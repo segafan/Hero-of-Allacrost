@@ -24,7 +24,7 @@ using namespace hoa_utils;
 		
 namespace hoa_audio {
 	
-SINGLETON1(GameAudio);
+SINGLETON_INITIALIZE(GameAudio);
 
 // The constructor initializes variables and the audio systems.
 GameAudio::GameAudio() {

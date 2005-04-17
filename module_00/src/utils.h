@@ -24,55 +24,75 @@ const bool UTILS_DEBUG = false;
 const bool UTILS_ONLY_POSITIVE = true;
 const int UTILS_NO_BOUNDS = 0;
 
-/*******************************************************************************
- * template<class T> class Singleton: A generic template for making classes singletons
- *	- Written by Kevin Martin
- *
- * Create the singleton initially by 
- *
- * Singleton<type> t;
- *
- * then as long as t remains in scope then any other Singleton<type> created 
- * will act as pointers to the inital one. If the initial one goes out of scope
- * then it will be destroyed and the next one will create a new object. If the
- * main one goes out of scope while another is still in scope then your screwed,
- * but if it does then your using it in a way it isnt inended
- *
- * To make sure a class is a singleton give it private constructor/
- * operator new/etc and use SINGLETON2 to give Singleton<type> permission to
- * construct it.
- *
- * SINGLETON1 is required in an implementation file to set up the static members
- * of Singleton<type>
- *******************************************************************************/
-template<class T> class Singleton {
-private:
-	static T *obj;
-	static Singleton<T> *createInst;
-public:
-	Singleton() {
-		if(obj == NULL) {
-			obj = new T;
-			createInst = this;
-		}
-	}
-	
-	~Singleton() {
-		if(obj != NULL && createInst == this) {
-			delete obj;
-			obj=NULL;
-			createInst=NULL;
-		}
+/******************************************************************************
+	SINGLETON macros - used for turning a class into a singleton class
+
+	The following three macros turn a normal class into a singleton class. To
+	create a singleton class, perform the following steps.
+
+	1) The class' header file must #include "utils.h"
+	2) Place SINGLETON_DECLARE(class_name) in the class' private section.
+	3) Place SINGLETON_METHODS(class_name) in the class' public section.
+	4) Place SINGLETON_INITIALIZE(class_name) at the top of the class' source file.
+	5) Replace 'class_name' in the above 3 with the name of the class you are writing.
+	5) *REQUIRED* Implement the constructor and destructor in the class' source file.
+
+	After performing these steps, your class with have 3 functions publicly avaiable to it:
+		- _Create():			returns a pointer to the class object
+		- _Destory():			removes a reference to the class object
+		- _GetRefCount(): returns the current number of references to this class. Used for
+											debugging purposes only
+
+	Notes and Usage:
+
+	1) The constructor and destructor *MUST* be defined! If you do not implement
+			them, then you will get a compilation error like:
+			> In function `SINGLETON::_Create()': undefined reference to `SINGLETON::SINGLETON[in-charge]()
+
+	2) You can not create or delete instances of this class normally. Ie, calling the constructor, copy
+			constructor, copy assignment operator, destructor, new/new[], or delete/delete[] operators will
+			result in a compilation error. Use the _Create() and _Destroy() functions instead.
+
+	3) Be *VERY* careful with the _Create() and _Destroy() functions. Every _Create() call needs a
+			_Destroy() call, otherwise there will be memory leaks.
+
+	4) You can get a class object pointer like this: 'MYCLASS *test = MYCLASS::_Create();'
+
+	5) After you are finished, invoke the following: 'test->_Delete();' *or* 'MYCLASS::_Delete();'
+			Either was is fine. Make sure to set 'test = NULL;' so you don't accidentally reference it
+			again (that would be dangerous...)
+ *****************************************************************************/
+
+// Put in the private sector of the class definition
+#define SINGLETON_DECLARE(class_name) \
+	static class_name *_ref; \
+	class_name(); \
+	~class_name(); \
+	class_name(const class_name&); \
+	class_name& operator=(const class_name&);
+
+// Put in the public sector of the class definition
+#define SINGLETON_METHODS(class_name) \
+	static class_name* _Create() { \
+			if (_ref == NULL) { \
+				_ref = new class_name(); \
+			} \
+			return _ref; \
+	} \
+	static void _Destroy() { \
+			if (_ref != 0) { \
+				delete _ref; \
+				_ref = NULL; \
+			} \
+	} \
+	static class_name* _GetReference() { \
+			return _ref; \
 	}
 
-	T &operator*() const {
-		return *obj;
-	}
+// Put in the class' source file
+#define SINGLETON_INITIALIZE(class_name) \
+	class_name* class_name::_ref = NULL;
 
-	T *operator->() const {
-		return obj; 
-	}
-};
 
 
  
@@ -109,9 +129,5 @@ int RandomNum(int lower_bound, int upper_bound);
 int GaussianValue(int mean, int range, bool positive_value);
 
 }
-
-// #defines used for the Singleton Template class
-#define SINGLETON1(type) type *hoa_utils::Singleton<type>::obj=NULL; hoa_utils::Singleton<type> *hoa_utils::Singleton<type>::createInst=NULL;
-#define SINGLETON2(type) friend class hoa_utils::Singleton<type>;
 
 #endif 

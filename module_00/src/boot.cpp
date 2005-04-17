@@ -9,13 +9,18 @@
  */
 
 #include <iostream>
+// #include "audio.h"
+// #include "video.h"
+// #include "global.h"
 #include "boot.h"
+
 
 using namespace std;
 using namespace hoa_global;
 using namespace hoa_video;
 using namespace hoa_audio;
 using namespace hoa_utils;
+using namespace hoa_data;
 using namespace hoa_map;
 
 
@@ -29,6 +34,13 @@ namespace hoa_boot {
 // The constructor initializes variables and sets up the path names of the boot images
 BootMode::BootMode() {
 	cerr << "DEBUG: BootMode's constructor invoked." << endl;
+	
+	AudioManager = GameAudio::_GetReference();
+	VideoManager = GameVideo::_GetReference();
+	DataManager = GameData::_GetReference();
+	ModeManager = GameModeManager::_GetReference();
+	SettingsManager = GameSettings::_GetReference();
+	
 	mtype = boot_m;
 	input = &(SettingsManager->InputStatus);
 	
@@ -36,6 +48,20 @@ BootMode::BootMode() {
 	menu_hidden = false;
 	
 	DataManager->LoadBootData(&boot_images, &boot_sound, &boot_music);
+	
+	VideoManager->SetCoordSys(0, 1024, 0, 768, 1); // TEMPORARY
+	
+ 	for (int i = 0; i < boot_images.size(); i++) {
+ 		VideoManager->LoadImage(boot_images[i]);
+ 	}
+	for (int i = 0; i < boot_music.size(); i++) {
+		AudioManager->LoadMusic(boot_music[i]);
+	}
+	for (int i = 0; i < boot_sound.size(); i++) {
+		AudioManager->LoadSound(boot_sound[i]);
+	}
+	
+	AudioManager->PlayMusic(boot_music[0], AUDIO_NO_FADE, AUDIO_LOOP_FOREVER);
 }
 
 
@@ -131,9 +157,8 @@ void BootMode::RedefineKey(SDLKey& change_key) {
 void BootMode::Update(Uint32 time_elapsed) {
 	// If our menu is hidden, we don't do anything until a user event occurs.
 	if (menu_hidden) {
-		if (input->confirm_press || input->cancel_press || input->menu_press ||
-				input->pause_press	 || input->up_press		 || input->down_press ||
-				input->left_press		|| input->right_press)
+		if (input->confirm_press || input->cancel_press || input->menu_press || 
+			input->up_press || input->down_press || input->left_press || input->right_press)
 			menu_hidden = false;
 		return;
 	}

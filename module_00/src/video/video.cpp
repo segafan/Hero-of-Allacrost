@@ -9,7 +9,7 @@
 
 namespace hoa_video {
 
-SINGLETON1(GameVideo);
+SINGLETON_INITIALIZE(GameVideo);
 
 GameVideo::GameVideo() : _width(0), _height(0), _setUp(false),
 	_blend(0), _xalign(-1), _yalign(-1), _xflip(0), _yflip(0)
@@ -27,6 +27,10 @@ GameVideo::GameVideo() : _width(0), _height(0), _setUp(false),
 	Render();
 	Clear();
 }
+
+
+// Added by Roots: Singleton classes need a destructor!!!
+GameVideo::~GameVideo() { }
 
 void
 GameVideo::SetCoordSys(float x_left, float x_right,
@@ -81,12 +85,14 @@ bool GameVideo::LoadTexture(ImageDescriptor &id) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
 					GL_LINEAR_MIPMAP_NEAREST); // bilinear for now
-	if (ilGetInteger(IL_IMAGE_FORMAT) == IL_RGBA)
+	if (ilGetInteger(IL_IMAGE_FORMAT) == IL_RGBA) {
 		gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA8, w, h,
 						  GL_RGBA, GL_UNSIGNED_BYTE, ilGetData());
-	else
+							}
+	else {
 		gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB8, w, h,
 						  GL_RGB, GL_UNSIGNED_BYTE, ilGetData());
+							}
 	ilDeleteImages(1, &img);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	return true;

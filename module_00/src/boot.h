@@ -10,13 +10,18 @@
  
 #ifndef __BOOT_HEADER__
 #define __BOOT_HEADER__ 
+
+// Partially defined namespace to avoid recursive inclusion problems.
+namespace hoa_boot {
+	class BootMode;
+} // namespace hoa_boot
  
 #include <string>
 #include <vector>
 #include "SDL.h"
-#include "video.h"
-#include "audio.h"
-#include "global.h"
+//#include "video.h"
+//#include "audio.h"
+//#include "global.h"
 #include "utils.h"
 #include "map.h"
 
@@ -72,12 +77,7 @@ private:
 	std::vector<hoa_audio::MusicDescriptor> boot_music;
 	std::vector<hoa_audio::SoundDescriptor> boot_sound;
 	std::vector<hoa_video::ImageDescriptor> boot_images;
-
-	hoa_utils::Singleton<hoa_video::GameVideo> VideoManager;	 
-	hoa_utils::Singleton<hoa_audio::GameAudio> AudioManager;
-	hoa_utils::Singleton<hoa_data::GameData> DataManager;
-	hoa_utils::Singleton<hoa_global::GameModeManager> ModeManager;
-	hoa_utils::Singleton<hoa_global::GameSettings> SettingsManager;
+	
 	hoa_global::InputState* input;
 	
 	void AnimateLogo();

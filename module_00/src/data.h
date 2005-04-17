@@ -11,16 +11,22 @@
 #ifndef __DATA_HEADER__
 #define __DATA_HEADER__
 
+// Partially defined namespace to avoid recursive inclusion problems.
+namespace hoa_data {
+	class GameData;
+} // namespace hoa_data
+
 extern "C" {
-#include <lua.h>
-   #include <lauxlib.h>
-   #include <lualib.h>
+	#include <lua.h>
+	#include <lauxlib.h>
+	#include <lualib.h>
 }
 #include <string>
 #include "utils.h"
-#include "global.h"
-#include "video.h"
 #include "audio.h"
+#include "video.h"
+#include "global.h"
+//#include "map.h"
 
 namespace hoa_data {
 
@@ -73,14 +79,8 @@ const int LUA_STACK_TOP = -1;
  *****************************************************************************/
 class GameData {
 private:
-	GameData();
-	GameData( const GameData& gd ) {}
-	GameData& operator=( const GameData& gd ) {}
-	SINGLETON2(GameData);
+	SINGLETON_DECLARE(GameData);
 	
-	hoa_utils::Singleton<hoa_video::GameVideo> VideoManager;
-	hoa_utils::Singleton<hoa_audio::GameAudio> AudioManager;
-
 // BEGIN Lua related stuff
 	lua_State *l_stack;
 	
@@ -98,14 +98,14 @@ private:
 // END Lua related stuff
 
 public:
-	~GameData();
+	SINGLETON_METHODS(GameData);
 	void PrintLuaStack();
 
 	void LoadGameSettings();
 	void ResetGameSettings();
 	void LoadBootData(std::vector<hoa_video::ImageDescriptor> *boot_images,
-		std::vector<hoa_audio::SoundDescriptor> *boot_sound,
-		std::vector<hoa_audio::MusicDescriptor> *boot_music);
+	std::vector<hoa_audio::SoundDescriptor> *boot_sound,
+	std::vector<hoa_audio::MusicDescriptor> *boot_music);
 };
 
 } // namespace hoa_data

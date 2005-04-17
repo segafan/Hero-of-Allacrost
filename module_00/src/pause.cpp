@@ -21,21 +21,26 @@ namespace hoa_pause {
 // Constructor changes audio, saves currently rendered screen, and draws "Paused" text
 PauseMode::PauseMode() {
 	cerr << "DEBUG: PauseMode constructor invoked" << endl;
-	mtype = paused_m;
+	
+	AudioManager = GameAudio::_GetReference();
+	VideoManager = GameVideo::_GetReference();
+	SettingsManager = GameSettings::_GetReference();
+	
+	mtype = pause_m;
 	input = &(SettingsManager->InputStatus);
 	
-	if (SettingsManager->pause_audio_on_quit) {
+	if (SettingsManager->paused_vol_type == GLOBAL_PAUSE_AUDIO_ON_PAUSE) {
 		AudioManager->PauseAudio();
 		return;
 	}
 	
 	else {
 		switch (SettingsManager->paused_vol_type) {
-			case GLOBAL_ZERO_VOLUME:
+			case GLOBAL_ZERO_VOLUME_ON_PAUSE:
 				AudioManager->SetMusicVolume(0);
 				AudioManager->SetSoundVolume(0);
 				break;
-			case GLOBAL_HALF_VOLUME:
+			case GLOBAL_HALF_VOLUME_ON_PAUSE:
 				AudioManager->SetMusicVolume((int)(SettingsManager->music_vol * 0.5));
 				AudioManager->SetSoundVolume((int)(SettingsManager->sound_vol * 0.5));
 				break;
@@ -53,39 +58,35 @@ PauseMode::PauseMode() {
 // The destructor might possibly have to free the "Paused" image...
 PauseMode::~PauseMode() {
 	cerr << "DEBUG: PauseMode destructor invoked" << endl;
-}
-
-
-
-// Restores volume or unpauses audio, then pops itself from the game stack 
-void PauseMode::Update(Uint32 time_elapsed) {
-
-	if (input->pause_press) {
-	
-		if (SettingsManager->pause_audio_on_quit) {
-			AudioManager->ResumeAudio();
-		}
-		
-		else {
-			switch (SettingsManager->paused_vol_type) {
-				case GLOBAL_ZERO_VOLUME:
-				case GLOBAL_HALF_VOLUME:
-					AudioManager->SetMusicVolume(SettingsManager->music_vol);
-					AudioManager->SetSoundVolume(SettingsManager->sound_vol);
-					break;
-				// We don't need to do anything for case GLOBAL_SAME_VOLUME
-			}
-		}
-	
-		// Here we'll need to release the saved screen that VideoManager is holding onto.
-	
-		ModeManager->Pop();
+	if (SettingsManager->paused_vol_type == GLOBAL_PAUSE_AUDIO_ON_PAUSE) {
+		AudioManager->ResumeAudio();
 	}
+	
+	else {
+		switch (SettingsManager->paused_vol_type) {
+			case GLOBAL_ZERO_VOLUME_ON_PAUSE:
+			case GLOBAL_HALF_VOLUME_ON_PAUSE:
+				AudioManager->SetMusicVolume(SettingsManager->music_vol);
+				AudioManager->SetSoundVolume(SettingsManager->sound_vol);
+				break;
+			// We don't need to do anything for case GLOBAL_SAME_VOLUME
+		}
+	}
+	
+	// Here we'll need to release the saved screen that VideoManager is holding onto.
+		
+	// Note that we *DON'T* pop the top of the game mode stack, because 
+	// GameSettings::KeyEventHandler() does it for us (hence this destructor gets called by it)
 }
 
 
 
-// Do we need to do anything here?
+// Doesn't do a thing. This is all handled in GameSettings::KeyEventHandler()
+void PauseMode::Update(Uint32 time_elapsed) { }
+
+
+
+// Nothing to draw since the screen never changes in pause mode
 void PauseMode::Draw() { }
 
 } // namespace hoa_pause

@@ -10,12 +10,16 @@
 
 #ifndef __SCENE_HEADER__
 #define __SCENE_HEADER__ 
+
+// Partially defined namespace to avoid recursive inclusion problems.
+namespace hoa_scene {
+	class SceneMode;
+} // namespace hoa_scene
  
 #include <string>
-#include "video.h"
 #include "audio.h"
+#include "video.h"
 #include "global.h"
-#include "pause.h"
 
 namespace hoa_scene {
 
@@ -50,9 +54,6 @@ class SceneMode : public hoa_global::GameMode {
 private:
 	int scene_timer;
 
-	hoa_utils::Singleton<hoa_video::GameVideo> VideoManager;
-	hoa_utils::Singleton<hoa_global::GameModeManager> ModeManager;
-	hoa_utils::Singleton<hoa_global::GameSettings> SettingsManager;
 	hoa_global::InputState* input;	
 	
 	//hoa_video::ImageDescriptor scene;

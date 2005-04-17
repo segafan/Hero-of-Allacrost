@@ -17,6 +17,8 @@
 	
 #include <iostream>
 #include "map.h"
+//#include "battle.h"
+//#include "menu.h"
 
 using namespace std;
 using namespace hoa_map::local_map;
@@ -24,9 +26,7 @@ using namespace hoa_global;
 using namespace hoa_utils;
 using namespace hoa_video;
 using namespace hoa_audio;
-//using namespace hoa_menu;
 //using namespace hoa_battle;
-using namespace hoa_pause;
 
 namespace hoa_map {
 
@@ -318,6 +318,12 @@ PlayerSprite::~PlayerSprite() {
 MapMode::MapMode(int new_map_id) {
 	cerr << "DEBUG: MapMode's constructor invoked." << endl;
 	
+	AudioManager = GameAudio::_GetReference();
+	VideoManager = GameVideo::_GetReference();
+	//DataManager = GameData::_GetReference();
+	ModeManager = GameModeManager::_GetReference();
+	SettingsManager = GameSettings::_GetReference();
+	
 	mtype = map_m;
 	input = &(SettingsManager->InputStatus);
 	map_state = EXPLORE;
@@ -601,12 +607,6 @@ void MapMode::Update(Uint32 time_elapsed) {
 		animation_counter -= animation_rate;
 	}
 	
-	if (input->pause_press) {
-		PauseMode *PM = new PauseMode();
-		ModeManager->Push(PM);
-		return;
-	}
-	
 	switch (map_state) {
 		case EXPLORE:
 			UpdateExploreState(time_elapsed);
@@ -715,14 +715,6 @@ void MapMode::UpdateExploreState(Uint32 time_elapsed) {
 void MapMode::UpdateDialogueState() {
 	cout << "TEMP: UpdateDialogueState()" << endl;
 	static bool print_done; // User can only continue/exit dialogue when this is set to true
-	
-	// Handle any requests to pause the game
-	if (input->pause_press) {
-		cout << "TEMP: Paused game" << endl;
-		PauseMode *PM = new PauseMode();
-		ModeManager->Push(PM);
-		return;
-	}
 	
 	// Handle other user input only if text printing is finished.
 	if (print_done) {
@@ -1011,6 +1003,65 @@ void MapMode::Draw() {
 	return; 
 }
 
+
+
+int MapMode::GetTiles() {
+	return tile_count;
+}
+
+
+
+int MapMode::GetRows() {
+	return rows_count;
+}
+
+
+
+int MapMode::GetCols() {
+	return cols_count;
+}
+
+
+
+std::vector<std::vector<MapTile> > MapMode::GetMapLayers() {
+	return map_layers;
+}
+
+
+
+std::vector<hoa_video::ImageDescriptor> MapMode::GetMapTiles() {
+	return map_tiles;
+}
+
+
+
+void MapMode::SetTiles(int num_tiles) {
+	tile_count = num_tiles;
+}
+
+
+
+void MapMode::SetRows(int num_rows) {
+	rows_count = num_rows;
+}
+
+
+
+void MapMode::SetCols(int num_cols) {
+	cols_count = num_cols;
+}
+
+
+
+void MapMode::SetMapLayers(std::vector<std::vector<MapTile> > layers) {
+	map_layers = layers;
+}
+
+
+
+void MapMode::SetMapTiles(std::vector<hoa_video::ImageDescriptor> tiles) {
+	map_tiles = tiles;
+} 
 
 
 } // namespace hoa_map

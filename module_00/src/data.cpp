@@ -9,8 +9,9 @@
  */
 
 
-#include "data.h"
 #include <iostream>
+#include "data.h"
+#include "map.h"
 
 using namespace std;
 using namespace hoa_global;
@@ -20,7 +21,7 @@ using namespace hoa_utils;
 
 namespace hoa_data {
 
-SINGLETON1(GameData);
+SINGLETON_INITIALIZE(GameData);
 
 // The constructor opens lua and its associated libraries.
 GameData::GameData() {
@@ -146,7 +147,7 @@ void GameData::FillStringVector(vector<string> *vect, const char *key) {
 
 // This function initializes all the members of the GameSettings singleton class
 void GameData::LoadGameSettings () {
-	hoa_utils::Singleton<hoa_global::GameSettings> SettingsManager;
+	hoa_global::GameSettings *SettingsManager = GameSettings::_GetReference();
 	const char *filename = "data/config/settings.hoa";
 
 	if (luaL_loadfile(l_stack, "data/config/settings.hoa") || lua_pcall(l_stack, 0, 0, 0))
@@ -201,33 +202,26 @@ void GameData::LoadBootData(
 	im.filename = GetGlobalString("background_image");
 	im.width    = GetGlobalInt("background_image_width");
 	im.height   = GetGlobalInt("background_image_height");
-	
-	VideoManager->LoadImage(im);
 	boot_images->push_back(im);
 	
 	// The logo
 	im.filename = GetGlobalString("logo_image");
 	im.width    = GetGlobalInt("logo_image_width");
 	im.height   = GetGlobalInt("logo_image_height");
-	
-	VideoManager->LoadImage(im);
 	boot_images->push_back(im);
 	
 	// The menu
 	im.filename = GetGlobalString("menu_image");
 	im.width    = GetGlobalInt("menu_image_width");
 	im.height   = GetGlobalInt("menu_image_height");
-	
-	VideoManager->LoadImage(im);
 	boot_images->push_back(im);
 	
 	// Set up a coordinate system - now you can use the boot.hoa to set it to whatever you like
-	VideoManager->SetCoordSys(GetGlobalInt("coord_sys_x_left"),
-					  GetGlobalInt("coord_sys_x_right"),
-					  GetGlobalInt("coord_sys_y_bottom"),
-					  GetGlobalInt("coord_sys_y_top"),
-					  GetGlobalInt("coord_sys_nl"));
-	
+	GameVideo::_GetReference()->SetCoordSys(GetGlobalInt("coord_sys_x_left"),
+					GetGlobalInt("coord_sys_x_right"),
+					GetGlobalInt("coord_sys_y_bottom"),
+					GetGlobalInt("coord_sys_y_top"),
+					GetGlobalInt("coord_sys_nl"));
 	
 	// Load the audio stuff
 	// Make a call to the config code that loads in two vectors of strings
@@ -243,7 +237,6 @@ void GameData::LoadBootData(
 	for (int i = 0; i < new_music_files.size(); i++) {
 		new_music.filename = new_music_files[i];
 		boot_music->push_back(new_music);
-		AudioManager->LoadMusic(boot_music->back());
 	}
 	
 	SoundDescriptor new_sound;
@@ -251,10 +244,8 @@ void GameData::LoadBootData(
 	for (int i = 0; i < new_sound_files.size(); i++) {
 		new_sound.filename = new_sound_files[i];
 		boot_sound->push_back(new_sound);
-		AudioManager->LoadSound(boot_sound->back());
 	}
 	
-	AudioManager->PlayMusic((*boot_music)[0], AUDIO_NO_FADE, AUDIO_LOOP_FOREVER);
 }
 
 

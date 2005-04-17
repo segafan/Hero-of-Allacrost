@@ -18,78 +18,87 @@
 #ifndef __MAP_HEADER__
 #define __MAP_HEADER__
 
+// Partially defined namespace to avoid recursive inclusion problems.
+namespace hoa_map {
+	class MapMode;
+	class ObjectLayer;
+} // namespace hoa_map
+
 #include <string>
 #include <vector>
 #include <list>
-#include <SDL/SDL.h>
-#include "audio.h"
-
-#include "video.h"
-
-#include "global.h"
 #include "utils.h"
-//#include "battle.h"
-//#include "menu.h"
-#include "pause.h"
-
-
+#include "audio.h"
+#include "video.h"
+#include "global.h"
 
 namespace hoa_map {
 
-class MapMode; // partially defined here so other classes can make it a friend
-class ObjectLayer;
-
+// The local_map namespace is only intended for map.cpp (and possibly some map editor code) to use.
+//  It holds constants and data structures that other parts of the program don't need to worry about.
+//  *DO NOT* use this namespace unless you know what you are doing!
 namespace local_map {
 
-// ************************ TILE CONSTANTS ****************************
+// ************************ MAP CONSTANTS ****************************
 
 // These are elapsed time dividers used for sprite movement
-const int SLOW_SPEED   = 32;
-const int NORMAL_SPEED = 16;
-const int FAST_SPEED   = 4;
+const int VERY_SLOW_SPEED = 24;
+const int SLOW_SPEED      = 20;
+const int NORMAL_SPEED    = 16;
+const int FAST_SPEED      = 8;
+const int VERY_FAST_SPEED = 4;
 
-// How many steps a sprite has to take to move to the next tile (they can skip steps on a slow machine)
+// How many 'steps' a sprite has to take to move to the next tile
 const int TILE_STEPS = 32;
 
 // The number of rows and columns of tiles that compose the screen
 const int SCREEN_ROWS = 20;
 const int SCREEN_COLS = 28;
 
+// Constants used for describing the current state of operation during MapMode
+const int EXPLORE      = 0x00000001;
+const int DIALOGUE     = 0x00000002;
+const int SCRIPT_EVENT = 0x00000004;
+
 // *********************** OBJECT CONSTANTS **************************
 
-// Different types of objects that can be in the object layer
+// Different object idenfitiers for use in the object layer
 const int PLAYER_SPRITE  = 1;
 const int NPC_SPRITE     = 2;
 const int ENEMY_SPRITE   = 3;
 const int STATIC_OBJECT  = 4;
 const int DYNAMIC_OBJECT = 5;
 
+// Each object (including sprites) has a "z" value to deterime it's height.
+//  The default object height is 0x8 and can range between 0x0 and 0xF (a range of 16 values)
+const int DEFAULT_Z = 0x000000008;
+
 // ********************** SPRITE CONSTANTS **************************
 
-// A series of constants used for sprite directions. (NORTH_NW = sprite moving NW, facing north)
-const int NORTH    = 0x00000001;
-const int SOUTH    = 0x00000002;
-const int WEST     = 0x00000004;
-const int EAST     = 0x00000008;
-const int NORTH_NW = 0x00000010;
-const int WEST_NW  = 0x00000020;
-const int NORTH_NE = 0x00000040;
-const int EAST_NE  = 0x00000080;
-const int SOUTH_SW = 0x00000100;
-const int WEST_SW  = 0x00000200;
-const int SOUTH_SE = 0x00000400;
-const int EAST_SE  = 0x00000800;
-
-const int FACE_MASK  = 0x00000FFF; // Used in bit-wise ops to get the sprite direction
-const int RESET_FACE = 0xFFFFF000; // Used to reset the direction the sprite is facing
-
 // A series of constants used for sprite status.
-const int STEP_SWAP  = 0x00001000; // Tracks sprite step frame (right or left foot step)
-const int IN_MOTION  = 0x00002000; // This is for detecting whether the sprite is currently moving
-const int UPDATEABLE = 0x00004000; // If this bit is set to zero, we do not update the sprite
-const int VISIBLE    = 0x00008000; // If this bit is set to zero, we do not draw the sprite
+const int STEP_SWAP  = 0x00000001; // Tracks sprite step frame (right or left foot step)
+const int IN_MOTION  = 0x00000002; // This is for detecting whether the sprite is currently moving
+const int UPDATEABLE = 0x00000004; // If this bit is set to zero, we do not update the sprite
+const int VISIBLE    = 0x00000008; // If this bit is set to zero, we do not draw the sprite
 
-// These constants are used for indexing a sprite animation frame vector
+// A series of constants used for sprite directions. (NORTH_NW = sprite facing north, moving NW)
+const int NORTH    = 0x00000010;
+const int SOUTH    = 0x00000020;
+const int WEST     = 0x00000040;
+const int EAST     = 0x00000080;
+const int NORTH_NW = 0x00000100;
+const int WEST_NW  = 0x00000200;
+const int NORTH_NE = 0x00000400;
+const int EAST_NE  = 0x00000800;
+const int SOUTH_SW = 0x00001000;
+const int WEST_SW  = 0x00002000;
+const int SOUTH_SE = 0x00004000;
+const int EAST_SE  = 0x00008000;
+
+const int FACE_MASK  = 0x0000FFF0; // Used in bit-wise ops to get the sprite direction
+const int RESET_FACE = 0xFFFF000F; // Used to reset the direction the sprite is facing
+
+// These constants are used for indexing a standard sprite animation frame vector
 const int DOWN_STANDING  = 0;
 const int DOWN_LSTEP1    = 1;
 const int DOWN_LSTEP2    = 2;
@@ -119,18 +128,19 @@ const int RIGHT_RSTEP1   = 21;
 const int RIGHT_RSTEP2   = 22;
 const int RIGHT_RSTEP3   = 23;
 
-// Constants used for describing the current state of operation during MapMode
-const int EXPLORE      = 0x00000001;
-const int DIALOGUE     = 0x00000002;
-const int SCRIPT_EVENT = 0x00000004;
+// ********************** TILE CONSTANTS **************************
 
-// Constants used for detecting different tile status
-const int NOT_WALKABLE = 0x00000001; // Duh.
-const int TREASURE     = 0x00000002; // A map treasure is located at this tile
-const int EVENT        = 0x00000004; // An event occurs when player steps onto this tile
-const int OCCUPIED     = 0x00000008; // Occupied by a sprite or other map object
-//const int LL_HIDDEN    = 0x00000010; // Don't draw the lower layer for this tile
-//const int UL_HIDDEN    = 0x00000020; // Don't draw the upper layer for this tile
+// Constants used for detecting different tile properties
+const int INC_HEIGHT   = 0x00000001; // Increments the height of any object that steps on it
+const int DEC_HEIGHT   = 0x00000002; // Decrements the height of any object that steps on it
+const int NOT_WALKABLE = 0x00000004; // Duh.
+const int TREASURE     = 0x00000008; // A map treasure is located at this tile
+const int EVENT        = 0x00000010; // An event occurs when player steps onto this tile
+const int OCCUPIED     = 0x00000020; // Occupied by a sprite or other map object
+
+// The next two features are in debate. They will incur greater overhead, but provide more functionality.
+//const int LL_HIDDEN    = 0x00000040; // Don't draw the lower layer for this tile
+//const int UL_HIDDEN    = 0x00000080; // Don't draw the upper layer for this tile
 
 
 
@@ -142,7 +152,7 @@ const int OCCUPIED     = 0x00000008; // Occupied by a sprite or other map object
 		int c_start, r_start: The starting index of the tile column/row we need to draw
 		float c_pos, r_pos:   Coordinates for setting the drawing cursor
 		int c_draw, r_draw:   The number of columns and rows of tiles to draw
- *****************************************************************************/
+******************************************************************************/
 typedef struct {
 	int c_start, r_start;
 	float c_pos, r_pos;
@@ -159,8 +169,8 @@ typedef struct {
 	>>>members<<<
 		int lower_layer: index to a lower layer tile in the MapMode tile_frames vector
 		int upper_layer: index to an upper layer tile in the MapMode tile_frames vector
-		unsigned int event_mask: a bit-wise mask indicating various tile status
- *****************************************************************************/
+		unsigned int event_mask: a bit-wise mask indicating various tile properties
+******************************************************************************/
 typedef struct {
 	int lower_layer;
 	int upper_layer;
@@ -190,7 +200,7 @@ typedef struct TileFrame {
 		int object_type: an identifier type for the object
 		int row_pos: the map row position for the bottom left corner of the object
 		int col_pos: the map col position for the bottom left corner of the object
-		int ver_pos: determines the "vertical" position of an object on a map
+		char ver_pos: determines the "vertical" position of an object on a map
 	>>>functions<<<
 		virtual void Draw(local_map::MapFrame& mf):
 			A purely virtual function for drawing the object, if it even needs to be drawn
@@ -198,20 +208,21 @@ typedef struct TileFrame {
 	>>>notes<<<
 		1) An object's "vertical" position is used so that objects can be drawn over each
 			other if necessary. For example, there may be a bridge that we want to be able
-			to walk on or under.
+			to walk on or under. Range is from -128 to 127. If an object has a height >= 100,
+			then the object is drawn *after* the upper layer.
  *****************************************************************************/
 class ObjectLayer {
 protected:
 	int object_type;
 	int row_pos;
 	int col_pos;
-	int ver_pos;
-	hoa_utils::Singleton<hoa_video::GameVideo> VideoManager;
+	char ver_pos;
+	hoa_video::GameVideo *VideoManager;
 	
 	friend class MapMode; // Necessary so that the MapMode class can access and change these data members
 public:
-	ObjectLayer() {}
-	~ObjectLayer() {}
+	ObjectLayer() { VideoManager = hoa_video::GameVideo::_Create(); }
+	~ObjectLayer() { hoa_video::GameVideo::_Destroy(); }
 	
 	bool operator>(const ObjectLayer& obj) const;
 	bool operator<(const ObjectLayer& obj) const;
@@ -447,11 +458,6 @@ private:
 	std::vector<hoa_audio::MusicDescriptor> map_music;
 	std::vector<hoa_audio::SoundDescriptor> map_sound;
 	
-	hoa_utils::Singleton<hoa_video::GameVideo> VideoManager;
-	hoa_utils::Singleton<hoa_audio::GameAudio> AudioManager;	
-	hoa_utils::Singleton<hoa_global::GameModeManager> ModeManager;
-	hoa_utils::Singleton<hoa_global::GameSettings> SettingsManager;
-	hoa_utils::Singleton<hoa_data::GameData> DataManager;
 	hoa_global::InputState* input;
 	
 //	 vector<MapEvent> map_events;
@@ -477,6 +483,20 @@ public:
 	
 	void Update(Uint32 time_elapsed);
 	void Draw();
+	
+	int GetTiles();
+	int GetRows();
+	int GetCols();
+	 
+	std::vector<std::vector<MapTile> > GetMapLayers();
+	std::vector<hoa_video::ImageDescriptor> GetMapTiles();
+	
+	void SetTiles(int num_tiles);
+	void SetRows(int num_rows);
+	void SetCols(int num_cols);
+	
+	void SetMapLayers(std::vector<std::vector<MapTile> > layers);
+	void SetMapTiles(std::vector<hoa_video::ImageDescriptor> tiles); 
 };
 
 } // namespace hoa_map;

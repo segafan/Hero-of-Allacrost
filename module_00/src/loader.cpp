@@ -10,15 +10,12 @@
 
 #include <iostream>
 #include <string>
-#include "global.h"
+#include "utils.h"
 #include "audio.h"
 #include "video.h"
-#include "boot.h"
 #include "data.h"
-#include "utils.h"
-#include "quit.h"
-
-#include "map.h"
+#include "global.h"
+#include "boot.h"
 
 using namespace std;
 using namespace hoa_global;
@@ -27,7 +24,6 @@ using namespace hoa_data;
 using namespace hoa_audio;
 using namespace hoa_video;
 using namespace hoa_boot;
-using namespace hoa_quit;
 
 using namespace hoa_map;
 
@@ -171,226 +167,6 @@ void PrintFileCheck() {
 
 
 
-// Handles all of the event processing for the game.
-void EventHandler() {
-	Singleton<GameSettings> SettingsManager;
-	Singleton<GameModeManager> ModeManager;
-	SDL_Event event;	// Holds the game event
-	
-	// Reset all of our press and release flags so they don't get detected twice.
-	SettingsManager->InputStatus.up_press = false; 
-	SettingsManager->InputStatus.up_release = false;
-	SettingsManager->InputStatus.down_press = false;
-	SettingsManager->InputStatus.down_release = false;
-	SettingsManager->InputStatus.left_press = false;
-	SettingsManager->InputStatus.left_release = false; 
-	SettingsManager->InputStatus.right_press = false;
-	SettingsManager->InputStatus.right_release = false; 
-	SettingsManager->InputStatus.confirm_press = false;
-	SettingsManager->InputStatus.confirm_release = false; 
-	SettingsManager->InputStatus.cancel_press = false;
-	SettingsManager->InputStatus.cancel_release = false; 
-	SettingsManager->InputStatus.menu_press = false;
-	SettingsManager->InputStatus.menu_release = false;
-	SettingsManager->InputStatus.swap_press = false;
-	SettingsManager->InputStatus.swap_release = false;
-	SettingsManager->InputStatus.rselect_press = false;
-	SettingsManager->InputStatus.rselect_release = false;
-	SettingsManager->InputStatus.lselect_press = false;
-	SettingsManager->InputStatus.lselect_release = false;
-	SettingsManager->InputStatus.pause_press = false;
-	SettingsManager->InputStatus.pause_release = false;
-	
-	while (SDL_PollEvent(&event)) { // Loops until we are out of events to process	 
-		switch (event.type) {	
-			case SDL_QUIT:
-				// We quit the game without question if we are in BootMode or QuitMode
-				if (ModeManager->GetGameType() == boot_m || ModeManager->GetGameType() == quit_m) {
-					SettingsManager->not_done = false;
-				}
-				// Otherwise, we push QuitMode onto the stack
-				else {
-					QuitMode *QM = new QuitMode();
-					ModeManager->Push(QM);
-				}
-				return;
-			case SDL_ACTIVEEVENT: // Should we care about Active events?
-				if (LOADER_DEBUG) cout << "Active event" << endl;
-				break;
-			
-			case SDL_KEYUP:
-			case SDL_KEYDOWN:
-				KeyEventHandler(&event.key);
-				break;
-				
-			case SDL_JOYAXISMOTION:
-			case SDL_JOYBALLMOTION:
-			case SDL_JOYHATMOTION:
-			case SDL_JOYBUTTONDOWN:
-			case SDL_JOYBUTTONUP:
-				JoystickEventHandler(&event);
-				break;
-		} // switch (event.type)
-	}
-}
-
-
-
-// Handles all keyboard events for the game
-void KeyEventHandler(SDL_KeyboardEvent *key_event) {
-	Singleton<GameSettings> SettingsManager;
-	Singleton<GameModeManager> ModeManager;
-	
-	if (key_event->type == SDL_KEYDOWN) { // Key was pressed
-		if (key_event->keysym.mod & KMOD_CTRL) {
-			switch (key_event->keysym.sym) {
-				case SDLK_f:
-					if (LOADER_DEBUG) cout << " Toggle Fullscreen!" << endl;
-					return;
-				case SDLK_s:
-					if (LOADER_DEBUG) cout << " Took Screenshot!" << endl;
-					return;
-				case SDLK_q:
-					// We quit the game without question if we are in BootMode or QuitMode
-					if (ModeManager->GetGameType() == boot_m || ModeManager->GetGameType() == quit_m) {
-						SettingsManager->not_done = false;
-					}
-					// Otherwise, we push QuitMode onto the stack
-					else {
-						QuitMode *QM = new QuitMode();
-						ModeManager->Push(QM);
-					}
-					return;
-				default:
-					return;
-			}
-		}
-		
-		// Note: a switch-case statement won't work here because SettingsManager.InputStatus.key.up
-		//	is not an integer value and if you set it as a case the compiler will whine and cry ;_;
-		if (key_event->keysym.sym == SettingsManager->InputStatus.key.up) {
-			if (LOADER_DEBUG) cout << " up key pressed." << endl;
-			SettingsManager->InputStatus.up_state = true;
-			SettingsManager->InputStatus.up_press = true;
-			return;
-		}
-		else if (key_event->keysym.sym == SettingsManager->InputStatus.key.down) {
-			if (LOADER_DEBUG) cout << " down key pressed." << endl;
-			SettingsManager->InputStatus.down_state = true;
-			SettingsManager->InputStatus.down_press = true;
-			return;
-		}
-		else if (key_event->keysym.sym == SettingsManager->InputStatus.key.left) {
-			if (LOADER_DEBUG) cout << " left key pressed." << endl;
-			SettingsManager->InputStatus.left_state = true;
-			SettingsManager->InputStatus.left_press = true;
-			return;
-		}
-		else if (key_event->keysym.sym == SettingsManager->InputStatus.key.right) {
-			if (LOADER_DEBUG) cout << " right key pressed." << endl;
-			SettingsManager->InputStatus.right_state = true;
-			SettingsManager->InputStatus.right_press = true;
-			return;
-		}
-		else if (key_event->keysym.sym == SettingsManager->InputStatus.key.confirm) {
-			if (LOADER_DEBUG) cout << " confirm key pressed." << endl;
-			SettingsManager->InputStatus.confirm_state = true;
-			SettingsManager->InputStatus.confirm_press = true;
-			return;
-		}
-		else if (key_event->keysym.sym == SettingsManager->InputStatus.key.cancel) {
-			if (LOADER_DEBUG) cout << " cancel key pressed." << endl;
-			SettingsManager->InputStatus.cancel_state = true;
-			SettingsManager->InputStatus.cancel_press = true;
-			return;
-		}
-		else if (key_event->keysym.sym == SettingsManager->InputStatus.key.menu) {
-			if (LOADER_DEBUG) cout << " menu key pressed." << endl;
-			SettingsManager->InputStatus.menu_state = true;
-			SettingsManager->InputStatus.menu_press = true;
-			return;
-		}
-		else if (key_event->keysym.sym == SettingsManager->InputStatus.key.pause) {
-			if (LOADER_DEBUG) cout << " pause key pressed." << endl;
-			SettingsManager->InputStatus.pause_state = true;
-			SettingsManager->InputStatus.pause_press = true;
-			return;
-		}
-	}
-	
-	else { // Key was released
-		if (key_event->keysym.mod & KMOD_CTRL) // We don't want to recognize a key release if ctrl is down
-			return;
-		
-		if (key_event->keysym.sym == SettingsManager->InputStatus.key.up) {
-			if (LOADER_DEBUG) cout << " up key released." << endl;
-			SettingsManager->InputStatus.up_state = false;
-			SettingsManager->InputStatus.up_release = true;
-			return;
-		}
-		else if (key_event->keysym.sym == SettingsManager->InputStatus.key.down) {
-			if (LOADER_DEBUG) cout << " down key released." << endl;
-			SettingsManager->InputStatus.down_state = false;
-			SettingsManager->InputStatus.down_release = true;
-			return;
-		}
-		else if (key_event->keysym.sym == Singleton<GameSettings>()->InputStatus.key.left) {
-			if (LOADER_DEBUG) cout << " left key released." << endl;
-			SettingsManager->InputStatus.left_state = false;
-			SettingsManager->InputStatus.left_release = true;
-			return;
-		}
-		else if (key_event->keysym.sym == SettingsManager->InputStatus.key.right) {
-			if (LOADER_DEBUG) cout << " right key released." << endl;
-			SettingsManager->InputStatus.right_state = false;
-			SettingsManager->InputStatus.right_release = true;
-			return;
-		}
-		else if (key_event->keysym.sym == Singleton<GameSettings>()->InputStatus.key.confirm) {
-			if (LOADER_DEBUG) cout << " confirm key released." << endl;
-			SettingsManager->InputStatus.confirm_state = false;
-			SettingsManager->InputStatus.confirm_release = true;
-			return;
-		}
-		else if (key_event->keysym.sym == SettingsManager->InputStatus.key.cancel) {
-			if (LOADER_DEBUG) cout << " cancel key released." << endl;
-			SettingsManager->InputStatus.cancel_state = false;
-			SettingsManager->InputStatus.cancel_release = true;
-			return;
-		}
-		else if (key_event->keysym.sym == SettingsManager->InputStatus.key.menu) {
-			if (LOADER_DEBUG) cout << " menu key released." << endl;
-			SettingsManager->InputStatus.menu_state = false;
-			SettingsManager->InputStatus.menu_release = true;
-			return;
-		}
-		else if (key_event->keysym.sym == SettingsManager->InputStatus.key.pause) {
-			if (LOADER_DEBUG) cout << " pause key released." << endl;
-			SettingsManager->InputStatus.pause_state = false;
-			SettingsManager->InputStatus.pause_release = true;
-			return;
-		}
-	}
-}
-
-
-
-// Handles all joystick events for the game 
-// >> on my to do list. - Tyler, Sept 22nd
-void JoystickEventHandler(SDL_Event *js_event) {
-	
-	switch (js_event->type) {
-		case SDL_JOYAXISMOTION:
-		case SDL_JOYBALLMOTION:
-		case SDL_JOYHATMOTION:
-		case SDL_JOYBUTTONDOWN:
-		case SDL_JOYBUTTONUP:
-			break;
-	}
-}
-
-
-
 // If you don't know what main is, you shouldn't be looking at this code.
 int main(int argc, char *argv[]) {
 	//ProcessCommandArguments(argc, argv);
@@ -419,17 +195,15 @@ int main(int argc, char *argv[]) {
 		SDL_JoystickEventState(SDL_IGNORE);
 		SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
 	}
-	else												 // At least one joystick exists
+	else // At least one joystick exists
 		SDL_JoystickEventState(SDL_ENABLE);
 	
+	GameAudio *AudioManager = GameAudio::_Create();
+	GameVideo *VideoManager = GameVideo::_Create();
+	GameData *DataManager = GameData::_Create();
+	GameModeManager *ModeManager = GameModeManager::_Create();
+	GameSettings *SettingsManager = GameSettings::_Create();
 	
-	Singleton<GameAudio> AudioManager;
-	Singleton<GameVideo> VideoManager;	
-  
-	Singleton<GameModeManager> ModeManager;
-	
-	Singleton<GameData> DataManager;
-	Singleton<GameSettings> SettingsManager;
 	DataManager->LoadGameSettings(); // Initializes remaining data members of Settings Manager
 	
 	AudioManager->SetMusicVolume(SettingsManager->music_vol);
@@ -452,7 +226,7 @@ int main(int argc, char *argv[]) {
 		VideoManager->Render();
 
 		// 3) Process all new events
-		EventHandler();
+		SettingsManager->EventHandler();
 		
 		// 4) Updates the game status
 		ModeManager->GetTop()->Update(SettingsManager->UpdateTime());
@@ -461,6 +235,12 @@ int main(int argc, char *argv[]) {
 		//SettingsManager->ResetInputFlags();
 	} // while (SettingsManager.not_done) 
 
-	// This line is reached when SettingsManager->not_done is set to false
+	// Begin exit sequence and destroy our singleton classes
+	GameAudio::_Destroy();
+	GameVideo::_Destroy();
+	GameData::_Destroy();
+	GameModeManager::_Destroy();
+	GameSettings::_Destroy();
+	
 	return 0;
 }

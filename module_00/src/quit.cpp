@@ -21,24 +21,31 @@ using namespace hoa_quit::local_quit;
 namespace hoa_quit {
 
 QuitMode::QuitMode() {
+	cerr << "DEBUG: QuitMode constructor called" << endl;
+	
+	AudioManager = GameAudio::_GetReference();
+	VideoManager = GameVideo::_GetReference();
+	ModeManager = GameModeManager::_GetReference();
+	SettingsManager = GameSettings::_GetReference();
+	
 	mtype = quit_m;
 	input = &(SettingsManager->InputStatus);
 	
 	quit_selected = QUIT_CANCEL;
-	cerr << "DEBUG: QuitMode constructor called" << endl;
+
 	
-	if (SettingsManager->pause_audio_on_quit) {
+	if (SettingsManager->paused_vol_type == GLOBAL_PAUSE_AUDIO_ON_PAUSE) {
 		AudioManager->PauseAudio();
 		return;
 	}
 	
 	else {
 		switch (SettingsManager->paused_vol_type) {
-			case GLOBAL_ZERO_VOLUME:
+			case GLOBAL_ZERO_VOLUME_ON_PAUSE:
 				AudioManager->SetMusicVolume(0);
 				AudioManager->SetSoundVolume(0);
 				break;
-			case GLOBAL_HALF_VOLUME:
+			case GLOBAL_HALF_VOLUME_ON_PAUSE:
 				AudioManager->SetMusicVolume((int)(SettingsManager->music_vol * 0.5));
 				AudioManager->SetSoundVolume((int)(SettingsManager->sound_vol * 0.5));
 				break;
@@ -99,14 +106,14 @@ void QuitMode::Update(Uint32 time_elapsed) {
 	
 	// The user really doesn't want to quit after all, so restore the game audio and state
 	if (input->cancel_press || (input->confirm_press && quit_selected == QUIT_CANCEL)) {
-		if (SettingsManager->pause_audio_on_quit) {
+		if (SettingsManager->paused_vol_type == GLOBAL_PAUSE_AUDIO_ON_PAUSE) {
 			AudioManager->ResumeAudio();
 		}
 		
 		else {
 			switch (SettingsManager->paused_vol_type) {
-				case GLOBAL_ZERO_VOLUME:
-				case GLOBAL_HALF_VOLUME:
+				case GLOBAL_ZERO_VOLUME_ON_PAUSE:
+				case GLOBAL_HALF_VOLUME_ON_PAUSE:
 					AudioManager->SetMusicVolume(SettingsManager->music_vol);
 					AudioManager->SetSoundVolume(SettingsManager->sound_vol);
 					break;
@@ -119,14 +126,14 @@ void QuitMode::Update(Uint32 time_elapsed) {
 	
 	// Restore the game audio, pop QuitMode off the stack, and push BootMode
 	else if (input->confirm_press && quit_selected == QUIT_TO_BOOTMENU) {
-	  if (SettingsManager->pause_audio_on_quit) {
+	  if (SettingsManager->paused_vol_type == GLOBAL_PAUSE_AUDIO_ON_PAUSE) {
 			AudioManager->ResumeAudio();
 		}
 		
 		else {
 			switch (SettingsManager->paused_vol_type) {
-				case GLOBAL_ZERO_VOLUME:
-				case GLOBAL_HALF_VOLUME:
+				case GLOBAL_ZERO_VOLUME_ON_PAUSE:
+				case GLOBAL_HALF_VOLUME_ON_PAUSE:
 					AudioManager->SetMusicVolume(SettingsManager->music_vol);
 					AudioManager->SetSoundVolume(SettingsManager->sound_vol);
 					break;

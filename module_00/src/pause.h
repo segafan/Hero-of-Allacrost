@@ -10,10 +10,15 @@
 
 #ifndef __PAUSED_HEADER__
 #define __PAUSED_HEADER__ 
+
+// Partially defined namespace to avoid recursive inclusion problems.
+namespace hoa_pause {
+	class PauseMode;
+} // namespace hoa_pause
  
 #include <string>
-#include "video.h"
 #include "audio.h"
+#include "video.h"
 #include "global.h"
 
 namespace hoa_pause {
@@ -34,18 +39,13 @@ namespace hoa_pause {
 	>>>notes<<<
 		1) THIS IS IMPORTANT! During some scenes of the game you might need the audio to be synchornized with the
 			game, and so if the user pauses the game you want to pause the audio so the audio doesn't go out of synch
-			with the action. In order to do this, when you beginning such a scene you need to set the pause_audio_on_quit
-			member of the GameSettings class to TRUE. When you are finished with this type of scene, you must must MUST
-			remember to set this member back to FALSE. Don't forget this!!!
-		
-	
+			with the action. In order to do this, when you beginning such a scene you need to set the
+			pause_vol_type member of the GameSettings class to GLOBAL_PAUSE_VOLUME_ON_PAUSE. When you are finished with
+			this type of scene, you must must MUST remember to restore this member back to it's default value. Don't
+			forget this!!!
  *****************************************************************************/
 class PauseMode : public hoa_global::GameMode {
 private:
-	hoa_utils::Singleton<hoa_audio::GameAudio> AudioManager;
-	hoa_utils::Singleton<hoa_video::GameVideo> VideoManager;
-	hoa_utils::Singleton<hoa_global::GameModeManager> ModeManager;
-	hoa_utils::Singleton<hoa_global::GameSettings> SettingsManager;
 	hoa_global::InputState* input;	
 public: 
   PauseMode();

@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include "scene.h"
+#include "pause.h"
 
 using namespace std;
 using namespace hoa_global;
@@ -20,6 +21,10 @@ using namespace hoa_scene::local_scene;
 namespace hoa_scene {
 
 SceneMode::SceneMode() {
+	VideoManager = GameVideo::_GetReference();
+	ModeManager = GameModeManager::_GetReference();
+	SettingsManager = GameSettings::_GetReference();
+	
 	mtype = scene_m;
 	input = &(SettingsManager->InputStatus);
 	scene_timer = 0;
@@ -42,13 +47,8 @@ SceneMode::~SceneMode() {
 void SceneMode::Update(Uint32 time_elapsed) {
 	scene_timer += time_elapsed;
 	
-	if (input->pause_press) {
-	  PauseMode *PM = new PauseMode();
-		ModeManager->Push(PM);
-	}
-	
 	// User must wait 0.75 seconds before they can exit the scene
-	else if ((input->confirm_press || input->cancel_press) && scene_timer < MIN_SCENE_UPDATES) {
+	if ((input->confirm_press || input->cancel_press) && scene_timer < MIN_SCENE_UPDATES) {
 		ModeManager->Pop();
 	}
 }

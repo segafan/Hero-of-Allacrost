@@ -24,16 +24,20 @@
 
 #ifndef __AUDIO_HEADER__
 #define __AUDIO_HEADER__ 
- 
+
+// Partially defined namespace to avoid recursive inclusion problems.
+namespace hoa_audio {
+	class GameAudio;
+	class MusicDescriptor;
+	class SoundDescriptor;
+} // namespace hoa_audio
+
 #include <string>
 #include "SDL.h"
 #include <SDL/SDL_mixer.h>
 #include "utils.h"
 
-
 namespace hoa_audio {
-
-class GameAudio;
 
 const bool AUDIO_DEBUG = true;
 
@@ -184,17 +188,14 @@ class MusicDescriptor {
  *				 5) Recommended fade time for playing music and sound is 500ms.
  *****************************************************************************/
 class GameAudio {
+private:
+	SINGLETON_DECLARE(GameAudio);
 	bool audio_on;
 	int current_track;
 	int music_id;
 	int sound_id;
 	local_audio::MusicItem music_cache[local_audio::MAX_CACHED_MUSIC];
 	local_audio::SoundItem sound_cache[local_audio::MAX_CACHED_SOUNDS];
-
-	GameAudio();
-	GameAudio( const GameAudio& ga ) {}
-	GameAudio& operator=( const GameAudio& ga ) {}
-	SINGLETON2(GameAudio);	
 	
 	int AllocateMusicIndex();
 	int FindMusicIndex(unsigned int mus_id);
@@ -203,8 +204,8 @@ class GameAudio {
 	int AllocateSoundIndex();
 	int FindSoundIndex(unsigned int snd_id);
 	void FreeSound(int index);
-public:		
-	~GameAudio();
+public:
+	SINGLETON_METHODS(GameAudio); 
 	void PauseAudio();
 	void ResumeAudio();
 	
@@ -223,7 +224,6 @@ public:
 	void SetSoundVolume(int value);
 	int GetSoundVolume();
 	void PrintSoundCache();
-
 };
 
 } // namespace hoa_audio

@@ -11,22 +11,32 @@
 #ifndef __GLOBAL_HEADER__
 #define __GLOBAL_HEADER__ 
 
+// Partially defined namespace to avoid recursive inclusion problems.
+namespace hoa_global {
+	class GameMode;
+	class GameModeManager;
+	class GameSettings;
+} // namespace hoa_global
+
 #include <vector>
 #include "SDL.h" 
 #include "utils.h"
+#include "audio.h"
+#include "video.h"
 #include "data.h"
 
 namespace hoa_global {
 
 const bool GLOBAL_DEBUG = true;
 
-// These are constants used for changing volume level during PausedMode and QuitMode
-const int GLOBAL_ZERO_VOLUME = 0;
-const int GLOBAL_HALF_VOLUME = 1;
-const int GLOBAL_SAME_VOLUME = 0;
+// These are constants used for changing the audio during PausedMode and QuitMode
+const unsigned char GLOBAL_PAUSE_AUDIO_ON_PAUSE = 0;
+const unsigned char GLOBAL_ZERO_VOLUME_ON_PAUSE = 1;
+const unsigned char GLOBAL_HALF_VOLUME_ON_PAUSE = 2;
+const unsigned char GLOBAL_SAME_VOLUME_ON_PAUSE = 3;
 
 // gmode = Game mode. Different states of operation the game can be in.
-enum gmode { dummy_m, boot_m, menu_m, map_m, battle_m, shop_m, world_m, paused_m, quit_m, scene_m };
+enum gmode { dummy_m, boot_m, menu_m, map_m, battle_m, shop_m, world_m, pause_m, quit_m, scene_m };
 
 // glanguage = Game language. Allows us to set what language the game is running in.
 enum glanguage { english_l, spanish_l, german_l };
@@ -34,8 +44,7 @@ enum glanguage { english_l, spanish_l, german_l };
 // gitem = identifiers for different types of weapons
 enum gitem { blank_i, item_i, sbook_i, weapon_i, armor_i };
 
-// Partially defined here so GameMode can declare it a friend
-class GameModeManager;
+
 
 /******************************************************************************
  GameMode class - A parent class that all other game mode classes inherit from.
@@ -63,14 +72,18 @@ class GameModeManager;
 class GameMode {
 protected:
 	gmode mtype;
-	
+	hoa_audio::GameAudio *AudioManager;
+	hoa_video::GameVideo *VideoManager;
+	hoa_data::GameData *DataManager;
+	GameModeManager *ModeManager;
+	GameSettings *SettingsManager;
 	friend class GameModeManager;
 private:
 	GameMode( const GameMode& other ) {}
 	GameMode& operator=( const GameMode& other ) {}
 public:
-	GameMode() { mtype = dummy_m; }
-	virtual ~GameMode() {}
+	GameMode();
+	~GameMode();
 	virtual void Update(Uint32 time_elapsed) = 0;
 	virtual void Draw() = 0;
 };
@@ -102,14 +115,10 @@ public:
  *****************************************************************************/
 class GameModeManager {
 private:
+	SINGLETON_DECLARE(GameModeManager);
 	std::vector<GameMode*> game_stack;
-	
-	GameModeManager() {}
-	GameModeManager( const GameModeManager& gs ) {}
-	GameModeManager& operator=( const GameModeManager& gs ) {}
-	SINGLETON2(GameModeManager);
 public: 
-	~GameModeManager();
+	SINGLETON_METHODS(GameModeManager);
 	
 	void Pop();
 	void Push(GameMode* gm);
@@ -284,7 +293,6 @@ typedef struct InputState {
 	KeyState key;
 	JoystickState joystick;
 	
-	
 	bool up_state;
 	bool up_press;
 	bool up_release;
@@ -325,9 +333,7 @@ typedef struct InputState {
 	bool lselect_press;
 	bool lselect_release;
 	
-	bool pause_state;
-	bool pause_press;
-	bool pause_release;	
+	// Note: We don't need to monitor the pause key. It is handled automatically
 } InputState;
 
 
@@ -346,17 +352,17 @@ typedef struct InputState {
 		bool full_screen: true if we are running the game in full screen mode. False if we are not.
 		int music_vol: the music volume level. Valid range is [0, 128]
 		int sound_vol: the sound volume level. Valid range is [0, 128]
-		int paused_vol_type: used by PauseMode and QuitMode for changing the volume
-		bool paused_audio_on_quit: if set to true, during PauseMode or QuitMode the audio will pause
+		unsigned char paused_vol_type: used by PauseMode and QuitMode for changing the volume
 		bool not_done: when this is set to false, the program will exit
 		InputState InputStatus: retains the user input configuration and status
 		glanguage language: the language currently selected by the user
 	
 	>>>functions<<< 
-		~GameSettings(): closes any open joysticks
-		
-		void ResetInputFlags(): resets all press and release input flags to false 
 		Uint32 UpdateTime(): sets the last_update member to the current time and returns their difference
+		void SetTimer(): sets up the timer info. Only called during program initialization
+		void EventHandler(): handles all user input events and sets input status flags appropriately
+		void KeyEventHandler(SDL_KeyboardEvent *key_event): helps handle keyboard events
+		void JoystickEventHandler(SDL_Event *js_event): helps handle joystick events
 	
 	>>>notes<<< 
 		1) The reason this class contains things like the volume and screen resolution instead of
@@ -364,37 +370,37 @@ typedef struct InputState {
 			can configure for themselves. It's much easier to load from and store to a config file 
 			with one class than several.
 			
-		2) There's a chance we could get seg faults in other parts of the code if the value returned by 
+		2) There's a chance we could get errors in other parts of the code if the value returned by 
 			UpdateTime() is zero. I might think of a way around this (like always making sure it at least
 			returns one), but until then be careful...
+			
+		3) *DO NOT* call SetTimer() anywhere in your code. It should only be in the game initialization
+			part of the code in loader.cpp. If you call it, you will be spelling your own doom.
  *****************************************************************************/
 class GameSettings {
 private:
+	SINGLETON_DECLARE(GameSettings);
 	Uint32 last_update;
 	Uint32 fps_timer;
 	int fps_counter;
-	
-	GameSettings();
-	GameSettings( const GameSettings& gs ) {}
-	GameSettings& operator=( const GameSettings& gs ) {}
-	SINGLETON2(GameSettings);
+protected:
+	void KeyEventHandler(SDL_KeyboardEvent *key_event);
+	void JoystickEventHandler(SDL_Event *js_event);
 public:
+	SINGLETON_METHODS(GameSettings);
 	float fps_rate;
 	SDL_Rect screen_res;
 	bool full_screen;
 	int music_vol;
 	int sound_vol;
-	int paused_vol_type;
-	bool pause_audio_on_quit;
+	unsigned char paused_vol_type;
 	bool not_done;
 	InputState InputStatus;
 	glanguage language;
 	
-	~GameSettings();
-	
-	void ResetInputFlags();	
 	Uint32 UpdateTime();
 	void SetTimer();
+	void EventHandler();
 };
 
 

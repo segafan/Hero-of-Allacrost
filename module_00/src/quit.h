@@ -11,9 +11,14 @@
 #ifndef __QUIT_HEADER__
 #define __QUIT_HEADER__ 
  
+// Partially defined namespace to avoid recursive inclusion problems.
+namespace hoa_quit {
+	class QuitMode;
+} // namespace hoa_quit
+
 #include <string>
-#include "video.h"
 #include "audio.h"
+#include "video.h"
 #include "global.h"
 #include "boot.h"
 
@@ -57,11 +62,6 @@ const int QUIT_CANCEL      = 2;
 class QuitMode : public hoa_global::GameMode {
 private:
 	int quit_selected;
-
-	hoa_utils::Singleton<hoa_audio::GameAudio> AudioManager;
-	hoa_utils::Singleton<hoa_video::GameVideo> VideoManager;
-	hoa_utils::Singleton<hoa_global::GameModeManager> ModeManager;
-	hoa_utils::Singleton<hoa_global::GameSettings> SettingsManager;
 	hoa_global::InputState* input;	
 public: 
   QuitMode();

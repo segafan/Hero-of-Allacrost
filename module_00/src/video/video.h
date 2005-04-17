@@ -42,6 +42,7 @@ const int VIDEO_BLEND_ADD = 13;
 class GameVideo
 {
 private:
+	SINGLETON_DECLARE(GameVideo);
 	//current screen info
 	int _width, _height;
 	bool _setUp;
@@ -58,10 +59,8 @@ private:
 	// textures
 	std::vector<ImageDescriptor*> _images;
 	static bool LoadTexture(ImageDescriptor &id);
-
-	SINGLETON2(GameVideo);
-	GameVideo();
 public:
+	SINGLETON_METHODS(GameVideo);
 	bool ChangeMode(const SDL_Rect &s);
 	void SetViewport(float left, float top, float right, float bottom);
 	void SetCoordSys(float x_left, float x_right,
