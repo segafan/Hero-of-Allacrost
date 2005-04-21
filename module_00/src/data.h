@@ -16,6 +16,10 @@ namespace hoa_data {
 	class GameData;
 } // namespace hoa_data
 
+namespace hoa_map {
+	class MapMode;
+}
+
 extern "C" {
 	#include <lua.h>
 	#include <lauxlib.h>
@@ -26,7 +30,7 @@ extern "C" {
 #include "audio.h"
 #include "video.h"
 #include "global.h"
-//#include "map.h"
+
 
 namespace hoa_data {
 
@@ -81,6 +85,9 @@ class GameData {
 private:
 	SINGLETON_DECLARE(GameData);
 	
+	hoa_audio::GameAudio *AudioManager;
+	hoa_video::GameVideo *VideoManager;
+	
 // BEGIN Lua related stuff
 	lua_State *l_stack;
 	
@@ -95,6 +102,7 @@ private:
 	std::string GetGlobalString(const char * key);
 	
 	void FillStringVector(std::vector<std::string> *vect, const char *key);
+	void FillIntVector(std::vector<int> *vect, const char *key);
 // END Lua related stuff
 
 public:
@@ -104,8 +112,9 @@ public:
 	void LoadGameSettings();
 	void ResetGameSettings();
 	void LoadBootData(std::vector<hoa_video::ImageDescriptor> *boot_images,
-	std::vector<hoa_audio::SoundDescriptor> *boot_sound,
-	std::vector<hoa_audio::MusicDescriptor> *boot_music);
+	                  std::vector<hoa_audio::SoundDescriptor> *boot_sound,
+	                  std::vector<hoa_audio::MusicDescriptor> *boot_music);
+	void LoadMap(hoa_map::MapMode *mapmode, int map_id);
 };
 
 } // namespace hoa_data

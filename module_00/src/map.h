@@ -22,6 +22,8 @@
 namespace hoa_map {
 	class MapMode;
 	class ObjectLayer;
+	class MapTile;
+	class TileFrame;
 } // namespace hoa_map
 
 #include <string>
@@ -31,6 +33,7 @@ namespace hoa_map {
 #include "audio.h"
 #include "video.h"
 #include "global.h"
+#include "map.h"
 
 namespace hoa_map {
 
@@ -171,11 +174,12 @@ typedef struct {
 		int upper_layer: index to an upper layer tile in the MapMode tile_frames vector
 		unsigned int event_mask: a bit-wise mask indicating various tile properties
 ******************************************************************************/
-typedef struct {
+class MapTile {
+public:
 	int lower_layer;
 	int upper_layer;
 	unsigned int event_mask;
-} MapTile;
+};
 
 
 
@@ -186,9 +190,10 @@ typedef struct {
 		int frame: holds a frame index pointing to map_tiles in MapMode class
 		Tileframe *next: a pointer to the next frame
  *****************************************************************************/
-typedef struct TileFrame {
+class TileFrame {
+public:
 	int frame;
-	struct TileFrame *next;
+	TileFrame *next;
 };
 
 
@@ -436,6 +441,8 @@ public:
  *****************************************************************************/
 class MapMode : public hoa_global::GameMode {
 private:
+	friend class hoa_data::GameData;
+	
 	int map_id;
 	unsigned int map_state;
 	int animation_rate;

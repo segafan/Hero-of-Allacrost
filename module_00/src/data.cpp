@@ -10,14 +10,15 @@
 
 
 #include <iostream>
-#include "data.h"
 #include "map.h"
+#include "data.h"
 
 using namespace std;
 using namespace hoa_global;
 using namespace hoa_video;
 using namespace hoa_audio;
 using namespace hoa_utils;
+using namespace hoa_map;
 
 namespace hoa_data {
 
@@ -35,6 +36,9 @@ GameData::GameData() {
 		lib->func(l_stack);      // open library
 		lua_settop(l_stack, 0);  // Clear the stack
 	}
+	
+	AudioManager = GameAudio::_Create();
+	VideoManager = GameVideo::_Create();
 }
 
 // Close Lua upon destruction
@@ -42,6 +46,9 @@ GameData::~GameData() {
 	if (DATA_DEBUG)
 		cerr << "DEBUG: GameData destructor invoked." << endl;
 	lua_close(l_stack);
+	
+	VideoManager->_Destroy();
+	AudioManager->_Destroy();
 }
 
 
@@ -140,6 +147,20 @@ void GameData::FillStringVector(vector<string> *vect, const char *key) {
 	lua_pushnil(l_stack);
 	while (lua_next(l_stack, t)) {
 		vect->push_back((string)lua_tostring(l_stack, LUA_STACK_TOP));
+		lua_pop(l_stack, 1);
+	}
+}
+
+void GameData::FillIntVector(std::vector<int> *vect, const char *key) {
+	lua_getglobal(l_stack, key);
+	if (!lua_istable(l_stack, LUA_STACK_TOP)) {
+		cout << "Lua error: table " << key << " does not exist, or " << key << "ain't a table\n";
+		return;
+	}
+	int t = lua_gettop(l_stack);
+	lua_pushnil(l_stack);
+	while (lua_next(l_stack, t)) {
+		vect->push_back((int)lua_tonumber(l_stack, LUA_STACK_TOP));
 		lua_pop(l_stack, 1);
 	}
 }
@@ -246,6 +267,131 @@ void GameData::LoadBootData(
 		boot_sound->push_back(new_sound);
 	}
 	
+}
+
+// This one loads all the tiles from img/tile/ directory and reads the map file given
+// by new_map_id. The function should be called only from the MapMode class members.
+void GameData::LoadMap(hoa_map::MapMode *map_mode, int new_map_id) {
+	// Load the map file
+	string filename = "data/maps/map";
+	filename += "1";	// TEMPORARY TEMPORARY
+	// filename += new_map_id;
+	filename += ".hoa";
+	
+	if (luaL_loadfile(l_stack, filename.c_str()) || lua_pcall(l_stack, 0, 0, 0))
+		cout << "LUA ERROR: Could not load "<< filename << " :: " << lua_tostring(l_stack, -1) << endl;
+	
+	// Setup some global map options (explanations are in map.h)
+	map_mode->map_state = GetGlobalInt("map_state");	
+	map_mode->random_encounters = GetGlobalBool("random_encounters");
+	map_mode->encounter_rate = GetGlobalInt("encounter_rate");
+	map_mode->steps_till_encounter = GaussianValue(map_mode->encounter_rate, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
+	map_mode->animation_rate = GetGlobalInt("animation_rate");
+	map_mode->animation_counter = GetGlobalInt("animation_counter");
+	map_mode->tile_count = GetGlobalInt("tile_count");
+	map_mode->rows_count = GetGlobalInt("rows_count");
+	map_mode->cols_count = GetGlobalInt("cols_count");
+	
+	// This part loads only the tiles needed by the current map. The map editor fills in the
+	// corresponding Lua vector.
+	vector<string> tiles_used;
+	string tile_prefix = "img/tile/";	// where they're at
+	FillStringVector(&tiles_used, "tiles_used");
+	if (tiles_used.size() == 0) {
+		cout << "Error loading map " << filename << " : No tiles specified for map!! (??)" << endl;
+		//TODO Add meaningful error codes, and make LoadMap return an int
+		return;
+	}
+	ImageDescriptor imgdsc;
+	imgdsc.width = imgdsc.height = 1;
+	for (int i = 0; i < tiles_used.size(); i++) {
+		imgdsc.filename = tile_prefix + tiles_used[i] + ".png";
+		map_mode->map_tiles.push_back(imgdsc);
+		VideoManager->LoadImage(imgdsc);
+	}
+	// The following chunk-o-code checks if the tilename has a letter at the end, which means the
+	// tile is a part of the animated tile (for example: cave12a, cave12b, cave12c, etc.). And
+	// takes care of everything else ;)
+	// First we build a table which tells us at what indices do the individual tiles start at.
+	// Example:
+	// "cave01", "cave02a", "cave02b", "cave02c", "city01a", "city02b", "city03"
+	// would generate a table that looks like:
+	// tbl[0] = 0;	// cave01
+	// tbl[1] = 1;	// cave02
+	// tbl[2] = 4;	// city01
+	// tbl[3] = 6;	// city03
+	// Oh, you get it...
+	vector<int> tbl;
+	tbl.push_back(0);		// There's always at least one tile
+	vector<string> basenames;	// basename("cave01a") == "cave01"
+	// create the basenames vector
+	for (int i = 0; i < tiles_used.size(); i++) {
+		if (tiles_used[i][tiles_used[i].size()-1] >= 'a' && tiles_used[i][tiles_used[i].size()-1] <= 'z')
+			basenames.push_back(tiles_used[i].substr(0, tiles_used[i].size()-1));
+		else
+			basenames.push_back(tiles_used[i]);
+	}
+	// examine the basenames, and create the table
+	for (int i = 0; i < tiles_used.size() - 1; i++) {
+		if (!(basenames[i] == basenames[i+1])) tbl.push_back(i+1);
+	}
+	tbl.push_back(tiles_used.size());
+	
+	for (int i = 0; i < tbl.size(); i++) cout << "In LoadMap: " << tbl[i] << endl;	/* DEBUG */
+	
+	// now that we have the table, we populate the tile_frames vector...
+	TileFrame *tframe, *root;
+	for (int i = 0; i < tbl.size() - 1; i++) {
+		tframe = new TileFrame;
+		root = tframe;
+		for (int j = tbl[i]; j < tbl[i+1]; j++) {
+			if (j > tbl[i]) {
+				tframe->next = new TileFrame;
+				tframe = tframe->next;
+			}
+			tframe->frame = j;
+			tframe->next = 0;
+		}
+		tframe->next = root;
+		map_mode->tile_frames.push_back(tframe);
+	}
+	
+	// Now load the map itself, by loading the lower_layer, upper_layer and event_mask vectors
+	vector<int> lower, upper, emask;
+	FillIntVector(&lower, "lower_layer");
+	FillIntVector(&upper, "upper_layer");
+	FillIntVector(&emask, "event_mask");
+	if (lower.size() != upper.size() || upper.size() != emask.size()) {
+		cout << "ERROR: The lower_layer, upper_layer and event_mask vectors do NOT have the same size! Check the editor code, or any modifications you made to the map file " << filename << "!\n";
+		// TODO Add meaningful error codes, and make LoadMap return an int
+		return;
+	}
+	if (lower.size() != map_mode->rows_count * map_mode->cols_count) {
+		cout << "ERROR: The actual size of the lower, upper and mask vectors is NOT EQUAL to rows_count*cols_count !!!\nBARF!\n";
+		// TODO Add meaningful error codes, and make LoadMap return an int
+		return;
+	}
+	int c = 0;
+	MapTile *t = new MapTile;
+	// TODO TODO  iz nekog razloga u ovoj petlji se javlja segfault...
+	for (int i = 0; i < map_mode->rows_count; i++) {
+		map_mode->map_layers.push_back(vector<MapTile>());
+		for (int j = 0; j < map_mode->cols_count; i++) {
+			t->lower_layer = lower[c];
+			t->upper_layer = upper[c];
+			t->event_mask = emask[c];
+			cout << "0x01 !!\n";
+			map_mode->map_layers[i].push_back(*t);
+			//cout << map_mode->map_layers[i][j].lower_layer << "\n";
+			cout << "0x02 !!\n";
+			c++;
+		}
+	}
+	delete t;
+	
+	// load Claudius
+	map_mode->player_sprite = new PlayerSprite();
+	map_mode->object_layer.push_back(map_mode->player_sprite);
 }
 
 
