@@ -21,7 +21,7 @@
 using namespace std;
 using namespace hoa_audio::local_audio;
 using namespace hoa_utils;
-		
+
 namespace hoa_audio {
 	
 SINGLETON_INITIALIZE(GameAudio);

@@ -10,11 +10,13 @@
 
 #include <iostream>
 #include "pause.h"
+#include "audio.h"
+#include "video.h"
 
 using namespace std;
-using namespace hoa_global;
 using namespace hoa_audio;
 using namespace hoa_video;
+using namespace hoa_global;
 
 namespace hoa_pause {
 
@@ -22,12 +24,7 @@ namespace hoa_pause {
 PauseMode::PauseMode() {
 	cerr << "DEBUG: PauseMode constructor invoked" << endl;
 	
-	AudioManager = GameAudio::_GetReference();
-	VideoManager = GameVideo::_GetReference();
-	SettingsManager = GameSettings::_GetReference();
-	
 	mtype = pause_m;
-	input = &(SettingsManager->InputStatus);
 	
 	if (SettingsManager->paused_vol_type == GLOBAL_PAUSE_AUDIO_ON_PAUSE) {
 		AudioManager->PauseAudio();
@@ -86,7 +83,7 @@ void PauseMode::Update(Uint32 time_elapsed) { }
 
 
 
-// Nothing to draw since the screen never changes in pause mode
+// Nothing to draw since the screen never changes in pause mode (maybe we should call SDL_Delay here?)
 void PauseMode::Draw() { }
 
 } // namespace hoa_pause

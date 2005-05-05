@@ -10,13 +10,17 @@
 
 #include <iostream>
 #include "quit.h"
+#include "audio.h"
+#include "video.h"
+#include "boot.h"
 
 using namespace std;
-using namespace hoa_global;
+using namespace hoa_quit::local_quit;
 using namespace hoa_audio;
 using namespace hoa_video;
+using namespace hoa_global;
 using namespace hoa_boot;
-using namespace hoa_quit::local_quit;
+
 
 namespace hoa_quit {
 
@@ -29,9 +33,8 @@ QuitMode::QuitMode() {
 	SettingsManager = GameSettings::_GetReference();
 	
 	mtype = quit_m;
-	input = &(SettingsManager->InputStatus);
 	
-	quit_selected = QUIT_CANCEL;
+	quit_type = QUIT_CANCEL;
 
 	
 	if (SettingsManager->paused_vol_type == GLOBAL_PAUSE_AUDIO_ON_PAUSE) {
@@ -55,7 +58,7 @@ QuitMode::QuitMode() {
 	
 	// Here we'll make a VideoManager call to save the current screen.
 	
-	// Here we'll render the "Really Quit?" text to screen along with Yes - No options
+	// Here we'll render the "Really Quit?" text to screen along with the quit options
 }
 
 
@@ -71,41 +74,41 @@ QuitMode::~QuitMode() {
 void QuitMode::Update(Uint32 time_elapsed) {
 
 	// Move the menu selected cursor as appropriate
-	if (input->left_press) {
-		switch (quit_selected) {
+	if (InputManager->LeftPress()) {
+		switch (quit_type) {
 			case QUIT_GAME:
-				quit_selected = QUIT_CANCEL;
+				quit_type = QUIT_CANCEL;
 				cout << "Cancel" << endl;
 				break;
 			case QUIT_TO_BOOTMENU:
-				quit_selected = QUIT_GAME;
+				quit_type = QUIT_GAME;
 				cout << "Quit Game" << endl;
 				break;
 			case QUIT_CANCEL:
-				quit_selected = QUIT_TO_BOOTMENU;
+				quit_type = QUIT_TO_BOOTMENU;
 				cout << "Quit to Bootmenu" << endl;
 				break;
 		}
 	}
-	else if (input->right_press) {
-		switch (quit_selected) {
+	else if (InputManager->RightPress()) {
+		switch (quit_type) {
 			case QUIT_GAME:
-				quit_selected = QUIT_TO_BOOTMENU;
+				quit_type = QUIT_TO_BOOTMENU;
 				cout << "Quit to Bootmenu" << endl;
 				break;
 			case QUIT_TO_BOOTMENU:
-				quit_selected = QUIT_CANCEL;
+				quit_type = QUIT_CANCEL;
 				cout << "Cancel" << endl;
 				break;
 			case QUIT_CANCEL:
-				quit_selected = QUIT_GAME;
+				quit_type = QUIT_GAME;
 				cout << "Quit Game" << endl;
 				break;
 		}
 	}
 	
 	// The user really doesn't want to quit after all, so restore the game audio and state
-	if (input->cancel_press || (input->confirm_press && quit_selected == QUIT_CANCEL)) {
+	if (InputManager->CancelPress() || (InputManager->ConfirmPress() && quit_type == QUIT_CANCEL)) {
 		if (SettingsManager->paused_vol_type == GLOBAL_PAUSE_AUDIO_ON_PAUSE) {
 			AudioManager->ResumeAudio();
 		}
@@ -125,7 +128,7 @@ void QuitMode::Update(Uint32 time_elapsed) {
 	}
 	
 	// Restore the game audio, pop QuitMode off the stack, and push BootMode
-	else if (input->confirm_press && quit_selected == QUIT_TO_BOOTMENU) {
+	else if (InputManager->ConfirmPress() && quit_type == QUIT_TO_BOOTMENU) {
 	  if (SettingsManager->paused_vol_type == GLOBAL_PAUSE_AUDIO_ON_PAUSE) {
 			AudioManager->ResumeAudio();
 		}
@@ -147,8 +150,8 @@ void QuitMode::Update(Uint32 time_elapsed) {
 	}
 	
 	// The user has confirmed that they want to quit.
-	else if (input->confirm_press && quit_selected) {
-		SettingsManager->not_done = false;
+	else if (InputManager->ConfirmPress() && quit_type) {
+		SettingsManager->ExitGame();
 	}
 }
 

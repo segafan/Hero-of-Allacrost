@@ -10,15 +10,9 @@
 
 #ifndef __SCENE_HEADER__
 #define __SCENE_HEADER__ 
-
-// Partially defined namespace to avoid recursive inclusion problems.
-namespace hoa_scene {
-	class SceneMode;
-} // namespace hoa_scene
  
 #include <string>
-#include "audio.h"
-#include "video.h"
+#include "defs.h"
 #include "global.h"
 
 namespace hoa_scene {
@@ -41,20 +35,18 @@ const int MIN_SCENE_UPDATES = 750;
 	SceneMode(): Loads up the scene image
 	~SceneMode(): Frees the scene image
 	
-	void Update(Uint32 time_elapsed): Processes user input, updates the game state & game mode stack appropriately
+	void Update(Uint32 time_elapsed): Processes user input, updates the game state appropriately
 	void Draw(): Draws the scene
  
 	>>>notes<<<
 		1) The user can not finish viewing the scene until after it has been on the screen for a short while. This is
 			done so that the user doesn't accidentally skip a scene without viewing it (and so they are forced to gaze
-			at the gorgeous artwork ^_~). That time is set to 25 times Update() is called, which is about 750ms.
+			at the gorgeous artwork ^_~). That time is set to 750ms.
 	
  *****************************************************************************/
 class SceneMode : public hoa_global::GameMode {
 private:
 	int scene_timer;
-
-	hoa_global::InputState* input;	
 	
 	//hoa_video::ImageDescriptor scene;
 public: 

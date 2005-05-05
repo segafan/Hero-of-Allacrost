@@ -10,7 +10,8 @@
 
 #include <iostream>
 #include "scene.h"
-#include "pause.h"
+#include "audio.h"
+#include "video.h"
 
 using namespace std;
 using namespace hoa_global;
@@ -26,7 +27,6 @@ SceneMode::SceneMode() {
 	SettingsManager = GameSettings::_GetReference();
 	
 	mtype = scene_m;
-	input = &(SettingsManager->InputStatus);
 	scene_timer = 0;
 	
 	// setup the scene Image Descriptor
@@ -48,7 +48,7 @@ void SceneMode::Update(Uint32 time_elapsed) {
 	scene_timer += time_elapsed;
 	
 	// User must wait 0.75 seconds before they can exit the scene
-	if ((input->confirm_press || input->cancel_press) && scene_timer < MIN_SCENE_UPDATES) {
+	if ((InputManager->ConfirmPress() || InputManager->CancelPress()) && scene_timer < MIN_SCENE_UPDATES) {
 		ModeManager->Pop();
 	}
 }

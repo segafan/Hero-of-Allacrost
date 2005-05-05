@@ -11,19 +11,11 @@
 #ifndef __GLOBAL_HEADER__
 #define __GLOBAL_HEADER__ 
 
-// Partially defined namespace to avoid recursive inclusion problems.
-namespace hoa_global {
-	class GameMode;
-	class GameModeManager;
-	class GameSettings;
-} // namespace hoa_global
-
 #include <vector>
 #include "SDL.h" 
+#include "defs.h"
 #include "utils.h"
-#include "audio.h"
-#include "video.h"
-#include "data.h"
+
 
 namespace hoa_global {
 
@@ -50,7 +42,8 @@ enum gitem { blank_i, item_i, sbook_i, weapon_i, armor_i };
  GameMode class - A parent class that all other game mode classes inherit from.
 
 	>>>members<<<
-		gmode mtype: value indicating what "type" of GameMode this is. 
+		gmode mtype: value indicating what "type" of GameMode this is.
+		Game* *Manager: easy references to all the game's singleton classes
 
 	>>>functions<<< 
 		virtual void Update(Uint32 time_elapsed): A purely virtual function that updates the game status
@@ -59,11 +52,8 @@ enum gitem { blank_i, item_i, sbook_i, weapon_i, armor_i };
 
 	>>>notes<<< 
 		1) Both the copy constructor and copy assignment operator are private.
-
-		2) Notice that the destructor is virtual. The subclasses that inherit from this class
-			handle destruction.
-
-		3) >>>>>>>>>>>>>>>>>>>>>THIS IS VERY IMPORTANT<<<<<<<<<<<<<<<<<<<<<<<<< 
+		
+		2) >>>>>>>>>>>>>>>>>>>>>THIS IS VERY IMPORTANT<<<<<<<<<<<<<<<<<<<<<<<<< 
 			Never, under any circumstances should you ever invoke the delete function on a pointer to this 
 			object or its related subclasses. The reason is that all of the memory reference handling is done 
 			by the GameModeManager class. If you attempt to ignore this warning you will generate segmentation 
@@ -72,11 +62,14 @@ enum gitem { blank_i, item_i, sbook_i, weapon_i, armor_i };
 class GameMode {
 protected:
 	gmode mtype;
+	
 	hoa_audio::GameAudio *AudioManager;
 	hoa_video::GameVideo *VideoManager;
 	hoa_data::GameData *DataManager;
+	GameInput *InputManager;
 	GameModeManager *ModeManager;
 	GameSettings *SettingsManager;
+	
 	friend class GameModeManager;
 private:
 	GameMode( const GameMode& other ) {}
@@ -246,95 +239,6 @@ public:
 
 
 
-/******************************************************************************
-	KeyState struct - a data structure holding information about the user defined key settings.
-
-	SDLKey *name*: stores the key that corresponds to the generic function of *name*
- *****************************************************************************/
-typedef struct KeyState {
-	SDLKey up;	
-	SDLKey down; 
-	SDLKey left;
-	SDLKey right;
-	
-	SDLKey confirm;
-	SDLKey cancel;
-	SDLKey menu;
-	SDLKey swap; // Anyone know a better name?
-	
-	SDLKey rselect; // Right shoulder button
-	SDLKey lselect; // Left shoulder button
-
-	SDLKey pause;
-} KeyState;
-
-
-
-/******************************************************************************
-	JoystickState struct - a data structure holding information about the status of the joystick
-	
-	>>> this is on my to do list. - Tyler, Sept 22nd
- *****************************************************************************/
-typedef struct JoystickState {
-	SDL_Joystick *js;
-} JoystickState;
-
-
-
-/******************************************************************************
- InputState struct - a container for holding both keyboard and joystick configuration data.
-	 Includes a series of boolean values that represent the combination of both keyboard and joystick status.
-
-	bool *name_state*:   true if a key is being held down
-	bool *name_press*:   true if key was just pressed
-	bool *name_release*: true if key was just released 
- *****************************************************************************/
-typedef struct InputState {
-	KeyState key;
-	JoystickState joystick;
-	
-	bool up_state;
-	bool up_press;
-	bool up_release;
-	
-	bool down_state;
-	bool down_press;
-	bool down_release;
-	
-	bool left_state;
-	bool left_press;
-	bool left_release;
-	
-	bool right_state;
-	bool right_press;
-	bool right_release;
-	
-	bool confirm_state;
-	bool confirm_press;
-	bool confirm_release;
-	
-	bool cancel_state;
-	bool cancel_press;
-	bool cancel_release;
-	
-	bool menu_state;
-	bool menu_press;
-	bool menu_release;
-	
-	bool swap_state;
-	bool swap_press;
-	bool swap_release;
-	
-	bool rselect_state;
-	bool rselect_press;
-	bool rselect_release;
-	
-	bool lselect_state;
-	bool lselect_press;
-	bool lselect_release;
-	
-	// Note: We don't need to monitor the pause key. It is handled automatically
-} InputState;
 
 
 
@@ -360,9 +264,6 @@ typedef struct InputState {
 	>>>functions<<< 
 		Uint32 UpdateTime(): sets the last_update member to the current time and returns their difference
 		void SetTimer(): sets up the timer info. Only called during program initialization
-		void EventHandler(): handles all user input events and sets input status flags appropriately
-		void KeyEventHandler(SDL_KeyboardEvent *key_event): helps handle keyboard events
-		void JoystickEventHandler(SDL_Event *js_event): helps handle joystick events
 	
 	>>>notes<<< 
 		1) The reason this class contains things like the volume and screen resolution instead of
@@ -371,11 +272,11 @@ typedef struct InputState {
 			with one class than several.
 			
 		2) There's a chance we could get errors in other parts of the code if the value returned by 
-			UpdateTime() is zero. I might think of a way around this (like always making sure it at least
-			returns one), but until then be careful...
+			UpdateTime() is zero. We might get around this if we always make sure it at least returns
+			one, but I'm not sure there exists a computer fast enough that we have to worry about it. ^_^
 			
 		3) *DO NOT* call SetTimer() anywhere in your code. It should only be in the game initialization
-			part of the code in loader.cpp. If you call it, you will be spelling your own doom.
+			part of the code in loader.cpp. If you call it, you will be spelling your own d-o-o-m.
  *****************************************************************************/
 class GameSettings {
 private:
@@ -383,24 +284,194 @@ private:
 	Uint32 last_update;
 	Uint32 fps_timer;
 	int fps_counter;
-protected:
-	void KeyEventHandler(SDL_KeyboardEvent *key_event);
-	void JoystickEventHandler(SDL_Event *js_event);
+	bool not_done;
 public:
 	SINGLETON_METHODS(GameSettings);
+	
 	float fps_rate;
 	SDL_Rect screen_res;
 	bool full_screen;
 	int music_vol;
 	int sound_vol;
 	unsigned char paused_vol_type;
-	bool not_done;
-	InputState InputStatus;
 	glanguage language;
 	
 	Uint32 UpdateTime();
 	void SetTimer();
+	bool NotDone() { return not_done; }
+	void ExitGame() { not_done = false; }
+};
+
+
+
+/******************************************************************************
+	KeyState class - a data structure holding information about the user defined key settings.
+	
+	>>>members<<<
+	SDLKey *name*: stores the key that corresponds to the generic function of *name*
+	
+	>>>functions<<<
+	
+	>>>notes<<<
+	1) The only classes that need to call this are GameInput and GameData. GameData
+		Initializes the members, and GameInput uses the keys to check for input.
+ *****************************************************************************/
+class KeyState {
+public:
+	KeyState() {}
+	~KeyState() {}
+private:
+	SDLKey up;	
+	SDLKey down; 
+	SDLKey left;
+	SDLKey right;
+	SDLKey confirm;
+	SDLKey cancel;
+	SDLKey menu;
+	SDLKey swap;
+	SDLKey rselect;
+	SDLKey lselect;
+	SDLKey pause;
+	
+	friend class GameInput;
+	friend class hoa_data::GameData;
+};
+
+
+
+/******************************************************************************
+	JoystickState class - a data structure holding information about the status of the joystick
+	
+	>>>members<<<
+	SDL_Joystick *js: a pointer to the active joystick
+	
+	>>>functions<<<
+	
+	>>>notes<<<
+	1) The only classes that need to call this are GameInput and GameData. GameData
+		Initializes the members, and GameInput uses the keys to check for input.
+		
+	2) This class is still incomplete and needs to be implemented. It's hard for me to do when
+		SDL won't recognize my joystick though, because I can't test it.
+ *****************************************************************************/
+class JoystickState {
+public:
+	JoystickState() {}
+	~JoystickState() {}
+private:
+	SDL_Joystick *js;
+	
+	friend class GameInput;
+	friend class hoa_data::GameData;
+};
+
+
+
+/******************************************************************************
+ GameInput class - Manages and handles all the game's user input
+	>>>This class is a singleton<<<
+	
+	>>>members<<<
+	bool *name_state*: true if input is being held down
+	bool *name_press*: true if input was just pressed
+	bool *name_release*: true if input was just released
+	
+	GameModeManager *ModeManager: a pointer to the singleton class
+	
+	>>>functions<<< 
+		void KeyEventHandler(SDL_KeyboardEvent *key_event): helps handle keyboard events
+		void JoystickEventHandler(SDL_Event *js_event): helps handle joystick events
+		void EventHandler(): handles all user input events and sets input status flags appropriately
+		bool *NameState*(): returns true if input is being held down
+		bool *NamePress*(): true if input was just pressed
+		bool *NameRelease*(): true if input was just released
+		
+	>>>notes<<<
+		1) There is also a 'pause' input, but it is handled automatically by this class and
+			your code will never need to worry about it. However, you can determine what happens
+			to the audio on a pause even (see the GameSettings class for info on that).
+			
+		2) EventHandler() is only called in the main game loop. Don't call it in your code.
+		
+		3) Just to make it perfectly clear, all you need to remember are the *State, *Press, and
+			*Release functions, so just memorize the name of the inputs that preceed those functions.
+			{{{ Up, Down, Left, Right, Confirm, Cancel, Menu, Swap, LSelect, RSelect }}}
+ *****************************************************************************/
+class GameInput {
+private:
+	SINGLETON_DECLARE(GameInput);
+	KeyState Key;
+	JoystickState Joystick;
+	
+	bool up_state;
+	bool up_press;
+	bool up_release;
+	bool down_state;
+	bool down_press;
+	bool down_release;
+	bool left_state;
+	bool left_press;
+	bool left_release;
+	bool right_state;
+	bool right_press;
+	bool right_release;
+	bool confirm_state;
+	bool confirm_press;
+	bool confirm_release;
+	bool cancel_state;
+	bool cancel_press;
+	bool cancel_release;
+	bool menu_state;
+	bool menu_press;
+	bool menu_release;
+	bool swap_state;
+	bool swap_press;
+	bool swap_release;
+	bool lselect_state;
+	bool lselect_press;
+	bool lselect_release;
+	bool rselect_state;
+	bool rselect_press;
+	bool rselect_release;
+	
+	GameModeManager *ModeManager;
+	
+	void KeyEventHandler(SDL_KeyboardEvent *key_event);
+	void JoystickEventHandler(SDL_Event *js_event);
+public:
+	SINGLETON_METHODS(GameInput);
 	void EventHandler();
+	
+	bool UpState() { return up_state; }
+	bool UpPress() { return up_press; }
+	bool UpRelease() { return up_release; }
+	bool DownState() { return down_state; }
+	bool DownPress() { return down_press; }
+	bool DownRelease() { return down_release; }
+	bool LeftState() { return left_state; }
+	bool LeftPress() { return left_press; }
+	bool LeftRelease() { return left_release; }
+	bool RightState() { return right_state; }
+	bool RightPress() { return right_press; }
+	bool RightRelease() { return right_release; }
+	bool ConfirmState() { return confirm_state; }
+	bool ConfirmPress() { return confirm_press; }
+	bool ConfirmRelease() { return confirm_release; }
+	bool CancelState() { return cancel_state; }
+	bool CancelPress() { return cancel_press; }
+	bool CancelRelease() { return cancel_release; }
+	bool MenuState() { return menu_state; }
+	bool MenuPress() { return menu_press; }
+	bool MenuRelease() { return menu_release; }
+	bool SwapState() { return swap_state; }
+	bool SwapPress() { return swap_press; }
+	bool SwapRelease() { return swap_release; }
+	bool LSelectState() { return lselect_state; }
+	bool LSelectPress() { return lselect_press; }
+	bool LSelectRelease() { return lselect_release; }
+	bool RSelectState() { return rselect_state; }
+	bool RSelectPress() { return rselect_press; }
+	bool RSelectRelease() { return rselect_release; }
 };
 
 

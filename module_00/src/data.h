@@ -11,25 +11,16 @@
 #ifndef __DATA_HEADER__
 #define __DATA_HEADER__
 
-// Partially defined namespace to avoid recursive inclusion problems.
-namespace hoa_data {
-	class GameData;
-} // namespace hoa_data
-
-namespace hoa_map {
-	class MapMode;
-}
-
 extern "C" {
 	#include <lua.h>
 	#include <lauxlib.h>
 	#include <lualib.h>
 }
 #include <string>
+#include <vector>
+#include "defs.h"
 #include "utils.h"
-#include "audio.h"
-#include "video.h"
-#include "global.h"
+
 
 
 namespace hoa_data {
@@ -111,6 +102,7 @@ public:
 
 	void LoadGameSettings();
 	void ResetGameSettings();
+	void LoadKeyJoyState(hoa_global::KeyState *keystate, hoa_global::JoystickState *joystate);
 	void LoadBootData(std::vector<hoa_video::ImageDescriptor> *boot_images,
 	                  std::vector<hoa_audio::SoundDescriptor> *boot_sound,
 	                  std::vector<hoa_audio::MusicDescriptor> *boot_music);

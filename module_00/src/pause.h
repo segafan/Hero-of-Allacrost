@@ -17,8 +17,7 @@ namespace hoa_pause {
 } // namespace hoa_pause
  
 #include <string>
-#include "audio.h"
-#include "video.h"
+#include "defs.h"
 #include "global.h"
 
 namespace hoa_pause {
@@ -27,7 +26,6 @@ namespace hoa_pause {
   PauseMode Class - A mode pushed onto the stack when the user pauses the game
 
 	>>>members<<<
-		Just some references to some singleton classes.
  
 	>>>functions<<<
 		PausedMode(): Constructor either pauses audio or changes audio level and displays "Paused" on screen
@@ -45,8 +43,6 @@ namespace hoa_pause {
 			forget this!!!
  *****************************************************************************/
 class PauseMode : public hoa_global::GameMode {
-private:
-	hoa_global::InputState* input;	
 public: 
   PauseMode();
   ~PauseMode();

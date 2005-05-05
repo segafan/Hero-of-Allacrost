@@ -10,10 +10,16 @@
 
 #include <iostream>
 #include "global.h"
+#include "audio.h"
+#include "video.h"
+#include "data.h"
 #include "quit.h"
 #include "pause.h"
 
 using namespace std;
+using namespace hoa_audio;
+using namespace hoa_video;
+using namespace hoa_data;
 using namespace hoa_quit;
 using namespace hoa_pause;
 
@@ -21,11 +27,24 @@ namespace hoa_global {
 
 SINGLETON_INITIALIZE(GameModeManager);
 SINGLETON_INITIALIZE(GameSettings);
+SINGLETON_INITIALIZE(GameInput);
+
+
+// ****************************************************************************
+// ******************************** GameMode **********************************
+// ****************************************************************************
 
 
 // Set the initial mtype value to something bad. The child class should replace it.
 GameMode::GameMode() { 
 	mtype = dummy_m; 
+	AudioManager = GameAudio::_GetReference();
+	VideoManager = GameVideo::_GetReference();
+	DataManager = GameData::_GetReference();
+	InputManager = GameInput::_GetReference();
+	ModeManager = GameModeManager::_GetReference();
+	SettingsManager = GameSettings::_GetReference();
+	
 }
 
 
@@ -33,9 +52,12 @@ GameMode::GameMode() {
 GameMode::~GameMode() { }
 
 
-// ************************** GameModeManager *****************************
+// ****************************************************************************
+// ***************************** GameModeManager ******************************
+// ****************************************************************************
 
-// Do-nothing constructor
+
+// Do-nothing constructor (necessary for the singleton macros)
 GameModeManager::GameModeManager() { }
 
 
@@ -102,9 +124,9 @@ void GameModeManager::PrintStack() {
 }
 
 
-
-// **************************** GameSettings *******************************
-
+// ****************************************************************************
+// **************************** GameSettings **********************************
+// ****************************************************************************
 
 
 // The constructor initalize all the data fields inside the GameSettings class
@@ -116,36 +138,6 @@ GameSettings::GameSettings() {
 	fps_timer = 0;
 	fps_counter = 0;
 	fps_rate = 0.0;
-	
-	InputStatus.up_state = false;
-	InputStatus.up_press = false;
-	InputStatus.up_release = false;
-		
-	InputStatus.down_state = false;
-	InputStatus.down_press = false;
-	InputStatus.down_release = false;
-	
-	InputStatus.left_state = false;
-	InputStatus.left_press = false;
-	InputStatus.left_release = false;
-	
-	InputStatus.right_state = false;
-	InputStatus.right_press = false;
-	InputStatus.right_release = false;
-	
-	InputStatus.confirm_state = false;
-	InputStatus.confirm_press = false;
-	InputStatus.confirm_release = false;
-	
-	InputStatus.cancel_state = false;
-	InputStatus.cancel_press = false;
-	InputStatus.cancel_release = false;
-	
-	InputStatus.menu_state = false;
-	InputStatus.menu_press = false;
-	InputStatus.menu_release = false;
-	
-	InputStatus.joystick.js = NULL;
 
 	// Remaining members are initialized by GameData->LoadGameSettings(), called in loader.cpp
 }
@@ -154,8 +146,6 @@ GameSettings::GameSettings() {
 
 // The destructor closes our joysticks
 GameSettings::~GameSettings() {
-	if (InputStatus.joystick.js != NULL) // If its open, close our joy stick before exiting
-		SDL_JoystickClose(InputStatus.joystick.js);
 	if (GLOBAL_DEBUG) cerr << "DEBUG: GameSettings destructor invoked" << endl;
 }
 
@@ -189,41 +179,102 @@ void GameSettings::SetTimer() {
 }
 
 
+// ****************************************************************************
+// ******************************** GameInput *********************************
+// ****************************************************************************
+
+
+// Initialize class members, call GameData routines for key and joystick initialization
+GameInput::GameInput() {
+	up_state = false;
+	up_press = false;
+	up_release = false;
+	
+	down_state = false;
+	down_press = false;
+	down_release = false;
+	
+	left_state = false;
+	left_press = false;
+	left_release = false;
+	
+	right_state = false;
+	right_press = false;
+	right_release = false;
+	
+	confirm_state = false;
+	confirm_press = false;
+	confirm_release = false;
+	
+	cancel_state = false;
+	cancel_press = false;
+	cancel_release = false;
+	
+	menu_state = false;
+	menu_press = false;
+	menu_release = false;
+	
+	swap_state = false;
+	swap_press = false;
+	swap_release = false;
+	
+	rselect_state = false;
+	rselect_press = false;
+	rselect_release = false;
+	
+	lselect_state = false;
+	lselect_press = false;
+	lselect_release = false;
+	
+	Joystick.js = NULL;
+	// CALL HERE: Call DataManager->SomeFn(Key&, Joystick&); to setup KeyState and JoystickState
+	GameData *DataManager = GameData::_GetReference();
+	DataManager->LoadKeyJoyState(&Key, &Joystick);
+	
+	// Because of this call, the GameModeManager class must be initialized before GameInput
+	ModeManager = GameModeManager::_GetReference();
+}
+
+
+
+GameInput::~GameInput() {
+	if (Joystick.js != NULL) // If its open, close the joystick before exiting
+		SDL_JoystickClose(Joystick.js);
+}
+
 
 // Handles all of the event processing for the game.
-void GameSettings::EventHandler() {
+void GameInput::EventHandler() {
 	SDL_Event event;	// Holds the game event
 	
 	// Reset all of our press and release flags so they don't get detected twice.
-	InputStatus.up_press = false; 
-	InputStatus.up_release = false;
-	InputStatus.down_press = false;
-	InputStatus.down_release = false;
-	InputStatus.left_press = false;
-	InputStatus.left_release = false; 
-	InputStatus.right_press = false;
-	InputStatus.right_release = false; 
-	InputStatus.confirm_press = false;
-	InputStatus.confirm_release = false; 
-	InputStatus.cancel_press = false;
-	InputStatus.cancel_release = false; 
-	InputStatus.menu_press = false;
-	InputStatus.menu_release = false;
-	InputStatus.swap_press = false;
-	InputStatus.swap_release = false;
-	InputStatus.rselect_press = false;
-	InputStatus.rselect_release = false;
-	InputStatus.lselect_press = false;
-	InputStatus.lselect_release = false;
+	up_press = false; 
+	up_release = false;
+	down_press = false;
+	down_release = false;
+	left_press = false;
+	left_release = false; 
+	right_press = false;
+	right_release = false; 
+	confirm_press = false;
+	confirm_release = false; 
+	cancel_press = false;
+	cancel_release = false; 
+	menu_press = false;
+	menu_release = false;
+	swap_press = false;
+	swap_release = false;
+	rselect_press = false;
+	rselect_release = false;
+	lselect_press = false;
+	lselect_release = false;
 	
 	while (SDL_PollEvent(&event)) { // Loops until we are out of events to process	 
-		if (event.type == SDL_QUIT) {	
-			// Get a temporary pointer to the ModeManager singleton
-			GameModeManager *ModeManager = GameModeManager::_GetReference(); 
+		if (event.type == SDL_QUIT) {
 			
 			// We quit the game without question if we are in BootMode or QuitMode
 			if (ModeManager->GetGameType() == boot_m || ModeManager->GetGameType() == quit_m) {
-				not_done = false;
+				(GameSettings::_GetReference())->ExitGame();
 			}
 			// Otherwise, we push QuitMode onto the stack
 			else {
@@ -251,9 +302,9 @@ void GameSettings::EventHandler() {
 
 
 // Handles all keyboard events for the game
-void GameSettings::KeyEventHandler(SDL_KeyboardEvent *key_event) {
+void GameInput::KeyEventHandler(SDL_KeyboardEvent *key_event) {
 	if (key_event->type == SDL_KEYDOWN) { // Key was pressed
-		if (key_event->keysym.mod & KMOD_CTRL) {
+		if (key_event->keysym.mod & KMOD_CTRL) { // CTRL key was held down
 			if (key_event->keysym.sym == SDLK_f) {
 				if (GLOBAL_DEBUG) cout << " Toggle Fullscreen!" << endl;
 				return;
@@ -263,14 +314,11 @@ void GameSettings::KeyEventHandler(SDL_KeyboardEvent *key_event) {
 				return;
 			}
 			else if (key_event->keysym.sym == SDLK_q) {
-				// Get a temporary pointer to the ModeManager singleton
-				GameModeManager *ModeManager = GameModeManager::_GetReference(); 
-				
-				// We quit the game without question if we are in BootMode or QuitMode
+				// Quit the game without question if we are in BootMode or QuitMode
 				if (ModeManager->GetGameType() == boot_m || ModeManager->GetGameType() == quit_m) {
-					not_done = false;
+					(GameSettings::_GetReference())->ExitGame();
 				}
-				// Otherwise, we push QuitMode onto the stack
+				// Otherwise, push QuitMode onto the stack
 				else {
 					QuitMode *QM = new QuitMode();
 					ModeManager->Push(QM);
@@ -280,55 +328,52 @@ void GameSettings::KeyEventHandler(SDL_KeyboardEvent *key_event) {
 				return;
 		}
 		
-		// Note: a switch-case statement won't work here because SettingsManager.InputStatus.key.up
-		//	is not an integer value and if you set it as a case the compiler will whine and cry ;_;
-		if (key_event->keysym.sym == InputStatus.key.up) {
+		// Note: a switch-case statement won't work here because Key.up is not an 
+		// integer value the compiler will whine and cry about it ;_;
+		if (key_event->keysym.sym == Key.up) {
 			if (GLOBAL_DEBUG) cout << " up key pressed." << endl;
-			InputStatus.up_state = true;
-			InputStatus.up_press = true;
+			up_state = true;
+			up_press = true;
 			return;
 		}
-		else if (key_event->keysym.sym == InputStatus.key.down) {
+		else if (key_event->keysym.sym == Key.down) {
 			if (GLOBAL_DEBUG) cout << " down key pressed." << endl;
-			InputStatus.down_state = true;
-			InputStatus.down_press = true;
+			down_state = true;
+			down_press = true;
 			return;
 		}
-		else if (key_event->keysym.sym == InputStatus.key.left) {
+		else if (key_event->keysym.sym == Key.left) {
 			if (GLOBAL_DEBUG) cout << " left key pressed." << endl;
-			InputStatus.left_state = true;
-			InputStatus.left_press = true;
+			left_state = true;
+			left_press = true;
 			return;
 		}
-		else if (key_event->keysym.sym == InputStatus.key.right) {
+		else if (key_event->keysym.sym == Key.right) {
 			if (GLOBAL_DEBUG) cout << " right key pressed." << endl;
-			InputStatus.right_state = true;
-			InputStatus.right_press = true;
+			right_state = true;
+			right_press = true;
 			return;
 		}
-		else if (key_event->keysym.sym == InputStatus.key.confirm) {
+		else if (key_event->keysym.sym == Key.confirm) {
 			if (GLOBAL_DEBUG) cout << " confirm key pressed." << endl;
-			InputStatus.confirm_state = true;
-			InputStatus.confirm_press = true;
+			confirm_state = true;
+			confirm_press = true;
 			return;
 		}
-		else if (key_event->keysym.sym == InputStatus.key.cancel) {
+		else if (key_event->keysym.sym == Key.cancel) {
 			if (GLOBAL_DEBUG) cout << " cancel key pressed." << endl;
-			InputStatus.cancel_state = true;
-			InputStatus.cancel_press = true;
+			cancel_state = true;
+			cancel_press = true;
 			return;
 		}
-		else if (key_event->keysym.sym == InputStatus.key.menu) {
+		else if (key_event->keysym.sym == Key.menu) {
 			if (GLOBAL_DEBUG) cout << " menu key pressed." << endl;
-			InputStatus.menu_state = true;
-			InputStatus.menu_press = true;
+			menu_state = true;
+			menu_press = true;
 			return;
 		}
-		else if (key_event->keysym.sym == InputStatus.key.pause) {
+		else if (key_event->keysym.sym == Key.pause) {
 			if (GLOBAL_DEBUG) cout << " pause key pressed." << endl;
-			// Get a temporary pointer to the ModeManager singleton
-			GameModeManager *ModeManager = GameModeManager::_GetReference(); 
-				
 			// Don't pause if we are in BootMode, QuitMode
 			if (ModeManager->GetGameType() == boot_m || ModeManager->GetGameType() == quit_m) {
 				return;
@@ -347,61 +392,58 @@ void GameSettings::KeyEventHandler(SDL_KeyboardEvent *key_event) {
 	}
 	
 	else { // Key was released
-		if (key_event->keysym.mod & KMOD_CTRL) // We don't want to recognize a key release if ctrl is down
+		if (key_event->keysym.mod & KMOD_CTRL) // Don't recognize a key release if ctrl is down
 			return;
 		
-		if (key_event->keysym.sym == InputStatus.key.up) {
+		if (key_event->keysym.sym == Key.up) {
 			if (GLOBAL_DEBUG) cout << " up key released." << endl;
-			InputStatus.up_state = false;
-			InputStatus.up_release = true;
+			up_state = false;
+			up_release = true;
 			return;
 		}
-		else if (key_event->keysym.sym == InputStatus.key.down) {
+		else if (key_event->keysym.sym == Key.down) {
 			if (GLOBAL_DEBUG) cout << " down key released." << endl;
-			InputStatus.down_state = false;
-			InputStatus.down_release = true;
+			down_state = false;
+			down_release = true;
 			return;
 		}
-		else if (key_event->keysym.sym == InputStatus.key.left) {
+		else if (key_event->keysym.sym == Key.left) {
 			if (GLOBAL_DEBUG) cout << " left key released." << endl;
-			InputStatus.left_state = false;
-			InputStatus.left_release = true;
+			left_state = false;
+			left_release = true;
 			return;
 		}
-		else if (key_event->keysym.sym == InputStatus.key.right) {
+		else if (key_event->keysym.sym == Key.right) {
 			if (GLOBAL_DEBUG) cout << " right key released." << endl;
-			InputStatus.right_state = false;
-			InputStatus.right_release = true;
+			right_state = false;
+			right_release = true;
 			return;
 		}
-		else if (key_event->keysym.sym == InputStatus.key.confirm) {
+		else if (key_event->keysym.sym == Key.confirm) {
 			if (GLOBAL_DEBUG) cout << " confirm key released." << endl;
-			InputStatus.confirm_state = false;
-			InputStatus.confirm_release = true;
+			confirm_state = false;
+			confirm_release = true;
 			return;
 		}
-		else if (key_event->keysym.sym == InputStatus.key.cancel) {
+		else if (key_event->keysym.sym == Key.cancel) {
 			if (GLOBAL_DEBUG) cout << " cancel key released." << endl;
-			InputStatus.cancel_state = false;
-			InputStatus.cancel_release = true;
+			cancel_state = false;
+			cancel_release = true;
 			return;
 		}
-		else if (key_event->keysym.sym == InputStatus.key.menu) {
+		else if (key_event->keysym.sym == Key.menu) {
 			if (GLOBAL_DEBUG) cout << " menu key released." << endl;
-			InputStatus.menu_state = false;
-			InputStatus.menu_release = true;
+			menu_state = false;
+			menu_release = true;
 			return;
 		}
-		// Note: we don't care about pause key releases
 	}
 }
 
 
 
-// Handles all joystick events for the game 
-// >> on my to do list. - Tyler, Sept 22nd
-void GameSettings::JoystickEventHandler(SDL_Event *js_event) {
-	
+// Handles all joystick events for the game (not implemented yet)
+void GameInput::JoystickEventHandler(SDL_Event *js_event) {
 	switch (js_event->type) {
 		case SDL_JOYAXISMOTION:
 		case SDL_JOYBALLMOTION:

@@ -10,8 +10,13 @@
 
 
 #include <iostream>
-#include "map.h"
 #include "data.h"
+#include "audio.h"
+#include "video.h"
+#include "global.h"
+#include "boot.h"
+#include "map.h"
+
 
 using namespace std;
 using namespace hoa_global;
@@ -37,8 +42,8 @@ GameData::GameData() {
 		lua_settop(l_stack, 0);  // Clear the stack
 	}
 	
-	AudioManager = GameAudio::_Create();
-	VideoManager = GameVideo::_Create();
+	AudioManager = GameAudio::_GetReference();
+	VideoManager = GameVideo::_GetReference();
 }
 
 // Close Lua upon destruction
@@ -46,9 +51,6 @@ GameData::~GameData() {
 	if (DATA_DEBUG)
 		cerr << "DEBUG: GameData destructor invoked." << endl;
 	lua_close(l_stack);
-	
-	VideoManager->_Destroy();
-	AudioManager->_Destroy();
 }
 
 
@@ -171,7 +173,7 @@ void GameData::LoadGameSettings () {
 	hoa_global::GameSettings *SettingsManager = GameSettings::_GetReference();
 	const char *filename = "data/config/settings.hoa";
 
-	if (luaL_loadfile(l_stack, "data/config/settings.hoa") || lua_pcall(l_stack, 0, 0, 0))
+	if (luaL_loadfile(l_stack, filename) || lua_pcall(l_stack, 0, 0, 0))
 		cout << "LUA ERROR: Could not load " << filename << " :: " << lua_tostring(l_stack, -1) << endl;
 
 	lua_getglobal(l_stack, "video_settings");
@@ -189,20 +191,47 @@ void GameData::LoadGameSettings () {
 	SettingsManager->music_vol = GetTableInt("music_vol");
 	SettingsManager->sound_vol = GetTableInt("sound_vol");
 
+// 	lua_getglobal(l_stack, "key_settings");
+// 	if (!lua_istable(l_stack, LUA_STACK_TOP))
+// 		cout << "LUA ERROR: could not retrieve table \"key_settings\"" << endl;
+
+// 	SettingsManager->InputStatus.key.up = (SDLKey)GetTableInt("up");
+// 	SettingsManager->InputStatus.key.down = (SDLKey)GetTableInt("down");
+// 	SettingsManager->InputStatus.key.left = (SDLKey)GetTableInt("left");
+// 	SettingsManager->InputStatus.key.right = (SDLKey)GetTableInt("right");
+// 	SettingsManager->InputStatus.key.confirm = (SDLKey)GetTableInt("confirm");
+// 	SettingsManager->InputStatus.key.cancel = (SDLKey)GetTableInt("cancel");
+// 	SettingsManager->InputStatus.key.menu = (SDLKey)GetTableInt("menu");
+// 	SettingsManager->InputStatus.key.pause = (SDLKey)GetTableInt("pause");
+
+	lua_pop(l_stack, 2); // Pop all tables from the stack before returning
+}
+
+void GameData::LoadKeyJoyState(KeyState *keystate, JoystickState *joystate) {
+	const char *filename = "data/config/settings.hoa";
+	if (luaL_loadfile(l_stack, filename) || lua_pcall(l_stack, 0, 0, 0))
+		cout << "LUA ERROR: Could not load " << filename << " :: " << lua_tostring(l_stack, -1) << endl;
+	
 	lua_getglobal(l_stack, "key_settings");
 	if (!lua_istable(l_stack, LUA_STACK_TOP))
 		cout << "LUA ERROR: could not retrieve table \"key_settings\"" << endl;
-
-	SettingsManager->InputStatus.key.up = (SDLKey)GetTableInt("up");
-	SettingsManager->InputStatus.key.down = (SDLKey)GetTableInt("down");
-	SettingsManager->InputStatus.key.left = (SDLKey)GetTableInt("left");
-	SettingsManager->InputStatus.key.right = (SDLKey)GetTableInt("right");
-	SettingsManager->InputStatus.key.confirm = (SDLKey)GetTableInt("confirm");
-	SettingsManager->InputStatus.key.cancel = (SDLKey)GetTableInt("cancel");
-	SettingsManager->InputStatus.key.menu = (SDLKey)GetTableInt("menu");
-	SettingsManager->InputStatus.key.pause = (SDLKey)GetTableInt("pause");
-
-	lua_pop(l_stack, 3); // Pop all 3 tables from the stack before returning
+	
+	keystate->up = (SDLKey)GetTableInt("up");
+	keystate->down = (SDLKey)GetTableInt("down");
+	keystate->left = (SDLKey)GetTableInt("left");
+	keystate->right = (SDLKey)GetTableInt("right");
+	keystate->confirm = (SDLKey)GetTableInt("confirm");
+	keystate->cancel = (SDLKey)GetTableInt("cancel");
+	keystate->menu = (SDLKey)GetTableInt("menu");
+	keystate->swap = (SDLKey)GetTableInt("swap");
+	keystate->rselect = (SDLKey)GetTableInt("rselect");
+	keystate->lselect = (SDLKey)GetTableInt("lselect");
+	keystate->pause = (SDLKey)GetTableInt("pause");
+	
+	//TODO Add joystick init, after we implement joystick functionality
+	
+	// POP! :)
+	lua_pop(l_stack, 1);
 }
 
 // This function loads all necessary variables and vectors from the boot.hoa config file
@@ -289,8 +318,8 @@ void GameData::LoadMap(hoa_map::MapMode *map_mode, int new_map_id) {
 	map_mode->animation_rate = GetGlobalInt("animation_rate");
 	map_mode->animation_counter = GetGlobalInt("animation_counter");
 	map_mode->tile_count = GetGlobalInt("tile_count");
-	map_mode->rows_count = GetGlobalInt("rows_count");
-	map_mode->cols_count = GetGlobalInt("cols_count");
+	map_mode->row_count = GetGlobalInt("row_count");
+	map_mode->col_count = GetGlobalInt("col_count");
 	
 	// This part loads only the tiles needed by the current map. The map editor fills in the
 	// corresponding Lua vector.
@@ -366,32 +395,32 @@ void GameData::LoadMap(hoa_map::MapMode *map_mode, int new_map_id) {
 		// TODO Add meaningful error codes, and make LoadMap return an int
 		return;
 	}
-	if (lower.size() != map_mode->rows_count * map_mode->cols_count) {
-		cout << "ERROR: The actual size of the lower, upper and mask vectors is NOT EQUAL to rows_count*cols_count !!!\nBARF!\n";
+	if (lower.size() != map_mode->row_count * map_mode->col_count) {
+		cout << "ERROR: The actual size of the lower, upper and mask vectors is NOT EQUAL to row_count*col_count !!! BARF!\n";
+		cout << "row_count = " << map_mode->row_count << "\n";
+		cout << "col_count = " << map_mode->col_count << "\n";
+		cout << "lower.size() = " << lower.size() << "\n";
 		// TODO Add meaningful error codes, and make LoadMap return an int
 		return;
 	}
 	int c = 0;
-	MapTile *t = new MapTile;
-	// TODO TODO  iz nekog razloga u ovoj petlji se javlja segfault...
-	for (int i = 0; i < map_mode->rows_count; i++) {
+	MapTile t;
+	for (int i = 0; i < map_mode->row_count; i++) {
 		map_mode->map_layers.push_back(vector<MapTile>());
-		for (int j = 0; j < map_mode->cols_count; i++) {
-			t->lower_layer = lower[c];
-			t->upper_layer = upper[c];
-			t->event_mask = emask[c];
-			cout << "0x01 !!\n";
-			map_mode->map_layers[i].push_back(*t);
-			//cout << map_mode->map_layers[i][j].lower_layer << "\n";
-			cout << "0x02 !!\n";
+		for (int j = 0; j < map_mode->col_count; j++) {
+			t.lower_layer = lower[c];
+			t.upper_layer = upper[c];
+			t.event_mask = emask[c];
+			map_mode->map_layers[i].push_back(t);
 			c++;
 		}
 	}
-	delete t;
 	
 	// load Claudius
 	map_mode->player_sprite = new PlayerSprite();
 	map_mode->object_layer.push_back(map_mode->player_sprite);
+	
+	cout << "Kewl!\n";
 }
 
 

@@ -34,14 +34,12 @@ const int UTILS_NO_BOUNDS = 0;
 	2) Place SINGLETON_DECLARE(class_name) in the class' private section.
 	3) Place SINGLETON_METHODS(class_name) in the class' public section.
 	4) Place SINGLETON_INITIALIZE(class_name) at the top of the class' source file.
-	5) Replace 'class_name' in the above 3 with the name of the class you are writing.
-	5) *REQUIRED* Implement the constructor and destructor in the class' source file.
+	5) *REQUIRED* Implement the class' constructor and destructor (even if it does nothing).
 
 	After performing these steps, your class with have 3 functions publicly avaiable to it:
-		- _Create():			returns a pointer to the class object
-		- _Destory():			removes a reference to the class object
-		- _GetRefCount(): returns the current number of references to this class. Used for
-											debugging purposes only
+		- _Create():			creates the new singleton and returns a pointer to the class object
+		- _Destroy():			destroys the singleton class
+		- _GetRefCount(): returns a pointer to the class object
 
 	Notes and Usage:
 
@@ -51,16 +49,19 @@ const int UTILS_NO_BOUNDS = 0;
 
 	2) You can not create or delete instances of this class normally. Ie, calling the constructor, copy
 			constructor, copy assignment operator, destructor, new/new[], or delete/delete[] operators will
-			result in a compilation error. Use the _Create() and _Destroy() functions instead.
+			result in a compilation error. Use the _Create(), _Destroy(), and _GetReference() functions instead.
 
-	3) Be *VERY* careful with the _Create() and _Destroy() functions. Every _Create() call needs a
-			_Destroy() call, otherwise there will be memory leaks.
+	3) The only place _Create() and _Destroy() should usually be called are in loader.cpp. But if a different
+			section of code detects a fatal error and needs to exit the game, _Destroy() should be called for *all*
+			Singletons.
 
-	4) You can get a class object pointer like this: 'MYCLASS *test = MYCLASS::_Create();'
+	4) FYI: _Create() and _Destroy() can be called multiple times without any problem. The only time you need
+			to worry is if _Destroy() is called and then a part of the code tries to reference a pointer to the old
+			singleton. Thus...
+			
+			>>> ONLY CALL _Destroy() WHEN YOU ARE EXITING OR ABORTING THE ENTIRE APPLICATION!!! <<<
 
-	5) After you are finished, invoke the following: 'test->_Delete();' *or* 'MYCLASS::_Delete();'
-			Either was is fine. Make sure to set 'test = NULL;' so you don't accidentally reference it
-			again (that would be dangerous...)
+	5) You can get a class object pointer like this: 'MYCLASS *test = MYCLASS::_GetReference();'
  *****************************************************************************/
 
 // Put in the private sector of the class definition

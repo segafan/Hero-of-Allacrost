@@ -18,22 +18,12 @@
 #ifndef __MAP_HEADER__
 #define __MAP_HEADER__
 
-// Partially defined namespace to avoid recursive inclusion problems.
-namespace hoa_map {
-	class MapMode;
-	class ObjectLayer;
-	class MapTile;
-	class TileFrame;
-} // namespace hoa_map
-
 #include <string>
 #include <vector>
 #include <list>
+#include "defs.h"
 #include "utils.h"
-#include "audio.h"
-#include "video.h"
 #include "global.h"
-#include "map.h"
 
 namespace hoa_map {
 
@@ -226,8 +216,8 @@ protected:
 	
 	friend class MapMode; // Necessary so that the MapMode class can access and change these data members
 public:
-	ObjectLayer() { VideoManager = hoa_video::GameVideo::_Create(); }
-	~ObjectLayer() { hoa_video::GameVideo::_Destroy(); }
+	ObjectLayer();
+	~ObjectLayer() {}
 	
 	bool operator>(const ObjectLayer& obj) const;
 	bool operator<(const ObjectLayer& obj) const;
@@ -431,7 +421,7 @@ public:
 	
 	>>>notes<<<
 		1) If you change the state of random_encounters from false to true, make sure to set 
-			a valid value (< 0) for steps_till_encounter. *NOTE: I might change this later*
+			a valid value (< 0) for steps_till_encounter. *sI might change this later*
 			
 		2) Be careful with calling the MapMode constructor, for it changes the coordinate system of the 
 			video engine without warning. Only create a new instance of this class if you plan to immediately
@@ -449,8 +439,8 @@ private:
 	int animation_counter;
 	
 	int tile_count;	
-	int rows_count;
-	int cols_count;
+	int row_count;
+	int col_count;
 	
 	bool random_encounters;
 	int encounter_rate;
@@ -464,8 +454,6 @@ private:
 	std::vector<hoa_video::ImageDescriptor> map_tiles;	
 	std::vector<hoa_audio::MusicDescriptor> map_music;
 	std::vector<hoa_audio::SoundDescriptor> map_sound;
-	
-	hoa_global::InputState* input;
 	
 //	 vector<MapEvent> map_events;
 //	 vector<Enemy> map_enemies;
@@ -488,22 +476,19 @@ public:
 	MapMode(int new_map_id);
 	~MapMode();
 	
-	void Update(Uint32 time_elapsed);
-	void Draw();
-	
-	int GetTiles();
-	int GetRows();
-	int GetCols();
-	 
 	std::vector<std::vector<MapTile> > GetMapLayers();
 	std::vector<hoa_video::ImageDescriptor> GetMapTiles();
-	
 	void SetTiles(int num_tiles);
 	void SetRows(int num_rows);
 	void SetCols(int num_cols);
-	
 	void SetMapLayers(std::vector<std::vector<MapTile> > layers);
-	void SetMapTiles(std::vector<hoa_video::ImageDescriptor> tiles); 
+	void SetMapTiles(std::vector<hoa_video::ImageDescriptor> tiles);
+	int GetTiles();
+	int GetRows();
+	int GetCols();
+	
+	void Update(Uint32 time_elapsed);
+	void Draw();
 };
 
 } // namespace hoa_map;

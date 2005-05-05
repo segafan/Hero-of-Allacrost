@@ -17,20 +17,32 @@
 	
 #include <iostream>
 #include "map.h"
+#include "audio.h"
+#include "video.h"
+#include "data.h"
 //#include "battle.h"
 //#include "menu.h"
 
 using namespace std;
 using namespace hoa_map::local_map;
-using namespace hoa_global;
 using namespace hoa_utils;
-using namespace hoa_video;
 using namespace hoa_audio;
+using namespace hoa_video;
+using namespace hoa_global;
+using namespace hoa_data;
 //using namespace hoa_battle;
+//using namespace hoa_menu;
 
 namespace hoa_map {
 
-// ***************** ObjectLayer Class Functions *******************
+// ****************************************************************************
+// ************************ ObjectLayer Class Functions ***********************
+// ****************************************************************************
+
+
+ObjectLayer::ObjectLayer() {
+	VideoManager = hoa_video::GameVideo::_Create();
+}
 
 bool ObjectLayer::operator>(const ObjectLayer& obj) const {
 	return (row_pos > obj.row_pos);
@@ -57,8 +69,10 @@ bool ObjectLayer::operator!=(const ObjectLayer& obj) const {
 }
 
 
+// ****************************************************************************
+// ************************ MapSprite Class Functions *************************
+// ****************************************************************************
 
-// ******************* MapSprite Class Functions *********************
 
 int MapSprite::FindFrame() {
 	int draw_frame; // The frame index that we should draw
@@ -227,8 +241,10 @@ void MapSprite::Draw(MapFrame& mf) {
 }
 
 
+// ****************************************************************************
+// ************************ PlayerSprite Class Functions **********************
+// ****************************************************************************
 
-// ****************** PlayerSprite Class Functions *******************
 
 // NOTE: This is all temporary code here
 PlayerSprite::PlayerSprite() {
@@ -310,157 +326,153 @@ PlayerSprite::~PlayerSprite() {
 	}
 }
 
-
-// ******************* MapMode Class Functions **********************
-
-// ********************* GENERAL FUNCTIONS **************************
+// ****************************************************************************
+// ************************** MapMode Class Functions *************************
+// ****************************************************************************
+// ***************************** GENERAL FUNCTIONS ****************************
+// ****************************************************************************
 
 MapMode::MapMode(int new_map_id) {
 	cerr << "DEBUG: MapMode's constructor invoked." << endl;
 	
-	AudioManager = GameAudio::_GetReference();
-	VideoManager = GameVideo::_GetReference();
-	//DataManager = GameData::_GetReference();
-	ModeManager = GameModeManager::_GetReference();
-	SettingsManager = GameSettings::_GetReference();
-	
 	mtype = map_m;
-	input = &(SettingsManager->InputStatus);
 	map_state = EXPLORE;
 	map_id = new_map_id;
 	
-	// DataManger->LoadNewMap(map_id);
+	// So let's check it out!!
+	DataManager->LoadMap(this, map_id);
+	
 	// This is all temporary code until I get a function to call that loads this data
 	
-	random_encounters = true;
-	encounter_rate = 12;
-	steps_till_encounter = GaussianValue(encounter_rate, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
-	animation_rate = 200; // update frames every 0.2 seconds
-	animation_counter = 0;
+// 	random_encounters = true;
+// 	encounter_rate = 12;
+// 	steps_till_encounter = GaussianValue(encounter_rate, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
+// 	animation_rate = 200; // update frames every 0.2 seconds
+// 	animation_counter = 0;
+// 	
+// 	tile_count = 16;	
+// 	row_count = 60;
+// 	col_count = 80;
 	
-	tile_count = 16;	
-	rows_count = 60;
-	cols_count = 80;
-	
-	// Load in all tile images from memory
-	ImageDescriptor imd;
-	imd.width = 1;
-	imd.height = 1;
-	
-	imd.filename = "img/tile/test_01.png";
-	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_02.png";
-	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_03.png";
-	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_04.png";
-	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_05.png";
-	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_06.png";
-	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_07.png";
-	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_08.png";
-	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_09.png";
-	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_10.png";
-	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_11.png";
-	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_12.png";
-	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_13.png";
-	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_14.png";
-	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_15.png";
-	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_16.png";
-	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_16a.png";
-	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_16b.png";
-	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_16d.png";
-	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_16d.png";
-	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_16e.png";
-	map_tiles.push_back(imd);
-	
-	for (int i = 0; i < map_tiles.size(); i++) { 
-		VideoManager->LoadImage(map_tiles[i]);
-	} 
-	
-	// Setup tile frame pointers for animation
-	TileFrame *tf;
-	for (int i = 0; i < tile_count - 1; i++) {
-		tf = new TileFrame;
-	  tf->frame = i;
-		tf->next = tf;
-		tile_frames.push_back(tf);
-	}
-	
-	// Setup our final animated frame tile
-	TileFrame *tmp;
-	tf = new TileFrame;
-	tf->frame = 15;
-	tf->next = NULL;
-	tile_frames.push_back(tf);
-	
-	tmp = new TileFrame;
-	tf->next = tmp;
-	tmp->frame = 16; // a
-	tf = tmp;
-	
-	tmp = new TileFrame;
-	tf->next = tmp;
-	tmp->frame = 17; // b
-	tf = tmp;
-	
-	tmp = new TileFrame;
-	tf->next = tmp;
-	tmp->frame = 18; // c
-	tf = tmp;
-	
-	tmp = new TileFrame;
-	tf->next = tmp;
-	tmp->frame = 19; // d
-	tf = tmp;
-	
-	tmp = new TileFrame;
-	tf->next = tmp;
-	tmp->frame = 20; // e
-	tmp->next = tile_frames[15]; // Makes the linked list circular now
-	
-	
-	
-	// Setup our image map
-	MapTile tmp_tile;
-	tmp_tile.upper_layer = -1; // No upper layer in this test
-	for (int r = 0; r < rows_count; r++) {
-		map_layers.push_back(vector <MapTile>());
-		for (int c = 0; c < cols_count; c++) {
-			tmp_tile.lower_layer = (RandomNum(0, 16 - 1)); // Build our lower layer from random tiles
-			if (tmp_tile.lower_layer == 15)
-				tmp_tile.event_mask = NOT_WALKABLE; // We can not walk on the water tiles
-			else
-				tmp_tile.event_mask = 0x0000;
-			map_layers[r].push_back(tmp_tile);
-		}
-	} 
-	
-	// Load player sprite and rest of map objects
-	player_sprite = new PlayerSprite();
-	object_layer.push_back(player_sprite);
-
-	// The is temporary code for our screen shots. It handles the setting up of NPC sprites
-	//ImageDescriptor imd;
-	imd.height = 2;
-	imd.width = 1;
-	imd.filename = "img/sprite/boy_d1.png";
+// 	// Load in all tile images from memory
+// 	ImageDescriptor imd;
+// 	imd.width = 1;
+// 	imd.height = 1;
+// 	
+// 	imd.filename = "img/tile/test_01.png";
+// 	map_tiles.push_back(imd);
+// 	imd.filename = "img/tile/test_02.png";
+// 	map_tiles.push_back(imd);
+// 	imd.filename = "img/tile/test_03.png";
+// 	map_tiles.push_back(imd);
+// 	imd.filename = "img/tile/test_04.png";
+// 	map_tiles.push_back(imd);
+// 	imd.filename = "img/tile/test_05.png";
+// 	map_tiles.push_back(imd);
+// 	imd.filename = "img/tile/test_06.png";
+// 	map_tiles.push_back(imd);
+// 	imd.filename = "img/tile/test_07.png";
+// 	map_tiles.push_back(imd);
+// 	imd.filename = "img/tile/test_08.png";
+// 	map_tiles.push_back(imd);
+// 	imd.filename = "img/tile/test_09.png";
+// 	map_tiles.push_back(imd);
+// 	imd.filename = "img/tile/test_10.png";
+// 	map_tiles.push_back(imd);
+// 	imd.filename = "img/tile/test_11.png";
+// 	map_tiles.push_back(imd);
+// 	imd.filename = "img/tile/test_12.png";
+// 	map_tiles.push_back(imd);
+// 	imd.filename = "img/tile/test_13.png";
+// 	map_tiles.push_back(imd);
+// 	imd.filename = "img/tile/test_14.png";
+// 	map_tiles.push_back(imd);
+// 	imd.filename = "img/tile/test_15.png";
+// 	map_tiles.push_back(imd);
+// 	imd.filename = "img/tile/test_16.png";
+// 	map_tiles.push_back(imd);
+// 	imd.filename = "img/tile/test_16a.png";
+// 	map_tiles.push_back(imd);
+// 	imd.filename = "img/tile/test_16b.png";
+// 	map_tiles.push_back(imd);
+// 	imd.filename = "img/tile/test_16d.png";
+// 	map_tiles.push_back(imd);
+// 	imd.filename = "img/tile/test_16d.png";
+// 	map_tiles.push_back(imd);
+// 	imd.filename = "img/tile/test_16e.png";
+// 	map_tiles.push_back(imd);
+// 	
+// 	for (int i = 0; i < map_tiles.size(); i++) { 
+// 		VideoManager->LoadImage(map_tiles[i]);
+// 	} 
+// 	
+// 	// Setup tile frame pointers for animation
+// 	TileFrame *tf;
+// 	for (int i = 0; i < tile_count - 1; i++) {
+// 		tf = new TileFrame;
+// 	  tf->frame = i;
+// 		tf->next = tf;
+// 		tile_frames.push_back(tf);
+// 	}
+// 	
+// 	// Setup our final animated frame tile
+// 	TileFrame *tmp;
+// 	tf = new TileFrame;
+// 	tf->frame = 15;
+// 	tf->next = NULL;
+// 	tile_frames.push_back(tf);
+// 	
+// 	tmp = new TileFrame;
+// 	tf->next = tmp;
+// 	tmp->frame = 16; // a
+// 	tf = tmp;
+// 	
+// 	tmp = new TileFrame;
+// 	tf->next = tmp;
+// 	tmp->frame = 17; // b
+// 	tf = tmp;
+// 	
+// 	tmp = new TileFrame;
+// 	tf->next = tmp;
+// 	tmp->frame = 18; // c
+// 	tf = tmp;
+// 	
+// 	tmp = new TileFrame;
+// 	tf->next = tmp;
+// 	tmp->frame = 19; // d
+// 	tf = tmp;
+// 	
+// 	tmp = new TileFrame;
+// 	tf->next = tmp;
+// 	tmp->frame = 20; // e
+// 	tmp->next = tile_frames[15]; // Makes the linked list circular now
+// 	
+// 	
+// 	
+// 	// Setup our image map
+// 	MapTile tmp_tile;
+// 	tmp_tile.upper_layer = -1; // No upper layer in this test
+// 	for (int r = 0; r < row_count; r++) {
+// 		map_layers.push_back(vector <MapTile>());
+// 		for (int c = 0; c < col_count; c++) {
+// 			tmp_tile.lower_layer = (RandomNum(0, 16 - 1)); // Build our lower layer from random tiles
+// 			if (tmp_tile.lower_layer == 15)
+// 				tmp_tile.event_mask = NOT_WALKABLE; // We can not walk on the water tiles
+// 			else
+// 				tmp_tile.event_mask = 0x0000;
+// 			map_layers[r].push_back(tmp_tile);
+// 		}
+// 	} 
+// 	
+// 	// Load player sprite and rest of map objects
+// 	player_sprite = new PlayerSprite();
+// 	object_layer.push_back(player_sprite);
+// 
+// 	// The is temporary code for our screen shots. It handles the setting up of NPC sprites
+// 	//ImageDescriptor imd;
+// 	imd.height = 2;
+// 	imd.width = 1;
+// 	imd.filename = "img/sprite/boy_d1.png";
 
 // 	NPCSprite *npc_sprite = new NPCSprite();
 // 	npc_sprite->row_pos = 4;
@@ -568,7 +580,7 @@ MapMode::~MapMode() {
 // Returns whether a sprite can move to a tile or not
 inline bool MapMode::TileMoveable(int row, int col) {
 	// First check that the player isn't trying to move outside the map boundaries
-	if (row < 0 || col < 0 || row >= rows_count || col >= cols_count) {
+	if (row < 0 || col < 0 || row >= row_count || col >= col_count) {
 		return false;
 	}
 	
@@ -581,7 +593,25 @@ inline bool MapMode::TileMoveable(int row, int col) {
 	return true;
 }
 
-// ************************ UPDATE FUNCTIONS ******************************
+
+
+// Simple functions for the MapEditor code
+std::vector<std::vector<MapTile> > MapMode::GetMapLayers() { return map_layers; }
+std::vector<hoa_video::ImageDescriptor> MapMode::GetMapTiles() { return map_tiles; }
+void MapMode::SetTiles(int num_tiles) { tile_count = num_tiles; }
+void MapMode::SetRows(int num_rows) { row_count = num_rows; }
+void MapMode::SetCols(int num_cols) { col_count = num_cols; }
+void MapMode::SetMapLayers(std::vector<std::vector<MapTile> > layers) { map_layers = layers; }
+void MapMode::SetMapTiles(std::vector<hoa_video::ImageDescriptor> tiles) { map_tiles = tiles; }
+int MapMode::GetTiles() { return tile_count; }
+int MapMode::GetRows() { return row_count; }
+int MapMode::GetCols() { return col_count; }
+
+
+// ****************************************************************************
+// **************************** UPDATE FUNCTIONS ******************************
+// ****************************************************************************
+
 
 // Updates the game state when in map mode. Called from the main game loop.
 void MapMode::Update(Uint32 time_elapsed) {
@@ -673,14 +703,14 @@ void MapMode::UpdateExploreState(Uint32 time_elapsed) {
 	// ********** If we arrive at the following code, the player is stopped on a tile **********
 	
 	// Handle menu press command
-	if (input->menu_press) { // Push MenuMode onto the stack
+	if (InputManager->MenuPress()) { // Push MenuMode onto the stack
 // 		//MenuMode *MenuM = new MenuMode();
 // 		//ModeManager->Push(MenuM);
 		return;
 	}
 	
 	// Handle confirm command.
-	else if (input->confirm_press) {
+	else if (InputManager->ConfirmPress()) {
 		
 		if (player_sprite->status & (WEST | WEST_NW | WEST_SW)) {
 			r_check = player_sprite->row_pos;
@@ -718,7 +748,7 @@ void MapMode::UpdateDialogueState() {
 	
 	// Handle other user input only if text printing is finished.
 	if (print_done) {
-		if (input->confirm_press) {
+		if (InputManager->ConfirmPress()) {
 			//if (more_dialgoue) {
 				// Send new dialogue to text renderer
 			//}
@@ -747,9 +777,9 @@ void MapMode::UpdatePlayerMovement() {
 	bool user_move = false; // Set to true if the user attempted to move the player sprite
 	
 	// Handle west, northwest, and southwest movement	
-	if (input->left_state || input->left_press) {
+	if (InputManager->LeftState() || InputManager->LeftPress()) {
 		user_move = true;
-		if (input->up_state || input->right_press) { // Moving northwest
+		if (InputManager->UpState() || InputManager->RightPress()) { // Moving northwest
 			new_r = player_sprite->row_pos - 1;
 			new_c = player_sprite->col_pos - 1;
 			
@@ -759,7 +789,7 @@ void MapMode::UpdatePlayerMovement() {
 				player_sprite->status = (player_sprite->status & RESET_FACE) | WEST_NW; 
 		}
 		
-		else if (input->down_state || input->down_press) { // Moving southwest
+		else if (InputManager->DownState() || InputManager->DownPress()) { // Moving southwest
 			new_r = player_sprite->row_pos + 1;
 			new_c = player_sprite->col_pos - 1;
 			
@@ -777,9 +807,9 @@ void MapMode::UpdatePlayerMovement() {
 	}
 	
 	// Handle east, northeast, and southeast movement
-	else if (input->right_state || input->right_press) {
+	else if (InputManager->RightState() || InputManager->RightPress()) {
 		user_move = true;
-		if (input->up_state || input->up_press) { // Moving northeast
+		if (InputManager->UpState() || InputManager->UpPress()) { // Moving northeast
 			new_r = player_sprite->row_pos - 1;
 			new_c = player_sprite->col_pos + 1;
 			
@@ -789,7 +819,7 @@ void MapMode::UpdatePlayerMovement() {
 				player_sprite->status = (player_sprite->status & RESET_FACE) | EAST_NE;
 		}
 		
-		else if (input->down_state || input->down_press) { // Moving southeast
+		else if (InputManager->DownState() || InputManager->DownPress()) { // Moving southeast
 			new_r = player_sprite->row_pos + 1;
 			new_c = player_sprite->col_pos + 1;
 			
@@ -807,7 +837,7 @@ void MapMode::UpdatePlayerMovement() {
 	}
 	
 	// Handle north movement
-	else if (input->up_state || input->up_press) {
+	else if (InputManager->UpState() || InputManager->UpPress()) {
 		user_move = true;
 		new_r = player_sprite->row_pos - 1;
 		new_c = player_sprite->col_pos;
@@ -815,7 +845,7 @@ void MapMode::UpdatePlayerMovement() {
 	}
 	
 	// Handle south movement
-	else if (input->down_state || input->down_press) {
+	else if (InputManager->DownState() || InputManager->DownPress()) {
 		user_move = true;
 		new_r = player_sprite->row_pos + 1;
 		new_c = player_sprite->col_pos;
@@ -850,7 +880,11 @@ void MapMode::UpdateNPCMovement(Uint32 time_elapsed) {
 // 	object_layer.sort();
 }
 
-// ********************* DRAWING FUNCTIONS **************************
+
+// ****************************************************************************
+// **************************** DRAW FUNCTIONS ********************************
+// ****************************************************************************
+
 
 // Determines things like our starting tiles
 void MapMode::GetDrawInfo(MapFrame& mf) {
@@ -926,8 +960,8 @@ void MapMode::GetDrawInfo(MapFrame& mf) {
 		mf.c_start = 0;
 		mf.c_pos = -SCREEN_COLS / 2;
 	}
-	else if (mf.c_start > cols_count - SCREEN_COLS - 1) { // We exceed the far-right side of the map
-		mf.c_start = cols_count - SCREEN_COLS;
+	else if (mf.c_start > col_count - SCREEN_COLS - 1) { // We exceed the far-right side of the map
+		mf.c_start = col_count - SCREEN_COLS;
 		mf.c_pos = -SCREEN_COLS / 2;
 	}
 	
@@ -940,8 +974,8 @@ void MapMode::GetDrawInfo(MapFrame& mf) {
 		mf.r_start = 0;
 		mf.r_pos = SCREEN_ROWS / 2 - 1;
 	}
-	else if (mf.r_start > rows_count - SCREEN_ROWS - 1) { // We exceed the far-south side of the map
-		mf.r_start = rows_count - SCREEN_ROWS;
+	else if (mf.r_start > row_count - SCREEN_ROWS - 1) { // We exceed the far-south side of the map
+		mf.r_start = row_count - SCREEN_ROWS;
 		mf.r_pos = SCREEN_ROWS / 2 - 1;
 	}
 	
@@ -1002,66 +1036,6 @@ void MapMode::Draw() {
 	// }
 	return; 
 }
-
-
-
-int MapMode::GetTiles() {
-	return tile_count;
-}
-
-
-
-int MapMode::GetRows() {
-	return rows_count;
-}
-
-
-
-int MapMode::GetCols() {
-	return cols_count;
-}
-
-
-
-std::vector<std::vector<MapTile> > MapMode::GetMapLayers() {
-	return map_layers;
-}
-
-
-
-std::vector<hoa_video::ImageDescriptor> MapMode::GetMapTiles() {
-	return map_tiles;
-}
-
-
-
-void MapMode::SetTiles(int num_tiles) {
-	tile_count = num_tiles;
-}
-
-
-
-void MapMode::SetRows(int num_rows) {
-	rows_count = num_rows;
-}
-
-
-
-void MapMode::SetCols(int num_cols) {
-	cols_count = num_cols;
-}
-
-
-
-void MapMode::SetMapLayers(std::vector<std::vector<MapTile> > layers) {
-	map_layers = layers;
-}
-
-
-
-void MapMode::SetMapTiles(std::vector<hoa_video::ImageDescriptor> tiles) {
-	map_tiles = tiles;
-} 
 
 
 } // namespace hoa_map

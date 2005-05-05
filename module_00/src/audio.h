@@ -25,13 +25,6 @@
 #ifndef __AUDIO_HEADER__
 #define __AUDIO_HEADER__ 
 
-// Partially defined namespace to avoid recursive inclusion problems.
-namespace hoa_audio {
-	class GameAudio;
-	class MusicDescriptor;
-	class SoundDescriptor;
-} // namespace hoa_audio
-
 #include <string>
 #include "SDL.h"
 #include <SDL/SDL_mixer.h>
@@ -91,14 +84,18 @@ typedef struct MusicItem {
  *	you could cause the wrong audio file to play.
  *****************************************************************************/
 class SoundDescriptor {
-	private:  unsigned int id;		// Unique sound ID. Zero indicates it is not loaded in memory
-	public: std::string filename; // The filename for the sound (without 'snd/' or '.wav')
+public:
+	std::string filename; // The filename for the sound (without 'snd/' or '.wav')
+private:
+	unsigned int id;		// Unique sound ID. Zero indicates it is not loaded in memory
 	friend class GameAudio;
 };
 
 class MusicDescriptor {
-	private: unsigned int id;			// Unique music ID. Zero indicates it is not loaded in memory
-	public: std::string filename; // The filename for the sound (without 'music/' or '.ogg')
+public: 
+	std::string filename; // The filename for the sound (without 'music/' or '.ogg')
+private:
+	unsigned int id;      // Unique music ID. Zero indicates it is not loaded in memory
 	friend class GameAudio;
 };
 

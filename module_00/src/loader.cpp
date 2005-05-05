@@ -46,16 +46,6 @@ void ResetSettings();
 
 
 
-// Handles all event processing in the game
-void EventHandler();
-
-// Handles all game keyboard events
-void KeyEventHandler(SDL_KeyboardEvent *key_event);
-
-// Handles all game joystick events
-void JoystickEventHandler(SDL_Event *js_event);
-
-
 // Prints out the usage options (arguments) for running the program (work in progress)
 void PrintUsage() {
 	cout << "Found a -usage argument!" << endl;
@@ -79,8 +69,6 @@ void PrintSysInfo() {
 		cout << "SDL Initialized succesfully." << endl;
 	atexit(SDL_Quit);
 
-	//VideoManager.InitVideo(); // Initialize the video manager
-	//AudioManager.InitAudio(); // Initialize the audio manager
 	// General Information
 	cout << " *** GENERAL INFORMATION *** " << endl;
 	
@@ -203,6 +191,7 @@ int main(int argc, char *argv[]) {
 	GameData *DataManager = GameData::_Create();
 	GameModeManager *ModeManager = GameModeManager::_Create();
 	GameSettings *SettingsManager = GameSettings::_Create();
+	GameInput *InputManager = GameInput::_Create();
 	
 	DataManager->LoadGameSettings(); // Initializes remaining data members of Settings Manager
 	
@@ -214,31 +203,29 @@ int main(int argc, char *argv[]) {
 
 	BootMode* BM = new BootMode(); // Create our first game mode...
 	ModeManager->Push(BM);         // ...and push it on the game mode stack!
-		
+	
 	SettingsManager->SetTimer();	// Initialize our game and FPS timers
 	
 	// This is the main loop for the game. The loop iterates once every frame.
-	while (SettingsManager->not_done) {
+	while (SettingsManager->NotDone()) {
 		// 1) Draws the screen to the back buffer
 		ModeManager->GetTop()->Draw();
 		
 		// 2) Displays the new frame on the screen
 		VideoManager->Render();
-
-		// 3) Process all new events
-		SettingsManager->EventHandler();
 		
-		// 4) Updates the game status
+		// 3) Process all new events
+		InputManager->EventHandler();
+		
+		// 4) Updates the game status and timer
 		ModeManager->GetTop()->Update(SettingsManager->UpdateTime());
-		      
-		// 5) Reset our key and joystick press and release flags
-		//SettingsManager->ResetInputFlags();
 	} // while (SettingsManager.not_done) 
 
-	// Begin exit sequence and destroy our singleton classes
+	// Begin exit sequence and destroy the singleton classes
 	GameAudio::_Destroy();
 	GameVideo::_Destroy();
 	GameData::_Destroy();
+	GameInput::_Destroy();
 	GameModeManager::_Destroy();
 	GameSettings::_Destroy();
 	
