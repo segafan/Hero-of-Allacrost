@@ -28,7 +28,7 @@ using namespace hoa_map::local_map;
 using namespace hoa_utils;
 using namespace hoa_audio;
 using namespace hoa_video;
-using namespace hoa_global;
+using namespace hoa_engine;
 using namespace hoa_data;
 //using namespace hoa_battle;
 //using namespace hoa_menu;
@@ -41,7 +41,7 @@ namespace hoa_map {
 
 
 ObjectLayer::ObjectLayer() {
-	VideoManager = hoa_video::GameVideo::_Create();
+	VideoManager = hoa_video::GameVideo::_GetReference();
 }
 
 bool ObjectLayer::operator>(const ObjectLayer& obj) const {
@@ -326,154 +326,219 @@ PlayerSprite::~PlayerSprite() {
 	}
 }
 
+
+// ****************************************************************************
+// ************************* NPCSprite Class Functions ************************
+// ****************************************************************************
+
+
+NPCSprite::NPCSprite(int pos_x, int pos_y) {
+	cerr << "DEBUG: NPCSprite's constructor invoked." << endl;
+	object_type = NPC_SPRITE;
+	row_pos = pos_x;
+	col_pos = pos_y;
+	step_count = 0;
+	status = (VISIBLE | SOUTH);
+	
+	ImageDescriptor imd;
+	imd.width = 1;
+	imd.height = 2;
+	
+	imd.filename = "img/sprite/claudius_d1.png";
+	frames.push_back(imd);
+	imd.filename = "img/sprite/claudius_d2.png";
+	frames.push_back(imd);
+	imd.filename = "img/sprite/claudius_d3.png";
+	frames.push_back(imd);
+	imd.filename = "img/sprite/claudius_d4.png";
+	frames.push_back(imd);
+	imd.filename = "img/sprite/claudius_d5.png";
+	frames.push_back(imd);
+	
+	imd.filename = "img/sprite/claudius_u1.png";
+	frames.push_back(imd);
+	imd.filename = "img/sprite/claudius_u2.png";
+	frames.push_back(imd);
+	imd.filename = "img/sprite/claudius_u3.png";
+	frames.push_back(imd);
+	imd.filename = "img/sprite/claudius_u4.png";
+	frames.push_back(imd);
+	imd.filename = "img/sprite/claudius_u5.png";
+	frames.push_back(imd);
+	
+	imd.filename = "img/sprite/claudius_l1.png";
+	frames.push_back(imd);
+	imd.filename = "img/sprite/claudius_l2.png";
+	frames.push_back(imd);
+	imd.filename = "img/sprite/claudius_l3.png";
+	frames.push_back(imd);
+	imd.filename = "img/sprite/claudius_l4.png";
+	frames.push_back(imd);
+	imd.filename = "img/sprite/claudius_l5.png";
+	frames.push_back(imd);
+	imd.filename = "img/sprite/claudius_l6.png";
+	frames.push_back(imd);
+	imd.filename = "img/sprite/claudius_l7.png";
+	frames.push_back(imd);
+	
+	imd.filename = "img/sprite/claudius_r1.png";
+	frames.push_back(imd);
+	imd.filename = "img/sprite/claudius_r2.png";
+	frames.push_back(imd);
+	imd.filename = "img/sprite/claudius_r3.png";
+	frames.push_back(imd);
+	imd.filename = "img/sprite/claudius_r4.png";
+	frames.push_back(imd);
+	imd.filename = "img/sprite/claudius_r5.png";
+	frames.push_back(imd);
+	imd.filename = "img/sprite/claudius_r6.png";
+	frames.push_back(imd);
+	imd.filename = "img/sprite/claudius_r7.png";
+	frames.push_back(imd);
+	
+	for (int i = 0; i < frames.size(); i++) {
+		VideoManager->LoadImage(frames[i]);
+	}
+}
+
+
 // ****************************************************************************
 // ************************** MapMode Class Functions *************************
 // ****************************************************************************
 // ***************************** GENERAL FUNCTIONS ****************************
 // ****************************************************************************
 
-MapMode::MapMode(int new_map_id) {
-	cerr << "DEBUG: MapMode's constructor invoked." << endl;
+void MapMode::TempCreateMap() {
+	random_encounters = true;
+	encounter_rate = 12;
+	steps_till_encounter = GaussianValue(encounter_rate, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
+	animation_rate = 200; // update frames every 0.2 seconds
+	animation_counter = 0;
 	
-	mtype = map_m;
-	map_state = EXPLORE;
-	map_id = new_map_id;
+	tile_count = 16;	
+	row_count = 60;
+	col_count = 80;
 	
-	// So let's check it out!!
-	DataManager->LoadMap(this, map_id);
+	// Load in all tile images from memory
+	ImageDescriptor imd;
+	imd.width = 1;
+	imd.height = 1;
 	
-	// This is all temporary code until I get a function to call that loads this data
+	imd.filename = "img/tile/test_01.png";
+	map_tiles.push_back(imd);
+	imd.filename = "img/tile/test_02.png";
+	map_tiles.push_back(imd);
+	imd.filename = "img/tile/test_03.png";
+	map_tiles.push_back(imd);
+	imd.filename = "img/tile/test_04.png";
+	map_tiles.push_back(imd);
+	imd.filename = "img/tile/test_05.png";
+	map_tiles.push_back(imd);
+	imd.filename = "img/tile/test_06.png";
+	map_tiles.push_back(imd);
+	imd.filename = "img/tile/test_07.png";
+	map_tiles.push_back(imd);
+	imd.filename = "img/tile/test_08.png";
+	map_tiles.push_back(imd);
+	imd.filename = "img/tile/test_09.png";
+	map_tiles.push_back(imd);
+	imd.filename = "img/tile/test_10.png";
+	map_tiles.push_back(imd);
+	imd.filename = "img/tile/test_11.png";
+	map_tiles.push_back(imd);
+	imd.filename = "img/tile/test_12.png";
+	map_tiles.push_back(imd);
+	imd.filename = "img/tile/test_13.png";
+	map_tiles.push_back(imd);
+	imd.filename = "img/tile/test_14.png";
+	map_tiles.push_back(imd);
+	imd.filename = "img/tile/test_15.png";
+	map_tiles.push_back(imd);
+	imd.filename = "img/tile/test_16.png";
+	map_tiles.push_back(imd);
+	imd.filename = "img/tile/test_16a.png";
+	map_tiles.push_back(imd);
+	imd.filename = "img/tile/test_16b.png";
+	map_tiles.push_back(imd);
+	imd.filename = "img/tile/test_16d.png";
+	map_tiles.push_back(imd);
+	imd.filename = "img/tile/test_16d.png";
+	map_tiles.push_back(imd);
+	imd.filename = "img/tile/test_16e.png";
+	map_tiles.push_back(imd);
 	
-// 	random_encounters = true;
-// 	encounter_rate = 12;
-// 	steps_till_encounter = GaussianValue(encounter_rate, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
-// 	animation_rate = 200; // update frames every 0.2 seconds
-// 	animation_counter = 0;
-// 	
-// 	tile_count = 16;	
-// 	row_count = 60;
-// 	col_count = 80;
+	for (int i = 0; i < map_tiles.size(); i++) { 
+		VideoManager->LoadImage(map_tiles[i]);
+	} 
 	
-// 	// Load in all tile images from memory
-// 	ImageDescriptor imd;
-// 	imd.width = 1;
-// 	imd.height = 1;
-// 	
-// 	imd.filename = "img/tile/test_01.png";
-// 	map_tiles.push_back(imd);
-// 	imd.filename = "img/tile/test_02.png";
-// 	map_tiles.push_back(imd);
-// 	imd.filename = "img/tile/test_03.png";
-// 	map_tiles.push_back(imd);
-// 	imd.filename = "img/tile/test_04.png";
-// 	map_tiles.push_back(imd);
-// 	imd.filename = "img/tile/test_05.png";
-// 	map_tiles.push_back(imd);
-// 	imd.filename = "img/tile/test_06.png";
-// 	map_tiles.push_back(imd);
-// 	imd.filename = "img/tile/test_07.png";
-// 	map_tiles.push_back(imd);
-// 	imd.filename = "img/tile/test_08.png";
-// 	map_tiles.push_back(imd);
-// 	imd.filename = "img/tile/test_09.png";
-// 	map_tiles.push_back(imd);
-// 	imd.filename = "img/tile/test_10.png";
-// 	map_tiles.push_back(imd);
-// 	imd.filename = "img/tile/test_11.png";
-// 	map_tiles.push_back(imd);
-// 	imd.filename = "img/tile/test_12.png";
-// 	map_tiles.push_back(imd);
-// 	imd.filename = "img/tile/test_13.png";
-// 	map_tiles.push_back(imd);
-// 	imd.filename = "img/tile/test_14.png";
-// 	map_tiles.push_back(imd);
-// 	imd.filename = "img/tile/test_15.png";
-// 	map_tiles.push_back(imd);
-// 	imd.filename = "img/tile/test_16.png";
-// 	map_tiles.push_back(imd);
-// 	imd.filename = "img/tile/test_16a.png";
-// 	map_tiles.push_back(imd);
-// 	imd.filename = "img/tile/test_16b.png";
-// 	map_tiles.push_back(imd);
-// 	imd.filename = "img/tile/test_16d.png";
-// 	map_tiles.push_back(imd);
-// 	imd.filename = "img/tile/test_16d.png";
-// 	map_tiles.push_back(imd);
-// 	imd.filename = "img/tile/test_16e.png";
-// 	map_tiles.push_back(imd);
-// 	
-// 	for (int i = 0; i < map_tiles.size(); i++) { 
-// 		VideoManager->LoadImage(map_tiles[i]);
-// 	} 
-// 	
-// 	// Setup tile frame pointers for animation
-// 	TileFrame *tf;
-// 	for (int i = 0; i < tile_count - 1; i++) {
-// 		tf = new TileFrame;
-// 	  tf->frame = i;
-// 		tf->next = tf;
-// 		tile_frames.push_back(tf);
-// 	}
-// 	
-// 	// Setup our final animated frame tile
-// 	TileFrame *tmp;
-// 	tf = new TileFrame;
-// 	tf->frame = 15;
-// 	tf->next = NULL;
-// 	tile_frames.push_back(tf);
-// 	
-// 	tmp = new TileFrame;
-// 	tf->next = tmp;
-// 	tmp->frame = 16; // a
-// 	tf = tmp;
-// 	
-// 	tmp = new TileFrame;
-// 	tf->next = tmp;
-// 	tmp->frame = 17; // b
-// 	tf = tmp;
-// 	
-// 	tmp = new TileFrame;
-// 	tf->next = tmp;
-// 	tmp->frame = 18; // c
-// 	tf = tmp;
-// 	
-// 	tmp = new TileFrame;
-// 	tf->next = tmp;
-// 	tmp->frame = 19; // d
-// 	tf = tmp;
-// 	
-// 	tmp = new TileFrame;
-// 	tf->next = tmp;
-// 	tmp->frame = 20; // e
-// 	tmp->next = tile_frames[15]; // Makes the linked list circular now
-// 	
-// 	
-// 	
-// 	// Setup our image map
-// 	MapTile tmp_tile;
-// 	tmp_tile.upper_layer = -1; // No upper layer in this test
-// 	for (int r = 0; r < row_count; r++) {
-// 		map_layers.push_back(vector <MapTile>());
-// 		for (int c = 0; c < col_count; c++) {
-// 			tmp_tile.lower_layer = (RandomNum(0, 16 - 1)); // Build our lower layer from random tiles
-// 			if (tmp_tile.lower_layer == 15)
-// 				tmp_tile.event_mask = NOT_WALKABLE; // We can not walk on the water tiles
-// 			else
-// 				tmp_tile.event_mask = 0x0000;
-// 			map_layers[r].push_back(tmp_tile);
-// 		}
-// 	} 
-// 	
-// 	// Load player sprite and rest of map objects
-// 	player_sprite = new PlayerSprite();
-// 	object_layer.push_back(player_sprite);
-// 
-// 	// The is temporary code for our screen shots. It handles the setting up of NPC sprites
-// 	//ImageDescriptor imd;
+	// Setup tile frame pointers for animation
+	TileFrame *tf;
+	for (int i = 0; i < tile_count - 1; i++) {
+		tf = new TileFrame;
+	  tf->frame = i;
+		tf->next = tf;
+		tile_frames.push_back(tf);
+	}
+	
+	// Setup our final animated frame tile
+	TileFrame *tmp;
+	tf = new TileFrame;
+	tf->frame = 15;
+	tf->next = NULL;
+	tile_frames.push_back(tf);
+	
+	tmp = new TileFrame;
+	tf->next = tmp;
+	tmp->frame = 16; // a
+	tf = tmp;
+	
+	tmp = new TileFrame;
+	tf->next = tmp;
+	tmp->frame = 17; // b
+	tf = tmp;
+	
+	tmp = new TileFrame;
+	tf->next = tmp;
+	tmp->frame = 18; // c
+	tf = tmp;
+	
+	tmp = new TileFrame;
+	tf->next = tmp;
+	tmp->frame = 19; // d
+	tf = tmp;
+	
+	tmp = new TileFrame;
+	tf->next = tmp;
+	tmp->frame = 20; // e
+	tmp->next = tile_frames[15]; // Makes the linked list circular now
+	
+	
+	
+	// Setup our image map
+	MapTile tmp_tile;
+	tmp_tile.upper_layer = -1; // No upper layer in this test
+	for (int r = 0; r < row_count; r++) {
+		map_layers.push_back(vector <MapTile>());
+		for (int c = 0; c < col_count; c++) {
+			tmp_tile.lower_layer = (RandomNum(0, 16 - 1)); // Build our lower layer from random tiles
+			if (tmp_tile.lower_layer == 15)
+				tmp_tile.event_mask = NOT_WALKABLE; // We can not walk on the water tiles
+			else
+				tmp_tile.event_mask = 0x0000;
+			map_layers[r].push_back(tmp_tile);
+		}
+	} 
+	
+	// Load player sprite and rest of map objects
+	player_sprite = new PlayerSprite();
+	object_layer.push_back(player_sprite);
+
+	// The is temporary code for our screen shots. It handles the setting up of NPC sprites
+	//ImageDescriptor imd;
 // 	imd.height = 2;
 // 	imd.width = 1;
 // 	imd.filename = "img/sprite/boy_d1.png";
-
+// 
 // 	NPCSprite *npc_sprite = new NPCSprite();
 // 	npc_sprite->row_pos = 4;
 // 	npc_sprite->col_pos = 6;
@@ -535,9 +600,22 @@ MapMode::MapMode(int new_map_id) {
 // 	npc_sprite->frame = imd;
 // 	VideoManager->LoadImage(npc_sprite->frame);
 // 	object_layer.push_back(npc_sprite);
+}
 
+MapMode::MapMode(int new_map_id) {
+	cerr << "DEBUG: MapMode's constructor invoked." << endl;
 	
-	// Setup our coordinate system
+	mtype = map_m;
+	map_state = EXPLORE;
+	map_id = new_map_id;
+	
+	// Load the map from the Lua data file
+	//DataManager->LoadMap(this, map_id);
+	
+	// Temporary function that creates a random map
+	TempCreateMap();
+	
+	// Setup the coordinate system
 	VideoManager->SetCoordSys(-SCREEN_COLS/2, SCREEN_COLS/2, -SCREEN_ROWS/2, SCREEN_ROWS/2, 1);
 }
 
@@ -888,7 +966,7 @@ void MapMode::UpdateNPCMovement(Uint32 time_elapsed) {
 
 // Determines things like our starting tiles
 void MapMode::GetDrawInfo(MapFrame& mf) {
-	// ************* (1) Calculate our default drawing positions for the tiles ****************
+	// ************* (1) Calculate the default drawing positions for the tiles ****************
 	
 	// We draw from the top left corner
 	mf.c_pos = -SCREEN_COLS / 2 - 0.5;
@@ -902,7 +980,7 @@ void MapMode::GetDrawInfo(MapFrame& mf) {
 	mf.c_start = player_sprite->col_pos - SCREEN_COLS / 2;
 	mf.r_start = player_sprite->row_pos - SCREEN_ROWS / 2;
 	
-	// *********************** (2) Calculate our drawing information **************************
+	// *********************** (2) Calculate the drawing information **************************
 	
 	if (player_sprite->status & IN_MOTION) {
 		if (player_sprite->step_count <= (TILE_STEPS / 2)) {
@@ -953,8 +1031,8 @@ void MapMode::GetDrawInfo(MapFrame& mf) {
 	
 	// *********************** (3) Check for special conditions **************************
 	
-	// Usually "the map moves around player", but when we encounter the edges of the map we 
-	// need "the player to move around the map" 
+	// Usually the map "moves around the player", but when we encounter the edges of the map we 
+	// need the player to "move around the map".
 	
 	if (mf.c_start < 0) { // We exceed the far-left side of the map
 		mf.c_start = 0;

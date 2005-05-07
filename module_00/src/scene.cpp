@@ -14,7 +14,7 @@
 #include "video.h"
 
 using namespace std;
-using namespace hoa_global;
+using namespace hoa_engine;
 using namespace hoa_video;
 using namespace hoa_pause;
 using namespace hoa_scene::local_scene;

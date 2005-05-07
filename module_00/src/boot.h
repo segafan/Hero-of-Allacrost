@@ -16,7 +16,7 @@
 #include "SDL.h"
 #include "defs.h"
 #include "utils.h"
-#include "global.h"
+#include "engine.h"
 
 namespace hoa_boot {
 
@@ -63,7 +63,7 @@ typedef struct SavedGameDescriptor {
  *
  * notes:
  *****************************************************************************/
-class BootMode : public hoa_global::GameMode {
+class BootMode : public hoa_engine::GameMode {
 private:
 	bool menu_hidden;
 	std::vector<int> vmenu_index;

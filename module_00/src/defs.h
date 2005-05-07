@@ -31,8 +31,8 @@ namespace hoa_data {
 	class GameData;
 }
 
-// Global declarations, see global.h/cpp
-namespace hoa_global {
+// Engine declarations, see engine.h/cpp
+namespace hoa_engine {
 	class GameMode;
 	class GameModeManager;
 	class GameSettings;
@@ -40,6 +40,11 @@ namespace hoa_global {
 	class JoystickState;
 	class GameInput;
 }
+
+// Global declarations, see global.h/cpp
+// namespace hoa_engine {
+// 
+// }
 
 // Boot mode declarations, see boot.h/cpp
 namespace hoa_boot {

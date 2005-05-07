@@ -16,7 +16,7 @@
 using namespace std;
 using namespace hoa_audio;
 using namespace hoa_video;
-using namespace hoa_global;
+using namespace hoa_engine;
 
 namespace hoa_pause {
 
@@ -26,22 +26,22 @@ PauseMode::PauseMode() {
 	
 	mtype = pause_m;
 	
-	if (SettingsManager->paused_vol_type == GLOBAL_PAUSE_AUDIO_ON_PAUSE) {
+	if (SettingsManager->paused_vol_type == ENGINE_PAUSE_AUDIO_ON_PAUSE) {
 		AudioManager->PauseAudio();
 		return;
 	}
 	
 	else {
 		switch (SettingsManager->paused_vol_type) {
-			case GLOBAL_ZERO_VOLUME_ON_PAUSE:
+			case ENGINE_ZERO_VOLUME_ON_PAUSE:
 				AudioManager->SetMusicVolume(0);
 				AudioManager->SetSoundVolume(0);
 				break;
-			case GLOBAL_HALF_VOLUME_ON_PAUSE:
+			case ENGINE_HALF_VOLUME_ON_PAUSE:
 				AudioManager->SetMusicVolume((int)(SettingsManager->music_vol * 0.5));
 				AudioManager->SetSoundVolume((int)(SettingsManager->sound_vol * 0.5));
 				break;
-			// We don't need to do anything for case GLOBAL_SAME_VOLUME
+			// We don't need to do anything for case ENGINE_SAME_VOLUME
 		}
 	}
 	
@@ -55,18 +55,18 @@ PauseMode::PauseMode() {
 // The destructor might possibly have to free the "Paused" image...
 PauseMode::~PauseMode() {
 	cerr << "DEBUG: PauseMode destructor invoked" << endl;
-	if (SettingsManager->paused_vol_type == GLOBAL_PAUSE_AUDIO_ON_PAUSE) {
+	if (SettingsManager->paused_vol_type == ENGINE_PAUSE_AUDIO_ON_PAUSE) {
 		AudioManager->ResumeAudio();
 	}
 	
 	else {
 		switch (SettingsManager->paused_vol_type) {
-			case GLOBAL_ZERO_VOLUME_ON_PAUSE:
-			case GLOBAL_HALF_VOLUME_ON_PAUSE:
+			case ENGINE_ZERO_VOLUME_ON_PAUSE:
+			case ENGINE_HALF_VOLUME_ON_PAUSE:
 				AudioManager->SetMusicVolume(SettingsManager->music_vol);
 				AudioManager->SetSoundVolume(SettingsManager->sound_vol);
 				break;
-			// We don't need to do anything for case GLOBAL_SAME_VOLUME
+			// We don't need to do anything for case ENGINE_SAME_VOLUME
 		}
 	}
 	

@@ -18,7 +18,7 @@ using namespace std;
 using namespace hoa_quit::local_quit;
 using namespace hoa_audio;
 using namespace hoa_video;
-using namespace hoa_global;
+using namespace hoa_engine;
 using namespace hoa_boot;
 
 
@@ -37,22 +37,22 @@ QuitMode::QuitMode() {
 	quit_type = QUIT_CANCEL;
 
 	
-	if (SettingsManager->paused_vol_type == GLOBAL_PAUSE_AUDIO_ON_PAUSE) {
+	if (SettingsManager->paused_vol_type == ENGINE_PAUSE_AUDIO_ON_PAUSE) {
 		AudioManager->PauseAudio();
 		return;
 	}
 	
 	else {
 		switch (SettingsManager->paused_vol_type) {
-			case GLOBAL_ZERO_VOLUME_ON_PAUSE:
+			case ENGINE_ZERO_VOLUME_ON_PAUSE:
 				AudioManager->SetMusicVolume(0);
 				AudioManager->SetSoundVolume(0);
 				break;
-			case GLOBAL_HALF_VOLUME_ON_PAUSE:
+			case ENGINE_HALF_VOLUME_ON_PAUSE:
 				AudioManager->SetMusicVolume((int)(SettingsManager->music_vol * 0.5));
 				AudioManager->SetSoundVolume((int)(SettingsManager->sound_vol * 0.5));
 				break;
-			// We don't need to do anything for case GLOBAL_SAME_VOLUME
+			// We don't need to do anything for case ENGINE_SAME_VOLUME
 		}
 	}
 	
@@ -109,18 +109,18 @@ void QuitMode::Update(Uint32 time_elapsed) {
 	
 	// The user really doesn't want to quit after all, so restore the game audio and state
 	if (InputManager->CancelPress() || (InputManager->ConfirmPress() && quit_type == QUIT_CANCEL)) {
-		if (SettingsManager->paused_vol_type == GLOBAL_PAUSE_AUDIO_ON_PAUSE) {
+		if (SettingsManager->paused_vol_type == ENGINE_PAUSE_AUDIO_ON_PAUSE) {
 			AudioManager->ResumeAudio();
 		}
 		
 		else {
 			switch (SettingsManager->paused_vol_type) {
-				case GLOBAL_ZERO_VOLUME_ON_PAUSE:
-				case GLOBAL_HALF_VOLUME_ON_PAUSE:
+				case ENGINE_ZERO_VOLUME_ON_PAUSE:
+				case ENGINE_HALF_VOLUME_ON_PAUSE:
 					AudioManager->SetMusicVolume(SettingsManager->music_vol);
 					AudioManager->SetSoundVolume(SettingsManager->sound_vol);
 					break;
-				// We don't need to do anything for case GLOBAL_SAME_VOLUME
+				// We don't need to do anything for case ENGINE_SAME_VOLUME
 			}
 		}
 		
@@ -129,18 +129,18 @@ void QuitMode::Update(Uint32 time_elapsed) {
 	
 	// Restore the game audio, pop QuitMode off the stack, and push BootMode
 	else if (InputManager->ConfirmPress() && quit_type == QUIT_TO_BOOTMENU) {
-	  if (SettingsManager->paused_vol_type == GLOBAL_PAUSE_AUDIO_ON_PAUSE) {
+	  if (SettingsManager->paused_vol_type == ENGINE_PAUSE_AUDIO_ON_PAUSE) {
 			AudioManager->ResumeAudio();
 		}
 		
 		else {
 			switch (SettingsManager->paused_vol_type) {
-				case GLOBAL_ZERO_VOLUME_ON_PAUSE:
-				case GLOBAL_HALF_VOLUME_ON_PAUSE:
+				case ENGINE_ZERO_VOLUME_ON_PAUSE:
+				case ENGINE_HALF_VOLUME_ON_PAUSE:
 					AudioManager->SetMusicVolume(SettingsManager->music_vol);
 					AudioManager->SetSoundVolume(SettingsManager->sound_vol);
 					break;
-				// We don't need to do anything for case GLOBAL_SAME_VOLUME
+				// We don't need to do anything for case ENGINE_SAME_VOLUME
 			}
 		}
 		

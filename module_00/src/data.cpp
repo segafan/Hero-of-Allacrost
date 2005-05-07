@@ -13,13 +13,13 @@
 #include "data.h"
 #include "audio.h"
 #include "video.h"
-#include "global.h"
+#include "engine.h"
 #include "boot.h"
 #include "map.h"
 
 
 using namespace std;
-using namespace hoa_global;
+using namespace hoa_engine;
 using namespace hoa_video;
 using namespace hoa_audio;
 using namespace hoa_utils;
@@ -170,7 +170,7 @@ void GameData::FillIntVector(std::vector<int> *vect, const char *key) {
 
 // This function initializes all the members of the GameSettings singleton class
 void GameData::LoadGameSettings () {
-	hoa_global::GameSettings *SettingsManager = GameSettings::_GetReference();
+	hoa_engine::GameSettings *SettingsManager = GameSettings::_GetReference();
 	const char *filename = "data/config/settings.hoa";
 
 	if (luaL_loadfile(l_stack, filename) || lua_pcall(l_stack, 0, 0, 0))

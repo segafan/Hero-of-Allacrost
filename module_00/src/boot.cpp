@@ -20,7 +20,7 @@ using namespace std;
 using namespace hoa_utils;
 using namespace hoa_audio;
 using namespace hoa_video;
-using namespace hoa_global;
+using namespace hoa_engine;
 using namespace hoa_data;
 using namespace hoa_map;
 

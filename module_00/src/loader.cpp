@@ -14,11 +14,11 @@
 #include "audio.h"
 #include "video.h"
 #include "data.h"
-#include "global.h"
+#include "engine.h"
 #include "boot.h"
 
 using namespace std;
-using namespace hoa_global;
+using namespace hoa_engine;
 using namespace hoa_utils;
 using namespace hoa_data;
 using namespace hoa_audio;

@@ -18,7 +18,7 @@ namespace hoa_pause {
  
 #include <string>
 #include "defs.h"
-#include "global.h"
+#include "engine.h"
 
 namespace hoa_pause {
  
@@ -38,11 +38,11 @@ namespace hoa_pause {
 		1) THIS IS IMPORTANT! During some scenes of the game you might need the audio to be synchornized with the
 			game, and so if the user pauses the game you want to pause the audio so the audio doesn't go out of synch
 			with the action. In order to do this, when you beginning such a scene you need to set the
-			pause_vol_type member of the GameSettings class to GLOBAL_PAUSE_VOLUME_ON_PAUSE. When you are finished with
+			pause_vol_type member of the GameSettings class to ENGINE_PAUSE_VOLUME_ON_PAUSE. When you are finished with
 			this type of scene, you must must MUST remember to restore this member back to it's default value. Don't
 			forget this!!!
  *****************************************************************************/
-class PauseMode : public hoa_global::GameMode {
+class PauseMode : public hoa_engine::GameMode {
 public: 
   PauseMode();
   ~PauseMode();

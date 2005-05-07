@@ -23,7 +23,7 @@
 #include <list>
 #include "defs.h"
 #include "utils.h"
-#include "global.h"
+#include "engine.h"
 
 namespace hoa_map {
 
@@ -138,26 +138,27 @@ const int OCCUPIED     = 0x00000020; // Occupied by a sprite or other map object
 
 
 /******************************************************************************
-	MapFrame struct - contains info about how the current map frame is being drawn. Used by map objects
-		to determine where they should be drawn.
+	MapFrame class - contains info about how the current map frame is being drawn. 
+		Used by map objects to determine where they should be drawn.
 	
 	>>>members<<<
 		int c_start, r_start: The starting index of the tile column/row we need to draw
 		float c_pos, r_pos:   Coordinates for setting the drawing cursor
 		int c_draw, r_draw:   The number of columns and rows of tiles to draw
 ******************************************************************************/
-typedef struct {
+class MapFrame {
+public:
 	int c_start, r_start;
 	float c_pos, r_pos;
 	int c_draw, r_draw;
-} MapFrame;
+};
 
 } // namespace local_map
 
 
 
 /******************************************************************************
-	MapTile struct - structs which fill a 2D vector composing the map
+	MapTile class - fills a 2D vector composing the map
 	
 	>>>members<<<
 		int lower_layer: index to a lower layer tile in the MapMode tile_frames vector
@@ -174,7 +175,7 @@ public:
 
 
 /******************************************************************************
-	TileFrame struct - element of a circular singlely linked list for tile frame animations
+	TileFrame class - element of a circular singlely linked list for tile frame animations
 	
 	>>>members<<<
 		int frame: holds a frame index pointing to map_tiles in MapMode class
@@ -195,7 +196,7 @@ public:
 		int object_type: an identifier type for the object
 		int row_pos: the map row position for the bottom left corner of the object
 		int col_pos: the map col position for the bottom left corner of the object
-		char ver_pos: determines the "vertical" position of an object on a map
+		unsigned char ver_pos: determines the "vertical" position of an object on a map
 	>>>functions<<<
 		virtual void Draw(local_map::MapFrame& mf):
 			A purely virtual function for drawing the object, if it even needs to be drawn
@@ -211,7 +212,7 @@ protected:
 	int object_type;
 	int row_pos;
 	int col_pos;
-	char ver_pos;
+	unsigned char ver_pos;
 	hoa_video::GameVideo *VideoManager;
 	
 	friend class MapMode; // Necessary so that the MapMode class can access and change these data members
@@ -267,10 +268,7 @@ private:
 	PlayerSprite - Manages the user-controllable player sprite on the map.
  
 	>>>members<<<
-	 float step_speed: Speed at which sprites move. 0.5 is slow, 1.5 is normal, and 1.50 is fast.
-	 int step_count: Keeps track of how many steps have been taken
-	 int facing: Indicates what direction the sprite is facing
-	 int status: Keeps track of things like motion, visiblity, etc
+
 	>>>functions<<<
  
 	>>>notes<<<
@@ -290,31 +288,19 @@ public:
 		This class is for managing the images needed to display and animate sprites on maps.
  
 	>>>members<<<
-	 float step_speed: Speed at which sprites move. 0.125 is slow, 0.25 is normal, and 0.50 is fast.
-	 int step_count: Keeps track of how many steps have been taken
-	 int facing: Indicates what direction the sprite is facing
-	 
+
 	>>>functions<<<		 
  
 	>>>notes<<<
 						
  *****************************************************************************/
-// class NPCSprite : public MapSprite {
-// 	 float step_speed;
-// 	 int step_count;
-// 	 unsigned int facing;
-// 	 hoa_video::ImageDescriptor frame;
-// 	 //vector<std::string> sprite_dialogue;
-// 	 //vector<bool> new_dialogue;
-// 	 hoa_utils::Singleton<hoa_video::GameVideo> VideoManager;
-// 	 friend class MapMode; // Necessary so that the MapMode class can access and change these data members
-// public:
-// 	 NPCSprite() {object_type = local_map::NPC_SPRITE;}
-// 	 ~NPCSprite() {VideoManager->DeleteImage(frame);}
-// //	 void LoadSprite(string sprite_name);
-// 	 void Draw(local_map::MapFrame* mf);
-// //	 void SpriteMovement();
-// };
+class NPCSprite : public MapSprite {
+	 friend class MapMode; // Necessary so that the MapMode class can access and change these data members
+	 //vector<bool, std::string> sprite_dialogue; LATER
+public:
+	 NPCSprite(int pos_x, int pos_y);
+	 ~NPCSprite();
+};
 
 
 
@@ -429,7 +415,7 @@ public:
 			
 		3) Any function that starts with "Temp" is temporary and will be removed evenutally.
  *****************************************************************************/
-class MapMode : public hoa_global::GameMode {
+class MapMode : public hoa_engine::GameMode {
 private:
 	friend class hoa_data::GameData;
 	

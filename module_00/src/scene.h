@@ -13,7 +13,7 @@
  
 #include <string>
 #include "defs.h"
-#include "global.h"
+#include "engine.h"
 
 namespace hoa_scene {
 
@@ -44,7 +44,7 @@ const int MIN_SCENE_UPDATES = 750;
 			at the gorgeous artwork ^_~). That time is set to 750ms.
 	
  *****************************************************************************/
-class SceneMode : public hoa_global::GameMode {
+class SceneMode : public hoa_engine::GameMode {
 private:
 	int scene_timer;
 	
