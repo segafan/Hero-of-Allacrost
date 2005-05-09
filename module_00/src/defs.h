@@ -42,9 +42,10 @@ namespace hoa_engine {
 }
 
 // Global declarations, see global.h/cpp
-// namespace hoa_engine {
-// 
-// }
+namespace hoa_engine {
+	class Character;
+	class GameInstance;
+}
 
 // Boot mode declarations, see boot.h/cpp
 namespace hoa_boot {

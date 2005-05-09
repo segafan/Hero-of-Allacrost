@@ -315,7 +315,6 @@ void GameData::LoadMap(hoa_map::MapMode *map_mode, int new_map_id) {
 	map_mode->random_encounters = GetGlobalBool("random_encounters");
 	map_mode->encounter_rate = GetGlobalInt("encounter_rate");
 	map_mode->steps_till_encounter = GaussianValue(map_mode->encounter_rate, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
-	map_mode->animation_rate = GetGlobalInt("animation_rate");
 	map_mode->animation_counter = GetGlobalInt("animation_counter");
 	map_mode->tile_count = GetGlobalInt("tile_count");
 	map_mode->row_count = GetGlobalInt("row_count");

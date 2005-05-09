@@ -15,5 +15,17 @@ using namespace std;
 
 namespace hoa_global {
 
+SINGLETON_INITIALIZE(GameInstance);
+
+
+
+// ****************************************************************************
+// ***************************** GameInstance *********************************
+// ****************************************************************************
+
+GameInstance::GameInstance() {}
+
+GameInstance::~GameInstance() {}
+
  
 }// namespace hoa_global

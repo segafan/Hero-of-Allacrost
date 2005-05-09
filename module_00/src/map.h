@@ -35,14 +35,17 @@ namespace local_map {
 // ************************ MAP CONSTANTS ****************************
 
 // These are elapsed time dividers used for sprite movement
-const int VERY_SLOW_SPEED = 24;
-const int SLOW_SPEED      = 20;
-const int NORMAL_SPEED    = 16;
+const int VERY_SLOW_SPEED = 20;
+const int SLOW_SPEED      = 16;
+const int NORMAL_SPEED    = 12;
 const int FAST_SPEED      = 8;
 const int VERY_FAST_SPEED = 4;
 
 // How many 'steps' a sprite has to take to move to the next tile
 const int TILE_STEPS = 32;
+
+// The rate at which tiles animated, in ms
+const int ANIMATION_RATE = 300;
 
 // The number of rows and columns of tiles that compose the screen
 const int SCREEN_ROWS = 20;
@@ -196,7 +199,7 @@ public:
 		int object_type: an identifier type for the object
 		int row_pos: the map row position for the bottom left corner of the object
 		int col_pos: the map col position for the bottom left corner of the object
-		unsigned char ver_pos: determines the "vertical" position of an object on a map
+		char ver_pos: determines the "vertical" position of an object on a map
 	>>>functions<<<
 		virtual void Draw(local_map::MapFrame& mf):
 			A purely virtual function for drawing the object, if it even needs to be drawn
@@ -212,7 +215,7 @@ protected:
 	int object_type;
 	int row_pos;
 	int col_pos;
-	unsigned char ver_pos;
+	char ver_pos;
 	hoa_video::GameVideo *VideoManager;
 	
 	friend class MapMode; // Necessary so that the MapMode class can access and change these data members
@@ -288,18 +291,24 @@ public:
 		This class is for managing the images needed to display and animate sprites on maps.
  
 	>>>members<<<
-
+		int wait_time: the number of milliseconds to wait till the next tile transition
+		int delay_time: the average time to wait between tile transitions
+	
 	>>>functions<<<		 
  
 	>>>notes<<<
 						
  *****************************************************************************/
 class NPCSprite : public MapSprite {
-	 friend class MapMode; // Necessary so that the MapMode class can access and change these data members
-	 //vector<bool, std::string> sprite_dialogue; LATER
+	friend class MapMode; // Necessary so that the MapMode class can access and change these data members
+	//vector<bool, std::string> sprite_dialogue; LATER
+	int wait_time;
+	int delay_time;
 public:
-	 NPCSprite(int pos_x, int pos_y);
-	 ~NPCSprite();
+	NPCSprite(std::string name);
+	~NPCSprite();
+	void ConstantMovement() { delay_time = 0; }
+	void DelayedMovement(int average_time) { delay_time = average_time; }
 };
 
 
@@ -373,7 +382,6 @@ public:
 	 int map_id: a unique ID number for each map object
 	 string mapname: the name of the map, also the location name in menu mode
 	 unsigned int map_state: indicates what state the map is in (explore, dialogue, script, etc)
-	 int animation_rate: the number of milliseconds that need to elapse for the map tile frames are updated
 	 int animation_counter: millisecond counter for use in tile animation
 	 
 	 int tile_count: the number of tile images used in the map, not counting individual animation tiles
@@ -387,27 +395,25 @@ public:
 	>>>functions<<< 
 	bool TileMoveable(int row, int col):
 		Determines if the tile given by the row arguments is free to move to
-	void UpdateExploreState(Uint32 time_elapsed):
+	void UpdateExploreState():
 		When the map is in the explore state, this function is called to update the game
 	void UpdateDialogueState():
 		When the map is in the dialogue state, this function is called to update the game
 	void UpdateScriptState():
 		When the map is in the script state, this function is called to update the game
-	void UpdatePlayerMovement():
-		Called to detect if the player wants to move to a new tile
 	void UpdateNPCMovement(Uint32 time_elapsed):
 		Updates the position of the NPCs on the map
 	void GetDrawInfo(local_map::MapFrame& mf):
 		Constructs a MapFrame struct which contains details about how to draw the current map frame
 	
-	void Update(Uint32 time_elapsed):
+	void Update(Uint32 new_time_elapsed):
 		Called in the main game loop to update the game status
 	void Draw():
 		Called in the maing ame loop to draw the next frame
 	
 	>>>notes<<<
 		1) If you change the state of random_encounters from false to true, make sure to set 
-			a valid value (< 0) for steps_till_encounter. *sI might change this later*
+			a valid value (< 0) for steps_till_encounter. *I might change this later*
 			
 		2) Be careful with calling the MapMode constructor, for it changes the coordinate system of the 
 			video engine without warning. Only create a new instance of this class if you plan to immediately
@@ -421,8 +427,8 @@ private:
 	
 	int map_id;
 	unsigned int map_state;
-	int animation_rate;
 	int animation_counter;
+	Uint32 time_elapsed;
 	
 	int tile_count;	
 	int row_count;
@@ -447,11 +453,13 @@ private:
 	
 	bool TileMoveable(int row, int col);
 	
-	void UpdateExploreState(Uint32 time_elapsed);
+	void UpdateExploreState();
+	void UpdatePlayerExplore();
+	void UpdateNPCExplore(NPCSprite *npc);
+	
 	void UpdateDialogueState();
 	void UpdateScriptState();
-	void UpdatePlayerMovement();
-	void UpdateNPCMovement(Uint32 time_elapsed);
+	void UpdateNPCMovement();
 	
 	void GetDrawInfo(local_map::MapFrame& mf);
 	
@@ -473,7 +481,7 @@ public:
 	int GetRows();
 	int GetCols();
 	
-	void Update(Uint32 time_elapsed);
+	void Update(Uint32 new_time_elapsed);
 	void Draw();
 };
 

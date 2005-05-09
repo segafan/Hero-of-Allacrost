@@ -1,7 +1,7 @@
 /* 
  * engine.h
  *	Header file for the Hero of Allacrost core game engine
- *	(C) 2004 by Tyler Olsen
+ *	(C) 2005 by Tyler Olsen
  *
  *	This code is licensed under the GNU GPL. It is free software and you may modify it 
  *	 and/or redistribute it under the terms of this license. See http://www.gnu.org/copyleft/gpl.html

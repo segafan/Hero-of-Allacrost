@@ -116,34 +116,65 @@ enum gitem { blank_i, item_i, sbook_i, weapon_i, armor_i };
 // class GameParty;
 // 	
 // 
-// class GameCharacter {
-// private:
-// 	 std::string name;
-// 	 Weapon eq_weapon;
-// 	 Armor eq_head;
-// 	 Armor eq_body;
-// 	 Armor eq_arms;
-// 	 Armor eq_legs;
-// 	 std::vector<Skill> attack_skills;
-// 	 std::vector<Skill> defense_skills;
-// 	 std::vector<Skill> support_skills;
-// 	 // AttackPoints[4]
-// 	 unsigned int hit_points;
-// 	 unsigned int skill_points;
-// 	 unsigned int xp_points;
-// 	 unsigned int xp_level;
-// 	 unsigned int xp_next_lvl;
-// 	 unsigned int strength;
-// 	 unsigned int intelligence;
-// 	 unsigned int agility;
-// 	 friend GameParty;
-// public:
+
+/******************************************************************************
+	Character - A class that represents a playable game character
+		
+	>>>members<<<
+		
+	>>>functions<<<
+		
+	>>>notes<<<
+		
+ *****************************************************************************/
+class Character {
+protected:
+	 std::string name;
+	 //Weapon eq_weapon;
+	 //Armor eq_head;
+	 //Armor eq_body;
+	 //Armor eq_arms;
+	 //Armor eq_legs;
+	 //std::vector<Skill> attack_skills;
+	 //std::vector<Skill> defense_skills;
+	 //std::vector<Skill> support_skills;
+	 // AttackPoints[4]
+	 unsigned int hit_points;
+	 unsigned int skill_points;
+	 unsigned int xp_points;
+	 unsigned int xp_level;
+	 unsigned int xp_next_lvl;
+	 unsigned int strength;
+	 unsigned int intelligence;
+	 unsigned int agility;
+	 friend class GameInstance;
+public:
 // 	 Weapon EquipWeapon(Weapon new_weapon);
 // 	 Armor EquipHeadArmor(Armor new_armor);
 // 	 Armor EquipBodyArmor(Armor new_armor);
 // 	 Armor EquipArmsArmor(Armor new_armor);
 // 	 Armor EquipLegsArmor(Armor new_armor);
-// };
+};
+
+
+/******************************************************************************
+	GameInstance class - Singleton containing information about the state of the game
+		
+	>>>members<<<
+		
+	>>>functions<<<
+		
+	>>>notes<<<
+		
+ *****************************************************************************/
+class GameInstance {
+private:
+	SINGLETON_DECLARE(GameInstance);
+public:
+	SINGLETON_METHODS(GameInstance);
+	
+	std::vector<Character> characters;
+};
 
 
 } // namespace hoa_global
