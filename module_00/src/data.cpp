@@ -191,19 +191,6 @@ void GameData::LoadGameSettings () {
 	SettingsManager->music_vol = GetTableInt("music_vol");
 	SettingsManager->sound_vol = GetTableInt("sound_vol");
 
-// 	lua_getglobal(l_stack, "key_settings");
-// 	if (!lua_istable(l_stack, LUA_STACK_TOP))
-// 		cout << "LUA ERROR: could not retrieve table \"key_settings\"" << endl;
-
-// 	SettingsManager->InputStatus.key.up = (SDLKey)GetTableInt("up");
-// 	SettingsManager->InputStatus.key.down = (SDLKey)GetTableInt("down");
-// 	SettingsManager->InputStatus.key.left = (SDLKey)GetTableInt("left");
-// 	SettingsManager->InputStatus.key.right = (SDLKey)GetTableInt("right");
-// 	SettingsManager->InputStatus.key.confirm = (SDLKey)GetTableInt("confirm");
-// 	SettingsManager->InputStatus.key.cancel = (SDLKey)GetTableInt("cancel");
-// 	SettingsManager->InputStatus.key.menu = (SDLKey)GetTableInt("menu");
-// 	SettingsManager->InputStatus.key.pause = (SDLKey)GetTableInt("pause");
-
 	lua_pop(l_stack, 2); // Pop all tables from the stack before returning
 }
 
@@ -243,9 +230,7 @@ void GameData::LoadBootData(
 	if (luaL_loadfile(l_stack, filename) || lua_pcall(l_stack, 0, 0, 0))
 		cout << "LUA ERROR: Could not load "<< filename << " :: " << lua_tostring(l_stack, -1) << endl;
 	
-	// Load the video stuff
-	//
-	
+	// Load the video stuff	
 	ImageDescriptor im;
 
 	// The background
@@ -290,12 +275,10 @@ void GameData::LoadBootData(
 	}
 	
 	SoundDescriptor new_sound;
-	
 	for (int i = 0; i < new_sound_files.size(); i++) {
 		new_sound.filename = new_sound_files[i];
 		boot_sound->push_back(new_sound);
 	}
-	
 }
 
 // This one loads all the tiles from img/tile/ directory and reads the map file given
@@ -303,8 +286,8 @@ void GameData::LoadBootData(
 void GameData::LoadMap(hoa_map::MapMode *map_mode, int new_map_id) {
 	// Load the map file
 	string filename = "data/maps/map";
-	filename += "1";	// TEMPORARY TEMPORARY
-	// filename += new_map_id;
+	// filename += "1";	// TEMPORARY TEMPORARY
+	filename += "1";
 	filename += ".hoa";
 	
 	if (luaL_loadfile(l_stack, filename.c_str()) || lua_pcall(l_stack, 0, 0, 0))
@@ -314,6 +297,7 @@ void GameData::LoadMap(hoa_map::MapMode *map_mode, int new_map_id) {
 	map_mode->map_state = GetGlobalInt("map_state");	
 	map_mode->random_encounters = GetGlobalBool("random_encounters");
 	map_mode->encounter_rate = GetGlobalInt("encounter_rate");
+	// this one will change:
 	map_mode->steps_till_encounter = GaussianValue(map_mode->encounter_rate, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
 	map_mode->animation_counter = GetGlobalInt("animation_counter");
 	map_mode->tile_count = GetGlobalInt("tile_count");
@@ -365,8 +349,6 @@ void GameData::LoadMap(hoa_map::MapMode *map_mode, int new_map_id) {
 	}
 	tbl.push_back(tiles_used.size());
 	
-	for (int i = 0; i < tbl.size(); i++) cout << "In LoadMap: " << tbl[i] << endl;	/* DEBUG */
-	
 	// now that we have the table, we populate the tile_frames vector...
 	TileFrame *tframe, *root;
 	for (int i = 0; i < tbl.size() - 1; i++) {
@@ -381,7 +363,7 @@ void GameData::LoadMap(hoa_map::MapMode *map_mode, int new_map_id) {
 			tframe->next = 0;
 		}
 		tframe->next = root;
-		map_mode->tile_frames.push_back(tframe);
+		map_mode->tile_frames.push_back(root);
 	}
 	
 	// Now load the map itself, by loading the lower_layer, upper_layer and event_mask vectors
@@ -418,8 +400,6 @@ void GameData::LoadMap(hoa_map::MapMode *map_mode, int new_map_id) {
 	// load Claudius
 	map_mode->player_sprite = new PlayerSprite();
 	map_mode->object_layer.push_back(map_mode->player_sprite);
-	
-	cout << "Kewl!\n";
 }
 
 

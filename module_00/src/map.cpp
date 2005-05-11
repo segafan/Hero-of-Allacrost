@@ -559,10 +559,10 @@ MapMode::MapMode(int new_map_id) {
 	map_id = new_map_id;
 	
 	// Load the map from the Lua data file
-	//DataManager->LoadMap(this, map_id);
+	DataManager->LoadMap(this, map_id);
 	
 	// Temporary function that creates a random map
-	TempCreateMap();
+	//TempCreateMap();
 	
 	// Setup the coordinate system
 	VideoManager->SetCoordSys(-SCREEN_COLS/2, SCREEN_COLS/2, -SCREEN_ROWS/2, SCREEN_ROWS/2, 1);
