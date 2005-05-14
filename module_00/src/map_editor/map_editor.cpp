@@ -17,7 +17,7 @@
 #include "map_editor.h"
 
 using namespace std;
-using namespace hoa_map;
+using namespace hoa_mapEd;
 
 const QString APP_KEY = "/map_editor/";
 
@@ -26,31 +26,20 @@ MapEditor::MapEditor() : QMainWindow(0, 0, WDestructiveClose)
 	// create the main widget and tile icons
 	QSplitter *split = new QSplitter(this);
 	tiles = new Tileset(split);
-	map = new Map(split);
+	map = new MapGrid(split);
 
-	//split->resize(600, 400);
 	setCentralWidget(split);
 	split->show();
+	resize(600, 400);
 
 	// create the statusbar
 	statBar = new QStatusBar(this);
 	
 	// file menu creation
 	fileMenu = new QPopupMenu(this);
+	connect(fileMenu, SIGNAL(aboutToShow()), this, SLOT(fileMenuSetup()));
 	menuBar()->insertItem("&File", fileMenu);
-	fileMenu->insertItem("&New...", this, SLOT(fileNew()), CTRL+Key_N);
-	fileMenu->insertItem("&Open...", this, SLOT(fileOpen()), CTRL+Key_O);
-	fileMenu->insertItem("&Save", this, SLOT(fileSave()), CTRL+Key_S);
-	fileMenu->insertItem("Save &As...", this, SLOT(fileSaveAs()));
-	fileMenu->insertSeparator();
-	fileMenu->insertItem("&Quit", this, SLOT(fileQuit()), CTRL+Key_Q);
-	fileMenu->insertSeparator();
-
-	// view menu creation
-	viewMenu = new QPopupMenu(this);
-	menuBar()->insertItem("&View", viewMenu);
-	viewMenu->insertItem("Toggle &Grid", this, SLOT(viewToggleGrid()));
-
+	
 	// help menu creation
 	helpMenu = new QPopupMenu(this);
 	menuBar()->insertItem("&Help", helpMenu);
@@ -58,7 +47,10 @@ MapEditor::MapEditor() : QMainWindow(0, 0, WDestructiveClose)
 	helpMenu->insertItem("&About", this, SLOT(helpAbout()));
 	helpMenu->insertItem("About &Qt", this, SLOT(helpAboutQt()));
 	
-	QSettings settings;		// contains saveable settings, like recent files
+	mapObject = new hoa_map::MapMode(1);
+	
+	// FIXME: these settings don't seem to be working...? hmm
+/*	QSettings settings;		// contains saveable settings, like recent files
 	QString filename;		// file to add to list of recently used files
 	for (int i = 0; i < MAX_RECENTFILES; ++i)
 	{
@@ -71,7 +63,7 @@ MapEditor::MapEditor() : QMainWindow(0, 0, WDestructiveClose)
 	// updates the recent files list in the File menu
 	if (masterRecentFiles.count())
 		updateRecentFilesMenu();
-	
+*/	
 	// loads the tileset for drag 'n' drop operation
 	tileInit();
 	
@@ -82,6 +74,12 @@ MapEditor::MapEditor() : QMainWindow(0, 0, WDestructiveClose)
 
 MapEditor::~MapEditor()
 {
+	if (map != NULL)
+		delete map;
+	if (tiles != NULL)
+		delete tiles;
+	if (mapObject != NULL)
+		delete mapObject;
 } // MapEditor destructor
 
 void MapEditor::closeEvent(QCloseEvent *)
@@ -89,27 +87,41 @@ void MapEditor::closeEvent(QCloseEvent *)
     fileQuit();
 } // closeEvent(...)
 
+void MapEditor::fileMenuSetup()
+{
+	fileMenu->clear();
+	fileMenu->insertItem("&New...", this, SLOT(fileNew()), CTRL+Key_N);
+	fileMenu->insertItem("&Open...", this, SLOT(fileOpen()), CTRL+Key_O);
+	int saveID = fileMenu->insertItem("&Save", this, SLOT(fileSave()), CTRL+Key_S);
+	int saveAsID = fileMenu->insertItem("Save &As...", this, SLOT(fileSaveAs()));
+	fileMenu->insertSeparator();
+	int resizeID = fileMenu->insertItem("&Resize Map...", this, SLOT(fileResize()));
+	fileMenu->insertSeparator();
+	fileMenu->insertItem("&Quit", this, SLOT(fileQuit()), CTRL+Key_Q);
+//	fileMenu->insertSeparator();
+
+	if (map->getChanged())
+	{
+		fileMenu->setItemEnabled(saveID, true);
+		fileMenu->setItemEnabled(saveAsID, true);
+		fileMenu->setItemEnabled(resizeID, true);
+	} // map has been changed, so those changes can be saved
+	else
+	{
+		fileMenu->setItemEnabled(saveID, false);
+		fileMenu->setItemEnabled(saveAsID, false);
+		fileMenu->setItemEnabled(resizeID, false);
+	} // map hasn't changed, no changes to be made, gray them out
+} // fileMenuSetup()
+
 void MapEditor::fileNew()
 {
-//	load(QString::null);
-
-	bool ok_pressed;	// TRUE = user pressed OK, FALSE otherwise
-	
-	// get map width from user
-	int width = QInputDialog::getInteger("New Map...",
-		"Enter map width (in tiles):", 0, 0, 1000, 1, &ok_pressed, this);
-	if (ok_pressed)
-		map->setWidth(width);
-	else
-		map->setWidth(0);
-		
-	// get map height from user
-	int height = QInputDialog::getInteger("New Map...",
-		"Enter map height (in tiles):", 0, 0, 1000, 1, &ok_pressed, this);
-	if (ok_pressed)
-		map->setHeight(height);
-	else
-		map->setHeight(0);
+	if (eraseOK())
+	{
+		QCanvas *canvas = new QCanvas(this);
+		map->setCanvas(canvas);
+		fileResize();
+	} // make sure an unsaved map is not lost
 } // fileNew()
 
 void MapEditor::fileOpen()
@@ -123,12 +135,12 @@ void MapEditor::fileOpen()
 	if (!fileName.isEmpty())
 		load(fileName);
 } // openMap()
-
+/*
 void MapEditor::fileOpenRecent(int index)
 {
 	load(masterRecentFiles[index]);
 } // fileOpenRecent(...)
-
+*/
 void MapEditor::fileSaveAs()
 {
 	// get the file name from the user
@@ -176,7 +188,7 @@ void MapEditor::fileSave()
 		return;
     } // make sure file is openable
     
-    map->saveMap(file);					// actually saves the map
+    map->saveMap(file);		// actually saves the map
     file.close();
 
     setCaption(QString("%1").arg(map->getFileName()));
@@ -185,9 +197,41 @@ void MapEditor::fileSave()
 		" Saving will be implemented soon..."), 5000);
 } // fileSave()
 
+void MapEditor::fileResize()
+{
+	bool ok_wpressed, ok_hpressed;	// TRUE = user pressed OK, else FALSE
+	
+	// get map width from user
+	int width = QInputDialog::getInteger("Map Size...",
+		"Enter map width (in tiles):", 0, 0, 1000, 1, &ok_wpressed, this);
+
+	// get map height from user
+	int height = QInputDialog::getInteger("Map Size...",
+		"Enter map height (in tiles):", 0, 0, 1000, 1, &ok_hpressed, this);
+
+	if (ok_wpressed && ok_hpressed)
+	{
+		map->canvas()->resize(width * TILE_WIDTH, height * TILE_HEIGHT);
+		map->createGrid();
+		map->setWidth(width);
+		map->setHeight(height);
+	} // only if the user entered both the height and the width
+	else
+		statBar->message("Invalid dimensions, no map created",5000);
+} // fileResize()
+
 void MapEditor::fileQuit()
 {
-	if (map->getChanged())
+	if (eraseOK())
+	{	
+		//saveOptions();		// saves window settings
+		qApp->exit(0);
+	} // checks to see if the map is unsaved
+} // fileQuit()
+
+bool MapEditor::eraseOK()
+{
+    if (map->getChanged())
 	{
 		switch(QMessageBox::warning(this, "Unsaved File",
 			"The document contains unsaved changes\n"
@@ -206,15 +250,14 @@ void MapEditor::fileQuit()
 			default: // Cancel clicked or Escape pressed
     	    	// don't exit
 				statBar->message("Save abandoned", 5000);
-        		return;
+        		return FALSE;
 	    } // warn the user to save
-	} // checks to see if the map is unsaved
-	
-	saveOptions();		// saves window settings
-	qApp->exit(0);
-} // fileQuit()
+    } // map has been modified
 
-void MapEditor::updateRecentFiles(const QString &fileName)
+    return TRUE;
+} // eraseOK()
+
+/*void MapEditor::updateRecentFiles(const QString &fileName)
 {
     if (masterRecentFiles.find(fileName) == masterRecentFiles.end())
 	{
@@ -251,14 +294,12 @@ void MapEditor::saveOptions()
 void MapEditor::viewToggleGrid()
 {
 	// toggles the map's grid on or off
-	if (map->showGrid())
-		map->setShowGrid(false);
-	else
-		map->setShowGrid(true);
+	map->viewToggleGrid();
 } // viewToggleGrid()
-
+*/
 void MapEditor::helpHelp()
 {
+	statBar->message(QString("Dunno what to put here..."), 5000);
 } // helpHelp()
 
 void MapEditor::helpAbout()
@@ -284,20 +325,31 @@ void MapEditor::load(const QString &fileName)
 /*	if (!fileName.isNull())
 	{
 		updateRecentFiles(fileName);
-		map = new Map(0, fileName);
+		map = new MapGrid(0, fileName);
 	} // only update if we have a name for the map
 	else
-		map = new Map(0); // <-- zero will make a floating map */
+		map = new MapGrid(0); // <-- zero will make a floating map */
 } // load(...)
 
 void MapEditor::tileInit()
 {
-	QDir tileDir("img/tile/", "*.png");    // tile set directory
+	QDir tileDir("img/tile/", "*.png");				// tile set directory
+	vector<hoa_video::ImageDescriptor> map_tiles;	// vector of tiles
+	hoa_video::ImageDescriptor imd;
+	
+	imd.width = 1;
+	imd.height = 1;
 	
 	// make sure directory exists
 	if (!tileDir.exists())
         	qWarning("Cannot find the tile directory");
 	
 	for (uint i = 0; i < tileDir.count(); i++)
+	{
 		(void) new QIconViewItem(tiles, tileDir[i], QPixmap("img/tile/" + tileDir[i]));
+		imd.filename = "img/tile/" + string(tileDir[i].ascii());
+		map_tiles.push_back(imd);
+	}
+
+	mapObject->SetMapTiles(map_tiles);
 } // tileInit()

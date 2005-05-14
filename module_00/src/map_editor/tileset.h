@@ -18,9 +18,8 @@
 #define TILESET_H
 
 #include <qiconview.h>
-//#include <qpixmap.h>
 
-namespace hoa_map
+namespace hoa_mapEd
 {
 
 class Tileset : public QIconView
@@ -34,7 +33,7 @@ class Tileset : public QIconView
 		QDragObject *dragObject();
 }; // class Tileset
 
-} // namespace hoa_map
+} // namespace hoa_mapEd
 
 #endif
 // TILESET_H

@@ -15,7 +15,7 @@
 
 #include "map_editor.h"
 
-using namespace hoa_map;
+using namespace hoa_mapEd;
 
 int main(int argc, char **argv)
 {

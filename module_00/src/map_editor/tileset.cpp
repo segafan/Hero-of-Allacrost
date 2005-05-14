@@ -16,7 +16,7 @@
 
 #include "tileset.h"
 
-using namespace hoa_map;
+using namespace hoa_mapEd;
 
 QDragObject *Tileset::dragObject()
 {
