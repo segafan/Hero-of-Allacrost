@@ -103,6 +103,7 @@ void MapGrid::setFileName(QString filename)
 } // getMapData()
 */
 
+// FIXME: contentsDragEnterEvent???
 void MapGrid::dragEnterEvent(QDragEnterEvent *evt)
 {
     if (QImageDrag::canDecode(evt))
@@ -121,8 +122,10 @@ void MapGrid::dropEvent(QDropEvent *evt)
 		// the division here will effectively snap the tile to the grid
 		// yes, it looks dumb. is there another way to round down to the
 		// nearest multiple of 32?
-		tile->move(point.x() / TILE_WIDTH * TILE_WIDTH,
-				   point.y() / TILE_HEIGHT * TILE_HEIGHT);
+		tile->move((point.x() + horizontalScrollBar()->value())
+					/ TILE_WIDTH * TILE_WIDTH,
+				   (point.y() + verticalScrollBar()->value())
+					/ TILE_HEIGHT * TILE_HEIGHT);
 		tile->setZ(0);		// sets height of tile TODO: create a menu option
 		// tile->tileInfo.lower_layer = 1; FIXME: perhaps not needed here
 		tile->tileInfo.upper_layer = -1; // TEMPORARY!!! FIXME: this neither
@@ -133,20 +136,20 @@ void MapGrid::dropEvent(QDropEvent *evt)
 	} // must be able to decode the drag in order to place the image
 } // dropEvent(...)
 
-void MapGrid::mousePressEvent(QMouseEvent *)
+/*void MapGrid::mousePressEvent(QMouseEvent *)
 {
-//	QTable::mousePressEvent(evt);
-//	dragging = TRUE;
+	QTable::mousePressEvent(evt);
+	dragging = TRUE;
 } // mousePressEvent(...)
 
 void MapGrid::mouseMoveEvent(QMouseEvent *)
 {
-//	if (dragging) {
-//		QDragObject *d = new QImageDrag(currentItem()->pixmap(), this );
-//		d->dragCopy(); // do NOT delete d.
-//		dragging = FALSE;
-//	}
-} // mouseMoveEvent(...)
+	if (dragging) {
+		QDragObject *d = new QImageDrag(currentItem()->pixmap(), this );
+		d->dragCopy(); // do NOT delete d.
+		dragging = FALSE;
+	}
+} // mouseMoveEvent(...)*/
 
 void MapGrid::contentsMousePressEvent(QMouseEvent *evt)
 {
@@ -202,11 +205,16 @@ void MapGrid::contentsMouseReleaseEvent(QMouseEvent *evt)
 	} // only if the user is moving an object
 } // contentsMouseReleaseEvent(...)
 
-void MapGrid::contextMenuEvent(QContextMenuEvent *)
+void MapGrid::contentsMouseDoubleClickEvent(QMouseEvent *evt)
+{
+	// FIXME: implement painting with this
+} // contentsMouseDoubleClickEvent(...)
+
+void MapGrid::contentsContextMenuEvent(QContextMenuEvent *)
 {
 	menuPosition = QCursor::pos();
 	theMenu->exec(menuPosition);
-} // contextMenuEvent(...)
+} // contentsContextMenuEvent(...)
 
 void MapGrid::createGrid()
 {

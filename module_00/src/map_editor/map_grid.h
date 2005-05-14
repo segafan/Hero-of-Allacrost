@@ -20,7 +20,6 @@
 #include "tile.h"
 #include "map.h"
 
-#include <qvbuttongroup.h>
 #include <qcanvas.h>
 #include <qcheckbox.h>
 #include <qcolor.h>
@@ -34,6 +33,7 @@
 #include <qradiobutton.h>
 #include <qstringlist.h>
 #include <qvaluevector.h>
+#include <qvbuttongroup.h>
 #include <qwmatrix.h>
 
 namespace hoa_mapEd
@@ -60,14 +60,14 @@ class MapGrid: public QCanvasView
 		// Low-level drag and drop
 		void dragEnterEvent(QDragEnterEvent *evt);
 		void dropEvent(QDropEvent *evt );
-		void mousePressEvent(QMouseEvent *);
-		void mouseMoveEvent(QMouseEvent *);
+		//void mousePressEvent(QMouseEvent *);
+		//void mouseMoveEvent(QMouseEvent *);
 		
 		void contentsMousePressEvent(QMouseEvent *evt);
 		void contentsMouseMoveEvent(QMouseEvent *evt);
 		void contentsMouseReleaseEvent(QMouseEvent *evt);
-		
-		void contextMenuEvent(QContextMenuEvent *);
+		void contentsMouseDoubleClickEvent(QMouseEvent *evt);
+		void contentsContextMenuEvent(QContextMenuEvent *);
 		
 	private slots:
 		// the following slots are used to gray out items in the menu
