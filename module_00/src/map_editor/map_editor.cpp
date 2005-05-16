@@ -162,7 +162,7 @@ void MapEditor::fileSaveAs()
 		if (answer == 0)
 		{
 			map->setFileName(fileName);
-//			updateRecentFiles(fileName);  <-- fix this ************************
+//			updateRecentFiles(fileName);  <-- FIXME
 			fileSave();
 			return;
 		} // save the file
@@ -352,4 +352,5 @@ void MapEditor::tileInit()
 	}
 
 	mapObject->SetMapTiles(map_tiles);
+	map->temp = tiles;		// FIXME: zOMG what a hack this is
 } // tileInit()

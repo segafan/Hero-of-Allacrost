@@ -17,20 +17,30 @@
 #ifndef TILESET_H
 #define TILESET_H
 
+#include <qcursor.h>
 #include <qiconview.h>
+#include <qpoint.h>
 
 namespace hoa_mapEd
 {
 
+/******************************************************************************
+ *
+ *  Class: Tileset
+ *
+ *  Inherits: QIconView
+ *
+ *  Description: This class displays map tiles as icons and implements drag
+ *				 and drop capability for these tiles.
+ *
+ *****************************************************************************/
 class Tileset : public QIconView
 {
-	//Q_OBJECT
 	public:
-		Tileset(QWidget * parent = 0, const char * name = 0, WFlags f = 0) :
+		Tileset(QWidget* parent = 0, const char* name = 0, WFlags f = 0) :
 			QIconView(parent, name, f) {}
 
-		// high-level drag and drop
-		QDragObject *dragObject();
+		QDragObject* dragObject();		// high-level drag and drop
 }; // class Tileset
 
 } // namespace hoa_mapEd

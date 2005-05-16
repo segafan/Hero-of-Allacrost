@@ -56,7 +56,8 @@ class MapEditor: public QMainWindow
 		// maximum number of recently used files to keep track of
 		// not sure why this is enum
 		enum { MAX_RECENTFILES = 5 };
-	
+
+		friend class MapGrid;	// needed for "painting" tiles
 	protected:
 		// Handles close and/or quit events, reimplemented from QMainWindow
 		virtual void closeEvent(QCloseEvent *);
@@ -67,7 +68,7 @@ class MapEditor: public QMainWindow
 		// the following slot is used to gray out items in file the menu
 		void fileMenuSetup();
 		
-		//void saveOptions();		// saves the list of most recently used files
+		//void saveOptions();	// saves the list of most recently used files
 
 		// the following slots are used in the file menu
 		void fileNew();
@@ -103,8 +104,8 @@ class MapEditor: public QMainWindow
 
 		QStatusBar *statBar;	// this is used to display messages
 	//	QStringList masterRecentFiles;	// list of recently used files
-		Tileset *tiles;		// iconview of tiles
-		MapGrid *map;		// current working map
+		Tileset *tiles;			// iconview of tiles
+		MapGrid *map;			// current working map
 		hoa_map::MapMode *mapObject;
 }; // class MapEditor
 

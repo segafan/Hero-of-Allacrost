@@ -19,6 +19,8 @@
 
 #include "tile.h"
 #include "map.h"
+#include "map_editor.h"
+#include "tileset.h"	// FIXME: needed for "OMG what a hack" in DoubleClick...
 
 #include <qcanvas.h>
 #include <qcheckbox.h>
@@ -53,7 +55,8 @@ class MapGrid: public QCanvasView
 		void setHeight(int height);	// sets the map's height in tiles (rows)
 		void setFileName(QString filename);	// sets the map's file name
 		void saveMap(QFile &);		// saves the map to a config file
-		void createGrid();		// creates grid lines on the map
+		void createGrid();			// creates grid lines on the map
+		Tileset* temp;				// FIXME: zOMG what a hack
 		
 	protected:
 		// I think these are protected
@@ -78,10 +81,10 @@ class MapGrid: public QCanvasView
 		void tileMenuEvaluate();
 		
 		// the following slots are used in the edit menu
-		void editUndo();	// undoes last action
-		void editRedo();	// redoes last action
-		void editClear();	// clears all items on the map
-		void editMode();	// sets the editting mode
+		void editUndo();		// undoes last action
+		void editRedo();		// redoes last action
+		void editClear();		// clears all items on the map
+//		void editMode();		// sets the editting mode
 		
 		// the following slots are used in the view menu
 		void viewToggleGrid();	// toggles the map's grid on or off
@@ -91,7 +94,7 @@ class MapGrid: public QCanvasView
 		void tileFlipVertical();
 		void tileRotateClockwise();
 		void tileRotateCounterClockwise();
-		void tileMode();	// sets the status of the tile
+		void tileMode();		// sets the status of the tile
 
 	private:
 		void getMapData();		// gets map height and width & loads into DOM
@@ -110,7 +113,7 @@ class MapGrid: public QCanvasView
 		QRadioButton *viewOccupied;
 		QRadioButton *viewNoWalk;
 
-		QVButtonGroup *properties;		// tile status button group (needed to gray it out)
+		QVButtonGroup *properties;			// tile status button group
 		QCheckBox *tileTreasure;
 		QCheckBox *tileEvent;
 		QCheckBox *tileOccupied;
@@ -129,7 +132,7 @@ class MapGrid: public QCanvasView
 		bool mapChanged;		// TRUE = map modified, FALSE otherwise
 		bool dragging;			// TRUE = something being dragged, else FALSE
 		bool gridOn;			// TRUE = grid is displayed, else FALSE
-		bool dragOn;			// TRUE = dragging is enabled, else painting
+		//bool dragOn;			// TRUE = dragging is enabled, else painting
 		bool walkOn;			// TRUE = walkable is set, else not-walkable
 }; // class MapGrid
 

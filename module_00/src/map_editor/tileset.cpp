@@ -18,8 +18,28 @@
 
 using namespace hoa_mapEd;
 
-QDragObject *Tileset::dragObject()
+/******************************************************************************
+ *
+ *  Function: dragObject
+ *
+ *  Inputs: none
+ *
+ *  Outputs: QImageDrag* imgDrag - object to drag, typecasted to QDragObject*
+ *
+ *  Description: This function implements high level drag and drop operations.
+ *				 It determines the desired object to drag from the QIconView.
+ *
+ *****************************************************************************/
+QDragObject* Tileset::dragObject()
 {
-	return new QImageDrag(currentItem()->pixmap()->convertToImage(), this);
-} // dragObject()
+	// creates an image to drag
+	QImageDrag *imgDrag = new QImageDrag(currentItem()->pixmap()
+		->convertToImage(), this);
+	
+	// creates the image user will see whilst dragging
+	imgDrag->setPixmap(*(currentItem()->pixmap()),
+		QPoint(currentItem()->pixmapRect().width() / 2,
+			currentItem()->pixmapRect().height() / 2));
 
+	return imgDrag;
+} // dragObject()

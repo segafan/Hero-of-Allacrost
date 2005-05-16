@@ -27,7 +27,7 @@ MapGrid::MapGrid(QWidget *parent, const QString &name)
 	setAcceptDrops(TRUE);	// enable drag 'n' drop
 	dragging = FALSE;		// FIXME: currently unneeded
 	setCanvas(NULL);		// don't have canvas until "New Map..." is selected
-	dragOn = true;			// default value
+	//dragOn = true;			// default value
 	walkOn = true;			// default value
 	tileProperties = 0;		// default value (tiles are walkable)
 	viewProperty = 0;		// default value (viewing mode off)
@@ -155,8 +155,8 @@ void MapGrid::contentsMousePressEvent(QMouseEvent *evt)
 {
 	if (evt->button() == Qt::LeftButton)
 	{
-		if (dragOn)
-		{
+//		if (dragOn)
+//		{
 			QPoint p = inverseWorldMatrix().map(evt->pos());
 			QCanvasItemList l = canvas()->collisions(p);
 			for (QCanvasItemList::Iterator it = l.begin(); it != l.end(); ++it)
@@ -172,7 +172,7 @@ void MapGrid::contentsMousePressEvent(QMouseEvent *evt)
 					return;
 				} // only want to move a tile, nothing else
 			} // go through the list of possible items to move
-		} // not painting tiles means we want to start moving them instead
+//		} // not painting tiles means we want to start moving them instead
 	} // only make the left mouse button useful/active
 
 	moving = 0;
@@ -207,7 +207,45 @@ void MapGrid::contentsMouseReleaseEvent(QMouseEvent *evt)
 
 void MapGrid::contentsMouseDoubleClickEvent(QMouseEvent *evt)
 {
-	// FIXME: implement painting with this
+    if (canvas() != NULL)
+	{
+/* FIXME FIXME FIXME OMG what a hack this is FIXME FIXME FIXME
+		std::cerr << "Blah" << std::endl;
+		if (((MapEditor*) parent()) == NULL)
+			std::cerr << "parent() is NULL" << std::endl;
+		std::cerr << "1" << std::endl;
+		if (((MapEditor*) parent())->tiles == NULL)
+			std::cerr << "tiles is NULL" << std::endl;
+		std::cerr << "2" << std::endl;
+		//((MapEditor*) parent())->tiles->printBlah();
+		if (temp->count() != 0)
+			std::cerr << "count() isn't 0" << std::endl;
+		std::cerr << "3" << std::endl;
+		if (temp->currentItem()->pixmap() == NULL)
+			std::cerr << "pixmap() is NULL" << std::endl;
+		std::cerr << "4" << std::endl;
+		if (temp->currentItem()->pixmap()->convertToImage() == NULL)
+			std::cerr << "convertToImage() is NULL" << std::endl;
+		std::cerr << "5" << std::endl;
+*/		QImage img = temp->currentItem()->pixmap()->convertToImage();
+		Tile *tile = new Tile(img, canvas());
+		QPoint point = inverseWorldMatrix().map(evt->pos());
+		
+		// the division here will effectively snap the tile to the grid
+		// yes, it looks dumb. is there another way to round down to the
+		// nearest multiple of 32?
+		tile->move((point.x() + horizontalScrollBar()->value())
+					/ TILE_WIDTH * TILE_WIDTH,
+				   (point.y() + verticalScrollBar()->value())
+					/ TILE_HEIGHT * TILE_HEIGHT);
+		tile->setZ(0);		// sets height of tile TODO: create a menu option
+		// tile->tileInfo.lower_layer = 1; FIXME: perhaps not needed here
+		tile->tileInfo.upper_layer = -1; // TEMPORARY!!! FIXME: this neither
+		tile->tileInfo.event_mask = tileProperties;
+		tile->show();
+		canvas()->update();
+		mapChanged = TRUE;
+	} // better have a canvas first
 } // contentsMouseDoubleClickEvent(...)
 
 void MapGrid::contentsContextMenuEvent(QContextMenuEvent *)
@@ -284,7 +322,7 @@ void MapGrid::editMenuSetup()
 		editMenu->setItemEnabled(clearID, false);
 	else
 		editMenu->setItemEnabled(clearID, true);
-
+/*
 	QVButtonGroup *mode = new QVButtonGroup("Editting Mode", editMenu);
 	QRadioButton *drag = new QRadioButton("Drag", mode);
 	QRadioButton *paint = new QRadioButton("Paint", mode);
@@ -296,7 +334,7 @@ void MapGrid::editMenuSetup()
 
 	connect(drag, SIGNAL(toggled(bool)), this, SLOT(editMode()));
 	editMenu->insertSeparator();
-	editMenu->insertItem(mode);
+	editMenu->insertItem(mode);*/
 } // editMenuSetup()
 
 void MapGrid::viewMenuSetup()
@@ -512,7 +550,7 @@ void MapGrid::editClear()
 
 	canvas()->update();
 } // editClear()
-
+/*
 void MapGrid::editMode()
 {
 	std::cerr << "changing the editting mode... but not really since painting is not yet implemented ;)" << std::endl;
@@ -521,7 +559,7 @@ void MapGrid::editMode()
 	else
 		dragOn = true;
 } // editMode()
-
+*/
 void MapGrid::viewToggleGrid()
 {
 	// toggles the grid on or off
