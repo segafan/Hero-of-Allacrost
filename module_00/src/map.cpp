@@ -20,7 +20,7 @@
 #include "audio.h"
 #include "video.h"
 #include "data.h"
-//#include "battle.h"
+#include "battle.h"
 //#include "menu.h"
 
 using namespace std;
@@ -30,7 +30,7 @@ using namespace hoa_audio;
 using namespace hoa_video;
 using namespace hoa_engine;
 using namespace hoa_data;
-//using namespace hoa_battle;
+using namespace hoa_battle;
 //using namespace hoa_menu;
 
 namespace hoa_map {
@@ -737,8 +737,8 @@ void MapMode::UpdatePlayerExplore() {
 					
 					// >>>Then once the script animation finishes, put this code at the end of the script<<<
 					// Decide what enemies/enemy group to encounter here...?
-					// BattleMode *BAM = new BattleMode(TEH_ENEMIEZ!!!);
-					// ModeManager->Push(BAM);
+					BattleMode *BM = new BattleMode();
+					ModeManager->Push(BM);
 					return;
 				}
 			}

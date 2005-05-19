@@ -234,6 +234,9 @@ void BootMode::UpdateLoadMenu() {
 			// Load the list of saved games
 			AudioManager->PlaySound(boot_sound[0], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // confirm sound
 			// Load a vector of the saved games here
+			BattleMode *BM = new BattleMode();
+			ModeManager->Pop();
+			ModeManager->Push(BM);
 		}
 		
 		return;
