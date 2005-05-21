@@ -294,7 +294,7 @@ void GameData::LoadMap(hoa_map::MapMode *map_mode, int new_map_id) {
 		cout << "LUA ERROR: Could not load "<< filename << " :: " << lua_tostring(l_stack, -1) << endl;
 	
 	// Setup some global map options (explanations are in map.h)
-	map_mode->map_state = GetGlobalInt("map_state");	
+	map_mode->map_state.push_back(GetGlobalInt("map_state"));	
 	map_mode->random_encounters = GetGlobalBool("random_encounters");
 	map_mode->encounter_rate = GetGlobalInt("encounter_rate");
 	// this one will change:
@@ -391,15 +391,16 @@ void GameData::LoadMap(hoa_map::MapMode *map_mode, int new_map_id) {
 		for (int j = 0; j < map_mode->col_count; j++) {
 			t.lower_layer = lower[c];
 			t.upper_layer = upper[c];
-			t.event_mask = emask[c];
+			t.properties = emask[c];
 			map_mode->map_layers[i].push_back(t);
 			c++;
 		}
 	}
 	
 	// load Claudius
-	map_mode->player_sprite = new PlayerSprite();
-	map_mode->object_layer.push_back(map_mode->player_sprite);
+	// >>> SNIPE: See the new definition for the PlayerSprite constructor
+	//map_mode->player_sprite = new PlayerSprite();
+	//map_mode->object_layer.push_back(map_mode->player_sprite);
 }
 
 
