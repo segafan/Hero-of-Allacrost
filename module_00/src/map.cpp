@@ -13,14 +13,15 @@
  *	a map (like a town or a dungeon). This includes handling tile images, sprite images, and events that
  *	occur on the map.
  *
- */
-	
+ */ 
+ 
 #include <iostream>
 #include "map.h"
 #include "audio.h"
 #include "video.h"
+//#include "global.h"
 #include "data.h"
-#include "battle.h"
+//#include "battle.h"
 //#include "menu.h"
 
 using namespace std;
@@ -30,48 +31,58 @@ using namespace hoa_audio;
 using namespace hoa_video;
 using namespace hoa_engine;
 using namespace hoa_data;
-using namespace hoa_battle;
+//using namespace hoa_battle;
 //using namespace hoa_menu;
 
 namespace hoa_map {
 
 // ****************************************************************************
-// ************************ ObjectLayer Class Functions ***********************
+// *********************** ObjectLayer Class Functions ************************
 // ****************************************************************************
 
-
-ObjectLayer::ObjectLayer() {
+ObjectLayer::ObjectLayer(unsigned int type, int row, int col) {
+	object_type = type;
+	row_pos = row;
+	col_pos = col;
 	VideoManager = hoa_video::GameVideo::_GetReference();
 }
 
-bool ObjectLayer::operator>(const ObjectLayer& obj) const {
-	return (row_pos > obj.row_pos);
+
+
+ObjectLayer::~ObjectLayer() {}
+
+// ****************************************************************************
+// *********************** MobileObject Class Functions ***********************
+// ****************************************************************************
+
+MobileObject::MobileObject(float ss, unsigned int type, int row, int col) : 
+	ObjectLayer(type, row, col) {
+	step_speed = ss;
+	step_count = 0;
+	status = 0;
 }
 
-bool ObjectLayer::operator<(const ObjectLayer& obj) const {
-	return (row_pos < obj.row_pos);
-}
 
-bool ObjectLayer::operator>=(const ObjectLayer& obj) const {
-	return (row_pos >= obj.row_pos);
-}
 
-bool ObjectLayer::operator<=(const ObjectLayer& obj) const {
-	return (row_pos <= obj.row_pos);
-}
-
-bool ObjectLayer::operator==(const ObjectLayer& obj) const {
-	return (row_pos == obj.row_pos);
-}
-
-bool ObjectLayer::operator!=(const ObjectLayer& obj) const {
-	return (row_pos != obj.row_pos);
-}
-
+MobileObject::~MobileObject() {}
 
 // ****************************************************************************
 // ************************ MapSprite Class Functions *************************
 // ****************************************************************************
+
+MapSprite::MapSprite(unsigned int stat, float ss, unsigned int type, int row, int col) :
+	MobileObject(ss, type, row, col) {
+	status = stat;
+}
+
+
+
+MapSprite::~MapSprite() {
+	for (int i = 0; i < frames.size(); i++) {
+		VideoManager->DeleteImage(frames[i]);
+	}
+}
+
 
 
 int MapSprite::FindFrame() {
@@ -82,22 +93,22 @@ int MapSprite::FindFrame() {
 		case SOUTH:
 		case SOUTH_SW:
 		case SOUTH_SE:
-			if (step_count < (0.25 * TILE_STEPS)) {
+			if (step_count < (0.25 * step_speed)) {
 				draw_frame = DOWN_STANDING;
 			}
-			else if (step_count < (0.50 * TILE_STEPS)) {
+			else if (step_count < (0.50 * step_speed)) {
 				if (status & STEP_SWAP) 
 					draw_frame = DOWN_RSTEP1;
 				else 
 					draw_frame = DOWN_LSTEP1;
 			}
-			else if (step_count < (0.75 * TILE_STEPS)) {
+			else if (step_count < (0.75 * step_speed)) {
 				if (status & STEP_SWAP) 
 					draw_frame = DOWN_RSTEP2;
 				else 
 					draw_frame = DOWN_LSTEP2;
 			}
-			else { // (step_count < TILE_STEPS) == true
+			else { // (step_count < step_speed) == true
 				if (status & STEP_SWAP) 
 					draw_frame = DOWN_RSTEP3;
 				else 
@@ -107,22 +118,22 @@ int MapSprite::FindFrame() {
 		case NORTH:
 		case NORTH_NW:
 		case NORTH_NE:
-			if (step_count < (0.25 * TILE_STEPS)) {
+			if (step_count < (0.25 * step_speed)) {
 				draw_frame = UP_STANDING;
 			}
-			else if (step_count < (0.50 * TILE_STEPS)) {
+			else if (step_count < (0.50 * step_speed)) {
 				if (status & STEP_SWAP) 
 					draw_frame = UP_RSTEP1;
 				else 
 					draw_frame = UP_LSTEP1;
 			}
-			else if (step_count < (0.75 * TILE_STEPS)) {
+			else if (step_count < (0.75 * step_speed)) {
 				if (status & STEP_SWAP) 
 					draw_frame = UP_RSTEP2;
 				else 
 					draw_frame = UP_LSTEP2;
 			}
-			else { // (step_count < TILE_STEPS) == true
+			else { // (step_count < step_speed) == true
 				if (status & STEP_SWAP) 
 					draw_frame = UP_RSTEP3;
 				else 
@@ -132,22 +143,22 @@ int MapSprite::FindFrame() {
 		case WEST:
 		case WEST_NW:
 		case WEST_SW:
-			if (step_count < (0.25 * TILE_STEPS)) {
+			if (step_count < (0.25 * step_speed)) {
 				draw_frame = LEFT_STANDING;
 			}
-			else if (step_count < (0.50 * TILE_STEPS)) {
+			else if (step_count < (0.50 * step_speed)) {
 				if (status & STEP_SWAP) 
 					draw_frame = LEFT_RSTEP1;
 				else 
 					draw_frame = LEFT_LSTEP1;
 			}
-			else if (step_count < (0.75 * TILE_STEPS)) {
+			else if (step_count < (0.75 * step_speed)) {
 				if (status & STEP_SWAP) 
 					draw_frame = LEFT_RSTEP2;
 				else 
 					draw_frame = LEFT_LSTEP2;
 			}
-			else { // (step_count < TILE_STEPS) == true
+			else { // (step_count < step_speed) == true
 				if (status & STEP_SWAP) 
 					draw_frame = LEFT_RSTEP3;
 				else 
@@ -157,22 +168,22 @@ int MapSprite::FindFrame() {
 		case EAST:
 		case EAST_NE:
 		case EAST_SE:
-			if (step_count < (0.25 * TILE_STEPS)) {
+			if (step_count < (0.25 * step_speed)) {
 				draw_frame = RIGHT_STANDING;
 			}
-			else if (step_count < (0.50 * TILE_STEPS)) {
+			else if (step_count < (0.50 * step_speed)) {
 				if (status & STEP_SWAP) 
 					draw_frame = RIGHT_RSTEP1;
 				else 
 					draw_frame = RIGHT_LSTEP1;
 			}
-			else if (step_count < (0.75 * TILE_STEPS)) {
+			else if (step_count < (0.75 * step_speed)) {
 				if (status & STEP_SWAP) 
 					draw_frame = RIGHT_RSTEP2;
 				else 
 					draw_frame = RIGHT_LSTEP2;
 			}
-			else { // (step_count < TILE_STEPS) == true
+			else { // (step_count < step_speed) == true
 				if (status & STEP_SWAP) 
 					draw_frame = RIGHT_RSTEP3;
 				else 
@@ -199,36 +210,36 @@ void MapSprite::Draw(MapFrame& mf) {
 	if (status & IN_MOTION) {
 		switch (status & FACE_MASK) {
 			case EAST:
-				x_pos -= (float)(TILE_STEPS - step_count) / (float)TILE_STEPS;
+				x_pos -= (step_speed - step_count) / step_speed;
 				break;
 			case WEST:
-				x_pos += (float)(TILE_STEPS - step_count) / (float)TILE_STEPS;
+				x_pos += (step_speed - step_count) / step_speed;
 				break;
 			case NORTH:
-				y_pos -= (float)(TILE_STEPS - step_count) / (float)TILE_STEPS;
+				y_pos -= (step_speed - step_count) / step_speed;
 				break;
 			case SOUTH:
-				y_pos += (float)(TILE_STEPS - step_count) / (float)TILE_STEPS;
+				y_pos += (step_speed - step_count) / step_speed;
 				break;
 			case NORTH_NW:
 			case WEST_NW:
-				x_pos += (float)(TILE_STEPS - step_count) / (float)TILE_STEPS;
-				y_pos -= (float)(TILE_STEPS - step_count) / (float)TILE_STEPS;
+				x_pos += (step_speed - step_count) / step_speed;
+				y_pos -= (step_speed - step_count) / step_speed;
 				break;
 			case SOUTH_SW:
 			case WEST_SW:
-				x_pos += (float)(TILE_STEPS - step_count) / (float)TILE_STEPS;
-				y_pos += (float)(TILE_STEPS - step_count) / (float)TILE_STEPS;
+				x_pos += (step_speed - step_count) / step_speed;
+				y_pos += (step_speed - step_count) / step_speed;
 				break;
 			case NORTH_NE:
 			case EAST_NE:
-				x_pos -= (float)(TILE_STEPS - step_count) / (float)TILE_STEPS;
-				y_pos -= (float)(TILE_STEPS - step_count) / (float)TILE_STEPS;
+				x_pos -= (step_speed - step_count) / step_speed;
+				y_pos -= (step_speed - step_count) / step_speed;
 				break;
 			case SOUTH_SE:
 			case EAST_SE:
-				x_pos -= (float)(TILE_STEPS - step_count) / (float)TILE_STEPS;
-				y_pos += (float)(TILE_STEPS - step_count) / (float)TILE_STEPS;
+				x_pos -= (step_speed - step_count) / step_speed;
+				y_pos += (step_speed - step_count) / step_speed;
 				break;
 		}
 	}
@@ -241,20 +252,26 @@ void MapSprite::Draw(MapFrame& mf) {
 }
 
 
+
+// ****************************************************************************
+// *********************** VirtualFocus Class Functions **********************
+// ****************************************************************************
+
+
+
+
+
+
+
 // ****************************************************************************
 // ************************ PlayerSprite Class Functions **********************
 // ****************************************************************************
 
 
 // NOTE: This is all temporary code here
-PlayerSprite::PlayerSprite() {
+PlayerSprite::PlayerSprite(unsigned int stat, float ss, unsigned int type, int row, int col) :
+	MapSprite(stat, ss, type, row, col) {
 	cerr << "DEBUG: PlayerSprite's constructor invoked." << endl;
-	object_type = PLAYER_SPRITE;
-	row_pos = 16;
-	col_pos = 12;
-	step_count = 0;
-	step_speed = NORMAL_SPEED;
-	status = (VISIBLE | SOUTH);
 	
 	ImageDescriptor imd;
 	imd.width = 1;
@@ -319,12 +336,8 @@ PlayerSprite::PlayerSprite() {
 
 
 
-// The destructor frees all of the loaded images
 PlayerSprite::~PlayerSprite() {
 	cerr << "DEBUG: PlayerSprite's destructor invoked." << endl;
-	for (int i = 0; i < frames.size(); i++) {
-		VideoManager->DeleteImage(frames[i]);
-	}
 }
 
 
@@ -333,15 +346,11 @@ PlayerSprite::~PlayerSprite() {
 // ****************************************************************************
 
 // NOTE: This is all temporary code here
-NPCSprite::NPCSprite(string name) {
+NPCSprite::NPCSprite(string name, int d_time, unsigned int stat, float ss, unsigned int type, int row, int col) :
+	MapSprite(stat, ss, type, row, col) {
 	cerr << "DEBUG: NPCSprite's constructor invoked." << endl;
-	object_type = NPC_SPRITE;
-	row_pos = 4;
-	col_pos = 6;
-	step_count = 0;
-	step_speed = 40;
-	status = (VISIBLE | SOUTH);
-	DelayedMovement(250);
+	wait_time = 0;
+	delay_time = d_time;
 	
 	string path_name = "img/sprite/" + name;
 	
@@ -407,13 +416,12 @@ NPCSprite::NPCSprite(string name) {
 }
 
 
-// The destructor frees all of the loaded images
+
 NPCSprite::~NPCSprite() {
 	cerr << "DEBUG: NPCSprite's destructor invoked." << endl;
-	for (int i = 0; i < frames.size(); i++) {
-		VideoManager->DeleteImage(frames[i]);
-	}
 }
+
+
 
 // ****************************************************************************
 // ************************** MapMode Class Functions *************************
@@ -492,7 +500,7 @@ void MapMode::TempCreateMap() {
 		tile_frames.push_back(tf);
 	}
 	
-	// Setup our final animated frame tile
+	// Setup the final animated frame tile
 	TileFrame *tmp;
 	tf = new TileFrame;
 	tf->frame = 15;
@@ -526,7 +534,7 @@ void MapMode::TempCreateMap() {
 	
 	
 	
-	// Setup our image map
+	// Setup the image map
 	MapTile tmp_tile;
 	tmp_tile.upper_layer = -1; // No upper layer in this test
 	for (int r = 0; r < row_count; r++) {
@@ -534,19 +542,24 @@ void MapMode::TempCreateMap() {
 		for (int c = 0; c < col_count; c++) {
 			tmp_tile.lower_layer = (RandomNum(0, 16 - 1)); // Build our lower layer from random tiles
 			if (tmp_tile.lower_layer == 15)
-				tmp_tile.event_mask = NOT_WALKABLE; // We can not walk on the water tiles
+				tmp_tile.properties = Z_LVL1; // We can not walk on the water tiles
 			else
-				tmp_tile.event_mask = 0x0000;
+				tmp_tile.properties = 0x0000;
 			map_layers[r].push_back(tmp_tile);
 		}
 	} 
 	
 	// Load player sprite and rest of map objects
-	player_sprite = new PlayerSprite();
-	object_layer.push_back(player_sprite);
+	PlayerSprite *p_sprite = new PlayerSprite((CONTROLABLE | VISIBLE | SOUTH | Z_LVL1), NORMAL_SPEED, 
+		PLAYER_SPRITE, 16, 12);
+	object_layer.push_back(p_sprite);
 	
-	NPCSprite *npc_sprite = new NPCSprite("laila");
+	NPCSprite *npc_sprite = new NPCSprite("laila", 50, (VISIBLE | EAST | Z_LVL1), NORMAL_SPEED, NPC_SPRITE, 
+		4, 6);
 	object_layer.push_back(npc_sprite);
+	
+	// If the focused_object is ever NULL, the game will exit with a seg fault :(
+	focused_object = p_sprite;
 }
 
 
@@ -555,17 +568,19 @@ MapMode::MapMode(int new_map_id) {
 	cerr << "DEBUG: MapMode's constructor invoked." << endl;
 	
 	mtype = map_m;
-	map_state = EXPLORE;
+	map_state.push_back(EXPLORE);
 	map_id = new_map_id;
 	
 	// Load the map from the Lua data file
-	DataManager->LoadMap(this, map_id);
+	//DataManager->LoadMap(this, map_id);
 	
 	// Temporary function that creates a random map
-	//TempCreateMap();
+	TempCreateMap();
 	
 	// Setup the coordinate system
 	VideoManager->SetCoordSys(-SCREEN_COLS/2, SCREEN_COLS/2, -SCREEN_ROWS/2, SCREEN_ROWS/2, 1);
+	
+	virtual_sprite = new MobileObject(VERY_FAST_SPEED, VIRTUAL_SPRITE, 20, 20);
 }
 
 
@@ -573,12 +588,12 @@ MapMode::MapMode(int new_map_id) {
 MapMode::~MapMode() {
 	cerr << "DEBUG: MapMode's destructor invoked." << endl;
 	
-	// Delete all of our tile images
+	// Delete all of the tile images
 	for (int i = 0; i < tile_count; i++) {
 		VideoManager->DeleteImage(map_tiles[i]);
 	}
 	
-	// Free up all our frame linked lists
+	// Free up all the frame linked lists
 	TileFrame *tf_del;
 	TileFrame *tf_tmp;
 	for (int i = 0; i < tile_frames.size(); i++) {
@@ -595,31 +610,174 @@ MapMode::~MapMode() {
 		tile_frames[i] = NULL;
 	}
 	
-	// Delete all of our objects
-	list<ObjectLayer*>::iterator obj_iter;
-	for(obj_iter = object_layer.begin(); obj_iter != object_layer.end(); obj_iter++) {
-		delete(*obj_iter);
+	// Delete all of the objects
+	for (int i = 0; i < object_layer.size(); i++) {
+		delete(object_layer[i]);
 	}
 }
 
 
 
 // Returns whether a sprite can move to a tile or not
-inline bool MapMode::TileMoveable(int row, int col) {
+inline bool MapMode::TileMoveable(int row, int col, unsigned int z_occupied) {
 	// First check that the object in question isn't trying to move outside the map boundaries
 	if (row < 1 || col < 0 || row >= row_count || col >= col_count) {
 		return false;
 	}
 	
-	// Check if the tile is not walkable or occupied by another object
-	if (map_layers[row][col].event_mask & (NOT_WALKABLE | OCCUPIED)) {
+	// Check if the tile is not walkable or occupied by another object on the same z level
+	if (map_layers[row][col].properties & z_occupied) {
 		return false;
 	}
 	
-	//cout << "Moving to new tile: {" << col << ',' << row << '}' << endl;
 	return true;
 }
 
+
+// Moves the sprite in direction, if possible. Returns true if move was successful.
+void MapMode::SpriteMove(int direction, MobileObject *sprite) {
+	int r_check, c_check; // Variables for holding the position of a tile to check.
+	
+	// Set the sprite's facing direction and tile coordinates it wishes to move to
+	switch (direction) {
+		case MOVE_NORTH:
+			sprite->status = (sprite->status & ~FACE_MASK) | NORTH;
+			r_check = sprite->row_pos - 1;
+			c_check = sprite->col_pos;
+			break;
+		case MOVE_SOUTH:
+			sprite->status = (sprite->status & ~FACE_MASK) | SOUTH;
+			r_check = sprite->row_pos + 1;
+			c_check = sprite->col_pos;
+			break;
+		case MOVE_WEST:
+			sprite->status = (sprite->status & ~FACE_MASK) | WEST;
+			r_check = sprite->row_pos;
+			c_check = sprite->col_pos - 1;
+			break;
+		case MOVE_EAST:
+			sprite->status = (sprite->status & ~FACE_MASK) | EAST;
+			r_check = sprite->row_pos;
+			c_check = sprite->col_pos + 1;
+			break;
+		case MOVE_NW:
+			if (sprite->status & (NORTH_NW | NORTH | NORTH_NE | EAST_NE | EAST | EAST_SE)) 
+				sprite->status = (sprite->status & ~FACE_MASK) | NORTH_NW;
+			else
+				sprite->status = (sprite->status & ~FACE_MASK) | WEST_NW;
+			r_check = sprite->row_pos - 1;
+			c_check = sprite->col_pos - 1;
+			break;
+		case MOVE_SW:
+			if (sprite->status & (SOUTH_SW | SOUTH | SOUTH_SE | EAST_SE | EAST | EAST_NE))
+				sprite->status = (sprite->status & ~FACE_MASK) | SOUTH_SW;
+			else
+				sprite->status = (sprite->status & ~FACE_MASK) | WEST_SW;
+			r_check = sprite->row_pos + 1;
+			c_check = sprite->col_pos - 1;
+			break;
+		case MOVE_NE:
+			if (sprite->status & (NORTH_NE | NORTH | NORTH_NW | WEST_NW | WEST | WEST_SW))
+				sprite->status = (sprite->status & ~FACE_MASK) | NORTH_NE;
+			else
+				sprite->status = (sprite->status & ~FACE_MASK) | EAST_NE;
+			r_check = sprite->row_pos - 1;
+			c_check = sprite->col_pos + 1;
+			break;
+		case MOVE_SE:
+			if (sprite->status & (SOUTH_SE | SOUTH | SOUTH_SW | WEST_SW | WEST | WEST_NW))
+				sprite->status = (sprite->status & ~FACE_MASK) | SOUTH_SE;
+			else
+				sprite->status = (sprite->status & ~FACE_MASK) | EAST_SE;
+			r_check = sprite->row_pos + 1;
+			c_check = sprite->col_pos + 1;
+			break;
+	}
+	
+	// If the tile is moveable, set the motion flag and update the sprite coordinates
+	if (TileMoveable(r_check, c_check, (sprite->status & Z_MASK))) {
+		sprite->status |= IN_MOTION;
+		map_layers[sprite->row_pos][sprite->col_pos].properties &= ~(sprite->status & Z_MASK);
+		sprite->row_pos = r_check;
+		sprite->col_pos = c_check;
+		// TODO: Check for map event here, change sprite's Z_LVL if necessary
+		map_layers[sprite->row_pos][sprite->col_pos].properties |= (sprite->status & Z_MASK);
+	}
+}
+
+
+// Processes user update and camera movement. Only called when the map is focused on a virtual sprite
+void MapMode::UpdateVirtualSprite() {
+	bool user_move;
+	int move_direction;
+	
+	// *********** (!) Handle updates for the player sprite when in motion ************
+	if (virtual_sprite->status & IN_MOTION) {
+		virtual_sprite->step_count += (float)time_elapsed / virtual_sprite->step_speed;
+		
+		// Check whether we've reached a new tile
+		if (virtual_sprite->step_count >= virtual_sprite->step_speed) { 
+			virtual_sprite->step_count -= virtual_sprite->step_speed;
+			virtual_sprite->status &= ~IN_MOTION; // IN_MOTION may get set again shortly
+		}
+	}
+	
+	// ********* (2) Handle updates for the player sprite when not in motion **********
+	if (!(virtual_sprite->status & IN_MOTION)) {
+		
+		// Handle west, northwest, and southwest movement	
+		if (InputManager->LeftState() || InputManager->LeftPress()) {
+			user_move = true;
+			if (InputManager->UpState() || InputManager->RightPress()) {
+				move_direction = MOVE_NW;
+			}
+			else if (InputManager->DownState() || InputManager->DownPress()) {
+				move_direction = MOVE_SW;
+			}
+			else {
+				move_direction = MOVE_WEST;
+			}
+		}
+		
+		// Handle east, northeast, and southeast movement
+		else if (InputManager->RightState() || InputManager->RightPress()) {
+			user_move = true;
+			if (InputManager->UpState() || InputManager->UpPress())
+				move_direction = MOVE_NE;
+			else if (InputManager->DownState() || InputManager->DownPress())
+				move_direction = MOVE_SE;
+			else
+				move_direction = MOVE_EAST;
+		}
+		
+		// Handle north movement
+		else if (InputManager->UpState() || InputManager->UpPress()) {
+			user_move = true;
+			move_direction = MOVE_NORTH;
+		}
+		
+		// Handle south movement
+		else if (InputManager->DownState() || InputManager->DownPress()) {
+			user_move = true;
+			move_direction = MOVE_SOUTH;
+		}
+		
+		// Now check if we can actualy move the sprite to the tile the user requested to move to
+		if (user_move) {
+			SpriteMove(move_direction, virtual_sprite); // The move will always be successful here
+			// A user can't move and do another command, so exit
+		}
+	}
+		
+	if (InputManager->CancelPress()) { 
+		// TEMP: Switch focus back to player sprite
+		cout << "Set focused object from Virtual sprite back to Player sprite" << endl;
+		if (object_layer[0]->object_type == PLAYER_SPRITE)
+			focused_object = dynamic_cast<PlayerSprite*>(object_layer[0]);
+		else
+			focused_object = dynamic_cast<PlayerSprite*>(object_layer[1]);
+	}
+}
 
 
 // Simple functions for the MapEditor code
@@ -665,7 +823,7 @@ void MapMode::Update(Uint32 new_time_elapsed) {
 	}
 	
 	// ***************** (2) Update the map based on what state we are in **************
-	switch (map_state) {
+	switch (map_state.back()) {
 		case EXPLORE:
 			UpdateExploreState();
 			break;
@@ -678,45 +836,54 @@ void MapMode::Update(Uint32 new_time_elapsed) {
 	}
 	
 	// ************ (3) Sort the objects so they are in the correct draw order ********
-	object_layer.sort();
+	for (int i = 1; i < object_layer.size(); i++) {
+		ObjectLayer *tmp = object_layer[i];
+		int j = i - 1;
+		while (j >= 0 && (object_layer[j])->row_pos > tmp->row_pos) {
+			object_layer[j+1] = object_layer[j];
+			j--;
+		}
+		object_layer[j+1] = tmp;
+	}
 }
 
 
 
 // Updates the game status when MapMode is in the 'explore' state
 void MapMode::UpdateExploreState() {
-	UpdatePlayerExplore(); // Updates the player's sprite and processes user input
-	
 	// Update all game objects (??? Or only non-playable sprites ???)
-	list<ObjectLayer*>::iterator obj_iter;
-	for(obj_iter = object_layer.begin(); obj_iter != object_layer.end(); obj_iter++ ) {
-		switch ((*obj_iter)->object_type) {
+	for (int i = 0; i < object_layer.size(); i++) {
+		switch ((object_layer[i])->object_type) {
 			case PLAYER_SPRITE:
-				//UpdatePlayerExplore(dynamic_cast<PlayerSprite*>(*obj_iter));
+				UpdatePlayerExplore(dynamic_cast<PlayerSprite*>(object_layer[i]));
 				break;
 			case NPC_SPRITE:
-				UpdateNPCExplore(dynamic_cast<NPCSprite*>(*obj_iter));
+				UpdateNPCExplore(dynamic_cast<NPCSprite*>(object_layer[i]));
 				break;
 			default:
 				cout << "Object not a sprite!" << endl;
 				break;
 		}
 	}
+	
+	if (focused_object == virtual_sprite) 
+		UpdateVirtualSprite();
 }
 
 
 // Updates the player sprite and processes user input while in the 'explore' state
-void MapMode::UpdatePlayerExplore() {
-	int r_check, c_check;   // Variables for holding the position of a tile to check.
+void MapMode::UpdatePlayerExplore(PlayerSprite *player_sprite) {
+	int r_check, c_check;   // Variables for saving tile coordinates
+	int move_direction;     // The direction the sprite may be set to move in
 	bool user_move = false; // Set to true if the user attempted to move the player sprite
 	
 	// *********** (!) Handle updates for the player sprite when in motion ************
 	if (player_sprite->status & IN_MOTION) {
-		player_sprite->step_count += (float)time_elapsed / (float)player_sprite->step_speed;
+		player_sprite->step_count += (float)time_elapsed / player_sprite->step_speed;
 		
 		// Check whether we've reached a new tile
-		if (player_sprite->step_count >= TILE_STEPS) { 
-			player_sprite->step_count -= TILE_STEPS;
+		if (player_sprite->step_count >= player_sprite->step_speed) { 
+			player_sprite->step_count -= player_sprite->step_speed;
 			
 			player_sprite->status &= ~IN_MOTION; // IN_MOTION may get set again shortly
 			player_sprite->status ^= STEP_SWAP; // This flips the step_swap bit. Bit-wise XOR
@@ -737,13 +904,17 @@ void MapMode::UpdatePlayerExplore() {
 					
 					// >>>Then once the script animation finishes, put this code at the end of the script<<<
 					// Decide what enemies/enemy group to encounter here...?
-					BattleMode *BM = new BattleMode();
-					ModeManager->Push(BM);
+					// BattleMode *BAM = new BattleMode(TEH_ENEMIEZ!!!);
+					// ModeManager->Push(BAM);
 					return;
 				}
 			}
 		}
 	}
+	
+	// If the player sprite is not currently the focused object, we have nothing more to do here
+	if (player_sprite != focused_object)
+		return;
 	
 	// ********* (2) Handle updates for the player sprite when not in motion **********
 	if (!(player_sprite->status & IN_MOTION)) {
@@ -751,88 +922,43 @@ void MapMode::UpdatePlayerExplore() {
 		// Handle west, northwest, and southwest movement	
 		if (InputManager->LeftState() || InputManager->LeftPress()) {
 			user_move = true;
-			if (InputManager->UpState() || InputManager->RightPress()) { // Moving northwest
-				r_check = player_sprite->row_pos - 1;
-				c_check = player_sprite->col_pos - 1;
-				
-				if (player_sprite->status & (NORTH_NW | NORTH | NORTH_NE | EAST_NE | EAST | EAST_SE))
-					player_sprite->status = (player_sprite->status & RESET_FACE) | NORTH_NW;
-				else
-					player_sprite->status = (player_sprite->status & RESET_FACE) | WEST_NW; 
+			if (InputManager->UpState() || InputManager->RightPress()) {
+				move_direction = MOVE_NW;
 			}
-			
-			else if (InputManager->DownState() || InputManager->DownPress()) { // Moving southwest
-				r_check = player_sprite->row_pos + 1;
-				c_check = player_sprite->col_pos - 1;
-				
-				if (player_sprite->status & (SOUTH_SW | SOUTH | SOUTH_SE | EAST_SE | EAST | EAST_NE))
-					player_sprite->status = (player_sprite->status & RESET_FACE) | SOUTH_SW;
-				else
-					player_sprite->status = (player_sprite->status & RESET_FACE) | WEST_SW;	
+			else if (InputManager->DownState() || InputManager->DownPress()) {
+				move_direction = MOVE_SW;
 			}
-			
-			else { // Moving west
-				r_check = player_sprite->row_pos;
-				c_check = player_sprite->col_pos - 1;
-				player_sprite->status = (player_sprite->status & RESET_FACE) | WEST;
+			else {
+				move_direction = MOVE_WEST;
 			}
 		}
 		
 		// Handle east, northeast, and southeast movement
 		else if (InputManager->RightState() || InputManager->RightPress()) {
 			user_move = true;
-			if (InputManager->UpState() || InputManager->UpPress()) { // Moving northeast
-				r_check = player_sprite->row_pos - 1;
-				c_check = player_sprite->col_pos + 1;
-				
-				if (player_sprite->status & (NORTH_NE | NORTH | NORTH_NW | WEST_NW | WEST | WEST_SW))
-					player_sprite->status = (player_sprite->status & RESET_FACE) | NORTH_NE;
-				else
-					player_sprite->status = (player_sprite->status & RESET_FACE) | EAST_NE;
-			}
-			
-			else if (InputManager->DownState() || InputManager->DownPress()) { // Moving southeast
-				r_check = player_sprite->row_pos + 1;
-				c_check = player_sprite->col_pos + 1;
-				
-				if (player_sprite->status & (SOUTH_SE | SOUTH | SOUTH_SW | WEST_SW | WEST | WEST_NW))
-					player_sprite->status = (player_sprite->status & RESET_FACE) | SOUTH_SE;
-				else
-					player_sprite->status = (player_sprite->status & RESET_FACE) | EAST_SE;		
-			}
-			
-			else { // Moving east
-				r_check = player_sprite->row_pos;
-				c_check = player_sprite->col_pos + 1;
-				player_sprite->status = (player_sprite->status & RESET_FACE) | EAST;
-			}
+			if (InputManager->UpState() || InputManager->UpPress())
+				move_direction = MOVE_NE;
+			else if (InputManager->DownState() || InputManager->DownPress())
+				move_direction = MOVE_SE;
+			else
+				move_direction = MOVE_EAST;
 		}
 		
 		// Handle north movement
 		else if (InputManager->UpState() || InputManager->UpPress()) {
 			user_move = true;
-			r_check = player_sprite->row_pos - 1;
-			c_check = player_sprite->col_pos;
-			player_sprite->status = (player_sprite->status & RESET_FACE) | NORTH;
+			move_direction = MOVE_NORTH;
 		}
 		
 		// Handle south movement
 		else if (InputManager->DownState() || InputManager->DownPress()) {
 			user_move = true;
-			r_check = player_sprite->row_pos + 1;
-			c_check = player_sprite->col_pos;
-			player_sprite->status = (player_sprite->status & RESET_FACE) | SOUTH;
+			move_direction = MOVE_SOUTH;
 		}
 		
 		// Now check if we can actualy move the sprite to the tile the user requested to move to
 		if (user_move) {
-			if (TileMoveable(r_check, c_check)) {
-				player_sprite->status |= IN_MOTION; // Set motion flag
-				map_layers[player_sprite->row_pos][player_sprite->col_pos].event_mask &= ~OCCUPIED;
-				player_sprite->row_pos = r_check;
-				player_sprite->col_pos = c_check;
-				map_layers[player_sprite->row_pos][player_sprite->col_pos].event_mask |= OCCUPIED;
-			}
+			SpriteMove(move_direction, player_sprite);
 			// Regardless of whether the move was successful or not, refuse to process additional commands
 			//  from the user.
 			return; 
@@ -842,6 +968,9 @@ void MapMode::UpdatePlayerExplore() {
 	if (InputManager->MenuPress()) { // Push MenuMode onto the stack
 		//MenuMode *MenuM = new MenuMode();
 		//ModeManager->Push(MenuM);
+		// TEMP: Switch the focused object to a virtual sprite
+		cout << "Set focused object from Player sprite to Virtual sprite" << endl;
+		focused_object = virtual_sprite;
 		return;
 	}
 	
@@ -874,74 +1003,37 @@ void MapMode::UpdatePlayerExplore() {
 
 // Updates the NPC sprites while in the 'explore' state
 void MapMode::UpdateNPCExplore(NPCSprite *npc) {
-	if (!(npc->status & IN_MOTION)) {
+	
+	if (npc->status & IN_MOTION) { 
+		npc->step_count += (float)time_elapsed / npc->step_speed;
+		
+		// Check whether we've reached a new tile
+		if (npc->step_count >= npc->step_speed) {
+			npc->step_count -= npc->step_speed;
+			npc->status &= ~IN_MOTION;
+			npc->status ^= STEP_SWAP; // This flips the step_swap bit. Bit-wise XOR
+			
+			if (npc->delay_time != 0) { // Stop the sprite for now and set a new wait time
+				npc->wait_time = GaussianValue(npc->delay_time, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
+				npc->step_count = 0;
+			}
+			else { // Keep the sprite moving
+				SpriteMove(RandomNum(0,7), npc); 
+			}
+		}
+		return;
+	}
+
+	else { // Sprite is not in motion
 		// Process either scripted movement or random movement
 		if (npc->wait_time > 0) {
 			npc->wait_time -= time_elapsed; // Decrement the wait timer
 		}
 		
 		else {
-			npc->status &= IN_MOTION;
-			switch (RandomNum(0, 3)) {
-				case 0:
-					npc->status = (npc->status & RESET_FACE) | NORTH;
-					if (TileMoveable(npc->row_pos - 1, npc->col_pos)) {
-						npc->status |= IN_MOTION;
-						map_layers[npc->row_pos][npc->col_pos].event_mask &= ~OCCUPIED;
-						npc->row_pos = npc->row_pos - 1;
-						map_layers[npc->row_pos][npc->col_pos].event_mask |= OCCUPIED;
-					}
-					break;
-				case 1:
-					npc->status = (npc->status & RESET_FACE) | SOUTH;
-					if (TileMoveable(npc->row_pos + 1, npc->col_pos)) {
-						npc->status |= IN_MOTION;
-						map_layers[npc->row_pos][npc->col_pos].event_mask &= ~OCCUPIED;
-						npc->row_pos = npc->row_pos + 1;
-						map_layers[npc->row_pos][npc->col_pos].event_mask |= OCCUPIED;
-					}
-					break;
-				case 2:
-					npc->status = (npc->status & RESET_FACE) | WEST;
-					if (TileMoveable(npc->row_pos, npc->col_pos - 1)) {
-						npc->status |= IN_MOTION;
-						map_layers[npc->row_pos][npc->col_pos].event_mask &= ~OCCUPIED;
-						npc->col_pos = npc->col_pos - 1;
-						map_layers[npc->row_pos][npc->col_pos].event_mask |= OCCUPIED;
-					}
-					break;
-				case 3:
-					npc->status = (npc->status & RESET_FACE) | EAST;
-					if (TileMoveable(npc->row_pos, npc->col_pos + 1)) {
-						npc->status |= IN_MOTION;
-						map_layers[npc->row_pos][npc->col_pos].event_mask &= ~OCCUPIED;
-						npc->col_pos = npc->col_pos + 1;
-						map_layers[npc->row_pos][npc->col_pos].event_mask |= OCCUPIED;
-					}
-					break;
-				default: cout << "wtf!?" << endl; 
-					break;
-			}
-			
-			if (npc->delay_time != 0) {
-				npc->wait_time = GaussianValue(npc->delay_time, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
-				cout << "Set new wait time!!! " << npc->wait_time << endl;
-			}
-			
-			return;
+			npc->status &= ~IN_MOTION;
+			SpriteMove(RandomNum(0,7), npc); 
 		}
-	}
-	
-	// Update sprites that are in motion
-	npc->step_count += (float)time_elapsed / (float)npc->step_speed;
-	
-	// Check whether we've reached a new tile
-	if (npc->step_count >= TILE_STEPS) { 
-		npc->step_count = 0;
-		//npc->step_count -= TILE_STEPS;
-		
-		npc->status &= ~IN_MOTION;
-		npc->status ^= STEP_SWAP; // This flips the step_swap bit. Bit-wise XOR
 	}
 }
 
@@ -958,7 +1050,7 @@ void MapMode::UpdateDialogueState() {
 				// Send new dialogue to text renderer
 			//}
 			//else {
-				map_state = EXPLORE;
+				map_state.push_back(EXPLORE);
 			//}
 			print_done = false; // Reset our print_done so that dialogue can be printed next time
 		}
@@ -986,7 +1078,7 @@ void MapMode::UpdateScriptState() {
 void MapMode::GetDrawInfo(MapFrame& mf) {
 	// ************* (1) Calculate the default drawing positions for the tiles ****************
 	
-	// We draw from the top left corner
+	// Draw from the top left corner
 	mf.c_pos = -SCREEN_COLS / 2 - 0.5;
 	mf.r_pos = SCREEN_ROWS / 2 - 0.5;
 	
@@ -995,54 +1087,54 @@ void MapMode::GetDrawInfo(MapFrame& mf) {
 	mf.r_draw = SCREEN_ROWS + 1;
 	
 	// These are the default starting positions
-	mf.c_start = player_sprite->col_pos - SCREEN_COLS / 2;
-	mf.r_start = player_sprite->row_pos - SCREEN_ROWS / 2;
+	mf.c_start = focused_object->col_pos - SCREEN_COLS / 2;
+	mf.r_start = focused_object->row_pos - SCREEN_ROWS / 2;
 	
 	// *********************** (2) Calculate the drawing information **************************
 	
-	if (player_sprite->status & IN_MOTION) {
-		if (player_sprite->step_count <= (TILE_STEPS / 2)) {
+	if (focused_object->status & IN_MOTION) {
+		if (focused_object->step_count <= (focused_object->step_speed / 2)) {
 			// We are not more than half-way moving west, so make adjustments
-			if (player_sprite->status & (WEST | NORTH_NW | WEST_NW | SOUTH_SW | WEST_SW)) { 
-				mf.c_pos += (float)player_sprite->step_count / (float)TILE_STEPS;
+			if (focused_object->status & (WEST | NORTH_NW | WEST_NW | SOUTH_SW | WEST_SW)) { 
+				mf.c_pos += focused_object->step_count / focused_object->step_speed;
 				mf.c_start++;
 			}
 			// We are not more than half-way moving east, so make adjustments
-			else if (player_sprite->status & (EAST | NORTH_NE | EAST_NE | SOUTH_SE | EAST_SE)) {
-				mf.c_pos -= (float)player_sprite->step_count / (float)TILE_STEPS;
+			else if (focused_object->status & (EAST | NORTH_NE | EAST_NE | SOUTH_SE | EAST_SE)) {
+				mf.c_pos -= focused_object->step_count / focused_object->step_speed;
 				mf.c_start--;
 			}
 			
 			// We are not more than half-way moving north, so make adjustments
-			if (player_sprite->status & (NORTH | WEST_NW | NORTH_NW | EAST_NE | NORTH_NE)) { 
-				mf.r_pos -= (float)player_sprite->step_count / (float)TILE_STEPS;
+			if (focused_object->status & (NORTH | WEST_NW | NORTH_NW | EAST_NE | NORTH_NE)) { 
+				mf.r_pos -= focused_object->step_count / focused_object->step_speed;
 				mf.r_start++;
 			}
 			// We are not more than half-way moving south, so make adjustments
-			else if (player_sprite->status & (SOUTH | WEST_SW | SOUTH_SW | EAST_SE | SOUTH_SE)) {
-				mf.r_pos += (float)player_sprite->step_count / (float)TILE_STEPS;
+			else if (focused_object->status & (SOUTH | WEST_SW | SOUTH_SW | EAST_SE | SOUTH_SE)) {
+				mf.r_pos += focused_object->step_count / focused_object->step_speed;
 				mf.r_start--;
 			}
 		}
 		
 		// NOTE: Draw code should never see a step_count >= 32. Update() takes care of that
-		else { // (player_sprite->step_count > (TILE_STEPS / 2))
+		else { // (focused_object->step_count > (TILE_STEPS / 2))
 			// We are at least half-way moving west, so make adjustments
-			if (player_sprite->status & (WEST | NORTH_NW | WEST_NW | SOUTH_SW | WEST_SW)) {
-				mf.c_pos -= (float)(TILE_STEPS - player_sprite->step_count) / (float)TILE_STEPS;
+			if (focused_object->status & (WEST | NORTH_NW | WEST_NW | SOUTH_SW | WEST_SW)) {
+				mf.c_pos -= (focused_object->step_speed - focused_object->step_count) / focused_object->step_speed;
 			}
 			// We are at least half-way moving east, so make adjustments
-			else if (player_sprite->status & (EAST | NORTH_NE | EAST_NE | SOUTH_SE | EAST_SE)) {
-				mf.c_pos += (float)(TILE_STEPS - player_sprite->step_count) / (float)TILE_STEPS;
+			else if (focused_object->status & (EAST | NORTH_NE | EAST_NE | SOUTH_SE | EAST_SE)) {
+				mf.c_pos += (focused_object->step_speed - focused_object->step_count) / focused_object->step_speed;
 			}
 			
 			// We are at least half-way moving north, so make adjustments
-			if (player_sprite->status & (NORTH | WEST_NW | NORTH_NW | EAST_NE | NORTH_NE)) {
-				mf.r_pos += (float)(TILE_STEPS - player_sprite->step_count) / (float)TILE_STEPS;
+			if (focused_object->status & (NORTH | WEST_NW | NORTH_NW | EAST_NE | NORTH_NE)) {
+				mf.r_pos += (focused_object->step_speed - focused_object->step_count) / focused_object->step_speed;
 			}
 			// We are at least half-way moving south, so make adjustments
-			else if (player_sprite->status & (SOUTH | WEST_SW | SOUTH_SW | EAST_SE | SOUTH_SE)) {
-				mf.r_pos -= (float)(TILE_STEPS - player_sprite->step_count) / (float)TILE_STEPS;
+			else if (focused_object->status & (SOUTH | WEST_SW | SOUTH_SW | EAST_SE | SOUTH_SE)) {
+				mf.r_pos -= (focused_object->step_speed - focused_object->step_count) / focused_object->step_speed;
 			}
 		}
 	}
@@ -1052,11 +1144,11 @@ void MapMode::GetDrawInfo(MapFrame& mf) {
 	// Usually the map "moves around the player", but when we encounter the edges of the map we 
 	// need the player to "move around the map".
 	
-	if (mf.c_start < 0) { // We exceed the far-left side of the map
+	if (mf.c_start < 0) { // Exceeds the far-left side of the map
 		mf.c_start = 0;
 		mf.c_pos = -SCREEN_COLS / 2;
 	}
-	else if (mf.c_start > col_count - SCREEN_COLS - 1) { // We exceed the far-right side of the map
+	else if (mf.c_start > col_count - SCREEN_COLS - 1) { // Exceeds the far-right side of the map
 		mf.c_start = col_count - SCREEN_COLS;
 		mf.c_pos = -SCREEN_COLS / 2;
 	}
@@ -1066,16 +1158,16 @@ void MapMode::GetDrawInfo(MapFrame& mf) {
 		mf.c_draw--;
 	}
 	
-	if (mf.r_start < 0) { // We exceed the far-north side of the map
+	if (mf.r_start < 0) { // Exceeds the far-north side of the map
 		mf.r_start = 0;
 		mf.r_pos = SCREEN_ROWS / 2 - 1;
 	}
-	else if (mf.r_start > row_count - SCREEN_ROWS - 1) { // We exceed the far-south side of the map
+	else if (mf.r_start > row_count - SCREEN_ROWS - 1) { // Exceeds the far-south side of the map
 		mf.r_start = row_count - SCREEN_ROWS;
 		mf.r_pos = SCREEN_ROWS / 2 - 1;
 	}
 	
-	// If our row position is exactly on the top of the screen, we draw one less row of tiles
+	// If the row position is exactly on the top of the screen, draw one less row of tiles
 	if (mf.r_pos == SCREEN_ROWS / 2 - 1) {
 		mf.r_draw--;
 	}
@@ -1105,9 +1197,8 @@ void MapMode::Draw() {
 	
 	// ************** (2) Draw the Object Layer *************
 	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-	list<ObjectLayer*>::iterator obj_iter;
-	for(obj_iter = object_layer.begin(); obj_iter != object_layer.end(); obj_iter++ ) {
-		(*obj_iter)->Draw(mf);
+	for (int i = 0; i < object_layer.size(); i++) {
+		(object_layer[i])->Draw(mf);
 	}
 	 
 	// ************** (3) Draw the Upper Layer *************
@@ -1126,7 +1217,7 @@ void MapMode::Draw() {
 	}
 	
 	// ************** (4) Draw the Dialoge box, if needed *************
-	// if (map_state = DIALOGUE) {
+	// if (map_state.back() = DIALOGUE) {
 	// }
 	return; 
 }

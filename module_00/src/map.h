@@ -15,15 +15,25 @@
  *
  */
  
+/* >>>>> STUFF TO IMPLEMENT (05/13/2005) <<<<<
+ * 
+ * > Fix drawing error with map objects
+ * > 8-layer 'heights' with individual collision detection
+ * > MapMode(int rows, int cols) constructor for MapEditor
+ * > Create map state stack instead of single map state variable
+ * > Ability for map to follow *any* object, not just the player sprite
+ * > "Virtual sprite" class for allowing an un-drawable focal point for the map
+ *
+*/ 
+ 
 #ifndef __MAP_HEADER__
 #define __MAP_HEADER__
 
 #include <string>
 #include <vector>
-#include <list>
 #include "defs.h"
-#include "utils.h"
 #include "engine.h"
+#include "utils.h"
 
 namespace hoa_map {
 
@@ -34,17 +44,7 @@ namespace local_map {
 
 // ************************ MAP CONSTANTS ****************************
 
-// These are elapsed time dividers used for sprite movement
-const int VERY_SLOW_SPEED = 20;
-const int SLOW_SPEED      = 16;
-const int NORMAL_SPEED    = 12;
-const int FAST_SPEED      = 8;
-const int VERY_FAST_SPEED = 4;
-
-// How many 'steps' a sprite has to take to move to the next tile
-const int TILE_STEPS = 32;
-
-// The rate at which tiles animated, in ms
+// The rate at which tiles are animated, in ms
 const int ANIMATION_RATE = 300;
 
 // The number of rows and columns of tiles that compose the screen
@@ -56,43 +56,70 @@ const int EXPLORE      = 0x00000001;
 const int DIALOGUE     = 0x00000002;
 const int SCRIPT_EVENT = 0x00000004;
 
+// Each object (sprites, etc.) has a z value that store's it's "height" on the map
+const unsigned int Z_LVL1 = 0x00000001;
+const unsigned int Z_LVL2 = 0x00000002;
+const unsigned int Z_LVL3 = 0x00000004;
+const unsigned int Z_LVL4 = 0x00000008;
+const unsigned int Z_LVL5 = 0x00000010;
+const unsigned int Z_LVL6 = 0x00000020;
+const unsigned int Z_LVL7 = 0x00000040;
+const unsigned int Z_LVL8 = 0x00000080;
+const unsigned int Z_MASK = 0x000000FF;
+
 // *********************** OBJECT CONSTANTS **************************
 
 // Different object idenfitiers for use in the object layer
-const int PLAYER_SPRITE  = 1;
-const int NPC_SPRITE     = 2;
-const int ENEMY_SPRITE   = 3;
-const int STATIC_OBJECT  = 4;
-const int DYNAMIC_OBJECT = 5;
-
-// Each object (including sprites) has a "z" value to deterime it's height.
-//  The default object height is 0x8 and can range between 0x0 and 0xF (a range of 16 values)
-const int DEFAULT_Z = 0x000000008;
+const int PLAYER_SPRITE  = 0x00000001;
+const int NPC_SPRITE     = 0x00000002;
+const int ENEMY_SPRITE   = 0x00000004;
+const int VIRTUAL_SPRITE  = 0x00000008;
+const int STATIC_OBJECT  = 0x00000010;
+const int DYNAMIC_OBJECT = 0x00000020;
 
 // ********************** SPRITE CONSTANTS **************************
 
-// A series of constants used for sprite status.
-const int STEP_SWAP  = 0x00000001; // Tracks sprite step frame (right or left foot step)
-const int IN_MOTION  = 0x00000002; // This is for detecting whether the sprite is currently moving
-const int UPDATEABLE = 0x00000004; // If this bit is set to zero, we do not update the sprite
-const int VISIBLE    = 0x00000008; // If this bit is set to zero, we do not draw the sprite
+// Note: The lower 8 bits for sprites use the Z_LEVEL_X constants
+
+// These are common speeds for sprite movement
+const float VERY_SLOW_SPEED = 30;
+const float SLOW_SPEED      = 25;
+const float NORMAL_SPEED    = 20;
+const float FAST_SPEED      = 15;
+const float VERY_FAST_SPEED = 10;
 
 // A series of constants used for sprite directions. (NORTH_NW = sprite facing north, moving NW)
-const int NORTH    = 0x00000010;
-const int SOUTH    = 0x00000020;
-const int WEST     = 0x00000040;
-const int EAST     = 0x00000080;
-const int NORTH_NW = 0x00000100;
-const int WEST_NW  = 0x00000200;
-const int NORTH_NE = 0x00000400;
-const int EAST_NE  = 0x00000800;
-const int SOUTH_SW = 0x00001000;
-const int WEST_SW  = 0x00002000;
-const int SOUTH_SE = 0x00004000;
-const int EAST_SE  = 0x00008000;
+const unsigned int NORTH    = 0x00000100;
+const unsigned int SOUTH    = 0x00000200;
+const unsigned int WEST     = 0x00000400;
+const unsigned int EAST     = 0x00000800;
+const unsigned int NORTH_NW = 0x00001000;
+const unsigned int WEST_NW  = 0x00002000;
+const unsigned int NORTH_NE = 0x00004000;
+const unsigned int EAST_NE  = 0x00008000;
+const unsigned int SOUTH_SW = 0x00010000;
+const unsigned int WEST_SW  = 0x00020000;
+const unsigned int SOUTH_SE = 0x00040000;
+const unsigned int EAST_SE  = 0x00080000;
 
-const int FACE_MASK  = 0x0000FFF0; // Used in bit-wise ops to get the sprite direction
-const int RESET_FACE = 0xFFFF000F; // Used to reset the direction the sprite is facing
+const unsigned int FACE_MASK  = 0x000FFF00; // Used in bit-wise ops to get the sprite direction
+
+// These are used by the MapSprite::SpriteMove() function
+const int MOVE_NORTH = 0;
+const int MOVE_SOUTH = 1;
+const int MOVE_WEST  = 2;
+const int MOVE_EAST  = 3;
+const int MOVE_NW    = 4;
+const int MOVE_SW    = 5;
+const int MOVE_NE    = 6;
+const int MOVE_SE    = 7;
+
+// A series of constants used for sprite status.
+const unsigned int STEP_SWAP   = 0x00100000; // Tracks sprite step frame (right or left foot step)
+const unsigned int IN_MOTION   = 0x00200000; // This is for detecting whether the sprite is currently moving
+const unsigned int UPDATEABLE  = 0x00400000; // If this bit is set to zero, we do not update the sprite
+const unsigned int VISIBLE     = 0x00800000; // If this bit is set to zero, we do not draw the sprite
+const unsigned int CONTROLABLE = 0x01000000; // If this bit is set, the sprite can be controlled by the player
 
 // These constants are used for indexing a standard sprite animation frame vector
 const int DOWN_STANDING  = 0;
@@ -126,17 +153,22 @@ const int RIGHT_RSTEP3   = 23;
 
 // ********************** TILE CONSTANTS **************************
 
-// Constants used for detecting different tile properties
-const int INC_HEIGHT   = 0x00000001; // Increments the height of any object that steps on it
-const int DEC_HEIGHT   = 0x00000002; // Decrements the height of any object that steps on it
-const int NOT_WALKABLE = 0x00000004; // Duh.
-const int TREASURE     = 0x00000008; // A map treasure is located at this tile
-const int EVENT        = 0x00000010; // An event occurs when player steps onto this tile
-const int OCCUPIED     = 0x00000020; // Occupied by a sprite or other map object
+// Sets the z level of the object that steps on it
+const unsigned int SET_Z_LVL1 = 0x00000100;
+const unsigned int SET_Z_LVL2 = 0x00000200;
+const unsigned int SET_Z_LVL3 = 0x00000400;
+const unsigned int SET_Z_LVL4 = 0x00000800;
+const unsigned int SET_Z_LVL5 = 0x00001000;
+const unsigned int SET_Z_LVL6 = 0x00002000; 
+const unsigned int SET_Z_LVL7 = 0x00004000;
+const unsigned int SET_Z_LVL8 = 0x00008000;
 
-// The next two features are in debate. They will incur greater overhead, but provide more functionality.
-//const int LL_HIDDEN    = 0x00000040; // Don't draw the lower layer for this tile
-//const int UL_HIDDEN    = 0x00000080; // Don't draw the upper layer for this tile
+const unsigned int SET_Z_MASK = 0x0000FF00;
+
+const unsigned int INC_Z_LEVEL   = 0x00010000; // Increments the z level of the object on this tile
+const unsigned int DEC_Z_LEVEL   = 0x00020000; // Decrements the z level of the object on this tile
+const unsigned int TREASURE      = 0x00040000; // A map treasure is located at this tile
+const unsigned int EVENT         = 0x00080000; // An event occurs when player steps onto this tile
 
 
 
@@ -166,13 +198,13 @@ public:
 	>>>members<<<
 		int lower_layer: index to a lower layer tile in the MapMode tile_frames vector
 		int upper_layer: index to an upper layer tile in the MapMode tile_frames vector
-		unsigned int event_mask: a bit-wise mask indicating various tile properties
+		unsigned int properties: a bit-wise mask indicating various tile properties
 ******************************************************************************/
 class MapTile {
 public:
 	int lower_layer;
 	int upper_layer;
-	unsigned int event_mask;
+	unsigned int properties;
 };
 
 
@@ -196,10 +228,10 @@ public:
 	ObjectLayer - Abstract class for all map objects
 		
 	>>>members<<<
-		int object_type: an identifier type for the object
+		unsigned int object_type: an identifier type for the object
 		int row_pos: the map row position for the bottom left corner of the object
 		int col_pos: the map col position for the bottom left corner of the object
-		char ver_pos: determines the "vertical" position of an object on a map
+		unsigned int status: a bit-mask for setting and detecting various conditions on the sprite
 	>>>functions<<<
 		virtual void Draw(local_map::MapFrame& mf):
 			A purely virtual function for drawing the object, if it even needs to be drawn
@@ -212,61 +244,83 @@ public:
  *****************************************************************************/
 class ObjectLayer {
 protected:
-	int object_type;
+	unsigned char object_type;
 	int row_pos;
 	int col_pos;
-	char ver_pos;
 	hoa_video::GameVideo *VideoManager;
 	
 	friend class MapMode; // Necessary so that the MapMode class can access and change these data members
 public:
-	ObjectLayer();
-	~ObjectLayer() {}
-	
-	bool operator>(const ObjectLayer& obj) const;
-	bool operator<(const ObjectLayer& obj) const;
-	bool operator>=(const ObjectLayer& obj) const;
-	bool operator<=(const ObjectLayer& obj) const;
-	bool operator==(const ObjectLayer& obj) const;
-	bool operator!=(const ObjectLayer& obj) const;
-	
+	ObjectLayer(unsigned int type, int row, int col);
+	~ObjectLayer();
 	virtual void Draw(local_map::MapFrame& mf) = 0;
 };
 
 
 
 /******************************************************************************
-	MapSprite - Abstract class for all character, NPC, enemy, and other sprites
+	MobileObject - A moveable, controllable object on the map
 		
 	>>>members<<<
-		float step_speed: determines how fast the sprite transitions between tiles
+		float step_speed: determines how fast the object can move around the map
 		float step_count: a counter used for tracking movement
-		unsigned int status: a bit-mask for setting and detecting various conditions on the sprite
+		unsigned int status: bit-mask containing various state information about the object
 	
 	>>>functions<<<
-		void Draw(local_map::MapFrame& mf):
-			A function for determining if a sprite needs to be drawn, and if so, drawing the sprite
-		int FindFrame():
-			Called by the Draw() function to figure out the sprite frame that should be drawn
 	
 	>>>notes<<<
-		1) TO DO: Add functionality in Draw() to determine if a sprite should be drawn or not
+		1) This class can be used to create an invisible "camera" that the map focuses on.
+		
+		2) A single, unique object of this class is created for every map, regardless of 
+			whether or not it is used.
  *****************************************************************************/
-class MapSprite : public ObjectLayer {
+class MobileObject : public ObjectLayer {
+private:
+	friend class MapMode;
+	
 protected:
 	float step_speed;
 	float step_count;
 	unsigned int status;
-	std::vector<hoa_video::ImageDescriptor> frames;
-	
-	void Draw(local_map::MapFrame& mf);
-	friend class MapMode; // Necessary so that the MapMode class can access and change these data members
-private:
-	int FindFrame();
+public:
+	MobileObject(float ss, unsigned int type, int row, int col);
+	~MobileObject();
+	void Draw(local_map::MapFrame& mf) {}
 };
 
 
+/******************************************************************************
+	MapSprite - Abstract class for all character, NPC, enemy, and other sprites
+		
+	>>>members<<<
+		vector <> frames: holds ImageDescriptors for all the sprite frame images
+	
+	>>>functions<<<
+		int FindFrame():
+			Called by the Draw() function to figure out the sprite frame that should be drawn
+		void Draw(local_map::MapFrame& mf):
+			A function for determining if a sprite needs to be drawn, and if so, drawing the sprite
+	
+	>>>notes<<<
+		1) TO DO: Add functionality in Draw() to determine if a sprite should be drawn or not
 
+ *****************************************************************************/
+class MapSprite : public MobileObject {
+private:
+	int FindFrame();
+	friend class MapMode;
+protected:
+	std::vector<hoa_video::ImageDescriptor> frames;
+	
+	void Draw(local_map::MapFrame& mf);
+public:
+	MapSprite(unsigned int stat, float ss, unsigned int type, int row, int col);
+	~MapSprite();
+};
+
+ 
+ 
+ 
 /******************************************************************************
 	PlayerSprite - Manages the user-controllable player sprite on the map.
  
@@ -278,9 +332,9 @@ private:
 						
  *****************************************************************************/
 class PlayerSprite : public MapSprite {
-	friend class MapMode; // Necessary so that the MapMode class can access and change these data members
+	friend class MapMode;
 public:
-	PlayerSprite();
+	PlayerSprite(unsigned int stat, float ss, unsigned int type, int row, int col);
 	~PlayerSprite();
 };
 
@@ -288,26 +342,29 @@ public:
 
 /******************************************************************************
 	NPCSprite Class
-		This class is for managing the images needed to display and animate sprites on maps.
+		This class is for managing the images needed to display and animate sprites on maps
  
 	>>>members<<<
 		int wait_time: the number of milliseconds to wait till the next tile transition
 		int delay_time: the average time to wait between tile transitions
 	
-	>>>functions<<<		 
+	>>>functions<<<
+		void DelayedMovement(int average_time): 
+			Sets the mean time between sprite tile transitions (zero is constant movement)
  
 	>>>notes<<<
 						
  *****************************************************************************/
 class NPCSprite : public MapSprite {
-	friend class MapMode; // Necessary so that the MapMode class can access and change these data members
+private:
+	friend class MapMode;
 	//vector<bool, std::string> sprite_dialogue; LATER
 	int wait_time;
 	int delay_time;
+	
 public:
-	NPCSprite(std::string name);
+	NPCSprite(std::string name, int d_time, unsigned int stat, float ss, unsigned int type, int row, int col);
 	~NPCSprite();
-	void ConstantMovement() { delay_time = 0; }
 	void DelayedMovement(int average_time) { delay_time = average_time; }
 };
 
@@ -341,7 +398,7 @@ public:
 // class StaticObject : public ObjectLayer {
 //	 ImageDescriptor frame;
 //	 
-//	 friend class MapMode; // Necessary so that the MapMode class can access and change these data members
+//	 friend class MapMode;
 // public:
 //	 StaticObject();
 //	 ~StaticObject();
@@ -363,7 +420,7 @@ public:
 // class DynamicObject : public ObjectLayer {
 //	 std::vector<ImageDescriptor> frames;
 //	 
-//	 friend class MapMode; // Necessary so that the MapMode class can access and change these data members
+//	 friend class MapMode;
 // public:
 //	 DynamicObject();
 //	 ~DynamicObject();
@@ -381,7 +438,7 @@ public:
 	>>>members<<<
 	 int map_id: a unique ID number for each map object
 	 string mapname: the name of the map, also the location name in menu mode
-	 unsigned int map_state: indicates what state the map is in (explore, dialogue, script, etc)
+	 vector<unsigned int> map_state: indicates what state the map is in (explore, dialogue, script, etc)
 	 int animation_counter: millisecond counter for use in tile animation
 	 
 	 int tile_count: the number of tile images used in the map, not counting individual animation tiles
@@ -391,10 +448,17 @@ public:
 	 bool random_encounters: a boolean indicating whether the player may encounter random foes
 	 int encouter_rate: the mean number of steps a player takes until they encounter a random foe
 	 int steps_till_encounter: the number of steps remaining until the next encounter
+	 
+	 MobileObject *focused_object: the object that the map camera is focused on
+	 MobileObject *virtual_sprite: serves as an invisible focal point for the camera
  
 	>>>functions<<< 
 	bool TileMoveable(int row, int col):
 		Determines if the tile given by the row arguments is free to move to
+	void MoveSprite(MobileObject *sprite, int direction):
+		Will move a sprite to a new tile and, if successful, change all necessary sprite and tile properties
+	void UpdateVirtualSprite():
+		Called if the focused object is a virtual sprite. Handles user input and virtual sprite movement
 	void UpdateExploreState():
 		When the map is in the explore state, this function is called to update the game
 	void UpdateDialogueState():
@@ -426,7 +490,7 @@ private:
 	friend class hoa_data::GameData;
 	
 	int map_id;
-	unsigned int map_state;
+	std::vector<unsigned int> map_state;
 	int animation_counter;
 	Uint32 time_elapsed;
 	
@@ -440,8 +504,9 @@ private:
 	
 	std::vector<std::vector<MapTile> > map_layers;
 	std::vector<TileFrame*> tile_frames;
-	std::list<ObjectLayer*> object_layer;
-	PlayerSprite *player_sprite;
+	std::vector<ObjectLayer*> object_layer;
+	MobileObject *focused_object;
+	MobileObject *virtual_sprite;
 	
 	std::vector<hoa_video::ImageDescriptor> map_tiles;	
 	std::vector<hoa_audio::MusicDescriptor> map_music;
@@ -449,12 +514,13 @@ private:
 	
 //	 vector<MapEvent> map_events;
 //	 vector<Enemy> map_enemies;
-//	 vector<EnemyGroup> m_enemy_groups;
 	
-	bool TileMoveable(int row, int col);
+	bool TileMoveable(int row, int col, unsigned int z_occupied);
+	void SpriteMove(int direction, MobileObject *sprite);
+	void UpdateVirtualSprite();
 	
 	void UpdateExploreState();
-	void UpdatePlayerExplore();
+	void UpdatePlayerExplore(PlayerSprite *player_sprite);
 	void UpdateNPCExplore(NPCSprite *npc);
 	
 	void UpdateDialogueState();
@@ -468,6 +534,7 @@ private:
 public: 
 	std::string mapname;
 	MapMode(int new_map_id);
+	MapMode(int rows, int cols) { row_count = rows; col_count = cols; }
 	~MapMode();
 	
 	std::vector<std::vector<MapTile> > GetMapLayers();
