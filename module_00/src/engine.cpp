@@ -331,49 +331,49 @@ void GameInput::KeyEventHandler(SDL_KeyboardEvent *key_event) {
 		// Note: a switch-case statement won't work here because Key.up is not an 
 		// integer value the compiler will whine and cry about it ;_;
 		if (key_event->keysym.sym == Key.up) {
-			if (ENGINE_DEBUG) cout << " up key pressed." << endl;
+			//if (ENGINE_DEBUG) cout << " up key pressed." << endl;
 			up_state = true;
 			up_press = true;
 			return;
 		}
 		else if (key_event->keysym.sym == Key.down) {
-			if (ENGINE_DEBUG) cout << " down key pressed." << endl;
+			//if (ENGINE_DEBUG) cout << " down key pressed." << endl;
 			down_state = true;
 			down_press = true;
 			return;
 		}
 		else if (key_event->keysym.sym == Key.left) {
-			if (ENGINE_DEBUG) cout << " left key pressed." << endl;
+			//if (ENGINE_DEBUG) cout << " left key pressed." << endl;
 			left_state = true;
 			left_press = true;
 			return;
 		}
 		else if (key_event->keysym.sym == Key.right) {
-			if (ENGINE_DEBUG) cout << " right key pressed." << endl;
+			//if (ENGINE_DEBUG) cout << " right key pressed." << endl;
 			right_state = true;
 			right_press = true;
 			return;
 		}
 		else if (key_event->keysym.sym == Key.confirm) {
-			if (ENGINE_DEBUG) cout << " confirm key pressed." << endl;
+			//if (ENGINE_DEBUG) cout << " confirm key pressed." << endl;
 			confirm_state = true;
 			confirm_press = true;
 			return;
 		}
 		else if (key_event->keysym.sym == Key.cancel) {
-			if (ENGINE_DEBUG) cout << " cancel key pressed." << endl;
+			//if (ENGINE_DEBUG) cout << " cancel key pressed." << endl;
 			cancel_state = true;
 			cancel_press = true;
 			return;
 		}
 		else if (key_event->keysym.sym == Key.menu) {
-			if (ENGINE_DEBUG) cout << " menu key pressed." << endl;
+			//if (ENGINE_DEBUG) cout << " menu key pressed." << endl;
 			menu_state = true;
 			menu_press = true;
 			return;
 		}
 		else if (key_event->keysym.sym == Key.pause) {
-			if (ENGINE_DEBUG) cout << " pause key pressed." << endl;
+			//if (ENGINE_DEBUG) cout << " pause key pressed." << endl;
 			// Don't pause if we are in BootMode, QuitMode
 			if (ModeManager->GetGameType() == boot_m || ModeManager->GetGameType() == quit_m) {
 				return;
@@ -396,43 +396,43 @@ void GameInput::KeyEventHandler(SDL_KeyboardEvent *key_event) {
 			return;
 		
 		if (key_event->keysym.sym == Key.up) {
-			if (ENGINE_DEBUG) cout << " up key released." << endl;
+			//if (ENGINE_DEBUG) cout << " up key released." << endl;
 			up_state = false;
 			up_release = true;
 			return;
 		}
 		else if (key_event->keysym.sym == Key.down) {
-			if (ENGINE_DEBUG) cout << " down key released." << endl;
+			//if (ENGINE_DEBUG) cout << " down key released." << endl;
 			down_state = false;
 			down_release = true;
 			return;
 		}
 		else if (key_event->keysym.sym == Key.left) {
-			if (ENGINE_DEBUG) cout << " left key released." << endl;
+			//if (ENGINE_DEBUG) cout << " left key released." << endl;
 			left_state = false;
 			left_release = true;
 			return;
 		}
 		else if (key_event->keysym.sym == Key.right) {
-			if (ENGINE_DEBUG) cout << " right key released." << endl;
+			//if (ENGINE_DEBUG) cout << " right key released." << endl;
 			right_state = false;
 			right_release = true;
 			return;
 		}
 		else if (key_event->keysym.sym == Key.confirm) {
-			if (ENGINE_DEBUG) cout << " confirm key released." << endl;
+			//if (ENGINE_DEBUG) cout << " confirm key released." << endl;
 			confirm_state = false;
 			confirm_release = true;
 			return;
 		}
 		else if (key_event->keysym.sym == Key.cancel) {
-			if (ENGINE_DEBUG) cout << " cancel key released." << endl;
+			//if (ENGINE_DEBUG) cout << " cancel key released." << endl;
 			cancel_state = false;
 			cancel_release = true;
 			return;
 		}
 		else if (key_event->keysym.sym == Key.menu) {
-			if (ENGINE_DEBUG) cout << " menu key released." << endl;
+			//if (ENGINE_DEBUG) cout << " menu key released." << endl;
 			menu_state = false;
 			menu_release = true;
 			return;
