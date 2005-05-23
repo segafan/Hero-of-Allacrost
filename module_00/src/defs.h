@@ -42,8 +42,16 @@ namespace hoa_engine {
 }
 
 // Global declarations, see global.h/cpp
-namespace hoa_engine {
-	class Character;
+namespace hoa_global {
+	class GObject;
+	class GItem;
+	class GSkillBook;
+	class GWeapon;
+	class GArmor;
+	class GSkill;
+	class GAttackPoint;
+	class GEnemy;
+	class GCharacter;
 	class GameInstance;
 }
 
