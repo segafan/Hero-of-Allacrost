@@ -14,6 +14,7 @@
 #include "video.h"
 #include "data.h"
 #include "map.h"
+#include "battle.h" // tmp
 
 
 using namespace std;
@@ -23,6 +24,7 @@ using namespace hoa_video;
 using namespace hoa_engine;
 using namespace hoa_data;
 using namespace hoa_map;
+using namespace hoa_battle; // tmp
 
 
 

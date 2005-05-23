@@ -82,7 +82,7 @@ private:
 	std::vector<hoa_audio::SoundDescriptor> battle_sound;
 	
 	int num_enemies;
-	
+	int m_iCounter;
 	
 public: 
 	BattleMode();

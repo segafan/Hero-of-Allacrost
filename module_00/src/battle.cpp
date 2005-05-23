@@ -17,7 +17,7 @@
 #include "audio.h"
 #include "video.h"
 #include "engine.h"
-#include "global.h" //<< not ready yet
+//#include "global.h" //<< not ready yet
 #include "data.h"
 
 using namespace std;
