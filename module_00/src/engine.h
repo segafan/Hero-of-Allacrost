@@ -19,19 +19,30 @@
 
 namespace hoa_engine {
 
-const bool ENGINE_DEBUG = true;
+extern bool ENGINE_DEBUG;
 
-// These are constants used for changing the audio during PausedMode and QuitMode
-const unsigned char ENGINE_PAUSE_AUDIO_ON_PAUSE = 0;
-const unsigned char ENGINE_ZERO_VOLUME_ON_PAUSE = 1;
-const unsigned char ENGINE_HALF_VOLUME_ON_PAUSE = 2;
-const unsigned char ENGINE_SAME_VOLUME_ON_PAUSE = 3;
+// These are constants used for changing the audio during PauseMode and QuitMode
+const unsigned char ENGINE_PAUSE_AUDIO = 0;
+const unsigned char ENGINE_ZERO_VOLUME = 1;
+const unsigned char ENGINE_HALF_VOLUME = 2;
+const unsigned char ENGINE_SAME_VOLUME = 3;
 
-// gmode = Game mode. Different states of operation the game can be in.
-enum gmode { dummy_m, boot_m, menu_m, map_m, battle_m, shop_m, world_m, pause_m, quit_m, scene_m };
+// Different states of operation the game can be in.
+const unsigned char ENGINE_DUMMY_MODE  = 0;
+const unsigned char ENGINE_BOOT_MODE   = 1;
+const unsigned char ENGINE_MAP_MODE    = 2;
+const unsigned char ENGINE_BATTLE_MODE = 3;
+const unsigned char ENGINE_MENU_MODE   = 4;
+const unsigned char ENGINE_SHOP_MODE   = 5;
+const unsigned char ENGINE_PAUSE_MODE  = 6;
+const unsigned char ENGINE_QUIT_MODE   = 7;
+const unsigned char ENGINE_SCENE_MODE  = 8;
+const unsigned char ENGINE_WORLD_MODE  = 9;
 
-// glanguage = Game language. Allows us to set what language the game is running in.
-enum glanguage { english_l, spanish_l, german_l };
+// Used for what language the game is running in
+const unsigned char ENGINE_ENGLISH = 0;
+const unsigned char ENGINE_SPANISH = 1;
+const unsigned char ENGINE_GERMAN  = 2;
 
 
 
@@ -39,13 +50,12 @@ enum glanguage { english_l, spanish_l, german_l };
  GameMode class - A parent class that all other game mode classes inherit from.
 
 	>>>members<<<
-		gmode mtype: value indicating what "type" of GameMode this is.
-		Game* *Manager: easy references to all the game's singleton classes
+		unsigned char mode_type: value indicating what "type" of GameMode this is.
+		GameXXX* XXXManager: easy references to all the game's singleton classes
 
 	>>>functions<<< 
 		virtual void Update(Uint32 time_elapsed): A purely virtual function that updates the game status
 		virtual void Render(): A purely virtual function that draws the next frame of the screen
-		gmode GetGameType(): Simply returns the value of mtype.
 
 	>>>notes<<< 
 		1) Both the copy constructor and copy assignment operator are private.
@@ -53,12 +63,12 @@ enum glanguage { english_l, spanish_l, german_l };
 		2) >>>>>>>>>>>>>>>>>>>>>THIS IS VERY IMPORTANT<<<<<<<<<<<<<<<<<<<<<<<<< 
 			Never, under any circumstances should you ever invoke the delete function on a pointer to this 
 			object or its related subclasses. The reason is that all of the memory reference handling is done 
-			by the GameModeManager class. If you attempt to ignore this warning you will generate segmentation 
-			faults. Godspeed gentlemen.
+			by the GameModeManager class. If you attempt to ignore this warning you will generate a segmentation 
+			fault. Godspeed gentlemen.
  *****************************************************************************/
 class GameMode {
 protected:
-	gmode mtype;
+	unsigned char mode_type;
 	
 	hoa_audio::GameAudio *AudioManager;
 	hoa_video::GameVideo *VideoManager;
@@ -66,11 +76,12 @@ protected:
 	GameInput *InputManager;
 	GameModeManager *ModeManager;
 	GameSettings *SettingsManager;
+	hoa_global::GameInstance *InstanceManager;
 	
 	friend class GameModeManager;
 private:
-	GameMode( const GameMode& other ) {}
-	GameMode& operator=( const GameMode& other ) {}
+	GameMode(const GameMode& other) {}
+	GameMode& operator=(const GameMode& other) {}
 public:
 	GameMode();
 	~GameMode();
@@ -90,9 +101,9 @@ public:
 	>>>functions<<< 
 		void Pop(): Removes the top item from the stack and destroys it.
 		void Push(GameMode* gm): Puts a new item on the top of the stack.
-		gmode GetGameType(): Returns the type of the top stack element. If the stack is empty, returns bad.
+		unsigned char GetGameType(): Returns the type of the top stack element
 		GameMode* GetTop(): Returns a copy of the top stack pointer
-		void PrintStack(): For debugging purposes ONLY. Prints out the stack and all the GameMode type values stored.
+		void PrintStack(): For debugging purposes ONLY. Prints out the stack information.
 
 	>>>notes<<< 
 		1) The mode that is on the top of the stack (back of the vector) is the game mode that is currently
@@ -111,131 +122,12 @@ public:
 	SINGLETON_METHODS(GameModeManager);
 	
 	void Pop();
+	void PopAll();
 	void Push(GameMode* gm);
-	gmode GetGameType();
+	unsigned char GetGameType();
 	GameMode* GetTop();
 	void PrintStack();
 }; // class GameModeManager
-
-
-
-/******************************************************************************
- GameItem class - A parent class that all the different item classes inherit from
-	
-	>>>members<<< 
-		gitem itype: value indicating what "type" the item is
-		int item_id: an identification number for each item.
-		int icount: the number of items in this instance
-
-	>>>functions<<< 
-		
-
-	>>>notes<<< 
-		
- *****************************************************************************/
-// class GameItem {
-// protected:
-// 	gitem itype;
-// 	int item_id;
-// 	int icount;
-// public:
-// 	GameItem();
-// 	GameItem( gitem );
-// 	bool operator== ( const cItem & ) const;
-// 	bool operator< ( const cItem & ) const;
-// 	bool operator> ( const cItem & ) const;
-// 	bool operator< ( const cItem & ) const;
-// 	bool operator< ( const cItem & ) const;
-// 	GameItem & operator= ( const cItem & );
-// 	GameItem& operator++ ();
-// 	GameItem& operator-- ();
-// 	GameItem& operator=+ ();
-// 	GameItem& operator=- ();
-// }; // class GameItem
-
-
-
-/******************************************************************************
- GItem class - A parent class that all the different item classes inherit from
-	
-	>>>members<<< 
-		int effect: a bit-mask stating what type of item it is (recovery, battle, map, etc)
-
-	>>>functions<<< 
-		Use(): use the item by executing it's function and decrementing it's icount
-
-	>>>notes<<< 
-		
- *****************************************************************************/
-// class GItem {
-// public:
-// 	int effect;
-// 	Use();
-// };
-// 
-// class GSkillBook {
-// 	int useable;
-// };
-// 
-// class GWeapon {
-// 
-// };
-// 
-// class GArmor {
-// 
-// };
-// 
-// 
-// class GItemPack { 
-// 	 std::map< GameItem, unsigned int > contents;
-// public:
-// 
-// 	 GItemPack( GItem & , unsigned long );
-// 	 void clear( );
-// 	 unsigned long add( const cItem & , const unsigned long );
-// 	 unsigned long remove( const cItem & , const unsigned long );
-// 	 unsigned long getAmount( const cItem & ) const;
-// 	 const std::map< cItem, unsigned long > & getItems( ) const;
-// 	 GItemPack & operator= ( const cItemPack & );
-// 	 GItemPack & operator+= ( const cItemPack & );
-// 	 GItemPack operator+ ( const cItemPack & ) const;
-// 
-// };
-// 
-// class GameParty;
-// 	
-// 
-// class GameCharacter {
-// private:
-// 	 std::string name;
-// 	 Weapon eq_weapon;
-// 	 Armor eq_head;
-// 	 Armor eq_body;
-// 	 Armor eq_arms;
-// 	 Armor eq_legs;
-// 	 std::vector<Skill> attack_skills;
-// 	 std::vector<Skill> defense_skills;
-// 	 std::vector<Skill> support_skills;
-// 	 // AttackPoints[4]
-// 	 unsigned int hit_points;
-// 	 unsigned int skill_points;
-// 	 unsigned int xp_points;
-// 	 unsigned int xp_level;
-// 	 unsigned int xp_next_lvl;
-// 	 unsigned int strength;
-// 	 unsigned int intelligence;
-// 	 unsigned int agility;
-// 	 friend GameParty;
-// public:
-// 	 Weapon EquipWeapon(Weapon new_weapon);
-// 	 Armor EquipHeadArmor(Armor new_armor);
-// 	 Armor EquipBodyArmor(Armor new_armor);
-// 	 Armor EquipArmsArmor(Armor new_armor);
-// 	 Armor EquipLegsArmor(Armor new_armor);
-// };
-
-
-
 
 
 
@@ -261,6 +153,7 @@ public:
 	>>>functions<<< 
 		Uint32 UpdateTime(): sets the last_update member to the current time and returns their difference
 		void SetTimer(): sets up the timer info. Only called during program initialization
+		void ToggleFullScreen(): pretty self-explanatory don't you think...
 	
 	>>>notes<<< 
 		1) The reason this class contains things like the volume and screen resolution instead of
@@ -281,22 +174,31 @@ private:
 	Uint32 last_update;
 	Uint32 fps_timer;
 	int fps_counter;
+	float fps_rate;
 	bool not_done;
+	unsigned char language;
+	SDL_Rect screen_info;
+	bool full_screen;
+	unsigned char pause_volume_action;
 public:
 	SINGLETON_METHODS(GameSettings);
 	
-	float fps_rate;
-	SDL_Rect screen_res;
-	bool full_screen;
 	int music_vol;
 	int sound_vol;
-	unsigned char paused_vol_type;
-	glanguage language;
 	
 	Uint32 UpdateTime();
 	void SetTimer();
+	void SetFullScreen(bool fs) { full_screen = fs; }
+	void ToggleFullScreen() { if (full_screen) full_screen = false; else full_screen = true; }
+	bool FullScreen() { return full_screen; }
+	SDL_Rect GetScreenInfo() { return screen_info; }
+	void SetScreenInfo(SDL_Rect info) { screen_info = info; }
+	unsigned char GetLanguage() { return language; }
+	void SetLanguage(unsigned char lang) { language = lang; }
 	bool NotDone() { return not_done; }
 	void ExitGame() { not_done = false; }
+	void SetPauseVolumeAction(unsigned char action) { pause_volume_action = action; }
+	unsigned char GetPauseVolumeAction() { return pause_volume_action; }
 };
 
 
@@ -326,8 +228,8 @@ private:
 	SDLKey cancel;
 	SDLKey menu;
 	SDLKey swap;
-	SDLKey rselect;
-	SDLKey lselect;
+	SDLKey left_select;
+	SDLKey right_select;
 	SDLKey pause;
 	
 	friend class GameInput;
@@ -424,21 +326,23 @@ private:
 	bool swap_state;
 	bool swap_press;
 	bool swap_release;
-	bool lselect_state;
-	bool lselect_press;
-	bool lselect_release;
-	bool rselect_state;
-	bool rselect_press;
-	bool rselect_release;
+	bool left_select_state;
+	bool left_select_press;
+	bool left_select_release;
+	bool right_select_state;
+	bool right_select_press;
+	bool right_select_release;
 	
 	GameModeManager *ModeManager;
+	GameSettings *SettingsManager;
+	hoa_data::GameData *DataManager;
 	
 	void KeyEventHandler(SDL_KeyboardEvent *key_event);
 	void JoystickEventHandler(SDL_Event *js_event);
 public:
 	SINGLETON_METHODS(GameInput);
-	void EventHandler();
 	
+	void EventHandler();
 	bool UpState() { return up_state; }
 	bool UpPress() { return up_press; }
 	bool UpRelease() { return up_release; }
@@ -463,12 +367,12 @@ public:
 	bool SwapState() { return swap_state; }
 	bool SwapPress() { return swap_press; }
 	bool SwapRelease() { return swap_release; }
-	bool LSelectState() { return lselect_state; }
-	bool LSelectPress() { return lselect_press; }
-	bool LSelectRelease() { return lselect_release; }
-	bool RSelectState() { return rselect_state; }
-	bool RSelectPress() { return rselect_press; }
-	bool RSelectRelease() { return rselect_release; }
+	bool LeftSelectState() { return left_select_state; }
+	bool LeftSelectPress() { return left_select_press; }
+	bool LeftSelectRelease() { return left_select_release; }
+	bool RightSelectState() { return right_select_state; }
+	bool RightSelectPress() { return right_select_press; }
+	bool RightSelectRelease() { return right_select_release; }
 };
 
 

@@ -8,6 +8,8 @@
 
 namespace hoa_video {
 
+extern bool VIDEO_DEBUG;
+
 class GameVideo;
 
 class ImageDescriptor {

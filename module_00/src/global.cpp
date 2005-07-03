@@ -18,12 +18,13 @@ using namespace hoa_utils;
 
 namespace hoa_global {
 
+bool GLOBAL_DEBUG = false;
 SINGLETON_INITIALIZE(GameInstance);
 
 // ****************************************************************************
 // ******************************* GObject ************************************
 // ****************************************************************************
-
+ 
 GObject::GObject(string name, unsigned char type, unsigned int usable, int id, int count) {
 	obj_name = name;
 	obj_type = type;
@@ -192,9 +193,13 @@ GAttackPoint::~GAttackPoint() {}
 // ***************************** GameInstance *********************************
 // ****************************************************************************
 
-GameInstance::GameInstance() {}
+GameInstance::GameInstance() {
+	if (GLOBAL_DEBUG) cout << "GLOBAL: GameInstance constructor invoked" << endl;
+}
 
-GameInstance::~GameInstance() {}
+GameInstance::~GameInstance() {
+	if (GLOBAL_DEBUG) cout << "GLOBAL: GameInstance destructor invoked" << endl;
+}
 
  
 }// namespace hoa_global

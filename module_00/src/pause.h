@@ -10,17 +10,14 @@
 
 #ifndef __PAUSED_HEADER__
 #define __PAUSED_HEADER__ 
-
-// Partially defined namespace to avoid recursive inclusion problems.
-namespace hoa_pause {
-	class PauseMode;
-} // namespace hoa_pause
  
 #include <string>
 #include "defs.h"
 #include "engine.h"
 
 namespace hoa_pause {
+
+extern bool PAUSE_DEBUG;
  
 /******************************************************************************
   PauseMode Class - A mode pushed onto the stack when the user pauses the game

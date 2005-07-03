@@ -1,7 +1,7 @@
 /*
  * data.cpp
  *  Data management module for Hero of Allacrost
- *  (C) 2004 by Tyler Olsen
+ *  (C) 2004, 2005 by Vladimir Mitrovic
  *
  *  This code is licensed under the GNU GPL. It is free software and you may modify it 
  *   and/or redistribute it under the terms of this license. See http://www.gnu.org/copyleft/gpl.html
@@ -27,12 +27,12 @@ using namespace hoa_map;
 
 namespace hoa_data {
 
+bool DATA_DEBUG = false;
 SINGLETON_INITIALIZE(GameData);
 
 // The constructor opens lua and its associated libraries.
 GameData::GameData() {
-	if (DATA_DEBUG)
-		cerr << "DEBUG: GameData constructor invoked." << endl;
+	if (DATA_DEBUG) cout << "DATA: GameData constructor invoked." << endl;
 	l_stack = lua_open();
 
 	// Load the Lua libraries
@@ -48,8 +48,7 @@ GameData::GameData() {
 
 // Close Lua upon destruction
 GameData::~GameData() {
-	if (DATA_DEBUG)
-		cerr << "DEBUG: GameData destructor invoked." << endl;
+	if (DATA_DEBUG) cout << "DATA: GameData destructor invoked." << endl;
 	lua_close(l_stack);
 }
 
@@ -61,7 +60,7 @@ bool GameData::GetTableBool (const char *key) {
 	lua_pushstring(l_stack, key);
 	lua_gettable(l_stack, -2);
 	if (!lua_isboolean(l_stack, -1))
-		cout << "ERROR: Invalid table field" << endl;
+		cerr << "DATA ERROR: Invalid table field" << endl;
 	result = lua_toboolean(l_stack, -1);
 	lua_pop(l_stack, 1);
 	return result;
@@ -73,7 +72,7 @@ int GameData::GetTableInt (const char *key) {
 	lua_pushstring(l_stack, key);
 	lua_gettable(l_stack, -2);
 	if (!lua_isnumber(l_stack, -1))
-		cout << "ERROR: Invalid table field" << endl;
+		cerr << "DATA ERROR: Invalid table field" << endl;
 	result = (int)lua_tonumber(l_stack, -1);
 	lua_pop(l_stack, 1);
 	return result;
@@ -85,7 +84,7 @@ float GameData::GetTableFloat (const char *key) {
 	lua_pushstring(l_stack, key);
 	lua_gettable(l_stack, -2);
 	if (!lua_isnumber(l_stack, -1))
-		cout << "ERROR: Invalid table field" << endl;
+		cerr << "DATA ERROR: Invalid table field" << endl;
 	result = (float)lua_tonumber(l_stack, -1);
 	lua_pop(l_stack, 1);
 	return result;
@@ -97,7 +96,7 @@ string GameData::GetTableString (const char *key) {
 	lua_pushstring(l_stack, key);
 	lua_gettable(l_stack, -2);
 	if (!lua_isstring(l_stack, -1))
-		cout << "ERROR: Invalid table field" << endl;
+		cerr << "DATA ERROR: Invalid table field" << endl;
 	result = (string)lua_tostring(l_stack, -1);
 	lua_pop(l_stack, 1);
 	return result;
@@ -142,7 +141,7 @@ std::string GameData::GetGlobalString(const char * key) {
 void GameData::FillStringVector(vector<string> *vect, const char *key) {
 	lua_getglobal(l_stack, key);
 	if (!lua_istable(l_stack, LUA_STACK_TOP)) {
-		cout << "Lua error: table " << key << " does not exist, or " << key << "ain't a table\n";
+		cerr << "DATA ERROR: table " << key << " does not exist, or " << key << "isn't a table\n";
 		return;
 	}
 	int t = lua_gettop(l_stack);
@@ -156,7 +155,7 @@ void GameData::FillStringVector(vector<string> *vect, const char *key) {
 void GameData::FillIntVector(std::vector<int> *vect, const char *key) {
 	lua_getglobal(l_stack, key);
 	if (!lua_istable(l_stack, LUA_STACK_TOP)) {
-		cout << "Lua error: table " << key << " does not exist, or " << key << "ain't a table\n";
+		cerr << "DATA ERROR: table " << key << " does not exist, or " << key << "ain't a table\n";
 		return;
 	}
 	int t = lua_gettop(l_stack);
@@ -174,19 +173,19 @@ void GameData::LoadGameSettings () {
 	const char *filename = "data/config/settings.hoa";
 
 	if (luaL_loadfile(l_stack, filename) || lua_pcall(l_stack, 0, 0, 0))
-		cout << "LUA ERROR: Could not load " << filename << " :: " << lua_tostring(l_stack, -1) << endl;
+		cerr << "DATA ERROR: Could not load " << filename << " :: " << lua_tostring(l_stack, -1) << endl;
 
 	lua_getglobal(l_stack, "video_settings");
 	if (!lua_istable(l_stack, LUA_STACK_TOP))
-		cout << "LUA ERROR: could not retrieve table \"video_settings\"" << endl;
+		cerr << "DATA ERROR: could not retrieve table \"video_settings\"" << endl;
 
 	//   SettingsManager->screen_resx = GetTableInt("screen_resx");
 	//   SettingsManager->screen_resy = GetTableInt("screen_resy");
-	SettingsManager->full_screen = GetTableBool("full_screen");
+	SettingsManager->SetFullScreen(GetTableBool("full_screen"));
 
 	lua_getglobal(l_stack, "audio_settings");
 	if (!lua_istable(l_stack, LUA_STACK_TOP))
-		cout << "LUA ERROR: could not retrieve table \"audio_settings\"" << endl;
+		cerr << "DATA ERROR: could not retrieve table \"audio_settings\"" << endl;
 
 	SettingsManager->music_vol = GetTableInt("music_vol");
 	SettingsManager->sound_vol = GetTableInt("sound_vol");
@@ -197,11 +196,11 @@ void GameData::LoadGameSettings () {
 void GameData::LoadKeyJoyState(KeyState *keystate, JoystickState *joystate) {
 	const char *filename = "data/config/settings.hoa";
 	if (luaL_loadfile(l_stack, filename) || lua_pcall(l_stack, 0, 0, 0))
-		cout << "LUA ERROR: Could not load " << filename << " :: " << lua_tostring(l_stack, -1) << endl;
+		cerr << "DATA ERROR: Could not load " << filename << " :: " << lua_tostring(l_stack, -1) << endl;
 	
 	lua_getglobal(l_stack, "key_settings");
 	if (!lua_istable(l_stack, LUA_STACK_TOP))
-		cout << "LUA ERROR: could not retrieve table \"key_settings\"" << endl;
+		cerr << "DATA ERROR: could not retrieve table \"key_settings\"" << endl;
 	
 	keystate->up = (SDLKey)GetTableInt("up");
 	keystate->down = (SDLKey)GetTableInt("down");
@@ -211,8 +210,9 @@ void GameData::LoadKeyJoyState(KeyState *keystate, JoystickState *joystate) {
 	keystate->cancel = (SDLKey)GetTableInt("cancel");
 	keystate->menu = (SDLKey)GetTableInt("menu");
 	keystate->swap = (SDLKey)GetTableInt("swap");
-	keystate->rselect = (SDLKey)GetTableInt("rselect");
-	keystate->lselect = (SDLKey)GetTableInt("lselect");
+	keystate->left_select = (SDLKey)GetTableInt("left_select");
+	keystate->right_select = (SDLKey)GetTableInt("right_select");
+
 	keystate->pause = (SDLKey)GetTableInt("pause");
 	
 	//TODO Add joystick init, after we implement joystick functionality
@@ -228,7 +228,7 @@ void GameData::LoadBootData(
 		vector<MusicDescriptor> *boot_music) {
 	char* filename = "data/config/boot.hoa";
 	if (luaL_loadfile(l_stack, filename) || lua_pcall(l_stack, 0, 0, 0))
-		cout << "LUA ERROR: Could not load "<< filename << " :: " << lua_tostring(l_stack, -1) << endl;
+		cerr << "DATA ERROR: Could not load "<< filename << " :: " << lua_tostring(l_stack, -1) << endl;
 	
 	// Load the video stuff	
 	ImageDescriptor im;
@@ -310,7 +310,7 @@ void GameData::LoadMap(hoa_map::MapMode *map_mode, int new_map_id) {
 	string tile_prefix = "img/tile/";	// where they're at
 	FillStringVector(&tiles_used, "tiles_used");
 	if (tiles_used.size() == 0) {
-		cout << "Error loading map " << filename << " : No tiles specified for map!! (??)" << endl;
+		cerr << "DATA ERROR: loading map " << filename << " : No tiles specified for map!! (??)" << endl;
 		//TODO Add meaningful error codes, and make LoadMap return an int
 		return;
 	}
@@ -372,15 +372,15 @@ void GameData::LoadMap(hoa_map::MapMode *map_mode, int new_map_id) {
 	FillIntVector(&upper, "upper_layer");
 	FillIntVector(&emask, "event_mask");
 	if (lower.size() != upper.size() || upper.size() != emask.size()) {
-		cout << "ERROR: The lower_layer, upper_layer and event_mask vectors do NOT have the same size! Check the editor code, or any modifications you made to the map file " << filename << "!\n";
+		cerr << "DATA ERROR: The lower_layer, upper_layer and event_mask vectors do NOT have the same size! Check the editor code, or any modifications you made to the map file " << filename << "!\n";
 		// TODO Add meaningful error codes, and make LoadMap return an int
 		return;
 	}
 	if (lower.size() != map_mode->row_count * map_mode->col_count) {
-		cout << "ERROR: The actual size of the lower, upper and mask vectors is NOT EQUAL to row_count*col_count !!! BARF!\n";
-		cout << "row_count = " << map_mode->row_count << "\n";
-		cout << "col_count = " << map_mode->col_count << "\n";
-		cout << "lower.size() = " << lower.size() << "\n";
+		cerr << "DATA ERROR: The actual size of the lower, upper and mask vectors is NOT EQUAL to row_count*col_count !!! BARF!\n";
+		cerr << "row_count = " << map_mode->row_count << "\n";
+		cerr << "col_count = " << map_mode->col_count << "\n";
+		cerr << "lower.size() = " << lower.size() << "\n";
 		// TODO Add meaningful error codes, and make LoadMap return an int
 		return;
 	}

@@ -36,6 +36,8 @@ using namespace hoa_data;
 
 namespace hoa_map {
 
+bool MAP_DEBUG = false;
+
 // ****************************************************************************
 // *********************** ObjectLayer Class Functions ************************
 // ****************************************************************************
@@ -52,31 +54,47 @@ ObjectLayer::ObjectLayer(unsigned int type, int row, int col) {
 ObjectLayer::~ObjectLayer() {}
 
 // ****************************************************************************
-// *********************** MobileObject Class Functions ***********************
-// ****************************************************************************
-
-MobileObject::MobileObject(float ss, unsigned int type, int row, int col) : 
-	ObjectLayer(type, row, col) {
-	step_speed = ss;
-	step_count = 0;
-	status = 0;
-}
-
-
-
-MobileObject::~MobileObject() {}
-
-// ****************************************************************************
 // ************************ MapSprite Class Functions *************************
 // ****************************************************************************
 
-MapSprite::MapSprite(unsigned int stat, float ss, unsigned int type, int row, int col) :
-	MobileObject(ss, type, row, col) {
+MapSprite::MapSprite(std::string na, std::string fn, int dt, unsigned int stat, float ss, 
+                     unsigned int type, int row, int col) : ObjectLayer(type, row, col) {
+	name = na;
+	filename = "img/sprite/" + fn;
 	status = stat;
+	step_speed = ss;
+	step_count = 0;
+	delay_time = dt;
+	wait_time = 10;
+	LoadFrames();
 }
 
 
+MapSprite::MapSprite(std::string na, std::string fn, unsigned int stat, float ss, 
+                     unsigned int type, int row, int col) : ObjectLayer(type, row, col) {
+	name = na;
+	filename = "img/sprite/" + fn;
+	status = stat;
+	step_speed = ss;
+	step_count = 0;
+	delay_time = 0;
+	wait_time = 0;
+	LoadFrames();
+}
 
+
+// This constructor doesn't need string arguments and is typically used for virtual sprites
+MapSprite::MapSprite(unsigned int stat, float ss, unsigned int type, int row, int col) : 
+                     ObjectLayer(type, row, col) {
+	status = stat;
+	step_speed = ss;
+	step_count = 0;
+	delay_time = 0;
+	wait_time = 0;
+}
+
+
+// Free all the frames from memory
 MapSprite::~MapSprite() {
 	for (int i = 0; i < frames.size(); i++) {
 		VideoManager->DeleteImage(frames[i]);
@@ -84,7 +102,86 @@ MapSprite::~MapSprite() {
 }
 
 
+// Load the appropriate number of image frames for the sprite time
+void MapSprite::LoadFrames() {
+	ImageDescriptor imd;
+	
+	// Load standard sprite animation frames (24 count)
+	if (status & (PLAYER_SPRITE | NPC_SPRITE | ADV_SPRITE)) {
+		imd.width = 1;
+		imd.height = 2;
+	
+		imd.filename = filename + "_d1.png";
+		frames.push_back(imd);
+		imd.filename = filename + "_d2.png";
+		frames.push_back(imd);
+		imd.filename = filename + "_d3.png";
+		frames.push_back(imd);
+		imd.filename = filename + "_d4.png";
+		frames.push_back(imd);
+		imd.filename = filename + "_d5.png";
+		frames.push_back(imd);
+		
+		imd.filename = filename + "_u1.png";
+		frames.push_back(imd);
+		imd.filename = filename + "_u2.png";
+		frames.push_back(imd);
+		imd.filename = filename + "_u3.png";
+		frames.push_back(imd);
+		imd.filename = filename + "_u4.png";
+		frames.push_back(imd);
+		imd.filename = filename + "_u5.png";
+		frames.push_back(imd);
+		
+		imd.filename = filename + "_l1.png";
+		frames.push_back(imd);
+		imd.filename = filename + "_l2.png";
+		frames.push_back(imd);
+		imd.filename = filename + "_l3.png";
+		frames.push_back(imd);
+		imd.filename = filename + "_l4.png";
+		frames.push_back(imd);
+		imd.filename = filename + "_l5.png";
+		frames.push_back(imd);
+		imd.filename = filename + "_l6.png";
+		frames.push_back(imd);
+		imd.filename = filename + "_l7.png";
+		frames.push_back(imd);
+		
+		imd.filename = filename + "_r1.png";
+		frames.push_back(imd);
+		imd.filename = filename + "_r2.png";
+		frames.push_back(imd);
+		imd.filename = filename + "_r3.png";
+		frames.push_back(imd);
+		imd.filename = filename + "_r4.png";
+		frames.push_back(imd);
+		imd.filename = filename + "_r5.png";
+		frames.push_back(imd);
+		imd.filename = filename + "_r6.png";
+		frames.push_back(imd);
+		imd.filename = filename + "_r7.png";
+		frames.push_back(imd);
+		
+// 		// Load additional extra frames if the sprite is not a regular NPC
+// 		if (status & (PLAYER_SPRITE | ADV_SPRITE)) {
+// 			
+// 			// Load even -more- extra frames if the sprite is a character
+// 			if (status & PLAYER_SPRITE) {
+// 			
+// 			}
+// 		}
+	}
+	
+		// Now load all the frames
+	for (unsigned int i = 0; i < frames.size(); i++) {
+		VideoManager->LoadImage(frames[i]);
+	}
 
+}
+
+
+// Find the frame image that should be drawn
 int MapSprite::FindFrame() {
 	int draw_frame; // The frame index that we should draw
 	
@@ -246,7 +343,6 @@ void MapSprite::Draw(MapFrame& mf) {
 	
 	draw_frame = FindFrame();
 	
-	//cout << "Attempting to draw frame #" << draw_frame << " at: {" << x_pos << ", " << y_pos << '}' << endl;
 	VideoManager->Move(x_pos, y_pos);
 	VideoManager->DrawImage(frames[draw_frame]);
 }
@@ -269,76 +365,76 @@ void MapSprite::Draw(MapFrame& mf) {
 
 
 // NOTE: This is all temporary code here
-PlayerSprite::PlayerSprite(unsigned int stat, float ss, unsigned int type, int row, int col) :
-	MapSprite(stat, ss, type, row, col) {
-	cerr << "DEBUG: PlayerSprite's constructor invoked." << endl;
-	
-	ImageDescriptor imd;
-	imd.width = 1;
-	imd.height = 2;
-	
-	imd.filename = "img/sprite/claudius_d1.png";
-	frames.push_back(imd);
-	imd.filename = "img/sprite/claudius_d2.png";
-	frames.push_back(imd);
-	imd.filename = "img/sprite/claudius_d3.png";
-	frames.push_back(imd);
-	imd.filename = "img/sprite/claudius_d4.png";
-	frames.push_back(imd);
-	imd.filename = "img/sprite/claudius_d5.png";
-	frames.push_back(imd);
-	
-	imd.filename = "img/sprite/claudius_u1.png";
-	frames.push_back(imd);
-	imd.filename = "img/sprite/claudius_u2.png";
-	frames.push_back(imd);
-	imd.filename = "img/sprite/claudius_u3.png";
-	frames.push_back(imd);
-	imd.filename = "img/sprite/claudius_u4.png";
-	frames.push_back(imd);
-	imd.filename = "img/sprite/claudius_u5.png";
-	frames.push_back(imd);
-	
-	imd.filename = "img/sprite/claudius_l1.png";
-	frames.push_back(imd);
-	imd.filename = "img/sprite/claudius_l2.png";
-	frames.push_back(imd);
-	imd.filename = "img/sprite/claudius_l3.png";
-	frames.push_back(imd);
-	imd.filename = "img/sprite/claudius_l4.png";
-	frames.push_back(imd);
-	imd.filename = "img/sprite/claudius_l5.png";
-	frames.push_back(imd);
-	imd.filename = "img/sprite/claudius_l6.png";
-	frames.push_back(imd);
-	imd.filename = "img/sprite/claudius_l7.png";
-	frames.push_back(imd);
-	
-	imd.filename = "img/sprite/claudius_r1.png";
-	frames.push_back(imd);
-	imd.filename = "img/sprite/claudius_r2.png";
-	frames.push_back(imd);
-	imd.filename = "img/sprite/claudius_r3.png";
-	frames.push_back(imd);
-	imd.filename = "img/sprite/claudius_r4.png";
-	frames.push_back(imd);
-	imd.filename = "img/sprite/claudius_r5.png";
-	frames.push_back(imd);
-	imd.filename = "img/sprite/claudius_r6.png";
-	frames.push_back(imd);
-	imd.filename = "img/sprite/claudius_r7.png";
-	frames.push_back(imd);
-	
-	for (int i = 0; i < frames.size(); i++) {
-		VideoManager->LoadImage(frames[i]);
-	}
-}
-
-
-
-PlayerSprite::~PlayerSprite() {
-	cerr << "DEBUG: PlayerSprite's destructor invoked." << endl;
-}
+// PlayerSprite::PlayerSprite(unsigned int stat, float ss, unsigned int type, int row, int col) :
+// 	MapSprite(stat, ss, type, row, col) {
+// 	if (MAP_DEBUG) cout << "MAP: PlayerSprite constructor invoked" << endl;
+// 	
+// 	ImageDescriptor imd;
+// 	imd.width = 1;
+// 	imd.height = 2;
+// 	
+// 	imd.filename = "img/sprite/claudius_d1.png";
+// 	frames.push_back(imd);
+// 	imd.filename = "img/sprite/claudius_d2.png";
+// 	frames.push_back(imd);
+// 	imd.filename = "img/sprite/claudius_d3.png";
+// 	frames.push_back(imd);
+// 	imd.filename = "img/sprite/claudius_d4.png";
+// 	frames.push_back(imd);
+// 	imd.filename = "img/sprite/claudius_d5.png";
+// 	frames.push_back(imd);
+// 	
+// 	imd.filename = "img/sprite/claudius_u1.png";
+// 	frames.push_back(imd);
+// 	imd.filename = "img/sprite/claudius_u2.png";
+// 	frames.push_back(imd);
+// 	imd.filename = "img/sprite/claudius_u3.png";
+// 	frames.push_back(imd);
+// 	imd.filename = "img/sprite/claudius_u4.png";
+// 	frames.push_back(imd);
+// 	imd.filename = "img/sprite/claudius_u5.png";
+// 	frames.push_back(imd);
+// 	
+// 	imd.filename = "img/sprite/claudius_l1.png";
+// 	frames.push_back(imd);
+// 	imd.filename = "img/sprite/claudius_l2.png";
+// 	frames.push_back(imd);
+// 	imd.filename = "img/sprite/claudius_l3.png";
+// 	frames.push_back(imd);
+// 	imd.filename = "img/sprite/claudius_l4.png";
+// 	frames.push_back(imd);
+// 	imd.filename = "img/sprite/claudius_l5.png";
+// 	frames.push_back(imd);
+// 	imd.filename = "img/sprite/claudius_l6.png";
+// 	frames.push_back(imd);
+// 	imd.filename = "img/sprite/claudius_l7.png";
+// 	frames.push_back(imd);
+// 	
+// 	imd.filename = "img/sprite/claudius_r1.png";
+// 	frames.push_back(imd);
+// 	imd.filename = "img/sprite/claudius_r2.png";
+// 	frames.push_back(imd);
+// 	imd.filename = "img/sprite/claudius_r3.png";
+// 	frames.push_back(imd);
+// 	imd.filename = "img/sprite/claudius_r4.png";
+// 	frames.push_back(imd);
+// 	imd.filename = "img/sprite/claudius_r5.png";
+// 	frames.push_back(imd);
+// 	imd.filename = "img/sprite/claudius_r6.png";
+// 	frames.push_back(imd);
+// 	imd.filename = "img/sprite/claudius_r7.png";
+// 	frames.push_back(imd);
+// 	
+// 	for (int i = 0; i < frames.size(); i++) {
+// 		VideoManager->LoadImage(frames[i]);
+// 	}
+// }
+// 
+// 
+// 
+// PlayerSprite::~PlayerSprite() {
+// 	if (MAP_DEBUG) cout << "MAP: PlayerSprite destructor invoked" << endl;
+// }
 
 
 // ****************************************************************************
@@ -346,80 +442,80 @@ PlayerSprite::~PlayerSprite() {
 // ****************************************************************************
 
 // NOTE: This is all temporary code here
-NPCSprite::NPCSprite(string name, int d_time, unsigned int stat, float ss, unsigned int type, int row, int col) :
-	MapSprite(stat, ss, type, row, col) {
-	cerr << "DEBUG: NPCSprite's constructor invoked." << endl;
-	wait_time = 0;
-	delay_time = d_time;
-	
-	string path_name = "img/sprite/" + name;
-	
-	ImageDescriptor imd;
-	imd.width = 1;
-	imd.height = 2;
-	
-	imd.filename = path_name + "_d1.png";
-	frames.push_back(imd);
-	imd.filename = path_name + "_d2.png";
-	frames.push_back(imd);
-	imd.filename = path_name + "_d3.png";
-	frames.push_back(imd);
-	imd.filename = path_name + "_d4.png";
-	frames.push_back(imd);
-	imd.filename = path_name + "_d5.png";
-	frames.push_back(imd);
-	
-	imd.filename = path_name + "_u1.png";
-	frames.push_back(imd);
-	imd.filename = path_name + "_u2.png";
-	frames.push_back(imd);
-	imd.filename = path_name + "_u3.png";
-	frames.push_back(imd);
-	imd.filename = path_name + "_u4.png";
-	frames.push_back(imd);
-	imd.filename = path_name + "_u5.png";
-	frames.push_back(imd);
-	
-	imd.filename = path_name + "_l1.png";
-	frames.push_back(imd);
-	imd.filename = path_name + "_l2.png";
-	frames.push_back(imd);
-	imd.filename = path_name + "_l3.png";
-	frames.push_back(imd);
-	imd.filename = path_name + "_l4.png";
-	frames.push_back(imd);
-	imd.filename = path_name + "_l5.png";
-	frames.push_back(imd);
-	imd.filename = path_name + "_l6.png";
-	frames.push_back(imd);
-	imd.filename = path_name + "_l7.png";
-	frames.push_back(imd);
-	
-	imd.filename = path_name + "_r1.png";
-	frames.push_back(imd);
-	imd.filename = path_name + "_r2.png";
-	frames.push_back(imd);
-	imd.filename = path_name + "_r3.png";
-	frames.push_back(imd);
-	imd.filename = path_name + "_r4.png";
-	frames.push_back(imd);
-	imd.filename = path_name + "_r5.png";
-	frames.push_back(imd);
-	imd.filename = path_name + "_r6.png";
-	frames.push_back(imd);
-	imd.filename = path_name + "_r7.png";
-	frames.push_back(imd);
-	
-	for (int i = 0; i < frames.size(); i++) {
-		VideoManager->LoadImage(frames[i]);
-	}
-}
-
-
-
-NPCSprite::~NPCSprite() {
-	cerr << "DEBUG: NPCSprite's destructor invoked." << endl;
-}
+// NPCSprite::NPCSprite(string name, int d_time, unsigned int stat, float ss, unsigned int type, int row, int col) :
+// 	MapSprite(stat, ss, type, row, col) {
+// 	if (MAP_DEBUG) cout << "MAP: NPCSprite constructor invoked" << endl;
+// 	wait_time = 0;
+// 	delay_time = d_time;
+// 	
+// 	string path_name = "img/sprite/" + name;
+// 	
+// 	ImageDescriptor imd;
+// 	imd.width = 1;
+// 	imd.height = 2;
+// 	
+// 	imd.filename = path_name + "_d1.png";
+// 	frames.push_back(imd);
+// 	imd.filename = path_name + "_d2.png";
+// 	frames.push_back(imd);
+// 	imd.filename = path_name + "_d3.png";
+// 	frames.push_back(imd);
+// 	imd.filename = path_name + "_d4.png";
+// 	frames.push_back(imd);
+// 	imd.filename = path_name + "_d5.png";
+// 	frames.push_back(imd);
+// 	
+// 	imd.filename = path_name + "_u1.png";
+// 	frames.push_back(imd);
+// 	imd.filename = path_name + "_u2.png";
+// 	frames.push_back(imd);
+// 	imd.filename = path_name + "_u3.png";
+// 	frames.push_back(imd);
+// 	imd.filename = path_name + "_u4.png";
+// 	frames.push_back(imd);
+// 	imd.filename = path_name + "_u5.png";
+// 	frames.push_back(imd);
+// 	
+// 	imd.filename = path_name + "_l1.png";
+// 	frames.push_back(imd);
+// 	imd.filename = path_name + "_l2.png";
+// 	frames.push_back(imd);
+// 	imd.filename = path_name + "_l3.png";
+// 	frames.push_back(imd);
+// 	imd.filename = path_name + "_l4.png";
+// 	frames.push_back(imd);
+// 	imd.filename = path_name + "_l5.png";
+// 	frames.push_back(imd);
+// 	imd.filename = path_name + "_l6.png";
+// 	frames.push_back(imd);
+// 	imd.filename = path_name + "_l7.png";
+// 	frames.push_back(imd);
+// 	
+// 	imd.filename = path_name + "_r1.png";
+// 	frames.push_back(imd);
+// 	imd.filename = path_name + "_r2.png";
+// 	frames.push_back(imd);
+// 	imd.filename = path_name + "_r3.png";
+// 	frames.push_back(imd);
+// 	imd.filename = path_name + "_r4.png";
+// 	frames.push_back(imd);
+// 	imd.filename = path_name + "_r5.png";
+// 	frames.push_back(imd);
+// 	imd.filename = path_name + "_r6.png";
+// 	frames.push_back(imd);
+// 	imd.filename = path_name + "_r7.png";
+// 	frames.push_back(imd);
+// 	
+// 	for (int i = 0; i < frames.size(); i++) {
+// 		VideoManager->LoadImage(frames[i]);
+// 	}
+// }
+// 
+// 
+// 
+// NPCSprite::~NPCSprite() {
+// 	if (MAP_DEBUG) cout << "MAP: NPCSprite destructor invoked." << endl;
+// }
 
 
 
@@ -550,12 +646,12 @@ void MapMode::TempCreateMap() {
 	} 
 	
 	// Load player sprite and rest of map objects
-	PlayerSprite *p_sprite = new PlayerSprite((CONTROLABLE | VISIBLE | SOUTH | Z_LVL1), NORMAL_SPEED, 
-		PLAYER_SPRITE, 16, 12);
+	MapSprite *p_sprite = new MapSprite("Claudius", "claudius", (CONTROLABLE | VISIBLE | SOUTH | Z_LVL1), 
+	                                    NORMAL_SPEED, PLAYER_SPRITE, 16, 12);
 	object_layer.push_back(p_sprite);
 	
-	NPCSprite *npc_sprite = new NPCSprite("laila", 50, (VISIBLE | EAST | Z_LVL1), NORMAL_SPEED, NPC_SPRITE, 
-		4, 6);
+	MapSprite *npc_sprite = new MapSprite("Laila", "laila", 50, (VISIBLE | EAST | Z_LVL1), 
+	                                      NORMAL_SPEED, NPC_SPRITE, 4, 6);
 	object_layer.push_back(npc_sprite);
 	
 	// If the focused_object is ever NULL, the game will exit with a seg fault :(
@@ -565,9 +661,9 @@ void MapMode::TempCreateMap() {
 
 
 MapMode::MapMode(int new_map_id) {
-	cerr << "DEBUG: MapMode's constructor invoked." << endl;
+	if (MAP_DEBUG) cout << "MAP: MapMode constructor invoked" << endl;
 	
-	mtype = map_m;
+	mode_type = ENGINE_MAP_MODE;
 	map_state.push_back(EXPLORE);
 	map_id = new_map_id;
 	
@@ -580,13 +676,13 @@ MapMode::MapMode(int new_map_id) {
 	// Setup the coordinate system
 	VideoManager->SetCoordSys(-SCREEN_COLS/2, SCREEN_COLS/2, -SCREEN_ROWS/2, SCREEN_ROWS/2, 1);
 	
-	virtual_sprite = new MobileObject(VERY_FAST_SPEED, VIRTUAL_SPRITE, 20, 20);
+	virtual_sprite = new MapSprite(VIRTUAL_SPRITE, VERY_FAST_SPEED, VIRTUAL_SPRITE, 20, 20);
 }
 
 
 
 MapMode::~MapMode() {
-	cerr << "DEBUG: MapMode's destructor invoked." << endl;
+	if (MAP_DEBUG) cout << "MAP: MapMode destructor invoked." << endl;
 	
 	// Delete all of the tile images
 	for (int i = 0; i < tile_count; i++) {
@@ -635,7 +731,7 @@ inline bool MapMode::TileMoveable(int row, int col, unsigned int z_occupied) {
 
 
 // Moves the sprite in direction, if possible. Returns true if move was successful.
-void MapMode::SpriteMove(int direction, MobileObject *sprite) {
+void MapMode::SpriteMove(int direction, MapSprite *sprite) {
 	int r_check, c_check; // Variables for holding the position of a tile to check.
 	
 	// Set the sprite's facing direction and tile coordinates it wishes to move to
@@ -773,9 +869,9 @@ void MapMode::UpdateVirtualSprite() {
 		// TEMP: Switch focus back to player sprite
 		cout << "Set focused object from Virtual sprite back to Player sprite" << endl;
 		if (object_layer[0]->object_type == PLAYER_SPRITE)
-			focused_object = dynamic_cast<PlayerSprite*>(object_layer[0]);
+			focused_object = dynamic_cast<MapSprite*>(object_layer[0]);
 		else
-			focused_object = dynamic_cast<PlayerSprite*>(object_layer[1]);
+			focused_object = dynamic_cast<MapSprite*>(object_layer[1]);
 	}
 }
 
@@ -855,13 +951,12 @@ void MapMode::UpdateExploreState() {
 	for (int i = 0; i < object_layer.size(); i++) {
 		switch ((object_layer[i])->object_type) {
 			case PLAYER_SPRITE:
-				UpdatePlayerExplore(dynamic_cast<PlayerSprite*>(object_layer[i]));
+				UpdatePlayerExplore(dynamic_cast<MapSprite*>(object_layer[i]));
 				break;
 			case NPC_SPRITE:
-				UpdateNPCExplore(dynamic_cast<NPCSprite*>(object_layer[i]));
+				UpdateNPCExplore(dynamic_cast<MapSprite*>(object_layer[i]));
 				break;
 			default:
-				cout << "Object not a sprite!" << endl;
 				break;
 		}
 	}
@@ -872,7 +967,7 @@ void MapMode::UpdateExploreState() {
 
 
 // Updates the player sprite and processes user input while in the 'explore' state
-void MapMode::UpdatePlayerExplore(PlayerSprite *player_sprite) {
+void MapMode::UpdatePlayerExplore(MapSprite *player_sprite) {
 	int r_check, c_check;   // Variables for saving tile coordinates
 	int move_direction;     // The direction the sprite may be set to move in
 	bool user_move = false; // Set to true if the user attempted to move the player sprite
@@ -897,7 +992,7 @@ void MapMode::UpdatePlayerExplore(PlayerSprite *player_sprite) {
 					player_sprite->step_count = 0; // we need to be centered on a tile when we return from battle
 					steps_till_encounter = GaussianValue(encounter_rate, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
 					
-					cout << "TEMP: Oh noes! A random encounter!!! Next encounter in: " << steps_till_encounter 
+					if (MAP_DEBUG) cout << "MAP: Oh noes! A random encounter!!! Next encounter in: " << steps_till_encounter 
 					<< " steps."<< endl;
 					// Play a scary random encounter sound
 					// Do a little cool script animation or something...
@@ -969,7 +1064,7 @@ void MapMode::UpdatePlayerExplore(PlayerSprite *player_sprite) {
 		//MenuMode *MenuM = new MenuMode();
 		//ModeManager->Push(MenuM);
 		// TEMP: Switch the focused object to a virtual sprite
-		cout << "Set focused object from Player sprite to Virtual sprite" << endl;
+		if (MAP_DEBUG) cout << "MAP: Set focused object from Player sprite to Virtual sprite" << endl;
 		focused_object = virtual_sprite;
 		return;
 	}
@@ -1002,7 +1097,7 @@ void MapMode::UpdatePlayerExplore(PlayerSprite *player_sprite) {
 
 
 // Updates the NPC sprites while in the 'explore' state
-void MapMode::UpdateNPCExplore(NPCSprite *npc) {
+void MapMode::UpdateNPCExplore(MapSprite *npc) {
 	
 	if (npc->status & IN_MOTION) { 
 		npc->step_count += (float)time_elapsed / npc->step_speed;

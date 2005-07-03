@@ -18,7 +18,7 @@
 
 namespace hoa_utils {
 
-const bool UTILS_DEBUG = false;
+extern bool UTILS_DEBUG;
 
 // Constants used for the GaussianValue() function
 const bool UTILS_ONLY_POSITIVE = true;
@@ -81,14 +81,14 @@ const int UTILS_NO_BOUNDS = 0;
 			return _ref; \
 	} \
 	static void _Destroy() { \
-			if (_ref != 0) { \
+			if (_ref != NULL) { \
 				delete _ref; \
 				_ref = NULL; \
 			} \
 	} \
 	static class_name* _GetReference() { \
 			return _ref; \
-	}
+	} \
 
 // Put in the class' source file
 #define SINGLETON_INITIALIZE(class_name) \

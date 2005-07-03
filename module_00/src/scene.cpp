@@ -21,12 +21,15 @@ using namespace hoa_scene::local_scene;
 
 namespace hoa_scene {
 
+bool SCENE_DEBUG = false;
+
 SceneMode::SceneMode() {
+	if (SCENE_DEBUG) cout << "SCENE: SceneMode constructor invoked" << endl;
 	VideoManager = GameVideo::_GetReference();
 	ModeManager = GameModeManager::_GetReference();
 	SettingsManager = GameSettings::_GetReference();
 	
-	mtype = scene_m;
+	mode_type = ENGINE_SCENE_MODE;
 	scene_timer = 0;
 	
 	// setup the scene Image Descriptor
@@ -38,6 +41,7 @@ SceneMode::SceneMode() {
 
 // The destructor frees up our scene image
 SceneMode::~SceneMode() { 
+	if (SCENE_DEBUG) cout << "SCENE: SceneMode destructor invoked" << endl;
   // VideoManager->FreeImage(scene);
 }
 

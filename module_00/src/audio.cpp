@@ -23,12 +23,13 @@ using namespace hoa_audio::local_audio;
 using namespace hoa_utils;
 
 namespace hoa_audio {
-	
+
+bool AUDIO_DEBUG = false;
 SINGLETON_INITIALIZE(GameAudio);
 
 // The constructor initializes variables and the audio systems.
 GameAudio::GameAudio() {
-	if (AUDIO_DEBUG) cout << "DEBUG: GameAudio constructor" << endl;
+	if (AUDIO_DEBUG) cout << "AUDIO: GameAudio constructor" << endl;
 	current_track = -1; // No track playing since we haven't loaded any music
 	music_id = 1;
 	sound_id = 1;
@@ -47,14 +48,14 @@ GameAudio::GameAudio() {
 	// Notice that we still continue the game even if audio initialization fails.
 		
 	if(SDL_InitSubSystem(SDL_INIT_AUDIO) == -1) { // Really bad!
-		cout << "ERROR: Could not initalize SDL audio subsystem: " << SDL_GetError() << endl;
+		cerr << "AUDIO ERROR: Could not initalize SDL audio subsystem: " << SDL_GetError() << endl;
 		return;
 	}
 
 	// Open 22.05KHz, signed 16bit, system byte order, stereo audio, using 1024 byte chunks
 	if (Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 1024) == -1) {
 		audio_on = false;
-		cout << "ERROR: Could not initialize mixer audio: " << Mix_GetError() << endl;
+		cerr << "AUDIO ERROR: Could not initialize mixer audio: " << Mix_GetError() << endl;
 	}
 	else {
 		audio_on = true;
@@ -66,7 +67,7 @@ GameAudio::GameAudio() {
 
 // The destructor halts all music, halts all sounds, frees every item in both caches, and then closes the audio
 GameAudio::~GameAudio() {
-	if (AUDIO_DEBUG) cerr << "DEBUG: GameAudio destructor invoked." << endl;
+	if (AUDIO_DEBUG) cout << "AUDIO: GameAudio destructor invoked." << endl;
 	Mix_HaltMusic();
 	Mix_HaltChannel(ALL_CHANNELS);	
 	
@@ -238,9 +239,9 @@ void GameAudio::LoadMusic(MusicDescriptor& md) {
 	string load_name = "music/" + md.filename + ".ogg"; // Create full path to filename
 	new_mus = Mix_LoadMUS(load_name.c_str()); // We need to convert the string to a C-type string
 	if (new_mus == NULL) { // typo in filename arg or missing/corrupt file are the most likely errors to cause this
-		cout << "ERROR: Could not load " << load_name << ". " << Mix_GetError() << endl;
-		cout << "* Likely causes of this error are a typo in the filename argument passed or a missing or corrupt" <<
-						"data file.\n	The game is exiting, please fix this error immediately!" << endl;
+		cerr << "AUDIO ERROR: Could not load " << load_name << ". " << Mix_GetError() << endl;
+		cerr << "* Likely causes of this error are a typo in the filename argument passed or a missing or corrupt" 
+		     <<	"data file.\n* The game is exiting, please fix this error immediately!" << endl;
 		exit(1);
 	}
 	
@@ -333,11 +334,11 @@ void GameAudio::SetMusicVolume(int value) {
 		
 	if (value > MIX_MAX_VOLUME) {
 		Mix_VolumeMusic(MIX_MAX_VOLUME); // Set music volume to maximum level
-		if (AUDIO_DEBUG) cerr << "WARNING: Tried to set music volume past max level: " << value << endl;
+		if (AUDIO_DEBUG) cerr << "AUDIO WARNING: Tried to set music volume past max level: " << value << endl;
 	}
 	else if (value < 0) {
 		Mix_VolumeMusic(0); // Turn music off (set volume to 0)
-		if (AUDIO_DEBUG) cerr << "WARNING: Tried to set music volume past min level: " << value << endl;
+		if (AUDIO_DEBUG) cerr << "AUDIO WARNING: Tried to set music volume past min level: " << value << endl;
 	}
 	else { // Set the music volume to the new value
 		Mix_VolumeMusic(value);
@@ -348,7 +349,7 @@ void GameAudio::SetMusicVolume(int value) {
 
 // *Used for debugging purposes ONLY* Prints the contents of the music cache.
 void GameAudio::PrintMusicCache() {
-	cout << "DEBUG: Printing music cache" << endl;
+	cout << "AUDIO: Printing music cache" << endl;
 	for (int i = 0; i < MAX_CACHED_MUSIC; i++) { // Loop thru the music cache
 		if (music_cache[i].music == NULL) // There is no memory allocated for this index
 			continue; // We aren't interested in cache locations that hold no data. Look at the next location
@@ -376,9 +377,9 @@ void GameAudio::LoadSound(SoundDescriptor& sd) {
 	string load_name = "snd/" + sd.filename + ".wav"; // Create full path to sound filename
 	new_chunk = Mix_LoadWAV(load_name.c_str()); // We need to convert the string to a C-type string
 	if (new_chunk == NULL) {
-		cout << "ERROR: Could not load " << load_name << ". " << Mix_GetError() << endl;
-		cout << " Likely causes of this error are a typo in the filename or a missing or corrupt"
-				 << "data file.\n The game is exiting, please fix this error immediately!" << endl;
+		cerr << "AUDIO ERROR: Could not load " << load_name << ". " << Mix_GetError() << endl;
+		cerr << " Likely causes of this error are a typo in the filename or a missing or corrupt"
+		     << "data file.\n The game is exiting, please fix this error immediately!" << endl;
 		exit(1);
 	}
 	
@@ -411,11 +412,11 @@ void GameAudio::PlaySound(SoundDescriptor& sd, int fade_ms, int loop) {
 	
 	if (fade_ms == 0) {
 		if (Mix_PlayChannel(ANY_OPEN_CHANNEL, sound_cache[location].sound, loop) == -1) // There was an error playing
-			cout << "ERROR: Could not play snd/" << sd.filename << ".wav. " << Mix_GetError() << endl;
+			cerr << "AUDIO ERROR: Could not play snd/" << sd.filename << ".wav. " << Mix_GetError() << endl;
 	}
 	else {
 		if (Mix_FadeInChannel(ANY_OPEN_CHANNEL, sound_cache[location].sound, loop, fade_ms) == -1) // Error
-			cout << "ERROR: Could not play snd/" << sd.filename << ".wav. " << Mix_GetError() << endl;
+			cerr << "AUDIO ERROR: Could not play snd/" << sd.filename << ".wav. " << Mix_GetError() << endl;
 	}
 	
 	sound_cache[location].time = SDL_GetTicks(); // Update last access time
@@ -470,7 +471,7 @@ void GameAudio::SetSoundVolume(int value) {
 
 // *Used for debugging purposes ONLY* Prints the contents of the sound cache
 void GameAudio::PrintSoundCache() {
-	cout << "DEBUG: Printing sound cache" << endl;
+	cout << "AUDIO: Printing sound cache" << endl;
 	for (int i = 0; i < MAX_CACHED_SOUNDS; i++) { // Loop thru the sound cache
 		if (sound_cache[i].sound == NULL) // There is no memory allocated for this index
 			continue; // We aren't interested in cache locations that hold no data. Look at the next location

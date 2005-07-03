@@ -17,6 +17,8 @@
 
 namespace hoa_quit {
 
+extern bool QUIT_DEBUG;
+
 namespace local_quit {
 
 // Some constants for different quit options the user can select in this mode

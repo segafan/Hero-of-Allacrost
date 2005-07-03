@@ -17,7 +17,7 @@
 #include "audio.h"
 #include "video.h"
 #include "engine.h"
-//#include "global.h" //<< not ready yet
+#include "global.h"
 #include "data.h"
 
 using namespace std;
@@ -26,6 +26,7 @@ using namespace hoa_utils;
 using namespace hoa_audio;
 using namespace hoa_video;
 using namespace hoa_engine;
+using namespace hoa_global;
 using namespace hoa_data;
 
 
@@ -53,6 +54,7 @@ the MapMode stuff is at the bottom of both files). Good luck!
 
 namespace hoa_battle {
 
+bool BATTLE_DEBUG = false;
 
 /* 
 
@@ -72,7 +74,7 @@ convenience:
 
 
 BattleMode::BattleMode() {
-	cerr << "DEBUG: BattleMode's constructor invoked." << endl;
+	cerr << "BATTLE: BattleMode constructor invoked." << endl;
 	
 	// Load the map from the Lua data file
 	//DataManager->LoadMap(this, map_id);
@@ -87,7 +89,7 @@ BattleMode::BattleMode() {
 
 BattleMode::~BattleMode() {
 	// Clean up any allocated music/images/sounds/whatever data here. Don't forget! ^_~
-	cerr << "DEBUG: BattleMode destructor invoked." << endl;
+	cerr << "BATTLE: BattleMode destructor invoked." << endl;
 }
 
 

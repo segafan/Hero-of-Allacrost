@@ -24,36 +24,35 @@ using namespace hoa_boot;
 
 namespace hoa_quit {
 
+bool QUIT_DEBUG = false;
+
 QuitMode::QuitMode() {
-	cerr << "DEBUG: QuitMode constructor called" << endl;
+	if (QUIT_DEBUG) cout << "QUIT: QuitMode constructor invoked" << endl;
 	
 	AudioManager = GameAudio::_GetReference();
 	VideoManager = GameVideo::_GetReference();
 	ModeManager = GameModeManager::_GetReference();
 	SettingsManager = GameSettings::_GetReference();
 	
-	mtype = quit_m;
+	mode_type = ENGINE_QUIT_MODE;
 	
 	quit_type = QUIT_CANCEL;
 
 	
-	if (SettingsManager->paused_vol_type == ENGINE_PAUSE_AUDIO_ON_PAUSE) {
-		AudioManager->PauseAudio();
-		return;
-	}
-	
-	else {
-		switch (SettingsManager->paused_vol_type) {
-			case ENGINE_ZERO_VOLUME_ON_PAUSE:
-				AudioManager->SetMusicVolume(0);
-				AudioManager->SetSoundVolume(0);
-				break;
-			case ENGINE_HALF_VOLUME_ON_PAUSE:
-				AudioManager->SetMusicVolume((int)(SettingsManager->music_vol * 0.5));
-				AudioManager->SetSoundVolume((int)(SettingsManager->sound_vol * 0.5));
-				break;
-			// We don't need to do anything for case ENGINE_SAME_VOLUME
-		}
+	switch (SettingsManager->GetPauseVolumeAction()) {
+		case ENGINE_PAUSE_AUDIO:
+			AudioManager->PauseAudio();
+			break;
+		case ENGINE_ZERO_VOLUME:
+			AudioManager->SetMusicVolume(0);
+			AudioManager->SetSoundVolume(0);
+			break;
+		case ENGINE_HALF_VOLUME:
+			AudioManager->SetMusicVolume((int)(SettingsManager->music_vol * 0.5));
+			AudioManager->SetSoundVolume((int)(SettingsManager->sound_vol * 0.5));
+			// Note that the music_vol/sound_vol members of SettingsManager aren't changed
+			break;
+		// Don't need to do anything for case ENGINE_SAME_VOLUME
 	}
 	
 	// Here we'll make a VideoManager call to save the current screen.
@@ -65,7 +64,7 @@ QuitMode::QuitMode() {
 
 // The destructor might possibly have to free any text textures we create...
 QuitMode::~QuitMode() { 
-	cerr << "DEBUG: QuitMode destructor called" << endl;
+	if (QUIT_DEBUG) cout << "QUIT: QuitMode destructor invoked" << endl;
 }
 
 
@@ -109,42 +108,34 @@ void QuitMode::Update(Uint32 time_elapsed) {
 	
 	// The user really doesn't want to quit after all, so restore the game audio and state
 	if (InputManager->CancelPress() || (InputManager->ConfirmPress() && quit_type == QUIT_CANCEL)) {
-		if (SettingsManager->paused_vol_type == ENGINE_PAUSE_AUDIO_ON_PAUSE) {
-			AudioManager->ResumeAudio();
+		switch (SettingsManager->GetPauseVolumeAction()) {
+			case ENGINE_PAUSE_AUDIO:
+				AudioManager->ResumeAudio();
+				break;
+			case ENGINE_ZERO_VOLUME:
+			case ENGINE_HALF_VOLUME:
+				AudioManager->SetMusicVolume(SettingsManager->music_vol);
+				AudioManager->SetSoundVolume(SettingsManager->sound_vol);
+				break;
+			// Don't need to do anything for case ENGINE_SAME_VOLUME
 		}
-		
-		else {
-			switch (SettingsManager->paused_vol_type) {
-				case ENGINE_ZERO_VOLUME_ON_PAUSE:
-				case ENGINE_HALF_VOLUME_ON_PAUSE:
-					AudioManager->SetMusicVolume(SettingsManager->music_vol);
-					AudioManager->SetSoundVolume(SettingsManager->sound_vol);
-					break;
-				// We don't need to do anything for case ENGINE_SAME_VOLUME
-			}
-		}
-		
 		ModeManager->Pop();
 	}
 	
 	// Restore the game audio, pop QuitMode off the stack, and push BootMode
 	else if (InputManager->ConfirmPress() && quit_type == QUIT_TO_BOOTMENU) {
-	  if (SettingsManager->paused_vol_type == ENGINE_PAUSE_AUDIO_ON_PAUSE) {
-			AudioManager->ResumeAudio();
+		switch (SettingsManager->GetPauseVolumeAction()) {
+			case ENGINE_PAUSE_AUDIO:
+				AudioManager->ResumeAudio();
+				break;
+			case ENGINE_ZERO_VOLUME:
+			case ENGINE_HALF_VOLUME:
+				AudioManager->SetMusicVolume(SettingsManager->music_vol);
+				AudioManager->SetSoundVolume(SettingsManager->sound_vol);
+				break;
+			// We don't need to do anything for case ENGINE_SAME_VOLUME
 		}
-		
-		else {
-			switch (SettingsManager->paused_vol_type) {
-				case ENGINE_ZERO_VOLUME_ON_PAUSE:
-				case ENGINE_HALF_VOLUME_ON_PAUSE:
-					AudioManager->SetMusicVolume(SettingsManager->music_vol);
-					AudioManager->SetSoundVolume(SettingsManager->sound_vol);
-					break;
-				// We don't need to do anything for case ENGINE_SAME_VOLUME
-			}
-		}
-		
-		ModeManager->Pop();
+		ModeManager->PopAll(); // Remove and free every game mode
 		BootMode *BM = new BootMode();
 		ModeManager->Push(BM);
 	}

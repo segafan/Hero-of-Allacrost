@@ -1,7 +1,7 @@
 /*
  * data.h
  *  Hero of Allacrost header file for data management
- *  (C) 2004 by Tyler Olsen
+ *  (C) 2004, 2005 by Vladimir Mitrovic
  *
  *  This code is licensed under the GNU GPL. It is free software and you may modify it 
  *   and/or redistribute it under the terms of this license. See http://www.gnu.org/copyleft/gpl.html
@@ -25,7 +25,7 @@ extern "C" {
 
 namespace hoa_data {
 
-const bool DATA_DEBUG = true;
+extern bool DATA_DEBUG;
 
 // A list of libraries to expose for use in scripts
 static const luaL_reg LUALIBS[] = {

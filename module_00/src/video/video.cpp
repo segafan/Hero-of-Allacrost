@@ -9,11 +9,14 @@
 
 namespace hoa_video {
 
+bool VIDEO_DEBUG = false;
+
 SINGLETON_INITIALIZE(GameVideo);
 
 GameVideo::GameVideo() : _width(0), _height(0), _setUp(false),
 	_blend(0), _xalign(-1), _yalign(-1), _xflip(0), _yflip(0)
 {
+	if (VIDEO_DEBUG) fprintf(stdout, "VIDEO: GameVideo constructor invoked\n");
 	if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) {
 		fprintf(stderr, "Barf! SDL Video Initialization failed!\n");
 		exit(1);
@@ -30,7 +33,9 @@ GameVideo::GameVideo() : _width(0), _height(0), _setUp(false),
 
 
 // Added by Roots: Singleton classes need a destructor!!!
-GameVideo::~GameVideo() { }
+GameVideo::~GameVideo() { 
+	if (VIDEO_DEBUG) fprintf(stdout, "VIDEO: GameVideo destructor invoked\n"); 
+}
 
 void
 GameVideo::SetCoordSys(float x_left, float x_right,
@@ -192,8 +197,9 @@ void GameVideo::DrawImage(const ImageDescriptor &id) {
 }
 
 bool GameVideo::LoadImage(ImageDescriptor &id) {
-	if (!LoadTexture(id))
+	if (!LoadTexture(id)) {
 		return false;
+	}
 	_images.push_back(&id);
 	return true;
 }

@@ -14,8 +14,10 @@ using namespace std;
 
 namespace hoa_utils {
 
+bool UTILS_DEBUG = false;
+
 // This will return a floating point number between -1 and 1. Its cute, really.
-float UnitRV() {
+inline float UnitRV() {
 	return 2 * (float) rand()/RAND_MAX - 1;
 }	 
 
@@ -28,14 +30,14 @@ int RandomNum(int lower_bound, int upper_bound) {
 	
 	range = upper_bound - lower_bound + 1;
 	if (range < 0) { // Oops, looks like someone accidentally switched the bound arguments
-		if (UTILS_DEBUG) cerr << "WARNING: Call to RandomNum had bound arguments swapped." << endl;
+		if (UTILS_DEBUG) cerr << "UTILS WARNING: Call to RandomNum had bound arguments swapped." << endl;
 		range = range * -1;
 	}
 	
 	result = range * (float) rand()/RAND_MAX; // Compute a random floating point number in our range
 	result = result + lower_bound; // Shift our range so that it is within the correct bounds;
 	
-	return (int)result;
+	return static_cast<int>(result);
 }
 
 

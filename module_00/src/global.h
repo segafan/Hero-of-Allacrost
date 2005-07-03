@@ -15,11 +15,11 @@
 #include "SDL.h" 
 #include "defs.h"
 #include "utils.h"
-
+#include "video.h"
 
 namespace hoa_global {
 
-const bool GLOBAL_DEBUG = true;
+extern bool GLOBAL_DEBUG;
 
 // Constants for different game object types
 const unsigned char GLOBAL_DUMMY_OBJ  = 0x00;
@@ -345,6 +345,23 @@ private:
 	unsigned int strength;
 	unsigned int intelligence;
 	unsigned int agility;
+	
+	unsigned int base_hit_points;
+	unsigned int base_experience_points;
+	unsigned int base_strength;
+	unsigned int base_intelligence;
+	unsigned int base_agility;
+	
+	unsigned int growth_hit_points;
+	unsigned int growth_experience_points;
+	unsigned int growth_strength;
+	unsigned int growth_intelligence;
+	unsigned int growth_agility;
+	
+	float rate_hit_points;
+	float rate_strength;
+	float rate_intelligence;
+	float rate_agility;
 public:
 // 	GEnemy() {}
 // 	~GEnemy() {}
@@ -406,10 +423,12 @@ private:
 	GArmor *eq_body;
 	GArmor *eq_arms;
 	GArmor *eq_legs;
-	std::vector<GSkill> skills;
+	std::vector<GSkill> attack_skills;
+	std::vector<GSkill> defense_skills;
+	std::vector<GSkill> support_skills;
 	std::vector<GAttackPoint> attack_points;
-// 	std::vector<hoa_video::ImageDescriptor> map_frames;
-// 	std::vector<hoa_video::ImageDescriptor> battle_frames;
+	std::vector<hoa_video::ImageDescriptor> map_frames;
+	std::vector<hoa_video::ImageDescriptor> battle_frames;
 	
 	unsigned int hit_points;
 	unsigned int max_hit_points;
@@ -421,8 +440,8 @@ private:
 	unsigned int intelligence;
 	unsigned int agility;
 public:
-// 	GCharacter() {}
-// 	~GCharacter() {}
+	GCharacter() {}
+	~GCharacter() {}
 	
 	GWeapon* EquipWeapon(GWeapon *new_weapon);
 	GArmor* EquipHeadArmor(GArmor *new_armor);
@@ -452,6 +471,39 @@ public:
 
 
 /******************************************************************************
+	GTime class - Saves information about the elapsed game time
+		
+	>>>members<<<
+		
+	>>>functions<<<
+		
+	>>>notes<<<
+		
+ *****************************************************************************/
+class GTime {
+private:
+	friend class GameInstance;
+	unsigned char seconds;
+	unsigned char minutes;
+	unsigned char hours;
+public:
+	void UpdateTime() {
+		seconds++;
+		if (seconds >= 60) {
+			minutes++;
+			if (minutes >= 60) {
+				hours++;
+			}
+		}
+	}
+	void SetTime(unsigned char h, unsigned char m, unsigned char s) {
+		hours = h;
+		minutes = m;
+		seconds = s;
+	}
+};
+
+/******************************************************************************
 	GameInstance class - Singleton containing information about the state of the game
 		
 	>>>members<<<
@@ -464,10 +516,15 @@ public:
 class GameInstance {
 private:
 	SINGLETON_DECLARE(GameInstance);
+	GTime game_time;
+	std::vector<GCharacter> characters;
+	std::vector<GObject> inventory;
+	unsigned int money;
+	
+	
 public:
 	SINGLETON_METHODS(GameInstance);
 	
-	std::vector<GCharacter> characters;
 };
 
 

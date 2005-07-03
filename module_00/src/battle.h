@@ -50,6 +50,7 @@ is once I write it.
 
 namespace hoa_battle {
 
+extern bool BATTLE_DEBUG;
 
 /* The reason for this embedded namespace is so you can have constants with short and "friendly" names. Any
 constants you make available inside hoa_battle namespace, you must prefix with BATTLE_ according to our code

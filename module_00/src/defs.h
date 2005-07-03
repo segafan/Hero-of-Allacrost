@@ -15,6 +15,7 @@
  
 // Audio declarations, see audio.h/cpp
 namespace hoa_audio {
+	extern bool AUDIO_DEBUG;
 	class GameAudio;
 	class MusicDescriptor;
 	class SoundDescriptor;
@@ -22,17 +23,20 @@ namespace hoa_audio {
 
 // Video declarations, see video.h/cpp
 namespace hoa_video {
+	extern bool VIDEO_DEBUG;
 	class GameVideo;
 	class ImageDescriptor;
 }
 
 // Data declarations, see data.h/cpp
 namespace hoa_data {
+	extern bool DATA_DEBUG;
 	class GameData;
 }
 
 // Engine declarations, see engine.h/cpp
 namespace hoa_engine {
+	extern bool ENGINE_DEBUG;
 	class GameMode;
 	class GameModeManager;
 	class GameSettings;
@@ -43,6 +47,7 @@ namespace hoa_engine {
 
 // Global declarations, see global.h/cpp
 namespace hoa_global {
+	extern bool GLOBAL_DEBUG;
 	class GObject;
 	class GItem;
 	class GSkillBook;
@@ -57,11 +62,13 @@ namespace hoa_global {
 
 // Boot mode declarations, see boot.h/cpp
 namespace hoa_boot {
+	extern bool BOOT_DEBUG;
 	class BootMode;
 }
 
 // Map mode declarations, see map.h/cpp
 namespace hoa_map {
+	extern bool MAP_DEBUG;
 	class MapMode;
 	class ObjectLayer;
 	class MapTile;
@@ -70,25 +77,35 @@ namespace hoa_map {
 
 // Battle mode declarations, see battle.h/cpp
 namespace hoa_battle {
+	extern bool BATTLE_DEBUG;
 	class BattleMode;
 }
 
 // Menu mode declarations, see menu.h/cpp
 namespace hoa_menu {
+	extern bool MENU_DEBUG;
 	class MenuMode;
 }
 
 // Pause mode declarations, see pause.h/cpp
 namespace hoa_pause {
+	extern bool PAUSE_DEBUG;
 	class PauseMode;
 }
 
 // Scene mode declarations, see scene.h/cpp
 namespace hoa_scene {
+	extern bool SCENE_DEBUG;
 	class SceneMode;
 }
 
 // Quit mode declarations, see quit.h/cpp
 namespace hoa_quit {
+	extern bool QUIT_DEBUG;
 	class QuitMode;
+}
+
+// Utils declarations, see utils.h/cpp
+namespace hoa_utils {
+	extern bool UTILS_DEBUG;
 }

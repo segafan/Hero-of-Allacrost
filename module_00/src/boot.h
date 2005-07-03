@@ -20,6 +20,8 @@
 
 namespace hoa_boot {
 
+extern bool BOOT_DEBUG;
+
 // Used to cycle thru the boot menus
 const int NEW_MENU     = 0;
 const int LOAD_MENU    = 1;

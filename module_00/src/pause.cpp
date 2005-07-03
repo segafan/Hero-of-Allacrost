@@ -20,55 +20,54 @@ using namespace hoa_engine;
 
 namespace hoa_pause {
 
+bool PAUSE_DEBUG = false;
+
 // Constructor changes audio, saves currently rendered screen, and draws "Paused" text
 PauseMode::PauseMode() {
-	cerr << "DEBUG: PauseMode constructor invoked" << endl;
+	if (PAUSE_DEBUG) cout << "PAUSE: PauseMode constructor invoked" << endl;
 	
-	mtype = pause_m;
+	mode_type = ENGINE_PAUSE_MODE;
+	unsigned char volume_action = SettingsManager->GetPauseVolumeAction();
 	
-	if (SettingsManager->paused_vol_type == ENGINE_PAUSE_AUDIO_ON_PAUSE) {
-		AudioManager->PauseAudio();
-		return;
+	// Adjust the volume while in paused mode acordingly
+	switch (SettingsManager->GetPauseVolumeAction()) {
+		case ENGINE_PAUSE_AUDIO:
+			AudioManager->PauseAudio();
+			break;
+		case ENGINE_ZERO_VOLUME:
+			AudioManager->SetMusicVolume(0);
+			AudioManager->SetSoundVolume(0);
+			break;
+		case ENGINE_HALF_VOLUME:
+			AudioManager->SetMusicVolume((int)(SettingsManager->music_vol * 0.5));
+			AudioManager->SetSoundVolume((int)(SettingsManager->sound_vol * 0.5));
+			break;
+		// Don't need to do anything for the case ENGINE_SAME_VOLUME
 	}
 	
-	else {
-		switch (SettingsManager->paused_vol_type) {
-			case ENGINE_ZERO_VOLUME_ON_PAUSE:
-				AudioManager->SetMusicVolume(0);
-				AudioManager->SetSoundVolume(0);
-				break;
-			case ENGINE_HALF_VOLUME_ON_PAUSE:
-				AudioManager->SetMusicVolume((int)(SettingsManager->music_vol * 0.5));
-				AudioManager->SetSoundVolume((int)(SettingsManager->sound_vol * 0.5));
-				break;
-			// We don't need to do anything for case ENGINE_SAME_VOLUME
-		}
-	}
+	// Here make a VideoManager call to save the current screen.
 	
-	// Here we'll make a VideoManager call to save the current screen.
-	
-	// Here we'll render the "Paused" text to appear on the screen
+	// Here render the "Paused" text to appear on the screen
 }
 
 
 
 // The destructor might possibly have to free the "Paused" image...
 PauseMode::~PauseMode() {
-	cerr << "DEBUG: PauseMode destructor invoked" << endl;
-	if (SettingsManager->paused_vol_type == ENGINE_PAUSE_AUDIO_ON_PAUSE) {
-		AudioManager->ResumeAudio();
+	if (PAUSE_DEBUG) cout << "PAUSE: PauseMode destructor invoked" << endl;
+
+	switch (SettingsManager->GetPauseVolumeAction()) {
+		case ENGINE_PAUSE_AUDIO:
+			AudioManager->ResumeAudio();
+			break;
+		case ENGINE_ZERO_VOLUME:
+		case ENGINE_HALF_VOLUME:
+			AudioManager->SetMusicVolume(SettingsManager->music_vol);
+			AudioManager->SetSoundVolume(SettingsManager->sound_vol);
+			break;
+		// Don't need to do anything for case ENGINE_SAME_VOLUME
 	}
-	
-	else {
-		switch (SettingsManager->paused_vol_type) {
-			case ENGINE_ZERO_VOLUME_ON_PAUSE:
-			case ENGINE_HALF_VOLUME_ON_PAUSE:
-				AudioManager->SetMusicVolume(SettingsManager->music_vol);
-				AudioManager->SetSoundVolume(SettingsManager->sound_vol);
-				break;
-			// We don't need to do anything for case ENGINE_SAME_VOLUME
-		}
-	}
+
 	
 	// Here we'll need to release the saved screen that VideoManager is holding onto.
 		

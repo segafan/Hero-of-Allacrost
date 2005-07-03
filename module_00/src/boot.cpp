@@ -30,15 +30,17 @@ using namespace hoa_battle; // tmp
 
 namespace hoa_boot {
 
+bool BOOT_DEBUG = false;
+
 // ****************************************************************************
 // *************************** GENERAL FUNCTIONS ******************************
 // ****************************************************************************
 
 // The constructor initializes variables and sets up the path names of the boot images
 BootMode::BootMode() {
-	cerr << "DEBUG: BootMode's constructor invoked." << endl;
+	if (BOOT_DEBUG) cout << "BOOT: BootMode constructor invoked." << endl;
 	
-	mtype = boot_m;
+	mode_type = ENGINE_BOOT_MODE;
 	
 	vmenu_index.push_back(LOAD_MENU);
 	menu_hidden = false;
@@ -64,7 +66,7 @@ BootMode::BootMode() {
 
 // The destructor frees all used music, sounds, and images.
 BootMode::~BootMode() {
-	cerr << "DEBUG: BootMode's destructor invoked." << endl;
+	if (BOOT_DEBUG) cout << "BOOT: BootMode destructor invoked." << endl;
 	
 	for (int i = 0; i < boot_music.size(); i++)
 		AudioManager->FreeMusic(boot_music[i]);
@@ -80,7 +82,7 @@ BootMode::~BootMode() {
 
 // Animates the logo when the boot mode starts up. Should not be called before LoadBootImages.
 void BootMode::AnimateLogo() {
-	cerr << "TEMP: Do nothing" << endl;
+	cout << "TEMP: Do nothing" << endl;
 	// Write a series of image moves/rotations to animate the logo here.
 }
 
@@ -154,7 +156,7 @@ void BootMode::Update(Uint32 time_elapsed) {
 	// If our menu is hidden, we don't do anything until a user event occurs.
 	if (menu_hidden) {
 		if (InputManager->ConfirmPress() || InputManager->CancelPress() || InputManager->MenuPress() || 
-				InputManager->SwapPress() || InputManager->LSelectPress() || InputManager->RSelectPress() ||
+				InputManager->SwapPress() || InputManager->LeftSelectPress() || InputManager->RightSelectPress() ||
 				InputManager->UpPress() || InputManager->DownPress() || InputManager->LeftPress() ||
 				InputManager->RightPress())
 			menu_hidden = false;
@@ -201,7 +203,7 @@ void BootMode::UpdateNewMenu() {
 	
 	if (InputManager->ConfirmPress()) {
 		AudioManager->PlaySound(boot_sound[2], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // game loading sound
-		cout << "*Starting new game!" << endl;
+		if (BOOT_DEBUG) cout << "BOOT: Starting new game." << endl;
 		// Remove the boot mode from the top of the stack
 		
 		MapMode *MM = new MapMode(-1);

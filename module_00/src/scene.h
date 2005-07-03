@@ -17,6 +17,8 @@
 
 namespace hoa_scene {
 
+extern bool SCENE_DEBUG;
+
 namespace local_scene {
 
 // How many milliseconds must pass before the user can exit the scene

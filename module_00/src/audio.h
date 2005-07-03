@@ -32,7 +32,7 @@
 
 namespace hoa_audio {
 
-const bool AUDIO_DEBUG = true;
+//extern bool AUDIO_DEBUG;
 
 // AUDIO_LOOP_FOREVER = Pass this into a loop argument and the music or sound will loop indefinitely
 const int AUDIO_LOOP_FOREVER = -1;
