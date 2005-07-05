@@ -84,7 +84,7 @@ private:
 	GameMode& operator=(const GameMode& other) {}
 public:
 	GameMode();
-	~GameMode();
+	virtual ~GameMode();
 	virtual void Update(Uint32 time_elapsed) = 0;
 	virtual void Draw() = 0;
 };

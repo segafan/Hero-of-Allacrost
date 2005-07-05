@@ -13,6 +13,8 @@
 #include "audio.h"
 #include "video.h"
 #include "data.h"
+#include "global.h"
+#include "engine.h"
 #include "map.h"
 #include "battle.h" // tmp
 
@@ -22,6 +24,7 @@ using namespace hoa_utils;
 using namespace hoa_audio;
 using namespace hoa_video;
 using namespace hoa_engine;
+using namespace hoa_global;
 using namespace hoa_data;
 using namespace hoa_map;
 using namespace hoa_battle; // tmp
@@ -206,6 +209,8 @@ void BootMode::UpdateNewMenu() {
 		if (BOOT_DEBUG) cout << "BOOT: Starting new game." << endl;
 		// Remove the boot mode from the top of the stack
 		
+		GCharacter *claud = new GCharacter("Claudius", "claudius", GLOBAL_CLAUDIUS);
+		InstanceManager->AddCharacter(claud);
 		MapMode *MM = new MapMode(-1);
 		ModeManager->Pop();
 		ModeManager->Push(MM);

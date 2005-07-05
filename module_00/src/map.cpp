@@ -19,7 +19,7 @@
 #include "map.h"
 #include "audio.h"
 #include "video.h"
-//#include "global.h"
+#include "global.h"
 #include "data.h"
 //#include "battle.h"
 //#include "menu.h"
@@ -30,6 +30,7 @@ using namespace hoa_utils;
 using namespace hoa_audio;
 using namespace hoa_video;
 using namespace hoa_engine;
+using namespace hoa_global;
 using namespace hoa_data;
 //using namespace hoa_battle;
 //using namespace hoa_menu;
@@ -42,126 +43,166 @@ bool MAP_DEBUG = false;
 // *********************** ObjectLayer Class Functions ************************
 // ****************************************************************************
 
-ObjectLayer::ObjectLayer(unsigned int type, int row, int col) {
+// Initialize the members and setup the pointer to the GameVideo class
+ObjectLayer::ObjectLayer(unsigned char type, uint row, uint col, uint stat) {
 	object_type = type;
 	row_pos = row;
 	col_pos = col;
+	status = stat;
 	VideoManager = hoa_video::GameVideo::_GetReference();
 }
 
 
-
+// Destructor
 ObjectLayer::~ObjectLayer() {}
 
 // ****************************************************************************
 // ************************ MapSprite Class Functions *************************
 // ****************************************************************************
 
-MapSprite::MapSprite(std::string na, std::string fn, int dt, unsigned int stat, float ss, 
-                     unsigned int type, int row, int col) : ObjectLayer(type, row, col) {
-	name = na;
-	filename = "img/sprite/" + fn;
-	status = stat;
-	step_speed = ss;
+// Constructor for critical class members. Other members are initialized via support functions
+MapSprite::MapSprite(unsigned char type, uint row, uint col, uint stat) 
+                     : ObjectLayer(type, row, col, stat) {
+	step_speed = NORMAL_SPEED;
 	step_count = 0;
-	delay_time = dt;
-	wait_time = 10;
-	LoadFrames();
-}
-
-
-MapSprite::MapSprite(std::string na, std::string fn, unsigned int stat, float ss, 
-                     unsigned int type, int row, int col) : ObjectLayer(type, row, col) {
-	name = na;
-	filename = "img/sprite/" + fn;
-	status = stat;
-	step_speed = ss;
-	step_count = 0;
-	delay_time = 0;
+	delay_time = NORMAL_DELAY;
 	wait_time = 0;
-	LoadFrames();
+	name = "";
+	filename = "";
+	frames = NULL;
+	dialogue = NULL;
 }
+										 
 
-
-// This constructor doesn't need string arguments and is typically used for virtual sprites
-MapSprite::MapSprite(unsigned int stat, float ss, unsigned int type, int row, int col) : 
-                     ObjectLayer(type, row, col) {
-	status = stat;
-	step_speed = ss;
-	step_count = 0;
-	delay_time = 0;
-	wait_time = 0;
-}
+// // Constructor for map sprites who are part of the party (the frames are in the GameInstance class)
+// MapSprite::MapSprite(uint ch, int dt, uint stat, float ss, uint type, int row, int col) 
+//                      : ObjectLayer(type, row, col) {
+// 	GCharacter *person = GameInstance::_GetReference()->GetCharacter(ch);
+// 	name = person->GetName();
+// 	filename = "img/sprite/" + person->GetFilename();
+// 	status = stat | SPR_GLOBAL; // Make sure that we don't delete the frames here, they're used elsewhere
+// 	step_speed = ss;
+// 	step_count = 0;
+// 	delay_time = dt;
+// 	wait_time = 0;
+// 	frames = person->GetMapFrames();
+// }
+// 
+// // Constructor for your standard NPC sprite with a delay timer
+// MapSprite::MapSprite(std::string na, std::string fn, int dt, uint stat, float ss, 
+//                      uint type, int row, int col) : ObjectLayer(type, row, col) {
+// 	name = na;
+// 	filename = "img/sprite/" + fn;
+// 	status = stat;
+// 	step_speed = ss;
+// 	step_count = 0;
+// 	delay_time = dt;
+// 	wait_time = 10;
+// 	LoadFrames();
+// }
+// 
+// 
+// // Constructor for NPCs that don't need a delay timer
+// MapSprite::MapSprite(std::string na, std::string fn, uint stat, float ss, 
+//                      uint type, int row, int col) : ObjectLayer(type, row, col) {
+// 	name = na;
+// 	filename = "img/sprite/" + fn;
+// 	status = stat;
+// 	step_speed = ss;
+// 	step_count = 0;
+// 	delay_time = 0;
+// 	wait_time = 0;
+// 	LoadFrames();
+// }
+// 
+// 
+// // This constructor doesn't need string arguments/images and is typically used for virtual sprites
+// MapSprite::MapSprite(uint stat, float ss, uint type, int row, int col) : 
+//                      ObjectLayer(type, row, col) {
+// 	status = stat;
+// 	step_speed = ss;
+// 	step_count = 0;
+// 	delay_time = 0;
+// 	wait_time = 0;
+// 	frames = NULL;
+// }
 
 
 // Free all the frames from memory
 MapSprite::~MapSprite() {
-	for (int i = 0; i < frames.size(); i++) {
-		VideoManager->DeleteImage(frames[i]);
+	if (status & SPR_GLOBAL) { // Don't delete these sprite frames
+		return;
 	}
+
+	for (int i = 0; i < frames->size(); i++) {
+		VideoManager->DeleteImage((*frames)[i]);
+	}
+	delete frames;
 }
 
 
-// Load the appropriate number of image frames for the sprite time
+// Load the appropriate number of image frames for the sprite
 void MapSprite::LoadFrames() {
+	cout << "Loading frames for sprite: " << filename << endl;
 	ImageDescriptor imd;
-	
+
 	// Load standard sprite animation frames (24 count)
 	if (status & (PLAYER_SPRITE | NPC_SPRITE | ADV_SPRITE)) {
+		frames = new vector<ImageDescriptor>;
 		imd.width = 1;
 		imd.height = 2;
 	
 		imd.filename = filename + "_d1.png";
-		frames.push_back(imd);
+		frames->push_back(imd);
 		imd.filename = filename + "_d2.png";
-		frames.push_back(imd);
+		frames->push_back(imd);
 		imd.filename = filename + "_d3.png";
-		frames.push_back(imd);
+		frames->push_back(imd);
 		imd.filename = filename + "_d4.png";
-		frames.push_back(imd);
+		frames->push_back(imd);
 		imd.filename = filename + "_d5.png";
-		frames.push_back(imd);
+		frames->push_back(imd);
 		
 		imd.filename = filename + "_u1.png";
-		frames.push_back(imd);
+		frames->push_back(imd);
 		imd.filename = filename + "_u2.png";
-		frames.push_back(imd);
+		frames->push_back(imd);
 		imd.filename = filename + "_u3.png";
-		frames.push_back(imd);
+		frames->push_back(imd);
 		imd.filename = filename + "_u4.png";
-		frames.push_back(imd);
+		frames->push_back(imd);
 		imd.filename = filename + "_u5.png";
-		frames.push_back(imd);
+		frames->push_back(imd);
 		
 		imd.filename = filename + "_l1.png";
-		frames.push_back(imd);
+		frames->push_back(imd);
 		imd.filename = filename + "_l2.png";
-		frames.push_back(imd);
+		frames->push_back(imd);
 		imd.filename = filename + "_l3.png";
-		frames.push_back(imd);
+		frames->push_back(imd);
 		imd.filename = filename + "_l4.png";
-		frames.push_back(imd);
+		frames->push_back(imd);
 		imd.filename = filename + "_l5.png";
-		frames.push_back(imd);
+		frames->push_back(imd);
 		imd.filename = filename + "_l6.png";
-		frames.push_back(imd);
+		frames->push_back(imd);
 		imd.filename = filename + "_l7.png";
-		frames.push_back(imd);
+		frames->push_back(imd);
 		
 		imd.filename = filename + "_r1.png";
-		frames.push_back(imd);
+		frames->push_back(imd);
 		imd.filename = filename + "_r2.png";
-		frames.push_back(imd);
+		frames->push_back(imd);
 		imd.filename = filename + "_r3.png";
-		frames.push_back(imd);
+		frames->push_back(imd);
 		imd.filename = filename + "_r4.png";
-		frames.push_back(imd);
+		frames->push_back(imd);
 		imd.filename = filename + "_r5.png";
-		frames.push_back(imd);
+		frames->push_back(imd);
 		imd.filename = filename + "_r6.png";
-		frames.push_back(imd);
+		frames->push_back(imd);
 		imd.filename = filename + "_r7.png";
-		frames.push_back(imd);
+		frames->push_back(imd);
 		
 // 		// Load additional extra frames if the sprite is not a regular NPC
 // 		if (status & (PLAYER_SPRITE | ADV_SPRITE)) {
@@ -173,11 +214,23 @@ void MapSprite::LoadFrames() {
 // 		}
 	}
 	
-		// Now load all the frames
-	for (unsigned int i = 0; i < frames.size(); i++) {
-		VideoManager->LoadImage(frames[i]);
+	// Now load all the frames
+	for (uint i = 0; i < frames->size(); i++) {
+		VideoManager->LoadImage((*frames)[i]);
 	}
+}
 
+
+// Loads the frames and other info from the GameInstance singleton
+void MapSprite::LoadCharacterInfo(uint character) {
+	GCharacter *pchar = GameInstance::_GetReference()->GetCharacter(character);
+	name = pchar->GetName();
+	filename = "img/sprite/" + pchar->GetFilename();
+	status |= SPR_GLOBAL; // Safety so we don't accdidentally delete the sprite frames
+	cout << "LoadCharacterInfo filename = " << filename << endl;
+	frames = pchar->GetMapFrames();
+// 	VideoManager->DrawImage((*frames)[0]);
+// 	cout << "Frames[0].filename = " << (*frames)[0].filename << endl;
 }
 
 
@@ -296,13 +349,14 @@ int MapSprite::FindFrame() {
 
 // Draw the appropriate sprite frame on the correct position on the screen
 void MapSprite::Draw(MapFrame& mf) {
-	float x_pos, y_pos; // The x and y cursor position to draw the sprite to 
-	int draw_frame;     // The sprite frame index to draw
+	float x_pos = 0.0;  // The x and y cursor position to draw the sprite to 
+	float y_pos = 0.0; 
+	int draw_frame = 0; // The sprite frame index to draw
 	
 	// Set the default x and y position (true positions when sprite is not in motion)
-	x_pos = mf.c_pos + (col_pos - mf.c_start);
-	y_pos = mf.r_pos + (mf.r_start - row_pos);
-	
+	x_pos = mf.c_pos + (static_cast<float>(col_pos) - static_cast<float>(mf.c_start));
+	y_pos = mf.r_pos + (static_cast<float>(mf.r_start) - static_cast<float>(row_pos));
+
 	// When we are in motion, we have to off-set the step positions
 	if (status & IN_MOTION) {
 		switch (status & FACE_MASK) {
@@ -340,184 +394,12 @@ void MapSprite::Draw(MapFrame& mf) {
 				break;
 		}
 	}
+
 	
 	draw_frame = FindFrame();
-	
 	VideoManager->Move(x_pos, y_pos);
-	VideoManager->DrawImage(frames[draw_frame]);
+	VideoManager->DrawImage((*frames)[draw_frame]);
 }
-
-
-
-// ****************************************************************************
-// *********************** VirtualFocus Class Functions **********************
-// ****************************************************************************
-
-
-
-
-
-
-
-// ****************************************************************************
-// ************************ PlayerSprite Class Functions **********************
-// ****************************************************************************
-
-
-// NOTE: This is all temporary code here
-// PlayerSprite::PlayerSprite(unsigned int stat, float ss, unsigned int type, int row, int col) :
-// 	MapSprite(stat, ss, type, row, col) {
-// 	if (MAP_DEBUG) cout << "MAP: PlayerSprite constructor invoked" << endl;
-// 	
-// 	ImageDescriptor imd;
-// 	imd.width = 1;
-// 	imd.height = 2;
-// 	
-// 	imd.filename = "img/sprite/claudius_d1.png";
-// 	frames.push_back(imd);
-// 	imd.filename = "img/sprite/claudius_d2.png";
-// 	frames.push_back(imd);
-// 	imd.filename = "img/sprite/claudius_d3.png";
-// 	frames.push_back(imd);
-// 	imd.filename = "img/sprite/claudius_d4.png";
-// 	frames.push_back(imd);
-// 	imd.filename = "img/sprite/claudius_d5.png";
-// 	frames.push_back(imd);
-// 	
-// 	imd.filename = "img/sprite/claudius_u1.png";
-// 	frames.push_back(imd);
-// 	imd.filename = "img/sprite/claudius_u2.png";
-// 	frames.push_back(imd);
-// 	imd.filename = "img/sprite/claudius_u3.png";
-// 	frames.push_back(imd);
-// 	imd.filename = "img/sprite/claudius_u4.png";
-// 	frames.push_back(imd);
-// 	imd.filename = "img/sprite/claudius_u5.png";
-// 	frames.push_back(imd);
-// 	
-// 	imd.filename = "img/sprite/claudius_l1.png";
-// 	frames.push_back(imd);
-// 	imd.filename = "img/sprite/claudius_l2.png";
-// 	frames.push_back(imd);
-// 	imd.filename = "img/sprite/claudius_l3.png";
-// 	frames.push_back(imd);
-// 	imd.filename = "img/sprite/claudius_l4.png";
-// 	frames.push_back(imd);
-// 	imd.filename = "img/sprite/claudius_l5.png";
-// 	frames.push_back(imd);
-// 	imd.filename = "img/sprite/claudius_l6.png";
-// 	frames.push_back(imd);
-// 	imd.filename = "img/sprite/claudius_l7.png";
-// 	frames.push_back(imd);
-// 	
-// 	imd.filename = "img/sprite/claudius_r1.png";
-// 	frames.push_back(imd);
-// 	imd.filename = "img/sprite/claudius_r2.png";
-// 	frames.push_back(imd);
-// 	imd.filename = "img/sprite/claudius_r3.png";
-// 	frames.push_back(imd);
-// 	imd.filename = "img/sprite/claudius_r4.png";
-// 	frames.push_back(imd);
-// 	imd.filename = "img/sprite/claudius_r5.png";
-// 	frames.push_back(imd);
-// 	imd.filename = "img/sprite/claudius_r6.png";
-// 	frames.push_back(imd);
-// 	imd.filename = "img/sprite/claudius_r7.png";
-// 	frames.push_back(imd);
-// 	
-// 	for (int i = 0; i < frames.size(); i++) {
-// 		VideoManager->LoadImage(frames[i]);
-// 	}
-// }
-// 
-// 
-// 
-// PlayerSprite::~PlayerSprite() {
-// 	if (MAP_DEBUG) cout << "MAP: PlayerSprite destructor invoked" << endl;
-// }
-
-
-// ****************************************************************************
-// ************************* NPCSprite Class Functions ************************
-// ****************************************************************************
-
-// NOTE: This is all temporary code here
-// NPCSprite::NPCSprite(string name, int d_time, unsigned int stat, float ss, unsigned int type, int row, int col) :
-// 	MapSprite(stat, ss, type, row, col) {
-// 	if (MAP_DEBUG) cout << "MAP: NPCSprite constructor invoked" << endl;
-// 	wait_time = 0;
-// 	delay_time = d_time;
-// 	
-// 	string path_name = "img/sprite/" + name;
-// 	
-// 	ImageDescriptor imd;
-// 	imd.width = 1;
-// 	imd.height = 2;
-// 	
-// 	imd.filename = path_name + "_d1.png";
-// 	frames.push_back(imd);
-// 	imd.filename = path_name + "_d2.png";
-// 	frames.push_back(imd);
-// 	imd.filename = path_name + "_d3.png";
-// 	frames.push_back(imd);
-// 	imd.filename = path_name + "_d4.png";
-// 	frames.push_back(imd);
-// 	imd.filename = path_name + "_d5.png";
-// 	frames.push_back(imd);
-// 	
-// 	imd.filename = path_name + "_u1.png";
-// 	frames.push_back(imd);
-// 	imd.filename = path_name + "_u2.png";
-// 	frames.push_back(imd);
-// 	imd.filename = path_name + "_u3.png";
-// 	frames.push_back(imd);
-// 	imd.filename = path_name + "_u4.png";
-// 	frames.push_back(imd);
-// 	imd.filename = path_name + "_u5.png";
-// 	frames.push_back(imd);
-// 	
-// 	imd.filename = path_name + "_l1.png";
-// 	frames.push_back(imd);
-// 	imd.filename = path_name + "_l2.png";
-// 	frames.push_back(imd);
-// 	imd.filename = path_name + "_l3.png";
-// 	frames.push_back(imd);
-// 	imd.filename = path_name + "_l4.png";
-// 	frames.push_back(imd);
-// 	imd.filename = path_name + "_l5.png";
-// 	frames.push_back(imd);
-// 	imd.filename = path_name + "_l6.png";
-// 	frames.push_back(imd);
-// 	imd.filename = path_name + "_l7.png";
-// 	frames.push_back(imd);
-// 	
-// 	imd.filename = path_name + "_r1.png";
-// 	frames.push_back(imd);
-// 	imd.filename = path_name + "_r2.png";
-// 	frames.push_back(imd);
-// 	imd.filename = path_name + "_r3.png";
-// 	frames.push_back(imd);
-// 	imd.filename = path_name + "_r4.png";
-// 	frames.push_back(imd);
-// 	imd.filename = path_name + "_r5.png";
-// 	frames.push_back(imd);
-// 	imd.filename = path_name + "_r6.png";
-// 	frames.push_back(imd);
-// 	imd.filename = path_name + "_r7.png";
-// 	frames.push_back(imd);
-// 	
-// 	for (int i = 0; i < frames.size(); i++) {
-// 		VideoManager->LoadImage(frames[i]);
-// 	}
-// }
-// 
-// 
-// 
-// NPCSprite::~NPCSprite() {
-// 	if (MAP_DEBUG) cout << "MAP: NPCSprite destructor invoked." << endl;
-// }
-
-
 
 // ****************************************************************************
 // ************************** MapMode Class Functions *************************
@@ -646,12 +528,16 @@ void MapMode::TempCreateMap() {
 	} 
 	
 	// Load player sprite and rest of map objects
-	MapSprite *p_sprite = new MapSprite("Claudius", "claudius", (CONTROLABLE | VISIBLE | SOUTH | Z_LVL1), 
-	                                    NORMAL_SPEED, PLAYER_SPRITE, 16, 12);
+	MapSprite *p_sprite = new MapSprite(PLAYER_SPRITE, 2, 2, (CONTROLABLE | VISIBLE | SOUTH | Z_LVL1));
+	p_sprite->LoadCharacterInfo(GLOBAL_CLAUDIUS);
 	object_layer.push_back(p_sprite);
 	
-	MapSprite *npc_sprite = new MapSprite("Laila", "laila", 50, (VISIBLE | EAST | Z_LVL1), 
-	                                      NORMAL_SPEED, NPC_SPRITE, 4, 6);
+	MapSprite *npc_sprite = new MapSprite(NPC_SPRITE, 4, 6, (VISIBLE | EAST | Z_LVL1));
+	npc_sprite->SetName("Laila");
+	npc_sprite->SetFilename("img/sprite/laila");
+	npc_sprite->SetSpeed(FAST_SPEED);
+	npc_sprite->SetDelay(SHORT_DELAY);
+	npc_sprite->LoadFrames();
 	object_layer.push_back(npc_sprite);
 	
 	// If the focused_object is ever NULL, the game will exit with a seg fault :(
@@ -670,19 +556,21 @@ MapMode::MapMode(int new_map_id) {
 	// Load the map from the Lua data file
 	//DataManager->LoadMap(this, map_id);
 	
-	// Temporary function that creates a random map
-	TempCreateMap();
-	
 	// Setup the coordinate system
 	VideoManager->SetCoordSys(-SCREEN_COLS/2, SCREEN_COLS/2, -SCREEN_ROWS/2, SCREEN_ROWS/2, 1);
 	
-	virtual_sprite = new MapSprite(VIRTUAL_SPRITE, VERY_FAST_SPEED, VIRTUAL_SPRITE, 20, 20);
+	virtual_sprite = new MapSprite(VIRTUAL_SPRITE, 20, 20, 0x0);
+	virtual_sprite->SetSpeed(VERY_FAST_SPEED);
+	virtual_sprite->SetDelay(NO_DELAY);
+	
+	// Temporary function that creates a random map
+	TempCreateMap();
 }
 
 
 
 MapMode::~MapMode() {
-	if (MAP_DEBUG) cout << "MAP: MapMode destructor invoked." << endl;
+	if (MAP_DEBUG) cout << "MAP: MapMode destructor invoked" << endl;
 	
 	// Delete all of the tile images
 	for (int i = 0; i < tile_count; i++) {
@@ -715,7 +603,7 @@ MapMode::~MapMode() {
 
 
 // Returns whether a sprite can move to a tile or not
-inline bool MapMode::TileMoveable(int row, int col, unsigned int z_occupied) {
+inline bool MapMode::TileMoveable(int row, int col, uint z_occupied) {
 	// First check that the object in question isn't trying to move outside the map boundaries
 	if (row < 1 || col < 0 || row >= row_count || col >= col_count) {
 		return false;
@@ -875,24 +763,9 @@ void MapMode::UpdateVirtualSprite() {
 	}
 }
 
-
-// Simple functions for the MapEditor code
-std::vector<std::vector<MapTile> > MapMode::GetMapLayers() { return map_layers; }
-std::vector<hoa_video::ImageDescriptor> MapMode::GetMapTiles() { return map_tiles; }
-void MapMode::SetTiles(int num_tiles) { tile_count = num_tiles; }
-void MapMode::SetRows(int num_rows) { row_count = num_rows; }
-void MapMode::SetCols(int num_cols) { col_count = num_cols; }
-void MapMode::SetMapLayers(std::vector<std::vector<MapTile> > layers) { map_layers = layers; }
-void MapMode::SetMapTiles(std::vector<hoa_video::ImageDescriptor> tiles) { map_tiles = tiles; }
-int MapMode::GetTiles() { return tile_count; }
-int MapMode::GetRows() { return row_count; }
-int MapMode::GetCols() { return col_count; }
-
-
 // ****************************************************************************
 // **************************** UPDATE FUNCTIONS ******************************
 // ****************************************************************************
-
 
 // Updates the game state when in map mode. Called from the main game loop.
 void MapMode::Update(Uint32 new_time_elapsed) {
@@ -966,7 +839,7 @@ void MapMode::UpdateExploreState() {
 }
 
 
-// Updates the player sprite and processes user input while in the 'explore' state
+// Updates the player-controlled sprite and processes user input while in the 'explore' state
 void MapMode::UpdatePlayerExplore(MapSprite *player_sprite) {
 	int r_check, c_check;   // Variables for saving tile coordinates
 	int move_direction;     // The direction the sprite may be set to move in
@@ -1100,13 +973,14 @@ void MapMode::UpdatePlayerExplore(MapSprite *player_sprite) {
 void MapMode::UpdateNPCExplore(MapSprite *npc) {
 	
 	if (npc->status & IN_MOTION) { 
+		cout << "im moving" << endl;
 		npc->step_count += (float)time_elapsed / npc->step_speed;
 		
 		// Check whether we've reached a new tile
 		if (npc->step_count >= npc->step_speed) {
 			npc->step_count -= npc->step_speed;
 			npc->status &= ~IN_MOTION;
-			npc->status ^= STEP_SWAP; // This flips the step_swap bit. Bit-wise XOR
+			npc->status ^= STEP_SWAP; // This flips the step_swap bit
 			
 			if (npc->delay_time != 0) { // Stop the sprite for now and set a new wait time
 				npc->wait_time = GaussianValue(npc->delay_time, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
@@ -1126,6 +1000,7 @@ void MapMode::UpdateNPCExplore(MapSprite *npc) {
 		}
 		
 		else {
+			cout << "hi" << endl;
 			npc->status &= ~IN_MOTION;
 			SpriteMove(RandomNum(0,7), npc); 
 		}
@@ -1172,7 +1047,6 @@ void MapMode::UpdateScriptState() {
 // Determines things like our starting tiles
 void MapMode::GetDrawInfo(MapFrame& mf) {
 	// ************* (1) Calculate the default drawing positions for the tiles ****************
-	
 	// Draw from the top left corner
 	mf.c_pos = -SCREEN_COLS / 2 - 0.5;
 	mf.r_pos = SCREEN_ROWS / 2 - 0.5;
@@ -1186,7 +1060,6 @@ void MapMode::GetDrawInfo(MapFrame& mf) {
 	mf.r_start = focused_object->row_pos - SCREEN_ROWS / 2;
 	
 	// *********************** (2) Calculate the drawing information **************************
-	
 	if (focused_object->status & IN_MOTION) {
 		if (focused_object->step_count <= (focused_object->step_speed / 2)) {
 			// We are not more than half-way moving west, so make adjustments
@@ -1276,7 +1149,6 @@ void MapMode::Draw() {
 	GetDrawInfo(mf); // Get all the information we need for drawing this map frame
 	
 	// ************** (1) Draw the Lower Layer *************
-	
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_NO_BLEND, 0);
 	VideoManager->SelectLayer(1);
 	VideoManager->Move(mf.c_pos, mf.r_pos);
@@ -1294,10 +1166,10 @@ void MapMode::Draw() {
 	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 	for (int i = 0; i < object_layer.size(); i++) {
 		(object_layer[i])->Draw(mf);
+// 		SDL_Delay(100);
 	}
-	 
+	
 	// ************** (3) Draw the Upper Layer *************
-
 	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 	VideoManager->SelectLayer(1);
 	VideoManager->Move(mf.c_pos, mf.r_pos);
@@ -1308,7 +1180,6 @@ void MapMode::Draw() {
 			VideoManager->MoveRel(1,0);
 		}
 		VideoManager->MoveRel(-mf.c_draw, -1);
-		
 	}
 	
 	// ************** (4) Draw the Dialoge box, if needed *************

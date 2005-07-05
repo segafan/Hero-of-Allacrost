@@ -7,7 +7,7 @@
  *	 and/or redistribute it under the terms of this license. See http://www.gnu.org/copyleft/gpl.html
  *	 for details.
  */
- 
+
 #ifndef __GLOBAL_HEADER__
 #define __GLOBAL_HEADER__ 
 
@@ -15,7 +15,6 @@
 #include "SDL.h" 
 #include "defs.h"
 #include "utils.h"
-#include "video.h"
 
 namespace hoa_global {
 
@@ -418,6 +417,9 @@ public:
 class GCharacter {
 private:
 	std::string name;
+	std::string filename;
+	uint char_id;
+	
 	GWeapon *eq_weapon;
 	GArmor *eq_head;
 	GArmor *eq_body;
@@ -440,8 +442,8 @@ private:
 	unsigned int intelligence;
 	unsigned int agility;
 public:
-	GCharacter() {}
-	~GCharacter() {}
+	GCharacter(std::string na, std::string fn, uint id);
+	~GCharacter();
 	
 	GWeapon* EquipWeapon(GWeapon *new_weapon);
 	GArmor* EquipHeadArmor(GArmor *new_armor);
@@ -449,6 +451,15 @@ public:
 	GArmor* EquipArmsArmor(GArmor *new_armor);
 	GArmor* EquipLegsArmor(GArmor *new_armor);
 	
+	void LoadFrames();
+	
+	void SetName(std::string na) { name = na; }
+	std::string GetName() { return name; }
+	void SetFilename(std::string fn) { filename = fn; }
+	std::string GetFilename() { return filename; }
+	void SetID(uint id) { char_id = id; }
+	uint GetID() { return char_id; }
+	std::vector<hoa_video::ImageDescriptor>* GetMapFrames() { return &map_frames; }
 	void SetHP(unsigned int hp) { hit_points = hp; }
 	unsigned int GetHP() { return hit_points; }
 	void SetMaxHP(unsigned int max_hp) { max_hit_points = max_hp; }
@@ -517,14 +528,17 @@ class GameInstance {
 private:
 	SINGLETON_DECLARE(GameInstance);
 	GTime game_time;
-	std::vector<GCharacter> characters;
+	std::vector<GCharacter*> characters;
 	std::vector<GObject> inventory;
 	unsigned int money;
 	
+	hoa_video::GameVideo *VideoManager;
 	
 public:
 	SINGLETON_METHODS(GameInstance);
 	
+	void AddCharacter(GCharacter *ch);
+	GCharacter* GetCharacter(uint id);
 };
 
 
