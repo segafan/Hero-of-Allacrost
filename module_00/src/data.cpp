@@ -170,7 +170,7 @@ void GameData::FillIntVector(std::vector<int> *vect, const char *key) {
 // This function initializes all the members of the GameSettings singleton class
 void GameData::LoadGameSettings () {
 	hoa_engine::GameSettings *SettingsManager = GameSettings::_GetReference();
-	const char *filename = "data/config/settings.hoa";
+	const char *filename = "dat/config/settings.hoa";
 
 	if (luaL_loadfile(l_stack, filename) || lua_pcall(l_stack, 0, 0, 0))
 		cerr << "DATA ERROR: Could not load " << filename << " :: " << lua_tostring(l_stack, -1) << endl;
@@ -194,7 +194,7 @@ void GameData::LoadGameSettings () {
 }
 
 void GameData::LoadKeyJoyState(KeyState *keystate, JoystickState *joystate) {
-	const char *filename = "data/config/settings.hoa";
+	const char *filename = "dat/config/settings.hoa";
 	if (luaL_loadfile(l_stack, filename) || lua_pcall(l_stack, 0, 0, 0))
 		cerr << "DATA ERROR: Could not load " << filename << " :: " << lua_tostring(l_stack, -1) << endl;
 	
@@ -226,7 +226,7 @@ void GameData::LoadBootData(
 		vector<ImageDescriptor> *boot_images,
 		vector<SoundDescriptor> *boot_sound,
 		vector<MusicDescriptor> *boot_music) {
-	char* filename = "data/config/boot.hoa";
+	char* filename = "dat/config/boot.hoa";
 	if (luaL_loadfile(l_stack, filename) || lua_pcall(l_stack, 0, 0, 0))
 		cerr << "DATA ERROR: Could not load "<< filename << " :: " << lua_tostring(l_stack, -1) << endl;
 	
@@ -285,7 +285,7 @@ void GameData::LoadBootData(
 // by new_map_id. The function should be called only from the MapMode class members.
 void GameData::LoadMap(hoa_map::MapMode *map_mode, int new_map_id) {
 	// Load the map file
-	string filename = "data/maps/map";
+	string filename = "dat/maps/map";
 	// filename += "1";	// TEMPORARY TEMPORARY
 	filename += "1";
 	filename += ".hoa";
@@ -300,7 +300,6 @@ void GameData::LoadMap(hoa_map::MapMode *map_mode, int new_map_id) {
 	// this one will change:
 	map_mode->steps_till_encounter = GaussianValue(map_mode->encounter_rate, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
 	map_mode->animation_counter = GetGlobalInt("animation_counter");
-	map_mode->tile_count = GetGlobalInt("tile_count");
 	map_mode->row_count = GetGlobalInt("row_count");
 	map_mode->col_count = GetGlobalInt("col_count");
 	

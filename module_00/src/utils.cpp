@@ -19,7 +19,14 @@ bool UTILS_DEBUG = false;
 // This will return a floating point number between -1 and 1. Its cute, really.
 inline float UnitRV() {
 	return 2 * (float) rand()/RAND_MAX - 1;
-}	 
+}
+
+
+
+// Returns a floaint point number between 0.0 and 1.0
+float RandomUnit() {
+	return (static_cast<float>(rand()/RAND_MAX));
+}
 
 
 
@@ -65,10 +72,10 @@ int GaussianValue(int mean, int range, bool positive_value) {
 	//	is a Gaussian random variable with mean 0 and standard deviation 1. 
 	//	 Reference: Knuth, The Art of Computer Programming, Volume 2, p. 122
 	do {
-		x = 2.0 * UnitRV() - 1.0;						// Get the X-coordinate
-		y = 2.0 * UnitRV() - 1.0;						// Get the Y-coordinate
-		r = x*x + y*y;											 // Compute the radius
-	} while (r > 1.0 || r == 0.0);				 // Loop is executed 4 / pi = 1.273 times on average	
+		x = 2.0 * UnitRV() - 1.0;            // Get the X-coordinate
+		y = 2.0 * UnitRV() - 1.0;            // Get the Y-coordinate
+		r = x*x + y*y;                       // Compute the radius
+	} while (r > 1.0 || r == 0.0);         // Loop is executed 4 / pi = 1.273 times on average	
 	z_value = x * sqrt(-2.0 * log(r) / r); // Get the Gaussian random value with mean 0 and standard devation 1
 	
 	// Compute a Gaussian value using our own mean and standard deviation
@@ -83,7 +90,7 @@ int GaussianValue(int mean, int range, bool positive_value) {
 	if (range <= 0) 
 		return (int)result;
 	
-	if (result < mean - range)			// Covers the case that we exceeded our lower bound (occurs 0.015% of the time)
+	if (result < mean - range)      // Covers the case that we exceeded our lower bound (occurs 0.015% of the time)
 		result = mean - range;
 	else if (result > mean + range) // Covers the case that we exceeded our upper bound (occurs 0.015% of the time)
 		result = mean + range;

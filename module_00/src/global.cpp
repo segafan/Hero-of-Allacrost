@@ -183,7 +183,40 @@ GAttackPoint::~GAttackPoint() {}
 // ******************************** GEnemy ************************************
 // ****************************************************************************
 
+GEnemy::GEnemy() { }
 
+GEnemy::~GEnemy() { }
+
+// Simulate the leveling up of experience for the enemy from its base stats.
+void GEnemy::LevelSimulator(uint lvl) {
+	float rate_inc = 0.0;
+
+	experience_level = lvl;
+	max_hit_points = base_hit_points;
+	experience_points = base_experience_points;
+	strength = base_strength;
+	intelligence = base_intelligence;
+	agility = base_agility;
+	
+	for (uint i = 1; i <= experience_level; i++) {
+		rate_inc = 1.0 - RandomUnit();
+		experience_points += growth_experience_points;
+		if (rate_hit_points <= rate_inc) {
+			max_hit_points += growth_hit_points;
+		}
+		if (rate_strength <= rate_inc) {
+			strength += growth_strength;
+		}
+		if (rate_intelligence <= rate_inc) {
+			intelligence += growth_intelligence;
+		}
+		if (rate_agility <= rate_inc) {
+			agility += growth_agility;
+		}
+	}
+	
+	hit_points = max_hit_points;
+}
 
 // ****************************************************************************
 // ****************************** GCharacter **********************************
@@ -216,7 +249,7 @@ GCharacter::~GCharacter() {
 void GCharacter::LoadFrames() {
 	GameVideo *VideoManager = GameVideo::_GetReference();
 	ImageDescriptor imd;
-	string full_name = "img/sprite/" + filename;
+	string full_name = "img/sprites/map/" + filename;
 	
 	imd.width = 1;
 	imd.height = 2;

@@ -21,8 +21,8 @@
 #include "video.h"
 #include "global.h"
 #include "data.h"
-//#include "battle.h"
-//#include "menu.h"
+#include "battle.h"
+#include "menu.h"
 
 using namespace std;
 using namespace hoa_map::local_map;
@@ -32,8 +32,8 @@ using namespace hoa_video;
 using namespace hoa_engine;
 using namespace hoa_global;
 using namespace hoa_data;
-//using namespace hoa_battle;
-//using namespace hoa_menu;
+using namespace hoa_battle;
+using namespace hoa_menu;
 
 namespace hoa_map {
 
@@ -143,7 +143,6 @@ MapSprite::~MapSprite() {
 
 // Load the appropriate number of image frames for the sprite
 void MapSprite::LoadFrames() {
-	cout << "Loading frames for sprite: " << filename << endl;
 	ImageDescriptor imd;
 
 	// Load standard sprite animation frames (24 count)
@@ -227,7 +226,6 @@ void MapSprite::LoadCharacterInfo(uint character) {
 	name = pchar->GetName();
 	filename = "img/sprite/" + pchar->GetFilename();
 	status |= SPR_GLOBAL; // Safety so we don't accdidentally delete the sprite frames
-	cout << "LoadCharacterInfo filename = " << filename << endl;
 	frames = pchar->GetMapFrames();
 // 	VideoManager->DrawImage((*frames)[0]);
 // 	cout << "Frames[0].filename = " << (*frames)[0].filename << endl;
@@ -413,7 +411,6 @@ void MapMode::TempCreateMap() {
 	steps_till_encounter = GaussianValue(encounter_rate, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
 	animation_counter = 0;
 	
-	tile_count = 16;	
 	row_count = 60;
 	col_count = 80;
 	
@@ -422,47 +419,47 @@ void MapMode::TempCreateMap() {
 	imd.width = 1;
 	imd.height = 1;
 	
-	imd.filename = "img/tile/test_01.png";
+	imd.filename = "img/tiles/test_01.png";
 	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_02.png";
+	imd.filename = "img/tiles/test_02.png";
 	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_03.png";
+	imd.filename = "img/tiles/test_03.png";
 	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_04.png";
+	imd.filename = "img/tiles/test_04.png";
 	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_05.png";
+	imd.filename = "img/tiles/test_05.png";
 	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_06.png";
+	imd.filename = "img/tiles/test_06.png";
 	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_07.png";
+	imd.filename = "img/tiles/test_07.png";
 	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_08.png";
+	imd.filename = "img/tiles/test_08.png";
 	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_09.png";
+	imd.filename = "img/tiles/test_09.png";
 	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_10.png";
+	imd.filename = "img/tiles/test_10.png";
 	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_11.png";
+	imd.filename = "img/tiles/test_11.png";
 	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_12.png";
+	imd.filename = "img/tiles/test_12.png";
 	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_13.png";
+	imd.filename = "img/tiles/test_13.png";
 	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_14.png";
+	imd.filename = "img/tiles/test_14.png";
 	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_15.png";
+	imd.filename = "img/tiles/test_15.png";
 	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_16.png";
+	imd.filename = "img/tiles/test_16a.png";
 	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_16a.png";
+	imd.filename = "img/tiles/test_16b.png";
 	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_16b.png";
+	imd.filename = "img/tiles/test_16d.png";
 	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_16d.png";
+	imd.filename = "img/tiles/test_16d.png";
 	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_16d.png";
+	imd.filename = "img/tiles/test_16e.png";
 	map_tiles.push_back(imd);
-	imd.filename = "img/tile/test_16e.png";
+	imd.filename = "img/tiles/blue_40.png";
 	map_tiles.push_back(imd);
 	
 	for (int i = 0; i < map_tiles.size(); i++) { 
@@ -471,7 +468,7 @@ void MapMode::TempCreateMap() {
 	
 	// Setup tile frame pointers for animation
 	TileFrame *tf;
-	for (int i = 0; i < tile_count - 1; i++) {
+	for (int i = 0; i < 15; i++) {
 		tf = new TileFrame;
 	  tf->frame = i;
 		tf->next = tf;
@@ -481,35 +478,34 @@ void MapMode::TempCreateMap() {
 	// Setup the final animated frame tile
 	TileFrame *tmp;
 	tf = new TileFrame;
-	tf->frame = 15;
+	tf->frame = 15; // a
 	tf->next = NULL;
 	tile_frames.push_back(tf);
 	
 	tmp = new TileFrame;
 	tf->next = tmp;
-	tmp->frame = 16; // a
+	tmp->frame = 16; // b
 	tf = tmp;
 	
 	tmp = new TileFrame;
 	tf->next = tmp;
-	tmp->frame = 17; // b
+	tmp->frame = 17; // c
 	tf = tmp;
 	
 	tmp = new TileFrame;
 	tf->next = tmp;
-	tmp->frame = 18; // c
+	tmp->frame = 18; // d
 	tf = tmp;
 	
 	tmp = new TileFrame;
 	tf->next = tmp;
-	tmp->frame = 19; // d
-	tf = tmp;
-	
-	tmp = new TileFrame;
-	tf->next = tmp;
-	tmp->frame = 20; // e
+	tmp->frame = 19; // e
 	tmp->next = tile_frames[15]; // Makes the linked list circular now
 	
+	tf = new TileFrame;
+	tf->frame = 20;
+	tf->next = tf;
+	tile_frames.push_back(tf);
 	
 	
 	// Setup the image map
@@ -518,7 +514,8 @@ void MapMode::TempCreateMap() {
 	for (int r = 0; r < row_count; r++) {
 		map_layers.push_back(vector <MapTile>());
 		for (int c = 0; c < col_count; c++) {
-			tmp_tile.lower_layer = (RandomNum(0, 16 - 1)); // Build our lower layer from random tiles
+			tmp_tile.lower_layer = (RandomNum(0, 16 - 1)); // Build the lower layer from random tiles
+			tmp_tile.upper_layer = 16;
 			if (tmp_tile.lower_layer == 15)
 				tmp_tile.properties = Z_LVL1; // We can not walk on the water tiles
 			else
@@ -534,9 +531,9 @@ void MapMode::TempCreateMap() {
 	
 	MapSprite *npc_sprite = new MapSprite(NPC_SPRITE, 4, 6, (VISIBLE | EAST | Z_LVL1));
 	npc_sprite->SetName("Laila");
-	npc_sprite->SetFilename("img/sprite/laila");
+	npc_sprite->SetFilename("img/sprites/map/laila");
 	npc_sprite->SetSpeed(FAST_SPEED);
-	npc_sprite->SetDelay(SHORT_DELAY);
+	npc_sprite->SetDelay(LONG_DELAY);
 	npc_sprite->LoadFrames();
 	object_layer.push_back(npc_sprite);
 	
@@ -573,7 +570,7 @@ MapMode::~MapMode() {
 	if (MAP_DEBUG) cout << "MAP: MapMode destructor invoked" << endl;
 	
 	// Delete all of the tile images
-	for (int i = 0; i < tile_count; i++) {
+	for (int i = 0; i < map_tiles.size(); i++) {
 		VideoManager->DeleteImage(map_tiles[i]);
 	}
 	
@@ -618,7 +615,7 @@ inline bool MapMode::TileMoveable(int row, int col, uint z_occupied) {
 }
 
 
-// Moves the sprite in direction, if possible. Returns true if move was successful.
+// Moves the sprite in some direction, if possible.
 void MapMode::SpriteMove(int direction, MapSprite *sprite) {
 	int r_check, c_check; // Variables for holding the position of a tile to check.
 	
@@ -695,7 +692,7 @@ void MapMode::UpdateVirtualSprite() {
 	bool user_move;
 	int move_direction;
 	
-	// *********** (!) Handle updates for the player sprite when in motion ************
+	// *********** (1) Handle updates for the player sprite when in motion ************
 	if (virtual_sprite->status & IN_MOTION) {
 		virtual_sprite->step_count += (float)time_elapsed / virtual_sprite->step_speed;
 		
@@ -973,7 +970,6 @@ void MapMode::UpdatePlayerExplore(MapSprite *player_sprite) {
 void MapMode::UpdateNPCExplore(MapSprite *npc) {
 	
 	if (npc->status & IN_MOTION) { 
-		cout << "im moving" << endl;
 		npc->step_count += (float)time_elapsed / npc->step_speed;
 		
 		// Check whether we've reached a new tile
@@ -996,12 +992,11 @@ void MapMode::UpdateNPCExplore(MapSprite *npc) {
 	else { // Sprite is not in motion
 		// Process either scripted movement or random movement
 		if (npc->wait_time > 0) {
-			npc->wait_time -= time_elapsed; // Decrement the wait timer
+			npc->wait_time -= static_cast<int>(time_elapsed); // Decrement the wait timer
 		}
 		
 		else {
-			cout << "hi" << endl;
-			npc->status &= ~IN_MOTION;
+			npc->status |= IN_MOTION;
 			SpriteMove(RandomNum(0,7), npc); 
 		}
 	}
@@ -1166,7 +1161,6 @@ void MapMode::Draw() {
 	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 	for (int i = 0; i < object_layer.size(); i++) {
 		(object_layer[i])->Draw(mf);
-// 		SDL_Delay(100);
 	}
 	
 	// ************** (3) Draw the Upper Layer *************

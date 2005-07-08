@@ -61,9 +61,10 @@ const unsigned int GLOBAL_SLEEP_STATUS  = 0x00000004;
 const int GLOBAL_MAX_SP = 100;
 
 // Constants for commonly accessed sounds
-const unsigned int GLOBAL_SOUND_CONFIRM = 0x00000001;
-const unsigned int GLOBAL_SOUND_CANCEL  = 0x00000002;
-
+const uint GLOBAL_SOUND_CONFIRM =  0;
+const uint GLOBAL_SOUND_CANCEL  =  1;
+const uint GLOBAL_SOUND_OBTAIN  =  2;
+const uint GLOBAL_SOUND_BUMP    =  3;
 
 
 /******************************************************************************
@@ -336,36 +337,38 @@ private:
 	std::vector<GAttackPoint> attack_points;
 	std::vector<hoa_video::ImageDescriptor> sprite_frames;
 	
-	unsigned int hit_points;
-	unsigned int max_hit_points;
-	unsigned int skill_points;
-	unsigned int experience_points;
-	unsigned int experience_level;
-	unsigned int strength;
-	unsigned int intelligence;
-	unsigned int agility;
+	uint hit_points;
+	uint max_hit_points;
+	uint skill_points;
+	uint experience_points;
+	uint experience_level;
+	uint strength;
+	uint intelligence;
+	uint agility;
 	
-	unsigned int base_hit_points;
-	unsigned int base_experience_points;
-	unsigned int base_strength;
-	unsigned int base_intelligence;
-	unsigned int base_agility;
+	uint base_hit_points;
+	uint base_experience_points;
+	uint base_strength;
+	uint base_intelligence;
+	uint base_agility;
 	
-	unsigned int growth_hit_points;
-	unsigned int growth_experience_points;
-	unsigned int growth_strength;
-	unsigned int growth_intelligence;
-	unsigned int growth_agility;
+	uint growth_hit_points;
+	uint growth_experience_points;
+	uint growth_strength;
+	uint growth_intelligence;
+	uint growth_agility;
 	
 	float rate_hit_points;
 	float rate_strength;
 	float rate_intelligence;
 	float rate_agility;
 public:
-// 	GEnemy() {}
-// 	~GEnemy() {}
+	GEnemy();
+	~GEnemy();
 // 	GEnemy(const GEnemy&) {}
 // 	GEnemy& operator=(const GEnemy&) {}
+
+	void LevelSimulator(uint lvl);
 	
 	void SetHP(unsigned int hp) { hit_points = hp; }
 	unsigned int GetHP() { return hit_points; }

@@ -106,6 +106,13 @@ const int UTILS_NO_BOUNDS = 0;
 float UnitRV();
 
 /******************************************************************************
+ * float RandomUnit():
+ *
+ *	A simple function that returns a random floating point value between [0.0, 1.0]. 
+ ******************************************************************************/
+float RandomUnit();
+
+/******************************************************************************
  * int RandomNum(int lower_bound, int upper_bound):
  *
  *	A simple function that returns a random interger value between [lower_bound, upper_bound].

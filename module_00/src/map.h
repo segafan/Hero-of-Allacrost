@@ -14,17 +14,6 @@
  *	occur on the map.
  *
  */
- 
-/* >>>>> STUFF TO IMPLEMENT (05/13/2005) <<<<<
- * 
- * > Fix drawing error with map objects
- * > 8-layer 'heights' with individual collision detection
- * > MapMode(int rows, int cols) constructor for MapEditor
- * > Create map state stack instead of single map state variable
- * > Ability for map to follow *any* object, not just the player sprite
- * > "Virtual sprite" class for allowing an un-drawable focal point for the map
- *
-*/ 
 
 #ifndef __MAP_HEADER__
 #define __MAP_HEADER__
@@ -100,7 +89,7 @@ const unsigned char ADV_SPRITE     = 0x04; // 'Advanced' NPC sprites with more e
 const unsigned char OTHER_SPRITE   = 0x08; // Sprites of non-standard sizes (small animals, etc)
 const unsigned char ENEMY_SPRITE   = 0x10; // Enemy sprites, various sizes
 const unsigned char STATIC_OBJECT  = 0x20; // A still, non-animate object
-const unsigned char DYNAMIC_OBJECT = 0x40; // A still but animate object
+const unsigned char DYNAMIC_OBJECT = 0x40; // A still and animate object
 const unsigned char MIDDLE_OBJECT  = 0x80; // A "middle-layer" object
 
 // ********************** SPRITE CONSTANTS **************************
@@ -272,9 +261,9 @@ public:
 	ObjectLayer - Abstract class for all map objects
 		
 	>>>members<<<
-		uint object_type: an identifier type for the object
-		int row_pos: the map row position for the bottom left corner of the object
-		int col_pos: the map col position for the bottom left corner of the object
+		unsigned char object_type: an identifier type for the object
+		uint row_pos: the map row position for the bottom left corner of the object
+		uint col_pos: the map col position for the bottom left corner of the object
 		uint status: a bit-mask for setting and detecting various conditions on the object
 
 	>>>functions<<<
@@ -338,7 +327,7 @@ protected:
 	std::string filename;
 	float step_speed;
 	float step_count;
-	uint wait_time;
+	int wait_time;
 	uint delay_time;
 	
 	std::vector<hoa_video::ImageDescriptor> *frames;
@@ -370,7 +359,6 @@ public:
 	 vector<uint> map_state: indicates what state the map is in (explore, dialogue, script, etc)
 	 int animation_counter: millisecond counter for use in tile animation
 	 
-	 int tile_count: the number of tile images used in the map, not counting individual animation tiles
 	 int row_count: the number of rows comprising the map
 	 int col_count: the number of columns comprising the map
 			
@@ -423,7 +411,6 @@ private:
 	int animation_counter;
 	Uint32 time_elapsed;
 	
-	int tile_count;	
 	int row_count;
 	int col_count;
 	
@@ -437,12 +424,14 @@ private:
 	MapSprite *focused_object;
 	MapSprite *virtual_sprite;
 	
-	std::vector<hoa_video::ImageDescriptor> map_tiles;	
+	static std::vector<hoa_video::ImageDescriptor> map_images;
+	std::vector<hoa_video::ImageDescriptor> map_tiles;
 	std::vector<hoa_audio::MusicDescriptor> map_music;
 	std::vector<hoa_audio::SoundDescriptor> map_sound;
+
 	
 //	 vector<MapEvent> map_events;
-//	 vector<GEnemy> map_enemies;
+//	std::vector<hoa_global::GEnemy> map_enemies;
 	
 	bool TileMoveable(int row, int col, uint z_occupied);
 	void SpriteMove(int direction, MapSprite *sprite);
@@ -468,12 +457,10 @@ public:
 	
 	std::vector<std::vector<MapTile> > GetMapLayers() { return map_layers; }
 	std::vector<hoa_video::ImageDescriptor> GetMapTiles() { return map_tiles; }
-	void SetTiles(int num_tiles) { tile_count = num_tiles; }
 	void SetRows(int num_rows) { row_count = num_rows; }
 	void SetCols(int num_cols) { col_count = num_cols; }
 	void SetMapLayers(std::vector<std::vector<MapTile> > layers) { map_layers = layers; }
 	void SetMapTiles(std::vector<hoa_video::ImageDescriptor> tiles) { map_tiles = tiles; }
-	int GetTiles() { return tile_count; }
 	int GetRows() { return row_count; }
 	int GetCols() { return col_count; }
 	
