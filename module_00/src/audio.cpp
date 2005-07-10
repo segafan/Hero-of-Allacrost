@@ -236,7 +236,7 @@ void GameAudio::LoadMusic(MusicDescriptor& md) {
 	if (location != -1) // File is already loaded. Return and be angry that you wasted your time
 		return;
 	
-	string load_name = "music/" + md.filename + ".ogg"; // Create full path to filename
+	string load_name = "mus/" + md.filename + ".ogg"; // Create full path to filename
 	new_mus = Mix_LoadMUS(load_name.c_str()); // We need to convert the string to a C-type string
 	if (new_mus == NULL) { // typo in filename arg or missing/corrupt file are the most likely errors to cause this
 		cerr << "AUDIO ERROR: Could not load " << load_name << ". " << Mix_GetError() << endl;
