@@ -63,6 +63,7 @@ ObjectLayer::~ObjectLayer() {}
 // Constructor for critical class members. Other members are initialized via support functions
 MapSprite::MapSprite(unsigned char type, uint row, uint col, uint stat) 
                      : ObjectLayer(type, row, col, stat) {
+	if (MAP_DEBUG) cout << "MAP: MapSprite constructor invoked" << endl;
 	step_speed = NORMAL_SPEED;
 	step_count = 0;
 	delay_time = NORMAL_DELAY;
@@ -70,66 +71,13 @@ MapSprite::MapSprite(unsigned char type, uint row, uint col, uint stat)
 	name = "";
 	filename = "";
 	frames = NULL;
-	dialogue = NULL;
+	speech = new SpriteDialogue();
 }
-										 
-
-// // Constructor for map sprites who are part of the party (the frames are in the GameInstance class)
-// MapSprite::MapSprite(uint ch, int dt, uint stat, float ss, uint type, int row, int col) 
-//                      : ObjectLayer(type, row, col) {
-// 	GCharacter *person = GameInstance::_GetReference()->GetCharacter(ch);
-// 	name = person->GetName();
-// 	filename = "img/sprite/" + person->GetFilename();
-// 	status = stat | SPR_GLOBAL; // Make sure that we don't delete the frames here, they're used elsewhere
-// 	step_speed = ss;
-// 	step_count = 0;
-// 	delay_time = dt;
-// 	wait_time = 0;
-// 	frames = person->GetMapFrames();
-// }
-// 
-// // Constructor for your standard NPC sprite with a delay timer
-// MapSprite::MapSprite(std::string na, std::string fn, int dt, uint stat, float ss, 
-//                      uint type, int row, int col) : ObjectLayer(type, row, col) {
-// 	name = na;
-// 	filename = "img/sprite/" + fn;
-// 	status = stat;
-// 	step_speed = ss;
-// 	step_count = 0;
-// 	delay_time = dt;
-// 	wait_time = 10;
-// 	LoadFrames();
-// }
-// 
-// 
-// // Constructor for NPCs that don't need a delay timer
-// MapSprite::MapSprite(std::string na, std::string fn, uint stat, float ss, 
-//                      uint type, int row, int col) : ObjectLayer(type, row, col) {
-// 	name = na;
-// 	filename = "img/sprite/" + fn;
-// 	status = stat;
-// 	step_speed = ss;
-// 	step_count = 0;
-// 	delay_time = 0;
-// 	wait_time = 0;
-// 	LoadFrames();
-// }
-// 
-// 
-// // This constructor doesn't need string arguments/images and is typically used for virtual sprites
-// MapSprite::MapSprite(uint stat, float ss, uint type, int row, int col) : 
-//                      ObjectLayer(type, row, col) {
-// 	status = stat;
-// 	step_speed = ss;
-// 	step_count = 0;
-// 	delay_time = 0;
-// 	wait_time = 0;
-// 	frames = NULL;
-// }
 
 
 // Free all the frames from memory
 MapSprite::~MapSprite() {
+	if (MAP_DEBUG) cout << "MAP: MapSprite destructor invoked" << endl;
 	if (status & SPR_GLOBAL) { // Don't delete these sprite frames
 		return;
 	}
@@ -138,6 +86,10 @@ MapSprite::~MapSprite() {
 		VideoManager->DeleteImage((*frames)[i]);
 	}
 	delete frames;
+	
+	if (speech != NULL) {
+		delete speech;
+	}
 }
 
 
@@ -400,6 +352,60 @@ void MapSprite::Draw(MapFrame& mf) {
 }
 
 // ****************************************************************************
+// ********************* SpriteDialouge Class Functions ***********************
+// ****************************************************************************
+
+SpriteDialogue::SpriteDialogue() {
+	if (MAP_DEBUG) cout << "MAP: SpriteDialogue constructor invoked" << endl;
+	seen_all = true;
+}
+
+
+SpriteDialogue::~SpriteDialogue() {
+	if (MAP_DEBUG) cout << "MAP: SpriteDialogue destructor invoked" << endl;
+}
+
+// Load a new set of dialogue
+void SpriteDialogue::LoadDialogue(vector<vector<string> > txt, vector<vector<uint> > sp) { 
+	dialogue = txt;
+	speaker = sp;
+	for (uint i = 0; i < dialogue.size(); i++) {
+		seen.push_back(false);
+	}
+	seen_all = false;
+	next_read = 0;	
+}
+
+// Add a new line of dialogue
+void SpriteDialogue::AddDialogue(vector<string> txt, vector<uint> sp) {
+	dialogue.push_back(txt);
+	speaker.push_back(sp);
+	seen.push_back(false);
+	
+	if (seen_all) { // Set the next read to point to the new dialogue
+		next_read = dialogue.size() - 1;
+	}
+	 
+	seen_all = false;
+}
+
+
+// Add a new line of dialogue, for one-part speeches
+void SpriteDialogue::AddDialogue(string txt, uint sp) {
+	vector<string> new_txt(1, txt);
+	vector<uint> new_sp(1, sp);
+	dialogue.push_back(new_txt);
+	speaker.push_back(new_sp);
+	
+	if (seen_all) {
+		next_read = dialogue.size() - 1;
+	}
+	
+	seen_all = false;
+}
+
+
+// ****************************************************************************
 // ************************** MapMode Class Functions *************************
 // ****************************************************************************
 // ***************************** GENERAL FUNCTIONS ****************************
@@ -535,6 +541,8 @@ void MapMode::TempCreateMap() {
 	npc_sprite->SetSpeed(FAST_SPEED);
 	npc_sprite->SetDelay(LONG_DELAY);
 	npc_sprite->LoadFrames();
+	npc_sprite->speech->AddDialogue("Hey there hot stuff", GLOBAL_LAILA);
+	npc_sprite->speech->AddDialogue("Wanna do it again?", GLOBAL_LAILA);
 	object_layer.push_back(npc_sprite);
 	
 	// If the focused_object is ever NULL, the game will exit with a seg fault :(
@@ -674,7 +682,7 @@ void MapMode::SpriteMove(int direction, MapSprite *sprite) {
 			c_check = sprite->col_pos + 1;
 			break;
 	}
-	
+
 	// If the tile is moveable, set the motion flag and update the sprite coordinates
 	if (TileMoveable(r_check, c_check, (sprite->status & Z_MASK))) {
 		sprite->status |= IN_MOTION;
@@ -683,6 +691,10 @@ void MapMode::SpriteMove(int direction, MapSprite *sprite) {
 		sprite->col_pos = c_check;
 		// TODO: Check for map event here, change sprite's Z_LVL if necessary
 		map_layers[sprite->row_pos][sprite->col_pos].properties |= (sprite->status & Z_MASK);
+	}
+	else {
+		sprite->status &= ~IN_MOTION;
+		sprite->wait_time = GaussianValue(sprite->delay_time, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
 	}
 }
 

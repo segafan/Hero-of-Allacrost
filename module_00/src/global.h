@@ -37,10 +37,10 @@ const unsigned char GLOBAL_BATTLE_ITEM   = 0x02;
 const unsigned char GLOBAL_MAP_ITEM      = 0x04;
 
 // Constants for character bit-masking for identification
-const unsigned int GLOBAL_NO_CHARACTERS  = 0x00000000;
-const unsigned int GLOBAL_CLAUDIUS       = 0x00000001;
-const unsigned int GLOBAL_LAILA          = 0x00000002;
-const unsigned int GLOBAL_ALL_CHARACTERS = 0xFFFFFFFF;
+const uint GLOBAL_NO_CHARACTERS  = 0;
+const uint GLOBAL_CLAUDIUS       = 1;
+const uint GLOBAL_LAILA          = 2;
+const uint GLOBAL_ALL_CHARACTERS = 0xFFFFFFFF;
 
 // Constants for elemental types
 const unsigned char GLOBAL_NO_ELEMENTAL        = 0x00;

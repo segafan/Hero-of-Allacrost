@@ -105,7 +105,7 @@ const float NORMAL_SPEED    = 20.0;
 const float FAST_SPEED      = 17.5;
 const float VERY_FAST_SPEED = 15.0;
 
-// These are common delay times inbetween movements
+// These are common delay times inbetween movements (numbers are in terms of milliseconds)
 const uint VERY_LONG_DELAY  = 500;
 const uint LONG_DELAY       = 400;
 const uint NORMAL_DELAY     = 300;
@@ -216,44 +216,13 @@ public:
 	TileFrame class - element of a circular singlely linked list for tile frame animations
 	
 	>>>members<<<
-		int frame: holds a frame index pointing to map_tiles in MapMode class
+		int frame: holds a frame index pointing to map_tiles in the MapMode class
 		Tileframe *next: a pointer to the next frame
  *****************************************************************************/
 class TileFrame {
 public:
 	int frame;
 	TileFrame *next;
-};
-
-
-/******************************************************************************
-	SpriteDialoge class - container class for sprite dialoge
-	
-	>>>members<<<
-		vector<string> dialogue: the actual text of the dialogue
-		vector<bool> seen: whether the player has seen this text or not
-		bool seen_all: true if the player has seen all the dialogue
-		
-	>>>functions<<<
-		bool ReadAllDialogue(): returns seen_all
-		
-	>>>notes<<<
-		1) Still need to add support for "interactive" dialogues. That is, the NPC says
-				something, the character says something back.
- *****************************************************************************/
-class SpriteDialogue {
-private:
-	std::vector<std::string> dialogue;
-	std::vector<bool> seen;
-	bool seen_all;
-public:
-	SpriteDialogue(std::vector<std::string> dia, std::vector<bool> se) { dialogue = dia; seen = se; }
-	//SpriteDialogue() {}
-	~SpriteDialogue() {}
-	bool ReadAllDialogue() { return seen_all; }
-	
-	void LoadDialogue(std::vector<std::string> dia) { dialogue = dia; }
-	void AddDialgoue(std::string txt) { dialogue.push_back(txt); seen.push_back(false); seen_all = false; }
 };
 
 
@@ -293,7 +262,6 @@ public:
 };
 
 
-
 /******************************************************************************
 	MapSprite - A moveable, controllable object on the map
 		
@@ -331,7 +299,7 @@ protected:
 	uint delay_time;
 	
 	std::vector<hoa_video::ImageDescriptor> *frames;
-	SpriteDialogue *dialogue;
+	SpriteDialogue *speech;
 	void Draw(local_map::MapFrame& mf);
 public:
 	MapSprite(unsigned char type, uint row, uint col, uint stat);
@@ -344,10 +312,45 @@ public:
 	void SetFilename(std::string fn) { filename = fn; }
 	void SetSpeed(float ss) { step_speed = ss; }
 	void SetDelay(uint dt) { delay_time = dt; }
-	
-
 };
 
+
+/******************************************************************************
+	SpriteDialoge class - container class for sprite dialoge
+	
+	>>>members<<<
+		uint next_read: index to next piece of dialogue to read
+		vector<vector<string> > dialogue: the text of the dialogue
+		vector<vector<uint> > speaker: who will be saying each part of the dialogue
+		vector<bool> seen: whether the player has seen this text or not
+		bool seen_all: true if the player has read all the dialogue
+		
+	>>>functions<<<
+		bool ReadAllDialogue(): returns seen_all
+		
+	>>>notes<<<
+		1) Still need to add support for "interactive" dialogues. That is, the NPC says
+				something, the character says something back.
+ *****************************************************************************/
+class SpriteDialogue {
+private:
+	uint next_read;
+	std::vector<std::vector<std::string> > dialogue;
+	std::vector<std::vector<uint> > speaker;
+	std::vector<bool> seen;
+	bool seen_all;
+	
+	friend class MapMode;
+public:
+	SpriteDialogue();
+	~SpriteDialogue();
+	
+	bool AllDialogueSeen() { return seen_all; }
+	void LoadDialogue(std::vector<std::vector<std::string> > txt, std::vector<std::vector<uint> > sp);
+	void AddDialogue(std::vector<std::string> txt, std::vector<uint> sp);
+	void AddDialogue(std::string txt, uint sp);
+	void ReadDialogue();
+};
 
 
 /******************************************************************************

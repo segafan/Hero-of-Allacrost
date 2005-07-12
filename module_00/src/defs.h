@@ -69,10 +69,12 @@ namespace hoa_boot {
 // Map mode declarations, see map.h/cpp
 namespace hoa_map {
 	extern bool MAP_DEBUG;
-	class MapMode;
-	class ObjectLayer;
 	class MapTile;
 	class TileFrame;
+	class ObjectLayer;
+	class MapSprite;
+	class SpriteDialogue;
+	class MapMode;
 }
 
 // Battle mode declarations, see battle.h/cpp
