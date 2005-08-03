@@ -11,11 +11,11 @@
 #ifndef __BOOT_HEADER__
 #define __BOOT_HEADER__ 
  
+#include "utils.h"
 #include <string>
 #include <vector>
 #include "SDL.h"
 #include "defs.h"
-#include "utils.h"
 #include "engine.h"
 
 namespace hoa_boot {

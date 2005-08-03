@@ -11,6 +11,8 @@
 #ifndef __DATA_HEADER__
 #define __DATA_HEADER__
 
+#include "utils.h"
+
 extern "C" {
 	#include <lua.h>
 	#include <lauxlib.h>
@@ -19,7 +21,6 @@ extern "C" {
 #include <string>
 #include <vector>
 #include "defs.h"
-#include "utils.h"
 
 
 

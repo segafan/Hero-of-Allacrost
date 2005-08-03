@@ -72,11 +72,11 @@ int GaussianValue(int mean, int range, bool positive_value) {
 	//	is a Gaussian random variable with mean 0 and standard deviation 1. 
 	//	 Reference: Knuth, The Art of Computer Programming, Volume 2, p. 122
 	do {
-		x = 2.0 * UnitRV() - 1.0;            // Get the X-coordinate
-		y = 2.0 * UnitRV() - 1.0;            // Get the Y-coordinate
+		x = 2.0f * UnitRV() - 1.0f;            // Get the X-coordinate
+		y = 2.0f * UnitRV() - 1.0f;            // Get the Y-coordinate
 		r = x*x + y*y;                       // Compute the radius
-	} while (r > 1.0 || r == 0.0);         // Loop is executed 4 / pi = 1.273 times on average	
-	z_value = x * sqrt(-2.0 * log(r) / r); // Get the Gaussian random value with mean 0 and standard devation 1
+	} while (r > 1.0f || r == 0.0f);         // Loop is executed 4 / pi = 1.273 times on average	
+	z_value = x * sqrt(-2.0f * log(r) / r); // Get the Gaussian random value with mean 0 and standard devation 1
 	
 	// Compute a Gaussian value using our own mean and standard deviation
 	//result = floatnearbyintf((std_dev * z_value) + mean); this fn does rounding, but I can't get it to compile...
@@ -91,9 +91,9 @@ int GaussianValue(int mean, int range, bool positive_value) {
 		return (int)result;
 	
 	if (result < mean - range)      // Covers the case that we exceeded our lower bound (occurs 0.015% of the time)
-		result = mean - range;
+		result = float( mean - range );
 	else if (result > mean + range) // Covers the case that we exceeded our upper bound (occurs 0.015% of the time)
-		result = mean + range;
+		result = float( mean + range );
 
 	// Note: because we cast rather than round the mean + range value isn't chosen as often as mean - range
 	return (int)result;	// Cast to an int and return
