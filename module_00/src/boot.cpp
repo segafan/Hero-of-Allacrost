@@ -8,6 +8,7 @@
  *	 for details.
  */
 
+#include "utils.h"
 #include <iostream>
 #include "boot.h"
 #include "audio.h"
@@ -52,13 +53,13 @@ BootMode::BootMode() {
 	
 	VideoManager->SetCoordSys(0, 1024, 0, 768, 1); // TEMPORARY
 	
- 	for (int i = 0; i < boot_images.size(); i++) {
+ 	for (uint i = 0; i < boot_images.size(); i++) {
  		VideoManager->LoadImage(boot_images[i]);
  	}
-	for (int i = 0; i < boot_music.size(); i++) {
+	for (uint i = 0; i < boot_music.size(); i++) {
 		AudioManager->LoadMusic(boot_music[i]);
 	}
-	for (int i = 0; i < boot_sound.size(); i++) {
+	for (uint i = 0; i < boot_sound.size(); i++) {
 		AudioManager->LoadSound(boot_sound[i]);
 	}
 	
@@ -71,11 +72,11 @@ BootMode::BootMode() {
 BootMode::~BootMode() {
 	if (BOOT_DEBUG) cout << "BOOT: BootMode destructor invoked." << endl;
 	
-	for (int i = 0; i < boot_music.size(); i++)
+	for (uint i = 0; i < boot_music.size(); i++)
 		AudioManager->FreeMusic(boot_music[i]);
-	for (int i = 0; i < boot_sound.size(); i++)
+	for (uint i = 0; i < boot_sound.size(); i++)
 		AudioManager->FreeSound(boot_sound[i]);
-	for (int i = 0; i < boot_images.size(); i++)
+	for (uint i = 0; i < boot_images.size(); i++)
 		VideoManager->DeleteImage(boot_images[i]);
 }
 
@@ -94,7 +95,7 @@ void BootMode::AnimateLogo() {
 
 // Redefines the change_key reference. Waits indefinitely for user to press any key.
 void BootMode::RedefineKey(SDLKey& change_key) {
-	SDL_Event event;
+//	SDL_Event event;
 	
 // 	KeyState *key_set = &(SettingsManager->InputStatus.key); // A shortcut
 	
@@ -211,9 +212,15 @@ void BootMode::UpdateNewMenu() {
 		
 		GCharacter *claud = new GCharacter("Claudius", "claudius", GLOBAL_CLAUDIUS);
 		InstanceManager->AddCharacter(claud);
+
+		// RAJ: I had to create this "manager" variable as a temporary fix
+		//      to the problem of game modes deleting themselves.
+		
+		GameModeManager *manager = ModeManager;
 		MapMode *MM = new MapMode(-1);
-		ModeManager->Pop();
-		ModeManager->Push(MM);
+		
+		manager->Pop();
+		manager->Push(MM);
 	}
 }
 
@@ -244,8 +251,11 @@ void BootMode::UpdateLoadMenu() {
 			AudioManager->PlaySound(boot_sound[0], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // confirm sound
 			// Load a vector of the saved games here
 			BattleMode *BM = new BattleMode();
-			ModeManager->Pop();
-			ModeManager->Push(BM);
+			
+			GameModeManager *manager = ModeManager;
+			
+			manager->Pop();
+			manager->Push(BM);
 		}
 		
 		return;
