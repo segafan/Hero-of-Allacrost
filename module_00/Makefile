@@ -9,7 +9,7 @@ CFLAGS := $(CFLAGS:%=-%)
 
 LDDIRS = 
 LDLIBS = m
-GLLIBS = SDL GL GLU IL ILUT SDL_mixer lua lualib
+GLLIBS = SDL GL GLU IL ILUT SDL_mixer SDL_ttf lua lualib
 LDFLAGS = $(LDDIRS:%=-L%) $(LDLIBS:%=-l%) $(GLLIBS:%=-l%)
 
 SRC = $(wildcard src/*.cpp src/video/*.cpp)
