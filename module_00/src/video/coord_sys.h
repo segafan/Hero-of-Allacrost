@@ -1,30 +1,40 @@
-#ifndef _COORD_SYS_H_
-#define _COORD_SYS_H_
+/*
+	===========================================================================
+	CoordSys structure
+	===========================================================================
+	
+	Holds a coordinate system
+*/
 
-namespace hoa_video {
+#ifndef _COORD_SYS_HEADER_
+#define _COORD_SYS_HEADER_
 
-class CoordinateSystem {
-public:
-	virtual void Setup(void) const=0;
-};
+#include "utils.h"
 
-/*******************************************************************************
-* sets up orthographic projection of the specified dimensions and provides
-* commands to move through it. i cant be bothered to explain what that means
-* right now so if you dont know then ask
-*******************************************************************************/
-class OrthographicCS : public CoordinateSystem
+struct CoordSys
 {
-private:
-	float l, r, b, t;
-	int layers;
-public:
-	OrthographicCS(float left, float right, float bottom, float top, int nl);
-
-	void Setup(void) const;
+	CoordSys() 
+	{
+		_left  = _top    = 0.0f;
+		_right = _bottom = 1.0f;
+		
+		_layer  = 1;
+	}
+	
+	CoordSys(float left, float right, float bottom, float top, int layer)
+	{
+		_left   = left;
+		_right  = right;
+		_bottom = bottom;
+		_top    = top;
+		_layer   = layer;
+	}
+	
+	float _left;
+	float _right;
+	float _bottom;
+	float _top;
+	int   _layer;
 };
-
-//eo namespace
-}
 
 #endif

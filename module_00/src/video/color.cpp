@@ -1,4 +1,4 @@
-#include <GL/gl.h>
+#include "utils.h"
 #include "color.h"
 
 namespace hoa_video {
