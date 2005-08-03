@@ -11,6 +11,7 @@
 #ifndef __QUIT_HEADER__
 #define __QUIT_HEADER__ 
 
+#include "utils.h"
 #include <string>
 #include "defs.h"
 #include "engine.h"

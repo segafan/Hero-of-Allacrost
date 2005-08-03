@@ -11,10 +11,10 @@
 #ifndef __MENU_HEADER__
 #define __MENU_HEADER__
 
+#include "utils.h"
 #include <string>
 #include <vector>
 #include "defs.h"
-#include "utils.h"
 #include "engine.h"
 
 namespace hoa_menu {

@@ -42,10 +42,10 @@ is once I write it.
 #ifndef __BATTLE_HEADER__
 #define __BATTLE_HEADER__
 
+#include "utils.h"
 #include <string>
 #include <vector>
 #include "defs.h"
-#include "utils.h"
 #include "engine.h"
 
 namespace hoa_battle {

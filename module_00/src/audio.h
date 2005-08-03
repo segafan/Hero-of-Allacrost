@@ -25,10 +25,11 @@
 #ifndef __AUDIO_HEADER__
 #define __AUDIO_HEADER__ 
 
+#include "utils.h"
 #include <string>
 #include "SDL.h"
 #include <SDL/SDL_mixer.h>
-#include "utils.h"
+
 
 namespace hoa_audio {
 

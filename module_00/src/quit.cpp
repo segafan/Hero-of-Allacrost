@@ -8,6 +8,7 @@
  *   for details.
  */
 
+#include "utils.h"
 #include <iostream>
 #include "quit.h"
 #include "audio.h"

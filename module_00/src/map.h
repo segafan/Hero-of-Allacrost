@@ -18,12 +18,12 @@
 #ifndef __MAP_HEADER__
 #define __MAP_HEADER__
 
+#include "utils.h"
 #include <string>
 #include <vector>
 #include "defs.h"
 #include "engine.h"
 #include "video.h"
-#include "utils.h"
 
 namespace hoa_map {
 

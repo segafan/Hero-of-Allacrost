@@ -11,10 +11,10 @@
 #ifndef __GLOBAL_HEADER__
 #define __GLOBAL_HEADER__ 
 
+#include "utils.h"
 #include <vector>
 #include "SDL.h" 
 #include "defs.h"
-#include "utils.h"
 
 namespace hoa_global {
 
