@@ -9,6 +9,7 @@
  */
 
 
+#include "utils.h"
 #include <iostream>
 #include "data.h"
 #include "audio.h"
@@ -61,7 +62,7 @@ bool GameData::GetTableBool (const char *key) {
 	lua_gettable(l_stack, -2);
 	if (!lua_isboolean(l_stack, -1))
 		cerr << "DATA ERROR: Invalid table field" << endl;
-	result = lua_toboolean(l_stack, -1);
+	result = (0 != lua_toboolean(l_stack, -1));
 	lua_pop(l_stack, 1);
 	return result;
 }
@@ -107,7 +108,7 @@ string GameData::GetTableString (const char *key) {
 bool GameData::GetGlobalBool(const char *key) {
 	bool result;
 	lua_getglobal(l_stack, key);
-	result = (bool)lua_toboolean(l_stack, LUA_STACK_TOP);
+	result = (0 != lua_toboolean(l_stack, LUA_STACK_TOP));
 	lua_pop(l_stack, 1);
 	return result;
 }
@@ -235,27 +236,27 @@ void GameData::LoadBootData(
 
 	// The background
 	im.filename = GetGlobalString("background_image");
-	im.width    = GetGlobalInt("background_image_width");
-	im.height   = GetGlobalInt("background_image_height");
+	im.width    = (float) GetGlobalInt("background_image_width");
+	im.height   = (float) GetGlobalInt("background_image_height");
 	boot_images->push_back(im);
 	
 	// The logo
 	im.filename = GetGlobalString("logo_image");
-	im.width    = GetGlobalInt("logo_image_width");
-	im.height   = GetGlobalInt("logo_image_height");
+	im.width    = (float) GetGlobalInt("logo_image_width");
+	im.height   = (float) GetGlobalInt("logo_image_height");
 	boot_images->push_back(im);
 	
 	// The menu
 	im.filename = GetGlobalString("menu_image");
-	im.width    = GetGlobalInt("menu_image_width");
-	im.height   = GetGlobalInt("menu_image_height");
+	im.width    = (float) GetGlobalInt("menu_image_width");
+	im.height   = (float) GetGlobalInt("menu_image_height");
 	boot_images->push_back(im);
 	
 	// Set up a coordinate system - now you can use the boot.hoa to set it to whatever you like
-	GameVideo::_GetReference()->SetCoordSys(GetGlobalInt("coord_sys_x_left"),
-					GetGlobalInt("coord_sys_x_right"),
-					GetGlobalInt("coord_sys_y_bottom"),
-					GetGlobalInt("coord_sys_y_top"),
+	GameVideo::_GetReference()->SetCoordSys((float)GetGlobalInt("coord_sys_x_left"),
+					(float) GetGlobalInt("coord_sys_x_right"),
+					(float) GetGlobalInt("coord_sys_y_bottom"),
+					(float) GetGlobalInt("coord_sys_y_top"),
 					GetGlobalInt("coord_sys_nl"));
 	
 	// Load the audio stuff
@@ -269,13 +270,13 @@ void GameData::LoadBootData(
 	// Push all our new music onto the boot_music vector
 	MusicDescriptor new_music;
 	
-	for (int i = 0; i < new_music_files.size(); i++) {
+	for (uint i = 0; i < new_music_files.size(); i++) {
 		new_music.filename = new_music_files[i];
 		boot_music->push_back(new_music);
 	}
 	
 	SoundDescriptor new_sound;
-	for (int i = 0; i < new_sound_files.size(); i++) {
+	for (uint i = 0; i < new_sound_files.size(); i++) {
 		new_sound.filename = new_sound_files[i];
 		boot_sound->push_back(new_sound);
 	}
@@ -315,11 +316,15 @@ void GameData::LoadMap(hoa_map::MapMode *map_mode, int new_map_id) {
 	}
 	ImageDescriptor imgdsc;
 	imgdsc.width = imgdsc.height = 1;
-	for (int i = 0; i < tiles_used.size(); i++) {
+	
+	VideoManager->BeginImageLoadBatch();
+	for (uint i = 0; i < tiles_used.size(); i++) {
 		imgdsc.filename = tile_prefix + tiles_used[i] + ".png";
 		map_mode->map_tiles.push_back(imgdsc);
 		VideoManager->LoadImage(imgdsc);
 	}
+	VideoManager->EndImageLoadBatch();
+	
 	// The following chunk-o-code checks if the tilename has a letter at the end, which means the
 	// tile is a part of the animated tile (for example: cave12a, cave12b, cave12c, etc.). And
 	// takes care of everything else ;)
@@ -336,21 +341,21 @@ void GameData::LoadMap(hoa_map::MapMode *map_mode, int new_map_id) {
 	tbl.push_back(0);		// There's always at least one tile
 	vector<string> basenames;	// basename("cave01a") == "cave01"
 	// create the basenames vector
-	for (int i = 0; i < tiles_used.size(); i++) {
+	for (uint i = 0; i < tiles_used.size(); i++) {
 		if (tiles_used[i][tiles_used[i].size()-1] >= 'a' && tiles_used[i][tiles_used[i].size()-1] <= 'z')
 			basenames.push_back(tiles_used[i].substr(0, tiles_used[i].size()-1));
 		else
 			basenames.push_back(tiles_used[i]);
 	}
 	// examine the basenames, and create the table
-	for (int i = 0; i < tiles_used.size() - 1; i++) {
+	for (int i = 0; i < (int)(tiles_used.size()) - 1; i++) {
 		if (!(basenames[i] == basenames[i+1])) tbl.push_back(i+1);
 	}
-	tbl.push_back(tiles_used.size());
+	tbl.push_back((const int)tiles_used.size());
 	
 	// now that we have the table, we populate the tile_frames vector...
 	TileFrame *tframe, *root;
-	for (int i = 0; i < tbl.size() - 1; i++) {
+	for (int i = 0; i < (int)tbl.size() - 1; i++) {
 		tframe = new TileFrame;
 		root = tframe;
 		for (int j = tbl[i]; j < tbl[i+1]; j++) {
@@ -379,7 +384,7 @@ void GameData::LoadMap(hoa_map::MapMode *map_mode, int new_map_id) {
 		cerr << "DATA ERROR: The actual size of the lower, upper and mask vectors is NOT EQUAL to row_count*col_count !!! BARF!\n";
 		cerr << "row_count = " << map_mode->row_count << "\n";
 		cerr << "col_count = " << map_mode->col_count << "\n";
-		cerr << "lower.size() = " << lower.size() << "\n";
+		cerr << "lower.size() = " << (uint)lower.size() << "\n";
 		// TODO Add meaningful error codes, and make LoadMap return an int
 		return;
 	}
