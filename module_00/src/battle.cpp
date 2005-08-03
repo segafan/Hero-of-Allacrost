@@ -12,6 +12,7 @@
  * The code in this file is for **** finish this ****
  */
 
+#include "utils.h"
 #include <iostream>
 #include "battle.h"
 #include "audio.h"
@@ -80,7 +81,7 @@ BattleMode::BattleMode() {
 	//DataManager->LoadMap(this, map_id);
 	
 	// Setup the coordinate system
-	VideoManager->SetCoordSys(0, SCREEN_LENGTH, 0, SCREEN_HEIGHT, 1);
+	VideoManager->SetCoordSys(0.0f, (float)SCREEN_LENGTH, 0.0f, (float)SCREEN_HEIGHT, 1);
 	// To Tim: This sets up a cooriate system where "0, 0" is the top left hand corner of the screen,
 	// extends to SCREEN_LENGTH and SCREEN_HEIGHT, and has 1 depth level (ie, it's 2D)
 	m_iCounter = 0;
