@@ -1,6 +1,6 @@
 /* 
- * battle.cpp
- *	Code for Hero of Allacrost battle mode
+ * menu.cpp
+ *	Code for Hero of Allacrost menu mode
  *	(C) 2005 by Tim Hargreaves
  *
  *	This code is licensed under the GNU GPL. It is free software and you may modify it 
@@ -12,6 +12,7 @@
  * The code in this file is for **** finish this ****
  */
 
+#include "utils.h"
 #include <iostream>
 #include "menu.h"
 #include "audio.h"
