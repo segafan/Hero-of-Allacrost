@@ -8,9 +8,11 @@
  *	 for details.
  */
 
+#include "utils.h"
 #include <iostream>
 #include "global.h"
 #include "video.h"
+#include <string>
 
 using namespace std;
 using namespace hoa_video;
@@ -73,6 +75,7 @@ GItem::~GItem() {}
 // ****************************************************************************
 // ****************************** GSkillBook **********************************
 // ****************************************************************************
+
 
 GSkillBook::GSkillBook(string name, unsigned char use, unsigned int usable, int id, int count) :
 	GObject(name, GLOBAL_SKILL_BOOK, usable, id, count) {
@@ -199,7 +202,7 @@ void GEnemy::LevelSimulator(uint lvl) {
 	agility = base_agility;
 	
 	for (uint i = 1; i <= experience_level; i++) {
-		rate_inc = 1.0 - RandomUnit();
+		rate_inc = 1.0f - RandomUnit();
 		experience_points += growth_experience_points;
 		if (rate_hit_points <= rate_inc) {
 			max_hit_points += growth_hit_points;
@@ -306,9 +309,11 @@ void GCharacter::LoadFrames() {
 	imd.filename = full_name + "_r7.png";
 	map_frames.push_back(imd);
 	
+	VideoManager->BeginImageLoadBatch();
 	for (uint i = 0; i < map_frames.size(); i++) {
 		VideoManager->LoadImage(map_frames[i]);
 	}
+	VideoManager->EndImageLoadBatch();
 }
 
 // ****************************************************************************
