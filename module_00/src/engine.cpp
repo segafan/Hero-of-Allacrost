@@ -8,6 +8,7 @@
  *	 for details.
  */
 
+#include "utils.h"
 #include <iostream>
 #include "engine.h"
 #include "audio.h"
@@ -136,7 +137,7 @@ void GameModeManager::PrintStack() {
 	}
 	
 	cout << "***top of stack***" << endl;
-	for (int i = game_stack.size() - 1; i >= 0; i--)
+	for (int i = (int) game_stack.size() - 1; i >= 0; i--)
 		cout << " index: " << i << " type: " << game_stack[i]->mode_type << endl;
 	cout << "***bottom of stack***" << endl;
 }
@@ -333,7 +334,15 @@ void GameInput::KeyEventHandler(SDL_KeyboardEvent *key_event) {
 			}
 			else if (key_event->keysym.sym == SDLK_s) {
 				//if (ENGINE_DEBUG) cout << " Took Screenshot!" << endl;
+					
+				GameVideo *VideoManager = GameVideo::_GetReference();
+				VideoManager->MakeScreenshot();
 				return;
+			}
+			else if (key_event->keysym.sym == SDLK_t) {
+				// press T to display and cycle through the texture sheets
+				GameVideo *VideoManager = GameVideo::_GetReference();
+				VideoManager->DEBUG_NextTexSheet();
 			}
 			else if (key_event->keysym.sym == SDLK_q) {
 				// Quit the game without question if we are in BootMode or QuitMode
