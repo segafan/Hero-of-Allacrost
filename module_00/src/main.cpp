@@ -1,5 +1,5 @@
 /* 
- * loader.cpp
+ * main.cpp
  *	Hero of Allacrost game intialization code
  *	(C) 2004 by Tyler Olsen
  *
@@ -8,10 +8,10 @@
  *	 for details.
  */
 
+#include "utils.h"
 #include <iostream>
 #include <string>
 #include "defs.h"
-#include "utils.h"
 #include "audio.h"
 #include "video.h"
 #include "data.h"
@@ -233,6 +233,7 @@ void FileCheck() {
 int main(int argc, char *argv[]) {
 	// Process command arguments with getopt
 	int arg;
+	
 	while ((arg = getopt(argc, argv, "+cd:hir")) != -1) {
 		switch (arg) {
 			case 'c':
@@ -295,32 +296,38 @@ int main(int argc, char *argv[]) {
 	GameInput *InputManager = GameInput::_Create();
 	GameInstance *InstanceManager = GameInstance::_Create();
 	
+	VideoManager->Initialize();
+
 	DataManager->LoadGameSettings(); // Initializes remaining data members of Settings Manager
 	
 	AudioManager->SetMusicVolume(SettingsManager->music_vol);
 	AudioManager->SetSoundVolume(SettingsManager->sound_vol);
 
-	SDL_Rect test_mode = {0,0,1024,768}; // TEMPORARY
-	VideoManager->ChangeMode(test_mode);
-
 	BootMode* BM = new BootMode(); // Create the first game mode...
 	ModeManager->Push(BM);         // ...and push it on the game mode stack!
 	
 	SettingsManager->SetTimer();	// Initialize the game and frames-per-second timers
+
+	int frame_time = 0;
 	
 	// This is the main loop for the game. The loop iterates once every frame drawn to the screen.
 	while (SettingsManager->NotDone()) {
-		// 1) Draws the screen to the back buffer
+		// 1) Render the scene
+		VideoManager->Clear();
 		ModeManager->GetTop()->Draw();
+		VideoManager->DrawFPS(frame_time);
+		VideoManager->Display();		
 		
-		// 2) Displays the new frame on the screen
-		VideoManager->Render();
-		
-		// 3) Process all new events
+		// 2) Process all new events
 		InputManager->EventHandler();
 		
-		// 4) Updates the game status and timer
-		ModeManager->GetTop()->Update(SettingsManager->UpdateTime());
+		// 3) Update the timer
+		frame_time = (int)SettingsManager->UpdateTime();		
+					
+		// 4) Update the game status
+		ModeManager->GetTop()->Update(frame_time);
+		
+		
 	} // while (SettingsManager->NotDone()) 
 
 	// Begin exit sequence and destroy the singleton classes
