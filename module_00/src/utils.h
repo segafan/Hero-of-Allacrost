@@ -11,10 +11,47 @@
 #ifndef __UTILS_HEADER__
 #define __UTILS_HEADER__
 
+#ifdef _WIN32
+
+// even though our game is platform independent, OpenGL on Windows requires
+// windows.h to be included, otherwise all sorts of bad things happen
+#include <windows.h>
+
+// the following defines basically disable command processing on Windows,
+// because there's no getopt() function. Some time in the future, I (Raj)
+// will fix this by using Cygwin or MingW or whatever...
+
+#define getopt(a,b,c)  (-1)
+#define optarg         (NULL)
+
+#endif
+
 #include <stdlib.h>
 #include <iostream>
 #include <cstdlib>
 #include <cmath> 
+
+#include <vector>
+#include <string>
+#include <map>
+#include <stack>
+
+
+#include <SDL/SDL.h>
+#include <SDL/SDL_ttf.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+
+#define ILUT_USE_OPENGL
+
+#include <IL/il.h>
+#include <IL/ilu.h>
+#include <IL/ilut.h>
+
+
+#ifdef _WIN32
+typedef Uint32  uint;  // linux GCC has uint, but not all compilers
+#endif
 
 namespace hoa_utils {
 
