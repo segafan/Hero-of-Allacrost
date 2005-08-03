@@ -15,6 +15,7 @@
  *
  */ 
  
+#include "utils.h"
 #include <iostream>
 #include "map.h"
 #include "audio.h"
@@ -82,7 +83,7 @@ MapSprite::~MapSprite() {
 		return;
 	}
 
-	for (int i = 0; i < frames->size(); i++) {
+	for (uint i = 0; i < frames->size(); i++) {
 		VideoManager->DeleteImage((*frames)[i]);
 	}
 	delete frames;
@@ -166,9 +167,12 @@ void MapSprite::LoadFrames() {
 	}
 	
 	// Now load all the frames
+
+	VideoManager->BeginImageLoadBatch();
 	for (uint i = 0; i < frames->size(); i++) {
 		VideoManager->LoadImage((*frames)[i]);
 	}
+	VideoManager->EndImageLoadBatch();
 }
 
 
@@ -383,7 +387,7 @@ void SpriteDialogue::AddDialogue(vector<string> txt, vector<uint> sp) {
 	seen.push_back(false);
 	
 	if (seen_all) { // Set the next read to point to the new dialogue
-		next_read = dialogue.size() - 1;
+		next_read = (uint)dialogue.size() - 1;
 	}
 	 
 	seen_all = false;
@@ -398,7 +402,7 @@ void SpriteDialogue::AddDialogue(string txt, uint sp) {
 	speaker.push_back(new_sp);
 	
 	if (seen_all) {
-		next_read = dialogue.size() - 1;
+		next_read = (uint)dialogue.size() - 1;
 	}
 	
 	seen_all = false;
@@ -468,9 +472,11 @@ void MapMode::TempCreateMap() {
 	imd.filename = "img/tiles/blue_40.png";
 	map_tiles.push_back(imd);
 	
-	for (int i = 0; i < map_tiles.size(); i++) { 
+	VideoManager->BeginImageLoadBatch();
+	for (uint i = 0; i < map_tiles.size(); i++) { 
 		VideoManager->LoadImage(map_tiles[i]);
 	} 
+	VideoManager->EndImageLoadBatch();
 	
 	// Setup tile frame pointers for animation
 	TileFrame *tf;
@@ -578,14 +584,14 @@ MapMode::~MapMode() {
 	if (MAP_DEBUG) cout << "MAP: MapMode destructor invoked" << endl;
 	
 	// Delete all of the tile images
-	for (int i = 0; i < map_tiles.size(); i++) {
+	for (uint i = 0; i < map_tiles.size(); i++) {
 		VideoManager->DeleteImage(map_tiles[i]);
 	}
 	
 	// Free up all the frame linked lists
 	TileFrame *tf_del;
 	TileFrame *tf_tmp;
-	for (int i = 0; i < tile_frames.size(); i++) {
+	for (uint i = 0; i < tile_frames.size(); i++) {
 		tf_del = tile_frames[i];
 		tf_tmp = tf_del->next;
 		delete tf_del;
@@ -600,7 +606,7 @@ MapMode::~MapMode() {
 	}
 	
 	// Delete all of the objects
-	for (int i = 0; i < object_layer.size(); i++) {
+	for (uint i = 0; i < object_layer.size(); i++) {
 		delete(object_layer[i]);
 	}
 }
@@ -785,7 +791,7 @@ void MapMode::Update(Uint32 new_time_elapsed) {
 	
 	if (animation_counter >= ANIMATION_RATE) {
 		// Update all tile frames
-		for (int i = 0; i < tile_frames.size(); i++) {
+		for (uint i = 0; i < tile_frames.size(); i++) {
 			tile_frames[i] = tile_frames[i]->next;
 		}
 		
@@ -814,9 +820,9 @@ void MapMode::Update(Uint32 new_time_elapsed) {
 	}
 	
 	// ************ (3) Sort the objects so they are in the correct draw order ********
-	for (int i = 1; i < object_layer.size(); i++) {
+	for (uint i = 1; i < object_layer.size(); i++) {
 		ObjectLayer *tmp = object_layer[i];
-		int j = i - 1;
+		int j = int(i) - 1;
 		while (j >= 0 && (object_layer[j])->row_pos > tmp->row_pos) {
 			object_layer[j+1] = object_layer[j];
 			j--;
@@ -830,13 +836,16 @@ void MapMode::Update(Uint32 new_time_elapsed) {
 // Updates the game status when MapMode is in the 'explore' state
 void MapMode::UpdateExploreState() {
 	// Update all game objects (??? Or only non-playable sprites ???)
-	for (int i = 0; i < object_layer.size(); i++) {
+	for (uint i = 0; i < object_layer.size(); i++) {
 		switch ((object_layer[i])->object_type) {
 			case PLAYER_SPRITE:
-				UpdatePlayerExplore(dynamic_cast<MapSprite*>(object_layer[i]));
+			{
+				ObjectLayer *pSprite = object_layer[i];
+				UpdatePlayerExplore(dynamic_cast<MapSprite *>(object_layer[i]));
 				break;
+			}
 			case NPC_SPRITE:
-				UpdateNPCExplore(dynamic_cast<MapSprite*>(object_layer[i]));
+				UpdateNPCExplore((MapSprite*)(object_layer[i]));
 				break;
 			default:
 				break;
@@ -1153,6 +1162,8 @@ void MapMode::GetDrawInfo(MapFrame& mf) {
 void MapMode::Draw() { 
 	MapFrame mf; // Contains all the information we need to know to draw the map
 	
+
+
 	GetDrawInfo(mf); // Get all the information we need for drawing this map frame
 	
 	// ************** (1) Draw the Lower Layer *************
@@ -1165,13 +1176,13 @@ void MapMode::Draw() {
 				VideoManager->DrawImage(map_tiles[tile_frames[map_layers[r][c].lower_layer]->frame]);
 			VideoManager->MoveRel(1,0);
 		}
-		VideoManager->MoveRel(-mf.c_draw, -1);
+		VideoManager->MoveRel((float) -mf.c_draw, -1.0f);
 		
 	}
 	
 	// ************** (2) Draw the Object Layer *************
 	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-	for (int i = 0; i < object_layer.size(); i++) {
+	for (uint i = 0; i < object_layer.size(); i++) {
 		(object_layer[i])->Draw(mf);
 	}
 	
@@ -1185,7 +1196,7 @@ void MapMode::Draw() {
 				VideoManager->DrawImage(map_tiles[tile_frames[map_layers[r][c].upper_layer]->frame]);
 			VideoManager->MoveRel(1,0);
 		}
-		VideoManager->MoveRel(-mf.c_draw, -1);
+		VideoManager->MoveRel((float) -mf.c_draw, -1.0f);
 	}
 	
 	// ************** (4) Draw the Dialoge box, if needed *************
