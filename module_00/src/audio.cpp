@@ -15,6 +15,7 @@
  */
 
 
+#include "utils.h"
 #include <iostream>
 #include "audio.h"
 
