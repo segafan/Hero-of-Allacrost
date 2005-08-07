@@ -189,7 +189,7 @@ struct Image
 
 class TexSheet
 {
-private:
+public:
 
 	TexSheet(int w, int h, GLuint texID_, TexSheetType type_, bool isStatic_);
 	~TexSheet();
@@ -456,8 +456,8 @@ public:
 	// General
 
 	bool Initialize();
-	void Clear();
-	void Display();
+	bool Clear();
+	bool Display();
 
 
 	// Coordinate systems
@@ -502,15 +502,15 @@ public:
 	bool LoadImage(ImageDescriptor &id);
 	bool DeleteImage(ImageDescriptor &id);
 	
-	void BeginImageLoadBatch();
+	bool BeginImageLoadBatch();
 	bool EndImageLoadBatch();
 
-	void UnloadImages();
-	void ReloadImages();
-	void DeleteImages();
+	bool UnloadImages();
+	bool ReloadImages();
+	bool DeleteImages();
 
 	void SetDrawFlags(int firstflag, ...);
-	void DrawImage(const ImageDescriptor &id);
+	bool DrawImage(const ImageDescriptor &id);
 
 	void SelectLayer(int l);
 	
@@ -615,7 +615,7 @@ private:
 
 	bool DeleteImage    (local_video::Image    *const);
 	bool DeleteTexSheet (local_video::TexSheet *const);
-	void DrawElement
+	bool DrawElement
 	(
 		const local_video::Image *const, 
 		float w, 
@@ -623,7 +623,7 @@ private:
 		const Color &color
 	);
 
-	void DEBUG_ShowTexSheet();
+	bool DEBUG_ShowTexSheet();
 	
 	friend class local_video::FixedTexMemMgr;
 	friend class local_video::VariableTexMemMgr;
