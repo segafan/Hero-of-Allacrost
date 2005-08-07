@@ -296,7 +296,11 @@ int main(int argc, char *argv[]) {
 	GameInput *InputManager = GameInput::_Create();
 	GameInstance *InstanceManager = GameInstance::_Create();
 	
-	VideoManager->Initialize();
+	if(!VideoManager->Initialize())
+	{
+		cerr << "ERROR: unable to initialize VideoManager" << endl;
+		return 1;
+	}
 
 	DataManager->LoadGameSettings(); // Initializes remaining data members of Settings Manager
 	
