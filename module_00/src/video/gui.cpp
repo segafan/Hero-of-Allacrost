@@ -21,6 +21,12 @@ GUI::GUI()
 		
 	_curSample = _numSamples = 0;
 	_videoManager = hoa_video::GameVideo::_GetReference();
+	
+	if(!_videoManager)
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: in GUI constructor, got NULL for GameVideo reference!" << endl;
+	}
 }
 
 
@@ -56,6 +62,14 @@ bool GUI::DrawFPS(int frameTime)
 	}
 	
 	// insert newly calculated FPS into fps buffer
+	
+	if(_curSample < 0 || _curSample >= VIDEO_FPS_SAMPLES)
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: out of bounds _curSample in DrawFPS()!" << endl;
+		return false;
+	}
+	
 	_fpsSamples[_curSample] = fps;
 	_curSample = (_curSample+1) % VIDEO_FPS_SAMPLES;
 	
