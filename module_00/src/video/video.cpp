@@ -34,62 +34,212 @@ GameVideo::GameVideo()
   _batching(false),
   _gui(NULL)
 {
-	if (VIDEO_DEBUG) fprintf(stdout, "VIDEO: GameVideo constructor invoked\n");
-
+	if (VIDEO_DEBUG) 
+		cout << "VIDEO: GameVideo constructor invoked\n";
 }
 
 bool GameVideo::Initialize()
 {
+	if(VIDEO_DEBUG)
+		cout << "VIDEO: Initializing SDL subsystem\n";
+		
 	if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) 
 	{
 		fprintf(stderr, "Barf! SDL Video Initialization failed!\n");
 		exit(1);
 	}
 
+	if(VIDEO_DEBUG)
+		cout << "VIDEO: setting video mode\n";
+
 	SDL_Rect mode = {0,0,1024,768}; // TEMPORARY
-	ChangeMode(mode);	
+	if(!ChangeMode(mode))
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: ChangeMode() failed in GameVideo::Initialize()!" << endl;
+		return false;
+	}
+
+	if(VIDEO_DEBUG)
+		cout << "VIDEO: Initializing IL\n";
+
 
 	// initialize DevIL
 	ilInit();
+	if(ilGetError())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: ilInit() failed!" << endl;
+		return false;
+	}
+	
 	ilOriginFunc(IL_ORIGIN_UPPER_LEFT);
 	ilEnable(IL_ORIGIN_SET);
+
+	if(VIDEO_DEBUG)
+		cout << "VIDEO: Initializing ILU\n";
+	
 	iluInit();
+	if(ilGetError())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: iluInit() failed!" << endl;
+		return false;
+	}
+
+	if(VIDEO_DEBUG)
+		cout << "VIDEO: Initializing ILUT\n";
+
 	ilutRenderer(ILUT_OPENGL);
+	if(ilGetError())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: ilutRenderer() failed!" << endl;
+		return false;
+	}
+
+	if(VIDEO_DEBUG)
+		cout << "VIDEO: Initializing SDL_ttf\n";
 
 	// initialize SDL_ttf
-	TTF_Init();
+	if(TTF_Init() < 0)
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: SDL_ttf did not initialize! (TTF_Init() failed)" << endl;
+		return false;
+	}
 
-	LoadFont("img/fonts/cour.ttf", "default", 18);
+	if(VIDEO_DEBUG)
+		cout << "VIDEO: Loading default font\n";
+	
+
+	if(!LoadFont("img/fonts/cour.ttf", "default", 18))
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: Could not load cour.ttf file!" << endl;
+		return false;
+	}
+
+	if(VIDEO_DEBUG)
+		cout << "VIDEO: Creating texture sheets\n";
+
 	
 	// create our default texture sheets
 
-	CreateTexSheet(512, 512, VIDEO_TEXSHEET_32x32, false);
-	CreateTexSheet(512, 512, VIDEO_TEXSHEET_32x64, false);
-	CreateTexSheet(512, 512, VIDEO_TEXSHEET_64x64, false);
-	CreateTexSheet(512, 512, VIDEO_TEXSHEET_ANY,   true);
-	CreateTexSheet(512, 512, VIDEO_TEXSHEET_ANY,   false);
+	if(!CreateTexSheet(512, 512, VIDEO_TEXSHEET_32x32, false))
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: could not create default 32x32 tex sheet!" << endl;
+		return false;
+	}
+	
+	if(!CreateTexSheet(512, 512, VIDEO_TEXSHEET_32x64, false))
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: could not create default 32x64 tex sheet!" << endl;
+		return false;
+	}
 
-	Clear();
-	Display();
-	Clear();
+	if(!CreateTexSheet(512, 512, VIDEO_TEXSHEET_64x64, false))
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: could not create default 64x64 tex sheet!" << endl;
+		return false;
+	}
+
+	if(!CreateTexSheet(512, 512, VIDEO_TEXSHEET_ANY,   true))
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: could not create default static  var-sized tex sheet!" << endl;
+		return false;
+	}
+
+	if(!CreateTexSheet(512, 512, VIDEO_TEXSHEET_ANY,   false))
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: could not create default var-sized tex sheet!" << endl;
+		return false;
+	}
+
+	if(VIDEO_DEBUG)
+		cout << "VIDEO: Erasing the screen\n";
+
+	if(!Clear())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: first call to Clear() in GameVideo::Initialize() failed!" << endl;
+		return false;
+	}
+	
+	if(!Display())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: Display() in GameVideo::Initialize() failed!" << endl;
+		return false;
+	}	
+
+	if(!Clear())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: second call to Clear() in GameVideo::Initialize() failed!" << endl;
+		return false;
+	}
 
 	_gui = new GUI;
-		
+	
 	return true;
 }
 
+
+//-----------------------------------------------------------------------------
+// MakeScreenshot: create a screenshot and save as screenshot.jpg
+//-----------------------------------------------------------------------------
+
 bool GameVideo::MakeScreenshot()
 {
-	//ilutGLScreenie();
-	
 	ILuint screenshot;
 	ilGenImages(1, &screenshot);
+	
+	if(ilGetError())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: ilGenImages() failed in MakeScreenshot()!" << endl;
+		return false;
+	}
+	
 	ilBindImage(screenshot);
+	if(ilGetError())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: ilBindImage() failed in MakeScreenshot()!" << endl;
+		return false;
+	}
 	
 	ilEnable(IL_FILE_OVERWRITE);
 	ilutGLScreen();
+	if(ilGetError())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: ilutGLScreen() failed in MakeScreenshot()!" << endl;
+		return false;
+	}
+
 	ilSaveImage("screenshot.jpg");
+	if(ilGetError())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: ilSaveImage() failed in MakeScreenshot()!" << endl;
+		return false;
+	}
+
 	ilDeleteImages(1, &screenshot);
+	if(ilGetError())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: ilDeleteImages() failed in MakeScreenshot()!" << endl;
+		return false;
+	}
+
 	return true;
 }
 
@@ -183,6 +333,9 @@ bool GameVideo::DrawTextHelper
 	float y 
 )
 {
+	if(_fontMap.empty())
+		return false;
+		
 	CoordSys tempCoordSys = _coordSys;
 	
 	SetCoordSys(0,1024,0,768,0);
@@ -190,6 +343,9 @@ bool GameVideo::DrawTextHelper
 	SDL_Color color;
 	location.x = (int)x;
 	location.y = (int)y;
+	
+	if(_fontMap.find(_currentFont) == _fontMap.end())
+		return false;
 	
 	TTF_Font *font = _fontMap[_currentFont];
 	
@@ -210,10 +366,24 @@ bool GameVideo::DrawTextHelper
 	if( uText )
 	{
 		initial = TTF_RenderUNICODE_Blended(font, uText, color);
+		
+		if(!initial)
+		{
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: TTF_RenderUNICODE_Blended() returned NULL in DrawTextHelper()!" << endl;
+			return false;
+		}
 	}
 	else
 	{
 		initial = TTF_RenderText_Blended(font, text, color);
+
+		if(!initial)
+		{
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: TTF_RenderText_Blended() returned NULL in DrawTextHelper()!" << endl;
+			return false;
+		}
 	}
 		
 	w = RoundUpPow2(initial->w);
@@ -222,18 +392,61 @@ bool GameVideo::DrawTextHelper
 	intermediary = SDL_CreateRGBSurface(0, w, h, 32, 
 			0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
 
-	SDL_BlitSurface(initial, 0, intermediary, 0);
-	
+	if(!intermediary)
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: SDL_CreateRGBSurface() returned NULL in DrawTextHelper()!" << endl;
+		return false;
+	}
+
+
+	if(SDL_BlitSurface(initial, 0, intermediary, 0) < 0)
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: SDL_BlitSurface() failed in DrawTextHelper()!" << endl;
+		return false;
+	}
+
+
 	glGenTextures(1, &texture);
+	if(glGetError())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: glGetError() true after glGenTextures() in DrawTextHelper!" << endl;
+		return false;
+	}
+	
 	glBindTexture(GL_TEXTURE_2D, texture);
+	if(glGetError())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: glGetError() true after glBindTexture() in DrawTextHelper!" << endl;
+		return false;
+	}
+
 	glTexImage2D(GL_TEXTURE_2D, 0, 4, w, h, 0, GL_RGBA, 
-			GL_UNSIGNED_BYTE, intermediary->pixels );
+	             GL_UNSIGNED_BYTE, intermediary->pixels );
+
+	if(glGetError())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: glGetError() true after glTexImage2D() in DrawTextHelper!" << endl;
+		return false;
+	}
+
 	
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);	
 
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, texture);
+	if(glGetError())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: glGetError() true after 2nd call to glBindTexture() in DrawTextHelper!" << endl;
+		return false;
+	}
+
 	glColor3f(1.0f, 1.0f, 1.0f);
 	
 	glBegin(GL_QUADS);
@@ -253,7 +466,14 @@ bool GameVideo::DrawTextHelper
 	
 	SDL_FreeSurface(initial);
 	SDL_FreeSurface(intermediary);
+		
 	glDeleteTextures(1, &texture);
+	if(glGetError())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "glGetError() true after glDeleteTextures() in DrawTextHelper!" << endl;
+		return false;
+	}
 
 	SetCoordSys( tempCoordSys._left, tempCoordSys._right, tempCoordSys._bottom, tempCoordSys._top, tempCoordSys._layer );
 
@@ -287,12 +507,12 @@ bool GameVideo::DrawText(const Uint16 *text, float x, float y)
 
 GameVideo::~GameVideo() 
 { 
-	if (VIDEO_DEBUG) fprintf(stdout, "VIDEO: GameVideo destructor invoked\n"); 
+	if (VIDEO_DEBUG) 
+		cout << "VIDEO: GameVideo destructor invoked" << endl;
 	
 	// delete GUI
 	delete _gui;
-	
-	
+		
 	// delete TTF fonts
 	map<string, TTF_Font *>::iterator iFont    = _fontMap.begin();
 	map<string, TTF_Font *>::iterator iFontEnd = _fontMap.end();
@@ -381,7 +601,11 @@ bool GameVideo::LoadFont(const string &filename, const string &name, int size)
 	TTF_Font *font = TTF_OpenFont(filename.c_str(), size);
 	
 	if(!font)
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: TTF_OpenFont() failed for filename:\n" << filename.c_str() << endl;
 		return false;
+	}
 	
 	_fontMap[name] = font;
 	return true;
@@ -400,7 +624,8 @@ void GameVideo::SetDrawFlags(int firstflag, ...)
 	va_list args;
 
 	va_start(args, firstflag);
-	for (n=0;;n++) {
+	for (n=0;;n++) 
+	{
 		flag = (n==0) ? firstflag : va_arg(args, int);
 		switch (flag) {
 		case 0: goto done;
@@ -424,7 +649,9 @@ void GameVideo::SetDrawFlags(int firstflag, ...)
 		case VIDEO_BLEND_ADD: _blend=2; break;
 
 		default:
-			fprintf(stderr, "Unknown flag %d passed to SetDrawFlags()\n", flag);
+			if(VIDEO_DEBUG)
+				cerr << "Unknown flag " << flag << " passed to SetDrawFlags()\n";
+			break;
 		}
 	}
 done:
@@ -436,7 +663,7 @@ done:
 // DrawImage: draws an image given the image descriptor
 //-----------------------------------------------------------------------------
 
-void GameVideo::DrawImage(const ImageDescriptor &id)
+bool GameVideo::DrawImage(const ImageDescriptor &id)
 {
 	size_t numElements = id._elements.size();
 	
@@ -444,15 +671,20 @@ void GameVideo::DrawImage(const ImageDescriptor &id)
 	{		
 		glPushMatrix();
 		MoveRel((float)id._elements[iElement].xOffset, (float)id._elements[iElement].yOffset);
-		DrawElement
-		(
+		if(!DrawElement(
 			id._elements[iElement].image, 
 			id._elements[iElement].width, 
 			id._elements[iElement].height,
 			id._elements[iElement].color
-		);
+		))
+		{
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: DrawElement() failed in DrawImage()!" << endl;
+			return false;
+		}
 		glPopMatrix();
 	}
+	return true;
 }
 
 
@@ -483,14 +715,23 @@ bool GameVideo::LoadImage(ImageDescriptor &id)
 	
 	if(_images.find(id.filename) != _images.end())
 	{
-		id._elements.clear();
+		id._elements.clear();		
+		
 		Image *img = _images[id.filename];
+		
+		if(!img)
+		{
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: got a NULL Image from images map in LoadImage()" << endl;
+			return false;
+		}
 
 		if(img->refCount == 0)
 		{
 			// if ref count is zero, it means this image was freed, but
 			// not removed, so restore it
-			img->texSheet->RestoreImage(img);
+			if(!img->texSheet->RestoreImage(img))
+				return false;
 		}
 		
 		++img->refCount;
@@ -500,8 +741,7 @@ bool GameVideo::LoadImage(ImageDescriptor &id)
 		if(id.height == 0.0f)
 			id.height = (float) img->height;
 		
-		ImageElement element(img, 0, 0, id.width, id.height, id.color);
-		
+		ImageElement element(img, 0, 0, id.width, id.height, id.color);		
 		id._elements.push_back(element);
 				
 		return true;
@@ -530,10 +770,12 @@ bool GameVideo::LoadImage(ImageDescriptor &id)
 //                    and loaded on EndTexLoadBatch().
 //-----------------------------------------------------------------------------
 
-void GameVideo::BeginImageLoadBatch()
+bool GameVideo::BeginImageLoadBatch()
 {
 	_batching = true;
 	_batchImages.clear();  // this should already be clear, but just in case...
+
+	return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -555,6 +797,14 @@ bool GameVideo::EndImageLoadBatch()
 	while(iImage != iEnd)
 	{
 		ImageDescriptor *id = *iImage;
+		
+		if(!id)
+		{
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: got a NULL ImageDescriptor in EndImageLoadBatch()!" << endl;
+			success = false;
+		}
+		
 		if(!LoadImage(*id))
 			success = false;
 		
@@ -581,7 +831,22 @@ bool GameVideo::LoadImageImmediate(ImageDescriptor &id, bool isStatic)
 	ILuint pixelData;
 	uint w,h;
 	ilGenImages(1, &pixelData);
+	
+	if(ilGetError())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "ilGetError() true after ilGenImages() in LoadImageImmediate()!" << endl;
+		return false;
+	}
+	
 	ilBindImage(pixelData);
+	
+	if(ilGetError())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "ilGetError() true after ilBindImage() in LoadImageImmediate()!" << endl;
+		return false;
+	}
 
 	if (!ilLoadImage((char *)id.filename.c_str())) 
 	{
@@ -633,6 +898,13 @@ bool GameVideo::LoadImageImmediate(ImageDescriptor &id, bool isStatic)
 
 	// finally, delete the buffer DevIL used to load the image
 	ilDeleteImages(1, &pixelData);
+	
+	if(ilGetError())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: ilGetError() true after ilDeleteImages() in LoadImageImmediate()!" << endl;
+		return false;
+	}
 	
 	return true;
 }
@@ -797,12 +1069,20 @@ TexSheet *GameVideo::InsertImageInTexSheet
 
 		// ran out of memory!
 		if(!sheet)
+		{
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: CreateTexSheet() returned NULL in InsertImageInTexSheet()!" << endl;
 			return NULL;
+		}
 					
 		if(sheet->AddImage(image, pixelData))
 			return sheet;
 		else
+		{
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: AddImage() returned false for inserting large image!" << endl;	
 			return NULL;
+		}
 	}
 		
 	
@@ -827,6 +1107,13 @@ TexSheet *GameVideo::InsertImageInTexSheet
 	for(uint iSheet = 0; iSheet < numTexSheets; ++iSheet)
 	{
 		TexSheet *sheet = _texSheets[iSheet];
+		if(!sheet)
+		{
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: _texSheets[iSheet] was NULL in InsertImageInTexSheet()!" << endl;
+			return NULL;
+		}
+		
 		if(sheet->type == type && sheet->isStatic == isStatic)
 		{
 			if(sheet->AddImage(image, pixelData))
@@ -1008,25 +1295,32 @@ VariableTexMemMgr::~VariableTexMemMgr()
 }
 
 
-void GameVideo::DEBUG_ShowTexSheet()
+bool GameVideo::DEBUG_ShowTexSheet()
 {
 	// value of zero means to disable display
 	if(_currentDebugTexSheet == -1)
-		return;
+		return true;
 		
 	// check if there aren't any texture sheets! (should never happen)
 	if(_texSheets.empty())
 	{
 		if(VIDEO_DEBUG)		
 			cerr << "VIDEO_WARNING: Called DEBUG_ShowTexture(), but there were no texture sheets" << endl;
-		return;
+		return false;
 	}
 	
 	
 	CoordSys tempCoordSys = _coordSys;
 	SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f, 1);
 	
+	if(_currentDebugTexSheet >= (int) _texSheets.size())
+		return false;
+	
 	TexSheet *sheet = _texSheets[_currentDebugTexSheet];
+	
+	if(!sheet)
+		return false;
+	
 	int w = sheet->width;
 	int h = sheet->height;
 	
@@ -1043,24 +1337,30 @@ void GameVideo::DEBUG_ShowTexSheet()
 	Move(0.0f,0.0f);
 	glScalef(0.5f, 0.5f, 0.5f);
 	
-	DrawElement(&img, (float)w, (float)h, Color(1.0f, 1.0f, 1.0f, 1.0f));
+	if(!DrawElement(&img, (float)w, (float)h, Color(1.0f, 1.0f, 1.0f, 1.0f)))
+		return false;
+		
 	glPopMatrix();
 	
 	_blend = blend;
 	_xalign = xalign;
 	_yalign = yalign;
 
-	SetFont("default");
+	if(!SetFont("default"))
+		return false;
 	
 	char buf[200];
 	
-	DrawText("Current Texture sheet:", 20, _coordSys._top - 30);
+	if(!DrawText("Current Texture sheet:", 20, _coordSys._top - 30))
+		return false;
 	
 	sprintf(buf, "  Sheet #: %d", _currentDebugTexSheet);	
-	DrawText(buf, 20, _coordSys._top - 50);
+	if(!DrawText(buf, 20, _coordSys._top - 50))
+		return false;
 	
 	sprintf(buf, "  Size:    %dx%d", sheet->width, sheet->height);
-	DrawText(buf, 20, _coordSys._top - 70);
+	if(!DrawText(buf, 20, _coordSys._top - 70))
+		return false;
 	
 	if(sheet->type == VIDEO_TEXSHEET_32x32)
 		sprintf(buf, "  Type:    32x32");
@@ -1071,16 +1371,20 @@ void GameVideo::DEBUG_ShowTexSheet()
 	else if(sheet->type == VIDEO_TEXSHEET_ANY)
 		sprintf(buf, "  Type:    Any size");
 	
-	DrawText(buf, 20, _coordSys._top - 90);
+	if(!DrawText(buf, 20, _coordSys._top - 90))
+		return false;
 	
 	sprintf(buf, "  Static:  %d", sheet->isStatic);
-	DrawText(buf, 20, _coordSys._top - 110);
+	if(!DrawText(buf, 20, _coordSys._top - 110))
+		return false;
 
 	sprintf(buf, "  TexID:   %d", sheet->texID);
-	DrawText(buf, 20, _coordSys._top - 130);
+	if(!DrawText(buf, 20, _coordSys._top - 130))
+		return false;
 
-		
 	SetCoordSys(tempCoordSys._left, tempCoordSys._right, tempCoordSys._bottom, tempCoordSys._top, tempCoordSys._layer);
+	
+	return true;
 }
 
 
@@ -1266,12 +1570,12 @@ bool TexSheet::RestoreImage(Image *img)
 // DrawElement: draws an image element. This is only used privately.
 //-----------------------------------------------------------------------------
 
-void GameVideo::DrawElement(const Image *const img, float w, float h, const Color &color)
+bool GameVideo::DrawElement(const Image *const img, float w, float h, const Color &color)
 {
 	if(color.color[3] == 0.0f)
 	{
 		// do nothing, alpha is 0
-		return;
+		return true;
 	}
 	
 	float s0,s1,t0,t1;
@@ -1387,6 +1691,15 @@ void GameVideo::DrawElement(const Image *const img, float w, float h, const Colo
 	glDisable(GL_TEXTURE_2D);
 	if (_blend)
 		glDisable(GL_BLEND);	
+		
+	if(glGetError())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: glGetError() returned true in DrawElement()!" << endl;
+		return false;
+	}		
+		
+	return true;
 }
 
 
@@ -1465,6 +1778,10 @@ bool GameVideo::DeleteImage(ImageDescriptor &id)
 
 bool GameVideo::RemoveImage(Image *img)
 {
+	// nothing to do if img is null
+	if(!img)
+		return true;
+
 	if(_images.empty())
 	{
 		return false;
@@ -1969,7 +2286,7 @@ void GameVideo::DEBUG_PrevTexSheet()
 // ReloadImages: reloads images if the gl context is lost
 //-----------------------------------------------------------------------------
 
-void GameVideo::ReloadImages() 
+bool GameVideo::ReloadImages() 
 {
 /* TODO: reimplement this
 	unsigned n= (unsigned) _images.size();
@@ -1982,6 +2299,7 @@ void GameVideo::ReloadImages()
 		LoadTexture(*_images[i]);
 	}
 	*/
+	return true;
 }
 
 
@@ -1990,7 +2308,7 @@ void GameVideo::ReloadImages()
 //               list of images alone in case they need to be reloaded
 //-----------------------------------------------------------------------------
 
-void GameVideo::UnloadImages() 
+bool GameVideo::UnloadImages() 
 {
 /*  REIMPLEMENT THIS
 	unsigned n= (unsigned) _images.size();
@@ -2001,6 +2319,7 @@ void GameVideo::UnloadImages()
 		}
 	}
 */
+	return true;
 }
 
 
@@ -2008,10 +2327,12 @@ void GameVideo::UnloadImages()
 // DeleteImages: deletes all the images completely (dangerous!)
 //-----------------------------------------------------------------------------
 
-void GameVideo::DeleteImages() 
+bool GameVideo::DeleteImages() 
 {
 	UnloadImages();
+		
 	_images.clear();
+	return true;
 }
 
 
@@ -2051,6 +2372,10 @@ bool GameVideo::ChangeMode(const SDL_Rect &s)
 		_setUp=false;
 		_width=0;
 		_height=0;
+		
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: SDL_SetVideoMode() failed in ChangeMode()!" << endl;
+		
 	} else {
 		_setUp=true;
 		_width=desWidth;
@@ -2092,11 +2417,16 @@ void GameVideo::SetViewport(float left, float bottom, float right, float top) {
 //        done by videostates that use them
 //-----------------------------------------------------------------------------
 
-void GameVideo::Clear() 
+bool GameVideo::Clear() 
 {
 	SetViewport(0,0,100,100);
 	glClearColor(0,0,0,1);
 	glClear(GL_COLOR_BUFFER_BIT);
+	
+	if(glGetError())
+		return false;
+		
+	return true;
 }
 
 
@@ -2105,10 +2435,14 @@ void GameVideo::Clear()
 //          screen
 //-----------------------------------------------------------------------------
 
-void GameVideo::Display() 
+bool GameVideo::Display() 
 {
-	DEBUG_ShowTexSheet();
+	if(!DEBUG_ShowTexSheet())
+		return false;
+		
 	SDL_GL_SwapBuffers();
+	
+	return true;
 }
 
 
@@ -2251,6 +2585,3 @@ bool GameVideo::CreateMenu(ImageDescriptor &id, float width, float height)
 
 
 }
-
-
-
