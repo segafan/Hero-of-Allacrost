@@ -319,8 +319,7 @@ int main(int argc, char *argv[]) {
 		// 1) Render the scene
 		VideoManager->Clear();
 		ModeManager->GetTop()->Draw();
-		VideoManager->DrawFPS(frame_time);
-		VideoManager->Display();		
+		VideoManager->Display(frame_time);		
 		
 		// 2) Process all new events
 		InputManager->EventHandler();
