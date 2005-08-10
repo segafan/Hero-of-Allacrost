@@ -12,9 +12,52 @@ using namespace hoa_video::local_video;
 namespace hoa_video 
 {
 
+// time between screen shake updates in milliseconds
+const int VIDEO_TIME_BETWEEN_SHAKE_UPDATES = 50;  
+
+// controls how slow the slow transform is. The greater the number, the "slower" it is.
+const float VIDEO_SLOW_TRANSFORM_POWER = 2.0f;
+
+// controls how fast the fast transform is. The smaller the number, the "faster" it is.
+const float VIDEO_FAST_TRANSFORM_POWER = 0.3f;
+
+
+
 bool VIDEO_DEBUG = false;
 
 SINGLETON_INITIALIZE(GameVideo);
+
+
+//-----------------------------------------------------------------------------
+// Lerp: linearly interpolates value between initial and final
+//-----------------------------------------------------------------------------
+
+float Lerp(float alpha, float initial, float final)
+{
+	return alpha * final + (1.0f-alpha) * initial;
+}
+
+
+//-----------------------------------------------------------------------------
+// RandomFloat: returns a random float between a and b
+//-----------------------------------------------------------------------------
+
+float RandomFloat(float a, float b)
+{
+	if(a == b)
+		return a;
+	
+	if(a > b)
+	{
+		float c = a;  // swap
+		a = b;
+		b = c;
+	}
+	
+	float r = float(rand()%10001);
+	
+	return a + (b - a) * r / 10000.0f;
+}
 
 
 //-----------------------------------------------------------------------------
@@ -23,8 +66,11 @@ SINGLETON_INITIALIZE(GameVideo);
 
 GameVideo::GameVideo() 
 : _width(0), 
-  _height(0), 
-  _setUp(false),
+  _height(0),
+  _fullscreen(false),
+  _temp_width(0),
+  _temp_height(0),
+  _temp_fullscreen(false),
   _blend(0), 
   _xalign(-1), 
   _yalign(-1), 
@@ -32,7 +78,12 @@ GameVideo::GameVideo()
   _yflip(0),
   _currentDebugTexSheet(-1),
   _batching(false),
-  _gui(NULL)
+  _gui(NULL),
+  _lastTexID(0xFFFFFFFF),
+  _numTexSwitches(0),
+  _advancedDisplay(false),
+  _shakeX(0),
+  _shakeY(0)
 {
 	if (VIDEO_DEBUG) 
 		cout << "VIDEO: GameVideo constructor invoked\n";
@@ -52,8 +103,10 @@ bool GameVideo::Initialize()
 	if(VIDEO_DEBUG)
 		cout << "VIDEO: setting video mode\n";
 
-	SDL_Rect mode = {0,0,1024,768}; // TEMPORARY
-	if(!ChangeMode(mode))
+	SetResolution(1024, 768);
+	SetFullscreen(false);
+	
+	if(!ApplySettings())
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: ChangeMode() failed in GameVideo::Initialize()!" << endl;
@@ -66,36 +119,28 @@ bool GameVideo::Initialize()
 
 	// initialize DevIL
 	ilInit();
-	if(ilGetError())
+	ilOriginFunc(IL_ORIGIN_UPPER_LEFT);
+	
+	if(!ilEnable(IL_ORIGIN_SET))
 	{
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: ilInit() failed!" << endl;
+			cerr << "VIDEO ERROR: SERIOUS PROBLEM! ilEnable(IL_ORIGIN_SET) failed in GameVideo::Initialize()!" << endl;
 		return false;
 	}
-	
-	ilOriginFunc(IL_ORIGIN_UPPER_LEFT);
-	ilEnable(IL_ORIGIN_SET);
 
 	if(VIDEO_DEBUG)
 		cout << "VIDEO: Initializing ILU\n";
 	
-	iluInit();
-	if(ilGetError())
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: iluInit() failed!" << endl;
-		return false;
-	}
-
+	iluInit();     // assume this function works since iluInit() doesn't return error codes! :(
+	
 	if(VIDEO_DEBUG)
 		cout << "VIDEO: Initializing ILUT\n";
 
-	ilutRenderer(ILUT_OPENGL);
-	if(ilGetError())
+	if(!ilutRenderer(ILUT_OPENGL))
 	{
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: ilutRenderer() failed!" << endl;
-		return false;
+			cerr << "VIDEO ERROR: SERIOUS PROBLEM! ilutRenderer(ILUT_OPENGL) failed in GameVideo::Initialize()!" << endl;
+		// don't return false, since it's possible to play game w/o ilutRenderer
 	}
 
 	if(VIDEO_DEBUG)
@@ -164,6 +209,8 @@ bool GameVideo::Initialize()
 	if(VIDEO_DEBUG)
 		cout << "VIDEO: Erasing the screen\n";
 
+	_gui = new GUI;
+
 	if(!Clear())
 	{
 		if(VIDEO_DEBUG)
@@ -171,7 +218,7 @@ bool GameVideo::Initialize()
 		return false;
 	}
 	
-	if(!Display())
+	if(!Display(0))
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: Display() in GameVideo::Initialize() failed!" << endl;
@@ -185,9 +232,149 @@ bool GameVideo::Initialize()
 		return false;
 	}
 
-	_gui = new GUI;
+	if(VIDEO_DEBUG)
+		cout << "VIDEO: GameVideo::Initialize() returned successfully" << endl;
 	
 	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// FadeTo: Begins a fade to the given color in numSeconds
+//         returns true if invalid parameter is passed
+//-----------------------------------------------------------------------------
+
+bool ScreenFader::FadeTo(const Color &final, float numSeconds)
+{
+	if(numSeconds < 0.0f)
+		return false;
+	
+	_initialColor = _currentColor;
+	_finalColor   = final;
+	
+	_currentTime = 0;
+	_endTime     = int(numSeconds * 1000);  // convert seconds to milliseconds here
+	
+	_isFading = true;
+	
+	// figure out if this is a simple fade or if an overlay is required
+	// A simple fade is defined as either a fade from (x,x,x,x)->(0,0,0,1) or from
+	// (0,0,0,1)->(x,x,x,x). In other words, fading into or out of black.
+
+	_useFadeOverlay = true;	
+
+	Color black(0.0f, 0.0f, 0.0f, 1.0f);
+
+	if( (_initialColor.color[0] == _initialColor.color[1] && 
+	     _initialColor.color[0] == _initialColor.color[2] &&
+	     _initialColor.color[0] == _initialColor.color[3] &&
+	     _finalColor == black ) ||
+	     
+	    (_finalColor.color[0] == _finalColor.color[1] && 
+	     _finalColor.color[0] == _finalColor.color[2] &&
+	     _finalColor.color[0] == _finalColor.color[3] &&
+	     _initialColor == black))	
+	{
+		_useFadeOverlay = false;
+	}
+	else
+	{
+		_fadeModulation = 1.0f;
+	}
+	
+	Update(0);  // do initial update
+	return true;
+}
+
+
+
+//-----------------------------------------------------------------------------
+// Update: updates screen fader- figures out new interpolated fade color,
+//         whether to fade using overlays or modulation, etc.
+//-----------------------------------------------------------------------------
+
+bool ScreenFader::Update(int t)
+{
+	if(!_isFading)
+		return true;
+				
+	if(_currentTime >= _endTime)
+	{
+		_currentColor   = _finalColor;
+		_isFading       = false;
+		
+		if(_useFadeOverlay)
+		{
+			// check if we have faded to black or clear. If so, we can use modulation
+			if(_finalColor[3] == 0.0f ||
+			  (_finalColor[0] == 0.0f &&
+			   _finalColor[1] == 0.0f &&
+			   _finalColor[2] == 0.0f))
+			{
+				_useFadeOverlay = false;
+				_fadeModulation = 1.0f - _finalColor[3];
+			}
+		}
+		else
+			_fadeModulation = 1.0f - _finalColor[3];
+	}
+	else
+	{
+		// calculate the new interpolated color
+		float a = (float)_currentTime / (float)_endTime;
+
+		_currentColor.color[3] = Lerp(a, _initialColor.color[3], _finalColor.color[3]);
+
+		
+		// if we are fading to or from clear, then only the alpha should get
+		// interpolated.
+		if(_finalColor.color[3] == 0.0f)
+		{
+			_currentColor.color[0] = _initialColor.color[0];
+			_currentColor.color[1] = _initialColor.color[1];
+			_currentColor.color[2] = _initialColor.color[2];
+		}
+		if(_initialColor.color[3] == 0.0f)
+		{
+			_currentColor.color[0] = _finalColor.color[0];
+			_currentColor.color[1] = _finalColor.color[1];
+			_currentColor.color[2] = _finalColor.color[2];
+		}
+		else
+		{
+			_currentColor.color[0] = Lerp(a, _initialColor.color[0], _finalColor.color[0]);
+			_currentColor.color[1] = Lerp(a, _initialColor.color[1], _finalColor.color[1]);
+			_currentColor.color[2] = Lerp(a, _initialColor.color[2], _finalColor.color[2]);
+		}
+		
+		if(!_useFadeOverlay)
+			_fadeModulation = 1.0f - _currentColor.color[3];
+		else
+			_fadeOverlayColor = _currentColor;
+	}
+
+	_currentTime += t;
+	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// FadeScreen: sets up a fade to the given color over "fadeTime" number of seconds
+//-----------------------------------------------------------------------------
+
+bool GameVideo::FadeScreen(const Color &color, float fadeTime)
+{
+	return _fader.FadeTo(color, fadeTime);
+}
+
+
+//-----------------------------------------------------------------------------
+// IsFading: returns true if screen is in the middle of a fade
+//-----------------------------------------------------------------------------
+
+bool GameVideo::IsFading()
+{
+	return _fader.IsFading();
 }
 
 
@@ -197,6 +384,9 @@ bool GameVideo::Initialize()
 
 bool GameVideo::MakeScreenshot()
 {
+	if(VIDEO_DEBUG)
+		cout << "VIDEO: Entering MakeScreenshot()" << endl;
+
 	ILuint screenshot;
 	ilGenImages(1, &screenshot);
 	
@@ -215,17 +405,21 @@ bool GameVideo::MakeScreenshot()
 		return false;
 	}
 	
-	ilEnable(IL_FILE_OVERWRITE);
-	ilutGLScreen();
-	if(ilGetError())
+	if(!ilEnable(IL_FILE_OVERWRITE))
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: ilEnable() failed in MakeScreenshot()!" << endl;
+		return false;		
+	}
+	
+	if(!ilutGLScreen())
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: ilutGLScreen() failed in MakeScreenshot()!" << endl;
 		return false;
 	}
 
-	ilSaveImage("screenshot.jpg");
-	if(ilGetError())
+	if(!ilSaveImage("screenshot.jpg"))
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: ilSaveImage() failed in MakeScreenshot()!" << endl;
@@ -239,6 +433,9 @@ bool GameVideo::MakeScreenshot()
 			cerr << "VIDEO ERROR: ilDeleteImages() failed in MakeScreenshot()!" << endl;
 		return false;
 	}
+
+	if(VIDEO_DEBUG)
+		cout << "VIDEO: Exiting MakeScreenshot() successfully (JPG file saved)" << endl;
 
 	return true;
 }
@@ -338,7 +535,7 @@ bool GameVideo::DrawTextHelper
 		
 	CoordSys tempCoordSys = _coordSys;
 	
-	SetCoordSys(0,1024,0,768,0);
+	SetCoordSys(0,1024,0,768);
 	SDL_Rect location;
 	SDL_Color color;
 	location.x = (int)x;
@@ -416,7 +613,7 @@ bool GameVideo::DrawTextHelper
 		return false;
 	}
 	
-	glBindTexture(GL_TEXTURE_2D, texture);
+	BindTexture(texture);
 	if(glGetError())
 	{
 		if(VIDEO_DEBUG)
@@ -439,7 +636,7 @@ bool GameVideo::DrawTextHelper
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);	
 
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	BindTexture(texture);
 	if(glGetError())
 	{
 		if(VIDEO_DEBUG)
@@ -467,15 +664,14 @@ bool GameVideo::DrawTextHelper
 	SDL_FreeSurface(initial);
 	SDL_FreeSurface(intermediary);
 		
-	glDeleteTextures(1, &texture);
-	if(glGetError())
+	if(!DeleteTexture(texture))
 	{
 		if(VIDEO_DEBUG)
 			cerr << "glGetError() true after glDeleteTextures() in DrawTextHelper!" << endl;
 		return false;
 	}
 
-	SetCoordSys( tempCoordSys._left, tempCoordSys._right, tempCoordSys._bottom, tempCoordSys._top, tempCoordSys._layer );
+	SetCoordSys( tempCoordSys._left, tempCoordSys._right, tempCoordSys._bottom, tempCoordSys._top);
 
 	return true;
 }
@@ -568,16 +764,15 @@ void GameVideo::SetCoordSys
 	float left, 
 	float right, 
 	float bottom, 
-	float top, 
-	int layer
+	float top
 )
 {
-	_coordSys = CoordSys(left, right, bottom, top, layer);
+	_coordSys = CoordSys(left, right, bottom, top);
 	
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	
-	glOrtho(_coordSys._left, _coordSys._right, _coordSys._bottom, _coordSys._top, -1e-4, _coordSys._layer+1e-4);
+	glOrtho(_coordSys._left, _coordSys._right, _coordSys._bottom, _coordSys._top, -1, 1);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
@@ -671,6 +866,11 @@ bool GameVideo::DrawImage(const ImageDescriptor &id)
 	{		
 		glPushMatrix();
 		MoveRel((float)id._elements[iElement].xOffset, (float)id._elements[iElement].yOffset);
+		
+		// include screen shaking effects
+		MoveRel(_shakeX * (_coordSys._right - _coordSys._left) / 1024.0f, 
+		        _shakeY * (_coordSys._top   - _coordSys._bottom) / 768.0f);  
+		
 		if(!DrawElement(
 			id._elements[iElement].image, 
 			id._elements[iElement].width, 
@@ -826,39 +1026,16 @@ bool GameVideo::LoadImageImmediate(ImageDescriptor &id, bool isStatic)
 {
 	id._elements.clear();
 
-	// load the image using DevIL
-
 	ILuint pixelData;
-	uint w,h;
-	ilGenImages(1, &pixelData);
+	uint w, h;
 	
-	if(ilGetError())
+	if(!LoadRawPixelData(id.filename, pixelData, w, h))
 	{
 		if(VIDEO_DEBUG)
-			cerr << "ilGetError() true after ilGenImages() in LoadImageImmediate()!" << endl;
-		return false;
-	}
-	
-	ilBindImage(pixelData);
-	
-	if(ilGetError())
-	{
-		if(VIDEO_DEBUG)
-			cerr << "ilGetError() true after ilBindImage() in LoadImageImmediate()!" << endl;
+			cerr << "VIDEO ERROR: LoadRawPixelData() failed in LoadImageImmediate()" << endl;
 		return false;
 	}
 
-	if (!ilLoadImage((char *)id.filename.c_str())) 
-	{
-		ilDeleteImages(1, &pixelData);
-		return false;
-	}
-	
-	// find width and height
-	
-	w = ilGetInteger(IL_IMAGE_WIDTH);
-	h = ilGetInteger(IL_IMAGE_HEIGHT);
-	
 
 	// create an Image structure and store it our std::map of images
 	Image *newImage = new Image(id.filename, w, h);
@@ -908,6 +1085,50 @@ bool GameVideo::LoadImageImmediate(ImageDescriptor &id, bool isStatic)
 	
 	return true;
 }
+
+
+//-----------------------------------------------------------------------------
+// LoadRawPixelData: uses DevIL to load the given filename.
+//                   Returns the DevIL texture ID, width and height
+//                   Upon exit, leaves this image as the currently "bound" image
+//-----------------------------------------------------------------------------
+
+bool GameVideo::LoadRawPixelData(const string &filename, ILuint &pixelData, uint &w, uint &h)
+{
+	// load the image using DevIL
+
+	ilGenImages(1, &pixelData);
+	
+	if(ilGetError())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "ilGetError() true after ilGenImages() in LoadImageImmediate()!" << endl;
+		return false;
+	}
+	
+	ilBindImage(pixelData);
+	
+	if(ilGetError())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "ilGetError() true after ilBindImage() in LoadImageImmediate()!" << endl;
+		return false;
+	}
+
+	if (!ilLoadImage((char *)filename.c_str())) 
+	{
+		ilDeleteImages(1, &pixelData);
+		return false;
+	}
+	
+	// find width and height
+	
+	w = ilGetInteger(IL_IMAGE_WIDTH);
+	h = ilGetInteger(IL_IMAGE_HEIGHT);
+	
+	return true;
+}	
+
 
 
 //-----------------------------------------------------------------------------
@@ -1166,8 +1387,8 @@ TexSheet *GameVideo::CreateTexSheet
 	bool isStatic
 )
 {
-	// validate the parameters
-	
+	// validate the parameters	
+
 	if(!IsPowerOfTwo(width) || !IsPowerOfTwo(height))
 	{
 		if(VIDEO_DEBUG)
@@ -1182,50 +1403,11 @@ TexSheet *GameVideo::CreateTexSheet
 			cerr << "VIDEO ERROR: Invalid TexSheetType passed to CreateTexSheet()!" << endl;
 			
 		return NULL;
-	}	
-	
-	// attempt to create a GL texture with the given width and height
-	// if texture creation fails, return NULL
-
-	int error;
-			
-	GLuint texID;
-
-	glGenTextures(1, &texID);
-	error = glGetError();
-	
-	if(!error)
-	{
-		glBindTexture(GL_TEXTURE_2D, texID);
-		error = glGetError();
-		
-		if(!error)
-		{		
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-			error = glGetError();
-		}
-	}
-		
-	if(error != 0)
-	{
-		glDeleteTextures(1, &texID);
-		
-		if(VIDEO_DEBUG)
-		{
-			cerr << "VIDEO ERROR: failed to create new texture in CreateTexSheet()." << endl;
-			cerr << "  OpenGL reported the following error:" << endl << "  ";
-			char *errString = (char*)gluErrorString(error);
-			cerr << errString << endl;
-		}
-		return NULL;
 	}
 	
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );	
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
+	GLuint texID = CreateBlankGLTexture(width, height);	
 	
-	// now that we have our texture loaded, simply create a new TexSheet
+	// now that we have our texture loaded, simply create a new TexSheet	
 	
 	TexSheet *sheet = new TexSheet(width, height, texID, type, isStatic);
 	_texSheets.push_back(sheet);
@@ -1245,6 +1427,7 @@ TexSheet::TexSheet(int w, int h, GLuint texID_, TexSheetType type_, bool isStati
 	texID = texID_;
 	type = type_;
 	isStatic = isStatic_;
+	loaded = true;
 	
 	if(type == VIDEO_TEXSHEET_32x32)
 		_texMemManager = new FixedTexMemMgr(this, 32, 32);
@@ -1266,8 +1449,18 @@ TexSheet::~TexSheet()
 	// delete texture memory manager
 	delete _texMemManager;
 	
+	GameVideo *videoManager = GameVideo::_GetReference();
+	
+	if(!videoManager)
+	{
+		if(VIDEO_DEBUG)
+		{
+			cerr << "VIDEO ERROR: GameVideo::_GetReference() returned NULL in TexSheet destructor!" << endl;
+		}
+	}
+	
 	// unload actual texture from memory
-	glDeleteTextures(1, &texID);
+	videoManager->DeleteTexture(texID);
 }
 
 
@@ -1310,11 +1503,14 @@ bool GameVideo::DEBUG_ShowTexSheet()
 	}
 	
 	
-	CoordSys tempCoordSys = _coordSys;
-	SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f, 1);
+	int numSheets = (int) _texSheets.size();
 	
-	if(_currentDebugTexSheet >= (int) _texSheets.size())
-		return false;
+	// we may go out of bounds say, if we were viewing a texture sheet and then it got
+	// deleted or something. To recover, just set it to the last texture sheet
+	if(_currentDebugTexSheet >= numSheets)
+	{
+		_currentDebugTexSheet = numSheets - 1;
+	}
 	
 	TexSheet *sheet = _texSheets[_currentDebugTexSheet];
 	
@@ -1381,8 +1577,6 @@ bool GameVideo::DEBUG_ShowTexSheet()
 	sprintf(buf, "  TexID:   %d", sheet->texID);
 	if(!DrawText(buf, 20, _coordSys._top - 130))
 		return false;
-
-	SetCoordSys(tempCoordSys._left, tempCoordSys._right, tempCoordSys._bottom, tempCoordSys._top, tempCoordSys._layer);
 	
 	return true;
 }
@@ -1461,12 +1655,11 @@ bool GameVideo::RemoveSheet(TexSheet *sheet)
 
 //-----------------------------------------------------------------------------
 // AddImage: adds a new image to a texture sheet
+// NOTE: assumes that the image we're adding is still "bound" in DevIL
 //-----------------------------------------------------------------------------
 
 bool TexSheet::AddImage(Image *img, ILuint pixelData)
 {
-	int error;
-
 	// try inserting into the texture memory manager
 	bool couldInsert = _texMemManager->Insert(img);	
 	if(!couldInsert)
@@ -1485,17 +1678,35 @@ bool TexSheet::AddImage(Image *img, ILuint pixelData)
 		}
 		return false;
 	}
+
+	if(!CopyRect(pixelData, img->x, img->y, img->width, img->height))
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: CopyRect() failed in TexSheet::AddImage()!" << endl;
+		return false;
+	}	
 	
-	GLuint texID = img->texSheet->texID;
+	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// CopyRect: copies an image into a sub-rectangle of the texture
+//-----------------------------------------------------------------------------
+
+bool TexSheet::CopyRect(ILuint pixelData, int x, int y, int w, int h)
+{
+	int error;
 	
-	glBindTexture(GL_TEXTURE_2D, texID);
+	GameVideo *videoManager = GameVideo::_GetReference();
+	videoManager->BindTexture(texID);	
 	
 	error = glGetError();
 	if(error)
 	{
 		if(VIDEO_DEBUG)
 		{
-			cerr << "VIDEO ERROR: could not bind texture in TexSheet::AddImage()!" << endl;
+			cerr << "VIDEO ERROR: could not bind texture in TexSheet::CopyRect()!" << endl;
 		}
 		return false;
 	}
@@ -1508,10 +1719,10 @@ bool TexSheet::AddImage(Image *img, ILuint pixelData)
 	(
 		GL_TEXTURE_2D,    // target
 		0,                // level
-		img->x,           // x offset
-		img->y,           // y offset
-		img->width,       // width
-		img->height,      // height
+		x,                // x offset within tex sheet
+		y,                // y offset within tex sheet
+		w,                // width in pixels of image
+		h,                // height in pixels of image
 		format,           // format
 		GL_UNSIGNED_BYTE, // type
 		pixels            // pixels of the sub image
@@ -1522,7 +1733,7 @@ bool TexSheet::AddImage(Image *img, ILuint pixelData)
 	{
 		if(VIDEO_DEBUG)
 		{
-			cerr << "VIDEO ERROR: glTexSubImage2D() failed in TexSHeet::AddImage()!" << endl;
+			cerr << "VIDEO ERROR: glTexSubImage2D() failed in TexSheet::CopyRect()!" << endl;
 		}
 		return false;
 	}
@@ -1570,13 +1781,19 @@ bool TexSheet::RestoreImage(Image *img)
 // DrawElement: draws an image element. This is only used privately.
 //-----------------------------------------------------------------------------
 
-bool GameVideo::DrawElement(const Image *const img, float w, float h, const Color &color)
+bool GameVideo::DrawElement(const Image *const img, float w, float h, const Color &c)
 {
+	Color color = c;
+	
 	if(color.color[3] == 0.0f)
 	{
 		// do nothing, alpha is 0
 		return true;
 	}
+
+	color.color[0] *= _fader.GetFadeModulation();
+	color.color[1] *= _fader.GetFadeModulation();
+	color.color[2] *= _fader.GetFadeModulation();
 	
 	float s0,s1,t0,t1;
 	float xoff,yoff;
@@ -1643,7 +1860,7 @@ bool GameVideo::DrawElement(const Image *const img, float w, float h, const Colo
 	if(img)
 	{
 		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, img->texSheet->texID);
+		BindTexture(img->texSheet->texID);
 	}	
 	
 	if (_blend || color.color[3] < 1.0f) 
@@ -2283,56 +2500,89 @@ void GameVideo::DEBUG_PrevTexSheet()
 
 
 //-----------------------------------------------------------------------------
-// ReloadImages: reloads images if the gl context is lost
+// ReloadTextures: reloads the texture sheets, after they have been unloaded
+//                 most likely due to a change of video mode.
+//                 Returns false if any of the textures fail to reload
 //-----------------------------------------------------------------------------
 
-bool GameVideo::ReloadImages() 
+bool GameVideo::ReloadTextures() 
 {
-/* TODO: reimplement this
-	unsigned n= (unsigned) _images.size();
+	// reload texture sheets
 	
-	for (unsigned i=0; i<n; i++) 
+	vector<TexSheet *>::iterator iSheet    = _texSheets.begin();
+	vector<TexSheet *>::iterator iSheetEnd = _texSheets.end();
+
+	bool success = true;
+
+	while(iSheet != iSheetEnd)
 	{
-		if (_images[i]->texid!=0)
-			glDeleteTextures(1, &_images[i]->texid);
-			
-		LoadTexture(*_images[i]);
-	}
-	*/
-	return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// UnloadImages: frees the memory taken up by the images, but leaves the
-//               list of images alone in case they need to be reloaded
-//-----------------------------------------------------------------------------
-
-bool GameVideo::UnloadImages() 
-{
-/*  REIMPLEMENT THIS
-	unsigned n= (unsigned) _images.size();
-	for (unsigned i=0; i<n; i++) {
-		if (_images[i]->texid != 0) {
-			glDeleteTextures(1,&_images[i]->texid);
-			_images[i]->texid=0;
-		}
-	}
-*/
-	return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// DeleteImages: deletes all the images completely (dangerous!)
-//-----------------------------------------------------------------------------
-
-bool GameVideo::DeleteImages() 
-{
-	UnloadImages();
+		TexSheet *sheet = *iSheet;
 		
-	_images.clear();
-	return true;
+		if(sheet)
+		{
+			if(!sheet->Reload())
+			{
+				if(VIDEO_DEBUG)
+					cerr << "VIDEO_ERROR: in ReloadTextures(), sheet->Reload() failed!" << endl;
+				success = false;
+			}
+		}
+		else
+		{
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: in ReloadTextures(), one of the tex sheets in the vector was NULL!" << endl;
+			success = false;
+		}
+		
+		
+		++iSheet;
+	}
+
+	return success;
+}
+
+
+//-----------------------------------------------------------------------------
+// UnloadTextures: frees the texture memory taken up by the texture sheets, 
+//                 but leaves the lists of images intact so we can reload them
+//                 Returns false if any of the textures fail to unload.
+//-----------------------------------------------------------------------------
+
+bool GameVideo::UnloadTextures() 
+{
+	// unload texture sheets
+	
+	vector<TexSheet *>::iterator iSheet    = _texSheets.begin();
+	vector<TexSheet *>::iterator iSheetEnd = _texSheets.end();
+
+	bool success = true;
+	
+	while(iSheet != iSheetEnd)
+	{
+		TexSheet *sheet = *iSheet;
+		
+		if(sheet)
+		{
+			if(!sheet->Unload())
+			{
+				if(VIDEO_DEBUG)
+					cerr << "VIDEO_ERROR: in UnloadTextures(), sheet->Unload() failed!" << endl;
+				success = false;
+			}
+		}
+		else
+		{
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: in UnloadTextures(), one of the tex sheets in the vector was NULL!" << endl;
+			success = false;
+		}
+		
+		
+		++iSheet;
+	}
+
+
+	return success;
 }
 
 
@@ -2347,44 +2597,49 @@ bool GameVideo::DrawFPS(int frameTime)
 
 
 //-----------------------------------------------------------------------------
-// ChangeMode: changes the mode, that's about it
+// ApplySettings: after you change the resolution and/or fullscreen settings,
+//                calling this function actually applies those settings
 //-----------------------------------------------------------------------------
 
-bool GameVideo::ChangeMode(const SDL_Rect &s) 
+bool GameVideo::ApplySettings()
 {
-	// Yea, so we need to reload our textures but we just lost our old GL
-	// context. See ReloadImages() call below.
-	UnloadImages();
+	// Losing GL context, so unload images first
+	UnloadTextures();
 
-	//probably gonna change the struct later
-	int desWidth = s.w;
-	int desHeight = s.h;
-	int desFlags = SDL_OPENGL;
+	int flags = SDL_OPENGL;
+	
+	if(_temp_fullscreen)
+		flags |= SDL_FULLSCREEN;
 
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
-	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8); // XXX
+	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-	if (SDL_SetVideoMode(desWidth, desHeight, 0, desFlags) == NULL) {
-		_setUp=false;
-		_width=0;
-		_height=0;
-		
+	if (!SDL_SetVideoMode(_temp_width, _temp_height, 0, flags)) 
+	{	
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: SDL_SetVideoMode() failed in ChangeMode()!" << endl;
-		
-	} else {
-		_setUp=true;
-		_width=desWidth;
-		_height=desHeight;
+			cerr << "VIDEO ERROR: SDL_SetVideoMode() failed in ApplySettings()!" << endl;
 
-		ReloadImages();
-	}
+		_temp_fullscreen = _fullscreen;
+		_temp_width      = _width;
+		_temp_height     = _height;
 
-	return _setUp;
+		if(_width > 0)   // quick test to see if we already had a valid video mode
+		{
+			ReloadTextures();					
+		}
+		return false;		
+	} 
+
+	_width      = _temp_width;
+	_height     = _temp_height;
+	_fullscreen = _temp_fullscreen;
+
+	ReloadTextures();
+	return true;
 }
 
 
@@ -2394,7 +2649,7 @@ bool GameVideo::ChangeMode(const SDL_Rect &s)
 //              whole screen
 //-----------------------------------------------------------------------------
 
-void GameVideo::SetViewport(float left, float bottom, float right, float top) {
+void GameVideo::SetViewport(float left, float right, float bottom, float top) {
 	assert(left < right);
 	assert(bottom < top);
 
@@ -2419,9 +2674,11 @@ void GameVideo::SetViewport(float left, float bottom, float right, float top) {
 
 bool GameVideo::Clear() 
 {
-	SetViewport(0,0,100,100);
+	SetViewport(0,100,0,100);
 	glClearColor(0,0,0,1);
 	glClear(GL_COLOR_BUFFER_BIT);
+	
+	_numTexSwitches = 0;
 	
 	if(glGetError())
 		return false;
@@ -2435,31 +2692,141 @@ bool GameVideo::Clear()
 //          screen
 //-----------------------------------------------------------------------------
 
-bool GameVideo::Display() 
+bool GameVideo::Display(int frameTime) 
 {
-	if(!DEBUG_ShowTexSheet())
-		return false;
+	// show an overlay over the screen if we're fading
+
+	CoordSys oldSys = _coordSys;
+	SetCoordSys(0, 1024, 0, 768);
+
+	UpdateShake(frameTime);
+	
+	if(_fader.ShouldUseFadeOverlay())
+	{
+		Color c = _fader.GetFadeOverlayColor();
+		ImageDescriptor fadeOverlay;
+		fadeOverlay.width  = 1024.0f;
+		fadeOverlay.height = 768.0f;
+		fadeOverlay.color  = c;
+		LoadImage(fadeOverlay);		
+		SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
+		PushState();
+		Move(0, 0);
+		DrawImage(fadeOverlay);		
+		PopState();
+		DeleteImage(fadeOverlay);
+	}
+
+	// this must be called before DrawFPS and all, because we only
+	// want to count texture switches related to the game itself, not the
+	// ones used to draw debug text and things like that.
+	
+	if(_advancedDisplay)
+		DEBUG_ShowTexSwitches();
+
+	DrawFPS(frameTime);
 		
+	if(!DEBUG_ShowTexSheet())
+	{
+		if(VIDEO_DEBUG)
+		{
+			// keep track of whether we've already shown this error.
+			// If we've shown it once, stop showing it so we don't clog up
+			// the debug output with the same message 1000 times
+			static bool hasFailed = false;
+			
+			if(!hasFailed)
+			{
+				cerr << "VIDEO ERROR: DEBUG_ShowTexSheet() failed\n";
+				hasFailed = true;
+			}
+		}
+	}
+
+	SetCoordSys(oldSys._left, oldSys._right, oldSys._bottom, oldSys._top);
+
 	SDL_GL_SwapBuffers();
 	
+	_fader.Update(frameTime);	
 	return true;
 }
 
 
 //-----------------------------------------------------------------------------
-// SelectLayer: move directly to layer l and reset to (x,y) = (0,0)
+// IsFullscreen: returns true if we're in fullscreen mode, false if windowed
 //-----------------------------------------------------------------------------
 
-void GameVideo::SelectLayer(int l) 
+bool GameVideo::IsFullscreen()
 {
-#ifndef NDEBUG
-	GLint matrixMode;
-	glGetIntegerv(GL_MATRIX_MODE, &matrixMode);
-	assert(matrixMode == GL_MODELVIEW);
-#endif
-	glLoadIdentity();
-	glTranslatef(0.0f, 0.0f, -1.0f);
+	return _fullscreen;
 }
+
+
+//-----------------------------------------------------------------------------
+// SetFullscreen: if you pass in true, makes the game fullscreen, otherwise
+//                makes it windowed. Returns false on failure.
+// NOTE: to actually apply the change, call ApplySettings()
+//-----------------------------------------------------------------------------
+
+bool GameVideo::SetFullscreen(bool fullscreen)
+{
+	_temp_fullscreen = fullscreen;
+	return true;	
+}
+
+
+//-----------------------------------------------------------------------------
+// ToggleFullscreen: if game is currently windowed, makes it fullscreen and
+//                   vica versa. Returns false on failure.
+// NOTE: to actually apply the change, call ApplySettings()
+//-----------------------------------------------------------------------------
+
+bool GameVideo::ToggleFullscreen()
+{
+	return SetFullscreen(!_temp_fullscreen);
+}
+
+
+//-----------------------------------------------------------------------------
+// SetResolution: sets the resolution
+// NOTE: to actually apply the change, call ApplySettings()
+//-----------------------------------------------------------------------------
+
+bool GameVideo::SetResolution(int width, int height)
+{
+	if(width <= 0 || height <= 0)
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: invalid width and/or height passed to SetResolution!" << endl;
+		return false;
+	}
+	
+	_temp_width  = width;
+	_temp_height = height;
+	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// DEBUG_ShowTexSwitches: display how many times we switched textures during
+//                        the current frame
+//-----------------------------------------------------------------------------
+
+bool GameVideo::DEBUG_ShowTexSwitches()
+{
+	// display to screen	
+	char text[16];
+	sprintf(text, "Switches: %d", _numTexSwitches);
+	
+	if( !SetFont("default"))
+		return false;
+		
+	if( !DrawText(text, 876.0f, 690.0f))
+		return false;
+		
+	return true;
+}
+
 
 
 //-----------------------------------------------------------------------------
@@ -2572,6 +2939,62 @@ bool GameVideo::SetMenuSkin
 
 
 //-----------------------------------------------------------------------------
+// DeleteTexture: wraps call to glDeleteTexture(), adds some checking to see
+//                if we deleted the last texture we bound using BindTexture(),
+//                then set the last tex ID to 0xffffffff
+//-----------------------------------------------------------------------------
+
+bool GameVideo::DeleteTexture(GLuint texID)
+{
+	glDeleteTextures(1, &texID);
+	
+	if(_lastTexID == texID)
+		_lastTexID = 0xFFFFFFFF;
+	
+	if(glGetError())
+		return false;
+		
+	return true;
+}
+
+
+
+//-----------------------------------------------------------------------------
+// BindTexture: wraps call to glBindTexture(), plus some extra checking to
+//              discard the call if we try to bind the same texture twice
+//-----------------------------------------------------------------------------
+
+bool GameVideo::BindTexture(GLuint texID)
+{
+	if(texID != _lastTexID)
+	{
+		_lastTexID = texID;
+		glBindTexture(GL_TEXTURE_2D, texID);
+		++_numTexSwitches;
+	}
+	
+	if(glGetError())
+		return false;
+	
+	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// ToggleAdvancedDisplay: toggles advanced display. When advanced display is
+//                        enabled, you can see things like how many texture
+//                        switches occurred during the current frame, etc.
+//-----------------------------------------------------------------------------
+
+bool GameVideo::ToggleAdvancedDisplay()
+{
+	_advancedDisplay = !_advancedDisplay;
+	return true;
+}
+
+
+
+//-----------------------------------------------------------------------------
 // CreateMenu
 //-----------------------------------------------------------------------------
 
@@ -2582,6 +3005,606 @@ bool GameVideo::CreateMenu(ImageDescriptor &id, float width, float height)
 
 
 
+//-----------------------------------------------------------------------------
+// Unload: unloads all memory used by OpenGL for this texture sheet
+//         Returns false if we fail to unload, or if the sheet was already
+//         unloaded
+//-----------------------------------------------------------------------------
 
-
+bool TexSheet::Unload()
+{
+	// check if we're already unloaded
+	if(!loaded)
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: unloading an already unloaded texture sheet" << endl;
+		return false;
+	}
+	
+	// delete the texture
+	GameVideo *videoManager = GameVideo::_GetReference();
+	if(!videoManager->DeleteTexture(texID))
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: DeleteTexture() failed in TexSheet::Unload()!" << endl;
+		return false;
+	}
+	
+	loaded = false;
+	return true;
 }
+
+
+//-----------------------------------------------------------------------------
+// CreateBlankGLTexture: creates a blank texture of the given width and height
+//                       and returns its OpenGL texture ID.
+//                       Returns 0xffffffff on failure
+//-----------------------------------------------------------------------------
+
+GLuint GameVideo::CreateBlankGLTexture(int width, int height)
+{
+	// attempt to create a GL texture with the given width and height
+	// if texture creation fails, return NULL
+
+	int error;
+			
+	GLuint texID;
+
+	glGenTextures(1, &texID);
+	error = glGetError();
+	
+	if(!error)   // if there's no error so far, attempt to bind texture
+	{
+		BindTexture(texID);
+		error = glGetError();
+		
+		// if the binding was successful, initialize the texture with glTexImage2D()
+		if(!error)
+		{		
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+			error = glGetError();
+		}
+	}
+		
+	if(error != 0)   // if there's an error, delete the texture and return error code
+	{
+		DeleteTexture(texID);
+		
+		if(VIDEO_DEBUG)
+		{
+			cerr << "VIDEO ERROR: failed to create new texture in CreateBlankGLTexture()." << endl;
+			cerr << "  OpenGL reported the following error:" << endl << "  ";
+			char *errString = (char*)gluErrorString(error);
+			cerr << errString << endl;
+		}
+		return 0xffffffff;
+	}
+	
+	// set clamping and filtering parameters
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
+	
+	return texID;
+}
+
+
+//-----------------------------------------------------------------------------
+// Reload: reallocate memory with OpenGL for this texture and load all the images
+//         back into it
+//         Returns false if we fail to reload or if the sheet was already loaded
+//-----------------------------------------------------------------------------
+
+bool TexSheet::Reload()
+{
+	// check if we're already loaded
+	if(loaded)
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: loading an already loaded texture sheet" << endl;
+		return false;
+	}
+	
+	// create new OpenGL texture
+	GameVideo *videoManager = GameVideo::_GetReference();	
+	GLuint tID = videoManager->CreateBlankGLTexture(width, height);
+	
+	if(tID == 0xFFFFFFFF)
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: CreateBlankGLTexture() failed in TexSheet::Reload()!" << endl;
+		return false;
+	}
+	
+	texID = tID;
+	
+	// now the hard part: go through all the images that belong to this texture
+	// and reload them again. (GameVideo's function, ReloadImagesToSheet does this)
+
+	if(!videoManager->ReloadImagesToSheet(this))
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: CopyImagesToSheet() failed in TexSheet::Reload()!" << endl;
+		return false;
+	}
+	
+	loaded = true;	
+	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// ReloadImagesToSheet: helper function of the GameVideo class to
+//                      TexSheet::Reload() to do the dirty work of reloading
+//                      image data into the appropriate spots on the texture
+//-----------------------------------------------------------------------------
+
+bool GameVideo::ReloadImagesToSheet(TexSheet *sheet)
+{
+	// delete images
+	map<FileName, Image *>::iterator iImage     = _images.begin();
+	map<FileName, Image *>::iterator iImageEnd  = _images.end();
+
+	bool success = true;
+	while(iImage != iImageEnd)
+	{
+		Image *i = iImage->second;
+		if(i->texSheet == sheet)
+		{
+			ILuint pixelData;
+			uint w, h;
+			
+			if(!LoadRawPixelData(i->filename, pixelData, w, h))
+			{
+				if(VIDEO_DEBUG)
+					cerr << "VIDEO ERROR: LoadRawPixelData() failed in ReloadImagesToSheet()!" << endl;
+				success = false;
+			}			
+			
+			if(!sheet->CopyRect(pixelData, i->x, i->y, w, h))
+			{
+				if(VIDEO_DEBUG)
+					cerr << "VIDEO ERROR: sheet->CopyRect() failed in ReloadImagesToSheet()!" << endl;
+				success = false;
+			}
+		}
+		++iImage;
+	}
+	
+	return success;
+}
+
+
+//-----------------------------------------------------------------------------
+// Interpolator constructor
+//-----------------------------------------------------------------------------
+
+Interpolator::Interpolator()
+{
+	_method = VIDEO_INTERPOLATE_LINEAR;
+	_currentTime = _endTime = 0;
+	_a = _b  = 0.0f;
+	_finished  = true;    // no interpolation in progress
+	_currentValue = 0.0f;
+}
+
+
+//-----------------------------------------------------------------------------
+// Start: begins an interpolation using a and b as inputs, in the given amount
+//        of time.
+//
+// Note: not all interpolation methods mean "going from A to B". In the case of
+//       linear, constant, fast, slow, they do start at A and go to B. But,
+//       ease interpolations go from A to B and then back. And constant
+//       interpolation means just staying at either A or B.
+//-----------------------------------------------------------------------------
+
+bool Interpolator::Start(float a, float b, int milliseconds)
+{
+	if(!ValidMethod())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: tried to start interpolation with invalid method!" << endl;
+		return false;
+	}
+	
+	if(milliseconds < 0)
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: passed negative time value to Interpolator::Start()!" << endl;
+		return false;
+	}
+	
+	_a = a;
+	_b = b;	
+	
+	_currentTime = 0;
+	_endTime     = milliseconds;
+	_finished    = false;
+	
+	Update(0);  // do initial update so we have a valid value for GetValue()
+	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// SetMethod: sets the current interpolation method. Two things will cause
+//            this to fail:
+//
+//            1. You pass in an invalid method
+//            2. You change the method while an interpolation is in progress
+//-----------------------------------------------------------------------------
+
+bool Interpolator::SetMethod(InterpolationMethod method)
+{
+	if(!_finished)
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: tried to call SetMethod() on an interpolator that was still in progress!" << endl;
+		return false;
+	}
+		
+	if(!ValidMethod())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: passed an invalid method to Interpolator::SetMethod()!" << endl;
+		return false;
+	}
+	
+	_method = method;
+	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// GetValue: returns the current value of the interpolator. The current value
+//           gets set when Update() is called so make sure to never call
+//           GetValue() before updating
+//-----------------------------------------------------------------------------
+
+float Interpolator::GetValue()
+{
+	return _currentValue;
+}
+
+
+//-----------------------------------------------------------------------------
+// Update: updates the interpolation by frameTime milliseconds.
+//         If we reach the end of the interpolation, then IsFinished()
+//         will return true.
+//         This function will return false if the method is invalid.
+//-----------------------------------------------------------------------------
+
+bool Interpolator::Update(int frameTime)
+{
+	if(frameTime < 0)
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: called Interpolator::Update() with negative frameTime!" << endl;
+		return false;
+	}
+	
+	if(!ValidMethod())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: called Interpolator::Update(), but method was invalid!" << endl;
+		return false;
+	}
+	
+	// update current time
+	_currentTime += frameTime;
+	
+	if(_currentTime > _endTime)
+	{
+		_currentTime = _endTime;
+		_finished    = true;
+	}
+	
+	// calculate a value from 0.0f to 1.0f of how far we are in the interpolation	
+	float t;
+	
+	if(_endTime == 0)
+	{
+		t = 1.0f;
+	}
+	else
+	{
+		t = (float)_currentTime / (float)_endTime;
+	}
+	
+	if(t > 1.0f)
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: calculated value of 't' was more than 1.0!" << endl;
+		t = 1.0f;
+	}
+	
+	// now apply a transformation based on the interpolation method
+	
+	switch(_method)
+	{
+		case VIDEO_INTERPOLATE_EASE:
+			t = EaseTransform(t);			
+			break;
+		case VIDEO_INTERPOLATE_SRCA:
+			t = 0.0f;
+			break;
+		case VIDEO_INTERPOLATE_SRCB:
+			t = 1.0f;
+			break;
+		case VIDEO_INTERPOLATE_FAST:
+			t = FastTransform(t);
+			break;
+		case VIDEO_INTERPOLATE_SLOW:
+			t = SlowTransform(t);			
+			break;
+		case VIDEO_INTERPOLATE_LINEAR:
+			// nothing to do, just use t value as it is!
+			break;
+		default:
+		{
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: in Interpolator::Update(), current method didn't match supported methods!" << endl;
+			return false;
+		}
+	};
+	
+	_currentValue = Lerp(t, _a, _b);
+	
+	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// FastTransform: rescales the range of t so that it looks like a sqrt function
+//                from 0.0 to 1.0, i.e. it increases quickly then levels off
+//-----------------------------------------------------------------------------
+
+float Interpolator::FastTransform(float t)
+{
+	// the fast transform power is some number above 0.0 and less than 1.0
+	return powf(t, VIDEO_FAST_TRANSFORM_POWER);
+}
+
+
+//-----------------------------------------------------------------------------
+// SlowTransform: rescales the range of t so it looks like a power function
+//                from 0.0 to 1.0, i.e. it increases slowly then rockets up
+//-----------------------------------------------------------------------------
+
+float Interpolator::SlowTransform(float t)
+{
+	// the slow transform power is a number above 1.0
+	return powf(t, VIDEO_SLOW_TRANSFORM_POWER);
+}
+
+
+//-----------------------------------------------------------------------------
+// EaseTransform: rescales the range of t so it increases slowly, rises to 1.0
+//                then falls back to 0.0
+//-----------------------------------------------------------------------------
+
+float Interpolator::EaseTransform(float t)
+{
+	return 0.5f * (1.0f + sinf(VIDEO_2PI * (t - 0.25f)));
+}
+
+
+//-----------------------------------------------------------------------------
+// IsFinished: returns true if the interpolator is done with the current
+//             interpolation
+//-----------------------------------------------------------------------------
+
+bool Interpolator::IsFinished()
+{
+	return _finished;
+}
+
+
+//-----------------------------------------------------------------------------
+// ValidMethod: private function to check that the current method is valid
+//-----------------------------------------------------------------------------
+
+bool Interpolator::ValidMethod()
+{
+	return (_method < VIDEO_INTERPOLATE_TOTAL && 
+	        _method > VIDEO_INTERPOLATE_INVALID);	
+}
+
+
+//-----------------------------------------------------------------------------
+// ShakeScreen: shakes the screen with a given force and shake method
+//              If you want it to shake until you manually stop it, then
+//              pass in VIDEO_FALLOFF_NONE and 0.0f for falloffTime
+//-----------------------------------------------------------------------------
+
+bool GameVideo::ShakeScreen(float force, float falloffTime, ShakeFalloff falloffMethod)
+{
+	// check inputs
+	if(force < 0.0f)
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: passed negative force to ShakeScreen()!" << endl;
+		return false;
+	}
+
+	if(falloffTime < 0.0f)
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: passed negative falloff time to ShakeScreen()!" << endl;
+		return false;
+	}
+
+	if(falloffMethod <= VIDEO_FALLOFF_INVALID || falloffMethod >= VIDEO_FALLOFF_TOTAL)
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: passed invalid shake method to ShakeScreen()!" << endl;
+		return false;
+	}
+	
+	if(falloffTime == 0.0f && falloffMethod != VIDEO_FALLOFF_NONE)
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: ShakeScreen() called with 0.0f (infinite), but falloff method was not VIDEO_FALLOFF_NONE!" << endl;
+		return false;
+	}
+		
+	// create the shake force structure
+	
+	int milliseconds = int(falloffTime * 1000);
+	ShakeForce s;
+	s.currentTime  = 0;
+	s.endTime      = milliseconds;
+	s.initialForce = force;
+	
+	
+	// set up the interpolation
+	switch(falloffMethod)
+	{
+		case VIDEO_FALLOFF_NONE:
+			s.interpolator.SetMethod(VIDEO_INTERPOLATE_SRCA);
+			s.interpolator.Start(force, 0.0f, milliseconds);
+			break;
+		
+		case VIDEO_FALLOFF_EASE:
+			s.interpolator.SetMethod(VIDEO_INTERPOLATE_EASE);
+			s.interpolator.Start(0.0f, force, milliseconds);
+			break;
+		
+		case VIDEO_FALLOFF_LINEAR:
+			s.interpolator.SetMethod(VIDEO_INTERPOLATE_LINEAR);
+			s.interpolator.Start(force, 0.0f, milliseconds);
+			break;
+			
+		case VIDEO_FALLOFF_GRADUAL:
+			s.interpolator.SetMethod(VIDEO_INTERPOLATE_SLOW);
+			s.interpolator.Start(force, 0.0f, milliseconds);
+			break;
+			
+		case VIDEO_FALLOFF_SUDDEN:
+			s.interpolator.SetMethod(VIDEO_INTERPOLATE_FAST);
+			s.interpolator.Start(force, 0.0f, milliseconds);
+			break;
+		
+		default:
+		{
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: falloff method passed to ShakeScreen() was not supported!" << endl;
+			return false;
+		}		
+	};
+	
+	// add the shake force to GameVideo's list
+	_shakeForces.push_front(s);
+	
+	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// StopShaking: removes ALL shaking on the screen
+//-----------------------------------------------------------------------------
+
+bool GameVideo::StopShaking()
+{
+	_shakeForces.clear();
+	_shakeX = _shakeY = 0.0f;
+	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// IsShaking: returns true if the screen has any shake effect applied to it
+//-----------------------------------------------------------------------------
+
+bool GameVideo::IsShaking()
+{
+	return !_shakeForces.empty();
+}
+
+
+//-----------------------------------------------------------------------------
+// RoundForce: rounds a force to an integer. Whether to round up or round down
+//             is based on the fractional part. A force of 1.37 has a 37%
+//             chance of being a 2, else it's a 1
+//             This is necessary because otherwise a shake force of 0.5f
+//             would get rounded to zero all the time even though there is some
+//             force
+//-----------------------------------------------------------------------------
+
+float GameVideo::RoundForce(float force)
+{
+	int fractionPct = int(force * 100) - (int(force) * 100);
+	
+	int r = rand()%100;
+	if(fractionPct > r)
+		force = ceilf(force);
+	else
+		force = floorf(force);
+		
+	return force;
+}
+
+
+
+//-----------------------------------------------------------------------------
+// UpdateShake: called once per frame to update the the shake effects
+//              and update the shake x,y offsets
+//-----------------------------------------------------------------------------
+
+void GameVideo::UpdateShake(int frameTime)
+{
+	if(_shakeForces.empty())
+	{
+		_shakeX = _shakeY = 0;
+		return;
+	}
+
+	// first, update all the shake effects and calculate the net force, i.e.
+	// the sum of the forces of all the shakes
+	
+	float netForce = 0.0f;
+	
+	list<ShakeForce>::iterator iShake = _shakeForces.begin();
+	list<ShakeForce>::iterator iEnd   = _shakeForces.end();
+	
+	while(iShake != iEnd)
+	{
+		ShakeForce &s = *iShake;
+		s.currentTime += frameTime;
+
+		if(s.endTime != 0 && s.currentTime >= s.endTime)
+		{
+			iShake = _shakeForces.erase(iShake);
+		}
+		else
+		{
+			s.interpolator.Update(frameTime);
+			netForce += s.interpolator.GetValue();
+			++iShake;	
+		}
+	}	
+
+	// cap the max update frequency
+	
+	static int timeTilNextUpdate = 0;		
+	timeTilNextUpdate -= frameTime;
+	
+	if(timeTilNextUpdate > 0)
+		return;
+	
+	timeTilNextUpdate = VIDEO_TIME_BETWEEN_SHAKE_UPDATES;
+
+
+	// now that we have our force (finally), calculate the proper shake offsets
+	// note that this doesn't produce a radially symmetric distribution of offsets
+	// but I think it's not noticeable so... :)
+	
+	_shakeX = RoundForce(RandomFloat(-netForce, netForce));
+	_shakeY = RoundForce(RandomFloat(-netForce, netForce));	
+}
+
+
+
+}  // namespace hoa_video
