@@ -568,7 +568,7 @@ MapMode::MapMode(int new_map_id) {
 	//DataManager->LoadMap(this, map_id);
 	
 	// Setup the coordinate system
-	VideoManager->SetCoordSys(-SCREEN_COLS/2, SCREEN_COLS/2, -SCREEN_ROWS/2, SCREEN_ROWS/2, 1);
+	VideoManager->SetCoordSys(-SCREEN_COLS/2, SCREEN_COLS/2, -SCREEN_ROWS/2, SCREEN_ROWS/2);
 	
 	virtual_sprite = new MapSprite(VIRTUAL_SPRITE, 20, 20, 0x0);
 	virtual_sprite->SetSpeed(VERY_FAST_SPEED);
@@ -1161,14 +1161,12 @@ void MapMode::GetDrawInfo(MapFrame& mf) {
 // Public draw function called by the main game loop
 void MapMode::Draw() { 
 	MapFrame mf; // Contains all the information we need to know to draw the map
-	
 
 
 	GetDrawInfo(mf); // Get all the information we need for drawing this map frame
 	
 	// ************** (1) Draw the Lower Layer *************
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_NO_BLEND, 0);
-	VideoManager->SelectLayer(1);
 	VideoManager->Move(mf.c_pos, mf.r_pos);
 	for (int r = mf.r_start; r < mf.r_start + mf.r_draw; r++) {
 		for (int c = mf.c_start; c < mf.c_start + mf.c_draw; c++) {
@@ -1188,7 +1186,6 @@ void MapMode::Draw() {
 	
 	// ************** (3) Draw the Upper Layer *************
 	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-	VideoManager->SelectLayer(1);
 	VideoManager->Move(mf.c_pos, mf.r_pos);
 	for (int r = mf.r_start; r < mf.r_start + mf.r_draw; r++) {
 		for (int c = mf.c_start; c < mf.c_start + mf.c_draw; c++) {
