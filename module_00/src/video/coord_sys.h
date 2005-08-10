@@ -17,24 +17,20 @@ struct CoordSys
 	{
 		_left  = _top    = 0.0f;
 		_right = _bottom = 1.0f;
-		
-		_layer  = 1;
 	}
 	
-	CoordSys(float left, float right, float bottom, float top, int layer)
+	CoordSys(float left, float right, float bottom, float top)
 	{
 		_left   = left;
 		_right  = right;
 		_bottom = bottom;
 		_top    = top;
-		_layer   = layer;
 	}
 	
 	float _left;
 	float _right;
 	float _bottom;
 	float _top;
-	int   _layer;
 };
 
 #endif
