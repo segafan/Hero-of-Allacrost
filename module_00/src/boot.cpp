@@ -51,7 +51,7 @@ BootMode::BootMode() {
 	
 	DataManager->LoadBootData(&boot_images, &boot_sound, &boot_music);
 	
-	VideoManager->SetCoordSys(0, 1024, 0, 768, 1); // TEMPORARY
+	VideoManager->SetCoordSys(0, 1024, 0, 768);
 	
  	for (uint i = 0; i < boot_images.size(); i++) {
  		VideoManager->LoadImage(boot_images[i]);
@@ -723,7 +723,6 @@ void BootMode::UpdateJoystickOptions() {
 // Draws our next frame to the video back buffer
 void BootMode::Draw() {
 	// Draw the backdrop image
-	VideoManager->SelectLayer(1);
 	
 	//VideoManager->Move(0, 0);
 	//VideoManager->Move(-1024/2, 0);
