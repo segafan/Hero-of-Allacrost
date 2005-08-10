@@ -256,8 +256,7 @@ void GameData::LoadBootData(
 	GameVideo::_GetReference()->SetCoordSys((float)GetGlobalInt("coord_sys_x_left"),
 					(float) GetGlobalInt("coord_sys_x_right"),
 					(float) GetGlobalInt("coord_sys_y_bottom"),
-					(float) GetGlobalInt("coord_sys_y_top"),
-					GetGlobalInt("coord_sys_nl"));
+					(float) GetGlobalInt("coord_sys_y_top"));
 	
 	// Load the audio stuff
 	// Make a call to the config code that loads in two vectors of strings
