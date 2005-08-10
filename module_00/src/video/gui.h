@@ -24,7 +24,16 @@ namespace local_video
 // take several samples of the FPS across frames and then average to get a
 // steady FPS display
 
-const int VIDEO_FPS_SAMPLES = 30;
+const int VIDEO_FPS_SAMPLES = 350;
+
+// maximum number of milliseconds that the current frame time and our averaged
+// frame time must vary before we freak out and start catching up
+
+const int VIDEO_MAX_FTIME_DIFF = 4;
+
+// if we need to play catchup with the FPS, how many samples to take
+
+const int VIDEO_FPS_CATCHUP = 20;
 
 
 //-----------------------------------------------------------------------------
@@ -86,6 +95,8 @@ private:
 	MenuSkin _currentSkin;
 
 	hoa_video::GameVideo *_videoManager;
+	
+	int _totalFPS;
 	
 	int _fpsSamples[VIDEO_FPS_SAMPLES];
 	int _curSample;

@@ -19,6 +19,8 @@ GUI::GUI()
 	for(int sample = 0; sample < VIDEO_FPS_SAMPLES; ++sample)
 		_fpsSamples[sample] = 0;
 		
+	_totalFPS      = 0;
+	
 	_curSample = _numSamples = 0;
 	_videoManager = hoa_video::GameVideo::_GetReference();
 	
@@ -59,28 +61,60 @@ bool GUI::DrawFPS(int frameTime)
 	if(frameTime)   
 	{
 		fps /= frameTime;
-	}
+	}	
 	
-	// insert newly calculated FPS into fps buffer
 	
-	if(_curSample < 0 || _curSample >= VIDEO_FPS_SAMPLES)
+	int nIter;
+	
+	if(_numSamples == 0)
 	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: out of bounds _curSample in DrawFPS()!" << endl;
-		return false;
+		// If the FPS display is uninitialized, set the entire FPS array to the
+		// current FPS
+		
+		_numSamples = nIter = VIDEO_FPS_SAMPLES;
 	}
+	else if(frameTime < 2)
+		nIter = 1;    // if the game is going at 500 fps or faster, 1 iteration is enough
+	else
+	{
+		// find if there's a discrepancy between the current frame time and the
+		// averaged one. If there's a large one, it's likely that we just switched
+		// modes (e.g. going from boot screen to map), so add extra samples so the
+		// FPS display "catches up" more quickly
+		
+		float avgFrameTime = 1000.0f * VIDEO_FPS_SAMPLES / _totalFPS;
+		int diffTime = ((int)avgFrameTime - frameTime);
+		
+		if(diffTime < 0)
+			diffTime = -diffTime;
+		
+		if(diffTime <= VIDEO_MAX_FTIME_DIFF)
+			nIter = 1;
+		else
+			nIter = VIDEO_FPS_CATCHUP;  // catch up faster
+	}
+		
 	
-	_fpsSamples[_curSample] = fps;
-	_curSample = (_curSample+1) % VIDEO_FPS_SAMPLES;
-	
+	for(int j = 0; j < nIter; ++j)
+	{	
+		// insert newly calculated FPS into fps buffer
+		
+		if(_curSample < 0 || _curSample >= VIDEO_FPS_SAMPLES)
+		{
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: out of bounds _curSample in DrawFPS()!" << endl;
+			return false;
+		}		
+		
+		_totalFPS -= _fpsSamples[_curSample];
+		_totalFPS += fps;		
+		_fpsSamples[_curSample] = fps;
+		_curSample = (_curSample+1) % VIDEO_FPS_SAMPLES;
+	}		
+		
 	// find the average FPS
-	int totalFPS = 0;
-	for(int sample = 0; sample < VIDEO_FPS_SAMPLES; ++sample)
-	{
-		totalFPS += _fpsSamples[sample];
-	}
-	
-	int avgFPS = totalFPS / VIDEO_FPS_SAMPLES;
+
+	int avgFPS = _totalFPS / VIDEO_FPS_SAMPLES;
 
 	// display to screen	
 	char fpsText[16];
