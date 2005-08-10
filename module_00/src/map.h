@@ -40,8 +40,8 @@ namespace local_map {
 const int ANIMATION_RATE = 300;
 
 // The number of rows and columns of tiles that compose the screen
-const int SCREEN_ROWS = 20;
-const int SCREEN_COLS = 28;
+const int SCREEN_ROWS = 24;
+const int SCREEN_COLS = 32;
 
 // Constants used for describing the current state of operation during MapMode
 const int EXPLORE      = 0x00000001;
