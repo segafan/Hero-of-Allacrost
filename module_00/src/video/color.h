@@ -27,6 +27,14 @@ class Color
 public:
 	float color[4];
 	
+	bool operator == (const Color &c)
+	{
+		return color[0] == c.color[0] &&
+		       color[1] == c.color[1] &&
+		       color[2] == c.color[2] &&
+		       color[3] == c.color[3];
+	}
+	
 	void VerifyColor();
 
 	Color();
