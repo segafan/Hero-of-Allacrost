@@ -21,8 +21,19 @@
 // because there's no getopt() function. Some time in the future, I (Raj)
 // will fix this by using Cygwin or MingW or whatever...
 
+#ifdef _DEBUG
+
+#define getopt(a,b,c)  (EnableDebugging("all"), -1)
+#define optarg         (NULL)
+
+
+#else
+
 #define getopt(a,b,c)  (-1)
 #define optarg         (NULL)
+
+#endif
+
 
 #endif
 
@@ -35,6 +46,7 @@
 #include <string>
 #include <map>
 #include <stack>
+#include <list>
 
 
 #include <SDL/SDL.h>
