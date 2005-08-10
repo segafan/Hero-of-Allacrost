@@ -329,20 +329,33 @@ void GameInput::KeyEventHandler(SDL_KeyboardEvent *key_event) {
 	if (key_event->type == SDL_KEYDOWN) { // Key was pressed
 		if (key_event->keysym.mod & KMOD_CTRL) { // CTRL key was held down
 			if (key_event->keysym.sym == SDLK_f) {
-				//if (ENGINE_DEBUG) cout << " Toggle Fullscreen!" << endl;
+				if (ENGINE_DEBUG) 
+					cout << " Toggle Fullscreen!" << endl;
+					
+				GameVideo *VideoManager = GameVideo::_GetReference();
+				VideoManager->ToggleFullscreen();
+				VideoManager->ApplySettings();
+				
 				return;
 			}
 			else if (key_event->keysym.sym == SDLK_s) {
-				//if (ENGINE_DEBUG) cout << " Took Screenshot!" << endl;
+				// press CTRL+S to make a screenshot
+				if (ENGINE_DEBUG) 
+					cout << "Taking Screenshot using MakeScreenshot!" << endl;					
 					
 				GameVideo *VideoManager = GameVideo::_GetReference();
 				VideoManager->MakeScreenshot();
 				return;
 			}
 			else if (key_event->keysym.sym == SDLK_t) {
-				// press T to display and cycle through the texture sheets
+				// press CTRL+T to display and cycle through the texture sheets
 				GameVideo *VideoManager = GameVideo::_GetReference();
 				VideoManager->DEBUG_NextTexSheet();
+			}
+			else if (key_event->keysym.sym == SDLK_a) {
+				// press CTRL+W to toggle the display of advanced video engine information
+				GameVideo *VideoManager = GameVideo::_GetReference();
+				VideoManager->ToggleAdvancedDisplay();
 			}
 			else if (key_event->keysym.sym == SDLK_q) {
 				// Quit the game without question if we are in BootMode or QuitMode
