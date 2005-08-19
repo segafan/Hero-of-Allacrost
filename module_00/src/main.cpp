@@ -334,9 +334,8 @@ int main(int argc, char *argv[]) {
 
 	AudioManager->SetMusicVolume(SettingsManager->music_vol);
 	AudioManager->SetSoundVolume(SettingsManager->sound_vol);
-
-	BootMode* BM = new BootMode(); // Create the first game mode...
-	ModeManager->Push(BM);         // ...and push it on the game mode stack!
+	
+	ModeManager->Initialize(); // Initialize ModeManager with a new BootMode
 
 	SettingsManager->SetTimer();	// Initialize the game and frames-per-second timers
 
@@ -348,17 +347,15 @@ int main(int argc, char *argv[]) {
 		VideoManager->Clear();
 		ModeManager->GetTop()->Draw();
 		VideoManager->Display(frame_time);
-
+		
 		// 2) Process all new events
 		InputManager->EventHandler();
-
+		
 		// 3) Update the timer
 		frame_time = (int)SettingsManager->UpdateTime();
-
+		
 		// 4) Update the game status
-		ModeManager->GetTop()->Update(frame_time);
-
-
+		ModeManager->Update(frame_time);
 	} // while (SettingsManager->NotDone())
 
 	// Begin exit sequence and destroy the singleton classes

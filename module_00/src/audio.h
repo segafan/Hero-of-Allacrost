@@ -61,12 +61,6 @@ const int ALL_CHANNELS = -1;
 //! When playing a sound, passing this argument will play it on any open channel
 const int ANY_OPEN_CHANNEL = -1;
 
-
-
-/******************************************************************************
- * SoundItem, MusicItem structs - Used by the audio code. You don't need to worry
- *	about these structs and you should never create any instances of them.
- *****************************************************************************/
 /*!****************************************************************************
  *  \brief Used by the GameAudio class to internally represent a sound data item.
  *

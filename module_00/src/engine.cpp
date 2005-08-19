@@ -21,6 +21,7 @@
 #include "video.h"
 #include "data.h"
 #include "global.h"
+#include "boot.h"
 #include "quit.h"
 #include "pause.h"
 
@@ -28,6 +29,7 @@ using namespace std;
 using namespace hoa_audio;
 using namespace hoa_video;
 using namespace hoa_data;
+using namespace hoa_boot;
 using namespace hoa_quit;
 using namespace hoa_pause;
 using namespace hoa_global;
@@ -87,6 +89,7 @@ GameMode::~GameMode() {
 // This constructor must be defined for the singleton macro
 GameModeManager::GameModeManager() {
 	if (ENGINE_DEBUG) cout << "ENGINE: GameModeManager constructor invoked" << endl;
+	pop_count = 0;
 }
 
 
@@ -94,35 +97,60 @@ GameModeManager::GameModeManager() {
 // The destructor frees all the modes still on the stack
 GameModeManager::~GameModeManager() {
 	if (ENGINE_DEBUG) cout << "ENGINE: GameModeManager destructor invoked" << endl;
+	// Delete any game modes on the stack
 	while (game_stack.size() != 0) {
-		Pop();
+		delete game_stack.back();
+		game_stack.pop_back();
 	}
+	
+	// Delete any game modes on the push stack
+	while (push_stack.size() != 0) {
+		delete push_stack.back();
+		push_stack.pop_back();
+	}
+}
+
+
+
+void GameModeManager::Initialize() {
+	// Delete any game modes on the stack
+	while (game_stack.size() != 0) {
+		delete game_stack.back();
+		game_stack.pop_back();
+	}
+	
+	// Delete any game modes on the push stack
+	while (push_stack.size() != 0) {
+		delete push_stack.back();
+		push_stack.pop_back();
+	}
+	
+	// Reset the pop counter
+	pop_count = 0;
+	
+	// Create a new BootMode and push it onto the true game stack immediately
+	BootMode* BM = new BootMode();
+	game_stack.push_back(BM);
 }
 
 
 
 // Free the top mode on the stack and pop it off
 inline void GameModeManager::Pop() {
-	if (game_stack.size() > 0) {
-		delete game_stack.back();
-		game_stack.pop_back();
-	}
+	pop_count++;
 }
 
 
 
 // Pop off all game modes
 void GameModeManager::PopAll() {
-	while (game_stack.size() > 0) {
-		delete game_stack.back();
-		game_stack.pop_back();
-	}
+	pop_count = game_stack.size();
 }
 
 
 // Push a new game mode onto the stack
 inline void GameModeManager::Push(GameMode* gm) {
-	game_stack.push_back(gm);
+	push_stack.push_back(gm);
 }
 
 
@@ -145,6 +173,30 @@ GameMode* GameModeManager::GetTop() {
 		return game_stack.back();
 }
 
+
+// Checks if any game modes need to be pushed or popped off the stack, then updates the top stack mode.
+void GameModeManager::Update(Uint32 time_elapsed) {
+	while (pop_count != 0) {
+		if (game_stack.empty()) {
+			if (ENGINE_DEBUG) {
+				cerr << "ENGINE: ERROR: Tried to pop off more game modes than were on the stack!" << endl;
+			}
+			break; // Exit the loop
+		}
+		delete game_stack.back();
+		game_stack.pop_back();
+		pop_count--;
+	}
+	
+	// Push any new game modes onto the true game stack.
+	while (push_stack.size() != 0) {
+		game_stack.push_back(push_stack.back());
+		push_stack.pop_back();
+	}
+	
+	// Call the Update function on the top stack mode (the active game mode)
+	game_stack.back()->Update(time_elapsed);
+}
 
 
 // Used for debugging purposes ONLY. Prints the contents of the game mode stack.
@@ -202,7 +254,8 @@ Uint32 GameSettings::UpdateTime() {
 		fps_rate = 1000 * static_cast<float>(fps_counter) / static_cast<float>(fps_timer);
 		fps_counter = 0;
 		fps_timer = 0;
-		cout << "FPS: " << fps_rate << endl;
+		// DEFUNCT: cout << "FPS: " << fps_rate << endl; 
+		// Need to make a call the the DrawFPS function in GameVideo here.
 	}
 
 	return (tmp); // Return the difference between the last update time and the time now

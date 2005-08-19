@@ -137,6 +137,14 @@ public:
  *  on the top of the stack is the active GameMode (there can only be one active
  *  game mode at any time). The virtual Update() and Draw() functions are invoked
  *  on the game mode that is on the top of the stack.
+ *  
+ *  When a condition is encountered in which a game mode wishes to destroy itself 
+ *  and/or push a new mode onto the stack, this does not occur until the next
+ *  call to the GameModeManager#Update() function. The GameModeManager#push_stack
+ *  retains all the game modes we wish to push onto the stack on the next call to
+ *  GameModeManager#Update(), and the GameModeManager#pop_count member retains
+ *  how many modes to delete and pop off the GameModeManager#game_stack. Pop 
+ *  operations are \c always performed before push operations.
  *
  *  \note 1) This class is a singleton.
  *
@@ -154,12 +162,30 @@ private:
 	 *  \note The back of the vector is the top of the stack.
 	 */
 	std::vector<GameMode*> game_stack;
+
+	//! A vector of game modes to push to the stack on the next call to GameModeManager#Update().
+	std::vector<GameMode*> push_stack;
+	//! The number of game modes to pop from the back of the stack on the next call to GameModeManager#Update().
+	Uint32 pop_count;
 public:
 	SINGLETON_METHODS(GameModeManager);
-	//! Removes the item on the top of the stack and destroys it.
+	/*!
+	 * \brief Clears any game modes on the stack and pushes a new BootMode to the top of the stack.
+	 * 
+	 * This function should only be called before the main game loop in main.cpp. It is dangerous.
+	 * Don't use it elsewhere.
+	 */
+	void Initialize();
+	//! Increases the GameModeManager#pop_count member to pop the top stack item on the next 
+	//! call to GameModeManager#Update().
 	void Pop();
 	/*!
-	 *  \brief Removes all items on the stack and destroys them.
+	 *  \brief Will remove all game modes from the stack on the next call to GameModeManager#Update().
+	 *  
+	 *  This function sets the GameModeManager#pop_count member to the size of GameModeManager#game_stack.
+	 *  If there is no game mode in GameModeManager#push_stack before the next call to GameModeManager#Update(),
+	 *  The game will encounter a segmentation fault and die. Therefore, be careful with this function.
+	 *  
 	 *  \note Typically only used when the game exits, or when a programmer is smoking crack.
 	 */
 	void PopAll();
@@ -180,6 +206,11 @@ public:
 	 *  \return A pointer to the GameMode object on the top of the stack.
 	 */
 	GameMode* GetTop();
+	/*!
+	 *  \brief Checks if the game stack needs modes pushed or popped, then calls Update on the top game mode stack.
+	 *  \param time_elapsed The amount of time that has passed since the last call to this function.
+	 */
+	void Update(Uint32 time_elapsed);
 	/*!
 	 *  \brief Prints the contents of the \c game_stack to standard output.
 	 *  \note This function is for debugging purposes \b only! You normally should never call it.
