@@ -1,13 +1,18 @@
-/*
- * data.cpp
- *  Data management module for Hero of Allacrost
- *  (C) 2004, 2005 by Vladimir Mitrovic
- *
- *  This code is licensed under the GNU GPL. It is free software and you may modify it 
- *   and/or redistribute it under the terms of this license. See http://www.gnu.org/copyleft/gpl.html
- *   for details.
- */
+///////////////////////////////////////////////////////////////////////////////
+//            Copyright (C) 2004, 2005 by The Allacrost Project
+//                       All Rights Reserved
+//
+// This code is licensed under the GNU GPL. It is free software and you may
+// modify it and/or redistribute it under the terms of this license.
+// See http://www.gnu.org/copyleft/gpl.html for details.
+///////////////////////////////////////////////////////////////////////////////
 
+/*!****************************************************************************
+ * \file    data.cpp
+ * \author  Vladimir Mitrovic, snipe714@allacrost.org
+ * \date    Last Updated: August 12th, 2005
+ * \brief   Source file for data and scripting engine.
+ *****************************************************************************/
 
 #include "utils.h"
 #include <iostream>
@@ -42,7 +47,7 @@ GameData::GameData() {
 		lib->func(l_stack);      // open library
 		lua_settop(l_stack, 0);  // Clear the stack
 	}
-	
+
 	AudioManager = GameAudio::_GetReference();
 	VideoManager = GameVideo::_GetReference();
 }
@@ -198,11 +203,11 @@ void GameData::LoadKeyJoyState(KeyState *keystate, JoystickState *joystate) {
 	const char *filename = "dat/config/settings.hoa";
 	if (luaL_loadfile(l_stack, filename) || lua_pcall(l_stack, 0, 0, 0))
 		cerr << "DATA ERROR: Could not load " << filename << " :: " << lua_tostring(l_stack, -1) << endl;
-	
+
 	lua_getglobal(l_stack, "key_settings");
 	if (!lua_istable(l_stack, LUA_STACK_TOP))
 		cerr << "DATA ERROR: could not retrieve table \"key_settings\"" << endl;
-	
+
 	keystate->up = (SDLKey)GetTableInt("up");
 	keystate->down = (SDLKey)GetTableInt("down");
 	keystate->left = (SDLKey)GetTableInt("left");
@@ -215,9 +220,9 @@ void GameData::LoadKeyJoyState(KeyState *keystate, JoystickState *joystate) {
 	keystate->right_select = (SDLKey)GetTableInt("right_select");
 
 	keystate->pause = (SDLKey)GetTableInt("pause");
-	
+
 	//TODO Add joystick init, after we implement joystick functionality
-	
+
 	// POP! :)
 	lua_pop(l_stack, 1);
 }
@@ -230,8 +235,8 @@ void GameData::LoadBootData(
 	char* filename = "dat/config/boot.hoa";
 	if (luaL_loadfile(l_stack, filename) || lua_pcall(l_stack, 0, 0, 0))
 		cerr << "DATA ERROR: Could not load "<< filename << " :: " << lua_tostring(l_stack, -1) << endl;
-	
-	// Load the video stuff	
+
+	// Load the video stuff
 	ImageDescriptor im;
 
 	// The background
@@ -239,41 +244,41 @@ void GameData::LoadBootData(
 	im.width    = (float) GetGlobalInt("background_image_width");
 	im.height   = (float) GetGlobalInt("background_image_height");
 	boot_images->push_back(im);
-	
+
 	// The logo
 	im.filename = GetGlobalString("logo_image");
 	im.width    = (float) GetGlobalInt("logo_image_width");
 	im.height   = (float) GetGlobalInt("logo_image_height");
 	boot_images->push_back(im);
-	
+
 	// The menu
 	im.filename = GetGlobalString("menu_image");
 	im.width    = (float) GetGlobalInt("menu_image_width");
 	im.height   = (float) GetGlobalInt("menu_image_height");
 	boot_images->push_back(im);
-	
+
 	// Set up a coordinate system - now you can use the boot.hoa to set it to whatever you like
 	GameVideo::_GetReference()->SetCoordSys((float)GetGlobalInt("coord_sys_x_left"),
 					(float) GetGlobalInt("coord_sys_x_right"),
 					(float) GetGlobalInt("coord_sys_y_bottom"),
 					(float) GetGlobalInt("coord_sys_y_top"));
-	
+
 	// Load the audio stuff
 	// Make a call to the config code that loads in two vectors of strings
 	vector<string> new_music_files;
 	FillStringVector(&new_music_files, "music_files");
-	
+
 	vector<string> new_sound_files;
 	FillStringVector(&new_sound_files, "sound_files");
-	
+
 	// Push all our new music onto the boot_music vector
 	MusicDescriptor new_music;
-	
+
 	for (uint i = 0; i < new_music_files.size(); i++) {
 		new_music.filename = new_music_files[i];
 		boot_music->push_back(new_music);
 	}
-	
+
 	SoundDescriptor new_sound;
 	for (uint i = 0; i < new_sound_files.size(); i++) {
 		new_sound.filename = new_sound_files[i];
@@ -289,12 +294,12 @@ void GameData::LoadMap(hoa_map::MapMode *map_mode, int new_map_id) {
 	// filename += "1";	// TEMPORARY TEMPORARY
 	filename += "1";
 	filename += ".hoa";
-	
+
 	if (luaL_loadfile(l_stack, filename.c_str()) || lua_pcall(l_stack, 0, 0, 0))
 		cout << "LUA ERROR: Could not load "<< filename << " :: " << lua_tostring(l_stack, -1) << endl;
-	
+
 	// Setup some global map options (explanations are in map.h)
-	map_mode->map_state.push_back(GetGlobalInt("map_state"));	
+	map_mode->map_state.push_back(GetGlobalInt("map_state"));
 	map_mode->random_encounters = GetGlobalBool("random_encounters");
 	map_mode->encounter_rate = GetGlobalInt("encounter_rate");
 	// this one will change:
@@ -302,7 +307,7 @@ void GameData::LoadMap(hoa_map::MapMode *map_mode, int new_map_id) {
 	map_mode->animation_counter = GetGlobalInt("animation_counter");
 	map_mode->row_count = GetGlobalInt("row_count");
 	map_mode->col_count = GetGlobalInt("col_count");
-	
+
 	// This part loads only the tiles needed by the current map. The map editor fills in the
 	// corresponding Lua vector.
 	vector<string> tiles_used;
@@ -315,7 +320,7 @@ void GameData::LoadMap(hoa_map::MapMode *map_mode, int new_map_id) {
 	}
 	ImageDescriptor imgdsc;
 	imgdsc.width = imgdsc.height = 1;
-	
+
 	VideoManager->BeginImageLoadBatch();
 	for (uint i = 0; i < tiles_used.size(); i++) {
 		imgdsc.filename = tile_prefix + tiles_used[i] + ".png";
@@ -323,7 +328,7 @@ void GameData::LoadMap(hoa_map::MapMode *map_mode, int new_map_id) {
 		VideoManager->LoadImage(imgdsc);
 	}
 	VideoManager->EndImageLoadBatch();
-	
+
 	// The following chunk-o-code checks if the tilename has a letter at the end, which means the
 	// tile is a part of the animated tile (for example: cave12a, cave12b, cave12c, etc.). And
 	// takes care of everything else ;)
@@ -351,7 +356,7 @@ void GameData::LoadMap(hoa_map::MapMode *map_mode, int new_map_id) {
 		if (!(basenames[i] == basenames[i+1])) tbl.push_back(i+1);
 	}
 	tbl.push_back((const int)tiles_used.size());
-	
+
 	// now that we have the table, we populate the tile_frames vector...
 	TileFrame *tframe, *root;
 	for (int i = 0; i < (int)tbl.size() - 1; i++) {
@@ -368,7 +373,7 @@ void GameData::LoadMap(hoa_map::MapMode *map_mode, int new_map_id) {
 		tframe->next = root;
 		map_mode->tile_frames.push_back(root);
 	}
-	
+
 	// Now load the map itself, by loading the lower_layer, upper_layer and event_mask vectors
 	vector<int> lower, upper, emask;
 	FillIntVector(&lower, "lower_layer");
@@ -399,7 +404,7 @@ void GameData::LoadMap(hoa_map::MapMode *map_mode, int new_map_id) {
 			c++;
 		}
 	}
-	
+
 	// load Claudius
 	// >>> SNIPE: See the new definition for the PlayerSprite constructor
 	//map_mode->player_sprite = new PlayerSprite();

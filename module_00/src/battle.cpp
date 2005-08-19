@@ -1,16 +1,18 @@
-/* 
- * battle.cpp
- *	Code for Hero of Allacrost battle mode
- *	(C) 2005 by Tim Hargreaves
- *
- *	This code is licensed under the GNU GPL. It is free software and you may modify it 
- *	 and/or redistribute it under the terms of this license. See http://www.gnu.org/copyleft/gpl.html
- *	 for details.
- */
- 
-/*
- * The code in this file is for **** finish this ****
- */
+///////////////////////////////////////////////////////////////////////////////
+//            Copyright (C) 2004, 2005 by The Allacrost Project
+//                       All Rights Reserved
+//
+// This code is licensed under the GNU GPL. It is free software and you may
+// modify it and/or redistribute it under the terms of this license.
+// See http://www.gnu.org/copyleft/gpl.html for details.
+///////////////////////////////////////////////////////////////////////////////
+
+/*!****************************************************************************
+ * \file    battle.cpp
+ * \author  Tim Hargreaves, balthazar@allacrost.org
+ * \date    Last Updated: August 12th, 2005
+ * \brief   Source file for battle mode interface.
+ *****************************************************************************/
 
 #include "utils.h"
 #include <iostream>
@@ -22,7 +24,7 @@
 #include "data.h"
 
 using namespace std;
-using namespace hoa_battle::local_battle;
+using namespace hoa_battle::private_battle;
 using namespace hoa_utils;
 using namespace hoa_audio;
 using namespace hoa_video;

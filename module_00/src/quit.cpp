@@ -1,9 +1,25 @@
-/* 
+///////////////////////////////////////////////////////////////////////////////
+//            Copyright (C) 2004, 2005 by The Allacrost Project
+//                       All Rights Reserved
+//
+// This code is licensed under the GNU GPL. It is free software and you may
+// modify it and/or redistribute it under the terms of this license.
+// See http://www.gnu.org/copyleft/gpl.html for details.
+///////////////////////////////////////////////////////////////////////////////
+
+/*!****************************************************************************
+ * \file    quit.cpp
+ * \author  Tyler Olsen, roots@allacrost.org
+ * \date    Last Updated: August 12th, 2005
+ * \brief   Source file for quit mode interface.
+ *****************************************************************************/
+
+/*
  * quit.cpp
  *  Code for Hero of Allacrost quit mode
  *  (C) 2005 by Tyler Olsen
  *
- *  This code is licensed under the GNU GPL. It is free software and you may modify it 
+ *  This code is licensed under the GNU GPL. It is free software and you may modify it
  *   and/or redistribute it under the terms of this license. See http://www.gnu.org/copyleft/gpl.html
  *   for details.
  */
@@ -16,7 +32,7 @@
 #include "boot.h"
 
 using namespace std;
-using namespace hoa_quit::local_quit;
+using namespace hoa_quit::private_quit;
 using namespace hoa_audio;
 using namespace hoa_video;
 using namespace hoa_engine;
@@ -29,17 +45,17 @@ bool QUIT_DEBUG = false;
 
 QuitMode::QuitMode() {
 	if (QUIT_DEBUG) cout << "QUIT: QuitMode constructor invoked" << endl;
-	
+
 	AudioManager = GameAudio::_GetReference();
 	VideoManager = GameVideo::_GetReference();
 	ModeManager = GameModeManager::_GetReference();
 	SettingsManager = GameSettings::_GetReference();
-	
+
 	mode_type = ENGINE_QUIT_MODE;
-	
+
 	quit_type = QUIT_CANCEL;
 
-	
+
 	switch (SettingsManager->GetPauseVolumeAction()) {
 		case ENGINE_PAUSE_AUDIO:
 			AudioManager->PauseAudio();
@@ -55,22 +71,22 @@ QuitMode::QuitMode() {
 			break;
 		// Don't need to do anything for case ENGINE_SAME_VOLUME
 	}
-	
+
 	// Here we'll make a VideoManager call to save the current screen.
-	
+
 	// Here we'll render the "Really Quit?" text to screen along with the quit options
 }
 
 
 
 // The destructor might possibly have to free any text textures we create...
-QuitMode::~QuitMode() { 
+QuitMode::~QuitMode() {
 	if (QUIT_DEBUG) cout << "QUIT: QuitMode destructor invoked" << endl;
 }
 
 
 
-// Restores volume or unpauses audio, then pops itself from the game stack 
+// Restores volume or unpauses audio, then pops itself from the game stack
 void QuitMode::Update(Uint32 time_elapsed) {
 
 	// Move the menu selected cursor as appropriate
@@ -106,7 +122,7 @@ void QuitMode::Update(Uint32 time_elapsed) {
 				break;
 		}
 	}
-	
+
 	// The user really doesn't want to quit after all, so restore the game audio and state
 	if (InputManager->CancelPress() || (InputManager->ConfirmPress() && quit_type == QUIT_CANCEL)) {
 		switch (SettingsManager->GetPauseVolumeAction()) {
@@ -122,7 +138,7 @@ void QuitMode::Update(Uint32 time_elapsed) {
 		}
 		ModeManager->Pop();
 	}
-	
+
 	// Restore the game audio, pop QuitMode off the stack, and push BootMode
 	else if (InputManager->ConfirmPress() && quit_type == QUIT_TO_BOOTMENU) {
 		switch (SettingsManager->GetPauseVolumeAction()) {
@@ -140,7 +156,7 @@ void QuitMode::Update(Uint32 time_elapsed) {
 		BootMode *BM = new BootMode();
 		ModeManager->Push(BM);
 	}
-	
+
 	// The user has confirmed that they want to quit.
 	else if (InputManager->ConfirmPress() && quit_type) {
 		SettingsManager->ExitGame();
@@ -150,12 +166,12 @@ void QuitMode::Update(Uint32 time_elapsed) {
 
 
 // Draws the saved screen, the quit prompt, the quit options, and highlights the selected option
-void QuitMode::Draw() { 
+void QuitMode::Draw() {
 // 	Draw the saved screen background
 // 	Apply a filter to darken it out...?
 // 	Draw the quit prompt
 // 	Draw the yes and no options
-// 	if (quit_selected) { 
+// 	if (quit_selected) {
 // 	  Highlight the yes option
 // 	}
 // 	else {

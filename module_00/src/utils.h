@@ -1,12 +1,22 @@
-/* 
- * hoa_utils.h
- *	Header file for the Hero of Allacrost utility functions
- *	(C) 2004 by Tyler Olsen
+///////////////////////////////////////////////////////////////////////////////
+//            Copyright (C) 2004, 2005 by The Allacrost Project
+//                       All Rights Reserved
+//
+// This code is licensed under the GNU GPL. It is free software and you may
+// modify it and/or redistribute it under the terms of this license.
+// See http://www.gnu.org/copyleft/gpl.html for details.
+///////////////////////////////////////////////////////////////////////////////
+
+/*!****************************************************************************
+ * \file    utils.h
+ * \author  Tyler Olsen, roots@allacrost.org
+ * \date    Last Updated: August 12th, 2005
+ * \brief   Header file for Allacrost utility code.
  *
- *	This code is licensed under the GNU GPL. It is free software and you may modify it 
- *	 and/or redistribute it under the terms of this license. See http://www.gnu.org/copyleft/gpl.html
- *	 for details.
- */
+ * This code includes various utility functions that are used across different
+ * parts of the game. This file is included in every header file in the
+ * Allacrost source tree, save for maybe some headers for the map editor code.
+ *****************************************************************************/
 
 #ifndef __UTILS_HEADER__
 #define __UTILS_HEADER__
@@ -21,32 +31,20 @@
 // because there's no getopt() function. Some time in the future, I (Raj)
 // will fix this by using Cygwin or MingW or whatever...
 
-#ifdef _DEBUG
-
-#define getopt(a,b,c)  (EnableDebugging("all"), -1)
-#define optarg         (NULL)
-
-
-#else
-
 #define getopt(a,b,c)  (-1)
 #define optarg         (NULL)
-
-#endif
-
 
 #endif
 
 #include <stdlib.h>
 #include <iostream>
 #include <cstdlib>
-#include <cmath> 
+#include <cmath>
 
 #include <vector>
 #include <string>
 #include <map>
 #include <stack>
-#include <list>
 
 
 #include <SDL/SDL.h>
@@ -65,8 +63,10 @@
 typedef Uint32  uint;  // linux GCC has uint, but not all compilers
 #endif
 
+//! Contains utility code used across the entire 
 namespace hoa_utils {
 
+//! Determines whether the code in the hoa_utils namespace should print debug statements or not.
 extern bool UTILS_DEBUG;
 
 // Constants used for the GaussianValue() function
@@ -107,7 +107,7 @@ const int UTILS_NO_BOUNDS = 0;
 	4) FYI: _Create() and _Destroy() can be called multiple times without any problem. The only time you need
 			to worry is if _Destroy() is called and then a part of the code tries to reference a pointer to the old
 			singleton. Thus...
-			
+
 			>>> ONLY CALL _Destroy() WHEN YOU ARE EXITING OR ABORTING THE ENTIRE APPLICATION!!! <<<
 
 	5) You can get a class object pointer like this: 'MYCLASS *test = MYCLASS::_GetReference();'
@@ -145,11 +145,11 @@ const int UTILS_NO_BOUNDS = 0;
 
 
 
- 
+
 /******************************************************************************
  * float UnitRV():
  *
- *	A simple function that returns a random floating point value between [-1, 1). 
+ *	A simple function that returns a random floating point value between [-1, 1).
  *	 Used by the GaussianValue function, but probably won't be used anywhere else.
  ******************************************************************************/
 float UnitRV();
@@ -157,7 +157,7 @@ float UnitRV();
 /******************************************************************************
  * float RandomUnit():
  *
- *	A simple function that returns a random floating point value between [0.0, 1.0]. 
+ *	A simple function that returns a random floating point value between [0.0, 1.0].
  ******************************************************************************/
 float RandomUnit();
 
@@ -167,7 +167,7 @@ float RandomUnit();
  *	A simple function that returns a random interger value between [lower_bound, upper_bound].
  *	 These arguments can be postive, negative, equal, or zero. The only problem occurs if lower_bound
  *	 is greater than upper_bound, but in that case the problem is fixed and a warning is printed out
- *	 to the screen. 
+ *	 to the screen.
  ******************************************************************************/
 int RandomNum(int lower_bound, int upper_bound);
 
@@ -180,11 +180,11 @@ int RandomNum(int lower_bound, int upper_bound);
  *	 zero or positive.
  *
  *	Mean is (obviously) the mean, and the range represents the value for 3 standard deviations from the mean.
- *	 That means that 99.7% of the random values chosen will lay between mean - range and mean + range, if 
- *	 range is a greater than or equal to zero. 
+ *	 That means that 99.7% of the random values chosen will lay between mean - range and mean + range, if
+ *	 range is a greater than or equal to zero.
  ******************************************************************************/
 int GaussianValue(int mean, int range, bool positive_value);
 
 }
 
-#endif 
+#endif

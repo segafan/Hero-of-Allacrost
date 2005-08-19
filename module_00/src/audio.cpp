@@ -1,26 +1,25 @@
-/* 
- * audio.cpp
- *	Audio management module for Hero of Allacrost
- *	(C) 2004 by Tyler Olsen
- *
- *	This code is licensed under the GNU GPL. It is free software and you may modify it 
- *	 and/or redistribute it under the terms of this license. See http://www.gnu.org/copyleft/gpl.html
- *	 for details.
- */
- 
-/*
- *	This code heavily uses the SDL_mixer 1.2.5 extension library. The documentation can be found here: 
- *	 http://jcatki.no-ip.org/SDL_mixer/SDL_mixer.html. The GameAudio class provides an easy-to-use API 
- *	 for managing all music and sound used in the game. It is a singleton class.
- */
+///////////////////////////////////////////////////////////////////////////////
+//            Copyright (C) 2004, 2005 by The Allacrost Project
+//                       All Rights Reserved
+//
+// This code is licensed under the GNU GPL. It is free software and you may
+// modify it and/or redistribute it under the terms of this license.
+// See http://www.gnu.org/copyleft/gpl.html for details.
+///////////////////////////////////////////////////////////////////////////////
 
+/*!****************************************************************************
+ * \file    audio.cpp
+ * \author  Tyler Olsen, roots@allacrost.org
+ * \date    Last Updated: August 11th, 2005
+ * \brief   Source file for audio engine interface.
+ *****************************************************************************/
 
 #include "utils.h"
 #include <iostream>
 #include "audio.h"
 
 using namespace std;
-using namespace hoa_audio::local_audio;
+using namespace hoa_audio::private_audio;
 using namespace hoa_utils;
 
 namespace hoa_audio {
@@ -34,20 +33,20 @@ GameAudio::GameAudio() {
 	current_track = -1; // No track playing since we haven't loaded any music
 	music_id = 1;
 	sound_id = 1;
-	
+
 	for (int i = 0; i < MAX_CACHED_MUSIC; i++) {
 		music_cache[i].id = 0;
 		music_cache[i].music = NULL;
-		music_cache[i].time = 0;		 
+		music_cache[i].time = 0;
 	}
 	for (int i = 0; i < MAX_CACHED_SOUNDS; i++) {
 		sound_cache[i].id = 0;
 		sound_cache[i].sound = NULL;
-		sound_cache[i].time = 0;			 
+		sound_cache[i].time = 0;
 	}
-	
+
 	// Notice that we still continue the game even if audio initialization fails.
-		
+
 	if(SDL_InitSubSystem(SDL_INIT_AUDIO) == -1) { // Really bad!
 		cerr << "AUDIO ERROR: Could not initalize SDL audio subsystem: " << SDL_GetError() << endl;
 		return;
@@ -61,7 +60,7 @@ GameAudio::GameAudio() {
 	else {
 		audio_on = true;
 		Mix_AllocateChannels(OPEN_CHANNELS);
-	}	 
+	}
 }
 
 
@@ -70,8 +69,8 @@ GameAudio::GameAudio() {
 GameAudio::~GameAudio() {
 	if (AUDIO_DEBUG) cout << "AUDIO: GameAudio destructor invoked." << endl;
 	Mix_HaltMusic();
-	Mix_HaltChannel(ALL_CHANNELS);	
-	
+	Mix_HaltChannel(ALL_CHANNELS);
+
 	// Close all open music and sounds
 	for (int i = 0; i < MAX_CACHED_MUSIC; i++) {
 		if (music_cache[i].music != NULL)
@@ -96,7 +95,7 @@ int GameAudio::AllocateMusicIndex() {
 		if (music_cache[i].id == 0) // Found a free location, so return its index
 			return i;
 	}
-		
+
 	// No free music cache locations were found, so use LRU replacement
 	if (current_track != 0) {
 		lru = music_cache[0].time;
@@ -104,9 +103,9 @@ int GameAudio::AllocateMusicIndex() {
 	}
 	else {
 		lru = sound_cache[1].time;
-		index = 1;		
+		index = 1;
 	}
-		
+
 	for (int i = 1; i < MAX_CACHED_MUSIC; i++) { // Go thru the music cache trying to find older items
 		if (music_cache[i].time < lru && i != current_track) { // Found a non-active item with an older time
 			lru = music_cache[i].time; // Replace lru and index with the attributes of the older element
@@ -156,7 +155,7 @@ int GameAudio::AllocateSoundIndex() {
 		if (sound_cache[i].sound == NULL) // Found a free location, so return its index
 			return i;
 	}
-		
+
 	// No free sound cache locations were found, so use LRU replacement
 	lru = sound_cache[0].time;	// Set time equal to the zero'th element's time (remember index = 0)
 
@@ -186,7 +185,7 @@ int GameAudio::FindSoundIndex(unsigned int snd_id) {
 
 
 // Frees the sound_cache location at 'index'
-void GameAudio::FreeSound(int index) {	
+void GameAudio::FreeSound(int index) {
 	// Make sure that our index is within the array bounds
 	if (index >= 0 && index < MAX_CACHED_SOUNDS) {
 		if (sound_cache[index].sound != NULL) // Only free the memory pointed to by 'sound' if it isn't NULL
@@ -203,7 +202,7 @@ void GameAudio::FreeSound(int index) {
 void GameAudio::PauseAudio() {
 	if (audio_on == false) // If audio wasn't properly initialized, we do nothing here
 		return;
-		
+
 	if (Mix_Paused(ALL_CHANNELS) == 0) // Sound channels are not paused, so pause them now
 		Mix_Pause(ALL_CHANNELS);
 	if (Mix_PausedMusic() == 0) // Music is not paused, so pause it now
@@ -216,7 +215,7 @@ void GameAudio::PauseAudio() {
 void GameAudio::ResumeAudio() {
 	if (audio_on == false) // If audio wasn't properly initialized, we do nothing here
 		return;
-		
+
 	if (Mix_Paused(ALL_CHANNELS) != 0) // Sound channels are all paused, so resume them now
 		Mix_Resume(ALL_CHANNELS);
 	if (Mix_PausedMusic() != 0) // Music is paused, so resume it now
@@ -229,32 +228,32 @@ void GameAudio::ResumeAudio() {
 void GameAudio::LoadMusic(MusicDescriptor& md) {
 	int location; // location is the array index in the music_cache that the song will be loaded to
 	Mix_Music *new_mus; // new_mus is the pointer to the music data we are trying to load
-	
+
 	if (audio_on == false) // Do nothing if audio init went bad
 		return;
 
 	location = FindMusicIndex(md.id); // Check if the file is already in the cache
 	if (location != -1) // File is already loaded. Return and be angry that you wasted your time
 		return;
-	
+
 	string load_name = "mus/" + md.filename + ".ogg"; // Create full path to filename
 	new_mus = Mix_LoadMUS(load_name.c_str()); // We need to convert the string to a C-type string
 	if (new_mus == NULL) { // typo in filename arg or missing/corrupt file are the most likely errors to cause this
 		cerr << "AUDIO ERROR: Could not load " << load_name << ". " << Mix_GetError() << endl;
-		cerr << "* Likely causes of this error are a typo in the filename argument passed or a missing or corrupt" 
+		cerr << "* Likely causes of this error are a typo in the filename argument passed or a missing or corrupt"
 		     <<	"data file.\n* The game is exiting, please fix this error immediately!" << endl;
 		exit(1);
 	}
-	
+
 	location = AllocateMusicIndex();
 	MusicItem new_song;							 // new_song is the new music_cache item we wish to create
 	new_song.id = music_id;
 	new_song.music = new_mus;
-	new_song.time = SDL_GetTicks();	 // Set the last refereneced time equal to now				
+	new_song.time = SDL_GetTicks();	 // Set the last refereneced time equal to now
 	music_cache[location] = new_song; // Store the new_song into the music_cache
 
 	md.id = music_id; // Setup the id in the MusicDescriptor passed
-	
+
 	music_id++; // This can generate an overflow after 4,294,967,295. Roughly 50 days if it occurs 1000 times/sec.
 }
 
@@ -264,32 +263,32 @@ void GameAudio::LoadMusic(MusicDescriptor& md) {
 void GameAudio::PlayMusic(MusicDescriptor& md, int fade_ms, int loop) {
 	int location; // location is the music_cache index of the file we wish to play
 
-	if (audio_on == false) // If audio wasn't initialized properly, how can we play anything? 
+	if (audio_on == false) // If audio wasn't initialized properly, how can we play anything?
 		return;
-		
+
 	if (current_track != -1) { // If already playing, return and be pissed at the programmer who called you
 		if (md.id == music_cache[current_track].id)
 			return;
 	}
-		
+
 	location = FindMusicIndex(md.id); // Find where the file is located in the cache, if its even there
 	if (location == -1) { // File is not in cache, so lets load it now
 		LoadMusic(md);
 		location = FindMusicIndex(md.id);
 	}
-		
+
 	if (Mix_PlayingMusic()) { // Then we need to stop playing the current song
 		if (fade_ms != 0)
 			Mix_FadeOutMusic(fade_ms); // Fade the current track out
 		else
 			Mix_HaltMusic(); // Stop the music immediately with no fade
 	}
-	
-	if (fade_ms != 0) 
+
+	if (fade_ms != 0)
 		Mix_FadeInMusic(music_cache[location].music, loop, fade_ms); // Fade next track in
 	else
 		Mix_PlayMusic(music_cache[location].music, loop); // Forget this fading business, just play the damn song!
-		
+
 	// Update current track and last access time for the file
 	current_track = location;
 	music_cache[current_track].time = SDL_GetTicks();
@@ -315,7 +314,7 @@ void GameAudio::FreeMusic(MusicDescriptor& md) {
 	int location = FindMusicIndex(md.id); // Find the index matching the filename
 	if (location == -1) // It's not in the cache so it has already been evicted
 		return;
-	
+
 	// Now free the element at 'location'
 	if (music_cache[location].music != NULL)	// Only free the memory pointed to by 'sound' if it isn't NULL
 		Mix_FreeMusic(music_cache[location].music);
@@ -332,7 +331,7 @@ void GameAudio::FreeMusic(MusicDescriptor& md) {
 void GameAudio::SetMusicVolume(int value) {
 	if (audio_on == false) // If audio wasn't properly initialized, we do nothing here
 		return;
-		
+
 	if (value > MIX_MAX_VOLUME) {
 		Mix_VolumeMusic(MIX_MAX_VOLUME); // Set music volume to maximum level
 		if (AUDIO_DEBUG) cerr << "AUDIO WARNING: Tried to set music volume past max level: " << value << endl;
@@ -367,14 +366,14 @@ void GameAudio::PrintMusicCache() {
 void GameAudio::LoadSound(SoundDescriptor& sd) {
 	int location;		 // location is the array index in the sound_cache where the sound will be stored
 	Mix_Chunk *new_chunk; // new_chunk is a pointer to the sound data we are loading in
-	
+
 	if (audio_on == false) // Do nothing if audio init went bad
 		return;
 
 	location = FindSoundIndex(sd.id); // Check if the file is already loaded in the cache
 	if (location != -1) // File is already loaded. Return and curse the idiot that called you!
-		return;	 
-				
+		return;
+
 	string load_name = "snd/" + sd.filename + ".wav"; // Create full path to sound filename
 	new_chunk = Mix_LoadWAV(load_name.c_str()); // We need to convert the string to a C-type string
 	if (new_chunk == NULL) {
@@ -383,34 +382,34 @@ void GameAudio::LoadSound(SoundDescriptor& sd) {
 		     << "data file.\n The game is exiting, please fix this error immediately!" << endl;
 		exit(1);
 	}
-	
+
 	location = AllocateSoundIndex();	// Find a location for the new sound in the cache
 	SoundItem new_snd;							 // new_snd is the new item we want to add to the sound_cache
 	new_snd.id = sound_id;
-	new_snd.sound = new_chunk;	
+	new_snd.sound = new_chunk;
 	new_snd.time = SDL_GetTicks();	 // Set the last reference time equal to right now
 	sound_cache[location] = new_snd; // Store the new_snd into the sound_cache
-	
+
 	sd.id = sound_id;
-	
+
 	sound_id++; // This can generate an overflow after 4,294,967,295. Roughly 50 days if it occurs 1000 times/sec.
 }
 
 
 
-// Plays a sound (duh). If the sound isn't in the cache, it will automatically be loaded. 
+// Plays a sound (duh). If the sound isn't in the cache, it will automatically be loaded.
 void GameAudio::PlaySound(SoundDescriptor& sd, int fade_ms, int loop) {
 	int location;
-	
+
 	if (audio_on == false)	// Check for bad audio initialization or bad filename
-		return;	
-	
+		return;
+
 	location = FindSoundIndex(sd.id); // Look for the sound in the cache and return its index.
 	if (location == -1) { // The sound isn't in the cache, so load it
 		LoadSound(sd); // The program aborts if we can't load the file here
 		location = FindSoundIndex(sd.id);
 	}
-	
+
 	if (fade_ms == 0) {
 		if (Mix_PlayChannel(ANY_OPEN_CHANNEL, sound_cache[location].sound, loop) == -1) // There was an error playing
 			cerr << "AUDIO ERROR: Could not play snd/" << sd.filename << ".wav. " << Mix_GetError() << endl;
@@ -419,7 +418,7 @@ void GameAudio::PlaySound(SoundDescriptor& sd, int fade_ms, int loop) {
 		if (Mix_FadeInChannel(ANY_OPEN_CHANNEL, sound_cache[location].sound, loop, fade_ms) == -1) // Error
 			cerr << "AUDIO ERROR: Could not play snd/" << sd.filename << ".wav. " << Mix_GetError() << endl;
 	}
-	
+
 	sound_cache[location].time = SDL_GetTicks(); // Update last access time
 }
 
@@ -439,7 +438,7 @@ void GameAudio::FreeSound(SoundDescriptor& sd) {
 	int location = FindSoundIndex(sd.id); // Find the index matching the filename
 	if (location == -1) // It's not in the cache so its already been evicted
 		return;
-	
+
 	// Now free the element at 'location'
 	if (sound_cache[location].sound != NULL) {// Only free the memory pointed to by 'sound' if it isn't NULL
 			Mix_FreeChunk(sound_cache[location].sound);
@@ -456,7 +455,7 @@ void GameAudio::FreeSound(SoundDescriptor& sd) {
 void GameAudio::SetSoundVolume(int value) {
 	if (audio_on == false) // If audio wasn't properly initialized, we do nothing here
 		return;
-		
+
 	if (value >= MIX_MAX_VOLUME) {
 		Mix_Volume(ALL_CHANNELS, MIX_MAX_VOLUME); // Set sound volume to maximum level
 	}
@@ -476,11 +475,11 @@ void GameAudio::PrintSoundCache() {
 	for (int i = 0; i < MAX_CACHED_SOUNDS; i++) { // Loop thru the sound cache
 		if (sound_cache[i].sound == NULL) // There is no memory allocated for this index
 			continue; // We aren't interested in cache locations that hold no data. Look at the next location
-			
+
 		cout << "*** sound_cache[" << i << "] ***\n";
 		cout << " id				 : " << sound_cache[i].id << "\n";
 		cout << " last access: " << sound_cache[i].time << endl;
-	}	
+	}
 }
 
 } // namespace hoa_audio

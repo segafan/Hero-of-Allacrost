@@ -1,12 +1,30 @@
-/* 
- * main.cpp
- *	Hero of Allacrost game intialization code
- *	(C) 2004 by Tyler Olsen
+///////////////////////////////////////////////////////////////////////////////
+//            Copyright (C) 2004, 2005 by The Allacrost Project
+//                       All Rights Reserved
+//
+// This code is licensed under the GNU GPL. It is free software and you may
+// modify it and/or redistribute it under the terms of this license.
+// See http://www.gnu.org/copyleft/gpl.html for details.
+///////////////////////////////////////////////////////////////////////////////
+
+/*!****************************************************************************
+ * \file    main.cpp
+ * \author  Tyler Olsen, roots@allacrost.org
+ * \date    Last Updated: August 12th, 2005
+ * \brief   Allacrost initialization code and main game loop.
  *
- *	This code is licensed under the GNU GPL. It is free software and you may modify it 
- *	 and/or redistribute it under the terms of this license. See http://www.gnu.org/copyleft/gpl.html
- *	 for details.
- */
+ * The code in this file is the first to run when the game is started and the
+ * last to run before the game exits. It also processes command-line arguments.
+ * The core engine of Allacrost uses time-based updating, which basically means
+ * that we update the game status by different amounts based on how much time
+ * expired since the last update. The main game loop consists of the following
+ * steps.
+ *
+ * -# Render the newly drawn frame to the screen.
+ * -# Collect information on new user input events.
+ * -# Update the main loop timer.
+ * -# Update the game status based on how much time expired from the last update.
+ *****************************************************************************/
 
 #include "utils.h"
 #include <iostream>
@@ -27,23 +45,33 @@ using namespace hoa_engine;
 using namespace hoa_global;
 using namespace hoa_data;
 using namespace hoa_boot;
-
 using namespace hoa_map;
 
 
-// PrintUsage prints out the usage options (arguments) for running the program
+/*!
+ *  \brief Prints out the usage options (command-line arguments) for running the program.
+ */
 void PrintUsage();
 
-// EnableDebugging enables various debugging print statements in different parts of the system
+/*!
+ *  \brief Enables debugging print statements in various parts of the game engine.
+ *  \param *arg The name of the debugger variable to enable.
+ */
 void EnableDebugging(const char* arg);
 
-// SystemInfo prints the user's system information, as SDL sees it
+/*!
+ *  \brief Prints information about the user's system, as SDL sees it.
+ */
 void SystemInfo();
 
-// FileCheck compares the filenames and (where appropriate) sizes to check the integrity of the game files. 
+/*!
+ *  \brief Checks the integrity of the game's file structure to make sure no files are missing or corrupt.
+ */
 void FileCheck();
 
-// Resets the game settings to default.
+/*!
+ *  \brief Resets the game settings (audio levels, key mappings, etc.) to their default values.
+ */
 void ResetSettings();
 
 
@@ -133,7 +161,7 @@ void EnableDebugging(const char* arg) {
 //  about the user's system (work in progress)
 void SystemInfo() {
 	cout << "_____Printing system information_____" << endl;
-	
+
 	// Initialize SDL and its subsystems and make sure it shutdowns properly on exit
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK) != 0) {
 		cerr << "ERROR: Unable to initialize SDL: " << SDL_GetError() << endl;
@@ -146,13 +174,13 @@ void SystemInfo() {
 
 	// General Information
 	cout << " *** GENERAL INFORMATION *** " << endl;
-	
+
 	// Video Information
 	cout << " *** VIDEO INFORMATION *** " << endl;
 	char video_driver[20];
 	SDL_VideoDriverName(video_driver, 20);
 	cout << "Video driver name: " << video_driver << "\n" << endl;
-	
+
 	const SDL_VideoInfo *user_video;
 	user_video = SDL_GetVideoInfo(); // Get information about the user's video system
 	cout << "Best available video mode" << endl;
@@ -184,14 +212,14 @@ void SystemInfo() {
 	if (user_video->blit_fill == 1) cout << "yes\n";
 	else cout << "no\n";
 	cout << ">Total video memory: " << user_video->video_mem << " kilobytes" << "\n" << endl;
-	
+
 	//cout << "The best pixel format: " << user_video->vfmt << endl;
-	
+
 	// Audio Information
-	
+
 	// Joystick Information
 	cout << " *** JOYSTICK INFORMATION *** " << endl;
-	
+
 	SDL_Joystick *js_test;
 	int js_num = SDL_NumJoysticks(); // Get the number of joysticks available
 	cout << "SDL has recognized " << js_num << " on this system." << endl;
@@ -207,7 +235,7 @@ void SystemInfo() {
 			cout << ">Trackballs: " << SDL_JoystickNumBalls(js_test) << endl;
 			cout << ">Hat Switches: " << SDL_JoystickNumHats(js_test) << endl;
 			SDL_JoystickClose(js_test);
-		}	
+		}
 	}
 }
 
@@ -233,7 +261,7 @@ void FileCheck() {
 int main(int argc, char *argv[]) {
 	// Process command arguments with getopt
 	int arg;
-	
+
 	while ((arg = getopt(argc, argv, "+cd:hir")) != -1) {
 		switch (arg) {
 			case 'c':
@@ -265,9 +293,9 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 	atexit(SDL_Quit);
-	
+
 	SDL_EnableUNICODE(1); // Enable unicode for multilingual keyboard support
-	
+
 	// Ignore the events that we don't care about so they never appear in the event queue
 	SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
 	SDL_EventState(SDL_MOUSEBUTTONDOWN, SDL_IGNORE);
@@ -276,7 +304,7 @@ int main(int argc, char *argv[]) {
 	SDL_EventState(SDL_VIDEOEXPOSE, SDL_IGNORE);
 	SDL_EventState(SDL_USEREVENT, SDL_IGNORE);
 	// NOTE: SDL_ActiveEvent reports mouse focus, input focus, iconified status. Should we disable it???
-	
+
 	// Does the subsystem need to be initialized before checking the num of joysticks?
 	SDL_InitSubSystem(SDL_INIT_JOYSTICK);
 	if (SDL_NumJoysticks() == 0) { // No joysticks found
@@ -286,7 +314,7 @@ int main(int argc, char *argv[]) {
 	else { // At least one joystick exists
 		SDL_JoystickEventState(SDL_ENABLE);
 	}
-	
+
 	// Create all the game singletons
 	GameAudio *AudioManager = GameAudio::_Create();
 	GameVideo *VideoManager = GameVideo::_Create();
@@ -295,7 +323,7 @@ int main(int argc, char *argv[]) {
 	GameSettings *SettingsManager = GameSettings::_Create();
 	GameInput *InputManager = GameInput::_Create();
 	GameInstance *InstanceManager = GameInstance::_Create();
-	
+
 	if(!VideoManager->Initialize())
 	{
 		cerr << "ERROR: unable to initialize VideoManager" << endl;
@@ -303,35 +331,35 @@ int main(int argc, char *argv[]) {
 	}
 
 	DataManager->LoadGameSettings(); // Initializes remaining data members of Settings Manager
-	
+
 	AudioManager->SetMusicVolume(SettingsManager->music_vol);
 	AudioManager->SetSoundVolume(SettingsManager->sound_vol);
 
 	BootMode* BM = new BootMode(); // Create the first game mode...
 	ModeManager->Push(BM);         // ...and push it on the game mode stack!
-	
+
 	SettingsManager->SetTimer();	// Initialize the game and frames-per-second timers
 
 	int frame_time = 0;
-	
+
 	// This is the main loop for the game. The loop iterates once every frame drawn to the screen.
 	while (SettingsManager->NotDone()) {
 		// 1) Render the scene
 		VideoManager->Clear();
 		ModeManager->GetTop()->Draw();
-		VideoManager->Display(frame_time);		
-		
+		VideoManager->Display(frame_time);
+
 		// 2) Process all new events
 		InputManager->EventHandler();
-		
+
 		// 3) Update the timer
-		frame_time = (int)SettingsManager->UpdateTime();		
-					
+		frame_time = (int)SettingsManager->UpdateTime();
+
 		// 4) Update the game status
 		ModeManager->GetTop()->Update(frame_time);
-		
-		
-	} // while (SettingsManager->NotDone()) 
+
+
+	} // while (SettingsManager->NotDone())
 
 	// Begin exit sequence and destroy the singleton classes
 	GameData::_Destroy();
@@ -341,6 +369,6 @@ int main(int argc, char *argv[]) {
 	GameInstance::_Destroy();
 	GameAudio::_Destroy();
 	GameVideo::_Destroy();
-	
+
 	return 0;
 }

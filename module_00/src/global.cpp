@@ -1,12 +1,18 @@
-/* 
- * global.cpp
- *	Hero of Allacrost global game class code
- *	(C) 2004 by Tyler Olsen
- *
- *	This code is licensed under the GNU GPL. It is free software and you may modify it 
- *	 and/or redistribute it under the terms of this license. See http://www.gnu.org/copyleft/gpl.html
- *	 for details.
- */
+///////////////////////////////////////////////////////////////////////////////
+//            Copyright (C) 2004, 2005 by The Allacrost Project
+//                       All Rights Reserved
+//
+// This code is licensed under the GNU GPL. It is free software and you may
+// modify it and/or redistribute it under the terms of this license.
+// See http://www.gnu.org/copyleft/gpl.html for details.
+///////////////////////////////////////////////////////////////////////////////
+
+/*!****************************************************************************
+ * \file    global.cpp
+ * \author  Tyler Olsen, roots@allacrost.org
+ * \date    Last Updated: August 12th, 2005
+ * \brief   Source file for the global game components.
+ *****************************************************************************/
 
 #include "utils.h"
 #include <iostream>
@@ -27,7 +33,7 @@ SINGLETON_INITIALIZE(GameInstance);
 // ****************************************************************************
 // ******************************* GObject ************************************
 // ****************************************************************************
- 
+
 GObject::GObject(string name, unsigned char type, unsigned int usable, int id, int count) {
 	obj_name = name;
 	obj_type = type;
@@ -63,7 +69,7 @@ GItem::GItem(string name, unsigned char use, unsigned int usable, int id, int co
 
 
 
-GItem::GItem() : 
+GItem::GItem() :
 	GObject() {
 	use_case = GLOBAL_UNUSABLE_ITEM;
 }
@@ -83,7 +89,7 @@ GSkillBook::GSkillBook(string name, unsigned char use, unsigned int usable, int 
 
 
 
-GSkillBook::GSkillBook() : 
+GSkillBook::GSkillBook() :
 	GObject() {
 	obj_type = GLOBAL_SKILL_BOOK;
 }
@@ -102,7 +108,7 @@ GWeapon::GWeapon(string name, unsigned int usable, int id, int count) :
 
 
 
-GWeapon::GWeapon() : 
+GWeapon::GWeapon() :
 	GObject() {
 	obj_type = GLOBAL_WEAPON;
 }
@@ -121,7 +127,7 @@ GArmor::GArmor(string name, unsigned char type, unsigned int usable, int id, int
 
 
 
-GArmor::GArmor() : 
+GArmor::GArmor() :
 	GObject() {
 }
 
@@ -153,7 +159,7 @@ GSkill::~GSkill() {}
 // ****************************** GAttackPoint ********************************
 // ****************************************************************************
 
-GAttackPoint::GAttackPoint(float x, float y, int def, int eva, unsigned char elem_weak, 
+GAttackPoint::GAttackPoint(float x, float y, int def, int eva, unsigned char elem_weak,
                            unsigned char elem_res, unsigned char stat_weak, unsigned char stat_res) {
 	x_position = x;
 	y_position = y;
@@ -200,7 +206,7 @@ void GEnemy::LevelSimulator(uint lvl) {
 	strength = base_strength;
 	intelligence = base_intelligence;
 	agility = base_agility;
-	
+
 	for (uint i = 1; i <= experience_level; i++) {
 		rate_inc = 1.0f - RandomUnit();
 		experience_points += growth_experience_points;
@@ -217,7 +223,7 @@ void GEnemy::LevelSimulator(uint lvl) {
 			agility += growth_agility;
 		}
 	}
-	
+
 	hit_points = max_hit_points;
 }
 
@@ -231,7 +237,7 @@ GCharacter::GCharacter(std::string na, std::string fn, uint id) {
 	name = na;
 	filename = fn;
 	char_id = id;
-	
+
 	LoadFrames();
 }
 
@@ -253,10 +259,10 @@ void GCharacter::LoadFrames() {
 	GameVideo *VideoManager = GameVideo::_GetReference();
 	ImageDescriptor imd;
 	string full_name = "img/sprites/map/" + filename;
-	
+
 	imd.width = 1;
 	imd.height = 2;
-	
+
 	imd.filename = full_name + "_d1.png";
 	map_frames.push_back(imd);
 	imd.filename = full_name + "_d2.png";
@@ -267,7 +273,7 @@ void GCharacter::LoadFrames() {
 	map_frames.push_back(imd);
 	imd.filename = full_name + "_d5.png";
 	map_frames.push_back(imd);
-	
+
 	imd.filename = full_name + "_u1.png";
 	map_frames.push_back(imd);
 	imd.filename = full_name + "_u2.png";
@@ -278,7 +284,7 @@ void GCharacter::LoadFrames() {
 	map_frames.push_back(imd);
 	imd.filename = full_name + "_u5.png";
 	map_frames.push_back(imd);
-	
+
 	imd.filename = full_name + "_l1.png";
 	map_frames.push_back(imd);
 	imd.filename = full_name + "_l2.png";
@@ -293,7 +299,7 @@ void GCharacter::LoadFrames() {
 	map_frames.push_back(imd);
 	imd.filename = full_name + "_l7.png";
 	map_frames.push_back(imd);
-	
+
 	imd.filename = full_name + "_r1.png";
 	map_frames.push_back(imd);
 	imd.filename = full_name + "_r2.png";
@@ -308,7 +314,7 @@ void GCharacter::LoadFrames() {
 	map_frames.push_back(imd);
 	imd.filename = full_name + "_r7.png";
 	map_frames.push_back(imd);
-	
+
 	VideoManager->BeginImageLoadBatch();
 	for (uint i = 0; i < map_frames.size(); i++) {
 		VideoManager->LoadImage(map_frames[i]);
@@ -322,7 +328,7 @@ void GCharacter::LoadFrames() {
 
 GameInstance::GameInstance() {
 	if (GLOBAL_DEBUG) cout << "GLOBAL: GameInstance constructor invoked" << endl;
-	VideoManager = GameVideo::_GetReference();
+// 	VideoManager = GameVideo::_GetReference();
 }
 
 GameInstance::~GameInstance() {
@@ -332,9 +338,9 @@ GameInstance::~GameInstance() {
 	}
 }
 
-void GameInstance::AddCharacter(GCharacter *ch) { 
+void GameInstance::AddCharacter(GCharacter *ch) {
 	if (GLOBAL_DEBUG) cout << "GLOBAL: Adding new character to party: " << ch->GetName() << endl;
-	characters.push_back(ch); 
+	characters.push_back(ch);
 }
 
 GCharacter* GameInstance::GetCharacter(uint id) {
@@ -347,5 +353,5 @@ GCharacter* GameInstance::GetCharacter(uint id) {
 	return NULL;
 }
 
- 
+
 }// namespace hoa_global

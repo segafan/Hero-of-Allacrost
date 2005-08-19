@@ -1,12 +1,18 @@
-/* 
- * hoa_boot.cpp
- *	Code for Hero of Allacrost boot menu
- *	(C) 2004 by Tyler Olsen
- *
- *	This code is licensed under the GNU GPL. It is free software and you may modify it 
- *	 and/or redistribute it under the terms of this license. See http://www.gnu.org/copyleft/gpl.html
- *	 for details.
- */
+///////////////////////////////////////////////////////////////////////////////
+//            Copyright (C) 2004, 2005 by The Allacrost Project
+//                       All Rights Reserved
+//
+// This code is licensed under the GNU GPL. It is free software and you may
+// modify it and/or redistribute it under the terms of this license.
+// See http://www.gnu.org/copyleft/gpl.html for details.
+///////////////////////////////////////////////////////////////////////////////
+
+/*!****************************************************************************
+ * \file    boot.cpp
+ * \author  Tyler Olsen, roots@allacrost.org
+ * \date    Last Updated: August 12th, 2005
+ * \brief   Source file for boot mode interface.
+ *****************************************************************************/
 
 #include "utils.h"
 #include <iostream>
@@ -19,8 +25,8 @@
 #include "map.h"
 #include "battle.h" // tmp
 
-
 using namespace std;
+using namespace hoa_boot::private_boot;
 using namespace hoa_utils;
 using namespace hoa_audio;
 using namespace hoa_video;
@@ -29,8 +35,6 @@ using namespace hoa_global;
 using namespace hoa_data;
 using namespace hoa_map;
 using namespace hoa_battle; // tmp
-
-
 
 namespace hoa_boot {
 
@@ -43,16 +47,16 @@ bool BOOT_DEBUG = false;
 // The constructor initializes variables and sets up the path names of the boot images
 BootMode::BootMode() {
 	if (BOOT_DEBUG) cout << "BOOT: BootMode constructor invoked." << endl;
-	
+
 	mode_type = ENGINE_BOOT_MODE;
-	
+
 	vmenu_index.push_back(LOAD_MENU);
 	menu_hidden = false;
-	
+
 	DataManager->LoadBootData(&boot_images, &boot_sound, &boot_music);
-	
-	VideoManager->SetCoordSys(0, 1024, 0, 768);
-	
+
+	VideoManager->SetCoordSys(0, 1024, 0, 768); // TEMPORARY
+
  	for (uint i = 0; i < boot_images.size(); i++) {
  		VideoManager->LoadImage(boot_images[i]);
  	}
@@ -62,7 +66,7 @@ BootMode::BootMode() {
 	for (uint i = 0; i < boot_sound.size(); i++) {
 		AudioManager->LoadSound(boot_sound[i]);
 	}
-	
+
 	AudioManager->PlayMusic(boot_music[0], AUDIO_NO_FADE, AUDIO_LOOP_FOREVER);
 }
 
@@ -71,7 +75,7 @@ BootMode::BootMode() {
 // The destructor frees all used music, sounds, and images.
 BootMode::~BootMode() {
 	if (BOOT_DEBUG) cout << "BOOT: BootMode destructor invoked." << endl;
-	
+
 	for (uint i = 0; i < boot_music.size(); i++)
 		AudioManager->FreeMusic(boot_music[i]);
 	for (uint i = 0; i < boot_sound.size(); i++)
@@ -96,9 +100,9 @@ void BootMode::AnimateLogo() {
 // Redefines the change_key reference. Waits indefinitely for user to press any key.
 void BootMode::RedefineKey(SDLKey& change_key) {
 //	SDL_Event event;
-	
+
 // 	KeyState *key_set = &(SettingsManager->InputStatus.key); // A shortcut
-	
+
 // 	while (SDL_WaitEvent(&event)) { // Waits indefinitely for events to occur.
 // 		switch (event.type) {
 // 			case SDL_KEYDOWN:
@@ -159,19 +163,19 @@ void BootMode::RedefineKey(SDLKey& change_key) {
 void BootMode::Update(Uint32 time_elapsed) {
 	// If our menu is hidden, we don't do anything until a user event occurs.
 	if (menu_hidden) {
-		if (InputManager->ConfirmPress() || InputManager->CancelPress() || InputManager->MenuPress() || 
+		if (InputManager->ConfirmPress() || InputManager->CancelPress() || InputManager->MenuPress() ||
 				InputManager->SwapPress() || InputManager->LeftSelectPress() || InputManager->RightSelectPress() ||
 				InputManager->UpPress() || InputManager->DownPress() || InputManager->LeftPress() ||
 				InputManager->RightPress())
 			menu_hidden = false;
 		return;
 	}
-	
+
 	switch (vmenu_index[0]) {
-		case NEW_MENU: 
+		case NEW_MENU:
 			UpdateNewMenu();
 			break;
-		case LOAD_MENU: 
+		case LOAD_MENU:
 			UpdateLoadMenu();
 			break;
 		case OPTIONS_MENU:
@@ -191,7 +195,7 @@ void BootMode::Update(Uint32 time_elapsed) {
 
 
 
-// Handles events when NEW_MENU is selected. 
+// Handles events when NEW_MENU is selected.
 void BootMode::UpdateNewMenu() {
 	// Left and right flags are mutually exclusive. We ignore right if both are pressed.
 	if (InputManager->LeftPress()) {
@@ -204,21 +208,21 @@ void BootMode::UpdateNewMenu() {
 		cout << "LOAD MENU" << endl;
 		AudioManager->PlaySound(boot_sound[3], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // move sound
 	}
-	
+
 	if (InputManager->ConfirmPress()) {
 		AudioManager->PlaySound(boot_sound[2], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // game loading sound
 		if (BOOT_DEBUG) cout << "BOOT: Starting new game." << endl;
 		// Remove the boot mode from the top of the stack
-		
+
 		GCharacter *claud = new GCharacter("Claudius", "claudius", GLOBAL_CLAUDIUS);
 		InstanceManager->AddCharacter(claud);
 
 		// RAJ: I had to create this "manager" variable as a temporary fix
 		//      to the problem of game modes deleting themselves.
-		
+
 		GameModeManager *manager = ModeManager;
 		MapMode *MM = new MapMode(-1);
-		
+
 		manager->Pop();
 		manager->Push(MM);
 	}
@@ -243,7 +247,7 @@ void BootMode::UpdateLoadMenu() {
 			AudioManager->PlaySound(boot_sound[3], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // move sound
 			return;
 		}
-		
+
 		if (InputManager->ConfirmPress()) {
 			vmenu_index.push_back(0);
 			cout << "*Entering Saved Game Selection Screen" << endl;
@@ -251,17 +255,17 @@ void BootMode::UpdateLoadMenu() {
 			AudioManager->PlaySound(boot_sound[0], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // confirm sound
 			// Load a vector of the saved games here
 			BattleMode *BM = new BattleMode();
-			
+
 			GameModeManager *manager = ModeManager;
-			
+
 			manager->Pop();
 			manager->Push(BM);
 		}
-		
+
 		return;
 	} // if (vmenu_index.size() == 1)
-	
-	
+
+
 	// Handle submenu level 1 events. This is the "saved game selection screen" submenu
 	if (vmenu_index.size() == 2) {
 		if (InputManager->CancelPress()) {
@@ -278,10 +282,10 @@ void BootMode::UpdateLoadMenu() {
 			// Call a config routine to load details about the selected saved game
 			return;
 		}
-		
-		// Change selected game. Up and down key presses mutality exclusive. Up has higher priority. 
+
+		// Change selected game. Up and down key presses mutality exclusive. Up has higher priority.
 		if (InputManager->UpPress()) {
-			if (vmenu_index[1] != 0) 
+			if (vmenu_index[1] != 0)
 				vmenu_index[1] = vmenu_index[1] - 1;
 			else
 				vmenu_index[1] = 5; // 5 = number of saved games (TEMP)
@@ -293,15 +297,15 @@ void BootMode::UpdateLoadMenu() {
 			if (vmenu_index[1] != 5) // 5 = num_saved_games (TEMP)
 				vmenu_index[1] = vmenu_index[1] + 1;
 			else
-				vmenu_index[1] = 0; 
+				vmenu_index[1] = 0;
 			cout << "*Saved game " << vmenu_index[1] << " selected." << endl;
 			AudioManager->PlaySound(boot_sound[3], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // move sound
 		}
-		
+
 		return;
 	} // if (vmenu_index.size() == 1)
-	
-	
+
+
 	// Handle submenu level 2 events. This is the "saved game confirmation screen" submenu
 	if (vmenu_index.size() == 3) {
 		if (InputManager->CancelPress()) {
@@ -315,7 +319,7 @@ void BootMode::UpdateLoadMenu() {
 			// Load the game
 		}
 	} // if (vmenu_index.size() == 2)
-	
+
 }
 
 
@@ -335,7 +339,7 @@ void BootMode::UpdateOptionsMenu() {
 			AudioManager->PlaySound(boot_sound[3], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // move sound
 			return;
 		}
-		
+
 		if (InputManager->ConfirmPress()) {
 			vmenu_index.push_back(0); // Left-Right main options menu
 			vmenu_index.push_back(0); // Up-Down specific options menu
@@ -344,7 +348,7 @@ void BootMode::UpdateOptionsMenu() {
 		}
 		return;
 	}
-	
+
 	// Level 1 submenu
 	if (vmenu_index.size() == 3) {
 		if (InputManager->CancelPress()) {
@@ -354,7 +358,7 @@ void BootMode::UpdateOptionsMenu() {
 			AudioManager->PlaySound(boot_sound[1], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // cancel sound
 			return;
 		}
-		
+
 		switch (vmenu_index[1]) {
 			case VIDEO_OP:
 				UpdateVideoOptions();
@@ -394,7 +398,7 @@ void BootMode::UpdateCreditsMenu() {
 			AudioManager->PlaySound(boot_sound[3], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // move sound
 			return;
 		}
-		
+
 		if (InputManager->ConfirmPress()) {
 			vmenu_index.push_back(0);
 			cout << "*Viewing credits now!" << endl;
@@ -403,7 +407,7 @@ void BootMode::UpdateCreditsMenu() {
 		}
 		return;
 	}
-	
+
 	// Level 1 submenu
 	if (InputManager->ConfirmPress() || InputManager->CancelPress()) {
 		vmenu_index.pop_back();
@@ -424,7 +428,7 @@ void BootMode::UpdateHideMenu() {
 	else if (InputManager->RightPress()) {
 		vmenu_index[0] = QUIT_MENU;
 		cout << "QUIT_MENU" << endl;
-		AudioManager->PlaySound(boot_sound[3], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // move sound	 
+		AudioManager->PlaySound(boot_sound[3], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // move sound
 	}
 	else if (InputManager->ConfirmPress()) {
 		menu_hidden = true;
@@ -443,7 +447,7 @@ void BootMode::UpdateQuitMenu() {
 	else if (InputManager->RightPress()) {
 		vmenu_index[0] = NEW_MENU;
 		cout << "NEW_MENU" << endl;
-		AudioManager->PlaySound(boot_sound[3], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // move sound	 
+		AudioManager->PlaySound(boot_sound[3], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // move sound
 	}
 	else if (InputManager->ConfirmPress()) {
 		SettingsManager->ExitGame();
@@ -468,7 +472,7 @@ void BootMode::UpdateVideoOptions() {
 		AudioManager->PlaySound(boot_sound[3], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // move sound
 		return;
 	}
-	
+
 	if (InputManager->UpPress()) {
 		if (vmenu_index[2] != 0)
 			vmenu_index[2] = vmenu_index[2] - 1;
@@ -483,7 +487,7 @@ void BootMode::UpdateVideoOptions() {
 			vmenu_index[2] = 0;
 		AudioManager->PlaySound(boot_sound[3], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // move sound
 	}
-	
+
 	if (InputManager->ConfirmPress()) {
 		switch (vmenu_index[2]) {
 			case 0:
@@ -524,7 +528,7 @@ void BootMode::UpdateAudioOptions() {
 			AudioManager->PlaySound(boot_sound[3], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // move sound
 			return;
 		}
-		
+
 		if (InputManager->UpPress()) {
 			if (vmenu_index[2] != 0)
 				vmenu_index[2] = vmenu_index[2] - 1;
@@ -539,34 +543,34 @@ void BootMode::UpdateAudioOptions() {
 				vmenu_index[2] = 0;
 			AudioManager->PlaySound(boot_sound[3], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // move sound
 		}
-		
+
 		if (InputManager->ConfirmPress()) {
 			vmenu_index.push_back(0);
 		}
 		return;
 	}
-	
+
 	// Changing volume levels
 	if (InputManager->CancelPress()) {
 		vmenu_index.pop_back();
 		AudioManager->PlaySound(boot_sound[1], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // cancel sound
 		return;
 	}
-	
+
 	if (vmenu_index[2] == 0) { // Change music volume
 		if (InputManager->LeftState()) { // Decrease music volume
 
 		}
 		if (InputManager->RightState()) { // Increase music volume
-		
+
 		}
 	}
 	else if (vmenu_index[2] == 1) { // Change sound volume
 		if (InputManager->LeftState()) { // Decrease music volume
-			
+
 		}
 		if (InputManager->RightState()) { // Increase music volume
-		
+
 		}
 	}
 }
@@ -589,7 +593,7 @@ void BootMode::UpdateLanguageOptions() {
 		AudioManager->PlaySound(boot_sound[3], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // move sound
 		return;
 	}
-	
+
 	if (InputManager->UpPress()) {
 		if (vmenu_index[2] != 0)
 			vmenu_index[2] = vmenu_index[2] - 1;
@@ -604,7 +608,7 @@ void BootMode::UpdateLanguageOptions() {
 			vmenu_index[2] = 0;
 		AudioManager->PlaySound(boot_sound[3], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // move sound
 	}
-	
+
 	if (InputManager->ConfirmPress()) {
 		switch (vmenu_index[2]) {
 			case 0:
@@ -638,7 +642,7 @@ void BootMode::UpdateKeyOptions() {
 		AudioManager->PlaySound(boot_sound[3], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // move sound
 		return;
 	}
-	
+
 	if (InputManager->UpPress()) {
 		if (vmenu_index[2] != 0)
 			vmenu_index[2] = vmenu_index[2] - 1;
@@ -653,7 +657,7 @@ void BootMode::UpdateKeyOptions() {
 			vmenu_index[2] = 0;
 		AudioManager->PlaySound(boot_sound[3], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // move sound
 	}
-	
+
 	if (InputManager->ConfirmPress()) {
 		switch (vmenu_index[2]) {
 			case 0: // Change up key
@@ -710,7 +714,7 @@ void BootMode::UpdateJoystickOptions() {
 		AudioManager->PlaySound(boot_sound[3], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // move sound
 		return;
 	}
-	
+
 // This function is incomplete for now. It will be very much like the UpdateKeyOptions when finished.
 }
 
@@ -723,27 +727,27 @@ void BootMode::UpdateJoystickOptions() {
 // Draws our next frame to the video back buffer
 void BootMode::Draw() {
 	// Draw the backdrop image
-	
+
 	//VideoManager->Move(0, 0);
 	//VideoManager->Move(-1024/2, 0);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_NO_BLEND, 0);
 	VideoManager->DrawImage(boot_images[0]);
-	
+
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_TOP, VIDEO_BLEND, 0);
 	VideoManager->Move(1024/2, 50);
 	VideoManager->DrawImage(boot_images[2]);
-	
+
 	VideoManager->Move(1024/2, 575);
 	VideoManager->DrawImage(boot_images[1]);
-	
+
 	if (menu_hidden) { // Then we are already done!
 		return;
 	}
-	
+
 	// Draw logo at top center of screen
-		
+
 	// Draw plain main menu at bottom center.
-		
+
 	// Draw text in menus depending on language
 	return;
 }

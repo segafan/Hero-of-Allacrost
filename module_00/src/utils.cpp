@@ -1,12 +1,18 @@
-/* 
- * hoa_utils.cpp
- *	General Purpose Utility functions for Hero of Allacrost
- *	(C) 2004 by Tyler Olsen
- *
- *	This code is licensed under the GNU GPL. It is free software and you may modify it 
- *	 and/or redistribute it under the terms of this license. See http://www.gnu.org/copyleft/gpl.html
- *	 for details.
- */
+///////////////////////////////////////////////////////////////////////////////
+//            Copyright (C) 2004, 2005 by The Allacrost Project
+//                       All Rights Reserved
+//
+// This code is licensed under the GNU GPL. It is free software and you may
+// modify it and/or redistribute it under the terms of this license.
+// See http://www.gnu.org/copyleft/gpl.html for details.
+///////////////////////////////////////////////////////////////////////////////
+
+/*!****************************************************************************
+ * \file    utils.cpp
+ * \author  Tyler Olsen, roots@allacrost.org
+ * \date    Last Updated: August 12th, 2005
+ * \brief   Source file for Allacrost utility code.
+ *****************************************************************************/
 
 #include "utils.h"
 
@@ -23,7 +29,7 @@ inline float UnitRV() {
 
 
 
-// Returns a floaint point number between 0.0 and 1.0
+// Returns a floaing point number between 0.0 and 1.0
 float RandomUnit() {
 	return (static_cast<float>(rand()/RAND_MAX));
 }
@@ -34,16 +40,16 @@ float RandomUnit() {
 int RandomNum(int lower_bound, int upper_bound) {
 	int range;		// The number of possible values we may return
 	float result; // Our result (we cast it when we return)
-	
+
 	range = upper_bound - lower_bound + 1;
 	if (range < 0) { // Oops, looks like someone accidentally switched the bound arguments
 		if (UTILS_DEBUG) cerr << "UTILS WARNING: Call to RandomNum had bound arguments swapped." << endl;
 		range = range * -1;
 	}
-	
+
 	result = range * (float) rand()/RAND_MAX; // Compute a random floating point number in our range
 	result = result + lower_bound; // Shift our range so that it is within the correct bounds;
-	
+
 	return static_cast<int>(result);
 }
 
@@ -60,36 +66,36 @@ int GaussianValue(int mean, int range, bool positive_value) {
 		std_dev = (float) (mean * 0.20 / 3);
 	else								// Set standard deviation equal to one third of the range
 		std_dev = (float) (range / 3);
-	
+
 	if (std_dev < 0)		// Make sure that we have a positive standard deviation
 		std_dev = -1 * std_dev;
-	
-	// Computes a standard Gaussian random deviate using the polar method. The polar method is to 
+
+	// Computes a standard Gaussian random deviate using the polar method. The polar method is to
 	//	compute a random point (x, y) inside the unit circle centered at (0, 0) with radius 1. Then
-	//	
+	//
 	//	 x * Math.sqrt(-2.0 * Math.log(r) / r)
-	//	 
-	//	is a Gaussian random variable with mean 0 and standard deviation 1. 
+	//
+	//	is a Gaussian random variable with mean 0 and standard deviation 1.
 	//	 Reference: Knuth, The Art of Computer Programming, Volume 2, p. 122
 	do {
 		x = 2.0f * UnitRV() - 1.0f;            // Get the X-coordinate
 		y = 2.0f * UnitRV() - 1.0f;            // Get the Y-coordinate
 		r = x*x + y*y;                       // Compute the radius
-	} while (r > 1.0f || r == 0.0f);         // Loop is executed 4 / pi = 1.273 times on average	
+	} while (r > 1.0f || r == 0.0f);         // Loop is executed 4 / pi = 1.273 times on average
 	z_value = x * sqrt(-2.0f * log(r) / r); // Get the Gaussian random value with mean 0 and standard devation 1
-	
+
 	// Compute a Gaussian value using our own mean and standard deviation
 	//result = floatnearbyintf((std_dev * z_value) + mean); this fn does rounding, but I can't get it to compile...
 	result = (std_dev * z_value) + mean;
-	
+
 	// Reverses sign of result if we don't want a negative value returned
 	if (positive_value && result < 0.0)
 		result = result * -1;
-	
+
 	// If we have a zero or negative range argument, we don't apply bounds to the value returned.
-	if (range <= 0) 
+	if (range <= 0)
 		return (int)result;
-	
+
 	if (result < mean - range)      // Covers the case that we exceeded our lower bound (occurs 0.015% of the time)
 		result = float( mean - range );
 	else if (result > mean + range) // Covers the case that we exceeded our upper bound (occurs 0.015% of the time)
@@ -108,7 +114,7 @@ int GaussianValue(int mean, int range, bool positive_value) {
 	int tmp;
 	int v15 = 0, v16 = 0, v17 = 0, v18 = 0, v19 = 0, v20 = 0, v21 = 0, v22 = 0, v23 = 0;
 	int v24 = 0, v25 = 0, v26 = 0, v27 = 0, v28 = 0, v29 = 0, v30 = 0, v31 = 0, v32 = 0, v33 = 0, v34 = 0, v35 = 0;
-	
+
 	srand(time(NULL));
 	for (int i = 0; i < 100000; i++) {
 		tmp = GaussianValue(25, 10, false);
@@ -137,19 +143,19 @@ int GaussianValue(int mean, int range, bool positive_value) {
 			default: cout << "ERROR: Exceeded range on trial " << i << " value " << tmp << endl;
 		}
 	}
-	
+
 	cout << "RESULTS FOR GAUSSIAN DISTRIBUTION:" << endl;
 	cout << v15 << ' ' << v16 << ' ' << v17 << ' ' << v18 << ' ' << v19 << ' ' << v20 << ' ' << v21 << ' ';
 	cout << v22 << ' ' << v23 << ' ' << v24 << '*' << v25 << '*' << v26 << ' ' << v27 << ' ' << v28 << ' ';
 	cout << v29 << ' ' << v30 << ' ' << v31 << ' ' << v32 << ' ' << v33 << ' ' << v34 << ' ' << v35 << endl;
-	
+
 	int lower;
 	int upper;
-	
-	v15 = 0; v16 = 0; v17 = 0; v18 = 0; v19 = 0; v20 = 0; v21 = 0; v22 = 0; v23 = 0; v24 = 0; v25 = 0; 
+
+	v15 = 0; v16 = 0; v17 = 0; v18 = 0; v19 = 0; v20 = 0; v21 = 0; v22 = 0; v23 = 0; v24 = 0; v25 = 0;
 	v26 = 0; v27 = 0; v28 = 0; v29 = 0; v30 = 0; v31 = 0; v32 = 0; v33 = 0; v34 = 0; v35 = 0;
 	lower = 15;
-	upper = 35; 
+	upper = 35;
 	for (int i = 0; i < 100000; i++) {
 		tmp = RandomNum(lower, upper);
 		switch (tmp) {

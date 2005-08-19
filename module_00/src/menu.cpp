@@ -1,16 +1,18 @@
-/* 
- * menu.cpp
- *	Code for Hero of Allacrost menu mode
- *	(C) 2005 by Tim Hargreaves
- *
- *	This code is licensed under the GNU GPL. It is free software and you may modify it 
- *	 and/or redistribute it under the terms of this license. See http://www.gnu.org/copyleft/gpl.html
- *	 for details.
- */
- 
-/*
- * The code in this file is for **** finish this ****
- */
+///////////////////////////////////////////////////////////////////////////////
+//            Copyright (C) 2004, 2005 by The Allacrost Project
+//                       All Rights Reserved
+//
+// This code is licensed under the GNU GPL. It is free software and you may
+// modify it and/or redistribute it under the terms of this license.
+// See http://www.gnu.org/copyleft/gpl.html for details.
+///////////////////////////////////////////////////////////////////////////////
+
+/*!****************************************************************************
+ * \file    menu.cpp
+ * \author  Tyler Olsen, roots@allacrost.org
+ * \date    Last Updated: August 12th, 2005
+ * \brief   Source file for menu mode interface.
+ *****************************************************************************/
 
 #include "utils.h"
 #include <iostream>
@@ -39,7 +41,7 @@ bool MENU_DEBUG = false;
 
 MenuMode::MenuMode() {
 	if (MENU_DEBUG) cout << "MENU: MenuMode constructor invoked." << endl;
-	
+
 	// Setup the coordinate system
 	//VideoManager->SetCoordSys(0, 16, 0, 12, 1);
 }

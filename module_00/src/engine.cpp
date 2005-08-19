@@ -1,12 +1,18 @@
-/* 
- * engine.cpp
- *	Hero of Allacrost core game engine source code
- *	(C) 2005 by Tyler Olsen
- *
- *	This code is licensed under the GNU GPL. It is free software and you may modify it 
- *	 and/or redistribute it under the terms of this license. See http://www.gnu.org/copyleft/gpl.html
- *	 for details.
- */
+///////////////////////////////////////////////////////////////////////////////
+//            Copyright (C) 2004, 2005 by The Allacrost Project
+//                       All Rights Reserved
+//
+// This code is licensed under the GNU GPL. It is free software and you may
+// modify it and/or redistribute it under the terms of this license.
+// See http://www.gnu.org/copyleft/gpl.html for details.
+///////////////////////////////////////////////////////////////////////////////
+
+/*!****************************************************************************
+ * \file    engine.cpp
+ * \author  Tyler Olsen, roots@allacrost.org
+ * \date    Last Updated: August 12th, 2005
+ * \brief   Source file for the core game engine.
+ *****************************************************************************/
 
 #include "utils.h"
 #include <iostream>
@@ -40,7 +46,7 @@ SINGLETON_INITIALIZE(GameInput);
 
 
 // The constructor automatically sets up all the singleton pointers
-GameMode::GameMode() { 
+GameMode::GameMode() {
 	if (ENGINE_DEBUG) cout << "ENGINE: GameMode constructor invoked" << endl;
 	mode_type = ENGINE_DUMMY_MODE; // This should be replaced by the child class
 	AudioManager = GameAudio::_GetReference();
@@ -53,8 +59,22 @@ GameMode::GameMode() {
 }
 
 
+// The constructor automatically sets up all the singleton pointers
+GameMode::GameMode(unsigned char mt) {
+	if (ENGINE_DEBUG) cout << "ENGINE: GameMode constructor invoked" << endl;
+	mode_type = mt;
+	AudioManager = GameAudio::_GetReference();
+	VideoManager = GameVideo::_GetReference();
+	DataManager = GameData::_GetReference();
+	InputManager = GameInput::_GetReference();
+	ModeManager = GameModeManager::_GetReference();
+	SettingsManager = GameSettings::_GetReference();
+	InstanceManager = GameInstance::_GetReference();
+}
 
-GameMode::~GameMode() { 
+
+
+GameMode::~GameMode() {
 	if (ENGINE_DEBUG) cout << "ENGINE: GameMode destructor invoked" << endl;
 }
 
@@ -67,7 +87,6 @@ GameMode::~GameMode() {
 // This constructor must be defined for the singleton macro
 GameModeManager::GameModeManager() {
 	if (ENGINE_DEBUG) cout << "ENGINE: GameModeManager constructor invoked" << endl;
-	game_stack.resize(10); // A stack size of 10 should be sufficient most of the time
 }
 
 
@@ -83,7 +102,7 @@ GameModeManager::~GameModeManager() {
 
 
 // Free the top mode on the stack and pop it off
-inline void GameModeManager::Pop() { 
+inline void GameModeManager::Pop() {
 	if (game_stack.size() > 0) {
 		delete game_stack.back();
 		game_stack.pop_back();
@@ -93,7 +112,7 @@ inline void GameModeManager::Pop() {
 
 
 // Pop off all game modes
-void GameModeManager::PopAll() { 
+void GameModeManager::PopAll() {
 	while (game_stack.size() > 0) {
 		delete game_stack.back();
 		game_stack.pop_back();
@@ -109,11 +128,11 @@ inline void GameModeManager::Push(GameMode* gm) {
 
 
 // Returns the mode type of the game mode on the top of the stack
-inline unsigned char GameModeManager::GetGameType() { 
-	if (game_stack.empty()) 
-		return ENGINE_DUMMY_MODE;		
+inline unsigned char GameModeManager::GetGameType() {
+	if (game_stack.empty())
+		return ENGINE_DUMMY_MODE;
 	else
-		return game_stack.back()->mode_type; 
+		return game_stack.back()->mode_type;
 }
 
 
@@ -135,7 +154,7 @@ void GameModeManager::PrintStack() {
 		cout << "***ERROR: Game stack is empty!" << endl;
 		return;
 	}
-	
+
 	cout << "***top of stack***" << endl;
 	for (int i = (int) game_stack.size() - 1; i >= 0; i--)
 		cout << " index: " << i << " type: " << game_stack[i]->mode_type << endl;
@@ -178,14 +197,14 @@ Uint32 GameSettings::UpdateTime() {
 	tmp = last_update - tmp;      // tmp = time now minus time this function was last called
 	fps_timer += tmp;
 	fps_counter++;
-	
+
 	if (fps_timer >= 1000) { // One second or more has expired, so update the FPS rate
-		fps_rate = 1000 * static_cast<float>(fps_counter) / static_cast<float>(fps_timer); 
+		fps_rate = 1000 * static_cast<float>(fps_counter) / static_cast<float>(fps_timer);
 		fps_counter = 0;
 		fps_timer = 0;
 		cout << "FPS: " << fps_rate << endl;
 	}
-	
+
 	return (tmp); // Return the difference between the last update time and the time now
 }
 
@@ -209,50 +228,50 @@ GameInput::GameInput() {
 	up_state = false;
 	up_press = false;
 	up_release = false;
-	
+
 	down_state = false;
 	down_press = false;
 	down_release = false;
-	
+
 	left_state = false;
 	left_press = false;
 	left_release = false;
-	
+
 	right_state = false;
 	right_press = false;
 	right_release = false;
-	
+
 	confirm_state = false;
 	confirm_press = false;
 	confirm_release = false;
-	
+
 	cancel_state = false;
 	cancel_press = false;
 	cancel_release = false;
-	
+
 	menu_state = false;
 	menu_press = false;
 	menu_release = false;
-	
+
 	swap_state = false;
 	swap_press = false;
 	swap_release = false;
-	
+
 	right_select_state = false;
 	right_select_press = false;
 	right_select_release = false;
-	
+
 	left_select_state = false;
 	left_select_press = false;
 	left_select_release = false;
-	
+
 	Joystick.js = NULL;
-	
+
 	// Because of these calls, these classes must be created before GameInput
 	ModeManager = GameModeManager::_GetReference();
 	SettingsManager = GameSettings::_GetReference();
 	GameData *DataManager = GameData::_GetReference();
-	
+
 	// CALL HERE: Call DataManager->SomeFn(Key&, Joystick&); to setup KeyState and JoystickState
 	DataManager->LoadKeyJoyState(&Key, &Joystick);
 }
@@ -269,20 +288,20 @@ GameInput::~GameInput() {
 // Handles all of the event processing for the game.
 void GameInput::EventHandler() {
 	SDL_Event event;	// Holds the game event
-	
+
 	// Reset all of the press and release flags so they don't get detected twice.
-	up_press = false; 
+	up_press = false;
 	up_release = false;
 	down_press = false;
 	down_release = false;
 	left_press = false;
-	left_release = false; 
+	left_release = false;
 	right_press = false;
-	right_release = false; 
+	right_release = false;
 	confirm_press = false;
-	confirm_release = false; 
+	confirm_release = false;
 	cancel_press = false;
-	cancel_release = false; 
+	cancel_release = false;
 	menu_press = false;
 	menu_release = false;
 	swap_press = false;
@@ -291,10 +310,10 @@ void GameInput::EventHandler() {
 	right_select_release = false;
 	left_select_press = false;
 	left_select_release = false;
-	
-	while (SDL_PollEvent(&event)) { // Loops until we are out of events to process	 
+
+	while (SDL_PollEvent(&event)) { // Loops until we are out of events to process
 		if (event.type == SDL_QUIT) {
-			
+
 			// We quit the game without question if we are in BootMode or QuitMode
 			if (ModeManager->GetGameType() == ENGINE_BOOT_MODE || ModeManager->GetGameType() == ENGINE_QUIT_MODE) {
 				SettingsManager->ExitGame();
@@ -329,33 +348,20 @@ void GameInput::KeyEventHandler(SDL_KeyboardEvent *key_event) {
 	if (key_event->type == SDL_KEYDOWN) { // Key was pressed
 		if (key_event->keysym.mod & KMOD_CTRL) { // CTRL key was held down
 			if (key_event->keysym.sym == SDLK_f) {
-				if (ENGINE_DEBUG) 
-					cout << " Toggle Fullscreen!" << endl;
-					
-				GameVideo *VideoManager = GameVideo::_GetReference();
-				VideoManager->ToggleFullscreen();
-				VideoManager->ApplySettings();
-				
+				//if (ENGINE_DEBUG) cout << " Toggle Fullscreen!" << endl;
 				return;
 			}
 			else if (key_event->keysym.sym == SDLK_s) {
-				// press CTRL+S to make a screenshot
-				if (ENGINE_DEBUG) 
-					cout << "Taking Screenshot using MakeScreenshot!" << endl;					
-					
+				//if (ENGINE_DEBUG) cout << " Took Screenshot!" << endl;
+
 				GameVideo *VideoManager = GameVideo::_GetReference();
 				VideoManager->MakeScreenshot();
 				return;
 			}
 			else if (key_event->keysym.sym == SDLK_t) {
-				// press CTRL+T to display and cycle through the texture sheets
+				// press T to display and cycle through the texture sheets
 				GameVideo *VideoManager = GameVideo::_GetReference();
 				VideoManager->DEBUG_NextTexSheet();
-			}
-			else if (key_event->keysym.sym == SDLK_a) {
-				// press CTRL+W to toggle the display of advanced video engine information
-				GameVideo *VideoManager = GameVideo::_GetReference();
-				VideoManager->ToggleAdvancedDisplay();
 			}
 			else if (key_event->keysym.sym == SDLK_q) {
 				// Quit the game without question if we are in BootMode or QuitMode
@@ -371,8 +377,8 @@ void GameInput::KeyEventHandler(SDL_KeyboardEvent *key_event) {
 			else
 				return;
 		}
-		
-		// Note: a switch-case statement won't work here because Key.up is not an 
+
+		// Note: a switch-case statement won't work here because Key.up is not an
 		// integer value the compiler will whine and cry about it ;_;
 		if (key_event->keysym.sym == Key.up) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: up key pressed." << endl;
@@ -434,11 +440,11 @@ void GameInput::KeyEventHandler(SDL_KeyboardEvent *key_event) {
 			return;
 		}
 	}
-	
+
 	else { // Key was released
 		if (key_event->keysym.mod & KMOD_CTRL) // Don't recognize a key release if ctrl is down
 			return;
-		
+
 		if (key_event->keysym.sym == Key.up) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: up key released." << endl;
 			up_state = false;
@@ -497,5 +503,5 @@ void GameInput::JoystickEventHandler(SDL_Event *js_event) {
 			break;
 	}
 }
- 
+
 }// namespace hoa_engine

@@ -31,6 +31,7 @@
 #include "utils.h"
 #include "coord_sys.h"
 #include "color.h"
+#include <list>
  
 //! All calls to the video engine are wrapped in this namespace.
 namespace hoa_video 

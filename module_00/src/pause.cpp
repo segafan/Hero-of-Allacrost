@@ -1,12 +1,18 @@
-/* 
- * pause.cpp
- *  Code for Hero of Allacrost paused mode
- *  (C) 2005 by Tyler Olsen
- *
- *  This code is licensed under the GNU GPL. It is free software and you may modify it 
- *   and/or redistribute it under the terms of this license. See http://www.gnu.org/copyleft/gpl.html
- *   for details.
- */
+///////////////////////////////////////////////////////////////////////////////
+//            Copyright (C) 2004, 2005 by The Allacrost Project
+//                       All Rights Reserved
+//
+// This code is licensed under the GNU GPL. It is free software and you may
+// modify it and/or redistribute it under the terms of this license.
+// See http://www.gnu.org/copyleft/gpl.html for details.
+///////////////////////////////////////////////////////////////////////////////
+
+/*!****************************************************************************
+ * \file    pause.cpp
+ * \author  Tyler Olsen, roots@allacrost.org
+ * \date    Last Updated: August 12th, 2005
+ * \brief   Source file for pause mode interface.
+ *****************************************************************************/
 
 #include "utils.h"
 #include <iostream>
@@ -26,10 +32,10 @@ bool PAUSE_DEBUG = false;
 // Constructor changes audio, saves currently rendered screen, and draws "Paused" text
 PauseMode::PauseMode() {
 	if (PAUSE_DEBUG) cout << "PAUSE: PauseMode constructor invoked" << endl;
-	
+
 	mode_type = ENGINE_PAUSE_MODE;
 	unsigned char volume_action = SettingsManager->GetPauseVolumeAction();
-	
+
 	// Adjust the volume while in paused mode acordingly
 	switch (SettingsManager->GetPauseVolumeAction()) {
 		case ENGINE_PAUSE_AUDIO:
@@ -45,9 +51,9 @@ PauseMode::PauseMode() {
 			break;
 		// Don't need to do anything for the case ENGINE_SAME_VOLUME
 	}
-	
+
 	// Here make a VideoManager call to save the current screen.
-	
+
 	// Here render the "Paused" text to appear on the screen
 }
 
@@ -69,10 +75,10 @@ PauseMode::~PauseMode() {
 		// Don't need to do anything for case ENGINE_SAME_VOLUME
 	}
 
-	
+
 	// Here we'll need to release the saved screen that VideoManager is holding onto.
-		
-	// Note that we *DON'T* pop the top of the game mode stack, because 
+
+	// Note that we *DON'T* pop the top of the game mode stack, because
 	// GameSettings::KeyEventHandler() does it for us (hence this destructor gets called by it)
 }
 

@@ -1,16 +1,26 @@
-/* 
- * hoa_boot.h
- *	Header file for Hero of Allacrost boot menu
- *	(C) 2004 by Tyler Olsen
+///////////////////////////////////////////////////////////////////////////////
+//            Copyright (C) 2004, 2005 by The Allacrost Project
+//                       All Rights Reserved
+//
+// This code is licensed under the GNU GPL. It is free software and you may
+// modify it and/or redistribute it under the terms of this license.
+// See http://www.gnu.org/copyleft/gpl.html for details.
+///////////////////////////////////////////////////////////////////////////////
+
+/*!****************************************************************************
+ * \file    boot.h
+ * \author  Tyler Olsen, roots@allacrost.org
+ * \date    Last Updated: August 12th, 2005
+ * \brief   Header file for boot mode interface.
  *
- *	This code is licensed under the GNU GPL. It is free software and you may modify it 
- *	 and/or redistribute it under the terms of this license. See http://www.gnu.org/copyleft/gpl.html
- *	 for details.
- */
- 
+ * This code handles the game event processing and frame drawing when the user
+ * is in boot mode (the boot screen and menus). It inherits from the GameMode class
+ * and there will only ever be one BattleMode inside the game stack at any one time.
+ *****************************************************************************/
+
 #ifndef __BOOT_HEADER__
-#define __BOOT_HEADER__ 
- 
+#define __BOOT_HEADER__
+
 #include "utils.h"
 #include <string>
 #include <vector>
@@ -18,91 +28,130 @@
 #include "defs.h"
 #include "engine.h"
 
+//! All calls to boot mode are wrapped in this namespace.
 namespace hoa_boot {
 
+//! Determines whether the code in the hoa_boot namespace should print debug statements or not.
 extern bool BOOT_DEBUG;
 
-// Used to cycle thru the boot menus
+//! An internal namespace to be used only within the boot code. Don't use this namespace anywhere else!
+namespace private_boot {
+
+//! \name Main menu selections
+//@{
+//! \brief Constants used to cycle through the primary boot menu
 const int NEW_MENU     = 0;
 const int LOAD_MENU    = 1;
 const int OPTIONS_MENU = 2;
 const int CREDITS_MENU = 3;
 const int HIDE_MENU    = 4;
 const int QUIT_MENU    = 5;
+//@}
 
+//! \name Options menu selections
+//@{
+//! \brief Constants used to cycle through the options boot menu
 const int VIDEO_OP     = 0;
 const int AUDIO_OP     = 1;
 const int LANGUAGE_OP  = 2;
 const int KEYS_OP      = 3;
 const int JOYSTICK_OP  = 4;
+//@}
 
+} // namespace private_boot
 
-
-// Work on this and where it will go exactly
-typedef struct SavedGameDescriptor {
-	std::string map_name;
-	unsigned int money;
-	// a class/struct for keeping the time
-} SavedGameDescriptor;
-
-
-
-/******************************************************************************
- * BootMode Class
+/*!****************************************************************************
+ * \brief Handles everything that needs to be done on the game's boot screen.
  *
- *	members: menu_hidden: if true code only draws the background and no menus/logo
- *					 vmenu_index: a vector storing menu pointers in a stack-like structure
+ * This is the first mode that is pushed onto the game stack when the program starts.
+ * Because the user can set various game settings from this game mode, it has a
+ * heavy amount of interaction with the GameSettings class.
  *
- * functions: void LoadBootImages():
- *							Loads all images used in the boot screen
- *						void LoadBootAudio(): 
- *							Loads all music and sounds used in the boot screen and plays the opening
- *						SDLKey RedefineKey():
- *							Toggles current_menu hidden value and reloads screen
- *
- *						void EventHandler(SDL_Event event):
- *							Handles user input events. This function will only be called in BOOT_MODE
- *
- * notes:
+ * \note Although the basic features are functional in this code, much remains
+ * to be done. The reason it hasn't been done before was primarily our lack of
+ * a GUI + text rendering, but now that that requirement has been met this code
+ * should see a lot of development in the near future.
  *****************************************************************************/
 class BootMode : public hoa_engine::GameMode {
 private:
+	//! If true, no menus will be drawn (so the player can get a nice good look at the background image).
 	bool menu_hidden;
+	//! A vector storing various menu pointers in a stack-like structure.
 	std::vector<int> vmenu_index;
+	//! Music to be used at the boot screen.
 	std::vector<hoa_audio::MusicDescriptor> boot_music;
+	//! Sounds that will be used at the boot screen.
 	std::vector<hoa_audio::SoundDescriptor> boot_sound;
+	//! Images that will be used at the boot screen.
 	std::vector<hoa_video::ImageDescriptor> boot_images;
-	
+
+	/*!
+	 *  \brief Animates the game logo when this class is first initialized.
+	 *
+	 *  The logo animation consists of:
+	 *  - The logo flying in from somewhere, with the 't' sword in Allacrost cut into the word
+	 *  - The sword unsheating itself from the word (with sound)
+	 *  - The sword spinning up and around a few times (with sound)
+	 *  - The sword slicing down into its final position as a t (with sound)
+	 */
 	void AnimateLogo();
-	
+
+	/*!
+	 *  \brief Redefines a key to be mapped to another command.
+	 *  \param &change_key The key to be re-mapped.
+	 */
 	void RedefineKey(SDLKey& change_key);
-	
+
+	//! Updates the game state when "New Game" is selected in the main menu.
 	void UpdateNewMenu();
-	void UpdateLoadMenu(); 
+	//! Updates the game state when "Load Game" is selected in the main menu.
+	void UpdateLoadMenu();
+	//! Updates the game state when "Options" is selected in the main menu.
 	void UpdateOptionsMenu();
+	//! Updates the game state when "Credits" is selected in the main menu.
 	void UpdateCreditsMenu();
+	//! Updates the game state when "Hide Menu" is selected in the main menu.
 	void UpdateHideMenu();
-	void UpdateQuitMenu();	
-	
+	//! Updates the game state when "Quit Menu" is selected in the main menu.
+	void UpdateQuitMenu();
+
+	//! Updates the game state when "Video" is selected in the options menu.
 	void UpdateVideoOptions();
+	//! Updates the game state when "Audio" is selected in the options menu.
 	void UpdateAudioOptions();
+	//! Updates the game state when "Language" is selected in the options menu.
 	void UpdateLanguageOptions();
+	//! Updates the game state when "Keyboard" is selected in the options menu.
 	void UpdateKeyOptions();
+	//! Updates the game state when "Joystick" is selected in the options menu.
 	void UpdateJoystickOptions();
-		
+
+	//! Draws the menu when "Load Game" has been selected in the main menu.
 	void DrawLoadMenu();
+	//! Draws the menu when a saved game has been selected from the "Load Game" menu.
 	void DrawLoadGame();
+	//! Draws the menu when "Video" has been selected in the options menu.
 	void DrawVideoOptions();
+	//! Draws the menu when "Audio" has been selected in the options menu.
 	void DrawAudioOptions();
+	//! Draws the menu when "Language" has been selected in the options menu.
 	void DrawLanguageOptions();
+	//! Draws the menu when "Keyboard" has been selected in the options menu.
 	void DrawKeyOptions();
-	void DrawJoystickOptions(); 
+	//! Draws the menu when "Joystick" has been selected in the options menu.
+	void DrawJoystickOptions();
+
+	//! Draws the menu when "Credits" has been selected in the main menu.
 	void DrawCredits();
-public: 
+public:
+	//! Initializes class members and loads media data.
 	BootMode();
+	//! Frees all media data (images and audio).
 	~BootMode();
-	
+
+	//! Wrapper function that calls different update functions depending on the menu state.
 	void Update(Uint32 time_elapsed);
+	//! Wrapper function that calls different draw functions depending on the menu state.
 	void Draw();
 };
 

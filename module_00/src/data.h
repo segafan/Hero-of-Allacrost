@@ -1,12 +1,26 @@
-/*
- * data.h
- *  Hero of Allacrost header file for data management
- *  (C) 2004, 2005 by Vladimir Mitrovic
+///////////////////////////////////////////////////////////////////////////////
+//            Copyright (C) 2004, 2005 by The Allacrost Project
+//                       All Rights Reserved
+//
+// This code is licensed under the GNU GPL. It is free software and you may
+// modify it and/or redistribute it under the terms of this license.
+// See http://www.gnu.org/copyleft/gpl.html for details.
+///////////////////////////////////////////////////////////////////////////////
+
+/*!****************************************************************************
+ * \file    data.h
+ * \author  Vladimir Mitrovic, snipe714@allacrost.org
+ * \date    Last Updated: August 12th, 2005
+ * \brief   Header file for data and scripting engine.
  *
- *  This code is licensed under the GNU GPL. It is free software and you may modify it 
- *   and/or redistribute it under the terms of this license. See http://www.gnu.org/copyleft/gpl.html
- *   for details.
- */
+ * This code serves as the bridge between the game engine (written in C++) and
+ * the data and scripting files (written in Lua).
+ *
+ * \note You shouldn't need to modify this code if you are wishing to extend
+ * the game (either for a new inherited GameMode class, or a new data/scripting
+ * file). Contact the author of this code if you feel it lacks functionality
+ * that you need.
+ *****************************************************************************/
 
 #ifndef __DATA_HEADER__
 #define __DATA_HEADER__
@@ -45,12 +59,12 @@ const int LUA_STACK_TOP = -1;
 
 
 /******************************************************************************
- * GameData class - Manages all the (Lua) data files and handling. 
+ * GameData class - Manages all the (Lua) data files and handling.
  *  >>>This class is a singleton<<<
  *
  * members: l_stack: the Lua stack. Handles all data sharing between C++ and Lua
  *
- * functions: 
+ * functions:
  *	XXX GetTableXXX(const char *key):
  *		Searches a table (assumed to be on top of the stack) for key and returns its value of
  *		type XXX (bool, int, float or string)
@@ -71,28 +85,28 @@ const int LUA_STACK_TOP = -1;
  *		The vectors passed to this function are the BootMode's member variables with similar names.
  *		The function fills them and passes them to the VideoManager and AudioManager singletons. It
  *		also sets the coordinate system used for the boot mode. See also the file data/config/boot.hoa
- *		
+ *
  *****************************************************************************/
 class GameData {
 private:
 	SINGLETON_DECLARE(GameData);
-	
+
 	hoa_audio::GameAudio *AudioManager;
 	hoa_video::GameVideo *VideoManager;
-	
+
 // BEGIN Lua related stuff
 	lua_State *l_stack;
-	
+
 	bool GetTableBool(const char *key);
 	int GetTableInt(const char *key);
 	float GetTableFloat(const char *key);
 	std::string GetTableString(const char * key);
-	
+
 	bool GetGlobalBool(const char *key);
 	int GetGlobalInt(const char *key);
 	float GetGlobalFloat(const char *key);
-	std::string GetGlobalString(const char * key);
-	
+	std::string GetGlobalString(const char *key);
+
 	void FillStringVector(std::vector<std::string> *vect, const char *key);
 	void FillIntVector(std::vector<int> *vect, const char *key);
 // END Lua related stuff

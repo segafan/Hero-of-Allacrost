@@ -1,18 +1,34 @@
-/*
- * defs.h
- *  Hero of Allacrost header file for forward declarations of classes
- *  (C) 2005 by Tyler Olsen
+///////////////////////////////////////////////////////////////////////////////
+//            Copyright (C) 2004, 2005 by The Allacrost Project
+//                       All Rights Reserved
+//
+// This code is licensed under the GNU GPL. It is free software and you may
+// modify it and/or redistribute it under the terms of this license.
+// See http://www.gnu.org/copyleft/gpl.html for details.
+///////////////////////////////////////////////////////////////////////////////
+
+/*!****************************************************************************
+ * \file    defs.h
+ * \author  Tyler Olsen, roots@allacrost.org
+ * \date    Last Updated: August 17th, 2005
+ * \brief   Header file for forward declarations of classes and debug variables.
  *
- *  This code is licensed under the GNU GPL. It is free software and you may modify it 
- *   and/or redistribute it under the terms of this license. See http://www.gnu.org/copyleft/gpl.html
- *   for details.
- */
- 
-// The purpose of this file is to define forward declarations in such a way that
-//  we avoid in recursive inclusion problems. Pretty much every header file
-//  in the source tree will need to include this, with a few exceptions (utils.h 
-//  is one). It should not be included in source files.
- 
+ * The primary purpose of this file is to forward declare classes and variables
+ * in such a way that we avoid recursive inclusion problems. It defines every
+ * class (that is not in a private_* namespace) across the entire source tree.
+ * If you add a new class or namespace, don't forget to add its declaration to
+ * this file!
+ *
+ * \note Pretty much every header file in the source tree will need to include
+ * this file, with a few exceptions (utils.h is one).
+ *
+ * \note This file should not be included in any source files.
+ *
+ * \note The commenting for all namespaces, variables, and classes declared in
+ * this file can be found in the respective header files for where these
+ * structures reside in. 
+ *****************************************************************************/
+
 // Audio declarations, see audio.h/cpp
 namespace hoa_audio {
 	extern bool AUDIO_DEBUG;

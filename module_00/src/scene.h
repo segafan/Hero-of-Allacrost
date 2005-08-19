@@ -1,64 +1,72 @@
-/* 
- * scene.h
- *  Header file for Hero of Allacrost scene mode
- *  (C) 2004 by Tyler Olsen
+///////////////////////////////////////////////////////////////////////////////
+//            Copyright (C) 2004, 2005 by The Allacrost Project
+//                       All Rights Reserved
+//
+// This code is licensed under the GNU GPL. It is free software and you may
+// modify it and/or redistribute it under the terms of this license.
+// See http://www.gnu.org/copyleft/gpl.html for details.
+///////////////////////////////////////////////////////////////////////////////
+
+/*!****************************************************************************
+ * \file    scene.h
+ * \author  Tyler Olsen, roots@allacrost.org
+ * \date    Last Updated: August 12th, 2005
+ * \brief   Header file for scene mode interface.
  *
- *  This code is licensed under the GNU GPL. It is free software and you may modify it 
- *   and/or redistribute it under the terms of this license. See http://www.gnu.org/copyleft/gpl.html
- *   for details.
- */
+ * This code handles the game event processing and frame drawing when the user
+ * is in scene mode (when a full-screen art piece is drawn to the screen).
+ * The user must wait a minimum amount of time, defined by the MIN_SCENE_UPDATES
+ * constant, before the scene can be passed. This is to keep the user from
+ * accidentally skipping over one of our beautiful artworks before they have
+ * the chance to gawk at it in amazement. :)
+ *****************************************************************************/
 
 #ifndef __SCENE_HEADER__
-#define __SCENE_HEADER__ 
- 
+#define __SCENE_HEADER__
+
 #include "utils.h"
 #include <string>
 #include "defs.h"
 #include "engine.h"
 
+//! All calls to scene mode are wrapped in this namespace.
 namespace hoa_scene {
 
+//! Determines whether the code in the hoa_scene namespace should print debug statements or not.
 extern bool SCENE_DEBUG;
 
-namespace local_scene {
+//! An internal namespace to be used only within the scene code. Don't use this namespace anywhere else!
+namespace private_scene {
 
-// How many milliseconds must pass before the user can exit the scene
+//! How many milliseconds must pass before the user can exit the scene
 const int MIN_SCENE_UPDATES = 750;
 
-} // namespace local_scene
+} // namespace private_scene
  
-/******************************************************************************
-  SceneMode Class - Pushed onto the stack when we are displaying a full-screen art scene
-
-	>>>members<<<
-		Uint32 scene_timer: keeps track of the number of times Update() has been called
-		ImageDescriptor scene: the image we are displaying in this scene
-	 
-	>>>functions<<<
-	SceneMode(): Loads up the scene image
-	~SceneMode(): Frees the scene image
-	
-	void Update(Uint32 time_elapsed): Processes user input, updates the game state appropriately
-	void Draw(): Draws the scene
- 
-	>>>notes<<<
-		1) The user can not finish viewing the scene until after it has been on the screen for a short while. This is
-			done so that the user doesn't accidentally skip a scene without viewing it (and so they are forced to gaze
-			at the gorgeous artwork ^_~). That time is set to 750ms.
-	
+/*!****************************************************************************
+ * \brief Handles everything that needs to be done when full-screen artwork is displayed.
+ *
+ * This game mode displays a single full-screen art scene, which are used in
+ * various places in the game. The scene can not be exited until the amount 
+ * of milliseconds defined in MIN_SCENE_UPDATES has expired, to ensure that
+ * the user does not accidentally skip the scene and can take the time to
+ * appreciate the art.
  *****************************************************************************/
 class SceneMode : public hoa_engine::GameMode {
 private:
+	//! Retains the number of milliseconds that have elapsed since this mode was initialized
 	int scene_timer;
-	
+
 	//hoa_video::ImageDescriptor scene;
-public: 
+public:
   SceneMode();
   ~SceneMode();
-  
+
+	//! Updates the game state by the amount of time that has elapsed
   void Update(Uint32 time_elapsed);
+	//! Draws the next frame to be displayed on the screen
   void Draw();
-};
+}; // class SceneMode
 
 } // namespace hoa_scene
 

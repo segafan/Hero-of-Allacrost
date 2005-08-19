@@ -1,52 +1,68 @@
-/* 
- * pause.h
- *  Header file for Hero of Allacrost paused mode
- *  (C) 2005 by Tyler Olsen
+///////////////////////////////////////////////////////////////////////////////
+//            Copyright (C) 2004, 2005 by The Allacrost Project
+//                       All Rights Reserved
+//
+// This code is licensed under the GNU GPL. It is free software and you may
+// modify it and/or redistribute it under the terms of this license.
+// See http://www.gnu.org/copyleft/gpl.html for details.
+///////////////////////////////////////////////////////////////////////////////
+
+/*!****************************************************************************
+ * \file    pause.h
+ * \author  Tyler Olsen, roots@allacrost.org
+ * \date    Last Updated: August 12th, 2005
+ * \brief   Header file for pause mode interface.
  *
- *  This code is licensed under the GNU GPL. It is free software and you may modify it 
- *   and/or redistribute it under the terms of this license. See http://www.gnu.org/copyleft/gpl.html
- *   for details.
- */
+ * This code handles the game event processing and frame drawing when the user
+ * is in pause mode (when the game is paused). In a nut-shell, all this code
+ * does is save a copy of the frame being displayed when the user requests a
+ * pause event, grays that image out, and then renders the text "PAUSED" while
+ * waiting for the user to un-pause the game.
+ *
+ * \note I plan to make it so that when the user enters this mode, the game
+ * will sleep every 100ms or so so that the game isn't using up 100% of the CPU
+ * resources.
+ *****************************************************************************/
 
 #ifndef __PAUSED_HEADER__
-#define __PAUSED_HEADER__ 
- 
+#define __PAUSED_HEADER__
+
 #include "utils.h"
 #include <string>
 #include "defs.h"
 #include "engine.h"
 
+//! All calls to pause mode are wrapped in this namespace.
 namespace hoa_pause {
 
+//! Determines whether the code in the hoa_pause namespace should print debug statements or not.
 extern bool PAUSE_DEBUG;
- 
-/******************************************************************************
-  PauseMode Class - A mode pushed onto the stack when the user pauses the game
 
-	>>>members<<<
- 
-	>>>functions<<<
-		PausedMode(): Constructor either pauses audio or changes audio level and displays "Paused" on screen
-		~PausedMode(): Constructor does nothing
-		
-		void Update(Uint32 time_elapsed): Checks to see if the user has requested to unpause the game
-		void Draw(): This function does nothing, but is necessary since all game modes must have this function
- 
-	>>>notes<<<
-		1) THIS IS IMPORTANT! During some scenes of the game you might need the audio to be synchornized with the
-			game, and so if the user pauses the game you want to pause the audio so the audio doesn't go out of synch
-			with the action. In order to do this, when you beginning such a scene you need to set the
-			pause_vol_type member of the GameSettings class to ENGINE_PAUSE_VOLUME_ON_PAUSE. When you are finished with
-			this type of scene, you must must MUST remember to restore this member back to it's default value. Don't
-			forget this!!!
- *****************************************************************************/
+/*!****************************************************************************
+ * \brief A mode pushed onto the game mode stack when the user pauses the game.
+ *
+ * This class basically saves the last frame displayed to the screen, grays it
+ * out a little, and then renders the text "Paused" in the center of the screen.
+ * The game remains paused until the user either presses the pause button again
+ * or tries to quit the game.
+ *
+ * \note 1) During some scenes of the game you might need the audio to be synchronized
+ * with the flow of action. If the user tries to pause the game you will want to pause 
+ * the audio so the audio doesn't go out of synch with the action. In order to do this, 
+ * when you begin such a scene you need to call the SetPauseVolumeAction() function of 
+ * the  GameSettings class with the argument ENGINE_PAUSE_AUDIO. When you are finished 
+ * with this type of scene, you must must MUST remember to set this member back to its 
+ * original value.
+ *****************************************************************************/ 
 class PauseMode : public hoa_engine::GameMode {
-public: 
-  PauseMode();
-  ~PauseMode();
-  
-  void Update(Uint32 time_elapsed);
-  void Draw();
+public:
+	PauseMode();
+	~PauseMode();
+	
+	//! Updates the game state by the amount of time that has elapsed
+	void Update(Uint32 time_elapsed);
+	//! Draws the next frame to be displayed on the screen
+	void Draw();
 };
 
 } // namespace hoa_pause
