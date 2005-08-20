@@ -31,6 +31,7 @@
 #include <string>
 #include "defs.h"
 #include "engine.h"
+#include "video.h"
 
 //! All calls to pause mode are wrapped in this namespace.
 namespace hoa_pause {
@@ -55,6 +56,9 @@ extern bool PAUSE_DEBUG;
  * original value.
  *****************************************************************************/ 
 class PauseMode : public hoa_engine::GameMode {
+private:
+	//! An image of the last frame shown on the screen before PauseMode was called.
+	hoa_video::ImageDescriptor saved_screen;
 public:
 	PauseMode();
 	~PauseMode();

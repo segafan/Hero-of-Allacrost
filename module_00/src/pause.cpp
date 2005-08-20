@@ -53,8 +53,11 @@ PauseMode::PauseMode() {
 	}
 
 	// Here make a VideoManager call to save the current screen.
-
-	// Here render the "Paused" text to appear on the screen
+	if (!VideoManager->CaptureScreen(saved_screen)) {
+		if (PAUSE_DEBUG) cerr << "PAUSE: ERROR: Couldn't save the screen!" << endl;
+	}
+	VideoManager->SetCoordSys(0, 1024, 0, 768);
+	VideoManager->Move(0,0);
 }
 
 
@@ -76,8 +79,13 @@ PauseMode::~PauseMode() {
 	}
 
 
-	// Here we'll need to release the saved screen that VideoManager is holding onto.
-
+	// Release the saved screen frame.
+	VideoManager->DeleteImage(saved_screen);
+	
+	// TEMPORARY: Because the Video Manager doesn't save the stat of the coordinate system
+	VideoManager->SetCoordSys(-14, 14, -10, 10);
+	
+	
 	// Note that we *DON'T* pop the top of the game mode stack, because
 	// GameSettings::KeyEventHandler() does it for us (hence this destructor gets called by it)
 }
@@ -90,6 +98,12 @@ void PauseMode::Update(Uint32 time_elapsed) { }
 
 
 // Nothing to draw since the screen never changes in pause mode (maybe we should call SDL_Delay here?)
-void PauseMode::Draw() { }
+void PauseMode::Draw() {
+
+	// Draw the background image
+	VideoManager->DrawImage(saved_screen);
+	// Render the "Paused" text to appear on the center of the screen
+	VideoManager->DrawText("Paused", 512, 384);
+}
 
 } // namespace hoa_pause
