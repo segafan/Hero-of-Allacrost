@@ -65,8 +65,8 @@ QuitMode::QuitMode() {
 			AudioManager->SetSoundVolume(0);
 			break;
 		case ENGINE_HALF_VOLUME:
-			AudioManager->SetMusicVolume((int)(SettingsManager->music_vol * 0.5));
-			AudioManager->SetSoundVolume((int)(SettingsManager->sound_vol * 0.5));
+			AudioManager->SetMusicVolume(static_cast<int32>(SettingsManager->music_vol * 0.5));
+			AudioManager->SetSoundVolume(static_cast<int32>(SettingsManager->sound_vol * 0.5));
 			// Note that the music_vol/sound_vol members of SettingsManager aren't changed
 			break;
 		// Don't need to do anything for case ENGINE_SAME_VOLUME
@@ -87,7 +87,7 @@ QuitMode::~QuitMode() {
 
 
 // Restores volume or unpauses audio, then pops itself from the game stack
-void QuitMode::Update(Uint32 time_elapsed) {
+void QuitMode::Update(uint32 time_elapsed) {
 
 	// Move the menu selected cursor as appropriate
 	if (InputManager->LeftPress()) {

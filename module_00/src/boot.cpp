@@ -10,7 +10,7 @@
 /*!****************************************************************************
  * \file    boot.cpp
  * \author  Tyler Olsen, roots@allacrost.org
- * \date    Last Updated: August 12th, 2005
+ * \date    Last Updated: August 23rd, 2005
  * \brief   Source file for boot mode interface.
  *****************************************************************************/
 
@@ -57,13 +57,13 @@ BootMode::BootMode() {
 
 	VideoManager->SetCoordSys(0, 1024, 0, 768); // TEMPORARY
 
- 	for (uint i = 0; i < boot_images.size(); i++) {
+ 	for (uint32 i = 0; i < boot_images.size(); i++) {
  		VideoManager->LoadImage(boot_images[i]);
  	}
-	for (uint i = 0; i < boot_music.size(); i++) {
+	for (uint32 i = 0; i < boot_music.size(); i++) {
 		AudioManager->LoadMusic(boot_music[i]);
 	}
-	for (uint i = 0; i < boot_sound.size(); i++) {
+	for (uint32 i = 0; i < boot_sound.size(); i++) {
 		AudioManager->LoadSound(boot_sound[i]);
 	}
 
@@ -76,11 +76,11 @@ BootMode::BootMode() {
 BootMode::~BootMode() {
 	if (BOOT_DEBUG) cout << "BOOT: BootMode destructor invoked." << endl;
 
-	for (uint i = 0; i < boot_music.size(); i++)
+	for (uint32 i = 0; i < boot_music.size(); i++)
 		AudioManager->FreeMusic(boot_music[i]);
-	for (uint i = 0; i < boot_sound.size(); i++)
+	for (uint32 i = 0; i < boot_sound.size(); i++)
 		AudioManager->FreeSound(boot_sound[i]);
-	for (uint i = 0; i < boot_images.size(); i++)
+	for (uint32 i = 0; i < boot_images.size(); i++)
 		VideoManager->DeleteImage(boot_images[i]);
 }
 
@@ -160,7 +160,7 @@ void BootMode::RedefineKey(SDLKey& change_key) {
 
 
 // This is called once every frame iteration to update the status of the game
-void BootMode::Update(Uint32 time_elapsed) {
+void BootMode::Update(uint32 time_elapsed) {
 	// If our menu is hidden, we don't do anything until a user event occurs.
 	if (menu_hidden) {
 		if (InputManager->ConfirmPress() || InputManager->CancelPress() || InputManager->MenuPress() ||
@@ -221,7 +221,7 @@ void BootMode::UpdateNewMenu() {
 		//      to the problem of game modes deleting themselves.
 
 		GameModeManager *manager = ModeManager;
-		MapMode *MM = new MapMode(-1);
+		MapMode *MM = new MapMode(0);
 
 		manager->Pop();
 		manager->Push(MM);

@@ -37,9 +37,9 @@ and battle.cpp, nothing more. So name those constants whatever you want! =D
 */
 namespace private_battle {
 
-const int TILE_SIZE = 64; // The virtual "tile map" that we discussed in the forums has square 64 pixel tiles
-const int SCREEN_LENGTH = 16; // Number of tiles long the screen is
-const int SCREEN_HEIGHT = 12; // The number of tiles high the screen is
+const int32 TILE_SIZE = 64; // The virtual "tile map" that we discussed in the forums has square 64 pixel tiles
+const int32 SCREEN_LENGTH = 16; // Number of tiles long the screen is
+const int32 SCREEN_HEIGHT = 12; // The number of tiles high the screen is
 
 }
 
@@ -60,14 +60,14 @@ private:
 	std::vector<hoa_audio::MusicDescriptor> battle_music;
 	std::vector<hoa_audio::SoundDescriptor> battle_sound;
 
-	int num_enemies;
-	int m_iCounter;
+	int32 num_enemies;
+	int32 m_iCounter;
 
 public:
 	BattleMode();
 	~BattleMode();
 
-	void Update(Uint32 time_elapsed);
+	void Update(uint32 time_elapsed);
 	void Draw();
 };
 

@@ -221,9 +221,9 @@ void SystemInfo() {
 	cout << " *** JOYSTICK INFORMATION *** " << endl;
 
 	SDL_Joystick *js_test;
-	int js_num = SDL_NumJoysticks(); // Get the number of joysticks available
+	int32 js_num = SDL_NumJoysticks(); // Get the number of joysticks available
 	cout << "SDL has recognized " << js_num << " on this system." << endl;
-	for (int i = 0; i < js_num; i++) { // Print out information about each joystick
+	for (uint32 i = 0; i < js_num; i++) { // Print out information about each joystick
 		js_test = SDL_JoystickOpen(i);
 		if (js_test == NULL)
 			cout << "ERROR: SDL was unable to open joystick #" << i << endl;
@@ -258,9 +258,9 @@ void FileCheck() {
 
 
 // If you don't know what main is, you shouldn't be looking at this code.
-int main(int argc, char *argv[]) {
+int32 main(int32 argc, char *argv[]) {
 	// Process command arguments with getopt
-	int arg;
+	int32 arg;
 
 	while ((arg = getopt(argc, argv, "+cd:hir")) != -1) {
 		switch (arg) {
@@ -339,7 +339,7 @@ int main(int argc, char *argv[]) {
 
 	SettingsManager->SetTimer();	// Initialize the game and frames-per-second timers
 
-	int frame_time = 0;
+	uint32 frame_time = 0;
 
 	// This is the main loop for the game. The loop iterates once every frame drawn to the screen.
 	while (SettingsManager->NotDone()) {
@@ -352,7 +352,7 @@ int main(int argc, char *argv[]) {
 		InputManager->EventHandler();
 		
 		// 3) Update the timer
-		frame_time = (int)SettingsManager->UpdateTime();
+		frame_time = SettingsManager->UpdateTime();
 		
 		// 4) Update the game status
 		ModeManager->Update(frame_time);

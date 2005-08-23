@@ -46,8 +46,8 @@ PauseMode::PauseMode() {
 			AudioManager->SetSoundVolume(0);
 			break;
 		case ENGINE_HALF_VOLUME:
-			AudioManager->SetMusicVolume((int)(SettingsManager->music_vol * 0.5));
-			AudioManager->SetSoundVolume((int)(SettingsManager->sound_vol * 0.5));
+			AudioManager->SetMusicVolume(static_cast<int32>(SettingsManager->music_vol * 0.5));
+			AudioManager->SetSoundVolume(static_cast<int32>(SettingsManager->sound_vol * 0.5));
 			break;
 		// Don't need to do anything for the case ENGINE_SAME_VOLUME
 	}
@@ -83,7 +83,7 @@ PauseMode::~PauseMode() {
 	VideoManager->DeleteImage(saved_screen);
 	
 	// TEMPORARY: Because the Video Manager doesn't save the stat of the coordinate system
-	VideoManager->SetCoordSys(-14, 14, -10, 10);
+	//VideoManager->SetCoordSys(-14, 14, -10, 10);
 	
 	
 	// Note that we *DON'T* pop the top of the game mode stack, because
@@ -93,7 +93,7 @@ PauseMode::~PauseMode() {
 
 
 // Doesn't do a thing. This is all handled in GameSettings::KeyEventHandler()
-void PauseMode::Update(Uint32 time_elapsed) { }
+void PauseMode::Update(uint32 time_elapsed) { }
 
 
 

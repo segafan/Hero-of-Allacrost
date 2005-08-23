@@ -17,6 +17,7 @@
 #include "utils.h"
 #include <iostream>
 #include "map.h"
+#include "map_objects.h"
 #include "audio.h"
 #include "video.h"
 #include "global.h"
@@ -38,375 +39,6 @@ using namespace hoa_menu;
 namespace hoa_map {
 
 bool MAP_DEBUG = false;
-
-// ****************************************************************************
-// *********************** ObjectLayer Class Functions ************************
-// ****************************************************************************
-
-// Initialize the members and setup the pointer to the GameVideo class
-ObjectLayer::ObjectLayer(unsigned char type, uint row, uint col, uint stat) {
-	object_type = type;
-	row_pos = row;
-	col_pos = col;
-	status = stat;
-	VideoManager = hoa_video::GameVideo::_GetReference();
-}
-
-
-// Destructor
-ObjectLayer::~ObjectLayer() {}
-
-// ****************************************************************************
-// ************************ MapSprite Class Functions *************************
-// ****************************************************************************
-
-// Constructor for critical class members. Other members are initialized via support functions
-MapSprite::MapSprite(unsigned char type, uint row, uint col, uint stat)
-                     : ObjectLayer(type, row, col, stat) {
-	if (MAP_DEBUG) cout << "MAP: MapSprite constructor invoked" << endl;
-	step_speed = NORMAL_SPEED;
-	step_count = 0;
-	delay_time = NORMAL_DELAY;
-	wait_time = 0;
-	name = "";
-	filename = "";
-	frames = NULL;
-	speech = new SpriteDialogue();
-}
-
-
-// Free all the frames from memory
-MapSprite::~MapSprite() {
-	if (MAP_DEBUG) cout << "MAP: MapSprite destructor invoked" << endl;
-	if (status & SPR_GLOBAL) { // Don't delete these sprite frames
-		return;
-	}
-
-	for (uint i = 0; i < frames->size(); i++) {
-		VideoManager->DeleteImage((*frames)[i]);
-	}
-	delete frames;
-
-	if (speech != NULL) {
-		delete speech;
-	}
-}
-
-
-// Load the appropriate number of image frames for the sprite
-void MapSprite::LoadFrames() {
-	ImageDescriptor imd;
-
-	// Load standard sprite animation frames (24 count)
-	if (status & (PLAYER_SPRITE | NPC_SPRITE | ADV_SPRITE)) {
-		frames = new vector<ImageDescriptor>;
-		imd.width = 1;
-		imd.height = 2;
-
-		imd.filename = filename + "_d1.png";
-		frames->push_back(imd);
-		imd.filename = filename + "_d2.png";
-		frames->push_back(imd);
-		imd.filename = filename + "_d3.png";
-		frames->push_back(imd);
-		imd.filename = filename + "_d4.png";
-		frames->push_back(imd);
-		imd.filename = filename + "_d5.png";
-		frames->push_back(imd);
-
-		imd.filename = filename + "_u1.png";
-		frames->push_back(imd);
-		imd.filename = filename + "_u2.png";
-		frames->push_back(imd);
-		imd.filename = filename + "_u3.png";
-		frames->push_back(imd);
-		imd.filename = filename + "_u4.png";
-		frames->push_back(imd);
-		imd.filename = filename + "_u5.png";
-		frames->push_back(imd);
-
-		imd.filename = filename + "_l1.png";
-		frames->push_back(imd);
-		imd.filename = filename + "_l2.png";
-		frames->push_back(imd);
-		imd.filename = filename + "_l3.png";
-		frames->push_back(imd);
-		imd.filename = filename + "_l4.png";
-		frames->push_back(imd);
-		imd.filename = filename + "_l5.png";
-		frames->push_back(imd);
-		imd.filename = filename + "_l6.png";
-		frames->push_back(imd);
-		imd.filename = filename + "_l7.png";
-		frames->push_back(imd);
-
-		imd.filename = filename + "_r1.png";
-		frames->push_back(imd);
-		imd.filename = filename + "_r2.png";
-		frames->push_back(imd);
-		imd.filename = filename + "_r3.png";
-		frames->push_back(imd);
-		imd.filename = filename + "_r4.png";
-		frames->push_back(imd);
-		imd.filename = filename + "_r5.png";
-		frames->push_back(imd);
-		imd.filename = filename + "_r6.png";
-		frames->push_back(imd);
-		imd.filename = filename + "_r7.png";
-		frames->push_back(imd);
-
-// 		// Load additional extra frames if the sprite is not a regular NPC
-// 		if (status & (PLAYER_SPRITE | ADV_SPRITE)) {
-//
-// 			// Load even -more- extra frames if the sprite is a character
-// 			if (status & PLAYER_SPRITE) {
-//
-// 			}
-// 		}
-	}
-
-	// Now load all the frames
-
-	VideoManager->BeginImageLoadBatch();
-	for (uint i = 0; i < frames->size(); i++) {
-		VideoManager->LoadImage((*frames)[i]);
-	}
-	VideoManager->EndImageLoadBatch();
-}
-
-
-// Loads the frames and other info from the GameInstance singleton
-void MapSprite::LoadCharacterInfo(uint character) {
-	GCharacter *pchar = GameInstance::_GetReference()->GetCharacter(character);
-	name = pchar->GetName();
-	filename = "img/sprite/" + pchar->GetFilename();
-	status |= SPR_GLOBAL; // Safety so we don't accdidentally delete the sprite frames
-	frames = pchar->GetMapFrames();
-// 	VideoManager->DrawImage((*frames)[0]);
-// 	cout << "Frames[0].filename = " << (*frames)[0].filename << endl;
-}
-
-
-// Find the frame image that should be drawn
-int MapSprite::FindFrame() {
-	int draw_frame; // The frame index that we should draw
-
-	// Depending on the direction the sprite is facing and the step_count, select the correct frame to draw
-	switch (status & FACE_MASK) {
-		case SOUTH:
-		case SOUTH_SW:
-		case SOUTH_SE:
-			if (step_count < (0.25 * step_speed)) {
-				draw_frame = DOWN_STANDING;
-			}
-			else if (step_count < (0.50 * step_speed)) {
-				if (status & STEP_SWAP)
-					draw_frame = DOWN_RSTEP1;
-				else
-					draw_frame = DOWN_LSTEP1;
-			}
-			else if (step_count < (0.75 * step_speed)) {
-				if (status & STEP_SWAP)
-					draw_frame = DOWN_RSTEP2;
-				else
-					draw_frame = DOWN_LSTEP2;
-			}
-			else { // (step_count < step_speed) == true
-				if (status & STEP_SWAP)
-					draw_frame = DOWN_RSTEP3;
-				else
-					draw_frame = DOWN_LSTEP3;
-			}
-			break;
-		case NORTH:
-		case NORTH_NW:
-		case NORTH_NE:
-			if (step_count < (0.25 * step_speed)) {
-				draw_frame = UP_STANDING;
-			}
-			else if (step_count < (0.50 * step_speed)) {
-				if (status & STEP_SWAP)
-					draw_frame = UP_RSTEP1;
-				else
-					draw_frame = UP_LSTEP1;
-			}
-			else if (step_count < (0.75 * step_speed)) {
-				if (status & STEP_SWAP)
-					draw_frame = UP_RSTEP2;
-				else
-					draw_frame = UP_LSTEP2;
-			}
-			else { // (step_count < step_speed) == true
-				if (status & STEP_SWAP)
-					draw_frame = UP_RSTEP3;
-				else
-					draw_frame = UP_LSTEP3;
-			}
-			break;
-		case WEST:
-		case WEST_NW:
-		case WEST_SW:
-			if (step_count < (0.25 * step_speed)) {
-				draw_frame = LEFT_STANDING;
-			}
-			else if (step_count < (0.50 * step_speed)) {
-				if (status & STEP_SWAP)
-					draw_frame = LEFT_RSTEP1;
-				else
-					draw_frame = LEFT_LSTEP1;
-			}
-			else if (step_count < (0.75 * step_speed)) {
-				if (status & STEP_SWAP)
-					draw_frame = LEFT_RSTEP2;
-				else
-					draw_frame = LEFT_LSTEP2;
-			}
-			else { // (step_count < step_speed) == true
-				if (status & STEP_SWAP)
-					draw_frame = LEFT_RSTEP3;
-				else
-					draw_frame = LEFT_LSTEP3;
-			}
-			break;
-		case EAST:
-		case EAST_NE:
-		case EAST_SE:
-			if (step_count < (0.25 * step_speed)) {
-				draw_frame = RIGHT_STANDING;
-			}
-			else if (step_count < (0.50 * step_speed)) {
-				if (status & STEP_SWAP)
-					draw_frame = RIGHT_RSTEP1;
-				else
-					draw_frame = RIGHT_LSTEP1;
-			}
-			else if (step_count < (0.75 * step_speed)) {
-				if (status & STEP_SWAP)
-					draw_frame = RIGHT_RSTEP2;
-				else
-					draw_frame = RIGHT_LSTEP2;
-			}
-			else { // (step_count < step_speed) == true
-				if (status & STEP_SWAP)
-					draw_frame = RIGHT_RSTEP3;
-				else
-					draw_frame = RIGHT_LSTEP3;
-			}
-			break;
-	}
-
-	return draw_frame;
-}
-
-
-
-// Draw the appropriate sprite frame on the correct position on the screen
-void MapSprite::Draw(MapFrame& mf) {
-	float x_pos = 0.0;  // The x and y cursor position to draw the sprite to
-	float y_pos = 0.0;
-	int draw_frame = 0; // The sprite frame index to draw
-
-	// Set the default x and y position (true positions when sprite is not in motion)
-	x_pos = mf.c_pos + (static_cast<float>(col_pos) - static_cast<float>(mf.c_start));
-	y_pos = mf.r_pos + (static_cast<float>(mf.r_start) - static_cast<float>(row_pos));
-
-	// When we are in motion, we have to off-set the step positions
-	if (status & IN_MOTION) {
-		switch (status & FACE_MASK) {
-			case EAST:
-				x_pos -= (step_speed - step_count) / step_speed;
-				break;
-			case WEST:
-				x_pos += (step_speed - step_count) / step_speed;
-				break;
-			case NORTH:
-				y_pos -= (step_speed - step_count) / step_speed;
-				break;
-			case SOUTH:
-				y_pos += (step_speed - step_count) / step_speed;
-				break;
-			case NORTH_NW:
-			case WEST_NW:
-				x_pos += (step_speed - step_count) / step_speed;
-				y_pos -= (step_speed - step_count) / step_speed;
-				break;
-			case SOUTH_SW:
-			case WEST_SW:
-				x_pos += (step_speed - step_count) / step_speed;
-				y_pos += (step_speed - step_count) / step_speed;
-				break;
-			case NORTH_NE:
-			case EAST_NE:
-				x_pos -= (step_speed - step_count) / step_speed;
-				y_pos -= (step_speed - step_count) / step_speed;
-				break;
-			case SOUTH_SE:
-			case EAST_SE:
-				x_pos -= (step_speed - step_count) / step_speed;
-				y_pos += (step_speed - step_count) / step_speed;
-				break;
-		}
-	}
-
-
-	draw_frame = FindFrame();
-	VideoManager->Move(x_pos, y_pos);
-	VideoManager->DrawImage((*frames)[draw_frame]);
-}
-
-// ****************************************************************************
-// ********************* SpriteDialouge Class Functions ***********************
-// ****************************************************************************
-
-SpriteDialogue::SpriteDialogue() {
-	if (MAP_DEBUG) cout << "MAP: SpriteDialogue constructor invoked" << endl;
-	seen_all = true;
-}
-
-
-SpriteDialogue::~SpriteDialogue() {
-	if (MAP_DEBUG) cout << "MAP: SpriteDialogue destructor invoked" << endl;
-}
-
-// Load a new set of dialogue
-void SpriteDialogue::LoadDialogue(vector<vector<string> > txt, vector<vector<uint> > sp) {
-	dialogue = txt;
-	speaker = sp;
-	for (uint i = 0; i < dialogue.size(); i++) {
-		seen.push_back(false);
-	}
-	seen_all = false;
-	next_read = 0;
-}
-
-// Add a new line of dialogue
-void SpriteDialogue::AddDialogue(vector<string> txt, vector<uint> sp) {
-	dialogue.push_back(txt);
-	speaker.push_back(sp);
-	seen.push_back(false);
-
-	if (seen_all) { // Set the next read to point to the new dialogue
-		next_read = (uint)dialogue.size() - 1;
-	}
-
-	seen_all = false;
-}
-
-
-// Add a new line of dialogue, for one-part speeches
-void SpriteDialogue::AddDialogue(string txt, uint sp) {
-	vector<string> new_txt(1, txt);
-	vector<uint> new_sp(1, sp);
-	dialogue.push_back(new_txt);
-	speaker.push_back(new_sp);
-
-	if (seen_all) {
-		next_read = (uint)dialogue.size() - 1;
-	}
-
-	seen_all = false;
-}
-
 
 // ****************************************************************************
 // ************************** MapMode Class Functions *************************
@@ -472,14 +104,14 @@ void MapMode::TempCreateMap() {
 	map_tiles.push_back(imd);
 
 	VideoManager->BeginImageLoadBatch();
-	for (uint i = 0; i < map_tiles.size(); i++) {
+	for (uint32 i = 0; i < map_tiles.size(); i++) {
 		VideoManager->LoadImage(map_tiles[i]);
 	}
 	VideoManager->EndImageLoadBatch();
 
 	// Setup tile frame pointers for animation
 	TileFrame *tf;
-	for (int i = 0; i < 15; i++) {
+	for (uint32 i = 0; i < 15; i++) {
 		tf = new TileFrame;
 	  tf->frame = i;
 		tf->next = tf;
@@ -522,9 +154,9 @@ void MapMode::TempCreateMap() {
 	// Setup the image map
 	MapTile tmp_tile;
 	tmp_tile.upper_layer = -1; // No upper layer in this test
-	for (int r = 0; r < row_count; r++) {
+	for (uint32 r = 0; r < row_count; r++) {
 		map_layers.push_back(vector <MapTile>());
-		for (int c = 0; c < col_count; c++) {
+		for (uint32 c = 0; c < col_count; c++) {
 			tmp_tile.lower_layer = (RandomNum(0, 16 - 1)); // Build the lower layer from random tiles
 			tmp_tile.upper_layer = 16;
 			if (tmp_tile.lower_layer == 15)
@@ -538,7 +170,7 @@ void MapMode::TempCreateMap() {
 	// Load player sprite and rest of map objects
 	MapSprite *p_sprite = new MapSprite(PLAYER_SPRITE, 2, 2, (CONTROLABLE | VISIBLE | SOUTH | Z_LVL1));
 	p_sprite->LoadCharacterInfo(GLOBAL_CLAUDIUS);
-	object_layer.push_back(p_sprite);
+	ground_objects.push_back(p_sprite);
 
 	MapSprite *npc_sprite = new MapSprite(NPC_SPRITE, 4, 6, (VISIBLE | EAST | Z_LVL1));
 	npc_sprite->SetName("Laila");
@@ -548,7 +180,7 @@ void MapMode::TempCreateMap() {
 	npc_sprite->LoadFrames();
 	npc_sprite->speech->AddDialogue("Hey there hot stuff", GLOBAL_LAILA);
 	npc_sprite->speech->AddDialogue("Wanna do it again?", GLOBAL_LAILA);
-	object_layer.push_back(npc_sprite);
+	ground_objects.push_back(npc_sprite);
 
 	// If the focused_object is ever NULL, the game will exit with a seg fault :(
 	focused_object = p_sprite;
@@ -556,7 +188,7 @@ void MapMode::TempCreateMap() {
 
 
 
-MapMode::MapMode(int new_map_id) {
+MapMode::MapMode(uint32 new_map_id) {
 	if (MAP_DEBUG) cout << "MAP: MapMode constructor invoked" << endl;
 
 	mode_type = ENGINE_MAP_MODE;
@@ -567,7 +199,7 @@ MapMode::MapMode(int new_map_id) {
 	//DataManager->LoadMap(this, map_id);
 
 	// Setup the coordinate system
-	VideoManager->SetCoordSys(-SCREEN_COLS/2, SCREEN_COLS/2, -SCREEN_ROWS/2, SCREEN_ROWS/2);
+	//VideoManager->SetCoordSys(-SCREEN_COLS/2.0, SCREEN_COLS/2.0, -SCREEN_ROWS/2.0, SCREEN_ROWS/2.0);
 
 	virtual_sprite = new MapSprite(VIRTUAL_SPRITE, 20, 20, 0x0);
 	virtual_sprite->SetSpeed(VERY_FAST_SPEED);
@@ -583,14 +215,14 @@ MapMode::~MapMode() {
 	if (MAP_DEBUG) cout << "MAP: MapMode destructor invoked" << endl;
 
 	// Delete all of the tile images
-	for (uint i = 0; i < map_tiles.size(); i++) {
+	for (uint32 i = 0; i < map_tiles.size(); i++) {
 		VideoManager->DeleteImage(map_tiles[i]);
 	}
 
 	// Free up all the frame linked lists
 	TileFrame *tf_del;
 	TileFrame *tf_tmp;
-	for (uint i = 0; i < tile_frames.size(); i++) {
+	for (uint32 i = 0; i < tile_frames.size(); i++) {
 		tf_del = tile_frames[i];
 		tf_tmp = tf_del->next;
 		delete tf_del;
@@ -605,15 +237,15 @@ MapMode::~MapMode() {
 	}
 
 	// Delete all of the objects
-	for (uint i = 0; i < object_layer.size(); i++) {
-		delete(object_layer[i]);
+	for (uint32 i = 0; i < ground_objects.size(); i++) {
+		delete(ground_objects[i]);
 	}
 }
 
 
 
-// Returns whether a sprite can move to a tile or not
-inline bool MapMode::TileMoveable(int row, int col, uint z_occupied) {
+// Returns true if the player is able to move to the tile.
+inline bool MapMode::TileMoveable(uint32 row, uint32 col, uint32 z_occupied) {
 	// First check that the object in question isn't trying to move outside the map boundaries
 	if (row < 1 || col < 0 || row >= row_count || col >= col_count) {
 		return false;
@@ -629,8 +261,8 @@ inline bool MapMode::TileMoveable(int row, int col, uint z_occupied) {
 
 
 // Moves the sprite in some direction, if possible.
-void MapMode::SpriteMove(int direction, MapSprite *sprite) {
-	int r_check, c_check; // Variables for holding the position of a tile to check.
+void MapMode::SpriteMove(uint32 direction, MapSprite *sprite) {
+	uint32 r_check, c_check; // Variables for holding the position of a tile to check.
 
 	// Set the sprite's facing direction and tile coordinates it wishes to move to
 	switch (direction) {
@@ -704,10 +336,10 @@ void MapMode::SpriteMove(int direction, MapSprite *sprite) {
 }
 
 
-// Processes user update and camera movement. Only called when the map is focused on a virtual sprite
+// Processes user update and camera movement. Only called when the map is focused on the virtual sprite
 void MapMode::UpdateVirtualSprite() {
 	bool user_move;
-	int move_direction;
+	uint32 move_direction;
 
 	// *********** (1) Handle updates for the player sprite when in motion ************
 	if (virtual_sprite->status & IN_MOTION) {
@@ -770,10 +402,10 @@ void MapMode::UpdateVirtualSprite() {
 	if (InputManager->CancelPress()) {
 		// TEMP: Switch focus back to player sprite
 		cout << "Set focused object from Virtual sprite back to Player sprite" << endl;
-		if (object_layer[0]->object_type == PLAYER_SPRITE)
-			focused_object = dynamic_cast<MapSprite*>(object_layer[0]);
+		if (ground_objects[0]->object_type == PLAYER_SPRITE)
+			focused_object = dynamic_cast<MapSprite*>(ground_objects[0]);
 		else
-			focused_object = dynamic_cast<MapSprite*>(object_layer[1]);
+			focused_object = dynamic_cast<MapSprite*>(ground_objects[1]);
 	}
 }
 
@@ -782,21 +414,21 @@ void MapMode::UpdateVirtualSprite() {
 // ****************************************************************************
 
 // Updates the game state when in map mode. Called from the main game loop.
-void MapMode::Update(Uint32 new_time_elapsed) {
+void MapMode::Update(uint32 new_time_elapsed) {
 	time_elapsed = new_time_elapsed;
 	animation_counter += time_elapsed;
 
-	// *********** (!) Update the tile animation frames if needed ***********
+	// *********** (1) Update the tile animation frames if needed ***********
 
 	if (animation_counter >= ANIMATION_RATE) {
 		// Update all tile frames
-		for (uint i = 0; i < tile_frames.size(); i++) {
+		for (uint32 i = 0; i < tile_frames.size(); i++) {
 			tile_frames[i] = tile_frames[i]->next;
 		}
 
 		// Update the frames for all dynamic map objects....???
 //		 list<ObjectLayer*>::iterator obj_iter;
-//		 for(obj_iter = object_layer.begin(); obj_iter != object_layer.end(); obj_iter++ ) {
+//		 for(obj_iter = ground_objects.begin(); obj_iter != ground_objects.end(); obj_iter++ ) {
 //			 if (obj_iter->object_type == DYNAMIC_OBJECT) {
 //				 obj_iter->frame_count = (obj_iter->frame_count + 1) % obj_iter->frames.size();
 //			 }
@@ -819,14 +451,14 @@ void MapMode::Update(Uint32 new_time_elapsed) {
 	}
 
 	// ************ (3) Sort the objects so they are in the correct draw order ********
-	for (uint i = 1; i < object_layer.size(); i++) {
-		ObjectLayer *tmp = object_layer[i];
-		int j = int(i) - 1;
-		while (j >= 0 && (object_layer[j])->row_pos > tmp->row_pos) {
-			object_layer[j+1] = object_layer[j];
+	for (uint32 i = 1; i < ground_objects.size(); i++) {
+		ObjectLayer *tmp = ground_objects[i];
+		int32 j = static_cast<int>(i) - 1;
+		while (j >= 0 && (ground_objects[j])->row_pos > tmp->row_pos) {
+			ground_objects[j+1] = ground_objects[j];
 			j--;
 		}
-		object_layer[j+1] = tmp;
+		ground_objects[j+1] = tmp;
 	}
 }
 
@@ -835,16 +467,16 @@ void MapMode::Update(Uint32 new_time_elapsed) {
 // Updates the game status when MapMode is in the 'explore' state
 void MapMode::UpdateExploreState() {
 	// Update all game objects (??? Or only non-playable sprites ???)
-	for (uint i = 0; i < object_layer.size(); i++) {
-		switch ((object_layer[i])->object_type) {
+	for (uint32 i = 0; i < ground_objects.size(); i++) {
+		switch ((ground_objects[i])->object_type) {
 			case PLAYER_SPRITE:
 			{
-				ObjectLayer *pSprite = object_layer[i];
-				UpdatePlayerExplore(dynamic_cast<MapSprite *>(object_layer[i]));
+				ObjectLayer *pSprite = ground_objects[i];
+				UpdatePlayerExplore(dynamic_cast<MapSprite *>(ground_objects[i]));
 				break;
 			}
 			case NPC_SPRITE:
-				UpdateNPCExplore((MapSprite*)(object_layer[i]));
+				UpdateNPCExplore((MapSprite*)(ground_objects[i]));
 				break;
 			default:
 				break;
@@ -858,8 +490,8 @@ void MapMode::UpdateExploreState() {
 
 // Updates the player-controlled sprite and processes user input while in the 'explore' state
 void MapMode::UpdatePlayerExplore(MapSprite *player_sprite) {
-	int r_check, c_check;   // Variables for saving tile coordinates
-	int move_direction;     // The direction the sprite may be set to move in
+	int32 r_check, c_check;   // Variables for saving tile coordinates
+	int32 move_direction;     // The direction the sprite may be set to move in
 	bool user_move = false; // Set to true if the user attempted to move the player sprite
 
 	// *********** (!) Handle updates for the player sprite when in motion ************
@@ -951,12 +583,12 @@ void MapMode::UpdatePlayerExplore(MapSprite *player_sprite) {
 	}
 
 	if (InputManager->MenuPress()) { // Push MenuMode onto the stack
-		//MenuMode *MenuM = new MenuMode();
-		//ModeManager->Push(MenuM);
-		// TEMP: Switch the focused object to a virtual sprite
-		if (MAP_DEBUG) cout << "MAP: Set focused object from Player sprite to Virtual sprite" << endl;
-		focused_object = virtual_sprite;
-		return;
+		MenuMode *MenuM = new MenuMode();
+		ModeManager->Push(MenuM);
+// 		TEMP: Switch the focused object to a virtual sprite
+// 		if (MAP_DEBUG) cout << "MAP: Set focused object from Player sprite to Virtual sprite" << endl;
+// 		focused_object = virtual_sprite;
+// 		return;
 	}
 
 	// Handle confirm command.
@@ -979,7 +611,7 @@ void MapMode::UpdatePlayerExplore(MapSprite *player_sprite) {
 			c_check = player_sprite->col_pos;
 		}
 
-		// TODO: Here check for treasure, sprite, etc interaction at postion [row_check, col_check]
+		//CheckTile(row_check, col_check, player_sprite->);
 		return;
 	}
 }
@@ -1012,7 +644,7 @@ void MapMode::UpdateNPCExplore(MapSprite *npc) {
 	else { // Sprite is not in motion
 		// Process either scripted movement or random movement
 		if (npc->wait_time > 0) {
-			npc->wait_time -= static_cast<int>(time_elapsed); // Decrement the wait timer
+			npc->wait_time -= static_cast<int32>(time_elapsed); // Decrement the wait timer
 		}
 
 		else {
@@ -1063,20 +695,27 @@ void MapMode::UpdateScriptState() {
 void MapMode::GetDrawInfo(MapFrame& mf) {
 	// ************* (1) Calculate the default drawing positions for the tiles ****************
 	// Draw from the top left corner
-	mf.c_pos = -SCREEN_COLS / 2 - 0.5;
-	mf.r_pos = SCREEN_ROWS / 2 - 0.5;
+	mf.c_pos = (-SCREEN_COLS / 2.0f) - 0.5f;
+	mf.r_pos = (SCREEN_ROWS / 2.0f) - 0.5f;
 
-	// Set the default col and row tile count
-	mf.c_draw = SCREEN_COLS + 1;
-	mf.r_draw = SCREEN_ROWS + 1;
+	// Set the default col and row tile counts
+	mf.c_draw = static_cast<uint32>(SCREEN_COLS) + 1;
+	mf.r_draw = static_cast<uint32>(SCREEN_ROWS) + 1;
 
 	// These are the default starting positions
-	mf.c_start = focused_object->col_pos - SCREEN_COLS / 2;
-	mf.r_start = focused_object->row_pos - SCREEN_ROWS / 2;
+	mf.c_start = focused_object->col_pos - (static_cast<int32>(SCREEN_COLS) / 2);
+	mf.r_start = focused_object->row_pos - (static_cast<int32>(SCREEN_ROWS) / 2);
+	
+// 	cout << ">>> RAWR (1) <<<" << endl;
+// 	cout << -(SCREEN_COLS / -2.0f) - 0.5f << ", " << (SCREEN_ROWS / 2.0f) << endl;
+// 	cout << "> Starting draw row: " << mf.r_start << endl;
+// 	cout << "> Starting draw column: " << mf.c_start << endl;
+// 	cout << "> Position draw row: " << mf.r_pos << endl;
+// 	cout << "> Position draw column: " << mf.c_pos << endl;
 
 	// *********************** (2) Calculate the drawing information **************************
 	if (focused_object->status & IN_MOTION) {
-		if (focused_object->step_count <= (focused_object->step_speed / 2)) {
+		if (focused_object->step_count <= (focused_object->step_speed / 2.0f)) {
 			// We are not more than half-way moving west, so make adjustments
 			if (focused_object->status & (WEST | NORTH_NW | WEST_NW | SOUTH_SW | WEST_SW)) {
 				mf.c_pos += focused_object->step_count / focused_object->step_speed;
@@ -1127,73 +766,86 @@ void MapMode::GetDrawInfo(MapFrame& mf) {
 	// Usually the map "moves around the player", but when we encounter the edges of the map we
 	// need the player to "move around the map".
 
-	if (mf.c_start < 0) { // Exceeds the far-left side of the map
+	// Exceeds the far-left side of the map
+	if (mf.c_start < 0) { 
 		mf.c_start = 0;
-		mf.c_pos = -SCREEN_COLS / 2;
+		mf.c_pos = -(SCREEN_COLS / 2.0f);
 	}
-	else if (mf.c_start > col_count - SCREEN_COLS - 1) { // Exceeds the far-right side of the map
-		mf.c_start = col_count - SCREEN_COLS;
-		mf.c_pos = -SCREEN_COLS / 2;
+	// Exceeds the far-right side of the map
+	else if (mf.c_start > col_count - static_cast<int32>(SCREEN_COLS) - 1) { 
+		mf.c_start = col_count - static_cast<int32>(SCREEN_COLS);
+		mf.c_pos = -(SCREEN_COLS / 2.0f);
 	}
 
 	// If our column position is exactly on the left edge of the screen, we draw one less column of tiles
-	if (mf.c_pos == -SCREEN_COLS / 2) {
+	if (mf.c_pos == -(SCREEN_COLS / 2.0f)) {
 		mf.c_draw--;
 	}
 
-	if (mf.r_start < 0) { // Exceeds the far-north side of the map
+	// Exceeds the far-north side of the map
+	if (mf.r_start < 0) { 
 		mf.r_start = 0;
-		mf.r_pos = SCREEN_ROWS / 2 - 1;
+		mf.r_pos = (SCREEN_ROWS / 2.0f) - 1.0f;
 	}
-	else if (mf.r_start > row_count - SCREEN_ROWS - 1) { // Exceeds the far-south side of the map
-		mf.r_start = row_count - SCREEN_ROWS;
-		mf.r_pos = SCREEN_ROWS / 2 - 1;
+	// Exceeds the far-south side of the map
+	else if (mf.r_start > row_count - static_cast<int32>(SCREEN_ROWS) - 1) { 
+		mf.r_start = row_count - static_cast<int32>(SCREEN_ROWS);
+		mf.r_pos = (SCREEN_ROWS / 2.0f) - 1.0f;
 	}
 
 	// If the row position is exactly on the top of the screen, draw one less row of tiles
-	if (mf.r_pos == SCREEN_ROWS / 2 - 1) {
+	if (mf.r_pos == (SCREEN_ROWS / 2.0f) - 1.0f) {
 		mf.r_draw--;
 	}
-}
+} // MapMode::GetDrawInfo(MapFrame& mf)
 
 
 // Public draw function called by the main game loop
 void MapMode::Draw() {
 	MapFrame mf; // Contains all the information we need to know to draw the map
 
-
+	// Make sure the coordinate system is set properly
+	VideoManager->SetCoordSys(-SCREEN_COLS/2.0f, SCREEN_COLS/2.0f, -SCREEN_ROWS/2.0f, SCREEN_ROWS/2.0f);
 
 	GetDrawInfo(mf); // Get all the information we need for drawing this map frame
 
+// 	cout << ">>> DEBUGGER <<<" << endl;
+// 	cout << "> Starting draw row: " << mf.r_start << endl;
+// 	cout << "> Starting draw column: " << mf.c_start << endl;
+// 	printf("> Position row: %f\n", mf.r_pos);
+// 	printf("> Position column: %f\n", mf.c_pos);
+// 	
+// 	SDL_Delay(200);
+	
 	// ************** (1) Draw the Lower Layer *************
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_NO_BLEND, 0);
 	VideoManager->Move(mf.c_pos, mf.r_pos);
-	for (int r = mf.r_start; r < mf.r_start + mf.r_draw; r++) {
-		for (int c = mf.c_start; c < mf.c_start + mf.c_draw; c++) {
+	for (uint32 r = static_cast<uint32>(mf.r_start); r < static_cast<uint32>(mf.r_start) + mf.r_draw; r++) {
+		for (uint32 c = static_cast<uint32>(mf.c_start); c < static_cast<uint32>(mf.c_start) + mf.c_draw; c++) {
 			if (map_layers[r][c].lower_layer >= 0) // Then a lower layer tile exists and we should draw it
 				VideoManager->DrawImage(map_tiles[tile_frames[map_layers[r][c].lower_layer]->frame]);
-			VideoManager->MoveRel(1,0);
+			VideoManager->MoveRel(1.0f, 0.0f);
 		}
-		VideoManager->MoveRel((float) -mf.c_draw, -1.0f);
+		VideoManager->MoveRel(-static_cast<float>(mf.c_draw), -1.0f);
 
 	}
 
 	// ************** (2) Draw the Object Layer *************
 	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-	for (uint i = 0; i < object_layer.size(); i++) {
-		(object_layer[i])->Draw(mf);
+	for (uint32 i = 0; i < ground_objects.size(); i++) {
+		(ground_objects[i])->Draw(mf);
 	}
 
 	// ************** (3) Draw the Upper Layer *************
 	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 	VideoManager->Move(mf.c_pos, mf.r_pos);
-	for (int r = mf.r_start; r < mf.r_start + mf.r_draw; r++) {
-		for (int c = mf.c_start; c < mf.c_start + mf.c_draw; c++) {
+	for (uint32 r = mf.r_start; r < mf.r_start + mf.r_draw; r++) {
+		for (uint32 c = mf.c_start; c < mf.c_start + mf.c_draw; c++) {
 			if (map_layers[r][c].upper_layer >= 0) // Then an upper layer tile exists and we should draw it
 				VideoManager->DrawImage(map_tiles[tile_frames[map_layers[r][c].upper_layer]->frame]);
-			VideoManager->MoveRel(1,0);
+			VideoManager->MoveRel(1.0f, 0.0f);
 		}
-		VideoManager->MoveRel((float) -mf.c_draw, -1.0f);
+		VideoManager->MoveRel(-static_cast<float>(mf.c_draw), -1.0f);
 	}
 
 	// ************** (4) Draw the Dialoge box, if needed *************

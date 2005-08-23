@@ -28,14 +28,18 @@
 #include "utils.h"
 #include <string>
 #include <vector>
+#include "video.h"
 #include "defs.h"
 #include "engine.h"
 
+//! All calls to menu mode are wrapped in this namespace.
 namespace hoa_menu {
 
+//! Determines whether the code in the hoa_menu namespace should print debug statements or not.
 extern bool MENU_DEBUG;
 
-namespace local_menu {
+//! An internal namespace to be used only within the menu code. Don't use this namespace anywhere else!
+namespace private_menu {
 
 }
 
@@ -52,6 +56,7 @@ class MenuMode : public hoa_engine::GameMode {
 private:
 	friend class hoa_data::GameData;
 
+	hoa_video::ImageDescriptor saved_screen;
 	std::vector<hoa_video::ImageDescriptor> menu_images;
 	std::vector<hoa_audio::MusicDescriptor> menu_music;
 	std::vector<hoa_audio::SoundDescriptor> menu_sound;
@@ -59,7 +64,7 @@ public:
 	MenuMode();
 	~MenuMode();
 
-	void Update(Uint32 time_elapsed);
+	void Update(uint32 time_elapsed);
 	void Draw();
 };
 

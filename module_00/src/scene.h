@@ -39,7 +39,7 @@ extern bool SCENE_DEBUG;
 namespace private_scene {
 
 //! How many milliseconds must pass before the user can exit the scene
-const int MIN_SCENE_UPDATES = 750;
+const uint32 MIN_SCENE_UPDATES = 750;
 
 } // namespace private_scene
  
@@ -55,7 +55,7 @@ const int MIN_SCENE_UPDATES = 750;
 class SceneMode : public hoa_engine::GameMode {
 private:
 	//! Retains the number of milliseconds that have elapsed since this mode was initialized
-	int scene_timer;
+	uint32 scene_timer;
 
 	//hoa_video::ImageDescriptor scene;
 public:
@@ -63,7 +63,7 @@ public:
   ~SceneMode();
 
 	//! Updates the game state by the amount of time that has elapsed
-  void Update(Uint32 time_elapsed);
+  void Update(uint32 time_elapsed);
 	//! Draws the next frame to be displayed on the screen
   void Draw();
 }; // class SceneMode

@@ -41,23 +41,23 @@ extern bool GLOBAL_DEBUG;
 //! \name Game Object Types
 //@{
 //! \brief Constants for different game object types
-const unsigned char GLOBAL_DUMMY_OBJ  = 0x00;
-const unsigned char GLOBAL_ITEM       = 0x01;
-const unsigned char GLOBAL_SKILL_BOOK = 0x02;
-const unsigned char GLOBAL_WEAPON     = 0x04;
-const unsigned char GLOBAL_HEAD_ARMOR = 0x08;
-const unsigned char GLOBAL_BODY_ARMOR = 0x10;
-const unsigned char GLOBAL_ARMS_ARMOR = 0x20;
-const unsigned char GLOBAL_LEGS_ARMOR = 0x40;
+const uint8 GLOBAL_DUMMY_OBJ  = 0x00;
+const uint8 GLOBAL_ITEM       = 0x01;
+const uint8 GLOBAL_SKILL_BOOK = 0x02;
+const uint8 GLOBAL_WEAPON     = 0x04;
+const uint8 GLOBAL_HEAD_ARMOR = 0x08;
+const uint8 GLOBAL_BODY_ARMOR = 0x10;
+const uint8 GLOBAL_ARMS_ARMOR = 0x20;
+const uint8 GLOBAL_LEGS_ARMOR = 0x40;
 //@}
 
 //! \name Game Item Usage Types
 //@{
 //! \brief Constants for the numerous methods of application of game items.
-const unsigned char GLOBAL_UNUSABLE_ITEM = 0x00;
-const unsigned char GLOBAL_RECOVERY_ITEM = 0x01;
-const unsigned char GLOBAL_BATTLE_ITEM   = 0x02;
-const unsigned char GLOBAL_MAP_ITEM      = 0x04;
+const uint8 GLOBAL_UNUSABLE_ITEM = 0x00;
+const uint8 GLOBAL_RECOVERY_ITEM = 0x01;
+const uint8 GLOBAL_BATTLE_ITEM   = 0x02;
+const uint8 GLOBAL_MAP_ITEM      = 0x04;
 //@}
 
 //! \name Game Character Types
@@ -72,31 +72,31 @@ const uint GLOBAL_ALL_CHARACTERS = 0xFFFFFFFF;
 //! \name Game Element Types
 //@{
 //! \brief Constants for the various elemental types.
-const unsigned char GLOBAL_NO_ELEMENTAL        = 0x00;
-const unsigned char GLOBAL_FIRE_ELEMENTAL      = 0x01;
-const unsigned char GLOBAL_ICE_ELEMENTAL       = 0x02;
-const unsigned char GLOBAL_LIGTHNING_ELEMENTAL = 0x04;
-const unsigned char GLOBAL_EARTH_ELEMENTAL     = 0x08;
-const unsigned char GLOBAL_LIGHT_ELEMENTAL     = 0x10;
-const unsigned char GLOBAL_DARK_ELEMENTAL      = 0x20;
+const uint8 GLOBAL_NO_ELEMENTAL        = 0x00;
+const uint8 GLOBAL_FIRE_ELEMENTAL      = 0x01;
+const uint8 GLOBAL_ICE_ELEMENTAL       = 0x02;
+const uint8 GLOBAL_LIGTHNING_ELEMENTAL = 0x04;
+const uint8 GLOBAL_EARTH_ELEMENTAL     = 0x08;
+const uint8 GLOBAL_LIGHT_ELEMENTAL     = 0x10;
+const uint8 GLOBAL_DARK_ELEMENTAL      = 0x20;
 //@}
 
 //! \name Game Status Types
 //@{
 //! \brief Constants used to reflect various status ailments.
-const unsigned int GLOBAL_NO_STATUS     = 0x00000000;
-const unsigned int GLOBAL_POISON_STATUS = 0x00000001;
-const unsigned int GLOBAL_SLOW_STATUS   = 0x00000002;
-const unsigned int GLOBAL_SLEEP_STATUS  = 0x00000004;
+const uint32 GLOBAL_NO_STATUS     = 0x00000000;
+const uint32 GLOBAL_POISON_STATUS = 0x00000001;
+const uint32 GLOBAL_SLOW_STATUS   = 0x00000002;
+const uint32 GLOBAL_SLEEP_STATUS  = 0x00000004;
 //@}
 
 //! \name Game Sounds
 //@{
 //! \brief Constants for referring to commonly accessed sound media.
-const uint GLOBAL_SOUND_CONFIRM =  0;
-const uint GLOBAL_SOUND_CANCEL  =  1;
-const uint GLOBAL_SOUND_OBTAIN  =  2;
-const uint GLOBAL_SOUND_BUMP    =  3;
+const uint32 GLOBAL_SOUND_CONFIRM =  0;
+const uint32 GLOBAL_SOUND_CANCEL  =  1;
+const uint32 GLOBAL_SOUND_OBTAIN  =  2;
+const uint32 GLOBAL_SOUND_BUMP    =  3;
 //@}
 
 /*!****************************************************************************
@@ -122,17 +122,17 @@ protected:
 	std::string obj_name;
 	//! \brief A numerical value that defines what type of object this is.
 	//! See the Game Object Type constants for a list of the different object types.
-	unsigned char obj_type;
+	uint8 obj_type;
 	//! \brief A bit-mask that determines what charactesr can use the said object.
 	//! See the Game Character Type constants for a list of the different characters.
-	unsigned int usable_by;
+	uint32 usable_by;
 	//! \brief An identification number for each item.
 	//! Two of the same object will share the same ID number.
-	int obj_id;
+	uint32 obj_id;
 	//! The number of objects contained within this instance.
-	int obj_count;
+	uint32 obj_count;
 public:
-	GObject(std::string name, unsigned char type, unsigned int usable, int id, int count);
+	GObject(std::string name, uint8 type, uint32 usable, uint32 id, uint32 count);
 	GObject();
 	~GObject();
 
@@ -141,15 +141,15 @@ public:
 	//! \brief Used for setting and getting the values of the various class members.
 	void SetName(std::string name) { obj_name = name; }
 	std::string GetName() { return obj_name; }
-	void SetType(unsigned char type) { obj_type = type; }
-	unsigned char GetType() { return obj_type; }
-	void SetUsableBy(unsigned int use) { usable_by = use; }
-	unsigned int GetUsableBy() { return usable_by; }
-	void SetID(int id) { obj_id = id; }
-	int GetID() { return obj_id; }
-	void SetCount(int amount) { obj_count = amount; if (obj_count < 0) obj_count = 0; }
-	void IncCount(int amount) { obj_count += amount; }
-	void DecCount(int amount) { obj_count -= amount; if (obj_count < 0) obj_count = 0; }
+	void SetType(uint8 type) { obj_type = type; }
+	uint8 GetType() { return obj_type; }
+	void SetUsableBy(uint32 use) { usable_by = use; }
+	uint32 GetUsableBy() { return usable_by; }
+	void SetID(uint32 id) { obj_id = id; }
+	uint32 GetID() { return obj_id; }
+	void SetCount(uint32 amount) { obj_count = amount; if (obj_count < 0) obj_count = 0; }
+	void IncCount(uint32 amount) { obj_count += amount; }
+	void DecCount(uint32 amount) { obj_count -= amount; if (obj_count < 0) obj_count = 0; }
 	//@}
 };
 
@@ -171,20 +171,20 @@ class GItem : public GObject {
 private:
 	//! \brief A bit-mask stating where the item may be used.
 	//! See the Game Item Usage Type constants for a list of locations.
-	unsigned char use_case;
+	uint8 use_case;
 
 	GItem(const GItem&) {}
 	GItem& operator=(const GItem&) {}
 public:
-	GItem(std::string name, unsigned char use, unsigned int usable, int id, int count);
+	GItem(std::string name, uint8 use, uint32 usable, uint32 id, uint32 count);
 	GItem();
 	~GItem();
 
 	//! \name Public Member Access Functions
 	//@{
 	//! \brief Used for setting and getting the values of the various class members.
-	void SetUseCase(unsigned char use) { use_case = use; }
-	unsigned char GetUseCase() { return use_case; }
+	void SetUseCase(uint8 use) { use_case = use; }
+	uint8 GetUseCase() { return use_case; }
 	//@}
 };
 
@@ -213,7 +213,7 @@ private:
 	GSkillBook(const GSkillBook&) {}
 	GSkillBook& operator=(const GSkillBook&) {}
 public:
-	GSkillBook(std::string name, unsigned char type, unsigned int usable, int id, int count);
+	GSkillBook(std::string name, uint8 type, uint32 usable, uint32 id, uint32 count);
 	GSkillBook();
 	~GSkillBook();
 
@@ -239,7 +239,7 @@ private:
 	GWeapon(const GWeapon&) {}
 	GWeapon& operator=(const GWeapon&) {}
 public:
-	GWeapon(std::string name, unsigned int usable, int id, int count);
+	GWeapon(std::string name, uint32 usable, uint32 id, uint32 count);
 	GWeapon();
 	~GWeapon();
 };
@@ -267,7 +267,7 @@ private:
 	GArmor(const GArmor&) {}
 	GArmor& operator=(const GArmor&) {}
 public:
-	GArmor(std::string name, unsigned char type, unsigned int usable, int id, int count);
+	GArmor(std::string name, uint8 type, uint32 usable, uint32 id, uint32 count);
 	GArmor();
 	~GArmor();
 };
@@ -291,12 +291,12 @@ private:
 	//! The name of the skill, as will be displayed to the player on the screen.
 	std::string skill_name;
 	//! The amount of skill points (SP) that the skill consumes (zero is valid).
-	unsigned int sp_usage;
+	uint32 sp_usage;
 	
 	GSkill(const GSkill&) {}
 	GSkill& operator=(const GSkill&) {}
 public:
-	GSkill(std::string name, unsigned int sp);
+	GSkill(std::string name, uint32 sp);
 	GSkill();
 	~GSkill();
 };
@@ -331,20 +331,20 @@ private:
 	float y_position;
 
 	//! The amount of defense ability this attack point has.
-	unsigned int defense;
+	uint32 defense;
 	//! The amount of evade ability this attack point has.
-	unsigned int evade;
+	uint32 evade;
 	//! A bit-mask of elemental weaknesses of the attack point.
-	unsigned char elemental_weakness;
+	uint8 elemental_weakness;
 	//! A bit-mask of elemental resistances of the attack point.
-	unsigned char elemental_resistance;
+	uint8 elemental_resistance;
 	//! A bit-mask of status weaknesses of the attack point.
-	unsigned char status_weakness;
+	uint8 status_weakness;
 	//! A bit-mask of status resistances of the attack point.
-	unsigned char status_resistance;
+	uint8 status_resistance;
 public:
-	GAttackPoint(float x, float y, int def, int eva, unsigned char elem_weak,
-	             unsigned char elem_res, unsigned char stat_weak, unsigned char stat_res);
+	GAttackPoint(float x, float y, uint32 def, uint32 eva, uint8 elem_weak,
+	             uint8 elem_res, uint8 stat_weak, uint8 stat_res);
 	GAttackPoint();
 	~GAttackPoint();
 	GAttackPoint(const GAttackPoint&) {}
@@ -357,18 +357,18 @@ public:
 	float GetXPosition() { return x_position; }
 	void SetYPosition(float y) { y_position = y; }
 	float GetYPosition() { return y_position; }
-	void SetDefense(unsigned int def) { defense = def; }
-	unsigned int GetDefense() { return defense; }
-	void SetEvade(unsigned int eva) { evade = eva; }
-	unsigned int GetEvade() { return evade; }
-	void SetElementWeakness(unsigned char elem_weak) { elemental_weakness = elem_weak; }
-	unsigned char GetElementWeakness() { return elemental_weakness; }
-	void SetElementResistance(unsigned char elem_res) { elemental_resistance = elem_res; }
-	unsigned char GetElementResistance() { return elemental_resistance; }
-	void SetStatusWeakness(unsigned char stat_weak) { status_weakness = stat_weak; }
-	unsigned char GetStatusWeakness() { return status_weakness; }
-	void SetStatusResistance(unsigned char stat_res) { status_resistance = stat_res; }
-	unsigned char GetStatusResistance() { return status_resistance; }
+	void SetDefense(uint32 def) { defense = def; }
+	uint32 GetDefense() { return defense; }
+	void SetEvade(uint32 eva) { evade = eva; }
+	uint32 GetEvade() { return evade; }
+	void SetElementWeakness(uint8 elem_weak) { elemental_weakness = elem_weak; }
+	uint8 GetElementWeakness() { return elemental_weakness; }
+	void SetElementResistance(uint8 elem_res) { elemental_resistance = elem_res; }
+	uint8 GetElementResistance() { return elemental_resistance; }
+	void SetStatusWeakness(uint8 stat_weak) { status_weakness = stat_weak; }
+	uint8 GetStatusWeakness() { return status_weakness; }
+	void SetStatusResistance(uint8 stat_res) { status_resistance = stat_res; }
+	uint8 GetStatusResistance() { return status_resistance; }
 	//@}
 };
 
@@ -407,11 +407,11 @@ private:
 	//! The base of the character's file name, used to retrieve various data for the enemy.
 	std::string filename;
 	//! An identification number for the enemy type.
-	int enemy_id;
+	uint32 enemy_id;
 	//! The width of the enemy sprite, in number of "virtual battle tiles".
-	int enemy_width;
+	uint32 enemy_width;
 	//! The height of the enemy sprite, in number of "virtual battle tiles".
-	int enemy_height;
+	uint32 enemy_height;
 	//! The skill set that the enemy may choose from to take actions.
 	std::vector<GSkill> enemy_skills;
 	//! The various attack points for the enemy.
@@ -420,42 +420,42 @@ private:
 	std::vector<hoa_video::ImageDescriptor> sprite_frames;
 
 	//! The current number of hit points for the enemy.
-	uint hit_points;
+	uint32 hit_points;
 	//! The maximum number of hit points that the enemy may have.
-	uint max_hit_points;
+	uint32 max_hit_points;
 	//! The current number of skill points for the enemy.
-	uint skill_points;
+	uint32 skill_points;
 	//! The maximum number of skill points that the enemy may have.
-	uint max_skill_points;
+	uint32 max_skill_points;
 	//! The number of experience points the enemy gives the party when defeated.
-	uint experience_points;
+	uint32 experience_points;
 	//! The current experience level of the enemy.
-	uint experience_level;
+	uint32 experience_level;
 	//! The strength index of the enemy.
-	uint strength;
+	uint32 strength;
 	//! The intelligence index of the enemy.
-	uint intelligence;
+	uint32 intelligence;
 	//! The agility index of the enemy.
-	uint agility;
+	uint32 agility;
 
 	//! \name Starting Base Statistics
 	//@{
 	//! \brief These are the base statistics for the enemy when on experience level 1. 
-	uint base_hit_points;
-	uint base_experience_points;
-	uint base_strength;
-	uint base_intelligence;
-	uint base_agility;
+	uint32 base_hit_points;
+	uint32 base_experience_points;
+	uint32 base_strength;
+	uint32 base_intelligence;
+	uint32 base_agility;
 	//@}
 
 	//! \name Growth Amount of Statistics
 	//@{
 	//! \brief The increase in statistic values between experience levels is reflected in these members.
-	uint growth_hit_points;
-	uint growth_experience_points;
-	uint growth_strength;
-	uint growth_intelligence;
-	uint growth_agility;
+	uint32 growth_hit_points;
+	uint32 growth_experience_points;
+	uint32 growth_strength;
+	uint32 growth_intelligence;
+	uint32 growth_agility;
 	//@}
 
 	//! \name Growth Rate of Statistics
@@ -489,27 +489,27 @@ public:
 	 *  battle, so the player doesn't keep fighting the same old enemy over and over, like the
 	 *  "level 5 scorpion with 60 HP".
 	 */
-	void LevelSimulator(uint lvl);
+	void LevelSimulator(uint32 lvl);
 
 	//! \name Public Member Access Functions
 	//@{
 	//! \brief Used for setting and getting the values of the various class members.
-	void SetHP(unsigned int hp) { hit_points = hp; }
-	unsigned int GetHP() { return hit_points; }
-	void SetMaxHP(unsigned int max_hp) { max_hit_points = max_hp; }
-	unsigned int GetMaxHP() { return max_hit_points; }
-	void SetSP(unsigned int sp) { skill_points = sp; }
-	unsigned int GetSP() { return skill_points; }
-	void SetXP(unsigned int xp) { experience_points = xp; }
-	unsigned int GetXP() { return experience_points; }
-	void SetXPLevel(unsigned int xp_lvl) { experience_level = xp_lvl; }
-	unsigned int GetXPLevel() { return experience_level; }
-	void SetStrength(unsigned int str) { strength = str; }
-	unsigned int GetStrength() { return strength; }
-	void SetIntelligence(unsigned int intel) { intelligence = intel; }
-	unsigned int GetIntelligence() { return intelligence; }
-	void SetAgility(unsigned int agi) { agility = agi; }
-	unsigned int GetAgility() { return agility; }
+	void SetHP(uint32 hp) { hit_points = hp; }
+	uint32 GetHP() { return hit_points; }
+	void SetMaxHP(uint32 max_hp) { max_hit_points = max_hp; }
+	uint32 GetMaxHP() { return max_hit_points; }
+	void SetSP(uint32 sp) { skill_points = sp; }
+	uint32 GetSP() { return skill_points; }
+	void SetXP(uint32 xp) { experience_points = xp; }
+	uint32 GetXP() { return experience_points; }
+	void SetXPLevel(uint32 xp_lvl) { experience_level = xp_lvl; }
+	uint32 GetXPLevel() { return experience_level; }
+	void SetStrength(uint32 str) { strength = str; }
+	uint32 GetStrength() { return strength; }
+	void SetIntelligence(uint32 intel) { intelligence = intel; }
+	uint32 GetIntelligence() { return intelligence; }
+	void SetAgility(uint32 agi) { agility = agi; }
+	uint32 GetAgility() { return agility; }
 	//@}
 };
 
@@ -532,7 +532,7 @@ private:
 	std::string filename;
 	//! \brief An identifier for the character.
 	//! See the Game Character Type constants.
-	uint char_id;
+	uint32 char_id;
 
 	//! The weapon that the character currently has equipped.
 	GWeapon *eq_weapon;
@@ -558,27 +558,27 @@ private:
 	std::vector<hoa_video::ImageDescriptor> battle_frames;
 
 	//! The current number of hit points of the character.
-	unsigned int hit_points;
+	uint32 hit_points;
 	//! The maximum number of hit points the character may have.
-	unsigned int max_hit_points;
+	uint32 max_hit_points;
 	//! The current number of skill points of the character.
-	unsigned int skill_points;
+	uint32 skill_points;
 	//! The maximum number of skill points the character may have.
-	unsigned int max_skill_points;
+	uint32 max_skill_points;
 	//! The current number of experience points of the character.
-	unsigned int experience_points;
+	uint32 experience_points;
 	//! The current experience level of the character.
-	unsigned int experience_level;
+	uint32 experience_level;
 	//! The current number of experience points needed to reach the next experience level.
-	unsigned int experience_next_level;
+	uint32 experience_next_level;
 	//! The character's strength index.
-	unsigned int strength;
+	uint32 strength;
 	//! The character's intelligence index.
-	unsigned int intelligence;
+	uint32 intelligence;
 	//! The character's agility index.
-	unsigned int agility;
+	uint32 agility;
 public:
-	GCharacter(std::string na, std::string fn, uint id);
+	GCharacter(std::string na, std::string fn, uint32 id);
 	~GCharacter();
 
 	//! \name Weapon and Armor Equip Functions
@@ -603,27 +603,27 @@ public:
 	std::string GetName() { return name; }
 	void SetFilename(std::string fn) { filename = fn; }
 	std::string GetFilename() { return filename; }
-	void SetID(uint id) { char_id = id; }
-	uint GetID() { return char_id; }
+	void SetID(uint32 id) { char_id = id; }
+	uint32 GetID() { return char_id; }
 	std::vector<hoa_video::ImageDescriptor>* GetMapFrames() { return &map_frames; }
-	void SetHP(unsigned int hp) { hit_points = hp; }
-	unsigned int GetHP() { return hit_points; }
-	void SetMaxHP(unsigned int max_hp) { max_hit_points = max_hp; }
-	unsigned int GetMaxHP() { return max_hit_points; }
-	void SetSP(unsigned int sp) { skill_points = sp; }
-	unsigned int GetSP() { return skill_points; }
-	void SetXP(unsigned int xp) { experience_points = xp; }
-	unsigned int GetXP() { return experience_points; }
-	void SetXPLevel(unsigned int xp_lvl) { experience_level = xp_lvl; }
-	unsigned int GetXPLevel() { return experience_level; }
-	void SetXPNextLevel(unsigned int xp_next) { experience_next_level = xp_next; }
-	unsigned int GetXPNextLevel() { return experience_next_level; }
-	void SetStrength(unsigned int str) { strength = str; }
-	unsigned int GetStrength() { return strength; }
-	void SetIntelligence(unsigned int intel) { intelligence = intel; }
-	unsigned int GetIntelligence() { return intelligence; }
-	void SetAgility(unsigned int agi) { agility = agi; }
-	unsigned int GetAgility() { return agility; }
+	void SetHP(uint32 hp) { hit_points = hp; }
+	uint32 GetHP() { return hit_points; }
+	void SetMaxHP(uint32 max_hp) { max_hit_points = max_hp; }
+	uint32 GetMaxHP() { return max_hit_points; }
+	void SetSP(uint32 sp) { skill_points = sp; }
+	uint32 GetSP() { return skill_points; }
+	void SetXP(uint32 xp) { experience_points = xp; }
+	uint32 GetXP() { return experience_points; }
+	void SetXPLevel(uint32 xp_lvl) { experience_level = xp_lvl; }
+	uint32 GetXPLevel() { return experience_level; }
+	void SetXPNextLevel(uint32 xp_next) { experience_next_level = xp_next; }
+	uint32 GetXPNextLevel() { return experience_next_level; }
+	void SetStrength(uint32 str) { strength = str; }
+	uint32 GetStrength() { return strength; }
+	void SetIntelligence(uint32 intel) { intelligence = intel; }
+	uint32 GetIntelligence() { return intelligence; }
+	void SetAgility(uint32 agi) { agility = agi; }
+	uint32 GetAgility() { return agility; }
 	//@}
 };
 
@@ -640,11 +640,11 @@ class GTime {
 private:
 	friend class GameInstance;
 	//! The number of seconds expired.
-	unsigned char seconds;
+	uint8 seconds;
 	//! The number of minutes expired.
-	unsigned char minutes;
+	uint8 minutes;
 	//! The number of hours expired.
-	unsigned char hours;
+	uint8 hours;
 public:
 	//! Updates the elapsed time by one second.
 	void UpdateTime() {
@@ -660,7 +660,7 @@ public:
 	//! \param h The amount of hours to set.
 	//! \param m The amount of minutes to set.
 	//! \param s The amount of seconds to set.
-	void SetTime(unsigned char h, unsigned char m, unsigned char s) {
+	void SetTime(uint8 h, uint8 m, uint8 s) {
 		hours = h;
 		minutes = m;
 		seconds = s;
@@ -693,7 +693,7 @@ private:
 	//! The inventory of the party.
 	std::vector<GObject> inventory;
 	//! The amount of financial resources the party currently has.
-	unsigned int money;
+	uint32 money;
 
 // 	hoa_video::GameVideo *VideoManager;
 
@@ -706,7 +706,7 @@ public:
 	//! Returns a pointer to a character currently in the party.
 	//! \param id The ID number of the character to retrieve.
 	//! \return A pointer to the character, or NULL if the character was not found.
-	GCharacter* GetCharacter(uint id);
+	GCharacter* GetCharacter(uint32 id);
 }; // class GameInstance
 
 

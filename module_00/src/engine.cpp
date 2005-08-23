@@ -62,7 +62,7 @@ GameMode::GameMode() {
 
 
 // The constructor automatically sets up all the singleton pointers
-GameMode::GameMode(unsigned char mt) {
+GameMode::GameMode(uint8 mt) {
 	if (ENGINE_DEBUG) cout << "ENGINE: GameMode constructor invoked" << endl;
 	mode_type = mt;
 	AudioManager = GameAudio::_GetReference();
@@ -78,6 +78,7 @@ GameMode::GameMode(unsigned char mt) {
 
 GameMode::~GameMode() {
 	if (ENGINE_DEBUG) cout << "ENGINE: GameMode destructor invoked" << endl;
+	// delete coordinate system pointer here
 }
 
 
@@ -156,7 +157,7 @@ inline void GameModeManager::Push(GameMode* gm) {
 
 
 // Returns the mode type of the game mode on the top of the stack
-inline unsigned char GameModeManager::GetGameType() {
+inline uint8 GameModeManager::GetGameType() {
 	if (game_stack.empty())
 		return ENGINE_DUMMY_MODE;
 	else
@@ -175,7 +176,7 @@ GameMode* GameModeManager::GetTop() {
 
 
 // Checks if any game modes need to be pushed or popped off the stack, then updates the top stack mode.
-void GameModeManager::Update(Uint32 time_elapsed) {
+void GameModeManager::Update(uint32 time_elapsed) {
 	while (pop_count != 0) {
 		if (game_stack.empty()) {
 			if (ENGINE_DEBUG) {
@@ -208,7 +209,7 @@ void GameModeManager::PrintStack() {
 	}
 
 	cout << "***top of stack***" << endl;
-	for (int i = (int) game_stack.size() - 1; i >= 0; i--)
+	for (int32 i = static_cast<int32>(game_stack.size()) - 1; i >= 0; i--)
 		cout << " index: " << i << " type: " << game_stack[i]->mode_type << endl;
 	cout << "***bottom of stack***" << endl;
 }
@@ -242,8 +243,8 @@ GameSettings::~GameSettings() {
 
 
 // Returns the difference between the time now and last_update (in ms) and calculates frame rate
-Uint32 GameSettings::UpdateTime() {
-	Uint32 tmp;
+uint32 GameSettings::UpdateTime() {
+	uint32 tmp;
 	tmp = last_update;
 	last_update = SDL_GetTicks();
 	tmp = last_update - tmp;      // tmp = time now minus time this function was last called

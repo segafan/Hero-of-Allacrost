@@ -96,7 +96,7 @@ BattleMode::~BattleMode() {
 }
 
 
-void BattleMode::Update(Uint32 time_elapsed) {
+void BattleMode::Update(uint32 time_elapsed) {
 	// This function is the top level function that updates the status of the game. You'll likely write
 	// several sub-functions that this function calls to keep the size of the function a sane amount.
 	// For example, UpdateCharacters() and UpdateEnemies(). Make these sub-functions private, because

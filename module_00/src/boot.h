@@ -40,22 +40,22 @@ namespace private_boot {
 //! \name Main menu selections
 //@{
 //! \brief Constants used to cycle through the primary boot menu
-const int NEW_MENU     = 0;
-const int LOAD_MENU    = 1;
-const int OPTIONS_MENU = 2;
-const int CREDITS_MENU = 3;
-const int HIDE_MENU    = 4;
-const int QUIT_MENU    = 5;
+const uint32 NEW_MENU     = 0;
+const uint32 LOAD_MENU    = 1;
+const uint32 OPTIONS_MENU = 2;
+const uint32 CREDITS_MENU = 3;
+const uint32 HIDE_MENU    = 4;
+const uint32 QUIT_MENU    = 5;
 //@}
 
 //! \name Options menu selections
 //@{
 //! \brief Constants used to cycle through the options boot menu
-const int VIDEO_OP     = 0;
-const int AUDIO_OP     = 1;
-const int LANGUAGE_OP  = 2;
-const int KEYS_OP      = 3;
-const int JOYSTICK_OP  = 4;
+const uint32 VIDEO_OP     = 0;
+const uint32 AUDIO_OP     = 1;
+const uint32 LANGUAGE_OP  = 2;
+const uint32 KEYS_OP      = 3;
+const uint32 JOYSTICK_OP  = 4;
 //@}
 
 } // namespace private_boot
@@ -77,7 +77,7 @@ private:
 	//! If true, no menus will be drawn (so the player can get a nice good look at the background image).
 	bool menu_hidden;
 	//! A vector storing various menu pointers in a stack-like structure.
-	std::vector<int> vmenu_index;
+	std::vector<uint32> vmenu_index;
 	//! Music to be used at the boot screen.
 	std::vector<hoa_audio::MusicDescriptor> boot_music;
 	//! Sounds that will be used at the boot screen.
@@ -150,7 +150,7 @@ public:
 	~BootMode();
 
 	//! Wrapper function that calls different update functions depending on the menu state.
-	void Update(Uint32 time_elapsed);
+	void Update(uint32 time_elapsed);
 	//! Wrapper function that calls different draw functions depending on the menu state.
 	void Draw();
 };

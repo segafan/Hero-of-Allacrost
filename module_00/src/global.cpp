@@ -34,7 +34,7 @@ SINGLETON_INITIALIZE(GameInstance);
 // ******************************* GObject ************************************
 // ****************************************************************************
 
-GObject::GObject(string name, unsigned char type, unsigned int usable, int id, int count) {
+GObject::GObject(string name, uint8 type, uint32 usable, uint32 id, uint32 count) {
 	obj_name = name;
 	obj_type = type;
 	usable_by = usable;
@@ -48,7 +48,7 @@ GObject::GObject() {
 	obj_name = "unknown";
 	obj_type = GLOBAL_DUMMY_OBJ;
 	usable_by = GLOBAL_NO_CHARACTERS;
-	obj_id = -1;
+	obj_id = 0;
 	obj_count = 0;
 }
 
@@ -62,7 +62,7 @@ GObject::~GObject() {
 // ******************************** GItem *************************************
 // ****************************************************************************
 
-GItem::GItem(string name, unsigned char use, unsigned int usable, int id, int count) :
+GItem::GItem(string name, uint8 use, uint32 usable, uint32 id, uint32 count) :
 	GObject(name, GLOBAL_ITEM, usable, id, count) {
 	use_case = use;
 }
@@ -83,7 +83,7 @@ GItem::~GItem() {}
 // ****************************************************************************
 
 
-GSkillBook::GSkillBook(string name, unsigned char use, unsigned int usable, int id, int count) :
+GSkillBook::GSkillBook(string name, uint8 use, uint32 usable, uint32 id, uint32 count) :
 	GObject(name, GLOBAL_SKILL_BOOK, usable, id, count) {
 }
 
@@ -102,7 +102,7 @@ GSkillBook::~GSkillBook() {}
 // ******************************* GWeapon ************************************
 // ****************************************************************************
 
-GWeapon::GWeapon(string name, unsigned int usable, int id, int count) :
+GWeapon::GWeapon(string name, uint32 usable, uint32 id, uint32 count) :
 	GObject(name, GLOBAL_WEAPON, usable, id, count) {
 }
 
@@ -121,7 +121,7 @@ GWeapon::~GWeapon() {}
 // ******************************** GArmor ************************************
 // ****************************************************************************
 
-GArmor::GArmor(string name, unsigned char type, unsigned int usable, int id, int count) :
+GArmor::GArmor(string name, uint8 type, uint32 usable, uint32 id, uint32 count) :
 	GObject(name, type, usable, id, count) {
 }
 
@@ -139,7 +139,7 @@ GArmor::~GArmor() {}
 // ******************************** GSkill ************************************
 // ****************************************************************************
 
-GSkill::GSkill(string name, unsigned int sp) {
+GSkill::GSkill(string name, uint32 sp) {
 	skill_name = name;
 	sp_usage = sp;
 }
@@ -159,8 +159,8 @@ GSkill::~GSkill() {}
 // ****************************** GAttackPoint ********************************
 // ****************************************************************************
 
-GAttackPoint::GAttackPoint(float x, float y, int def, int eva, unsigned char elem_weak,
-                           unsigned char elem_res, unsigned char stat_weak, unsigned char stat_res) {
+GAttackPoint::GAttackPoint(float x, float y, uint32 def, uint32 eva, uint8 elem_weak,
+                           uint8 elem_res, uint8 stat_weak, uint8 stat_res) {
 	x_position = x;
 	y_position = y;
 	defense = def;
@@ -197,7 +197,7 @@ GEnemy::GEnemy() { }
 GEnemy::~GEnemy() { }
 
 // Simulate the leveling up of experience for the enemy from its base stats.
-void GEnemy::LevelSimulator(uint lvl) {
+void GEnemy::LevelSimulator(uint32 lvl) {
 	float rate_inc = 0.0;
 
 	experience_level = lvl;
@@ -207,7 +207,7 @@ void GEnemy::LevelSimulator(uint lvl) {
 	intelligence = base_intelligence;
 	agility = base_agility;
 
-	for (uint i = 1; i <= experience_level; i++) {
+	for (uint32 i = 1; i <= experience_level; i++) {
 		rate_inc = 1.0f - RandomUnit();
 		experience_points += growth_experience_points;
 		if (rate_hit_points <= rate_inc) {
@@ -232,7 +232,7 @@ void GEnemy::LevelSimulator(uint lvl) {
 // ****************************************************************************
 
 //
-GCharacter::GCharacter(std::string na, std::string fn, uint id) {
+GCharacter::GCharacter(std::string na, std::string fn, uint32 id) {
 	if (GLOBAL_DEBUG) cout << "GLOBAL: GCharacter constructor invoked" << endl;
 	name = na;
 	filename = fn;
@@ -246,10 +246,10 @@ GCharacter::GCharacter(std::string na, std::string fn, uint id) {
 GCharacter::~GCharacter() {
 	if (GLOBAL_DEBUG) cout << "GLOBAL: GCharacter destructor invoked" << endl;
 	GameVideo *VideoManager = GameVideo::_GetReference();
-	for (uint i = 0; i < map_frames.size(); i++) {
+	for (uint32 i = 0; i < map_frames.size(); i++) {
 		VideoManager->DeleteImage(map_frames[i]);
 	}
-	for (uint i = 0; i < battle_frames.size(); i++) {
+	for (uint32 i = 0; i < battle_frames.size(); i++) {
 		VideoManager->DeleteImage(battle_frames[i]);
 	}
 }
@@ -316,7 +316,7 @@ void GCharacter::LoadFrames() {
 	map_frames.push_back(imd);
 
 	VideoManager->BeginImageLoadBatch();
-	for (uint i = 0; i < map_frames.size(); i++) {
+	for (uint32 i = 0; i < map_frames.size(); i++) {
 		VideoManager->LoadImage(map_frames[i]);
 	}
 	VideoManager->EndImageLoadBatch();
@@ -333,7 +333,7 @@ GameInstance::GameInstance() {
 
 GameInstance::~GameInstance() {
 	if (GLOBAL_DEBUG) cout << "GLOBAL: GameInstance destructor invoked" << endl;
-	for (uint i = 0; i < characters.size(); i++) {
+	for (uint32 i = 0; i < characters.size(); i++) {
 		delete characters[i];
 	}
 }
@@ -343,8 +343,8 @@ void GameInstance::AddCharacter(GCharacter *ch) {
 	characters.push_back(ch);
 }
 
-GCharacter* GameInstance::GetCharacter(uint id) {
-	for (uint i = 0; i < characters.size(); i++) {
+GCharacter* GameInstance::GetCharacter(uint32 id) {
+	for (uint32 i = 0; i < characters.size(); i++) {
 		if (characters[i]->GetID() == id) {
 			return characters[i];
 		}

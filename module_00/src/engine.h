@@ -10,7 +10,7 @@
 /*!****************************************************************************
  * \file    engine.h
  * \author  Tyler Olsen, roots@allacrost.org
- * \date    Last Updated: August 12th, 2005
+ * \date    Last Updated: August 23rd, 2005
  * \brief   Header file for the core game engine.
  *
  * This code contains three core components of the game engine, namely the game
@@ -36,33 +36,33 @@ extern bool ENGINE_DEBUG;
 //! \name Pause/Quit Audio Constants
 //@{
 //! \brief These are constants used for changing the audio during PauseMode and QuitMode
-const unsigned char ENGINE_PAUSE_AUDIO = 0;
-const unsigned char ENGINE_ZERO_VOLUME = 1;
-const unsigned char ENGINE_HALF_VOLUME = 2;
-const unsigned char ENGINE_SAME_VOLUME = 3;
+const uint8 ENGINE_PAUSE_AUDIO = 0;
+const uint8 ENGINE_ZERO_VOLUME = 1;
+const uint8 ENGINE_HALF_VOLUME = 2;
+const uint8 ENGINE_SAME_VOLUME = 3;
 //@}
 
 //! \name Game States/Modes
 //@{
 //! \brief Different modes of operation that the game can be in.
-const unsigned char ENGINE_DUMMY_MODE  = 0;
-const unsigned char ENGINE_BOOT_MODE   = 1;
-const unsigned char ENGINE_MAP_MODE    = 2;
-const unsigned char ENGINE_BATTLE_MODE = 3;
-const unsigned char ENGINE_MENU_MODE   = 4;
-const unsigned char ENGINE_SHOP_MODE   = 5;
-const unsigned char ENGINE_PAUSE_MODE  = 6;
-const unsigned char ENGINE_QUIT_MODE   = 7;
-const unsigned char ENGINE_SCENE_MODE  = 8;
-const unsigned char ENGINE_WORLD_MODE  = 9;
+const uint8 ENGINE_DUMMY_MODE  = 0;
+const uint8 ENGINE_BOOT_MODE   = 1;
+const uint8 ENGINE_MAP_MODE    = 2;
+const uint8 ENGINE_BATTLE_MODE = 3;
+const uint8 ENGINE_MENU_MODE   = 4;
+const uint8 ENGINE_SHOP_MODE   = 5;
+const uint8 ENGINE_PAUSE_MODE  = 6;
+const uint8 ENGINE_QUIT_MODE   = 7;
+const uint8 ENGINE_SCENE_MODE  = 8;
+const uint8 ENGINE_WORLD_MODE  = 9;
 //@}
 
 //! \name Game Languages
 //@{
 //! \brief Languages that the game can be run in.
-const unsigned char ENGINE_ENGLISH = 0;
-const unsigned char ENGINE_SPANISH = 1;
-const unsigned char ENGINE_GERMAN  = 2;
+const uint8 ENGINE_ENGLISH = 0;
+const uint8 ENGINE_SPANISH = 1;
+const uint8 ENGINE_GERMAN  = 2;
 //@}
 
 /*!****************************************************************************
@@ -75,7 +75,12 @@ const unsigned char ENGINE_GERMAN  = 2;
  *
  *  \note 1) Both the copy constructor and copy assignment operator are private.
  *
- *  \note 2) <b>THIS IS VERY IMPORTANT.</b> Never, under any circumstances should
+ *  \note 2) Keep in mind that just because you set the coordinate_system member,
+ *  the actual coordinate system won't change until you call 
+ *  VideoManager->SetCoordSys(coordinate_system). Remember to always do this in
+ *  the dervied class destructor.
+ *
+ *  \note 3) <b>THIS IS VERY IMPORTANT.</b> Never, under any circumstances should
  *  you ever invoke the delete function on a pointer to this object or its related
  *  subclasses. The reason is that all of the memory reference handling is done
  *  by the GameModeManager class. If you attempt to ignore this warning you \b will
@@ -84,8 +89,9 @@ const unsigned char ENGINE_GERMAN  = 2;
 class GameMode {
 protected:
 	//! Indicates what 'mode' this object is in (what type of inherited class).
-	unsigned char mode_type;
-
+	uint8 mode_type;
+	// The coordinate system that the game mode uses.
+	// CoordSys coordinate_system;
 	//! \name Singleton class pointers
 	//@{
 	/*!
@@ -118,14 +124,14 @@ public:
 	 *  \brief In addition to initializing the singleton pointers, this sets the proper \c mode_type.
 	 *  \param mt The \c mode_type to set this object to.
 	 */
-	GameMode(unsigned char mt);
+	GameMode(uint8 mt);
 	//! Virtual destructor, since the inherited class holds all the important data.
 	virtual ~GameMode();
 	/*!
 	 *  \brief Purely virtual function for updating the status in this game mode
 	 *  \param time_elapsed The amount of milliseconds that have elapsed since the last time this function was called.
 	 */
-	virtual void Update(Uint32 time_elapsed) = 0;
+	virtual void Update(uint32 time_elapsed) = 0;
 	//! Purely virtual function for drawing the next screen frame.
 	virtual void Draw() = 0;
 }; // class GameMode
@@ -166,7 +172,7 @@ private:
 	//! A vector of game modes to push to the stack on the next call to GameModeManager#Update().
 	std::vector<GameMode*> push_stack;
 	//! The number of game modes to pop from the back of the stack on the next call to GameModeManager#Update().
-	Uint32 pop_count;
+	uint32 pop_count;
 public:
 	SINGLETON_METHODS(GameModeManager);
 	/*!
@@ -200,7 +206,7 @@ public:
 	 *  \brief Gets the type of the currently active game mode.
 	 *  \return The value of \c mode_type of the GameMode object on the top of the stack.
 	 */
-	unsigned char GetGameType();
+	uint8 GetGameType();
 	/*!
 	 *  \brief Gets a pointer to the top game stack object.
 	 *  \return A pointer to the GameMode object on the top of the stack.
@@ -210,7 +216,7 @@ public:
 	 *  \brief Checks if the game stack needs modes pushed or popped, then calls Update on the top game mode stack.
 	 *  \param time_elapsed The amount of time that has passed since the last call to this function.
 	 */
-	void Update(Uint32 time_elapsed);
+	void Update(uint32 time_elapsed);
 	/*!
 	 *  \brief Prints the contents of the \c game_stack to standard output.
 	 *  \note This function is for debugging purposes \b only! You normally should never call it.
@@ -240,23 +246,23 @@ class GameSettings {
 private:
 	SINGLETON_DECLARE(GameSettings);
 	//! The last time the game was updated, in milliseconds.
-	Uint32 last_update;
+	uint32 last_update;
 	//! Retains the number of milliseconds that have expired for frame rate calculation.
-	Uint32 fps_timer;
+	uint32 fps_timer;
 	//! Keeps count of the number of frames that have been drawn.
-	int fps_counter;
+	uint32 fps_counter;
 	//! The number of frames drawn per second. Updated approximately every one second.
 	float fps_rate;
 	//! When this is set to false, the program will exit (maturally).
 	bool not_done;
 	//! The language in which to render text.
-	unsigned char language;
+	uint8 language;
 	//! Retains the current screen width and height.
 	SDL_Rect screen_info;
 	//! True if the game is running in full screen mode.
 	bool full_screen;
 	//! Used by PauseMode and QuitMode for temporarily changing the volume on pause/quit events.
-	unsigned char pause_volume_action;
+	uint8 pause_volume_action;
 
 
 public:
@@ -265,10 +271,10 @@ public:
 	// NOTE: I think I'll remove these two members since you can call GetMusic/SoundVolume from the GameAudio class
 	//! \brief The music volume level
 	//! \note  Valid range is [0, 128]
-	int music_vol;
+	int32 music_vol;
 	//! \brief The sound volume level
 	//! \note  Valid range is [0, 128]
-	int sound_vol;
+	int32 sound_vol;
 
 	/*!
 	 *  \brief  Sets the \c last_update member to the current time.
@@ -278,7 +284,7 @@ public:
 	 *  function returns at least one, but I'm not sure there exists a computer fast enough
 	 *  that we have to worry about it.
 	 */
-	Uint32 UpdateTime();
+	uint32 UpdateTime();
 	/*!
 	 *  \brief Initializes the \c last_update member to the current time (in milliseconds).
 	 *  \note <b>DO NOT</b> call SetTimer() anywhere in your code. It should only be called once
@@ -317,12 +323,12 @@ public:
 	 *  \brief  Used to determine what language the game is running in.
 	 *  \return The language that the game is running in.
 	 */
-	unsigned char GetLanguage() { return language; }
+	uint8 GetLanguage() { return language; }
 	/*!
 	 *  \brief  Sets the language that the game should use.
 	 *  \return The numerical value representing the language the game is running in.
 	 */
-	void SetLanguage(unsigned char lang) { language = lang; }
+	void SetLanguage(uint8 lang) { language = lang; }
 	/*!
 	 *  \brief  Determines whether the user is done with the game.
 	 *  \return False if the user is done and would like to exit the game.
@@ -339,12 +345,12 @@ public:
 	 *
 	 *  This action takes place whenever the active game mode class is PauseMode or QuitMode.
 	 */
-	void SetPauseVolumeAction(unsigned char action) { pause_volume_action = action; }
+	void SetPauseVolumeAction(uint8 action) { pause_volume_action = action; }
 	/*!
 	 *  \brief  Used to find out what the game is set to do on a pause event.
 	 *  \return The value of the action that the game takes on a pause event.
 	 */
-	unsigned char GetPauseVolumeAction() { return pause_volume_action; }
+	uint8 GetPauseVolumeAction() { return pause_volume_action; }
 }; // class GameSettings
 
 /*!****************************************************************************

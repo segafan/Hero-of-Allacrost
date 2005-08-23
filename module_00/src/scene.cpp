@@ -55,7 +55,7 @@ SceneMode::~SceneMode() {
 
 
 // Restores volume or unpauses audio, then pops itself from the game stack
-void SceneMode::Update(Uint32 time_elapsed) {
+void SceneMode::Update(uint32 time_elapsed) {
 	scene_timer += time_elapsed;
 
 	// User must wait 0.75 seconds before they can exit the scene

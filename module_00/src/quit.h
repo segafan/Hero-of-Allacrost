@@ -43,9 +43,9 @@ namespace private_quit {
 //! \name Quit Option Constants
 //@{
 //! \brief Constants for different quit options that the user can select.
-const int QUIT_GAME        = 0;
-const int QUIT_TO_BOOTMENU = 1;
-const int QUIT_CANCEL      = 2;
+const uint8 QUIT_GAME        = 0;
+const uint8 QUIT_TO_BOOTMENU = 1;
+const uint8 QUIT_CANCEL      = 2;
 //@}
 
 } // namespace private_quit
@@ -80,13 +80,13 @@ const int QUIT_CANCEL      = 2;
 class QuitMode : public hoa_engine::GameMode {
 private:
 	//! The currently selected quit option
-	int quit_type;
+	uint8 quit_type;
 public:
   QuitMode();
   ~QuitMode();
 
 	//! Updates the game state by the amount of time that has elapsed
-  void Update(Uint32 time_elapsed);
+  void Update(uint32 time_elapsed);
 	//! Draws the next frame to be displayed on the screen
   void Draw();
 }; // class QuitMode

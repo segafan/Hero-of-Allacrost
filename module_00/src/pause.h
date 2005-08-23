@@ -64,7 +64,7 @@ public:
 	~PauseMode();
 	
 	//! Updates the game state by the amount of time that has elapsed
-	void Update(Uint32 time_elapsed);
+	void Update(uint32 time_elapsed);
 	//! Draws the next frame to be displayed on the screen
 	void Draw();
 };
