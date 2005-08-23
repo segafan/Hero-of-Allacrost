@@ -10,12 +10,11 @@
 /*!****************************************************************************
  * \file    audio.cpp
  * \author  Tyler Olsen, roots@allacrost.org
- * \date    Last Updated: August 11th, 2005
+ * \date    Last Updated: August 23rd, 2005
  * \brief   Source file for audio engine interface.
  *****************************************************************************/
 
 #include "utils.h"
-#include <iostream>
 #include "audio.h"
 
 using namespace std;
@@ -34,12 +33,12 @@ GameAudio::GameAudio() {
 	music_id = 1;
 	sound_id = 1;
 
-	for (int i = 0; i < MAX_CACHED_MUSIC; i++) {
+	for (uint32 i = 0; i < MAX_CACHED_MUSIC; i++) {
 		music_cache[i].id = 0;
 		music_cache[i].music = NULL;
 		music_cache[i].time = 0;
 	}
-	for (int i = 0; i < MAX_CACHED_SOUNDS; i++) {
+	for (uint32 i = 0; i < MAX_CACHED_SOUNDS; i++) {
 		sound_cache[i].id = 0;
 		sound_cache[i].sound = NULL;
 		sound_cache[i].time = 0;
@@ -72,11 +71,11 @@ GameAudio::~GameAudio() {
 	Mix_HaltChannel(ALL_CHANNELS);
 
 	// Close all open music and sounds
-	for (int i = 0; i < MAX_CACHED_MUSIC; i++) {
+	for (uint32 i = 0; i < MAX_CACHED_MUSIC; i++) {
 		if (music_cache[i].music != NULL)
 		 FreeMusic(i);
 	}
-	for (int i = 0; i < MAX_CACHED_SOUNDS; i++) {
+	for (uint32 i = 0; i < MAX_CACHED_SOUNDS; i++) {
 		if (sound_cache[i].sound != NULL)
 		 FreeSound(i);
 	}
@@ -87,11 +86,11 @@ GameAudio::~GameAudio() {
 
 
 // Returns a free music cache index. If there are no free indeces, uses LRU replacement.
-int GameAudio::AllocateMusicIndex() {
-	Uint32 lru; // represents the time of the oldest item
-	int index;	// represents the array index of the oldest item
+uint32 GameAudio::AllocateMusicIndex() {
+	uint32 lru; // represents the time of the oldest item
+	uint32 index;	// represents the array index of the oldest item
 
-	for (int i = 0; i < MAX_CACHED_MUSIC; i++) { // Traverse thru the music cache looking for free indeces
+	for (uint32 i = 0; i < MAX_CACHED_MUSIC; i++) { // Traverse thru the music cache looking for free indeces
 		if (music_cache[i].id == 0) // Found a free location, so return its index
 			return i;
 	}
@@ -106,7 +105,7 @@ int GameAudio::AllocateMusicIndex() {
 		index = 1;
 	}
 
-	for (int i = 1; i < MAX_CACHED_MUSIC; i++) { // Go thru the music cache trying to find older items
+	for (uint32 i = 1; i < MAX_CACHED_MUSIC; i++) { // Go thru the music cache trying to find older items
 		if (music_cache[i].time < lru && i != current_track) { // Found a non-active item with an older time
 			lru = music_cache[i].time; // Replace lru and index with the attributes of the older element
 			index = i;
@@ -119,11 +118,11 @@ int GameAudio::AllocateMusicIndex() {
 
 
 // Returns the cache index that stores the same id as the argument. Returns -1 if not found.
-int GameAudio::FindMusicIndex(unsigned int mus_id) {
+int32 GameAudio::FindMusicIndex(uint32 mus_id) {
 	if (mus_id == 0) // This music hasn't been loaded, so its clearly not in the cache
 		return -1;
 
-	for (int i = 0; i < MAX_CACHED_MUSIC; i++) { // Traverse thru the music cache
+	for (uint32 i = 0; i < MAX_CACHED_MUSIC; i++) { // Traverse thru the music cache
 		if (music_cache[i].id == mus_id) // Found the item, return its index!
 			return i;
 	}
@@ -133,7 +132,7 @@ int GameAudio::FindMusicIndex(unsigned int mus_id) {
 
 
 // Frees the cache location at 'index'
-void GameAudio::FreeMusic(int index) {
+void GameAudio::FreeMusic(uint32 index) {
 	// Make sure that our index is within the array bounds
 	if (index >= 0 && index < MAX_CACHED_MUSIC) {
 		if (music_cache[index].music != NULL)	// Only free the memory pointed to by 'music' if it isn't NULL
@@ -147,11 +146,11 @@ void GameAudio::FreeMusic(int index) {
 
 
 // Returns a free sound cache index. If there are no free indeces, uses LRU replacement.
-int GameAudio::AllocateSoundIndex() {
-	Uint32 lru;		// represents the time of the oldest item
-	int index = 0; // represents the array index of the oldest item
+uint32 GameAudio::AllocateSoundIndex() {
+	uint32 lru;		// represents the time of the oldest item
+	uint32 index = 0; // represents the array index of the oldest item
 
-	for (int i = 0; i < MAX_CACHED_SOUNDS; i++) { // Traverse thru the music cache looking for free indeces
+	for (uint32 i = 0; i < MAX_CACHED_SOUNDS; i++) { // Traverse thru the music cache looking for free indeces
 		if (sound_cache[i].sound == NULL) // Found a free location, so return its index
 			return i;
 	}
@@ -159,7 +158,7 @@ int GameAudio::AllocateSoundIndex() {
 	// No free sound cache locations were found, so use LRU replacement
 	lru = sound_cache[0].time;	// Set time equal to the zero'th element's time (remember index = 0)
 
-	for (int i = 1; i < MAX_CACHED_SOUNDS; i++) { // Go thru the sound cache trying to find older itmes
+	for (uint32 i = 1; i < MAX_CACHED_SOUNDS; i++) { // Go thru the sound cache trying to find older itmes
 		if (sound_cache[i].time < lru) { // Found an item with an older time, so replace 'lru' and 'index'
 			lru = sound_cache[i].time; // Replace lru and index with the new least recently used element.
 			index = i;
@@ -172,11 +171,11 @@ int GameAudio::AllocateSoundIndex() {
 
 
 // Returns the cache index that stores the same id as the argument. Returns -1 if not found.
-int GameAudio::FindSoundIndex(unsigned int snd_id) {
+int32 GameAudio::FindSoundIndex(uint32 snd_id) {
 	if (snd_id == 0) // The sound hasn't been loaded, so its clearly not in the cache
 		return -1;
 
-	for (int i = 0; i < MAX_CACHED_SOUNDS; i++) { // Traverse thru the music cache
+	for (uint32 i = 0; i < MAX_CACHED_SOUNDS; i++) { // Traverse thru the music cache
 		if (sound_cache[i].id == snd_id) // Found the item, return its index!
 			return i;
 	}
@@ -185,7 +184,7 @@ int GameAudio::FindSoundIndex(unsigned int snd_id) {
 
 
 // Frees the sound_cache location at 'index'
-void GameAudio::FreeSound(int index) {
+void GameAudio::FreeSound(uint32 index) {
 	// Make sure that our index is within the array bounds
 	if (index >= 0 && index < MAX_CACHED_SOUNDS) {
 		if (sound_cache[index].sound != NULL) // Only free the memory pointed to by 'sound' if it isn't NULL
@@ -226,7 +225,7 @@ void GameAudio::ResumeAudio() {
 
 // Loads a new song into the music_cache. Exits program if an error occurs.
 void GameAudio::LoadMusic(MusicDescriptor& md) {
-	int location; // location is the array index in the music_cache that the song will be loaded to
+	int32 location; // location is the array index in the music_cache that the song will be loaded to
 	Mix_Music *new_mus; // new_mus is the pointer to the music data we are trying to load
 
 	if (audio_on == false) // Do nothing if audio init went bad
@@ -260,8 +259,8 @@ void GameAudio::LoadMusic(MusicDescriptor& md) {
 
 
 // Plays the music. loop can be: loop = AUDIO_LOOP_FOREVER (-1), loop = AUDIO_LOOP_ONCE (0) ...
-void GameAudio::PlayMusic(MusicDescriptor& md, int fade_ms, int loop) {
-	int location; // location is the music_cache index of the file we wish to play
+void GameAudio::PlayMusic(MusicDescriptor& md, uint32 fade_ms, int32 loop) {
+	uint32 location; // location is the music_cache index of the file we wish to play
 
 	if (audio_on == false) // If audio wasn't initialized properly, how can we play anything?
 		return;
@@ -297,7 +296,7 @@ void GameAudio::PlayMusic(MusicDescriptor& md, int fade_ms, int loop) {
 
 
 // I don't think this will ever be used unless we need sudden dramatic silence ;) But it's here just in case.
-void GameAudio::StopMusic(int fade_ms) {
+void GameAudio::StopMusic(uint32 fade_ms) {
 	if (audio_on && Mix_PlayingMusic()) { // Don't stop the music unless it's playing
 		if (fade_ms != 0)
 			Mix_FadeOutMusic(fade_ms);
@@ -311,7 +310,7 @@ void GameAudio::StopMusic(int fade_ms) {
 
 // Frees the music based on the md.id value of the argument
 void GameAudio::FreeMusic(MusicDescriptor& md) {
-	int location = FindMusicIndex(md.id); // Find the index matching the filename
+	int32 location = FindMusicIndex(md.id); // Find the index matching the filename
 	if (location == -1) // It's not in the cache so it has already been evicted
 		return;
 
@@ -328,7 +327,7 @@ void GameAudio::FreeMusic(MusicDescriptor& md) {
 
 
 // Changes the music volume. The value argument should be between 0 and 128
-void GameAudio::SetMusicVolume(int value) {
+void GameAudio::SetMusicVolume(int32 value) {
 	if (audio_on == false) // If audio wasn't properly initialized, we do nothing here
 		return;
 
@@ -350,7 +349,7 @@ void GameAudio::SetMusicVolume(int value) {
 // *Used for debugging purposes ONLY* Prints the contents of the music cache.
 void GameAudio::PrintMusicCache() {
 	cout << "AUDIO: Printing music cache" << endl;
-	for (int i = 0; i < MAX_CACHED_MUSIC; i++) { // Loop thru the music cache
+	for (uint32 i = 0; i < MAX_CACHED_MUSIC; i++) { // Loop thru the music cache
 		if (music_cache[i].music == NULL) // There is no memory allocated for this index
 			continue; // We aren't interested in cache locations that hold no data. Look at the next location
 
@@ -364,7 +363,7 @@ void GameAudio::PrintMusicCache() {
 
 // Loads a new sound into the sound_cache. Exits the program if a load error occurs.
 void GameAudio::LoadSound(SoundDescriptor& sd) {
-	int location;		 // location is the array index in the sound_cache where the sound will be stored
+	int32 location;      // location is the array index in the sound_cache where the sound will be stored
 	Mix_Chunk *new_chunk; // new_chunk is a pointer to the sound data we are loading in
 
 	if (audio_on == false) // Do nothing if audio init went bad
@@ -398,8 +397,8 @@ void GameAudio::LoadSound(SoundDescriptor& sd) {
 
 
 // Plays a sound (duh). If the sound isn't in the cache, it will automatically be loaded.
-void GameAudio::PlaySound(SoundDescriptor& sd, int fade_ms, int loop) {
-	int location;
+void GameAudio::PlaySound(SoundDescriptor& sd, uint32 fade_ms, int32 loop) {
+	int32 location;
 
 	if (audio_on == false)	// Check for bad audio initialization or bad filename
 		return;
@@ -435,7 +434,7 @@ void GameAudio::StopSound() {
 
 // Frees the sound based on the sd->id value of the argument
 void GameAudio::FreeSound(SoundDescriptor& sd) {
-	int location = FindSoundIndex(sd.id); // Find the index matching the filename
+	int32 location = FindSoundIndex(sd.id); // Find the index matching the filename
 	if (location == -1) // It's not in the cache so its already been evicted
 		return;
 
@@ -452,7 +451,7 @@ void GameAudio::FreeSound(SoundDescriptor& sd) {
 
 
 // Changes the sound volume. The argument should be between 0 and 128
-void GameAudio::SetSoundVolume(int value) {
+void GameAudio::SetSoundVolume(int32 value) {
 	if (audio_on == false) // If audio wasn't properly initialized, we do nothing here
 		return;
 
@@ -472,7 +471,7 @@ void GameAudio::SetSoundVolume(int value) {
 // *Used for debugging purposes ONLY* Prints the contents of the sound cache
 void GameAudio::PrintSoundCache() {
 	cout << "AUDIO: Printing sound cache" << endl;
-	for (int i = 0; i < MAX_CACHED_SOUNDS; i++) { // Loop thru the sound cache
+	for (uint32 i = 0; i < MAX_CACHED_SOUNDS; i++) { // Loop thru the sound cache
 		if (sound_cache[i].sound == NULL) // There is no memory allocated for this index
 			continue; // We aren't interested in cache locations that hold no data. Look at the next location
 

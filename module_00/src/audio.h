@@ -10,7 +10,7 @@
 /*!****************************************************************************
  * \file    audio.h
  * \author  Tyler Olsen, roots@allacrost.org
- * \date    Last Updated: August 11th, 2005
+ * \date    Last Updated: August 23rd, 2005
  * \brief   Header file for audio engine interface.
  *
  * This code provides an easy-to-use API for managing all music and sounds used
@@ -39,27 +39,27 @@ namespace hoa_audio {
 extern bool AUDIO_DEBUG;
 
 //! Pass this as the \c loop argument in an audio function and the music or sound will loop indefinitely.
-const int AUDIO_LOOP_FOREVER = -1;
+const int32 AUDIO_LOOP_FOREVER = -1;
 //! Pass this as the \c loop argument in an audio function and the music or sound will play only once.
-const int AUDIO_LOOP_ONCE = 0;
+const int32 AUDIO_LOOP_ONCE = 0;
 //! Pass this as the \c fade_ms argument in an audio function for no fading in or out of the audio.
-const int AUDIO_NO_FADE = 0;
+const uint32 AUDIO_NO_FADE = 0;
 //! The default time to fade in/out music (500ms). Pass this as the \c fade_ms argument in an audio function.
-const int AUDIO_DEFAULT_FADE = 500;
+const uint32 AUDIO_DEFAULT_FADE = 500;
 
 //! An internal namespace to be used only within the audio engine. Don't use this namespace anywhere else!
 namespace private_audio {
 
 //! The maximum number of songs that can be loaded at any given time.
-const int MAX_CACHED_MUSIC = 5;
+const uint32 MAX_CACHED_MUSIC = 5;
 //! The maximum number of sounds that can be loaded at any given time.
-const int MAX_CACHED_SOUNDS = 50;
+const uint32 MAX_CACHED_SOUNDS = 50;
 //! The number of sound channels to open for audio mixing (music automatically has its own channel)
-const int OPEN_CHANNELS = 16;
+const uint32 OPEN_CHANNELS = 16;
 //! Used in function calls for pausing audio, halting audio, or changing the volume
-const int ALL_CHANNELS = -1;
+const int32 ALL_CHANNELS = -1;
 //! When playing a sound, passing this argument will play it on any open channel
-const int ANY_OPEN_CHANNEL = -1;
+const int32 ANY_OPEN_CHANNEL = -1;
 
 /*!****************************************************************************
  *  \brief Used by the GameAudio class to internally represent a sound data item.
@@ -69,11 +69,11 @@ const int ANY_OPEN_CHANNEL = -1;
 class SoundItem {
 public:
 	//! A unique ID number assigned for the sound item.
-	unsigned int id;
+	uint32 id;
 	//! A pointer to the sound data loaded in memory.
 	Mix_Chunk *sound;
 	//! The last time that the sound was referenced, in milliseconds.
-	Uint32 time;
+	uint32 time;
 };
 
 /*!****************************************************************************
@@ -84,11 +84,11 @@ public:
 class MusicItem {
 public:
 	//! A unique ID number assigned for the music item.
-	unsigned int id;
+	uint32 id;
 	//! A pointer to the sound data loaded in memory.
 	Mix_Music *music;
 	//! The last time that the sound was referenced, in milliseconds.
-	Uint32 time;
+	uint32 time;
 };
 
 } // namespace local_audio
@@ -116,7 +116,7 @@ private:
 	 *
 	 *  Zero indicates it is not loaded in memory, however, the converse is not always true.
 	 */
-	unsigned int id;
+	uint32 id;
 	friend class GameAudio;
 };
 
@@ -142,7 +142,7 @@ private:
 	 *
 	 *  Zero indicates it is not loaded in memory, however, the converse is not always true.
 	 */
-	unsigned int id;
+	uint32 id;
 	friend class GameAudio;
 };
 
@@ -185,11 +185,11 @@ private:
 	//! A boolean value that disables all audio functions when set to false.
 	bool audio_on;
 	//! Indicates the array index of the song currently playing in music_cache.
-	int current_track;
+	int32 current_track;
 	//! Retains the next id value to give a new music item.
-	int music_id;
+	uint32 music_id;
 	//! Retains the next id value to give a new sound item.
-	int sound_id;
+	uint32 sound_id;
 	//! An array storing up to MAX_CACHED_MUSIC MusicItem objects loaded into memory.
 	private_audio::MusicItem music_cache[private_audio::MAX_CACHED_MUSIC];
 	//! An array storing up to MAX_CACHED_SOUNDS SoundItem objects loaded into memory.
@@ -203,18 +203,18 @@ private:
 	 *
 	 *  \return The music_cache index allocated for the new music data.
 	 */
-	int AllocateMusicIndex();
+	uint32 AllocateMusicIndex();
 	/*!
 	 *  \brief Searches music_cache for an id that matches the function parameter.
 	 *  \param mus_id The id number to search the cache for.
 	 *  \return The cache index of the MusicItem with an id matching mus_id. Returns -1 if not found.
 	 */
-	int FindMusicIndex(unsigned int mus_id);
+	int32 FindMusicIndex(uint32 mus_id);
 	/*!
 	 *  \brief Frees a MusicItem in the music_cache.
 	 *  \param index The index in the music_cache to free.
 	 */
-	void FreeMusic(int index);
+	void FreeMusic(uint32 index);
 
 	/*!
 	 *  \brief  Finds and allocates the first free index found in the sound_cache.
@@ -224,18 +224,18 @@ private:
 	 *
 	 *  \return The sound_cache index allocated for the new sound data.
 	 */
-	int AllocateSoundIndex();
+	uint32 AllocateSoundIndex();
 	/*!
 	 *  \brief Searches sound_cache for an id that matches the function parameter.
 	 *  \param snd_id The id number to search the cache for.
 	 *  \return The cache index of the SoundItem with an id matching snd_id. Returns -1 if not found.
 	 */
-	int FindSoundIndex(unsigned int snd_id);
+	int32 FindSoundIndex(uint32 snd_id);
 	/*!
 	 *  \brief Frees a SoundItem in the sound_cache.
 	 *  \param index The index in the sound_cache to free.
 	 */
-	void FreeSound(int index);
+	void FreeSound(uint32 index);
 
 public:
 	SINGLETON_METHODS(GameAudio);
@@ -270,12 +270,12 @@ public:
 	 *  \param fade_ms The amount of time to fade out the current music, and then fade in the new music by.
 	 *  \param loop    Specifies how many times the music should be looped.
 	 */
-	void PlayMusic(MusicDescriptor& md, int fade_ms, int loop);
+	void PlayMusic(MusicDescriptor& md, uint32 fade_ms, int32 loop);
 	/*!
 	 *  \brief Stops the currently playing music.
 	 *  \param fade_ms The amount to fade out the playing music by, in milliseconds.
 	 */
-	void StopMusic(int fade_ms);
+	void StopMusic(uint32 fade_ms);
 	/*!
 	 *  \brief Frees an item from the music_cache specified by the argument.
 	 *
@@ -292,12 +292,12 @@ public:
 	 *
 	 *  \param value The numerical value to set the music volume to.
 	 */
-	void SetMusicVolume(int value);
-	/*!
-	 *  \brief Returns the current volume level of the music (0 to 128 inclusive).
-	 *  \return The volume level of the music.
-	 */
-	int GetMusicVolume();
+	void SetMusicVolume(int32 value);
+//	/*!
+//	 *  \brief Returns the current volume level of the music (0 to 128 inclusive).
+//	 *  \return The volume level of the music.
+//	 */
+//	uint32 GetMusicVolume();
 	/*!
 	 *  \brief Prints details about what is currently stored in music_cache to standard output.
 	 *  \note This function is for debugging purposes \b only! You normally should never call it.
@@ -326,7 +326,7 @@ public:
 	 *  \param fade_ms The amount of time to fade in the new sound by.
 	 *  \param loop    Specifies how many times the sound should be looped.
 	 */
-	void PlaySound(SoundDescriptor& sd, int fade_ms, int loop);
+	void PlaySound(SoundDescriptor& sd, uint32 fade_ms, int32 loop);
 	/*!
 	 *  \brief Stops all currently playing sounds.
 	 */
@@ -347,12 +347,12 @@ public:
 	 *
 	 *  \param value The numerical value to set the sound volume to.
 	 */
-	void SetSoundVolume(int value);
-	/*!
-	 *  \brief Returns the current volume level of the sound (0 to 128 inclusive).
-	 *  \return The volume level of the sound.
-	 */
-	int GetSoundVolume();
+	void SetSoundVolume(int32 value);
+//	/*!
+//	 *  \brief Returns the current volume level of the sound (0 to 128 inclusive).
+//	 *  \return The volume level of the sound.
+//	 */
+//	int GetSoundVolume();
 	/*!
 	 *  \brief Prints details about what is currently stored in sound_cache to standard output.
 	 *  \note This function is for debugging purposes \b only! You normally should never call it.
