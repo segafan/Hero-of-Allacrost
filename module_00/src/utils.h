@@ -10,7 +10,7 @@
 /*!****************************************************************************
  * \file    utils.h
  * \author  Tyler Olsen, roots@allacrost.org
- * \date    Last Updated: August 12th, 2005
+ * \date    Last Updated: August 23rd, 2005
  * \brief   Header file for Allacrost utility code.
  *
  * This code includes various utility functions that are used across different
@@ -37,28 +37,42 @@
 #endif
 
 #include <stdlib.h>
-#include <iostream>
 #include <cstdlib>
 #include <cmath>
 
-#include <vector>
+#include <iostream>
 #include <string>
+#include <vector>
+#include <list>
 #include <map>
 #include <stack>
 
-
 #include <SDL/SDL.h>
+
+// The following includes will be removed once they are migrated to the video header
 #include <SDL/SDL_ttf.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
-
 #define ILUT_USE_OPENGL
-
 #include <IL/il.h>
 #include <IL/ilu.h>
 #include <IL/ilut.h>
 
+/*! \name Allacrost Integer Types.
+ *  \brief These are the integer types you should use. Use of int, short, etc. is forbidden!
+ *  
+ *  These types are just renamed types from SDL, because we don't like their named types.
+ */
+//@{ 
+typedef Sint32  int32;
+typedef Uint32  uint32;
+typedef Sint16  int16;
+typedef Uint16  uint16;
+typedef Sint8   int8;
+typedef Uint8   uint8;
+//@}
 
+// The following typedef will be defunct once we finish converting over to the new types.
 #ifdef _WIN32
 typedef Uint32  uint;  // linux GCC has uint, but not all compilers
 #endif
@@ -71,7 +85,7 @@ extern bool UTILS_DEBUG;
 
 // Constants used for the GaussianValue() function
 const bool UTILS_ONLY_POSITIVE = true;
-const int UTILS_NO_BOUNDS = 0;
+const int32 UTILS_NO_BOUNDS = 0;
 
 /******************************************************************************
 	SINGLETON macros - used for turning a class into a singleton class
@@ -169,7 +183,7 @@ float RandomUnit();
  *	 is greater than upper_bound, but in that case the problem is fixed and a warning is printed out
  *	 to the screen.
  ******************************************************************************/
-int RandomNum(int lower_bound, int upper_bound);
+int RandomNum(int32 lower_bound, int32 upper_bound);
 
 /******************************************************************************
  * int GaussianValue(int mean, int range, bool positive_value):
@@ -183,7 +197,7 @@ int RandomNum(int lower_bound, int upper_bound);
  *	 That means that 99.7% of the random values chosen will lay between mean - range and mean + range, if
  *	 range is a greater than or equal to zero.
  ******************************************************************************/
-int GaussianValue(int mean, int range, bool positive_value);
+int32 GaussianValue(int32 mean, int32 range, bool positive_value);
 
 }
 

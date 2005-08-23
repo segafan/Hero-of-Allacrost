@@ -37,8 +37,8 @@ float RandomUnit() {
 
 
 // This will return a random integer between lower_bound and upper_bound (inclusive)
-int RandomNum(int lower_bound, int upper_bound) {
-	int range;		// The number of possible values we may return
+int32 RandomNum(int32 lower_bound, int32 upper_bound) {
+	int32 range;		// The number of possible values we may return
 	float result; // Our result (we cast it when we return)
 
 	range = upper_bound - lower_bound + 1;
@@ -50,13 +50,13 @@ int RandomNum(int lower_bound, int upper_bound) {
 	result = range * (float) rand()/RAND_MAX; // Compute a random floating point number in our range
 	result = result + lower_bound; // Shift our range so that it is within the correct bounds;
 
-	return static_cast<int>(result);
+	return static_cast<int32>(result);
 }
 
 
 
 // This returns a Gaussian random value in the range: [mean - range, mean + range]
-int GaussianValue(int mean, int range, bool positive_value) {
+int32 GaussianValue(int32 mean, int32 range, bool positive_value) {
 	float x, y, r; // x and y are points on the unit circle. r is the radius
 	float z_value; // This is a Gaussian random variable on a normal distribution curve (mean 0, stand dev 1)
 	float result;	// This is the resulting Gaussian random variable we want to return
@@ -94,7 +94,7 @@ int GaussianValue(int mean, int range, bool positive_value) {
 
 	// If we have a zero or negative range argument, we don't apply bounds to the value returned.
 	if (range <= 0)
-		return (int)result;
+		return (int32)result;
 
 	if (result < mean - range)      // Covers the case that we exceeded our lower bound (occurs 0.015% of the time)
 		result = float( mean - range );
@@ -102,7 +102,7 @@ int GaussianValue(int mean, int range, bool positive_value) {
 		result = float( mean + range );
 
 	// Note: because we cast rather than round the mean + range value isn't chosen as often as mean - range
-	return (int)result;	// Cast to an int and return
+	return (int32)result;	// Cast to an int32 and return
 }
 
 } // namespace utils
