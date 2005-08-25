@@ -43,7 +43,7 @@ MenuMode::MenuMode() {
 	if (MENU_DEBUG) cout << "MENU: MenuMode constructor invoked." << endl;
 
 	// Save the currently drawn screen
-	if (!VideoManager->CaptureScreen(saved_screen)) {
+	if (!VideoManager->CaptureScreen(_saved_screen)) {
 		cerr << "MENU: ERROR: Couldn't save the screen!" << endl;
 	}
 	
@@ -61,30 +61,30 @@ MenuMode::MenuMode() {
 	);
 	
 	ImageDescriptor new_menu;
-	menu_images.push_back(new_menu);
-	menu_images.push_back(new_menu);
-	menu_images.push_back(new_menu);
-	menu_images.push_back(new_menu);
-	menu_images.push_back(new_menu);
-	menu_images.push_back(new_menu);
+	_menu_images.push_back(new_menu);
+	_menu_images.push_back(new_menu);
+	_menu_images.push_back(new_menu);
+	_menu_images.push_back(new_menu);
+	_menu_images.push_back(new_menu);
+	_menu_images.push_back(new_menu);
 	
 	// Create menu images
-	if(!VideoManager->CreateMenu(menu_images[0], 256, 576)) { // create a 256x576 menu
+	if(!VideoManager->CreateMenu(_menu_images[0], 256, 576)) { // create a 256x576 menu
 		cerr << "MENU: ERROR: Couldn't create menu image!" << endl;
 	}
-	if(!VideoManager->CreateMenu(menu_images[1], 256, 576)) {
+	if(!VideoManager->CreateMenu(_menu_images[1], 256, 576)) {
 		cerr << "MENU: ERROR: Couldn't create menu image!" << endl;
 	}
-	if(!VideoManager->CreateMenu(menu_images[2], 256, 576)) {
+	if(!VideoManager->CreateMenu(_menu_images[2], 256, 576)) {
 		cerr << "MENU: ERROR: Couldn't create menu image!" << endl;
 	}
-	if(!VideoManager->CreateMenu(menu_images[3], 256, 576)) {
+	if(!VideoManager->CreateMenu(_menu_images[3], 256, 576)) {
 		cerr << "MENU: ERROR: Couldn't create menu image!" << endl;
 	}
-	if(!VideoManager->CreateMenu(menu_images[4], 1024, 96)) {
+	if(!VideoManager->CreateMenu(_menu_images[4], 1024, 96)) {
 		cerr << "MENU: ERROR: Couldn't create menu image!" << endl;
 	}
-	if(!VideoManager->CreateMenu(menu_images[5], 1024, 96)) {
+	if(!VideoManager->CreateMenu(_menu_images[5], 1024, 96)) {
 		cerr << "MENU: ERROR: Couldn't create menu image!" << endl;
 	}
 	
@@ -100,10 +100,10 @@ MenuMode::~MenuMode() {
 	if (MENU_DEBUG) cout << "MENU: MenuMode destructor invoked." << endl;
 	
 	// Remove saved images
-	VideoManager->DeleteImage(saved_screen);
+	VideoManager->DeleteImage(_saved_screen);
 	
-	for (uint32 i = 0; i < menu_images.size(); i++) {
-		VideoManager->DeleteImage(menu_images[i]);
+	for (uint32 i = 0; i < _menu_images.size(); i++) {
+		VideoManager->DeleteImage(_menu_images[i]);
 	}
 }
 
@@ -125,22 +125,22 @@ void MenuMode::Draw() {
 	VideoManager->Move(0,0);
 	
 	// Draw the saved screen as the menu background
-	VideoManager->DrawImage(saved_screen); 
+	VideoManager->DrawImage(_saved_screen); 
 	
 	// Draw the four character menus
-	VideoManager->DrawImage(menu_images[0]);
+	VideoManager->DrawImage(_menu_images[0]);
 	VideoManager->MoveRel(256, 0);
-	VideoManager->DrawImage(menu_images[1]);
+	VideoManager->DrawImage(_menu_images[1]);
 	VideoManager->MoveRel(256, 0);
-	VideoManager->DrawImage(menu_images[2]);
+	VideoManager->DrawImage(_menu_images[2]);
 	VideoManager->MoveRel(256, 0);
-	VideoManager->DrawImage(menu_images[3]);
+	VideoManager->DrawImage(_menu_images[3]);
 	
 	// Draw the bottom two menus
 	VideoManager->Move(0, 576);
-	VideoManager->DrawImage(menu_images[4]);
+	VideoManager->DrawImage(_menu_images[4]);
 	VideoManager->MoveRel(0, 96);
-	VideoManager->DrawImage(menu_images[5]);
+	VideoManager->DrawImage(_menu_images[5]);
 	
 	// Draw 1st character menu text
 	if (!VideoManager->DrawText("Claudius", 32, 768 - 48))

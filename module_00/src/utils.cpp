@@ -89,7 +89,7 @@ int32 GaussianValue(int32 mean, int32 range, bool positive_value) {
 	result = (std_dev * z_value) + mean;
 
 	// Reverses sign of result if we don't want a negative value returned
-	if (positive_value && result < 0.0)
+	if (positive_value && result < 0.0f)
 		result = result * -1;
 
 	// If we have a zero or negative range argument, we don't apply bounds to the value returned.

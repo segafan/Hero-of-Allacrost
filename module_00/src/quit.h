@@ -80,7 +80,7 @@ const uint8 QUIT_CANCEL      = 2;
 class QuitMode : public hoa_engine::GameMode {
 private:
 	//! The currently selected quit option
-	uint8 quit_type;
+	uint8 _quit_type;
 public:
   QuitMode();
   ~QuitMode();

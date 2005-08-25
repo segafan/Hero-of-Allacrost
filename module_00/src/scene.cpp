@@ -37,7 +37,7 @@ SceneMode::SceneMode() {
 	SettingsManager = GameSettings::_GetReference();
 
 	mode_type = ENGINE_SCENE_MODE;
-	scene_timer = 0;
+	_scene_timer = 0;
 
 	// setup the scene Image Descriptor
 
@@ -56,10 +56,10 @@ SceneMode::~SceneMode() {
 
 // Restores volume or unpauses audio, then pops itself from the game stack
 void SceneMode::Update(uint32 time_elapsed) {
-	scene_timer += time_elapsed;
+	_scene_timer += time_elapsed;
 
 	// User must wait 0.75 seconds before they can exit the scene
-	if ((InputManager->ConfirmPress() || InputManager->CancelPress()) && scene_timer < MIN_SCENE_UPDATES) {
+	if ((InputManager->ConfirmPress() || InputManager->CancelPress()) && _scene_timer < MIN_SCENE_UPDATES) {
 		ModeManager->Pop();
 	}
 }

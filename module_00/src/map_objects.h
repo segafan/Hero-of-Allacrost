@@ -183,15 +183,15 @@ const int32 RIGHT_RSTEP3   = 23;
 class ObjectLayer {
 protected:
 	//! A type identifier for the object.
-	uint8 object_type;
+	uint8 _object_type;
 	//! The map row position for the bottom left corner of the object.
-	uint32 row_pos;
+	uint32 _row_pos;
 	//! The map column position for the bottom left corner of the object.
-	uint32 col_pos;
+	uint32 _col_pos;
 	//! A bit-mask for setting and detecting various conditions on the object.
-	uint32 status;
+	uint32 _status;
 	//! The vertical or "Z" position of the object.
-	uint32 z_pos;
+	uint32 _z_pos;
 	//! A reference to the video engine singleton.
 	hoa_video::GameVideo *VideoManager;
 
@@ -239,38 +239,38 @@ private:
 	friend class MapMode;
 	friend class hoa_data::GameData;
 
-	/*!
-	 * \brief Determines what frame image should be drawn for the sprite.
-	 * \return An index to the frames vector for the frame image to draw.
-	 */
-	uint32 FindFrame();
-protected:
 	//! The name of the sprite, as seen by the player in the game.
-	std::string name;
+	std::string _name;
 	//! The base filename of the sprite, used to load various data for the sprite.
-	std::string filename;
+	std::string _filename;
 	//! The speed at which the sprite moves around the map.
-	float step_speed;
+	float _step_speed;
 	//! A counter to keep track of a sprites actual position when moving between tiles.
-	float step_count;
+	float _step_count;
 	//! The remaining amount of time to wait before moving the sprite again (used for NPCs).
-	int32 wait_time;
+	int32 _wait_time;
 	//! The average amount of time a sprite should remain still between tile moves.
-	uint32 delay_time;
+	uint32 _delay_time;
 
 	//! A pointer to a vector containing all the sprite's frame images.
-	std::vector<hoa_video::ImageDescriptor> *frames;
+	std::vector<hoa_video::ImageDescriptor> *_frames;
 	//! Retains the dialogue that the sprite has to say.
-	SpriteDialogue *speech;
+	SpriteDialogue *_speech;
 	/*!
 	 *  \brief Draws the object to the frame buffer.
 	 *  \param &mf A reference to the map frame information so the object knows where to draw itself.
 	 */
-	void Draw(private_map::MapFrame& mf);
+	uint32 _FindFrame();
 public:
 	MapSprite(uint8 type, uint32 row, uint32 col, uint32 stat);
 	~MapSprite();
-
+	
+	void Draw(private_map::MapFrame& mf);
+	/*!
+	 * \brief Determines what frame image should be drawn for the sprite.
+	 * \return An index to the frames vector for the frame image to draw.
+	 */
+	
 	//! Fills up the *frames vector.
 	void LoadFrames();
 	/*!
@@ -285,10 +285,10 @@ public:
 	//! \name Public Member Access Functions
 	//@{
 	//! \brief Used for setting and getting the values of the various class members.
-	void SetName(std::string na) { name = na; }
-	void SetFilename(std::string fn) { filename = fn; }
-	void SetSpeed(float ss) { step_speed = ss; }
-	void SetDelay(uint32 dt) { delay_time = dt; }
+	void SetName(std::string na) { _name = na; }
+	void SetFilename(std::string fn) { _filename = fn; }
+	void SetSpeed(float ss) { _step_speed = ss; }
+	void SetDelay(uint32 dt) { _delay_time = dt; }
 	//@}
 }; // class MapSprite
 
@@ -303,15 +303,15 @@ public:
 class SpriteDialogue {
 private:
 	//! An index to the next dialogue piece to read.
-	uint32 next_read;
+	uint32 _next_read;
 	//! The dialogue itself, broken into conversations and individual lines.
-	std::vector<std::vector<std::string> > dialogue;
+	std::vector<std::vector<std::string> > _dialogue;
 	//! A vector indicating whom is the speaker for a section of dialogue.
-	std::vector<std::vector<uint32> > speaker;
+	std::vector<std::vector<uint32> > _speaker;
 	//! A boolean for each piece of dialogue, representing whether the player has read it or not.
-	std::vector<bool> seen;
+	std::vector<bool> _seen;
 	//! True if the player has already read all of the sprite's dialogue.
-	bool seen_all;
+	bool _seen_all;
 
 	friend class MapMode;
 public:
@@ -321,7 +321,7 @@ public:
 	//! \name Public Member Access Functions
 	//@{
 	//! \brief Used for setting and getting the values of the various class members.
-	bool AllDialogueSeen() { return seen_all; }
+	bool AllDialogueSeen() { return _seen_all; }
 	void LoadDialogue(std::vector<std::vector<std::string> > txt, std::vector<std::vector<uint32> > sp);
 	void AddDialogue(std::vector<std::string> txt, std::vector<uint32> sp);
 	void AddDialogue(std::string txt, uint32 sp);

@@ -53,7 +53,7 @@ PauseMode::PauseMode() {
 	}
 
 	// Here make a VideoManager call to save the current screen.
-	if (!VideoManager->CaptureScreen(saved_screen)) {
+	if (!VideoManager->CaptureScreen(_saved_screen)) {
 		if (PAUSE_DEBUG) cerr << "PAUSE: ERROR: Couldn't save the screen!" << endl;
 	}
 	VideoManager->SetCoordSys(0, 1024, 0, 768);
@@ -80,7 +80,7 @@ PauseMode::~PauseMode() {
 
 
 	// Release the saved screen frame.
-	VideoManager->DeleteImage(saved_screen);
+	VideoManager->DeleteImage(_saved_screen);
 	
 	// TEMPORARY: Because the Video Manager doesn't save the stat of the coordinate system
 	//VideoManager->SetCoordSys(-14, 14, -10, 10);
@@ -101,7 +101,7 @@ void PauseMode::Update(uint32 time_elapsed) { }
 void PauseMode::Draw() {
 
 	// Draw the background image
-	VideoManager->DrawImage(saved_screen);
+	VideoManager->DrawImage(_saved_screen);
 	// Render the "Paused" text to appear on the center of the screen
 	VideoManager->DrawText("Paused", 512, 384);
 }

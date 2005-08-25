@@ -64,14 +64,14 @@ GObject::~GObject() {
 
 GItem::GItem(string name, uint8 use, uint32 usable, uint32 id, uint32 count) :
 	GObject(name, GLOBAL_ITEM, usable, id, count) {
-	use_case = use;
+	_use_case = use;
 }
 
 
 
 GItem::GItem() :
 	GObject() {
-	use_case = GLOBAL_UNUSABLE_ITEM;
+	_use_case = GLOBAL_UNUSABLE_ITEM;
 }
 
 
@@ -140,15 +140,15 @@ GArmor::~GArmor() {}
 // ****************************************************************************
 
 GSkill::GSkill(string name, uint32 sp) {
-	skill_name = name;
-	sp_usage = sp;
+	_skill_name = name;
+	_sp_usage = sp;
 }
 
 
 
 GSkill::GSkill() {
-	skill_name = "unknown";
-	sp_usage = 0;
+	_skill_name = "unknown";
+	_sp_usage = 0;
 }
 
 
@@ -161,27 +161,27 @@ GSkill::~GSkill() {}
 
 GAttackPoint::GAttackPoint(float x, float y, uint32 def, uint32 eva, uint8 elem_weak,
                            uint8 elem_res, uint8 stat_weak, uint8 stat_res) {
-	x_position = x;
-	y_position = y;
-	defense = def;
-	evade = eva;
-	elemental_weakness = elem_weak;
-	elemental_resistance = elem_res;
-	status_weakness = stat_weak;
-	status_resistance = stat_res;
+	_x_position = x;
+	_y_position = y;
+	_defense = def;
+	_evade = eva;
+	_elemental_weakness = elem_weak;
+	_elemental_resistance = elem_res;
+	_status_weakness = stat_weak;
+	_status_resistance = stat_res;
 }
 
 
 
 GAttackPoint::GAttackPoint() {
-	x_position = 0;
-	y_position = 0;
-	defense = 0;
-	evade = 0;
-	elemental_weakness = GLOBAL_NO_ELEMENTAL;
-	elemental_resistance = GLOBAL_NO_ELEMENTAL;
-	status_weakness = GLOBAL_NO_STATUS;
-	status_resistance = GLOBAL_NO_STATUS;
+	_x_position = 0;
+	_y_position = 0;
+	_defense = 0;
+	_evade = 0;
+	_elemental_weakness = GLOBAL_NO_ELEMENTAL;
+	_elemental_resistance = GLOBAL_NO_ELEMENTAL;
+	_status_weakness = GLOBAL_NO_STATUS;
+	_status_resistance = GLOBAL_NO_STATUS;
 }
 
 
@@ -198,33 +198,21 @@ GEnemy::~GEnemy() { }
 
 // Simulate the leveling up of experience for the enemy from its base stats.
 void GEnemy::LevelSimulator(uint32 lvl) {
-	float rate_inc = 0.0;
+	_experience_level = lvl;
+	
+	// Assign the initial values of the stats (== base + growth * lvl)
+	_max_hit_points = _base_hit_points + (_growth_hit_points * lvl);
+	_experience_points = _base_experience_points + (_growth_experience_points * lvl);
+	_strength = _base_strength + (_growth_strength * lvl);
+	_intelligence = _base_intelligence + (_growth_intelligence * lvl);
+	_agility = _base_agility + (_growth_agility * lvl);
 
-	experience_level = lvl;
-	max_hit_points = base_hit_points;
-	experience_points = base_experience_points;
-	strength = base_strength;
-	intelligence = base_intelligence;
-	agility = base_agility;
-
-	for (uint32 i = 1; i <= experience_level; i++) {
-		rate_inc = 1.0f - RandomUnit();
-		experience_points += growth_experience_points;
-		if (rate_hit_points <= rate_inc) {
-			max_hit_points += growth_hit_points;
-		}
-		if (rate_strength <= rate_inc) {
-			strength += growth_strength;
-		}
-		if (rate_intelligence <= rate_inc) {
-			intelligence += growth_intelligence;
-		}
-		if (rate_agility <= rate_inc) {
-			agility += growth_agility;
-		}
-	}
-
-	hit_points = max_hit_points;
+	// Randomize the stats using a guassian random variable, with the inital stats as the means
+	_max_hit_points = GaussianValue(_max_hit_points, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
+	_experience_points = GaussianValue(_experience_points, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
+	_strength = GaussianValue(_strength, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
+	_intelligence = GaussianValue(_intelligence, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
+	_agility = GaussianValue(_agility, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
 }
 
 // ****************************************************************************
@@ -234,9 +222,9 @@ void GEnemy::LevelSimulator(uint32 lvl) {
 //
 GCharacter::GCharacter(std::string na, std::string fn, uint32 id) {
 	if (GLOBAL_DEBUG) cout << "GLOBAL: GCharacter constructor invoked" << endl;
-	name = na;
-	filename = fn;
-	char_id = id;
+	_name = na;
+	_filename = fn;
+	_char_id = id;
 
 	LoadFrames();
 }
@@ -246,11 +234,11 @@ GCharacter::GCharacter(std::string na, std::string fn, uint32 id) {
 GCharacter::~GCharacter() {
 	if (GLOBAL_DEBUG) cout << "GLOBAL: GCharacter destructor invoked" << endl;
 	GameVideo *VideoManager = GameVideo::_GetReference();
-	for (uint32 i = 0; i < map_frames.size(); i++) {
-		VideoManager->DeleteImage(map_frames[i]);
+	for (uint32 i = 0; i < _map_frames.size(); i++) {
+		VideoManager->DeleteImage(_map_frames[i]);
 	}
-	for (uint32 i = 0; i < battle_frames.size(); i++) {
-		VideoManager->DeleteImage(battle_frames[i]);
+	for (uint32 i = 0; i < _battle_frames.size(); i++) {
+		VideoManager->DeleteImage(_battle_frames[i]);
 	}
 }
 
@@ -258,66 +246,66 @@ GCharacter::~GCharacter() {
 void GCharacter::LoadFrames() {
 	GameVideo *VideoManager = GameVideo::_GetReference();
 	ImageDescriptor imd;
-	string full_name = "img/sprites/map/" + filename;
+	string full_name = "img/sprites/map/" + _filename;
 
 	imd.width = 1;
 	imd.height = 2;
 
 	imd.filename = full_name + "_d1.png";
-	map_frames.push_back(imd);
+	_map_frames.push_back(imd);
 	imd.filename = full_name + "_d2.png";
-	map_frames.push_back(imd);
+	_map_frames.push_back(imd);
 	imd.filename = full_name + "_d3.png";
-	map_frames.push_back(imd);
+	_map_frames.push_back(imd);
 	imd.filename = full_name + "_d4.png";
-	map_frames.push_back(imd);
+	_map_frames.push_back(imd);
 	imd.filename = full_name + "_d5.png";
-	map_frames.push_back(imd);
+	_map_frames.push_back(imd);
 
 	imd.filename = full_name + "_u1.png";
-	map_frames.push_back(imd);
+	_map_frames.push_back(imd);
 	imd.filename = full_name + "_u2.png";
-	map_frames.push_back(imd);
+	_map_frames.push_back(imd);
 	imd.filename = full_name + "_u3.png";
-	map_frames.push_back(imd);
+	_map_frames.push_back(imd);
 	imd.filename = full_name + "_u4.png";
-	map_frames.push_back(imd);
+	_map_frames.push_back(imd);
 	imd.filename = full_name + "_u5.png";
-	map_frames.push_back(imd);
+	_map_frames.push_back(imd);
 
 	imd.filename = full_name + "_l1.png";
-	map_frames.push_back(imd);
+	_map_frames.push_back(imd);
 	imd.filename = full_name + "_l2.png";
-	map_frames.push_back(imd);
+	_map_frames.push_back(imd);
 	imd.filename = full_name + "_l3.png";
-	map_frames.push_back(imd);
+	_map_frames.push_back(imd);
 	imd.filename = full_name + "_l4.png";
-	map_frames.push_back(imd);
+	_map_frames.push_back(imd);
 	imd.filename = full_name + "_l5.png";
-	map_frames.push_back(imd);
+	_map_frames.push_back(imd);
 	imd.filename = full_name + "_l6.png";
-	map_frames.push_back(imd);
+	_map_frames.push_back(imd);
 	imd.filename = full_name + "_l7.png";
-	map_frames.push_back(imd);
+	_map_frames.push_back(imd);
 
 	imd.filename = full_name + "_r1.png";
-	map_frames.push_back(imd);
+	_map_frames.push_back(imd);
 	imd.filename = full_name + "_r2.png";
-	map_frames.push_back(imd);
+	_map_frames.push_back(imd);
 	imd.filename = full_name + "_r3.png";
-	map_frames.push_back(imd);
+	_map_frames.push_back(imd);
 	imd.filename = full_name + "_r4.png";
-	map_frames.push_back(imd);
+	_map_frames.push_back(imd);
 	imd.filename = full_name + "_r5.png";
-	map_frames.push_back(imd);
+	_map_frames.push_back(imd);
 	imd.filename = full_name + "_r6.png";
-	map_frames.push_back(imd);
+	_map_frames.push_back(imd);
 	imd.filename = full_name + "_r7.png";
-	map_frames.push_back(imd);
+	_map_frames.push_back(imd);
 
 	VideoManager->BeginImageLoadBatch();
-	for (uint32 i = 0; i < map_frames.size(); i++) {
-		VideoManager->LoadImage(map_frames[i]);
+	for (uint32 i = 0; i < _map_frames.size(); i++) {
+		VideoManager->LoadImage(_map_frames[i]);
 	}
 	VideoManager->EndImageLoadBatch();
 }
@@ -333,20 +321,20 @@ GameInstance::GameInstance() {
 
 GameInstance::~GameInstance() {
 	if (GLOBAL_DEBUG) cout << "GLOBAL: GameInstance destructor invoked" << endl;
-	for (uint32 i = 0; i < characters.size(); i++) {
-		delete characters[i];
+	for (uint32 i = 0; i < _characters.size(); i++) {
+		delete _characters[i];
 	}
 }
 
 void GameInstance::AddCharacter(GCharacter *ch) {
 	if (GLOBAL_DEBUG) cout << "GLOBAL: Adding new character to party: " << ch->GetName() << endl;
-	characters.push_back(ch);
+	_characters.push_back(ch);
 }
 
 GCharacter* GameInstance::GetCharacter(uint32 id) {
-	for (uint32 i = 0; i < characters.size(); i++) {
-		if (characters[i]->GetID() == id) {
-			return characters[i];
+	for (uint32 i = 0; i < _characters.size(); i++) {
+		if (_characters[i]->GetID() == id) {
+			return _characters[i];
 		}
 	}
 	if (GLOBAL_DEBUG) cerr << "GLOBAL WARNING: No character matching id #" << id << " found in party" << endl;

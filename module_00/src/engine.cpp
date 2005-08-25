@@ -51,11 +51,11 @@ SINGLETON_INITIALIZE(GameInput);
 GameMode::GameMode() {
 	if (ENGINE_DEBUG) cout << "ENGINE: GameMode constructor invoked" << endl;
 	mode_type = ENGINE_DUMMY_MODE; // This should be replaced by the child class
-	AudioManager = GameAudio::_GetReference();
-	VideoManager = GameVideo::_GetReference();
-	DataManager = GameData::_GetReference();
-	InputManager = GameInput::_GetReference();
-	ModeManager = GameModeManager::_GetReference();
+	AudioManager =    GameAudio::_GetReference();
+	VideoManager =    GameVideo::_GetReference();
+	DataManager =     GameData::_GetReference();
+	InputManager =    GameInput::_GetReference();
+	ModeManager =     GameModeManager::_GetReference();
 	SettingsManager = GameSettings::_GetReference();
 	InstanceManager = GameInstance::_GetReference();
 }
@@ -65,11 +65,11 @@ GameMode::GameMode() {
 GameMode::GameMode(uint8 mt) {
 	if (ENGINE_DEBUG) cout << "ENGINE: GameMode constructor invoked" << endl;
 	mode_type = mt;
-	AudioManager = GameAudio::_GetReference();
-	VideoManager = GameVideo::_GetReference();
-	DataManager = GameData::_GetReference();
-	InputManager = GameInput::_GetReference();
-	ModeManager = GameModeManager::_GetReference();
+	AudioManager =    GameAudio::_GetReference();
+	VideoManager =    GameVideo::_GetReference();
+	DataManager =     GameData::_GetReference();
+	InputManager =    GameInput::_GetReference();
+	ModeManager =     GameModeManager::_GetReference();
 	SettingsManager = GameSettings::_GetReference();
 	InstanceManager = GameInstance::_GetReference();
 }
@@ -90,7 +90,8 @@ GameMode::~GameMode() {
 // This constructor must be defined for the singleton macro
 GameModeManager::GameModeManager() {
 	if (ENGINE_DEBUG) cout << "ENGINE: GameModeManager constructor invoked" << endl;
-	pop_count = 0;
+	_pop_count = 0;
+	_state_change = false;
 }
 
 
@@ -99,118 +100,137 @@ GameModeManager::GameModeManager() {
 GameModeManager::~GameModeManager() {
 	if (ENGINE_DEBUG) cout << "ENGINE: GameModeManager destructor invoked" << endl;
 	// Delete any game modes on the stack
-	while (game_stack.size() != 0) {
-		delete game_stack.back();
-		game_stack.pop_back();
+	while (_game_stack.size() != 0) {
+		delete _game_stack.back();
+		_game_stack.pop_back();
 	}
 	
 	// Delete any game modes on the push stack
-	while (push_stack.size() != 0) {
-		delete push_stack.back();
-		push_stack.pop_back();
+	while (_push_stack.size() != 0) {
+		delete _push_stack.back();
+		_push_stack.pop_back();
 	}
 }
 
 
-
+// Empties out the game stack and then initializes it by placing BootMode on the stack top.
 void GameModeManager::Initialize() {
 	// Delete any game modes on the stack
-	while (game_stack.size() != 0) {
-		delete game_stack.back();
-		game_stack.pop_back();
+	while (_game_stack.size() != 0) {
+		delete _game_stack.back();
+		_game_stack.pop_back();
 	}
 	
 	// Delete any game modes on the push stack
-	while (push_stack.size() != 0) {
-		delete push_stack.back();
-		push_stack.pop_back();
+	while (_push_stack.size() != 0) {
+		delete _push_stack.back();
+		_push_stack.pop_back();
 	}
 	
 	// Reset the pop counter
-	pop_count = 0;
+	_pop_count = 0;
 	
 	// Create a new BootMode and push it onto the true game stack immediately
 	BootMode* BM = new BootMode();
-	game_stack.push_back(BM);
+	_game_stack.push_back(BM);
+	_state_change = true;
 }
 
 
 
 // Free the top mode on the stack and pop it off
 inline void GameModeManager::Pop() {
-	pop_count++;
+	_pop_count++;
+	_state_change = true;
 }
 
 
 
 // Pop off all game modes
 void GameModeManager::PopAll() {
-	pop_count = game_stack.size();
+	_pop_count = _game_stack.size();
 }
 
 
 // Push a new game mode onto the stack
 inline void GameModeManager::Push(GameMode* gm) {
-	push_stack.push_back(gm);
+	_push_stack.push_back(gm);
+	_state_change = true;
 }
 
 
 
 // Returns the mode type of the game mode on the top of the stack
 inline uint8 GameModeManager::GetGameType() {
-	if (game_stack.empty())
+	if (_game_stack.empty())
 		return ENGINE_DUMMY_MODE;
 	else
-		return game_stack.back()->mode_type;
+		return _game_stack.back()->mode_type;
 }
 
 
 
 // Returns a pointer to the game mode that's currently on the top of the stack
 GameMode* GameModeManager::GetTop() {
-	if (game_stack.empty())
+	if (_game_stack.empty())
 		return NULL;
 	else
-		return game_stack.back();
+		return _game_stack.back();
 }
 
 
 // Checks if any game modes need to be pushed or popped off the stack, then updates the top stack mode.
 void GameModeManager::Update(uint32 time_elapsed) {
-	while (pop_count != 0) {
-		if (game_stack.empty()) {
-			if (ENGINE_DEBUG) {
-				cerr << "ENGINE: ERROR: Tried to pop off more game modes than were on the stack!" << endl;
+	// If a Push() or Pop() function was called, we need to adjust the state of the game stack.
+	if (_state_change == true) {
+		// Pop however many game modes we need to from the stop of thes tack
+		while (_pop_count != 0) {
+			if (_game_stack.empty()) { 
+				if (ENGINE_DEBUG) {
+					cerr << "ENGINE: WARNING: Tried to pop off more game modes than were on the stack!" << endl;
+				}
+				break; // Exit the loop
 			}
-			break; // Exit the loop
+			delete _game_stack.back();
+			_game_stack.pop_back();
+			_pop_count--;
 		}
-		delete game_stack.back();
-		game_stack.pop_back();
-		pop_count--;
-	}
-	
-	// Push any new game modes onto the true game stack.
-	while (push_stack.size() != 0) {
-		game_stack.push_back(push_stack.back());
-		push_stack.pop_back();
+		
+		// Push any new game modes onto the true game stack.
+		while (_push_stack.size() != 0) {
+			_game_stack.push_back(_push_stack.back());
+			_push_stack.pop_back();
+		}
+		
+		// Make sure there is a game mode on the stack, otherwise we'll get a segementation fault.
+		if (_game_stack.empty()) {
+			cerr << "ENGINE: ERROR: Game stack is empty! Now re-initializing boot mode." << endl;
+			Initialize();
+		}
+		
+		// Call the newly active game mode's "AtTop()" function to re-initialize class members
+		// game_stack.back()->AtTop();
+		
+		// Reset the state change variable
+		_state_change = false;
 	}
 	
 	// Call the Update function on the top stack mode (the active game mode)
-	game_stack.back()->Update(time_elapsed);
+	_game_stack.back()->Update(time_elapsed);
 }
 
 
 // Used for debugging purposes ONLY. Prints the contents of the game mode stack.
 void GameModeManager::PrintStack() {
 	cout << "ENGINE: Printing Game Stack" << endl;
-	if ( game_stack.size() == 0 ) {
+	if (_game_stack.size() == 0) {
 		cout << "***ERROR: Game stack is empty!" << endl;
 		return;
 	}
 
 	cout << "***top of stack***" << endl;
-	for (int32 i = static_cast<int32>(game_stack.size()) - 1; i >= 0; i--)
-		cout << " index: " << i << " type: " << game_stack[i]->mode_type << endl;
+	for (int32 i = static_cast<int32>(_game_stack.size()) - 1; i >= 0; i--)
+		cout << " index: " << i << " type: " << _game_stack[i]->mode_type << endl;
 	cout << "***bottom of stack***" << endl;
 }
 
@@ -223,12 +243,12 @@ void GameModeManager::PrintStack() {
 // The constructor initalize all the data fields inside the GameSettings class
 GameSettings::GameSettings() {
 	if (ENGINE_DEBUG) cout << "ENGINE: GameSettings constructor invoked" << endl;
-	pause_volume_action = ENGINE_SAME_VOLUME;
-	not_done = true;
-	last_update = 0;
-	fps_timer = 0;
-	fps_counter = 0;
-	fps_rate = 0.0;
+	_pause_volume_action = ENGINE_SAME_VOLUME;
+	_not_done = true;
+	_last_update = 0;
+	_fps_timer = 0;
+	_fps_counter = 0;
+	_fps_rate = 0.0;
 
 	// Remaining members are initialized by GameData->LoadGameSettings(), called in main.cpp
 }
@@ -245,16 +265,16 @@ GameSettings::~GameSettings() {
 // Returns the difference between the time now and last_update (in ms) and calculates frame rate
 uint32 GameSettings::UpdateTime() {
 	uint32 tmp;
-	tmp = last_update;
-	last_update = SDL_GetTicks();
-	tmp = last_update - tmp;      // tmp = time now minus time this function was last called
-	fps_timer += tmp;
-	fps_counter++;
+	tmp = _last_update;
+	_last_update = SDL_GetTicks();
+	tmp = _last_update - tmp;      // tmp = time now minus time this function was last called
+	_fps_timer += tmp;
+	_fps_counter++;
 
-	if (fps_timer >= 1000) { // One second or more has expired, so update the FPS rate
-		fps_rate = 1000 * static_cast<float>(fps_counter) / static_cast<float>(fps_timer);
-		fps_counter = 0;
-		fps_timer = 0;
+	if (_fps_timer >= 1000) { // One second or more has expired, so update the FPS rate
+		_fps_rate = 1000 * static_cast<float>(_fps_counter) / static_cast<float>(_fps_timer);
+		_fps_counter = 0;
+		_fps_timer = 0;
 		// DEFUNCT: cout << "FPS: " << fps_rate << endl; 
 		// Need to make a call the the DrawFPS function in GameVideo here.
 	}
@@ -266,8 +286,8 @@ uint32 GameSettings::UpdateTime() {
 
 // Set up the timers for the first frame draw
 void GameSettings::SetTimer() {
-	last_update = SDL_GetTicks();
-	fps_timer = 0;
+	_last_update = SDL_GetTicks();
+	_fps_timer = 0;
 }
 
 
@@ -279,63 +299,63 @@ void GameSettings::SetTimer() {
 // Initialize class members, call GameData routines for key and joystick initialization
 GameInput::GameInput() {
 	if (ENGINE_DEBUG) cout << "ENGINE: GameInput constructor invoked" << endl;
-	up_state = false;
-	up_press = false;
-	up_release = false;
+	_up_state = false;
+	_up_press = false;
+	_up_release = false;
 
-	down_state = false;
-	down_press = false;
-	down_release = false;
+	_down_state = false;
+	_down_press = false;
+	_down_release = false;
 
-	left_state = false;
-	left_press = false;
-	left_release = false;
+	_left_state = false;
+	_left_press = false;
+	_left_release = false;
 
-	right_state = false;
-	right_press = false;
-	right_release = false;
+	_right_state = false;
+	_right_press = false;
+	_right_release = false;
 
-	confirm_state = false;
-	confirm_press = false;
-	confirm_release = false;
+	_confirm_state = false;
+	_confirm_press = false;
+	_confirm_release = false;
 
-	cancel_state = false;
-	cancel_press = false;
-	cancel_release = false;
+	_cancel_state = false;
+	_cancel_press = false;
+	_cancel_release = false;
 
-	menu_state = false;
-	menu_press = false;
-	menu_release = false;
+	_menu_state = false;
+	_menu_press = false;
+	_menu_release = false;
 
-	swap_state = false;
-	swap_press = false;
-	swap_release = false;
+	_swap_state = false;
+	_swap_press = false;
+	_swap_release = false;
 
-	right_select_state = false;
-	right_select_press = false;
-	right_select_release = false;
+	_right_select_state = false;
+	_right_select_press = false;
+	_right_select_release = false;
 
-	left_select_state = false;
-	left_select_press = false;
-	left_select_release = false;
+	_left_select_state = false;
+	_left_select_press = false;
+	_left_select_release = false;
 
-	Joystick.js = NULL;
+	_Joystick._js = NULL;
 
 	// Because of these calls, these classes must be created before GameInput
-	ModeManager = GameModeManager::_GetReference();
-	SettingsManager = GameSettings::_GetReference();
+	_ModeManager = GameModeManager::_GetReference();
+	_SettingsManager = GameSettings::_GetReference();
 	GameData *DataManager = GameData::_GetReference();
 
 	// CALL HERE: Call DataManager->SomeFn(Key&, Joystick&); to setup KeyState and JoystickState
-	DataManager->LoadKeyJoyState(&Key, &Joystick);
+	DataManager->LoadKeyJoyState(&_Key, &_Joystick);
 }
 
 
 
 GameInput::~GameInput() {
 	if (ENGINE_DEBUG) cout << "ENGINE: GameInput destructor invoked" << endl;
-	if (Joystick.js != NULL) // If its open, close the joystick before exiting
-		SDL_JoystickClose(Joystick.js);
+	if (_Joystick._js != NULL) // If its open, close the joystick before exiting
+		SDL_JoystickClose(_Joystick._js);
 }
 
 
@@ -344,38 +364,38 @@ void GameInput::EventHandler() {
 	SDL_Event event;	// Holds the game event
 
 	// Reset all of the press and release flags so they don't get detected twice.
-	up_press = false;
-	up_release = false;
-	down_press = false;
-	down_release = false;
-	left_press = false;
-	left_release = false;
-	right_press = false;
-	right_release = false;
-	confirm_press = false;
-	confirm_release = false;
-	cancel_press = false;
-	cancel_release = false;
-	menu_press = false;
-	menu_release = false;
-	swap_press = false;
-	swap_release = false;
-	right_select_press = false;
-	right_select_release = false;
-	left_select_press = false;
-	left_select_release = false;
+	_up_press = false;
+	_up_release = false;
+	_down_press = false;
+	_down_release = false;
+	_left_press = false;
+	_left_release = false;
+	_right_press = false;
+	_right_release = false;
+	_confirm_press = false;
+	_confirm_release = false;
+	_cancel_press = false;
+	_cancel_release = false;
+	_menu_press = false;
+	_menu_release = false;
+	_swap_press = false;
+	_swap_release = false;
+	_right_select_press = false;
+	_right_select_release = false;
+	_left_select_press = false;
+	_left_select_release = false;
 
 	while (SDL_PollEvent(&event)) { // Loops until we are out of events to process
 		if (event.type == SDL_QUIT) {
 
 			// We quit the game without question if we are in BootMode or QuitMode
-			if (ModeManager->GetGameType() == ENGINE_BOOT_MODE || ModeManager->GetGameType() == ENGINE_QUIT_MODE) {
-				SettingsManager->ExitGame();
+			if (_ModeManager->GetGameType() == ENGINE_BOOT_MODE || _ModeManager->GetGameType() == ENGINE_QUIT_MODE) {
+				_SettingsManager->ExitGame();
 			}
 			// Otherwise, we push QuitMode onto the stack
 			else {
 				QuitMode *QM = new QuitMode();
-				ModeManager->Push(QM);
+				_ModeManager->Push(QM);
 			}
 			return;
 		}
@@ -385,11 +405,11 @@ void GameInput::EventHandler() {
 			break;
 		}
 		else if (event.type == SDL_KEYUP || event.type == SDL_KEYDOWN) {
-			KeyEventHandler(&event.key);
+			_KeyEventHandler(&event.key);
 			break;
 		}
 		else {
-			JoystickEventHandler(&event);
+			_JoystickEventHandler(&event);
 			break;
 		} // switch (event.type)
 	}
@@ -398,98 +418,110 @@ void GameInput::EventHandler() {
 
 
 // Handles all keyboard events for the game
-void GameInput::KeyEventHandler(SDL_KeyboardEvent *key_event) {
+void GameInput::_KeyEventHandler(SDL_KeyboardEvent *key_event) {
 	if (key_event->type == SDL_KEYDOWN) { // Key was pressed
 		if (key_event->keysym.mod & KMOD_CTRL) { // CTRL key was held down
-			if (key_event->keysym.sym == SDLK_f) {
-				//if (ENGINE_DEBUG) cout << " Toggle Fullscreen!" << endl;
+			if (key_event->keysym.sym == SDLK_a) {	
+				// Toggle the display of advanced video engine information
+				GameVideo *VideoManager = GameVideo::_GetReference();
+				VideoManager->ToggleAdvancedDisplay();
+			}
+			else if (key_event->keysym.sym == SDLK_f) {
+				// Toggle between full-screen and windowed mode
+				GameVideo *VideoManager = GameVideo::_GetReference();
+				VideoManager->ToggleFullscreen();
+				VideoManager->ApplySettings();
 				return;
 			}
+			else if (key_event->keysym.sym == SDLK_q) {
+				// Quit the game without question if we are in BootMode or QuitMode
+				if (_ModeManager->GetGameType() == ENGINE_BOOT_MODE || _ModeManager->GetGameType() == ENGINE_QUIT_MODE) {
+					_SettingsManager->ExitGame();
+				}
+				// Otherwise, push QuitMode onto the stack
+				else {
+					QuitMode *QM = new QuitMode();
+					_ModeManager->Push(QM);
+				}
+			}
+			// Will add a call to VideoManager to swap the FPS display
+			// else if (key_event->keysym.sym == SDLK_r) { 
+			// 	VideoManager->ToggleFPS();
+			// }
 			else if (key_event->keysym.sym == SDLK_s) {
-				//if (ENGINE_DEBUG) cout << " Took Screenshot!" << endl;
-
+				// Take a screenshot of the current game
 				GameVideo *VideoManager = GameVideo::_GetReference();
 				VideoManager->MakeScreenshot();
 				return;
 			}
 			else if (key_event->keysym.sym == SDLK_t) {
-				// press T to display and cycle through the texture sheets
+				// Display and cycle through the texture sheets
 				GameVideo *VideoManager = GameVideo::_GetReference();
 				VideoManager->DEBUG_NextTexSheet();
 			}
-			else if (key_event->keysym.sym == SDLK_q) {
-				// Quit the game without question if we are in BootMode or QuitMode
-				if (ModeManager->GetGameType() == ENGINE_BOOT_MODE || ModeManager->GetGameType() == ENGINE_QUIT_MODE) {
-					SettingsManager->ExitGame();
-				}
-				// Otherwise, push QuitMode onto the stack
-				else {
-					QuitMode *QM = new QuitMode();
-					ModeManager->Push(QM);
-				}
-			}
+			
 			else
 				return;
 		}
 
 		// Note: a switch-case statement won't work here because Key.up is not an
 		// integer value the compiler will whine and cry about it ;_;
-		if (key_event->keysym.sym == Key.up) {
+		if (key_event->keysym.sym == _Key._up) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: up key pressed." << endl;
-			up_state = true;
-			up_press = true;
+			_up_state = true;
+			_up_press = true;
 			return;
 		}
-		else if (key_event->keysym.sym == Key.down) {
+		else if (key_event->keysym.sym == _Key._down) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: down key pressed." << endl;
-			down_state = true;
-			down_press = true;
+			_down_state = true;
+			_down_press = true;
 			return;
 		}
-		else if (key_event->keysym.sym == Key.left) {
+		else if (key_event->keysym.sym == _Key._left) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: left key pressed." << endl;
-			left_state = true;
-			left_press = true;
+			_left_state = true;
+			_left_press = true;
 			return;
 		}
-		else if (key_event->keysym.sym == Key.right) {
+		else if (key_event->keysym.sym == _Key._right) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: right key pressed." << endl;
-			right_state = true;
-			right_press = true;
+			_right_state = true;
+			_right_press = true;
 			return;
 		}
-		else if (key_event->keysym.sym == Key.confirm) {
+		else if (key_event->keysym.sym == _Key._confirm) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: confirm key pressed." << endl;
-			confirm_state = true;
-			confirm_press = true;
+			_confirm_state = true;
+			_confirm_press = true;
 			return;
 		}
-		else if (key_event->keysym.sym == Key.cancel) {
+		else if (key_event->keysym.sym == _Key._cancel) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: cancel key pressed." << endl;
-			cancel_state = true;
-			cancel_press = true;
+			_cancel_state = true;
+			_cancel_press = true;
 			return;
 		}
-		else if (key_event->keysym.sym == Key.menu) {
+		else if (key_event->keysym.sym == _Key._menu) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: menu key pressed." << endl;
-			menu_state = true;
-			menu_press = true;
+			_menu_state = true;
+			_menu_press = true;
 			return;
 		}
-		else if (key_event->keysym.sym == Key.pause) {
+		else if (key_event->keysym.sym == _Key._pause) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: pause key pressed." << endl;
 			// Don't pause if we are in BootMode, QuitMode
-			if (ModeManager->GetGameType() == ENGINE_BOOT_MODE || ModeManager->GetGameType() == ENGINE_QUIT_MODE) {
+			if (_ModeManager->GetGameType() == ENGINE_BOOT_MODE || _ModeManager->GetGameType() == ENGINE_QUIT_MODE) {
 				return;
 			}
 			// If we are in PauseMode, unpause the game
-			else if (ModeManager->GetGameType() == ENGINE_PAUSE_MODE) {
-				ModeManager->Pop(); // We're no longer in pause mode, so pop it from the stack
+			else if (_ModeManager->GetGameType() == ENGINE_PAUSE_MODE) {
+				_ModeManager->Pop(); // We're no longer in pause mode, so pop it from the stack
 			}
 			// Otherwise, we push PauseMode onto the stack
 			else {
 				PauseMode *PM = new PauseMode();
-				ModeManager->Push(PM);
+				_ModeManager->Push(PM);
 			}
 			return;
 		}
@@ -499,46 +531,46 @@ void GameInput::KeyEventHandler(SDL_KeyboardEvent *key_event) {
 		if (key_event->keysym.mod & KMOD_CTRL) // Don't recognize a key release if ctrl is down
 			return;
 
-		if (key_event->keysym.sym == Key.up) {
+		if (key_event->keysym.sym == _Key._up) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: up key released." << endl;
-			up_state = false;
-			up_release = true;
+			_up_state = false;
+			_up_release = true;
 			return;
 		}
-		else if (key_event->keysym.sym == Key.down) {
+		else if (key_event->keysym.sym == _Key._down) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: down key released." << endl;
-			down_state = false;
-			down_release = true;
+			_down_state = false;
+			_down_release = true;
 			return;
 		}
-		else if (key_event->keysym.sym == Key.left) {
+		else if (key_event->keysym.sym == _Key._left) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: left key released." << endl;
-			left_state = false;
-			left_release = true;
+			_left_state = false;
+			_left_release = true;
 			return;
 		}
-		else if (key_event->keysym.sym == Key.right) {
+		else if (key_event->keysym.sym == _Key._right) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: right key released." << endl;
-			right_state = false;
-			right_release = true;
+			_right_state = false;
+			_right_release = true;
 			return;
 		}
-		else if (key_event->keysym.sym == Key.confirm) {
+		else if (key_event->keysym.sym == _Key._confirm) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: confirm key released." << endl;
-			confirm_state = false;
-			confirm_release = true;
+			_confirm_state = false;
+			_confirm_release = true;
 			return;
 		}
-		else if (key_event->keysym.sym == Key.cancel) {
+		else if (key_event->keysym.sym == _Key._cancel) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: cancel key released." << endl;
-			cancel_state = false;
-			cancel_release = true;
+			_cancel_state = false;
+			_cancel_release = true;
 			return;
 		}
-		else if (key_event->keysym.sym == Key.menu) {
+		else if (key_event->keysym.sym == _Key._menu) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: menu key released." << endl;
-			menu_state = false;
-			menu_release = true;
+			_menu_state = false;
+			_menu_release = true;
 			return;
 		}
 	}
@@ -547,7 +579,7 @@ void GameInput::KeyEventHandler(SDL_KeyboardEvent *key_event) {
 
 
 // Handles all joystick events for the game (not implemented yet)
-void GameInput::JoystickEventHandler(SDL_Event *js_event) {
+void GameInput::_JoystickEventHandler(SDL_Event *js_event) {
 	switch (js_event->type) {
 		case SDL_JOYAXISMOTION:
 		case SDL_JOYBALLMOTION:

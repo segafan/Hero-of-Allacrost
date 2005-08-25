@@ -75,15 +75,15 @@ const uint32 JOYSTICK_OP  = 4;
 class BootMode : public hoa_engine::GameMode {
 private:
 	//! If true, no menus will be drawn (so the player can get a nice good look at the background image).
-	bool menu_hidden;
+	bool _menu_hidden;
 	//! A vector storing various menu pointers in a stack-like structure.
-	std::vector<uint32> vmenu_index;
+	std::vector<uint32> _vmenu_index;
 	//! Music to be used at the boot screen.
-	std::vector<hoa_audio::MusicDescriptor> boot_music;
+	std::vector<hoa_audio::MusicDescriptor> _boot_music;
 	//! Sounds that will be used at the boot screen.
-	std::vector<hoa_audio::SoundDescriptor> boot_sound;
+	std::vector<hoa_audio::SoundDescriptor> _boot_sound;
 	//! Images that will be used at the boot screen.
-	std::vector<hoa_video::ImageDescriptor> boot_images;
+	std::vector<hoa_video::ImageDescriptor> _boot_images;
 
 	/*!
 	 *  \brief Animates the game logo when this class is first initialized.
@@ -94,55 +94,55 @@ private:
 	 *  - The sword spinning up and around a few times (with sound)
 	 *  - The sword slicing down into its final position as a t (with sound)
 	 */
-	void AnimateLogo();
+	void _AnimateLogo();
 
 	/*!
 	 *  \brief Redefines a key to be mapped to another command.
 	 *  \param &change_key The key to be re-mapped.
 	 */
-	void RedefineKey(SDLKey& change_key);
+	void _RedefineKey(SDLKey& change_key);
 
 	//! Updates the game state when "New Game" is selected in the main menu.
-	void UpdateNewMenu();
+	void _UpdateNewMenu();
 	//! Updates the game state when "Load Game" is selected in the main menu.
-	void UpdateLoadMenu();
+	void _UpdateLoadMenu();
 	//! Updates the game state when "Options" is selected in the main menu.
-	void UpdateOptionsMenu();
+	void _UpdateOptionsMenu();
 	//! Updates the game state when "Credits" is selected in the main menu.
-	void UpdateCreditsMenu();
+	void _UpdateCreditsMenu();
 	//! Updates the game state when "Hide Menu" is selected in the main menu.
-	void UpdateHideMenu();
+	void _UpdateHideMenu();
 	//! Updates the game state when "Quit Menu" is selected in the main menu.
-	void UpdateQuitMenu();
+	void _UpdateQuitMenu();
 
 	//! Updates the game state when "Video" is selected in the options menu.
-	void UpdateVideoOptions();
+	void _UpdateVideoOptions();
 	//! Updates the game state when "Audio" is selected in the options menu.
-	void UpdateAudioOptions();
+	void _UpdateAudioOptions();
 	//! Updates the game state when "Language" is selected in the options menu.
-	void UpdateLanguageOptions();
+	void _UpdateLanguageOptions();
 	//! Updates the game state when "Keyboard" is selected in the options menu.
-	void UpdateKeyOptions();
+	void _UpdateKeyOptions();
 	//! Updates the game state when "Joystick" is selected in the options menu.
-	void UpdateJoystickOptions();
+	void _UpdateJoystickOptions();
 
 	//! Draws the menu when "Load Game" has been selected in the main menu.
-	void DrawLoadMenu();
+	void _DrawLoadMenu();
 	//! Draws the menu when a saved game has been selected from the "Load Game" menu.
-	void DrawLoadGame();
+	void _DrawLoadGame();
 	//! Draws the menu when "Video" has been selected in the options menu.
-	void DrawVideoOptions();
+	void _DrawVideoOptions();
 	//! Draws the menu when "Audio" has been selected in the options menu.
-	void DrawAudioOptions();
+	void _DrawAudioOptions();
 	//! Draws the menu when "Language" has been selected in the options menu.
-	void DrawLanguageOptions();
+	void _DrawLanguageOptions();
 	//! Draws the menu when "Keyboard" has been selected in the options menu.
-	void DrawKeyOptions();
+	void _DrawKeyOptions();
 	//! Draws the menu when "Joystick" has been selected in the options menu.
-	void DrawJoystickOptions();
+	void _DrawJoystickOptions();
 
 	//! Draws the menu when "Credits" has been selected in the main menu.
-	void DrawCredits();
+	void _DrawCredits();
 public:
 	//! Initializes class members and loads media data.
 	BootMode();

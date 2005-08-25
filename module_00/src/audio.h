@@ -106,9 +106,9 @@ public:
  *****************************************************************************/
 class SoundDescriptor {
 public:
-	SoundDescriptor() { id = 0; }
+	SoundDescriptor() { _id = 0; }
 	//! \param fn The string to set the filename member to.
-	SoundDescriptor(std::string fn) { filename = fn; id = 0; }
+	SoundDescriptor(std::string fn) { filename = fn; _id = 0; }
 	//! The filename for the sound, without the prefixed \c snd/ directory or \c .wav extension.
 	std::string filename;
 private:
@@ -116,7 +116,7 @@ private:
 	 *
 	 *  Zero indicates it is not loaded in memory, however, the converse is not always true.
 	 */
-	uint32 id;
+	uint32 _id;
 	friend class GameAudio;
 };
 
@@ -133,8 +133,8 @@ private:
  *****************************************************************************/
 class MusicDescriptor {
 public:
-	MusicDescriptor() { id = 0; }
-	MusicDescriptor(std::string fn) { filename = fn; id = 0; }
+	MusicDescriptor() { _id = 0; }
+	MusicDescriptor(std::string fn) { filename = fn; _id = 0; }
 	//! The filename for the music, without the prefixed \c mus/ directory or \c .ogg extension.
 	std::string filename;
 private:
@@ -142,7 +142,7 @@ private:
 	 *
 	 *  Zero indicates it is not loaded in memory, however, the converse is not always true.
 	 */
-	uint32 id;
+	uint32 _id;
 	friend class GameAudio;
 };
 
@@ -183,17 +183,17 @@ class GameAudio {
 private:
 	SINGLETON_DECLARE(GameAudio); // Semi-colon not needed here, will it create a warning?
 	//! A boolean value that disables all audio functions when set to false.
-	bool audio_on;
+	bool _audio_on;
 	//! Indicates the array index of the song currently playing in music_cache.
-	int32 current_track;
+	int32 _current_track;
 	//! Retains the next id value to give a new music item.
-	uint32 music_id;
+	uint32 _music_id;
 	//! Retains the next id value to give a new sound item.
-	uint32 sound_id;
+	uint32 _sound_id;
 	//! An array storing up to MAX_CACHED_MUSIC MusicItem objects loaded into memory.
-	private_audio::MusicItem music_cache[private_audio::MAX_CACHED_MUSIC];
+	private_audio::MusicItem _music_cache[private_audio::MAX_CACHED_MUSIC];
 	//! An array storing up to MAX_CACHED_SOUNDS SoundItem objects loaded into memory.
-	private_audio::SoundItem sound_cache[private_audio::MAX_CACHED_SOUNDS];
+	private_audio::SoundItem _sound_cache[private_audio::MAX_CACHED_SOUNDS];
 
 	/*!
 	 *  \brief  Finds and allocates the first free index found in the music_cache.
@@ -203,18 +203,18 @@ private:
 	 *
 	 *  \return The music_cache index allocated for the new music data.
 	 */
-	uint32 AllocateMusicIndex();
+	uint32 _AllocateMusicIndex();
 	/*!
 	 *  \brief Searches music_cache for an id that matches the function parameter.
 	 *  \param mus_id The id number to search the cache for.
 	 *  \return The cache index of the MusicItem with an id matching mus_id. Returns -1 if not found.
 	 */
-	int32 FindMusicIndex(uint32 mus_id);
+	int32 _FindMusicIndex(uint32 mus_id);
 	/*!
 	 *  \brief Frees a MusicItem in the music_cache.
 	 *  \param index The index in the music_cache to free.
 	 */
-	void FreeMusic(uint32 index);
+	void _FreeMusic(uint32 index);
 
 	/*!
 	 *  \brief  Finds and allocates the first free index found in the sound_cache.
@@ -224,18 +224,18 @@ private:
 	 *
 	 *  \return The sound_cache index allocated for the new sound data.
 	 */
-	uint32 AllocateSoundIndex();
+	uint32 _AllocateSoundIndex();
 	/*!
 	 *  \brief Searches sound_cache for an id that matches the function parameter.
 	 *  \param snd_id The id number to search the cache for.
 	 *  \return The cache index of the SoundItem with an id matching snd_id. Returns -1 if not found.
 	 */
-	int32 FindSoundIndex(uint32 snd_id);
+	int32 _FindSoundIndex(uint32 snd_id);
 	/*!
 	 *  \brief Frees a SoundItem in the sound_cache.
 	 *  \param index The index in the sound_cache to free.
 	 */
-	void FreeSound(uint32 index);
+	void _FreeSound(uint32 index);
 
 public:
 	SINGLETON_METHODS(GameAudio);

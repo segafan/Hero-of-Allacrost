@@ -55,8 +55,8 @@ const uint32 ANIMATION_RATE = 300;
 //! \name Screen Coordiante System Constants
 //@{
 //! \brief The number of rows and columns of tiles that compose the screen.
-const float SCREEN_ROWS = 20.0;
-const float SCREEN_COLS = 28.0;
+const float SCREEN_ROWS = 24.0;
+const float SCREEN_COLS = 32.0;
 //@}
 
 //! \name Map State Constants
@@ -188,52 +188,52 @@ private:
 	friend class hoa_data::GameData;
 
 	//! A unique ID value for the map.
-	uint32 map_id;
+	uint32 _map_id;
 	//! A stack indicating the various states the map code is in (ie, exploration, dialogue, script).
-	std::vector<uint32> map_state;
+	std::vector<uint32> _map_state;
 	//! A millisecond counter for use in tile animation.
-	int32 animation_counter;
+	int32 _animation_counter;
 	//! The time elapsed since the last Update() call to MapMode.
-	uint32 time_elapsed;
+	uint32 _time_elapsed;
 
 	//! The number of tile rows in the map.
-	uint32 row_count;
+	uint32 _row_count;
 	//! The number of tile columns in the map.
-	uint32 col_count;
+	uint32 _col_count;
 
 	//! True if this map is to have random encounters.
-	bool random_encounters;
+	bool _random_encounters;
 	//! The average number of steps the player takes before encountering an enemy.
-	uint32 encounter_rate;
+	uint32 _encounter_rate;
 	//! The remaining steps until the player meets their next party of foes.
-	uint32 steps_till_encounter;
+	uint32 _steps_till_encounter;
 
 	//! A 2D vector that represents the map itself.
-	std::vector<std::vector<MapTile> > map_layers;
+	std::vector<std::vector<MapTile> > _map_layers;
 	//! A vector of circular singely-linked lists for each tile frame animation.
-	std::vector<TileFrame*> tile_frames;
+	std::vector<TileFrame*> _tile_frames;
 	//! The normal set of map objects.
-	std::vector<ObjectLayer*> ground_objects;
+	std::vector<ObjectLayer*> _ground_objects;
 	//! Objects that can be both walked under and above on (like bridges).
-	std::vector<ObjectLayer*> middle_objects;
+	std::vector<ObjectLayer*> _middle_objects;
 	//! Objects that are drawn above everything else.
-	std::vector<ObjectLayer*> sky_objects;
+	std::vector<ObjectLayer*> _sky_objects;
 	//! A pointer to the map sprite that the map should focus on.
-	MapSprite *focused_object;
+	MapSprite *_focused_object;
 	//! A "virtual sprite" that serves as a camera, available for use in each map.
-	MapSprite *virtual_sprite;
+	MapSprite *_virtual_sprite;
 
 	//! A vector for miscellaneous map images.
-	static std::vector<hoa_video::ImageDescriptor> map_images;
+	static std::vector<hoa_video::ImageDescriptor> _map_images;
 	//! A vector containing the image for each map tile and frame.
-	std::vector<hoa_video::ImageDescriptor> map_tiles;
+	std::vector<hoa_video::ImageDescriptor> _map_tiles;
 	//! The music that we would like available on the map.
-	std::vector<hoa_audio::MusicDescriptor> map_music;
+	std::vector<hoa_audio::MusicDescriptor> _map_music;
 	//! The specific sounds that the map needs available.
-	std::vector<hoa_audio::SoundDescriptor> map_sound;
+	std::vector<hoa_audio::SoundDescriptor> _map_sound;
 
-//	 vector<MapEvent> map_events;
-//	std::vector<hoa_global::GEnemy> map_enemies;
+//	 vector<MapEvent> _map_events;
+//	std::vector<hoa_global::GEnemy> _map_enemies;
 
 	/*!
 	 * \brief Determines whether an object may be placed on a tile.
@@ -242,7 +242,7 @@ private:
 	 * \param z_occupied The Z level to check for an occupied object.
 	 * \return True if an object may move to the tile, false otherwise.
 	 */
-	bool TileMoveable(uint32 row, uint32 col, uint32 z_occupied);
+	bool _TileMoveable(uint32 row, uint32 col, uint32 z_occupied);
 	
 	/*!
 	 * \brief Determines if an adjacent tile has some sort of interaction
@@ -250,58 +250,58 @@ private:
 	 * \param col The column index of the tile to check.
 	 * \param z_occupied The Z level to check.
 	 */
-	void CheckTile(uint32 row, uint32 col, uint32 z_occupied);
+	void _CheckTile(uint32 row, uint32 col, uint32 z_occupied);
 	/*!
 	 * \brief Attempts to move a sprite in the indicated direction.
 	 * \param direction The direction that the sprite wishes to move.
 	 * \param *sprite A pointer to the sprite itself.
 	 */
-	void SpriteMove(uint32 direction, MapSprite *sprite);
+	void _SpriteMove(uint32 direction, MapSprite *sprite);
 	//! Updates the virtual_sprite class member.
-	void UpdateVirtualSprite();
+	void _UpdateVirtualSprite();
 
 	//! Updates the map when in the explore state.
-	void UpdateExploreState();
+	void _UpdateExploreState();
 	//! Updates the focused player sprite when in the explore state.
 	//! \param *player_sprite A pointer to the sprite to update.
-	void UpdatePlayerExplore(MapSprite *player_sprite);
+	void _UpdatePlayerExplore(MapSprite *player_sprite);
 	//! Updates a NPC sprite when in the explore state.
 	//! \param *npc A pointer to the sprite to update.
-	void UpdateNPCExplore(MapSprite *npc);
+	void _UpdateNPCExplore(MapSprite *npc);
 
 	//! Updates the map when in the dialogue state.
-	void UpdateDialogueState();
+	void _UpdateDialogueState();
 	//! Updates the map when in the script state.
-	void UpdateScriptState();
+	void _UpdateScriptState();
 	//! Updates the movement of all map NPCs.
-	void UpdateNPCMovement();
+	void _UpdateNPCMovement();
 
 	//! Calculates information about how to draw the next map frame.
 	//! \param &mf The refereneced object to put the calculated drawing results into.
-	void GetDrawInfo(private_map::MapFrame& mf);
+	void _GetDrawInfo(private_map::MapFrame& mf);
 
 	// TEMPORARY FUNCTIONS FOR TESTING PURPOSES >>> eventally will be defunct
-	void TempCreateMap();
-	void TempCreateSprites();
+	void _TempCreateMap();
+	void _TempCreateSprites();
 public:
 	//! The name of the map, as seen by the player in the game.
 	std::string mapname;
 	MapMode(uint32 new_map_id);
-	MapMode(uint32 rows, uint32 cols) { row_count = rows; col_count = cols; }
+	MapMode(uint32 rows, uint32 cols) { _row_count = rows; _col_count = cols; }
 	~MapMode();
 
 	//! \name Map Editor Access functions
 	//@{
 	//! \brief Used by the map editor for accessing various map information.
 	//! \note These functions might go defunct if the map editor becomes independent of the game.
-	std::vector<std::vector<MapTile> > GetMapLayers() { return map_layers; }
-	std::vector<hoa_video::ImageDescriptor> GetMapTiles() { return map_tiles; }
-	void SetRows(uint32 num_rows) { row_count = num_rows; }
-	void SetCols(uint32 num_cols) { col_count = num_cols; }
-	void SetMapLayers(std::vector<std::vector<MapTile> > layers) { map_layers = layers; }
-	void SetMapTiles(std::vector<hoa_video::ImageDescriptor> tiles) { map_tiles = tiles; }
-	uint32 GetRows() { return row_count; }
-	uint32 GetCols() { return col_count; }
+	std::vector<std::vector<MapTile> > GetMapLayers() { return _map_layers; }
+	std::vector<hoa_video::ImageDescriptor> GetMapTiles() { return _map_tiles; }
+	void SetRows(uint32 num_rows) { _row_count = num_rows; }
+	void SetCols(uint32 num_cols) { _col_count = num_cols; }
+	void SetMapLayers(std::vector<std::vector<MapTile> > layers) { _map_layers = layers; }
+	void SetMapTiles(std::vector<hoa_video::ImageDescriptor> tiles) { _map_tiles = tiles; }
+	uint32 GetRows() { return _row_count; }
+	uint32 GetCols() { return _col_count; }
 	//@}
 
 	//! Updates the game and calls various sub-update functions depending on the state of map mode.

@@ -56,10 +56,10 @@ class MenuMode : public hoa_engine::GameMode {
 private:
 	friend class hoa_data::GameData;
 
-	hoa_video::ImageDescriptor saved_screen;
-	std::vector<hoa_video::ImageDescriptor> menu_images;
-	std::vector<hoa_audio::MusicDescriptor> menu_music;
-	std::vector<hoa_audio::SoundDescriptor> menu_sound;
+	hoa_video::ImageDescriptor _saved_screen;
+	std::vector<hoa_video::ImageDescriptor> _menu_images;
+	std::vector<hoa_audio::MusicDescriptor> _menu_music;
+	std::vector<hoa_audio::SoundDescriptor> _menu_sound;
 public:
 	MenuMode();
 	~MenuMode();

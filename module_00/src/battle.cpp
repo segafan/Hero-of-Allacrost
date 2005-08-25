@@ -86,7 +86,7 @@ BattleMode::BattleMode() {
 	VideoManager->SetCoordSys(0.0f, (float)SCREEN_LENGTH, 0.0f, (float)SCREEN_HEIGHT);
 	// To Tim: This sets up a cooriate system where "0, 0" is the top left hand corner of the screen,
 	// extends to SCREEN_LENGTH and SCREEN_HEIGHT, and has 1 depth level (ie, it's 2D)
-	m_iCounter = 0;
+	_m_iCounter = 0;
 }
 
 
@@ -103,10 +103,10 @@ void BattleMode::Update(uint32 time_elapsed) {
 	// nothing else should need to know about them.
 	
 	// time_elapsed tells us how long it's been since the last time this function was called.
-	++m_iCounter;
-	cerr << m_iCounter << endl;
+	++_m_iCounter;
+	cerr << _m_iCounter << endl;
 	
-	if (m_iCounter >= 1000)
+	if (_m_iCounter >= 1000)
 		ModeManager->Pop();
 }
 

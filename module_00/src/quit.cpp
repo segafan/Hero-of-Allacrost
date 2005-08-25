@@ -53,7 +53,7 @@ QuitMode::QuitMode() {
 
 	mode_type = ENGINE_QUIT_MODE;
 
-	quit_type = QUIT_CANCEL;
+	_quit_type = QUIT_CANCEL;
 
 
 	switch (SettingsManager->GetPauseVolumeAction()) {
@@ -91,40 +91,40 @@ void QuitMode::Update(uint32 time_elapsed) {
 
 	// Move the menu selected cursor as appropriate
 	if (InputManager->LeftPress()) {
-		switch (quit_type) {
+		switch (_quit_type) {
 			case QUIT_GAME:
-				quit_type = QUIT_CANCEL;
+				_quit_type = QUIT_CANCEL;
 				cout << "Cancel" << endl;
 				break;
 			case QUIT_TO_BOOTMENU:
-				quit_type = QUIT_GAME;
+				_quit_type = QUIT_GAME;
 				cout << "Quit Game" << endl;
 				break;
 			case QUIT_CANCEL:
-				quit_type = QUIT_TO_BOOTMENU;
+				_quit_type = QUIT_TO_BOOTMENU;
 				cout << "Quit to Bootmenu" << endl;
 				break;
 		}
 	}
 	else if (InputManager->RightPress()) {
-		switch (quit_type) {
+		switch (_quit_type) {
 			case QUIT_GAME:
-				quit_type = QUIT_TO_BOOTMENU;
+				_quit_type = QUIT_TO_BOOTMENU;
 				cout << "Quit to Bootmenu" << endl;
 				break;
 			case QUIT_TO_BOOTMENU:
-				quit_type = QUIT_CANCEL;
+				_quit_type = QUIT_CANCEL;
 				cout << "Cancel" << endl;
 				break;
 			case QUIT_CANCEL:
-				quit_type = QUIT_GAME;
+				_quit_type = QUIT_GAME;
 				cout << "Quit Game" << endl;
 				break;
 		}
 	}
 
 	// The user really doesn't want to quit after all, so restore the game audio and state
-	if (InputManager->CancelPress() || (InputManager->ConfirmPress() && quit_type == QUIT_CANCEL)) {
+	if (InputManager->CancelPress() || (InputManager->ConfirmPress() && _quit_type == QUIT_CANCEL)) {
 		switch (SettingsManager->GetPauseVolumeAction()) {
 			case ENGINE_PAUSE_AUDIO:
 				AudioManager->ResumeAudio();
@@ -140,7 +140,7 @@ void QuitMode::Update(uint32 time_elapsed) {
 	}
 
 	// Restore the game audio, pop QuitMode off the stack, and push BootMode
-	else if (InputManager->ConfirmPress() && quit_type == QUIT_TO_BOOTMENU) {
+	else if (InputManager->ConfirmPress() && _quit_type == QUIT_TO_BOOTMENU) {
 		switch (SettingsManager->GetPauseVolumeAction()) {
 			case ENGINE_PAUSE_AUDIO:
 				AudioManager->ResumeAudio();
@@ -158,7 +158,7 @@ void QuitMode::Update(uint32 time_elapsed) {
 	}
 
 	// The user has confirmed that they want to quit.
-	else if (InputManager->ConfirmPress() && quit_type) {
+	else if (InputManager->ConfirmPress() && _quit_type) {
 		SettingsManager->ExitGame();
 	}
 }

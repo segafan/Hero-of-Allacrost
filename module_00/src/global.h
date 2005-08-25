@@ -171,7 +171,7 @@ class GItem : public GObject {
 private:
 	//! \brief A bit-mask stating where the item may be used.
 	//! See the Game Item Usage Type constants for a list of locations.
-	uint8 use_case;
+	uint8 _use_case;
 
 	GItem(const GItem&) {}
 	GItem& operator=(const GItem&) {}
@@ -183,8 +183,8 @@ public:
 	//! \name Public Member Access Functions
 	//@{
 	//! \brief Used for setting and getting the values of the various class members.
-	void SetUseCase(uint8 use) { use_case = use; }
-	uint8 GetUseCase() { return use_case; }
+	void SetUseCase(uint8 use) { _use_case = use; }
+	uint8 GetUseCase() { return _use_case; }
 	//@}
 };
 
@@ -208,7 +208,7 @@ public:
 class GSkillBook : public GObject {
 private:
 	//! The list of skills that this skill book contains.
-	std::vector<GSkill> skills;
+	std::vector<GSkill> _skills;
 
 	GSkillBook(const GSkillBook&) {}
 	GSkillBook& operator=(const GSkillBook&) {}
@@ -289,9 +289,9 @@ public:
 class GSkill {
 private:
 	//! The name of the skill, as will be displayed to the player on the screen.
-	std::string skill_name;
+	std::string _skill_name;
 	//! The amount of skill points (SP) that the skill consumes (zero is valid).
-	uint32 sp_usage;
+	uint32 _sp_usage;
 	
 	GSkill(const GSkill&) {}
 	GSkill& operator=(const GSkill&) {}
@@ -326,22 +326,22 @@ public:
 class GAttackPoint {
 private:
 	//! The x position of the attack point on the sprite.
-	float x_position;
+	float _x_position;
 	//! The y position of the attack point on the sprite.
-	float y_position;
+	float _y_position;
 
 	//! The amount of defense ability this attack point has.
-	uint32 defense;
+	uint32 _defense;
 	//! The amount of evade ability this attack point has.
-	uint32 evade;
+	uint32 _evade;
 	//! A bit-mask of elemental weaknesses of the attack point.
-	uint8 elemental_weakness;
+	uint8 _elemental_weakness;
 	//! A bit-mask of elemental resistances of the attack point.
-	uint8 elemental_resistance;
+	uint8 _elemental_resistance;
 	//! A bit-mask of status weaknesses of the attack point.
-	uint8 status_weakness;
+	uint8 _status_weakness;
 	//! A bit-mask of status resistances of the attack point.
-	uint8 status_resistance;
+	uint8 _status_resistance;
 public:
 	GAttackPoint(float x, float y, uint32 def, uint32 eva, uint8 elem_weak,
 	             uint8 elem_res, uint8 stat_weak, uint8 stat_res);
@@ -353,22 +353,22 @@ public:
 	//! \name Public Member Access Functions
 	//@{
 	//! \brief Used for setting and getting the values of the various class members.
-	void SetXPosition(float x) { x_position = x; }
-	float GetXPosition() { return x_position; }
-	void SetYPosition(float y) { y_position = y; }
-	float GetYPosition() { return y_position; }
-	void SetDefense(uint32 def) { defense = def; }
-	uint32 GetDefense() { return defense; }
-	void SetEvade(uint32 eva) { evade = eva; }
-	uint32 GetEvade() { return evade; }
-	void SetElementWeakness(uint8 elem_weak) { elemental_weakness = elem_weak; }
-	uint8 GetElementWeakness() { return elemental_weakness; }
-	void SetElementResistance(uint8 elem_res) { elemental_resistance = elem_res; }
-	uint8 GetElementResistance() { return elemental_resistance; }
-	void SetStatusWeakness(uint8 stat_weak) { status_weakness = stat_weak; }
-	uint8 GetStatusWeakness() { return status_weakness; }
-	void SetStatusResistance(uint8 stat_res) { status_resistance = stat_res; }
-	uint8 GetStatusResistance() { return status_resistance; }
+	void SetXPosition(float x) { _x_position = x; }
+	float GetXPosition() { return _x_position; }
+	void SetYPosition(float y) { _y_position = y; }
+	float GetYPosition() { return _y_position; }
+	void SetDefense(uint32 def) { _defense = def; }
+	uint32 GetDefense() { return _defense; }
+	void SetEvade(uint32 eva) { _evade = eva; }
+	uint32 GetEvade() { return _evade; }
+	void SetElementWeakness(uint8 elem_weak) { _elemental_weakness = elem_weak; }
+	uint8 GetElementWeakness() { return _elemental_weakness; }
+	void SetElementResistance(uint8 elem_res) { _elemental_resistance = elem_res; }
+	uint8 GetElementResistance() { return _elemental_resistance; }
+	void SetStatusWeakness(uint8 stat_weak) { _status_weakness = stat_weak; }
+	uint8 GetStatusWeakness() { return _status_weakness; }
+	void SetStatusResistance(uint8 stat_res) { _status_resistance = stat_res; }
+	uint8 GetStatusResistance() { return _status_resistance; }
 	//@}
 };
 
@@ -403,69 +403,61 @@ public:
 class GEnemy {
 private:
 	//! The enemy's name, as seen by the player on the screen.
-	std::string enemy_name;
+	std::string _enemy_name;
 	//! The base of the character's file name, used to retrieve various data for the enemy.
-	std::string filename;
+	std::string _filename;
 	//! An identification number for the enemy type.
-	uint32 enemy_id;
+	uint32 _enemy_id;
 	//! The width of the enemy sprite, in number of "virtual battle tiles".
-	uint32 enemy_width;
+	uint32 _enemy_width;
 	//! The height of the enemy sprite, in number of "virtual battle tiles".
-	uint32 enemy_height;
+	uint32 _enemy_height;
 	//! The skill set that the enemy may choose from to take actions.
-	std::vector<GSkill> enemy_skills;
+	std::vector<GSkill> _enemy_skills;
 	//! The various attack points for the enemy.
-	std::vector<GAttackPoint> attack_points;
+	std::vector<GAttackPoint> _attack_points;
 	//! The frame images for the enemy sprite.
-	std::vector<hoa_video::ImageDescriptor> sprite_frames;
+	std::vector<hoa_video::ImageDescriptor> _sprite_frames;
 
 	//! The current number of hit points for the enemy.
-	uint32 hit_points;
+	uint32 _hit_points;
 	//! The maximum number of hit points that the enemy may have.
-	uint32 max_hit_points;
+	uint32 _max_hit_points;
 	//! The current number of skill points for the enemy.
-	uint32 skill_points;
+	uint32 _skill_points;
 	//! The maximum number of skill points that the enemy may have.
-	uint32 max_skill_points;
+	uint32 _max_skill_points;
 	//! The number of experience points the enemy gives the party when defeated.
-	uint32 experience_points;
+	uint32 _experience_points;
 	//! The current experience level of the enemy.
-	uint32 experience_level;
+	uint32 _experience_level;
 	//! The strength index of the enemy.
-	uint32 strength;
+	uint32 _strength;
 	//! The intelligence index of the enemy.
-	uint32 intelligence;
+	uint32 _intelligence;
 	//! The agility index of the enemy.
-	uint32 agility;
+	uint32 _agility;
 
 	//! \name Starting Base Statistics
 	//@{
 	//! \brief These are the base statistics for the enemy when on experience level 1. 
-	uint32 base_hit_points;
-	uint32 base_experience_points;
-	uint32 base_strength;
-	uint32 base_intelligence;
-	uint32 base_agility;
+	uint32 _base_hit_points;
+	uint32 _base_experience_points;
+	uint32 _base_strength;
+	uint32 _base_intelligence;
+	uint32 _base_agility;
 	//@}
 
 	//! \name Growth Amount of Statistics
 	//@{
 	//! \brief The increase in statistic values between experience levels is reflected in these members.
-	uint32 growth_hit_points;
-	uint32 growth_experience_points;
-	uint32 growth_strength;
-	uint32 growth_intelligence;
-	uint32 growth_agility;
+	uint32 _growth_hit_points;
+	uint32 _growth_experience_points;
+	uint32 _growth_strength;
+	uint32 _growth_intelligence;
+	uint32 _growth_agility;
 	//@}
 
-	//! \name Growth Rate of Statistics
-	//@{
-	//! \brief Values between 0.0 and 1.0 that reflect how likely a stastic is to grow between experience levels.
-	float rate_hit_points;
-	float rate_strength;
-	float rate_intelligence;
-	float rate_agility;
-	//@}
 public:
 	GEnemy();
 	~GEnemy();
@@ -494,22 +486,22 @@ public:
 	//! \name Public Member Access Functions
 	//@{
 	//! \brief Used for setting and getting the values of the various class members.
-	void SetHP(uint32 hp) { hit_points = hp; }
-	uint32 GetHP() { return hit_points; }
-	void SetMaxHP(uint32 max_hp) { max_hit_points = max_hp; }
-	uint32 GetMaxHP() { return max_hit_points; }
-	void SetSP(uint32 sp) { skill_points = sp; }
-	uint32 GetSP() { return skill_points; }
-	void SetXP(uint32 xp) { experience_points = xp; }
-	uint32 GetXP() { return experience_points; }
-	void SetXPLevel(uint32 xp_lvl) { experience_level = xp_lvl; }
-	uint32 GetXPLevel() { return experience_level; }
-	void SetStrength(uint32 str) { strength = str; }
-	uint32 GetStrength() { return strength; }
-	void SetIntelligence(uint32 intel) { intelligence = intel; }
-	uint32 GetIntelligence() { return intelligence; }
-	void SetAgility(uint32 agi) { agility = agi; }
-	uint32 GetAgility() { return agility; }
+	void SetHP(uint32 hp) { _hit_points = hp; }
+	uint32 GetHP() { return _hit_points; }
+	void SetMaxHP(uint32 max_hp) { _max_hit_points = max_hp; }
+	uint32 GetMaxHP() { return _max_hit_points; }
+	void SetSP(uint32 sp) { _skill_points = sp; }
+	uint32 GetSP() { return _skill_points; }
+	void SetXP(uint32 xp) { _experience_points = xp; }
+	uint32 GetXP() { return _experience_points; }
+	void SetXPLevel(uint32 xp_lvl) { _experience_level = xp_lvl; }
+	uint32 GetXPLevel() { return _experience_level; }
+	void SetStrength(uint32 str) { _strength = str; }
+	uint32 GetStrength() { return _strength; }
+	void SetIntelligence(uint32 intel) { _intelligence = intel; }
+	uint32 GetIntelligence() { return _intelligence; }
+	void SetAgility(uint32 agi) { _agility = agi; }
+	uint32 GetAgility() { return _agility; }
 	//@}
 };
 
@@ -527,56 +519,56 @@ public:
 class GCharacter {
 private:
 	//! The character's name, as seen by the player on the screen.
-	std::string name;
+	std::string _name;
 	//! The base of the character's file name, used to retrieve various data for the character.
-	std::string filename;
+	std::string _filename;
 	//! \brief An identifier for the character.
 	//! See the Game Character Type constants.
-	uint32 char_id;
+	uint32 _char_id;
 
 	//! The weapon that the character currently has equipped.
-	GWeapon *eq_weapon;
+	GWeapon *_eq_weapon;
 	//! The head armor that the character currently has equipped.
-	GArmor *eq_head;
+	GArmor *_eq_head;
 	//! The body armor that the character currently has equipped.
-	GArmor *eq_body;
+	GArmor *_eq_body;
 	//! The arm armor that the character currently has equipped.
-	GArmor *eq_arms;
+	GArmor *_eq_arms;
 	//! The leg armor that the character currently has equipped.
-	GArmor *eq_legs;
+	GArmor *_eq_legs;
 	//! The attack skills the character can currently use.
-	std::vector<GSkill> attack_skills;
+	std::vector<GSkill> _attack_skills;
 	//! The defense skills the character can currently use.
-	std::vector<GSkill> defense_skills;
+	std::vector<GSkill> _defense_skills;
 	//! The support skills the character can currently use.
-	std::vector<GSkill> support_skills;
+	std::vector<GSkill> _support_skills;
 	//! The (four) attack points of the character.
-	std::vector<GAttackPoint> attack_points;
+	std::vector<GAttackPoint> _attack_points;
 	//! The frame images for the character's map sprite.
-	std::vector<hoa_video::ImageDescriptor> map_frames;
+	std::vector<hoa_video::ImageDescriptor> _map_frames;
 	//! The frame images for the character's battle sprite.
-	std::vector<hoa_video::ImageDescriptor> battle_frames;
+	std::vector<hoa_video::ImageDescriptor> _battle_frames;
 
 	//! The current number of hit points of the character.
-	uint32 hit_points;
+	uint32 _hit_points;
 	//! The maximum number of hit points the character may have.
-	uint32 max_hit_points;
+	uint32 _max_hit_points;
 	//! The current number of skill points of the character.
-	uint32 skill_points;
+	uint32 _skill_points;
 	//! The maximum number of skill points the character may have.
-	uint32 max_skill_points;
+	uint32 _max_skill_points;
 	//! The current number of experience points of the character.
-	uint32 experience_points;
+	uint32 _experience_points;
 	//! The current experience level of the character.
-	uint32 experience_level;
+	uint32 _experience_level;
 	//! The current number of experience points needed to reach the next experience level.
-	uint32 experience_next_level;
+	uint32 _experience_next_level;
 	//! The character's strength index.
-	uint32 strength;
+	uint32 _strength;
 	//! The character's intelligence index.
-	uint32 intelligence;
+	uint32 _intelligence;
 	//! The character's agility index.
-	uint32 agility;
+	uint32 _agility;
 public:
 	GCharacter(std::string na, std::string fn, uint32 id);
 	~GCharacter();
@@ -586,11 +578,11 @@ public:
 	//! \brief Swaps in and out equipment on the character.
 	//! \param *new_eq The new weapon or armor to equip.
 	//! \return The previously equipped weapon or armor.
-	GWeapon* EquipWeapon(GWeapon *new_eq);
-	GArmor* EquipHeadArmor(GArmor *new_eq);
-	GArmor* EquipBodyArmor(GArmor *new_eq);
-	GArmor* EquipArmsArmor(GArmor *new_eq);
-	GArmor* EquipLegsArmor(GArmor *new_eq);
+	GWeapon* EquipWeapon(GWeapon *_new_eq);
+	GArmor* EquipHeadArmor(GArmor *_new_eq);
+	GArmor* EquipBodyArmor(GArmor *_new_eq);
+	GArmor* EquipArmsArmor(GArmor *_new_eq);
+	GArmor* EquipLegsArmor(GArmor *_new_eq);
 	//@}
 
 	//! Loads the character's various map and battle frame images from memory.
@@ -599,31 +591,31 @@ public:
 	//! \name Public Member Access Functions
 	//@{
 	//! \brief Used for setting and getting the values of the various class members.
-	void SetName(std::string na) { name = na; }
-	std::string GetName() { return name; }
-	void SetFilename(std::string fn) { filename = fn; }
-	std::string GetFilename() { return filename; }
-	void SetID(uint32 id) { char_id = id; }
-	uint32 GetID() { return char_id; }
-	std::vector<hoa_video::ImageDescriptor>* GetMapFrames() { return &map_frames; }
-	void SetHP(uint32 hp) { hit_points = hp; }
-	uint32 GetHP() { return hit_points; }
-	void SetMaxHP(uint32 max_hp) { max_hit_points = max_hp; }
-	uint32 GetMaxHP() { return max_hit_points; }
-	void SetSP(uint32 sp) { skill_points = sp; }
-	uint32 GetSP() { return skill_points; }
-	void SetXP(uint32 xp) { experience_points = xp; }
-	uint32 GetXP() { return experience_points; }
-	void SetXPLevel(uint32 xp_lvl) { experience_level = xp_lvl; }
-	uint32 GetXPLevel() { return experience_level; }
-	void SetXPNextLevel(uint32 xp_next) { experience_next_level = xp_next; }
-	uint32 GetXPNextLevel() { return experience_next_level; }
-	void SetStrength(uint32 str) { strength = str; }
-	uint32 GetStrength() { return strength; }
-	void SetIntelligence(uint32 intel) { intelligence = intel; }
-	uint32 GetIntelligence() { return intelligence; }
-	void SetAgility(uint32 agi) { agility = agi; }
-	uint32 GetAgility() { return agility; }
+	void SetName(std::string na) { _name = na; }
+	std::string GetName() { return _name; }
+	void SetFilename(std::string fn) { _filename = fn; }
+	std::string GetFilename() { return _filename; }
+	void SetID(uint32 id) { _char_id = id; }
+	uint32 GetID() { return _char_id; }
+	std::vector<hoa_video::ImageDescriptor>* GetMapFrames() { return &_map_frames; }
+	void SetHP(uint32 hp) { _hit_points = hp; }
+	uint32 GetHP() { return _hit_points; }
+	void SetMaxHP(uint32 max_hp) { _max_hit_points = max_hp; }
+	uint32 GetMaxHP() { return _max_hit_points; }
+	void SetSP(uint32 sp) { _skill_points = sp; }
+	uint32 GetSP() { return _skill_points; }
+	void SetXP(uint32 xp) { _experience_points = xp; }
+	uint32 GetXP() { return _experience_points; }
+	void SetXPLevel(uint32 xp_lvl) { _experience_level = xp_lvl; }
+	uint32 GetXPLevel() { return _experience_level; }
+	void SetXPNextLevel(uint32 xp_next) { _experience_next_level = xp_next; }
+	uint32 GetXPNextLevel() { return _experience_next_level; }
+	void SetStrength(uint32 str) { _strength = str; }
+	uint32 GetStrength() { return _strength; }
+	void SetIntelligence(uint32 intel) { _intelligence = intel; }
+	uint32 GetIntelligence() { return _intelligence; }
+	void SetAgility(uint32 agi) { _agility = agi; }
+	uint32 GetAgility() { return _agility; }
 	//@}
 };
 
@@ -640,19 +632,19 @@ class GTime {
 private:
 	friend class GameInstance;
 	//! The number of seconds expired.
-	uint8 seconds;
+	uint8 _seconds;
 	//! The number of minutes expired.
-	uint8 minutes;
+	uint8 _minutes;
 	//! The number of hours expired.
-	uint8 hours;
+	uint8 _hours;
 public:
 	//! Updates the elapsed time by one second.
 	void UpdateTime() {
-		seconds++;
-		if (seconds >= 60) {
-			minutes++;
-			if (minutes >= 60) {
-				hours++;
+		_seconds++;
+		if (_seconds >= 60) {
+			_minutes++;
+			if (_minutes >= 60) {
+				_hours++;
 			}
 		}
 	}
@@ -661,9 +653,9 @@ public:
 	//! \param m The amount of minutes to set.
 	//! \param s The amount of seconds to set.
 	void SetTime(uint8 h, uint8 m, uint8 s) {
-		hours = h;
-		minutes = m;
-		seconds = s;
+		_hours = h;
+		_minutes = m;
+		_seconds = s;
 	}
 }; // class GTime
 
@@ -687,13 +679,13 @@ class GameInstance {
 private:
 	SINGLETON_DECLARE(GameInstance);
 	//! An object for retaining the elapsed game time.
-	GTime game_time;
+	GTime _game_time;
 	//! The characters currently in the party.
-	std::vector<GCharacter*> characters;
+	std::vector<GCharacter*> _characters;
 	//! The inventory of the party.
-	std::vector<GObject> inventory;
+	std::vector<GObject> _inventory;
 	//! The amount of financial resources the party currently has.
-	uint32 money;
+	uint32 _money;
 
 // 	hoa_video::GameVideo *VideoManager;
 

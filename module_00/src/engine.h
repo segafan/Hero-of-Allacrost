@@ -134,6 +134,14 @@ public:
 	virtual void Update(uint32 time_elapsed) = 0;
 	//! Purely virtual function for drawing the next screen frame.
 	virtual void Draw() = 0;
+	/*!
+	 *  \brief Purely virtual function for resetting the state of the class.
+	 *  
+	 *  This function is called whenever the game mode is made active (ie, it is now the new active game mode
+	 *  on the top of the game stack). This includes when the game mode is first created and pushed onto the
+	 *  game stack, so in that manner it can also be viewed as a helper function to the con
+	 */
+	//virtual void Reset() = 0;
 }; // class GameMode
 
 /*!****************************************************************************
@@ -167,12 +175,14 @@ private:
 	 *  \brief A stack containing all the live game modes.
 	 *  \note The back of the vector is the top of the stack.
 	 */
-	std::vector<GameMode*> game_stack;
+	std::vector<GameMode*> _game_stack;
 
 	//! A vector of game modes to push to the stack on the next call to GameModeManager#Update().
-	std::vector<GameMode*> push_stack;
+	std::vector<GameMode*> _push_stack;
+	//! True if a state change occured and we need to change the active game mode.
+	bool _state_change;
 	//! The number of game modes to pop from the back of the stack on the next call to GameModeManager#Update().
-	uint32 pop_count;
+	uint32 _pop_count;
 public:
 	SINGLETON_METHODS(GameModeManager);
 	/*!
@@ -246,23 +256,23 @@ class GameSettings {
 private:
 	SINGLETON_DECLARE(GameSettings);
 	//! The last time the game was updated, in milliseconds.
-	uint32 last_update;
+	uint32 _last_update;
 	//! Retains the number of milliseconds that have expired for frame rate calculation.
-	uint32 fps_timer;
+	uint32 _fps_timer;
 	//! Keeps count of the number of frames that have been drawn.
-	uint32 fps_counter;
+	uint32 _fps_counter;
 	//! The number of frames drawn per second. Updated approximately every one second.
-	float fps_rate;
+	float _fps_rate;
 	//! When this is set to false, the program will exit (maturally).
-	bool not_done;
+	bool _not_done;
 	//! The language in which to render text.
-	uint8 language;
+	uint8 _language;
 	//! Retains the current screen width and height.
-	SDL_Rect screen_info;
+	SDL_Rect _screen_info;
 	//! True if the game is running in full screen mode.
-	bool full_screen;
+	bool _full_screen;
 	//! Used by PauseMode and QuitMode for temporarily changing the volume on pause/quit events.
-	uint8 pause_volume_action;
+	uint8 _pause_volume_action;
 
 
 public:
@@ -298,59 +308,59 @@ public:
 	 *  \note  This function will cause no harm if the desired screen mode is already active.
 	 *  \note  Function is a candidate for becoming extinct.
 	 */
-	void SetFullScreen(bool fs) { full_screen = fs; }
+	void SetFullScreen(bool fs) { _full_screen = fs; }
 	/*!
 	 *  \brief  Toggles between full-screen and windowed mode.
 	 */
-	void ToggleFullScreen() { if (full_screen) full_screen = false; else full_screen = true; }
+	void ToggleFullScreen() { if (_full_screen) _full_screen = false; else _full_screen = true; }
 	/*!
 	 *  \brief  Determines if the game is running in full screen mode.
 	 *  \return True if the game is running in full-screen mode.
 	 *  \note   This function will likely get a name change later.
 	 */
-	bool FullScreen() { return full_screen; }
+	bool FullScreen() { return _full_screen; }
 	/*!
 	 *  \brief  Gets information about the current screen size.
 	 *  \return Information about the screen width and height.
 	 */
-	SDL_Rect GetScreenInfo() { return screen_info; }
+	SDL_Rect GetScreenInfo() { return _screen_info; }
 	/*!
 	 *  \brief  Sets the screen size.
 	 *  \param info The screen width and height.
 	 */
-	void SetScreenInfo(SDL_Rect info) { screen_info = info; }
+	void SetScreenInfo(SDL_Rect info) { _screen_info = info; }
 	/*!
 	 *  \brief  Used to determine what language the game is running in.
 	 *  \return The language that the game is running in.
 	 */
-	uint8 GetLanguage() { return language; }
+	uint8 GetLanguage() { return _language; }
 	/*!
 	 *  \brief  Sets the language that the game should use.
 	 *  \return The numerical value representing the language the game is running in.
 	 */
-	void SetLanguage(uint8 lang) { language = lang; }
+	void SetLanguage(uint8 lang) { _language = lang; }
 	/*!
 	 *  \brief  Determines whether the user is done with the game.
 	 *  \return False if the user is done and would like to exit the game.
 	 */
-	bool NotDone() { return not_done; }
+	bool NotDone() { return _not_done; }
 	/*!
 	 *  \brief  The function to call to initialize the exit process of the game.
 	 *  \note  The game won't actually quit until it tries to re-iterate through the main game loop again.
 	 */
-	void ExitGame() { not_done = false; }
+	void ExitGame() { _not_done = false; }
 	/*!
 	 *  \brief  Sets the action to take on the audio volume levels when the game is paused.
 	 *  \param action The value to set pause_volume_action to.
 	 *
 	 *  This action takes place whenever the active game mode class is PauseMode or QuitMode.
 	 */
-	void SetPauseVolumeAction(uint8 action) { pause_volume_action = action; }
+	void SetPauseVolumeAction(uint8 action) { _pause_volume_action = action; }
 	/*!
 	 *  \brief  Used to find out what the game is set to do on a pause event.
 	 *  \return The value of the action that the game takes on a pause event.
 	 */
-	uint8 GetPauseVolumeAction() { return pause_volume_action; }
+	uint8 GetPauseVolumeAction() { return _pause_volume_action; }
 }; // class GameSettings
 
 /*!****************************************************************************
@@ -369,17 +379,17 @@ private:
 //! \name Generic key names
 //@{
 //! \brief Each member holds the actual keyboard key that corresponds to the named key event.
-	SDLKey up;
-	SDLKey down;
-	SDLKey left;
-	SDLKey right;
-	SDLKey confirm;
-	SDLKey cancel;
-	SDLKey menu;
-	SDLKey swap;
-	SDLKey left_select;
-	SDLKey right_select;
-	SDLKey pause;
+	SDLKey _up;
+	SDLKey _down;
+	SDLKey _left;
+	SDLKey _right;
+	SDLKey _confirm;
+	SDLKey _cancel;
+	SDLKey _menu;
+	SDLKey _swap;
+	SDLKey _left_select;
+	SDLKey _right_select;
+	SDLKey _pause;
 //@}
 
 	friend class GameInput;
@@ -404,7 +414,7 @@ private:
 class JoystickState {
 private:
 	//! A pointer to the active joystick
-	SDL_Joystick *js;
+	SDL_Joystick *_js;
 
 	friend class GameInput;
 	friend class hoa_data::GameData;
@@ -466,53 +476,53 @@ class GameInput {
 private:
 	SINGLETON_DECLARE(GameInput);
 	//! Retains the active-user defined key settings
-	KeyState Key;
+	KeyState _Key;
 	//! Retains the active-user defined joystick settings
-	JoystickState Joystick;
+	JoystickState _Joystick;
 
 	//! \name Input state members
 	//@{
 	//! \brief True if the named input event key/button is currently being held down
-	bool up_state;
-	bool down_state;
-	bool left_state;
-	bool right_state;
-	bool confirm_state;
-	bool cancel_state;
-	bool menu_state;
-	bool swap_state;
-	bool left_select_state;
-	bool right_select_state;
+	bool _up_state;
+	bool _down_state;
+	bool _left_state;
+	bool _right_state;
+	bool _confirm_state;
+	bool _cancel_state;
+	bool _menu_state;
+	bool _swap_state;
+	bool _left_select_state;
+	bool _right_select_state;
 	//@}
 	
 	//! \name Input press members
 	//@{
 	//! \brief True if the named input event key/button has just been pressed
-	bool up_press;
-	bool down_press;
-	bool left_press;
-	bool right_press;
-	bool confirm_press;
-	bool cancel_press;
-	bool menu_press;
-	bool swap_press;
-	bool left_select_press;
-	bool right_select_press;
+	bool _up_press;
+	bool _down_press;
+	bool _left_press;
+	bool _right_press;
+	bool _confirm_press;
+	bool _cancel_press;
+	bool _menu_press;
+	bool _swap_press;
+	bool _left_select_press;
+	bool _right_select_press;
 	//@}
 	
 	//! \name Input release
 	//@{
 	//! \brief True if the named input event key/button has just been released
-	bool up_release;
-	bool down_release;
-	bool left_release;
-	bool right_release;
-	bool confirm_release;
-	bool cancel_release;
-	bool menu_release;
-	bool swap_release;
-	bool left_select_release;
-	bool right_select_release;
+	bool _up_release;
+	bool _down_release;
+	bool _left_release;
+	bool _right_release;
+	bool _confirm_release;
+	bool _cancel_release;
+	bool _menu_release;
+	bool _swap_release;
+	bool _left_select_release;
+	bool _right_select_release;
 	//@}
 
 	//! \name Singleton class pointers
@@ -524,15 +534,15 @@ private:
 	 *  (pause and quit events) and its more convenient that the class retains pointers
 	 *  to the singletons it needs to interact with on those events.
 	 */
-	GameModeManager *ModeManager;
-	GameSettings *SettingsManager;
-	hoa_data::GameData *DataManager;
+	GameModeManager *_ModeManager;
+	GameSettings *_SettingsManager;
+	hoa_data::GameData *_DataManager;
 	//@}
 
 	//! Processes all keyboard input events
-	void KeyEventHandler(SDL_KeyboardEvent *key_event);
+	void _KeyEventHandler(SDL_KeyboardEvent *key_event);
 	//! Processes all joystick input events
-	void JoystickEventHandler(SDL_Event *js_event);
+	void _JoystickEventHandler(SDL_Event *js_event);
 public:
 	SINGLETON_METHODS(GameInput);
 
@@ -551,46 +561,46 @@ public:
 	//! \name Input state member access functions
 	//@{
 	//! \brief True if the named input event key/button is currently being held down
-	bool UpState() { return up_state; }
-	bool DownState() { return down_state; }
-	bool LeftState() { return left_state; }
-	bool RightState() { return right_state; }
-	bool ConfirmState() { return confirm_state; }
-	bool CancelState() { return cancel_state; }
-	bool MenuState() { return menu_state; }
-	bool SwapState() { return swap_state; }
-	bool LeftSelectState() { return left_select_state; }
-	bool RightSelectState() { return right_select_state; }
+	bool UpState() { return _up_state; }
+	bool DownState() { return _down_state; }
+	bool LeftState() { return _left_state; }
+	bool RightState() { return _right_state; }
+	bool ConfirmState() { return _confirm_state; }
+	bool CancelState() { return _cancel_state; }
+	bool MenuState() { return _menu_state; }
+	bool SwapState() { return _swap_state; }
+	bool LeftSelectState() { return _left_select_state; }
+	bool RightSelectState() { return _right_select_state; }
 	//@}
 	
 	//! \name Input press members
 	//@{
 	//! \brief True if the named input event key/button has just been pressed
-	bool UpPress() { return up_press; }
-	bool DownPress() { return down_press; }
-	bool LeftPress() { return left_press; }
-	bool RightPress() { return right_press; }
-	bool ConfirmPress() { return confirm_press; }
-	bool CancelPress() { return cancel_press; }
-	bool MenuPress() { return menu_press; }
-	bool SwapPress() { return swap_press; }
-	bool LeftSelectPress() { return left_select_press; }
-	bool RightSelectPress() { return right_select_press; }
+	bool UpPress() { return _up_press; }
+	bool DownPress() { return _down_press; }
+	bool LeftPress() { return _left_press; }
+	bool RightPress() { return _right_press; }
+	bool ConfirmPress() { return _confirm_press; }
+	bool CancelPress() { return _cancel_press; }
+	bool MenuPress() { return _menu_press; }
+	bool SwapPress() { return _swap_press; }
+	bool LeftSelectPress() { return _left_select_press; }
+	bool RightSelectPress() { return _right_select_press; }
 	//@}
 	
 	//! \name Input release
 	//@{
 	//! \brief True if the named input event key/button has just been released
-	bool UpRelease() { return up_release; }
-	bool DownRelease() { return down_release; }
-	bool LeftRelease() { return left_release; }
-	bool RightRelease() { return right_release; }
-	bool ConfirmRelease() { return confirm_release; }
-	bool CancelRelease() { return cancel_release; }
-	bool MenuRelease() { return menu_release; }
-	bool SwapRelease() { return swap_release; }
-	bool LeftSelectRelease() { return left_select_release; }
-	bool RightSelectRelease() { return right_select_release; }
+	bool UpRelease() { return _up_release; }
+	bool DownRelease() { return _down_release; }
+	bool LeftRelease() { return _left_release; }
+	bool RightRelease() { return _right_release; }
+	bool ConfirmRelease() { return _confirm_release; }
+	bool CancelRelease() { return _cancel_release; }
+	bool MenuRelease() { return _menu_release; }
+	bool SwapRelease() { return _swap_release; }
+	bool LeftSelectRelease() { return _left_select_release; }
+	bool RightSelectRelease() { return _right_select_release; }
 	//@}
 }; // class GameInput
 
