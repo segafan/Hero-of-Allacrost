@@ -3,11 +3,10 @@
 #include <cstdarg>
 #include "video.h"
 #include <math.h>
-#include "coord_sys.h"
 #include "gui.h"
 
 using namespace std;
-using namespace hoa_video::local_video;
+using namespace hoa_video::private_video;
 
 namespace hoa_video 
 {
@@ -26,7 +25,7 @@ bool ScreenFader::FadeTo(const Color &final, float numSeconds)
 	_finalColor   = final;
 	
 	_currentTime = 0;
-	_endTime     = int(numSeconds * 1000);  // convert seconds to milliseconds here
+	_endTime     = int32(numSeconds * 1000);  // convert seconds to milliseconds here
 	
 	_isFading = true;
 	
@@ -66,7 +65,7 @@ bool ScreenFader::FadeTo(const Color &final, float numSeconds)
 //         whether to fade using overlays or modulation, etc.
 //-----------------------------------------------------------------------------
 
-bool ScreenFader::Update(int t)
+bool ScreenFader::Update(int32 t)
 {
 	if(!_isFading)
 		return true;
@@ -96,7 +95,7 @@ bool ScreenFader::Update(int t)
 		// calculate the new interpolated color
 		float a = (float)_currentTime / (float)_endTime;
 
-		_currentColor.color[3] = Lerp(a, _initialColor.color[3], _finalColor.color[3]);
+		_currentColor.color[3] = _Lerp(a, _initialColor.color[3], _finalColor.color[3]);
 
 		
 		// if we are fading to or from clear, then only the alpha should get
@@ -115,9 +114,9 @@ bool ScreenFader::Update(int t)
 		}
 		else
 		{
-			_currentColor.color[0] = Lerp(a, _initialColor.color[0], _finalColor.color[0]);
-			_currentColor.color[1] = Lerp(a, _initialColor.color[1], _finalColor.color[1]);
-			_currentColor.color[2] = Lerp(a, _initialColor.color[2], _finalColor.color[2]);
+			_currentColor.color[0] = _Lerp(a, _initialColor.color[0], _finalColor.color[0]);
+			_currentColor.color[1] = _Lerp(a, _initialColor.color[1], _finalColor.color[1]);
+			_currentColor.color[2] = _Lerp(a, _initialColor.color[2], _finalColor.color[2]);
 		}
 		
 		if(!_useFadeOverlay)

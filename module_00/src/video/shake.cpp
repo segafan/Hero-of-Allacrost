@@ -3,17 +3,16 @@
 #include <cstdarg>
 #include "video.h"
 #include <math.h>
-#include "coord_sys.h"
 #include "gui.h"
 
 using namespace std;
-using namespace hoa_video::local_video;
+using namespace hoa_video::private_video;
 
 namespace hoa_video 
 {
 
 // time between screen shake updates in milliseconds
-const int VIDEO_TIME_BETWEEN_SHAKE_UPDATES = 50;  
+const int32 VIDEO_TIME_BETWEEN_SHAKE_UPDATES = 50;  
 
 //-----------------------------------------------------------------------------
 // ShakeScreen: shakes the screen with a given force and shake method
@@ -54,7 +53,7 @@ bool GameVideo::ShakeScreen(float force, float falloffTime, ShakeFalloff falloff
 		
 	// create the shake force structure
 	
-	int milliseconds = int(falloffTime * 1000);
+	int32 milliseconds = int32(falloffTime * 1000);
 	ShakeForce s;
 	s.currentTime  = 0;
 	s.endTime      = milliseconds;
@@ -127,7 +126,7 @@ bool GameVideo::IsShaking()
 
 
 //-----------------------------------------------------------------------------
-// RoundForce: rounds a force to an integer. Whether to round up or round down
+// _RoundForce: rounds a force to an integer. Whether to round up or round down
 //             is based on the fractional part. A force of 1.37 has a 37%
 //             chance of being a 2, else it's a 1
 //             This is necessary because otherwise a shake force of 0.5f
@@ -135,11 +134,11 @@ bool GameVideo::IsShaking()
 //             force
 //-----------------------------------------------------------------------------
 
-float GameVideo::RoundForce(float force)
+float GameVideo::_RoundForce(float force)
 {
-	int fractionPct = int(force * 100) - (int(force) * 100);
+	int32 fractionPct = int32(force * 100) - (int32(force) * 100);
 	
-	int r = rand()%100;
+	int32 r = rand()%100;
 	if(fractionPct > r)
 		force = ceilf(force);
 	else
@@ -150,11 +149,11 @@ float GameVideo::RoundForce(float force)
 
 
 //-----------------------------------------------------------------------------
-// UpdateShake: called once per frame to update the the shake effects
+// _UpdateShake: called once per frame to update the the shake effects
 //              and update the shake x,y offsets
 //-----------------------------------------------------------------------------
 
-void GameVideo::UpdateShake(int frameTime)
+void GameVideo::_UpdateShake(int32 frameTime)
 {
 	if(_shakeForces.empty())
 	{
@@ -189,7 +188,7 @@ void GameVideo::UpdateShake(int frameTime)
 
 	// cap the max update frequency
 	
-	static int timeTilNextUpdate = 0;		
+	static int32 timeTilNextUpdate = 0;		
 	timeTilNextUpdate -= frameTime;
 	
 	if(timeTilNextUpdate > 0)
@@ -202,8 +201,8 @@ void GameVideo::UpdateShake(int frameTime)
 	// note that this doesn't produce a radially symmetric distribution of offsets
 	// but I think it's not noticeable so... :)
 	
-	_shakeX = RoundForce(RandomFloat(-netForce, netForce));
-	_shakeY = RoundForce(RandomFloat(-netForce, netForce));	
+	_shakeX = _RoundForce(RandomFloat(-netForce, netForce));
+	_shakeY = _RoundForce(RandomFloat(-netForce, netForce));	
 }
 
 

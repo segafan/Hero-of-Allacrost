@@ -240,21 +240,30 @@ void GameData::LoadBootData(
 	ImageDescriptor im;
 
 	// The background
-	im.filename = _GetGlobalString("background_image");
-	im.width    = (float) _GetGlobalInt("background_image_width");
-	im.height   = (float) _GetGlobalInt("background_image_height");
+	im.SetFilename(_GetGlobalString("background_image"));
+	im.SetDimensions
+	(
+		(float) _GetGlobalInt("background_image_width"),
+		(float) _GetGlobalInt("background_image_height")
+	);
 	boot_images->push_back(im);
 
 	// The logo
-	im.filename = _GetGlobalString("logo_image");
-	im.width    = (float) _GetGlobalInt("logo_image_width");
-	im.height   = (float) _GetGlobalInt("logo_image_height");
+	im.SetFilename(_GetGlobalString("logo_image"));
+	im.SetDimensions
+	(
+		(float) _GetGlobalInt("logo_image_width"),
+		(float) _GetGlobalInt("logo_image_height")
+	);
 	boot_images->push_back(im);
 
 	// The menu
-	im.filename = _GetGlobalString("menu_image");
-	im.width    = (float) _GetGlobalInt("menu_image_width");
-	im.height   = (float) _GetGlobalInt("menu_image_height");
+	im.SetFilename(_GetGlobalString("menu_image"));
+	im.SetDimensions
+	(
+		(float) _GetGlobalInt("menu_image_width"),
+		(float) _GetGlobalInt("menu_image_height")
+	);
 	boot_images->push_back(im);
 
 	// Set up a coordinate system - now you can use the boot.hoa to set it to whatever you like
@@ -319,11 +328,11 @@ void GameData::LoadMap(hoa_map::MapMode *map_mode, int32 new_map_id) {
 		return;
 	}
 	ImageDescriptor imgdsc;
-	imgdsc.width = imgdsc.height = 1;
+	imgdsc.SetDimensions(1.0f, 1.0f);
 
 	_VideoManager->BeginImageLoadBatch();
 	for (uint i = 0; i < tiles_used.size(); i++) {
-		imgdsc.filename = tile_prefix + tiles_used[i] + ".png";
+		imgdsc.SetFilename(tile_prefix + tiles_used[i] + ".png");
 		map_mode->_map_tiles.push_back(imgdsc);
 		_VideoManager->LoadImage(imgdsc);
 	}

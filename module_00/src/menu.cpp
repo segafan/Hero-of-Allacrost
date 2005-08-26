@@ -48,16 +48,13 @@ MenuMode::MenuMode() {
 	}
 	
 	// Setup menu skin
+	
 	VideoManager->SetMenuSkin(
-	"img/menus/concrete_t.png", // border images
-	"img/menus/concrete_t.png",
-	"img/menus/concrete_tr.png",
-	"img/menus/concrete_l.png",
-	"img/menus/concrete_r.png",
-	"img/menus/concrete_bl.png",
-	"img/menus/concrete_b.png",
-	"img/menus/concrete_br.png",
-	Color(0.0f, 0.0f, 1.0f, 0.5f) // fill inside with 50% translucent blue
+	"img/menus/concrete",
+	Color(0.0f, 0.0f, 1.0f, 0.5f),
+	Color(0.0f, 0.0f, 1.0f, 0.5f),
+	Color(0.0f, 0.0f, 1.0f, 0.5f),
+	Color(0.0f, 0.0f, 1.0f, 0.5f)
 	);
 	
 	ImageDescriptor new_menu;

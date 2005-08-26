@@ -3,11 +3,10 @@
 #include <cstdarg>
 #include "video.h"
 #include <math.h>
-#include "coord_sys.h"
 #include "gui.h"
 
 using namespace std;
-using namespace hoa_video::local_video;
+using namespace hoa_video::private_video;
 
 namespace hoa_video 
 {
@@ -43,7 +42,7 @@ Interpolator::Interpolator()
 //       interpolation means just staying at either A or B.
 //-----------------------------------------------------------------------------
 
-bool Interpolator::Start(float a, float b, int milliseconds)
+bool Interpolator::Start(float a, float b, int32 milliseconds)
 {
 	if(!ValidMethod())
 	{
@@ -119,7 +118,7 @@ float Interpolator::GetValue()
 //         This function will return false if the method is invalid.
 //-----------------------------------------------------------------------------
 
-bool Interpolator::Update(int frameTime)
+bool Interpolator::Update(int32 frameTime)
 {
 	if(frameTime < 0)
 	{
@@ -193,7 +192,7 @@ bool Interpolator::Update(int frameTime)
 		}
 	};
 	
-	_currentValue = Lerp(t, _a, _b);
+	_currentValue = _Lerp(t, _a, _b);
 	
 	return true;
 }

@@ -3,11 +3,10 @@
 #include <cstdarg>
 #include "video.h"
 #include <math.h>
-#include "coord_sys.h"
 #include "gui.h"
 
 using namespace std;
-using namespace hoa_video::local_video;
+using namespace hoa_video::private_video;
 
 namespace hoa_video 
 {
@@ -38,7 +37,7 @@ bool GameVideo::DrawImage(const ImageDescriptor &id, const Color &color)
 {
 	size_t numElements = id._elements.size();
 	
-	for(uint iElement = 0; iElement < numElements; ++iElement)
+	for(uint32 iElement = 0; iElement < numElements; ++iElement)
 	{		
 		glPushMatrix();
 		MoveRel((float)id._elements[iElement].xOffset, (float)id._elements[iElement].yOffset);
@@ -47,15 +46,18 @@ bool GameVideo::DrawImage(const ImageDescriptor &id, const Color &color)
 		MoveRel(_shakeX * (_coordSys._right - _coordSys._left) / 1024.0f, 
 		        _shakeY * (_coordSys._top   - _coordSys._bottom) / 768.0f);  
 		
-		if(!DrawElement(
+		if(!_DrawElement(
 			id._elements[iElement].image, 
 			id._elements[iElement].width, 
 			id._elements[iElement].height,
-			id._elements[iElement].color * color  // include color passed in
+			id._elements[iElement].color[0] * color,
+			id._elements[iElement].color[1] * color,
+			id._elements[iElement].color[2] * color,
+			id._elements[iElement].color[3] * color
 		))
 		{
 			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: DrawElement() failed in DrawImage()!" << endl;
+				cerr << "VIDEO ERROR: _DrawElement() failed in DrawImage()!" << endl;
 			return false;
 		}
 		glPopMatrix();
@@ -66,22 +68,35 @@ bool GameVideo::DrawImage(const ImageDescriptor &id, const Color &color)
 
 
 //-----------------------------------------------------------------------------
-// DrawElement: draws an image element. This is only used privately.
+// _DrawElement: draws an image element. This is only used privately.
 //-----------------------------------------------------------------------------
 
-bool GameVideo::DrawElement(const Image *const img, float w, float h, const Color &c)
+bool GameVideo::_DrawElement
+(
+	const Image *const img, 
+	float w, 
+	float h, 
+	Color c_TL,
+	Color c_TR,
+	Color c_BL,
+	Color c_BR
+)
 {
-	Color color = c;
-	
-	if(color.color[3] == 0.0f)
+	// if all of the vertex colors have zero alpha, don't draw!
+	if(c_TL[3] == 0.0f && c_TR[3] == 0.0f && c_BL[3] == 0.0f && c_BR[3] == 0.0f)
 	{
 		// do nothing, alpha is 0
 		return true;
 	}
-
-	color.color[0] *= _fader.GetFadeModulation();
-	color.color[1] *= _fader.GetFadeModulation();
-	color.color[2] *= _fader.GetFadeModulation();
+	
+	float modulation = _fader.GetFadeModulation();
+	
+	Color fadeColor(modulation, modulation, modulation, 1.0f);
+	
+	c_TL *= fadeColor;
+	c_TR *= fadeColor;
+	c_BL *= fadeColor;
+	c_BR *= fadeColor;
 	
 	float s0,s1,t0,t1;
 	float xoff,yoff;
@@ -148,10 +163,10 @@ bool GameVideo::DrawElement(const Image *const img, float w, float h, const Colo
 	if(img)
 	{
 		glEnable(GL_TEXTURE_2D);
-		BindTexture(img->texSheet->texID);
+		_BindTexture(img->texSheet->texID);
 	}	
 	
-	if (_blend || color.color[3] < 1.0f) 
+	if (_blend || c_TL[3] < 1.0f)// || c_TR[3] < 1.0f || c_BL[3] < 1.0f || c_BR[3] < 1.0f) 
 	{
 		glEnable(GL_BLEND);
 		if (_blend == 1)
@@ -168,23 +183,26 @@ bool GameVideo::DrawElement(const Image *const img, float w, float h, const Colo
 	
 	glTranslatef(xoff, yoff, 0);
 	glBegin(GL_QUADS);
-		glColor4fv(&(color.color[0]));
-		
+	
+		glColor4fv(&(c_BL[0]));		
 		if(img)
 			glTexCoord2f(s0, t1);
 		
 		glVertex2f(xlo, ylo); //bl
 
+		glColor4fv(&(c_BR[0]));		
 		if(img)
 			glTexCoord2f(s1, t1);
 
 		glVertex2f(xhi, ylo); //br
 
+		glColor4fv(&(c_TR[0]));		
 		if(img)
 			glTexCoord2f(s1, t0);
 
 		glVertex2f(xhi, yhi);//tr
 
+		glColor4fv(&(c_TL[0]));		
 		if(img)
 			glTexCoord2f(s0, t0);
 
@@ -200,7 +218,7 @@ bool GameVideo::DrawElement(const Image *const img, float w, float h, const Colo
 	if(glGetError())
 	{
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: glGetError() returned true in DrawElement()!" << endl;
+			cerr << "VIDEO ERROR: glGetError() returned true in _DrawElement()!" << endl;
 		return false;
 	}		
 		
@@ -225,7 +243,7 @@ bool GameVideo::DrawHalo
 {
 	Move(x, y);
 
-	int oldBlendMode = _blend;
+	int32 oldBlendMode = _blend;
 	_blend = VIDEO_BLEND_ADD;
 	DrawImage(id, color);
 	_blend = oldBlendMode;
@@ -264,7 +282,7 @@ bool GameVideo::DrawLight
 // DrawFPS: draws current frames per second
 //-----------------------------------------------------------------------------
 
-bool GameVideo::DrawFPS(int frameTime)
+bool GameVideo::DrawFPS(int32 frameTime)
 {
 	return _gui->DrawFPS(frameTime);
 }

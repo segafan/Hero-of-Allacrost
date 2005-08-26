@@ -10,7 +10,7 @@
 /*!****************************************************************************
  * \file    video.h
  * \author  Raj Sharma, rajx30@gmail.com
- * \date    Last Updated: August 15th, 2005
+ * \date    Last Updated: August 23rd, 2005
  * \brief   Header file for video engine interface.
  *
  * This code provides an easy-to-use API for managing all video and GUI stuff.
@@ -29,9 +29,20 @@
 #define _VIDEO_HEADER_
 
 #include "utils.h"
-#include "coord_sys.h"
-#include "color.h"
-#include <list>
+
+// SDL includes
+#include <SDL/SDL_ttf.h>
+
+// OpenGL includes
+#include <GL/gl.h>
+#include <GL/glu.h>
+
+// DevIL includes
+#define ILUT_USE_OPENGL
+#include <IL/il.h>
+#include <IL/ilu.h>
+#include <IL/ilut.h>
+
  
 //! All calls to the video engine are wrapped in this namespace.
 namespace hoa_video 
@@ -48,7 +59,7 @@ extern bool VIDEO_DEBUG;
  *  \param final   Final value
  */
  
-float Lerp(float alpha, float initial, float final);
+float _Lerp(float alpha, float initial, float final);
 
 /*!
  *  \brief Creates a random float between a and b.
@@ -56,13 +67,16 @@ float Lerp(float alpha, float initial, float final);
 
 float RandomFloat(float a, float b);
 
-//! pi
-const float VIDEO_PI  = 3.141592653f;
+//! \name Constants
+//@{
+//! \brief PI and multiples of PI. Used in various math calculations such as interpolations
+const float VIDEO_QUARTER_PI = 0.785398163f;
+const float VIDEO_HALF_PI    = 1.570796326f;
+const float VIDEO_PI         = 3.141592653f;
+const float VIDEO_2PI        = 6.283185307f;
+//@}
 
-//! 2 * pi
-const float VIDEO_2PI = 6.283185307f;
-
-//! Draw flags which control x,y alignment, flipping, and blending
+//! Draw flags to control x,y alignment, flipping, and blending
 enum
 {
 	VIDEO_X_LEFT = 1,
@@ -122,12 +136,100 @@ enum InterpolationMethod
 // forward declarations
 class ImageDescriptor;
 class GameVideo;
+class Color;
 
-//! local_video namespace, hides things which are used internally
-namespace local_video
+
+/*!***************************************************************************
+ *  \brief class for representing colors, with common operations like
+ *         multiplying, adding, etc.
+ *****************************************************************************/
+
+class Color
 {
+public:
 
-typedef std::string FileName;
+	// default colors
+	
+	static Color white;
+	static Color gray;
+	static Color black;
+	static Color red;
+	static Color orange;
+	static Color yellow;
+	static Color green;
+	static Color aqua;
+	static Color blue;
+	static Color violet;
+	static Color brown;
+
+	float color[4];
+	
+	bool operator == (const Color &c)
+	{
+		return color[0] == c.color[0] &&
+		       color[1] == c.color[1] &&
+		       color[2] == c.color[2] &&
+		       color[3] == c.color[3];
+	}
+
+	Color operator + (const Color &c) const
+	{
+		Color color = Color(color[0] + c.color[0],
+		                    color[1] + c.color[1],
+		                    color[2] + c.color[2],
+		                    color[3] + c.color[3]);
+		                    
+		if(color[0] > 1.0f) color[0] = 0.0f;
+		if(color[1] > 1.0f) color[1] = 0.0f;
+		if(color[2] > 1.0f) color[2] = 0.0f;
+		if(color[3] > 1.0f) color[3] = 0.0f;
+		return color;
+	}
+
+	Color operator *= (const Color &c)
+	{
+		return Color(color[0] * c.color[0],
+		             color[1] * c.color[1],
+		             color[2] * c.color[2],
+		             color[3] * c.color[3]);
+	}
+
+
+	Color operator * (const Color &c) const
+	{
+		return Color(color[0] * c.color[0],
+		             color[1] * c.color[1],
+		             color[2] * c.color[2],
+		             color[3] * c.color[3]);
+	}
+	
+	Color()
+	{
+		color[0]=0.0f;
+		color[1]=0.0f;
+		color[2]=0.0f;
+		color[3]=1.0f;		
+	}
+	
+	Color(float r, float g, float b, float a)
+	{
+		color[0]=r;
+		color[1]=g;
+		color[2]=b;
+		color[3]=a;
+	}
+
+	float &operator[](int32 i)
+	{
+		// no bounds check for efficiency!
+		return color[i];
+	}
+};
+
+
+//! private_video namespace, hides things which are used internally
+namespace private_video
+{
 
 class GUI;
 class TexSheet;
@@ -168,15 +270,18 @@ struct ImageElement
 		float yOffset_, 
 		float width_, 
 		float height_,
-		Color color_
+		Color color_[4]
 	)
 	{
-		image   = image_;
-		xOffset = xOffset_;
-		yOffset = yOffset_;
-		width   = width_;
-		height  = height_;
-		color   = color_;
+		image    = image_;
+		xOffset  = xOffset_;
+		yOffset  = yOffset_;
+		width    = width_;
+		height   = height_;
+		color[0] = color_[0];
+		color[1] = color_[1];
+		color[2] = color_[2];
+		color[3] = color_[3];
 	}
 	
 	Image * image;
@@ -187,7 +292,7 @@ struct ImageElement
 	float width;
 	float height;
 	
-	Color color;
+	Color color[4];
 };
 
 
@@ -200,9 +305,9 @@ struct Image
 {
 	Image
 	(
-		const FileName &fname,
-		int w, 
-		int h
+		const std::string &fname,
+		int32 w, 
+		int32 h
 	) 
 	: filename(fname)
 	{ 
@@ -214,11 +319,11 @@ struct Image
 	Image
 	(
 		TexSheet *sheet,
-		const FileName &fname,
-		int x_,
-		int y_,
-		int w, 
-		int h,
+		const std::string &fname,
+		int32 x_,
+		int32 y_,
+		int32 w, 
+		int32 h,
 		float u1_,
 		float v1_,
 		float u2_,
@@ -240,16 +345,16 @@ struct Image
 
 
 
-	TexSheet *texSheet;   //! texture sheet using this image
-	FileName filename;    //! stored for every image in case it needs to be reloaded
+	TexSheet *texSheet;     //! texture sheet using this image
+	std::string filename;   //! stored for every image in case it needs to be reloaded
 	
-	int x, y;             //! location of image within the sheet
-	int width, height;    //! width and height, in pixels
+	int32 x, y;             //! location of image within the sheet
+	int32 width, height;    //! width and height, in pixels
 
-	float u1, v1;         //! also store the actual uv coords. This is a bit
-	float u2, v2;         //! redundant, but saves floating point calculations
+	float u1, v1;           //! also store the actual uv coords. This is a bit
+	float u2, v2;           //! redundant, but saves floating point calculations
 	
-	int refCount;         //! keep track of when this image can be deleted
+	int32 refCount;         //! keep track of when this image can be deleted
 };
 
 
@@ -266,7 +371,7 @@ class TexSheet
 {
 public:
 
-	TexSheet(int w, int h, GLuint texID_, TexSheetType type_, bool isStatic_);
+	TexSheet(int32 w, int32 h, GLuint texID_, TexSheetType type_, bool isStatic_);
 	~TexSheet();
 
 	bool AddImage                   //! adds new image to the tex sheet
@@ -275,17 +380,17 @@ public:
 		ILuint pixelData
 	);
 	
-	bool CopyRect(ILuint pixelData, int x, int y, int w, int h);
+	bool CopyRect(ILuint pixelData, int32 x, int32 y, int32 w, int32 h);
 	
-	bool RemoveImage (Image *img);  //! removes an image completely
+	bool _RemoveImage (Image *img);  //! removes an image completely
 	bool FreeImage   (Image *img);  //! marks the image as free
 	bool RestoreImage (Image *img); //! marks a previously freed image as "used"
 	
 	bool Unload();  //! unloads texture memory used by this sheet
 	bool Reload();  //! reloads all the images into the sheet
 
-	int width;
-	int height;
+	int32 width;
+	int32 height;
 
 	bool isStatic;       //! if true, images in this sheet that are unlikely to change
 	TexSheetType type;   //! does it hold 32x32, 32x64, 64x64, or any kind
@@ -333,7 +438,7 @@ struct FixedImageNode
 	FixedImageNode *next;
 	FixedImageNode *prev;
 	
-	int blockIndex;
+	int32 blockIndex;
 };
 
 
@@ -349,7 +454,7 @@ struct FixedImageNode
 class FixedTexMemMgr : public TexMemMgr
 {
 public:
-	FixedTexMemMgr(TexSheet *texSheet, int imgW, int imgH);
+	FixedTexMemMgr(TexSheet *texSheet, int32 imgW, int32 imgH);
 	~FixedTexMemMgr();
 	
 	bool Insert  (Image *img);
@@ -359,8 +464,8 @@ public:
 
 private:
 
-	int CalculateBlockIndex(Image *img);
-	void DeleteNode(int blockIndex);
+	int32 CalculateBlockIndex(Image *img);
+	void DeleteNode(int32 blockIndex);
 	
 	//! store dimensions of both the texture sheet, and the images that
 	//! it contains
@@ -368,10 +473,10 @@ private:
 	//! NOTE: the sheet dimensions are not in pixels, but images.
 	//!       So, a 512x512 sheet holding 32x32 images would be 16x16
 	
-	int _sheetWidth;
-	int _sheetHeight;
-	int _imageWidth;
-	int _imageHeight;
+	int32 _sheetWidth;
+	int32 _sheetHeight;
+	int32 _imageWidth;
+	int32 _imageHeight;
 	
 	TexSheet *_texSheet;
 	
@@ -429,14 +534,14 @@ public:
 	Interpolator();
 
 	//! call to begin an interpolation
-	bool Start(float a, float b, int milliseconds);
+	bool Start(float a, float b, int32 milliseconds);
 
 	//! set the method of the interpolator. If you don't call it, the default
 	//! is VIDEO_INTERPOLATION_LINEAR
 	bool  SetMethod(InterpolationMethod method);
 	
 	float GetValue();              //! get the current value
-	bool  Update(int frameTime);   //! call this every frame
+	bool  Update(int32 frameTime);   //! call this every frame
 	bool  IsFinished();            //! returns true if interpolation is done
 
 private:
@@ -450,8 +555,8 @@ private:
 	InterpolationMethod _method;
 	
 	float _a, _b;
-	int   _currentTime;
-	int   _endTime;
+	int32   _currentTime;
+	int32   _endTime;
 	bool  _finished;
 	float _currentValue;
 };
@@ -468,8 +573,8 @@ struct ShakeForce
 	
 	
 	Interpolator interpolator;
-	int   currentTime;   //! milliseconds that passed since this shake started
-	int   endTime;       //! milliseconds that this shake was set to last for
+	int32   currentTime;   //! milliseconds that passed since this shake started
+	int32   endTime;       //! milliseconds that this shake was set to last for
 };
 
 
@@ -493,7 +598,7 @@ public:
 	}
 	
 	bool FadeTo(const Color &final, float numSeconds);
-	bool Update(int t);
+	bool Update(int32 t);
 
 	//! fades are either implemented with overlays or with modulation, depending
 	//! on whether it's a simple fade to black or a fade to a different color.
@@ -511,8 +616,8 @@ private:
 	Color _currentColor;  //! color the screen is currently faded to	
 	Color _initialColor;  //! color we started from
 	Color _finalColor;    //! color we are fading to
-	int   _currentTime;   //! milliseconds that passed since this fade started
-	int   _endTime;       //! milliseconds that this fade was set to last for
+	int32   _currentTime;   //! milliseconds that passed since this fade started
+	int32   _endTime;       //! milliseconds that this fade was set to last for
 	bool  _isFading;      //! true if we're in the middle of a fade
 	
 	bool  _useFadeOverlay;
@@ -561,12 +666,44 @@ private:
 	//! NOTE: these aren't in pixels, but in "blocks" of 16x16. So,
 	//!       a 512x512 sheet would be 32x32 in blocks
 	
-	int _sheetWidth;
-	int _sheetHeight;
+	int32 _sheetWidth;
+	int32 _sheetHeight;
 };
 
 
-} // namespace local_video
+} // namespace private_video
+
+
+/*!***************************************************************************
+ *  \brief the CoordSys structure holds a "coordinate system", which is
+ *         defined by rectangle (left, right, bottom, and top) which determines
+ *         how coordinates are mapped to the screen. The default coordinate
+ *         system is (0,1024,0,768). As another example, if you wanted to make
+ *         it so that the screen coordinates ranged from 0 to 1, you could
+ *         set the coordinate system to (0,1,0,1)
+ *****************************************************************************/
+
+struct CoordSys
+{
+	CoordSys() 
+	{
+		_left  = _top    = 0.0f;
+		_right = _bottom = 1.0f;
+	}
+	
+	CoordSys(float left, float right, float bottom, float top)
+	{
+		_left   = left;
+		_right  = right;
+		_bottom = bottom;
+		_top    = top;
+	}
+	
+	float _left;
+	float _right;
+	float _bottom;
+	float _top;
+};
 
 
 /*!***************************************************************************
@@ -584,9 +721,8 @@ class ImageDescriptor
 public:
 
 	ImageDescriptor() 
-	: width(0.0f), height(0.0f), color(1.0f, 1.0f, 1.0f, 1.0f)
 	{
-		isStatic = false;
+		Clear();
 	}
 	
 	//! AddImage allows you to create compound images. You start with a 
@@ -598,40 +734,84 @@ public:
 	
 	void Clear()
 	{
-		filename.clear();
-		isStatic = false;
-		width = height = 0.0f;
-		color = Color(1.0f, 1.0f, 1.0f, 1.0f);
+		_filename.clear();
+		_isStatic = false;
+		_width = _height = 0.0f;
+		_color[0] = _color[1] = _color[2] = _color[3] = Color::white;
 		_elements.clear();
 	}
-	
-	
-	local_video::FileName filename;  //! used only as a parameter to LoadImage.
 
-	bool  isStatic;       //! used only as a parameter to LoadImage. This tells
+	void SetColor        (const Color &color)
+	{
+		_color[0] = _color[1] = _color[2] = _color[3] = color;
+	}
+	
+	void SetVertexColors (const Color &tl, const Color &tr, const Color &bl, const Color &br)
+	{
+		_color[0] = tl;
+		_color[1] = tr;
+		_color[2] = bl;
+		_color[3] = br;
+	}
+	
+	void SetDimensions   (float width, float height) {	_width  = width;  _height = height; }
+	
+	void SetWidth        (float width)    { _width = width; }	
+	void SetHeight       (float height)   {	_height = height; }
+	
+	void SetStatic       (bool isStatic)  { _isStatic = isStatic; }
+	void SetFilename     (const std::string &filename) { _filename = filename; }
+		
+	float GetWidth() const  { return _width; }
+	float GetHeight() const { return _height; }
+	void  GetVertexColor(Color &c, int colorIndex) { c = _color[colorIndex]; }
+	
+private:
+
+	Color _color[4];         //! used only as a parameter to LoadImage. Holds the color of the upper left, upper right, lower left, and lower right vertices respectively
+
+	std::string _filename;  //! used only as a parameter to LoadImage.
+
+	bool  _isStatic;      //! used only as a parameter to LoadImage. This tells
 	                      //! whether the image being loaded is to be loaded
 	                      //! into a non-volatile area of texture memory
 	                      
-	Color color;          //! used only as a parameter to LoadImage
-
-
-	float width, height;  //! width and height of image, in pixels.
-	                      //! If the ImageDescriptor is a compound, i.e. it
-	                      //! contains multiple images, then the width and height
-	                      //! refer to the entire compound           
-
-private:
+	float _width, _height;  //! width and height of image, in pixels.
+	                         //! If the ImageDescriptor is a compound, i.e. it
+	                         //! contains multiple images, then the width and height
+	                         //! refer to the entire compound           
 
 	//! an image descriptor represents a compound image, which is made
 	//! up of multiple elements
-	std::vector <local_video::ImageElement> _elements;
+	std::vector <private_video::ImageElement> _elements;
 
 	friend class GameVideo;
 };
 
+///*!***************************************************************************
+// *  \brief contains the image descriptor for a menu, plus the width and height
+// *         of the menu in case it needs to be reconstructed
+// *****************************************************************************/
+//
+//class ImageDescriptor
+//{
+//	ImageDescriptor()
+//	{
+//		_width = _height = 0;
+//	}
+//	
+//private:
+//
+//	ImageDescriptor _image;
+//	int _width, _height;	
+//};
 
-/*!***************************************************************************
- *  \brief main class for all video and GUI drawing
+
+/*!****************************************************************************
+ *  \brief Manages all the video audio and serves as the API to the video engine.
+ *
+ * \note Full documentation for video engine can be found at:
+ *       http://www.allacrost.org/staff/user/roos/video.html
  *****************************************************************************/
 
 class GameVideo
@@ -657,7 +837,7 @@ public:
 	 *
 	 *  \param frameTime   milliseconds since the last frame
 	 */
-	bool Display(int frameTime);
+	bool Display(int32 frameTime);
 	
 
 	//-- Video settings -------------------------------------------------------
@@ -668,9 +848,11 @@ public:
 	/*!
 	 *  \brief sets the current resolution to the given width and height
 	 *
+	 *  \param width new screen width
+	 *  \param height new screen height
 	 *  \note  you must call ApplySettings() to actually apply the change
 	 */	
-	bool SetResolution(int width, int height);	
+	bool SetResolution(int32 width, int32 height);	
 
 	/*!
 	 *  \brief returns true if game is in fullscreen mode
@@ -681,6 +863,7 @@ public:
 	 *  \brief sets the game to fullscreen or windowed depending on whether
 	 *         true or false is passed
 	 *
+	 *  \param fullscreen set to true if you want fullscreen, false for windowed.
 	 *  \note  you must call ApplySettings() to actually apply the change
 	 */	
 	bool SetFullscreen(bool fullscreen);
@@ -707,6 +890,10 @@ public:
 	 *  \brief sets the viewport, i.e. the area of the screen that gets drawn
 	 *         to. The default is (0, 100, 0, 100).
 	 *
+	 *  \param left   left border of screen
+	 *  \param right  right border of screen
+	 *  \param top    top border of screen
+	 *  \param bottom bottom border of screen
 	 *  \note  The arguments are percentages (0-100)
 	 */
 	void SetViewport
@@ -719,6 +906,10 @@ public:
 
 	/*!
 	 *  \brief sets the coordinate system. Default is (0,1024,0,768)
+	 *  \param left   left border of screen
+	 *  \param right  right border of screen
+	 *  \param top    top border of screen
+	 *  \param bottom bottom border of screen
 	 */   	                  
 	void SetCoordSys
 	(
@@ -728,6 +919,15 @@ public:
 		float top
 	);
 
+
+	/*!
+	 *  \brief sets the coordinate system. Default is (0,1024,0,768)
+	 *  \param coordSys the coordinate system you want to set to
+	 */   	                  
+	void SetCoordSys
+	(
+		const CoordSys &coordSys
+	);
 	
 	//-- Transformations ------------------------------------------------------
 
@@ -743,21 +943,27 @@ public:
 	
 	/*!
 	 *  \brief sets draw position to (x,y)
+	 *  \param x  x coordinate to move to
+	 *  \param y  y coordinate to move to
 	 */
 	void Move   (float x, float y);
 	
 	/*!
 	 *  \brief moves draw position (dx, dy) units
+	 *  \param dx how many units to move in x direction
+	 *  \param dy how many units to move in y direction
 	 */
 	void MoveRel(float dx, float dy);
 	
 	/*!
 	 *  \brief rotates images counterclockwise by 'angle' radians
+	 *  \param angle how many radians to rotate by
 	 */
 	void Rotate (float angle);
 
 	/*!
 	 *  \brief sets OpenGL transform to contents of 4x4 matrix (16 values)
+	 *  \param array of 16 float values forming a 4x4 transformation matrix
 	 */
 	void SetTransform(float m[16]);
 
@@ -765,23 +971,36 @@ public:
 
 	/*!
 	 *  \brief loads a font from a TTF file
+	 *  \param TTF_filename  the filename of the TTF file to load
+	 *  \param name          name of the font (e.g. "courier24")
+	 *  \param size          point size of the font
 	 */
 	bool LoadFont
 	(
-		const local_video::FileName &TTF_filename, 
+		const std::string &TTF_filename, 
 		const std::string &name, 
-		int size
+		int32 size
 	);
 	
 	/*!
 	 *  \brief sets current font
+	 *  \param name  name of the font to set to
 	 */
-	bool SetFont      (const std::string &name);
+	bool SetFont(const std::string &name);
+
+
+	/*!
+	 *  \brief enables/disables text shadowing
+	 *  \param enable  pass true to enable, false to disable
+	 */
+	bool EnableTextShadow(bool enable);
+
 	
 	/*!
 	 *  \brief sets current text color
+	 *  \param color  color to set to
 	 */
-	bool SetTextColor (const Color &color);
+	bool SetTextColor(const Color &color);
 		
 	/*!
 	 *  \brief get name of current font
@@ -797,7 +1016,9 @@ public:
 	 *  \brief non-unicode version of DrawText(). Only use this for debug
 	 *         output or other things which don't have to be localized
 	 *
-	 *  \param P1      Explanation
+	 *  \param text   text string to draw
+	 *  \param x      x coordinate to position text at
+	 *  \param y      y coordinate to position text at
 	 */
 	bool DrawText(const char *const text, float x, float y);
 	
@@ -805,26 +1026,36 @@ public:
 	 *  \brief unicode version of DrawText(). This should be used for
 	 *         anything in the game which might need to be localized
 	 *         (game dialogue, interface text, etc.)
+	 *
+	 *  \param uText  unicode text string to draw
+	 *  \param x      x coordinate to position text at
+	 *  \param y      y coordinate to position text at
 	 */
-	bool DrawText(const Uint16 *const text, float x, float y);
+	bool DrawText(const Uint16 *const uText, float x, float y);
 
 
 	//-- Images ----------------------------------------------------------------
 	
 	/*!
-	 *  \brief loads an image	 
+	 *  \brief loads an image
+	 *
+	 *  \param id  image descriptor to load. Can specify filename, color, width, height, and static as its parameters
 	 */
 	bool LoadImage(ImageDescriptor &id);
 
 	/*!
 	 *  \brief captures the contents of the screen and saves it to an image
 	 *         descriptor
+	 *
+	 *  \param id  image descriptor to capture to
 	 */
 	bool CaptureScreen(ImageDescriptor &id);
 
 	
 	/*!
 	 *  \brief decreases ref count of an image
+	 *
+	 *  \param id  image descriptor to decrease the reference count of
 	 */
 	bool DeleteImage(ImageDescriptor &id);
 	
@@ -858,16 +1089,20 @@ public:
 	 *         parameter is a zero.
 	 *         e.g. SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, 0);
 	 */
-	void SetDrawFlags(int firstflag, ...);
+	void SetDrawFlags(int32 firstflag, ...);
 	
 	/*!
 	 *  \brief draws an image which is modulated by the scene's light color
+	 *
+	 *  \param id  image descriptor to draw
 	 */	
 	bool DrawImage(const ImageDescriptor &id);  
 	
 	/*!
 	 *  \brief draws an iamge which is modulated by a custom color (not the
 	 *         scene lighting)
+	 *  \param id  Image descriptor to draw
+	 *  \param color  color to modulate the image by
 	 */
 	bool DrawImage(const ImageDescriptor &id, const Color &color);  
 
@@ -881,7 +1116,7 @@ public:
 	ImageDescriptor TilesToObject
 	( 
 		std::vector<ImageDescriptor> &tiles, 
-		std::vector< std::vector<uint> > indices 
+		std::vector< std::vector<uint32> > indices 
 	);
 
 	void DEBUG_NextTexSheet();    // These cycle through the currently loaded
@@ -891,40 +1126,69 @@ public:
 	//-- Menus -----------------------------------------------------------------
 
 	/*!
-	 *  \brief sets the current menu skin (borders+fill color).
+	 *  \brief sets the current menu skin (borders+fill color). Assumes all four
+	 *         vertices of menu interior are same color
 	 *
-	 *  \param imgFile_UL    image file for upper-left border
-	 *  \param imgFile_U     image file for upper border
-	 *  \param imgFile_UR    image file for upper-right border
-	 *  \param imgFile_L     image file for left border
-	 *  \param imgFile_R     image file for right border
-	 *  \param imgFile_BL    image file for bottom-left border
-	 *  \param imgFile_B     image file for bottom border
-	 *  \param imgFile_BR    image file for bottom-right border
-	 *  \param fillColor     color for inner area of menu
+	 *  \param imgBaseName  name of images which form this skin.
+	 *                      For example if you pass in "/img/menus/chrome", then it will load:
+	 *                          /img/menus/chrome_tl.png
+	 *                          /img/menus/chrome_t.png
+	 *                          /img/menus/chrome_tr.png
+	 *                          /img/menus/chrome_l.png
+	 *                          /img/menus/chrome_r.png
+	 *                          /img/menus/chrome_bl.png
+	 *                          /img/menus/chrome_b.png
+	 *                          /img/menus/chrome_br.png
+	 *	 
+	 *  \param fillColor    color for inner area of menu. can be transparent
 	 */
 	bool SetMenuSkin
 	(
-		const std::string &imgFile_UL,  // image filenames for the borders
-		const std::string &imgFile_U,
-		const std::string &imgFile_UR,
-		const std::string &imgFile_L,
-		const std::string &imgFile_R,
-		const std::string &imgFile_BL,
-		const std::string &imgFile_B,
-		const std::string &imgFile_BR,
-		
-		const Color  &fillColor         // color to fill the menu with. You can
-		                                // make it transparent by setting alpha
+		const std::string &imgBaseName,
+		const Color  &fillColor
 	);
+
 	
 	/*!
+	 *  \brief sets the current menu skin (borders+fill color). This version of
+	 *         SetMenuSkin() allows the 4 vertices of the interior of the menu
+	 *         to have different colors so you can have gradients.
+	 *
+	 *  \param imgBaseName  name of images which form this skin.
+	 *                      For example if you pass in "/img/menus/chrome", then it will load:
+	 *                          /img/menus/chrome_tl.png
+	 *                          /img/menus/chrome_t.png
+	 *                          /img/menus/chrome_tr.png
+	 *                          /img/menus/chrome_l.png
+	 *                          /img/menus/chrome_r.png
+	 *                          /img/menus/chrome_bl.png
+	 *                          /img/menus/chrome_b.png
+	 *                          /img/menus/chrome_br.png
+	 *	 
+	 *  \param fillColor_TL  color for upper left  vertex of interior
+	 *  \param fillColor_TR  color for upper right vertex of interior
+	 *  \param fillColor_BL  color for lower left  vertex of interior
+	 *  \param fillColor_BR  color for lower right vertex of interior
+	 */
+	bool SetMenuSkin
+	(
+		const std::string &imgBaseName,
+		const Color  &fillColor_TL,
+		const Color  &fillColor_TR,
+		const Color  &fillColor_BL,
+		const Color  &fillColor_BR
+	);
+
+
+	/*!
 	 *  \brief creates an ImageDescriptor of a menu which is the given size
+	 *
+	 *  \param menu   Reference to menu to create
 	 *
 	 *  \param width  Width of menu, based on pixels in 1024x768 resolution
 	 *  \param height Height of menu, based on pixels in 1024x768 resolution.
 	 */
-	bool CreateMenu(ImageDescriptor &id, float width, float height);
+	bool CreateMenu(ImageDescriptor &menu, float width, float height);
 
 
 	//-- Lighting and fog -----------------------------------------------------
@@ -1042,7 +1306,14 @@ public:
 	 *  \brief updates the FPS counter with the given frame time and draws the
 	 *         current FPS on the screen.
 	 */
-	bool DrawFPS(int frameTime);
+	bool DrawFPS(int32 frameTime);
+	
+
+	/*!
+	 *  \brief toggles the FPS display (on by default)
+	 */
+	void ToggleFPS();
+	
 	
 	/*!
 	 *  \brief makes a screenshot, saves it as screenshot.jpg in the directory
@@ -1059,122 +1330,275 @@ public:
 private:
 	SINGLETON_DECLARE(GameVideo);
 	
+	//-- Private variables ----------------------------------------------------
+
+	
 	// for now the game gui class is a member of video so that
 	// externally people only have to deal with GameVideo.
-	local_video::GUI *_gui;
+
+	private_video::GUI *_gui;    //! pointer to GUI class which implements all GUI functionality
 
 	// draw flags	
-	char _blend;
-	char _xalign;
-	char _yalign;
-	char _xflip;
-	char _yflip;
+	char _blend;        //! blend flag which specifies normal alpha blending
+	char _xalign;       //! x align flag which tells if images should be left, center, or right aligned
+	char _yalign;       //! y align flag which tells if images should be top, center, or bottom aligned
+	char _xflip;        //! x flip flag. true if images should be flipped horizontally
+	char _yflip;        //! y flip flag. true if images should be flipped vertically
 
-	CoordSys    _coordSys;
-	local_video::ScreenFader _fader;
+	CoordSys    _coordSys;    //! current coordinate system
 	
-	bool _advancedDisplay;
+	private_video::ScreenFader _fader;  //! fader class which implements screen fading
 	
-	int  _currentDebugTexSheet;
-	int  _numTexSwitches;
-	int  _numDrawCalls;
-	bool _batchLoading;
+	bool   _advancedDisplay;       //! advanced display flag. If true, info about the video engine is shown on screen
+	bool   _fpsDisplay;            //! fps display flag. If true, FPS is displayed
 	
-	bool   _usesLights;
-	GLuint _lightOverlay;
+	int32  _currentDebugTexSheet;  //! current debug texture sheet
+	int32  _numTexSwitches;        //! keep track of number of texture switches per frame
+	int32  _numDrawCalls;          //! keep track of number of draw calls per frame
+	bool   _batchLoading;          //! if true, we are in batch mode
+	
+	bool   _usesLights;      //! true if real lights are enabled
+	GLuint _lightOverlay;    //! lighting overlay texture
 
-	float _shakeX, _shakeY;   // offsets to shake the screen by (if any)
-	std::list<local_video::ShakeForce> _shakeForces;
+	float  _shakeX, _shakeY; //! offsets to shake the screen by (if any)
 	
-	bool _fullscreen;
-	int  _width;
-	int  _height;
+	std::list<private_video::ShakeForce> _shakeForces;  //! current shake forces affecting screen
+		
+	bool _fullscreen;     //! true if game is currently running fullscreen
+	int32  _width;        //! current screen width
+	int32  _height;       //! current screen height
 	
-	bool _temp_fullscreen;    // changing the video settings does not actually do anything until
-	int  _temp_width;         // you call ApplySettings(). Up til that point, store them in temp
-	int  _temp_height;        // variables so if the new settings are invalid, we can roll back.
+	// changing the video settings does not actually do anything until
+	// you call ApplySettings(). Up til that point, store them in temp
+	// variables so if the new settings are invalid, we can roll back.
 	
-	// requests new texture from OpenGL of given width, height. returns 0xffffffff on failure
-	GLuint CreateBlankGLTexture(int width, int height);
+	bool   _temp_fullscreen;   //! holds the desired fullscreen status (true=fullscreen, false=windowed). Not actually applied until ApplySettings() is called
+	int32  _temp_width;        //! holds the desired screen width. Not actually applied until ApplySettings() is called
+	int32  _temp_height;       //! holds the desired screen height. Not actually applied until ApplySettings() is called
+		
+	GLuint _lastTexID;    //! ID of the last texture that was bound. Used to eliminate redundant binding of textures
 
-	GLuint _lastTexID;
+	std::string _currentFont;          //! current font name
+	Color       _currentTextColor;     //! current text color
 
-	std::string _currentFont;
-	Color       _currentTextColor;
-
-	Color _fogColor;
-	float _fogIntensity;
+	Color _fogColor;        //! current fog color (set by SetFog())
+	float _fogIntensity;    //! current fog intensity (set by SetFog())
 	
-	Color _lightColor;
+	Color _lightColor;      //! current scene lighting color (essentially just modulates vertex colors of all the images)
 
-	std::vector <ImageDescriptor *>    _batchLoadImages;
+	std::vector <ImageDescriptor *>    _batchLoadImages;    //! vector of images in a batch which are to be loaded
 	
-	std::map    <local_video::FileName, local_video::Image*>   _images;
-	std::vector <local_video::TexSheet *>                      _texSheets;
-	std::map    <std::string, TTF_Font *>                      _fontMap;
+	std::map    <std::string, private_video::Image*>   _images;    //! STL map containing all the images currently being managed by the video engine	
+	std::vector <private_video::TexSheet *>   _texSheets;          //! vector containing all texture sheets currently being managed by the video engine
+	std::map    <std::string, TTF_Font *>     _fontMap;            //! STL map containing all the fonts currently being managed by the video engine
 
-	bool DrawTextHelper( 
+
+	//-- Private methods ------------------------------------------------------
+
+	/*!
+	 *  \brief creates a blank texture of the given width and height and returns integer used by OpenGL to refer to this texture. Returns 0xffffffff on failure.
+	 *
+	 *  \param width   desired width of the texture
+	 *  \param height  desired height of the texture
+	 */	
+
+	GLuint _CreateBlankGLTexture(int32 width, int32 height);
+
+	/*!
+	 *  \brief does the actual work of drawing text
+	 *
+	 *  \param text   Pointer to a C-style string holding the text to draw. NULL if we're using unicode
+	 *  \param uText  Pointer to a unicode string holding the text to draw. NULL if we're using C-style
+	 *  \param x      x coordinate of text to be drawn
+	 *  \param y      y coordinate of text to be drawn
+	 */	
+
+	bool _DrawTextHelper
+	(
 		const char   *const text, 
 		const Uint16 *const uText, 
 		float x, 
 		float y
 	);
 
-	local_video::TexSheet *CreateTexSheet
+
+	/*!
+	 *  \brief creates a texture sheet
+	 *
+	 *  \param width    width of the sheet
+	 *  \param height   height of the sheet
+	 *  \param type     specifies what type of images this texture sheet manages (e.g. 32x32 images, 64x64 images, any type, etc)
+	 *  \param isStatic if true, this texture sheet is meant to manage images which are not expected to be loaded and unloaded very often
+	 */	
+
+	private_video::TexSheet *_CreateTexSheet
 	(
-		int width,
-		int height,
-		local_video::TexSheetType type,
+		int32 width,
+		int32 height,
+		private_video::TexSheetType type,
 		bool isStatic
 	);
 
-	local_video::TexSheet *InsertImageInTexSheet
+
+	/*!
+	 *  \brief inserts an image into a texture sheet
+	 *
+	 *  \param image       pointer to the image to insert
+	 *  \param pixelData   DevIL handle to the loaded raw image data
+	 *  \param x           x coordinate where image gets inserted is returned into this parameter
+	 *  \param y           y coordinate where image gets inserted is returned into this parameter
+	 *  \param w           width of image (in pixels)
+	 *  \param h           height of image (in pixels) 
+	 */	
+
+	private_video::TexSheet *_InsertImageInTexSheet
 	(
-		local_video::Image *image,
+		private_video::Image *image,
 		ILuint pixelData, 
-		int &x, 
-		int &y,
-		int w,
-		int h,
+		int32 &x, 
+		int32 &y,
+		int32 w,
+		int32 h,
 		bool isStatic
 	);
 		
-	float Lerp(float alpha, float initial, float final);
+
+	/*!
+	 *  \brief linearly interpolation, returns a value which is (alpha*100) percent between initial and final
+	 *
+	 *  \param alpha    controls the linear interpolation
+	 *  \param initial  initial value
+	 *  \param final    final value
+	 */	
+
+	float _Lerp(float alpha, float initial, float final);
 	
-	bool LoadImageImmediate(ImageDescriptor &id, bool isStatic);
 
-	// use DevIL to load an image and return the raw image data
-	bool LoadRawPixelData(const std::string &filename, ILuint &pixelData, uint &width, uint &height);
+	/*!
+	 *  \brief does the actual work of loading an image
+	 *
+	 *  \param id  ImageDescriptor of the image to load. May specify a filename, color, width, height, and static
+	 */	
 
-	// loop through all currently loaded images and if they belong to the given tex sheet,
-	// reload them into it
-	bool ReloadImagesToSheet(local_video::TexSheet *);
+	bool _LoadImageHelper(ImageDescriptor &id);
 
-	bool BindTexture(GLuint texID);
-	bool DeleteTexture(GLuint texID);
 
-	bool RemoveImage(local_video::Image *);     // removes image from std::map
-	bool RemoveSheet(local_video::TexSheet *);  // removes sheet from std::vector
+	/*!
+	 *  \brief use DevIL to load an image and return raw pixel data
+	 *
+	 *  \param filename   Filename of image to load
+	 *  \param pixelData  The loaded image's integer handle gets returned into this variable
+	 *  \param width      The loaded image's width gets returned into this variable
+	 *  \param width      The loaded image's height gets returned into this variable
+	 */	
 
-	bool DeleteImage    (local_video::Image    *const);
-	bool DeleteTexSheet (local_video::TexSheet *const);
-	bool DrawElement
+	bool _LoadRawPixelData(const std::string &filename, ILuint &pixelData, uint32 &width, uint32 &height);
+
+
+	/*!
+	 *  \brief loop through all currently loaded images and if they belong to the given tex sheet, reload them into it
+	 *
+	 *  \param texSheet   pointer to the tex sheet whose images we want to load
+	 */	
+
+	bool _ReloadImagesToSheet(private_video::TexSheet *texSheet);
+
+
+	/*!
+	 *  \brief wraps a call to glBindTexture(), except it adds checking to eliminate redundant texture binding. Redundancy checks are already implemented by most drivers, but this is a double check "just in case"
+	 *
+	 *  \param texID   integer handle to the OpenGL texture
+	 */	
+
+	bool _BindTexture(GLuint texID);
+
+
+	/*!
+	 *  \brief wraps a call to glDeleteTextures(), except it adds some checking related to eliminating redundant texture binding.
+	 *
+	 *  \param texID   integer handle to the OpenGL texture
+	 */	
+	bool _DeleteTexture(GLuint texID);
+
+
+	/*!
+	 *  \brief removes the image from the STL map with the same pointer as the one passed in. Returns false on failure
+	 *
+	 *  \param imageToRemove   pointer to the image we want to remove
+	 */	
+
+	bool _RemoveImage(private_video::Image *imageToRemove);
+	
+
+	/*!
+	 *  \brief removes a texture sheet from our vector of sheets and deletes it
+	 *
+	 *  \param sheetToRemove  pointer to the sheet we want to remove
+	 */	
+	bool _RemoveSheet(private_video::TexSheet *sheetToRemove);
+
+
+	/*!
+	 *  \brief decreases the reference count of an image
+	 *
+	 *  \param image  pointer to image
+	 */	
+	bool _DeleteImage    (private_video::Image *const image);
+	
+	
+	/*!
+	 *  \brief draws an image element, i.e. one image within an image descriptor which may contain multiple images
+	 *
+	 *  \param image     pointer to the image
+	 *  \param w         width to draw the image
+	 *  \param h         height to draw the image
+	 *  \param color_TL  color of top-left     vertex
+	 *  \param color_TR  color of top-right    vertex
+	 *  \param color_BL  color of bottom-left  vertex
+	 *  \param color_BR  color of bottom-right vertex
+	 */	
+	bool _DrawElement
 	(
-		const local_video::Image *const, 
+		const private_video::Image *const  image, 
 		float w, 
 		float h, 
-		const Color &color
+		Color color_TL,
+		Color color_TR,
+		Color color_BL,
+		Color color_BR
 	);
 
-	float RoundForce(float force);   // rounds a force value
-	void UpdateShake(int frameTime); // this must be called every frame internally to update shake effects
 
-	bool DEBUG_ShowTexSwitches();
-	bool DEBUG_ShowTexSheet();
+	/*!
+	 *  \brief rounds a force value to the nearest integer. Rounding is based on probability. For example the number 2.85 has an 85% chance of rounding to 3 and a 15% chance of rounding to 2
+	 *
+	 *  \param force  The force to round
+	 */	
+	float _RoundForce(float force);   // rounds a force value
+
+
+	/*!
+	 *  \brief updates the shaking effect
+	 *
+	 *  \param frameTime  elapsed time for the current rendering frame
+	 */	
+	void  _UpdateShake(int32 frameTime);
+
+
+	/*!
+	 *  \brief function solely for debugging, which shows number of texture switches made during a frame
+	 */	
+	bool _DEBUG_ShowTexSwitches();
+
+
+	/*!
+	 *  \brief function solely for debugging, which displays the currently selected texture sheet. By using DEBUG_NextTexSheet() and DEBUG_PrevTexSheet(), you can change the current texture sheet so the sheet shown by this function cycles through all currently loaded sheets.
+	 */	
+	bool _DEBUG_ShowTexSheet();
 	
-	friend class local_video::FixedTexMemMgr;
-	friend class local_video::VariableTexMemMgr;
-	friend class local_video::TexSheet;
+	friend class private_video::FixedTexMemMgr;
+	friend class private_video::VariableTexMemMgr;
+	friend class private_video::TexSheet;
 };
 
 }   // namespace hoa_video

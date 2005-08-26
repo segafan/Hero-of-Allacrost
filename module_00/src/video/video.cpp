@@ -3,11 +3,10 @@
 #include <cstdarg>
 #include "video.h"
 #include <math.h>
-#include "coord_sys.h"
 #include "gui.h"
 
 using namespace std;
-using namespace hoa_video::local_video;
+using namespace hoa_video::private_video;
 
 namespace hoa_video 
 {
@@ -18,10 +17,27 @@ SINGLETON_INITIALIZE(GameVideo);
 
 
 //-----------------------------------------------------------------------------
-// Lerp: linearly interpolates value between initial and final
+// Static variables
 //-----------------------------------------------------------------------------
 
-float Lerp(float alpha, float initial, float final)
+Color Color::white (1.0f, 1.0f, 1.0f, 1.0f);
+Color Color::gray  (0.5f, 0.5f, 0.5f, 1.0f);
+Color Color::black (0.0f, 0.0f, 0.0f, 1.0f);
+Color Color::red   (1.0f, 0.0f, 0.0f, 1.0f);
+Color Color::orange(1.0f, 0.4f, 0.0f, 1.0f);
+Color Color::yellow(1.0f, 1.0f, 0.0f, 1.0f);
+Color Color::green (0.0f, 1.0f, 0.0f, 1.0f);
+Color Color::aqua  (0.0f, 1.0f, 1.0f, 1.0f);
+Color Color::blue  (1.0f, 0.0f, 1.0f, 1.0f);
+Color Color::violet(1.0f, 0.0f, 1.0f, 1.0f);
+Color Color::brown (0.6f, 0.3f, 0.1f, 1.0f);
+
+
+//-----------------------------------------------------------------------------
+// _Lerp: linearly interpolates value between initial and final
+//-----------------------------------------------------------------------------
+
+float _Lerp(float alpha, float initial, float final)
 {
 	return alpha * final + (1.0f-alpha) * initial;
 }
@@ -73,6 +89,7 @@ GameVideo::GameVideo()
   _lastTexID(0xFFFFFFFF),
   _numTexSwitches(0),
   _advancedDisplay(false),
+  _fpsDisplay(true),
   _shakeX(0),
   _shakeY(0),
   _fogColor(1.0f, 1.0f, 1.0f, 1.0f),
@@ -170,35 +187,35 @@ bool GameVideo::Initialize()
 	
 	// create our default texture sheets
 
-	if(!CreateTexSheet(512, 512, VIDEO_TEXSHEET_32x32, false))
+	if(!_CreateTexSheet(512, 512, VIDEO_TEXSHEET_32x32, false))
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: could not create default 32x32 tex sheet!" << endl;
 		return false;
 	}
 	
-	if(!CreateTexSheet(512, 512, VIDEO_TEXSHEET_32x64, false))
+	if(!_CreateTexSheet(512, 512, VIDEO_TEXSHEET_32x64, false))
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: could not create default 32x64 tex sheet!" << endl;
 		return false;
 	}
 
-	if(!CreateTexSheet(512, 512, VIDEO_TEXSHEET_64x64, false))
+	if(!_CreateTexSheet(512, 512, VIDEO_TEXSHEET_64x64, false))
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: could not create default 64x64 tex sheet!" << endl;
 		return false;
 	}
 
-	if(!CreateTexSheet(512, 512, VIDEO_TEXSHEET_ANY,   true))
+	if(!_CreateTexSheet(512, 512, VIDEO_TEXSHEET_ANY,   true))
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: could not create default static  var-sized tex sheet!" << endl;
 		return false;
 	}
 
-	if(!CreateTexSheet(512, 512, VIDEO_TEXSHEET_ANY,   false))
+	if(!_CreateTexSheet(512, 512, VIDEO_TEXSHEET_ANY,   false))
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: could not create default var-sized tex sheet!" << endl;
@@ -350,8 +367,8 @@ GameVideo::~GameVideo()
 	}
 	
 	// delete images
-	map<FileName, Image *>::iterator iImage     = _images.begin();
-	map<FileName, Image *>::iterator iImageEnd  = _images.end();
+	map<string, Image *>::iterator iImage     = _images.begin();
+	map<string, Image *>::iterator iImageEnd  = _images.end();
 
 	while(iImage != iImageEnd)
 	{
@@ -367,15 +384,9 @@ GameVideo::~GameVideo()
 // SetCoordSys: sets the current coordinate system
 //-----------------------------------------------------------------------------
 
-void GameVideo::SetCoordSys
-(
-	float left, 
-	float right, 
-	float bottom, 
-	float top
-)
+void GameVideo::SetCoordSys(const CoordSys &coordSys)
 {
-	_coordSys = CoordSys(left, right, bottom, top);
+	_coordSys = coordSys;
 	
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -387,19 +398,35 @@ void GameVideo::SetCoordSys
 
 
 //-----------------------------------------------------------------------------
+// SetCoordSys: sets the current coordinate system
+//-----------------------------------------------------------------------------
+
+void GameVideo::SetCoordSys
+(
+	float left, 
+	float right, 
+	float bottom, 
+	float top
+)
+{
+	SetCoordSys(CoordSys(left, right, bottom, top));	
+}
+
+
+//-----------------------------------------------------------------------------
 // SetDrawFlags: used for controlling various flags like blending, flipping, etc.
 //-----------------------------------------------------------------------------
 
-void GameVideo::SetDrawFlags(int firstflag, ...)
+void GameVideo::SetDrawFlags(int32 firstflag, ...)
 {
-	int n;
-	int flag;
+	int32 n;
+	int32 flag;
 	va_list args;
 
 	va_start(args, firstflag);
 	for (n=0;;n++) 
 	{
-		flag = (n==0) ? firstflag : va_arg(args, int);
+		flag = (n==0) ? firstflag : va_arg(args, int32);
 		switch (flag) {
 		case 0: goto done;
 
@@ -442,7 +469,7 @@ bool GameVideo::ApplySettings()
 	// Losing GL context, so unload images first
 	UnloadTextures();
 
-	int flags = SDL_OPENGL;
+	int32 flags = SDL_OPENGL;
 	
 	if(_temp_fullscreen)
 		flags |= SDL_FULLSCREEN;
@@ -493,10 +520,10 @@ void GameVideo::SetViewport(float left, float right, float bottom, float top)
 	assert(left < right);
 	assert(bottom < top);
 
-	int l=int(left*_width*.01f);
-	int b=int(bottom*_height*.01f);
-	int r=int(right*_width*.01f);
-	int t=int(top*_height*.01f);
+	int32 l=int32(left*_width*.01f);
+	int32 b=int32(bottom*_height*.01f);
+	int32 r=int32(right*_width*.01f);
+	int32 t=int32(top*_height*.01f);
 
 	if (l<0) l=0;
 	if (b<0) b=0;
@@ -550,7 +577,7 @@ bool GameVideo::AccumulateLights()
 {
 	if(_lightOverlay != 0xFFFFFFFF)
 	{
-		BindTexture(_lightOverlay);
+		_BindTexture(_lightOverlay);
 		glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, 1024, 1024, 0);
 	}
 	
@@ -563,22 +590,21 @@ bool GameVideo::AccumulateLights()
 //          screen
 //-----------------------------------------------------------------------------
 
-bool GameVideo::Display(int frameTime) 
+bool GameVideo::Display(int32 frameTime) 
 {
 	// update shaking effect
 	CoordSys oldSys = _coordSys;
 	SetCoordSys(0, 1024, 0, 768);
 
-	UpdateShake(frameTime);	
+	_UpdateShake(frameTime);	
 	
 	// show an overlay over the screen if we're fading
 	if(_fader.ShouldUseFadeOverlay())
 	{
 		Color c = _fader.GetFadeOverlayColor();
 		ImageDescriptor fadeOverlay;
-		fadeOverlay.width  = 1024.0f;
-		fadeOverlay.height = 768.0f;
-		fadeOverlay.color  = c;
+		fadeOverlay.SetDimensions(1024.0f, 768.0f);
+		fadeOverlay.SetColor(c);
 		LoadImage(fadeOverlay);		
 		SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 		PushState();
@@ -593,11 +619,12 @@ bool GameVideo::Display(int frameTime)
 	// ones used to draw debug text and things like that.
 	
 	if(_advancedDisplay)
-		DEBUG_ShowTexSwitches();
+		_DEBUG_ShowTexSwitches();
 
-	DrawFPS(frameTime);
+	if(_fpsDisplay)
+		DrawFPS(frameTime);
 		
-	if(!DEBUG_ShowTexSheet())
+	if(!_DEBUG_ShowTexSheet())
 	{
 		if(VIDEO_DEBUG)
 		{
@@ -608,7 +635,7 @@ bool GameVideo::Display(int frameTime)
 			
 			if(!hasFailed)
 			{
-				cerr << "VIDEO ERROR: DEBUG_ShowTexSheet() failed\n";
+				cerr << "VIDEO ERROR: _DEBUG_ShowTexSheet() failed\n";
 				hasFailed = true;
 			}
 		}
@@ -663,7 +690,7 @@ bool GameVideo::ToggleFullscreen()
 // NOTE: to actually apply the change, call ApplySettings()
 //-----------------------------------------------------------------------------
 
-bool GameVideo::SetResolution(int width, int height)
+bool GameVideo::SetResolution(int32 width, int32 height)
 {
 	if(width <= 0 || height <= 0)
 	{
@@ -679,11 +706,11 @@ bool GameVideo::SetResolution(int width, int height)
 
 
 //-----------------------------------------------------------------------------
-// DEBUG_ShowTexSwitches: display how many times we switched textures during
+// _DEBUG_ShowTexSwitches: display how many times we switched textures during
 //                        the current frame
 //-----------------------------------------------------------------------------
 
-bool GameVideo::DEBUG_ShowTexSwitches()
+bool GameVideo::_DEBUG_ShowTexSwitches()
 {
 	// display to screen	
 	char text[16];
@@ -776,45 +803,61 @@ void GameVideo::PopState()
 }
 
 
-
 //-----------------------------------------------------------------------------
-// SetMenuSkin
+// SetMenuSkin: sets the menu skin to use the menu border images starting with
+//              imageBaseName, and with an interior of fill color
 //-----------------------------------------------------------------------------
 
 bool GameVideo::SetMenuSkin
 (
-	const std::string &imgFile_UL,
-	const std::string &imgFile_U,
-	const std::string &imgFile_UR,
-	const std::string &imgFile_L,
-	const std::string &imgFile_R,
-	const std::string &imgFile_BL,
-	const std::string &imgFile_B,
-	const std::string &imgFile_BR,	
+	const std::string &imgBaseName,	
 	const Color  &fillColor
+)
+{
+	return SetMenuSkin(imgBaseName, fillColor, fillColor, fillColor, fillColor);
+}
+
+
+//-----------------------------------------------------------------------------
+// SetMenuSkin: sets the menu skin to use the menu border images starting with
+//              imageBaseName, and with an interior whose 4 vertices' colors
+//              are given by fillColor_TL, fillColor_TR, fillColor_BL and
+//              fillColor_BR
+//-----------------------------------------------------------------------------
+
+bool GameVideo::SetMenuSkin
+(
+	const std::string &imgBaseName,
+	const Color  &fillColor_TL,
+	const Color  &fillColor_TR,
+	const Color  &fillColor_BL,
+	const Color  &fillColor_BR
 )
 {
 	return _gui->SetMenuSkin
 	(
-		imgFile_UL,
-		imgFile_U,
-		imgFile_UR,
-		imgFile_L,
-		imgFile_R,
-		imgFile_BL,
-		imgFile_B,
-		imgFile_BR,
-		fillColor
+		imgBaseName + "_tl.png",
+		imgBaseName + "_t.png",
+		imgBaseName + "_tr.png",
+		imgBaseName + "_l.png",
+		imgBaseName + "_r.png",
+		imgBaseName + "_bl.png",
+		imgBaseName + "_b.png",
+		imgBaseName + "_br.png",
+		fillColor_TL,
+		fillColor_TR,
+		fillColor_BL,
+		fillColor_BR
 	);
 }
 
 
 //-----------------------------------------------------------------------------
-// BindTexture: wraps call to glBindTexture(), plus some extra checking to
+// _BindTexture: wraps call to glBindTexture(), plus some extra checking to
 //              discard the call if we try to bind the same texture twice
 //-----------------------------------------------------------------------------
 
-bool GameVideo::BindTexture(GLuint texID)
+bool GameVideo::_BindTexture(GLuint texID)
 {
 	if(texID != _lastTexID)
 	{
@@ -848,9 +891,9 @@ bool GameVideo::ToggleAdvancedDisplay()
 // CreateMenu
 //-----------------------------------------------------------------------------
 
-bool GameVideo::CreateMenu(ImageDescriptor &id, float width, float height)
+bool GameVideo::CreateMenu(ImageDescriptor &menu, float width, float height)
 {
-	return _gui->CreateMenu(id, width, height);
+	return _gui->CreateMenu(menu, width, height);
 }
 
 
@@ -945,13 +988,13 @@ bool GameVideo::EnableRealLights(bool enable)
 {
 	if(enable)
 	{
-		_lightOverlay = CreateBlankGLTexture(1024, 1024);
+		_lightOverlay = _CreateBlankGLTexture(1024, 1024);
 	}
 	else
 	{
 		if(_lightOverlay != 0xFFFFFFFF)
 		{
-			DeleteTexture(_lightOverlay);
+			_DeleteTexture(_lightOverlay);
 		}
 		
 		_lightOverlay = 0xFFFFFFFF;
@@ -985,7 +1028,7 @@ bool GameVideo::ApplyLightingOverlay()
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_DST_COLOR, GL_ZERO);
 		
-		BindTexture(_lightOverlay);
+		_BindTexture(_lightOverlay);
 		glBegin(GL_QUADS);
 		glTexCoord2f(0.0f, 0.0f);	
 		glVertex2f(xlo, ylo); //bl
@@ -1021,13 +1064,6 @@ bool GameVideo::CaptureScreen(ImageDescriptor &id)
 	if(VIDEO_DEBUG)
 		cout << "VIDEO: Entering CaptureScreen()" << endl;
 
-	if(_images.find("!!screenie!!") != _images.end())
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: Tried to CaptureScreen() even though captured image was already in memory!" << endl;
-		return false;
-	}
-
 	ILuint screenshot;
 	ilGenImages(1, &screenshot);
 	
@@ -1061,25 +1097,28 @@ bool GameVideo::CaptureScreen(ImageDescriptor &id)
 
 	id._elements.clear();
 	
-	int w, h;
+	int32 w, h;
 	
 	w = ilGetInteger(IL_IMAGE_WIDTH);
 	h = ilGetInteger(IL_IMAGE_HEIGHT);
 
 	// create an Image structure and store it our std::map of images
-	Image *newImage = new Image("!!screenie!!", w, h);
+	// note the "" for the filename indicates that this is an image which
+	// was not loaded from a file, so do not perform the same kind of
+	// resource management on it
+	Image *newImage = new Image("", w, h);
 
 	// try to insert the image in a texture sheet
-	int x, y;
-	TexSheet *sheet = InsertImageInTexSheet(newImage, screenshot, x, y, w, h, false);
+	int32 x, y;
+	TexSheet *sheet = _InsertImageInTexSheet(newImage, screenshot, x, y, w, h, false);
 
 	if(!sheet)
 	{
 		// this should never happen, unless we run out of memory or there
-		// is a bug in the InsertImageInTexSheet() function
+		// is a bug in the _InsertImageInTexSheet() function
 		
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO_DEBUG: GameVideo::InsertImageInTexSheet() returned NULL!" << endl;
+			cerr << "VIDEO_DEBUG: GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
 		
 		ilDeleteImages(1, &screenshot);
 		return false;
@@ -1088,17 +1127,17 @@ bool GameVideo::CaptureScreen(ImageDescriptor &id)
 	newImage->refCount = 1;
 	
 	// store the image in our std::map
-	_images[id.filename] = newImage;
+	_images[id._filename] = newImage;
 
 	// if width or height are zero, that means to use the dimensions of image
-	if(id.width == 0.0f)
-		id.width = (float) w;
+	if(id._width == 0.0f)
+		id._width = (float) w;
 	
-	if(id.height == 0.0f)
-		id.height = (float) h;
+	if(id._height == 0.0f)
+		id._height = (float) h;
 
 	// store the new image element
-	ImageElement element(newImage, 0, 0, id.width, id.height, id.color);
+	ImageElement element(newImage, 0, 0, id._width, id._height, id._color);
 	id._elements.push_back(element);
 
 	// finally, delete the buffer DevIL used to load the image
@@ -1116,6 +1155,15 @@ bool GameVideo::CaptureScreen(ImageDescriptor &id)
 	return true;
 }
 
+
+//-----------------------------------------------------------------------------
+// ToggleFPS: toggles the FPS display
+//-----------------------------------------------------------------------------
+
+void GameVideo::ToggleFPS()
+{
+	_fpsDisplay = !_fpsDisplay;
+}
 
 
 }  // namespace hoa_video

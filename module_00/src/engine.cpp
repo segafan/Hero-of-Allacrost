@@ -428,6 +428,7 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent *key_event) {
 			}
 			else if (key_event->keysym.sym == SDLK_f) {
 				// Toggle between full-screen and windowed mode
+				if (ENGINE_DEBUG) cout << "Toggle fullscreen!" << endl;
 				GameVideo *VideoManager = GameVideo::_GetReference();
 				VideoManager->ToggleFullscreen();
 				VideoManager->ApplySettings();
@@ -444,10 +445,10 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent *key_event) {
 					_ModeManager->Push(QM);
 				}
 			}
-			// Will add a call to VideoManager to swap the FPS display
-			// else if (key_event->keysym.sym == SDLK_r) { 
-			// 	VideoManager->ToggleFPS();
-			// }
+			else if (key_event->keysym.sym == SDLK_r) {
+				GameVideo *VideoManager = GameVideo::_GetReference();
+				VideoManager->ToggleFPS();
+			}
 			else if (key_event->keysym.sym == SDLK_s) {
 				// Take a screenshot of the current game
 				GameVideo *VideoManager = GameVideo::_GetReference();

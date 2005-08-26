@@ -3,16 +3,15 @@
 #include <cstdarg>
 #include "video.h"
 #include <math.h>
-#include "coord_sys.h"
 #include "gui.h"
 
 using namespace std;
-using namespace hoa_video::local_video;
+using namespace hoa_video::private_video;
 
 namespace hoa_video 
 {
 
-extern uint RoundUpPow2(unsigned x);
+extern uint32 RoundUpPow2(uint32 x);
 
 //-----------------------------------------------------------------------------
 // LoadFont: loads a font of a given size. The name parameter is a string which
@@ -21,7 +20,7 @@ extern uint RoundUpPow2(unsigned x);
 //   Example:  gamevideo->LoadFont( "fonts/arial.ttf", "arial36", 36 );
 //-----------------------------------------------------------------------------
 
-bool GameVideo::LoadFont(const string &filename, const string &name, int size)
+bool GameVideo::LoadFont(const string &filename, const string &name, int32 size)
 {
 	if( _fontMap.find(filename) != _fontMap.end() )
 	{
@@ -91,13 +90,13 @@ Color GameVideo::GetTextColor () const
 
 
 //-----------------------------------------------------------------------------
-// DrawTextHelper: since there are two DrawText functions (one for unicode and
+// _DrawTextHelper: since there are two DrawText functions (one for unicode and
 //                 one for non-unicode), this private function is used to
 //                 do all the work so that code doesn't have to be duplicated.
 //                 Either text or uText is valid string and the other is NULL.
 //-----------------------------------------------------------------------------
 
-bool GameVideo::DrawTextHelper
+bool GameVideo::_DrawTextHelper
 ( 
 	const char   *text, 
 	const Uint16 *uText, 
@@ -113,8 +112,8 @@ bool GameVideo::DrawTextHelper
 	SetCoordSys(0,1024,0,768);
 	SDL_Rect location;
 	SDL_Color color;
-	location.x = (int)x;
-	location.y = (int)y;
+	location.x = (int32)x;
+	location.y = (int32)y;
 	
 	if(_fontMap.find(_currentFont) == _fontMap.end())
 		return false;
@@ -131,7 +130,7 @@ bool GameVideo::DrawTextHelper
 
 	SDL_Surface *initial;
 	SDL_Surface *intermediary;
-	int w,h;
+	int32 w,h;
 	GLuint texture;
 	
 	
@@ -142,7 +141,7 @@ bool GameVideo::DrawTextHelper
 		if(!initial)
 		{
 			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: TTF_RenderUNICODE_Blended() returned NULL in DrawTextHelper()!" << endl;
+				cerr << "VIDEO ERROR: TTF_RenderUNICODE_Blended() returned NULL in _DrawTextHelper()!" << endl;
 			return false;
 		}
 	}
@@ -153,7 +152,7 @@ bool GameVideo::DrawTextHelper
 		if(!initial)
 		{
 			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: TTF_RenderText_Blended() returned NULL in DrawTextHelper()!" << endl;
+				cerr << "VIDEO ERROR: TTF_RenderText_Blended() returned NULL in _DrawTextHelper()!" << endl;
 			return false;
 		}
 	}
@@ -167,7 +166,7 @@ bool GameVideo::DrawTextHelper
 	if(!intermediary)
 	{
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: SDL_CreateRGBSurface() returned NULL in DrawTextHelper()!" << endl;
+			cerr << "VIDEO ERROR: SDL_CreateRGBSurface() returned NULL in _DrawTextHelper()!" << endl;
 		return false;
 	}
 
@@ -175,7 +174,7 @@ bool GameVideo::DrawTextHelper
 	if(SDL_BlitSurface(initial, 0, intermediary, 0) < 0)
 	{
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: SDL_BlitSurface() failed in DrawTextHelper()!" << endl;
+			cerr << "VIDEO ERROR: SDL_BlitSurface() failed in _DrawTextHelper()!" << endl;
 		return false;
 	}
 
@@ -184,15 +183,15 @@ bool GameVideo::DrawTextHelper
 	if(glGetError())
 	{
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: glGetError() true after glGenTextures() in DrawTextHelper!" << endl;
+			cerr << "VIDEO ERROR: glGetError() true after glGenTextures() in _DrawTextHelper!" << endl;
 		return false;
 	}
 	
-	BindTexture(texture);
+	_BindTexture(texture);
 	if(glGetError())
 	{
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: glGetError() true after glBindTexture() in DrawTextHelper!" << endl;
+			cerr << "VIDEO ERROR: glGetError() true after glBindTexture() in _DrawTextHelper!" << endl;
 		return false;
 	}
 
@@ -202,7 +201,7 @@ bool GameVideo::DrawTextHelper
 	if(glGetError())
 	{
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: glGetError() true after glTexImage2D() in DrawTextHelper!" << endl;
+			cerr << "VIDEO ERROR: glGetError() true after glTexImage2D() in _DrawTextHelper!" << endl;
 		return false;
 	}
 
@@ -211,11 +210,11 @@ bool GameVideo::DrawTextHelper
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);	
 
 	glEnable(GL_TEXTURE_2D);
-	BindTexture(texture);
+	_BindTexture(texture);
 	if(glGetError())
 	{
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: glGetError() true after 2nd call to glBindTexture() in DrawTextHelper!" << endl;
+			cerr << "VIDEO ERROR: glGetError() true after 2nd call to glBindTexture() in _DrawTextHelper!" << endl;
 		return false;
 	}
 
@@ -245,10 +244,10 @@ bool GameVideo::DrawTextHelper
 	SDL_FreeSurface(initial);
 	SDL_FreeSurface(intermediary);
 		
-	if(!DeleteTexture(texture))
+	if(!_DeleteTexture(texture))
 	{
 		if(VIDEO_DEBUG)
-			cerr << "glGetError() true after glDeleteTextures() in DrawTextHelper!" << endl;
+			cerr << "glGetError() true after glDeleteTextures() in _DrawTextHelper!" << endl;
 		return false;
 	}
 
@@ -264,7 +263,7 @@ bool GameVideo::DrawTextHelper
 
 bool GameVideo::DrawText(const char *text, float x, float y)
 {
-	return DrawTextHelper(text, NULL, x, y);
+	return _DrawTextHelper(text, NULL, x, y);
 }
 
 
@@ -274,7 +273,7 @@ bool GameVideo::DrawText(const char *text, float x, float y)
 
 bool GameVideo::DrawText(const Uint16 *text, float x, float y)
 {
-	return DrawTextHelper(NULL, text, x, y);
+	return _DrawTextHelper(NULL, text, x, y);
 }
 
 

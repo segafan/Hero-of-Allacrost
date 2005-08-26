@@ -98,59 +98,58 @@ void MapSprite::LoadFrames() {
 
 	// Prepare standard sprite animation frames (24 count)
 	_frames = new vector<ImageDescriptor>;
-	imd.width = 1;
-	imd.height = 2;
+	imd.SetDimensions(1.0f, 2.0f);
 
-	imd.filename = _filename + "_d1.png";
+	imd.SetFilename(_filename + "_d1.png");
 	_frames->push_back(imd);
-	imd.filename = _filename + "_d2.png";
+	imd.SetFilename(_filename + "_d2.png");
 	_frames->push_back(imd);
-	imd.filename = _filename + "_d3.png";
+	imd.SetFilename(_filename + "_d3.png");
 	_frames->push_back(imd);
-	imd.filename = _filename + "_d4.png";
+	imd.SetFilename(_filename + "_d4.png");
 	_frames->push_back(imd);
-	imd.filename = _filename + "_d5.png";
-	_frames->push_back(imd);
-
-	imd.filename = _filename + "_u1.png";
-	_frames->push_back(imd);
-	imd.filename = _filename + "_u2.png";
-	_frames->push_back(imd);
-	imd.filename = _filename + "_u3.png";
-	_frames->push_back(imd);
-	imd.filename = _filename + "_u4.png";
-	_frames->push_back(imd);
-	imd.filename = _filename + "_u5.png";
+	imd.SetFilename(_filename + "_d5.png");
 	_frames->push_back(imd);
 
-	imd.filename = _filename + "_l1.png";
+	imd.SetFilename(_filename + "_u1.png");
 	_frames->push_back(imd);
-	imd.filename = _filename + "_l2.png";
+	imd.SetFilename(_filename + "_u2.png");
 	_frames->push_back(imd);
-	imd.filename = _filename + "_l3.png";
+	imd.SetFilename(_filename + "_u3.png");
 	_frames->push_back(imd);
-	imd.filename = _filename + "_l4.png";
+	imd.SetFilename(_filename + "_u4.png");
 	_frames->push_back(imd);
-	imd.filename = _filename + "_l5.png";
-	_frames->push_back(imd);
-	imd.filename = _filename + "_l6.png";
-	_frames->push_back(imd);
-	imd.filename = _filename + "_l7.png";
+	imd.SetFilename(_filename + "_u5.png");
 	_frames->push_back(imd);
 
-	imd.filename = _filename + "_r1.png";
+	imd.SetFilename(_filename + "_l1.png");
 	_frames->push_back(imd);
-	imd.filename = _filename + "_r2.png";
+	imd.SetFilename(_filename + "_l2.png");
 	_frames->push_back(imd);
-	imd.filename = _filename + "_r3.png";
+	imd.SetFilename(_filename + "_l3.png");
 	_frames->push_back(imd);
-	imd.filename = _filename + "_r4.png";
+	imd.SetFilename(_filename + "_l4.png");
 	_frames->push_back(imd);
-	imd.filename = _filename + "_r5.png";
+	imd.SetFilename(_filename + "_l5.png");
 	_frames->push_back(imd);
-	imd.filename = _filename + "_r6.png";
+	imd.SetFilename(_filename + "_l6.png");
 	_frames->push_back(imd);
-	imd.filename = _filename + "_r7.png";
+	imd.SetFilename(_filename + "_l7.png");
+	_frames->push_back(imd);
+
+	imd.SetFilename(_filename + "_r1.png");
+	_frames->push_back(imd);
+	imd.SetFilename(_filename + "_r2.png");
+	_frames->push_back(imd);
+	imd.SetFilename(_filename + "_r3.png");
+	_frames->push_back(imd);
+	imd.SetFilename(_filename + "_r4.png");
+	_frames->push_back(imd);
+	imd.SetFilename(_filename + "_r5.png");
+	_frames->push_back(imd);
+	imd.SetFilename(_filename + "_r6.png");
+	_frames->push_back(imd);
+	imd.SetFilename(_filename + "_r7.png");
 	_frames->push_back(imd);
 
 //	// Prepare additional extra frames if the sprite is not a regular NPC

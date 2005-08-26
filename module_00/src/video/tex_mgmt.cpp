@@ -3,11 +3,10 @@
 #include <cstdarg>
 #include "video.h"
 #include <math.h>
-#include "coord_sys.h"
 #include "gui.h"
 
 using namespace std;
-using namespace hoa_video::local_video;
+using namespace hoa_video::private_video;
 using namespace hoa_video;
 
 namespace hoa_video 
@@ -17,7 +16,7 @@ namespace hoa_video
 // RoundUpPow2: rounds up a number to the nearest power of 2
 //-----------------------------------------------------------------------------
 
-uint RoundUpPow2(unsigned x)
+uint32 RoundUpPow2(uint32 x)
 {
 	x -= 1;
 	x |= x >>  1;
@@ -33,7 +32,7 @@ uint RoundUpPow2(unsigned x)
 // IsPowerOfTwo: returns true if given number is a power of 2
 //-----------------------------------------------------------------------------
 
-bool IsPowerOfTwo(uint x)
+bool IsPowerOfTwo(uint32 x)
 {
 	return ((x & (x-1)) == 0);
 }
@@ -52,10 +51,10 @@ bool GameVideo::LoadImage(ImageDescriptor &id)
 {
 	// 1. special case: if filename is empty, load a colored quad
 	
-	if(id.filename.empty())
+	if(id._filename.empty())
 	{
 		id._elements.clear();		
-		ImageElement quad(NULL, 0.0f, 0.0f, id.width, id.height, id.color);
+		ImageElement quad(NULL, 0.0f, 0.0f, id._width, id._height, id._color);
 		id._elements.push_back(quad);		
 		return true;
 	}
@@ -64,11 +63,11 @@ bool GameVideo::LoadImage(ImageDescriptor &id)
 	// 2. check if an image with the same filename has already been loaded
 	//    If so, point to that
 	
-	if(_images.find(id.filename) != _images.end())
+	if(_images.find(id._filename) != _images.end())
 	{
 		id._elements.clear();		
 		
-		Image *img = _images[id.filename];
+		Image *img = _images[id._filename];
 		
 		if(!img)
 		{
@@ -87,12 +86,12 @@ bool GameVideo::LoadImage(ImageDescriptor &id)
 		
 		++img->refCount;
 		
-		if(id.width == 0.0f)
-			id.width = (float) img->width;
-		if(id.height == 0.0f)
-			id.height = (float) img->height;
+		if(id._width == 0.0f)
+			id._width = (float) img->width;
+		if(id._height == 0.0f)
+			id._height = (float) img->height;
 		
-		ImageElement element(img, 0, 0, id.width, id.height, id.color);		
+		ImageElement element(img, 0, 0, id._width, id._height, id._color);		
 		id._elements.push_back(element);
 				
 		return true;
@@ -111,7 +110,16 @@ bool GameVideo::LoadImage(ImageDescriptor &id)
 
 	// 4. If we're not batching, then load the image right away
 	
-	return LoadImageImmediate(id, id.isStatic);
+	bool success = _LoadImageHelper(id);
+	
+	if(!success)
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: in LoadImage() failed to load " << id._filename << endl;
+		return false;
+	}
+	
+	return success;
 }
 
 //-----------------------------------------------------------------------------
@@ -169,39 +177,41 @@ bool GameVideo::EndImageLoadBatch()
 
 
 //-----------------------------------------------------------------------------
-// LoadImageImmediate: private function which does the dirty work of actually
+// _LoadImageHelper: private function which does the dirty work of actually
 //                     loading an image.
 //-----------------------------------------------------------------------------
 
-bool GameVideo::LoadImageImmediate(ImageDescriptor &id, bool isStatic)
+bool GameVideo::_LoadImageHelper(ImageDescriptor &id)
 {
+	bool isStatic = id._isStatic;
+	
 	id._elements.clear();
 
 	ILuint pixelData;
-	uint w, h;
+	uint32 w, h;
 	
-	if(!LoadRawPixelData(id.filename, pixelData, w, h))
+	if(!_LoadRawPixelData(id._filename, pixelData, w, h))
 	{
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: LoadRawPixelData() failed in LoadImageImmediate()" << endl;
+			cerr << "VIDEO ERROR: _LoadRawPixelData() failed in _LoadImageHelper()" << endl;
 		return false;
 	}
 
 
 	// create an Image structure and store it our std::map of images
-	Image *newImage = new Image(id.filename, w, h);
+	Image *newImage = new Image(id._filename, w, h);
 
 	// try to insert the image in a texture sheet
-	int x, y;
-	TexSheet *sheet = InsertImageInTexSheet(newImage, pixelData, x, y, w, h, isStatic);
+	int32 x, y;
+	TexSheet *sheet = _InsertImageInTexSheet(newImage, pixelData, x, y, w, h, isStatic);
 	
 	if(!sheet)
 	{
 		// this should never happen, unless we run out of memory or there
-		// is a bug in the InsertImageInTexSheet() function
+		// is a bug in the _InsertImageInTexSheet() function
 		
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO_DEBUG: GameVideo::InsertImageInTexSheet() returned NULL!" << endl;
+			cerr << "VIDEO_DEBUG: GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
 		
 		ilDeleteImages(1, &pixelData);
 		return false;
@@ -210,18 +220,18 @@ bool GameVideo::LoadImageImmediate(ImageDescriptor &id, bool isStatic)
 	newImage->refCount = 1;
 	
 	// store the image in our std::map
-	_images[id.filename] = newImage;
+	_images[id._filename] = newImage;
 
 
 	// if width or height are zero, that means to use the dimensions of image
-	if(id.width == 0.0f)
-		id.width = (float) w;
+	if(id._width == 0.0f)
+		id._width = (float) w;
 	
-	if(id.height == 0.0f)
-		id.height = (float) h;
+	if(id._height == 0.0f)
+		id._height = (float) h;
 
 	// store the new image element
-	ImageElement element(newImage, 0, 0, id.width, id.height, id.color);
+	ImageElement element(newImage, 0, 0, id._width, id._height, id._color);
 	id._elements.push_back(element);
 
 	// finally, delete the buffer DevIL used to load the image
@@ -230,7 +240,7 @@ bool GameVideo::LoadImageImmediate(ImageDescriptor &id, bool isStatic)
 	if(ilGetError())
 	{
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: ilGetError() true after ilDeleteImages() in LoadImageImmediate()!" << endl;
+			cerr << "VIDEO ERROR: ilGetError() true after ilDeleteImages() in _LoadImageHelper()!" << endl;
 		return false;
 	}
 	
@@ -239,12 +249,12 @@ bool GameVideo::LoadImageImmediate(ImageDescriptor &id, bool isStatic)
 
 
 //-----------------------------------------------------------------------------
-// LoadRawPixelData: uses DevIL to load the given filename.
+// _LoadRawPixelData: uses DevIL to load the given filename.
 //                   Returns the DevIL texture ID, width and height
 //                   Upon exit, leaves this image as the currently "bound" image
 //-----------------------------------------------------------------------------
 
-bool GameVideo::LoadRawPixelData(const string &filename, ILuint &pixelData, uint &w, uint &h)
+bool GameVideo::_LoadRawPixelData(const string &filename, ILuint &pixelData, uint32 &w, uint32 &h)
 {
 	// load the image using DevIL
 
@@ -253,7 +263,7 @@ bool GameVideo::LoadRawPixelData(const string &filename, ILuint &pixelData, uint
 	if(ilGetError())
 	{
 		if(VIDEO_DEBUG)
-			cerr << "ilGetError() true after ilGenImages() in LoadImageImmediate()!" << endl;
+			cerr << "ilGetError() true after ilGenImages() in _LoadImageHelper()!" << endl;
 		return false;
 	}
 	
@@ -262,7 +272,7 @@ bool GameVideo::LoadRawPixelData(const string &filename, ILuint &pixelData, uint
 	if(ilGetError())
 	{
 		if(VIDEO_DEBUG)
-			cerr << "ilGetError() true after ilBindImage() in LoadImageImmediate()!" << endl;
+			cerr << "ilGetError() true after ilBindImage() in _LoadImageHelper()!" << endl;
 		return false;
 	}
 
@@ -321,7 +331,7 @@ bool ImageDescriptor::AddImage
 		return false;
 	}
 	
-	for(uint iElement = 0; iElement < numElements; ++iElement)
+	for(uint32 iElement = 0; iElement < numElements; ++iElement)
 	{
 		// add the new image element to our descriptor
 		ImageElement elem = id._elements[iElement];
@@ -338,12 +348,12 @@ bool ImageDescriptor::AddImage
 		// recalculate width and height of the descriptor as a whole
 		// This assumes that there are no negative offsets
 		float maxX = elem.xOffset + elem.width;
-		if(maxX > width)
-			width = maxX;
+		if(maxX > _width)
+			_width = maxX;
 			
 		float maxY = elem.yOffset + elem.height;
-		if(maxY > height)
-			height = maxY;		
+		if(maxY > _height)
+			_height = maxY;		
 	}
 	
 	return true;	
@@ -366,28 +376,28 @@ bool ImageDescriptor::AddImage
 ImageDescriptor GameVideo::TilesToObject
 ( 
 	vector<ImageDescriptor> &tiles, 
-	vector< vector<uint> > indices 
+	vector< vector<uint32> > indices 
 )
 {	
 	ImageDescriptor id;
 
 	// figure out the width and height information
 		
-	int w, h;
-	w = (int) indices[0].size();         // how many tiles wide and high
-	h = (int) indices.size();
+	int32 w, h;
+	w = (int32) indices[0].size();         // how many tiles wide and high
+	h = (int32) indices.size();
 
-	float tileWidth  = tiles[0].width;   // width and height of each tile
-	float tileHeight = tiles[0].height;
+	float tileWidth  = tiles[0]._width;   // width and height of each tile
+	float tileHeight = tiles[0]._height;
 	
-	id.width  = (float) w * tileWidth;   // total width/height of compound
-	id.height = (float) h * tileHeight;
+	id._width  = (float) w * tileWidth;   // total width/height of compound
+	id._height = (float) h * tileHeight;
 	
-	id.isStatic = tiles[0].isStatic;
+	id._isStatic = tiles[0]._isStatic;
 	
-	for(int y = 0; y < h; ++y)
+	for(int32 y = 0; y < h; ++y)
 	{
-		for(int x = 0; x < w; ++x)
+		for(int32 x = 0; x < w; ++x)
 		{
 			// add each tile at the correct offset
 			
@@ -409,7 +419,7 @@ ImageDescriptor GameVideo::TilesToObject
 
 
 //-----------------------------------------------------------------------------
-// InsertImageInTexSheet: takes an image that was loaded with DevIL, finds
+// _InsertImageInTexSheet: takes an image that was loaded with DevIL, finds
 //                        an available texture sheet, copies it to the sheet,
 //                        and returns a pointer to the texture sheet. If no
 //                        available texture sheet is found, a new one is created.
@@ -418,14 +428,14 @@ ImageDescriptor GameVideo::TilesToObject
 //                        we run out of memory or bad argument is passed.
 //-----------------------------------------------------------------------------
 
-TexSheet *GameVideo::InsertImageInTexSheet
+TexSheet *GameVideo::_InsertImageInTexSheet
 (
 	Image *image,
 	ILuint pixelData, 
-	int &x, 
-	int &y,
-	int w,
-	int h,
+	int32 &x, 
+	int32 &y,
+	int32 w,
+	int32 h,
 	bool isStatic
 )
 {
@@ -434,15 +444,15 @@ TexSheet *GameVideo::InsertImageInTexSheet
 
 	if(w > 512 || h > 512)
 	{
-		int roundW = RoundUpPow2(w);
-		int roundH = RoundUpPow2(h);		
-		TexSheet *sheet = CreateTexSheet(roundW, roundH, VIDEO_TEXSHEET_ANY, false);
+		int32 roundW = RoundUpPow2(w);
+		int32 roundH = RoundUpPow2(h);		
+		TexSheet *sheet = _CreateTexSheet(roundW, roundH, VIDEO_TEXSHEET_ANY, false);
 
 		// ran out of memory!
 		if(!sheet)
 		{
 			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: CreateTexSheet() returned NULL in InsertImageInTexSheet()!" << endl;
+				cerr << "VIDEO ERROR: _CreateTexSheet() returned NULL in _InsertImageInTexSheet()!" << endl;
 			return NULL;
 		}
 					
@@ -475,13 +485,13 @@ TexSheet *GameVideo::InsertImageInTexSheet
 	
 	size_t numTexSheets = _texSheets.size();
 	
-	for(uint iSheet = 0; iSheet < numTexSheets; ++iSheet)
+	for(uint32 iSheet = 0; iSheet < numTexSheets; ++iSheet)
 	{
 		TexSheet *sheet = _texSheets[iSheet];
 		if(!sheet)
 		{
 			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: _texSheets[iSheet] was NULL in InsertImageInTexSheet()!" << endl;
+				cerr << "VIDEO ERROR: _texSheets[iSheet] was NULL in _InsertImageInTexSheet()!" << endl;
 			return NULL;
 		}
 		
@@ -497,14 +507,14 @@ TexSheet *GameVideo::InsertImageInTexSheet
 	
 	// if it doesn't fit in any of them, create a new 512x512 and stuff it in
 	
-	TexSheet *sheet = CreateTexSheet(512, 512, type, isStatic);
+	TexSheet *sheet = _CreateTexSheet(512, 512, type, isStatic);
 	if(!sheet)
 	{
 		// failed to create texture, ran out of memory probably
 		
 		if(VIDEO_DEBUG)
 		{
-			cerr << "VIDEO ERROR: Failed to create new texture sheet in InsertImageInTexSheet!" << endl;
+			cerr << "VIDEO ERROR: Failed to create new texture sheet in _InsertImageInTexSheet!" << endl;
 		}
 		
 		return NULL;
@@ -522,17 +532,17 @@ TexSheet *GameVideo::InsertImageInTexSheet
 
 
 //-----------------------------------------------------------------------------
-// CreateTexSheet: creates a new texture sheet with the given parameters,
+// _CreateTexSheet: creates a new texture sheet with the given parameters,
 //                 adds it to our internal vector of texture sheets, and
 //                 returns a pointer to it.
 //                 Returns NULL on failure, which should only happen if
 //                 we run out of memory or bad argument is passed.
 //-----------------------------------------------------------------------------
 
-TexSheet *GameVideo::CreateTexSheet
+TexSheet *GameVideo::_CreateTexSheet
 (
-	int width,
-	int height,
+	int32 width,
+	int32 height,
 	TexSheetType type,
 	bool isStatic
 )
@@ -542,7 +552,7 @@ TexSheet *GameVideo::CreateTexSheet
 	if(!IsPowerOfTwo(width) || !IsPowerOfTwo(height))
 	{
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: non pow2 width and/or height passed to CreateTexSheet!" << endl;
+			cerr << "VIDEO ERROR: non pow2 width and/or height passed to _CreateTexSheet!" << endl;
 			
 		return NULL;
 	}
@@ -550,12 +560,12 @@ TexSheet *GameVideo::CreateTexSheet
 	if(type <= VIDEO_TEXSHEET_INVALID || type >= VIDEO_TEXSHEET_TOTAL)
 	{
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: Invalid TexSheetType passed to CreateTexSheet()!" << endl;
+			cerr << "VIDEO ERROR: Invalid TexSheetType passed to _CreateTexSheet()!" << endl;
 			
 		return NULL;
 	}
 	
-	GLuint texID = CreateBlankGLTexture(width, height);	
+	GLuint texID = _CreateBlankGLTexture(width, height);	
 	
 	// now that we have our texture loaded, simply create a new TexSheet	
 	
@@ -570,7 +580,7 @@ TexSheet *GameVideo::CreateTexSheet
 // TexSheet constructor
 //-----------------------------------------------------------------------------
 
-TexSheet::TexSheet(int w, int h, GLuint texID_, TexSheetType type_, bool isStatic_)
+TexSheet::TexSheet(int32 w, int32 h, GLuint texID_, TexSheetType type_, bool isStatic_)
 {
 	width = w;
 	height = h;
@@ -610,7 +620,7 @@ TexSheet::~TexSheet()
 	}
 	
 	// unload actual texture from memory
-	videoManager->DeleteTexture(texID);
+	videoManager->_DeleteTexture(texID);
 }
 
 
@@ -638,7 +648,7 @@ VariableTexMemMgr::~VariableTexMemMgr()
 }
 
 
-bool GameVideo::DEBUG_ShowTexSheet()
+bool GameVideo::_DEBUG_ShowTexSheet()
 {
 	// value of zero means to disable display
 	if(_currentDebugTexSheet == -1)
@@ -653,7 +663,7 @@ bool GameVideo::DEBUG_ShowTexSheet()
 	}
 	
 	
-	int numSheets = (int) _texSheets.size();
+	int32 numSheets = (int32) _texSheets.size();
 	
 	// we may go out of bounds say, if we were viewing a texture sheet and then it got
 	// deleted or something. To recover, just set it to the last texture sheet
@@ -667,14 +677,14 @@ bool GameVideo::DEBUG_ShowTexSheet()
 	if(!sheet)
 		return false;
 	
-	int w = sheet->width;
-	int h = sheet->height;
+	int32 w = sheet->width;
+	int32 h = sheet->height;
 	
 	Image img( sheet, string(), 0, 0, w, h, 0.0f, 0.0f, 1.0f, 1.0f );
 
-	int blend = _blend;
-	int xalign = _xalign;
-	int yalign = _yalign;
+	int32 blend = _blend;
+	int32 xalign = _xalign;
+	int32 yalign = _yalign;
 	
 	SetDrawFlags(VIDEO_NO_BLEND, VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 	
@@ -683,7 +693,7 @@ bool GameVideo::DEBUG_ShowTexSheet()
 	Move(0.0f,0.0f);
 	glScalef(0.5f, 0.5f, 0.5f);
 	
-	if(!DrawElement(&img, (float)w, (float)h, Color(1.0f, 1.0f, 1.0f, 1.0f)))
+	if(!_DrawElement(&img, (float)w, (float)h, Color::white, Color::white, Color::white, Color::white))
 		return false;
 		
 	glPopMatrix();
@@ -733,19 +743,19 @@ bool GameVideo::DEBUG_ShowTexSheet()
 
 
 //-----------------------------------------------------------------------------
-// DeleteImage: decreases the reference count on an image, and deletes it
-//              if zero is reached. Note that for images larger than 512x512,
-//              there is no reference counting; we just delete it immediately
-//              because we don't want huge textures sitting around in memory
+// _DeleteImage: decreases the reference count on an image, and deletes it
+//               if zero is reached. Note that for images larger than 512x512,
+//               there is no reference counting; we just delete it immediately
+//               because we don't want huge textures sitting around in memory
 //-----------------------------------------------------------------------------
 
-bool GameVideo::DeleteImage(Image *const img)
+bool GameVideo::_DeleteImage(Image *const img)
 {
 	if(img->width > 512 || img->height > 512)
 	{
 		// remove the image and texture sheet completely
-		DeleteTexSheet(img->texSheet);
-		RemoveImage(img);
+		_RemoveSheet(img->texSheet);
+		_RemoveImage(img);
 	}
 	else
 	{
@@ -762,21 +772,10 @@ bool GameVideo::DeleteImage(Image *const img)
 
 
 //-----------------------------------------------------------------------------
-// DeleteTexSheet: deletes a texture sheet with given pointer
+// _RemoveSheet: removes a texture sheet from the internal std::vector
 //-----------------------------------------------------------------------------
 
-bool GameVideo::DeleteTexSheet (TexSheet *const sheet)
-{
-	RemoveSheet(sheet);
-	return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// RemoveSheet: removes a texture sheet from the internal std::vector
-//-----------------------------------------------------------------------------
-
-bool GameVideo::RemoveSheet(TexSheet *sheet)
+bool GameVideo::_RemoveSheet(TexSheet *sheet)
 {
 	if(_texSheets.empty())
 	{
@@ -844,12 +843,12 @@ bool TexSheet::AddImage(Image *img, ILuint pixelData)
 // CopyRect: copies an image into a sub-rectangle of the texture
 //-----------------------------------------------------------------------------
 
-bool TexSheet::CopyRect(ILuint pixelData, int x, int y, int w, int h)
+bool TexSheet::CopyRect(ILuint pixelData, int32 x, int32 y, int32 w, int32 h)
 {
-	int error;
+	int32 error;
 	
 	hoa_video::GameVideo *videoManager = hoa_video::GameVideo::_GetReference();
-	videoManager->BindTexture(texID);	
+	videoManager->_BindTexture(texID);	
 	
 	error = glGetError();
 	if(error)
@@ -893,11 +892,11 @@ bool TexSheet::CopyRect(ILuint pixelData, int x, int y, int w, int h)
 
 
 //-----------------------------------------------------------------------------
-// RemoveImage: removes an image completely from the texture sheet's
+// _RemoveImage: removes an image completely from the texture sheet's
 //              memory manager so that a new image can be loaded in its place
 //-----------------------------------------------------------------------------
 
-bool TexSheet::RemoveImage(Image *img)
+bool TexSheet::_RemoveImage(Image *img)
 {
 	return _texMemManager->Remove(img);
 }
@@ -928,7 +927,7 @@ bool TexSheet::RestoreImage(Image *img)
 
 
 //-----------------------------------------------------------------------------
-// DeleteImage: decrements the reference count for all images composing this
+// _DeleteImage: decrements the reference count for all images composing this
 //              image descriptor.
 //
 // NOTE: for images which are 1024x1024 or higher, once their reference count
@@ -969,7 +968,7 @@ bool GameVideo::DeleteImage(ImageDescriptor &id)
 				
 				if(img->width > 512 || img->height > 512)
 				{				
-					DeleteImage   (img);  // overloaded DeleteImage for deleting Image
+					_DeleteImage(img);  // overloaded DeleteImage for deleting Image
 				}
 
 				// 2. otherwise, mark it as "freed"
@@ -987,19 +986,19 @@ bool GameVideo::DeleteImage(ImageDescriptor &id)
 	}
 	
 	id._elements.clear();
-	id.filename.clear();
-	id.height = id.width = 0;
-	id.isStatic = 0;
+	id._filename.clear();
+	id._height = id._width = 0;
+	id._isStatic = 0;
 	
 	return true;
 }
 
 
 //-----------------------------------------------------------------------------
-// RemoveImage: removes the image pointer from the std::map
+// _RemoveImage: removes the image pointer from the std::map
 //-----------------------------------------------------------------------------
 
-bool GameVideo::RemoveImage(Image *img)
+bool GameVideo::_RemoveImage(Image *img)
 {
 	// nothing to do if img is null
 	if(!img)
@@ -1010,8 +1009,8 @@ bool GameVideo::RemoveImage(Image *img)
 		return false;
 	}
 		
-	map<FileName, Image*>::iterator iImage = _images.begin();
-	map<FileName, Image*>::iterator iEnd   = _images.end();
+	map<string, Image*>::iterator iImage = _images.begin();
+	map<string, Image*>::iterator iEnd   = _images.end();
 	
 	// search std::map for pointer matching img and remove it
 	while(iImage != iEnd)
@@ -1037,8 +1036,8 @@ bool GameVideo::RemoveImage(Image *img)
 FixedTexMemMgr::FixedTexMemMgr
 (
 	TexSheet *texSheet, 
-	int imgW, 
-	int imgH
+	int32 imgW, 
+	int32 imgH
 )
 {
 	_texSheet = texSheet;
@@ -1050,7 +1049,7 @@ FixedTexMemMgr::FixedTexMemMgr
 	_imageHeight = imgH;
 	
 	// allocate the blocks array	
-	int numBlocks = _sheetWidth * _sheetHeight;
+	int32 numBlocks = _sheetWidth * _sheetHeight;
 	_blocks = new FixedImageNode[numBlocks];
 	
 	// initialize linked list of open blocks... which, at this point is
@@ -1059,7 +1058,7 @@ FixedTexMemMgr::FixedTexMemMgr
 	_openListTail = &_blocks[numBlocks-1];
 	
 	// now initialize all the blocks to proper values		
-	for(int i = 0; i < numBlocks - 1; ++i)
+	for(int32 i = 0; i < numBlocks - 1; ++i)
 	{
 		_blocks[i].next  = &_blocks[i+1];
 		_blocks[i].image = NULL;
@@ -1104,10 +1103,10 @@ bool VariableTexMemMgr::Insert  (Image *img)
 
 	// find an open block of memory. If none is found, return false
 	
-	int w = (img->width  + 15) / 16;   // width and height in blocks
-	int h = (img->height + 15) / 16;
+	int32 w = (img->width  + 15) / 16;   // width and height in blocks
+	int32 h = (img->height + 15) / 16;
 
-	int blockX=-1, blockY=-1;
+	int32 blockX=-1, blockY=-1;
 	
 	
 	// this is a 100% brute force way to allocate a block, just a bunch
@@ -1116,15 +1115,15 @@ bool VariableTexMemMgr::Insert  (Image *img)
 	// about fitting images with pixel perfect resolution.
 	// Later, if this turns out to be a bottleneck, we can rewrite this
 	// algorithm to something more intelligent ^_^
-	for(int y = 0; y < _sheetHeight - h + 1; ++y)
+	for(int32 y = 0; y < _sheetHeight - h + 1; ++y)
 	{
-		for(int x = 0; x < _sheetWidth - w + 1; ++x)
+		for(int32 x = 0; x < _sheetWidth - w + 1; ++x)
 		{
-			int furthestBlocker = -1;
+			int32 furthestBlocker = -1;
 			
-			for(int dy = 0; dy < h; ++dy)
+			for(int32 dy = 0; dy < h; ++dy)
 			{
-				for(int dx = 0; dx < w; ++dx)
+				for(int32 dx = 0; dx < w; ++dx)
 				{
 					if(!_blocks[(x+dx)+(y+dy)*_sheetWidth].free)
 					{
@@ -1157,10 +1156,10 @@ bool VariableTexMemMgr::Insert  (Image *img)
 	hoa_video::GameVideo *VideoManager = hoa_video::GameVideo::_GetReference();
 
 	// update blocks
-	for(int y = blockY; y < blockY + h; ++y)
+	for(int32 y = blockY; y < blockY + h; ++y)
 	{
-		int index = y*_sheetHeight + blockX;
-		for(int x = blockX; x < blockX + w; ++x)
+		int32 index = y*_sheetHeight + blockX;
+		for(int32 x = blockX; x < blockX + w; ++x)
 		{			
 			// check if there's already an image at the point we're
 			// trying to load at. If so, we need to tell GameVideo
@@ -1168,7 +1167,7 @@ bool VariableTexMemMgr::Insert  (Image *img)
 			
 			if(_blocks[index].image)
 			{
-				VideoManager->RemoveImage(_blocks[index].image);
+				VideoManager->_RemoveImage(_blocks[index].image);
 			}
 
 
@@ -1230,15 +1229,15 @@ bool VariableTexMemMgr::SetBlockProperties
 	Image *newImage
 )
 {
-	int blockX = img->x / 16;          // upper-left corner in blocks
-	int blockY = img->y / 16;
+	int32 blockX = img->x / 16;          // upper-left corner in blocks
+	int32 blockY = img->y / 16;
 	
-	int w = (img->width  + 15) / 16;   // width and height in blocks
-	int h = (img->height + 15) / 16;
+	int32 w = (img->width  + 15) / 16;   // width and height in blocks
+	int32 h = (img->height + 15) / 16;
 
-	for(int y = blockY; y < blockY + h; ++y)
+	for(int32 y = blockY; y < blockY + h; ++y)
 	{
-		for(int x = blockX; x < blockX + w; ++x)
+		for(int32 x = blockX; x < blockX + w; ++x)
 		{
 			if(changeFree)
 				_blocks[x+y*_sheetWidth].free  = free;
@@ -1310,7 +1309,7 @@ bool FixedTexMemMgr::Insert(Image *img)
 	if(node->image)
 	{
 		hoa_video::GameVideo *VideoManager = hoa_video::GameVideo::_GetReference();
-		VideoManager->RemoveImage(node->image);
+		VideoManager->_RemoveImage(node->image);
 		node->image = NULL;
 	}
 	
@@ -1340,12 +1339,12 @@ bool FixedTexMemMgr::Insert(Image *img)
 // CalculateBlockIndex: returns the block index used up by this image
 //-----------------------------------------------------------------------------
 
-int FixedTexMemMgr::CalculateBlockIndex(Image *img)
+int32 FixedTexMemMgr::CalculateBlockIndex(Image *img)
 {
-	int blockX = img->x / _imageWidth;
-	int blockY = img->y / _imageHeight;
+	int32 blockX = img->x / _imageWidth;
+	int32 blockY = img->y / _imageHeight;
 	
-	int blockIndex = blockX + _sheetWidth * blockY;
+	int32 blockIndex = blockX + _sheetWidth * blockY;
 	return blockIndex;
 }
 
@@ -1360,7 +1359,7 @@ int FixedTexMemMgr::CalculateBlockIndex(Image *img)
 bool FixedTexMemMgr::Remove(Image *img)
 {
 	// translate x,y coordinates into a block index
-	int blockIndex = CalculateBlockIndex(img);
+	int32 blockIndex = CalculateBlockIndex(img);
 	
 	// check to make sure the block is actually owned by this image
 	if(_blocks[blockIndex].image != img)
@@ -1387,7 +1386,7 @@ bool FixedTexMemMgr::Remove(Image *img)
 // DeleteNode: deletes a node from the open list with the given block index
 //-----------------------------------------------------------------------------
 
-void FixedTexMemMgr::DeleteNode(int blockIndex)
+void FixedTexMemMgr::DeleteNode(int32 blockIndex)
 {
 	if(blockIndex < 0)
 		return;
@@ -1437,7 +1436,7 @@ void FixedTexMemMgr::DeleteNode(int blockIndex)
 
 bool FixedTexMemMgr::Free(Image *img)
 {
-	int blockIndex = CalculateBlockIndex(img);
+	int32 blockIndex = CalculateBlockIndex(img);
 	
 	FixedImageNode *node = &_blocks[blockIndex];
 	
@@ -1467,7 +1466,7 @@ bool FixedTexMemMgr::Free(Image *img)
 
 bool FixedTexMemMgr::Restore(Image *img)
 {
-	int blockIndex = CalculateBlockIndex(img);	
+	int32 blockIndex = CalculateBlockIndex(img);	
 	DeleteNode(blockIndex);	
 	return true;
 }
@@ -1475,14 +1474,14 @@ bool FixedTexMemMgr::Restore(Image *img)
 
 //-----------------------------------------------------------------------------
 // DEBUG_NextTexSheet: increments to the next texture sheet to show with
-//                     DEBUG_ShowTexSheet().
+//                     _DEBUG_ShowTexSheet().
 //-----------------------------------------------------------------------------
 
 void GameVideo::DEBUG_NextTexSheet()
 {
 	++_currentDebugTexSheet;
 	
-	if(_currentDebugTexSheet >= (int) _texSheets.size()) 
+	if(_currentDebugTexSheet >= (int32) _texSheets.size()) 
 	{
 		_currentDebugTexSheet = -1;   // disable display
 	}
@@ -1491,7 +1490,7 @@ void GameVideo::DEBUG_NextTexSheet()
 
 //-----------------------------------------------------------------------------
 // DEBUG_PrevTexSheet: cycles to the previous texturesheet to show with
-//                     DEBUG_ShowTexSheet().
+//                     _DEBUG_ShowTexSheet().
 //-----------------------------------------------------------------------------
 
 void GameVideo::DEBUG_PrevTexSheet()
@@ -1500,7 +1499,7 @@ void GameVideo::DEBUG_PrevTexSheet()
 	
 	if(_currentDebugTexSheet < -1)
 	{
-		_currentDebugTexSheet = (int) _texSheets.size() - 1;
+		_currentDebugTexSheet = (int32) _texSheets.size() - 1;
 	}
 }
 
@@ -1545,7 +1544,7 @@ bool GameVideo::ReloadTextures()
 	}
 
 	if(_usesLights)
-		_lightOverlay = CreateBlankGLTexture(1024, 1024);
+		_lightOverlay = _CreateBlankGLTexture(1024, 1024);
 
 	return success;
 }
@@ -1592,7 +1591,7 @@ bool GameVideo::UnloadTextures()
 
 	if(_lightOverlay != 0xFFFFFFFF)
 	{
-		DeleteTexture(_lightOverlay);
+		_DeleteTexture(_lightOverlay);
 		_lightOverlay = 0xFFFFFFFF;
 	}
 
@@ -1600,12 +1599,12 @@ bool GameVideo::UnloadTextures()
 }
 
 //-----------------------------------------------------------------------------
-// DeleteTexture: wraps call to glDeleteTexture(), adds some checking to see
-//                if we deleted the last texture we bound using BindTexture(),
+// _DeleteTexture: wraps call to glDeleteTexture(), adds some checking to see
+//                if we deleted the last texture we bound using _BindTexture(),
 //                then set the last tex ID to 0xffffffff
 //-----------------------------------------------------------------------------
 
-bool GameVideo::DeleteTexture(GLuint texID)
+bool GameVideo::_DeleteTexture(GLuint texID)
 {
 	glDeleteTextures(1, &texID);
 	
@@ -1637,10 +1636,10 @@ bool TexSheet::Unload()
 	
 	// delete the texture
 	hoa_video::GameVideo *videoManager = hoa_video::GameVideo::_GetReference();
-	if(!videoManager->DeleteTexture(texID))
+	if(!videoManager->_DeleteTexture(texID))
 	{
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: DeleteTexture() failed in TexSheet::Unload()!" << endl;
+			cerr << "VIDEO ERROR: _DeleteTexture() failed in TexSheet::Unload()!" << endl;
 		return false;
 	}
 	
@@ -1650,17 +1649,17 @@ bool TexSheet::Unload()
 
 
 //-----------------------------------------------------------------------------
-// CreateBlankGLTexture: creates a blank texture of the given width and height
+// _CreateBlankGLTexture: creates a blank texture of the given width and height
 //                       and returns its OpenGL texture ID.
 //                       Returns 0xffffffff on failure
 //-----------------------------------------------------------------------------
 
-GLuint GameVideo::CreateBlankGLTexture(int width, int height)
+GLuint GameVideo::_CreateBlankGLTexture(int32 width, int32 height)
 {
 	// attempt to create a GL texture with the given width and height
 	// if texture creation fails, return NULL
 
-	int error;
+	int32 error;
 			
 	GLuint texID;
 
@@ -1669,7 +1668,7 @@ GLuint GameVideo::CreateBlankGLTexture(int width, int height)
 	
 	if(!error)   // if there's no error so far, attempt to bind texture
 	{
-		BindTexture(texID);
+		_BindTexture(texID);
 		error = glGetError();
 		
 		// if the binding was successful, initialize the texture with glTexImage2D()
@@ -1682,11 +1681,11 @@ GLuint GameVideo::CreateBlankGLTexture(int width, int height)
 		
 	if(error != 0)   // if there's an error, delete the texture and return error code
 	{
-		DeleteTexture(texID);
+		_DeleteTexture(texID);
 		
 		if(VIDEO_DEBUG)
 		{
-			cerr << "VIDEO ERROR: failed to create new texture in CreateBlankGLTexture()." << endl;
+			cerr << "VIDEO ERROR: failed to create new texture in _CreateBlankGLTexture()." << endl;
 			cerr << "  OpenGL reported the following error:" << endl << "  ";
 			char *errString = (char*)gluErrorString(error);
 			cerr << errString << endl;
@@ -1722,21 +1721,21 @@ bool TexSheet::Reload()
 	
 	// create new OpenGL texture
 	hoa_video::GameVideo *videoManager = hoa_video::GameVideo::_GetReference();	
-	GLuint tID = videoManager->CreateBlankGLTexture(width, height);
+	GLuint tID = videoManager->_CreateBlankGLTexture(width, height);
 	
 	if(tID == 0xFFFFFFFF)
 	{
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: CreateBlankGLTexture() failed in TexSheet::Reload()!" << endl;
+			cerr << "VIDEO ERROR: _CreateBlankGLTexture() failed in TexSheet::Reload()!" << endl;
 		return false;
 	}
 	
 	texID = tID;
 	
 	// now the hard part: go through all the images that belong to this texture
-	// and reload them again. (GameVideo's function, ReloadImagesToSheet does this)
+	// and reload them again. (GameVideo's function, _ReloadImagesToSheet does this)
 
-	if(!videoManager->ReloadImagesToSheet(this))
+	if(!videoManager->_ReloadImagesToSheet(this))
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: CopyImagesToSheet() failed in TexSheet::Reload()!" << endl;
@@ -1749,16 +1748,16 @@ bool TexSheet::Reload()
 
 
 //-----------------------------------------------------------------------------
-// ReloadImagesToSheet: helper function of the GameVideo class to
+// _ReloadImagesToSheet: helper function of the GameVideo class to
 //                      TexSheet::Reload() to do the dirty work of reloading
 //                      image data into the appropriate spots on the texture
 //-----------------------------------------------------------------------------
 
-bool GameVideo::ReloadImagesToSheet(TexSheet *sheet)
+bool GameVideo::_ReloadImagesToSheet(TexSheet *sheet)
 {
 	// delete images
-	map<FileName, Image *>::iterator iImage     = _images.begin();
-	map<FileName, Image *>::iterator iImageEnd  = _images.end();
+	map<string, Image *>::iterator iImage     = _images.begin();
+	map<string, Image *>::iterator iImageEnd  = _images.end();
 
 	bool success = true;
 	while(iImage != iImageEnd)
@@ -1767,19 +1766,19 @@ bool GameVideo::ReloadImagesToSheet(TexSheet *sheet)
 		if(i->texSheet == sheet)
 		{
 			ILuint pixelData;
-			uint w, h;
+			uint32 w, h;
 			
-			if(!LoadRawPixelData(i->filename, pixelData, w, h))
+			if(!_LoadRawPixelData(i->filename, pixelData, w, h))
 			{
 				if(VIDEO_DEBUG)
-					cerr << "VIDEO ERROR: LoadRawPixelData() failed in ReloadImagesToSheet()!" << endl;
+					cerr << "VIDEO ERROR: _LoadRawPixelData() failed in _ReloadImagesToSheet()!" << endl;
 				success = false;
 			}			
 			
 			if(!sheet->CopyRect(pixelData, i->x, i->y, w, h))
 			{
 				if(VIDEO_DEBUG)
-					cerr << "VIDEO ERROR: sheet->CopyRect() failed in ReloadImagesToSheet()!" << endl;
+					cerr << "VIDEO ERROR: sheet->CopyRect() failed in _ReloadImagesToSheet()!" << endl;
 				success = false;
 			}
 		}

@@ -27,14 +27,23 @@
 // windows.h to be included, otherwise all sorts of bad things happen
 #include <windows.h>
 
-// the following defines basically disable command processing on Windows,
-// because there's no getopt() function. Some time in the future, I (Raj)
-// will fix this by using Cygwin or MingW or whatever...
+#ifdef _DEBUG
 
+// allow console logging on windows in debug mode
+#define getopt(a,b,c)  (EnableDebugging("all"), -1)
+#define optarg         (NULL)
+
+#else
+
+// disable console logging on windows in release mode
 #define getopt(a,b,c)  (-1)
 #define optarg         (NULL)
 
-#endif
+#endif  //#ifdef _DEBUG
+
+typedef unsigned int uint;
+
+#endif  //#ifdef _WIN32
 
 #include <stdlib.h>
 #include <cstdlib>
@@ -49,15 +58,6 @@
 
 #include <SDL/SDL.h>
 
-// The following includes will be removed once they are migrated to the video header
-#include <SDL/SDL_ttf.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
-#define ILUT_USE_OPENGL
-#include <IL/il.h>
-#include <IL/ilu.h>
-#include <IL/ilut.h>
-
 /*! \name Allacrost Integer Types.
  *  \brief These are the integer types you should use. Use of int, short, etc. is forbidden!
  *  
@@ -71,11 +71,6 @@ typedef Uint16  uint16;
 typedef Sint8   int8;
 typedef Uint8   uint8;
 //@}
-
-// The following typedef will be defunct once we finish converting over to the new types.
-#ifdef _WIN32
-typedef Uint32  uint;  // linux GCC has uint, but not all compilers
-#endif
 
 //! Contains utility code used across the entire 
 namespace hoa_utils {

@@ -7,7 +7,8 @@ using namespace std;
 namespace hoa_video
 {
 
-namespace local_video
+
+namespace private_video
 {
 
 //-----------------------------------------------------------------------------
@@ -16,7 +17,7 @@ namespace local_video
 
 GUI::GUI()
 {
-	for(int sample = 0; sample < VIDEO_FPS_SAMPLES; ++sample)
+	for(int32 sample = 0; sample < VIDEO_FPS_SAMPLES; ++sample)
 		_fpsSamples[sample] = 0;
 		
 	_totalFPS      = 0;
@@ -38,9 +39,9 @@ GUI::GUI()
 
 GUI::~GUI()
 {
-	for(int y = 0; y < 3; ++y)
+	for(int32 y = 0; y < 3; ++y)
 	{
-		for(int x = 0; x < 3; ++x)
+		for(int32 x = 0; x < 3; ++x)
 		{
 			_videoManager->DeleteImage(_currentSkin.skin[y][x]);
 		}
@@ -54,17 +55,17 @@ GUI::~GUI()
 //          screen is actually the average over the last VIDEO_FPS_SAMPLES frames.
 //-----------------------------------------------------------------------------
 
-bool GUI::DrawFPS(int frameTime)
+bool GUI::DrawFPS(int32 frameTime)
 {
 	// calculate the FPS for current frame	
-	int fps = 1000;		
+	int32 fps = 1000;		
 	if(frameTime)   
 	{
 		fps /= frameTime;
 	}	
 	
 	
-	int nIter;
+	int32 nIter;
 	
 	if(_numSamples == 0)
 	{
@@ -83,7 +84,7 @@ bool GUI::DrawFPS(int frameTime)
 		// FPS display "catches up" more quickly
 		
 		float avgFrameTime = 1000.0f * VIDEO_FPS_SAMPLES / _totalFPS;
-		int diffTime = ((int)avgFrameTime - frameTime);
+		int32 diffTime = ((int32)avgFrameTime - frameTime);
 		
 		if(diffTime < 0)
 			diffTime = -diffTime;
@@ -95,7 +96,7 @@ bool GUI::DrawFPS(int frameTime)
 	}
 		
 	
-	for(int j = 0; j < nIter; ++j)
+	for(int32 j = 0; j < nIter; ++j)
 	{	
 		// insert newly calculated FPS into fps buffer
 		
@@ -114,7 +115,7 @@ bool GUI::DrawFPS(int frameTime)
 		
 	// find the average FPS
 
-	int avgFPS = _totalFPS / VIDEO_FPS_SAMPLES;
+	int32 avgFPS = _totalFPS / VIDEO_FPS_SAMPLES;
 
 	// display to screen	
 	char fpsText[16];
@@ -136,18 +137,22 @@ bool GUI::DrawFPS(int frameTime)
 
 bool GUI::SetMenuSkin
 (
-	const std::string &imgFile_UL,
-	const std::string &imgFile_U,
-	const std::string &imgFile_UR,
+	const std::string &imgFile_TL,
+	const std::string &imgFile_T,
+	const std::string &imgFile_TR,	
 	const std::string &imgFile_L,
 	const std::string &imgFile_R,
 	const std::string &imgFile_BL,
 	const std::string &imgFile_B,
-	const std::string &imgFile_BR,	
-	const Color  &fillColor
+	const std::string &imgFile_BR,
+	const Color &fillColor_TL,
+	const Color &fillColor_TR,
+	const Color &fillColor_BL,
+	const Color &fillColor_BR
+
 )
 {
-	int x, y;
+	int32 x, y;
 	
 	// before we actually load in the new skin, delete the old one
 	
@@ -159,26 +164,30 @@ bool GUI::SetMenuSkin
 			
 			// setting width/height to zero means to fall back to the
 			// width and height of the images in pixels			
-			_currentSkin.skin[y][x].width  = 0.0f;
-			_currentSkin.skin[y][x].height = 0.0f;			
+			_currentSkin.skin[y][x].SetDimensions(0.0f, 0.0f);
 		}
 	}
 	
 	// now load the new images
 	
-	_currentSkin.skin[0][0].filename = imgFile_BL;
-	_currentSkin.skin[0][1].filename = imgFile_B;
-	_currentSkin.skin[0][2].filename = imgFile_BR;
-	_currentSkin.skin[1][0].filename = imgFile_L;
-	_currentSkin.skin[1][2].filename = imgFile_R;
-	_currentSkin.skin[2][0].filename = imgFile_UL;
-	_currentSkin.skin[2][1].filename = imgFile_U;
-	_currentSkin.skin[2][2].filename = imgFile_UR;
+	_currentSkin.skin[0][0].SetFilename(imgFile_TL);
+	_currentSkin.skin[0][1].SetFilename(imgFile_T);
+	_currentSkin.skin[0][2].SetFilename(imgFile_TR);
+	_currentSkin.skin[1][0].SetFilename(imgFile_L);
+	_currentSkin.skin[1][2].SetFilename(imgFile_R);
+	_currentSkin.skin[2][0].SetFilename(imgFile_BL);
+	_currentSkin.skin[2][1].SetFilename(imgFile_B);
+	_currentSkin.skin[2][2].SetFilename(imgFile_BR);
 
 	// the center doesn't have an image, it's just a colored quad
-	_currentSkin.skin[1][1].color    = fillColor;
-	
-	
+	_currentSkin.skin[1][1].SetVertexColors
+	(
+		fillColor_TL,
+		fillColor_TR,
+		fillColor_BL,
+		fillColor_BR
+	);
+		
 	_videoManager->BeginImageLoadBatch();
 	for(y = 0; y < 3; ++y)
 	{
@@ -207,24 +216,24 @@ bool GUI::SetMenuSkin
 
 bool GUI::CheckSkinConsistency(const MenuSkin &s)
 {
-	float leftBorderSize   = _currentSkin.skin[1][0].width;
-	float rightBorderSize  = _currentSkin.skin[1][2].width;
-	float topBorderSize    = _currentSkin.skin[2][1].height;
-	float bottomBorderSize = _currentSkin.skin[0][1].height;
+	float leftBorderSize   = _currentSkin.skin[1][0].GetWidth();
+	float rightBorderSize  = _currentSkin.skin[1][2].GetWidth();
+	float topBorderSize    = _currentSkin.skin[2][1].GetHeight();
+	float bottomBorderSize = _currentSkin.skin[0][1].GetHeight();
 
 	float horizontalBorderSize = leftBorderSize + rightBorderSize;
 	float verticalBorderSize   = topBorderSize  + bottomBorderSize;
 	
-	float topWidth    = _currentSkin.skin[2][1].width;
-	float bottomWidth = _currentSkin.skin[0][1].width;
+	float topWidth    = _currentSkin.skin[2][1].GetWidth();
+	float bottomWidth = _currentSkin.skin[0][1].GetWidth();
 	
-	float leftHeight  = _currentSkin.skin[1][0].height;
-	float rightHeight = _currentSkin.skin[1][2].height;
+	float leftHeight  = _currentSkin.skin[1][0].GetHeight();
+	float rightHeight = _currentSkin.skin[1][2].GetHeight();
 	
 	
 	// check #1: widths of top and bottom borders are equal
 	
-	if(s.skin[2][1].width != s.skin[0][1].width)
+	if(s.skin[2][1].GetWidth() != s.skin[0][1].GetWidth())
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: widths of top and bottom border of skin are mismatched!" << endl;
@@ -233,7 +242,7 @@ bool GUI::CheckSkinConsistency(const MenuSkin &s)
 	
 	// check #2: heights of left and right borders are equal
 	
-	if(s.skin[1][0].height != s.skin[1][2].height)
+	if(s.skin[1][0].GetHeight() != s.skin[1][2].GetHeight())
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: heights of left and right border of skin are mismatched!" << endl;
@@ -242,8 +251,8 @@ bool GUI::CheckSkinConsistency(const MenuSkin &s)
 
 	// check #3: widths of upper-left, left, and bottom-left border are equal
 	
-	if( (s.skin[2][0].width != s.skin[1][0].width) ||  // UL, L
-	    (s.skin[2][0].width != s.skin[0][0].width))    // UL, BL
+	if( (s.skin[2][0].GetWidth() != s.skin[1][0].GetWidth()) ||  // UL, L
+	    (s.skin[2][0].GetWidth() != s.skin[0][0].GetWidth()))    // UL, BL
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: upper-left, left, and lower-left of menu skin must have equal width!" << endl;
@@ -252,8 +261,8 @@ bool GUI::CheckSkinConsistency(const MenuSkin &s)
 	                                           
 	// check #4: widths of upper-right, right, and bottom-right border are equal
 	
-	if( (s.skin[2][2].width != s.skin[1][2].width) ||  // UR, R
-	    (s.skin[2][2].width != s.skin[0][2].width))    // UR, BR
+	if( (s.skin[2][2].GetWidth() != s.skin[1][2].GetWidth()) ||  // UR, R
+	    (s.skin[2][2].GetWidth() != s.skin[0][2].GetWidth()))    // UR, BR
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: upper-right, right, and lower-right of menu skin must have equal width!" << endl;
@@ -262,8 +271,8 @@ bool GUI::CheckSkinConsistency(const MenuSkin &s)
 	
 	// check #5: heights of upper-left, top, and upper-right are equal
 
-	if( (s.skin[2][0].height != s.skin[2][1].height) || // UL, U
-	    (s.skin[2][0].height != s.skin[2][2].height))   // UL, UR
+	if( (s.skin[2][0].GetHeight() != s.skin[2][1].GetHeight()) || // UL, U
+	    (s.skin[2][0].GetHeight() != s.skin[2][2].GetHeight()))   // UL, UR
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: upper-left, top, and upper-right of menu skin must have equal height!" << endl;
@@ -272,8 +281,8 @@ bool GUI::CheckSkinConsistency(const MenuSkin &s)
 
 	// check #6: heights of lower-left, bottom, and lower-right are equal
 	
-	if( (s.skin[0][0].height != s.skin[0][1].height) || // LL, L
-	    (s.skin[0][0].height != s.skin[0][2].height))   // LL, LR
+	if( (s.skin[0][0].GetHeight() != s.skin[0][1].GetHeight()) || // LL, L
+	    (s.skin[0][0].GetHeight() != s.skin[0][2].GetHeight()))   // LL, LR
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: lower-left, bottom, and lower-right of menu skin must have equal height!" << endl;
@@ -304,16 +313,16 @@ bool GUI::CreateMenu(hoa_video::ImageDescriptor &id, float width, float height)
 	
 	// get all the border size information
 	
-	float leftBorderSize   = _currentSkin.skin[1][0].width;
-	float rightBorderSize  = _currentSkin.skin[1][2].width;
-	float topBorderSize    = _currentSkin.skin[2][1].height;
-	float bottomBorderSize = _currentSkin.skin[0][1].height;
+	float leftBorderSize   = _currentSkin.skin[1][0].GetWidth();
+	float rightBorderSize  = _currentSkin.skin[1][2].GetWidth();
+	float topBorderSize    = _currentSkin.skin[2][1].GetHeight();
+	float bottomBorderSize = _currentSkin.skin[0][1].GetHeight();
 
 	float horizontalBorderSize = leftBorderSize + rightBorderSize;
 	float verticalBorderSize   = topBorderSize  + bottomBorderSize;
 	
-	float topWidth   = _currentSkin.skin[2][1].width;
-	float leftHeight = _currentSkin.skin[1][0].height;
+	float topWidth   = _currentSkin.skin[2][1].GetWidth();
+	float leftHeight = _currentSkin.skin[1][0].GetHeight();
 		
 	// calculate how many times the top/bottom images have to be tiled
 	// to make up the width of the window
@@ -346,8 +355,8 @@ bool GUI::CreateMenu(hoa_video::ImageDescriptor &id, float width, float height)
 	float numXTiles = innerWidth  / topWidth;
 	float numYTiles = innerHeight / leftHeight;
 	
-	int inumXTiles = int(numXTiles);
-	int inumYTiles = int(numYTiles);
+	int32 inumXTiles = int32(numXTiles);
+	int32 inumYTiles = int32(numYTiles);
 	
 	// ideally, numTop and friends should all divide evenly into integers,
 	// but the person who called this function might have passed in a bogus
@@ -380,25 +389,29 @@ bool GUI::CreateMenu(hoa_video::ImageDescriptor &id, float width, float height)
 	float maxY = bottomBorderSize + inumYTiles * leftHeight;
 	
 	id.AddImage(_currentSkin.skin[0][0], 0.0f, 0.0f);   // lower left	
-	id.AddImage(_currentSkin.skin[0][2], maxX,	0.0f); // lower right	            
+	id.AddImage(_currentSkin.skin[0][2], maxX,	0.0f);  // lower right	            
 	id.AddImage(_currentSkin.skin[2][0], 0.0f, maxY);   // upper left	
 	id.AddImage(_currentSkin.skin[2][2], maxX, maxY);   // upper right
 
 	// re-create the overlay at the correct width and height
 	
-	Color &skinColor = _currentSkin.skin[1][1].color;
+	Color c[4];
+	_currentSkin.skin[1][1].GetVertexColor(c[0], 0);
+	_currentSkin.skin[1][1].GetVertexColor(c[1], 1);
+	_currentSkin.skin[1][1].GetVertexColor(c[2], 2);
+	_currentSkin.skin[1][1].GetVertexColor(c[3], 3);
+	
 	_videoManager->DeleteImage(_currentSkin.skin[1][1]);
 	
-	_currentSkin.skin[1][1].width  = innerWidth;
-	_currentSkin.skin[1][1].height = innerHeight;
-	_currentSkin.skin[1][1].color  = skinColor;
+	_currentSkin.skin[1][1].SetDimensions(innerWidth, innerHeight);
+	_currentSkin.skin[1][1].SetVertexColors(c[0], c[1], c[2], c[3]);
 	_videoManager->LoadImage(_currentSkin.skin[1][1]);
 	
 	id.AddImage(_currentSkin.skin[1][1], leftBorderSize, bottomBorderSize);
 
 	// iterate from left to right and fill in the horizontal borders
 	
-	for(int tileX = 0; tileX < inumXTiles; ++tileX)
+	for(int32 tileX = 0; tileX < inumXTiles; ++tileX)
 	{
 		id.AddImage(_currentSkin.skin[2][1], leftBorderSize + topWidth * tileX, maxY);
 		id.AddImage(_currentSkin.skin[0][1], leftBorderSize + topWidth * tileX, 0.0f);
@@ -406,7 +419,7 @@ bool GUI::CreateMenu(hoa_video::ImageDescriptor &id, float width, float height)
 	
 	// iterate from bottom to top and fill in the vertical borders
 
-	for(int tileY = 0; tileY < inumYTiles; ++tileY)
+	for(int32 tileY = 0; tileY < inumYTiles; ++tileY)
 	{
 		id.AddImage(_currentSkin.skin[1][0], 0.0f, bottomBorderSize + leftHeight * tileY);
 		id.AddImage(_currentSkin.skin[1][2], maxX, bottomBorderSize + leftHeight * tileY);
@@ -415,5 +428,5 @@ bool GUI::CreateMenu(hoa_video::ImageDescriptor &id, float width, float height)
 	return true;
 }
 
-}  // namespace local_video
+}  // namespace private_video
 }  // namespace hoa_video
