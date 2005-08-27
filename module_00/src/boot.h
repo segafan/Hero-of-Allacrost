@@ -149,10 +149,13 @@ public:
 	//! Frees all media data (images and audio).
 	~BootMode();
 
+	//! Resets appropriate class members. Called whenever BootMode is made the active game mode.
+	void Reset();
 	//! Wrapper function that calls different update functions depending on the menu state.
 	void Update(uint32 time_elapsed);
 	//! Wrapper function that calls different draw functions depending on the menu state.
 	void Draw();
+	
 };
 
 } // namespace hoa_boot

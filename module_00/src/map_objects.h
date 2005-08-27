@@ -36,7 +36,7 @@ namespace private_map {
 //@{
 //! \brief Object idenfitier constants for use in the object layer.
 const uint8 VIRTUAL_SPRITE = 0x00; // Sprites with no physical image
-const uint8 PLAYER_SPRITE  = 0x01; // Playable character sprites
+const uint8 CHARACTER_SPRITE  = 0x01; // Playable character sprites
 const uint8 NPC_SPRITE     = 0x02; // Regular NPC sprites
 const uint8 ADV_SPRITE     = 0x04; // 'Advanced' NPC sprites with more emotion frames
 const uint8 OTHER_SPRITE   = 0x08; // Sprites of non-standard sizes (small animals, etc)
@@ -99,7 +99,7 @@ const uint32 FACE_MASK = 0x000FFF00;
 
 //! \name Sprte Move Constants
 //@{
-//! \brief These are used by the MapSprite::SpriteMove() function.
+//! \brief These are used by the MapMode#_SpriteMove function.
 const int32 MOVE_NORTH = 0;
 const int32 MOVE_SOUTH = 1;
 const int32 MOVE_WEST  = 2;
@@ -117,14 +117,12 @@ const int32 MOVE_SE    = 7;
 const uint32 STEP_SWAP   = 0x00100000; 
 //! This is for detecting whether the sprite is currently moving.
 const uint32 IN_MOTION   = 0x00200000; 
-//! If this bit is set to zero, we do not update the sprite's position.
+//! If this bit is set to zero, we do not update the sprite.
 const uint32 UPDATEABLE  = 0x00400000; 
 //! If this bit is set to zero, we do not draw the sprite.
 const uint32 VISIBLE     = 0x00800000; 
-//! If this bit is set, the sprite can be controlled by the player.
-const uint32 CONTROLABLE = 0x01000000; 
-//! Sprite frames are located in GameInstance singleton.
-const uint32 SPR_GLOBAL  = 0x02000000; 
+//! Only sprites that are in context with the player can be seen and interacted with.
+const uint32 IN_CONTEXT  = 0x01000000; 
 //@}
 
 //! \name Sprite Animation Vector Access Constants
@@ -188,17 +186,20 @@ protected:
 	uint32 _row_pos;
 	//! The map column position for the bottom left corner of the object.
 	uint32 _col_pos;
+	//! The altitude of the object
+	//! This member is really only useful for objects in the ground object layer.
+	uint8 _altitude;
 	//! A bit-mask for setting and detecting various conditions on the object.
 	uint32 _status;
-	//! The vertical or "Z" position of the object.
-	uint32 _z_pos;
+	
 	//! A reference to the video engine singleton.
+	//! This member is static because there's only one singleton.
 	hoa_video::GameVideo *VideoManager;
 
 	friend class MapMode;
 	friend class hoa_data::GameData;
 public:
-	ObjectLayer(uint8 type, uint32 row, uint32 col, uint32 status);
+	ObjectLayer(uint8 type, uint32 row, uint32 col, uint8 alt, uint32 status);
 	~ObjectLayer();
 	/*!
 	 *  \brief Draws the object to the frame buffer.
@@ -262,7 +263,7 @@ private:
 	 */
 	uint32 _FindFrame();
 public:
-	MapSprite(uint8 type, uint32 row, uint32 col, uint32 stat);
+	MapSprite(uint8 type, uint32 row, uint32 col, uint8 alt, uint32 stat);
 	~MapSprite();
 	
 	void Draw(private_map::MapFrame& mf);
@@ -304,14 +305,16 @@ class SpriteDialogue {
 private:
 	//! An index to the next dialogue piece to read.
 	uint32 _next_read;
+	//! Saves the status of the sprite just before a dialogue is initiated.
+	uint32 _saved_status; 
 	//! The dialogue itself, broken into conversations and individual lines.
-	std::vector<std::vector<std::string> > _dialogue;
+	std::vector<std::vector<std::string> > _conversations;
 	//! A vector indicating whom is the speaker for a section of dialogue.
-	std::vector<std::vector<uint32> > _speaker;
-	//! A boolean for each piece of dialogue, representing whether the player has read it or not.
-	std::vector<bool> _seen;
-	//! True if the player has already read all of the sprite's dialogue.
-	bool _seen_all;
+	std::vector<std::vector<MapSprite*> > _speakers;
+//	//! A boolean for each piece of dialogue, representing whether the player has read it or not.
+//	std::vector<bool> _seen;
+//	//! True if the player has already read all of the sprite's dialogue.
+//	bool _seen_all;
 
 	friend class MapMode;
 public:
@@ -321,12 +324,13 @@ public:
 	//! \name Public Member Access Functions
 	//@{
 	//! \brief Used for setting and getting the values of the various class members.
-	bool AllDialogueSeen() { return _seen_all; }
-	void LoadDialogue(std::vector<std::vector<std::string> > txt, std::vector<std::vector<uint32> > sp);
-	void AddDialogue(std::vector<std::string> txt, std::vector<uint32> sp);
-	void AddDialogue(std::string txt, uint32 sp);
-	void ReadDialogue();
+// 	bool AllDialogueSeen() { return _seen_all; }
+	void LoadDialogue(std::vector<std::vector<std::string> > txt);
+	void AddDialogue(std::vector<std::string> txt);
+	void AddDialogue(std::string txt);
+	void ReadDialogue() { _next_read = (_next_read + 1) % _conversations.size(); }
 	//@}
+	
 }; // class SpriteDialogue
 
 } // namespace hoa_map

@@ -137,11 +137,11 @@ public:
 	/*!
 	 *  \brief Purely virtual function for resetting the state of the class.
 	 *  
-	 *  This function is called whenever the game mode is made active (ie, it is now the new active game mode
+	 *  This function is called whenever the game mode is made active (ie, it is made the new active game mode
 	 *  on the top of the game stack). This includes when the game mode is first created and pushed onto the
-	 *  game stack, so in that manner it can also be viewed as a helper function to the con
+	 *  game stack, so in that manner it can also be viewed as a helper function to the constructor.
 	 */
-	//virtual void Reset() = 0;
+	virtual void Reset() = 0;
 }; // class GameMode
 
 /*!****************************************************************************

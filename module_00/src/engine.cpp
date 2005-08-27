@@ -209,7 +209,7 @@ void GameModeManager::Update(uint32 time_elapsed) {
 		}
 		
 		// Call the newly active game mode's "AtTop()" function to re-initialize class members
-		// game_stack.back()->AtTop();
+		_game_stack.back()->Reset();
 		
 		// Reset the state change variable
 		_state_change = false;

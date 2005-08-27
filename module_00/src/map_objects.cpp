@@ -43,10 +43,11 @@ namespace hoa_map {
 // ****************************************************************************
 
 // Initialize the members and setup the pointer to the GameVideo class
-ObjectLayer::ObjectLayer(uint8 type, uint32 row, uint32 col, uint32 stat) {
+ObjectLayer::ObjectLayer(uint8 type, uint32 row, uint32 col, uint8 alt, uint32 stat) {
 	_object_type = type;
 	_row_pos = row;
 	_col_pos = col;
+	_altitude = alt;
 	_status = stat;
 	VideoManager = hoa_video::GameVideo::_GetReference();
 }
@@ -60,8 +61,8 @@ ObjectLayer::~ObjectLayer() {}
 // ****************************************************************************
 
 // Constructor for critical class members. Other members are initialized via support functions
-MapSprite::MapSprite(uint8 type, uint32 row, uint32 col, uint32 stat)
-                     : ObjectLayer(type, row, col, stat) {
+MapSprite::MapSprite(uint8 type, uint32 row, uint32 col, uint8 alt, uint32 stat)
+                     : ObjectLayer(type, row, col, alt, stat) {
 	if (MAP_DEBUG) cout << "MAP: MapSprite constructor invoked" << endl;
 	_step_speed = NORMAL_SPEED;
 	_step_count = 0;
@@ -77,7 +78,9 @@ MapSprite::MapSprite(uint8 type, uint32 row, uint32 col, uint32 stat)
 // Free all the frames from memory
 MapSprite::~MapSprite() {
 	if (MAP_DEBUG) cout << "MAP: MapSprite destructor invoked" << endl;
-	if (_status & SPR_GLOBAL) { // Don't delete these sprite frames
+	
+	// Character sprite frames are kept globally, so don't delete them.
+	if (_object_type == CHARACTER_SPRITE) { 
 		return;
 	}
 
@@ -153,10 +156,10 @@ void MapSprite::LoadFrames() {
 	_frames->push_back(imd);
 
 //	// Prepare additional extra frames if the sprite is not a regular NPC
-//	if (_status & (PLAYER_SPRITE | ADV_SPRITE)) {
+//	if (_status & (CHARACTER_SPRITE | ADV_SPRITE)) {
 //
 //		// Prepare even -more- extra frames if the sprite is a character
-//		if (_status & PLAYER_SPRITE) {
+//		if (_status & CHARACTER_SPRITE) {
 //
 //		}
 //	}
@@ -176,7 +179,6 @@ void MapSprite::LoadCharacterInfo(uint32 character) {
 	GCharacter *pchar = GameInstance::_GetReference()->GetCharacter(character);
 	_name = pchar->GetName();
 	_filename = "img/sprite/" + pchar->GetFilename();
-	_status |= SPR_GLOBAL; // Safety so we don't accdidentally delete the sprite frames
 	_frames = pchar->GetMapFrames();
 }
 
@@ -354,7 +356,7 @@ void MapSprite::Draw(MapFrame& mf) {
 
 SpriteDialogue::SpriteDialogue() {
 	if (MAP_DEBUG) cout << "MAP: SpriteDialogue constructor invoked" << endl;
-	_seen_all = true;
+// 	_seen_all = true;
 }
 
 
@@ -363,42 +365,42 @@ SpriteDialogue::~SpriteDialogue() {
 }
 
 // Load a new set of dialogue
-void SpriteDialogue::LoadDialogue(vector<vector<string> > txt, vector<vector<uint32> > sp) {
-	_dialogue = txt;
-	_speaker = sp;
-	for (uint32 i = 0; i < _dialogue.size(); i++) {
-		_seen.push_back(false);
-	}
-	_seen_all = false;
+void SpriteDialogue::LoadDialogue(vector<vector<string> > txt) {
+	_conversations = txt;
+// 	_speaker = sp;
+// 	for (uint32 i = 0; i < _dialogue.size(); i++) {
+// 		_seen.push_back(false);
+// 	}
+// 	_seen_all = false;
 	_next_read = 0;
 }
 
 // Add a new line of dialogue
-void SpriteDialogue::AddDialogue(vector<string> txt, vector<uint32> sp) {
-	_dialogue.push_back(txt);
-	_speaker.push_back(sp);
-	_seen.push_back(false);
+void SpriteDialogue::AddDialogue(vector<string> txt) {
+	_conversations.push_back(txt);
+// 	_speaker.push_back(sp);
+// 	_seen.push_back(false);
 
-	if (_seen_all) { // Set the next read to point to the new dialogue
-		_next_read = _dialogue.size() - 1;
-	}
+// 	if (_seen_all) { // Set the next read to point to the new dialogue
+// 		_next_read = _dialogue.size() - 1;
+// 	}
 
-	_seen_all = false;
+// 	_seen_all = false;
 }
 
 
 // Add a new line of dialogue, for one-part speeches
-void SpriteDialogue::AddDialogue(string txt, uint32 sp) {
+void SpriteDialogue::AddDialogue(string txt) {
 	vector<string> new_txt(1, txt);
-	vector<uint32> new_sp(1, sp);
-	_dialogue.push_back(new_txt);
-	_speaker.push_back(new_sp);
+// 	vector<uint32> new_sp(1, sp);
+	_conversations.push_back(new_txt);
+// 	_speaker.push_back(new_sp);
 
-	if (_seen_all) {
-		_next_read = _dialogue.size() - 1;
-	}
-
-	_seen_all = false;
+// 	if (_seen_all) {
+// 		_next_read = _dialogue.size() - 1;
+// 	}
+// 
+// 	_seen_all = false;
 }
 
 } // namespace hoa_map

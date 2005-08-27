@@ -324,11 +324,17 @@ int32 main(int32 argc, char *argv[]) {
 	GameInput *InputManager = GameInput::_Create();
 	GameInstance *InstanceManager = GameInstance::_Create();
 
-	if(!VideoManager->Initialize())
-	{
+	if(!VideoManager->Initialize()) {
 		cerr << "ERROR: unable to initialize VideoManager" << endl;
 		return 1;
 	}
+	VideoManager->SetMenuSkin("img/menus/concrete",
+	                          Color(0.0f, 0.0f, 1.0f, 0.5f),
+	                          Color(0.0f, 0.0f, 1.0f, 0.5f),
+	                          Color(0.0f, 0.0f, 1.0f, 0.5f),
+	                          Color(0.0f, 0.0f, 1.0f, 0.5f));
+	if(!VideoManager->LoadFont("img/fonts/tarnhalo.ttf", "default", 16))
+		cerr << "MAP: ERROR > Couldn't load map font!" << endl;
 
 	DataManager->LoadGameSettings(); // Initializes remaining data members of Settings Manager
 

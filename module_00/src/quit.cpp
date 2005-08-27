@@ -45,17 +45,8 @@ bool QUIT_DEBUG = false;
 
 QuitMode::QuitMode() {
 	if (QUIT_DEBUG) cout << "QUIT: QuitMode constructor invoked" << endl;
-
-	AudioManager = GameAudio::_GetReference();
-	VideoManager = GameVideo::_GetReference();
-	ModeManager = GameModeManager::_GetReference();
-	SettingsManager = GameSettings::_GetReference();
-
 	mode_type = ENGINE_QUIT_MODE;
-
-	_quit_type = QUIT_CANCEL;
-
-
+	
 	switch (SettingsManager->GetPauseVolumeAction()) {
 		case ENGINE_PAUSE_AUDIO:
 			AudioManager->PauseAudio();
@@ -72,9 +63,11 @@ QuitMode::QuitMode() {
 		// Don't need to do anything for case ENGINE_SAME_VOLUME
 	}
 
-	// Here we'll make a VideoManager call to save the current screen.
-
-	// Here we'll render the "Really Quit?" text to screen along with the quit options
+	// Save a copy of the current screen to use as a backdrop
+	if (!VideoManager->CaptureScreen(_saved_screen)) 
+		if (QUIT_DEBUG) cerr << "PAUSE: ERROR: Couldn't save the screen!" << endl;
+	if(!VideoManager->CreateMenu(_quit_menu, 320, 64)) // create a 256x64 menu
+		cerr << "QUIT: ERROR: Couldn't create menu image!" << endl;
 }
 
 
@@ -84,6 +77,17 @@ QuitMode::~QuitMode() {
 	if (QUIT_DEBUG) cout << "QUIT: QuitMode destructor invoked" << endl;
 }
 
+
+// Called whenever QuitMode is put on top of the stack
+void QuitMode::Reset() {
+	_quit_type = QUIT_CANCEL;
+	
+	// Setup video engine constructs.
+	VideoManager->SetCoordSys(0, 1024, 0, 768);
+	if(!VideoManager->SetFont("default")) 
+    cerr << "MAP: ERROR > Couldn't set map font!" << endl;
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
+}
 
 
 // Restores volume or unpauses audio, then pops itself from the game stack
@@ -158,7 +162,7 @@ void QuitMode::Update(uint32 time_elapsed) {
 	}
 
 	// The user has confirmed that they want to quit.
-	else if (InputManager->ConfirmPress() && _quit_type) {
+	else if (InputManager->ConfirmPress() && _quit_type == QUIT_GAME) {
 		SettingsManager->ExitGame();
 	}
 }
@@ -167,16 +171,18 @@ void QuitMode::Update(uint32 time_elapsed) {
 
 // Draws the saved screen, the quit prompt, the quit options, and highlights the selected option
 void QuitMode::Draw() {
-// 	Draw the saved screen background
-// 	Apply a filter to darken it out...?
-// 	Draw the quit prompt
-// 	Draw the yes and no options
-// 	if (quit_selected) {
-// 	  Highlight the yes option
-// 	}
-// 	else {
-// 	  Highlight the no option
-// 	}
+	// Draw the saved screen background
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
+	Color grayed(0.35f, 0.35f, 0.35f, 1.0f);
+	VideoManager->Move(0, 0);
+	VideoManager->DrawImage(_saved_screen, grayed);
+
+	// Draw the quit menu
+	VideoManager->Move((1024 - 320)/2, (768 - 32)/2);
+	VideoManager->DrawImage(_quit_menu);
+
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
+	VideoManager->DrawText("Quit Game     Quit to Boot Menu     Cancel", 1024/2, 768/2);
 }
 
 } // namespace hoa_quit

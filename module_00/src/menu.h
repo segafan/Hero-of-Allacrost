@@ -64,6 +64,7 @@ public:
 	MenuMode();
 	~MenuMode();
 
+	void Reset();
 	void Update(uint32 time_elapsed);
 	void Draw();
 };

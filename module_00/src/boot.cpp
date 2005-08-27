@@ -54,9 +54,7 @@ BootMode::BootMode() {
 	_menu_hidden = false;
 
 	DataManager->LoadBootData(&_boot_images, &_boot_sound, &_boot_music);
-
-	VideoManager->SetCoordSys(0, 1024, 0, 768); // TEMPORARY
-
+	
  	for (uint32 i = 0; i < _boot_images.size(); i++) {
  		VideoManager->LoadImage(_boot_images[i]);
  	}
@@ -66,10 +64,7 @@ BootMode::BootMode() {
 	for (uint32 i = 0; i < _boot_sound.size(); i++) {
 		AudioManager->LoadSound(_boot_sound[i]);
 	}
-
-	AudioManager->PlayMusic(_boot_music[0], AUDIO_NO_FADE, AUDIO_LOOP_FOREVER);
 }
-
 
 
 // The destructor frees all used music, sounds, and images.
@@ -85,7 +80,13 @@ BootMode::~BootMode() {
 }
 
 
-
+// Resets appropriate class members.
+void BootMode::Reset() {
+	// Set the coordinate system that BootMode uses
+	VideoManager->SetCoordSys(0, 1024, 0, 768);
+	// Play the intro theme
+	AudioManager->PlayMusic(_boot_music[0], AUDIO_NO_FADE, AUDIO_LOOP_FOREVER);
+}
 
 
 // Animates the logo when the boot mode starts up. Should not be called before LoadBootImages.

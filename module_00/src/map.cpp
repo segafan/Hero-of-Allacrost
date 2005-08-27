@@ -46,7 +46,7 @@ bool MAP_DEBUG = false;
 // ***************************** GENERAL FUNCTIONS ****************************
 // ****************************************************************************
 
-void MapMode::_TempCreateMap() {
+void MapMode::_TEMP_CreateMap() {
 	_random_encounters = true;
 	_encounter_rate = 12;
 	_steps_till_encounter = GaussianValue(_encounter_rate, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
@@ -158,31 +158,37 @@ void MapMode::_TempCreateMap() {
 		for (uint32 c = 0; c < _col_count; c++) {
 			tmp_tile.lower_layer = (RandomNum(0, 16 - 1)); // Build the lower layer from random tiles
 			tmp_tile.upper_layer = 16;
-			if (tmp_tile.lower_layer == 15)
-				tmp_tile.properties = Z_LVL1; // We can not walk on the water tiles
-			else
-				tmp_tile.properties = 0x0000;
+			if (tmp_tile.lower_layer == 15) { // Set water tile properties
+				tmp_tile.not_walkable = ALTITUDE_1;
+				tmp_tile.properties = CONFIRM_EVENT;
+			}
+			else {
+				tmp_tile.not_walkable = 0x00;
+				tmp_tile.properties = 0x00;
+			}
+			tmp_tile.occupied = 0x00;
 			_map_layers[r].push_back(tmp_tile);
 		}
 	}
 	
 	// Load player sprite and rest of map objects
-	MapSprite *p_sprite = new MapSprite(PLAYER_SPRITE, 2, 2, (CONTROLABLE | VISIBLE | SOUTH | Z_LVL1));
-	p_sprite->LoadCharacterInfo(GLOBAL_CLAUDIUS);
-	_ground_objects.push_back(p_sprite);
+	MapSprite *player = new MapSprite(CHARACTER_SPRITE, 2, 2, ALTITUDE_1, (VISIBLE | SOUTH));
+	player->LoadCharacterInfo(GLOBAL_CLAUDIUS);
+	_ground_objects.push_back(player);
 
-	MapSprite *npc_sprite = new MapSprite(NPC_SPRITE, 4, 6, (VISIBLE | EAST | Z_LVL1));
+	MapSprite *npc_sprite = new MapSprite(NPC_SPRITE, 4, 6, ALTITUDE_1, (VISIBLE | EAST));
 	npc_sprite->SetName("Laila");
 	npc_sprite->SetFilename("img/sprites/map/laila");
-	npc_sprite->SetSpeed(FAST_SPEED);
+	npc_sprite->SetSpeed(VERY_SLOW_SPEED);
 	npc_sprite->SetDelay(LONG_DELAY);
 	npc_sprite->LoadFrames();
-	npc_sprite->_speech->AddDialogue("Hey there hot stuff", GLOBAL_LAILA);
-	npc_sprite->_speech->AddDialogue("Wanna do it again?", GLOBAL_LAILA);
+	npc_sprite->_speech->AddDialogue("I'm a hottie!");
+	npc_sprite->_speech->AddDialogue("But, I'm also your sister...");
+	npc_sprite->_speech->AddDialogue("Is this really okay?");
 	_ground_objects.push_back(npc_sprite);
 
 	// If the _focused_object is ever NULL, the game will exit with a seg fault :(
-	_focused_object = p_sprite;
+	_focused_object = player;
 }
 
 
@@ -197,17 +203,13 @@ MapMode::MapMode(uint32 new_map_id) {
 	// Load the map from the Lua data file
 	//DataManager->LoadMap(this, map_id);
 
-	// Setup the coordinate system
-	//VideoManager->SetCoordSys(-SCREEN_COLS/2.0, SCREEN_COLS/2.0, -SCREEN_ROWS/2.0, SCREEN_ROWS/2.0);
-
-	_virtual_sprite = new MapSprite(VIRTUAL_SPRITE, 20, 20, 0x0);
+	_virtual_sprite = new MapSprite(VIRTUAL_SPRITE, 20, 20, ALTITUDE_0, 0x0);
 	_virtual_sprite->SetSpeed(VERY_FAST_SPEED);
 	_virtual_sprite->SetDelay(NO_DELAY);
 
 	// Temporary function that creates a random map
-	_TempCreateMap();
+	_TEMP_CreateMap();
 }
-
 
 
 MapMode::~MapMode() {
@@ -242,25 +244,96 @@ MapMode::~MapMode() {
 }
 
 
+// Resets appropriate class members.
+void MapMode::Reset() {
+	// Set video engine properties
+	VideoManager->SetCoordSys(-SCREEN_COLS/2.0f, SCREEN_COLS/2.0f, -SCREEN_ROWS/2.0f, SCREEN_ROWS/2.0f);
+	if(!VideoManager->SetFont("default")) 
+    cerr << "MAP: ERROR > Couldn't set map font!" << endl;
+}
+
+
 
 // Returns true if the player is able to move to the tile.
-inline bool MapMode::_TileMoveable(uint32 row, uint32 col, uint32 z_occupied) {
+inline bool MapMode::_TileMoveable(int32 row, int32 col, uint8 altitude_level) {
 	// First check that the object in question isn't trying to move outside the map boundaries
 	if (row < 1 || col < 0 || row >= _row_count || col >= _col_count) {
 		return false;
 	}
 
-	// Check if the tile is not walkable or occupied by another object on the same z level
-	if (_map_layers[row][col].properties & z_occupied) {
+	// Check if the tile is not walkable at this altitude
+	if (_map_layers[row][col].not_walkable & altitude_level) {
+		return false;
+	}
+	
+	// Check that no other objects occupy this tile
+	if (_map_layers[row][col].occupied & altitude_level) {
 		return false;
 	}
 
 	return true;
 }
 
+// Checks if there is an interaction with the 'confirm' command at a specified tile.
+void MapMode::_CheckInteraction(int32 row, int32 col, uint8 altitude_level) {
+	// First check that the object in question isn't trying to move outside the map boundaries
+	if (row < 1 || col < 0 || row >= _row_count || col >= _col_count) {
+		return;
+	}
+	
+	// Check if an object occupies the tile
+	if (_map_layers[row][col].occupied && altitude_level) {
+		// Look up the object that occupies this tile at this altitude
+		
+		// ****** TEMPORARY PROOF OF CONCEPT CODE ********
+		// On the next update, we want to go to the dialogue state
+		_map_state.push_back(DIALOGUE);
+		// Save the status of both sprites so they can be set back after the dialogue is finished
+		for (uint32 i = 0; i < _ground_objects.size(); i++) {
+			switch ((_ground_objects[i])->_object_type) {
+				case CHARACTER_SPRITE:
+				case NPC_SPRITE:
+					MapSprite *tmp_sprite = dynamic_cast<MapSprite *>(_ground_objects[i]);
+					// Save the sprite's current status
+					tmp_sprite->_speech->_saved_status = tmp_sprite->_status;
+					// Turn off its update function so it doesn't move around while the dialogue is occuring
+					tmp_sprite->_status &= (~IN_MOTION | ~UPDATEABLE);
+					
+					// We need to get the sprite on the recieving end of the player to face the player's sprite
+					if (_ground_objects[i] != _focused_object) {
+						if (_focused_object->_status & (NORTH | NORTH_NW | NORTH_NE)) {
+							tmp_sprite->_status = (tmp_sprite->_status & ~FACE_MASK) | SOUTH;
+						}
+						else if (_focused_object->_status & (SOUTH | SOUTH_SW | SOUTH_SE)) {
+							tmp_sprite->_status = (tmp_sprite->_status & ~FACE_MASK) | NORTH;
+						}
+						else if (_focused_object->_status & (EAST | EAST_NE | EAST_SE)) {
+							tmp_sprite->_status = (tmp_sprite->_status & ~FACE_MASK) | WEST;
+						}
+						else { // (_focused_object->_status & (WEST | WEST_NW | WEST_SW))
+							tmp_sprite->_status = (tmp_sprite->_status & ~FACE_MASK) | EAST;
+						}
+					}
+					break;
 
-// Moves the sprite in some direction, if possible.
-void MapMode::_SpriteMove(uint32 direction, MapSprite *sprite) {
+				default:
+					break;
+			}
+		}
+		return;
+	}
+	
+	// Finally, check if the tile has a confirm event associated with it.
+	if (_map_layers[row][col].properties && CONFIRM_EVENT) {
+		// Look up the event corresponding to this tile in the event list.
+		cout << "RAWR! I'm a tile with a confirm event!" << endl;
+		return;
+	}
+
+}
+
+// Attempts to move a sprite in the ground object layer in the given direction.
+void MapMode::_GroundSpriteMove(uint32 direction, MapSprite *sprite) {
 	uint32 r_check, c_check; // Variables for holding the position of a tile to check.
 
 	// Set the sprite's facing direction and tile coordinates it wishes to move to
@@ -319,17 +392,21 @@ void MapMode::_SpriteMove(uint32 direction, MapSprite *sprite) {
 			break;
 	}
 
-	// If the tile is moveable, set the motion flag and update the sprite coordinates
-	if (_TileMoveable(r_check, c_check, (sprite->_status & Z_MASK))) {
+	// If the tile is moveable, update the sprite and tiles that are effected appropriatel.
+	if (_TileMoveable(r_check, c_check, sprite->_altitude)) {
+		// First set the sprite's motion flag
 		sprite->_status |= IN_MOTION;
-		_map_layers[sprite->_row_pos][sprite->_col_pos].properties &= ~(sprite->_status & Z_MASK);
+		// For the tile the sprite is moving off of, negate the occupied bit.
+		_map_layers[sprite->_row_pos][sprite->_col_pos].occupied &= ~sprite->_altitude;
 		sprite->_row_pos = r_check;
 		sprite->_col_pos = c_check;
-		// TODO: Check for map event here, change sprite's Z_LVL if necessary
-		_map_layers[sprite->_row_pos][sprite->_col_pos].properties |= (sprite->_status & Z_MASK);
+		// Set the occuped bit for the tile the sprite is moving on to.
+		_map_layers[sprite->_row_pos][sprite->_col_pos].occupied |= sprite->_altitude;
+		// TODO: Check for tile event here.
 	}
 	else {
 		sprite->_status &= ~IN_MOTION;
+		// TODO: Only modify the wait time if the sprite is a random NPC mover, not scripted and player sprites.
 		sprite->_wait_time = GaussianValue(sprite->_delay_time, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
 	}
 }
@@ -391,22 +468,13 @@ void MapMode::_UpdateVirtualSprite() {
 			move_direction = MOVE_SOUTH;
 		}
 
-		// Now check if we can actualy move the sprite to the tile the user requested to move to
-		if (user_move) {
-			_SpriteMove(move_direction, _virtual_sprite); // The move will always be successful here
+		//if (user_move) {
+			// Check that the tile the player wishes to move to isn't off the map
+			
 			// A user can't move and do another command, so exit
-		}
+		//}
 	}
-
-	if (InputManager->CancelPress()) {
-		// TEMP: Switch focus back to player sprite
-		cout << "Set focused object from Virtual sprite back to Player sprite" << endl;
-		if (_ground_objects[0]->_object_type == PLAYER_SPRITE)
-			_focused_object = dynamic_cast<MapSprite*>(_ground_objects[0]);
-		else
-			_focused_object = dynamic_cast<MapSprite*>(_ground_objects[1]);
-	}
-}
+} // MapMode::_UpdateVirtualSprite()
 
 // ****************************************************************************
 // **************************** UPDATE FUNCTIONS ******************************
@@ -418,7 +486,8 @@ void MapMode::Update(uint32 new_time_elapsed) {
 	_animation_counter += _time_elapsed;
 
 	// *********** (1) Update the tile animation frames if needed ***********
-
+	// NOTE: This section will become defunct once animation is supported in the video engine
+	
 	if (_animation_counter >= ANIMATION_RATE) {
 		// Update all tile frames
 		for (uint32 i = 0; i < _tile_frames.size(); i++) {
@@ -452,7 +521,7 @@ void MapMode::Update(uint32 new_time_elapsed) {
 	// ************ (3) Sort the objects so they are in the correct draw order ********
 	for (uint32 i = 1; i < _ground_objects.size(); i++) {
 		ObjectLayer *tmp = _ground_objects[i];
-		int32 j = static_cast<int>(i) - 1;
+		int32 j = static_cast<int32>(i) - 1;
 		while (j >= 0 && (_ground_objects[j])->_row_pos > tmp->_row_pos) {
 			_ground_objects[j+1] = _ground_objects[j];
 			j--;
@@ -468,14 +537,14 @@ void MapMode::_UpdateExploreState() {
 	// Update all game objects (??? Or only non-playable sprites ???)
 	for (uint32 i = 0; i < _ground_objects.size(); i++) {
 		switch ((_ground_objects[i])->_object_type) {
-			case PLAYER_SPRITE:
+			case CHARACTER_SPRITE:
 			{
 				ObjectLayer *pSprite = _ground_objects[i];
-				_UpdatePlayerExplore(dynamic_cast<MapSprite *>(_ground_objects[i]));
+				_UpdatePlayer(dynamic_cast<MapSprite *>(_ground_objects[i]));
 				break;
 			}
 			case NPC_SPRITE:
-				_UpdateNPCExplore((MapSprite*)(_ground_objects[i]));
+				_UpdateNPC((MapSprite*)(_ground_objects[i]));
 				break;
 			default:
 				break;
@@ -487,13 +556,13 @@ void MapMode::_UpdateExploreState() {
 }
 
 
-// Updates the player-controlled sprite and processes user input while in the 'explore' state
-void MapMode::_UpdatePlayerExplore(MapSprite *player_sprite) {
+// Updates the player-controlled sprite and also processes user input.
+void MapMode::_UpdatePlayer(MapSprite *player_sprite) {
 	int32 r_check, c_check;   // Variables for saving tile coordinates
 	int32 move_direction;     // The direction the sprite may be set to move in
 	bool user_move = false; // Set to true if the user attempted to move the player sprite
 
-	// *********** (!) Handle updates for the player sprite when in motion ************
+	// *********** (1) Handle updates for the player sprite when in motion ************
 	if (player_sprite->_status & IN_MOTION) {
 		player_sprite->_step_count += (float)_time_elapsed / player_sprite->_step_speed;
 
@@ -574,7 +643,7 @@ void MapMode::_UpdatePlayerExplore(MapSprite *player_sprite) {
 
 		// Now check if we can actualy move the sprite to the tile the user requested to move to
 		if (user_move) {
-			_SpriteMove(move_direction, player_sprite);
+			_GroundSpriteMove(move_direction, player_sprite);
 			// Regardless of whether the move was successful or not, refuse to process additional commands
 			//  from the user.
 			return;
@@ -584,10 +653,6 @@ void MapMode::_UpdatePlayerExplore(MapSprite *player_sprite) {
 	if (InputManager->MenuPress()) { // Push MenuMode onto the stack
 		MenuMode *MenuM = new MenuMode();
 		ModeManager->Push(MenuM);
-// 		TEMP: Switch the focused object to a virtual sprite
-// 		if (MAP_DEBUG) cout << "MAP: Set focused object from Player sprite to Virtual sprite" << endl;
-// 		_focused_object = _virtual_sprite;
-// 		return;
 	}
 
 	// Handle confirm command.
@@ -610,15 +675,16 @@ void MapMode::_UpdatePlayerExplore(MapSprite *player_sprite) {
 			c_check = player_sprite->_col_pos;
 		}
 
-		//CheckTile(row_check, col_check, player_sprite->);
+		// Check the tile the player is facing for events or other objects that can be interacted with.
+		_CheckInteraction(r_check, c_check, player_sprite->_altitude);
 		return;
 	}
 }
 
 
 
-// Updates the NPC sprites while in the 'explore' state
-void MapMode::_UpdateNPCExplore(MapSprite *npc) {
+// Updates the NPC sprites
+void MapMode::_UpdateNPC(MapSprite *npc) {
 
 	if (npc->_status & IN_MOTION) {
 		npc->_step_count += (float)_time_elapsed / npc->_step_speed;
@@ -634,7 +700,7 @@ void MapMode::_UpdateNPCExplore(MapSprite *npc) {
 				npc->_step_count = 0;
 			}
 			else { // Keep the sprite moving
-				_SpriteMove(RandomNum(0,7), npc);
+				_GroundSpriteMove(RandomNum(0,7), npc);
 			}
 		}
 		return;
@@ -648,7 +714,7 @@ void MapMode::_UpdateNPCExplore(MapSprite *npc) {
 
 		else {
 			npc->_status |= IN_MOTION;
-			_SpriteMove(RandomNum(0,7), npc);
+			_GroundSpriteMove(RandomNum(0,7), npc);
 		}
 	}
 }
@@ -656,23 +722,28 @@ void MapMode::_UpdateNPCExplore(MapSprite *npc) {
 
 // Updates the game status when MapMode is in the 'dialogue' state
 void MapMode::_UpdateDialogueState() {
-	cout << "TEMP: UpdateDialogueState()" << endl;
-	static bool print_done; // User can only continue/exit dialogue when this is set to true
-
-	// Handle other user input only if text printing is finished.
-	if (print_done) {
-		if (InputManager->ConfirmPress()) {
-			//if (more_dialgoue) {
-				// Send new dialogue to text renderer
-			//}
-			//else {
-				_map_state.push_back(EXPLORE);
-			//}
-			print_done = false; // Reset our print_done so that dialogue can be printed next time
+	cout << "UpdateDialogueState: setting text" << endl;
+	for (uint32 i = 0; i < _ground_objects.size(); i++) {
+		if (_ground_objects[i] != _focused_object) {
+			MapSprite *tmp_sprite = dynamic_cast<MapSprite*>(_ground_objects[i]);
+			_dialogue_text = tmp_sprite->_speech->_conversations[tmp_sprite->_speech->_next_read][0];
 		}
 	}
-
-	//UpdateNPCMovement(); // NPCs can still walk around while we are in dialogue mode
+	
+	// User is done reading the dialogue if they press confirm
+	if (InputManager->ConfirmPress()) {
+		cout << "UpdateDialogueState: processing confirm press" << endl;
+		// Remove the dialogue state from the map state stack
+		_map_state.pop_back();
+		
+		// Restore the status of map sprites
+		for (uint32 i = 0; i < _ground_objects.size(); i++) {
+			if (_ground_objects[i] != _focused_object) {
+				MapSprite *tmp_sprite = dynamic_cast<MapSprite*>(_ground_objects[i]);
+				tmp_sprite->_status = tmp_sprite->_speech->_saved_status;
+			}
+		}
+	}
 }
 
 
@@ -691,43 +762,43 @@ void MapMode::_UpdateScriptState() {
 
 
 // Determines things like our starting tiles
-void MapMode::_GetDrawInfo(MapFrame& mf) {
+void MapMode::_GetDrawInfo() {
 	// ************* (1) Calculate the default drawing positions for the tiles ****************
 	// Draw from the top left corner
-	mf.c_pos = (-SCREEN_COLS / 2.0f) - 0.5f;
-	mf.r_pos = (SCREEN_ROWS / 2.0f) - 0.5f;
+	_map_info.c_pos = (-SCREEN_COLS / 2.0f) - 0.5f;
+	_map_info.r_pos = (SCREEN_ROWS / 2.0f) - 0.5f;
 
 	// Set the default col and row tile counts
-	mf.c_draw = static_cast<uint32>(SCREEN_COLS) + 1;
-	mf.r_draw = static_cast<uint32>(SCREEN_ROWS) + 1;
+	_map_info.c_draw = static_cast<uint32>(SCREEN_COLS) + 1;
+	_map_info.r_draw = static_cast<uint32>(SCREEN_ROWS) + 1;
 
 	// These are the default starting positions
-	mf.c_start = _focused_object->_col_pos - (static_cast<int32>(SCREEN_COLS) / 2);
-	mf.r_start = _focused_object->_row_pos - (static_cast<int32>(SCREEN_ROWS) / 2);
+	_map_info.c_start = _focused_object->_col_pos - (static_cast<int32>(SCREEN_COLS) / 2);
+	_map_info.r_start = _focused_object->_row_pos - (static_cast<int32>(SCREEN_ROWS) / 2);
 
 	// *********************** (2) Calculate the drawing information **************************
 	if (_focused_object->_status & IN_MOTION) {
 		if (_focused_object->_step_count <= (_focused_object->_step_speed / 2.0f)) {
 			// We are not more than half-way moving west, so make adjustments
 			if (_focused_object->_status & (WEST | NORTH_NW | WEST_NW | SOUTH_SW | WEST_SW)) {
-				mf.c_pos += _focused_object->_step_count / _focused_object->_step_speed;
-				mf.c_start++;
+				_map_info.c_pos += _focused_object->_step_count / _focused_object->_step_speed;
+				_map_info.c_start++;
 			}
 			// We are not more than half-way moving east, so make adjustments
 			else if (_focused_object->_status & (EAST | NORTH_NE | EAST_NE | SOUTH_SE | EAST_SE)) {
-				mf.c_pos -= _focused_object->_step_count / _focused_object->_step_speed;
-				mf.c_start--;
+				_map_info.c_pos -= _focused_object->_step_count / _focused_object->_step_speed;
+				_map_info.c_start--;
 			}
 
 			// We are not more than half-way moving north, so make adjustments
 			if (_focused_object->_status & (NORTH | WEST_NW | NORTH_NW | EAST_NE | NORTH_NE)) {
-				mf.r_pos -= _focused_object->_step_count / _focused_object->_step_speed;
-				mf.r_start++;
+				_map_info.r_pos -= _focused_object->_step_count / _focused_object->_step_speed;
+				_map_info.r_start++;
 			}
 			// We are not more than half-way moving south, so make adjustments
 			else if (_focused_object->_status & (SOUTH | WEST_SW | SOUTH_SW | EAST_SE | SOUTH_SE)) {
-				mf.r_pos += _focused_object->_step_count / _focused_object->_step_speed;
-				mf.r_start--;
+				_map_info.r_pos += _focused_object->_step_count / _focused_object->_step_speed;
+				_map_info.r_start--;
 			}
 		}
 
@@ -735,20 +806,20 @@ void MapMode::_GetDrawInfo(MapFrame& mf) {
 		else { // (_focused_object->_step_count > (TILE_STEPS / 2))
 			// We are at least half-way moving west, so make adjustments
 			if (_focused_object->_status & (WEST | NORTH_NW | WEST_NW | SOUTH_SW | WEST_SW)) {
-				mf.c_pos -= (_focused_object->_step_speed - _focused_object->_step_count) / _focused_object->_step_speed;
+				_map_info.c_pos -= (_focused_object->_step_speed - _focused_object->_step_count) / _focused_object->_step_speed;
 			}
 			// We are at least half-way moving east, so make adjustments
 			else if (_focused_object->_status & (EAST | NORTH_NE | EAST_NE | SOUTH_SE | EAST_SE)) {
-				mf.c_pos += (_focused_object->_step_speed - _focused_object->_step_count) / _focused_object->_step_speed;
+				_map_info.c_pos += (_focused_object->_step_speed - _focused_object->_step_count) / _focused_object->_step_speed;
 			}
 
 			// We are at least half-way moving north, so make adjustments
 			if (_focused_object->_status & (NORTH | WEST_NW | NORTH_NW | EAST_NE | NORTH_NE)) {
-				mf.r_pos += (_focused_object->_step_speed - _focused_object->_step_count) / _focused_object->_step_speed;
+				_map_info.r_pos += (_focused_object->_step_speed - _focused_object->_step_count) / _focused_object->_step_speed;
 			}
 			// We are at least half-way moving south, so make adjustments
 			else if (_focused_object->_status & (SOUTH | WEST_SW | SOUTH_SW | EAST_SE | SOUTH_SE)) {
-				mf.r_pos -= (_focused_object->_step_speed - _focused_object->_step_count) / _focused_object->_step_speed;
+				_map_info.r_pos -= (_focused_object->_step_speed - _focused_object->_step_count) / _focused_object->_step_speed;
 			}
 		}
 	}
@@ -759,85 +830,87 @@ void MapMode::_GetDrawInfo(MapFrame& mf) {
 	// need the player to "move around the map".
 
 	// Exceeds the far-left side of the map
-	if (mf.c_start < 0) { 
-		mf.c_start = 0;
-		mf.c_pos = -(SCREEN_COLS / 2.0f);
+	if (_map_info.c_start < 0) { 
+		_map_info.c_start = 0;
+		_map_info.c_pos = -(SCREEN_COLS / 2.0f);
 	}
 	// Exceeds the far-right side of the map
-	else if (mf.c_start > _col_count - static_cast<int32>(SCREEN_COLS) - 1) { 
-		mf.c_start = _col_count - static_cast<int32>(SCREEN_COLS);
-		mf.c_pos = -(SCREEN_COLS / 2.0f);
+	else if (_map_info.c_start > _col_count - static_cast<int32>(SCREEN_COLS) - 1) { 
+		_map_info.c_start = _col_count - static_cast<int32>(SCREEN_COLS);
+		_map_info.c_pos = -(SCREEN_COLS / 2.0f);
 	}
 
 	// If our column position is exactly on the left edge of the screen, we draw one less column of tiles
-	if (mf.c_pos == -(SCREEN_COLS / 2.0f)) {
-		mf.c_draw--;
+	if (_map_info.c_pos == -(SCREEN_COLS / 2.0f)) {
+		_map_info.c_draw--;
 	}
 
 	// Exceeds the far-north side of the map
-	if (mf.r_start < 0) { 
-		mf.r_start = 0;
-		mf.r_pos = (SCREEN_ROWS / 2.0f) - 1.0f;
+	if (_map_info.r_start < 0) { 
+		_map_info.r_start = 0;
+		_map_info.r_pos = (SCREEN_ROWS / 2.0f) - 1.0f;
 	}
 	// Exceeds the far-south side of the map
-	else if (mf.r_start > _row_count - static_cast<int32>(SCREEN_ROWS) - 1) { 
-		mf.r_start = _row_count - static_cast<int32>(SCREEN_ROWS);
-		mf.r_pos = (SCREEN_ROWS / 2.0f) - 1.0f;
+	else if (_map_info.r_start > _row_count - static_cast<int32>(SCREEN_ROWS) - 1) { 
+		_map_info.r_start = _row_count - static_cast<int32>(SCREEN_ROWS);
+		_map_info.r_pos = (SCREEN_ROWS / 2.0f) - 1.0f;
 	}
 
 	// If the row position is exactly on the top of the screen, draw one less row of tiles
-	if (mf.r_pos == (SCREEN_ROWS / 2.0f) - 1.0f) {
-		mf.r_draw--;
+	if (_map_info.r_pos == (SCREEN_ROWS / 2.0f) - 1.0f) {
+		_map_info.r_draw--;
 	}
-} // MapMode::GetDrawInfo(MapFrame& mf)
+} // MapMode::_GetDrawInfo()
 
 
 // Public draw function called by the main game loop
 void MapMode::Draw() {
-	MapFrame mf; // Contains all the information we need to know to draw the map
-
-	// Make sure the coordinate system is set properly
-	VideoManager->SetCoordSys(-SCREEN_COLS/2.0f, SCREEN_COLS/2.0f, -SCREEN_ROWS/2.0f, SCREEN_ROWS/2.0f);
-
-	_GetDrawInfo(mf); // Get all the information we need for drawing this map frame
-
+	// Calculate all the information we need for drawing this map frame
+	_GetDrawInfo(); 
 
 	// ************** (1) Draw the Lower Layer *************
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_NO_BLEND, 0);
-	VideoManager->Move(mf.c_pos, mf.r_pos);
-	for (uint32 r = static_cast<uint32>(mf.r_start); r < static_cast<uint32>(mf.r_start) + mf.r_draw; r++) {
-		for (uint32 c = static_cast<uint32>(mf.c_start); c < static_cast<uint32>(mf.c_start) + mf.c_draw; c++) {
+	VideoManager->Move(_map_info.c_pos, _map_info.r_pos);
+	for (uint32 r = static_cast<uint32>(_map_info.r_start); 
+	     r < static_cast<uint32>(_map_info.r_start) + _map_info.r_draw; r++) {
+		for (uint32 c = static_cast<uint32>(_map_info.c_start); 
+		     c < static_cast<uint32>(_map_info.c_start) + _map_info.c_draw; c++) {
 			if (_map_layers[r][c].lower_layer >= 0) // Then a lower layer tile exists and we should draw it
 				VideoManager->DrawImage(_map_tiles[_tile_frames[_map_layers[r][c].lower_layer]->frame]);
 			VideoManager->MoveRel(1.0f, 0.0f);
 		}
-		VideoManager->MoveRel(-static_cast<float>(mf.c_draw), -1.0f);
+		VideoManager->MoveRel(-static_cast<float>(_map_info.c_draw), -1.0f);
 
 	}
 
 	// ************** (2) Draw the Object Layer *************
 	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 	for (uint32 i = 0; i < _ground_objects.size(); i++) {
-		(_ground_objects[i])->Draw(mf);
+		(_ground_objects[i])->Draw(_map_info);
 	}
 
 	// ************** (3) Draw the Upper Layer *************
 	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-	VideoManager->Move(mf.c_pos, mf.r_pos);
-	for (uint32 r = mf.r_start; r < mf.r_start + mf.r_draw; r++) {
-		for (uint32 c = mf.c_start; c < mf.c_start + mf.c_draw; c++) {
+	VideoManager->Move(_map_info.c_pos, _map_info.r_pos);
+	for (uint32 r = _map_info.r_start; r < _map_info.r_start + _map_info.r_draw; r++) {
+		for (uint32 c = _map_info.c_start; c < _map_info.c_start + _map_info.c_draw; c++) {
 			if (_map_layers[r][c].upper_layer >= 0) // Then an upper layer tile exists and we should draw it
 				VideoManager->DrawImage(_map_tiles[_tile_frames[_map_layers[r][c].upper_layer]->frame]);
 			VideoManager->MoveRel(1.0f, 0.0f);
 		}
-		VideoManager->MoveRel(-static_cast<float>(mf.c_draw), -1.0f);
+		VideoManager->MoveRel(-static_cast<float>(_map_info.c_draw), -1.0f);
 	}
 
-	// ************** (4) Draw the Dialoge box, if needed *************
-	// if (_map_state.back() = DIALOGUE) {
-	// }
+	// ************** (4) Draw the Dialoge menu and text *************
+// 	if (_map_state.back() == DIALOGUE) {
+// 		cout << "DIALOGUE DRAW!" << endl;
+// 		
+// 		cout << _dialogue_text << endl;
+// 		//VideoManager->DrawText(const_cast<char*>(_dialogue_text.c_str()), (-SCREEN_COLS/2.0f) + 32, (SCREEN_ROWS/2.0f) - 32); 
+// 		cout << "DIALOGUE DRAW DONE!" << endl;
+// 	}
 	return;
-}
+} // MapMode::_Draw()
 
 
 } // namespace hoa_map

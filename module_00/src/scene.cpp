@@ -32,12 +32,8 @@ bool SCENE_DEBUG = false;
 
 SceneMode::SceneMode() {
 	if (SCENE_DEBUG) cout << "SCENE: SceneMode constructor invoked" << endl;
-	VideoManager = GameVideo::_GetReference();
-	ModeManager = GameModeManager::_GetReference();
-	SettingsManager = GameSettings::_GetReference();
-
 	mode_type = ENGINE_SCENE_MODE;
-	_scene_timer = 0;
+	
 
 	// setup the scene Image Descriptor
 
@@ -50,6 +46,12 @@ SceneMode::SceneMode() {
 SceneMode::~SceneMode() {
 	if (SCENE_DEBUG) cout << "SCENE: SceneMode destructor invoked" << endl;
   // VideoManager->FreeImage(scene);
+}
+
+
+// Resets class members appropriately
+void SceneMode::Reset() {
+	_scene_timer = 0;
 }
 
 

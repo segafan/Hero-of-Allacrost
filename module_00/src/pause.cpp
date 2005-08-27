@@ -34,8 +34,6 @@ PauseMode::PauseMode() {
 	if (PAUSE_DEBUG) cout << "PAUSE: PauseMode constructor invoked" << endl;
 
 	mode_type = ENGINE_PAUSE_MODE;
-	unsigned char volume_action = SettingsManager->GetPauseVolumeAction();
-
 	// Adjust the volume while in paused mode acordingly
 	switch (SettingsManager->GetPauseVolumeAction()) {
 		case ENGINE_PAUSE_AUDIO:
@@ -52,13 +50,9 @@ PauseMode::PauseMode() {
 		// Don't need to do anything for the case ENGINE_SAME_VOLUME
 	}
 
-	// Here make a VideoManager call to save the current screen.
-	if (!VideoManager->CaptureScreen(_saved_screen)) {
+	// Save a copy of the current screen to use as a backdrop
+	if (!VideoManager->CaptureScreen(_saved_screen)) 
 		if (PAUSE_DEBUG) cerr << "PAUSE: ERROR: Couldn't save the screen!" << endl;
-	}
-	VideoManager->SetCoordSys(0, 1024, 0, 768);
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
-	VideoManager->Move(0,0);
 }
 
 
@@ -67,6 +61,7 @@ PauseMode::PauseMode() {
 PauseMode::~PauseMode() {
 	if (PAUSE_DEBUG) cout << "PAUSE: PauseMode destructor invoked" << endl;
 
+	// Restore the game audio/volume levels appropriately
 	switch (SettingsManager->GetPauseVolumeAction()) {
 		case ENGINE_PAUSE_AUDIO:
 			AudioManager->ResumeAudio();
@@ -76,31 +71,37 @@ PauseMode::~PauseMode() {
 			AudioManager->SetMusicVolume(SettingsManager->music_vol);
 			AudioManager->SetSoundVolume(SettingsManager->sound_vol);
 			break;
-		// Don't need to do anything for case ENGINE_SAME_VOLUME
+		default: // Don't need to do anything for case ENGINE_SAME_VOLUME
+			break;
+		
 	}
-
 
 	// Release the saved screen frame.
 	VideoManager->DeleteImage(_saved_screen);
-	
-	// TEMPORARY: Because the Video Manager doesn't save the stat of the coordinate system
-	//VideoManager->SetCoordSys(-14, 14, -10, 10);
-	
-	
-	// Note that we *DON'T* pop the top of the game mode stack, because
-	// GameSettings::KeyEventHandler() does it for us (hence this destructor gets called by it)
 }
 
 
+// Called whenever PauseMode is put on top of the stack
+void PauseMode::Reset() {
+	// Setup video engine constructs.
+	VideoManager->SetCoordSys(0, 1024, 0, 768);
+	if(!VideoManager->SetFont("default")) 
+    cerr << "MAP: ERROR > Couldn't set map font!" << endl;
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
+	VideoManager->Move(0,0);
+}
 
-// Doesn't do a thing. This is all handled in GameSettings::KeyEventHandler()
-void PauseMode::Update(uint32 time_elapsed) { }
+
+// The true logic is all handled in GameSettings::KeyEventHandler() instead of this function.
+void PauseMode::Update(uint32 time_elapsed) { 
+	// Don't eat up 100% of the CPU time when we're in pause mode
+	SDL_Delay(50);
+}
 
 
 
 // Nothing to draw since the screen never changes in pause mode (maybe we should call SDL_Delay here?)
 void PauseMode::Draw() {
-
 	// Draw the background image
 	Color grayed(0.35f, 0.35f, 0.35f, 1.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, 0);

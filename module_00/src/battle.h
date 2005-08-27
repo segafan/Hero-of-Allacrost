@@ -67,7 +67,11 @@ public:
 	BattleMode();
 	~BattleMode();
 
+	//! Resets appropriate class members. Called whenever BootMode is made the active game mode.
+	void Reset();
+	//! Wrapper function that calls different update functions depending on the battle state.
 	void Update(uint32 time_elapsed);
+	//! Wrapper function that calls different draw functions depending on the battle state.
 	void Draw();
 };
 

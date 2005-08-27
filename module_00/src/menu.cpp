@@ -47,16 +47,6 @@ MenuMode::MenuMode() {
 		cerr << "MENU: ERROR: Couldn't save the screen!" << endl;
 	}
 	
-	// Setup menu skin
-	
-	VideoManager->SetMenuSkin(
-	"img/menus/concrete",
-	Color(0.0f, 0.0f, 1.0f, 0.5f),
-	Color(0.0f, 0.0f, 1.0f, 0.5f),
-	Color(0.0f, 0.0f, 1.0f, 0.5f),
-	Color(0.0f, 0.0f, 1.0f, 0.5f)
-	);
-	
 	ImageDescriptor new_menu;
 	_menu_images.push_back(new_menu);
 	_menu_images.push_back(new_menu);
@@ -66,30 +56,18 @@ MenuMode::MenuMode() {
 	_menu_images.push_back(new_menu);
 	
 	// Create menu images
-	if(!VideoManager->CreateMenu(_menu_images[0], 256, 576)) { // create a 256x576 menu
+	if(!VideoManager->CreateMenu(_menu_images[0], 256, 576))  // create a 256x576 menu
 		cerr << "MENU: ERROR: Couldn't create menu image!" << endl;
-	}
-	if(!VideoManager->CreateMenu(_menu_images[1], 256, 576)) {
+	if(!VideoManager->CreateMenu(_menu_images[1], 256, 576)) 
 		cerr << "MENU: ERROR: Couldn't create menu image!" << endl;
-	}
-	if(!VideoManager->CreateMenu(_menu_images[2], 256, 576)) {
+	if(!VideoManager->CreateMenu(_menu_images[2], 256, 576)) 
 		cerr << "MENU: ERROR: Couldn't create menu image!" << endl;
-	}
-	if(!VideoManager->CreateMenu(_menu_images[3], 256, 576)) {
+	if(!VideoManager->CreateMenu(_menu_images[3], 256, 576)) 
 		cerr << "MENU: ERROR: Couldn't create menu image!" << endl;
-	}
-	if(!VideoManager->CreateMenu(_menu_images[4], 1024, 96)) {
+	if(!VideoManager->CreateMenu(_menu_images[4], 1024, 96)) 
 		cerr << "MENU: ERROR: Couldn't create menu image!" << endl;
-	}
-	if(!VideoManager->CreateMenu(_menu_images[5], 1024, 96)) {
+	if(!VideoManager->CreateMenu(_menu_images[5], 1024, 96)) 
 		cerr << "MENU: ERROR: Couldn't create menu image!" << endl;
-	}
-	
-	// Setup a menu font
-	if(!VideoManager->LoadFont("img/fonts/tarnhalo.ttf", "rawr", 48))
-		cerr << "MENU: ERROR > Couldn't load menu font!" << endl;
-// 	if(!VideoManager->EnableTextShadow(true)) 
-// 		cerr << "MENU: ERROR > Couldn't enable text shadows!" << endl;
 }
 
 
@@ -105,6 +83,14 @@ MenuMode::~MenuMode() {
 }
 
 
+// Resets appropriate class members
+void MenuMode::Reset() {
+	VideoManager->SetCoordSys(0, 1024, 768, 0); // Top left corner coordinates are (0,0)
+	if(!VideoManager->SetFont("default")) 
+    cerr << "MAP: ERROR > Couldn't set menu font!" << endl;
+}
+
+
 void MenuMode::Update(uint32 time_elapsed) {
 
 	if (InputManager->CancelPress()) {
@@ -114,10 +100,7 @@ void MenuMode::Update(uint32 time_elapsed) {
 
 
 void MenuMode::Draw() {
-	// Set the coordinate system
-	VideoManager->SetCoordSys(0, 1024, 768, 0); // Top left corner coordinates are (0,0)
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-	
 	// Move to the top left corner
 	VideoManager->Move(0,0);
 	

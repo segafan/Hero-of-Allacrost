@@ -30,6 +30,7 @@
 #include <string>
 #include "defs.h"
 #include "engine.h"
+#include "video.h"
 
 //! All calls to quit mode are wrapped in this namespace.
 namespace hoa_quit {
@@ -81,14 +82,21 @@ class QuitMode : public hoa_engine::GameMode {
 private:
 	//! The currently selected quit option
 	uint8 _quit_type;
+	//! An image of the last frame shown on the screen before QuitMode was called.
+	hoa_video::ImageDescriptor _saved_screen;
+	//! An image of the quit menu.
+	hoa_video::ImageDescriptor _quit_menu;
 public:
   QuitMode();
   ~QuitMode();
 
+	//! Resets appropriate class members. Called whenever PauseMode is made the active game mode.
+	void Reset();
 	//! Updates the game state by the amount of time that has elapsed
   void Update(uint32 time_elapsed);
 	//! Draws the next frame to be displayed on the screen
   void Draw();
+	
 }; // class QuitMode
 
 } // namespace hoa_quit

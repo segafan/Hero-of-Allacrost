@@ -49,7 +49,8 @@ namespace private_map {
 
 // ************************ MAP CONSTANTS ****************************
 
-//! The rate at which tiles are animated, in ms
+//! The rate at which tiles are animated, in milliseconds.
+//! \note This will become defunct later when the video engine handles the animation.
 const uint32 ANIMATION_RATE = 300;
 
 //! \name Screen Coordiante System Constants
@@ -67,46 +68,30 @@ const uint32 DIALOGUE     = 0x00000002;
 const uint32 SCRIPT_EVENT = 0x00000004;
 //@}
 
-//! \name Z Level Constants
+//! \name Altitude Constants
 //@{
-//! \brief The z value constants that determine an object's "height" on the map.
-const uint32 Z_LVL1 = 0x00000001;
-const uint32 Z_LVL2 = 0x00000002;
-const uint32 Z_LVL3 = 0x00000004;
-const uint32 Z_LVL4 = 0x00000008;
-const uint32 Z_LVL5 = 0x00000010;
-const uint32 Z_LVL6 = 0x00000020;
-const uint32 Z_LVL7 = 0x00000040;
-const uint32 Z_LVL8 = 0x00000080;
-const uint32 Z_MASK = 0x000000FF;
+//! \brief Constants for accessing the nine different alititude levels of both tiles and objects.
+const uint8 ALTITUDE_0 = 0x00;
+const uint8 ALTITUDE_1 = 0x01;
+const uint8 ALTITUDE_2 = 0x02;
+const uint8 ALTITUDE_3 = 0x04;
+const uint8 ALTITUDE_4 = 0x08;
+const uint8 ALTITUDE_5 = 0x10;
+const uint8 ALTITUDE_6 = 0x20;
+const uint8 ALTITUDE_7 = 0x40;
+const uint8 ALTITUDE_8 = 0x80;
 //@}
 
 // ********************** TILE CONSTANTS **************************
 
-// Note: The lower 8 bits of the properties member for tiles use the z level constants.
-
-//! \name Z Level Set Constants
-//@{
-//! \brief Constants for setting the z level of objects that move to certain areas on the map.
-const uint32 SET_Z_LVL1  = 0x00000100;
-const uint32 SET_Z_LVL2  = 0x00000200;
-const uint32 SET_Z_LVL3  = 0x00000400;
-const uint32 SET_Z_LVL4  = 0x00000800;
-const uint32 SET_Z_LVL5  = 0x00001000;
-const uint32 SET_Z_LVL6  = 0x00002000;
-const uint32 SET_Z_LVL7  = 0x00004000;
-const uint32 SET_Z_LVL8  = 0x00008000;
-const uint32 SET_Z_MASK  = 0x0000FF00;
-//@}
-
-//! Increments the z level of the object by one (max 8).
-const uint32 INC_Z_LEVEL = 0x00010000;
-//! Increments the z level of the object by one (min 0).
-const uint32 DEC_Z_LEVEL = 0x00020000;
+//! Indicates that an event will take place when the player steps onto this tile.
+const uint8 ARRIVE_EVENT  = 0x01;
+//! Indicates that an event will take place when the player steps off of this tile.
+const uint8 DEPART_EVENT  = 0x02;
+//! Indicates that an event will take place when the player faces this tile and presses "confirm".
+const uint8 CONFIRM_EVENT = 0x04;
 //! Indicates a treasure is contained on this tile.
-const uint32 TREASURE    = 0x00040000;
-//! Indicates that an event will take place when the player steps onto this tile
-const uint32 EVENT       = 0x00080000;
+const uint8 TREASURE      = 0x08;
 
 /*!****************************************************************************
  * \brief Retains information about how the next map frame should be drawn.
@@ -141,20 +126,27 @@ public:
  *****************************************************************************/
 class MapTile {
 public:
-	//! Index to a lower layer tile in the MapMode tile_frames vector
+	//! Index to a lower layer tile in the MapMode tile_frames vector.
 	int32 lower_layer;
-	// Possibly might have a new layer in the future...
-	// int32 middle_layer;
-	//! Index to an upper layer tile in the MapMode tile_frames vector
+	//! Index to a middle layer tile in the MapMode tile_frames vector.
+	int32 middle_layer;
+	//! Index to an upper layer tile in the MapMode tile_frames vector.
 	int32 upper_layer;
+	//! A bit-mask for indicating whether a tile is walkable on each altitude level.
+	uint8 not_walkable;
+	//! A bit-mask for indicating that a tile is occupied by an object.
+	uint8 occupied;
 	//! A bit-mask indicating various tile properties.
-	uint32 properties;
+	uint8 properties;
 }; // class MapTile
 
 
 /*!****************************************************************************
  * \brief Element of a circular singlely linked list for tile frame animations.
  *
+ * \note 0) This class will become defunct later, when the video engine is 
+ * capable of handling all the animation.
+ * 
  * \note 1) Obviously, not all tiles are animated. For those that aren't, the
  * list will only contain one item and the next pointer will point to itself.
  *****************************************************************************/
@@ -234,41 +226,61 @@ private:
 
 //	 vector<MapEvent> _map_events;
 //	std::vector<hoa_global::GEnemy> _map_enemies;
-
+	//! Retains information needed to draw the next map frame.
+	private_map::MapFrame _map_info;
+	//! The dialogue menu used by map mode
+	hoa_video::ImageDescriptor _dialogue_menu;
+	//! Contains the string of dialogue text to draw on the string when code is in the dialogue state.
+	std::string _dialogue_text;
+	//! When a dialogue takes place, this vector contains pointers to all of the individual speakers.
+	std::vector<MapSprite*> _dialogue_speakers;
+	
 	/*!
 	 * \brief Determines whether an object may be placed on a tile.
 	 * \param row The row index of the tile to check.
 	 * \param col The column index of the tile to check.
-	 * \param z_occupied The Z level to check for an occupied object.
+	 * \param altitude_level The altitude level of the tile to check.
 	 * \return True if an object may move to the tile, false otherwise.
 	 */
-	bool _TileMoveable(uint32 row, uint32 col, uint32 z_occupied);
-	
+	bool _TileMoveable(int32 row, int32 col, uint8 altitude_level);
 	/*!
-	 * \brief Determines if an adjacent tile has some sort of interaction
+	 * \brief Determines if an adjacent tile has some sort of interaction.
 	 * \param row The row index of the tile to check.
 	 * \param col The column index of the tile to check.
-	 * \param z_occupied The Z level to check.
+	 * \param altitude_level The altitude level of the tile to check.
+	 * 
+	 * An interaction may be either an event bound to the tile or another
+	 * map object/sprite occupying that tile.
 	 */
-	void _CheckTile(uint32 row, uint32 col, uint32 z_occupied);
+	void _CheckInteraction(int32 row, int32 col, uint8 altitude_level);
 	/*!
 	 * \brief Attempts to move a sprite in the indicated direction.
 	 * \param direction The direction that the sprite wishes to move.
 	 * \param *sprite A pointer to the sprite itself.
+	 *
+	 * This function is only called for sprites that are located in the
+	 * ground object layer. Sprites are typically never in the middle 
+	 * object layer, and sprites in the sky object layer don't need
+	 * collision detection. This function is also never called with a
+	 * virtual sprite object.
 	 */
-	void _SpriteMove(uint32 direction, MapSprite *sprite);
-	//! Updates the virtual_sprite class member.
+	void _GroundSpriteMove(uint32 direction, MapSprite *sprite);
+	
+	//! Updates the focused player sprite and processes user input.
+	//! \param *player_sprite A pointer to the sprite to update.
+	void _UpdatePlayer(MapSprite *player_sprite);
+	//! Updates a NPC sprite.
+	//! \param *npc A pointer to the sprite to update.
+	void _UpdateNPC(MapSprite *npc);
+	/*! 
+	 *  Updates the MapMode#_virtual_sprite class member.
+	 *
+	 *  This function is only called when MapMode#_focused_object is MapMode#_virtual_sprite.
+	 */
 	void _UpdateVirtualSprite();
 
 	//! Updates the map when in the explore state.
 	void _UpdateExploreState();
-	//! Updates the focused player sprite when in the explore state.
-	//! \param *player_sprite A pointer to the sprite to update.
-	void _UpdatePlayerExplore(MapSprite *player_sprite);
-	//! Updates a NPC sprite when in the explore state.
-	//! \param *npc A pointer to the sprite to update.
-	void _UpdateNPCExplore(MapSprite *npc);
-
 	//! Updates the map when in the dialogue state.
 	void _UpdateDialogueState();
 	//! Updates the map when in the script state.
@@ -277,12 +289,10 @@ private:
 	void _UpdateNPCMovement();
 
 	//! Calculates information about how to draw the next map frame.
-	//! \param &mf The refereneced object to put the calculated drawing results into.
-	void _GetDrawInfo(private_map::MapFrame& mf);
+	void _GetDrawInfo();
 
 	// TEMPORARY FUNCTIONS FOR TESTING PURPOSES >>> eventally will be defunct
-	void _TempCreateMap();
-	void _TempCreateSprites();
+	void _TEMP_CreateMap();
 public:
 	//! The name of the map, as seen by the player in the game.
 	std::string mapname;
@@ -304,6 +314,8 @@ public:
 	uint32 GetCols() { return _col_count; }
 	//@}
 
+	//! Resets appropriate class members. Called whenever MapMode is made the active game mode.
+	void Reset();
 	//! Updates the game and calls various sub-update functions depending on the state of map mode.
 	//! \param new_time_elapsed The amount of milliseconds that have elapsed since the last call to this function.
 	void Update(uint32 new_time_elapsed);
