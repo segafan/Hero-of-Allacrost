@@ -88,7 +88,6 @@ void PauseMode::Reset() {
 	if(!VideoManager->SetFont("default")) 
     cerr << "MAP: ERROR > Couldn't set map font!" << endl;
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
-	VideoManager->Move(0,0);
 }
 
 
