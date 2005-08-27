@@ -98,8 +98,8 @@ Color GameVideo::GetTextColor () const
 
 bool GameVideo::_DrawTextHelper
 ( 
-	const char   *text, 
-	const Uint16 *uText, 
+	const char    *text, 
+	const wchar_t *uText, 
 	float x, 
 	float y 
 )
@@ -107,7 +107,7 @@ bool GameVideo::_DrawTextHelper
 	if(_fontMap.empty())
 		return false;
 		
-	CoordSys tempCoordSys = _coordSys;
+	_PushContext();
 	
 	SetCoordSys(0,1024,0,768);
 	SDL_Rect location;
@@ -136,7 +136,7 @@ bool GameVideo::_DrawTextHelper
 	
 	if( uText )
 	{
-		initial = TTF_RenderUNICODE_Blended(font, uText, color);
+		initial = TTF_RenderUNICODE_Blended(font, (uint16 *) uText, color);
 		
 		if(!initial)
 		{
@@ -159,6 +159,14 @@ bool GameVideo::_DrawTextHelper
 		
 	w = RoundUpPow2(initial->w);
 	h = RoundUpPow2(initial->h);
+
+
+	CoordSys &cs = _coordSys;
+	float xoff = ((_xalign+1) * initial->w) * .5f * (cs._left < cs._right ? -1 : +1);
+	float yoff = ((_yalign+1) * initial->h) * .5f * (cs._bottom < cs._top ? -1 : +1);
+	
+	location.x += (int32)xoff;
+	location.y += (int32)yoff;
 	
 	intermediary = SDL_CreateRGBSurface(0, w, h, 32, 
 			0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
@@ -251,7 +259,7 @@ bool GameVideo::_DrawTextHelper
 		return false;
 	}
 
-	SetCoordSys( tempCoordSys._left, tempCoordSys._right, tempCoordSys._bottom, tempCoordSys._top);
+	_PopContext();
 
 	return true;
 }
@@ -261,9 +269,35 @@ bool GameVideo::_DrawTextHelper
 // DrawText: non unicode version
 //-----------------------------------------------------------------------------
 
-bool GameVideo::DrawText(const char *text, float x, float y)
+bool GameVideo::DrawText(const string &txt, float x, float y)
 {
-	return _DrawTextHelper(text, NULL, x, y);
+	TTF_Font *font = _fontMap[_currentFont];
+	
+	
+	if(font)
+	{
+		int32 lineSkip = TTF_FontLineSkip(_fontMap[GetFont()]);	
+		// use a temporary string since the code changes it
+		string text = txt;
+		
+		do
+		{
+			size_t newlinePos = text.find("\n");
+			if(newlinePos != string::npos)
+			{
+				_DrawTextHelper(text.substr(0, newlinePos).c_str(), NULL, x, y);
+				text = text.substr(newlinePos+1, text.length()-newlinePos);
+				y -= lineSkip;
+			}
+			else
+			{
+				_DrawTextHelper(text.c_str(), NULL, x, y);
+				text = "";
+			}
+		} while(text != "");
+	}
+
+	return true;
 }
 
 
@@ -271,9 +305,36 @@ bool GameVideo::DrawText(const char *text, float x, float y)
 // DrawText: unicode version
 //-----------------------------------------------------------------------------
 
-bool GameVideo::DrawText(const Uint16 *text, float x, float y)
+bool GameVideo::DrawText(const wstring &txt, float x, float y)
 {
-	return _DrawTextHelper(NULL, text, x, y);
+	TTF_Font *font = _fontMap[_currentFont];
+	
+	uint32 newline = uint32('\n');
+	
+	if(font)
+	{
+		int32 lineSkip = TTF_FontLineSkip(_fontMap[GetFont()]);	
+		
+		// temporary so we can mess with it
+		wstring text = txt;
+		
+		do
+		{
+			size_t newlinePos = text.find(newline);
+			if(newlinePos != string::npos)
+			{
+				_DrawTextHelper(NULL, text.substr(0, newlinePos).c_str(), x, y);
+				text = text.substr(newlinePos+1, text.length()-newlinePos);
+				y -= lineSkip;
+			}
+			else
+			{
+				_DrawTextHelper(NULL, text.c_str(), x, y);
+				text.clear();
+			}
+		} while(!text.empty());
+	}
+	return true;
 }
 
 
