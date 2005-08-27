@@ -652,7 +652,9 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 {
 	// value of zero means to disable display
 	if(_currentDebugTexSheet == -1)
+	{
 		return true;
+	}
 		
 	// check if there aren't any texture sheets! (should never happen)
 	if(_texSheets.empty())
@@ -674,7 +676,9 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 	TexSheet *sheet = _texSheets[_currentDebugTexSheet];
 	
 	if(!sheet)
+	{
 		return false;
+	}
 	
 	int32 w = sheet->width;
 	int32 h = sheet->height;
@@ -699,7 +703,7 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 		
 	glPopMatrix();
 
-	if(!SetFont("default"))
+	if(!SetFont("debug_font"))
 	{
 		_PopContext();
 		return false;

@@ -35,6 +35,7 @@ bool GameVideo::DrawImage(const ImageDescriptor &id)
 
 bool GameVideo::DrawImage(const ImageDescriptor &id, const Color &color)
 {
+	_PushContext(); 
 	size_t numElements = id._elements.size();
 	
 	for(uint32 iElement = 0; iElement < numElements; ++iElement)
@@ -68,6 +69,8 @@ bool GameVideo::DrawImage(const ImageDescriptor &id, const Color &color)
 		}
 		glPopMatrix();
 	}
+
+	_PopContext();
 
 	return true;
 }

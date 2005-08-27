@@ -178,7 +178,7 @@ bool GameVideo::Initialize()
 	if(VIDEO_DEBUG)
 		cout << "VIDEO: Loading default font\n";
 
-	if(!LoadFont("img/fonts/cour.ttf", "default", 18))
+	if(!LoadFont("img/fonts/cour.ttf", "debug_font", 16))
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: Could not load cour.ttf file!" << endl;
@@ -401,10 +401,11 @@ void GameVideo::SetCoordSys(const CoordSys &coordSys)
 	_coordSys = coordSys;
 	
 	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	
+	glLoadIdentity();	
 	glOrtho(_coordSys._left, _coordSys._right, _coordSys._bottom, _coordSys._top, -1, 1);
-	glMatrixMode(GL_MODELVIEW);
+	
+	// Removed this code bleow
+ 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
 
@@ -605,9 +606,9 @@ bool GameVideo::AccumulateLights()
 bool GameVideo::Display(int32 frameTime) 
 {
 	// update shaking effect
-	CoordSys oldSys = _coordSys;
+	
+	_PushContext();
 	SetCoordSys(0, 1024, 0, 768);
-
 	_UpdateShake(frameTime);	
 	
 	// show an overlay over the screen if we're fading
@@ -653,7 +654,7 @@ bool GameVideo::Display(int32 frameTime)
 		}
 	}
 
-	SetCoordSys(oldSys._left, oldSys._right, oldSys._bottom, oldSys._top);
+	_PopContext();
 
 	SDL_GL_SwapBuffers();
 	
@@ -728,7 +729,7 @@ bool GameVideo::_DEBUG_ShowTexSwitches()
 	char text[16];
 	sprintf(text, "Switches: %d", _numTexSwitches);
 	
-	if( !SetFont("default"))
+	if( !SetFont("debug_font"))
 		return false;
 		
 	if( !DrawText(text, 876.0f, 690.0f))
@@ -1233,7 +1234,10 @@ string GameVideo::_CreateTempFilename(const string &extension)
 
 void GameVideo::_PushContext()
 {
+	// push current modelview transformation
 	PushState();
+	
+	// save context information
 	Context c;
 	c.coordSys = _coordSys;
 	c.blend    = _blend;
@@ -1241,6 +1245,9 @@ void GameVideo::_PushContext()
 	c.yalign   = _yalign;
 	c.xflip    = _xflip;
 	c.yflip    = _yflip;
+	
+	c.currentFont      = _currentFont;
+	c.currentTextColor = _currentTextColor;
 	
 	_contextStack.push(c);
 }
@@ -1253,8 +1260,7 @@ void GameVideo::_PushContext()
 
 void GameVideo::_PopContext()
 {
-	PopState();
-	
+	// restore context information and pop it from stack
 	Context c = _contextStack.top();
 	SetCoordSys(c.coordSys);
 	_blend  = c.blend;
@@ -1262,7 +1268,14 @@ void GameVideo::_PopContext()
 	_yalign = c.yalign;
 	_xflip  = c.xflip;
 	_yflip  = c.yflip;
+	
+	_currentFont      = c.currentFont;
+	_currentTextColor = c.currentTextColor;
+	
 	_contextStack.pop();
+
+	// restore modelview transformation
+	PopState();
 }
 
 

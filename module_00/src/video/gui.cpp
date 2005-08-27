@@ -124,14 +124,17 @@ bool GUI::DrawFPS(int32 frameTime)
 	sprintf(fpsText, "fps: %d", avgFPS);
 	
 	string oldFont = _videoManager->GetFont();
-	if( !_videoManager->SetFont("default"))
+	if( !_videoManager->SetFont("debug_font"))
+	{
 		return false;
+	}
 	
 	if( !_videoManager->DrawText(fpsText, 930.0f, 720.0f))
+	{
 		return false;
+	}
 		
 	_videoManager->SetFont(oldFont);
-		
 	return true;
 }
 

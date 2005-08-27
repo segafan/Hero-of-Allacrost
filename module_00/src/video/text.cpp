@@ -107,8 +107,6 @@ bool GameVideo::_DrawTextHelper
 	if(_fontMap.empty())
 		return false;
 		
-	_PushContext();
-	
 	SetCoordSys(0,1024,0,768);
 	SDL_Rect location;
 	SDL_Color color;
@@ -152,7 +150,7 @@ bool GameVideo::_DrawTextHelper
 		if(!initial)
 		{
 			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: TTF_RenderText_Blended() returned NULL in _DrawTextHelper()!" << endl;
+				cerr << "VIDEO ERROR: TTF_RenderText_Blended() returned NULL in _DrawTextHelper()!\n(current font = " << _currentFont << ", text={" << text << "}" << endl;
 			return false;
 		}
 	}
@@ -259,8 +257,6 @@ bool GameVideo::_DrawTextHelper
 		return false;
 	}
 
-	_PopContext();
-
 	return true;
 }
 
@@ -270,10 +266,18 @@ bool GameVideo::_DrawTextHelper
 //-----------------------------------------------------------------------------
 
 bool GameVideo::DrawText(const string &txt, float x, float y)
-{
+{		
+	if(txt.empty())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: tried to draw empty text string!" << endl;		
+	}
+
+
 	TTF_Font *font = _fontMap[_currentFont];
-	
-	
+
+	_PushContext();
+
 	if(font)
 	{
 		int32 lineSkip = TTF_FontLineSkip(_fontMap[GetFont()]);	
@@ -285,17 +289,27 @@ bool GameVideo::DrawText(const string &txt, float x, float y)
 			size_t newlinePos = text.find("\n");
 			if(newlinePos != string::npos)
 			{
-				_DrawTextHelper(text.substr(0, newlinePos).c_str(), NULL, x, y);
+				if(!_DrawTextHelper(text.substr(0, newlinePos).c_str(), NULL, x, y))
+				{
+					_PopContext();
+					return false;
+				}
 				text = text.substr(newlinePos+1, text.length()-newlinePos);
 				y -= lineSkip;
 			}
 			else
 			{
-				_DrawTextHelper(text.c_str(), NULL, x, y);
+				if(!_DrawTextHelper(text.c_str(), NULL, x, y))
+				{
+					_PopContext();
+					return false;
+				}
 				text = "";
 			}
 		} while(text != "");
 	}
+	
+	_PopContext();
 
 	return true;
 }
@@ -313,6 +327,7 @@ bool GameVideo::DrawText(const wstring &txt, float x, float y)
 	
 	if(font)
 	{
+		_PushContext();
 		int32 lineSkip = TTF_FontLineSkip(_fontMap[GetFont()]);	
 		
 		// temporary so we can mess with it
@@ -323,17 +338,28 @@ bool GameVideo::DrawText(const wstring &txt, float x, float y)
 			size_t newlinePos = text.find(newline);
 			if(newlinePos != string::npos)
 			{
-				_DrawTextHelper(NULL, text.substr(0, newlinePos).c_str(), x, y);
+				if(!_DrawTextHelper(NULL, text.substr(0, newlinePos).c_str(), x, y))
+				{
+					_PopContext();
+					return false;
+				}
 				text = text.substr(newlinePos+1, text.length()-newlinePos);
 				y -= lineSkip;
 			}
 			else
 			{
-				_DrawTextHelper(NULL, text.c_str(), x, y);
+				if(!_DrawTextHelper(NULL, text.c_str(), x, y))
+				{
+					_PopContext();
+					return false;
+				}
 				text.clear();
 			}
 		} while(!text.empty());
+		
+		_PopContext();
 	}
+		
 	return true;
 }
 

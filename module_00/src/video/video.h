@@ -756,6 +756,8 @@ struct Context
 {
 	char blend, xalign, yalign, xflip, yflip;
 	CoordSys coordSys;
+	std::string currentFont;
+	Color currentTextColor;
 };
 
 
@@ -1705,7 +1707,7 @@ private:
 	bool _DEBUG_ShowTexSheet();
 	
 	
-	
+	friend class private_video::GUI;	
 	friend class private_video::FixedTexMemMgr;
 	friend class private_video::VariableTexMemMgr;
 	friend class private_video::TexSheet;
