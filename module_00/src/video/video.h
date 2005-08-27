@@ -61,6 +61,41 @@ extern bool VIDEO_DEBUG;
  
 float _Lerp(float alpha, float initial, float final);
 
+
+/*!
+	*  \brief erases all the files in a given directory
+	*
+	*  \param directoryName  name of directory
+	*/	
+bool CleanDirectory(const std::string &directoryName);
+
+
+/*!
+	*  \brief called at the beginning of the application to create a folder called "temp" to store
+	*         temporary files as needed. If the function manages to create the directory, or if
+	*         the directory already existed, returns true. Otherwise, false on failure.
+	*
+	*  \note  If a temp folder already exists, MakeDirectory() simply exits- it doesn't
+	*         check to see if there are any files in the folder and remove them. That's why
+	*         you must call RemoveDirectory before MakeDirectory() at app startup
+	*
+	*  \param directoryName    Name of temp folder, e.g. "temp"
+	*/
+
+bool MakeDirectory(const std::string &directoryName);
+
+
+/*!
+	*  \brief called at the beginning of application before MakeDirectory() to clean out
+	*         any temporary files that may have been left over if the game crashed previously,
+	*         and at the end of the game to remove the temp directory and all files in it
+	*
+	*  \param directoryName    Name of temp folder, e.g. "temp"
+	*/	
+
+bool RemoveDirectory(const std::string &directoryName);
+
+
 /*!
  *  \brief Creates a random float between a and b.
  */
@@ -224,7 +259,46 @@ public:
 		// no bounds check for efficiency!
 		return color[i];
 	}
+
+	const float &operator[](int32 i) const
+	{
+		// no bounds check for efficiency!
+		return color[i];
+	}
 };
+
+
+/*!***************************************************************************
+ *  \brief the CoordSys structure holds a "coordinate system", which is
+ *         defined by rectangle (left, right, bottom, and top) which determines
+ *         how coordinates are mapped to the screen. The default coordinate
+ *         system is (0,1024,0,768). As another example, if you wanted to make
+ *         it so that the screen coordinates ranged from 0 to 1, you could
+ *         set the coordinate system to (0,1,0,1)
+ *****************************************************************************/
+
+struct CoordSys
+{
+	CoordSys() 
+	{
+		_left  = _top    = 0.0f;
+		_right = _bottom = 1.0f;
+	}
+	
+	CoordSys(float left, float right, float bottom, float top)
+	{
+		_left   = left;
+		_right  = right;
+		_bottom = bottom;
+		_top    = top;
+	}
+	
+	float _left;
+	float _right;
+	float _bottom;
+	float _top;
+};
+
 
 
 //! private_video namespace, hides things which are used internally
@@ -380,9 +454,11 @@ public:
 		ILuint pixelData
 	);
 	
+	bool SaveImage(Image *img);
+	
 	bool CopyRect(ILuint pixelData, int32 x, int32 y, int32 w, int32 h);
 	
-	bool _RemoveImage (Image *img);  //! removes an image completely
+	bool RemoveImage (Image *img);  //! removes an image completely
 	bool FreeImage   (Image *img);  //! marks the image as free
 	bool RestoreImage (Image *img); //! marks a previously freed image as "used"
 	
@@ -395,14 +471,10 @@ public:
 	bool isStatic;       //! if true, images in this sheet that are unlikely to change
 	TexSheetType type;   //! does it hold 32x32, 32x64, 64x64, or any kind
 
-	TexMemMgr *_texMemManager;  //! manages which areas of the texture are free
+	TexMemMgr *texMemManager;  //! manages which areas of the texture are free
 
 	GLuint texID;     //! number OpenGL uses to refer to this texture
-	bool loaded;
-		
-	friend class FixedTexMemMgr;
-	friend class VariableTexMemMgr;
-	friend class GameVideo;
+	bool loaded;		
 };
 
 
@@ -671,39 +743,23 @@ private:
 };
 
 
-} // namespace private_video
-
-
 /*!***************************************************************************
- *  \brief the CoordSys structure holds a "coordinate system", which is
- *         defined by rectangle (left, right, bottom, and top) which determines
- *         how coordinates are mapped to the screen. The default coordinate
- *         system is (0,1024,0,768). As another example, if you wanted to make
- *         it so that the screen coordinates ranged from 0 to 1, you could
- *         set the coordinate system to (0,1,0,1)
+ *  \brief Represents the graphics "context", i.e. draw flags, transformation
+ *         and coord sys. Must be pushed and popped by any GameVideo functions
+ *         which modify any of the context
+ *
+ *         Note: transformation is actually not a part of this struct since
+ *               it is handled separately by the OpenGL transformation stack
  *****************************************************************************/
 
-struct CoordSys
+struct Context
 {
-	CoordSys() 
-	{
-		_left  = _top    = 0.0f;
-		_right = _bottom = 1.0f;
-	}
-	
-	CoordSys(float left, float right, float bottom, float top)
-	{
-		_left   = left;
-		_right  = right;
-		_bottom = bottom;
-		_top    = top;
-	}
-	
-	float _left;
-	float _right;
-	float _bottom;
-	float _top;
+	char blend, xalign, yalign, xflip, yflip;
+	CoordSys coordSys;
 };
+
+
+} // namespace private_video
 
 
 /*!***************************************************************************
@@ -1020,7 +1076,7 @@ public:
 	 *  \param x      x coordinate to position text at
 	 *  \param y      y coordinate to position text at
 	 */
-	bool DrawText(const char *const text, float x, float y);
+	bool DrawText(const std::string &text, float x, float y);
 	
 	/*!
 	 *  \brief unicode version of DrawText(). This should be used for
@@ -1031,7 +1087,7 @@ public:
 	 *  \param x      x coordinate to position text at
 	 *  \param y      y coordinate to position text at
 	 */
-	bool DrawText(const Uint16 *const uText, float x, float y);
+	bool DrawText(const std::wstring &uText, float x, float y);
 
 
 	//-- Images ----------------------------------------------------------------
@@ -1083,6 +1139,7 @@ public:
 	 */
 	bool ReloadTextures();
 
+	
 	/*!
 	 *  \brief sets draw flags (flip, align, blending, etc). Simply pass
 	 *         in as many parameters as you want, as long as the last
@@ -1314,7 +1371,7 @@ public:
 	 */
 	void ToggleFPS();
 	
-	
+
 	/*!
 	 *  \brief makes a screenshot, saves it as screenshot.jpg in the directory
 	 *         of the game
@@ -1344,6 +1401,8 @@ private:
 	char _yalign;       //! y align flag which tells if images should be top, center, or bottom aligned
 	char _xflip;        //! x flip flag. true if images should be flipped horizontally
 	char _yflip;        //! y flip flag. true if images should be flipped vertically
+
+	char _nextTempFile[9];    //! eight character name for temp files that increments every time you create a new one so they are always unique
 
 	CoordSys    _coordSys;    //! current coordinate system
 	
@@ -1391,9 +1450,20 @@ private:
 	std::map    <std::string, private_video::Image*>   _images;    //! STL map containing all the images currently being managed by the video engine	
 	std::vector <private_video::TexSheet *>   _texSheets;          //! vector containing all texture sheets currently being managed by the video engine
 	std::map    <std::string, TTF_Font *>     _fontMap;            //! STL map containing all the fonts currently being managed by the video engine
+	std::stack  <private_video::Context>      _contextStack;       //! stack containing context, i.e. draw flags plus coord sys. Context is pushed and popped by any GameVideo functions that clobber these settings
 
 
 	//-- Private methods ------------------------------------------------------
+
+
+	/*!
+	 *  \brief wraps a call to glBindTexture(), except it adds checking to eliminate redundant texture binding. Redundancy checks are already implemented by most drivers, but this is a double check "just in case"
+	 *
+	 *  \param texID   integer handle to the OpenGL texture
+	 */	
+
+	bool _BindTexture(GLuint texID);
+
 
 	/*!
 	 *  \brief creates a blank texture of the given width and height and returns integer used by OpenGL to refer to this texture. Returns 0xffffffff on failure.
@@ -1404,22 +1474,20 @@ private:
 
 	GLuint _CreateBlankGLTexture(int32 width, int32 height);
 
+
 	/*!
-	 *  \brief does the actual work of drawing text
+	 *  \brief returns a filename like TEMP_abcd1234.ext, and each time you call it, it increments the
+	 *         alphanumeric part of the filename. This way, during any particular run
+	 *         of the game, each temp filename is guaranteed to be unique.
+	 *         Assuming you create a new temp file every second, it would take 100,000 years to get
+	 *         from TEMP_00000000 to TEMP_zzzzzzzz
 	 *
-	 *  \param text   Pointer to a C-style string holding the text to draw. NULL if we're using unicode
-	 *  \param uText  Pointer to a unicode string holding the text to draw. NULL if we're using C-style
-	 *  \param x      x coordinate of text to be drawn
-	 *  \param y      y coordinate of text to be drawn
+	 *  \param extension   The extension for the temp file. Although we could just save temp files
+	 *                     without an extension, that might cause stupid bugs like DevIL refusing
+	 *                     to load an image because it doesn't end with .png.
 	 */	
 
-	bool _DrawTextHelper
-	(
-		const char   *const text, 
-		const Uint16 *const uText, 
-		float x, 
-		float y
-	);
+	std::string _CreateTempFilename(const std::string &extension);
 
 
 	/*!
@@ -1437,6 +1505,71 @@ private:
 		int32 height,
 		private_video::TexSheetType type,
 		bool isStatic
+	);
+
+
+	/*!
+	 *  \brief wraps a call to glDeleteTextures(), except it adds some checking related to eliminating redundant texture binding.
+	 *
+	 *  \param texID   integer handle to the OpenGL texture
+	 */	
+	bool _DeleteTexture(GLuint texID);
+
+
+	/*!
+	 *  \brief decreases the reference count of an image
+	 *
+	 *  \param image  pointer to image
+	 */	
+	bool _DeleteImage    (private_video::Image *const image);
+	
+	
+	/*!
+	 *  \brief deletes the temporary textures from the "temp" folder that were saved
+	 *         by _SaveTempTextures()
+	 */	
+	
+	bool _DeleteTempTextures();
+
+	
+	/*!
+	 *  \brief draws an image element, i.e. one image within an image descriptor which may contain multiple images
+	 *
+	 *  \param image     pointer to the image
+	 *  \param w         width to draw the image
+	 *  \param h         height to draw the image
+	 *  \param color_TL  color of top-left     vertex
+	 *  \param color_TR  color of top-right    vertex
+	 *  \param color_BL  color of bottom-left  vertex
+	 *  \param color_BR  color of bottom-right vertex
+	 */	
+	bool _DrawElement
+	(
+		const private_video::Image *const  image, 
+		float w, 
+		float h, 
+		const Color &color_TL,
+		const Color &color_TR,
+		const Color &color_BL,
+		const Color &color_BR
+	);
+
+
+	/*!
+	 *  \brief does the actual work of drawing text
+	 *
+	 *  \param text   Pointer to a C-style string holding the text to draw. NULL if we're using unicode
+	 *  \param uText  Pointer to a unicode string holding the text to draw. NULL if we're using C-style
+	 *  \param x      x coordinate of text to be drawn
+	 *  \param y      y coordinate of text to be drawn
+	 */	
+
+	bool _DrawTextHelper
+	(
+		const char    *const text, 
+		const wchar_t *const uText, 
+		float x, 
+		float y
 	);
 
 
@@ -1461,7 +1594,7 @@ private:
 		int32 h,
 		bool isStatic
 	);
-		
+
 
 	/*!
 	 *  \brief linearly interpolation, returns a value which is (alpha*100) percent between initial and final
@@ -1505,23 +1638,6 @@ private:
 
 
 	/*!
-	 *  \brief wraps a call to glBindTexture(), except it adds checking to eliminate redundant texture binding. Redundancy checks are already implemented by most drivers, but this is a double check "just in case"
-	 *
-	 *  \param texID   integer handle to the OpenGL texture
-	 */	
-
-	bool _BindTexture(GLuint texID);
-
-
-	/*!
-	 *  \brief wraps a call to glDeleteTextures(), except it adds some checking related to eliminating redundant texture binding.
-	 *
-	 *  \param texID   integer handle to the OpenGL texture
-	 */	
-	bool _DeleteTexture(GLuint texID);
-
-
-	/*!
 	 *  \brief removes the image from the STL map with the same pointer as the one passed in. Returns false on failure
 	 *
 	 *  \param imageToRemove   pointer to the image we want to remove
@@ -1539,42 +1655,34 @@ private:
 
 
 	/*!
-	 *  \brief decreases the reference count of an image
-	 *
-	 *  \param image  pointer to image
-	 */	
-	bool _DeleteImage    (private_video::Image *const image);
-	
-	
-	/*!
-	 *  \brief draws an image element, i.e. one image within an image descriptor which may contain multiple images
-	 *
-	 *  \param image     pointer to the image
-	 *  \param w         width to draw the image
-	 *  \param h         height to draw the image
-	 *  \param color_TL  color of top-left     vertex
-	 *  \param color_TR  color of top-right    vertex
-	 *  \param color_BL  color of bottom-left  vertex
-	 *  \param color_BR  color of bottom-right vertex
-	 */	
-	bool _DrawElement
-	(
-		const private_video::Image *const  image, 
-		float w, 
-		float h, 
-		Color color_TL,
-		Color color_TR,
-		Color color_BL,
-		Color color_BR
-	);
-
-
-	/*!
 	 *  \brief rounds a force value to the nearest integer. Rounding is based on probability. For example the number 2.85 has an 85% chance of rounding to 3 and a 15% chance of rounding to 2
 	 *
 	 *  \param force  The force to round
 	 */	
 	float _RoundForce(float force);   // rounds a force value
+
+
+	/*!
+	 *  \brief restores coord system, draw flags, and transformations
+	 */	
+
+	void _PopContext();
+
+
+	/*!
+	 *  \brief saves coord system, draw flags, and transformations
+	 */	
+
+	void _PushContext();
+	
+	/*!
+	 *  \brief saves temporary textures to disk, in other words, textures which were not
+	 *         loaded to a file. This is used when the GL context is being destroyed,
+	 *         perhaps because we are switching from windowed to fullscreen. So, we need
+	 *         to save all textures to disk so we can reload them later.
+	 */	
+	
+	bool _SaveTempTextures();
 
 
 	/*!
@@ -1595,6 +1703,8 @@ private:
 	 *  \brief function solely for debugging, which displays the currently selected texture sheet. By using DEBUG_NextTexSheet() and DEBUG_PrevTexSheet(), you can change the current texture sheet so the sheet shown by this function cycles through all currently loaded sheets.
 	 */	
 	bool _DEBUG_ShowTexSheet();
+	
+	
 	
 	friend class private_video::FixedTexMemMgr;
 	friend class private_video::VariableTexMemMgr;

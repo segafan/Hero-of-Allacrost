@@ -98,6 +98,8 @@ GameVideo::GameVideo()
 {
 	if (VIDEO_DEBUG) 
 		cout << "VIDEO: GameVideo constructor invoked\n";
+	
+	strcpy(_nextTempFile, "00000000");	
 }
 
 
@@ -114,19 +116,6 @@ bool GameVideo::Initialize()
 	{
 		fprintf(stderr, "Barf! SDL Video Initialization failed!\n");
 		exit(1);
-	}
-
-	if(VIDEO_DEBUG)
-		cout << "VIDEO: setting video mode\n";
-
-	SetResolution(1024, 768);
-	SetFullscreen(false);
-	
-	if(!ApplySettings())
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: ChangeMode() failed in GameVideo::Initialize()!" << endl;
-		return false;
 	}
 
 	if(VIDEO_DEBUG)
@@ -158,6 +147,9 @@ bool GameVideo::Initialize()
 			cerr << "VIDEO ERROR: SERIOUS PROBLEM! ilutRenderer(ILUT_OPENGL) failed in GameVideo::Initialize()!" << endl;
 		// don't return false, since it's possible to play game w/o ilutRenderer
 	}
+	
+	// prevent certain NVidia cards from automatically converting to 16-bit bpp
+	ilutEnable(ILUT_OPENGL_CONV);
 
 	if(VIDEO_DEBUG)
 		cout << "VIDEO: Initializing SDL_ttf\n";
@@ -171,8 +163,20 @@ bool GameVideo::Initialize()
 	}
 
 	if(VIDEO_DEBUG)
-		cout << "VIDEO: Loading default font\n";
+		cout << "VIDEO: setting video mode\n";
+
+	SetResolution(1024, 768);
+	SetFullscreen(false);
 	
+	if(!ApplySettings())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: ChangeMode() failed in GameVideo::Initialize()!" << endl;
+		return false;
+	}
+
+	if(VIDEO_DEBUG)
+		cout << "VIDEO: Loading default font\n";
 
 	if(!LoadFont("img/fonts/cour.ttf", "default", 18))
 	{
@@ -225,8 +229,16 @@ bool GameVideo::Initialize()
 	if(VIDEO_DEBUG)
 		cout << "VIDEO: Erasing the screen\n";
 
+	// create the GUI
 	_gui = new GUI;
 
+	// make a temp directory and make sure it doesn't contain any files
+	// (in case the game crashed during a previous run, leaving stuff behind)
+	MakeDirectory("temp");		
+	CleanDirectory("temp");
+
+
+	// set up the screen for rendering
 	if(!Clear())
 	{
 		if(VIDEO_DEBUG)
@@ -376,7 +388,7 @@ GameVideo::~GameVideo()
 		++iImage;
 	}
 	
-	
+	RemoveDirectory("temp");	
 }
 
 
@@ -1061,6 +1073,7 @@ bool GameVideo::ApplyLightingOverlay()
 
 bool GameVideo::CaptureScreen(ImageDescriptor &id)
 {
+
 	if(VIDEO_DEBUG)
 		cout << "VIDEO: Entering CaptureScreen()" << endl;
 
@@ -1106,7 +1119,8 @@ bool GameVideo::CaptureScreen(ImageDescriptor &id)
 	// note the "" for the filename indicates that this is an image which
 	// was not loaded from a file, so do not perform the same kind of
 	// resource management on it
-	Image *newImage = new Image("", w, h);
+	Image *newImage = new Image(_CreateTempFilename(".png"), w, h);
+	id._filename = newImage->filename;
 
 	// try to insert the image in a texture sheet
 	int32 x, y;
@@ -1152,6 +1166,7 @@ bool GameVideo::CaptureScreen(ImageDescriptor &id)
 
 	if(VIDEO_DEBUG)
 		cout << "VIDEO: Exited CaptureScreen() successfully!" << endl;
+
 	return true;
 }
 
@@ -1163,6 +1178,91 @@ bool GameVideo::CaptureScreen(ImageDescriptor &id)
 void GameVideo::ToggleFPS()
 {
 	_fpsDisplay = !_fpsDisplay;
+}
+
+
+//-----------------------------------------------------------------------------
+// _CreateTempFilename
+//-----------------------------------------------------------------------------
+
+string GameVideo::_CreateTempFilename(const string &extension)
+{
+	// figure out the temp filename to return
+	string filename = "temp/TEMP_";
+	filename += _nextTempFile;
+	filename += extension;
+	
+	// increment the 8-character temp name
+	// Note: assume that the temp name is currently set to
+	//       a valid name
+	
+	
+	for(int digit = 7; digit >= 0; --digit)
+	{
+		++_nextTempFile[digit];		
+		
+		if(_nextTempFile[digit] > 'z')
+		{
+			if(digit==0)
+			{
+				if(VIDEO_DEBUG)
+					cerr << "VIDEO ERROR: _nextTempFile went past 'zzzzzzzz'" << endl;
+				return filename;
+			}
+			
+			_nextTempFile[digit] = '0';
+		}
+		else
+		{
+			if(_nextTempFile[digit] > '9' && _nextTempFile[digit] < 'a')
+				_nextTempFile[digit] = 'a';
+		
+			// if the digit did not overflow, then we don't need to carry over
+			break;
+		}		
+	}	
+	
+	return filename;
+}
+
+
+//-----------------------------------------------------------------------------
+// _PushContext: pushes transformation, coordsys, and draw flags so that
+//               GameVideo doesn't trample on client's settings
+//-----------------------------------------------------------------------------
+
+void GameVideo::_PushContext()
+{
+	PushState();
+	Context c;
+	c.coordSys = _coordSys;
+	c.blend    = _blend;
+	c.xalign   = _xalign;
+	c.yalign   = _yalign;
+	c.xflip    = _xflip;
+	c.yflip    = _yflip;
+	
+	_contextStack.push(c);
+}
+
+
+//-----------------------------------------------------------------------------
+// _PopContext: pops transformation, coordsys, and draw flags so that
+//              GameVideo doesn't trample on client's settings
+//-----------------------------------------------------------------------------
+
+void GameVideo::_PopContext()
+{
+	PopState();
+	
+	Context c = _contextStack.top();
+	SetCoordSys(c.coordSys);
+	_blend  = c.blend;
+	_xalign = c.xalign;
+	_yalign = c.yalign;
+	_xflip  = c.xflip;
+	_yflip  = c.yflip;
+	_contextStack.pop();
 }
 
 
