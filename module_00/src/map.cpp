@@ -288,6 +288,7 @@ void MapMode::_CheckInteraction(int32 row, int32 col, uint8 altitude_level) {
 			switch ((_ground_objects[i])->_object_type) {
 				case CHARACTER_SPRITE:
 				case NPC_SPRITE:
+				{
 					MapSprite *tmp_sprite = dynamic_cast<MapSprite *>(_ground_objects[i]);
 					// Save the sprite's current status
 					tmp_sprite->_speech->_saved_status = tmp_sprite->_status;
@@ -311,7 +312,7 @@ void MapMode::_CheckInteraction(int32 row, int32 col, uint8 altitude_level) {
 						}
 					}
 					break;
-
+				}
 				default:
 					break;
 			}
