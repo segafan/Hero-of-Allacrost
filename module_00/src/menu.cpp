@@ -139,9 +139,12 @@ void MenuMode::Draw() {
 	VideoManager->MoveRel(0, 96);
 	VideoManager->DrawImage(_menu_images[5]);
 	
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
+	
 	// Draw 1st character menu text
 	if (!VideoManager->DrawText("Claudius", 32, 768 - 48))
 		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
+		
 	if (!VideoManager->DrawText("Health: 68", 32, 768 - 516))
 		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
 	if (!VideoManager->DrawText("Skill: 23", 32, 768 - 541))
