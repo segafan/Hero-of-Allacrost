@@ -202,15 +202,15 @@ uint32 MapSprite::_FindFrame() {
 					draw_frame = DOWN_LSTEP1;
 			}
 			else if (_step_count < (0.75 * _step_speed)) {
-				if (_status & STEP_SWAP)
+				if (_status & STEP_SWAP) 
 					draw_frame = DOWN_RSTEP2;
-				else
+				else 
 					draw_frame = DOWN_LSTEP2;
 			}
 			else { // (_step_count < _step_speed) == true
-				if (_status & STEP_SWAP)
+				if (_status & STEP_SWAP) 
 					draw_frame = DOWN_RSTEP3;
-				else
+				else 
 					draw_frame = DOWN_LSTEP3;
 			}
 			break;
@@ -233,9 +233,9 @@ uint32 MapSprite::_FindFrame() {
 					draw_frame = UP_LSTEP2;
 			}
 			else { // (_step_count < _step_speed) == true
-				if (_status & STEP_SWAP)
+				if (_status & STEP_SWAP) 
 					draw_frame = UP_RSTEP3;
-				else
+				else 
 					draw_frame = UP_LSTEP3;
 			}
 			break;
@@ -289,7 +289,12 @@ uint32 MapSprite::_FindFrame() {
 					draw_frame = RIGHT_LSTEP3;
 			}
 			break;
+		default:
+			cerr << "MAP: ERROR: Sprite direction was not set in call to MapSprite::_FindFrame()" << endl;
+			draw_frame = 0; // To avoid any seg faults from occuring.
+			break;
 	}
+	
 	return draw_frame;
 }
 
@@ -342,11 +347,9 @@ void MapSprite::Draw(MapFrame& mf) {
 				break;
 		}
 	}
-
-
-	draw_frame = _FindFrame();
+	
 	VideoManager->Move(x_pos, y_pos);
-	VideoManager->DrawImage((*_frames)[draw_frame]);
+	VideoManager->DrawImage((*_frames)[_FindFrame()]);
 }
 
 // ****************************************************************************

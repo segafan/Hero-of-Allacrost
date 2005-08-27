@@ -93,13 +93,11 @@ void MapMode::_TEMP_CreateMap() {
 	_map_tiles.push_back(imd);
 	imd.SetFilename("img/tiles/test_16b.png");
 	_map_tiles.push_back(imd);
-	imd.SetFilename("img/tiles/test_16d.png");
+	imd.SetFilename("img/tiles/test_16c.png");
 	_map_tiles.push_back(imd);
 	imd.SetFilename("img/tiles/test_16d.png");
 	_map_tiles.push_back(imd);
 	imd.SetFilename("img/tiles/test_16e.png");
-	_map_tiles.push_back(imd);
-	imd.SetFilename("img/tiles/blue_40.png");
 	_map_tiles.push_back(imd);
 
 	VideoManager->BeginImageLoadBatch();
@@ -144,12 +142,6 @@ void MapMode::_TEMP_CreateMap() {
 	tmp->frame = 19; // e
 	tmp->next = _tile_frames[15]; // Makes the linked list circular now
 
-	tf = new TileFrame;
-	tf->frame = 20;
-	tf->next = tf;
-	_tile_frames.push_back(tf);
-
-
 	// Setup the image map
 	MapTile tmp_tile;
 	tmp_tile.upper_layer = -1; // No upper layer in this test
@@ -157,7 +149,6 @@ void MapMode::_TEMP_CreateMap() {
 		_map_layers.push_back(vector <MapTile>());
 		for (uint32 c = 0; c < _col_count; c++) {
 			tmp_tile.lower_layer = (RandomNum(0, 16 - 1)); // Build the lower layer from random tiles
-			tmp_tile.upper_layer = 16;
 			if (tmp_tile.lower_layer == 15) { // Set water tile properties
 				tmp_tile.not_walkable = ALTITUDE_1;
 				tmp_tile.properties = CONFIRM_EVENT;
@@ -172,12 +163,14 @@ void MapMode::_TEMP_CreateMap() {
 	}
 	
 	// Load player sprite and rest of map objects
-	MapSprite *player = new MapSprite(CHARACTER_SPRITE, 2, 2, ALTITUDE_1, (VISIBLE | SOUTH));
+	MapSprite *player = new MapSprite(CHARACTER_SPRITE, 2, 2, ALTITUDE_1, (UPDATEABLE | VISIBLE | IN_CONTEXT));
 	player->LoadCharacterInfo(GLOBAL_CLAUDIUS);
+	player->_direction = SOUTH;
 	_ground_objects.push_back(player);
 
-	MapSprite *npc_sprite = new MapSprite(NPC_SPRITE, 4, 6, ALTITUDE_1, (VISIBLE | EAST));
+	MapSprite *npc_sprite = new MapSprite(NPC_SPRITE, 4, 6, ALTITUDE_1, (UPDATEABLE | VISIBLE | IN_CONTEXT));
 	npc_sprite->SetName("Laila");
+	npc_sprite->_direction = EAST;
 	npc_sprite->SetFilename("img/sprites/map/laila");
 	npc_sprite->SetSpeed(VERY_SLOW_SPEED);
 	npc_sprite->SetDelay(LONG_DELAY);
@@ -898,8 +891,9 @@ void MapMode::Draw() {
 	     r < static_cast<uint32>(_map_info.r_start) + _map_info.r_draw; r++) {
 		for (uint32 c = static_cast<uint32>(_map_info.c_start); 
 		     c < static_cast<uint32>(_map_info.c_start) + _map_info.c_draw; c++) {
-			if (_map_layers[r][c].lower_layer >= 0) // Then a lower layer tile exists and we should draw it
+			if (_map_layers[r][c].lower_layer >= 0) { // Then a lower layer tile exists and we should draw it
 				VideoManager->DrawImage(_map_tiles[_tile_frames[_map_layers[r][c].lower_layer]->frame]);
+			}
 			VideoManager->MoveRel(1.0f, 0.0f);
 		}
 		VideoManager->MoveRel(-static_cast<float>(_map_info.c_draw), -1.0f);
@@ -917,7 +911,7 @@ void MapMode::Draw() {
 	VideoManager->Move(_map_info.c_pos, _map_info.r_pos);
 	for (uint32 r = _map_info.r_start; r < _map_info.r_start + _map_info.r_draw; r++) {
 		for (uint32 c = _map_info.c_start; c < _map_info.c_start + _map_info.c_draw; c++) {
-			if (_map_layers[r][c].upper_layer >= 0) // Then an upper layer tile exists and we should draw it
+			if (_map_layers[r][c].upper_layer >= 0) // Then an upper layer tile exists and we should draw it;
 				VideoManager->DrawImage(_map_tiles[_tile_frames[_map_layers[r][c].upper_layer]->frame]);
 			VideoManager->MoveRel(1.0f, 0.0f);
 		}
@@ -926,12 +920,8 @@ void MapMode::Draw() {
 
 	// ************** (4) Draw the Dialoge menu and text *************
 	if (_map_state.back() == DIALOGUE) {
-// 		cout << "DIALOGUE DRAW!" << endl;
-		
 // 		cout << _dialogue_text << endl;
 		VideoManager->DrawText(_dialogue_text, (-SCREEN_COLS/2.0f) + 64, (-SCREEN_ROWS/2.0f) + 64);
-		//(-SCREEN_COLS/2.0f) + 32, (SCREEN_ROWS/2.0f) - 32); 
-// 		cout << "DIALOGUE DRAW DONE!" << endl;
 	}
 	
 	return;

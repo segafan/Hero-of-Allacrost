@@ -123,34 +123,34 @@ const uint16 IN_CONTEXT  = 0x0010;
 //! \name Sprite Animation Vector Access Constants
 //@{
 //! \brief These constants are used for indexing a standard sprite animation frame vector.
-const int32 DOWN_STANDING  = 0;
-const int32 DOWN_LSTEP1    = 1;
-const int32 DOWN_LSTEP2    = 2;
-const int32 DOWN_LSTEP3    = 1;
-const int32 DOWN_RSTEP1    = 3;
-const int32 DOWN_RSTEP2    = 4;
-const int32 DOWN_RSTEP3    = 3;
-const int32 UP_STANDING    = 5;
-const int32 UP_LSTEP1      = 6;
-const int32 UP_LSTEP2      = 7;
-const int32 UP_LSTEP3      = 6;
-const int32 UP_RSTEP1      = 8;
-const int32 UP_RSTEP2      = 9;
-const int32 UP_RSTEP3      = 8;
-const int32 LEFT_STANDING  = 10;
-const int32 LEFT_LSTEP1    = 11;
-const int32 LEFT_LSTEP2    = 12;
-const int32 LEFT_LSTEP3    = 13;
-const int32 LEFT_RSTEP1    = 14;
-const int32 LEFT_RSTEP2    = 15;
-const int32 LEFT_RSTEP3    = 16;
-const int32 RIGHT_STANDING = 17;
-const int32 RIGHT_LSTEP1   = 18;
-const int32 RIGHT_LSTEP2   = 19;
-const int32 RIGHT_LSTEP3   = 20;
-const int32 RIGHT_RSTEP1   = 21;
-const int32 RIGHT_RSTEP2   = 22;
-const int32 RIGHT_RSTEP3   = 23;
+const uint32 DOWN_STANDING  = 0;
+const uint32 DOWN_LSTEP1    = 1;
+const uint32 DOWN_LSTEP2    = 2;
+const uint32 DOWN_LSTEP3    = 1;
+const uint32 DOWN_RSTEP1    = 3;
+const uint32 DOWN_RSTEP2    = 4;
+const uint32 DOWN_RSTEP3    = 3;
+const uint32 UP_STANDING    = 5;
+const uint32 UP_LSTEP1      = 6;
+const uint32 UP_LSTEP2      = 7;
+const uint32 UP_LSTEP3      = 6;
+const uint32 UP_RSTEP1      = 8;
+const uint32 UP_RSTEP2      = 9;
+const uint32 UP_RSTEP3      = 8;
+const uint32 LEFT_STANDING  = 10;
+const uint32 LEFT_LSTEP1    = 11;
+const uint32 LEFT_LSTEP2    = 12;
+const uint32 LEFT_LSTEP3    = 13;
+const uint32 LEFT_RSTEP1    = 14;
+const uint32 LEFT_RSTEP2    = 15;
+const uint32 LEFT_RSTEP3    = 16;
+const uint32 RIGHT_STANDING = 17;
+const uint32 RIGHT_LSTEP1   = 18;
+const uint32 RIGHT_LSTEP2   = 19;
+const uint32 RIGHT_LSTEP3   = 20;
+const uint32 RIGHT_RSTEP1   = 21;
+const uint32 RIGHT_RSTEP2   = 22;
+const uint32 RIGHT_RSTEP3   = 23;
 //@}
 
 } // namespace private_map
