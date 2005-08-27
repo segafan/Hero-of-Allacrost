@@ -151,7 +151,7 @@ private:
 	 *
 	 *  \param skin    The skin you want to check
 	 */	
-	bool CheckSkinConsistency(const MenuSkin &skin);
+	bool _CheckSkinConsistency(const MenuSkin &skin);
 };
 
 } // namespace private_video
