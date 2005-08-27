@@ -45,19 +45,25 @@ bool GameVideo::DrawImage(const ImageDescriptor &id, const Color &color)
 		// include screen shaking effects
 		MoveRel(_shakeX * (_coordSys._right - _coordSys._left) / 1024.0f, 
 		        _shakeY * (_coordSys._top   - _coordSys._bottom) / 768.0f);  
+
+		float modulation = _fader.GetFadeModulation();
+		Color fadeColor(modulation, modulation, modulation, 1.0f);
 		
-		if(!_DrawElement(
+		if(!_DrawElement
+		(
 			id._elements[iElement].image, 
 			id._elements[iElement].width, 
 			id._elements[iElement].height,
-			id._elements[iElement].color[0] * color,
-			id._elements[iElement].color[1] * color,
-			id._elements[iElement].color[2] * color,
-			id._elements[iElement].color[3] * color
+			id._elements[iElement].color[0] * color * fadeColor,
+			id._elements[iElement].color[1] * color * fadeColor,
+			id._elements[iElement].color[2] * color * fadeColor,
+			id._elements[iElement].color[3] * color * fadeColor
 		))
 		{
 			if(VIDEO_DEBUG)
 				cerr << "VIDEO ERROR: _DrawElement() failed in DrawImage()!" << endl;
+			
+			_PopContext();
 			return false;
 		}
 		glPopMatrix();
@@ -76,10 +82,10 @@ bool GameVideo::_DrawElement
 	const Image *const img, 
 	float w, 
 	float h, 
-	Color c_TL,
-	Color c_TR,
-	Color c_BL,
-	Color c_BR
+	const Color &c_TL,
+	const Color &c_TR,
+	const Color &c_BL,
+	const Color &c_BR
 )
 {
 	// if all of the vertex colors have zero alpha, don't draw!
@@ -88,16 +94,7 @@ bool GameVideo::_DrawElement
 		// do nothing, alpha is 0
 		return true;
 	}
-	
-	float modulation = _fader.GetFadeModulation();
-	
-	Color fadeColor(modulation, modulation, modulation, 1.0f);
-	
-	c_TL *= fadeColor;
-	c_TR *= fadeColor;
-	c_BL *= fadeColor;
-	c_BR *= fadeColor;
-	
+		
 	float s0,s1,t0,t1;
 	float xoff,yoff;
 	float xlo,xhi,ylo,yhi;
@@ -166,7 +163,7 @@ bool GameVideo::_DrawElement
 		_BindTexture(img->texSheet->texID);
 	}	
 	
-	if (_blend || c_TL[3] < 1.0f)// || c_TR[3] < 1.0f || c_BL[3] < 1.0f || c_BR[3] < 1.0f) 
+	if (_blend || c_TL[3] < 1.0f || c_TR[3] < 1.0f || c_BL[3] < 1.0f || c_BR[3] < 1.0f) 
 	{
 		glEnable(GL_BLEND);
 		if (_blend == 1)
@@ -241,12 +238,14 @@ bool GameVideo::DrawHalo
 	const Color &color
 )
 {
+	_PushContext();
 	Move(x, y);
 
 	int32 oldBlendMode = _blend;
 	_blend = VIDEO_BLEND_ADD;
 	DrawImage(id, color);
-	_blend = oldBlendMode;
+	_blend = oldBlendMode;	
+	_PopContext();
 	
 	return true;
 }
@@ -284,7 +283,11 @@ bool GameVideo::DrawLight
 
 bool GameVideo::DrawFPS(int32 frameTime)
 {
-	return _gui->DrawFPS(frameTime);
+	_PushContext();
+	bool success = _gui->DrawFPS(frameTime);
+	_PopContext();
+	
+	return success;
 }
 
 
