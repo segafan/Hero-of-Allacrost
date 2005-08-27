@@ -57,6 +57,8 @@ GUI::~GUI()
 
 bool GUI::DrawFPS(int32 frameTime)
 {
+	_videoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_X_NOFLIP, VIDEO_Y_NOFLIP, VIDEO_BLEND, 0);
+	
 	// calculate the FPS for current frame	
 	int32 fps = 1000;		
 	if(frameTime)   
@@ -117,15 +119,18 @@ bool GUI::DrawFPS(int32 frameTime)
 
 	int32 avgFPS = _totalFPS / VIDEO_FPS_SAMPLES;
 
-	// display to screen	
+	// display to screen	 
 	char fpsText[16];
 	sprintf(fpsText, "fps: %d", avgFPS);
 	
+	string oldFont = _videoManager->GetFont();
 	if( !_videoManager->SetFont("default"))
 		return false;
-		
+	
 	if( !_videoManager->DrawText(fpsText, 930.0f, 720.0f))
 		return false;
+		
+	_videoManager->SetFont(oldFont);
 		
 	return true;
 }
@@ -198,7 +203,7 @@ bool GUI::SetMenuSkin
 	}
 	_videoManager->EndImageLoadBatch();
 	
-	if(!CheckSkinConsistency(_currentSkin))
+	if(!_CheckSkinConsistency(_currentSkin))
 	{
 		return false;			
 	}
@@ -208,13 +213,13 @@ bool GUI::SetMenuSkin
 
 
 //-----------------------------------------------------------------------------
-// CheckSkinConsistency: runs some simple checks on a skin to make sure its
-//                       images are properly sized. If it finds any errors
-//                       it'll return false and output an error message
+// _CheckSkinConsistency: runs some simple checks on a skin to make sure its
+//                        images are properly sized. If it finds any errors
+//                        it'll return false and output an error message
 //-----------------------------------------------------------------------------
 
 
-bool GUI::CheckSkinConsistency(const MenuSkin &s)
+bool GUI::_CheckSkinConsistency(const MenuSkin &s)
 {
 	float leftBorderSize   = _currentSkin.skin[1][0].GetWidth();
 	float rightBorderSize  = _currentSkin.skin[1][2].GetWidth();
@@ -304,7 +309,7 @@ bool GUI::CheckSkinConsistency(const MenuSkin &s)
 //
 // NOTE: this function assumes that the skin images actually WOULD fit together
 //       if you put them next to each other. This should be an OK assumption
-//       since we call CheckSkinConsistency() when we set a new skin
+//       since we call _CheckSkinConsistency() when we set a new skin
 //-----------------------------------------------------------------------------
 
 bool GUI::CreateMenu(hoa_video::ImageDescriptor &id, float width, float height)
