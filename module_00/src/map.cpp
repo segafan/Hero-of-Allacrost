@@ -246,6 +246,8 @@ MapMode::~MapMode() {
 
 // Resets appropriate class members.
 void MapMode::Reset() {
+	_dialogue_text = "";
+	
 	// Set video engine properties
 	VideoManager->SetCoordSys(-SCREEN_COLS/2.0f, SCREEN_COLS/2.0f, -SCREEN_ROWS/2.0f, SCREEN_ROWS/2.0f);
 	if(!VideoManager->SetFont("default")) 
@@ -284,7 +286,7 @@ void MapMode::_CheckInteraction(int32 row, int32 col, uint8 altitude_level) {
 	// Check if an object occupies the tile
 	if (_map_layers[row][col].occupied && altitude_level) {
 		// Look up the object that occupies this tile at this altitude
-		
+		cout << "OCCUPIED TILE" << endl;
 		// ****** TEMPORARY PROOF OF CONCEPT CODE ********
 		// On the next update, we want to go to the dialogue state
 		_map_state.push_back(DIALOGUE);
@@ -296,22 +298,23 @@ void MapMode::_CheckInteraction(int32 row, int32 col, uint8 altitude_level) {
 					MapSprite *tmp_sprite = dynamic_cast<MapSprite *>(_ground_objects[i]);
 					// Save the sprite's current status
 					tmp_sprite->_speech->_saved_status = tmp_sprite->_status;
+					tmp_sprite->_speech->_saved_direction = tmp_sprite->_direction;
 					// Turn off its update function so it doesn't move around while the dialogue is occuring
 					tmp_sprite->_status &= (~IN_MOTION | ~UPDATEABLE);
 					
 					// We need to get the sprite on the recieving end of the player to face the player's sprite
 					if (_ground_objects[i] != _focused_object) {
-						if (_focused_object->_status & (NORTH | NORTH_NW | NORTH_NE)) {
-							tmp_sprite->_status = (tmp_sprite->_status & ~FACE_MASK) | SOUTH;
+						if (_focused_object->_direction & (NORTH | NORTH_NW | NORTH_NE)) {
+							tmp_sprite->_direction = SOUTH;
 						}
-						else if (_focused_object->_status & (SOUTH | SOUTH_SW | SOUTH_SE)) {
-							tmp_sprite->_status = (tmp_sprite->_status & ~FACE_MASK) | NORTH;
+						else if (_focused_object->_direction & (SOUTH | SOUTH_SW | SOUTH_SE)) {
+							tmp_sprite->_direction = NORTH;
 						}
-						else if (_focused_object->_status & (EAST | EAST_NE | EAST_SE)) {
-							tmp_sprite->_status = (tmp_sprite->_status & ~FACE_MASK) | WEST;
+						else if (_focused_object->_direction & (EAST | EAST_NE | EAST_SE)) {
+							tmp_sprite->_direction = WEST;
 						}
-						else { // (_focused_object->_status & (WEST | WEST_NW | WEST_SW))
-							tmp_sprite->_status = (tmp_sprite->_status & ~FACE_MASK) | EAST;
+						else { // (_focused_object->_direction & (WEST | WEST_NW | WEST_SW))
+							tmp_sprite->_direction = EAST;
 						}
 					}
 					break;
@@ -339,70 +342,82 @@ void MapMode::_GroundSpriteMove(uint32 direction, MapSprite *sprite) {
 	// Set the sprite's facing direction and tile coordinates it wishes to move to
 	switch (direction) {
 		case MOVE_NORTH:
-			sprite->_status = (sprite->_status & ~FACE_MASK) | NORTH;
+			sprite->_direction = NORTH;
 			r_check = sprite->_row_pos - 1;
 			c_check = sprite->_col_pos;
 			break;
 		case MOVE_SOUTH:
-			sprite->_status = (sprite->_status & ~FACE_MASK) | SOUTH;
+			sprite->_direction = SOUTH;
 			r_check = sprite->_row_pos + 1;
 			c_check = sprite->_col_pos;
 			break;
 		case MOVE_WEST:
-			sprite->_status = (sprite->_status & ~FACE_MASK) | WEST;
+			sprite->_direction = WEST;
 			r_check = sprite->_row_pos;
 			c_check = sprite->_col_pos - 1;
 			break;
 		case MOVE_EAST:
-			sprite->_status = (sprite->_status & ~FACE_MASK) | EAST;
+			sprite->_direction = EAST;
 			r_check = sprite->_row_pos;
 			c_check = sprite->_col_pos + 1;
 			break;
 		case MOVE_NW:
-			if (sprite->_status & (NORTH_NW | NORTH | NORTH_NE | EAST_NE | EAST | EAST_SE))
-				sprite->_status = (sprite->_status & ~FACE_MASK) | NORTH_NW;
+			if (sprite->_direction & (NORTH_NW | NORTH | NORTH_NE | EAST_NE | EAST | EAST_SE))
+				sprite->_direction = NORTH_NW;
 			else
-				sprite->_status = (sprite->_status & ~FACE_MASK) | WEST_NW;
+				sprite->_direction = WEST_NW;
 			r_check = sprite->_row_pos - 1;
 			c_check = sprite->_col_pos - 1;
 			break;
 		case MOVE_SW:
-			if (sprite->_status & (SOUTH_SW | SOUTH | SOUTH_SE | EAST_SE | EAST | EAST_NE))
-				sprite->_status = (sprite->_status & ~FACE_MASK) | SOUTH_SW;
+			if (sprite->_direction & (SOUTH_SW | SOUTH | SOUTH_SE | EAST_SE | EAST | EAST_NE))
+				sprite->_direction = SOUTH_SW;
 			else
-				sprite->_status = (sprite->_status & ~FACE_MASK) | WEST_SW;
+				sprite->_direction = WEST_SW;
 			r_check = sprite->_row_pos + 1;
 			c_check = sprite->_col_pos - 1;
 			break;
 		case MOVE_NE:
-			if (sprite->_status & (NORTH_NE | NORTH | NORTH_NW | WEST_NW | WEST | WEST_SW))
-				sprite->_status = (sprite->_status & ~FACE_MASK) | NORTH_NE;
+			if (sprite->_direction & (NORTH_NE | NORTH | NORTH_NW | WEST_NW | WEST | WEST_SW))
+				sprite->_direction = NORTH_NE;
 			else
-				sprite->_status = (sprite->_status & ~FACE_MASK) | EAST_NE;
+				sprite->_direction = EAST_NE;
 			r_check = sprite->_row_pos - 1;
 			c_check = sprite->_col_pos + 1;
 			break;
 		case MOVE_SE:
-			if (sprite->_status & (SOUTH_SE | SOUTH | SOUTH_SW | WEST_SW | WEST | WEST_NW))
-				sprite->_status = (sprite->_status & ~FACE_MASK) | SOUTH_SE;
+			if (sprite->_direction & (SOUTH_SE | SOUTH | SOUTH_SW | WEST_SW | WEST | WEST_NW))
+				sprite->_direction = SOUTH_SE;
 			else
-				sprite->_status = (sprite->_status & ~FACE_MASK) | EAST_SE;
+				sprite->_direction = EAST_SE;
 			r_check = sprite->_row_pos + 1;
 			c_check = sprite->_col_pos + 1;
 			break;
 	}
 
-	// If the tile is moveable, update the sprite and tiles that are effected appropriatel.
+	// Check if the sprite can move to the new tile and change the game state accordingly
 	if (_TileMoveable(r_check, c_check, sprite->_altitude)) {
 		// First set the sprite's motion flag
 		sprite->_status |= IN_MOTION;
 		// For the tile the sprite is moving off of, negate the occupied bit.
 		_map_layers[sprite->_row_pos][sprite->_col_pos].occupied &= ~sprite->_altitude;
+		
+		// ************************ Check For Tile Departure Event ***********************
+		if (_map_layers[r_check][c_check].properties & DEPART_EVENT) {
+			// Look-up and process the event associated with the tile.
+			cout << "Tile had a departure event." << endl;
+		}
+		
 		sprite->_row_pos = r_check;
 		sprite->_col_pos = c_check;
 		// Set the occuped bit for the tile the sprite is moving on to.
 		_map_layers[sprite->_row_pos][sprite->_col_pos].occupied |= sprite->_altitude;
-		// TODO: Check for tile event here.
+		
+		// ************************ Check For Tile Departure Event ***********************
+		if (_map_layers[r_check][c_check].properties & ARRIVE_EVENT) {
+			// Look-up and process the event associated with the tile.
+			cout << "Tile has an arrival event." << endl;
+		}
 	}
 	else {
 		sprite->_status &= ~IN_MOTION;
@@ -575,7 +590,7 @@ void MapMode::_UpdatePlayer(MapSprite *player_sprite) {
 
 			if (_random_encounters) {
 				_steps_till_encounter--;
-				if (player_sprite->_status & !(WEST | EAST | SOUTH | NORTH))
+				if (player_sprite->_direction & !(WEST | EAST | SOUTH | NORTH))
 					_steps_till_encounter--; // Decrease count again if player moved diagonally
 
 				if (_random_encounters && (_steps_till_encounter <= 0)) { // then a random encounter has occured
@@ -658,19 +673,19 @@ void MapMode::_UpdatePlayer(MapSprite *player_sprite) {
 	// Handle confirm command.
 	else if (InputManager->ConfirmPress()) {
 
-		if (player_sprite->_status & (WEST | WEST_NW | WEST_SW)) {
+		if (player_sprite->_direction & (WEST | WEST_NW | WEST_SW)) {
 			r_check = player_sprite->_row_pos;
 			c_check = player_sprite->_col_pos - 1;
 		}
-		else if (player_sprite->_status & (EAST | EAST_NE | EAST_SE)) {
+		else if (player_sprite->_direction & (EAST | EAST_NE | EAST_SE)) {
 			r_check = player_sprite->_row_pos;
 			c_check = player_sprite->_col_pos + 1;
 		}
-		else if (player_sprite->_status & (NORTH | NORTH_NW | NORTH_NE)) {
+		else if (player_sprite->_direction & (NORTH | NORTH_NW | NORTH_NE)) {
 			r_check = player_sprite->_row_pos - 1;
 			c_check = player_sprite->_col_pos;
 		}
-		else { // then => (player_sprite->_status & (SOUTH | SOUTH_SW | SOUTH_SE)) == true
+		else { // then => (player_sprite->_direction & (SOUTH | SOUTH_SW | SOUTH_SE)) == true
 			r_check = player_sprite->_row_pos + 1;
 			c_check = player_sprite->_col_pos;
 		}
@@ -722,7 +737,7 @@ void MapMode::_UpdateNPC(MapSprite *npc) {
 
 // Updates the game status when MapMode is in the 'dialogue' state
 void MapMode::_UpdateDialogueState() {
-	cout << "UpdateDialogueState: setting text" << endl;
+// 	cout << "UpdateDialogueState: setting text" << endl;
 	for (uint32 i = 0; i < _ground_objects.size(); i++) {
 		if (_ground_objects[i] != _focused_object) {
 			MapSprite *tmp_sprite = dynamic_cast<MapSprite*>(_ground_objects[i]);
@@ -741,6 +756,10 @@ void MapMode::_UpdateDialogueState() {
 			if (_ground_objects[i] != _focused_object) {
 				MapSprite *tmp_sprite = dynamic_cast<MapSprite*>(_ground_objects[i]);
 				tmp_sprite->_status = tmp_sprite->_speech->_saved_status;
+				tmp_sprite->_direction = tmp_sprite->_speech->_saved_direction;
+				if (_ground_objects[i] != _focused_object) {
+					tmp_sprite->_speech->FinishedConversation();
+				}
 			}
 		}
 	}
@@ -780,23 +799,23 @@ void MapMode::_GetDrawInfo() {
 	if (_focused_object->_status & IN_MOTION) {
 		if (_focused_object->_step_count <= (_focused_object->_step_speed / 2.0f)) {
 			// We are not more than half-way moving west, so make adjustments
-			if (_focused_object->_status & (WEST | NORTH_NW | WEST_NW | SOUTH_SW | WEST_SW)) {
+			if (_focused_object->_direction & (WEST | NORTH_NW | WEST_NW | SOUTH_SW | WEST_SW)) {
 				_map_info.c_pos += _focused_object->_step_count / _focused_object->_step_speed;
 				_map_info.c_start++;
 			}
 			// We are not more than half-way moving east, so make adjustments
-			else if (_focused_object->_status & (EAST | NORTH_NE | EAST_NE | SOUTH_SE | EAST_SE)) {
+			else if (_focused_object->_direction & (EAST | NORTH_NE | EAST_NE | SOUTH_SE | EAST_SE)) {
 				_map_info.c_pos -= _focused_object->_step_count / _focused_object->_step_speed;
 				_map_info.c_start--;
 			}
 
 			// We are not more than half-way moving north, so make adjustments
-			if (_focused_object->_status & (NORTH | WEST_NW | NORTH_NW | EAST_NE | NORTH_NE)) {
+			if (_focused_object->_direction & (NORTH | WEST_NW | NORTH_NW | EAST_NE | NORTH_NE)) {
 				_map_info.r_pos -= _focused_object->_step_count / _focused_object->_step_speed;
 				_map_info.r_start++;
 			}
 			// We are not more than half-way moving south, so make adjustments
-			else if (_focused_object->_status & (SOUTH | WEST_SW | SOUTH_SW | EAST_SE | SOUTH_SE)) {
+			else if (_focused_object->_direction & (SOUTH | WEST_SW | SOUTH_SW | EAST_SE | SOUTH_SE)) {
 				_map_info.r_pos += _focused_object->_step_count / _focused_object->_step_speed;
 				_map_info.r_start--;
 			}
@@ -805,21 +824,25 @@ void MapMode::_GetDrawInfo() {
 		// NOTE: Draw code should never see a step_count >= 32. Update() takes care of that
 		else { // (_focused_object->_step_count > (TILE_STEPS / 2))
 			// We are at least half-way moving west, so make adjustments
-			if (_focused_object->_status & (WEST | NORTH_NW | WEST_NW | SOUTH_SW | WEST_SW)) {
-				_map_info.c_pos -= (_focused_object->_step_speed - _focused_object->_step_count) / _focused_object->_step_speed;
+			if (_focused_object->_direction & (WEST | NORTH_NW | WEST_NW | SOUTH_SW | WEST_SW)) {
+				_map_info.c_pos -= (_focused_object->_step_speed - _focused_object->_step_count) / 
+				                    _focused_object->_step_speed;
 			}
 			// We are at least half-way moving east, so make adjustments
-			else if (_focused_object->_status & (EAST | NORTH_NE | EAST_NE | SOUTH_SE | EAST_SE)) {
-				_map_info.c_pos += (_focused_object->_step_speed - _focused_object->_step_count) / _focused_object->_step_speed;
+			else if (_focused_object->_direction & (EAST | NORTH_NE | EAST_NE | SOUTH_SE | EAST_SE)) {
+				_map_info.c_pos += (_focused_object->_step_speed - _focused_object->_step_count) / 
+				                    _focused_object->_step_speed;
 			}
 
 			// We are at least half-way moving north, so make adjustments
-			if (_focused_object->_status & (NORTH | WEST_NW | NORTH_NW | EAST_NE | NORTH_NE)) {
-				_map_info.r_pos += (_focused_object->_step_speed - _focused_object->_step_count) / _focused_object->_step_speed;
+			if (_focused_object->_direction & (NORTH | WEST_NW | NORTH_NW | EAST_NE | NORTH_NE)) {
+				_map_info.r_pos += (_focused_object->_step_speed - _focused_object->_step_count) / 
+				                    _focused_object->_step_speed;
 			}
 			// We are at least half-way moving south, so make adjustments
-			else if (_focused_object->_status & (SOUTH | WEST_SW | SOUTH_SW | EAST_SE | SOUTH_SE)) {
-				_map_info.r_pos -= (_focused_object->_step_speed - _focused_object->_step_count) / _focused_object->_step_speed;
+			else if (_focused_object->_direction & (SOUTH | WEST_SW | SOUTH_SW | EAST_SE | SOUTH_SE)) {
+				_map_info.r_pos -= (_focused_object->_step_speed - _focused_object->_step_count) / 
+				                    _focused_object->_step_speed;
 			}
 		}
 	}
@@ -902,13 +925,15 @@ void MapMode::Draw() {
 	}
 
 	// ************** (4) Draw the Dialoge menu and text *************
-// 	if (_map_state.back() == DIALOGUE) {
+	if (_map_state.back() == DIALOGUE) {
 // 		cout << "DIALOGUE DRAW!" << endl;
-// 		
+		
 // 		cout << _dialogue_text << endl;
-// 		//VideoManager->DrawText(const_cast<char*>(_dialogue_text.c_str()), (-SCREEN_COLS/2.0f) + 32, (SCREEN_ROWS/2.0f) - 32); 
+		VideoManager->DrawText(_dialogue_text, (-SCREEN_COLS/2.0f) + 64, (-SCREEN_ROWS/2.0f) + 64);
+		//(-SCREEN_COLS/2.0f) + 32, (SCREEN_ROWS/2.0f) - 32); 
 // 		cout << "DIALOGUE DRAW DONE!" << endl;
-// 	}
+	}
+	
 	return;
 } // MapMode::_Draw()
 

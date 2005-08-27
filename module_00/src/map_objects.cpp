@@ -43,7 +43,7 @@ namespace hoa_map {
 // ****************************************************************************
 
 // Initialize the members and setup the pointer to the GameVideo class
-ObjectLayer::ObjectLayer(uint8 type, uint32 row, uint32 col, uint8 alt, uint32 stat) {
+ObjectLayer::ObjectLayer(uint8 type, uint32 row, uint32 col, uint8 alt, uint16 stat) {
 	_object_type = type;
 	_row_pos = row;
 	_col_pos = col;
@@ -61,7 +61,7 @@ ObjectLayer::~ObjectLayer() {}
 // ****************************************************************************
 
 // Constructor for critical class members. Other members are initialized via support functions
-MapSprite::MapSprite(uint8 type, uint32 row, uint32 col, uint8 alt, uint32 stat)
+MapSprite::MapSprite(uint8 type, uint32 row, uint32 col, uint8 alt, uint16 stat)
                      : ObjectLayer(type, row, col, alt, stat) {
 	if (MAP_DEBUG) cout << "MAP: MapSprite constructor invoked" << endl;
 	_step_speed = NORMAL_SPEED;
@@ -188,7 +188,7 @@ uint32 MapSprite::_FindFrame() {
 	uint32 draw_frame; // The frame index that we should draw
 
 	// Depending on the direction the sprite is facing and the step_count, select the correct frame to draw
-	switch (_status & FACE_MASK) {
+	switch (_direction) {
 		case SOUTH:
 		case SOUTH_SW:
 		case SOUTH_SE:
@@ -290,7 +290,6 @@ uint32 MapSprite::_FindFrame() {
 			}
 			break;
 	}
-
 	return draw_frame;
 }
 
@@ -306,9 +305,9 @@ void MapSprite::Draw(MapFrame& mf) {
 	x_pos = mf.c_pos + (static_cast<float>(_col_pos) - static_cast<float>(mf.c_start));
 	y_pos = mf.r_pos + (static_cast<float>(mf.r_start) - static_cast<float>(_row_pos));
 
-	// When we are in motion, we have to off-set the step positions
+	// When the sprite is in motion, we have to off-set the step positions
 	if (_status & IN_MOTION) {
-		switch (_status & FACE_MASK) {
+		switch (_direction) {
 			case EAST:
 				x_pos -= (_step_speed - _step_count) / _step_speed;
 				break;
@@ -356,6 +355,7 @@ void MapSprite::Draw(MapFrame& mf) {
 
 SpriteDialogue::SpriteDialogue() {
 	if (MAP_DEBUG) cout << "MAP: SpriteDialogue constructor invoked" << endl;
+	_next_read = 0;
 // 	_seen_all = true;
 }
 
@@ -372,7 +372,7 @@ void SpriteDialogue::LoadDialogue(vector<vector<string> > txt) {
 // 		_seen.push_back(false);
 // 	}
 // 	_seen_all = false;
-	_next_read = 0;
+	
 }
 
 // Add a new line of dialogue
