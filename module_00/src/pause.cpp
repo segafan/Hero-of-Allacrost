@@ -57,6 +57,7 @@ PauseMode::PauseMode() {
 		if (PAUSE_DEBUG) cerr << "PAUSE: ERROR: Couldn't save the screen!" << endl;
 	}
 	VideoManager->SetCoordSys(0, 1024, 0, 768);
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 	VideoManager->Move(0,0);
 }
 
@@ -101,8 +102,12 @@ void PauseMode::Update(uint32 time_elapsed) { }
 void PauseMode::Draw() {
 
 	// Draw the background image
-	VideoManager->DrawImage(_saved_screen);
+	Color grayed(0.35f, 0.35f, 0.35f, 1.0f);
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, 0);
+	VideoManager->DrawImage(_saved_screen, grayed);
+	
 	// Render the "Paused" text to appear on the center of the screen
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, 0);
 	VideoManager->DrawText("Paused", 512, 384);
 }
 
