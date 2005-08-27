@@ -721,8 +721,7 @@ void BootMode::_UpdateJoystickOptions() {
 void BootMode::Draw() {
 	// Draw the backdrop image
 
-	//VideoManager->Move(0, 0);
-	//VideoManager->Move(-1024/2, 0);
+	VideoManager->Move(0, 0);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_NO_BLEND, 0);
 	VideoManager->DrawImage(_boot_images[0]);
 
