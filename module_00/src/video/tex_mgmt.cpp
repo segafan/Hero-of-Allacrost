@@ -569,7 +569,7 @@ TexSheet *GameVideo::_CreateTexSheet
 	
 	// now that we have our texture loaded, simply create a new TexSheet	
 	
-	TexSheet *sheet = new TexSheet(width, height, texID, type, isStatic);
+ 	TexSheet *sheet = new TexSheet(width, height, texID, type, isStatic);
 	_texSheets.push_back(sheet);
 	
 	return sheet;
@@ -590,13 +590,13 @@ TexSheet::TexSheet(int32 w, int32 h, GLuint texID_, TexSheetType type_, bool isS
 	loaded = true;
 	
 	if(type == VIDEO_TEXSHEET_32x32)
-		_texMemManager = new FixedTexMemMgr(this, 32, 32);
+		texMemManager = new FixedTexMemMgr(this, 32, 32);
 	else if(type == VIDEO_TEXSHEET_32x64)
-		_texMemManager = new FixedTexMemMgr(this, 32, 64);
+		texMemManager = new FixedTexMemMgr(this, 32, 64);
 	else if(type == VIDEO_TEXSHEET_64x64)
-		_texMemManager = new FixedTexMemMgr(this, 64, 64);
+		texMemManager = new FixedTexMemMgr(this, 64, 64);
 	else
-		_texMemManager = new VariableTexMemMgr(this);
+		texMemManager = new VariableTexMemMgr(this);
 }
 
 
@@ -607,7 +607,7 @@ TexSheet::TexSheet(int32 w, int32 h, GLuint texID_, TexSheetType type_, bool isS
 TexSheet::~TexSheet()
 {
 	// delete texture memory manager
-	delete _texMemManager;
+	delete texMemManager;
 	
 	hoa_video::GameVideo *videoManager = hoa_video::GameVideo::_GetReference();
 	
@@ -662,7 +662,6 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 		return false;
 	}
 	
-	
 	int32 numSheets = (int32) _texSheets.size();
 	
 	// we may go out of bounds say, if we were viewing a texture sheet and then it got
@@ -682,11 +681,10 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 	
 	Image img( sheet, string(), 0, 0, w, h, 0.0f, 0.0f, 1.0f, 1.0f );
 
-	int32 blend = _blend;
-	int32 xalign = _xalign;
-	int32 yalign = _yalign;
-	
+
+	_PushContext();	
 	SetDrawFlags(VIDEO_NO_BLEND, VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
+	SetCoordSys(0.0f, 1024.0f, 0.0f, 760.0f);
 	
 	glPushMatrix();
 
@@ -694,29 +692,40 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 	glScalef(0.5f, 0.5f, 0.5f);
 	
 	if(!_DrawElement(&img, (float)w, (float)h, Color::white, Color::white, Color::white, Color::white))
+	{
+		_PopContext();
 		return false;
+	}
 		
 	glPopMatrix();
-	
-	_blend = blend;
-	_xalign = xalign;
-	_yalign = yalign;
 
 	if(!SetFont("default"))
+	{
+		_PopContext();
 		return false;
+	}
 	
 	char buf[200];
 	
 	if(!DrawText("Current Texture sheet:", 20, _coordSys._top - 30))
+	{
+		_PopContext();
 		return false;
+	}
 	
 	sprintf(buf, "  Sheet #: %d", _currentDebugTexSheet);	
 	if(!DrawText(buf, 20, _coordSys._top - 50))
+	{
+		_PopContext();
 		return false;
+	}
 	
 	sprintf(buf, "  Size:    %dx%d", sheet->width, sheet->height);
 	if(!DrawText(buf, 20, _coordSys._top - 70))
+	{
+		_PopContext();
 		return false;
+	}
 	
 	if(sheet->type == VIDEO_TEXSHEET_32x32)
 		sprintf(buf, "  Type:    32x32");
@@ -728,16 +737,26 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 		sprintf(buf, "  Type:    Any size");
 	
 	if(!DrawText(buf, 20, _coordSys._top - 90))
+	{
+		_PopContext();
 		return false;
+	}
 	
 	sprintf(buf, "  Static:  %d", sheet->isStatic);
 	if(!DrawText(buf, 20, _coordSys._top - 110))
+	{
+		_PopContext();
 		return false;
+	}
 
 	sprintf(buf, "  TexID:   %d", sheet->texID);
 	if(!DrawText(buf, 20, _coordSys._top - 130))
+	{
+		_PopContext();
 		return false;
+	}
 	
+	_PopContext();
 	return true;
 }
 
@@ -810,7 +829,7 @@ bool GameVideo::_RemoveSheet(TexSheet *sheet)
 bool TexSheet::AddImage(Image *img, ILuint pixelData)
 {
 	// try inserting into the texture memory manager
-	bool couldInsert = _texMemManager->Insert(img);	
+	bool couldInsert = texMemManager->Insert(img);	
 	if(!couldInsert)
 		return false;
 	
@@ -896,9 +915,9 @@ bool TexSheet::CopyRect(ILuint pixelData, int32 x, int32 y, int32 w, int32 h)
 //              memory manager so that a new image can be loaded in its place
 //-----------------------------------------------------------------------------
 
-bool TexSheet::_RemoveImage(Image *img)
+bool TexSheet::RemoveImage(Image *img)
 {
-	return _texMemManager->Remove(img);
+	return texMemManager->Remove(img);
 }
 
 
@@ -911,7 +930,7 @@ bool TexSheet::_RemoveImage(Image *img)
 
 bool TexSheet::FreeImage(Image *img)
 {
-	return _texMemManager->Free(img);
+	return texMemManager->Free(img);
 }
 
 //-----------------------------------------------------------------------------
@@ -922,7 +941,7 @@ bool TexSheet::FreeImage(Image *img)
 
 bool TexSheet::RestoreImage(Image *img)
 {
-	return _texMemManager->Restore(img);
+	return texMemManager->Restore(img);
 }
 
 
@@ -1543,6 +1562,8 @@ bool GameVideo::ReloadTextures()
 		++iSheet;
 	}
 
+	_DeleteTempTextures();
+
 	if(_usesLights)
 		_lightOverlay = _CreateBlankGLTexture(1024, 1024);
 
@@ -1558,8 +1579,12 @@ bool GameVideo::ReloadTextures()
 
 bool GameVideo::UnloadTextures() 
 {
-	// unload texture sheets
-	
+	// save temporary textures to disk, in other words textures which weren't
+	// loaded to a file. This way when we recreate the GL context we will
+	// be able to load them again.
+	_SaveTempTextures();
+
+	// unload texture sheets	
 	vector<TexSheet *>::iterator iSheet    = _texSheets.begin();
 	vector<TexSheet *>::iterator iSheetEnd = _texSheets.end();
 
@@ -1786,6 +1811,86 @@ bool GameVideo::_ReloadImagesToSheet(TexSheet *sheet)
 	}
 	
 	return success;
+}
+
+
+//-----------------------------------------------------------------------------
+// _SaveTempTextures: save all textures to disk which were not loaded from a file
+//-----------------------------------------------------------------------------
+
+bool GameVideo::_SaveTempTextures()
+{
+	map<string, Image*>::iterator iImage = _images.begin();
+	map<string, Image*>::iterator iEnd   = _images.end();
+	
+	while(iImage != iEnd)
+	{
+		Image *image = iImage->second;
+		
+		// it's a temporary texture!!
+		if(image->filename.find("TEMP_") != string::npos)
+		{
+			image->texSheet->SaveImage(image);			
+		}
+		
+		++iImage;
+	}
+	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// _DeleteTempTextures: delete all the textures in the temp directory
+//-----------------------------------------------------------------------------
+
+bool GameVideo::_DeleteTempTextures()
+{
+	return CleanDirectory("temp");
+}
+
+
+//-----------------------------------------------------------------------------
+// SaveImage: saves the image to the given filename
+//-----------------------------------------------------------------------------
+
+bool TexSheet::SaveImage(Image *img)
+{
+	uint8 *pixels = new uint8[width*height*4];
+	GameVideo *videoManager = GameVideo::_GetReference();
+	videoManager->_BindTexture(texID);
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+	
+	if(glGetError())
+	{
+		if(VIDEO_DEBUG)	
+			cerr << "VIDEO ERROR: glGetTexImage() failed in TexSheet::SaveImage()\nImage filename: " << img->filename << endl;
+		return false;
+	}
+
+	ILuint pixelData;
+	ilGenImages(1, &pixelData);
+
+	if(ilGetError())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "ilGetError() true after ilGenImages() in TexSheet::SaveImage()!" << endl;
+		return false;
+	}
+	
+	ilBindImage(pixelData);
+	
+	if(ilGetError())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "ilGetError() true after ilBindImage() in TexSheet::SaveImage()!" << endl;
+		return false;
+	}
+	ilTexImage(img->width, img->height, 1, 4, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	ilSetPixels(-img->x, -img->y, 0, img->width, img->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+	iluFlipImage();
+	ilSaveImage((char *)img->filename.c_str());
+	ilDeleteImages(1, &pixelData);	
+	return true;
 }
 
 
