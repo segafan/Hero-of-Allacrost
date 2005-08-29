@@ -233,7 +233,7 @@ GCharacter::GCharacter(std::string na, std::string fn, uint32 id) {
 // Remove all frame images upon destruction
 GCharacter::~GCharacter() {
 	if (GLOBAL_DEBUG) cout << "GLOBAL: GCharacter destructor invoked" << endl;
-	GameVideo *VideoManager = GameVideo::_GetReference();
+	GameVideo *VideoManager = GameVideo::GetReference();
 	for (uint32 i = 0; i < _map_frames.size(); i++) {
 		VideoManager->DeleteImage(_map_frames[i]);
 	}
@@ -244,7 +244,7 @@ GCharacter::~GCharacter() {
 
 
 void GCharacter::LoadFrames() {
-	GameVideo *VideoManager = GameVideo::_GetReference();
+	GameVideo *VideoManager = GameVideo::GetReference();
 	ImageDescriptor imd;
 	string full_name = "img/sprites/map/" + _filename;
 
@@ -315,7 +315,6 @@ void GCharacter::LoadFrames() {
 
 GameInstance::GameInstance() {
 	if (GLOBAL_DEBUG) cout << "GLOBAL: GameInstance constructor invoked" << endl;
-// 	VideoManager = GameVideo::_GetReference();
 }
 
 GameInstance::~GameInstance() {
@@ -323,6 +322,12 @@ GameInstance::~GameInstance() {
 	for (uint32 i = 0; i < _characters.size(); i++) {
 		delete _characters[i];
 	}
+}
+
+// Initialize GameInstance members
+bool GameInstance::Initialize() {
+// 	VideoManager = GameVideo::GetReference();
+	return true;
 }
 
 void GameInstance::AddCharacter(GCharacter *ch) {

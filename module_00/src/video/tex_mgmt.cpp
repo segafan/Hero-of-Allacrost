@@ -609,13 +609,13 @@ TexSheet::~TexSheet()
 	// delete texture memory manager
 	delete texMemManager;
 	
-	hoa_video::GameVideo *videoManager = hoa_video::GameVideo::_GetReference();
+	hoa_video::GameVideo *videoManager = hoa_video::GameVideo::GetReference();
 	
 	if(!videoManager)
 	{
 		if(VIDEO_DEBUG)
 		{
-			cerr << "VIDEO ERROR: GameVideo::_GetReference() returned NULL in TexSheet destructor!" << endl;
+			cerr << "VIDEO ERROR: GameVideo::GetReference() returned NULL in TexSheet destructor!" << endl;
 		}
 	}
 	
@@ -870,7 +870,7 @@ bool TexSheet::CopyRect(ILuint pixelData, int32 x, int32 y, int32 w, int32 h)
 {
 	int32 error;
 	
-	hoa_video::GameVideo *videoManager = hoa_video::GameVideo::_GetReference();
+	hoa_video::GameVideo *videoManager = hoa_video::GameVideo::GetReference();
 	videoManager->_BindTexture(texID);	
 	
 	error = glGetError();
@@ -1176,7 +1176,7 @@ bool VariableTexMemMgr::Insert  (Image *img)
 	// If so, we have to notify GameVideo that we're ejecting
 	// this image out of memory to make place for the new one	
 	
-	hoa_video::GameVideo *VideoManager = hoa_video::GameVideo::_GetReference();
+	hoa_video::GameVideo *VideoManager = hoa_video::GameVideo::GetReference();
 
 	// update blocks
 	for(int32 y = blockY; y < blockY + h; ++y)
@@ -1331,7 +1331,7 @@ bool FixedTexMemMgr::Insert(Image *img)
 	
 	if(node->image)
 	{
-		hoa_video::GameVideo *VideoManager = hoa_video::GameVideo::_GetReference();
+		hoa_video::GameVideo *VideoManager = hoa_video::GameVideo::GetReference();
 		VideoManager->_RemoveImage(node->image);
 		node->image = NULL;
 	}
@@ -1664,7 +1664,7 @@ bool TexSheet::Unload()
 	}
 	
 	// delete the texture
-	hoa_video::GameVideo *videoManager = hoa_video::GameVideo::_GetReference();
+	hoa_video::GameVideo *videoManager = hoa_video::GameVideo::GetReference();
 	if(!videoManager->_DeleteTexture(texID))
 	{
 		if(VIDEO_DEBUG)
@@ -1749,7 +1749,7 @@ bool TexSheet::Reload()
 	}
 	
 	// create new OpenGL texture
-	hoa_video::GameVideo *videoManager = hoa_video::GameVideo::_GetReference();	
+	hoa_video::GameVideo *videoManager = hoa_video::GameVideo::GetReference();	
 	GLuint tID = videoManager->_CreateBlankGLTexture(width, height);
 	
 	if(tID == 0xFFFFFFFF)
@@ -1860,7 +1860,7 @@ bool GameVideo::_DeleteTempTextures()
 bool TexSheet::SaveImage(Image *img)
 {
 	uint8 *pixels = new uint8[width*height*4];
-	GameVideo *videoManager = GameVideo::_GetReference();
+	GameVideo *videoManager = GameVideo::GetReference();
 	videoManager->_BindTexture(texID);
 	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 	

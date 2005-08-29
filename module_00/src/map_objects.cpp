@@ -49,7 +49,7 @@ ObjectLayer::ObjectLayer(uint8 type, uint32 row, uint32 col, uint8 alt, uint16 s
 	_col_pos = col;
 	_altitude = alt;
 	_status = stat;
-	VideoManager = hoa_video::GameVideo::_GetReference();
+	VideoManager = hoa_video::GameVideo::GetReference();
 }
 
 
@@ -176,7 +176,7 @@ void MapSprite::LoadFrames() {
 
 // Loads the frames and other info from the GameInstance singleton
 void MapSprite::LoadCharacterInfo(uint32 character) {
-	GCharacter *pchar = GameInstance::_GetReference()->GetCharacter(character);
+	GCharacter *pchar = GameInstance::GetReference()->GetCharacter(character);
 	_name = pchar->GetName();
 	_filename = "img/sprite/" + pchar->GetFilename();
 	_frames = pchar->GetMapFrames();

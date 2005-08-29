@@ -185,13 +185,6 @@ private:
 	uint32 _pop_count;
 public:
 	SINGLETON_METHODS(GameModeManager);
-	/*!
-	 * \brief Clears any game modes on the stack and pushes a new BootMode to the top of the stack.
-	 * 
-	 * This function should only be called before the main game loop in main.cpp. It is dangerous.
-	 * Don't use it elsewhere.
-	 */
-	void Initialize();
 	//! Increases the GameModeManager#pop_count member to pop the top stack item on the next 
 	//! call to GameModeManager#Update().
 	void Pop();
@@ -273,7 +266,12 @@ private:
 	bool _full_screen;
 	//! Used by PauseMode and QuitMode for temporarily changing the volume on pause/quit events.
 	uint8 _pause_volume_action;
-
+	
+	//! \name Singleton Class Pointers
+	//@{
+	//! \brief References to the various game singletons.
+	hoa_data::GameData *_DataManager;
+	//@}
 
 public:
 	SINGLETON_METHODS(GameSettings);
@@ -376,9 +374,9 @@ public:
  *****************************************************************************/
 class KeyState {
 private:
-//! \name Generic key names
-//@{
-//! \brief Each member holds the actual keyboard key that corresponds to the named key event.
+	//! \name Generic key names
+	//@{
+	//! \brief Each member holds the actual keyboard key that corresponds to the named key event.
 	SDLKey _up;
 	SDLKey _down;
 	SDLKey _left;
@@ -390,8 +388,8 @@ private:
 	SDLKey _left_select;
 	SDLKey _right_select;
 	SDLKey _pause;
-//@}
-
+	//@}
+	
 	friend class GameInput;
 	friend class hoa_data::GameData;
 }; // class KeyState
@@ -400,7 +398,11 @@ private:
  *  \brief Retains information about the user-defined joystick settings.
  *
  *  This class is simply a container for various SDL structures that represent
- *  the joystick input.
+ *  the joystick input. Because joystick axis movement is not a simple "on/off"
+ *  state as opposed to keys, we need a little extra logic so that it can be
+ *  represented as such. In the range of possible joystick values (-32768 to 32767),
+ *  we section off the region into thirds and label any crossing of these 'boundaries'
+ *  as state changes.
  *
  *  \note 1) The only classes that need to interact with this class are GameInput
  *  and GameData (hence, all members are private and both classes are declared
@@ -413,9 +415,39 @@ private:
  *****************************************************************************/
 class JoystickState {
 private:
-	//! A pointer to the active joystick
+	//! A pointer to the active joystick.
 	SDL_Joystick *_js;
-
+	
+	//! An index to the SDL joystick which should be made active.
+	int32 _joy_index;
+	
+	//! \name Generic button names.
+	//@{
+	//! \brief Each member retains the index that refers to the joystick button registered to the event.
+	uint8 _confirm;
+	uint8 _cancel;
+	uint8 _menu;
+	uint8 _swap;
+	uint8 _left_select;
+	uint8 _right_select;
+	uint8 _pause;
+	uint8 _quit;
+	//@}
+	
+	//! \name Previous Peak Joystick Axis Values
+	//@{
+	//! \brief These variables retain the previous peak value of each joystick axis. 
+	int16 _x_previous_peak;
+	int16 _y_previous_peak;
+	//@}
+	
+	//! \name Current Peak Joystick Axis Values
+	//@{
+	//! \brief These variables retain the current peak value of each joystick axis. 
+	int16 _x_current_peak;
+	int16 _y_current_peak;
+	//@}
+	
 	friend class GameInput;
 	friend class hoa_data::GameData;
 }; // class JoystickState
@@ -456,6 +488,11 @@ private:
  *  - Ctrl+Q     :: brings up the quit menu/quits the game
  *  - Ctrl+S     :: saves a screenshot of the current screen
  *  - Quit Event :: same as Ctrl+Q, this happens when the user tries to close the game window
+ *  
+ *  Keep in mind that these events are \c not mutually exclusive (you can have an up press and
+ *  a down press during the same event processing). This class does not attempt to give one
+ *  event precedence over the other, except in the case of pause and quit events. Therefore, in
+ *  your code you should deal with the problem of not having mutual exclusive events directly.
  *
  *  \note 1) This class is a singleton.
  *
@@ -470,17 +507,20 @@ private:
  *  bugs in the code. (eg. `if (up_state = true)` instead of `if (up_state == true)`.
  *  
  *  \note 4) In the end, all you really need to know about this class are the
- *  member access functions in the public section of this class (its not that hard). 
+ *  member access functions in the public section of this class (its not that hard).
+ *  
+ *  \note 5) Currently joystick hat and ball events are not handled by this input
+ *  event manager. I may add support for them later if necessary. 
  *****************************************************************************/
 class GameInput {
 private:
 	SINGLETON_DECLARE(GameInput);
 	//! Retains the active-user defined key settings
-	KeyState _Key;
+	KeyState _key;
 	//! Retains the active-user defined joystick settings
-	JoystickState _Joystick;
-
-	//! \name Input state members
+	JoystickState _joystick;
+	
+	//! \name Input State Members
 	//@{
 	//! \brief True if the named input event key/button is currently being held down
 	bool _up_state;
@@ -495,7 +535,7 @@ private:
 	bool _right_select_state;
 	//@}
 	
-	//! \name Input press members
+	//! \name Input Press Members
 	//@{
 	//! \brief True if the named input event key/button has just been pressed
 	bool _up_press;
@@ -510,7 +550,7 @@ private:
 	bool _right_select_press;
 	//@}
 	
-	//! \name Input release
+	//! \name Input Release
 	//@{
 	//! \brief True if the named input event key/button has just been released
 	bool _up_release;
@@ -524,8 +564,16 @@ private:
 	bool _left_select_release;
 	bool _right_select_release;
 	//@}
-
-	//! \name Singleton class pointers
+	
+		
+	//! \name First Joystick Axis Motion 
+	//@{
+	//! \brief Retains whether a joystick axis event has already occured or not
+	bool _joyaxis_x_first;
+	bool _joyaxis_y_first;
+	//@}
+	
+	//! \name Singleton Class Pointers
 	//@{
 	/*!
 	 * \brief References to the various game singletons.
@@ -537,12 +585,13 @@ private:
 	GameModeManager *_ModeManager;
 	GameSettings *_SettingsManager;
 	hoa_data::GameData *_DataManager;
+	hoa_video::GameVideo *_VideoManager;
 	//@}
 
 	//! Processes all keyboard input events
-	void _KeyEventHandler(SDL_KeyboardEvent *key_event);
+	void _KeyEventHandler(SDL_KeyboardEvent& key_event);
 	//! Processes all joystick input events
-	void _JoystickEventHandler(SDL_Event *js_event);
+	void _JoystickEventHandler(SDL_Event& js_event);
 public:
 	SINGLETON_METHODS(GameInput);
 

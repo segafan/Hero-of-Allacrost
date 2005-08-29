@@ -184,34 +184,34 @@ void SystemInfo() {
 	const SDL_VideoInfo *user_video;
 	user_video = SDL_GetVideoInfo(); // Get information about the user's video system
 	cout << "Best available video mode" << endl;
-	cout << ">Creates hardware surfaces: ";
+	cout << "> Creates hardware surfaces: ";
 	if (user_video->hw_available == 1) cout << "yes\n";
 	else cout << "no\n";
-	cout << ">Has window manager available: ";
+	cout << "> Has window manager available: ";
 	if (user_video->wm_available == 1) cout << "yes\n";
 	else cout << "no\n";
-	cout << ">Hardware to hardware blits accelerated: ";
+	cout << "> Hardware to hardware blits accelerated: ";
 	if (user_video->blit_hw == 1) cout << "yes\n";
 	else cout << "no\n";
-	cout << ">Hardware to hardware colorkey blits accelerated: ";
+	cout << "> Hardware to hardware colorkey blits accelerated: ";
 	if (user_video->blit_hw_CC == 1) cout << "yes\n";
 	else cout << "no\n";
-	cout << ">Hardware to hardware alpha blits accelerated: ";
+	cout << "> Hardware to hardware alpha blits accelerated: ";
 	if (user_video->blit_hw_A == 1) cout << "yes\n";
 	else cout << "no\n";
-	cout << ">Software to hardware blits acceleerated: ";
+	cout << "> Software to hardware blits acceleerated: ";
 	if (user_video->blit_sw == 1) cout << "yes\n";
 	else cout << "no\n";
-	cout << ">Software to hardware colorkey blits accelerated: ";
+	cout << "> Software to hardware colorkey blits accelerated: ";
 	if (user_video->blit_sw_CC == 1) cout << "yes\n";
 	else cout << "no\n";
-	cout << ">Software to hardware alpha blits accelerated: ";
+	cout << "> Software to hardware alpha blits accelerated: ";
 	if (user_video->blit_sw_A == 1) cout << "yes\n";
 	else cout << "no\n";
-	cout << ">Color fills accelerated: ";
+	cout << "> Color fills accelerated: ";
 	if (user_video->blit_fill == 1) cout << "yes\n";
 	else cout << "no\n";
-	cout << ">Total video memory: " << user_video->video_mem << " kilobytes" << "\n" << endl;
+	cout << "> Total video memory: " << user_video->video_mem << " kilobytes" << "\n" << endl;
 
 	//cout << "The best pixel format: " << user_video->vfmt << endl;
 
@@ -229,11 +229,11 @@ void SystemInfo() {
 			cout << "ERROR: SDL was unable to open joystick #" << i << endl;
 		else {
 			cout << "Joystick #" << i << endl;
-			cout << ">Name: " << SDL_JoystickName(i) << endl;
-			cout << ">Axes: " << SDL_JoystickNumAxes(js_test) << endl;
-			cout << ">Buttons: " << SDL_JoystickNumButtons(js_test) << endl;
-			cout << ">Trackballs: " << SDL_JoystickNumBalls(js_test) << endl;
-			cout << ">Hat Switches: " << SDL_JoystickNumHats(js_test) << endl;
+			cout << "> Name: " << SDL_JoystickName(i) << endl;
+			cout << "> Axes: " << SDL_JoystickNumAxes(js_test) << endl;
+			cout << "> Buttons: " << SDL_JoystickNumButtons(js_test) << endl;
+			cout << "> Trackballs: " << SDL_JoystickNumBalls(js_test) << endl;
+			cout << "> Hat Switches: " << SDL_JoystickNumHats(js_test) << endl;
 			SDL_JoystickClose(js_test);
 		}
 	}
@@ -294,7 +294,14 @@ int32 main(int32 argc, char *argv[]) {
 	}
 	atexit(SDL_Quit);
 
-	SDL_EnableUNICODE(1); // Enable unicode for multilingual keyboard support
+	// Enable unicode for multilingual keyboard support
+	SDL_EnableUNICODE(1); 
+	
+	// Disable (hide) the mouse cursor
+	SDL_ShowCursor(SDL_DISABLE);
+	
+	// Set the window title + icon
+	SDL_WM_SetCaption("Hero of Allacrost", NULL);
 
 	// Ignore the events that we don't care about so they never appear in the event queue
 	SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
@@ -304,30 +311,50 @@ int32 main(int32 argc, char *argv[]) {
 	SDL_EventState(SDL_VIDEOEXPOSE, SDL_IGNORE);
 	SDL_EventState(SDL_USEREVENT, SDL_IGNORE);
 	// NOTE: SDL_ActiveEvent reports mouse focus, input focus, iconified status. Should we disable it???
-
-	// Does the subsystem need to be initialized before checking the num of joysticks?
-	SDL_InitSubSystem(SDL_INIT_JOYSTICK);
-	if (SDL_NumJoysticks() == 0) { // No joysticks found
-		SDL_JoystickEventState(SDL_IGNORE);
-		SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
-	}
-	else { // At least one joystick exists
-		SDL_JoystickEventState(SDL_ENABLE);
-	}
-
+	
 	// Create all the game singletons
-	GameAudio *AudioManager = GameAudio::_Create();
-	GameVideo *VideoManager = GameVideo::_Create();
-	GameData *DataManager = GameData::_Create();
-	GameModeManager *ModeManager = GameModeManager::_Create();
-	GameSettings *SettingsManager = GameSettings::_Create();
-	GameInput *InputManager = GameInput::_Create();
-	GameInstance *InstanceManager = GameInstance::_Create();
+	GameAudio *AudioManager = GameAudio::Create();
+	GameVideo *VideoManager = GameVideo::Create();
+	GameData *DataManager = GameData::Create();
+	GameModeManager *ModeManager = GameModeManager::Create();
+	GameSettings *SettingsManager = GameSettings::Create();
+	GameInput *InputManager = GameInput::Create();
+	GameInstance *InstanceManager = GameInstance::Create();
 
-	if(!VideoManager->Initialize()) {
+	if (!VideoManager->Initialize()) {
 		cerr << "ERROR: unable to initialize VideoManager" << endl;
 		return 1;
 	}
+	if (!AudioManager->Initialize()) {
+		cerr << "ERROR: unable to initialize AudioManager" << endl;
+		return 1;
+	}
+	if (!DataManager->Initialize()) {
+		cerr << "ERROR: unable to initialize DataManager" << endl;
+		return 1;
+	}
+	if (!ModeManager->Initialize()) {
+		cerr << "ERROR: unable to initialize ModeManager" << endl;
+		return 1;
+	}
+	if (!SettingsManager->Initialize()) {
+		cerr << "ERROR: unable to initialize SettingsManager" << endl;
+		return 1;
+	}
+	if (!InputManager->Initialize()) {
+		cerr << "ERROR: unable to initialize InputManager" << endl;
+		return 1;
+	}
+	if (!InstanceManager->Initialize()) {
+		cerr << "ERROR: unable to initialize InstanceManager" << endl;
+		return 1;
+	}
+	
+	
+	AudioManager->SetMusicVolume(SettingsManager->music_vol);
+	AudioManager->SetSoundVolume(SettingsManager->sound_vol);
+	
+	
 	VideoManager->SetMenuSkin("img/menus/concrete",
 	                          Color(0.0f, 0.0f, 1.0f, 0.5f),
 	                          Color(0.0f, 0.0f, 1.0f, 0.5f),
@@ -336,16 +363,11 @@ int32 main(int32 argc, char *argv[]) {
 	if(!VideoManager->LoadFont("img/fonts/tarnhalo.ttf", "default", 16))
 		cerr << "MAP: ERROR > Couldn't load map font!" << endl;
 
-	DataManager->LoadGameSettings(); // Initializes remaining data members of Settings Manager
 
-	AudioManager->SetMusicVolume(SettingsManager->music_vol);
-	AudioManager->SetSoundVolume(SettingsManager->sound_vol);
-	
-	ModeManager->Initialize(); // Initialize ModeManager with a new BootMode
 
-	SettingsManager->SetTimer();	// Initialize the game and frames-per-second timers
-
+	// Retains the amount of time (in milliseconds) between main loop iterations
 	uint32 frame_time = 0;
+	SettingsManager->SetTimer();	// Initialize the game and frames-per-second timers
 
 	// This is the main loop for the game. The loop iterates once every frame drawn to the screen.
 	while (SettingsManager->NotDone()) {
@@ -365,13 +387,13 @@ int32 main(int32 argc, char *argv[]) {
 	} // while (SettingsManager->NotDone())
 
 	// Begin exit sequence and destroy the singleton classes
-	GameData::_Destroy();
-	GameInput::_Destroy();
-	GameModeManager::_Destroy();
-	GameSettings::_Destroy();
-	GameInstance::_Destroy();
-	GameAudio::_Destroy();
-	GameVideo::_Destroy();
+	GameData::Destroy();
+	GameInput::Destroy();
+	GameModeManager::Destroy();
+	GameSettings::Destroy();
+	GameInstance::Destroy();
+	GameAudio::Destroy();
+	GameVideo::Destroy();
 
 	return 0;
 }

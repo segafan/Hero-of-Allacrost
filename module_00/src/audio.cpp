@@ -85,6 +85,12 @@ GameAudio::~GameAudio() {
 
 
 
+// Mandatory for singleton classes
+bool GameAudio::Initialize() {
+	return true;
+}
+
+
 // Returns a free music cache index. If there are no free indeces, uses LRU replacement.
 uint32 GameAudio::_AllocateMusicIndex() {
 	uint32 lru; // represents the time of the oldest item

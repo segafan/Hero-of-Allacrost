@@ -132,21 +132,22 @@ const int32 UTILS_NO_BOUNDS = 0;
 
 // Put in the public sector of the class definition
 #define SINGLETON_METHODS(class_name) \
-	static class_name* _Create() { \
+	static class_name* Create() { \
 			if (_ref == NULL) { \
 				_ref = new class_name(); \
 			} \
 			return _ref; \
 	} \
-	static void _Destroy() { \
+	static void Destroy() { \
 			if (_ref != NULL) { \
 				delete _ref; \
 				_ref = NULL; \
 			} \
 	} \
-	static class_name* _GetReference() { \
+	static class_name* GetReference() { \
 			return _ref; \
 	} \
+	bool Initialize();
 
 // Put in the class' source file
 #define SINGLETON_INITIALIZE(class_name) \

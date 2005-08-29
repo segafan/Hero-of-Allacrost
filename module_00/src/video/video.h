@@ -881,11 +881,6 @@ public:
 	//-- General --------------------------------------------------------------
 
 	/*!
-	 *  \brief call this once at beginning of app
-	 */
-	bool Initialize();
-
-	/*!
 	 *  \brief call at beginning of every frame
 	 */
 	bool Clear();

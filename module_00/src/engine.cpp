@@ -51,13 +51,13 @@ SINGLETON_INITIALIZE(GameInput);
 GameMode::GameMode() {
 	if (ENGINE_DEBUG) cout << "ENGINE: GameMode constructor invoked" << endl;
 	mode_type = ENGINE_DUMMY_MODE; // This should be replaced by the child class
-	AudioManager =    GameAudio::_GetReference();
-	VideoManager =    GameVideo::_GetReference();
-	DataManager =     GameData::_GetReference();
-	InputManager =    GameInput::_GetReference();
-	ModeManager =     GameModeManager::_GetReference();
-	SettingsManager = GameSettings::_GetReference();
-	InstanceManager = GameInstance::_GetReference();
+	AudioManager =    GameAudio::GetReference();
+	VideoManager =    GameVideo::GetReference();
+	DataManager =     GameData::GetReference();
+	InputManager =    GameInput::GetReference();
+	ModeManager =     GameModeManager::GetReference();
+	SettingsManager = GameSettings::GetReference();
+	InstanceManager = GameInstance::GetReference();
 }
 
 
@@ -65,13 +65,13 @@ GameMode::GameMode() {
 GameMode::GameMode(uint8 mt) {
 	if (ENGINE_DEBUG) cout << "ENGINE: GameMode constructor invoked" << endl;
 	mode_type = mt;
-	AudioManager =    GameAudio::_GetReference();
-	VideoManager =    GameVideo::_GetReference();
-	DataManager =     GameData::_GetReference();
-	InputManager =    GameInput::_GetReference();
-	ModeManager =     GameModeManager::_GetReference();
-	SettingsManager = GameSettings::_GetReference();
-	InstanceManager = GameInstance::_GetReference();
+	AudioManager =    GameAudio::GetReference();
+	VideoManager =    GameVideo::GetReference();
+	DataManager =     GameData::GetReference();
+	InputManager =    GameInput::GetReference();
+	ModeManager =     GameModeManager::GetReference();
+	SettingsManager = GameSettings::GetReference();
+	InstanceManager = GameInstance::GetReference();
 }
 
 
@@ -114,7 +114,7 @@ GameModeManager::~GameModeManager() {
 
 
 // Empties out the game stack and then initializes it by placing BootMode on the stack top.
-void GameModeManager::Initialize() {
+bool GameModeManager::Initialize() {
 	// Delete any game modes on the stack
 	while (_game_stack.size() != 0) {
 		delete _game_stack.back();
@@ -134,6 +134,8 @@ void GameModeManager::Initialize() {
 	BootMode* BM = new BootMode();
 	_game_stack.push_back(BM);
 	_state_change = true;
+	
+	return true;
 }
 
 
@@ -250,7 +252,7 @@ GameSettings::GameSettings() {
 	_fps_counter = 0;
 	_fps_rate = 0.0;
 
-	// Remaining members are initialized by GameData->LoadGameSettings(), called in main.cpp
+	// Remaining members are initialized in the Initialize() function
 }
 
 
@@ -260,6 +262,12 @@ GameSettings::~GameSettings() {
 	if (ENGINE_DEBUG) cout << "ENGINE: GameSettings destructor invoked" << endl;
 }
 
+
+// Makes a call to the data manager for retrieving configured settings
+bool GameSettings::Initialize() {
+	GameData::GetReference()->LoadGameSettings(); // Initializes remaining data members
+	return true;
+}
 
 
 // Returns the difference between the time now and last_update (in ms) and calculates frame rate
@@ -338,24 +346,52 @@ GameInput::GameInput() {
 	_left_select_state = false;
 	_left_select_press = false;
 	_left_select_release = false;
+	
+	_joyaxis_x_first = true;
+	_joyaxis_y_first = true;
 
-	_Joystick._js = NULL;
-
-	// Because of these calls, these classes must be created before GameInput
-	_ModeManager = GameModeManager::_GetReference();
-	_SettingsManager = GameSettings::_GetReference();
-	GameData *DataManager = GameData::_GetReference();
-
-	// CALL HERE: Call DataManager->SomeFn(Key&, Joystick&); to setup KeyState and JoystickState
-	DataManager->LoadKeyJoyState(&_Key, &_Joystick);
+	_joystick._js = NULL;
 }
 
 
 
 GameInput::~GameInput() {
 	if (ENGINE_DEBUG) cout << "ENGINE: GameInput destructor invoked" << endl;
-	if (_Joystick._js != NULL) // If its open, close the joystick before exiting
-		SDL_JoystickClose(_Joystick._js);
+	
+	// If open, close the joystick before exiting
+	if (_joystick._js != NULL) {
+		SDL_JoystickClose(_joystick._js);
+	}
+}
+
+
+// Initialize singleton pointers and key/joystick systems. Always returns true
+bool GameInput::Initialize() {
+	// Setup singleton pointers
+	_ModeManager = GameModeManager::GetReference();
+	_SettingsManager = GameSettings::GetReference();
+	_DataManager = GameData::GetReference();
+	_VideoManager = GameVideo::GetReference();
+
+	// Loads saved settings to setup the key and joystick configurations
+	_DataManager->LoadKeyJoyState(&_key, &_joystick);
+	
+	// Attempt to initialize and setup the configured joystick
+	if (SDL_InitSubSystem(SDL_INIT_JOYSTICK) != 0) {
+		cerr << "ENGINE: ERROR: Failed to initailize SDL joystick subsystem" << endl;
+	}
+	else {
+		if (SDL_NumJoysticks() == 0) { // No joysticks found
+			SDL_JoystickEventState(SDL_IGNORE);
+			SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+		}
+		else { // At least one joystick exists
+			SDL_JoystickEventState(SDL_ENABLE);
+			// TEMP: need to allow user to specify which joystick to open, if multiple exist
+			_joystick._js = SDL_JoystickOpen(_joystick._joy_index);
+		}
+	}
+	return true;
 }
 
 
@@ -405,36 +441,113 @@ void GameInput::EventHandler() {
 			break;
 		}
 		else if (event.type == SDL_KEYUP || event.type == SDL_KEYDOWN) {
-			_KeyEventHandler(&event.key);
+			_KeyEventHandler(event.key);
 			break;
 		}
 		else {
-			_JoystickEventHandler(&event);
+			_JoystickEventHandler(event);
 			break;
-		} // switch (event.type)
-	}
-}
+		}
+	} // while (SDL_PollEvent(&event)
+	
+	// Compare the current and previous peak joystick axis values to detect movement events
+	if (_joystick._js != NULL) {
+		// ******************************* X-Axis Movment *************************************
+		// Check for a x-axis boundary change from left to center or right
+		if ((_joystick._x_previous_peak <= -8192) && (_joystick._x_current_peak > -8192)) { 
+			_left_state = false;
+			_left_release = true;
+			// Check for a right x-axis boundary change
+			if (_joystick._x_current_peak >= 8192) {
+				_right_state = true;
+				_right_press = true;
+			}
+		}
+		// Check for a x-axis boundary change from right to center or left
+		else if ((_joystick._x_previous_peak >= 8192) && (_joystick._x_current_peak < 8192)) {
+			_right_state = false;
+			_right_release = true;
+			// Check for a left x-axis boundary change
+			if (_joystick._x_current_peak <= -8192) {
+				_left_state = true;
+				_left_press = true;
+			}
+		}
+		// Check for a x-axis boundary change from center to left
+		else if ((_joystick._x_current_peak <= -8192) && (_joystick._x_previous_peak > -8192) && 
+							(_joystick._x_previous_peak < 8192)) {
+			_left_state = true;
+			_left_press = true;
+		}
+		// Check for a x-axis boundary change from center to right
+		else if ((_joystick._x_current_peak >= 8192) && (_joystick._x_previous_peak > -8192) && 
+							(_joystick._x_previous_peak > 8192)) {
+			_right_state = true;
+			_right_press = true;
+		}
+		
+		// ******************************* Y-Axis Movment *************************************
+		// Check for a y-axis boundary change from up to center or down
+		if ((_joystick._y_previous_peak <= -8192) && (_joystick._y_current_peak > -8192)) { 
+			_up_state = false;
+			_up_release = true;
+			// Check for a down y-axis boundary change
+			if (_joystick._y_current_peak >= 8192) {
+				_down_state = true;
+				_down_press = true;
+			}
+		}
+		// Check for a y-axis boundary change from down to center or up
+		else if ((_joystick._y_previous_peak >= 8192) && (_joystick._y_current_peak < 8192)) {
+			_down_state = false;
+			_down_release = true;
+			// Check for an up y-axis boundary change
+			if (_joystick._y_current_peak <= -8192) {
+				_up_state = true;
+				_up_press = true;
+			}
+		}
+		// Check for a y-axis boundary change from center to up
+		else if ((_joystick._y_current_peak <= -8192) && (_joystick._y_previous_peak > -8192) && 
+							(_joystick._y_previous_peak < 8192)) {
+			_up_state = true;
+			_up_press = true;
+		}
+		// Check for a x-axis boundary change from center to down
+		else if ((_joystick._y_current_peak >= 8192) && (_joystick._y_previous_peak > -8192) && 
+							(_joystick._y_previous_peak < 8192)) {
+			_down_state = true;
+			_down_press = true;
+		}
+		
+		// Save previous peak values for the next iteration of event processing
+		_joystick._x_previous_peak = _joystick._x_current_peak;
+		_joystick._y_previous_peak = _joystick._y_current_peak;
+		
+		// Reset first axis motion detectors for next event processing loop
+		_joyaxis_x_first = true;
+		_joyaxis_y_first = true;
+	} // (_joystick._js != NULL)
+} // void GameInput::EventHandler()
 
 
 
 // Handles all keyboard events for the game
-void GameInput::_KeyEventHandler(SDL_KeyboardEvent *key_event) {
-	if (key_event->type == SDL_KEYDOWN) { // Key was pressed
-		if (key_event->keysym.mod & KMOD_CTRL) { // CTRL key was held down
-			if (key_event->keysym.sym == SDLK_a) {	
+void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
+	if (key_event.type == SDL_KEYDOWN) { // Key was pressed
+		if (key_event.keysym.mod & KMOD_CTRL) { // CTRL key was held down
+			if (key_event.keysym.sym == SDLK_a) {	
 				// Toggle the display of advanced video engine information
-				GameVideo *VideoManager = GameVideo::_GetReference();
-				VideoManager->ToggleAdvancedDisplay();
+				_VideoManager->ToggleAdvancedDisplay();
 			}
-			else if (key_event->keysym.sym == SDLK_f) {
+			else if (key_event.keysym.sym == SDLK_f) {
 				// Toggle between full-screen and windowed mode
 				if (ENGINE_DEBUG) cout << "Toggle fullscreen!" << endl;
-				GameVideo *VideoManager = GameVideo::_GetReference();
-				VideoManager->ToggleFullscreen();
-				VideoManager->ApplySettings();
+				_VideoManager->ToggleFullscreen();
+				_VideoManager->ApplySettings();
 				return;
 			}
-			else if (key_event->keysym.sym == SDLK_q) {
+			else if (key_event.keysym.sym == SDLK_q) {
 				// Quit the game without question if we are in BootMode or QuitMode
 				if (_ModeManager->GetGameType() == ENGINE_BOOT_MODE || _ModeManager->GetGameType() == ENGINE_QUIT_MODE) {
 					_SettingsManager->ExitGame();
@@ -445,20 +558,17 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent *key_event) {
 					_ModeManager->Push(QM);
 				}
 			}
-			else if (key_event->keysym.sym == SDLK_r) {
-				GameVideo *VideoManager = GameVideo::_GetReference();
-				VideoManager->ToggleFPS();
+			else if (key_event.keysym.sym == SDLK_r) {
+				_VideoManager->ToggleFPS();
 			}
-			else if (key_event->keysym.sym == SDLK_s) {
+			else if (key_event.keysym.sym == SDLK_s) {
 				// Take a screenshot of the current game
-				GameVideo *VideoManager = GameVideo::_GetReference();
-				VideoManager->MakeScreenshot();
+				_VideoManager->MakeScreenshot();
 				return;
 			}
-			else if (key_event->keysym.sym == SDLK_t) {
+			else if (key_event.keysym.sym == SDLK_t) {
 				// Display and cycle through the texture sheets
-				GameVideo *VideoManager = GameVideo::_GetReference();
-				VideoManager->DEBUG_NextTexSheet();
+				_VideoManager->DEBUG_NextTexSheet();
 			}
 			
 			else
@@ -467,49 +577,67 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent *key_event) {
 
 		// Note: a switch-case statement won't work here because Key.up is not an
 		// integer value the compiler will whine and cry about it ;_;
-		if (key_event->keysym.sym == _Key._up) {
+		if (key_event.keysym.sym == _key._up) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: up key pressed." << endl;
 			_up_state = true;
 			_up_press = true;
 			return;
 		}
-		else if (key_event->keysym.sym == _Key._down) {
+		else if (key_event.keysym.sym == _key._down) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: down key pressed." << endl;
 			_down_state = true;
 			_down_press = true;
 			return;
 		}
-		else if (key_event->keysym.sym == _Key._left) {
+		else if (key_event.keysym.sym == _key._left) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: left key pressed." << endl;
 			_left_state = true;
 			_left_press = true;
 			return;
 		}
-		else if (key_event->keysym.sym == _Key._right) {
+		else if (key_event.keysym.sym == _key._right) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: right key pressed." << endl;
 			_right_state = true;
 			_right_press = true;
 			return;
 		}
-		else if (key_event->keysym.sym == _Key._confirm) {
+		else if (key_event.keysym.sym == _key._confirm) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: confirm key pressed." << endl;
 			_confirm_state = true;
 			_confirm_press = true;
 			return;
 		}
-		else if (key_event->keysym.sym == _Key._cancel) {
+		else if (key_event.keysym.sym == _key._cancel) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: cancel key pressed." << endl;
 			_cancel_state = true;
 			_cancel_press = true;
 			return;
 		}
-		else if (key_event->keysym.sym == _Key._menu) {
+		else if (key_event.keysym.sym == _key._menu) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: menu key pressed." << endl;
 			_menu_state = true;
 			_menu_press = true;
 			return;
 		}
-		else if (key_event->keysym.sym == _Key._pause) {
+		else if (key_event.keysym.sym == _key._swap) {
+			//if (ENGINE_DEBUG) cout << "ENGINE: swap key presed." << endl;
+			_swap_state = true;
+			_swap_press = true;
+			return;
+		}
+		else if (key_event.keysym.sym == _key._left_select) {
+			//if (ENGINE_DEBUG) cout << "ENGINE: left select key pressed." << endl;
+			_left_select_state = true;
+			_left_select_press = true;
+			return;
+		}
+		else if (key_event.keysym.sym == _key._right_select) {
+			//if (ENGINE_DEBUG) cout << "ENGINE: right select key pressed." << endl;
+			_right_select_state = true;
+			_right_select_press = true;
+			return;
+		}
+		else if (key_event.keysym.sym == _key._pause) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: pause key pressed." << endl;
 			// Don't pause if we are in BootMode, QuitMode
 			if (_ModeManager->GetGameType() == ENGINE_BOOT_MODE || _ModeManager->GetGameType() == ENGINE_QUIT_MODE) {
@@ -529,66 +657,203 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent *key_event) {
 	}
 
 	else { // Key was released
-		if (key_event->keysym.mod & KMOD_CTRL) // Don't recognize a key release if ctrl is down
+		if (key_event.keysym.mod & KMOD_CTRL) // Don't recognize a key release if ctrl is down
 			return;
 
-		if (key_event->keysym.sym == _Key._up) {
+		if (key_event.keysym.sym == _key._up) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: up key released." << endl;
 			_up_state = false;
 			_up_release = true;
 			return;
 		}
-		else if (key_event->keysym.sym == _Key._down) {
+		else if (key_event.keysym.sym == _key._down) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: down key released." << endl;
 			_down_state = false;
 			_down_release = true;
 			return;
 		}
-		else if (key_event->keysym.sym == _Key._left) {
+		else if (key_event.keysym.sym == _key._left) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: left key released." << endl;
 			_left_state = false;
 			_left_release = true;
 			return;
 		}
-		else if (key_event->keysym.sym == _Key._right) {
+		else if (key_event.keysym.sym == _key._right) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: right key released." << endl;
 			_right_state = false;
 			_right_release = true;
 			return;
 		}
-		else if (key_event->keysym.sym == _Key._confirm) {
+		else if (key_event.keysym.sym == _key._confirm) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: confirm key released." << endl;
 			_confirm_state = false;
 			_confirm_release = true;
 			return;
 		}
-		else if (key_event->keysym.sym == _Key._cancel) {
+		else if (key_event.keysym.sym == _key._cancel) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: cancel key released." << endl;
 			_cancel_state = false;
 			_cancel_release = true;
 			return;
 		}
-		else if (key_event->keysym.sym == _Key._menu) {
+		else if (key_event.keysym.sym == _key._menu) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: menu key released." << endl;
 			_menu_state = false;
 			_menu_release = true;
 			return;
 		}
+		else if (key_event.keysym.sym == _key._swap) {
+			//if (ENGINE_DEBUG) cout << "ENGINE: swap key released." << endl;
+			_swap_state = false;
+			_swap_release = true;
+			return;
+		}
+		else if (key_event.keysym.sym == _key._left_select) {
+			//if (ENGINE_DEBUG) cout << "ENGINE: left select key released." << endl;
+			_left_select_state = false;
+			_left_select_release = true;
+			return;
+		}
+		else if (key_event.keysym.sym == _key._right_select) {
+			//if (ENGINE_DEBUG) cout << "ENGINE: right select key released." << endl;
+			_right_select_state = false;
+			_right_select_release = true;
+			return;
+		}
 	}
-}
+} // void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event)
 
 
-
-// Handles all joystick events for the game (not implemented yet)
-void GameInput::_JoystickEventHandler(SDL_Event *js_event) {
-	switch (js_event->type) {
-		case SDL_JOYAXISMOTION:
-		case SDL_JOYBALLMOTION:
-		case SDL_JOYHATMOTION:
-		case SDL_JOYBUTTONDOWN:
-		case SDL_JOYBUTTONUP:
-			break;
-	}
-}
+// Handles all joystick events for the game 
+void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
+	if (js_event.type == SDL_JOYAXISMOTION) {
+		if (js_event.jaxis.axis == 0) { // X-axis motion
+			if (_joyaxis_x_first == true) {
+				_joystick._x_current_peak = js_event.jaxis.value;
+				_joyaxis_x_first = false;
+			}
+			else if (abs(js_event.jaxis.value) > abs(_joystick._x_current_peak)) {
+				_joystick._x_current_peak = js_event.jaxis.value;
+			} 
+		}
+		else { // Y-axis motion
+			if (_joyaxis_y_first == true) {
+				_joystick._y_current_peak = js_event.jaxis.value;
+				_joyaxis_y_first = false;
+			}
+			if (abs(js_event.jaxis.value) > abs(_joystick._y_current_peak)) {
+				_joystick._y_current_peak = js_event.jaxis.value;
+			} 
+		}
+	} // if (js_event.type == SDL_JOYAXISMOTION)
+	else if (js_event.type == SDL_JOYBUTTONDOWN) {
+		if (js_event.jbutton.button == _joystick._confirm) {
+			//if (ENGINE_DEBUG) cout << "ENGINE: confirm button pressed." << endl;
+			_confirm_state = true;
+			_confirm_press = true;
+			return;
+		}
+		else if (js_event.jbutton.button == _joystick._cancel) {
+			//if (ENGINE_DEBUG) cout << "ENGINE: cancel button pressed." << endl;
+			_cancel_state = true;
+			_cancel_press = true;
+			return;
+		}
+		else if (js_event.jbutton.button == _joystick._menu) {
+			//if (ENGINE_DEBUG) cout << "ENGINE: menu button pressed." << endl;
+			_menu_state = true;
+			_menu_press = true;
+			return;
+		}
+		else if (js_event.jbutton.button == _joystick._swap) {
+			//if (ENGINE_DEBUG) cout << "ENGINE: swap button presed." << endl;
+			_swap_state = true;
+			_swap_press = true;
+			return;
+		}
+		else if (js_event.jbutton.button == _joystick._left_select) {
+			//if (ENGINE_DEBUG) cout << "ENGINE: left select button pressed." << endl;
+			_left_select_state = true;
+			_left_select_press = true;
+			return;
+		}
+		else if (js_event.jbutton.button == _joystick._right_select) {
+			//if (ENGINE_DEBUG) cout << "ENGINE: right select button pressed." << endl;
+			_right_select_state = true;
+			_right_select_press = true;
+			return;
+		}
+		else if (js_event.jbutton.button == _joystick._pause) {
+			//if (ENGINE_DEBUG) cout << "ENGINE: pause button pressed." << endl;
+			// Don't pause if we are in BootMode, QuitMode
+			if (_ModeManager->GetGameType() == ENGINE_BOOT_MODE || _ModeManager->GetGameType() == ENGINE_QUIT_MODE) {
+				return;
+			}
+			// If we are in PauseMode, unpause the game
+			else if (_ModeManager->GetGameType() == ENGINE_PAUSE_MODE) {
+				_ModeManager->Pop(); // We're no longer in pause mode, so pop it from the stack
+			}
+			// Otherwise, we push PauseMode onto the stack
+			else {
+				PauseMode *PM = new PauseMode();
+				_ModeManager->Push(PM);
+			}
+			return;
+		}
+		else if (js_event.jbutton.button == _joystick._quit) {
+			// We quit the game without question if we are in BootMode or QuitMode
+			if (_ModeManager->GetGameType() == ENGINE_BOOT_MODE || _ModeManager->GetGameType() == ENGINE_QUIT_MODE) {
+				_SettingsManager->ExitGame();
+			}
+			// Otherwise, we push QuitMode onto the stack
+			else {
+				QuitMode *QM = new QuitMode();
+				_ModeManager->Push(QM);
+			}
+			return;
+		}
+	} // else if (js_event.type == JOYBUTTONDOWN)
+	else if (js_event.type == SDL_JOYBUTTONUP) {
+		if (js_event.jbutton.button == _joystick._confirm) {
+			//if (ENGINE_DEBUG) cout << "ENGINE: confirm button released." << endl;
+			_confirm_state = false;
+			_confirm_release = true;
+			return;
+		}
+		else if (js_event.jbutton.button == _joystick._cancel) {
+			//if (ENGINE_DEBUG) cout << "ENGINE: cancel button released." << endl;
+			_cancel_state = false;
+			_cancel_release = true;
+			return;
+		}
+		else if (js_event.jbutton.button == _joystick._menu) {
+			//if (ENGINE_DEBUG) cout << "ENGINE: menu button released." << endl;
+			_menu_state = false;
+			_menu_release = true;
+			return;
+		}
+		else if (js_event.jbutton.button == _joystick._swap) {
+			//if (ENGINE_DEBUG) cout << "ENGINE: swap button released." << endl;
+			_swap_state = false;
+			_swap_release = true;
+			return;
+		}
+		else if (js_event.jbutton.button == _joystick._left_select) {
+			//if (ENGINE_DEBUG) cout << "ENGINE: left select button released." << endl;
+			_left_select_state = false;
+			_left_select_release = true;
+			return;
+		}
+		else if (js_event.jbutton.button == _joystick._right_select) {
+			//if (ENGINE_DEBUG) cout << "ENGINE: right select button released." << endl;
+			_right_select_state = false;
+			_right_select_release = true;
+			return;
+		}
+	} // else if (js_event.type == JOYBUTTONUP)
+	
+	// SDL_JOYBALLMOTION and SDL_JOYHATMOTION are ignored for now. Should we process them?
+	
+} // void GameInput::_JoystickEventHandler(SDL_Event& js_event)
 
 }// namespace hoa_engine

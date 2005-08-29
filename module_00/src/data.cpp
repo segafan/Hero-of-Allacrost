@@ -47,15 +47,22 @@ GameData::GameData() {
 		lib->func(_l_stack);      // open library
 		lua_settop(_l_stack, 0);  // Clear the stack
 	}
-
-	_AudioManager = GameAudio::_GetReference();
-	_VideoManager = GameVideo::_GetReference();
 }
+
 
 // Close Lua upon destruction
 GameData::~GameData() {
 	if (DATA_DEBUG) cout << "DATA: GameData destructor invoked." << endl;
 	lua_close(_l_stack);
+}
+
+
+// Initialize the singleton pointers
+bool GameData::Initialize() {
+	_AudioManager = GameAudio::GetReference();
+	_VideoManager = GameVideo::GetReference();
+	_SettingsManager = GameSettings::GetReference();
+	return true;
 }
 
 
@@ -175,7 +182,6 @@ void GameData::_FillIntVector(std::vector<int> *vect, const char *key) {
 
 // This function initializes all the members of the GameSettings singleton class
 void GameData::LoadGameSettings () {
-	hoa_engine::GameSettings *SettingsManager = GameSettings::_GetReference();
 	const char *filename = "dat/config/settings.hoa";
 
 	if (luaL_loadfile(_l_stack, filename) || lua_pcall(_l_stack, 0, 0, 0))
@@ -185,16 +191,16 @@ void GameData::LoadGameSettings () {
 	if (!lua_istable(_l_stack, LUA_STACK_TOP))
 		cerr << "DATA ERROR: could not retrieve table \"video_settings\"" << endl;
 
-	//   SettingsManager->screen_resx = GetTableInt("screen_resx");
-	//   SettingsManager->screen_resy = GetTableInt("screen_resy");
-	SettingsManager->SetFullScreen(_GetTableBool("full_screen"));
+	//   _SettingsManager->screen_resx = GetTableInt("screen_resx");
+	//   _SettingsManager->screen_resy = GetTableInt("screen_resy");
+	_SettingsManager->SetFullScreen(_GetTableBool("full_screen"));
 
 	lua_getglobal(_l_stack, "audio_settings");
 	if (!lua_istable(_l_stack, LUA_STACK_TOP))
 		cerr << "DATA ERROR: could not retrieve table \"audio_settings\"" << endl;
 
-	SettingsManager->music_vol = _GetTableInt("music_vol");
-	SettingsManager->sound_vol = _GetTableInt("sound_vol");
+	_SettingsManager->music_vol = _GetTableInt("music_vol");
+	_SettingsManager->sound_vol = _GetTableInt("sound_vol");
 
 	lua_pop(_l_stack, 2); // Pop all tables from the stack before returning
 }
@@ -205,26 +211,43 @@ void GameData::LoadKeyJoyState(KeyState *keystate, JoystickState *joystate) {
 		cerr << "DATA ERROR: Could not load " << filename << " :: " << lua_tostring(_l_stack, -1) << endl;
 
 	lua_getglobal(_l_stack, "key_settings");
-	if (!lua_istable(_l_stack, LUA_STACK_TOP))
+	if (!lua_istable(_l_stack, LUA_STACK_TOP)) {
 		cerr << "DATA ERROR: could not retrieve table \"key_settings\"" << endl;
-
-	keystate->_up = (SDLKey)_GetTableInt("up");
-	keystate->_down = (SDLKey)_GetTableInt("down");
-	keystate->_left = (SDLKey)_GetTableInt("left");
-	keystate->_right = (SDLKey)_GetTableInt("right");
-	keystate->_confirm = (SDLKey)_GetTableInt("confirm");
-	keystate->_cancel = (SDLKey)_GetTableInt("cancel");
-	keystate->_menu = (SDLKey)_GetTableInt("menu");
-	keystate->_swap = (SDLKey)_GetTableInt("swap");
-	keystate->_left_select = (SDLKey)_GetTableInt("left_select");
-	keystate->_right_select = (SDLKey)_GetTableInt("right_select");
-
-	keystate->_pause = (SDLKey)_GetTableInt("pause");
-
+	}
+	else {
+		keystate->_up = (SDLKey)_GetTableInt("up");
+		keystate->_down = (SDLKey)_GetTableInt("down");
+		keystate->_left = (SDLKey)_GetTableInt("left");
+		keystate->_right = (SDLKey)_GetTableInt("right");
+		keystate->_confirm = (SDLKey)_GetTableInt("confirm");
+		keystate->_cancel = (SDLKey)_GetTableInt("cancel");
+		keystate->_menu = (SDLKey)_GetTableInt("menu");
+		keystate->_swap = (SDLKey)_GetTableInt("swap");
+		keystate->_left_select = (SDLKey)_GetTableInt("left_select");
+		keystate->_right_select = (SDLKey)_GetTableInt("right_select");
+		keystate->_pause = (SDLKey)_GetTableInt("pause");
+	}
+		
 	//TODO Add joystick init, after we implement joystick functionality
+	
+	lua_getglobal(_l_stack, "joystick_settings");
+	if (!lua_istable(_l_stack, LUA_STACK_TOP)) {
+		cerr << "DATA ERROR: could not retrieve table \"joystick_settings\"" << endl;
+	}
+	else {
+		joystate->_joy_index = (int32)_GetTableInt("index");
+		joystate->_confirm = (uint8)_GetTableInt("confirm");
+		joystate->_cancel = (uint8)_GetTableInt("cancel");
+		joystate->_menu = (uint8)_GetTableInt("menu");
+		joystate->_swap = (uint8)_GetTableInt("swap");
+		joystate->_left_select = (uint8)_GetTableInt("left_select");
+		joystate->_right_select = (uint8)_GetTableInt("right_select");
+		joystate->_pause = (uint8)_GetTableInt("pause");
+		joystate->_quit = (uint8)_GetTableInt("quit");
+	}
 
-	// POP! :)
-	lua_pop(_l_stack, 1);
+	// Pop the key_settings and joystick_settings tables off the Lua stack
+	lua_pop(_l_stack, 2);
 }
 
 // This function loads all necessary variables and vectors from the boot.hoa config file
@@ -267,7 +290,7 @@ void GameData::LoadBootData(
 	boot_images->push_back(im);
 
 	// Set up a coordinate system - now you can use the boot.hoa to set it to whatever you like
-	GameVideo::_GetReference()->SetCoordSys((float)_GetGlobalInt("coord_sys_x_left"),
+	_VideoManager->SetCoordSys((float)_GetGlobalInt("coord_sys_x_left"),
 					(float) _GetGlobalInt("coord_sys_x_right"),
 					(float) _GetGlobalInt("coord_sys_y_bottom"),
 					(float) _GetGlobalInt("coord_sys_y_top"));
@@ -298,17 +321,17 @@ void GameData::LoadBootData(
 // This one loads all the tiles from img/tile/ directory and reads the map file given
 // by new_map_id. The function should be called only from the MapMode class members.
 void GameData::LoadMap(hoa_map::MapMode *map_mode, int32 new_map_id) {
-	// Load the map file
-	string filename = "dat/maps/map";
-	// filename += "1";	// TEMPORARY TEMPORARY
-	filename += "1";
-	filename += ".hoa";
+// 	// Load the map file
+// 	string filename = "dat/maps/map";
+// 	// filename += "1";	// TEMPORARY TEMPORARY
+// 	filename += "1";
+// 	filename += ".hoa";
+	string filename = "dat/maps/test_map.hoa";
 
 	if (luaL_loadfile(_l_stack, filename.c_str()) || lua_pcall(_l_stack, 0, 0, 0))
 		cout << "LUA ERROR: Could not load "<< filename << " :: " << lua_tostring(_l_stack, -1) << endl;
 
 	// Setup some global map options (explanations are in map.h)
-	map_mode->_map_state.push_back(_GetGlobalInt("map_state"));
 	map_mode->_random_encounters = _GetGlobalBool("random_encounters");
 	map_mode->_encounter_rate = _GetGlobalInt("encounter_rate");
 	// this one will change:
@@ -323,7 +346,7 @@ void GameData::LoadMap(hoa_map::MapMode *map_mode, int32 new_map_id) {
 	string tile_prefix = "img/tile/";	// where they're at
 	_FillStringVector(&tiles_used, "tiles_used");
 	if (tiles_used.size() == 0) {
-		cerr << "DATA ERROR: loading map " << filename << " : No tiles specified for map!! (??)" << endl;
+		cerr << "DATA ERROR: loading map " << filename << " : No tiles specified for map!" << endl;
 		//TODO Add meaningful error codes, and make LoadMap return an int
 		return;
 	}
@@ -414,10 +437,7 @@ void GameData::LoadMap(hoa_map::MapMode *map_mode, int32 new_map_id) {
 		}
 	}
 
-	// load Claudius
-	// >>> SNIPE: See the new definition for the PlayerSprite constructor
-	//map_mode->player_sprite = new PlayerSprite();
-	//map_mode->object_layer.push_back(map_mode->player_sprite);
+	// Load the player's sprite
 }
 
 

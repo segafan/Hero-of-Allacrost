@@ -23,7 +23,7 @@ GUI::GUI()
 	_totalFPS      = 0;
 	
 	_curSample = _numSamples = 0;
-	_videoManager = hoa_video::GameVideo::_GetReference();
+	_videoManager = hoa_video::GameVideo::GetReference();
 	
 	if(!_videoManager)
 	{
