@@ -65,6 +65,14 @@ const uint8 ENGINE_SPANISH = 1;
 const uint8 ENGINE_GERMAN  = 2;
 //@}
 
+//! An internal namespace to be used only within the engine code. 
+namespace private_engine {
+
+//! The threshold value we use to partition the range of joystick values into on and off
+const int16 JOYAXIS_THRESHOLD = 8192;
+
+} // namespace private_engine
+
 /*!****************************************************************************
  *  \brief A (mostly) abstract parent class that all other game mode classes inherit from.
  *

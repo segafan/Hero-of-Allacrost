@@ -33,6 +33,7 @@ using namespace hoa_boot;
 using namespace hoa_quit;
 using namespace hoa_pause;
 using namespace hoa_global;
+using namespace hoa_engine::private_engine;
 
 namespace hoa_engine {
 
@@ -454,68 +455,76 @@ void GameInput::EventHandler() {
 	if (_joystick._js != NULL) {
 		// ******************************* X-Axis Movment *************************************
 		// Check for a x-axis boundary change from left to center or right
-		if ((_joystick._x_previous_peak <= -8192) && (_joystick._x_current_peak > -8192)) { 
+		if ((_joystick._x_previous_peak <= -JOYAXIS_THRESHOLD) && 
+		    (_joystick._x_current_peak > -JOYAXIS_THRESHOLD)) { 
 			_left_state = false;
 			_left_release = true;
 			// Check for a right x-axis boundary change
-			if (_joystick._x_current_peak >= 8192) {
+			if (_joystick._x_current_peak >= JOYAXIS_THRESHOLD) {
 				_right_state = true;
 				_right_press = true;
 			}
 		}
 		// Check for a x-axis boundary change from right to center or left
-		else if ((_joystick._x_previous_peak >= 8192) && (_joystick._x_current_peak < 8192)) {
+		else if ((_joystick._x_previous_peak >= JOYAXIS_THRESHOLD) && 
+		         (_joystick._x_current_peak < JOYAXIS_THRESHOLD)) {
 			_right_state = false;
 			_right_release = true;
 			// Check for a left x-axis boundary change
-			if (_joystick._x_current_peak <= -8192) {
+			if (_joystick._x_current_peak <= -JOYAXIS_THRESHOLD) {
 				_left_state = true;
 				_left_press = true;
 			}
 		}
 		// Check for a x-axis boundary change from center to left
-		else if ((_joystick._x_current_peak <= -8192) && (_joystick._x_previous_peak > -8192) && 
-							(_joystick._x_previous_peak < 8192)) {
+		else if ((_joystick._x_current_peak <= -JOYAXIS_THRESHOLD) && 
+		         (_joystick._x_previous_peak > -JOYAXIS_THRESHOLD) && 
+		         (_joystick._x_previous_peak < JOYAXIS_THRESHOLD)) {
 			_left_state = true;
 			_left_press = true;
 		}
 		// Check for a x-axis boundary change from center to right
-		else if ((_joystick._x_current_peak >= 8192) && (_joystick._x_previous_peak > -8192) && 
-							(_joystick._x_previous_peak > 8192)) {
+		else if ((_joystick._x_current_peak >= JOYAXIS_THRESHOLD) && 
+		         (_joystick._x_previous_peak > -JOYAXIS_THRESHOLD) && 
+		         (_joystick._x_previous_peak > JOYAXIS_THRESHOLD)) {
 			_right_state = true;
 			_right_press = true;
 		}
 		
 		// ******************************* Y-Axis Movment *************************************
 		// Check for a y-axis boundary change from up to center or down
-		if ((_joystick._y_previous_peak <= -8192) && (_joystick._y_current_peak > -8192)) { 
+		if ((_joystick._y_previous_peak <= -JOYAXIS_THRESHOLD) && 
+		    (_joystick._y_current_peak > -JOYAXIS_THRESHOLD)) { 
 			_up_state = false;
 			_up_release = true;
 			// Check for a down y-axis boundary change
-			if (_joystick._y_current_peak >= 8192) {
+			if (_joystick._y_current_peak >= JOYAXIS_THRESHOLD) {
 				_down_state = true;
 				_down_press = true;
 			}
 		}
 		// Check for a y-axis boundary change from down to center or up
-		else if ((_joystick._y_previous_peak >= 8192) && (_joystick._y_current_peak < 8192)) {
+		else if ((_joystick._y_previous_peak >= JOYAXIS_THRESHOLD) && 
+		         (_joystick._y_current_peak < JOYAXIS_THRESHOLD)) {
 			_down_state = false;
 			_down_release = true;
 			// Check for an up y-axis boundary change
-			if (_joystick._y_current_peak <= -8192) {
+			if (_joystick._y_current_peak <= -JOYAXIS_THRESHOLD) {
 				_up_state = true;
 				_up_press = true;
 			}
 		}
 		// Check for a y-axis boundary change from center to up
-		else if ((_joystick._y_current_peak <= -8192) && (_joystick._y_previous_peak > -8192) && 
-							(_joystick._y_previous_peak < 8192)) {
+		else if ((_joystick._y_current_peak <= -JOYAXIS_THRESHOLD) && 
+		         (_joystick._y_previous_peak > -JOYAXIS_THRESHOLD) && 
+		         (_joystick._y_previous_peak < JOYAXIS_THRESHOLD)) {
 			_up_state = true;
 			_up_press = true;
 		}
 		// Check for a x-axis boundary change from center to down
-		else if ((_joystick._y_current_peak >= 8192) && (_joystick._y_previous_peak > -8192) && 
-							(_joystick._y_previous_peak < 8192)) {
+		else if ((_joystick._y_current_peak >= JOYAXIS_THRESHOLD) && 
+		         (_joystick._y_previous_peak > -JOYAXIS_THRESHOLD) && 
+		         (_joystick._y_previous_peak < JOYAXIS_THRESHOLD)) {
 			_down_state = true;
 			_down_press = true;
 		}
@@ -560,6 +569,7 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 			}
 			else if (key_event.keysym.sym == SDLK_r) {
 				_VideoManager->ToggleFPS();
+				return;
 			}
 			else if (key_event.keysym.sym == SDLK_s) {
 				// Take a screenshot of the current game
@@ -569,6 +579,7 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 			else if (key_event.keysym.sym == SDLK_t) {
 				// Display and cycle through the texture sheets
 				_VideoManager->DEBUG_NextTexSheet();
+				return;
 			}
 			
 			else

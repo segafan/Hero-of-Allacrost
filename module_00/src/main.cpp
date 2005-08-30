@@ -293,24 +293,6 @@ int32 main(int32 argc, char *argv[]) {
 		return 1;
 	}
 	atexit(SDL_Quit);
-
-	// Enable unicode for multilingual keyboard support
-	SDL_EnableUNICODE(1); 
-	
-	// Disable (hide) the mouse cursor
-	SDL_ShowCursor(SDL_DISABLE);
-	
-	// Set the window title + icon
-	SDL_WM_SetCaption("Hero of Allacrost", NULL);
-
-	// Ignore the events that we don't care about so they never appear in the event queue
-	SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
-	SDL_EventState(SDL_MOUSEBUTTONDOWN, SDL_IGNORE);
-	SDL_EventState(SDL_MOUSEBUTTONUP, SDL_IGNORE);
-	SDL_EventState(SDL_SYSWMEVENT, SDL_IGNORE);
-	SDL_EventState(SDL_VIDEOEXPOSE, SDL_IGNORE);
-	SDL_EventState(SDL_USEREVENT, SDL_IGNORE);
-	// NOTE: SDL_ActiveEvent reports mouse focus, input focus, iconified status. Should we disable it???
 	
 	// Create all the game singletons
 	GameAudio *AudioManager = GameAudio::Create();
@@ -350,6 +332,23 @@ int32 main(int32 argc, char *argv[]) {
 		return 1;
 	}
 	
+	// Disable (hide) the mouse cursor
+	SDL_ShowCursor(SDL_DISABLE);
+	
+	// Set the window title + icon
+	SDL_WM_SetCaption("Hero of Allacrost", NULL);
+	
+	// Enable unicode for multilingual keyboard support
+	SDL_EnableUNICODE(1); 
+	
+	// Ignore the events that we don't care about so they never appear in the event queue
+	SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
+	SDL_EventState(SDL_MOUSEBUTTONDOWN, SDL_IGNORE);
+	SDL_EventState(SDL_MOUSEBUTTONUP, SDL_IGNORE);
+	SDL_EventState(SDL_SYSWMEVENT, SDL_IGNORE);
+	SDL_EventState(SDL_VIDEOEXPOSE, SDL_IGNORE);
+	SDL_EventState(SDL_USEREVENT, SDL_IGNORE);
+	// NOTE: SDL_ActiveEvent reports mouse focus, input focus, iconified status. Should we disable it???
 	
 	AudioManager->SetMusicVolume(SettingsManager->music_vol);
 	AudioManager->SetSoundVolume(SettingsManager->sound_vol);
