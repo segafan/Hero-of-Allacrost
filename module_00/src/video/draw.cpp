@@ -21,10 +21,10 @@ bool GameVideo::DrawImage(const ImageDescriptor &id)
 	// if real lighting is enabled, draw images normally since the light overlay
 	// will take care of the modulation. If not, (i.e. no overlay is being used)
 	// then pass the light color so the vertex colors can do the modulation
-	if(_usesLights)
-		return DrawImage(id, Color(1.0f, 1.0f, 1.0f, 1.0f));
-	else
+	if(!_usesLights)
 		return DrawImage(id, _lightColor);
+	else
+		return DrawImage(id, Color(1.0f, 1.0f, 1.0f, 1.0f));
 }
 
 	
@@ -35,42 +35,70 @@ bool GameVideo::DrawImage(const ImageDescriptor &id)
 
 bool GameVideo::DrawImage(const ImageDescriptor &id, const Color &color)
 {
-	_PushContext(); 
+	// don't do anything if this image is completely transparent (invisible)
+	if(color[3] == 0.0f)
+		return true;
+		
 	size_t numElements = id._elements.size();
 	
-	for(uint32 iElement = 0; iElement < numElements; ++iElement)
-	{		
-		glPushMatrix();
-		MoveRel((float)id._elements[iElement].xOffset, (float)id._elements[iElement].yOffset);
-		
-		// include screen shaking effects
-		MoveRel(_shakeX * (_coordSys._right - _coordSys._left) / 1024.0f, 
-		        _shakeY * (_coordSys._top   - _coordSys._bottom) / 768.0f);  
+	float modulation = _fader.GetFadeModulation();
+	Color fadeColor(modulation, modulation, modulation, 1.0f);
 
-		float modulation = _fader.GetFadeModulation();
-		Color fadeColor(modulation, modulation, modulation, 1.0f);
+	float oldxoff = 0.0f, oldyoff = 0.0f;
+
+	float shakeX = _shakeX * (_coordSys._right - _coordSys._left) / 1024.0f;
+	float shakeY = _shakeY * (_coordSys._top   - _coordSys._bottom) / 768.0f;
+
+	if(color == Color::white && modulation == 1.0f)
+	{
+		// call draw element with no color parameter so we don't
+		// waste time doing modulation
 		
-		if(!_DrawElement
-		(
-			id._elements[iElement].image, 
-			id._elements[iElement].width, 
-			id._elements[iElement].height,
-			id._elements[iElement].color[0] * color * fadeColor,
-			id._elements[iElement].color[1] * color * fadeColor,
-			id._elements[iElement].color[2] * color * fadeColor,
-			id._elements[iElement].color[3] * color * fadeColor
-		))
-		{
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: _DrawElement() failed in DrawImage()!" << endl;
+		for(uint32 iElement = 0; iElement < numElements; ++iElement)
+		{		
+			float xoff = (float)id._elements[iElement].xOffset + shakeX;
+			float yoff = (float)id._elements[iElement].yOffset + shakeY;
+
+			MoveRelative(xoff - oldxoff, yoff - oldyoff);
 			
-			_PopContext();
-			return false;
+			if(!_DrawElement(id._elements[iElement]))
+			{
+				if(VIDEO_DEBUG)
+					cerr << "VIDEO ERROR: _DrawElement() failed in DrawImage()!" << endl;
+				
+				MoveRelative(-xoff, -yoff);
+				return false;
+			}
+			
+			oldxoff = xoff;
+			oldyoff = yoff;
 		}
-		glPopMatrix();
+	}
+	else
+	{
+		// call draw element function that takes a color parameter
+		for(uint32 iElement = 0; iElement < numElements; ++iElement)
+		{		
+			float xoff = (float)id._elements[iElement].xOffset + shakeX;
+			float yoff = (float)id._elements[iElement].yOffset + shakeY;
+
+			MoveRelative(xoff - oldxoff, yoff - oldyoff);
+			
+			if(!_DrawElement(id._elements[iElement], color * fadeColor))
+			{
+				if(VIDEO_DEBUG)
+					cerr << "VIDEO ERROR: _DrawElement() failed in DrawImage()!" << endl;
+				
+				MoveRelative(-xoff, -yoff);
+				return false;
+			}
+			
+			oldxoff = xoff;
+			oldyoff = yoff;
+		}
 	}
 
-	_PopContext();
+	MoveRelative(-oldxoff, -oldyoff);
 
 	return true;
 }
@@ -82,22 +110,13 @@ bool GameVideo::DrawImage(const ImageDescriptor &id, const Color &color)
 
 bool GameVideo::_DrawElement
 (
-	const Image *const img, 
-	float w, 
-	float h, 
-	const Color &c_TL,
-	const Color &c_TR,
-	const Color &c_BL,
-	const Color &c_BR
+	const ImageElement &element
 )
-{
-	// if all of the vertex colors have zero alpha, don't draw!
-	if(c_TL[3] == 0.0f && c_TR[3] == 0.0f && c_BL[3] == 0.0f && c_BR[3] == 0.0f)
-	{
-		// do nothing, alpha is 0
-		return true;
-	}
-		
+{	
+	Image *img = element.image;
+	float h    = element.height;
+	float w    = element.width;
+	
 	float s0,s1,t0,t1;
 	float xoff,yoff;
 	float xlo,xhi,ylo,yhi;
@@ -116,49 +135,42 @@ bool GameVideo::_DrawElement
 	{ 
 		s0=1-s0; 
 		s1=1-s1; 
-	} 
-
-	if (_yflip) 
-	{ 
-		t0=1-t0;
-		t1=1-t1;
-	} 
-
-	if (_xflip)
-	{
 		xlo = (float) w;
 		xhi = 0.0f;
-	}
+	} 
 	else
 	{
 		xlo = 0.0f;
 		xhi = (float) w;
 	}
-	if (cs._left > cs._right) 
-	{ 
-		xlo = (float) -xlo; 
-		xhi = (float) -xhi; 
-	}
 
-	if (_yflip)
-	{
+	if (_yflip) 
+	{ 
+		t0=1-t0;
+		t1=1-t1;
 		ylo=(float) h;
 		yhi=0.0f;
-	}
+	} 
 	else
 	{
 		ylo=0.0f;
 		yhi=(float) h;
 	}
+
 	
+	if (cs._left > cs._right) 
+	{ 
+		xlo = (float) -xlo; 
+		xhi = (float) -xhi; 
+	}
 	if (cs._bottom > cs._top) 
 	{ 
 		ylo=(float) -ylo; 
 		yhi=(float) -yhi; 
 	}
 
-	xoff = ((_xalign+1) * w) * .5f * (cs._left < cs._right ? -1 : +1);
-	yoff = ((_yalign+1) * h) * .5f * (cs._bottom < cs._top ? -1 : +1);
+	xoff = ((_xalign+1) * w) * .5f * -cs._rightDir;
+	yoff = ((_yalign+1) * h) * .5f * -cs._upDir;
 
 	if(img)
 	{
@@ -166,7 +178,7 @@ bool GameVideo::_DrawElement
 		_BindTexture(img->texSheet->texID);
 	}	
 	
-	if (_blend || c_TL[3] < 1.0f || c_TR[3] < 1.0f || c_BL[3] < 1.0f || c_BR[3] < 1.0f) 
+	if(_blend)
 	{
 		glEnable(GL_BLEND);
 		if (_blend == 1)
@@ -176,7 +188,12 @@ bool GameVideo::_DrawElement
 	}
 	else
 	{
-		glDisable(GL_BLEND);
+		// if blending isn't in the draw flags, don't use blending UNLESS
+		// the given image element has translucent vertex colors
+		if(!element.blend)
+			glDisable(GL_BLEND);
+		else
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
 
 	glPushMatrix();
@@ -184,36 +201,251 @@ bool GameVideo::_DrawElement
 	glTranslatef(xoff, yoff, 0);
 	glBegin(GL_QUADS);
 	
-		glColor4fv(&(c_BL[0]));		
-		if(img)
+	if(img)
+	{
+		if(element.oneColor)
+		{
+			glColor4fv((GLfloat *)&element.color[0]);
 			glTexCoord2f(s0, t1);
-		
-		glVertex2f(xlo, ylo); //bl
-
-		glColor4fv(&(c_BR[0]));		
-		if(img)
+			glVertex2f(xlo, ylo); //bl
 			glTexCoord2f(s1, t1);
-
-		glVertex2f(xhi, ylo); //br
-
-		glColor4fv(&(c_TR[0]));		
-		if(img)
+			glVertex2f(xhi, ylo); //br
 			glTexCoord2f(s1, t0);
-
-		glVertex2f(xhi, yhi);//tr
-
-		glColor4fv(&(c_TL[0]));		
-		if(img)
+			glVertex2f(xhi, yhi); //tr
 			glTexCoord2f(s0, t0);
-
-		glVertex2f(xlo, yhi);//tl
+			glVertex2f(xlo, yhi); //tl
+		}
+		else
+		{
+			glColor4fv((GLfloat *)&element.color[0]);
+			glTexCoord2f(s0, t1);
+			glVertex2f(xlo, ylo); //bl
+			glColor4fv((GLfloat *)&element.color[1]);
+			glTexCoord2f(s1, t1);
+			glVertex2f(xhi, ylo); //br
+			glColor4fv((GLfloat *)&element.color[2]);
+			glTexCoord2f(s1, t0);
+			glVertex2f(xhi, yhi); //tr
+			glColor4fv((GLfloat *)&element.color[3]);
+			glTexCoord2f(s0, t0);
+			glVertex2f(xlo, yhi); //tl			
+		}		
+	}
+	else
+	{
+		if(element.oneColor)
+		{
+			glColor4fv((GLfloat *)&element.color[0]);
+			glVertex2f(xlo, ylo); //bl
+			glVertex2f(xhi, ylo); //br
+			glVertex2f(xhi, yhi); //tr
+			glVertex2f(xlo, yhi); //tl			
+		}
+		else
+		{
+			glColor4fv((GLfloat *)&element.color[0]);
+			glVertex2f(xlo, ylo); //bl
+			glColor4fv((GLfloat *)&element.color[1]);
+			glVertex2f(xhi, ylo); //br
+			glColor4fv((GLfloat *)&element.color[2]);
+			glVertex2f(xhi, yhi); //tr
+			glColor4fv((GLfloat *)&element.color[3]);
+			glVertex2f(xlo, yhi); //tl			
+		}
+	}
 
 	glEnd();
 	glPopMatrix();
 
 	glDisable(GL_TEXTURE_2D);
 	if (_blend)
-		glDisable(GL_BLEND);	
+		glDisable(GL_BLEND);
+		
+	if(glGetError())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: glGetError() returned true in _DrawElement()!" << endl;
+		return false;
+	}		
+		
+	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// _DrawElement: draws an image element. This is only used privately.
+//
+// Note: this version includes modulation set by the image descriptor and
+//       screen fader
+//-----------------------------------------------------------------------------
+
+bool GameVideo::_DrawElement
+(
+	const ImageElement &element,
+	const Color &modulateColor
+)
+{	
+	Image *img = element.image;
+	float h    = element.height;
+	float w    = element.width;
+	
+	float s0,s1,t0,t1;
+	float xoff,yoff;
+	float xlo,xhi,ylo,yhi;
+
+	CoordSys &cs = _coordSys;
+	
+	if(img)
+	{
+		s0 = img->u1;
+		s1 = img->u2;
+		t0 = img->v1;
+		t1 = img->v2;
+	}
+
+	if (_xflip) 
+	{ 
+		s0=1-s0; 
+		s1=1-s1; 
+		xlo = (float) w;
+		xhi = 0.0f;
+	} 
+	else
+	{
+		xlo = 0.0f;
+		xhi = (float) w;
+	}
+
+	if (_yflip) 
+	{ 
+		t0=1-t0;
+		t1=1-t1;
+		ylo=(float) h;
+		yhi=0.0f;
+	} 
+	else
+	{
+		ylo=0.0f;
+		yhi=(float) h;
+	}
+
+	
+	if (cs._left > cs._right) 
+	{ 
+		xlo = (float) -xlo; 
+		xhi = (float) -xhi; 
+	}
+	if (cs._bottom > cs._top) 
+	{ 
+		ylo=(float) -ylo; 
+		yhi=(float) -yhi; 
+	}
+
+	xoff = ((_xalign+1) * w) * .5f * -cs._rightDir;
+	yoff = ((_yalign+1) * h) * .5f * -cs._upDir;
+
+	if(img)
+	{
+		glEnable(GL_TEXTURE_2D);
+		_BindTexture(img->texSheet->texID);
+	}	
+	
+	if(_blend)
+	{
+		glEnable(GL_BLEND);
+		if (_blend == 1)
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		else
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE); // additive
+	}
+	else
+	{
+		// if blending isn't in the draw flags, don't use blending UNLESS
+		// the given image element has translucent vertex colors
+		if(!element.blend)
+			glDisable(GL_BLEND);
+		else
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	}
+
+	glPushMatrix();
+	
+	glTranslatef(xoff, yoff, 0);
+	glBegin(GL_QUADS);
+	
+	if(img)
+	{
+		if(element.oneColor)
+		{
+			Color color = element.color[0] * modulateColor;
+			glColor4fv((GLfloat *)&color);
+			glTexCoord2f(s0, t1);
+			glVertex2f(xlo, ylo); //bl
+			glTexCoord2f(s1, t1);
+			glVertex2f(xhi, ylo); //br
+			glTexCoord2f(s1, t0);
+			glVertex2f(xhi, yhi); //tr
+			glTexCoord2f(s0, t0);
+			glVertex2f(xlo, yhi); //tl
+		}
+		else
+		{
+			Color color[4];
+			color[0] = modulateColor * element.color[0];
+			color[1] = modulateColor * element.color[1];
+			color[2] = modulateColor * element.color[2];
+			color[3] = modulateColor * element.color[3];
+			
+			glColor4fv((GLfloat *)&color[0]);
+			glTexCoord2f(s0, t1);
+			glVertex2f(xlo, ylo); //bl
+			glColor4fv((GLfloat *)&color[1]);
+			glTexCoord2f(s1, t1);
+			glVertex2f(xhi, ylo); //br
+			glColor4fv((GLfloat *)&color[2]);
+			glTexCoord2f(s1, t0);
+			glVertex2f(xhi, yhi); //tr
+			glColor4fv((GLfloat *)&color[3]);
+			glTexCoord2f(s0, t0);
+			glVertex2f(xlo, yhi); //tl			
+		}		
+	}
+	else
+	{
+		if(element.oneColor)
+		{
+			Color color = element.color[0] * modulateColor;			
+			glColor4fv((GLfloat *)&color);
+			glVertex2f(xlo, ylo); //bl
+			glVertex2f(xhi, ylo); //br
+			glVertex2f(xhi, yhi); //tr
+			glVertex2f(xlo, yhi); //tl			
+		}
+		else
+		{
+			Color color[4];
+			color[0] = modulateColor * element.color[0];
+			color[1] = modulateColor * element.color[1];
+			color[2] = modulateColor * element.color[2];
+			color[3] = modulateColor * element.color[3];
+
+			glColor4fv((GLfloat *)&color[0]);
+			glVertex2f(xlo, ylo); //bl
+			glColor4fv((GLfloat *)&color[1]);
+			glVertex2f(xhi, ylo); //br
+			glColor4fv((GLfloat *)&color[2]);
+			glVertex2f(xhi, yhi); //tr
+			glColor4fv((GLfloat *)&color[3]);
+			glVertex2f(xlo, yhi); //tl			
+		}
+	}
+
+	glEnd();
+	glPopMatrix();
+
+	glDisable(GL_TEXTURE_2D);
+	if (_blend)
+		glDisable(GL_BLEND);
 		
 	if(glGetError())
 	{

@@ -7,6 +7,7 @@
 
 using namespace std;
 using namespace hoa_video::private_video;
+using namespace hoa_utils;
 
 namespace hoa_video 
 {
@@ -20,6 +21,7 @@ SINGLETON_INITIALIZE(GameVideo);
 // Static variables
 //-----------------------------------------------------------------------------
 
+Color Color::clear (0.0f, 0.0f, 0.0f, 0.0f);
 Color Color::white (1.0f, 1.0f, 1.0f, 1.0f);
 Color Color::gray  (0.5f, 0.5f, 0.5f, 1.0f);
 Color Color::black (0.0f, 0.0f, 0.0f, 1.0f);
@@ -94,7 +96,10 @@ GameVideo::GameVideo()
   _shakeY(0),
   _fogColor(1.0f, 1.0f, 1.0f, 1.0f),
   _fogIntensity(0.0f),
-  _lightColor(1.0f, 1.0f, 1.0f, 1.0f)
+  _lightColor(1.0f, 1.0f, 1.0f, 1.0f),
+  _currentTextColor(1.0f, 1.0f, 1.0f, 1.0f),
+  _textShadow(false),
+  _coordSys(0.0f, 1024.0f, 0.0f, 768.0f)
 {
 	if (VIDEO_DEBUG) 
 		cout << "VIDEO: GameVideo constructor invoked\n";
@@ -263,6 +268,9 @@ bool GameVideo::Initialize()
 	if(VIDEO_DEBUG)
 		cout << "VIDEO: GameVideo::Initialize() returned successfully" << endl;
 	
+	
+	EnableTextShadow(true);
+
 	return true;
 }
 
@@ -362,6 +370,19 @@ GameVideo::~GameVideo()
 		++iFont;
 	}
 	
+	// delete font properties
+	
+	map<string, FontProperties *>::iterator iFontProp    = _fontProperties.begin();
+	map<string, FontProperties *>::iterator iFontPropEnd = _fontProperties.end();
+	
+	while(iFontProp != _fontProperties.end())
+	{
+		FontProperties *fp = iFontProp->second;		
+		delete fp;		
+		++iFontProp;
+	}
+	
+		
 	// uninitialize SDL_ttf
 	TTF_Quit();
 	
@@ -447,9 +468,9 @@ void GameVideo::SetDrawFlags(int32 firstflag, ...)
 		case VIDEO_X_CENTER: _xalign=0; break;
 		case VIDEO_X_RIGHT: _xalign=1; break;
 
-		case VIDEO_Y_TOP: _yalign=-1; break;
+		case VIDEO_Y_TOP: _yalign=1; break;
 		case VIDEO_Y_CENTER: _yalign=0; break;
-		case VIDEO_Y_BOTTOM: _yalign=1; break;
+		case VIDEO_Y_BOTTOM: _yalign=-1; break;
 
 		case VIDEO_X_NOFLIP: _xflip=0; break;
 		case VIDEO_X_FLIP: _xflip=1; break;
@@ -619,7 +640,7 @@ bool GameVideo::Display(int32 frameTime)
 		fadeOverlay.SetDimensions(1024.0f, 768.0f);
 		fadeOverlay.SetColor(c);
 		LoadImage(fadeOverlay);		
-		SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
+		SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 		PushState();
 		Move(0, 0);
 		DrawImage(fadeOverlay);		
@@ -732,7 +753,8 @@ bool GameVideo::_DEBUG_ShowTexSwitches()
 	if( !SetFont("debug_font"))
 		return false;
 		
-	if( !DrawText(text, 876.0f, 690.0f))
+	Move(896.0f, 690.0f);
+	if( !DrawText(text))
 		return false;
 		
 	return true;
@@ -756,10 +778,10 @@ void GameVideo::Move(float tx, float ty)
 }
 
 //-----------------------------------------------------------------------------
-// MoveRel: 
+// MoveRelative: 
 //-----------------------------------------------------------------------------
 
-void GameVideo::MoveRel(float tx, float ty) 
+void GameVideo::MoveRelative(float tx, float ty) 
 {
 #ifndef NDEBUG
 	GLint matrixMode;
@@ -792,12 +814,8 @@ void GameVideo::Rotate(float acAngle)
 //-----------------------------------------------------------------------------
 
 void GameVideo::PushState() {
-#ifndef NDEBUG
-	GLint matrixMode;
-	glGetIntegerv(GL_MATRIX_MODE, &matrixMode);
-	assert(matrixMode == GL_MODELVIEW);
-#endif
-	glPushMatrix();
+	//glPushMatrix();
+	_PushContext();
 }
 
 
@@ -807,12 +825,8 @@ void GameVideo::PushState() {
 
 void GameVideo::PopState() 
 {
-#ifndef NDEBUG
-	GLint matrixMode;
-	glGetIntegerv(GL_MATRIX_MODE, &matrixMode);
-	assert(matrixMode == GL_MODELVIEW);
-#endif
-	glPopMatrix();
+	//glPopMatrix();
+	_PopContext();
 }
 
 
@@ -1235,7 +1249,8 @@ string GameVideo::_CreateTempFilename(const string &extension)
 void GameVideo::_PushContext()
 {
 	// push current modelview transformation
-	PushState();
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
 	
 	// save context information
 	Context c;
@@ -1275,7 +1290,8 @@ void GameVideo::_PopContext()
 	_contextStack.pop();
 
 	// restore modelview transformation
-	PopState();
+	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
 }
 
 

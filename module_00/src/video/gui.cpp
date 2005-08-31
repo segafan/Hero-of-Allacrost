@@ -57,7 +57,7 @@ GUI::~GUI()
 
 bool GUI::DrawFPS(int32 frameTime)
 {
-	_videoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_X_NOFLIP, VIDEO_Y_NOFLIP, VIDEO_BLEND, 0);
+	_videoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_X_NOFLIP, VIDEO_Y_NOFLIP, VIDEO_BLEND, 0);
 	
 	// calculate the FPS for current frame	
 	int32 fps = 1000;		
@@ -129,7 +129,8 @@ bool GUI::DrawFPS(int32 frameTime)
 		return false;
 	}
 	
-	if( !_videoManager->DrawText(fpsText, 930.0f, 720.0f))
+	_videoManager->Move(930.0f, 720.0f);
+	if( !_videoManager->DrawText(fpsText))
 	{
 		return false;
 	}

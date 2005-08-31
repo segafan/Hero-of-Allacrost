@@ -8,6 +8,7 @@
 using namespace std;
 using namespace hoa_video::private_video;
 using namespace hoa_video;
+using namespace hoa_utils;
 
 namespace hoa_video 
 {
@@ -687,15 +688,17 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 
 
 	_PushContext();	
-	SetDrawFlags(VIDEO_NO_BLEND, VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
+	SetDrawFlags(VIDEO_NO_BLEND, VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 	SetCoordSys(0.0f, 1024.0f, 0.0f, 760.0f);
 	
 	glPushMatrix();
 
 	Move(0.0f,0.0f);
 	glScalef(0.5f, 0.5f, 0.5f);
+
+	ImageElement elem(&img, 0.0f, 0.0f, (float)w, (float)h);
 	
-	if(!_DrawElement(&img, (float)w, (float)h, Color::white, Color::white, Color::white, Color::white))
+	if(!_DrawElement(elem))
 	{
 		_PopContext();
 		return false;
@@ -711,21 +714,24 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 	
 	char buf[200];
 	
-	if(!DrawText("Current Texture sheet:", 20, _coordSys._top - 30))
+	Move(20, _coordSys._top - 30);
+	if(!DrawText("Current Texture sheet:"))
 	{
 		_PopContext();
 		return false;
 	}
 	
 	sprintf(buf, "  Sheet #: %d", _currentDebugTexSheet);	
-	if(!DrawText(buf, 20, _coordSys._top - 50))
+	MoveRelative(0, -20);
+	if(!DrawText(buf))
 	{
 		_PopContext();
 		return false;
 	}
 	
+	MoveRelative(0, -20);
 	sprintf(buf, "  Size:    %dx%d", sheet->width, sheet->height);
-	if(!DrawText(buf, 20, _coordSys._top - 70))
+	if(!DrawText(buf))
 	{
 		_PopContext();
 		return false;
@@ -740,21 +746,24 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 	else if(sheet->type == VIDEO_TEXSHEET_ANY)
 		sprintf(buf, "  Type:    Any size");
 	
-	if(!DrawText(buf, 20, _coordSys._top - 90))
+	MoveRelative(0, -20);
+	if(!DrawText(buf))
 	{
 		_PopContext();
 		return false;
 	}
 	
 	sprintf(buf, "  Static:  %d", sheet->isStatic);
-	if(!DrawText(buf, 20, _coordSys._top - 110))
+	MoveRelative(0, -20);
+	if(!DrawText(buf))
 	{
 		_PopContext();
 		return false;
 	}
 
 	sprintf(buf, "  TexID:   %d", sheet->texID);
-	if(!DrawText(buf, 20, _coordSys._top - 130))
+	MoveRelative(0, -20);
+	if(!DrawText(buf))
 	{
 		_PopContext();
 		return false;

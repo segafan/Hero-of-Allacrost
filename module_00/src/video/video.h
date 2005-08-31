@@ -63,40 +63,6 @@ float _Lerp(float alpha, float initial, float final);
 
 
 /*!
-	*  \brief erases all the files in a given directory
-	*
-	*  \param directoryName  name of directory
-	*/	
-bool CleanDirectory(const std::string &directoryName);
-
-
-/*!
-	*  \brief called at the beginning of the application to create a folder called "temp" to store
-	*         temporary files as needed. If the function manages to create the directory, or if
-	*         the directory already existed, returns true. Otherwise, false on failure.
-	*
-	*  \note  If a temp folder already exists, MakeDirectory() simply exits- it doesn't
-	*         check to see if there are any files in the folder and remove them. That's why
-	*         you must call RemoveDirectory before MakeDirectory() at app startup
-	*
-	*  \param directoryName    Name of temp folder, e.g. "temp"
-	*/
-
-bool MakeDirectory(const std::string &directoryName);
-
-
-/*!
-	*  \brief called at the beginning of application before MakeDirectory() to clean out
-	*         any temporary files that may have been left over if the game crashed previously,
-	*         and at the end of the game to remove the temp directory and all files in it
-	*
-	*  \param directoryName    Name of temp folder, e.g. "temp"
-	*/	
-
-bool RemoveDirectory(const std::string &directoryName);
-
-
-/*!
  *  \brief Creates a random float between a and b.
  */
 
@@ -139,11 +105,11 @@ enum ShakeFalloff
 {
 	VIDEO_FALLOFF_INVALID = -1,
 	
-	VIDEO_FALLOFF_NONE,     // shake remains at constant force
-	VIDEO_FALLOFF_EASE,     // shake starts out small, builds up, then dies down
-	VIDEO_FALLOFF_LINEAR,   // shake strength decreases linear til the end
-	VIDEO_FALLOFF_GRADUAL,  // shake decreases slowly and drops off at the end
-	VIDEO_FALLOFF_SUDDEN,   // shake suddenly falls off, for "impacts" like meteors
+	VIDEO_FALLOFF_NONE,     //! shake remains at constant force
+	VIDEO_FALLOFF_EASE,     //! shake starts out small, builds up, then dies down
+	VIDEO_FALLOFF_LINEAR,   //! shake strength decreases linear til the end
+	VIDEO_FALLOFF_GRADUAL,  //! shake decreases slowly and drops off at the end
+	VIDEO_FALLOFF_SUDDEN,   //! shake suddenly falls off, for "impacts" like meteors
 	
 	VIDEO_FALLOFF_TOTAL
 };
@@ -157,15 +123,37 @@ enum InterpolationMethod
 {
 	VIDEO_INTERPOLATE_INVALID = -1,
 	
-	VIDEO_INTERPOLATE_EASE,   // rise from A to B and then down to A again
-	VIDEO_INTERPOLATE_SRCA,   // constant value of A
-	VIDEO_INTERPOLATE_SRCB,   // constant value of B
-	VIDEO_INTERPOLATE_FAST,   // rises quickly at the beginning and levels out
-	VIDEO_INTERPOLATE_SLOW,   // rises slowly at the beginning then shoots up
-	VIDEO_INTERPOLATE_LINEAR, // simple linear interpolation between A and B
+	VIDEO_INTERPOLATE_EASE,   //! rise from A to B and then down to A again
+	VIDEO_INTERPOLATE_SRCA,   //! constant value of A
+	VIDEO_INTERPOLATE_SRCB,   //! constant value of B
+	VIDEO_INTERPOLATE_FAST,   //! rises quickly at the beginning and levels out
+	VIDEO_INTERPOLATE_SLOW,   //! rises slowly at the beginning then shoots up
+	VIDEO_INTERPOLATE_LINEAR, //! simple linear interpolation between A and B
 	
 	VIDEO_INTERPOLATE_TOTAL
 };
+
+
+/*!***************************************************************************
+ *  \brief Styles for text shadows
+ *****************************************************************************/
+
+enum TextShadowStyle
+{
+	VIDEO_TEXT_SHADOW_INVALID = -1,
+	
+	VIDEO_TEXT_SHADOW_NONE,       //! no text shadow, even if shadows are enabled
+	VIDEO_TEXT_SHADOW_DARK,       //! shadowed area is darkened (default)
+	VIDEO_TEXT_SHADOW_LIGHT,      //! shadowed area is lightened
+	VIDEO_TEXT_SHADOW_BLACK,      //! shadowed area is completely black
+	VIDEO_TEXT_SHADOW_COLOR,      //! shadowed area is the color of the text, but less alpha
+	VIDEO_TEXT_SHADOW_INVCOLOR,   //! shadowed area is the inverse of the text's color (e.g. white text, black shadow)
+	
+	VIDEO_TEXT_SHADOW_TOTAL
+	
+};
+
+
 
 
 // forward declarations
@@ -185,6 +173,7 @@ public:
 
 	// default colors
 	
+	static Color clear;
 	static Color white;
 	static Color gray;
 	static Color black;
@@ -199,7 +188,7 @@ public:
 
 	float color[4];
 	
-	bool operator == (const Color &c)
+	bool operator == (const Color &c) const
 	{
 		return color[0] == c.color[0] &&
 		       color[1] == c.color[1] &&
@@ -277,28 +266,61 @@ public:
  *         set the coordinate system to (0,1,0,1)
  *****************************************************************************/
 
-struct CoordSys
+class CoordSys
 {
-	CoordSys() 
-	{
-		_left  = _top    = 0.0f;
-		_right = _bottom = 1.0f;
-	}
-	
+public:
+
+	CoordSys() {}
+
 	CoordSys(float left, float right, float bottom, float top)
 	{
 		_left   = left;
 		_right  = right;
 		_bottom = bottom;
 		_top    = top;
+		
+		if(_right > _left)
+			_rightDir = 1.0f;
+		else
+			_rightDir = -1.0f;
+			
+		if(_top > _bottom)
+			_upDir = 1.0f;
+		else
+			_upDir = -1.0f;
 	}
 	
+private:
+
+	float _upDir;     //! this is 1.0f if increasing y coordinates are up, otherwise it's -1.0f.
+	float _rightDir;  //! this is 1.0f if increasing x coordinates are right, otherwise -1.0f. Pretty much any SANE coordinate system has a rightVec of 1.0f
+
 	float _left;
 	float _right;
 	float _bottom;
 	float _top;
+
+	friend class TextBox;
+	friend class GameVideo;
 };
 
+
+/*!***************************************************************************
+ *  \brief this structure holds properties about fonts
+ *****************************************************************************/
+
+class FontProperties
+{
+public:
+	int32 height;   //! maximum height of all glyphs
+	int32 lineskip; //! SDL_ttf's recommended amount of spacing between lines
+	int32 ascent;   //! height above baseline of font
+	int32 descent;  //! height below baseline of font
+	int32 shadowX;  //! x offset of text shadow
+	int32 shadowY;  //! y offset of text shadow
+	
+	TextShadowStyle shadowStyle;  //! style of text shadow
+};
 
 
 //! private_video namespace, hides things which are used internally
@@ -311,7 +333,7 @@ class TexMemMgr;
 class FixedTexMemMgr;
 class VariableTexMemMgr;
 
-struct Image;
+class Image;
 
 /*!***************************************************************************
  *  \brief Represents the different image sizes that a texture sheet can hold
@@ -335,8 +357,9 @@ enum TexSheetType
  *         images are formed of multiple ImageElements.
  *****************************************************************************/
 
-struct ImageElement
+class ImageElement
 {
+public:
 	ImageElement
 	(
 		Image *image_, 
@@ -352,12 +375,63 @@ struct ImageElement
 		yOffset  = yOffset_;
 		width    = width_;
 		height   = height_;
+		
 		color[0] = color_[0];
-		color[1] = color_[1];
-		color[2] = color_[2];
-		color[3] = color_[3];
+		
+		if(color_[1] == color[0] &&
+		   color_[2] == color[0] &&
+		   color_[3] == color[0])
+		{
+			// if all colors are the same then mark it so we don't have to process all vertex colors
+			oneColor = true;
+
+			if(color[0] == Color::white)
+			{			
+				// if all vertex colors are white, just set a flag so they don't have to
+				// be processed
+				white = true;
+				blend = false;
+			}
+			else
+			{
+				// blend if alpha < 1
+				blend = (color[0][3] < 1.0f);
+			}
+		}
+		else
+		{	
+			color[0] = color_[0];
+			color[1] = color_[1];
+			color[2] = color_[2];
+			color[3] = color_[3];
+			
+			blend = (color[0][3] < 1.0f || color[1][3] < 1.0f || color[2][3] < 1.0f || color[3][3] < 1.0f);			
+		}
 	}
 	
+	
+	ImageElement
+	(
+		Image *image_, 
+		float xOffset_, 
+		float yOffset_, 
+		float width_, 
+		float height_
+	)
+	{
+		image    = image_;
+		xOffset  = xOffset_;
+		yOffset  = yOffset_;
+		width    = width_;
+		height   = height_;
+		white    = true;
+		oneColor = true;
+		blend    = false;
+	}
+	
+	bool blend;
+	bool oneColor;
+	bool white;	
 	Image * image;
 
 	float xOffset;
@@ -375,8 +449,9 @@ struct ImageElement
  *         sub-rect within a texture sheet.
  *****************************************************************************/
 
-struct Image
+class Image
 {
+public:
 	Image
 	(
 		const std::string &fname,
@@ -504,8 +579,9 @@ public:
  *  \note  The list is doubly linked to allow for O(1) removal
  *****************************************************************************/
 
-struct FixedImageNode
+class FixedImageNode
 {
+public:
 	Image          *image;
 	FixedImageNode *next;
 	FixedImageNode *prev;
@@ -579,8 +655,9 @@ private:
  *         variable texture mem manager
  *****************************************************************************/
 
-struct VariableImageNode
+class VariableImageNode
 {
+public:
 	VariableImageNode()
 	{
 		image = NULL;
@@ -639,8 +716,9 @@ private:
  *         to represent the force of that particular shake
  *****************************************************************************/
 
-struct ShakeForce
+class ShakeForce
 {
+public:
 	float initialForce;  //! initial force of the shake
 	
 	
@@ -752,8 +830,9 @@ private:
  *               it is handled separately by the OpenGL transformation stack
  *****************************************************************************/
 
-struct Context
+class Context
 {
+public:
 	char blend, xalign, yalign, xflip, yflip;
 	CoordSys coordSys;
 	std::string currentFont;
@@ -1006,7 +1085,7 @@ public:
 	 *  \param dx how many units to move in x direction
 	 *  \param dy how many units to move in y direction
 	 */
-	void MoveRel(float dx, float dy);
+	void MoveRelative(float dx, float dy);
 	
 	/*!
 	 *  \brief rotates images counterclockwise by 'angle' radians
@@ -1035,6 +1114,46 @@ public:
 		int32 size
 	);
 	
+
+	/*!
+	 *  \brief returns true if the font with the given name has been successfully loaded
+	 *  \param name   name of the font (e.g. "courier24")
+	 */
+	bool IsValidFont(const std::string &name);
+
+
+	/*!
+	 *  \brief given the name of a font, fill in a font properties structure with info
+	 *         like the height of the font, etc.
+	 *
+	 *  \param fontName  name of the font, e.g. "courier24"
+	 *  \param fp        reference to font properties structure to return information into
+	 */
+	bool GetFontProperties(const std::string &fontName, FontProperties &fp);
+
+
+	/*!
+	 *  \brief calculates the width of the given text if it were rendered with the given font
+	 *         If an invalid font name is passed, returns -1
+	 *
+	 *  \param fontName  the font to use
+	 *  \param text      the text string in unicode
+	 */
+
+	int32 CalculateTextWidth(const std::string &fontName, const hoa_utils::ustring &text);
+
+
+	/*!
+	 *  \brief calculates the width of the given text if it were rendered with the given font
+	 *         If an invalid font name is passed, returns -1
+	 *
+	 *  \param fontName  the font to use
+	 *  \param text      the text string in multi-byte character format
+	 */
+
+	int32 CalculateTextWidth(const std::string &fontName, const std::string  &text);
+
+
 	/*!
 	 *  \brief sets current font
 	 *  \param name  name of the font to set to
@@ -1046,7 +1165,7 @@ public:
 	 *  \brief enables/disables text shadowing
 	 *  \param enable  pass true to enable, false to disable
 	 */
-	bool EnableTextShadow(bool enable);
+	void EnableTextShadow(bool enable);
 
 	
 	/*!
@@ -1055,6 +1174,40 @@ public:
 	 */
 	bool SetTextColor(const Color &color);
 		
+
+	/*!
+	 *  \brief sets the shadow offset to use for a given font. By default, all font shadows
+	 *         are slightly to the right and to the bottom of the text, by an offset of
+	 *         fontHeight / 8. That doesn't always look good though, so use this function
+	 *         to adjust it if you want.
+	 *
+	 *  \param fontName  label of the font you want to set the shadow offset for
+	 *  \param x         x offset in pixels (based on 1024x768)
+	 */
+	bool SetFontShadowXOffset(const std::string &fontName, int32 x);
+
+
+	/*!
+	 *  \brief sets the shadow offset to use for a given font. By default, all font shadows
+	 *         are slightly to the right and to the bottom of the text, by an offset of
+	 *         fontHeight / 8. That doesn't always look good though, so use this function
+	 *         to adjust it if you want.
+	 *
+	 *  \param fontName  label of the font you want to set the shadow offset for
+	 *  \param y         y offset in pixels (based on 1024x768)
+	 */
+	bool SetFontShadowYOffset(const std::string &fontName, int32 y);
+
+
+	/*!
+	 *  \brief sets the shadow style to use for the given font
+	 *
+	 *  \param fontName  label of the font you want to set the shadow style for
+	 *  \param style     the shadow style you want (e.g. VIDEO_TEXT_SHADOW_BLACK)
+	 */
+	bool SetFontShadowStyle(const std::string &fontName, TextShadowStyle style);
+
+
 	/*!
 	 *  \brief get name of current font
 	 */
@@ -1070,10 +1223,8 @@ public:
 	 *         output or other things which don't have to be localized
 	 *
 	 *  \param text   text string to draw
-	 *  \param x      x coordinate to position text at
-	 *  \param y      y coordinate to position text at
 	 */
-	bool DrawText(const std::string &text, float x, float y);
+	bool DrawText(const std::string &text);
 	
 	/*!
 	 *  \brief unicode version of DrawText(). This should be used for
@@ -1081,10 +1232,8 @@ public:
 	 *         (game dialogue, interface text, etc.)
 	 *
 	 *  \param uText  unicode text string to draw
-	 *  \param x      x coordinate to position text at
-	 *  \param y      y coordinate to position text at
 	 */
-	bool DrawText(const std::wstring &uText, float x, float y);
+	bool DrawText(const hoa_utils::ustring &uText);
 
 
 	//-- Images ----------------------------------------------------------------
@@ -1144,7 +1293,8 @@ public:
 	 *         e.g. SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, 0);
 	 */
 	void SetDrawFlags(int32 firstflag, ...);
-	
+
+
 	/*!
 	 *  \brief draws an image which is modulated by the scene's light color
 	 *
@@ -1436,6 +1586,8 @@ private:
 
 	std::string _currentFont;          //! current font name
 	Color       _currentTextColor;     //! current text color
+	
+	bool _textShadow;   //! if true, text shadow effect is enabled
 
 	Color _fogColor;        //! current fog color (set by SetFog())
 	float _fogIntensity;    //! current fog intensity (set by SetFog())
@@ -1444,10 +1596,12 @@ private:
 
 	std::vector <ImageDescriptor *>    _batchLoadImages;    //! vector of images in a batch which are to be loaded
 	
-	std::map    <std::string, private_video::Image*>   _images;    //! STL map containing all the images currently being managed by the video engine	
-	std::vector <private_video::TexSheet *>   _texSheets;          //! vector containing all texture sheets currently being managed by the video engine
-	std::map    <std::string, TTF_Font *>     _fontMap;            //! STL map containing all the fonts currently being managed by the video engine
-	std::stack  <private_video::Context>      _contextStack;       //! stack containing context, i.e. draw flags plus coord sys. Context is pushed and popped by any GameVideo functions that clobber these settings
+	std::map    <std::string, private_video::Image*>   _images;      //! STL map containing all the images currently being managed by the video engine	
+	std::vector <private_video::TexSheet *>     _texSheets;          //! vector containing all texture sheets currently being managed by the video engine
+	std::map    <std::string, TTF_Font *>       _fontMap;            //! STL map containing all the fonts currently being managed by the video engine
+	std::map    <std::string, FontProperties *> _fontProperties;     //! STL map containing properties for each font
+	
+	std::stack  <private_video::Context>      _contextStack;         //! stack containing context, i.e. draw flags plus coord sys. Context is pushed and popped by any GameVideo functions that clobber these settings
 
 
 	//-- Private methods ------------------------------------------------------
@@ -1532,41 +1686,40 @@ private:
 	/*!
 	 *  \brief draws an image element, i.e. one image within an image descriptor which may contain multiple images
 	 *
-	 *  \param image     pointer to the image
-	 *  \param w         width to draw the image
-	 *  \param h         height to draw the image
-	 *  \param color_TL  color of top-left     vertex
-	 *  \param color_TR  color of top-right    vertex
-	 *  \param color_BL  color of bottom-left  vertex
-	 *  \param color_BR  color of bottom-right vertex
-	 */	
+	 *  \param element        pointer to the image element to draw
+	 *  \param modulateColor  combination of color for this image, and our current fade color
+	 */		 
 	bool _DrawElement
 	(
-		const private_video::Image *const  image, 
-		float w, 
-		float h, 
-		const Color &color_TL,
-		const Color &color_TR,
-		const Color &color_BL,
-		const Color &color_BR
+		const private_video::ImageElement &element, 
+		const Color &modulateColor
+	);
+
+
+	/*!
+	 *  \brief draws an image element, i.e. one image within an image descriptor which may contain multiple images
+	 *
+	 *  \note  this version of the function accepts no color, so for cases where no fade is going on
+	 *         and we don't want to modulate the image's color (which is the case indeed 99% of the time),
+	 *         we can skip all the nasty modulation math for a bit of extra efficiency
+	 *
+	 *  \param element        pointer to the image element to draw
+	 */		 
+	bool _DrawElement
+	(
+		const private_video::ImageElement &element
 	);
 
 
 	/*!
 	 *  \brief does the actual work of drawing text
 	 *
-	 *  \param text   Pointer to a C-style string holding the text to draw. NULL if we're using unicode
-	 *  \param uText  Pointer to a unicode string holding the text to draw. NULL if we're using C-style
-	 *  \param x      x coordinate of text to be drawn
-	 *  \param y      y coordinate of text to be drawn
+	 *  \param uText  Pointer to a unicode string holding the text to draw
 	 */	
 
 	bool _DrawTextHelper
 	(
-		const char    *const text, 
-		const wchar_t *const uText, 
-		float x, 
-		float y
+		const uint16 *const uText
 	);
 
 
@@ -1701,7 +1854,7 @@ private:
 	 */	
 	bool _DEBUG_ShowTexSheet();
 	
-	
+	friend class TextBox;	
 	friend class private_video::GUI;	
 	friend class private_video::FixedTexMemMgr;
 	friend class private_video::VariableTexMemMgr;

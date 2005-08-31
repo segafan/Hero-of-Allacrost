@@ -30,22 +30,19 @@ bool ScreenFader::FadeTo(const Color &final, float numSeconds)
 	_isFading = true;
 	
 	// figure out if this is a simple fade or if an overlay is required
-	// A simple fade is defined as either a fade from (x,x,x,x)->(0,0,0,1) or from
-	// (0,0,0,1)->(x,x,x,x). In other words, fading into or out of black.
+	// A simple fade is defined as a fade from clear to black, from black
+	// to clear, or from somewhere between clear and black to either clear
+	// or black. More simply, it's a fade where both the initial and final
+	// color's RGB values are zeroed out
 
 	_useFadeOverlay = true;	
 
-	Color black(0.0f, 0.0f, 0.0f, 1.0f);
-
-	if( (_initialColor.color[0] == _initialColor.color[1] && 
-	     _initialColor.color[0] == _initialColor.color[2] &&
-	     _initialColor.color[0] == _initialColor.color[3] &&
-	     _finalColor == black ) ||
-	     
-	    (_finalColor.color[0] == _finalColor.color[1] && 
-	     _finalColor.color[0] == _finalColor.color[2] &&
-	     _finalColor.color[0] == _finalColor.color[3] &&
-	     _initialColor == black))	
+	if( (_initialColor.color[0] == 0.0f && 
+	     _initialColor.color[1] == 0.0f &&
+	     _initialColor.color[2] == 0.0f &&
+	     _finalColor.color[0]   == 0.0f && 
+	     _finalColor.color[1]   == 0.0f && 
+	     _finalColor.color[2]   == 0.0f))
 	{
 		_useFadeOverlay = false;
 	}
