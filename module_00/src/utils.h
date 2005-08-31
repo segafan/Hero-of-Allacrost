@@ -72,8 +72,12 @@ typedef Sint8   int8;
 typedef Uint8   uint8;
 //@}
 
+
 //! Contains utility code used across the entire 
 namespace hoa_utils {
+
+//! unicode string class- basically like wstring except it doesn't use wchar_t which has bad compatibility
+typedef std::basic_string<uint16> ustring;
 
 //! Determines whether the code in the hoa_utils namespace should print debug statements or not.
 extern bool UTILS_DEBUG;
@@ -194,6 +198,47 @@ int32 RandomNum(int32 lower_bound, int32 upper_bound);
  *	 range is a greater than or equal to zero.
  ******************************************************************************/
 int32 GaussianValue(int32 mean, int32 range, bool positive_value);
+
+
+
+/******************************************************************************
+ * bool CleanDirectory(const std::string &directoryName);
+ *
+ *	This function erases all the files in a given directory (e.g. "img/fonts")
+ ******************************************************************************/
+
+bool CleanDirectory(const std::string &directoryName);
+
+
+/******************************************************************************
+ * bool MakeDirectory(const std::string &directoryName);
+ *
+ *	This function creates the given directory (e.g. "img/fonts")
+ ******************************************************************************/
+
+
+bool MakeDirectory(const std::string &directoryName);
+
+
+/******************************************************************************
+ * bool RemoveDirectory(const std::string &directoryName);
+ *
+ *	This function removes the given directory (e.g. "img/fonts")
+ ******************************************************************************/
+
+bool RemoveDirectory(const std::string &directoryName);
+
+
+/******************************************************************************
+ * bool MakeWideString(const std::string &text);
+ *
+ *	This function converts a string to a wide string. All of our GUI is based
+ *  on unicode text, so this is used in cases where we want to display some
+ *  non-unicode text for debugging/diagnostics purposes.
+ ******************************************************************************/
+
+hoa_utils::ustring MakeWideString(const std::string &text);
+
 
 }
 
