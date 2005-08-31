@@ -362,7 +362,9 @@ int32 main(int32 argc, char *argv[]) {
 	if(!VideoManager->LoadFont("img/fonts/tarnhalo.ttf", "default", 16))
 		cerr << "MAP: ERROR > Couldn't load map font!" << endl;
 
-
+	VideoManager->SetFontShadowXOffset("default", 1);
+	VideoManager->SetFontShadowYOffset("default", -2);
+	VideoManager->SetFontShadowStyle("default", VIDEO_TEXT_SHADOW_BLACK);
 
 	// Retains the amount of time (in milliseconds) between main loop iterations
 	uint32 frame_time = 0;
