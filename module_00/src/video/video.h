@@ -427,6 +427,7 @@ public:
 		white    = true;
 		oneColor = true;
 		blend    = false;
+		color[0] = Color::white;
 	}
 	
 	bool blend;
