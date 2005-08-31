@@ -87,7 +87,7 @@ void PauseMode::Reset() {
 	VideoManager->SetCoordSys(0, 1024, 0, 768);
 	if(!VideoManager->SetFont("default")) 
     cerr << "MAP: ERROR > Couldn't set map font!" << endl;
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 }
 
 
@@ -104,11 +104,13 @@ void PauseMode::Draw() {
 	// Draw the background image
 	Color grayed(0.35f, 0.35f, 0.35f, 1.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, 0);
+	VideoManager->Move(0,0);
 	VideoManager->DrawImage(_saved_screen, grayed);
 	
 	// Render the "Paused" text to appear on the center of the screen
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, 0);
-	VideoManager->DrawText("Paused", 512, 384);
+	VideoManager->Move(512, 384);
+	VideoManager->DrawText("Paused");
 }
 
 } // namespace hoa_pause
