@@ -16,6 +16,18 @@
 
 #include "utils.h"
 
+
+// Includes for directory manipulation. Note, windows has its own way of 
+// dealing with directories, hence the need for conditional includes
+
+#ifdef _WIN32
+#include <direct.h>
+#else
+#include <dirent.h>
+#endif
+
+#include <sys/stat.h>
+
 using namespace std;
 
 namespace hoa_utils {
@@ -104,6 +116,167 @@ int32 GaussianValue(int32 mean, int32 range, bool positive_value) {
 	// Note: because we cast rather than round the mean + range value isn't chosen as often as mean - range
 	return (int32)result;	// Cast to an int32 and return
 }
+
+
+// This creates a directory of the given path (e.g. img/fonts)
+bool MakeDirectory(const std::string &directoryName)
+{
+	// don't do anything if folder already exists
+	struct stat buf;
+	int32 i = stat(directoryName.c_str(), &buf);	
+	if(i==0)	
+		return true;
+
+	// if not then create it with mkdir(). Note that linux requires
+	// file permissions to be set but windows doesn't
+
+#ifdef _WIN32
+	int32 success = mkdir(directoryName.c_str());
+#else
+	int32 success = mkdir(directoryName.c_str(), S_IRWXG | S_IRWXO | S_IRWXU);
+#endif
+	
+	if(success == -1)
+	{
+		if(UTILS_DEBUG)
+			cerr << "UTILS ERROR: could not create directory: " << directoryName.c_str() << endl;
+		
+		return false;
+	}
+	
+	return true;
+}
+
+
+// this removes all the files in the given directory
+bool CleanDirectory(const std::string &directoryName)
+{
+	// don't do anything if folder doesn't exist
+	struct stat buf;
+	int32 i = stat(directoryName.c_str(), &buf);	
+	if(i!=0)	
+		return true;
+
+#ifdef _WIN32
+
+//--- WINDOWS -------------------------------------------------------
+
+	// get the directory of the application	
+	char appPath[1024];
+	GetCurrentDirectory(1024, appPath);	
+	int32 appPathLen = (int32)strlen(appPath);	
+	if(appPathLen <= 0)
+		return false;	
+	if(appPath[appPathLen-1] == '\\')    // cut off ending slash if it's there
+		appPath[appPathLen-1] = '\0';
+		
+	string fullPath = appPath;
+	
+	if(directoryName[0] == '/' || directoryName[0] == '\\')
+	{
+		fullPath += directoryName;
+	}
+	else
+	{
+		fullPath += "/";
+		fullPath += directoryName;
+	}
+	
+	char fileFound[1024];
+	WIN32_FIND_DATA info;
+	HANDLE hp;
+	sprintf(fileFound, "%s\\*.*", fullPath.c_str());
+	hp = FindFirstFile(fileFound, &info);
+	
+	if(hp != INVALID_HANDLE_VALUE)
+	{
+		do
+		{
+			sprintf(fileFound, "%s\\%s", fullPath.c_str(), info.cFileName);			
+			DeleteFile(fileFound);
+		} while(FindNextFile(hp, &info));
+	}	
+	FindClose(hp);
+
+#else
+
+//--- LINUX / MACOS -------------------------------------------------------
+	
+	DIR *pDir;
+	struct dirent *pEnt;
+	
+	pDir = opendir(directoryName.c_str());   // open the directory we want to clean
+	if(!pDir)
+	{
+		if(UTILS_DEBUG)
+			cerr << "UTILS ERROR: failed to clean directory: " << directoryName << endl;
+		return false;
+	}
+
+	string baseDir = directoryName;
+	if(baseDir[baseDir.length()-1] != '/')
+		baseDir += "/";
+	
+	while((pEnt=readdir(pDir)))
+	{
+		string removedFile = baseDir + pEnt->d_name;
+		remove(removedFile.c_str());
+	}
+	
+	closedir(pDir);
+	
+#endif
+	
+	return true;
+}
+
+
+// this removes the given directory
+bool RemoveDirectory(const std::string &directoryName)
+{
+	// don't do anything if folder doesn't exist
+	struct stat buf;
+	int32 i = stat(directoryName.c_str(), &buf);	
+	if(i!=0)	
+		return true;
+
+	// if the folder is still there, make sure it doesn't have any files in it
+	CleanDirectory(directoryName);
+ 
+	// finally, remove the folder itself with rmdir()
+	int32 success = rmdir(directoryName.c_str());
+	
+	if(success == -1)
+	{
+		if(UTILS_DEBUG)
+			cerr << "UTILS ERROR: could not delete directory: " << directoryName.c_str() << endl;
+		
+		return false;
+	}
+	
+	return true;
+}
+
+
+// converts a string to a wide string
+ustring MakeWideString(const string &text)
+{
+	int32 length = (int32) text.length();
+	uint16 *ustr = new uint16[length+1];
+	ustr[length] = uint16('\0');
+	
+	for(int32 c = 0; c < length; ++c)
+	{
+		ustr[c] = uint16(text[c]);
+	}
+	
+	ustring wstr(ustr);
+	delete [] ustr;
+	
+	return wstr;
+}
+
+
 
 } // namespace utils
 
