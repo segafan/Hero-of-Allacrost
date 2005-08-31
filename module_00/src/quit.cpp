@@ -86,7 +86,7 @@ void QuitMode::Reset() {
 	VideoManager->SetCoordSys(0, 1024, 0, 768);
 	if(!VideoManager->SetFont("default")) 
     cerr << "MAP: ERROR > Couldn't set map font!" << endl;
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 }
 
 
@@ -172,7 +172,7 @@ void QuitMode::Update(uint32 time_elapsed) {
 // Draws the saved screen, the quit prompt, the quit options, and highlights the selected option
 void QuitMode::Draw() {
 	// Draw the saved screen background
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 	Color grayed(0.35f, 0.35f, 0.35f, 1.0f);
 	VideoManager->Move(0, 0);
 	VideoManager->DrawImage(_saved_screen, grayed);
@@ -182,7 +182,8 @@ void QuitMode::Draw() {
 	VideoManager->DrawImage(_quit_menu);
 
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
-	VideoManager->DrawText("Quit Game     Quit to Boot Menu     Cancel", 1024/2, 768/2);
+	VideoManager->Move(512, 384);
+	VideoManager->DrawText("Quit Game     Quit to Boot Menu     Cancel");
 }
 
 } // namespace hoa_quit
