@@ -700,6 +700,7 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 	
 	if(!_DrawElement(elem))
 	{
+		glPopMatrix();
 		_PopContext();
 		return false;
 	}
