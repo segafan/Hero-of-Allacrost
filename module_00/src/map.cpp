@@ -24,6 +24,7 @@
 #include "data.h"
 #include "battle.h"
 #include "menu.h"
+#include "gui.h"
 
 using namespace std;
 using namespace hoa_map::private_map;
@@ -886,7 +887,7 @@ void MapMode::Draw() {
 	_GetDrawInfo(); 
 
 	// ************** (1) Draw the Lower Layer *************
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_NO_BLEND, 0);
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_NO_BLEND, 0);
 	VideoManager->Move(_map_info.c_pos, _map_info.r_pos);
 	for (uint32 r = static_cast<uint32>(_map_info.r_start); 
 	     r < static_cast<uint32>(_map_info.r_start) + _map_info.r_draw; r++) {
@@ -895,9 +896,9 @@ void MapMode::Draw() {
 			if (_map_layers[r][c].lower_layer >= 0) { // Then a lower layer tile exists and we should draw it
 				VideoManager->DrawImage(_map_tiles[_tile_frames[_map_layers[r][c].lower_layer]->frame]);
 			}
-			VideoManager->MoveRel(1.0f, 0.0f);
+			VideoManager->MoveRelative(1.0f, 0.0f);
 		}
-		VideoManager->MoveRel(-static_cast<float>(_map_info.c_draw), -1.0f);
+		VideoManager->MoveRelative(-static_cast<float>(_map_info.c_draw), -1.0f);
 
 	}
 
@@ -914,15 +915,51 @@ void MapMode::Draw() {
 		for (uint32 c = _map_info.c_start; c < _map_info.c_start + _map_info.c_draw; c++) {
 			if (_map_layers[r][c].upper_layer >= 0) // Then an upper layer tile exists and we should draw it;
 				VideoManager->DrawImage(_map_tiles[_tile_frames[_map_layers[r][c].upper_layer]->frame]);
-			VideoManager->MoveRel(1.0f, 0.0f);
+			VideoManager->MoveRelative(1.0f, 0.0f);
 		}
-		VideoManager->MoveRel(-static_cast<float>(_map_info.c_draw), -1.0f);
+		VideoManager->MoveRelative(-static_cast<float>(_map_info.c_draw), -1.0f);
 	}
+
 
 	// ************** (4) Draw the Dialoge menu and text *************
 	if (_map_state.back() == DIALOGUE) {
 // 		cout << _dialogue_text << endl;
-		VideoManager->DrawText(_dialogue_text, (-SCREEN_COLS/2.0f) + 64, (-SCREEN_ROWS/2.0f) + 64);
+
+		//---Raj added some sample code here for textbox display---
+
+		float dialogueWidth = 1024.0f;
+		float dialogueHeight = 150.0f;
+
+		ImageDescriptor menu;
+		VideoManager->CreateMenu(menu, dialogueWidth, dialogueHeight);
+		
+		VideoManager->PushState();
+		VideoManager->SetCoordSys(CoordSys(0, 1024, 0, 768));
+		VideoManager->Move(0,0);
+		VideoManager->DrawImage(menu);
+		VideoManager->DeleteImage(menu);
+		VideoManager->PopState();
+
+
+		VideoManager->PushState();		
+		VideoManager->SetCoordSys(CoordSys(0,1024,0,768));		
+	
+		// Roots: here's a BASIC example of using a textbox. Note, in reality you wouldn't
+		//        just create a textbox every frame, but this is just for an example:
+	
+		TextBox box;
+		box.SetDisplaySpeed(10);
+		box.SetPosition(0,0);
+		box.SetDimensions(dialogueWidth, dialogueHeight);
+		box.SetFont("default");
+		box.SetDisplayMode(VIDEO_TEXT_INSTANT);
+		box.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+		box.ShowText(_dialogue_text);
+		box.Draw();
+		
+		VideoManager->PopState();				
+		//---End Raj's Sample code------------------
+
 	}
 	
 	return;
