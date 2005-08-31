@@ -100,7 +100,7 @@ void MenuMode::Update(uint32 time_elapsed) {
 
 
 void MenuMode::Draw() {
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
 	// Move to the top left corner
 	VideoManager->Move(0,0);
 	
@@ -109,40 +109,50 @@ void MenuMode::Draw() {
 	
 	// Draw the four character menus
 	VideoManager->DrawImage(_menu_images[0]);
-	VideoManager->MoveRel(256, 0);
+	VideoManager->MoveRelative(256, 0);
 	VideoManager->DrawImage(_menu_images[1]);
-	VideoManager->MoveRel(256, 0);
+	VideoManager->MoveRelative(256, 0);
 	VideoManager->DrawImage(_menu_images[2]);
-	VideoManager->MoveRel(256, 0);
+	VideoManager->MoveRelative(256, 0);
 	VideoManager->DrawImage(_menu_images[3]);
 	
 	// Draw the bottom two menus
 	VideoManager->Move(0, 576);
 	VideoManager->DrawImage(_menu_images[4]);
-	VideoManager->MoveRel(0, 96);
+	VideoManager->MoveRelative(0, 96);
 	VideoManager->DrawImage(_menu_images[5]);
 	
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 	
 	// Draw 1st character menu text
-	if (!VideoManager->DrawText("Claudius", 32, 768 - 48))
+	VideoManager->Move(32, 20);
+	if (!VideoManager->DrawText("Claudius"))
+		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
+	
+	VideoManager->Move(32, 488);
+	if (!VideoManager->DrawText("Health: 68"))
 		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
 		
-	if (!VideoManager->DrawText("Health: 68", 32, 768 - 516))
+	VideoManager->Move(32, 453);
+	if (!VideoManager->DrawText("Skill: 23"))
 		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
-	if (!VideoManager->DrawText("Skill: 23", 32, 768 - 541))
-		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
-	if (!VideoManager->DrawText("XP to level: 498", 32, 768 - 566))
+		
+	VideoManager->Move(32, 538);
+	if (!VideoManager->DrawText("XP to level: 498"))
 		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
 		
 	// Draw selection menu text
-	if (!VideoManager->DrawText("Inventory     Skills     Equipment     Status     Options     Save", 32, 768 - 640))
+	VideoManager->Move(32, 612);
+	if (!VideoManager->DrawText("Inventory     Skills     Equipment     Status     Options     Save"))
 		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
 	
 	// Draw 2nd menu text
-	if (!VideoManager->DrawText("Time: 00:24:35", 32, 768 - 720))
+	VideoManager->Move(32, 692);
+	if (!VideoManager->DrawText("Time: 00:24:35"))
 		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
-	if (!VideoManager->DrawText("Bling: 4,201B", 32, 768 - 744))
+		
+	VideoManager->Move(32, 716);
+	if (!VideoManager->DrawText("Bling: 4,201B"))
 		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
 	
 }
