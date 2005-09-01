@@ -125,33 +125,33 @@ void MenuMode::Draw() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 	
 	// Draw 1st character menu text
-	VideoManager->Move(32, 20);
+	VideoManager->Move(32, 40);
 	if (!VideoManager->DrawText("Claudius"))
 		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
 	
-	VideoManager->Move(32, 488);
+	VideoManager->MoveRelative(0, 468);
 	if (!VideoManager->DrawText("Health: 68"))
 		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
 		
-	VideoManager->Move(32, 453);
+	VideoManager->MoveRelative(0, -35);
 	if (!VideoManager->DrawText("Skill: 23"))
 		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
 		
-	VideoManager->Move(32, 538);
+	VideoManager->MoveRelative(0, 85);
 	if (!VideoManager->DrawText("XP to level: 498"))
 		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
 		
 	// Draw selection menu text
-	VideoManager->Move(32, 612);
+	VideoManager->MoveRelative(0, 74);
 	if (!VideoManager->DrawText("Inventory     Skills     Equipment     Status     Options     Save"))
 		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
 	
 	// Draw 2nd menu text
-	VideoManager->Move(32, 692);
+	VideoManager->MoveRelative(0, 80);
 	if (!VideoManager->DrawText("Time: 00:24:35"))
 		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
 		
-	VideoManager->Move(32, 716);
+	VideoManager->MoveRelative(0, 24);
 	if (!VideoManager->DrawText("Bling: 4,201B"))
 		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
 	

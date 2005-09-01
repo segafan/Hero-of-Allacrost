@@ -928,33 +928,48 @@ void MapMode::Draw() {
 		//---Raj added some sample code here for textbox display---
 
 		float dialogueWidth = 1024.0f;
-		float dialogueHeight = 150.0f;
+		float dialogueHeight = 160.0f;
+		
+		int32 xalign = VIDEO_X_LEFT;
+		int32 yalign = VIDEO_Y_BOTTOM;
+		CoordSys cs(0, 1024, 0, 768);
+		int32 x = 0;
+		int32 y = 0;
+		
 
 		ImageDescriptor menu;
 		VideoManager->CreateMenu(menu, dialogueWidth, dialogueHeight);
 		
 		VideoManager->PushState();
-		VideoManager->SetCoordSys(CoordSys(0, 1024, 0, 768));
-		VideoManager->Move(0,0);
+		VideoManager->SetDrawFlags(xalign, yalign, 0);
+		VideoManager->SetCoordSys(cs);
+		VideoManager->Move((float)x, (float)y);
 		VideoManager->DrawImage(menu);
 		VideoManager->DeleteImage(menu);
 		VideoManager->PopState();
 
-
 		VideoManager->PushState();		
-		VideoManager->SetCoordSys(CoordSys(0,1024,0,768));		
+		VideoManager->SetDrawFlags(xalign, yalign, 0);
+		VideoManager->SetCoordSys(cs);		
 	
 		// Roots: here's a BASIC example of using a textbox. Note, in reality you wouldn't
 		//        just create a textbox every frame, but this is just for an example:
 	
-		TextBox box;
-		box.SetDisplaySpeed(10);
-		box.SetPosition(0,0);
-		box.SetDimensions(dialogueWidth, dialogueHeight);
-		box.SetFont("default");
-		box.SetDisplayMode(VIDEO_TEXT_INSTANT);
-		box.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-		box.ShowText(_dialogue_text);
+		static TextBox box;
+		static string oldDlgText = "()";
+
+		if(oldDlgText != _dialogue_text)
+		{
+			box.SetDisplaySpeed(23);
+			box.SetPosition((float)x, (float)y);
+			box.SetDimensions(dialogueWidth, dialogueHeight);
+			box.SetFont("default");
+			box.SetDisplayMode(VIDEO_TEXT_REVEAL);
+			box.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+			box.ShowText(_dialogue_text);
+			oldDlgText = _dialogue_text;
+		}
+		box.Update(10);
 		box.Draw();
 		
 		VideoManager->PopState();				

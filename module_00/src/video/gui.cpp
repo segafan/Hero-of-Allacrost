@@ -123,7 +123,6 @@ bool GUI::DrawFPS(int32 frameTime)
 	char fpsText[16];
 	sprintf(fpsText, "fps: %d", avgFPS);
 	
-	string oldFont = _videoManager->GetFont();
 	if( !_videoManager->SetFont("debug_font"))
 	{
 		return false;
@@ -133,9 +132,8 @@ bool GUI::DrawFPS(int32 frameTime)
 	if( !_videoManager->DrawText(fpsText))
 	{
 		return false;
-	}
-		
-	_videoManager->SetFont(oldFont);
+	}		
+	
 	return true;
 }
 
@@ -396,10 +394,12 @@ bool GUI::CreateMenu(hoa_video::ImageDescriptor &id, float width, float height)
 	
 	float maxX = leftBorderSize + inumXTiles * topWidth;
 	float maxY = bottomBorderSize + inumYTiles * leftHeight;
+	float minX = 0.0f;
+	float minY = 0.0f;	
 	
-	id.AddImage(_currentSkin.skin[0][0], 0.0f, 0.0f);   // lower left	
-	id.AddImage(_currentSkin.skin[0][2], maxX,	0.0f);  // lower right	            
-	id.AddImage(_currentSkin.skin[2][0], 0.0f, maxY);   // upper left	
+	id.AddImage(_currentSkin.skin[0][0], minX, minY);   // lower left	
+	id.AddImage(_currentSkin.skin[0][2], maxX, minY);   // lower right	            
+	id.AddImage(_currentSkin.skin[2][0], minX, maxY);   // upper left	
 	id.AddImage(_currentSkin.skin[2][2], maxX, maxY);   // upper right
 
 	// re-create the overlay at the correct width and height

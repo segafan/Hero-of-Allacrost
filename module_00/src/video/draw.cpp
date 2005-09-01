@@ -21,10 +21,10 @@ bool GameVideo::DrawImage(const ImageDescriptor &id)
 	// if real lighting is enabled, draw images normally since the light overlay
 	// will take care of the modulation. If not, (i.e. no overlay is being used)
 	// then pass the light color so the vertex colors can do the modulation
-	if(!_usesLights)
+	if(!_usesLights && !(_lightColor == Color::white))
 		return DrawImage(id, _lightColor);
 	else
-		return DrawImage(id, Color(1.0f, 1.0f, 1.0f, 1.0f));
+		return DrawImage(id, Color::white);
 }
 
 	

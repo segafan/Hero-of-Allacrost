@@ -5,6 +5,7 @@
 
 using namespace std;
 using namespace hoa_video;
+using namespace hoa_video::private_video;
 using hoa_utils::MakeWideString;
 using hoa_utils::ustring;
 
@@ -27,7 +28,8 @@ TextBox::TextBox()
   _finished(false),
   _currentTime(0),
   _mode(VIDEO_TEXT_INVALID),
-  _displaySpeed(0.0f)
+  _displaySpeed(0.0f),
+  _numChars(0)
 {
 	_initialized = IsInitialized(_initializeErrors);
 }
@@ -51,26 +53,13 @@ TextBox::~TextBox()
 bool TextBox::Update(int32 frameTime)
 {
 	_currentTime += frameTime;
+	
+	if(!_text.empty() && _currentTime > _endTime)
+		_finished = true;
+	
 	return true;
 }
 
-
-string makestring(ustring text)
-{
-	int32 length = (int32) text.length();
-	char *astring = new char[length+1];
-	astring[length] = char('\0');
-	
-	for(int32 c = 0; c < length; ++c)
-	{
-		astring[c] = char(text[c]);
-	}
-	
-	string str(astring);
-	delete [] astring;
-	
-	return str;	
-}
 
 //-----------------------------------------------------------------------------
 // Draw: actually draws the text (via the GameVideo interface)
@@ -93,27 +82,23 @@ bool TextBox::Draw()
 	
 	video->SetFont(_font);
 
-	left   = _x;
-	right  = _x;
-	top    = _y;
-	bottom = _y;
+	left   = 0.0f;
+	right  = _width;
+	bottom    = 0.0f;
+	top    = _height;
 	
 	CoordSys &cs = video->_coordSys;
 	
-	if(cs._upDir > 0.0f)
-		top += _height;
-	else
-		bottom += _height;
+	if(cs._upDir < 0.0f)
+		top = -top;
 		
-	if(cs._rightDir > 0.0f)
-		right += _width;
-	else
-		left += _width;
+	if(cs._rightDir < 0.0f)
+		right = -right;
 	
 	float xoff, yoff;
 	
-	xoff = ((video->_xalign + 1) * _width)  * 0.5f * -cs._rightDir;
-	yoff = ((video->_yalign + 1) * _height) * 0.5f * -cs._upDir;
+	xoff = _x + ((video->_xalign + 1) * _width)  * 0.5f * -cs._rightDir;
+	yoff = _y + ((video->_yalign + 1) * _height) * 0.5f * -cs._upDir;
 	
 	left   += xoff;
 	right  += xoff;
@@ -123,59 +108,51 @@ bool TextBox::Draw()
 	
 	// figure out where the top of the rendered text is
 	
-	float textHeight = (float) CalculateTextHeight();
-	float textTop;
+	float textHeight = (float) _CalculateTextHeight();
+	float textY;
 	if(_yalign == 1)
 	{
 		// top alignment
-		textTop = top;
+		textY = top;
 	}
 	else if(_yalign == 0)
 	{
-		textTop = top - cs._upDir * (_height - textHeight) * 0.5f;
+		textY = top - cs._upDir * (_height - textHeight) * 0.5f;
 	}
 	else
 	{
 		// right alignment
-		textTop = top - cs._upDir * (_height - textHeight);
+		textY = top - cs._upDir * (_height - textHeight);
 	}
 	
 	
-	int32 xalign;
 	float textX;
 	
 	// figure out X alignment
 	if(_xalign == -1)
 	{
 		// left align
-		xalign = VIDEO_X_LEFT;
 		textX = left;
 	}
 	else if(_xalign == 0)
 	{
 		// center align
-		xalign = VIDEO_X_CENTER;
 		textX = (left + right) * 0.5f;
 	}
 	else
 	{
 		// right align
-		xalign = VIDEO_X_RIGHT;
 		textX = right;
 	}
 	
-	video->Move(textX, textTop);
-
-	video->SetDrawFlags(xalign, VIDEO_Y_TOP, VIDEO_BLEND, 0);
+	video->Move(0.0f, textY);
+	
+	video->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
 	
 	// draw the text line by line		
 
-	for(int32 line = 0; line < (int32)_text.size(); ++line)
-	{
-		video->DrawText(_text[line]);
-		video->MoveRelative(0.0f, _fontProperties.lineskip * -cs._upDir);
-	}
-		
+	_DrawTextLines(textX,textY);
+			
 	video->_PopContext();
 	return true;
 }
@@ -385,11 +362,12 @@ TextDisplayMode TextBox::GetDisplayMode()
 //-----------------------------------------------------------------------------
 // SetDisplaySpeed: sets the current display speed for this textbox. The unit
 //                  is characters per second. For display modes which are based
-//                  on one line at a time, we assume 30 characters per line, so
-//                  a display speed of 10 means 3 seconds per line. Although we
-//                  could make it so that the display speed corresponds to characters
-//                  per second for display modes which use characters, and lines
-//                  per second for display modes which use lines, it's easier
+//                  on one line at a time, we assume VIDEO_CHARS_PER_LINE 
+//                  characters per line, so say VIDEO_CHARS_PER_LINE is 30, and
+//                  we have a display speed of 10. Then that means 3 seconds per line. 
+//                  Although we could make it so that the display speed corresponds 
+//                  to characters per second for display modes which use characters, 
+//                  and lines per second for display modes which use lines, it's easier
 //                  to have a consistent unit.
 //
 //                  Returns false if displaySpeed is negative or zero.
@@ -487,6 +465,7 @@ bool TextBox::ShowText(const hoa_utils::ustring &text)
 	uint16 newline = static_cast<uint16>('\n');
 
 	_text.clear();	
+	_numChars = 0;
 	
 	do
 	{
@@ -496,12 +475,12 @@ bool TextBox::ShowText(const hoa_utils::ustring &text)
 		// otherwise, add the part up to the newline and 
 		if(newlinePos == ustring::npos)
 		{
-			AddLine(tempStr);
+			_AddLine(tempStr);
 			break;
 		}
 		else
 		{
-			AddLine(tempStr.substr(0, newlinePos));
+			_AddLine(tempStr.substr(0, newlinePos));
 			tempStr = tempStr.substr(newlinePos+1, tempStr.length() - newlinePos);
 		}		
 	} while(newlinePos != ustring::npos);
@@ -511,7 +490,7 @@ bool TextBox::ShowText(const hoa_utils::ustring &text)
 	// false, but still allow the font to render since it's not an unrecoverable
 	// error.
 	
-	int32 textHeight = CalculateTextHeight();
+	int32 textHeight = _CalculateTextHeight();
 	
 	if(textHeight > _height)
 	{
@@ -526,6 +505,46 @@ bool TextBox::ShowText(const hoa_utils::ustring &text)
 	
 	// reset variables to indicate a new text display is in progress
 	_currentTime = 0;
+	
+	// figure out how much time the text will take to display
+	
+	switch(_mode)
+	{
+		case VIDEO_TEXT_INSTANT:    // instant
+		{
+			_endTime = 0;
+			break;
+		}		
+		
+		case VIDEO_TEXT_CHAR:       // One character at a time
+		case VIDEO_TEXT_FADECHAR:
+		case VIDEO_TEXT_REVEAL:
+		{		
+			// we want milliseconds per string
+			// displaySpeed is characters per second
+			// numChars is characters per string
+			// 1000 is milliseconds per second
+			
+			_endTime = int32(1000.0f * _numChars / _displaySpeed);
+			break;
+		}
+
+		case VIDEO_TEXT_FADELINE:   // One line at a time
+		{
+			// same calculation as one character at a time, except instead of _numChars,
+			// we use number of lines, times VIDEO_CHARS_PER_LINE
+			
+			_endTime = int32(1000.0f * (_text.size() * VIDEO_CHARS_PER_LINE) / _displaySpeed);			
+			break;
+		}
+		default:
+		{
+			_endTime = 0;
+			if(VIDEO_DEBUG)		
+				cerr << "VIDEO ERROR: undetected display mode in TextBox::ShowText()!" << endl;
+			break;
+		}	
+	};
 	
 	// note, instant text display is basically always "finished" ;)
 	if(_mode == VIDEO_TEXT_INSTANT)
@@ -545,6 +564,7 @@ bool TextBox::Clear()
 {
 	_finished = true;
 	_text.clear();
+	_numChars = 0;
 	return true;
 }
 
@@ -642,14 +662,14 @@ bool TextBox::IsInitialized(string &errors)
 
 
 //-----------------------------------------------------------------------------
-// CalculateTextHeight: calculates the height of the text as it would be rendered
-//                      with the set font
+// _CalculateTextHeight: calculates the height of the text as it would be rendered
+//                       with the set font
 //
 // Note: this is a pretty low level function so it doesn't do any checking
 //       to see if the current font is actually valid
 //-----------------------------------------------------------------------------
 
-int32 TextBox::CalculateTextHeight()
+int32 TextBox::_CalculateTextHeight()
 {
 	if(_text.empty())
 		return 0;
@@ -659,11 +679,11 @@ int32 TextBox::CalculateTextHeight()
 
 
 //-----------------------------------------------------------------------------
-// AddLine: adds new line to the _text vector. If the line is too long, it
-//          word wraps and creates new lines
+// _AddLine: adds new line to the _text vector. If the line is too long, it
+//           word wraps and creates new lines
 //-----------------------------------------------------------------------------
 
-void TextBox::AddLine(const hoa_utils::ustring &line)
+void TextBox::_AddLine(const hoa_utils::ustring &line)
 {
 	// perform word wrapping in a loop until all the text is added
 	
@@ -679,6 +699,7 @@ void TextBox::AddLine(const hoa_utils::ustring &line)
 		if(textWidth < _width)
 		{
 			_text.push_back(tempLine);
+			_numChars += (int32) tempLine.size();
 			return;
 		}
 		
@@ -698,7 +719,7 @@ void TextBox::AddLine(const hoa_utils::ustring &line)
 		{
 			wrappedLine += tempLine[numWrappedChars];
 			
-			if(IsBreakableChar(tempLine[numWrappedChars]))
+			if(_IsBreakableChar(tempLine[numWrappedChars]))
 			{
 				int32 textWidth = videoManager->CalculateTextWidth(_font, wrappedLine);
 				
@@ -736,6 +757,7 @@ void TextBox::AddLine(const hoa_utils::ustring &line)
 		// and truncate tempLine
 		
 		_text.push_back(wrappedLine);
+		_numChars += (int32) wrappedLine.size();
 		if(numWrappedChars == lineLength)
 			return;
 		
@@ -745,12 +767,12 @@ void TextBox::AddLine(const hoa_utils::ustring &line)
 
 
 //-----------------------------------------------------------------------------
-// IsBreakableChar: returns true if the given character can be broken upon for
-//                  a line break. (for example in English, 0x20 (space) is
-//                  okay to break on. It might vary in other languages)
+// _IsBreakableChar: returns true if the given character can be broken upon for
+//                   a line break. (for example in English, 0x20 (space) is
+//                   okay to break on. It might vary in other languages)
 //-----------------------------------------------------------------------------
 
-bool TextBox::IsBreakableChar(uint16 character)
+bool TextBox::_IsBreakableChar(uint16 character)
 {
 	if(character == 0x20)
 		return true;
@@ -767,6 +789,236 @@ bool TextBox::ShowText(const std::string &text)
 {
 	ustring wstr = MakeWideString(text);	
 	return ShowText(wstr);
+}
+
+
+//-----------------------------------------------------------------------------
+// _DrawTextLines: does the dirtywork of actually drawing text, taking the
+//                 display mode into consideration
+//-----------------------------------------------------------------------------
+
+void TextBox::_DrawTextLines(float textX, float textY)
+{
+	GameVideo *video = GameVideo::GetReference();
+	CoordSys  &cs    = video->_coordSys;
+	
+	int32 numCharsDrawn = 0;	
+	
+	TextDisplayMode mode = _mode;
+	
+	if(_finished)
+		mode = VIDEO_TEXT_INSTANT;	
+	
+	// calculate the fraction of the text to display
+	float percentComplete; 
+	if(_finished)
+		percentComplete = 1.0f;
+	else
+		percentComplete = (float)_currentTime / (float)_endTime;
+	
+	for(int32 line = 0; line < (int32)_text.size(); ++line)
+	{	
+		float xOffset;
+		
+		// calculate the xOffset for this line
+		float lineWidth = video->CalculateTextWidth(_font, _text[line]);
+	
+		xOffset = textX + ((_xalign + 1) * lineWidth) * 0.5f * -cs._rightDir;
+		video->MoveRelative(xOffset, 0.0f);	
+	
+		int32 lineSize = (int32) _text[line].size();
+		
+		switch(mode)
+		{
+			case VIDEO_TEXT_INSTANT:
+			{
+				video->DrawText(_text[line]);
+				break;
+			}
+			case VIDEO_TEXT_CHAR:
+			{
+				// figure out which character is currently being rendered
+				int32 curChar = int32(percentComplete * _numChars);
+				
+				if(numCharsDrawn + lineSize < curChar)
+				{
+					// if this line is before the current character, just render the whole thing
+					video->DrawText(_text[line]);
+				}
+				else
+				{
+					// if this line contains the current character, then we need to figure out
+					// how many characters it can draw until reaching curChar, and then only
+					// draw that many characters
+					
+					int32 numCompletedChars = curChar - numCharsDrawn;
+					
+					if(numCompletedChars > 0)
+					{					
+						ustring substring = _text[line].substr(0, numCompletedChars);					
+						video->DrawText(substring);
+					}
+				}				
+				
+				break;
+			}
+			case VIDEO_TEXT_FADECHAR:
+			{
+				// figure out which character is currently being rendered
+				float fCurChar = percentComplete * _numChars;
+				int32 curChar = int32(fCurChar);
+				float curPct  = fCurChar - curChar;
+				
+				if(numCharsDrawn + lineSize <= curChar)
+				{
+					// if this line is before the current character, just render the whole thing
+					video->DrawText(_text[line]);
+				}
+				else
+				{
+					// if this line contains the current character, then we need to draw all
+					// the characters before curChar at full alpha, and then draw curChar
+					// based on the time	
+					
+					int32 numCompletedChars = curChar - numCharsDrawn;
+					
+					// check if this line is even visible at all yet
+					if(numCompletedChars >= 0)
+					{
+						ustring substring;
+						
+						// if we have already drawn some characters on this line, draw them
+						if(numCompletedChars > 0)
+						{
+							substring = _text[line].substr(0, numCompletedChars);
+							video->DrawText(substring);
+						}
+						
+						// now draw the current character from this line (faded)
+						Color oldColor = video->GetTextColor();
+						Color newColor = oldColor;
+						newColor[3] *= curPct;
+						
+						video->SetTextColor(newColor);
+						video->MoveRelative(video->CalculateTextWidth(_font, substring), 0.0f);
+						video->DrawText(_text[line].substr(numCompletedChars, 1));
+						video->SetTextColor(oldColor);
+					}
+				}				
+				
+				break;
+			}
+
+			case VIDEO_TEXT_FADELINE:
+			{
+				// figure out which character is currently being rendered
+				float fLines = percentComplete * _text.size();
+				int32 lines  = int32(fLines);
+				float curPct = fLines - lines;
+				
+				if(line < lines)
+				{
+					// if this line is before the current character, just render the whole thing
+					video->DrawText(_text[line]);
+				}
+				else if(line == lines)
+				{
+					Color oldColor = video->GetTextColor();
+					Color newColor = oldColor;
+					newColor[3] *= curPct;
+					
+					video->SetTextColor(newColor);
+					//video->MoveRelative(video->CalculateTextWidth(_font, _text[line]), 0.0f);
+					video->DrawText(_text[line]);						
+					video->SetTextColor(oldColor);
+				}				
+				
+				break;
+			}
+			
+			case VIDEO_TEXT_REVEAL:
+			{			
+				// figure out which character is currently being rendered
+				float fCurChar = percentComplete * _numChars;
+				int32 curChar = int32(fCurChar);
+				float curPct  = fCurChar - curChar;
+				
+				if(numCharsDrawn + lineSize <= curChar)
+				{
+					// if this line is before the current character, just render the whole thing
+					video->DrawText(_text[line]);
+				}
+				else
+				{
+					// if this line contains the current character, then we need to draw all
+					// the characters before curChar at full alpha, and then draw curChar
+					// based on the time	
+					
+					int32 numCompletedChars = curChar - numCharsDrawn;
+					
+					// check if this line is even visible at all yet
+					if(numCompletedChars >= 0)
+					{
+						ustring substring;
+						
+						// if we have already drawn some characters on this line, draw them
+						if(numCompletedChars > 0)
+						{
+							substring = _text[line].substr(0, numCompletedChars);
+							video->DrawText(substring);
+						}
+						
+						// now draw the current character from this line (scissored)
+						
+						ustring curCharString = _text[line].substr(numCompletedChars, 1);						
+
+						// rectangle of the current character, in window coordinates
+						int32 charX, charY, charW, charH;
+						charX = xOffset + cs._rightDir * video->CalculateTextWidth(_font, substring);
+						charY = textY - cs._upDir * (_fontProperties.height + _fontProperties.descent);
+						
+						if(cs._upDir < 0.0f)
+							charY = cs._bottom - charY;
+
+						if(cs._rightDir < 0.0f)
+							charX = cs._left - charX;
+						
+						charW = video->CalculateTextWidth(_font, curCharString);
+						charH = _fontProperties.height;
+						
+						// multiply width by percentage done
+						charW *= curPct;
+						
+						glEnable(GL_SCISSOR_TEST);
+						glScissor(charX, charY, charW, charH);						
+						video->MoveRelative(cs._rightDir * video->CalculateTextWidth(_font, substring), 0.0f);
+						video->DrawText(curCharString);
+						glDisable(GL_SCISSOR_TEST);
+					}
+				}				
+				
+				break;
+			}
+			
+			default:
+			{
+				video->DrawText(_text[line]);
+				
+				if(VIDEO_DEBUG)
+				{
+					cerr << "VIDEO ERROR: Unsupported text display mode (" << mode << ") found in TextBox::_DrawTextLines!" << endl;
+				}
+				break;
+			}
+		};
+
+
+		numCharsDrawn += lineSize;
+		//video->MoveRelative(-xOffset, _fontProperties.lineskip * -cs._upDir);
+		
+		textY += _fontProperties.lineskip * -cs._upDir;
+		video->Move(0.0f, textY);
+	}
 }
 
 

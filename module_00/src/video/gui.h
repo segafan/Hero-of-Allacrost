@@ -41,6 +41,7 @@ extern bool VIDEO_DEBUG;
  *   VIDEO_TEXT_FADELINE: fade each line in one at a time
  *   VIDEO_TEXT_FADECHAR: fades in each character at a time
  *   VIDEO_TEXT_REVEAL: goes left to right and reveals the text one pixel column at a time
+ *   VIDEO_TEXT_FADEREVEAL: like REVEAL, except as text gets revealed it fades in
  *****************************************************************************/
 
 enum TextDisplayMode
@@ -51,6 +52,8 @@ enum TextDisplayMode
 	VIDEO_TEXT_CHAR,
 	VIDEO_TEXT_FADELINE,
 	VIDEO_TEXT_FADECHAR,
+	VIDEO_TEXT_REVEAL,
+	VIDEO_TEXT_FADEREVEAL,
 	
 	VIDEO_TEXT_TOTAL
 };
@@ -183,8 +186,9 @@ public:
 	 *
 	 *  \param displaySpeed The display speed, always based on characters per
 	 *                      second. If the current display mode is one line at a time,
-	 *                      then the display speed is based on 30 characters per line,
-	 *                      so for example, a display speed of 10 would mean 3 seconds per line.
+	 *                      then the display speed is based on VIDEO_CHARS_PER_LINE 
+	 *                      characters per line, so for example, a display speed of 10 
+	 *                      would mean 3 seconds per line if VIDEO_CHARS_PER_LINE is 30.
 	 *                      
 	 *
 	 *  \note  This has no effect for textboxes using the VIDEO_TEXT_INSTANT
@@ -281,22 +285,24 @@ private:
 
 	float _displaySpeed;             //! characters per second to display text
 						   
-	int _xalign, _yalign;            //! alignment flags for text
+	int32 _xalign, _yalign;          //! alignment flags for text
+	int32 _numChars;                 //! hold the number of characters for the entire text
 						   
 	bool    _finished;               //! true if the text being drawn by ShowText() is done displaying in the case of gradual rendering
 	int32   _currentTime;            //! milliseconds that passed since ShowText() was called
+	int32   _endTime;                //! milliseconds from the time since ShowText() was called until the text display will be complete
 	
 	std::string    _font;            //! font used for this textbox
 	FontProperties _fontProperties;  //! structure containing properties of the current font like height, etc.
 
-	TextDisplayMode _mode;           //! text display mode (one character at a time, fading in, instant, etc.)
+	TextDisplayMode _mode;                 //! text display mode (one character at a time, fading in, instant, etc.)
 	std::vector<hoa_utils::ustring> _text; //! array of strings, one for each line
 
 
 	/*!
 	 *  \brief returns the height of the text when it's rendered with the current font
 	 */
-	int32 CalculateTextHeight();
+	int32 _CalculateTextHeight();
 
 	
 	/*!
@@ -306,7 +312,7 @@ private:
 	 *
 	 *  \param character the character you want to check
 	 */
-	bool IsBreakableChar(uint16 character);
+	bool _IsBreakableChar(uint16 character);
 
 
 	/*!
@@ -315,7 +321,16 @@ private:
 	 *
 	 *  \param line unicode text string to add as a new line
 	 */
-	void AddLine(const hoa_utils::ustring &line);
+	void _AddLine(const hoa_utils::ustring &line);
+	
+
+	/*!
+	 *  \brief does dirtywork of drawing the text, taking the display mode into account
+	 *
+	 *  \param textX x value to use depending on the alignment
+	 *  \param textY y value to use depending on the alignment
+	 */
+	void _DrawTextLines(float textX, float textY);
 };
 
 
@@ -332,6 +347,9 @@ const int32 VIDEO_MAX_FTIME_DIFF = 4;
 
 // !if we need to play catchup with the FPS, how many samples to take
 const int32 VIDEO_FPS_CATCHUP = 20;
+
+// !assume this many characters per line of text when calculating display speed for textboxes
+const int32 VIDEO_CHARS_PER_LINE = 30;
 
 
 /*!****************************************************************************

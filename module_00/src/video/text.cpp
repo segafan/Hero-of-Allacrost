@@ -297,6 +297,8 @@ bool GameVideo::_DrawTextHelper
 	//glDisable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+	//glBlendFunc(GL_SRC_ALPHA, GL_SRC_COLOR);
+
 	glEnable(GL_TEXTURE_2D);
 	_BindTexture(texture);
 	if(glGetError())
@@ -314,31 +316,27 @@ bool GameVideo::_DrawTextHelper
 	
 	MoveRelative(xoff, yoff);
 	
+	float xhi = (float) initial->w, yhi = (float) initial->h;
+	
+	if(cs._rightDir < 0.0f)
+		xhi = -xhi;
+	if(cs._upDir < 0.0f)
+		yhi = -yhi;
+		
+	float tx, ty;
+	tx = (float)initial->w / w;
+	ty = (float)initial->h / h;
+	
 	glBegin(GL_QUADS);
-	if(_coordSys._upDir > 0.0f)
-	{
-		glColor4fv((GLfloat *)&_currentTextColor);
-		glTexCoord2f(0.0f, 1.0f); 
-		glVertex2f(0.0f, 0.0f);
-		glTexCoord2f(1.0f, 1.0f); 
-		glVertex2f((float)w, 0.0f);
-		glTexCoord2f(1.0f, 0.0f); 
-		glVertex2f((float)w, (float)h);
-		glTexCoord2f(0.0f, 0.0f); 
-		glVertex2f(0.0f, (float)h);
-	}
-	else
-	{
-		glColor4fv((GLfloat *)&_currentTextColor);
-		glTexCoord2f(0.0f, 1.0f); 
-		glVertex2f(0.0f, (float)h);
-		glTexCoord2f(1.0f, 1.0f); 
-		glVertex2f((float)w, (float)h);
-		glTexCoord2f(1.0f, 0.0f); 
-		glVertex2f((float)w, 0.0f);
-		glTexCoord2f(0.0f, 0.0f); 
-		glVertex2f(0.0f, 0.0f);
-	}	
+	glColor4fv((GLfloat *)&_currentTextColor);
+	glTexCoord2f(0.0f, ty); 
+	glVertex2f(0.0f, 0.0f);
+	glTexCoord2f(tx, ty); 
+	glVertex2f(xhi, 0.0f);
+	glTexCoord2f(tx, 0.0f); 
+	glVertex2f(xhi, yhi);
+	glTexCoord2f(0.0f, 0.0f); 
+	glVertex2f(0.0f, yhi);
 	glEnd();
 
 	glPopMatrix();
