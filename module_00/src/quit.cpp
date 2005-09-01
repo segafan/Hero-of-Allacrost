@@ -178,7 +178,8 @@ void QuitMode::Draw() {
 	VideoManager->DrawImage(_saved_screen, grayed);
 
 	// Draw the quit menu
-	VideoManager->Move((1024 - 320)/2, (768 - 32)/2);
+	VideoManager->Move(512, 384);
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 	VideoManager->DrawImage(_quit_menu);
 
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);

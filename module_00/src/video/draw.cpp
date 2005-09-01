@@ -44,62 +44,70 @@ bool GameVideo::DrawImage(const ImageDescriptor &id, const Color &color)
 	float modulation = _fader.GetFadeModulation();
 	Color fadeColor(modulation, modulation, modulation, 1.0f);
 
-	float oldxoff = 0.0f, oldyoff = 0.0f;
-
 	float shakeX = _shakeX * (_coordSys._right - _coordSys._left) / 1024.0f;
 	float shakeY = _shakeY * (_coordSys._top   - _coordSys._bottom) / 768.0f;
 
-	if(color == Color::white && modulation == 1.0f)
-	{
-		// call draw element with no color parameter so we don't
-		// waste time doing modulation
+	float xAlignOffset = ((_xalign+1) * id._width)  * 0.5f * -_coordSys._rightDir;
+	float yAlignOffset = ((_yalign+1) * id._height) * 0.5f * -_coordSys._upDir;
+
+	glPushMatrix();
+	MoveRelative(xAlignOffset, yAlignOffset);	
+
+	bool skipModulation = (color == Color::white && modulation == 1.0f);
+	
+	
+	for(uint32 iElement = 0; iElement < numElements; ++iElement)
+	{		
+		glPushMatrix();
 		
-		for(uint32 iElement = 0; iElement < numElements; ++iElement)
-		{		
-			float xoff = (float)id._elements[iElement].xOffset + shakeX;
-			float yoff = (float)id._elements[iElement].yOffset + shakeY;
+		float xoff = (float)id._elements[iElement].xOffset;
+		float yoff = (float)id._elements[iElement].yOffset;
 
-			MoveRelative(xoff - oldxoff, yoff - oldyoff);
-			
-			if(!_DrawElement(id._elements[iElement]))
-			{
-				if(VIDEO_DEBUG)
-					cerr << "VIDEO ERROR: _DrawElement() failed in DrawImage()!" << endl;
-				
-				MoveRelative(-xoff, -yoff);
-				return false;
-			}
-			
-			oldxoff = xoff;
-			oldyoff = yoff;
+		if(_xflip)
+		{
+			xoff = id._width - xoff - id._elements[iElement].width;
 		}
-	}
-	else
-	{
-		// call draw element function that takes a color parameter
-		for(uint32 iElement = 0; iElement < numElements; ++iElement)
-		{		
-			float xoff = (float)id._elements[iElement].xOffset + shakeX;
-			float yoff = (float)id._elements[iElement].yOffset + shakeY;
-
-			MoveRelative(xoff - oldxoff, yoff - oldyoff);
-			
-			if(!_DrawElement(id._elements[iElement], color * fadeColor))
-			{
-				if(VIDEO_DEBUG)
-					cerr << "VIDEO ERROR: _DrawElement() failed in DrawImage()!" << endl;
-				
-				MoveRelative(-xoff, -yoff);
-				return false;
-			}
-			
-			oldxoff = xoff;
-			oldyoff = yoff;
+		
+		if(_yflip)
+		{
+			yoff = id._height - yoff - id._elements[iElement].height;
 		}
+
+		xoff += shakeX;
+		yoff += shakeY;
+
+		MoveRelative(xoff * _coordSys._rightDir, yoff * _coordSys._upDir);
+		
+		float xscale = id._elements[iElement].width;
+		float yscale = id._elements[iElement].height;
+		
+		if(_coordSys._rightDir < 0.0f)
+			xscale = -xscale;
+		if(_coordSys._upDir < 0.0f)
+			yscale = -yscale;
+		
+		glScalef(xscale, yscale, 1.0f);
+
+		bool success;
+		
+		if(skipModulation)
+			success = _DrawElement(id._elements[iElement]);
+		else
+			success = _DrawElement(id._elements[iElement], color * fadeColor);
+
+		
+		if(!success)
+		{
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: _DrawElement() failed in DrawImage()!" << endl;
+			
+			glPopMatrix();
+			return false;
+		}			
+		glPopMatrix();
 	}
 
-	MoveRelative(-oldxoff, -oldyoff);
-
+	glPopMatrix();
 	return true;
 }
 
@@ -118,11 +126,11 @@ bool GameVideo::_DrawElement
 	float w    = element.width;
 	
 	float s0,s1,t0,t1;
-	float xoff,yoff;
 	float xlo,xhi,ylo,yhi;
 
 	CoordSys &cs = _coordSys;
-	
+
+	// set texture coordinates	
 	if(img)
 	{
 		s0 = img->u1;
@@ -131,47 +139,29 @@ bool GameVideo::_DrawElement
 		t1 = img->v2;
 	}
 
-	if (_xflip) 
+	// set vertex coordinates
+	xlo = 0.0f;
+	xhi = 1.0f;
+	ylo = 0.0f;
+	yhi = 1.0f;
+
+	// swap x texture coordinates for x flipping
+	if (_xflip && img) 
 	{ 
-		s0=1-s0; 
-		s1=1-s1; 
-		xlo = (float) w;
-		xhi = 0.0f;
+		float temp = s0;
+		s0 = s1;
+		s1 = temp;
 	} 
-	else
-	{
-		xlo = 0.0f;
-		xhi = (float) w;
-	}
 
-	if (_yflip) 
+	// swap y texture coordinates for y flipping
+	if (_yflip && img) 
 	{ 
-		t0=1-t0;
-		t1=1-t1;
-		ylo=(float) h;
-		yhi=0.0f;
-	} 
-	else
-	{
-		ylo=0.0f;
-		yhi=(float) h;
+		float temp = t0;
+		t0 = t1;
+		t1 = temp;
 	}
 
-	
-	if (cs._left > cs._right) 
-	{ 
-		xlo = (float) -xlo; 
-		xhi = (float) -xhi; 
-	}
-	if (cs._bottom > cs._top) 
-	{ 
-		ylo=(float) -ylo; 
-		yhi=(float) -yhi; 
-	}
-
-	xoff = ((_xalign+1) * w) * .5f * -cs._rightDir;
-	yoff = ((_yalign+1) * h) * .5f * -cs._upDir;
-
+	// set up blending parameters
 	if(img)
 	{
 		glEnable(GL_TEXTURE_2D);
@@ -196,9 +186,8 @@ bool GameVideo::_DrawElement
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
 
-	glPushMatrix();
+	// make calls to OpenGL to render this image
 	
-	glTranslatef(xoff, yoff, 0);
 	glBegin(GL_QUADS);
 	
 	if(img)
@@ -255,8 +244,9 @@ bool GameVideo::_DrawElement
 	}
 
 	glEnd();
-	glPopMatrix();
 
+
+	// clean up
 	glDisable(GL_TEXTURE_2D);
 	if (_blend)
 		glDisable(GL_BLEND);
@@ -290,11 +280,11 @@ bool GameVideo::_DrawElement
 	float w    = element.width;
 	
 	float s0,s1,t0,t1;
-	float xoff,yoff;
 	float xlo,xhi,ylo,yhi;
 
 	CoordSys &cs = _coordSys;
-	
+
+	// set texture coordinates	
 	if(img)
 	{
 		s0 = img->u1;
@@ -303,47 +293,29 @@ bool GameVideo::_DrawElement
 		t1 = img->v2;
 	}
 
-	if (_xflip) 
+	// set vertex coordinates
+	xlo = 0.0f;
+	xhi = 1.0f;
+	ylo = 0.0f;
+	yhi = 1.0f;
+
+	// swap x texture coordinates for x flipping
+	if (_xflip && img) 
 	{ 
-		s0=1-s0; 
-		s1=1-s1; 
-		xlo = (float) w;
-		xhi = 0.0f;
+		float temp = s0;
+		s0 = s1;
+		s1 = temp;
 	} 
-	else
-	{
-		xlo = 0.0f;
-		xhi = (float) w;
-	}
 
-	if (_yflip) 
+	// swap y texture coordinates for y flipping
+	if (_yflip && img) 
 	{ 
-		t0=1-t0;
-		t1=1-t1;
-		ylo=(float) h;
-		yhi=0.0f;
+		float temp = t0;
+		t0 = t1;
+		t1 = temp;
 	} 
-	else
-	{
-		ylo=0.0f;
-		yhi=(float) h;
-	}
 
-	
-	if (cs._left > cs._right) 
-	{ 
-		xlo = (float) -xlo; 
-		xhi = (float) -xhi; 
-	}
-	if (cs._bottom > cs._top) 
-	{ 
-		ylo=(float) -ylo; 
-		yhi=(float) -yhi; 
-	}
-
-	xoff = ((_xalign+1) * w) * .5f * -cs._rightDir;
-	yoff = ((_yalign+1) * h) * .5f * -cs._upDir;
-
+	// set up blending parameters
 	if(img)
 	{
 		glEnable(GL_TEXTURE_2D);
@@ -368,9 +340,8 @@ bool GameVideo::_DrawElement
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
 
-	glPushMatrix();
+	// make calls to OpenGL to render this image
 	
-	glTranslatef(xoff, yoff, 0);
 	glBegin(GL_QUADS);
 	
 	if(img)
@@ -441,7 +412,6 @@ bool GameVideo::_DrawElement
 	}
 
 	glEnd();
-	glPopMatrix();
 
 	glDisable(GL_TEXTURE_2D);
 	if (_blend)

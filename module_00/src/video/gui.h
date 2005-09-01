@@ -363,15 +363,15 @@ class MenuSkin
 public:
 	// this 2d array holds the skin for the menu.
 	
-	// skin[0][0]: bottom left
-	// skin[0][1]: bottom
-	// skin[0][2]: bottom right
+	// skin[0][0]: upper left 
+	// skin[0][1]: top
+	// skin[0][2]: upper right
 	// skin[1][0]: left
 	// skin[1][1]: center (no image, just colors)
 	// skin[1][2]: right
-	// skin[2][0]: upper left
-	// skin[2][1]: top
-	// skin[2][2]: upper right
+	// skin[2][0]: bottom left
+	// skin[2][1]: bottom
+	// skin[2][2]: bottom right
 	
 	hoa_video::ImageDescriptor skin[3][3];
 };

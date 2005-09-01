@@ -397,10 +397,10 @@ bool GUI::CreateMenu(hoa_video::ImageDescriptor &id, float width, float height)
 	float minX = 0.0f;
 	float minY = 0.0f;	
 	
-	id.AddImage(_currentSkin.skin[0][0], minX, minY);   // lower left	
-	id.AddImage(_currentSkin.skin[0][2], maxX, minY);   // lower right	            
-	id.AddImage(_currentSkin.skin[2][0], minX, maxY);   // upper left	
-	id.AddImage(_currentSkin.skin[2][2], maxX, maxY);   // upper right
+	id.AddImage(_currentSkin.skin[2][0], minX, minY);   // lower left	
+	id.AddImage(_currentSkin.skin[2][2], maxX, minY);   // lower right	            
+	id.AddImage(_currentSkin.skin[0][0], minX, maxY);   // upper left	
+	id.AddImage(_currentSkin.skin[0][2], maxX, maxY);   // upper right
 
 	// re-create the overlay at the correct width and height
 	
@@ -422,8 +422,8 @@ bool GUI::CreateMenu(hoa_video::ImageDescriptor &id, float width, float height)
 	
 	for(int32 tileX = 0; tileX < inumXTiles; ++tileX)
 	{
-		id.AddImage(_currentSkin.skin[2][1], leftBorderSize + topWidth * tileX, maxY);
-		id.AddImage(_currentSkin.skin[0][1], leftBorderSize + topWidth * tileX, 0.0f);
+		id.AddImage(_currentSkin.skin[0][1], leftBorderSize + topWidth * tileX, maxY);
+		id.AddImage(_currentSkin.skin[2][1], leftBorderSize + topWidth * tileX, 0.0f);
 	}
 	
 	// iterate from bottom to top and fill in the vertical borders
