@@ -302,7 +302,10 @@ int32 main(int32 argc, char *argv[]) {
 	GameSettings *SettingsManager = GameSettings::Create();
 	GameInput *InputManager = GameInput::Create();
 	GameInstance *InstanceManager = GameInstance::Create();
-
+	
+	// This must be called before the singleton Initialize functions, otherwise we get a seg fault.
+	GameMode::InitializeSingletonPointers();
+	
 	if (!VideoManager->Initialize()) {
 		cerr << "ERROR: unable to initialize VideoManager" << endl;
 		return 1;

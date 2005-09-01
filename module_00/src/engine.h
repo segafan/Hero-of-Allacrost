@@ -105,17 +105,17 @@ protected:
 	/*!
 	 * \brief References to the various game singletons.
 	 *
-	 *  The activation of these singletons are automatically handled by this class,
+	 *  The activation of these static singletons is handled in main.cpp,
 	 *  so in classes inherited from GameMode you don't need to worry about setting
-	 *  up or managing your singleton pointers; its already done for you here.
+	 *  up or managing your singleton pointers. Its already done for you here.
 	 */
-	hoa_audio::GameAudio *AudioManager;
-	hoa_video::GameVideo *VideoManager;
-	hoa_data::GameData *DataManager;
-	hoa_engine::GameInput *InputManager;
-	hoa_engine::GameModeManager *ModeManager;
-	hoa_engine::GameSettings *SettingsManager;
-	hoa_global::GameInstance *InstanceManager;
+	static hoa_audio::GameAudio *AudioManager;
+	static hoa_video::GameVideo *VideoManager;
+	static hoa_data::GameData *DataManager;
+	static hoa_engine::GameInput *InputManager;
+	static hoa_engine::GameModeManager *ModeManager;
+	static hoa_engine::GameSettings *SettingsManager;
+	static hoa_global::GameInstance *InstanceManager;
 	//@}
 
 	friend class GameModeManager;
@@ -139,6 +139,9 @@ public:
 	 *  \brief Purely virtual function for updating the status in this game mode
 	 *  \param time_elapsed The amount of milliseconds that have elapsed since the last time this function was called.
 	 */
+	 //! Initializes all the static class singleton pointers. Only needs to be called once (in main.cpp).
+	static void InitializeSingletonPointers();
+	
 	virtual void Update(uint32 time_elapsed) = 0;
 	//! Purely virtual function for drawing the next screen frame.
 	virtual void Draw() = 0;

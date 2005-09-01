@@ -42,6 +42,14 @@ SINGLETON_INITIALIZE(GameModeManager);
 SINGLETON_INITIALIZE(GameSettings);
 SINGLETON_INITIALIZE(GameInput);
 
+// Initialize static members of GameMode class
+GameAudio* GameMode::AudioManager = NULL;
+GameVideo* GameMode::VideoManager = NULL;
+GameData* GameMode::DataManager = NULL;
+GameInput* GameMode::InputManager = NULL;
+GameModeManager* GameMode::ModeManager = NULL;
+GameSettings* GameMode::SettingsManager = NULL;
+GameInstance* GameMode::InstanceManager = NULL;
 
 // ****************************************************************************
 // ******************************** GameMode **********************************
@@ -80,6 +88,18 @@ GameMode::GameMode(uint8 mt) {
 GameMode::~GameMode() {
 	if (ENGINE_DEBUG) cout << "ENGINE: GameMode destructor invoked" << endl;
 	// delete coordinate system pointer here
+}
+
+
+// Initializes static singleton pointers for later use
+void GameMode::InitializeSingletonPointers() {
+	AudioManager =    GameAudio::GetReference();
+	VideoManager =    GameVideo::GetReference();
+	DataManager =     GameData::GetReference();
+	InputManager =    GameInput::GetReference();
+	ModeManager =     GameModeManager::GetReference();
+	SettingsManager = GameSettings::GetReference();
+	InstanceManager = GameInstance::GetReference();
 }
 
 
