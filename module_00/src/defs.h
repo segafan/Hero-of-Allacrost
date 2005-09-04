@@ -86,10 +86,10 @@ namespace hoa_boot {
 namespace hoa_map {
 	extern bool MAP_DEBUG;
 	class MapTile;
-	class TileFrame;
-	class ObjectLayer;
+	class TileFrame; // Will become defunct once animation support is built into video engine
+	class MapObject;
 	class MapSprite;
-	class SpriteDialogue;
+	class MapDialogue;
 	class MapMode;
 }
 

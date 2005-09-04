@@ -427,12 +427,12 @@ void GameData::LoadMap(hoa_map::MapMode *map_mode, int32 new_map_id) {
 	int32 c = 0;
 	MapTile t;
 	for (int32 i = 0; i < map_mode->_row_count; i++) {
-		map_mode->_map_layers.push_back(vector<MapTile>());
+		map_mode->_tile_layers.push_back(vector<MapTile>());
 		for (int32 j = 0; j < map_mode->_col_count; j++) {
 			t.lower_layer = lower[c];
 			t.upper_layer = upper[c];
 			t.properties = emask[c];
-			map_mode->_map_layers[i].push_back(t);
+			map_mode->_tile_layers[i].push_back(t);
 			c++;
 		}
 	}

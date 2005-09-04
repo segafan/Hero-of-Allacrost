@@ -49,7 +49,7 @@ float RandomUnit() {
 
 
 // This will return a random integer between lower_bound and upper_bound (inclusive)
-int32 RandomNum(int32 lower_bound, int32 upper_bound) {
+int32 RandomNumber(int32 lower_bound, int32 upper_bound) {
 	int32 range;		// The number of possible values we may return
 	float result; // Our result (we cast it when we return)
 

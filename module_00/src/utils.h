@@ -183,7 +183,7 @@ float RandomUnit();
  *	 is greater than upper_bound, but in that case the problem is fixed and a warning is printed out
  *	 to the screen.
  ******************************************************************************/
-int32 RandomNum(int32 lower_bound, int32 upper_bound);
+int32 RandomNumber(int32 lower_bound, int32 upper_bound);
 
 /******************************************************************************
  * int GaussianValue(int mean, int range, bool positive_value):

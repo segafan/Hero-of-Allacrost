@@ -56,8 +56,8 @@ const uint32 ANIMATION_RATE = 300;
 //! \name Screen Coordiante System Constants
 //@{
 //! \brief The number of rows and columns of tiles that compose the screen.
-const float SCREEN_ROWS = 24.0;
-const float SCREEN_COLS = 32.0;
+const float SCREEN_ROWS = 24.0f;
+const float SCREEN_COLS = 32.0f;
 //@}
 
 //! \name Map State Constants
@@ -80,6 +80,13 @@ const uint8 ALTITUDE_5 = 0x10;
 const uint8 ALTITUDE_6 = 0x20;
 const uint8 ALTITUDE_7 = 0x40;
 const uint8 ALTITUDE_8 = 0x80;
+//@}
+
+//! \name Interaction Type Constants
+//@{
+//! \brief Types of interactions that can occur on a specific tile
+const uint32 NO_INTERACTION     = 0;
+const uint32 SPRITE_INTERACTION = 1;
 //@}
 
 // ********************** TILE CONSTANTS **************************
@@ -117,6 +124,24 @@ public:
 	//! The number of rows of tiles that need to be drawn.
 	uint32 r_draw;
 }; // class MapFrame
+
+/*!****************************************************************************
+ * \brief A container class for storing information when a tile needs to be examined.
+ *
+ * This class is used in the MapMode#_TileMoveable() and MapMode#_CheckInteraction() 
+ * functions to do appropriate tile and object interaction checking.
+ *****************************************************************************/
+class TileCheck {
+public:
+	//! The row index of the tile to check.
+	int16 row;
+	//! The column index of the tile to check.
+	int16 col;
+	//! The facing direction of the sprite doing the tile checking.
+	uint16 direction;
+	//! The altitude level of the tile to check.
+	uint8 altitude;
+}; // class TileCheck
 
 } // namespace private_map
 
@@ -178,21 +203,21 @@ public:
 class MapMode : public hoa_engine::GameMode {
 private:
 	friend class hoa_data::GameData;
-
+	friend class MapSprite;
+	
 	//! A unique ID value for the map.
 	uint32 _map_id;
 	//! A stack indicating the various states the map code is in (ie, exploration, dialogue, script).
 	std::vector<uint32> _map_state;
 	//! A millisecond counter for use in tile animation.
+	//! \note This will eventually become defunct once the video engine supports animation natively.
 	int32 _animation_counter;
 	//! The time elapsed since the last Update() call to MapMode.
 	uint32 _time_elapsed;
-
 	//! The number of tile rows in the map.
 	uint32 _row_count;
 	//! The number of tile columns in the map.
 	uint32 _col_count;
-
 	//! True if this map is to have random encounters.
 	bool _random_encounters;
 	//! The average number of steps the player takes before encountering an enemy.
@@ -201,15 +226,15 @@ private:
 	uint32 _steps_till_encounter;
 
 	//! A 2D vector that represents the map itself.
-	std::vector<std::vector<MapTile> > _map_layers;
+	std::vector<std::vector<MapTile> > _tile_layers;
 	//! A vector of circular singely-linked lists for each tile frame animation.
 	std::vector<TileFrame*> _tile_frames;
 	//! The normal set of map objects.
-	std::vector<ObjectLayer*> _ground_objects;
+	std::vector<MapObject*> _ground_objects;
 	//! Objects that can be both walked under and above on (like bridges).
-	std::vector<ObjectLayer*> _middle_objects;
+	std::vector<MapObject*> _middle_objects;
 	//! Objects that are drawn above everything else.
-	std::vector<ObjectLayer*> _sky_objects;
+	std::vector<MapObject*> _sky_objects;
 	//! A pointer to the map sprite that the map should focus on.
 	MapSprite *_focused_object;
 	//! A "virtual sprite" that serves as a camera, available for use in each map.
@@ -227,44 +252,14 @@ private:
 //	 vector<MapEvent> _map_events;
 //	std::vector<hoa_global::GEnemy> _map_enemies;
 	//! Retains information needed to draw the next map frame.
-	private_map::MapFrame _map_info;
-	//! The dialogue menu used by map mode
-	hoa_video::ImageDescriptor _dialogue_menu;
-	//! Contains the string of dialogue text to draw on the string when code is in the dialogue state.
-	std::string _dialogue_text;
-	//! When a dialogue takes place, this vector contains pointers to all of the individual speakers.
-	std::vector<MapSprite*> _dialogue_speakers;
+	private_map::MapFrame _draw_info;
 	
-	/*!
-	 * \brief Determines whether an object may be placed on a tile.
-	 * \param row The row index of the tile to check.
-	 * \param col The column index of the tile to check.
-	 * \param altitude_level The altitude level of the tile to check.
-	 * \return True if an object may move to the tile, false otherwise.
-	 */
-	bool _TileMoveable(int32 row, int32 col, uint8 altitude_level);
-	/*!
-	 * \brief Determines if an adjacent tile has some sort of interaction.
-	 * \param row The row index of the tile to check.
-	 * \param col The column index of the tile to check.
-	 * \param altitude_level The altitude level of the tile to check.
-	 * 
-	 * An interaction may be either an event bound to the tile or another
-	 * map object/sprite occupying that tile.
-	 */
-	void _CheckInteraction(int32 row, int32 col, uint8 altitude_level);
-	/*!
-	 * \brief Attempts to move a sprite in the indicated direction.
-	 * \param direction The direction that the sprite wishes to move.
-	 * \param *sprite A pointer to the sprite itself.
-	 *
-	 * This function is only called for sprites that are located in the
-	 * ground object layer. Sprites are typically never in the middle 
-	 * object layer, and sprites in the sky object layer don't need
-	 * collision detection. This function is also never called with a
-	 * virtual sprite object.
-	 */
-	void _GroundSpriteMove(uint32 direction, MapSprite *sprite);
+	
+	//! The dialogue menu used by map mode.
+	hoa_video::ImageDescriptor _dialogue_menu;
+	//! A pointer to the lines of the current dialogue.
+	std::vector<std::string> *_dialogue_text;
+	
 	
 	//! Updates the focused player sprite and processes user input.
 	//! \param *player_sprite A pointer to the sprite to update.
@@ -291,29 +286,49 @@ private:
 	//! Calculates information about how to draw the next map frame.
 	void _GetDrawInfo();
 
-	// TEMPORARY FUNCTIONS FOR TESTING PURPOSES >>> eventally will be defunct
+	// TEMPORARY FUNCTION FOR TESTING PURPOSES >>> eventally will be defunct
 	void _TEMP_CreateMap();
+	
+	/*!
+	 * \brief Determines whether an object may be placed on a tile.
+	 * \param row The row index of the tile to check.
+	 * \param col The column index of the tile to check.
+	 * \param altitude_level The altitude level of the tile to check.
+	 * \return True if an object may move to the tile, false otherwise.
+	 */
+	bool _TileMoveable(const private_map::TileCheck& tcheck);
+	/*!
+	 * \brief Determines if an adjacent tile has some sort of interaction.
+	 * \param row The row index of the tile to check.
+	 * \param col The column index of the tile to check.
+	 * \param altitude_level The altitude level of the tile to check.
+	 * \return A constant that indicates what type of interaction is found on the tile.
+	 * 
+	 * An interaction may be either an event bound to the tile or another
+	 * map object/sprite occupying that tile.
+	 */
+	uint32 _CheckInteraction(const private_map::TileCheck& tcheck);
 public:
 	//! The name of the map, as seen by the player in the game.
 	std::string mapname;
 	MapMode(uint32 new_map_id);
 	MapMode(uint32 rows, uint32 cols) { _row_count = rows; _col_count = cols; }
 	~MapMode();
-
+	
 	//! \name Map Editor Access functions
 	//@{
 	//! \brief Used by the map editor for accessing various map information.
 	//! \note These functions might go defunct if the map editor becomes independent of the game.
-	std::vector<std::vector<MapTile> > GetMapLayers() { return _map_layers; }
+	std::vector<std::vector<MapTile> > GetMapLayers() { return _tile_layers; }
 	std::vector<hoa_video::ImageDescriptor> GetMapTiles() { return _map_tiles; }
 	void SetRows(uint32 num_rows) { _row_count = num_rows; }
 	void SetCols(uint32 num_cols) { _col_count = num_cols; }
-	void SetMapLayers(std::vector<std::vector<MapTile> > layers) { _map_layers = layers; }
+	void SetMapLayers(std::vector<std::vector<MapTile> > layers) { _tile_layers = layers; }
 	void SetMapTiles(std::vector<hoa_video::ImageDescriptor> tiles) { _map_tiles = tiles; }
 	uint32 GetRows() { return _row_count; }
 	uint32 GetCols() { return _col_count; }
 	//@}
-
+	
 	//! Resets appropriate class members. Called whenever MapMode is made the active game mode.
 	void Reset();
 	//! Updates the game and calls various sub-update functions depending on the state of map mode.

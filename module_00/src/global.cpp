@@ -247,7 +247,6 @@ void GCharacter::LoadFrames() {
 	GameVideo *VideoManager = GameVideo::GetReference();
 	ImageDescriptor imd;
 	string full_name = "img/sprites/map/" + _filename;
-
 	imd.SetDimensions(1.0f, 2.0f);
 
 	imd.SetFilename(full_name + "_d1.png");
