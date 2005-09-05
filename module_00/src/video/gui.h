@@ -60,6 +60,157 @@ enum TextDisplayMode
 
 
 /*!****************************************************************************
+ *  \brief These are the types of events that an option box can generate
+ *   VIDEO_OPTION_SELECTION_CHANGE: the selection changed
+ *   VIDEO_OPTION_CONFIRM: the player confirmed an option
+ *   VIDEO_OPTION_CANCEL:  the player pressed the cancel key
+ *   VIDEO_OPTION_SWITCH:  two elements were just switched
+ *****************************************************************************/
+
+enum OptionBoxEvent
+{
+	VIDEO_OPTION_INVALID = -1,
+	
+	VIDEO_OPTION_SELECTION_CHANGE = 0x1,
+	VIDEO_OPTION_CONFIRM          = 0x2,
+	VIDEO_OPTION_CANCEL           = 0x4,
+	VIDEO_OPTION_SWITCH           = 0x8,
+	
+	VIDEO_OPTION_TOTAL
+};
+
+
+/*!****************************************************************************
+ *  \brief When you create an option, it's more than just text- it can contain
+ *         alignment tags, position tags, or even images. These are called
+ *         "option elements":
+ *   VIDEO_OPTION_ELEMENT_LEFT_ALIGN: left align tag
+ *   VIDEO_OPTION_ELEMENT_CENTER_ALIGN: center align tag
+ *   VIDEO_OPTION_ELEMENT_RIGHT_ALIGN: right align tag
+ *   VIDEO_OPTION_ELEMENT_POSITION: position tag
+ *   VIDEO_OPTION_ELEMENT_IMAGE: image
+ *   VIDEO_OPTION_ELEMENT_TEXT: text
+ *****************************************************************************/
+
+enum OptionElementType
+{
+	VIDEO_OPTION_ELEMENT_INVALID = -1,
+	
+	VIDEO_OPTION_ELEMENT_LEFT_ALIGN,
+	VIDEO_OPTION_ELEMENT_CENTER_ALIGN,
+	VIDEO_OPTION_ELEMENT_RIGHT_ALIGN,	
+
+	VIDEO_OPTION_ELEMENT_POSITION,	
+	VIDEO_OPTION_ELEMENT_IMAGE,
+	VIDEO_OPTION_ELEMENT_TEXT,
+
+	VIDEO_OPTION_ELEMENT_TOTAL
+};
+
+
+/*!****************************************************************************
+ *  \brief The visual state of the menu cursor
+ *   VIDEO_CURSOR_STATE_HIDDEN: causes cursor to not be displayed
+ *   VIDEO_CURSOR_STATE_VISIBLE: causes cursor to be displayed
+ *   VIDEO_CURSOR_STATE_BLINKING: causes cursor to continually blink
+ *****************************************************************************/
+
+enum CursorState
+{
+	VIDEO_CURSOR_STATE_INVALID = -1,
+	
+	VIDEO_CURSOR_STATE_HIDDEN,
+	VIDEO_CURSOR_STATE_VISIBLE,
+	VIDEO_CURSOR_STATE_BLINKING,
+	
+	VIDEO_CURSOR_STATE_TOTAL
+};
+
+
+/*!****************************************************************************
+ *  \brief These select modes control how confirming works when you choose options
+ *   VIDEO_SELECT_SINGLE: just confirm on an item once
+ *   VIDEO_SELECT_DOUBLE: confirm once to highlight an item, then again to actually
+ *                        confirm. If you press confirm on one item and then again
+ *                        on a *different* item, then the two items get switched
+ *****************************************************************************/
+
+enum SelectMode
+{
+	VIDEO_SELECT_INVALID = -1,
+	
+	VIDEO_SELECT_SINGLE,
+	VIDEO_SELECT_DOUBLE,
+	
+	VIDEO_SELECT_TOTAL
+};
+
+
+/*!****************************************************************************
+ *  \brief GUIControl is the base class for all GUI controls. It contains
+ *         some basic things like Draw(), Update(), etc.
+ *****************************************************************************/
+
+class GUIControl
+{
+public:
+	
+	virtual ~GUIControl() {}
+
+	
+	/*!
+	 *  \brief draws a control
+	 */
+
+	virtual bool Draw() = 0;
+
+
+	/*!
+	 *  \brief updates the control
+	 *
+	 *  \param frameTime time elapsed during this frame, in milliseconds
+	 */
+
+	virtual bool Update(int32 frameTime) = 0;
+
+
+	/*!
+	 *  \brief does a self-check on all its members to see if all its members have been
+	 *         set to valid values. This is used internally to make sure we have a valid
+	 *         object before doing any complicated operations. If it detects
+	 *         any problems, it generates a list of errors and returns it by reference
+	 *         so they can be displayed
+	 *
+	 *  \param errors reference to a string to be filled if any errors are found
+	 */
+	virtual bool IsInitialized(std::string &errors) = 0;
+
+
+	/*!
+	 *  \brief sets the position of the text box
+	 *
+	 *  \note  x and y are in terms of coordinate system defined by (0, 1024, 0, 768)
+	 */
+	virtual void SetPosition(float x, float y) = 0;
+
+protected:
+
+	float _x, _y;	                 //! position of the control
+	bool   _initialized;             //! after every change to any of the settings, check if the object is in a valid state and update this bool
+	std::string _initializeErrors;   //! if the object is in an invalid state (not ready for rendering), then this string contains the errors that need to be resolved
+	
+	
+	/*!
+	 *  \brief given a rectangle specified in VIDEO_X_LEFT and VIDEO_Y_BOTTOM
+	 *         orientation, this function transforms the rectangle based on
+	 *         the video engine's coordinate system and alignment flags.
+	 */
+	
+	void _CalculateScreenRect(float &left, float &right, float &bottom, float &top);
+};
+
+
+/*!****************************************************************************
  *  \brief Although we have a DrawText() function, for any non-trivial text
  *         display, the TextBox class is used. This class provides a couple
  *         of things which aren't handled by DrawText(), namely word wrapping,
@@ -72,7 +223,7 @@ enum TextDisplayMode
  *         text, that's fine but it will store it internally as wide strings
  *****************************************************************************/
 
-class TextBox
+class TextBox : public GUIControl
 {
 public:
 
@@ -134,7 +285,7 @@ public:
 	 *  \param xalign x alignment, e.g. VIDEO_X_LEFT
 	 *  \param yalign y alignment, e.g. VIDEO_Y_TOP
 	 */
-	bool SetAlignment(int xalign, int yalign);
+	bool SetAlignment(int32 xalign, int32 yalign);
 
 
 	/*!
@@ -143,7 +294,7 @@ public:
 	 *  \param xalign x alignment, e.g. VIDEO_X_LEFT
 	 *  \param yalign y alignment, e.g. VIDEO_Y_TOP
 	 */
-	void GetAlignment(int &xalign, int &yalign);
+	void GetAlignment(int32 &xalign, int32 &yalign);
 
 
 	/*!
@@ -266,7 +417,7 @@ public:
 	/*!
 	 *  \brief does a self-check on all its members to see if all its members have been
 	 *         set to valid values. This is used internally to make sure we have a valid
-	 *         textbox object before doing any complicated operations. If it detects
+	 *         object before doing any complicated operations. If it detects
 	 *         any problems, it generates a list of errors and returns it by reference
 	 *         so they can be displayed
 	 *
@@ -274,13 +425,8 @@ public:
 	 */
 	bool IsInitialized(std::string &errors);
 
-
 private:
 
-	bool   _initialized;             //! after every change to any of the settings, check if the textbox is in a valid state and update this bool
-	std::string _initializeErrors;   //! if the textbox is in an invalid state (not ready for rendering text), then this string contains the errors that need to be resolved
-
-	float _x, _y;                    //! position of the text box
 	float _width, _height;           //! dimensions of the text box
 
 	float _displaySpeed;             //! characters per second to display text
@@ -331,6 +477,399 @@ private:
 	 *  \param textY y value to use depending on the alignment
 	 */
 	void _DrawTextLines(float textX, float textY);
+};
+
+
+/*!****************************************************************************
+ *  \brief with an option, you can have text, images, alignment tags, or
+ *         position tags. An OptionElement encapsulates each of these things
+ *****************************************************************************/
+
+class OptionElement
+{
+public:
+
+	OptionElementType type;    //! type of option element
+	int32 value;               //! value, like an offset for a position tag, etc.
+};
+
+
+/*!****************************************************************************
+ *  \brief holds the bounds for a particular "cell" in an option box. This is
+ *         used for calculations when drawing an option box
+ *****************************************************************************/
+
+class OptionCellBounds
+{
+public:
+	float cellYTop;     //! y coordinate of top of cell
+	float cellYCenter;  //! y coordinate of center of cell
+	float cellYBottom;  //! y coordinate of bottom of cell
+	
+	float cellXLeft;    //! x coordinate of left of cell
+	float cellXCenter;  //! x coordinate of center of cell
+	float cellXRight;	//! x coordinate of right of cell
+};
+
+
+/*!****************************************************************************
+ *  \brief represents one particular option in a list. For example
+ *         in a shop, one option might be "Mythril knife", and it contains
+ *         an icon of a knife, the text, "Mythril knife", and then a
+ *         right alignment flag, and at the end, "500 Gil"
+ *****************************************************************************/
+
+class Option
+{
+public:
+	
+	std::vector<OptionElement>      elements;  //! vector of option elements
+	std::vector<hoa_utils::ustring> text;      //! vector of text
+	std::vector<ImageDescriptor>    images;    //! vector of images
+	
+	bool disabled;   //! flag to specify whether this option is disabled or not
+};
+
+
+/*!****************************************************************************
+ *  \brief The OptionBox control is used for basically showing several choices
+ *         that the player can choose by moving the cursor to the choice they
+ *         want and pressing the confirm key.
+ *****************************************************************************/
+
+class OptionBox : public GUIControl
+{
+public:
+	
+	OptionBox();
+	~OptionBox();
+	
+	/*!
+	 *  \brief updates the option box control
+	 *
+	 *  \param frameTime number of milliseconds elapsed this frame
+	 */
+	
+	bool Update(int32 frameTime);
+
+
+	/*!
+	 *  \brief draws the control
+	 */
+		
+	bool Draw();
+	
+	
+	/*!
+	 *  \brief sets the font for this control
+	 *
+	 *  \fontName label to a valid, already-loaded font
+	 */
+	
+	bool SetFont(const std::string &fontName);
+
+
+	/*!
+	 *  \brief handles left key press
+	 */
+
+	void HandleLeftKey();
+
+
+	/*!
+	 *  \brief handles up key press
+	 */
+
+	void HandleUpKey();
+
+
+	/*!
+	 *  \brief handles down key press
+	 */
+
+	void HandleDownKey();
+
+
+	/*!
+	 *  \brief handles right key press
+	 */
+
+	void HandleRightKey();
+
+
+	/*!
+	 *  \brief handles confirm key press
+	 */
+
+	void HandleConfirmKey();
+
+
+	/*!
+	 *  \brief handles cancel key press
+	 */
+
+	void HandleCancelKey();
+
+
+	/*!
+	 *  \brief sets position of the control
+	 */
+
+	void SetPosition(float x, float y);
+
+
+	/*!
+	 *  \brief sets the cell width (horizontal spacing between options)
+	 */
+
+	void SetHorizontalSpacing(float hSpacing);
+
+
+	/*!
+	 *  \brief sets the cell height (vertical spacing between options)
+	 */
+
+	void SetVerticalSpacing(float vSpacing);
+
+
+	/*!
+	 *  \brief sets the size of the box in terms of number of columns and rows
+	 */
+
+	void SetSize(int32 columns, int32 rows);
+
+
+	/*!
+	 *  \brief sets the alignment of the option text
+	 */
+
+	void SetOptionAlignment(int32 xalign, int32 yalign);
+
+
+	/*!
+	 *  \brief sets the selection mode (single or double confirm mode)
+	 */
+
+	void SetSelectMode(SelectMode mode);
+
+
+	/*!
+	 *  \brief enables/disables switching, where player can confirm on one item, then
+	 *         confirm on another item to switch them
+	 */
+
+	void EnableSwitching(bool enable);
+
+
+	/*!
+	 *  \brief enables/disables wrapping, where the cursor "wraps" around once it goes
+	 *         past the beginning or end of the option list
+	 */
+
+	void EnableWrapping(bool enable);
+
+
+	/*!
+	 *  \brief sets the cursor state to be visible, hidden, or blinking
+	 */
+
+	bool SetCursorState(CursorState state);
+
+
+	/*!
+	 *  \brief sets the cursor offset relative to the text positions
+	 */
+
+	bool SetCursorOffset(float x, float y);	
+
+
+	/*!
+	 *  \brief sets the current selection (0 to _numOptions-1)
+	 */
+
+	bool SetSelection(int32 index);
+
+
+	/*!
+	 *  \brief sets the options to display in this option box
+	 *
+	 *  \param formatText a vector of unicode strings which contain the text
+	 *         for each item, along with any formatting tags
+	 *
+	 *         For example: "<img/weapons/mythril.png>Mythril knife<r>500 Gil"
+	 */
+
+	bool SetOptions(const std::vector<hoa_utils::ustring> &formatText);
+
+
+	/*!
+	 *  \brief enables/disables the option with the given index
+	 */
+
+	bool EnableOption(int32 index, bool enable);
+
+
+	/*!
+	 *  \brief sorts the option list alphabetically
+	 */
+
+	bool Sort();
+
+
+	/*!
+	 *  \brief returns true if the option box is in the middle of scrolling
+	 */
+
+	bool IsScrolling();
+
+
+	/*!
+	 *  \brief returns an integer which may contain one or more events as bit flags
+	 *         This should be called every frame to see if anything new happened, like
+	 *         the player confirming or canceling, etc.
+	 */
+
+	int32 GetEvents();
+
+
+	/*!
+	 *  \brief returns the index of the currently selected option
+	 */
+
+	int32 GetSelection();
+
+
+	/*!
+	 *  \brief if double-confirm mode is enabled and one item has been confirmed but
+	 *         we're waiting for the player to confirm the other, then GetSwitchSelection()
+	 *         returns the index of the already-confirmed item
+	 */
+
+	int32 GetSwitchSelection();
+
+
+	/*!
+	 *  \brief returns the number of rows
+	 */
+
+	int32 GetNumRows();
+
+
+	/*!
+	 *  \brief returns the number of columns
+	 */
+
+	int32 GetNumColumns();
+
+
+	/*!
+	 *  \brief returns the number of options that were set using SetOptions()
+	 */
+
+	int32 GetNumOptions();
+
+
+	/*!
+	 *  \brief used mostly internally to determine if the option box is initialized.
+	 *         If not, then "errors" is filled with a list of reasons why it is not
+	 *         initialized.
+	 */
+
+	bool IsInitialized(std::string &errors);
+
+private:
+
+	/*!
+	 *  \brief given an alignment and the bounds of an option cell, it sets up the correct
+	 *         flags to render into that cell, and returns the x and y values where the
+	 *         text should be rendered.
+	 */
+
+	void _SetupAlignment(int32 xalign, int32 yalign, const OptionCellBounds &bounds, float &x, float &y);
+
+
+	/*!
+	 *  \brief clears the list of options
+	 */
+
+	void _ClearOptions();
+
+
+	/*!
+	 *  \brief helper function to add a new option, used by SetOptions().
+	 */
+
+	bool _AddOption(const hoa_utils::ustring &formatString);
+
+
+	/*!
+	 *  \brief switches the option items specified by _selection and _switchSelection
+	 */
+
+	void _SwitchItems();
+
+
+	/*!
+	 *  \brief increments or decrements the current selection by offset
+	 */
+
+	void _ChangeSelection(int32 offset);
+
+
+	/*!
+	 *  \brief plays the confirm sound
+	 */
+
+	void _PlayConfirmSound();
+
+
+	/*!
+	 *  \brief returns the height of the text when it's rendered with the current font
+	 */
+
+	void _PlayNoConfirmSound();
+
+
+	/*!
+	 *  \brief plays the select sound
+	 */
+
+	void _PlaySelectSound();
+
+
+	/*!
+	 *  \brief plays the switch sound
+	 */
+
+	void _PlaySwitchSound();
+
+
+	bool   _initialized;             //! after every change to any of the settings, check if the textbox is in a valid state and update this bool
+	std::string _initializeErrors;   //! if the option box is in an invalid state (not ready for drawing), then this string contains the errors that need to be resolved
+	std::string _font;               //! font used for the options
+	float _cursorX, _cursorY;        //! cursor offset
+	
+	float _hSpacing;            //! horizontal spacing
+	float _vSpacing;            //! vertical spacing
+	int32 _numColumns;          //! number of columns
+	int32 _numRows;             //! numer of rows
+	int32 _xalign;              //! horizontal alignment for text
+	int32 _yalign;              //! vertical alignment for text
+	
+	SelectMode _selectMode;   //! selection mode
+	bool _switching;          //! allow switching
+	bool _wrapping;           //! allow wrapping
+
+	CursorState _cursorState; //! current cursor state (blinking, visible, hidden, etc)
+	
+	int32 _events;                   //! events bit flag
+	int32 _selection;                //! current selection
+	int32 _switchSelection;          //! if player has confirmed once in a double-confirm mode, _switchSelection is the first item the player confirmed
+	
+	std::vector <Option> _options;   //! vector containing each option
+	int32 _numOptions;               //! how many options there are in this box
+	bool  _scrolling;                //! true if the box is currently in the middle of scrolling
+	FontProperties _fontProperties;  //! structure containing properties of the current font like height, etc.
 };
 
 

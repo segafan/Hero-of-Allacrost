@@ -240,6 +240,28 @@ bool RemoveDirectory(const std::string &directoryName);
 hoa_utils::ustring MakeWideString(const std::string &text);
 
 
+/******************************************************************************
+ * bool MakeByteString(const hoa_utils::ustring &uText);
+ *
+ *	This function converts a wide string to a string. This is used in some places,
+ *  where there is for example a filename in a wide string format which needs
+ *  to be converted to a non-wide format since all our resource loading code
+ *  is based on std::string
+ ******************************************************************************/
+
+std::string MakeByteString(const hoa_utils::ustring &uText);
+
+
+/******************************************************************************
+ * bool IsNumber(const std::string &text);
+ *
+ *	This function returns true if the text passed to it is a number. For example,
+ *  "50", or "2350", or "-235.025" are numbers, whereas "523abc" is not :)
+ ******************************************************************************/
+
+bool IsNumber(const std::string &text);
+
+
 }
 
 #endif

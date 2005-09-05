@@ -231,9 +231,6 @@ bool GameVideo::Initialize()
 		return false;
 	}
 
-	if(VIDEO_DEBUG)
-		cout << "VIDEO: Erasing the screen\n";
-
 	// create the GUI
 	_gui = new GUI;
 
@@ -241,6 +238,24 @@ bool GameVideo::Initialize()
 	// (in case the game crashed during a previous run, leaving stuff behind)
 	MakeDirectory("temp");		
 	CleanDirectory("temp");
+
+	// enable text shadows
+	EnableTextShadow(true);
+
+	// set default menu cursor
+	
+	if(VIDEO_DEBUG)
+		cout << "VIDEO: Setting default menu cursor" << endl;
+	
+	if(!SetDefaultCursor("img/menus/cursor.png"))
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: problem loading default menu cursor" << endl;
+	}
+	
+
+	if(VIDEO_DEBUG)
+		cout << "VIDEO: Erasing the screen\n";
 
 
 	// set up the screen for rendering
@@ -269,8 +284,6 @@ bool GameVideo::Initialize()
 		cout << "VIDEO: GameVideo::Initialize() returned successfully" << endl;
 	
 	
-	EnableTextShadow(true);
-
 	return true;
 }
 
@@ -1292,6 +1305,66 @@ void GameVideo::_PopContext()
 	// restore modelview transformation
 	glMatrixMode(GL_MODELVIEW);
 	glPopMatrix();
+}
+
+
+//-----------------------------------------------------------------------------
+// _ConvertYAlign: convert a value like VIDEO_Y_BOTTOM to an offset like -1
+//-----------------------------------------------------------------------------
+
+int32 GameVideo::_ConvertYAlign(int32 yalign)
+{
+	switch(yalign)
+	{
+		case VIDEO_Y_BOTTOM:
+			return -1;
+		case VIDEO_X_CENTER:
+			return 0;
+		default:
+			return 1;
+	}
+}
+
+
+//-----------------------------------------------------------------------------
+// _ConvertXAlign: convert a value like VIDEO_X_LEFT to an offset like -1
+//-----------------------------------------------------------------------------
+
+int32 GameVideo::_ConvertXAlign(int32 xalign)
+{
+	switch(xalign)
+	{
+		case VIDEO_X_LEFT:
+			return -1;
+		case VIDEO_X_CENTER:
+			return 0;
+		default:
+			return 1;
+	}
+}
+
+
+//-----------------------------------------------------------------------------
+// SetDefaultCursor: sets the default menu cursor, returns false if it fails
+//-----------------------------------------------------------------------------
+
+bool GameVideo::SetDefaultCursor(const std::string &cursorImageFilename)
+{
+	_defaultMenuCursor.SetFilename(cursorImageFilename);
+	return LoadImage(_defaultMenuCursor);
+}
+
+
+//-----------------------------------------------------------------------------
+// GetDefaultCursor: sets the gefault menu cursor, returns NULL if none is set
+//-----------------------------------------------------------------------------
+
+ImageDescriptor *GameVideo::GetDefaultCursor()
+{
+	if(_defaultMenuCursor.GetWidth() != 0.0f)  // cheap test if image is valid
+		return &_defaultMenuCursor;
+	else
+		return NULL;
 }
 
 

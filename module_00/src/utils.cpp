@@ -277,6 +277,58 @@ ustring MakeWideString(const string &text)
 }
 
 
+// converts a wide string to a string
+string MakeByteString(const ustring &uText)
+{
+	int32 length = (int32) uText.length();
+	unsigned char *str = new unsigned char[length+1];
+	str[length] = '\0';
+	
+	for(int32 c = 0; c < length; ++c)
+	{
+		uint16 curChar = uText[c];
+		
+		if(curChar > 0xff)
+			str[c] = '?';
+		else
+			str[c] = static_cast<unsigned char> (curChar);
+	}
+	
+	string byteString(reinterpret_cast<char *>(str));
+	delete [] str;
+	
+	return byteString;
+}
+
+
+// returns true if the given text is a number
+bool IsNumber(const std::string &text)
+{
+	if(text.empty())
+		return false;
+				
+	// keep track of whether decimal point is allowed. Basically it's allowed at any point
+	// except once it's been used once it can't be used again
+	bool isDecimalAllowed = true;
+	
+	size_t len = text.length();
+	
+	for(size_t c = 0; c < len; ++c)
+	{
+		// if the character is not a valid minus or plus sign, and it's not a
+		// digit, and it's not a valid decimal point, then this string isn't a number
+		
+		bool isNumeric = (c==0 && (text[c] == '-' || text[c] == '+')) ||
+		                 (isdigit(int32(text[c]))) ||
+		                 (isDecimalAllowed && text[c] == '.');
+		
+		if(!isNumeric)
+			return false;
+	}
+	
+	return true;
+}
+
 
 } // namespace utils
 

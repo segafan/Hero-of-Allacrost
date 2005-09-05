@@ -19,19 +19,18 @@ namespace hoa_video
 //-----------------------------------------------------------------------------
 
 TextBox::TextBox()
-: _x(0.0f),
-  _y(0.0f),
-  _width (0.0f),
-  _height(0.0f),
-  _xalign(-1),
-  _yalign(-1),
-  _finished(false),
+: _finished(false),
   _currentTime(0),
   _mode(VIDEO_TEXT_INVALID),
   _displaySpeed(0.0f),
   _numChars(0)
 {
 	_initialized = IsInitialized(_initializeErrors);
+	
+	_x = _y = 0.0f;	
+	_width = _height = 0.0f;
+	_xalign = VIDEO_X_LEFT;
+	_yalign = VIDEO_Y_BOTTOM;
 }
 
 
@@ -87,35 +86,19 @@ bool TextBox::Draw()
 	bottom    = 0.0f;
 	top    = _height;
 	
+	_CalculateScreenRect(left, right, bottom, top);
 	CoordSys &cs = video->_coordSys;
-	
-	if(cs._upDir < 0.0f)
-		top = -top;
-		
-	if(cs._rightDir < 0.0f)
-		right = -right;
-	
-	float xoff, yoff;
-	
-	xoff = _x + ((video->_xalign + 1) * _width)  * 0.5f * -cs._rightDir;
-	yoff = _y + ((video->_yalign + 1) * _height) * 0.5f * -cs._upDir;
-	
-	left   += xoff;
-	right  += xoff;
-	
-	top    += yoff;
-	bottom += yoff;	
-	
+
 	// figure out where the top of the rendered text is
 	
 	float textHeight = (float) _CalculateTextHeight();
 	float textY;
-	if(_yalign == 1)
+	if(_yalign == VIDEO_Y_TOP)
 	{
 		// top alignment
 		textY = top;
 	}
-	else if(_yalign == 0)
+	else if(_yalign == VIDEO_Y_CENTER)
 	{
 		textY = top - cs._upDir * (_height - textHeight) * 0.5f;
 	}
@@ -129,12 +112,12 @@ bool TextBox::Draw()
 	float textX;
 	
 	// figure out X alignment
-	if(_xalign == -1)
+	if(_xalign == VIDEO_X_LEFT)
 	{
 		// left align
 		textX = left;
 	}
-	else if(_xalign == 0)
+	else if(_xalign == VIDEO_X_CENTER)
 	{
 		// center align
 		textX = (left + right) * 0.5f;
@@ -228,47 +211,11 @@ void TextBox::GetDimensions(float &w, float &h)
 //               returns false if any invalid alignment flag is passed
 //-----------------------------------------------------------------------------
 
-bool TextBox::SetAlignment(int xalign, int yalign)
+bool TextBox::SetAlignment(int32 xalign, int32 yalign)
 {
 	bool success = true;
-	
-	switch(xalign)
-	{
-		case VIDEO_X_LEFT:
-			_xalign = -1;
-			break;
-		case VIDEO_X_CENTER:
-			_xalign = 0;
-			break;
-		case VIDEO_X_RIGHT:
-			_xalign = 1;
-			break;
-		default:
-		{
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: TextBox::SetAlignment() failed, invalid xalign: " << xalign << endl;
-			success = false;
-		}
-	};
-	
-	switch(yalign)
-	{
-		case VIDEO_Y_TOP:
-			_yalign = 1;
-			break;
-		case VIDEO_Y_CENTER:
-			_yalign = 0;
-			break;
-		case VIDEO_Y_BOTTOM:
-			_yalign = -1;
-			break;
-		default:
-		{
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: TextBox::SetAlignment() failed, invalid yalign: " << yalign << endl;
-			success = false;
-		}
-	};
+	_xalign = xalign;
+	_yalign = yalign;	
 	
 	_initialized = IsInitialized(_initializeErrors);
 	
@@ -280,7 +227,7 @@ bool TextBox::SetAlignment(int xalign, int yalign)
 // GetAlignment: returns the alignment flags into xalign and yalign
 //-----------------------------------------------------------------------------
 
-void TextBox::GetAlignment(int &xalign, int &yalign)
+void TextBox::GetAlignment(int32 &xalign, int32 &yalign)
 {
 	xalign = _xalign;
 	yalign = _yalign;
@@ -337,7 +284,7 @@ string TextBox::GetFont()
 
 bool TextBox::SetDisplayMode(const TextDisplayMode &mode)
 {
-	if(mode <= VIDEO_TEXT_INVALID || mode > VIDEO_TEXT_TOTAL)
+	if(mode <= VIDEO_TEXT_INVALID || mode >= VIDEO_TEXT_TOTAL)
 	{
 		cerr << "VIDEO ERROR: TextBox::SetDisplayMode() failed because a mode with the value of " << mode << " was passed in!" << endl;
 		return false;
@@ -591,70 +538,34 @@ bool TextBox::IsInitialized(string &errors)
 	bool success = true;
 	
 	errors.clear();
+	ostringstream s;
 	
 	// check width
 	if(_width <= 0.0f || _width > 1024.0f)
-	{
-		ostringstream s;
 		s << "* Invalid width (" << _width << ")" << endl;
-		errors += s.str();
-		success = false;
-	}
 	
 	// check height
 	if(_height <= 0.0f || _height > 768.0f)
-	{
-		ostringstream s;
 		s << "* Invalid height (" << _height << ")" << endl;
-		errors += s.str();
-		success = false;
-	}
 	
 	// check display speed
 	if(_displaySpeed <= 0.0f)
-	{
-		ostringstream s;
 		s << "* Invalid display speed (" << _displaySpeed << ")" << endl;
-		errors += s.str();
-		success = false;
-	}
 	
 	// check alignment flags
-	if(_xalign < -1 || _xalign > 1)
-	{
-		ostringstream s;
+	if(_xalign < VIDEO_X_LEFT || _xalign > VIDEO_X_RIGHT)
 		s << "* Invalid x align (" << _xalign << ")" << endl;
-		errors += s.str();
-		success = false;
-	}
 	
-	if(_yalign < -1 || _yalign > 1)
-	{
-		ostringstream s;
+	if(_yalign < VIDEO_Y_TOP || _yalign > VIDEO_Y_BOTTOM)
 		s << "* Invalid y align (" << _yalign << ")" << endl;
-		errors += s.str();
-		success = false;
-	}
-	
 	
 	// check font
 	if(_font.empty())
-	{
-		ostringstream s;
 		s << "* Invalid font (none has been set)" << endl;
-		errors += s.str();
-		success = false;		
-	}
-
 	
 	// check display mode
-	if(_mode <= VIDEO_TEXT_INVALID || _mode > VIDEO_TEXT_TOTAL)
-	{
-		ostringstream s;
+	if(_mode <= VIDEO_TEXT_INVALID || _mode >= VIDEO_TEXT_TOTAL)
 		s << "* Invalid display mode (" << _mode << ")" << endl;
-		errors += s.str();
-		success = false;
-	}
 
 	_initialized = success;	
 	return success;
@@ -821,9 +732,11 @@ void TextBox::_DrawTextLines(float textX, float textY)
 		float xOffset;
 		
 		// calculate the xOffset for this line
-		float lineWidth = video->CalculateTextWidth(_font, _text[line]);
+		float lineWidth = (float) video->CalculateTextWidth(_font, _text[line]);
 	
-		xOffset = textX + ((_xalign + 1) * lineWidth) * 0.5f * -cs._rightDir;
+		int32 xAlign = video->_ConvertXAlign(_xalign);
+				
+		xOffset = textX + ((xAlign + 1) * lineWidth) * 0.5f * -cs._rightDir;
 		video->MoveRelative(xOffset, 0.0f);	
 	
 		int32 lineSize = (int32) _text[line].size();
@@ -900,7 +813,7 @@ void TextBox::_DrawTextLines(float textX, float textY)
 						newColor[3] *= curPct;
 						
 						video->SetTextColor(newColor);
-						video->MoveRelative(video->CalculateTextWidth(_font, substring), 0.0f);
+						video->MoveRelative((float)video->CalculateTextWidth(_font, substring), 0.0f);
 						video->DrawText(_text[line].substr(numCompletedChars, 1));
 						video->SetTextColor(oldColor);
 					}
@@ -974,20 +887,20 @@ void TextBox::_DrawTextLines(float textX, float textY)
 
 						// rectangle of the current character, in window coordinates
 						int32 charX, charY, charW, charH;
-						charX = xOffset + cs._rightDir * video->CalculateTextWidth(_font, substring);
-						charY = textY - cs._upDir * (_fontProperties.height + _fontProperties.descent);
+						charX = int32(xOffset + cs._rightDir * video->CalculateTextWidth(_font, substring));
+						charY = int32(textY - cs._upDir * (_fontProperties.height + _fontProperties.descent));
 						
 						if(cs._upDir < 0.0f)
-							charY = cs._bottom - charY;
+							charY = int32(cs._bottom) - charY;
 
 						if(cs._rightDir < 0.0f)
-							charX = cs._left - charX;
-						
+							charX = int32(cs._left) - charX;
+							
 						charW = video->CalculateTextWidth(_font, curCharString);
 						charH = _fontProperties.height;
 						
 						// multiply width by percentage done
-						charW *= curPct;
+						charW = int32(curPct * charW);
 						
 						glEnable(GL_SCISSOR_TEST);
 						glScissor(charX, charY, charW, charH);						

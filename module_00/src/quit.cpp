@@ -37,6 +37,7 @@ using namespace hoa_audio;
 using namespace hoa_video;
 using namespace hoa_engine;
 using namespace hoa_boot;
+using namespace hoa_utils;
 
 
 namespace hoa_quit {
@@ -66,8 +67,26 @@ QuitMode::QuitMode() {
 	// Save a copy of the current screen to use as a backdrop
 	if (!VideoManager->CaptureScreen(_saved_screen)) 
 		if (QUIT_DEBUG) cerr << "PAUSE: ERROR: Couldn't save the screen!" << endl;
-	if(!VideoManager->CreateMenu(_quit_menu, 320, 64)) // create a 256x64 menu
+	if(!VideoManager->CreateMenu(_quit_menu, 448, 80)) // create a menu
 		cerr << "QUIT: ERROR: Couldn't create menu image!" << endl;
+
+	// Initialize the option box
+	
+	_option_box.SetFont("default");
+	_option_box.SetHorizontalSpacing(150.0f);
+	_option_box.SetSize(3, 1);
+	_option_box.SetPosition(512.0f, 384.0f);
+	_option_box.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_option_box.SetSelectMode(VIDEO_SELECT_SINGLE);
+	_option_box.SetCursorOffset(-35.0f, -4.0f);
+	
+	vector<ustring> options;
+	options.push_back(MakeWideString("Quit Game"));
+	options.push_back(MakeWideString("Quit to Boot Menu"));
+	options.push_back(MakeWideString("Cancel"));
+	
+	_option_box.SetOptions(options);
+	_option_box.SetSelection(0);
 }
 
 
@@ -92,79 +111,51 @@ void QuitMode::Reset() {
 
 // Restores volume or unpauses audio, then pops itself from the game stack
 void QuitMode::Update(uint32 time_elapsed) {
-
-	// Move the menu selected cursor as appropriate
-	if (InputManager->LeftPress()) {
-		switch (_quit_type) {
+	
+	// Dispatch input to option box
+	
+	if (InputManager->LeftPress())
+		_option_box.HandleLeftKey();
+	else if(InputManager->RightPress())
+		_option_box.HandleRightKey();
+	else if(InputManager->CancelPress())
+		_option_box.HandleCancelKey();
+	else if(InputManager->ConfirmPress())
+		_option_box.HandleConfirmKey();
+		
+	// See if option box has any events
+	
+	int32 events = _option_box.GetEvents();
+	int32 selection = _option_box.GetSelection();
+		
+	if(events & VIDEO_OPTION_CONFIRM)
+	{
+		switch(selection)
+		{
 			case QUIT_GAME:
-				_quit_type = QUIT_CANCEL;
-				cout << "Cancel" << endl;
+				_QuitGame();
 				break;
 			case QUIT_TO_BOOTMENU:
-				_quit_type = QUIT_GAME;
-				cout << "Quit Game" << endl;
-				break;
+				_QuitToBootMenu();
+				break;			
 			case QUIT_CANCEL:
-				_quit_type = QUIT_TO_BOOTMENU;
-				cout << "Quit to Bootmenu" << endl;
+				_Cancel();
 				break;
-		}
+			default:
+			{
+				if(QUIT_DEBUG)
+					cerr << "QUIT ERROR: received confirm event, but option box selection was invalid" << endl;
+				break;
+			}
+		};
 	}
-	else if (InputManager->RightPress()) {
-		switch (_quit_type) {
-			case QUIT_GAME:
-				_quit_type = QUIT_TO_BOOTMENU;
-				cout << "Quit to Bootmenu" << endl;
-				break;
-			case QUIT_TO_BOOTMENU:
-				_quit_type = QUIT_CANCEL;
-				cout << "Cancel" << endl;
-				break;
-			case QUIT_CANCEL:
-				_quit_type = QUIT_GAME;
-				cout << "Quit Game" << endl;
-				break;
-		}
+	else if(events & VIDEO_OPTION_CANCEL)
+	{
+		_Cancel();
 	}
-
-	// The user really doesn't want to quit after all, so restore the game audio and state
-	if (InputManager->CancelPress() || (InputManager->ConfirmPress() && _quit_type == QUIT_CANCEL)) {
-		switch (SettingsManager->GetPauseVolumeAction()) {
-			case ENGINE_PAUSE_AUDIO:
-				AudioManager->ResumeAudio();
-				break;
-			case ENGINE_ZERO_VOLUME:
-			case ENGINE_HALF_VOLUME:
-				AudioManager->SetMusicVolume(SettingsManager->music_vol);
-				AudioManager->SetSoundVolume(SettingsManager->sound_vol);
-				break;
-			// Don't need to do anything for case ENGINE_SAME_VOLUME
-		}
-		ModeManager->Pop();
-	}
-
-	// Restore the game audio, pop QuitMode off the stack, and push BootMode
-	else if (InputManager->ConfirmPress() && _quit_type == QUIT_TO_BOOTMENU) {
-		switch (SettingsManager->GetPauseVolumeAction()) {
-			case ENGINE_PAUSE_AUDIO:
-				AudioManager->ResumeAudio();
-				break;
-			case ENGINE_ZERO_VOLUME:
-			case ENGINE_HALF_VOLUME:
-				AudioManager->SetMusicVolume(SettingsManager->music_vol);
-				AudioManager->SetSoundVolume(SettingsManager->sound_vol);
-				break;
-			// We don't need to do anything for case ENGINE_SAME_VOLUME
-		}
-		ModeManager->PopAll(); // Remove and free every game mode
-		BootMode *BM = new BootMode();
-		ModeManager->Push(BM);
-	}
-
-	// The user has confirmed that they want to quit.
-	else if (InputManager->ConfirmPress() && _quit_type == QUIT_GAME) {
-		SettingsManager->ExitGame();
-	}
+	
+	// Update the option box
+	_option_box.Update(time_elapsed);
 }
 
 
@@ -178,13 +169,61 @@ void QuitMode::Draw() {
 	VideoManager->DrawImage(_saved_screen, grayed);
 
 	// Draw the quit menu
+	
 	VideoManager->Move(512, 384);
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
-	VideoManager->DrawImage(_quit_menu);
-
-	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
-	VideoManager->Move(512, 384);
-	VideoManager->DrawText("Quit Game     Quit to Boot Menu     Cancel");
+	VideoManager->DrawImage(_quit_menu);	
+	_option_box.Draw();
 }
+
+
+// Quit the game completely
+void QuitMode::_QuitGame()
+{
+	SettingsManager->ExitGame();
+}
+
+
+// Quit to the boot menu
+void QuitMode::_QuitToBootMenu()
+{
+	// Restore the game audio, pop QuitMode off the stack, and push BootMode
+	switch (SettingsManager->GetPauseVolumeAction()) {
+		case ENGINE_PAUSE_AUDIO:
+			AudioManager->ResumeAudio();
+			break;
+		case ENGINE_ZERO_VOLUME:
+		case ENGINE_HALF_VOLUME:
+			AudioManager->SetMusicVolume(SettingsManager->music_vol);
+			AudioManager->SetSoundVolume(SettingsManager->sound_vol);
+			break;
+		// We don't need to do anything for case ENGINE_SAME_VOLUME
+	}
+	ModeManager->PopAll(); // Remove and free every game mode
+	BootMode *BM = new BootMode();
+	ModeManager->Push(BM);
+}
+
+
+// Cancel out of quit mode
+void QuitMode::_Cancel()
+{
+	// The user really doesn't want to quit after all, so restore the game audio and state
+	switch (SettingsManager->GetPauseVolumeAction()) {
+		case ENGINE_PAUSE_AUDIO:
+			AudioManager->ResumeAudio();
+			break;
+		case ENGINE_ZERO_VOLUME:
+		case ENGINE_HALF_VOLUME:
+			AudioManager->SetMusicVolume(SettingsManager->music_vol);
+			AudioManager->SetSoundVolume(SettingsManager->sound_vol);
+			break;
+		// Don't need to do anything for case ENGINE_SAME_VOLUME
+	}
+	ModeManager->Pop();
+}
+
+
+
 
 } // namespace hoa_quit

@@ -31,6 +31,8 @@
 #include "defs.h"
 #include "engine.h"
 #include "video.h"
+#include "gui.h"
+
 
 //! All calls to quit mode are wrapped in this namespace.
 namespace hoa_quit {
@@ -86,6 +88,16 @@ private:
 	hoa_video::ImageDescriptor _saved_screen;
 	//! An image of the quit menu.
 	hoa_video::ImageDescriptor _quit_menu;
+	//! The option menu which asks if you want to quit
+	hoa_video::OptionBox _option_box;
+
+	//! Helper function which quits the game
+	void _QuitGame();
+	//! Helper function which quits to the boot menu
+	void _QuitToBootMenu();
+	//! Helper function which cancels out of quit mode
+	void _Cancel();
+
 public:
   QuitMode();
   ~QuitMode();

@@ -438,4 +438,41 @@ bool GUI::CreateMenu(hoa_video::ImageDescriptor &id, float width, float height)
 }
 
 }  // namespace private_video
+
+
+//-----------------------------------------------------------------------------
+// _CalculateScreenRect: transforms a rectangle based on the coordinate system
+//                       and alignment flags
+//-----------------------------------------------------------------------------
+
+void GUIControl::_CalculateScreenRect(float &left, float &right, float &bottom, float &top)
+{
+	float width  = right - left;
+	float height = top - bottom;
+	
+	GameVideo *video = GameVideo::GetReference();	
+	CoordSys &cs = video->_coordSys;
+	
+	if(cs._upDir < 0.0f)
+		top = -top;
+		
+	if(cs._rightDir < 0.0f)
+		right = -right;
+	
+	float xoff, yoff;
+	
+	xoff = _x + ((video->_xalign + 1) * width)  * 0.5f * -cs._rightDir;
+	yoff = _y + ((video->_yalign + 1) * height) * 0.5f * -cs._upDir;
+	
+	left   += xoff;
+	right  += xoff;
+	
+	top    += yoff;
+	bottom += yoff;		
+}
+
+
+
+
+
 }  // namespace hoa_video

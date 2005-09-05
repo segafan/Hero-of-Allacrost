@@ -300,7 +300,9 @@ private:
 	float _bottom;
 	float _top;
 
+	friend class GUIControl;
 	friend class TextBox;
+	friend class OptionBox;
 	friend class GameVideo;
 };
 
@@ -1532,6 +1534,9 @@ public:
 	 */
 	bool ToggleAdvancedDisplay();
 
+	bool SetDefaultCursor(const std::string &cursorImageFilename);
+	ImageDescriptor *GetDefaultCursor();
+
 private:
 	SINGLETON_DECLARE(GameVideo);
 	
@@ -1587,6 +1592,8 @@ private:
 
 	std::string _currentFont;          //! current font name
 	Color       _currentTextColor;     //! current text color
+
+	ImageDescriptor _defaultMenuCursor;  //! image which is to be used as the cursor
 	
 	bool _textShadow;   //! if true, text shadow effect is enabled
 
@@ -1616,6 +1623,9 @@ private:
 
 	bool _BindTexture(GLuint texID);
 
+
+	int32 _ConvertXAlign(int32 xalign);
+	int32 _ConvertYAlign(int32 yalign);
 
 	/*!
 	 *  \brief creates a blank texture of the given width and height and returns integer used by OpenGL to refer to this texture. Returns 0xffffffff on failure.
@@ -1855,7 +1865,9 @@ private:
 	 */	
 	bool _DEBUG_ShowTexSheet();
 	
-	friend class TextBox;	
+	friend class TextBox;
+	friend class OptionBox;
+	friend class GUIControl;
 	friend class private_video::GUI;	
 	friend class private_video::FixedTexMemMgr;
 	friend class private_video::VariableTexMemMgr;
