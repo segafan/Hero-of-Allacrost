@@ -23,13 +23,22 @@ OptionBox::OptionBox()
   _yalign(VIDEO_Y_TOP),
   _selectMode(VIDEO_SELECT_SINGLE),
   _switching(false),
-  _wrapping(false),
+  _hWrapMode(VIDEO_WRAP_MODE_NONE),
+  _vWrapMode(VIDEO_WRAP_MODE_NONE),
   _cursorState(VIDEO_CURSOR_STATE_VISIBLE),
-  _events(0),
+  _event(0),
   _selection(-1),
   _switchSelection(-1),
   _numOptions(0),
   _scrolling(0),
+  _scrollOffset(0),
+  _scrollStartOffset(0),
+  _scrollEndOffset(0),
+  _blinkTime(0),
+  _scrollTime(0),
+  _switchCursorX(-3),
+  _switchCursorY(-3),
+  _blink(false),
   _cursorX(0.0f),
   _cursorY(0.0f)
 {
@@ -78,8 +87,12 @@ bool OptionBox::SetFont(const std::string &fontName)
 
 void OptionBox::HandleLeftKey()
 {
-	if(_numColumns > 1)
-		_ChangeSelection(-1);
+	// ignore input while scrolling, or if an event has already been logged this frame
+	if(_scrolling || _event)
+		return;
+
+	if(!_ChangeSelection(-1, true))
+		_event = VIDEO_OPTION_BOUNDS_LEFT;
 }
 
 
@@ -89,30 +102,127 @@ void OptionBox::HandleLeftKey()
 //                   how much to change the current selection by.
 //-----------------------------------------------------------------------------
 
-void OptionBox::_ChangeSelection(int32 offset)
+bool OptionBox::_ChangeSelection(int32 offset, bool horizontal)
 {
-	bool selectionChanged = true;
-
-	_selection += offset;
+	// special case: if we have only one column, then the only way pressing
+	//               left or right can cause the selection to change is
+	//               by moving up or down (shifted).
+	if(horizontal && _numColumns == 1 && _hWrapMode != VIDEO_WRAP_MODE_SHIFTED)
+		return false;
 	
-	if(_wrapping)
+	int32 row = _selection / _numColumns;
+	int32 col = _selection % _numColumns;
+	
+	int32 totalRows = (_numOptions / _numColumns) + 1;
+	
+	// if scrolling is enabled (i.e. we have more rows we can possibly show)
+	// then don't allow vertical wrapping
+	if(totalRows > _numRows)
 	{
-		if(_selection < 0)
-			_selection += _numOptions;
-		else if(_selection >= _numOptions)
-			_selection -= _numOptions;			
-	}	
-	else if(_selection < 0 || _selection >= _numOptions)
+		_vWrapMode = VIDEO_WRAP_MODE_NONE;
+	}
+	
+
+	// **** case 1: horizontal change, wrapping is enabled ***************		
+	if(_numColumns > 1 && horizontal && _hWrapMode != VIDEO_WRAP_MODE_NONE)
 	{
-		_selection -= offset;
-		selectionChanged = false;
+		if(offset == -1 && col == 0)                    // going too far to left
+		{
+			if(_hWrapMode == VIDEO_WRAP_MODE_STRAIGHT)
+				offset += _numColumns;
+			else if(_hWrapMode == VIDEO_WRAP_MODE_SHIFTED)
+				if(row > 0 || _vWrapMode != VIDEO_WRAP_MODE_NONE)
+					offset += _numOptions;
+				else
+					return false;
+		}
+		else if(offset == 1 && col == _numColumns - 1)  // going too far to right
+		{
+			if(_hWrapMode == VIDEO_WRAP_MODE_STRAIGHT)
+				offset -= _numColumns;
+			else if(_hWrapMode == VIDEO_WRAP_MODE_SHIFTED)
+				if(row >= _numRows - 1 && _vWrapMode == VIDEO_WRAP_MODE_NONE)
+					return false;
+		}
+		
+		_selection = (_selection + offset) % _numOptions;
+
 	}
 
-	if(selectionChanged)
+	// **** case 2: vertical change, wrapping is enabled ***************		
+	else if(_numRows > 1 && !horizontal && _vWrapMode != VIDEO_WRAP_MODE_NONE)
 	{
-		_PlaySelectSound();
-		_events |= VIDEO_OPTION_SELECTION_CHANGE;
+		// vertical wrapping
+
+		if(offset < 0 && row == 0)                    // going too far up
+		{
+			if(_vWrapMode == VIDEO_WRAP_MODE_STRAIGHT)
+				offset += _numOptions;
+			else if(_vWrapMode == VIDEO_WRAP_MODE_SHIFTED)
+			{
+				offset += _numOptions;
+				
+				if(col == 0)
+				{
+					if(_hWrapMode != VIDEO_WRAP_MODE_NONE)
+						offset += _numColumns - 1;
+				}
+				else
+					--offset;
+			}
+		}
+		else if(offset > 0 && row == _numRows - 1)  // going too far down
+		{
+			if(_vWrapMode == VIDEO_WRAP_MODE_SHIFTED)
+			{
+				if(col == _numColumns - 1)
+				{
+					if(_hWrapMode != VIDEO_WRAP_MODE_NONE)
+						offset -= (_numColumns - 1);
+				}
+				else
+					++offset;					
+			}
+		}
+		
+		_selection = (_selection + offset) % _numOptions;
 	}
+	
+	// **** case 3: selection out of bounds, no wrapping, don't do anything ***************		
+	else if( (horizontal && ((col == 0 && offset == -1) || 
+	                        (col == _numColumns - 1 && offset == 1))) ||	         
+	         (!horizontal && ((row == 0 && offset < 0) || 
+	                        (row == totalRows - 1 && offset > 0))))
+	{	         
+		return false;
+	}
+
+
+	// **** case 4: no wrapping, but selection is within bounds ***************		
+	else
+	{
+		_selection += offset;		
+	}
+
+	// if the new selection isn't currently being displayed, set scrolling mode
+	int32 selRow = _selection / _numColumns;	
+	if(selRow < _scrollOffset || selRow > _scrollOffset + _numRows - 1)
+	{
+		_scrollTime = 0;
+		
+		if(selRow < _scrollOffset)
+			_scrollDirection = -1;   // up
+		else
+			_scrollDirection = 1;    // down
+		
+		_scrollOffset += _scrollDirection;		
+		_scrolling = true;
+	}
+	
+	_PlaySelectSound();
+	_event = VIDEO_OPTION_SELECTION_CHANGE;
+	
+	return true;
 }
 
 
@@ -122,8 +232,12 @@ void OptionBox::_ChangeSelection(int32 offset)
 
 void OptionBox::HandleUpKey()
 {
-	if(_numRows > 1)
-		_ChangeSelection(-_numColumns);
+	// ignore input while scrolling, or if an event has already been logged this frame
+	if(_scrolling || _event)
+		return;
+
+	if(!_ChangeSelection(-_numColumns, false))
+		_event = VIDEO_OPTION_BOUNDS_UP;
 }
 
 
@@ -133,8 +247,12 @@ void OptionBox::HandleUpKey()
 
 void OptionBox::HandleDownKey()
 {
-	if(_numRows > 1)
-		_ChangeSelection(_numColumns);
+	// ignore input while scrolling, or if an event has already been logged this frame
+	if(_scrolling || _event)
+		return;
+
+	if(!_ChangeSelection(_numColumns, false))
+		_event = VIDEO_OPTION_BOUNDS_DOWN;
 }
 
 //-----------------------------------------------------------------------------
@@ -143,8 +261,13 @@ void OptionBox::HandleDownKey()
 
 void OptionBox::HandleRightKey()
 {
-	if(_numColumns > 1)
-		_ChangeSelection(1);
+	// ignore input while scrolling, or if an event has already been logged this frame
+	if(_scrolling || _event)
+		return;
+
+
+	if(!_ChangeSelection(1, true))
+		_event = VIDEO_OPTION_BOUNDS_RIGHT;
 }
 
 
@@ -186,6 +309,10 @@ bool OptionBox::SetCursorOffset(float x, float y)
 
 void OptionBox::HandleCancelKey()
 {
+	// ignore input while scrolling, or if an event has already been logged this frame
+	if(_scrolling || _event)
+		return;
+
 	// if we're in switch mode and cancel key is hit, get out of switch mode
 	// but don't send the cancel event since player still might want to select
 	// something.
@@ -195,7 +322,7 @@ void OptionBox::HandleCancelKey()
 	else
 	{
 		// send cancel event
-		_events |= VIDEO_OPTION_CANCEL;
+		_event = VIDEO_OPTION_CANCEL;
 	}
 	
 	_PlaySelectSound();  // for now, cancel sounds the same as a selection
@@ -208,6 +335,10 @@ void OptionBox::HandleCancelKey()
 
 void OptionBox::HandleConfirmKey()
 {	
+	// ignore input while scrolling, or if an event has already been logged this frame
+	if(_scrolling || _event)
+		return;
+
 	// check that a valid option is selected	
 	if(_selection < 0 || _selection >= _numOptions)
 		return;		
@@ -225,12 +356,15 @@ void OptionBox::HandleConfirmKey()
 		_SwitchItems();
 		
 		// send a switch event
-		_events |= VIDEO_OPTION_SWITCH;
+		_event = VIDEO_OPTION_SWITCH;
 		_PlaySwitchSound();
+
+		// get out of switch mode
+		_switchSelection = -1;
 	}
 	
 	// case 2: partial confirm (confirming the first element in a double confirm)
-	else if(_selectMode == VIDEO_SELECT_DOUBLE)
+	else if(_selectMode == VIDEO_SELECT_DOUBLE && _switchSelection == -1)
 	{
 		// mark the item that is getting switched	
 		_switchSelection = _selection;
@@ -239,12 +373,12 @@ void OptionBox::HandleConfirmKey()
 	// case 3: confirm
 	else
 	{
-		_events |= VIDEO_OPTION_CONFIRM;
+		_event = VIDEO_OPTION_CONFIRM;
 		_PlayConfirmSound();
-	}
-	
-	// get out of switch mode
-	_switchSelection = -1;
+
+		// get out of switch mode
+		_switchSelection = -1;
+	}	
 }
 
 
@@ -283,22 +417,12 @@ void OptionBox::SetPosition(float x, float y)
 
 
 //-----------------------------------------------------------------------------
-// SetHorizontalSpacing: sets the pixel width of each "cell" in the option box
+// SetCellSize: sets the pixel width/height of each "cell" in the option box
 //-----------------------------------------------------------------------------
 
-void OptionBox::SetHorizontalSpacing(float hSpacing)
+void OptionBox::SetCellSize(float hSpacing, float vSpacing)
 {
 	_hSpacing = hSpacing;
-	_initialized = IsInitialized(_initializeErrors);
-}
-
-
-//-----------------------------------------------------------------------------
-// SetVerticalSpacing: sets the pixel height of each "cell" in the option box
-//-----------------------------------------------------------------------------
-
-void OptionBox::SetVerticalSpacing(float vSpacing)
-{
 	_vSpacing = vSpacing;
 	_initialized = IsInitialized(_initializeErrors);
 }
@@ -357,13 +481,19 @@ void OptionBox::EnableSwitching(bool enable)
 
 
 //-----------------------------------------------------------------------------
-// EnableWrapping: if true is passed, then going past the end of the option box
-//                 takes you back to the beginning, and vica versa.
+// SetVerticalWrapMode: controls how the cursor wraps when it goes beyond the
+//                      top or bottom row of the option box.
 //-----------------------------------------------------------------------------
 
-void OptionBox::EnableWrapping(bool enable)
+void OptionBox::SetVerticalWrapMode(WrapMode mode)
 {
-	_wrapping = enable;
+	_vWrapMode = mode;
+}
+
+
+void OptionBox::SetHorizontalWrapMode(WrapMode mode)
+{
+	_hWrapMode = mode;
 }
 
 
@@ -385,6 +515,22 @@ bool OptionBox::SetSelection(int32 index)
 		return false;
 	}
 	_selection = index;
+	
+	int32 _selRow = _selection / _numColumns;
+	
+	// if the new selection isn't currently being displayed, instantly scroll to it
+	if(_selRow < _scrollOffset || _selRow > _scrollOffset + _numRows - 1)
+	{
+		_scrollOffset = _selRow - _numRows + 1;
+
+		int32 totalNumRows = (_numOptions + _numColumns - 1) / _numColumns;
+		
+		if(_scrollOffset + _numRows >= totalNumRows)
+		{
+			_scrollOffset = totalNumRows - _numRows;
+		}
+	}
+
 	return true;
 }
 
@@ -468,7 +614,7 @@ bool OptionBox::Sort()
 // IsScrolling: returns true if the option box is in the middle of scrolling
 //-----------------------------------------------------------------------------
 
-bool OptionBox::IsScrolling()
+bool OptionBox::IsScrolling() const
 {
 	return _scrolling;
 }
@@ -478,10 +624,10 @@ bool OptionBox::IsScrolling()
 // GetEvents: returns bitfield of OptionBoxEvent's.
 //-----------------------------------------------------------------------------
 
-int32 OptionBox::GetEvents()
+int32 OptionBox::GetEvent()
 {
-	int32 returnValue = _events;
-	_events = 0;  // clear it out when it's checked
+	int32 returnValue = _event;
+	_event = 0;  // clear it out when it's checked
 	
 	return returnValue;
 }
@@ -493,7 +639,7 @@ int32 OptionBox::GetEvents()
 //                 it means nothing is selected.
 //-----------------------------------------------------------------------------
 
-int32 OptionBox::GetSelection()
+int32 OptionBox::GetSelection() const
 {
 	return _selection;
 }
@@ -505,7 +651,7 @@ int32 OptionBox::GetSelection()
 //                     index. Returns -1 if nothing is currently selected
 //-----------------------------------------------------------------------------
 
-int32 OptionBox::GetSwitchSelection()
+int32 OptionBox::GetSwitchSelection() const
 {
 	return _switchSelection;
 }
@@ -515,7 +661,7 @@ int32 OptionBox::GetSwitchSelection()
 // GetNumRows
 //-----------------------------------------------------------------------------
 
-int32 OptionBox::GetNumRows()
+int32 OptionBox::GetNumRows() const
 {
 	return _numRows;
 }
@@ -525,7 +671,7 @@ int32 OptionBox::GetNumRows()
 // GetNumColumns
 //-----------------------------------------------------------------------------
 
-int32 OptionBox::GetNumColumns()
+int32 OptionBox::GetNumColumns() const
 {
 	return _numColumns;
 }
@@ -536,7 +682,7 @@ int32 OptionBox::GetNumColumns()
 //                the size of the vector passed to SetOptions()
 //-----------------------------------------------------------------------------
 
-int32 OptionBox::GetNumOptions()
+int32 OptionBox::GetNumOptions() const
 {
 	return _numOptions;
 }
@@ -850,28 +996,66 @@ bool OptionBox::Draw()
 	top    = _numRows    * _vSpacing;
 
 	_CalculateScreenRect(left, right, bottom, top);
+
+	int32 x, y, w, h;
 	
+	x = int32(left < right? left: right);
+	y = int32(top < bottom? top : bottom);
+	w = int32(right - left);
+	if(w < 0) w = -w;
+	h = int32(top - bottom);
+	if(h < 0) h = -h;
+	
+	glScissor(x, y, w, h);
+	glEnable(GL_SCISSOR_TEST);
+		
 	GameVideo *video = GameVideo::GetReference();
 	CoordSys &cs = video->_coordSys;
 	
 	video->_PushContext();	
 	video->SetFont(_font);
 	
-	video->SetDrawFlags(_xalign, _yalign, VIDEO_X_NOFLIP, VIDEO_Y_NOFLIP, VIDEO_NO_BLEND, 0);
+	video->SetDrawFlags(_xalign, _yalign, VIDEO_X_NOFLIP, VIDEO_Y_NOFLIP, VIDEO_BLEND, 0);
+
+
+	int32 rowMin, rowMax;
+	float cellOffset = 0.0f;
+
+	
+	if(!_scrolling)
+	{
+		rowMin = _scrollOffset;
+		rowMax = _scrollOffset + _numRows;
+	}
+	else if(_scrollDirection == -1)
+	{
+		rowMin = _scrollOffset;
+		rowMax = _scrollOffset + _numRows + 1;
+		
+		cellOffset = cs._upDir * (1.0f - (_scrollTime / (VIDEO_OPTION_SCROLL_TIME * 1000))) * _vSpacing;		
+	}
+	else  // scrolling down
+	{
+		rowMin = _scrollOffset - 1;
+		rowMax = _scrollOffset + _numRows;
+
+		cellOffset = cs._upDir * ((_scrollTime / (VIDEO_OPTION_SCROLL_TIME * 1000))) * _vSpacing;
+	}
+
 
 	OptionCellBounds bounds;
 
-	bounds.cellYTop    = top;
+	bounds.cellYTop    = top + cellOffset;
 	bounds.cellYCenter = bounds.cellYTop - 0.5f * _vSpacing * cs._upDir;
 	bounds.cellYBottom = bounds.cellYCenter * 2.0f - bounds.cellYTop;
 
 	float yoff = -_vSpacing * cs._upDir;
 	float xoff = _hSpacing * cs._rightDir;
 	
-	bool finished = false;
+	bool finished = false;	
 	
 	// go through all the "cells" and draw them	
-	for(int32 row = 0; row < _numRows; ++row)
+	for(int32 row = rowMin; row < rowMax; ++row)
 	{
 		bounds.cellXLeft   = left;
 		bounds.cellXCenter = bounds.cellXLeft + 0.5f * _hSpacing * cs._rightDir;
@@ -945,7 +1129,6 @@ bool OptionBox::Draw()
 							if(edge < leftEdge)
 								leftEdge = edge;
 							
-
 						}
 						break;
 					}
@@ -964,7 +1147,7 @@ bool OptionBox::Draw()
 						if(textIndex >= 0 && textIndex < (int32)op.text.size())
 						{						
 							const ustring &text = op.text[textIndex];
-							float width = video->CalculateTextWidth(_font, text);
+							float width = static_cast<float>(video->CalculateTextWidth(_font, text));
 							float edge = x - bounds.cellXLeft;
 							
 							if(xalign == VIDEO_X_CENTER)
@@ -983,18 +1166,43 @@ bool OptionBox::Draw()
 				};
 			}
 
+			float cursorOffset = 0;
+			if(_scrolling)
+			{
+				if(_scrollDirection == -1)
+				{
+					cursorOffset = -cellOffset;
+				}
+				else
+					cursorOffset = -cellOffset + cs._upDir * _vSpacing;
+			}
 
-			// if this is the index where we are supposed to show the cursor, show it			
-			if(index == _selection)
+
+			glDisable(GL_SCISSOR_TEST);
+			// if this is the index where we are supposed to show the switch cursor, show it			
+			if(index == _switchSelection && !_blink && _cursorState != VIDEO_CURSOR_STATE_HIDDEN)
 			{
 				_SetupAlignment(VIDEO_X_LEFT, _yalign, bounds, x, y);
 				video->SetDrawFlags(VIDEO_BLEND, 0);
-				video->MoveRelative(_cursorX + leftEdge, _cursorY);
+				video->MoveRelative(_cursorX + leftEdge + _switchCursorX, cursorOffset + _cursorY + _switchCursorY);
 				ImageDescriptor *defaultCursor = video->GetDefaultCursor();
 				
 				if(defaultCursor)			
 					video->DrawImage(*defaultCursor);				
 			}
+
+			// if this is the index where we are supposed to show the cursor, show it			
+			if(index == _selection && !(_blink && _cursorState == VIDEO_CURSOR_STATE_BLINKING) && _cursorState != VIDEO_CURSOR_STATE_HIDDEN)
+			{
+				_SetupAlignment(VIDEO_X_LEFT, _yalign, bounds, x, y);
+				video->SetDrawFlags(VIDEO_BLEND, 0);
+				video->MoveRelative(_cursorX + leftEdge, cursorOffset + _cursorY);
+				ImageDescriptor *defaultCursor = video->GetDefaultCursor();
+				
+				if(defaultCursor)			
+					video->DrawImage(*defaultCursor);				
+			}
+			glEnable(GL_SCISSOR_TEST);
 		
 			bounds.cellXLeft   += xoff;
 			bounds.cellXCenter += xoff;
@@ -1009,10 +1217,16 @@ bool OptionBox::Draw()
 		bounds.cellYBottom += yoff;		
 	}
 	
+	glDisable(GL_SCISSOR_TEST);
 	video->_PopContext();
 	return true;
 }
 
+
+//-----------------------------------------------------------------------------
+// _SetupAlignment: does the dirty work of figuring out alignment for each
+//                  option cell
+//-----------------------------------------------------------------------------
 
 void OptionBox::_SetupAlignment(int32 xalign, int32 yalign, const OptionCellBounds &bounds, float &x, float &y)
 {	
@@ -1049,8 +1263,25 @@ void OptionBox::_SetupAlignment(int32 xalign, int32 yalign, const OptionCellBoun
 }
 
 
+//-----------------------------------------------------------------------------
+// Update: update any blinking or scrolling effects for the option box
+//-----------------------------------------------------------------------------
+
 bool OptionBox::Update(int32 frameTime)
 {
+	_blink = ((_blinkTime / VIDEO_CURSOR_BLINK_RATE) % 2) == 1;	
+	_blinkTime += frameTime;
+	
+	if(_scrolling)
+	{
+		_scrollTime += frameTime;
+		
+		if(_scrollTime > VIDEO_OPTION_SCROLL_TIME * 1000)
+		{
+			_scrollTime = 0;
+			_scrolling = false;
+		}
+	}
 	return true;
 } 
 

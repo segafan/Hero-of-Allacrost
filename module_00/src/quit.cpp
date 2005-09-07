@@ -73,7 +73,7 @@ QuitMode::QuitMode() {
 	// Initialize the option box
 	
 	_option_box.SetFont("default");
-	_option_box.SetHorizontalSpacing(150.0f);
+	_option_box.SetCellSize(150.0f, 50.0f);
 	_option_box.SetSize(3, 1);
 	_option_box.SetPosition(512.0f, 384.0f);
 	_option_box.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -125,10 +125,10 @@ void QuitMode::Update(uint32 time_elapsed) {
 		
 	// See if option box has any events
 	
-	int32 events = _option_box.GetEvents();
+	int32 event = _option_box.GetEvent();
 	int32 selection = _option_box.GetSelection();
 		
-	if(events & VIDEO_OPTION_CONFIRM)
+	if(event == VIDEO_OPTION_CONFIRM)
 	{
 		switch(selection)
 		{
@@ -149,7 +149,7 @@ void QuitMode::Update(uint32 time_elapsed) {
 			}
 		};
 	}
-	else if(events & VIDEO_OPTION_CANCEL)
+	else if(event == VIDEO_OPTION_CANCEL)
 	{
 		_Cancel();
 	}

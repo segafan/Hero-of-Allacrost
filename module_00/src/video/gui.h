@@ -34,6 +34,15 @@ namespace hoa_video
 extern bool VIDEO_DEBUG;
 
 
+// !how often the menu cursor blinks (assuming it's in blinking state), in milliseconds
+const int32 VIDEO_CURSOR_BLINK_RATE = 40;
+
+
+// !how many seconds it takes to scroll when the cursor goes past the end of an option box
+const float VIDEO_OPTION_SCROLL_TIME = .1f;
+
+
+
 /*!****************************************************************************
  *  \brief These text display modes control how the text is rendered:
  *   VIDEO_TEXT_INSTANT: render the text instantly
@@ -62,19 +71,29 @@ enum TextDisplayMode
 /*!****************************************************************************
  *  \brief These are the types of events that an option box can generate
  *   VIDEO_OPTION_SELECTION_CHANGE: the selection changed
- *   VIDEO_OPTION_CONFIRM: the player confirmed an option
- *   VIDEO_OPTION_CANCEL:  the player pressed the cancel key
- *   VIDEO_OPTION_SWITCH:  two elements were just switched
+ *   VIDEO_OPTION_CONFIRM:          the player confirmed an option
+ *   VIDEO_OPTION_CANCEL:           the player pressed the cancel key
+ *   VIDEO_OPTION_SWITCH:           two elements were just switched
+ *   VIDEO_OPTION_BOUNDS_UP:        player tried to go past top of option box
+ *   VIDEO_OPTION_BOUNDS_DOWN:      player tried to go past bottom of option box
+ *   VIDEO_OPTION_BOUNDS_LEFT:      player tried to go past left of option box
+ *   VIDEO_OPTION_BOUNDS_RIGHT:     player tried to go past right of option box
  *****************************************************************************/
 
 enum OptionBoxEvent
 {
 	VIDEO_OPTION_INVALID = -1,
 	
-	VIDEO_OPTION_SELECTION_CHANGE = 0x1,
-	VIDEO_OPTION_CONFIRM          = 0x2,
-	VIDEO_OPTION_CANCEL           = 0x4,
-	VIDEO_OPTION_SWITCH           = 0x8,
+	VIDEO_OPTION_NO_EVENT = 0,
+	
+	VIDEO_OPTION_SELECTION_CHANGE,
+	VIDEO_OPTION_CONFIRM,
+	VIDEO_OPTION_CANCEL,
+	VIDEO_OPTION_SWITCH,
+	VIDEO_OPTION_BOUNDS_UP,
+	VIDEO_OPTION_BOUNDS_DOWN,
+	VIDEO_OPTION_BOUNDS_LEFT,
+	VIDEO_OPTION_BOUNDS_RIGHT,
 	
 	VIDEO_OPTION_TOTAL
 };
@@ -124,6 +143,29 @@ enum CursorState
 	VIDEO_CURSOR_STATE_BLINKING,
 	
 	VIDEO_CURSOR_STATE_TOTAL
+};
+
+
+/*!****************************************************************************
+ *  \brief Modes to control how the cursor wraps around when the player goes
+ *         too far to one side of an option box
+ *   VIDEO_WRAP_MODE_NONE:     if cursor goes off the right edge, it stays
+ *                             where it is
+ *   VIDEO_WRAP_MODE_STRAIGHT: if the cursor goes off the right edge, it appears
+ *                             on the left side, on the same row
+ *   VIDEO_WRAP_MODE_SHIFTED:  if the cursor goes off the right edge, it appears
+ *                             on the left side, but one row down
+ *****************************************************************************/
+
+enum WrapMode
+{
+	VIDEO_WRAP_MODE_INVALID = -1,
+	
+	VIDEO_WRAP_MODE_NONE,
+	VIDEO_WRAP_MODE_STRAIGHT,
+	VIDEO_WRAP_MODE_SHIFTED,
+	
+	VIDEO_WRAP_MODE_TOTAL
 };
 
 
@@ -619,18 +661,11 @@ public:
 
 
 	/*!
-	 *  \brief sets the cell width (horizontal spacing between options)
+	 *  \brief sets the cell width and height
 	 */
 
-	void SetHorizontalSpacing(float hSpacing);
-
-
-	/*!
-	 *  \brief sets the cell height (vertical spacing between options)
-	 */
-
-	void SetVerticalSpacing(float vSpacing);
-
+	void SetCellSize(float hSpacing, float vSpacing);
+	
 
 	/*!
 	 *  \brief sets the size of the box in terms of number of columns and rows
@@ -662,11 +697,17 @@ public:
 
 
 	/*!
-	 *  \brief enables/disables wrapping, where the cursor "wraps" around once it goes
-	 *         past the beginning or end of the option list
+	 *  \brief sets the behavior to use for vertical wrapping
 	 */
 
-	void EnableWrapping(bool enable);
+	void SetVerticalWrapMode(WrapMode mode);
+
+
+	/*!
+	 *  \brief sets the behavior to use for horizontal wrapping
+	 */
+
+	void SetHorizontalWrapMode(WrapMode mode);
 
 
 	/*!
@@ -720,23 +761,25 @@ public:
 	 *  \brief returns true if the option box is in the middle of scrolling
 	 */
 
-	bool IsScrolling();
+	bool IsScrolling() const;
 
 
 	/*!
-	 *  \brief returns an integer which may contain one or more events as bit flags
-	 *         This should be called every frame to see if anything new happened, like
-	 *         the player confirming or canceling, etc.
+	 *  \brief returns an integer which contains the code of an event that occurred, or
+	 *         zero if no event occurred. This should be called every frame to see if 
+	 *         anything new happened, like the player confirming or canceling, etc. Do
+	 *         not call it more than once per frame though, because it clears the event
+	 *         flag.
 	 */
 
-	int32 GetEvents();
+	int32 GetEvent();
 
 
 	/*!
 	 *  \brief returns the index of the currently selected option
 	 */
 
-	int32 GetSelection();
+	int32 GetSelection() const;
 
 
 	/*!
@@ -745,28 +788,28 @@ public:
 	 *         returns the index of the already-confirmed item
 	 */
 
-	int32 GetSwitchSelection();
+	int32 GetSwitchSelection() const;
 
 
 	/*!
 	 *  \brief returns the number of rows
 	 */
 
-	int32 GetNumRows();
+	int32 GetNumRows() const;
 
 
 	/*!
 	 *  \brief returns the number of columns
 	 */
 
-	int32 GetNumColumns();
+	int32 GetNumColumns() const;
 
 
 	/*!
 	 *  \brief returns the number of options that were set using SetOptions()
 	 */
 
-	int32 GetNumOptions();
+	int32 GetNumOptions() const;
 
 
 	/*!
@@ -811,9 +854,10 @@ private:
 
 	/*!
 	 *  \brief increments or decrements the current selection by offset
+	 *  \return false if the selection does not change
 	 */
 
-	void _ChangeSelection(int32 offset);
+	bool _ChangeSelection(int32 offset, bool horizontal);
 
 
 	/*!
@@ -844,10 +888,11 @@ private:
 	void _PlaySwitchSound();
 
 
-	bool   _initialized;             //! after every change to any of the settings, check if the textbox is in a valid state and update this bool
-	std::string _initializeErrors;   //! if the option box is in an invalid state (not ready for drawing), then this string contains the errors that need to be resolved
-	std::string _font;               //! font used for the options
-	float _cursorX, _cursorY;        //! cursor offset
+	bool   _initialized;                  //! after every change to any of the settings, check if the textbox is in a valid state and update this bool
+	std::string _initializeErrors;        //! if the option box is in an invalid state (not ready for drawing), then this string contains the errors that need to be resolved
+	std::string _font;                    //! font used for the options
+	float _cursorX, _cursorY;             //! cursor offset
+	float _switchCursorX, _switchCursorY; //! switch cursor offset (relative to the normal cursor offset)
 	
 	float _hSpacing;            //! horizontal spacing
 	float _vSpacing;            //! vertical spacing
@@ -856,13 +901,27 @@ private:
 	int32 _xalign;              //! horizontal alignment for text
 	int32 _yalign;              //! vertical alignment for text
 	
-	SelectMode _selectMode;   //! selection mode
-	bool _switching;          //! allow switching
-	bool _wrapping;           //! allow wrapping
-
-	CursorState _cursorState; //! current cursor state (blinking, visible, hidden, etc)
+	bool _blink;                //! when Update() is called, blink is set to true on frames that cursor should blink (i.e. not be visible)
+							 
+	int32 _blinkTime;           //! timer used for controlling blink effect
+	int32 _scrollTime;          //! timer used for controlling scrolling effect
 	
-	int32 _events;                   //! events bit flag
+	int32 _scrollStartOffset;   //! offset we're scrolling from
+	int32 _scrollEndOffset;     //! offset we're scrolling to
+	
+	int32 _scrollDirection;     //! 1 for down, -1 for up
+	
+	int32 _scrollOffset;        //! current scroll offset
+							 
+	SelectMode _selectMode;     //! selection mode
+	bool _switching;            //! allow switching
+							 
+	CursorState _cursorState;   //! current cursor state (blinking, visible, hidden, etc)
+							 
+	WrapMode   _hWrapMode;      //! horizontal wrapping mode
+	WrapMode   _vWrapMode;      //! vertical wrapping mode
+	
+	int32 _event;                    //! event that occurred during a frame
 	int32 _selection;                //! current selection
 	int32 _switchSelection;          //! if player has confirmed once in a double-confirm mode, _switchSelection is the first item the player confirmed
 	
