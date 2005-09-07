@@ -114,7 +114,7 @@ bool OptionBox::_ChangeSelection(int32 offset, bool horizontal)
 	int32 row = _selection / _numColumns;
 	int32 col = _selection % _numColumns;
 	
-	int32 totalRows = (_numOptions / _numColumns) + 1;
+	int32 totalRows = ((_numOptions-1+_numColumns) / _numColumns);
 	
 	// if scrolling is enabled (i.e. we have more rows we can possibly show)
 	// then don't allow vertical wrapping
@@ -142,7 +142,7 @@ bool OptionBox::_ChangeSelection(int32 offset, bool horizontal)
 			if(_hWrapMode == VIDEO_WRAP_MODE_STRAIGHT)
 				offset -= _numColumns;
 			else if(_hWrapMode == VIDEO_WRAP_MODE_SHIFTED)
-				if(row >= _numRows - 1 && _vWrapMode == VIDEO_WRAP_MODE_NONE)
+				if(row >= totalRows - 1 && _vWrapMode == VIDEO_WRAP_MODE_NONE)
 					return false;
 		}
 		
@@ -343,24 +343,21 @@ void OptionBox::HandleConfirmKey()
 	// check that a valid option is selected	
 	if(_selection < 0 || _selection >= _numOptions)
 		return;		
-	if(_options[_selection].disabled)
-	{
-		// play an annoying beep to tell player they clicked on a disabled option
-		_PlayNoConfirmSound();
-		return;
-	}
 
 	// case 1: switching 2 different elements
 	if(_firstSelection >= 0 && _selection != _firstSelection)
 	{
-		_switchSelection = _firstSelection;
+		if(_switching)
+		{
+			_switchSelection = _firstSelection;
 
-		// perform the actual switch
-		_SwitchItems();
-		
-		// send a switch event
-		_event = VIDEO_OPTION_SWITCH;
-		_PlaySwitchSound();
+			// perform the actual switch
+			_SwitchItems();
+			
+			// send a switch event
+			_event = VIDEO_OPTION_SWITCH;
+			_PlaySwitchSound();
+		}
 	}
 	
 	// case 2: partial confirm (confirming the first element in a double confirm)
@@ -373,6 +370,13 @@ void OptionBox::HandleConfirmKey()
 	// case 3: confirm
 	else
 	{
+		if(_options[_selection].disabled)
+		{
+			// play an annoying beep to tell player they clicked on a disabled option
+			_PlayNoConfirmSound();
+			return;
+		}
+
 		_event = VIDEO_OPTION_CONFIRM;
 		_PlayConfirmSound();
 
@@ -1117,7 +1121,10 @@ bool OptionBox::Draw()
 						
 						if(imageIndex >= 0 && imageIndex < (int32)op.images.size())
 						{
-							video->DrawImage(op.images[imageIndex]);
+							if(op.disabled)
+								video->DrawImage(op.images[imageIndex], Color::gray);
+							else
+								video->DrawImage(op.images[imageIndex]);
 
 							float edge = x - bounds.cellXLeft;
 							float width = op.images[imageIndex].GetWidth();
