@@ -923,7 +923,8 @@ private:
 	
 	int32 _event;                    //! event that occurred during a frame
 	int32 _selection;                //! current selection
-	int32 _switchSelection;          //! if player has confirmed once in a double-confirm mode, _switchSelection is the first item the player confirmed
+	int32 _switchSelection;          //! if a switch event happens, switch selection is one of the elements being switched, and the other is _selection
+	int32 _firstSelection;           //! first selection that player confirmed on in double-confirm mode
 	
 	std::vector <Option> _options;   //! vector containing each option
 	int32 _numOptions;               //! how many options there are in this box

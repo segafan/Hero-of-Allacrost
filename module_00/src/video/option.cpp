@@ -29,6 +29,7 @@ OptionBox::OptionBox()
   _event(0),
   _selection(-1),
   _switchSelection(-1),
+  _firstSelection(-1),
   _numOptions(0),
   _scrolling(0),
   _scrollOffset(0),
@@ -317,8 +318,8 @@ void OptionBox::HandleCancelKey()
 	// but don't send the cancel event since player still might want to select
 	// something.
 	
-	if(_switchSelection >= 0)
-		_switchSelection = -1;
+	if(_firstSelection >= 0)
+		_firstSelection = -1;
 	else
 	{
 		// send cancel event
@@ -350,24 +351,23 @@ void OptionBox::HandleConfirmKey()
 	}
 
 	// case 1: switching 2 different elements
-	if(_switchSelection >= 0 && _selection != _switchSelection)
+	if(_firstSelection >= 0 && _selection != _firstSelection)
 	{
+		_switchSelection = _firstSelection;
+
 		// perform the actual switch
 		_SwitchItems();
 		
 		// send a switch event
 		_event = VIDEO_OPTION_SWITCH;
 		_PlaySwitchSound();
-
-		// get out of switch mode
-		_switchSelection = -1;
 	}
 	
 	// case 2: partial confirm (confirming the first element in a double confirm)
-	else if(_selectMode == VIDEO_SELECT_DOUBLE && _switchSelection == -1)
+	else if(_selectMode == VIDEO_SELECT_DOUBLE && _firstSelection == -1)
 	{
 		// mark the item that is getting switched	
-		_switchSelection = _selection;
+		_firstSelection = _selection;
 	}
 	
 	// case 3: confirm
@@ -377,7 +377,7 @@ void OptionBox::HandleConfirmKey()
 		_PlayConfirmSound();
 
 		// get out of switch mode
-		_switchSelection = -1;
+		_firstSelection = -1;
 	}	
 }
 
@@ -392,13 +392,13 @@ void OptionBox::_SwitchItems()
 	// switch the two options within the vector
 	
 	Option temp = _options[_selection];
-	_options[_selection]       = _options[_switchSelection];
-	_options[_switchSelection] = temp;
+	_options[_selection]       = _options[_firstSelection];
+	_options[_firstSelection] = temp;
 	
-	// set _switchSelection to -1, so that we know we're not in switching mode
+	// set _firstSelection to -1, so that we know we're not in switching mode
 	// any more
 	
-	_switchSelection = -1;
+	_firstSelection = -1;
 }
 
 
@@ -1180,7 +1180,7 @@ bool OptionBox::Draw()
 
 			glDisable(GL_SCISSOR_TEST);
 			// if this is the index where we are supposed to show the switch cursor, show it			
-			if(index == _switchSelection && !_blink && _cursorState != VIDEO_CURSOR_STATE_HIDDEN)
+			if(index == _firstSelection && !_blink && _cursorState != VIDEO_CURSOR_STATE_HIDDEN)
 			{
 				_SetupAlignment(VIDEO_X_LEFT, _yalign, bounds, x, y);
 				video->SetDrawFlags(VIDEO_BLEND, 0);
