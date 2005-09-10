@@ -14,3 +14,10 @@ Once you've unpacked the tarball or checked it out of CVS, just run './configure
 
 Directories included are:
 dat/ img/ mus/ snd/ src/
+
+Library dependencies (you will need the following in order to compile and run the game):
+OpenGL
+DevIL
+SDL
+Lua
+Qt (optional for use of the map editor)
