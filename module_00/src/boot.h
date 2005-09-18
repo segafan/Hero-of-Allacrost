@@ -27,6 +27,7 @@
 #include "SDL.h"
 #include "defs.h"
 #include "engine.h"
+#include "gui.h"
 
 //! All calls to boot mode are wrapped in this namespace.
 namespace hoa_boot {
@@ -40,12 +41,12 @@ namespace private_boot {
 //! \name Main menu selections
 //@{
 //! \brief Constants used to cycle through the primary boot menu
-const uint32 NEW_MENU     = 0;
-const uint32 LOAD_MENU    = 1;
-const uint32 OPTIONS_MENU = 2;
-const uint32 CREDITS_MENU = 3;
-const uint32 HIDE_MENU    = 4;
-const uint32 QUIT_MENU    = 5;
+const uint32 NEW_GAME  = 0;
+const uint32 LOAD_GAME = 1;
+const uint32 OPTIONS   = 2;
+const uint32 CREDITS   = 3;
+const uint32 HIDE_MENU = 4;
+const uint32 QUIT      = 5;
 //@}
 
 //! \name Options menu selections
@@ -76,6 +77,8 @@ class BootMode : public hoa_engine::GameMode {
 private:
 	//! If true, no menus will be drawn (so the player can get a nice good look at the background image).
 	bool _menu_hidden;
+	//! If true, boot mode is exiting and we have to wait for the screen to finish fading out.
+	bool _fade_out;
 	//! A vector storing various menu pointers in a stack-like structure.
 	std::vector<uint32> _vmenu_index;
 	//! Music to be used at the boot screen.
@@ -84,6 +87,9 @@ private:
 	std::vector<hoa_audio::SoundDescriptor> _boot_sound;
 	//! Images that will be used at the boot screen.
 	std::vector<hoa_video::ImageDescriptor> _boot_images;
+	
+	//! The lowest level options in boot mode
+	hoa_video::OptionBox _main_options;
 
 	/*!
 	 *  \brief Animates the game logo when this class is first initialized.
@@ -101,20 +107,7 @@ private:
 	 *  \param &change_key The key to be re-mapped.
 	 */
 	void _RedefineKey(SDLKey& change_key);
-
-	//! Updates the game state when "New Game" is selected in the main menu.
-	void _UpdateNewMenu();
-	//! Updates the game state when "Load Game" is selected in the main menu.
-	void _UpdateLoadMenu();
-	//! Updates the game state when "Options" is selected in the main menu.
-	void _UpdateOptionsMenu();
-	//! Updates the game state when "Credits" is selected in the main menu.
-	void _UpdateCreditsMenu();
-	//! Updates the game state when "Hide Menu" is selected in the main menu.
-	void _UpdateHideMenu();
-	//! Updates the game state when "Quit Menu" is selected in the main menu.
-	void _UpdateQuitMenu();
-
+	
 	//! Updates the game state when "Video" is selected in the options menu.
 	void _UpdateVideoOptions();
 	//! Updates the game state when "Audio" is selected in the options menu.

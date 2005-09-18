@@ -88,7 +88,7 @@ private:
 	hoa_video::ImageDescriptor _saved_screen;
 	//! An image of the quit menu.
 	hoa_video::ImageDescriptor _quit_menu;
-	//! The option menu which asks if you want to quit
+	//! The option box which presents the quit options that the user can select.
 	hoa_video::OptionBox _option_box;
 
 	//! Helper function which quits the game

@@ -71,7 +71,6 @@ QuitMode::QuitMode() {
 		cerr << "QUIT: ERROR: Couldn't create menu image!" << endl;
 
 	// Initialize the option box
-	
 	_option_box.SetFont("default");
 	_option_box.SetCellSize(150.0f, 50.0f);
 	_option_box.SetSize(3, 1);
@@ -86,7 +85,7 @@ QuitMode::QuitMode() {
 	options.push_back(MakeWideString("Cancel"));
 	
 	_option_box.SetOptions(options);
-	_option_box.SetSelection(0);
+	_option_box.SetSelection(QUIT_CANCEL);
 }
 
 
@@ -156,6 +155,9 @@ void QuitMode::Update(uint32 time_elapsed) {
 	
 	// Update the option box
 	_option_box.Update(time_elapsed);
+	
+	// Don't consume hoards of CPU time in quit mode
+	SDL_Delay(50);
 }
 
 
