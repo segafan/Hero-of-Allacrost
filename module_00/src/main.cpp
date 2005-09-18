@@ -310,10 +310,25 @@ int32 main(int32 argc, char *argv[]) {
 		cerr << "ERROR: unable to initialize VideoManager" << endl;
 		return 1;
 	}
+	VideoManager->SetMenuSkin("img/menus/concrete",
+	                          Color(0.0f, 0.0f, 1.0f, 0.5f),
+	                          Color(0.0f, 0.0f, 1.0f, 0.5f),
+	                          Color(0.0f, 0.0f, 1.0f, 0.5f),
+	                          Color(0.0f, 0.0f, 1.0f, 0.5f));
+	if(!VideoManager->LoadFont("img/fonts/tarnhalo.ttf", "default", 16))
+		cerr << "MAP: ERROR > Couldn't load map font!" << endl;
+
+	VideoManager->SetFontShadowXOffset("default", 1);
+	VideoManager->SetFontShadowYOffset("default", -2);
+	VideoManager->SetFontShadowStyle("default", VIDEO_TEXT_SHADOW_BLACK);
+	
 	if (!AudioManager->Initialize()) {
 		cerr << "ERROR: unable to initialize AudioManager" << endl;
 		return 1;
 	}
+	AudioManager->SetMusicVolume(SettingsManager->music_vol);
+ 	AudioManager->SetSoundVolume(SettingsManager->sound_vol);
+	
 	if (!DataManager->Initialize()) {
 		cerr << "ERROR: unable to initialize DataManager" << endl;
 		return 1;
@@ -353,22 +368,6 @@ int32 main(int32 argc, char *argv[]) {
 	SDL_EventState(SDL_USEREVENT, SDL_IGNORE);
 	// NOTE: SDL_ActiveEvent reports mouse focus, input focus, iconified status. Should we disable it???
 	
-	AudioManager->SetMusicVolume(SettingsManager->music_vol);
-	AudioManager->SetSoundVolume(SettingsManager->sound_vol);
-	
-	
-	VideoManager->SetMenuSkin("img/menus/concrete",
-	                          Color(0.0f, 0.0f, 1.0f, 0.5f),
-	                          Color(0.0f, 0.0f, 1.0f, 0.5f),
-	                          Color(0.0f, 0.0f, 1.0f, 0.5f),
-	                          Color(0.0f, 0.0f, 1.0f, 0.5f));
-	if(!VideoManager->LoadFont("img/fonts/tarnhalo.ttf", "default", 16))
-		cerr << "MAP: ERROR > Couldn't load map font!" << endl;
-
-	VideoManager->SetFontShadowXOffset("default", 1);
-	VideoManager->SetFontShadowYOffset("default", -2);
-	VideoManager->SetFontShadowStyle("default", VIDEO_TEXT_SHADOW_BLACK);
-
 	// Retains the amount of time (in milliseconds) between main loop iterations
 	uint32 frame_time = 0;
 	SettingsManager->SetTimer();	// Initialize the game and frames-per-second timers
