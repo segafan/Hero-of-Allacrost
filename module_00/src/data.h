@@ -79,44 +79,64 @@ private:
 	hoa_engine::GameSettings *_SettingsManager;
 	//@}
 
-// BEGIN Lua related stuff
+
 	//! The Lua stack, which handles all data sharing between C++ and Lua.
 	lua_State *_l_stack;
+	
+public:
+// BEGIN Lua related stuff
+	//! \name Lua file access functions
+	//@{
+	//! \brief Lua file access functions
+	//! \param file_name The name of the Lua file to be opened.
+	void OpenLuaFile(const char* file_name);
+	// Do we need a CloseLuaFile() function?
+	//@}
 
 	//! \name Lua Table Access Functions
 	//@{
 	//! \brief These functions look up a member of a Lua table and return its value.
+	//! \param *tbl_name The name of the table to open.
 	//! \param *key The name of the table member to access.
-	bool _GetTableBool(const char *key);
-	int32 _GetTableInt(const char *key);
-	float _GetTableFloat(const char *key);
-	std::string _GetTableString(const char * key);
+	//! \param &ref A reference to the variable to be filled with the requested value.
+	//! The table in question is assumed to be at the top of the stack.
+	/*!
+	    General usage: first call OpenTable(tname), and then any of the GetTable*()
+	    functions, to access that table's members. When you're done with that particular
+	    table, call CloseTable(). Obey the protocol! :)
+	*/ 
+	void OpenTable(const char *tbl_name);
+	void CloseTable();
+	void GetTableBool(const char *key, bool &ref);
+	void GetTableInt(const char *key, int32 &ref);
+	void GetTableFloat(const char *key, float &ref);
+	void GetTableString(const char * key, std::string &ref);
 	//@}
 
 	//! \name Lua Variable Access Functions
 	//@{
 	//! \brief These functions look up a global variable in a Lua file and return its value.
 	//! \param *key The name of the Lua variable to access.
-	//! The table in question is assumed to be at the top of the stack.
-	bool _GetGlobalBool(const char *key);
-	int32 _GetGlobalInt(const char *key);
-	float _GetGlobalFloat(const char *key);
-	std::string _GetGlobalString(const char *key);
+	//! \param &ref A reference to the variable to be filled with the requested value.
+	void GetGlobalBool(const char *key, bool &ref);
+	void GetGlobalInt(const char *key, int32 &ref);
+	void GetGlobalFloat(const char *key, float &ref);
+	void GetGlobalString(const char *key, std::string &ref);
 	//@}
 
 	//! \name Lua Vector Fill Functions
 	//@{
 	//! \brief These functions fill a vector with members of a table in a Lua file.
-	//! \param *vect A pointer to the vector of elements to fill.
+	//! \param &vect A reference to the vector of elements to fill.
 	//! \param *key The name of the table to use to fill the vector.
-	void _FillStringVector(std::vector<std::string> *vect, const char *key);
-	void _FillIntVector(std::vector<int32> *vect, const char *key);
+	void FillStringVector(const char *key, std::vector<std::string> &vect);
+	void FillIntVector(const char *key, std::vector<int32> &vect);
 	//@}
+	
+	void PrintLuaStack();
 // END Lua related stuff
 
-public:
 	SINGLETON_METHODS(GameData);
-	void PrintLuaStack();
 
 	void LoadGameSettings();
 	void ResetGameSettings();

@@ -65,93 +65,91 @@ bool GameData::Initialize() {
 	return true;
 }
 
+void GameData::OpenLuaFile(const char* file_name) {
+	if (luaL_loadfile(_l_stack, file_name) || lua_pcall(_l_stack, 0, 0, 0))
+		cerr << "DATA ERROR: Could not load " << file_name << " :: " <<
+		        lua_tostring(_l_stack, -1) << endl;
+}
 
+void GameData::OpenTable(const char* tbl_name) {
+	lua_getglobal(_l_stack, tbl_name);
+	if (!lua_istable(_l_stack, LUA_STACK_TOP))
+		cerr << "DATA ERROR: could not retrieve table \"" << tbl_name << "\"" << endl;
+}
+
+void GameData::CloseTable() {
+	lua_pop(_l_stack, 1);
+}
 
 // Get an individual boolean field from a table, assumed to be on top of the stack
-bool GameData::_GetTableBool (const char *key) {
-	bool result;
+void GameData::GetTableBool (const char *key, bool &ref) {
 	lua_pushstring(_l_stack, key);
 	lua_gettable(_l_stack, -2);
 	if (!lua_isboolean(_l_stack, -1))
 		cerr << "DATA ERROR: Invalid table field" << endl;
-	result = (0 != lua_toboolean(_l_stack, -1));
+	ref = (0 != lua_toboolean(_l_stack, -1));
 	lua_pop(_l_stack, 1);
-	return result;
 }
 
 // Get an individual integer field from a table, assumed to be on top of the stack
-int GameData::_GetTableInt (const char *key) {
-	int32 result;
+void GameData::GetTableInt (const char *key, int32 &ref) {
 	lua_pushstring(_l_stack, key);
 	lua_gettable(_l_stack, -2);
 	if (!lua_isnumber(_l_stack, -1))
 		cerr << "DATA ERROR: Invalid table field" << endl;
-	result = (int32)lua_tonumber(_l_stack, -1);
+	ref = (int32)lua_tonumber(_l_stack, -1);
 	lua_pop(_l_stack, 1);
-	return result;
 }
 
 // Get an individual floating point field from a table, assumed to be on top of the stack
-float GameData::_GetTableFloat (const char *key) {
-	float result;
+void GameData::GetTableFloat (const char *key, float &ref) {
 	lua_pushstring(_l_stack, key);
 	lua_gettable(_l_stack, -2);
 	if (!lua_isnumber(_l_stack, -1))
 		cerr << "DATA ERROR: Invalid table field" << endl;
-	result = (float)lua_tonumber(_l_stack, -1);
+	ref = (float)lua_tonumber(_l_stack, -1);
 	lua_pop(_l_stack, 1);
-	return result;
 }
 
 // Get an individual string field from a table, assumed to be on top of the stack
-string GameData::_GetTableString (const char *key) {
-	string result;
+void GameData::GetTableString (const char *key, string &ref) {
 	lua_pushstring(_l_stack, key);
 	lua_gettable(_l_stack, -2);
 	if (!lua_isstring(_l_stack, -1))
 		cerr << "DATA ERROR: Invalid table field" << endl;
-	result = (string)lua_tostring(_l_stack, -1);
+	ref = (string)lua_tostring(_l_stack, -1);
 	lua_pop(_l_stack, 1);
-	return result;
 }
 
 
 
-bool GameData::_GetGlobalBool(const char *key) {
-	bool result;
+void GameData::GetGlobalBool(const char *key, bool &ref) {
 	lua_getglobal(_l_stack, key);
-	result = (0 != lua_toboolean(_l_stack, LUA_STACK_TOP));
+	ref = (0 != lua_toboolean(_l_stack, LUA_STACK_TOP));
 	lua_pop(_l_stack, 1);
-	return result;
 }
 
-int GameData::_GetGlobalInt(const char *key) {
-	int32 result;
+void GameData::GetGlobalInt(const char *key, int32 &ref) {
 	lua_getglobal(_l_stack, key);
-	result = (int32)lua_tonumber(_l_stack, LUA_STACK_TOP);
+	ref = (int32)lua_tonumber(_l_stack, LUA_STACK_TOP);
 	lua_pop(_l_stack, 1);
-	return result;
 }
 
-float GameData::_GetGlobalFloat(const char *key) {
-	float result;
+void GameData::GetGlobalFloat(const char *key, float &ref) {
 	lua_getglobal(_l_stack, key);
-	result = (float)lua_tonumber(_l_stack, LUA_STACK_TOP);
+	ref = (float)lua_tonumber(_l_stack, LUA_STACK_TOP);
 	lua_pop(_l_stack, 1);
-	return result;
 }
 
-std::string GameData::_GetGlobalString(const char * key) {
-	string result;
+void GameData::GetGlobalString(const char * key, string &ref) {
 	lua_getglobal(_l_stack, key);
-	result = (string)lua_tostring(_l_stack, LUA_STACK_TOP);
+	ref = (string)lua_tostring(_l_stack, LUA_STACK_TOP);
 	lua_pop(_l_stack, 1);
-	return result;
 }
 
 // TODO L8R: Maybe turn this function into FillVector(vector*, const char*, int lua_type),
 //           which will fill a custom vector?
-void GameData::_FillStringVector(vector<string> *vect, const char *key) {
+void GameData::FillStringVector(const char *key, vector<string> &vect) {
 	lua_getglobal(_l_stack, key);
 	if (!lua_istable(_l_stack, LUA_STACK_TOP)) {
 		cerr << "DATA ERROR: table " << key << " does not exist, or " << key << "isn't a table\n";
@@ -160,12 +158,12 @@ void GameData::_FillStringVector(vector<string> *vect, const char *key) {
 	int32 t = lua_gettop(_l_stack);
 	lua_pushnil(_l_stack);
 	while (lua_next(_l_stack, t)) {
-		vect->push_back((string)lua_tostring(_l_stack, LUA_STACK_TOP));
+		vect.push_back((string)lua_tostring(_l_stack, LUA_STACK_TOP));
 		lua_pop(_l_stack, 1);
 	}
 }
 
-void GameData::_FillIntVector(std::vector<int> *vect, const char *key) {
+void GameData::FillIntVector(const char *key, std::vector<int32> &vect) {
 	lua_getglobal(_l_stack, key);
 	if (!lua_istable(_l_stack, LUA_STACK_TOP)) {
 		cerr << "DATA ERROR: table " << key << " does not exist, or " << key << "isn't a table\n";
@@ -174,7 +172,7 @@ void GameData::_FillIntVector(std::vector<int> *vect, const char *key) {
 	int32 t = lua_gettop(_l_stack);
 	lua_pushnil(_l_stack);
 	while (lua_next(_l_stack, t)) {
-		vect->push_back((int32)lua_tonumber(_l_stack, LUA_STACK_TOP));
+		vect.push_back((int32)lua_tonumber(_l_stack, LUA_STACK_TOP));
 		lua_pop(_l_stack, 1);
 	}
 }
@@ -182,72 +180,53 @@ void GameData::_FillIntVector(std::vector<int> *vect, const char *key) {
 
 // This function initializes all the members of the GameSettings singleton class
 void GameData::LoadGameSettings () {
-	const char *filename = "dat/config/settings.hoa";
-
-	if (luaL_loadfile(_l_stack, filename) || lua_pcall(_l_stack, 0, 0, 0))
-		cerr << "DATA ERROR: Could not load " << filename << " :: " << lua_tostring(_l_stack, -1) << endl;
-
-	lua_getglobal(_l_stack, "video_settings");
-	if (!lua_istable(_l_stack, LUA_STACK_TOP))
-		cerr << "DATA ERROR: could not retrieve table \"video_settings\"" << endl;
-
+	OpenLuaFile("dat/config/settings.hoa");
+	
+	OpenTable("video_settings");
 	//   _SettingsManager->screen_resx = GetTableInt("screen_resx");
 	//   _SettingsManager->screen_resy = GetTableInt("screen_resy");
-	_SettingsManager->SetFullScreen(_GetTableBool("full_screen"));
+	bool full_screen;
+	GetTableBool("full_screen", full_screen);
+	_SettingsManager->SetFullScreen(full_screen);
+	CloseTable();
 
-	lua_getglobal(_l_stack, "audio_settings");
-	if (!lua_istable(_l_stack, LUA_STACK_TOP))
-		cerr << "DATA ERROR: could not retrieve table \"audio_settings\"" << endl;
-
-	_SettingsManager->music_vol = _GetTableInt("music_vol");
-	_SettingsManager->sound_vol = _GetTableInt("sound_vol");
-
-	lua_pop(_l_stack, 2); // Pop all tables from the stack before returning
+	OpenTable("audio_settings");
+	int32 vol;
+	GetTableInt("music_vol", vol);
+	_SettingsManager->music_vol = vol;
+	GetTableInt("sound_vol", vol);
+	_SettingsManager->sound_vol = vol;
+	CloseTable();
 }
 
 void GameData::LoadKeyJoyState(KeyState *keystate, JoystickState *joystate) {
-	const char *filename = "dat/config/settings.hoa";
-	if (luaL_loadfile(_l_stack, filename) || lua_pcall(_l_stack, 0, 0, 0))
-		cerr << "DATA ERROR: Could not load " << filename << " :: " << lua_tostring(_l_stack, -1) << endl;
-
-	lua_getglobal(_l_stack, "key_settings");
-	if (!lua_istable(_l_stack, LUA_STACK_TOP)) {
-		cerr << "DATA ERROR: could not retrieve table \"key_settings\"" << endl;
-	}
-	else {
-		keystate->_up = (SDLKey)_GetTableInt("up");
-		keystate->_down = (SDLKey)_GetTableInt("down");
-		keystate->_left = (SDLKey)_GetTableInt("left");
-		keystate->_right = (SDLKey)_GetTableInt("right");
-		keystate->_confirm = (SDLKey)_GetTableInt("confirm");
-		keystate->_cancel = (SDLKey)_GetTableInt("cancel");
-		keystate->_menu = (SDLKey)_GetTableInt("menu");
-		keystate->_swap = (SDLKey)_GetTableInt("swap");
-		keystate->_left_select = (SDLKey)_GetTableInt("left_select");
-		keystate->_right_select = (SDLKey)_GetTableInt("right_select");
-		keystate->_pause = (SDLKey)_GetTableInt("pause");
-	}
-		
-	//TODO Add joystick init, after we implement joystick functionality
+	OpenLuaFile("dat/config/settings.hoa");
+	int32 tempy;
+	OpenTable("key_settings");
+	GetTableInt("up", tempy);           keystate->_up = (SDLKey)tempy;
+	GetTableInt("down", tempy);         keystate->_down = (SDLKey)tempy;
+	GetTableInt("left", tempy);         keystate->_left = (SDLKey)tempy;
+	GetTableInt("right", tempy);        keystate->_right = (SDLKey)tempy;
+	GetTableInt("confirm", tempy);      keystate->_confirm = (SDLKey)tempy;
+	GetTableInt("cancel", tempy);       keystate->_cancel = (SDLKey)tempy;
+	GetTableInt("menu", tempy);         keystate->_menu = (SDLKey)tempy;
+	GetTableInt("swap", tempy);         keystate->_swap = (SDLKey)tempy;
+	GetTableInt("left_select", tempy);  keystate->_left_select = (SDLKey)tempy;
+	GetTableInt("right_select", tempy); keystate->_right_select = (SDLKey)tempy;
+	GetTableInt("pause", tempy);        keystate->_pause = (SDLKey)tempy;
+	CloseTable();
 	
-	lua_getglobal(_l_stack, "joystick_settings");
-	if (!lua_istable(_l_stack, LUA_STACK_TOP)) {
-		cerr << "DATA ERROR: could not retrieve table \"joystick_settings\"" << endl;
-	}
-	else {
-		joystate->_joy_index = (int32)_GetTableInt("index");
-		joystate->_confirm = (uint8)_GetTableInt("confirm");
-		joystate->_cancel = (uint8)_GetTableInt("cancel");
-		joystate->_menu = (uint8)_GetTableInt("menu");
-		joystate->_swap = (uint8)_GetTableInt("swap");
-		joystate->_left_select = (uint8)_GetTableInt("left_select");
-		joystate->_right_select = (uint8)_GetTableInt("right_select");
-		joystate->_pause = (uint8)_GetTableInt("pause");
-		joystate->_quit = (uint8)_GetTableInt("quit");
-	}
-
-	// Pop the key_settings and joystick_settings tables off the Lua stack
-	lua_pop(_l_stack, 2);
+	OpenTable("joystick_settings");
+	GetTableInt("index", tempy);        joystate->_joy_index = (int32)tempy;
+	GetTableInt("confirm", tempy);      joystate->_confirm = (uint8)tempy;
+	GetTableInt("cancel", tempy);       joystate->_cancel = (uint8)tempy;
+	GetTableInt("menu", tempy);         joystate->_menu = (uint8)tempy;
+	GetTableInt("swap", tempy);         joystate->_swap = (uint8)tempy;
+	GetTableInt("left_select", tempy);  joystate->_left_select = (uint8)tempy;
+	GetTableInt("right_select", tempy); joystate->_right_select = (uint8)tempy;
+	GetTableInt("pause", tempy);        joystate->_pause = (uint8)tempy;
+	GetTableInt("quit", tempy);         joystate->_quit = (uint8)tempy;
+	CloseTable();
 }
 
 // This function loads all necessary variables and vectors from the boot.hoa config file
@@ -255,53 +234,50 @@ void GameData::LoadBootData(
 		vector<ImageDescriptor> *boot_images,
 		vector<SoundDescriptor> *boot_sound,
 		vector<MusicDescriptor> *boot_music) {
-	char* filename = "dat/config/boot.hoa";
-	if (luaL_loadfile(_l_stack, filename) || lua_pcall(_l_stack, 0, 0, 0))
-		cerr << "DATA ERROR: Could not load "<< filename << " :: " << lua_tostring(_l_stack, -1) << endl;
-
+	OpenLuaFile("dat/config/boot.hoa");
+	string s;
+	int32 x1, x2, y1, y2;
 	// Load the video stuff
 	ImageDescriptor im;
 
 	// The background
-	im.SetFilename(_GetGlobalString("background_image"));
-	im.SetDimensions
-	(
-		(float) _GetGlobalInt("background_image_width"),
-		(float) _GetGlobalInt("background_image_height")
-	);
+	GetGlobalString("background_image", s);
+	im.SetFilename(s);
+	GetGlobalInt("background_image_width", x1);
+	GetGlobalInt("background_image_height", y1);
+	im.SetDimensions((float) x1, (float) y1);
 	boot_images->push_back(im);
 
 	// The logo
-	im.SetFilename(_GetGlobalString("logo_image"));
-	im.SetDimensions
-	(
-		(float) _GetGlobalInt("logo_image_width"),
-		(float) _GetGlobalInt("logo_image_height")
-	);
+	GetGlobalString("logo_image", s);
+	im.SetFilename(s);
+	GetGlobalInt("logo_image_width", x1);
+	GetGlobalInt("logo_image_height", y1);
+	im.SetDimensions((float) x1, (float) y1);
 	boot_images->push_back(im);
 
 	// The menu
-	im.SetFilename(_GetGlobalString("menu_image"));
-	im.SetDimensions
-	(
-		(float) _GetGlobalInt("menu_image_width"),
-		(float) _GetGlobalInt("menu_image_height")
-	);
+	GetGlobalString("menu_image", s);
+	im.SetFilename(s);
+	GetGlobalInt("menu_image_width", x1);
+	GetGlobalInt("menu_image_height", y1);
+	im.SetDimensions((float) x1, (float) y1);
 	boot_images->push_back(im);
 
 	// Set up a coordinate system - now you can use the boot.hoa to set it to whatever you like
-	_VideoManager->SetCoordSys((float)_GetGlobalInt("coord_sys_x_left"),
-					(float) _GetGlobalInt("coord_sys_x_right"),
-					(float) _GetGlobalInt("coord_sys_y_bottom"),
-					(float) _GetGlobalInt("coord_sys_y_top"));
+	GetGlobalInt("coord_sys_x_left", x1);
+	GetGlobalInt("coord_sys_x_right", x2);
+	GetGlobalInt("coord_sys_y_bottom", y1);
+	GetGlobalInt("coord_sys_y_top", y2);
+	_VideoManager->SetCoordSys((float)x1, (float) x2, (float) y1, (float) y2);
 
 	// Load the audio stuff
 	// Make a call to the config code that loads in two vectors of strings
 	vector<string> new_music_files;
-	_FillStringVector(&new_music_files, "music_files");
+	FillStringVector("music_files", new_music_files);
 
 	vector<string> new_sound_files;
-	_FillStringVector(&new_sound_files, "sound_files");
+	FillStringVector("sound_files", new_sound_files);
 
 	// Push all our new music onto the boot_music vector
 	MusicDescriptor new_music;
@@ -322,29 +298,23 @@ void GameData::LoadBootData(
 // by new_map_id. The function should be called only from the MapMode class members.
 void GameData::LoadMap(hoa_map::MapMode *map_mode, int32 new_map_id) {
 // 	// Load the map file
-// 	string filename = "dat/maps/map";
-// 	// filename += "1";	// TEMPORARY TEMPORARY
-// 	filename += "1";
-// 	filename += ".hoa";
-	string filename = "dat/maps/test_map.hoa";
-
-	if (luaL_loadfile(_l_stack, filename.c_str()) || lua_pcall(_l_stack, 0, 0, 0))
-		cout << "LUA ERROR: Could not load "<< filename << " :: " << lua_tostring(_l_stack, -1) << endl;
+	const char *filename = "dat/maps/test_map.hoa";
+	OpenLuaFile(filename);
 
 	// Setup some global map options (explanations are in map.h)
-	map_mode->_random_encounters = _GetGlobalBool("random_encounters");
-	map_mode->_encounter_rate = _GetGlobalInt("encounter_rate");
+	GetGlobalBool((const char*)"random_encounters", (bool&)(map_mode->_random_encounters));
+	GetGlobalInt((const char*)"encounter_rate", (int32&)(map_mode->_encounter_rate));
 	// this one will change:
 	map_mode->_steps_till_encounter = GaussianValue(map_mode->_encounter_rate, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
-	map_mode->_animation_counter = _GetGlobalInt("animation_counter");
-	map_mode->_row_count = _GetGlobalInt("row_count");
-	map_mode->_col_count = _GetGlobalInt("col_count");
+	GetGlobalInt((const char*)"animation_counter", (int32&)(map_mode->_animation_counter));
+	GetGlobalInt((const char*)"row_count", (int32&)(map_mode->_row_count));
+	GetGlobalInt((const char*)"col_count", (int32&)(map_mode->_col_count));
 
 	// This part loads only the tiles needed by the current map. The map editor fills in the
 	// corresponding Lua vector.
 	vector<string> tiles_used;
 	string tile_prefix = "img/tile/";	// where they're at
-	_FillStringVector(&tiles_used, "tiles_used");
+	FillStringVector("tiles_used", tiles_used);
 	if (tiles_used.size() == 0) {
 		cerr << "DATA ERROR: loading map " << filename << " : No tiles specified for map!" << endl;
 		//TODO Add meaningful error codes, and make LoadMap return an int
@@ -408,9 +378,9 @@ void GameData::LoadMap(hoa_map::MapMode *map_mode, int32 new_map_id) {
 
 	// Now load the map itself, by loading the lower_layer, upper_layer and event_mask vectors
 	vector<int32> lower, upper, emask;
-	_FillIntVector(&lower, "lower_layer");
-	_FillIntVector(&upper, "upper_layer");
-	_FillIntVector(&emask, "event_mask");
+	FillIntVector("lower_layer", lower);
+	FillIntVector("upper_layer", upper);
+	FillIntVector("event_mask", emask);
 	if (lower.size() != upper.size() || upper.size() != emask.size()) {
 		cerr << "DATA ERROR: The lower_layer, upper_layer and event_mask vectors do NOT have the same size! Check the editor code, or any modifications you made to the map file " << filename << "!\n";
 		// TODO Add meaningful error codes, and make LoadMap return an int
