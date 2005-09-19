@@ -990,6 +990,9 @@ bool OptionBox::Draw()
 		return false;		
 	}
 
+	GameVideo *video = GameVideo::GetReference();
+	video->_PushContext();	
+
 	float left, right, bottom, top;
 
 	// calculate width and height of option box
@@ -999,7 +1002,7 @@ bool OptionBox::Draw()
 	right  = _numColumns * _hSpacing;
 	top    = _numRows    * _vSpacing;
 
-	_CalculateScreenRect(left, right, bottom, top);
+	_CalculateAlignedRect(left, right, bottom, top);
 
 	int32 x, y, w, h;
 	
@@ -1013,10 +1016,8 @@ bool OptionBox::Draw()
 	glScissor(x, y, w, h);
 	glEnable(GL_SCISSOR_TEST);
 		
-	GameVideo *video = GameVideo::GetReference();
 	CoordSys &cs = video->_coordSys;
 	
-	video->_PushContext();	
 	video->SetFont(_font);
 	
 	video->SetDrawFlags(_xalign, _yalign, VIDEO_X_NOFLIP, VIDEO_Y_NOFLIP, VIDEO_BLEND, 0);
@@ -1036,14 +1037,14 @@ bool OptionBox::Draw()
 		rowMin = _scrollOffset;
 		rowMax = _scrollOffset + _numRows + 1;
 		
-		cellOffset = cs._upDir * (1.0f - (_scrollTime / (VIDEO_OPTION_SCROLL_TIME * 1000))) * _vSpacing;		
+		cellOffset = cs._upDir * (1.0f - (_scrollTime / (VIDEO_OPTION_SCROLL_TIME))) * _vSpacing;		
 	}
 	else  // scrolling down
 	{
 		rowMin = _scrollOffset - 1;
 		rowMax = _scrollOffset + _numRows;
 
-		cellOffset = cs._upDir * ((_scrollTime / (VIDEO_OPTION_SCROLL_TIME * 1000))) * _vSpacing;
+		cellOffset = cs._upDir * ((_scrollTime / (VIDEO_OPTION_SCROLL_TIME))) * _vSpacing;
 	}
 
 
@@ -1124,7 +1125,7 @@ bool OptionBox::Draw()
 							if(op.disabled)
 								video->DrawImage(op.images[imageIndex], Color::gray);
 							else
-								video->DrawImage(op.images[imageIndex]);
+								video->DrawImage(op.images[imageIndex], Color::white);
 
 							float edge = x - bounds.cellXLeft;
 							float width = op.images[imageIndex].GetWidth();
@@ -1195,7 +1196,7 @@ bool OptionBox::Draw()
 				ImageDescriptor *defaultCursor = video->GetDefaultCursor();
 				
 				if(defaultCursor)			
-					video->DrawImage(*defaultCursor);				
+					video->DrawImage(*defaultCursor, Color::white);
 			}
 
 			// if this is the index where we are supposed to show the cursor, show it			
@@ -1207,7 +1208,7 @@ bool OptionBox::Draw()
 				ImageDescriptor *defaultCursor = video->GetDefaultCursor();
 				
 				if(defaultCursor)			
-					video->DrawImage(*defaultCursor);				
+					video->DrawImage(*defaultCursor, Color::white);
 			}
 			glEnable(GL_SCISSOR_TEST);
 		
@@ -1283,7 +1284,7 @@ bool OptionBox::Update(int32 frameTime)
 	{
 		_scrollTime += frameTime;
 		
-		if(_scrollTime > VIDEO_OPTION_SCROLL_TIME * 1000)
+		if(_scrollTime > VIDEO_OPTION_SCROLL_TIME)
 		{
 			_scrollTime = 0;
 			_scrolling = false;

@@ -38,9 +38,70 @@ extern bool VIDEO_DEBUG;
 const int32 VIDEO_CURSOR_BLINK_RATE = 40;
 
 
-// !how many seconds it takes to scroll when the cursor goes past the end of an option box
-const float VIDEO_OPTION_SCROLL_TIME = .1f;
+// !how many milliseconds it takes to scroll when the cursor goes past the end of an option box
+const int32 VIDEO_OPTION_SCROLL_TIME = 100;
 
+
+// !how many milliseconds it takes for a menu to scroll in or out of view
+const int32 VIDEO_MENU_SCROLL_TIME = 200;
+
+
+//! \name Menu edge bitflags
+//@{
+/*!
+	* \brief flags to control the drawing of each edge of the menu. For example,
+	*        if you want to show a menu with its left edge hidden, then you'd
+	*        pass in all the flags except VIDEO_MENU_EDGE_LEFT to the Create()
+	*        function, or alternatively you could pass the complement of that
+	*        bit flag (~VIDEO_MENU_EDGE_LEFT)
+	*/
+
+const int32 VIDEO_MENU_EDGE_LEFT   = 0x1;
+const int32 VIDEO_MENU_EDGE_RIGHT  = 0x2;
+const int32 VIDEO_MENU_EDGE_TOP    = 0x4;
+const int32 VIDEO_MENU_EDGE_BOTTOM = 0x8;
+const int32 VIDEO_MENU_EDGE_ALL    = 0xF;
+//@}
+
+
+/*!****************************************************************************
+ *  \brief These menu display modes control how the menu appears or disappears.
+ *         It can happen instantly, or it can animate showing/hiding
+ *   VIDEO_MENU_INSTANT: appears/disappears instantly
+ *   VIDEO_MENU_EXPAND_FROM_CENTER: starts as a thin horizontal line at center and expands out
+ *****************************************************************************/
+ 
+enum MenuDisplayMode
+{
+	VIDEO_MENU_INVALID = -1,
+	
+	VIDEO_MENU_INSTANT            = 0,
+	VIDEO_MENU_EXPAND_FROM_CENTER = 1,
+	
+	VIDEO_MENU_TOTAL = 2
+};
+
+
+/*!****************************************************************************
+ *  \brief These menu states tell you whether a menu is fully hidden/shown,
+ *         or in the process of changing state.
+ *   VIDEO_MENU_STATE_SHOWN: menu is fully shown
+ *   VIDEO_MENU_STATE_SHOWING: menu is still scrolling on to the screen
+ *   VIDEO_MENU_STATE_HIDING: menu is scrolling out, but not completely hidden yet
+ *   VIDEO_MENU_STATE_HIDDEN: menu is fully hidden
+ *****************************************************************************/
+
+enum MenuState
+{
+	VIDEO_MENU_STATE_INVALID = -1,
+	
+	VIDEO_MENU_STATE_SHOWN   = 0,
+	VIDEO_MENU_STATE_SHOWING = 1,
+	VIDEO_MENU_STATE_HIDING  = 2,
+	VIDEO_MENU_STATE_HIDDEN  = 3,
+	
+	VIDEO_MENU_STATE_TOTAL = 4
+};
 
 
 /*!****************************************************************************
@@ -57,14 +118,14 @@ enum TextDisplayMode
 {
 	VIDEO_TEXT_INVALID = -1,
 	
-	VIDEO_TEXT_INSTANT,
-	VIDEO_TEXT_CHAR,
-	VIDEO_TEXT_FADELINE,
-	VIDEO_TEXT_FADECHAR,
-	VIDEO_TEXT_REVEAL,
-	VIDEO_TEXT_FADEREVEAL,
+	VIDEO_TEXT_INSTANT    = 0,
+	VIDEO_TEXT_CHAR       = 1,
+	VIDEO_TEXT_FADELINE   = 2,
+	VIDEO_TEXT_FADECHAR   = 3,
+	VIDEO_TEXT_REVEAL     = 4,
+	VIDEO_TEXT_FADEREVEAL = 5,
 	
-	VIDEO_TEXT_TOTAL
+	VIDEO_TEXT_TOTAL = 6
 };
 
 
@@ -86,16 +147,16 @@ enum OptionBoxEvent
 	
 	VIDEO_OPTION_NO_EVENT = 0,
 	
-	VIDEO_OPTION_SELECTION_CHANGE,
-	VIDEO_OPTION_CONFIRM,
-	VIDEO_OPTION_CANCEL,
-	VIDEO_OPTION_SWITCH,
-	VIDEO_OPTION_BOUNDS_UP,
-	VIDEO_OPTION_BOUNDS_DOWN,
-	VIDEO_OPTION_BOUNDS_LEFT,
-	VIDEO_OPTION_BOUNDS_RIGHT,
+	VIDEO_OPTION_SELECTION_CHANGE = 0,
+	VIDEO_OPTION_CONFIRM          = 1,
+	VIDEO_OPTION_CANCEL           = 2,
+	VIDEO_OPTION_SWITCH           = 3,
+	VIDEO_OPTION_BOUNDS_UP        = 4,
+	VIDEO_OPTION_BOUNDS_DOWN      = 5,
+	VIDEO_OPTION_BOUNDS_LEFT      = 6,
+	VIDEO_OPTION_BOUNDS_RIGHT     = 7,
 	
-	VIDEO_OPTION_TOTAL
+	VIDEO_OPTION_TOTAL = 8
 };
 
 
@@ -115,15 +176,15 @@ enum OptionElementType
 {
 	VIDEO_OPTION_ELEMENT_INVALID = -1,
 	
-	VIDEO_OPTION_ELEMENT_LEFT_ALIGN,
-	VIDEO_OPTION_ELEMENT_CENTER_ALIGN,
-	VIDEO_OPTION_ELEMENT_RIGHT_ALIGN,	
+	VIDEO_OPTION_ELEMENT_LEFT_ALIGN   = 0,
+	VIDEO_OPTION_ELEMENT_CENTER_ALIGN = 1,
+	VIDEO_OPTION_ELEMENT_RIGHT_ALIGN  = 2,	
 
-	VIDEO_OPTION_ELEMENT_POSITION,	
-	VIDEO_OPTION_ELEMENT_IMAGE,
-	VIDEO_OPTION_ELEMENT_TEXT,
+	VIDEO_OPTION_ELEMENT_POSITION = 3,	
+	VIDEO_OPTION_ELEMENT_IMAGE    = 4,
+	VIDEO_OPTION_ELEMENT_TEXT     = 5,
 
-	VIDEO_OPTION_ELEMENT_TOTAL
+	VIDEO_OPTION_ELEMENT_TOTAL = 6
 };
 
 
@@ -138,11 +199,11 @@ enum CursorState
 {
 	VIDEO_CURSOR_STATE_INVALID = -1,
 	
-	VIDEO_CURSOR_STATE_HIDDEN,
-	VIDEO_CURSOR_STATE_VISIBLE,
-	VIDEO_CURSOR_STATE_BLINKING,
+	VIDEO_CURSOR_STATE_HIDDEN   = 0,
+	VIDEO_CURSOR_STATE_VISIBLE  = 1,
+	VIDEO_CURSOR_STATE_BLINKING = 2,
 	
-	VIDEO_CURSOR_STATE_TOTAL
+	VIDEO_CURSOR_STATE_TOTAL = 3
 };
 
 
@@ -161,11 +222,11 @@ enum WrapMode
 {
 	VIDEO_WRAP_MODE_INVALID = -1,
 	
-	VIDEO_WRAP_MODE_NONE,
-	VIDEO_WRAP_MODE_STRAIGHT,
-	VIDEO_WRAP_MODE_SHIFTED,
+	VIDEO_WRAP_MODE_NONE     = 0,
+	VIDEO_WRAP_MODE_STRAIGHT = 1,
+	VIDEO_WRAP_MODE_SHIFTED  = 2,
 	
-	VIDEO_WRAP_MODE_TOTAL
+	VIDEO_WRAP_MODE_TOTAL = 3
 };
 
 
@@ -181,10 +242,10 @@ enum SelectMode
 {
 	VIDEO_SELECT_INVALID = -1,
 	
-	VIDEO_SELECT_SINGLE,
-	VIDEO_SELECT_DOUBLE,
+	VIDEO_SELECT_SINGLE = 0,
+	VIDEO_SELECT_DOUBLE = 1,
 	
-	VIDEO_SELECT_TOTAL
+	VIDEO_SELECT_TOTAL = 2
 };
 
 
@@ -229,7 +290,7 @@ public:
 
 
 	/*!
-	 *  \brief sets the position of the text box
+	 *  \brief sets the position of the object
 	 *
 	 *  \note  x and y are in terms of coordinate system defined by (0, 1024, 0, 768)
 	 */
@@ -245,10 +306,152 @@ protected:
 	/*!
 	 *  \brief given a rectangle specified in VIDEO_X_LEFT and VIDEO_Y_BOTTOM
 	 *         orientation, this function transforms the rectangle based on
-	 *         the video engine's coordinate system and alignment flags.
+	 *         the video engine's alignment flags.
 	 */
 	
-	void _CalculateScreenRect(float &left, float &right, float &bottom, float &top);
+	void _CalculateAlignedRect(float &left, float &right, float &bottom, float &top);
+};
+
+
+/*!****************************************************************************
+ *  \brief Menus are basically "windows", like those blue rectangular ones
+ *         in Final Fantasy games
+ *****************************************************************************/
+
+class MenuWindow : public GUIControl
+{
+public:
+
+	MenuWindow();
+	~MenuWindow();
+	
+	/*!
+	 *  \brief draws menu window on screen
+	 */
+	bool Draw();
+
+
+	/*!
+	 *  \brief updates the menu window, used for gradual show/hide effects
+	 *
+	 *  \param frameTime time elapsed during this frame, in milliseconds
+	 */
+	bool Update(int32 frameTime);
+
+
+	/*!
+	 *  \brief causes the menu to be visible. Depending on the display mode,
+	 *         the menu might show instantly or gradually. You can check for when
+	 *         the menu is fully shown by checking if GetState() returns
+	 *         VIDEO_MENU_STATE_SHOWN (Until then, it is VIDOE_MENU_STATE_SHOWING)
+	 *
+	 *  \note  The time it takes for the menu to show is VIDEO_MENU_SCROLL_TIME
+	 */
+	bool Show();
+
+
+	/*!
+	 *  \brief hides the menu. Depending on the display mode, the menu might hide
+	 *         instantly or gradually. If it's gradual, you should still continue
+	 *         calling Draw() even after you call Hide() until it's fully hidden.
+	 *         You can check if it's fully hidden by checking if GetState()
+	 *         returns VIDEO_MENU_STATE_HIDDEN. (Until then, it will be 
+	 *         VIDEO_MENU_STATE_HIDING)
+	 *
+	 *  \note  The time it takes for the menu to show is VIDEO_MENU_SCROLL_TIME
+	 */
+	bool Hide();
+	
+
+	/*!
+	 *  \brief does a self-check on all its members to see if all its members have been
+	 *         set to valid values. This is used internally to make sure we have a valid
+	 *         object before doing any complicated operations. If it detects
+	 *         any problems, it generates a list of errors and returns it by reference
+	 *         so they can be displayed
+	 *
+	 *  \param errors reference to a string to be filled if any errors are found
+	 */
+	bool IsInitialized(std::string &errors);
+
+
+	/*!
+	 *  \brief sets the position of the object
+	 *
+	 *  \note  x and y are in terms of coordinate system defined by (0, 1024, 0, 768)
+	 */
+	void SetPosition(float x, float y);
+
+
+	/*!
+	 *  \brief sets the width and height of the menu. Returns false and prints an error message
+	 *         if the width or height are negative or larger than 1024 or 768 respectively
+	 *
+	 *  \param w width in pixels
+	 *  \param h height in pixels
+	 *  \param edgeFlags a combination of bitflags, VIDEO_MENU_EDGE_LEFT, etc.
+	 *  \param displayMode can be VIDEO_MENU_INSTANT or VIDEO_MENU_EXPAND_FROM_CENTER
+	 *
+	 *  \note  this MUST be called before you try drawing it
+	 */
+	bool Create(float w, float h, int32 edgeFlags = VIDEO_MENU_EDGE_ALL);
+
+
+	/*!
+	 *  \brief you MUST call this when you are done using a menu. Failure to do so
+	 *         may result in problems like texture memory not being freed.
+	 */
+	void Destroy();
+
+
+	/*!
+	 *  \brief gets the width and height of the menu. Returns false if SetDimensions() hasn't
+	 *         been called yet
+	 *
+	 *  \note  w and h are in terms of coordinate system defined by (0, 1024, 0, 768) 
+	 */
+	void GetDimensions(float &w, float &h);
+
+
+	/*!
+	 *  \brief sets the current menu display mode, e.g. instantly appearing,
+	 *         or expanding from the center outward, etc.
+	 *
+	 *  \param mode  menu display mode to use, e.g. VIDEO_MENU_INSTANT, 
+	 *               VIDEO_MENU_EXPAND_FROM_CENTER, etc.
+	 */
+	bool SetDisplayMode(MenuDisplayMode mode);
+	
+	
+	/*!
+	 *  \brief get the current menu display mode set for this menu
+	 */
+	MenuDisplayMode GetDisplayMode();	
+	
+	/*!
+	 *  \brief get the current state for this menu (hidden, shown, hiding, showing)
+	 */
+	MenuState GetState();
+
+private:
+
+	/*!
+	 *  \brief used to recreate the menu image descriptor when the menu is created
+	 *         for the first time, or if the menu skin changes
+	 */
+	bool RecreateImage();
+
+	static int32 _currentMenuID;                    //! hand out new IDs to each menu that is created
+	static std::map<int32, MenuWindow *> _menuMap;  //! keep a registered std::map of menus in case they need to be updated when the skin changes
+	
+	int32 _id;                       //! id of the menu, used to register and unregister it with the std::map when it is constructed/destructed
+	float _width, _height;           //! dimensions
+	int32 _edgeFlags;                //! flags used to tell which edges are visible 
+	
+	MenuState _state;                //! menu state (hidden, shown, hiding, showing)
+	int32  _currentTime;             //! milliseconds that passed since menu was shown
+	ImageDescriptor _menuImage;      //! image descriptor of the menu
+	MenuDisplayMode _mode;           //! text display mode (one character at a time, fading in, instant, etc.)
 };
 
 
@@ -1023,11 +1226,17 @@ public:
 	 *  \param width  desired width of menu, based on pixels in 1024x768 resolution
 	 *  \param height desired height of menu, based on pixels in 1024x768 resolution
 	 *
+	 *  \param edgeFlags specifies all the edges of the menu that should be drawn.
+	 *         In most cases, this should just be the default of VIDEO_MENU_EDGE_ALL.
+	 *         However, for example, you can make the left edge disappear by using
+	 *         ~VIDEO_MENU_EDGE_LEFT, or alternatively bitwise OR-ing all the other
+	 *         edge flags together (right, top, and bottom)
+	 *
 	 *  \note  Width and height must be aligned to the border image sizes. So for example
 	 *         if your border artwork is all 8x8 images and you try to create a menu that
 	 *         is 117x69, it will get rounded to 120x72.
 	 */	
-	bool CreateMenu(ImageDescriptor &id, float width, float height);
+	bool CreateMenu(ImageDescriptor &id, float width, float height, int32 edgeFlags);
 
 private:
 

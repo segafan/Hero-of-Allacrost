@@ -227,6 +227,14 @@ public:
 		             color[3] * c.color[3]);
 	}
 	
+	Color operator * (float f) const
+	{
+		return Color(color[0] * f,
+		             color[1] * f,
+		             color[2] * f,
+		             color[3]);
+	}
+
 	Color()
 	{
 		color[0]=0.0f;
@@ -322,6 +330,36 @@ public:
 	int32 shadowY;  //! y offset of text shadow
 	
 	TextShadowStyle shadowStyle;  //! style of text shadow
+};
+
+
+/*!***************************************************************************
+ *  \brief a rectangle structure, used in storing the current scissoring
+ *         or viewport rectangles, etc. It is based on standard screen coordinates,
+ *         where (0,0) is the top-left and the unit is 1 pixel (hence int32 coordinates)
+ *****************************************************************************/
+
+class ScreenRect
+{
+public:	
+	ScreenRect() {}
+	ScreenRect(int32 l, int32 t, int32 w, int32 h)
+	: left(l), top(t), width(w), height(h)
+	{
+	}
+	
+
+	/*!
+	 *  \brief intersects this rectangle with the one passed in, and modifies this
+	 *         rect to be the intersection of the two. (The intersection of two
+	 *         rectangles is of course, another smaller rectangle). Note that
+	 *         if the two rectangles don't intersect at all, then a "zero rectangle"
+	 *         results where left, top, width, and height are all zero.
+	 */	
+	
+	void Intersect(const ScreenRect &rect);	
+	
+	int32 left, top, width, height;
 };
 
 
@@ -840,6 +878,9 @@ public:
 	CoordSys coordSys;
 	std::string currentFont;
 	Color currentTextColor;
+	ScreenRect viewport;
+	ScreenRect scissorRect;
+	bool scissorEnabled;
 };
 
 
@@ -928,24 +969,6 @@ private:
 	friend class GameVideo;
 };
 
-///*!***************************************************************************
-// *  \brief contains the image descriptor for a menu, plus the width and height
-// *         of the menu in case it needs to be reconstructed
-// *****************************************************************************/
-//
-//class ImageDescriptor
-//{
-//	ImageDescriptor()
-//	{
-//		_width = _height = 0;
-//	}
-//	
-//private:
-//
-//	ImageDescriptor _image;
-//	int _width, _height;	
-//};
-
 
 /*!****************************************************************************
  *  \brief Manages all the video audio and serves as the API to the video engine.
@@ -960,6 +983,7 @@ public:
 	
 	SINGLETON_METHODS(GameVideo);
 	
+
 	//-- General --------------------------------------------------------------
 
 	/*!
@@ -1019,7 +1043,7 @@ public:
 	bool ApplySettings();
 
 
-	//-- Coordinate systems ---------------------------------------------------
+	//-- Coordinate system / viewport  ------------------------------------------
 	
 	/*!
 	 *  \brief sets the viewport, i.e. the area of the screen that gets drawn
@@ -1063,19 +1087,64 @@ public:
 	(
 		const CoordSys &coordSys
 	);
+
+
+	/*!
+	 *  \brief enables scissoring, where you can specify a rectangle of the screen
+	 *         which is affected by rendering operations. MAKE SURE to disable
+	 *         scissoring as soon as you're done using the effect, or all subsequent
+	 *         draw calls will get messed up
+	 *
+	 *  \param enable pass true to turn on scissoring, false to disable
+	 */   	                  
+	void EnableScissoring(bool enable);
 	
+
+	/*!
+	 *  \brief sets the rectangle to use for scissorring, where you can specify an
+	 *         area of the screen for draw operations to affect. Note, the coordinates
+	 *         you pass in are based on the current coordinate system, not screen coords
+	 */   	                  
+	void SetScissorRect
+	(
+		float left,
+		float right,
+		float bottom,
+		float top
+	);
+
+
 	//-- Transformations ------------------------------------------------------
 
 	/*!
-	 *  \brief saves current draw position on the stack
+	 *  \brief saves entire state of the video engine on to the stack (all draw
+	 *         flags, coordinate system, scissor rect, viewport, etc.)
+	 *         This is useful for safety purposes between two major parts of code
+	 *         to ensure that one part doesn't inadvertently affect the other.
+	 *         However, it's a very expensive function call. If you only need to
+	 *         push the current transformation, you should use PushMatrix() and
+	 *         PopMatrix()
 	 */
 	void PushState();
 	
 	/*!
-	 *  \brief restores current draw position from stack
+	 *  \brief pops the most recently pushed video engine state from the stack
+	 *         and restores all of the old settings.
 	 */
 	void PopState ();
 	
+
+	/*!
+	 *  \brief saves current modelview transformation on to the stack. In English,
+	 *         that means the combined result of calls to Move/MoveRelative/Scale/Rotate
+	 */
+	void PushMatrix();
+	
+	/*!
+	 *  \brief pops the modelview transformation from the stack.
+	 */
+	void PopMatrix();
+
 	/*!
 	 *  \brief sets draw position to (x,y)
 	 *  \param x  x coordinate to move to
@@ -1093,14 +1162,33 @@ public:
 	/*!
 	 *  \brief rotates images counterclockwise by 'angle' radians
 	 *  \param angle how many radians to rotate by
+	 *  \note This function should NOT be used unless you understand how transformation
+	 *        matrices work in OpenGL.
 	 */
 	void Rotate (float angle);
+
+	
+	/*!
+	 *  \brief after you call this, subsequent calls to DrawImage() result in
+	 *         a scaled image
+	 *
+	 *  \param xScale pass 1.0 for normal horizontal scaling, 2.0 for double
+	 *                  scaling, etc.
+	 *  \param yScale same, except vertical scaling
+	 *
+	 *  \note This function should NOT be used unless you understand how transformation
+	 *        matrices work in OpenGL.
+	 */
+
+	void Scale(float xScale, float yScale);
+	
 
 	/*!
 	 *  \brief sets OpenGL transform to contents of 4x4 matrix (16 values)
 	 *  \param array of 16 float values forming a 4x4 transformation matrix
 	 */
 	void SetTransform(float m[16]);
+
 
 	//-- Text -----------------------------------------------------------------
 
@@ -1387,17 +1475,6 @@ public:
 	);
 
 
-	/*!
-	 *  \brief creates an ImageDescriptor of a menu which is the given size
-	 *
-	 *  \param menu   Reference to menu to create
-	 *
-	 *  \param width  Width of menu, based on pixels in 1024x768 resolution
-	 *  \param height Height of menu, based on pixels in 1024x768 resolution.
-	 */
-	bool CreateMenu(ImageDescriptor &menu, float width, float height);
-
-
 	//-- Lighting and fog -----------------------------------------------------
 	
 	/*!
@@ -1559,6 +1636,11 @@ private:
 
 	CoordSys    _coordSys;    //! current coordinate system
 	
+	ScreenRect _viewport;     //! current viewport
+	ScreenRect _scissorRect;  //! current scissor rectangle
+	
+	bool _scissorEnabled;   //! is scissoring enabled or not
+	
 	private_video::ScreenFader _fader;  //! fader class which implements screen fading
 	
 	bool   _advancedDisplay;       //! advanced display flag. If true, info about the video engine is shown on screen
@@ -1623,6 +1705,9 @@ private:
 
 	bool _BindTexture(GLuint texID);
 
+	
+	ScreenRect _CalculateScreenRect(float left, float right, float bottom, float top);
+
 
 	int32 _ConvertXAlign(int32 xalign);
 	int32 _ConvertYAlign(int32 yalign);
@@ -1635,6 +1720,20 @@ private:
 	 */	
 
 	GLuint _CreateBlankGLTexture(int32 width, int32 height);
+
+
+	/*!
+	 *  \brief creates an ImageDescriptor of a menu which is the given size
+	 *
+	 *  \param menu   Reference to menu to create
+	 *
+	 *  \param width  Width of menu, based on pixels in 1024x768 resolution
+	 *  \param height Height of menu, based on pixels in 1024x768 resolution.
+	 *
+	 *  \note  this is only meant to be used by the Menu class, not by users of
+	 *         the video engine.
+	 */
+	bool _CreateMenu(ImageDescriptor &menu, float width, float height, int32 edgeFlags);
 
 
 	/*!
@@ -1846,6 +1945,9 @@ private:
 	bool _SaveTempTextures();
 
 
+	int32 _ScreenCoordX(float x);
+	int32 _ScreenCoordY(float y);
+
 	/*!
 	 *  \brief updates the shaking effect
 	 *
@@ -1868,6 +1970,7 @@ private:
 	friend class TextBox;
 	friend class OptionBox;
 	friend class GUIControl;
+	friend class MenuWindow;
 	friend class private_video::GUI;	
 	friend class private_video::FixedTexMemMgr;
 	friend class private_video::VariableTexMemMgr;

@@ -223,21 +223,6 @@ bool GUI::SetMenuSkin
 
 bool GUI::_CheckSkinConsistency(const MenuSkin &s)
 {
-	float leftBorderSize   = _currentSkin.skin[1][0].GetWidth();
-	float rightBorderSize  = _currentSkin.skin[1][2].GetWidth();
-	float topBorderSize    = _currentSkin.skin[2][1].GetHeight();
-	float bottomBorderSize = _currentSkin.skin[0][1].GetHeight();
-
-	float horizontalBorderSize = leftBorderSize + rightBorderSize;
-	float verticalBorderSize   = topBorderSize  + bottomBorderSize;
-	
-	float topWidth    = _currentSkin.skin[2][1].GetWidth();
-	float bottomWidth = _currentSkin.skin[0][1].GetWidth();
-	
-	float leftHeight  = _currentSkin.skin[1][0].GetHeight();
-	float rightHeight = _currentSkin.skin[1][2].GetHeight();
-	
-	
 	// check #1: widths of top and bottom borders are equal
 	
 	if(s.skin[2][1].GetWidth() != s.skin[0][1].GetWidth())
@@ -314,7 +299,7 @@ bool GUI::_CheckSkinConsistency(const MenuSkin &s)
 //       since we call _CheckSkinConsistency() when we set a new skin
 //-----------------------------------------------------------------------------
 
-bool GUI::CreateMenu(hoa_video::ImageDescriptor &id, float width, float height)
+bool GUI::CreateMenu(hoa_video::ImageDescriptor &id, float width, float height, int32 edgeFlags)
 {
 	id.Clear();
 	
@@ -389,18 +374,7 @@ bool GUI::CreateMenu(hoa_video::ImageDescriptor &id, float width, float height)
 	}
 	
 	// now we have all the information we need to create the menu!
-	
-	// first add the corners
-	
-	float maxX = leftBorderSize + inumXTiles * topWidth;
-	float maxY = bottomBorderSize + inumYTiles * leftHeight;
-	float minX = 0.0f;
-	float minY = 0.0f;	
-	
-	id.AddImage(_currentSkin.skin[2][0], minX, minY);   // lower left	
-	id.AddImage(_currentSkin.skin[2][2], maxX, minY);   // lower right	            
-	id.AddImage(_currentSkin.skin[0][0], minX, maxY);   // upper left	
-	id.AddImage(_currentSkin.skin[0][2], maxX, maxY);   // upper right
+
 
 	// re-create the overlay at the correct width and height
 	
@@ -410,29 +384,79 @@ bool GUI::CreateMenu(hoa_video::ImageDescriptor &id, float width, float height)
 	_currentSkin.skin[1][1].GetVertexColor(c[2], 2);
 	_currentSkin.skin[1][1].GetVertexColor(c[3], 3);
 	
-	_videoManager->DeleteImage(_currentSkin.skin[1][1]);
-	
-	_currentSkin.skin[1][1].SetDimensions(innerWidth, innerHeight);
+	_videoManager->DeleteImage(_currentSkin.skin[1][1]);	
+	_currentSkin.skin[1][1].SetDimensions(leftBorderSize, topBorderSize);
 	_currentSkin.skin[1][1].SetVertexColors(c[0], c[1], c[2], c[3]);
 	_videoManager->LoadImage(_currentSkin.skin[1][1]);
 	
-	id.AddImage(_currentSkin.skin[1][1], leftBorderSize, bottomBorderSize);
+	
+	// first add the corners
+	
+	float maxX = leftBorderSize + inumXTiles * topWidth;
+	float maxY = bottomBorderSize + inumYTiles * leftHeight;
+	float minX = 0.0f;
+	float minY = 0.0f;	
+
+	if(edgeFlags & VIDEO_MENU_EDGE_LEFT || edgeFlags & VIDEO_MENU_EDGE_BOTTOM)	
+		id.AddImage(_currentSkin.skin[2][0], minX, minY);   // lower left	
+	else
+		id.AddImage(_currentSkin.skin[1][1], minX, minY);
+	
+	if(edgeFlags & VIDEO_MENU_EDGE_RIGHT || edgeFlags & VIDEO_MENU_EDGE_BOTTOM)	
+		id.AddImage(_currentSkin.skin[2][2], maxX, minY);   // lower right	            
+	else
+		id.AddImage(_currentSkin.skin[1][1], maxX, minY);
+
+	if(edgeFlags & VIDEO_MENU_EDGE_LEFT || edgeFlags & VIDEO_MENU_EDGE_TOP)
+		id.AddImage(_currentSkin.skin[0][0], minX, maxY);   // upper left	
+	else
+		id.AddImage(_currentSkin.skin[1][1], minX, maxY);
+
+	if(edgeFlags & VIDEO_MENU_EDGE_TOP || edgeFlags & VIDEO_MENU_EDGE_RIGHT)	
+		id.AddImage(_currentSkin.skin[0][2], maxX, maxY);   // upper right
+	else
+		id.AddImage(_currentSkin.skin[1][1], maxX, maxY);
 
 	// iterate from left to right and fill in the horizontal borders
 	
 	for(int32 tileX = 0; tileX < inumXTiles; ++tileX)
 	{
-		id.AddImage(_currentSkin.skin[0][1], leftBorderSize + topWidth * tileX, maxY);
-		id.AddImage(_currentSkin.skin[2][1], leftBorderSize + topWidth * tileX, 0.0f);
+		if(edgeFlags & VIDEO_MENU_EDGE_TOP)
+			id.AddImage(_currentSkin.skin[0][1], leftBorderSize + topWidth * tileX, maxY);
+		else
+			id.AddImage(_currentSkin.skin[1][1], leftBorderSize + topWidth * tileX, maxY);
+
+		if(edgeFlags & VIDEO_MENU_EDGE_BOTTOM)
+			id.AddImage(_currentSkin.skin[2][1], leftBorderSize + topWidth * tileX, 0.0f);
+		else
+			id.AddImage(_currentSkin.skin[1][1], leftBorderSize + topWidth * tileX, 0.0f);
 	}
 	
 	// iterate from bottom to top and fill in the vertical borders
 
 	for(int32 tileY = 0; tileY < inumYTiles; ++tileY)
 	{
-		id.AddImage(_currentSkin.skin[1][0], 0.0f, bottomBorderSize + leftHeight * tileY);
-		id.AddImage(_currentSkin.skin[1][2], maxX, bottomBorderSize + leftHeight * tileY);
+		if(edgeFlags & VIDEO_MENU_EDGE_LEFT)
+			id.AddImage(_currentSkin.skin[1][0], 0.0f, bottomBorderSize + leftHeight * tileY);
+		else
+			id.AddImage(_currentSkin.skin[1][1], 0.0f, bottomBorderSize + leftHeight * tileY);
+		
+		if(edgeFlags & VIDEO_MENU_EDGE_RIGHT)
+			id.AddImage(_currentSkin.skin[1][2], maxX, bottomBorderSize + leftHeight * tileY);
+		else
+			id.AddImage(_currentSkin.skin[1][1], maxX, bottomBorderSize + leftHeight * tileY);
 	}
+
+
+	// re-create the overlay at the correct width and height
+	
+	_videoManager->DeleteImage(_currentSkin.skin[1][1]);
+	_currentSkin.skin[1][1].SetDimensions(innerWidth, innerHeight);
+	_currentSkin.skin[1][1].SetVertexColors(c[0], c[1], c[2], c[3]);
+	_videoManager->LoadImage(_currentSkin.skin[1][1]);
+	
+	id.AddImage(_currentSkin.skin[1][1], leftBorderSize, bottomBorderSize);
+
 
 	return true;
 }
@@ -441,14 +465,20 @@ bool GUI::CreateMenu(hoa_video::ImageDescriptor &id, float width, float height)
 
 
 //-----------------------------------------------------------------------------
-// _CalculateScreenRect: transforms a rectangle based on the coordinate system
+// _CalculateAlignedRect: transforms a rectangle based on the coordinate system
 //                       and alignment flags
 //-----------------------------------------------------------------------------
 
-void GUIControl::_CalculateScreenRect(float &left, float &right, float &bottom, float &top)
+void GUIControl::_CalculateAlignedRect(float &left, float &right, float &bottom, float &top)
 {
 	float width  = right - left;
 	float height = top - bottom;
+
+	if(width < 0.0f)
+		width = -width;
+	
+	if(height < 0.0f)
+		height = -height;
 	
 	GameVideo *video = GameVideo::GetReference();	
 	CoordSys &cs = video->_coordSys;

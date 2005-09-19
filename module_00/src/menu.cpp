@@ -56,6 +56,9 @@ MenuMode::MenuMode() {
 	_menu_images.push_back(new_menu);
 	
 	// Create menu images
+
+	/* !@# Roots: I had to get rid of this code so the game would compile
+		
 	if(!VideoManager->CreateMenu(_menu_images[0], 256, 576))  // create a 256x576 menu
 		cerr << "MENU: ERROR: Couldn't create menu image!" << endl;
 	if(!VideoManager->CreateMenu(_menu_images[1], 256, 576)) 
@@ -68,6 +71,8 @@ MenuMode::MenuMode() {
 		cerr << "MENU: ERROR: Couldn't create menu image!" << endl;
 	if(!VideoManager->CreateMenu(_menu_images[5], 1024, 96)) 
 		cerr << "MENU: ERROR: Couldn't create menu image!" << endl;
+	*/
+	
 }
 
 

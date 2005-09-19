@@ -71,6 +71,15 @@ bool TextBox::Draw()
 	if(_text.empty())
 		return true;
 		
+
+	// fail if text box isn't initialized properly
+	if(!_initialized)
+	{
+		if(VIDEO_DEBUG)
+			cerr << "TextBox::Draw() failed because the textbox was not initialized:" << endl << _initializeErrors << endl;			
+		return false;
+	}
+		
 	// determine the rectangle of the textbox based on the position, dimensions,
 	// and draw flags in the video engine
 	
@@ -86,7 +95,7 @@ bool TextBox::Draw()
 	bottom    = 0.0f;
 	top    = _height;
 	
-	_CalculateScreenRect(left, right, bottom, top);
+	_CalculateAlignedRect(left, right, bottom, top);
 	CoordSys &cs = video->_coordSys;
 
 	// figure out where the top of the rendered text is

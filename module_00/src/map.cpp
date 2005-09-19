@@ -787,6 +787,9 @@ void MapMode::Draw() {
 	if (_map_state.back() == DIALOGUE) {
 // 		cout << _dialogue_text << endl;
 
+/* !@# Roots: I got rid of this code for now since CreateMenu() is defunct
+
+
 		//---Raj added some sample code here for textbox display---
 
 		float dialogueWidth = 1024.0f;
@@ -800,7 +803,7 @@ void MapMode::Draw() {
 		
 
 		ImageDescriptor menu;
-		VideoManager->CreateMenu(menu, dialogueWidth, dialogueHeight);
+		VideoManager->CreateMenu(menu, dialogueWidth, dialogueHeight, 0);
 		
 		VideoManager->PushState();
 		VideoManager->SetDrawFlags(xalign, yalign, 0);
@@ -833,6 +836,7 @@ void MapMode::Draw() {
 		
 		VideoManager->PopState();				
 		//---End Raj's Sample code------------------
+*/
 	}
 		
 	return;

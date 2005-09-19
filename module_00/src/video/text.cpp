@@ -327,8 +327,11 @@ bool GameVideo::_DrawTextHelper
 	tx = (float)initial->w / w;
 	ty = (float)initial->h / h;
 	
+	float modulation = _fader.GetFadeModulation();
+	Color textColor = _currentTextColor * modulation;
+	
 	glBegin(GL_QUADS);
-	glColor4fv((GLfloat *)&_currentTextColor);
+	glColor4fv((GLfloat *)&textColor);
 	glTexCoord2f(0.0f, ty); 
 	glVertex2f(0.0f, 0.0f);
 	glTexCoord2f(tx, ty); 

@@ -40,6 +40,7 @@ using namespace hoa_boot;
 using namespace hoa_utils;
 
 
+
 namespace hoa_quit {
 
 bool QUIT_DEBUG = false;
@@ -67,8 +68,13 @@ QuitMode::QuitMode() {
 	// Save a copy of the current screen to use as a backdrop
 	if (!VideoManager->CaptureScreen(_saved_screen)) 
 		if (QUIT_DEBUG) cerr << "PAUSE: ERROR: Couldn't save the screen!" << endl;
-	if(!VideoManager->CreateMenu(_quit_menu, 448, 80)) // create a menu
-		cerr << "QUIT: ERROR: Couldn't create menu image!" << endl;
+
+
+// !@# Roots: I got rid of this code for now since CreateMenu() is defunct
+
+//	if(!VideoManager->CreateMenu(_quit_menu, 448, 80)) // create a menu
+//		cerr << "QUIT: ERROR: Couldn't create menu image!" << endl;
+
 
 	// Initialize the option box
 	_option_box.SetFont("default");
@@ -105,6 +111,7 @@ void QuitMode::Reset() {
 	if(!VideoManager->SetFont("default")) 
     cerr << "MAP: ERROR > Couldn't set map font!" << endl;
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+
 }
 
 
@@ -157,6 +164,7 @@ void QuitMode::Update(uint32 time_elapsed) {
 	_option_box.Update(time_elapsed);
 	
 	// Don't consume hoards of CPU time in quit mode
+		
 	SDL_Delay(50);
 }
 
@@ -174,7 +182,8 @@ void QuitMode::Draw() {
 	
 	VideoManager->Move(512, 384);
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
-	VideoManager->DrawImage(_quit_menu);	
+//!@#	VideoManager->DrawImage(_quit_menu);	
+
 	_option_box.Draw();
 }
 

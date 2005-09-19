@@ -99,7 +99,10 @@ GameVideo::GameVideo()
   _lightColor(1.0f, 1.0f, 1.0f, 1.0f),
   _currentTextColor(1.0f, 1.0f, 1.0f, 1.0f),
   _textShadow(false),
-  _coordSys(0.0f, 1024.0f, 0.0f, 768.0f)
+  _coordSys(0.0f, 1024.0f, 0.0f, 768.0f),
+  _scissorEnabled(false),
+  _viewport(0, 0, 100, 100),
+  _scissorRect(0, 0, 1024, 768)
 {
 	if (VIDEO_DEBUG) 
 		cout << "VIDEO: GameVideo constructor invoked\n";
@@ -577,6 +580,7 @@ void GameVideo::SetViewport(float left, float right, float bottom, float top)
 	if (r>_width) r=_width;
 	if (t>_height) t=_height;
 
+	_viewport = ScreenRect(l, b, r-l+1, t-b+1);
 	glViewport(l, b, r-l+1, t-b+1);
 }
 
@@ -822,12 +826,29 @@ void GameVideo::Rotate(float acAngle)
 
 
 //-----------------------------------------------------------------------------
+// Scale: scales the coordinate axes by xScale and yScale respectively
+//-----------------------------------------------------------------------------
+
+void Scale(float xScale, float yScale)
+{
+#ifndef NDEBUG
+	GLint matrixMode;
+	glGetIntegerv(GL_MATRIX_MODE, &matrixMode);
+	assert(matrixMode == GL_MODELVIEW);
+#endif
+
+	glScalef(xScale, yScale, 1.0f);
+}
+
+
+
+//-----------------------------------------------------------------------------
 // PushState: saves your current position in a stack, bewarned this stack is 
 //            small ~32 so use it wisely
 //-----------------------------------------------------------------------------
 
-void GameVideo::PushState() {
-	//glPushMatrix();
+void GameVideo::PushState() 
+{
 	_PushContext();
 }
 
@@ -838,7 +859,6 @@ void GameVideo::PushState() {
 
 void GameVideo::PopState() 
 {
-	//glPopMatrix();
 	_PopContext();
 }
 
@@ -928,12 +948,12 @@ bool GameVideo::ToggleAdvancedDisplay()
 
 
 //-----------------------------------------------------------------------------
-// CreateMenu
+// _CreateMenu: creates menu image descriptor
 //-----------------------------------------------------------------------------
 
-bool GameVideo::CreateMenu(ImageDescriptor &menu, float width, float height)
+bool GameVideo::_CreateMenu(ImageDescriptor &menu, float width, float height, int32 edgeFlags)
 {
-	return _gui->CreateMenu(menu, width, height);
+	return _gui->CreateMenu(menu, width, height, edgeFlags);
 }
 
 
@@ -1274,6 +1294,10 @@ void GameVideo::_PushContext()
 	c.xflip    = _xflip;
 	c.yflip    = _yflip;
 	
+	c.viewport = _viewport;
+	c.scissorRect = _scissorRect;
+	c.scissorEnabled = _scissorEnabled;
+	
 	c.currentFont      = _currentFont;
 	c.currentTextColor = _currentTextColor;
 	
@@ -1300,11 +1324,26 @@ void GameVideo::_PopContext()
 	_currentFont      = c.currentFont;
 	_currentTextColor = c.currentTextColor;
 	
+	_viewport = c.viewport;
+	_scissorRect = c.scissorRect;
+	_scissorEnabled = c.scissorEnabled;
 	_contextStack.pop();
 
 	// restore modelview transformation
 	glMatrixMode(GL_MODELVIEW);
 	glPopMatrix();
+	
+	glViewport(_viewport.left, _viewport.top, _viewport.width, _viewport.height);
+	
+	if(_scissorEnabled)
+	{
+		glEnable(GL_SCISSOR_TEST);
+		glScissor(_scissorRect.left, _scissorRect.top, _scissorRect.width, _scissorRect.height);
+	}
+	else
+	{
+		glDisable(GL_SCISSOR_TEST);
+	}
 }
 
 
@@ -1365,6 +1404,157 @@ ImageDescriptor *GameVideo::GetDefaultCursor()
 		return &_defaultMenuCursor;
 	else
 		return NULL;
+}
+
+
+//-----------------------------------------------------------------------------
+// PushMatrix: pushes the current model view transformation on to stack
+//             Note, this assumes that glMatrixMode(GL_MODELVIEW) has been called
+//-----------------------------------------------------------------------------
+
+void GameVideo::PushMatrix()
+{
+	glPushMatrix();
+}
+
+
+//-----------------------------------------------------------------------------
+// PopMatrix: pops the current model view transformation from stack
+//            Note, this assumes that glMatrixMode(GL_MODELVIEW) has been called
+//-----------------------------------------------------------------------------
+
+void GameVideo::PopMatrix()
+{
+	glPopMatrix();
+}
+
+
+//-----------------------------------------------------------------------------
+// Intersect: intersects this rect with another, and stores the resulting
+//            rectangle. If the two rectangles don't intersect, then all
+//            member variables are zero
+//-----------------------------------------------------------------------------
+
+void ScreenRect::Intersect(const ScreenRect &rect)
+{
+	left   = max(left,   rect.left);
+	top    = max(top,    rect.top);
+
+	int32 right  = min(left + width - 1,  rect.left + rect.width - 1);
+	int32 bottom = min(top + height - 1, rect.top + rect.height - 1);
+	
+	if(left > right || top > bottom)
+	{
+		left = right = width = height = 0;
+	}
+	else
+	{
+		width  = right - left + 1;
+		height = bottom - top + 1;
+	}
+}
+
+
+//-----------------------------------------------------------------------------
+// EnableScissoring: enable/disable scissoring
+//-----------------------------------------------------------------------------
+
+void GameVideo::EnableScissoring(bool enable)
+{
+	_scissorEnabled = enable;
+	
+	if(enable)
+		glEnable(GL_SCISSOR_TEST);
+	else
+		glDisable(GL_SCISSOR_TEST);
+}
+
+
+//-----------------------------------------------------------------------------
+// SetScissorRect: set the scissoring rectangle, coordinates relative to the
+//                 current coord sys
+//-----------------------------------------------------------------------------
+
+void GameVideo::SetScissorRect
+(
+	float left,
+	float right,
+	float bottom,
+	float top
+)
+{
+	_scissorRect = _CalculateScreenRect(left, right, bottom, top);
+	glScissor(_scissorRect.left, _scissorRect.top, _scissorRect.width, _scissorRect.height);	
+}
+
+
+//-----------------------------------------------------------------------------
+// _CalculateScreenRect: calculate a rectangle in screen coordinates given one
+//                       using our current coordinate system
+//-----------------------------------------------------------------------------
+
+ScreenRect GameVideo::_CalculateScreenRect(float left, float right, float bottom, float top)
+{
+	ScreenRect rect;
+	
+	int32 scr_left    = _ScreenCoordX(left);
+	int32 scr_right   = _ScreenCoordX(right);
+	int32 scr_bottom  = _ScreenCoordY(bottom);
+	int32 scr_top     = _ScreenCoordY(top);
+	
+	int32 temp;
+	if(scr_left > scr_right)
+	{
+		temp = scr_left;
+		scr_left = scr_right;
+		scr_right = temp;
+	}
+	
+	if(scr_top > scr_bottom)
+	{
+		temp = scr_top;
+		scr_top = scr_bottom;
+		scr_bottom = temp;
+	}
+
+	rect.top    = scr_top;
+	rect.left   = scr_left;	
+	rect.width  = scr_right - scr_left;
+	rect.height = scr_bottom - scr_top;
+	
+	return rect;
+}
+
+
+//-----------------------------------------------------------------------------
+// _ScreenCoordX
+//-----------------------------------------------------------------------------
+
+int32 GameVideo::_ScreenCoordX(float x)
+{
+	float percent;
+	if(_coordSys._left < _coordSys._right)
+		percent = (x - _coordSys._left) / (_coordSys._right - _coordSys._left);
+	else
+		percent = (x - _coordSys._right) / (_coordSys._left - _coordSys._right);
+	
+	return int32(percent * float(_width));
+}
+
+
+//-----------------------------------------------------------------------------
+// _ScreenCoordY
+//-----------------------------------------------------------------------------
+
+int32 GameVideo::_ScreenCoordY(float y)
+{
+	float percent;
+	if(_coordSys._top < _coordSys._bottom)
+		percent = (y - _coordSys._top) / (_coordSys._bottom - _coordSys._top);
+	else
+		percent = (y - _coordSys._bottom) / (_coordSys._top - _coordSys._bottom);
+	
+	return int32(percent * float(_height));
 }
 
 

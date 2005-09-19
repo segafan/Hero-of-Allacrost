@@ -227,6 +227,7 @@ void BootMode::Update(uint32 time_elapsed) {
 	if (event == VIDEO_OPTION_CONFIRM) {
 		switch (_main_options.GetSelection()) {
 			case NEW_GAME:
+			{
 				AudioManager->PlaySound(_boot_sound[2], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // game loading sound
 				if (BOOT_DEBUG) cout << "BOOT: Starting new game." << endl;
 				GCharacter *claud = new GCharacter("Claudius", "claudius", GLOBAL_CLAUDIUS);
@@ -234,13 +235,16 @@ void BootMode::Update(uint32 time_elapsed) {
 				_fade_out = true;
 				VideoManager->FadeScreen(Color::black, 1.0f);
 				break;
+			}
 			case LOAD_GAME:
+			{
 				AudioManager->PlaySound(_boot_sound[0], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // confirm sound
 				cout << "BOOT: TEMP: Entering battle mode" << endl;
 				BattleMode *BM = new BattleMode();
 				ModeManager->Pop();
 				ModeManager->Push(BM);
 				break;
+			}
 			case OPTIONS:
 				cout << "BOOT: TEMP: Switching context to options" << endl;
 				break;
