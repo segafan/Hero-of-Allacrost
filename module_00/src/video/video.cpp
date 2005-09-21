@@ -235,7 +235,7 @@ bool GameVideo::Initialize()
 	}
 
 	// create the GUI
-	_gui = new GUI;
+	_gui = new private_video::GUI;
 
 	// make a temp directory and make sure it doesn't contain any files
 	// (in case the game crashed during a previous run, leaving stuff behind)
@@ -315,16 +315,18 @@ bool GameVideo::MakeScreenshot()
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: ilBindImage() failed in MakeScreenshot()!" << endl;
-		return false;
+
 		ilDeleteImages(1, &screenshot);
+		return false;
 	}
 	
 	if(!ilEnable(IL_FILE_OVERWRITE))
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: ilEnable() failed in MakeScreenshot()!" << endl;
-		return false;		
+
 		ilDeleteImages(1, &screenshot);
+		return false;		
 	}
 	
 	if(!ilutGLScreen())
@@ -904,6 +906,12 @@ bool GameVideo::SetMenuSkin
 		imgBaseName + "_bl.png",
 		imgBaseName + "_b.png",
 		imgBaseName + "_br.png",
+		imgBaseName + "_tri_t.png",
+		imgBaseName + "_tri_l.png",
+		imgBaseName + "_tri_r.png",
+		imgBaseName + "_tri_b.png",
+		imgBaseName + "_quad.png",
+		
 		fillColor_TL,
 		fillColor_TR,
 		fillColor_BL,
@@ -951,9 +959,9 @@ bool GameVideo::ToggleAdvancedDisplay()
 // _CreateMenu: creates menu image descriptor
 //-----------------------------------------------------------------------------
 
-bool GameVideo::_CreateMenu(ImageDescriptor &menu, float width, float height, int32 edgeFlags)
+bool GameVideo::_CreateMenu(ImageDescriptor &menu, float width, float height, int32 edgeVisibleFlags, int32 edgeSharedFlags)
 {
-	return _gui->CreateMenu(menu, width, height, edgeFlags);
+	return _gui->CreateMenu(menu, width, height, edgeVisibleFlags, edgeSharedFlags);
 }
 
 

@@ -178,8 +178,8 @@ bool GameVideo::_DrawTextHelper
 	glBlendFunc(GL_ONE, GL_ONE);
 	glEnable(GL_BLEND);
 
-	SDL_Surface *initial;
-	SDL_Surface *intermediary;
+	SDL_Surface *initial = NULL;
+	SDL_Surface *intermediary = NULL;
 	int32 w,h;
 	GLuint texture;
 	
@@ -413,7 +413,7 @@ bool GameVideo::DrawText(const ustring &txt)
 		
 		do
 		{
-			size_t newlinePos = text.find(newline);
+			size_t newlinePos = text.find(wchar_t(newline));
 			ustring textToDraw;
 			
 			if(newlinePos != string::npos)

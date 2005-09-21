@@ -698,7 +698,10 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 
 	ImageElement elem(&img, 0.0f, 0.0f, (float)w, (float)h);
 	
-	if(!_DrawElement(elem))
+	ImageDescriptor id;
+	id._elements.push_back(elem);
+	
+	if(!DrawImage(id))
 	{
 		glPopMatrix();
 		_PopContext();
@@ -1019,7 +1022,7 @@ bool GameVideo::DeleteImage(ImageDescriptor &id)
 	}
 	
 	id._elements.clear();
-	id._filename.clear();
+	id._filename = "";
 	id._height = id._width = 0;
 	id._isStatic = 0;
 	

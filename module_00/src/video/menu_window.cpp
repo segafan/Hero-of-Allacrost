@@ -208,7 +208,7 @@ bool MenuWindow::Hide()
 // Create: creates the window, using the given width, height, edge flags, and display mode
 //-----------------------------------------------------------------------------
 
-bool MenuWindow::Create(float w, float h, int32 edgeFlags)
+bool MenuWindow::Create(float w, float h, int32 edgeVisibleFlags, int32 edgeSharedFlags)
 {
 	if(w <= 0 || h <= 0)
 	{
@@ -217,15 +217,10 @@ bool MenuWindow::Create(float w, float h, int32 edgeFlags)
 		return false;
 	}
 	
-	if(edgeFlags > 0xF || (edgeFlags != 0xF && !((edgeFlags & (edgeFlags-1)) == 0)))
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: MenuWindow::Create() failed because invalid edgeFlags were passed (" << edgeFlags << ")" << endl;
-	}
-	
 	_width = w;
 	_height = h;
-	_edgeFlags = edgeFlags;
+	_edgeVisibleFlags = edgeVisibleFlags;
+	_edgeSharedFlags = edgeSharedFlags;
 	
 	bool couldRecreate = RecreateImage();
 	
@@ -252,7 +247,8 @@ bool MenuWindow::Create(float w, float h, int32 edgeFlags)
 bool MenuWindow::RecreateImage()
 {
 	GameVideo *video = GameVideo::GetReference();
-	return video->_CreateMenu(_menuImage, _width, _height, _edgeFlags);
+	video->DeleteImage(_menuImage);
+	return video->_CreateMenu(_menuImage, _width, _height, _edgeVisibleFlags, _edgeSharedFlags);
 }
 
 
@@ -380,6 +376,31 @@ void MenuWindow::SetPosition(float x, float y)
 	_y = y;
 }
 
+
+//-----------------------------------------------------------------------------
+// ChangeEdgeVisibleFlags
+//-----------------------------------------------------------------------------
+
+bool MenuWindow::ChangeEdgeVisibleFlags(int32 edgeVisibleFlags)
+{
+	_edgeVisibleFlags = edgeVisibleFlags;
+	RecreateImage();
+
+	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// ChangeEdgeSharedFlags
+//-----------------------------------------------------------------------------
+
+bool MenuWindow::ChangeEdgeSharedFlags(int32 edgeSharedFlags)
+{
+	_edgeSharedFlags = edgeSharedFlags;
+	RecreateImage();
+
+	return true;
+}
 
 
 }  // namespace hoa_video

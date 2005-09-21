@@ -1434,6 +1434,11 @@ public:
 	 *                          /img/menus/chrome_bl.png
 	 *                          /img/menus/chrome_b.png
 	 *                          /img/menus/chrome_br.png
+	 *                          /img/menus/chrome_tri_t.png
+	 *                          /img/menus/chrome_tri_l.png
+	 *                          /img/menus/chrome_tri_r.png
+	 *                          /img/menus/chrome_tri_b.png
+	 *                          /img/menus/chrome_quad.png
 	 *	 
 	 *  \param fillColor    color for inner area of menu. can be transparent
 	 */
@@ -1459,6 +1464,11 @@ public:
 	 *                          /img/menus/chrome_bl.png
 	 *                          /img/menus/chrome_b.png
 	 *                          /img/menus/chrome_br.png
+	 *                          /img/menus/chrome_tri_t.png
+	 *                          /img/menus/chrome_tri_l.png
+	 *                          /img/menus/chrome_tri_r.png
+	 *                          /img/menus/chrome_tri_b.png
+	 *                          /img/menus/chrome_quad.png
 	 *	 
 	 *  \param fillColor_TL  color for upper left  vertex of interior
 	 *  \param fillColor_TR  color for upper right vertex of interior
@@ -1729,11 +1739,20 @@ private:
 	 *
 	 *  \param width  Width of menu, based on pixels in 1024x768 resolution
 	 *  \param height Height of menu, based on pixels in 1024x768 resolution.
+	 *  \param edgeVisibleFlags bit flags to tell which edges are visible
+	 *  \param edgeSharedFlags  bit flags to tell which edges are shared with other menus
 	 *
 	 *  \note  this is only meant to be used by the Menu class, not by users of
 	 *         the video engine.
 	 */
-	bool _CreateMenu(ImageDescriptor &menu, float width, float height, int32 edgeFlags);
+	bool _CreateMenu
+	(
+		ImageDescriptor &menu, 
+		float width, 
+		float height, 
+		int32 edgeVisibleFlags, 
+		int32 edgeSharedFlags
+	);
 
 
 	/*!

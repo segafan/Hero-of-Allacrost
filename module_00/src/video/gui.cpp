@@ -134,7 +134,7 @@ bool GUI::DrawFPS(int32 frameTime)
 		return false;
 	}		
 	
-	return true;
+	return true; 
 }
 
 
@@ -152,6 +152,11 @@ bool GUI::SetMenuSkin
 	const std::string &imgFile_BL,
 	const std::string &imgFile_B,
 	const std::string &imgFile_BR,
+	const std::string &imgFile_Tri_T,
+	const std::string &imgFile_Tri_L,
+	const std::string &imgFile_Tri_R,
+	const std::string &imgFile_Tri_B,
+	const std::string &imgFile_Quad,		
 	const Color &fillColor_TL,
 	const Color &fillColor_TR,
 	const Color &fillColor_BL,
@@ -175,6 +180,27 @@ bool GUI::SetMenuSkin
 		}
 	}
 	
+	_videoManager->DeleteImage(_currentSkin.tri_t);
+	_videoManager->DeleteImage(_currentSkin.tri_l);
+	_videoManager->DeleteImage(_currentSkin.tri_r);
+	_videoManager->DeleteImage(_currentSkin.tri_b);
+	_videoManager->DeleteImage(_currentSkin.quad);
+	_currentSkin.tri_t.SetDimensions(0.0f, 0.0f);
+	_currentSkin.tri_l.SetDimensions(0.0f, 0.0f);
+	_currentSkin.tri_r.SetDimensions(0.0f, 0.0f);
+	_currentSkin.tri_b.SetDimensions(0.0f, 0.0f);
+	_currentSkin.quad.SetDimensions(0.0f, 0.0f);
+
+
+	map<int32, MenuWindow *>::iterator iMenu = MenuWindow::_menuMap.begin();
+	
+	while(iMenu != MenuWindow::_menuMap.end())
+	{
+		MenuWindow *menu = iMenu->second;
+		_videoManager->DeleteImage(menu->_menuImage);
+		++iMenu;
+	}
+	
 	// now load the new images
 	
 	_currentSkin.skin[0][0].SetFilename(imgFile_TL);
@@ -185,6 +211,12 @@ bool GUI::SetMenuSkin
 	_currentSkin.skin[2][0].SetFilename(imgFile_BL);
 	_currentSkin.skin[2][1].SetFilename(imgFile_B);
 	_currentSkin.skin[2][2].SetFilename(imgFile_BR);
+
+	_currentSkin.tri_t.SetFilename(imgFile_Tri_T);
+	_currentSkin.tri_l.SetFilename(imgFile_Tri_L);
+	_currentSkin.tri_r.SetFilename(imgFile_Tri_R);
+	_currentSkin.tri_b.SetFilename(imgFile_Tri_B);
+	_currentSkin.quad.SetFilename(imgFile_Quad);
 
 	// the center doesn't have an image, it's just a colored quad
 	_currentSkin.skin[1][1].SetVertexColors
@@ -203,12 +235,29 @@ bool GUI::SetMenuSkin
 			_videoManager->LoadImage(_currentSkin.skin[y][x]);
 		}
 	}
+
+	_videoManager->LoadImage(_currentSkin.tri_t);
+	_videoManager->LoadImage(_currentSkin.tri_l);
+	_videoManager->LoadImage(_currentSkin.tri_r);
+	_videoManager->LoadImage(_currentSkin.tri_b);
+	_videoManager->LoadImage(_currentSkin.quad);
+
 	_videoManager->EndImageLoadBatch();
 	
 	if(!_CheckSkinConsistency(_currentSkin))
 	{
 		return false;			
 	}
+
+	iMenu = MenuWindow::_menuMap.begin();
+	
+	while(iMenu != MenuWindow::_menuMap.end())
+	{
+		MenuWindow *menu = iMenu->second;
+		menu->RecreateImage();
+		++iMenu;
+	}
+
 	
 	return true;
 }
@@ -299,7 +348,14 @@ bool GUI::_CheckSkinConsistency(const MenuSkin &s)
 //       since we call _CheckSkinConsistency() when we set a new skin
 //-----------------------------------------------------------------------------
 
-bool GUI::CreateMenu(hoa_video::ImageDescriptor &id, float width, float height, int32 edgeFlags)
+bool GUI::CreateMenu
+(
+	hoa_video::ImageDescriptor &id, 
+	float width, 
+	float height, 
+	int32 edgeVisibleFlags,
+	int32 edgeSharedFlags
+)
 {
 	id.Clear();
 	
@@ -397,23 +453,80 @@ bool GUI::CreateMenu(hoa_video::ImageDescriptor &id, float width, float height, 
 	float minX = 0.0f;
 	float minY = 0.0f;	
 
-	if(edgeFlags & VIDEO_MENU_EDGE_LEFT || edgeFlags & VIDEO_MENU_EDGE_BOTTOM)	
-		id.AddImage(_currentSkin.skin[2][0], minX, minY);   // lower left	
+	// lower left
+	if(edgeVisibleFlags & VIDEO_MENU_EDGE_LEFT && edgeVisibleFlags & VIDEO_MENU_EDGE_BOTTOM)
+	{
+		if(edgeSharedFlags & VIDEO_MENU_EDGE_LEFT && edgeSharedFlags & VIDEO_MENU_EDGE_BOTTOM)
+			id.AddImage(_currentSkin.quad, minX, minY);
+		else if(edgeSharedFlags & VIDEO_MENU_EDGE_LEFT)
+			id.AddImage(_currentSkin.tri_b, minX, minY);
+		else if(edgeSharedFlags & VIDEO_MENU_EDGE_BOTTOM)
+			id.AddImage(_currentSkin.tri_l, minX, minY);
+		else
+			id.AddImage(_currentSkin.skin[2][0], minX, minY);
+	}
+	else if(edgeVisibleFlags & VIDEO_MENU_EDGE_LEFT)	
+		id.AddImage(_currentSkin.skin[1][0], minX, minY);
+	else if(edgeVisibleFlags & VIDEO_MENU_EDGE_BOTTOM)
+		id.AddImage(_currentSkin.skin[0][1], minX, minY);
 	else
 		id.AddImage(_currentSkin.skin[1][1], minX, minY);
 	
-	if(edgeFlags & VIDEO_MENU_EDGE_RIGHT || edgeFlags & VIDEO_MENU_EDGE_BOTTOM)	
-		id.AddImage(_currentSkin.skin[2][2], maxX, minY);   // lower right	            
+	
+	// lower right
+	if(edgeVisibleFlags & VIDEO_MENU_EDGE_RIGHT && edgeVisibleFlags & VIDEO_MENU_EDGE_BOTTOM)	
+	{
+		if(edgeSharedFlags & VIDEO_MENU_EDGE_RIGHT && edgeSharedFlags & VIDEO_MENU_EDGE_BOTTOM)
+			id.AddImage(_currentSkin.quad, maxX, minY);            
+		else if(edgeSharedFlags & VIDEO_MENU_EDGE_RIGHT)
+			id.AddImage(_currentSkin.tri_b, maxX, minY);            
+		else if(edgeSharedFlags & VIDEO_MENU_EDGE_BOTTOM)
+			id.AddImage(_currentSkin.tri_r, maxX, minY);            
+		else
+			id.AddImage(_currentSkin.skin[2][2], maxX, minY);            
+	}
+	else if(edgeVisibleFlags & VIDEO_MENU_EDGE_RIGHT)
+		id.AddImage(_currentSkin.skin[1][2], maxX, minY);
+	else if(edgeVisibleFlags & VIDEO_MENU_EDGE_BOTTOM)
+		id.AddImage(_currentSkin.skin[2][1], maxX, minY);
 	else
 		id.AddImage(_currentSkin.skin[1][1], maxX, minY);
 
-	if(edgeFlags & VIDEO_MENU_EDGE_LEFT || edgeFlags & VIDEO_MENU_EDGE_TOP)
-		id.AddImage(_currentSkin.skin[0][0], minX, maxY);   // upper left	
+	// upper left
+	if(edgeVisibleFlags & VIDEO_MENU_EDGE_LEFT && edgeVisibleFlags & VIDEO_MENU_EDGE_TOP)
+	{
+		if(edgeSharedFlags & VIDEO_MENU_EDGE_LEFT && edgeSharedFlags & VIDEO_MENU_EDGE_TOP)
+			id.AddImage(_currentSkin.quad, minX, maxY);
+		else if(edgeSharedFlags & VIDEO_MENU_EDGE_LEFT)
+			id.AddImage(_currentSkin.tri_t, minX, maxY);
+		else if(edgeSharedFlags & VIDEO_MENU_EDGE_TOP)
+			id.AddImage(_currentSkin.tri_l, minX, maxY);
+		else
+			id.AddImage(_currentSkin.skin[0][0], minX, maxY);
+	}
+	else if(edgeVisibleFlags & VIDEO_MENU_EDGE_LEFT)
+		id.AddImage(_currentSkin.skin[1][0], minX, maxY);
+	else if(edgeVisibleFlags & VIDEO_MENU_EDGE_TOP)
+		id.AddImage(_currentSkin.skin[0][1], minX, maxY);
 	else
 		id.AddImage(_currentSkin.skin[1][1], minX, maxY);
 
-	if(edgeFlags & VIDEO_MENU_EDGE_TOP || edgeFlags & VIDEO_MENU_EDGE_RIGHT)	
-		id.AddImage(_currentSkin.skin[0][2], maxX, maxY);   // upper right
+	// upper right
+	if(edgeVisibleFlags & VIDEO_MENU_EDGE_TOP && edgeVisibleFlags & VIDEO_MENU_EDGE_RIGHT)	
+	{		
+		if(edgeSharedFlags & VIDEO_MENU_EDGE_RIGHT && edgeSharedFlags & VIDEO_MENU_EDGE_TOP)
+			id.AddImage(_currentSkin.quad, maxX, maxY);
+		else if(edgeSharedFlags & VIDEO_MENU_EDGE_RIGHT)
+			id.AddImage(_currentSkin.tri_t, maxX, maxY);
+		else if(edgeSharedFlags & VIDEO_MENU_EDGE_TOP)
+			id.AddImage(_currentSkin.tri_r, maxX, maxY);
+		else
+			id.AddImage(_currentSkin.skin[0][2], maxX, maxY);
+	}
+	else if(edgeVisibleFlags & VIDEO_MENU_EDGE_TOP)
+		id.AddImage(_currentSkin.skin[0][1], maxX, maxY);
+	else if(edgeVisibleFlags & VIDEO_MENU_EDGE_RIGHT)
+		id.AddImage(_currentSkin.skin[1][2], maxX, maxY);
 	else
 		id.AddImage(_currentSkin.skin[1][1], maxX, maxY);
 
@@ -421,12 +534,12 @@ bool GUI::CreateMenu(hoa_video::ImageDescriptor &id, float width, float height, 
 	
 	for(int32 tileX = 0; tileX < inumXTiles; ++tileX)
 	{
-		if(edgeFlags & VIDEO_MENU_EDGE_TOP)
+		if(edgeVisibleFlags & VIDEO_MENU_EDGE_TOP)
 			id.AddImage(_currentSkin.skin[0][1], leftBorderSize + topWidth * tileX, maxY);
 		else
 			id.AddImage(_currentSkin.skin[1][1], leftBorderSize + topWidth * tileX, maxY);
 
-		if(edgeFlags & VIDEO_MENU_EDGE_BOTTOM)
+		if(edgeVisibleFlags & VIDEO_MENU_EDGE_BOTTOM)
 			id.AddImage(_currentSkin.skin[2][1], leftBorderSize + topWidth * tileX, 0.0f);
 		else
 			id.AddImage(_currentSkin.skin[1][1], leftBorderSize + topWidth * tileX, 0.0f);
@@ -436,12 +549,12 @@ bool GUI::CreateMenu(hoa_video::ImageDescriptor &id, float width, float height, 
 
 	for(int32 tileY = 0; tileY < inumYTiles; ++tileY)
 	{
-		if(edgeFlags & VIDEO_MENU_EDGE_LEFT)
+		if(edgeVisibleFlags & VIDEO_MENU_EDGE_LEFT)
 			id.AddImage(_currentSkin.skin[1][0], 0.0f, bottomBorderSize + leftHeight * tileY);
 		else
 			id.AddImage(_currentSkin.skin[1][1], 0.0f, bottomBorderSize + leftHeight * tileY);
 		
-		if(edgeFlags & VIDEO_MENU_EDGE_RIGHT)
+		if(edgeVisibleFlags & VIDEO_MENU_EDGE_RIGHT)
 			id.AddImage(_currentSkin.skin[1][2], maxX, bottomBorderSize + leftHeight * tileY);
 		else
 			id.AddImage(_currentSkin.skin[1][1], maxX, bottomBorderSize + leftHeight * tileY);

@@ -30,6 +30,8 @@
 namespace hoa_video
 {
 
+class GUI;
+
 //! Determines whether the code in the hoa_video namespace should print debug statements or not.
 extern bool VIDEO_DEBUG;
 
@@ -389,12 +391,32 @@ public:
 	 *
 	 *  \param w width in pixels
 	 *  \param h height in pixels
-	 *  \param edgeFlags a combination of bitflags, VIDEO_MENU_EDGE_LEFT, etc.
-	 *  \param displayMode can be VIDEO_MENU_INSTANT or VIDEO_MENU_EXPAND_FROM_CENTER
+	 *  \param edgeVisibleFlags a combination of bitflags, VIDEO_MENU_EDGE_LEFT, etc. This tells which edges are visible. (A non-visible edge means that the border gets stripped off)
+	 *  \param edgeSharedFlags  a combination of bitflags, VIDEO_MENU_EDGE_LEFT, etc. This tells which edges are shared with other menus so they can use the appropriate connector images
 	 *
 	 *  \note  this MUST be called before you try drawing it
 	 */
-	bool Create(float w, float h, int32 edgeFlags = VIDEO_MENU_EDGE_ALL);
+	bool Create(float w, float h, int32 edgeVisibleFlags = VIDEO_MENU_EDGE_ALL, int32 edgeSharedFlags = 0);
+
+
+	/*!
+	 *  \brief after the call to Create(), if the edge flags have to change for
+	 *         some reason, call this function. Note that it is somewhat expensive
+	 *         since it has to recreate the image descriptor
+	 *
+	 *  \param edgeVisibleFlags bit flags to specify which edges are visible
+	 */
+	bool ChangeEdgeVisibleFlags(int32 edgeVisibleFlags);
+
+
+	/*!
+	 *  \brief after the call to Create(), if the edge flags have to change for
+	 *         some reason, call this function. Note that it is somewhat expensive
+	 *         since it has to recreate the image descriptor
+	 *
+	 *  \param edgeSharedFlags bit flags to specify which edges are shared
+	 */
+	bool ChangeEdgeSharedFlags(int32 edgeSharedFlags);
 
 
 	/*!
@@ -434,7 +456,7 @@ public:
 	MenuState GetState();
 
 private:
-
+	
 	/*!
 	 *  \brief used to recreate the menu image descriptor when the menu is created
 	 *         for the first time, or if the menu skin changes
@@ -446,12 +468,15 @@ private:
 	
 	int32 _id;                       //! id of the menu, used to register and unregister it with the std::map when it is constructed/destructed
 	float _width, _height;           //! dimensions
-	int32 _edgeFlags;                //! flags used to tell which edges are visible 
+	int32 _edgeVisibleFlags;         //! flags used to tell which edges are visible 
+	int32 _edgeSharedFlags;          //! flags used to tell which edges are shared
 	
 	MenuState _state;                //! menu state (hidden, shown, hiding, showing)
 	int32  _currentTime;             //! milliseconds that passed since menu was shown
 	ImageDescriptor _menuImage;      //! image descriptor of the menu
 	MenuDisplayMode _mode;           //! text display mode (one character at a time, fading in, instant, etc.)
+	
+	friend class private_video::GUI;
 };
 
 
@@ -1175,7 +1200,7 @@ public:
 	// skin[2][1]: bottom
 	// skin[2][2]: bottom right
 	
-	hoa_video::ImageDescriptor skin[3][3];
+	hoa_video::ImageDescriptor skin[3][3], tri_t, tri_l, tri_r, tri_b, quad;
 };
 
 
@@ -1211,8 +1236,12 @@ public:
 		const std::string &imgFile_R,
 		const std::string &imgFile_BL,  // image filenames for the borders
 		const std::string &imgFile_B,
-		const std::string &imgFile_BR,
-		
+		const std::string &imgFile_BR,		
+		const std::string &imgFile_Tri_T,
+		const std::string &imgFile_Tri_L,
+		const std::string &imgFile_Tri_R,
+		const std::string &imgFile_Tri_B,
+		const std::string &imgFile_Quad,		
 		const Color &fillColor_TL,     // color to fill the menu with. You can
 		const Color &fillColor_TR,     // make it transparent by setting alpha
 		const Color &fillColor_BL,
@@ -1226,17 +1255,30 @@ public:
 	 *  \param width  desired width of menu, based on pixels in 1024x768 resolution
 	 *  \param height desired height of menu, based on pixels in 1024x768 resolution
 	 *
-	 *  \param edgeFlags specifies all the edges of the menu that should be drawn.
+	 *  \param edgeVisibleFlags specifies all the edges of the menu that should be drawn.
 	 *         In most cases, this should just be the default of VIDEO_MENU_EDGE_ALL.
 	 *         However, for example, you can make the left edge disappear by using
 	 *         ~VIDEO_MENU_EDGE_LEFT, or alternatively bitwise OR-ing all the other
 	 *         edge flags together (right, top, and bottom)
 	 *
+	 *  \param edgeSharedFlags tells which sides of the menu window are shared with
+	 *         other menus. The rule of thumb is that when you want 2 menus to share
+	 *         a border, then you should hide one of the menu's border with the
+	 *         visible flags, and specify the other menu's border as shared, so it
+	 *         becomes the common one they both use.
+	 *
 	 *  \note  Width and height must be aligned to the border image sizes. So for example
 	 *         if your border artwork is all 8x8 images and you try to create a menu that
 	 *         is 117x69, it will get rounded to 120x72.
 	 */	
-	bool CreateMenu(ImageDescriptor &id, float width, float height, int32 edgeFlags);
+	bool CreateMenu
+	(
+		ImageDescriptor &id, 
+		float width, 
+		float height, 
+		int32 edgeVisibleFlags, 
+		int32 edgeSharedFlags
+	);
 
 private:
 
