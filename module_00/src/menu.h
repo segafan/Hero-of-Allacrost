@@ -31,6 +31,7 @@
 #include "video.h"
 #include "defs.h"
 #include "engine.h"
+#include "gui.h"
 
 //! All calls to menu mode are wrapped in this namespace.
 namespace hoa_menu {
@@ -43,14 +44,22 @@ namespace private_menu {
 
 }
 
- /******************************************************************************
-	MenuMode Class
-
-	>>>members<<<
-
-	>>>functions<<<
-
-	>>>notes<<<
+/*!****************************************************************************
+ * \brief Responsible for managing the game when executing in the main in-game menu.
+ *
+ * This code in this class and its respective partner classes is arguably one of the
+ * most complex pieces of the game to date. Basic functionality in this class has been
+ * working for a while, but we still have much work to do here (namely, integrating
+ * map scripts). I intend to more fully document the primary operational features of
+ * this class at a later time, but I would like to wait until it is in a more finalized
+ * state before I do so.
+ *
+ * \note 1) If you change the state of random_encounters from false to true, make 
+ * sure to set a valid value (< 0) for steps_till_encounter. *I might change this later*
+ * 
+ * \note 2) Be careful with calling the MapMode constructor, for it changes the coordinate 
+ * system of the video engine without warning. Only create a new instance of this class if
+ * you plan to immediately push it on top of the game stack.
  *****************************************************************************/
 class MenuMode : public hoa_engine::GameMode {
 private:
@@ -60,6 +69,23 @@ private:
 	std::vector<hoa_video::ImageDescriptor> _menu_images;
 	std::vector<hoa_audio::MusicDescriptor> _menu_music;
 	std::vector<hoa_audio::SoundDescriptor> _menu_sound;
+	
+	//! \name Main Display Windows
+	//@{
+	//! \brief The windows that are displayed in the top level of menu mode.
+	hoa_video::MenuWindow _character_window0;
+	hoa_video::MenuWindow _character_window1;
+	hoa_video::MenuWindow _character_window2;
+	hoa_video::MenuWindow _character_window3;
+	hoa_video::MenuWindow _bottom_window;
+	//@}
+	
+	//! \name Main Display Text Boxes
+	//1{
+	//! \brief The text boxes that are displayed in the top level of menu mode.
+	
+	//! The top level options in boot mode
+	hoa_video::OptionBox _main_options;
 public:
 	MenuMode();
 	~MenuMode();

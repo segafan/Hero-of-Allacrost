@@ -63,6 +63,7 @@ public:
 	void SetLines(std::vector<std::string> txt) { _lines = txt; _seen = false; }
 	void AddLine(std::string txt) { _lines.push_back(txt); _seen = false; }
 	bool SeenDialogue() { return _seen; }
+	void ReadDialogue() { _seen = true; }
 	//@}
 	
 }; // class MapDialogue

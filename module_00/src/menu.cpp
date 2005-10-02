@@ -47,32 +47,6 @@ MenuMode::MenuMode() {
 		cerr << "MENU: ERROR: Couldn't save the screen!" << endl;
 	}
 	
-	ImageDescriptor new_menu;
-	_menu_images.push_back(new_menu);
-	_menu_images.push_back(new_menu);
-	_menu_images.push_back(new_menu);
-	_menu_images.push_back(new_menu);
-	_menu_images.push_back(new_menu);
-	_menu_images.push_back(new_menu);
-	
-	// Create menu images
-
-	/* !@# Roots: I had to get rid of this code so the game would compile
-		
-	if(!VideoManager->CreateMenu(_menu_images[0], 256, 576))  // create a 256x576 menu
-		cerr << "MENU: ERROR: Couldn't create menu image!" << endl;
-	if(!VideoManager->CreateMenu(_menu_images[1], 256, 576)) 
-		cerr << "MENU: ERROR: Couldn't create menu image!" << endl;
-	if(!VideoManager->CreateMenu(_menu_images[2], 256, 576)) 
-		cerr << "MENU: ERROR: Couldn't create menu image!" << endl;
-	if(!VideoManager->CreateMenu(_menu_images[3], 256, 576)) 
-		cerr << "MENU: ERROR: Couldn't create menu image!" << endl;
-	if(!VideoManager->CreateMenu(_menu_images[4], 1024, 96)) 
-		cerr << "MENU: ERROR: Couldn't create menu image!" << endl;
-	if(!VideoManager->CreateMenu(_menu_images[5], 1024, 96)) 
-		cerr << "MENU: ERROR: Couldn't create menu image!" << endl;
-	*/
-	
 }
 
 
@@ -85,6 +59,13 @@ MenuMode::~MenuMode() {
 	for (uint32 i = 0; i < _menu_images.size(); i++) {
 		VideoManager->DeleteImage(_menu_images[i]);
 	}
+	
+	// Destroy menu windows
+	_character_window0.Destroy();
+	_character_window1.Destroy();
+	_character_window2.Destroy();
+	_character_window3.Destroy();
+	_bottom_window.Destroy();
 }
 
 
@@ -92,7 +73,24 @@ MenuMode::~MenuMode() {
 void MenuMode::Reset() {
 	VideoManager->SetCoordSys(0, 1024, 768, 0); // Top left corner coordinates are (0,0)
 	if(!VideoManager->SetFont("default")) 
-    cerr << "MAP: ERROR > Couldn't set menu font!" << endl;
+		cerr << "MAP: ERROR > Couldn't set menu font!" << endl;
+	
+		// Setup the menu windows
+	_character_window0.Create(256, 576);
+	_character_window0.SetPosition(0, 0);
+	_character_window0.Show();
+	_character_window1.Create(256, 576);
+	_character_window1.SetPosition(256, 0);
+	_character_window1.Show();
+	_character_window2.Create(256, 576);
+	_character_window2.SetPosition(512, 0);
+	_character_window2.Show();
+	_character_window3.Create(256, 576);
+	_character_window3.SetPosition(768, 0);
+	_character_window3.Show();
+	_bottom_window.Create(1024, 192);
+	_bottom_window.SetPosition(0, 576);
+	_bottom_window.Show();
 }
 
 
@@ -113,19 +111,11 @@ void MenuMode::Draw() {
 	VideoManager->DrawImage(_saved_screen); 
 	
 	// Draw the four character menus
-	VideoManager->DrawImage(_menu_images[0]);
-	VideoManager->MoveRelative(256, 0);
-	VideoManager->DrawImage(_menu_images[1]);
-	VideoManager->MoveRelative(256, 0);
-	VideoManager->DrawImage(_menu_images[2]);
-	VideoManager->MoveRelative(256, 0);
-	VideoManager->DrawImage(_menu_images[3]);
-	
-	// Draw the bottom two menus
-	VideoManager->Move(0, 576);
-	VideoManager->DrawImage(_menu_images[4]);
-	VideoManager->MoveRelative(0, 96);
-	VideoManager->DrawImage(_menu_images[5]);
+	_character_window0.Draw();
+	_character_window1.Draw();
+	_character_window2.Draw();
+	_character_window3.Draw();
+	_bottom_window.Draw();
 	
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 	

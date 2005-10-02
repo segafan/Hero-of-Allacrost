@@ -49,8 +49,8 @@ const uint8 MIDDLE_OBJECT    = 0x80; // A "middle-layer" object
 /*! 
  *  \brief The number of standard walking/standing frames for a sprite.
  *  
- *  Up and down movement require 5 animation frames, while left and right movement
- *  requires 14 animation frames. Diagonal movement uses the up/down/left/right frames.
+ *  Up and down movement require 5 animation frames each, while left and right movement
+ *  requires 7 animation frames. Diagonal movement uses the up/down/left/right frames.
  */
 const uint32 SPRITE_STD_FRAME_COUNT = 24;
 
@@ -90,6 +90,10 @@ const uint16 SOUTH_SW  = 0x0100;
 const uint16 WEST_SW   = 0x0200;
 const uint16 SOUTH_SE  = 0x0400;
 const uint16 EAST_SE   = 0x0800;
+const uint16 NORTHWEST = 0x1000;
+const uint16 NORTHEAST = 0x2000;
+const uint16 SOUTHWEST = 0x4000;
+const uint16 SOUTHEAST = 0x8000;
 const uint16 LATERAL   = 0x000F;
 const uint16 DIAGONAL  = 0x0FF0;
 //@}
@@ -170,7 +174,7 @@ protected:
 	int16 _row_pos;
 	//! The map column position for the bottom left corner of the object.
 	int16 _col_pos;
-	//! The altitude of the object
+	//! The altitude of the object.
 	//! \note This member is really only useful for objects in the ground object layer.
 	uint8 _altitude;
 	//! A bit-mask for setting and detecting various conditions on the object.

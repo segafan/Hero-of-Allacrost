@@ -56,6 +56,20 @@ void MapMode::_TEMP_CreateMap() {
 
 	_row_count = 60;
 	_col_count = 80;
+	
+	// Setup GUI items in 1024x768 coordinate system
+	VideoManager->PushState();
+	VideoManager->SetCoordSys(0, 1024, 768, 0);
+	_dialogue_window.Create(1024.0f, 128.0f);
+	_dialogue_window.SetPosition(0.0f, 768.0f);
+	
+	_dialogue_textbox.SetDisplaySpeed(30);
+	_dialogue_textbox.SetPosition(0.0f + 32.0f, 768.0f - 32.0f);
+	_dialogue_textbox.SetDimensions(1024.0f - 64.0f, 128.0f - 64.0f);
+	_dialogue_textbox.SetFont("default");
+	_dialogue_textbox.SetDisplayMode(VIDEO_TEXT_REVEAL);
+	_dialogue_textbox.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	VideoManager->PopState();
 
 	// Load in all tile images from memory
 	ImageDescriptor imd;
@@ -195,12 +209,12 @@ MapMode::MapMode(uint32 new_map_id) {
 	if (MAP_DEBUG) cout << "MAP: MapMode constructor invoked" << endl;
 
 	mode_type = ENGINE_MAP_MODE;
-	_map_state.push_back(EXPLORE);
+	_map_state = EXPLORE;
 	_map_id = new_map_id;
-
+	
 	// Load the map from the Lua data file
 	//DataManager->LoadMap(this, map_id);
-
+	
 	_virtual_sprite = new MapSprite(VIRTUAL_SPRITE, 20, 20, ALTITUDE_0, 0x0);
 	_virtual_sprite->SetSpeed(VERY_FAST_SPEED);
 	_virtual_sprite->SetDelay(NO_DELAY);
@@ -239,6 +253,9 @@ MapMode::~MapMode() {
 	for (uint32 i = 0; i < _ground_objects.size(); i++) {
 		delete(_ground_objects[i]);
 	}
+	
+	// Free up the dialogue menu
+	_dialogue_window.Destroy();
 }
 
 
@@ -337,6 +354,37 @@ uint32 MapMode::_CheckInteraction(const private_map::TileCheck& tcheck) {
 }
 
 
+
+MapObject* MapMode::_FindTileOccupant(const private_map::TileCheck& tcheck) {
+	for (uint32 i = 0; i < _ground_objects.size(); i++) {
+		if (_ground_objects[i]->_row_pos == tcheck.row && 
+				_ground_objects[i]->_col_pos == tcheck.col &&
+				_ground_objects[i]->_altitude == tcheck.altitude) {
+			return _ground_objects[i];
+		}  
+	}
+	return NULL;
+} // MapMode::_FindTileOccupant()
+
+
+
+void MapMode::_FindPath(const MapSprite* sprite, const private_map::TileNode& destination) {
+	// NOTE: This algorithm is just in its primitive stages now and only checks for non-movable tiles.
+	// It will also check for occupied tiles at a later time.
+	
+	// The source tile that the sprite is currently occupying
+	TileNode source;
+	// 
+	vector<TileNode> open_list;
+	// The nodes which have already been visited once.
+	vector<TileNode> closed_list;
+	
+	source.row = sprite->_row_pos;
+	source.col = sprite->_col_pos;
+
+}
+
+
 // Processes user update and camera movement. Only called when the map is focused on the virtual sprite
 void MapMode::_UpdateVirtualSprite() {
 	bool user_move;
@@ -422,7 +470,7 @@ void MapMode::Update(uint32 new_time_elapsed) {
 	}
 
 	// ***************** (2) Update the map based on what state we are in **************
-	switch (_map_state.back()) {
+	switch (_map_state) {
 		case EXPLORE:
 			_UpdateExploreState();
 			break;
@@ -433,8 +481,20 @@ void MapMode::Update(uint32 new_time_elapsed) {
 			_UpdateScriptState();
 			break;
 	}
+	
+	// ***************** (3) Update all objects on the map **************
+	for (uint32 i = 0; i < _ground_objects.size(); i++) {
+		switch ((_ground_objects[i])->_object_type) {
+			case NPC_SPRITE:
+				dynamic_cast<MapSprite *>(_ground_objects[i])->Update();
+				break;
+			default:
+				break;
+		}
+	}
 
-	// ************ (3) Sort the objects so they are in the correct draw order ********
+	// ************ (4) Sort the objects so they are in the correct draw order ********
+	// Note: this sorting algorithm will be optimized at a later time
 	for (uint32 i = 1; i < _ground_objects.size(); i++) {
 		MapObject *tmp = _ground_objects[i];
 		int32 j = static_cast<int32>(i) - 1;
@@ -453,18 +513,6 @@ void MapMode::_UpdateExploreState() {
 	if (_focused_object->_object_type == CHARACTER_SPRITE) {
 		_UpdatePlayer(_focused_object);
 	}
-
-	// Update all NPC sprites
-	for (uint32 i = 0; i < _ground_objects.size(); i++) {
-		switch ((_ground_objects[i])->_object_type) {
-			case NPC_SPRITE:
-				dynamic_cast<MapSprite *>(_ground_objects[i])->Update();
-				break;
-			default:
-				break;
-		}
-	}
-
 	if (_focused_object == _virtual_sprite)
 		_UpdateVirtualSprite();
 }
@@ -549,9 +597,10 @@ void MapMode::_UpdatePlayer(MapSprite *player_sprite) {
 		// Now check if we can actualy move the sprite to the tile the user requested to move to
 		if (user_move) {
 			player_sprite->GroundMove(move_direction);
-			// Regardless of whether the move was successful or not, refuse to process additional commands
-			//  from the user.
-			return;
+			// If the move was successful, don't process any other input
+			if (player_sprite->_status & IN_MOTION) {
+				return;
+			}
 		}
 	}
 
@@ -585,7 +634,42 @@ void MapMode::_UpdatePlayer(MapSprite *player_sprite) {
 		tcheck.direction = player_sprite->_direction;
 
 		// Check the tile the player is facing for events or other objects that can be interacted with.
-		_CheckInteraction(tcheck);
+		uint32 interaction = _CheckInteraction(tcheck);
+		if (interaction == SPRITE_INTERACTION) {
+			MapObject* obj = _FindTileOccupant(tcheck);
+			if (obj != NULL) {
+				switch (obj->_object_type) {
+					case NPC_SPRITE:
+							MapSprite* spr = dynamic_cast<MapSprite*>(obj);
+							spr->SaveState();
+							spr->_status &= ~UPDATEABLE;
+							_dialogue_window.Show();
+							if (tcheck.direction & (NORTH | NORTH_NW | NORTH_NE)) {
+								spr->_direction = SOUTH;
+							}
+							else if (tcheck.direction & (SOUTH | SOUTH_SW | SOUTH_SE)) {
+								spr->_direction = NORTH;
+							}
+							else if (tcheck.direction & (EAST | EAST_NE | EAST_SE)) {
+								spr->_direction = WEST;
+							}
+							else if (tcheck.direction & (WEST | WEST_NW | WEST_SW)) {
+								spr->_direction = EAST;
+							}
+							_dialogue_speakers.push_back(spr);
+							_dialogue_text = &(spr->_dialogues[spr->_next_dialogue]._lines);
+							_dialogue_line = 0;
+							_dialogue_textbox.ShowText(MakeWideString((*_dialogue_text)[0]));
+							_map_state = DIALOGUE;
+						break;
+					default:
+						break;
+				}
+			}
+			else {
+				cerr << "MAP: WARNING: No occupant found in call to _FindTileOccupant()" << endl;
+			}
+		}
 		return;
 	}
 }
@@ -594,29 +678,30 @@ void MapMode::_UpdatePlayer(MapSprite *player_sprite) {
 
 // Updates the game status when MapMode is in the 'dialogue' state
 void MapMode::_UpdateDialogueState() {
-// 	cout << "UpdateDialogueState: setting text" << endl;
-	for (uint32 i = 0; i < _ground_objects.size(); i++) {
-		if (_ground_objects[i] != _focused_object) {
-			MapSprite *tmp_sprite = dynamic_cast<MapSprite*>(_ground_objects[i]);
-			_dialogue_text = &(tmp_sprite->_dialogues[tmp_sprite->_next_dialogue]._lines);
-		}
-	}
+	_dialogue_textbox.Update(_time_elapsed);
 	
 	// User is done reading the dialogue if they press confirm
 	if (InputManager->ConfirmPress()) {
-		cout << "UpdateDialogueState: processing confirm press" << endl;
-		// Remove the dialogue state from the map state stack
-		_map_state.pop_back();
+		_dialogue_line++;
+		// Check if we've passed the last line of dialogue, and if so exit the dialogue
+		if (_dialogue_line >= _dialogue_text->size()) {
+				// Remove the dialogue state from the map state stack
+			_map_state = EXPLORE;
 		
-		// Restore the status of map sprites
-		for (uint32 i = 0; i < _ground_objects.size(); i++) {
-			if (_ground_objects[i] != _focused_object) {
-				MapSprite *tmp_sprite = dynamic_cast<MapSprite*>(_ground_objects[i]);
-				tmp_sprite->RestoreState();
+			// Restore the status of map sprites
+			for (uint32 i = 0; i < _dialogue_speakers.size(); i++) {
 				if (_ground_objects[i] != _focused_object) {
-					tmp_sprite->FinishedDialogue();
+					_dialogue_speakers[i]->RestoreState();
+					_dialogue_speakers[i]->FinishedDialogue();
 				}
 			}
+			
+			// Clean out the dialogue speakers
+			_dialogue_speakers.clear();
+			_dialogue_window.Hide();
+		}
+		else {
+			_dialogue_textbox.ShowText(MakeWideString((*_dialogue_text)[_dialogue_line]));
 		}
 	}
 }
@@ -772,7 +857,6 @@ void MapMode::Draw() {
 	}
 
 	// ************** (3) Draw the Upper Layer *************
-	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 	VideoManager->Move(_draw_info.c_pos, _draw_info.r_pos);
 	for (uint32 r = _draw_info.r_start; r < _draw_info.r_start + _draw_info.r_draw; r++) {
 		for (uint32 c = _draw_info.c_start; c < _draw_info.c_start + _draw_info.c_draw; c++) {
@@ -782,61 +866,15 @@ void MapMode::Draw() {
 		}
 		VideoManager->MoveRelative(-static_cast<float>(_draw_info.c_draw), -1.0f);
 	}
-
-	// ************** (4) Draw the Dialoge menu and text *************
-	if (_map_state.back() == DIALOGUE) {
-// 		cout << _dialogue_text << endl;
-
-/* !@# Roots: I got rid of this code for now since CreateMenu() is defunct
-
-
-		//---Raj added some sample code here for textbox display---
-
-		float dialogueWidth = 1024.0f;
-		float dialogueHeight = 160.0f;
-		
-		int32 xalign = VIDEO_X_LEFT;
-		int32 yalign = VIDEO_Y_BOTTOM;
-		CoordSys cs(0, 1024, 0, 768);
-		int32 x = 0;
-		int32 y = 0;
-		
-
-		ImageDescriptor menu;
-		VideoManager->CreateMenu(menu, dialogueWidth, dialogueHeight, 0);
-		
+	
+	
+	// ************** (4) Draw the Dialogue menu and text *************
+	if (_map_state == DIALOGUE) {
 		VideoManager->PushState();
-		VideoManager->SetDrawFlags(xalign, yalign, 0);
-		VideoManager->SetCoordSys(cs);
-		VideoManager->Move((float)x, (float)y);
-		VideoManager->DrawImage(menu);
-		VideoManager->DeleteImage(menu);
+		VideoManager->SetCoordSys(0, 1024, 768, 0);
+		_dialogue_window.Draw();
+		_dialogue_textbox.Draw();
 		VideoManager->PopState();
-
-		VideoManager->PushState();		
-		VideoManager->SetDrawFlags(xalign, yalign, 0);
-		VideoManager->SetCoordSys(cs);		
-	
-		// Roots: here's a BASIC example of using a textbox. Note, in reality you wouldn't
-		//        just create a textbox every frame, but this is just for an example:
-	
-		static TextBox box;
-
-		if(_dialogue_text != NULL) {
-			box.SetDisplaySpeed(23);
-			box.SetPosition((float)x, (float)y);
-			box.SetDimensions(dialogueWidth, dialogueHeight);
-			box.SetFont("default");
-			box.SetDisplayMode(VIDEO_TEXT_REVEAL);
-			box.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-			box.ShowText((*_dialogue_text)[0]);
-		}
-		box.Update(10);
-		box.Draw();
-		
-		VideoManager->PopState();				
-		//---End Raj's Sample code------------------
-*/
 	}
 		
 	return;
