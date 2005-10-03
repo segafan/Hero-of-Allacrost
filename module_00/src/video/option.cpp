@@ -18,9 +18,8 @@ namespace hoa_video
 //-----------------------------------------------------------------------------
 
 OptionBox::OptionBox()
-: _initialized(false),
-  _xalign(VIDEO_X_LEFT),
-  _yalign(VIDEO_Y_TOP),
+: _option_xalign(VIDEO_X_LEFT),
+  _option_yalign(VIDEO_Y_TOP),
   _selectMode(VIDEO_SELECT_SINGLE),
   _switching(false),
   _hWrapMode(VIDEO_WRAP_MODE_NONE),
@@ -43,7 +42,6 @@ OptionBox::OptionBox()
   _cursorX(0.0f),
   _cursorY(0.0f)
 {
-	_x = _y = 0.0f;
 	_hSpacing = _vSpacing = 0.0f;
 	_numRows = _numColumns = 0;
 	_initialized = IsInitialized(_initializeErrors);
@@ -407,20 +405,6 @@ void OptionBox::_SwitchItems()
 
 
 //-----------------------------------------------------------------------------
-// SetPosition: sets the position of the option box as a whole. Note that
-//              the video engine's alignment flags will affect the positioning
-//              at the point that OptionBox::Draw() is called, as will the
-//              current coordinate system
-//-----------------------------------------------------------------------------
-
-void OptionBox::SetPosition(float x, float y)
-{
-	_x = x;
-	_y = y;
-}
-
-
-//-----------------------------------------------------------------------------
 // SetCellSize: sets the pixel width/height of each "cell" in the option box
 //-----------------------------------------------------------------------------
 
@@ -453,8 +437,8 @@ void OptionBox::SetSize(int32 columns, int32 rows)
 
 void OptionBox::SetOptionAlignment(int32 xalign, int32 yalign)
 {
-	_xalign = xalign;
-	_yalign = yalign;
+	_option_xalign = xalign;
+	_option_yalign = yalign;
 	_initialized = IsInitialized(_initializeErrors);
 }
 
@@ -722,11 +706,11 @@ bool OptionBox::IsInitialized(string &errors)
 		s << "* Invalid vertical spacing (" << _vSpacing << ")" << endl;
 
 	// check alignment flags
-	if(_xalign < VIDEO_X_LEFT || _xalign > VIDEO_X_RIGHT)
-		s << "* Invalid x align (" << _xalign << ")" << endl;
+	if(_option_xalign < VIDEO_X_LEFT || _option_xalign > VIDEO_X_RIGHT)
+		s << "* Invalid x align (" << _option_xalign << ")" << endl;
 
-	if(_yalign < VIDEO_Y_TOP || _yalign > VIDEO_Y_BOTTOM)
-		s << "* Invalid y align (" << _yalign << ")" << endl;
+	if(_option_yalign < VIDEO_Y_TOP || _option_yalign > VIDEO_Y_BOTTOM)
+		s << "* Invalid y align (" << _option_yalign << ")" << endl;
 	
 	// check font
 	if(_font.empty())
@@ -992,17 +976,17 @@ bool OptionBox::Draw()
 
 	GameVideo *video = GameVideo::GetReference();
 	video->_PushContext();	
-
-	float left, right, bottom, top;
+	video->SetDrawFlags(_xalign, _yalign, VIDEO_BLEND, 0);
 
 	// calculate width and height of option box
-	
+
+	float left, right, bottom, top;	
 	left   = 0.0f;
 	bottom = 0.0f;
 	right  = _numColumns * _hSpacing;
 	top    = _numRows    * _vSpacing;
 
-	_CalculateAlignedRect(left, right, bottom, top);
+	CalculateAlignedRect(left, right, bottom, top);
 
 	int32 x, y, w, h;
 	
@@ -1012,15 +996,25 @@ bool OptionBox::Draw()
 	if(w < 0) w = -w;
 	h = int32(top - bottom);
 	if(h < 0) h = -h;
+
+	ScreenRect rect(x, y, w, h);
 	
-	glScissor(x, y, w, h);
-	glEnable(GL_SCISSOR_TEST);
-		
+	int32 cursorMargin = static_cast<int32>(video->GetDefaultCursor()->GetWidth() + 1 - this->_cursorX);
+	rect.left -= cursorMargin;
+	rect.width += cursorMargin;	
+	
+	if(_owner)
+		rect.Intersect(_owner->GetScissorRect());
+	rect.Intersect(video->GetScissorRect());
+	video->EnableScissoring(_owner || video->IsScissoringEnabled());
+	if(video->IsScissoringEnabled())
+		video->SetScissorRect(rect);
+
 	CoordSys &cs = video->_coordSys;
 	
 	video->SetFont(_font);
 	
-	video->SetDrawFlags(_xalign, _yalign, VIDEO_X_NOFLIP, VIDEO_Y_NOFLIP, VIDEO_BLEND, 0);
+	video->SetDrawFlags(_option_xalign, _option_yalign, VIDEO_X_NOFLIP, VIDEO_Y_NOFLIP, VIDEO_BLEND, 0);
 
 
 	int32 rowMin, rowMax;
@@ -1079,8 +1073,8 @@ bool OptionBox::Draw()
 			float leftEdge = 999999.0f;  // x offset to where the text actually begins			
 			float x, y;
 			
-			int32 xalign = _xalign;
-			int32 yalign = _yalign;
+			int32 xalign = _option_xalign;
+			int32 yalign = _option_yalign;
 			
 			_SetupAlignment(xalign, yalign, bounds, x, y);
 					
@@ -1098,21 +1092,21 @@ bool OptionBox::Draw()
 					case VIDEO_OPTION_ELEMENT_LEFT_ALIGN:
 					{
 						xalign = VIDEO_X_LEFT;
-						_SetupAlignment(xalign, _yalign, bounds, x, y);
+						_SetupAlignment(xalign, _option_yalign, bounds, x, y);
 						break;
 					}
 
 					case VIDEO_OPTION_ELEMENT_CENTER_ALIGN:
 					{
 						xalign = VIDEO_X_CENTER;
-						_SetupAlignment(xalign, _yalign, bounds, x, y);
+						_SetupAlignment(xalign, _option_yalign, bounds, x, y);
 						break;
 					}
 
 					case VIDEO_OPTION_ELEMENT_RIGHT_ALIGN:
 					{
 						xalign = VIDEO_X_RIGHT;
-						_SetupAlignment(xalign, _yalign, bounds, x, y);
+						_SetupAlignment(xalign, _option_yalign, bounds, x, y);
 						break;
 					}
 
@@ -1185,12 +1179,10 @@ bool OptionBox::Draw()
 					cursorOffset = -cellOffset + cs._upDir * _vSpacing;
 			}
 
-
-			glDisable(GL_SCISSOR_TEST);
 			// if this is the index where we are supposed to show the switch cursor, show it			
 			if(index == _firstSelection && !_blink && _cursorState != VIDEO_CURSOR_STATE_HIDDEN)
 			{
-				_SetupAlignment(VIDEO_X_LEFT, _yalign, bounds, x, y);
+				_SetupAlignment(VIDEO_X_LEFT, _option_yalign, bounds, x, y);
 				video->SetDrawFlags(VIDEO_BLEND, 0);
 				video->MoveRelative(_cursorX + leftEdge + _switchCursorX, cursorOffset + _cursorY + _switchCursorY);
 				ImageDescriptor *defaultCursor = video->GetDefaultCursor();
@@ -1202,7 +1194,7 @@ bool OptionBox::Draw()
 			// if this is the index where we are supposed to show the cursor, show it			
 			if(index == _selection && !(_blink && _cursorState == VIDEO_CURSOR_STATE_BLINKING) && _cursorState != VIDEO_CURSOR_STATE_HIDDEN)
 			{
-				_SetupAlignment(VIDEO_X_LEFT, _yalign, bounds, x, y);
+				_SetupAlignment(VIDEO_X_LEFT, _option_yalign, bounds, x, y);
 				video->SetDrawFlags(VIDEO_BLEND, 0);
 				video->MoveRelative(_cursorX + leftEdge, cursorOffset + _cursorY);
 				ImageDescriptor *defaultCursor = video->GetDefaultCursor();
@@ -1210,7 +1202,6 @@ bool OptionBox::Draw()
 				if(defaultCursor)			
 					video->DrawImage(*defaultCursor, Color::white);
 			}
-			glEnable(GL_SCISSOR_TEST);
 		
 			bounds.cellXLeft   += xoff;
 			bounds.cellXCenter += xoff;
@@ -1225,7 +1216,6 @@ bool OptionBox::Draw()
 		bounds.cellYBottom += yoff;		
 	}
 	
-	glDisable(GL_SCISSOR_TEST);
 	video->_PopContext();
 	return true;
 }

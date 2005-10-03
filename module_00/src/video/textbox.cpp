@@ -27,10 +27,9 @@ TextBox::TextBox()
 {
 	_initialized = IsInitialized(_initializeErrors);
 	
-	_x = _y = 0.0f;	
 	_width = _height = 0.0f;
-	_xalign = VIDEO_X_LEFT;
-	_yalign = VIDEO_Y_BOTTOM;
+	_text_xalign = VIDEO_X_LEFT;
+	_text_yalign = VIDEO_Y_BOTTOM;
 }
 
 
@@ -88,6 +87,7 @@ bool TextBox::Draw()
 	
 	video->_PushContext();
 	
+	video->SetDrawFlags(_xalign, _yalign, VIDEO_BLEND, 0);
 	video->SetFont(_font);
 
 	left   = 0.0f;
@@ -95,7 +95,26 @@ bool TextBox::Draw()
 	bottom    = 0.0f;
 	top    = _height;
 	
-	_CalculateAlignedRect(left, right, bottom, top);
+	CalculateAlignedRect(left, right, bottom, top);
+	
+	int32 x, y, w, h;
+	
+	x = int32(left < right? left: right);
+	y = int32(top < bottom? top : bottom);
+	w = int32(right - left);
+	if(w < 0) w = -w;
+	h = int32(top - bottom);
+	if(h < 0) h = -h;
+
+	ScreenRect rect(x, y, w, h);
+
+	if(_owner)
+		rect.Intersect(_owner->GetScissorRect());
+	rect.Intersect(video->GetScissorRect());
+	video->EnableScissoring(_owner || video->IsScissoringEnabled());
+	if(video->IsScissoringEnabled())
+		video->SetScissorRect(rect);
+	
 	CoordSys &cs = video->_coordSys;
 
 	// figure out where the top of the rendered text is
@@ -121,12 +140,12 @@ bool TextBox::Draw()
 	float textX;
 	
 	// figure out X alignment
-	if(_xalign == VIDEO_X_LEFT)
+	if(_text_xalign == VIDEO_X_LEFT)
 	{
 		// left align
 		textX = left;
 	}
-	else if(_xalign == VIDEO_X_CENTER)
+	else if(_text_xalign == VIDEO_X_CENTER)
 	{
 		// center align
 		textX = (left + right) * 0.5f;
@@ -143,34 +162,10 @@ bool TextBox::Draw()
 	
 	// draw the text line by line		
 
-	_DrawTextLines(textX,textY);
+	_DrawTextLines(textX,textY, rect);
 			
 	video->_PopContext();
 	return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// SetPosition: sets the position of the textbox, based on the (0, 1024, 0, 768)
-//              coordinate system. Note that the textbox IS affected by the 
-//              video engine's alignment flags
-//-----------------------------------------------------------------------------
-
-void TextBox::SetPosition(float x, float y)
-{
-	_x = x;
-	_y = y;
-}
-
-
-//-----------------------------------------------------------------------------
-// GetPosition: returns the position of the textbox into x and y
-//-----------------------------------------------------------------------------
-
-void TextBox::GetPosition(float &x, float &y)
-{
-	x = _x;
-	y = _y;
 }
 
 
@@ -216,15 +211,15 @@ void TextBox::GetDimensions(float &w, float &h)
 
 
 //-----------------------------------------------------------------------------
-// SetAlignment: sets the alignment flags to be used for the text
-//               returns false if any invalid alignment flag is passed
+// SetTextAlignment: sets the alignment flags to be used for the text
+//                   returns false if any invalid alignment flag is passed
 //-----------------------------------------------------------------------------
 
-bool TextBox::SetAlignment(int32 xalign, int32 yalign)
+bool TextBox::SetTextAlignment(int32 xalign, int32 yalign)
 {
 	bool success = true;
-	_xalign = xalign;
-	_yalign = yalign;	
+	_text_xalign = xalign;
+	_text_yalign = yalign;	
 	
 	_initialized = IsInitialized(_initializeErrors);
 	
@@ -233,13 +228,13 @@ bool TextBox::SetAlignment(int32 xalign, int32 yalign)
 
 
 //-----------------------------------------------------------------------------
-// GetAlignment: returns the alignment flags into xalign and yalign
+// GetTextAlignment: returns the alignment flags into xalign and yalign
 //-----------------------------------------------------------------------------
 
-void TextBox::GetAlignment(int32 &xalign, int32 &yalign)
+void TextBox::GetTextAlignment(int32 &xalign, int32 &yalign)
 {
-	xalign = _xalign;
-	yalign = _yalign;
+	xalign = _text_xalign;
+	yalign = _text_yalign;
 }
 
 
@@ -562,11 +557,11 @@ bool TextBox::IsInitialized(string &errors)
 		s << "* Invalid display speed (" << _displaySpeed << ")" << endl;
 	
 	// check alignment flags
-	if(_xalign < VIDEO_X_LEFT || _xalign > VIDEO_X_RIGHT)
-		s << "* Invalid x align (" << _xalign << ")" << endl;
+	if(_text_xalign < VIDEO_X_LEFT || _text_xalign > VIDEO_X_RIGHT)
+		s << "* Invalid x align (" << _text_xalign << ")" << endl;
 	
-	if(_yalign < VIDEO_Y_TOP || _yalign > VIDEO_Y_BOTTOM)
-		s << "* Invalid y align (" << _yalign << ")" << endl;
+	if(_text_yalign < VIDEO_Y_TOP || _text_yalign > VIDEO_Y_BOTTOM)
+		s << "* Invalid y align (" << _text_yalign << ")" << endl;
 	
 	// check font
 	if(_font.empty())
@@ -717,7 +712,7 @@ bool TextBox::ShowText(const std::string &text)
 //                 display mode into consideration
 //-----------------------------------------------------------------------------
 
-void TextBox::_DrawTextLines(float textX, float textY)
+void TextBox::_DrawTextLines(float textX, float textY, ScreenRect scissorRect)
 {
 	GameVideo *video = GameVideo::GetReference();
 	CoordSys  &cs    = video->_coordSys;
@@ -743,7 +738,7 @@ void TextBox::_DrawTextLines(float textX, float textY)
 		// calculate the xOffset for this line
 		float lineWidth = (float) video->CalculateTextWidth(_font, _text[line]);
 	
-		int32 xAlign = video->_ConvertXAlign(_xalign);
+		int32 xAlign = video->_ConvertXAlign(_text_xalign);
 				
 		xOffset = textX + ((xAlign + 1) * lineWidth) * 0.5f * -cs._rightDir;
 		video->MoveRelative(xOffset, 0.0f);	
@@ -909,13 +904,16 @@ void TextBox::_DrawTextLines(float textX, float textY)
 						charH = _fontProperties.height;
 						
 						// multiply width by percentage done
-						charW = int32(curPct * charW);
-						
-						glEnable(GL_SCISSOR_TEST);
-						glScissor(charX, charY, charW, charH);						
+						charW = int32(curPct * charW);						
 						video->MoveRelative(cs._rightDir * video->CalculateTextWidth(_font, substring), 0.0f);
+						
+						video->PushState();
+						ScreenRect charScissorRect(charX, charY, charW, charH);
+						scissorRect.Intersect(charScissorRect);
+						video->EnableScissoring(true);
+						video->SetScissorRect(scissorRect);
 						video->DrawText(curCharString);
-						glDisable(GL_SCISSOR_TEST);
+						video->PopState();
 					}
 				}				
 				

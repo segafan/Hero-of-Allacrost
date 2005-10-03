@@ -27,7 +27,8 @@ MenuWindow::MenuWindow()
   _height(0),
   _state(VIDEO_MENU_STATE_HIDDEN),
   _currentTime(0),
-  _mode(VIDEO_MENU_INSTANT)
+  _mode(VIDEO_MENU_INSTANT),
+  _isScissored(false)
 {
 	_id = _currentMenuID;
 	++_currentMenuID;	
@@ -63,47 +64,28 @@ bool MenuWindow::Draw()
 
 	if(_state == VIDEO_MENU_STATE_HIDDEN)
 		return true;  // nothing to do
-	
-	// how much of the menu to draw	
-	float drawPortion = 1.0f;	
-	if(_mode != VIDEO_MENU_INSTANT && _state != VIDEO_MENU_STATE_SHOWN)
-	{
-		float t = float(_currentTime) / float(VIDEO_MENU_SCROLL_TIME);
-		if(t > 1.0f)
-			t = 1.0f;
-		
-		if(_state == VIDEO_MENU_STATE_HIDING)
-			t = 1.0f - t;
-		
-		drawPortion = t;
-	}
-	
+
 	GameVideo *video = GameVideo::GetReference();
 
 	video->_PushContext();
+
+	video->SetDrawFlags(_xalign, _yalign, VIDEO_BLEND, 0);
+	if(_isScissored)
+	{		
+		ScreenRect rect = _scissorRect;
 		
-	if(drawPortion != 1.0f)
-	{
-		if(_mode == VIDEO_MENU_EXPAND_FROM_CENTER)
+		if(video->IsScissoringEnabled())
+		{
+			rect.Intersect(video->GetScissorRect());
+		}
+		else
 		{
 			video->EnableScissoring(true);
-			float left, right, bottom, top;
-			left = 0.0f;
-			right = _width;
-			bottom = 0.0f;
-			top = _height;
-			MenuWindow::_CalculateAlignedRect(left, right, bottom, top);
-			
-			float center = (top + bottom) * 0.5f;
-			
-			bottom = center * (1.0f - drawPortion) + bottom * drawPortion;
-			top    = center * (1.0f - drawPortion) + top * drawPortion;
-
-			video->SetScissorRect(left, right, bottom, top);		
-
 		}
+
+		video->SetScissorRect(rect);
 	}
-		
+
 	video->Move(_x, _y);
 	if(!video->DrawImage(_menuImage, Color::white))
 	{
@@ -135,7 +117,57 @@ bool MenuWindow::Update(int32 frameTime)
 		else if(_state == VIDEO_MENU_STATE_HIDING)
 			_state = VIDEO_MENU_STATE_HIDDEN;
 	}
+
+	if(_state == VIDEO_MENU_STATE_HIDDEN || _state == VIDEO_MENU_STATE_SHOWN) 
+	{
+		_isScissored = false;
+		return true;
+	}
+
+	_isScissored = true;
+
+	// how much of the menu to draw	
+	float drawPortion = 1.0f;	
+	
+	if(_mode != VIDEO_MENU_INSTANT && _state != VIDEO_MENU_STATE_SHOWN)
+	{
+		float t = float(_currentTime) / float(VIDEO_MENU_SCROLL_TIME);
+		if(t > 1.0f)
+			t = 1.0f;
 		
+		if(_state == VIDEO_MENU_STATE_HIDING)
+			t = 1.0f - t;
+		
+		drawPortion = t;
+	}
+
+	if(drawPortion != 1.0f)
+	{
+		if(_mode == VIDEO_MENU_EXPAND_FROM_CENTER)
+		{
+			GameVideo *video = GameVideo::GetReference();
+
+			float left, right, bottom, top;
+			left = 0.0f;
+			right = _width;
+			bottom = 0.0f;
+			top = _height;
+			video->PushState();
+			video->SetDrawFlags(_xalign, _yalign, 0);
+			MenuWindow::CalculateAlignedRect(left, right, bottom, top);
+			video->PopState();
+			
+			float center = (top + bottom) * 0.5f;
+			
+			bottom = center * (1.0f - drawPortion) + bottom * drawPortion;
+			top    = center * (1.0f - drawPortion) + top * drawPortion;
+
+			_scissorRect = video->CalculateScreenRect(left, right, bottom, top);
+		}
+	}
+	else
+		_isScissored = false;
+	
 	return true;
 }
 
@@ -363,17 +395,6 @@ void MenuWindow::GetDimensions(float &w, float &h)
 {
 	w = _width;
 	h = _height;
-}
-
-
-//-----------------------------------------------------------------------------
-// SetPosition
-//-----------------------------------------------------------------------------
-
-void MenuWindow::SetPosition(float x, float y)
-{
-	_x = x;
-	_y = y;
 }
 
 

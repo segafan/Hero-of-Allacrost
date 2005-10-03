@@ -203,8 +203,7 @@ bool GameVideo::_LoadImageHelper(ImageDescriptor &id)
 	Image *newImage = new Image(id._filename, w, h);
 
 	// try to insert the image in a texture sheet
-	int32 x, y;
-	TexSheet *sheet = _InsertImageInTexSheet(newImage, pixelData, x, y, w, h, isStatic);
+	TexSheet *sheet = _InsertImageInTexSheet(newImage, w, h, isStatic);
 	
 	if(!sheet)
 	{
@@ -432,9 +431,6 @@ ImageDescriptor GameVideo::TilesToObject
 TexSheet *GameVideo::_InsertImageInTexSheet
 (
 	Image *image,
-	ILuint pixelData, 
-	int32 &x, 
-	int32 &y,
 	int32 w,
 	int32 h,
 	bool isStatic
@@ -457,7 +453,7 @@ TexSheet *GameVideo::_InsertImageInTexSheet
 			return NULL;
 		}
 					
-		if(sheet->AddImage(image, pixelData))
+		if(sheet->AddImage(image))
 			return sheet;
 		else
 		{
@@ -498,7 +494,7 @@ TexSheet *GameVideo::_InsertImageInTexSheet
 		
 		if(sheet->type == type && sheet->isStatic == isStatic)
 		{
-			if(sheet->AddImage(image, pixelData))
+			if(sheet->AddImage(image))
 			{
 				// added to a sheet successfully
 				return sheet;
@@ -523,7 +519,7 @@ TexSheet *GameVideo::_InsertImageInTexSheet
 
 	// now that we have a fresh texture sheet, AddImage() should work without
 	// any problem
-	if(sheet->AddImage(image, pixelData))
+	if(sheet->AddImage(image))
 	{
 		return sheet;
 	}
@@ -843,7 +839,7 @@ bool GameVideo::_RemoveSheet(TexSheet *sheet)
 // NOTE: assumes that the image we're adding is still "bound" in DevIL
 //-----------------------------------------------------------------------------
 
-bool TexSheet::AddImage(Image *img, ILuint pixelData)
+bool TexSheet::AddImage(Image *img)
 {
 	// try inserting into the texture memory manager
 	bool couldInsert = texMemManager->Insert(img);	
@@ -864,7 +860,7 @@ bool TexSheet::AddImage(Image *img, ILuint pixelData)
 		return false;
 	}
 
-	if(!CopyRect(pixelData, img->x, img->y, img->width, img->height))
+	if(!CopyRect(img->x, img->y, img->width, img->height))
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: CopyRect() failed in TexSheet::AddImage()!" << endl;
@@ -879,7 +875,7 @@ bool TexSheet::AddImage(Image *img, ILuint pixelData)
 // CopyRect: copies an image into a sub-rectangle of the texture
 //-----------------------------------------------------------------------------
 
-bool TexSheet::CopyRect(ILuint pixelData, int32 x, int32 y, int32 w, int32 h)
+bool TexSheet::CopyRect(int32 x, int32 y, int32 w, int32 h)
 {
 	int32 error;
 	
@@ -1817,7 +1813,7 @@ bool GameVideo::_ReloadImagesToSheet(TexSheet *sheet)
 				success = false;
 			}			
 			
-			if(!sheet->CopyRect(pixelData, i->x, i->y, w, h))
+			if(!sheet->CopyRect(i->x, i->y, w, h))
 			{
 				if(VIDEO_DEBUG)
 					cerr << "VIDEO ERROR: sheet->CopyRect() failed in _ReloadImagesToSheet()!" << endl;

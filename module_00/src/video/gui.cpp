@@ -578,11 +578,11 @@ bool GUI::CreateMenu
 
 
 //-----------------------------------------------------------------------------
-// _CalculateAlignedRect: transforms a rectangle based on the coordinate system
+// CalculateAlignedRect: transforms a rectangle based on the coordinate system
 //                       and alignment flags
 //-----------------------------------------------------------------------------
 
-void GUIControl::_CalculateAlignedRect(float &left, float &right, float &bottom, float &top)
+void GUIElement::CalculateAlignedRect(float &left, float &right, float &bottom, float &top)
 {
 	float width  = right - left;
 	float height = top - bottom;
@@ -615,7 +615,117 @@ void GUIControl::_CalculateAlignedRect(float &left, float &right, float &bottom,
 }
 
 
+//-----------------------------------------------------------------------------
+// CalculateAlignedRect: calculates the rectangle for a GUI control. The difference
+//                        between this function and the one for GUI elements is that
+//                        controls must take their owner window into account
+//-----------------------------------------------------------------------------
 
+void GUIControl::CalculateAlignedRect(float &left, float &right, float &bottom, float &top)
+{
+	GUIElement::CalculateAlignedRect(left, right, bottom, top);
+
+	// calculate the position offsets due to the owner window
+	if(_owner)
+	{
+		// first, calculate the owner menu's rectangle
+		float menu_left, menu_right, menu_bottom, menu_top;
+		float menu_height, menu_width;
+		
+		GameVideo *video = GameVideo::GetReference();
+		_owner->GetDimensions(menu_width, menu_height);
+		menu_left = 0.0f;
+		menu_right = menu_width;
+		menu_bottom = 0.0f;
+		menu_top = menu_height;
+		video->PushState();
+		
+		int32 xalign, yalign;
+		_owner->GetAlignment(xalign, yalign);
+		
+		video->SetDrawFlags(xalign, yalign, 0);
+		_owner->CalculateAlignedRect(menu_left, menu_right, menu_bottom, menu_top);
+		video->PopState();
+		
+		// now, depending on the alignment of the control, add an offset
+	
+		if(menu_left < menu_right)
+		{
+			left += menu_left;
+			right += menu_left;
+		}
+		else
+		{
+			left += menu_right;
+			right += menu_right;
+		}
+		
+		if(menu_top < menu_bottom)
+		{
+			top += menu_top;
+			bottom += menu_top;
+		}
+		else
+		{
+			top += menu_bottom;
+			bottom += menu_bottom;
+		}		
+
+	}
+}
+
+
+
+//-----------------------------------------------------------------------------
+// SetAlignment: sets the x, y alignment. Returns false if invalid value is passed
+//-----------------------------------------------------------------------------
+
+bool GUIElement::SetAlignment(int32 xalign, int32 yalign)
+{
+	if(_xalign != VIDEO_X_LEFT && _xalign != VIDEO_X_CENTER && _xalign != VIDEO_X_RIGHT)
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: Invalid xalign value (" << xalign << ") passed to GUIElement::SetAlignment()" << endl;
+		return false;
+	}
+	
+	if(_yalign != VIDEO_Y_TOP && _yalign != VIDEO_Y_CENTER && _yalign != VIDEO_Y_BOTTOM)
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: Invalid yalign value (" << yalign << ") passed to GUIElement::SetAlignment()" << endl;
+		return false;
+	}
+	
+	_xalign = xalign;
+	_yalign = yalign;
+	
+	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// GetAlignment: returns the x, y alignment
+//-----------------------------------------------------------------------------
+
+void GUIElement::GetAlignment(int32 &xalign, int32 &yalign)
+{
+	xalign = _xalign;
+	yalign = _yalign;
+}
+
+
+//-----------------------------------------------------------------------------
+// GUIElement constructor
+//-----------------------------------------------------------------------------
+
+GUIElement::GUIElement()
+: _xalign(VIDEO_X_LEFT),
+  _yalign(VIDEO_Y_TOP),
+  _x(0.0f),
+  _y(0.0f),
+  _initialized(false)
+{
+}
 
 
 }  // namespace hoa_video

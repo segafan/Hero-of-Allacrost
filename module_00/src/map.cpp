@@ -640,6 +640,7 @@ void MapMode::_UpdatePlayer(MapSprite *player_sprite) {
 			if (obj != NULL) {
 				switch (obj->_object_type) {
 					case NPC_SPRITE:
+					{
 							MapSprite* spr = dynamic_cast<MapSprite*>(obj);
 							spr->SaveState();
 							spr->_status &= ~UPDATEABLE;
@@ -662,6 +663,7 @@ void MapMode::_UpdatePlayer(MapSprite *player_sprite) {
 							_dialogue_textbox.ShowText(MakeWideString((*_dialogue_text)[0]));
 							_map_state = DIALOGUE;
 						break;
+					}
 					default:
 						break;
 				}

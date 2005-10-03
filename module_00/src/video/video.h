@@ -308,7 +308,7 @@ private:
 	float _bottom;
 	float _top;
 
-	friend class GUIControl;
+	friend class GUIElement;
 	friend class TextBox;
 	friend class OptionBox;
 	friend class GameVideo;
@@ -566,13 +566,12 @@ public:
 
 	bool AddImage                   //! adds new image to the tex sheet
 	(
-		Image *img, 
-		ILuint pixelData
+		Image *img
 	);
 	
 	bool SaveImage(Image *img);
 	
-	bool CopyRect(ILuint pixelData, int32 x, int32 y, int32 w, int32 h);
+	bool CopyRect(int32 x, int32 y, int32 w, int32 h);
 	
 	bool RemoveImage (Image *img);  //! removes an image completely
 	bool FreeImage   (Image *img);  //! marks the image as free
@@ -1101,6 +1100,12 @@ public:
 	
 
 	/*!
+	 *  \brief returns true if scissoring's enabled
+	 */   	                  
+	
+	bool IsScissoringEnabled() { return _scissorEnabled; }
+
+	/*!
 	 *  \brief sets the rectangle to use for scissorring, where you can specify an
 	 *         area of the screen for draw operations to affect. Note, the coordinates
 	 *         you pass in are based on the current coordinate system, not screen coords
@@ -1113,6 +1118,34 @@ public:
 		float top
 	);
 
+
+	/*!
+	 *  \brief sets the rectangle to use for scissorring. This version of the function
+	 *         expects a ScreenRect, in other words the coordinates have already been
+	 *         transformed to integer values (pixel unit) with (0,0) as the upper left
+	 *         and (w-1, h-1) as the lower right, where w and h are the current screen
+	 *         dimensions
+	 */   	                  
+	void SetScissorRect
+	(
+		const ScreenRect &rect
+	);
+
+
+	/*!
+	 *  \brief returns scissor rect
+	 */   	                  
+	ScreenRect GetScissorRect() { return _scissorRect; }
+
+
+	/*!
+	 *  \brief converts coordinates given relative to the current coord sys into
+	 *         "screen coordinates", which are in pixel units with (0,0) as the
+	 *         top left and (w-1, h-1) as the lower-right, where w and h are the
+	 *         dimensions of the screen
+	 */   	                  
+
+	ScreenRect CalculateScreenRect(float left, float right, float bottom, float top);
 
 	//-- Transformations ------------------------------------------------------
 
@@ -1715,10 +1748,6 @@ private:
 
 	bool _BindTexture(GLuint texID);
 
-	
-	ScreenRect _CalculateScreenRect(float left, float right, float bottom, float top);
-
-
 	int32 _ConvertXAlign(int32 xalign);
 	int32 _ConvertYAlign(int32 yalign);
 
@@ -1856,9 +1885,6 @@ private:
 	 *  \brief inserts an image into a texture sheet
 	 *
 	 *  \param image       pointer to the image to insert
-	 *  \param pixelData   DevIL handle to the loaded raw image data
-	 *  \param x           x coordinate where image gets inserted is returned into this parameter
-	 *  \param y           y coordinate where image gets inserted is returned into this parameter
 	 *  \param w           width of image (in pixels)
 	 *  \param h           height of image (in pixels) 
 	 */	
@@ -1866,9 +1892,6 @@ private:
 	private_video::TexSheet *_InsertImageInTexSheet
 	(
 		private_video::Image *image,
-		ILuint pixelData, 
-		int32 &x, 
-		int32 &y,
 		int32 w,
 		int32 h,
 		bool isStatic
@@ -1988,7 +2011,7 @@ private:
 	
 	friend class TextBox;
 	friend class OptionBox;
-	friend class GUIControl;
+	friend class GUIElement;
 	friend class MenuWindow;
 	friend class private_video::GUI;	
 	friend class private_video::FixedTexMemMgr;

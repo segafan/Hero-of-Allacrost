@@ -252,21 +252,21 @@ enum SelectMode
 
 
 /*!****************************************************************************
- *  \brief GUIControl is the base class for all GUI controls. It contains
- *         some basic things like Draw(), Update(), etc.
+ *  \brief GUIElement is the base class for all GUI elements (windows + controls). 
+ *         It contains some basic things like Draw(), Update(), etc.
  *****************************************************************************/
 
-class GUIControl
+class GUIElement
 {
 public:
 	
-	virtual ~GUIControl() {}
+	GUIElement();
+	virtual ~GUIElement() {}
 
 	
 	/*!
 	 *  \brief draws a control
 	 */
-
 	virtual bool Draw() = 0;
 
 
@@ -275,7 +275,6 @@ public:
 	 *
 	 *  \param frameTime time elapsed during this frame, in milliseconds
 	 */
-
 	virtual bool Update(int32 frameTime) = 0;
 
 
@@ -294,24 +293,87 @@ public:
 	/*!
 	 *  \brief sets the position of the object
 	 *
-	 *  \note  x and y are in terms of coordinate system defined by (0, 1024, 0, 768)
+	 *  \note  x and y are in terms of a 1024x768 coordinate system
 	 */
-	virtual void SetPosition(float x, float y) = 0;
+	void SetPosition(float x, float y) { _x = x; _y = y; }
 
-protected:
 
-	float _x, _y;	                 //! position of the control
-	bool   _initialized;             //! after every change to any of the settings, check if the object is in a valid state and update this bool
-	std::string _initializeErrors;   //! if the object is in an invalid state (not ready for rendering), then this string contains the errors that need to be resolved
+	/*!
+	 *  \brief gets the position of the text box
+	 *
+	 *  \note  x and y are in terms of a 1024x768 coordinate system
+	 */
+
+	void GetPosition(float &x, float &y) { x = _x; y = _y; }
+
 	
+	/*!
+	 *  \brief sets the alignment of the element
+	 *
+	 *  \param xalign can be VIDEO_X_LEFT, VIDEO_X_CENTER, or VIDEO_X_RIGHT
+	 *  \param yalign can be VIDEO_Y_TOP, VIDEO_Y_CENTER, or VIDEO_Y_BOTTOM
+	 *
+	 *  \return false if invalid value is passed
+	 */
+	bool SetAlignment(int32 xalign, int32 yalign);
 	
+
+	/*!
+	 *  \brief gets the x and y alignment of the element
+	 */
+	void GetAlignment(int32 &xalign, int32 &yalign);
+
+
 	/*!
 	 *  \brief given a rectangle specified in VIDEO_X_LEFT and VIDEO_Y_BOTTOM
 	 *         orientation, this function transforms the rectangle based on
 	 *         the video engine's alignment flags.
 	 */
+	virtual void CalculateAlignedRect(float &left, float &right, float &bottom, float &top);
+
+protected:
+
+	int32 _xalign, _yalign;          //! alignment (left, center, right, etc)
+	float _x, _y;	                 //! position of the control
+	bool   _initialized;             //! after every change to any of the settings, check if the object is in a valid state and update this bool
+	std::string _initializeErrors;   //! if the object is in an invalid state (not ready for rendering), then this string contains the errors that need to be resolved
 	
-	void _CalculateAlignedRect(float &left, float &right, float &bottom, float &top);
+};
+
+
+
+/*!****************************************************************************
+ *  \brief GUIControl is a type of GUI element, specifically for controls.
+ *         This is for functions that controls have, but menu windows don't have,
+ *         such as the SetOwner() function
+ *****************************************************************************/
+
+class GUIControl : public GUIElement
+{
+public:
+	
+	GUIControl() { _owner = NULL; }
+	virtual ~GUIControl() 	{}
+
+	/*!
+	 *  \brief sets the "owner" of the menu window. When a control is owned
+	 *         by a menu, it means that it obeys the menu's scissoring rectangle,
+	 *         so it won't draw outside of the bounds of the menu. It also means
+	 *         that the position of the control is relative to the position of the
+	 *         window. (i.e. control.position += menu.position).
+	 *
+	 *  \param ownerWindow  pointer to the menu that owns the control. If the
+	 *         control is not owned by any menu window, then pass NULL. In this case,
+	 *         the control can draw to any part of the screen (so scissoring is ignored)
+	 *         and coordinates are not modified.
+	 */
+	virtual void SetOwner(MenuWindow *ownerWindow) { _owner = ownerWindow; }
+
+protected:
+
+	virtual void CalculateAlignedRect(float &left, float &right, float &bottom, float &top);
+
+	MenuWindow *_owner;
 };
 
 
@@ -320,7 +382,7 @@ protected:
  *         in Final Fantasy games
  *****************************************************************************/
 
-class MenuWindow : public GUIControl
+class MenuWindow : public GUIElement
 {
 public:
 
@@ -378,14 +440,6 @@ public:
 
 
 	/*!
-	 *  \brief sets the position of the object
-	 *
-	 *  \note  x and y are in terms of coordinate system defined by (0, 1024, 0, 768)
-	 */
-	void SetPosition(float x, float y);
-
-
-	/*!
 	 *  \brief sets the width and height of the menu. Returns false and prints an error message
 	 *         if the width or height are negative or larger than 1024 or 768 respectively
 	 *
@@ -430,7 +484,7 @@ public:
 	 *  \brief gets the width and height of the menu. Returns false if SetDimensions() hasn't
 	 *         been called yet
 	 *
-	 *  \note  w and h are in terms of coordinate system defined by (0, 1024, 0, 768) 
+	 *  \note  w and h are in terms of a 1024x768 coordinate system
 	 */
 	void GetDimensions(float &w, float &h);
 
@@ -455,6 +509,14 @@ public:
 	 */
 	MenuState GetState();
 
+
+	/*!
+	 *  \brief get the current screen rectangle for scissoring used by this menu.
+	 *         This is mainly used so that controls owned by a menu obey the parent
+	 *         window's scissor rectangle
+	 */
+	ScreenRect GetScissorRect() { return _scissorRect; }
+
 private:
 	
 	/*!
@@ -476,6 +538,8 @@ private:
 	ImageDescriptor _menuImage;      //! image descriptor of the menu
 	MenuDisplayMode _mode;           //! text display mode (one character at a time, fading in, instant, etc.)
 	
+	bool       _isScissored;         //! true if scissoring needs to be used
+	ScreenRect _scissorRect;         //! rectangle used for scissoring, set during each call to Update()
 	friend class private_video::GUI;
 };
 
@@ -515,27 +579,10 @@ public:
 
 
 	/*!
-	 *  \brief sets the position of the text box
-	 *
-	 *  \note  x and y are in terms of coordinate system defined by (0, 1024, 0, 768)
-	 */
-	void SetPosition(float x, float y);
-
-
-	/*!
-	 *  \brief gets the position of the text box
-	 *
-	 *  \note  x and y are in terms of coordinate system defined by (0, 1024, 0, 768)	 
-	 */
-
-	void GetPosition(float &x, float &y);
-
-
-	/*!
 	 *  \brief sets the width and height of the text box. Returns false and prints an error message
 	 *         if the width or height are negative or larger than 1024 or 768 respectively
 	 *
-	 *  \note  w and h are in terms of coordinate system defined by (0, 1024, 0, 768) 
+	 *  \note  w and h are in terms of a 1024x768 coordinate system
 	 */
 	bool SetDimensions(float w, float h);
 
@@ -544,7 +591,7 @@ public:
 	 *  \brief gets the width and height of the text box. Returns false if SetDimensions() hasn't
 	 *         been called yet
 	 *
-	 *  \note  w and h are in terms of coordinate system defined by (0, 1024, 0, 768) 
+	 *  \note  w and h are in terms of a 1024x768 coordinate system
 	 */
 	void GetDimensions(float &w, float &h);
 
@@ -555,7 +602,7 @@ public:
 	 *  \param xalign x alignment, e.g. VIDEO_X_LEFT
 	 *  \param yalign y alignment, e.g. VIDEO_Y_TOP
 	 */
-	bool SetAlignment(int32 xalign, int32 yalign);
+	bool SetTextAlignment(int32 xalign, int32 yalign);
 
 
 	/*!
@@ -564,7 +611,7 @@ public:
 	 *  \param xalign x alignment, e.g. VIDEO_X_LEFT
 	 *  \param yalign y alignment, e.g. VIDEO_Y_TOP
 	 */
-	void GetAlignment(int32 &xalign, int32 &yalign);
+	void GetTextAlignment(int32 &xalign, int32 &yalign);
 
 
 	/*!
@@ -697,19 +744,19 @@ public:
 
 private:
 
-	float _width, _height;           //! dimensions of the text box
+	float _width, _height;            //! dimensions of the text box
 
-	float _displaySpeed;             //! characters per second to display text
+	float _displaySpeed;              //! characters per second to display text
 						   
-	int32 _xalign, _yalign;          //! alignment flags for text
-	int32 _numChars;                 //! hold the number of characters for the entire text
+	int32 _text_xalign, _text_yalign; //! alignment flags for text
+	int32 _numChars;                  //! hold the number of characters for the entire text
 						   
-	bool    _finished;               //! true if the text being drawn by ShowText() is done displaying in the case of gradual rendering
-	int32   _currentTime;            //! milliseconds that passed since ShowText() was called
-	int32   _endTime;                //! milliseconds from the time since ShowText() was called until the text display will be complete
-	
-	std::string    _font;            //! font used for this textbox
-	FontProperties _fontProperties;  //! structure containing properties of the current font like height, etc.
+	bool    _finished;                //! true if the text being drawn by ShowText() is done displaying in the case of gradual rendering
+	int32   _currentTime;             //! milliseconds that passed since ShowText() was called
+	int32   _endTime;                 //! milliseconds from the time since ShowText() was called until the text display will be complete
+								   
+	std::string    _font;             //! font used for this textbox
+	FontProperties _fontProperties;   //! structure containing properties of the current font like height, etc.
 
 	TextDisplayMode _mode;                 //! text display mode (one character at a time, fading in, instant, etc.)
 	std::vector<hoa_utils::ustring> _text; //! array of strings, one for each line
@@ -745,8 +792,9 @@ private:
 	 *
 	 *  \param textX x value to use depending on the alignment
 	 *  \param textY y value to use depending on the alignment
+	 *  \param scissorRect  scissor rectangle used for the textbox
 	 */
-	void _DrawTextLines(float textX, float textY);
+	void _DrawTextLines(float textX, float textY, ScreenRect scissorRect);
 };
 
 
@@ -879,13 +927,6 @@ public:
 	 */
 
 	void HandleCancelKey();
-
-
-	/*!
-	 *  \brief sets position of the control
-	 */
-
-	void SetPosition(float x, float y);
 
 
 	/*!
@@ -1126,8 +1167,8 @@ private:
 	float _vSpacing;            //! vertical spacing
 	int32 _numColumns;          //! number of columns
 	int32 _numRows;             //! numer of rows
-	int32 _xalign;              //! horizontal alignment for text
-	int32 _yalign;              //! vertical alignment for text
+	int32 _option_xalign;       //! horizontal alignment for text
+	int32 _option_yalign;       //! vertical alignment for text
 	
 	bool _blink;                //! when Update() is called, blink is set to true on frames that cursor should blink (i.e. not be visible)
 							 

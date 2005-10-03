@@ -122,52 +122,16 @@ bool GameVideo::_DrawElement
 )
 {	
 	Image *img = element.image;
-	float h    = element.height;
-	float w    = element.width;
 	
-	float s0,s1,t0,t1;
-	float xlo,xhi,ylo,yhi;
-
-	CoordSys &cs = _coordSys;
-
-	// set texture coordinates	
-	if(img)
-	{
-		s0 = img->u1;
-		s1 = img->u2;
-		t0 = img->v1;
-		t1 = img->v2;
-	}
-
 	// set vertex coordinates
+	float xlo,xhi,ylo,yhi;
 	xlo = 0.0f;
 	xhi = 1.0f;
 	ylo = 0.0f;
 	yhi = 1.0f;
 
-	// swap x texture coordinates for x flipping
-	if (_xflip && img) 
-	{ 
-		float temp = s0;
-		s0 = s1;
-		s1 = temp;
-	} 
 
-	// swap y texture coordinates for y flipping
-	if (_yflip && img) 
-	{ 
-		float temp = t0;
-		t0 = t1;
-		t1 = temp;
-	}
-
-	// set up blending parameters
-	if(img)
-	{
-		glEnable(GL_TEXTURE_2D);
-		_BindTexture(img->texSheet->texID);
-	}	
-	
+	// set blending parameters
 	if(_blend)
 	{
 		glEnable(GL_BLEND);
@@ -187,11 +151,39 @@ bool GameVideo::_DrawElement
 	}
 
 	// make calls to OpenGL to render this image
-	
-	glBegin(GL_QUADS);
-	
+		
 	if(img)
 	{
+		// set texture coordinates	
+		float s0,s1,t0,t1;
+
+		s0 = img->u1;
+		s1 = img->u2;
+		t0 = img->v1;
+		t1 = img->v2;
+
+		// swap x texture coordinates for x flipping
+		if (_xflip) 
+		{ 
+			float temp = s0;
+			s0 = s1;
+			s1 = temp;
+		} 
+
+		// swap y texture coordinates for y flipping
+		if (_yflip) 
+		{ 
+			float temp = t0;
+			t0 = t1;
+			t1 = temp;
+		}
+
+		// set up blending parameters
+		glEnable(GL_TEXTURE_2D);
+		_BindTexture(img->texSheet->texID);
+
+		glBegin(GL_QUADS);
+
 		if(element.oneColor)
 		{
 			glColor4fv((GLfloat *)&element.color[0]);
@@ -222,6 +214,7 @@ bool GameVideo::_DrawElement
 	}
 	else
 	{
+		glBegin(GL_QUADS);
 		if(element.oneColor)
 		{
 			glColor4fv((GLfloat *)&element.color[0]);
@@ -250,7 +243,7 @@ bool GameVideo::_DrawElement
 	glDisable(GL_TEXTURE_2D);
 	if (_blend)
 		glDisable(GL_BLEND);
-		
+	
 	if(glGetError())
 	{
 		if(VIDEO_DEBUG)
@@ -276,52 +269,15 @@ bool GameVideo::_DrawElement
 )
 {	
 	Image *img = element.image;
-	float h    = element.height;
-	float w    = element.width;
-	
-	float s0,s1,t0,t1;
-	float xlo,xhi,ylo,yhi;
-
-	CoordSys &cs = _coordSys;
-
-	// set texture coordinates	
-	if(img)
-	{
-		s0 = img->u1;
-		s1 = img->u2;
-		t0 = img->v1;
-		t1 = img->v2;
-	}
 
 	// set vertex coordinates
+	float xlo,xhi,ylo,yhi;
 	xlo = 0.0f;
 	xhi = 1.0f;
 	ylo = 0.0f;
 	yhi = 1.0f;
-
-	// swap x texture coordinates for x flipping
-	if (_xflip && img) 
-	{ 
-		float temp = s0;
-		s0 = s1;
-		s1 = temp;
-	} 
-
-	// swap y texture coordinates for y flipping
-	if (_yflip && img) 
-	{ 
-		float temp = t0;
-		t0 = t1;
-		t1 = temp;
-	} 
-
-	// set up blending parameters
-	if(img)
-	{
-		glEnable(GL_TEXTURE_2D);
-		_BindTexture(img->texSheet->texID);
-	}	
 	
+	// set blending
 	if(_blend)
 	{
 		glEnable(GL_BLEND);
@@ -342,10 +298,36 @@ bool GameVideo::_DrawElement
 
 	// make calls to OpenGL to render this image
 	
-	glBegin(GL_QUADS);
-	
 	if(img)
 	{
+		// set texture coordinates	
+		float s0,s1,t0,t1;
+		s0 = img->u1;
+		s1 = img->u2;
+		t0 = img->v1;
+		t1 = img->v2;
+
+		// swap x texture coordinates for x flipping
+		if (_xflip) 
+		{ 
+			float temp = s0;
+			s0 = s1;
+			s1 = temp;
+		} 
+
+		// swap y texture coordinates for y flipping
+		if (_yflip) 
+		{ 
+			float temp = t0;
+			t0 = t1;
+			t1 = temp;
+		} 
+
+		// set up texture parameters
+		glEnable(GL_TEXTURE_2D);
+		_BindTexture(img->texSheet->texID);
+
+		glBegin(GL_QUADS);
 		if(element.oneColor)
 		{
 			Color color = element.color[0] * modulateColor;
@@ -383,6 +365,7 @@ bool GameVideo::_DrawElement
 	}
 	else
 	{
+		glBegin(GL_QUADS);
 		if(element.oneColor)
 		{
 			Color color = element.color[0] * modulateColor;			
@@ -446,10 +429,10 @@ bool GameVideo::DrawHalo
 	_PushContext();
 	Move(x, y);
 
-	int32 oldBlendMode = _blend;
+	char oldBlendMode = _blend;
 	_blend = VIDEO_BLEND_ADD;
 	DrawImage(id, color);
-	_blend = oldBlendMode;	
+	_blend = oldBlendMode;
 	_PopContext();
 	
 	return true;

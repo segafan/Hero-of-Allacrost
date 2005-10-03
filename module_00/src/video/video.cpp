@@ -1179,8 +1179,7 @@ bool GameVideo::CaptureScreen(ImageDescriptor &id)
 	id._filename = newImage->filename;
 
 	// try to insert the image in a texture sheet
-	int32 x, y;
-	TexSheet *sheet = _InsertImageInTexSheet(newImage, screenshot, x, y, w, h, false);
+	TexSheet *sheet = _InsertImageInTexSheet(newImage, w, h, false);
 
 	if(!sheet)
 	{
@@ -1491,17 +1490,27 @@ void GameVideo::SetScissorRect
 	float top
 )
 {
-	_scissorRect = _CalculateScreenRect(left, right, bottom, top);
+	_scissorRect = CalculateScreenRect(left, right, bottom, top);
 	glScissor(_scissorRect.left, _scissorRect.top, _scissorRect.width, _scissorRect.height);	
 }
 
 
 //-----------------------------------------------------------------------------
-// _CalculateScreenRect: calculate a rectangle in screen coordinates given one
+// SetScissorRect: set the scissoring rectangle
+//-----------------------------------------------------------------------------
+
+void GameVideo::SetScissorRect(const ScreenRect &rect)
+{
+	_scissorRect = rect;
+	glScissor(rect.left, rect.top, rect.width, rect.height);
+}
+
+//-----------------------------------------------------------------------------
+// CalculateScreenRect: calculate a rectangle in screen coordinates given one
 //                       using our current coordinate system
 //-----------------------------------------------------------------------------
 
-ScreenRect GameVideo::_CalculateScreenRect(float left, float right, float bottom, float top)
+ScreenRect GameVideo::CalculateScreenRect(float left, float right, float bottom, float top)
 {
 	ScreenRect rect;
 	
