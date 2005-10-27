@@ -223,7 +223,7 @@ void SystemInfo() {
 	SDL_Joystick *js_test;
 	int32 js_num = SDL_NumJoysticks(); // Get the number of joysticks available
 	cout << "SDL has recognized " << js_num << " on this system." << endl;
-	for (uint32 i = 0; i < js_num; i++) { // Print out information about each joystick
+	for (int32 i = 0; i < js_num; i++) { // Print out information about each joystick
 		js_test = SDL_JoystickOpen(i);
 		if (js_test == NULL)
 			cout << "ERROR: SDL was unable to open joystick #" << i << endl;

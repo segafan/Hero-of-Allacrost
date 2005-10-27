@@ -72,7 +72,7 @@ void MapMode::_TEMP_CreateMap() {
 	VideoManager->PopState();
 
 	// Load in all tile images from memory
-	ImageDescriptor imd;
+	StaticImage imd;
 	imd.SetDimensions(1.0f, 1.0f);
 
 	imd.SetFilename("img/tiles/test_01.png");
@@ -164,7 +164,7 @@ void MapMode::_TEMP_CreateMap() {
 	for (uint32 r = 0; r < _row_count; r++) {
 		_tile_layers.push_back(vector <MapTile>());
 		for (uint32 c = 0; c < _col_count; c++) {
-			tmp_tile.lower_layer = (RandomNumber(0, 16 - 1)); // Build the lower layer from random tiles
+			tmp_tile.lower_layer = static_cast<int16>(RandomNumber(0, 16 - 1)); // Build the lower layer from random tiles
 			if (tmp_tile.lower_layer == 15) { // Set water tile properties
 				tmp_tile.not_walkable = ALTITUDE_1;
 				tmp_tile.properties = CONFIRM_EVENT;
@@ -521,7 +521,7 @@ void MapMode::_UpdateExploreState() {
 // Updates the player-controlled sprite and also processes user input.
 void MapMode::_UpdatePlayer(MapSprite *player_sprite) {
 	bool user_move = false; // Set to true if the user attempted to move the player sprite
-	uint16 move_direction;
+	uint16 move_direction = 0;
 
 	// *********** (1) Handle updates for the player sprite when in motion ************
 	if (player_sprite->_status & IN_MOTION) {
@@ -731,12 +731,12 @@ void MapMode::_GetDrawInfo() {
 	_draw_info.r_pos = (SCREEN_ROWS / 2.0f) - 0.5f;
 
 	// Set the default col and row tile counts
-	_draw_info.c_draw = static_cast<uint32>(SCREEN_COLS) + 1;
-	_draw_info.r_draw = static_cast<uint32>(SCREEN_ROWS) + 1;
+	_draw_info.c_draw = static_cast<uint8>(SCREEN_COLS) + 1;
+	_draw_info.r_draw = static_cast<uint8>(SCREEN_ROWS) + 1;
 
 	// These are the default starting positions
-	_draw_info.c_start = _focused_object->_col_pos - (static_cast<int32>(SCREEN_COLS) / 2);
-	_draw_info.r_start = _focused_object->_row_pos - (static_cast<int32>(SCREEN_ROWS) / 2);
+	_draw_info.c_start = static_cast<int16>(_focused_object->_col_pos - (static_cast<int32>(SCREEN_COLS) / 2));
+	_draw_info.r_start = static_cast<int16>(_focused_object->_row_pos - (static_cast<int32>(SCREEN_ROWS) / 2));
 
 	// *********************** (2) Calculate the drawing information **************************
 	if (_focused_object->_status & IN_MOTION) {
@@ -802,7 +802,7 @@ void MapMode::_GetDrawInfo() {
 	}
 	// Exceeds the far-right side of the map
 	else if (_draw_info.c_start > _col_count - static_cast<int32>(SCREEN_COLS) - 1) { 
-		_draw_info.c_start = _col_count - static_cast<int32>(SCREEN_COLS);
+		_draw_info.c_start = static_cast<int16>(_col_count - static_cast<int32>(SCREEN_COLS));
 		_draw_info.c_pos = -(SCREEN_COLS / 2.0f);
 	}
 
@@ -818,7 +818,7 @@ void MapMode::_GetDrawInfo() {
 	}
 	// Exceeds the far-south side of the map
 	else if (_draw_info.r_start > _row_count - static_cast<int32>(SCREEN_ROWS) - 1) { 
-		_draw_info.r_start = _row_count - static_cast<int32>(SCREEN_ROWS);
+		_draw_info.r_start = static_cast<int16>(_row_count - static_cast<int32>(SCREEN_ROWS));
 		_draw_info.r_pos = (SCREEN_ROWS / 2.0f) - 1.0f;
 	}
 
@@ -860,8 +860,8 @@ void MapMode::Draw() {
 
 	// ************** (3) Draw the Upper Layer *************
 	VideoManager->Move(_draw_info.c_pos, _draw_info.r_pos);
-	for (uint32 r = _draw_info.r_start; r < _draw_info.r_start + _draw_info.r_draw; r++) {
-		for (uint32 c = _draw_info.c_start; c < _draw_info.c_start + _draw_info.c_draw; c++) {
+	for (int32 r = _draw_info.r_start; r < _draw_info.r_start + _draw_info.r_draw; r++) {
+		for (int32 c = _draw_info.c_start; c < _draw_info.c_start + _draw_info.c_draw; c++) {
 			if (_tile_layers[r][c].upper_layer >= 0) // Then an upper layer tile exists and we should draw it;
 				VideoManager->DrawImage(_map_tiles[_tile_frames[_tile_layers[r][c].upper_layer]->frame]);
 			VideoManager->MoveRelative(1.0f, 0.0f);

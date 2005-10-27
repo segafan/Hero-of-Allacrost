@@ -171,7 +171,7 @@ inline void GameModeManager::Pop() {
 
 // Pop off all game modes
 void GameModeManager::PopAll() {
-	_pop_count = _game_stack.size();
+	_pop_count = static_cast<uint32>(_game_stack.size());
 }
 
 

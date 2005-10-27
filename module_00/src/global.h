@@ -417,7 +417,7 @@ private:
 	//! The various attack points for the enemy.
 	std::vector<GAttackPoint> _attack_points;
 	//! The frame images for the enemy sprite.
-	std::vector<hoa_video::ImageDescriptor> _sprite_frames;
+	std::vector<hoa_video::StaticImage> _sprite_frames;
 
 	//! The current number of hit points for the enemy.
 	uint32 _hit_points;
@@ -545,9 +545,9 @@ private:
 	//! The (four) attack points of the character.
 	std::vector<GAttackPoint> _attack_points;
 	//! The frame images for the character's map sprite.
-	std::vector<hoa_video::ImageDescriptor> _map_frames;
+	std::vector<hoa_video::StaticImage> _map_frames;
 	//! The frame images for the character's battle sprite.
-	std::vector<hoa_video::ImageDescriptor> _battle_frames;
+	std::vector<hoa_video::StaticImage> _battle_frames;
 
 	//! The current number of hit points of the character.
 	uint32 _hit_points;
@@ -597,7 +597,7 @@ public:
 	std::string GetFilename() { return _filename; }
 	void SetID(uint32 id) { _char_id = id; }
 	uint32 GetID() { return _char_id; }
-	std::vector<hoa_video::ImageDescriptor>* GetMapFrames() { return &_map_frames; }
+	std::vector<hoa_video::StaticImage>* GetMapFrames() { return &_map_frames; }
 	void SetHP(uint32 hp) { _hit_points = hp; }
 	uint32 GetHP() { return _hit_points; }
 	void SetMaxHP(uint32 max_hp) { _max_hit_points = max_hp; }

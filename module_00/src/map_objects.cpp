@@ -50,8 +50,8 @@ MapMode* MapObject::CurrentMap = NULL;
 // Initialize the members and setup the pointer to the GameVideo class
 MapObject::MapObject(uint8 type, uint32 row, uint32 col, uint8 alt, uint16 stat) {
 	_object_type = type;
-	_row_pos = row;
-	_col_pos = col;
+	_row_pos = static_cast<int16>(row);
+	_col_pos = static_cast<int16>(col);
 	_altitude = alt;
 	_status = stat;
 }
@@ -97,10 +97,10 @@ MapSprite::~MapSprite() {
 
 // Load the appropriate number of image frames for the sprite
 void MapSprite::LoadFrames() {
-	ImageDescriptor imd;
+	StaticImage imd;
 
 	// Prepare standard sprite animation frames (24 count)
-	_frames = new vector<ImageDescriptor>;
+	_frames = new vector<StaticImage>;
 	imd.SetDimensions(1.0f, 2.0f);
 	imd.SetFilename(_filename + "_d1.png");
 	_frames->push_back(imd);

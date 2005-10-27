@@ -102,7 +102,9 @@ GameVideo::GameVideo()
   _coordSys(0.0f, 1024.0f, 0.0f, 768.0f),
   _scissorEnabled(false),
   _viewport(0, 0, 100, 100),
-  _scissorRect(0, 0, 1024, 768)
+  _scissorRect(0, 0, 1024, 768),
+  _animation_counter(0),
+  _current_frame_diff(0)
 {
 	if (VIDEO_DEBUG) 
 		cout << "VIDEO: GameVideo constructor invoked\n";
@@ -649,13 +651,13 @@ bool GameVideo::Display(int32 frameTime)
 	
 	_PushContext();
 	SetCoordSys(0, 1024, 0, 768);
-	_UpdateShake(frameTime);	
+	_UpdateShake(frameTime);
 	
 	// show an overlay over the screen if we're fading
 	if(_fader.ShouldUseFadeOverlay())
 	{
 		Color c = _fader.GetFadeOverlayColor();
-		ImageDescriptor fadeOverlay;
+		StaticImage fadeOverlay;
 		fadeOverlay.SetDimensions(1024.0f, 768.0f);
 		fadeOverlay.SetColor(c);
 		LoadImage(fadeOverlay);		
@@ -699,6 +701,15 @@ bool GameVideo::Display(int32 frameTime)
 	SDL_GL_SwapBuffers();
 	
 	_fader.Update(frameTime);	
+	
+	// update animation timers
+	
+	int32 oldFrameIndex = _animation_counter / VIDEO_ANIMATION_FRAME_PERIOD;
+	_animation_counter += frameTime;
+	int32 currentFrameIndex = _animation_counter / VIDEO_ANIMATION_FRAME_PERIOD;
+	
+	_current_frame_diff = currentFrameIndex - oldFrameIndex;
+	
 	return true;
 }
 
@@ -959,7 +970,7 @@ bool GameVideo::ToggleAdvancedDisplay()
 // _CreateMenu: creates menu image descriptor
 //-----------------------------------------------------------------------------
 
-bool GameVideo::_CreateMenu(ImageDescriptor &menu, float width, float height, int32 edgeVisibleFlags, int32 edgeSharedFlags)
+bool GameVideo::_CreateMenu(StaticImage &menu, float width, float height, int32 edgeVisibleFlags, int32 edgeSharedFlags)
 {
 	return _gui->CreateMenu(menu, width, height, edgeVisibleFlags, edgeSharedFlags);
 }
@@ -1127,7 +1138,7 @@ bool GameVideo::ApplyLightingOverlay()
 //                      capture is already in memory, it is considered an error
 //-----------------------------------------------------------------------------
 
-bool GameVideo::CaptureScreen(ImageDescriptor &id)
+bool GameVideo::CaptureScreen(StaticImage &id)
 {
 
 	if(VIDEO_DEBUG)
@@ -1405,7 +1416,7 @@ bool GameVideo::SetDefaultCursor(const std::string &cursorImageFilename)
 // GetDefaultCursor: sets the gefault menu cursor, returns NULL if none is set
 //-----------------------------------------------------------------------------
 
-ImageDescriptor *GameVideo::GetDefaultCursor()
+StaticImage *GameVideo::GetDefaultCursor()
 {
 	if(_defaultMenuCursor.GetWidth() != 0.0f)  // cheap test if image is valid
 		return &_defaultMenuCursor;
@@ -1572,6 +1583,119 @@ int32 GameVideo::_ScreenCoordY(float y)
 		percent = (y - _coordSys._bottom) / (_coordSys._top - _coordSys._bottom);
 	
 	return int32(percent * float(_height));
+}
+
+
+//-----------------------------------------------------------------------------
+// Update: updates the internal frame counter for an animation
+//-----------------------------------------------------------------------------
+
+void AnimatedImage::Update()
+{
+	int32 numFrames = static_cast<int32>(_frames.size());
+	if(numFrames <= 1)
+		return;
+		
+	GameVideo *video = GameVideo::GetReference();
+	int32 frameChange = video->GetFrameChange();
+	
+	_frame_counter += frameChange;
+	
+	while(_frame_counter >= _frames[_frame_index]._frame_time)
+	{
+		frameChange = _frame_counter - _frames[_frame_index]._frame_time;
+		_frame_index = (_frame_index + 1) % numFrames;
+		_frame_counter = frameChange;
+	}
+}
+	
+
+//-----------------------------------------------------------------------------
+// SetFrameIndex: sets the current frame of the animation to frame_index
+//-----------------------------------------------------------------------------
+
+void AnimatedImage::SetFrameIndex(int32 frame_index)
+{
+	_frame_index    = frame_index;
+	_frame_counter  = 0;
+}
+	
+
+//-----------------------------------------------------------------------------
+// AddFrame: add a new frame to the animation, passing in only the filename
+//           and frame count (how long the frame should last)
+//-----------------------------------------------------------------------------
+
+bool AnimatedImage::AddFrame(const std::string &frame, int frame_time)
+{
+	StaticImage img;
+	img.SetFilename(frame);	
+	
+	AnimationFrame animFrame;
+	animFrame._frame_time = frame_time;
+	animFrame._image = img;	
+	_frames.push_back(animFrame);
+
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+// AddFrame: add a new frame to the animation, passing in a static image and
+//           a frame count (how long the frame should last)
+//-----------------------------------------------------------------------------
+
+bool AnimatedImage::AddFrame(const StaticImage &frame, int frame_time)
+{
+	AnimationFrame animFrame;
+	animFrame._frame_time = frame_time;
+	animFrame._image = frame;
+	
+	// check if the static image which was passed actually has been loaded yet
+	// if it has been loaded, then we have to increment the reference count
+		
+	int32 numElements = static_cast<int32>(animFrame._image._elements.size());
+	if(numElements)
+	{
+		for(int j = 0; j < numElements; ++j)
+		{
+			++(animFrame._image._elements[j].image->refCount);
+		}		
+	}
+	
+	_frames.push_back(animFrame);
+	return true;
+}
+	
+//-----------------------------------------------------------------------------
+// GetWidth: returns the width of the 1st frame of the animation
+//-----------------------------------------------------------------------------
+
+float AnimatedImage::GetWidth() const
+{
+	return _frames[0]._image.GetWidth();
+}
+
+
+//-----------------------------------------------------------------------------
+// GetHeight: returns the height of the 1st frame of the animation
+//-----------------------------------------------------------------------------
+
+float AnimatedImage::GetHeight() const
+{
+	return _frames[0]._image.GetHeight();
+}
+
+	
+//-----------------------------------------------------------------------------
+// GetFrame: returns pointer to the indexth frame of animation as a static image.
+//           This function is somewhat dangerous since it lets you mess around
+//           with the internals of the animation, so only use it if it's
+//           necessary.
+//-----------------------------------------------------------------------------
+
+StaticImage *AnimatedImage::GetFrame(int32 index) const
+{
+	return const_cast<StaticImage *>(&(_frames[index]._image));
 }
 
 

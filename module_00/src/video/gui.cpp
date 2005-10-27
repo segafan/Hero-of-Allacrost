@@ -350,7 +350,7 @@ bool GUI::_CheckSkinConsistency(const MenuSkin &s)
 
 bool GUI::CreateMenu
 (
-	hoa_video::ImageDescriptor &id, 
+	hoa_video::StaticImage &id, 
 	float width, 
 	float height, 
 	int32 edgeVisibleFlags,

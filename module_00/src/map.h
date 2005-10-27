@@ -265,7 +265,7 @@ private:
 	private_map::MapFrame _draw_info;
 	
 	//! A vector containing the image for each map tile and frame.
-	std::vector<hoa_video::ImageDescriptor> _map_tiles;
+	std::vector<hoa_video::StaticImage> _map_tiles;
 	//! The music that we would like available on the map.
 	std::vector<hoa_audio::MusicDescriptor> _map_music;
 	//! The specific sounds that the map needs available.
@@ -278,7 +278,7 @@ private:
 	//! A vector of all the NPC map sprites that participate in this dialogue
 	std::vector<MapSprite*> _dialogue_speakers;
 	//! The dialogue menu used by map mode.
-	hoa_video::ImageDescriptor _dialogue_menu;
+	hoa_video::StaticImage _dialogue_menu;
 	//! A pointer to the lines of the current dialogue.
 	std::vector<std::string> *_dialogue_text;
 	//! The index to the current line of dialogue.

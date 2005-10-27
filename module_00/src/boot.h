@@ -86,7 +86,7 @@ private:
 	//! Sounds that will be used at the boot screen.
 	std::vector<hoa_audio::SoundDescriptor> _boot_sound;
 	//! Images that will be used at the boot screen.
-	std::vector<hoa_video::ImageDescriptor> _boot_images;
+	std::vector<hoa_video::StaticImage> _boot_images;
 	
 	//! The lowest level options in boot mode
 	hoa_video::OptionBox _main_options;

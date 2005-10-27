@@ -85,9 +85,9 @@ private:
 	//! The currently selected quit option
 	uint8 _quit_type;
 	//! An image of the last frame shown on the screen before QuitMode was called.
-	hoa_video::ImageDescriptor _saved_screen;
+	hoa_video::StaticImage _saved_screen;
 	//! An image of the quit menu.
-	hoa_video::ImageDescriptor _quit_menu;
+	hoa_video::StaticImage _quit_menu;
 	//! The option box which presents the quit options that the user can select.
 	hoa_video::OptionBox _option_box;
 

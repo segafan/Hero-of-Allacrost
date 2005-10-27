@@ -77,6 +77,9 @@ const float VIDEO_PI         = 3.141592653f;
 const float VIDEO_2PI        = 6.283185307f;
 //@}
 
+//! animation frame period: how many milliseconds 1 frame of animation lasts for
+const int32 VIDEO_ANIMATION_FRAME_PERIOD = 10;
+
 //! Draw flags to control x,y alignment, flipping, and blending
 enum
 {
@@ -157,7 +160,7 @@ enum TextShadowStyle
 
 
 // forward declarations
-class ImageDescriptor;
+class StaticImage;
 class GameVideo;
 class Color;
 
@@ -482,6 +485,8 @@ public:
 	float height;
 	
 	Color color[4];
+	
+	friend class AnimatedImage;
 };
 
 
@@ -887,30 +892,54 @@ public:
 
 
 /*!***************************************************************************
- *  \brief this is the class that external modules deal with when loading and
- *         drawing images.
+ *  \brief base class for StaticImage and AnimatedImage
+ *****************************************************************************/
+
+class ImageDescriptor
+{
+public:
+
+	virtual ~ImageDescriptor() {}
+
+	void SetStatic(bool isStatic);
+
+	virtual float GetWidth() const = 0;
+	virtual float GetHeight() const = 0;
+
+protected:
+
+	ImageDescriptor() {}  // private constructor, this class is only meant to be used as a base
+	bool _animated; 
+	
+	friend class GameVideo;
+};
+
+
+/*!***************************************************************************
+ *  \brief this represents an image, used internally ONLY
  *
- *  \note  ImageDescriptors may be simple images or compound images. Compound
+ *  \note  StaticImages may be simple images or compound images. Compound
  *         images are when you stitch together multiple small images to create
  *         a large image, e.g. with TilesToObject(). Externally though,
  *         it's fine to think of compound images as just a single image.
  *****************************************************************************/
 
-class ImageDescriptor 
+class StaticImage : public ImageDescriptor
 {
 public:
 
-	ImageDescriptor() 
+	StaticImage() 
 	{
 		Clear();
+		_animated = false;
 	}
 	
 	//! AddImage allows you to create compound images. You start with a 
-	//! newly created ImageDescriptor, then call AddImage(), passing in
+	//! newly created StaticImage, then call AddImage(), passing in
 	//! all the images you want to add, along with the x, y offsets they
 	//! should be positioned at.
 	
-	bool AddImage(const ImageDescriptor &id, float xOffset, float yOffset);
+	bool AddImage(const StaticImage &id, float xOffset, float yOffset);
 	
 	void Clear()
 	{
@@ -920,6 +949,8 @@ public:
 		_color[0] = _color[1] = _color[2] = _color[3] = Color::white;
 		_elements.clear();
 	}
+
+	void SetFilename     (const std::string &filename) { _filename = filename; }
 
 	void SetColor        (const Color &color)
 	{
@@ -940,33 +971,148 @@ public:
 	void SetHeight       (float height)   {	_height = height; }
 	
 	void SetStatic       (bool isStatic)  { _isStatic = isStatic; }
-	void SetFilename     (const std::string &filename) { _filename = filename; }
 		
 	float GetWidth() const  { return _width; }
 	float GetHeight() const { return _height; }
 	void  GetVertexColor(Color &c, int colorIndex) { c = _color[colorIndex]; }
-	
+			
 private:
 
-	Color _color[4];         //! used only as a parameter to LoadImage. Holds the color of the upper left, upper right, lower left, and lower right vertices respectively
-
 	std::string _filename;  //! used only as a parameter to LoadImage.
+
+	//! an image descriptor represents a compound image, which is made
+	//! up of multiple elements
+	std::vector <private_video::ImageElement> _elements;
+
+
+	Color _color[4];      //! used only as a parameter to LoadImage. Holds the color of the upper left, upper right, lower left, and lower right vertices respectively
 
 	bool  _isStatic;      //! used only as a parameter to LoadImage. This tells
 	                      //! whether the image being loaded is to be loaded
 	                      //! into a non-volatile area of texture memory
 	                      
 	float _width, _height;  //! width and height of image, in pixels.
-	                         //! If the ImageDescriptor is a compound, i.e. it
+	                         //! If the StaticImage is a compound, i.e. it
 	                         //! contains multiple images, then the width and height
 	                         //! refer to the entire compound           
 
-	//! an image descriptor represents a compound image, which is made
-	//! up of multiple elements
-	std::vector <private_video::ImageElement> _elements;
+	friend class GameVideo;
+	friend class AnimatedImage;
+};	
+
+
+
+/*!***************************************************************************
+ *  \brief this represents an animated image.
+ *****************************************************************************/
+
+class AnimationFrame
+{
+public:
+	
+	int32     _frame_time;  // how long to display this frame (relative to VIDEO_ANIMTION_FRAME_PERIOD)
+	StaticImage _image;
+};
+
+class AnimatedImage : public ImageDescriptor
+{
+public:
+	AnimatedImage() { _animated = true; _frame_index = _frame_counter = 0; }
+	
+
+	/*!
+	 *  \brief call every frame to update the animation's current frame. This will automatically
+	 *         synchronize the animation to VIDEO_ANIMATION_FRAME_PERIOD, i.e. 30 frames per second.
+	 *         If you want to update the frames yourself using some custom method, then use
+	 *         SetFrame()
+	 */
+	void Update();
+	
+
+	/*!
+	 *  \brief call to set the current frame index of the animation. This is useful for character
+	 *         animation for example, where the current frame depends on how far the character is
+	 *         from one tile to the next tile.
+	 *
+	 *  \param frame_index an index from 0 to numFrames - 1
+	 */	
+	void SetFrameIndex(int32 frame_index);
+	
+	
+	/*!
+	 *  \brief returns the number of frames in this animation
+	 */
+	int32 GetNumFrames() const { return static_cast<int32>(_frames.size()); }
+
+
+	/*!
+	 *  \brief returns an index to the current animation
+	 */
+	int32 GetCurFrameIndex() const { return _frame_index; }
+
+	
+	/*!
+	 *  \brief adds a frame using the filename of the image. This is the most convenient
+	 *         way to add frames, BUT this makes it impossible to control the image properties,
+	 *         such as vertex colors, and size (width and height). If you do it this way,
+	 *         the width and height will be the pixel width/height of the image itself. This isn't
+	 *         always what you want- for example if your coordinate system is in terms of tiles,
+	 *         then a 32x32 tile would have a width and height of 1, not 32.
+	 *
+	 *  \param frame filename of the frame to add
+	 *
+	 *  \param frame_time  how many animation periods this frame lasts for. For example, if
+	 *                     VIDEO_ANIMATION_FRAME_PERIOD is 30, and frame_count is 3, then this
+	 *                     frame will last for 90 milliseconds.
+	 */	
+	bool AddFrame(const std::string &frame, int frame_time);
+
+
+	/*!
+	 *  \brief adds a frame by passing in a static image.
+	 *
+	 *  \param frame a static image to use as the frame
+	 *
+	 *  \param frame_time  how many animation periods this frame lasts for. For example, if
+	 *                     VIDEO_ANIMATION_FRAME_PERIOD is 30, and frame_count is 3, then this
+	 *                     frame will last for 90 milliseconds.
+	 */	
+	bool AddFrame(const StaticImage &frame, int frame_time);
+
+
+	/*!
+	 *  \brief returns the width of the 1st frame of animation. You should try to make all your
+	 *         frames the same size, otherwise the "width" of an animation doesn't really have any
+	 *         meaning.
+	 */
+	float GetWidth() const;
+
+
+	/*!
+	 *  \brief returns the height of the 1st frame of animation. You should try to make all your
+	 *         frames the same size, otherwise the "height" of an animation doesn't really have any
+	 *         meaning.
+	 */
+	float GetHeight() const;
+
+	
+	/*!
+	 *  \brief returns a pointer to the indexth frame. For the most part, this is a function you
+	 *         should never be messing with, but this function is available in case you need it.
+	 */
+	StaticImage *GetFrame(int32 index) const;
+	
+
+private:
+
+	int32 _frame_index;      // index of which animation frame to show
+	int32 _frame_counter;    // count how long each frame has been shown for
+	
+	std::vector<AnimationFrame> _frames;
 
 	friend class GameVideo;
 };
+
 
 
 /*!****************************************************************************
@@ -1360,14 +1506,19 @@ public:
 	bool DrawText(const hoa_utils::ustring &uText);
 
 
-	//-- Images ----------------------------------------------------------------
+	//-- Images / Animation ---------------------------------------------------------
 	
+
 	/*!
-	 *  \brief loads an image
+	 *  \brief loads an image (static or animated image). Assumes that you have already called
+	 *         all the appropriate functions to initialize the image. In the case of a static image,
+	 *         this means setting its filename, and possibly other properties like width, height, and
+	 *         color. In the case of an animated image, it means calling AddFrame().
 	 *
-	 *  \param id  image descriptor to load. Can specify filename, color, width, height, and static as its parameters
+	 *  \param id  image descriptor to load- either a StaticImage or AnimatedImage.
 	 */
 	bool LoadImage(ImageDescriptor &id);
+
 
 	/*!
 	 *  \brief captures the contents of the screen and saves it to an image
@@ -1375,16 +1526,17 @@ public:
 	 *
 	 *  \param id  image descriptor to capture to
 	 */
-	bool CaptureScreen(ImageDescriptor &id);
+	bool CaptureScreen(StaticImage &id);
 
 	
 	/*!
-	 *  \brief decreases ref count of an image
+	 *  \brief decreases ref count of an image (static or animated)
 	 *
 	 *  \param id  image descriptor to decrease the reference count of
 	 */
 	bool DeleteImage(ImageDescriptor &id);
 	
+
 	/*!
 	 *  \brief marks the start of an image loading batch. Use for loading
 	 *         map tiles for instance, where many images are being loaded at
@@ -1422,17 +1574,18 @@ public:
 	/*!
 	 *  \brief draws an image which is modulated by the scene's light color
 	 *
-	 *  \param id  image descriptor to draw
+	 *  \param id  image descriptor to draw (either StaticImage or AnimatedImage)
 	 */	
-	bool DrawImage(const ImageDescriptor &id);  
-	
+	bool DrawImage(const ImageDescriptor &id);
+
+
 	/*!
-	 *  \brief draws an iamge which is modulated by a custom color (not the
-	 *         scene lighting)
-	 *  \param id  Image descriptor to draw
-	 *  \param color  color to modulate the image by
-	 */
-	bool DrawImage(const ImageDescriptor &id, const Color &color);  
+	 *  \brief draws an image which is modulated by a custom color
+	 *
+	 *  \param id  image descriptor to draw (either StaticImage or AnimatedImage)
+	 */	
+	bool DrawImage(const ImageDescriptor &id, const Color &color);
+	
 
 	/*!
 	 *  \brief converts a 2D array of tiles into one big image
@@ -1441,11 +1594,19 @@ public:
 	 *  \param indices a 2D vector in row-column order (e.g. indices[y][x])
 	 *         which forms a rectangular array of tiles
 	 */
-	ImageDescriptor TilesToObject
+	StaticImage TilesToObject
 	( 
-		std::vector<ImageDescriptor> &tiles, 
+		std::vector<StaticImage> &tiles, 
 		std::vector< std::vector<uint32> > indices 
 	);
+
+
+	/*!
+	 *  \brief returns the amount of animation frames that have passed since the last
+	 *         call to GameVideo::Display(). This number is based on VIDEO_ANIMATION_FRAME_PERIOD,
+	 *         and is used so that AnimatedImages know how many frames to increment themselves by.
+	 */
+	int32 GetFrameChange() { return _current_frame_diff; }
 
 	void DEBUG_NextTexSheet();    // These cycle through the currently loaded
 	void DEBUG_PrevTexSheet();    // texture sheets so they can be viewed on screen
@@ -1543,7 +1704,7 @@ public:
 	 */
 	bool DrawHalo
 	(
-		const ImageDescriptor &id, 
+		const StaticImage &id, 
 		float x, 
 		float y, 
 		const Color &color = Color(1.0f, 1.0f, 1.0f, 1.0f)
@@ -1559,7 +1720,7 @@ public:
 	 */	
 	bool DrawLight
 	(
-		const ImageDescriptor &id, 
+		const StaticImage &id, 
 		float x, 
 		float y, 
 		const Color &color = Color(1.0f, 1.0f, 1.0f, 1.0f)
@@ -1655,7 +1816,7 @@ public:
 	bool ToggleAdvancedDisplay();
 
 	bool SetDefaultCursor(const std::string &cursorImageFilename);
-	ImageDescriptor *GetDefaultCursor();
+	StaticImage *GetDefaultCursor();
 
 private:
 	SINGLETON_DECLARE(GameVideo);
@@ -1718,7 +1879,7 @@ private:
 	std::string _currentFont;          //! current font name
 	Color       _currentTextColor;     //! current text color
 
-	ImageDescriptor _defaultMenuCursor;  //! image which is to be used as the cursor
+	StaticImage _defaultMenuCursor;  //! image which is to be used as the cursor
 	
 	bool _textShadow;   //! if true, text shadow effect is enabled
 
@@ -1727,7 +1888,10 @@ private:
 	
 	Color _lightColor;      //! current scene lighting color (essentially just modulates vertex colors of all the images)
 
-	std::vector <ImageDescriptor *>    _batchLoadImages;    //! vector of images in a batch which are to be loaded
+	int32 _animation_counter;   //! counter to keep track of milliseconds since game started for animations
+	int32 _current_frame_diff;  //! keeps track of the number of frames animations should increment by for the current frame
+
+	std::vector <StaticImage *>    _batchLoadImages;    //! vector of images in a batch which are to be loaded
 	
 	std::map    <std::string, private_video::Image*>   _images;      //! STL map containing all the images currently being managed by the video engine	
 	std::vector <private_video::TexSheet *>     _texSheets;          //! vector containing all texture sheets currently being managed by the video engine
@@ -1762,7 +1926,7 @@ private:
 
 
 	/*!
-	 *  \brief creates an ImageDescriptor of a menu which is the given size
+	 *  \brief creates an StaticImage of a menu which is the given size
 	 *
 	 *  \param menu   Reference to menu to create
 	 *
@@ -1776,7 +1940,7 @@ private:
 	 */
 	bool _CreateMenu
 	(
-		ImageDescriptor &menu, 
+		StaticImage &menu, 
 		float width, 
 		float height, 
 		int32 edgeVisibleFlags, 
@@ -1832,6 +1996,22 @@ private:
 	 */	
 	bool _DeleteImage    (private_video::Image *const image);
 	
+
+	/*!
+	 *  \brief decreases ref count of an image
+	 *
+	 *  \param id  image descriptor to decrease the reference count of
+	 */
+	bool _DeleteImage(StaticImage &id);
+
+	
+	/*!
+	 *  \brief decreases ref count of an animated image
+	 *
+	 *  \param id  image descriptor to decrease the reference count of
+	 */
+	bool _DeleteImage(AnimatedImage &id);
+
 	
 	/*!
 	 *  \brief deletes the temporary textures from the "temp" folder that were saved
@@ -1867,6 +2047,23 @@ private:
 	(
 		const private_video::ImageElement &element
 	);
+
+
+	/*!
+	 *  \brief helper function to DrawImage() to do the actual work of doing an image
+	 *
+	 *  \param img static image to draw
+	 */	
+	bool _DrawStaticImage(const StaticImage &img);
+
+
+	/*!
+	 *  \brief helper function to DrawImage() to do the actual work of drawing an image
+	 *
+	 *  \param img static image to draw
+	 *  \param color color to modulate image by
+	 */	
+	bool _DrawStaticImage(const StaticImage &img, const Color &color);  
 
 
 	/*!
@@ -1907,15 +2104,31 @@ private:
 	 */	
 
 	float _Lerp(float alpha, float initial, float final);
+
+
+	/*!
+	 *  \brief loads an image
+	 *
+	 *  \param id  image descriptor to load. Can specify filename, color, width, height, and static as its parameters
+	 */
+	bool _LoadImage(StaticImage &id);
+
+
+	/*!
+	 *  \brief loads an animated image. Assumes that you have called AddFrame for all the frames.
+	 *
+	 *  \param id  image descriptor to load
+	 */
+	bool _LoadImage(AnimatedImage &id);
 	
 
 	/*!
 	 *  \brief does the actual work of loading an image
 	 *
-	 *  \param id  ImageDescriptor of the image to load. May specify a filename, color, width, height, and static
+	 *  \param id  StaticImage of the image to load. May specify a filename, color, width, height, and static
 	 */	
 
-	bool _LoadImageHelper(ImageDescriptor &id);
+	bool _LoadImageHelper(StaticImage &id);
 
 
 	/*!

@@ -112,7 +112,7 @@ uint32 GameAudio::_AllocateMusicIndex() {
 	}
 
 	for (uint32 i = 1; i < MAX_CACHED_MUSIC; i++) { // Go thru the music cache trying to find older items
-		if (_music_cache[i].time < lru && i != _current_track) { // Found a non-active item with an older time
+		if (_music_cache[i].time < lru && static_cast<int32>(i) != _current_track) { // Found a non-active item with an older time
 			lru = _music_cache[i].time; // Replace lru and index with the attributes of the older element
 			index = i;
 		}

@@ -231,14 +231,14 @@ void GameData::LoadKeyJoyState(KeyState *keystate, JoystickState *joystate) {
 
 // This function loads all necessary variables and vectors from the boot.hoa config file
 void GameData::LoadBootData(
-		vector<ImageDescriptor> *boot_images,
+		vector<StaticImage> *boot_images,
 		vector<SoundDescriptor> *boot_sound,
 		vector<MusicDescriptor> *boot_music) {
 	OpenLuaFile("dat/config/boot.hoa");
 	string s;
 	int32 x1, x2, y1, y2;
 	// Load the video stuff
-	ImageDescriptor im;
+	StaticImage im;
 
 	// The background
 	GetGlobalString("background_image", s);
@@ -320,7 +320,7 @@ void GameData::LoadMap(hoa_map::MapMode *map_mode, int32 new_map_id) {
 		//TODO Add meaningful error codes, and make LoadMap return an int
 		return;
 	}
-	ImageDescriptor imgdsc;
+	StaticImage imgdsc;
 	imgdsc.SetDimensions(1.0f, 1.0f);
 
 	_VideoManager->BeginImageLoadBatch();
@@ -386,7 +386,7 @@ void GameData::LoadMap(hoa_map::MapMode *map_mode, int32 new_map_id) {
 		// TODO Add meaningful error codes, and make LoadMap return an int
 		return;
 	}
-	if (lower.size() != map_mode->_row_count * map_mode->_col_count) {
+	if (static_cast<int32>(lower.size()) != map_mode->_row_count * map_mode->_col_count) {
 		cerr << "DATA ERROR: The actual size of the lower, upper and mask vectors is NOT EQUAL to row_count*col_count !!! BARF!\n";
 		cerr << "_row_count = " << map_mode->_row_count << "\n";
 		cerr << "_col_count = " << map_mode->_col_count << "\n";
@@ -399,9 +399,9 @@ void GameData::LoadMap(hoa_map::MapMode *map_mode, int32 new_map_id) {
 	for (int32 i = 0; i < map_mode->_row_count; i++) {
 		map_mode->_tile_layers.push_back(vector<MapTile>());
 		for (int32 j = 0; j < map_mode->_col_count; j++) {
-			t.lower_layer = lower[c];
-			t.upper_layer = upper[c];
-			t.properties = emask[c];
+			t.lower_layer = static_cast<uint8>(lower[c]);
+			t.upper_layer = static_cast<uint8>(upper[c]);
+			t.properties = static_cast<uint8>(emask[c]);
 			map_mode->_tile_layers[i].push_back(t);
 			c++;
 		}

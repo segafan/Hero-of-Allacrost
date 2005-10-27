@@ -57,7 +57,7 @@ private:
 	//! Retains the number of milliseconds that have elapsed since this mode was initialized
 	uint32 _scene_timer;
 
-	//hoa_video::ImageDescriptor scene;
+	//hoa_video::StaticImage scene;
 public:
   SceneMode();
   ~SceneMode();

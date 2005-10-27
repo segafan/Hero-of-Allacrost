@@ -40,15 +40,62 @@ bool IsPowerOfTwo(uint32 x)
 
 
 //-----------------------------------------------------------------------------
-// LoadImage: loads an image and returns it in the image descriptor
-//            On failure, returns false.
-//
-//            If isStatic is true, that means this is an image that is probably
-//            to remain in memory for the entire game, so place it in a
-//            special texture sheet reserved for things that don't change often.
+// LoadImage: loads an image (static image or animated image) and returns true
+//            on success
 //-----------------------------------------------------------------------------
 
 bool GameVideo::LoadImage(ImageDescriptor &id)
+{
+	if(id._animated)
+	{
+		return _LoadImage(dynamic_cast<AnimatedImage &>(id));
+	}
+	else
+	{
+		return _LoadImage(dynamic_cast<StaticImage &>(id));
+	}
+}
+
+
+//-----------------------------------------------------------------------------
+// _LoadImage: helper function to load an animated image
+//-----------------------------------------------------------------------------
+
+bool GameVideo::_LoadImage(AnimatedImage &id)
+{
+	uint32 numFrames = static_cast<uint32>(id._frames.size());
+	
+	bool success = true;
+	
+	// go through all the frames and load anything that hasn't already been loaded
+	for(uint32 frame = 0; frame < numFrames; ++frame)
+	{
+		// if the API user passes only filenames to AddFrame(), then we need to load
+		// the images, but if a static image is passed directly, then we can skip
+		// loading
+		
+		bool needToLoad = id._frames[frame]._image._elements.empty();
+		
+		if(needToLoad)
+		{
+			success &= _LoadImage(id._frames[frame]._image);
+		}
+	}
+	
+	return success;
+}
+
+
+//-----------------------------------------------------------------------------
+// _LoadImage: loads an image and returns it in the static image
+//             On failure, returns false.
+//
+//             If isStatic is true, that means this is an image that is probably
+//             to remain in memory for the entire game, so place it in a
+//             special texture sheet reserved for things that don't change often.
+//-----------------------------------------------------------------------------
+
+bool GameVideo::_LoadImage(StaticImage &id)
 {
 	// 1. special case: if filename is empty, load a colored quad
 	
@@ -148,19 +195,19 @@ bool GameVideo::EndImageLoadBatch()
 	
 	// go through vector of images waiting to be loaded and load them
 
-	std::vector <ImageDescriptor *>::iterator iImage = _batchLoadImages.begin();
-	std::vector <ImageDescriptor *>::iterator iEnd   = _batchLoadImages.end();
+	std::vector <StaticImage *>::iterator iImage = _batchLoadImages.begin();
+	std::vector <StaticImage *>::iterator iEnd   = _batchLoadImages.end();
 	
 	bool success = true;
 	
 	while(iImage != iEnd)
 	{
-		ImageDescriptor *id = *iImage;
+		StaticImage *id = *iImage;
 		
 		if(!id)
 		{
 			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: got a NULL ImageDescriptor in EndImageLoadBatch()!" << endl;
+				cerr << "VIDEO ERROR: got a NULL StaticImage in EndImageLoadBatch()!" << endl;
 			success = false;
 		}
 		
@@ -182,7 +229,7 @@ bool GameVideo::EndImageLoadBatch()
 //                     loading an image.
 //-----------------------------------------------------------------------------
 
-bool GameVideo::_LoadImageHelper(ImageDescriptor &id)
+bool GameVideo::_LoadImageHelper(StaticImage &id)
 {
 	bool isStatic = id._isStatic;
 	
@@ -303,9 +350,9 @@ bool GameVideo::_LoadRawPixelData(const string &filename, ILuint &pixelData, uin
 //       it's not loading any new image from disk, it increases the ref counts.
 //-----------------------------------------------------------------------------
 
-bool ImageDescriptor::AddImage
+bool StaticImage::AddImage
 (
-	const ImageDescriptor &id, 
+	const StaticImage &id, 
 	float xOffset, 
 	float yOffset
 )
@@ -373,13 +420,13 @@ bool ImageDescriptor::AddImage
 //     5. Remember to call DeleteImage() when you're done.
 //-----------------------------------------------------------------------------
 
-ImageDescriptor GameVideo::TilesToObject
+StaticImage GameVideo::TilesToObject
 ( 
-	vector<ImageDescriptor> &tiles, 
+	vector<StaticImage> &tiles, 
 	vector< vector<uint32> > indices 
 )
 {	
-	ImageDescriptor id;
+	StaticImage id;
 
 	// figure out the width and height information
 		
@@ -694,7 +741,7 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 
 	ImageElement elem(&img, 0.0f, 0.0f, (float)w, (float)h);
 	
-	ImageDescriptor id;
+	StaticImage id;
 	id._elements.push_back(elem);
 	
 	if(!DrawImage(id))
@@ -959,6 +1006,42 @@ bool TexSheet::RestoreImage(Image *img)
 
 
 //-----------------------------------------------------------------------------
+// DeleteImage: deletes an image descriptor (this is what the API user should call)
+//-----------------------------------------------------------------------------
+
+bool GameVideo::DeleteImage(ImageDescriptor &id)
+{
+	if(id._animated)
+	{
+		return _DeleteImage(dynamic_cast<AnimatedImage &>(id));
+	}
+	else
+	{
+		return _DeleteImage(dynamic_cast<StaticImage &>(id));
+	}	
+}
+
+
+//-----------------------------------------------------------------------------
+// _DeleteImage: deletes an animated image. Actually just goes through each frame
+//               and deletes that static image by calling the other _DeleteImage() function
+//-----------------------------------------------------------------------------
+
+bool GameVideo::_DeleteImage(AnimatedImage &id)
+{
+	int32 numFrames = id.GetNumFrames();
+	bool success = true;
+	
+	for(int j = 0; j < numFrames; ++j)
+	{
+		success &= _DeleteImage(id._frames[j]._image);
+	}
+	
+	return success;
+}
+
+
+//-----------------------------------------------------------------------------
 // _DeleteImage: decrements the reference count for all images composing this
 //              image descriptor.
 //
@@ -967,7 +1050,7 @@ bool TexSheet::RestoreImage(Image *img)
 //       in memory if possible). For others, they're simply marked as "free"
 //-----------------------------------------------------------------------------
 
-bool GameVideo::DeleteImage(ImageDescriptor &id)
+bool GameVideo::_DeleteImage(StaticImage &id)
 {
 	vector<ImageElement>::iterator iImage = id._elements.begin();
 	vector<ImageElement>::iterator iEnd   = id._elements.end();

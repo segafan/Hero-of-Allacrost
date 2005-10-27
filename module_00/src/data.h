@@ -141,7 +141,7 @@ public:
 	void LoadGameSettings();
 	void ResetGameSettings();
 	void LoadKeyJoyState(hoa_engine::KeyState *keystate, hoa_engine::JoystickState *joystate);
-	void LoadBootData(std::vector<hoa_video::ImageDescriptor> *boot_images,
+	void LoadBootData(std::vector<hoa_video::StaticImage> *boot_images,
 	                  std::vector<hoa_audio::SoundDescriptor> *boot_sound,
 	                  std::vector<hoa_audio::MusicDescriptor> *boot_music);
 	void LoadMap(hoa_map::MapMode *mapmode, int32 map_id);

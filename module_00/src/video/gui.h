@@ -535,7 +535,7 @@ private:
 	
 	MenuState _state;                //! menu state (hidden, shown, hiding, showing)
 	int32  _currentTime;             //! milliseconds that passed since menu was shown
-	ImageDescriptor _menuImage;      //! image descriptor of the menu
+	StaticImage _menuImage;      //! image descriptor of the menu
 	MenuDisplayMode _mode;           //! text display mode (one character at a time, fading in, instant, etc.)
 	
 	bool       _isScissored;         //! true if scissoring needs to be used
@@ -843,7 +843,7 @@ public:
 	
 	std::vector<OptionElement>      elements;  //! vector of option elements
 	std::vector<hoa_utils::ustring> text;      //! vector of text
-	std::vector<ImageDescriptor>    images;    //! vector of images
+	std::vector<StaticImage>    images;    //! vector of images
 	
 	bool disabled;   //! flag to specify whether this option is disabled or not
 };
@@ -1241,7 +1241,7 @@ public:
 	// skin[2][1]: bottom
 	// skin[2][2]: bottom right
 	
-	hoa_video::ImageDescriptor skin[3][3], tri_t, tri_l, tri_r, tri_b, quad;
+	hoa_video::StaticImage skin[3][3], tri_t, tri_l, tri_r, tri_b, quad;
 };
 
 
@@ -1314,7 +1314,7 @@ public:
 	 */	
 	bool CreateMenu
 	(
-		ImageDescriptor &id, 
+		StaticImage &id, 
 		float width, 
 		float height, 
 		int32 edgeVisibleFlags, 
