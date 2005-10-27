@@ -104,7 +104,10 @@ GameVideo::GameVideo()
   _viewport(0, 0, 100, 100),
   _scissorRect(0, 0, 1024, 768),
   _animation_counter(0),
-  _current_frame_diff(0)
+  _current_frame_diff(0),
+  _lightningActive(false),
+  _lightningCurTime(0),
+  _lightningEndTime(0)
 {
 	if (VIDEO_DEBUG) 
 		cout << "VIDEO: GameVideo constructor invoked\n";
@@ -652,6 +655,12 @@ bool GameVideo::Display(int32 frameTime)
 	_PushContext();
 	SetCoordSys(0, 1024, 0, 768);
 	_UpdateShake(frameTime);
+	
+	// update lightning timer
+	_lightningCurTime += frameTime;
+	
+	if(_lightningCurTime > _lightningEndTime)
+		_lightningActive = false;
 	
 	// show an overlay over the screen if we're fading
 	if(_fader.ShouldUseFadeOverlay())
@@ -1697,6 +1706,114 @@ StaticImage *AnimatedImage::GetFrame(int32 index) const
 {
 	return const_cast<StaticImage *>(&(_frames[index]._image));
 }
+
+
+//-----------------------------------------------------------------------------
+// MakeLightning: creates a lightning effect
+//-----------------------------------------------------------------------------
+
+bool GameVideo::MakeLightning(const std::string &litFile)
+{
+	FILE *fp = fopen(litFile.c_str(), "rb");
+	if(!fp)
+		return false;
+	
+	int32 dataSize;
+	if(!fread(&dataSize, 4, 1, fp))
+	{
+		fclose(fp);
+		return false;
+	}
+
+	// since this file was created on windows, it uses little endian byte order
+	// Check if this processor uses big endian, and reorder bytes if so.
+
+	#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+		dataSize = ((dataSize & 0xFF000000) >> 24) | 
+		           ((dataSize & 0x00FF0000) >> 8) | 
+		           ((dataSize & 0x0000FF00) << 8) |
+		           ((dataSize & 0x000000FF) << 24);
+	#endif
+
+	uint8 *data = new uint8[dataSize];
+	
+	if(!fread(data, dataSize, 1, fp))
+	{
+		delete [] data;
+		fclose(fp);
+		return false;
+	}
+	
+	fclose(fp);
+	
+	_lightningData.clear();
+	
+	for(int32 j = 0; j < dataSize; ++j)
+	{
+		float f = float(data[j]) / 255.0f;
+		_lightningData.push_back(f);
+	}
+	
+	delete [] data;	
+	
+	_lightningActive = true;
+	_lightningCurTime = 0;
+	_lightningEndTime = dataSize * 1000 / 100;
+	
+	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// DrawLightning: draws lightning effect on the screen using a fullscreen overlay
+//-----------------------------------------------------------------------------
+
+bool GameVideo::DrawLightning()
+{
+	if(!_lightningActive)
+		return true;
+	
+	// convert milliseconds elapsed into data points elapsed
+	
+	float t = _lightningCurTime * 100.0f / 1000.0f;
+	
+	int32 roundedT = static_cast<int32>(t);
+	t -= roundedT;
+	
+	// get 2 separate data points and blend together (linear interpolation)
+	
+	float data1 = _lightningData[roundedT];
+	float data2 = _lightningData[roundedT+1];
+
+	float intensity = data1 * (1-t) + data2 * t;
+
+	DrawFullscreenOverlay(Color(1.0f, 1.0f, 1.0f, intensity));
+	
+	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// DrawFullscreenOverlay
+//-----------------------------------------------------------------------------
+
+bool GameVideo::DrawFullscreenOverlay(const Color &color)
+{
+	PushState();
+	
+	SetCoordSys(0.0f, 1.0f, 0.0f, 1.0f);
+	SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+	Move(0.0f, 0.0f);
+	StaticImage img;
+	img.SetDimensions(1.0f, 1.0f);
+	LoadImage(img);	
+	DrawImage(img, color);	
+	
+	PopState();
+	
+	return true;
+}
+
 
 
 }  // namespace hoa_video

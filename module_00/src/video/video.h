@@ -1745,6 +1745,32 @@ public:
 	 */	
 	bool ApplyLightingOverlay();
 
+
+	//-- Overlays / lightning -------------------------------------------------------
+
+
+	/*!
+	 *  \brief draws a full screen overlay of the given color
+	 *  \note  This is very slow, so use sparingly!
+	 */	
+	bool DrawFullscreenOverlay(const Color &color);
+
+
+	/*!
+	 *  \brief call to create lightning effect
+	 *  \param litFile a .lit file which contains lightning intensities stored
+	 *                 as bytes (0-255).
+	 */	
+	bool MakeLightning(const std::string &litFile);
+
+
+	/*!
+	 *  \brief call this every frame to draw any lightning effects. You should make
+	 *         sure to place this call in an appropriate spot. In particular, you should
+	 *         draw the lightning before drawing the GUI.
+	 */	
+	bool DrawLightning();
+
 	
 	//-- Fading ---------------------------------------------------------------
 
@@ -1887,6 +1913,12 @@ private:
 	float _fogIntensity;    //! current fog intensity (set by SetFog())
 	
 	Color _lightColor;      //! current scene lighting color (essentially just modulates vertex colors of all the images)
+
+	bool  _lightningActive;  //! true if a lightning effect is active
+	int32 _lightningCurTime; //! current time of lightning effect (time since it started)
+	int32 _lightningEndTime; //! how many milliseconds to do the lightning effect for
+	
+	std::vector <float> _lightningData;  //! intensity data for lightning effect
 
 	int32 _animation_counter;   //! counter to keep track of milliseconds since game started for animations
 	int32 _current_frame_diff;  //! keeps track of the number of frames animations should increment by for the current frame
