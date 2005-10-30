@@ -29,6 +29,10 @@
  * structures reside in. 
  *****************************************************************************/
 
+#ifndef __DEFS_HEADER__
+#define __DEFS_HEADER__
+
+
 // Audio declarations, see audio.h/cpp
 namespace hoa_audio {
 	extern bool AUDIO_DEBUG;
@@ -127,3 +131,5 @@ namespace hoa_quit {
 namespace hoa_utils {
 	extern bool UTILS_DEBUG;
 }
+
+#endif

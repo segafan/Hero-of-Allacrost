@@ -23,6 +23,7 @@
 #include "defs.h"
 #include "engine.h"
 #include "video.h"
+#include "map_dialogue.h"
 
 //! All calls to map mode are wrapped in this namespace.
 namespace hoa_map {
