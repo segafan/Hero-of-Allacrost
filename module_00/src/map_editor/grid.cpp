@@ -1,71 +1,62 @@
-/******************************************************************************
- *
- *	Hero of Allacrost Map class implementation
- *	Copyright (c) 2004
- *	Licensed under the GPL
- *
- *	Created by: Philip Vorsilak
- *	Date: 8/29/04
- *	Filename: map_grid.cpp
- *
- *	$Id$
- *
- *	Description: This class constructs and manipulates a map used in the map
- *               editor.
- *
- *****************************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2004, 2005 by The Allacrost Project
+// All Rights Reserved
+//
+// This code is licensed under the GNU GPL. It is free software and you may
+// modify it and/or redistribute it under the terms of this license.
+// See http://www.gnu.org/copyleft/gpl.html for details.
+///////////////////////////////////////////////////////////////////////////////
 
 #include <iostream>
-#include "map_grid.h"
+#include "grid.h"
 
-using namespace hoa_mapEd;
-using namespace hoa_map::local_map;
+using namespace hoa_editor;
 
-MapGrid::MapGrid(QWidget *parent, const QString &name)
+Grid::Grid(QWidget *parent, const QString &name)
 	: QCanvasView(parent, (const char*)name)
 {	
 	setAcceptDrops(TRUE);	// enable drag 'n' drop
-	dragging = FALSE;		// FIXME: currently unneeded
+	_dragging = FALSE;		// FIXME: currently unneeded
 	setCanvas(NULL);		// don't have canvas until "New Map..." is selected
-	//dragOn = true;			// default value
-	walkOn = true;			// default value
-	tileProperties = 0;		// default value (tiles are walkable)
-	viewProperty = 0;		// default value (viewing mode off)
-	mapChanged = false;		// map has not yet been modified
-	createMenus();			// initialize the menus
-} // MapGrid constructor
+	//_drag_on = true;		// default value
+	_walk_on = true;		// default value
+	_tile_properties = 0;	// default value (tiles are walkable)
+	_view_property = 0;		// default value (viewing mode off)
+	_changed = false;		// map has not yet been modified
+	_CreateMenus();			// initialize the menus
+} // Grid constructor
 
-MapGrid::~MapGrid()
+Grid::~Grid()
 {
 	// do nothing Qt should take care of everything
-} // MapGrid destructor
+} // Grid destructor
 
-bool MapGrid::getChanged()
+bool Grid::GetChanged()
 {
-	return mapChanged;
-} // getChanged()
+	return _changed;
+} // GetChanged()
 
-QString MapGrid::getFileName()
+QString Grid::GetFileName()
 {
-	return mapFileName;
-} // getFileName()
+	return _file_name;
+} // GetFileName()
 
-void MapGrid::setWidth(int width)
+void Grid::SetWidth(int width)
 {
-	mapWidth = width;
-} //setWidth(...)
+	_width = width;
+} //SetWidth(...)
 
-void MapGrid::setHeight(int height)
+void Grid::SetHeight(int height)
 {
-	mapHeight = height;
-} //setHeight(...)
+	_height = height;
+} //SetHeight(...)
 
-void MapGrid::setFileName(QString filename)
+void Grid::SetFileName(QString filename)
 {
-	mapFileName = filename;
-} //setFileName(...)
+	_file_name = filename;
+} //SetFileName(...)
 
-/*void MapGrid::getMapData()
+/*void Grid::getMapData()
 {
 	QString fileNames;
 	QString locations;
@@ -104,13 +95,13 @@ void MapGrid::setFileName(QString filename)
 */
 
 // FIXME: contentsDragEnterEvent???
-void MapGrid::dragEnterEvent(QDragEnterEvent *evt)
+void Grid::dragEnterEvent(QDragEnterEvent *evt)
 {
     if (QImageDrag::canDecode(evt))
         evt->accept();
 } // dragEnterEvent(...)
 
-void MapGrid::dropEvent(QDropEvent *evt)
+void Grid::dropEvent(QDropEvent *evt)
 {
     QImage img;		// image to insert into the map
     
@@ -128,21 +119,21 @@ void MapGrid::dropEvent(QDropEvent *evt)
 					/ TILE_HEIGHT * TILE_HEIGHT);
 		tile->setZ(0);		// sets height of tile TODO: create a menu option
 		// tile->tileInfo.lower_layer = 1; FIXME: perhaps not needed here
-		tile->tileInfo.upper_layer = -1; // TEMPORARY!!! FIXME: this neither
-		tile->tileInfo.event_mask = tileProperties;
+		//tile->tileInfo.upper_layer = -1; // TEMPORARY!!! FIXME: this neither
+		//tile->tileInfo.event_mask = tileProperties;
 		tile->show();
 		canvas()->update();
-		mapChanged = TRUE;
+		_changed = TRUE;
 	} // must be able to decode the drag in order to place the image
 } // dropEvent(...)
 
-/*void MapGrid::mousePressEvent(QMouseEvent *)
+/*void Grid::mousePressEvent(QMouseEvent *)
 {
 	QTable::mousePressEvent(evt);
 	dragging = TRUE;
 } // mousePressEvent(...)
 
-void MapGrid::mouseMoveEvent(QMouseEvent *)
+void Grid::mouseMoveEvent(QMouseEvent *)
 {
 	if (dragging) {
 		QDragObject *d = new QImageDrag(currentItem()->pixmap(), this );
@@ -151,7 +142,7 @@ void MapGrid::mouseMoveEvent(QMouseEvent *)
 	}
 } // mouseMoveEvent(...)*/
 
-void MapGrid::contentsMousePressEvent(QMouseEvent *evt)
+void Grid::contentsMousePressEvent(QMouseEvent *evt)
 {
 	if (evt->button() == Qt::LeftButton)
 	{
@@ -164,58 +155,58 @@ void MapGrid::contentsMousePressEvent(QMouseEvent *evt)
 				if ((*it)->rtti() == TILE_RTTI)
 				{
 					Tile *item= (Tile*)(*it);
-					if (!item->hit(p))
+					if (!item->Hit(p))
 						continue;
 
-					moving = *it;
-					moving_start = p;
+					_moving = *it;
+					_moving_start = p;
 					return;
 				} // only want to move a tile, nothing else
 			} // go through the list of possible items to move
 //		} // not painting tiles means we want to start moving them instead
 	} // only make the left mouse button useful/active
 
-	moving = 0;
+	_moving = 0;
 } // contentsMousePressEvent(...)
 
-void MapGrid::contentsMouseMoveEvent(QMouseEvent *evt)
+void Grid::contentsMouseMoveEvent(QMouseEvent *evt)
 {
-	if (moving)
+	if (_moving)
 	{
 		QPoint p = inverseWorldMatrix().map(evt->pos());
-		moving->moveBy(p.x() - moving_start.x(), p.y() - moving_start.y());
-		moving_start = p;
+		_moving->moveBy(p.x() - _moving_start.x(), p.y() - _moving_start.y());
+		_moving_start = p;
 		canvas()->update();
 	} // only if the user is moving an object
 } // contentsMouseMoveEvent(...)
 
-void MapGrid::contentsMouseReleaseEvent(QMouseEvent *evt)
+void Grid::contentsMouseReleaseEvent(QMouseEvent *evt)
 {
-	if (moving)
+	if (_moving)
 	{
 		QPoint point = inverseWorldMatrix().map(evt->pos());
 		
 		// the division here will effectively snap the tile to the grid
 		// yes, it looks dumb. is there another way to round down to the
 		// nearest multiple of 32?
-		moving->move(point.x() / TILE_WIDTH * TILE_WIDTH,
-			     point.y() / TILE_HEIGHT * TILE_HEIGHT);
+		_moving->move(point.x() / TILE_WIDTH * TILE_WIDTH,
+					  point.y() / TILE_HEIGHT * TILE_HEIGHT);
 		canvas()->update();
-		mapChanged = TRUE;
+		_changed = TRUE;
 	} // only if the user is moving an object
 } // contentsMouseReleaseEvent(...)
 
-void MapGrid::contentsMouseDoubleClickEvent(QMouseEvent *evt)
+void Grid::contentsMouseDoubleClickEvent(QMouseEvent *evt)
 {
     if (canvas() != NULL)
 	{
-/* FIXME FIXME FIXME OMG what a hack this is FIXME FIXME FIXME
-		std::cerr << "Blah" << std::endl;
-		if (((MapEditor*) parent()) == NULL)
-			std::cerr << "parent() is NULL" << std::endl;
+/*// FIXME FIXME FIXME OMG what a hack this is FIXME FIXME FIXME
+//		std::cerr << "Blah" << std::endl;
+//		if (((MapEditor*) parent()) == NULL)
+//			std::cerr << "parent() is NULL" << std::endl;
 		std::cerr << "1" << std::endl;
-		if (((MapEditor*) parent())->tiles == NULL)
-			std::cerr << "tiles is NULL" << std::endl;
+//		if (((MapEditor*) parent())->tiles == NULL)
+//			std::cerr << "tiles is NULL" << std::endl;
 		std::cerr << "2" << std::endl;
 		//((MapEditor*) parent())->tiles->printBlah();
 		if (temp->count() != 0)
@@ -240,21 +231,21 @@ void MapGrid::contentsMouseDoubleClickEvent(QMouseEvent *evt)
 					/ TILE_HEIGHT * TILE_HEIGHT);
 		tile->setZ(0);		// sets height of tile TODO: create a menu option
 		// tile->tileInfo.lower_layer = 1; FIXME: perhaps not needed here
-		tile->tileInfo.upper_layer = -1; // TEMPORARY!!! FIXME: this neither
-		tile->tileInfo.event_mask = tileProperties;
+		//tile->tileInfo.upper_layer = -1; // TEMPORARY!!! FIXME: this neither
+		//tile->tileInfo.event_mask = tileProperties;
 		tile->show();
 		canvas()->update();
-		mapChanged = TRUE;
+		_changed = TRUE;
 	} // better have a canvas first
 } // contentsMouseDoubleClickEvent(...)
 
-void MapGrid::contentsContextMenuEvent(QContextMenuEvent *)
+void Grid::contentsContextMenuEvent(QContextMenuEvent *)
 {
-	menuPosition = QCursor::pos();
-	theMenu->exec(menuPosition);
+	_menu_position = QCursor::pos();
+	_the_menu->exec(_menu_position);
 } // contentsContextMenuEvent(...)
 
-void MapGrid::createGrid()
+void Grid::CreateGrid()
 {
 	QCanvasItemList list = canvas()->allItems();
 
@@ -281,47 +272,47 @@ void MapGrid::createGrid()
 		line->show();
 	} // create vertical lines
 
-	gridOn = true;
-} //createGrid()
+	_grid_on = true;
+} //CreateGrid()
 
-void MapGrid::createMenus()
+void Grid::_CreateMenus()
 {
 	// top menu creation
-	theMenu = new QPopupMenu(this);
+	_the_menu = new QPopupMenu(this);
 	
 	// edit menu creation
-	editMenu = new QPopupMenu(theMenu);
-	connect(editMenu, SIGNAL(aboutToShow()), this, SLOT(editMenuSetup()));
+	_edit_menu = new QPopupMenu(_the_menu);
+	connect(_edit_menu, SIGNAL(aboutToShow()), this, SLOT(_EditMenuSetup()));
 
 	// view menu creation
-	viewMenu = new QPopupMenu(theMenu);
-	connect(viewMenu, SIGNAL(aboutToShow()), this, SLOT(viewMenuSetup()));
-	connect(viewMenu, SIGNAL(aboutToHide()), this, SLOT(viewMenuEvaluate()));
+	_view_menu = new QPopupMenu(_the_menu);
+	connect(_view_menu, SIGNAL(aboutToShow()), this, SLOT(_ViewMenuSetup()));
+	connect(_view_menu, SIGNAL(aboutToHide()), this, SLOT(_ViewMenuEvaluate()));
 	
 	// tile menu creation
-	tileMenu = new QPopupMenu(theMenu);
-	connect(tileMenu, SIGNAL(aboutToShow()), this, SLOT(tileMenuSetup()));
-	connect(tileMenu, SIGNAL(aboutToHide()), this, SLOT(tileMenuEvaluate()));
+	_tile_menu = new QPopupMenu(_the_menu);
+	connect(_tile_menu, SIGNAL(aboutToShow()), this, SLOT(_TileMenuSetup()));
+	connect(_tile_menu, SIGNAL(aboutToHide()), this, SLOT(_TileMenuEvaluate()));
 	
-	theMenu->insertItem("Edit", editMenu);
-	theMenu->insertItem("View", viewMenu);
-	theMenu->insertItem("Tile", tileMenu);
-} // createMenus()
+	_the_menu->insertItem("Edit", _edit_menu);
+	_the_menu->insertItem("View", _view_menu);
+	_the_menu->insertItem("Tile", _tile_menu);
+} // _CreateMenus()
 
-void MapGrid::editMenuSetup()
+void Grid::_EditMenuSetup()
 {
-	editMenu->clear();
+	_edit_menu->clear();
 	
-	int undoID = editMenu->insertItem("Undo", this, SLOT(editUndo()), CTRL+Key_Z);
-	int redoID = editMenu->insertItem("Redo", this, SLOT(editRedo()), CTRL+Key_R);
-	int clearID = editMenu->insertItem("Clear Map...", this, SLOT(editClear()));
+	int undo_ID = _edit_menu->insertItem("Undo", this, SLOT(_EditUndo()), CTRL+Key_Z);
+	int redo_ID = _edit_menu->insertItem("Redo", this, SLOT(_EditRedo()), CTRL+Key_R);
+	int clear_ID = _edit_menu->insertItem("Clear Map...", this, SLOT(_EditClear()));
 
-	editMenu->setItemEnabled(undoID, false);
-	editMenu->setItemEnabled(redoID, false);
+	_edit_menu->setItemEnabled(undo_ID, false);
+	_edit_menu->setItemEnabled(redo_ID, false);
 	if (canvas() == NULL)
-		editMenu->setItemEnabled(clearID, false);
+		_edit_menu->setItemEnabled(clear_ID, false);
 	else
-		editMenu->setItemEnabled(clearID, true);
+		_edit_menu->setItemEnabled(clear_ID, true);
 /*
 	QVButtonGroup *mode = new QVButtonGroup("Editting Mode", editMenu);
 	QRadioButton *drag = new QRadioButton("Drag", mode);
@@ -335,13 +326,13 @@ void MapGrid::editMenuSetup()
 	connect(drag, SIGNAL(toggled(bool)), this, SLOT(editMode()));
 	editMenu->insertSeparator();
 	editMenu->insertItem(mode);*/
-} // editMenuSetup()
+} // _EditMenuSetup()
 
-void MapGrid::viewMenuSetup()
+void Grid::_ViewMenuSetup()
 {
-	viewMenu->clear();
+	_view_menu->clear();
 
-	QCheckBox *grid = new QCheckBox("Toggle &Grid", viewMenu);
+	QCheckBox* grid = new QCheckBox("Toggle &Grid", _view_menu);
 
 	if (canvas() == NULL)
 	{
@@ -350,43 +341,43 @@ void MapGrid::viewMenuSetup()
 	} // can't have a grid without a canvas
 	else
 	{
-		if (gridOn)
+		if (_grid_on)
 			grid->setChecked(true);
 		else
 			grid->setChecked(false);
 		grid->setEnabled(true);
 	} // we have a canvas so all is good
 
-	viewMenu->insertItem(grid);
-	connect(grid, SIGNAL(toggled(bool)), this, SLOT(viewToggleGrid()));
+	_view_menu->insertItem(grid);
+	connect(grid, SIGNAL(toggled(bool)), this, SLOT(_ViewToggleGrid()));
 
-	QVButtonGroup *properties = new QVButtonGroup("Tile Properties", viewMenu);
-	viewNone = new QRadioButton("None", properties);
-	viewTreasure = new QRadioButton("Treasure", properties);
-	viewEvent = new QRadioButton("Event", properties);
-	viewOccupied = new QRadioButton("Occupied", properties);
-	viewNoWalk = new QRadioButton("Not walkable", properties);
+	QVButtonGroup* properties = new QVButtonGroup("Tile Properties", _view_menu);
+	_view_none = new QRadioButton("None", properties);
+	_view_treasure = new QRadioButton("Treasure", properties);
+	_view_event = new QRadioButton("Event", properties);
+	_view_occupied = new QRadioButton("Occupied", properties);
+	_view_no_walk = new QRadioButton("Not walkable", properties);
 
 	// mutually exclusive radio buttons, hence else if structure
-	if ((viewProperty & TREASURE) == TREASURE)
-		viewTreasure->setChecked(true);
-	else if ((viewProperty & EVENT) == EVENT)
-		viewEvent->setChecked(true);
-	else if ((viewProperty & OCCUPIED) == OCCUPIED)
-		viewOccupied->setChecked(true);
-	else if ((viewProperty & NOT_WALKABLE) == NOT_WALKABLE)
-		viewNoWalk->setChecked(true);
+/*	if ((_view_property & TREASURE) == TREASURE)
+		_view_treasure->setChecked(true);
+	else if ((_view_property & EVENT) == EVENT)
+		_view_event->setChecked(true);
+	else if ((_view_property & OCCUPIED) == OCCUPIED)
+		_view_occupied->setChecked(true);
+	else if ((_view_property & NOT_WALKABLE) == NOT_WALKABLE)
+		_view_no_walk->setChecked(true);
 	else
 		viewNone->setChecked(true);
-	
-	viewMenu->insertSeparator();
-	viewMenu->insertItem(properties);
+*/
+	_view_menu->insertSeparator();
+	_view_menu->insertItem(properties);
 } // viewMenuSetup()
 
-void MapGrid::tileMenuSetup()
+void Grid::_TileMenuSetup()
 {
-	tileMenu->clear();
-	
+	_tile_menu->clear();
+/*	
 	int horFlipID = tileMenu->insertItem("Flip Horizontally",this, SLOT(tileFlipHorizontal()));
 	int vertFlipID = tileMenu->insertItem("Flip Vertically", this, SLOT(tileFlipVertical()));
 	int rotClkID = tileMenu->insertItem("Rotate Clockwise",this, SLOT(tileRotateClockwise()));
@@ -396,65 +387,65 @@ void MapGrid::tileMenuSetup()
 	tileMenu->setItemEnabled(vertFlipID, false);
 	tileMenu->setItemEnabled(rotClkID, false);
 	tileMenu->setItemEnabled(rotCntClkID, false);
+*/
+	QVButtonGroup* mode = new QVButtonGroup("Properties", _tile_menu);
+	QRadioButton* no_walk = new QRadioButton("Not walkable", mode);
+	QRadioButton* walk = new QRadioButton("Walkable", mode);
+	_properties = new QVButtonGroup(mode);
+	_tile_treasure = new QCheckBox("Treasure", _properties);
+	_tile_event = new QCheckBox("Event", _properties);
+	_tile_occupied = new QCheckBox("Occupied", _properties);
 
-	QVButtonGroup *mode = new QVButtonGroup("Properties", tileMenu);
-	QRadioButton *noWalk = new QRadioButton("Not walkable", mode);
-	QRadioButton *walk = new QRadioButton("Walkable", mode);
-	properties = new QVButtonGroup(mode);
-	tileTreasure = new QCheckBox("Treasure", properties);
-	tileEvent = new QCheckBox("Event", properties);
-	tileOccupied = new QCheckBox("Occupied", properties);
-
-	if (walkOn)
+	if (_walk_on)
 	{
 		walk->setChecked(true);
-		properties->setEnabled(true);
+		_properties->setEnabled(true);
 
-		if ((tileProperties & TREASURE) == TREASURE)
-			tileTreasure->setChecked(true);
+/*		if ((_tile_properties & TREASURE) == TREASURE)
+			_tile_treasure->setChecked(true);
 
-		if ((tileProperties & EVENT) == EVENT)
-			tileEvent->setChecked(true);
+		if ((_tile_properties & EVENT) == EVENT)
+			_tile_event->setChecked(true);
 
-		if ((tileProperties & OCCUPIED) == OCCUPIED)
-			tileOccupied->setChecked(true);
-	} // enable desired options
+		if ((_tile_properties & OCCUPIED) == OCCUPIED)
+			_tile_occupied->setChecked(true);
+*/	} // enable desired options
 	else
 	{
-		noWalk->setChecked(true);
-		properties->setEnabled(false);
+		no_walk->setChecked(true);
+		_properties->setEnabled(false);
 	} // disable unwanted options
 
-	connect(walk, SIGNAL(toggled(bool)), this, SLOT(tileMode()));
-	tileMenu->insertSeparator();
-	tileMenu->insertItem(mode);
-} // tileMenuSetup()
+	connect(walk, SIGNAL(toggled(bool)), this, SLOT(_TileMode()));
+	_tile_menu->insertSeparator();
+	_tile_menu->insertItem(mode);
+} // _TileMenuSetup()
 
-void MapGrid::viewMenuEvaluate()
+void Grid::_ViewMenuEvaluate()
 {
-	if (viewTreasure->isChecked())
-		viewProperty = TREASURE;
-	else if (viewEvent->isChecked())
-		viewProperty = EVENT;
-	else if (viewOccupied->isChecked())
-		viewProperty = OCCUPIED;
-	else if (viewNoWalk->isChecked())
-		viewProperty = NOT_WALKABLE;
+/*	if (_view_treasure->isChecked())
+		_view_property = TREASURE;
+	else if (_view_event->isChecked())
+		_view_property = EVENT;
+	else if (_view_occupied->isChecked())
+		_view_property = OCCUPIED;
+	else if (_view_no_walk->isChecked())
+		_view_property = NOT_WALKABLE;
 	else
-		viewProperty = 0;
+*/		_view_property = 0;
 
 	if (canvas() != NULL)
 	{
 		QCanvasItemList list = canvas()->allItems();
 
-		for (QCanvasItemList::Iterator it = list.begin(); it != list.end();++it)
+/*		for (QCanvasItemList::Iterator it = list.begin(); it != list.end();++it)
 		{
-			if (((*it)->rtti() == TILE_RTTI) && (viewProperty != 0))
+			if (((*it)->rtti() == TILE_RTTI) && (_view_property != 0))
 			{
 				Tile *item = (Tile*)(*it);
 				
 				// set color masks appropriately
-				if ((item->tileInfo.event_mask & viewProperty) == TREASURE)
+				if ((item->tileInfo.event_mask & _view_property) == TREASURE)
 				{
 					QCanvasRectangle *rect= new QCanvasRectangle(int(item->x()),
 						int (item->y()), TILE_WIDTH, TILE_HEIGHT, canvas());
@@ -463,7 +454,7 @@ void MapGrid::viewMenuEvaluate()
 					rect->setZ(2);		// FIXME: TEMPORARY!!!
 					rect->show();
 				}
-				else if ((item->tileInfo.event_mask & viewProperty) == EVENT)
+				else if ((item->tileInfo.event_mask & _view_property) == EVENT)
 				{
 					QCanvasRectangle *rect= new QCanvasRectangle(int(item->x()),
 						int (item->y()), TILE_WIDTH, TILE_HEIGHT, canvas());
@@ -472,7 +463,7 @@ void MapGrid::viewMenuEvaluate()
 					rect->setZ(2);		// FIXME: TEMPORARY!!!
 					rect->show();
 				}
-				else if ((item->tileInfo.event_mask & viewProperty) == OCCUPIED)
+				else if ((item->tileInfo.event_mask & _view_property) == OCCUPIED)
 				{
 					QCanvasRectangle *rect= new QCanvasRectangle(int(item->x()),
 						int (item->y()), TILE_WIDTH, TILE_HEIGHT, canvas());
@@ -481,7 +472,7 @@ void MapGrid::viewMenuEvaluate()
 					rect->setZ(2);		// FIXME: TEMPORARY!!!
 					rect->show();
 				}
-				else if ((item->tileInfo.event_mask & viewProperty) == NOT_WALKABLE)
+				else if ((item->tileInfo.event_mask & _view_property) == NOT_WALKABLE)
 				{
 					QCanvasRectangle *rect= new QCanvasRectangle(int(item->x()),
 						int (item->y()), TILE_WIDTH, TILE_HEIGHT, canvas());
@@ -494,53 +485,56 @@ void MapGrid::viewMenuEvaluate()
 			else if ((*it)->rtti() == QCanvasItem::Rtti_Rectangle)
 				delete *it;		// always delete a tint so we can tint over it
 		} // iterate through all the items on the canvas
-
+*/
 		canvas()->update();
 	} // need a canvas for these operations!
-} // viewMenuEvaluate()
+} // _ViewMenuEvaluate()
 
-void MapGrid::tileMenuEvaluate()
+void Grid::_TileMenuEvaluate()
 {
-	if (!walkOn)
-		tileProperties = hoa_map::local_map::NOT_WALKABLE;
+/*	if (!_walk_on)
+		_tile_properties = hoa_map::local_map::NOT_WALKABLE;
 	else
 	{
-		tileProperties = 0;
-		if (tileTreasure->isChecked())
-			tileProperties |= hoa_map::local_map::TREASURE;		// bitwise OR
+		_tile_properties = 0;
+		if (_tile_treasure->isChecked())
+			_tile_properties |= hoa_map::local_map::TREASURE;	// bitwise OR
 		
-		if (tileEvent->isChecked())
-			tileProperties |= hoa_map::local_map::EVENT;
+		if (_tileEvent->isChecked())
+			_tile_properties |= hoa_map::local_map::EVENT;
 		
-		if (tileOccupied->isChecked())
-			tileProperties |= hoa_map::local_map::OCCUPIED;
+		if (_tile_occupied->isChecked())
+			_tile_properties |= hoa_map::local_map::OCCUPIED;
 	} // tile is walkable and can have a mixture of these properties
-	
+*/	
 	// figure out which tile was right-clicked on to change its properties
-	QCanvasItemList l = canvas()->collisions(inverseWorldMatrix().map(mapFromGlobal(menuPosition)));
+	QCanvasItemList l = canvas()->collisions(inverseWorldMatrix().
+		map(mapFromGlobal(_menu_position)));
 	for (QCanvasItemList::Iterator it = l.begin(); it != l.end(); ++it)
 	{
 		if ((*it)->rtti() == TILE_RTTI)
 		{
-			Tile *item= (Tile*)(*it);
-			if (!item->hit(mapFromGlobal(menuPosition)))
+			Tile* item= (Tile*)(*it);
+			if (!item->Hit(mapFromGlobal(_menu_position)))
 				continue;
 
-			item->tileInfo.event_mask = tileProperties;
+//			item->tileInfo.event_mask = _tile_properties;
 			return;		// only apply changes to one tile
 		} // only apply changes to a tile, nothing else
 	} // go through the list of possible items to change their properties
-} // tileMenuEvaluate()
+} // _TileMenuEvaluate()
 
-void MapGrid::editUndo()
+void Grid::_EditUndo()
 {
-} // editUndo()
+// FIXME
+} // _EditUndo()
 
-void MapGrid::editRedo()
+void Grid::_EditRedo()
 {
-} // editRedo()
+// FIXME
+} // _EditRedo()
 
-void MapGrid::editClear()
+void Grid::_EditClear()
 {
 	QCanvasItemList list = canvas()->allItems();
 	
@@ -549,33 +543,33 @@ void MapGrid::editClear()
 			delete *it;
 
 	canvas()->update();
-} // editClear()
+} // _EditClear()
 /*
-void MapGrid::editMode()
+void Grid::_EditMode()
 {
 	std::cerr << "changing the editting mode... but not really since painting is not yet implemented ;)" << std::endl;
-	if (dragOn)
-		dragOn = false;
+	if (_drag_on)
+		_drag_on = false;
 	else
-		dragOn = true;
-} // editMode()
+		_drag_on = true;
+} // _EditMode()
 */
-void MapGrid::viewToggleGrid()
+void Grid::_ViewToggleGrid()
 {
 	// toggles the grid on or off
-	if (gridOn)
+	if (_grid_on)
 	{
 		QCanvasItemList list = canvas()->allItems();
 	    for (QCanvasItemList::Iterator it=list.begin(); it != list.end(); ++it)
 		{
         	if ((*it)->rtti() == QCanvasItem::Rtti_Line)
 			{
-            	QCanvasLine *line = (QCanvasLine*)(*it);
+            	QCanvasLine* line = (QCanvasLine*)(*it);
 				line->hide();
         	} // hide the lines
     	} // go through the list of items on the canvas
 
-		gridOn = false;
+		_grid_on = false;
 	} // the grid was on
 	else
 	{
@@ -584,65 +578,65 @@ void MapGrid::viewToggleGrid()
 		{
         	if ((*it)->rtti() == QCanvasItem::Rtti_Line)
 			{
-            	QCanvasLine *line = (QCanvasLine*)(*it);
+            	QCanvasLine* line = (QCanvasLine*)(*it);
 				line->show();
         	} // show the lines
     	} // go through the list of items on the canvas
 
-		gridOn = true;
+		_grid_on = true;
 	} // the grid was off
 
 	canvas()->update();
 } // viewToggleGrid
-
-void MapGrid::tileFlipHorizontal()
+/*
+void Grid::tileFlipHorizontal()
 {
 	if (!mapChanged)
 		mapChanged = true;
 } // tileFlipHorizontal()
 
-void MapGrid::tileFlipVertical()
+void Grid::tileFlipVertical()
 {
 	if (!mapChanged)
 		mapChanged = true;
 } // tileFlipVertical()
 
-void MapGrid::tileRotateClockwise()
+void Grid::tileRotateClockwise()
 {
 	if (!mapChanged)
 		mapChanged = true;
 } // tileRotateClockwise()
 
-void MapGrid::tileRotateCounterClockwise()
+void Grid::tileRotateCounterClockwise()
 {
 	if (!mapChanged)
 		mapChanged = true;
 } // tileRotateCounterClockwise()
-
-void MapGrid::tileMode()
+*/
+void Grid::_TileMode()
 {
-	if (walkOn)
+	if (_walk_on)
 	{
-		properties->setEnabled(false);
-		walkOn = false;
+		_properties->setEnabled(false);
+		_walk_on = false;
 	} // gray out impossible combinations
 	else
 	{
-		properties->setEnabled(true);
-		walkOn = true;
+		_properties->setEnabled(true);
+		_walk_on = true;
 
-		if ((tileProperties & hoa_map::local_map::TREASURE) == hoa_map::local_map::TREASURE)
-			tileTreasure->setChecked(true);
+/*		if ((_tile_properties & hoa_map::local_map::TREASURE) == hoa_map::local_map::TREASURE)
+			_tile_treasure->setChecked(true);
 
-		if ((tileProperties & hoa_map::local_map::EVENT) == hoa_map::local_map::EVENT)
-			tileEvent->setChecked(true);
+		if ((_tile_properties & hoa_map::local_map::EVENT) == hoa_map::local_map::EVENT)
+			_tile_event->setChecked(true);
 
-		if ((tileProperties & hoa_map::local_map::OCCUPIED) == hoa_map::local_map::OCCUPIED)
-			tileOccupied->setChecked(true);
-	} // ungray them out
-} // tileMode()
+		if ((_tile_properties & hoa_map::local_map::OCCUPIED) == hoa_map::local_map::OCCUPIED)
+			_tile_occupied->setChecked(true);
+*/	} // ungray them out
+} // _TileMode()
 
-void MapGrid::saveMap(QFile &file)
+void Grid::SaveMap(QFile &file)
 {
-	mapChanged = false;
-} // saveMap()
+	_changed = false;
+} // _SaveMap()
