@@ -76,8 +76,10 @@ typedef Uint8   uint8;
 //! Contains utility code used across the entire 
 namespace hoa_utils {
 
+class UnicodeString;
+
 //! unicode string class- basically like wstring except it doesn't use wchar_t which has bad compatibility
-typedef std::basic_string<uint16> ustring;
+typedef UnicodeString ustring;
 
 //! Determines whether the code in the hoa_utils namespace should print debug statements or not.
 extern bool UTILS_DEBUG;
@@ -260,6 +262,97 @@ std::string MakeByteString(const hoa_utils::ustring &uText);
  ******************************************************************************/
 
 bool IsNumber(const std::string &text);
+
+
+/*!****************************************************************************
+ *  \brief UnicodeString lets us use strings with uint16 as the type of character.
+ *         Unfortunately there were some libstdc++ compatability problems with
+ *         simply defining basic_string<uint16> so this class is basically our
+ *         homebrewed version of it. Of course, not all functionality of basic_string
+ *         has been implemented, just the stuff that we tend to use in practice
+ *****************************************************************************/
+
+class UnicodeString
+{
+public:
+
+	UnicodeString();
+	UnicodeString(const uint16 *);
+	
+	
+	/*!
+	 *  \brief clears to empty string
+	 */
+	void clear();
+	
+	
+	/*!
+	 *  \brief returns true if string's empty
+	 */	
+	bool empty() const;
+	
+
+	/*!
+	 *  \brief returns length of string
+	 */
+	size_t length() const;
+	
+	
+	/*!
+	 *  \brief returns length of string (synonym for length())
+	 */
+	size_t size() const;
+
+
+	/*!
+	 *  \brief returns a substring, starting at element pos, and n elements long
+	 *  \note  this function will only fail if pos is beyond the range of the string
+	 *         In this case, the std::out_of_range exception is thrown
+	 */	
+	UnicodeString substr(size_t pos=0, size_t n=npos) const;
+	
+
+	UnicodeString & operator += (uint16 c);
+	UnicodeString & operator += (const UnicodeString &s);	
+	UnicodeString & operator = (const UnicodeString &s);
+	
+	
+	/*!
+	 *  \brief searches for a character within the string, starting at element pos.
+	 *  \return npos if nothing is found, or the starting index of the substring
+	 */	
+	size_t find(uint16 c, size_t pos=0) const;
+
+
+	/*!
+	 *  \brief searches for a substring within the string, starting at element pos.
+	 *  \return npos if nothing is found, or the starting index of the substring
+	 */	
+	size_t find(const UnicodeString &s, size_t pos=0) const;
+	
+
+	/*!
+	 *  \brief npos is the largest possible value of size_t, namely -1 (0xFFFFFFFF on most machines)
+	 */	
+	static const size_t npos;
+
+
+	/*!
+	 *  \brief returns a raw pointer to the string
+	 */	
+	const uint16 * c_str() const;
+	
+
+	uint16 & operator [] (size_t pos);
+	const uint16 & operator [] (size_t pos) const;
+
+private:
+
+
+	//! UnicodeString is just a wrapper for a vector of uint16. Note that we don't even
+	//! have a destructor, because vector will destroy itself
+	std::vector <uint16> _str;
+};
 
 
 }

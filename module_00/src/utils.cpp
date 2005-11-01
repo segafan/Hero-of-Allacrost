@@ -33,6 +33,8 @@ using namespace std;
 namespace hoa_utils {
 
 bool UTILS_DEBUG = false;
+const size_t UnicodeString::npos = -1;
+
 
 // This will return a floating point number between -1 and 1. Its cute, really.
 inline float UnitRV() {
@@ -281,6 +283,7 @@ ustring MakeWideString(const string &text)
 string MakeByteString(const ustring &uText)
 {
 	int32 length = (int32) uText.length();
+	
 	unsigned char *str = new unsigned char[length+1];
 	str[length] = '\0';
 	
@@ -327,6 +330,172 @@ bool IsNumber(const std::string &text)
 	}
 	
 	return true;
+}
+
+
+UnicodeString::UnicodeString()
+{
+	_str.push_back(0);
+}
+
+
+UnicodeString::UnicodeString(const uint16 *s)
+{
+	clear();
+	
+	if(!s)
+	{
+		_str.push_back(0);
+		return;
+	}
+	
+	while(*s != 0)
+	{
+		_str.push_back(*s);
+		++s;
+	}
+	
+	_str.push_back(0);
+}
+	
+	
+// clear to empty string
+void UnicodeString::clear()
+{
+	_str.clear();
+}
+
+
+// return true if string is empty
+bool UnicodeString::empty() const
+{
+	return _str.empty();
+}
+	
+	
+// length of string
+size_t UnicodeString::length() const
+{
+	// note the -1, because we assume that there is always a null terminating character
+	return _str.size() - 1;
+}
+
+
+// length of string
+size_t UnicodeString::size() const
+{
+	return length();
+}
+	
+
+// return substring starting at pos, and continuing for n elements
+UnicodeString UnicodeString::substr(size_t pos, size_t n) const
+{
+	size_t len = length();
+	
+	if(pos >= len)
+		throw std::out_of_range("pos passed to substr() was too large");
+		
+	UnicodeString s;
+	while(n > 0 && pos < len)
+	{
+		s += _str[pos];
+		++pos;
+		--n;
+	}
+	
+	return s;
+}
+
+
+// add a character to end of string	
+UnicodeString & UnicodeString::operator += (uint16 c)
+{
+	_str.push_back(c);
+	
+	return *this;
+}
+
+
+// concatenate another string onto this one
+UnicodeString & UnicodeString::operator += (const UnicodeString &s)	
+{
+	size_t len = s.length();
+	for(size_t j = 0; j < len; ++j)
+	{
+		_str.push_back(s[j]);
+	}
+	
+	return *this;
+}
+
+
+// assign this string to another one
+UnicodeString & UnicodeString::operator = (const UnicodeString &s)
+{
+	clear();
+	
+	return operator += (s);
+}
+
+
+// finds a character within a string, starting at pos. If nothing found, returns npos
+size_t UnicodeString::find(uint16 c, size_t pos) const
+{
+	size_t len = length();
+	
+	for(size_t j = pos; j < len; ++j)
+	{
+		if(_str[j] == c)
+			return j;
+	}
+	
+	return npos;
+}
+
+
+// finds a string within a string, starting at pos. If nothing found, returns npos
+size_t UnicodeString::find(const UnicodeString &s, size_t pos) const
+{
+	size_t len = length();
+	size_t total_chars = s.length();
+	size_t chars_found = 0;
+	
+	for(size_t j = pos; j < len; ++j)
+	{
+		if(_str[j] == s[chars_found])
+		{
+			++chars_found;
+			if(chars_found == total_chars)
+			{
+				return j - chars_found + 1;
+			}
+		}
+		else
+		{
+			chars_found = 0;
+		}
+	}
+	
+	return npos;
+}
+	
+
+// returns raw pointer to string
+const uint16 * UnicodeString::c_str() const
+{
+	return &_str[0];
+}
+
+	
+uint16 & UnicodeString::operator [] (size_t pos)
+{
+	return _str[pos];
+}
+
+const uint16 & UnicodeString::operator [] (size_t pos) const
+{
+	return _str[pos];
 }
 
 
