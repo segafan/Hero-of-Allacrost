@@ -435,7 +435,10 @@ UnicodeString & UnicodeString::operator = (const UnicodeString &s)
 {
 	clear();
 	
-	return operator += (s);
+	operator += (s);
+	operator += (0);
+	
+	return *this;
 }
 
 
