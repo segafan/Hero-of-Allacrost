@@ -45,6 +45,7 @@ typedef unsigned int uint;
 
 #endif  //#ifdef _WIN32
 
+#include <stdexcept>
 #include <stdlib.h>
 #include <cstdlib>
 #include <cmath>

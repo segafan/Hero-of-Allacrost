@@ -33,7 +33,7 @@ using namespace std;
 namespace hoa_utils {
 
 bool UTILS_DEBUG = false;
-const size_t UnicodeString::npos = -1;
+const size_t UnicodeString::npos = ~0;
 
 
 // This will return a floating point number between -1 and 1. Its cute, really.
