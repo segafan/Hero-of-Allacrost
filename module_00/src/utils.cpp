@@ -341,7 +341,7 @@ UnicodeString::UnicodeString()
 
 UnicodeString::UnicodeString(const uint16 *s)
 {
-	clear();
+	_str.clear();
 	
 	if(!s)
 	{
@@ -362,14 +362,15 @@ UnicodeString::UnicodeString(const uint16 *s)
 // clear to empty string
 void UnicodeString::clear()
 {
-	_str.clear();
+	_str.clear();	
+	_str.push_back(0);
 }
 
 
 // return true if string is empty
 bool UnicodeString::empty() const
 {
-	return _str.empty();
+	return _str.size() <= 1;
 }
 	
 	
@@ -411,7 +412,8 @@ UnicodeString UnicodeString::substr(size_t pos, size_t n) const
 // add a character to end of string	
 UnicodeString & UnicodeString::operator += (uint16 c)
 {
-	_str.push_back(c);
+	_str[length()] = c;
+	_str.push_back(0);
 	
 	return *this;
 }
@@ -420,11 +422,22 @@ UnicodeString & UnicodeString::operator += (uint16 c)
 // concatenate another string onto this one
 UnicodeString & UnicodeString::operator += (const UnicodeString &s)	
 {
+	// nothing to do for empty string
+	if(s.empty())
+		return *this;
+	
+	// add first character of string into the null character spot
+	_str[length()] = s[0];
+	
+	// add rest of characters afterward		
 	size_t len = s.length();
-	for(size_t j = 0; j < len; ++j)
+	for(size_t j = 1; j < len; ++j)
 	{
 		_str.push_back(s[j]);
 	}
+	
+	// finish off with a null character
+	_str.push_back(0);
 	
 	return *this;
 }
@@ -433,10 +446,8 @@ UnicodeString & UnicodeString::operator += (const UnicodeString &s)
 // assign this string to another one
 UnicodeString & UnicodeString::operator = (const UnicodeString &s)
 {
-	clear();
-	
+	clear();	
 	operator += (s);
-	operator += (0);
 	
 	return *this;
 }
