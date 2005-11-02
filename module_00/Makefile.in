@@ -60,9 +60,9 @@ am_allacrost_OBJECTS = audio.$(OBJEXT) battle.$(OBJEXT) boot.$(OBJEXT) \
 	main.$(OBJEXT) map_dialogue.$(OBJEXT) map_objects.$(OBJEXT) \
 	map.$(OBJEXT) menu.$(OBJEXT) pause.$(OBJEXT) quit.$(OBJEXT) \
 	scene.$(OBJEXT) utils.$(OBJEXT) draw.$(OBJEXT) fade.$(OBJEXT) \
-	gui.$(OBJEXT) interpolator.$(OBJEXT) option.$(OBJEXT) \
-	shake.$(OBJEXT) tex_mgmt.$(OBJEXT) text.$(OBJEXT) \
-	textbox.$(OBJEXT) video.$(OBJEXT)
+	gui.$(OBJEXT) interpolator.$(OBJEXT) menu_window.$(OBJEXT) \
+	option.$(OBJEXT) shake.$(OBJEXT) tex_mgmt.$(OBJEXT) \
+	text.$(OBJEXT) textbox.$(OBJEXT) video.$(OBJEXT)
 allacrost_OBJECTS = $(am_allacrost_OBJECTS)
 allacrost_LDADD = $(LDADD)
 am__objects_1 = editor.moc.$(OBJEXT) grid.moc.$(OBJEXT)
@@ -211,7 +211,8 @@ allacrost_SOURCES = src/audio.cpp src/battle.cpp src/boot.cpp src/data.cpp \
 	src/engine.cpp src/global.cpp src/main.cpp src/map_dialogue.cpp \
 	src/map_objects.cpp src/map.cpp src/menu.cpp src/pause.cpp src/quit.cpp \
 	src/scene.cpp src/utils.cpp src/video/draw.cpp src/video/fade.cpp \
-	src/video/gui.cpp src/video/interpolator.cpp src/video/option.cpp \
+	src/video/gui.cpp src/video/interpolator.cpp src/video/menu_window.cpp \
+	src/video/option.cpp \
 	src/video/shake.cpp src/video/tex_mgmt.cpp src/video/text.cpp \
 	src/video/textbox.cpp src/video/video.cpp src/audio.h src/battle.h \
 	src/boot.h src/data.h src/defs.h src/engine.h src/global.h src/map.h \
@@ -329,6 +330,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/map_dialogue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/map_objects.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/menu.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/menu_window.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/option.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pause.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/quit.Po@am__quote@
@@ -621,6 +623,20 @@ interpolator.obj: src/video/interpolator.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/video/interpolator.cpp' object='interpolator.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o interpolator.obj `if test -f 'src/video/interpolator.cpp'; then $(CYGPATH_W) 'src/video/interpolator.cpp'; else $(CYGPATH_W) '$(srcdir)/src/video/interpolator.cpp'; fi`
+
+menu_window.o: src/video/menu_window.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT menu_window.o -MD -MP -MF "$(DEPDIR)/menu_window.Tpo" -c -o menu_window.o `test -f 'src/video/menu_window.cpp' || echo '$(srcdir)/'`src/video/menu_window.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/menu_window.Tpo" "$(DEPDIR)/menu_window.Po"; else rm -f "$(DEPDIR)/menu_window.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/video/menu_window.cpp' object='menu_window.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o menu_window.o `test -f 'src/video/menu_window.cpp' || echo '$(srcdir)/'`src/video/menu_window.cpp
+
+menu_window.obj: src/video/menu_window.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT menu_window.obj -MD -MP -MF "$(DEPDIR)/menu_window.Tpo" -c -o menu_window.obj `if test -f 'src/video/menu_window.cpp'; then $(CYGPATH_W) 'src/video/menu_window.cpp'; else $(CYGPATH_W) '$(srcdir)/src/video/menu_window.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/menu_window.Tpo" "$(DEPDIR)/menu_window.Po"; else rm -f "$(DEPDIR)/menu_window.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/video/menu_window.cpp' object='menu_window.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o menu_window.obj `if test -f 'src/video/menu_window.cpp'; then $(CYGPATH_W) 'src/video/menu_window.cpp'; else $(CYGPATH_W) '$(srcdir)/src/video/menu_window.cpp'; fi`
 
 option.o: src/video/option.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT option.o -MD -MP -MF "$(DEPDIR)/option.Tpo" -c -o option.o `test -f 'src/video/option.cpp' || echo '$(srcdir)/'`src/video/option.cpp; \

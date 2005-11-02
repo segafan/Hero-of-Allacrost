@@ -29,7 +29,8 @@ allacrost_SOURCES = src/audio.cpp src/battle.cpp src/boot.cpp src/data.cpp \
 	src/engine.cpp src/global.cpp src/main.cpp src/map_dialogue.cpp \
 	src/map_objects.cpp src/map.cpp src/menu.cpp src/pause.cpp src/quit.cpp \
 	src/scene.cpp src/utils.cpp src/video/draw.cpp src/video/fade.cpp \
-	src/video/gui.cpp src/video/interpolator.cpp src/video/option.cpp \
+	src/video/gui.cpp src/video/interpolator.cpp src/video/menu_window.cpp \
+	src/video/option.cpp \
 	src/video/shake.cpp src/video/tex_mgmt.cpp src/video/text.cpp \
 	src/video/textbox.cpp src/video/video.cpp src/audio.h src/battle.h \
 	src/boot.h src/data.h src/defs.h src/engine.h src/global.h src/map.h \
