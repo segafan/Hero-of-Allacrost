@@ -28,6 +28,7 @@
 #ifndef _VIDEO_HEADER_
 #define _VIDEO_HEADER_
 
+#include "defs.h"
 #include "utils.h"
 
 // SDL includes
@@ -48,6 +49,8 @@
 namespace hoa_video 
 {
 
+//! The singleton pointer responsible for all video operations.
+extern GameVideo *VideoManager;
 //! Determines whether the code in the hoa_video namespace should print
 extern bool VIDEO_DEBUG;
 

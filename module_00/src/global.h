@@ -35,6 +35,8 @@
 //! All calls to global code are wrapped in this namespace.
 namespace hoa_global {
 
+//! The singleton pointer responsible for the management of global game data.
+extern GameInstance *InstanceManager;
 //! Determines whether the code in the hoa_boot namespace should print debug statements or not.
 extern bool GLOBAL_DEBUG;
 

@@ -40,7 +40,6 @@ using namespace hoa_menu;
 namespace hoa_map {
 
 // Initialize static class members
-GameVideo* MapObject::VideoManager = NULL;
 MapMode* MapObject::CurrentMap = NULL;
 
 // ****************************************************************************

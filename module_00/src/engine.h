@@ -30,6 +30,12 @@
 //! All calls to the main engine are wrapped in this namespace.
 namespace hoa_engine {
 
+//! The singleton pointer responsible for maintaining and updating the game mode state.
+extern GameModeManager *ModeManager;
+//! The singleton pointer responsible for the user's settings during game operation.
+extern GameSettings *SettingsManager;
+//! The singleton pointer responsible for handling and updating user input.
+extern GameInput *InputManager;
 //! Determines whether the code in the hoa_engine namespace should print debug statements or not.
 extern bool ENGINE_DEBUG;
 
@@ -100,23 +106,6 @@ protected:
 	uint8 mode_type;
 	// The coordinate system that the game mode uses.
 	// CoordSys coordinate_system;
-	//! \name Singleton class pointers
-	//@{
-	/*!
-	 * \brief References to the various game singletons.
-	 *
-	 *  The activation of these static singletons is handled in main.cpp,
-	 *  so in classes inherited from GameMode you don't need to worry about setting
-	 *  up or managing your singleton pointers. Its already done for you here.
-	 */
-	static hoa_audio::GameAudio *AudioManager;
-	static hoa_video::GameVideo *VideoManager;
-	static hoa_data::GameData *DataManager;
-	static hoa_engine::GameInput *InputManager;
-	static hoa_engine::GameModeManager *ModeManager;
-	static hoa_engine::GameSettings *SettingsManager;
-	static hoa_global::GameInstance *InstanceManager;
-	//@}
 
 	friend class GameModeManager;
 private:
@@ -139,9 +128,6 @@ public:
 	 *  \brief Purely virtual function for updating the status in this game mode
 	 *  \param time_elapsed The amount of milliseconds that have elapsed since the last time this function was called.
 	 */
-	 //! Initializes all the static class singleton pointers. Only needs to be called once (in main.cpp).
-	static void InitializeSingletonPointers();
-	
 	virtual void Update(uint32 time_elapsed) = 0;
 	//! Purely virtual function for drawing the next screen frame.
 	virtual void Draw() = 0;
@@ -584,21 +570,6 @@ private:
 	bool _joyaxis_y_first;
 	//@}
 	
-	//! \name Singleton Class Pointers
-	//@{
-	/*!
-	 * \brief References to the various game singletons.
-	 *
-	 *  These exist because some input events are automatically handled by this class
-	 *  (pause and quit events) and its more convenient that the class retains pointers
-	 *  to the singletons it needs to interact with on those events.
-	 */
-	GameModeManager *_ModeManager;
-	GameSettings *_SettingsManager;
-	hoa_data::GameData *_DataManager;
-	hoa_video::GameVideo *_VideoManager;
-	//@}
-
 	//! Processes all keyboard input events
 	void _KeyEventHandler(SDL_KeyboardEvent& key_event);
 	//! Processes all joystick input events

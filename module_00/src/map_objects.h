@@ -181,8 +181,6 @@ protected:
 	//! A bit-mask for setting and detecting various conditions on the object.
 	uint16 _status;
 	
-	//! A reference to the video engine singleton.
-	static hoa_video::GameVideo *VideoManager;
 	//! A pointer to the currently active instance of MapMode.
 	static MapMode *CurrentMap;
 

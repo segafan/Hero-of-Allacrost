@@ -37,36 +37,22 @@ using namespace hoa_engine::private_engine;
 
 namespace hoa_engine {
 
+GameModeManager *ModeManager = NULL;
+GameSettings *SettingsManager = NULL;
+GameInput *InputManager = NULL;
 bool ENGINE_DEBUG = false;
 SINGLETON_INITIALIZE(GameModeManager);
 SINGLETON_INITIALIZE(GameSettings);
 SINGLETON_INITIALIZE(GameInput);
 
-// Initialize static members of GameMode class
-GameAudio* GameMode::AudioManager = NULL;
-GameVideo* GameMode::VideoManager = NULL;
-GameData* GameMode::DataManager = NULL;
-GameInput* GameMode::InputManager = NULL;
-GameModeManager* GameMode::ModeManager = NULL;
-GameSettings* GameMode::SettingsManager = NULL;
-GameInstance* GameMode::InstanceManager = NULL;
-
 // ****************************************************************************
 // ******************************** GameMode **********************************
 // ****************************************************************************
-
 
 // The constructor automatically sets up all the singleton pointers
 GameMode::GameMode() {
 	if (ENGINE_DEBUG) cout << "ENGINE: GameMode constructor invoked" << endl;
 	mode_type = ENGINE_DUMMY_MODE; // This should be replaced by the child class
-	AudioManager =    GameAudio::GetReference();
-	VideoManager =    GameVideo::GetReference();
-	DataManager =     GameData::GetReference();
-	InputManager =    GameInput::GetReference();
-	ModeManager =     GameModeManager::GetReference();
-	SettingsManager = GameSettings::GetReference();
-	InstanceManager = GameInstance::GetReference();
 }
 
 
@@ -74,13 +60,6 @@ GameMode::GameMode() {
 GameMode::GameMode(uint8 mt) {
 	if (ENGINE_DEBUG) cout << "ENGINE: GameMode constructor invoked" << endl;
 	mode_type = mt;
-	AudioManager =    GameAudio::GetReference();
-	VideoManager =    GameVideo::GetReference();
-	DataManager =     GameData::GetReference();
-	InputManager =    GameInput::GetReference();
-	ModeManager =     GameModeManager::GetReference();
-	SettingsManager = GameSettings::GetReference();
-	InstanceManager = GameInstance::GetReference();
 }
 
 
@@ -90,23 +69,9 @@ GameMode::~GameMode() {
 	// delete coordinate system pointer here
 }
 
-
-// Initializes static singleton pointers for later use
-void GameMode::InitializeSingletonPointers() {
-	AudioManager =    GameAudio::GetReference();
-	VideoManager =    GameVideo::GetReference();
-	DataManager =     GameData::GetReference();
-	InputManager =    GameInput::GetReference();
-	ModeManager =     GameModeManager::GetReference();
-	SettingsManager = GameSettings::GetReference();
-	InstanceManager = GameInstance::GetReference();
-}
-
-
 // ****************************************************************************
 // ***************************** GameModeManager ******************************
 // ****************************************************************************
-
 
 // This constructor must be defined for the singleton macro
 GameModeManager::GameModeManager() {
@@ -114,7 +79,6 @@ GameModeManager::GameModeManager() {
 	_pop_count = 0;
 	_state_change = false;
 }
-
 
 
 // The destructor frees all the modes still on the stack
@@ -278,7 +242,6 @@ GameSettings::GameSettings() {
 
 
 
-
 GameSettings::~GameSettings() {
 	if (ENGINE_DEBUG) cout << "ENGINE: GameSettings destructor invoked" << endl;
 }
@@ -286,7 +249,18 @@ GameSettings::~GameSettings() {
 
 // Makes a call to the data manager for retrieving configured settings
 bool GameSettings::Initialize() {
-	GameData::GetReference()->LoadGameSettings(); // Initializes remaining data members
+	bool fs;
+	DataManager->OpenLuaFile("dat/config/settings.hoa");
+	DataManager->OpenTable("video_settings");
+	DataManager->GetTableBool("full_screen", fs);
+	SetFullScreen(fs);
+	DataManager->CloseTable();
+
+	DataManager->OpenTable("audio_settings");
+	DataManager->GetTableInt("music_vol", music_vol);
+	DataManager->GetTableInt("sound_vol", sound_vol);
+	DataManager->CloseTable();
+
 	return true;
 }
 
@@ -388,14 +362,54 @@ GameInput::~GameInput() {
 
 // Initialize singleton pointers and key/joystick systems. Always returns true
 bool GameInput::Initialize() {
-	// Setup singleton pointers
-	_ModeManager = GameModeManager::GetReference();
-	_SettingsManager = GameSettings::GetReference();
-	_DataManager = GameData::GetReference();
-	_VideoManager = GameVideo::GetReference();
-
 	// Loads saved settings to setup the key and joystick configurations
-	_DataManager->LoadKeyJoyState(&_key, &_joystick);
+	DataManager->OpenLuaFile("dat/config/settings.hoa");
+	int32 tempy;
+	DataManager->OpenTable("key_settings");
+	DataManager->GetTableInt("up", tempy);           
+	_key._up = (SDLKey)tempy;
+	DataManager->GetTableInt("down", tempy);         
+	_key._down = (SDLKey)tempy;
+	DataManager->GetTableInt("left", tempy);         
+	_key._left = (SDLKey)tempy;
+	DataManager->GetTableInt("right", tempy);        
+	_key._right = (SDLKey)tempy;
+	DataManager->GetTableInt("confirm", tempy);      
+	_key._confirm = (SDLKey)tempy;
+	DataManager->GetTableInt("cancel", tempy);       
+	_key._cancel = (SDLKey)tempy;
+	DataManager->GetTableInt("menu", tempy);         
+	_key._menu = (SDLKey)tempy;
+	DataManager->GetTableInt("swap", tempy);         
+	_key._swap = (SDLKey)tempy;
+	DataManager->GetTableInt("left_select", tempy);  
+	_key._left_select = (SDLKey)tempy;
+	DataManager->GetTableInt("right_select", tempy); 
+	_key._right_select = (SDLKey)tempy;
+	DataManager->GetTableInt("pause", tempy);
+	_key._pause = (SDLKey)tempy;
+	DataManager->CloseTable();
+	
+	DataManager->OpenTable("joystick_settings");
+	DataManager->GetTableInt("index", tempy);        
+	_joystick._joy_index = (int32)tempy;
+	DataManager->GetTableInt("confirm", tempy);      
+	_joystick._confirm = (uint8)tempy;
+	DataManager->GetTableInt("cancel", tempy);       
+	_joystick._cancel = (uint8)tempy;
+	DataManager->GetTableInt("menu", tempy);         
+	_joystick._menu = (uint8)tempy;
+	DataManager->GetTableInt("swap", tempy);         
+	_joystick._swap = (uint8)tempy;
+	DataManager->GetTableInt("left_select", tempy);  
+	_joystick._left_select = (uint8)tempy;
+	DataManager->GetTableInt("right_select", tempy); 
+	_joystick._right_select = (uint8)tempy;
+	DataManager->GetTableInt("pause", tempy);        
+	_joystick._pause = (uint8)tempy;
+	DataManager->GetTableInt("quit", tempy);         
+	_joystick._quit = (uint8)tempy;
+	DataManager->CloseTable();
 	
 	// Attempt to initialize and setup the configured joystick
 	if (SDL_InitSubSystem(SDL_INIT_JOYSTICK) != 0) {
@@ -446,13 +460,13 @@ void GameInput::EventHandler() {
 		if (event.type == SDL_QUIT) {
 
 			// We quit the game without question if we are in BootMode or QuitMode
-			if (_ModeManager->GetGameType() == ENGINE_BOOT_MODE || _ModeManager->GetGameType() == ENGINE_QUIT_MODE) {
-				_SettingsManager->ExitGame();
+			if (ModeManager->GetGameType() == ENGINE_BOOT_MODE || ModeManager->GetGameType() == ENGINE_QUIT_MODE) {
+				SettingsManager->ExitGame();
 			}
 			// Otherwise, we push QuitMode onto the stack
 			else {
 				QuitMode *QM = new QuitMode();
-				_ModeManager->Push(QM);
+				ModeManager->Push(QM);
 			}
 			return;
 		}
@@ -567,38 +581,38 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 		if (key_event.keysym.mod & KMOD_CTRL) { // CTRL key was held down
 			if (key_event.keysym.sym == SDLK_a) {	
 				// Toggle the display of advanced video engine information
-				_VideoManager->ToggleAdvancedDisplay();
+				VideoManager->ToggleAdvancedDisplay();
 			}
 			else if (key_event.keysym.sym == SDLK_f) {
 				// Toggle between full-screen and windowed mode
 				if (ENGINE_DEBUG) cout << "Toggle fullscreen!" << endl;
-				_VideoManager->ToggleFullscreen();
-				_VideoManager->ApplySettings();
+				VideoManager->ToggleFullscreen();
+				VideoManager->ApplySettings();
 				return;
 			}
 			else if (key_event.keysym.sym == SDLK_q) {
 				// Quit the game without question if we are in BootMode or QuitMode
-				if (_ModeManager->GetGameType() == ENGINE_BOOT_MODE || _ModeManager->GetGameType() == ENGINE_QUIT_MODE) {
-					_SettingsManager->ExitGame();
+				if (ModeManager->GetGameType() == ENGINE_BOOT_MODE || ModeManager->GetGameType() == ENGINE_QUIT_MODE) {
+					SettingsManager->ExitGame();
 				}
 				// Otherwise, push QuitMode onto the stack
 				else {
 					QuitMode *QM = new QuitMode();
-					_ModeManager->Push(QM);
+					ModeManager->Push(QM);
 				}
 			}
 			else if (key_event.keysym.sym == SDLK_r) {
-				_VideoManager->ToggleFPS();
+				VideoManager->ToggleFPS();
 				return;
 			}
 			else if (key_event.keysym.sym == SDLK_s) {
 				// Take a screenshot of the current game
-				_VideoManager->MakeScreenshot();
+				VideoManager->MakeScreenshot();
 				return;
 			}
 			else if (key_event.keysym.sym == SDLK_t) {
 				// Display and cycle through the texture sheets
-				_VideoManager->DEBUG_NextTexSheet();
+				VideoManager->DEBUG_NextTexSheet();
 				return;
 			}
 			
@@ -671,17 +685,17 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 		else if (key_event.keysym.sym == _key._pause) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: pause key pressed." << endl;
 			// Don't pause if we are in BootMode, QuitMode
-			if (_ModeManager->GetGameType() == ENGINE_BOOT_MODE || _ModeManager->GetGameType() == ENGINE_QUIT_MODE) {
+			if (ModeManager->GetGameType() == ENGINE_BOOT_MODE || ModeManager->GetGameType() == ENGINE_QUIT_MODE) {
 				return;
 			}
 			// If we are in PauseMode, unpause the game
-			else if (_ModeManager->GetGameType() == ENGINE_PAUSE_MODE) {
-				_ModeManager->Pop(); // We're no longer in pause mode, so pop it from the stack
+			else if (ModeManager->GetGameType() == ENGINE_PAUSE_MODE) {
+				ModeManager->Pop(); // We're no longer in pause mode, so pop it from the stack
 			}
 			// Otherwise, we push PauseMode onto the stack
 			else {
 				PauseMode *PM = new PauseMode();
-				_ModeManager->Push(PM);
+				ModeManager->Push(PM);
 			}
 			return;
 		}
@@ -817,29 +831,29 @@ void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 		else if (js_event.jbutton.button == _joystick._pause) {
 			//if (ENGINE_DEBUG) cout << "ENGINE: pause button pressed." << endl;
 			// Don't pause if we are in BootMode, QuitMode
-			if (_ModeManager->GetGameType() == ENGINE_BOOT_MODE || _ModeManager->GetGameType() == ENGINE_QUIT_MODE) {
+			if (ModeManager->GetGameType() == ENGINE_BOOT_MODE || ModeManager->GetGameType() == ENGINE_QUIT_MODE) {
 				return;
 			}
 			// If we are in PauseMode, unpause the game
-			else if (_ModeManager->GetGameType() == ENGINE_PAUSE_MODE) {
-				_ModeManager->Pop(); // We're no longer in pause mode, so pop it from the stack
+			else if (ModeManager->GetGameType() == ENGINE_PAUSE_MODE) {
+				ModeManager->Pop(); // We're no longer in pause mode, so pop it from the stack
 			}
 			// Otherwise, we push PauseMode onto the stack
 			else {
 				PauseMode *PM = new PauseMode();
-				_ModeManager->Push(PM);
+				ModeManager->Push(PM);
 			}
 			return;
 		}
 		else if (js_event.jbutton.button == _joystick._quit) {
 			// We quit the game without question if we are in BootMode or QuitMode
-			if (_ModeManager->GetGameType() == ENGINE_BOOT_MODE || _ModeManager->GetGameType() == ENGINE_QUIT_MODE) {
-				_SettingsManager->ExitGame();
+			if (ModeManager->GetGameType() == ENGINE_BOOT_MODE || ModeManager->GetGameType() == ENGINE_QUIT_MODE) {
+				SettingsManager->ExitGame();
 			}
 			// Otherwise, we push QuitMode onto the stack
 			else {
 				QuitMode *QM = new QuitMode();
-				_ModeManager->Push(QM);
+				ModeManager->Push(QM);
 			}
 			return;
 		}

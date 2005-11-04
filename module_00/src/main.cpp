@@ -295,16 +295,13 @@ int32 main(int32 argc, char *argv[]) {
 	atexit(SDL_Quit);
 	
 	// Create all the game singletons
-	GameAudio *AudioManager = GameAudio::Create();
-	GameVideo *VideoManager = GameVideo::Create();
-	GameData *DataManager = GameData::Create();
-	GameModeManager *ModeManager = GameModeManager::Create();
-	GameSettings *SettingsManager = GameSettings::Create();
-	GameInput *InputManager = GameInput::Create();
-	GameInstance *InstanceManager = GameInstance::Create();
-	
-	// This must be called before the singleton Initialize functions, otherwise we get a seg fault.
-	GameMode::InitializeSingletonPointers();
+	AudioManager = GameAudio::Create();
+	VideoManager = GameVideo::Create();
+	DataManager = GameData::Create();
+	ModeManager = GameModeManager::Create();
+	SettingsManager = GameSettings::Create();
+	InputManager = GameInput::Create();
+	InstanceManager = GameInstance::Create();
 	
 	if (!VideoManager->Initialize()) {
 		cerr << "ERROR: unable to initialize VideoManager" << endl;

@@ -178,7 +178,6 @@ void MapMode::_TEMP_CreateMap() {
 		}
 	}
 	
-	MapSprite::VideoManager = VideoManager;
 	MapSprite::CurrentMap = this;
 	
 	// Load player sprite and rest of map objects
@@ -269,7 +268,6 @@ void MapMode::Reset() {
     cerr << "MAP: ERROR > Couldn't set map font!" << endl;
 	
 	// Set MapObject Static Pointers
-	MapObject::VideoManager = VideoManager;
 	MapObject::CurrentMap = this;
 }
 

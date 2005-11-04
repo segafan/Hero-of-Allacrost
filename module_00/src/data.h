@@ -39,6 +39,8 @@ extern "C" {
 //! All calls to the data engine are wrapped in this namespace.
 namespace hoa_data {
 
+//! The singleton pointer responsible for the interaction between the C++ engine and Lua scripts.
+extern GameData *DataManager;
 //! Determines whether the code in the hoa_data namespace should print debug statements or not.
 extern bool DATA_DEBUG;
 
@@ -137,14 +139,6 @@ public:
 // END Lua related stuff
 
 	SINGLETON_METHODS(GameData);
-
-	void LoadGameSettings();
-	void ResetGameSettings();
-	void LoadKeyJoyState(hoa_engine::KeyState *keystate, hoa_engine::JoystickState *joystate);
-	void LoadBootData(std::vector<hoa_video::StaticImage> *boot_images,
-	                  std::vector<hoa_audio::SoundDescriptor> *boot_sound,
-	                  std::vector<hoa_audio::MusicDescriptor> *boot_music);
-	void LoadMap(hoa_map::MapMode *mapmode, int32 map_id);
 };
 
 } // namespace hoa_data

@@ -54,8 +54,66 @@ BootMode::BootMode() {
 	_fade_out = false;
 	
 	_vmenu_index.push_back(LOAD_GAME);
+	
+	DataManager->OpenLuaFile("dat/config/boot.hoa");
+	
+	string s;
+	int32 x1, x2, y1, y2;
+	
+	// Load the video stuff
+	StaticImage im;
 
-	DataManager->LoadBootData(&_boot_images, &_boot_sound, &_boot_music);
+	// The background
+	DataManager->GetGlobalString("background_image", s);
+	im.SetFilename(s);
+	DataManager->GetGlobalInt("background_image_width", x1);
+	DataManager->GetGlobalInt("background_image_height", y1);
+	im.SetDimensions((float) x1, (float) y1);
+	_boot_images.push_back(im);
+
+	// The logo
+	DataManager->GetGlobalString("logo_image", s);
+	im.SetFilename(s);
+	DataManager->GetGlobalInt("logo_image_width", x1);
+	DataManager->GetGlobalInt("logo_image_height", y1);
+	im.SetDimensions((float) x1, (float) y1);
+	_boot_images.push_back(im);
+
+	// The menu
+	DataManager->GetGlobalString("menu_image", s);
+	im.SetFilename(s);
+	DataManager->GetGlobalInt("menu_image_width", x1);
+	DataManager->GetGlobalInt("menu_image_height", y1);
+	im.SetDimensions((float) x1, (float) y1);
+	_boot_images.push_back(im);
+
+	// Set up a coordinate system - now you can use the boot.hoa to set it to whatever you like
+	DataManager->GetGlobalInt("coord_sys_x_left", x1);
+	DataManager->GetGlobalInt("coord_sys_x_right", x2);
+	DataManager->GetGlobalInt("coord_sys_y_bottom", y1);
+	DataManager->GetGlobalInt("coord_sys_y_top", y2);
+	VideoManager->SetCoordSys((float)x1, (float) x2, (float) y1, (float) y2);
+
+	// Load the audio stuff
+	// Make a call to the config code that loads in two vectors of strings
+	vector<string> new_music_files;
+	DataManager->FillStringVector("music_files", new_music_files);
+
+	vector<string> new_sound_files;
+	DataManager->FillStringVector("sound_files", new_sound_files);
+
+	// Push all our new music onto the boot_music vector
+	MusicDescriptor new_music;
+	for (uint i = 0; i < new_music_files.size(); i++) {
+		new_music.filename = new_music_files[i];
+		_boot_music.push_back(new_music);
+	}
+
+	SoundDescriptor new_sound;
+	for (uint i = 0; i < new_sound_files.size(); i++) {
+		new_sound.filename = new_sound_files[i];
+		_boot_sound.push_back(new_sound);
+	}
 	
  	for (uint32 i = 0; i < _boot_images.size(); i++) {
  		VideoManager->LoadImage(_boot_images[i]);

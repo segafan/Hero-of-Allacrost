@@ -27,6 +27,7 @@ using namespace hoa_utils;
 
 namespace hoa_global {
 
+GameInstance *InstanceManager = NULL;
 bool GLOBAL_DEBUG = false;
 SINGLETON_INITIALIZE(GameInstance);
 

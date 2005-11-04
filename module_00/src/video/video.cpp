@@ -12,6 +12,7 @@ using namespace hoa_utils;
 namespace hoa_video 
 {
 
+GameVideo *VideoManager = NULL;
 bool VIDEO_DEBUG = false;
 
 SINGLETON_INITIALIZE(GameVideo);

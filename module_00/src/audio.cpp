@@ -23,6 +23,7 @@ using namespace hoa_utils;
 
 namespace hoa_audio {
 
+GameAudio *AudioManager = NULL;
 bool AUDIO_DEBUG = false;
 SINGLETON_INITIALIZE(GameAudio);
 

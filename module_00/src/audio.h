@@ -28,6 +28,7 @@
 #define __AUDIO_HEADER__
 
 #include "utils.h"
+#include "defs.h"
 #include <string>
 #include "SDL.h"
 #include <SDL/SDL_mixer.h>
@@ -35,6 +36,8 @@
 //! All calls to the audio engine are wrapped in this namespace.
 namespace hoa_audio {
 
+//! The singleton pointer responsible for all audio operations.
+extern GameAudio *AudioManager;
 //! Determines whether the code in the hoa_audio namespace should print debug statements or not.
 extern bool AUDIO_DEBUG;
 
