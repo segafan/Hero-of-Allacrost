@@ -14,22 +14,10 @@
  * \brief   Source file for data and scripting engine.
  *****************************************************************************/
 
-#include "utils.h"
 #include <iostream>
 #include "data.h"
-#include "audio.h"
-#include "video.h"
-#include "engine.h"
-#include "boot.h"
-#include "map.h"
-
 
 using namespace std;
-using namespace hoa_engine;
-using namespace hoa_video;
-using namespace hoa_audio;
-using namespace hoa_utils;
-using namespace hoa_map;
 
 namespace hoa_data {
 

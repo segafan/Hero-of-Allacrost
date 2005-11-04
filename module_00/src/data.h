@@ -73,15 +73,6 @@ class GameData {
 private:
 	SINGLETON_DECLARE(GameData);
 
-	//! \name Singleton Class Pointers
-	//@{
-	//! \brief Pointers to the singleton classes frequently used by this class.
-	hoa_audio::GameAudio *_AudioManager;
-	hoa_video::GameVideo *_VideoManager;
-	hoa_engine::GameSettings *_SettingsManager;
-	//@}
-
-
 	//! The Lua stack, which handles all data sharing between C++ and Lua.
 	lua_State *_l_stack;
 	
