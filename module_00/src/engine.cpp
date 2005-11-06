@@ -252,13 +252,12 @@ bool GameSettings::Initialize() {
 	bool fs;
 	DataManager->OpenLuaFile("dat/config/settings.hoa");
 	DataManager->OpenTable("video_settings");
-	DataManager->GetTableBool("full_screen", fs);
-	SetFullScreen(fs);
+	SetFullScreen(DataManager->GetTableBool("full_screen"));
 	DataManager->CloseTable();
 
 	DataManager->OpenTable("audio_settings");
-	DataManager->GetTableInt("music_vol", music_vol);
-	DataManager->GetTableInt("sound_vol", sound_vol);
+	DataManager->GetTableIntRef("music_vol", music_vol);
+	DataManager->GetTableIntRef("sound_vol", sound_vol);
 	DataManager->CloseTable();
 
 	return true;
@@ -364,51 +363,31 @@ GameInput::~GameInput() {
 bool GameInput::Initialize() {
 	// Loads saved settings to setup the key and joystick configurations
 	DataManager->OpenLuaFile("dat/config/settings.hoa");
-	int32 tempy;
 	DataManager->OpenTable("key_settings");
-	DataManager->GetTableInt("up", tempy);           
-	_key._up = (SDLKey)tempy;
-	DataManager->GetTableInt("down", tempy);         
-	_key._down = (SDLKey)tempy;
-	DataManager->GetTableInt("left", tempy);         
-	_key._left = (SDLKey)tempy;
-	DataManager->GetTableInt("right", tempy);        
-	_key._right = (SDLKey)tempy;
-	DataManager->GetTableInt("confirm", tempy);      
-	_key._confirm = (SDLKey)tempy;
-	DataManager->GetTableInt("cancel", tempy);       
-	_key._cancel = (SDLKey)tempy;
-	DataManager->GetTableInt("menu", tempy);         
-	_key._menu = (SDLKey)tempy;
-	DataManager->GetTableInt("swap", tempy);         
-	_key._swap = (SDLKey)tempy;
-	DataManager->GetTableInt("left_select", tempy);  
-	_key._left_select = (SDLKey)tempy;
-	DataManager->GetTableInt("right_select", tempy); 
-	_key._right_select = (SDLKey)tempy;
-	DataManager->GetTableInt("pause", tempy);
-	_key._pause = (SDLKey)tempy;
+	
+	_key._up = (SDLKey) DataManager->GetTableInt("up");         
+	_key._down = (SDLKey) DataManager->GetTableInt("down");
+	_key._left = (SDLKey) DataManager->GetTableInt("left");
+	_key._right = (SDLKey) DataManager->GetTableInt("right");
+	_key._confirm = (SDLKey) DataManager->GetTableInt("confirm");
+	_key._cancel = (SDLKey) DataManager->GetTableInt("cancel");
+	_key._menu = (SDLKey) DataManager->GetTableInt("menu");
+	_key._swap = (SDLKey) DataManager->GetTableInt("swap");
+	_key._left_select = (SDLKey) DataManager->GetTableInt("left_select");
+	_key._right_select = (SDLKey) DataManager->GetTableInt("right_select");
+	_key._pause = (SDLKey) DataManager->GetTableInt("pause");
 	DataManager->CloseTable();
 	
 	DataManager->OpenTable("joystick_settings");
-	DataManager->GetTableInt("index", tempy);        
-	_joystick._joy_index = (int32)tempy;
-	DataManager->GetTableInt("confirm", tempy);      
-	_joystick._confirm = (uint8)tempy;
-	DataManager->GetTableInt("cancel", tempy);       
-	_joystick._cancel = (uint8)tempy;
-	DataManager->GetTableInt("menu", tempy);         
-	_joystick._menu = (uint8)tempy;
-	DataManager->GetTableInt("swap", tempy);         
-	_joystick._swap = (uint8)tempy;
-	DataManager->GetTableInt("left_select", tempy);  
-	_joystick._left_select = (uint8)tempy;
-	DataManager->GetTableInt("right_select", tempy); 
-	_joystick._right_select = (uint8)tempy;
-	DataManager->GetTableInt("pause", tempy);        
-	_joystick._pause = (uint8)tempy;
-	DataManager->GetTableInt("quit", tempy);         
-	_joystick._quit = (uint8)tempy;
+	_joystick._joy_index = (int32) DataManager->GetTableInt("index");
+	_joystick._confirm = (uint8) DataManager->GetTableInt("confirm");
+	_joystick._cancel = (uint8) DataManager->GetTableInt("cancel");
+	_joystick._menu = (uint8) DataManager->GetTableInt("menu");
+	_joystick._swap = (uint8) DataManager->GetTableInt("swap");
+	_joystick._left_select = (uint8) DataManager->GetTableInt("left_select");
+	_joystick._right_select = (uint8) DataManager->GetTableInt("right_select");
+	_joystick._pause = (uint8) DataManager->GetTableInt("pause");
+	_joystick._quit = (uint8) DataManager->GetTableInt("quit");
 	DataManager->CloseTable();
 	
 	// Attempt to initialize and setup the configured joystick

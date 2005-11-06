@@ -57,42 +57,32 @@ BootMode::BootMode() {
 	
 	DataManager->OpenLuaFile("dat/config/boot.hoa");
 	
-	string s;
-	int32 x1, x2, y1, y2;
-	
 	// Load the video stuff
 	StaticImage im;
 
 	// The background
-	DataManager->GetGlobalString("background_image", s);
-	im.SetFilename(s);
-	DataManager->GetGlobalInt("background_image_width", x1);
-	DataManager->GetGlobalInt("background_image_height", y1);
-	im.SetDimensions((float) x1, (float) y1);
+	im.SetFilename(DataManager->GetGlobalString("background_image"));
+	im.SetDimensions((float) DataManager->GetGlobalInt("background_image_width"),
+	                 (float) DataManager->GetGlobalInt("background_image_height"));
 	_boot_images.push_back(im);
 
 	// The logo
-	DataManager->GetGlobalString("logo_image", s);
-	im.SetFilename(s);
-	DataManager->GetGlobalInt("logo_image_width", x1);
-	DataManager->GetGlobalInt("logo_image_height", y1);
-	im.SetDimensions((float) x1, (float) y1);
+	im.SetFilename(DataManager->GetGlobalString("logo_image"));
+	im.SetDimensions((float) DataManager->GetGlobalInt("logo_image_width"),
+	                 (float) DataManager->GetGlobalInt("logo_image_height"));
 	_boot_images.push_back(im);
 
 	// The menu
-	DataManager->GetGlobalString("menu_image", s);
-	im.SetFilename(s);
-	DataManager->GetGlobalInt("menu_image_width", x1);
-	DataManager->GetGlobalInt("menu_image_height", y1);
-	im.SetDimensions((float) x1, (float) y1);
+	im.SetFilename(DataManager->GetGlobalString("menu_image"));
+	im.SetDimensions((float) DataManager->GetGlobalInt("menu_image_width"),
+	                 (float) DataManager->GetGlobalInt("menu_image_height"));
 	_boot_images.push_back(im);
 
 	// Set up a coordinate system - now you can use the boot.hoa to set it to whatever you like
-	DataManager->GetGlobalInt("coord_sys_x_left", x1);
-	DataManager->GetGlobalInt("coord_sys_x_right", x2);
-	DataManager->GetGlobalInt("coord_sys_y_bottom", y1);
-	DataManager->GetGlobalInt("coord_sys_y_top", y2);
-	VideoManager->SetCoordSys((float)x1, (float) x2, (float) y1, (float) y2);
+	VideoManager->SetCoordSys((float) DataManager->GetGlobalInt("coord_sys_x_left"),
+	                          (float) DataManager->GetGlobalInt("coord_sys_x_right"),
+				  (float) DataManager->GetGlobalInt("coord_sys_y_bottom"),
+				  (float) DataManager->GetGlobalInt("coord_sys_y_top"));
 
 	// Load the audio stuff
 	// Make a call to the config code that loads in two vectors of strings
