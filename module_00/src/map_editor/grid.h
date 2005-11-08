@@ -10,6 +10,9 @@
 #ifndef __GRID_HEADER__
 #define __GRID_HEADER__
 
+#include "utils.h"
+#include "defs.h"
+#include "data.h"
 #include "tile.h"
 #include "tileset.h"	// FIXME: needed for "OMG what a hack" in DoubleClick...
 
@@ -41,14 +44,16 @@ class Grid: public QCanvasView
 		Grid(QWidget *parent = 0, const QString &name = QString("Untitled"));
 		~Grid();
 		
-		bool GetChanged();  		// returns mapChanged
-		QString GetFileName();		// returns mapFileName
-		void SetWidth(int width);	// sets the map's width in tiles (columns)
-		void SetHeight(int height);	// sets the map's height in tiles (rows)
-		void SetFileName(QString filename);	// sets the map's file name
-		void SaveMap(QFile &);		// saves the map to a config file
-		void CreateGrid();			// creates grid lines on the map
-		Tileset* temp;				// FIXME: zOMG what a hack
+		bool GetChanged();          // returns mapChanged
+		QString GetFileName();      // returns mapFileName
+		void SetWidth(int width);   // sets the map's width in tiles (columns)
+		void SetHeight(int height); // sets the map's height in tiles (rows)
+		void SetFileName(QString filename);    // sets the map's file name
+		void SetFileNameList(QStringList list);// sets list of map's tile names
+		void LoadMap();             // loads a map from a config file
+		void SaveMap();             // saves the map to a config file
+		void CreateGrid();          // creates grid lines on the map
+		Tileset* temp;              // FIXME: zOMG what a hack
 		
 	protected:
 		// I think these are protected
@@ -111,7 +116,7 @@ class Grid: public QCanvasView
 		QCheckBox* _tile_occupied;
 
 		QStringList _file_name_list;		// list of tile file names
-//QValueVector<int> locationVector;// FIXME: WTF??? vector of tiles in each cell
+		std::vector<int32> _tile_array;     // vector of tiles in each cell
 		
 		QCanvasItem* _moving;	// set if an object is currently being moved
 		QPoint _moving_start;	// moving object's starting point
@@ -126,6 +131,7 @@ class Grid: public QCanvasView
 		bool _grid_on;			// TRUE = grid is displayed, else FALSE
 		//bool _drag_on;		// TRUE = dragging is enabled, else painting
 		bool _walk_on;			// TRUE = walkable is set, else not-walkable
+		hoa_data::GameData* _data_manager;  // Lua <--> C++ interface
 }; // class Grid
 
 } // namespace hoa_editor

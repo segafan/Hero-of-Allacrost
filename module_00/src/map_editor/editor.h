@@ -18,7 +18,6 @@
 #include <qfiledialog.h>
 #include <qimage.h>
 #include <qinputdialog.h>
-//#include <qlayout.h>
 #include <qmainwindow.h>
 #include <qmenubar.h>
 #include <qmessagebox.h>
@@ -28,10 +27,6 @@
 #include <qstatusbar.h>
 #include <qstring.h>
 #include <qstringlist.h>
-
-//class QPopupMenu;
-//class QString;
-//class QStringList;
 
 //! All calls to the editor are wrapped in this namespace.
 namespace hoa_editor
@@ -46,7 +41,7 @@ class Editor: public QMainWindow
 		~Editor();				// destructor
 		
 		// maximum number of recently used files to keep track of
-		// not sure why this is enum
+		// FIXME: not sure why this is enum
 		enum { MAX_RECENTFILES = 5 };
 
 		friend class Grid;		// needed for "painting" tiles
@@ -54,8 +49,7 @@ class Editor: public QMainWindow
 	protected:
 		// Handles close and/or quit events, reimplemented from QMainWindow
 		virtual void closeEvent(QCloseEvent *);
-		// not sure if I need this:
-		//void resizeEvent(QResizeEvent *); where does this go?
+		//void resizeEvent(QResizeEvent *); FIXME: where does this go?
 	
 	private slots:
 		// the following slot is used to gray out items in file the menu
@@ -72,16 +66,12 @@ class Editor: public QMainWindow
 		void _FileResize();
 		void _FileQuit();
 				
-		// the following slots are used in the view menu
-	//	void viewToggleGrid();
-		
 		// the following slots are used in the help menu
 		void _HelpHelp();
 		void _HelpAbout();
 		void _HelpAboutQt();
 		
 	private:
-		void _Load(const QString &file_name);	// loads a map
 		void _TileInit();		// loads the tiles for drag 'n' drop
 		bool _EraseOK();		// saves the map if it is unsaved
 
@@ -92,7 +82,6 @@ class Editor: public QMainWindow
 		//void updateRecentFilesMenu();
 		
 		QPopupMenu* _file_menu;	// this is used for the File menu
-	//	QPopupMenu *viewMenu;	// this is used for the View menu
 		QPopupMenu* _help_menu;	// this is used for the Help menu
 
 		QStatusBar* _stat_bar;	// this is used to display messages

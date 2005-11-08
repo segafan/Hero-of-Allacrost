@@ -10,11 +10,19 @@
 #include <iostream>
 #include "grid.h"
 
+using namespace std;
+using namespace hoa_data;
 using namespace hoa_editor;
 
 Grid::Grid(QWidget *parent, const QString &name)
 	: QCanvasView(parent, (const char*)name)
 {	
+	// Create and initialize the GameData singleton
+	_data_manager = GameData::Create();
+	_data_manager = GameData::GetReference();
+	if (!DataManager->Initialize())
+		cerr << "ERROR: unable to initialize DataManager" << endl;
+	
 	setAcceptDrops(TRUE);	// enable drag 'n' drop
 	_dragging = FALSE;		// FIXME: currently unneeded
 	setCanvas(NULL);		// don't have canvas until "New Map..." is selected
@@ -24,10 +32,16 @@ Grid::Grid(QWidget *parent, const QString &name)
 	_view_property = 0;		// default value (viewing mode off)
 	_changed = false;		// map has not yet been modified
 	_CreateMenus();			// initialize the menus
+	_file_name = name;      // gives the map a name
+	_width = 0;             // initial # of columns
+	_height= 0;             // initial # of rows
 } // Grid constructor
 
 Grid::~Grid()
 {
+	// Destroy GameData singleton
+	GameData::Destroy();
+	
 	// do nothing Qt should take care of everything
 } // Grid destructor
 
@@ -44,17 +58,17 @@ QString Grid::GetFileName()
 void Grid::SetWidth(int width)
 {
 	_width = width;
-} //SetWidth(...)
+} // SetWidth(...)
 
 void Grid::SetHeight(int height)
 {
 	_height = height;
-} //SetHeight(...)
+} // SetHeight(...)
 
 void Grid::SetFileName(QString filename)
 {
 	_file_name = filename;
-} //SetFileName(...)
+} // SetFileName(...)
 
 /*void Grid::getMapData()
 {
@@ -636,7 +650,43 @@ void Grid::_TileMode()
 */	} // ungray them out
 } // _TileMode()
 
-void Grid::SaveMap(QFile &file)
+void Grid::LoadMap()
+{
+	_data_manager->OpenLuaFile(_file_name);
+	_height = _data_manager->GetGlobalInt("row_count");
+	_width  = _data_manager->GetGlobalInt("col_count");
+	QCanvas *canvas = new QCanvas(this);
+	setCanvas(canvas);
+	this->canvas()->resize(_width * TILE_WIDTH, _height * TILE_HEIGHT);
+	CreateGrid();
+		
+	vector<string> vect;
+	_data_manager->FillStringVector("tiles_used", vect);
+	for (vector<string>::iterator it = vect.begin(); it != vect.end(); ++it)
+		_file_name_list.append(*it);
+
+	_data_manager->FillIntVector("lower_layer", _tile_array);
+	int32 row = 0, col = 0;
+	for (int32 i = 0; i < _tile_array.size(); i++)
+	{	
+		QImage img = temp->findItem(_file_name_list[_tile_array[i]])->pixmap()
+			->convertToImage();
+		Tile *tile = new Tile(img, this->canvas());
+		tile->move(col * TILE_WIDTH, row * TILE_HEIGHT);
+		tile->setZ(0);		// sets height of tile TODO: create a menu option
+		// tile->tileInfo.lower_layer = 1; FIXME: perhaps not needed here
+		//tile->tileInfo.upper_layer = -1; // TEMPORARY!!! FIXME: this neither
+		//tile->tileInfo.event_mask = tileProperties;
+		tile->show();
+		col = ++col % _width;
+		if (col == 0)
+			row++;
+	}
+	this->canvas()->update();
+	_changed = false;
+} // LoadMap()
+
+void Grid::SaveMap()
 {
 	_changed = false;
-} // _SaveMap()
+} // SaveMap()

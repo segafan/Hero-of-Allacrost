@@ -10,12 +10,23 @@
 #include "editor.h"
 
 using namespace std;
+using namespace hoa_data;
+using namespace hoa_utils;
 using namespace hoa_editor;
 
 const QString APP_KEY = "/map_editor/";
 
 Editor::Editor() : QMainWindow(0, 0, WDestructiveClose)
 {
+	// Create and initialize the GameData singleton
+	DataManager = GameData::Create();
+	DataManager = GameData::GetReference();
+	if (!DataManager->Initialize())
+	{
+		cerr << "ERROR: unable to initialize DataManager" << endl;
+		_FileQuit();
+	} // Make sure DataManager is properly initialized.
+	
 	// create the main widget and tile icons
 	QSplitter *split = new QSplitter(this);
 	_tiles = new Tileset(split);
@@ -65,6 +76,8 @@ Editor::Editor() : QMainWindow(0, 0, WDestructiveClose)
 
 Editor::~Editor()
 {
+	// Destroy GameData singleton
+	GameData::Destroy();
 	if (_map != NULL)
 		delete _map;
 	if (_tiles != NULL)
@@ -124,7 +137,13 @@ void Editor::_FileOpen()
 
 	// file must exist in order to open it
 	if (!file_name.isEmpty())
-		_Load(file_name);
+	{
+		_map->SetFileName(file_name);
+		_map->LoadMap();
+		_stat_bar->message(QString("Opened \'%1\'").arg(_map->GetFileName()),
+			5000);
+//		_UpdateRecentFiles(file_name);  <-- FIXME
+	}
 } // _FileOpen()
 /*
 void Editor::_FileOpenRecent(int index)
@@ -154,7 +173,7 @@ void Editor::_FileSaveAs()
 		if (answer == 0)
 		{
 			_map->SetFileName(file_name);
-//			_UpdateRecentFiles(fileName);  <-- FIXME
+//			_UpdateRecentFiles(file_name);  <-- FIXME
 			_FileSave();
 			return;
 		} // save the file
@@ -171,17 +190,7 @@ void Editor::_FileSave()
 		return;
     } // gets a file name if it is blank
 
-    QFile file(_map->GetFileName());	// file to write to
-	
-    if (!file.open(IO_WriteOnly))
-	{
-		_stat_bar->message(QString("\'%1\' is not writable").
-			arg(_map->GetFileName()), 5000);
-		return;
-    } // make sure file is openable
-    
-    _map->SaveMap(file);				// actually saves the map
-    file.close();
+    _map->SaveMap();	// actually saves the map
 
     setCaption(QString("%1").arg(_map->GetFileName()));
     //_stat_bar->message(QString("Saved \'%1\'").arg(map->getFileName()),5000);
@@ -312,20 +321,6 @@ void Editor::_HelpAboutQt()
 {
     QMessageBox::aboutQt(this, "HoA Level Editor -- About Qt");
 } // _HelpAboutQt()
-
-void Editor::_Load(const QString &file_name)
-{
-	_stat_bar->message(QString("Hold your horses!"
-		" Loading will be implemented soon..."), 5000);
-
-/*	if (!file_name.isNull())
-	{
-		updateRecentFiles(file_name);
-		_map = new Grid(0, file_name);
-	} // only update if we have a name for the map
-	else
-		_map = new Grid(0); // <-- FIXME: zero will make a floating map */
-} // _Load(...)
 
 void Editor::_TileInit()
 {
