@@ -2,33 +2,31 @@ EXTRA_DIST = configure dat fnt img mus snd
 ACLOCAL_AMFLAGS = -I m4
 INCLUDES = -I/usr/include/SDL -I$(top_srcdir)/src/video -I$(top_srcdir)/src
 
-bin_PROGRAMS = allacrost
-
-#if COND_EDITOR
-MAYBE_EDITOR = src/map_editor
-bin_PROGRAMS += editor
-#endif
-
-#if COND_EDITOR
+if COND_EDITOR
+EDITOR_DIR = src/map_editor
+EDITOR_BIN = editor
 AM_CXXFLAGS := $(CXXFLAGS) $(QT_CXXFLAGS)
 BUILT_SOURCES = $(editor_MOC)
 CLEANFILES = $(BUILT_SOURCES)
-$(MAYBE_EDITOR)%.moc.cpp: $(MAYBE_EDITOR)%.h
+$(EDITOR_DIR)%.moc.cpp: $(EDITOR_DIR)%.h
 	$(MOC) -o $@ $<
-editor_MOC = $(MAYBE_EDITOR)/editor.moc.cpp $(MAYBE_EDITOR)/grid.moc.cpp
-editor_SOURCES = $(MAYBE_EDITOR)/editor_main.cpp $(MAYBE_EDITOR)/editor.cpp \
-	$(MAYBE_EDITOR)/editor.h $(MAYBE_EDITOR)/grid.cpp src/video/video.h \
+editor_MOC = $(EDITOR_DIR)/editor.moc.cpp $(EDITOR_DIR)/grid.moc.cpp
+editor_SOURCES = $(EDITOR_DIR)/editor_main.cpp $(EDITOR_DIR)/editor.cpp \
+	$(EDITOR_DIR)/editor.h $(EDITOR_DIR)/grid.cpp src/video/video.h \
 	src/video/video.cpp src/video/tex_mgmt.cpp \
 	src/video/draw.cpp src/video/fade.cpp src/video/interpolator.cpp \
 	src/video/menu_window.cpp src/video/option.cpp src/video/shake.cpp \
 	src/video/text.cpp src/video/textbox.cpp src/utils.cpp src/video/gui.h \
 	src/video/gui.cpp src/data_bind.h \
-	$(MAYBE_EDITOR)/grid.h $(MAYBE_EDITOR)/tile.cpp src/utils.h src/defs.h \
-	$(MAYBE_EDITOR)/tile.h $(MAYBE_EDITOR)/tileset.cpp src/data.h src/data.cpp \
-	$(MAYBE_EDITOR)/tileset.h $(editor_MOC)
+	$(EDITOR_DIR)/grid.h $(EDITOR_DIR)/tile.cpp src/utils.h src/defs.h \
+	$(EDITOR_DIR)/tile.h $(EDITOR_DIR)/tileset.cpp src/data.h src/data.cpp \
+	$(EDITOR_DIR)/tileset.h $(editor_MOC)
 editor_LDADD = $(QT_GUILINK) $(QT_LDADD) -lqt
-#endif
-#SUBDIRS = $(MAYBE_EDITOR) src
+else
+EDITOR_BIN =
+endif
+
+bin_PROGRAMS = allacrost $(EDITOR_BIN)
 
 allacrost_SOURCES = src/audio.cpp src/battle.cpp src/boot.cpp src/data.cpp \
 	src/engine.cpp src/global.cpp src/main.cpp src/map_dialogue.cpp \

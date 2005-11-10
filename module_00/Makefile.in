@@ -36,7 +36,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-bin_PROGRAMS = allacrost$(EXEEXT) editor$(EXEEXT)
+bin_PROGRAMS = allacrost$(EXEEXT) $(am__EXEEXT_1)
 subdir = .
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
@@ -52,6 +52,7 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES =
+@COND_EDITOR_TRUE@am__EXEEXT_1 = editor$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
@@ -65,17 +66,34 @@ am_allacrost_OBJECTS = audio.$(OBJEXT) battle.$(OBJEXT) boot.$(OBJEXT) \
 	text.$(OBJEXT) textbox.$(OBJEXT) video.$(OBJEXT)
 allacrost_OBJECTS = $(am_allacrost_OBJECTS)
 allacrost_LDADD = $(LDADD)
-am__objects_1 = editor.moc.$(OBJEXT) grid.moc.$(OBJEXT)
-am_editor_OBJECTS = editor_main.$(OBJEXT) editor.$(OBJEXT) \
-	grid.$(OBJEXT) video.$(OBJEXT) tex_mgmt.$(OBJEXT) \
-	draw.$(OBJEXT) fade.$(OBJEXT) interpolator.$(OBJEXT) \
-	menu_window.$(OBJEXT) option.$(OBJEXT) shake.$(OBJEXT) \
-	text.$(OBJEXT) textbox.$(OBJEXT) utils.$(OBJEXT) gui.$(OBJEXT) \
-	tile.$(OBJEXT) tileset.$(OBJEXT) data.$(OBJEXT) \
-	$(am__objects_1)
+am__editor_SOURCES_DIST = $(EDITOR_DIR)/editor_main.cpp \
+	$(EDITOR_DIR)/editor.cpp $(EDITOR_DIR)/editor.h \
+	$(EDITOR_DIR)/grid.cpp src/video/video.h src/video/video.cpp \
+	src/video/tex_mgmt.cpp src/video/draw.cpp src/video/fade.cpp \
+	src/video/interpolator.cpp src/video/menu_window.cpp \
+	src/video/option.cpp src/video/shake.cpp src/video/text.cpp \
+	src/video/textbox.cpp src/utils.cpp src/video/gui.h \
+	src/video/gui.cpp src/data_bind.h $(EDITOR_DIR)/grid.h \
+	$(EDITOR_DIR)/tile.cpp src/utils.h src/defs.h \
+	$(EDITOR_DIR)/tile.h $(EDITOR_DIR)/tileset.cpp src/data.h \
+	src/data.cpp $(EDITOR_DIR)/tileset.h \
+	$(EDITOR_DIR)/editor.moc.cpp $(EDITOR_DIR)/grid.moc.cpp
+@COND_EDITOR_TRUE@am__objects_1 = editor.moc.$(OBJEXT) \
+@COND_EDITOR_TRUE@	grid.moc.$(OBJEXT)
+@COND_EDITOR_TRUE@am_editor_OBJECTS = editor_main.$(OBJEXT) \
+@COND_EDITOR_TRUE@	editor.$(OBJEXT) grid.$(OBJEXT) \
+@COND_EDITOR_TRUE@	video.$(OBJEXT) tex_mgmt.$(OBJEXT) \
+@COND_EDITOR_TRUE@	draw.$(OBJEXT) fade.$(OBJEXT) \
+@COND_EDITOR_TRUE@	interpolator.$(OBJEXT) menu_window.$(OBJEXT) \
+@COND_EDITOR_TRUE@	option.$(OBJEXT) shake.$(OBJEXT) \
+@COND_EDITOR_TRUE@	text.$(OBJEXT) textbox.$(OBJEXT) \
+@COND_EDITOR_TRUE@	utils.$(OBJEXT) gui.$(OBJEXT) tile.$(OBJEXT) \
+@COND_EDITOR_TRUE@	tileset.$(OBJEXT) data.$(OBJEXT) \
+@COND_EDITOR_TRUE@	$(am__objects_1)
 editor_OBJECTS = $(am_editor_OBJECTS)
 am__DEPENDENCIES_1 =
-editor_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@COND_EDITOR_TRUE@editor_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+@COND_EDITOR_TRUE@	$(am__DEPENDENCIES_1)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I.
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -89,7 +107,7 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(allacrost_SOURCES) $(editor_SOURCES)
-DIST_SOURCES = $(allacrost_SOURCES) $(editor_SOURCES)
+DIST_SOURCES = $(allacrost_SOURCES) $(am__editor_SOURCES_DIST)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -192,30 +210,25 @@ target_alias = @target_alias@
 EXTRA_DIST = configure dat fnt img mus snd
 ACLOCAL_AMFLAGS = -I m4
 INCLUDES = -I/usr/include/SDL -I$(top_srcdir)/src/video -I$(top_srcdir)/src
+@COND_EDITOR_TRUE@EDITOR_DIR = src/map_editor
+@COND_EDITOR_FALSE@EDITOR_BIN = 
+@COND_EDITOR_TRUE@EDITOR_BIN = editor
+@COND_EDITOR_TRUE@AM_CXXFLAGS := $(CXXFLAGS) $(QT_CXXFLAGS)
+@COND_EDITOR_TRUE@BUILT_SOURCES = $(editor_MOC)
+@COND_EDITOR_TRUE@CLEANFILES = $(BUILT_SOURCES)
+@COND_EDITOR_TRUE@editor_MOC = $(EDITOR_DIR)/editor.moc.cpp $(EDITOR_DIR)/grid.moc.cpp
+@COND_EDITOR_TRUE@editor_SOURCES = $(EDITOR_DIR)/editor_main.cpp $(EDITOR_DIR)/editor.cpp \
+@COND_EDITOR_TRUE@	$(EDITOR_DIR)/editor.h $(EDITOR_DIR)/grid.cpp src/video/video.h \
+@COND_EDITOR_TRUE@	src/video/video.cpp src/video/tex_mgmt.cpp \
+@COND_EDITOR_TRUE@	src/video/draw.cpp src/video/fade.cpp src/video/interpolator.cpp \
+@COND_EDITOR_TRUE@	src/video/menu_window.cpp src/video/option.cpp src/video/shake.cpp \
+@COND_EDITOR_TRUE@	src/video/text.cpp src/video/textbox.cpp src/utils.cpp src/video/gui.h \
+@COND_EDITOR_TRUE@	src/video/gui.cpp src/data_bind.h \
+@COND_EDITOR_TRUE@	$(EDITOR_DIR)/grid.h $(EDITOR_DIR)/tile.cpp src/utils.h src/defs.h \
+@COND_EDITOR_TRUE@	$(EDITOR_DIR)/tile.h $(EDITOR_DIR)/tileset.cpp src/data.h src/data.cpp \
+@COND_EDITOR_TRUE@	$(EDITOR_DIR)/tileset.h $(editor_MOC)
 
-#if COND_EDITOR
-MAYBE_EDITOR = src/map_editor
-#endif
-
-#if COND_EDITOR
-AM_CXXFLAGS := $(CXXFLAGS) $(QT_CXXFLAGS)
-BUILT_SOURCES = $(editor_MOC)
-CLEANFILES = $(BUILT_SOURCES)
-editor_MOC = $(MAYBE_EDITOR)/editor.moc.cpp $(MAYBE_EDITOR)/grid.moc.cpp
-editor_SOURCES = $(MAYBE_EDITOR)/editor_main.cpp $(MAYBE_EDITOR)/editor.cpp \
-	$(MAYBE_EDITOR)/editor.h $(MAYBE_EDITOR)/grid.cpp src/video/video.h \
-	src/video/video.cpp src/video/tex_mgmt.cpp \
-	src/video/draw.cpp src/video/fade.cpp src/video/interpolator.cpp \
-	src/video/menu_window.cpp src/video/option.cpp src/video/shake.cpp \
-	src/video/text.cpp src/video/textbox.cpp src/utils.cpp src/video/gui.h \
-	src/video/gui.cpp src/data_bind.h \
-	$(MAYBE_EDITOR)/grid.h $(MAYBE_EDITOR)/tile.cpp src/utils.h src/defs.h \
-	$(MAYBE_EDITOR)/tile.h $(MAYBE_EDITOR)/tileset.cpp src/data.h src/data.cpp \
-	$(MAYBE_EDITOR)/tileset.h $(editor_MOC)
-
-editor_LDADD = $(QT_GUILINK) $(QT_LDADD) -lqt
-#endif
-#SUBDIRS = $(MAYBE_EDITOR) src
+@COND_EDITOR_TRUE@editor_LDADD = $(QT_GUILINK) $(QT_LDADD) -lqt
 allacrost_SOURCES = src/audio.cpp src/battle.cpp src/boot.cpp src/data.cpp \
 	src/engine.cpp src/global.cpp src/main.cpp src/map_dialogue.cpp \
 	src/map_objects.cpp src/map.cpp src/menu.cpp src/pause.cpp src/quit.cpp \
@@ -731,103 +744,103 @@ video.obj: src/video/video.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o video.obj `if test -f 'src/video/video.cpp'; then $(CYGPATH_W) 'src/video/video.cpp'; else $(CYGPATH_W) '$(srcdir)/src/video/video.cpp'; fi`
 
-editor_main.o: $(MAYBE_EDITOR)/editor_main.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT editor_main.o -MD -MP -MF "$(DEPDIR)/editor_main.Tpo" -c -o editor_main.o `test -f '$(MAYBE_EDITOR)/editor_main.cpp' || echo '$(srcdir)/'`$(MAYBE_EDITOR)/editor_main.cpp; \
+editor_main.o: $(EDITOR_DIR)/editor_main.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT editor_main.o -MD -MP -MF "$(DEPDIR)/editor_main.Tpo" -c -o editor_main.o `test -f '$(EDITOR_DIR)/editor_main.cpp' || echo '$(srcdir)/'`$(EDITOR_DIR)/editor_main.cpp; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/editor_main.Tpo" "$(DEPDIR)/editor_main.Po"; else rm -f "$(DEPDIR)/editor_main.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MAYBE_EDITOR)/editor_main.cpp' object='editor_main.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(EDITOR_DIR)/editor_main.cpp' object='editor_main.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o editor_main.o `test -f '$(MAYBE_EDITOR)/editor_main.cpp' || echo '$(srcdir)/'`$(MAYBE_EDITOR)/editor_main.cpp
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o editor_main.o `test -f '$(EDITOR_DIR)/editor_main.cpp' || echo '$(srcdir)/'`$(EDITOR_DIR)/editor_main.cpp
 
-editor_main.obj: $(MAYBE_EDITOR)/editor_main.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT editor_main.obj -MD -MP -MF "$(DEPDIR)/editor_main.Tpo" -c -o editor_main.obj `if test -f '$(MAYBE_EDITOR)/editor_main.cpp'; then $(CYGPATH_W) '$(MAYBE_EDITOR)/editor_main.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MAYBE_EDITOR)/editor_main.cpp'; fi`; \
+editor_main.obj: $(EDITOR_DIR)/editor_main.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT editor_main.obj -MD -MP -MF "$(DEPDIR)/editor_main.Tpo" -c -o editor_main.obj `if test -f '$(EDITOR_DIR)/editor_main.cpp'; then $(CYGPATH_W) '$(EDITOR_DIR)/editor_main.cpp'; else $(CYGPATH_W) '$(srcdir)/$(EDITOR_DIR)/editor_main.cpp'; fi`; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/editor_main.Tpo" "$(DEPDIR)/editor_main.Po"; else rm -f "$(DEPDIR)/editor_main.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MAYBE_EDITOR)/editor_main.cpp' object='editor_main.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(EDITOR_DIR)/editor_main.cpp' object='editor_main.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o editor_main.obj `if test -f '$(MAYBE_EDITOR)/editor_main.cpp'; then $(CYGPATH_W) '$(MAYBE_EDITOR)/editor_main.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MAYBE_EDITOR)/editor_main.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o editor_main.obj `if test -f '$(EDITOR_DIR)/editor_main.cpp'; then $(CYGPATH_W) '$(EDITOR_DIR)/editor_main.cpp'; else $(CYGPATH_W) '$(srcdir)/$(EDITOR_DIR)/editor_main.cpp'; fi`
 
-editor.o: $(MAYBE_EDITOR)/editor.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT editor.o -MD -MP -MF "$(DEPDIR)/editor.Tpo" -c -o editor.o `test -f '$(MAYBE_EDITOR)/editor.cpp' || echo '$(srcdir)/'`$(MAYBE_EDITOR)/editor.cpp; \
+editor.o: $(EDITOR_DIR)/editor.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT editor.o -MD -MP -MF "$(DEPDIR)/editor.Tpo" -c -o editor.o `test -f '$(EDITOR_DIR)/editor.cpp' || echo '$(srcdir)/'`$(EDITOR_DIR)/editor.cpp; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/editor.Tpo" "$(DEPDIR)/editor.Po"; else rm -f "$(DEPDIR)/editor.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MAYBE_EDITOR)/editor.cpp' object='editor.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(EDITOR_DIR)/editor.cpp' object='editor.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o editor.o `test -f '$(MAYBE_EDITOR)/editor.cpp' || echo '$(srcdir)/'`$(MAYBE_EDITOR)/editor.cpp
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o editor.o `test -f '$(EDITOR_DIR)/editor.cpp' || echo '$(srcdir)/'`$(EDITOR_DIR)/editor.cpp
 
-editor.obj: $(MAYBE_EDITOR)/editor.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT editor.obj -MD -MP -MF "$(DEPDIR)/editor.Tpo" -c -o editor.obj `if test -f '$(MAYBE_EDITOR)/editor.cpp'; then $(CYGPATH_W) '$(MAYBE_EDITOR)/editor.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MAYBE_EDITOR)/editor.cpp'; fi`; \
+editor.obj: $(EDITOR_DIR)/editor.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT editor.obj -MD -MP -MF "$(DEPDIR)/editor.Tpo" -c -o editor.obj `if test -f '$(EDITOR_DIR)/editor.cpp'; then $(CYGPATH_W) '$(EDITOR_DIR)/editor.cpp'; else $(CYGPATH_W) '$(srcdir)/$(EDITOR_DIR)/editor.cpp'; fi`; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/editor.Tpo" "$(DEPDIR)/editor.Po"; else rm -f "$(DEPDIR)/editor.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MAYBE_EDITOR)/editor.cpp' object='editor.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(EDITOR_DIR)/editor.cpp' object='editor.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o editor.obj `if test -f '$(MAYBE_EDITOR)/editor.cpp'; then $(CYGPATH_W) '$(MAYBE_EDITOR)/editor.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MAYBE_EDITOR)/editor.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o editor.obj `if test -f '$(EDITOR_DIR)/editor.cpp'; then $(CYGPATH_W) '$(EDITOR_DIR)/editor.cpp'; else $(CYGPATH_W) '$(srcdir)/$(EDITOR_DIR)/editor.cpp'; fi`
 
-grid.o: $(MAYBE_EDITOR)/grid.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT grid.o -MD -MP -MF "$(DEPDIR)/grid.Tpo" -c -o grid.o `test -f '$(MAYBE_EDITOR)/grid.cpp' || echo '$(srcdir)/'`$(MAYBE_EDITOR)/grid.cpp; \
+grid.o: $(EDITOR_DIR)/grid.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT grid.o -MD -MP -MF "$(DEPDIR)/grid.Tpo" -c -o grid.o `test -f '$(EDITOR_DIR)/grid.cpp' || echo '$(srcdir)/'`$(EDITOR_DIR)/grid.cpp; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/grid.Tpo" "$(DEPDIR)/grid.Po"; else rm -f "$(DEPDIR)/grid.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MAYBE_EDITOR)/grid.cpp' object='grid.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(EDITOR_DIR)/grid.cpp' object='grid.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o grid.o `test -f '$(MAYBE_EDITOR)/grid.cpp' || echo '$(srcdir)/'`$(MAYBE_EDITOR)/grid.cpp
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o grid.o `test -f '$(EDITOR_DIR)/grid.cpp' || echo '$(srcdir)/'`$(EDITOR_DIR)/grid.cpp
 
-grid.obj: $(MAYBE_EDITOR)/grid.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT grid.obj -MD -MP -MF "$(DEPDIR)/grid.Tpo" -c -o grid.obj `if test -f '$(MAYBE_EDITOR)/grid.cpp'; then $(CYGPATH_W) '$(MAYBE_EDITOR)/grid.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MAYBE_EDITOR)/grid.cpp'; fi`; \
+grid.obj: $(EDITOR_DIR)/grid.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT grid.obj -MD -MP -MF "$(DEPDIR)/grid.Tpo" -c -o grid.obj `if test -f '$(EDITOR_DIR)/grid.cpp'; then $(CYGPATH_W) '$(EDITOR_DIR)/grid.cpp'; else $(CYGPATH_W) '$(srcdir)/$(EDITOR_DIR)/grid.cpp'; fi`; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/grid.Tpo" "$(DEPDIR)/grid.Po"; else rm -f "$(DEPDIR)/grid.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MAYBE_EDITOR)/grid.cpp' object='grid.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(EDITOR_DIR)/grid.cpp' object='grid.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o grid.obj `if test -f '$(MAYBE_EDITOR)/grid.cpp'; then $(CYGPATH_W) '$(MAYBE_EDITOR)/grid.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MAYBE_EDITOR)/grid.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o grid.obj `if test -f '$(EDITOR_DIR)/grid.cpp'; then $(CYGPATH_W) '$(EDITOR_DIR)/grid.cpp'; else $(CYGPATH_W) '$(srcdir)/$(EDITOR_DIR)/grid.cpp'; fi`
 
-tile.o: $(MAYBE_EDITOR)/tile.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tile.o -MD -MP -MF "$(DEPDIR)/tile.Tpo" -c -o tile.o `test -f '$(MAYBE_EDITOR)/tile.cpp' || echo '$(srcdir)/'`$(MAYBE_EDITOR)/tile.cpp; \
+tile.o: $(EDITOR_DIR)/tile.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tile.o -MD -MP -MF "$(DEPDIR)/tile.Tpo" -c -o tile.o `test -f '$(EDITOR_DIR)/tile.cpp' || echo '$(srcdir)/'`$(EDITOR_DIR)/tile.cpp; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/tile.Tpo" "$(DEPDIR)/tile.Po"; else rm -f "$(DEPDIR)/tile.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MAYBE_EDITOR)/tile.cpp' object='tile.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(EDITOR_DIR)/tile.cpp' object='tile.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tile.o `test -f '$(MAYBE_EDITOR)/tile.cpp' || echo '$(srcdir)/'`$(MAYBE_EDITOR)/tile.cpp
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tile.o `test -f '$(EDITOR_DIR)/tile.cpp' || echo '$(srcdir)/'`$(EDITOR_DIR)/tile.cpp
 
-tile.obj: $(MAYBE_EDITOR)/tile.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tile.obj -MD -MP -MF "$(DEPDIR)/tile.Tpo" -c -o tile.obj `if test -f '$(MAYBE_EDITOR)/tile.cpp'; then $(CYGPATH_W) '$(MAYBE_EDITOR)/tile.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MAYBE_EDITOR)/tile.cpp'; fi`; \
+tile.obj: $(EDITOR_DIR)/tile.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tile.obj -MD -MP -MF "$(DEPDIR)/tile.Tpo" -c -o tile.obj `if test -f '$(EDITOR_DIR)/tile.cpp'; then $(CYGPATH_W) '$(EDITOR_DIR)/tile.cpp'; else $(CYGPATH_W) '$(srcdir)/$(EDITOR_DIR)/tile.cpp'; fi`; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/tile.Tpo" "$(DEPDIR)/tile.Po"; else rm -f "$(DEPDIR)/tile.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MAYBE_EDITOR)/tile.cpp' object='tile.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(EDITOR_DIR)/tile.cpp' object='tile.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tile.obj `if test -f '$(MAYBE_EDITOR)/tile.cpp'; then $(CYGPATH_W) '$(MAYBE_EDITOR)/tile.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MAYBE_EDITOR)/tile.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tile.obj `if test -f '$(EDITOR_DIR)/tile.cpp'; then $(CYGPATH_W) '$(EDITOR_DIR)/tile.cpp'; else $(CYGPATH_W) '$(srcdir)/$(EDITOR_DIR)/tile.cpp'; fi`
 
-tileset.o: $(MAYBE_EDITOR)/tileset.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tileset.o -MD -MP -MF "$(DEPDIR)/tileset.Tpo" -c -o tileset.o `test -f '$(MAYBE_EDITOR)/tileset.cpp' || echo '$(srcdir)/'`$(MAYBE_EDITOR)/tileset.cpp; \
+tileset.o: $(EDITOR_DIR)/tileset.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tileset.o -MD -MP -MF "$(DEPDIR)/tileset.Tpo" -c -o tileset.o `test -f '$(EDITOR_DIR)/tileset.cpp' || echo '$(srcdir)/'`$(EDITOR_DIR)/tileset.cpp; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/tileset.Tpo" "$(DEPDIR)/tileset.Po"; else rm -f "$(DEPDIR)/tileset.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MAYBE_EDITOR)/tileset.cpp' object='tileset.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(EDITOR_DIR)/tileset.cpp' object='tileset.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tileset.o `test -f '$(MAYBE_EDITOR)/tileset.cpp' || echo '$(srcdir)/'`$(MAYBE_EDITOR)/tileset.cpp
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tileset.o `test -f '$(EDITOR_DIR)/tileset.cpp' || echo '$(srcdir)/'`$(EDITOR_DIR)/tileset.cpp
 
-tileset.obj: $(MAYBE_EDITOR)/tileset.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tileset.obj -MD -MP -MF "$(DEPDIR)/tileset.Tpo" -c -o tileset.obj `if test -f '$(MAYBE_EDITOR)/tileset.cpp'; then $(CYGPATH_W) '$(MAYBE_EDITOR)/tileset.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MAYBE_EDITOR)/tileset.cpp'; fi`; \
+tileset.obj: $(EDITOR_DIR)/tileset.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tileset.obj -MD -MP -MF "$(DEPDIR)/tileset.Tpo" -c -o tileset.obj `if test -f '$(EDITOR_DIR)/tileset.cpp'; then $(CYGPATH_W) '$(EDITOR_DIR)/tileset.cpp'; else $(CYGPATH_W) '$(srcdir)/$(EDITOR_DIR)/tileset.cpp'; fi`; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/tileset.Tpo" "$(DEPDIR)/tileset.Po"; else rm -f "$(DEPDIR)/tileset.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MAYBE_EDITOR)/tileset.cpp' object='tileset.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(EDITOR_DIR)/tileset.cpp' object='tileset.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tileset.obj `if test -f '$(MAYBE_EDITOR)/tileset.cpp'; then $(CYGPATH_W) '$(MAYBE_EDITOR)/tileset.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MAYBE_EDITOR)/tileset.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tileset.obj `if test -f '$(EDITOR_DIR)/tileset.cpp'; then $(CYGPATH_W) '$(EDITOR_DIR)/tileset.cpp'; else $(CYGPATH_W) '$(srcdir)/$(EDITOR_DIR)/tileset.cpp'; fi`
 
-editor.moc.o: $(MAYBE_EDITOR)/editor.moc.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT editor.moc.o -MD -MP -MF "$(DEPDIR)/editor.moc.Tpo" -c -o editor.moc.o `test -f '$(MAYBE_EDITOR)/editor.moc.cpp' || echo '$(srcdir)/'`$(MAYBE_EDITOR)/editor.moc.cpp; \
+editor.moc.o: $(EDITOR_DIR)/editor.moc.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT editor.moc.o -MD -MP -MF "$(DEPDIR)/editor.moc.Tpo" -c -o editor.moc.o `test -f '$(EDITOR_DIR)/editor.moc.cpp' || echo '$(srcdir)/'`$(EDITOR_DIR)/editor.moc.cpp; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/editor.moc.Tpo" "$(DEPDIR)/editor.moc.Po"; else rm -f "$(DEPDIR)/editor.moc.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MAYBE_EDITOR)/editor.moc.cpp' object='editor.moc.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(EDITOR_DIR)/editor.moc.cpp' object='editor.moc.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o editor.moc.o `test -f '$(MAYBE_EDITOR)/editor.moc.cpp' || echo '$(srcdir)/'`$(MAYBE_EDITOR)/editor.moc.cpp
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o editor.moc.o `test -f '$(EDITOR_DIR)/editor.moc.cpp' || echo '$(srcdir)/'`$(EDITOR_DIR)/editor.moc.cpp
 
-editor.moc.obj: $(MAYBE_EDITOR)/editor.moc.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT editor.moc.obj -MD -MP -MF "$(DEPDIR)/editor.moc.Tpo" -c -o editor.moc.obj `if test -f '$(MAYBE_EDITOR)/editor.moc.cpp'; then $(CYGPATH_W) '$(MAYBE_EDITOR)/editor.moc.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MAYBE_EDITOR)/editor.moc.cpp'; fi`; \
+editor.moc.obj: $(EDITOR_DIR)/editor.moc.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT editor.moc.obj -MD -MP -MF "$(DEPDIR)/editor.moc.Tpo" -c -o editor.moc.obj `if test -f '$(EDITOR_DIR)/editor.moc.cpp'; then $(CYGPATH_W) '$(EDITOR_DIR)/editor.moc.cpp'; else $(CYGPATH_W) '$(srcdir)/$(EDITOR_DIR)/editor.moc.cpp'; fi`; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/editor.moc.Tpo" "$(DEPDIR)/editor.moc.Po"; else rm -f "$(DEPDIR)/editor.moc.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MAYBE_EDITOR)/editor.moc.cpp' object='editor.moc.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(EDITOR_DIR)/editor.moc.cpp' object='editor.moc.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o editor.moc.obj `if test -f '$(MAYBE_EDITOR)/editor.moc.cpp'; then $(CYGPATH_W) '$(MAYBE_EDITOR)/editor.moc.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MAYBE_EDITOR)/editor.moc.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o editor.moc.obj `if test -f '$(EDITOR_DIR)/editor.moc.cpp'; then $(CYGPATH_W) '$(EDITOR_DIR)/editor.moc.cpp'; else $(CYGPATH_W) '$(srcdir)/$(EDITOR_DIR)/editor.moc.cpp'; fi`
 
-grid.moc.o: $(MAYBE_EDITOR)/grid.moc.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT grid.moc.o -MD -MP -MF "$(DEPDIR)/grid.moc.Tpo" -c -o grid.moc.o `test -f '$(MAYBE_EDITOR)/grid.moc.cpp' || echo '$(srcdir)/'`$(MAYBE_EDITOR)/grid.moc.cpp; \
+grid.moc.o: $(EDITOR_DIR)/grid.moc.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT grid.moc.o -MD -MP -MF "$(DEPDIR)/grid.moc.Tpo" -c -o grid.moc.o `test -f '$(EDITOR_DIR)/grid.moc.cpp' || echo '$(srcdir)/'`$(EDITOR_DIR)/grid.moc.cpp; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/grid.moc.Tpo" "$(DEPDIR)/grid.moc.Po"; else rm -f "$(DEPDIR)/grid.moc.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MAYBE_EDITOR)/grid.moc.cpp' object='grid.moc.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(EDITOR_DIR)/grid.moc.cpp' object='grid.moc.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o grid.moc.o `test -f '$(MAYBE_EDITOR)/grid.moc.cpp' || echo '$(srcdir)/'`$(MAYBE_EDITOR)/grid.moc.cpp
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o grid.moc.o `test -f '$(EDITOR_DIR)/grid.moc.cpp' || echo '$(srcdir)/'`$(EDITOR_DIR)/grid.moc.cpp
 
-grid.moc.obj: $(MAYBE_EDITOR)/grid.moc.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT grid.moc.obj -MD -MP -MF "$(DEPDIR)/grid.moc.Tpo" -c -o grid.moc.obj `if test -f '$(MAYBE_EDITOR)/grid.moc.cpp'; then $(CYGPATH_W) '$(MAYBE_EDITOR)/grid.moc.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MAYBE_EDITOR)/grid.moc.cpp'; fi`; \
+grid.moc.obj: $(EDITOR_DIR)/grid.moc.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT grid.moc.obj -MD -MP -MF "$(DEPDIR)/grid.moc.Tpo" -c -o grid.moc.obj `if test -f '$(EDITOR_DIR)/grid.moc.cpp'; then $(CYGPATH_W) '$(EDITOR_DIR)/grid.moc.cpp'; else $(CYGPATH_W) '$(srcdir)/$(EDITOR_DIR)/grid.moc.cpp'; fi`; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/grid.moc.Tpo" "$(DEPDIR)/grid.moc.Po"; else rm -f "$(DEPDIR)/grid.moc.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MAYBE_EDITOR)/grid.moc.cpp' object='grid.moc.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(EDITOR_DIR)/grid.moc.cpp' object='grid.moc.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o grid.moc.obj `if test -f '$(MAYBE_EDITOR)/grid.moc.cpp'; then $(CYGPATH_W) '$(MAYBE_EDITOR)/grid.moc.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MAYBE_EDITOR)/grid.moc.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o grid.moc.obj `if test -f '$(EDITOR_DIR)/grid.moc.cpp'; then $(CYGPATH_W) '$(EDITOR_DIR)/grid.moc.cpp'; else $(CYGPATH_W) '$(srcdir)/$(EDITOR_DIR)/grid.moc.cpp'; fi`
 uninstall-info-am:
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
@@ -1106,8 +1119,8 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 	tags uninstall uninstall-am uninstall-binPROGRAMS \
 	uninstall-info-am
 
-$(MAYBE_EDITOR)%.moc.cpp: $(MAYBE_EDITOR)%.h
-	$(MOC) -o $@ $<
+@COND_EDITOR_TRUE@$(EDITOR_DIR)%.moc.cpp: $(EDITOR_DIR)%.h
+@COND_EDITOR_TRUE@	$(MOC) -o $@ $<
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
