@@ -9,7 +9,7 @@
 
 /*!****************************************************************************
  * \file    video.h
- * \author  Raj Sharma, rajx30@gmail.com
+ * \author  Raj Sharma, roos@allacrost.org
  * \date    Last Updated: August 23rd, 2005
  * \brief   Header file for video engine interface.
  *
@@ -28,8 +28,8 @@
 #ifndef _VIDEO_HEADER_
 #define _VIDEO_HEADER_
 
-#include "defs.h"
 #include "utils.h"
+#include "defs.h"
 
 // SDL includes
 #include <SDL/SDL_ttf.h>
@@ -44,32 +44,58 @@
 #include <IL/ilu.h>
 #include <IL/ilut.h>
 
+#include "context.h"
+#include "color.h"
+#include "coord_sys.h"
+#include "fade.h"
+#include "image.h"
+#include "interpolator.h"
+#include "shake.h"
+#include "screen_rect.h"
+#include "tex_mgmt.h"
+#include "text.h"
+#include "particle_manager.h"
+#include "particle_effect.h"
+#include "gui.h"
+#include "menu_window.h"
+#include "option.h"
+#include "textbox.h"
+
  
 //! All calls to the video engine are wrapped in this namespace.
 namespace hoa_video 
 {
 
+class GameVideo;
 //! The singleton pointer responsible for all video operations.
 extern GameVideo *VideoManager;
 //! Determines whether the code in the hoa_video namespace should print
 extern bool VIDEO_DEBUG;
 
-/*!
- *  \brief Linearly interpolates between initial and final value.
- *
- *  \param alpha   From 0.0 to 1.0, how much to interpolate between initial and final
- *  \param initial Initial value
- *  \param final   Final value
- */
- 
-float _Lerp(float alpha, float initial, float final);
 
 
 /*!
  *  \brief Creates a random float between a and b.
  */
-
 float RandomFloat(float a, float b);
+
+
+/*!
+ *  \brief Rotates a point (x,y) around the origin (0,0), by angle radians
+ */
+void RotatePoint(float &x, float &y, float angle);
+
+
+/*!
+ *  \brief linearly interpolation, returns a value which is (alpha*100) percent between initial and final
+ *
+ *  \param alpha    controls the linear interpolation
+ *  \param initial  initial value
+ *  \param final    final value
+ */	
+float Lerp(float alpha, float initial, float final);
+
+
 
 //! \name Constants
 //@{
@@ -103,62 +129,36 @@ enum
 
 
 /*!***************************************************************************
- *  \brief An enumeration of shake falloff modes.which controls how quickly the
- *         shaking dies down when you do a screen shake.
+ *  \brief target must be set before the call to GameVideo::Initialize().
+ *         This specifies whether we are drawing to an SDL window, a QT widget, etc.
  *****************************************************************************/
 
-enum ShakeFalloff
+enum VIDEO_TARGET
 {
-	VIDEO_FALLOFF_INVALID = -1,
-	
-	VIDEO_FALLOFF_NONE,     //! shake remains at constant force
-	VIDEO_FALLOFF_EASE,     //! shake starts out small, builds up, then dies down
-	VIDEO_FALLOFF_LINEAR,   //! shake strength decreases linear til the end
-	VIDEO_FALLOFF_GRADUAL,  //! shake decreases slowly and drops off at the end
-	VIDEO_FALLOFF_SUDDEN,   //! shake suddenly falls off, for "impacts" like meteors
-	
-	VIDEO_FALLOFF_TOTAL
-};
+	VIDEO_TARGET_INVALID = -1,
 
-/*!***************************************************************************
- *  \brief Interpolation metods are various ways to create smoothed values
- *         between two numbers, e.g. linear interpolation
- *****************************************************************************/
-
-enum InterpolationMethod
-{
-	VIDEO_INTERPOLATE_INVALID = -1,
+	VIDEO_TARGET_SDL_WINDOW = 0,   //! SDL window
+	VIDEO_TARGET_QT_WIDGET  = 1,   //! QT widget
 	
-	VIDEO_INTERPOLATE_EASE,   //! rise from A to B and then down to A again
-	VIDEO_INTERPOLATE_SRCA,   //! constant value of A
-	VIDEO_INTERPOLATE_SRCB,   //! constant value of B
-	VIDEO_INTERPOLATE_FAST,   //! rises quickly at the beginning and levels out
-	VIDEO_INTERPOLATE_SLOW,   //! rises slowly at the beginning then shoots up
-	VIDEO_INTERPOLATE_LINEAR, //! simple linear interpolation between A and B
-	
-	VIDEO_INTERPOLATE_TOTAL
+	VIDEO_TARGET_TOTAL = 2
 };
 
 
 /*!***************************************************************************
- *  \brief Styles for text shadows
+ *  \brief stencil operation to use, describes how stencil buffer is modified
  *****************************************************************************/
 
-enum TextShadowStyle
+enum VIDEO_STENCIL_OP
 {
-	VIDEO_TEXT_SHADOW_INVALID = -1,
+	VIDEO_STENCIL_OP_INVALID = -1,
 	
-	VIDEO_TEXT_SHADOW_NONE,       //! no text shadow, even if shadows are enabled
-	VIDEO_TEXT_SHADOW_DARK,       //! shadowed area is darkened (default)
-	VIDEO_TEXT_SHADOW_LIGHT,      //! shadowed area is lightened
-	VIDEO_TEXT_SHADOW_BLACK,      //! shadowed area is completely black
-	VIDEO_TEXT_SHADOW_COLOR,      //! shadowed area is the color of the text, but less alpha
-	VIDEO_TEXT_SHADOW_INVCOLOR,   //! shadowed area is the inverse of the text's color (e.g. white text, black shadow)
+	VIDEO_STENCIL_OP_ONE      = 0,  //! set stencil value to one
+	VIDEO_STENCIL_OP_ZERO     = 1,  //! set stencil value to zero
+	VIDEO_STENCIL_OP_INCREASE = 2,  //! increase stencil value
+	VIDEO_STENCIL_OP_DECREASE = 3,  //! decrease stencil value
 	
-	VIDEO_TEXT_SHADOW_TOTAL
-	
+	VIDEO_STENCIL_OP_TOTAL = 4
 };
-
 
 
 
@@ -173,201 +173,6 @@ class Color;
  *         multiplying, adding, etc.
  *****************************************************************************/
 
-class Color
-{
-public:
-
-	// default colors
-	
-	static Color clear;
-	static Color white;
-	static Color gray;
-	static Color black;
-	static Color red;
-	static Color orange;
-	static Color yellow;
-	static Color green;
-	static Color aqua;
-	static Color blue;
-	static Color violet;
-	static Color brown;
-
-	float color[4];
-	
-	bool operator == (const Color &c) const
-	{
-		return color[0] == c.color[0] &&
-		       color[1] == c.color[1] &&
-		       color[2] == c.color[2] &&
-		       color[3] == c.color[3];
-	}
-
-	Color operator + (const Color &c) const
-	{
-		Color color = Color(color[0] + c.color[0],
-		                    color[1] + c.color[1],
-		                    color[2] + c.color[2],
-		                    color[3] + c.color[3]);
-		                    
-		if(color[0] > 1.0f) color[0] = 0.0f;
-		if(color[1] > 1.0f) color[1] = 0.0f;
-		if(color[2] > 1.0f) color[2] = 0.0f;
-		if(color[3] > 1.0f) color[3] = 0.0f;
-		return color;
-	}
-
-	Color operator *= (const Color &c)
-	{
-		return Color(color[0] * c.color[0],
-		             color[1] * c.color[1],
-		             color[2] * c.color[2],
-		             color[3] * c.color[3]);
-	}
-
-
-	Color operator * (const Color &c) const
-	{
-		return Color(color[0] * c.color[0],
-		             color[1] * c.color[1],
-		             color[2] * c.color[2],
-		             color[3] * c.color[3]);
-	}
-	
-	Color operator * (float f) const
-	{
-		return Color(color[0] * f,
-		             color[1] * f,
-		             color[2] * f,
-		             color[3]);
-	}
-
-	Color()
-	{
-		color[0]=0.0f;
-		color[1]=0.0f;
-		color[2]=0.0f;
-		color[3]=1.0f;		
-	}
-	
-	Color(float r, float g, float b, float a)
-	{
-		color[0]=r;
-		color[1]=g;
-		color[2]=b;
-		color[3]=a;
-	}
-
-	float &operator[](int32 i)
-	{
-		// no bounds check for efficiency!
-		return color[i];
-	}
-
-	const float &operator[](int32 i) const
-	{
-		// no bounds check for efficiency!
-		return color[i];
-	}
-};
-
-
-/*!***************************************************************************
- *  \brief the CoordSys structure holds a "coordinate system", which is
- *         defined by rectangle (left, right, bottom, and top) which determines
- *         how coordinates are mapped to the screen. The default coordinate
- *         system is (0,1024,0,768). As another example, if you wanted to make
- *         it so that the screen coordinates ranged from 0 to 1, you could
- *         set the coordinate system to (0,1,0,1)
- *****************************************************************************/
-
-class CoordSys
-{
-public:
-
-	CoordSys() {}
-
-	CoordSys(float left, float right, float bottom, float top)
-	{
-		_left   = left;
-		_right  = right;
-		_bottom = bottom;
-		_top    = top;
-		
-		if(_right > _left)
-			_rightDir = 1.0f;
-		else
-			_rightDir = -1.0f;
-			
-		if(_top > _bottom)
-			_upDir = 1.0f;
-		else
-			_upDir = -1.0f;
-	}
-	
-private:
-
-	float _upDir;     //! this is 1.0f if increasing y coordinates are up, otherwise it's -1.0f.
-	float _rightDir;  //! this is 1.0f if increasing x coordinates are right, otherwise -1.0f. Pretty much any SANE coordinate system has a rightVec of 1.0f
-
-	float _left;
-	float _right;
-	float _bottom;
-	float _top;
-
-	friend class GUIElement;
-	friend class TextBox;
-	friend class OptionBox;
-	friend class GameVideo;
-};
-
-
-/*!***************************************************************************
- *  \brief this structure holds properties about fonts
- *****************************************************************************/
-
-class FontProperties
-{
-public:
-	int32 height;   //! maximum height of all glyphs
-	int32 lineskip; //! SDL_ttf's recommended amount of spacing between lines
-	int32 ascent;   //! height above baseline of font
-	int32 descent;  //! height below baseline of font
-	int32 shadowX;  //! x offset of text shadow
-	int32 shadowY;  //! y offset of text shadow
-	
-	TextShadowStyle shadowStyle;  //! style of text shadow
-};
-
-
-/*!***************************************************************************
- *  \brief a rectangle structure, used in storing the current scissoring
- *         or viewport rectangles, etc. It is based on standard screen coordinates,
- *         where (0,0) is the top-left and the unit is 1 pixel (hence int32 coordinates)
- *****************************************************************************/
-
-class ScreenRect
-{
-public:	
-	ScreenRect() {}
-	ScreenRect(int32 l, int32 t, int32 w, int32 h)
-	: left(l), top(t), width(w), height(h)
-	{
-	}
-	
-
-	/*!
-	 *  \brief intersects this rectangle with the one passed in, and modifies this
-	 *         rect to be the intersection of the two. (The intersection of two
-	 *         rectangles is of course, another smaller rectangle). Note that
-	 *         if the two rectangles don't intersect at all, then a "zero rectangle"
-	 *         results where left, top, width, and height are all zero.
-	 */	
-	
-	void Intersect(const ScreenRect &rect);	
-	
-	int32 left, top, width, height;
-};
-
 
 //! private_video namespace, hides things which are used internally
 namespace private_video
@@ -378,743 +183,13 @@ class TexSheet;
 class TexMemMgr;
 class FixedTexMemMgr;
 class VariableTexMemMgr;
-
 class Image;
 
-/*!***************************************************************************
- *  \brief Represents the different image sizes that a texture sheet can hold
- *****************************************************************************/
 
-enum TexSheetType
-{
-	VIDEO_TEXSHEET_INVALID = -1,
-	
-	VIDEO_TEXSHEET_32x32,
-	VIDEO_TEXSHEET_32x64,
-	VIDEO_TEXSHEET_64x64,
-	VIDEO_TEXSHEET_ANY,
-	
-	VIDEO_TEXSHEET_TOTAL
-};
-
-
-/*!***************************************************************************
- *  \brief Represents a single image within an image descriptor. Compound
- *         images are formed of multiple ImageElements.
- *****************************************************************************/
-
-class ImageElement
-{
-public:
-	ImageElement
-	(
-		Image *image_, 
-		float xOffset_, 
-		float yOffset_, 
-		float width_, 
-		float height_,
-		Color color_[4]
-	)
-	{
-		image    = image_;
-		xOffset  = xOffset_;
-		yOffset  = yOffset_;
-		width    = width_;
-		height   = height_;
-		
-		color[0] = color_[0];
-		
-		if(color_[1] == color[0] &&
-		   color_[2] == color[0] &&
-		   color_[3] == color[0])
-		{
-			// if all colors are the same then mark it so we don't have to process all vertex colors
-			oneColor = true;
-
-			if(color[0] == Color::white)
-			{			
-				// if all vertex colors are white, just set a flag so they don't have to
-				// be processed
-				white = true;
-				blend = false;
-			}
-			else
-			{
-				// blend if alpha < 1
-				blend = (color[0][3] < 1.0f);
-			}
-		}
-		else
-		{	
-			color[0] = color_[0];
-			color[1] = color_[1];
-			color[2] = color_[2];
-			color[3] = color_[3];
-			
-			blend = (color[0][3] < 1.0f || color[1][3] < 1.0f || color[2][3] < 1.0f || color[3][3] < 1.0f);			
-		}
-	}
-	
-	
-	ImageElement
-	(
-		Image *image_, 
-		float xOffset_, 
-		float yOffset_, 
-		float width_, 
-		float height_
-	)
-	{
-		image    = image_;
-		xOffset  = xOffset_;
-		yOffset  = yOffset_;
-		width    = width_;
-		height   = height_;
-		white    = true;
-		oneColor = true;
-		blend    = false;
-		color[0] = Color::white;
-	}
-	
-	bool blend;
-	bool oneColor;
-	bool white;	
-	Image * image;
-
-	float xOffset;
-	float yOffset;
-	
-	float width;
-	float height;
-	
-	Color color[4];
-	
-	friend class AnimatedImage;
-};
-
-
-/*!***************************************************************************
- *  \brief represents a single image. Internally it's a reference to a
- *         sub-rect within a texture sheet.
- *****************************************************************************/
-
-class Image
-{
-public:
-	Image
-	(
-		const std::string &fname,
-		int32 w, 
-		int32 h
-	) 
-	: filename(fname)
-	{ 
-		width    = w;
-		height   = h;
-		refCount = 0;
-	}
-
-	Image
-	(
-		TexSheet *sheet,
-		const std::string &fname,
-		int32 x_,
-		int32 y_,
-		int32 w, 
-		int32 h,
-		float u1_,
-		float v1_,
-		float u2_,
-		float v2_
-	) 
-	: filename(fname)
-	{
-		texSheet = sheet;
-		x = x_;
-		y = y_;
-		width = w;
-		height = h;
-		u1 = u1_;
-		u2 = u2_;
-		v1 = v1_;
-		v2 = v2_;
-		refCount = 0;
-	}
-
-
-
-	TexSheet *texSheet;     //! texture sheet using this image
-	std::string filename;   //! stored for every image in case it needs to be reloaded
-	
-	int32 x, y;             //! location of image within the sheet
-	int32 width, height;    //! width and height, in pixels
-
-	float u1, v1;           //! also store the actual uv coords. This is a bit
-	float u2, v2;           //! redundant, but saves floating point calculations
-	
-	int32 refCount;         //! keep track of when this image can be deleted
-};
-
-
-/*!***************************************************************************
- *  \brief An actual OpenGL texture which can be used for storing multiple
- *         smaller images in it, to save on texture switches.
- *
- *  \note  This is called TexSheet instead of Texture, so it's clear that
- *         this doesn't represent an image that you would draw on the screen,
- *         but simply a "container" for smaller images.
- *****************************************************************************/
-
-class TexSheet
-{
-public:
-
-	TexSheet(int32 w, int32 h, GLuint texID_, TexSheetType type_, bool isStatic_);
-	~TexSheet();
-
-	bool AddImage                   //! adds new image to the tex sheet
-	(
-		Image *img
-	);
-	
-	bool SaveImage(Image *img);
-	
-	bool CopyRect(int32 x, int32 y, int32 w, int32 h);
-	
-	bool RemoveImage (Image *img);  //! removes an image completely
-	bool FreeImage   (Image *img);  //! marks the image as free
-	bool RestoreImage (Image *img); //! marks a previously freed image as "used"
-	
-	bool Unload();  //! unloads texture memory used by this sheet
-	bool Reload();  //! reloads all the images into the sheet
-
-	int32 width;
-	int32 height;
-
-	bool isStatic;       //! if true, images in this sheet that are unlikely to change
-	TexSheetType type;   //! does it hold 32x32, 32x64, 64x64, or any kind
-
-	TexMemMgr *texMemManager;  //! manages which areas of the texture are free
-
-	GLuint texID;     //! number OpenGL uses to refer to this texture
-	bool loaded;		
-};
-
-
-/*!***************************************************************************
- *  \brief base class for texture memory managers. It is used by TextureSheet
- *         to manage which areas of the texture are available and which are used.
- *****************************************************************************/
-
-class TexMemMgr
-{
-public:
-	
-	virtual ~TexMemMgr() {}
-
-	virtual bool Insert  (Image *img)=0;
-	virtual bool Remove  (Image *img)=0;
-	virtual bool Free    (Image *img)=0;
-	virtual bool Restore (Image *img)=0;
-	
-};
-
-
-/*!***************************************************************************
- *  \brief used by the fixed-size texture manager to keep track of which blocks
- *         are owned by which images.
- *
- *  \note  The list is doubly linked to allow for O(1) removal
- *****************************************************************************/
-
-class FixedImageNode
-{
-public:
-	Image          *image;
-	FixedImageNode *next;
-	FixedImageNode *prev;
-	
-	int32 blockIndex;
-};
-
-
-/*!***************************************************************************
- *  \brief used to manage textures which are designated for fixed image sizes.
- *         For example, a 512x512 sheet that only holds 32x32 tiles.
- *
- *  \note  The texture sheet's size must be divisible by the size of the images
- *         that it holds. For example, you can't create a 256x256 sheet which
- *         holds tiles which are 17x93.
- *****************************************************************************/
-
-class FixedTexMemMgr : public TexMemMgr
-{
-public:
-	FixedTexMemMgr(TexSheet *texSheet, int32 imgW, int32 imgH);
-	~FixedTexMemMgr();
-	
-	bool Insert  (Image *img);
-	bool Remove  (Image *img);
-	bool Free    (Image *img);
-	bool Restore (Image *img);
-
-private:
-
-	int32 CalculateBlockIndex(Image *img);
-	void DeleteNode(int32 blockIndex);
-	
-	//! store dimensions of both the texture sheet, and the images that
-	//! it contains
-	
-	//! NOTE: the sheet dimensions are not in pixels, but images.
-	//!       So, a 512x512 sheet holding 32x32 images would be 16x16
-	
-	int32 _sheetWidth;
-	int32 _sheetHeight;
-	int32 _imageWidth;
-	int32 _imageHeight;
-	
-	TexSheet *_texSheet;
-	
-	//! The open list keeps track of which blocks of memory are
-	//! open. Note that we track blocks with BOTH an array and a list.
-	//! Although it takes up more memory, this makes ALL operations
-	//! dealing with the blocklist O(1) so performance is awesome.
-	//! Memory isn't too bad either, since blocklist is fairly small.
-	//! The tail pointer is also kept so that we can add newly
-	//! freed blocks to the end of the list- that way, essentially
-	//! blocks that are freed are given a little bit of time from the
-	//! time they're freed to the time they're removed, in case they
-	//! are loaded again in the near future
-	
-	FixedImageNode *_openListHead;
-	FixedImageNode *_openListTail;
-	
-	//! this is our actual array of blocks which is indexed like a 2D
-	//! array. For example, blocks[x+y*width]->image would tell us
-	//! which image is currently allocated at spot (x,y)
-	
-	FixedImageNode *_blocks;
-};
-
-
-/*!***************************************************************************
- *  \brief this is how we keep track of which images are used/freed in the
- *         variable texture mem manager
- *****************************************************************************/
-
-class VariableImageNode
-{
-public:
-	VariableImageNode()
-	{
-		image = NULL;
-		free  = true;
-	}
-
-	Image *image;
-	bool   free;
-};
-
-
-/*!***************************************************************************
- *  \brief class that lets you set up various kinds of interpolations.
- *         The basic way to use it is to set the interpolation method using
- *         SetMethod(), then call Start() with the values you want to
- *         interpolate between and the time to do it in.
- *****************************************************************************/
- 
-class Interpolator
-{
-public:
-
-	Interpolator();
-
-	//! call to begin an interpolation
-	bool Start(float a, float b, int32 milliseconds);
-
-	//! set the method of the interpolator. If you don't call it, the default
-	//! is VIDEO_INTERPOLATION_LINEAR
-	bool  SetMethod(InterpolationMethod method);
-	
-	float GetValue();              //! get the current value
-	bool  Update(int32 frameTime);   //! call this every frame
-	bool  IsFinished();            //! returns true if interpolation is done
-
-private:
-
-	float FastTransform(float t);
-	float SlowTransform(float t);
-	float EaseTransform(float t);
-
-	bool ValidMethod();
-	
-	InterpolationMethod _method;
-	
-	float _a, _b;
-	int32   _currentTime;
-	int32   _endTime;
-	bool  _finished;
-	float _currentValue;
-};
-
-
-/*!***************************************************************************
- *  \brief every time ShakeScreen() is called, a new ShakeForce is created
- *         to represent the force of that particular shake
- *****************************************************************************/
-
-class ShakeForce
-{
-public:
-	float initialForce;  //! initial force of the shake
-	
-	
-	Interpolator interpolator;
-	int32   currentTime;   //! milliseconds that passed since this shake started
-	int32   endTime;       //! milliseconds that this shake was set to last for
-};
-
-
-/*!***************************************************************************
- *  \brief class for fading the screen. Keeps track of current color and
- *         figures out whether we should implement the fade using modulation
- *         or an overlay.
- *****************************************************************************/
-
-class ScreenFader
-{
-public:
-	
-	ScreenFader()
-	: _currentColor(0.0f, 0.0f, 0.0f, 0.0f),
-	  _isFading(false)
-	{
-		_currentTime = _endTime = 0;
-		_fadeModulation = 1.0f;
-		_useFadeOverlay = false;
-	}
-	
-	bool FadeTo(const Color &final, float numSeconds);
-	bool Update(int32 t);
-
-	//! fades are either implemented with overlays or with modulation, depending
-	//! on whether it's a simple fade to black or a fade to a different color.
-	//! Based on that, these functions tell what overlay and modulation factors
-	//! to use.
-	bool  ShouldUseFadeOverlay() { return _useFadeOverlay;   }
-	Color GetFadeOverlayColor()  { return _fadeOverlayColor; }
-	float GetFadeModulation()    { return _fadeModulation;   }
-
-	bool  IsFading() { return _isFading; }
-
-private:
-	
-	
-	Color _currentColor;  //! color the screen is currently faded to	
-	Color _initialColor;  //! color we started from
-	Color _finalColor;    //! color we are fading to
-	int32   _currentTime;   //! milliseconds that passed since this fade started
-	int32   _endTime;       //! milliseconds that this fade was set to last for
-	bool  _isFading;      //! true if we're in the middle of a fade
-	
-	bool  _useFadeOverlay;
-	Color _fadeOverlayColor;
-	float _fadeModulation;
-};
-
-
-/*!***************************************************************************
- *  \brief used to manage a texture sheet where the size of the images it
- *         will contain are unknown
- *
- *  \note  For the sake of reducing the time it takes to allocate an image,
- *         this class rounds image dimensions up to powers of 16. So although
- *         it's fine to add any-sized images to a variable texture sheet,
- *         some space will be wasted due to rounding.
- *****************************************************************************/
-
-class VariableTexMemMgr : public TexMemMgr
-{
-public:
-	
-	VariableTexMemMgr(TexSheet *sheet);
-	~VariableTexMemMgr();
-
-	bool Insert  (Image *img);
-	bool Remove  (Image *img);
-	bool Free    (Image *img);
-	bool Restore (Image *img);
-
-private:
-
-	bool SetBlockProperties
-	(
-		Image *img, 
-		bool changeFree, 
-		bool changeImage, 
-		bool free, 
-		Image *newImage
-	);
-
-	TexSheet *_texSheet;
-	VariableImageNode *_blocks;
-	
-	//! Sheet's dimensions
-	//! NOTE: these aren't in pixels, but in "blocks" of 16x16. So,
-	//!       a 512x512 sheet would be 32x32 in blocks
-	
-	int32 _sheetWidth;
-	int32 _sheetHeight;
-};
-
-
-/*!***************************************************************************
- *  \brief Represents the graphics "context", i.e. draw flags, transformation
- *         and coord sys. Must be pushed and popped by any GameVideo functions
- *         which modify any of the context
- *
- *         Note: transformation is actually not a part of this struct since
- *               it is handled separately by the OpenGL transformation stack
- *****************************************************************************/
-
-class Context
-{
-public:
-	char blend, xalign, yalign, xflip, yflip;
-	CoordSys coordSys;
-	std::string currentFont;
-	Color currentTextColor;
-	ScreenRect viewport;
-	ScreenRect scissorRect;
-	bool scissorEnabled;
-};
 
 
 } // namespace private_video
 
-
-/*!***************************************************************************
- *  \brief base class for StaticImage and AnimatedImage
- *****************************************************************************/
-
-class ImageDescriptor
-{
-public:
-
-	virtual ~ImageDescriptor() {}
-
-	void SetStatic(bool isStatic);
-
-	virtual float GetWidth() const = 0;
-	virtual float GetHeight() const = 0;
-
-protected:
-
-	ImageDescriptor() {}  // private constructor, this class is only meant to be used as a base
-	bool _animated; 
-	
-	friend class GameVideo;
-};
-
-
-/*!***************************************************************************
- *  \brief this represents an image, used internally ONLY
- *
- *  \note  StaticImages may be simple images or compound images. Compound
- *         images are when you stitch together multiple small images to create
- *         a large image, e.g. with TilesToObject(). Externally though,
- *         it's fine to think of compound images as just a single image.
- *****************************************************************************/
-
-class StaticImage : public ImageDescriptor
-{
-public:
-
-	StaticImage() 
-	{
-		Clear();
-		_animated = false;
-	}
-	
-	//! AddImage allows you to create compound images. You start with a 
-	//! newly created StaticImage, then call AddImage(), passing in
-	//! all the images you want to add, along with the x, y offsets they
-	//! should be positioned at.
-	
-	bool AddImage(const StaticImage &id, float xOffset, float yOffset);
-	
-	void Clear()
-	{
-		_filename.clear();
-		_isStatic = false;
-		_width = _height = 0.0f;
-		_color[0] = _color[1] = _color[2] = _color[3] = Color::white;
-		_elements.clear();
-	}
-
-	void SetFilename     (const std::string &filename) { _filename = filename; }
-
-	void SetColor        (const Color &color)
-	{
-		_color[0] = _color[1] = _color[2] = _color[3] = color;
-	}
-	
-	void SetVertexColors (const Color &tl, const Color &tr, const Color &bl, const Color &br)
-	{
-		_color[0] = tl;
-		_color[1] = tr;
-		_color[2] = bl;
-		_color[3] = br;
-	}
-	
-	void SetDimensions   (float width, float height) {	_width  = width;  _height = height; }
-	
-	void SetWidth        (float width)    { _width = width; }	
-	void SetHeight       (float height)   {	_height = height; }
-	
-	void SetStatic       (bool isStatic)  { _isStatic = isStatic; }
-		
-	float GetWidth() const  { return _width; }
-	float GetHeight() const { return _height; }
-	void  GetVertexColor(Color &c, int colorIndex) { c = _color[colorIndex]; }
-			
-private:
-
-	std::string _filename;  //! used only as a parameter to LoadImage.
-
-	//! an image descriptor represents a compound image, which is made
-	//! up of multiple elements
-	std::vector <private_video::ImageElement> _elements;
-
-
-	Color _color[4];      //! used only as a parameter to LoadImage. Holds the color of the upper left, upper right, lower left, and lower right vertices respectively
-
-	bool  _isStatic;      //! used only as a parameter to LoadImage. This tells
-	                      //! whether the image being loaded is to be loaded
-	                      //! into a non-volatile area of texture memory
-	                      
-	float _width, _height;  //! width and height of image, in pixels.
-	                         //! If the StaticImage is a compound, i.e. it
-	                         //! contains multiple images, then the width and height
-	                         //! refer to the entire compound           
-
-	friend class GameVideo;
-	friend class AnimatedImage;
-};	
-
-
-
-/*!***************************************************************************
- *  \brief this represents an animated image.
- *****************************************************************************/
-
-class AnimationFrame
-{
-public:
-	
-	int32     _frame_time;  // how long to display this frame (relative to VIDEO_ANIMTION_FRAME_PERIOD)
-	StaticImage _image;
-};
-
-class AnimatedImage : public ImageDescriptor
-{
-public:
-	AnimatedImage() { _animated = true; _frame_index = _frame_counter = 0; }
-	
-
-	/*!
-	 *  \brief call every frame to update the animation's current frame. This will automatically
-	 *         synchronize the animation to VIDEO_ANIMATION_FRAME_PERIOD, i.e. 30 frames per second.
-	 *         If you want to update the frames yourself using some custom method, then use
-	 *         SetFrame()
-	 */
-	void Update();
-	
-
-	/*!
-	 *  \brief call to set the current frame index of the animation. This is useful for character
-	 *         animation for example, where the current frame depends on how far the character is
-	 *         from one tile to the next tile.
-	 *
-	 *  \param frame_index an index from 0 to numFrames - 1
-	 */	
-	void SetFrameIndex(int32 frame_index);
-	
-	
-	/*!
-	 *  \brief returns the number of frames in this animation
-	 */
-	int32 GetNumFrames() const { return static_cast<int32>(_frames.size()); }
-
-
-	/*!
-	 *  \brief returns an index to the current animation
-	 */
-	int32 GetCurFrameIndex() const { return _frame_index; }
-
-	
-	/*!
-	 *  \brief adds a frame using the filename of the image. This is the most convenient
-	 *         way to add frames, BUT this makes it impossible to control the image properties,
-	 *         such as vertex colors, and size (width and height). If you do it this way,
-	 *         the width and height will be the pixel width/height of the image itself. This isn't
-	 *         always what you want- for example if your coordinate system is in terms of tiles,
-	 *         then a 32x32 tile would have a width and height of 1, not 32.
-	 *
-	 *  \param frame filename of the frame to add
-	 *
-	 *  \param frame_time  how many animation periods this frame lasts for. For example, if
-	 *                     VIDEO_ANIMATION_FRAME_PERIOD is 30, and frame_count is 3, then this
-	 *                     frame will last for 90 milliseconds.
-	 */	
-	bool AddFrame(const std::string &frame, int frame_time);
-
-
-	/*!
-	 *  \brief adds a frame by passing in a static image.
-	 *
-	 *  \param frame a static image to use as the frame
-	 *
-	 *  \param frame_time  how many animation periods this frame lasts for. For example, if
-	 *                     VIDEO_ANIMATION_FRAME_PERIOD is 30, and frame_count is 3, then this
-	 *                     frame will last for 90 milliseconds.
-	 */	
-	bool AddFrame(const StaticImage &frame, int frame_time);
-
-
-	/*!
-	 *  \brief returns the width of the 1st frame of animation. You should try to make all your
-	 *         frames the same size, otherwise the "width" of an animation doesn't really have any
-	 *         meaning.
-	 */
-	float GetWidth() const;
-
-
-	/*!
-	 *  \brief returns the height of the 1st frame of animation. You should try to make all your
-	 *         frames the same size, otherwise the "height" of an animation doesn't really have any
-	 *         meaning.
-	 */
-	float GetHeight() const;
-
-	
-	/*!
-	 *  \brief returns a pointer to the indexth frame. For the most part, this is a function you
-	 *         should never be messing with, but this function is available in case you need it.
-	 */
-	StaticImage *GetFrame(int32 index) const;
-	
-
-private:
-
-	int32 _frame_index;      // index of which animation frame to show
-	int32 _frame_counter;    // count how long each frame has been shown for
-	
-	std::vector<AnimationFrame> _frames;
-
-	friend class GameVideo;
-};
 
 
 
@@ -1138,6 +213,13 @@ public:
 	 *  \brief call at beginning of every frame
 	 */
 	bool Clear();
+
+
+	/*!
+	 *  \brief call this version of clear if you want to clear the screen
+	 *         to some specific color
+	 */
+	bool Clear(const Color &c);
 		
 	/*!
 	 *  \brief call at end of every frame
@@ -1145,6 +227,19 @@ public:
 	 *  \param frameTime   milliseconds since the last frame
 	 */
 	bool Display(int32 frameTime);
+	
+	
+	/*!
+	 *  \brief set the target, i.e. whether the video engine is being used to
+	 *         draw to an SDL window, or a QT widget. (There are some important
+	 *         differences, so the video engine needs to know).
+	 *
+	 *  \param target can be VIDEO_TARGET_QT_WIDGET, or VIDEO_TARGET_SDL_WINDOW
+	 *
+	 *  \note  If you don't call this function, the default target is SDL window
+	 *         Also, note that you MUST call this before calling Initialize()
+	 */
+	bool SetTarget(VIDEO_TARGET target);
 	
 
 	//-- Video settings -------------------------------------------------------
@@ -1160,6 +255,18 @@ public:
 	 *  \note  you must call ApplySettings() to actually apply the change
 	 */	
 	bool SetResolution(int32 width, int32 height);	
+
+	
+	/*!
+	 *  \brief returns width, (whatever was set with SetResolution)
+	 */	
+	int32 GetWidth() { return _width; }
+
+
+	/*!
+	 *  \brief returns height, (whatever was set with SetResolution)
+	 */	
+	int32 GetHeight() { return _height; }
 
 	/*!
 	 *  \brief returns true if game is in fullscreen mode
@@ -1509,6 +616,46 @@ public:
 	bool DrawText(const hoa_utils::ustring &uText);
 
 
+	//-- Particle effects -----------------------------------------------------------
+	
+
+	/*!
+	 *  \brief add a particle effect at the given point x and y
+	 *  \note  set the reload parameter to true to reload the effect definition file
+	 *         every time the effect is played. This is useful if you are working on an
+	 *         effect and want to see how it looks. When we actually release the game,
+	 *         reload should be false since it adds some cost to the loading
+	 */
+	ParticleEffectID AddParticleEffect(const std::string &particleEffectFilename, float x, float y, bool reload=false);	
+
+
+	/*!
+	 *  \brief draws all active particle effects
+	 */
+	bool DrawParticleEffects();
+
+
+	/*!
+	 *  \brief stops all active particle effects
+	 *  \param kill_immediate  If this is true, then the particle effects die out immediately
+	 *                         If it is false, then they don't immediately die, but new particles
+	 *                         stop spawning
+	 */
+	void StopAllParticleEffects(bool kill_immediate = false);
+
+
+	/*!
+	 *  \brief get pointer to an effect given its ID
+	 */
+	ParticleEffect *GetParticleEffect(ParticleEffectID id);
+
+
+	/*!
+	 *  \brief get number of live particles
+	 */
+	int32 GetNumParticles();
+
+
 	//-- Images / Animation ---------------------------------------------------------
 	
 
@@ -1689,6 +836,12 @@ public:
 	 */
 	bool SetLighting (const Color &color);
 
+
+	/*!
+	 *  \brief returns the scene lighting color
+	 */
+	void GetLighting(Color &color);
+
 	/*!
 	 *  \brief sets fog parameters
 	 *
@@ -1831,6 +984,19 @@ public:
 	 */
 	void ToggleFPS();
 	
+	
+	/*!
+	 *  \brief draws a line grid. Used by map editor to draw a grid over all
+	 *         the tiles. This function will start at (x,y), and go to
+	 *         (xMax, yMax), with horizontal cell spacing of xstep and
+	 *         vertical cell spacing of ystep. The final parameter is just the
+	 *         color the lines should be drawn
+	 *
+	 *  \note  xMax and yMax are not inputs to the function- they are taken
+	 *         from the current coord sys
+	 */
+	void DrawGrid(float x, float y, float xstep, float ystep, const Color &c);
+	
 
 	/*!
 	 *  \brief makes a screenshot, saves it as screenshot.jpg in the directory
@@ -1857,6 +1023,12 @@ private:
 	// externally people only have to deal with GameVideo.
 
 	private_video::GUI *_gui;    //! pointer to GUI class which implements all GUI functionality
+
+	// particle manager, does dirty work of managing particle effects
+	private_video::ParticleManager _particle_manager;
+
+	// target (QT widget or SDL window)
+	VIDEO_TARGET _target;
 
 	// draw flags	
 	char _blend;        //! blend flag which specifies normal alpha blending
@@ -1932,6 +1104,8 @@ private:
 	std::vector <private_video::TexSheet *>     _texSheets;          //! vector containing all texture sheets currently being managed by the video engine
 	std::map    <std::string, TTF_Font *>       _fontMap;            //! STL map containing all the fonts currently being managed by the video engine
 	std::map    <std::string, FontProperties *> _fontProperties;     //! STL map containing properties for each font
+
+	std::map <std::string, ParticleEffectDef *> _particle_effect_defs; //! STL map containing all loaded particle effect definitions
 	
 	std::stack  <private_video::Context>      _contextStack;         //! stack containing context, i.e. draw flags plus coord sys. Context is pushed and popped by any GameVideo functions that clobber these settings
 
@@ -2131,17 +1305,6 @@ private:
 
 
 	/*!
-	 *  \brief linearly interpolation, returns a value which is (alpha*100) percent between initial and final
-	 *
-	 *  \param alpha    controls the linear interpolation
-	 *  \param initial  initial value
-	 *  \param final    final value
-	 */	
-
-	float _Lerp(float alpha, float initial, float final);
-
-
-	/*!
 	 *  \brief loads an image
 	 *
 	 *  \param id  image descriptor to load. Can specify filename, color, width, height, and static as its parameters
@@ -2247,9 +1410,10 @@ private:
 
 
 	/*!
-	 *  \brief function solely for debugging, which shows number of texture switches made during a frame
+	 *  \brief function solely for debugging, which shows number of texture switches made during a frame,
+	 *         and other statistics useful for performance tweaking, etc.
 	 */	
-	bool _DEBUG_ShowTexSwitches();
+	bool _DEBUG_ShowAdvancedStats();
 
 
 	/*!
@@ -2265,6 +1429,7 @@ private:
 	friend class private_video::FixedTexMemMgr;
 	friend class private_video::VariableTexMemMgr;
 	friend class private_video::TexSheet;
+	friend class private_video::ParticleSystem;
 };
 
 }   // namespace hoa_video

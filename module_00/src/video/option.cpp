@@ -1,6 +1,6 @@
 #include "utils.h"
+#include "option.h"
 #include "video.h"
-#include "gui.h"
 #include <sstream>
 
 using namespace std;

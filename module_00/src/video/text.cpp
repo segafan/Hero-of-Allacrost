@@ -163,6 +163,10 @@ bool GameVideo::_DrawTextHelper
 	if(_fontMap.empty())
 		return false;
 		
+	// empty string, do nothing
+	if(*uText == 0)
+		return true;
+		
 	SDL_Color color;
 	
 	if(_fontMap.find(_currentFont) == _fontMap.end())
@@ -195,22 +199,9 @@ bool GameVideo::_DrawTextHelper
 			return false;
 		}
 	}
-	/*
-	else
-	{
-		initial = TTF_RenderText_Blended(font, text, color);
 
-		if(!initial)
-		{
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: TTF_RenderText_Blended() returned NULL in _DrawTextHelper()!\n(current font = " << _currentFont << ", text={" << text << "}" << endl;
-			return false;
-		}
-	}
-	*/	
 	w = RoundUpPow2(initial->w);
 	h = RoundUpPow2(initial->h);
-
 
 	CoordSys &cs = _coordSys;
 
@@ -291,13 +282,7 @@ bool GameVideo::_DrawTextHelper
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);	
 
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//glBlendFunc(GL_ONE, GL_ONE);
-	//glBlendFunc(GL_DST_COLOR, GL_ZERO);
-	//glDisable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	//glBlendFunc(GL_SRC_ALPHA, GL_SRC_COLOR);
 
 	glEnable(GL_TEXTURE_2D);
 	_BindTexture(texture);
@@ -307,8 +292,6 @@ bool GameVideo::_DrawTextHelper
 			cerr << "VIDEO ERROR: glGetError() true after 2nd call to glBindTexture() in _DrawTextHelper!" << endl;
 		return false;
 	}
-
-//	glColor3f(1.0f, 1.0f, 1.0f);
 
 	glDisable(GL_FOG);
 
@@ -386,9 +369,14 @@ bool GameVideo::DrawText(const ustring &txt)
 {
 	if(txt.empty())
 	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: tried to draw empty unicode text string!" << endl;		
+		// Previously, if an empty string was passed, it was considered an error
+		// However, it happens often enough in practice that now we just return true
+		// without doing anything.
+		
+		return true;
 	}
+
+
 
 	FontProperties fp;
 	if(!GetFontProperties(_currentFont, fp))
@@ -484,10 +472,14 @@ bool GameVideo::DrawText(const ustring &txt)
 			SetTextColor(oldTextColor);
 
 			// draw the text itself
-			if(!_DrawTextHelper(textToDraw.c_str()))
+			
+			if(!textToDraw.empty())
 			{
-				_PopContext();
-				return false;
+				if(!_DrawTextHelper(textToDraw.c_str()))
+				{
+					_PopContext();
+					return false;
+				}
 			}
 			
 			glPopMatrix();

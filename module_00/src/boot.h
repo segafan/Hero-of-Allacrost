@@ -27,7 +27,7 @@
 #include "SDL.h"
 #include "defs.h"
 #include "engine.h"
-#include "gui.h"
+#include "video.h"
 
 //! All calls to boot mode are wrapped in this namespace.
 namespace hoa_boot {

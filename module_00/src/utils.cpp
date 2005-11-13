@@ -165,7 +165,7 @@ bool CleanDirectory(const std::string &directoryName)
 
 	// get the directory of the application	
 	char appPath[1024];
-	GetCurrentDirectory(1024, appPath);	
+	GetCurrentDirectoryA(1024, appPath);	
 	int32 appPathLen = (int32)strlen(appPath);	
 	if(appPathLen <= 0)
 		return false;	
@@ -185,18 +185,18 @@ bool CleanDirectory(const std::string &directoryName)
 	}
 	
 	char fileFound[1024];
-	WIN32_FIND_DATA info;
+	WIN32_FIND_DATAA info;
 	HANDLE hp;
 	sprintf(fileFound, "%s\\*.*", fullPath.c_str());
-	hp = FindFirstFile(fileFound, &info);
+	hp = FindFirstFileA(fileFound, &info);
 	
 	if(hp != INVALID_HANDLE_VALUE)
 	{
 		do
 		{
 			sprintf(fileFound, "%s\\%s", fullPath.c_str(), info.cFileName);			
-			DeleteFile(fileFound);
-		} while(FindNextFile(hp, &info));
+			DeleteFileA(fileFound);
+		} while(FindNextFileA(hp, &info));
 	}	
 	FindClose(hp);
 

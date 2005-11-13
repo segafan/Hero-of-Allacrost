@@ -92,7 +92,7 @@ bool ScreenFader::Update(int32 t)
 		// calculate the new interpolated color
 		float a = (float)_currentTime / (float)_endTime;
 
-		_currentColor.color[3] = _Lerp(a, _initialColor.color[3], _finalColor.color[3]);
+		_currentColor.color[3] = Lerp(a, _initialColor.color[3], _finalColor.color[3]);
 
 		
 		// if we are fading to or from clear, then only the alpha should get
@@ -111,9 +111,9 @@ bool ScreenFader::Update(int32 t)
 		}
 		else
 		{
-			_currentColor.color[0] = _Lerp(a, _initialColor.color[0], _finalColor.color[0]);
-			_currentColor.color[1] = _Lerp(a, _initialColor.color[1], _finalColor.color[1]);
-			_currentColor.color[2] = _Lerp(a, _initialColor.color[2], _finalColor.color[2]);
+			_currentColor.color[0] = Lerp(a, _initialColor.color[0], _finalColor.color[0]);
+			_currentColor.color[1] = Lerp(a, _initialColor.color[1], _finalColor.color[1]);
+			_currentColor.color[2] = Lerp(a, _initialColor.color[2], _finalColor.color[2]);
 		}
 		
 		if(!_useFadeOverlay)

@@ -943,4 +943,3 @@ inline void lua_pushobjectdirectclosure(lua_State* L, Callee* callee, Func func,
 
 
 #endif
-

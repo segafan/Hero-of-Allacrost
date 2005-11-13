@@ -37,10 +37,10 @@ Color Color::brown (0.6f, 0.3f, 0.1f, 1.0f);
 
 
 //-----------------------------------------------------------------------------
-// _Lerp: linearly interpolates value between initial and final
+// Lerp: linearly interpolates value between initial and final
 //-----------------------------------------------------------------------------
 
-float _Lerp(float alpha, float initial, float final)
+float Lerp(float alpha, float initial, float final)
 {
 	return alpha * final + (1.0f-alpha) * initial;
 }
@@ -67,6 +67,20 @@ float RandomFloat(float a, float b)
 	return a + (b - a) * r / 10000.0f;
 }
 
+
+//-----------------------------------------------------------------------------
+// RotatePoint: rotates (x,y) around origin by angle radians
+//-----------------------------------------------------------------------------
+
+void RotatePoint(float &x, float &y, float angle)
+{
+	float old_x = x;
+	float cos_angle = cosf(angle);
+	float sin_angle = sinf(angle);
+	
+	x = x * cos_angle - y * sin_angle;
+	y = y * cos_angle + old_x * sin_angle;
+}
 
 //-----------------------------------------------------------------------------
 // GameVideo
@@ -108,7 +122,8 @@ GameVideo::GameVideo()
   _current_frame_diff(0),
   _lightningActive(false),
   _lightningCurTime(0),
-  _lightningEndTime(0)
+  _lightningEndTime(0),
+  _target(VIDEO_TARGET_SDL_WINDOW)
 {
 	if (VIDEO_DEBUG) 
 		cout << "VIDEO: GameVideo constructor invoked\n";
@@ -374,6 +389,9 @@ GameVideo::~GameVideo()
 { 
 	if (VIDEO_DEBUG) 
 		cout << "VIDEO: GameVideo destructor invoked" << endl;
+
+	// destroy particle manager
+	_particle_manager.Destroy();	
 	
 	// delete GUI
 	delete _gui;
@@ -524,46 +542,59 @@ done:
 
 bool GameVideo::ApplySettings()
 {
-	// Losing GL context, so unload images first
-	UnloadTextures();
+	if(_target == VIDEO_TARGET_QT_WIDGET)
+	{
+		_width      = _temp_width;
+		_height     = _temp_height;
+		_fullscreen = _temp_fullscreen;		
+		
+		return true;
+	}
+	else if(_target == VIDEO_TARGET_SDL_WINDOW)
+	{
+		// Losing GL context, so unload images first
+		UnloadTextures();
 
-	int32 flags = SDL_OPENGL;
+		int32 flags = SDL_OPENGL;
+		
+		if(_temp_fullscreen)
+			flags |= SDL_FULLSCREEN;
+
+		SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+		SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+		SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
+		SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
+		if (!SDL_SetVideoMode(_temp_width, _temp_height, 0, flags)) 
+		{	
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: SDL_SetVideoMode() failed in ApplySettings()!" << endl;
+
+			_temp_fullscreen = _fullscreen;
+			_temp_width      = _width;
+			_temp_height     = _height;
+
+			if(_width > 0)   // quick test to see if we already had a valid video mode
+			{
+				ReloadTextures();					
+			}
+			return false;		
+		} 
+
+		_width      = _temp_width;
+		_height     = _temp_height;
+		_fullscreen = _temp_fullscreen;
+
+		ReloadTextures();
+		
+		SetFog(_fogColor, _fogIntensity);
+		
+		return true;
+	}
 	
-	if(_temp_fullscreen)
-		flags |= SDL_FULLSCREEN;
-
-	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
-	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-
-	if (!SDL_SetVideoMode(_temp_width, _temp_height, 0, flags)) 
-	{	
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: SDL_SetVideoMode() failed in ApplySettings()!" << endl;
-
-		_temp_fullscreen = _fullscreen;
-		_temp_width      = _width;
-		_temp_height     = _height;
-
-		if(_width > 0)   // quick test to see if we already had a valid video mode
-		{
-			ReloadTextures();					
-		}
-		return false;		
-	} 
-
-	_width      = _temp_width;
-	_height     = _temp_height;
-	_fullscreen = _temp_fullscreen;
-
-	ReloadTextures();
-	
-	SetFog(_fogColor, _fogIntensity);
-	
-	return true;
+	return false;
 }
 
 
@@ -600,21 +631,23 @@ void GameVideo::SetViewport(float left, float right, float bottom, float top)
 
 bool GameVideo::Clear() 
 {
-	SetViewport(0,100,0,100);
-	
 	if(_usesLights)
-	{
-		glClearColor
-		(
-			_lightColor.color[0], 
-			_lightColor.color[1], 
-			_lightColor.color[2], 
-			_lightColor.color[3]
-		);
-	}
+		return Clear(_lightColor);
 	else
-		glClearColor(0,0,0,1);	
-	
+		return Clear(Color::black);
+}
+
+
+
+//-----------------------------------------------------------------------------
+// Clear: clear the screen to given color, it doesnt clear other buffers, that can be 
+//        done by videostates that use them
+//-----------------------------------------------------------------------------
+
+bool GameVideo::Clear(const Color &c) 
+{
+	SetViewport(0,100,0,100);
+	glClearColor(c[0], c[1], c[2], c[3]);
 	glClear(GL_COLOR_BUFFER_BIT);
 		
 	_numTexSwitches = 0;
@@ -624,7 +657,6 @@ bool GameVideo::Clear()
 		
 	return true;
 }
-
 
 //-----------------------------------------------------------------------------
 // AccumulateLights: if real lights are enabled, then you must call DrawLight()
@@ -651,8 +683,10 @@ bool GameVideo::AccumulateLights()
 
 bool GameVideo::Display(int32 frameTime) 
 {
-	// update shaking effect
-	
+	// update particle effects
+	_particle_manager.Update(frameTime);
+
+	// update shaking effect	
 	_PushContext();
 	SetCoordSys(0, 1024, 0, 768);
 	_UpdateShake(frameTime);
@@ -684,7 +718,7 @@ bool GameVideo::Display(int32 frameTime)
 	// ones used to draw debug text and things like that.
 	
 	if(_advancedDisplay)
-		_DEBUG_ShowTexSwitches();
+		_DEBUG_ShowAdvancedStats();
 
 	if(_fpsDisplay)
 		DrawFPS(frameTime);
@@ -780,15 +814,15 @@ bool GameVideo::SetResolution(int32 width, int32 height)
 
 
 //-----------------------------------------------------------------------------
-// _DEBUG_ShowTexSwitches: display how many times we switched textures during
-//                        the current frame
+// _DEBUG_ShowAdvancedStats: display # of tex switches and other useful runtime
+//                           statistics
 //-----------------------------------------------------------------------------
 
-bool GameVideo::_DEBUG_ShowTexSwitches()
+bool GameVideo::_DEBUG_ShowAdvancedStats()
 {
 	// display to screen	
-	char text[16];
-	sprintf(text, "Switches: %d", _numTexSwitches);
+	char text[50];
+	sprintf(text, "Switches: %d\nParticles: %d", _numTexSwitches, _particle_manager.GetNumParticles());
 	
 	if( !SetFont("debug_font"))
 		return false;
@@ -796,7 +830,7 @@ bool GameVideo::_DEBUG_ShowTexSwitches()
 	Move(896.0f, 690.0f);
 	if( !DrawText(text))
 		return false;
-		
+			
 	return true;
 }
 
@@ -1005,6 +1039,17 @@ bool GameVideo::SetLighting(const Color &color)
 
 	return true;
 }
+
+
+//-----------------------------------------------------------------------------
+// GetLighting: returns the scene lighting color
+//-----------------------------------------------------------------------------
+
+void GameVideo::GetLighting(Color &color)
+{
+	color = _lightColor;
+}
+
 
 
 //-----------------------------------------------------------------------------
@@ -1597,119 +1642,6 @@ int32 GameVideo::_ScreenCoordY(float y)
 
 
 //-----------------------------------------------------------------------------
-// Update: updates the internal frame counter for an animation
-//-----------------------------------------------------------------------------
-
-void AnimatedImage::Update()
-{
-	int32 numFrames = static_cast<int32>(_frames.size());
-	if(numFrames <= 1)
-		return;
-		
-	GameVideo *video = GameVideo::GetReference();
-	int32 frameChange = video->GetFrameChange();
-	
-	_frame_counter += frameChange;
-	
-	while(_frame_counter >= _frames[_frame_index]._frame_time)
-	{
-		frameChange = _frame_counter - _frames[_frame_index]._frame_time;
-		_frame_index = (_frame_index + 1) % numFrames;
-		_frame_counter = frameChange;
-	}
-}
-	
-
-//-----------------------------------------------------------------------------
-// SetFrameIndex: sets the current frame of the animation to frame_index
-//-----------------------------------------------------------------------------
-
-void AnimatedImage::SetFrameIndex(int32 frame_index)
-{
-	_frame_index    = frame_index;
-	_frame_counter  = 0;
-}
-	
-
-//-----------------------------------------------------------------------------
-// AddFrame: add a new frame to the animation, passing in only the filename
-//           and frame count (how long the frame should last)
-//-----------------------------------------------------------------------------
-
-bool AnimatedImage::AddFrame(const std::string &frame, int frame_time)
-{
-	StaticImage img;
-	img.SetFilename(frame);	
-	
-	AnimationFrame animFrame;
-	animFrame._frame_time = frame_time;
-	animFrame._image = img;	
-	_frames.push_back(animFrame);
-
-	return true;
-}
-
-//-----------------------------------------------------------------------------
-// AddFrame: add a new frame to the animation, passing in a static image and
-//           a frame count (how long the frame should last)
-//-----------------------------------------------------------------------------
-
-bool AnimatedImage::AddFrame(const StaticImage &frame, int frame_time)
-{
-	AnimationFrame animFrame;
-	animFrame._frame_time = frame_time;
-	animFrame._image = frame;
-	
-	// check if the static image which was passed actually has been loaded yet
-	// if it has been loaded, then we have to increment the reference count
-		
-	int32 numElements = static_cast<int32>(animFrame._image._elements.size());
-	if(numElements)
-	{
-		for(int j = 0; j < numElements; ++j)
-		{
-			++(animFrame._image._elements[j].image->refCount);
-		}		
-	}
-	
-	_frames.push_back(animFrame);
-	return true;
-}
-	
-//-----------------------------------------------------------------------------
-// GetWidth: returns the width of the 1st frame of the animation
-//-----------------------------------------------------------------------------
-
-float AnimatedImage::GetWidth() const
-{
-	return _frames[0]._image.GetWidth();
-}
-
-
-//-----------------------------------------------------------------------------
-// GetHeight: returns the height of the 1st frame of the animation
-//-----------------------------------------------------------------------------
-
-float AnimatedImage::GetHeight() const
-{
-	return _frames[0]._image.GetHeight();
-}
-
-	
-//-----------------------------------------------------------------------------
-// GetFrame: returns pointer to the indexth frame of animation as a static image.
-//           This function is somewhat dangerous since it lets you mess around
-//           with the internals of the animation, so only use it if it's
-//           necessary.
-//-----------------------------------------------------------------------------
-
-StaticImage *AnimatedImage::GetFrame(int32 index) const
-{
-	return const_cast<StaticImage *>(&(_frames[index]._image));
-}
-
-
-//-----------------------------------------------------------------------------
 // MakeLightning: creates a lightning effect
 //-----------------------------------------------------------------------------
 
@@ -1813,6 +1745,58 @@ bool GameVideo::DrawFullscreenOverlay(const Color &color)
 	PopState();
 	
 	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// SetTarget: lets video engine know if it's drawing to an SDL window or a
+//            QT widget
+//-----------------------------------------------------------------------------
+
+bool GameVideo::SetTarget(VIDEO_TARGET target)
+{
+	if(target <= VIDEO_TARGET_INVALID || target >= VIDEO_TARGET_TOTAL)
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: tried to set video engine to invalid target (" << target << ")" << endl;
+		return false;
+	}
+
+	_target = target;	
+	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// DrawGrid: draws a grid going from (x,y) to (maxX, maxY), with horizontal and
+//           vertical grid spacing of xstep and ystep, with a color 'c'
+//-----------------------------------------------------------------------------
+
+void GameVideo::DrawGrid(float x, float y, float xstep, float ystep, const Color &c)
+{
+	PushState();
+	
+	Move(0, 0);
+	glBegin(GL_LINES);
+	glColor4fv(&c[0]);
+	
+	float xMax = _coordSys._right;
+	float yMax = _coordSys._bottom;
+	
+	for(; x <= xMax; x += xstep)
+	{
+		glVertex2f(x, _coordSys._bottom);
+		glVertex2f(x, _coordSys._top);
+	}
+
+	for(; y <= yMax; y += ystep)
+	{
+		glVertex2f(_coordSys._left, y);
+		glVertex2f(_coordSys._right, y);
+	}
+	
+	glEnd();
+	PopState();
 }
 
 

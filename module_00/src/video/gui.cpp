@@ -1,5 +1,7 @@
 #include "utils.h"
 #include "gui.h"
+#include "video.h"
+
 
 using namespace std;
 
@@ -23,7 +25,7 @@ GUI::GUI()
 	_totalFPS      = 0;
 	
 	_curSample = _numSamples = 0;
-	_videoManager = hoa_video::GameVideo::GetReference();
+	_videoManager = GameVideo::GetReference();
 	
 	if(!_videoManager)
 	{
@@ -350,7 +352,7 @@ bool GUI::_CheckSkinConsistency(const MenuSkin &s)
 
 bool GUI::CreateMenu
 (
-	hoa_video::StaticImage &id, 
+	StaticImage &id, 
 	float width, 
 	float height, 
 	int32 edgeVisibleFlags,

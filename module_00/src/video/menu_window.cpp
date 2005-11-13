@@ -2,6 +2,7 @@
 #include "video.h"
 #include "gui.h"
 #include <sstream>
+#include "menu_window.h"
 
 using namespace std;
 using namespace hoa_video;
@@ -311,7 +312,7 @@ bool MenuWindow::IsInitialized(string &errors)
 		s << "* Invalid display mode (" << _mode << ")" << endl;
 		
 	// check state
-	if(_state <= VIDEO_MENU_STATE_INVALID || _mode >= VIDEO_MENU_STATE_TOTAL)
+	if(_state <= VIDEO_MENU_STATE_INVALID || _state >= VIDEO_MENU_STATE_TOTAL)
 		s << "* Invalid state (" << _state << ")" << endl;
 		
 	// check to see a valid image is loaded

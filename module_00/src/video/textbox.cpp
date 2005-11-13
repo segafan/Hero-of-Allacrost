@@ -1,7 +1,9 @@
 #include "utils.h"
 #include "video.h"
-#include "gui.h"
 #include <sstream>
+#include "menu_window.h"
+#include "textbox.h"
+
 
 using namespace std;
 using namespace hoa_video;

@@ -59,6 +59,14 @@ typedef unsigned int uint;
 
 #include <SDL/SDL.h>
 
+#include <string.h>   // C string manipulation functions like strcmp
+
+#ifdef _WIN32
+	#define strcasecmp stricmp  // for some reason, case-insensitive string compare is called
+	                            // strcasecmp on linux and stricmp on windows
+#endif
+
+
 /*! \name Allacrost Integer Types.
  *  \brief These are the integer types you should use. Use of int, short, etc. is forbidden!
  *  

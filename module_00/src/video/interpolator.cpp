@@ -3,7 +3,6 @@
 #include <cstdarg>
 #include "video.h"
 #include <math.h>
-#include "gui.h"
 
 using namespace std;
 using namespace hoa_video::private_video;
@@ -192,7 +191,7 @@ bool Interpolator::Update(int32 frameTime)
 		}
 	};
 	
-	_currentValue = _Lerp(t, _a, _b);
+	_currentValue = Lerp(t, _a, _b);
 	
 	return true;
 }
