@@ -26,9 +26,7 @@ using namespace hoa_video;
 	{\
 		if(VIDEO_DEBUG) \
 			cerr << "VIDEO ERROR: could not load parameter " << str << " in ParticleManager::LoadEffect()!" << endl; \
-		lua_close(L); \
-		delete def;   \
-		return NULL;  \
+		return false; \
 	}\
 	(var) = (int32)lua_tonumber(L, -1);\
 	lua_pop(L, 1); \
@@ -43,9 +41,7 @@ using namespace hoa_video;
 	{\
 		if(VIDEO_DEBUG) \
 			cerr << "VIDEO ERROR: could not load parameter " << str << " in ParticleManager::LoadEffect()!" << endl; \
-		lua_close(L); \
-		delete def;   \
-		return NULL;  \
+		return false; \
 	}\
 	(var) = (float)lua_tonumber(L, -1);\
 	lua_pop(L, 1); \
@@ -60,7 +56,7 @@ using namespace hoa_video;
 	{\
 		if(VIDEO_DEBUG) \
 			cerr << "VIDEO ERROR: could not load parameter " << str << " in ParticleManager::LoadEffect()!" << endl; \
-		goto __failed_load; \
+		return false; \
 	}\
 	(var) = (bool)lua_tonumber(L, -1);\
 	lua_pop(L, 1); \
@@ -75,7 +71,7 @@ using namespace hoa_video;
 	{\
 		if(VIDEO_DEBUG) \
 			cerr << "VIDEO ERROR: could not load parameter " << str << " in ParticleManager::LoadEffect()!" << endl; \
-		goto __failed_load; \
+		return false; \
 	}\
 	var = string(lua_tostring(L, -1));\
 	lua_pop(L, 1); \
@@ -90,14 +86,14 @@ using namespace hoa_video;
 	{\
 		if(VIDEO_DEBUG) \
 			cerr << "VIDEO ERROR: could not load parameter " << str << " in ParticleManager::LoadEffect()!" << endl; \
-		goto __failed_load; \
+		return false; \
 	}\
 	int32 num_color_components = luaL_getn(L, -1); \
 	if(num_color_components != 4)\
 	{\
 		if(VIDEO_DEBUG) \
 			cerr << "VIDEO ERROR: wrong number of components while loading color " << str << " in ParticleManager::LoadEffect()!" << endl; \
-		goto __failed_load; \
+		return false; \
 	}\
 	for(int32 cmp = 1; cmp <= 4; ++cmp) \
 	{\
@@ -106,7 +102,7 @@ using namespace hoa_video;
 		{\
 			if(VIDEO_DEBUG) \
 				cerr << "VIDEO ERROR: lua_isnumber() returned false while trying to load " << str << " in ParticleManager::LoadEffect()!" << endl; \
-			goto __failed_load; \
+			return false; \
 		}\
 		var[cmp-1] = (float)lua_tonumber(L, -1);\
 		lua_pop(L, 1);\
@@ -116,28 +112,25 @@ using namespace hoa_video;
 
 
 
-
 namespace hoa_video
 {
 
 namespace private_video
 {
 
+
 //-----------------------------------------------------------------------------
-// LoadEffect: loads an effect definition from disk given the filename
-//             Returns NULL if there is a problem with loading
+// Loads the effect, returns false on failure. This is a temporary function, until
+// the GameData code is finished
 //-----------------------------------------------------------------------------
 
-ParticleEffectDef *ParticleManager::LoadEffect(const std::string &filename)
+bool TEMP_LoadEffectHelper(const string &filename, lua_State *L, ParticleEffectDef *def)
 {
-	ParticleEffectDef *def = new ParticleEffectDef;
-	lua_State *L = lua_open();
-	
 	if(!L)
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: lua_open() failed in ParticleManager::LoadEffect()!" << endl;
-		goto __failed_load;
+		return false;
 	}
 	
 	luaopen_base(L);
@@ -147,8 +140,8 @@ ParticleEffectDef *ParticleManager::LoadEffect(const std::string &filename)
 	
 	if(luaL_loadfile(L, filename.c_str()) || lua_pcall(L, 0, 0, 0))
 	{
-		cerr << "VIDEO ERROR: could not load particle effect " << filename << " :: " << lua_tostring(L, -1) << endl;
-		goto __failed_load;
+		cerr << "VIDEO ERROR: could not load particle effect " << filename << " :: " << lua_tostring(L, -1) << endl;				
+		return false;
 	}
 
 	
@@ -157,7 +150,7 @@ ParticleEffectDef *ParticleManager::LoadEffect(const std::string &filename)
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: could not find 'systems' in particle effect " << filename << endl;
-		goto __failed_load;
+		return false;
 	}
 
 	
@@ -167,7 +160,7 @@ ParticleEffectDef *ParticleManager::LoadEffect(const std::string &filename)
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: num_systems less than 1 while opening particle effect " << filename << endl;
-		goto __failed_load;
+		return false;
 	}
 
 	for(int32 sys = 1; sys <= num_systems; ++sys)
@@ -178,7 +171,7 @@ ParticleEffectDef *ParticleManager::LoadEffect(const std::string &filename)
 		{
 			if(VIDEO_DEBUG)
 				cerr << "VIDEO ERROR: could not find system #" << sys << " in particle effect " << filename << endl;
-			goto __failed_load;
+			return false;
 		}
 		
 		// open up the emitter table
@@ -188,7 +181,7 @@ ParticleEffectDef *ParticleManager::LoadEffect(const std::string &filename)
 		{
 			if(VIDEO_DEBUG)
 				cerr << "VIDEO ERROR: could not find emitter in system #" << sys << " in particle effect " << filename << endl;
-			goto __failed_load;
+			return false;
 		}
 		
 		ParticleSystemDef *sys_def = new ParticleSystemDef;
@@ -258,7 +251,7 @@ ParticleEffectDef *ParticleManager::LoadEffect(const std::string &filename)
 		{
 			if(VIDEO_DEBUG)
 				cerr << "VIDEO ERROR: could not locate keyframes while loading particle effect " << filename << endl;
-			goto __failed_load;
+			return false;
 		}
 
 		int32 num_keyframes = luaL_getn(L, -1);				
@@ -297,7 +290,7 @@ ParticleEffectDef *ParticleManager::LoadEffect(const std::string &filename)
 		{
 			if(VIDEO_DEBUG)
 				cerr << "VIDEO ERROR: could not locate 'animation_frames' in the effect file " << filename << endl;
-			goto __failed_load;
+			return false;
 		}
 
 		int32 num_animation_frames = luaL_getn(L, -1);
@@ -306,7 +299,7 @@ ParticleEffectDef *ParticleManager::LoadEffect(const std::string &filename)
 		{
 			if(VIDEO_DEBUG)
 				cerr << "VIDEO ERROR: the 'animation_frames' table was empty in effect file " << filename << endl;
-			goto __failed_load;
+			return false;
 		}
 		
 		for(int32 n_frame = 0; n_frame < num_animation_frames; ++n_frame)
@@ -317,7 +310,7 @@ ParticleEffectDef *ParticleManager::LoadEffect(const std::string &filename)
 			{
 				if(VIDEO_DEBUG)
 					cerr << "VIDEO ERROR: encountered a non-string element in animation frames array, in effect file " << filename << endl;
-				goto __failed_load;
+				return false;
 			}			
 			
 			string anim_filename = lua_tostring(L, -1);
@@ -337,7 +330,7 @@ ParticleEffectDef *ParticleManager::LoadEffect(const std::string &filename)
 		{
 			if(VIDEO_DEBUG)
 				cerr << "VIDEO ERROR: could not locate 'animation_frame_times' in the effect file " << filename << endl;
-			goto __failed_load;
+			return false;
 		}
 
 		int32 num_animation_frame_times = luaL_getn(L, -1);
@@ -346,7 +339,7 @@ ParticleEffectDef *ParticleManager::LoadEffect(const std::string &filename)
 		{
 			if(VIDEO_DEBUG)
 				cerr << "VIDEO ERROR: the 'animation_frame_times' table was empty in effect file " << filename << endl;
-			goto __failed_load;
+			return false;
 		}
 		
 		for(int32 n_frame_time = 0; n_frame_time < num_animation_frame_times; ++n_frame_time)
@@ -357,7 +350,7 @@ ParticleEffectDef *ParticleManager::LoadEffect(const std::string &filename)
 			{
 				if(VIDEO_DEBUG)
 					cerr << "VIDEO ERROR: encountered a non-numeric element in animation frame times array, in effect file " << filename << endl;
-				goto __failed_load;
+				return false;
 			}			
 			
 			int32 anim_frame_time = (int32)lua_tonumber(L, -1);
@@ -429,16 +422,30 @@ ParticleEffectDef *ParticleManager::LoadEffect(const std::string &filename)
 		def->_systems.push_back(sys_def);		
 	}
 
-	// File was loaded successfully! return pointer to the newly created effect definition
+	return true;
+}
 
-	return def;
 
+//-----------------------------------------------------------------------------
+// LoadEffect: loads an effect definition from disk given the filename
+//             Returns NULL if there is a problem with loading
+//-----------------------------------------------------------------------------
 
-	__failed_load:
+ParticleEffectDef *ParticleManager::LoadEffect(const std::string &filename)
+{
+	ParticleEffectDef *def = new ParticleEffectDef;
+	lua_State *L = lua_open();
+
+	bool could_load = TEMP_LoadEffectHelper(filename, L, def);	
+
+	if(!could_load)
+	{
+		lua_close(L);
+		delete def;
+		return NULL;
+	}
 	
-	lua_close(L);
-	delete def;
-	return NULL;
+	return def;
 }
 
 
