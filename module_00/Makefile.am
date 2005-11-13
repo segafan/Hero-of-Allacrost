@@ -38,4 +38,13 @@ allacrost_SOURCES = src/audio.cpp src/battle.cpp src/boot.cpp src/data.cpp \
 	src/video/textbox.cpp src/video/video.cpp src/audio.h src/battle.h \
 	src/boot.h src/data.h src/defs.h src/engine.h src/global.h src/map.h \
 	src/map_dialogue.h src/map_objects.h src/menu.h src/pause.h src/quit.h \
-	src/scene.h src/utils.h src/video/gui.h src/video/video.h
+	src/scene.h src/utils.h src/video/gui.h src/video/video.h \
+	src/video/color.h src/video/context.h src/video/coord_sys.h \
+	src/video/effects.h src/video/fade.cpp src/video/image.cpp src/video/image.h \
+	src/video/interpolator.h src/video/menu_window.h src/video/option.h \
+	src/video/particle.h src/video/particle_effect.cpp src/video/particle_effect.h \
+	src/video/particle_emitter.h src/video/particle_keyframe.h \
+	src/video/particle_manager.h src/video/particle_manager.cpp \
+	src/video/particle_system.cpp src/video/particle_system.h \
+	src/video/screen_rect.h src/video/shake.h src/video/tex_mgmt.h \
+	src/video/text.h src/video/textbox.h
