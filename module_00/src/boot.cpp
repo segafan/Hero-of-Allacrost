@@ -50,7 +50,6 @@ BootMode::BootMode() {
 
 	mode_type = ENGINE_BOOT_MODE;
 	
-	_menu_hidden = false;
 	_fade_out = false;
 	
 	_vmenu_index.push_back(LOAD_GAME);
@@ -117,8 +116,9 @@ BootMode::BootMode() {
 	
 	_main_options.SetFont("default");
 	_main_options.SetCellSize(128.0f, 50.0f);
-	_main_options.SetSize(6, 1);
+	_main_options.SetSize(5, 1);
 	_main_options.SetPosition(512.0f, 50.0f);
+	_main_options.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_main_options.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_main_options.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_main_options.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
@@ -129,7 +129,6 @@ BootMode::BootMode() {
 	options.push_back(MakeWideString("Load Game"));
 	options.push_back(MakeWideString("Options"));
 	options.push_back(MakeWideString("Credits"));
-	options.push_back(MakeWideString("Hide Menu"));
 	options.push_back(MakeWideString("Quit"));
 	
 	_main_options.SetOptions(options);
@@ -234,16 +233,6 @@ void BootMode::_RedefineKey(SDLKey& change_key) {
 
 // This is called once every frame iteration to update the status of the game
 void BootMode::Update(uint32 time_elapsed) {
-	// If our menu is hidden, we don't do anything until a user event occurs.
-	if (_menu_hidden) {
-		if (InputManager->ConfirmPress() || InputManager->CancelPress() || InputManager->MenuPress() ||
-				InputManager->SwapPress() || InputManager->LeftSelectPress() || InputManager->RightSelectPress() ||
-				InputManager->UpPress() || InputManager->DownPress() || InputManager->LeftPress() ||
-				InputManager->RightPress())
-			_menu_hidden = false;
-		return;
-	}
-	
 	// Screen is in the process of fading out
 	if (_fade_out) {
 		// When the screen is finished fading to black, create a new map mode and fade back in
@@ -299,9 +288,6 @@ void BootMode::Update(uint32 time_elapsed) {
 			case CREDITS:
 				AudioManager->PlaySound(_boot_sound[0], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // confirm sound
 				cout << "BOOT: TEMP: Viewing credits now!" << endl;
-				break;
-			case HIDE_MENU:
-				_menu_hidden = true;
 				break;
 			case QUIT:
 				SettingsManager->ExitGame();
@@ -590,11 +576,6 @@ void BootMode::Draw() {
 	VideoManager->Move(512, 384);
 	VideoManager->SetDrawFlags(VIDEO_NO_BLEND, 0);
 	VideoManager->DrawImage(_boot_images[0]);
-	
-	// Only draw the backdrop if this statement is true
-	if (_menu_hidden) { 
-		return;
-	}
 	
 	// Draw logo near the top of the screen
 	VideoManager->Move(512, 668);

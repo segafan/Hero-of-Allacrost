@@ -40,6 +40,7 @@ class GUI;
 
 
 class MenuWindow;
+class GameVideo;
 
 //! Determines whether the code in the hoa_video namespace should print debug statements or not.
 extern bool VIDEO_DEBUG;

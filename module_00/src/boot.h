@@ -75,8 +75,6 @@ const uint32 JOYSTICK_OP  = 4;
  *****************************************************************************/
 class BootMode : public hoa_engine::GameMode {
 private:
-	//! If true, no menus will be drawn (so the player can get a nice good look at the background image).
-	bool _menu_hidden;
 	//! If true, boot mode is exiting and we have to wait for the screen to finish fading out.
 	bool _fade_out;
 	//! A vector storing various menu pointers in a stack-like structure.

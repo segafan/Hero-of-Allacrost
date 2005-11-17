@@ -81,6 +81,7 @@ QuitMode::QuitMode() {
 	_option_box.SetCellSize(150.0f, 50.0f);
 	_option_box.SetSize(3, 1);
 	_option_box.SetPosition(512.0f, 384.0f);
+	_option_box.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_option_box.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_option_box.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_option_box.SetCursorOffset(-35.0f, -4.0f);
