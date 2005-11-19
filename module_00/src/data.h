@@ -77,21 +77,41 @@ private:
 	lua_State *_l_stack;
 	
 public:
-// BEGIN Lua related stuff
+	SINGLETON_METHODS(GameData);
+	
 	//! \name Lua file access functions
-	//@{
 	//! \brief Lua file access functions
 	//! \param file_name The name of the Lua file to be opened.
-	void OpenLuaFile(const char* file_name);
-	// Do we need a CloseLuaFile() function?
-	//@}
-
-	//! \name Lua Table Access Functions
 	//@{
+	void OpenLuaFile(const char* file_name);
+	// Do we need a CloseLuaFile() function? >>> YES!
+	//@}
+	
+	//! \name Lua Variable Access Functions
+	//! \brief These functions look up a global variable in a Lua file and return its value.
+	//! \param *key The name of the Lua variable to access.
+	//! \param &ref A reference to the variable to be filled with the requested value.
+	//@{
+	
+	bool GetGlobalBool(const char *key);
+	void GetGlobalBoolRef(const char *key, bool &ref);
+	
+	int32 GetGlobalInt(const char *key);
+	void GetGlobalIntRef(const char *key, int32 &ref);
+	
+	float GetGlobalFloat(const char *key);
+	void GetGlobalFloatRef(const char *key, float &ref);
+	
+	std::string GetGlobalString(const char *key);
+	void GetGlobalStringRef(const char *key, std::string &ref);
+	//@}
+	
+	//! \name Lua Table Access Functions
 	//! \brief These functions look up a member of a Lua table and return its value.
 	//! \param *tbl_name The name of the table to open.
 	//! \param *key The name of the table member to access.
 	//! \param &ref A reference to the variable to be filled with the requested value.
+	//! \note The GetTableString{Ref} functions are for normal C++ strings, not for unicode game text.
 	//! The table in question is assumed to be at the top of the stack.
 	/*!
 	    General usage: first call OpenTable(tname), and then any of the GetTable*()
@@ -99,7 +119,11 @@ public:
 	    table, call CloseTable(). Obey the protocol! :)
 	    GetTable*Ref() functions return the value by reference, and GetTable*() return by value.
 	*/ 
+	//@{
 	void OpenTable(const char *tbl_name);
+	bool OpenSubTable(const int32 key);
+	bool OpenSubTable(const char *key);
+	void CloseSubTable();
 	void CloseTable();
 	
 	bool GetTableBool(const char *key);
@@ -114,38 +138,23 @@ public:
 	std::string GetTableString(const char *key);
 	void GetTableStringRef(const char * key, std::string &ref);
 	//@}
-
-	//! \name Lua Variable Access Functions
-	//@{
-	//! \brief These functions look up a global variable in a Lua file and return its value.
-	//! \param *key The name of the Lua variable to access.
-	//! \param &ref A reference to the variable to be filled with the requested value.
-	bool GetGlobalBool(const char *key);
-	void GetGlobalBoolRef(const char *key, bool &ref);
 	
-	int32 GetGlobalInt(const char *key);
-	void GetGlobalIntRef(const char *key, int32 &ref);
-	
-	float GetGlobalFloat(const char *key);
-	void GetGlobalFloatRef(const char *key, float &ref);
-	
-	std::string GetGlobalString(const char *key);
-	void GetGlobalStringRef(const char *key, std::string &ref);
-	//@}
-
 	//! \name Lua Vector Fill Functions
-	//@{
-	//! \brief These functions fill a vector with members of a table in a Lua file.
+	//! \brief These functions fill a vector with members of a global table in a Lua file.
 	//! \param &vect A reference to the vector of elements to fill.
 	//! \param *key The name of the table to use to fill the vector.
+	//! \note The functions that are messing the key assume that the table is already on the top of the stack.
+	//@{
 	void FillStringVector(const char *key, std::vector<std::string> &vect);
 	void FillIntVector(const char *key, std::vector<int32> &vect);
+	void FillFloatVector(const char *key, std::vector<float> &vect);
+	
+	void FillStringVector(std::vector<std::string> &vect);
+	void FillIntVector(std::vector<int32> &vect);
+	void FillFloatVector(std::vector<float> &vect);
 	//@}
 	
-	void PrintLuaStack();
-	
 	//! \name Lua<->C++ binding functions
-	//@{
 	//! \brief Functions used to bind C++ class member functions and objects to be used directly from Lua.
 	//! \param *obj the object to be registered (see notes below)
 	//! \param *objname the name by which the object will be referred from Lua
@@ -162,7 +171,7 @@ public:
 	    
 	    Notes on usage:
 	    
-	    - when calling RegisterMemberFunction, the second parameter (Class *obj) should be specified like this:
+	    - When calling RegisterMemberFunction, the second parameter (Class *obj) should be specified like this:
 	        (MyClass*)0
 	      For example:
 	      	RegisterMemberFunction("GetSomething", (MyClass*)0, &MyClass::GetSomething);
@@ -170,7 +179,7 @@ public:
 	      template magic, and that's the easy way to let it know what class it's working with.
 	      But, when calling RegisterObject(), you specify a valid object pointer (don't forget the cast).
 	    
-	    - one RegisterClassStart/RegisterClassEnd block creates one Lua metatable and uses it to assign C++ stuff.
+	    - One RegisterClassStart/RegisterClassEnd block creates one Lua metatable and uses it to assign C++ stuff.
 	      What this means is that if you register all the members of a class and, say, one object of that class
 	      inside one RCS/RCE block, and then make a new block which just registers another object of the
 	      same class, that won't work, because that object will be assigned a NEW (and empty) metatable.
@@ -178,6 +187,7 @@ public:
 	      class methods the object needs inside the second block too. This can be useful, actually.
 	      See the HTML documentation for a more detailed explanation. 
 	*/ 
+	//@{
 	void RegisterClassStart();
 	void RegisterClassEnd();
 	template <typename Class, typename Function>
@@ -188,7 +198,7 @@ public:
 	bool RegisterFunction(const char* funcname, Function func);
 	//@}
 	
-	//! \name Lua function calling wrapper
+	//! \name Lua function calling wrappers
 	//@{
 	//! \brief This function allows you to call arbitrary Lua functions from C++
 	//! \param *func a string containing the name of the Lua function to be called
@@ -210,11 +220,11 @@ public:
 		  The function allocates the space for the string.
 	*/
 	void CallGlobalFunction(const char *func, const char *sig, ...);
+	void CallTableFunction(const char *func, const char *sig, ...);
 	//@}
 	
-// END Lua related stuff
-
-	SINGLETON_METHODS(GameData);
+	//! Prints the current contents of the Lua stack
+	void DEBUG_PrintLuaStack();
 };
 
 } // namespace hoa_data
