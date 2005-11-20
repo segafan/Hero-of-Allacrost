@@ -860,7 +860,7 @@ bool OptionBox::_AddOption(const hoa_utils::ustring &formatString)
 					{
 						// this must be an image tag
 						
-						StaticImage imd;
+						StillImage imd;
 						imd.SetFilename(tagText);
 						GameVideo *videoManager = GameVideo::GetReference();
 						
@@ -1185,7 +1185,7 @@ bool OptionBox::Draw()
 				_SetupAlignment(VIDEO_X_LEFT, _option_yalign, bounds, x, y);
 				video->SetDrawFlags(VIDEO_BLEND, 0);
 				video->MoveRelative(_cursorX + leftEdge + _switchCursorX, cursorOffset + _cursorY + _switchCursorY);
-				StaticImage *defaultCursor = video->GetDefaultCursor();
+				StillImage *defaultCursor = video->GetDefaultCursor();
 				
 				if(defaultCursor)			
 					video->DrawImage(*defaultCursor, Color::white);
@@ -1197,7 +1197,7 @@ bool OptionBox::Draw()
 				_SetupAlignment(VIDEO_X_LEFT, _option_yalign, bounds, x, y);
 				video->SetDrawFlags(VIDEO_BLEND, 0);
 				video->MoveRelative(_cursorX + leftEdge, cursorOffset + _cursorY);
-				StaticImage *defaultCursor = video->GetDefaultCursor();
+				StillImage *defaultCursor = video->GetDefaultCursor();
 				
 				if(defaultCursor)			
 					video->DrawImage(*defaultCursor, Color::white);

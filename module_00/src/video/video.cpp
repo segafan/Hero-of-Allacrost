@@ -701,7 +701,7 @@ bool GameVideo::Display(int32 frameTime)
 	if(_fader.ShouldUseFadeOverlay())
 	{
 		Color c = _fader.GetFadeOverlayColor();
-		StaticImage fadeOverlay;
+		StillImage fadeOverlay;
 		fadeOverlay.SetDimensions(1024.0f, 768.0f);
 		fadeOverlay.SetColor(c);
 		LoadImage(fadeOverlay);		
@@ -1014,7 +1014,7 @@ bool GameVideo::ToggleAdvancedDisplay()
 // _CreateMenu: creates menu image descriptor
 //-----------------------------------------------------------------------------
 
-bool GameVideo::_CreateMenu(StaticImage &menu, float width, float height, int32 edgeVisibleFlags, int32 edgeSharedFlags)
+bool GameVideo::_CreateMenu(StillImage &menu, float width, float height, int32 edgeVisibleFlags, int32 edgeSharedFlags)
 {
 	return _gui->CreateMenu(menu, width, height, edgeVisibleFlags, edgeSharedFlags);
 }
@@ -1193,7 +1193,7 @@ bool GameVideo::ApplyLightingOverlay()
 //                      capture is already in memory, it is considered an error
 //-----------------------------------------------------------------------------
 
-bool GameVideo::CaptureScreen(StaticImage &id)
+bool GameVideo::CaptureScreen(StillImage &id)
 {
 
 	if(VIDEO_DEBUG)
@@ -1471,7 +1471,7 @@ bool GameVideo::SetDefaultCursor(const std::string &cursorImageFilename)
 // GetDefaultCursor: sets the gefault menu cursor, returns NULL if none is set
 //-----------------------------------------------------------------------------
 
-StaticImage *GameVideo::GetDefaultCursor()
+StillImage *GameVideo::GetDefaultCursor()
 {
 	if(_defaultMenuCursor.GetWidth() != 0.0f)  // cheap test if image is valid
 		return &_defaultMenuCursor;
@@ -1737,7 +1737,7 @@ bool GameVideo::DrawFullscreenOverlay(const Color &color)
 	SetCoordSys(0.0f, 1.0f, 0.0f, 1.0f);
 	SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 	Move(0.0f, 0.0f);
-	StaticImage img;
+	StillImage img;
 	img.SetDimensions(1.0f, 1.0f);
 	LoadImage(img);	
 	DrawImage(img, color);	

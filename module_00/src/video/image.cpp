@@ -26,9 +26,9 @@ namespace hoa_video
 //       it's not loading any new image from disk, it increases the ref counts.
 //-----------------------------------------------------------------------------
 
-bool StaticImage::AddImage
+bool StillImage::AddImage
 (
-	const StaticImage &id, 
+	const StillImage &id, 
 	float xOffset, 
 	float yOffset
 )
@@ -84,6 +84,21 @@ bool StaticImage::AddImage
 
 
 //-----------------------------------------------------------------------------
+// Clear: clears animated image
+//-----------------------------------------------------------------------------
+
+void AnimatedImage::Clear()
+{
+	_frame_index = 0;
+	_frame_counter = 0;
+	_frames.clear();
+	
+	_isStatic = false;
+	_width = _height = 0.0f;
+}
+
+
+//-----------------------------------------------------------------------------
 // Update: updates the internal frame counter for an animation
 //-----------------------------------------------------------------------------
 
@@ -125,8 +140,11 @@ void AnimatedImage::SetFrameIndex(int32 frame_index)
 
 bool AnimatedImage::AddFrame(const std::string &frame, int frame_time)
 {
-	StaticImage img;
+	StillImage img;
 	img.SetFilename(frame);	
+	img.SetDimensions(_width, _height);
+	img.SetVertexColors(_color[0], _color[1], _color[2], _color[3]);
+	img.SetStatic(_isStatic);
 	
 	AnimationFrame animFrame;
 	animFrame._frame_time = frame_time;
@@ -141,7 +159,7 @@ bool AnimatedImage::AddFrame(const std::string &frame, int frame_time)
 //           a frame count (how long the frame should last)
 //-----------------------------------------------------------------------------
 
-bool AnimatedImage::AddFrame(const StaticImage &frame, int frame_time)
+bool AnimatedImage::AddFrame(const StillImage &frame, int frame_time)
 {
 	AnimationFrame animFrame;
 	animFrame._frame_time = frame_time;
@@ -190,11 +208,136 @@ float AnimatedImage::GetHeight() const
 //           necessary.
 //-----------------------------------------------------------------------------
 
-StaticImage *AnimatedImage::GetFrame(int32 index) const
+StillImage *AnimatedImage::GetFrame(int32 index) const
 {
-	return const_cast<StaticImage *>(&(_frames[index]._image));
+	return const_cast<StillImage *>(&(_frames[index]._image));
 }
 
+
+//-----------------------------------------------------------------------------
+// Load: loads the image
+//-----------------------------------------------------------------------------
+
+bool ImageDescriptor::Load()
+{
+	return VideoManager->LoadImage(*this);
+}
+
+
+//-----------------------------------------------------------------------------
+// Draw: draws the image
+//-----------------------------------------------------------------------------
+
+bool ImageDescriptor::Draw()
+{
+	return VideoManager->DrawImage(*this);
+}
+
+
+//-----------------------------------------------------------------------------
+// SetWidth: sets all frames to be a certain width
+//-----------------------------------------------------------------------------
+
+void AnimatedImage::SetWidth(float width)
+{
+	_width = width;
+	
+	// update frames	
+	int32 n_frames = GetNumFrames();	
+	for(int32 j = 0; j < n_frames; ++j)
+	{
+		StillImage *img = GetFrame(j);
+		img->SetWidth(width);
+	}
+}
+
+
+//-----------------------------------------------------------------------------
+// SetHeight: sets all frames to be a certain height
+//-----------------------------------------------------------------------------
+
+void AnimatedImage::SetHeight(float height)
+{
+	_height = height;
+
+	// update frames	
+	int32 n_frames = GetNumFrames();	
+	for(int32 j = 0; j < n_frames; ++j)
+	{
+		StillImage *img = GetFrame(j);
+		img->SetHeight(height);
+	}
+}
+
+
+//-----------------------------------------------------------------------------
+// SetDimensions: sets all frames to be a certain width and height
+//-----------------------------------------------------------------------------
+
+void AnimatedImage::SetDimensions(float width, float height)
+{
+	SetWidth(width);
+	SetHeight(height);
+
+	// update frames	
+	int32 n_frames = GetNumFrames();	
+	for(int32 j = 0; j < n_frames; ++j)
+	{
+		StillImage *img = GetFrame(j);
+		img->SetDimensions(width, height);
+	}
+}
+
+
+//-----------------------------------------------------------------------------
+// SetColor: sets all frames to be a certain color
+//-----------------------------------------------------------------------------
+
+void AnimatedImage::SetColor(const Color &color)
+{
+	SetVertexColors(color, color, color, color);
+	int32 n_frames = GetNumFrames();	
+
+	// update frames	
+	for(int32 j = 0; j < n_frames; ++j)
+	{
+		StillImage *img = GetFrame(j);
+		img->SetColor(color);
+	}
+}
+
+
+//-----------------------------------------------------------------------------
+// SetVertexColors: sets all frames to have the vertex colors specified
+//-----------------------------------------------------------------------------
+
+void AnimatedImage::SetVertexColors (const Color &tl, const Color &tr, const Color &bl, const Color &br)
+{
+	_color[0] = tl;
+	_color[1] = tr;
+	_color[2] = bl;
+	_color[3] = br;
+
+	// update frames	
+	int32 n_frames = GetNumFrames();	
+	for(int32 j = 0; j < n_frames; ++j)
+	{
+		StillImage *img = GetFrame(j);
+		img->SetVertexColors(tl, tr, bl, br);
+	}
+}
+
+
+//-----------------------------------------------------------------------------
+// SetStatic: sets all frames to be loaded statically
+//            Note: if the frames are already loaded, it doesn't bother to try
+//            to unload them and then load them again statically.
+//-----------------------------------------------------------------------------
+
+void AnimatedImage::SetStatic(bool isStatic)
+{
+	_isStatic = isStatic;
+}
 
 
 }  // namespace hoa_video

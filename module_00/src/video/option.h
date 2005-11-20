@@ -204,7 +204,7 @@ public:
 	
 	std::vector<OptionElement>      elements;  //! vector of option elements
 	std::vector<hoa_utils::ustring> text;      //! vector of text
-	std::vector<StaticImage>    images;    //! vector of images
+	std::vector<StillImage>    images;    //! vector of images
 	
 	bool disabled;   //! flag to specify whether this option is disabled or not
 };

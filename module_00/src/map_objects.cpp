@@ -96,10 +96,10 @@ MapSprite::~MapSprite() {
 
 // Load the appropriate number of image frames for the sprite
 void MapSprite::LoadFrames() {
-	StaticImage imd;
+	StillImage imd;
 
 	// Prepare standard sprite animation frames (24 count)
-	_frames = new vector<StaticImage>;
+	_frames = new vector<StillImage>;
 	imd.SetDimensions(1.0f, 2.0f);
 	imd.SetFilename(_filename + "_d1.png");
 	_frames->push_back(imd);

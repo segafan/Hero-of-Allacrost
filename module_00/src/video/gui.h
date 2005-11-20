@@ -210,7 +210,7 @@ public:
 	// skin[2][1]: bottom
 	// skin[2][2]: bottom right
 	
-	StaticImage skin[3][3], tri_t, tri_l, tri_r, tri_b, quad;
+	StillImage skin[3][3], tri_t, tri_l, tri_r, tri_b, quad;
 };
 
 
@@ -283,7 +283,7 @@ public:
 	 */	
 	bool CreateMenu
 	(
-		StaticImage &id, 
+		StillImage &id, 
 		float width, 
 		float height, 
 		int32 edgeVisibleFlags, 

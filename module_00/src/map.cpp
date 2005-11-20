@@ -147,7 +147,7 @@ void MapMode::_LoadMap() {
 		DataManager->FillIntVector(tile_mappings);
 		
 		if (tile_mappings.size() == 1) { // Then add a new static image
-			StaticImage static_tile;
+			StillImage static_tile;
 			static_tile.SetDimensions(1.0f, 1.0f);
 			static_tile.SetFilename(tile_filenames[tile_mappings[0]]);
 			_map_tiles.push_back(static_tile);

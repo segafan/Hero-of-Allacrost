@@ -19,13 +19,13 @@
  *           a physical image in memory. Used internally by ImageElement.
  *
  *   -ImageElement: contains a pointer to an Image, plus properties like
- *                  width, height, and color. Used internally by StaticImage
+ *                  width, height, and color. Used internally by StillImage
  *
  *   -ImageDescriptor: abstract base class for images. The only time the API
  *                     user should ever need to use this class is if they want
  *                     a mixed array containing both static and animated images
  *
- *   -StaticImage: an image, non-animated. This is what the user will be dealing
+ *   -StillImage: an image, non-animated. This is what the user will be dealing
  *                 with most of the time.
  *
  *   -AnimatedImage: an animated image, containing multiple frames
@@ -211,7 +211,7 @@ public:
 
 
 /*!***************************************************************************
- *  \brief base class for StaticImage and AnimatedImage
+ *  \brief base class for StillImage and AnimatedImage
  *****************************************************************************/
 
 class ImageDescriptor
@@ -220,14 +220,35 @@ public:
 
 	virtual ~ImageDescriptor() {}
 
-	void SetStatic(bool isStatic);
+	virtual void Clear() = 0;
+	
+	virtual void SetStatic(bool isStatic) = 0;
+	virtual void SetWidth(float width) = 0;
+	virtual void SetHeight(float height) = 0;
+	virtual void SetDimensions(float width, float height) = 0;
+
+	virtual void SetColor(const Color &color) = 0;	
+	virtual void SetVertexColors (const Color &tl, const Color &tr, const Color &bl, const Color &br) = 0;
 
 	virtual float GetWidth() const = 0;
 	virtual float GetHeight() const = 0;
 
+	bool Load();
+	bool Draw();
+
 protected:
 
-	ImageDescriptor() {}  // private constructor, this class is only meant to be used as a base
+	Color _color[4];      //! used only as a parameter to LoadImage. Holds the color of the upper left, upper right, lower left, and lower right vertices respectively
+
+	bool  _isStatic;      //! used only as a parameter to LoadImage. This tells
+	                      //! whether the image being loaded is to be loaded
+	                      //! into a non-volatile area of texture memory
+	                      
+	float _width, _height;  //! width and height of image, in pixels.
+	                         //! If the StillImage is a compound, i.e. it
+	                         //! contains multiple images, then the width and height
+	                         //! refer to the entire compound           
+
 	bool _animated; 
 	
 	friend class GameVideo;
@@ -237,41 +258,40 @@ protected:
 /*!***************************************************************************
  *  \brief this represents an image, used internally ONLY
  *
- *  \note  StaticImages may be simple images or compound images. Compound
+ *  \note  StillImages may be simple images or compound images. Compound
  *         images are when you stitch together multiple small images to create
  *         a large image, e.g. with TilesToObject(). Externally though,
  *         it's fine to think of compound images as just a single image.
  *****************************************************************************/
 
-class StaticImage : public ImageDescriptor
+class StillImage : public ImageDescriptor
 {
 public:
 
-	StaticImage() 
+	StillImage() 
 	{
 		Clear();
 		_animated = false;
 	}
 	
 	//! AddImage allows you to create compound images. You start with a 
-	//! newly created StaticImage, then call AddImage(), passing in
+	//! newly created StillImage, then call AddImage(), passing in
 	//! all the images you want to add, along with the x, y offsets they
 	//! should be positioned at.
 	
-	bool AddImage(const StaticImage &id, float xOffset, float yOffset);
+	bool AddImage(const StillImage &id, float xOffset, float yOffset);
 	
 	void Clear()
 	{
-		_filename.clear();
 		_isStatic = false;
 		_width = _height = 0.0f;
-		_color[0] = _color[1] = _color[2] = _color[3] = Color::white;
+		_filename.clear();
 		_elements.clear();
 	}
 
-	void SetFilename     (const std::string &filename) { _filename = filename; }
+	void SetFilename(const std::string &filename) { _filename = filename; }
 
-	void SetColor        (const Color &color)
+	void SetColor(const Color &color)
 	{
 		_color[0] = _color[1] = _color[2] = _color[3] = color;
 	}
@@ -289,7 +309,7 @@ public:
 	void SetWidth        (float width)    { _width = width; }	
 	void SetHeight       (float height)   {	_height = height; }
 	
-	void SetStatic       (bool isStatic)  { _isStatic = isStatic; }
+	virtual void SetStatic(bool isStatic)  { _isStatic = isStatic; }
 		
 	float GetWidth() const  { return _width; }
 	float GetHeight() const { return _height; }
@@ -302,18 +322,6 @@ private:
 	//! an image descriptor represents a compound image, which is made
 	//! up of multiple elements
 	std::vector <private_video::ImageElement> _elements;
-
-
-	Color _color[4];      //! used only as a parameter to LoadImage. Holds the color of the upper left, upper right, lower left, and lower right vertices respectively
-
-	bool  _isStatic;      //! used only as a parameter to LoadImage. This tells
-	                      //! whether the image being loaded is to be loaded
-	                      //! into a non-volatile area of texture memory
-	                      
-	float _width, _height;  //! width and height of image, in pixels.
-	                         //! If the StaticImage is a compound, i.e. it
-	                         //! contains multiple images, then the width and height
-	                         //! refer to the entire compound           
 
 	friend class GameVideo;
 	friend class AnimatedImage;
@@ -331,13 +339,24 @@ class AnimationFrame
 public:
 	
 	int32     _frame_time;  // how long to display this frame (relative to VIDEO_ANIMTION_FRAME_PERIOD)
-	StaticImage _image;
+	StillImage _image;
 };
 
 class AnimatedImage : public ImageDescriptor
 {
 public:
-	AnimatedImage() { _animated = true; _frame_index = _frame_counter = 0; }
+	
+	AnimatedImage()
+	{ 
+		Clear();
+		_animated = true; 
+	}
+
+
+	/*!
+	 *  \brief clears the animated image
+	 */
+	void Clear();
 	
 
 	/*!
@@ -397,7 +416,7 @@ public:
 	 *                     VIDEO_ANIMATION_FRAME_PERIOD is 30, and frame_count is 3, then this
 	 *                     frame will last for 90 milliseconds.
 	 */	
-	bool AddFrame(const StaticImage &frame, int frame_time);
+	bool AddFrame(const StillImage &frame, int frame_time);
 
 
 	/*!
@@ -415,12 +434,47 @@ public:
 	 */
 	float GetHeight() const;
 
+
+	/*!
+	 *  \brief sets all frames to loaded statically
+	 */
+	void SetStatic(bool isStatic);
+
+	/*!
+	 *  \brief sets all frames to be a certain width
+	 */
+	void SetWidth(float width);
+
+
+	/*!
+	 *  \brief sets all frames to be a certain height
+	 */
+	void SetHeight(float height);
+
+
+	/*!
+	 *  \brief sets all frames to be a certain width and height
+	 */
+	void SetDimensions(float width, float height);
+
+
+	/*!
+	 *  \brief sets all frames to be a certain color
+	 */
+	void SetColor(const Color &color);
+
+
+	/*!
+	 *  \brief sets all frames to have the specified vertex colors
+	 */
+	void SetVertexColors (const Color &tl, const Color &tr, const Color &bl, const Color &br);
+
 	
 	/*!
 	 *  \brief returns a pointer to the indexth frame. For the most part, this is a function you
 	 *         should never be messing with, but this function is available in case you need it.
 	 */
-	StaticImage *GetFrame(int32 index) const;
+	StillImage *GetFrame(int32 index) const;
 
 	float GetFrameProgress() const
 	{
@@ -429,10 +483,10 @@ public:
 
 private:
 
-	int32 _frame_index;      // index of which animation frame to show
-	int32 _frame_counter;    // count how long each frame has been shown for
+	int32 _frame_index;      //! index of which animation frame to show
+	int32 _frame_counter;    //! count how long each frame has been shown for
 	
-	std::vector<AnimationFrame> _frames;
+	std::vector<AnimationFrame> _frames;  //! vector of animation frames
 
 	friend class GameVideo;
 };

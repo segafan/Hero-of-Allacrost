@@ -56,7 +56,7 @@ class BattleMode : public hoa_engine::GameMode {
 private:
 	friend class hoa_data::GameData;
 
-	std::vector<hoa_video::StaticImage> _battle_images;
+	std::vector<hoa_video::StillImage> _battle_images;
 	std::vector<hoa_audio::MusicDescriptor> _battle_music;
 	std::vector<hoa_audio::SoundDescriptor> _battle_sound;
 

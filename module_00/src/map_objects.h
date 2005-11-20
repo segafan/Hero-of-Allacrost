@@ -269,7 +269,7 @@ private:
 	 * elsewhere. For example, playable character sprites can be found in the GameInstance singleton
 	 * in the GCharacter class for each character.
 	 */
-	std::vector<hoa_video::StaticImage> *_frames;
+	std::vector<hoa_video::StillImage> *_frames;
 	//! Retain the dialogues that correspond to the sprite.
 	std::vector<MapDialogue> _dialogues;
 	//! A pointer to the next dialogue for the user to read.

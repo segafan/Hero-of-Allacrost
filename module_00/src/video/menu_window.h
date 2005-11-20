@@ -255,7 +255,7 @@ private:
 	
 	MenuState _state;                //! menu state (hidden, shown, hiding, showing)
 	int32  _currentTime;             //! milliseconds that passed since menu was shown
-	StaticImage _menuImage;      //! image descriptor of the menu
+	StillImage _menuImage;      //! image descriptor of the menu
 	MenuDisplayMode _mode;           //! text display mode (one character at a time, fading in, instant, etc.)
 	
 	bool       _isScissored;         //! true if scissoring needs to be used

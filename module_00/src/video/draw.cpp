@@ -12,29 +12,29 @@ namespace hoa_video
 {
 
 //-----------------------------------------------------------------------------
-// _DrawStaticImage: draws an image given the image descriptor, using the scene light
+// _DrawStillImage: draws an image given the image descriptor, using the scene light
 //                   color. Helper function to DrawImage()
 //-----------------------------------------------------------------------------
 
-bool GameVideo::_DrawStaticImage(const StaticImage &id)
+bool GameVideo::_DrawStillImage(const StillImage &id)
 {
 	// if real lighting is enabled, draw images normally since the light overlay
 	// will take care of the modulation. If not, (i.e. no overlay is being used)
 	// then pass the light color so the vertex colors can do the modulation
 	
 	if(!_usesLights && !(_lightColor == Color::white))
-		return _DrawStaticImage(id, _lightColor);
+		return _DrawStillImage(id, _lightColor);
 	else
-		return _DrawStaticImage(id, Color::white);
+		return _DrawStillImage(id, Color::white);
 }
 
 	
 //-----------------------------------------------------------------------------
-// _DrawStaticImage: draws an image given the image descriptor, colored using the
+// _DrawStillImage: draws an image given the image descriptor, colored using the
 //                   color passed in.
 //-----------------------------------------------------------------------------
 
-bool GameVideo::_DrawStaticImage(const StaticImage &id, const Color &color)
+bool GameVideo::_DrawStillImage(const StillImage &id, const Color &color)
 {
 	// don't do anything if this image is completely transparent (invisible)
 	if(color[3] == 0.0f)
@@ -421,7 +421,7 @@ bool GameVideo::_DrawElement
 
 bool GameVideo::DrawHalo
 (
-	const StaticImage &id, 
+	const StillImage &id, 
 	float x, 
 	float y, 
 	const Color &color
@@ -449,7 +449,7 @@ bool GameVideo::DrawHalo
 
 bool GameVideo::DrawLight
 (
-	const StaticImage &id, 
+	const StillImage &id, 
 	float x, 
 	float y, 
 	const Color &color
@@ -490,11 +490,11 @@ bool GameVideo::DrawImage(const ImageDescriptor &id)
 	if(id._animated)
 	{
 		const AnimatedImage &anim = dynamic_cast<const AnimatedImage &>(id);		
-		return _DrawStaticImage(*anim.GetFrame(anim.GetCurFrameIndex()));
+		return _DrawStillImage(*anim.GetFrame(anim.GetCurFrameIndex()));
 	}
 	else
 	{
-		return _DrawStaticImage(dynamic_cast<const StaticImage &>(id));
+		return _DrawStillImage(dynamic_cast<const StillImage &>(id));
 	}
 }
 
@@ -509,11 +509,11 @@ bool GameVideo::DrawImage(const ImageDescriptor &id, const Color &color)
 	if(id._animated)
 	{
 		const AnimatedImage &anim = dynamic_cast<const AnimatedImage &>(id);		
-		return _DrawStaticImage(*anim.GetFrame(anim.GetCurFrameIndex()), color);
+		return _DrawStillImage(*anim.GetFrame(anim.GetCurFrameIndex()), color);
 	}
 	else
 	{
-		return _DrawStaticImage(dynamic_cast<const StaticImage &>(id), color);
+		return _DrawStillImage(dynamic_cast<const StillImage &>(id), color);
 	}
 }
 

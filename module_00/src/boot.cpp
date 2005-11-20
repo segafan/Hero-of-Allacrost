@@ -57,7 +57,7 @@ BootMode::BootMode() {
 	DataManager->OpenLuaFile("dat/config/boot.lua");
 	
 	// Load the video stuff
-	StaticImage im;
+	StillImage im;
 
 	// The background
 	im.SetFilename(DataManager->GetGlobalString("background_image"));

@@ -52,7 +52,7 @@ bool GameVideo::LoadImage(ImageDescriptor &id)
 	}
 	else
 	{
-		return _LoadImage(dynamic_cast<StaticImage &>(id));
+		return _LoadImage(dynamic_cast<StillImage &>(id));
 	}
 }
 
@@ -95,7 +95,7 @@ bool GameVideo::_LoadImage(AnimatedImage &id)
 //             special texture sheet reserved for things that don't change often.
 //-----------------------------------------------------------------------------
 
-bool GameVideo::_LoadImage(StaticImage &id)
+bool GameVideo::_LoadImage(StillImage &id)
 {
 	// 1. special case: if filename is empty, load a colored quad
 	
@@ -195,19 +195,19 @@ bool GameVideo::EndImageLoadBatch()
 	
 	// go through vector of images waiting to be loaded and load them
 
-	std::vector <StaticImage *>::iterator iImage = _batchLoadImages.begin();
-	std::vector <StaticImage *>::iterator iEnd   = _batchLoadImages.end();
+	std::vector <StillImage *>::iterator iImage = _batchLoadImages.begin();
+	std::vector <StillImage *>::iterator iEnd   = _batchLoadImages.end();
 	
 	bool success = true;
 	
 	while(iImage != iEnd)
 	{
-		StaticImage *id = *iImage;
+		StillImage *id = *iImage;
 		
 		if(!id)
 		{
 			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: got a NULL StaticImage in EndImageLoadBatch()!" << endl;
+				cerr << "VIDEO ERROR: got a NULL StillImage in EndImageLoadBatch()!" << endl;
 			success = false;
 		}
 		
@@ -229,7 +229,7 @@ bool GameVideo::EndImageLoadBatch()
 //                     loading an image.
 //-----------------------------------------------------------------------------
 
-bool GameVideo::_LoadImageHelper(StaticImage &id)
+bool GameVideo::_LoadImageHelper(StillImage &id)
 {
 	bool isStatic = id._isStatic;
 	
@@ -351,13 +351,13 @@ bool GameVideo::_LoadRawPixelData(const string &filename, ILuint &pixelData, uin
 //     5. Remember to call DeleteImage() when you're done.
 //-----------------------------------------------------------------------------
 
-StaticImage GameVideo::TilesToObject
+StillImage GameVideo::TilesToObject
 ( 
-	vector<StaticImage> &tiles, 
+	vector<StillImage> &tiles, 
 	vector< vector<uint32> > indices 
 )
 {	
-	StaticImage id;
+	StillImage id;
 
 	// figure out the width and height information
 		
@@ -672,7 +672,7 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 
 	ImageElement elem(&img, 0.0f, 0.0f, (float)w, (float)h);
 	
-	StaticImage id;
+	StillImage id;
 	id._elements.push_back(elem);
 	
 	if(!DrawImage(id))
@@ -948,7 +948,7 @@ bool GameVideo::DeleteImage(ImageDescriptor &id)
 	}
 	else
 	{
-		return _DeleteImage(dynamic_cast<StaticImage &>(id));
+		return _DeleteImage(dynamic_cast<StillImage &>(id));
 	}	
 }
 
@@ -981,7 +981,7 @@ bool GameVideo::_DeleteImage(AnimatedImage &id)
 //       in memory if possible). For others, they're simply marked as "free"
 //-----------------------------------------------------------------------------
 
-bool GameVideo::_DeleteImage(StaticImage &id)
+bool GameVideo::_DeleteImage(StillImage &id)
 {
 	vector<ImageElement>::iterator iImage = id._elements.begin();
 	vector<ImageElement>::iterator iEnd   = id._elements.end();

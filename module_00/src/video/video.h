@@ -163,7 +163,7 @@ enum VIDEO_STENCIL_OP
 
 
 // forward declarations
-class StaticImage;
+class StillImage;
 class GameVideo;
 class Color;
 
@@ -665,7 +665,7 @@ public:
 	 *         this means setting its filename, and possibly other properties like width, height, and
 	 *         color. In the case of an animated image, it means calling AddFrame().
 	 *
-	 *  \param id  image descriptor to load- either a StaticImage or AnimatedImage.
+	 *  \param id  image descriptor to load- either a StillImage or AnimatedImage.
 	 */
 	bool LoadImage(ImageDescriptor &id);
 
@@ -676,7 +676,7 @@ public:
 	 *
 	 *  \param id  image descriptor to capture to
 	 */
-	bool CaptureScreen(StaticImage &id);
+	bool CaptureScreen(StillImage &id);
 
 	
 	/*!
@@ -724,7 +724,7 @@ public:
 	/*!
 	 *  \brief draws an image which is modulated by the scene's light color
 	 *
-	 *  \param id  image descriptor to draw (either StaticImage or AnimatedImage)
+	 *  \param id  image descriptor to draw (either StillImage or AnimatedImage)
 	 */	
 	bool DrawImage(const ImageDescriptor &id);
 
@@ -732,7 +732,7 @@ public:
 	/*!
 	 *  \brief draws an image which is modulated by a custom color
 	 *
-	 *  \param id  image descriptor to draw (either StaticImage or AnimatedImage)
+	 *  \param id  image descriptor to draw (either StillImage or AnimatedImage)
 	 */	
 	bool DrawImage(const ImageDescriptor &id, const Color &color);
 	
@@ -744,9 +744,9 @@ public:
 	 *  \param indices a 2D vector in row-column order (e.g. indices[y][x])
 	 *         which forms a rectangular array of tiles
 	 */
-	StaticImage TilesToObject
+	StillImage TilesToObject
 	( 
-		std::vector<StaticImage> &tiles, 
+		std::vector<StillImage> &tiles, 
 		std::vector< std::vector<uint32> > indices 
 	);
 
@@ -860,7 +860,7 @@ public:
 	 */
 	bool DrawHalo
 	(
-		const StaticImage &id, 
+		const StillImage &id, 
 		float x, 
 		float y, 
 		const Color &color = Color(1.0f, 1.0f, 1.0f, 1.0f)
@@ -876,7 +876,7 @@ public:
 	 */	
 	bool DrawLight
 	(
-		const StaticImage &id, 
+		const StillImage &id, 
 		float x, 
 		float y, 
 		const Color &color = Color(1.0f, 1.0f, 1.0f, 1.0f)
@@ -1011,7 +1011,7 @@ public:
 	bool ToggleAdvancedDisplay();
 
 	bool SetDefaultCursor(const std::string &cursorImageFilename);
-	StaticImage *GetDefaultCursor();
+	StillImage *GetDefaultCursor();
 
 private:
 	SINGLETON_DECLARE(GameVideo);
@@ -1080,7 +1080,7 @@ private:
 	std::string _currentFont;          //! current font name
 	Color       _currentTextColor;     //! current text color
 
-	StaticImage _defaultMenuCursor;  //! image which is to be used as the cursor
+	StillImage _defaultMenuCursor;  //! image which is to be used as the cursor
 	
 	bool _textShadow;   //! if true, text shadow effect is enabled
 
@@ -1098,7 +1098,7 @@ private:
 	int32 _animation_counter;   //! counter to keep track of milliseconds since game started for animations
 	int32 _current_frame_diff;  //! keeps track of the number of frames animations should increment by for the current frame
 
-	std::vector <StaticImage *>    _batchLoadImages;    //! vector of images in a batch which are to be loaded
+	std::vector <StillImage *>    _batchLoadImages;    //! vector of images in a batch which are to be loaded
 	
 	std::map    <std::string, private_video::Image*>   _images;      //! STL map containing all the images currently being managed by the video engine	
 	std::vector <private_video::TexSheet *>     _texSheets;          //! vector containing all texture sheets currently being managed by the video engine
@@ -1135,7 +1135,7 @@ private:
 
 
 	/*!
-	 *  \brief creates an StaticImage of a menu which is the given size
+	 *  \brief creates an StillImage of a menu which is the given size
 	 *
 	 *  \param menu   Reference to menu to create
 	 *
@@ -1149,7 +1149,7 @@ private:
 	 */
 	bool _CreateMenu
 	(
-		StaticImage &menu, 
+		StillImage &menu, 
 		float width, 
 		float height, 
 		int32 edgeVisibleFlags, 
@@ -1211,7 +1211,7 @@ private:
 	 *
 	 *  \param id  image descriptor to decrease the reference count of
 	 */
-	bool _DeleteImage(StaticImage &id);
+	bool _DeleteImage(StillImage &id);
 
 	
 	/*!
@@ -1263,7 +1263,7 @@ private:
 	 *
 	 *  \param img static image to draw
 	 */	
-	bool _DrawStaticImage(const StaticImage &img);
+	bool _DrawStillImage(const StillImage &img);
 
 
 	/*!
@@ -1272,7 +1272,7 @@ private:
 	 *  \param img static image to draw
 	 *  \param color color to modulate image by
 	 */	
-	bool _DrawStaticImage(const StaticImage &img, const Color &color);  
+	bool _DrawStillImage(const StillImage &img, const Color &color);  
 
 
 	/*!
@@ -1309,7 +1309,7 @@ private:
 	 *
 	 *  \param id  image descriptor to load. Can specify filename, color, width, height, and static as its parameters
 	 */
-	bool _LoadImage(StaticImage &id);
+	bool _LoadImage(StillImage &id);
 
 
 	/*!
@@ -1323,10 +1323,10 @@ private:
 	/*!
 	 *  \brief does the actual work of loading an image
 	 *
-	 *  \param id  StaticImage of the image to load. May specify a filename, color, width, height, and static
+	 *  \param id  StillImage of the image to load. May specify a filename, color, width, height, and static
 	 */	
 
-	bool _LoadImageHelper(StaticImage &id);
+	bool _LoadImageHelper(StillImage &id);
 
 
 	/*!

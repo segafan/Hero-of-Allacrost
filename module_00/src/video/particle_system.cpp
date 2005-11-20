@@ -131,7 +131,7 @@ bool ParticleSystem::Draw()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	
-	StaticImage *id = _animation.GetFrame(_animation.GetCurFrameIndex());
+	StillImage *id = _animation.GetFrame(_animation.GetCurFrameIndex());
 	Image *img = id->_elements[0].image;
 	VideoManager->_BindTexture(img->texSheet->texID);
 
@@ -337,7 +337,7 @@ bool ParticleSystem::Draw()
 		int findex = _animation.GetCurFrameIndex();
 		findex = (findex + 1) % _animation.GetNumFrames();
 		
-		StaticImage *id2 = _animation.GetFrame(findex);
+		StillImage *id2 = _animation.GetFrame(findex);
 		Image *img2 = id2->_elements[0].image;
 		VideoManager->_BindTexture(img2->texSheet->texID);
 

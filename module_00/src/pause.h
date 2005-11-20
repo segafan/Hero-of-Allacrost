@@ -58,7 +58,7 @@ extern bool PAUSE_DEBUG;
 class PauseMode : public hoa_engine::GameMode {
 private:
 	//! An image of the last frame shown on the screen before PauseMode was called.
-	hoa_video::StaticImage _saved_screen;
+	hoa_video::StillImage _saved_screen;
 public:
 	PauseMode();
 	~PauseMode();

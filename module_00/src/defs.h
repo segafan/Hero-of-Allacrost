@@ -45,7 +45,7 @@ namespace hoa_audio {
 namespace hoa_video {
 	extern bool VIDEO_DEBUG;
 	class GameVideo;
-	class StaticImage;
+	class StillImage;
 }
 
 // Data declarations, see data.h/cpp
