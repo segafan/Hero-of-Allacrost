@@ -250,7 +250,7 @@ GameSettings::~GameSettings() {
 // Makes a call to the data manager for retrieving configured settings
 bool GameSettings::Initialize() {
 	bool fs;
-	DataManager->OpenLuaFile("dat/config/settings.hoa");
+	DataManager->OpenLuaFile("dat/config/settings.lua");
 	DataManager->OpenTable("video_settings");
 	SetFullScreen(DataManager->GetTableBool("full_screen"));
 	DataManager->CloseTable();

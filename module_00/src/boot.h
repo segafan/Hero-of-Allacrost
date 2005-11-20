@@ -39,24 +39,39 @@ extern bool BOOT_DEBUG;
 namespace private_boot {
 
 //! \name Main menu selections
-//@{
 //! \brief Constants used to cycle through the primary boot menu
+//@{
 const uint32 NEW_GAME  = 0;
 const uint32 LOAD_GAME = 1;
 const uint32 OPTIONS   = 2;
 const uint32 CREDITS   = 3;
-const uint32 HIDE_MENU = 4;
-const uint32 QUIT      = 5;
+const uint32 QUIT      = 4;
 //@}
 
 //! \name Options menu selections
-//@{
 //! \brief Constants used to cycle through the options boot menu
-const uint32 VIDEO_OP     = 0;
-const uint32 AUDIO_OP     = 1;
-const uint32 LANGUAGE_OP  = 2;
-const uint32 KEYS_OP      = 3;
-const uint32 JOYSTICK_OP  = 4;
+//@{
+const uint32 VIDEO_OPTIONS     = 0;
+const uint32 AUDIO_OPTIONS     = 1;
+const uint32 LANGUAGE_OPTIONS  = 2;
+const uint32 KEYS_OPTIONS      = 3;
+const uint32 JOYSTICK_OPTIONS  = 4;
+//@}
+
+//! \name Default key settings
+//! \brief The default SDL key mapping used with Allacrost.
+//@{
+const uint32 UP_KEY_DEFAULT           = SDLK_UP;
+const uint32 DOWN_KEY_DEFAULT         = SDLK_DOWN;
+const uint32 LEFT_KEY_DEFAULT         = SDLK_LEFT;
+const uint32 RIGHT_KEY_DEFAULT        = SDLK_RIGHT;
+const uint32 CONFIRM_KEY_DEFAULT      = SDLK_f;
+const uint32 CANCEL_KEY_DEFAULT       = SDLK_d;
+const uint32 MENU_KEY_DEFAULT         = SDLK_s;
+const uint32 SWAP_KEY_DEFAULT         = SDLK_a;
+const uint32 PAUSE_KEY_DEFAULT        = SDLK_SPACE;
+const uint32 LEFT_SELECT_KEY_DEFAULT  = SDLK_w;
+const uint32 RIGHT_SELECT_KEY_DEFAULT = SDLK_e;
 //@}
 
 } // namespace private_boot
@@ -86,9 +101,13 @@ private:
 	//! Images that will be used at the boot screen.
 	std::vector<hoa_video::StaticImage> _boot_images;
 	
-	//! The lowest level options in boot mode
+	//! GUI component for the main options.
 	hoa_video::OptionBox _main_options;
-
+	//! GUI component for the setting options.
+	hoa_video::OptionBox _setting_options;
+	//! GUI component for the setting window.
+	hoa_video::MenuWindow _setting_window;
+	
 	/*!
 	 *  \brief Animates the game logo when this class is first initialized.
 	 *

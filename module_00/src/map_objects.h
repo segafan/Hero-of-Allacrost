@@ -34,17 +34,24 @@ namespace private_map {
 // *********************** OBJECT CONSTANTS **************************
 
 //! \name Map Object Types
-//@{
 //! \brief Object idenfitier constants for use in the object layer.
-const uint8 VIRTUAL_SPRITE   = 0x00; // Sprites with no physical image
-const uint8 CHARACTER_SPRITE = 0x01; // Playable character sprites
-const uint8 NPC_SPRITE       = 0x02; // Regular NPC sprites
-const uint8 ADV_SPRITE       = 0x04; // 'Advanced' NPC sprites with more emotion frames
-const uint8 OTHER_SPRITE     = 0x08; // Sprites of non-standard sizes (small animals, etc)
-const uint8 ENEMY_SPRITE     = 0x10; // Enemy sprites, various sizes
-const uint8 STATIC_OBJECT    = 0x20; // A still, non-animate object
-const uint8 DYNAMIC_OBJECT   = 0x40; // A still and animate object
-const uint8 MIDDLE_OBJECT    = 0x80; // A "middle-layer" object
+//@{
+//! Sprites with no physical image, used mainly as a focus for the map's camera.
+const uint8 VIRTUAL_SPRITE   = 0x01; 
+//! The player-controlled character sprite.
+const uint8 PLAYER_SPRITE    = 0x02;
+//! Standard NPC sprites. May also be party members.
+const uint8 NPC_SPRITE       = 0x04;
+//! Sprites of non-standard sizes (small animals, etc)
+const uint8 OTHER_SPRITE     = 0x08;
+//! Enemy sprites, various sizes
+const uint8 ENEMY_SPRITE     = 0x10;
+//! A still, non-animate object
+const uint8 STATIC_OBJECT    = 0x20;
+//! A still and animate object
+const uint8 DYNAMIC_OBJECT   = 0x40;
+//! A "middle-layer" object, such as a bridge.
+const uint8 MIDDLE_OBJECT    = 0x80;
 //@}
 
 /*! 

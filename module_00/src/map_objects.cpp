@@ -83,7 +83,7 @@ MapSprite::~MapSprite() {
 	if (MAP_DEBUG) cout << "MAP: MapSprite destructor invoked" << endl;
 	
 	// Character sprite frames are kept globally, so don't delete them.
-	if (_object_type == CHARACTER_SPRITE) { 
+	if (_object_type == PLAYER_SPRITE) { 
 		return;
 	}
 

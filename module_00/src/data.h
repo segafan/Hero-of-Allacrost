@@ -126,17 +126,28 @@ public:
 	void CloseSubTable();
 	void CloseTable();
 	
+	int32 GetTableSize(const char *tbl_name);
+	int32 GetTableSize();
+	
 	bool GetTableBool(const char *key);
 	void GetTableBoolRef(const char *key, bool &ref);
+	bool GetTableBool(const int32 key);
+	void GetTableBoolRef(const int32 key, bool &ref);
 	
 	int32 GetTableInt(const char *key);
 	void GetTableIntRef(const char *key, int32 &ref);
+	int32 GetTableInt(const int32 key);
+	void GetTableIntRef(const int32 key, int32 &ref);
 	
 	float GetTableFloat(const char *key);
 	void GetTableFloatRef(const char *key, float &ref);
+	float GetTableFloat(const int32 key);
+	void GetTableFloatRef(const int32 key, float &ref);
 	
 	std::string GetTableString(const char *key);
-	void GetTableStringRef(const char * key, std::string &ref);
+	void GetTableStringRef(const char *key, std::string &ref);
+	std::string GetTableString(const int32 key);
+	void GetTableStringRef(const int32 key, std::string &ref);
 	//@}
 	
 	//! \name Lua Vector Fill Functions

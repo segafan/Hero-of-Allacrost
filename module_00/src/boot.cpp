@@ -54,7 +54,7 @@ BootMode::BootMode() {
 	
 	_vmenu_index.push_back(LOAD_GAME);
 	
-	DataManager->OpenLuaFile("dat/config/boot.hoa");
+	DataManager->OpenLuaFile("dat/config/boot.lua");
 	
 	// Load the video stuff
 	StaticImage im;
@@ -114,6 +114,7 @@ BootMode::BootMode() {
 		AudioManager->LoadSound(_boot_sound[i]);
 	}
 	
+	// Initialize all the properties of the main menu
 	_main_options.SetFont("default");
 	_main_options.SetCellSize(128.0f, 50.0f);
 	_main_options.SetSize(5, 1);
@@ -133,6 +134,27 @@ BootMode::BootMode() {
 	
 	_main_options.SetOptions(options);
 	_main_options.SetSelection(LOAD_GAME);
+	
+	// Initialize all the properties of the settings menu
+	_setting_options.SetFont("default");
+	_setting_options.SetCellSize(128.0f, 50.0f);
+	_setting_options.SetSize(5, 1);
+	_setting_options.SetPosition(512.0f, 500.0f);
+	_setting_options.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_setting_options.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_setting_options.SetSelectMode(VIDEO_SELECT_SINGLE);
+	_setting_options.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_setting_options.SetCursorOffset(-35.0f, -4.0f);
+	
+	options.clear();
+	options.push_back(MakeWideString("Video"));
+	options.push_back(MakeWideString("Audio"));
+	options.push_back(MakeWideString("Language"));
+	options.push_back(MakeWideString("Key Settings"));
+	options.push_back(MakeWideString("Joystick Settings"));
+	
+	_setting_options.SetOptions(options);
+	_setting_options.SetSelection(VIDEO_OPTIONS);
 }
 
 
@@ -237,7 +259,7 @@ void BootMode::Update(uint32 time_elapsed) {
 	if (_fade_out) {
 		// When the screen is finished fading to black, create a new map mode and fade back in
 		if (!VideoManager->IsFading()) { 
-			MapMode *MM = new MapMode(0);
+			MapMode *MM = new MapMode();
 			ModeManager->Pop();
 			ModeManager->Push(MM);
 			VideoManager->FadeScreen(Color::clear, 1.0f);
@@ -305,14 +327,14 @@ void BootMode::Update(uint32 time_elapsed) {
 // Handle updates when video options menu is selected. One sub-menu level.
 void BootMode::_UpdateVideoOptions() {
 	if (InputManager->LeftPress()) {
-		_vmenu_index[1] = JOYSTICK_OP;
+		_vmenu_index[1] = JOYSTICK_OPTIONS;
 		_vmenu_index[2] = 0;
 		cout << "OPTIONS: JOYSTICK MENU" << endl;
 		AudioManager->PlaySound(_boot_sound[3], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // move sound
 		return;
 	}
 	else if (InputManager->RightPress()) {
-		_vmenu_index[1] = AUDIO_OP;
+		_vmenu_index[1] = AUDIO_OPTIONS;
 		_vmenu_index[2] = 0;
 		cout << "OPTIONS: AUDIO MENU" << endl;
 		AudioManager->PlaySound(_boot_sound[3], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // move sound
@@ -361,14 +383,14 @@ void BootMode::_UpdateVideoOptions() {
 void BootMode::_UpdateAudioOptions() {
 	if (_vmenu_index.size() == 3) {
 		if (InputManager->LeftPress()) {
-			_vmenu_index[1] = VIDEO_OP;
+			_vmenu_index[1] = VIDEO_OPTIONS;
 			_vmenu_index[2] = 0;
 			cout << "OPTIONS: VIDEO MENU" << endl;
 			AudioManager->PlaySound(_boot_sound[3], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // move sound
 			return;
 		}
 		else if (InputManager->RightPress()) {
-			_vmenu_index[1] = LANGUAGE_OP;
+			_vmenu_index[1] = LANGUAGE_OPTIONS;
 			_vmenu_index[2] = 0;
 			cout << "OPTIONS: LANGUAGE MENU" << endl;
 			AudioManager->PlaySound(_boot_sound[3], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // move sound
@@ -426,14 +448,14 @@ void BootMode::_UpdateAudioOptions() {
 // Handles language options menu updates. One sub-menu level.
 void BootMode::_UpdateLanguageOptions() {
 	if (InputManager->LeftPress()) {
-		_vmenu_index[1] = AUDIO_OP;
+		_vmenu_index[1] = AUDIO_OPTIONS;
 		_vmenu_index[2] = 0;
 		cout << "OPTIONS: AUDIO MENU" << endl;
 		AudioManager->PlaySound(_boot_sound[3], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // move sound
 		return;
 	}
 	else if (InputManager->RightPress()) {
-		_vmenu_index[1] = KEYS_OP;
+		_vmenu_index[1] = KEYS_OPTIONS;
 		_vmenu_index[2] = 0;
 		cout << "OPTIONS: KEY SETTINGS MENU" << endl;
 		AudioManager->PlaySound(_boot_sound[3], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // move sound
@@ -475,14 +497,14 @@ void BootMode::_UpdateLanguageOptions() {
 // Handle updates when key settings options menu is selected. One sub-menu.
 void BootMode::_UpdateKeyOptions() {
 	if (InputManager->LeftPress()) {
-		_vmenu_index[1] = LANGUAGE_OP;
+		_vmenu_index[1] = LANGUAGE_OPTIONS;
 		_vmenu_index[2] = 0;
 		cout << "OPTIONS: LANGUAGE MENU" << endl;
 		AudioManager->PlaySound(_boot_sound[3], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // move sound
 		return;
 	}
 	else if (InputManager->RightPress()) {
-		_vmenu_index[1] = JOYSTICK_OP;
+		_vmenu_index[1] = JOYSTICK_OPTIONS;
 		_vmenu_index[2] = 0;
 		cout << "OPTIONS: JOYSTICK MENU" << endl;
 		AudioManager->PlaySound(_boot_sound[3], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // move sound
@@ -547,14 +569,14 @@ void BootMode::_UpdateKeyOptions() {
 // Handle updates when joystick options menu is selected. One sub-menu.
 void BootMode::_UpdateJoystickOptions() {
 	if (InputManager->LeftPress()) {
-		_vmenu_index[1] = KEYS_OP;
+		_vmenu_index[1] = KEYS_OPTIONS;
 		_vmenu_index[2] = 0;
 		cout << "OPTIONS: KEY SETTINGS MENU" << endl;
 		AudioManager->PlaySound(_boot_sound[3], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // move sound
 		return;
 	}
 	else if (InputManager->RightPress()) {
-		_vmenu_index[1] = VIDEO_OP;
+		_vmenu_index[1] = VIDEO_OPTIONS;
 		_vmenu_index[2] = 0;
 		cout << "OPTIONS: VIDEO MENU" << endl;
 		AudioManager->PlaySound(_boot_sound[3], AUDIO_NO_FADE, AUDIO_LOOP_ONCE); // move sound

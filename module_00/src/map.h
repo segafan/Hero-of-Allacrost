@@ -55,24 +55,24 @@ namespace private_map {
 const uint32 ANIMATION_RATE = 300;
 
 //! \name Screen Coordiante System Constants
-//@{
 //! \brief The number of rows and columns of tiles that compose the screen.
+//@{
 const float SCREEN_ROWS = 24.0f;
 const float SCREEN_COLS = 32.0f;
 //@}
 
 //! \name Map State Constants
-//@{
 //! \brief Constants used for describing the current state of operation during map mode.
+//@{
 const uint8 EXPLORE      = 0x00000001;
 const uint8 DIALOGUE     = 0x00000002;
 const uint8 SCRIPT_EVENT = 0x00000004;
 //@}
 
 //! \name Altitude Constants
+//! \brief Constants for accessing the eight different alititude levels of both tiles and objects.
+//! \note Higher numbers correspond to higher altitudes.
 //@{
-//! \brief Constants for accessing the nine different alititude levels of both tiles and objects.
-const uint8 ALTITUDE_0 = 0x00;
 const uint8 ALTITUDE_1 = 0x01;
 const uint8 ALTITUDE_2 = 0x02;
 const uint8 ALTITUDE_3 = 0x04;
@@ -84,8 +84,8 @@ const uint8 ALTITUDE_8 = 0x80;
 //@}
 
 //! \name Interaction Type Constants
-//@{
 //! \brief Types of interactions that can occur on a specific tile
+//@{
 const uint32 NO_INTERACTION     = 0;
 const uint32 SPRITE_INTERACTION = 1;
 //@}
@@ -179,30 +179,18 @@ public:
 	//! Index to an upper layer tile in the MapMode tile_frames vector.
 	int16 upper_layer;
 	//! A bit-mask for indicating whether a tile is walkable on each altitude level.
-	uint8 not_walkable;
+	uint8 walkable;
 	//! A bit-mask for indicating that a tile is occupied by an object.
 	uint8 occupied;
 	//! A bit-mask indicating various tile properties.
 	uint8 properties;
+	//! The map event (if any) registered to this tile.
+	int16 event;
+	
+	MapTile() 
+		{ lower_layer = 0; middle_layer = 0; upper_layer = 0; 
+		  walkable = 0; occupied = 0; properties = 0; event = 0; }
 }; // class MapTile
-
-
-/*!****************************************************************************
- * \brief Element of a circular singlely linked list for tile frame animations.
- *
- * \note 0) This class will become defunct later, when the video engine is 
- * capable of handling all the animation.
- * 
- * \note 1) Obviously, not all tiles are animated. For those that aren't, the
- * list will only contain one item and the next pointer will point to itself.
- *****************************************************************************/
-class TileFrame {
-public:
-	//! Holds a frame index pointing to map_tiles in the MapMode class.
-	int32 frame;
-	//! A pointer to the next frame in the animation.
-	TileFrame *next;
-}; // class TileFrame
 
 /*!****************************************************************************
  * \brief Handles everything that needs to be done when the player is exploring maps.
@@ -222,17 +210,27 @@ public:
  * you plan to immediately push it on top of the game stack.
  *****************************************************************************/
 class MapMode : public hoa_engine::GameMode {
+public:
+	MapMode();
+	~MapMode();
+	
+	//! Resets appropriate class members. Called whenever MapMode is made the active game mode.
+	void Reset();
+	//! Updates the game and calls various sub-update functions depending on the state of map mode.
+	//! \param new_time_elapsed The amount of milliseconds that have elapsed since the last call to this function.
+	void Update(uint32 new_time_elapsed);
+	//! Handles the drawing of everything on the map and makes sub-draw function calls as appropriate.
+	void Draw();
+	
+	//! Fills in all the map structures from a Lua data file.
+	void _LoadMap();
 private:
-	friend class hoa_data::GameData;
 	friend class MapSprite;
 	
-	//! A unique ID value for the map.
-	uint32 _map_id;
-	//! Indicates an special conditions that the map is in (e.g. a dialogue is taking place)
+	//! The name of the map, as will be read by the player in-game.
+	hoa_utils::ustring _map_name;
+	//! Indicates a special conditions that the map is in (e.g. a dialogue is taking place)
 	uint8 _map_state;
-	//! A millisecond counter for use in tile animation.
-	//! \note This will eventually become defunct once the video engine supports animation natively.
-	int32 _animation_counter;
 	//! The time elapsed since the last Update() call to MapMode.
 	uint32 _time_elapsed;
 	//! The number of tile rows in the map.
@@ -248,8 +246,6 @@ private:
 
 	//! A 2D vector that represents the map itself.
 	std::vector<std::vector<MapTile> > _tile_layers;
-	//! A vector of circular singely-linked lists for each tile frame animation.
-	std::vector<TileFrame*> _tile_frames;
 	//! The normal set of map objects.
 	std::vector<MapObject*> _ground_objects;
 	//! Objects that can be both walked under and above on (like bridges).
@@ -312,8 +308,6 @@ private:
 	//! Calculates information about how to draw the next map frame.
 	void _GetDrawInfo();
 
-	// TEMPORARY FUNCTION FOR TESTING PURPOSES >>> eventally will be defunct
-	void _TEMP_CreateMap();
 	
 	/*!
 	 * \brief Determines whether an object may be placed on a tile.
@@ -344,19 +338,6 @@ private:
 	 * \param &tdest The destination tile information, including row, column, and altitude information.
 	 */
 	void _FindPath(const MapSprite* sprite, const private_map::TileNode& destination);
-public:
-	//! The name of the map, as seen by the player in the game.
-	std::string mapname;
-	MapMode(uint32 new_map_id);
-	~MapMode();
-	
-	//! Resets appropriate class members. Called whenever MapMode is made the active game mode.
-	void Reset();
-	//! Updates the game and calls various sub-update functions depending on the state of map mode.
-	//! \param new_time_elapsed The amount of milliseconds that have elapsed since the last call to this function.
-	void Update(uint32 new_time_elapsed);
-	//! Handles the drawing of everything on the map and makes sub-draw function calls as appropriate.
-	void Draw();
 }; // class MapMode
 
 } // namespace hoa_map;

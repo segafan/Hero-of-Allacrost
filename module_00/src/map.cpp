@@ -48,179 +48,20 @@ bool MAP_DEBUG = false;
 // ***************************** GENERAL FUNCTIONS ****************************
 // ****************************************************************************
 
-void MapMode::_TEMP_CreateMap() {
-	_random_encounters = true;
-	_encounter_rate = 12;
-	_steps_till_encounter = GaussianValue(_encounter_rate, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
-	_animation_counter = 0;
-
-	_row_count = 60;
-	_col_count = 80;
-	
-	// Setup GUI items in 1024x768 coordinate system
-	VideoManager->PushState();
-	VideoManager->SetCoordSys(0, 1024, 768, 0);
-	_dialogue_window.Create(1024.0f, 128.0f);
-	_dialogue_window.SetPosition(0.0f, 768.0f);
-	
-	_dialogue_textbox.SetDisplaySpeed(30);
-	_dialogue_textbox.SetPosition(0.0f + 32.0f, 768.0f - 32.0f);
-	_dialogue_textbox.SetDimensions(1024.0f - 64.0f, 128.0f - 64.0f);
-	_dialogue_textbox.SetFont("default");
-	_dialogue_textbox.SetDisplayMode(VIDEO_TEXT_REVEAL);
-	_dialogue_textbox.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
-	VideoManager->PopState();
-
-	// Load in all tile images from memory
-	StaticImage imd;
-	imd.SetDimensions(1.0f, 1.0f);
-
-	imd.SetFilename("img/tiles/test_01.png");
-	_map_tiles.push_back(imd);
-	imd.SetFilename("img/tiles/test_02.png");
-	_map_tiles.push_back(imd);
-	imd.SetFilename("img/tiles/test_03.png");
-	_map_tiles.push_back(imd);
-	imd.SetFilename("img/tiles/test_04.png");
-	_map_tiles.push_back(imd);
-	imd.SetFilename("img/tiles/test_05.png");
-	_map_tiles.push_back(imd);
-	imd.SetFilename("img/tiles/test_06.png");
-	_map_tiles.push_back(imd);
-	imd.SetFilename("img/tiles/test_07.png");
-	_map_tiles.push_back(imd);
-	imd.SetFilename("img/tiles/test_08.png");
-	_map_tiles.push_back(imd);
-	imd.SetFilename("img/tiles/test_09.png");
-	_map_tiles.push_back(imd);
-	imd.SetFilename("img/tiles/test_10.png");
-	_map_tiles.push_back(imd);
-	imd.SetFilename("img/tiles/test_11.png");
-	_map_tiles.push_back(imd);
-	imd.SetFilename("img/tiles/test_12.png");
-	_map_tiles.push_back(imd);
-	imd.SetFilename("img/tiles/test_13.png");
-	_map_tiles.push_back(imd);
-	imd.SetFilename("img/tiles/test_14.png");
-	_map_tiles.push_back(imd);
-	imd.SetFilename("img/tiles/test_15.png");
-	_map_tiles.push_back(imd);
-	imd.SetFilename("img/tiles/test_16a.png");
-	_map_tiles.push_back(imd);
-	imd.SetFilename("img/tiles/test_16b.png");
-	_map_tiles.push_back(imd);
-	imd.SetFilename("img/tiles/test_16c.png");
-	_map_tiles.push_back(imd);
-	imd.SetFilename("img/tiles/test_16d.png");
-	_map_tiles.push_back(imd);
-	imd.SetFilename("img/tiles/test_16e.png");
-	_map_tiles.push_back(imd);
-
-	VideoManager->BeginImageLoadBatch();
-	for (uint32 i = 0; i < _map_tiles.size(); i++) {
-		VideoManager->LoadImage(_map_tiles[i]);
-	}
-	VideoManager->EndImageLoadBatch();
-
-	// Setup tile frame pointers for animation
-	TileFrame *tf;
-	for (uint32 i = 0; i < 15; i++) {
-		tf = new TileFrame;
-	  tf->frame = i;
-		tf->next = tf;
-		_tile_frames.push_back(tf);
-	}
-
-	// Setup the final animated frame tile
-	TileFrame *tmp;
-	tf = new TileFrame;
-	tf->frame = 15; // a
-	tf->next = NULL;
-	_tile_frames.push_back(tf);
-
-	tmp = new TileFrame;
-	tf->next = tmp;
-	tmp->frame = 16; // b
-	tf = tmp;
-
-	tmp = new TileFrame;
-	tf->next = tmp;
-	tmp->frame = 17; // c
-	tf = tmp;
-
-	tmp = new TileFrame;
-	tf->next = tmp;
-	tmp->frame = 18; // d
-	tf = tmp;
-
-	tmp = new TileFrame;
-	tf->next = tmp;
-	tmp->frame = 19; // e
-	tmp->next = _tile_frames[15]; // Makes the linked list circular now
-
-	// Setup the image map
-	MapTile tmp_tile;
-	tmp_tile.upper_layer = -1; // No upper layer in this test
-	for (uint32 r = 0; r < _row_count; r++) {
-		_tile_layers.push_back(vector <MapTile>());
-		for (uint32 c = 0; c < _col_count; c++) {
-			tmp_tile.lower_layer = static_cast<int16>(RandomNumber(0, 16 - 1)); // Build the lower layer from random tiles
-			if (tmp_tile.lower_layer == 15) { // Set water tile properties
-				tmp_tile.not_walkable = ALTITUDE_1;
-				tmp_tile.properties = CONFIRM_EVENT;
-			}
-			else {
-				tmp_tile.not_walkable = 0x00;
-				tmp_tile.properties = 0x00;
-			}
-			tmp_tile.occupied = 0x00;
-			_tile_layers[r].push_back(tmp_tile);
-		}
-	}
-	
-	MapSprite::CurrentMap = this;
-	
-	// Load player sprite and rest of map objects
-	MapSprite *player = new MapSprite(CHARACTER_SPRITE, 2, 2, ALTITUDE_1, (UPDATEABLE | VISIBLE | IN_CONTEXT));
-	player->LoadCharacterInfo(GLOBAL_CLAUDIUS);
-	player->_direction = SOUTH;
-	_ground_objects.push_back(player);
-
-	MapSprite *npc_sprite = new MapSprite(NPC_SPRITE, 4, 6, ALTITUDE_1, (UPDATEABLE | VISIBLE | IN_CONTEXT));
-	npc_sprite->SetName("Laila");
-	npc_sprite->_direction = EAST;
-	npc_sprite->SetFilename("img/sprites/map/laila");
-	npc_sprite->SetSpeed(VERY_SLOW_SPEED);
-	npc_sprite->SetDelay(LONG_DELAY);
-	npc_sprite->LoadFrames();
-	npc_sprite->AddDialogue(std::vector<std::string>(1, "I'm a hottie!"));
-	npc_sprite->AddDialogue(std::vector<std::string>(1, "But, I'm also your sister..."));
-	npc_sprite->AddDialogue(std::vector<std::string>(1, "Is this really okay?"));
-	_ground_objects.push_back(npc_sprite);
-
-	// If the _focused_object is ever NULL, the game will exit with a seg fault :(
-	_focused_object = player;
-}
-
-
-
-MapMode::MapMode(uint32 new_map_id) {
+MapMode::MapMode() {
 	if (MAP_DEBUG) cout << "MAP: MapMode constructor invoked" << endl;
 
 	mode_type = ENGINE_MAP_MODE;
 	_map_state = EXPLORE;
-	_map_id = new_map_id;
 	
-	// Load the map from the Lua data file
-	//DataManager->LoadMap(this, map_id);
-	
-	_virtual_sprite = new MapSprite(VIRTUAL_SPRITE, 20, 20, ALTITUDE_0, 0x0);
+	_virtual_sprite = new MapSprite(VIRTUAL_SPRITE, 20, 20, ALTITUDE_1, 0x0);
 	_virtual_sprite->SetSpeed(VERY_FAST_SPEED);
 	_virtual_sprite->SetDelay(NO_DELAY);
 
-	// Temporary function that creates a random map
-	_TEMP_CreateMap();
+	// Loads all the map data
+	_LoadMap();
 }
+
 
 
 MapMode::~MapMode() {
@@ -229,23 +70,6 @@ MapMode::~MapMode() {
 	// Delete all of the tile images
 	for (uint32 i = 0; i < _map_tiles.size(); i++) {
 		VideoManager->DeleteImage(_map_tiles[i]);
-	}
-
-	// Free up all the frame linked lists
-	TileFrame *tf_del;
-	TileFrame *tf_tmp;
-	for (uint32 i = 0; i < _tile_frames.size(); i++) {
-		tf_del = _tile_frames[i];
-		tf_tmp = tf_del->next;
-		delete tf_del;
-
-		while (tf_tmp != _tile_frames[i]) {
-			tf_del = tf_tmp;
-			tf_tmp = tf_del->next;
-			delete tf_del;
-		}
-
-		_tile_frames[i] = NULL;
 	}
 
 	// Delete all of the objects
@@ -272,6 +96,199 @@ void MapMode::Reset() {
 }
 
 
+
+void MapMode::_LoadMap() {
+	// *********** (1) Setup GUI items in 1024x768 coordinate system ************
+	VideoManager->PushState();
+	VideoManager->SetCoordSys(0, 1024, 768, 0);
+	_dialogue_window.Create(1024.0f, 128.0f);
+	_dialogue_window.SetPosition(0.0f, 768.0f);
+	
+	_dialogue_textbox.SetDisplaySpeed(30);
+	_dialogue_textbox.SetPosition(0.0f + 32.0f, 768.0f - 32.0f);
+	_dialogue_textbox.SetDimensions(1024.0f - 64.0f, 128.0f - 64.0f);
+	_dialogue_textbox.SetFont("default");
+	_dialogue_textbox.SetDisplayMode(VIDEO_TEXT_REVEAL);
+	_dialogue_textbox.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	VideoManager->PopState();
+	
+	// ************* (2) Open data file and begin processing data ***************
+	DataManager->OpenLuaFile("dat/maps/test_01.lua");
+	_random_encounters = DataManager->GetGlobalBool("random_encounters");
+	if (_random_encounters) {
+		_encounter_rate = DataManager->GetGlobalInt("encounter_rate");
+		_steps_till_encounter = GaussianValue(_encounter_rate, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
+	}
+	else {
+		// Set some decent default values, just in case a script turns random encounters on later
+		_encounter_rate = 10;
+		_steps_till_encounter = 10;
+	}
+
+	_row_count = DataManager->GetGlobalInt("row_count");
+	_col_count = DataManager->GetGlobalInt("col_count");
+	
+	// ********************** (3) Load in tile filenames ************************
+	vector<string> tile_filenames;
+	DataManager->FillStringVector("tile_filenames", tile_filenames);
+	for (uint32 i = 0; i < tile_filenames.size(); i++) {
+		// Prepend the pathname and append the file extension for all the file names
+		tile_filenames[i] = "img/tiles/" + tile_filenames[i] + ".png";
+	}
+	
+	// ******************** (3) Setup tile image mappings ***********************
+	vector<int32> tile_mappings;
+	DataManager->OpenTable("tile_mappings");
+	int32 mapping_count = tile_filenames.size(); // TMP
+	//int32 mapping_count = DataManager->GetTableSize("tile_mappings");
+	//cout << "mapping_count == " << mapping_count << endl;
+	for (uint32 i = 0; i < mapping_count; i++) {
+		DataManager->OpenSubTable(i);
+		DataManager->FillIntVector(tile_mappings);
+		
+		if (tile_mappings.size() == 1) { // Then add a new static image
+			StaticImage static_tile;
+			static_tile.SetDimensions(1.0f, 1.0f);
+			static_tile.SetFilename(tile_filenames[tile_mappings[0]]);
+			_map_tiles.push_back(static_tile);
+		}
+		else { // Create a new dynamic image
+			//_map_tiles.push_back(&animate_tile);
+			for (uint32 j = 0; j < tile_mappings.size(); j += 2) {
+//				(dynamic_cast<AnimatedImage>(_map_tiles.back())).AddFrame
+//				 (tile_filenames[tile_mappings[j]], tile_mappings[j+1]);
+				// NOTE: Find a cleaner way to do this later...
+			}
+		}
+		tile_mappings.clear();
+		DataManager->CloseSubTable();
+	}
+	DataManager->CloseTable();
+	
+	// **************** (4) Load all tile images from memory ********************
+	VideoManager->BeginImageLoadBatch();
+	for (uint32 i = 0; i < _map_tiles.size(); i++) {
+		VideoManager->LoadImage(_map_tiles[i]);
+	}
+	VideoManager->EndImageLoadBatch();
+	
+	// ******************** (5) Create the 2D tile map *************************
+	MapTile tmp_tile;
+	for (uint32 r = 0; r < _row_count; r++) {
+		_tile_layers.push_back(vector <MapTile>(_col_count));
+	}
+	
+	vector<int32> properties;
+	DataManager->OpenTable("lower_layer");
+	for (uint32 r = 0; r < _row_count; r++) {
+		DataManager->OpenSubTable(r);
+		DataManager->FillIntVector(properties);
+		
+		for (uint32 c = 0; c < _col_count; c++) {
+			_tile_layers[r][c].lower_layer = static_cast<int16>(properties[c]);
+		}
+
+		properties.clear();
+		DataManager->CloseSubTable();
+	}
+	DataManager->CloseTable();
+	
+	DataManager->OpenTable("middle_layer");
+	for (uint32 r = 0; r < _row_count; r++) {
+		DataManager->OpenSubTable(r);
+		DataManager->FillIntVector(properties);
+		
+		for (uint32 c = 0; c < _col_count; c++) {
+			_tile_layers[r][c].middle_layer = static_cast<int16>(properties[c]);
+		}
+		
+		properties.clear();
+		DataManager->CloseSubTable();
+	}
+	DataManager->CloseTable();
+	
+	DataManager->OpenTable("upper_layer");
+	for (uint32 r = 0; r < _row_count; r++) {
+		DataManager->OpenSubTable(r);
+		DataManager->FillIntVector(properties);
+		
+		for (uint32 c = 0; c < _col_count; c++) {
+			_tile_layers[r][c].upper_layer = static_cast<int16>(properties[c]);
+		}
+		
+		properties.clear();
+		DataManager->CloseSubTable();
+	}
+	DataManager->CloseTable();
+	
+	DataManager->OpenTable("tile_walkable");
+	for (uint32 r = 0; r < _row_count; r++) {
+		DataManager->OpenSubTable(r);
+		DataManager->FillIntVector(properties);
+		
+		for (uint32 c = 0; c < _col_count; c++) {
+			_tile_layers[r][c].walkable = static_cast<uint8>(properties[c]);
+		}
+		
+		properties.clear();
+		DataManager->CloseSubTable();
+	}
+	DataManager->CloseTable();
+	
+	DataManager->OpenTable("tile_properties");
+	for (uint32 r = 0; r < _row_count; r++) {
+		DataManager->OpenSubTable(r);
+		DataManager->FillIntVector(properties);
+		
+		for (uint32 c = 0; c < _col_count; c++) {
+			_tile_layers[r][c].properties = static_cast<uint8>(properties[c]);
+		}
+		
+		properties.clear();
+		DataManager->CloseSubTable();
+	}
+	DataManager->CloseTable();
+	
+	// The occupied member of tiles are not set until we place map objects
+	
+	DataManager->OpenTable("tile_events");
+	for (uint32 r = 0; r < _row_count; r++) {
+		DataManager->OpenSubTable(r);
+		DataManager->FillIntVector(properties);
+		
+		for (uint32 c = 0; c < _col_count; c++) {
+			_tile_layers[r][c].event = static_cast<int16>(properties[c]);
+		}
+		
+		properties.clear();
+		DataManager->CloseSubTable();
+	}
+	DataManager->CloseTable();
+	
+	// Load player sprite and rest of map objects
+	MapSprite *player = new MapSprite(PLAYER_SPRITE, 2, 2, ALTITUDE_1, (UPDATEABLE | VISIBLE | IN_CONTEXT));
+	player->LoadCharacterInfo(GLOBAL_CLAUDIUS);
+	player->_direction = SOUTH;
+	_ground_objects.push_back(player);
+
+	MapSprite *npc_sprite = new MapSprite(NPC_SPRITE, 4, 6, ALTITUDE_1, (UPDATEABLE | VISIBLE | IN_CONTEXT));
+	npc_sprite->SetName("Laila");
+	npc_sprite->_direction = EAST;
+	npc_sprite->SetFilename("img/sprites/map/laila");
+	npc_sprite->SetSpeed(VERY_SLOW_SPEED);
+	npc_sprite->SetDelay(LONG_DELAY);
+	npc_sprite->LoadFrames();
+	npc_sprite->AddDialogue(std::vector<std::string>(1, "I'm a hottie!"));
+	npc_sprite->AddDialogue(std::vector<std::string>(1, "But, I'm also your sister..."));
+	npc_sprite->AddDialogue(std::vector<std::string>(1, "Is this really okay?"));
+	_ground_objects.push_back(npc_sprite);
+
+	// If the _focused_object is ever NULL, the game will exit with a seg fault :(
+	_focused_object = player;
+} // _LoadMap()
+
+
+
 // Returns true if an object can be moved to the tile.
 bool MapMode::_TileMoveable(const private_map::TileCheck& tcheck) {
 	// Check that the row and col indeces are valid and not outside the map
@@ -281,7 +298,7 @@ bool MapMode::_TileMoveable(const private_map::TileCheck& tcheck) {
 	}
 
 	// Check if the tile is not walkable at this altitude
-	if (_tile_layers[tcheck.row][tcheck.col].not_walkable & tcheck.altitude) {
+	if (!(_tile_layers[tcheck.row][tcheck.col].walkable & tcheck.altitude)) {
 		return false;
 	}
 	
@@ -294,29 +311,29 @@ bool MapMode::_TileMoveable(const private_map::TileCheck& tcheck) {
 			break;
 		case NORTH_NW:
 		case WEST_NW:
-			if ((_tile_layers[tcheck.row][tcheck.col + 1].not_walkable & tcheck.altitude) ||
-			    (_tile_layers[tcheck.row + 1][tcheck.col].not_walkable & tcheck.altitude)) {
+			if ( !((_tile_layers[tcheck.row][tcheck.col + 1].walkable & tcheck.altitude) ||
+			      (_tile_layers[tcheck.row + 1][tcheck.col].walkable & tcheck.altitude)) ) {
 				return false;
 			}
 			break;
 		case SOUTH_SW:
 		case WEST_SW:
-			if ((_tile_layers[tcheck.row][tcheck.col + 1].not_walkable & tcheck.altitude) ||
-			    (_tile_layers[tcheck.row - 1][tcheck.col].not_walkable & tcheck.altitude)) {
+			if ( !((_tile_layers[tcheck.row][tcheck.col + 1].walkable & tcheck.altitude) ||
+			      (_tile_layers[tcheck.row - 1][tcheck.col].walkable & tcheck.altitude)) ) {
 				return false;
 			}
 			break;
 		case NORTH_NE:
 		case EAST_NE:
-			if ((_tile_layers[tcheck.row][tcheck.col - 1].not_walkable & tcheck.altitude) ||
-			    (_tile_layers[tcheck.row + 1][tcheck.col].not_walkable & tcheck.altitude)) {
+			if ( !((_tile_layers[tcheck.row][tcheck.col - 1].walkable & tcheck.altitude) ||
+			      (_tile_layers[tcheck.row + 1][tcheck.col].walkable & tcheck.altitude)) ) {
 				return false;
 			}
 			break;
 		case SOUTH_SE:
 		case EAST_SE:
-			if ((_tile_layers[tcheck.row][tcheck.col - 1].not_walkable & tcheck.altitude) ||
-			    (_tile_layers[tcheck.row - 1][tcheck.col].not_walkable & tcheck.altitude)) {
+			if ( !((_tile_layers[tcheck.row][tcheck.col - 1].walkable & tcheck.altitude) ||
+			      (_tile_layers[tcheck.row - 1][tcheck.col].walkable & tcheck.altitude)) ) {
 				return false;
 			}
 			break;
@@ -454,20 +471,8 @@ void MapMode::_UpdateVirtualSprite() {
 // Updates the game state when in map mode. Called from the main game loop.
 void MapMode::Update(uint32 new_time_elapsed) {
 	_time_elapsed = new_time_elapsed;
-	_animation_counter += _time_elapsed;
 
-	// *********** (1) Update the tile animation frames if needed ***********
-	// NOTE: This section will become defunct once animation is supported in the video engine
-	
-	if (_animation_counter >= ANIMATION_RATE) {
-		// Update all tile frames
-		for (uint32 i = 0; i < _tile_frames.size(); i++) {
-			_tile_frames[i] = _tile_frames[i]->next;
-		}
-		_animation_counter -= ANIMATION_RATE;
-	}
-
-	// ***************** (2) Update the map based on what state we are in **************
+	// ***************** (1) Update the map based on what state we are in **************
 	switch (_map_state) {
 		case EXPLORE:
 			_UpdateExploreState();
@@ -480,7 +485,7 @@ void MapMode::Update(uint32 new_time_elapsed) {
 			break;
 	}
 	
-	// ***************** (3) Update all objects on the map **************
+	// ***************** (2) Update all objects on the map **************
 	for (uint32 i = 0; i < _ground_objects.size(); i++) {
 		switch ((_ground_objects[i])->_object_type) {
 			case NPC_SPRITE:
@@ -491,7 +496,7 @@ void MapMode::Update(uint32 new_time_elapsed) {
 		}
 	}
 
-	// ************ (4) Sort the objects so they are in the correct draw order ********
+	// ************ (3) Sort the objects so they are in the correct draw order ********
 	// Note: this sorting algorithm will be optimized at a later time
 	for (uint32 i = 1; i < _ground_objects.size(); i++) {
 		MapObject *tmp = _ground_objects[i];
@@ -508,7 +513,7 @@ void MapMode::Update(uint32 new_time_elapsed) {
 
 // Updates the game status when MapMode is in the 'explore' state
 void MapMode::_UpdateExploreState() {
-	if (_focused_object->_object_type == CHARACTER_SPRITE) {
+	if (_focused_object->_object_type == PLAYER_SPRITE) {
 		_UpdatePlayer(_focused_object);
 	}
 	if (_focused_object == _virtual_sprite)
@@ -841,7 +846,7 @@ void MapMode::Draw() {
 		for (uint32 c = static_cast<uint32>(_draw_info.c_start); 
 		     c < static_cast<uint32>(_draw_info.c_start) + _draw_info.c_draw; c++) {
 			if (_tile_layers[r][c].lower_layer >= 0) { // Then a lower layer tile exists and we should draw it
-				VideoManager->DrawImage(_map_tiles[_tile_frames[_tile_layers[r][c].lower_layer]->frame]);
+				VideoManager->DrawImage(_map_tiles[_tile_layers[r][c].lower_layer]);
 			}
 			VideoManager->MoveRelative(1.0f, 0.0f);
 		}
@@ -861,12 +866,11 @@ void MapMode::Draw() {
 	for (int32 r = _draw_info.r_start; r < _draw_info.r_start + _draw_info.r_draw; r++) {
 		for (int32 c = _draw_info.c_start; c < _draw_info.c_start + _draw_info.c_draw; c++) {
 			if (_tile_layers[r][c].upper_layer >= 0) // Then an upper layer tile exists and we should draw it;
-				VideoManager->DrawImage(_map_tiles[_tile_frames[_tile_layers[r][c].upper_layer]->frame]);
+				VideoManager->DrawImage(_map_tiles[_tile_layers[r][c].upper_layer]);
 			VideoManager->MoveRelative(1.0f, 0.0f);
 		}
 		VideoManager->MoveRelative(-static_cast<float>(_draw_info.c_draw), -1.0f);
 	}
-	
 	
 	// ************** (4) Draw the Dialogue menu and text *************
 	if (_map_state == DIALOGUE) {

@@ -155,7 +155,7 @@ bool GameData::OpenSubTable(const int32 key) {
 		cerr << "DATA ERROR: could not complete call OpenSubTable because top stack element was not a table" << endl;
 		return false;
 	}
-	lua_pushboolean(_l_stack, key);
+	lua_pushnumber(_l_stack, key);
 	lua_gettable(_l_stack, LUA_STACK_TOP - 1);
 	if (!lua_istable(_l_stack, LUA_STACK_TOP)) {
 		cerr << "DATA ERROR: could not retreive sub-table using integer key " << key << endl;
@@ -187,6 +187,28 @@ void GameData::CloseSubTable() {
 }
 
 
+// NOTE: This function doesn't work yet. I'm still trying to figure out why.
+int32 GameData::GetTableSize(const char *tbl_name) {
+	lua_getglobal(_l_stack, "table.getn");
+	lua_pushstring(_l_stack, tbl_name);
+	if (lua_pcall(_l_stack, 1, 1, 0) != 0) {
+		cerr << "DATA ERROR: error running function table.getn: " << lua_tostring(_l_stack, -1) << endl;
+		return -1;
+	}
+	else {
+		int32 result = static_cast<int32>(lua_tonumber(_l_stack, -1));
+		lua_pop(_l_stack, 1);
+		return result;
+	}
+}
+
+
+// NOTE: I'll write this function once I fix the above version
+int32 GetTableSize() {
+	return -1;
+}
+
+
 
 // Get an individual boolean field from a table, assumed to be on top of the stack
 bool GameData::GetTableBool(const char *key) {
@@ -206,6 +228,24 @@ void GameData::GetTableBoolRef(const char *key, bool &ref) {
 	ref = GetTableBool(key);
 }
 
+
+
+bool GameData::GetTableBool(const int32 key) {
+	lua_pushnumber(_l_stack, key);
+	lua_gettable(_l_stack, -2);
+	if (!lua_isboolean(_l_stack, -1))
+		cerr << "DATA ERROR: Invalid table field" << endl;
+	bool ret = (0 != lua_toboolean(_l_stack, -1));
+	lua_pop(_l_stack, 1);
+	
+	return ret;
+}
+
+
+
+void GameData::GetTableBoolRef(const int32 key, bool &ref) {
+	ref = GetTableBool(key);
+}
 
 
 // Get an individual integer field from a table, assumed to be on top of the stack
@@ -228,6 +268,24 @@ void GameData::GetTableIntRef(const char *key, int32 &ref) {
 
 
 
+int32 GameData::GetTableInt(const int32 key) {
+	lua_pushnumber(_l_stack, key);
+	lua_gettable(_l_stack, -2);
+	if (!lua_isnumber(_l_stack, -1))
+		cerr << "DATA ERROR: Invalid table field" << endl;
+	int32 ret = (int32)lua_tonumber(_l_stack, -1);
+	lua_pop(_l_stack, 1);
+	
+	return ret;
+}
+
+
+
+void GameData::GetTableIntRef(const int32 key, int32 &ref) {
+	ref = GetTableInt(key);
+}
+
+
 // Get an individual floating point field from a table, assumed to be on top of the stack
 float GameData::GetTableFloat(const char *key) {
 	lua_pushstring(_l_stack, key);
@@ -248,6 +306,24 @@ void GameData::GetTableFloatRef(const char *key, float &ref) {
 
 
 
+float GameData::GetTableFloat(const int32 key) {
+	lua_pushnumber(_l_stack, key);
+	lua_gettable(_l_stack, -2);
+	if (!lua_isnumber(_l_stack, -1))
+		cerr << "DATA ERROR: Invalid table field" << endl;
+	float ret = (float)lua_tonumber(_l_stack, -1);
+	lua_pop(_l_stack, 1);
+	
+	return ret;
+}
+
+
+
+void GameData::GetTableFloatRef(const int32 key, float &ref) {
+	ref = GetTableFloat(key);
+}
+
+
 // Get an individual string field from a table, assumed to be on top of the stack
 string GameData::GetTableString(const char *key) {
 	lua_pushstring(_l_stack, key);
@@ -263,6 +339,25 @@ string GameData::GetTableString(const char *key) {
 
 
 void GameData::GetTableStringRef(const char *key, string &ref) {
+	ref = GetTableString(key);
+}
+
+
+
+string GameData::GetTableString(const int32 key) {
+	lua_pushnumber(_l_stack, key);
+	lua_gettable(_l_stack, -2);
+	if (!lua_isstring(_l_stack, -1))
+		cerr << "DATA ERROR: Invalid table field" << endl;
+	string ret = (string)lua_tostring(_l_stack, -1);
+	lua_pop(_l_stack, 1);
+	
+	return ret;
+}
+
+
+
+void GameData::GetTableStringRef(const int32 key, string &ref) {
 	ref = GetTableString(key);
 }
 
@@ -297,6 +392,9 @@ void GameData::FillIntVector(const char *key, std::vector<int32> &vect) {
 	int32 t = lua_gettop(_l_stack);
 	lua_pushnil(_l_stack);
 	while (lua_next(_l_stack, t)) {
+		if (!lua_isnumber(_l_stack, LUA_STACK_TOP)) {
+			cout << "DATA WTF: Not a number!" << endl;
+		}
 		vect.push_back((int32)lua_tonumber(_l_stack, LUA_STACK_TOP));
 		lua_pop(_l_stack, 1);
 	}
@@ -343,6 +441,9 @@ void GameData::FillIntVector(std::vector<int32> &vect) {
 	int32 t = lua_gettop(_l_stack);
 	lua_pushnil(_l_stack);
 	while (lua_next(_l_stack, t)) {
+		if (!lua_isnumber(_l_stack, LUA_STACK_TOP)) {
+			cout << "DATA WTF: Not a number!" << endl;
+		}
 		vect.push_back((int32)lua_tonumber(_l_stack, LUA_STACK_TOP));
 		lua_pop(_l_stack, 1);
 	}
@@ -364,7 +465,7 @@ void GameData::FillFloatVector(std::vector<float> &vect) {
 }
 
 // ****************************************************************************
-// ********************** Lua variable access functions ***********************
+// *********************** Lua<->C++ binding functions ************************
 // ****************************************************************************
 
 // start the registration of member functions and objects
