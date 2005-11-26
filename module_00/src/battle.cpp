@@ -72,7 +72,6 @@ convenience:
 	GameInput *InputManager;
 	GameModeManager *ModeManager;
 	GameSettings *SettingsManager;
-
 */
 
 /**
@@ -91,6 +90,7 @@ Actor::Actor(BattleMode *bm, uint32 x, uint32 y) {
 	_isMoveCapable = true;
 	_nextAction = NULL;
 	_mode = new IdleMode(this);
+	_performingAction = false;
 }
 
 Actor::Actor(const Actor&  a) {
@@ -106,6 +106,7 @@ Actor::Actor(const Actor&  a) {
 	_warmingUp = a._warmingUp;
 	_defensiveMode = a._defensiveMode;
 	_supporters = a._supporters;
+	_performingAction = a._performingAction;
 	
 	_mode = new IdleMode(this);
 }
@@ -120,6 +121,8 @@ Actor::~Actor() {
 	for(;it != _effects.end(); ) {
 		delete *it;
 	}
+	
+	_ownerBattleMode->RemoveFromActionQueue(this);
 }
 
 BattleMode *Actor::GetOwnerBattleMode() {
@@ -159,6 +162,7 @@ void Actor::RemoveEffect(ActorEffect *e) {
 }
 
 void Actor::PerformAction() {
+	_ownerBattleMode->SetPerformingAction(true); 
 	_nextAction->PerformAction();
 }
 
@@ -169,6 +173,14 @@ void Actor::SetNextAction(Action *a) {
 
 bool Actor::HasNextAction() {
 	return _nextAction == NULL;
+}
+
+bool Actor::IsPerformingAction() {
+	return _performingAction;
+}
+
+void Actor::SetPerformingAction(bool performing) {
+	_performingAction = performing;
 }
 
 bool Actor::IsMoveCapable() {
@@ -206,6 +218,8 @@ void Actor::SetWarmingUp(bool warmup) {
 void Actor::SetAnimation(std::string animationMode) {
 	//set the animation for this actor
 	std::cout << this << " is going into animation mode: " << animationMode << std::endl;
+	
+	//perform the animation.  
 }
 
 /**
@@ -274,6 +288,20 @@ PlayerActor::~PlayerActor() {
 
 void PlayerActor::Update(uint32 dt) {
 	std::cout << "Updating: " << this << std::endl;
+	
+	//if we are currently performing an action 
+	// if( IsPerformingAction() ) {
+	//using _animationMode and _wrappedCharacter, 
+	//we find the GetFrameProgress() on the current
+	//frame we are processing -- and if it is 100%,
+	//we call "finish action."
+	//	 _nextAction->FinishAction();
+	// }
+	// This will pop our current mode to either idle
+	// or cooldown, and remove us from BattleMode's 
+	// action queue -- and thus, the next action can
+	// take place
+	
 	//update the current effects on the player
 	std::cout << "\tUpdate effects." << std::endl;
 	UpdateEffects(dt);
@@ -358,6 +386,15 @@ EnemyActor::~EnemyActor() {
 void EnemyActor::Update(uint32 dt) {
 	std::cout << "Updating: " << this << std::endl;
 	
+	//if we are currently performing an action 
+	// if( IsPerformingAction() ) {
+	//using _animationMode and _wrappedCharacter, 
+	//we find the GetFrameProgress() on the current
+	//frame we are processing -- and if it is 100%,
+	//we call "finish action."
+	//	 _nextAction->FinishAction();
+	// }
+	
 	std::cout << "\tUpdate effects." << std::endl;
 	UpdateEffects(dt);
 	
@@ -374,7 +411,8 @@ void EnemyActor::Draw() {
 }
 
 void EnemyActor::DoAI(uint32 dt) {
-	//do some artificial intelligence, or something like that.s
+	//do some artificial intelligence, or something like that.
+	//as long as HasNextAction() is false...
 }
 
 void EnemyActor::LevelUp(uint32 average_level) {
@@ -573,9 +611,10 @@ void IdleMode::UndoMode() {
  *
  */
 
-WarmUpMode::WarmUpMode(uint32 TTL, Actor *a) : 
+WarmUpMode::WarmUpMode(uint32 TTL, Action *act, Actor *a) : 
 	ActorMode(a) {
 	_TTL = TTL;
+	_action = act;
 	a->SetWarmingUp(true);
 	a->SetAnimation("WARMUP");
 }
@@ -592,7 +631,53 @@ void WarmUpMode::Update(uint32 dt) {
 void WarmUpMode::UndoMode() {
 	//tell the actor we are ready to perform the action
 	Actor *host = GetHost();
+	//add to battle mode event queue
 	host->SetWarmingUp(false);
+	host->SetMode(new ActionMode(host, _action));
+}
+
+/**
+ * ActionMode
+ *
+ *
+ *
+ *
+ *
+ */
+ 
+ActionMode::ActionMode(Actor *a, Action *act) :
+	ActorMode(a) {
+	//we stay in our previous stance, but set the next action
+	a->SetNextAction(act);
+	//add ourselves to the action queue in the battle mode
+	a->SetPerformingAction(true);
+	a->GetOwnerBattleMode()->AddToActionQueue(a);
+}
+
+ActionMode::~ActionMode() {
+	//since the action is complete, 
+	//we should tell the owning battle mode
+	//that we are no longer performing an action
+	
+	//this should be called when we are put 
+	//into a new mode by the action, but it
+	//idle or cooldown -- the actor should 
+	//delete their current mode -- hence,
+	//we tell the battle mode the action is over
+	BattleMode *bm = GetHost()->GetOwnerBattleMode();
+	GetHost()->SetPerformingAction(false);
+	bm->SetPerformingAction(false);
+}
+
+void ActionMode::Update(uint32 dt) {
+	//we have nothing to update
+}
+
+Action *ActionMode::GetAction() {
+	return _action;
+}
+
+void ActionMode::UndoMode() {
 }
 
 /**
@@ -634,7 +719,6 @@ void CoolDownMode::UndoMode() {
  *
  *
  *
- *
  */
  
 VisualEffect::VisualEffect(std::string am, hoa_video::AnimatedImage i) {
@@ -649,6 +733,7 @@ void VisualEffect::Draw() {
 std::string VisualEffect::GetAnimationMode() {
 	return _animationMode;
 }
+
 
 /**
  * ActorEffect
@@ -740,7 +825,7 @@ Action::Action(VisualEffect *ve, SoundDescriptor se, Actor *p, std::list<Actor *
 }
 
 Action::~Action() {
-	delete _visualEffect;
+	delete _visualEffect;	
 }
 
 Actor *Action::GetHost() {
@@ -780,7 +865,17 @@ void SkillAction::PerformAction() {
 }
 
 void SkillAction::PerformSkill() {
+	//here, from GSkill, we work our magic
+	Actor *host = GetHost();
+	//we either go into cooldown mode or idle mode, based 
+	//on the skill
 	
+	host->SetMode(new IdleMode(host));
+}
+
+void SkillAction::FinishAction() {
+	Actor *host = GetHost();
+	host->SetMode(new IdleMode(host));
 }
 
 /**
@@ -801,6 +896,31 @@ Action(ve, se, p, args)
 
 void SwapAction::PerformAction() {
 	//here, we must tell the battle mode to swap the characters
+	//from _PCsInBattle and _playerActors
+	//so remove our host from _PCsInBattle and push it into _playerActors
+	//and remove our argument from _playerActors and put it into _PCsInBattle
+	
+	Actor *host = GetHost();
+	std::list<Actor *> args = GetArguments();
+	std::list<Actor *>::iterator it = args.begin();
+	
+	//get the host to run out
+	host->SetAnimation("RUNOUT");
+	//where we want our new character to run to
+	//uint32 destination_x = host->GetX();
+	//uint32 destination_y = host->GetY();
+	
+	//get the argument to run in -- to destination_x and destination_y
+	(*it)->SetAnimation("RUNIN");
+}
+
+void SwapAction::FinishAction() {
+	Actor *host = GetHost();
+	std::list<Actor *> args = GetArguments();
+	std::list<Actor *>::iterator it = args.begin();
+	
+	host->SetMode(new IdleMode(host));
+	(*it)->SetMode(new IdleMode(*it));
 }
 
 /**
@@ -820,7 +940,16 @@ Action(ve, se, p, args)
 }
 
 void UseItemAction::PerformAction() {
+	//here, p uses GItem on args
+	
+	Actor *host = GetHost();
+	//put the character into use item animation mode
+	host->SetAnimation("USEITEM");
+}
 
+void UseItemAction::FinishAction() {
+	Actor *host = GetHost();
+	host->SetMode(new IdleMode(host));
 }
 
 /**
@@ -916,6 +1045,13 @@ void BattleMode::Update(uint32 time_elapsed) {
 		(*enemy_itr)->Update(time_elapsed);
 		(*enemy_itr)->DoAI(time_elapsed);
 	}
+	
+	if(_actionQueue.size() > 0 && !IsPerformingAction()) {
+		std::list<Actor *>::iterator it = _actionQueue.begin();
+		_currentlyPerforming = *it;
+		_actionQueue.pop_front();
+		_currentlyPerforming->PerformAction();
+	}
 }
 
 void BattleMode::ShutDown() {
@@ -933,6 +1069,14 @@ void BattleMode::DrawBackground() {
 	std::cout << "Draw the Background." << std::endl;
 }
 
+bool BattleMode::IsPerformingAction() {
+	return _performingAction;
+}
+
+void BattleMode::SetPerformingAction(bool isPerforming) {
+	_performingAction = isPerforming;
+}
+
 void BattleMode::DrawCharacters() {
 	//update our characters
 	std::list<PlayerActor *>::iterator pc_itr = _PCsInBattle.begin();
@@ -946,6 +1090,14 @@ void BattleMode::DrawCharacters() {
 	for(; enemy_itr != _enemyActors.end(); enemy_itr++) {
 		(*enemy_itr)->Draw();
 	}
+}
+
+void BattleMode::AddToActionQueue(Actor *a) {
+	_actionQueue.push_back(a);
+}
+
+void BattleMode::RemoveFromActionQueue(Actor *a) {
+	_actionQueue.remove(a);
 }
 
 } // namespace hoa_battle
