@@ -140,8 +140,9 @@ GArmor::~GArmor() {}
 // ******************************** GSkill ************************************
 // ****************************************************************************
 
-GSkill::GSkill(string name, uint32 sp) {
+GSkill::GSkill(string name, std::string animation, uint32 sp) {
 	_skill_name = name;
+	_animation_mode = animation;
 	_sp_usage = sp;
 }
 
@@ -149,6 +150,7 @@ GSkill::GSkill(string name, uint32 sp) {
 
 GSkill::GSkill() {
 	_skill_name = "unknown";
+	_animation_mode = "unknown";
 	_sp_usage = 0;
 }
 
