@@ -29,7 +29,7 @@
 
 #include "utils.h"
 #include <vector>
-#include "SDL.h"
+#include <SDL/SDL.h>
 #include "defs.h"
 
 //! All calls to global code are wrapped in this namespace.
@@ -295,11 +295,18 @@ private:
 	//! The amount of skill points (SP) that the skill consumes (zero is valid).
 	uint32 _sp_usage;
 	
+	//!!Added by visage on November 16, 2004
+	//! The battle animation mode to call when this skill is used
+	std::string _animation_mode;
+	//! The level required to use this skill
+	uint32 _levelRequired; 
+	uint32 _numArguments;
+
+public:
+	GSkill(std::string name, std::string animation, uint32 sp);
+	GSkill();
 	GSkill(const GSkill&) {}
 	GSkill& operator=(const GSkill&) {}
-public:
-	GSkill(std::string name, uint32 sp);
-	GSkill();
 	~GSkill();
 };
 
@@ -419,7 +426,11 @@ private:
 	//! The various attack points for the enemy.
 	std::vector<GAttackPoint> _attack_points;
 	//! The frame images for the enemy sprite.
+<<<<<<< global.h
+	std::vector<hoa_video::StaticImage> _sprite_frames;
+=======
 	std::vector<hoa_video::StillImage> _sprite_frames;
+>>>>>>> 1.17
 
 	//! The current number of hit points for the enemy.
 	uint32 _hit_points;
@@ -444,6 +455,7 @@ private:
 	//@{
 	//! \brief These are the base statistics for the enemy when on experience level 1. 
 	uint32 _base_hit_points;
+	uint32 _base_skill_points;
 	uint32 _base_experience_points;
 	uint32 _base_strength;
 	uint32 _base_intelligence;
@@ -454,6 +466,7 @@ private:
 	//@{
 	//! \brief The increase in statistic values between experience levels is reflected in these members.
 	uint32 _growth_hit_points;
+	uint32 _growth_skill_points;
 	uint32 _growth_experience_points;
 	uint32 _growth_strength;
 	uint32 _growth_intelligence;
@@ -485,6 +498,8 @@ public:
 	 */
 	void LevelSimulator(uint32 lvl);
 
+	std::string GetName() { return _enemy_name; }
+
 	//! \name Public Member Access Functions
 	//@{
 	//! \brief Used for setting and getting the values of the various class members.
@@ -494,6 +509,8 @@ public:
 	uint32 GetMaxHP() { return _max_hit_points; }
 	void SetSP(uint32 sp) { _skill_points = sp; }
 	uint32 GetSP() { return _skill_points; }
+	void SetMaxSP(uint32 sp) { _max_skill_points = sp; }
+	uint32 GetMaxSP() { return _max_skill_points; }
 	void SetXP(uint32 xp) { _experience_points = xp; }
 	uint32 GetXP() { return _experience_points; }
 	void SetXPLevel(uint32 xp_lvl) { _experience_level = xp_lvl; }
@@ -504,6 +521,22 @@ public:
 	uint32 GetIntelligence() { return _intelligence; }
 	void SetAgility(uint32 agi) { _agility = agi; }
 	uint32 GetAgility() { return _agility; }
+	
+	//!Added by visage November 16
+	uint32 GetBaseHitPoints() { return _base_hit_points; }
+	uint32 GetBaseSkillPoints() { return _base_skill_points; }
+	uint32 GetBaseExperiencePoints() { return _base_experience_points; }
+	uint32 GetBaseStrength() { return _base_strength; }
+	uint32 GetBaseIntelligence() { return _base_intelligence; } 
+	uint32 GetBaseAgility() { return _base_agility; }
+	uint32 GetGrowthHitPoints() { return _growth_hit_points; }
+	uint32 GetGrowthSkillPoints() { return _growth_skill_points; }
+	uint32 GetGrowthExperiencePoints() { return _growth_experience_points; }
+	uint32 GetGrowthStrength() { return _growth_strength; }
+	uint32 GetGrowthIntelligence() { return _growth_intelligence; } 
+	uint32 GetGrowthAgility() { return _growth_agility; }
+	std::vector<GSkill> GetSkills() { return _enemy_skills; }
+	std::vector<GAttackPoint> GetAttackPoints() { return _attack_points; }
 	//@}
 };
 
@@ -550,7 +583,6 @@ private:
 	std::vector<hoa_video::StillImage> _map_frames;
 	//! The frame images for the character's battle sprite.
 	std::vector<hoa_video::StillImage> _battle_frames;
-
 	//! The current number of hit points of the character.
 	uint32 _hit_points;
 	//! The maximum number of hit points the character may have.
@@ -606,6 +638,8 @@ public:
 	uint32 GetMaxHP() { return _max_hit_points; }
 	void SetSP(uint32 sp) { _skill_points = sp; }
 	uint32 GetSP() { return _skill_points; }
+	void SetMaxSP(uint32 sp) { _max_skill_points = sp; }
+	uint32 GetMaxSP() { return _max_skill_points; }
 	void SetXP(uint32 xp) { _experience_points = xp; }
 	uint32 GetXP() { return _experience_points; }
 	void SetXPLevel(uint32 xp_lvl) { _experience_level = xp_lvl; }
@@ -618,6 +652,12 @@ public:
 	uint32 GetIntelligence() { return _intelligence; }
 	void SetAgility(uint32 agi) { _agility = agi; }
 	uint32 GetAgility() { return _agility; }
+	//!Added by visage November 16th
+	std::vector<GSkill> GetAttackSkills() { return _attack_skills; }
+	std::vector<GSkill> GetDefenseSkills() { return _defense_skills; }
+	std::vector<GSkill> GetSupportSkills() { return _support_skills; }
+	
+	std::vector<GAttackPoint> GetAttackPoints() { return _attack_points; }
 	//@}
 };
 
