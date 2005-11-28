@@ -100,6 +100,20 @@ namespace hoa_map {
 // Battle mode declarations, see battle.h/cpp
 namespace hoa_battle {
 	extern bool BATTLE_DEBUG;
+	//!!Added by visage on November 16, 2005
+	class BattleUI;
+	class Actor;
+	class PlayerActor;
+	class EnemyActor;
+	class ActorMode;
+	class ActorEffect;
+	class VisualEffect;
+	class Action;
+	class SkillAction;
+	class UseItemAction;
+	class SwapAction;
+	class AilmentEffect;
+	class StatusEffect;
 	class BattleMode;
 }
 
