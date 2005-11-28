@@ -426,11 +426,7 @@ private:
 	//! The various attack points for the enemy.
 	std::vector<GAttackPoint> _attack_points;
 	//! The frame images for the enemy sprite.
-<<<<<<< global.h
-	std::vector<hoa_video::StaticImage> _sprite_frames;
-=======
 	std::vector<hoa_video::StillImage> _sprite_frames;
->>>>>>> 1.17
 
 	//! The current number of hit points for the enemy.
 	uint32 _hit_points;
