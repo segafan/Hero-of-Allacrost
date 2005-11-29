@@ -92,6 +92,8 @@ void AnimatedImage::Clear()
 	_frame_index = 0;
 	_frame_counter = 0;
 	_frames.clear();
+
+	SetColor(Color::white);
 	
 	_isStatic = false;
 	_width = _height = 0.0f;

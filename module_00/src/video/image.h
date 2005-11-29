@@ -287,6 +287,7 @@ public:
 		_width = _height = 0.0f;
 		_filename.clear();
 		_elements.clear();
+		SetColor(Color::white);
 	}
 
 	void SetFilename(const std::string &filename) { _filename = filename; }
