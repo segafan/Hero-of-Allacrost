@@ -25,15 +25,13 @@
 #ifndef __DATA_HEADER__
 #define __DATA_HEADER__
 
-#include "utils.h"
-
+#include <fstream>
 extern "C" {
 	#include <lua.h>
 	#include <lauxlib.h>
 	#include <lualib.h>
 }
-#include <string>
-#include <vector>
+#include "utils.h"
 #include "defs.h"
 
 //! All calls to the data engine are wrapped in this namespace.
@@ -44,6 +42,9 @@ extern GameData *DataManager;
 //! Determines whether the code in the hoa_data namespace should print debug statements or not.
 extern bool DATA_DEBUG;
 
+//! An internal namespace to be used only by the data engine itself. Don't use this namespace anywhere else!
+namespace private_data {
+
 //! A list of Lua libraries to expose for use in scripts.
 static const luaL_reg LUALIBS[] = {
 	{"base", luaopen_base},
@@ -53,10 +54,13 @@ static const luaL_reg LUALIBS[] = {
 	{"math", luaopen_math},
 	{"debug", luaopen_debug},
 	{"loadlib", luaopen_loadlib},
-	{NULL, NULL} };
+	{NULL, NULL} 
+};
 
 //! For quick reference to the top of the Lua stack.
 const int LUA_STACK_TOP = -1;
+
+} // namespace private_data
 
 /*!****************************************************************************
  *  \brief Manages all the interactions between the C++ game engine and the Lua data and script files.
@@ -72,10 +76,28 @@ const int LUA_STACK_TOP = -1;
 class GameData {
 private:
 	SINGLETON_DECLARE(GameData);
-
+	
 	//! The Lua stack, which handles all data sharing between C++ and Lua.
 	lua_State *_l_stack;
 	
+	//! The output file stream to write to.
+	std::ofstream _outfile;
+//	// All table names that have been used in the current write output file.
+// 	std::map<std::string> _table_names;
+	//! The names of the tables that are currently opened when doing file write operations.
+	std::vector<std::string> _open_tables;
+	
+	
+	//! \brief Checks if the output file for writing is open. 
+	//! Used by all the standard write functions to avoid segmentation faults.
+	//! \return True if the output file is open.
+	bool _IsWriteFileOpen();
+	//! \brief Checks if any tables are currently open for writing.
+	//! \return True if there is at least one table open for writing, false otherwise.
+	bool _IsWriteTableOpen();
+	//! Writes the pathname of all open tables (ie, table1[table2][table3])
+	//! _IsWriteFileOpen() Is always called prior to this class, so it doesn't check for errors.
+	void _WriteTablePath();
 public:
 	SINGLETON_METHODS(GameData);
 	
@@ -165,6 +187,31 @@ public:
 	void FillFloatVector(std::vector<float> &vect);
 	//@}
 	
+	//! \name Lua function calling wrappers
+	//! \brief This function allows you to call arbitrary Lua functions from C++
+	//! \param *func a string containing the name of the Lua function to be called
+	//! \param *sig a string describing arguments and results. See below for explanation.
+	/*!
+	    This function is an almost identical copy of the call_va() function from the book
+	    "Programming In Lua", chapter 25.3. It lets you call an arbitrary Lua function with
+	    a desired number of arguments and results.
+	    
+	    Here's how the *sig string is used: for example, if you want to call a function that
+	    receives two integeres, and returns a double and a string, then *sig would equal "ii>ds".
+	    The ">" is used to delimit results from arguments. Here is a list of descriptors you can use:
+	    "i" - an integer value
+	    "d" - double precision floating point value
+	    "s" - a string. When supplying CallGlobalFunction with a variable to hold the return value of
+	          string type, you should supply the address of a char* . Example:
+		  	char *retval = 0;
+			CallGlobalFunction("function_returning_a_string", ">s", &retval);
+		  The function allocates the space for the string.
+	*/
+	//@{
+	void CallGlobalFunction(const char *func, const char *sig, ...);
+	void CallTableFunction(const char *func, const char *sig, ...);
+	//@}
+	
 	//! \name Lua<->C++ binding functions
 	//! \brief Functions used to bind C++ class member functions and objects to be used directly from Lua.
 	//! \param *obj the object to be registered (see notes below)
@@ -209,34 +256,87 @@ public:
 	bool RegisterFunction(const char* funcname, Function func);
 	//@}
 	
-	//! \name Lua function calling wrappers
+	/*! \name Lua File Write Functions
+	 *  \brief Opens files for write priveledges.
+	 *  \param file_name The name of the Lua file to be opened.
+	 *  \note These functions are only for overwriting existing files or writing new files. You can
+	 *   not append to or modify existing Lua files with these functions.
+	 */
 	//@{
-	//! \brief This function allows you to call arbitrary Lua functions from C++
-	//! \param *func a string containing the name of the Lua function to be called
-	//! \param *sig a string describing arguments and results. See below for explanation.
-	/*!
-	    This function is an almost identical copy of the call_va() function from the book
-	    "Programming In Lua", chapter 25.3. It lets you call an arbitrary Lua function with
-	    a desired number of arguments and results.
-	    
-	    Here's how the *sig string is used: for example, if you want to call a function that
-	    receives two integeres, and returns a double and a string, then *sig would equal "ii>ds".
-	    The ">" is used to delimit results from arguments. Here is a list of descriptors you can use:
-	    "i" - an integer value
-	    "d" - double precision floating point value
-	    "s" - a string. When supplying CallGlobalFunction with a variable to hold the return value of
-	          string type, you should supply the address of a char* . Example:
-		  	char *retval = 0;
-			CallGlobalFunction("function_returning_a_string", ">s", &retval);
-		  The function allocates the space for the string.
-	*/
-	void CallGlobalFunction(const char *func, const char *sig, ...);
-	void CallTableFunction(const char *func, const char *sig, ...);
+	bool WriteOpenFile(const char* file_name);
+	void WriteCloseFile();
+	//@}
+	
+	/*! \name Lua CommentWrite Functions
+	 *  \brief Writes comments into a Lua file
+	 *  \param comment The comment to write to the file.
+	 *
+	 *  \note All functions automatically insert and append a new line character before returning.
+	 *  
+	 *  \note There is no support for writing unicode string comments (yet). May be implemented in the
+	 *  future.
+	 */
+	//@{
+	//! Inserts a blank line into the text.
+	void WriteInsertNewLine();
+	//! Writes a string of text and prepends it with a comment. Equivalent to `// comment` in C++.
+	void WriteComment(const char* comment);
+	void WriteComment(std::string& comment);
+	//! After this function is invoked, every single write call will be a comment. Equivalent to `/*` in C++.
+	void WriteBeginCommentBlock();
+	//! Ends a comment block. Equivalent to `*/` in C++
+	void WriteEndCommentBlock();
+	/*! \brief Writes the plain string of text to the file with no modification, except for a newline.
+	 * \note Typically, unless you \c really know what you are doing, you should only call this between
+	 * the beginning and end of a comment block.
+	 */
+	void WriteLine(const char* comment);
+	void WriteLine(std::string& comment);
+	//@}
+	
+	/*! \name Lua Variable Write Functions
+	 *  \brief These functions will write a single variable and its value to a Lua file.
+	 *  \param *key The name of the Lua variable to write.
+	 *  \param value The value of the new global variable to write.
+	 *  \note If no write tables are open when these calls are made, the variables become global
+	 *  in the Lua file. Otherwise, they become keys of the most recently opened table.
+	 */
+	//@{
+	void WriteBool(const char *key, bool value);
+	void WriteInt(const char *key, int32 value);
+	void WriteFloat(const char *key, float value);
+	void WriteString(const char *key, const char* value);
+	void WriteString(const char *key, std::string& value);
+	//@}
+	
+	/*! \name Lua Table Write Functions
+	 *  \brief These functions write Lua tables and their members
+	 *  \param *table_name The name of the table to write.
+	 *  \param *key The name of the table member to access.
+	 *  \note If you begin a new table and then begin another when you haven't ended the first one, the
+	 *  new table will become a key to the first. A table will only become global when there are no other
+	 *  write tables open.
+	 */
+	//@{
+	void WriteBeginTable(const char *table_name);
+	void WriteEndTable();
+	//@}
+	
+	/*! \name Lua Vector Write Functions
+	 *  \brief These functions write a vector of data to a Lua file.
+	 *  \param *key The name of the table to use in the Lua file to represent the data.
+	 *  \param &vect A reference to the vector of elements to write.
+	 */
+	//@{
+	void WriteBoolVector(const char *key, std::vector<bool> &vect);
+	void WriteIntVector(const char *key, std::vector<int32> &vect);
+	void WriteFloatVector(const char *key, std::vector<float> &vect);
+	void WriteStringVector(const char *key, std::vector<std::string> &vect);
 	//@}
 	
 	//! Prints the current contents of the Lua stack
 	void DEBUG_PrintLuaStack();
-};
+}; // class GameData
 
 } // namespace hoa_data
 
