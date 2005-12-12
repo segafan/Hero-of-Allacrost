@@ -46,12 +46,15 @@ namespace hoa_video {
 	extern bool VIDEO_DEBUG;
 	class GameVideo;
 	class StillImage;
+	class AnimatedImage;
 }
 
 // Data declarations, see data.h/cpp
 namespace hoa_data {
 	extern bool DATA_DEBUG;
 	class GameData;
+	class ReadDataDescriptor;
+	class WriteDataDescriptor;
 }
 
 // Engine declarations, see engine.h/cpp
@@ -90,7 +93,6 @@ namespace hoa_boot {
 namespace hoa_map {
 	extern bool MAP_DEBUG;
 	class MapTile;
-	class TileFrame; // Will become defunct once animation support is built into video engine
 	class MapObject;
 	class MapSprite;
 	class MapDialogue;
@@ -100,7 +102,6 @@ namespace hoa_map {
 // Battle mode declarations, see battle.h/cpp
 namespace hoa_battle {
 	extern bool BATTLE_DEBUG;
-	//!!Added by visage on November 16, 2005
 	class BattleUI;
 	class Actor;
 	class PlayerActor;

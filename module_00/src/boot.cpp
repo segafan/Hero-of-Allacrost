@@ -54,42 +54,49 @@ BootMode::BootMode() {
 	
 	_vmenu_index.push_back(LOAD_GAME);
 	
-	DataManager->OpenLuaFile("dat/config/boot.lua");
+	ReadDataDescriptor read_data;
+	if (!read_data.OpenFile("dat/config/boot.lua")) {
+		cout << "BOOT ERROR: failed to load data file" << endl;
+	}
 	
 	// Load the video stuff
 	StillImage im;
 
 	// The background
-	im.SetFilename(DataManager->GetGlobalString("background_image"));
-	im.SetDimensions((float) DataManager->GetGlobalInt("background_image_width"),
-	                 (float) DataManager->GetGlobalInt("background_image_height"));
+	im.SetFilename(read_data.ReadString("background_image"));
+	im.SetDimensions(read_data.ReadFloat("background_image_width"),
+	                 read_data.ReadFloat("background_image_height"));
 	_boot_images.push_back(im);
 
 	// The logo
-	im.SetFilename(DataManager->GetGlobalString("logo_image"));
-	im.SetDimensions((float) DataManager->GetGlobalInt("logo_image_width"),
-	                 (float) DataManager->GetGlobalInt("logo_image_height"));
+	im.SetFilename(read_data.ReadString("logo_image"));
+	im.SetDimensions(read_data.ReadFloat("logo_image_width"),
+	                 read_data.ReadFloat("logo_image_height"));
 	_boot_images.push_back(im);
 
 	// The menu
-	im.SetFilename(DataManager->GetGlobalString("menu_image"));
-	im.SetDimensions((float) DataManager->GetGlobalInt("menu_image_width"),
-	                 (float) DataManager->GetGlobalInt("menu_image_height"));
+	im.SetFilename(read_data.ReadString("menu_image"));
+	im.SetDimensions(read_data.ReadFloat("menu_image_width"),
+	                 read_data.ReadFloat("menu_image_height"));
 	_boot_images.push_back(im);
 
-	// Set up a coordinate system - now you can use the boot.hoa to set it to whatever you like
-	VideoManager->SetCoordSys((float) DataManager->GetGlobalInt("coord_sys_x_left"),
-	                          (float) DataManager->GetGlobalInt("coord_sys_x_right"),
-				  (float) DataManager->GetGlobalInt("coord_sys_y_bottom"),
-				  (float) DataManager->GetGlobalInt("coord_sys_y_top"));
+	// Set up a coordinate system - now you can use the boot.lua to set it to whatever you like
+	VideoManager->SetCoordSys(read_data.ReadFloat("coord_sys_x_left"),
+	                          read_data.ReadFloat("coord_sys_x_right"),
+	                          read_data.ReadFloat("coord_sys_y_bottom"),
+	                          read_data.ReadFloat("coord_sys_y_top"));
 
 	// Load the audio stuff
 	// Make a call to the config code that loads in two vectors of strings
 	vector<string> new_music_files;
-	DataManager->FillStringVector("music_files", new_music_files);
+	read_data.FillStringVector("music_files", new_music_files);
 
 	vector<string> new_sound_files;
-	DataManager->FillStringVector("sound_files", new_sound_files);
+	read_data.FillStringVector("sound_files", new_sound_files);
+	
+	if (read_data.GetError() != DATA_NO_ERRORS) {
+		cout << "BOOT ERROR: some error occured during reading of boot data file" << endl;
+	}
 
 	// Push all our new music onto the boot_music vector
 	MusicDescriptor new_music;
@@ -104,9 +111,9 @@ BootMode::BootMode() {
 		_boot_sound.push_back(new_sound);
 	}
 	
- 	for (uint32 i = 0; i < _boot_images.size(); i++) {
- 		VideoManager->LoadImage(_boot_images[i]);
- 	}
+	for (uint32 i = 0; i < _boot_images.size(); i++) {
+		VideoManager->LoadImage(_boot_images[i]);
+	}
 	for (uint32 i = 0; i < _boot_music.size(); i++) {
 		AudioManager->LoadMusic(_boot_music[i]);
 	}

@@ -250,16 +250,24 @@ GameSettings::~GameSettings() {
 // Makes a call to the data manager for retrieving configured settings
 bool GameSettings::Initialize() {
 	bool fs;
-	DataManager->OpenLuaFile("dat/config/settings.lua");
-	DataManager->OpenTable("video_settings");
-	SetFullScreen(DataManager->GetTableBool("full_screen"));
-	DataManager->CloseTable();
+	ReadDataDescriptor read_data;
+	
+	if (!read_data.OpenFile("dat/config/settings.lua")) {
+		cout << "ENGINE ERROR: failed to load settings from data file" << endl;
+	}
+	read_data.OpenTable("video_settings");
+	SetFullScreen(read_data.ReadBool("full_screen"));
+	read_data.CloseTable();
 
-	DataManager->OpenTable("audio_settings");
-	DataManager->GetTableIntRef("music_vol", music_vol);
-	DataManager->GetTableIntRef("sound_vol", sound_vol);
-	DataManager->CloseTable();
-
+	read_data.OpenTable("audio_settings");
+	music_vol = read_data.ReadInt("music_vol");
+	sound_vol = read_data.ReadInt("sound_vol");
+	read_data.CloseTable();
+	
+	if (read_data.GetError() != DATA_NO_ERRORS) {
+		cout << "ENGINE WARNING: some error occured during read operations from data file" << endl;
+	}
+	read_data.CloseFile();
 	return true;
 }
 
@@ -362,33 +370,42 @@ GameInput::~GameInput() {
 // Initialize singleton pointers and key/joystick systems. Always returns true
 bool GameInput::Initialize() {
 	// Loads saved settings to setup the key and joystick configurations
-	DataManager->OpenLuaFile("dat/config/settings.hoa");
-	DataManager->OpenTable("key_settings");
+	ReadDataDescriptor read_data;
+	if (!read_data.OpenFile("dat/config/settings.lua")) {
+		cout << "ENGINE ERROR: failed to load settings from data file" << endl;
+	}
 	
-	_key._up = (SDLKey) DataManager->GetTableInt("up");         
-	_key._down = (SDLKey) DataManager->GetTableInt("down");
-	_key._left = (SDLKey) DataManager->GetTableInt("left");
-	_key._right = (SDLKey) DataManager->GetTableInt("right");
-	_key._confirm = (SDLKey) DataManager->GetTableInt("confirm");
-	_key._cancel = (SDLKey) DataManager->GetTableInt("cancel");
-	_key._menu = (SDLKey) DataManager->GetTableInt("menu");
-	_key._swap = (SDLKey) DataManager->GetTableInt("swap");
-	_key._left_select = (SDLKey) DataManager->GetTableInt("left_select");
-	_key._right_select = (SDLKey) DataManager->GetTableInt("right_select");
-	_key._pause = (SDLKey) DataManager->GetTableInt("pause");
-	DataManager->CloseTable();
+	read_data.OpenTable("key_settings");
+	_key._up = static_cast<SDLKey>(read_data.ReadInt("up"));         
+	_key._down = static_cast<SDLKey>(read_data.ReadInt("down"));
+	_key._left = static_cast<SDLKey>(read_data.ReadInt("left"));
+	_key._right =static_cast<SDLKey>(read_data.ReadInt("right"));
+	_key._confirm = static_cast<SDLKey>(read_data.ReadInt("confirm"));
+	_key._cancel = static_cast<SDLKey>(read_data.ReadInt("cancel"));
+	_key._menu = static_cast<SDLKey>(read_data.ReadInt("menu"));
+	_key._swap = static_cast<SDLKey>(read_data.ReadInt("swap"));
+	_key._left_select = static_cast<SDLKey>(read_data.ReadInt("left_select"));
+	_key._right_select = static_cast<SDLKey>(read_data.ReadInt("right_select"));
+	_key._pause = static_cast<SDLKey>(read_data.ReadInt("pause"));
+	read_data.CloseTable();
 	
-	DataManager->OpenTable("joystick_settings");
-	_joystick._joy_index = (int32) DataManager->GetTableInt("index");
-	_joystick._confirm = (uint8) DataManager->GetTableInt("confirm");
-	_joystick._cancel = (uint8) DataManager->GetTableInt("cancel");
-	_joystick._menu = (uint8) DataManager->GetTableInt("menu");
-	_joystick._swap = (uint8) DataManager->GetTableInt("swap");
-	_joystick._left_select = (uint8) DataManager->GetTableInt("left_select");
-	_joystick._right_select = (uint8) DataManager->GetTableInt("right_select");
-	_joystick._pause = (uint8) DataManager->GetTableInt("pause");
-	_joystick._quit = (uint8) DataManager->GetTableInt("quit");
-	DataManager->CloseTable();
+	read_data.OpenTable("joystick_settings");
+	_joystick._joy_index = static_cast<int32>(read_data.ReadInt("index"));
+	_joystick._confirm = static_cast<uint8>(read_data.ReadInt("confirm"));
+	_joystick._cancel = static_cast<uint8>(read_data.ReadInt("cancel"));
+	_joystick._menu = static_cast<uint8>(read_data.ReadInt("menu"));
+	_joystick._swap = static_cast<uint8>(read_data.ReadInt("swap"));
+	_joystick._left_select = static_cast<uint8>(read_data.ReadInt("left_select"));
+	_joystick._right_select = static_cast<uint8>(read_data.ReadInt("right_select"));
+	_joystick._pause = static_cast<uint8>(read_data.ReadInt("pause"));
+	_joystick._quit = static_cast<uint8>(read_data.ReadInt("quit"));
+	read_data.CloseTable();
+	
+	read_data.CloseFile();
+	
+	if (read_data.GetError() != DATA_NO_ERRORS) {
+		cout << "ENGINE WARNING: some error occured during read operations from data file" << endl;
+	}
 	
 	// Attempt to initialize and setup the configured joystick
 	if (SDL_InitSubSystem(SDL_INIT_JOYSTICK) != 0) {

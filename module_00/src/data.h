@@ -45,6 +45,9 @@ extern bool DATA_DEBUG;
 //! An internal namespace to be used only by the data engine itself. Don't use this namespace anywhere else!
 namespace private_data {
 
+//! For quick reference to the top of the Lua stack.
+const int32 STACK_TOP = -1;
+
 //! A list of Lua libraries to expose for use in scripts.
 static const luaL_reg LUALIBS[] = {
 	{"base", luaopen_base},
@@ -57,141 +60,184 @@ static const luaL_reg LUALIBS[] = {
 	{NULL, NULL} 
 };
 
-//! For quick reference to the top of the Lua stack.
-const int LUA_STACK_TOP = -1;
-
 } // namespace private_data
 
+//! \name Data Error Codes
+//@{
+const uint32 DATA_NO_ERRORS           = 0x00000000;
+//! Occurs when a numerical key is used for a variable read/write in the global space.
+const uint32 DATA_BAD_GLOBAL          = 0x00000001;
+//! Occurs when a table failed to open.
+const uint32 DATA_OPEN_TABLE_FAILURE  = 0x00000002;
+//! Occurs when a table failed to close. Usually means too many close operations were invoked.
+const uint32 DATA_CLOSE_TABLE_FAILURE = 0x00000004;
+//! Occurs when a table field that is read contains no data.
+const uint32 DATA_INVALID_TABLE_KEY   = 0x00000008;
+//! Occurs when a file is not open and user tries to operate on the file data.
+const uint32 DATA_BAD_FILE_ACCESS     = 0x00000010;
+//! Occurs when user attempts to write a vector of size 0, or fill a vector that is not initially empty.
+const uint32 DATA_BAD_VECTOR_SIZE     = 0x00000020;
+//@}
+
 /*!****************************************************************************
- *  \brief Manages all the interactions between the C++ game engine and the Lua data and script files.
+ *  \brief An abstract class for representing data files
  *
- *  This primary function of this class is to load and store game data from Lua files. Allacrost
- *  uses the `.hoa` extension for all of its data and script files. Because this class needs access
- *  to so many members of other classes, many of which it would be unsafe to leave public, several
- *  classes declare the GameData class a friend so that it may access and modify this data as it
- *  needs.
+ *  This class serves as a parent class for readable and writeable data files.
+ *  These data files are actually Lua scripts which are processed by the game
+ *  engine. Files with a .lua extension are human-readable, uncompiled files
+ *  and files with a .hoa extension are compiled files. 
  *
- *  \note 1) This class is a singleton
+ *  \note 1) Compiled Lua files exhibit faster performance than uncompile files.
+ *  
+ *  \note 2) The members of this class can not be set within this class. The user
+ *  may only modify the members of this class via the derived children classes.
  *****************************************************************************/
-class GameData {
-private:
-	SINGLETON_DECLARE(GameData);
-	
-	//! The Lua stack, which handles all data sharing between C++ and Lua.
-	lua_State *_l_stack;
-	
-	//! The output file stream to write to.
-	std::ofstream _outfile;
-//	// All table names that have been used in the current write output file.
-// 	std::map<std::string> _table_names;
-	//! The names of the tables that are currently opened when doing file write operations.
+class DataDescriptor {
+	friend class GameData;
+protected:
+	//! The name of the file that is being operating on.
+	std::string _filename;
+	//! Boolean value indicating whether a file is open or not.
+	bool _file_open;
+	//! A bit-mask that is used to set and detect various error conditions.
+	uint32 _error_code;
+	//! The names of the Lua tables that are currently opened for operations.
 	std::vector<std::string> _open_tables;
-	
-	
-	//! \brief Checks if the output file for writing is open. 
-	//! Used by all the standard write functions to avoid segmentation faults.
-	//! \return True if the output file is open.
-	bool _IsWriteFileOpen();
-	//! \brief Checks if any tables are currently open for writing.
-	//! \return True if there is at least one table open for writing, false otherwise.
-	bool _IsWriteTableOpen();
-	//! Writes the pathname of all open tables (ie, table1[table2][table3])
-	//! _IsWriteFileOpen() Is always called prior to this class, so it doesn't check for errors.
-	void _WriteTablePath();
 public:
-	SINGLETON_METHODS(GameData);
+	DataDescriptor () { _filename = ""; _file_open = false; _error_code = 0; }
+	~DataDescriptor () {}
 	
-	//! \name Lua file access functions
-	//! \brief Lua file access functions
+	/*! \brief Used to check if any error occured in previous operations.
+	 *  \return A bit-mask value of all error conditions that have been detected.
+	 *
+	 *  It is good practice to call this function after chunks of function calls to the
+	 *  children of this class (ReadDataDescriptor, WriteDataDescriptor) to detect if
+	 *  anything went wrong. The bit-mask values returned by this function are all listed
+	 *  in the constants called "Data Error Codes" at the top of this file. It is perfectly
+	 *  acceptable (although maybe pedantic) to call this function after every function call 
+	 *  to the children of this class.
+	 *  
+	 *  It is up to the API user to figure out how to recover when they detect an error condition.
+	 *  The only thing that the code in the data management classes do are to prevent errors
+	 *  from causing segmentation faults.
+	 *
+	 *  \note Everytime this function is called, the internal _error_code flag is cleared.
+	 */
+	uint32 GetError()
+		{ uint32 code = _error_code; _error_code = DATA_NO_ERRORS; return code; }
+	
+	//! \name Class Member Access Functions
+	//@{
+	bool IsFileOpen() { return _file_open; }
+	std::string GetFilename() { return _filename; }
+	uint32 GetErrorCode() { return _error_code; }
+	std::vector<std::string> &GetOpenTables() { return _open_tables; }
+	//@}
+}; // class DataDescriptor
+
+/*!****************************************************************************
+ *  \brief Manager of readable Lua data scripts.
+ *
+ *  This class manages Lua files that have read privledges. Each class object
+ *  maintains and manages its own Lua state.
+ *
+ *  \note 1) Compiled Lua files exhibit faster performance than uncompile files.
+ *****************************************************************************/
+class ReadDataDescriptor : public DataDescriptor {
+	friend class GameData;
+private:
+	//! The Lua stack, which handles all data sharing between C++ and Lua.
+	lua_State *_lstack;
+	
+	//! Returns true if the file is open. Otherwise sets the error code.
+	bool _IsFileOpen();
+public:
+	ReadDataDescriptor () { _lstack = NULL; }
+	~ReadDataDescriptor () {}
+	
+	//! \name File access functions
+	//! \brief Functions for opening and closing of readable Lua files.
+	//@{
 	//! \param file_name The name of the Lua file to be opened.
-	//@{
-	void OpenLuaFile(const char* file_name);
-	// Do we need a CloseLuaFile() function? >>> YES!
+	//! \return False on failure.
+	//! \note This is the only function that uses explicit error checking. In other words, an error in
+	//! this function call will not change the return value of the GetError() function
+	bool OpenFile(const char* file_name);
+	//! OpenFile() with no argument assumes the correct filename is already loaded in the class object.
+	//! \return False on failure.
+	//! \note This is the only function that uses explicit error checking. In other words, an error in
+	//! this function call will not change the return value of the GetError() function
+	bool OpenFile();
+	void CloseFile();
 	//@}
 	
-	//! \name Lua Variable Access Functions
-	//! \brief These functions look up a global variable in a Lua file and return its value.
-	//! \param *key The name of the Lua variable to access.
-	//! \param &ref A reference to the variable to be filled with the requested value.
+	/*! \name Variable Access Functions
+	 *  \brief These functions grab a basic data type from the Lua file and return its value.
+	 *  \param key The name of the Lua variable to access.
+	 *  \param lang The two-letter language identifier for unicode string retrieval.
+	 *  \note The integer keys are only valid for variables stored in a table, not for global variables.
+	 */
 	//@{
-	
-	bool GetGlobalBool(const char *key);
-	void GetGlobalBoolRef(const char *key, bool &ref);
-	
-	int32 GetGlobalInt(const char *key);
-	void GetGlobalIntRef(const char *key, int32 &ref);
-	
-	float GetGlobalFloat(const char *key);
-	void GetGlobalFloatRef(const char *key, float &ref);
-	
-	std::string GetGlobalString(const char *key);
-	void GetGlobalStringRef(const char *key, std::string &ref);
+	bool ReadBool(const char *key);
+	bool ReadBool(const int32 key);
+	int32 ReadInt(const char *key);
+	int32 ReadInt(const int32 key);
+	float ReadFloat(const char *key);
+	float ReadFloat(const int32 key);
+	std::string ReadString(const char *key);
+	std::string ReadString(const int32 key);
+	hoa_utils::ustring ReadUString(const char *key, const char *lang);
+	hoa_utils::ustring ReadUString(const int32 key, const char *lang);
 	//@}
 	
-	//! \name Lua Table Access Functions
-	//! \brief These functions look up a member of a Lua table and return its value.
-	//! \param *tbl_name The name of the table to open.
-	//! \param *key The name of the table member to access.
-	//! \param &ref A reference to the variable to be filled with the requested value.
-	//! \note The GetTableString{Ref} functions are for normal C++ strings, not for unicode game text.
-	//! The table in question is assumed to be at the top of the stack.
-	/*!
-	    General usage: first call OpenTable(tname), and then any of the GetTable*()
-	    functions, to access that table's members. When you're done with that particular
-	    table, call CloseTable(). Obey the protocol! :)
-	    GetTable*Ref() functions return the value by reference, and GetTable*() return by value.
-	*/ 
+	/*! \name Lua Table Access Functions
+	 *  \brief These functions open and close tables in the Lua file.
+	 *  \param key The name of the table to open.
+	 *  \return Zero if there are no table elements or there was an error.
+	 *  
+	 *  After a table is opened, it becomes the active "space" that all of the data read
+	 *  operations operate on. You must \c always remember to close a table once you are
+	 *  finished reading data from it.
+	 *  
+	 *  \note The version of OpenTable that uses an integer key will only work when there is
+	 *  at least one table already open. In other words, we can't use a number to address a 
+	 *  table that is in the global space.
+	 */
 	//@{
-	void OpenTable(const char *tbl_name);
-	bool OpenSubTable(const int32 key);
-	bool OpenSubTable(const char *key);
-	void CloseSubTable();
+	void OpenTable(const char *key);
+	void OpenTable(const int32 key);
 	void CloseTable();
-	
-	int32 GetTableSize(const char *tbl_name);
-	int32 GetTableSize();
-	
-	bool GetTableBool(const char *key);
-	void GetTableBoolRef(const char *key, bool &ref);
-	bool GetTableBool(const int32 key);
-	void GetTableBoolRef(const int32 key, bool &ref);
-	
-	int32 GetTableInt(const char *key);
-	void GetTableIntRef(const char *key, int32 &ref);
-	int32 GetTableInt(const int32 key);
-	void GetTableIntRef(const int32 key, int32 &ref);
-	
-	float GetTableFloat(const char *key);
-	void GetTableFloatRef(const char *key, float &ref);
-	float GetTableFloat(const int32 key);
-	void GetTableFloatRef(const int32 key, float &ref);
-	
-	std::string GetTableString(const char *key);
-	void GetTableStringRef(const char *key, std::string &ref);
-	std::string GetTableString(const int32 key);
-	void GetTableStringRef(const int32 key, std::string &ref);
+	uint32 GetTableSize(const char *key);
+	uint32 GetTableSize(const int32 key);
+	//! The function call with no arguments attempts to get the size of the most recently opened table.
+	uint32 GetTableSize();
 	//@}
 	
-	//! \name Lua Vector Fill Functions
-	//! \brief These functions fill a vector with members of a global table in a Lua file.
-	//! \param &vect A reference to the vector of elements to fill.
-	//! \param *key The name of the table to use to fill the vector.
-	//! \note The functions that are messing the key assume that the table is already on the top of the stack.
+	/*! \name Vector Fill Functions
+	 *  \brief These functions fill a vector with members of a table read from the Lua file.
+	 *  \param key The name of the table to use to fill the vector.	 
+	 *  \param vect A reference to the vector of elements to fill.
+	 *  
+	 *  The table that these functions attempt to access is assumed to be \c not currently
+	 *  opened. If it is, these functions will not execute properly.
+	 *  
+	 *  \note The integer keys are only valid for tables that are elements of a parent table. 
+	 *  They can not be used to access tables in the global space.
+	 */
 	//@{
-	void FillStringVector(const char *key, std::vector<std::string> &vect);
 	void FillIntVector(const char *key, std::vector<int32> &vect);
-	void FillFloatVector(const char *key, std::vector<float> &vect);
-	
-	void FillStringVector(std::vector<std::string> &vect);
-	void FillIntVector(std::vector<int32> &vect);
-	void FillFloatVector(std::vector<float> &vect);
+	void FillFloatVector(const char *key, std::vector<float> &vect);	
+	void FillStringVector(const char *key, std::vector<std::string> &vect);
+	void FillIntVector(const int32 key, std::vector<int32> &vect);
+	void FillFloatVector(const int32 key, std::vector<float> &vect);
+	void FillStringVector(const int32 key, std::vector<std::string> &vect);
 	//@}
 	
-	//! \name Lua function calling wrappers
-	//! \brief This function allows you to call arbitrary Lua functions from C++
-	//! \param *func a string containing the name of the Lua function to be called
-	//! \param *sig a string describing arguments and results. See below for explanation.
-	/*!
+	/*! \name Lua Function Calling Wrapper
+	 *  \brief This function allows you to call arbitrary Lua functions from C++
+	 *  \param *func a string containing the name of the Lua function to be called
+	 *  \param *sig a string describing arguments and results. See below for explanation.
+	  
 	    This function is an almost identical copy of the call_va() function from the book
 	    "Programming In Lua", chapter 25.3. It lets you call an arbitrary Lua function with
 	    a desired number of arguments and results.
@@ -202,23 +248,20 @@ public:
 	    "i" - an integer value
 	    "d" - double precision floating point value
 	    "s" - a string. When supplying CallGlobalFunction with a variable to hold the return value of
-	          string type, you should supply the address of a char* . Example:
-		  	char *retval = 0;
-			CallGlobalFunction("function_returning_a_string", ">s", &retval);
-		  The function allocates the space for the string.
+	          string type, you should supply the address of a char* . Example: 
+	            char *retval = 0;
+	            CallGlobalFunction("function_returning_a_string", ">s", &retval);
+	    The function allocates the space for the string.
 	*/
-	//@{
-	void CallGlobalFunction(const char *func, const char *sig, ...);
-	void CallTableFunction(const char *func, const char *sig, ...);
-	//@}
+	void CallFunction(const char *func, const char *sig, ...);
 	
-	//! \name Lua<->C++ binding functions
-	//! \brief Functions used to bind C++ class member functions and objects to be used directly from Lua.
-	//! \param *obj the object to be registered (see notes below)
-	//! \param *objname the name by which the object will be referred from Lua
-	//! \param func a pointer to the function to be registered
-	//! \param *funcname the name by which the function will be referred to from Lua
-	/*!
+	/*! \name Lua<->C++ binding functions
+	 *  \brief Functions used to bind C++ class member functions and objects to be used directly from Lua.
+	 *  \param *obj the object to be registered (see notes below)
+	 *  \param *objname the name by which the object will be referred from Lua
+	 *  \param func a pointer to the function to be registered
+	 *  \param *funcname the name by which the function will be referred to from Lua
+	  
 	    Calling protocol:
 	    1. RegisterClassStart()
 	    2. RegisterMemberFunction(...), and/or RegisterObject(...), in any order.
@@ -249,12 +292,49 @@ public:
 	void RegisterClassStart();
 	void RegisterClassEnd();
 	template <typename Class, typename Function>
-	bool RegisterMemberFunction(const char *funcname, Class *obj, Function func);
+	void RegisterMemberFunction(const char *funcname, Class *obj, Function func);
 	template <typename Class>
-	bool RegisterObject(const char *objname, Class *obj);
+	void RegisterObject(const char *objname, Class *obj);
 	template <typename Function>
-	bool RegisterFunction(const char* funcname, Function func);
+	void RegisterFunction(const char* funcname, Function func);
 	//@}
+	
+	//! Prints the current contents of the Lua stack
+	void DEBUG_PrintLuaStack();
+}; // class ReadDataDescriptor
+
+
+/*!****************************************************************************
+ *  \brief Manages writing to Lua files.
+ *
+ *  This class manages the creation and construction of new Lua files. Currently
+ *  it is only capable of writing comments, global values, and tables, but may
+ *  have more functionality included in the future, such as writing functions.
+ *
+ *  \note 1) There is currently no support for modifying or appending to existing
+ *  files. This may be added in the future (or it may become a new class).
+ *  
+ *  \note 2) We may also provide a function to compile the written Lua file as well.
+ *  
+ *  \note 3) You are allowed to assign the same key a different value twice (ie first
+ *  declaring that a = 0, then later declaring that a = "pizza". There is no error
+ *  checking for this condition, so just be sure that you know what you are doing.
+ *****************************************************************************/
+class WriteDataDescriptor : public DataDescriptor {
+	friend class GameData;
+private:
+	//! The output file stream to write to.
+	std::ofstream _outfile;
+	
+	//! \brief Checks if the output file for writing is open. 
+	//! Used by all the standard write functions to avoid segmentation faults.
+	//! \return True if the output file is open.
+	bool _IsFileOpen();
+	//! Writes the pathname of all open tables (ie, table1[table2][table3])
+	void _WriteTablePath();
+public:
+	WriteDataDescriptor () {}
+	~WriteDataDescriptor () {}
 	
 	/*! \name Lua File Write Functions
 	 *  \brief Opens files for write priveledges.
@@ -263,8 +343,9 @@ public:
 	 *   not append to or modify existing Lua files with these functions.
 	 */
 	//@{
-	bool WriteOpenFile(const char* file_name);
-	void WriteCloseFile();
+	bool OpenFile(const char* file_name);
+	bool OpenFile();
+	void CloseFile();
 	//@}
 	
 	/*! \name Lua CommentWrite Functions
@@ -278,17 +359,17 @@ public:
 	 */
 	//@{
 	//! Inserts a blank line into the text.
-	void WriteInsertNewLine();
+	void InsertNewLine();
 	//! Writes a string of text and prepends it with a comment. Equivalent to `// comment` in C++.
 	void WriteComment(const char* comment);
 	void WriteComment(std::string& comment);
-	//! After this function is invoked, every single write call will be a comment. Equivalent to `/*` in C++.
-	void WriteBeginCommentBlock();
+	//! After this function is invoked, every single function call will be a comment. Equivalent to `/*` in C++.
+	void BeginCommentBlock();
 	//! Ends a comment block. Equivalent to `*/` in C++
-	void WriteEndCommentBlock();
+	void EndCommentBlock();
 	/*! \brief Writes the plain string of text to the file with no modification, except for a newline.
-	 * \note Typically, unless you \c really know what you are doing, you should only call this between
-	 * the beginning and end of a comment block.
+	 *  \note Typically, unless you \c really know what you are doing, you should only call this between
+	 *  the beginning and end of a comment block.
 	 */
 	void WriteLine(const char* comment);
 	void WriteLine(std::string& comment);
@@ -307,19 +388,23 @@ public:
 	void WriteFloat(const char *key, float value);
 	void WriteString(const char *key, const char* value);
 	void WriteString(const char *key, std::string& value);
+	void WriteBool(const int32 key, bool value);
+	void WriteInt(const int32 key, int32 value);
+	void WriteFloat(const int32 key, float value);
+	void WriteString(const int32 key, const char* value);
+	void WriteString(const int32 key, std::string& value);
 	//@}
 	
 	/*! \name Lua Table Write Functions
 	 *  \brief These functions write Lua tables and their members
-	 *  \param *table_name The name of the table to write.
-	 *  \param *key The name of the table member to access.
+	 *  \param *key The name of the table to write.
 	 *  \note If you begin a new table and then begin another when you haven't ended the first one, the
 	 *  new table will become a key to the first. A table will only become global when there are no other
 	 *  write tables open.
 	 */
 	//@{
-	void WriteBeginTable(const char *table_name);
-	void WriteEndTable();
+	void BeginTable(const char *key);
+	void EndTable();
 	//@}
 	
 	/*! \name Lua Vector Write Functions
@@ -333,9 +418,34 @@ public:
 	void WriteFloatVector(const char *key, std::vector<float> &vect);
 	void WriteStringVector(const char *key, std::vector<std::string> &vect);
 	//@}
+}; // class WriteDataDescriptor
+
+
+/*!****************************************************************************
+ *  \brief Singleton class that manages all open data files.
+ *
+ *  This class monitors all open data files and their descriptor objects.
+ *
+ *  \note 1) This class is a singleton
+ *  
+ *  \note 2) In the future, this class will manage all the open data files and
+ *  make sure that no file is opened more than once at the same time.
+ *****************************************************************************/
+class GameData {
+	friend class ReadDataDescriptor;
+	friend class WriteDataDescriptor;
+private:
+	SINGLETON_DECLARE(GameData);
 	
-	//! Prints the current contents of the Lua stack
-	void DEBUG_PrintLuaStack();
+	//! Maintains a list of all data files currently open.
+	std::map<std::string, DataDescriptor*> _open_files;
+public:
+	SINGLETON_METHODS(GameData);
+	
+	//! Checks if a file is already in use by a DataDescriptor object.
+	//! \param filename The name of the file to check.
+	//! \return True if the filename is registered to a DataDescriptor object who has the file opeend.
+	bool CheckOpenFile(std::string filename) { return false; }
 }; // class GameData
 
 } // namespace hoa_data

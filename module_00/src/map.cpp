@@ -113,10 +113,12 @@ void MapMode::_LoadMap() {
 	VideoManager->PopState();
 	
 	// ************* (2) Open data file and begin processing data ***************
-	DataManager->OpenLuaFile("dat/maps/test_01.lua");
-	_random_encounters = DataManager->GetGlobalBool("random_encounters");
+	ReadDataDescriptor read_data;
+	
+	read_data.OpenFile("dat/maps/test_01.lua");
+	_random_encounters = read_data.ReadBool("random_encounters");
 	if (_random_encounters) {
-		_encounter_rate = DataManager->GetGlobalInt("encounter_rate");
+		_encounter_rate = read_data.ReadInt("encounter_rate");
 		_steps_till_encounter = GaussianValue(_encounter_rate, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
 	}
 	else {
@@ -125,26 +127,25 @@ void MapMode::_LoadMap() {
 		_steps_till_encounter = 10;
 	}
 
-	_row_count = DataManager->GetGlobalInt("row_count");
-	_col_count = DataManager->GetGlobalInt("col_count");
+	_row_count = read_data.ReadInt("row_count");
+	_col_count = read_data.ReadInt("col_count");
 	
 	// ********************** (3) Load in tile filenames ************************
 	vector<string> tile_filenames;
-	DataManager->FillStringVector("tile_filenames", tile_filenames);
+	read_data.FillStringVector("tile_filenames", tile_filenames);
 	for (uint32 i = 0; i < tile_filenames.size(); i++) {
 		// Prepend the pathname and append the file extension for all the file names
 		tile_filenames[i] = "img/tiles/" + tile_filenames[i] + ".png";
 	}
 	
-	// ******************** (3) Setup tile image mappings ***********************
+	// ******************** (4) Setup tile image mappings ***********************
 	vector<int32> tile_mappings;
-	DataManager->OpenTable("tile_mappings");
+	read_data.OpenTable("tile_mappings");
 	int32 mapping_count = tile_filenames.size(); // TMP
-	//int32 mapping_count = DataManager->GetTableSize("tile_mappings");
+	//int32 mapping_count = read_data.GetTableSize("tile_mappings");
 	//cout << "mapping_count == " << mapping_count << endl;
 	for (uint32 i = 0; i < mapping_count; i++) {
-		DataManager->OpenSubTable(i);
-		DataManager->FillIntVector(tile_mappings);
+		read_data.FillIntVector(i, tile_mappings);
 		
 		if (tile_mappings.size() == 1) { // Then add a new static image
 			StillImage static_tile;
@@ -161,109 +162,101 @@ void MapMode::_LoadMap() {
 			}
 		}
 		tile_mappings.clear();
-		DataManager->CloseSubTable();
 	}
-	DataManager->CloseTable();
+	read_data.CloseTable();
 	
-	// **************** (4) Load all tile images from memory ********************
+	// **************** (5) Load all tile images from memory ********************
 	VideoManager->BeginImageLoadBatch();
 	for (uint32 i = 0; i < _map_tiles.size(); i++) {
 		VideoManager->LoadImage(_map_tiles[i]);
 	}
 	VideoManager->EndImageLoadBatch();
 	
-	// ******************** (5) Create the 2D tile map *************************
+	// ******************** (6) Create the 2D tile map *************************
 	MapTile tmp_tile;
 	for (uint32 r = 0; r < _row_count; r++) {
 		_tile_layers.push_back(vector <MapTile>(_col_count));
 	}
 	
 	vector<int32> properties;
-	DataManager->OpenTable("lower_layer");
+	read_data.OpenTable("lower_layer");
 	for (uint32 r = 0; r < _row_count; r++) {
-		DataManager->OpenSubTable(r);
-		DataManager->FillIntVector(properties);
+		read_data.FillIntVector(r, properties);
 		
 		for (uint32 c = 0; c < _col_count; c++) {
 			_tile_layers[r][c].lower_layer = static_cast<int16>(properties[c]);
 		}
 
 		properties.clear();
-		DataManager->CloseSubTable();
 	}
-	DataManager->CloseTable();
+	read_data.CloseTable();
 	
-	DataManager->OpenTable("middle_layer");
+	read_data.OpenTable("middle_layer");
 	for (uint32 r = 0; r < _row_count; r++) {
-		DataManager->OpenSubTable(r);
-		DataManager->FillIntVector(properties);
+		read_data.FillIntVector(r, properties);
 		
 		for (uint32 c = 0; c < _col_count; c++) {
 			_tile_layers[r][c].middle_layer = static_cast<int16>(properties[c]);
 		}
 		
 		properties.clear();
-		DataManager->CloseSubTable();
 	}
-	DataManager->CloseTable();
+	read_data.CloseTable();
 	
-	DataManager->OpenTable("upper_layer");
+	read_data.OpenTable("upper_layer");
 	for (uint32 r = 0; r < _row_count; r++) {
-		DataManager->OpenSubTable(r);
-		DataManager->FillIntVector(properties);
+		read_data.FillIntVector(r, properties);
 		
 		for (uint32 c = 0; c < _col_count; c++) {
 			_tile_layers[r][c].upper_layer = static_cast<int16>(properties[c]);
 		}
 		
 		properties.clear();
-		DataManager->CloseSubTable();
 	}
-	DataManager->CloseTable();
+	read_data.CloseTable();
 	
-	DataManager->OpenTable("tile_walkable");
+	read_data.OpenTable("tile_walkable");
 	for (uint32 r = 0; r < _row_count; r++) {
-		DataManager->OpenSubTable(r);
-		DataManager->FillIntVector(properties);
+		read_data.FillIntVector(r, properties);
 		
 		for (uint32 c = 0; c < _col_count; c++) {
 			_tile_layers[r][c].walkable = static_cast<uint8>(properties[c]);
 		}
 		
 		properties.clear();
-		DataManager->CloseSubTable();
 	}
-	DataManager->CloseTable();
+	read_data.CloseTable();
 	
-	DataManager->OpenTable("tile_properties");
+	read_data.OpenTable("tile_properties");
 	for (uint32 r = 0; r < _row_count; r++) {
-		DataManager->OpenSubTable(r);
-		DataManager->FillIntVector(properties);
+		read_data.FillIntVector(r, properties);
 		
 		for (uint32 c = 0; c < _col_count; c++) {
 			_tile_layers[r][c].properties = static_cast<uint8>(properties[c]);
 		}
 		
 		properties.clear();
-		DataManager->CloseSubTable();
 	}
-	DataManager->CloseTable();
+	read_data.CloseTable();
 	
 	// The occupied member of tiles are not set until we place map objects
 	
-	DataManager->OpenTable("tile_events");
+	read_data.OpenTable("tile_events");
 	for (uint32 r = 0; r < _row_count; r++) {
-		DataManager->OpenSubTable(r);
-		DataManager->FillIntVector(properties);
+		read_data.FillIntVector(r, properties);
 		
 		for (uint32 c = 0; c < _col_count; c++) {
 			_tile_layers[r][c].event = static_cast<int16>(properties[c]);
 		}
 		
 		properties.clear();
-		DataManager->CloseSubTable();
 	}
-	DataManager->CloseTable();
+	read_data.CloseTable();
+	read_data.CloseFile();
+	
+	if (read_data.GetError() != DATA_NO_ERRORS) {
+		cout << "MAP ERROR: some error occured during reading of map file" << endl;
+	}
 	
 	// Load player sprite and rest of map objects
 	MapSprite *player = new MapSprite(PLAYER_SPRITE, 2, 2, ALTITUDE_1, (UPDATEABLE | VISIBLE | IN_CONTEXT));

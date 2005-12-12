@@ -25,23 +25,23 @@ encounter_rate = 12
 row_count = 32
 col_count = 55
 
--- The names of the tile image files used, with the path and file extension omitted (note that the indeces begin with 1, not 0)
+-- The names of the tile image files used, with the path and file extension omitted
 tile_filenames = {}
-tile_filenames[1] = "test_01"
-tile_filenames[2] = "test_02"
-tile_filenames[3] = "test_03"
-tile_filenames[4] = "test_04"
-tile_filenames[5] = "test_05"
-tile_filenames[6] = "test_06"
-tile_filenames[7] = "test_07"
-tile_filenames[8] = "test_08"
-tile_filenames[9] = "test_09"
-tile_filenames[10] = "test_10"
-tile_filenames[11] = "test_11"
-tile_filenames[12] = "test_12"
-tile_filenames[13] = "test_13"
-tile_filenames[14] = "test_14"
-tile_filenames[15] = "test_15"
+tile_filenames[0] = "test_01"
+tile_filenames[1] = "test_02"
+tile_filenames[2] = "test_03"
+tile_filenames[3] = "test_04"
+tile_filenames[4] = "test_05"
+tile_filenames[5] = "test_06"
+tile_filenames[6] = "test_07"
+tile_filenames[7] = "test_08"
+tile_filenames[8] = "test_09"
+tile_filenames[9] = "test_10"
+tile_filenames[10] = "test_11"
+tile_filenames[11] = "test_12"
+tile_filenames[12] = "test_13"
+tile_filenames[13] = "test_14"
+tile_filenames[14] = "test_15"
 
 -- This structure forms still or animate tile images. In this case, all of our tiles are stills, but note that each element must still be a table.
 tile_mappings = {}

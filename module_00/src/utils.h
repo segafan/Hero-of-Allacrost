@@ -41,8 +41,6 @@
 
 #endif  //#ifdef _DEBUG
 
-typedef unsigned int uint;
-
 #endif  //#ifdef _WIN32
 
 #include <stdexcept>
@@ -361,7 +359,40 @@ private:
 	//! UnicodeString is just a wrapper for a vector of uint16. Note that we don't even
 	//! have a destructor, because vector will destroy itself
 	std::vector <uint16> _str;
-};
+}; // class UnicodeString
+
+
+/*! \brief Performs an insertion sort on a vector of elements
+ *  \param swap_vec The vector of elements to be sorted.
+ *
+ *  Insertion sort should *only* be used for vectors that are already nearly sorted, or
+ *  for vectors of size 10 or less. Otherwise this algorithm is computationally expensive
+ *  and you should choose another sorting algorithm.
+ *  
+ *  A good example of code that uses this function can be found in map.cpp, which sorts map
+ *  objects every frame. Because map objects change position slowly, there is usually no change
+ *  or little relative change in sorting order from the previous pass.
+ *  
+ *  \note The type of element that is passed should have its > and = operators functionally
+ *  correct (ie, if T is a class, you must overload these operators). In general, its good
+ *  practice if you overload all comparison operators for these types.
+ *  
+ *  \note This function will not compile if you try to invoke it with a vector of pointers to
+ *  class-type objects.
+ */
+template <typename T>
+void InsertionSort(std::vector<T>& swap_vec) {
+	int32 i, j;
+	T value;
+	for (i = 1; i < swap_vec.size(); i++) {
+		value = swap_vec[i];
+		for (j = i - 1; j >= 0 && swap_vec[j] > value; j--) {
+			swap_vec[j+1] = swap_vec[j];
+		}
+		swap_vec[j+1] = value;
+	}
+}
+
 
 
 }
