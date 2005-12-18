@@ -14,16 +14,17 @@
  * \brief   Source file for the global game components.
  *****************************************************************************/
 
-#include "utils.h"
 #include <iostream>
 #include "global.h"
+#include "utils.h"
 #include "video.h"
-#include <string>
+#include "map_objects.h"
 
 using namespace std;
 using namespace hoa_video;
 using namespace hoa_audio;
 using namespace hoa_utils;
+using namespace hoa_map;
 
 namespace hoa_global {
 
@@ -229,7 +230,9 @@ GCharacter::GCharacter(std::string na, std::string fn, uint32 id) {
 	_filename = fn;
 	_char_id = id;
 
-	LoadFrames();
+	_map_sprite = new MapSprite();
+	_map_sprite->SetFilename("img/sprites/map/claudius");
+	_map_sprite->LoadFrames();
 }
 
 
@@ -237,78 +240,9 @@ GCharacter::GCharacter(std::string na, std::string fn, uint32 id) {
 GCharacter::~GCharacter() {
 	if (GLOBAL_DEBUG) cout << "GLOBAL: GCharacter destructor invoked" << endl;
 	GameVideo *VideoManager = GameVideo::GetReference();
-	for (uint32 i = 0; i < _map_frames.size(); i++) {
-		VideoManager->DeleteImage(_map_frames[i]);
-	}
 	for (uint32 i = 0; i < _battle_frames.size(); i++) {
 		VideoManager->DeleteImage(_battle_frames[i]);
 	}
-}
-
-
-void GCharacter::LoadFrames() {
-	GameVideo *VideoManager = GameVideo::GetReference();
-	StillImage imd;
-	string full_name = "img/sprites/map/" + _filename;
-	imd.SetDimensions(1.0f, 2.0f);
-
-	imd.SetFilename(full_name + "_d1.png");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_d2.png");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_d3.png");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_d4.png");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_d5.png");
-	_map_frames.push_back(imd);
-
-	imd.SetFilename(full_name + "_u1.png");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_u2.png");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_u3.png");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_u4.png");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_u5.png");
-	_map_frames.push_back(imd);
-
-	imd.SetFilename(full_name + "_l1.png");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_l2.png");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_l3.png");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_l4.png");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_l5.png");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_l6.png");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_l7.png");
-	_map_frames.push_back(imd);
-
-	imd.SetFilename(full_name + "_r1.png");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_r2.png");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_r3.png");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_r4.png");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_r5.png");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_r6.png");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_r7.png");
-	_map_frames.push_back(imd);
-
-	VideoManager->BeginImageLoadBatch();
-	for (uint32 i = 0; i < _map_frames.size(); i++) {
-		VideoManager->LoadImage(_map_frames[i]);
-	}
-	VideoManager->EndImageLoadBatch();
 }
 
 // ****************************************************************************

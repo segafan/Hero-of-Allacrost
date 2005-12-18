@@ -35,6 +35,7 @@
 #include <string>
 #include <vector>
 #include "defs.h"
+#include "data.h"
 #include "engine.h"
 #include "video.h"
 #include "gui.h"
@@ -66,7 +67,6 @@ const float SCREEN_COLS = 32.0f;
 //@{
 const uint8 EXPLORE      = 0x00000001;
 const uint8 DIALOGUE     = 0x00000002;
-const uint8 SCRIPT_EVENT = 0x00000004;
 //@}
 
 //! \name Altitude Constants
@@ -83,15 +83,11 @@ const uint8 ALTITUDE_7 = 0x40;
 const uint8 ALTITUDE_8 = 0x80;
 //@}
 
-//! \name Interaction Type Constants
-//! \brief Types of interactions that can occur on a specific tile
-//@{
-const uint32 NO_INTERACTION     = 0;
-const uint32 SPRITE_INTERACTION = 1;
-//@}
-
 // ********************** TILE CONSTANTS **************************
 
+//! \name Tile Property Constants
+//! \brief Contain various properties about tiles.
+//@{
 //! Indicates that an event will take place when the player steps onto this tile.
 const uint8 ARRIVE_EVENT  = 0x01;
 //! Indicates that an event will take place when the player steps off of this tile.
@@ -100,15 +96,19 @@ const uint8 DEPART_EVENT  = 0x02;
 const uint8 CONFIRM_EVENT = 0x04;
 //! Indicates a treasure is contained on this tile.
 const uint8 TREASURE      = 0x08;
+//@}
 
 /*!****************************************************************************
  * \brief Retains information about how the next map frame should be drawn.
  *
- * This class is used by map objects to determine where (and if) they should
- * be drawn.
+ * This class is used by the MapMode class to determine how the next map frame
+ * should be drawn, including which tiles will be visible and offset coordinates
+ * for the screen. Map objects also use this information to determine where (and if) 
+ * they should be drawn.
  * 
  * \note 1) The MapMode class keeps an active object of this class with the latest
- * information about the map, so you should never need to create an instance of it.
+ * information about the map. It should be the only instance of this class that is
+ * needed.
  *****************************************************************************/
 class MapFrame {
 public:
@@ -140,56 +140,78 @@ public:
 	int16 col;
 	//! The altitude level of the tile to check.
 	uint8 altitude;
-	//! The direction of the movement (this may go defunct). 
+	//! The direction of the action (this may go defunct). 
 	uint16 direction;
 }; // class TileCheck
 
 /*!****************************************************************************
- * \brief A container class for node information in pathfinding
+ * \brief A container class for node information in pathfinding.
  *
- * This class is used in the MapMode#_FindPath() to find an optimal path from
- * a source node to a destination node.
+ * This class is used in the MapMode#_FindPath() function to find an optimal 
+ * path from a source node to a destination node.
  *****************************************************************************/
 class TileNode {
 public:
-	//! The row index of the node tile.
+	//! \brief Tile coordinates for this node (in X,Y,Z / R,C,A format).
+	//@{
 	int16 row;
-	//! The column index of the node tile
 	int16 col;
-	//! The total score for this node.
+	uint8 altitude;
+	//@}
+	
+	//! \brief Information used to assign the node a score on the path.
+	//@{
+	//! The total score for this node (f = g + h).
 	int16 f_score;
 	//! The score for this node relative to the source.
 	int16 g_score;
-	//! The estimated score for this node relative to the destination.
+	//! Manhattan distance from this node to the destination.
 	int16 h_score;
+	//@}
+	
+	//! Overloaded comparison operator checks that tile.row and tile.col are equal
+	bool operator==(const TileNode& that) const
+		{ return ((this->row == that.row) && (this->col == that.col)); }
 }; // class TileNode
 
 } // namespace private_map
 
 
 /*!****************************************************************************
- * \brief Class structure for representing the 2D vector that composes the map.
+ * \brief Represents a single tile on the map.
+ * 
+ * The image(s) a tile uses aren't actually stored within this class. They are
+ * stored in the MapMode#_tile_images vector, and this class contains three
+ * indices to images in that vector.
+ * 
  *****************************************************************************/
 class MapTile {
 public:
-	//! Index to a lower layer tile in the MapMode tile_frames vector.
+	//! \name Tile Layer Indeces
+	//! \brief Indeces to MapMode#_tile_images, mapping to the three tile layers.
+	//! \note A value less than zero means that no image is registered to that tile layer.
+	//@{
 	int16 lower_layer;
-	//! Index to a middle layer tile in the MapMode tile_frames vector.
 	int16 middle_layer;
-	//! Index to an upper layer tile in the MapMode tile_frames vector.
 	int16 upper_layer;
+	//@}
+	//! \name Tile Events
+	//! \brief Events registered to the map tile, sorted by event type.
+	//! \note A value of 255 means that no event is registered to the tile.
+	//@{
+	uint8 arrive_event;
+	uint8 depart_event;
+	uint8 confirm_event;
+	//@}
 	//! A bit-mask for indicating whether a tile is walkable on each altitude level.
 	uint8 walkable;
 	//! A bit-mask for indicating that a tile is occupied by an object.
 	uint8 occupied;
-	//! A bit-mask indicating various tile properties.
-	uint8 properties;
-	//! The map event (if any) registered to this tile.
-	int16 event;
 	
 	MapTile() 
-		{ lower_layer = 0; middle_layer = 0; upper_layer = 0; 
-		  walkable = 0; occupied = 0; properties = 0; event = 0; }
+		{ lower_layer = -1; middle_layer = -1; upper_layer = -1;  
+		  arrive_event = 255; depart_event = 255; confirm_event = 255; 
+		  walkable = 0; occupied = 0; }
 }; // class MapTile
 
 /*!****************************************************************************
@@ -210,26 +232,26 @@ public:
  * you plan to immediately push it on top of the game stack.
  *****************************************************************************/
 class MapMode : public hoa_engine::GameMode {
+	friend class MapSprite;
 public:
 	MapMode();
 	~MapMode();
 	
-	//! Resets appropriate class members. Called whenever MapMode is made the active game mode.
+	//! Resets appropriate class members. Called whenever the MapMode object is made the active game mode.
 	void Reset();
 	//! Updates the game and calls various sub-update functions depending on the state of map mode.
 	//! \param new_time_elapsed The amount of milliseconds that have elapsed since the last call to this function.
 	void Update(uint32 new_time_elapsed);
 	//! Handles the drawing of everything on the map and makes sub-draw function calls as appropriate.
 	void Draw();
-	
 	//! Fills in all the map structures from a Lua data file.
-	void _LoadMap();
+	void LoadMap();
 private:
-	friend class MapSprite;
+
 	
 	//! The name of the map, as will be read by the player in-game.
 	hoa_utils::ustring _map_name;
-	//! Indicates a special conditions that the map is in (e.g. a dialogue is taking place)
+	//! Indicates special conditions that the map is currently in (e.g. a dialogue is taking place)
 	uint8 _map_state;
 	//! The time elapsed since the last Update() call to MapMode.
 	uint32 _time_elapsed;
@@ -237,58 +259,63 @@ private:
 	uint16 _row_count;
 	//! The number of tile columns in the map.
 	uint16 _col_count;
-	//! True if this map is to have random encounters.
+	//! When true, random enemy encounters may occur on the map.
 	bool _random_encounters;
 	//! The average number of steps the player takes before encountering an enemy.
 	uint32 _encounter_rate;
 	//! The remaining steps until the player meets their next party of foes.
 	uint32 _steps_till_encounter;
 
-	//! A 2D vector that represents the map itself.
+	//! A 2D vector that represents all of the map tiles.
 	std::vector<std::vector<MapTile> > _tile_layers;
-	//! The normal set of map objects.
+	//! The set of ground map objects.
 	std::vector<MapObject*> _ground_objects;
 	//! Objects that can be both walked under and above on (like bridges).
 	std::vector<MapObject*> _middle_objects;
-	//! Objects that are drawn above everything else.
+	//! Objects that are drawn in the sky above everything else.
 	std::vector<MapObject*> _sky_objects;
+	//! A "virtual sprite" that can serve as a camera, available for use in each map.
+	//! \note Usually though, the camera focuses on the player's sprite, not this object.
+	MapSprite *_map_camera;
 	//! A pointer to the map sprite that the map should focus on.
 	MapSprite *_focused_object;
-	//! A "virtual sprite" that serves as a camera, available for use in each map.
-	MapSprite *_virtual_sprite;
+	//! Contains the map sprites for all members in the player's party.
+	std::vector<MapSprite*> _party_sprites;
+
 	
-	//! Retains information needed to draw the next map frame.
+	//! Holds and processes information needed to draw the next map frame.
 	private_map::MapFrame _draw_info;
 	
-	//! A vector containing the image for each map tile and frame.
-	std::vector<hoa_video::StillImage> _map_tiles;
-	//! The music that we would like available on the map.
+	//! A vector containing the image for each map tile, both still and animate.
+	std::vector<hoa_video::ImageDescriptor*> _tile_images;
+	//! The music that we would like to have available on the map.
 	std::vector<hoa_audio::MusicDescriptor> _map_music;
-	//! The specific sounds that the map needs available.
+	//! The sounds that the map needs available.
 	std::vector<hoa_audio::SoundDescriptor> _map_sound;
 	
+	//! The dialogue menu used by map mode.
+	hoa_video::StillImage _dialogue_menu;
 	//! The window for sprite dialogues.
 	hoa_video::MenuWindow _dialogue_window;
 	//! The textbox for sprite dialogues.
 	hoa_video::TextBox _dialogue_textbox;
-	//! A vector of all the NPC map sprites that participate in this dialogue
-	std::vector<MapSprite*> _dialogue_speakers;
-	//! The dialogue menu used by map mode.
-	hoa_video::StillImage _dialogue_menu;
 	//! A pointer to the lines of the current dialogue.
 	std::vector<std::string> *_dialogue_text;
 	//! The index to the current line of dialogue.
 	uint32 _dialogue_line;
 	
-//	 vector<MapEvent> _map_events;
+	//! The interface to the file which contains all the map's stored data, sans unicode text.
+	hoa_data::ReadDataDescriptor _map_data;
+	//! The data file which contains all of the on-screen text.
+	hoa_data::ReadDataDescriptor _map_text;
+	
 //	std::vector<hoa_global::GEnemy> _map_enemies;
 	
 	//! Updates the focused player sprite and processes user input.
 	//! \param *player_sprite A pointer to the sprite to update.
 	void _UpdatePlayer(MapSprite *player_sprite);
 	//! Updates a NPC sprite.
-	//! \param *npc A pointer to the sprite to update.
-	void _UpdateNPC(MapSprite *npc);
+
 	/*! 
 	 *  Updates the MapMode#_virtual_sprite class member.
 	 *
@@ -297,13 +324,9 @@ private:
 	void _UpdateVirtualSprite();
 
 	//! Updates the map when in the explore state.
-	void _UpdateExploreState();
+	void _UpdateExplore();
 	//! Updates the map when in the dialogue state.
-	void _UpdateDialogueState();
-	//! Updates the map when in the script state.
-	void _UpdateScriptState();
-	//! Updates the movement of all map NPCs.
-	void _UpdateNPCMovement();
+	void _UpdateDialogue();
 
 	//! Calculates information about how to draw the next map frame.
 	void _GetDrawInfo();
@@ -325,7 +348,7 @@ private:
 	 * An interaction may be either an event bound to the tile or another
 	 * map object/sprite occupying that tile.
 	 */
-	uint32 _CheckInteraction(const private_map::TileCheck& tcheck);
+	// uint32 _CheckInteraction(const private_map::TileCheck& tcheck);
 	/*!
 	 * \brief Determine which object is occuping a given tile
 	 * \param &tcheck Contains information about the occupied tile in question.
@@ -337,7 +360,9 @@ private:
 	 * \param *sprite A pointer to the sprite who will use the path (also contains the source location).
 	 * \param &tdest The destination tile information, including row, column, and altitude information.
 	 */
-	void _FindPath(const MapSprite* sprite, const private_map::TileNode& destination);
+	void _FindPath(const MapSprite* sprite, 
+	               const private_map::TileNode& destination, 
+	               std::vector<private_map::TileNode> &path);
 }; // class MapMode
 
 } // namespace hoa_map;

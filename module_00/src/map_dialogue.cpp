@@ -39,11 +39,37 @@ using namespace hoa_menu;
 
 namespace hoa_map {
 
-MapDialogue::MapDialogue() {
-	if (MAP_DEBUG) cout << "MAP: MapDialogue constructor invoked" << endl;
+// ****************************************************************************
+// ********************** SpriteDialogue Class Functions **********************
+// ****************************************************************************
+
+SpriteDialogue::SpriteDialogue() {
+	if (MAP_DEBUG) cout << "MAP: SpriteDialogue constructor invoked" << endl;
 	_next_line = 0;
 	// Don't set to false until we actually have some lines of dialogue
-	_seen = true;
+	_seen_all = true;
+}
+
+
+
+SpriteDialogue::~SpriteDialogue() {
+	if (MAP_DEBUG) cout << "MAP: SpriteDialogue destructor invoked" << endl;
+}
+
+
+
+void SpriteDialogue::AddLine(hoa_utils::ustring txt) {
+	SpriteText new_dialogue;
+	//new_dialogue._text.push_back(txt);
+	_lines.push_back(new_dialogue);
+}
+
+// ****************************************************************************
+// *********************** MapDialogue Class Functions ************************
+// ****************************************************************************
+
+MapDialogue::MapDialogue() {
+	if (MAP_DEBUG) cout << "MAP: MapDialogue constructor invoked" << endl;
 }
 
 

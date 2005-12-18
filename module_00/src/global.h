@@ -27,10 +27,8 @@
 #ifndef __GLOBAL_HEADER__
 #define __GLOBAL_HEADER__
 
-#include "utils.h"
-#include <vector>
-#include <SDL/SDL.h>
 #include "defs.h"
+#include "utils.h"
 
 //! All calls to global code are wrapped in this namespace.
 namespace hoa_global {
@@ -575,10 +573,6 @@ private:
 	std::vector<GSkill> _support_skills;
 	//! The (four) attack points of the character.
 	std::vector<GAttackPoint> _attack_points;
-	//! The frame images for the character's map sprite.
-	std::vector<hoa_video::StillImage> _map_frames;
-	//! The frame images for the character's battle sprite.
-	std::vector<hoa_video::StillImage> _battle_frames;
 	//! The current number of hit points of the character.
 	uint32 _hit_points;
 	//! The maximum number of hit points the character may have.
@@ -599,10 +593,15 @@ private:
 	uint32 _intelligence;
 	//! The character's agility index.
 	uint32 _agility;
+	
+	//! The frame images for the character's map sprite.
+	hoa_map::MapSprite *_map_sprite;
+	//! The frame images for the character's battle sprite.
+	std::vector<hoa_video::StillImage> _battle_frames;
 public:
 	GCharacter(std::string na, std::string fn, uint32 id);
 	~GCharacter();
-
+	
 	//! \name Weapon and Armor Equip Functions
 	//@{
 	//! \brief Swaps in and out equipment on the character.
@@ -614,10 +613,7 @@ public:
 	GArmor* EquipArmsArmor(GArmor *_new_eq);
 	GArmor* EquipLegsArmor(GArmor *_new_eq);
 	//@}
-
-	//! Loads the character's various map and battle frame images from memory.
-	void LoadFrames();
-
+	
 	//! \name Public Member Access Functions
 	//@{
 	//! \brief Used for setting and getting the values of the various class members.
@@ -627,7 +623,6 @@ public:
 	std::string GetFilename() { return _filename; }
 	void SetID(uint32 id) { _char_id = id; }
 	uint32 GetID() { return _char_id; }
-	std::vector<hoa_video::StillImage>* GetMapFrames() { return &_map_frames; }
 	void SetHP(uint32 hp) { _hit_points = hp; }
 	uint32 GetHP() { return _hit_points; }
 	void SetMaxHP(uint32 max_hp) { _max_hit_points = max_hp; }
