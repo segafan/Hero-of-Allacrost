@@ -26,6 +26,9 @@ fi
 AM_CONDITIONAL([COND_EDITOR], [test "$enable_editor" = yes])
 
 dnl Check for libraries.
+AC_CHECK_LIB([openal], [alGetError], [], \
+	[echo "You need to install the OpenAL library."
+	 exit -1])
 AC_CHECK_LIB([GL], [glEnable], [], \
 	[echo "You need to install the GL library."
 	 exit -1])
