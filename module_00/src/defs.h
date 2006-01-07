@@ -116,6 +116,20 @@ namespace hoa_battle {
 	class AilmentEffect;
 	class StatusEffect;
 	class BattleMode;
+	
+	class BattleAction;
+	class MoveAction;
+	class MoveRelativeToCurrentLocation;
+	class MoveRelativeToOrigin;
+	class MoveRelativeToPosition;
+	class MoveAbsolute;
+	class PerformSkill;
+	class PerformVisualEffect;
+	class PerformAudioEffect;
+	class PlayCharacterAnimation;
+	class DisplaySkillEffects;
+	class RetreatAction;
+	class FinishSkill;
 }
 
 // Menu mode declarations, see menu.h/cpp
