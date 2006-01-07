@@ -60,17 +60,16 @@
 #include <string.h>   // C string manipulation functions like strcmp
 
 #ifdef _WIN32
-	#define strcasecmp stricmp  // for some reason, case-insensitive string compare is called
-	                            // strcasecmp on linux and stricmp on windows
+	#define strcasecmp stricmp  // for some reason, case-insensitive string compare is called strcasecmp on linux and stricmp on windows
 #endif
 
 
 /*! \name Allacrost Integer Types.
  *  \brief These are the integer types you should use. Use of int, short, etc. is forbidden!
- *  
+ *
  *  These types are just renamed types from SDL, because we don't like their named types.
  */
-//@{ 
+//@{
 typedef Sint32  int32;
 typedef Uint32  uint32;
 typedef Sint16  int16;
@@ -79,8 +78,13 @@ typedef Sint8   int8;
 typedef Uint8   uint8;
 //@}
 
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+	const int32 UTILS_SYSTEM_ENDIAN = 1;
+#else
+	const int32 UTILS_SYSTEM_ENDIAN = 0;
+#endif
 
-//! Contains utility code used across the entire 
+//! Contains utility code used across the entire
 namespace hoa_utils {
 
 class UnicodeString;
@@ -285,26 +289,26 @@ public:
 
 	UnicodeString();
 	UnicodeString(const uint16 *);
-	
-	
+
+
 	/*!
 	 *  \brief clears to empty string
 	 */
 	void clear();
-	
-	
+
+
 	/*!
 	 *  \brief returns true if string's empty
-	 */	
+	 */
 	bool empty() const;
-	
+
 
 	/*!
 	 *  \brief returns length of string
 	 */
 	size_t length() const;
-	
-	
+
+
 	/*!
 	 *  \brief returns length of string (synonym for length())
 	 */
@@ -315,40 +319,40 @@ public:
 	 *  \brief returns a substring, starting at element pos, and n elements long
 	 *  \note  this function will only fail if pos is beyond the range of the string
 	 *         In this case, the std::out_of_range exception is thrown
-	 */	
+	 */
 	UnicodeString substr(size_t pos=0, size_t n=npos) const;
-	
+
 
 	UnicodeString & operator += (uint16 c);
-	UnicodeString & operator += (const UnicodeString &s);	
+	UnicodeString & operator += (const UnicodeString &s);
 	UnicodeString & operator = (const UnicodeString &s);
-	
-	
+
+
 	/*!
 	 *  \brief searches for a character within the string, starting at element pos.
 	 *  \return npos if nothing is found, or the starting index of the substring
-	 */	
+	 */
 	size_t find(uint16 c, size_t pos=0) const;
 
 
 	/*!
 	 *  \brief searches for a substring within the string, starting at element pos.
 	 *  \return npos if nothing is found, or the starting index of the substring
-	 */	
+	 */
 	size_t find(const UnicodeString &s, size_t pos=0) const;
-	
+
 
 	/*!
 	 *  \brief npos is the largest possible value of size_t, namely -1 (0xFFFFFFFF on most machines)
-	 */	
+	 */
 	static const size_t npos;
 
 
 	/*!
 	 *  \brief returns a raw pointer to the string
-	 */	
+	 */
 	const uint16 * c_str() const;
-	
+
 
 	uint16 & operator [] (size_t pos);
 	const uint16 & operator [] (size_t pos) const;
@@ -368,15 +372,15 @@ private:
  *  Insertion sort should *only* be used for vectors that are already nearly sorted, or
  *  for vectors of size 10 or less. Otherwise this algorithm is computationally expensive
  *  and you should choose another sorting algorithm.
- *  
+ *
  *  A good example of code that uses this function can be found in map.cpp, which sorts map
  *  objects every frame. Because map objects change position slowly, there is usually no change
  *  or little relative change in sorting order from the previous pass.
- *  
+ *
  *  \note The type of element that is passed should have its > and = operators functionally
  *  correct (ie, if T is a class, you must overload these operators). In general, its good
  *  practice if you overload all comparison operators for these types.
- *  
+ *
  *  \note This function will not compile if you try to invoke it with a vector of pointers to
  *  class-type objects.
  */

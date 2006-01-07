@@ -10,18 +10,13 @@
 /*!****************************************************************************
  * \file    audio.h
  * \author  Tyler Olsen, roots@allacrost.org
- * \date    Last Updated: August 23rd, 2005
+ * \date    Last Updated: October 29th, 2005
  * \brief   Header file for audio engine interface.
  *
  * This code provides an easy-to-use API for managing all music and sounds used
  * in the game.
  *
- * \note This code uses the SDL_mixer 1.2.5 extension library. The documentation
- *       for it may be found here: http://jcatki.no-ip.org/SDL_mixer/SDL_mixer.html
- *
- * \note There is more functionality in SDL_mixer than what is included here, like
- *       stereo panning, distance attenuation, and some other effects. These
- *       features will be available in future releases of this code.
+ * \note This code uses the OpenAL audio library. See http://www.openal.com/
  *****************************************************************************/
 
 #ifndef __AUDIO_HEADER__
@@ -29,338 +24,332 @@
 
 #include "utils.h"
 #include "defs.h"
+#include "audio_sound.h"
+#include "audio_music.h"
 #include <string>
-#include "SDL.h"
-#include <SDL/SDL_mixer.h>
+#include <AL/al.h>
+#include <AL/alc.h>
+#include <AL/alut.h>
 
-//! All calls to the audio engine are wrapped in this namespace.
 namespace hoa_audio {
 
-//! The singleton pointer responsible for all audio operations.
 extern GameAudio *AudioManager;
-//! Determines whether the code in the hoa_audio namespace should print debug statements or not.
 extern bool AUDIO_DEBUG;
 
-//! Pass this as the \c loop argument in an audio function and the music or sound will loop indefinitely.
-const int32 AUDIO_LOOP_FOREVER = -1;
-//! Pass this as the \c loop argument in an audio function and the music or sound will play only once.
-const int32 AUDIO_LOOP_ONCE = 0;
-//! Pass this as the \c fade_ms argument in an audio function for no fading in or out of the audio.
-const uint32 AUDIO_NO_FADE = 0;
-//! The default time to fade in/out music (500ms). Pass this as the \c fade_ms argument in an audio function.
-const uint32 AUDIO_DEFAULT_FADE = 500;
+//! \name Audio State Constants
+//! \brief Used to determine what state a sound or music piece is in.
+//@{
+const uint8 AUDIO_STATE_UNLOADED            = 0x01;
+const uint8 AUDIO_STATE_STOPPED             = 0x02;
+const uint8 AUDIO_STATE_PAUSED              = 0x04;
+const uint8 AUDIO_STATE_PLAYING             = 0x08;
+//@}
 
-//! An internal namespace to be used only within the audio engine. Don't use this namespace anywhere else!
+//! \name Audio Distance Model Constants
+//! \brief Used to set the distance model used by OpenAL.
+//! \note The default distance model is AUDIO_DISTANCE_INVERSE_CLAMPED
+//@{
+const uint8 AUDIO_DISTANCE_NONE             = 0x01;
+const uint8 AUDIO_DISTANCE_LINEAR           = 0x02;
+const uint8 AUDIO_DISTANCE_LINEAR_CLAMPED   = 0x04;
+const uint8 AUDIO_DISTANCE_INVERSE          = 0x08;
+const uint8 AUDIO_DISTANCE_INVERSE_CLAMPED  = 0x10;
+const uint8 AUDIO_DISTANCE_EXPONENT         = 0x20;
+const uint8 AUDIO_DISTANCE_EXPONENT_CLAMPED = 0x40;
+//@}
+
+//! \name Audio Error Codes
+//@{
+//! \brief These are error codes that the API user can query and handle as they wish.
+//! \note The default distance model is AUDIO_INVERSE_DISTANCE_CLAMPED
+const uint32 AUDIO_NO_ERRORS                  = 0x00000000;
+const uint32 AUDIO_OUT_OF_MEMORY              = 0x00000001;
+const uint32 AUDIO_INVALID_OPERATION          = 0x00000002;
+//! Indicates that too many sounds are being played concurrently.
+const uint32 AUDIO_SOURCE_OVERUSAGE           = 0x00000000;
+const uint32 AUDIO_SOURCE_ACQUISITION_FAILURE = 0x00000000;
+//@}
+
 namespace private_audio {
 
-//! The maximum number of songs that can be loaded at any given time.
-const uint32 MAX_CACHED_MUSIC = 5;
-//! The maximum number of sounds that can be loaded at any given time.
-const uint32 MAX_CACHED_SOUNDS = 50;
-//! The number of sound channels to open for audio mixing (music automatically has its own channel)
-const uint32 OPEN_CHANNELS = 16;
-//! Used in function calls for pausing audio, halting audio, or changing the volume
-const int32 ALL_CHANNELS = -1;
-//! When playing a sound, passing this argument will play it on any open channel
-const int32 ANY_OPEN_CHANNEL = -1;
+//! \name {Sound/Music}Descriptor Property Constants
+//@{
+//! \brief Constants used interally to check whether a property is in a default state or not.
+const uint16 SOURCE_BAD                = 0x0000;
+const uint16 SOURCE_OK                 = 0x0001;
+const uint16 SOURCE_LOOP               = 0x0002;
+const uint16 SOURCE_GAIN               = 0x0004;
+const uint16 SOURCE_PITCH              = 0x0008;
+const uint16 SOURCE_MIN_GAIN           = 0x0010;
+const uint16 SOURCE_MAX_GAIN           = 0x0020;
+const uint16 SOURCE_MAX_DISTANCE       = 0x0040;
+const uint16 SOURCE_REFERENCE_DISTANCE = 0x0080;
+const uint16 SOURCE_ROLLOFF_FACTOR     = 0x0100;
+const uint16 SOURCE_RELATIVE           = 0x0200;
+const uint16 SOURCE_CONE_INNER_ANGLE   = 0x0400;
+const uint16 SOURCE_CONE_OUTER_ANGLE   = 0x0800;
+const uint16 SOURCE_CONE_OUTER_GAIN    = 0x1000;
+//@}
+
+//! Converts the OpenAL enum error codes into a string.
+std::string GetALErrorString(ALenum err);
+//! Converts the OpenALC enum error codes into a string.
+std::string GetALCErrorString(ALenum err);
 
 /*!****************************************************************************
- *  \brief Used by the GameAudio class to internally represent a sound data item.
+ * \brief An internal class used for retaining audio state information.
  *
- *  You don't need to worry about this class and you should never create any instance of it.
+ * When a game mode is made to be the new active game mode of the stack, sometimes
+ * we will wish to retain information about the audio state. This is so that when
+ * we restore the previously active state again, the audio can resume as if no interruption
+ * had occured.
+ *
+ * This class takes a snapshot of the audio state and saves the following information:
+ *  - The listener properties
+ *  - The attenutation distance model
+ *  - Which sources are assigned to which buffers
+ *  - The source properties
+ *  - The position of each audio source that was playing when the call was made.
  *****************************************************************************/
-class SoundItem {
+class AudioState {
 public:
-	//! A unique ID number assigned for the sound item.
-	uint32 id;
-	//! A pointer to the sound data loaded in memory.
-	Mix_Chunk *sound;
-	//! The last time that the sound was referenced, in milliseconds.
-	uint32 time;
-};
-
-/*!****************************************************************************
- *  \brief Used by the GameAudio class to internally represent a music data item.
- *
- *  You don't need to worry about this class and you should never create any instance of it.
- *****************************************************************************/
-class MusicItem {
-public:
-	//! A unique ID number assigned for the music item.
-	uint32 id;
-	//! A pointer to the sound data loaded in memory.
-	Mix_Music *music;
-	//! The last time that the sound was referenced, in milliseconds.
-	uint32 time;
-};
-
-} // namespace local_audio
-
-/*!****************************************************************************
- *  \brief A container class for referring to sound objects.
- *
- *  \note If a sound is not referenced for a long time the audio engine may choose to evict
- *  it from the sound cache. However, if you try to play a sound not loaded into memory the
- *  audio engine will automatically load it and play it.
- *
- *  \note When a sound is loaded, the interal \c SoundDescriptor#id argument is the
- *  same value as the \c SoundItem#id argument in the SoundItem class used internally
- *  by the audio engine.
- *****************************************************************************/
-class SoundDescriptor {
-public:
-	SoundDescriptor() { _id = 0; }
-	//! \param fn The string to set the filename member to.
-	SoundDescriptor(std::string fn) { filename = fn; _id = 0; }
-	//! The filename for the sound, without the prefixed \c snd/ directory or \c .wav extension.
-	std::string filename;
+	AudioState();
+	~AudioState();
 private:
-	/*! \brief A unique id number for the sound.
-	 *
-	 *  Zero indicates it is not loaded in memory, however, the converse is not always true.
-	 */
-	uint32 _id;
+	ALenum _distance_model;
+	ALfloat _listener_gain;
+	ALfloat _listener_position[3];
+	ALfloat _listener_velocity[3];
+	ALfloat _listener_orientation[6];
 	friend class GameAudio;
 };
 
-/*!****************************************************************************
- *  \brief A container class for referring to music objects.
- *
- *  \note If the music is not referenced for a long time the audio engine may choose to evict
- *  it from the music cache. However, if you try to play music not loaded into memory the
- *  audio engine will automatically load it and play it.
- *
- *  \note When music is loaded, the interal \c MusicDescriptor#id argument is the
- *  same value as the \c MusicItem#id argument in the MusicItem class used internally
- *  by the audio engine.
- *****************************************************************************/
-class MusicDescriptor {
-public:
-	MusicDescriptor() { _id = 0; }
-	MusicDescriptor(std::string fn) { filename = fn; _id = 0; }
-	//! The filename for the music, without the prefixed \c mus/ directory or \c .ogg extension.
-	std::string filename;
-private:
-	/*! \brief A unique id number for the sound.
-	 *
-	 *  Zero indicates it is not loaded in memory, however, the converse is not always true.
-	 */
-	uint32 _id;
-	friend class GameAudio;
-};
+} // namespace private_audio
 
 /*!****************************************************************************
- *  \brief Manages all the game audio and serves as the API to the audio engine.
+ * \brief A singleton class for managing and interfacing with audio data.
  *
- *  The primary way you interface with this class is through the use of SoundDescriptor
- *  and MusicDescriptor class objects. You can think of them as pointers to audio data,
- *  although the details are hidden from the user of this API so its virtually impossible
- *  to cause a segmentation fault. However, be careful with setting the filenames of
- *  SoundDescriptor and MusicDescriptor because if you try to load in audio that has a
- *  misspelt filename (or refers to a missing file) this class will print out a strict
- *  error message about the issue and promptly exit the game, forcing you to fix the
- *  problem.
+ * This class manages all audio data allocation and manipulation. The OpenAL sources
+ * are wrapped inside this class and OpenAL buffers (which are represented by the
+ * SoundDescriptor and MusicObject classes) grab these sources as they need them. The
+ * buffers are stored in map structures so that audio data is not loaded when it already
+ * exists.
  *
- *  \note 1) This class is a singleton.
+ * \note 1) Operations that load audio data should be done during parts of the game
+ * when game modes are being created and destroyed. In other words, ideally you should
+ * load data into SoundSource and MusicSource objects when a new game mode class object is created,
+ * instead of creating them only immediately before they are needed.
  *
- *  \note 2) You'll notice that there are two definitions of the FreeMusic and
- *  FreeSound functions. The private version is used by the audio code. You
- *  should use the public version (obviously).
- *
- *  \note 3) Technically LoadMusic/Sound and FreeMusic/Sound can never be called and
- *  you can still play music normally without fear of segmentation faults. *HOWEVER*,
- *  it is good practice to call the Load*() functions when you have new audio you wish
- *  to play and the Free*() functions when you are done.
- *
- *  \note 4) In a normal class, music_id and sound_id would need to be static ints,
- *  but since this is a Singleton template class, we don't need to declare them static.
- *
- *  \note 5) For those interested, this class uses a LRU replacement algorithm when the
- *  caches are full and a new audio file needs to be loaded. The cache sizes are defined
- *  by the const ints at the top of this file.
- *
- *  \note 6) Recommended fade time for playing music and sound is 500ms. Use the
- *  AUDIO_DEFAULT_FADE constant
+ * \note 2) This audio engine uses smart memory management so that loaded audio
+ * data is not re-loaded if the user requests a load operation on the same
+ * data. Audio data is only freed once there are no more references to the
+ * data.
  *****************************************************************************/
 class GameAudio {
+	friend class AudioState;
+	friend class private_audio::SoundBuffer;
+	friend class private_audio::SoundSource;
+	friend class SoundDescriptor;
+	friend class private_audio::MusicBuffer;
+	friend class private_audio::MusicSource;
+	friend class MusicDescriptor;
 private:
-	SINGLETON_DECLARE(GameAudio); // Semi-colon not needed here, will it create a warning?
-	//! A boolean value that disables all audio functions when set to false.
-	bool _audio_on;
-	//! Indicates the array index of the song currently playing in music_cache.
-	int32 _current_track;
-	//! Retains the next id value to give a new music item.
-	uint32 _music_id;
-	//! Retains the next id value to give a new sound item.
-	uint32 _sound_id;
-	//! An array storing up to MAX_CACHED_MUSIC MusicItem objects loaded into memory.
-	private_audio::MusicItem _music_cache[private_audio::MAX_CACHED_MUSIC];
-	//! An array storing up to MAX_CACHED_SOUNDS SoundItem objects loaded into memory.
-	private_audio::SoundItem _sound_cache[private_audio::MAX_CACHED_SOUNDS];
+	SINGLETON_DECLARE(GameAudio)
 
-	/*!
-	 *  \brief  Finds and allocates the first free index found in the music_cache.
-	 *
-	 *  If no free indeces exist, uses LRU (least recently used) replacement to evict
-	 *  the oldest item in the cache.
-	 *
-	 *  \return The music_cache index allocated for the new music data.
-	 */
-	uint32 _AllocateMusicIndex();
-	/*!
-	 *  \brief Searches music_cache for an id that matches the function parameter.
-	 *  \param mus_id The id number to search the cache for.
-	 *  \return The cache index of the MusicItem with an id matching mus_id. Returns -1 if not found.
-	 */
-	int32 _FindMusicIndex(uint32 mus_id);
-	/*!
-	 *  \brief Frees a MusicItem in the music_cache.
-	 *  \param index The index in the music_cache to free.
-	 */
-	void _FreeMusic(uint32 index);
+	//! The audio device opened and being operated on by OpenAL.
+	ALCdevice *_device;
+	//! The OpenAL context using the device.
+	ALCcontext *_context;
 
-	/*!
-	 *  \brief  Finds and allocates the first free index found in the sound_cache.
+	//! The volume (gain) for the music source. Valid range is between 0.0f and 1.0f.
+	float _music_volume;
+	//! The volume (gain) for all sound sources. Valid range is between 0.0f and 1.0f.
+	float _sound_volume;
+
+	//! Retains all the errors that have occured on audio-related function calls, except for loading errors.
+	uint32 _audio_errors;
+
+	//! \name Containers for Audio Data
+	//! \brief STL maps are used to hold both music and sounds.
+	//@{
+	std::map<std::string, private_audio::MusicBuffer*> _music_buffers;
+	std::map<std::string, private_audio::SoundBuffer*> _sound_buffers;
+	//@}
+
+	//! The single source reserved for game music.
+	private_audio::MusicSource *_music_source;
+	//! All of the sources that are reserved for sound data.
+	std::list<private_audio::SoundSource*> _sound_sources;
+
+	// //! A map of the audio states we have saved. Probably will never be more than four or five elements.
+	// std::map<uint32, private_audio::AudioState> _saved_states;
+
+	/*! \name Buffer Retrieval Functions
+	 *  \brief Creates and loads new buffer data if the data is not already loaded.
+	 *  \param filename The filename of the file data to search for (not including the pathname or file extension).
+	 *  \return A pointer to the class object holding the new data. NULL may also be returned, indicating an error.
 	 *
-	 *  If no free indeces exist, uses LRU (least recently used) replacement to evict
-	 *  the oldest item in the cache.
-	 *
-	 *  \return The sound_cache index allocated for the new sound data.
+	 *  These functions are critical to ensuring efficient memory usage in the audio engine (in other words:
+	 *  making sure no more than one copy of audio data is loaded into the engine at any given time). When these
+	 *  functions are called, first the map of buffer objects is searched to see if the data is already found
+	 *  in there. If it is, a pointer to that object is returned. Otherwise, the function will attempt to create
+	 *  a new object and store that into the appropriate buffer object map. If that fails for some reason, the function
+	 *  will return NULL.
 	 */
-	uint32 _AllocateSoundIndex();
-	/*!
-	 *  \brief Searches sound_cache for an id that matches the function parameter.
-	 *  \param snd_id The id number to search the cache for.
-	 *  \return The cache index of the SoundItem with an id matching snd_id. Returns -1 if not found.
+	//@{
+	private_audio::SoundBuffer* _AcquireSoundBuffer(std::string filename);
+	private_audio::MusicBuffer* _AcquireMusicBuffer(std::string filename);
+	//@}
+
+	/*! \name Source Acquisition Functions
+	 *  \brief Retrieves an audio source that may be used for
+	 *  \return A pointer to a sound source that may be allocated. NULL may also be returned, indicating an error.
 	 */
-	int32 _FindSoundIndex(uint32 snd_id);
-	/*!
-	 *  \brief Frees a SoundItem in the sound_cache.
-	 *  \param index The index in the sound_cache to free.
+	//@{
+	private_audio::SoundSource* _AcquireSoundSource();
+	private_audio::MusicSource* _AcquireMusicSource();
+	//@}
+
+	/*! \name Source Release Functions
+	 *  \brief Releases an audio source from being allocated to a descriptor object.
+	 *  \param free_source A pointer to the audio source to free.
 	 */
-	void _FreeSound(uint32 index);
+	//@{
+	void _ReleaseSoundSource(private_audio::SoundSource* free_source);
+	void _ReleaseMusicSource(private_audio::MusicSource* free_source);
+	//@}
 
 public:
 	SINGLETON_METHODS(GameAudio);
-	/*!
-	 *  \brief Pauses both music and sound audio until ResumeAudio() is called.
+
+	/*! \brief Updates all streaming audio queues.
+	 *
+	 *  The purpose of this function is to refill buffers that are part of a streaming audio source. It
+	 *  is vital to prevent the player from hearing jumps or skips in the audio
+	 *
+	 *  \note This function is only called from one location: the main game loop. It should not be
+	 *  called anywhere else.
 	 */
+	void Update();
+
+	/*! \brief Returns a set of error codes and also clears the error code to a no-error state.
+	 *
+	 *  This is the standard CheckErrors() function as defined in the Allacrost code standard.
+	 *  The error code constants are listed at the top of this file in the Audio Error Codes
+	 *  group.
+	 */
+	uint32 CheckErrors()
+		{ uint32 return_code; return_code = _audio_errors; _audio_errors = AUDIO_NO_ERRORS; return return_code; }
+
+	/*! \name Volume Member Access Functions
+	 *  \brief Used for reading and modifying the volume of music/sound in the game.
+	 *
+	 *  These volume changes have a global effect (they modify the volume of all music/sound sources).
+	 *  There is currently no support to change the volume levels of individual sound or music
+	 *  sources. However, one can achieve the same effect by modifying the source properties and (in the
+	 *  case of single-channel audio) manipulating distance attenuation.
+	 *
+	 *  \note In OpenAL, the gain property of sources is essentially the volume.
+	 *
+	 *  \note In addition to these functions, you can also change the gain (volume) of the listener, which
+	 *  will effect the volume level of \c all audio heard in the game.
+	 */
+	//@{
+	float GetMusicVolume()
+		{ return _music_volume; }
+	float GetSoundVolume()
+		{ return _sound_volume; }
+	void SetMusicVolume(float vol);
+	void SetSoundVolume(float vol);
+	//@}
+
+	/*! \name Global Audio Manipulation Functions
+	 *  \brief Performs specified operation on all active sounds and music.
+	 *
+	 *  These functions will only effect audio data that is in the state(s) specified below:
+	 *  PauseAudio()    <==>   playing state
+	 *  ResumeAudio()   <==>   paused state
+	 *  StopAudio()     <==>   playing state
+	 *  RewindAudio()   <==>   playing state, paused state
+	 */
+	//@{
 	void PauseAudio();
-	/*!
-	 *  \brief Un-pauses both music and sound audio.
-	 */
 	void ResumeAudio();
+	void StopAudio();
+	void RewindAudio();
+	//@}
 
-	/*!
-	 *  \brief Loads a music audio file and allocates memory for its content.
-	 *
-	 *  The filename member of md should be set prior to calling this function.
-	 *  This function modifies the id member of md, unless it is determined that
-	 *  the music is already loaded in music_cache. The function will force the
-	 *  game to exit if it was unsuccessful.
-	 *
-	 *  \param &md A reference to the MusicDescriptor to load.
+	/*! \name Global Sound Manipulation Functions
+	 *  \brief Performs specified operation on all active sounds.
 	 */
-	void LoadMusic(MusicDescriptor& md);
-	/*!
-	 *  \brief Plays the piece of music specified by the argument.
-	 *
-	 *  If the audio engine can not find the music referrenced by md in the music_cache,
-	 *  it will be loaded in and then played. Refer to the hoa_audio namespace constants
-	 *  for common values to pass into the fade_ms and loop parameters.
-	 *
-	 *  \param &md     The MusicDescriptor object to play.
-	 *  \param fade_ms The amount of time to fade out the current music, and then fade in the new music by.
-	 *  \param loop    Specifies how many times the music should be looped.
-	 */
-	void PlayMusic(MusicDescriptor& md, uint32 fade_ms, int32 loop);
-	/*!
-	 *  \brief Stops the currently playing music.
-	 *  \param fade_ms The amount to fade out the playing music by, in milliseconds.
-	 */
-	void StopMusic(uint32 fade_ms);
-	/*!
-	 *  \brief Frees an item from the music_cache specified by the argument.
-	 *
-	 *  If the item is not found in the cache, the function will return without causing harm.
-	 *
-	 *  \param &md A reference to the music piece to evict from the music_cache.
-	 */
-	void FreeMusic(MusicDescriptor& md);
-	/*!
-	 *  \brief Sets the volume of the music. The valid range is 0 to 128 inclusive.
-	 *
-	 *  If a value is passed to this function that exceeds the acceptable bounds of the volume level,
-	 *  the function will set the volume to the closest acceptable value (either 0 or 128).
-	 *
-	 *  \param value The numerical value to set the music volume to.
-	 */
-	void SetMusicVolume(int32 value);
-//	/*!
-//	 *  \brief Returns the current volume level of the music (0 to 128 inclusive).
-//	 *  \return The volume level of the music.
-//	 */
-//	uint32 GetMusicVolume();
-	/*!
-	 *  \brief Prints details about what is currently stored in music_cache to standard output.
-	 *  \note This function is for debugging purposes \b only! You normally should never call it.
-	 */
-	void PrintMusicCache();
+	//@{
+	//! \note Make sure to resume these sounds, otherwise the sources that they hold will never be released!
+	void PauseAllSounds();
+	void ResumeAllSounds();
+	void StopAllSounds();
+	void RewindAllSounds();
+	//@}
 
-/*!
-	 *  \brief Loads a sound audio file and allocates memory for its content.
+	/*! \name Global Music Manipulation Functions
+	 *  \brief Performs specified operation on all active music.
 	 *
-	 *  The filename member of sd should be set prior to calling this function.
-	 *  This function modifies the id member of sd, unless it is determined that
-	 *  the sound is already loaded in sound_cache. The function will force the
-	 *  game to exit if it was unsuccessful.
-	 *
-	 *  \param &sd A reference to the SoundDescriptor to load.
+	 *  Since there is only one music source, these functions only affect that source. They are equivalent
+	 *  to calling the {Pause/Resume/Stop/Rewind}Music functions on the MusicDescriptor which currently
+	 *  has posession of the source.
 	 */
-	void LoadSound(SoundDescriptor& sd);
-	/*!
-	 *  \brief Plays the sound piece specified by the argument.
-	 *
-	 *  If the audio engine can not find the sound referrenced by sd in the music_cache,
-	 *  it will be loaded in and then played. Refer to the hoa_audio namespace constants
-	 *  for common values to pass into the fade_ms and loop parameters.
-	 *
-	 *  \param &md     The SoundDescriptor object to play.
-	 *  \param fade_ms The amount of time to fade in the new sound by.
-	 *  \param loop    Specifies how many times the sound should be looped.
+	//@{
+	void PauseAllMusic();
+	void ResumeAllMusic();
+	void StopAllMusic();
+	void RewindAllMusic();
+	//@}
+
+	/*! \name Listener Property Access Functions
+	 *  \brief Functions used for reading and  modifying the properties of the listener.
 	 */
-	void PlaySound(SoundDescriptor& sd, uint32 fade_ms, int32 loop);
-	/*!
-	 *  \brief Stops all currently playing sounds.
+	//@{
+// 	void GetListenerPosition(float[3] pos)
+// 		{ alGetListenerfv(AL_POSITION, pos); }
+// 	void GetListenerVelocity(float[3] vel)
+// 		{ alGetListenerfv(AL_VELOCITY, vel); }
+// 	float GetListenerGain(float gain)
+// 		{ float g; alGetListenerf(AL_GAIN, &g); return g; }
+// 	void GetListenerOrientation(float[6] ori)
+// 		{ alGetListenerfv(AL_ORIENTATION, ori); }
+// 	void SetListenerPosition(float[3] pos)
+// 		{ alListenerfv(AL_POSITION, pos); }
+// 	void SetListenerVelocity(float[3] vel)
+// 		{ alListenerfv(AL_VELOCITY, vel); }
+// 	void SetListenerGain(float gain)
+// 		{ alListenerf(AL_GAIN, gain); }
+// 	void SetListenerOrientation(float[6] ori)
+// 		{ alListenerfv(AL_ORIENTATION, ori); }
+	//@}
+
+	/*! \brief Gets a value indicating what distance model is currently being used by OpenAL.
+	 *  \return A value representing the distance model. Refer to the Audio Distance Model Constants.
 	 */
-	void StopSound();
-	/*!
-	 *  \brief Frees an item from the sound_cache specified by the argument.
-	 *
-	 *  If the item is not found in the cache, the function will return without causing harm.
-	 *
-	 *  \param &sd A reference to the sound piece to evict from the sound_cache.
+	uint8 GetDistanceModel();
+	/*! \brief Changes the distance model that will be used by OpenAL.
+	 *  \param model A value representing the distance model. Refer to the Audio Distance Model Constants.
+	 *  \note The new distance model will immediately take effect after this call.
 	 */
-	void FreeSound(SoundDescriptor& sd);
-	/*!
-	 *  \brief Sets the sound volume. The valid range is 0 to 128 inclusive.
-	 *
-	 *  If a value is passed to this function that exceeds the acceptable bounds of the volume level,
-	 *  the function will set the volume to the closest acceptable value (either 0 or 128).
-	 *
-	 *  \param value The numerical value to set the sound volume to.
+	void SetDistanceModel(uint8 model);
+
+
+
+	/*! \brief Saves the audio state onto an internal stack.
+	 *  \return
+	 *  The state data that is saved includes: properties of the listener, the distance model used for
+	 *  attenuation, and which SoundDescriptors and MusicObjects are allocated to which sources.
 	 */
-	void SetSoundVolume(int32 value);
-//	/*!
-//	 *  \brief Returns the current volume level of the sound (0 to 128 inclusive).
-//	 *  \return The volume level of the sound.
-//	 */
-//	int GetSoundVolume();
-	/*!
-	 *  \brief Prints details about what is currently stored in sound_cache to standard output.
-	 *  \note This function is for debugging purposes \b only! You normally should never call it.
-	 */
-	void PrintSoundCache();
+	// uint32 SaveAudioState();
+	//! Restores the audio state properties from the stack.
+	//! \param state_id The identification number of the state to retrieve.
+	// void RestoreAudioState(uint32 state_id);
+
+	//! Prints information related to the system's audio capabilities as seen by OpenAL.
+	void DEBUG_PrintInfo();
 }; // class GameAudio
 
 } // namespace hoa_audio
