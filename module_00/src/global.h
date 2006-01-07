@@ -293,19 +293,44 @@ private:
 	//! The amount of skill points (SP) that the skill consumes (zero is valid).
 	uint32 _sp_usage;
 	
-	//!!Added by visage on November 16, 2004
-	//! The battle animation mode to call when this skill is used
-	std::string _animation_mode;
+	uint32 _skill_type; //defined by the enums
+	
+	uint32 _attack;
+	uint32 _defense;
+	uint32 _support;
+	
+	/*
+	
+	Okay, if there is a warmup time when we select the skill,
+	we put the character straight into warmup mode, passing in a 
+	new SkillAction.  Otherwise, set them as having a new action.
+	This way, we don't have to hack up a warmupaction and cooldownaction.
+	
+	So upon selecting a skill from the battle mode gui, check if the
+	character should go into a warmup mode.  
+	
+	*/
+	uint32 _warmUpTime;
+	uint32 _coolDownTime;
+	
 	//! The level required to use this skill
 	uint32 _levelRequired; 
 	uint32 _numArguments;
-
+	
+	hoa_battle::Actor *_host;
+	std::vector<hoa_battle::Actor *> _arguments;
+	std::vector<hoa_battle::BattleAction *> _actions;
 public:
-	GSkill(std::string name, std::string animation, uint32 sp);
+	
+	GSkill(std::string name, uint32 sp);
 	GSkill();
-	GSkill(const GSkill&) {}
-	GSkill& operator=(const GSkill&) {}
 	~GSkill();
+	
+	void PerformSkill(hoa_battle::Actor *a, std::vector<hoa_battle::Actor *> args);
+	void AddBattleAction(hoa_battle::BattleAction *bsa);
+	
+	uint32 GetCooldownTime();
+	uint32 GetWarmupTime();
 };
 
 /*!****************************************************************************
@@ -420,7 +445,7 @@ private:
 	//! The height of the enemy sprite, in number of "virtual battle tiles".
 	uint32 _enemy_height;
 	//! The skill set that the enemy may choose from to take actions.
-	std::vector<GSkill> _enemy_skills;
+	std::vector<GSkill *> _enemy_skills;
 	//! The various attack points for the enemy.
 	std::vector<GAttackPoint> _attack_points;
 	//! The frame images for the enemy sprite.
@@ -529,8 +554,10 @@ public:
 	uint32 GetGrowthStrength() { return _growth_strength; }
 	uint32 GetGrowthIntelligence() { return _growth_intelligence; } 
 	uint32 GetGrowthAgility() { return _growth_agility; }
-	std::vector<GSkill> GetSkills() { return _enemy_skills; }
+	std::vector<GSkill *> GetSkills() { return _enemy_skills; }
 	std::vector<GAttackPoint> GetAttackPoints() { return _attack_points; }
+	
+	void AddSkill(GSkill *sk) { _enemy_skills.push_back(sk); }
 	//@}
 };
 
@@ -566,11 +593,11 @@ private:
 	//! The leg armor that the character currently has equipped.
 	GArmor *_eq_legs;
 	//! The attack skills the character can currently use.
-	std::vector<GSkill> _attack_skills;
+	std::vector<GSkill *> _attack_skills;
 	//! The defense skills the character can currently use.
-	std::vector<GSkill> _defense_skills;
+	std::vector<GSkill *> _defense_skills;
 	//! The support skills the character can currently use.
-	std::vector<GSkill> _support_skills;
+	std::vector<GSkill *> _support_skills;
 	//! The (four) attack points of the character.
 	std::vector<GAttackPoint> _attack_points;
 	//! The current number of hit points of the character.
@@ -644,11 +671,15 @@ public:
 	void SetAgility(uint32 agi) { _agility = agi; }
 	uint32 GetAgility() { return _agility; }
 	//!Added by visage November 16th
-	std::vector<GSkill> GetAttackSkills() { return _attack_skills; }
-	std::vector<GSkill> GetDefenseSkills() { return _defense_skills; }
-	std::vector<GSkill> GetSupportSkills() { return _support_skills; }
+	std::vector<GSkill *> GetAttackSkills() { return _attack_skills; }
+	std::vector<GSkill *> GetDefenseSkills() { return _defense_skills; }
+	std::vector<GSkill *> GetSupportSkills() { return _support_skills; }
 	
 	std::vector<GAttackPoint> GetAttackPoints() { return _attack_points; }
+	
+	void AddAttackSkill(GSkill *sk) { _attack_skills.push_back(sk); }
+	void AddDefenseSkill(GSkill *sk) { _defense_skills.push_back(sk); }
+	void AddSupportSkill(GSkill *sk) { _support_skills.push_back(sk); }
 	//@}
 };
 
