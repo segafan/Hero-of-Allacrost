@@ -18,7 +18,14 @@
 #include "global.h"
 #include "utils.h"
 #include "video.h"
+
+//<<<<<<< global.cpp
+#include "battle_actions.h"
+#include <string>
+//=======
+
 #include "map_objects.h"
+//>>>>>>> 1.22
 
 using namespace std;
 using namespace hoa_video;
@@ -141,9 +148,8 @@ GArmor::~GArmor() {}
 // ******************************** GSkill ************************************
 // ****************************************************************************
 
-GSkill::GSkill(string name, std::string animation, uint32 sp) {
+GSkill::GSkill(string name, uint32 sp) {
 	_skill_name = name;
-	_animation_mode = animation;
 	_sp_usage = sp;
 }
 
@@ -151,13 +157,41 @@ GSkill::GSkill(string name, std::string animation, uint32 sp) {
 
 GSkill::GSkill() {
 	_skill_name = "unknown";
-	_animation_mode = "unknown";
 	_sp_usage = 0;
 }
 
 
 
-GSkill::~GSkill() {}
+GSkill::~GSkill() {
+	for(unsigned int i = 0; i < _actions.size(); i++) {
+		delete _actions[i];
+	}
+}
+
+void GSkill::PerformSkill(hoa_battle::Actor *a, std::vector<hoa_battle::Actor *> args) {
+	_host = a;
+	//add all the actions to the player to perform
+	for(int i = 0; i < _arguments.size(); i++) {
+		_actions[i]->Initialize(this, a, args);
+		a->AddBattleAction(_actions[i]);
+	}
+	//this will destruct the skill
+	hoa_battle::FinishSkill *fa = new hoa_battle::FinishSkill();
+	fa->Initialize(this, a, args);
+	a->AddBattleAction(fa);
+}
+
+void GSkill::AddBattleAction(hoa_battle::BattleAction *bsa) {
+	_actions.push_back(bsa);
+}
+
+uint32 GSkill::GetCooldownTime() {
+	return _coolDownTime;
+}
+
+uint32 GSkill::GetWarmupTime() {
+	return _warmUpTime;
+}
 
 // ****************************************************************************
 // ****************************** GAttackPoint ********************************
@@ -245,6 +279,77 @@ GCharacter::~GCharacter() {
 	}
 }
 
+/*
+<<<<<<< global.cpp
+
+void GCharacter::LoadFrames() {
+	GameVideo *VideoManager = GameVideo::GetReference();
+	StillImage imd;
+	string full_name = "img/sprites/map/" + _filename;
+	imd.SetDimensions(1.0f, 2.0f);
+
+	imd.SetFilename(full_name + "_d1.jpg");
+	_map_frames.push_back(imd);
+	imd.SetFilename(full_name + "_d2.jpg");
+	_map_frames.push_back(imd);
+	imd.SetFilename(full_name + "_d3.jpg");
+	_map_frames.push_back(imd);
+	imd.SetFilename(full_name + "_d4.jpg");
+	_map_frames.push_back(imd);
+	imd.SetFilename(full_name + "_d5.jpg");
+	_map_frames.push_back(imd);
+
+	imd.SetFilename(full_name + "_u1.jpg");
+	_map_frames.push_back(imd);
+	imd.SetFilename(full_name + "_u2.jpg");
+	_map_frames.push_back(imd);
+	imd.SetFilename(full_name + "_u3.jpg");
+	_map_frames.push_back(imd);
+	imd.SetFilename(full_name + "_u4.jpg");
+	_map_frames.push_back(imd);
+	imd.SetFilename(full_name + "_u5.jpg");
+	_map_frames.push_back(imd);
+
+	imd.SetFilename(full_name + "_l1.jpg");
+	_map_frames.push_back(imd);
+	imd.SetFilename(full_name + "_l2.jpg");
+	_map_frames.push_back(imd);
+	imd.SetFilename(full_name + "_l3.jpg");
+	_map_frames.push_back(imd);
+	imd.SetFilename(full_name + "_l4.jpg");
+	_map_frames.push_back(imd);
+	imd.SetFilename(full_name + "_l5.jpg");
+	_map_frames.push_back(imd);
+	imd.SetFilename(full_name + "_l6.jpg");
+	_map_frames.push_back(imd);
+	imd.SetFilename(full_name + "_l7.jpg");
+	_map_frames.push_back(imd);
+
+	imd.SetFilename(full_name + "_r1.jpg");
+	_map_frames.push_back(imd);
+	imd.SetFilename(full_name + "_r2.jpg");
+	_map_frames.push_back(imd);
+	imd.SetFilename(full_name + "_r3.jpg");
+	_map_frames.push_back(imd);
+	imd.SetFilename(full_name + "_r4.jpg");
+	_map_frames.push_back(imd);
+	imd.SetFilename(full_name + "_r5.jpg");
+	_map_frames.push_back(imd);
+	imd.SetFilename(full_name + "_r6.jpg");
+	_map_frames.push_back(imd);
+	imd.SetFilename(full_name + "_r7.jpg");
+	_map_frames.push_back(imd);
+
+	VideoManager->BeginImageLoadBatch();
+	for (uint32 i = 0; i < _map_frames.size(); i++) {
+		VideoManager->LoadImage(_map_frames[i]);
+	}
+	VideoManager->EndImageLoadBatch();
+}
+
+=======
+*/
+//>>>>>>> 1.22
 // ****************************************************************************
 // ***************************** GameInstance *********************************
 // ****************************************************************************
