@@ -28,7 +28,8 @@ endif
 
 bin_PROGRAMS = allacrost $(EDITOR_BIN)
 
-allacrost_SOURCES = src/audio.cpp src/battle.cpp src/battle_actions.cpp src/boot.cpp src/data.cpp \
+allacrost_SOURCES = src/audio.cpp src/audio_sound.cpp src/audio_music.cpp \
+        src/battle.cpp src/battle_actions.cpp src/boot.cpp src/data.cpp \
 	src/engine.cpp src/global.cpp src/main.cpp src/map_dialogue.cpp \
 	src/map_objects.cpp src/map.cpp src/menu.cpp src/pause.cpp src/quit.cpp \
 	src/scene.cpp src/utils.cpp src/video/draw.cpp src/video/fade.cpp \
