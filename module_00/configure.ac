@@ -50,9 +50,10 @@ AC_CHECK_LIB([SDL_mixer], [Mix_OpenAudio], [], \
 AC_CHECK_LIB([SDL_ttf], [TTF_Init], [], \
 	[echo "You need to install the SDL_ttf library."
 	 exit -1])
-AC_CHECK_LIB([lua], [lua_open], [], \
-	[echo "You need to install the lua library."
-	 exit -1])
+AC_CHECK_LIB([lua50], [lua_open], [], \
+	[AC_CHECK_LIB([lua], [lua_open], [], \
+		[echo "You need to install the lua library."
+		 exit -1])])
 AC_CHECK_LIB([lualib], [luaopen_table], [], \
 	[echo "You need to install the lualib library."
 	 exit -1])

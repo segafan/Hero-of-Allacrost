@@ -21,6 +21,9 @@
 /* Define to 1 if you have the `lua' library (-llua). */
 #undef HAVE_LIBLUA
 
+/* Define to 1 if you have the `lua50' library (-llua50). */
+#undef HAVE_LIBLUA50
+
 /* Define to 1 if you have the `lualib' library (-llualib). */
 #undef HAVE_LIBLUALIB
 
