@@ -10,7 +10,7 @@
 /*!****************************************************************************
  * \file    map_actions.cpp
  * \author  Tyler Olsen, roots@allacrost.org
- * \date    Last Updated: August 20th, 2005
+ * \date    Created: December 20th, 2005
  * \brief   Source file for map mode actions.
  *****************************************************************************/
 
@@ -42,31 +42,30 @@ namespace hoa_map {
 namespace private_map {
 
 // ******************** ActionPathMove ***********************
-/*
+
 void ActionPathMove::Load(uint32 table_key) {
-	ReadDataDescriptor &read_data = _sprite->_current_map->_map_data;
-	
+	ReadDataDescriptor &read_data = sprite->current_map->_map_data;
+
 	read_data->OpenTable(table_key);
-	_destination.row = read_data->ReadInt(row);
-	_destination.col = read_data->ReadInt(col;
-	_destination.altitude = read_data->ReadInt(altitude);
+	destination.row = read_data->ReadInt(row);
+	destination.col = read_data->ReadInt(col;
+	destination.altitude = read_data->ReadInt(altitude);
 	read_data->CloseTable();
-	
+
 	if (read_data->GetError() != DATA_NO_ERRORS) {
-		if (MAP_DEBUG)
-			cerr << "MAP ERROR: Failed to load data for an ActionPathMove object" << endl;
+		if (MAP_DEBUG) cerr << "MAP ERROR: Failed to load data for an ActionPathMove object" << endl;
 	}
 }
 
 void ActionPathMove::Process() {
 	// Check if we already have a previously computed path and, if it is still valid, use it.
 	if (!path.empty()) {
-		
+
 	}
-	
+
 	// Find a new path from scratch.
-	
-}*/
+
+}
 
 
 

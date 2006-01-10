@@ -237,7 +237,7 @@ GEnemy::~GEnemy() { }
 // Simulate the leveling up of experience for the enemy from its base stats.
 void GEnemy::LevelSimulator(uint32 lvl) {
 	_experience_level = lvl;
-	
+
 	// Assign the initial values of the stats (== base + growth * lvl)
 	_max_hit_points = _base_hit_points + (_growth_hit_points * lvl);
 	_experience_points = _base_experience_points + (_growth_experience_points * lvl);
@@ -264,9 +264,66 @@ GCharacter::GCharacter(std::string na, std::string fn, uint32 id) {
 	_filename = fn;
 	_char_id = id;
 
-	_map_sprite = new MapSprite();
-	_map_sprite->SetFilename("img/sprites/map/claudius");
-	_map_sprite->LoadFrames();
+	// Prepare standard sprite animation frames (24 count)
+	StillImage imd;
+	imd.SetDimensions(1.0f, 2.0f);
+	imd.SetFilename("img/sprites/map/" + _filename + "_d0.png");
+	_map_frames.push_back(imd);
+	imd.SetFilename("img/sprites/map/" + _filename + "_d1.png");
+	_map_frames.push_back(imd);
+	imd.SetFilename("img/sprites/map/" + _filename + "_d2.png");
+	_map_frames.push_back(imd);
+	imd.SetFilename("img/sprites/map/" + _filename + "_d3.png");
+	_map_frames.push_back(imd);
+	imd.SetFilename("img/sprites/map/" + _filename + "_d4.png");
+	_map_frames.push_back(imd);
+	imd.SetFilename("img/sprites/map/" + _filename + "_d5.png");
+	_map_frames.push_back(imd);
+
+	imd.SetFilename("img/sprites/map/" + _filename + "_u0.png");
+	_map_frames.push_back(imd);
+	imd.SetFilename("img/sprites/map/" + _filename + "_u1.png");
+	_map_frames.push_back(imd);
+	imd.SetFilename("img/sprites/map/" + _filename + "_u2.png");
+	_map_frames.push_back(imd);
+	imd.SetFilename("img/sprites/map/" + _filename + "_u3.png");
+	_map_frames.push_back(imd);
+	imd.SetFilename("img/sprites/map/" + _filename + "_u4.png");
+	_map_frames.push_back(imd);
+	imd.SetFilename("img/sprites/map/" + _filename + "_u5.png");
+	_map_frames.push_back(imd);
+
+	imd.SetFilename("img/sprites/map/" + _filename + "_l0.png");
+	_map_frames.push_back(imd);
+	imd.SetFilename("img/sprites/map/" + _filename + "_l1.png");
+	_map_frames.push_back(imd);
+	imd.SetFilename("img/sprites/map/" + _filename + "_l2.png");
+	_map_frames.push_back(imd);
+	imd.SetFilename("img/sprites/map/" + _filename + "_l3.png");
+	_map_frames.push_back(imd);
+	imd.SetFilename("img/sprites/map/" + _filename + "_l4.png");
+	_map_frames.push_back(imd);
+	imd.SetFilename("img/sprites/map/" + _filename + "_l5.png");
+	_map_frames.push_back(imd);
+
+	imd.SetFilename("img/sprites/map/" + _filename + "_r0.png");
+	_map_frames.push_back(imd);
+	imd.SetFilename("img/sprites/map/" + _filename + "_r1.png");
+	_map_frames.push_back(imd);
+	imd.SetFilename("img/sprites/map/" + _filename + "_r2.png");
+	_map_frames.push_back(imd);
+	imd.SetFilename("img/sprites/map/" + _filename + "_r3.png");
+	_map_frames.push_back(imd);
+	imd.SetFilename("img/sprites/map/" + _filename + "_r4.png");
+	_map_frames.push_back(imd);
+	imd.SetFilename("img/sprites/map/" + _filename + "_r5.png");
+	_map_frames.push_back(imd);
+
+	VideoManager->BeginImageLoadBatch();
+	for (uint32 i = 0; i < _map_frames.size(); i++) {
+		VideoManager->LoadImage(_map_frames[i]);
+	}
+	VideoManager->EndImageLoadBatch();
 }
 
 

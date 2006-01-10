@@ -192,7 +192,7 @@ public:
  * \brief A class for representing skill books found in the game.
  *
  * Skill Books are rare objects found in the game that contain different skills.
- * Once a skill book is found, the skills are not immediately available to the 
+ * Once a skill book is found, the skills are not immediately available to the
  * characters, unless they are at a relatively high experience level. Skills found
  * in skill books are learned by retaining the book in the inventory, and then
  * gaining a certain number of experience levels to learn the skill.
@@ -223,7 +223,7 @@ public:
 /*!****************************************************************************
  * \brief A class for representing weapons found in the game.
  *
- * It should be fairly obvious, but not all weapons can be equipped by all 
+ * It should be fairly obvious, but not all weapons can be equipped by all
  * characters.
  *
  * \note 1) The copy constructor and copy assignment operator are private because
@@ -247,7 +247,7 @@ public:
  /*!****************************************************************************
  * \brief A class for representing armor found in the game.
  *
- * It should be fairly obvious, but not all armor can be equipped by all 
+ * It should be fairly obvious, but not all armor can be equipped by all
  * characters. Even though there's only one armor class, there are actually four
  * types of armor: head, body, arms, and legs. The GObject#obj_type member is used
  * to identify what armor category an instance of this class belongs to. All armor
@@ -292,43 +292,43 @@ private:
 	std::string _skill_name;
 	//! The amount of skill points (SP) that the skill consumes (zero is valid).
 	uint32 _sp_usage;
-	
+
 	uint32 _skill_type; //defined by the enums
-	
+
 	uint32 _attack;
 	uint32 _defense;
 	uint32 _support;
-	
+
 	/*
-	
+
 	Okay, if there is a warmup time when we select the skill,
-	we put the character straight into warmup mode, passing in a 
+	we put the character straight into warmup mode, passing in a
 	new SkillAction.  Otherwise, set them as having a new action.
 	This way, we don't have to hack up a warmupaction and cooldownaction.
-	
+
 	So upon selecting a skill from the battle mode gui, check if the
-	character should go into a warmup mode.  
-	
+	character should go into a warmup mode.
+
 	*/
 	uint32 _warmUpTime;
 	uint32 _coolDownTime;
-	
+
 	//! The level required to use this skill
-	uint32 _levelRequired; 
+	uint32 _levelRequired;
 	uint32 _numArguments;
-	
+
 	hoa_battle::Actor *_host;
 	std::vector<hoa_battle::Actor *> _arguments;
 	std::vector<hoa_battle::BattleAction *> _actions;
 public:
-	
+
 	GSkill(std::string name, uint32 sp);
 	GSkill();
 	~GSkill();
-	
+
 	void PerformSkill(hoa_battle::Actor *a, std::vector<hoa_battle::Actor *> args);
 	void AddBattleAction(hoa_battle::BattleAction *bsa);
-	
+
 	uint32 GetCooldownTime();
 	uint32 GetWarmupTime();
 };
@@ -340,7 +340,7 @@ public:
  * quantity). Sprites may have multiple attack points, each with their own resistances
  * and weaknesses. The standard number of attack points on character battle sprites
  * is four, found on the head, body, arms, and legs.
- * 
+ *
  * The x_position and y_position members determine the pinpoint location of the attack
  * point on the sprite, where each value of 1.0 represents the length of one "battle tile".
  * (See battle.h for more information on the coordinate system in battle mode). The lower
@@ -409,15 +409,15 @@ public:
  *
  * Enemies are very similar to characters in the term of the data members and member
  * access functions. The major difference is that the player can control characters
- * but not enemies. 
- * 
- * The Allacrost battle system is designed to give the player a unique experience for 
- * each individual battle. One of the ways we accomplish this is by randomizing the stats 
+ * but not enemies.
+ *
+ * The Allacrost battle system is designed to give the player a unique experience for
+ * each individual battle. One of the ways we accomplish this is by randomizing the stats
  * of enemies for every battle. First, a random Guassian number is chosen with the party's
  * median experience level as the mean. A random guassian number is chosen for each enemy,
  * so encountered enemies in battle can have a variety of experience levels (but the majority
  * are within one standard deviation of the average party level).
- * 
+ *
  * Secondly, the enemy is thrown through a "level-up" simulator that simulates the growth of
  * its statistics for each experience level. Each statistic is simulated seperately and has
  * class members for: the base amount, the growth amount, and the rate (chance) of growth
@@ -428,7 +428,7 @@ public:
  * complicated construct so for now I've left it out until we decide on how to manage
  * our AI routines.
  *
- * \note 2) Once we figure things out between handling this class between the map code and 
+ * \note 2) Once we figure things out between handling this class between the map code and
  * battle code a little more, we'll need to define the copy constructor and copy assignment
  * operator. For now they are left blank.
  *****************************************************************************/
@@ -472,7 +472,7 @@ private:
 
 	//! \name Starting Base Statistics
 	//@{
-	//! \brief These are the base statistics for the enemy when on experience level 1. 
+	//! \brief These are the base statistics for the enemy when on experience level 1.
 	uint32 _base_hit_points;
 	uint32 _base_skill_points;
 	uint32 _base_experience_points;
@@ -502,10 +502,10 @@ public:
 	 *  \brief Simulates the growth of the enemy from the base experience level.
 	 *  \param lvl The final level to simulate to.
 	 *
-	 *  This function "simulates" the growth of an enemy from its base xp level (level 1) to 
+	 *  This function "simulates" the growth of an enemy from its base xp level (level 1) to
 	 *  the specified level in the argument. It sounds more complicated than it really is. All
 	 *  that the function does is the following:
-	 *  
+	 *
 	 *  -# Start with the base statistics
 	 *  -# For every level gain, calculate a random number between 0.0 and 1.0
 	 *  -# If the random number is less than the rate member for the specific,
@@ -540,23 +540,23 @@ public:
 	uint32 GetIntelligence() { return _intelligence; }
 	void SetAgility(uint32 agi) { _agility = agi; }
 	uint32 GetAgility() { return _agility; }
-	
+
 	//!Added by visage November 16
 	uint32 GetBaseHitPoints() { return _base_hit_points; }
 	uint32 GetBaseSkillPoints() { return _base_skill_points; }
 	uint32 GetBaseExperiencePoints() { return _base_experience_points; }
 	uint32 GetBaseStrength() { return _base_strength; }
-	uint32 GetBaseIntelligence() { return _base_intelligence; } 
+	uint32 GetBaseIntelligence() { return _base_intelligence; }
 	uint32 GetBaseAgility() { return _base_agility; }
 	uint32 GetGrowthHitPoints() { return _growth_hit_points; }
 	uint32 GetGrowthSkillPoints() { return _growth_skill_points; }
 	uint32 GetGrowthExperiencePoints() { return _growth_experience_points; }
 	uint32 GetGrowthStrength() { return _growth_strength; }
-	uint32 GetGrowthIntelligence() { return _growth_intelligence; } 
+	uint32 GetGrowthIntelligence() { return _growth_intelligence; }
 	uint32 GetGrowthAgility() { return _growth_agility; }
 	std::vector<GSkill *> GetSkills() { return _enemy_skills; }
 	std::vector<GAttackPoint> GetAttackPoints() { return _attack_points; }
-	
+
 	void AddSkill(GSkill *sk) { _enemy_skills.push_back(sk); }
 	//@}
 };
@@ -565,11 +565,11 @@ public:
  * \brief A class for representing playable game characters.
  *
  * This calls represents playable game characters only (those that you can control,
- * equip, and send into battle). It does not cover NPCs or anything else. All 
+ * equip, and send into battle). It does not cover NPCs or anything else. All
  * active character objects in the game are wrapped inside the GameInstance class.
  *
- * \note 1) Almost always, a character will have four, and only four, attack points. 
- * However, I've left it as a vector here in case we have some special case later in 
+ * \note 1) Almost always, a character will have four, and only four, attack points.
+ * However, I've left it as a vector here in case we have some special case later in
  * the game where we want to add or remove attack points from a character.
  *****************************************************************************/
 class GCharacter {
@@ -620,15 +620,15 @@ private:
 	uint32 _intelligence;
 	//! The character's agility index.
 	uint32 _agility;
-	
+
 	//! The frame images for the character's map sprite.
-	hoa_map::MapSprite *_map_sprite;
+	std::vector<hoa_video::StillImage> _map_frames;
 	//! The frame images for the character's battle sprite.
 	std::vector<hoa_video::StillImage> _battle_frames;
 public:
 	GCharacter(std::string na, std::string fn, uint32 id);
 	~GCharacter();
-	
+
 	//! \name Weapon and Armor Equip Functions
 	//@{
 	//! \brief Swaps in and out equipment on the character.
@@ -640,7 +640,7 @@ public:
 	GArmor* EquipArmsArmor(GArmor *_new_eq);
 	GArmor* EquipLegsArmor(GArmor *_new_eq);
 	//@}
-	
+
 	//! \name Public Member Access Functions
 	//@{
 	//! \brief Used for setting and getting the values of the various class members.
@@ -674,9 +674,9 @@ public:
 	std::vector<GSkill *> GetAttackSkills() { return _attack_skills; }
 	std::vector<GSkill *> GetDefenseSkills() { return _defense_skills; }
 	std::vector<GSkill *> GetSupportSkills() { return _support_skills; }
-	
+
 	std::vector<GAttackPoint> GetAttackPoints() { return _attack_points; }
-	
+
 	void AddAttackSkill(GSkill *sk) { _attack_skills.push_back(sk); }
 	void AddDefenseSkill(GSkill *sk) { _defense_skills.push_back(sk); }
 	void AddSupportSkill(GSkill *sk) { _support_skills.push_back(sk); }
@@ -688,7 +688,7 @@ public:
  *
  * This simple class retains and updates the elapsed game time. When in pause mode,
  * quit mode, and boot mode, time is frozen and does not update.
- * 
+ *
  * \note 1) The only instance of this class that you should need already exists
  * privately in the GameInstance class.
  *****************************************************************************/
@@ -733,10 +733,10 @@ public:
  * common menu sounds and graphics.
  *
  * \note 1) This class is a singleton.
- * 
+ *
  * \note 2) This class still needs \c A \c LOT of work done. It will be modified
  * along with the code in map.h, battle.h, and menu.h, which will use this class
- * heavily. The class shall be developed progressively along with the progress 
+ * heavily. The class shall be developed progressively along with the progress
  * of these other files.
  *****************************************************************************/
 class GameInstance {

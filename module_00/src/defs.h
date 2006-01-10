@@ -26,7 +26,7 @@
  *
  * \note The commenting for all namespaces, variables, and classes declared in
  * this file can be found in the respective header files for where these
- * structures reside in. 
+ * structures reside in.
  *****************************************************************************/
 
 #ifndef __DEFS_HEADER__
@@ -92,11 +92,23 @@ namespace hoa_boot {
 // Map mode declarations, see map.h/cpp
 namespace hoa_map {
 	extern bool MAP_DEBUG;
-	class MapTile;
-	class MapObject;
-	class MapSprite;
-	class MapDialogue;
 	class MapMode;
+	namespace private_map {
+		class MapFrame;
+		class MapTile;
+		class MapObject;
+		class MapSprite;
+		class MapDialogue;
+		class TileCheck;
+		class TileNode;
+		class SpriteDialogue;
+		class SpriteText;
+		class SpriteAction;
+		class ActionPathMove;
+		class ActionFrameDisplay;
+		class ActionRandomMove;
+		class ActionScriptFunction;
+	}
 }
 
 // Battle mode declarations, see battle.h/cpp
@@ -116,7 +128,7 @@ namespace hoa_battle {
 	class AilmentEffect;
 	class StatusEffect;
 	class BattleMode;
-	
+
 	class BattleAction;
 	class MoveAction;
 	class MoveRelativeToCurrentLocation;

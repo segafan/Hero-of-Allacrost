@@ -15,7 +15,6 @@
  *****************************************************************************/
 
 #include "utils.h"
-#include <iostream>
 #include "map.h"
 #include "map_objects.h"
 #include "map_dialogue.h"
@@ -27,7 +26,6 @@
 #include "menu.h"
 
 using namespace std;
-using namespace hoa_map::private_map;
 using namespace hoa_utils;
 using namespace hoa_audio;
 using namespace hoa_video;
@@ -39,15 +37,17 @@ using namespace hoa_menu;
 
 namespace hoa_map {
 
+namespace private_map {
+
 // ****************************************************************************
 // ********************** SpriteDialogue Class Functions **********************
 // ****************************************************************************
 
 SpriteDialogue::SpriteDialogue() {
 	if (MAP_DEBUG) cout << "MAP: SpriteDialogue constructor invoked" << endl;
-	_next_line = 0;
+	next_line = 0;
 	// Don't set to false until we actually have some lines of dialogue
-	_seen_all = true;
+	seen_all = true;
 }
 
 
@@ -58,10 +58,19 @@ SpriteDialogue::~SpriteDialogue() {
 
 
 
-void SpriteDialogue::AddLine(hoa_utils::ustring txt) {
+void SpriteDialogue::AddSingleLine(ustring &txt) {
 	SpriteText new_dialogue;
-	//new_dialogue._text.push_back(txt);
-	_lines.push_back(new_dialogue);
+	new_dialogue.text.push_back(txt);
+	lines.push_back(new_dialogue);
+}
+
+
+void SpriteDialogue::AddMultipleLines(vector<ustring> &txt) {
+	SpriteText new_dialogue;
+	for (uint32 i = 0; i < txt.size(); i++) {
+		new_dialogue.text.push_back(txt[i]);
+	}
+	lines.push_back(new_dialogue);
 }
 
 // ****************************************************************************
@@ -77,5 +86,7 @@ MapDialogue::MapDialogue() {
 MapDialogue::~MapDialogue() {
 	if (MAP_DEBUG) cout << "MAP: MapDialogue destructor invoked" << endl;
 }
+
+} // namespace private_map
 
 } // namespace hoa_map

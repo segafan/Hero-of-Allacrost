@@ -18,8 +18,6 @@
 #define __MAP_OBJECTS_HEADER__
 
 #include "utils.h"
-#include <string>
-#include <vector>
 #include "defs.h"
 #include "engine.h"
 #include "video.h"
@@ -40,7 +38,7 @@ namespace private_map {
 //! The default type value of an object.
 const uint8 EMPTY_OBJECT     = 0x00;
 //! A "virtual sprite" with no physical image, used as a focus for the map's camera.
-const uint8 MAP_CAMERA       = 0x01; 
+const uint8 MAP_CAMERA       = 0x01;
 //! The player-controlled character sprite.
 const uint8 PLAYER_SPRITE    = 0x02;
 //! Standard NPC sprites. May also be party members.
@@ -59,9 +57,9 @@ const uint8 MIDDLE_OBJECT    = 0x80;
 
 // *********************** SPRITE CONSTANTS **************************
 
-/*! 
+/*!
  *  \brief The number of standard walking/standing frames for a sprite.
- *  
+ *
  *  Up and down movement require 5 animation frames each, while left and right movement
  *  requires 7 animation frames. Diagonal movement uses the up/down/left/right frames.
  */
@@ -111,30 +109,30 @@ const uint16 SOUTHEAST = 0x8000;
 const uint16 LATERAL   = 0x000F;
 const uint16 DIAGONAL  = 0x0FF0;
 //@}
- 
+
 //! \name Sprite Status Constants
 //! \brief A series of constants used for sprite status.
 //@{
 //! Tracks sprite step frame (right or left foot step first).
-const uint16 STEP_SWAP          = 0x0001; 
+const uint16 STEP_SWAP          = 0x0001;
 //! This is for detecting whether the sprite is currently moving.
-const uint16 IN_MOTION          = 0x0002; 
+const uint16 IN_MOTION          = 0x0002;
 //! If this bit is set to zero, we do not update the sprite.
-const uint16 UPDATEABLE         = 0x0004; 
+const uint16 UPDATEABLE         = 0x0004;
 //! If this bit is set to zero, we do not draw the sprite.
-const uint16 VISIBLE            = 0x0008; 
+const uint16 VISIBLE            = 0x0008;
 //! If this bit is set to one, we continue to draw this object even when it is not in context.
-const uint16 ALWAYS_IN_CONTEXT  = 0x0010; 
+const uint16 ALWAYS_IN_CONTEXT  = 0x0010;
 //@}
 
 /*! \name Sprite Animation Vector Access Constants
  *  \brief These constants are used for indexing a standard sprite animation frame vector.
- *  
+ *
  *  Every sprite has a set of 20 frames for standard movement. There are 5 frames per direction
- *  (north, south, west, east). 8-directional movement is supported with these 20 frames by 
+ *  (north, south, west, east). 8-directional movement is supported with these 20 frames by
  *  simply displaying the "west" frames when the sprite is moving south west. The frame order for
  *  a simple step forward is the following:
- *  
+ *
  *  - FRAME_0 (start position, standing)
  *  - FRAME_1 (left foot forward)
  *  - FRAME_2 (left foot forward)
@@ -170,74 +168,71 @@ const uint8 RIGHT_RSTEP1   = 22;
 const uint8 RIGHT_RSTEP2   = 23;
 //@}
 
-} // namespace private_map
-
 /*!****************************************************************************
  * \brief Abstract class for all map objects.
  *
  * A map object can be anything from a sprite to a house. To summarize it simply,
- * a map objects is a map image that is \c not tiled. In MapMode, all objects in 
+ * a map objects is a map image that is \c not tiled. In MapMode, all objects in
  * the map are split into the following categories:
- * 
+ *
  * - A single virtual sprite for the map (serves as a camera/focus point)
  * - Ground layer objects (sprites, houses, etc)
  * - "Middle layer" objects, like bridges that sprites can go both over and under.
  * - Sky objects that are drawn above everything else on the map.
  *****************************************************************************/
 class MapObject {
-	friend class MapMode;
-protected:
+public:
 	//! A type identifier for the object.
-	uint8 _object_type;
+	uint8 object_type;
 	//! An identification number for the object as it is represented in the map file.
-	uint32 _object_id;
+	uint32 object_id;
 	//! The map row position for the bottom left corner of the object.
-	int16 _row_position;
+	int16 row_position;
 	//! The map column position for the bottom left corner of the object.
-	int16 _col_position;
+	int16 col_position;
 	//! The width of the object's image, in number of tiles.
-	uint8 _obj_width;
+	uint8 obj_width;
 	//! The height of the object's image, in number of tiles.
-	uint8 _obj_height;
+	uint8 obj_height;
 	//! The altitude of the object.
 	//! \note This member is only used for objects in the ground object layer.
-	uint8 _altitude;
+	uint8 altitude;
 	//! A bit-mask for setting and detecting various conditions on the object.
-	uint16 _status;
+	uint16 status;
 	//! The map context for the object (determines whether sprites are inside, outside, etc.)
-	uint8 _context;
-	
+	uint8 context;
+
 	//! A pointer to the currently active instance of MapMode.
 	static MapMode *CurrentMap;
-public:
+
 	MapObject();
 	~MapObject();
-	
+
 	/*! \brief Member Access functions
-	 *  
+	 *
 	 *  These functions are for setting and retrieving the values of the members for the MapObject class.
 	 *  Almost always after constructing a new MapObject object, you should invoke these functions to set
 	 *  all the properties of the object. Otherwise the object won't do anything useful.
 	 */
 	//@{
-	void SetObjectType(uint8 type) { _object_type = type; }
-	void SetRowPosition(int16 row) { _row_position = row; }
-	void SetColPosition(int16 col) { _col_position = col; }
-	void SetAltitude(uint8 alt) { _altitude = alt; }
-	void SetStatus(uint16 stat) { _status = stat; }
-	
-	uint8 GetObjectType() { return _object_type; }
-	int16 GetRowPosition() { return _row_position; }
-	int16 GetColPosition() { return _col_position; }
-	uint8 GetAltitude() { return _altitude; }
-	uint16 GetStatus() {return  _status; }
+	void SetObjectType(uint8 type) { object_type = type; }
+	void SetRowPosition(int16 row) { row_position = row; }
+	void SetColPosition(int16 col) { col_position = col; }
+	void SetAltitude(uint8 alt) { altitude = alt; }
+	void SetStatus(uint16 stat) { status = stat; }
+
+	uint8 GetObjectType() { return object_type; }
+	int16 GetRowPosition() { return row_position; }
+	int16 GetColPosition() { return col_position; }
+	uint8 GetAltitude() { return altitude; }
+	uint16 GetStatus() {return status; }
 	//@}
-	
+
 	/*!
 	 *  \brief Updates the state of an object on a map.
 	 *
 	 *  Many map objects may not actually have a use for this function. For example, animated objects like a
-	 *  tree automatically have their frames updated by the video engine, so there is no need to 
+	 *  tree automatically have their frames updated by the video engine, so there is no need to
 	 *  call this function for it. The function is only called for objects which have the UPDATEABLE bit in
 	 *  the MapObject#_status member set.
 	 */
@@ -258,7 +253,7 @@ public:
  * Map sprites are basically animate, "living" map objects. Although there is
  * but a single class to represent all the map sprites in the game, they can
  * actually be divided into the following categories:
- * 
+ *
  * - Virtual sprites (a controllable, invisible map camera of sorts)
  * - Playable character sprites (those that are in the player's party)
  * - NPC (non-playable character) sprites.
@@ -266,7 +261,7 @@ public:
  * - Other sprites (like animals, etc.)
  *
  * It is easier to manage a single sprite class rather than several classes for
- * each sprite type. The fact that there is only one class for representing 
+ * each sprite type. The fact that there is only one class for representing
  * several sprite types is the reason why many of these class members are pointers.
  * For example, we don't need dialogue for a dog sprite, so we don't want to waste
  * unnecessary space.
@@ -276,85 +271,82 @@ public:
  * in another member of this class later.
  *****************************************************************************/
 class MapSprite : public MapObject {
-	friend class MapMode;
-	friend class SpriteAction;
-private:
+public:
 	//! The name of the sprite, as seen by the player in the game.
-	hoa_utils::ustring _name;
+	hoa_utils::ustring name;
 	//! The base filename of the sprite, used to load various data for the sprite.
-	std::string _filename;
+	std::string filename;
 	//! A bit-mask for various information regarding the sprite's draw orientation.
-	uint16 _direction;
+	uint16 direction;
 	//! The speed at which the sprite moves around the map.
-	float _step_speed;
+	float step_speed;
 	//! A counter to keep track of a sprites actual position when moving between tiles.
-	float _step_count;
+	float step_count;
 	//! The tile column position plus an offset between 0.0 and 1.0 (used for sprite movement).
-	float _x_position;
+	float x_position;
 	//! The tile row position plus an offset between 0.0 and 1.0 (used for sprite movement).
-	float _y_position;
+	float y_position;
 	//! The remaining amount of time to wait before moving the sprite again (used for NPCs).
-	int32 _wait_time;
+	int32 wait_time;
 	//! The average amount of time a sprite should remain still between tile moves.
-	uint32 _delay_time;
+	uint32 delay_time;
 	//! Retains the frame index that should be drawn on the next frame.
-	uint8 _frame;
+	uint8 frame;
 	//! True if all the dialogue of this sprite has been seen by the player.
-	bool _seen_all_dialogue;
-	
+	bool seen_all_dialogue;
+
 	/*! \name Saved State Members
 	 *  \brief Used to temporarily retain some state properties of a sprite.
 	 *  These members are primarly used to store and restore the state of a sprite that is
 	 *  interrupted from a dialogue.
 	 */
 	//@{
-	uint16 _saved_direction;
-	uint16 _saved_status;
-	uint8 _saved_frame;
+	uint16 saved_direction;
+	uint16 saved_status;
+	uint8 saved_frame;
 	//@}
-	
+
 	//! A container for all of the actions this sprite performs.
-	std::vector<private_map::SpriteAction> _actions;
+	std::vector<SpriteAction*> actions;
 	//! An index into the _actions vector, representing the current sprite action.
-	uint8 _current_action;
-	
-	
+	uint8 current_action;
+
+
 	/*! \brief A pointer to a vector containing all the sprite's frame images.
-	 * 
+	 *
 	 *  Frames 0-23 are the standard animation frames. It is safe to assume that for all sprites
 	 *  (other than the virtual sprite), these indeces exist. Every frame past index number 23
 	 *  are special frames, used for map-specific events and scripts.
 	 */
-	std::vector<hoa_video::StillImage> _frames;
-	
-	/*! \brief Retains and manages all the possible conversations one may have with this sprite. 
+	std::vector<hoa_video::StillImage> frames;
+
+	/*! \brief Retains and manages all the possible conversations one may have with this sprite.
 	 *
 	 *  It is legal for a sprite to have no dialogue at all. The player controlled sprite obviously
 	 *  can't have any dialogue, because the player can't initiate a conversation with him/herself.
 	 */
-	SpriteDialogue _dialogue;
+	SpriteDialogue dialogue;
 //	//! Retain the dialogues that correspond to the sprite.
 //	std::vector<MapDialogue> _dialogues;
 //	//! A pointer to the next dialogue for the user to read.
 //	uint8 _next_dialogue;
-	
+
 	/*! \brief Determines the standard animation frame to draw for the sprite.
-	 *  
+	 *
 	 *  Note that special frames (frames not part of the standard walk/stand animation) are of no
 	 *  concern to this function. This simply finds the standard animation frame for normal sprite
-	 *  operation. 
+	 *  operation.
 	 */
-	void _FindFrame();
-	
-public:
+	void FindFrame();
+
 	MapSprite();
 	~MapSprite();
-	
+
 	// TODO: bool SeenAllDialogue() { return _see_all_dialogue; }
-	
+
 	//! Fills up the frames vector and loads the sprite image frames.
 	void LoadFrames();
-	
+
 	/*!
 	 * \brief Attempts to move a sprite in an indicated direction.
 	 * \param direction The direction in which the sprite wishes to move.
@@ -364,7 +356,7 @@ public:
 	 * the sprite is currently facing, and won't move the sprite if the tile is occupied.
 	 */
 	void Move(uint16 direction);
-	
+
 	/*!
 	 * \brief Adds a new dialogue to the sprite.
 	 * \param new_dia The new dialogue to add to the end of the MapSprite#_dialogues vector
@@ -373,40 +365,42 @@ public:
 	 */
 	void AddDialogue(std::vector<std::string> new_dia);
 	//! Updates the dialogue pointer when a dialogue finishes.
-// 	void FinishedDialogue() { _next_dialogue = static_cast<uint8>((_next_dialogue + 1) % _dialogues.size()); }
-	
+// 	void FinishedDialogue() { next_dialogue = static_cast<uint8>((_next_dialogue + 1) % _dialogues.size()); }
+
 	//! Saves the status and frame of the sprite (primarily used for dialogues).
 	void SaveState();
 	//! Restores the status and frame of the sprite (primarily used for dialogues).
 	void RestoreState();
-	
+
 	//! Updates the sprite position and state.
 	void Update();
 	//! Draws the appropriate sprite frame in the appropriate position on the screen, if at all.
 	void Draw();
-	
+
 	/*! \brief Member Access functions
-	 *  
+	 *
 	 *  These functions are for setting and retrieving the values of the members for the MapSprite class.
 	 *  Almost always after constructing a new MapSprite object, you should invoke these functions to set
 	 *  all the properties of the object. Otherwise the sprite won't do anything useful.
-	 *  
+	 *
 	 *  \note Not all members of this class have member access functions, because they are not
 	 */
 	//@{
-	void SetName(hoa_utils::ustring name) { _name = name; }
-	void SetFilename(std::string filename) { _filename = filename; }
-	void SetDirection(uint16 direction) { _direction = direction; }
-	void SetStepSpeed(float speed) { _step_speed = speed; }
-	void SetDelayTime(uint32 delay) { _delay_time = delay; }
-	
-	hoa_utils::ustring GetName() { return _name; }
-	std::string GetFilename() { return _filename; }
-	uint16 GetDirection() { return _direction; }
-	float GetStepSpeed() { return _step_speed; }
-	uint32 GetDelayTime() { return _delay_time; }
+	void SetName(hoa_utils::ustring na) { name = na; }
+	void SetFilename(std::string fn) { filename = fn; }
+	void SetDirection(uint16 di) { direction = di; }
+	void SetStepSpeed(float sp) { step_speed = sp; }
+	void SetDelayTime(uint32 delay) { delay_time = delay; }
+
+	hoa_utils::ustring GetName() { return name; }
+	std::string GetFilename() { return filename; }
+	uint16 GetDirection() { return direction; }
+	float GetStepSpeed() { return step_speed; }
+	uint32 GetDelayTime() { return delay_time; }
 	//@}
 }; // class MapSprite
+
+} // namespace private_map
 
 } // namespace hoa_map
 
