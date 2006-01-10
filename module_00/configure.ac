@@ -54,9 +54,10 @@ AC_CHECK_LIB([lua50], [lua_open], [], \
 	[AC_CHECK_LIB([lua], [lua_open], [], \
 		[echo "You need to install the lua library."
 		 exit -1])])
-AC_CHECK_LIB([lualib], [luaopen_table], [], \
-	[echo "You need to install the lualib library."
-	 exit -1])
+AC_CHECK_LIB([lualib50], [luaopen_table], [], \
+	[AC_CHECK_LIB([lualib], [luaopen_table], [], \
+		[echo "You need to install the lualib library."
+		 exit -1])])
 AC_CHECK_LIB([m], [log], [], \
 	[echo "You need to install the math library."
 	 exit -1])
