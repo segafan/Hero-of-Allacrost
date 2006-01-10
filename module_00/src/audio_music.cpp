@@ -184,7 +184,7 @@ void MusicBuffer::DEBUG_PrintProperties() {
 
 // MusicSources are only created in the GameAudio::Initialize() function
 MusicSource::MusicSource() {
-	Owner = NULL;
+	owner = NULL;
 	alGenSources(1, &source);
 	if (IsValid()) {
 		// Turn off attenuation for this source
@@ -221,7 +221,7 @@ void MusicSource::EmptyStreamQueue() {
 }
 
 void MusicSource::UpdateStreamQueue() {
-	if (Owner == NULL) { // If nothing owns this source, it certainly has no data to stream in
+	if (owner == NULL) { // If nothing owns this source, it certainly has no data to stream in
 		return;
 	}
 
@@ -233,7 +233,7 @@ void MusicSource::UpdateStreamQueue() {
 		alSourceUnqueueBuffers(source, 1, &buff); // Unqueues one of the buffers in the MusicBuffer object
 		num_processed--;
 		// check for errors here
-		Owner->_Buffer->RefillBuffer(buff);
+		owner->_data->RefillBuffer(buff);
 		alSourceQueueBuffers(source, 1, &buff); // Requeues one of the buffers in the Musicbuffer object
 		// check for errors here
 	}
@@ -249,31 +249,31 @@ using namespace hoa_audio::private_audio;
 
 // The no-arg constructor does not attempt to retrieve any resources.
 MusicDescriptor::MusicDescriptor() {
-	_Source = NULL;
-	_Buffer = NULL;
+	_origin = NULL;
+	_data = NULL;
 }
 
 // The destructor will call the AudioManager singleton to manage the buffer and source that the class was using.
 MusicDescriptor::~MusicDescriptor() {
-	if (_Buffer != NULL) {
-		_Buffer->RemoveReference();
-		_Buffer = NULL;
+	if (_data != NULL) {
+		_data->RemoveReference();
+		_data = NULL;
 	}
 	// TODO: Fix me later
-	if (_Source != NULL) {
-		_Source = NULL;
+	if (_origin != NULL) {
+		_origin = NULL;
 	}
 }
 
 
 
 bool MusicDescriptor::LoadMusic(std::string fname) {
-	if (_Buffer != NULL) {
-		_Buffer->RemoveReference();
-		_Buffer = NULL;
+	if (_data != NULL) {
+		_data->RemoveReference();
+		_data = NULL;
 	}
-	_Buffer = AudioManager->_AcquireMusicBuffer(fname);
-	if (_Buffer == NULL) {
+	_data = AudioManager->_AcquireMusicBuffer(fname);
+	if (_data == NULL) {
 		return false;
 	}
 	return true;
@@ -282,40 +282,40 @@ bool MusicDescriptor::LoadMusic(std::string fname) {
 
 // Releases the music source (if it currently holds it) and removes the reference to the buffer it holds.
 void MusicDescriptor::FreeMusic() {
-	if (_Source != NULL) {
+	if (_origin != NULL) {
 		// stop music if it is playing
 		// free allocation of the source
 	}
 
-	if (_Buffer != NULL) {
-		_Buffer->RemoveReference();
-		_Buffer = NULL;
+	if (_data != NULL) {
+		_data->RemoveReference();
+		_data = NULL;
 	}
 }
 
 
 void MusicDescriptor::AllocateSource() {
-	if (_Source != NULL) { // Then nothing needs to be done
+	if (_origin != NULL) { // Then nothing needs to be done
 		return;
 	}
 	// If another music piece is playing, this call will stop it.
-	_Source = AudioManager->_AcquireMusicSource();
+	_origin = AudioManager->_AcquireMusicSource();
 }
 
 void MusicDescriptor::PlayMusic() {
-	if (_Buffer == NULL) { // Can't play music without data
+	if (_data == NULL) { // Can't play music without data
 		return;
 	}
 
-	if (_Source == NULL) { // Always check whether we have the source or not and if not, get it.
-		_Source = AudioManager->_AcquireMusicSource();
-		if (_Source == NULL) {
+	if (_origin == NULL) { // Always check whether we have the source or not and if not, get it.
+		_origin = AudioManager->_AcquireMusicSource();
+		if (_origin == NULL) {
 			AudioManager->_audio_errors |= AUDIO_SOURCE_ACQUISITION_FAILURE;
 			if (AUDIO_DEBUG) cerr << "AUDIO ERROR: Failure to acquire a music source." << endl;
 			return;
 		}
 		else {
-			_Source->Owner = this;
+			_origin->owner = this;
 		}
 	}
 
@@ -323,28 +323,28 @@ void MusicDescriptor::PlayMusic() {
 	// We do not want this, so instead calling this function while the music is already playing is effectively
 	// a no-op.
 	ALenum state;
-	alGetSourcei(_Source->source, AL_SOURCE_STATE, &state);
+	alGetSourcei(_origin->source, AL_SOURCE_STATE, &state);
 	if (state == AL_PLAYING) {
 		return;
 	}
 
-	_Buffer->RefillBuffer(_Buffer->buffers[0]);
-	_Buffer->RefillBuffer(_Buffer->buffers[1]);
+	_data->RefillBuffer(_data->buffers[0]);
+	_data->RefillBuffer(_data->buffers[1]);
 
-	alSourceQueueBuffers(_Source->source, 2, _Buffer->buffers);
-	alSourcePlay(_Source->source);
+	alSourceQueueBuffers(_origin->source, 2, _data->buffers);
+	alSourcePlay(_origin->source);
 }
 
 void MusicDescriptor::PauseMusic() {
-	if (_Source == NULL) {
+	if (_origin == NULL) {
 		return;
 	}
 
-	alSourcePause(_Source->source);
+	alSourcePause(_origin->source);
 }
 
 void MusicDescriptor::ResumeMusic() {
-	if (_Source == NULL) {
+	if (_origin == NULL) {
 		// note to self: might want to try acquiring a source in this case...?
 		return;
 	}
@@ -352,29 +352,29 @@ void MusicDescriptor::ResumeMusic() {
 	// The music must be paused to resume(play) it again. Otherwise this function
 	// could generate incorrect behavior in certain scenarios.
 	ALenum state;
-	alGetSourcei(_Source->source, AL_SOURCE_STATE, &state);
+	alGetSourcei(_origin->source, AL_SOURCE_STATE, &state);
 	if (state != AL_PAUSED) {
 		return;
 	}
 
-	alSourcePlay(_Source->source);
+	alSourcePlay(_origin->source);
 }
 
 
 void MusicDescriptor::StopMusic() {
-	if (_Source == NULL) {
+	if (_origin == NULL) {
 		return;
 	}
 
-	alSourceStop(_Source->source);
+	alSourceStop(_origin->source);
 }
 
 void MusicDescriptor::RewindMusic() {
-	if (_Source == NULL) {
+	if (_origin == NULL) {
 		return;
 	}
 
-	alSourceRewind(_Source->source);
+	alSourceRewind(_origin->source);
 }
 
 } // namespace hoa_audio

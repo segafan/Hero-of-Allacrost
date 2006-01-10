@@ -137,7 +137,7 @@ void SoundBuffer::DEBUG_PrintProperties() {
 
 // SoundSources are only created in the GameAudio::Initialize() function
 SoundSource::SoundSource() {
-	Owner = NULL;
+	owner = NULL;
 	alGenSources(1, &source);
 }
 
@@ -258,21 +258,21 @@ using namespace hoa_audio::private_audio;
 
 // The constructor does not attempt to retrieve any resources.
 SoundDescriptor::SoundDescriptor() {
-	_Source = NULL;
-	_Buffer = NULL;
+	_origin = NULL;
+	_data = NULL;
 }
 
 
 // The destructor will call the AudioManager singleton to manage the buffer and source that the class was using.
 SoundDescriptor::~SoundDescriptor() {
-	if (_Buffer != NULL) {
-		_Buffer->RemoveReference();
-		_Buffer = NULL;
+	if (_data != NULL) {
+		_data->RemoveReference();
+		_data = NULL;
 	}
 
-	if (_Source != NULL) {
-		AudioManager->_ReleaseSoundSource(_Source);
-		_Source = NULL;
+	if (_origin != NULL) {
+		AudioManager->_ReleaseSoundSource(_origin);
+		_origin = NULL;
 	}
 }
 
@@ -284,8 +284,8 @@ bool SoundDescriptor::LoadSound(string fname) {
 		return false;
 	}
 
-	_Buffer = AudioManager->_AcquireSoundBuffer(fname);
-	if (_Buffer == NULL) {
+	_data = AudioManager->_AcquireSoundBuffer(fname);
+	if (_data == NULL) {
 		cerr << "AUDIO ERROR: Failed to get a buffer for sound file snd/" << fname << ".wav" << endl;
 		return false;
 	}
@@ -295,13 +295,13 @@ bool SoundDescriptor::LoadSound(string fname) {
 
 // Retrieve the state of the audio
 uint8 SoundDescriptor::GetState() {
-	if (_Buffer == NULL)
+	if (_data == NULL)
 		return AUDIO_STATE_UNLOADED;
-	if (_Source == NULL)
+	if (_origin == NULL)
 		return AUDIO_STATE_STOPPED;
 
 	ALenum state;
-	alGetSourcei(_Source->source, AL_SOURCE_STATE, &state);
+	alGetSourcei(_origin->source, AL_SOURCE_STATE, &state);
 	switch (state) {
 		case AL_PLAYING:
 			return AUDIO_STATE_PLAYING;
@@ -316,61 +316,61 @@ uint8 SoundDescriptor::GetState() {
 
 
 void SoundDescriptor::PlaySound() {
-	if (_Buffer == NULL) {
+	if (_data == NULL) {
 		if (AUDIO_DEBUG) cerr << "AUDIO WARNING: Attempted to play a sound that had no audio data." << endl;
 		return;
 	}
 
-	if (_Source == NULL) {
+	if (_origin == NULL) {
 		AllocateSource();
-		if (_Source == NULL) {
+		if (_origin == NULL) {
 			if (AUDIO_DEBUG) cerr << "AUDIO WARNING: Failed to allocate a sound source for playing a sound." << endl;
 			return;
 		}
 	}
 
-	alSourcePlay(_Source->source);
+	alSourcePlay(_origin->source);
 }
 
 void SoundDescriptor::PauseSound() {
-	if (_Source == NULL) { // If there is no source, there won't be a buffer either.
+	if (_origin == NULL) { // If there is no source, there won't be a buffer either.
 		return;
 	}
-	alSourcePause(_Source->source);
+	alSourcePause(_origin->source);
 }
 
 void SoundDescriptor::StopSound() {
-	if (_Source == NULL) { // If there is no source, there won't be a buffer either.
+	if (_origin == NULL) { // If there is no source, there won't be a buffer either.
 		return;
 	}
-	alSourceStop(_Source->source);
+	alSourceStop(_origin->source);
 }
 
 void SoundDescriptor::RewindSound() {
-	if (_Source == NULL) { // If there is no source, there won't be a buffer either.
+	if (_origin == NULL) { // If there is no source, there won't be a buffer either.
 		return;
 	}
-	alSourceRewind(_Source->source);
+	alSourceRewind(_origin->source);
 }
 
 
 //
 void SoundDescriptor::FreeSound() {
-	if (_Buffer != NULL) {
-		_Buffer->RemoveReference();
-		_Buffer = NULL;
+	if (_data != NULL) {
+		_data->RemoveReference();
+		_data = NULL;
 	}
 
-	if (_Source != NULL) {
-		AudioManager->_ReleaseSoundSource(_Source);
-		_Source = NULL;
+	if (_origin != NULL) {
+		AudioManager->_ReleaseSoundSource(_origin);
+		_origin = NULL;
 	}
 }
 
 
 
 void SoundDescriptor::SetLooping(bool loop) {
-	if (_Source == NULL) {
+	if (_origin == NULL) {
 		return;
 	}
 	if (loop == _looping) {
@@ -379,32 +379,32 @@ void SoundDescriptor::SetLooping(bool loop) {
 
 	_looping = loop;
 	if (_looping) {
-		alSourcei(_Source->source, AL_LOOPING, AL_TRUE);
+		alSourcei(_origin->source, AL_LOOPING, AL_TRUE);
 		cout << "SET LOOP!" << endl;
 	}
 	else {
-		alSourcei(_Source->source, AL_LOOPING, AL_FALSE);
+		alSourcei(_origin->source, AL_LOOPING, AL_FALSE);
 	}
 }
 
 
 
 void SoundDescriptor::AllocateSource() {
-	if (_Source != NULL || _Buffer == NULL) {
+	if (_origin != NULL || _data == NULL) {
 		return;
 	}
-	_Source = AudioManager->_AcquireSoundSource();
-	if (_Source == NULL) {
+	_origin = AudioManager->_AcquireSoundSource();
+	if (_origin == NULL) {
 		if (AUDIO_DEBUG) cerr << "AUDIO WARNING: Failed to allocate sound source" << endl;
 		return;
 	}
 
-	alSourcei(_Source->source, AL_BUFFER, _Buffer->buffer);
-// 	alSourcef(_Source->source,  AL_PITCH,    1.0f     );
-// 	alSourcef(_Source->source,  AL_GAIN,     1.0f     );
-// 	alSourcefv(_Source->source, AL_POSITION, SourcePos);
-// 	alSourcefv(_Source->source, AL_VELOCITY, SourceVel);
-// 	alSourcei(_Source->source,  AL_LOOPING,  loop     ););
+	alSourcei(_origin->source, AL_BUFFER, _data->buffer);
+// 	alSourcef(_origin->source,  AL_PITCH,    1.0f     );
+// 	alSourcef(_origin->source,  AL_GAIN,     1.0f     );
+// 	alSourcefv(_origin->source, AL_POSITION, SourcePos);
+// 	alSourcefv(_origin->source, AL_VELOCITY, SourceVel);
+// 	alSourcei(_origin->source,  AL_LOOPING,  loop     ););
 }
 
 } // namespace hoa_audio

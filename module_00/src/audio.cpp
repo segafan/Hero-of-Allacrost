@@ -244,8 +244,8 @@ SoundSource* GameAudio::_AcquireSoundSource() {
 
 // Stops any music that is playing, unbuffers and resets the source, and returns the source pointer.
 MusicSource* GameAudio::_AcquireMusicSource() {
-	if (_music_source->Owner != NULL) {
-		_music_source->Owner->StopMusic();
+	if (_music_source->owner != NULL) {
+		_music_source->owner->StopMusic();
 		_ReleaseMusicSource(_music_source);
 	}
 	return _music_source;
@@ -254,23 +254,23 @@ MusicSource* GameAudio::_AcquireMusicSource() {
 
 
 void GameAudio::_ReleaseSoundSource(private_audio::SoundSource* free_source) {
-	if (free_source->Owner == NULL) // Then the source is already released
+	if (free_source->owner == NULL) // Then the source is already released
 		return;
 
-	free_source->Owner->StopSound();
+	free_source->owner->StopSound();
 	// Maybe buffered audio data needs to be removed here???
-	free_source->Owner->_Source = NULL;
-	free_source->Owner = NULL;
+	free_source->owner->_origin = NULL;
+	free_source->owner = NULL;
 }
 
 void GameAudio::_ReleaseMusicSource(private_audio::MusicSource* free_source) {
-	if (free_source->Owner == NULL) // Then the source is already released
+	if (free_source->owner == NULL) // Then the source is already released
 		return;
 
-	free_source->Owner->StopMusic();
+	free_source->owner->StopMusic();
 	// Maybe buffered audio data needs to be removed here???
-	free_source->Owner->_Source = NULL;
-	free_source->Owner = NULL;
+	free_source->owner->_origin = NULL;
+	free_source->owner = NULL;
 }
 
 
@@ -368,26 +368,26 @@ void GameAudio::RewindAllSounds() {
 
 
 void GameAudio::PauseAllMusic() {
-	if (_music_source->Owner != NULL) {
-		_music_source->Owner->PauseMusic();
+	if (_music_source->owner != NULL) {
+		_music_source->owner->PauseMusic();
 	}
 }
 
 void GameAudio::ResumeAllMusic() {
-	if (_music_source->Owner != NULL) {
-		_music_source->Owner->ResumeMusic();
+	if (_music_source->owner != NULL) {
+		_music_source->owner->ResumeMusic();
 	}
 }
 
 void GameAudio::StopAllMusic() {
-	if (_music_source->Owner != NULL) {
-		_music_source->Owner->StopMusic();
+	if (_music_source->owner != NULL) {
+		_music_source->owner->StopMusic();
 	}
 }
 
 void GameAudio::RewindAllMusic() {
-	if (_music_source->Owner != NULL) {
-		_music_source->Owner->RewindMusic();
+	if (_music_source->owner != NULL) {
+		_music_source->owner->RewindMusic();
 	}
 }
 

@@ -95,7 +95,7 @@ public:
 	//! The OpenAL source that this class object maintains.
 	ALuint source;
 	//! A pointer to the MusicDescriptor that currently owns this source.
-	MusicDescriptor *Owner;
+	MusicDescriptor *owner;
 
 	//! Returns true if OpenAL determines that the source is valid.
 	bool IsValid();
@@ -115,16 +115,16 @@ class MusicDescriptor {
 	friend class private_audio::MusicSource;
 private:
 	//! A pointer to the music buffer that is used.
-	private_audio::MusicBuffer *_Buffer;
+	private_audio::MusicBuffer *_data;
 	//! A pointer to the music source that is used.
-	private_audio::MusicSource *_Source;
+	private_audio::MusicSource *_origin;
 
 public:
 	MusicDescriptor();
 	~MusicDescriptor();
 
 	const std::string &GetFilename()
-		{ if (_Buffer != NULL) return _Buffer->filename; }
+		{ if (_data != NULL) return _data->filename; }
 	//! Loads the music file from memory.
 	//! \param fname The name of the file to load, without path information or file extension attached.
 	bool LoadMusic(std::string fname);
@@ -152,11 +152,11 @@ public:
 	//@}
 
 	//! Displays the properties of the music descriptor's buffer.
-	void DEBUG_BufferProperties()
-		{ if (_Buffer != NULL) _Buffer->DEBUG_PrintProperties(); }
+	void DEBUG_dataProperties()
+		{ if (_data != NULL) _data->DEBUG_PrintProperties(); }
 	//! Displays the properties of the music descriptor's source.
-	void DEBUG_SourceProperties()
-		{ if (_Source != NULL) _Source->DEBUG_PrintProperties(); }
+	void DEBUG_originProperties()
+		{ if (_origin != NULL) _origin->DEBUG_PrintProperties(); }
 }; // class MusicDescriptor
 
 } // namespace hoa_audio

@@ -94,7 +94,7 @@ public:
 	//! The properties that have been modified from their defaults.
 	uint16 properties;
 	//! A pointer to the SoundDescriptor that currently owns this source.
-	SoundDescriptor *Owner;
+	SoundDescriptor *owner;
 
 	//! Returns true if OpenAL determines that the source is valid.
 	bool IsValid();
@@ -116,9 +116,9 @@ class SoundDescriptor {
 	friend class GameAudio;
 private:
 	//! A pointer to the sound buffer that is used.
-	private_audio::SoundBuffer *_Buffer;
+	private_audio::SoundBuffer *_data;
 	//! A pointer to the sound source that is used.
-	private_audio::SoundSource *_Source;
+	private_audio::SoundSource *_origin;
 
 	bool _looping;
 // 	float[3] _position;
@@ -141,7 +141,7 @@ public:
 	~SoundDescriptor();
 	//! Returns a const reference to the filename of the buffer that the source points to.
 	const std::string &GetFilename()
-		{ if (_Buffer != NULL) return _Buffer->filename; }
+		{ if (_data != NULL) return _data->filename; }
 	/*! \brief Loads new sound data from a file.
 	 *  \param fname The name of the file, without path information or a file extension.
 	 *  \return Returns false if there was an error loading the sound.
@@ -210,49 +210,49 @@ public:
 	 *  \return True if the object has position of a source.
 	 */
 	bool HasSource()
-		{ if (_Source == NULL) return false; else return true; }
+		{ if (_origin == NULL) return false; else return true; }
 
 	/*! \name Property Set Functions for Soundobjects
 	 *  \brief Sets the various properties of a sound.
 	 */
 	//@{
 // 	void SetPosition(float position[3])
-// 		{ if (_Source != NULL) alSourcefv(_Source->source, AL_POSITION, position); }
+// 		{ if (_origin != NULL) alSourcefv(_origin->source, AL_POSITION, position); }
 // 	void SetVelocity(float velocity[3])
-// 		{ if (_Source != NULL) alSourcefv(_Source->source, AL_VELOCITY, velocity); }
+// 		{ if (_origin != NULL) alSourcefv(_origin->source, AL_VELOCITY, velocity); }
 // 	void SetLoop(bool loop)
-// 		{ if (_Source == NULL) return; ALint aloop; if (loop) aloop = AL_TRUE else aloop = AL_FALSE; alSourcei(_Source->source, AL_LOOPING, &aloop); }
+// 		{ if (_origin == NULL) return; ALint aloop; if (loop) aloop = AL_TRUE else aloop = AL_FALSE; alSourcei(_origin->source, AL_LOOPING, &aloop); }
 // 	// void SetGain(float gain);
 // 	void SetPitch(float pitch)
-// 		{ if (_Source != NULL) alSourcef(_Source->source, AL_PITCH, &pitch); }
+// 		{ if (_origin != NULL) alSourcef(_origin->source, AL_PITCH, &pitch); }
 // 	void SetMinGain(float min_gain)
-// 		{ if (_Source != NULL) alSourcef(_Source->source, AL_MIN_GAIN, &min_gain); }
+// 		{ if (_origin != NULL) alSourcef(_origin->source, AL_MIN_GAIN, &min_gain); }
 // 	void SetMaxGame(float max_gain)
-// 		{ if (_Source != NULL) alSourcef(_Source->source, AL_MAX_GAIN, &max_gain); }
+// 		{ if (_origin != NULL) alSourcef(_origin->source, AL_MAX_GAIN, &max_gain); }
 // 	void SetMaxDistance(float max_distance)
-// 		{ if (_Source != NULL) alSourcef(_Source->source, AL_MAX_DISTANCE, &max_distance); }
+// 		{ if (_origin != NULL) alSourcef(_origin->source, AL_MAX_DISTANCE, &max_distance); }
 // 	void SetReferenceDistance(float ref_distance[3])
-// 		{ if (_Source != NULL) alSourcefv(_Source->source, AL_REFERENCE_DISTANCE, ref_distance); }
+// 		{ if (_origin != NULL) alSourcefv(_origin->source, AL_REFERENCE_DISTANCE, ref_distance); }
 // 	void SetRollOffFactor(float roll_factor)
-// 		{ if (_Source != NULL) alSourcef(_Source->source, AL_ROLLOFF_FACTOR, &roll_factor); }
+// 		{ if (_origin != NULL) alSourcef(_origin->source, AL_ROLLOFF_FACTOR, &roll_factor); }
 // 	void SetRelative(bool relative)
-// 		{ if (_Source == NULL) return; ALint rel; if (relative) rel = AL_TRUE else rel = AL_FALSE; alSourcei(_Source->source, AL_LOOPING, &rel); }
+// 		{ if (_origin == NULL) return; ALint rel; if (relative) rel = AL_TRUE else rel = AL_FALSE; alSourcei(_origin->source, AL_LOOPING, &rel); }
 // 	void SetConeInnerAngle(float angle)
-// 		{ if (_Source != NULL) alSourcef(_Source->source, AL_CONE_INNER_ANGLE, &angle); }
+// 		{ if (_origin != NULL) alSourcef(_origin->source, AL_CONE_INNER_ANGLE, &angle); }
 // 	void SetConeOuterAngle(float angle)
-// 		{ if (_Source != NULL) alSourcef(_Source->source, AL_CONE_OUTER_ANGLE, &angle); }
+// 		{ if (_origin != NULL) alSourcef(_origin->source, AL_CONE_OUTER_ANGLE, &angle); }
 // 	void SetConeOuterGain(float gain)
-// 		{ if (_Source != NULL) alSourcef(_Source->source, AL_CONE_OUTER_GAIN, &gain); }
+// 		{ if (_origin != NULL) alSourcef(_origin->source, AL_CONE_OUTER_GAIN, &gain); }
 	//@}
 
 
 
 	//! Displays the properties of the sound descriptor's buffer.
-	void DEBUG_BufferProperties()
-		{ if (_Buffer != NULL) _Buffer->DEBUG_PrintProperties(); }
+	void DEBUG_dataProperties()
+		{ if (_data != NULL) _data->DEBUG_PrintProperties(); }
 	//! Displays the properties of the sound descriptor's source.
-	void DEBUG_SourceProperties()
-		{ if (_Source != NULL) _Source->DEBUG_PrintProperties(); }
+	void DEBUG_originProperties()
+		{ if (_origin != NULL) _origin->DEBUG_PrintProperties(); }
 }; // class SoundDescriptor
 
 } // namespace hoa_audio
