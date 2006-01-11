@@ -3419,7 +3419,7 @@ test -z "$INSTALL_SCRIPT" && INSTALL_SCRIPT='${INSTALL}'
 
 test -z "$INSTALL_DATA" && INSTALL_DATA='${INSTALL} -m 644'
 
-CXXFLAGS=
+CXXFLAGS=-Werror
 
 echo "$as_me:$LINENO: checking whether to enable usage of map editor" >&5
 echo $ECHO_N "checking whether to enable usage of map editor... $ECHO_C" >&6

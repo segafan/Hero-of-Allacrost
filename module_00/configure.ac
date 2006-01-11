@@ -11,7 +11,7 @@ dnl Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_INSTALL
-CXXFLAGS=
+CXXFLAGS=-Werror
 
 dnl Check for map editor and Qt.
 AC_MSG_CHECKING(whether to enable usage of map editor)
