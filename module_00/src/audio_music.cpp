@@ -283,8 +283,12 @@ bool MusicDescriptor::LoadMusic(std::string fname) {
 // Releases the music source (if it currently holds it) and removes the reference to the buffer it holds.
 void MusicDescriptor::FreeMusic() {
 	if (_origin != NULL) {
-		// stop music if it is playing
-		// free allocation of the source
+		StopMusic();
+		ALuint buff;
+		alSourceUnqueueBuffers(_origin->source, 1, &buff);
+		alSourceUnqueueBuffers(_origin->source, 1, &buff);
+		_origin->owner = NULL; // Releases hold of the source
+		_origin = NULL; // To make sure we don't try to use the source again
 	}
 
 	if (_data != NULL) {
@@ -319,9 +323,8 @@ void MusicDescriptor::PlayMusic() {
 		}
 	}
 
-	// If the music is already playing, when OpenAl plays it again it will rewind it and then begin playing.
-	// We do not want this, so instead calling this function while the music is already playing is effectively
-	// a no-op.
+	// If the music is already playing and OpenAL attempt to play it again, it will rewind it and then begin playing.
+	// We do not want this, so instead calling this function while the music is already playing is effectively a no-op.
 	ALenum state;
 	alGetSourcei(_origin->source, AL_SOURCE_STATE, &state);
 	if (state == AL_PLAYING) {

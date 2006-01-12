@@ -71,7 +71,7 @@ const uint8 ENGINE_SPANISH = 1;
 const uint8 ENGINE_GERMAN  = 2;
 //@}
 
-//! An internal namespace to be used only within the engine code. 
+//! An internal namespace to be used only within the engine code.
 namespace private_engine {
 
 //! The threshold value we use to partition the range of joystick values into on and off
@@ -90,7 +90,7 @@ const int16 JOYAXIS_THRESHOLD = 8192;
  *  \note 1) Both the copy constructor and copy assignment operator are private.
  *
  *  \note 2) Keep in mind that just because you set the coordinate_system member,
- *  the actual coordinate system won't change until you call 
+ *  the actual coordinate system won't change until you call
  *  VideoManager->SetCoordSys(coordinate_system). Remember to always do this in
  *  the dervied class destructor.
  *
@@ -133,7 +133,7 @@ public:
 	virtual void Draw() = 0;
 	/*!
 	 *  \brief Purely virtual function for resetting the state of the class.
-	 *  
+	 *
 	 *  This function is called whenever the game mode is made active (ie, it is made the new active game mode
 	 *  on the top of the game stack). This includes when the game mode is first created and pushed onto the
 	 *  game stack, so in that manner it can also be viewed as a helper function to the constructor.
@@ -148,13 +148,13 @@ public:
  *  on the top of the stack is the active GameMode (there can only be one active
  *  game mode at any time). The virtual Update() and Draw() functions are invoked
  *  on the game mode that is on the top of the stack.
- *  
- *  When a condition is encountered in which a game mode wishes to destroy itself 
+ *
+ *  When a condition is encountered in which a game mode wishes to destroy itself
  *  and/or push a new mode onto the stack, this does not occur until the next
  *  call to the GameModeManager#Update() function. The GameModeManager#push_stack
  *  retains all the game modes we wish to push onto the stack on the next call to
  *  GameModeManager#Update(), and the GameModeManager#pop_count member retains
- *  how many modes to delete and pop off the GameModeManager#game_stack. Pop 
+ *  how many modes to delete and pop off the GameModeManager#game_stack. Pop
  *  operations are \c always performed before push operations.
  *
  *  \note 1) This class is a singleton.
@@ -182,16 +182,16 @@ private:
 	uint32 _pop_count;
 public:
 	SINGLETON_METHODS(GameModeManager);
-	//! Increases the GameModeManager#pop_count member to pop the top stack item on the next 
+	//! Increases the GameModeManager#pop_count member to pop the top stack item on the next
 	//! call to GameModeManager#Update().
 	void Pop();
 	/*!
 	 *  \brief Will remove all game modes from the stack on the next call to GameModeManager#Update().
-	 *  
+	 *
 	 *  This function sets the GameModeManager#pop_count member to the size of GameModeManager#game_stack.
 	 *  If there is no game mode in GameModeManager#push_stack before the next call to GameModeManager#Update(),
 	 *  The game will encounter a segmentation fault and die. Therefore, be careful with this function.
-	 *  
+	 *
 	 *  \note Typically only used when the game exits, or when a programmer is smoking crack.
 	 */
 	void PopAll();
@@ -263,7 +263,7 @@ private:
 	bool _full_screen;
 	//! Used by PauseMode and QuitMode for temporarily changing the volume on pause/quit events.
 	uint8 _pause_volume_action;
-	
+
 	//! \name Singleton Class Pointers
 	//@{
 	//! \brief References to the various game singletons.
@@ -275,11 +275,11 @@ public:
 
 	// NOTE: I think I'll remove these two members since you can call GetMusic/SoundVolume from the GameAudio class
 	//! \brief The music volume level
-	//! \note  Valid range is [0, 128]
-	int32 music_vol;
+	//! \note  Valid range is [0.0f, 1.0f]
+	float music_vol;
 	//! \brief The sound volume level
-	//! \note  Valid range is [0, 128]
-	int32 sound_vol;
+	//! \note  Valid range is [0.0f, 1.0f]
+	float sound_vol;
 
 	/*!
 	 *  \brief  Sets the \c last_update member to the current time.
@@ -386,7 +386,7 @@ private:
 	SDLKey _right_select;
 	SDLKey _pause;
 	//@}
-	
+
 	friend class GameInput;
 	friend class hoa_data::GameData;
 }; // class KeyState
@@ -406,7 +406,7 @@ private:
  *  as friends). GameData initailizes the class members and GameInput uses the
  *  members to check for joystick input events.
  *
- *  \note 2) This class is still incomplete and needs to be implemented. I 
+ *  \note 2) This class is still incomplete and needs to be implemented. I
  *  haven't gotten around to it due to problems getting SDL to recognize my
  *  own joystick.
  *****************************************************************************/
@@ -414,10 +414,10 @@ class JoystickState {
 private:
 	//! A pointer to the active joystick.
 	SDL_Joystick *_js;
-	
+
 	//! An index to the SDL joystick which should be made active.
 	int32 _joy_index;
-	
+
 	//! \name Generic button names.
 	//@{
 	//! \brief Each member retains the index that refers to the joystick button registered to the event.
@@ -430,21 +430,21 @@ private:
 	uint8 _pause;
 	uint8 _quit;
 	//@}
-	
+
 	//! \name Previous Peak Joystick Axis Values
 	//@{
-	//! \brief These variables retain the previous peak value of each joystick axis. 
+	//! \brief These variables retain the previous peak value of each joystick axis.
 	int16 _x_previous_peak;
 	int16 _y_previous_peak;
 	//@}
-	
+
 	//! \name Current Peak Joystick Axis Values
 	//@{
-	//! \brief These variables retain the current peak value of each joystick axis. 
+	//! \brief These variables retain the current peak value of each joystick axis.
 	int16 _x_current_peak;
 	int16 _y_current_peak;
 	//@}
-	
+
 	friend class GameInput;
 	friend class hoa_data::GameData;
 }; // class JoystickState
@@ -455,11 +455,11 @@ private:
  *  \brief Retains and manages all user input events.
  *
  *  The way this class operates is by first retaining the user-defined keyboard
- *  and joystick settings. The EventHandler() function is called once every 
+ *  and joystick settings. The EventHandler() function is called once every
  *  iteration of the main game loop to process all events that have accumulated
  *  in the SDL input queue. Three boolean varaiables for each type of input event
  *  are maintained to represent the state of each input:
- *  
+ *
  *  - state   :: for when a key/button is being held down
  *  - press   :: for when a key/button was previously untouched, but has since been pressed
  *  - release :: for when a key/button was previously held down, but has since been released
@@ -485,7 +485,7 @@ private:
  *  - Ctrl+Q     :: brings up the quit menu/quits the game
  *  - Ctrl+S     :: saves a screenshot of the current screen
  *  - Quit Event :: same as Ctrl+Q, this happens when the user tries to close the game window
- *  
+ *
  *  Keep in mind that these events are \c not mutually exclusive (you can have an up press and
  *  a down press during the same event processing). This class does not attempt to give one
  *  event precedence over the other, except in the case of pause and quit events. Therefore, in
@@ -502,12 +502,12 @@ private:
  *  the various booleans, encapsulation has been used so that one can't
  *  accidentally change the value of one of the members and introduce hard-to-find
  *  bugs in the code. (eg. `if (up_state = true)` instead of `if (up_state == true)`.
- *  
+ *
  *  \note 4) In the end, all you really need to know about this class are the
  *  member access functions in the public section of this class (its not that hard).
- *  
+ *
  *  \note 5) Currently joystick hat and ball events are not handled by this input
- *  event manager. I may add support for them later if necessary. 
+ *  event manager. I may add support for them later if necessary.
  *****************************************************************************/
 class GameInput {
 private:
@@ -516,7 +516,7 @@ private:
 	KeyState _key;
 	//! Retains the active-user defined joystick settings
 	JoystickState _joystick;
-	
+
 	//! \name Input State Members
 	//@{
 	//! \brief True if the named input event key/button is currently being held down
@@ -531,7 +531,7 @@ private:
 	bool _left_select_state;
 	bool _right_select_state;
 	//@}
-	
+
 	//! \name Input Press Members
 	//@{
 	//! \brief True if the named input event key/button has just been pressed
@@ -546,7 +546,7 @@ private:
 	bool _left_select_press;
 	bool _right_select_press;
 	//@}
-	
+
 	//! \name Input Release
 	//@{
 	//! \brief True if the named input event key/button has just been released
@@ -561,15 +561,15 @@ private:
 	bool _left_select_release;
 	bool _right_select_release;
 	//@}
-	
-		
-	//! \name First Joystick Axis Motion 
+
+
+	//! \name First Joystick Axis Motion
 	//@{
 	//! \brief Retains whether a joystick axis event has already occured or not
 	bool _joyaxis_x_first;
 	bool _joyaxis_y_first;
 	//@}
-	
+
 	//! Processes all keyboard input events
 	void _KeyEventHandler(SDL_KeyboardEvent& key_event);
 	//! Processes all joystick input events
@@ -580,13 +580,13 @@ public:
 	/*!
 	 *  \brief Examines the SDL queue for all user input events and calls appropriate sub-functions.
 	 *
-	 *  This function handles all the meta keyboard events (events when a modifier key like Ctrl or 
+	 *  This function handles all the meta keyboard events (events when a modifier key like Ctrl or
 	 *  Alt is held down) and all miscellaneous user input events (like clicking on the window button
 	 *  to quit the game). Any keyboard or joystick events that occur are passed to the KeyEventHandler()
 	 *  and JoystickEventHandler() functions.
 	 *
 	 *  \note EventHandler() is only called in the main game loop. Don't call it in your code.
-	 */ 
+	 */
 	void EventHandler();
 
 	//! \name Input state member access functions
@@ -603,7 +603,7 @@ public:
 	bool LeftSelectState() { return _left_select_state; }
 	bool RightSelectState() { return _right_select_state; }
 	//@}
-	
+
 	//! \name Input press members
 	//@{
 	//! \brief True if the named input event key/button has just been pressed
@@ -618,7 +618,7 @@ public:
 	bool LeftSelectPress() { return _left_select_press; }
 	bool RightSelectPress() { return _right_select_press; }
 	//@}
-	
+
 	//! \name Input release
 	//@{
 	//! \brief True if the named input event key/button has just been released

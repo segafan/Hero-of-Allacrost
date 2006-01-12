@@ -163,7 +163,7 @@ void SystemInfo() {
 	cout << "_____Printing system information_____" << endl;
 
 	// Initialize SDL and its subsystems and make sure it shutdowns properly on exit
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK) != 0) {
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) != 0) {
 		cerr << "ERROR: Unable to initialize SDL: " << SDL_GetError() << endl;
 		return;
 	}
@@ -172,10 +172,6 @@ void SystemInfo() {
 	}
 	atexit(SDL_Quit);
 
-	// General Information
-	cout << " *** GENERAL INFORMATION *** " << endl;
-
-	// Video Information
 	cout << " *** VIDEO INFORMATION *** " << endl;
 	char video_driver[20];
 	SDL_VideoDriverName(video_driver, 20);
@@ -215,25 +211,32 @@ void SystemInfo() {
 
 	//cout << "The best pixel format: " << user_video->vfmt << endl;
 
-	// Audio Information
+	cout << " *** AUDIO INFORMATION *** " << endl;
+	AudioManager = GameAudio::Create();
+	if (!AudioManager->Initialize()) {
+		cerr << "ERROR: unable to initialize AudioManager" << endl;
+	}
+	else {
+		AudioManager->DEBUG_PrintInfo();
+	}
+	GameAudio::Destroy();
 
-	// Joystick Information
 	cout << " *** JOYSTICK INFORMATION *** " << endl;
 
 	SDL_Joystick *js_test;
 	int32 js_num = SDL_NumJoysticks(); // Get the number of joysticks available
-	cout << "SDL has recognized " << js_num << " on this system." << endl;
+	cout << "SDL has recognized " << js_num << " joysticks on this system." << endl;
 	for (int32 i = 0; i < js_num; i++) { // Print out information about each joystick
 		js_test = SDL_JoystickOpen(i);
 		if (js_test == NULL)
 			cout << "ERROR: SDL was unable to open joystick #" << i << endl;
 		else {
 			cout << "Joystick #" << i << endl;
-			cout << "> Name: " << SDL_JoystickName(i) << endl;
-			cout << "> Axes: " << SDL_JoystickNumAxes(js_test) << endl;
-			cout << "> Buttons: " << SDL_JoystickNumButtons(js_test) << endl;
-			cout << "> Trackballs: " << SDL_JoystickNumBalls(js_test) << endl;
-			cout << "> Hat Switches: " << SDL_JoystickNumHats(js_test) << endl;
+			cout << "> Name:          " << SDL_JoystickName(i) << endl;
+			cout << "> Axes:          " << SDL_JoystickNumAxes(js_test) << endl;
+			cout << "> Buttons:       " << SDL_JoystickNumButtons(js_test) << endl;
+			cout << "> Trackballs:    " << SDL_JoystickNumBalls(js_test) << endl;
+			cout << "> Hat Switches:  " << SDL_JoystickNumHats(js_test) << endl;
 			SDL_JoystickClose(js_test);
 		}
 	}
@@ -293,7 +296,7 @@ int32 main(int32 argc, char *argv[]) {
 		return 1;
 	}
 	atexit(SDL_Quit);
-	
+
 	// Create all the game singletons
 	AudioManager = GameAudio::Create();
 	VideoManager = GameVideo::Create();
@@ -302,7 +305,7 @@ int32 main(int32 argc, char *argv[]) {
 	SettingsManager = GameSettings::Create();
 	InputManager = GameInput::Create();
 	InstanceManager = GameInstance::Create();
-	
+
 	if (!VideoManager->Initialize()) {
 		cerr << "ERROR: unable to initialize VideoManager" << endl;
 		return 1;
@@ -318,14 +321,14 @@ int32 main(int32 argc, char *argv[]) {
 	VideoManager->SetFontShadowXOffset("default", 1);
 	VideoManager->SetFontShadowYOffset("default", -2);
 	VideoManager->SetFontShadowStyle("default", VIDEO_TEXT_SHADOW_BLACK);
-	
+
 	if (!AudioManager->Initialize()) {
 		cerr << "ERROR: unable to initialize AudioManager" << endl;
 		return 1;
 	}
 	AudioManager->SetMusicVolume(SettingsManager->music_vol);
  	AudioManager->SetSoundVolume(SettingsManager->sound_vol);
-	
+
 	if (!DataManager->Initialize()) {
 		cerr << "ERROR: unable to initialize DataManager" << endl;
 		return 1;
@@ -346,16 +349,16 @@ int32 main(int32 argc, char *argv[]) {
 		cerr << "ERROR: unable to initialize InstanceManager" << endl;
 		return 1;
 	}
-	
+
 	// Disable (hide) the mouse cursor
 	SDL_ShowCursor(SDL_DISABLE);
-	
+
 	// Set the window title + icon
 	SDL_WM_SetCaption("Hero of Allacrost", NULL);
-	
+
 	// Enable unicode for multilingual keyboard support
-	SDL_EnableUNICODE(1); 
-	
+	SDL_EnableUNICODE(1);
+
 	// Ignore the events that we don't care about so they never appear in the event queue
 	SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
 	SDL_EventState(SDL_MOUSEBUTTONDOWN, SDL_IGNORE);
@@ -364,7 +367,7 @@ int32 main(int32 argc, char *argv[]) {
 	SDL_EventState(SDL_VIDEOEXPOSE, SDL_IGNORE);
 	SDL_EventState(SDL_USEREVENT, SDL_IGNORE);
 	// NOTE: SDL_ActiveEvent reports mouse focus, input focus, iconified status. Should we disable it???
-	
+
 	// Retains the amount of time (in milliseconds) between main loop iterations
 	uint32 frame_time = 0;
 	SettingsManager->SetTimer();	// Initialize the game and frames-per-second timers
@@ -375,14 +378,17 @@ int32 main(int32 argc, char *argv[]) {
 		VideoManager->Clear();
 		ModeManager->GetTop()->Draw();
 		VideoManager->Display(frame_time);
-		
+
 		// 2) Process all new events
 		InputManager->EventHandler();
-		
-		// 3) Update the timer
+
+		// 3) Update any streaming audio sources
+		AudioManager->Update();
+
+		// 4) Update the timer
 		frame_time = SettingsManager->UpdateTime();
-		
-		// 4) Update the game status
+
+		// 5) Update the game status
 		ModeManager->Update(frame_time);
 	} // while (SettingsManager->NotDone())
 

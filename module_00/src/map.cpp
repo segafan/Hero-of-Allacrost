@@ -97,7 +97,7 @@ void MapMode::Reset() {
     cerr << "MAP: ERROR > Couldn't set map font!" << endl;
 
 	// Let all map objects know that this is the current map
-	MapObject::CurrentMap = this;
+	MapObject::current_map = this;
 }
 
 

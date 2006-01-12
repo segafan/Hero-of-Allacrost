@@ -203,7 +203,7 @@ public:
 	uint8 context;
 
 	//! A pointer to the currently active instance of MapMode.
-	static MapMode *CurrentMap;
+	static MapMode *current_map;
 
 	MapObject();
 	~MapObject();

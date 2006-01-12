@@ -188,3 +188,4 @@ class FinishSkill : public BattleAction {
 }
 
 #endif
+

@@ -89,7 +89,7 @@ GameModeManager::~GameModeManager() {
 		delete _game_stack.back();
 		_game_stack.pop_back();
 	}
-	
+
 	// Delete any game modes on the push stack
 	while (_push_stack.size() != 0) {
 		delete _push_stack.back();
@@ -105,21 +105,21 @@ bool GameModeManager::Initialize() {
 		delete _game_stack.back();
 		_game_stack.pop_back();
 	}
-	
+
 	// Delete any game modes on the push stack
 	while (_push_stack.size() != 0) {
 		delete _push_stack.back();
 		_push_stack.pop_back();
 	}
-	
+
 	// Reset the pop counter
 	_pop_count = 0;
-	
+
 	// Create a new BootMode and push it onto the true game stack immediately
 	BootMode* BM = new BootMode();
 	_game_stack.push_back(BM);
 	_state_change = true;
-	
+
 	return true;
 }
 
@@ -172,7 +172,7 @@ void GameModeManager::Update(uint32 time_elapsed) {
 	if (_state_change == true) {
 		// Pop however many game modes we need to from the stop of thes tack
 		while (_pop_count != 0) {
-			if (_game_stack.empty()) { 
+			if (_game_stack.empty()) {
 				if (ENGINE_DEBUG) {
 					cerr << "ENGINE: WARNING: Tried to pop off more game modes than were on the stack!" << endl;
 				}
@@ -182,26 +182,26 @@ void GameModeManager::Update(uint32 time_elapsed) {
 			_game_stack.pop_back();
 			_pop_count--;
 		}
-		
+
 		// Push any new game modes onto the true game stack.
 		while (_push_stack.size() != 0) {
 			_game_stack.push_back(_push_stack.back());
 			_push_stack.pop_back();
 		}
-		
+
 		// Make sure there is a game mode on the stack, otherwise we'll get a segementation fault.
 		if (_game_stack.empty()) {
 			cerr << "ENGINE: ERROR: Game stack is empty! Now re-initializing boot mode." << endl;
 			Initialize();
 		}
-		
+
 		// Call the newly active game mode's "AtTop()" function to re-initialize class members
 		_game_stack.back()->Reset();
-		
+
 		// Reset the state change variable
 		_state_change = false;
 	}
-	
+
 	// Call the Update function on the top stack mode (the active game mode)
 	_game_stack.back()->Update(time_elapsed);
 }
@@ -251,7 +251,7 @@ GameSettings::~GameSettings() {
 bool GameSettings::Initialize() {
 	bool fs;
 	ReadDataDescriptor read_data;
-	
+
 	if (!read_data.OpenFile("dat/config/settings.lua")) {
 		cout << "ENGINE ERROR: failed to load settings from data file" << endl;
 	}
@@ -260,10 +260,10 @@ bool GameSettings::Initialize() {
 	read_data.CloseTable();
 
 	read_data.OpenTable("audio_settings");
-	music_vol = read_data.ReadInt("music_vol");
-	sound_vol = read_data.ReadInt("sound_vol");
+	music_vol = read_data.ReadFloat("music_vol");
+	sound_vol = read_data.ReadFloat("sound_vol");
 	read_data.CloseTable();
-	
+
 	if (read_data.GetError() != DATA_NO_ERRORS) {
 		cout << "ENGINE WARNING: some error occured during read operations from data file" << endl;
 	}
@@ -285,7 +285,7 @@ uint32 GameSettings::UpdateTime() {
 		_fps_rate = 1000 * static_cast<float>(_fps_counter) / static_cast<float>(_fps_timer);
 		_fps_counter = 0;
 		_fps_timer = 0;
-		// DEFUNCT: cout << "FPS: " << fps_rate << endl; 
+		// DEFUNCT: cout << "FPS: " << fps_rate << endl;
 		// Need to make a call the the DrawFPS function in GameVideo here.
 	}
 
@@ -348,7 +348,7 @@ GameInput::GameInput() {
 	_left_select_state = false;
 	_left_select_press = false;
 	_left_select_release = false;
-	
+
 	_joyaxis_x_first = true;
 	_joyaxis_y_first = true;
 
@@ -359,7 +359,7 @@ GameInput::GameInput() {
 
 GameInput::~GameInput() {
 	if (ENGINE_DEBUG) cout << "ENGINE: GameInput destructor invoked" << endl;
-	
+
 	// If open, close the joystick before exiting
 	if (_joystick._js != NULL) {
 		SDL_JoystickClose(_joystick._js);
@@ -374,9 +374,9 @@ bool GameInput::Initialize() {
 	if (!read_data.OpenFile("dat/config/settings.lua")) {
 		cout << "ENGINE ERROR: failed to load settings from data file" << endl;
 	}
-	
+
 	read_data.OpenTable("key_settings");
-	_key._up = static_cast<SDLKey>(read_data.ReadInt("up"));         
+	_key._up = static_cast<SDLKey>(read_data.ReadInt("up"));
 	_key._down = static_cast<SDLKey>(read_data.ReadInt("down"));
 	_key._left = static_cast<SDLKey>(read_data.ReadInt("left"));
 	_key._right =static_cast<SDLKey>(read_data.ReadInt("right"));
@@ -388,7 +388,7 @@ bool GameInput::Initialize() {
 	_key._right_select = static_cast<SDLKey>(read_data.ReadInt("right_select"));
 	_key._pause = static_cast<SDLKey>(read_data.ReadInt("pause"));
 	read_data.CloseTable();
-	
+
 	read_data.OpenTable("joystick_settings");
 	_joystick._joy_index = static_cast<int32>(read_data.ReadInt("index"));
 	_joystick._confirm = static_cast<uint8>(read_data.ReadInt("confirm"));
@@ -400,13 +400,13 @@ bool GameInput::Initialize() {
 	_joystick._pause = static_cast<uint8>(read_data.ReadInt("pause"));
 	_joystick._quit = static_cast<uint8>(read_data.ReadInt("quit"));
 	read_data.CloseTable();
-	
+
 	read_data.CloseFile();
-	
+
 	if (read_data.GetError() != DATA_NO_ERRORS) {
 		cout << "ENGINE WARNING: some error occured during read operations from data file" << endl;
 	}
-	
+
 	// Attempt to initialize and setup the configured joystick
 	if (SDL_InitSubSystem(SDL_INIT_JOYSTICK) != 0) {
 		cerr << "ENGINE: ERROR: Failed to initailize SDL joystick subsystem" << endl;
@@ -480,13 +480,13 @@ void GameInput::EventHandler() {
 			break;
 		}
 	} // while (SDL_PollEvent(&event)
-	
+
 	// Compare the current and previous peak joystick axis values to detect movement events
 	if (_joystick._js != NULL) {
 		// ******************************* X-Axis Movment *************************************
 		// Check for a x-axis boundary change from left to center or right
-		if ((_joystick._x_previous_peak <= -JOYAXIS_THRESHOLD) && 
-		    (_joystick._x_current_peak > -JOYAXIS_THRESHOLD)) { 
+		if ((_joystick._x_previous_peak <= -JOYAXIS_THRESHOLD) &&
+		    (_joystick._x_current_peak > -JOYAXIS_THRESHOLD)) {
 			_left_state = false;
 			_left_release = true;
 			// Check for a right x-axis boundary change
@@ -496,7 +496,7 @@ void GameInput::EventHandler() {
 			}
 		}
 		// Check for a x-axis boundary change from right to center or left
-		else if ((_joystick._x_previous_peak >= JOYAXIS_THRESHOLD) && 
+		else if ((_joystick._x_previous_peak >= JOYAXIS_THRESHOLD) &&
 		         (_joystick._x_current_peak < JOYAXIS_THRESHOLD)) {
 			_right_state = false;
 			_right_release = true;
@@ -507,24 +507,24 @@ void GameInput::EventHandler() {
 			}
 		}
 		// Check for a x-axis boundary change from center to left
-		else if ((_joystick._x_current_peak <= -JOYAXIS_THRESHOLD) && 
-		         (_joystick._x_previous_peak > -JOYAXIS_THRESHOLD) && 
+		else if ((_joystick._x_current_peak <= -JOYAXIS_THRESHOLD) &&
+		         (_joystick._x_previous_peak > -JOYAXIS_THRESHOLD) &&
 		         (_joystick._x_previous_peak < JOYAXIS_THRESHOLD)) {
 			_left_state = true;
 			_left_press = true;
 		}
 		// Check for a x-axis boundary change from center to right
-		else if ((_joystick._x_current_peak >= JOYAXIS_THRESHOLD) && 
-		         (_joystick._x_previous_peak > -JOYAXIS_THRESHOLD) && 
+		else if ((_joystick._x_current_peak >= JOYAXIS_THRESHOLD) &&
+		         (_joystick._x_previous_peak > -JOYAXIS_THRESHOLD) &&
 		         (_joystick._x_previous_peak > JOYAXIS_THRESHOLD)) {
 			_right_state = true;
 			_right_press = true;
 		}
-		
+
 		// ******************************* Y-Axis Movment *************************************
 		// Check for a y-axis boundary change from up to center or down
-		if ((_joystick._y_previous_peak <= -JOYAXIS_THRESHOLD) && 
-		    (_joystick._y_current_peak > -JOYAXIS_THRESHOLD)) { 
+		if ((_joystick._y_previous_peak <= -JOYAXIS_THRESHOLD) &&
+		    (_joystick._y_current_peak > -JOYAXIS_THRESHOLD)) {
 			_up_state = false;
 			_up_release = true;
 			// Check for a down y-axis boundary change
@@ -534,7 +534,7 @@ void GameInput::EventHandler() {
 			}
 		}
 		// Check for a y-axis boundary change from down to center or up
-		else if ((_joystick._y_previous_peak >= JOYAXIS_THRESHOLD) && 
+		else if ((_joystick._y_previous_peak >= JOYAXIS_THRESHOLD) &&
 		         (_joystick._y_current_peak < JOYAXIS_THRESHOLD)) {
 			_down_state = false;
 			_down_release = true;
@@ -545,24 +545,24 @@ void GameInput::EventHandler() {
 			}
 		}
 		// Check for a y-axis boundary change from center to up
-		else if ((_joystick._y_current_peak <= -JOYAXIS_THRESHOLD) && 
-		         (_joystick._y_previous_peak > -JOYAXIS_THRESHOLD) && 
+		else if ((_joystick._y_current_peak <= -JOYAXIS_THRESHOLD) &&
+		         (_joystick._y_previous_peak > -JOYAXIS_THRESHOLD) &&
 		         (_joystick._y_previous_peak < JOYAXIS_THRESHOLD)) {
 			_up_state = true;
 			_up_press = true;
 		}
 		// Check for a x-axis boundary change from center to down
-		else if ((_joystick._y_current_peak >= JOYAXIS_THRESHOLD) && 
-		         (_joystick._y_previous_peak > -JOYAXIS_THRESHOLD) && 
+		else if ((_joystick._y_current_peak >= JOYAXIS_THRESHOLD) &&
+		         (_joystick._y_previous_peak > -JOYAXIS_THRESHOLD) &&
 		         (_joystick._y_previous_peak < JOYAXIS_THRESHOLD)) {
 			_down_state = true;
 			_down_press = true;
 		}
-		
+
 		// Save previous peak values for the next iteration of event processing
 		_joystick._x_previous_peak = _joystick._x_current_peak;
 		_joystick._y_previous_peak = _joystick._y_current_peak;
-		
+
 		// Reset first axis motion detectors for next event processing loop
 		_joyaxis_x_first = true;
 		_joyaxis_y_first = true;
@@ -575,7 +575,7 @@ void GameInput::EventHandler() {
 void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 	if (key_event.type == SDL_KEYDOWN) { // Key was pressed
 		if (key_event.keysym.mod & KMOD_CTRL) { // CTRL key was held down
-			if (key_event.keysym.sym == SDLK_a) {	
+			if (key_event.keysym.sym == SDLK_a) {
 				// Toggle the display of advanced video engine information
 				VideoManager->ToggleAdvancedDisplay();
 			}
@@ -611,7 +611,7 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 				VideoManager->DEBUG_NextTexSheet();
 				return;
 			}
-			
+
 			else
 				return;
 		}
@@ -765,7 +765,7 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 } // void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event)
 
 
-// Handles all joystick events for the game 
+// Handles all joystick events for the game
 void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 	if (js_event.type == SDL_JOYAXISMOTION) {
 		if (js_event.jaxis.axis == 0) { // X-axis motion
@@ -775,7 +775,7 @@ void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 			}
 			else if (abs(js_event.jaxis.value) > abs(_joystick._x_current_peak)) {
 				_joystick._x_current_peak = js_event.jaxis.value;
-			} 
+			}
 		}
 		else { // Y-axis motion
 			if (_joyaxis_y_first == true) {
@@ -784,7 +784,7 @@ void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 			}
 			if (abs(js_event.jaxis.value) > abs(_joystick._y_current_peak)) {
 				_joystick._y_current_peak = js_event.jaxis.value;
-			} 
+			}
 		}
 	} // if (js_event.type == SDL_JOYAXISMOTION)
 	else if (js_event.type == SDL_JOYBUTTONDOWN) {
@@ -892,9 +892,9 @@ void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 			return;
 		}
 	} // else if (js_event.type == JOYBUTTONUP)
-	
+
 	// SDL_JOYBALLMOTION and SDL_JOYHATMOTION are ignored for now. Should we process them?
-	
+
 } // void GameInput::_JoystickEventHandler(SDL_Event& js_event)
 
 }// namespace hoa_engine

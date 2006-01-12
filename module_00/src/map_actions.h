@@ -82,8 +82,8 @@ public:
 	ActionPathMove() {}
 	~ActionPathMove() {}
 
-	void Load(uint32 table_key) {}
-	void Process() {}
+	void Load(uint32 table_key);
+	void Process();
 
 	//! Computes a new path, either because a previous path doesn't exist or it is unoptimal.
 	void FindNewPath() {}

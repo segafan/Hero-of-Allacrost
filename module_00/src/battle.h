@@ -674,3 +674,4 @@ public:
 } // namespace hoa_battle
 
 #endif
+

@@ -48,6 +48,7 @@ SpriteDialogue::SpriteDialogue() {
 	next_line = 0;
 	// Don't set to false until we actually have some lines of dialogue
 	seen_all = true;
+	no_speech = false;
 }
 
 

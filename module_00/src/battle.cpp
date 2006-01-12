@@ -1179,3 +1179,4 @@ std::list<PlayerActor *> BattleMode::ReturnCharacters() {
 }
 
 } // namespace hoa_battle
+

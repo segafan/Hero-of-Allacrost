@@ -44,12 +44,12 @@ namespace private_map {
 // ******************** ActionPathMove ***********************
 
 void ActionPathMove::Load(uint32 table_key) {
-	ReadDataDescriptor &read_data = sprite->current_map->_map_data;
+	ReadDataDescriptor *read_data = &(sprite->current_map->_map_data);
 
 	read_data->OpenTable(table_key);
-	destination.row = read_data->ReadInt(row);
-	destination.col = read_data->ReadInt(col;
-	destination.altitude = read_data->ReadInt(altitude);
+	destination.row = read_data->ReadInt("row");
+	destination.col = read_data->ReadInt("col");
+	destination.altitude = read_data->ReadInt("altitude");
 	read_data->CloseTable();
 
 	if (read_data->GetError() != DATA_NO_ERRORS) {

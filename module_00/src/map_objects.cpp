@@ -41,7 +41,7 @@ namespace hoa_map {
 namespace private_map {
 
 // Initialize static class members
-MapMode* MapObject::CurrentMap = NULL;
+MapMode* MapObject::current_map = NULL;
 
 // ****************************************************************************
 // *********************** MapObject Class Functions ************************
@@ -375,9 +375,9 @@ void MapSprite::Move(uint16 move_direction) {
 	tcheck.altitude = altitude;
 	tcheck.direction = direction;
 
-	if (CurrentMap->_TileMoveable(tcheck)) {
+	if (current_map->_TileMoveable(tcheck)) {
 		// ************************ Check For Tile Departure Event ***********************
-		if (CurrentMap->_tile_layers[row_position][col_position].depart_event != 255) {
+		if (current_map->_tile_layers[row_position][col_position].depart_event != 255) {
 			// Look-up and process the event associated with the tile.
 			cout << "Tile had a departure event." << endl;
 		}
@@ -385,14 +385,14 @@ void MapSprite::Move(uint16 move_direction) {
 		status |= IN_MOTION; // Set the sprite's motion flag
 
 		// For the tile the sprite is moving off of, clear off the occupied bit.
-		CurrentMap->_tile_layers[row_position][col_position].occupied &= ~altitude;
+		current_map->_tile_layers[row_position][col_position].occupied &= ~altitude;
 
 		// Change the new tile row and column coordinates of the sprite.
 		row_position = tcheck.row;
 		col_position = tcheck.col;
 
 		// Set the occuped bit for the tile the sprite is moving on to.
-		CurrentMap->_tile_layers[row_position][col_position].occupied |= altitude;
+		current_map->_tile_layers[row_position][col_position].occupied |= altitude;
 	}
 	else {
 		status &= ~IN_MOTION;
@@ -402,7 +402,7 @@ void MapSprite::Move(uint16 move_direction) {
 // Updates the status of the sprite
 void MapSprite::Update() {
 	if (status & IN_MOTION) {
-		step_count += static_cast<float>(CurrentMap->_time_elapsed);
+		step_count += static_cast<float>(current_map->_time_elapsed);
 
 		// Check whether we've reached a new tile and if so, update accordingly.
 		if (step_count >= step_speed) {
@@ -411,7 +411,7 @@ void MapSprite::Update() {
 			status ^= STEP_SWAP; // This flips the step_swap bit
 
 			// ************************ Check For Tile Arrival Event ***********************
-			if (CurrentMap->_tile_layers[row_position][col_position].arrive_event != 255) {
+			if (current_map->_tile_layers[row_position][col_position].arrive_event != 255) {
 				// Look-up and process the event associated with the tile.
 				cout << "Tile has an arrival event." << endl;
 			}
@@ -447,8 +447,8 @@ void MapSprite::Draw() {
 
 
 	// Find the x and y position (true positions when sprite is not in motion)
-	x_draw = CurrentMap->_draw_info.c_pos + (static_cast<float>(col_position) - CurrentMap->_draw_info.c_start);
-	y_draw = CurrentMap->_draw_info.r_pos + (static_cast<float>(row_position) - CurrentMap->_draw_info.r_start);
+	x_draw = current_map->_draw_info.c_pos + (static_cast<float>(col_position) - current_map->_draw_info.c_start);
+	y_draw = current_map->_draw_info.r_pos + (static_cast<float>(row_position) - current_map->_draw_info.r_start);
 
 	// When the sprite is in motion, we have to off-set the step positions
 	if (status & IN_MOTION) {

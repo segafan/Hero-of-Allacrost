@@ -235,6 +235,7 @@ class MapMode : public hoa_engine::GameMode {
 	friend class private_map::MapFrame;
 	friend class private_map::MapObject;
 	friend class private_map::MapSprite;
+	friend class private_map::ActionPathMove;
 public:
 	MapMode();
 	~MapMode();

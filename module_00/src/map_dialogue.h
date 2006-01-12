@@ -58,6 +58,10 @@ public:
 	SpriteText()
 		{ next_text = 0; seen = false; }
 	~SpriteText() {}
+
+	//!
+	//! \return
+	uint32 NextText();
 };
 
 /*!****************************************************************************
@@ -78,6 +82,8 @@ public:
 	uint32 next_line;
 	//! True if the player has already read every dialogue from the sprite.
 	bool seen_all;
+	//! When set to true, the player can not speak with this sprite.
+	bool no_speech;
 
 	SpriteDialogue();
 	~SpriteDialogue();
@@ -86,6 +92,8 @@ public:
 	void AddSingleLine(hoa_utils::ustring &txt);
 	//! Adds a new dialogue with multiple lines of text.
 	void AddMultipleLines(std::vector<hoa_utils::ustring> &txt);
+	//!
+	bool NextLine();
 
 	//! \name Public Member Access Functions
 	//! \brief Used for setting and retrieving the values of the various class members.
