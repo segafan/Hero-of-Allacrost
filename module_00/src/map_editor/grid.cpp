@@ -17,12 +17,6 @@ using namespace hoa_editor;
 Grid::Grid(QWidget *parent, const QString &name)
 	: QCanvasView(parent, (const char*)name)
 {	
-	// Create and initialize the GameData singleton
-	_data_manager = GameData::Create();
-	_data_manager = GameData::GetReference();
-	if (!DataManager->Initialize())
-		cerr << "ERROR: unable to initialize DataManager" << endl;
-	
 	setAcceptDrops(TRUE);	// enable drag 'n' drop
 	_dragging = FALSE;		// FIXME: currently unneeded
 	setCanvas(NULL);		// don't have canvas until "New Map..." is selected
@@ -39,9 +33,6 @@ Grid::Grid(QWidget *parent, const QString &name)
 
 Grid::~Grid()
 {
-	// Destroy GameData singleton
-	GameData::Destroy();
-	
 	// do nothing Qt should take care of everything
 } // Grid destructor
 
@@ -121,7 +112,13 @@ void Grid::dropEvent(QDropEvent *evt)
     
     if (QImageDrag::decode(evt, img) && (canvas() != NULL))
 	{
-		Tile *tile = new Tile(img, canvas());
+		QString name = temp->currentItem()->text().remove(".png");
+		int index = _file_name_list.findIndex(name);
+		// Check if tile name is new.
+		if (index == -1)
+			_file_name_list.append(name);
+		
+		Tile *tile = new Tile(name, img, canvas());
 		QPoint point = inverseWorldMatrix().map(evt->pos());
 		
 		// the division here will effectively snap the tile to the grid
@@ -233,7 +230,13 @@ void Grid::contentsMouseDoubleClickEvent(QMouseEvent *evt)
 			std::cerr << "convertToImage() is NULL" << std::endl;
 		std::cerr << "5" << std::endl;
 */		QImage img = temp->currentItem()->pixmap()->convertToImage();
-		Tile *tile = new Tile(img, canvas());
+		QString name = temp->currentItem()->text().remove(".png");
+		int index = _file_name_list.findIndex(name);
+		// Check if tile name is new.
+		if (index == -1)
+			_file_name_list.append(name);
+		
+		Tile *tile = new Tile(name, img, canvas());
 		QPoint point = inverseWorldMatrix().map(evt->pos());
 		
 		// the division here will effectively snap the tile to the grid
@@ -528,7 +531,7 @@ void Grid::_TileMenuEvaluate()
 	{
 		if ((*it)->rtti() == TILE_RTTI)
 		{
-			Tile* item= (Tile*)(*it);
+			Tile* item = (Tile*)(*it);
 			if (!item->Hit(mapFromGlobal(_menu_position)))
 				continue;
 
@@ -652,32 +655,57 @@ void Grid::_TileMode()
 
 void Grid::LoadMap()
 {
-	_data_manager->OpenLuaFile(_file_name);
-	_height = _data_manager->GetGlobalInt("row_count");
-	_width  = _data_manager->GetGlobalInt("col_count");
+	ReadDataDescriptor read_data;
+	
+	if (!read_data.OpenFile(_file_name))
+		cerr << "ERROR: failed to load " << _file_name << endl;
+
+	if (this->canvas() != NULL)
+		_EditClear();
+	_file_name_list.clear();
+	_tile_array.clear();
+	
+	_height = read_data.ReadInt("row_count");
+	_width  = read_data.ReadInt("col_count");
 	QCanvas *canvas = new QCanvas(this);
 	setCanvas(canvas);
 	this->canvas()->resize(_width * TILE_WIDTH, _height * TILE_HEIGHT);
 	CreateGrid();
-		
-	vector<string> vect;
-	_data_manager->FillStringVector("tiles_used", vect);
-	for (vector<string>::iterator it = vect.begin(); it != vect.end(); ++it)
-		_file_name_list.append(*it);
 
-	_data_manager->FillIntVector("lower_layer", _tile_array);
+	read_data.OpenTable("tile_filenames");
+	uint32 table_size = read_data.GetTableSize();
+	for (uint32 i = 1; i <= table_size; i++)
+		_file_name_list.append(read_data.ReadString(i));
+	read_data.CloseTable();
+
+	read_data.OpenTable("lower_layer");
+	vector<int32> vect;
+	for (int32 i = 0; i < _height; i++)
+	{
+		read_data.FillIntVector(i, vect);
+		for (vector<int32>::iterator it = vect.begin(); it != vect.end(); it++)
+			_tile_array.push_back(*it);
+		vect.clear();
+	} // iterate through the rows of the lower layer
+	read_data.CloseTable();
+	
 	int32 row = 0, col = 0;
 	for (int32 i = 0; i < _tile_array.size(); i++)
-	{	
-		QImage img = temp->findItem(_file_name_list[_tile_array[i]])->pixmap()
-			->convertToImage();
-		Tile *tile = new Tile(img, this->canvas());
-		tile->move(col * TILE_WIDTH, row * TILE_HEIGHT);
-		tile->setZ(0);		// sets height of tile TODO: create a menu option
-		// tile->tileInfo.lower_layer = 1; FIXME: perhaps not needed here
-		//tile->tileInfo.upper_layer = -1; // TEMPORARY!!! FIXME: this neither
-		//tile->tileInfo.event_mask = tileProperties;
-		tile->show();
+	{
+		if (_tile_array[i] != -1)
+		{
+			QImage img = temp->findItem(_file_name_list[_tile_array[i]])->
+				pixmap()->convertToImage();
+			QString name = temp->findItem(_file_name_list[_tile_array[i]])->
+				text();
+			Tile *tile = new Tile(name, img, this->canvas());
+			tile->move(col * TILE_WIDTH, row * TILE_HEIGHT);
+			tile->setZ(0);// sets height of tile TODO: create a menu option
+			// tile->tileInfo.lower_layer = 1; FIXME: perhaps not needed here
+			//tile->tileInfo.upper_layer = -1; TEMPORARY!!! FIXME: this neither
+			//tile->tileInfo.event_mask = tileProperties;
+			tile->show();
+		}
 		col = ++col % _width;
 		if (col == 0)
 			row++;
@@ -688,5 +716,153 @@ void Grid::LoadMap()
 
 void Grid::SaveMap()
 {
+	int i;      // Lua table index / Loop counter variable
+	int j;      // Loop counter variable FIXME: temporary!
+	int index;  // _file_name_list index used in tile layers
+	WriteDataDescriptor write_data;
+	
+	if(!write_data.OpenFile(_file_name))
+		cerr << "ERROR: failed to save " << _file_name << endl;
+	
+	write_data.WriteComment(_file_name);
+	write_data.InsertNewLine();
+
+	write_data.WriteComment("Whether or not we have random encounters, and if so the rate of encounter");
+	write_data.WriteInt("random_encounters", false);// FIXME: hard-coded for now
+	write_data.WriteInt("encounter_rate", 12);      // FIXME: hard-coded for now
+	write_data.InsertNewLine();
+
+	write_data.WriteComment("The number of rows and columns of tiles that compose the map");
+	write_data.WriteInt("row_count", _height);
+	write_data.WriteInt("col_count", _width);
+	write_data.InsertNewLine();
+
+	write_data.WriteComment("The names of the tile image files used, with the path and file extension omitted (note that the indeces begin with 1, not 0)");
+	write_data.BeginTable("tile_filenames");
+	i = 0;
+	for (QValueListIterator<QString> it = _file_name_list.begin();
+			it != _file_name_list.end(); ++it)
+	{
+		i++;
+		write_data.WriteString(i, (*it).ascii());
+	} // Iterate through _file_name_list writing each element
+	write_data.EndTable();
+	write_data.InsertNewLine();
+
+	// FIXME: hard-coded for now
+	write_data.WriteComment("This structure forms still or animate tile images. In this case, all of our tiles are stills, but note that each element must still be a table.");
+	write_data.BeginTable("tile_mappings");
+	vector<int32> vect_single;
+	for (j = 0; j < i; j++)
+	{
+		vect_single.push_back(j);
+		char buffer[_file_name_list.size()];
+		sprintf(buffer, "%d", j);
+		write_data.WriteIntVector(buffer, vect_single);
+		vect_single.clear();
+	}
+	write_data.EndTable();
+	write_data.InsertNewLine();
+
+	write_data.WriteComment("The lower tile layer. The numbers are indeces to the tile_mappings table.");
+	write_data.BeginTable("lower_layer");
+	vector<int32> ll_row;
+	for (int row = 0; row < _height; row++)
+	{
+		for (int col = 0; col < _width; col++)
+		{
+			QCanvasItemList list = canvas()->collisions(
+				QPoint(col * TILE_WIDTH + 10, row * TILE_HEIGHT + 10));
+			QCanvasItemList::Iterator it = list.begin();
+			while (it != list.end() && (*it)->rtti() != TILE_RTTI)
+				it++;
+			if (list.empty())
+				ll_row.push_back(-1);
+			else if ((*it)->rtti() == TILE_RTTI)
+			{
+				Tile* tile = static_cast<Tile*> (*it);
+				index = _file_name_list.findIndex(tile->GetName());
+				ll_row.push_back(index);
+			} // make sure object is a tile
+		}
+		char buffer[_height];
+		sprintf(buffer, "%d", row);
+		write_data.WriteIntVector(buffer, ll_row);
+		ll_row.clear();
+	}
+	write_data.EndTable();
+	write_data.InsertNewLine();
+
+	// Create vector of -1s.
+	vector<int32> vect(_width, -1);
+	
+	// FIXME: hard-coded for now
+	write_data.WriteComment("The middle tile layer. The numbers are indeces to the tile_mappings table.");
+	write_data.BeginTable("middle_layer");
+	for (i = 0; i < _height; i++)
+	{
+		char buffer[_height];
+		sprintf(buffer, "%d", i);
+		write_data.WriteIntVector(buffer, vect);
+	}
+	write_data.EndTable();
+	write_data.InsertNewLine();
+
+	// FIXME: hard-coded for now
+	write_data.WriteComment("The upper tile layer. The numbers are indeces to the tile_mappings table.");
+	write_data.BeginTable("upper_layer");
+	for (i = 0; i < _height; i++)
+	{
+		char buffer[_height];
+		sprintf(buffer, "%d", i);
+		write_data.WriteIntVector(buffer, vect);
+	}
+	write_data.EndTable();
+	write_data.InsertNewLine();
+
+	// Create vector of 0s.
+	vector<int32> vect_0s(_width, 0);
+	
+	// FIXME: hard-coded for now
+	write_data.WriteComment("Tile properties, not including walkability status. Valid range: [0-255]");
+	write_data.BeginTable("tile_properties");
+	for (i = 0; i < _height; i++)
+	{
+		char buffer[_height];
+		sprintf(buffer, "%d", i);
+		write_data.WriteIntVector(buffer, vect_0s);
+	}
+	write_data.EndTable();
+	write_data.InsertNewLine();
+
+	// Create vector of 255s.
+	vector<int32> vect_255s(_width, 255);
+
+	// FIXME: hard-coded for now
+	write_data.WriteComment("Walkablity status of tiles for 8 height levels. Non-zero indicates walkable. Valid range: [0-255]");
+	write_data.BeginTable("tile_walkable");
+	for (i = 0; i < _height; i++)
+	{
+		char buffer[_height];
+		sprintf(buffer, "%d", i);
+		write_data.WriteIntVector(buffer, vect_255s);
+	}
+	write_data.EndTable();
+	write_data.InsertNewLine();
+
+	// FIXME: hard-coded for now
+	write_data.WriteComment("Events associated with each tile. -1 indicates no event.");
+	write_data.BeginTable("tile_events");
+	for (i = 0; i < _height; i++)
+	{
+		char buffer[_height];
+		sprintf(buffer, "%d", i);
+		write_data.WriteIntVector(buffer, vect);
+	}
+	write_data.EndTable();
+	
+	write_data.InsertNewLine();
+	write_data.CloseFile();
+	
 	_changed = false;
 } // SaveMap()

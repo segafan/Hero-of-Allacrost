@@ -8,7 +8,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 /*!****************************************************************************
- * \file tile .h
+ * \file tile.h
  * \author Philip Vorsilak, gorzuate@allacrost.org
  * \date Last Updated: October 30th, 2005
  * \brief Header file for representing a tile in the editor.
@@ -24,6 +24,7 @@
 #include <qimage.h>
 #include <qpainter.h>
 #include <qpixmap.h>
+#include <qstring.h>
 
 //! All calls to the editor are wrapped in this namespace.
 namespace hoa_editor
@@ -45,7 +46,7 @@ const int TILE_HEIGHT = 32;
 class Tile: public QCanvasRectangle
 {
 	public:
-    	Tile(QImage img, QCanvas *canvas);
+    	Tile(QString name, QImage img, QCanvas *canvas);
 
 		/*!
 		 *  \brief Reimplemented Qt function used to easily identify objects on
@@ -62,6 +63,12 @@ class Tile: public QCanvasRectangle
 		 */
 		bool Hit(const QPoint &p) const;
 
+		/*!
+		 *  \brief Used to get the tile's file name.
+		 *  \return A QString of the tile's file name.
+		 */
+    	QString GetName() { return _file_name; }
+		
 	protected:
 		/*!
 		 *  \brief Reimplemented Qt function used to draw the tile onto the
@@ -72,6 +79,7 @@ class Tile: public QCanvasRectangle
     	void drawShape(QPainter &p);
 
 	private:
+		QString _file_name;
     	QImage _image;
     	QPixmap _pixmap;
 }; // class Tile

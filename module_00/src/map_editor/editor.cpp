@@ -94,28 +94,31 @@ void Editor::_FileMenuSetup()
 	_file_menu->clear();
 	_file_menu->insertItem("&New...", this, SLOT(_FileNew()), CTRL+Key_N);
 	_file_menu->insertItem("&Open...", this, SLOT(_FileOpen()), CTRL+Key_O);
-	int saveID = _file_menu->insertItem("&Save", this, SLOT(_FileSave()),
+	int save_id = _file_menu->insertItem("&Save", this, SLOT(_FileSave()),
 		CTRL+Key_S);
-	int saveAsID = _file_menu->insertItem("Save &As...", this,
+	int save_as_id = _file_menu->insertItem("Save &As...", this,
 		SLOT(_FileSaveAs()));
 	_file_menu->insertSeparator();
-	int resizeID = _file_menu->insertItem("&Resize Map...", this,
+	int resize_id = _file_menu->insertItem("&Resize Map...", this,
 		SLOT(_FileResize()));
 	_file_menu->insertSeparator();
 	_file_menu->insertItem("&Quit", this, SLOT(_FileQuit()), CTRL+Key_Q);
 
 	if (_map->GetChanged())
+		_file_menu->setItemEnabled(save_id, true);
+	else
+		_file_menu->setItemEnabled(save_id, false);
+
+	if (_map->canvas() == NULL)
 	{
-		_file_menu->setItemEnabled(saveID, true);
-		_file_menu->setItemEnabled(saveAsID, true);
-		_file_menu->setItemEnabled(resizeID, true);
-	} // map has been changed, so those changes can be saved
+		_file_menu->setItemEnabled(save_as_id, false);
+		_file_menu->setItemEnabled(resize_id, false);
+	}
 	else
 	{
-		_file_menu->setItemEnabled(saveID, false);
-		_file_menu->setItemEnabled(saveAsID, false);
-		_file_menu->setItemEnabled(resizeID, false);
-	} // map hasn't changed, no changes to be made, gray them out
+		_file_menu->setItemEnabled(save_as_id, true);
+		_file_menu->setItemEnabled(resize_id, true);
+	}
 } // _FileMenuSetup()
 
 void Editor::_FileNew()
@@ -130,20 +133,22 @@ void Editor::_FileNew()
 
 void Editor::_FileOpen()
 {
-	// file to open
-	QString file_name = QFileDialog::getOpenFileName(
-		"data/maps", "Maps (*.hoa)", this, "file open",
-		"HoA Map Editor -- File Open");
-
-	// file must exist in order to open it
-	if (!file_name.isEmpty())
+	if (_EraseOK())
 	{
-		_map->SetFileName(file_name);
-		_map->LoadMap();
-		_stat_bar->message(QString("Opened \'%1\'").arg(_map->GetFileName()),
-			5000);
-//		_UpdateRecentFiles(file_name);  <-- FIXME
-	}
+		// file to open
+		QString file_name = QFileDialog::getOpenFileName(
+			"dat/maps", "Maps (*.lua)", this, "file open",
+			"HoA Level Editor -- File Open");
+
+		if (!file_name.isEmpty())
+		{
+			_map->SetFileName(file_name);
+			_map->LoadMap();
+			_stat_bar->message(QString("Opened \'%1\'").
+				arg(_map->GetFileName()), 5000);
+//			_UpdateRecentFiles(file_name);  <-- FIXME
+		} // file must exist in order to open it
+	} // make sure an unsaved map is not lost
 } // _FileOpen()
 /*
 void Editor::_FileOpenRecent(int index)
@@ -154,16 +159,16 @@ FIXME
 */
 void Editor::_FileSaveAs()
 {
-	// get the file name from the user
+	// Get the file name from the user.
 	QString file_name = QFileDialog::getSaveFileName(
-		"data/maps", "Maps (*.hoa)", this, "file save",
-		"HoA Map Editor -- File Save");
+		"dat/maps", "Maps (*.lua)", this, "file save",
+		"HoA Level Editor -- File Save");
 		
 	if (!file_name.isEmpty())
 	{
 		int answer = 0;		// button pressed by user
 		
-		// ask to overwrite existing file
+		// Ask to overwrite existing file.
 		if (QFile::exists(file_name))
 			answer = QMessageBox::warning(
 				this, "Overwrite File",
@@ -176,26 +181,24 @@ void Editor::_FileSaveAs()
 //			_UpdateRecentFiles(file_name);  <-- FIXME
 			_FileSave();
 			return;
-		} // save the file
-    } // make sure the file name is not blank
+		} // Save the file.
+    } // Make sure the file name is not blank.
 	
-    _stat_bar->message("Save abandoned", 5000);
+    _stat_bar->message("Save abandoned.", 5000);
 } // _FileSaveAs()
 
 void Editor::_FileSave()
 {
-	if (_map->GetFileName().isEmpty())
+	if (_map->GetFileName().isEmpty() || _map->GetFileName() == "Untitled")
 	{
 		_FileSaveAs();
 		return;
     } // gets a file name if it is blank
 
     _map->SaveMap();	// actually saves the map
-
     setCaption(QString("%1").arg(_map->GetFileName()));
-    //_stat_bar->message(QString("Saved \'%1\'").arg(map->getFileName()),5000);
-	_stat_bar->message(QString("Hold your horses!"
-		" Saving will be implemented soon..."), 5000);
+   	_stat_bar->message(QString("Saved \'%1\' successfully!").
+		arg(_map->GetFileName()), 5000);
 } // _FileSave()
 
 void Editor::_FileResize()
@@ -236,7 +239,7 @@ bool Editor::_EraseOK()
 	{
 		switch(QMessageBox::warning(this, "Unsaved File",
 			"The document contains unsaved changes\n"
-			"Do you want to save the changes before exiting?",
+			"Do you want to save the changes before proceeding?",
 			"&Save", "&Discard", "Cancel",
 			0,		// Enter == button 0
         	2))		// Escape == button 2

@@ -131,7 +131,6 @@ class Grid: public QCanvasView
 		bool _grid_on;			// TRUE = grid is displayed, else FALSE
 		//bool _drag_on;		// TRUE = dragging is enabled, else painting
 		bool _walk_on;			// TRUE = walkable is set, else not-walkable
-		hoa_data::GameData* _data_manager;  // Lua <--> C++ interface
 }; // class Grid
 
 } // namespace hoa_editor
