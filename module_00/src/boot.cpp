@@ -86,6 +86,7 @@ BootMode::BootMode() {
 	                          read_data.ReadFloat("coord_sys_y_bottom"),
 	                          read_data.ReadFloat("coord_sys_y_top"));
 
+
 	// Load the audio stuff
 	// Make a call to the config code that loads in two vectors of strings
 	vector<string> new_music_files;
@@ -99,17 +100,17 @@ BootMode::BootMode() {
 	}
 
 	// Push all our new music onto the boot_music vector
-	MusicDescriptor new_music;
-	for (uint i = 0; i < new_music_files.size(); i++) {
-		_boot_music.push_back(new_music);
-		_boot_music[i].LoadMusic(new_music_files[i]);
-	}
-
-	SoundDescriptor new_sound;
-	for (uint i = 0; i < new_sound_files.size(); i++) {
-		_boot_sound.push_back(new_sound);
-		_boot_sound[i].LoadSound(new_sound_files[i]);
-	}
+// 	MusicDescriptor new_music;
+// 	for (uint i = 0; i < new_music_files.size(); i++) {
+// 		_boot_music.push_back(new_music);
+// 		_boot_music[i].LoadMusic(new_music_files[i]);
+// 	}
+// 
+// 	SoundDescriptor new_sound;
+// 	for (uint i = 0; i < new_sound_files.size(); i++) {
+// 		_boot_sound.push_back(new_sound);
+// 		_boot_sound[i].LoadSound(new_sound_files[i]);
+// 	}
 
 	for (uint32 i = 0; i < _boot_images.size(); i++) {
 		VideoManager->LoadImage(_boot_images[i]);
@@ -157,6 +158,7 @@ BootMode::BootMode() {
 
 	_setting_options.SetOptions(options);
 	_setting_options.SetSelection(VIDEO_OPTIONS);
+	cout << "BOOT MODE CONSTRUCTOR END" << endl;
 }
 
 
@@ -176,7 +178,7 @@ BootMode::~BootMode() {
 // Resets appropriate class members.
 void BootMode::Reset() {
 	// Play the intro theme
-	_boot_music[0].PlayMusic();
+// 	_boot_music[0].PlayMusic();
 	// Set the coordinate system that BootMode uses
 	VideoManager->SetCoordSys(0, 1024, 0, 768);
 	//
@@ -289,7 +291,7 @@ void BootMode::Update(uint32 time_elapsed) {
 		switch (_main_options.GetSelection()) {
 			case NEW_GAME:
 			{
-				_boot_sound[2].PlaySound(); // acquire sound
+// 				_boot_sound[2].PlaySound(); // acquire sound
 				if (BOOT_DEBUG) cout << "BOOT: Starting new game." << endl;
 				GCharacter *claud = new GCharacter("Claudius", "claudius", GLOBAL_CLAUDIUS);
 				InstanceManager->AddCharacter(claud);
@@ -299,7 +301,7 @@ void BootMode::Update(uint32 time_elapsed) {
 			}
 			case LOAD_GAME:
 			{
-				_boot_sound[0].PlaySound(); // confirm sound
+// 				_boot_sound[0].PlaySound(); // confirm sound
 				cout << "BOOT: TEMP: Entering battle mode" << endl;
 				BattleMode *BM = new BattleMode();
 				ModeManager->Pop();
@@ -310,7 +312,7 @@ void BootMode::Update(uint32 time_elapsed) {
 				cout << "BOOT: TEMP: Switching context to options" << endl;
 				break;
 			case CREDITS:
-				_boot_sound[0].PlaySound(); // confirm sound
+// 				_boot_sound[0].PlaySound(); // confirm sound
 				cout << "BOOT: TEMP: Viewing credits now!" << endl;
 				break;
 			case QUIT:
@@ -332,14 +334,14 @@ void BootMode::_UpdateVideoOptions() {
 		_vmenu_index[1] = JOYSTICK_OPTIONS;
 		_vmenu_index[2] = 0;
 		cout << "OPTIONS: JOYSTICK MENU" << endl;
-		_boot_sound[3].PlaySound(); // move sound
+// 		_boot_sound[3].PlaySound(); // move sound
 		return;
 	}
 	else if (InputManager->RightPress()) {
 		_vmenu_index[1] = AUDIO_OPTIONS;
 		_vmenu_index[2] = 0;
 		cout << "OPTIONS: AUDIO MENU" << endl;
-		_boot_sound[3].PlaySound(); // move sound
+// 		_boot_sound[3].PlaySound(); // move sound
 		return;
 	}
 
@@ -348,14 +350,14 @@ void BootMode::_UpdateVideoOptions() {
 			_vmenu_index[2] = _vmenu_index[2] - 1;
 		else
 			_vmenu_index[2] = 4;
-		_boot_sound[3].PlaySound(); // move sound
+// 		_boot_sound[3].PlaySound(); // move sound
 	}
 	else if (InputManager->DownPress()) {
 		if (_vmenu_index[2] != 4)
 			_vmenu_index[2] = _vmenu_index[2] + 1;
 		else
 			_vmenu_index[2] = 0;
-		_boot_sound[3].PlaySound(); // move sound
+// 		_boot_sound[3].PlaySound(); // move sound
 	}
 
 	if (InputManager->ConfirmPress()) {
@@ -388,14 +390,14 @@ void BootMode::_UpdateAudioOptions() {
 			_vmenu_index[1] = VIDEO_OPTIONS;
 			_vmenu_index[2] = 0;
 			cout << "OPTIONS: VIDEO MENU" << endl;
-			_boot_sound[3].PlaySound(); // move sound
+// 			_boot_sound[3].PlaySound(); // move sound
 			return;
 		}
 		else if (InputManager->RightPress()) {
 			_vmenu_index[1] = LANGUAGE_OPTIONS;
 			_vmenu_index[2] = 0;
 			cout << "OPTIONS: LANGUAGE MENU" << endl;
-			_boot_sound[3].PlaySound(); // move sound
+// 			_boot_sound[3].PlaySound(); // move sound
 			return;
 		}
 
@@ -404,14 +406,14 @@ void BootMode::_UpdateAudioOptions() {
 				_vmenu_index[2] = _vmenu_index[2] - 1;
 			else
 				_vmenu_index[2] = 1;
-			_boot_sound[3].PlaySound(); // move sound
+// 			_boot_sound[3].PlaySound(); // move sound
 		}
 		else if (InputManager->DownPress()) {
 			if (_vmenu_index[2] != 1)
 				_vmenu_index[2] = _vmenu_index[2] + 1;
 			else
 				_vmenu_index[2] = 0;
-			_boot_sound[3].PlaySound(); // move sound
+// 			_boot_sound[3].PlaySound(); // move sound
 		}
 
 		if (InputManager->ConfirmPress()) {
@@ -423,7 +425,7 @@ void BootMode::_UpdateAudioOptions() {
 	// Changing volume levels
 	if (InputManager->CancelPress()) {
 		_vmenu_index.pop_back();
-		_boot_sound[1].PlaySound(); // cancel sound
+// 		_boot_sound[1].PlaySound(); // cancel sound
 		return;
 	}
 
@@ -453,14 +455,14 @@ void BootMode::_UpdateLanguageOptions() {
 		_vmenu_index[1] = AUDIO_OPTIONS;
 		_vmenu_index[2] = 0;
 		cout << "OPTIONS: AUDIO MENU" << endl;
-		_boot_sound[3].PlaySound(); // move sound
+// 		_boot_sound[3].PlaySound(); // move sound
 		return;
 	}
 	else if (InputManager->RightPress()) {
 		_vmenu_index[1] = KEYS_OPTIONS;
 		_vmenu_index[2] = 0;
 		cout << "OPTIONS: KEY SETTINGS MENU" << endl;
-		_boot_sound[3].PlaySound(); // move sound
+// 		_boot_sound[3].PlaySound(); // move sound
 		return;
 	}
 
@@ -469,14 +471,14 @@ void BootMode::_UpdateLanguageOptions() {
 			_vmenu_index[2] = _vmenu_index[2] - 1;
 		else
 			_vmenu_index[2] = 2;
-		_boot_sound[3].PlaySound(); // move sound
+// 		_boot_sound[3].PlaySound(); // move sound
 	}
 	else if (InputManager->DownPress()) {
 		if (_vmenu_index[2] != 2)
 			_vmenu_index[2] = _vmenu_index[2] + 1;
 		else
 			_vmenu_index[2] = 0;
-		_boot_sound[3].PlaySound(); // move sound
+// 		_boot_sound[3].PlaySound(); // move sound
 	}
 
 	if (InputManager->ConfirmPress()) {
@@ -502,14 +504,14 @@ void BootMode::_UpdateKeyOptions() {
 		_vmenu_index[1] = LANGUAGE_OPTIONS;
 		_vmenu_index[2] = 0;
 		cout << "OPTIONS: LANGUAGE MENU" << endl;
-		_boot_sound[3].PlaySound(); // move sound
+// 		_boot_sound[3].PlaySound(); // move sound
 		return;
 	}
 	else if (InputManager->RightPress()) {
 		_vmenu_index[1] = JOYSTICK_OPTIONS;
 		_vmenu_index[2] = 0;
 		cout << "OPTIONS: JOYSTICK MENU" << endl;
-		_boot_sound[3].PlaySound(); // move sound
+// 		_boot_sound[3].PlaySound(); // move sound
 		return;
 	}
 
@@ -518,49 +520,49 @@ void BootMode::_UpdateKeyOptions() {
 			_vmenu_index[2] = _vmenu_index[2] - 1;
 		else
 			_vmenu_index[2] = 7;
-		_boot_sound[3].PlaySound(); // move sound
+// 		_boot_sound[3].PlaySound(); // move sound
 	}
 	else if (InputManager->DownPress()) {
 		if (_vmenu_index[2] != 7)
 			_vmenu_index[2] = _vmenu_index[2] + 1;
 		else
 			_vmenu_index[2] = 0;
-		_boot_sound[3].PlaySound(); // move sound
+// 		_boot_sound[3].PlaySound(); // move sound
 	}
 
 	if (InputManager->ConfirmPress()) {
 		switch (_vmenu_index[2]) {
 			case 0: // Change up key
 				//RedefineKey(InputManager->Key.up&);
-				_boot_sound[0].PlaySound(); // confirm sound
+// 				_boot_sound[0].PlaySound(); // confirm sound
 				break;
 			case 1: // Change down key
 				//RedefineKey(&(InputManager->Key.down));
-				_boot_sound[0].PlaySound(); // confirm sound
+// 				_boot_sound[0].PlaySound(); // confirm sound
 				break;
 			case 2: // Change left key
 				//RedefineKey(&(InputManager->Key.left));
-				_boot_sound[0].PlaySound(); // confirm sound
+// 				_boot_sound[0].PlaySound(); // confirm sound
 				break;
 			case 3: // Change right key
 				//RedefineKey(&(InputManager->Key.right));
-				_boot_sound[0].PlaySound(); // confirm sound
+// 				_boot_sound[0].PlaySound(); // confirm sound
 				break;
 			case 4: // Change confirm key
 				//RedefineKey(&(InputManager->Key.confirm));
-				_boot_sound[0].PlaySound(); // confirm sound
+// 				_boot_sound[0].PlaySound(); // confirm sound
 				break;
 			case 5: // Change cancel key
 				//RedefineKey(&(InputManager->Key.cancel));
-				_boot_sound[0].PlaySound(); // confirm sound
+// 				_boot_sound[0].PlaySound(); // confirm sound
 				break;
 			case 6: // Change menu key
 				//RedefineKey(&(InputManager->Key.menu));
-				_boot_sound[0].PlaySound(); // confirm sound
+// 				_boot_sound[0].PlaySound(); // confirm sound
 				break;
 			case 7: // Change pause key
 				//RedefineKey(&(InputManager->Key.pause));
-				_boot_sound[0].PlaySound(); // confirm sound
+// 				_boot_sound[0].PlaySound(); // confirm sound
 				break;
 		}
 	}
@@ -574,14 +576,14 @@ void BootMode::_UpdateJoystickOptions() {
 		_vmenu_index[1] = KEYS_OPTIONS;
 		_vmenu_index[2] = 0;
 		cout << "OPTIONS: KEY SETTINGS MENU" << endl;
-		_boot_sound[3].PlaySound(); // move sound
+// 		_boot_sound[3].PlaySound(); // move sound
 		return;
 	}
 	else if (InputManager->RightPress()) {
 		_vmenu_index[1] = VIDEO_OPTIONS;
 		_vmenu_index[2] = 0;
 		cout << "OPTIONS: VIDEO MENU" << endl;
-		_boot_sound[3].PlaySound(); // move sound
+// 		_boot_sound[3].PlaySound(); // move sound
 		return;
 	}
 
