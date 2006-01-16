@@ -9,8 +9,8 @@
 
 /*!****************************************************************************
  * \file    global.h
- * \author  Tyler Olsen, roots@allacrost.org
- * \date    Last Updated: August 18th, 2005
+ * \author  Tyler Olsen, roots@allacrost.org, Daniel Steuernol steu@allacrost.org
+ * \date    Last Updated: January 19th, 2006
  * \brief   Header file for the global game components.
  *
  * This file contains several classes that need to be used "globally" by all
@@ -683,6 +683,32 @@ public:
 	//@}
 };
 
+/*!**************************************************************************
+ * \brief Represents a party of characters
+ *
+ * This class contains a group of characters.  There is generally only one 
+ * active party, but there could be at times multiple parties, for example
+ * some of the fights in FF VI.
+ ***************************************************************************/
+class GParty
+{
+private:
+	//! Character id's on those in the party (max of 4)
+	std::vector<uint32> _characters;
+public:
+	GParty();
+	~GParty();
+	//! Add a character to the party
+	void AddCharacter(uint32 char_id);
+	//! Remove a character from the party
+	void RemoveCharacter(uint32 char_id);
+	//! Get all the characters in the party
+	//! \returns a vector containing the character ids of the characters in the party.
+	std::vector<uint32> GetCharacters() { return _characters; }
+	//! Gets the party size
+	uint32 GetPartySize() { return _characters.size(); }
+};
+
 /*!****************************************************************************
  * \brief Manages elapsed game time.
  *
@@ -750,6 +776,8 @@ private:
 	std::vector<GObject> _inventory;
 	//! The amount of financial resources the party currently has.
 	uint32 _money;
+	//! The active party (currently only support for one party, may need to be changed)
+	GParty _party;
 
 // 	hoa_video::GameVideo *VideoManager;
 
@@ -763,6 +791,20 @@ public:
 	//! \param id The ID number of the character to retrieve.
 	//! \return A pointer to the character, or NULL if the character was not found.
 	GCharacter* GetCharacter(uint32 id);
+	//! Money handling functions, 
+	//! Get, returns the current amount
+	//! Set, sets the money to the specified amount
+	//! Add, adds the specified amount to the current amount
+	//! Subtract, takes away the specified amount from the current amount
+	//@{
+	uint32 GetMoney();
+	void SetMoney(uint32 amount);
+	void AddMoney(uint32 amount);
+	void SubtractMoney(uint32 amount);
+	// @}
+	//! Gets the Characters in the active party
+	//! \returns The Characters in the active party
+	std::vector<GCharacter *> GetParty();
 }; // class GameInstance
 
 

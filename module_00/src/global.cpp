@@ -431,6 +431,9 @@ bool GameInstance::Initialize() {
 void GameInstance::AddCharacter(GCharacter *ch) {
 	if (GLOBAL_DEBUG) cout << "GLOBAL: Adding new character to party: " << ch->GetName() << endl;
 	_characters.push_back(ch);
+	// Check size of active party if less then 4, add to party
+	if (_party.GetPartySize() < 4)
+		_party.AddCharacter(ch->GetID());
 }
 
 GCharacter* GameInstance::GetCharacter(uint32 id) {
@@ -443,5 +446,95 @@ GCharacter* GameInstance::GetCharacter(uint32 id) {
 	return NULL;
 }
 
+//-------------------------------
+// GameInstance::GetMoney
+//-------------------------------
+uint32 GameInstance::GetMoney()
+{
+	return _money;
+}
+
+//------------------------------
+// GameInstance::SetMoney
+//------------------------------
+void GameInstance::SetMoney(uint32 amount)
+{
+	_money = amount;
+}
+
+//-----------------------------
+// GameInstance::AddMoney
+//-----------------------------
+void GameInstance::AddMoney(uint32 amount)
+{
+	_money += amount;
+}
+
+//------------------------------
+// GameInstance::SubtractMoney
+//------------------------------
+void GameInstance::SubtractMoney(uint32 amount)
+{
+	// check to make amount is less then current amount of money
+	if (amount <= _money)
+		_money -= amount;
+	else
+		if (GLOBAL_DEBUG) cerr << "GLOBAL: SubtractMoney tried to subtract more money then we had! Current amount left alone." << endl;
+}
+
+//----------------------------------------------
+// GameInstance::GetParty
+//----------------------------------------------
+vector<GCharacter *> GameInstance::GetParty()
+{
+	vector<uint32> characters = _party.GetCharacters();
+	vector<GCharacter *> ret;
+	for (vector<uint32>::iterator p = characters.begin(); p != characters.end(); ++p)
+		ret.push_back(GetCharacter((*p)));
+	
+	return ret;
+}
+
+//-----------------------
+// GParty::GParty
+//-----------------------
+GParty::GParty()
+{
+	// Nothing to do here yet.
+}
+
+//-----------------------
+// GParty::~GParty
+//-----------------------
+GParty::~GParty()
+{
+	// Nothing to do here yet.
+}
+
+//-------------------------------------
+// GParty::AddCharacter
+//-------------------------------------
+void GParty::AddCharacter(uint32 char_id)
+{
+	// Only add the new char if there is less then 4 members in the party.
+	if (_characters.size() < 4)
+		_characters.push_back(char_id);
+	else
+		cerr << "GLOBAL: Unable to add another char to party, it is already at 4 members!" << endl;
+}
+
+void GParty::RemoveCharacter(uint32 char_id)
+{
+	// search for id and remove it
+	for (vector<uint32>::iterator p = _characters.begin(); p != _characters.end(); ++p)
+	{
+		if ((*p) == char_id)
+		{
+			_characters.erase(p);
+			return;
+		}
+	}
+	if (GLOBAL_DEBUG) cerr << "GLOBAL: No Character matching " << char_id << " found!" << endl;
+}
 
 }// namespace hoa_global

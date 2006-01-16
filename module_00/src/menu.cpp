@@ -16,6 +16,7 @@
 
 #include "utils.h"
 #include <iostream>
+#include <sstream>
 #include "menu.h"
 #include "audio.h"
 #include "video.h"
@@ -38,8 +39,11 @@ namespace hoa_menu {
 
 bool MENU_DEBUG = false;
 
-
-MenuMode::MenuMode() {
+//--------------------------
+// MenuMode::MenuMode
+//--------------------------
+MenuMode::MenuMode() 
+{
 	if (MENU_DEBUG) cout << "MENU: MenuMode constructor invoked." << endl;
 
 	// Save the currently drawn screen
@@ -47,6 +51,42 @@ MenuMode::MenuMode() {
 		cerr << "MENU: ERROR: Couldn't save the screen!" << endl;
 	}
 	
+	vector<GCharacter *> characters = GameInstance::GetReference()->GetParty();
+	if (characters.size() == 4)
+	{
+		_character_window0.SetCharacter(characters[0]);
+		_character_window1.SetCharacter(characters[1]);
+		_character_window2.SetCharacter(characters[2]);
+		_character_window3.SetCharacter(characters[3]);
+	}
+	else if (characters.size() == 3)
+	{
+		_character_window0.SetCharacter(characters[0]);
+		_character_window1.SetCharacter(characters[1]);
+		_character_window2.SetCharacter(characters[2]);
+	}
+	else if (characters.size() == 2)
+	{
+		_character_window0.SetCharacter(characters[0]);
+		_character_window1.SetCharacter(characters[1]);
+	}
+	else if (characters.size() == 1)
+	{
+		_character_window0.SetCharacter(characters[0]);
+	}
+	
+	// Set the default menu to the main option box
+	_current_menu_showing = SHOW_MAIN;
+	_current_menu = &_main_options;
+	
+	// Set Font
+	_font_name = "default";
+	
+	// delete this when we have real data.
+	GameInstance::GetReference()->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetHP(80);
+	GameInstance::GetReference()->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetSP(35);
+	GameInstance::GetReference()->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetXPNextLevel(156);
+	GameInstance::GetReference()->SetMoney(4236);
 }
 
 
@@ -68,14 +108,164 @@ MenuMode::~MenuMode() {
 	_bottom_window.Destroy();
 }
 
+//-----------------------------------------
+// MenuMode::SetupOptionBoxCommonSettings
+//-----------------------------------------
+void MenuMode::_SetupOptionBoxCommonSettings(OptionBox *ob)
+{
+	// Set all the default options
+	ob->SetFont(_font_name);
+	ob->SetCellSize(128.0f, 50.0f);
+	ob->SetPosition(30.0f, 625.0f);
+	ob->SetAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	ob->SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	ob->SetSelectMode(VIDEO_SELECT_SINGLE);
+	ob->SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	ob->SetCursorOffset(-35.0f, 5.0f);
+}
+
+//-------------------------------
+// MenuMode::SetupMainOptionBox
+//-------------------------------
+void MenuMode::_SetupMainOptionBox()
+{
+	// Setup the main options box
+	this->_SetupOptionBoxCommonSettings(&_main_options);
+	_main_options.SetSize(MAIN_SIZE, 1);
+	
+	// Generate the strings
+	vector<ustring> options;
+	options.push_back(MakeWideString("Inventory"));
+	options.push_back(MakeWideString("Skills"));
+	options.push_back(MakeWideString("Equipment"));
+	options.push_back(MakeWideString("Status"));
+	options.push_back(MakeWideString("Options"));
+	options.push_back(MakeWideString("Save"));
+	options.push_back(MakeWideString("Exit"));
+	
+	// Add strings and set default selection.
+	_main_options.SetOptions(options);
+	_main_options.SetSelection(MAIN_INVENTORY);
+}
+
+//-------------------------------------
+// MenuMode::SetupInventoryOptionBox
+//-------------------------------------
+void MenuMode::_SetupInventoryOptionBox()
+{
+	// Setup the option box
+	this->_SetupOptionBoxCommonSettings(&_menu_inventory);
+	_menu_inventory.SetSize(INV_SIZE, 1);
+	
+	// Generate the strings
+	vector<ustring> options;
+	options.push_back(MakeWideString("Use"));
+	options.push_back(MakeWideString("Sort"));
+	options.push_back(MakeWideString("Cancel"));
+	
+	_menu_inventory.SetOptions(options);
+	_menu_inventory.SetSelection(INV_USE);
+}
+
+//------------------------------------
+// MenuMode::SetupSkillsOptionBox
+//------------------------------------
+void MenuMode::_SetupSkillsOptionBox()
+{
+	// setup the option box
+	this->_SetupOptionBoxCommonSettings(&_menu_skills);
+	_menu_skills.SetSize(SKILLS_SIZE, 1);
+	
+	// Generate the strings
+	vector<ustring> options;
+	options.push_back(MakeWideString("Cancel"));
+	
+	_menu_skills.SetOptions(options);
+	_menu_skills.SetSelection(SKILLS_CANCEL);
+}
+
+//------------------------------------
+// MenuMode::SetupEquipmentOptionBox
+//------------------------------------
+void MenuMode::_SetupEquipmentOptionBox()
+{
+	// setup the option box
+	this->_SetupOptionBoxCommonSettings(&_menu_equipment);
+	_menu_equipment.SetSize(EQUIP_SIZE, 1);
+	
+	// Generate the strings
+	vector<ustring> options;
+	options.push_back(MakeWideString("Equip"));
+	options.push_back(MakeWideString("Remove"));
+	options.push_back(MakeWideString("Cancel"));
+	
+	_menu_equipment.SetOptions(options);
+	_menu_equipment.SetSelection(EQUIP_EQUIP);
+}
+
+//------------------------------------
+// MenuMode::SetupStatusOptionBox
+//------------------------------------
+void MenuMode::_SetupStatusOptionBox()
+{
+	// setup the status option box
+	this->_SetupOptionBoxCommonSettings(&_menu_status);
+	_menu_status.SetSize(STATUS_SIZE, 1);
+	
+	// Generate the strings
+	vector<ustring> options;
+	options.push_back(MakeWideString("Next Character"));
+	options.push_back(MakeWideString("Prev Character"));
+	options.push_back(MakeWideString("Cancel"));
+	
+	_menu_status.SetOptions(options);
+	_menu_status.SetSelection(STATUS_NEXT);
+}
+
+//-------------------------------------
+// MenuMode::SetupOptionsOptionBox
+//-------------------------------------
+void MenuMode::_SetupOptionsOptionBox()
+{
+	// setup the options option box
+	this->_SetupOptionBoxCommonSettings(&_menu_options);
+	_menu_options.SetSize(OPTIONS_SIZE, 1);
+	
+	// Generate the strings
+	vector<ustring> options;
+	options.push_back(MakeWideString("Edit"));
+	options.push_back(MakeWideString("Save"));
+	options.push_back(MakeWideString("Cancel"));
+	
+	_menu_options.SetOptions(options);
+	_menu_options.SetSelection(OPTIONS_EDIT);
+}
+
+//-------------------------------------
+// MenuMode::SetupSaveOptionBox
+//-------------------------------------
+void MenuMode::_SetupSaveOptionBox()
+{
+	// setup the save options box
+	this->_SetupOptionBoxCommonSettings(&_menu_save);
+	_menu_save.SetSize(SAVE_SIZE, 1);
+	
+	// Generate the strings
+	vector<ustring> options;
+	options.push_back(MakeWideString("Save"));
+	options.push_back(MakeWideString("Cancel"));
+	
+	_menu_save.SetOptions(options);
+	_menu_save.SetSelection(SAVE_SAVE);
+}
 
 // Resets appropriate class members
 void MenuMode::Reset() {
 	VideoManager->SetCoordSys(0, 1024, 768, 0); // Top left corner coordinates are (0,0)
-	if(!VideoManager->SetFont("default")) 
+	if(!VideoManager->SetFont(_font_name)) 
 		cerr << "MAP: ERROR > Couldn't set menu font!" << endl;
 	
-		// Setup the menu windows
+	// Setup the menu windows
 	_character_window0.Create(256, 576);
 	_character_window0.SetPosition(0, 0);
 	_character_window0.Show();
@@ -91,17 +281,292 @@ void MenuMode::Reset() {
 	_bottom_window.Create(1024, 192);
 	_bottom_window.SetPosition(0, 576);
 	_bottom_window.Show();
+	
+	// Setup OptionBoxes
+	this->_SetupMainOptionBox();
+	this->_SetupInventoryOptionBox();
+	this->_SetupSkillsOptionBox();
+	this->_SetupEquipmentOptionBox();
+	this->_SetupStatusOptionBox();
+	this->_SetupOptionsOptionBox();
+	this->_SetupSaveOptionBox();
 }
 
-
+//------------------------------------------
+// MenuMode::Update
+//-------------------------------------------
 void MenuMode::Update(uint32 time_elapsed) {
 
-	if (InputManager->CancelPress()) {
-		ModeManager->Pop();
+	if (InputManager->CancelPress()) 
+	{
+		if (_current_menu_showing == SHOW_MAIN)
+			ModeManager->Pop();
+		else
+		{
+			_current_menu_showing = SHOW_MAIN;
+			_current_menu = &_main_options;
+		}
+	}
+	else if (InputManager->ConfirmPress())
+	{
+		// Play Sound
+		_current_menu->HandleConfirmKey();
+	}
+	else if (InputManager->LeftPress())
+	{
+		// Play Sound
+		_current_menu->HandleLeftKey();
+	}
+	else if (InputManager->RightPress())
+	{
+		// Play Sound
+		_current_menu->HandleRightKey();
+	}
+	
+	// Get the latest event from the current menu
+	int32 event = _current_menu->GetEvent();
+	
+	if (event == VIDEO_OPTION_CONFIRM)
+	{
+		switch (_current_menu_showing)
+		{
+			case SHOW_MAIN:
+				this->_HandleMainMenu();
+				break;
+			case SHOW_INVENTORY:
+				this->_HandleInventoryMenu();
+				break;
+			case SHOW_EQUIPMENT:
+				this->_HandleEquipmentMenu();
+				break;
+			case SHOW_SKILLS:
+				this->_HandleSkillsMenu();
+				break;
+			case SHOW_STATUS:
+				this->_HandleStatusMenu();
+				break;
+			case SHOW_OPTIONS:
+				this->_HandleOptionsMenu();
+				break;
+			case SHOW_SAVE:
+				this->_HandleSaveMenu();
+				break;
+			default:
+				cerr << "MENU: ERROR: Invalid menu showing!" << endl;
+				break;
+		}
 	}
 }
 
+//-------------------------------
+// MenuMode::HandleMainMenu
+//-------------------------------
+void MenuMode::_HandleMainMenu()
+{
+	// Change the based on which option was selected.
+	switch (_main_options.GetSelection())
+	{
+		case MAIN_INVENTORY:
+		{
+			_current_menu_showing = SHOW_INVENTORY;
+			_current_menu = &_menu_inventory;
+			break;
+		}
+		case MAIN_EQUIPMENT:
+		{
+			_current_menu_showing = SHOW_EQUIPMENT;
+			_current_menu = &_menu_equipment;
+			break;
+		}
+		case MAIN_SKILLS:
+		{
+			_current_menu_showing = SHOW_SKILLS;
+			_current_menu = &_menu_skills;
+			break;
+		}
+		case MAIN_OPTIONS:
+		{
+			_current_menu_showing = SHOW_OPTIONS;
+			_current_menu = &_menu_options;
+			break;
+		}
+		case MAIN_STATUS:
+		{
+			_current_menu_showing = SHOW_STATUS;
+			_current_menu = &_menu_status;
+			break;
+		}
+		case MAIN_SAVE:
+		{
+			_current_menu_showing = SHOW_SAVE;
+			_current_menu = &_menu_save;
+			break;
+		}
+		case MAIN_EXIT:
+		{
+			ModeManager->Pop();
+			break;
+		}
+		default:
+		{
+			cerr << "MENU: ERROR: Invalid option in MenuMode::HandleMainMenu()!" << endl;
+			break;
+		}
+	}
+}
 
+//--------------------------------
+// MenuMode::HandleInventoryMenu
+//--------------------------------
+void MenuMode::_HandleInventoryMenu()
+{
+	switch (_menu_inventory.GetSelection())
+	{
+		case INV_USE:
+			// TODO: Handle the use inventory command
+			cout << "MENU: Inventory Use command!" << endl;
+			break;
+		case INV_SORT:
+			// TODO: Handle the sort inventory comand
+			cout << "MENU: Inventory sort command!" << endl;
+			break;
+		case INV_CANCEL:
+		{
+			_current_menu_showing = SHOW_MAIN;
+			_current_menu = &_main_options;
+			break;
+		}
+		default:
+			cerr << "MENU: ERROR: Invalid option in MenuMode::HandleInventoryMenu()!" << endl;
+			break;
+	}
+}
+
+//--------------------------------
+// MenuMode::HandleEquipmentMenu
+//--------------------------------
+void MenuMode::_HandleEquipmentMenu()
+{
+	switch (_menu_equipment.GetSelection())
+	{
+		case EQUIP_EQUIP:
+			// TODO: Handle the equip equipment command
+			cout << "MENU: Equipment Equip command!" << endl;
+			break;
+		case EQUIP_REMOVE:
+			// TODO: Handle the remove equipment command
+			cout << "MENU: Equipment Remove command!" << endl;
+			break;
+		case EQUIP_CANCEL:
+		{
+			_current_menu_showing = SHOW_MAIN;
+			_current_menu = &_main_options;
+			break;
+		}
+		default:
+			cerr << "MENU: ERROR: Invalid option in MenuMode::HandleEquipmentMenu()!" << endl;
+			break;
+	}
+}
+
+//--------------------------------
+// MenuMode::HandleSkillsMenu
+//--------------------------------
+void MenuMode::_HandleSkillsMenu()
+{
+	switch (_menu_skills.GetSelection())
+	{
+		case SKILLS_CANCEL:
+		{
+			_current_menu_showing = SHOW_MAIN;
+			_current_menu = &_main_options;
+			break;
+		}
+		default:
+			cerr << "MENU: ERROR: Invalid option in MenuMode::HandleSkillsMenu()!" << endl;
+			break;
+	}
+}
+
+//----------------------------------
+// MenuMode::HandleStatusMenu
+//----------------------------------
+void MenuMode::_HandleStatusMenu()
+{
+	switch (_menu_status.GetSelection())
+	{
+		case STATUS_NEXT:
+			// TODO: Handle the status - next command.
+			cout << "MENU: Status Next command!" << endl;
+			break;
+		case STATUS_PREV:
+			// TODO: Handle the status - prev command.
+			cout << "MENU: Status Prev command!" << endl;
+			break;
+		case STATUS_CANCEL:
+		{
+			_current_menu_showing = SHOW_MAIN;
+			_current_menu = &_main_options;
+			break;
+		}
+		default:
+			cerr << "MENU: ERROR: Invalid option in MenuMode::HandleStatusMenu()!" << endl;
+			break;
+	}
+}
+
+//----------------------------------
+// MenuMode::HandleOptionsMenu
+//----------------------------------
+void MenuMode::_HandleOptionsMenu()
+{
+	switch (_menu_options.GetSelection())
+	{
+		case OPTIONS_EDIT:
+			// TODO: Handle the Options - Edit command
+			cout << "MENU: Options - Edit command!" << endl;
+			break;
+		case OPTIONS_SAVE:
+			// TODO: Handle the Options - Save command
+			cout << "MENU: Options - Save command!" << endl;
+			break;
+		case OPTIONS_CANCEL:
+		{
+			_current_menu_showing = SHOW_MAIN;
+			_current_menu = &_main_options;
+			break;
+		}
+		default:
+			cerr << "MENU: ERROR: Invalid option in MenuMode::HandleOptionsMenu()!" << endl;
+			break;
+	}
+}
+
+//---------------------------------
+// MenuMode::HandleSaveMenu
+//---------------------------------
+void MenuMode::_HandleSaveMenu()
+{
+	switch (_menu_save.GetSelection())
+	{
+		case SAVE_SAVE:
+			// TODO: Handle Save - Save command
+			cout << "MENU: Save - Save command!" << endl;
+			break;
+		case SAVE_CANCEL:
+		{
+			_current_menu_showing = SHOW_MAIN;
+			_current_menu = &_main_options;
+			break;
+		}
+		default:
+			cerr << "MENU: ERROR: Invalid option in MenuMode::HandleSaveMenu()!" << endl;
+	}
+}
+
+//----------------------
+// MenuMode::Draw
+//----------------------
 void MenuMode::Draw() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
 	// Move to the top left corner
@@ -119,37 +584,118 @@ void MenuMode::Draw() {
 	
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 	
-	// Draw 1st character menu text
-	VideoManager->Move(32, 40);
-	if (!VideoManager->DrawText("Claudius"))
-		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
+	// Draw currently active options box
+	_current_menu->Draw();
 	
-	VideoManager->MoveRelative(0, 468);
-	if (!VideoManager->DrawText("Health: 68"))
-		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
-		
-	VideoManager->MoveRelative(0, -35);
-	if (!VideoManager->DrawText("Skill: 23"))
-		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
-		
-	VideoManager->MoveRelative(0, 85);
-	if (!VideoManager->DrawText("XP to level: 498"))
-		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
-		
-	// Draw selection menu text
-	VideoManager->MoveRelative(0, 74);
-	if (!VideoManager->DrawText("Inventory     Skills     Equipment     Status     Options     Save"))
-		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
 	
 	// Draw 2nd menu text
-	VideoManager->MoveRelative(0, 80);
+	VideoManager->Move(30, 700);
 	if (!VideoManager->DrawText("Time: 00:24:35"))
 		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
-		
+	
+	std:ostringstream os_money;
+	os_money << GameInstance::GetReference()->GetMoney();
+	std::string money = std::string("Bling:") + os_money.str() + "B";
 	VideoManager->MoveRelative(0, 24);
-	if (!VideoManager->DrawText("Bling: 4,201B"))
+	if (!VideoManager->DrawText(MakeWideString(money)))
 		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
 	
+}
+
+//--------------------------------
+// Draw the window to the screen
+//-------------------------------
+bool CharacterWindow::Draw()
+{
+	// Call parent Draw method, if failed pass on fail result
+	if (MenuWindow::Draw() == false)
+		return false;
+	// Window is hidden return true
+	if (MenuWindow::GetState() == hoa_video::VIDEO_MENU_STATE_HIDDEN)
+		return true;
+	
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
+	
+	// Get the window metrics
+	float x, y, w, h;
+	this->GetPosition(x,y);
+	this->GetDimensions(w,h);
+
+	// check to see if this window is an actual character
+	if (this->_char_id == hoa_global::GLOBAL_NO_CHARACTERS)
+		// no more to do here
+		return true;
+	
+	// Get the instance manager
+	GCharacter *character = GameInstance::GetReference()->GetCharacter(this->_char_id);
+	
+	// Draw name
+	VideoManager->Move(x + 32, y + 40);
+	if (!VideoManager->DrawText(character->GetName()))
+		cerr << "CHARACTERWINDOW: ERROR > Couldn't draw Character Name!" << endl;
+	
+	// Draw health
+	VideoManager->MoveRelative(0, 468);
+
+	// convert to std::string
+	std:ostringstream os_health;
+	os_health << character->GetHP();
+	std::string health = std::string("Health:") + os_health.str();
+	if (!VideoManager->DrawText(MakeWideString(health)))
+		cerr << "CHARACTERWINDOW: ERROR > Couldn't draw health!" << endl;
+		
+	// Draw skill
+	VideoManager->MoveRelative(0, -35);
+	
+	// convert to std::string
+	std::ostringstream os_skill;
+	os_skill << character->GetSP();
+	std::string skill = std::string("Skill:") + os_skill.str();
+	if (!VideoManager->DrawText(MakeWideString(skill)))
+		cerr << "CHARACTERWINDOW: ERROR > Couldn't draw skill!" << endl;
+		
+	// Draw xp
+	VideoManager->MoveRelative(0, 85);
+	
+	// Convert to std::string
+	std::ostringstream os_xp;
+	os_xp << character->GetXPNextLevel();
+	std::string xp = std::string("XP:") + os_xp.str();
+	if (!VideoManager->DrawText(MakeWideString(xp)))
+		cerr << "CHARACTERWINDOW: ERROR > Couldn't draw xp!" << endl;
+	
+	return true;
+}
+
+//------------------------------------
+// CharacterWindow Constructor
+//------------------------------------
+CharacterWindow::CharacterWindow()
+{ 
+	_char_id = GLOBAL_NO_CHARACTERS;
+}
+
+//-------------------------------------
+// CharacterWindow::~CharacterWindow
+//-------------------------------------
+CharacterWindow::~CharacterWindow()
+{ 
+	// Delete Our portrait
+	//VideoManager->DeleteImage(this->_portrait);
+}
+
+//-------------------------------------
+// CharacterWindow::SetCharacter
+//-------------------------------------
+void CharacterWindow::SetCharacter(GCharacter *character)
+{
+	this->_char_id = character->GetID();
+	
+	// TODO: Load the portrait
+	//this->_portrait.SetFilename(Get_The_Filename_Somehow);
+	//this->_portrait.SetDimensions(Get_The_Dimensions);
+	// Load image into VideoManager
+	//VideoManager->LoadImage(this->_portrait);
 }
 
 } // namespace hoa_menu
