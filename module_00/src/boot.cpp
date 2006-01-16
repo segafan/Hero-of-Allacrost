@@ -293,8 +293,8 @@ void BootMode::Update(uint32 time_elapsed) {
 			{
 // 				_boot_sound[2].PlaySound(); // acquire sound
 				if (BOOT_DEBUG) cout << "BOOT: Starting new game." << endl;
-				GCharacter *claud = new GCharacter("Claudius", "claudius", GLOBAL_CLAUDIUS);
-				InstanceManager->AddCharacter(claud);
+				GlobalCharacter *claud = new GlobalCharacter("Claudius", "claudius", GLOBAL_CLAUDIUS);
+				GlobalManager->AddCharacter(claud);
 				_fade_out = true;
 				VideoManager->FadeScreen(Color::black, 1.0f);
 				break;

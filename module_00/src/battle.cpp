@@ -38,30 +38,6 @@ namespace hoa_battle {
 
 bool BATTLE_DEBUG = false;
 
-/* 
-
-To Tim: From the GameMode class that BattleMode inherits from, you already have working access to
-all of the game's singleton classes so you don't need to worry about allocating pointers to them, etc.
-You can find them all inside the GameMode class in engine.h, but here's a reference of them for your
-convenience:
-
-	hoa_audio::GameAudio *AudioManager;
-	hoa_video::GameVideo *VideoManager;
-	hoa_data::GameData *DataManager;
-	GameInput *InputManager;
-	GameModeManager *ModeManager;
-	GameSettings *SettingsManager;
-*/
-
-/*
- * Actor
- *
- *
- *
- *
- *
- */
-
 //Actor constructor
 Actor::Actor(BattleMode *bm, uint32 x, uint32 y) {
 	_ownerBattleMode = bm;
@@ -300,7 +276,7 @@ void BattleUI::SetNumberNecessarySelections(uint32 select) {
  *
  */
 
-PlayerActor::PlayerActor(GCharacter *wrapped, BattleMode *bm, int x, int y) 
+PlayerActor::PlayerActor(GlobalCharacter *wrapped, BattleMode *bm, int x, int y) 
 	: Actor(bm, x, y) {
 	_wrappedCharacter = wrapped;
 }
@@ -331,15 +307,15 @@ void PlayerActor::Draw() {
 	//draw outselves here
 }
 		
-std::vector<GSkill *> PlayerActor::GetAttackSkills() {
+std::vector<GlobalSkill *> PlayerActor::GetAttackSkills() {
 	return _wrappedCharacter->GetAttackSkills();
 }
 
-std::vector<GSkill *> PlayerActor::GetDefenseSkills() {
+std::vector<GlobalSkill *> PlayerActor::GetDefenseSkills() {
 	return _wrappedCharacter->GetDefenseSkills();
 }
 
-std::vector<GSkill *> PlayerActor::GetSupportSkills() {
+std::vector<GlobalSkill *> PlayerActor::GetSupportSkills() {
 	return _wrappedCharacter->GetSupportSkills();
 }
 
@@ -359,7 +335,7 @@ uint32 PlayerActor::GetSkillPoints() {
 	return _wrappedCharacter->GetSP();
 } 
 
-std::vector<GAttackPoint> PlayerActor::GetAttackPoints() {
+std::vector<GlobalAttackPoint> PlayerActor::GetAttackPoints() {
 	return _wrappedCharacter->GetAttackPoints();
 } 
 
@@ -389,7 +365,7 @@ uint32 PlayerActor::GetHealth() {
  *
  */
 
-EnemyActor::EnemyActor(GEnemy *ge, BattleMode *bm, int x, int y) 
+EnemyActor::EnemyActor(GlobalEnemy *ge, BattleMode *bm, int x, int y) 
 	: Actor(bm, x,  y) {
 	_wrappedEnemy = ge;
 }
@@ -438,7 +414,7 @@ void EnemyActor::DoAI(uint32 dt) {
 		
 		std::cout << "EnemyActor: Getting PCs in battle..." << std::endl;
 		std::list<PlayerActor *> targets = GetOwnerBattleMode()->ReturnCharacters();
-		std::vector<GSkill *> skills = _wrappedEnemy->GetSkills();
+		std::vector<GlobalSkill *> skills = _wrappedEnemy->GetSkills();
 		std::list<PlayerActor *>::iterator it = targets.begin();
 		std::vector<Actor *> truetargets;
 		for(unsigned int i = 0; i < targets.size(); i++) {
@@ -497,13 +473,13 @@ void EnemyActor::LevelUp(uint32 average_level) {
 	_wrappedEnemy->SetAgility(base_agility);
 }
 
-std::vector<GSkill *> EnemyActor::GetSkills() {
+std::vector<GlobalSkill *> EnemyActor::GetSkills() {
 	return _wrappedEnemy->GetSkills();
 	//here we need to deal with the current level and the level required to use
 	//the skill
 }
 
-std::vector<GAttackPoint> EnemyActor::GetAttackPoints() {
+std::vector<GlobalAttackPoint> EnemyActor::GetAttackPoints() {
 	return _wrappedEnemy->GetAttackPoints();
 }
 
@@ -888,7 +864,7 @@ std::vector<Actor *> Action::GetArguments() {
  *
  */
 
-SkillAction::SkillAction(GSkill *s, Actor *p, std::vector<Actor *> args) :
+SkillAction::SkillAction(GlobalSkill *s, Actor *p, std::vector<Actor *> args) :
 Action(p, args)
 {
 	_skill = s;
@@ -903,7 +879,7 @@ void SkillAction::PerformAction() {
 }
 
 void SkillAction::PerformSkill() {
-	//here, from GSkill, we work our magic
+	//here, from GlobalSkill, we work our magic
 
 	//okay, here we actually perform the skill 
 	std::cout << "SkillAction: Perform Skill" << std::endl;
@@ -982,7 +958,7 @@ void SwapAction::FinishAction() {
  *
  */
  
-UseItemAction::UseItemAction(GItem *i, Actor *p, std::vector<Actor *> args) :
+UseItemAction::UseItemAction(GlobalItem *i, Actor *p, std::vector<Actor *> args) :
 Action(p, args)
 {
 	_item = i;
@@ -993,7 +969,7 @@ UseItemAction::~UseItemAction() {
 }
 
 void UseItemAction::PerformAction() {
-	//here, p uses GItem on args
+	//here, p uses GlobalItem on args
 	
 	Actor *host = GetHost();
 	//put the character into use item animation mode
@@ -1024,7 +1000,7 @@ BattleMode::BattleMode() : _UserInterface(this) {
 	// extends to SCREEN_LENGTH and SCREEN_HEIGHT, and has 1 depth level (ie, it's 2D)
 	
 	cerr << "Making new skill." << endl;
-	GSkill *slash = new GSkill("Slash", 5);
+	GlobalSkill *slash = new GlobalSkill("Slash", 5);
 	cerr << "Making move relative to origin." << endl;
 	MoveAction *ma = new MoveRelativeToOrigin(5, 5);
 	cerr << "New perform skill." << endl;
@@ -1037,7 +1013,7 @@ BattleMode::BattleMode() : _UserInterface(this) {
 	
 	
 	cerr << "Adding the skill to claudius." << endl;
-	GCharacter *claud = InstanceManager->GetCharacter(GLOBAL_CLAUDIUS);
+	GlobalCharacter *claud = GlobalManager->GetCharacter(GLOBAL_CLAUDIUS);
 	//claud->AddAttackSkill(slash);
 	
 	cerr << "Creating claudius player character." << endl;
@@ -1045,7 +1021,7 @@ BattleMode::BattleMode() : _UserInterface(this) {
 	_playerActors.push_back(claudius);
 	_PCsInBattle.push_back(claudius);
 	
-	GEnemy *e = new GEnemy();
+	GlobalEnemy *e = new GlobalEnemy();
 	cerr << "Adding the skill to the enemy." << endl;
 	e->AddSkill(slash);
 	EnemyActor *enemy = new EnemyActor(e, this, 1, 1);
@@ -1059,7 +1035,6 @@ BattleMode::BattleMode() : _UserInterface(this) {
 
 
 BattleMode::~BattleMode() {
-	// Clean up any allocated music/images/sounds/whatever data here. Don't forget! ^_~
 	cerr << "BATTLE: BattleMode destructor invoked." << endl;
 	
 	//clean up our actors

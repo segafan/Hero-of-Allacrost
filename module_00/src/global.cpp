@@ -24,7 +24,6 @@
 #include <string>
 //=======
 
-#include "map_objects.h"
 //>>>>>>> 1.22
 
 using namespace std;
@@ -35,15 +34,15 @@ using namespace hoa_map;
 
 namespace hoa_global {
 
-GameInstance *InstanceManager = NULL;
+GameGlobal *GlobalManager = NULL;
 bool GLOBAL_DEBUG = false;
-SINGLETON_INITIALIZE(GameInstance);
+SINGLETON_INITIALIZE(GameGlobal);
 
 // ****************************************************************************
-// ******************************* GObject ************************************
+// ******************************* GlobalObject ************************************
 // ****************************************************************************
 
-GObject::GObject(string name, uint8 type, uint32 usable, uint32 id, uint32 count) {
+GlobalObject::GlobalObject(string name, uint8 type, uint32 usable, uint32 id, uint32 count) {
 	obj_name = name;
 	obj_type = type;
 	usable_by = usable;
@@ -53,7 +52,7 @@ GObject::GObject(string name, uint8 type, uint32 usable, uint32 id, uint32 count
 
 
 
-GObject::GObject() {
+GlobalObject::GlobalObject() {
 	obj_name = "unknown";
 	obj_type = GLOBAL_DUMMY_OBJ;
 	usable_by = GLOBAL_NO_CHARACTERS;
@@ -63,112 +62,92 @@ GObject::GObject() {
 
 
 
-GObject::~GObject() {
+GlobalObject::~GlobalObject() {
 	obj_count = 0;
 }
 
 // ****************************************************************************
-// ******************************** GItem *************************************
+// ******************************** GlobalItem *************************************
 // ****************************************************************************
 
-GItem::GItem(string name, uint8 use, uint32 usable, uint32 id, uint32 count) :
-	GObject(name, GLOBAL_ITEM, usable, id, count) {
+GlobalItem::GlobalItem(string name, uint8 use, uint32 usable, uint32 id, uint32 count) :
+	GlobalObject(name, GLOBAL_ITEM, usable, id, count) {
 	_use_case = use;
 }
 
 
 
-GItem::GItem() :
-	GObject() {
+GlobalItem::GlobalItem() :
+	GlobalObject() {
 	_use_case = GLOBAL_UNUSABLE_ITEM;
 }
 
 
 
-GItem::~GItem() {}
+GlobalItem::~GlobalItem() {}
 
 // ****************************************************************************
-// ****************************** GSkillBook **********************************
+// ******************************* GlobalWeapon ************************************
 // ****************************************************************************
 
-
-GSkillBook::GSkillBook(string name, uint8 use, uint32 usable, uint32 id, uint32 count) :
-	GObject(name, GLOBAL_SKILL_BOOK, usable, id, count) {
+GlobalWeapon::GlobalWeapon(string name, uint32 usable, uint32 id, uint32 count) :
+	GlobalObject(name, GLOBAL_WEAPON, usable, id, count) {
 }
 
 
 
-GSkillBook::GSkillBook() :
-	GObject() {
-	obj_type = GLOBAL_SKILL_BOOK;
-}
-
-
-
-GSkillBook::~GSkillBook() {}
-
-// ****************************************************************************
-// ******************************* GWeapon ************************************
-// ****************************************************************************
-
-GWeapon::GWeapon(string name, uint32 usable, uint32 id, uint32 count) :
-	GObject(name, GLOBAL_WEAPON, usable, id, count) {
-}
-
-
-
-GWeapon::GWeapon() :
-	GObject() {
+GlobalWeapon::GlobalWeapon() :
+	GlobalObject() {
 	obj_type = GLOBAL_WEAPON;
 }
 
 
 
-GWeapon::~GWeapon() {}
+GlobalWeapon::~GlobalWeapon() {}
 
 // ****************************************************************************
-// ******************************** GArmor ************************************
+// ******************************** GlobalArmor ************************************
 // ****************************************************************************
 
-GArmor::GArmor(string name, uint8 type, uint32 usable, uint32 id, uint32 count) :
-	GObject(name, type, usable, id, count) {
+GlobalArmor::GlobalArmor(string name, uint8 type, uint32 usable, uint32 id, uint32 count) :
+	GlobalObject(name, type, usable, id, count) {
 }
 
 
 
-GArmor::GArmor() :
-	GObject() {
+GlobalArmor::GlobalArmor() :
+	GlobalObject() {
 }
 
 
 
-GArmor::~GArmor() {}
+GlobalArmor::~GlobalArmor() {}
 
 // ****************************************************************************
-// ******************************** GSkill ************************************
+// ******************************** GlobalSkill ************************************
 // ****************************************************************************
 
-GSkill::GSkill(string name, uint32 sp) {
+GlobalSkill::GlobalSkill(string name, uint32 sp) {
 	_skill_name = name;
 	_sp_usage = sp;
 }
 
 
 
-GSkill::GSkill() {
+GlobalSkill::GlobalSkill() {
 	_skill_name = "unknown";
 	_sp_usage = 0;
 }
 
 
 
-GSkill::~GSkill() {
+GlobalSkill::~GlobalSkill() {
 	for(unsigned int i = 0; i < _actions.size(); i++) {
 		delete _actions[i];
 	}
 }
 
-void GSkill::PerformSkill(hoa_battle::Actor *a, std::vector<hoa_battle::Actor *> args) {
+void GlobalSkill::PerformSkill(hoa_battle::Actor *a, std::vector<hoa_battle::Actor *> args) {
 	_host = a;
 	//add all the actions to the player to perform
 	for(int i = 0; i < _arguments.size(); i++) {
@@ -181,23 +160,23 @@ void GSkill::PerformSkill(hoa_battle::Actor *a, std::vector<hoa_battle::Actor *>
 	a->AddBattleAction(fa);
 }
 
-void GSkill::AddBattleAction(hoa_battle::BattleAction *bsa) {
+void GlobalSkill::AddBattleAction(hoa_battle::BattleAction *bsa) {
 	_actions.push_back(bsa);
 }
 
-uint32 GSkill::GetCooldownTime() {
+uint32 GlobalSkill::GetCooldownTime() {
 	return _coolDownTime;
 }
 
-uint32 GSkill::GetWarmupTime() {
+uint32 GlobalSkill::GetWarmupTime() {
 	return _warmUpTime;
 }
 
 // ****************************************************************************
-// ****************************** GAttackPoint ********************************
+// ****************************** GlobalAttackPoint ********************************
 // ****************************************************************************
 
-GAttackPoint::GAttackPoint(float x, float y, uint32 def, uint32 eva, uint8 elem_weak,
+GlobalAttackPoint::GlobalAttackPoint(float x, float y, uint32 def, uint32 eva, uint8 elem_weak,
                            uint8 elem_res, uint8 stat_weak, uint8 stat_res) {
 	_x_position = x;
 	_y_position = y;
@@ -211,7 +190,7 @@ GAttackPoint::GAttackPoint(float x, float y, uint32 def, uint32 eva, uint8 elem_
 
 
 
-GAttackPoint::GAttackPoint() {
+GlobalAttackPoint::GlobalAttackPoint() {
 	_x_position = 0;
 	_y_position = 0;
 	_defense = 0;
@@ -224,18 +203,18 @@ GAttackPoint::GAttackPoint() {
 
 
 
-GAttackPoint::~GAttackPoint() {}
+GlobalAttackPoint::~GlobalAttackPoint() {}
 
 // ****************************************************************************
-// ******************************** GEnemy ************************************
+// ******************************** GlobalEnemy ************************************
 // ****************************************************************************
 
-GEnemy::GEnemy() { }
+GlobalEnemy::GlobalEnemy() { }
 
-GEnemy::~GEnemy() { }
+GlobalEnemy::~GlobalEnemy() { }
 
 // Simulate the leveling up of experience for the enemy from its base stats.
-void GEnemy::LevelSimulator(uint32 lvl) {
+void GlobalEnemy::LevelSimulator(uint32 lvl) {
 	_experience_level = lvl;
 
 	// Assign the initial values of the stats (== base + growth * lvl)
@@ -254,12 +233,12 @@ void GEnemy::LevelSimulator(uint32 lvl) {
 }
 
 // ****************************************************************************
-// ****************************** GCharacter **********************************
+// ****************************** GlobalCharacter **********************************
 // ****************************************************************************
 
 //
-GCharacter::GCharacter(std::string na, std::string fn, uint32 id) {
-	if (GLOBAL_DEBUG) cout << "GLOBAL: GCharacter constructor invoked" << endl;
+GlobalCharacter::GlobalCharacter(std::string na, std::string fn, uint32 id) {
+	if (GLOBAL_DEBUG) cout << "GLOBAL: GlobalCharacter constructor invoked" << endl;
 	_name = na;
 	_filename = fn;
 	_char_id = id;
@@ -328,8 +307,8 @@ GCharacter::GCharacter(std::string na, std::string fn, uint32 id) {
 
 
 // Remove all frame images upon destruction
-GCharacter::~GCharacter() {
-	if (GLOBAL_DEBUG) cout << "GLOBAL: GCharacter destructor invoked" << endl;
+GlobalCharacter::~GlobalCharacter() {
+	if (GLOBAL_DEBUG) cout << "GLOBAL: GlobalCharacter destructor invoked" << endl;
 	GameVideo *VideoManager = GameVideo::GetReference();
 	for (uint32 i = 0; i < _battle_frames.size(); i++) {
 		VideoManager->DeleteImage(_battle_frames[i]);
@@ -339,7 +318,7 @@ GCharacter::~GCharacter() {
 /*
 <<<<<<< global.cpp
 
-void GCharacter::LoadFrames() {
+void GlobalCharacter::LoadFrames() {
 	GameVideo *VideoManager = GameVideo::GetReference();
 	StillImage imd;
 	string full_name = "img/sprites/map/" + _filename;
@@ -408,27 +387,27 @@ void GCharacter::LoadFrames() {
 */
 //>>>>>>> 1.22
 // ****************************************************************************
-// ***************************** GameInstance *********************************
+// ***************************** GameGlobal *********************************
 // ****************************************************************************
 
-GameInstance::GameInstance() {
-	if (GLOBAL_DEBUG) cout << "GLOBAL: GameInstance constructor invoked" << endl;
+GameGlobal::GameGlobal() {
+	if (GLOBAL_DEBUG) cout << "GLOBAL: GameGlobal constructor invoked" << endl;
 }
 
-GameInstance::~GameInstance() {
-	if (GLOBAL_DEBUG) cout << "GLOBAL: GameInstance destructor invoked" << endl;
+GameGlobal::~GameGlobal() {
+	if (GLOBAL_DEBUG) cout << "GLOBAL: GameGlobal destructor invoked" << endl;
 	for (uint32 i = 0; i < _characters.size(); i++) {
 		delete _characters[i];
 	}
 }
 
-// Initialize GameInstance members
-bool GameInstance::Initialize() {
+// Initialize GameGlobal members
+bool GameGlobal::Initialize() {
 // 	VideoManager = GameVideo::GetReference();
 	return true;
 }
 
-void GameInstance::AddCharacter(GCharacter *ch) {
+void GameGlobal::AddCharacter(GlobalCharacter *ch) {
 	if (GLOBAL_DEBUG) cout << "GLOBAL: Adding new character to party: " << ch->GetName() << endl;
 	_characters.push_back(ch);
 	// Check size of active party if less then 4, add to party
@@ -436,7 +415,7 @@ void GameInstance::AddCharacter(GCharacter *ch) {
 		_party.AddCharacter(ch->GetID());
 }
 
-GCharacter* GameInstance::GetCharacter(uint32 id) {
+GlobalCharacter* GameGlobal::GetCharacter(uint32 id) {
 	for (uint32 i = 0; i < _characters.size(); i++) {
 		if (_characters[i]->GetID() == id) {
 			return _characters[i];
@@ -447,33 +426,33 @@ GCharacter* GameInstance::GetCharacter(uint32 id) {
 }
 
 //-------------------------------
-// GameInstance::GetMoney
+// GameGlobal::GetMoney
 //-------------------------------
-uint32 GameInstance::GetMoney()
+uint32 GameGlobal::GetMoney()
 {
 	return _money;
 }
 
 //------------------------------
-// GameInstance::SetMoney
+// GameGlobal::SetMoney
 //------------------------------
-void GameInstance::SetMoney(uint32 amount)
+void GameGlobal::SetMoney(uint32 amount)
 {
 	_money = amount;
 }
 
 //-----------------------------
-// GameInstance::AddMoney
+// GameGlobal::AddMoney
 //-----------------------------
-void GameInstance::AddMoney(uint32 amount)
+void GameGlobal::AddMoney(uint32 amount)
 {
 	_money += amount;
 }
 
 //------------------------------
-// GameInstance::SubtractMoney
+// GameGlobal::SubtractMoney
 //------------------------------
-void GameInstance::SubtractMoney(uint32 amount)
+void GameGlobal::SubtractMoney(uint32 amount)
 {
 	// check to make amount is less then current amount of money
 	if (amount <= _money)
@@ -483,12 +462,12 @@ void GameInstance::SubtractMoney(uint32 amount)
 }
 
 //----------------------------------------------
-// GameInstance::GetParty
+// GameGlobal::GetParty
 //----------------------------------------------
-vector<GCharacter *> GameInstance::GetParty()
+vector<GlobalCharacter *> GameGlobal::GetParty()
 {
 	vector<uint32> characters = _party.GetCharacters();
-	vector<GCharacter *> ret;
+	vector<GlobalCharacter *> ret;
 	for (vector<uint32>::iterator p = characters.begin(); p != characters.end(); ++p)
 		ret.push_back(GetCharacter((*p)));
 	
@@ -496,25 +475,25 @@ vector<GCharacter *> GameInstance::GetParty()
 }
 
 //-----------------------
-// GParty::GParty
+// GlobalParty::GlobalParty
 //-----------------------
-GParty::GParty()
+GlobalParty::GlobalParty()
 {
 	// Nothing to do here yet.
 }
 
 //-----------------------
-// GParty::~GParty
+// GlobalParty::~GlobalParty
 //-----------------------
-GParty::~GParty()
+GlobalParty::~GlobalParty()
 {
 	// Nothing to do here yet.
 }
 
 //-------------------------------------
-// GParty::AddCharacter
+// GlobalParty::AddCharacter
 //-------------------------------------
-void GParty::AddCharacter(uint32 char_id)
+void GlobalParty::AddCharacter(uint32 char_id)
 {
 	// Only add the new char if there is less then 4 members in the party.
 	if (_characters.size() < 4)
@@ -523,7 +502,7 @@ void GParty::AddCharacter(uint32 char_id)
 		cerr << "GLOBAL: Unable to add another char to party, it is already at 4 members!" << endl;
 }
 
-void GParty::RemoveCharacter(uint32 char_id)
+void GlobalParty::RemoveCharacter(uint32 char_id)
 {
 	// search for id and remove it
 	for (vector<uint32>::iterator p = _characters.begin(); p != _characters.end(); ++p)

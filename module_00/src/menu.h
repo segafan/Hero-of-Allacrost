@@ -9,7 +9,7 @@
 
 /*!****************************************************************************
  * \file    menu.h
- * \author  Tyler Olsen, roots@allacrost.org, Daniel Steuernol steu@allacrost.org
+ * \author  Daniel Steuernol steu@allacrost.org
  * \date    Last Updated: January 15th, 2006
  * \brief   Header file for menu mode interface.
  *
@@ -146,7 +146,7 @@ public:
 	virtual ~CharacterWindow();
 
 	//! Set the character for this window
-	void SetCharacter(hoa_global::GCharacter *character);
+	void SetCharacter(hoa_global::GlobalCharacter *character);
 
 	/*!
 	 * \brief render this window to the screen.

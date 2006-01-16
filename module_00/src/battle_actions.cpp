@@ -29,7 +29,7 @@ namespace hoa_battle {
 
 
 */
-void BattleAction::Initialize(GSkill *sk, Actor *a, std::vector<Actor *> arguments) {
+void BattleAction::Initialize(GlobalSkill *sk, Actor *a, std::vector<Actor *> arguments) {
 	_skill = sk;
 	_host = a;
 	_arguments = arguments;

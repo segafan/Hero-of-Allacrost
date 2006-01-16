@@ -115,7 +115,7 @@ class Actor {
 		bool HasNextAction();
 		
 		/*!
-			Add a minor action (animation, GSkill related things, et cetera)
+			Add a minor action (animation, GlobalSkill related things, et cetera)
 		*/
 		void AddBattleAction(BattleAction *act);
 		
@@ -158,7 +158,7 @@ class Actor {
 		void UpdateMinorActions(uint32 dt);
 		
 		/*!
-			GCharacter and GEnemy will use a Map of sorts
+			GlobalCharacter and GlobalEnemy will use a Map of sorts
 			to map strings to image animations
 			This sets our characters animation
 		*/
@@ -168,7 +168,7 @@ class Actor {
 			Specific getters for classes that inherit
 		*/
 		virtual std::string GetName() = 0;
-		virtual std::vector<GAttackPoint> GetAttackPoints() = 0;
+		virtual std::vector<GlobalAttackPoint> GetAttackPoints() = 0;
 		virtual uint32 GetHealth() = 0;
 		virtual uint32 GetMaxHealth() = 0;
 		virtual uint32 GetSkillPoints() = 0;
@@ -245,26 +245,26 @@ class BattleUI {
 class PlayerActor : public Actor {
 	private:
 		//! The global character we have wrapped around
-		GCharacter *_wrappedCharacter;
+		GlobalCharacter *_wrappedCharacter;
 	
 	public:
-		PlayerActor(GCharacter *_wrapped, BattleMode *bm, int x, int y);
+		PlayerActor(GlobalCharacter *_wrapped, BattleMode *bm, int x, int y);
 		~PlayerActor();
 		void Update(uint32 dt);
 		void Draw();
 		
 		/*!
-			Get the skills from GCharacter
+			Get the skills from GlobalCharacter
 		*/
-		std::vector<GSkill *> GetAttackSkills();
-		std::vector<GSkill *> GetDefenseSkills();
-		std::vector<GSkill *> GetSupportSkills();
+		std::vector<GlobalSkill *> GetAttackSkills();
+		std::vector<GlobalSkill *> GetDefenseSkills();
+		std::vector<GlobalSkill *> GetSupportSkills();
 		
 		/*!
-			More getters from GCharacter
+			More getters from GlobalCharacter
 		*/
 		std::string GetName();
-		std::vector<GAttackPoint> GetAttackPoints();
+		std::vector<GlobalAttackPoint> GetAttackPoints();
 		uint32 GetHealth();
 		uint32 GetMaxHealth();
 		uint32 GetSkillPoints();
@@ -277,16 +277,16 @@ class PlayerActor : public Actor {
 class EnemyActor : public Actor {
 	private:
 		//! The enemy we have wrapped around
-		GEnemy *_wrappedEnemy;
+		GlobalEnemy *_wrappedEnemy;
 		
 	public:
-		EnemyActor(GEnemy *ge, BattleMode *bm, int x, int y);
+		EnemyActor(GlobalEnemy *ge, BattleMode *bm, int x, int y);
 		~EnemyActor();
 		void Update(uint32 dt);
 		void Draw();
 
 		/*!
-			Has the GEnemy level up to average_level
+			Has the GlobalEnemy level up to average_level
 		*/
 		void LevelUp(uint32 average_level);
 		
@@ -296,12 +296,12 @@ class EnemyActor : public Actor {
 		void DoAI(uint32 dt);
 
 		/*!
-			GEnemy getters
+			GlobalEnemy getters
 		*/
-		std::vector<GSkill *> GetSkills();
+		std::vector<GlobalSkill *> GetSkills();
 		
 		std::string GetName();
-		std::vector<GAttackPoint> GetAttackPoints();
+		std::vector<GlobalAttackPoint> GetAttackPoints();
 		uint32 GetHealth();
 		uint32 GetMaxHealth();
 		uint32 GetSkillPoints();
@@ -459,13 +459,13 @@ class Action {
 class SkillAction : public Action {
 	private:
 		//! The skill that is going to be performed.
-		GSkill *_skill;
+		GlobalSkill *_skill;
 		
 		void PerformSkill();
 		void PerformCooldown();
 		
 	public:
-		SkillAction(GSkill *s, Actor *p, std::vector<Actor *> args);
+		SkillAction(GlobalSkill *s, Actor *p, std::vector<Actor *> args);
 		~SkillAction();
 		void PerformAction();
 		void FinishAction();
@@ -492,10 +492,10 @@ class SwapAction : public Action {
 class UseItemAction : public Action {
 	private:
 		//! The item we are going to use
-		GItem *_item;
+		GlobalItem *_item;
 		
 	public:
-		UseItemAction(GItem *i, Actor *p, std::vector<Actor *> args);
+		UseItemAction(GlobalItem *i, Actor *p, std::vector<Actor *> args);
 		~UseItemAction();
 		void PerformAction();
 		void FinishAction();

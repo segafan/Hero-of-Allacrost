@@ -304,7 +304,7 @@ int32 main(int32 argc, char *argv[]) {
 	ModeManager = GameModeManager::Create();
 	SettingsManager = GameSettings::Create();
 	InputManager = GameInput::Create();
-	InstanceManager = GameInstance::Create();
+	GlobalManager = GameGlobal::Create();
 
 	if (!VideoManager->Initialize()) {
 		cerr << "ERROR: unable to initialize VideoManager" << endl;
@@ -345,8 +345,8 @@ int32 main(int32 argc, char *argv[]) {
 		cerr << "ERROR: unable to initialize InputManager" << endl;
 		return 1;
 	}
-	if (!InstanceManager->Initialize()) {
-		cerr << "ERROR: unable to initialize InstanceManager" << endl;
+	if (!GlobalManager->Initialize()) {
+		cerr << "ERROR: unable to initialize GlobalManager" << endl;
 		return 1;
 	}
 
@@ -397,7 +397,7 @@ int32 main(int32 argc, char *argv[]) {
 	GameInput::Destroy();
 	GameModeManager::Destroy();
 	GameSettings::Destroy();
-	GameInstance::Destroy();
+	GameGlobal::Destroy();
 	GameAudio::Destroy();
 	GameVideo::Destroy();
 

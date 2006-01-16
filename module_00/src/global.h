@@ -34,7 +34,7 @@
 namespace hoa_global {
 
 //! The singleton pointer responsible for the management of global game data.
-extern GameInstance *InstanceManager;
+extern GameGlobal *GlobalManager;
 //! Determines whether the code in the hoa_boot namespace should print debug statements or not.
 extern bool GLOBAL_DEBUG;
 
@@ -113,10 +113,10 @@ const uint32 GLOBAL_SOUND_BUMP    =  3;
  * programmer against accidentally changing the important values of the class
  * members.
  *****************************************************************************/
-class GObject {
+class GlobalObject {
 private:
-	GObject(const GObject&) {}
-	GObject& operator=(const GObject&) {}
+	GlobalObject(const GlobalObject&) {}
+	GlobalObject& operator=(const GlobalObject&) {}
 protected:
 	//! The name of the object, as will be displayed on the player's screen.
 	std::string obj_name;
@@ -132,9 +132,9 @@ protected:
 	//! The number of objects contained within this instance.
 	uint32 obj_count;
 public:
-	GObject(std::string name, uint8 type, uint32 usable, uint32 id, uint32 count);
-	GObject();
-	~GObject();
+	GlobalObject(std::string name, uint8 type, uint32 usable, uint32 id, uint32 count);
+	GlobalObject();
+	~GlobalObject();
 
 	//! \name Public Member Access Functions
 	//@{
@@ -167,18 +167,18 @@ public:
  * programmer against accidentally changing the important values of the class
  * members.
  *****************************************************************************/
-class GItem : public GObject {
+class GlobalItem : public GlobalObject {
 private:
 	//! \brief A bit-mask stating where the item may be used.
 	//! See the Game Item Usage Type constants for a list of locations.
 	uint8 _use_case;
 
-	GItem(const GItem&) {}
-	GItem& operator=(const GItem&) {}
+	GlobalItem(const GlobalItem&) {}
+	GlobalItem& operator=(const GlobalItem&) {}
 public:
-	GItem(std::string name, uint8 use, uint32 usable, uint32 id, uint32 count);
-	GItem();
-	~GItem();
+	GlobalItem(std::string name, uint8 use, uint32 usable, uint32 id, uint32 count);
+	GlobalItem();
+	~GlobalItem();
 
 	//! \name Public Member Access Functions
 	//@{
@@ -188,37 +188,7 @@ public:
 	//@}
 };
 
-/*!****************************************************************************
- * \brief A class for representing skill books found in the game.
- *
- * Skill Books are rare objects found in the game that contain different skills.
- * Once a skill book is found, the skills are not immediately available to the
- * characters, unless they are at a relatively high experience level. Skills found
- * in skill books are learned by retaining the book in the inventory, and then
- * gaining a certain number of experience levels to learn the skill.
- *
- * \note 1) The copy constructor and copy assignment operator are private because
- * we don't want to accidentally allow the player to find a hack for duplicating
- * objects in their inventory.
- *
- * \note 2) There are several member access functions to safe-guard the
- * programmer against accidentally changing the important values of the class
- * members.
- *****************************************************************************/
-class GSkillBook : public GObject {
-private:
-	//! The list of skills that this skill book contains.
-	std::vector<GSkill> _skills;
 
-	GSkillBook(const GSkillBook&) {}
-	GSkillBook& operator=(const GSkillBook&) {}
-public:
-	GSkillBook(std::string name, uint8 type, uint32 usable, uint32 id, uint32 count);
-	GSkillBook();
-	~GSkillBook();
-
-// void LoadBookSkills(); <<< fills up the skills vector. Or should this go in the GameData class?
-};
 
 /*!****************************************************************************
  * \brief A class for representing weapons found in the game.
@@ -234,14 +204,14 @@ public:
  * programmer against accidentally changing the important values of the class
  * members.
  *****************************************************************************/
-class GWeapon : public GObject {
+class GlobalWeapon : public GlobalObject {
 private:
-	GWeapon(const GWeapon&) {}
-	GWeapon& operator=(const GWeapon&) {}
+	GlobalWeapon(const GlobalWeapon&) {}
+	GlobalWeapon& operator=(const GlobalWeapon&) {}
 public:
-	GWeapon(std::string name, uint32 usable, uint32 id, uint32 count);
-	GWeapon();
-	~GWeapon();
+	GlobalWeapon(std::string name, uint32 usable, uint32 id, uint32 count);
+	GlobalWeapon();
+	~GlobalWeapon();
 };
 
  /*!****************************************************************************
@@ -249,7 +219,7 @@ public:
  *
  * It should be fairly obvious, but not all armor can be equipped by all
  * characters. Even though there's only one armor class, there are actually four
- * types of armor: head, body, arms, and legs. The GObject#obj_type member is used
+ * types of armor: head, body, arms, and legs. The GlobalObject#obj_type member is used
  * to identify what armor category an instance of this class belongs to. All armor
  * have the same members/properties, so it doesn't make any sense to make four
  * identical classes different only in name for the four armor types.
@@ -262,14 +232,14 @@ public:
  * programmer against accidentally changing the important values of the class
  * members.
  *****************************************************************************/
-class GArmor : public GObject {
+class GlobalArmor : public GlobalObject {
 private:
-	GArmor(const GArmor&) {}
-	GArmor& operator=(const GArmor&) {}
+	GlobalArmor(const GlobalArmor&) {}
+	GlobalArmor& operator=(const GlobalArmor&) {}
 public:
-	GArmor(std::string name, uint8 type, uint32 usable, uint32 id, uint32 count);
-	GArmor();
-	~GArmor();
+	GlobalArmor(std::string name, uint8 type, uint32 usable, uint32 id, uint32 count);
+	GlobalArmor();
+	~GlobalArmor();
 };
 
 /*!****************************************************************************
@@ -286,7 +256,7 @@ public:
  * programmer against accidentally changing the important values of the class
  * members.
  *****************************************************************************/
-class GSkill {
+class GlobalSkill {
 private:
 	//! The name of the skill, as will be displayed to the player on the screen.
 	std::string _skill_name;
@@ -322,9 +292,9 @@ private:
 	std::vector<hoa_battle::BattleAction *> _actions;
 public:
 
-	GSkill(std::string name, uint32 sp);
-	GSkill();
-	~GSkill();
+	GlobalSkill(std::string name, uint32 sp);
+	GlobalSkill();
+	~GlobalSkill();
 
 	void PerformSkill(hoa_battle::Actor *a, std::vector<hoa_battle::Actor *> args);
 	void AddBattleAction(hoa_battle::BattleAction *bsa);
@@ -355,7 +325,7 @@ public:
  * programmer against accidentally changing the important values of the class
  * members.
  *****************************************************************************/
-class GAttackPoint {
+class GlobalAttackPoint {
 private:
 	//! The x position of the attack point on the sprite.
 	float _x_position;
@@ -375,12 +345,12 @@ private:
 	//! A bit-mask of status resistances of the attack point.
 	uint8 _status_resistance;
 public:
-	GAttackPoint(float x, float y, uint32 def, uint32 eva, uint8 elem_weak,
+	GlobalAttackPoint(float x, float y, uint32 def, uint32 eva, uint8 elem_weak,
 	             uint8 elem_res, uint8 stat_weak, uint8 stat_res);
-	GAttackPoint();
-	~GAttackPoint();
-	GAttackPoint(const GAttackPoint&) {}
-	GAttackPoint& operator=(const GAttackPoint&) {}
+	GlobalAttackPoint();
+	~GlobalAttackPoint();
+	GlobalAttackPoint(const GlobalAttackPoint&) {}
+	GlobalAttackPoint& operator=(const GlobalAttackPoint&) {}
 
 	//! \name Public Member Access Functions
 	//@{
@@ -432,7 +402,7 @@ public:
  * battle code a little more, we'll need to define the copy constructor and copy assignment
  * operator. For now they are left blank.
  *****************************************************************************/
-class GEnemy {
+class GlobalEnemy {
 private:
 	//! The enemy's name, as seen by the player on the screen.
 	std::string _enemy_name;
@@ -445,9 +415,9 @@ private:
 	//! The height of the enemy sprite, in number of "virtual battle tiles".
 	uint32 _enemy_height;
 	//! The skill set that the enemy may choose from to take actions.
-	std::vector<GSkill *> _enemy_skills;
+	std::vector<GlobalSkill *> _enemy_skills;
 	//! The various attack points for the enemy.
-	std::vector<GAttackPoint> _attack_points;
+	std::vector<GlobalAttackPoint> _attack_points;
 	//! The frame images for the enemy sprite.
 	std::vector<hoa_video::StillImage> _sprite_frames;
 
@@ -493,10 +463,10 @@ private:
 	//@}
 
 public:
-	GEnemy();
-	~GEnemy();
-// 	GEnemy(const GEnemy&) {}
-// 	GEnemy& operator=(const GEnemy&) {}
+	GlobalEnemy();
+	~GlobalEnemy();
+// 	GlobalEnemy(const GlobalEnemy&) {}
+// 	GlobalEnemy& operator=(const GlobalEnemy&) {}
 
 	/*!
 	 *  \brief Simulates the growth of the enemy from the base experience level.
@@ -554,25 +524,25 @@ public:
 	uint32 GetGrowthStrength() { return _growth_strength; }
 	uint32 GetGrowthIntelligence() { return _growth_intelligence; }
 	uint32 GetGrowthAgility() { return _growth_agility; }
-	std::vector<GSkill *> GetSkills() { return _enemy_skills; }
-	std::vector<GAttackPoint> GetAttackPoints() { return _attack_points; }
+	std::vector<GlobalSkill *> GetSkills() { return _enemy_skills; }
+	std::vector<GlobalAttackPoint> GetAttackPoints() { return _attack_points; }
 
-	void AddSkill(GSkill *sk) { _enemy_skills.push_back(sk); }
+	void AddSkill(GlobalSkill *sk) { _enemy_skills.push_back(sk); }
 	//@}
-};
+}; // class GlobalEnemy
 
 /*!****************************************************************************
  * \brief A class for representing playable game characters.
  *
  * This calls represents playable game characters only (those that you can control,
  * equip, and send into battle). It does not cover NPCs or anything else. All
- * active character objects in the game are wrapped inside the GameInstance class.
+ * active character objects in the game are wrapped inside the GameGlobal class.
  *
  * \note 1) Almost always, a character will have four, and only four, attack points.
  * However, I've left it as a vector here in case we have some special case later in
  * the game where we want to add or remove attack points from a character.
  *****************************************************************************/
-class GCharacter {
+class GlobalCharacter {
 private:
 	//! The character's name, as seen by the player on the screen.
 	std::string _name;
@@ -583,23 +553,23 @@ private:
 	uint32 _char_id;
 
 	//! The weapon that the character currently has equipped.
-	GWeapon *_eq_weapon;
+	GlobalWeapon *_eq_weapon;
 	//! The head armor that the character currently has equipped.
-	GArmor *_eq_head;
+	GlobalArmor *_eq_head;
 	//! The body armor that the character currently has equipped.
-	GArmor *_eq_body;
+	GlobalArmor *_eq_body;
 	//! The arm armor that the character currently has equipped.
-	GArmor *_eq_arms;
+	GlobalArmor *_eq_arms;
 	//! The leg armor that the character currently has equipped.
-	GArmor *_eq_legs;
+	GlobalArmor *_eq_legs;
 	//! The attack skills the character can currently use.
-	std::vector<GSkill *> _attack_skills;
+	std::vector<GlobalSkill *> _attack_skills;
 	//! The defense skills the character can currently use.
-	std::vector<GSkill *> _defense_skills;
+	std::vector<GlobalSkill *> _defense_skills;
 	//! The support skills the character can currently use.
-	std::vector<GSkill *> _support_skills;
+	std::vector<GlobalSkill *> _support_skills;
 	//! The (four) attack points of the character.
-	std::vector<GAttackPoint> _attack_points;
+	std::vector<GlobalAttackPoint> _attack_points;
 	//! The current number of hit points of the character.
 	uint32 _hit_points;
 	//! The maximum number of hit points the character may have.
@@ -626,19 +596,19 @@ private:
 	//! The frame images for the character's battle sprite.
 	std::vector<hoa_video::StillImage> _battle_frames;
 public:
-	GCharacter(std::string na, std::string fn, uint32 id);
-	~GCharacter();
+	GlobalCharacter(std::string na, std::string fn, uint32 id);
+	~GlobalCharacter();
 
 	//! \name Weapon and Armor Equip Functions
 	//@{
 	//! \brief Swaps in and out equipment on the character.
 	//! \param *new_eq The new weapon or armor to equip.
 	//! \return The previously equipped weapon or armor.
-	GWeapon* EquipWeapon(GWeapon *_new_eq);
-	GArmor* EquipHeadArmor(GArmor *_new_eq);
-	GArmor* EquipBodyArmor(GArmor *_new_eq);
-	GArmor* EquipArmsArmor(GArmor *_new_eq);
-	GArmor* EquipLegsArmor(GArmor *_new_eq);
+	GlobalWeapon* EquipWeapon(GlobalWeapon *_new_eq);
+	GlobalArmor* EquipHeadArmor(GlobalArmor *_new_eq);
+	GlobalArmor* EquipBodyArmor(GlobalArmor *_new_eq);
+	GlobalArmor* EquipArmsArmor(GlobalArmor *_new_eq);
+	GlobalArmor* EquipLegsArmor(GlobalArmor *_new_eq);
 	//@}
 
 	//! \name Public Member Access Functions
@@ -670,16 +640,16 @@ public:
 	uint32 GetIntelligence() { return _intelligence; }
 	void SetAgility(uint32 agi) { _agility = agi; }
 	uint32 GetAgility() { return _agility; }
-	//!Added by visage November 16th
-	std::vector<GSkill *> GetAttackSkills() { return _attack_skills; }
-	std::vector<GSkill *> GetDefenseSkills() { return _defense_skills; }
-	std::vector<GSkill *> GetSupportSkills() { return _support_skills; }
+	
+	std::vector<GlobalSkill *> GetAttackSkills() { return _attack_skills; }
+	std::vector<GlobalSkill *> GetDefenseSkills() { return _defense_skills; }
+	std::vector<GlobalSkill *> GetSupportSkills() { return _support_skills; }
 
-	std::vector<GAttackPoint> GetAttackPoints() { return _attack_points; }
+	std::vector<GlobalAttackPoint> GetAttackPoints() { return _attack_points; }
 
-	void AddAttackSkill(GSkill *sk) { _attack_skills.push_back(sk); }
-	void AddDefenseSkill(GSkill *sk) { _defense_skills.push_back(sk); }
-	void AddSupportSkill(GSkill *sk) { _support_skills.push_back(sk); }
+	void AddAttackSkill(GlobalSkill *sk) { _attack_skills.push_back(sk); }
+	void AddDefenseSkill(GlobalSkill *sk) { _defense_skills.push_back(sk); }
+	void AddSupportSkill(GlobalSkill *sk) { _support_skills.push_back(sk); }
 	//@}
 };
 
@@ -690,14 +660,14 @@ public:
  * active party, but there could be at times multiple parties, for example
  * some of the fights in FF VI.
  ***************************************************************************/
-class GParty
+class GlobalParty
 {
 private:
 	//! Character id's on those in the party (max of 4)
 	std::vector<uint32> _characters;
 public:
-	GParty();
-	~GParty();
+	GlobalParty();
+	~GlobalParty();
 	//! Add a character to the party
 	void AddCharacter(uint32 char_id);
 	//! Remove a character from the party
@@ -716,11 +686,11 @@ public:
  * quit mode, and boot mode, time is frozen and does not update.
  *
  * \note 1) The only instance of this class that you should need already exists
- * privately in the GameInstance class.
+ * privately in the GameGlobal class.
  *****************************************************************************/
-class GTime {
+class GlobalTime {
 private:
-	friend class GameInstance;
+	friend class GameGlobal;
 	//! The number of seconds expired.
 	uint8 _seconds;
 	//! The number of minutes expired.
@@ -747,7 +717,7 @@ public:
 		_minutes = m;
 		_seconds = s;
 	}
-}; // class GTime
+}; // class GlobalTime
 
 /*!****************************************************************************
  * \brief A class that retains all the state information about the active game.
@@ -765,32 +735,32 @@ public:
  * heavily. The class shall be developed progressively along with the progress
  * of these other files.
  *****************************************************************************/
-class GameInstance {
+class GameGlobal {
 private:
-	SINGLETON_DECLARE(GameInstance);
+	SINGLETON_DECLARE(GameGlobal);
 	//! An object for retaining the elapsed game time.
-	GTime _game_time;
+	GlobalTime _game_time;
 	//! The characters currently in the party.
-	std::vector<GCharacter*> _characters;
+	std::vector<GlobalCharacter*> _characters;
 	//! The inventory of the party.
-	std::vector<GObject> _inventory;
+	std::vector<GlobalObject> _inventory;
 	//! The amount of financial resources the party currently has.
 	uint32 _money;
 	//! The active party (currently only support for one party, may need to be changed)
-	GParty _party;
+	GlobalParty _party;
 
 // 	hoa_video::GameVideo *VideoManager;
 
 public:
-	SINGLETON_METHODS(GameInstance);
+	SINGLETON_METHODS(GameGlobal);
 
 	//! Adds a new character to the party.
-	//! \param *ch A pointer to the GCharacter object to add to the party.
-	void AddCharacter(GCharacter *ch);
+	//! \param *ch A pointer to the GlobalCharacter object to add to the party.
+	void AddCharacter(GlobalCharacter *ch);
 	//! Returns a pointer to a character currently in the party.
 	//! \param id The ID number of the character to retrieve.
 	//! \return A pointer to the character, or NULL if the character was not found.
-	GCharacter* GetCharacter(uint32 id);
+	GlobalCharacter* GetCharacter(uint32 id);
 	//! Money handling functions, 
 	//! Get, returns the current amount
 	//! Set, sets the money to the specified amount
@@ -804,8 +774,8 @@ public:
 	// @}
 	//! Gets the Characters in the active party
 	//! \returns The Characters in the active party
-	std::vector<GCharacter *> GetParty();
-}; // class GameInstance
+	std::vector<GlobalCharacter *> GetParty();
+}; // class GameGlobal
 
 
 } // namespace hoa_global

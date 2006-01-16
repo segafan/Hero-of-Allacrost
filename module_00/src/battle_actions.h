@@ -36,7 +36,7 @@ class BattleAction {
 		//! Is it concurrent?
 		bool _isConcurrent;
 		//! The skill we belong to (potential to be NULL)
-		GSkill *_skill;
+		GlobalSkill *_skill;
 		//! The host we belong to (must be assigned)
 		Actor *_host;
 		//! The arguments we have (potential to be size 0)
@@ -48,7 +48,7 @@ class BattleAction {
 		/*!
 			Assigns all the values
 		*/
-		void Initialize(GSkill *sk, Actor *a, std::vector<Actor *> arguments);
+		void Initialize(GlobalSkill *sk, Actor *a, std::vector<Actor *> arguments);
 		virtual void Update(uint32 dt) = 0;
 		
 		/*!
@@ -56,7 +56,7 @@ class BattleAction {
 		*/
 		void SetConcurrent(bool concur) { _isConcurrent = concur; }
 		bool IsConcurrent() { return _isConcurrent; }
-		GSkill * GetSkill() { return _skill; }
+		GlobalSkill * GetSkill() { return _skill; }
 		Actor * GetHost() { return _host; }
 		std::vector<Actor *> GetArguments() { return _arguments; }
 };

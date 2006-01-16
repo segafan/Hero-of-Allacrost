@@ -71,16 +71,15 @@ namespace hoa_engine {
 // Global declarations, see global.h/cpp
 namespace hoa_global {
 	extern bool GLOBAL_DEBUG;
-	class GObject;
-	class GItem;
-	class GSkillBook;
-	class GWeapon;
-	class GArmor;
-	class GSkill;
-	class GAttackPoint;
-	class GEnemy;
-	class GCharacter;
-	class GameInstance;
+	class GlobalObject;
+	class GlobalItem;
+	class GlobalWeapon;
+	class GlobalArmor;
+	class GlobalSkill;
+	class GlobalAttackPoint;
+	class GlobalEnemy;
+	class GlobalCharacter;
+	class GameGlobal;
 }
 
 // Boot mode declarations, see boot.h/cpp

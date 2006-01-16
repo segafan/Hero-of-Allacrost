@@ -9,8 +9,8 @@
 
 /*!****************************************************************************
  * \file    menu.cpp
- * \author  Tyler Olsen, roots@allacrost.org
- * \date    Last Updated: August 12th, 2005
+ * \author  Daniel Steuernol steu@allacrost.org
+ * \date    Last Updated: January 15th, 2006
  * \brief   Source file for menu mode interface.
  *****************************************************************************/
 
@@ -51,7 +51,7 @@ MenuMode::MenuMode()
 		cerr << "MENU: ERROR: Couldn't save the screen!" << endl;
 	}
 	
-	vector<GCharacter *> characters = GameInstance::GetReference()->GetParty();
+	vector<GlobalCharacter *> characters = GlobalManager->GetParty();
 	if (characters.size() == 4)
 	{
 		_character_window0.SetCharacter(characters[0]);
@@ -83,10 +83,10 @@ MenuMode::MenuMode()
 	_font_name = "default";
 	
 	// delete this when we have real data.
-	GameInstance::GetReference()->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetHP(80);
-	GameInstance::GetReference()->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetSP(35);
-	GameInstance::GetReference()->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetXPNextLevel(156);
-	GameInstance::GetReference()->SetMoney(4236);
+	GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetHP(80);
+	GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetSP(35);
+	GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetXPNextLevel(156);
+	GlobalManager->SetMoney(4236);
 }
 
 
@@ -594,7 +594,7 @@ void MenuMode::Draw() {
 		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
 	
 	std:ostringstream os_money;
-	os_money << GameInstance::GetReference()->GetMoney();
+	os_money << GlobalManager->GetMoney();
 	std::string money = std::string("Bling:") + os_money.str() + "B";
 	VideoManager->MoveRelative(0, 24);
 	if (!VideoManager->DrawText(MakeWideString(money)))
@@ -627,7 +627,7 @@ bool CharacterWindow::Draw()
 		return true;
 	
 	// Get the instance manager
-	GCharacter *character = GameInstance::GetReference()->GetCharacter(this->_char_id);
+	GlobalCharacter *character = GlobalManager->GetCharacter(this->_char_id);
 	
 	// Draw name
 	VideoManager->Move(x + 32, y + 40);
@@ -687,7 +687,7 @@ CharacterWindow::~CharacterWindow()
 //-------------------------------------
 // CharacterWindow::SetCharacter
 //-------------------------------------
-void CharacterWindow::SetCharacter(GCharacter *character)
+void CharacterWindow::SetCharacter(GlobalCharacter *character)
 {
 	this->_char_id = character->GetID();
 	
