@@ -628,12 +628,13 @@ public:
 	uint32 GetSP() { return _skill_points; }
 	void SetMaxSP(uint32 sp) { _max_skill_points = sp; }
 	uint32 GetMaxSP() { return _max_skill_points; }
+	void AddXP(uint32 xp);
 	void SetXP(uint32 xp) { _experience_points = xp; }
 	uint32 GetXP() { return _experience_points; }
 	void SetXPLevel(uint32 xp_lvl) { _experience_level = xp_lvl; }
 	uint32 GetXPLevel() { return _experience_level; }
 	void SetXPNextLevel(uint32 xp_next) { _experience_next_level = xp_next; }
-	uint32 GetXPNextLevel() { return _experience_next_level; }
+	uint32 GetXPForNextLevel() { return _experience_next_level; }
 	void SetStrength(uint32 str) { _strength = str; }
 	uint32 GetStrength() { return _strength; }
 	void SetIntelligence(uint32 intel) { _intelligence = intel; }

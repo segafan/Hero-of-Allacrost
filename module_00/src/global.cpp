@@ -315,6 +315,21 @@ GlobalCharacter::~GlobalCharacter() {
 	}
 }
 
+// Add xp and increase lvl if necessary
+void GlobalCharacter::AddXP(uint32 xp)
+{
+	_experience_points += xp;
+	_experience_next_level -= xp;
+	// TODO: Consult lvl chart and take appropriate action
+	// Replace amount_required variables with the right values
+	//if (_experience_points >= amount_required_to_level_up)
+	//{
+	//	_IncreaseCharacterAttributes();
+	//	_experience_points = _experience_points - amount_required_to_level_up;
+	//	_experience_next_level = amount_required_for_next_level - _experience_points;
+	//}
+}
+
 /*
 <<<<<<< global.cpp
 
