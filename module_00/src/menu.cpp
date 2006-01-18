@@ -51,6 +51,10 @@ MenuMode::MenuMode()
 		cerr << "MENU: ERROR: Couldn't save the screen!" << endl;
 	}
 	
+	// DELETE THIS TOO!!
+	GlobalCharacter *laila = new GlobalCharacter("Laila", "laila", GLOBAL_LAILA);
+	GlobalManager->AddCharacter(laila);
+	
 	vector<GlobalCharacter *> characters = GlobalManager->GetParty();
 	if (characters.size() == 4)
 	{
@@ -82,10 +86,21 @@ MenuMode::MenuMode()
 	// Set Font
 	_font_name = "default";
 	
-	// delete this when we have real data.
+	// DELETE this when we have real data.
 	GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetHP(80);
+	GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetMaxHP(340);
 	GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetSP(35);
+	GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetMaxSP(65);
+	GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetXP(35);
 	GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetXPNextLevel(156);
+	GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetXPLevel(100);
+	GlobalManager->GetCharacter(hoa_global::GLOBAL_LAILA)->SetHP(300);
+	GlobalManager->GetCharacter(hoa_global::GLOBAL_LAILA)->SetMaxHP(440);
+	GlobalManager->GetCharacter(hoa_global::GLOBAL_LAILA)->SetSP(300);
+	GlobalManager->GetCharacter(hoa_global::GLOBAL_LAILA)->SetMaxSP(370);
+	GlobalManager->GetCharacter(hoa_global::GLOBAL_LAILA)->SetXP(124);
+	GlobalManager->GetCharacter(hoa_global::GLOBAL_LAILA)->SetXPNextLevel(357);
+	GlobalManager->GetCharacter(hoa_global::GLOBAL_LAILA)->SetXPLevel(75);
 	GlobalManager->SetMoney(4236);
 }
 
@@ -266,16 +281,16 @@ void MenuMode::Reset() {
 		cerr << "MAP: ERROR > Couldn't set menu font!" << endl;
 	
 	// Setup the menu windows
-	_character_window0.Create(256, 576);
+	_character_window0.Create(256, 576, ~VIDEO_MENU_EDGE_RIGHT);
 	_character_window0.SetPosition(0, 0);
 	_character_window0.Show();
-	_character_window1.Create(256, 576);
+	_character_window1.Create(256, 576, ~VIDEO_MENU_EDGE_RIGHT, VIDEO_MENU_EDGE_LEFT);
 	_character_window1.SetPosition(256, 0);
 	_character_window1.Show();
-	_character_window2.Create(256, 576);
+	_character_window2.Create(256, 576, ~VIDEO_MENU_EDGE_RIGHT, VIDEO_MENU_EDGE_LEFT);
 	_character_window2.SetPosition(512, 0);
 	_character_window2.Show();
-	_character_window3.Create(256, 576);
+	_character_window3.Create(256, 576, VIDEO_MENU_EDGE_ALL, VIDEO_MENU_EDGE_LEFT);
 	_character_window3.SetPosition(768, 0);
 	_character_window3.Show();
 	_bottom_window.Create(1024, 192);
@@ -593,7 +608,7 @@ void MenuMode::Draw() {
 	if (!VideoManager->DrawText("Time: 00:24:35"))
 		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
 	
-	std:ostringstream os_money;
+	std::ostringstream os_money;
 	os_money << GlobalManager->GetMoney();
 	std::string money = std::string("Bling:") + os_money.str() + "B";
 	VideoManager->MoveRelative(0, 24);
@@ -614,7 +629,7 @@ bool CharacterWindow::Draw()
 	if (MenuWindow::GetState() == hoa_video::VIDEO_MENU_STATE_HIDDEN)
 		return true;
 	
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 	
 	// Get the window metrics
 	float x, y, w, h;
@@ -622,45 +637,62 @@ bool CharacterWindow::Draw()
 	this->GetDimensions(w,h);
 
 	// check to see if this window is an actual character
-	if (this->_char_id == hoa_global::GLOBAL_NO_CHARACTERS)
+	if (_char_id == hoa_global::GLOBAL_NO_CHARACTERS)
 		// no more to do here
 		return true;
 	
-	// Get the instance manager
-	GlobalCharacter *character = GlobalManager->GetCharacter(this->_char_id);
+	// Menu border fudge
+	x += 8;
 	
-	// Draw name
+	// Get the instance manager
+	GlobalCharacter *character = GlobalManager->GetCharacter(_char_id);
+	
+	// Draw name first
 	VideoManager->Move(x + 32, y + 40);
 	if (!VideoManager->DrawText(character->GetName()))
 		cerr << "CHARACTERWINDOW: ERROR > Couldn't draw Character Name!" << endl;
 	
-	// Draw health
-	VideoManager->MoveRelative(0, 468);
-
+	// Draw Level
+	VideoManager->MoveRelative(140, 0);
+	// Get the char's lvl
+	std::ostringstream os_level;
+	os_level << character->GetXPLevel();
+	std::string xp_level = std::string("Level: ") + os_level.str();
+	if (!VideoManager->DrawText(MakeWideString(xp_level)))
+		cerr << "CHARACTERWINDOW: ERROR: > Couldn't draw xp level" << endl;
+	
+	
+	// Draw Portrait
+	VideoManager->Move(x + 128 - (_portrait.GetWidth() / 2), y + 80);
+	VideoManager->DrawImage(_portrait);
+	
+	
+	// Draw Health
+	VideoManager->Move(x + 32, y + 400);
 	// convert to std::string
-	std:ostringstream os_health;
-	os_health << character->GetHP();
-	std::string health = std::string("Health:") + os_health.str();
+	std::ostringstream os_health;
+	os_health << character->GetHP() << " / " << character->GetMaxHP();
+	std::string health = std::string("Health: ") + os_health.str();
 	if (!VideoManager->DrawText(MakeWideString(health)))
 		cerr << "CHARACTERWINDOW: ERROR > Couldn't draw health!" << endl;
 		
 	// Draw skill
-	VideoManager->MoveRelative(0, -35);
+	VideoManager->MoveRelative(0, 40);
 	
 	// convert to std::string
 	std::ostringstream os_skill;
-	os_skill << character->GetSP();
-	std::string skill = std::string("Skill:") + os_skill.str();
+	os_skill << character->GetSP() << " / " << character->GetMaxSP();
+	std::string skill = std::string("Skill: ") + os_skill.str();
 	if (!VideoManager->DrawText(MakeWideString(skill)))
 		cerr << "CHARACTERWINDOW: ERROR > Couldn't draw skill!" << endl;
 		
 	// Draw xp
-	VideoManager->MoveRelative(0, 85);
+	VideoManager->MoveRelative(0, 40);
 	
 	// Convert to std::string
 	std::ostringstream os_xp;
-	os_xp << character->GetXPNextLevel();
-	std::string xp = std::string("XP:") + os_xp.str();
+	os_xp << character->GetXPForNextLevel();
+	std::string xp = std::string("XP Remaining: ") + os_xp.str();
 	if (!VideoManager->DrawText(MakeWideString(xp)))
 		cerr << "CHARACTERWINDOW: ERROR > Couldn't draw xp!" << endl;
 	
@@ -692,10 +724,12 @@ void CharacterWindow::SetCharacter(GlobalCharacter *character)
 	this->_char_id = character->GetID();
 	
 	// TODO: Load the portrait
-	//this->_portrait.SetFilename(Get_The_Filename_Somehow);
+	this->_portrait.SetFilename("img/menus/blank.png");
+	this->_portrait.SetStatic(true);
+	this->_portrait.SetDimensions(200, 300);
 	//this->_portrait.SetDimensions(Get_The_Dimensions);
 	// Load image into VideoManager
-	//VideoManager->LoadImage(this->_portrait);
+	VideoManager->LoadImage(this->_portrait);
 }
 
 } // namespace hoa_menu
