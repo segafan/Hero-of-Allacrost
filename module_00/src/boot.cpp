@@ -258,7 +258,9 @@ void BootMode::_RedefineKey(SDLKey& change_key) {
 
 
 // This is called once every frame iteration to update the status of the game
-void BootMode::Update(uint32 time_elapsed) {
+void BootMode::Update() {
+	uint32 time_elapsed = SettingsManager->GetUpdateTime();
+
 	// Screen is in the process of fading out
 	if (_fade_out) {
 		// When the screen is finished fading to black, create a new map mode and fade back in

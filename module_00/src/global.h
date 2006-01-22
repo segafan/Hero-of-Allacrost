@@ -680,45 +680,7 @@ public:
 	uint32 GetPartySize() { return _characters.size(); }
 };
 
-/*!****************************************************************************
- * \brief Manages elapsed game time.
- *
- * This simple class retains and updates the elapsed game time. When in pause mode,
- * quit mode, and boot mode, time is frozen and does not update.
- *
- * \note 1) The only instance of this class that you should need already exists
- * privately in the GameGlobal class.
- *****************************************************************************/
-class GlobalTime {
-private:
-	friend class GameGlobal;
-	//! The number of seconds expired.
-	uint8 _seconds;
-	//! The number of minutes expired.
-	uint8 _minutes;
-	//! The number of hours expired.
-	uint8 _hours;
-public:
-	//! Updates the elapsed time by one second.
-	void UpdateTime() {
-		_seconds++;
-		if (_seconds >= 60) {
-			_minutes++;
-			if (_minutes >= 60) {
-				_hours++;
-			}
-		}
-	}
-	//! Resets the class members to the specified time.
-	//! \param h The amount of hours to set.
-	//! \param m The amount of minutes to set.
-	//! \param s The amount of seconds to set.
-	void SetTime(uint8 h, uint8 m, uint8 s) {
-		_hours = h;
-		_minutes = m;
-		_seconds = s;
-	}
-}; // class GlobalTime
+
 
 /*!****************************************************************************
  * \brief A class that retains all the state information about the active game.
@@ -739,8 +701,6 @@ public:
 class GameGlobal {
 private:
 	SINGLETON_DECLARE(GameGlobal);
-	//! An object for retaining the elapsed game time.
-	GlobalTime _game_time;
 	//! The characters currently in the party.
 	std::vector<GlobalCharacter*> _characters;
 	//! The inventory of the party.

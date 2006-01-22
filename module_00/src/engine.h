@@ -124,11 +124,8 @@ public:
 	GameMode(uint8 mt);
 	//! Virtual destructor, since the inherited class holds all the important data.
 	virtual ~GameMode();
-	/*!
-	 *  \brief Purely virtual function for updating the status in this game mode
-	 *  \param time_elapsed The amount of milliseconds that have elapsed since the last time this function was called.
-	 */
-	virtual void Update(uint32 time_elapsed) = 0;
+	//! Purely virtual function for updating the status of the game mode.
+	virtual void Update() = 0;
 	//! Purely virtual function for drawing the next screen frame.
 	virtual void Draw() = 0;
 	/*!
@@ -212,16 +209,13 @@ public:
 	 *  \return A pointer to the GameMode object on the top of the stack.
 	 */
 	GameMode* GetTop();
-	/*!
-	 *  \brief Checks if the game stack needs modes pushed or popped, then calls Update on the top game mode stack.
-	 *  \param time_elapsed The amount of time that has passed since the last call to this function.
-	 */
-	void Update(uint32 time_elapsed);
-	/*!
-	 *  \brief Prints the contents of the \c game_stack to standard output.
-	 *  \note This function is for debugging purposes \b only! You normally should never call it.
-	 */
-	void PrintStack();
+
+	//! \brief Checks if the game stack needs modes pushed or popped, then calls Update on the top game mode stack.
+	void Update();
+	//! \brief Calls the Draw() function on the top game mode.
+	void Draw();
+	//! \brief Prints the contents of the \c game_stack to standard output.
+	void DEBUG_PrintStack();
 }; // class GameModeManager
 
 /*!****************************************************************************
@@ -245,18 +239,25 @@ public:
 class GameSettings {
 private:
 	SINGLETON_DECLARE(GameSettings);
-	//! The last time the game was updated, in milliseconds.
+	//! The last time that the UpdateTimers function was called, in milliseconds.
 	uint32 _last_update;
-	//! Retains the number of milliseconds that have expired for frame rate calculation.
-	uint32 _fps_timer;
-	//! Keeps count of the number of frames that have been drawn.
-	uint32 _fps_counter;
-	//! The number of frames drawn per second. Updated approximately every one second.
-	float _fps_rate;
+	//! The number of milliseconds that have transpired on the last timer update.
+	uint32 _update_time;
+	//! \name User play time variables.
+	//! \brief Timers that are updated to reflect the total amount of time the user has been playing.
+	//@{
+	uint8 _hours_played;
+	uint8 _minutes_played;
+	uint8 _seconds_played;
+	//! \note Milliseconds are not retained when saving or loading a saved game file.
+	uint16 _milliseconds_played;
+	//@}
+
 	//! When this is set to false, the program will exit (maturally).
 	bool _not_done;
 	//! The language in which to render text.
-	uint8 _language;
+	char _language[2];
+
 	//! Retains the current screen width and height.
 	SDL_Rect _screen_info;
 	//! True if the game is running in full screen mode.
@@ -264,98 +265,109 @@ private:
 	//! Used by PauseMode and QuitMode for temporarily changing the volume on pause/quit events.
 	uint8 _pause_volume_action;
 
-	//! \name Singleton Class Pointers
-	//@{
-	//! \brief References to the various game singletons.
-	hoa_data::GameData *_DataManager;
-	//@}
-
 public:
 	SINGLETON_METHODS(GameSettings);
 
-	// NOTE: I think I'll remove these two members since you can call GetMusic/SoundVolume from the GameAudio class
-	//! \brief The music volume level
-	//! \note  Valid range is [0.0f, 1.0f]
-	float music_vol;
-	//! \brief The sound volume level
-	//! \note  Valid range is [0.0f, 1.0f]
-	float sound_vol;
-
-	/*!
-	 *  \brief  Sets the \c last_update member to the current time.
-	 *  \return The difference between the last value of \c last_update and the current time.
-	 *  \note   There's a chance we could get errors in other parts of the program code if the
-	 *  value returned by UpdateTime() is zero. We can prevent this if we always make sure the
+	/*! \brief Initializes the timers used in the game.
+	 *  This function should only be called \c once, in main.cpp just before the main game loop begins.
+	 */
+	void InitializeTimers();
+	//! Updates the game time variables.
+	void UpdateTimers();
+	/*! \brief Retrieves the amount of time that the game should be updated by for time-based movement.
+	 *  This function should \c only be called in the main game loop, located in main.cpp.
+	 *  \return The number of milliseconds that have transpired since the last update.
+	 *  
+	 *  \note There's a chance we could get errors in other parts of the program code if the
+	 *  value returned by this function is zero. We can prevent this if we always make sure the
 	 *  function returns at least one, but I'm not sure there exists a computer fast enough
 	 *  that we have to worry about it.
 	 */
-	uint32 UpdateTime();
-	/*!
-	 *  \brief Initializes the \c last_update member to the current time (in milliseconds).
-	 *  \note <b>DO NOT</b> call SetTimer() anywhere in your code. It should only be called once
-	 *  in main.cpp, just before entering the main game loop. If you call it, you will be spelling
-	 *  your own d-o-o-m.
+	const uint32 GetUpdateTime()
+		{ return _update_time; }
+	/*! \brief Sets the play-time of
+	 *  \param h The amount of hours to set.
+	 *  \param m The amount of minutes to set.
+	 *  \param s The amount of seconds to set.
 	 */
-	void SetTimer();
+	void SetPlayTime(const uint8 h, const uint8 m, const uint8 s)
+		{ _hours_played = h; _minutes_played = m; _seconds_played = s; _milliseconds_played = 0; }
+	/*! \brief Functions for retrieving the play time.
+	 *  \return The number of hours, minutes, or seconds of play time.
+	 */
+	//@{
+	const uint8 GetPlayHours()
+		{ return _hours_played; }
+	const uint8 GetPlayMinutes()
+		{ return _minutes_played; }
+	const uint8 GetPlaySeconds()
+		{ return _seconds_played; }
+	//@}
+
 	/*!
 	 *  \brief Changes game to run in full screen mode or windowed mode.
 	 *  \param fs If true, the game will run in full-screen mode, otherwise in windowed mode.
 	 *  \note  This function will cause no harm if the desired screen mode is already active.
 	 *  \note  Function is a candidate for becoming extinct.
 	 */
-	void SetFullScreen(bool fs) { _full_screen = fs; }
-	/*!
-	 *  \brief  Toggles between full-screen and windowed mode.
-	 */
-	void ToggleFullScreen() { if (_full_screen) _full_screen = false; else _full_screen = true; }
-	/*!
-	 *  \brief  Determines if the game is running in full screen mode.
+	void SetFullScreen(bool fs) 
+		{ _full_screen = fs; }
+	//! \brief  Toggles between full-screen and windowed mode.
+	void ToggleFullScreen() 
+		{ if (_full_screen) _full_screen = false; else _full_screen = true; }
+	/*! \brief  Determines if the game is running in full screen mode.
 	 *  \return True if the game is running in full-screen mode.
 	 *  \note   This function will likely get a name change later.
 	 */
-	bool FullScreen() { return _full_screen; }
-	/*!
-	 *  \brief  Gets information about the current screen size.
+	bool FullScreen() 
+		{ return _full_screen; }
+	/*! \brief  Gets information about the current screen size.
 	 *  \return Information about the screen width and height.
 	 */
-	SDL_Rect GetScreenInfo() { return _screen_info; }
-	/*!
-	 *  \brief  Sets the screen size.
+	SDL_Rect GetScreenInfo() 
+		{ return _screen_info; }
+	/*! \brief  Sets the screen size.
 	 *  \param info The screen width and height.
 	 */
-	void SetScreenInfo(SDL_Rect info) { _screen_info = info; }
+	void SetScreenInfo(SDL_Rect info) 
+		{ _screen_info = info; }
+
 	/*!
 	 *  \brief  Used to determine what language the game is running in.
 	 *  \return The language that the game is running in.
 	 */
-	uint8 GetLanguage() { return _language; }
+	char* GetLanguage() 
+		{ return _language; }
 	/*!
 	 *  \brief  Sets the language that the game should use.
 	 *  \return The numerical value representing the language the game is running in.
 	 */
-	void SetLanguage(uint8 lang) { _language = lang; }
-	/*!
-	 *  \brief  Determines whether the user is done with the game.
+// 	void SetLanguage(char lang[]) 
+// 		{ _language = lang; }
+	/*! \brief  Determines whether the user is done with the game.
 	 *  \return False if the user is done and would like to exit the game.
 	 */
-	bool NotDone() { return _not_done; }
-	/*!
-	 *  \brief  The function to call to initialize the exit process of the game.
+
+	bool NotDone() 
+		{ return _not_done; }
+	/*! \brief  The function to call to initialize the exit process of the game.
 	 *  \note  The game won't actually quit until it tries to re-iterate through the main game loop again.
 	 */
-	void ExitGame() { _not_done = false; }
-	/*!
-	 *  \brief  Sets the action to take on the audio volume levels when the game is paused.
+	void ExitGame() 
+		{ _not_done = false; }
+	/*! \brief  Sets the action to take on the audio volume levels when the game is paused.
 	 *  \param action The value to set pause_volume_action to.
 	 *
 	 *  This action takes place whenever the active game mode class is PauseMode or QuitMode.
 	 */
-	void SetPauseVolumeAction(uint8 action) { _pause_volume_action = action; }
-	/*!
-	 *  \brief  Used to find out what the game is set to do on a pause event.
+
+	void SetPauseVolumeAction(uint8 action) 
+		{ _pause_volume_action = action; }
+	/*! \brief  Used to find out what the game is set to do on a pause event.
 	 *  \return The value of the action that the game takes on a pause event.
 	 */
-	uint8 GetPauseVolumeAction() { return _pause_volume_action; }
+	uint8 GetPauseVolumeAction() 
+		{ return _pause_volume_action; }
 }; // class GameSettings
 
 /*!****************************************************************************

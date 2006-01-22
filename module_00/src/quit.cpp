@@ -58,8 +58,8 @@ QuitMode::QuitMode() {
 			AudioManager->SetSoundVolume(0);
 			break;
 		case ENGINE_HALF_VOLUME:
-			AudioManager->SetMusicVolume(static_cast<int32>(SettingsManager->music_vol * 0.5));
-			AudioManager->SetSoundVolume(static_cast<int32>(SettingsManager->sound_vol * 0.5));
+// 			AudioManager->SetMusicVolume(static_cast<int32>(SettingsManager->music_vol * 0.5));
+// 			AudioManager->SetSoundVolume(static_cast<int32>(SettingsManager->sound_vol * 0.5));
 			// Note that the music_vol/sound_vol members of SettingsManager aren't changed
 			break;
 		// Don't need to do anything for case ENGINE_SAME_VOLUME
@@ -117,7 +117,8 @@ void QuitMode::Reset() {
 
 
 // Restores volume or unpauses audio, then pops itself from the game stack
-void QuitMode::Update(uint32 time_elapsed) {
+void QuitMode::Update() {
+	uint32 time_elapsed = SettingsManager->GetUpdateTime();
 	
 	// Dispatch input to option box
 	
@@ -206,8 +207,8 @@ void QuitMode::_QuitToBootMenu()
 			break;
 		case ENGINE_ZERO_VOLUME:
 		case ENGINE_HALF_VOLUME:
-			AudioManager->SetMusicVolume(SettingsManager->music_vol);
-			AudioManager->SetSoundVolume(SettingsManager->sound_vol);
+// 			AudioManager->SetMusicVolume(SettingsManager->music_vol);
+// 			AudioManager->SetSoundVolume(SettingsManager->sound_vol);
 			break;
 		// We don't need to do anything for case ENGINE_SAME_VOLUME
 	}
@@ -227,8 +228,8 @@ void QuitMode::_Cancel()
 			break;
 		case ENGINE_ZERO_VOLUME:
 		case ENGINE_HALF_VOLUME:
-			AudioManager->SetMusicVolume(SettingsManager->music_vol);
-			AudioManager->SetSoundVolume(SettingsManager->sound_vol);
+// 			AudioManager->SetMusicVolume(SettingsManager->music_vol);
+// 			AudioManager->SetSoundVolume(SettingsManager->sound_vol);
 			break;
 		// Don't need to do anything for case ENGINE_SAME_VOLUME
 	}

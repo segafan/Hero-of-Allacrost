@@ -310,7 +310,8 @@ void MenuMode::Reset() {
 //------------------------------------------
 // MenuMode::Update
 //-------------------------------------------
-void MenuMode::Update(uint32 time_elapsed) {
+void MenuMode::Update() {
+	uint32 time_elapsed = SettingsManager->GetUpdateTime();
 
 	if (InputManager->CancelPress()) 
 	{

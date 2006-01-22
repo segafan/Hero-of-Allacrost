@@ -223,10 +223,8 @@ public:
 		
 	/*!
 	 *  \brief call at end of every frame
-	 *
-	 *  \param frameTime   milliseconds since the last frame
 	 */
-	bool Display(int32 frameTime);
+	bool Display();
 	
 	
 	/*!

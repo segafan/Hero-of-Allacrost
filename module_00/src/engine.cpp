@@ -167,7 +167,7 @@ GameMode* GameModeManager::GetTop() {
 
 
 // Checks if any game modes need to be pushed or popped off the stack, then updates the top stack mode.
-void GameModeManager::Update(uint32 time_elapsed) {
+void GameModeManager::Update() {
 	// If a Push() or Pop() function was called, we need to adjust the state of the game stack.
 	if (_state_change == true) {
 		// Pop however many game modes we need to from the stop of thes tack
@@ -203,12 +203,22 @@ void GameModeManager::Update(uint32 time_elapsed) {
 	}
 
 	// Call the Update function on the top stack mode (the active game mode)
-	_game_stack.back()->Update(time_elapsed);
+	_game_stack.back()->Update();
+}
+
+
+// Checks if any game modes need to be pushed or popped off the stack, then updates the top stack mode.
+void GameModeManager::Draw() {
+	if (_game_stack.size() == 0) {
+		return;
+	}
+
+	_game_stack.back()->Draw();
 }
 
 
 // Used for debugging purposes ONLY. Prints the contents of the game mode stack.
-void GameModeManager::PrintStack() {
+void GameModeManager::DEBUG_PrintStack() {
 	cout << "ENGINE: Printing Game Stack" << endl;
 	if (_game_stack.size() == 0) {
 		cout << "***ERROR: Game stack is empty!" << endl;
@@ -232,10 +242,6 @@ GameSettings::GameSettings() {
 	if (ENGINE_DEBUG) cout << "ENGINE: GameSettings constructor invoked" << endl;
 	_pause_volume_action = ENGINE_SAME_VOLUME;
 	_not_done = true;
-	_last_update = 0;
-	_fps_timer = 0;
-	_fps_counter = 0;
-	_fps_rate = 0.0;
 
 	// Remaining members are initialized in the Initialize() function
 }
@@ -249,19 +255,20 @@ GameSettings::~GameSettings() {
 
 // Makes a call to the data manager for retrieving configured settings
 bool GameSettings::Initialize() {
-	bool fs;
 	ReadDataDescriptor read_data;
 
 	if (!read_data.OpenFile("dat/config/settings.lua")) {
 		cout << "ENGINE ERROR: failed to load settings from data file" << endl;
+		return false;
 	}
+
 	read_data.OpenTable("video_settings");
 	SetFullScreen(read_data.ReadBool("full_screen"));
 	read_data.CloseTable();
 
 	read_data.OpenTable("audio_settings");
-	music_vol = read_data.ReadFloat("music_vol");
-	sound_vol = read_data.ReadFloat("sound_vol");
+	AudioManager->SetMusicVolume(read_data.ReadFloat("music_vol"));
+	AudioManager->SetSoundVolume(read_data.ReadFloat("sound_vol"));
 	read_data.CloseTable();
 
 	if (read_data.GetError() != DATA_NO_ERRORS) {
@@ -272,32 +279,38 @@ bool GameSettings::Initialize() {
 }
 
 
-// Returns the difference between the time now and last_update (in ms) and calculates frame rate
-uint32 GameSettings::UpdateTime() {
-	uint32 tmp;
-	tmp = _last_update;
+// Set up the timers before the main game loop begins
+void GameSettings::InitializeTimers() {
 	_last_update = SDL_GetTicks();
-	tmp = _last_update - tmp;      // tmp = time now minus time this function was last called
-	_fps_timer += tmp;
-	_fps_counter++;
-
-	if (_fps_timer >= 1000) { // One second or more has expired, so update the FPS rate
-		_fps_rate = 1000 * static_cast<float>(_fps_counter) / static_cast<float>(_fps_timer);
-		_fps_counter = 0;
-		_fps_timer = 0;
-		// DEFUNCT: cout << "FPS: " << fps_rate << endl;
-		// Need to make a call the the DrawFPS function in GameVideo here.
-	}
-
-	return (tmp); // Return the difference between the last update time and the time now
+	_update_time = 1; // Must be non-zero, otherwise bad things will happen...
+	_hours_played = 0;
+	_minutes_played = 0;
+	_seconds_played = 0;
+	_milliseconds_played = 0;
 }
 
 
+// Returns the difference between the time now and last_update (in ms) and calculates frame rate
+void GameSettings::UpdateTimers() {
+	uint32 tmp;
 
-// Set up the timers for the first frame draw
-void GameSettings::SetTimer() {
+	tmp = _last_update;
 	_last_update = SDL_GetTicks();
-	_fps_timer = 0;
+	_update_time = _last_update - tmp;
+
+	_milliseconds_played += _update_time;
+	if (_milliseconds_played > 1000) {
+		_milliseconds_played -= 1000;
+		_seconds_played += 1;
+		if (_seconds_played > 60) {
+			_seconds_played -= 60;
+			_minutes_played += 1;
+			if (_minutes_played > 60) {
+				_minutes_played -= 60;
+				_hours_played += 1;
+			}
+		}
+	}
 }
 
 

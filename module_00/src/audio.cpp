@@ -15,9 +15,11 @@
  *****************************************************************************/
 
 #include "audio.h"
+#include "data.h"
 
 using namespace std;
 using namespace hoa_utils;
+using namespace hoa_data;
 
 namespace hoa_audio {
 

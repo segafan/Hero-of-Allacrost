@@ -326,8 +326,8 @@ int32 main(int32 argc, char *argv[]) {
 		cerr << "ERROR: unable to initialize AudioManager" << endl;
 		return 1;
 	}
-	AudioManager->SetMusicVolume(SettingsManager->music_vol);
- 	AudioManager->SetSoundVolume(SettingsManager->sound_vol);
+// 	AudioManager->SetMusicVolume(SettingsManager->music_vol);
+//  	AudioManager->SetSoundVolume(SettingsManager->sound_vol);
 
 	if (!DataManager->Initialize()) {
 		cerr << "ERROR: unable to initialize DataManager" << endl;
@@ -368,16 +368,14 @@ int32 main(int32 argc, char *argv[]) {
 	SDL_EventState(SDL_USEREVENT, SDL_IGNORE);
 	// NOTE: SDL_ActiveEvent reports mouse focus, input focus, iconified status. Should we disable it???
 
-	// Retains the amount of time (in milliseconds) between main loop iterations
-	uint32 frame_time = 0;
-	SettingsManager->SetTimer();	// Initialize the game and frames-per-second timers
+	SettingsManager->InitializeTimers();	
 
 	// This is the main loop for the game. The loop iterates once every frame drawn to the screen.
 	while (SettingsManager->NotDone()) {
 		// 1) Render the scene
 		VideoManager->Clear();
-		ModeManager->GetTop()->Draw();
-		VideoManager->Display(frame_time);
+		ModeManager->Draw();
+		VideoManager->Display();
 
 		// 2) Process all new events
 		InputManager->EventHandler();
@@ -385,11 +383,11 @@ int32 main(int32 argc, char *argv[]) {
 		// 3) Update any streaming audio sources
 		AudioManager->Update();
 
-		// 4) Update the timer
-		frame_time = SettingsManager->UpdateTime();
+		// 4) Update timers for correct time-based movment operation
+		SettingsManager->UpdateTimers();
 
 		// 5) Update the game status
-		ModeManager->Update(frame_time);
+		ModeManager->Update();
 	} // while (SettingsManager->NotDone())
 
 	// Begin exit sequence and destroy the singleton classes

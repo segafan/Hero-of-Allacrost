@@ -1,13 +1,31 @@
+///////////////////////////////////////////////////////////////////////////////
+//            Copyright (C) 2004-2006 by The Allacrost Project
+//                       All Rights Reserved
+//
+// This code is licensed under the GNU GPL. It is free software and you may
+// modify it and/or redistribute it under the terms of this license.
+// See http://www.gnu.org/copyleft/gpl.html for details.
+/////////////////////////////////////////////////////////////////////////////// 
+
+/*!****************************************************************************
+ * \file    video.cpp
+ * \author  Raj Sharma, roos@allacrost.org
+ * \date    Last Updated: January 21, 2006
+ * \brief   Source file for video engine interface.
+ *****************************************************************************/ 
+
 #include "utils.h"
 #include <cassert>
 #include <cstdarg>
 #include "video.h"
 #include <math.h>
 #include "gui.h"
+#include "engine.h"
 
 using namespace std;
 using namespace hoa_video::private_video;
 using namespace hoa_utils;
+using namespace hoa_engine;
 
 namespace hoa_video 
 {
@@ -290,7 +308,7 @@ bool GameVideo::Initialize()
 		return false;
 	}
 	
-	if(!Display(0))
+	if(!Display())
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: Display() in GameVideo::Initialize() failed!" << endl;
@@ -681,8 +699,9 @@ bool GameVideo::AccumulateLights()
 //          screen
 //-----------------------------------------------------------------------------
 
-bool GameVideo::Display(int32 frameTime) 
+bool GameVideo::Display() 
 {
+	uint32 frameTime = hoa_engine::SettingsManager->GetUpdateTime();
 	// update particle effects
 	_particle_manager.Update(frameTime);
 

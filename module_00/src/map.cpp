@@ -447,8 +447,8 @@ void MapMode::_UpdateVirtualSprite() {
 // ****************************************************************************
 
 // Updates the game state when in map mode. Called from the main game loop.
-void MapMode::Update(uint32 new_time_elapsed) {
-	_time_elapsed = new_time_elapsed;
+void MapMode::Update() {
+	_time_elapsed = SettingsManager->GetUpdateTime();
 
 	// ***************** (1) Update all objects on the map **************
 	for (uint32 i = 0; i < _ground_objects.size(); i++) {

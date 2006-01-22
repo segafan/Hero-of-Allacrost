@@ -1056,15 +1056,9 @@ void BattleMode::Reset() {
 }
 
 
-void BattleMode::Update(uint32 time_elapsed) {
-	// This function is the top level function that updates the status of the game. You'll likely write
-	// several sub-functions that this function calls to keep the size of the function a sane amount.
-	// For example, UpdateCharacters() and UpdateEnemies(). Make these sub-functions private, because
-	// nothing else should need to know about them.
-	
-	// time_elapsed tells us how long it's been since the last time this function was called.
-	
-	//get input
+void BattleMode::Update() {
+	uint32 time_elapsed = SettingsManager->GetUpdateTime();
+
 	std::cout << "Updating with DT of: " << time_elapsed << std::endl;
 	
 	//update our characters

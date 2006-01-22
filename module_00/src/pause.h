@@ -59,6 +59,12 @@ class PauseMode : public hoa_engine::GameMode {
 private:
 	//! An image of the last frame shown on the screen before PauseMode was called.
 	hoa_video::StillImage _saved_screen;
+
+	/*! \brief Retains the original volume levels when this mode is active.
+	 *  Volume is restored when the mode is destroyed.
+	 */
+	float _saved_music_volume;
+	float _saved_sound_volume;
 public:
 	PauseMode();
 	~PauseMode();
@@ -66,7 +72,7 @@ public:
 	//! Resets appropriate class members. Called whenever PauseMode is made the active game mode.
 	void Reset();
 	//! Updates the game state by the amount of time that has elapsed
-	void Update(uint32 time_elapsed);
+	void Update();
 	//! Draws the next frame to be displayed on the screen
 	void Draw();
 };

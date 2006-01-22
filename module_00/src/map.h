@@ -243,15 +243,12 @@ public:
 	//! Resets appropriate class members. Called whenever the MapMode object is made the active game mode.
 	void Reset();
 	//! Updates the game and calls various sub-update functions depending on the state of map mode.
-	//! \param new_time_elapsed The amount of milliseconds that have elapsed since the last call to this function.
-	void Update(uint32 new_time_elapsed);
+	void Update();
 	//! Handles the drawing of everything on the map and makes sub-draw function calls as appropriate.
 	void Draw();
 	//! Fills in all the map structures from a Lua data file.
 	void LoadMap();
 private:
-
-
 	//! The name of the map, as will be read by the player in-game.
 	hoa_utils::ustring _map_name;
 	//! Indicates special conditions that the map is currently in (e.g. a dialogue is taking place)

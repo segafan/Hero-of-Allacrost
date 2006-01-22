@@ -44,8 +44,8 @@ PauseMode::PauseMode() {
 			AudioManager->SetSoundVolume(0);
 			break;
 		case ENGINE_HALF_VOLUME:
-			AudioManager->SetMusicVolume(static_cast<int32>(SettingsManager->music_vol * 0.5));
-			AudioManager->SetSoundVolume(static_cast<int32>(SettingsManager->sound_vol * 0.5));
+// 			AudioManager->SetMusicVolume(static_cast<int32>(SettingsManager->music_vol * 0.5));
+// 			AudioManager->SetSoundVolume(static_cast<int32>(SettingsManager->sound_vol * 0.5));
 			break;
 		// Don't need to do anything for the case ENGINE_SAME_VOLUME
 	}
@@ -68,8 +68,8 @@ PauseMode::~PauseMode() {
 			break;
 		case ENGINE_ZERO_VOLUME:
 		case ENGINE_HALF_VOLUME:
-			AudioManager->SetMusicVolume(SettingsManager->music_vol);
-			AudioManager->SetSoundVolume(SettingsManager->sound_vol);
+// 			AudioManager->SetMusicVolume(SettingsManager->music_vol);
+// 			AudioManager->SetSoundVolume(SettingsManager->sound_vol);
 			break;
 		default: // Don't need to do anything for case ENGINE_SAME_VOLUME
 			break;
@@ -92,7 +92,7 @@ void PauseMode::Reset() {
 
 
 // The true logic is all handled in GameSettings::KeyEventHandler() instead of this function.
-void PauseMode::Update(uint32 time_elapsed) { 
+void PauseMode::Update() { 
 	// Don't eat up 100% of the CPU time when we're in pause mode
 	SDL_Delay(50);
 }
