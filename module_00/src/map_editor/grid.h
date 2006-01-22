@@ -44,12 +44,14 @@ class Grid: public QCanvasView
 		Grid(QWidget *parent = 0, const QString &name = QString("Untitled"));
 		~Grid();
 		
-		bool GetChanged();          // returns mapChanged
-		QString GetFileName();      // returns mapFileName
+		bool GetChanged() const { return _changed; }
+		QString GetFileName() const { return _file_name; }
+		
 		void SetWidth(int width);   // sets the map's width in tiles (columns)
 		void SetHeight(int height); // sets the map's height in tiles (rows)
 		void SetFileName(QString filename);    // sets the map's file name
 		void SetFileNameList(QStringList list);// sets list of map's tile names
+
 		void LoadMap();             // loads a map from a config file
 		void SaveMap();             // saves the map to a config file
 		void CreateGrid();          // creates grid lines on the map

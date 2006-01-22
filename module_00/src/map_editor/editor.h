@@ -14,15 +14,18 @@
 #include "tileset.h"
 
 #include <qapplication.h>
+#include <qdialog.h>
 #include <qdir.h>
 #include <qfiledialog.h>
 #include <qimage.h>
-#include <qinputdialog.h>
+#include <qlabel.h>
+#include <qlayout.h>
 #include <qmainwindow.h>
 #include <qmenubar.h>
 #include <qmessagebox.h>
 #include <qpopupmenu.h>
-#include <qsettings.h>
+#include <qpushbutton.h>
+#include <qspinbox.h>
 #include <qsplitter.h>
 #include <qstatusbar.h>
 #include <qstring.h>
@@ -34,33 +37,26 @@ namespace hoa_editor
 
 class Editor: public QMainWindow
 {
-	Q_OBJECT	// macro needed to use QT's slots and signals
+	Q_OBJECT    // macro needed to use Qt's slots and signals
 	
 	public:
 		Editor();				// constructor
 		~Editor();				// destructor
 		
-		// maximum number of recently used files to keep track of
-		// FIXME: not sure why this is enum
-		enum { MAX_RECENTFILES = 5 };
-
 		friend class Grid;		// needed for "painting" tiles
 
 	protected:
 		// Handles close and/or quit events, reimplemented from QMainWindow
-		virtual void closeEvent(QCloseEvent *);
+		void closeEvent(QCloseEvent *);
 		//void resizeEvent(QResizeEvent *); FIXME: where does this go?
 	
 	private slots:
 		// the following slot is used to gray out items in file the menu
 		void _FileMenuSetup();
 		
-		//void _SaveOptions();	// saves the list of most recently used files
-
 		// the following slots are used in the file menu
 		void _FileNew();
 		void _FileOpen();
-	//	void _FileOpenRecent(int index);
 		void _FileSaveAs();
 		void _FileSave();
 		void _FileResize();
@@ -75,20 +71,37 @@ class Editor: public QMainWindow
 		void _TileInit();		// loads the tiles for drag 'n' drop
 		bool _EraseOK();		// saves the map if it is unsaved
 
-		// updates the list of recently used files with fileName
-		//void updateRecentFiles(const QString &fileName);
-		
-		// updates the list of recently used files in the File menu
-		//void updateRecentFilesMenu();
-		
 		QPopupMenu* _file_menu;	// this is used for the File menu
 		QPopupMenu* _help_menu;	// this is used for the Help menu
 
 		QStatusBar* _stat_bar;	// this is used to display messages
-	//	QStringList _master_recent_files;	// list of recently used files
 		Tileset* _tiles;		// iconview of tiles
 		Grid* _map;				// current working map
 }; // class Editor
+
+class SizeDialog: public QDialog
+{
+	Q_OBJECT    // macro needed to use Qt's slots and signals
+	
+	public:
+		SizeDialog(QWidget* parent, const QString& name);   // constructor
+		~SizeDialog();                                      // destructor
+
+		int GetHeight() const { return height_sbox->value(); }
+		int GetWidth()  const { return  width_sbox->value(); }
+
+	private:
+		QSpinBox* height_sbox;
+		QSpinBox* width_sbox;
+
+		QLabel* height_label;
+		QLabel* width_label;
+
+		QPushButton* cancel_pbut;
+		QPushButton* ok_pbut;
+
+		QGridLayout* grid_lay;
+}; // class SizeDialog
 
 } // namespace hoa_editor
 

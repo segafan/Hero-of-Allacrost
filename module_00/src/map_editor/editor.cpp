@@ -18,15 +18,6 @@ const QString APP_KEY = "/map_editor/";
 
 Editor::Editor() : QMainWindow(0, 0, WDestructiveClose)
 {
-	// Create and initialize the GameData singleton
-	DataManager = GameData::Create();
-	DataManager = GameData::GetReference();
-	if (!DataManager->Initialize())
-	{
-		cerr << "ERROR: unable to initialize DataManager" << endl;
-		_FileQuit();
-	} // Make sure DataManager is properly initialized.
-	
 	// create the main widget and tile icons
 	QSplitter *split = new QSplitter(this);
 	_tiles = new Tileset(split);
@@ -51,33 +42,12 @@ Editor::Editor() : QMainWindow(0, 0, WDestructiveClose)
 	_help_menu->insertItem("&About", this, SLOT(_HelpAbout()));
 	_help_menu->insertItem("About &Qt", this, SLOT(_HelpAboutQt()));
 	
-	// FIXME: these settings don't seem to be working...? hmm
-/*	QSettings settings;		// contains saveable settings, like recent files
-	QString filename;		// file to add to list of recently used files
-	for (int i = 0; i < MAX_RECENTFILES; ++i)
-	{
-		filename = settings.readEntry(APP_KEY + "File" + 
-			QString::number(i + 1));
-		if (!filename.isEmpty())
-			masterRecentFiles.push_back(filename);
-	} // puts saved files into a list of recently used files
-
-	// updates the recent files list in the File menu
-	if (masterRecentFiles.count())
-		updateRecentFilesMenu();
-*/	
 	// loads the tileset for drag 'n' drop operation
 	_TileInit();
-	
-	// FIXME: opens the most recently used file
-//	if (!filename.isEmpty())
-//		load(filename);
 } // Editor constructor
 
 Editor::~Editor()
 {
-	// Destroy GameData singleton
-	GameData::Destroy();
 	if (_map != NULL)
 		delete _map;
 	if (_tiles != NULL)
@@ -94,13 +64,10 @@ void Editor::_FileMenuSetup()
 	_file_menu->clear();
 	_file_menu->insertItem("&New...", this, SLOT(_FileNew()), CTRL+Key_N);
 	_file_menu->insertItem("&Open...", this, SLOT(_FileOpen()), CTRL+Key_O);
-	int save_id = _file_menu->insertItem("&Save", this, SLOT(_FileSave()),
-		CTRL+Key_S);
-	int save_as_id = _file_menu->insertItem("Save &As...", this,
-		SLOT(_FileSaveAs()));
+	int save_id = _file_menu->insertItem("&Save", this, SLOT(_FileSave()), CTRL+Key_S);
+	int save_as_id = _file_menu->insertItem("Save &As...", this, SLOT(_FileSaveAs()));
 	_file_menu->insertSeparator();
-	int resize_id = _file_menu->insertItem("&Resize Map...", this,
-		SLOT(_FileResize()));
+	int resize_id = _file_menu->insertItem("&Resize Map...", this, SLOT(_FileResize()));
 	_file_menu->insertSeparator();
 	_file_menu->insertItem("&Quit", this, SLOT(_FileQuit()), CTRL+Key_Q);
 
@@ -146,17 +113,10 @@ void Editor::_FileOpen()
 			_map->LoadMap();
 			_stat_bar->message(QString("Opened \'%1\'").
 				arg(_map->GetFileName()), 5000);
-//			_UpdateRecentFiles(file_name);  <-- FIXME
 		} // file must exist in order to open it
 	} // make sure an unsaved map is not lost
 } // _FileOpen()
-/*
-void Editor::_FileOpenRecent(int index)
-{
-FIXME
-	_Load(masterRecentFiles[index]);
-} // _FileOpenRecent(...)
-*/
+
 void Editor::_FileSaveAs()
 {
 	// Get the file name from the user.
@@ -178,7 +138,6 @@ void Editor::_FileSaveAs()
 		if (answer == 0)
 		{
 			_map->SetFileName(file_name);
-//			_UpdateRecentFiles(file_name);  <-- FIXME
 			_FileSave();
 			return;
 		} // Save the file.
@@ -203,34 +162,26 @@ void Editor::_FileSave()
 
 void Editor::_FileResize()
 {
-	bool ok_wpressed, ok_hpressed;	// TRUE = user pressed OK, else FALSE
+	SizeDialog* resize = new SizeDialog(this, "map_resize");
 	
-	// get map width from user
-	int width = QInputDialog::getInteger("Map Size...",
-		"Enter map width (in tiles):", 0, 0, 1000, 1, &ok_wpressed, this);
-
-	// get map height from user
-	int height = QInputDialog::getInteger("Map Size...",
-		"Enter map height (in tiles):", 0, 0, 1000, 1, &ok_hpressed, this);
-
-	if (ok_wpressed && ok_hpressed)
+	if (resize->exec() == QDialog::Accepted)
 	{
-		_map->canvas()->resize(width * TILE_WIDTH, height * TILE_HEIGHT);
+		_map->canvas()->resize(resize->GetWidth() * TILE_WIDTH, resize->GetHeight() * TILE_HEIGHT);
 		_map->CreateGrid();
-		_map->SetWidth(width);
-		_map->SetHeight(height);
-	} // only if the user entered both the height and the width
+		_map->SetHeight(resize->GetHeight());
+		_map->SetWidth(resize->GetWidth());
+	} // only if the user pressed OK
 	else
-		_stat_bar->message("Invalid dimensions, no map created",5000);
+		_stat_bar->message("No map created!",5000);
+
+	delete resize;
 } // _FileResize()
 
 void Editor::_FileQuit()
 {
+	// Checks to see if the map is unsaved.
 	if (_EraseOK())
-	{	
-		//_SaveOptions();		// FIXME: saves window settings
 		qApp->exit(0);
-	} // checks to see if the map is unsaved
 } // _FileQuit()
 
 bool Editor::_EraseOK()
@@ -339,3 +290,40 @@ void Editor::_TileInit()
 
 	_map->temp = _tiles;		// FIXME: zOMG what a hack this is
 } // _TileInit()
+
+SizeDialog::SizeDialog(QWidget* parent, const QString& name)
+	: QDialog(parent, (const char*) name)
+{
+	setCaption("Map Size...");
+
+	grid_lay = new QGridLayout(this, 3, 2, 5);
+	
+	height_label = new QLabel("Height (in tiles):", this);
+	height_sbox  = new QSpinBox(1, 1000, 1, this);
+	width_label  = new QLabel(" Width (in tiles):", this);
+	width_sbox   = new QSpinBox(1, 1000, 1, this);
+	cancel_pbut  = new QPushButton("Cancel", this);
+	ok_pbut      = new QPushButton("OK", this);
+	
+	cancel_pbut->setDefault(true);
+	connect(ok_pbut,     SIGNAL(released()), this, SLOT(accept()));
+	connect(cancel_pbut, SIGNAL(released()), this, SLOT(reject()));
+
+	grid_lay->addWidget(height_label, 0, 0);
+	grid_lay->addWidget(height_sbox, 0, 1);
+	grid_lay->addWidget(width_label, 1, 0);
+	grid_lay->addWidget(width_sbox, 1, 1);
+	grid_lay->addWidget(cancel_pbut, 2, 1);
+	grid_lay->addWidget(ok_pbut, 2, 0);
+} // SizeDialog constructor
+
+SizeDialog::~SizeDialog()
+{
+	delete height_label;
+	delete height_sbox;
+	delete width_label;
+	delete width_sbox;
+	delete cancel_pbut;
+	delete ok_pbut;
+	delete grid_lay;
+} // SizeDialog destructor

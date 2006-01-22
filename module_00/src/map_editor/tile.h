@@ -10,7 +10,7 @@
 /*!****************************************************************************
  * \file tile.h
  * \author Philip Vorsilak, gorzuate@allacrost.org
- * \date Last Updated: October 30th, 2005
+ * \date Last Updated: January 22nd, 2006
  * \brief Header file for representing a tile in the editor.
  *
  * This code provides a class to store a tile's properties and attributes in
@@ -67,7 +67,7 @@ class Tile: public QCanvasRectangle
 		 *  \brief Used to get the tile's file name.
 		 *  \return A QString of the tile's file name.
 		 */
-    	QString GetName() { return _file_name; }
+    	QString GetName() const { return _file_name; }
 		
 	protected:
 		/*!

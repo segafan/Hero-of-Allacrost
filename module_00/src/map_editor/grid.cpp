@@ -14,8 +14,8 @@ using namespace std;
 using namespace hoa_data;
 using namespace hoa_editor;
 
-Grid::Grid(QWidget *parent, const QString &name)
-	: QCanvasView(parent, (const char*)name)
+Grid::Grid(QWidget* parent, const QString& name)
+	: QCanvasView(parent, (const char*) name)
 {	
 	setAcceptDrops(TRUE);	// enable drag 'n' drop
 	_dragging = FALSE;		// FIXME: currently unneeded
@@ -33,18 +33,8 @@ Grid::Grid(QWidget *parent, const QString &name)
 
 Grid::~Grid()
 {
-	// do nothing Qt should take care of everything
+	// do nothing Qt should take care of everything...really? hrm... FIXME
 } // Grid destructor
-
-bool Grid::GetChanged()
-{
-	return _changed;
-} // GetChanged()
-
-QString Grid::GetFileName()
-{
-	return _file_name;
-} // GetFileName()
 
 void Grid::SetWidth(int width)
 {
@@ -697,7 +687,7 @@ void Grid::LoadMap()
 			QImage img = temp->findItem(_file_name_list[_tile_array[i]])->
 				pixmap()->convertToImage();
 			QString name = temp->findItem(_file_name_list[_tile_array[i]])->
-				text();
+				text().remove(".png");
 			Tile *tile = new Tile(name, img, this->canvas());
 			tile->move(col * TILE_WIDTH, row * TILE_HEIGHT);
 			tile->setZ(0);// sets height of tile TODO: create a menu option
@@ -776,6 +766,7 @@ void Grid::SaveMap()
 			QCanvasItemList::Iterator it = list.begin();
 			while (it != list.end() && (*it)->rtti() != TILE_RTTI)
 				it++;
+
 			if (list.empty())
 				ll_row.push_back(-1);
 			else if ((*it)->rtti() == TILE_RTTI)
