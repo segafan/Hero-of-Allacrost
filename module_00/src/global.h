@@ -63,10 +63,10 @@ const uint8 GLOBAL_MAP_ITEM      = 0x04;
 //! \name Game Character Types
 //@{
 //! \brief Constants for character bit-masking for identification.
-const uint GLOBAL_NO_CHARACTERS  = 0x00000000;
-const uint GLOBAL_CLAUDIUS       = 0x00000001;
-const uint GLOBAL_LAILA          = 0x00000002;
-const uint GLOBAL_ALL_CHARACTERS = 0xFFFFFFFF;
+const uint32 GLOBAL_NO_CHARACTERS  = 0x00000000;
+const uint32 GLOBAL_CLAUDIUS       = 0x00000001;
+const uint32 GLOBAL_LAILA          = 0x00000002;
+const uint32 GLOBAL_ALL_CHARACTERS = 0xFFFFFFFF;
 //@}
 
 //! \name Game Element Types
