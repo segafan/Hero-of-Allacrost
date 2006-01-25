@@ -10,7 +10,7 @@
 /*!****************************************************************************
  * \file    menu.h
  * \author  Daniel Steuernol steu@allacrost.org
- * \date    Last Updated: January 15th, 2006
+ * \date    Last Updated: January 24th, 2006
  * \brief   Header file for menu mode interface.
  *
  * This code handles the game event processing and frame drawing when the user
@@ -18,8 +18,6 @@
  * are to allow the user to view stastics about their party and manage inventory
  * and equipment.
  *
- * \note As you can see, this code is largely underdeveloped and this file is
- * more of a placeholder than anything useful at this point.
  *****************************************************************************/
 
 #ifndef __MENU_HEADER__
@@ -33,6 +31,7 @@
 #include "engine.h"
 #include "gui.h"
 #include "global.h"
+#include "menu_views.h"
 
 //! All calls to menu mode are wrapped in this namespace.
 namespace hoa_menu {
@@ -121,39 +120,6 @@ const uint32 SHOW_SAVE		= 6;
 
 }
 
-/*!***********************************************************************
- * \brief Represents an individual character window for the in-game menu.
- * 
- * There should be one of these windows for each character in the game.
- * It will contain all the information to be drawn for that character, and
- * also handles the placement of this.
- *************************************************************************/
-class CharacterWindow : public hoa_video::MenuWindow
-{
-private:
-	//! The name of the character that this window corresponds(sp?) to
-	uint32 _char_id;
-	//! The image of the character
-	hoa_video::StillImage _portrait;
-public:
-	/*!
-	 * \brief CharacterWindow Default constructor
-	 */
-	CharacterWindow();
-	/*!
-     * \brief CharacterWindow Destructor
-	 */
-	virtual ~CharacterWindow();
-
-	//! Set the character for this window
-	void SetCharacter(hoa_global::GlobalCharacter *character);
-
-	/*!
-	 * \brief render this window to the screen.
-	 */
-	bool Draw();
-};
-
 /*!****************************************************************************
  * \brief Responsible for managing the game when executing in the main in-game menu.
  *
@@ -176,18 +142,20 @@ private:
 	friend class hoa_data::GameData;
 
 	hoa_video::StillImage _saved_screen;
+	hoa_video::StillImage _location_picture;
 	std::vector<hoa_video::StillImage> _menu_images;
 	std::vector<hoa_audio::MusicDescriptor> _menu_music;
 	std::vector<hoa_audio::SoundDescriptor> _menu_sound;
 	
 	//! \name Main Display Windows
 	//@{
-	//! \brief The windows that are displayed in the top level of menu mode.
+	//! \brief The windows that are displayed in the menu mode.
 	CharacterWindow _character_window0;
 	CharacterWindow _character_window1;
 	CharacterWindow _character_window2;
 	CharacterWindow _character_window3;
 	hoa_video::MenuWindow _bottom_window;
+	InventoryWindow _inventory_window;
 	//@}
 		
 	//! \brief The current option box to display

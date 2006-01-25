@@ -414,6 +414,11 @@ GameGlobal::~GameGlobal() {
 	for (uint32 i = 0; i < _characters.size(); i++) {
 		delete _characters[i];
 	}
+	
+	// Clean up inventory items
+	for (uint32 i = 0; i < _inventory.size(); ++i) {
+		delete _inventory[i];
+	}
 }
 
 // Initialize GameGlobal members

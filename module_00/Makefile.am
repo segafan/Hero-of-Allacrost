@@ -107,6 +107,8 @@ allacrost_SOURCES = \
 	src/map_objects.h \
 	src/menu.cpp \
 	src/menu.h \
+	src/menu_views.cpp \
+	src/menu_views.h \
 	src/pause.cpp \
 	src/pause.h \
 	src/quit.cpp \

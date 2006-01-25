@@ -123,7 +123,7 @@ protected:
 	//! \brief A numerical value that defines what type of object this is.
 	//! See the Game Object Type constants for a list of the different object types.
 	uint8 obj_type;
-	//! \brief A bit-mask that determines what charactesr can use the said object.
+	//! \brief A bit-mask that determines what characters can use the said object.
 	//! See the Game Character Type constants for a list of the different characters.
 	uint32 usable_by;
 	//! \brief An identification number for each item.
@@ -147,6 +147,7 @@ public:
 	uint32 GetUsableBy() { return usable_by; }
 	void SetID(uint32 id) { obj_id = id; }
 	uint32 GetID() { return obj_id; }
+	uint32 GetCount() { return obj_count; }
 	void SetCount(uint32 amount) { obj_count = amount; if (obj_count < 0) obj_count = 0; }
 	void IncCount(uint32 amount) { obj_count += amount; }
 	void DecCount(uint32 amount) { obj_count -= amount; if (obj_count < 0) obj_count = 0; }
@@ -704,7 +705,7 @@ private:
 	//! The characters currently in the party.
 	std::vector<GlobalCharacter*> _characters;
 	//! The inventory of the party.
-	std::vector<GlobalObject> _inventory;
+	std::vector<GlobalObject *> _inventory;
 	//! The amount of financial resources the party currently has.
 	uint32 _money;
 	//! The active party (currently only support for one party, may need to be changed)
@@ -718,10 +719,12 @@ public:
 	//! Adds a new character to the party.
 	//! \param *ch A pointer to the GlobalCharacter object to add to the party.
 	void AddCharacter(GlobalCharacter *ch);
+	
 	//! Returns a pointer to a character currently in the party.
 	//! \param id The ID number of the character to retrieve.
 	//! \return A pointer to the character, or NULL if the character was not found.
 	GlobalCharacter* GetCharacter(uint32 id);
+
 	//! Money handling functions, 
 	//! Get, returns the current amount
 	//! Set, sets the money to the specified amount
@@ -733,6 +736,16 @@ public:
 	void AddMoney(uint32 amount);
 	void SubtractMoney(uint32 amount);
 	// @}
+
+	//! Inventory Functions
+	//! GetInventory returns the entire inventory.
+	//!		This function returns a reference so the inventory can be edited directly
+	//! AddItemToInventory(GlobalObject &) adds the given object to the inventory
+	//@{
+	std::vector<GlobalObject *> &GetInventory() { return _inventory; }
+	void AddItemToInventory(GlobalObject *obj) 
+	{ _inventory.push_back(obj); }	
+	
 	//! Gets the Characters in the active party
 	//! \returns The Characters in the active party
 	std::vector<GlobalCharacter *> GetParty();
