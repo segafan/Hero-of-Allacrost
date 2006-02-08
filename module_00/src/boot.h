@@ -24,7 +24,6 @@
 #include "utils.h"
 #include <string>
 #include <vector>
-#include "SDL.h"
 #include "defs.h"
 #include "engine.h"
 #include "video.h"

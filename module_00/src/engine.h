@@ -24,7 +24,6 @@
 
 #include "utils.h"
 #include <vector>
-#include "SDL.h"
 #include "defs.h"
 
 //! All calls to the main engine are wrapped in this namespace.
