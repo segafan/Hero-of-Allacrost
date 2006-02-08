@@ -276,6 +276,9 @@ public:
 	hoa_utils::ustring name;
 	//! The base filename of the sprite, used to load various data for the sprite.
 	std::string filename;
+	//! An identification number for the sprite.
+	uint32 sprite_id;
+
 	//! A bit-mask for various information regarding the sprite's draw orientation.
 	uint16 direction;
 	//! The speed at which the sprite moves around the map.
@@ -292,6 +295,11 @@ public:
 	uint32 delay_time;
 	//! Retains the frame index that should be drawn on the next frame.
 	uint8 frame;
+	
+	//! Contains all of the conversations that a player may have with a sprite.
+	std::vector<SpriteDialogue*> dialogues;
+	//! An index to the next dialogue to have with the sprite.
+	uint32 next_conversation;
 	//! True if all the dialogue of this sprite has been seen by the player.
 	bool seen_all_dialogue;
 
@@ -301,6 +309,8 @@ public:
 	 *  interrupted from a dialogue.
 	 */
 	//@{
+	//! If this member is false, then the saved data is irrelevant and shouldn't be loaded.
+	bool saved_valid;
 	uint16 saved_direction;
 	uint16 saved_status;
 	uint8 saved_frame;
@@ -308,7 +318,7 @@ public:
 
 	//! A container for all of the actions this sprite performs.
 	std::vector<SpriteAction*> actions;
-	//! An index into the _actions vector, representing the current sprite action.
+	//! An index into the actions vector, representing the current sprite action.
 	uint8 current_action;
 
 
@@ -320,17 +330,18 @@ public:
 	 */
 	std::vector<hoa_video::StillImage> frames;
 
-	/*! \brief Retains and manages all the possible conversations one may have with this sprite.
-	 *
-	 *  It is legal for a sprite to have no dialogue at all. The player controlled sprite obviously
-	 *  can't have any dialogue, because the player can't initiate a conversation with him/herself.
-	 */
-	SpriteDialogue dialogue;
-//	//! Retain the dialogues that correspond to the sprite.
-//	std::vector<MapDialogue> _dialogues;
-//	//! A pointer to the next dialogue for the user to read.
-//	uint8 _next_dialogue;
+	
 
+	MapSprite();
+	~MapSprite();
+	
+	//! Updates the sprite position and state.
+	void Update();
+	//! Draws the appropriate sprite frame in the appropriate position on the screen, if at all.
+	void Draw();
+
+	//! Fills up the frames vector and loads the sprite image frames.
+	void LoadFrames();
 	/*! \brief Determines the standard animation frame to draw for the sprite.
 	 *
 	 *  Note that special frames (frames not part of the standard walk/stand animation) are of no
@@ -338,14 +349,6 @@ public:
 	 *  operation.
 	 */
 	void FindFrame();
-
-	MapSprite();
-	~MapSprite();
-
-	// TODO: bool SeenAllDialogue() { return _see_all_dialogue; }
-
-	//! Fills up the frames vector and loads the sprite image frames.
-	void LoadFrames();
 
 	/*!
 	 * \brief Attempts to move a sprite in an indicated direction.
@@ -357,25 +360,14 @@ public:
 	 */
 	void Move(uint16 direction);
 
-	/*!
-	 * \brief Adds a new dialogue to the sprite.
-	 * \param new_dia The new dialogue to add to the end of the MapSprite#_dialogues vector
-	 *
-	 * Naturally, this will automatically set the MapSprite#_seen_all_dialogue flag to false.
-	 */
-	void AddDialogue(std::vector<std::string> new_dia);
-	//! Updates the dialogue pointer when a dialogue finishes.
-// 	void FinishedDialogue() { next_dialogue = static_cast<uint8>((_next_dialogue + 1) % _dialogues.size()); }
-
 	//! Saves the status and frame of the sprite (primarily used for dialogues).
 	void SaveState();
 	//! Restores the status and frame of the sprite (primarily used for dialogues).
 	void RestoreState();
-
-	//! Updates the sprite position and state.
-	void Update();
-	//! Draws the appropriate sprite frame in the appropriate position on the screen, if at all.
-	void Draw();
+	// TODO: bool SeenAllDialogue() { return _see_all_dialogue; }
+	
+	//! Increases the sprite's conversation index.
+	void UpdateConversationCounter();
 
 	/*! \brief Member Access functions
 	 *
@@ -387,12 +379,14 @@ public:
 	 */
 	//@{
 	void SetName(hoa_utils::ustring na) { name = na; }
+	void SetID(uint8 id) { sprite_id = id; }
 	void SetFilename(std::string fn) { filename = fn; }
 	void SetDirection(uint16 di) { direction = di; }
 	void SetStepSpeed(float sp) { step_speed = sp; }
 	void SetDelayTime(uint32 delay) { delay_time = delay; }
 
 	hoa_utils::ustring GetName() { return name; }
+	uint8 GetID() { return sprite_id; }
 	std::string GetFilename() { return filename; }
 	uint16 GetDirection() { return direction; }
 	float GetStepSpeed() { return step_speed; }

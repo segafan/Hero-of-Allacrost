@@ -101,7 +101,6 @@ namespace hoa_map {
 		class TileCheck;
 		class TileNode;
 		class SpriteDialogue;
-		class SpriteText;
 		class SpriteAction;
 		class ActionPathMove;
 		class ActionFrameDisplay;

@@ -98,6 +98,16 @@ const uint8 CONFIRM_EVENT = 0x04;
 const uint8 TREASURE      = 0x08;
 //@}
 
+//! \name Object Interaction Constants
+//! \brief Booleans for determining various types of interaction that objects may have.
+//@{
+const uint8 NO_INTERACTION    = 0x00;
+//! Indicates that the tile in question contains a confirm event property.
+const uint8 TILE_INTERACTION  = 0x01;
+//! An object (which may or may not be a sprite) is located on this tile.
+const uint8 OBJECT_INTERACTION  = 0x02;
+//@}
+
 /*!****************************************************************************
  * \brief Retains information about how the next map frame should be drawn.
  *
@@ -268,6 +278,8 @@ private:
 
 	//! A 2D vector that represents all of the map tiles.
 	std::vector<std::vector<MapTile> > _tile_layers;
+	//! A map containing pointers to all of the sprites on a map.
+	std::map<uint8, private_map::MapSprite*> _sprites;
 	//! The set of ground map objects.
 	std::vector<private_map::MapObject*> _ground_objects;
 	//! Objects that can be both walked under and above on (like bridges).
@@ -299,10 +311,8 @@ private:
 	hoa_video::MenuWindow _dialogue_window;
 	//! The textbox for sprite dialogues.
 	hoa_video::TextBox _dialogue_textbox;
-	//! A pointer to the lines of the current dialogue.
-	std::vector<std::string> *_dialogue_text;
-	//! The index to the current line of dialogue.
-	uint32 _dialogue_line;
+	//! The container object of the current dialogue.
+	private_map::MapDialogue *_current_dialogue;
 
 	//! The interface to the file which contains all the map's stored data, sans unicode text.
 	hoa_data::ReadDataDescriptor _map_data;
@@ -348,7 +358,7 @@ private:
 	 * An interaction may be either an event bound to the tile or another
 	 * map object/sprite occupying that tile.
 	 */
-	// uint32 _CheckInteraction(const private_map::TileCheck& tcheck);
+	const uint8 _CheckInteraction(const private_map::TileCheck& tcheck);
 	/*!
 	 * \brief Determine which object is occuping a given tile
 	 * \param &tcheck Contains information about the occupied tile in question.

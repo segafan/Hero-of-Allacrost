@@ -39,40 +39,7 @@ namespace hoa_map {
 
 namespace private_map {
 
-// ****************************************************************************
-// ********************** SpriteDialogue Class Functions **********************
-// ****************************************************************************
 
-SpriteDialogue::SpriteDialogue() {
-	if (MAP_DEBUG) cout << "MAP: SpriteDialogue constructor invoked" << endl;
-	next_line = 0;
-	// Don't set to false until we actually have some lines of dialogue
-	seen_all = true;
-	no_speech = false;
-}
-
-
-
-SpriteDialogue::~SpriteDialogue() {
-	if (MAP_DEBUG) cout << "MAP: SpriteDialogue destructor invoked" << endl;
-}
-
-
-
-void SpriteDialogue::AddSingleLine(ustring &txt) {
-	SpriteText new_dialogue;
-	new_dialogue.text.push_back(txt);
-	lines.push_back(new_dialogue);
-}
-
-
-void SpriteDialogue::AddMultipleLines(vector<ustring> &txt) {
-	SpriteText new_dialogue;
-	for (uint32 i = 0; i < txt.size(); i++) {
-		new_dialogue.text.push_back(txt[i]);
-	}
-	lines.push_back(new_dialogue);
-}
 
 // ****************************************************************************
 // *********************** MapDialogue Class Functions ************************
@@ -80,12 +47,43 @@ void SpriteDialogue::AddMultipleLines(vector<ustring> &txt) {
 
 MapDialogue::MapDialogue() {
 	if (MAP_DEBUG) cout << "MAP: MapDialogue constructor invoked" << endl;
+	seen = false;
+	current_line = 0;
 }
 
 
 
 MapDialogue::~MapDialogue() {
 	if (MAP_DEBUG) cout << "MAP: MapDialogue destructor invoked" << endl;
+}
+
+
+const bool MapDialogue::ReadNextLine() {
+	current_line++;
+	if (current_line >= text.size()) { 
+		current_line = 0; 
+		return false; 
+	} 
+	return true;
+}
+
+// ****************************************************************************
+// ********************** SpriteDialogue Class Functions **********************
+// ****************************************************************************
+
+SpriteDialogue::SpriteDialogue() {
+	if (MAP_DEBUG) cout << "MAP: SpriteDialogue constructor invoked" << endl;
+	
+	speaking_action = NULL;
+}
+
+
+
+SpriteDialogue::~SpriteDialogue() {
+	if (MAP_DEBUG) cout << "MAP: SpriteDialogue destructor invoked" << endl;
+	
+	if (speaking_action != NULL)
+		delete (speaking_action);
 }
 
 } // namespace private_map

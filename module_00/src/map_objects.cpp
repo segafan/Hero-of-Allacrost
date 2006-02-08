@@ -66,11 +66,12 @@ MapObject::~MapObject() {}
 // Constructor for critical class members. Other members are initialized via support functions
 MapSprite::MapSprite() {
 	if (MAP_DEBUG) cout << "MAP: MapSprite constructor invoked" << endl;
+	object_type = NPC_SPRITE;
 	step_speed = NORMAL_SPEED;
 	step_count = 0.0f;
 	delay_time = NORMAL_DELAY;
 	wait_time = 0;
-
+	next_conversation = 0;
 }
 
 
@@ -80,6 +81,10 @@ MapSprite::~MapSprite() {
 
 	for (uint32 i = 0; i < frames.size(); i++) {
 		VideoManager->DeleteImage(frames[i]);
+	}
+
+	for (uint32 i = 0; i < dialogues.size(); i++) {
+		delete(dialogues[i]);
 	}
 }
 
@@ -154,6 +159,7 @@ void MapSprite::LoadFrames() {
 
 
 void MapSprite::SaveState() {
+	saved_valid = true;
 	saved_status = status;
 	saved_frame = frame;
 }
@@ -161,16 +167,19 @@ void MapSprite::SaveState() {
 
 
 void MapSprite::RestoreState() {
+	if (!saved_valid)
+		return;
+	saved_valid = false;
 	status = saved_status;
 	frame = saved_frame;
 }
 
 
-void MapSprite::AddDialogue(std::vector<std::string> new_dia) {
-	MapDialogue new_dialogue;
-	//new_dialogue.SetLines(new_dia);
-	//_dialogues.push_back(new_dialogue);
-	seen_all_dialogue = false;
+void MapSprite::UpdateConversationCounter() {
+	next_conversation++;
+	if (next_conversation >= dialogues.size()) {
+		next_conversation = 0;
+	}
 }
 
 

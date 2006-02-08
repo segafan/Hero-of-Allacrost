@@ -29,97 +29,59 @@ namespace hoa_map {
 namespace private_map {
 
 /*!****************************************************************************
- * \brief Container for the information necessary to process a single sprite conversation.
+ * \brief A class for retaining and managing map dialogues.
  *
- * NPC map sprites typically have multiple things to say to the player. This class represents
- * a single conversation of that sprite.
+ * This 
+ * 
+ * \note The text, speakers, and events vectors are all the same size.
  *
- * \note This class has no functions because the only class that modifies and manages this
- * information is the SpriteDialogue class.
- *
- * \note This class is under-going evolutionary stages and currently is far from developed. In
- * particular, this class is lacking the ability to process the following types of dialogues.
- *
- * -# The ability to have multiple speakers in a dialogue, either between other NPCs or playable
- *    characters.
- * -# The ability to keep the sprite in motion during the dialogue.
- * -# The ability to have scripted, non-standard dialogue sequences. For example, displaying special
- *    sprite frames during the dialogue to illustrate emotion.
  *****************************************************************************/
-class SpriteText {
+class MapDialogue {
 public:
-	//! The entire text for this conversation, split up into multiple lines.
+	MapDialogue();
+	~MapDialogue();
+
+	//! The text of the conversation, split up into multiple lines.
 	std::vector<hoa_utils::ustring> text;
-	//! The next line in the text vector to display.
-	uint32 next_text;
+	//! A list of sprite ID numbers for who speaks what lines.
+	std::vector<uint32> speakers;
+	// A list of events that may occur after each line.
+	// std::vector<SpriteAction*> events
+
 	//! True if the player has already read this dialogue.
 	bool seen;
+	//! An index to the current line to read.
+	uint32 current_line;
 
-	SpriteText()
-		{ next_text = 0; seen = false; }
-	~SpriteText() {}
+	const bool IsSeenDialogue()
+		{ return seen; }
+	void SetSeenDialogue()
+		{ seen = true; }
+	void ClearSeenDialogue()
+		{ seen = false; }
+		
+	const bool ReadNextLine();
+}; // class MapDialogue
 
-	//!
-	//! \return
-	uint32 NextText();
-};
+
 
 /*!****************************************************************************
  * \brief Retains and manages all of a sprite's dialogue.
- *
- * This class manages the dialogue of
  *
  * Dialogues in map mode are rather complex. We would like to have dialogues
  * between a character and an NPC, dialogues between multiple NPCs, etc. This
  * class is still in its infant stages and support for some of the more advanced
  * dialogue types has yet to be implemented.
  *****************************************************************************/
-class SpriteDialogue {
+class SpriteDialogue : public MapDialogue {
 public:
-	//! All of the sprite's individual dialogues.
-	std::vector<SpriteText> lines;
-	//! An index to the next set of lines to read.
-	uint32 next_line;
-	//! True if the player has already read every dialogue from the sprite.
-	bool seen_all;
-	//! When set to true, the player can not speak with this sprite.
-	bool no_speech;
-
+	//! The action that the sprite takes when it is spoken to by the player.
+	//! \note The default action (NULL) is to turn and face the player.
+	SpriteAction* speaking_action;
+	
 	SpriteDialogue();
 	~SpriteDialogue();
-
-	//! Adds a new dialogue with \c only a single line of text.
-	void AddSingleLine(hoa_utils::ustring &txt);
-	//! Adds a new dialogue with multiple lines of text.
-	void AddMultipleLines(std::vector<hoa_utils::ustring> &txt);
-	//!
-	bool NextLine();
-
-	//! \name Public Member Access Functions
-	//! \brief Used for setting and retrieving the values of the various class members.
-	//@{
-	bool IsSeenAllDialogue() { return seen_all; }
-	void SetSeenAllDialogue() { seen_all = true; }
-	//@}
 }; // class SpriteDialogue
-
-
-/*!****************************************************************************
- * \brief A class for retaining and managing a scripted map dialogue.
- *
- * The MapDialogue class manages dialogues that take place from a scripted map
- * sequence. These dialogues do not "belong" to any one sprite and are almost
- * always read only once by the player during a scripted sequence.
- *
- * \note Obviously, this class has a lot of work to be done. I'm mostly waiting
- * on support from the DataManager side of things before I implement this class.
- *****************************************************************************/
-class MapDialogue {
-public:
-
-	MapDialogue();
-	~MapDialogue();
-}; // class MapDialogue
 
 } // namespace private_map
 

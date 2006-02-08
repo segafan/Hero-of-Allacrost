@@ -88,7 +88,7 @@ MapMode::~MapMode() {
 
 // Resets appropriate class members.
 void MapMode::Reset() {
-	_dialogue_text = NULL;
+	_current_dialogue = NULL;
 
 	// Reset active video engine properties
 	VideoManager->SetCoordSys(0.0f, SCREEN_COLS, SCREEN_ROWS, 0.0f);
@@ -106,14 +106,15 @@ void MapMode::LoadMap() {
 	// *********** (1) Setup GUI items in 1024x768 coordinate system ************
 	VideoManager->PushState();
 	VideoManager->SetCoordSys(0, 1024, 768, 0);
-	_dialogue_window.Create(1024.0f, 128.0f);
-	_dialogue_window.SetPosition(0.0f, 768.0f);
-
+	_dialogue_window.Create(1024.0f, 256.0f);
+	_dialogue_window.SetPosition(0.0f, 512.0f);
+// 	_dialogue_window.SetDisplayMode(VIDEO_MENU_EXPAND_FROM_CENTER);
+	
 	_dialogue_textbox.SetDisplaySpeed(30);
-	_dialogue_textbox.SetPosition(0.0f + 32.0f, 768.0f - 32.0f);
-	_dialogue_textbox.SetDimensions(1024.0f - 64.0f, 128.0f - 64.0f);
+	_dialogue_textbox.SetPosition(0.0f + 40.0f, 512.0f + 40.0f);
+	_dialogue_textbox.SetDimensions(1024.0f - 80.0f, 256.0f - 80.0f);
 	_dialogue_textbox.SetFont("default");
-	_dialogue_textbox.SetDisplayMode(VIDEO_TEXT_REVEAL);
+	_dialogue_textbox.SetDisplayMode(VIDEO_TEXT_INSTANT);
 	_dialogue_textbox.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	VideoManager->PopState();
 
@@ -267,6 +268,8 @@ void MapMode::LoadMap() {
 
 	// Load player sprite and rest of map objects
 	MapSprite *player = new MapSprite();
+	player->SetName(MakeWideString("Claudius"));
+	player->SetID(0);
 	player->SetObjectType(PLAYER_SPRITE);
 	player->SetRowPosition(18);
 	player->SetColPosition(18);
@@ -278,26 +281,41 @@ void MapMode::LoadMap() {
 	player->LoadFrames();
 	_tile_layers[player->GetColPosition()][player->GetRowPosition()].occupied |= player->GetAltitude();
 	_ground_objects.push_back(player);
+	_sprites[player->sprite_id] = player;
 
 	MapSprite *npc = new MapSprite();
+	npc->SetName(MakeWideString("Laila"));
+	npc->SetID(1);
 	npc->SetObjectType(NPC_SPRITE);
 	npc->SetRowPosition(4);
 	npc->SetColPosition(4);
 	npc->SetStepSpeed(NORMAL_SPEED);
 	npc->SetAltitude(ALTITUDE_1);
 	npc->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
-	npc->SetFilename("img/sprites/map/claudius");
+	npc->SetFilename("img/sprites/map/laila");
 	npc->SetDirection(SOUTH);
 	npc->LoadFrames();
 	_tile_layers[npc->GetColPosition()][npc->GetRowPosition()].occupied |= npc->GetAltitude();
-	ustring tmptxt = MakeWideString("Who's the real Claudius?");
-	npc->dialogue.AddSingleLine(tmptxt);
-	vector<ustring> tmplines;
-	tmplines.push_back(MakeWideString("I sure wish we had more art, don't you agree?"));
-	tmplines.push_back(MakeWideString("Because then I could have my own unique look."));
-	tmplines.push_back(MakeWideString("Why don't you go out and recruit some new aritsts already!"));
-	npc->dialogue.AddMultipleLines(tmplines);
+
+	SpriteDialogue *sd1 = new SpriteDialogue();
+	sd1->text.push_back(MakeWideString("When is the demo going to be released?"));
+	sd1->speakers.push_back(1); // NPC speaks
+	npc->dialogues.push_back(sd1);
+
+	SpriteDialogue *sd2 = new SpriteDialogue();
+	sd2->text.push_back(MakeWideString("I sure wish we had more art, don't you agree?"));
+	sd2->speakers.push_back(1); // NPC speaks
+	sd2->text.push_back(MakeWideString("Well, good pixel artists are difficult to find."));
+	sd2->speakers.push_back(0); // Player speaks
+	npc->dialogues.push_back(sd2);
+
+	SpriteDialogue *sd3 = new SpriteDialogue();
+	sd3->text.push_back(MakeWideString("Stop talking to me and get back to work already!"));
+	sd3->speakers.push_back(1); // NPC speaks
+	npc->dialogues.push_back(sd3);
+	
 	_ground_objects.push_back(npc);
+	_sprites[npc->sprite_id] = npc;
 
 	// If the _focused_object is ever NULL, the game will exit with a seg fault :(
 	_focused_object = player;
@@ -373,31 +391,29 @@ bool MapMode::_TileMoveable(const private_map::TileCheck& tcheck) {
 
 
 // Checks if there is an interaction with a map object or event at the specified tile.
-// This function is used when the user presses the "confirm" key in the map exploration state.
-// uint32 MapMode::_CheckInteraction(const private_map::TileCheck& tcheck) {
-// 	// Check that the row and col indeces are valid and not outside the map
-// 	if (tcheck.row < 1 || tcheck.col < 0 || tcheck.row >= _row_count || tcheck.col >= _col_count) {
-// 		cerr << "MAP: WARNING: Called _CheckInteraction() with out of bounds row and column" << endl;
-// 		return NO_INTERACTION;
-// 	}
-//
-// 	// Check if the tile in question has a confirm event registered to it.
-// 	if (_tile_layers[tcheck.row][tcheck.col].properties & CONFIRM_EVENT) {
-// 		return TILE_INTERACTION;
-// 	}
-//
-// 	// Check if an object occupies the tile
-// 	if (_tile_layers[tcheck.row][tcheck.col].occupied && tcheck.altitude) {
-// 		// TODO: Look up the object that occupies this tile at this altitude
-// 		return OBJECT_INTERACTION;
-// 	}
-//
-// 	return NO_INTERACTION;
-// }
+const uint8 MapMode::_CheckInteraction(const private_map::TileCheck& tcheck) {
+	// Check that the row and col indeces are valid and not outside the map
+	if (tcheck.row < 1 || tcheck.col < 0 || tcheck.row >= _row_count || tcheck.col >= _col_count) {
+		cerr << "MAP: WARNING: Called _CheckInteraction() with out of bounds row or column" << endl;
+		return NO_INTERACTION;
+	}
+	
+	// Check if an object occupies the tile
+	if (_tile_layers[tcheck.row][tcheck.col].occupied && tcheck.altitude) {
+		return OBJECT_INTERACTION;
+	}
+
+	// Check if the tile in question has a confirm event registered to it.
+	if (_tile_layers[tcheck.row][tcheck.col].confirm_event != 255) {
+		return TILE_INTERACTION;
+	}
+
+	return NO_INTERACTION;
+}
 
 
 // Searches the list of map objects to find the object occupying a tile.
-MapObject* MapMode::_FindTileOccupant(const private_map::TileCheck& tcheck) {
+MapObject* MapMode::_FindTileOccupant(const TileCheck& tcheck) {
 	// TODO: Use a more sophisticated search algorithm here
 	for (uint32 i = 0; i < _ground_objects.size(); i++) {
 		if (_ground_objects[i]->row_position == tcheck.row &&
@@ -413,7 +429,7 @@ MapObject* MapMode::_FindTileOccupant(const private_map::TileCheck& tcheck) {
 
 // Finds a path for a sprite to take, using the A* algorithm.
 void MapMode::_FindPath(const MapSprite* sprite,
-                        const private_map::TileNode& destination,
+                        const TileNode& destination,
                         vector<TileNode> &path) {
 	// The source tile that the sprite is currently occupying
 	TileNode source;
@@ -523,7 +539,30 @@ void MapMode::_UpdateExplore() {
 		tcheck.direction = _focused_object->direction;
 
 		// Check the tile the player is facing for events or other objects that can be interacted with.
-		// uint8 interaction = _CheckInteraction(tcheck);
+		switch (_CheckInteraction(tcheck)) {
+			case NO_INTERACTION:
+				break;
+			case TILE_INTERACTION:
+				cout << "Tile with confirm event was flagged by player" << endl;
+				break;
+			case OBJECT_INTERACTION:
+				MapObject *obj = _FindTileOccupant(tcheck);
+				if (obj->object_type = NPC_SPRITE) {
+					MapSprite *sprite = dynamic_cast<MapSprite*>(obj);
+					if (sprite->dialogues.size() != 0) {
+						_map_state = DIALOGUE;
+						_dialogue_window.Show();
+						_current_dialogue = dynamic_cast<MapDialogue*>(sprite->dialogues[sprite->next_conversation]);
+// 						if (_current_dialogue == NULL) {
+// 							cout << "DIE!" << endl;
+// 						if (sprite->dialogues[sprite->next_conversation]->speaking_action == NULL) {
+// 							cout << 3.5 << endl;
+// 							sprite->SaveState();
+// 						}
+					}
+				}
+				break;
+		}
 		return;
 	}
 
@@ -579,32 +618,27 @@ void MapMode::_UpdateExplore() {
 
 // Updates the game status when MapMode is in the 'dialogue' state
 void MapMode::_UpdateDialogue() {
-// 	_dialogue_textbox.Update(_time_elapsed);
-//
-// 	// User is done reading the dialogue if they press confirm
-// 	if (InputManager->ConfirmPress()) {
-// 		_dialogue_line++;
-// 		// Check if we've passed the last line of dialogue, and if so exit the dialogue
-// 		if (_dialogue_line >= _dialogue_text->size()) {
-// 				// Remove the dialogue state from the map state stack
-// 			_map_state = EXPLORE;
-//
-// 			// Restore the status of map sprites
-// 			for (uint32 i = 0; i < _dialogue_speakers.size(); i++) {
-// 				if (_ground_objects[i] != _focused_object) {
-// 					_dialogue_speakers[i]->RestoreState();
-// 					_dialogue_speakers[i]->FinishedDialogue();
-// 				}
-// 			}
-//
-// 			// Clean out the dialogue speakers
-// 			_dialogue_speakers.clear();
-// 			_dialogue_window.Hide();
-// 		}
-// 		else {
-// 			_dialogue_textbox.ShowText(MakeWideString((*_dialogue_text)[_dialogue_line]));
-// 		}
-// 	}
+	_dialogue_window.Update(_time_elapsed);
+	_dialogue_textbox.Update(_time_elapsed);
+	_dialogue_textbox.ShowText(_current_dialogue->text[_current_dialogue->current_line]);
+
+	if (InputManager->ConfirmPress()) {
+		// TODO: Check if the text is shown or not. If not, display it instantly.
+		bool not_finished = _current_dialogue->ReadNextLine();
+		
+		if (!not_finished) {
+			_dialogue_window.Hide();
+			_map_state = EXPLORE;
+			// Restore the status of the map sprites
+			for (uint32 i = 0; i < _current_dialogue->speakers.size(); i++) {
+				_sprites[_current_dialogue->speakers[i]]->RestoreState();
+			}
+			// TMP_sprites[1]->UpdateConversationCounter();
+				_sprites[1]->UpdateConversationCounter();
+			_current_dialogue = NULL;
+		}
+		// Otherwise, the dialogue is automatically updated to the next line
+	}
 }
 
 
