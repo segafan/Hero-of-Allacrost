@@ -94,7 +94,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)"
 			IntermediateDirectory="Release"
 			ConfigurationType="1"
 			>
@@ -139,7 +139,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="SDL.lib SDL_TTF.lib SDLMain.lib Opengl32.lib glu32.lib OpenAL32.lib ALut.lib ogg.lib vorbis.lib vorbisfile.lib DevIL.lib ILUT.lib ILU.lib Lua+lib.lib"
 				LinkIncremental="0"
-				GenerateDebugInformation="true"
+				GenerateDebugInformation="false"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -437,6 +437,14 @@
 			</File>
 			<File
 				RelativePath=".\src\menu.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\menu_views.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\menu_views.h"
 				>
 			</File>
 			<File
