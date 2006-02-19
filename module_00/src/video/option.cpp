@@ -545,7 +545,9 @@ bool OptionBox::SetOptions(const vector<ustring> &formatText)
 	{
 		const ustring &str = *iText;
 		
-		if(!_AddOption(str))
+		Option option;
+		
+		if(!_ParseOption(str, option))
 		{
 			_options.clear();
 			_numOptions = 0;
@@ -554,10 +556,44 @@ bool OptionBox::SetOptions(const vector<ustring> &formatText)
 			return false;
 		}
 		
+		_options.push_back(option);
+		
 		++_numOptions;		
 		++iText;
 	}
 	
+	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// SetOptionText: changes the text for a given option
+//-----------------------------------------------------------------------------
+
+bool OptionBox::SetOptionText(int32 index, const hoa_utils::ustring &text)
+{
+	// check for bad index
+	
+	if(index < 0)
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: called OptionBox::SetOptionText() with index less than zero (" << index << ")" << endl;
+		return false;
+	}
+	
+	
+	if(index >= _numOptions)
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: called OptionBox::SetOptionText() with an index that was too large (" << index << ")" << endl;
+		return false;
+	}
+	
+	
+	// if index is fine, go ahead and change the option text
+	
+	_ParseOption(text, _options[index]);
+		
 	return true;
 }
 
@@ -767,15 +803,20 @@ void OptionBox::_PlaySwitchSound()
 
 
 //-----------------------------------------------------------------------------
-// _AddOption: helper function to SetOptions. Adds a new option to _options vector
+// _ParseOption: helper function to SetOptions. Reads in option format string,
+//               and spits out an Option structure
 //-----------------------------------------------------------------------------
 
-bool OptionBox::_AddOption(const hoa_utils::ustring &formatString)
+bool OptionBox::_ParseOption(const hoa_utils::ustring &formatString, Option &op)
 {
-	Option op;
-	
 	// by default, option isn't disabled
 	op.disabled = false;
+	
+	// clear all vectors, since you can't guarantee that the Option passed in is
+	// empty
+	op.elements.clear();
+	op.text.clear();
+	op.images.clear();
 
 	// if we want to show a text label for this option, process the label plus
 	// any formatting tags that it contains
@@ -812,7 +853,7 @@ bool OptionBox::_AddOption(const hoa_utils::ustring &formatString)
 					// need the opening (<) and close (>) plus stuff in the middle.
 					
 					if(VIDEO_DEBUG)
-						cerr << "VIDEO ERROR: In OptionBox::_AddOption(), tag opening detected with string size less than 3." << endl;
+						cerr << "VIDEO ERROR: In OptionBox::_ParseOption(), tag opening detected with string size less than 3." << endl;
 					return false;
 				}
 				
@@ -822,7 +863,7 @@ bool OptionBox::_AddOption(const hoa_utils::ustring &formatString)
 				{
 					// uh oh! We have a tag beginning but never ending. This is an error
 					if(VIDEO_DEBUG)
-						cerr << "VIDEO ERROR: In OptionBox::_AddOption(), format string had unclosed tag" << endl;
+						cerr << "VIDEO ERROR: In OptionBox::_ParseOption(), format string had unclosed tag" << endl;
 					return false;
 				}
 				
@@ -873,7 +914,7 @@ bool OptionBox::_AddOption(const hoa_utils::ustring &formatString)
 						else
 						{
 							if(VIDEO_DEBUG)
-								cerr << "VIDEO ERROR: invalid tag <" << tagText << "> found in OptionBox::_AddOption()!" << endl;
+								cerr << "VIDEO ERROR: invalid tag <" << tagText << "> found in OptionBox::_ParseOption()!" << endl;
 
 							return false;
 						}
@@ -919,8 +960,6 @@ bool OptionBox::_AddOption(const hoa_utils::ustring &formatString)
 		}
 	}
 
-	_options.push_back(op);
-	
 	return true;
 }
 

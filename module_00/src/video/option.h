@@ -374,6 +374,20 @@ public:
 
 
 	/*!
+	 *  \brief changes the text of a particular option
+	 *
+	 *  \param index which option to change
+	 *  \param text the text to change the option to
+	 *
+	 *  \return returns false on failure, for example if the index passed in is
+	 *          invalid or if SetOptions() has never been called to initially
+	 *          populate the options box
+	 */
+
+	bool SetOptionText(int32 index, const hoa_utils::ustring &text);
+
+
+	/*!
 	 *  \brief enables/disables the option with the given index
 	 */
 
@@ -469,10 +483,10 @@ private:
 
 
 	/*!
-	 *  \brief helper function to add a new option, used by SetOptions().
+	 *  \brief helper function to parse text for an option box, and fill an Option structure
 	 */
 
-	bool _AddOption(const hoa_utils::ustring &formatString);
+	bool _ParseOption(const hoa_utils::ustring &formatString, Option &option);
 
 
 	/*!
