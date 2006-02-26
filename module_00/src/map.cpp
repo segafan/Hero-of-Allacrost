@@ -271,8 +271,8 @@ void MapMode::LoadMap() {
 	player->SetName(MakeWideString("Claudius"));
 	player->SetID(0);
 	player->SetObjectType(PLAYER_SPRITE);
-	player->SetRowPosition(18);
-	player->SetColPosition(18);
+	player->SetRowPosition(12);
+	player->SetColPosition(12);
 	player->SetStepSpeed(NORMAL_SPEED);
 	player->SetAltitude(ALTITUDE_1);
 	player->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
@@ -290,7 +290,7 @@ void MapMode::LoadMap() {
 	npc->SetRowPosition(4);
 	npc->SetColPosition(4);
 	npc->SetStepSpeed(NORMAL_SPEED);
-	npc->SetAltitude(ALTITUDE_1);
+	npc->SetAltitude(1);
 	npc->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
 	npc->SetFilename("img/sprites/map/laila");
 	npc->SetDirection(SOUTH);
@@ -313,6 +313,34 @@ void MapMode::LoadMap() {
 	sd3->text.push_back(MakeWideString("Stop talking to me and get back to work already!"));
 	sd3->speakers.push_back(1); // NPC speaks
 	npc->dialogues.push_back(sd3);
+	
+	ActionPathMove *apm1 = new ActionPathMove();
+	apm1->destination.row = 4;
+	apm1->destination.col = 16;
+	apm1->destination.altitude = 1;
+	apm1->sprite = npc;
+	npc->actions.push_back(apm1);
+	
+	ActionPathMove *apm2 = new ActionPathMove();
+	apm2->destination.row = 16;
+	apm2->destination.col = 16;
+	apm2->destination.altitude = 1;
+	apm2->sprite = npc;
+	npc->actions.push_back(apm2);
+	
+	ActionPathMove *apm3 = new ActionPathMove();
+	apm3->destination.row = 16;
+	apm3->destination.col = 4;
+	apm3->destination.altitude = 1;
+	apm3->sprite = npc;
+	npc->actions.push_back(apm3);
+	
+	ActionPathMove *apm4 = new ActionPathMove();
+	apm4->destination.row = 4;
+	apm4->destination.col = 4;
+	apm4->destination.altitude = 1;
+	apm4->sprite = npc;
+	npc->actions.push_back(apm4);
 	
 	_ground_objects.push_back(npc);
 	_sprites[npc->sprite_id] = npc;
@@ -348,6 +376,7 @@ bool MapMode::_TileMoveable(const private_map::TileCheck& tcheck) {
 		case WEST:
 		case EAST:
 			break;
+		case NORTHWEST:
 		case NW_NORTH:
 		case NW_WEST:
 			if ( !((_tile_layers[tcheck.row][tcheck.col + 1].walkable & tcheck.altitude) ||
@@ -355,6 +384,7 @@ bool MapMode::_TileMoveable(const private_map::TileCheck& tcheck) {
 				return false;
 			}
 			break;
+		case SOUTHWEST:
 		case SW_SOUTH:
 		case SW_WEST:
 			if ( !((_tile_layers[tcheck.row][tcheck.col + 1].walkable & tcheck.altitude) ||
@@ -362,6 +392,7 @@ bool MapMode::_TileMoveable(const private_map::TileCheck& tcheck) {
 				return false;
 			}
 			break;
+		case NORTHEAST:
 		case NE_NORTH:
 		case NE_EAST:
 			if ( !((_tile_layers[tcheck.row][tcheck.col - 1].walkable & tcheck.altitude) ||
@@ -369,6 +400,7 @@ bool MapMode::_TileMoveable(const private_map::TileCheck& tcheck) {
 				return false;
 			}
 			break;
+		case SOUTHEAST:
 		case SE_SOUTH:
 		case SE_EAST:
 			if ( !((_tile_layers[tcheck.row][tcheck.col - 1].walkable & tcheck.altitude) ||
@@ -427,29 +459,259 @@ MapObject* MapMode::_FindTileOccupant(const TileCheck& tcheck) {
 
 
 
+bool MapMode::_IsNodeInList(const TileCheck& node, list<TileNode> &node_list) {
+	for (list<TileNode>::iterator i = node_list.begin(); i != node_list.end(); i++) {
+		if (node.row == i->row && node.col == i->col) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+TileNode* MapMode::_FindNodeInList(const TileCheck& node, list<TileNode> &node_list) {
+	for (list<TileNode>::iterator i = node_list.begin(); i != node_list.end(); i++) {
+		if (node.row == i->row && node.col == i->col) {
+			return &(*i);
+		}
+	}
+	return NULL;
+}
+
+
+
 // Finds a path for a sprite to take, using the A* algorithm.
-void MapMode::_FindPath(const MapSprite* sprite,
-                        const TileNode& destination,
-                        vector<TileNode> &path) {
-	// The source tile that the sprite is currently occupying
-	TileNode source;
+void MapMode::_FindPath(const TileNode& destination, vector<TileNode> &path) {
+	cout << "BEGIN FIND PATH" << endl;
+	cout << "Source: [" << path[0].col << ", " << path[0].row << "]" << endl;
+	cout << "Destination: [" << destination.col << ", " << destination.row << "]" << endl;
+	
 	// The tiles that we are considering for the next move
-	vector<TileNode> open_list;
+	list<TileNode> open_list;
 	// The tiles which have already been visited once.
-	vector<TileNode> closed_list;
-
-	// Set the source properties
-	source.row = sprite->row_position;
-	source.col = sprite->col_position;
-	source.altitude = sprite->altitude;
-
-	closed_list.push_back(source);
+	list<TileNode> closed_list;
+	// Used to examine if a path is valid
+	TileCheck tcheck;
+	// A new node to construct and add to the path
+	TileNode new_node;
+	// Used to temporarily hold a pointer to a node in a list
+	TileNode *list_node = NULL;
+	
+	// Check that the source is not equal to the destination
+	if (path[0].row == destination.row && path[0].col == destination.col) {
+		return;
+	}
+	
+	// This is the altitude to use for finding the path
+	tcheck.altitude = path[0].altitude;
+	new_node.altitude = path[0].altitude;
+	// Push the node that the sprite is currently standing on to the closed list
+	closed_list.push_back(path[0]);
 
 	// Find a path until the current node is equal to the destination
-	while (source.row != destination.row && source.col != destination.col) {
-
+	while (closed_list.back() != destination) {
+		// Check bottom left tile
+		tcheck.direction = SOUTHWEST;
+		tcheck.row = closed_list.back().row - 1;
+		tcheck.col = closed_list.back().col - 1;
+		if (_TileMoveable(tcheck) && (!_IsNodeInList(tcheck, closed_list))) {
+			list_node = _FindNodeInList(tcheck, open_list);
+			if ((list_node != NULL) && (list_node->g_score > closed_list.back().g_score + 14)) { // Check the node for a better g score
+				list_node->g_score = closed_list.back().g_score + 14;
+				list_node->parent = &(closed_list.back());
+			}
+			else if (list_node == NULL) { // Add new node to open list
+				new_node.row = tcheck.row;
+				new_node.col = tcheck.col;
+				new_node.parent = &(closed_list.back());
+				new_node.g_score = new_node.parent->g_score + 14;
+				new_node.h_score = 10 * (abs(destination.row - new_node.row) + abs(destination.col - new_node.col));
+				new_node.f_score = new_node.g_score + new_node.h_score;
+				open_list.push_back(new_node);
+			}
+		}
+		
+		// Check left tile
+		tcheck.direction = WEST;
+		tcheck.row = closed_list.back().row;
+		tcheck.col = closed_list.back().col - 1;
+		if (_TileMoveable(tcheck) && (!_IsNodeInList(tcheck, closed_list))) {
+			list_node = _FindNodeInList(tcheck, open_list);
+			if ((list_node != NULL) && (list_node->g_score > closed_list.back().g_score + 10)) { // Check the node for a better g score
+				list_node->g_score = closed_list.back().g_score + 10;
+				list_node->parent = &(closed_list.back());
+			}
+			else if (list_node == NULL) { // Add new node to open list
+				new_node.row = tcheck.row;
+				new_node.col = tcheck.col;
+				new_node.parent = &(closed_list.back());
+				new_node.g_score = new_node.parent->g_score + 10;
+				new_node.h_score = 10 * (abs(destination.row - new_node.row) + abs(destination.col - new_node.col));
+				new_node.f_score = new_node.g_score + new_node.h_score;
+				open_list.push_back(new_node);
+			}
+		}
+		
+		// Check top left tile
+		tcheck.direction = NORTHWEST;
+		tcheck.row = closed_list.back().row + 1;
+		tcheck.col = closed_list.back().col - 1;
+		if (_TileMoveable(tcheck) && (!_IsNodeInList(tcheck, closed_list))) {
+			list_node = _FindNodeInList(tcheck, open_list);
+			if ((list_node != NULL) && (list_node->g_score > closed_list.back().g_score + 14)) { // Check the node for a better g score
+				list_node->g_score = closed_list.back().g_score + 14;
+				list_node->parent = &(closed_list.back());
+			}
+			else if (list_node == NULL) { // Add new node to open list
+				new_node.row = tcheck.row;
+				new_node.col = tcheck.col;
+				new_node.parent = &(closed_list.back());
+				new_node.g_score = new_node.parent->g_score + 14;
+				new_node.h_score = 10 * (abs(destination.row - new_node.row) + abs(destination.col - new_node.col));
+				new_node.f_score = new_node.g_score + new_node.h_score;
+				open_list.push_back(new_node);
+			}
+		}
+		
+		// Check top tile
+		tcheck.direction = NORTH;
+		tcheck.row = closed_list.back().row - 1;
+		tcheck.col = closed_list.back().col;
+		if (_TileMoveable(tcheck) && (!_IsNodeInList(tcheck, closed_list))) {
+			list_node = _FindNodeInList(tcheck, open_list);
+			if ((list_node != NULL) && (list_node->g_score > closed_list.back().g_score + 10)) { // Check the node for a better g score
+				list_node->g_score = closed_list.back().g_score + 10;
+				list_node->parent = &(closed_list.back());
+			}
+			else if (list_node == NULL) { // Add new node to open list
+				new_node.row = tcheck.row;
+				new_node.col = tcheck.col;
+				new_node.parent = &(closed_list.back());
+				new_node.g_score = new_node.parent->g_score + 10;
+				new_node.h_score = 10 * (abs(destination.row - new_node.row) + abs(destination.col - new_node.col));
+				new_node.f_score = new_node.g_score + new_node.h_score;
+				open_list.push_back(new_node);
+			}
+		}
+		
+		// Check top right tile
+		tcheck.direction = NORTHEAST;
+		tcheck.row = closed_list.back().row - 1;
+		tcheck.col = closed_list.back().col + 1;
+		if (_TileMoveable(tcheck) && (!_IsNodeInList(tcheck, closed_list))) {
+			list_node = _FindNodeInList(tcheck, open_list);
+			if ((list_node != NULL) && (list_node->g_score > closed_list.back().g_score + 14)) { // Check the node for a better g score
+				list_node->g_score = closed_list.back().g_score + 14;
+				list_node->parent = &(closed_list.back());
+			}
+			else if (list_node == NULL) { // Add new node to open list
+				new_node.row = tcheck.row;
+				new_node.col = tcheck.col;
+				new_node.parent = &(closed_list.back());
+				new_node.g_score = new_node.parent->g_score + 14;
+				new_node.h_score = 10 * (abs(destination.row - new_node.row) + abs(destination.col - new_node.col));
+				new_node.f_score = new_node.g_score + new_node.h_score;
+				open_list.push_back(new_node);
+			}
+		}
+		
+		// Check right tile
+		tcheck.direction = EAST;
+		tcheck.row = closed_list.back().row;
+		tcheck.col = closed_list.back().col + 1;
+		if (_TileMoveable(tcheck) && (!_IsNodeInList(tcheck, closed_list))) {
+			list_node = _FindNodeInList(tcheck, open_list);
+			if ((list_node != NULL) && (list_node->g_score > closed_list.back().g_score + 10)) { // Check the node for a better g score
+				list_node->g_score = closed_list.back().g_score + 10;
+				list_node->parent = &(closed_list.back());
+			}
+			else if (list_node == NULL) { // Add new node to open list
+				new_node.row = tcheck.row;
+				new_node.col = tcheck.col;
+				new_node.parent = &(closed_list.back());
+				new_node.g_score = new_node.parent->g_score + 10;
+				new_node.h_score = 10 * (abs(destination.row - new_node.row) + abs(destination.col - new_node.col));
+				new_node.f_score = new_node.g_score + new_node.h_score;
+				open_list.push_back(new_node);
+			}
+		}
+		
+		// Check bottom right tile
+		tcheck.direction = SOUTHEAST;
+		tcheck.row = closed_list.back().row + 1;
+		tcheck.col = closed_list.back().col + 1;
+		if (_TileMoveable(tcheck) && (!_IsNodeInList(tcheck, closed_list))) {
+			list_node = _FindNodeInList(tcheck, open_list);
+			if ((list_node != NULL) && (list_node->g_score > closed_list.back().g_score + 14)) { // Check the node for a better g score
+				list_node->g_score = closed_list.back().g_score + 14;
+				list_node->parent = &(closed_list.back());
+			}
+			else if (list_node == NULL) { // Add new node to open list
+				new_node.row = tcheck.row;
+				new_node.col = tcheck.col;
+				new_node.parent = &(closed_list.back());
+				new_node.g_score = new_node.parent->g_score + 14;
+				new_node.h_score = 10 * (abs(destination.row - new_node.row) + abs(destination.col - new_node.col));
+				new_node.f_score = new_node.g_score + new_node.h_score;
+				open_list.push_back(new_node);
+			}
+		}
+		
+		// Check bottom tile
+		tcheck.direction = SOUTH;
+		tcheck.row = closed_list.back().row - 1;
+		tcheck.col = closed_list.back().col;
+		if (_TileMoveable(tcheck) && (!_IsNodeInList(tcheck, closed_list))) {
+			list_node = _FindNodeInList(tcheck, open_list);
+			if ((list_node != NULL) && (list_node->g_score > closed_list.back().g_score + 10)) { // Check the node for a better g score
+				list_node->g_score = closed_list.back().g_score + 10;
+				list_node->parent = &(closed_list.back());
+			}
+			else if (list_node == NULL) { // Add new node to open list
+				new_node.row = tcheck.row;
+				new_node.col = tcheck.col;
+				new_node.parent = &(closed_list.back());
+				new_node.g_score = new_node.parent->g_score + 10;
+				new_node.h_score = 10 * (abs(destination.row - new_node.row) + abs(destination.col - new_node.col));
+				new_node.f_score = new_node.g_score + new_node.h_score;
+				open_list.push_back(new_node);
+			}
+		}
+		
+		// If there are no nodes on the open list, a path couldn't be found
+		if (open_list.empty()) {
+			cerr << "MAP ERROR: Couldn't find a path between two nodes" << endl;
+			return;
+		}
+		
+		// Find the node on the open list with the lowest F score, and move it to the closed list
+		list<TileNode>::iterator best_move = open_list.begin();
+		for (list<TileNode>::iterator i = open_list.begin(); i != open_list.end(); i++) {
+			if (i->f_score < best_move->f_score) {
+				best_move = i;
+			}
+		}
+		cout << "> Adding new node to closed list: [" << best_move->col << ", " << best_move->row << "]" << endl;
+		closed_list.push_back(*best_move);
+		open_list.erase(best_move);
+	} // while (destination != end of closed list)
+	
+	// Save the new path by tracing it backwards
+	path.clear();
+	open_list.clear();
+	list_node = &(closed_list.back());
+	
+	// Reverse sort the closed_list into the open list
+	// First find the number of elements
+	while (list_node->parent != NULL) {
+		open_list.push_back(*list_node);
+		list_node = list_node->parent;
 	}
-
+	// Now put the open list elements into the path vector
+	while (!open_list.empty()) {
+		path.push_back(open_list.back());
+		open_list.pop_back();
+	}
 }
 
 
@@ -497,6 +759,8 @@ void MapMode::Update() {
 		}
 		_ground_objects[j+1] = tmp;
 	}
+	
+	
 }
 
 

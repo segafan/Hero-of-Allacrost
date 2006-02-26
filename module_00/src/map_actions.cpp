@@ -49,7 +49,7 @@ void ActionPathMove::Load(uint32 table_key) {
 	read_data->OpenTable(table_key);
 	destination.row = read_data->ReadInt("row");
 	destination.col = read_data->ReadInt("col");
-	destination.altitude = read_data->ReadInt("altitude");
+	destination.altitude = read_data->ReadInt("alt");
 	read_data->CloseTable();
 
 	if (read_data->GetError() != DATA_NO_ERRORS) {
@@ -59,12 +59,68 @@ void ActionPathMove::Load(uint32 table_key) {
 
 void ActionPathMove::Process() {
 	// Check if we already have a previously computed path and, if it is still valid, use it.
-	if (!path.empty()) {
-
+	if (path.empty()) {
+		// Find a new path from scratch.
+		TileNode start;
+		start.row = sprite->row_position;
+		start.col = sprite->col_position;
+		start.altitude = sprite->altitude;
+		start.f_score = 0;
+		start.g_score = 0;
+		start.h_score = 0;
+		start.parent = NULL;
+		path.push_back(start);
+		sprite->current_map->_FindPath(destination, path);
+		
+		cout << ">>> FOUND PATH <<<" << endl;
+		for (uint32 i = 0; i < path.size(); i++) {
+			cout << "[" << path[i].col << ", " << path[i].row << "] ";
+		}
+		cout << endl;
 	}
-
-	// Find a new path from scratch.
-
+	
+	if (sprite->row_position > path[current_node].row) {
+		if (sprite->col_position > path[current_node].col) {
+			sprite->Move(NORTHWEST);
+		}
+		else if (sprite->col_position < path[current_node].col) {
+			sprite->Move(NORTHEAST);
+		}
+		else {
+			sprite->Move(NORTH);
+		}
+	}
+	else if (sprite->row_position < path[current_node].row) {
+		if (sprite->col_position > path[current_node].col) {
+			sprite->Move(SOUTHWEST);
+		}
+		else if (sprite->col_position < path[current_node].col) {
+			sprite->Move(SOUTHEAST);
+		}
+		else {
+			sprite->Move(SOUTH);
+		}
+	}
+	else if (sprite->col_position < path[current_node].col) {
+		sprite->Move(EAST);
+	}
+	else if (sprite->col_position > path[current_node].col) {
+		sprite->Move(WEST);
+	}
+	// The else case should never happen. If it does, the sprite will stop moving
+	
+	// Check if move was successful and if so, update the current_node for the path
+	if (sprite->status & IN_MOTION) {
+		current_node++;
+		// Check if this is the final node and if so, update the sprite's action index
+		if (current_node >= path.size()) {
+			current_node = 0;
+			sprite->current_action = sprite->current_action + 1;
+			if (sprite->current_action >= sprite->actions.size()) {
+				sprite->current_action = 0;
+			}
+		}
+	}
 }
 
 

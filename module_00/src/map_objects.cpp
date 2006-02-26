@@ -72,6 +72,7 @@ MapSprite::MapSprite() {
 	delay_time = NORMAL_DELAY;
 	wait_time = 0;
 	next_conversation = 0;
+	current_action = 0;
 }
 
 
@@ -342,6 +343,7 @@ void MapSprite::Move(uint16 move_direction) {
 			break;
 		case NW_NORTH:
 		case NW_WEST:
+		case NORTHWEST:
 			tcheck.row = row_position - 1;
 			tcheck.col = col_position - 1;
 			if (direction & (NW_NORTH | NORTH | NE_NORTH | NE_EAST | EAST | SE_EAST))
@@ -351,6 +353,7 @@ void MapSprite::Move(uint16 move_direction) {
 			break;
 		case SW_SOUTH:
 		case SW_WEST:
+		case SOUTHWEST:
 			if (direction & (SW_SOUTH | SOUTH | SE_SOUTH | SE_EAST | EAST | NE_EAST))
 				direction = SW_SOUTH;
 			else
@@ -360,6 +363,7 @@ void MapSprite::Move(uint16 move_direction) {
 			break;
 		case NE_NORTH:
 		case NE_EAST:
+		case NORTHEAST:
 			if (direction & (NE_NORTH | NORTH | NW_NORTH | NW_WEST | WEST | SW_WEST))
 				direction = NE_NORTH;
 			else
@@ -369,6 +373,7 @@ void MapSprite::Move(uint16 move_direction) {
 			break;
 		case SE_SOUTH:
 		case SE_EAST:
+		case SOUTHEAST:
 			if (direction & (SE_SOUTH | SOUTH | SW_SOUTH | SW_WEST | WEST | NW_WEST))
 				direction = SE_SOUTH;
 			else
@@ -430,7 +435,7 @@ void MapSprite::Update() {
 				actions[current_action]->Process();
 			}
 
-			// If the sprite isn't going to move to another tile, reset the step offset
+			// If the sprite isn't going to move to another tile, reset the step offset to 0.0f
 			if (!(status & IN_MOTION)) {
 				step_count = 0.0f;
 			}

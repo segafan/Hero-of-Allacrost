@@ -78,15 +78,14 @@ public:
 	TileNode destination;
 	//! The path we need to traverse from source to destination
 	std::vector<TileNode> path;
+	//! An index to the path vector containing the node that the sprite is currently on.
+	uint32 current_node;
 
-	ActionPathMove() {}
+	ActionPathMove() { current_node = 0; }
 	~ActionPathMove() {}
 
 	void Load(uint32 table_key);
 	void Process();
-
-	//! Computes a new path, either because a previous path doesn't exist or it is unoptimal.
-	void FindNewPath() {}
 };
 
 /*!****************************************************************************

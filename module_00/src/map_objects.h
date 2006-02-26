@@ -107,7 +107,7 @@ const uint16 NORTHEAST = 0x2000;
 const uint16 SOUTHWEST = 0x4000;
 const uint16 SOUTHEAST = 0x8000;
 const uint16 LATERAL   = 0x000F;
-const uint16 DIAGONAL  = 0x0FF0;
+const uint16 DIAGONAL  = 0xFFF0;
 //@}
 
 //! \name Sprite Status Constants

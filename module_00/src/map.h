@@ -32,8 +32,6 @@
 #define __MAP_HEADER__
 
 #include "utils.h"
-#include <string>
-#include <vector>
 #include "defs.h"
 #include "data.h"
 #include "engine.h"
@@ -178,10 +176,15 @@ public:
 	//! Manhattan distance from this node to the destination.
 	int16 h_score;
 	//@}
+	
+	//! The parent node of this node.
+	TileNode *parent;
 
 	//! Overloaded comparison operator checks that tile.row and tile.col are equal
 	bool operator==(const TileNode& that) const
 		{ return ((this->row == that.row) && (this->col == that.col)); }
+	bool operator!=(const TileNode& that) const
+		{ return ((this->row != that.row) || (this->col != that.col)); }
 }; // class TileNode
 
 } // namespace private_map
@@ -365,14 +368,24 @@ private:
 	 * \return A pointer to the map object in question. Returns null if no occupant is found.
 	 */
 	private_map::MapObject* _FindTileOccupant(const private_map::TileCheck& tcheck);
+	
+	//! \name Pathfinding Functions
+	//! \brief This group of functions are for path-finding and discovery.
+	//@{
+	bool _IsNodeInList(const private_map::TileCheck& node, std::list<private_map::TileNode> &node_list);
+	
+	private_map::TileNode* _FindNodeInList(const private_map::TileCheck& node, std::list<private_map::TileNode> &node_list);
+	
 	/*!
 	 * \brief Uses the A* algorithm to find a path from a source to a destination.
-	 * \param *sprite A pointer to the sprite who will use the path (also contains the source location).
-	 * \param &tdest The destination tile information, including row, column, and altitude information.
+	 * \param &destination The destination tile information, including row, column, and altitude information.
+	 * \param &path Contains a single element when passed as an argument (the source node). The result path is
+	 * placed into this vector.
 	 */
-	void _FindPath(const private_map::MapSprite* sprite,
-	               const private_map::TileNode& destination,
-	               std::vector<private_map::TileNode> &path);
+	void _FindPath(const private_map::TileNode& destination, std::vector<private_map::TileNode> &path);
+	
+
+	//@}
 }; // class MapMode
 
 } // namespace hoa_map;
