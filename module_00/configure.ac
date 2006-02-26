@@ -44,9 +44,6 @@ AC_CHECK_LIB([ILUT], [iluInit], [], \
 AC_CHECK_LIB([SDL], [SDL_InitSubSystem], [], \
 	[echo "You need to install the SDL library."
 	 exit -1])
-AC_CHECK_LIB([SDL_mixer], [Mix_OpenAudio], [], \
-	[echo "You need to install the SDL_mixer library."
-	 exit -1])
 AC_CHECK_LIB([SDL_ttf], [TTF_Init], [], \
 	[echo "You need to install the SDL_ttf library."
 	 exit -1])

@@ -10,41 +10,58 @@
 /*!****************************************************************************
  * \file    tileset.h
  * \author  Philip Vorsilak, gorzuate@allacrost.org
- * \date    Last Updated: September 7th, 2005
+ * \date    Last Updated: February 7th, 2006
  * \brief   Header file for editor's tileset, mainly used for drag'n'drop.
  *
- * This code displays map tiles as icons and implements drag and drop
+ * This code displays map tiles in a grid and implements drag and drop
  * capability for these tiles.
  *****************************************************************************/
 			   
 #ifndef __TILESET_HEADER__
 #define __TILESET_HEADER__
 
-#include <qcursor.h>
-#include <qiconview.h>
-#include <qpoint.h>
+#include "utils.h"
+#include "defs.h"
+#include "data.h"
+#include "tile.h"
+
+//#include <qcursor.h>
+#include <qmessagebox.h>
+//#include <qpainter.h>
+#include <qpixmap.h>
+//#include <qpoint.h>
+#include <qstring.h>
+#include <qtable.h>
 
 //! All calls to the editor are wrapped in this namespace.
 namespace hoa_editor
 {
 
 /*!****************************************************************************
- * \brief Manages individual tiles into a QIconView with drag and drop
+ * \brief Manages individual tiles into a QTable with drag and drop
  * capability.
  * 
- * \note Inherits QIconView.
+ * \note Inherits QTable.
  *****************************************************************************/
-class Tileset : public QIconView
+class Tileset : public QTable
 {
 	public:
-		Tileset(QWidget* parent = 0, const char* name = 0, WFlags f = 0) :
-			QIconView(parent, name, f) {}
+		Tileset(QWidget* parent, const QString& name);    // constructor
+		~Tileset();                                       // destructor
 
 		/*!
 		 *  \brief Implements high-level drag and drop functionality.
 		 *  \return A pointer to the object being dragged.
 		 */
-		QDragObject* dragObject();
+//		QDragObject* dragObject();
+
+	protected:
+//		void paintCell(QPainter* painter, int row, int col);
+		
+	private:
+//		QPainter* _painter;        // needed for draw operations on the grid
+//		std::vector<QPixmap> _pixmap_vect;
+//		std::vector<QPixmap>::iterator _it;
 }; // class Tileset
 
 } // namespace hoa_editor

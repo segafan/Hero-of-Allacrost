@@ -14,94 +14,259 @@
 #include "tileset.h"
 
 #include <qapplication.h>
+#include <qcombobox.h>
 #include <qdialog.h>
 #include <qdir.h>
 #include <qfiledialog.h>
+#include <qgl.h>
+#include <qiconview.h>
 #include <qimage.h>
 #include <qlabel.h>
 #include <qlayout.h>
+#include <qlineedit.h>
+#include <qlistview.h>
 #include <qmainwindow.h>
 #include <qmenubar.h>
 #include <qmessagebox.h>
 #include <qpopupmenu.h>
 #include <qpushbutton.h>
+#include <qscrollview.h>
 #include <qspinbox.h>
-#include <qsplitter.h>
 #include <qstatusbar.h>
 #include <qstring.h>
 #include <qstringlist.h>
+#include <qtabdialog.h>
+#include <qtabwidget.h>
 
 //! All calls to the editor are wrapped in this namespace.
 namespace hoa_editor
 {
 
+//! Different tile editing modes follow.
+enum TILE_MODE_TYPE
+{
+	INVALID_TILE = -1,
+	PAINT_TILE   = 0,
+	MOVE_TILE    = 1,
+	DELETE_TILE  = 2,
+	TOTAL_TILE   = 3
+};
+
+//! Different layer editing modes follow.
+enum LAYER_EDIT_TYPE
+{
+	INVALID_LAYER = -1,
+	LOWER_LAYER   = 0,
+	MIDDLE_LAYER  = 1,
+	UPPER_LAYER   = 2,
+	TOTAL_LAYER   = 3
+};
+
+class EditorScrollView;
+
 class Editor: public QMainWindow
 {
-	Q_OBJECT    // macro needed to use Qt's slots and signals
+	//! Macro needed to use Qt's slots and signals.
+	Q_OBJECT
 	
 	public:
-		Editor();				// constructor
-		~Editor();				// destructor
-		
-		friend class Grid;		// needed for "painting" tiles
+		Editor();                       // constructor
+		~Editor();                      // destructor
+
+		//! Needed for tile editing.
+		friend class EditorScrollView;
 
 	protected:
-		// Handles close and/or quit events, reimplemented from QMainWindow
-		void closeEvent(QCloseEvent *);
-		//void resizeEvent(QResizeEvent *); FIXME: where does this go?
+		//! Handles close and/or quit events.
+		//! \note Reimplemented from QMainWindow.
+		//! \param QCloseEvent* A pointer to a Qt close event.
+		void closeEvent(QCloseEvent*);
+		//void resizeEvent(QResizeEvent*); FIXME: do I need this?
 	
 	private slots:
-		// the following slot is used to gray out items in file the menu
+		//! This slot is used to gray out items in the File menu.
 		void _FileMenuSetup();
-		
-		// the following slots are used in the file menu
+
+		//! \name File Menu Item Slots
+		//! \brief These slots process selection for their item in the File menu.
+		//{@
 		void _FileNew();
 		void _FileOpen();
 		void _FileSaveAs();
 		void _FileSave();
 		void _FileResize();
 		void _FileQuit();
-				
-		// the following slots are used in the help menu
+		//@}
+
+		//! \name View Menu Item Slots
+		//! \brief These slots process selection for their item in the View menu.
+		//{@
+		void _ViewToggleGrid();
+		void _ViewToggleLL();
+		void _ViewToggleML();
+		void _ViewToggleUL();
+		//@}
+
+		//! \name Tiles Menu Item Slots
+		//! \brief These slots process selection for their item in the Tiles menu.
+		//{@
+		void _TileModePaint();
+		void _TileModeMove();
+		void _TileModeDelete();
+		void _TileEditLL();
+		void _TileEditML();
+		void _TileEditUL();
+		void _TileDatabase();
+		//@}
+
+		//! \name Help Menu Item Slots
+		//! \brief These slots process selection for their item in the Help menu.
+		//{@
 		void _HelpHelp();
 		void _HelpAbout();
 		void _HelpAboutQt();
+		//@}
 		
 	private:
-		void _TileInit();		// loads the tiles for drag 'n' drop
-		bool _EraseOK();		// saves the map if it is unsaved
+		//! Saves the map if it is unsaved.
+		bool _EraseOK();
+		//! Sets up the tile database.
+		void _CreateTileDatabase();
+		//! Adds tiles to the database.
+		void _GenerateDatabase();
 
-		QPopupMenu* _file_menu;	// this is used for the File menu
-		QPopupMenu* _help_menu;	// this is used for the Help menu
+		//! This is used to represent the File menu.
+		QPopupMenu* _file_menu;
+		//! This is used to represent the View menu.
+		QPopupMenu* _view_menu;
+		//! This is used to represent the Tiles menu.
+		QPopupMenu* _tiles_menu;
+		//! This is used to represent the Help menu.
+		QPopupMenu* _help_menu;
 
-		QStatusBar* _stat_bar;	// this is used to display messages
-		Tileset* _tiles;		// iconview of tiles
-		Grid* _map;				// current working map
+		//! This is used to display status messages.
+		QStatusBar*       _stat_bar;
+		//! Tabbed widget of tilesets.
+		QTabWidget*       _ed_tabs;
+		//! Used to add scrollbars to the QGLWidget of the map.
+		EditorScrollView* _ed_scrollview;
+		//! Main window layout.
+		QBoxLayout*       _ed_layout;
+		//! Needed for _ed_layout for it's children.
+		QWidget*          _ed_widget;
+
+		//! Grid item in View menu.
+		int  _grid_id;
+		//! Lower layer item in View menu.
+		int  _ll_id;
+		//! Middle layer item in View menu.
+		int  _ml_id;
+		//! Upper layer item in View menu.
+		int  _ul_id;
+		//! Grid toggle view switch.
+		bool _grid_on;
+		//! Lower layer toggle view switch.
+		bool _ll_on;
+		//! Middle layer toggle view switch.
+		bool _ml_on;
+		//! Upper layer toggle view switch.
+		bool _ul_on;
 }; // class Editor
 
-class SizeDialog: public QDialog
+class NewMapDialog: public QDialog
 {
-	Q_OBJECT    // macro needed to use Qt's slots and signals
-	
 	public:
-		SizeDialog(QWidget* parent, const QString& name);   // constructor
-		~SizeDialog();                                      // destructor
+		NewMapDialog(QWidget* parent, const QString& name);   // constructor
+		~NewMapDialog();                                      // destructor
 
-		int GetHeight() const { return height_sbox->value(); }
-		int GetWidth()  const { return  width_sbox->value(); }
+		int GetHeight() const { return _height_sbox->value(); }
+		int GetWidth()  const { return  _width_sbox->value(); }
+		QListView* GetTilesetListView() const { return _tileset_lview; }
 
 	private:
-		QSpinBox* height_sbox;
-		QSpinBox* width_sbox;
+		QListView* _tileset_lview;
 
-		QLabel* height_label;
-		QLabel* width_label;
+		QSpinBox* _height_sbox;
+		QSpinBox* _width_sbox;
 
-		QPushButton* cancel_pbut;
-		QPushButton* ok_pbut;
+		QLabel* _height_label;
+		QLabel* _width_label;
 
-		QGridLayout* grid_lay;
-}; // class SizeDialog
+		QPushButton* _cancel_pbut;
+		QPushButton* _ok_pbut;
+
+		QGridLayout* _dia_layout;
+}; // class NewMapDialog
+
+class EditorScrollView: public QScrollView
+{
+	//! Macro needed to use Qt's slots and signals.
+	Q_OBJECT 
+	
+	public:
+		EditorScrollView(QWidget* parent, const QString& name, int width,
+			int height);                     // constructor
+		~EditorScrollView();                 // destructor
+
+		//! Resizes the map.
+		//! \param width Width of the map.
+		//! \param height Height of the map.
+		void Resize(int width, int height); 
+
+		//! Needed for changing the editing mode and painting.
+		friend class Editor;
+
+	protected:
+		//! \name Mouse Processing Functions
+		//! \brief Functions to process mouse events on the map.
+		//! \note Reimplemented from QScrollView.
+		//! \param evt A pointer to the QMouseEvent generated by the mouse.
+		//{@
+		void contentsMousePressEvent(QMouseEvent* evt);
+		void contentsMouseMoveEvent(QMouseEvent* evt);
+		void contentsMouseReleaseEvent(QMouseEvent* evt);
+		void contentsMouseDoubleClickEvent(QMouseEvent* evt);
+		//@}
+
+	private:
+		//! Current working map.
+		Grid* _map;
+		//! Current tile edit mode being used.
+		TILE_MODE_TYPE  _tile_mode;
+		//! Current layer being edited.
+		LAYER_EDIT_TYPE _layer_edit;
+		//! Mouse is at this tile index on the map.
+		int _tile_index;
+}; // class EditorScrollView
+
+class DatabaseDialog: public QTabDialog
+{
+	//! Macro needed to use Qt's slots and signals.
+	Q_OBJECT 
+
+	public:
+		DatabaseDialog(QWidget* parent, const QString& name);    // constructor
+		~DatabaseDialog();                                       // destructor
+
+	private slots:
+		//! Writes out/updates all modifications to the tile database.
+		void _UpdateData();
+		//! Adds a tile to a tileset.
+		void _AddTile();
+		//! Deletes a tile from a tileset.
+		void _DelTile();
+		//! Draws the tileset specified onto the window.
+		//! \param name Name of the tileset to draw.
+		void _PopulateTileset(const QString& name);
+
+	private:
+		//! Lists all available tiles to create new tileset.
+		QIconView* _all_tiles; 
+		//! Lists tiles added to new/modified tileset.
+		QIconView* _mod_tileset; 
+		//! Editable name of the tileset.
+		QLineEdit* _tileset_ledit; 
+}; // class DatabaseDialog
 
 } // namespace hoa_editor
 

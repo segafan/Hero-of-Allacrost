@@ -10,86 +10,438 @@
 #include <iostream>
 #include "grid.h"
 
-using namespace std;
 using namespace hoa_data;
 using namespace hoa_editor;
+using namespace hoa_video;
+using namespace std;
 
-Grid::Grid(QWidget* parent, const QString& name)
-	: QCanvasView(parent, (const char*) name)
+Grid::Grid(QWidget* parent, const QString& name, int width, int height)
+	: QGLWidget(parent, (const char*) name)
 {	
-	setAcceptDrops(TRUE);	// enable drag 'n' drop
-	_dragging = FALSE;		// FIXME: currently unneeded
-	setCanvas(NULL);		// don't have canvas until "New Map..." is selected
-	//_drag_on = true;		// default value
-	_walk_on = true;		// default value
-	_tile_properties = 0;	// default value (tiles are walkable)
-	_view_property = 0;		// default value (viewing mode off)
-	_changed = false;		// map has not yet been modified
-	_CreateMenus();			// initialize the menus
+//	_walk_on = true;		// default value
+//	_tile_properties = 0;	// default value (tiles are walkable)
+//	_view_property = 0;		// default value (viewing mode off)
 	_file_name = name;      // gives the map a name
-	_width = 0;             // initial # of columns
-	_height= 0;             // initial # of rows
+
+	// Initial size
+	_height = height;
+	_width  = width;
+	resize(_width * TILE_WIDTH, _height * TILE_HEIGHT);
+
+	// Default properties
+	_changed = false;       // map has not yet been modified
+	_grid_on = true;        // grid lines default to on
+	_ll_on = true;          // lower layer default to on
+	_ml_on = false;         // middle layer default to off
+	_ul_on = false;         // upper layer default to off
+
+	// Initialize layers
+	for (int i = 0; i < _width * _height; i++)
+	{
+		lower_layer.push_back(-1);
+		middle_layer.push_back(-1);
+		upper_layer.push_back(-1);
+	} // -1 is used for no tiles
+
+	// Create the video engine's singleton
+	VideoManager = GameVideo::Create();
 } // Grid constructor
 
 Grid::~Grid()
 {
-	// do nothing Qt should take care of everything...really? hrm... FIXME
+	// FIXME
+//	VideoManager->DeleteImage();
+	GameVideo::Destroy();
 } // Grid destructor
 
-void Grid::SetWidth(int width)
-{
-	_width = width;
-} // SetWidth(...)
 
-void Grid::SetHeight(int height)
+
+// ********** Public functions **********
+
+void Grid::SetChanged(bool value)
 {
-	_height = height;
-} // SetHeight(...)
+	_changed = value;
+} // SetChanged(...)
 
 void Grid::SetFileName(QString filename)
 {
 	_file_name = filename;
 } // SetFileName(...)
 
-/*void Grid::getMapData()
+void Grid::SetHeight(int height)
 {
-	QString fileNames;
-	QString locations;
-    QDomElement element = document->documentElement();
-	QDomNode node = element.firstChild();
-	
-	if(!node.isNull()) {
-        QDomElement e = node.toElement(); // convert the node to an element
-        if( !e.isNull() )
-            fileNames = e.text(); // the node really is an element
-	}
-	
-    node = node.nextSibling();
-	if(!node.isNull()) {
-		QDomElement e = node.toElement(); // convert the node to an element
-        if( !e.isNull() )
-            locations = e.text(); // the node really is an element
-	}
-	
-	fileNames = fileNames.simplifyWhiteSpace();
-	fileNameList = QStringList::split(' ', fileNames);
-	
-	QStringList locationRowList = QStringList::split('\n', locations);
-	mapHeight = locationRowList.count() - 1;
-	for(int i = 0; i < mapHeight; i++)
-		locationRowList[i] = locationRowList[i].simplifyWhiteSpace();
-	mapWidth = QStringList::split(' ', locationRowList[0]).count();
-	
-	for(int i = 0; i < mapHeight; i++)
-	{
-		QStringList temp = QStringList::split(' ', locationRowList[i]);
-		for(int j = 0; j < mapWidth; j++)
-			locationVector.push_back(atoi(temp[j]));
-	}
-} // getMapData()
-*/
+	_height = height;
+	_changed = true;
+} // SetHeight(...)
 
-// FIXME: contentsDragEnterEvent???
+void Grid::SetWidth(int width)
+{
+	_width = width;
+	_changed = true;
+} // SetWidth(...)
+
+void Grid::SetLLOn(bool value)
+{
+	_ll_on = value;
+	updateGL();
+} // SetLLOn(...)
+
+void Grid::SetMLOn(bool value)
+{
+	_ml_on = value;
+	updateGL();
+} // SetMLOn(...)
+
+void Grid::SetULOn(bool value)
+{
+	_ul_on = value;
+	updateGL();
+} // SetULOn(...)
+
+void Grid::SetGridOn(bool value)
+{
+	_grid_on = value;
+	updateGL();
+} // SetGridOn(...)
+
+void Grid::LoadMap()
+{
+	ReadDataDescriptor read_data;
+	vector<int32> vect;             // used to read in vectors from the file
+
+	if (!read_data.OpenFile(_file_name))
+		QMessageBox::warning(this, "Loading File...", QString("ERROR: could not open %1 for reading!").arg(_file_name));
+
+	file_name_list.clear();
+	lower_layer.clear();
+	middle_layer.clear();
+	upper_layer.clear();
+	
+	_height = read_data.ReadInt("row_count");
+	_width  = read_data.ReadInt("col_count");
+	resize(_width * TILE_WIDTH, _height * TILE_HEIGHT);
+
+	read_data.OpenTable("tileset_names");
+	uint32 table_size = read_data.GetTableSize();
+	for (uint32 i = 1; i <= table_size; i++)
+		tileset_list.append(read_data.ReadString(i));
+	read_data.CloseTable();
+
+	read_data.OpenTable("tile_filenames");
+	table_size = read_data.GetTableSize();
+	for (uint32 i = 1; i <= table_size; i++)
+		file_name_list.append(QString(read_data.ReadString(i)).prepend("img/tiles/").append(".png"));
+	read_data.CloseTable();
+
+	read_data.OpenTable("lower_layer");
+	for (int32 i = 0; i < _height; i++)
+	{
+		read_data.FillIntVector(i, vect);
+		for (vector<int32>::iterator it = vect.begin(); it != vect.end(); it++)
+			lower_layer.push_back(*it);
+		vect.clear();
+	} // iterate through the rows of the lower layer
+	read_data.CloseTable();
+
+	read_data.OpenTable("middle_layer");
+	for (int32 i = 0; i < _height; i++)
+	{
+		read_data.FillIntVector(i, vect);
+		for (vector<int32>::iterator it = vect.begin(); it != vect.end(); it++)
+			middle_layer.push_back(*it);
+		vect.clear();
+	} // iterate through the rows of the lower layer
+	read_data.CloseTable();
+
+	read_data.OpenTable("upper_layer");
+	for (int32 i = 0; i < _height; i++)
+	{
+		read_data.FillIntVector(i, vect);
+		for (vector<int32>::iterator it = vect.begin(); it != vect.end(); it++)
+			upper_layer.push_back(*it);
+		vect.clear();
+	} // iterate through the rows of the lower layer
+	read_data.CloseTable();
+	
+	_grid_on = true;        // grid lines default to on
+	_ll_on = true;          // lower layer default to on
+	_ml_on = true;          // middle layer default to off
+	_ul_on = true;          // upper layer default to off
+	_changed = false;       // map has not been changed yet
+	updateGL();
+} // LoadMap()
+
+void Grid::SaveMap()
+{
+	int i;      // Lua table index / Loop counter variable
+	int j;      // Loop counter variable FIXME: temporary!
+	vector<int32>::iterator it;  // used to iterate through the layers
+	vector<int32> layer_row;     // one row of a layer
+	WriteDataDescriptor write_data;
+	
+	if (!write_data.OpenFile(_file_name))
+		QMessageBox::warning(this, "Saving File...", QString("ERROR: could not open %1 for writing!").arg(_file_name));
+	else
+	{
+		write_data.WriteComment(_file_name);
+		write_data.InsertNewLine();
+
+		write_data.WriteComment("Whether or not we have random encounters, and if so the rate of encounter");
+		write_data.WriteInt("random_encounters", false);// FIXME: hard-coded for now
+		write_data.WriteInt("encounter_rate", 12);      // FIXME: hard-coded for now
+		write_data.InsertNewLine();
+
+		write_data.WriteComment("The number of rows and columns of tiles that compose the map");
+		write_data.WriteInt("row_count", _height);
+		write_data.WriteInt("col_count", _width);
+		write_data.InsertNewLine();
+
+		write_data.WriteComment("The names of the tilesets used, with the path and file extension omitted (note that the indeces begin with 1, not 0)");
+		write_data.BeginTable("tileset_names");
+		i = 0;
+		for (QValueListIterator<QString> qit = tileset_list.begin();
+				qit != tileset_list.end(); ++qit)
+		{
+			i++;
+			write_data.WriteString(i, (*qit).ascii());
+		} // iterate through tileset_list writing each element
+		write_data.EndTable();
+		write_data.InsertNewLine();
+
+		write_data.WriteComment("The names of the tile image files used, with the path and file extension omitted (note that the indeces begin with 1, not 0)");
+		write_data.BeginTable("tile_filenames");
+		i = 0;
+		for (QValueListIterator<QString> qit = file_name_list.begin();
+				qit != file_name_list.end(); ++qit)
+		{
+			i++;
+			write_data.WriteString(i, (*qit).remove(".png").remove("img/tiles/").ascii());
+		} // iterate through file_name_list writing each element
+		write_data.EndTable();
+		write_data.InsertNewLine();
+
+		// FIXME: hard-coded for now
+		write_data.WriteComment("This structure forms still or animate tile images. In this case, all of our tiles are stills, but note that each element must still be a table.");
+		write_data.BeginTable("tile_mappings");
+		vector<int32> vect_single;
+		for (j = 0; j < i; j++)
+		{
+			vect_single.push_back(j);
+			char buffer[file_name_list.size()];
+			sprintf(buffer, "%d", j);
+			write_data.WriteIntVector(buffer, vect_single);
+			vect_single.clear();
+		}
+		write_data.EndTable();
+		write_data.InsertNewLine();
+
+		write_data.WriteComment("The lower tile layer. The numbers are indeces to the tile_mappings table.");
+		write_data.BeginTable("lower_layer");
+		it = lower_layer.begin();
+		for (int row = 0; row < _height; row++)
+		{
+			for (int col = 0; col < _width; col++)
+			{
+				layer_row.push_back(*it);
+				it++;
+			} // iterate through the columns of the lower layer
+			char buffer[_height];
+			sprintf(buffer, "%d", row);
+			write_data.WriteIntVector(buffer, layer_row);
+			layer_row.clear();
+		} // iterate through the rows of the lower layer
+		write_data.EndTable();
+		write_data.InsertNewLine();
+
+		write_data.WriteComment("The middle tile layer. The numbers are indeces to the tile_mappings table.");
+		write_data.BeginTable("middle_layer");
+		it = middle_layer.begin();
+		for (int row = 0; row < _height; row++)
+		{
+			for (int col = 0; col < _width; col++)
+			{
+				layer_row.push_back(*it);
+				it++;
+			} // iterate through the columns of the middle layer
+			char buffer[_height];
+			sprintf(buffer, "%d", row);
+			write_data.WriteIntVector(buffer, layer_row);
+			layer_row.clear();
+		} // iterate through the rows of the middle layer
+		write_data.EndTable();
+		write_data.InsertNewLine();
+
+		write_data.WriteComment("The upper tile layer. The numbers are indeces to the tile_mappings table.");
+		write_data.BeginTable("upper_layer");
+		it = upper_layer.begin();
+		for (int row = 0; row < _height; row++)
+		{
+			for (int col = 0; col < _width; col++)
+			{
+				layer_row.push_back(*it);
+				it++;
+			} // iterate through the columns of the upper layer
+			char buffer[_height];
+			sprintf(buffer, "%d", row);
+			write_data.WriteIntVector(buffer, layer_row);
+			layer_row.clear();
+		} // iterate through the rows of the upper layer
+		write_data.EndTable();
+		write_data.InsertNewLine();
+
+		// Create vector of 0s.
+		vector<int32> vect_0s(_width, 0);
+
+		// FIXME: hard-coded for now
+		write_data.WriteComment("Tile properties, not including walkability status. Valid range: [0-255]");
+		write_data.BeginTable("tile_properties");
+		for (i = 0; i < _height; i++)
+		{
+			char buffer[_height];
+			sprintf(buffer, "%d", i);
+			write_data.WriteIntVector(buffer, vect_0s);
+		}
+		write_data.EndTable();
+		write_data.InsertNewLine();
+
+		// Create vector of 255s.
+		vector<int32> vect_255s(_width, 255);
+
+		// FIXME: hard-coded for now
+		write_data.WriteComment("Walkablity status of tiles for 8 height levels. Non-zero indicates walkable. Valid range: [0-255]");
+		write_data.BeginTable("tile_walkable");
+		for (i = 0; i < _height; i++)
+		{
+			char buffer[_height];
+			sprintf(buffer, "%d", i);
+			write_data.WriteIntVector(buffer, vect_255s);
+		}
+		write_data.EndTable();
+		write_data.InsertNewLine();
+
+		// Create vector of -1s.
+		vector<int32> vect(_width, -1);
+
+		// FIXME: hard-coded for now
+		write_data.WriteComment("Events associated with each tile. -1 indicates no event.");
+		write_data.BeginTable("tile_events");
+		for (i = 0; i < _height; i++)
+		{
+			char buffer[_height];
+			sprintf(buffer, "%d", i);
+			write_data.WriteIntVector(buffer, vect);
+		}
+		write_data.EndTable();
+
+		write_data.InsertNewLine();
+		write_data.CloseFile();
+	
+		_changed = false;
+	} // successfully opened file for writing
+} // SaveMap()
+
+
+
+// ********** Protected slots **********
+
+void Grid::initializeGL()
+{
+	VideoManager->SetTarget(VIDEO_TARGET_QT_WIDGET);
+	VideoManager->Initialize();
+	VideoManager->ToggleFPS();
+} // initializeGL()
+
+void Grid::paintGL()
+{
+	int32 col;                       // tile array loop index
+	vector<int32>::iterator it;      // used to iterate through tile arrays
+	hoa_video::StillImage tile;      // tile to draw to screen
+
+	// Setup drawing parameters
+	VideoManager->SetCoordSys(0.0f, VideoManager->GetWidth() / TILE_WIDTH,
+		VideoManager->GetHeight() / TILE_HEIGHT, 0.0f);
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
+	VideoManager->Clear(Color::white);
+	tile.SetDimensions(1.0f, 1.0f);  // all tiles are same size (for now)
+
+	// Draw lower layer
+	if (_ll_on)
+	{
+		VideoManager->Move(0.0f, 0.0f);
+		col = 0;
+		for (it = lower_layer.begin(); it != lower_layer.end(); it++)
+		{
+			if (*it != -1)
+			{
+				tile.SetFilename(file_name_list[*it]);
+				VideoManager->LoadImage(tile);
+				VideoManager->DrawImage(tile);
+			} // a tile exists to draw
+			col = ++col % _width;
+			if (col == 0)
+				VideoManager->MoveRelative(-_width + 1, 1.0f);
+			else
+				VideoManager->MoveRelative(1.0f, 0.0f);
+		} // iterate through lower layer
+	} // lower layer must be viewable
+
+	// Draw middle layer
+	if (_ml_on)
+	{
+		VideoManager->Move(0.0f, 0.0f);
+		col = 0;
+		for (it = middle_layer.begin(); it != middle_layer.end(); it++)
+		{
+			if (*it != -1)
+			{
+				tile.SetFilename(file_name_list[*it]);
+				VideoManager->LoadImage(tile);
+				VideoManager->DrawImage(tile);
+			} // a tile exists to draw
+			col = ++col % _width;
+			if (col == 0)
+				VideoManager->MoveRelative(-_width + 1, 1.0f);
+			else
+				VideoManager->MoveRelative(1.0f, 0.0f);
+		} // iterate through middle layer
+	} // middle layer must be viewable
+
+	// Draw upper layer
+	if (_ul_on)
+	{
+		VideoManager->Move(0.0f, 0.0f);
+		col = 0;
+		for (it = upper_layer.begin(); it != upper_layer.end(); it++)
+		{
+			if (*it != -1)
+			{
+				tile.SetFilename(file_name_list[*it]);
+				VideoManager->LoadImage(tile);
+				VideoManager->DrawImage(tile);
+			} // a tile exists to draw
+			col = ++col % _width;
+			if (col == 0)
+				VideoManager->MoveRelative(-_width + 1, 1.0f);
+			else
+				VideoManager->MoveRelative(1.0f, 0.0f);
+		} // iterate through upper layer
+	} // upper layer must be viewable
+
+	// If grid is toggled on, draw it
+	if (_grid_on)
+		VideoManager->DrawGrid(0.0f, 0.0f, 1.0f, 1.0f, Color::black);
+} // paintGL()
+
+void Grid::resizeGL(int w, int h)
+{
+	VideoManager->SetResolution(w, h);
+	VideoManager->ApplySettings();
+} // resizeGL(...)
+
+
+
+/*
+// what about contentsDragEnterEvent???
 void Grid::dragEnterEvent(QDragEnterEvent *evt)
 {
     if (QImageDrag::canDecode(evt))
@@ -102,33 +454,33 @@ void Grid::dropEvent(QDropEvent *evt)
     
     if (QImageDrag::decode(evt, img) && (canvas() != NULL))
 	{
-		QString name = temp->currentItem()->text().remove(".png");
-		int index = _file_name_list.findIndex(name);
+		//QString name = temp->currentItem()->text().remove(".png");
+		//int index = _file_name_list.findIndex(name);
 		// Check if tile name is new.
-		if (index == -1)
-			_file_name_list.append(name);
+		//if (index == -1)
+		//	_file_name_list.append(name);
 		
-		Tile *tile = new Tile(name, img, canvas());
-		QPoint point = inverseWorldMatrix().map(evt->pos());
+		//Tile *tile = new Tile(name, img, canvas());
+		//QPoint point = inverseWorldMatrix().map(evt->pos());
 		
 		// the division here will effectively snap the tile to the grid
 		// yes, it looks dumb. is there another way to round down to the
 		// nearest multiple of 32?
-		tile->move((point.x() + horizontalScrollBar()->value())
-					/ TILE_WIDTH * TILE_WIDTH,
-				   (point.y() + verticalScrollBar()->value())
-					/ TILE_HEIGHT * TILE_HEIGHT);
-		tile->setZ(0);		// sets height of tile TODO: create a menu option
+		//tile->move((point.x() + horizontalScrollBar()->value())
+		//			/ TILE_WIDTH * TILE_WIDTH,
+		//		   (point.y() + verticalScrollBar()->value())
+		//			/ TILE_HEIGHT * TILE_HEIGHT);
+		//tile->setZ(0);		// sets height of tile TODO: create a menu option
 		// tile->tileInfo.lower_layer = 1; FIXME: perhaps not needed here
 		//tile->tileInfo.upper_layer = -1; // TEMPORARY!!! FIXME: this neither
 		//tile->tileInfo.event_mask = tileProperties;
-		tile->show();
-		canvas()->update();
+		//tile->show();
+		//canvas()->update();
 		_changed = TRUE;
 	} // must be able to decode the drag in order to place the image
 } // dropEvent(...)
 
-/*void Grid::mousePressEvent(QMouseEvent *)
+void Grid::mousePressEvent(QMouseEvent *)
 {
 	QTable::mousePressEvent(evt);
 	dragging = TRUE;
@@ -141,7 +493,7 @@ void Grid::mouseMoveEvent(QMouseEvent *)
 		d->dragCopy(); // do NOT delete d.
 		dragging = FALSE;
 	}
-} // mouseMoveEvent(...)*/
+} // mouseMoveEvent(...)
 
 void Grid::contentsMousePressEvent(QMouseEvent *evt)
 {
@@ -201,7 +553,7 @@ void Grid::contentsMouseDoubleClickEvent(QMouseEvent *evt)
 {
     if (canvas() != NULL)
 	{
-/*// FIXME FIXME FIXME OMG what a hack this is FIXME FIXME FIXME
+// FIXME FIXME FIXME OMG what a hack this is FIXME FIXME FIXME
 //		std::cerr << "Blah" << std::endl;
 //		if (((MapEditor*) parent()) == NULL)
 //			std::cerr << "parent() is NULL" << std::endl;
@@ -219,29 +571,29 @@ void Grid::contentsMouseDoubleClickEvent(QMouseEvent *evt)
 		if (temp->currentItem()->pixmap()->convertToImage() == NULL)
 			std::cerr << "convertToImage() is NULL" << std::endl;
 		std::cerr << "5" << std::endl;
-*/		QImage img = temp->currentItem()->pixmap()->convertToImage();
-		QString name = temp->currentItem()->text().remove(".png");
-		int index = _file_name_list.findIndex(name);
+//		QImage img = temp->currentItem()->pixmap()->convertToImage();
+		//QString name = temp->currentItem()->text().remove(".png");
+		//int index = _file_name_list.findIndex(name);
 		// Check if tile name is new.
-		if (index == -1)
-			_file_name_list.append(name);
+		//if (index == -1)
+		//	_file_name_list.append(name);
 		
-		Tile *tile = new Tile(name, img, canvas());
-		QPoint point = inverseWorldMatrix().map(evt->pos());
+		//Tile *tile = new Tile(name, img, canvas());
+		//QPoint point = inverseWorldMatrix().map(evt->pos());
 		
 		// the division here will effectively snap the tile to the grid
 		// yes, it looks dumb. is there another way to round down to the
 		// nearest multiple of 32?
-		tile->move((point.x() + horizontalScrollBar()->value())
-					/ TILE_WIDTH * TILE_WIDTH,
-				   (point.y() + verticalScrollBar()->value())
-					/ TILE_HEIGHT * TILE_HEIGHT);
-		tile->setZ(0);		// sets height of tile TODO: create a menu option
+		//tile->move((point.x() + horizontalScrollBar()->value())
+		//			/ TILE_WIDTH * TILE_WIDTH,
+		//		   (point.y() + verticalScrollBar()->value())
+		//			/ TILE_HEIGHT * TILE_HEIGHT);
+		//tile->setZ(0);		// sets height of tile TODO: create a menu option
 		// tile->tileInfo.lower_layer = 1; FIXME: perhaps not needed here
 		//tile->tileInfo.upper_layer = -1; // TEMPORARY!!! FIXME: this neither
 		//tile->tileInfo.event_mask = tileProperties;
-		tile->show();
-		canvas()->update();
+		//tile->show();
+		//canvas()->update();
 		_changed = TRUE;
 	} // better have a canvas first
 } // contentsMouseDoubleClickEvent(...)
@@ -320,7 +672,7 @@ void Grid::_EditMenuSetup()
 		_edit_menu->setItemEnabled(clear_ID, false);
 	else
 		_edit_menu->setItemEnabled(clear_ID, true);
-/*
+
 	QVButtonGroup *mode = new QVButtonGroup("Editting Mode", editMenu);
 	QRadioButton *drag = new QRadioButton("Drag", mode);
 	QRadioButton *paint = new QRadioButton("Paint", mode);
@@ -332,7 +684,7 @@ void Grid::_EditMenuSetup()
 
 	connect(drag, SIGNAL(toggled(bool)), this, SLOT(editMode()));
 	editMenu->insertSeparator();
-	editMenu->insertItem(mode);*/
+	editMenu->insertItem(mode);
 } // _EditMenuSetup()
 
 void Grid::_ViewMenuSetup()
@@ -366,7 +718,7 @@ void Grid::_ViewMenuSetup()
 	_view_no_walk = new QRadioButton("Not walkable", properties);
 
 	// mutually exclusive radio buttons, hence else if structure
-/*	if ((_view_property & TREASURE) == TREASURE)
+	if ((_view_property & TREASURE) == TREASURE)
 		_view_treasure->setChecked(true);
 	else if ((_view_property & EVENT) == EVENT)
 		_view_event->setChecked(true);
@@ -376,7 +728,7 @@ void Grid::_ViewMenuSetup()
 		_view_no_walk->setChecked(true);
 	else
 		viewNone->setChecked(true);
-*/
+
 	_view_menu->insertSeparator();
 	_view_menu->insertItem(properties);
 } // viewMenuSetup()
@@ -384,7 +736,7 @@ void Grid::_ViewMenuSetup()
 void Grid::_TileMenuSetup()
 {
 	_tile_menu->clear();
-/*	
+	
 	int horFlipID = tileMenu->insertItem("Flip Horizontally",this, SLOT(tileFlipHorizontal()));
 	int vertFlipID = tileMenu->insertItem("Flip Vertically", this, SLOT(tileFlipVertical()));
 	int rotClkID = tileMenu->insertItem("Rotate Clockwise",this, SLOT(tileRotateClockwise()));
@@ -394,7 +746,7 @@ void Grid::_TileMenuSetup()
 	tileMenu->setItemEnabled(vertFlipID, false);
 	tileMenu->setItemEnabled(rotClkID, false);
 	tileMenu->setItemEnabled(rotCntClkID, false);
-*/
+
 	QVButtonGroup* mode = new QVButtonGroup("Properties", _tile_menu);
 	QRadioButton* no_walk = new QRadioButton("Not walkable", mode);
 	QRadioButton* walk = new QRadioButton("Walkable", mode);
@@ -408,7 +760,7 @@ void Grid::_TileMenuSetup()
 		walk->setChecked(true);
 		_properties->setEnabled(true);
 
-/*		if ((_tile_properties & TREASURE) == TREASURE)
+		if ((_tile_properties & TREASURE) == TREASURE)
 			_tile_treasure->setChecked(true);
 
 		if ((_tile_properties & EVENT) == EVENT)
@@ -416,7 +768,7 @@ void Grid::_TileMenuSetup()
 
 		if ((_tile_properties & OCCUPIED) == OCCUPIED)
 			_tile_occupied->setChecked(true);
-*/	} // enable desired options
+	} // enable desired options
 	else
 	{
 		no_walk->setChecked(true);
@@ -430,7 +782,7 @@ void Grid::_TileMenuSetup()
 
 void Grid::_ViewMenuEvaluate()
 {
-/*	if (_view_treasure->isChecked())
+	if (_view_treasure->isChecked())
 		_view_property = TREASURE;
 	else if (_view_event->isChecked())
 		_view_property = EVENT;
@@ -439,13 +791,13 @@ void Grid::_ViewMenuEvaluate()
 	else if (_view_no_walk->isChecked())
 		_view_property = NOT_WALKABLE;
 	else
-*/		_view_property = 0;
+		_view_property = 0;
 
 	if (canvas() != NULL)
 	{
 		QCanvasItemList list = canvas()->allItems();
 
-/*		for (QCanvasItemList::Iterator it = list.begin(); it != list.end();++it)
+		for (QCanvasItemList::Iterator it = list.begin(); it != list.end();++it)
 		{
 			if (((*it)->rtti() == TILE_RTTI) && (_view_property != 0))
 			{
@@ -492,14 +844,14 @@ void Grid::_ViewMenuEvaluate()
 			else if ((*it)->rtti() == QCanvasItem::Rtti_Rectangle)
 				delete *it;		// always delete a tint so we can tint over it
 		} // iterate through all the items on the canvas
-*/
+
 		canvas()->update();
 	} // need a canvas for these operations!
 } // _ViewMenuEvaluate()
 
 void Grid::_TileMenuEvaluate()
 {
-/*	if (!_walk_on)
+	if (!_walk_on)
 		_tile_properties = hoa_map::local_map::NOT_WALKABLE;
 	else
 	{
@@ -513,7 +865,7 @@ void Grid::_TileMenuEvaluate()
 		if (_tile_occupied->isChecked())
 			_tile_properties |= hoa_map::local_map::OCCUPIED;
 	} // tile is walkable and can have a mixture of these properties
-*/	
+	
 	// figure out which tile was right-clicked on to change its properties
 	QCanvasItemList l = canvas()->collisions(inverseWorldMatrix().
 		map(mapFromGlobal(_menu_position)));
@@ -533,12 +885,10 @@ void Grid::_TileMenuEvaluate()
 
 void Grid::_EditUndo()
 {
-// FIXME
 } // _EditUndo()
 
 void Grid::_EditRedo()
 {
-// FIXME
 } // _EditRedo()
 
 void Grid::_EditClear()
@@ -551,7 +901,7 @@ void Grid::_EditClear()
 
 	canvas()->update();
 } // _EditClear()
-/*
+
 void Grid::_EditMode()
 {
 	std::cerr << "changing the editting mode... but not really since painting is not yet implemented ;)" << std::endl;
@@ -560,7 +910,7 @@ void Grid::_EditMode()
 	else
 		_drag_on = true;
 } // _EditMode()
-*/
+
 void Grid::_ViewToggleGrid()
 {
 	// toggles the grid on or off
@@ -595,7 +945,7 @@ void Grid::_ViewToggleGrid()
 
 	canvas()->update();
 } // viewToggleGrid
-/*
+
 void Grid::tileFlipHorizontal()
 {
 	if (!mapChanged)
@@ -619,7 +969,7 @@ void Grid::tileRotateCounterClockwise()
 	if (!mapChanged)
 		mapChanged = true;
 } // tileRotateCounterClockwise()
-*/
+
 void Grid::_TileMode()
 {
 	if (_walk_on)
@@ -632,7 +982,7 @@ void Grid::_TileMode()
 		_properties->setEnabled(true);
 		_walk_on = true;
 
-/*		if ((_tile_properties & hoa_map::local_map::TREASURE) == hoa_map::local_map::TREASURE)
+		if ((_tile_properties & hoa_map::local_map::TREASURE) == hoa_map::local_map::TREASURE)
 			_tile_treasure->setChecked(true);
 
 		if ((_tile_properties & hoa_map::local_map::EVENT) == hoa_map::local_map::EVENT)
@@ -640,220 +990,5 @@ void Grid::_TileMode()
 
 		if ((_tile_properties & hoa_map::local_map::OCCUPIED) == hoa_map::local_map::OCCUPIED)
 			_tile_occupied->setChecked(true);
-*/	} // ungray them out
-} // _TileMode()
-
-void Grid::LoadMap()
-{
-	ReadDataDescriptor read_data;
-	
-	if (!read_data.OpenFile(_file_name))
-		cerr << "ERROR: failed to load " << _file_name << endl;
-
-	if (this->canvas() != NULL)
-		_EditClear();
-	_file_name_list.clear();
-	_tile_array.clear();
-	
-	_height = read_data.ReadInt("row_count");
-	_width  = read_data.ReadInt("col_count");
-	QCanvas *canvas = new QCanvas(this);
-	setCanvas(canvas);
-	this->canvas()->resize(_width * TILE_WIDTH, _height * TILE_HEIGHT);
-	CreateGrid();
-
-	read_data.OpenTable("tile_filenames");
-	uint32 table_size = read_data.GetTableSize();
-	for (uint32 i = 1; i <= table_size; i++)
-		_file_name_list.append(read_data.ReadString(i));
-	read_data.CloseTable();
-
-	read_data.OpenTable("lower_layer");
-	vector<int32> vect;
-	for (int32 i = 0; i < _height; i++)
-	{
-		read_data.FillIntVector(i, vect);
-		for (vector<int32>::iterator it = vect.begin(); it != vect.end(); it++)
-			_tile_array.push_back(*it);
-		vect.clear();
-	} // iterate through the rows of the lower layer
-	read_data.CloseTable();
-	
-	int32 row = 0, col = 0;
-	for (int32 i = 0; i < _tile_array.size(); i++)
-	{
-		if (_tile_array[i] != -1)
-		{
-			QImage img = temp->findItem(_file_name_list[_tile_array[i]])->
-				pixmap()->convertToImage();
-			QString name = temp->findItem(_file_name_list[_tile_array[i]])->
-				text().remove(".png");
-			Tile *tile = new Tile(name, img, this->canvas());
-			tile->move(col * TILE_WIDTH, row * TILE_HEIGHT);
-			tile->setZ(0);// sets height of tile TODO: create a menu option
-			// tile->tileInfo.lower_layer = 1; FIXME: perhaps not needed here
-			//tile->tileInfo.upper_layer = -1; TEMPORARY!!! FIXME: this neither
-			//tile->tileInfo.event_mask = tileProperties;
-			tile->show();
-		}
-		col = ++col % _width;
-		if (col == 0)
-			row++;
-	}
-	this->canvas()->update();
-	_changed = false;
-} // LoadMap()
-
-void Grid::SaveMap()
-{
-	int i;      // Lua table index / Loop counter variable
-	int j;      // Loop counter variable FIXME: temporary!
-	int index;  // _file_name_list index used in tile layers
-	WriteDataDescriptor write_data;
-	
-	if(!write_data.OpenFile(_file_name))
-		cerr << "ERROR: failed to save " << _file_name << endl;
-	
-	write_data.WriteComment(_file_name);
-	write_data.InsertNewLine();
-
-	write_data.WriteComment("Whether or not we have random encounters, and if so the rate of encounter");
-	write_data.WriteInt("random_encounters", false);// FIXME: hard-coded for now
-	write_data.WriteInt("encounter_rate", 12);      // FIXME: hard-coded for now
-	write_data.InsertNewLine();
-
-	write_data.WriteComment("The number of rows and columns of tiles that compose the map");
-	write_data.WriteInt("row_count", _height);
-	write_data.WriteInt("col_count", _width);
-	write_data.InsertNewLine();
-
-	write_data.WriteComment("The names of the tile image files used, with the path and file extension omitted (note that the indeces begin with 1, not 0)");
-	write_data.BeginTable("tile_filenames");
-	i = 0;
-	for (QValueListIterator<QString> it = _file_name_list.begin();
-			it != _file_name_list.end(); ++it)
-	{
-		i++;
-		write_data.WriteString(i, (*it).ascii());
-	} // Iterate through _file_name_list writing each element
-	write_data.EndTable();
-	write_data.InsertNewLine();
-
-	// FIXME: hard-coded for now
-	write_data.WriteComment("This structure forms still or animate tile images. In this case, all of our tiles are stills, but note that each element must still be a table.");
-	write_data.BeginTable("tile_mappings");
-	vector<int32> vect_single;
-	for (j = 0; j < i; j++)
-	{
-		vect_single.push_back(j);
-		char buffer[_file_name_list.size()];
-		sprintf(buffer, "%d", j);
-		write_data.WriteIntVector(buffer, vect_single);
-		vect_single.clear();
-	}
-	write_data.EndTable();
-	write_data.InsertNewLine();
-
-	write_data.WriteComment("The lower tile layer. The numbers are indeces to the tile_mappings table.");
-	write_data.BeginTable("lower_layer");
-	vector<int32> ll_row;
-	for (int row = 0; row < _height; row++)
-	{
-		for (int col = 0; col < _width; col++)
-		{
-			QCanvasItemList list = canvas()->collisions(
-				QPoint(col * TILE_WIDTH + 10, row * TILE_HEIGHT + 10));
-			QCanvasItemList::Iterator it = list.begin();
-			while (it != list.end() && (*it)->rtti() != TILE_RTTI)
-				it++;
-
-			if (list.empty())
-				ll_row.push_back(-1);
-			else if ((*it)->rtti() == TILE_RTTI)
-			{
-				Tile* tile = static_cast<Tile*> (*it);
-				index = _file_name_list.findIndex(tile->GetName());
-				ll_row.push_back(index);
-			} // make sure object is a tile
-		}
-		char buffer[_height];
-		sprintf(buffer, "%d", row);
-		write_data.WriteIntVector(buffer, ll_row);
-		ll_row.clear();
-	}
-	write_data.EndTable();
-	write_data.InsertNewLine();
-
-	// Create vector of -1s.
-	vector<int32> vect(_width, -1);
-	
-	// FIXME: hard-coded for now
-	write_data.WriteComment("The middle tile layer. The numbers are indeces to the tile_mappings table.");
-	write_data.BeginTable("middle_layer");
-	for (i = 0; i < _height; i++)
-	{
-		char buffer[_height];
-		sprintf(buffer, "%d", i);
-		write_data.WriteIntVector(buffer, vect);
-	}
-	write_data.EndTable();
-	write_data.InsertNewLine();
-
-	// FIXME: hard-coded for now
-	write_data.WriteComment("The upper tile layer. The numbers are indeces to the tile_mappings table.");
-	write_data.BeginTable("upper_layer");
-	for (i = 0; i < _height; i++)
-	{
-		char buffer[_height];
-		sprintf(buffer, "%d", i);
-		write_data.WriteIntVector(buffer, vect);
-	}
-	write_data.EndTable();
-	write_data.InsertNewLine();
-
-	// Create vector of 0s.
-	vector<int32> vect_0s(_width, 0);
-	
-	// FIXME: hard-coded for now
-	write_data.WriteComment("Tile properties, not including walkability status. Valid range: [0-255]");
-	write_data.BeginTable("tile_properties");
-	for (i = 0; i < _height; i++)
-	{
-		char buffer[_height];
-		sprintf(buffer, "%d", i);
-		write_data.WriteIntVector(buffer, vect_0s);
-	}
-	write_data.EndTable();
-	write_data.InsertNewLine();
-
-	// Create vector of 255s.
-	vector<int32> vect_255s(_width, 255);
-
-	// FIXME: hard-coded for now
-	write_data.WriteComment("Walkablity status of tiles for 8 height levels. Non-zero indicates walkable. Valid range: [0-255]");
-	write_data.BeginTable("tile_walkable");
-	for (i = 0; i < _height; i++)
-	{
-		char buffer[_height];
-		sprintf(buffer, "%d", i);
-		write_data.WriteIntVector(buffer, vect_255s);
-	}
-	write_data.EndTable();
-	write_data.InsertNewLine();
-
-	// FIXME: hard-coded for now
-	write_data.WriteComment("Events associated with each tile. -1 indicates no event.");
-	write_data.BeginTable("tile_events");
-	for (i = 0; i < _height; i++)
-	{
-		char buffer[_height];
-		sprintf(buffer, "%d", i);
-		write_data.WriteIntVector(buffer, vect);
-	}
-	write_data.EndTable();
-	
-	write_data.InsertNewLine();
-	write_data.CloseFile();
-	
-	_changed = false;
-} // SaveMap()
+	} // ungray them out
+} // _TileMode()*/

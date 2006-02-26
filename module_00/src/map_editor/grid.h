@@ -13,6 +13,8 @@
 #include "utils.h"
 #include "defs.h"
 #include "data.h"
+#include "video.h"
+
 #include "tile.h"
 #include "tileset.h"	// FIXME: needed for "OMG what a hack" in DoubleClick...
 
@@ -22,7 +24,9 @@
 #include <qcursor.h>
 #include <qdragobject.h>
 #include <qfile.h>
+#include <qgl.h>
 #include <qlayout.h>
+#include <qmessagebox.h>
 #include <qpen.h>
 #include <qpixmap.h>
 #include <qpopupmenu.h>
@@ -36,31 +40,45 @@
 namespace hoa_editor
 {
 
-class Grid: public QCanvasView
+class Grid: public QGLWidget
 {
 	Q_OBJECT     // macro needed to use QT's slots and signals
 	
 	public:
-		Grid(QWidget *parent = 0, const QString &name = QString("Untitled"));
-		~Grid();
-		
-		bool GetChanged() const { return _changed; }
-		QString GetFileName() const { return _file_name; }
-		
-		void SetWidth(int width);   // sets the map's width in tiles (columns)
-		void SetHeight(int height); // sets the map's height in tiles (rows)
-		void SetFileName(QString filename);    // sets the map's file name
-		void SetFileNameList(QStringList list);// sets list of map's tile names
+		Grid(QWidget *parent = 0, const QString &name = QString("Untitled"),
+			int width = 0, int height = 0); // constructor
+		~Grid();                            // destructor
 
-		void LoadMap();             // loads a map from a config file
-		void SaveMap();             // saves the map to a config file
-		void CreateGrid();          // creates grid lines on the map
-		Tileset* temp;              // FIXME: zOMG what a hack
-		
+		bool GetChanged() const { return _changed; }
+		void SetChanged(bool value);        // sets the map's modified status
+		QString GetFileName() const { return _file_name; }
+		void    SetFileName(QString filename); // sets the map's file name
+		int  GetHeight() const { return _height; }
+		int  GetWidth() const {return _width; }
+		void SetHeight(int height);         // sets the map's height in tiles (rows)
+		void SetWidth(int width);           // sets the map's width in tiles (columns)
+		void SetLLOn(bool value);           // sets lower layer on/off
+		void SetMLOn(bool value);           // sets middle layer on/off
+		void SetULOn(bool value);           // sets upper layer on/off
+		void SetGridOn(bool value);         // sets grid on/off
+
+		void LoadMap();                     // loads a map from a config file
+		void SaveMap();                     // saves the map to a config file
+
+		QStringList file_name_list;         // list of tile file names
+		QStringList tileset_list;           // list of tileset names
+		std::vector<int32> lower_layer;     // vector of tiles in the lower layer
+		std::vector<int32> middle_layer;    // vector of tiles in the middle layer
+		std::vector<int32> upper_layer;     // vector of tiles in the upper layer
+
 	protected:
+		void initializeGL();                // sets up the rendering context
+		void paintGL();                     // paints the entire map
+		void resizeGL(int w, int h);        // resizes the widget
+
 		// I think these are protected
 		// Low-level drag and drop
-		void dragEnterEvent(QDragEnterEvent *evt);
+/*		void dragEnterEvent(QDragEnterEvent *evt);
 		void dropEvent(QDropEvent *evt);
 		//void mousePressEvent(QMouseEvent *);
 		//void mouseMoveEvent(QMouseEvent *);
@@ -70,10 +88,10 @@ class Grid: public QCanvasView
 		void contentsMouseReleaseEvent(QMouseEvent *evt);
 		void contentsMouseDoubleClickEvent(QMouseEvent *evt);
 		void contentsContextMenuEvent(QContextMenuEvent *);
-		
+*/		
 	private slots:
 		// the following slots are used to gray out items in the menu
-		void _EditMenuSetup();
+/*		void _EditMenuSetup();
 		void _ViewMenuSetup();
 		void _ViewMenuEvaluate();
 		void _TileMenuSetup();
@@ -94,9 +112,9 @@ class Grid: public QCanvasView
 //		void _TileRotateClockwise();
 //		void _TileRotateCounterClockwise();
 		void _TileMode();		// sets the status of the tile
-
+*/
 	private:
-		void _GetMapData();		// gets map height and width & loads into DOM
+/*		void _GetMapData();		// gets map height and width & loads into DOM
 //		void _PaintMap();		// paints the map to the screen
 		void _CreateMenus();	// creates the various context menus
 		
@@ -116,24 +134,25 @@ class Grid: public QCanvasView
 		QCheckBox* _tile_treasure;
 		QCheckBox* _tile_event;
 		QCheckBox* _tile_occupied;
-
-		QStringList _file_name_list;		// list of tile file names
-		std::vector<int32> _tile_array;     // vector of tiles in each cell
 		
 		QCanvasItem* _moving;	// set if an object is currently being moved
 		QPoint _moving_start;	// moving object's starting point
 
-		QString _file_name;		// map's file name
-		int _view_property;		// hex. bit mask of which property being viewed
+*/		QString _file_name;		// map's file name
+/*		int _view_property;		// hex. bit mask of which property being viewed
 		int _tile_properties;	// hex. bit mask of a tile's properties
-		int _height;			// height of map in tiles
+*/		int _height;			// height of map in tiles
 		int _width;				// width of map in tiles
+		hoa_video::StillImage _tile;
 		bool _changed;			// TRUE = map modified, FALSE otherwise
-		bool _dragging;			// TRUE = something being dragged, else FALSE
+		//bool _dragging;		// TRUE = something being dragged, else FALSE
 		bool _grid_on;			// TRUE = grid is displayed, else FALSE
-		//bool _drag_on;		// TRUE = dragging is enabled, else painting
+		bool _ll_on;            // TRUE = lower layer is displayer, else FALSE
+		bool _ml_on;            // TRUE = middle layer is displayer, else FALSE
+		bool _ul_on;            // TRUE = upper layer is displayer, else FALSE
+/*		//bool _drag_on;		// TRUE = dragging is enabled, else painting
 		bool _walk_on;			// TRUE = walkable is set, else not-walkable
-}; // class Grid
+*/}; // class Grid
 
 } // namespace hoa_editor
 
