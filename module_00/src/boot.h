@@ -10,7 +10,7 @@
 /*!****************************************************************************
  * \file    boot.h
  * \author  Tyler Olsen, roots@allacrost.org
- * \date    Last Updated: August 12th, 2005
+ * \date    Last Updated: February 16th, 2006
  * \brief   Header file for boot mode interface.
  *
  * This code handles the game event processing and frame drawing when the user
@@ -37,25 +37,62 @@ extern bool BOOT_DEBUG;
 //! An internal namespace to be used only within the boot code. Don't use this namespace anywhere else!
 namespace private_boot {
 
+//! \name All possible visible menus
+enum VISIBLE_MENU
+{
+	MAIN_MENU_VISIBLE = 0,
+	OPTIONS_MENU_VISIBLE,
+	VIDEO_OPTIONS_MENU_VISIBLE,
+	AUDIO_OPTIONS_MENU_VISIBLE
+};
+
 //! \name Main menu selections
-//! \brief Constants used to cycle through the primary boot menu
-//@{
-const uint32 NEW_GAME  = 0;
-const uint32 LOAD_GAME = 1;
-const uint32 OPTIONS   = 2;
-const uint32 CREDITS   = 3;
-const uint32 QUIT      = 4;
-//@}
+enum MAIN_MENU
+{
+	NEW_GAME  = 0,
+	LOAD_GAME,
+	OPTIONS,
+	CREDITS,
+	QUIT,
+
+	MAIN_MENU_SIZE
+};
 
 //! \name Options menu selections
-//! \brief Constants used to cycle through the options boot menu
-//@{
-const uint32 VIDEO_OPTIONS     = 0;
-const uint32 AUDIO_OPTIONS     = 1;
-const uint32 LANGUAGE_OPTIONS  = 2;
-const uint32 KEYS_OPTIONS      = 3;
-const uint32 JOYSTICK_OPTIONS  = 4;
-//@}
+enum OPTIONS_MENU
+{
+	VIDEO_OPTIONS = 0,
+	AUDIO_OPTIONS,
+	LANGUAGE_OPTIONS,
+	KEYS_OPTIONS,
+	JOYSTICK_OPTIONS,
+	//SET_DEFAULT_OPTIONS = x,
+	BACK_OPTIONS,
+
+	OPTIONS_MENU_SIZE
+};
+
+//! \name Video-options menu selections
+enum VIDEO_OPTIONS_MENU
+{
+	RESOLUTION_VIDEO_OPTIONS = 0,
+	FULLWINDOWED_VIDEO_OPTIONS,
+	BRIGHTNESS_VIDEO_OPTIONS,
+	QUALITY_VIDEO_OPTIONS,
+	BACK_VIDEO_OPTIONS,
+
+	VIDEO_OPTIONS_MENU_SIZE
+};
+
+//! \name Audio-options menu selections
+enum AUDIO_OPTIONS_MENU
+{
+	SOUND_VOLUME_AUDIO_OPTIONS = 0,
+	MUSIC_VOLUME_AUDIO_OPTIONS,
+	BACK_AUDIO_OPTIONS,
+
+	AUDIO_OPTIONS_MENU_SIZE
+};
 
 //! \name Default key settings
 //! \brief The default SDL key mapping used with Allacrost.
@@ -96,16 +133,26 @@ private:
 	//! Music to be used at the boot screen.
 	std::vector<hoa_audio::MusicDescriptor> _boot_music;
 	//! Sounds that will be used at the boot screen.
-	std::vector<hoa_audio::SoundDescriptor> _boot_sound;
+	std::vector<hoa_audio::SoundDescriptor> _boot_sounds;
 	//! Images that will be used at the boot screen.
 	std::vector<hoa_video::StillImage> _boot_images;
 	
 	//! GUI component for the main options.
-	hoa_video::OptionBox _main_options;
+	hoa_video::OptionBox _main_menu;
 	//! GUI component for the setting options.
-	hoa_video::OptionBox _setting_options;
-	//! GUI component for the setting window.
-	hoa_video::MenuWindow _setting_window;
+	hoa_video::OptionBox _options_menu;
+	//! GUI component for the video options.
+	hoa_video::OptionBox _video_options_menu;
+	//! GUI component for the audio options.
+	hoa_video::OptionBox _audio_options_menu;
+	//! GUI component for the settings window.
+	hoa_video::MenuWindow _settings_window;
+
+	//! The currently visible menu index 
+	private_boot::VISIBLE_MENU _current_menu_visible;
+	
+	//! A pointer to the current OptionBox visible
+	hoa_video::OptionBox *_current_menu;
 	
 	/*!
 	 *  \brief Animates the game logo when this class is first initialized.
@@ -123,17 +170,30 @@ private:
 	 *  \param &change_key The key to be re-mapped.
 	 */
 	void _RedefineKey(SDLKey& change_key);
-	
-	//! Updates the game state when "Video" is selected in the options menu.
-	void _UpdateVideoOptions();
-	//! Updates the game state when "Audio" is selected in the options menu.
-	void _UpdateAudioOptions();
-	//! Updates the game state when "Language" is selected in the options menu.
-	void _UpdateLanguageOptions();
-	//! Updates the game state when "Keyboard" is selected in the options menu.
-	void _UpdateKeyOptions();
-	//! Updates the game state when "Joystick" is selected in the options menu.
-	void _UpdateJoystickOptions();
+
+	//! Inits 'default' looks for a given horizontal menu
+	void _InitMenuDefaults(hoa_video::OptionBox & menu);
+	//! Inits 'default' looks for a given vertical menu inside a window
+	void _InitWindowMenuDefaults(hoa_video::OptionBox & menu, hoa_video::MenuWindow & window);
+
+	//! Inits the main menu
+	void _SetupMainMenu();
+	//! Inits the options menu
+	void _SetupOptionsMenu();
+	//! Inits the video-options menu
+	void _SetupVideoOptionsMenu();
+	//! Inits the audio-options menu
+	void _SetupAudioOptionsMenu();
+
+	//! Handles main menu events
+	void _HandleMainMenu(private_boot::MAIN_MENU selection);
+	//! Handles options menu events
+	void _HandleOptionsMenu(private_boot::OPTIONS_MENU selection);
+	//! Handles video-options menu events
+	void _HandleVideoOptionsMenu(private_boot::VIDEO_OPTIONS_MENU selection);
+	//! Handles audio-options menu events
+	void _HandleAudioOptionsMenu(private_boot::AUDIO_OPTIONS_MENU selection);
+
 
 	//! Draws the menu when "Load Game" has been selected in the main menu.
 	void _DrawLoadMenu();
@@ -149,9 +209,9 @@ private:
 	void _DrawKeyOptions();
 	//! Draws the menu when "Joystick" has been selected in the options menu.
 	void _DrawJoystickOptions();
-
 	//! Draws the menu when "Credits" has been selected in the main menu.
 	void _DrawCredits();
+
 public:
 	//! Initializes class members and loads media data.
 	BootMode();
