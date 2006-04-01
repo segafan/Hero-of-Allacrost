@@ -40,7 +40,23 @@ SoundBuffer::SoundBuffer(string fname) {
 	ALenum error_check;
 
 	filename = fname;
+	
+	// Differences between OpenAL 1.* and earlier versions require this function
+	// to be written in very different ways depending on the OpenAL version.
 
+	// For OpenAL 1.*
+	#ifdef ALUT_API_MAJOR_VERSION
+	buffer = alutCreateBufferFromFile(("snd/" + filename + ".wav").c_str());
+	if (buffer == AL_NONE) {
+		cout << "AUDIO ERROR: ALUT could not load WAV file " << "snd/" + filename + ".wav" << endl;
+		cout << "> " << GetALUTErrorString(alutGetError()) << endl;
+		reference_count = 0;
+		return;
+	}
+	reference_count = 1;
+	
+	// For older versions of OpenAL prior to 1.*
+	#else
 	// (1) Generate a new OpenAL buffer and set the _reference_count to one if successful.
 	alGenBuffers(1, &buffer);
 	error_check = alGetError();
@@ -84,6 +100,7 @@ SoundBuffer::SoundBuffer(string fname) {
 		reference_count = 0;
 		return;
 	}
+	#endif
 }
 
 SoundBuffer::~SoundBuffer() {
@@ -321,7 +338,7 @@ void SoundDescriptor::PlaySound() {
 		return;
 	}
 
-	if (_origin == NULL) {
+	if (HasSource() == false) {
 		AllocateSource();
 		if (_origin == NULL) {
 			if (AUDIO_DEBUG) cerr << "AUDIO WARNING: Failed to allocate a sound source for playing a sound." << endl;
@@ -393,12 +410,13 @@ void SoundDescriptor::AllocateSource() {
 	if (_origin != NULL || _data == NULL) {
 		return;
 	}
+	cout << "reallly allocating source..." << endl;
 	_origin = AudioManager->_AcquireSoundSource();
 	if (_origin == NULL) {
 		if (AUDIO_DEBUG) cerr << "AUDIO WARNING: Failed to allocate sound source" << endl;
 		return;
 	}
-
+  cout << "source it up!" << endl;
 	alSourcei(_origin->source, AL_BUFFER, _data->buffer);
 // 	alSourcef(_origin->source,  AL_PITCH,    1.0f     );
 // 	alSourcef(_origin->source,  AL_GAIN,     1.0f     );

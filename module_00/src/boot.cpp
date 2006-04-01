@@ -105,12 +105,23 @@ BootMode::BootMode() {
 // 		_boot_music.push_back(new_music);
 // 		_boot_music[i].LoadMusic(new_music_files[i]);
 // 	}
- 
- 	SoundDescriptor new_sound;
- 	for (uint32 i = 0; i < new_sound_files.size(); i++) {
- 		_boot_sounds.push_back(new_sound);
- 		_boot_sounds[i].LoadSound(new_sound_files[i]);
- 	}
+
+	SoundDescriptor new_sound;
+	_boot_sounds.push_back(new_sound);
+	_boot_sounds.push_back(new_sound);
+	_boot_sounds.push_back(new_sound);
+	_boot_sounds.push_back(new_sound);
+	_boot_sounds[0].LoadSound(new_sound_files[0]);
+	_boot_sounds[1].LoadSound(new_sound_files[1]);
+	_boot_sounds[2].LoadSound(new_sound_files[2]);
+	_boot_sounds[3].LoadSound(new_sound_files[3]);
+	
+	// This loop causes a seg fault for an unknown reason. Roots is looking into it (04/01/2006)
+// 	for (uint32 i = 0; i < new_sound_files.size(); i++) {
+// 		_boot_sounds.push_back(new_sound);
+// 		_boot_sounds[i].LoadSound(new_sound_files[i]);
+// 	}
+
 
 	for (uint32 i = 0; i < _boot_images.size(); i++) {
 		VideoManager->LoadImage(_boot_images[i]);
@@ -131,8 +142,6 @@ BootMode::BootMode() {
 	// Set main menu as our currently selected menu...
 	_current_menu = &_main_menu;
 	_current_menu_visible = MAIN_MENU_VISIBLE;
-
-	if (BOOT_DEBUG) cout << "BOOT MODE CONSTRUCTOR END" << endl;
 }
 
 

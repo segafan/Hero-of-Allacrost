@@ -31,7 +31,7 @@ namespace private_audio {
 
 // Returns an error string corresponding to a particular error code
 string GetALErrorString(ALenum err) {
-	switch(err) {
+	switch (err) {
 		case AL_INVALID_NAME:
 			return "AL_INVALID_NAME";
 			break;
@@ -54,7 +54,7 @@ string GetALErrorString(ALenum err) {
 
 // Returns an error string corresponding to a particular error code
 string GetALCErrorString(ALenum err) {
-	switch(err) {
+	switch (err) {
 		case ALC_INVALID_DEVICE:
 			return "ALC_INVALID_DEVICE";
 			break;
@@ -74,6 +74,73 @@ string GetALCErrorString(ALenum err) {
 			return "AL_NO_ERROR";
 	}
 }
+
+// Returns an error string corresponding to a particular error code
+string GetALUTErrorString(ALenum err) {
+	switch (err) {
+		case (ALUT_ERROR_NO_ERROR):
+			return "ALUT_ERROR_NO_ERROR: No ALUT error found";
+			break;
+		case (ALUT_ERROR_OUT_OF_MEMORY):
+			return "ALUT_ERROR_OUT_OF_MEMORY: ALUT ran out of memory";
+			break;
+		case (ALUT_ERROR_INVALID_ENUM):
+			return "ALUT_ERROR_INVALID_ENUM: ALUT was given an invalid enumeration token";
+			break;
+		case (ALUT_ERROR_INVALID_VALUE):
+			return "ALUT_ERROR_INVALID_VALUE: ALUT was given an invalid value.";
+			break;
+		case (ALUT_ERROR_INVALID_OPERATION):
+			return "ALUT_ERROR_INVALID_OPERATION: The operation is invalid in the current ALUT state";
+			break;
+		case (ALUT_ERROR_NO_CURRENT_CONTEXT):
+			return "ALUT_ERROR_NO_CURRENT_CONTEXT: There is no current AL context";
+			break;
+		case (ALUT_ERROR_AL_ERROR_ON_ENTRY):
+			return "ALUT_ERROR_AL_ERROR_ON_ENTRY: There was already an AL error on entry to alutCreateBufferFromFile";
+			break;
+		case (ALUT_ERROR_ALC_ERROR_ON_ENTRY):
+			return "ALUT_ERROR_ALC_ERROR_ON_ENTRY: There was already an ALC error on entry to alutCreateBufferFromFile";
+			break;
+		case (ALUT_ERROR_OPEN_DEVICE):
+			return "ALUT_ERROR_OPEN_DEVICE: There was an error opening the ALC device";
+			break;
+		case (ALUT_ERROR_CLOSE_DEVICE):
+			return "ALUT_ERROR_CLOSE_DEVICE: There was an error closing the ALC device";
+			break;
+		case (ALUT_ERROR_CREATE_CONTEXT):
+			return "ALUT_ERROR_CREATE_CONTEXT: There was an error creating an ALC context";
+			break;
+		case (ALUT_ERROR_MAKE_CONTEXT_CURRENT):
+			return "ALUT_ERROR_MAKE_CONTEXT_CURRENT: Could not change the current ALC context";
+			break;
+		case (ALUT_ERROR_DESTROY_CONTEXT):
+			return "ALUT_ERROR_DESTROY_CONTEXT: There was an error destroying the ALC context";
+			break;
+		case (ALUT_ERROR_GEN_BUFFERS):
+			return "ALUT_ERROR_GEN_BUFFERS: There was an error generating an AL buffer";
+			break;
+		case (ALUT_ERROR_BUFFER_DATA):
+			return "ALUT_ERROR_BUFFER_DATA: ALUT has not been initialized";
+			break;
+		case (ALUT_ERROR_IO_ERROR):
+			return "ALUT_ERROR_IO_ERROR: I/O error, consult errno for more details";
+			break;
+		case (ALUT_ERROR_UNSUPPORTED_FILE_TYPE):
+			return "ALUT_ERROR_UNSUPPORTED_FILE_TYPE: Unsupported file type";
+			break;
+		case (ALUT_ERROR_UNSUPPORTED_FILE_SUBTYPE):
+			return "ALUT_ERROR_UNSUPPORTED_FILE_SUBTYPE: Unsupported mode within an otherwise usable file type";
+			break;
+		case (ALUT_ERROR_CORRUPT_OR_TRUNCATED_DATA):
+			return "ALUT_ERROR_CORRUPT_OR_TRUNCATED_DATA: The sound data was corrupt or truncated";
+			break;
+		default:
+			return "ALUT Error: An unknown error code wasreturned";
+	} // switch (err)
+} // string GetALUTErrorString(ALenum err)
+
+
 
 // ****************************************************************************
 // ************************ AudioState Class Functions ************************
@@ -137,12 +204,14 @@ void GameAudio::Update() {
 
 // Initializes OpenAL and creates the global audio context
 bool GameAudio::Initialize() {
-	_device = alcOpenDevice(NULL); // Opens the default device
+	// Open the default device
+	_device = alcOpenDevice(NULL); 
 	if (_device == NULL) {
 		cerr << "AUDIO ERROR: Failed to initialize OpenAL and open a default device." << endl;
 		return false;
 	}
 
+	// Create an OpenAL context
 	_context = alcCreateContext(_device, NULL);
 	if (_context == NULL) {
 		cerr << "AUDIO ERROR: Failed to create an OpenAL context." << endl;
@@ -151,7 +220,15 @@ bool GameAudio::Initialize() {
 	}
 	alcMakeContextCurrent(_context);
 	alGetError(); // Clear the error code
+	
+	// Initialize ALUT without a context (it has already been created)
+	if (alutInitWithoutContext(NULL, NULL) == AL_FALSE) {
+		cerr << "AUDIO ERROR: Failed to initialize ALUT" << endl;
+		cerr << "> " << GetALUTErrorString(alutGetError()) << endl;
+		return false;
+	}
 
+	// Create a single source for music
 	_music_source = new MusicSource();
 	if (!_music_source->IsValid()) {
 		cerr << "AUDIO ERROR: Failed to create a single source." << endl;
@@ -179,6 +256,7 @@ bool GameAudio::Initialize() {
 	}
 
 	if (AUDIO_DEBUG) cout << "AUDIO: Allocated " << _sound_sources.size() + 1 << " audio sources." << endl;
+	DEBUG_PrintInfo();
 	return true;
 }
 
@@ -232,7 +310,7 @@ SoundSource* GameAudio::_AcquireSoundSource() {
 	alGetSourcei(_sound_sources.back()->source, AL_SOURCE_STATE, &state);
 
 	if (state == AL_PLAYING) {
-		if (AUDIO_DEBUG) cerr << "AUDIO WARNING: All sources are occupied!" << endl;
+		if (AUDIO_DEBUG) cerr << "AUDIO WARNING: All sound sources are occupied, force stopping a source" << endl;
 		// Stop this source and release it.
 		alSourceStop(_sound_sources.back()->source);
 		_ReleaseSoundSource(_sound_sources.back());
@@ -427,24 +505,24 @@ void GameAudio::SetDistanceModel(uint8 model) {
 		case AUDIO_DISTANCE_NONE:
 			dist_model = AL_NONE;
 			break;
-// 		case AUDIO_DISTANCE_LINEAR:
-// 			dist_model = AL_LINEAR;
-// 			break;
-// 		case AUDIO_DISTANCE_LINEAR_CLAMPED:
-// 			dist_model = AL_LINEAR_CLAMPED;
-// 			break;
+		case AUDIO_DISTANCE_LINEAR:
+			dist_model = AL_LINEAR_DISTANCE;
+			break;
+		case AUDIO_DISTANCE_LINEAR_CLAMPED:
+			dist_model = AL_LINEAR_DISTANCE_CLAMPED;
+			break;
 		case AUDIO_DISTANCE_INVERSE:
 			dist_model = AL_INVERSE_DISTANCE;
 			break;
 		case AUDIO_DISTANCE_INVERSE_CLAMPED:
 			dist_model = AL_INVERSE_DISTANCE_CLAMPED;
 			break;
-// 		case AUDIO_DISTANCE_EXPONENT:
-// 			dist_model = AL_EXPONENT;
-// 			break;
-// 		case AUDIO_DISTANCE_EXPONENT_CLAMPED:
-// 			dist_model = AL_EXPONENT_CLAMPED;
-// 			break;
+		case AUDIO_DISTANCE_EXPONENT:
+			dist_model = AL_EXPONENT_DISTANCE;
+			break;
+		case AUDIO_DISTANCE_EXPONENT_CLAMPED:
+			dist_model = AL_EXPONENT_DISTANCE_CLAMPED;
+			break;
 		default:
 			if (AUDIO_DEBUG) cerr << "AUDIO WARNING: attempted to set an invalid distance model: " << model << endl;
 			return;
@@ -457,13 +535,15 @@ void GameAudio::SetDistanceModel(uint8 model) {
 // Prints information about that audio settings on the user's machine
 void GameAudio::DEBUG_PrintInfo() {
 	cout << "*** Audio Information ***" << endl;
-	cout << "List of available audio devices: " << alcGetString(_device, ALC_DEVICE_SPECIFIER) << endl;
-	cout << "Default audio device:            " << alcGetString(_device, ALC_DEFAULT_DEVICE_SPECIFIER) << endl;
-	cout << "OpenAL Version:                  " << alGetString(AL_VERSION) << endl;
-	cout << "OpenAL Renderer:                 " << alGetString(AL_RENDERER) << endl;
-	cout << "OpenAL Vendor:                   " << alGetString(AL_VENDOR) << endl;
-	cout << "OpenAL Available Extensions:     " << alGetString(AL_EXTENSIONS) << endl;
-	cout << "Available number of sources:     " << (_sound_sources.size() + 1) << endl;
+	cout << "Available audio devices:        " << alcGetString(_device, ALC_DEVICE_SPECIFIER) << endl;
+	cout << "Default audio device:           " << alcGetString(_device, ALC_DEFAULT_DEVICE_SPECIFIER) << endl;
+	cout << "OpenAL Version:                 " << alGetString(AL_VERSION) << endl;
+	cout << "OpenAL Renderer:                " << alGetString(AL_RENDERER) << endl;
+	cout << "OpenAL Vendor:                  " << alGetString(AL_VENDOR) << endl;
+	cout << "OpenAL Available Extensions:    " << alGetString(AL_EXTENSIONS) << endl;
+	cout << "ALUT Major Version:             " << alutGetMajorVersion() << endl;
+	cout << "ALUT Minor Version:             " << alutGetMinorVersion() << endl;
+	cout << "Audio sources available:        " << (_sound_sources.size() + 1) << endl;
 }
 
 } // namespace hoa_audio

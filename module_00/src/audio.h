@@ -95,6 +95,9 @@ const uint16 SOURCE_CONE_OUTER_GAIN    = 0x1000;
 std::string GetALErrorString(ALenum err);
 //! Converts the OpenALC enum error codes into a string.
 std::string GetALCErrorString(ALenum err);
+//! Converts the ALUT enum error codes into a string.
+//! \note ALUT provides a function alutGetErrorString that does this, but the precise text description varies between implementations
+std::string GetALUTErrorString(ALenum err);
 
 /*!****************************************************************************
  * \brief An internal class used for retaining audio state information.

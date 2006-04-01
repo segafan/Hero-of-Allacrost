@@ -6,8 +6,8 @@
 video_defaults = {screen_resx = 1024, screen_resy = 768, full_screen = true};
 video_settings = {screen_resx = 1024, screen_resy = 768, full_screen = true};
 
-audio_defaults = {music_vol = 128, sound_vol = 128};
-audio_settings = {music_vol = 128, sound_vol = 128};
+audio_defaults = {music_vol = 1.0, sound_vol = 1.0};
+audio_settings = {music_vol = 1.0, sound_vol = 1.0};
 
 -- Default Language: English = 0
 language_defaults = 0;
