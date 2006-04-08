@@ -44,7 +44,7 @@ SoundBuffer::SoundBuffer(string fname) {
 	// Differences between OpenAL 1.* and earlier versions require this function
 	// to be written in very different ways depending on the OpenAL version.
 
-	// For OpenAL 1.*
+	// For OpenAL version 1.*, otherwise known as freealut
 	#ifdef ALUT_API_MAJOR_VERSION
 	buffer = alutCreateBufferFromFile(("snd/" + filename + ".wav").c_str());
 	if (buffer == AL_NONE) {
@@ -105,7 +105,8 @@ SoundBuffer::SoundBuffer(string fname) {
 
 SoundBuffer::~SoundBuffer() {
 	if (reference_count != 0) {
-		cerr << "AUDIO WARNING: Deletion of a sound buffer that does not have a zero reference count." << endl;
+		cerr << "AUDIO WARNING: Audio engine is attempting to delete buffer " << filename 
+		     << ", which still has " << reference_count << " number of references to it." << endl;
 	}
 	alDeleteBuffers(1, &buffer);
 	// Remove the element from the sound buffer map
@@ -124,9 +125,7 @@ bool SoundBuffer::IsValid() {
 	if (alIsBuffer(buffer) == AL_TRUE) {
 		return true;
 	}
-	else {
-		return false;
-	}
+	return false;
 }
 
 void SoundBuffer::DEBUG_PrintProperties() {
@@ -410,13 +409,11 @@ void SoundDescriptor::AllocateSource() {
 	if (_origin != NULL || _data == NULL) {
 		return;
 	}
-	cout << "reallly allocating source..." << endl;
 	_origin = AudioManager->_AcquireSoundSource();
 	if (_origin == NULL) {
 		if (AUDIO_DEBUG) cerr << "AUDIO WARNING: Failed to allocate sound source" << endl;
 		return;
 	}
-  cout << "source it up!" << endl;
 	alSourcei(_origin->source, AL_BUFFER, _data->buffer);
 // 	alSourcef(_origin->source,  AL_PITCH,    1.0f     );
 // 	alSourcef(_origin->source,  AL_GAIN,     1.0f     );

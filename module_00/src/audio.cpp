@@ -178,7 +178,7 @@ GameAudio::~GameAudio() {
 	}
 	_sound_sources.clear();
 
-	// ************ (2) Delete all audio buffers ******************
+	// ************ (2) Delete all music and sound buffers ******************
 	for (std::map<string, MusicBuffer*>::iterator i = _music_buffers.begin(); i != _music_buffers.end(); i++) {
 		delete(i->second);
 	}
@@ -221,12 +221,15 @@ bool GameAudio::Initialize() {
 	alcMakeContextCurrent(_context);
 	alGetError(); // Clear the error code
 	
+	// Only necessary to initialize ALUT for version 1.*, aka freealut
+	#ifdef ALUT_API_MAJOR_VERSION
 	// Initialize ALUT without a context (it has already been created)
 	if (alutInitWithoutContext(NULL, NULL) == AL_FALSE) {
 		cerr << "AUDIO ERROR: Failed to initialize ALUT" << endl;
 		cerr << "> " << GetALUTErrorString(alutGetError()) << endl;
 		return false;
 	}
+	#endif
 
 	// Create a single source for music
 	_music_source = new MusicSource();
@@ -263,41 +266,49 @@ bool GameAudio::Initialize() {
 
 // Returns a pointer to the sound buffer for the file. Loads the file from memory if it isn't already. Returns NULL if there was an error.
 SoundBuffer* GameAudio::_AcquireSoundBuffer(string filename) {
-	if (_sound_buffers.find(filename) == _sound_buffers.end()) { // Then the sound isn't in the buffer map, so load it.
+	// If the buffer in question is already loaded, return a pointer to it.
+	if (_sound_buffers.find(filename) != _sound_buffers.end()) { 
+		return _sound_buffers[filename];
+	}
+	
+	// The buffer is not loaded, so create a new one, place it in the pool of buffers, and return a pointer to it
+	else {
 		SoundBuffer *SB = new SoundBuffer(filename);
-		if (!SB->IsValid()) {
-			// No error code is set here, because this function is only called from LoadSound() in SoundDescriptor
+		// Return a pointer to the new buffer if it was created successfully, otherwise return NULL.
+		if (SB->IsValid()) {
+			_sound_buffers[filename] = SB;
+			return SB;
+		}
+		else {
+			// Note: No error code is set here because this function is only called from LoadMusic() in MusicDescriptor
 			if (AUDIO_DEBUG) cerr << "AUDIO ERROR: Unable to create a new SoundBuffer" << endl;
 			delete(SB);
 			return NULL;
 		}
-		else {
-			_sound_buffers[filename] = SB;
-			return SB;
-		}
-	}
-	else { // The file is already loaded, so return a pointer to its buffer
-		return _sound_buffers[filename];
 	}
 }
 
 // Returns a pointer to the music buffer for the file. Loads the file from memory if it isn't already. Returns NULL if there was an error.
 MusicBuffer* GameAudio::_AcquireMusicBuffer(string filename) {
-	if (_music_buffers.find(filename) == _music_buffers.end()) { // Then the music isn't in the buffer map, so load it.
+	// If the buffer in question is already loaded, return a pointer to it.
+	if (_music_buffers.find(filename) != _music_buffers.end()) { 
+		return _music_buffers[filename];
+	}
+	
+	// The buffer is not loaded, so create a new one, place it in the pool of buffers, and return a pointer to it
+	else {
 		MusicBuffer *MB = new MusicBuffer(filename);
-		if (!MB->IsValid()) {
-			// No error code is set here, because this function is only called from LoadMusic() in MusicDescriptor
+		// Return a pointer to the new buffer if it was created successfully, otherwise return NULL.
+		if (MB->IsValid()) {
+			_music_buffers[filename] = MB;
+			return MB;
+		}
+		else {
+			// Note: No error code is set here because this function is only called from LoadMusic() in MusicDescriptor
 			if (AUDIO_DEBUG) cerr << "AUDIO ERROR: Unable to create a new MusicBuffer" << endl;
 			delete(MB);
 			return NULL;
 		}
-		else {
-			_music_buffers[filename] = MB;
-			return MB;
-		}
-	}
-	else { // The file is already loaded, so return a pointer to its buffer
-		return _music_buffers[filename];
 	}
 }
 
@@ -445,8 +456,6 @@ void GameAudio::RewindAllSounds() {
 	}
 }
 
-
-
 void GameAudio::PauseAllMusic() {
 	if (_music_source->owner != NULL) {
 		_music_source->owner->PauseMusic();
@@ -474,26 +483,25 @@ void GameAudio::RewindAllMusic() {
 
 uint8 GameAudio::GetDistanceModel() {
 	ALint al_model;
-
 	al_model = alGetInteger(AL_DISTANCE_MODEL);
 
 	switch (al_model) {
 		case AL_NONE:
 			return AUDIO_DISTANCE_NONE;
-// 		case AL_LINEAR:
-// 			return AUDIO_DISTANCE_LINEAR;
-// 		case AL_LINEAR_CLAMPED:
-// 			return AUDIO_DISTANCE_LINEAR_CLAMPED;
+		case AL_LINEAR_DISTANCE:
+			return AUDIO_DISTANCE_LINEAR;
+		case AL_LINEAR_DISTANCE_CLAMPED:
+			return AUDIO_DISTANCE_LINEAR_CLAMPED;
 		case AL_INVERSE_DISTANCE:
 			return AUDIO_DISTANCE_INVERSE;
 		case AL_INVERSE_DISTANCE_CLAMPED:
 			return AUDIO_DISTANCE_INVERSE_CLAMPED;
-// 		case AL_EXPONENT:
-// 			return AUDIO_DISTANCE_EXPONENT;
-// 		case AL_EXPONENT_CLAMPED:
-// 			return AUDIO_DISTANCE_EXPONENT_CLAMPED;
+		case AL_EXPONENT_DISTANCE:
+			return AUDIO_DISTANCE_EXPONENT;
+		case AL_EXPONENT_DISTANCE_CLAMPED:
+			return AUDIO_DISTANCE_EXPONENT_CLAMPED;
 		default:
-			if (AUDIO_DEBUG) cerr << "AUDIO WARNING: using unknown OpenAL distance model: " << al_model << endl;
+			if (AUDIO_DEBUG) cerr << "AUDIO WARNING: engine is using an unknown distance model: " << al_model << endl;
 			return 0;
 	}
 }
@@ -524,7 +532,7 @@ void GameAudio::SetDistanceModel(uint8 model) {
 			dist_model = AL_EXPONENT_DISTANCE_CLAMPED;
 			break;
 		default:
-			if (AUDIO_DEBUG) cerr << "AUDIO WARNING: attempted to set an invalid distance model: " << model << endl;
+			if (AUDIO_DEBUG) cerr << "AUDIO WARNING: attempted to use an invalid distance model: " << model << endl;
 			return;
 	}
 	alDistanceModel(dist_model);
@@ -535,15 +543,22 @@ void GameAudio::SetDistanceModel(uint8 model) {
 // Prints information about that audio settings on the user's machine
 void GameAudio::DEBUG_PrintInfo() {
 	cout << "*** Audio Information ***" << endl;
-	cout << "Available audio devices:        " << alcGetString(_device, ALC_DEVICE_SPECIFIER) << endl;
-	cout << "Default audio device:           " << alcGetString(_device, ALC_DEFAULT_DEVICE_SPECIFIER) << endl;
-	cout << "OpenAL Version:                 " << alGetString(AL_VERSION) << endl;
-	cout << "OpenAL Renderer:                " << alGetString(AL_RENDERER) << endl;
-	cout << "OpenAL Vendor:                  " << alGetString(AL_VENDOR) << endl;
-	cout << "OpenAL Available Extensions:    " << alGetString(AL_EXTENSIONS) << endl;
-	cout << "ALUT Major Version:             " << alutGetMajorVersion() << endl;
-	cout << "ALUT Minor Version:             " << alutGetMinorVersion() << endl;
-	cout << "Audio sources available:        " << (_sound_sources.size() + 1) << endl;
+	cout << "Available audio devices:     " << alcGetString(_device, ALC_DEVICE_SPECIFIER) << endl;
+	cout << "Default audio device:        " << alcGetString(_device, ALC_DEFAULT_DEVICE_SPECIFIER) << endl;
+	cout << "OpenAL Version:              " << alGetString(AL_VERSION) << endl;
+	cout << "OpenAL Renderer:             " << alGetString(AL_RENDERER) << endl;
+	cout << "OpenAL Vendor:               " << alGetString(AL_VENDOR) << endl;
+	cout << "OpenAL Available Extensions: " << alGetString(AL_EXTENSIONS) << endl;
+	
+	#ifdef ALUT_API_MAJOR_VERSION
+	cout << "ALUT Major Version:          " << alutGetMajorVersion() << endl;
+	cout << "ALUT Minor Version:          " << alutGetMinorVersion() << endl;
+	#else
+	cout << "ALUT Major Version:          " << "not available" << endl;
+	cout << "ALUT Minor Version:          " << "not available" << endl;
+	#endif
+	
+	cout << "Audio sources created:       " << (_sound_sources.size() + 1) << endl;
 }
 
 } // namespace hoa_audio
