@@ -77,6 +77,8 @@ string GetALCErrorString(ALenum err) {
 
 // Returns an error string corresponding to a particular error code
 string GetALUTErrorString(ALenum err) {
+	// For OpenAL version 1.*, otherwise known as freealut
+	#ifdef ALUT_API_MAJOR_VERSION
 	switch (err) {
 		case (ALUT_ERROR_NO_ERROR):
 			return "ALUT_ERROR_NO_ERROR: No ALUT error found";
@@ -136,8 +138,14 @@ string GetALUTErrorString(ALenum err) {
 			return "ALUT_ERROR_CORRUPT_OR_TRUNCATED_DATA: The sound data was corrupt or truncated";
 			break;
 		default:
-			return "ALUT Error: An unknown error code wasreturned";
+			return "ALUT Error: An unknown error code was returned";
 	} // switch (err)
+	
+	#else 
+		// This function will probably never be called if ALUT_API_MAJOR_VERSION is not defined, thus this
+		// statement should never be reached.
+		return "ALUT Error: This ALUT version does not support error codes";
+	#endif /* ALUT_API_MAJOR_VERSION */
 } // string GetALUTErrorString(ALenum err)
 
 
