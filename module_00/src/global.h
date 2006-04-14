@@ -270,38 +270,18 @@ private:
 	uint32 _defense;
 	uint32 _support;
 
-	/*
-
-	Okay, if there is a warmup time when we select the skill,
-	we put the character straight into warmup mode, passing in a
-	new SkillAction.  Otherwise, set them as having a new action.
-	This way, we don't have to hack up a warmupaction and cooldownaction.
-
-	So upon selecting a skill from the battle mode gui, check if the
-	character should go into a warmup mode.
-
-	*/
-	uint32 _warmUpTime;
-	uint32 _coolDownTime;
-
 	//! The level required to use this skill
 	uint32 _levelRequired;
 	uint32 _numArguments;
 
-	hoa_battle::Actor *_host;
-	std::vector<hoa_battle::Actor *> _arguments;
-	std::vector<hoa_battle::BattleAction *> _actions;
 public:
 
 	GlobalSkill(std::string name, uint32 sp);
 	GlobalSkill();
 	~GlobalSkill();
 
-	void PerformSkill(hoa_battle::Actor *a, std::vector<hoa_battle::Actor *> args);
-	void AddBattleAction(hoa_battle::BattleAction *bsa);
-
-	uint32 GetCooldownTime();
-	uint32 GetWarmupTime();
+	uint32 GetCooldownTime() {}
+	uint32 GetWarmupTime() {}
 };
 
 /*!****************************************************************************
@@ -420,7 +400,8 @@ private:
 	//! The various attack points for the enemy.
 	std::vector<GlobalAttackPoint> _attack_points;
 	//! The frame images for the enemy sprite.
-	std::vector<hoa_video::StillImage> _sprite_frames;
+	std::map<std::string, std::vector<hoa_video::StillImage> > _sprite_animations; 
+	//std::vector<hoa_video::StillImage> _sprite_frames;
 
 	//! The current number of hit points for the enemy.
 	uint32 _hit_points;
@@ -440,6 +421,9 @@ private:
 	uint32 _intelligence;
 	//! The agility index of the enemy.
 	uint32 _agility;
+	
+	//! The speed which the character should move in battle
+	uint32 _movementSpeed;
 
 	//! \name Starting Base Statistics
 	//@{
@@ -488,47 +472,50 @@ public:
 	 */
 	void LevelSimulator(uint32 lvl);
 
-	std::string GetName() { return _enemy_name; }
+	std::string GetName() const { return _enemy_name; }
 
 	//! \name Public Member Access Functions
 	//@{
 	//! \brief Used for setting and getting the values of the various class members.
 	void SetHP(uint32 hp) { _hit_points = hp; }
-	uint32 GetHP() { return _hit_points; }
+	uint32 GetHP() const { return _hit_points; }
 	void SetMaxHP(uint32 max_hp) { _max_hit_points = max_hp; }
-	uint32 GetMaxHP() { return _max_hit_points; }
+	uint32 GetMaxHP() const { return _max_hit_points; }
 	void SetSP(uint32 sp) { _skill_points = sp; }
-	uint32 GetSP() { return _skill_points; }
+	uint32 GetSP() const { return _skill_points; }
 	void SetMaxSP(uint32 sp) { _max_skill_points = sp; }
-	uint32 GetMaxSP() { return _max_skill_points; }
+	uint32 GetMaxSP() const { return _max_skill_points; }
 	void SetXP(uint32 xp) { _experience_points = xp; }
-	uint32 GetXP() { return _experience_points; }
+	uint32 GetXP() const { return _experience_points; }
 	void SetXPLevel(uint32 xp_lvl) { _experience_level = xp_lvl; }
-	uint32 GetXPLevel() { return _experience_level; }
+	uint32 GetXPLevel() const { return _experience_level; }
 	void SetStrength(uint32 str) { _strength = str; }
-	uint32 GetStrength() { return _strength; }
+	uint32 GetStrength() const { return _strength; }
 	void SetIntelligence(uint32 intel) { _intelligence = intel; }
-	uint32 GetIntelligence() { return _intelligence; }
+	uint32 GetIntelligence() const { return _intelligence; }
 	void SetAgility(uint32 agi) { _agility = agi; }
-	uint32 GetAgility() { return _agility; }
-
-	//!Added by visage November 16
-	uint32 GetBaseHitPoints() { return _base_hit_points; }
-	uint32 GetBaseSkillPoints() { return _base_skill_points; }
-	uint32 GetBaseExperiencePoints() { return _base_experience_points; }
-	uint32 GetBaseStrength() { return _base_strength; }
-	uint32 GetBaseIntelligence() { return _base_intelligence; }
-	uint32 GetBaseAgility() { return _base_agility; }
-	uint32 GetGrowthHitPoints() { return _growth_hit_points; }
-	uint32 GetGrowthSkillPoints() { return _growth_skill_points; }
-	uint32 GetGrowthExperiencePoints() { return _growth_experience_points; }
-	uint32 GetGrowthStrength() { return _growth_strength; }
-	uint32 GetGrowthIntelligence() { return _growth_intelligence; }
-	uint32 GetGrowthAgility() { return _growth_agility; }
-	std::vector<GlobalSkill *> GetSkills() { return _enemy_skills; }
-	std::vector<GlobalAttackPoint> GetAttackPoints() { return _attack_points; }
+	uint32 GetAgility() const { return _agility; }
+	void SetMovementSpeed(uint32 ms) { _movementSpeed = ms; }
+	uint32 GetMovementSpeed() const { return _movementSpeed; }
+	
+	uint32 GetBaseHitPoints() const { return _base_hit_points; }
+	uint32 GetBaseSkillPoints() const { return _base_skill_points; }
+	uint32 GetBaseExperiencePoints() const { return _base_experience_points; }
+	uint32 GetBaseStrength() const { return _base_strength; }
+	uint32 GetBaseIntelligence() const { return _base_intelligence; }
+	uint32 GetBaseAgility() const { return _base_agility; }
+	uint32 GetGrowthHitPoints() const { return _growth_hit_points; }
+	uint32 GetGrowthSkillPoints() const { return _growth_skill_points; }
+	uint32 GetGrowthExperiencePoints() const { return _growth_experience_points; }
+	uint32 GetGrowthStrength() const { return _growth_strength; }
+	uint32 GetGrowthIntelligence() const { return _growth_intelligence; }
+	uint32 GetGrowthAgility() const { return _growth_agility; }
+	const std::vector<GlobalSkill *> GetSkills() const { return _enemy_skills; }
+	const std::vector<GlobalAttackPoint> GetAttackPoints() const { return _attack_points; }
 
 	void AddSkill(GlobalSkill *sk) { _enemy_skills.push_back(sk); }
+	void AddAnimation(std::string anim, std::vector<hoa_video::StillImage> v) { _sprite_animations[anim] = v; }
+	std::vector<hoa_video::StillImage> GetAnimation(std::string anim) { return _sprite_animations[anim]; }
 	//@}
 }; // class GlobalEnemy
 
@@ -556,11 +543,11 @@ private:
 	//! The weapon that the character currently has equipped.
 	GlobalWeapon *_eq_weapon;
 	//! The head armor that the character currently has equipped.
-	GlobalArmor *_eq_head;
+        GlobalArmor *_eq_head;
 	//! The body armor that the character currently has equipped.
 	GlobalArmor *_eq_body;
 	//! The arm armor that the character currently has equipped.
-	GlobalArmor *_eq_arms;
+        GlobalArmor *_eq_arms;
 	//! The leg armor that the character currently has equipped.
 	GlobalArmor *_eq_legs;
 	//! The attack skills the character can currently use.
@@ -591,11 +578,14 @@ private:
 	uint32 _intelligence;
 	//! The character's agility index.
 	uint32 _agility;
+	
+	//! The speed which the character should move in battle
+	uint32 _movementSpeed;
 
 	//! The frame images for the character's map sprite.
 	std::vector<hoa_video::StillImage> _map_frames;
 	//! The frame images for the character's battle sprite.
-	std::vector<hoa_video::StillImage> _battle_frames;
+	std::map<std::string, hoa_video::AnimatedImage> _battle_animation;
 public:
 	GlobalCharacter(std::string na, std::string fn, uint32 id);
 	~GlobalCharacter();
@@ -652,6 +642,9 @@ public:
 	void AddAttackSkill(GlobalSkill *sk) { _attack_skills.push_back(sk); }
 	void AddDefenseSkill(GlobalSkill *sk) { _defense_skills.push_back(sk); }
 	void AddSupportSkill(GlobalSkill *sk) { _support_skills.push_back(sk); }
+	
+	uint32 GetMovementSpeed() { return _movementSpeed; }
+	void SetMovementSpeed(uint32 ms) { _movementSpeed = ms; }
 	//@}
 };
 
