@@ -19,12 +19,8 @@
 #include "utils.h"
 #include "video.h"
 
-//<<<<<<< global.cpp
-#include "battle_actions.h"
 #include <string>
-//=======
 
-//>>>>>>> 1.22
 
 using namespace std;
 using namespace hoa_video;
@@ -142,34 +138,7 @@ GlobalSkill::GlobalSkill() {
 
 
 GlobalSkill::~GlobalSkill() {
-	for(unsigned int i = 0; i < _actions.size(); i++) {
-		delete _actions[i];
-	}
-}
 
-void GlobalSkill::PerformSkill(hoa_battle::Actor *a, std::vector<hoa_battle::Actor *> args) {
-	_host = a;
-	//add all the actions to the player to perform
-	for(int i = 0; i < _arguments.size(); i++) {
-		_actions[i]->Initialize(this, a, args);
-		a->AddBattleAction(_actions[i]);
-	}
-	//this will destruct the skill
-	hoa_battle::FinishSkill *fa = new hoa_battle::FinishSkill();
-	fa->Initialize(this, a, args);
-	a->AddBattleAction(fa);
-}
-
-void GlobalSkill::AddBattleAction(hoa_battle::BattleAction *bsa) {
-	_actions.push_back(bsa);
-}
-
-uint32 GlobalSkill::GetCooldownTime() {
-	return _coolDownTime;
-}
-
-uint32 GlobalSkill::GetWarmupTime() {
-	return _warmUpTime;
 }
 
 // ****************************************************************************
@@ -209,7 +178,17 @@ GlobalAttackPoint::~GlobalAttackPoint() {}
 // ******************************** GlobalEnemy ************************************
 // ****************************************************************************
 
-GlobalEnemy::GlobalEnemy() { }
+GlobalEnemy::GlobalEnemy() :
+	_base_hit_points(20),
+	_growth_hit_points(5),
+	_base_strength(1),
+	_growth_strength(1),
+	_base_intelligence(1),
+	_growth_intelligence(1),
+	_base_agility(1),
+	_growth_agility(1)
+{ 
+}
 
 GlobalEnemy::~GlobalEnemy() { }
 
@@ -230,6 +209,9 @@ void GlobalEnemy::LevelSimulator(uint32 lvl) {
 	_strength = GaussianValue(_strength, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
 	_intelligence = GaussianValue(_intelligence, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
 	_agility = GaussianValue(_agility, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
+	
+	_hit_points = _max_hit_points;
+	_movementSpeed = 5 + _agility%5;
 }
 
 // ****************************************************************************
@@ -246,56 +228,56 @@ GlobalCharacter::GlobalCharacter(std::string na, std::string fn, uint32 id) {
 	// Prepare standard sprite animation frames (24 count)
 	StillImage imd;
 	imd.SetDimensions(1.0f, 2.0f);
-	imd.SetFilename("img/sprites/map/" + _filename + "_d0.png");
+	imd.SetFilename("img/sprites/map/" + _filename + "_d0.tif");
 	_map_frames.push_back(imd);
-	imd.SetFilename("img/sprites/map/" + _filename + "_d1.png");
+	imd.SetFilename("img/sprites/map/" + _filename + "_d1.tif");
 	_map_frames.push_back(imd);
-	imd.SetFilename("img/sprites/map/" + _filename + "_d2.png");
+	imd.SetFilename("img/sprites/map/" + _filename + "_d2.tif");
 	_map_frames.push_back(imd);
-	imd.SetFilename("img/sprites/map/" + _filename + "_d3.png");
+	imd.SetFilename("img/sprites/map/" + _filename + "_d3.tif");
 	_map_frames.push_back(imd);
-	imd.SetFilename("img/sprites/map/" + _filename + "_d4.png");
+	imd.SetFilename("img/sprites/map/" + _filename + "_d4.tif");
 	_map_frames.push_back(imd);
-	imd.SetFilename("img/sprites/map/" + _filename + "_d5.png");
-	_map_frames.push_back(imd);
-
-	imd.SetFilename("img/sprites/map/" + _filename + "_u0.png");
-	_map_frames.push_back(imd);
-	imd.SetFilename("img/sprites/map/" + _filename + "_u1.png");
-	_map_frames.push_back(imd);
-	imd.SetFilename("img/sprites/map/" + _filename + "_u2.png");
-	_map_frames.push_back(imd);
-	imd.SetFilename("img/sprites/map/" + _filename + "_u3.png");
-	_map_frames.push_back(imd);
-	imd.SetFilename("img/sprites/map/" + _filename + "_u4.png");
-	_map_frames.push_back(imd);
-	imd.SetFilename("img/sprites/map/" + _filename + "_u5.png");
+	imd.SetFilename("img/sprites/map/" + _filename + "_d5.tif");
 	_map_frames.push_back(imd);
 
-	imd.SetFilename("img/sprites/map/" + _filename + "_l0.png");
+	imd.SetFilename("img/sprites/map/" + _filename + "_u0.tif");
 	_map_frames.push_back(imd);
-	imd.SetFilename("img/sprites/map/" + _filename + "_l1.png");
+	imd.SetFilename("img/sprites/map/" + _filename + "_u1.tif");
 	_map_frames.push_back(imd);
-	imd.SetFilename("img/sprites/map/" + _filename + "_l2.png");
+	imd.SetFilename("img/sprites/map/" + _filename + "_u2.tif");
 	_map_frames.push_back(imd);
-	imd.SetFilename("img/sprites/map/" + _filename + "_l3.png");
+	imd.SetFilename("img/sprites/map/" + _filename + "_u3.tif");
 	_map_frames.push_back(imd);
-	imd.SetFilename("img/sprites/map/" + _filename + "_l4.png");
+	imd.SetFilename("img/sprites/map/" + _filename + "_u4.tif");
 	_map_frames.push_back(imd);
-	imd.SetFilename("img/sprites/map/" + _filename + "_l5.png");
+	imd.SetFilename("img/sprites/map/" + _filename + "_u5.tif");
 	_map_frames.push_back(imd);
 
-	imd.SetFilename("img/sprites/map/" + _filename + "_r0.png");
+	imd.SetFilename("img/sprites/map/" + _filename + "_l0.tif");
 	_map_frames.push_back(imd);
-	imd.SetFilename("img/sprites/map/" + _filename + "_r1.png");
+	imd.SetFilename("img/sprites/map/" + _filename + "_l1.tif");
 	_map_frames.push_back(imd);
-	imd.SetFilename("img/sprites/map/" + _filename + "_r2.png");
+	imd.SetFilename("img/sprites/map/" + _filename + "_l2.tif");
 	_map_frames.push_back(imd);
-	imd.SetFilename("img/sprites/map/" + _filename + "_r3.png");
+	imd.SetFilename("img/sprites/map/" + _filename + "_l3.tif");
 	_map_frames.push_back(imd);
-	imd.SetFilename("img/sprites/map/" + _filename + "_r4.png");
+	imd.SetFilename("img/sprites/map/" + _filename + "_l4.tif");
 	_map_frames.push_back(imd);
-	imd.SetFilename("img/sprites/map/" + _filename + "_r5.png");
+	imd.SetFilename("img/sprites/map/" + _filename + "_l5.tif");
+	_map_frames.push_back(imd);
+
+	imd.SetFilename("img/sprites/map/" + _filename + "_r0.tif");
+	_map_frames.push_back(imd);
+	imd.SetFilename("img/sprites/map/" + _filename + "_r1.tif");
+	_map_frames.push_back(imd);
+	imd.SetFilename("img/sprites/map/" + _filename + "_r2.tif");
+	_map_frames.push_back(imd);
+	imd.SetFilename("img/sprites/map/" + _filename + "_r3.tif");
+	_map_frames.push_back(imd);
+	imd.SetFilename("img/sprites/map/" + _filename + "_r4.tif");
+	_map_frames.push_back(imd);
+	imd.SetFilename("img/sprites/map/" + _filename + "_r5.tif");
 	_map_frames.push_back(imd);
 
 	VideoManager->BeginImageLoadBatch();
@@ -303,6 +285,8 @@ GlobalCharacter::GlobalCharacter(std::string na, std::string fn, uint32 id) {
 		VideoManager->LoadImage(_map_frames[i]);
 	}
 	VideoManager->EndImageLoadBatch();
+	
+	_movementSpeed = 5;
 }
 
 
@@ -310,8 +294,13 @@ GlobalCharacter::GlobalCharacter(std::string na, std::string fn, uint32 id) {
 GlobalCharacter::~GlobalCharacter() {
 	if (GLOBAL_DEBUG) cout << "GLOBAL: GlobalCharacter destructor invoked" << endl;
 	GameVideo *VideoManager = GameVideo::GetReference();
-	for (uint32 i = 0; i < _battle_frames.size(); i++) {
+	/*for (uint32 i = 0; i < _battle_frames.size(); i++) {
 		VideoManager->DeleteImage(_battle_frames[i]);
+	}*/
+	
+	std::map<std::string, hoa_video::AnimatedImage>::iterator it = _battle_animation.begin();
+	for(; it != _battle_animation.end(); it++) {
+		//VideoManager->DeleteImage((*it->second));
 	}
 }
 
@@ -330,77 +319,6 @@ void GlobalCharacter::AddXP(uint32 xp)
 	//}
 }
 
-/*
-<<<<<<< global.cpp
-
-void GlobalCharacter::LoadFrames() {
-	GameVideo *VideoManager = GameVideo::GetReference();
-	StillImage imd;
-	string full_name = "img/sprites/map/" + _filename;
-	imd.SetDimensions(1.0f, 2.0f);
-
-	imd.SetFilename(full_name + "_d1.jpg");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_d2.jpg");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_d3.jpg");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_d4.jpg");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_d5.jpg");
-	_map_frames.push_back(imd);
-
-	imd.SetFilename(full_name + "_u1.jpg");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_u2.jpg");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_u3.jpg");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_u4.jpg");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_u5.jpg");
-	_map_frames.push_back(imd);
-
-	imd.SetFilename(full_name + "_l1.jpg");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_l2.jpg");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_l3.jpg");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_l4.jpg");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_l5.jpg");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_l6.jpg");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_l7.jpg");
-	_map_frames.push_back(imd);
-
-	imd.SetFilename(full_name + "_r1.jpg");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_r2.jpg");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_r3.jpg");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_r4.jpg");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_r5.jpg");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_r6.jpg");
-	_map_frames.push_back(imd);
-	imd.SetFilename(full_name + "_r7.jpg");
-	_map_frames.push_back(imd);
-
-	VideoManager->BeginImageLoadBatch();
-	for (uint32 i = 0; i < _map_frames.size(); i++) {
-		VideoManager->LoadImage(_map_frames[i]);
-	}
-	VideoManager->EndImageLoadBatch();
-}
-
-=======
-*/
-//>>>>>>> 1.22
 // ****************************************************************************
 // ***************************** GameGlobal *********************************
 // ****************************************************************************
