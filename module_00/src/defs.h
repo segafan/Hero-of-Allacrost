@@ -112,34 +112,18 @@ namespace hoa_map {
 // Battle mode declarations, see battle.h/cpp
 namespace hoa_battle {
 	extern bool BATTLE_DEBUG;
-	class BattleUI;
-	class Actor;
-	class PlayerActor;
-	class EnemyActor;
-	class ActorMode;
-	class ActorEffect;
-	class VisualEffect;
-	class Action;
-	class SkillAction;
-	class UseItemAction;
-	class SwapAction;
-	class AilmentEffect;
-	class StatusEffect;
-	class BattleMode;
-
-	class BattleAction;
-	class MoveAction;
-	class MoveRelativeToCurrentLocation;
-	class MoveRelativeToOrigin;
-	class MoveRelativeToPosition;
-	class MoveAbsolute;
-	class PerformSkill;
-	class PerformVisualEffect;
-	class PerformAudioEffect;
-	class PlayCharacterAnimation;
-	class DisplaySkillEffects;
-	class RetreatAction;
-	class FinishSkill;
+        class BattleMode;
+        struct BattleStatTypes;
+        class ActorEffect;
+        
+        namespace private_battle {
+                class Actor;
+                class BattleUI;
+                class PlayerActor;
+                class EnemyActor;
+                class Action;
+                class ScriptEvent;
+        }
 }
 
 // Menu mode declarations, see menu.h/cpp
