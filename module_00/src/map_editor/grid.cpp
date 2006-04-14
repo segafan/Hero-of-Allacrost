@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2004, 2005 by The Allacrost Project
+// Copyright (C) 2004, 2005, 2006 by The Allacrost Project
 // All Rights Reserved
 //
 // This code is licensed under the GNU GPL. It is free software and you may
@@ -7,6 +7,13 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
+/*!****************************************************************************
+ * \file    grid.cpp
+ * \author  Philip Vorsilak, gorzuate@allacrost.org
+ * \brief   Source file for editor's grid, used for the OpenGL map portion
+ *          where tiles are painted, edited, etc.
+ *****************************************************************************/
+			   
 #include <iostream>
 #include "grid.h"
 
@@ -173,6 +180,7 @@ void Grid::LoadMap()
 
 void Grid::SaveMap()
 {
+	char buffer[2]; // used for converting an int to a string with sprintf
 	int i;      // Lua table index / Loop counter variable
 	int j;      // Loop counter variable FIXME: temporary!
 	vector<int32>::iterator it;  // used to iterate through the layers
@@ -227,7 +235,6 @@ void Grid::SaveMap()
 		for (j = 0; j < i; j++)
 		{
 			vect_single.push_back(j);
-			char buffer[file_name_list.size()];
 			sprintf(buffer, "%d", j);
 			write_data.WriteIntVector(buffer, vect_single);
 			vect_single.clear();
@@ -245,7 +252,6 @@ void Grid::SaveMap()
 				layer_row.push_back(*it);
 				it++;
 			} // iterate through the columns of the lower layer
-			char buffer[_height];
 			sprintf(buffer, "%d", row);
 			write_data.WriteIntVector(buffer, layer_row);
 			layer_row.clear();
@@ -263,7 +269,6 @@ void Grid::SaveMap()
 				layer_row.push_back(*it);
 				it++;
 			} // iterate through the columns of the middle layer
-			char buffer[_height];
 			sprintf(buffer, "%d", row);
 			write_data.WriteIntVector(buffer, layer_row);
 			layer_row.clear();
@@ -281,7 +286,6 @@ void Grid::SaveMap()
 				layer_row.push_back(*it);
 				it++;
 			} // iterate through the columns of the upper layer
-			char buffer[_height];
 			sprintf(buffer, "%d", row);
 			write_data.WriteIntVector(buffer, layer_row);
 			layer_row.clear();
@@ -297,7 +301,6 @@ void Grid::SaveMap()
 		write_data.BeginTable("tile_properties");
 		for (i = 0; i < _height; i++)
 		{
-			char buffer[_height];
 			sprintf(buffer, "%d", i);
 			write_data.WriteIntVector(buffer, vect_0s);
 		}
@@ -312,7 +315,6 @@ void Grid::SaveMap()
 		write_data.BeginTable("tile_walkable");
 		for (i = 0; i < _height; i++)
 		{
-			char buffer[_height];
 			sprintf(buffer, "%d", i);
 			write_data.WriteIntVector(buffer, vect_255s);
 		}
@@ -327,7 +329,6 @@ void Grid::SaveMap()
 		write_data.BeginTable("tile_events");
 		for (i = 0; i < _height; i++)
 		{
-			char buffer[_height];
 			sprintf(buffer, "%d", i);
 			write_data.WriteIntVector(buffer, vect);
 		}
@@ -360,7 +361,7 @@ void Grid::paintGL()
 	// Setup drawing parameters
 	VideoManager->SetCoordSys(0.0f, VideoManager->GetWidth() / TILE_WIDTH,
 		VideoManager->GetHeight() / TILE_HEIGHT, 0.0f);
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
 	VideoManager->Clear(Color::white);
 	tile.SetDimensions(1.0f, 1.0f);  // all tiles are same size (for now)
 

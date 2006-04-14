@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2004, 2005 by The Allacrost Project
+// Copyright (C) 2004, 2005, 2006 by The Allacrost Project
 // All Rights Reserved
 //
 // This code is licensed under the GNU GPL. It is free software and you may
@@ -7,6 +7,13 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
+/*!****************************************************************************
+ * \file    grid.h
+ * \author  Philip Vorsilak, gorzuate@allacrost.org
+ * \brief   Header file for editor's grid, used for the OpenGL map portion
+ *          where tiles are painted, edited, etc.
+ *****************************************************************************/
+			   
 #ifndef __GRID_HEADER__
 #define __GRID_HEADER__
 
@@ -16,7 +23,6 @@
 #include "video.h"
 
 #include "tile.h"
-#include "tileset.h"	// FIXME: needed for "OMG what a hack" in DoubleClick...
 
 #include <qcanvas.h>
 #include <qcheckbox.h>

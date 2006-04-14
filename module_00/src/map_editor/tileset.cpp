@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2004, 2005 by The Allacrost Project
+// Copyright (C) 2004, 2005, 2006 by The Allacrost Project
 // All Rights Reserved
 //
 // This code is licensed under the GNU GPL. It is free software and you may
@@ -10,8 +10,8 @@
 /*!****************************************************************************
  * \file    tileset.cpp
  * \author  Philip Vorsilak, gorzuate@allacrost.org
- * \date    Last Updated: January 26th, 2006
- * \brief   Source file for editor's tileset, mainly used for drag'n'drop.
+ * \brief   Source file for editor's tileset, used for maintaining a visible
+ *          "list" of tiles to select from for painting on the map.
  *****************************************************************************/
 
 #include "tileset.h"
@@ -23,20 +23,14 @@ using namespace hoa_editor;
 Tileset::Tileset(QWidget* parent, const QString& name)
 	: QTable(parent, (const char*) name)
 {
-	// Setup table properties.FIXME: should make this somewhat smart based on tileset it's loading
+	// Set some table properties.
 	setReadOnly(true);
 	setShowGrid(false);
 	setSelectionMode(QTable::Single);
 	setTopMargin(0);
 	setLeftMargin(0);
-	setNumCols(13);
-	setNumRows(6);
-	for (int i = 0; i < numRows(); i++)
-		setRowHeight(i, TILE_HEIGHT);
-	for (int i = 0; i < numCols(); i++)
-		setColumnWidth(i, TILE_WIDTH);
 	
-	// Create file name from name.
+	// Create filename from name.
 	QString file_name;
 	if (name == "Global")
 		file_name = "tiles_database.lua";
@@ -48,10 +42,22 @@ Tileset::Tileset(QWidget* parent, const QString& name)
 		QMessageBox::warning(parent, "Tilesets", QString("ERROR: could not open %1 for reading!").arg(file_name));
 	else
 	{
-		QString tile_name;
-		QPixmap tile_pixmap;
+		QString tile_name;     // a tile's filename
+		QPixmap tile_pixmap;   // a tile's pixmap of it's image
 		read_data.OpenTable("tile_filenames");
 		uint32 table_size = read_data.GetTableSize();
+
+		// Dynamically set the table size based on number of tiles in the tileset.
+		// Subtract 1 because visibleWidth() does not account for the scrollbar.
+		int num_columns = visibleWidth() / TILE_WIDTH - 1;
+		setNumCols(num_columns);
+		setNumRows(static_cast<int> (ceil(
+			static_cast<double> (table_size) / static_cast<double> (num_columns))));
+		for (int i = 0; i < numRows(); i++)
+			setRowHeight(i, TILE_HEIGHT);
+		for (int i = 0; i < numCols(); i++)
+			setColumnWidth(i, TILE_WIDTH);
+
 		uint32 row, col;
 		row = col = 0;
 		for (uint32 i = 1; i <= table_size; i++)
@@ -65,50 +71,13 @@ Tileset::Tileset(QWidget* parent, const QString& name)
 			{
 				col = 0;
 				row++;
-			}
+			} // end of the column has been reached
 		} // construct image from tile filename and place it in the grid
 		read_data.CloseTable();
 		read_data.CloseFile();
-	} // file was opened succuessfully
-
+	} // file was opened successfully
 } // Tileset constructor
 
 Tileset::~Tileset()
 {
 } // Tileset destructor
-
-//void Tileset::paintCell(QPainter* painter, int row, int col)
-//{
-	//painter->drawPixmap(0, 0, *_it);
-//	bitBlt(_it, 0, 0, _it);
-//	if (_it == _pixmap_vect.end())
-//		_it = _pixmap_vect.begin();
-//	else
-//		_it++;
-//} // paintCell(...)
-
-/******************************************************************************
- *
- *  Function: dragObject
- *
- *  Inputs: none
- *
- *  Outputs: QImageDrag* img_drag - object to drag, typecasted to QDragObject*
- *
- *  Description: This function implements high level drag and drop operations.
- *				 It determines the desired object to drag from the QIconView.
- *
- *****************************************************************************/
-//QDragObject* Tileset::dragObject()
-//{
-	// creates an image to drag
-//	QImageDrag* img_drag = new QImageDrag(currentItem()->pixmap()
-//		->convertToImage(), this);
-	
-	// creates the image user will see whilst dragging
-//	img_drag->setPixmap(*(currentItem()->pixmap()),
-//		QPoint(currentItem()->pixmapRect().width() / 2,
-//			currentItem()->pixmapRect().height() / 2));
-
-//	return img_drag;
-//} // dragObject()

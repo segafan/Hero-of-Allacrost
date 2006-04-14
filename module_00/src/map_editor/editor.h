@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2004, 2005 by The Allacrost Project
+// Copyright (C) 2004, 2005, 2006 by The Allacrost Project
 // All Rights Reserved
 //
 // This code is licensed under the GNU GPL. It is free software and you may
@@ -7,6 +7,12 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
+/*!****************************************************************************
+ * \file    editor.h
+ * \author  Philip Vorsilak, gorzuate@allacrost.org
+ * \brief   Header file for editor's main window and user interface.
+ *****************************************************************************/
+			   
 #ifndef __EDITOR_HEADER__
 #define __EDITOR_HEADER__
 
@@ -110,6 +116,8 @@ class Editor: public QMainWindow
 		//! \name Tiles Menu Item Slots
 		//! \brief These slots process selection for their item in the Tiles menu.
 		//{@
+		void _TileLayerFill();
+		void _TileLayerClear();
 		void _TileModePaint();
 		void _TileModeMove();
 		void _TileModeDelete();
@@ -179,22 +187,29 @@ class NewMapDialog: public QDialog
 		NewMapDialog(QWidget* parent, const QString& name);   // constructor
 		~NewMapDialog();                                      // destructor
 
+		//! Public accessor to get the map height from the height spinbox.
 		int GetHeight() const { return _height_sbox->value(); }
+		//! Public accessor to get the map width from the width spinbox.
 		int GetWidth()  const { return  _width_sbox->value(); }
+		//! Public accessor to get the listview containing checkable tilesets.
 		QListView* GetTilesetListView() const { return _tileset_lview; }
 
 	private:
+		//! A listview for showing all available tilesets.
 		QListView* _tileset_lview;
-
+		//! A spinbox for specifying the map's height.
 		QSpinBox* _height_sbox;
+		//! A spinbox for specifying the map's width.
 		QSpinBox* _width_sbox;
-
+		//! A label used to visually name the height spinbox.
 		QLabel* _height_label;
+		//! A label used to visually name the width spinbox.
 		QLabel* _width_label;
-
+		//! A pushbutton for canceling the new map dialog.
 		QPushButton* _cancel_pbut;
+		//! A pushbutton for okaying the new map dialog.
 		QPushButton* _ok_pbut;
-
+		//! A layout to manage all the labels, spinboxes, and listviews.
 		QGridLayout* _dia_layout;
 }; // class NewMapDialog
 

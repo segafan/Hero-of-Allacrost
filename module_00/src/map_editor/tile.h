@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2004, 2005 by The Allacrost Project
+// Copyright (C) 2004, 2005, 2006 by The Allacrost Project
 // All Rights Reserved
 //
 // This code is licensed under the GNU GPL. It is free software and you may
@@ -10,11 +10,8 @@
 /*!****************************************************************************
  * \file tile.h
  * \author Philip Vorsilak, gorzuate@allacrost.org
- * \date Last Updated: January 22nd, 2006
- * \brief Header file for representing a tile in the editor.
- *
- * This code provides a class to store a tile's properties and attributes in
- * the editor.
+ * \brief Header file for representing a tile in the editor, and stores a
+ *        tile's properties and attributes.
  *****************************************************************************/
 
 #ifndef __TILE_HEADER__
@@ -32,9 +29,9 @@ namespace hoa_editor
 
 //! A unique number used to distinguish tiles from other objects on the grid.
 static const int TILE_RTTI = 973952;
-//! A tile's width in pixels
+//! A tile's width in pixels.
 const int TILE_WIDTH = 32;
-//! A tile's height in pixels
+//! A tile's height in pixels.
 const int TILE_HEIGHT = 32;
 
 /*!****************************************************************************
@@ -79,8 +76,11 @@ class Tile: public QCanvasRectangle
     	void drawShape(QPainter &p);
 
 	private:
+		//! A tile's filename.
 		QString _file_name;
+		//! A tile's image.
     	QImage _image;
+		//! A tile's pixmap.
     	QPixmap _pixmap;
 }; // class Tile
 

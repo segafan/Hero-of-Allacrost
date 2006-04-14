@@ -1,11 +1,17 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2004, 2005 by The Allacrost Project
+// Copyright (C) 2004, 2005, 2006 by The Allacrost Project
 // All Rights Reserved
 //
 // This code is licensed under the GNU GPL. It is free software and you may
 // modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
+
+/*!****************************************************************************
+ * \file    editor.cpp
+ * \author  Philip Vorsilak, gorzuate@allacrost.org
+ * \brief   Source file for editor's main window and user interface.
+ *****************************************************************************/
 
 #include "editor.h"
 
@@ -38,6 +44,9 @@ Editor::Editor() : QMainWindow(0, 0, WDestructiveClose)
 	// tile menu creation
 	_tiles_menu = new QPopupMenu(this);
 	menuBar()->insertItem("&Tiles", _tiles_menu);
+	_tiles_menu->insertItem("&Fill current layer", this, SLOT(_TileLayerFill()));
+	_tiles_menu->insertItem("&Clear current layer", this, SLOT(_TileLayerClear()));
+	_tiles_menu->insertSeparator();
 	_tiles_menu->insertItem("&Paint mode", this, SLOT(_TileModePaint()));
 	_tiles_menu->insertItem("&Move mode", this, SLOT(_TileModeMove()));
 	_tiles_menu->insertItem("&Delete mode", this, SLOT(_TileModeDelete()));
@@ -196,7 +205,7 @@ void Editor::_FileOpen()
 			_ed_scrollview->_map->LoadMap();
 
 			for (QValueListIterator<QString> it = _ed_scrollview->_map->tileset_list.begin();
-				it != _ed_scrollview->_map->tileset_list.end(); ++it)
+				it != _ed_scrollview->_map->tileset_list.end(); it++)
 				_ed_tabs->addTab(new Tileset(_ed_widget, *it), *it);
 			_ed_tabs->show();
 
@@ -342,6 +351,77 @@ void Editor::_ViewToggleUL()
 		_ed_scrollview->_map->SetULOn(_ul_on);
 	} // map must exist in order to view things on it
 } // _ViewToggleUL()
+
+void Editor::_TileLayerFill()
+{
+	// get reference to current tileset
+	//Editor* editor = static_cast<Editor*> (topLevelWidget());
+	QTable* table = static_cast<QTable*> (this->_ed_tabs->currentPage());
+
+	// put selected tile from tileset into tile array at correct position
+	QString name = table->text(table->currentRow(), table->currentColumn());
+	int file_index = _ed_scrollview->_map->file_name_list.findIndex(name);
+	if (file_index == -1)
+	{
+		_ed_scrollview->_map->file_name_list.append(name);
+		file_index = _ed_scrollview->_map->file_name_list.findIndex(name);
+	} // add tile filename to the list in use
+
+	vector<int32>::iterator it;    // used to iterate over an entire layer
+	switch (_ed_scrollview->_layer_edit)
+	{
+		case LOWER_LAYER:
+			for (it = _ed_scrollview->_map->lower_layer.begin();
+					it != _ed_scrollview->_map->lower_layer.end(); it++)
+				*it = file_index;
+			break;
+
+		case MIDDLE_LAYER:
+			for (it = _ed_scrollview->_map->middle_layer.begin();
+					it != _ed_scrollview->_map->middle_layer.end(); it++)
+				*it = file_index;
+			break;
+
+		case UPPER_LAYER:
+			for (it = _ed_scrollview->_map->upper_layer.begin();
+					it != _ed_scrollview->_map->upper_layer.end(); it++)
+				*it = file_index;
+			break;
+
+		default:
+			QMessageBox::warning(this, "Layer editing mode",
+				"ERROR: Invalid layer editing mode!");
+	} // switch on layer editing mode
+} // _TileLayerFill()
+
+void Editor::_TileLayerClear()
+{
+	vector<int32>::iterator it;    // used to iterate over an entire layer
+	switch (_ed_scrollview->_layer_edit)
+	{
+		case LOWER_LAYER:
+			for (it = _ed_scrollview->_map->lower_layer.begin();
+					it != _ed_scrollview->_map->lower_layer.end(); it++)
+				*it = -1;
+			break;
+
+		case MIDDLE_LAYER:
+			for (it = _ed_scrollview->_map->middle_layer.begin();
+					it != _ed_scrollview->_map->middle_layer.end(); it++)
+				*it = -1;
+			break;
+
+		case UPPER_LAYER:
+			for (it = _ed_scrollview->_map->upper_layer.begin();
+					it != _ed_scrollview->_map->upper_layer.end(); it++)
+				*it = -1;
+			break;
+
+		default:
+			QMessageBox::warning(this, "Layer editing mode",
+				"ERROR: Invalid layer editing mode!");
+	} // switch on layer editing mode
+} // _TileLayerClear()
 
 void Editor::_TileModePaint()
 {
@@ -966,7 +1046,7 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, const QString& name)
 
 	QDir tileset_dir("dat/tilesets");    // tileset directory
 
-	// make sure directory exists
+	// Make sure directory exists.
 	if (!tileset_dir.exists())
        	QMessageBox::warning(this, "Directory Warning", "Cannot find the tileset directory dat/tilesets/!");
 	else
@@ -978,7 +1058,7 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, const QString& name)
 		// Create a widget to put inside a tab of the dialog.
 		QWidget* tilesets_widget = new QWidget(this);
 
-		// Create a QLabel for a read-only QComboBox (drop-down list) amd add all existing tilesets, and connect it to a slot.
+		// Create a QLabel for a read-only QComboBox (drop-down list) and add all existing tilesets, and connect it to a slot.
 		QLabel* tilesets_label   = new QLabel("Tileset to modify:", tilesets_widget, "tilesets_label");
 		tilesets_label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
 		QComboBox* tilesets_cbox = new QComboBox(false, tilesets_widget, "tilesets_cbox");
@@ -1025,7 +1105,7 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, const QString& name)
 			{
 				QString filename = read_data.ReadString(i);
 				(void) new QIconViewItem(_all_tiles, filename, QPixmap("img/tiles/" + filename.append(".png")));
-			} // iterates through all tiles in the tileset
+			} // iterate through all tiles in the tileset
 			read_data.CloseTable();
 			read_data.CloseFile();
 		} // file was successfully opened
@@ -1053,6 +1133,8 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, const QString& name)
 		// ***************************************************
 		// End of Tilesets tab creation.
 		// ***************************************************
+
+		// TODO: add other tab here
 	} // tile image directory exists
 
 	// Create a Cancel button and connect the OK button to a useful slot.
