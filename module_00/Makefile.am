@@ -84,8 +84,6 @@ allacrost_SOURCES = \
 	src/audio_sound.h \
 	src/battle.cpp \
 	src/battle.h \
-	src/battle_actions.cpp \
-	src/battle_actions.h \
 	src/boot.cpp \
 	src/boot/h \
 	src/data.cpp \
