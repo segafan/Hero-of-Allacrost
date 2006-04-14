@@ -9,8 +9,7 @@
 
 /*!****************************************************************************
  * \file    battle.cpp
- * \author  Tim Hargreaves, balthazar@allacrost.org
- * \date    Last Updated: August 12th, 2005
+ * \author  Corey Hoffstein, visage@allacrost.org
  * \brief   Source file for battle mode interface.
  *****************************************************************************/
 
@@ -38,1114 +37,716 @@ namespace hoa_battle {
 
 bool BATTLE_DEBUG = false;
 
-//Actor constructor
-Actor::Actor(BattleMode *bm, uint32 x, uint32 y) {
-	_ownerBattleMode = bm;
-	_X_Location = x;
-	_Y_Location = y;
-	_isMoveCapable = true;
-	_nextAction = NULL;
-	_mode = new IdleMode(this);
-	_performingAction = false;
+namespace private_battle {
+
+/*
+
+        ACTOR
+
+*/
+
+Actor::Actor(BattleMode *ABattleMode, uint32 AXLocation, uint32 AYLocation) :
+        _ownerBattleMode(ABattleMode),
+        _X_Origin(AXLocation),
+        _Y_Origin(AYLocation),
+        _X_Location(AXLocation),
+        _Y_Location(AYLocation),
+        _maxSkillPoints(0),
+        _currentSkillPoints(0),
+        _isMoveCapable(true),
+        _isAlive(true),
+        _nextAction(NULL),
+        _performingAction(false),
+        _warmupTime(0),
+        _cooldownTime(0),
+        _defensiveModeBonus(0),
+        _totalStrengthModifier(0),
+        _totalAgilityModifier(0),
+        _totalIntelligenceModifier(0),
+        _animation("NEUTRAL")
+{
+
 }
 
-//copy constructor
-Actor::Actor(const Actor&  a) {
-	_X_Location = a._X_Location;
-	_Y_Location = a._Y_Location;
-	_mode = a._mode;
-	_effects = a._effects;
-	_maxSkillPoints = a._maxSkillPoints;
-	_currentSkillPoints = a._currentSkillPoints;
-	_isMoveCapable = a._isMoveCapable;
-	_isAlive = a._isAlive;
-	_nextAction = a._nextAction;
-	_warmingUp = a._warmingUp;
-	_defensiveMode = a._defensiveMode;
-	_supporters = a._supporters;
-	_performingAction = a._performingAction;
-	_minorBattleActions = a._minorBattleActions;
-	
-	_mode = new IdleMode(this);
+Actor::Actor(const Actor& AOtherActor) :
+        _ownerBattleMode(AOtherActor._ownerBattleMode),
+        _X_Origin(AOtherActor._X_Origin),
+        _Y_Origin(AOtherActor._Y_Origin),
+        _X_Location(AOtherActor._X_Location),
+        _Y_Location(AOtherActor._Y_Location),
+        _maxSkillPoints(AOtherActor._maxSkillPoints),
+        _currentSkillPoints(AOtherActor._currentSkillPoints),
+        _isMoveCapable(AOtherActor._isMoveCapable),
+        _isAlive(AOtherActor._isAlive),
+        _nextAction(AOtherActor._nextAction),
+        _performingAction(AOtherActor._performingAction),
+        _warmupTime(AOtherActor._warmupTime),
+        _cooldownTime(AOtherActor._cooldownTime),
+        _defensiveModeBonus(AOtherActor._defensiveModeBonus),
+        _totalStrengthModifier(AOtherActor._totalStrengthModifier),
+        _totalAgilityModifier(AOtherActor._totalAgilityModifier),
+        _totalIntelligenceModifier(AOtherActor._totalIntelligenceModifier),
+        _animation(AOtherActor._animation)
+{
+
 }
 
+/*!
+        Need to implement this!
+*/
 Actor::~Actor() {
-	//get rid of the next move, if we have one
-	delete _nextAction;
-	//delete our current mode
-	delete _mode;
-	
-	std::list<ActorEffect *>::iterator it = _effects.begin();
-	for(;it != _effects.end(); ) {
-		delete *it;
-	}
-	
-	_ownerBattleMode->RemoveFromActionQueue(this);
+
 }
 
-// Get the owning battle mode
-BattleMode *Actor::GetOwnerBattleMode() {
-	return _ownerBattleMode;
+/*!
+        Stuff relating to, you know, death
+*/
+void Actor::Die() {
+        _isAlive = false;
 }
 
-//Add a battle action 
-void Actor::AddBattleAction(BattleAction *act) {
-	if(act->IsConcurrent()) {
-		//add it to the owning battle mode
-		_ownerBattleMode->AddConcurrentBattleAction(act);
-	}
-	else {
-		_minorBattleActions.push_back(act);
-	}
+bool Actor::IsAlive() const {
+        return _isAlive;
 }
 
-//Set a new mode, delete the old
-void Actor::SetMode(ActorMode *m) {
-	delete _mode; //delete on NULL does nothing
-	_mode = m;
-	cout << "Actor: Changing actor mode." << endl;
+/*!
+        Get the mode we are currently fighting in
+*/
+const BattleMode *Actor::GetOwnerBattleMode() const {
+        return _ownerBattleMode;
 }
 
-//Return the mode
-ActorMode *Actor::GetMode() {
-	return _mode;
+/*!
+        Manage effects that the player is feeling
+*/
+void Actor::UpdateEffects(uint32 ATimeElapsed) {
+        for(unsigned int i = 0; i < _effects.size(); i++) {
+                _effects[i].Update(ATimeElapsed);
+        }
 }
 
-//update the current effects affecting the character
-void Actor::UpdateEffects(uint32 dt) {
-	cout << "Actor: Update effects." << endl;
-	std::list<ActorEffect *>::iterator it = _effects.begin();
-	for(;it != _effects.end(); ) {
-		(*it)->Update(dt); 
-		if((*it)->GetTTL() == 0) { //if the TTL is 0, the effect should wear off
-			(*it)->UndoEffect();
-			_effects.erase(it);
-		}
-		else {
-			it++;
-		}
-	}
+void Actor::PushEffect(const ActorEffect AEffect) {
+        _effects.push_back(AEffect);
 }
 
-// add an effect to the actor's list of effects
-void Actor::PushEffect(ActorEffect *e) {
-	_effects.push_back(e);
+/*!
+        Set the next action, action related methods
+*/
+void Actor::SetNextAction(Action * const ANextAction) {
+        _nextAction = ANextAction;
 }
 
-// Remove an effect from the list
-void Actor::RemoveEffect(ActorEffect *e) {
-	_effects.remove(e);
-	delete e;
-}
-
-// Perform the action we are waiting to perform
 void Actor::PerformAction() {
-	cout << "Actor: Perform Action." << endl;
-	_nextAction->PerformAction();
+        SetPerformingAction(true);
+        /*   ...   */
 }
 
-// Set the actors next action
-void Actor::SetNextAction(Action *a) {
-	delete _nextAction;
-	_nextAction = a;
+bool Actor::HasNextAction() const {
+        return _nextAction != NULL;
 }
 
-// Do we have an action to perform?
-bool Actor::HasNextAction() {
-	return _nextAction != NULL;
+/*!
+        Is the player frozen, asleep, et cetera?
+*/
+bool Actor::IsMoveCapable() const {
+        return _isMoveCapable;
 }
 
-// Are we performing an action?
-bool Actor::IsPerformingAction() {
-	return _performingAction;
+void Actor::SetMoveCapable(bool AMoveCapable) {
+        _isMoveCapable = AMoveCapable;
 }
 
-// Set whether or not we are performing an action
-void Actor::SetPerformingAction(bool performing) {
-	_performingAction = performing;
+/*!
+        If the player is warming up, it really can't do anything
+        Sort of a special case
+*/
+bool Actor::IsWarmingUp() const {
+        return _warmupTime != 0;
 }
 
-// Is the character capable of moving?
-bool Actor::IsMoveCapable() {
-	return _isMoveCapable;
+void Actor::SetWarmupTime(uint32 AWarmupTime) {
+        _warmupTime = AWarmupTime;
 }
 
-// Set whether or not the character is capable of moving
-void Actor::SetMoveCapable(bool capable) {
-	_isMoveCapable = capable;
-}
-
-// Add a supporter to call when we get attacked
-void Actor::AddSupporter(Actor *a) {
-	_supporters.push_back(a);
-}
-
-// Remove a supporter
-void Actor::RemoveSupporter(Actor *a) {
-	_supporters.remove(a);
-}
-
-// Put the actor into defensive move
-void Actor::SetDefensiveMode(bool d) {
-	_defensiveMode = d;
-}
-
-// Is the actor in defensive mode?
-bool Actor::IsInDefensiveMode() {
-	return _defensiveMode;
-}
-
-// Is the actor warming up?
-bool Actor::IsWarmingUp() {
-	return _warmingUp;
-}
-
-// Set whether or not the actor is warming up
-void Actor::SetWarmingUp(bool warmup) {
-	_warmingUp = warmup;
-}
-
-// Does the actor have minor actions?
-bool Actor::HasMinorActions() {
-	return _minorBattleActions.size() > 0;
-}
-
-// Update the action at the front of the list
-void Actor::UpdateMinorActions(uint32 dt) {
-	_minorBattleActions[0]->Update(dt);
-	//if _minorBattleActions[0] has ties, update the ties
-}
-
-// This should be removed
-void Actor::SetAnimation(std::string animation) {
-	//set the animation to "animation"
-	std::cout << "Setting animation to: " << animation << std::endl;
-}
-
-/**
- * BattleUI
- *
- *
- *
- *
- *
- */
-
-BattleUI::BattleUI(BattleMode *bm) {
-	_bm = bm;
+/*!
+        Defensive mode boosts defense
+*/
+bool Actor::IsInDefensiveMode() const {
+        return _defensiveModeBonus != 0;
 }
 		
-Actor* BattleUI::GetSelectedActor() {
-	return _currentlySelectedActor;
+void Actor::SetDefensiveBonus(uint32 ADefensiveBonus) {
+        _defensiveModeBonus = ADefensiveBonus;
 }
 
-void BattleUI::SetActorSelected(Actor *a) {
-	_currentlySelectedActor = a;
+/*!
+        If we are currently performing an action we can't do anything else
+        on the update
+*/
+bool Actor::IsPerformingAction() const {
+        return _performingAction;
 }
 
+void Actor::SetPerformingAction(bool AIsPerforming) {
+        _performingAction = AIsPerforming;
+}
+
+/*!
+        GlobalCharacter and GlobalEnemy will use a Map of sorts
+        to map strings to image animations
+        This sets our characters animation
+*/
+void Actor::SetAnimation(std::string ACurrentAnimation) {
+        _animation = ACurrentAnimation;
+}
+
+const std::string Actor::GetAnimation() const {
+        return _animation;
+}
+
+
+void Actor::SetTotalStrengthModifier(uint32 AStrengthModifier) {
+        _totalStrengthModifier = AStrengthModifier;
+}
+
+uint32 Actor::GetTotalStrengthModifier() {
+        return _totalStrengthModifier;
+}
+
+void Actor::SetTotalAgilityModifier(uint32 AAgilityModifier) {
+        _totalAgilityModifier = AAgilityModifier;
+}
+
+uint32 Actor::GetTotalAgilityModifier() {
+        return _totalAgilityModifier;
+}
+
+void Actor::SetTotalIntelligenceModifier(uint32 AIntelligenceModifier) {
+        _totalIntelligenceModifier = AIntelligenceModifier;
+}
+
+uint32 Actor::GetTotalIntelligenceModifier() {
+        return _totalIntelligenceModifier;
+}
+
+/*
+
+        BATTLEUI
+
+*/
+
+BattleUI::BattleUI(BattleMode * const ABattleMode) :
+        _bm(ABattleMode),
+        _currentlySelectedActor(NULL),
+        _necessarySelections(0),
+        _currentHoverSelection(0),
+        _numberMenuItems(0)
+{
+
+}
+		
+/*!
+        Get the actor we are currently on
+*/
+Actor * const BattleUI::GetSelectedActor() const {
+        return _currentlySelectedActor;
+}
+
+/*!
+        We clicked on an actor
+*/
+void BattleUI::SetActorSelected(Actor * const AWhichActor) {
+        _currentlySelectedActor = AWhichActor;
+}
+
+/*!
+        No actor is selected...we are now selecting an actor
+*/
 void BattleUI::DeselectActor() {
-	_currentlySelectedActor = NULL;
+        _currentlySelectedActor = NULL;
+}      
+
+/*!
+        Get other people selected
+*/
+std::list<Actor *> BattleUI::GetSelectedArgumentActors() const {
+        return _currentlySelectedArgumentActors;
 }
 
-std::list<Actor *> BattleUI::GetSelectedArgumentActors() {
-	return _currentlySelectedArgumentActors;
+/*!
+        The actor we just selected is now an argument
+*/
+void BattleUI::SetActorAsArgument(Actor * const AActor) {
+        _currentlySelectedArgumentActors.push_back(AActor);
 }
 
-void BattleUI::setActorAsArgument(Actor *a) {
-	_currentlySelectedArgumentActors.push_back(a);
+/*!
+        No longer do we want this actor as an argument
+*/
+void BattleUI::RemoveActorAsArgument(Actor * const AActor) {
+        _currentlySelectedArgumentActors.remove(AActor);
 }
 
-void BattleUI::RemoveActorAsArgument(Actor *a) {
-	//we don't have to erase the actor because it will be
-	//cleaned up at the end of the battle mode when all
-	//actors are cleaned up
-	//everything should stay alive until then
-	_currentlySelectedArgumentActors.remove(a);
+/*!
+        Sets the number of arguments we should be allowing
+*/
+void BattleUI::SetNumberNecessarySelections(uint32 ANumSelections) {
+        _necessarySelections = ANumSelections;
 }
 
-void BattleUI::SetNumberNecessarySelections(uint32 select) {
-	_necessarySelections = select;
-}
+/*! PlayerCharacter 
 
-/**
- * PlayerActor
- *
- *
- *
- *
- *
- */
 
-PlayerActor::PlayerActor(GlobalCharacter *wrapped, BattleMode *bm, int x, int y) 
-	: Actor(bm, x, y) {
-	_wrappedCharacter = wrapped;
+*/
+
+
+PlayerActor::PlayerActor(GlobalCharacter * const AWrapped, BattleMode * const ABattleMode, uint32 AXLoc, uint32 AYLoc) :
+        Actor(ABattleMode, AXLoc, AYLoc),
+        _wrappedCharacter(AWrapped) {
+        
 }
 
 PlayerActor::~PlayerActor() {
-	//don't delete _wrappedCharacter--it should exist outside
-	//of battle as well
+
 }
 
-void PlayerActor::Update(uint32 dt) {
-	std::cout << "PlayerActor: Updating: " << this << std::endl;
-	
-	if(HasMinorActions()) {
-		UpdateMinorActions(dt);
-	}
-	else {
-		//update the current effects on the player
-		std::cout << "\tPlayerActor: Update effects." << std::endl;
-		UpdateEffects(dt);
-		//update the current mode on the player
-		std::cout << "\tPlayerActor: Update mode." << std::endl;
-		GetMode()->Update(dt);
-	}
+void PlayerActor::Update(uint32 ATimeElapsed) {
+
 }
 
 void PlayerActor::Draw() {
-	std::cout << "PlayerActor: Draw: " << this << std::endl;
-	//draw outselves here
-}
-		
-std::vector<GlobalSkill *> PlayerActor::GetAttackSkills() {
-	return _wrappedCharacter->GetAttackSkills();
+
 }
 
-std::vector<GlobalSkill *> PlayerActor::GetDefenseSkills() {
-	return _wrappedCharacter->GetDefenseSkills();
+/*!
+        Get the skills from GlobalCharacter
+*/
+std::vector<GlobalSkill *> PlayerActor::GetAttackSkills() const {
+       return _wrappedCharacter->GetAttackSkills();
 }
 
-std::vector<GlobalSkill *> PlayerActor::GetSupportSkills() {
-	return _wrappedCharacter->GetSupportSkills();
+std::vector<GlobalSkill *> PlayerActor::GetDefenseSkills() const {
+        return _wrappedCharacter->GetDefenseSkills();
 }
 
-uint32 PlayerActor::GetAgility() {
-	return _wrappedCharacter->GetAgility();
+std::vector<GlobalSkill *> PlayerActor::GetSupportSkills() const {
+        return _wrappedCharacter->GetSupportSkills();
 }
 
-uint32 PlayerActor::GetStrength() {
-	return _wrappedCharacter->GetStrength();
+/*!
+        More getters from GlobalCharacter
+*/
+const std::string PlayerActor::GetName() const {
+        return _wrappedCharacter->GetName();
 }
 
-uint32 PlayerActor::GetMaxHealth() {
-	return _wrappedCharacter->GetMaxHP();
+const std::vector<GlobalAttackPoint> PlayerActor::GetAttackPoints() const {
+        return _wrappedCharacter->GetAttackPoints();
 }
 
-uint32 PlayerActor::GetSkillPoints() {
-	return _wrappedCharacter->GetSP();
-} 
-
-std::vector<GlobalAttackPoint> PlayerActor::GetAttackPoints() {
-	return _wrappedCharacter->GetAttackPoints();
-} 
-
-uint32 PlayerActor::GetIntelligence() {
-	return _wrappedCharacter->GetIntelligence();
-} 
-
-uint32 PlayerActor::GetMaxSkillPoints() {
-	return _wrappedCharacter->GetMaxSP();
-} 
-
-std::string PlayerActor::GetName() {
-	return _wrappedCharacter->GetName();
+uint32 PlayerActor::GetHealth() const {
+        return _wrappedCharacter->GetHP();
 }
 
-uint32 PlayerActor::GetHealth() {
-	return _wrappedCharacter->GetSP();
+void PlayerActor::SetHealth(uint32 AHealth) {
+        _wrappedCharacter->SetHP(AHealth);
+}
+
+uint32 PlayerActor::GetMaxHealth() const {
+        return _wrappedCharacter->GetMaxHP();
+}
+
+uint32 PlayerActor::GetSkillPoints() const {
+        return _wrappedCharacter->GetSP();
+}
+
+void PlayerActor::SetSkillPoints(uint32 ASkillPoints) {
+        _wrappedCharacter->SetSP(ASkillPoints);
+}
+
+uint32 PlayerActor::GetMaxSkillPoints() const {
+        return _wrappedCharacter->GetMaxSP();
+}
+
+uint32 PlayerActor::GetStrength() const {
+        return _wrappedCharacter->GetStrength();
+}
+
+uint32 PlayerActor::GetIntelligence() const {
+        return _wrappedCharacter->GetIntelligence();
+}
+
+uint32 PlayerActor::GetAgility() const {
+        return _wrappedCharacter->GetAgility();
+}
+
+uint32 PlayerActor::GetMovementSpeed() const {
+        return _wrappedCharacter->GetMovementSpeed();
 }
 
 
-/**
- * EnemyActor
- *
- *
- *
- *
- *
- */
+/*! EnemyActor
 
-EnemyActor::EnemyActor(GlobalEnemy *ge, BattleMode *bm, int x, int y) 
-	: Actor(bm, x,  y) {
-	_wrappedEnemy = ge;
+*/
+
+EnemyActor::EnemyActor(GlobalEnemy AGlobalEnemy, BattleMode * const ABattleMode, uint32 AXLoc, uint32 AYLoc) :
+        Actor(ABattleMode, AXLoc, AYLoc),
+        _wrappedEnemy(AGlobalEnemy) {
+        
+        
+        
 }
 
 EnemyActor::~EnemyActor() {
-	delete _wrappedEnemy;
+
 }
 
-void EnemyActor::Update(uint32 dt) {
-	std::cout << "EnemyActor: Updating: " << this << std::endl;
-	
-	//if we are currently performing an action 
-	// if( IsPerformingAction() ) {
-	//using _animationMode and _wrappedCharacter, 
-	//we find the GetFrameProgress() on the current
-	//frame we are processing -- and if it is 100%,
-	//we call "finish action."
-	//	 _nextAction->FinishAction();
-	// }
-	
-	std::cout << "\tEnemyActor: Update effects." << std::endl;
-	UpdateEffects(dt);
-	
-	std::cout << "\tEnemyActor: Update mode." << std::endl;
-	GetMode()->Update(dt);
-	
-	std::cout << "\tEnemyActor: Do AI." << std::endl;
-	DoAI(dt);
+void EnemyActor::Update(uint32 ATimeElapsed) {
+
 }
 
 void EnemyActor::Draw() {
-	std::cout << "EnemyActor: Draw: " << this << std::endl;
-	//draw ourselves here
-}
-
-void EnemyActor::DoAI(uint32 dt) {
-	std::cout << "EnemyActor: Doing AI..." << std::endl;
-	
-	if(!HasNextAction()) {
-		std::cout << "EnemyActor: Does not have next action..." << std::endl;
-		//get our enemy
-		
-		//get a skill
-		//if our skill requires warmup time, perform the warmup
-		//otherwise, go into actionmode
-		
-		std::cout << "EnemyActor: Getting PCs in battle..." << std::endl;
-		std::list<PlayerActor *> targets = GetOwnerBattleMode()->ReturnCharacters();
-		std::vector<GlobalSkill *> skills = _wrappedEnemy->GetSkills();
-		std::list<PlayerActor *>::iterator it = targets.begin();
-		std::vector<Actor *> truetargets;
-		for(unsigned int i = 0; i < targets.size(); i++) {
-			truetargets.push_back(*it);
-			it++;
-		}
-		std::cout << "Setting mode to attack..." << std::endl;
-		SetMode(new ActionMode(this, new SkillAction(skills[0], this, truetargets)));
-	}
-	//do some artificial intelligence, or something like that.
-	//as long as HasNextAction() is false...
-}
-
-void EnemyActor::LevelUp(uint32 average_level) {
-	//[0.0, 1.0] RandomUnit()  
-	//uint32 GaussianValue(int32 mean, int32 range, bool positive_value)
-	uint32 level = hoa_utils::GaussianValue(average_level,
-													RandomNumber(-3, 3), true);
-	
-	uint32 base_health = _wrappedEnemy->GetBaseHitPoints();
-	uint32 base_exp = _wrappedEnemy->GetBaseExperiencePoints();
-	uint32 base_skill = _wrappedEnemy->GetBaseSkillPoints();
-	uint32 base_strength = _wrappedEnemy->GetBaseStrength();
-	uint32 base_intelligence = _wrappedEnemy->GetBaseIntelligence();
-	uint32 base_agility = _wrappedEnemy->GetBaseAgility();
-	
-	uint32 growth_health = _wrappedEnemy->GetGrowthHitPoints();
-	uint32 growth_exp = _wrappedEnemy->GetGrowthExperiencePoints();
-	uint32 growth_skill = _wrappedEnemy->GetGrowthSkillPoints();
-	uint32 growth_strength = _wrappedEnemy->GetGrowthStrength();
-	uint32 growth_intelligence = _wrappedEnemy->GetGrowthIntelligence();
-	uint32 growth_agility = _wrappedEnemy->GetGrowthAgility();
-	
-	for(uint32 i = 0; i < level; i++) {
-		base_health = base_health + hoa_utils::GaussianValue(growth_health,
-													RandomNumber(-3, 3), true);
-		base_exp = base_exp + hoa_utils::GaussianValue(growth_exp,
-													RandomNumber(-3, 3), true);
-		base_skill = base_skill+ hoa_utils::GaussianValue(growth_skill,
-													RandomNumber(-3, 3), true);
-		base_strength = base_strength + hoa_utils::GaussianValue(growth_strength,
-													RandomNumber(-3, 3), true);
-		base_intelligence = base_intelligence + hoa_utils::GaussianValue(
-													growth_intelligence,
-													RandomNumber(-3, 3), true);
-		base_agility = base_agility + hoa_utils::GaussianValue(growth_agility,
-													RandomNumber(-3, 3), true);
-	}
-
-	_wrappedEnemy->SetMaxHP(base_health);
-	_wrappedEnemy->SetXP(base_exp);
-	_wrappedEnemy->SetXPLevel(level);
-	_wrappedEnemy->SetSP(base_skill);
-	_wrappedEnemy->SetStrength(base_strength);
-	_wrappedEnemy->SetIntelligence(base_intelligence);
-	_wrappedEnemy->SetAgility(base_agility);
-}
-
-std::vector<GlobalSkill *> EnemyActor::GetSkills() {
-	return _wrappedEnemy->GetSkills();
-	//here we need to deal with the current level and the level required to use
-	//the skill
-}
-
-std::vector<GlobalAttackPoint> EnemyActor::GetAttackPoints() {
-	return _wrappedEnemy->GetAttackPoints();
-}
-
-uint32 EnemyActor::GetAgility() {
-	return _wrappedEnemy->GetAgility();
-}
-
-uint32 EnemyActor::GetStrength() {
-	return _wrappedEnemy->GetStrength();
-}
-
-uint32 EnemyActor::GetIntelligence() {
-	return _wrappedEnemy->GetIntelligence();
-}
-
-uint32 EnemyActor::GetHealth() {
-	return _wrappedEnemy->GetHP();
-}
-
-uint32 EnemyActor::GetMaxHealth() {
-	return _wrappedEnemy->GetMaxHP();
-}
-
-uint32 EnemyActor::GetSkillPoints() {
-	return _wrappedEnemy->GetSP();
-}
-
-uint32 EnemyActor::GetMaxSkillPoints() {
-	return _wrappedEnemy->GetMaxSP();
-}
-
-std::string EnemyActor::GetName() {
-	return _wrappedEnemy->GetName();
-}
-
-/**
- * ActorMode
- *
- *
- *
- *
- *
- */
-
-ActorMode::ActorMode(Actor *a) {
-	_host = a;
-}
-
-ActorMode::~ActorMode() {
 
 }
 
-Actor *ActorMode::GetHost() {
-	return _host;
+/*!
+        Has the GlobalEnemy level up to average_level
+*/
+void EnemyActor::LevelUp(uint32 AAverageLevel) {
+        _wrappedEnemy.LevelSimulator(AAverageLevel);
 }
 
-/**
- * SupportMode
- *
- *
- *
- *
- *
- */
-
-SupportMode::SupportMode(uint32 TTL, Actor *a, std::vector<Actor *> supported) : 
-	ActorMode(a) {
-	_supported = supported;
-	std::vector<Actor *>::iterator it = _supported.begin();
-	
-	//go through those we are supporting and set our character as a supporter
-	for(; it != _supported.end(); it++) {
-		(*it)->AddSupporter(a);
-	}
-	a->SetAnimation("SUPPORT");
-}
-
-void SupportMode::Update(uint32 dt) {
-	//SubtractTTL(dt);
-}
-
-void SupportMode::UndoMode() {
-	Actor *host = GetHost();
-	std::vector<Actor *>::iterator it = _supported.begin();
-	for(; it != _supported.end(); it++) {
-		(*it)->RemoveSupporter(host);
-	}
-	host->SetMode(new IdleMode(host));
-}
-
-/**
- * DefensiveMode
- *
- *
- *
- *
- *
- */
-
-DefensiveMode::DefensiveMode(Actor *a) : 
-	ActorMode(a) {
-	//put the host in defensive mode
-	a->SetDefensiveMode(true);
-	a->SetAnimation("DEFENSIVE");
-}
-
-void DefensiveMode::Update(uint32 dt) {
-	//falala, nothing to do
-}
-
-void DefensiveMode::UndoMode() {
-	//get the host out of defensive mode
-	Actor *host = GetHost();
-	host->SetDefensiveMode(false);
-	host->SetMode(new IdleMode(host));
-}
-
-/**
- * IdleMode
- *
- *
- *
- *
- *
- */
-
-IdleMode::IdleMode(Actor *a) : 
-	ActorMode(a) {
-	a->SetAnimation("IDLE");
-}
-
-void IdleMode::Update(uint32 dt) {
-	//falala, nothing to do
-}
-
-void IdleMode::UndoMode() {
-}
-
-/**
- * WarmUpMode
- *
- *
- *
- *
- *
- */
-
-WarmUpMode::WarmUpMode(uint32 TTL, Action *act, Actor *a) : 
-	ActorMode(a) {
-	_TTL = TTL;
-	_action = act;
-	a->SetWarmingUp(true);
-	a->SetAnimation("WARMUP");
-}
-
-void WarmUpMode::Update(uint32 dt) {
-	//just update the time to live
-	_TTL = _TTL - dt;
-	if(_TTL < 0) _TTL = 0;
-	
-	if(_TTL == 0) {
-		UndoMode();
-	}
-}
-
-void WarmUpMode::UndoMode() {
-	//tell the actor we are ready to perform the action
-	Actor *host = GetHost();
-	//add to battle mode event queue
-	host->SetWarmingUp(false);
-	host->SetMode(new ActionMode(host, _action));
-}
-
-/**
- * ActionMode
- *
- *
- *
- *
- *
- */
- 
-ActionMode::ActionMode(Actor *a, Action *act) :
-	ActorMode(a) {
-	_action = act;
-	//we stay in our previous stance, but set the next action
-	a->SetNextAction(act);
-	//add ourselves to the action queue in the battle mode
-	a->SetPerformingAction(true);
-	std::cout << "ActionMode: Adding action to global queue..." << std::endl;
-	a->GetOwnerBattleMode()->AddToActionQueue(a);
-}
-
-ActionMode::~ActionMode() {
-	//since the action is complete, 
-	//we should tell the owning battle mode
-	//that we are no longer performing an action
-	
-	//this should be called when we are put 
-	//into a new mode by the action, but it
-	//idle or cooldown -- the actor should 
-	//delete their current mode -- hence,
-	//we tell the battle mode the action is over
-	
-	std::cout << "ActionMode: Action finished..." << std::endl;
-	BattleMode *bm = GetHost()->GetOwnerBattleMode();
-	GetHost()->SetPerformingAction(false);
-	bm->SetPerformingAction(false);
-}
-
-void ActionMode::Update(uint32 dt) {
-	//do nothing here
-}
-
-Action *ActionMode::GetAction() {
-	return _action;
-}
-
-void ActionMode::UndoMode() {
-}
-
-/**
- * CoolDownMode
- *
- *
- *
- *
- *
- */
-
-CoolDownMode::CoolDownMode(uint32 TTL, Actor *a) : 
-	ActorMode(a) {
-	_TTL = TTL;
-	a->SetWarmingUp(true);
-	a->SetAnimation("COOLDOWN");
-}
-
-void CoolDownMode::Update(uint32 dt) {
-	//update the cooldown
-	_TTL = _TTL - dt;
-	if(_TTL < 0) _TTL = 0;
-	
-	if(_TTL == 0) {
-		UndoMode();
-	}
-}
-
-void CoolDownMode::UndoMode() {
-	//tell the actor we are ready to perform the action
-	Actor *host = GetHost();
-	host->SetMode(new IdleMode(host));
-}
-
-/**
- * VisualEffect
- *
- *
- *
- *	So vague, I don't even know what to do.  Aw hamburgers.
- *
- *
- */
- 
-VisualEffect::VisualEffect(std::string am, hoa_video::AnimatedImage i) {
-	_animationMode = am;
-	_image = i;
-}
-
-void VisualEffect::Draw() {
+/*!
+        The AI routine
+*/
+void EnemyActor::DoAI() {
 
 }
 
-std::string VisualEffect::GetAnimationMode() {
-	return _animationMode;
+/*!
+        GlobalEnemy getters
+*/
+const std::vector<GlobalSkill *> EnemyActor::GetSkills() const {
+        return _wrappedEnemy.GetSkills();
 }
 
-
-/**
- * ActorEffect
- *
- *
- *
- *
- *
- */
-
-ActorEffect::ActorEffect(Actor *a, std::string name, uint32 ttl, uint32 ctc,
-					uint32 ul, VisualEffect *ve, SoundDescriptor se) {
-	_host = a;
-	_EffectName = name;
-	_TTL = ttl;
-	_chanceToCure = ctc;
-	_updateLength = ul;
-	_visualEffect = ve;
-	_soundEffect = se;
-	
-	//here, we actually need system time
-	_age = 0;
-	_lastUpdate = _age;
+std::string EnemyActor::GetName() const {
+        return _wrappedEnemy.GetName();
 }
 
-ActorEffect::~ActorEffect() {
-	delete _visualEffect;
+const std::vector<GlobalAttackPoint> EnemyActor::GetAttackPoints() const {
+        return _wrappedEnemy.GetAttackPoints();
 }
 
-uint32 ActorEffect::GetTTL() {
-	return _TTL;
+uint32 EnemyActor::GetHealth() const {
+        return _wrappedEnemy.GetHP();
 }
 
-void ActorEffect::SubtractTTL(uint32 dt) {
-	_TTL = _TTL - dt;
-	if(_TTL < 0) _TTL = 0;
+void EnemyActor::SetHealth(uint32 AHealth) {
+        _wrappedEnemy.SetHP(AHealth);
 }
 
-void ActorEffect::Update(uint32 dt) {
-	SubtractTTL(dt);
+uint32 EnemyActor::GetMaxHealth() const {
+        return _wrappedEnemy.GetMaxHP();
 }
 
-Actor *ActorEffect::GetHost() {
-	return _host;
+uint32 EnemyActor::GetSkillPoints() const {
+        return _wrappedEnemy.GetSP();
 }
 
-std::string ActorEffect::GetEffectName() {
-	return _EffectName;
+void EnemyActor::SetSkillPoints(uint32 ASkillPoints) {
+        _wrappedEnemy.SetSP(ASkillPoints);
 }
 
-uint32 ActorEffect::GetChanceToCure() {
-	return _chanceToCure;
+uint32 EnemyActor::GetMaxSkillPoints() const {
+        return _wrappedEnemy.GetMaxSP();
 }
 
-uint32 ActorEffect::GetUpdateLength() {
-	return _updateLength;
+uint32 EnemyActor::GetStrength() const {
+        return _wrappedEnemy.GetStrength();
 }
 
-uint32 ActorEffect::GetLastUpdate() {
-	return _lastUpdate;
+uint32 EnemyActor::GetIntelligence() const {
+        return _wrappedEnemy.GetIntelligence();
 }
 
-void ActorEffect::SetLastUpdate(uint32 lu) {
-	_lastUpdate = lu;
+uint32 EnemyActor::GetAgility() const {
+        return _wrappedEnemy.GetAgility();
 }
 
-VisualEffect *ActorEffect::GetVisualEffect() {
-	return _visualEffect;
+uint32 EnemyActor::GetMovementSpeed() const {
+        return _wrappedEnemy.GetMovementSpeed();
 }
 
-SoundDescriptor ActorEffect::GetSoundEffect() {
-	return _soundEffect;
-}
-		
-/**
- * Action
- *
- *
- *
- *
- *
- */
+/*! Actions
 
-Action::Action(Actor *p, std::vector<Actor *> args) {
-	_host = p;
-	_arguments = args;
+*/
+
+Action::Action(Actor * const AHostActor, std::vector<Actor *> AArguments, const std::string ASkillName) :
+        	_host(AHostActor),
+		_arguments(AArguments),
+                _skillName(ASkillName)
+{
+
 }
 
 Action::~Action() {
+
 }
 
-Actor *Action::GetHost() {
-	return _host;
+Actor * const Action::GetHost() const {
+        return _host;
 }
 
-std::vector<Actor *> Action::GetArguments() {
-	return _arguments;
+const std::vector<Actor *> Action::GetArguments() const {
+        return _arguments;
+}
+                
+const std::string Action::GetSkillName() const {
+        return _skillName;
 }
 
-/**
- * SkillAction
- *
- *
- *
- *
- *
- */
+/*!
+        Effect
 
-SkillAction::SkillAction(GlobalSkill *s, Actor *p, std::vector<Actor *> args) :
-Action(p, args)
+*/
+
+ActorEffect::ActorEffect(Actor * const AHost, std::string AEffectName, StatusSeverity AHowSevere,
+                                uint32 ATTL, bool ACanMove, uint32 AHealthModifier, 
+                                uint32 ASkillPointModifier, uint32 AStrengthModifier, 
+                                uint32 AIntelligenceModifier, uint32 AAgilityModifier, 
+                                uint32 AUpdateLength) : 
+        _host(AHost),
+        _EffectName(AEffectName),
+        _TTL(ATTL),
+        _severeness(AHowSevere),
+        _canMove(ACanMove),
+        _healthModifier(AHealthModifier),
+        _skillPointModifier(ASkillPointModifier),
+        _strengthModifier(ASkillPointModifier),
+        _intelligenceModifier(AIntelligenceModifier),
+        _agilityModifier(AAgilityModifier),
+        _updateLength(AUpdateLength),
+        _age(0),
+        _timesUpdated(0)
 {
-	_skill = s;
+        _lastUpdate = SettingsManager->GetUpdateTime();
 }
 
-SkillAction::~SkillAction() {
-	FinishAction();
+ActorEffect::~ActorEffect() {
+
 }
 
-void SkillAction::PerformAction() {
-	PerformSkill();
+uint32 ActorEffect::GetTTL() const {
+        return _TTL;
 }
 
-void SkillAction::PerformSkill() {
-	//here, from GlobalSkill, we work our magic
+void ActorEffect::Update(uint32 ATimeElapsed) {
 
-	//okay, here we actually perform the skill 
-	std::cout << "SkillAction: Perform Skill" << std::endl;
-	_skill->PerformSkill(GetHost(), GetArguments());
 }
 
-void SkillAction::PerformCooldown() {
-	//we either go into cooldown mode or idle mode, based 
-	//on the skill
-	if(_skill->GetCooldownTime() > 0) {
-		GetHost()->SetMode(new CoolDownMode(_skill->GetCooldownTime(), GetHost()));
-	}
-	else {
-		GetHost()->SetMode(new IdleMode(GetHost()));
-	}
+Actor * const ActorEffect::GetHost() const {
+        return _host;
 }
 
-void SkillAction::FinishAction() {
-	PerformCooldown();
+std::string ActorEffect::GetEffectName() const {
+        return _EffectName;
 }
 
-/**
- * SwapAction
- *
- *
- *
- *
- *
- *
- */
- 
-SwapAction::SwapAction(Actor *p, std::vector<Actor *> args) :
-Action(p, args)
+uint32 ActorEffect::GetUpdateLength() const {
+        return _updateLength;
+}
+
+uint32 ActorEffect::GetLastUpdate() const {
+        return _lastUpdate;
+}
+
+bool ActorEffect::CanMove() const {
+        return _canMove;
+}
+
+uint32 ActorEffect::GetHealthModifier() const {
+        return _healthModifier;
+}
+
+uint32 ActorEffect::GetSkillPointModifier() const {
+        return _skillPointModifier;
+}
+
+uint32 ActorEffect::GetStrengthModifier() const {
+        return _strengthModifier;
+}
+
+uint32 ActorEffect::GetIntelligenceModifier() const {
+        return _intelligenceModifier;
+}
+
+uint32 ActorEffect::GetAgilityModifier() const {
+        return _agilityModifier;
+}
+
+void ActorEffect::SetLastUpdate(uint32 ALastUpdate) {
+        _lastUpdate = ALastUpdate;
+}
+
+void ActorEffect::UndoEffect() const {
+
+}
+
+/*!
+        Scripted Event class wrapper
+*/
+        
+ScriptEvent::ScriptEvent(Actor *AHost, std::list<Actor *> AArguments, std::string AScriptName) :
+        _scriptName(AScriptName),
+        _host(AHost),
+        _arguments(AArguments)
 {
+
 }
 
-SwapAction::~SwapAction() {
-	FinishAction();
+ScriptEvent::~ScriptEvent() {
+
 }
 
-void SwapAction::PerformAction() {
-	//here, we must tell the battle mode to swap the characters
-	//from _PCsInBattle and _playerActors
-	//so remove our host from _PCsInBattle and push it into _playerActors
-	//and remove our argument from _playerActors and put it into _PCsInBattle
-	
-	Actor *host = GetHost();
-	std::vector<Actor *> args = GetArguments();
-	std::vector<Actor *>::iterator it = args.begin();
-	
-	//get the host to run out
-	host->SetAnimation("RUNOUT");
-	//where we want our new character to run to
-	//uint32 destination_x = host->GetX();
-	//uint32 destination_y = host->GetY();
-	
-	//get the argument to run in -- to destination_x and destination_y
-	(*it)->SetAnimation("RUNIN");
+void ScriptEvent::RunScript() {
+        //get script from global script repository and run,
+        //passing in list of arguments and host actor
 }
 
-void SwapAction::FinishAction() {
-	Actor *host = GetHost();
-	std::vector<Actor *> args = GetArguments();
-	std::vector<Actor *>::iterator it = args.begin();
-	
-	host->SetMode(new IdleMode(host));
-	(*it)->SetMode(new IdleMode(*it));
+Actor *ScriptEvent::GetHost() {
+        return _host;
 }
 
-/**
- * UseItemAction
- *
- *
- *
- *
- *
- */
- 
-UseItemAction::UseItemAction(GlobalItem *i, Actor *p, std::vector<Actor *> args) :
-Action(p, args)
+} //end namespace for private battle
+
+/*!
+        The actual battle mode
+*/
+
+
+BattleMode::BattleMode() : 
+        _UserInterface(this),
+        _performingScript(false)
 {
-	_item = i;
+        Reset();
+        
+        //Test load a background
+        StillImage backgrd;
+	backgrd.SetFilename("img/backdrops/battle_screen.jpg");
+        backgrd.SetDimensions(SCREEN_LENGTH*TILE_SIZE, SCREEN_HEIGHT*TILE_SIZE);
+        _battle_images.push_back(backgrd);
+	if(!VideoManager->LoadImage(_battle_images[0]))
+		cerr << "Failed to load background image." << endl; //failed to laod image
 }
-
-UseItemAction::~UseItemAction() {
-	FinishAction();
-}
-
-void UseItemAction::PerformAction() {
-	//here, p uses GlobalItem on args
-	
-	Actor *host = GetHost();
-	//put the character into use item animation mode
-	host->SetAnimation("USEITEM");
-}
-
-void UseItemAction::FinishAction() {
-	Actor *host = GetHost();
-	host->SetMode(new IdleMode(host));
-}
-
-/**
- * BattleMode
- *
- *
- *
- *
- *
- */
- 
-BattleMode::BattleMode() : _UserInterface(this) {
-	cerr << "BATTLE: BattleMode constructor invoked." << endl;
-	
-	// Load the map from the Lua data file
-	//DataManager->LoadMap(this, map_id);
-	
-	// To Tim: This sets up a cooriate system where "0, 0" is the top left hand corner of the screen,
-	// extends to SCREEN_LENGTH and SCREEN_HEIGHT, and has 1 depth level (ie, it's 2D)
-	
-	cerr << "Making new skill." << endl;
-	GlobalSkill *slash = new GlobalSkill("Slash", 5);
-	cerr << "Making move relative to origin." << endl;
-	MoveAction *ma = new MoveRelativeToOrigin(5, 5);
-	cerr << "New perform skill." << endl;
-	PerformSkill *ps = new PerformSkill();
-	cerr << "Adding battle skill actions." << endl;
-	PlayCharacterAnimation *ca = new PlayCharacterAnimation("SWORD ATTACK");
-	slash->AddBattleAction(ma);
-	slash->AddBattleAction(ps);
-	slash->AddBattleAction(ca);
-	
-	
-	cerr << "Adding the skill to claudius." << endl;
-	GlobalCharacter *claud = GlobalManager->GetCharacter(GLOBAL_CLAUDIUS);
-	//claud->AddAttackSkill(slash);
-	
-	cerr << "Creating claudius player character." << endl;
-	PlayerActor *claudius = new PlayerActor(claud, this, 0, 0);
-	_playerActors.push_back(claudius);
-	_PCsInBattle.push_back(claudius);
-	
-	GlobalEnemy *e = new GlobalEnemy();
-	cerr << "Adding the skill to the enemy." << endl;
-	e->AddSkill(slash);
-	EnemyActor *enemy = new EnemyActor(e, this, 1, 1);
-	_enemyActors.push_back(enemy);
-		
-		
-	_performingAction = false;
-	
-	Reset();
-}
-
 
 BattleMode::~BattleMode() {
-	cerr << "BATTLE: BattleMode destructor invoked." << endl;
-	
-	//clean up our actors
-	std::list<PlayerActor *>::iterator pc_itr = _playerActors.begin();
-	std::list<EnemyActor *>::iterator enemy_itr = _enemyActors.begin();
-	
+        // Delete the player actors.  Don't want to waste memory
+        std::deque<PlayerActor *>::iterator pc_itr = _playerActors.begin();
 	for(; pc_itr != _playerActors.end(); pc_itr++) {
 		delete *pc_itr;
 	}
-	for(; enemy_itr != _enemyActors.end(); enemy_itr++) {
-		delete *enemy_itr;
+
+        //get rid of the battle images that we created (TEMP)
+        for (uint32 i = 0; i < _battle_images.size(); i++) {
+		VideoManager->DeleteImage(_battle_images[i]);
 	}
 }
 
-
+//! Resets appropriate class members. Called whenever BootMode is made the active game mode.
 void BattleMode::Reset() {
-	// Setup the coordinate system
-	VideoManager->SetCoordSys(0.0f, (float)SCREEN_LENGTH, 0.0f, (float)SCREEN_HEIGHT);
+        //VideoManager->SetCoordSys(0.0f, (float)SCREEN_LENGTH, 0.0f, (float)SCREEN_HEIGHT);
+        VideoManager->SetCoordSys(0.0f, (float)SCREEN_LENGTH*TILE_SIZE, 0.0f,  (float)SCREEN_HEIGHT*TILE_SIZE);
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 }
 
-
+//! Wrapper function that calls different update functions depending on the battle state.
 void BattleMode::Update() {
-	uint32 time_elapsed = SettingsManager->GetUpdateTime();
-
-	std::cout << "Updating with DT of: " << time_elapsed << std::endl;
-	
-	//update our characters
-	std::list<PlayerActor *>::iterator pc_itr = _PCsInBattle.begin();
-	std::list<EnemyActor *>::iterator enemy_itr = _enemyActors.begin();
-	
-	//is the battle over?
-	if(pc_itr == _PCsInBattle.end() || enemy_itr == _enemyActors.end()) {
-		ShutDown();
-	}
-	
-	//update the concurrent battle actions
-	for(unsigned int i = 0; i < _concurrentActions.size(); i++) {
-		_concurrentActions[i]->Update(time_elapsed);
-	}
-	
-	//update the PCs
-	for(; pc_itr != _PCsInBattle.end(); pc_itr++) {
-		(*pc_itr)->Update(time_elapsed);
-	}
-	//update the enemies
-	for(; enemy_itr != _enemyActors.end(); enemy_itr++) {
-		(*enemy_itr)->Update(time_elapsed);
-	}
-	
-	if(_actionQueue.size() > 0 && !IsPerformingAction()) {
-		std::list<Actor *>::iterator it = _actionQueue.begin();
-		_currentlyPerforming = *it;
-		_actionQueue.pop_front();
-		SetPerformingAction(true);
-		_currentlyPerforming->PerformAction();
-	}
+        uint32 updateTime = SettingsManager->GetUpdateTime();
+        
+        //check here for end conditions.  How many people are still alive?
+        
+        for(unsigned int i = 0; i < _PCsInBattle.size(); i++) {
+                _PCsInBattle[i]->Update(updateTime);
+        }
+        
+        for(unsigned int i = 0; i < _enemyActors.size(); i++) {
+                _enemyActors[i]->Update(updateTime);
+                _enemyActors[i]->DoAI();
+        }
+        
+        //check if any scripts need to run here
 }
 
-void BattleMode::ShutDown() {
-	ModeManager->Pop();
-}
-
+//! Wrapper function that calls different draw functions depending on the battle state.
 void BattleMode::Draw() {
-	// This function draws the next frame that will be displayed to the screen. Like Update(), you'll
-	// probably write several sub-functions to keep the size of this function manageable. 
-	DrawBackground();
-	DrawCharacters();
+        DrawBackground();
+        DrawCharacters();
 }
 
 void BattleMode::DrawBackground() {
-	std::cout << "Draw the Background." << std::endl;
-}
-
-bool BattleMode::IsPerformingAction() {
-	return _performingAction;
-}
-
-void BattleMode::SetPerformingAction(bool isPerforming) {
-	_performingAction = isPerforming;
+        VideoManager->Move(0,0);
+	VideoManager->SetDrawFlags(VIDEO_NO_BLEND, 0);
+	VideoManager->DrawImage(_battle_images[0]);
 }
 
 void BattleMode::DrawCharacters() {
-	//update our characters
-	std::list<PlayerActor *>::iterator pc_itr = _PCsInBattle.begin();
-	std::list<EnemyActor *>::iterator enemy_itr = _enemyActors.begin();
-	
-	//update the PCs
-	for(; pc_itr != _PCsInBattle.end(); pc_itr++) {
-		(*pc_itr)->Draw();
-	}
-	//update the enemies
-	for(; enemy_itr != _enemyActors.end(); enemy_itr++) {
-		(*enemy_itr)->Draw();
-	}
+        for(unsigned int i = 0; i < _PCsInBattle.size(); i++) {
+                _PCsInBattle[i]->Draw();
+        }
+        
+        for(unsigned int i = 0; i < _enemyActors.size(); i++) {
+                _enemyActors[i]->Draw();
+        }
 }
 
-void BattleMode::AddToActionQueue(Actor *a) {
-	_actionQueue.push_back(a);
+//! Shutdown the battle mode
+void BattleMode::ShutDown() {
+        ModeManager->Pop();
 }
 
-void BattleMode::RemoveFromActionQueue(Actor *a) {
-	_actionQueue.remove(a);
+//!Are we performing an action
+bool BattleMode::IsPerformingScript() {
+        return _performingScript;
 }
 
-void BattleMode::AddConcurrentBattleAction(BattleAction *act) {
-	_concurrentActions.push_back(act);
+//! Sets T/F whether an action is being performed
+void BattleMode::SetPerformingScript(bool AIsPerforming) {
+        _performingScript = AIsPerforming;
 }
 
-std::list<PlayerActor *> BattleMode::ReturnCharacters() {
-	return _PCsInBattle;
+//! Adds an actor waiting to perform an action to the queue.
+void BattleMode::AddToActionQueue(Actor *AActorToAdd) {
+        _actionQueue.push_back(AActorToAdd);
 }
 
+//! Removes an actor from the action queue (perhaps they died, et cetera)
+void BattleMode::RemoveFromActionQueue(Actor *AActorToRemove) {
+        _actionQueue.remove(AActorToRemove);
+}
+
+ void BattleMode::AddScriptEventToQueue(ScriptEvent AEventToAdd) {
+        _scriptQueue.push_back(AEventToAdd);
+ }
+        
+//! Remove all scripted events for an actor
+void BattleMode::RemoveScriptedEventsForActor(Actor *AActorToRemove) {
+        std::list<ScriptEvent>::iterator it = _scriptQueue.begin();
+        
+        while( it != _scriptQueue.end() ) { 
+                if((*it).GetHost() == AActorToRemove) {
+                        _scriptQueue.erase(it); //remove this location
+                }
+                else //otherwise, increment the iterator 
+                        it++; 
+        }
+}
+
+//! Returns all player actors
+std::deque<PlayerActor *> BattleMode::ReturnCharacters() const {
+        return _PCsInBattle;
+}
+
+                
 } // namespace hoa_battle
 
