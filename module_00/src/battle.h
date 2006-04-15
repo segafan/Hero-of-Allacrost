@@ -20,10 +20,11 @@
 #ifndef __BATTLE_HEADER__
 #define __BATTLE_HEADER__
 
-#include "utils.h"
 #include <string>
 #include <vector>
 #include <deque>
+
+#include "utils.h"
 #include "defs.h"
 #include "engine.h"
 
@@ -58,6 +59,73 @@ enum StatusSeverity {
         NORMAL,
         GREATER,
         ULTIMATE
+};
+
+
+/*!
+	Actor Effects affect the stats of an Actor, be it burn, sleep, frozen, 
+	poison, et cetera.
+        Goes before the private namespace because Actor needs to know about it
+*/
+class ActorEffect {
+	private:
+		//! Who we are effecting
+		Actor *_host;
+		//! The name of the effect
+		std::string _EffectName;
+		//! The length the effect will last
+		uint32 _TTL;
+                
+                StatusSeverity _severeness;
+                
+		/*! How often the effect does something
+		     -1 for update once
+		*/
+                bool _canMove;
+                uint32 _healthModifier;
+                uint32 _skillPointModifier;
+                
+                uint32 _strengthModifier;
+                uint32 _intelligenceModifier;
+                uint32 _agilityModifier;
+                
+                //how often to update the effect
+		uint32 _updateLength;
+		//! How old the effect is
+		uint32 _age;
+		//! When the last update was
+		uint32 _lastUpdate;
+                //! How many times this effect updated on the player
+                uint32 _timesUpdated;
+		
+		void SubtractTTL(uint32 dt);
+		
+	public:
+		ActorEffect(Actor * const AHost, std::string AEffectName, StatusSeverity AHowSevere,
+                                uint32 ATTL, bool ACanMove, uint32 AHealthModifier, 
+                                uint32 ASkillPointModifier, uint32 AStrengthModifier, 
+                                uint32 AIntelligenceModifier, uint32 AAgilityModifier, 
+                                uint32 AUpdateLength);
+		virtual ~ActorEffect();
+		
+		uint32 GetTTL() const;
+		void Update(uint32 ATimeElapsed);
+		
+		Actor * const GetHost() const;
+		std::string GetEffectName() const;
+		uint32 GetUpdateLength() const;
+		uint32 GetLastUpdate() const;
+                
+                bool CanMove() const;
+                uint32 GetHealthModifier() const;
+                uint32 GetSkillPointModifier() const;
+                uint32 GetStrengthModifier() const;
+                uint32 GetIntelligenceModifier() const;
+                uint32 GetAgilityModifier() const;
+                
+		void SetLastUpdate(uint32 ALastUpdate);
+		
+		void UndoEffect() const;
 };
 
 namespace private_battle {
@@ -405,71 +473,6 @@ class ScriptEvent {
 };
 
 } //end private_battle
-
-/*!
-	Actor Effects affect the stats of an Actor, be it burn, sleep, frozen, 
-	poison, et cetera.
-*/
-class ActorEffect {
-	private:
-		//! Who we are effecting
-		Actor *_host;
-		//! The name of the effect
-		std::string _EffectName;
-		//! The length the effect will last
-		uint32 _TTL;
-                
-                StatusSeverity _severeness;
-                
-		/*! How often the effect does something
-		     -1 for update once
-		*/
-                bool _canMove;
-                uint32 _healthModifier;
-                uint32 _skillPointModifier;
-                
-                uint32 _strengthModifier;
-                uint32 _intelligenceModifier;
-                uint32 _agilityModifier;
-                
-                //how often to update the effect
-		uint32 _updateLength;
-		//! How old the effect is
-		uint32 _age;
-		//! When the last update was
-		uint32 _lastUpdate;
-                //! How many times this effect updated on the player
-                uint32 _timesUpdated;
-		
-		void SubtractTTL(uint32 dt);
-		
-	public:
-		ActorEffect(Actor * const AHost, std::string AEffectName, StatusSeverity AHowSevere,
-                                uint32 ATTL, bool ACanMove, uint32 AHealthModifier, 
-                                uint32 ASkillPointModifier, uint32 AStrengthModifier, 
-                                uint32 AIntelligenceModifier, uint32 AAgilityModifier, 
-                                uint32 AUpdateLength);
-		virtual ~ActorEffect();
-		
-		uint32 GetTTL() const;
-		void Update(uint32 ATimeElapsed);
-		
-		Actor * const GetHost() const;
-		std::string GetEffectName() const;
-		uint32 GetUpdateLength() const;
-		uint32 GetLastUpdate() const;
-                
-                bool CanMove() const;
-                uint32 GetHealthModifier() const;
-                uint32 GetSkillPointModifier() const;
-                uint32 GetStrengthModifier() const;
-                uint32 GetIntelligenceModifier() const;
-                uint32 GetAgilityModifier() const;
-                
-		void SetLastUpdate(uint32 ALastUpdate);
-		
-		void UndoEffect() const;
-};
 
 
  /******************************************************************************
