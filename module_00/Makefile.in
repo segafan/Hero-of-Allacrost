@@ -61,13 +61,12 @@ am__objects_1 = draw.$(OBJEXT) effects.$(OBJEXT) fade.$(OBJEXT) \
 	particle_system.$(OBJEXT) shake.$(OBJEXT) tex_mgmt.$(OBJEXT) \
 	text.$(OBJEXT) textbox.$(OBJEXT) video.$(OBJEXT)
 am_allacrost_OBJECTS = audio.$(OBJEXT) audio_music.$(OBJEXT) \
-	audio_sound.$(OBJEXT) battle.$(OBJEXT) \
-	 boot.$(OBJEXT) data.$(OBJEXT) \
-	engine.$(OBJEXT) global.$(OBJEXT) main.$(OBJEXT) map.$(OBJEXT) \
-	map_actions.$(OBJEXT) map_dialogue.$(OBJEXT) \
-	map_objects.$(OBJEXT) menu.$(OBJEXT) menu_views.$(OBJEXT) \
-	pause.$(OBJEXT) quit.$(OBJEXT) scene.$(OBJEXT) utils.$(OBJEXT) \
-	$(am__objects_1)
+	audio_sound.$(OBJEXT) battle.$(OBJEXT) boot.$(OBJEXT) \
+	data.$(OBJEXT) engine.$(OBJEXT) global.$(OBJEXT) \
+	main.$(OBJEXT) map.$(OBJEXT) map_actions.$(OBJEXT) \
+	map_dialogue.$(OBJEXT) map_objects.$(OBJEXT) menu.$(OBJEXT) \
+	menu_views.$(OBJEXT) pause.$(OBJEXT) quit.$(OBJEXT) \
+	scene.$(OBJEXT) utils.$(OBJEXT) $(am__objects_1)
 allacrost_OBJECTS = $(am_allacrost_OBJECTS)
 allacrost_LDADD = $(LDADD)
 am__editor_SOURCES_DIST = $(EDITOR_DIR)/editor_main.cpp \

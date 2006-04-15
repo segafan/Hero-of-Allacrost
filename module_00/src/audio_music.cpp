@@ -115,7 +115,7 @@ void MusicBuffer::RefillBuffer(ALuint buff) {
 	int32 bitstream;
 	int32 result;
 
-	while(size < MUSIC_BUFFER_SIZE) {
+	while (size < static_cast<int32>(MUSIC_BUFFER_SIZE)) {
 		// ov_read function args: OggVorbis_File, char* buffer, int buffer_length, endianness (1 = big, 0 = little),
 		//                        int data_size (bytes, 1 or 2), int signed (1 = signed, 0 = unsigned), int* bitstream_number
 		result = ov_read(&file_stream, data + size, MUSIC_BUFFER_SIZE - size, UTILS_SYSTEM_ENDIAN, 2, 1, &bitstream);
@@ -127,7 +127,7 @@ void MusicBuffer::RefillBuffer(ALuint buff) {
 		}
 		else { // (result < 0) == error
 			if (AUDIO_DEBUG) cerr << "AUDIO ERROR: Failure while streaming music data into buffer. Error message: ";
-			switch(result) {
+			switch (result) {
 				case OV_EREAD:
 					if (AUDIO_DEBUG) cerr << "read error from ogg file." << endl;
 					break;
@@ -154,7 +154,7 @@ void MusicBuffer::RefillBuffer(ALuint buff) {
 		}
 	}
 
-	if(size == 0) { // No data was buffered, either because of an error or EOF
+	if (size == 0) { // No data was buffered, either because of an error or EOF
 		return;
 	}
 
@@ -173,7 +173,7 @@ void MusicBuffer::DEBUG_PrintProperties() {
 	cout << "Bitrate Lower:   " << file_info->bitrate_lower << endl;
 	cout << "Bitrate Window:  " << file_info->bitrate_window << endl;
 	cout << "Comments: " << endl;
-	for (uint32 i = 0; i < file_comment->comments; i++) {
+	for (uint32 i = 0; i < static_cast<uint32>(file_comment->comments); i++) {
 		cout << "> " << file_comment->user_comments[i] << endl;
 	}
 }

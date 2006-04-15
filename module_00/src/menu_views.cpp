@@ -186,7 +186,7 @@ InventoryWindow::InventoryWindow() : _inventory_active(false)
 	
 	vector<ustring> inv_names;
 	
-	for (int i = 0; i < inv.size(); ++i)
+	for (uint32 i = 0; i < inv.size(); ++i)
 	{
 		// TODO: Eventually include the icon for the item.
 		ostringstream os_obj_count;
@@ -257,7 +257,8 @@ void InventoryWindow::Update()
 	}
 	
 	// Handle Event from option box
-	int32 event = _inventory_items.GetEvent();
+	// int32 event = _inventory_items.GetEvent();
+	_inventory_items.GetEvent();
 	
 	// Take appropriate action based on event!
 }

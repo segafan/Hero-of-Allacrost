@@ -206,7 +206,7 @@ public:
 	static MapMode *current_map;
 
 	MapObject();
-	~MapObject();
+	virtual ~MapObject();
 
 	/*! \brief Member Access functions
 	 *

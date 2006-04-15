@@ -148,7 +148,7 @@ void MapMode::LoadMap() {
 	int32 mapping_count = tile_filenames.size(); // TMP
 	//int32 mapping_count = _map_data.GetTableSize("tile_mappings");
 	//cout << "mapping_count == " << mapping_count << endl;
-	for (uint32 i = 0; i < mapping_count; i++) {
+	for (uint32 i = 0; i < static_cast<uint32>(mapping_count); i++) {
 		_map_data.FillIntVector(i, tile_mappings);
 
 		if (tile_mappings.size() == 1) { // Then add a new static image
@@ -811,7 +811,7 @@ void MapMode::_UpdateExplore() {
 				break;
 			case OBJECT_INTERACTION:
 				MapObject *obj = _FindTileOccupant(tcheck);
-				if (obj->object_type = NPC_SPRITE) {
+				if (obj->object_type == NPC_SPRITE) {
 					MapSprite *sprite = dynamic_cast<MapSprite*>(obj);
 					if (sprite->dialogues.size() != 0) {
 						_map_state = DIALOGUE;

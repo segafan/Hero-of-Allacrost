@@ -647,8 +647,8 @@ void ParticleSystem::_UpdateParticles(float t, const EffectParameters &params)
 		if(_system_def->_wave_motion_used && _particles[j]._wave_half_amplitude > 0.0f)
 		{
 			// find the magnitude of the wave velocity			
-			float half_amp = _particles[j]._wave_half_amplitude;
-			float wcoef = _particles[j]._wave_length_coefficient;
+// 			float half_amp = _particles[j]._wave_half_amplitude; UNUSED VARIABLE 
+// 			float wcoef = _particles[j]._wave_length_coefficient; UNUSED VARIABLE
 			float wave_speed = _particles[j]._wave_half_amplitude * sinf(_particles[j]._wave_length_coefficient * _particles[j]._time);
 			
 			// now the wave velocity is just that wave speed times the particle's tangential vector			

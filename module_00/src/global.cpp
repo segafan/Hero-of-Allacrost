@@ -178,16 +178,15 @@ GlobalAttackPoint::~GlobalAttackPoint() {}
 // ******************************** GlobalEnemy ************************************
 // ****************************************************************************
 
-GlobalEnemy::GlobalEnemy() :
-	_base_hit_points(20),
-	_growth_hit_points(5),
-	_base_strength(1),
-	_growth_strength(1),
-	_base_intelligence(1),
-	_growth_intelligence(1),
-	_base_agility(1),
-	_growth_agility(1)
-{ 
+GlobalEnemy::GlobalEnemy() {
+	_base_hit_points = 20;
+	_growth_hit_points = 5;
+	_base_strength = 1;
+	_growth_strength = 1;
+	_base_intelligence = 1;
+	_growth_intelligence = 1;
+	_base_agility = 1;
+	_growth_agility = 1;
 }
 
 GlobalEnemy::~GlobalEnemy() { }
@@ -293,7 +292,6 @@ GlobalCharacter::GlobalCharacter(std::string na, std::string fn, uint32 id) {
 // Remove all frame images upon destruction
 GlobalCharacter::~GlobalCharacter() {
 	if (GLOBAL_DEBUG) cout << "GLOBAL: GlobalCharacter destructor invoked" << endl;
-	GameVideo *VideoManager = GameVideo::GetReference();
 	/*for (uint32 i = 0; i < _battle_frames.size(); i++) {
 		VideoManager->DeleteImage(_battle_frames[i]);
 	}*/

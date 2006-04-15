@@ -51,7 +51,7 @@ public:
 	uint8 type;
 
 	SpriteAction() {}
-	~SpriteAction() {}
+	virtual ~SpriteAction() {}
 
 	//! Loads the data for this action from the map's data file.
 	//! \param table_key The index of the table in the map data file that contains this action's data.

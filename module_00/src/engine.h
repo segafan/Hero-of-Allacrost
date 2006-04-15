@@ -109,9 +109,9 @@ protected:
 	friend class GameModeManager;
 private:
 	//! Copy constructor is private, because having a copy of a game mode object is a \b bad idea.
-	GameMode(const GameMode& other) {}
+	GameMode(const GameMode& other);
 	//! Copy assignment operator is private, because having a copy of a game mode object is a \b bad idea.
-	GameMode& operator=(const GameMode& other) {}
+	GameMode& operator=(const GameMode& other);
 	// Note: Should I make the delete and delete[] operators private too?
 public:
 	//! The constructor initializes the singleton pointers.

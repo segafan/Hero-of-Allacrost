@@ -20,15 +20,14 @@ namespace hoa_video
 // TextBox
 //-----------------------------------------------------------------------------
 
-TextBox::TextBox()
-: _finished(false),
-  _currentTime(0),
-  _mode(VIDEO_TEXT_INVALID),
-  _displaySpeed(0.0f),
-  _numChars(0)
+TextBox::TextBox() 
 {
+	_finished = false;
+	_currentTime = 0;
+	_mode = VIDEO_TEXT_INVALID;
+	_displaySpeed = 0.0f;
+	_numChars = 0;
 	_initialized = IsInitialized(_initializeErrors);
-	
 	_width = _height = 0.0f;
 	_text_xalign = VIDEO_X_LEFT;
 	_text_yalign = VIDEO_Y_BOTTOM;

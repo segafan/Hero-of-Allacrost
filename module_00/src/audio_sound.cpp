@@ -31,14 +31,6 @@ namespace private_audio {
 // Creates a new buffer for the filename and loads the WAV data.
 
 SoundBuffer::SoundBuffer(string fname) {
-	ALenum format;
-	ALsizei size;
-	ALvoid *data;
-	ALsizei freq;
-	ALboolean loop;
-	ALbyte *file;
-	ALenum error_check;
-
 	filename = fname;
 	
 	// Differences between OpenAL 1.* and earlier versions require this function
@@ -57,6 +49,14 @@ SoundBuffer::SoundBuffer(string fname) {
 	
 	// For older versions of OpenAL prior to 1.*
 	#else
+	ALenum format;
+	ALsizei size;
+	ALvoid *data;
+	ALsizei freq;
+	ALboolean loop;
+	ALbyte *file;
+	ALenum error_check;
+	
 	// (1) Generate a new OpenAL buffer and set the _reference_count to one if successful.
 	alGenBuffers(1, &buffer);
 	error_check = alGetError();

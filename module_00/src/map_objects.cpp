@@ -457,7 +457,6 @@ void MapSprite::Draw() {
 
 	float x_draw = 0.0;  // The x and y cursor position to draw the sprite to
 	float y_draw = 0.0;
-	uint32 draw_frame = 0; // The sprite frame index to draw
 
 
 	// Find the x and y position (true positions when sprite is not in motion)

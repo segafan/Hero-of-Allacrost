@@ -104,45 +104,46 @@ void RotatePoint(float &x, float &y, float angle)
 // GameVideo
 //-----------------------------------------------------------------------------
 
-GameVideo::GameVideo() 
-: _width(0), 
-  _height(0),
-  _fullscreen(false),
-  _temp_width(0),
-  _temp_height(0),
-  _temp_fullscreen(false),
-  _blend(0), 
-  _xalign(-1), 
-  _yalign(-1), 
-  _xflip(0), 
-  _yflip(0),
-  _currentDebugTexSheet(-1),
-  _batchLoading(false),
-  _usesLights(false),
-  _lightOverlay(0xFFFFFFFF),
-  _gui(NULL),
-  _lastTexID(0xFFFFFFFF),
-  _numTexSwitches(0),
-  _advancedDisplay(false),
-  _fpsDisplay(true),
-  _shakeX(0),
-  _shakeY(0),
-  _fogColor(1.0f, 1.0f, 1.0f, 1.0f),
-  _fogIntensity(0.0f),
-  _lightColor(1.0f, 1.0f, 1.0f, 1.0f),
-  _currentTextColor(1.0f, 1.0f, 1.0f, 1.0f),
-  _textShadow(false),
-  _coordSys(0.0f, 1024.0f, 0.0f, 768.0f),
-  _scissorEnabled(false),
-  _viewport(0, 0, 100, 100),
-  _scissorRect(0, 0, 1024, 768),
-  _animation_counter(0),
-  _current_frame_diff(0),
-  _lightningActive(false),
-  _lightningCurTime(0),
-  _lightningEndTime(0),
-  _target(VIDEO_TARGET_SDL_WINDOW)
+GameVideo::GameVideo()
 {
+	_width = 0; 
+	_height = 0;
+	_fullscreen = false;
+	_temp_width = 0;
+	_temp_height = 0;
+	_temp_fullscreen = false;
+	_blend = 0; 
+	_xalign = -1; 
+	_yalign = -1; 
+	_xflip = 0; 
+	_yflip = 0;
+	_currentDebugTexSheet = -1;
+	_batchLoading = false;
+	_usesLights = false;
+	_lightOverlay = 0xFFFFFFFF;
+	_gui = NULL;
+	_lastTexID = 0xFFFFFFFF;
+	_numTexSwitches = 0;
+	_advancedDisplay = false;
+	_fpsDisplay = true;
+	_shakeX = 0;
+	_shakeY = 0;
+	_fogColor = Color(1.0f, 1.0f, 1.0f, 1.0f);
+	_fogIntensity = 0.0f;
+	_lightColor = Color(1.0f, 1.0f, 1.0f, 1.0f);
+	_currentTextColor = Color(1.0f, 1.0f, 1.0f, 1.0f);
+	_textShadow = false;
+	_coordSys = CoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
+	_scissorEnabled = false;
+	_viewport = ScreenRect(0, 0, 100, 100);
+	_scissorRect = ScreenRect(0, 0, 1024, 768);
+	_animation_counter = 0;
+	_current_frame_diff = 0;
+	_lightningActive = false;
+	_lightningCurTime = 0;
+	_lightningEndTime = 0;
+	_target = VIDEO_TARGET_SDL_WINDOW;
+
 	if (VIDEO_DEBUG) 
 		cout << "VIDEO: GameVideo constructor invoked\n";
 	

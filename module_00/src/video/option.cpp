@@ -17,31 +17,31 @@ namespace hoa_video
 // OptionBox
 //-----------------------------------------------------------------------------
 
-OptionBox::OptionBox()
-: _option_xalign(VIDEO_X_LEFT),
-  _option_yalign(VIDEO_Y_TOP),
-  _selectMode(VIDEO_SELECT_SINGLE),
-  _switching(false),
-  _hWrapMode(VIDEO_WRAP_MODE_NONE),
-  _vWrapMode(VIDEO_WRAP_MODE_NONE),
-  _cursorState(VIDEO_CURSOR_STATE_VISIBLE),
-  _event(0),
-  _selection(-1),
-  _switchSelection(-1),
-  _firstSelection(-1),
-  _numOptions(0),
-  _scrolling(0),
-  _scrollOffset(0),
-  _scrollStartOffset(0),
-  _scrollEndOffset(0),
-  _blinkTime(0),
-  _scrollTime(0),
-  _switchCursorX(-3),
-  _switchCursorY(-3),
-  _blink(false),
-  _cursorX(0.0f),
-  _cursorY(0.0f)
+OptionBox::OptionBox() 
 {
+	_option_xalign = VIDEO_X_LEFT;
+	_option_yalign = VIDEO_Y_TOP;
+	_selectMode = VIDEO_SELECT_SINGLE;
+	_switching = false;
+	_hWrapMode = VIDEO_WRAP_MODE_NONE;
+	_vWrapMode = VIDEO_WRAP_MODE_NONE;
+	_cursorState = VIDEO_CURSOR_STATE_VISIBLE;
+	_event = 0;
+	_selection = -1;
+	_switchSelection = -1;
+	_firstSelection = -1;
+	_numOptions = 0;
+	_scrolling = 0;
+	_scrollOffset = 0;
+	_scrollStartOffset = 0;
+	_scrollEndOffset = 0;
+	_blinkTime = 0;
+	_scrollTime = 0;
+	_switchCursorX = -3;
+	_switchCursorY = -3;
+	_blink = false;
+	_cursorX = 0.0f;
+	_cursorY = 0.0f;
 	_hSpacing = _vSpacing = 0.0f;
 	_numRows = _numColumns = 0;
 	_initialized = IsInitialized(_initializeErrors);
@@ -1204,6 +1204,13 @@ bool OptionBox::Draw()
 						
 						break;
 					}
+					
+					// Added by Roots: These cases weren't accounted for and were generating warnings.
+					// plese fix this up when you get a chance
+					case VIDEO_OPTION_ELEMENT_INVALID:
+					case VIDEO_OPTION_ELEMENT_TOTAL:
+					default:
+						break;
 				};
 			}
 

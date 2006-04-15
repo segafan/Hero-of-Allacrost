@@ -115,8 +115,8 @@ const uint32 GLOBAL_SOUND_BUMP    =  3;
  *****************************************************************************/
 class GlobalObject {
 private:
-	GlobalObject(const GlobalObject&) {}
-	GlobalObject& operator=(const GlobalObject&) {}
+	GlobalObject(const GlobalObject&);
+	GlobalObject& operator=(const GlobalObject&);
 protected:
 	//! The name of the object, as will be displayed on the player's screen.
 	std::string obj_name;
@@ -174,8 +174,8 @@ private:
 	//! See the Game Item Usage Type constants for a list of locations.
 	uint8 _use_case;
 
-	GlobalItem(const GlobalItem&) {}
-	GlobalItem& operator=(const GlobalItem&) {}
+	GlobalItem(const GlobalItem&);
+	GlobalItem& operator=(const GlobalItem&);
 public:
 	GlobalItem(std::string name, uint8 use, uint32 usable, uint32 id, uint32 count);
 	GlobalItem();
@@ -207,8 +207,8 @@ public:
  *****************************************************************************/
 class GlobalWeapon : public GlobalObject {
 private:
-	GlobalWeapon(const GlobalWeapon&) {}
-	GlobalWeapon& operator=(const GlobalWeapon&) {}
+	GlobalWeapon(const GlobalWeapon&);
+	GlobalWeapon& operator=(const GlobalWeapon&);
 public:
 	GlobalWeapon(std::string name, uint32 usable, uint32 id, uint32 count);
 	GlobalWeapon();
@@ -235,8 +235,8 @@ public:
  *****************************************************************************/
 class GlobalArmor : public GlobalObject {
 private:
-	GlobalArmor(const GlobalArmor&) {}
-	GlobalArmor& operator=(const GlobalArmor&) {}
+	GlobalArmor(const GlobalArmor&);
+	GlobalArmor& operator=(const GlobalArmor&);
 public:
 	GlobalArmor(std::string name, uint8 type, uint32 usable, uint32 id, uint32 count);
 	GlobalArmor();
@@ -280,8 +280,8 @@ public:
 	GlobalSkill();
 	~GlobalSkill();
 
-	uint32 GetCooldownTime() {}
-	uint32 GetWarmupTime() {}
+	uint32 GetCooldownTime() { return 0; }
+	uint32 GetWarmupTime() { return 0; }
 };
 
 /*!****************************************************************************
@@ -330,8 +330,8 @@ public:
 	             uint8 elem_res, uint8 stat_weak, uint8 stat_res);
 	GlobalAttackPoint();
 	~GlobalAttackPoint();
-	GlobalAttackPoint(const GlobalAttackPoint&) {}
-	GlobalAttackPoint& operator=(const GlobalAttackPoint&) {}
+// 	GlobalAttackPoint(const GlobalAttackPoint&);
+// 	GlobalAttackPoint& operator=(const GlobalAttackPoint&);
 
 	//! \name Public Member Access Functions
 	//@{

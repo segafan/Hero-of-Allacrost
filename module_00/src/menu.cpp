@@ -182,8 +182,6 @@ void MenuMode::Reset() {
 // MenuMode::Update
 //-------------------------------------------
 void MenuMode::Update() {
-	uint32 time_elapsed = SettingsManager->GetUpdateTime();
-
 	// See if inventory window is active
 	if (_inventory_window.IsActive())
 	{
