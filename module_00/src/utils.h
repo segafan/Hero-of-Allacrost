@@ -1,9 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
-//            Copyright (C) 2004, 2005 by The Allacrost Project
-//                       All Rights Reserved
+//            Copyright (C) 2004-2006 by The Allacrost Project
+//                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL. It is free software and you may
-// modify it and/or redistribute it under the terms of this license.
+// This code is licensed under the GNU GPL version 2. It is free software 
+// and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 

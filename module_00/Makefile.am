@@ -1,8 +1,18 @@
 EXTRA_DIST = configure dat fnt img mus snd
 ACLOCAL_AMFLAGS = -I m4
-INCLUDES = -I/usr/include/SDL -I$(top_srcdir)/src/video -I$(top_srcdir)/src
+INCLUDES = \
+	-I/usr/include/SDL \
+	-I$(top_srcdir)/src/ \
+	-I$(top_srcdir)/src/engine \
+	-I$(top_srcdir)/src/engine/audio \
+	-I$(top_srcdir)/src/engine/video \
+	-I$(top_srcdir)/src/modes \
+	-I$(top_srcdir)/src/modes/battle \
+	-I$(top_srcdir)/src/modes/boot \
+	-I$(top_srcdir)/src/modes/map \
+	-I$(top_srcdir)/src/modes/menu
 
-VIDEO_DIR = src/video
+VIDEO_DIR = src/engine/video
 video_SOURCES = \
 	$(VIDEO_DIR)/color.h \
 	$(VIDEO_DIR)/context.h \
@@ -41,9 +51,61 @@ video_SOURCES = \
 	$(VIDEO_DIR)/textbox.h \
 	$(VIDEO_DIR)/video.cpp \
 	$(VIDEO_DIR)/video.h
+
+AUDIO_DIR = src/engine/audio
+audio_SOURCES = \
+	$(AUDIO_DIR)/audio.cpp \
+	$(AUDIO_DIR)/audio.h \
+	$(AUDIO_DIR)/audio_sound.cpp \
+	$(AUDIO_DIR)/audio_sound.h \
+	$(AUDIO_DIR)/audio_music.cpp \
+	$(AUDIO_DIR)/audio_music.h 
+
+ENGINE_DIR = src/engine
+engine_SOURCES = \
+	$(ENGINE_DIR)/settings.cpp \
+	$(ENGINE_DIR)/settings.h \
+	$(ENGINE_DIR)/input.cpp \
+	$(ENGINE_DIR)/input.h \
+	$(ENGINE_DIR)/mode_manager.cpp \
+	$(ENGINE_DIR)/mode_manager.h \
+	$(ENGINE_DIR)/data.cpp \
+	$(ENGINE_DIR)/data.h \
+	$(ENGINE_DIR)/data_bind.h \
+	$(ENGINE_DIR)/global.cpp \
+	$(ENGINE_DIR)/global.h \
+	$(audio_SOURCES) \
+	$(video_SOURCES)
+
+MODES_DIR = src/modes
+modes_SOURCES = \
+	$(MODES_DIR)/battle/battle.cpp \
+	$(MODES_DIR)/battle/battle.h \
+	$(MODES_DIR)/boot/boot.cpp \
+	$(MODES_DIR)/boot/boot.h \
+	$(MODES_DIR)/boot/boot_menu.cpp \
+	$(MODES_DIR)/boot/boot_menu.h \
+	$(MODES_DIR)/map/map.cpp \
+	$(MODES_DIR)/map/map.h \
+	$(MODES_DIR)/map/map_actions.cpp \
+	$(MODES_DIR)/map/map_actions.h \
+	$(MODES_DIR)/map/map_dialogue.cpp \
+	$(MODES_DIR)/map/map_dialogue.h \
+	$(MODES_DIR)/map/map_objects.cpp \
+	$(MODES_DIR)/map/map_objects.h \
+	$(MODES_DIR)/menu/menu.cpp \
+	$(MODES_DIR)/menu/menu.h \
+	$(MODES_DIR)/menu/menu_views.cpp \
+	$(MODES_DIR)/menu/menu_views.h \
+	$(MODES_DIR)/pause.cpp \
+	$(MODES_DIR)/pause.h \
+	$(MODES_DIR)/quit.cpp \
+	$(MODES_DIR)/quit.h \
+	$(MODES_DIR)/scene.cpp \
+	$(MODES_DIR)/scene.h
 	
 if COND_EDITOR
-EDITOR_DIR = src/map_editor
+EDITOR_DIR = src/editor
 EDITOR_BIN = editor
 AM_CXXFLAGS := $(CXXFLAGS) $(QT_CXXFLAGS)
 BUILT_SOURCES = $(editor_MOC)
@@ -63,8 +125,8 @@ editor_SOURCES = \
 	$(EDITOR_DIR)/tileset.h \
 	$(editor_MOC) \
 	$(video_SOURCES) \
-	src/data.cpp \
-	src/data.h \
+	$(ENGINE_DIR)/data.cpp \
+	$(ENGINE_DIR)/data.h \
 	src/defs.h \
 	src/utils.cpp \
 	src/utils.h
@@ -76,43 +138,9 @@ endif
 bin_PROGRAMS = allacrost $(EDITOR_BIN)
 
 allacrost_SOURCES = \
-	src/audio.cpp \
-	src/audio.h \
-	src/audio_music.cpp \
-	src/audio_music.h \
-	src/audio_sound.cpp \
-	src/audio_sound.h \
-	src/battle.cpp \
-	src/battle.h \
-	src/boot.cpp \
-	src/boot/h \
-	src/data.cpp \
-	src/data.h \
-	src/data_bind.h \
-	src/defs.h \
-	src/engine.cpp \
-	src/engine.h \
-	src/global.cpp \
-	src/global.h \
 	src/main.cpp \
-	src/map.cpp \
-	src/map.h \
-	src/map_actions.cpp \
-	src/map_actions.h \
-	src/map_dialogue.cpp \
-	src/map_dialogue.h \
-	src/map_objects.cpp \
-	src/map_objects.h \
-	src/menu.cpp \
-	src/menu.h \
-	src/menu_views.cpp \
-	src/menu_views.h \
-	src/pause.cpp \
-	src/pause.h \
-	src/quit.cpp \
-	src/quit.h \
-	src/scene.cpp \
-	src/scene.h \
+	src/defs.h \
 	src/utils.cpp \
 	src/utils.h \
-	$(video_SOURCES)
+	$(engine_SOURCES) \
+	$(modes_SOURCES)
