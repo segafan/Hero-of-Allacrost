@@ -269,20 +269,25 @@ void BootMode::_InitWindowMenuDefaults(hoa_video::OptionBox & menu, hoa_video::M
 // Inits the main menu
 void BootMode::_SetupMainMenu() {
 
-	// Set defaults
+	// Set menu defaults
 	_InitMenuDefaults(_main_menu);
 	_main_menu.SetSize(MAIN_MENU_SIZE, 1);
 
-	// Generate the strings
-	vector<ustring> options;
-	options.push_back(MakeWideString("New Game"));
-	options.push_back(MakeWideString("Load Game"));
-	options.push_back(MakeWideString("Options"));
-	options.push_back(MakeWideString("Credits"));
-	options.push_back(MakeWideString("Quit"));
+	// Generate the strings, the old way
+	//vector<ustring> options;
+	//options.push_back(MakeWideString("New Game"));
+	//options.push_back(MakeWideString("Load Game"));
+	//options.push_back(MakeWideString("Options"));
+	//options.push_back(MakeWideString("Credits"));
+	//options.push_back(MakeWideString("Quit"));
 	
 	// Add strings and set the default selection.
-	_main_menu.SetOptions(options);
+	//_main_menu.SetOptions(options);
+	_main_menu.AddOption(MakeWideString("New Game"));
+	_main_menu.AddOption(MakeWideString("Load Game"));
+	_main_menu.AddOption(MakeWideString("Options"));
+	_main_menu.AddOption(MakeWideString("Credits"));
+	_main_menu.AddOption(MakeWideString("Quit"));
 	_main_menu.SetSelection(NEW_GAME);
 }
 
