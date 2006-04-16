@@ -599,6 +599,32 @@ bool OptionBox::SetOptionText(int32 index, const hoa_utils::ustring &text)
 
 
 //-----------------------------------------------------------------------------
+// AddOption: Adds a new option to the OptionBox
+//-----------------------------------------------------------------------------
+
+bool OptionBox::AddOption(const hoa_utils::ustring &text)
+{
+	Option option;
+		
+	// Parse the option string
+	if (!_ParseOption(text, option))
+	{
+		if(VIDEO_DEBUG)
+		{
+			cerr << "VIDEO ERROR: OptionBox::AddOption() failed. Invalid format string." << endl;
+		}
+		return false;
+	}
+		
+	// And add it!
+	_options.push_back(option);		
+	++_numOptions;
+
+	return true;
+}
+
+
+//-----------------------------------------------------------------------------
 // EnableOption: enables or disables the option with the given index
 //-----------------------------------------------------------------------------
 

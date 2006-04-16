@@ -386,6 +386,15 @@ public:
 
 	bool SetOptionText(int32 index, const hoa_utils::ustring &text);
 
+	/*!
+	 *  \brief Adds a new option to the OptionBox
+	 *
+	 *  \param text for the new option
+	 *
+	 *  \return returns false on failure (if the given text is illegal)
+	 */
+	bool AddOption(const hoa_utils::ustring &text);
+
 
 	/*!
 	 *  \brief enables/disables the option with the given index
