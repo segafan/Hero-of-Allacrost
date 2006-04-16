@@ -137,7 +137,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="SDL.lib SDL_TTF.lib SDLMain.lib Opengl32.lib glu32.lib OpenAL32.lib ALut.lib ogg.lib vorbis.lib vorbisfile.lib DevIL.lib ILUT.lib ILU.lib Lua+lib.lib qt-mt3.lib"
+				AdditionalDependencies="SDL.lib SDL_TTF.lib SDLMain.lib Opengl32.lib glu32.lib OpenAL32.lib ALut.lib ogg.lib vorbis.lib vorbisfile.lib DevIL.lib ILUT.lib ILU.lib Lua+lib.lib"
 				LinkIncremental="0"
 				GenerateDebugInformation="false"
 				SubSystem="2"
@@ -193,10 +193,6 @@
 			</File>
 			<File
 				RelativePath=".\src\battle.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\battle_actions.h"
 				>
 			</File>
 			<File
@@ -373,10 +369,6 @@
 			</File>
 			<File
 				RelativePath=".\src\battle.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\battle_actions.cpp"
 				>
 			</File>
 			<File
