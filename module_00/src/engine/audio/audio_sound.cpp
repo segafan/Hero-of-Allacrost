@@ -268,7 +268,7 @@ void SoundSource::DEBUG_PrintProperties() {
 using namespace hoa_audio::private_audio;
 
 // ****************************************************************************
-// *********************** SoundDescriptor Class Functions ************************
+// ***** SoundDescriptor Class Functions
 // ****************************************************************************
 
 // The constructor does not attempt to retrieve any resources.
