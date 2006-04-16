@@ -62,6 +62,19 @@ enum StatusSeverity {
 };
 
 
+namespace private_battle {
+
+const uint32 TILE_SIZE = 64; // The virtual "tile map" that we discussed in the forums has square 64 pixel tiles
+const uint32 SCREEN_LENGTH = 16; // Number of tiles long the screen is
+const uint32 SCREEN_HEIGHT = 12; // The number of tiles high the screen is
+
+const uint32 DRAW_OFFSET_LEFT = 224; //from the left of the screen = 0
+const uint32 DRAW_OFFSET_TOP = 640; //from bottom of the screen = 0 (128 from the top of the screen)
+const uint32 DRAW_OFFSET_BOTTOM = 64; //from the bottom of the screen = 0
+
+const uint32 NUM_WIDTH_TILES = 12;
+const uint32 NUM_HEIGHT_TILES = 9;
+
 /*!
 	Actor Effects affect the stats of an Actor, be it burn, sleep, frozen, 
 	poison, et cetera.
@@ -127,19 +140,6 @@ class ActorEffect {
 		
 		void UndoEffect() const;
 };
-
-namespace private_battle {
-
-const uint32 TILE_SIZE = 64; // The virtual "tile map" that we discussed in the forums has square 64 pixel tiles
-const uint32 SCREEN_LENGTH = 16; // Number of tiles long the screen is
-const uint32 SCREEN_HEIGHT = 12; // The number of tiles high the screen is
-
-const uint32 DRAW_OFFSET_LEFT = 224; //from the left of the screen = 0
-const uint32 DRAW_OFFSET_TOP = 640; //from bottom of the screen = 0 (128 from the top of the screen)
-const uint32 DRAW_OFFSET_BOTTOM = 64; //from the bottom of the screen = 0
-
-const uint32 NUM_WIDTH_TILES = 12;
-const uint32 NUM_HEIGHT_TILES = 9;
 
 /**
 	Actor is the general entity partaking in battle.  It will be inherited by player actors and enemy actors.
