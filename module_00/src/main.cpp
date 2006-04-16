@@ -1,9 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
-//            Copyright (C) 2004, 2005 by The Allacrost Project
-//                       All Rights Reserved
+//            Copyright (C) 2004-2006 by The Allacrost Project
+//                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL. It is free software and you may
-// modify it and/or redistribute it under the terms of this license.
+// This code is licensed under the GNU GPL version 2. It is free software 
+// and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -33,7 +33,9 @@
 #include "audio.h"
 #include "video.h"
 #include "data.h"
-#include "engine.h"
+#include "mode_manager.h"
+#include "input.h"
+#include "settings.h"
 #include "global.h"
 #include "boot.h"
 
@@ -41,7 +43,9 @@ using namespace std;
 using namespace hoa_utils;
 using namespace hoa_audio;
 using namespace hoa_video;
-using namespace hoa_engine;
+using namespace hoa_mode_manager;
+using namespace hoa_input;
+using namespace hoa_settings;
 using namespace hoa_global;
 using namespace hoa_data;
 using namespace hoa_boot;
@@ -87,19 +91,21 @@ void PrintUsage() {
 // EnableDebugging enables various debugging print statements in different parts of the game
 void EnableDebugging(const char* arg) {
 	if (strcmp(arg, "all") == 0) {
-		hoa_audio::AUDIO_DEBUG = true;
-		hoa_battle::BATTLE_DEBUG = true;
-		hoa_boot::BOOT_DEBUG = true;
-		hoa_data::DATA_DEBUG = true;
-		hoa_engine::ENGINE_DEBUG = true;
-		hoa_global::GLOBAL_DEBUG = true;
-		hoa_map::MAP_DEBUG = true;
-		hoa_menu::MENU_DEBUG = true;
-		hoa_pause::PAUSE_DEBUG = true;
-		hoa_quit::QUIT_DEBUG = true;
-		hoa_scene::SCENE_DEBUG = true;
-		hoa_utils::UTILS_DEBUG = true;
-		hoa_video::VIDEO_DEBUG = true;
+		hoa_audio::AUDIO_DEBUG               = true;
+		hoa_battle::BATTLE_DEBUG             = true;
+		hoa_boot::BOOT_DEBUG                 = true;
+		hoa_data::DATA_DEBUG                 = true;
+		hoa_mode_manager::MODE_MANAGER_DEBUG = true;
+		hoa_input::INPUT_DEBUG               = true;
+		hoa_settings::SETTINGS_DEBUG         = true;
+		hoa_global::GLOBAL_DEBUG             = true;
+		hoa_map::MAP_DEBUG                   = true;
+		hoa_menu::MENU_DEBUG                 = true;
+		hoa_pause::PAUSE_DEBUG               = true;
+		hoa_quit::QUIT_DEBUG                 = true;
+		hoa_scene::SCENE_DEBUG               = true;
+		hoa_utils::UTILS_DEBUG               = true;
+		hoa_video::VIDEO_DEBUG               = true;
 		return;
 	}
 	if (strcmp(arg, "audio") == 0) {
@@ -118,8 +124,16 @@ void EnableDebugging(const char* arg) {
 		hoa_data::DATA_DEBUG = true;
 		return;
 	}
-	if (strcmp(arg, "engine") == 0) {
-		hoa_engine::ENGINE_DEBUG = true;
+	if (strcmp(arg, "mode_manager") == 0) {
+		hoa_mode_manager::MODE_MANAGER_DEBUG = true;
+		return;
+	}
+	if (strcmp(arg, "input") == 0) {
+		hoa_input::INPUT_DEBUG = true;
+		return;
+	}
+	if (strcmp(arg, "settings") == 0) {
+		hoa_settings::SETTINGS_DEBUG = true;
 		return;
 	}
 	if (strcmp(arg, "global") == 0) {
@@ -375,7 +389,7 @@ int32 main(int32 argc, char *argv[]) {
 		// 1) Render the scene
 		VideoManager->Clear();
 		ModeManager->Draw();
-		VideoManager->Display();
+		VideoManager->Display(SettingsManager->GetUpdateTime());
 
 		// 2) Process all new events
 		InputManager->EventHandler();

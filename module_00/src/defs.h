@@ -1,33 +1,32 @@
 ///////////////////////////////////////////////////////////////////////////////
-//            Copyright (C) 2004, 2005 by The Allacrost Project
-//                       All Rights Reserved
+//            Copyright (C) 2004-2006 by The Allacrost Project
+//                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL. It is free software and you may
-// modify it and/or redistribute it under the terms of this license.
+// This code is licensed under the GNU GPL version 2. It is free software 
+// and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-/*!****************************************************************************
- * \file    defs.h
- * \author  Tyler Olsen, roots@allacrost.org
- * \date    Last Updated: August 17th, 2005
- * \brief   Header file for forward declarations of classes and debug variables.
- *
- * The primary purpose of this file is to forward declare classes and variables
- * in such a way that we avoid recursive inclusion problems. It defines every
- * class (that is not in a private_* namespace) across the entire source tree.
- * If you add a new class or namespace, don't forget to add its declaration to
- * this file!
- *
- * \note Pretty much every header file in the source tree will need to include
- * this file, with a few exceptions (utils.h is one).
- *
- * \note This file should not be included in any source files.
- *
- * \note The commenting for all namespaces, variables, and classes declared in
- * this file can be found in the respective header files for where these
- * structures reside in.
- *****************************************************************************/
+/** ***************************************************************************
+*** \file    defs.h
+*** \author  Tyler Olsen, roots@allacrost.org
+*** \brief   Header file for forward declarations of classes and debug variables.
+***
+*** The primary purpose of this file is to forward declare classes and variables
+*** in such a way that we avoid recursive inclusion problems. It defines every
+*** class (that is not in a private_* namespace) across the entire source tree.
+*** If you add a new class or namespace, don't forget to add its declaration to
+*** this file!
+***
+*** \note Pretty much every header file in the source tree will need to include
+*** this file, with a few exceptions (utils.h is one).
+***
+*** \note This file should not be included in any source files.
+***
+*** \note The commenting for all namespaces, variables, and classes declared in
+*** this file can be found in the respective header files for where these
+*** structures reside in.
+*** **************************************************************************/
 
 #ifndef __DEFS_HEADER__
 #define __DEFS_HEADER__
@@ -57,16 +56,26 @@ namespace hoa_data {
 	class WriteDataDescriptor;
 }
 
-// Engine declarations, see engine.h/cpp
-namespace hoa_engine {
-	extern bool ENGINE_DEBUG;
+// Mode manager declarations, see mode_manager.h/cpp
+namespace hoa_mode_manager {
+	extern bool MODE_MANAGER_DEBUG;
 	class GameMode;
 	class GameModeManager;
-	class GameSettings;
-	class KeyState;
-	class JoystickState;
+}
+
+// Input declarations, see input.h/cpp
+namespace hoa_input {
+	extern bool INPUT_DEBUG;
 	class GameInput;
 }
+
+
+// Settings declarations, see settings.h/cpp
+namespace hoa_settings {
+	extern bool SETTINGS_DEBUG;
+	class GameSettings;
+}
+
 
 // Global declarations, see global.h/cpp
 namespace hoa_global {

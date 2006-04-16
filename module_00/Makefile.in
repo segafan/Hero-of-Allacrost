@@ -54,19 +54,23 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am__objects_1 = draw.$(OBJEXT) effects.$(OBJEXT) fade.$(OBJEXT) \
+am__objects_1 = audio.$(OBJEXT) audio_sound.$(OBJEXT) \
+	audio_music.$(OBJEXT)
+am__objects_2 = draw.$(OBJEXT) effects.$(OBJEXT) fade.$(OBJEXT) \
 	gui.$(OBJEXT) image.$(OBJEXT) interpolator.$(OBJEXT) \
 	menu_window.$(OBJEXT) option.$(OBJEXT) \
 	particle_effect.$(OBJEXT) particle_manager.$(OBJEXT) \
 	particle_system.$(OBJEXT) shake.$(OBJEXT) tex_mgmt.$(OBJEXT) \
 	text.$(OBJEXT) textbox.$(OBJEXT) video.$(OBJEXT)
-am_allacrost_OBJECTS = audio.$(OBJEXT) audio_music.$(OBJEXT) \
-	audio_sound.$(OBJEXT) battle.$(OBJEXT) boot.$(OBJEXT) \
-	data.$(OBJEXT) engine.$(OBJEXT) global.$(OBJEXT) \
-	main.$(OBJEXT) map.$(OBJEXT) map_actions.$(OBJEXT) \
-	map_dialogue.$(OBJEXT) map_objects.$(OBJEXT) menu.$(OBJEXT) \
-	menu_views.$(OBJEXT) pause.$(OBJEXT) quit.$(OBJEXT) \
-	scene.$(OBJEXT) utils.$(OBJEXT) $(am__objects_1)
+am__objects_3 = settings.$(OBJEXT) input.$(OBJEXT) \
+	mode_manager.$(OBJEXT) data.$(OBJEXT) global.$(OBJEXT) \
+	$(am__objects_1) $(am__objects_2)
+am__objects_4 = battle.$(OBJEXT) boot.$(OBJEXT) boot_menu.$(OBJEXT) \
+	map.$(OBJEXT) map_actions.$(OBJEXT) map_dialogue.$(OBJEXT) \
+	map_objects.$(OBJEXT) menu.$(OBJEXT) menu_views.$(OBJEXT) \
+	pause.$(OBJEXT) quit.$(OBJEXT) scene.$(OBJEXT)
+am_allacrost_OBJECTS = main.$(OBJEXT) utils.$(OBJEXT) $(am__objects_3) \
+	$(am__objects_4)
 allacrost_OBJECTS = $(am_allacrost_OBJECTS)
 allacrost_LDADD = $(LDADD)
 am__editor_SOURCES_DIST = $(EDITOR_DIR)/editor_main.cpp \
@@ -94,14 +98,15 @@ am__editor_SOURCES_DIST = $(EDITOR_DIR)/editor_main.cpp \
 	$(VIDEO_DIR)/tex_mgmt.cpp $(VIDEO_DIR)/tex_mgmt.h \
 	$(VIDEO_DIR)/text.cpp $(VIDEO_DIR)/text.h \
 	$(VIDEO_DIR)/textbox.cpp $(VIDEO_DIR)/textbox.h \
-	$(VIDEO_DIR)/video.cpp $(VIDEO_DIR)/video.h src/data.cpp \
-	src/data.h src/defs.h src/utils.cpp src/utils.h
-@COND_EDITOR_TRUE@am__objects_2 = editor.moc.$(OBJEXT) \
+	$(VIDEO_DIR)/video.cpp $(VIDEO_DIR)/video.h \
+	$(ENGINE_DIR)/data.cpp $(ENGINE_DIR)/data.h src/defs.h \
+	src/utils.cpp src/utils.h
+@COND_EDITOR_TRUE@am__objects_5 = editor.moc.$(OBJEXT) \
 @COND_EDITOR_TRUE@	grid.moc.$(OBJEXT)
 @COND_EDITOR_TRUE@am_editor_OBJECTS = editor_main.$(OBJEXT) \
 @COND_EDITOR_TRUE@	editor.$(OBJEXT) grid.$(OBJEXT) \
 @COND_EDITOR_TRUE@	tile.$(OBJEXT) tileset.$(OBJEXT) \
-@COND_EDITOR_TRUE@	$(am__objects_2) $(am__objects_1) \
+@COND_EDITOR_TRUE@	$(am__objects_5) $(am__objects_2) \
 @COND_EDITOR_TRUE@	data.$(OBJEXT) utils.$(OBJEXT)
 editor_OBJECTS = $(am_editor_OBJECTS)
 am__DEPENDENCIES_1 =
@@ -222,8 +227,19 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 EXTRA_DIST = configure dat fnt img mus snd
 ACLOCAL_AMFLAGS = -I m4
-INCLUDES = -I/usr/include/SDL -I$(top_srcdir)/src/video -I$(top_srcdir)/src
-VIDEO_DIR = src/video
+INCLUDES = \
+	-I/usr/include/SDL \
+	-I$(top_srcdir)/src/ \
+	-I$(top_srcdir)/src/engine \
+	-I$(top_srcdir)/src/engine/audio \
+	-I$(top_srcdir)/src/engine/video \
+	-I$(top_srcdir)/src/modes \
+	-I$(top_srcdir)/src/modes/battle \
+	-I$(top_srcdir)/src/modes/boot \
+	-I$(top_srcdir)/src/modes/map \
+	-I$(top_srcdir)/src/modes/menu
+
+VIDEO_DIR = src/engine/video
 video_SOURCES = \
 	$(VIDEO_DIR)/color.h \
 	$(VIDEO_DIR)/context.h \
@@ -263,7 +279,59 @@ video_SOURCES = \
 	$(VIDEO_DIR)/video.cpp \
 	$(VIDEO_DIR)/video.h
 
-@COND_EDITOR_TRUE@EDITOR_DIR = src/map_editor
+AUDIO_DIR = src/engine/audio
+audio_SOURCES = \
+	$(AUDIO_DIR)/audio.cpp \
+	$(AUDIO_DIR)/audio.h \
+	$(AUDIO_DIR)/audio_sound.cpp \
+	$(AUDIO_DIR)/audio_sound.h \
+	$(AUDIO_DIR)/audio_music.cpp \
+	$(AUDIO_DIR)/audio_music.h 
+
+ENGINE_DIR = src/engine
+engine_SOURCES = \
+	$(ENGINE_DIR)/settings.cpp \
+	$(ENGINE_DIR)/settings.h \
+	$(ENGINE_DIR)/input.cpp \
+	$(ENGINE_DIR)/input.h \
+	$(ENGINE_DIR)/mode_manager.cpp \
+	$(ENGINE_DIR)/mode_manager.h \
+	$(ENGINE_DIR)/data.cpp \
+	$(ENGINE_DIR)/data.h \
+	$(ENGINE_DIR)/data_bind.h \
+	$(ENGINE_DIR)/global.cpp \
+	$(ENGINE_DIR)/global.h \
+	$(audio_SOURCES) \
+	$(video_SOURCES)
+
+MODES_DIR = src/modes
+modes_SOURCES = \
+	$(MODES_DIR)/battle/battle.cpp \
+	$(MODES_DIR)/battle/battle.h \
+	$(MODES_DIR)/boot/boot.cpp \
+	$(MODES_DIR)/boot/boot.h \
+	$(MODES_DIR)/boot/boot_menu.cpp \
+	$(MODES_DIR)/boot/boot_menu.h \
+	$(MODES_DIR)/map/map.cpp \
+	$(MODES_DIR)/map/map.h \
+	$(MODES_DIR)/map/map_actions.cpp \
+	$(MODES_DIR)/map/map_actions.h \
+	$(MODES_DIR)/map/map_dialogue.cpp \
+	$(MODES_DIR)/map/map_dialogue.h \
+	$(MODES_DIR)/map/map_objects.cpp \
+	$(MODES_DIR)/map/map_objects.h \
+	$(MODES_DIR)/menu/menu.cpp \
+	$(MODES_DIR)/menu/menu.h \
+	$(MODES_DIR)/menu/menu_views.cpp \
+	$(MODES_DIR)/menu/menu_views.h \
+	$(MODES_DIR)/pause.cpp \
+	$(MODES_DIR)/pause.h \
+	$(MODES_DIR)/quit.cpp \
+	$(MODES_DIR)/quit.h \
+	$(MODES_DIR)/scene.cpp \
+	$(MODES_DIR)/scene.h
+
+@COND_EDITOR_TRUE@EDITOR_DIR = src/editor
 @COND_EDITOR_FALSE@EDITOR_BIN = 
 @COND_EDITOR_TRUE@EDITOR_BIN = editor
 @COND_EDITOR_TRUE@AM_CXXFLAGS := $(CXXFLAGS) $(QT_CXXFLAGS)
@@ -282,54 +350,20 @@ video_SOURCES = \
 @COND_EDITOR_TRUE@	$(EDITOR_DIR)/tileset.h \
 @COND_EDITOR_TRUE@	$(editor_MOC) \
 @COND_EDITOR_TRUE@	$(video_SOURCES) \
-@COND_EDITOR_TRUE@	src/data.cpp \
-@COND_EDITOR_TRUE@	src/data.h \
+@COND_EDITOR_TRUE@	$(ENGINE_DIR)/data.cpp \
+@COND_EDITOR_TRUE@	$(ENGINE_DIR)/data.h \
 @COND_EDITOR_TRUE@	src/defs.h \
 @COND_EDITOR_TRUE@	src/utils.cpp \
 @COND_EDITOR_TRUE@	src/utils.h
 
 @COND_EDITOR_TRUE@editor_LDADD = $(QT_GUILINK) $(QT_LDADD) -lqt
 allacrost_SOURCES = \
-	src/audio.cpp \
-	src/audio.h \
-	src/audio_music.cpp \
-	src/audio_music.h \
-	src/audio_sound.cpp \
-	src/audio_sound.h \
-	src/battle.cpp \
-	src/battle.h \
-	src/boot.cpp \
-	src/boot/h \
-	src/data.cpp \
-	src/data.h \
-	src/data_bind.h \
-	src/defs.h \
-	src/engine.cpp \
-	src/engine.h \
-	src/global.cpp \
-	src/global.h \
 	src/main.cpp \
-	src/map.cpp \
-	src/map.h \
-	src/map_actions.cpp \
-	src/map_actions.h \
-	src/map_dialogue.cpp \
-	src/map_dialogue.h \
-	src/map_objects.cpp \
-	src/map_objects.h \
-	src/menu.cpp \
-	src/menu.h \
-	src/menu_views.cpp \
-	src/menu_views.h \
-	src/pause.cpp \
-	src/pause.h \
-	src/quit.cpp \
-	src/quit.h \
-	src/scene.cpp \
-	src/scene.h \
+	src/defs.h \
 	src/utils.cpp \
 	src/utils.h \
-	$(video_SOURCES)
+	$(engine_SOURCES) \
+	$(modes_SOURCES)
 
 all: $(BUILT_SOURCES) config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -427,19 +461,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/audio_sound.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/battle.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/boot.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/boot_menu.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/data.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/draw.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/editor.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/editor.moc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/editor_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/effects.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/engine.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fade.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/global.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grid.moc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gui.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/image.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/input.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/interpolator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/map.Po@am__quote@
@@ -449,6 +484,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/menu.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/menu_views.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/menu_window.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mode_manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/option.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/particle_effect.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/particle_manager.Po@am__quote@
@@ -456,6 +492,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pause.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/quit.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/scene.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/settings.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shake.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tex_mgmt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/text.Po@am__quote@
@@ -479,118 +516,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
-audio.o: src/audio.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT audio.o -MD -MP -MF "$(DEPDIR)/audio.Tpo" -c -o audio.o `test -f 'src/audio.cpp' || echo '$(srcdir)/'`src/audio.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/audio.Tpo" "$(DEPDIR)/audio.Po"; else rm -f "$(DEPDIR)/audio.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/audio.cpp' object='audio.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o audio.o `test -f 'src/audio.cpp' || echo '$(srcdir)/'`src/audio.cpp
-
-audio.obj: src/audio.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT audio.obj -MD -MP -MF "$(DEPDIR)/audio.Tpo" -c -o audio.obj `if test -f 'src/audio.cpp'; then $(CYGPATH_W) 'src/audio.cpp'; else $(CYGPATH_W) '$(srcdir)/src/audio.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/audio.Tpo" "$(DEPDIR)/audio.Po"; else rm -f "$(DEPDIR)/audio.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/audio.cpp' object='audio.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o audio.obj `if test -f 'src/audio.cpp'; then $(CYGPATH_W) 'src/audio.cpp'; else $(CYGPATH_W) '$(srcdir)/src/audio.cpp'; fi`
-
-audio_music.o: src/audio_music.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT audio_music.o -MD -MP -MF "$(DEPDIR)/audio_music.Tpo" -c -o audio_music.o `test -f 'src/audio_music.cpp' || echo '$(srcdir)/'`src/audio_music.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/audio_music.Tpo" "$(DEPDIR)/audio_music.Po"; else rm -f "$(DEPDIR)/audio_music.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/audio_music.cpp' object='audio_music.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o audio_music.o `test -f 'src/audio_music.cpp' || echo '$(srcdir)/'`src/audio_music.cpp
-
-audio_music.obj: src/audio_music.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT audio_music.obj -MD -MP -MF "$(DEPDIR)/audio_music.Tpo" -c -o audio_music.obj `if test -f 'src/audio_music.cpp'; then $(CYGPATH_W) 'src/audio_music.cpp'; else $(CYGPATH_W) '$(srcdir)/src/audio_music.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/audio_music.Tpo" "$(DEPDIR)/audio_music.Po"; else rm -f "$(DEPDIR)/audio_music.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/audio_music.cpp' object='audio_music.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o audio_music.obj `if test -f 'src/audio_music.cpp'; then $(CYGPATH_W) 'src/audio_music.cpp'; else $(CYGPATH_W) '$(srcdir)/src/audio_music.cpp'; fi`
-
-audio_sound.o: src/audio_sound.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT audio_sound.o -MD -MP -MF "$(DEPDIR)/audio_sound.Tpo" -c -o audio_sound.o `test -f 'src/audio_sound.cpp' || echo '$(srcdir)/'`src/audio_sound.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/audio_sound.Tpo" "$(DEPDIR)/audio_sound.Po"; else rm -f "$(DEPDIR)/audio_sound.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/audio_sound.cpp' object='audio_sound.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o audio_sound.o `test -f 'src/audio_sound.cpp' || echo '$(srcdir)/'`src/audio_sound.cpp
-
-audio_sound.obj: src/audio_sound.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT audio_sound.obj -MD -MP -MF "$(DEPDIR)/audio_sound.Tpo" -c -o audio_sound.obj `if test -f 'src/audio_sound.cpp'; then $(CYGPATH_W) 'src/audio_sound.cpp'; else $(CYGPATH_W) '$(srcdir)/src/audio_sound.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/audio_sound.Tpo" "$(DEPDIR)/audio_sound.Po"; else rm -f "$(DEPDIR)/audio_sound.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/audio_sound.cpp' object='audio_sound.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o audio_sound.obj `if test -f 'src/audio_sound.cpp'; then $(CYGPATH_W) 'src/audio_sound.cpp'; else $(CYGPATH_W) '$(srcdir)/src/audio_sound.cpp'; fi`
-
-battle.o: src/battle.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT battle.o -MD -MP -MF "$(DEPDIR)/battle.Tpo" -c -o battle.o `test -f 'src/battle.cpp' || echo '$(srcdir)/'`src/battle.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/battle.Tpo" "$(DEPDIR)/battle.Po"; else rm -f "$(DEPDIR)/battle.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/battle.cpp' object='battle.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o battle.o `test -f 'src/battle.cpp' || echo '$(srcdir)/'`src/battle.cpp
-
-battle.obj: src/battle.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT battle.obj -MD -MP -MF "$(DEPDIR)/battle.Tpo" -c -o battle.obj `if test -f 'src/battle.cpp'; then $(CYGPATH_W) 'src/battle.cpp'; else $(CYGPATH_W) '$(srcdir)/src/battle.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/battle.Tpo" "$(DEPDIR)/battle.Po"; else rm -f "$(DEPDIR)/battle.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/battle.cpp' object='battle.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o battle.obj `if test -f 'src/battle.cpp'; then $(CYGPATH_W) 'src/battle.cpp'; else $(CYGPATH_W) '$(srcdir)/src/battle.cpp'; fi`
-
-boot.o: src/boot.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT boot.o -MD -MP -MF "$(DEPDIR)/boot.Tpo" -c -o boot.o `test -f 'src/boot.cpp' || echo '$(srcdir)/'`src/boot.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/boot.Tpo" "$(DEPDIR)/boot.Po"; else rm -f "$(DEPDIR)/boot.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/boot.cpp' object='boot.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o boot.o `test -f 'src/boot.cpp' || echo '$(srcdir)/'`src/boot.cpp
-
-boot.obj: src/boot.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT boot.obj -MD -MP -MF "$(DEPDIR)/boot.Tpo" -c -o boot.obj `if test -f 'src/boot.cpp'; then $(CYGPATH_W) 'src/boot.cpp'; else $(CYGPATH_W) '$(srcdir)/src/boot.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/boot.Tpo" "$(DEPDIR)/boot.Po"; else rm -f "$(DEPDIR)/boot.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/boot.cpp' object='boot.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o boot.obj `if test -f 'src/boot.cpp'; then $(CYGPATH_W) 'src/boot.cpp'; else $(CYGPATH_W) '$(srcdir)/src/boot.cpp'; fi`
-
-data.o: src/data.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT data.o -MD -MP -MF "$(DEPDIR)/data.Tpo" -c -o data.o `test -f 'src/data.cpp' || echo '$(srcdir)/'`src/data.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/data.Tpo" "$(DEPDIR)/data.Po"; else rm -f "$(DEPDIR)/data.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/data.cpp' object='data.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o data.o `test -f 'src/data.cpp' || echo '$(srcdir)/'`src/data.cpp
-
-data.obj: src/data.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT data.obj -MD -MP -MF "$(DEPDIR)/data.Tpo" -c -o data.obj `if test -f 'src/data.cpp'; then $(CYGPATH_W) 'src/data.cpp'; else $(CYGPATH_W) '$(srcdir)/src/data.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/data.Tpo" "$(DEPDIR)/data.Po"; else rm -f "$(DEPDIR)/data.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/data.cpp' object='data.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o data.obj `if test -f 'src/data.cpp'; then $(CYGPATH_W) 'src/data.cpp'; else $(CYGPATH_W) '$(srcdir)/src/data.cpp'; fi`
-
-engine.o: src/engine.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT engine.o -MD -MP -MF "$(DEPDIR)/engine.Tpo" -c -o engine.o `test -f 'src/engine.cpp' || echo '$(srcdir)/'`src/engine.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/engine.Tpo" "$(DEPDIR)/engine.Po"; else rm -f "$(DEPDIR)/engine.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/engine.cpp' object='engine.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o engine.o `test -f 'src/engine.cpp' || echo '$(srcdir)/'`src/engine.cpp
-
-engine.obj: src/engine.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT engine.obj -MD -MP -MF "$(DEPDIR)/engine.Tpo" -c -o engine.obj `if test -f 'src/engine.cpp'; then $(CYGPATH_W) 'src/engine.cpp'; else $(CYGPATH_W) '$(srcdir)/src/engine.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/engine.Tpo" "$(DEPDIR)/engine.Po"; else rm -f "$(DEPDIR)/engine.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/engine.cpp' object='engine.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o engine.obj `if test -f 'src/engine.cpp'; then $(CYGPATH_W) 'src/engine.cpp'; else $(CYGPATH_W) '$(srcdir)/src/engine.cpp'; fi`
-
-global.o: src/global.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT global.o -MD -MP -MF "$(DEPDIR)/global.Tpo" -c -o global.o `test -f 'src/global.cpp' || echo '$(srcdir)/'`src/global.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/global.Tpo" "$(DEPDIR)/global.Po"; else rm -f "$(DEPDIR)/global.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/global.cpp' object='global.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o global.o `test -f 'src/global.cpp' || echo '$(srcdir)/'`src/global.cpp
-
-global.obj: src/global.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT global.obj -MD -MP -MF "$(DEPDIR)/global.Tpo" -c -o global.obj `if test -f 'src/global.cpp'; then $(CYGPATH_W) 'src/global.cpp'; else $(CYGPATH_W) '$(srcdir)/src/global.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/global.Tpo" "$(DEPDIR)/global.Po"; else rm -f "$(DEPDIR)/global.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/global.cpp' object='global.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o global.obj `if test -f 'src/global.cpp'; then $(CYGPATH_W) 'src/global.cpp'; else $(CYGPATH_W) '$(srcdir)/src/global.cpp'; fi`
-
 main.o: src/main.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT main.o -MD -MP -MF "$(DEPDIR)/main.Tpo" -c -o main.o `test -f 'src/main.cpp' || echo '$(srcdir)/'`src/main.cpp; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/main.Tpo" "$(DEPDIR)/main.Po"; else rm -f "$(DEPDIR)/main.Tpo"; exit 1; fi
@@ -605,132 +530,6 @@ main.obj: src/main.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o main.obj `if test -f 'src/main.cpp'; then $(CYGPATH_W) 'src/main.cpp'; else $(CYGPATH_W) '$(srcdir)/src/main.cpp'; fi`
 
-map.o: src/map.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT map.o -MD -MP -MF "$(DEPDIR)/map.Tpo" -c -o map.o `test -f 'src/map.cpp' || echo '$(srcdir)/'`src/map.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/map.Tpo" "$(DEPDIR)/map.Po"; else rm -f "$(DEPDIR)/map.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/map.cpp' object='map.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o map.o `test -f 'src/map.cpp' || echo '$(srcdir)/'`src/map.cpp
-
-map.obj: src/map.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT map.obj -MD -MP -MF "$(DEPDIR)/map.Tpo" -c -o map.obj `if test -f 'src/map.cpp'; then $(CYGPATH_W) 'src/map.cpp'; else $(CYGPATH_W) '$(srcdir)/src/map.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/map.Tpo" "$(DEPDIR)/map.Po"; else rm -f "$(DEPDIR)/map.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/map.cpp' object='map.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o map.obj `if test -f 'src/map.cpp'; then $(CYGPATH_W) 'src/map.cpp'; else $(CYGPATH_W) '$(srcdir)/src/map.cpp'; fi`
-
-map_actions.o: src/map_actions.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT map_actions.o -MD -MP -MF "$(DEPDIR)/map_actions.Tpo" -c -o map_actions.o `test -f 'src/map_actions.cpp' || echo '$(srcdir)/'`src/map_actions.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/map_actions.Tpo" "$(DEPDIR)/map_actions.Po"; else rm -f "$(DEPDIR)/map_actions.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/map_actions.cpp' object='map_actions.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o map_actions.o `test -f 'src/map_actions.cpp' || echo '$(srcdir)/'`src/map_actions.cpp
-
-map_actions.obj: src/map_actions.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT map_actions.obj -MD -MP -MF "$(DEPDIR)/map_actions.Tpo" -c -o map_actions.obj `if test -f 'src/map_actions.cpp'; then $(CYGPATH_W) 'src/map_actions.cpp'; else $(CYGPATH_W) '$(srcdir)/src/map_actions.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/map_actions.Tpo" "$(DEPDIR)/map_actions.Po"; else rm -f "$(DEPDIR)/map_actions.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/map_actions.cpp' object='map_actions.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o map_actions.obj `if test -f 'src/map_actions.cpp'; then $(CYGPATH_W) 'src/map_actions.cpp'; else $(CYGPATH_W) '$(srcdir)/src/map_actions.cpp'; fi`
-
-map_dialogue.o: src/map_dialogue.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT map_dialogue.o -MD -MP -MF "$(DEPDIR)/map_dialogue.Tpo" -c -o map_dialogue.o `test -f 'src/map_dialogue.cpp' || echo '$(srcdir)/'`src/map_dialogue.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/map_dialogue.Tpo" "$(DEPDIR)/map_dialogue.Po"; else rm -f "$(DEPDIR)/map_dialogue.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/map_dialogue.cpp' object='map_dialogue.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o map_dialogue.o `test -f 'src/map_dialogue.cpp' || echo '$(srcdir)/'`src/map_dialogue.cpp
-
-map_dialogue.obj: src/map_dialogue.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT map_dialogue.obj -MD -MP -MF "$(DEPDIR)/map_dialogue.Tpo" -c -o map_dialogue.obj `if test -f 'src/map_dialogue.cpp'; then $(CYGPATH_W) 'src/map_dialogue.cpp'; else $(CYGPATH_W) '$(srcdir)/src/map_dialogue.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/map_dialogue.Tpo" "$(DEPDIR)/map_dialogue.Po"; else rm -f "$(DEPDIR)/map_dialogue.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/map_dialogue.cpp' object='map_dialogue.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o map_dialogue.obj `if test -f 'src/map_dialogue.cpp'; then $(CYGPATH_W) 'src/map_dialogue.cpp'; else $(CYGPATH_W) '$(srcdir)/src/map_dialogue.cpp'; fi`
-
-map_objects.o: src/map_objects.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT map_objects.o -MD -MP -MF "$(DEPDIR)/map_objects.Tpo" -c -o map_objects.o `test -f 'src/map_objects.cpp' || echo '$(srcdir)/'`src/map_objects.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/map_objects.Tpo" "$(DEPDIR)/map_objects.Po"; else rm -f "$(DEPDIR)/map_objects.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/map_objects.cpp' object='map_objects.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o map_objects.o `test -f 'src/map_objects.cpp' || echo '$(srcdir)/'`src/map_objects.cpp
-
-map_objects.obj: src/map_objects.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT map_objects.obj -MD -MP -MF "$(DEPDIR)/map_objects.Tpo" -c -o map_objects.obj `if test -f 'src/map_objects.cpp'; then $(CYGPATH_W) 'src/map_objects.cpp'; else $(CYGPATH_W) '$(srcdir)/src/map_objects.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/map_objects.Tpo" "$(DEPDIR)/map_objects.Po"; else rm -f "$(DEPDIR)/map_objects.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/map_objects.cpp' object='map_objects.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o map_objects.obj `if test -f 'src/map_objects.cpp'; then $(CYGPATH_W) 'src/map_objects.cpp'; else $(CYGPATH_W) '$(srcdir)/src/map_objects.cpp'; fi`
-
-menu.o: src/menu.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT menu.o -MD -MP -MF "$(DEPDIR)/menu.Tpo" -c -o menu.o `test -f 'src/menu.cpp' || echo '$(srcdir)/'`src/menu.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/menu.Tpo" "$(DEPDIR)/menu.Po"; else rm -f "$(DEPDIR)/menu.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/menu.cpp' object='menu.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o menu.o `test -f 'src/menu.cpp' || echo '$(srcdir)/'`src/menu.cpp
-
-menu.obj: src/menu.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT menu.obj -MD -MP -MF "$(DEPDIR)/menu.Tpo" -c -o menu.obj `if test -f 'src/menu.cpp'; then $(CYGPATH_W) 'src/menu.cpp'; else $(CYGPATH_W) '$(srcdir)/src/menu.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/menu.Tpo" "$(DEPDIR)/menu.Po"; else rm -f "$(DEPDIR)/menu.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/menu.cpp' object='menu.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o menu.obj `if test -f 'src/menu.cpp'; then $(CYGPATH_W) 'src/menu.cpp'; else $(CYGPATH_W) '$(srcdir)/src/menu.cpp'; fi`
-
-menu_views.o: src/menu_views.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT menu_views.o -MD -MP -MF "$(DEPDIR)/menu_views.Tpo" -c -o menu_views.o `test -f 'src/menu_views.cpp' || echo '$(srcdir)/'`src/menu_views.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/menu_views.Tpo" "$(DEPDIR)/menu_views.Po"; else rm -f "$(DEPDIR)/menu_views.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/menu_views.cpp' object='menu_views.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o menu_views.o `test -f 'src/menu_views.cpp' || echo '$(srcdir)/'`src/menu_views.cpp
-
-menu_views.obj: src/menu_views.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT menu_views.obj -MD -MP -MF "$(DEPDIR)/menu_views.Tpo" -c -o menu_views.obj `if test -f 'src/menu_views.cpp'; then $(CYGPATH_W) 'src/menu_views.cpp'; else $(CYGPATH_W) '$(srcdir)/src/menu_views.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/menu_views.Tpo" "$(DEPDIR)/menu_views.Po"; else rm -f "$(DEPDIR)/menu_views.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/menu_views.cpp' object='menu_views.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o menu_views.obj `if test -f 'src/menu_views.cpp'; then $(CYGPATH_W) 'src/menu_views.cpp'; else $(CYGPATH_W) '$(srcdir)/src/menu_views.cpp'; fi`
-
-pause.o: src/pause.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT pause.o -MD -MP -MF "$(DEPDIR)/pause.Tpo" -c -o pause.o `test -f 'src/pause.cpp' || echo '$(srcdir)/'`src/pause.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/pause.Tpo" "$(DEPDIR)/pause.Po"; else rm -f "$(DEPDIR)/pause.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/pause.cpp' object='pause.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o pause.o `test -f 'src/pause.cpp' || echo '$(srcdir)/'`src/pause.cpp
-
-pause.obj: src/pause.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT pause.obj -MD -MP -MF "$(DEPDIR)/pause.Tpo" -c -o pause.obj `if test -f 'src/pause.cpp'; then $(CYGPATH_W) 'src/pause.cpp'; else $(CYGPATH_W) '$(srcdir)/src/pause.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/pause.Tpo" "$(DEPDIR)/pause.Po"; else rm -f "$(DEPDIR)/pause.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/pause.cpp' object='pause.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o pause.obj `if test -f 'src/pause.cpp'; then $(CYGPATH_W) 'src/pause.cpp'; else $(CYGPATH_W) '$(srcdir)/src/pause.cpp'; fi`
-
-quit.o: src/quit.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT quit.o -MD -MP -MF "$(DEPDIR)/quit.Tpo" -c -o quit.o `test -f 'src/quit.cpp' || echo '$(srcdir)/'`src/quit.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/quit.Tpo" "$(DEPDIR)/quit.Po"; else rm -f "$(DEPDIR)/quit.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/quit.cpp' object='quit.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o quit.o `test -f 'src/quit.cpp' || echo '$(srcdir)/'`src/quit.cpp
-
-quit.obj: src/quit.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT quit.obj -MD -MP -MF "$(DEPDIR)/quit.Tpo" -c -o quit.obj `if test -f 'src/quit.cpp'; then $(CYGPATH_W) 'src/quit.cpp'; else $(CYGPATH_W) '$(srcdir)/src/quit.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/quit.Tpo" "$(DEPDIR)/quit.Po"; else rm -f "$(DEPDIR)/quit.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/quit.cpp' object='quit.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o quit.obj `if test -f 'src/quit.cpp'; then $(CYGPATH_W) 'src/quit.cpp'; else $(CYGPATH_W) '$(srcdir)/src/quit.cpp'; fi`
-
-scene.o: src/scene.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT scene.o -MD -MP -MF "$(DEPDIR)/scene.Tpo" -c -o scene.o `test -f 'src/scene.cpp' || echo '$(srcdir)/'`src/scene.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/scene.Tpo" "$(DEPDIR)/scene.Po"; else rm -f "$(DEPDIR)/scene.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/scene.cpp' object='scene.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o scene.o `test -f 'src/scene.cpp' || echo '$(srcdir)/'`src/scene.cpp
-
-scene.obj: src/scene.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT scene.obj -MD -MP -MF "$(DEPDIR)/scene.Tpo" -c -o scene.obj `if test -f 'src/scene.cpp'; then $(CYGPATH_W) 'src/scene.cpp'; else $(CYGPATH_W) '$(srcdir)/src/scene.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/scene.Tpo" "$(DEPDIR)/scene.Po"; else rm -f "$(DEPDIR)/scene.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/scene.cpp' object='scene.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o scene.obj `if test -f 'src/scene.cpp'; then $(CYGPATH_W) 'src/scene.cpp'; else $(CYGPATH_W) '$(srcdir)/src/scene.cpp'; fi`
-
 utils.o: src/utils.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT utils.o -MD -MP -MF "$(DEPDIR)/utils.Tpo" -c -o utils.o `test -f 'src/utils.cpp' || echo '$(srcdir)/'`src/utils.cpp; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/utils.Tpo" "$(DEPDIR)/utils.Po"; else rm -f "$(DEPDIR)/utils.Tpo"; exit 1; fi
@@ -744,6 +543,118 @@ utils.obj: src/utils.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/utils.cpp' object='utils.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o utils.obj `if test -f 'src/utils.cpp'; then $(CYGPATH_W) 'src/utils.cpp'; else $(CYGPATH_W) '$(srcdir)/src/utils.cpp'; fi`
+
+settings.o: $(ENGINE_DIR)/settings.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT settings.o -MD -MP -MF "$(DEPDIR)/settings.Tpo" -c -o settings.o `test -f '$(ENGINE_DIR)/settings.cpp' || echo '$(srcdir)/'`$(ENGINE_DIR)/settings.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/settings.Tpo" "$(DEPDIR)/settings.Po"; else rm -f "$(DEPDIR)/settings.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(ENGINE_DIR)/settings.cpp' object='settings.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o settings.o `test -f '$(ENGINE_DIR)/settings.cpp' || echo '$(srcdir)/'`$(ENGINE_DIR)/settings.cpp
+
+settings.obj: $(ENGINE_DIR)/settings.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT settings.obj -MD -MP -MF "$(DEPDIR)/settings.Tpo" -c -o settings.obj `if test -f '$(ENGINE_DIR)/settings.cpp'; then $(CYGPATH_W) '$(ENGINE_DIR)/settings.cpp'; else $(CYGPATH_W) '$(srcdir)/$(ENGINE_DIR)/settings.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/settings.Tpo" "$(DEPDIR)/settings.Po"; else rm -f "$(DEPDIR)/settings.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(ENGINE_DIR)/settings.cpp' object='settings.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o settings.obj `if test -f '$(ENGINE_DIR)/settings.cpp'; then $(CYGPATH_W) '$(ENGINE_DIR)/settings.cpp'; else $(CYGPATH_W) '$(srcdir)/$(ENGINE_DIR)/settings.cpp'; fi`
+
+input.o: $(ENGINE_DIR)/input.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT input.o -MD -MP -MF "$(DEPDIR)/input.Tpo" -c -o input.o `test -f '$(ENGINE_DIR)/input.cpp' || echo '$(srcdir)/'`$(ENGINE_DIR)/input.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/input.Tpo" "$(DEPDIR)/input.Po"; else rm -f "$(DEPDIR)/input.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(ENGINE_DIR)/input.cpp' object='input.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o input.o `test -f '$(ENGINE_DIR)/input.cpp' || echo '$(srcdir)/'`$(ENGINE_DIR)/input.cpp
+
+input.obj: $(ENGINE_DIR)/input.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT input.obj -MD -MP -MF "$(DEPDIR)/input.Tpo" -c -o input.obj `if test -f '$(ENGINE_DIR)/input.cpp'; then $(CYGPATH_W) '$(ENGINE_DIR)/input.cpp'; else $(CYGPATH_W) '$(srcdir)/$(ENGINE_DIR)/input.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/input.Tpo" "$(DEPDIR)/input.Po"; else rm -f "$(DEPDIR)/input.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(ENGINE_DIR)/input.cpp' object='input.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o input.obj `if test -f '$(ENGINE_DIR)/input.cpp'; then $(CYGPATH_W) '$(ENGINE_DIR)/input.cpp'; else $(CYGPATH_W) '$(srcdir)/$(ENGINE_DIR)/input.cpp'; fi`
+
+mode_manager.o: $(ENGINE_DIR)/mode_manager.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mode_manager.o -MD -MP -MF "$(DEPDIR)/mode_manager.Tpo" -c -o mode_manager.o `test -f '$(ENGINE_DIR)/mode_manager.cpp' || echo '$(srcdir)/'`$(ENGINE_DIR)/mode_manager.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/mode_manager.Tpo" "$(DEPDIR)/mode_manager.Po"; else rm -f "$(DEPDIR)/mode_manager.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(ENGINE_DIR)/mode_manager.cpp' object='mode_manager.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mode_manager.o `test -f '$(ENGINE_DIR)/mode_manager.cpp' || echo '$(srcdir)/'`$(ENGINE_DIR)/mode_manager.cpp
+
+mode_manager.obj: $(ENGINE_DIR)/mode_manager.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mode_manager.obj -MD -MP -MF "$(DEPDIR)/mode_manager.Tpo" -c -o mode_manager.obj `if test -f '$(ENGINE_DIR)/mode_manager.cpp'; then $(CYGPATH_W) '$(ENGINE_DIR)/mode_manager.cpp'; else $(CYGPATH_W) '$(srcdir)/$(ENGINE_DIR)/mode_manager.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/mode_manager.Tpo" "$(DEPDIR)/mode_manager.Po"; else rm -f "$(DEPDIR)/mode_manager.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(ENGINE_DIR)/mode_manager.cpp' object='mode_manager.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mode_manager.obj `if test -f '$(ENGINE_DIR)/mode_manager.cpp'; then $(CYGPATH_W) '$(ENGINE_DIR)/mode_manager.cpp'; else $(CYGPATH_W) '$(srcdir)/$(ENGINE_DIR)/mode_manager.cpp'; fi`
+
+data.o: $(ENGINE_DIR)/data.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT data.o -MD -MP -MF "$(DEPDIR)/data.Tpo" -c -o data.o `test -f '$(ENGINE_DIR)/data.cpp' || echo '$(srcdir)/'`$(ENGINE_DIR)/data.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/data.Tpo" "$(DEPDIR)/data.Po"; else rm -f "$(DEPDIR)/data.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(ENGINE_DIR)/data.cpp' object='data.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o data.o `test -f '$(ENGINE_DIR)/data.cpp' || echo '$(srcdir)/'`$(ENGINE_DIR)/data.cpp
+
+data.obj: $(ENGINE_DIR)/data.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT data.obj -MD -MP -MF "$(DEPDIR)/data.Tpo" -c -o data.obj `if test -f '$(ENGINE_DIR)/data.cpp'; then $(CYGPATH_W) '$(ENGINE_DIR)/data.cpp'; else $(CYGPATH_W) '$(srcdir)/$(ENGINE_DIR)/data.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/data.Tpo" "$(DEPDIR)/data.Po"; else rm -f "$(DEPDIR)/data.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(ENGINE_DIR)/data.cpp' object='data.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o data.obj `if test -f '$(ENGINE_DIR)/data.cpp'; then $(CYGPATH_W) '$(ENGINE_DIR)/data.cpp'; else $(CYGPATH_W) '$(srcdir)/$(ENGINE_DIR)/data.cpp'; fi`
+
+global.o: $(ENGINE_DIR)/global.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT global.o -MD -MP -MF "$(DEPDIR)/global.Tpo" -c -o global.o `test -f '$(ENGINE_DIR)/global.cpp' || echo '$(srcdir)/'`$(ENGINE_DIR)/global.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/global.Tpo" "$(DEPDIR)/global.Po"; else rm -f "$(DEPDIR)/global.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(ENGINE_DIR)/global.cpp' object='global.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o global.o `test -f '$(ENGINE_DIR)/global.cpp' || echo '$(srcdir)/'`$(ENGINE_DIR)/global.cpp
+
+global.obj: $(ENGINE_DIR)/global.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT global.obj -MD -MP -MF "$(DEPDIR)/global.Tpo" -c -o global.obj `if test -f '$(ENGINE_DIR)/global.cpp'; then $(CYGPATH_W) '$(ENGINE_DIR)/global.cpp'; else $(CYGPATH_W) '$(srcdir)/$(ENGINE_DIR)/global.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/global.Tpo" "$(DEPDIR)/global.Po"; else rm -f "$(DEPDIR)/global.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(ENGINE_DIR)/global.cpp' object='global.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o global.obj `if test -f '$(ENGINE_DIR)/global.cpp'; then $(CYGPATH_W) '$(ENGINE_DIR)/global.cpp'; else $(CYGPATH_W) '$(srcdir)/$(ENGINE_DIR)/global.cpp'; fi`
+
+audio.o: $(AUDIO_DIR)/audio.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT audio.o -MD -MP -MF "$(DEPDIR)/audio.Tpo" -c -o audio.o `test -f '$(AUDIO_DIR)/audio.cpp' || echo '$(srcdir)/'`$(AUDIO_DIR)/audio.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/audio.Tpo" "$(DEPDIR)/audio.Po"; else rm -f "$(DEPDIR)/audio.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(AUDIO_DIR)/audio.cpp' object='audio.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o audio.o `test -f '$(AUDIO_DIR)/audio.cpp' || echo '$(srcdir)/'`$(AUDIO_DIR)/audio.cpp
+
+audio.obj: $(AUDIO_DIR)/audio.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT audio.obj -MD -MP -MF "$(DEPDIR)/audio.Tpo" -c -o audio.obj `if test -f '$(AUDIO_DIR)/audio.cpp'; then $(CYGPATH_W) '$(AUDIO_DIR)/audio.cpp'; else $(CYGPATH_W) '$(srcdir)/$(AUDIO_DIR)/audio.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/audio.Tpo" "$(DEPDIR)/audio.Po"; else rm -f "$(DEPDIR)/audio.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(AUDIO_DIR)/audio.cpp' object='audio.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o audio.obj `if test -f '$(AUDIO_DIR)/audio.cpp'; then $(CYGPATH_W) '$(AUDIO_DIR)/audio.cpp'; else $(CYGPATH_W) '$(srcdir)/$(AUDIO_DIR)/audio.cpp'; fi`
+
+audio_sound.o: $(AUDIO_DIR)/audio_sound.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT audio_sound.o -MD -MP -MF "$(DEPDIR)/audio_sound.Tpo" -c -o audio_sound.o `test -f '$(AUDIO_DIR)/audio_sound.cpp' || echo '$(srcdir)/'`$(AUDIO_DIR)/audio_sound.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/audio_sound.Tpo" "$(DEPDIR)/audio_sound.Po"; else rm -f "$(DEPDIR)/audio_sound.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(AUDIO_DIR)/audio_sound.cpp' object='audio_sound.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o audio_sound.o `test -f '$(AUDIO_DIR)/audio_sound.cpp' || echo '$(srcdir)/'`$(AUDIO_DIR)/audio_sound.cpp
+
+audio_sound.obj: $(AUDIO_DIR)/audio_sound.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT audio_sound.obj -MD -MP -MF "$(DEPDIR)/audio_sound.Tpo" -c -o audio_sound.obj `if test -f '$(AUDIO_DIR)/audio_sound.cpp'; then $(CYGPATH_W) '$(AUDIO_DIR)/audio_sound.cpp'; else $(CYGPATH_W) '$(srcdir)/$(AUDIO_DIR)/audio_sound.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/audio_sound.Tpo" "$(DEPDIR)/audio_sound.Po"; else rm -f "$(DEPDIR)/audio_sound.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(AUDIO_DIR)/audio_sound.cpp' object='audio_sound.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o audio_sound.obj `if test -f '$(AUDIO_DIR)/audio_sound.cpp'; then $(CYGPATH_W) '$(AUDIO_DIR)/audio_sound.cpp'; else $(CYGPATH_W) '$(srcdir)/$(AUDIO_DIR)/audio_sound.cpp'; fi`
+
+audio_music.o: $(AUDIO_DIR)/audio_music.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT audio_music.o -MD -MP -MF "$(DEPDIR)/audio_music.Tpo" -c -o audio_music.o `test -f '$(AUDIO_DIR)/audio_music.cpp' || echo '$(srcdir)/'`$(AUDIO_DIR)/audio_music.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/audio_music.Tpo" "$(DEPDIR)/audio_music.Po"; else rm -f "$(DEPDIR)/audio_music.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(AUDIO_DIR)/audio_music.cpp' object='audio_music.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o audio_music.o `test -f '$(AUDIO_DIR)/audio_music.cpp' || echo '$(srcdir)/'`$(AUDIO_DIR)/audio_music.cpp
+
+audio_music.obj: $(AUDIO_DIR)/audio_music.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT audio_music.obj -MD -MP -MF "$(DEPDIR)/audio_music.Tpo" -c -o audio_music.obj `if test -f '$(AUDIO_DIR)/audio_music.cpp'; then $(CYGPATH_W) '$(AUDIO_DIR)/audio_music.cpp'; else $(CYGPATH_W) '$(srcdir)/$(AUDIO_DIR)/audio_music.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/audio_music.Tpo" "$(DEPDIR)/audio_music.Po"; else rm -f "$(DEPDIR)/audio_music.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(AUDIO_DIR)/audio_music.cpp' object='audio_music.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o audio_music.obj `if test -f '$(AUDIO_DIR)/audio_music.cpp'; then $(CYGPATH_W) '$(AUDIO_DIR)/audio_music.cpp'; else $(CYGPATH_W) '$(srcdir)/$(AUDIO_DIR)/audio_music.cpp'; fi`
 
 draw.o: $(VIDEO_DIR)/draw.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT draw.o -MD -MP -MF "$(DEPDIR)/draw.Tpo" -c -o draw.o `test -f '$(VIDEO_DIR)/draw.cpp' || echo '$(srcdir)/'`$(VIDEO_DIR)/draw.cpp; \
@@ -968,6 +879,174 @@ video.obj: $(VIDEO_DIR)/video.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(VIDEO_DIR)/video.cpp' object='video.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o video.obj `if test -f '$(VIDEO_DIR)/video.cpp'; then $(CYGPATH_W) '$(VIDEO_DIR)/video.cpp'; else $(CYGPATH_W) '$(srcdir)/$(VIDEO_DIR)/video.cpp'; fi`
+
+battle.o: $(MODES_DIR)/battle/battle.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT battle.o -MD -MP -MF "$(DEPDIR)/battle.Tpo" -c -o battle.o `test -f '$(MODES_DIR)/battle/battle.cpp' || echo '$(srcdir)/'`$(MODES_DIR)/battle/battle.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/battle.Tpo" "$(DEPDIR)/battle.Po"; else rm -f "$(DEPDIR)/battle.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MODES_DIR)/battle/battle.cpp' object='battle.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o battle.o `test -f '$(MODES_DIR)/battle/battle.cpp' || echo '$(srcdir)/'`$(MODES_DIR)/battle/battle.cpp
+
+battle.obj: $(MODES_DIR)/battle/battle.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT battle.obj -MD -MP -MF "$(DEPDIR)/battle.Tpo" -c -o battle.obj `if test -f '$(MODES_DIR)/battle/battle.cpp'; then $(CYGPATH_W) '$(MODES_DIR)/battle/battle.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MODES_DIR)/battle/battle.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/battle.Tpo" "$(DEPDIR)/battle.Po"; else rm -f "$(DEPDIR)/battle.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MODES_DIR)/battle/battle.cpp' object='battle.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o battle.obj `if test -f '$(MODES_DIR)/battle/battle.cpp'; then $(CYGPATH_W) '$(MODES_DIR)/battle/battle.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MODES_DIR)/battle/battle.cpp'; fi`
+
+boot.o: $(MODES_DIR)/boot/boot.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT boot.o -MD -MP -MF "$(DEPDIR)/boot.Tpo" -c -o boot.o `test -f '$(MODES_DIR)/boot/boot.cpp' || echo '$(srcdir)/'`$(MODES_DIR)/boot/boot.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/boot.Tpo" "$(DEPDIR)/boot.Po"; else rm -f "$(DEPDIR)/boot.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MODES_DIR)/boot/boot.cpp' object='boot.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o boot.o `test -f '$(MODES_DIR)/boot/boot.cpp' || echo '$(srcdir)/'`$(MODES_DIR)/boot/boot.cpp
+
+boot.obj: $(MODES_DIR)/boot/boot.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT boot.obj -MD -MP -MF "$(DEPDIR)/boot.Tpo" -c -o boot.obj `if test -f '$(MODES_DIR)/boot/boot.cpp'; then $(CYGPATH_W) '$(MODES_DIR)/boot/boot.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MODES_DIR)/boot/boot.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/boot.Tpo" "$(DEPDIR)/boot.Po"; else rm -f "$(DEPDIR)/boot.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MODES_DIR)/boot/boot.cpp' object='boot.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o boot.obj `if test -f '$(MODES_DIR)/boot/boot.cpp'; then $(CYGPATH_W) '$(MODES_DIR)/boot/boot.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MODES_DIR)/boot/boot.cpp'; fi`
+
+boot_menu.o: $(MODES_DIR)/boot/boot_menu.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT boot_menu.o -MD -MP -MF "$(DEPDIR)/boot_menu.Tpo" -c -o boot_menu.o `test -f '$(MODES_DIR)/boot/boot_menu.cpp' || echo '$(srcdir)/'`$(MODES_DIR)/boot/boot_menu.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/boot_menu.Tpo" "$(DEPDIR)/boot_menu.Po"; else rm -f "$(DEPDIR)/boot_menu.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MODES_DIR)/boot/boot_menu.cpp' object='boot_menu.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o boot_menu.o `test -f '$(MODES_DIR)/boot/boot_menu.cpp' || echo '$(srcdir)/'`$(MODES_DIR)/boot/boot_menu.cpp
+
+boot_menu.obj: $(MODES_DIR)/boot/boot_menu.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT boot_menu.obj -MD -MP -MF "$(DEPDIR)/boot_menu.Tpo" -c -o boot_menu.obj `if test -f '$(MODES_DIR)/boot/boot_menu.cpp'; then $(CYGPATH_W) '$(MODES_DIR)/boot/boot_menu.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MODES_DIR)/boot/boot_menu.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/boot_menu.Tpo" "$(DEPDIR)/boot_menu.Po"; else rm -f "$(DEPDIR)/boot_menu.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MODES_DIR)/boot/boot_menu.cpp' object='boot_menu.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o boot_menu.obj `if test -f '$(MODES_DIR)/boot/boot_menu.cpp'; then $(CYGPATH_W) '$(MODES_DIR)/boot/boot_menu.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MODES_DIR)/boot/boot_menu.cpp'; fi`
+
+map.o: $(MODES_DIR)/map/map.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT map.o -MD -MP -MF "$(DEPDIR)/map.Tpo" -c -o map.o `test -f '$(MODES_DIR)/map/map.cpp' || echo '$(srcdir)/'`$(MODES_DIR)/map/map.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/map.Tpo" "$(DEPDIR)/map.Po"; else rm -f "$(DEPDIR)/map.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MODES_DIR)/map/map.cpp' object='map.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o map.o `test -f '$(MODES_DIR)/map/map.cpp' || echo '$(srcdir)/'`$(MODES_DIR)/map/map.cpp
+
+map.obj: $(MODES_DIR)/map/map.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT map.obj -MD -MP -MF "$(DEPDIR)/map.Tpo" -c -o map.obj `if test -f '$(MODES_DIR)/map/map.cpp'; then $(CYGPATH_W) '$(MODES_DIR)/map/map.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MODES_DIR)/map/map.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/map.Tpo" "$(DEPDIR)/map.Po"; else rm -f "$(DEPDIR)/map.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MODES_DIR)/map/map.cpp' object='map.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o map.obj `if test -f '$(MODES_DIR)/map/map.cpp'; then $(CYGPATH_W) '$(MODES_DIR)/map/map.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MODES_DIR)/map/map.cpp'; fi`
+
+map_actions.o: $(MODES_DIR)/map/map_actions.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT map_actions.o -MD -MP -MF "$(DEPDIR)/map_actions.Tpo" -c -o map_actions.o `test -f '$(MODES_DIR)/map/map_actions.cpp' || echo '$(srcdir)/'`$(MODES_DIR)/map/map_actions.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/map_actions.Tpo" "$(DEPDIR)/map_actions.Po"; else rm -f "$(DEPDIR)/map_actions.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MODES_DIR)/map/map_actions.cpp' object='map_actions.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o map_actions.o `test -f '$(MODES_DIR)/map/map_actions.cpp' || echo '$(srcdir)/'`$(MODES_DIR)/map/map_actions.cpp
+
+map_actions.obj: $(MODES_DIR)/map/map_actions.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT map_actions.obj -MD -MP -MF "$(DEPDIR)/map_actions.Tpo" -c -o map_actions.obj `if test -f '$(MODES_DIR)/map/map_actions.cpp'; then $(CYGPATH_W) '$(MODES_DIR)/map/map_actions.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MODES_DIR)/map/map_actions.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/map_actions.Tpo" "$(DEPDIR)/map_actions.Po"; else rm -f "$(DEPDIR)/map_actions.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MODES_DIR)/map/map_actions.cpp' object='map_actions.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o map_actions.obj `if test -f '$(MODES_DIR)/map/map_actions.cpp'; then $(CYGPATH_W) '$(MODES_DIR)/map/map_actions.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MODES_DIR)/map/map_actions.cpp'; fi`
+
+map_dialogue.o: $(MODES_DIR)/map/map_dialogue.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT map_dialogue.o -MD -MP -MF "$(DEPDIR)/map_dialogue.Tpo" -c -o map_dialogue.o `test -f '$(MODES_DIR)/map/map_dialogue.cpp' || echo '$(srcdir)/'`$(MODES_DIR)/map/map_dialogue.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/map_dialogue.Tpo" "$(DEPDIR)/map_dialogue.Po"; else rm -f "$(DEPDIR)/map_dialogue.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MODES_DIR)/map/map_dialogue.cpp' object='map_dialogue.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o map_dialogue.o `test -f '$(MODES_DIR)/map/map_dialogue.cpp' || echo '$(srcdir)/'`$(MODES_DIR)/map/map_dialogue.cpp
+
+map_dialogue.obj: $(MODES_DIR)/map/map_dialogue.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT map_dialogue.obj -MD -MP -MF "$(DEPDIR)/map_dialogue.Tpo" -c -o map_dialogue.obj `if test -f '$(MODES_DIR)/map/map_dialogue.cpp'; then $(CYGPATH_W) '$(MODES_DIR)/map/map_dialogue.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MODES_DIR)/map/map_dialogue.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/map_dialogue.Tpo" "$(DEPDIR)/map_dialogue.Po"; else rm -f "$(DEPDIR)/map_dialogue.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MODES_DIR)/map/map_dialogue.cpp' object='map_dialogue.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o map_dialogue.obj `if test -f '$(MODES_DIR)/map/map_dialogue.cpp'; then $(CYGPATH_W) '$(MODES_DIR)/map/map_dialogue.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MODES_DIR)/map/map_dialogue.cpp'; fi`
+
+map_objects.o: $(MODES_DIR)/map/map_objects.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT map_objects.o -MD -MP -MF "$(DEPDIR)/map_objects.Tpo" -c -o map_objects.o `test -f '$(MODES_DIR)/map/map_objects.cpp' || echo '$(srcdir)/'`$(MODES_DIR)/map/map_objects.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/map_objects.Tpo" "$(DEPDIR)/map_objects.Po"; else rm -f "$(DEPDIR)/map_objects.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MODES_DIR)/map/map_objects.cpp' object='map_objects.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o map_objects.o `test -f '$(MODES_DIR)/map/map_objects.cpp' || echo '$(srcdir)/'`$(MODES_DIR)/map/map_objects.cpp
+
+map_objects.obj: $(MODES_DIR)/map/map_objects.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT map_objects.obj -MD -MP -MF "$(DEPDIR)/map_objects.Tpo" -c -o map_objects.obj `if test -f '$(MODES_DIR)/map/map_objects.cpp'; then $(CYGPATH_W) '$(MODES_DIR)/map/map_objects.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MODES_DIR)/map/map_objects.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/map_objects.Tpo" "$(DEPDIR)/map_objects.Po"; else rm -f "$(DEPDIR)/map_objects.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MODES_DIR)/map/map_objects.cpp' object='map_objects.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o map_objects.obj `if test -f '$(MODES_DIR)/map/map_objects.cpp'; then $(CYGPATH_W) '$(MODES_DIR)/map/map_objects.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MODES_DIR)/map/map_objects.cpp'; fi`
+
+menu.o: $(MODES_DIR)/menu/menu.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT menu.o -MD -MP -MF "$(DEPDIR)/menu.Tpo" -c -o menu.o `test -f '$(MODES_DIR)/menu/menu.cpp' || echo '$(srcdir)/'`$(MODES_DIR)/menu/menu.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/menu.Tpo" "$(DEPDIR)/menu.Po"; else rm -f "$(DEPDIR)/menu.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MODES_DIR)/menu/menu.cpp' object='menu.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o menu.o `test -f '$(MODES_DIR)/menu/menu.cpp' || echo '$(srcdir)/'`$(MODES_DIR)/menu/menu.cpp
+
+menu.obj: $(MODES_DIR)/menu/menu.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT menu.obj -MD -MP -MF "$(DEPDIR)/menu.Tpo" -c -o menu.obj `if test -f '$(MODES_DIR)/menu/menu.cpp'; then $(CYGPATH_W) '$(MODES_DIR)/menu/menu.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MODES_DIR)/menu/menu.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/menu.Tpo" "$(DEPDIR)/menu.Po"; else rm -f "$(DEPDIR)/menu.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MODES_DIR)/menu/menu.cpp' object='menu.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o menu.obj `if test -f '$(MODES_DIR)/menu/menu.cpp'; then $(CYGPATH_W) '$(MODES_DIR)/menu/menu.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MODES_DIR)/menu/menu.cpp'; fi`
+
+menu_views.o: $(MODES_DIR)/menu/menu_views.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT menu_views.o -MD -MP -MF "$(DEPDIR)/menu_views.Tpo" -c -o menu_views.o `test -f '$(MODES_DIR)/menu/menu_views.cpp' || echo '$(srcdir)/'`$(MODES_DIR)/menu/menu_views.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/menu_views.Tpo" "$(DEPDIR)/menu_views.Po"; else rm -f "$(DEPDIR)/menu_views.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MODES_DIR)/menu/menu_views.cpp' object='menu_views.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o menu_views.o `test -f '$(MODES_DIR)/menu/menu_views.cpp' || echo '$(srcdir)/'`$(MODES_DIR)/menu/menu_views.cpp
+
+menu_views.obj: $(MODES_DIR)/menu/menu_views.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT menu_views.obj -MD -MP -MF "$(DEPDIR)/menu_views.Tpo" -c -o menu_views.obj `if test -f '$(MODES_DIR)/menu/menu_views.cpp'; then $(CYGPATH_W) '$(MODES_DIR)/menu/menu_views.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MODES_DIR)/menu/menu_views.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/menu_views.Tpo" "$(DEPDIR)/menu_views.Po"; else rm -f "$(DEPDIR)/menu_views.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MODES_DIR)/menu/menu_views.cpp' object='menu_views.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o menu_views.obj `if test -f '$(MODES_DIR)/menu/menu_views.cpp'; then $(CYGPATH_W) '$(MODES_DIR)/menu/menu_views.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MODES_DIR)/menu/menu_views.cpp'; fi`
+
+pause.o: $(MODES_DIR)/pause.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT pause.o -MD -MP -MF "$(DEPDIR)/pause.Tpo" -c -o pause.o `test -f '$(MODES_DIR)/pause.cpp' || echo '$(srcdir)/'`$(MODES_DIR)/pause.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/pause.Tpo" "$(DEPDIR)/pause.Po"; else rm -f "$(DEPDIR)/pause.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MODES_DIR)/pause.cpp' object='pause.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o pause.o `test -f '$(MODES_DIR)/pause.cpp' || echo '$(srcdir)/'`$(MODES_DIR)/pause.cpp
+
+pause.obj: $(MODES_DIR)/pause.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT pause.obj -MD -MP -MF "$(DEPDIR)/pause.Tpo" -c -o pause.obj `if test -f '$(MODES_DIR)/pause.cpp'; then $(CYGPATH_W) '$(MODES_DIR)/pause.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MODES_DIR)/pause.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/pause.Tpo" "$(DEPDIR)/pause.Po"; else rm -f "$(DEPDIR)/pause.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MODES_DIR)/pause.cpp' object='pause.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o pause.obj `if test -f '$(MODES_DIR)/pause.cpp'; then $(CYGPATH_W) '$(MODES_DIR)/pause.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MODES_DIR)/pause.cpp'; fi`
+
+quit.o: $(MODES_DIR)/quit.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT quit.o -MD -MP -MF "$(DEPDIR)/quit.Tpo" -c -o quit.o `test -f '$(MODES_DIR)/quit.cpp' || echo '$(srcdir)/'`$(MODES_DIR)/quit.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/quit.Tpo" "$(DEPDIR)/quit.Po"; else rm -f "$(DEPDIR)/quit.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MODES_DIR)/quit.cpp' object='quit.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o quit.o `test -f '$(MODES_DIR)/quit.cpp' || echo '$(srcdir)/'`$(MODES_DIR)/quit.cpp
+
+quit.obj: $(MODES_DIR)/quit.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT quit.obj -MD -MP -MF "$(DEPDIR)/quit.Tpo" -c -o quit.obj `if test -f '$(MODES_DIR)/quit.cpp'; then $(CYGPATH_W) '$(MODES_DIR)/quit.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MODES_DIR)/quit.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/quit.Tpo" "$(DEPDIR)/quit.Po"; else rm -f "$(DEPDIR)/quit.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MODES_DIR)/quit.cpp' object='quit.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o quit.obj `if test -f '$(MODES_DIR)/quit.cpp'; then $(CYGPATH_W) '$(MODES_DIR)/quit.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MODES_DIR)/quit.cpp'; fi`
+
+scene.o: $(MODES_DIR)/scene.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT scene.o -MD -MP -MF "$(DEPDIR)/scene.Tpo" -c -o scene.o `test -f '$(MODES_DIR)/scene.cpp' || echo '$(srcdir)/'`$(MODES_DIR)/scene.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/scene.Tpo" "$(DEPDIR)/scene.Po"; else rm -f "$(DEPDIR)/scene.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MODES_DIR)/scene.cpp' object='scene.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o scene.o `test -f '$(MODES_DIR)/scene.cpp' || echo '$(srcdir)/'`$(MODES_DIR)/scene.cpp
+
+scene.obj: $(MODES_DIR)/scene.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT scene.obj -MD -MP -MF "$(DEPDIR)/scene.Tpo" -c -o scene.obj `if test -f '$(MODES_DIR)/scene.cpp'; then $(CYGPATH_W) '$(MODES_DIR)/scene.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MODES_DIR)/scene.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/scene.Tpo" "$(DEPDIR)/scene.Po"; else rm -f "$(DEPDIR)/scene.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MODES_DIR)/scene.cpp' object='scene.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o scene.obj `if test -f '$(MODES_DIR)/scene.cpp'; then $(CYGPATH_W) '$(MODES_DIR)/scene.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MODES_DIR)/scene.cpp'; fi`
 
 editor_main.o: $(EDITOR_DIR)/editor_main.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT editor_main.o -MD -MP -MF "$(DEPDIR)/editor_main.Tpo" -c -o editor_main.o `test -f '$(EDITOR_DIR)/editor_main.cpp' || echo '$(srcdir)/'`$(EDITOR_DIR)/editor_main.cpp; \

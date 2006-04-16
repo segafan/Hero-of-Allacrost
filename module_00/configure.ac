@@ -92,7 +92,7 @@ AC_CHECK_FUNCS([atexit sqrt])
 
 AC_CONFIG_FILES([Makefile])
 dnl				 src/Makefile
-dnl				 src/map_editor/Makefile])
+dnl				 src/editor/Makefile])
 										  
 AC_OUTPUT
 
