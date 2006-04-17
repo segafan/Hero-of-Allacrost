@@ -26,7 +26,7 @@
 
 #include "utils.h"
 #include "defs.h"
-#include "engine.h"
+#include "mode_manager.h"
 
 #include "global.h"
 #include "video.h"
@@ -477,7 +477,7 @@ class ScriptEvent {
 
 	The big kahuna
  *****************************************************************************/
-class BattleMode : public hoa_engine::GameMode {
+class BattleMode : public hoa_mode_manager::GameMode {
 private:
 	friend class hoa_data::GameData;
 
