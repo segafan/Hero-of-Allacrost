@@ -122,10 +122,10 @@ namespace hoa_map {
 namespace hoa_battle {
 	extern bool BATTLE_DEBUG;
         class BattleMode;
-        struct BattleStatTypes;
-        class ActorEffect;
+        class BattleStatTypes;
         
         namespace private_battle {
+                class ActorEffect;
                 class Actor;
                 class BattleUI;
                 class PlayerActor;
