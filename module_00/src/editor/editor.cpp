@@ -581,7 +581,7 @@ void Editor::_GenerateDatabase()
 		// Add individual tiles to the database.
 		write_data.WriteComment("Names of all possible tile image files, with the path and file extension omitted (note that the indeces begin with 1, not 0)");
 		write_data.BeginTable("tile_filenames");
-		for (int32 i = 0; i < tile_dir.count(); i++)
+		for (uint32 i = 0; i < tile_dir.count(); i++)
 			write_data.WriteString(i+1, tile_dir[i].remove(".png").ascii());
 		write_data.EndTable();
 		write_data.InsertNewLine();
@@ -589,7 +589,7 @@ void Editor::_GenerateDatabase()
 		// Add default properties to individual tiles.
 		write_data.WriteComment("Properties of all possible tiles (valid range: 0-255, non-zero being walkable)");
 		write_data.BeginTable("tile_properties");
-		for (int32 i = 1; i < tile_dir.count(); i++)
+		for (uint32 i = 1; i < tile_dir.count(); i++)
 			write_data.WriteInt(i, 255);
 		write_data.EndTable();
 		write_data.InsertNewLine();
