@@ -1,15 +1,16 @@
 ///////////////////////////////////////////////////////////////////////////////
-//            Copyright (C) 2004-2006 by The Allacrost Project
-//                         All Rights Reserved
+//            Copyright (C) 2004, 2005 by The Allacrost Project
+//                       All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
-// and you may modify it and/or redistribute it under the terms of this license.
+// This code is licensed under the GNU GPL. It is free software and you may
+// modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
 /*!****************************************************************************
  * \file    battle.h
  * \author  Corey Hoffstein, visage@allacrost.org
+ * \date    Last Updated: February 20, 2006
  * \brief   Header file for battle mode interface.
  *
  * This code handles the game event processing and frame drawing when the user
@@ -25,32 +26,26 @@
 
 #include "utils.h"
 #include "defs.h"
-#include "mode_manager.h"
+#include "engine.h"
 
 #include "global.h"
 #include "video.h"
 #include "audio.h"
 
-using namespace hoa_global;
-using namespace hoa_video;
-using namespace hoa_audio;
-using namespace hoa_utils;
-
-using namespace hoa_battle::private_battle;
-
 namespace hoa_battle {
 
 extern bool BATTLE_DEBUG;
 
-struct BattleStatTypes {
-        int32 VOLT; //strong against water, weak against earth
-        int32 EARTH; //strong against volt, weak against fire
-        int32 WATER; //strong against fire, weak against volt
-        int32 FIRE; //strong against earth, weak against water
-        
-        int32 PIERCING;
-        int32 SLASHING;
-        int32 BLUDGEONING;
+class BattleStatTypes {
+        public:
+                int32 volt; //strong against water, weak against earth
+                int32 earth; //strong against volt, weak against fire
+                int32 water; //strong against fire, weak against volt
+                int32 fire; //strong against earth, weak against water
+                
+                int32 piercing;
+                int32 slashing;
+                int32 bludgeoning;
 };
 
 enum StatusSeverity {
@@ -60,7 +55,11 @@ enum StatusSeverity {
         ULTIMATE
 };
 
+/***
 
+   Begin private namespace
+
+***/
 namespace private_battle {
 
 const uint32 TILE_SIZE = 64; // The virtual "tile map" that we discussed in the forums has square 64 pixel tiles
@@ -82,9 +81,9 @@ const uint32 NUM_HEIGHT_TILES = 9;
 class ActorEffect {
 	private:
 		//! Who we are effecting
-		Actor *_host;
+		private_battle::Actor *_host;
 		//! The name of the effect
-		std::string _EffectName;
+		std::string _effect_name;
 		//! The length the effect will last
 		uint32 _TTL;
                 
@@ -93,27 +92,27 @@ class ActorEffect {
 		/*! How often the effect does something
 		     -1 for update once
 		*/
-                bool _canMove;
-                uint32 _healthModifier;
-                uint32 _skillPointModifier;
+                bool _can_move;
+                uint32 _health_modifier;
+                uint32 _skill_point_modifier;
                 
-                uint32 _strengthModifier;
-                uint32 _intelligenceModifier;
-                uint32 _agilityModifier;
+                uint32 _strength_modifier;
+                uint32 _intelligence_modifier;
+                uint32 _agility_modifier;
                 
                 //how often to update the effect
-		uint32 _updateLength;
+		uint32 _update_length;
 		//! How old the effect is
 		uint32 _age;
 		//! When the last update was
-		uint32 _lastUpdate;
+		uint32 _last_update;
                 //! How many times this effect updated on the player
-                uint32 _timesUpdated;
+                uint32 _times_updated;
 		
-		void SubtractTTL(uint32 dt);
+		void _SubtractTTL(uint32 dt);
 		
 	public:
-		ActorEffect(Actor * const AHost, std::string AEffectName, StatusSeverity AHowSevere,
+		ActorEffect(private_battle::Actor * const AHost, std::string AEffectName, StatusSeverity AHowSevere,
                                 uint32 ATTL, bool ACanMove, uint32 AHealthModifier, 
                                 uint32 ASkillPointModifier, uint32 AStrengthModifier, 
                                 uint32 AIntelligenceModifier, uint32 AAgilityModifier, 
@@ -123,7 +122,7 @@ class ActorEffect {
 		uint32 GetTTL() const;
 		void Update(uint32 ATimeElapsed);
 		
-		Actor * const GetHost() const;
+		private_battle::Actor * const GetHost() const;
 		std::string GetEffectName() const;
 		uint32 GetUpdateLength() const;
 		uint32 GetLastUpdate() const;
@@ -146,47 +145,46 @@ class ActorEffect {
 class Actor {
 	private:
 		//! The mode we belong to
-		BattleMode *_ownerBattleMode;
+		BattleMode *_owner_battle_mode;
 		//! The original X location of the actor
-		uint32 _X_Origin;
+		uint32 _x_origin;
 		//! The original Y location of the actor
-		uint32 _Y_Origin;
+		uint32 _y_origin;
 		//! The X location of the actor on the battle grid
-		uint32 _X_Location;
+		double _x_location;
 		//! The Y location of the actor on the battle grid
-		uint32 _Y_Location;
+		double _y_location;
 		//! A list of effects and ailments on the character
 		std::deque<ActorEffect> _effects;
 		//! The maximum stamina
-		uint32 _maxSkillPoints;
+		uint32 _max_skill_points;
 		//! The remaining level of stamina
-		uint32 _currentSkillPoints;
+		uint32 _current_skill_points;
 		//! Tells whether the character can move (frozen, burned, et cetera)
-		bool _isMoveCapable;
+		bool _is_move_capable;
 		//! Tells if the character is alive or dead
-		bool _isAlive;
+		bool _is_alive;
 		//! The next action to perform
-		Action *_nextAction;
+		Action *_next_action;
 		//! Are we performing the action right now?
-		bool _performingAction;
+		bool _performing_action;
                 //! Are we warming up for the action?
-                uint32 _warmupTime;
+                uint32 _warmup_time;
                 //! Are we cooling down from an action?
-                uint32 _cooldownTime;
+                uint32 _cooldown_time;
                 //! Do we have a defensive mode bonus?  how much?
-                uint32 _defensiveModeBonus;
+                uint32 _defensive_mode_bonus;
                 
                 //! The sum of all modifiers from effects
-                uint32 _totalStrengthModifier;
-                uint32 _totalAgilityModifier;
-                uint32 _totalIntelligenceModifier;
+                uint32 _total_strength_modifier;
+                uint32 _total_agility_modifier;
+                uint32 _total_intelligence_modifier;
 		
                 //! Our current animation to update and draw
 		std::string _animation;
 		
 	public:
 		Actor(BattleMode *ABattleMode, uint32 AXLocation, uint32 AYLocation);
-		Actor(const Actor& AOtherActor);
 		
 		virtual ~Actor();
 		virtual void Update(uint32 ATimeElapsed) = 0;
@@ -254,7 +252,7 @@ class Actor {
 			Specific getters for classes that inherit
 		*/
 		virtual std::string GetName() = 0;
-		virtual std::vector<GlobalAttackPoint> GetAttackPoints() = 0;
+		virtual std::vector<hoa_global::GlobalAttackPoint> GetAttackPoints() = 0;
 		virtual uint32 GetHealth() = 0;
 		virtual void SetHealth(uint32 hp) = 0;
 		virtual uint32 GetMaxHealth() = 0;
@@ -268,14 +266,14 @@ class Actor {
 		/*!
 			More getters and setters
 		*/
-                const uint32 GetXOrigin() const { return _X_Origin; }
-                const uint32 GetYOrigin() const { return _Y_Origin; }
-		void SetXOrigin(int x) { _X_Origin = x; }
-		void SetYOrigin(int y) { _Y_Origin = y; }
-		const uint32 GetXLocation() const { return _X_Location; }
-		const uint32 GetYLocation() const { return _Y_Location; }
-		void SetXLocation(int x) { _X_Location = x; }
-		void SetYLocation(int y) { _Y_Location = y; }
+                const uint32 GetXOrigin() const { return _x_origin; }
+                const uint32 GetYOrigin() const { return _y_origin; }
+		void SetXOrigin(uint32 x) { _x_origin = x; }
+		void SetYOrigin(uint32 y) { _y_origin = y; }
+		const double GetXLocation() const { return _x_location; }
+		const double GetYLocation() const { return _y_location; }
+		void SetXLocation(double x) { _x_location = x; }
+		void SetYLocation(double y) { _y_location = y; }
 		
 		/*!
 			Get the movement speed in battle for this character
@@ -301,17 +299,17 @@ class BattleUI {
 		//! The battlemode we belong to
 		BattleMode *_bm;
 		//! The current actor we have clicked on
-		Actor *_currentlySelectedActor;
+		Actor *_currently_selected_actor;
 		//! The actors we have selected as arguments
-		std::list<Actor *> _currentlySelectedArgumentActors;
+		std::list<Actor *> _currently_selected_argument_actors;
 		//! A stack of menu selections we have gone through
-		std::deque<uint32> _currentlySelectedMenuItem;
+		std::deque<uint32> _currently_selected_menu_item;
 		//! The number of selections that must be made for an action
-		uint32 _necessarySelections;
+		uint32 _necessary_selections;
 		//! The menu item we are hovering over
-		uint32 _currentHoverSelection;
+		uint32 _current_hover_selection;
 		//! The number of items in this menu
-		uint32 _numberMenuItems;
+		uint32 _number_menu_items;
 		
 	public:
 		BattleUI(BattleMode * const ABattleMode);
@@ -356,10 +354,10 @@ class BattleUI {
 class PlayerActor : public Actor {
 	private:
 		//! The global character we have wrapped around
-		GlobalCharacter *_wrappedCharacter;
+		hoa_global::GlobalCharacter *_wrapped_character;
 	
 	public:
-		PlayerActor(GlobalCharacter * const AWrapped, BattleMode * const ABattleMode, uint32 AXLoc, uint32 AYLoc);
+		PlayerActor(hoa_global::GlobalCharacter * const AWrapped, BattleMode * const ABattleMode, uint32 AXLoc, uint32 AYLoc);
 		~PlayerActor();
                 void Update(uint32 ATimeElapsed);
                 void Draw();
@@ -367,15 +365,15 @@ class PlayerActor : public Actor {
 		/*!
 			Get the skills from GlobalCharacter
 		*/
-		std::vector<GlobalSkill *> GetAttackSkills() const;
-		std::vector<GlobalSkill *> GetDefenseSkills() const;
-		std::vector<GlobalSkill *> GetSupportSkills() const;
+		std::vector<hoa_global::GlobalSkill *> GetAttackSkills() const;
+		std::vector<hoa_global::GlobalSkill *> GetDefenseSkills() const;
+		std::vector<hoa_global::GlobalSkill *> GetSupportSkills() const;
 		
 		/*!
 			More getters from GlobalCharacter
 		*/
 		const std::string GetName() const;
-		const std::vector<GlobalAttackPoint> GetAttackPoints() const;
+		const std::vector<hoa_global::GlobalAttackPoint> GetAttackPoints() const;
 		uint32 GetHealth() const;
 		void SetHealth(uint32 AHealth);
 		uint32 GetMaxHealth() const;
@@ -394,10 +392,10 @@ class PlayerActor : public Actor {
 class EnemyActor : public Actor {
 	private:
 		//! The enemy we have wrapped around
-		GlobalEnemy _wrappedEnemy;
+		hoa_global::GlobalEnemy _wrapped_enemy;
 		
 	public:
-		EnemyActor(GlobalEnemy AGlobalEnemy, BattleMode * const ABattleMode, uint32 AXLoc, uint32 AYLoc);
+		EnemyActor(hoa_global::GlobalEnemy AGlobalEnemy, BattleMode * const ABattleMode, uint32 AXLoc, uint32 AYLoc);
 		~EnemyActor();
                 void Update(uint32 ATimeElapsed);
                 void Draw();
@@ -415,10 +413,10 @@ class EnemyActor : public Actor {
 		/*!
 			GlobalEnemy getters
 		*/
-		const std::vector<GlobalSkill *> GetSkills() const;
+		const std::vector<hoa_global::GlobalSkill *> GetSkills() const;
 		
 		std::string GetName() const;
-		const std::vector<GlobalAttackPoint> GetAttackPoints() const;
+		const std::vector<hoa_global::GlobalAttackPoint> GetAttackPoints() const;
 		uint32 GetHealth() const;
 		void SetHealth(uint32 AHealth);
 		uint32 GetMaxHealth() const;
@@ -445,7 +443,7 @@ class Action {
 		//! A list of argument actors for the action
 		std::vector<Actor *> _arguments;
                 
-                std::string _skillName;
+                std::string _skill_name;
 
 	public:
 		Action(Actor * const AHostActor, std::vector<Actor *> AArguments, const std::string ASkillName);
@@ -459,7 +457,7 @@ class Action {
 
 class ScriptEvent {
         private:
-                std::string _scriptName;
+                std::string _script_name;
                 Actor *_host;
                 std::list<Actor *> _arguments;
         
@@ -479,7 +477,7 @@ class ScriptEvent {
 
 	The big kahuna
  *****************************************************************************/
-class BattleMode : public hoa_mode_manager::GameMode {
+class BattleMode : public hoa_engine::GameMode {
 private:
 	friend class hoa_data::GameData;
 
@@ -488,38 +486,38 @@ private:
 	//std::vector<hoa_audio::SoundDescriptor> _battle_sound;
 
 	//! Current list of actors 
-	std::deque<PlayerActor *> _playerActors;
+	std::deque<private_battle::PlayerActor *> _player_actors;
 	
 	//actors actually in battle
-	std::deque<EnemyActor *> _enemyActors;
-	std::deque<PlayerActor *> _PCsInBattle;
+	std::deque<private_battle::EnemyActor *> _enemy_actors;
+	std::deque<private_battle::PlayerActor *> _players_characters_in_battle;
 	
 	//! a queue of actors trying to perform actions
-	std::list<Actor *> _actionQueue;
+	std::list<private_battle::Actor *> _action_queue;
 	
         //! a queue of scripted events to perform
-        std::list<ScriptEvent> _scriptQueue;
+        std::list<private_battle::ScriptEvent> _script_queue;
         
 	//! the user interface belonging to this battle mode
-	BattleUI _UserInterface;
+	private_battle::BattleUI _user_interface;
 	
 	//! Is an action being performed?
-	bool _performingScript;
+	bool _performing_script;
         		
         //! Swapping information
-        uint32 _numSwapCards;
-        uint32 _maxSwapCards;
-        uint32 _lastTimeSwapAwarded;
+        uint32 _num_swap_cards;
+        uint32 _max_swap_cards;
+        uint32 _last_time_swap_awarded;
 	
 	//! Drawing methods
-	void DrawBackground();
-	void DrawCharacters();
+	void _DrawBackground();
+	void _DrawCharacters();
 	
 	//! Shutdown the battle mode
-	void ShutDown();
+	void _ShutDown();
 	
 	//!Are we performing an action
-	bool IsPerformingScript();
+	bool _IsPerformingScript();
 
 public:
 	BattleMode();
@@ -536,19 +534,19 @@ public:
 	void SetPerformingScript(bool AIsPerforming);
 	
 	//! Adds an actor waiting to perform an action to the queue.
-	void AddToActionQueue(Actor *AActorToAdd);
+	void AddToActionQueue(private_battle::Actor *AActorToAdd);
 	
 	//! Removes an actor from the action queue (perhaps they died, et cetera)
-	void RemoveFromActionQueue(Actor *AActorToRemove);
+	void RemoveFromActionQueue(private_battle::Actor *AActorToRemove);
         
         //! Added a scripted event to the queue
-        void AddScriptEventToQueue(ScriptEvent AEventToAdd);
+        void AddScriptEventToQueue(private_battle::ScriptEvent AEventToAdd);
         
         //! Remove all scripted events for an actor
-        void RemoveScriptedEventsForActor(Actor *AActorToRemove);
+        void RemoveScriptedEventsForActor(private_battle::Actor *AActorToRemove);
 
 	//! Returns all player actors
-	std::deque<PlayerActor *> ReturnCharacters() const;
+	std::deque<private_battle::PlayerActor *> ReturnCharacters() const;
 };
 
 
