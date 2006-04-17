@@ -58,7 +58,7 @@ Tileset::Tileset(QWidget* parent, const QString& name)
 		for (int i = 0; i < numCols(); i++)
 			setColumnWidth(i, TILE_WIDTH);
 
-		uint32 row, col;
+		int32 row, col;
 		row = col = 0;
 		for (uint32 i = 1; i <= table_size; i++)
 		{
