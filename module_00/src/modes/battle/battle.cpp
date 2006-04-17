@@ -18,7 +18,9 @@
 #include "battle.h"
 #include "audio.h"
 #include "video.h"
-#include "engine.h"
+#include "mode_manager.h"
+#include "input.h"
+#include "settings.h"
 #include "global.h"
 #include "data.h"
 
@@ -27,10 +29,11 @@ using namespace hoa_battle::private_battle;
 using namespace hoa_utils;
 using namespace hoa_audio;
 using namespace hoa_video;
-using namespace hoa_engine;
+using namespace hoa_mode_manager;
+using namespace hoa_input;
+using namespace hoa_settings;
 using namespace hoa_global;
 using namespace hoa_data;
-
 
 
 namespace hoa_battle {
