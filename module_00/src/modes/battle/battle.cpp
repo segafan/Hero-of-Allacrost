@@ -1,9 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
-//            Copyright (C) 2004-2006 by The Allacrost Project
-//                         All Rights Reserved
+//            Copyright (C) 2004, 2005 by The Allacrost Project
+//                       All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
-// and you may modify it and/or redistribute it under the terms of this license.
+// This code is licensed under the GNU GPL. It is free software and you may
+// modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -18,9 +18,7 @@
 #include "battle.h"
 #include "audio.h"
 #include "video.h"
-#include "mode_manager.h"
-#include "input.h"
-#include "settings.h"
+#include "engine.h"
 #include "global.h"
 #include "data.h"
 
@@ -29,9 +27,7 @@ using namespace hoa_battle::private_battle;
 using namespace hoa_utils;
 using namespace hoa_audio;
 using namespace hoa_video;
-using namespace hoa_mode_manager;
-using namespace hoa_input;
-using namespace hoa_settings;
+using namespace hoa_engine;
 using namespace hoa_global;
 using namespace hoa_data;
 
@@ -50,47 +46,24 @@ namespace private_battle {
 */
 
 Actor::Actor(BattleMode *ABattleMode, uint32 AXLocation, uint32 AYLocation) :
-        _ownerBattleMode(ABattleMode),
-        _X_Origin(AXLocation),
-        _Y_Origin(AYLocation),
-        _X_Location(AXLocation),
-        _Y_Location(AYLocation),
-        _maxSkillPoints(0),
-        _currentSkillPoints(0),
-        _isMoveCapable(true),
-        _isAlive(true),
-        _nextAction(NULL),
-        _performingAction(false),
-        _warmupTime(0),
-        _cooldownTime(0),
-        _defensiveModeBonus(0),
-        _totalStrengthModifier(0),
-        _totalAgilityModifier(0),
-        _totalIntelligenceModifier(0),
+        _owner_battle_mode(ABattleMode),
+        _x_origin(AXLocation),
+        _y_origin(AYLocation),
+        _x_location(AXLocation),
+        _y_location(AYLocation),
+        _max_skill_points(0),
+        _current_skill_points(0),
+        _is_move_capable(true),
+        _is_alive(true),
+        _next_action(NULL),
+        _performing_action(false),
+        _warmup_time(0),
+        _cooldown_time(0),
+        _defensive_mode_bonus(0),
+        _total_strength_modifier(0),
+        _total_agility_modifier(0),
+        _total_intelligence_modifier(0),
         _animation("NEUTRAL")
-{
-
-}
-
-Actor::Actor(const Actor& AOtherActor) :
-        _ownerBattleMode(AOtherActor._ownerBattleMode),
-        _X_Origin(AOtherActor._X_Origin),
-        _Y_Origin(AOtherActor._Y_Origin),
-        _X_Location(AOtherActor._X_Location),
-        _Y_Location(AOtherActor._Y_Location),
-        _maxSkillPoints(AOtherActor._maxSkillPoints),
-        _currentSkillPoints(AOtherActor._currentSkillPoints),
-        _isMoveCapable(AOtherActor._isMoveCapable),
-        _isAlive(AOtherActor._isAlive),
-        _nextAction(AOtherActor._nextAction),
-        _performingAction(AOtherActor._performingAction),
-        _warmupTime(AOtherActor._warmupTime),
-        _cooldownTime(AOtherActor._cooldownTime),
-        _defensiveModeBonus(AOtherActor._defensiveModeBonus),
-        _totalStrengthModifier(AOtherActor._totalStrengthModifier),
-        _totalAgilityModifier(AOtherActor._totalAgilityModifier),
-        _totalIntelligenceModifier(AOtherActor._totalIntelligenceModifier),
-        _animation(AOtherActor._animation)
 {
 
 }
@@ -106,18 +79,18 @@ Actor::~Actor() {
         Stuff relating to, you know, death
 */
 void Actor::Die() {
-        _isAlive = false;
+        _is_alive = false;
 }
 
 bool Actor::IsAlive() const {
-        return _isAlive;
+        return _is_alive;
 }
 
 /*!
         Get the mode we are currently fighting in
 */
 const BattleMode *Actor::GetOwnerBattleMode() const {
-        return _ownerBattleMode;
+        return _owner_battle_mode;
 }
 
 /*!
@@ -137,7 +110,7 @@ void Actor::PushEffect(const ActorEffect AEffect) {
         Set the next action, action related methods
 */
 void Actor::SetNextAction(Action * const ANextAction) {
-        _nextAction = ANextAction;
+        _next_action = ANextAction;
 }
 
 void Actor::PerformAction() {
@@ -146,18 +119,18 @@ void Actor::PerformAction() {
 }
 
 bool Actor::HasNextAction() const {
-        return _nextAction != NULL;
+        return _next_action != NULL;
 }
 
 /*!
         Is the player frozen, asleep, et cetera?
 */
 bool Actor::IsMoveCapable() const {
-        return _isMoveCapable;
+        return _is_move_capable;
 }
 
 void Actor::SetMoveCapable(bool AMoveCapable) {
-        _isMoveCapable = AMoveCapable;
+        _is_move_capable = AMoveCapable;
 }
 
 /*!
@@ -165,22 +138,22 @@ void Actor::SetMoveCapable(bool AMoveCapable) {
         Sort of a special case
 */
 bool Actor::IsWarmingUp() const {
-        return _warmupTime != 0;
+        return _warmup_time != 0;
 }
 
 void Actor::SetWarmupTime(uint32 AWarmupTime) {
-        _warmupTime = AWarmupTime;
+        _warmup_time = AWarmupTime;
 }
 
 /*!
         Defensive mode boosts defense
 */
 bool Actor::IsInDefensiveMode() const {
-        return _defensiveModeBonus != 0;
+        return _defensive_mode_bonus != 0;
 }
 		
 void Actor::SetDefensiveBonus(uint32 ADefensiveBonus) {
-        _defensiveModeBonus = ADefensiveBonus;
+        _defensive_mode_bonus = ADefensiveBonus;
 }
 
 /*!
@@ -188,11 +161,11 @@ void Actor::SetDefensiveBonus(uint32 ADefensiveBonus) {
         on the update
 */
 bool Actor::IsPerformingAction() const {
-        return _performingAction;
+        return _performing_action;
 }
 
 void Actor::SetPerformingAction(bool AIsPerforming) {
-        _performingAction = AIsPerforming;
+        _performing_action = AIsPerforming;
 }
 
 /*!
@@ -210,27 +183,27 @@ const std::string Actor::GetAnimation() const {
 
 
 void Actor::SetTotalStrengthModifier(uint32 AStrengthModifier) {
-        _totalStrengthModifier = AStrengthModifier;
+        _total_strength_modifier = AStrengthModifier;
 }
 
 uint32 Actor::GetTotalStrengthModifier() {
-        return _totalStrengthModifier;
+        return _total_strength_modifier;
 }
 
 void Actor::SetTotalAgilityModifier(uint32 AAgilityModifier) {
-        _totalAgilityModifier = AAgilityModifier;
+        _total_agility_modifier = AAgilityModifier;
 }
 
 uint32 Actor::GetTotalAgilityModifier() {
-        return _totalAgilityModifier;
+        return _total_agility_modifier;
 }
 
 void Actor::SetTotalIntelligenceModifier(uint32 AIntelligenceModifier) {
-        _totalIntelligenceModifier = AIntelligenceModifier;
+        _total_intelligence_modifier = AIntelligenceModifier;
 }
 
 uint32 Actor::GetTotalIntelligenceModifier() {
-        return _totalIntelligenceModifier;
+        return _total_intelligence_modifier;
 }
 
 /*
@@ -241,10 +214,10 @@ uint32 Actor::GetTotalIntelligenceModifier() {
 
 BattleUI::BattleUI(BattleMode * const ABattleMode) :
         _bm(ABattleMode),
-        _currentlySelectedActor(NULL),
-        _necessarySelections(0),
-        _currentHoverSelection(0),
-        _numberMenuItems(0)
+        _currently_selected_actor(NULL),
+        _necessary_selections(0),
+        _current_hover_selection(0),
+        _number_menu_items(0)
 {
 
 }
@@ -253,49 +226,49 @@ BattleUI::BattleUI(BattleMode * const ABattleMode) :
         Get the actor we are currently on
 */
 Actor * const BattleUI::GetSelectedActor() const {
-        return _currentlySelectedActor;
+        return _currently_selected_actor;
 }
 
 /*!
         We clicked on an actor
 */
 void BattleUI::SetActorSelected(Actor * const AWhichActor) {
-        _currentlySelectedActor = AWhichActor;
+        _currently_selected_actor = AWhichActor;
 }
 
 /*!
         No actor is selected...we are now selecting an actor
 */
 void BattleUI::DeselectActor() {
-        _currentlySelectedActor = NULL;
+        _currently_selected_actor = NULL;
 }      
 
 /*!
         Get other people selected
 */
 std::list<Actor *> BattleUI::GetSelectedArgumentActors() const {
-        return _currentlySelectedArgumentActors;
+        return _currently_selected_argument_actors;
 }
 
 /*!
         The actor we just selected is now an argument
 */
 void BattleUI::SetActorAsArgument(Actor * const AActor) {
-        _currentlySelectedArgumentActors.push_back(AActor);
+        _currently_selected_argument_actors.push_back(AActor);
 }
 
 /*!
         No longer do we want this actor as an argument
 */
 void BattleUI::RemoveActorAsArgument(Actor * const AActor) {
-        _currentlySelectedArgumentActors.remove(AActor);
+        _currently_selected_argument_actors.remove(AActor);
 }
 
 /*!
         Sets the number of arguments we should be allowing
 */
 void BattleUI::SetNumberNecessarySelections(uint32 ANumSelections) {
-        _necessarySelections = ANumSelections;
+        _necessary_selections = ANumSelections;
 }
 
 /*! PlayerCharacter 
@@ -306,7 +279,7 @@ void BattleUI::SetNumberNecessarySelections(uint32 ANumSelections) {
 
 PlayerActor::PlayerActor(GlobalCharacter * const AWrapped, BattleMode * const ABattleMode, uint32 AXLoc, uint32 AYLoc) :
         Actor(ABattleMode, AXLoc, AYLoc),
-        _wrappedCharacter(AWrapped) {
+        _wrapped_character(AWrapped) {
         
 }
 
@@ -326,66 +299,66 @@ void PlayerActor::Draw() {
         Get the skills from GlobalCharacter
 */
 std::vector<GlobalSkill *> PlayerActor::GetAttackSkills() const {
-       return _wrappedCharacter->GetAttackSkills();
+       return _wrapped_character->GetAttackSkills();
 }
 
 std::vector<GlobalSkill *> PlayerActor::GetDefenseSkills() const {
-        return _wrappedCharacter->GetDefenseSkills();
+        return _wrapped_character->GetDefenseSkills();
 }
 
 std::vector<GlobalSkill *> PlayerActor::GetSupportSkills() const {
-        return _wrappedCharacter->GetSupportSkills();
+        return _wrapped_character->GetSupportSkills();
 }
 
 /*!
         More getters from GlobalCharacter
 */
 const std::string PlayerActor::GetName() const {
-        return _wrappedCharacter->GetName();
+        return _wrapped_character->GetName();
 }
 
 const std::vector<GlobalAttackPoint> PlayerActor::GetAttackPoints() const {
-        return _wrappedCharacter->GetAttackPoints();
+        return _wrapped_character->GetAttackPoints();
 }
 
 uint32 PlayerActor::GetHealth() const {
-        return _wrappedCharacter->GetHP();
+        return _wrapped_character->GetHP();
 }
 
 void PlayerActor::SetHealth(uint32 AHealth) {
-        _wrappedCharacter->SetHP(AHealth);
+        _wrapped_character->SetHP(AHealth);
 }
 
 uint32 PlayerActor::GetMaxHealth() const {
-        return _wrappedCharacter->GetMaxHP();
+        return _wrapped_character->GetMaxHP();
 }
 
 uint32 PlayerActor::GetSkillPoints() const {
-        return _wrappedCharacter->GetSP();
+        return _wrapped_character->GetSP();
 }
 
 void PlayerActor::SetSkillPoints(uint32 ASkillPoints) {
-        _wrappedCharacter->SetSP(ASkillPoints);
+        _wrapped_character->SetSP(ASkillPoints);
 }
 
 uint32 PlayerActor::GetMaxSkillPoints() const {
-        return _wrappedCharacter->GetMaxSP();
+        return _wrapped_character->GetMaxSP();
 }
 
 uint32 PlayerActor::GetStrength() const {
-        return _wrappedCharacter->GetStrength();
+        return _wrapped_character->GetStrength();
 }
 
 uint32 PlayerActor::GetIntelligence() const {
-        return _wrappedCharacter->GetIntelligence();
+        return _wrapped_character->GetIntelligence();
 }
 
 uint32 PlayerActor::GetAgility() const {
-        return _wrappedCharacter->GetAgility();
+        return _wrapped_character->GetAgility();
 }
 
 uint32 PlayerActor::GetMovementSpeed() const {
-        return _wrappedCharacter->GetMovementSpeed();
+        return _wrapped_character->GetMovementSpeed();
 }
 
 
@@ -395,7 +368,7 @@ uint32 PlayerActor::GetMovementSpeed() const {
 
 EnemyActor::EnemyActor(GlobalEnemy AGlobalEnemy, BattleMode * const ABattleMode, uint32 AXLoc, uint32 AYLoc) :
         Actor(ABattleMode, AXLoc, AYLoc),
-        _wrappedEnemy(AGlobalEnemy) {
+        _wrapped_enemy(AGlobalEnemy) {
         
         
         
@@ -417,7 +390,7 @@ void EnemyActor::Draw() {
         Has the GlobalEnemy level up to average_level
 */
 void EnemyActor::LevelUp(uint32 AAverageLevel) {
-        _wrappedEnemy.LevelSimulator(AAverageLevel);
+        _wrapped_enemy.LevelSimulator(AAverageLevel);
 }
 
 /*!
@@ -431,55 +404,55 @@ void EnemyActor::DoAI() {
         GlobalEnemy getters
 */
 const std::vector<GlobalSkill *> EnemyActor::GetSkills() const {
-        return _wrappedEnemy.GetSkills();
+        return _wrapped_enemy.GetSkills();
 }
 
 std::string EnemyActor::GetName() const {
-        return _wrappedEnemy.GetName();
+        return _wrapped_enemy.GetName();
 }
 
 const std::vector<GlobalAttackPoint> EnemyActor::GetAttackPoints() const {
-        return _wrappedEnemy.GetAttackPoints();
+        return _wrapped_enemy.GetAttackPoints();
 }
 
 uint32 EnemyActor::GetHealth() const {
-        return _wrappedEnemy.GetHP();
+        return _wrapped_enemy.GetHP();
 }
 
 void EnemyActor::SetHealth(uint32 AHealth) {
-        _wrappedEnemy.SetHP(AHealth);
+        _wrapped_enemy.SetHP(AHealth);
 }
 
 uint32 EnemyActor::GetMaxHealth() const {
-        return _wrappedEnemy.GetMaxHP();
+        return _wrapped_enemy.GetMaxHP();
 }
 
 uint32 EnemyActor::GetSkillPoints() const {
-        return _wrappedEnemy.GetSP();
+        return _wrapped_enemy.GetSP();
 }
 
 void EnemyActor::SetSkillPoints(uint32 ASkillPoints) {
-        _wrappedEnemy.SetSP(ASkillPoints);
+        _wrapped_enemy.SetSP(ASkillPoints);
 }
 
 uint32 EnemyActor::GetMaxSkillPoints() const {
-        return _wrappedEnemy.GetMaxSP();
+        return _wrapped_enemy.GetMaxSP();
 }
 
 uint32 EnemyActor::GetStrength() const {
-        return _wrappedEnemy.GetStrength();
+        return _wrapped_enemy.GetStrength();
 }
 
 uint32 EnemyActor::GetIntelligence() const {
-        return _wrappedEnemy.GetIntelligence();
+        return _wrapped_enemy.GetIntelligence();
 }
 
 uint32 EnemyActor::GetAgility() const {
-        return _wrappedEnemy.GetAgility();
+        return _wrapped_enemy.GetAgility();
 }
 
 uint32 EnemyActor::GetMovementSpeed() const {
-        return _wrappedEnemy.GetMovementSpeed();
+        return _wrapped_enemy.GetMovementSpeed();
 }
 
 /*! Actions
@@ -489,7 +462,7 @@ uint32 EnemyActor::GetMovementSpeed() const {
 Action::Action(Actor * const AHostActor, std::vector<Actor *> AArguments, const std::string ASkillName) :
         	_host(AHostActor),
 		_arguments(AArguments),
-                _skillName(ASkillName)
+                _skill_name(ASkillName)
 {
 
 }
@@ -507,7 +480,7 @@ const std::vector<Actor *> Action::GetArguments() const {
 }
                 
 const std::string Action::GetSkillName() const {
-        return _skillName;
+        return _skill_name;
 }
 
 /*!
@@ -521,20 +494,20 @@ ActorEffect::ActorEffect(Actor * const AHost, std::string AEffectName, StatusSev
                                 uint32 AIntelligenceModifier, uint32 AAgilityModifier, 
                                 uint32 AUpdateLength) : 
         _host(AHost),
-        _EffectName(AEffectName),
+        _effect_name(AEffectName),
         _TTL(ATTL),
         _severeness(AHowSevere),
-        _canMove(ACanMove),
-        _healthModifier(AHealthModifier),
-        _skillPointModifier(ASkillPointModifier),
-        _strengthModifier(ASkillPointModifier),
-        _intelligenceModifier(AIntelligenceModifier),
-        _agilityModifier(AAgilityModifier),
-        _updateLength(AUpdateLength),
+        _can_move(ACanMove),
+        _health_modifier(AHealthModifier),
+        _skill_point_modifier(ASkillPointModifier),
+        _strength_modifier(ASkillPointModifier),
+        _intelligence_modifier(AIntelligenceModifier),
+        _agility_modifier(AAgilityModifier),
+        _update_length(AUpdateLength),
         _age(0),
-        _timesUpdated(0)
+        _times_updated(0)
 {
-        _lastUpdate = SettingsManager->GetUpdateTime();
+        _last_update = SettingsManager->GetUpdateTime();
 }
 
 ActorEffect::~ActorEffect() {
@@ -554,43 +527,43 @@ Actor * const ActorEffect::GetHost() const {
 }
 
 std::string ActorEffect::GetEffectName() const {
-        return _EffectName;
+        return _effect_name;
 }
 
 uint32 ActorEffect::GetUpdateLength() const {
-        return _updateLength;
+        return _update_length;
 }
 
 uint32 ActorEffect::GetLastUpdate() const {
-        return _lastUpdate;
+        return _last_update;
 }
 
 bool ActorEffect::CanMove() const {
-        return _canMove;
+        return _can_move;
 }
 
 uint32 ActorEffect::GetHealthModifier() const {
-        return _healthModifier;
+        return _health_modifier;
 }
 
 uint32 ActorEffect::GetSkillPointModifier() const {
-        return _skillPointModifier;
+        return _skill_point_modifier;
 }
 
 uint32 ActorEffect::GetStrengthModifier() const {
-        return _strengthModifier;
+        return _strength_modifier;
 }
 
 uint32 ActorEffect::GetIntelligenceModifier() const {
-        return _intelligenceModifier;
+        return _intelligence_modifier;
 }
 
 uint32 ActorEffect::GetAgilityModifier() const {
-        return _agilityModifier;
+        return _agility_modifier;
 }
 
 void ActorEffect::SetLastUpdate(uint32 ALastUpdate) {
-        _lastUpdate = ALastUpdate;
+        _last_update = ALastUpdate;
 }
 
 void ActorEffect::UndoEffect() const {
@@ -602,7 +575,7 @@ void ActorEffect::UndoEffect() const {
 */
         
 ScriptEvent::ScriptEvent(Actor *AHost, std::list<Actor *> AArguments, std::string AScriptName) :
-        _scriptName(AScriptName),
+        _script_name(AScriptName),
         _host(AHost),
         _arguments(AArguments)
 {
@@ -630,8 +603,8 @@ Actor *ScriptEvent::GetHost() {
 
 
 BattleMode::BattleMode() : 
-        _UserInterface(this),
-        _performingScript(false)
+        _user_interface(this),
+        _performing_script(false)
 {
         Reset();
         
@@ -646,8 +619,8 @@ BattleMode::BattleMode() :
 
 BattleMode::~BattleMode() {
         // Delete the player actors.  Don't want to waste memory
-        std::deque<PlayerActor *>::iterator pc_itr = _playerActors.begin();
-	for(; pc_itr != _playerActors.end(); pc_itr++) {
+        std::deque<PlayerActor *>::iterator pc_itr = _player_actors.begin();
+	for(; pc_itr != _player_actors.end(); pc_itr++) {
 		delete *pc_itr;
 	}
 
@@ -670,13 +643,13 @@ void BattleMode::Update() {
         
         //check here for end conditions.  How many people are still alive?
         
-        for(unsigned int i = 0; i < _PCsInBattle.size(); i++) {
-                _PCsInBattle[i]->Update(updateTime);
+        for(unsigned int i = 0; i < _players_characters_in_battle.size(); i++) {
+                _players_characters_in_battle[i]->Update(updateTime);
         }
         
-        for(unsigned int i = 0; i < _enemyActors.size(); i++) {
-                _enemyActors[i]->Update(updateTime);
-                _enemyActors[i]->DoAI();
+        for(unsigned int i = 0; i < _enemy_actors.size(); i++) {
+                _enemy_actors[i]->Update(updateTime);
+                _enemy_actors[i]->DoAI();
         }
         
         //check if any scripts need to run here
@@ -684,62 +657,62 @@ void BattleMode::Update() {
 
 //! Wrapper function that calls different draw functions depending on the battle state.
 void BattleMode::Draw() {
-        DrawBackground();
-        DrawCharacters();
+        _DrawBackground();
+        _DrawCharacters();
 }
 
-void BattleMode::DrawBackground() {
+void BattleMode::_DrawBackground() {
         VideoManager->Move(0,0);
 	VideoManager->SetDrawFlags(VIDEO_NO_BLEND, 0);
 	VideoManager->DrawImage(_battle_images[0]);
 }
 
-void BattleMode::DrawCharacters() {
-        for(unsigned int i = 0; i < _PCsInBattle.size(); i++) {
-                _PCsInBattle[i]->Draw();
+void BattleMode::_DrawCharacters() {
+        for(unsigned int i = 0; i < _players_characters_in_battle.size(); i++) {
+                _players_characters_in_battle[i]->Draw();
         }
         
-        for(unsigned int i = 0; i < _enemyActors.size(); i++) {
-                _enemyActors[i]->Draw();
+        for(unsigned int i = 0; i < _enemy_actors.size(); i++) {
+                _enemy_actors[i]->Draw();
         }
 }
 
 //! Shutdown the battle mode
-void BattleMode::ShutDown() {
+void BattleMode::_ShutDown() {
         ModeManager->Pop();
 }
 
 //!Are we performing an action
-bool BattleMode::IsPerformingScript() {
-        return _performingScript;
+bool BattleMode::_IsPerformingScript() {
+        return _performing_script;
 }
 
 //! Sets T/F whether an action is being performed
 void BattleMode::SetPerformingScript(bool AIsPerforming) {
-        _performingScript = AIsPerforming;
+        _performing_script = AIsPerforming;
 }
 
 //! Adds an actor waiting to perform an action to the queue.
 void BattleMode::AddToActionQueue(Actor *AActorToAdd) {
-        _actionQueue.push_back(AActorToAdd);
+        _action_queue.push_back(AActorToAdd);
 }
 
 //! Removes an actor from the action queue (perhaps they died, et cetera)
 void BattleMode::RemoveFromActionQueue(Actor *AActorToRemove) {
-        _actionQueue.remove(AActorToRemove);
+        _action_queue.remove(AActorToRemove);
 }
 
  void BattleMode::AddScriptEventToQueue(ScriptEvent AEventToAdd) {
-        _scriptQueue.push_back(AEventToAdd);
+        _script_queue.push_back(AEventToAdd);
  }
         
 //! Remove all scripted events for an actor
 void BattleMode::RemoveScriptedEventsForActor(Actor *AActorToRemove) {
-        std::list<ScriptEvent>::iterator it = _scriptQueue.begin();
+        std::list<ScriptEvent>::iterator it = _script_queue.begin();
         
-        while( it != _scriptQueue.end() ) { 
+        while( it != _script_queue.end() ) { 
                 if((*it).GetHost() == AActorToRemove) {
-                        _scriptQueue.erase(it); //remove this location
+                        _script_queue.erase(it); //remove this location
                 }
                 else //otherwise, increment the iterator 
                         it++; 
@@ -748,7 +721,7 @@ void BattleMode::RemoveScriptedEventsForActor(Actor *AActorToRemove) {
 
 //! Returns all player actors
 std::deque<PlayerActor *> BattleMode::ReturnCharacters() const {
-        return _PCsInBattle;
+        return _players_characters_in_battle;
 }
 
                 
