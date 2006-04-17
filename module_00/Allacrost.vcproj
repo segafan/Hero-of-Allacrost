@@ -115,7 +115,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)\src&quot;;&quot;$(ProjectDir)\src\video&quot;;&quot;$(ProjectDir)\src\map_editor&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)\src&quot;;&quot;$(ProjectDir)\src\engine\video&quot;;&quot;$(ProjectDir)\src\editor&quot;;&quot;$(ProjectDir)\src\engine\audio&quot;;&quot;$(ProjectDir)\src\modes&quot;;&quot;$(ProjectDir)\src\engine&quot;;&quot;$(ProjectDir)\src\modes\battle&quot;;&quot;$(ProjectDir)\src\modes\boot&quot;;&quot;$(ProjectDir)\src\modes\map&quot;;&quot;$(ProjectDir)\src\modes\menu&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
@@ -180,47 +180,47 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\src\audio.h"
+				RelativePath=".\src\engine\audio\audio.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\audio_music.h"
+				RelativePath=".\src\engine\audio\audio_music.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\audio_sound.h"
+				RelativePath=".\src\engine\audio\audio_sound.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\battle.h"
+				RelativePath=".\src\modes\battle\battle.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\boot.h"
+				RelativePath=".\src\modes\boot\boot.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\boot_menu.h"
+				RelativePath=".\src\modes\boot\boot_menu.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\color.h"
+				RelativePath=".\src\engine\video\color.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\context.h"
+				RelativePath=".\src\engine\video\context.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\coord_sys.h"
+				RelativePath=".\src\engine\video\coord_sys.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\data.h"
+				RelativePath=".\src\engine\data.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\data_bind.h"
+				RelativePath=".\src\engine\data_bind.h"
 				>
 			</File>
 			<File
@@ -228,111 +228,139 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\engine.h"
+				RelativePath=".\src\editor\editor.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\fade.h"
+				RelativePath=".\src\engine\video\fade.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\global.h"
+				RelativePath=".\src\engine\global.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\gui.h"
+				RelativePath=".\src\editor\grid.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\image.h"
+				RelativePath=".\src\engine\video\gui.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\interpolator.h"
+				RelativePath=".\src\engine\video\image.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\map.h"
+				RelativePath=".\src\engine\input.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\map_actions.h"
+				RelativePath=".\src\engine\video\interpolator.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\map_dialogue.h"
+				RelativePath=".\src\modes\map\map.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\map_objects.h"
+				RelativePath=".\src\modes\map\map_actions.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\menu.h"
+				RelativePath=".\src\modes\map\map_dialogue.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\menu_window.h"
+				RelativePath=".\src\modes\map\map_objects.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\option.h"
+				RelativePath=".\src\modes\menu\menu.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\particle.h"
+				RelativePath=".\src\modes\menu\menu_views.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\particle_effect.h"
+				RelativePath=".\src\engine\video\menu_window.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\particle_emitter.h"
+				RelativePath=".\src\engine\mode_manager.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\particle_keyframe.h"
+				RelativePath=".\src\engine\video\option.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\particle_manager.h"
+				RelativePath=".\src\engine\video\particle.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\particle_system.h"
+				RelativePath=".\src\engine\video\particle_effect.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\pause.h"
+				RelativePath=".\src\engine\video\particle_emitter.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\quit.h"
+				RelativePath=".\src\engine\video\particle_keyframe.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\scene.h"
+				RelativePath=".\src\engine\video\particle_manager.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\screen_rect.h"
+				RelativePath=".\src\engine\video\particle_system.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\shake.h"
+				RelativePath=".\src\modes\pause.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\tex_mgmt.h"
+				RelativePath=".\src\modes\quit.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\text.h"
+				RelativePath=".\src\modes\scene.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\textbox.h"
+				RelativePath=".\src\engine\video\screen_rect.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\settings.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\video\shake.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\video\tex_mgmt.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\video\text.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\video\textbox.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\editor\tile.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\editor\tileset.h"
 				>
 			</File>
 			<File
@@ -340,7 +368,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\video.h"
+				RelativePath=".\src\engine\video\video.h"
 				>
 			</File>
 		</Filter>
@@ -356,63 +384,63 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\src\audio.cpp"
+				RelativePath=".\src\engine\audio\audio.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\audio_music.cpp"
+				RelativePath=".\src\engine\audio\audio_music.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\audio_sound.cpp"
+				RelativePath=".\src\engine\audio\audio_sound.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\battle.cpp"
+				RelativePath=".\src\modes\battle\battle.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\boot.cpp"
+				RelativePath=".\src\modes\boot\boot.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\boot_menu.cpp"
+				RelativePath=".\src\modes\boot\boot_menu.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\data.cpp"
+				RelativePath=".\src\engine\data.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\draw.cpp"
+				RelativePath=".\src\engine\video\draw.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\effects.cpp"
+				RelativePath=".\src\engine\video\effects.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\engine.cpp"
+				RelativePath=".\src\engine\video\fade.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\fade.cpp"
+				RelativePath=".\src\engine\global.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\global.cpp"
+				RelativePath=".\src\engine\video\gui.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\gui.cpp"
+				RelativePath=".\src\engine\video\image.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\image.cpp"
+				RelativePath=".\src\engine\input.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\interpolator.cpp"
+				RelativePath=".\src\engine\video\interpolator.cpp"
 				>
 			</File>
 			<File
@@ -420,79 +448,83 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\map.cpp"
+				RelativePath=".\src\modes\map\map.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\map_actions.cpp"
+				RelativePath=".\src\modes\map\map_actions.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\map_dialogue.cpp"
+				RelativePath=".\src\modes\map\map_dialogue.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\map_objects.cpp"
+				RelativePath=".\src\modes\map\map_objects.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\menu.cpp"
+				RelativePath=".\src\modes\menu\menu.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\menu_views.cpp"
+				RelativePath=".\src\modes\menu\menu_views.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\menu_views.h"
+				RelativePath=".\src\engine\video\menu_window.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\menu_window.cpp"
+				RelativePath=".\src\engine\mode_manager.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\option.cpp"
+				RelativePath=".\src\engine\video\option.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\particle_effect.cpp"
+				RelativePath=".\src\engine\video\particle_effect.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\particle_manager.cpp"
+				RelativePath=".\src\engine\video\particle_manager.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\particle_system.cpp"
+				RelativePath=".\src\engine\video\particle_system.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\pause.cpp"
+				RelativePath=".\src\modes\pause.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\quit.cpp"
+				RelativePath=".\src\modes\quit.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\scene.cpp"
+				RelativePath=".\src\modes\scene.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\shake.cpp"
+				RelativePath=".\src\engine\settings.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\tex_mgmt.cpp"
+				RelativePath=".\src\engine\video\shake.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\text.cpp"
+				RelativePath=".\src\engine\video\tex_mgmt.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\textbox.cpp"
+				RelativePath=".\src\engine\video\text.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\video\textbox.cpp"
 				>
 			</File>
 			<File
@@ -500,7 +532,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\video\video.cpp"
+				RelativePath=".\src\engine\video\video.cpp"
 				>
 			</File>
 		</Filter>
