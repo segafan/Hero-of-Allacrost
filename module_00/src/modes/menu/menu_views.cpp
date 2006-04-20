@@ -68,7 +68,7 @@ bool CharacterWindow::Draw()
 		cerr << "CHARACTERWINDOW: ERROR > Couldn't draw Character Name!" << endl;
 	
 	// Draw Level
-	VideoManager->MoveRelative(150, 0);
+	VideoManager->MoveRelative(100, 0);
 	// Get the char's lvl
 	std::ostringstream os_level;
 	os_level << character->GetXPLevel();
@@ -78,12 +78,12 @@ bool CharacterWindow::Draw()
 	
 	
 	// Draw Portrait
-	VideoManager->Move(x + 16 + 118 - (_portrait.GetWidth() / 2), y + 80);
+	VideoManager->Move(x + 16 + 95 - (_portrait.GetWidth() / 2), y + 80);
 	VideoManager->DrawImage(_portrait);
 	
 	
 	// Draw Health
-	VideoManager->Move(x + 34, y + 450);
+	VideoManager->Move(x + 34, y + 300);
 	// convert to std::string
 	std::ostringstream os_health;
 	os_health << character->GetHP() << " / " << character->GetMaxHP();
@@ -141,7 +141,7 @@ void CharacterWindow::SetCharacter(GlobalCharacter *character)
 	// TODO: Load the portrait
 	this->_portrait.SetFilename("img/menus/blank.png");
 	this->_portrait.SetStatic(true);
-	this->_portrait.SetDimensions(200, 350);
+	this->_portrait.SetDimensions(150, 200);
 	//this->_portrait.SetDimensions(Get_The_Dimensions);
 	// Load image into VideoManager
 	VideoManager->LoadImage(this->_portrait);
@@ -256,8 +256,7 @@ void InventoryWindow::Update()
 	}
 	
 	// Handle Event from option box
-	// int32 event = _inventory_items.GetEvent();
-	_inventory_items.GetEvent();
+	int32 event = _inventory_items.GetEvent();
 	
 	// Take appropriate action based on event!
 }

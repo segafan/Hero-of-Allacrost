@@ -44,14 +44,13 @@ namespace private_menu {
 //! \name MenuMode OptionBox Main options
 //! \brief Constants used for the menu in the main menu mode
 //@{
-const uint32 MAIN_INVENTORY = 0;
-const uint32 MAIN_SKILLS 	= 1;
-const uint32 MAIN_EQUIPMENT = 2;
-const uint32 MAIN_STATUS 	= 3;
-const uint32 MAIN_OPTIONS	= 4;
-const uint32 MAIN_SAVE 		= 5;
-const uint32 MAIN_EXIT		= 6;
-const uint32 MAIN_SIZE		= 7;
+const uint32 MAIN_INVENTORY			= 0;
+const uint32 MAIN_SKILLS 			= 1;
+const uint32 MAIN_STATUS_EQUIP		= 2;
+const uint32 MAIN_OPTIONS			= 3;
+const uint32 MAIN_SAVE 				= 4;
+const uint32 MAIN_EXIT				= 5;
+const uint32 MAIN_SIZE				= 6;
 //@}
 	
 //! \name MenuMode Inventory Menu options
@@ -70,22 +69,15 @@ const uint32 SKILLS_CANCEL 	= 0;
 const uint32 SKILLS_SIZE	= 1;
 //@}
 
-//! \name MenuMode Equipment Menu options
-//! \brief Constants used for the equipment menu
+//! \name MenuMode Status Equipment Menu options
+//! \brief Constants used for the status/equip menu
 //@{
-const uint32 EQUIP_EQUIP	= 0;
-const uint32 EQUIP_REMOVE	= 1;
-const uint32 EQUIP_CANCEL	= 2;
-const uint32 EQUIP_SIZE		= 3;
-//@}
-
-//! \name MenuMode Status Menu options
-//! \brief Constants used for the status menu
-//@{
-const uint32 STATUS_NEXT	= 0;
-const uint32 STATUS_PREV	= 1;
-const uint32 STATUS_CANCEL	= 2;
-const uint32 STATUS_SIZE	= 3;
+const uint32 STATUS_EQUIP_EQUIP		= 0;
+const uint32 STATUS_EQUIP_REMOVE	= 1;
+const uint32 STATUS_EQUIP_NEXT		= 2;
+const uint32 STATUS_EQUIP_PREV		= 3;
+const uint32 STATUS_EQUIP_CANCEL	= 4;
+const uint32 STATUS_EQUIP_SIZE		= 5;
 //@}
 
 //! \name MenuMode Options Menu options
@@ -108,13 +100,12 @@ const uint32 SAVE_SIZE		= 2;
 //! \name MenuMode OptionBox Show Flags
 //! \brief Constants to determine which option box is currently showing.
 //@{
-const uint32 SHOW_MAIN 		= 0;
-const uint32 SHOW_INVENTORY = 1;
-const uint32 SHOW_SKILLS	= 2;
-const uint32 SHOW_EQUIPMENT	= 3;
-const uint32 SHOW_STATUS	= 4;
-const uint32 SHOW_OPTIONS	= 5;
-const uint32 SHOW_SAVE		= 6;
+const uint32 SHOW_MAIN 				= 0;
+const uint32 SHOW_INVENTORY			= 1;
+const uint32 SHOW_SKILLS			= 2;
+const uint32 SHOW_STATUS_EQUIP		= 3;
+const uint32 SHOW_OPTIONS			= 4;
+const uint32 SHOW_SAVE				= 5;
 //@}
 
 }
@@ -169,8 +160,7 @@ private:
 	//@{
 	hoa_video::OptionBox _menu_inventory;
 	hoa_video::OptionBox _menu_skills;
-	hoa_video::OptionBox _menu_equipment;
-	hoa_video::OptionBox _menu_status;
+	hoa_video::OptionBox _menu_status_equip;
 	hoa_video::OptionBox _menu_options;
 	hoa_video::OptionBox _menu_save;
 	//@}
@@ -181,8 +171,7 @@ private:
 	void _SetupMainOptionBox();
 	void _SetupInventoryOptionBox();
 	void _SetupSkillsOptionBox();
-	void _SetupEquipmentOptionBox();
-	void _SetupStatusOptionBox();
+	void _SetupStatusEquipOptionBox();
 	void _SetupOptionsOptionBox();
 	void _SetupSaveOptionBox();
 	//@}
@@ -192,8 +181,7 @@ private:
 	void _HandleMainMenu();
 	void _HandleInventoryMenu();
 	void _HandleSkillsMenu();
-	void _HandleEquipmentMenu();
-	void _HandleStatusMenu();
+	void _HandleStatusEquipMenu();
 	void _HandleOptionsMenu();
 	void _HandleSaveMenu();
 	//@}
