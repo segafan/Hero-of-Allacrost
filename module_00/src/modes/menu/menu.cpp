@@ -148,20 +148,29 @@ void MenuMode::Reset() {
 		cerr << "MAP: ERROR > Couldn't set menu font!" << endl;
 	
 	// Setup the menu windows
-	_character_window0.Create(252, 576, ~VIDEO_MENU_EDGE_RIGHT);
-	_character_window0.SetPosition(0, 0);
+	// Width of each char window is 200 px.
+	// each window will have an additional 16 px for the left border, and the 4th window
+	// will have another 16 px for the right border
+	// Height of the char window is 408 px.
+	// The bottom window in the main view is 192 px high, and the full width which will be 216 * 4 + 16
+	uint32 start_x = (1024-800)/2 - 40;
+	uint32 start_y = (768-600)/2;
+	uint32 win_width = 208;
+	uint32 win_height = 600-192;
+	_character_window0.Create(static_cast<float>(win_width), static_cast<float>(win_height), ~VIDEO_MENU_EDGE_RIGHT, VIDEO_MENU_EDGE_RIGHT);
+	_character_window0.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y));
 	_character_window0.Show();
-	_character_window1.Create(252, 576, ~VIDEO_MENU_EDGE_RIGHT);
-	_character_window1.SetPosition(252, 0);
+	_character_window1.Create(static_cast<float>(win_width), static_cast<float>(win_height), ~VIDEO_MENU_EDGE_RIGHT, VIDEO_MENU_EDGE_LEFT | VIDEO_MENU_EDGE_RIGHT);
+	_character_window1.SetPosition(static_cast<float>(start_x) + static_cast<float>(win_width), static_cast<float>(start_y));
 	_character_window1.Show();
-	_character_window2.Create(252, 576, ~VIDEO_MENU_EDGE_RIGHT);
-	_character_window2.SetPosition(504, 0);
+	_character_window2.Create(static_cast<float>(win_width), static_cast<float>(win_height), ~VIDEO_MENU_EDGE_RIGHT, VIDEO_MENU_EDGE_LEFT | VIDEO_MENU_EDGE_RIGHT);
+	_character_window2.SetPosition(static_cast<float>(start_x) + static_cast<float>((2 * win_width)), static_cast<float>(start_y));
 	_character_window2.Show();
-	_character_window3.Create(268, 576, VIDEO_MENU_EDGE_ALL);
-	_character_window3.SetPosition(756, 0);
+	_character_window3.Create(static_cast<float>(win_width) + 16, static_cast<float>(win_height), VIDEO_MENU_EDGE_ALL, VIDEO_MENU_EDGE_LEFT);
+	_character_window3.SetPosition(static_cast<float>(start_x) + static_cast<float>((3 * win_width)), static_cast<float>(start_y));
 	_character_window3.Show();
-	_bottom_window.Create(1024, 192, ~VIDEO_MENU_EDGE_TOP);
-	_bottom_window.SetPosition(0, 576);
+	_bottom_window.Create(208 * 4 + 16, 192, ~VIDEO_MENU_EDGE_TOP);
+	_bottom_window.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y) + static_cast<float>(win_height) + 8);
 	_bottom_window.Show();
 	
 	// Setup the inventory window
@@ -173,8 +182,7 @@ void MenuMode::Reset() {
 	this->_SetupMainOptionBox();
 	this->_SetupInventoryOptionBox();
 	this->_SetupSkillsOptionBox();
-	this->_SetupEquipmentOptionBox();
-	this->_SetupStatusOptionBox();
+	this->_SetupStatusEquipOptionBox();
 	this->_SetupOptionsOptionBox();
 	this->_SetupSaveOptionBox();
 }
@@ -245,14 +253,11 @@ void MenuMode::Update() {
 			case SHOW_INVENTORY:
 				this->_HandleInventoryMenu();
 				break;
-			case SHOW_EQUIPMENT:
-				this->_HandleEquipmentMenu();
-				break;
 			case SHOW_SKILLS:
 				this->_HandleSkillsMenu();
 				break;
-			case SHOW_STATUS:
-				this->_HandleStatusMenu();
+			case SHOW_STATUS_EQUIP:
+				this->_HandleStatusEquipMenu();
 				break;
 			case SHOW_OPTIONS:
 				this->_HandleOptionsMenu();
@@ -303,7 +308,7 @@ void MenuMode::Draw() {
 	_current_menu->Draw();
 		
 	// Draw 2nd menu text
-	VideoManager->Move(30, 700);
+	VideoManager->Move(105, 615);
 	if (!VideoManager->DrawText("Time: 00:24:35"))
 		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
 	
@@ -318,7 +323,7 @@ void MenuMode::Draw() {
 	VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, 0);
 	
 	// Display Location
-	VideoManager->Move(450, 748);
+	VideoManager->Move(350, 670);
 	if (!VideoManager->DrawText("Harrvah Kingdom - Town"))
 		cerr << "MENU: ERROR > Couldn't draw location!" << endl;
 	
@@ -343,12 +348,6 @@ void MenuMode::_HandleMainMenu()
 			_current_menu = &_menu_inventory;
 			break;
 		}
-		case MAIN_EQUIPMENT:
-		{
-			_current_menu_showing = SHOW_EQUIPMENT;
-			_current_menu = &_menu_equipment;
-			break;
-		}
 		case MAIN_SKILLS:
 		{
 			_current_menu_showing = SHOW_SKILLS;
@@ -361,10 +360,10 @@ void MenuMode::_HandleMainMenu()
 			_current_menu = &_menu_options;
 			break;
 		}
-		case MAIN_STATUS:
+		case MAIN_STATUS_EQUIP:
 		{
-			_current_menu_showing = SHOW_STATUS;
-			_current_menu = &_menu_status;
+			_current_menu_showing = SHOW_STATUS_EQUIP;
+			_current_menu = &_menu_status_equip;
 			break;
 		}
 		case MAIN_SAVE:
@@ -415,33 +414,6 @@ void MenuMode::_HandleInventoryMenu()
 }
 
 //--------------------------------
-// MenuMode::HandleEquipmentMenu
-//--------------------------------
-void MenuMode::_HandleEquipmentMenu()
-{
-	switch (_menu_equipment.GetSelection())
-	{
-		case EQUIP_EQUIP:
-			// TODO: Handle the equip equipment command
-			cout << "MENU: Equipment Equip command!" << endl;
-			break;
-		case EQUIP_REMOVE:
-			// TODO: Handle the remove equipment command
-			cout << "MENU: Equipment Remove command!" << endl;
-			break;
-		case EQUIP_CANCEL:
-		{
-			_current_menu_showing = SHOW_MAIN;
-			_current_menu = &_main_options;
-			break;
-		}
-		default:
-			cerr << "MENU: ERROR: Invalid option in MenuMode::HandleEquipmentMenu()!" << endl;
-			break;
-	}
-}
-
-//--------------------------------
 // MenuMode::HandleSkillsMenu
 //--------------------------------
 void MenuMode::_HandleSkillsMenu()
@@ -463,19 +435,27 @@ void MenuMode::_HandleSkillsMenu()
 //----------------------------------
 // MenuMode::HandleStatusMenu
 //----------------------------------
-void MenuMode::_HandleStatusMenu()
+void MenuMode::_HandleStatusEquipMenu()
 {
-	switch (_menu_status.GetSelection())
+	switch (_menu_status_equip.GetSelection())
 	{
-		case STATUS_NEXT:
+		case STATUS_EQUIP_EQUIP:
+			// TODO: Handle the equip command
+			cout << "MENU: Equip command!" << endl;
+			break;
+		case STATUS_EQUIP_REMOVE:
+			// TODO: Handle the remove command
+			cout << "MENU: Remove command!" << endl;
+			break;
+		case STATUS_EQUIP_NEXT:
 			// TODO: Handle the status - next command.
 			cout << "MENU: Status Next command!" << endl;
 			break;
-		case STATUS_PREV:
+		case STATUS_EQUIP_PREV:
 			// TODO: Handle the status - prev command.
 			cout << "MENU: Status Prev command!" << endl;
 			break;
-		case STATUS_CANCEL:
+		case STATUS_EQUIP_CANCEL:
 		{
 			_current_menu_showing = SHOW_MAIN;
 			_current_menu = &_main_options;
@@ -544,7 +524,7 @@ void MenuMode::_SetupOptionBoxCommonSettings(OptionBox *ob)
 	// Set all the default options
 	ob->SetFont(_font_name);
 	ob->SetCellSize(108.0f, 50.0f);
-	ob->SetPosition(30.0f, 600.0f);
+	ob->SetPosition(102.0f, 515.0f);
 	ob->SetAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	ob->SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	ob->SetSelectMode(VIDEO_SELECT_SINGLE);
@@ -565,8 +545,7 @@ void MenuMode::_SetupMainOptionBox()
 	vector<ustring> options;
 	options.push_back(MakeWideString("Inventory"));
 	options.push_back(MakeWideString("Skills"));
-	options.push_back(MakeWideString("Equipment"));
-	options.push_back(MakeWideString("Status"));
+	options.push_back(MakeWideString("Status\\Equipment"));
 	options.push_back(MakeWideString("Options"));
 	options.push_back(MakeWideString("Save"));
 	options.push_back(MakeWideString("Exit"));
@@ -613,41 +592,24 @@ void MenuMode::_SetupSkillsOptionBox()
 }
 
 //------------------------------------
-// MenuMode::SetupEquipmentOptionBox
+// MenuMode::SetupStatusEquipOptionBox
 //------------------------------------
-void MenuMode::_SetupEquipmentOptionBox()
+void MenuMode::_SetupStatusEquipOptionBox()
 {
-	// setup the option box
-	this->_SetupOptionBoxCommonSettings(&_menu_equipment);
-	_menu_equipment.SetSize(EQUIP_SIZE, 1);
+	// setup the status option box
+	this->_SetupOptionBoxCommonSettings(&_menu_status_equip);
+	_menu_status_equip.SetSize(STATUS_EQUIP_SIZE, 1);
 	
 	// Generate the strings
 	vector<ustring> options;
 	options.push_back(MakeWideString("Equip"));
 	options.push_back(MakeWideString("Remove"));
-	options.push_back(MakeWideString("Cancel"));
-	
-	_menu_equipment.SetOptions(options);
-	_menu_equipment.SetSelection(EQUIP_EQUIP);
-}
-
-//------------------------------------
-// MenuMode::SetupStatusOptionBox
-//------------------------------------
-void MenuMode::_SetupStatusOptionBox()
-{
-	// setup the status option box
-	this->_SetupOptionBoxCommonSettings(&_menu_status);
-	_menu_status.SetSize(STATUS_SIZE, 1);
-	
-	// Generate the strings
-	vector<ustring> options;
 	options.push_back(MakeWideString("Next Character"));
 	options.push_back(MakeWideString("Prev Character"));
 	options.push_back(MakeWideString("Cancel"));
 	
-	_menu_status.SetOptions(options);
-	_menu_status.SetSelection(STATUS_NEXT);
+	_menu_status_equip.SetOptions(options);
+	_menu_status_equip.SetSelection(STATUS_EQUIP_EQUIP);
 }
 
 //-------------------------------------
