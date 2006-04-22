@@ -95,6 +95,7 @@ namespace hoa_global {
 namespace hoa_boot {
 	extern bool BOOT_DEBUG;
 	class BootMode;
+	class BootMenu;
 }
 
 // Map mode declarations, see map.h/cpp

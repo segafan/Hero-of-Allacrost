@@ -26,6 +26,7 @@
 #include "defs.h"
 #include "mode_manager.h"
 #include "video.h"
+#include "boot_menu.h"
 
 //! All calls to boot mode are wrapped in this namespace.
 namespace hoa_boot {
@@ -36,62 +37,6 @@ extern bool BOOT_DEBUG;
 //! An internal namespace to be used only within the boot code. Don't use this namespace anywhere else!
 namespace private_boot {
 
-//! \name All possible visible menus
-enum VISIBLE_MENU
-{
-	MAIN_MENU_VISIBLE = 0,
-	OPTIONS_MENU_VISIBLE,
-	VIDEO_OPTIONS_MENU_VISIBLE,
-	AUDIO_OPTIONS_MENU_VISIBLE
-};
-
-//! \name Main menu selections
-enum MAIN_MENU
-{
-	NEW_GAME  = 0,
-	LOAD_GAME,
-	OPTIONS,
-	CREDITS,
-	QUIT,
-
-	MAIN_MENU_SIZE
-};
-
-//! \name Options menu selections
-enum OPTIONS_MENU
-{
-	VIDEO_OPTIONS = 0,
-	AUDIO_OPTIONS,
-	LANGUAGE_OPTIONS,
-	KEYS_OPTIONS,
-	JOYSTICK_OPTIONS,
-	//SET_DEFAULT_OPTIONS = x,
-	BACK_OPTIONS,
-
-	OPTIONS_MENU_SIZE
-};
-
-//! \name Video-options menu selections
-enum VIDEO_OPTIONS_MENU
-{
-	RESOLUTION_VIDEO_OPTIONS = 0,
-	FULLWINDOWED_VIDEO_OPTIONS,
-	BRIGHTNESS_VIDEO_OPTIONS,
-	QUALITY_VIDEO_OPTIONS,
-	BACK_VIDEO_OPTIONS,
-
-	VIDEO_OPTIONS_MENU_SIZE
-};
-
-//! \name Audio-options menu selections
-enum AUDIO_OPTIONS_MENU
-{
-	SOUND_VOLUME_AUDIO_OPTIONS = 0,
-	MUSIC_VOLUME_AUDIO_OPTIONS,
-	BACK_AUDIO_OPTIONS,
-
-	AUDIO_OPTIONS_MENU_SIZE
-};
 
 //! \name Default key settings
 //! \brief The default SDL key mapping used with Allacrost.
@@ -127,8 +72,6 @@ class BootMode : public hoa_mode_manager::GameMode {
 private:
 	//! If true, boot mode is exiting and we have to wait for the screen to finish fading out.
 	bool _fade_out;
-	//! A vector storing various menu pointers in a stack-like structure.
-	std::vector<uint32> _vmenu_index;
 	//! Music to be used at the boot screen.
 	std::vector<hoa_audio::MusicDescriptor> _boot_music;
 	//! Sounds that will be used at the boot screen.
@@ -136,22 +79,21 @@ private:
 	//! Images that will be used at the boot screen.
 	std::vector<hoa_video::StillImage> _boot_images;
 	
-	//! GUI component for the main options.
-	hoa_video::OptionBox _main_menu;
-	//! GUI component for the setting options.
-	hoa_video::OptionBox _options_menu;
-	//! GUI component for the video options.
-	hoa_video::OptionBox _video_options_menu;
-	//! GUI component for the audio options.
-	hoa_video::OptionBox _audio_options_menu;
-	//! GUI component for the settings window.
-	hoa_video::MenuWindow _settings_window;
+	//! A pointer to the current menu visible
+	BootMenu * _current_menu;
 
-	//! The currently visible menu index 
-	private_boot::VISIBLE_MENU _current_menu_visible;
-	
-	//! A pointer to the current OptionBox visible
-	hoa_video::OptionBox *_current_menu;
+	//! Main menu
+	BootMenu _main_menu;
+
+	//! 'Options' menu
+	BootMenu _options_menu;
+
+	//! 'Video Options' menu
+	BootMenu _video_options_menu;
+
+	//! 'Audio Options' menu
+	BootMenu _audio_options_menu;
+
 	
 	/*!
 	 *  \brief Animates the game logo when this class is first initialized.
@@ -170,11 +112,6 @@ private:
 	 */
 	void _RedefineKey(SDLKey& change_key);
 
-	//! Inits 'default' looks for a given horizontal menu
-	void _InitMenuDefaults(hoa_video::OptionBox & menu);
-	//! Inits 'default' looks for a given vertical menu inside a window
-	void _InitWindowMenuDefaults(hoa_video::OptionBox & menu, hoa_video::MenuWindow & window);
-
 	//! Inits the main menu
 	void _SetupMainMenu();
 	//! Inits the options menu
@@ -184,32 +121,25 @@ private:
 	//! Inits the audio-options menu
 	void _SetupAudioOptionsMenu();
 
-	//! Handles main menu events
-	void _HandleMainMenu(private_boot::MAIN_MENU selection);
-	//! Handles options menu events
-	void _HandleOptionsMenu(private_boot::OPTIONS_MENU selection);
-	//! Handles video-options menu events
-	void _HandleVideoOptionsMenu(private_boot::VIDEO_OPTIONS_MENU selection);
-	//! Handles audio-options menu events
-	void _HandleAudioOptionsMenu(private_boot::AUDIO_OPTIONS_MENU selection);
+	// Main Menu handlers
+	//! 'New Game' confirmed
+	void OnNewGame();
+	//! 'Load Game' confirmed
+	void OnLoadGame();
+	//! 'Options' confirmed
+	void OnOptions();
+	//! 'Credits' confirmed
+	void OnCredits();
+	//! 'Quit' confirmed
+	void OnQuit();
+
+	// Options' handlers
+	//! 'Video' confirmed
+	void OnVideoOptions();
+	//! 'Audio' confirmed
+	void OnAudioOptions();
 
 
-	//! Draws the menu when "Load Game" has been selected in the main menu.
-	void _DrawLoadMenu();
-	//! Draws the menu when a saved game has been selected from the "Load Game" menu.
-	void _DrawLoadGame();
-	//! Draws the menu when "Video" has been selected in the options menu.
-	void _DrawVideoOptions();
-	//! Draws the menu when "Audio" has been selected in the options menu.
-	void _DrawAudioOptions();
-	//! Draws the menu when "Language" has been selected in the options menu.
-	void _DrawLanguageOptions();
-	//! Draws the menu when "Keyboard" has been selected in the options menu.
-	void _DrawKeyOptions();
-	//! Draws the menu when "Joystick" has been selected in the options menu.
-	void _DrawJoystickOptions();
-	//! Draws the menu when "Credits" has been selected in the main menu.
-	void _DrawCredits();
 
 public:
 	//! Initializes class members and loads media data.
