@@ -15,6 +15,8 @@
  * This code extends some parts of the OptionBox to match the
  * requirements of the boot menu. This includes features like multi-depth 
  * menus and custom visualization as well as custom event handling.
+ * However, no inheritance was used as I found it to be more of a nuisance
+ * than benefit in here!
  *****************************************************************************/
  
 #ifndef __BOOT_MENU__
@@ -40,24 +42,117 @@ namespace hoa_boot {
 class BootMenu
 {
 public:
-	BootMenu(BootMenu * parent = 0);
-	~BootMenu();
+	BootMenu(BootMenu * parent = 0, bool windowed = false, BootMode * boot_mode = 0);
 
-	//! Adds a new option with the desired function attached to it
-	void AddOption(const hoa_utils::ustring & text, void (*function)());
+	~BootMenu();
+	
+	/** \brief Adds a new menu option with the desired function attached to it
+	*** \param text A text representing the new option
+	*** \param *confirm_function 'Confirm' handler from the BootMode
+	*** \param *left_function 'Left' handler from the BootMode
+	*** \param *right_function 'Right' handler from the BootMode
+	*** \param *up_function 'Up' handler from the BootMode
+	*** \param *down_function 'Down' handler from the BootMode
+	**/
+	void AddOption(const hoa_utils::ustring & text, void (BootMode::*confirm_function)() = 0, void (BootMode::*left_function)() = 0, void (BootMode::*right_function)() = 0, void (BootMode::*up_function)() = 0, void (BootMode::*down_function)() = 0);
+
+	/** \brief Changes text of the option
+	*** \param index index of the text to be changed
+	*** \param text new text for the option
+	**/
+	void SetOptionText(uint32 index, const hoa_utils::ustring & text);
+
+	/** \brief Toggles this menu to be windowed (or not windowed)
+	*** \param windowed true == enable windowing
+	**/
+	void SetWindowed(bool windowed);
+
+	/** \brief Sets a new parent for this menu
+	*** \param parent Pointer to the new parent
+	**/
+	void SetParent(BootMenu * parent);
+
+	/** \brief Updates menu events. Call this every frame just like you would do on OptionBox!
+	*** \return The event code from OptionBox::GetEvent()
+	**/
+	int32 GetEvent();
+
+	/** \brief Returns parent of the menu
+	*** \return Parent of the menu (or 0 for the root menu)
+	**/
+	BootMenu * GetParent() const;
+
+	/** \brief Returns boolean if the menu is windowed or not
+	*** \return True if windowed. False if not
+	**/
+	bool IsWindowed() const;
+
+	//! Draws menu on the screen
+	bool Draw();
+
+	//! Handles the confirm key
+	void ConfirmPressed();
+
+	//! Handles the left key
+	void LeftPressed();
+
+	//! Handles the right key
+	void RightPressed();
+
+	//! Handles the up key
+	void UpPressed();
+
+	//! Handles the down key
+	void DownPressed();
+
+	//! Handles the cancel key
+	void CancelPressed();
+
+
+	/** \brief Updates the menu window
+	*** \param frameTime time of the frame in ms
+	**/
+	static void UpdateWindow(int32 frame_time);
+
+	/** \brief Shows or hides the menu window
+	*** \param toggle menu window on or off
+	**/
+	static void ShowWindow(bool toggle);
+
+	//! Inits the menu window
+	static void  InitWindow();
 
 private:
-	//! Possible parent-menu (always 0 for the root-menu!)
-	BootMenu * _parent;
+	//! A pointer to the boot mode
+	static BootMode * _boot_mode;
 
-	//! Current OptionBox displaying
+	//! A pointer to the parent menu (or 0 for the root menu)
+	BootMenu * _parent_menu;
+
+	//! OptionBox displayed on the screen
 	hoa_video::OptionBox _current_menu;
 
-	//! Child menus for the menu options (or 0 if no child is available from the option!)
-	std::vector<BootMenu *> _childs;
 
-	//! confirm-key handlers for all options. These are given by the boot-mode.
-	std::vector<void (*)()> _confirm_handlers;
+	//! Is this menu windowed (and thus vertically aligned) or not
+	bool _is_windowed;
+
+	//! A window needed by some menus
+	static hoa_video::MenuWindow * _menu_window;
+
+	//! confirm-key handlers for all options in the menu
+	std::vector<void (BootMode::*)()> _confirm_handlers;
+
+	//! left-key handlers for all options in the menu
+	std::vector<void (BootMode::*)()> _left_handlers;
+
+	//! right-key handlers for all options in the menu
+	std::vector<void (BootMode::*)()> _right_handlers;
+
+	//! up-key handlers for all options in the menu
+	std::vector<void (BootMode::*)()> _up_handlers;
+
+	//! down-key handlers for all options in the menu
+	std::vector<void (BootMode::*)()> _down_handlers;
 
 }; // end class BootMenu
 

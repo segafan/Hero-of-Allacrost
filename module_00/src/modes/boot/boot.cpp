@@ -17,6 +17,7 @@
 #include "utils.h"
 #include <iostream>
 #include "boot.h"
+#include "boot_menu.h"
 #include "audio.h"
 #include "video.h"
 #include "data.h"
@@ -49,14 +50,14 @@ bool BOOT_DEBUG = false;
 // ****************************************************************************
 
 // The constructor initializes variables and sets up the path names of the boot images
-BootMode::BootMode() {
+BootMode::BootMode() :
+_main_menu(0, false, this)
+{
 	if (BOOT_DEBUG) cout << "BOOT: BootMode constructor invoked." << endl;
 
 	mode_type = MODE_MANAGER_BOOT_MODE;
 
 	_fade_out = false;
-
-	_vmenu_index.push_back(LOAD_GAME);
 
 	ReadDataDescriptor read_data;
 	if (!read_data.OpenFile("dat/config/boot.lua")) {
@@ -131,11 +132,8 @@ BootMode::BootMode() {
 		VideoManager->LoadImage(_boot_images[i]);
 	}
 
-	// Init the settings window
-	_settings_window.Create(1024.0f, 400.0f);
-	_settings_window.SetPosition(0.0f, 576.0f);
-	_settings_window.SetDisplayMode(VIDEO_MENU_EXPAND_FROM_CENTER);
-	_settings_window.Hide();
+	// Init the menu window
+	BootMenu::InitWindow();
 
 	// Setup every menu and their possible sub-menus
 	_SetupMainMenu();
@@ -143,17 +141,14 @@ BootMode::BootMode() {
 	_SetupVideoOptionsMenu();
 	_SetupAudioOptionsMenu();
 
-	// Set main menu as our currently selected menu...
+	// Set main menu as our current menu
 	_current_menu = &_main_menu;
-	_current_menu_visible = MAIN_MENU_VISIBLE;
 }
 
 
 // The destructor frees all used music, sounds, and images.
 BootMode::~BootMode() {
 	if (BOOT_DEBUG) cout << "BOOT: BootMode destructor invoked." << endl;
-
-	_settings_window.Destroy();
 
 	for (uint32 i = 0; i < _boot_music.size(); i++)
 		_boot_music[i].FreeMusic();
@@ -240,257 +235,112 @@ void BootMode::_RedefineKey(SDLKey& change_key) {
 }
 
 
-// Inits 'default' looks for a given horizontal menu
-void BootMode::_InitMenuDefaults(hoa_video::OptionBox & menu) {
-	menu.SetFont("default");
-	menu.SetCellSize(128.0f, 50.0f);
-	//menu.SetSize(5, 1);
-	menu.SetPosition(512.0f, 50.0f);
-	menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-	menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-	menu.SetSelectMode(VIDEO_SELECT_SINGLE);
-	menu.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-	menu.SetCursorOffset(-35.0f, -4.0f);
-}
-
-
-// Inits 'default' looks for a given vertical menu inside a window
-void BootMode::_InitWindowMenuDefaults(hoa_video::OptionBox & menu, hoa_video::MenuWindow & window)
-{
-	menu.SetFont("default");
-	menu.SetCellSize(128.0f, 50.0f);
-	//menu.SetSize(1, 5);
-	menu.SetPosition(410.0f, 200.0f);
-	menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-	menu.SetOptionAlignment(VIDEO_X_RIGHT, VIDEO_Y_CENTER);
-	menu.SetSelectMode(VIDEO_SELECT_SINGLE);
-	menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-	menu.SetCursorOffset(-35.0f, -4.0f);
-	menu.SetOwner(&window); // For some reason, I can't get this to work properly! Help appreciated
-}
-
-
 // Inits the main menu
 void BootMode::_SetupMainMenu() {
 
-	// Set menu defaults
-	_InitMenuDefaults(_main_menu);
-	_main_menu.SetSize(MAIN_MENU_SIZE, 1);
-
-	// Generate the strings, the old way
-	//vector<ustring> options;
-	//options.push_back(MakeWideString("New Game"));
-	//options.push_back(MakeWideString("Load Game"));
-	//options.push_back(MakeWideString("Options"));
-	//options.push_back(MakeWideString("Credits"));
-	//options.push_back(MakeWideString("Quit"));
-	
-	// Add strings and set the default selection.
-	//_main_menu.SetOptions(options);
-	_main_menu.AddOption(MakeWideString("New Game"));
-	_main_menu.AddOption(MakeWideString("Load Game"));
-	_main_menu.AddOption(MakeWideString("Options"));
-	_main_menu.AddOption(MakeWideString("Credits"));
-	_main_menu.AddOption(MakeWideString("Quit"));
-	_main_menu.SetSelection(NEW_GAME);
+	// Add all the needed menu options to the main menu
+	_main_menu.AddOption(MakeWideString("New Game"), &BootMode::OnNewGame);
+	_main_menu.AddOption(MakeWideString("Load Game"), &BootMode::OnLoadGame);
+	_main_menu.AddOption(MakeWideString("Options"), &BootMode::OnOptions);
+	_main_menu.AddOption(MakeWideString("Credits"), &BootMode::OnCredits);
+	_main_menu.AddOption(MakeWideString("Quit"), &BootMode::OnQuit);
 }
 
 
 // Inits the options menu
 void BootMode::_SetupOptionsMenu() {
-
-	// Set defaults
-	_InitMenuDefaults(_options_menu);
-	_options_menu.SetSize(OPTIONS_MENU_SIZE, 1);
-
-	// Generate the strings
-	vector<ustring> options;
-	options.push_back(MakeWideString("Video"));
-	options.push_back(MakeWideString("Audio"));
-	options.push_back(MakeWideString("Language"));
-	options.push_back(MakeWideString("Key Settings"));
-	options.push_back(MakeWideString("Joystick Settings"));
-	options.push_back(MakeWideString("Back"));
-	
-	// Add strings and set the default selection.
-	_options_menu.SetOptions(options);
-	_options_menu.SetSelection(VIDEO_OPTIONS);
+	_options_menu.AddOption(MakeWideString("Video"), &BootMode::OnVideoOptions);
+	_options_menu.AddOption(MakeWideString("Audio"), &BootMode::OnAudioOptions);
+	_options_menu.AddOption(MakeWideString("Language"));
+	_options_menu.AddOption(MakeWideString("Key Settings"));
+	_options_menu.AddOption(MakeWideString("Joystick Settings"));
+	_options_menu.SetWindowed(true);
+	_options_menu.SetParent(&_main_menu);
 }
 
 
 // Inits the video-options menu
 void BootMode::_SetupVideoOptionsMenu()
 {
-	// Set defaults
-	_InitWindowMenuDefaults(_video_options_menu, _settings_window);
-	_video_options_menu.SetSize(1, VIDEO_OPTIONS_MENU_SIZE);
-
-	// Generate the strings
-	vector<ustring> options;
-	options.push_back(MakeWideString("Resolution:"));
-	options.push_back(MakeWideString("Window mode:"));
-	options.push_back(MakeWideString("Brightness:"));
-	options.push_back(MakeWideString("Image quality:"));
-	options.push_back(MakeWideString("Back"));
-
-	// Add strings and set the default selection.
-	_video_options_menu.SetOptions(options);
-	_video_options_menu.SetSelection(RESOLUTION_VIDEO_OPTIONS);
+	_video_options_menu.AddOption(MakeWideString("Resolution:"));
+	_video_options_menu.AddOption(MakeWideString("Window mode:"));
+	_video_options_menu.AddOption(MakeWideString("Brightness:"));
+	_video_options_menu.AddOption(MakeWideString("Image quality:"));
+	_video_options_menu.SetWindowed(true);
+	_video_options_menu.SetParent(&_options_menu);
 }
 
 
 // Inits the audio-options menu
 void BootMode::_SetupAudioOptionsMenu()
 {
-	// Set defaults
-	_InitWindowMenuDefaults(_audio_options_menu, _settings_window);
-	_audio_options_menu.SetSize(1, AUDIO_OPTIONS_MENU_SIZE);
-
-	// Generate the strings
-	vector<ustring> options;
-	options.push_back(MakeWideString("Sound Volume:"));
-	options.push_back(MakeWideString("Music Volume:"));
-	options.push_back(MakeWideString("Back"));
-
-	// Add strings and set the default selection.
-	_audio_options_menu.SetOptions(options);
-	_audio_options_menu.SetSelection(SOUND_VOLUME_AUDIO_OPTIONS);
+	_audio_options_menu.AddOption(MakeWideString("Sound Volume:"));
+	_audio_options_menu.AddOption(MakeWideString("Music Volume:"));
+	_audio_options_menu.SetWindowed(true);
+	_audio_options_menu.SetParent(&_options_menu);
 }
 
 
-// Handles main menu events
-void BootMode::_HandleMainMenu(private_boot::MAIN_MENU selection) {
-	switch (selection)
-	{
-	case NEW_GAME:
-		{
-			if (BOOT_DEBUG) cout << "BOOT: Starting new game." << endl;
-			GlobalCharacter *claud = new GlobalCharacter("Claudius", "claudius", GLOBAL_CLAUDIUS);
-			GlobalManager->AddCharacter(claud);
-			_fade_out = true;
-			VideoManager->FadeScreen(Color::black, 1.0f);
-			break;
-		}
-	case LOAD_GAME:
-		{
-			cout << "BOOT: TEMP: Entering battle mode" << endl;
-			BattleMode *BM = new BattleMode();
-			ModeManager->Pop();
-			ModeManager->Push(BM);
-			break;
-		}
-	case OPTIONS:
-		{
-			_current_menu = &_options_menu;
-			_current_menu_visible = OPTIONS_MENU_VISIBLE;
-			break;
-		}
-	case CREDITS:
-		{
-			cout << "BOOT: TEMP: Viewing credits now!" << endl;
-			break;
-		}
-	case QUIT:
-		{
-			SettingsManager->ExitGame();
-			break;
-		}
-	default:
-		{
-			cerr << "BOOT: ERROR: Invalid selection #" << static_cast<uint32>(selection) << " in main-menu" << endl;
-			break;
-		}
-	}
-
-}
-
-
-// Handles options menu events
-void BootMode::_HandleOptionsMenu(private_boot::OPTIONS_MENU selection) {
-	switch (selection)
-	{
-	case VIDEO_OPTIONS:
-		{
-			_current_menu = &_video_options_menu;
-			_current_menu_visible = VIDEO_OPTIONS_MENU_VISIBLE;
-			_settings_window.Show();
-			break;
-		}
-	case AUDIO_OPTIONS:
-		{
-			_current_menu = &_audio_options_menu;
-			_current_menu_visible = AUDIO_OPTIONS_MENU_VISIBLE;
-			_settings_window.Show();
-			break;
-		}
-	case BACK_OPTIONS:
-		{
-			// Return to the main menu
-			_current_menu = &_main_menu;
-			_current_menu_visible = MAIN_MENU_VISIBLE;
-			break;
-		}
-	default:
-		{
-			cerr << "BOOT: ERROR: Invalid selection #" << static_cast<uint32>(selection) << " in options-menu" << endl;
-			break;
-		}
-	}
-}
-
-
-// Handles video-options menu events
-void BootMode::_HandleVideoOptionsMenu(private_boot::VIDEO_OPTIONS_MENU selection)
+// Main menu handlers
+// 'New Game' confirmed
+void BootMode::OnNewGame()
 {
-	switch (selection)
-	{
-	case FULLWINDOWED_VIDEO_OPTIONS:
-		{
-			VideoManager->ToggleFullscreen();
-			break;
-		}
-	case BACK_VIDEO_OPTIONS:
-		{
-			// Return to the options menu
-			_current_menu = &_options_menu;
-			_current_menu_visible = OPTIONS_MENU_VISIBLE;
-			_settings_window.Hide();
-			break;
-		}
-	default:
-		{
-			cerr << "BOOT: ERROR: Invalid selection #" << static_cast<uint32>(selection) << " in video-options menu" << endl;
-			break;
-		}
-	}
+	if (BOOT_DEBUG)
+		cout << "BOOT: Starting new game." << endl;
+	
+	GlobalCharacter *claud = new GlobalCharacter("Claudius", "claudius", GLOBAL_CLAUDIUS);
+	GlobalManager->AddCharacter(claud);
+	_fade_out = true;
+	VideoManager->FadeScreen(Color::black, 1.0f);
 }
 
 
-// Handles audio-options menu events
-void BootMode::_HandleAudioOptionsMenu(private_boot::AUDIO_OPTIONS_MENU selection)
+// 'Load Game' confirmed
+void BootMode::OnLoadGame()
 {
-	switch (selection)
-	{
-	case BACK_AUDIO_OPTIONS:
-		{
-			// Return to the options menu
-			_current_menu = &_options_menu;
-			_current_menu_visible = OPTIONS_MENU_VISIBLE;
-			_settings_window.Hide();
-			break;
-		}
-	default:
-		{
-			cerr << "BOOT: ERROR: Invalid selection #" << static_cast<uint32>(selection) << " in audio-options menu" << endl;
-			break;
-		}
-	}
+	if (BOOT_DEBUG)
+		cout << "BOOT: Entering battle mode" << endl;
+
+	BattleMode *BM = new BattleMode();
+	ModeManager->Pop();
+	ModeManager->Push(BM);
 }
 
 
-// ****************************************************************************
-// **************************** UPDATE FUNCTIONS ******************************
-// ****************************************************************************
+// 'Options' confirmed
+void BootMode::OnOptions()
+{
+	_current_menu = &_options_menu;
+}
+
+
+// 'Credits' confirmed
+void BootMode::OnCredits()
+{
+	if (BOOT_DEBUG)
+		cout << "BOOT: Viewing credits now!" << endl;
+}
+
+
+// 'Quit' confirmed
+void BootMode::OnQuit()
+{
+	SettingsManager->ExitGame();
+}
+
+
+// 'Video' confirmed	
+void BootMode::OnVideoOptions()
+{
+	_current_menu = &_video_options_menu;
+}
+
+
+// 'Audio' confirmed
+void BootMode::OnAudioOptions()
+{
+	_current_menu = &_audio_options_menu;
+}
 
 
 // This is called once every frame iteration to update the status of the game
@@ -509,82 +359,64 @@ void BootMode::Update() {
 		return;
 	}
 
-	// Update settings window
-	_settings_window.Update(time_elapsed);
+	// Update the menu window
+	BootMenu::UpdateWindow(time_elapsed);
 
 	// A key was pressed -> handle it 
-	// (sounds maybe be added inside these later on (like this: _boot_sounds[2].PlaySound(); )
 	if (InputManager->ConfirmPress()) 
 	{
-		_current_menu->HandleConfirmKey();
+		_current_menu->ConfirmPressed();
+		
+		// Update window status
+		if (_current_menu->IsWindowed())
+		{
+			BootMenu::ShowWindow(true);
+		}
+		else
+		{
+			BootMenu::ShowWindow(false);
+		}
 	}
 	else if (InputManager->LeftPress()) 
 	{
-		_current_menu->HandleLeftKey();
+		_current_menu->LeftPressed();
 	}
 	else if(InputManager->RightPress()) 
 	{
-		_current_menu->HandleRightKey();
+		_current_menu->RightPressed();
 	}
 	else if(InputManager->UpPress())
 	{
-		_current_menu->HandleUpKey();
+		_current_menu->UpPressed();
 	}
 	else if(InputManager->DownPress())
 	{
-		_current_menu->HandleDownKey();
+		_current_menu->DownPressed();
 	}
 	else if(InputManager->CancelPress())
 	{
-		_current_menu->HandleCancelKey();
+		_current_menu->CancelPressed();
+
+		// Go up in the menu hierarchy if possible
+		if (_current_menu->GetParent() != 0)
+		{
+			_current_menu = _current_menu->GetParent();
+
+			// Update window status again
+			if (_current_menu->IsWindowed())
+			{
+				BootMenu::ShowWindow(true);
+			}
+			else
+			{
+				BootMenu::ShowWindow(false);
+			}
+		}
 	}
 
-	// Get the latest event from the current menu
-	int32 event = _current_menu->GetEvent();
-	
-	// Confirm was pressed -> Find out which menu is visible and handle the confirm
-	if (event == VIDEO_OPTION_CONFIRM)
-	{
-		switch (_current_menu_visible)
-		{
-			// Handle main menu confirm
-			case MAIN_MENU_VISIBLE:
-			{
-				this->_HandleMainMenu(static_cast<MAIN_MENU>(_current_menu->GetSelection()));
-				break;
-			}
-			// Handle options menu confirm
-			case OPTIONS_MENU_VISIBLE:
-			{
-				this->_HandleOptionsMenu(static_cast<OPTIONS_MENU>(_current_menu->GetSelection()));
-				break;
-			}
-			// Handle video-options menu confirm
-			case VIDEO_OPTIONS_MENU_VISIBLE:
-			{
-				this->_HandleVideoOptionsMenu(static_cast<VIDEO_OPTIONS_MENU>(_current_menu->GetSelection()));
-				break;
-			}
-			// Handle audio-options menu confirm
-			case AUDIO_OPTIONS_MENU_VISIBLE:
-			{
-				_HandleAudioOptionsMenu(static_cast<AUDIO_OPTIONS_MENU>(_current_menu->GetSelection()));
-				break;
-			}
-
-			default:
-			{
-				cerr << "BOOT: ERROR: Invalid menu #" << static_cast<uint32>(_current_menu_visible) << " visible!" << endl;
-				break;
-			}
-		} // end switch
-	} // end VIDEO_OPTION_CONFIRM
+	// Update menu events
+	_current_menu->GetEvent();	
 }
-
-
-// ****************************************************************************
-// ***************************** DRAW FUNCTIONS *******************************
-// ****************************************************************************
 
 
 // Draws our next frame to the video back buffer
@@ -600,59 +432,10 @@ void BootMode::Draw() {
 	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 	VideoManager->DrawImage(_boot_images[1]);
 
-	// Draw the extra-settings window if it's set visible
-	_settings_window.Draw();
-
-	// Draw the currently visible OptionBox menu
+	// Draw the currently visible menu (and it's window if needed)
 	_current_menu->Draw();
 
 	return;
-}
-
-
-// Draws a window displaying summary info of all the saved games on the system
-void BootMode::_DrawLoadMenu() {
-	cout << "TEMP: DrawLoadMenu() invoked" << endl;
-}
-
-
-// Draws the menu screen for the selected game and displays a confirmation dialogue
-void BootMode::_DrawLoadGame() {
-	cout << "TEMP: DrawLoadGame() invoked." << endl;
-}
-
-// Draws the video options menu.
-void BootMode::_DrawVideoOptions() {
-	//_settings_window.Draw();
-}
-
-// Draws the audio options menu.
-void BootMode::_DrawAudioOptions() {
-	//_settings_window.Draw();
-}
-
-// Draws the language options menu.
-void BootMode::_DrawLanguageOptions() {
-	cout << "TEMP: DrawLanguageOptions() invoked." << endl;
-	// Draw a list of all the languages available.
-}
-
-// Draws the key options menu.
-void BootMode::_DrawKeyOptions() {
-	cout << "TEMP: DrawKeyOptions() invoked." << endl;
-	// Draw a list of all the function->key mappings. I'll need strings for all the keysyms...
-}
-
-// Draws the joystick options menu.
-void BootMode::_DrawJoystickOptions() {
-	cout << "TEMP: DrawJoystickOptions() invoked." << endl;
-	// This will be implemented later.
-}
-
-// Draws the credits menu.
-void BootMode::_DrawCredits() {
-	cout << "TEMP: DrawCredits() invoked." << endl;
-	// Draw a text box with our names and junk. Later will be made into a specify animation.
 }
 
 
