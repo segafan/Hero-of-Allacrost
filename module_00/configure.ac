@@ -13,10 +13,21 @@ AC_PROG_CC
 AC_PROG_INSTALL
 CXXFLAGS="-Werror -Wall"
 
+dnl Check for debugging option
+AC_MSG_CHECKING(whether to enable debugging)
+debug_default="no"
+AC_ARG_ENABLE(debug, [  --enable-debug=[no/yes] will build with debugging capability [default=no]], , enable_debug=$debug_default)
+if test "x$enable_debug" = "xyes"; then
+    AC_MSG_RESULT(yes)
+    CXXFLAGS="$CXXFLAGS -g"
+else
+    AC_MSG_RESULT(no)
+fi
+
 dnl Check for map editor and Qt.
 AC_MSG_CHECKING(whether to enable usage of map editor)
 editor_default="no"
-AC_ARG_ENABLE(editor, [--enable-editor=[no/yes] will build the map editor [default=no]], , enable_editor=$editor_default)
+AC_ARG_ENABLE(editor, [  --enable-editor=[no/yes] will build the map editor [default=no]], , enable_editor=$editor_default)
 if test "x$enable_editor" = "xyes"; then
     AC_MSG_RESULT(yes)
     gw_CHECK_QT

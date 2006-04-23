@@ -106,14 +106,14 @@ modes_SOURCES = \
 	
 if COND_EDITOR
 EDITOR_DIR = src/editor
-EDITOR_BIN = editor
+EDITOR_BIN = allacrost-editor
 AM_CXXFLAGS := $(CXXFLAGS) $(QT_CXXFLAGS)
-BUILT_SOURCES = $(editor_MOC)
+BUILT_SOURCES = $(allacrost_editor_MOC)
 CLEANFILES = $(BUILT_SOURCES)
 $(EDITOR_DIR)%.moc.cpp: $(EDITOR_DIR)%.h
 	$(MOC) -o $@ $<
-editor_MOC = $(EDITOR_DIR)/editor.moc.cpp $(EDITOR_DIR)/grid.moc.cpp
-editor_SOURCES = \
+allacrost_editor_MOC = $(EDITOR_DIR)/editor.moc.cpp $(EDITOR_DIR)/grid.moc.cpp
+allacrost_editor_SOURCES = \
 	$(EDITOR_DIR)/editor_main.cpp \
 	$(EDITOR_DIR)/editor.cpp \
 	$(EDITOR_DIR)/editor.h \
@@ -123,14 +123,14 @@ editor_SOURCES = \
 	$(EDITOR_DIR)/tile.h \
 	$(EDITOR_DIR)/tileset.cpp \
 	$(EDITOR_DIR)/tileset.h \
-	$(editor_MOC) \
+	$(allacrost_editor_MOC) \
 	$(video_SOURCES) \
 	$(ENGINE_DIR)/data.cpp \
 	$(ENGINE_DIR)/data.h \
 	src/defs.h \
 	src/utils.cpp \
 	src/utils.h
-editor_LDADD = $(QT_GUILINK) $(QT_LDADD) -lqt
+allacrost_editor_LDADD = $(QT_GUILINK) $(QT_LDADD) -lqt
 else
 EDITOR_BIN =
 endif
