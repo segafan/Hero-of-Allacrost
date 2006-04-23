@@ -50,7 +50,7 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES =
-@COND_EDITOR_TRUE@am__EXEEXT_1 = editor$(EXEEXT)
+@COND_EDITOR_TRUE@am__EXEEXT_1 = allacrost-editor$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
@@ -73,7 +73,7 @@ am_allacrost_OBJECTS = main.$(OBJEXT) utils.$(OBJEXT) $(am__objects_3) \
 	$(am__objects_4)
 allacrost_OBJECTS = $(am_allacrost_OBJECTS)
 allacrost_LDADD = $(LDADD)
-am__editor_SOURCES_DIST = $(EDITOR_DIR)/editor_main.cpp \
+am__allacrost_editor_SOURCES_DIST = $(EDITOR_DIR)/editor_main.cpp \
 	$(EDITOR_DIR)/editor.cpp $(EDITOR_DIR)/editor.h \
 	$(EDITOR_DIR)/grid.cpp $(EDITOR_DIR)/grid.h \
 	$(EDITOR_DIR)/tile.cpp $(EDITOR_DIR)/tile.h \
@@ -103,15 +103,15 @@ am__editor_SOURCES_DIST = $(EDITOR_DIR)/editor_main.cpp \
 	src/utils.cpp src/utils.h
 @COND_EDITOR_TRUE@am__objects_5 = editor.moc.$(OBJEXT) \
 @COND_EDITOR_TRUE@	grid.moc.$(OBJEXT)
-@COND_EDITOR_TRUE@am_editor_OBJECTS = editor_main.$(OBJEXT) \
+@COND_EDITOR_TRUE@am_allacrost_editor_OBJECTS = editor_main.$(OBJEXT) \
 @COND_EDITOR_TRUE@	editor.$(OBJEXT) grid.$(OBJEXT) \
 @COND_EDITOR_TRUE@	tile.$(OBJEXT) tileset.$(OBJEXT) \
 @COND_EDITOR_TRUE@	$(am__objects_5) $(am__objects_2) \
 @COND_EDITOR_TRUE@	data.$(OBJEXT) utils.$(OBJEXT)
-editor_OBJECTS = $(am_editor_OBJECTS)
+allacrost_editor_OBJECTS = $(am_allacrost_editor_OBJECTS)
 am__DEPENDENCIES_1 =
-@COND_EDITOR_TRUE@editor_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-@COND_EDITOR_TRUE@	$(am__DEPENDENCIES_1)
+@COND_EDITOR_TRUE@allacrost_editor_DEPENDENCIES =  \
+@COND_EDITOR_TRUE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I.
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -124,8 +124,9 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(allacrost_SOURCES) $(editor_SOURCES)
-DIST_SOURCES = $(allacrost_SOURCES) $(am__editor_SOURCES_DIST)
+SOURCES = $(allacrost_SOURCES) $(allacrost_editor_SOURCES)
+DIST_SOURCES = $(allacrost_SOURCES) \
+	$(am__allacrost_editor_SOURCES_DIST)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -333,12 +334,12 @@ modes_SOURCES = \
 
 @COND_EDITOR_TRUE@EDITOR_DIR = src/editor
 @COND_EDITOR_FALSE@EDITOR_BIN = 
-@COND_EDITOR_TRUE@EDITOR_BIN = editor
+@COND_EDITOR_TRUE@EDITOR_BIN = allacrost-editor
 @COND_EDITOR_TRUE@AM_CXXFLAGS := $(CXXFLAGS) $(QT_CXXFLAGS)
-@COND_EDITOR_TRUE@BUILT_SOURCES = $(editor_MOC)
+@COND_EDITOR_TRUE@BUILT_SOURCES = $(allacrost_editor_MOC)
 @COND_EDITOR_TRUE@CLEANFILES = $(BUILT_SOURCES)
-@COND_EDITOR_TRUE@editor_MOC = $(EDITOR_DIR)/editor.moc.cpp $(EDITOR_DIR)/grid.moc.cpp
-@COND_EDITOR_TRUE@editor_SOURCES = \
+@COND_EDITOR_TRUE@allacrost_editor_MOC = $(EDITOR_DIR)/editor.moc.cpp $(EDITOR_DIR)/grid.moc.cpp
+@COND_EDITOR_TRUE@allacrost_editor_SOURCES = \
 @COND_EDITOR_TRUE@	$(EDITOR_DIR)/editor_main.cpp \
 @COND_EDITOR_TRUE@	$(EDITOR_DIR)/editor.cpp \
 @COND_EDITOR_TRUE@	$(EDITOR_DIR)/editor.h \
@@ -348,7 +349,7 @@ modes_SOURCES = \
 @COND_EDITOR_TRUE@	$(EDITOR_DIR)/tile.h \
 @COND_EDITOR_TRUE@	$(EDITOR_DIR)/tileset.cpp \
 @COND_EDITOR_TRUE@	$(EDITOR_DIR)/tileset.h \
-@COND_EDITOR_TRUE@	$(editor_MOC) \
+@COND_EDITOR_TRUE@	$(allacrost_editor_MOC) \
 @COND_EDITOR_TRUE@	$(video_SOURCES) \
 @COND_EDITOR_TRUE@	$(ENGINE_DIR)/data.cpp \
 @COND_EDITOR_TRUE@	$(ENGINE_DIR)/data.h \
@@ -356,7 +357,7 @@ modes_SOURCES = \
 @COND_EDITOR_TRUE@	src/utils.cpp \
 @COND_EDITOR_TRUE@	src/utils.h
 
-@COND_EDITOR_TRUE@editor_LDADD = $(QT_GUILINK) $(QT_LDADD) -lqt
+@COND_EDITOR_TRUE@allacrost_editor_LDADD = $(QT_GUILINK) $(QT_LDADD) -lqt
 allacrost_SOURCES = \
 	src/main.cpp \
 	src/defs.h \
@@ -446,9 +447,9 @@ clean-binPROGRAMS:
 allacrost$(EXEEXT): $(allacrost_OBJECTS) $(allacrost_DEPENDENCIES) 
 	@rm -f allacrost$(EXEEXT)
 	$(CXXLINK) $(allacrost_LDFLAGS) $(allacrost_OBJECTS) $(allacrost_LDADD) $(LIBS)
-editor$(EXEEXT): $(editor_OBJECTS) $(editor_DEPENDENCIES) 
-	@rm -f editor$(EXEEXT)
-	$(CXXLINK) $(editor_LDFLAGS) $(editor_OBJECTS) $(editor_LDADD) $(LIBS)
+allacrost-editor$(EXEEXT): $(allacrost_editor_OBJECTS) $(allacrost_editor_DEPENDENCIES) 
+	@rm -f allacrost-editor$(EXEEXT)
+	$(CXXLINK) $(allacrost_editor_LDFLAGS) $(allacrost_editor_OBJECTS) $(allacrost_editor_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
