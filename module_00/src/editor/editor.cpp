@@ -78,6 +78,8 @@ Editor::Editor() : QMainWindow(0, 0, WDestructiveClose)
 	// create the main widget and layout
 	_ed_widget = new QWidget(this);
 	_ed_layout = new QVBoxLayout(_ed_widget);
+	_ed_scrollview = NULL;
+	_ed_tabs = NULL;
 	setCentralWidget(_ed_widget);
 	resize(600, 400);
 } // Editor constructor
