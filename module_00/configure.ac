@@ -11,7 +11,7 @@ dnl Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_INSTALL
-CXXFLAGS="-Werror -Wall"
+CXXFLAGS="-Wall"
 
 dnl Check for debugging option
 AC_MSG_CHECKING(whether to enable debugging)

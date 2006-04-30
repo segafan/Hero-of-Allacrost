@@ -123,7 +123,7 @@ void MapMode::LoadMap() {
 	VideoManager->PopState();
 
 	// ************* (2) Open data file and begin processing data ***************
-	_map_data.OpenFile("dat/maps/test_01.lua");
+	_map_data.OpenFile("dat/maps/desert_cave.lua");
 	_random_encounters = _map_data.ReadBool("random_encounters");
 	if (_random_encounters) {
 		_encounter_rate = _map_data.ReadInt("encounter_rate");
@@ -302,7 +302,7 @@ void MapMode::LoadMap() {
 	_tile_layers[npc->GetColPosition()][npc->GetRowPosition()].occupied |= npc->GetAltitude();
 
 	SpriteDialogue *sd1 = new SpriteDialogue();
-	sd1->text.push_back(MakeWideString("When is the demo going to be released?"));
+	sd1->text.push_back(MakeWideString("This is not a real demo. There is no spoon."));
 	sd1->speakers.push_back(1); // NPC speaks
 	npc->dialogues.push_back(sd1);
 
@@ -314,7 +314,7 @@ void MapMode::LoadMap() {
 	npc->dialogues.push_back(sd2);
 
 	SpriteDialogue *sd3 = new SpriteDialogue();
-	sd3->text.push_back(MakeWideString("Stop talking to me and get back to work already!"));
+	sd3->text.push_back(MakeWideString("Check out our website at http://www.allacrost.org/"));
 	sd3->speakers.push_back(1); // NPC speaks
 	npc->dialogues.push_back(sd3);
 	
@@ -486,9 +486,9 @@ TileNode* MapMode::_FindNodeInList(const TileCheck& node, list<TileNode> &node_l
 
 // Finds a path for a sprite to take, using the A* algorithm.
 void MapMode::_FindPath(const TileNode& destination, vector<TileNode> &path) {
-	cout << "BEGIN FIND PATH" << endl;
-	cout << "Source: [" << path[0].col << ", " << path[0].row << "]" << endl;
-	cout << "Destination: [" << destination.col << ", " << destination.row << "]" << endl;
+// 	cout << "BEGIN FIND PATH" << endl;
+// 	cout << "Source: [" << path[0].col << ", " << path[0].row << "]" << endl;
+// 	cout << "Destination: [" << destination.col << ", " << destination.row << "]" << endl;
 	
 	// The tiles that we are considering for the next move
 	list<TileNode> open_list;
@@ -695,7 +695,7 @@ void MapMode::_FindPath(const TileNode& destination, vector<TileNode> &path) {
 				best_move = i;
 			}
 		}
-		cout << "> Adding new node to closed list: [" << best_move->col << ", " << best_move->row << "]" << endl;
+		// cout << "> Adding new node to closed list: [" << best_move->col << ", " << best_move->row << "]" << endl;
 		closed_list.push_back(*best_move);
 		open_list.erase(best_move);
 	} // while (destination != end of closed list)

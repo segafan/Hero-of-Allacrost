@@ -67,7 +67,7 @@ MusicBuffer::MusicBuffer(string fname) {
 
 	file_info = ov_info(&file_stream, -1);
 	file_comment = ov_comment(&file_stream, -1);
-	if(file_info->channels == 1)
+	if (file_info->channels == 1)
 		format = AL_FORMAT_MONO16;
 	else
 		format = AL_FORMAT_STEREO16;
