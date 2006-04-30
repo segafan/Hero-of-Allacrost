@@ -79,12 +79,6 @@ _main_menu(0, false, this)
 	                 read_data.ReadFloat("logo_image_height"));
 	_boot_images.push_back(im);
 
-	// The menu
-	im.SetFilename(read_data.ReadString("menu_image"));
-	im.SetDimensions(read_data.ReadFloat("menu_image_width"),
-	                 read_data.ReadFloat("menu_image_height"));
-	_boot_images.push_back(im);
-
 	// Set up a coordinate system - now you can use the boot.lua to set it to whatever you like
 	VideoManager->SetCoordSys(read_data.ReadFloat("coord_sys_x_left"),
 	                          read_data.ReadFloat("coord_sys_x_right"),

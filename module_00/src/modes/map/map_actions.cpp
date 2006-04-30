@@ -70,11 +70,11 @@ void ActionPathMove::Process() {
 		path.push_back(start);
 		sprite->current_map->_FindPath(destination, path);
 		
-		cout << ">>> FOUND PATH <<<" << endl;
-		for (uint32 i = 0; i < path.size(); i++) {
-			cout << "[" << path[i].col << ", " << path[i].row << "] ";
-		}
-		cout << endl;
+// 		cout << ">>> FOUND PATH <<<" << endl;
+// 		for (uint32 i = 0; i < path.size(); i++) {
+// 			cout << "[" << path[i].col << ", " << path[i].row << "] ";
+// 		}
+// 		cout << endl;
 	}
 	
 	if (sprite->row_position > path[current_node].row) {

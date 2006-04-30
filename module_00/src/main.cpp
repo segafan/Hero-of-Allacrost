@@ -367,8 +367,11 @@ int32 main(int32 argc, char *argv[]) {
 	// Disable (hide) the mouse cursor
 	SDL_ShowCursor(SDL_DISABLE);
 
-	// Set the window title + icon
-	SDL_WM_SetCaption("Hero of Allacrost", NULL);
+	// Set the window title and icon name
+	SDL_WM_SetCaption("Hero of Allacrost", "Hero of Allacrost");
+
+	// Set the window icon
+	SDL_WM_SetIcon(SDL_LoadBMP("img/logos/program_icon.bmp"), NULL);
 
 	// Enable unicode for multilingual keyboard support
 	SDL_EnableUNICODE(1);
