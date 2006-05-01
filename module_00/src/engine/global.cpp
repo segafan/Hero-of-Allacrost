@@ -37,12 +37,13 @@ SINGLETON_INITIALIZE(GameGlobal);
 // ******************************* GlobalObject ************************************
 // ****************************************************************************
 
-GlobalObject::GlobalObject(string name, uint8 type, uint32 usable, uint32 id, uint32 count) {
+GlobalObject::GlobalObject(string name, uint8 type, uint32 usable, uint32 id, uint32 count, string icon_path) {
 	obj_name = name;
 	obj_type = type;
 	usable_by = usable;
 	obj_id = id;
 	obj_count = count;
+	_icon_path = icon_path;
 }
 
 
@@ -65,8 +66,8 @@ GlobalObject::~GlobalObject() {
 // ******************************** GlobalItem *************************************
 // ****************************************************************************
 
-GlobalItem::GlobalItem(string name, uint8 use, uint32 usable, uint32 id, uint32 count) :
-	GlobalObject(name, GLOBAL_ITEM, usable, id, count) {
+GlobalItem::GlobalItem(string name, uint8 use, uint32 usable, uint32 id, uint32 count, string icon_path) :
+	GlobalObject(name, GLOBAL_ITEM, usable, id, count, icon_path) {
 	_use_case = use;
 }
 
@@ -85,8 +86,8 @@ GlobalItem::~GlobalItem() {}
 // ******************************* GlobalWeapon ************************************
 // ****************************************************************************
 
-GlobalWeapon::GlobalWeapon(string name, uint32 usable, uint32 id, uint32 count) :
-	GlobalObject(name, GLOBAL_WEAPON, usable, id, count) {
+GlobalWeapon::GlobalWeapon(string name, uint32 usable, uint32 id, uint32 count, string icon_path) :
+	GlobalObject(name, GLOBAL_WEAPON, usable, id, count, icon_path) {
 }
 
 
@@ -104,8 +105,8 @@ GlobalWeapon::~GlobalWeapon() {}
 // ******************************** GlobalArmor ************************************
 // ****************************************************************************
 
-GlobalArmor::GlobalArmor(string name, uint8 type, uint32 usable, uint32 id, uint32 count) :
-	GlobalObject(name, type, usable, id, count) {
+GlobalArmor::GlobalArmor(string name, uint8 type, uint32 usable, uint32 id, uint32 count, string icon_path) :
+	GlobalObject(name, type, usable, id, count, icon_path) {
 }
 
 

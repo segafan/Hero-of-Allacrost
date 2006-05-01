@@ -174,8 +174,8 @@ void MenuMode::Reset() {
 	_bottom_window.Show();
 	
 	// Setup the inventory window
-	_inventory_window.Create(1024, 576);
-	_inventory_window.SetPosition(0, 0);
+	_inventory_window.Create(win_width * 4 + 16, win_height, VIDEO_MENU_EDGE_ALL, VIDEO_MENU_EDGE_BOTTOM);
+	_inventory_window.SetPosition(start_x, start_y);
 	_inventory_window.Show();
 	
 	// Setup OptionBoxes
@@ -292,6 +292,7 @@ void MenuMode::Draw() {
 			_character_window1.Draw();
 			_character_window2.Draw();
 			_character_window3.Draw();
+
 			break;
 		}
 		case SHOW_INVENTORY:
@@ -299,7 +300,12 @@ void MenuMode::Draw() {
 			_inventory_window.Draw();
 		}
 	}
-	
+
+	_DrawBottomMenu();
+}
+
+void MenuMode::_DrawBottomMenu()
+{
 	_bottom_window.Draw();
 	
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
@@ -331,7 +337,6 @@ void MenuMode::Draw() {
 		
 	VideoManager->MoveRelative(50, 0);
 	VideoManager->DrawImage(_location_picture);
-	
 }
 
 //-------------------------------
