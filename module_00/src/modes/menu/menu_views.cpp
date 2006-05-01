@@ -156,25 +156,26 @@ InventoryWindow::InventoryWindow() : _inventory_active(false)
 	/////////////// DELETE THIS ////////////////////////////
 	// ONCE INVENTORY IS ADDING THROUGH THE RIGHT SPOT /////
 	////////////////////////////////////////////////////////
-	GlobalManager->AddItemToInventory(new GlobalItem("Item 1", GLOBAL_ALL_CHARACTERS, GLOBAL_RECOVERY_ITEM, 1, 1));
-	GlobalManager->AddItemToInventory(new GlobalItem("Item 2", GLOBAL_ALL_CHARACTERS, GLOBAL_RECOVERY_ITEM, 2, 4));
-	GlobalManager->AddItemToInventory(new GlobalItem("Item 3", GLOBAL_ALL_CHARACTERS, GLOBAL_RECOVERY_ITEM, 3, 7));
+	GlobalManager->AddItemToInventory(new GlobalItem("Item 1", GLOBAL_ALL_CHARACTERS, GLOBAL_RECOVERY_ITEM, 1, 1, "img/icons/helmet2.png"));
+	GlobalManager->AddItemToInventory(new GlobalItem("Item 2", GLOBAL_ALL_CHARACTERS, GLOBAL_RECOVERY_ITEM, 2, 4, "img/icons/sword.png"));
+	GlobalManager->AddItemToInventory(new GlobalItem("Item 3", GLOBAL_ALL_CHARACTERS, GLOBAL_RECOVERY_ITEM, 3, 7, "img/icons/breastplate.png"));
 	////////////////////////////////////////////////////////
 	/////////////// DELETE THIS ////////////////////////////
 	// ONCE INVENTORY IS ADDING THROUGH THE RIGHT SPOT /////
 	////////////////////////////////////////////////////////
 	
 	// Set up the inventory option box
-	_inventory_items.SetCellSize(150.0f, 50.0f);
+	_inventory_items.SetCellSize(135.0f, 50.0f);
 	// This is dependant on the number of inventory items?
 	// or maybe have blank items.
 	//_inventory_items.SetSize(2, 10);
-	_inventory_items.SetPosition(40.0f, 40.0f);
+	_inventory_items.SetPosition((1024-800)/2.0f, (768-600)/2.0f + 40.0f);
 	_inventory_items.SetFont("default");
 	//_inventory_items.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_inventory_items.SetCursorOffset(-35.0f, -4.0f);
 	_inventory_items.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
 	_inventory_items.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_inventory_items.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	// Get the inventory items
 	vector<GlobalObject *> inv = GlobalManager->GetInventory();
 	
@@ -191,7 +192,7 @@ InventoryWindow::InventoryWindow() : _inventory_active(false)
 		ostringstream os_obj_count;
 		os_obj_count << inv[i]->GetCount();
 		// Add in a bunch of spaces on the end to provide some spacing between columns
-		string inv_item_str = string("<L>") + inv[i]->GetName() + string("<R>") + os_obj_count.str() + string("                       ");		
+		string inv_item_str = string("<") + inv[i]->GetIconPath() + string("><32>") + inv[i]->GetName() + string("<R>") + os_obj_count.str() + string("    ");
 		inv_names.push_back(MakeWideString(inv_item_str));
 	}
 	
@@ -259,6 +260,9 @@ void InventoryWindow::Update()
 	int32 event = _inventory_items.GetEvent();
 	
 	// Take appropriate action based on event!
+	if (event == VIDEO_OPTION_CONFIRM)
+	{
+	}
 }
 
 //-------------------------------------------

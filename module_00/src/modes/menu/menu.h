@@ -185,6 +185,9 @@ private:
 	void _HandleOptionsMenu();
 	void _HandleSaveMenu();
 	//@}
+
+	//! \brief Draw the bottom part of the menu mode.
+	void _DrawBottomMenu();
 	
 	//! The name for the font to be used in the menu
 	std::string _font_name;

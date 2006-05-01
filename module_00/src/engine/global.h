@@ -130,8 +130,10 @@ protected:
 	uint32 obj_id;
 	//! The number of objects contained within this instance.
 	uint32 obj_count;
+	//! The path of the icon for this object, may be null
+	std::string _icon_path;
 public:
-	GlobalObject(std::string name, uint8 type, uint32 usable, uint32 id, uint32 count);
+	GlobalObject(std::string name, uint8 type, uint32 usable, uint32 id, uint32 count, std::string icon_path);
 	GlobalObject();
 	~GlobalObject();
 
@@ -147,6 +149,8 @@ public:
 	void SetID(uint32 id) { obj_id = id; }
 	uint32 GetID() { return obj_id; }
 	uint32 GetCount() { return obj_count; }
+	void SetIconPath(std::string icon_path) { _icon_path = icon_path; }
+	std::string GetIconPath() { return _icon_path; }
 	void SetCount(uint32 amount) { obj_count = amount; if (obj_count < 0) obj_count = 0; }
 	void IncCount(uint32 amount) { obj_count += amount; }
 	void DecCount(uint32 amount) { obj_count -= amount; if (obj_count < 0) obj_count = 0; }
@@ -176,7 +180,7 @@ private:
 	GlobalItem(const GlobalItem&);
 	GlobalItem& operator=(const GlobalItem&);
 public:
-	GlobalItem(std::string name, uint8 use, uint32 usable, uint32 id, uint32 count);
+	GlobalItem(std::string name, uint8 use, uint32 usable, uint32 id, uint32 count, std::string icon_path);
 	GlobalItem();
 	~GlobalItem();
 
@@ -209,7 +213,7 @@ private:
 	GlobalWeapon(const GlobalWeapon&);
 	GlobalWeapon& operator=(const GlobalWeapon&);
 public:
-	GlobalWeapon(std::string name, uint32 usable, uint32 id, uint32 count);
+	GlobalWeapon(std::string name, uint32 usable, uint32 id, uint32 count, std::string icon_path);
 	GlobalWeapon();
 	~GlobalWeapon();
 };
@@ -237,7 +241,7 @@ private:
 	GlobalArmor(const GlobalArmor&);
 	GlobalArmor& operator=(const GlobalArmor&);
 public:
-	GlobalArmor(std::string name, uint8 type, uint32 usable, uint32 id, uint32 count);
+	GlobalArmor(std::string name, uint8 type, uint32 usable, uint32 id, uint32 count, std::string icon_path);
 	GlobalArmor();
 	~GlobalArmor();
 };
