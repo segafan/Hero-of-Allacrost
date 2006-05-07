@@ -305,7 +305,7 @@ private:
 	//! The music that we would like to have available on the map.
 	std::vector<hoa_audio::MusicDescriptor> _map_music;
 	//! The sounds that the map needs available.
-	std::vector<hoa_audio::SoundDescriptor> _map_sound;
+	std::vector<hoa_audio::SoundDescriptor> _map_sounds;
 
 	//! The dialogue menu used by map mode.
 	hoa_video::StillImage _dialogue_menu;

@@ -122,7 +122,7 @@ GameVideo::GameVideo()
 	_lastTexID = 0xFFFFFFFF;
 	_numTexSwitches = 0;
 	_advancedDisplay = false;
-	_fpsDisplay = true;
+	_fpsDisplay = false;
 	_shakeX = 0;
 	_shakeY = 0;
 	_fogColor = Color(1.0f, 1.0f, 1.0f, 1.0f);

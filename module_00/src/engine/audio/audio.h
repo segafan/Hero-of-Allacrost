@@ -155,72 +155,7 @@ class GameAudio {
 	friend class private_audio::MusicBuffer;
 	friend class private_audio::MusicSource;
 	friend class MusicDescriptor;
-private:
-	SINGLETON_DECLARE(GameAudio)
-
-	//! The audio device opened and being operated on by OpenAL.
-	ALCdevice *_device;
-	//! The OpenAL context using the device.
-	ALCcontext *_context;
-
-	//! The volume (gain) for the music source. Valid range is between 0.0f and 1.0f.
-	float _music_volume;
-	//! The volume (gain) for all sound sources. Valid range is between 0.0f and 1.0f.
-	float _sound_volume;
-
-	//! Retains all the errors that have occured on audio-related function calls, except for loading errors.
-	uint32 _audio_errors;
-
-	//! \name Containers for Audio Data
-	//! \brief STL maps are used to hold both music and sounds.
-	//@{
-	std::map<std::string, private_audio::MusicBuffer*> _music_buffers;
-	std::map<std::string, private_audio::SoundBuffer*> _sound_buffers;
-	//@}
-
-	//! The single source reserved for game music.
-	private_audio::MusicSource *_music_source;
-	//! All of the sources that are reserved for sound data.
-	std::list<private_audio::SoundSource*> _sound_sources;
-
-	// //! A map of the audio states we have saved. Probably will never be more than four or five elements.
-	// std::map<uint32, private_audio::AudioState> _saved_states;
-
-	/*! \name Buffer Retrieval Functions
-	 *  \brief Creates and loads new buffer data if the data is not already loaded.
-	 *  \param filename The filename of the file data to search for (not including the pathname or file extension).
-	 *  \return A pointer to the class object holding the new data. NULL may also be returned, indicating an error.
-	 *
-	 *  These functions are critical to ensuring efficient memory usage in the audio engine (in other words:
-	 *  making sure no more than one copy of audio data is loaded into the engine at any given time). When these
-	 *  functions are called, first the map of buffer objects is searched to see if the data is already found
-	 *  in there. If it is, a pointer to that object is returned. Otherwise, the function will attempt to create
-	 *  a new object and store that into the appropriate buffer object map. If that fails for some reason, the function
-	 *  will return NULL.
-	 */
-	//@{
-	private_audio::SoundBuffer* _AcquireSoundBuffer(std::string filename);
-	private_audio::MusicBuffer* _AcquireMusicBuffer(std::string filename);
-	//@}
-
-	/*! \name Source Acquisition Functions
-	 *  \brief Retrieves an audio source that may be used for
-	 *  \return A pointer to a sound source that may be allocated. NULL may also be returned, indicating an error.
-	 */
-	//@{
-	private_audio::SoundSource* _AcquireSoundSource();
-	private_audio::MusicSource* _AcquireMusicSource();
-	//@}
-
-	/*! \name Source Release Functions
-	 *  \brief Releases an audio source from being allocated to a descriptor object.
-	 *  \param free_source A pointer to the audio source to free.
-	 */
-	//@{
-	void _ReleaseSoundSource(private_audio::SoundSource* free_source);
-	void _ReleaseMusicSource(private_audio::MusicSource* free_source);
-	//@}
-
+	
 public:
 	SINGLETON_METHODS(GameAudio);
 
@@ -352,6 +287,73 @@ public:
 
 	//! Prints information related to the system's audio capabilities as seen by OpenAL.
 	void DEBUG_PrintInfo();
+private:
+	SINGLETON_DECLARE(GameAudio)
+
+	//! The audio device opened and being operated on by OpenAL.
+	ALCdevice *_device;
+	//! The OpenAL context using the device.
+	ALCcontext *_context;
+
+	//! The volume (gain) for the music source. Valid range is between 0.0f and 1.0f.
+	float _music_volume;
+	//! The volume (gain) for all sound sources. Valid range is between 0.0f and 1.0f.
+	float _sound_volume;
+
+	//! Retains all the errors that have occured on audio-related function calls, except for loading errors.
+	uint32 _audio_errors;
+
+	//! \name Containers for Audio Data
+	//! \brief STL maps are used to hold both music and sounds.
+	//@{
+	std::map<std::string, private_audio::MusicBuffer*> _music_buffers;
+	std::map<std::string, private_audio::SoundBuffer*> _sound_buffers;
+	//@}
+
+	//! The single source reserved for game music.
+	private_audio::MusicSource *_music_source;
+	//! All of the sources that are reserved for sound data.
+	std::list<private_audio::SoundSource*> _sound_sources;
+
+	// //! A map of the audio states we have saved. Probably will never be more than four or five elements.
+	// std::map<uint32, private_audio::AudioState> _saved_states;
+
+	/*! \name Buffer Retrieval Functions
+	 *  \brief Creates and loads new buffer data if the data is not already loaded.
+	 *  \param filename The filename of the file data to search for (not including the pathname or file extension).
+	 *  \return A pointer to the class object holding the new data. NULL may also be returned, indicating an error.
+	 *
+	 *  These functions are critical to ensuring efficient memory usage in the audio engine (in other words:
+	 *  making sure no more than one copy of audio data is loaded into the engine at any given time). When these
+	 *  functions are called, first the map of buffer objects is searched to see if the data is already found
+	 *  in there. If it is, a pointer to that object is returned. Otherwise, the function will attempt to create
+	 *  a new object and store that into the appropriate buffer object map. If that fails for some reason, the function
+	 *  will return NULL.
+	 */
+	//@{
+	private_audio::SoundBuffer* _AcquireSoundBuffer(std::string filename);
+	private_audio::MusicBuffer* _AcquireMusicBuffer(std::string filename);
+	//@}
+
+	/*! \name Source Acquisition Functions
+	 *  \brief Retrieves an audio source that may be used for
+	 *  \return A pointer to a sound source that may be allocated. NULL may also be returned, indicating an error.
+	 */
+	//@{
+	private_audio::SoundSource* _AcquireSoundSource();
+	private_audio::MusicSource* _AcquireMusicSource();
+	//@}
+
+	/*! \name Source Release Functions
+	 *  \brief Releases an audio source from being allocated to a descriptor object.
+	 *  \param free_source A pointer to the audio source to free.
+	 */
+	//@{
+	void _ReleaseSoundSource(private_audio::SoundSource* free_source);
+	void _ReleaseMusicSource(private_audio::MusicSource* free_source);
+	//@}
+
+
 }; // class GameAudio
 
 } // namespace hoa_audio
