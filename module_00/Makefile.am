@@ -139,8 +139,11 @@ bin_PROGRAMS = allacrost $(EDITOR_BIN)
 
 allacrost_SOURCES = \
 	src/main.cpp \
+	src/main_options.cpp \
+	src/main_options.h \
 	src/defs.h \
 	src/utils.cpp \
 	src/utils.h \
 	$(engine_SOURCES) \
 	$(modes_SOURCES)
+

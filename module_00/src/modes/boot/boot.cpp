@@ -99,11 +99,11 @@ _main_menu(0, false, this)
 	}
 
 	// Push all our new music onto the boot_music vector
-// 	MusicDescriptor new_music;
-// 	for (uint32 i = 0; i < new_music_files.size(); i++) {
-// 		_boot_music.push_back(new_music);
-// 		_boot_music[i].LoadMusic(new_music_files[i]);
-// 	}
+	MusicDescriptor new_music;
+	for (uint32 i = 0; i < new_music_files.size(); i++) {
+		_boot_music.push_back(new_music);
+		_boot_music[i].LoadMusic(new_music_files[i]);
+	}
 
 	SoundDescriptor new_sound;
 	_boot_sounds.push_back(new_sound);
@@ -144,8 +144,9 @@ _main_menu(0, false, this)
 BootMode::~BootMode() {
 	if (BOOT_DEBUG) cout << "BOOT: BootMode destructor invoked." << endl;
 
-	for (uint32 i = 0; i < _boot_music.size(); i++)
+	for (uint32 i = 0; i < _boot_music.size(); i++) {
 		_boot_music[i].FreeMusic();
+	}
 	for (uint32 i = 0; i < _boot_sounds.size(); i++)
 		_boot_sounds[i].FreeSound();
 	for (uint32 i = 0; i < _boot_images.size(); i++)
@@ -156,7 +157,7 @@ BootMode::~BootMode() {
 // Resets appropriate class members.
 void BootMode::Reset() {
 	// Play the intro theme
-	// _boot_music[0].PlayMusic();
+	_boot_music[0].PlayMusic();
 	// Set the coordinate system that BootMode uses
 	VideoManager->SetCoordSys(0, 1024, 0, 768);
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);

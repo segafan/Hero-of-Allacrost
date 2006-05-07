@@ -75,6 +75,10 @@ MapMode::MapMode() {
 MapMode::~MapMode() {
 	if (MAP_DEBUG) cout << "MAP: MapMode destructor invoked" << endl;
 
+	for (uint32 i = 0; i < _map_music.size(); i++) {
+		_map_music[i].FreeMusic();
+	}
+	
 	// Delete all of the tile images
 	for (uint32 i = 0; i < _tile_images.size(); i++) {
 		VideoManager->DeleteImage(*(_tile_images[i]));
@@ -102,11 +106,17 @@ void MapMode::Reset() {
 
 	// Let all map objects know that this is the current map
 	MapObject::current_map = this;
+	
+	_map_music[0].PlayMusic();
 }
 
 
 // Loads the map from a Lua file.
 void MapMode::LoadMap() {
+	
+	_map_music.push_back(MusicDescriptor());
+	_map_music[0].LoadMusic("Seeking_New_Worlds");
+	
 	// *********** (1) Setup GUI items in 1024x768 coordinate system ************
 	VideoManager->PushState();
 	VideoManager->SetCoordSys(0, 1024, 768, 0);

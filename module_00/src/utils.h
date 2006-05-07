@@ -78,10 +78,10 @@ typedef Sint8   int8;
 typedef Uint8   uint8;
 //@}
 
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	const int32 UTILS_SYSTEM_ENDIAN = 1;
+#if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
+	const bool UTILS_SYSTEM_ENDIAN = true;
 #else
-	const int32 UTILS_SYSTEM_ENDIAN = 0;
+	const bool UTILS_SYSTEM_ENDIAN = false;
 #endif
 
 //! Contains utility code used across the entire

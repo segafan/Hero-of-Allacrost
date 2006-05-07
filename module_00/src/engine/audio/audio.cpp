@@ -265,8 +265,10 @@ bool GameAudio::Initialize() {
 		}
 	}
 
-	if (AUDIO_DEBUG) cout << "AUDIO: Allocated " << _sound_sources.size() + 1 << " audio sources." << endl;
-	DEBUG_PrintInfo();
+	if (AUDIO_DEBUG) {
+		cout << "AUDIO: Allocated " << _sound_sources.size() + 1 << " audio sources." << endl;
+		DEBUG_PrintInfo();
+	}
 	return true;
 }
 
