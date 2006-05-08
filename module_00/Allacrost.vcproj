@@ -61,7 +61,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="SDL.lib SDL_TTF.lib SDLMain.lib Opengl32.lib glu32.lib OpenAL32.lib ALut.lib ogg.lib vorbis.lib vorbisfile.lib DevIL.lib ILUT.lib ILU.lib Lua+lib.lib"
+				AdditionalOptions="/NODEFAULTLIB:LIBCMT&#x0D;&#x0A;/NODEFAULTLIB:msvcrt.lib"
+				AdditionalDependencies="SDL.lib SDL_TTF.lib SDLMain.lib Opengl32.lib glu32.lib OpenAL32.lib ALut.lib ogg.lib vorbis.lib vorbisfile_static.lib DevIL.lib ILUT.lib ILU.lib Lua+lib.lib"
 				LinkIncremental="0"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -137,7 +138,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="SDL.lib SDL_TTF.lib SDLMain.lib Opengl32.lib glu32.lib OpenAL32.lib ALut.lib ogg.lib vorbis.lib vorbisfile.lib DevIL.lib ILUT.lib ILU.lib Lua+lib.lib"
+				AdditionalOptions="/NODEFAULTLIB:LIBCMT"
+				AdditionalDependencies="SDL.lib SDL_TTF.lib SDLMain.lib Opengl32.lib glu32.lib OpenAL32.lib ALut.lib ogg.lib vorbis.lib vorbisfile_static.lib DevIL.lib ILUT.lib ILU.lib Lua+lib.lib"
 				LinkIncremental="0"
 				GenerateDebugInformation="false"
 				SubSystem="2"
@@ -257,6 +259,10 @@
 			</File>
 			<File
 				RelativePath=".\src\engine\video\interpolator.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\main_options.h"
 				>
 			</File>
 			<File
@@ -449,6 +455,10 @@
 			</File>
 			<File
 				RelativePath=".\src\main.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\main_options.cpp"
 				>
 			</File>
 			<File
