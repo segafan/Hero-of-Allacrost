@@ -528,7 +528,7 @@ void MenuMode::_SetupOptionBoxCommonSettings(OptionBox *ob)
 {
 	// Set all the default options
 	ob->SetFont(_font_name);
-	ob->SetCellSize(108.0f, 50.0f);
+	ob->SetCellSize(115.0f, 50.0f);
 	ob->SetPosition(102.0f, 515.0f);
 	ob->SetAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	ob->SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -550,7 +550,7 @@ void MenuMode::_SetupMainOptionBox()
 	vector<ustring> options;
 	options.push_back(MakeWideString("Inventory"));
 	options.push_back(MakeWideString("Skills"));
-	options.push_back(MakeWideString("Status\\Equipment"));
+	options.push_back(MakeWideString("Status/Equipment"));
 	options.push_back(MakeWideString("Options"));
 	options.push_back(MakeWideString("Save"));
 	options.push_back(MakeWideString("Exit"));
