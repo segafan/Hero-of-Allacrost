@@ -902,7 +902,7 @@ void GameVideo::Rotate(float acAngle)
 // Scale: scales the coordinate axes by xScale and yScale respectively
 //-----------------------------------------------------------------------------
 
-void Scale(float xScale, float yScale)
+void GameVideo::Scale(float xScale, float yScale)
 {
 #ifndef NDEBUG
 	GLint matrixMode;
