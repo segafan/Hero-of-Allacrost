@@ -248,7 +248,7 @@ void BootMenu::CancelPressed()
 }
 
 
-//! Updates the menu window
+// Updates the menu window
 void BootMenu::UpdateWindow(int32 frameTime)
 {
 	if (_menu_window)
@@ -256,7 +256,7 @@ void BootMenu::UpdateWindow(int32 frameTime)
 }
 
 
-//! Shows or hides the menu window
+// Shows or hides the menu window
 void BootMenu::ShowWindow(bool toggle)
 {
 	if (toggle)
@@ -274,7 +274,7 @@ void BootMenu::InitWindow()
 		_menu_window = new hoa_video::MenuWindow();
 	}
 	_menu_window->Create(1024.0f, 400.0f);
-	_menu_window->SetPosition(0.0f, 576.0f);
+	_menu_window->SetPosition(0.0f, 560.0f);
 	_menu_window->SetDisplayMode(VIDEO_MENU_EXPAND_FROM_CENTER);
 	_menu_window->Hide();
 }

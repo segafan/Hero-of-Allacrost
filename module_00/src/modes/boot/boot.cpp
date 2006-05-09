@@ -16,6 +16,7 @@
 
 #include "utils.h"
 #include <iostream>
+#include <sstream>
 #include "boot.h"
 #include "boot_menu.h"
 #include "audio.h"
@@ -57,14 +58,24 @@ _main_menu(0, false, this)
 
 	mode_type = MODE_MANAGER_BOOT_MODE;
 
+	// No, we're not fading out yet!
 	_fade_out = false;
+
+	// But yes, we want the darned animation already
+	_logo_animating = true;
+	
+	// Sword setup
+	_sword_x = 415.0f;
+	_sword_y = 700.0f;
+	_sword_angle = 90.0f;
+	_sword_scale = 1.0f;
 
 	ReadDataDescriptor read_data;
 	if (!read_data.OpenFile("dat/config/boot.lua")) {
 		cout << "BOOT ERROR: failed to load data file" << endl;
 	}
 
-	// Load the video stuff
+	// Load all the bitmaps using this StillImage
 	StillImage im;
 
 	// The background
@@ -73,10 +84,22 @@ _main_menu(0, false, this)
 	                 read_data.ReadFloat("background_image_height"));
 	_boot_images.push_back(im);
 
-	// The logo
-	im.SetFilename(read_data.ReadString("logo_image"));
-	im.SetDimensions(read_data.ReadFloat("logo_image_width"),
-	                 read_data.ReadFloat("logo_image_height"));
+	// The logo background
+	im.SetFilename(read_data.ReadString("logo_background"));
+	im.SetDimensions(read_data.ReadFloat("logo_background_width"),
+	                 read_data.ReadFloat("logo_background_height"));
+	_boot_images.push_back(im);
+
+	// The big-ass sword of character whopping
+	im.SetFilename(read_data.ReadString("logo_sword"));
+	im.SetDimensions(read_data.ReadFloat("logo_sword_width"),
+	                 read_data.ReadFloat("logo_sword_height"));
+	_boot_images.push_back(im);
+
+	// Logo text
+	im.SetFilename(read_data.ReadString("logo_text"));
+	im.SetDimensions(read_data.ReadFloat("logo_text_width"),
+	                 read_data.ReadFloat("logo_text_height"));
 	_boot_images.push_back(im);
 
 	// Set up a coordinate system - now you can use the boot.lua to set it to whatever you like
@@ -165,9 +188,48 @@ void BootMode::Reset() {
 
 
 // Animates the logo when the boot mode starts up. Should not be called before LoadBootImages.
-void BootMode::_AnimateLogo() {
-	cout << "TEMP: Do nothing" << endl;
-	// Write a series of image moves/rotations to animate the logo here.
+void BootMode::_AnimateLogo(uint32 time_elapsed) {
+
+	// Sequence start times
+	static const uint32 SEQUENCE_ONE = 1000;
+	static const uint32 SEQUENCE_TWO = 1200;
+	static const uint32 SEQUENCE_THREE = 1800;
+	static const uint32 SEQUENCE_FOUR = 2000;
+
+	// Total time in ms
+	static uint32 total_time = 0;
+
+	// sword velocity on the x-axis
+	static float sword_velocity_x = -2.0f;
+
+	// sword velocity on the y-axis
+	static float sword_velocity_y = -2.0f;
+
+	// Get the total time in ms
+	total_time += time_elapsed;
+
+	// Sequence one: unsheathe the sword
+	if (total_time >= SEQUENCE_ONE && total_time < SEQUENCE_TWO)
+	{
+		sword_velocity_x -= 0.05f * time_elapsed;
+		_sword_x += sword_velocity_x;
+	}
+	else if (total_time >= SEQUENCE_TWO && total_time < SEQUENCE_THREE)
+	{
+		_sword_angle += 0.5f * time_elapsed;
+		_sword_x += sword_velocity_x;
+		_sword_y += sword_velocity_y;
+	}
+	if (total_time >= SEQUENCE_FOUR)
+	{
+		_sword_scale = 1.0f;
+		_sword_angle = 0.0f;
+		_sword_x = 762.0f;
+		_sword_y = 578.0f;
+		_logo_animating = false;
+	}
+
+	
 }
 
 
@@ -235,7 +297,7 @@ void BootMode::_SetupMainMenu() {
 
 	// Add all the needed menu options to the main menu
 	_main_menu.AddOption(MakeWideString("New Game"), &BootMode::OnNewGame);
-	_main_menu.AddOption(MakeWideString("Load Game"), &BootMode::OnLoadGame);
+	_main_menu.AddOption(MakeWideString("Battle-Mode"), &BootMode::OnLoadGame);
 	_main_menu.AddOption(MakeWideString("Options"), &BootMode::OnOptions);
 	_main_menu.AddOption(MakeWideString("Credits"), &BootMode::OnCredits);
 	_main_menu.AddOption(MakeWideString("Quit"), &BootMode::OnQuit);
@@ -258,7 +320,11 @@ void BootMode::_SetupOptionsMenu() {
 void BootMode::_SetupVideoOptionsMenu()
 {
 	_video_options_menu.AddOption(MakeWideString("Resolution:"));
-	_video_options_menu.AddOption(MakeWideString("Window mode:"));
+
+	if (VideoManager->IsFullscreen())
+		_video_options_menu.AddOption(MakeWideString("Window mode: full-screen"), &BootMode::OnVideoMode);
+	else
+		_video_options_menu.AddOption(MakeWideString("Window mode: windowed"), &BootMode::OnVideoMode);
 	_video_options_menu.AddOption(MakeWideString("Brightness:"));
 	_video_options_menu.AddOption(MakeWideString("Image quality:"));
 	_video_options_menu.SetWindowed(true);
@@ -269,8 +335,14 @@ void BootMode::_SetupVideoOptionsMenu()
 // Inits the audio-options menu
 void BootMode::_SetupAudioOptionsMenu()
 {
-	_audio_options_menu.AddOption(MakeWideString("Sound Volume:"));
-	_audio_options_menu.AddOption(MakeWideString("Music Volume:"));
+	std::ostringstream sound_volume("");
+	sound_volume << "Sound Volume: " << static_cast<int>(AudioManager->GetSoundVolume() * 100.0f) << " %";
+
+	std::ostringstream music_volume("");
+	music_volume << "Music Volume: " << static_cast<int>(AudioManager->GetMusicVolume() * 100.0f) << " %";
+
+	_audio_options_menu.AddOption(MakeWideString(sound_volume.str()));
+	_audio_options_menu.AddOption(MakeWideString(music_volume.str()));
 	_audio_options_menu.SetWindowed(true);
 	_audio_options_menu.SetParent(&_options_menu);
 }
@@ -338,12 +410,28 @@ void BootMode::OnAudioOptions()
 }
 
 
+// 'Video mode' confirmed
+void BootMode::OnVideoMode()
+{
+	// Toggle fullscreen / windowed
+	VideoManager->ToggleFullscreen();
+	VideoManager->ApplySettings();
+
+	// Change the text accordingly
+	if (VideoManager->IsFullscreen())
+		_video_options_menu.SetOptionText(1, MakeWideString("Window mode: full-screen"));
+	else
+		_video_options_menu.SetOptionText(1, MakeWideString("Window mode: windowed"));
+}
+
+
 // This is called once every frame iteration to update the status of the game
 void BootMode::Update() {
 	uint32 time_elapsed = SettingsManager->GetUpdateTime();
 
 	// Screen is in the process of fading out
-	if (_fade_out) {
+	if (_fade_out)
+	{
 		// When the screen is finished fading to black, create a new map mode and fade back in
 		if (!VideoManager->IsFading()) {
 			MapMode *MM = new MapMode();
@@ -354,12 +442,21 @@ void BootMode::Update() {
 		return;
 	}
 
+	// Main logo is animating at the moment
+	if (_logo_animating)
+	{
+		_AnimateLogo(time_elapsed);
+	}
+
 	// Update the menu window
 	BootMenu::UpdateWindow(time_elapsed);
 
 	// A key was pressed -> handle it 
 	if (InputManager->ConfirmPress()) 
 	{
+		// Play the confirm sound (TODO: Perhaps we shouldn't play this if nothing happened on confirm?)
+		_boot_sounds.at(0).PlaySoundA();
+
 		_current_menu->ConfirmPressed();
 		
 		// Update window status
@@ -395,6 +492,9 @@ void BootMode::Update() {
 		// Go up in the menu hierarchy if possible
 		if (_current_menu->GetParent() != 0)
 		{
+			// Play the cancel sound here
+			_boot_sounds.at(1).PlaySoundA();
+
 			_current_menu = _current_menu->GetParent();
 
 			// Update window status again
@@ -422,10 +522,22 @@ void BootMode::Draw() {
 	VideoManager->SetDrawFlags(VIDEO_NO_BLEND, 0);
 	VideoManager->DrawImage(_boot_images[0]);
 
-	// Draw logo near the top of the screen
-	VideoManager->Move(512, 668);
+	// Draw the logo background
+	VideoManager->Move(512, 648);
 	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 	VideoManager->DrawImage(_boot_images[1]);
+
+	// Draw the sword with it's custom angle and scale
+	VideoManager->Move(_sword_x, _sword_y);
+	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+	VideoManager->Scale(_sword_scale, _sword_scale);
+	VideoManager->Rotate(_sword_angle);
+	VideoManager->DrawImage(_boot_images[2]);
+
+	// Draw the logo text on top of the sword
+	VideoManager->Move(512, 648);
+	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+	VideoManager->DrawImage(_boot_images[3]);
 
 	// Draw the currently visible menu (and it's window if needed)
 	_current_menu->Draw();
