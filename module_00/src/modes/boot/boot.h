@@ -72,6 +72,22 @@ class BootMode : public hoa_mode_manager::GameMode {
 private:
 	//! If true, boot mode is exiting and we have to wait for the screen to finish fading out.
 	bool _fade_out;
+
+	//! If true, the logo is animating (sword flying and so on...)
+	bool _logo_animating;
+
+	//! Sword X coordinate
+	float _sword_x;
+
+	//! Sword X coordinate
+	float _sword_y;
+
+	//! Sword rotation angle
+	float _sword_angle;
+
+	//! Sword scale
+	float _sword_scale;
+
 	//! Music to be used at the boot screen.
 	std::vector<hoa_audio::MusicDescriptor> _boot_music;
 	//! Sounds that will be used at the boot screen.
@@ -104,7 +120,7 @@ private:
 	 *  - The sword spinning up and around a few times (with sound)
 	 *  - The sword slicing down into its final position as a t (with sound)
 	 */
-	void _AnimateLogo();
+	void _AnimateLogo(uint32 time_elapsed);
 
 	/*!
 	 *  \brief Redefines a key to be mapped to another command.
@@ -138,6 +154,9 @@ private:
 	void OnVideoOptions();
 	//! 'Audio' confirmed
 	void OnAudioOptions();
+
+	//! 'Video mode' confirmed
+	void OnVideoMode();
 
 
 
