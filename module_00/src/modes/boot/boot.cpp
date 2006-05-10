@@ -455,7 +455,7 @@ void BootMode::Update() {
 	if (InputManager->ConfirmPress()) 
 	{
 		// Play the confirm sound (TODO: Perhaps we shouldn't play this if nothing happened on confirm?)
-		_boot_sounds.at(0).PlaySoundA();
+		_boot_sounds.at(0).PlaySound();
 
 		_current_menu->ConfirmPressed();
 		
@@ -493,7 +493,7 @@ void BootMode::Update() {
 		if (_current_menu->GetParent() != 0)
 		{
 			// Play the cancel sound here
-			_boot_sounds.at(1).PlaySoundA();
+			_boot_sounds.at(1).PlaySound();
 
 			_current_menu = _current_menu->GetParent();
 
