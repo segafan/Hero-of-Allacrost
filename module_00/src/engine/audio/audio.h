@@ -21,14 +21,13 @@
 #ifndef __AUDIO_HEADER__
 #define __AUDIO_HEADER__
 
+#include <AL/al.h>
+#include <AL/alc.h>
+
 #include "utils.h"
 #include "defs.h"
 #include "audio_sound.h"
 #include "audio_music.h"
-#include <string>
-#include <AL/al.h>
-#include <AL/alc.h>
-#include <AL/alut.h>
 
 namespace hoa_audio {
 
@@ -58,9 +57,9 @@ const uint8 AUDIO_DISTANCE_EXPONENT_CLAMPED = 0x40;
 //@}
 
 //! \name Audio Error Codes
-//@{
 //! \brief These are error codes that the API user can query and handle as they wish.
 //! \note The default distance model is AUDIO_INVERSE_DISTANCE_CLAMPED
+//@{
 const uint32 AUDIO_NO_ERRORS                  = 0x00000000;
 const uint32 AUDIO_OUT_OF_MEMORY              = 0x00000001;
 const uint32 AUDIO_INVALID_OPERATION          = 0x00000002;
@@ -72,8 +71,8 @@ const uint32 AUDIO_SOURCE_ACQUISITION_FAILURE = 0x00000000;
 namespace private_audio {
 
 //! \name {Sound/Music}Descriptor Property Constants
-//@{
 //! \brief Constants used interally to check whether a property is in a default state or not.
+//@{
 const uint16 SOURCE_BAD                = 0x0000;
 const uint16 SOURCE_OK                 = 0x0001;
 const uint16 SOURCE_LOOP               = 0x0002;
@@ -90,13 +89,27 @@ const uint16 SOURCE_CONE_OUTER_ANGLE   = 0x0800;
 const uint16 SOURCE_CONE_OUTER_GAIN    = 0x1000;
 //@}
 
-//! Converts the OpenAL enum error codes into a string.
-std::string GetALErrorString(ALenum err);
-//! Converts the OpenALC enum error codes into a string.
-std::string GetALCErrorString(ALenum err);
-//! Converts the ALUT enum error codes into a string.
-//! \note ALUT provides a function alutGetErrorString that does this, but the precise text description varies between implementations
-std::string GetALUTErrorString(ALenum err);
+/** \brief Converts the OpenAL enum error codes into a string.
+*** \param error_code The error code providing by an OpenAL function.
+*** \return A string with a brief error message.
+**/
+const std::string GetALErrorString(ALenum error_code);
+/** \brief Converts the OpenALC enum error codes into a string.
+*** \param error_code The error code providing by an OpenALC function.
+*** \return A string with a brief error message.
+**/
+const std::string GetALCErrorString(ALenum error_code);
+/** \brief Converts the ALUT enum error codes into a string.
+*** \param error_code The error code providing by a libvorbisfile function.
+*** \return A string with a brief error message.
+*** \note ALUT provides a function alutGetErrorString that does this, but the precise text description varies between implementations
+**/
+const std::string GetALUTErrorString(ALenum error_code);
+/** \brief Gets the error string corresponding to an Ogg Vorbis error code.
+*** \param error_code The error code providing by a libvorbisfile function.
+*** \return A string with a brief error message.
+**/
+const std::string GetOVErrorString(int32 error_code);
 
 /*!****************************************************************************
  * \brief An internal class used for retaining audio state information.
@@ -287,6 +300,7 @@ public:
 
 	//! Prints information related to the system's audio capabilities as seen by OpenAL.
 	void DEBUG_PrintInfo();
+
 private:
 	SINGLETON_DECLARE(GameAudio)
 
@@ -352,10 +366,8 @@ private:
 	void _ReleaseSoundSource(private_audio::SoundSource* free_source);
 	void _ReleaseMusicSource(private_audio::MusicSource* free_source);
 	//@}
-
-
 }; // class GameAudio
 
 } // namespace hoa_audio
 
-#endif
+#endif /* #ifndef __AUDIO_HEADER__ */

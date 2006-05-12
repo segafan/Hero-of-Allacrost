@@ -23,9 +23,7 @@
 
 #include "utils.h"
 #include "defs.h"
-#include <AL/al.h>
-#include <AL/alc.h>
-#include <AL/alut.h>
+#include "audio.h"
 
 namespace hoa_audio {
 
@@ -256,4 +254,4 @@ public:
 
 } // namespace hoa_audio
 
-#endif
+#endif /* #ifndef __AUDIO_SOUND_HEADER__ */

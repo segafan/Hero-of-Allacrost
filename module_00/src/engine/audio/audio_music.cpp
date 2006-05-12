@@ -13,7 +13,6 @@
  * \brief   Source file for music-related code in the audio engine.
  *****************************************************************************/
 
-#include "audio.h"
 #include "audio_music.h"
 
 using namespace std;
@@ -30,6 +29,7 @@ namespace private_audio {
 MusicBuffer::MusicBuffer(string fname) {
 	filename = fname;
 	reference_count = 1;
+	FILE* file_handle = NULL;
 
 	file_handle = fopen(("mus/" + filename + ".ogg").c_str(), "rb");
 	if (file_handle == NULL) {
@@ -39,50 +39,45 @@ MusicBuffer::MusicBuffer(string fname) {
 
 	int32 result;
 	result = ov_open(file_handle, &file_stream, NULL, 0);
-	if (result < 0) {
+	if (result != 0) {
 		fclose(file_handle);
-		cerr << "AUDIO ERROR: Failed to open Vorbig Ogg file: music/" << filename << ".ogg.  Error message: ";
-		switch (result) {
-			case OV_EREAD:
-				cout << "A read from media returned an error." << endl;
-				break;
-			case OV_ENOTVORBIS:
-				cout << "The bitstream is not Vorbis data." << endl;
-				break;
-			case OV_EVERSION:
-				cout << "Vorbis version mismatch." << endl;
-				break;
-			case OV_EBADHEADER:
-				cout << "Invalid Vorbis bitstream header." << endl;
-				break;
-			case OV_EFAULT:
-				cout << "Internal logic fault (possible heap/stack corruption)" << endl;
-				break;
-			default:
-				cout << "Unknown error." << endl;
-				break;
-			}
+		cerr << "AUDIO ERROR: Failed to open Ogg Vorbis file: music/" << filename << ".ogg." << endl;;
+		GetOVErrorString(result);
+// 		reference_count = 0;
 		return;
 	}
 
+	if (ov_info(&file_stream, -1)->channels == 1) {
+		data_format = AL_FORMAT_MONO16;
+	}
+	else {
+		data_format = AL_FORMAT_STEREO16;
+	}
 	file_info = ov_info(&file_stream, -1);
 	file_comment = ov_comment(&file_stream, -1);
-	if (file_info->channels == 1)
-		format = AL_FORMAT_MONO16;
-	else
-		format = AL_FORMAT_STEREO16;
 
-	alGenBuffers(2, buffers);
+	alGenBuffers(MUSIC_BUFFER_COUNT, buffers);
+	ALenum error_code = alGetError();
+	
+	if (error_code != AL_NO_ERROR) {
+		cerr << "AUDIO: error generating music buffers: " << alGetString(error_code) << endl;
+// 		reference_count = 0;
+	}
+	
+	if (AUDIO_DEBUG)
+		DEBUG_PrintProperties();
 }
+
+
 
 MusicBuffer::~MusicBuffer() {
 	if (reference_count != 0) {
 		if (AUDIO_DEBUG) cerr << "AUDIO WARNING: Deleting a music buffer with a non-zero reference count" << endl;
 	}
-	alDeleteBuffers(2, buffers);
+	
+	alDeleteBuffers(MUSIC_BUFFER_COUNT, buffers);
 
-	ov_clear(&file_stream); // This call also closes the file handle
-	file_handle = NULL;
+	ov_clear(&file_stream);
 	file_info = NULL;
 	file_comment = NULL;
 
@@ -90,14 +85,19 @@ MusicBuffer::~MusicBuffer() {
 	AudioManager->_music_buffers.erase(AudioManager->_music_buffers.find(filename));
 }
 
+
+
 bool MusicBuffer::IsValid() {
-	if (alIsBuffer(buffers[0]) == AL_TRUE && alIsBuffer(buffers[1]) == AL_TRUE) {
-		return true;
+	for (uint8 i = 0; i < MUSIC_BUFFER_COUNT; i++) {
+		if (alIsBuffer(buffers[i]) == AL_FALSE) {
+			return false;
+		}
 	}
-	else {
-		return false;
-	}
+	
+	return true;
 }
+
+
 
 // Remove a reference to this buffer object and delete it if there are no more references.
 void MusicBuffer::RemoveReference() {
@@ -107,62 +107,49 @@ void MusicBuffer::RemoveReference() {
 	}
 }
 
+
+
 // Refills the specified buffer with more audio data
-void MusicBuffer::RefillBuffer(ALuint buff) {
+void MusicBuffer::RefillBuffer(ALuint buffer) {
 	char data[MUSIC_BUFFER_SIZE];
 	int32 size = 0;
 	int32 bitstream;
-	int32 result;
+	int32 bytes_read;
 
 	while (size < static_cast<int32>(MUSIC_BUFFER_SIZE)) {
 		// ov_read function args: OggVorbis_File, char* buffer, int buffer_length, endianness (1 = big, 0 = little),
 		//                        int data_size (bytes, 1 or 2), int signed (1 = signed, 0 = unsigned), int* bitstream_number
-		result = ov_read(&file_stream, data + size, MUSIC_BUFFER_SIZE - size, UTILS_SYSTEM_ENDIAN, 2, 1, &bitstream);
-		if (result > 0) {
-			size += result;
+		bytes_read = ov_read(&file_stream, data + size, MUSIC_BUFFER_SIZE - size, UTILS_SYSTEM_ENDIAN, 2, 1, &bitstream);
+		if (bytes_read > 0) {
+			size += bytes_read;
 		}
-		else if (result == 0) { // Indicates EOF
+		else if (bytes_read == 0) { // Indicates end-of-file
 			break;
 		}
-		else { // (result < 0) == error
-			if (AUDIO_DEBUG) cerr << "AUDIO ERROR: Failure while streaming music data into buffer. Error message: ";
-			switch (result) {
-				case OV_EREAD:
-					if (AUDIO_DEBUG) cerr << "read error from ogg file." << endl;
-					break;
-				case OV_ENOTVORBIS:
-					if (AUDIO_DEBUG) cerr << "music file does not contain vorbis data." << endl;
-					break;
-				case OV_EVERSION:
-					if (AUDIO_DEBUG) cerr << "vorbis version mismatch." << endl;
-					break;
-				case OV_EBADHEADER:
-					if (AUDIO_DEBUG) cerr << "invalid vorbis header." << endl;
-					break;
-				case OV_EFAULT:
-					if (AUDIO_DEBUG) cerr << "internal logic fault (possibly heap/stack corruption)." << endl;
-					break;
-				case OV_EINVAL:
-					if (AUDIO_DEBUG) cerr << "invalidation error." << endl;
-					break;
-				default:
-					if (AUDIO_DEBUG) cerr << "unknown ogg error; error code: " << result << endl;
-					break;
+		else { // indicates an error occured
+			if (AUDIO_DEBUG) {
+				cerr << "AUDIO ERROR: Failure while streaming music data into buffer." 
+				     << GetOVErrorString(bytes_read) << endl;
 			}
-			break;
+			return;
 		}
 	}
 
 	if (size == 0) { // No data was buffered, either because of an error or EOF
+// 		cout << "MusicBuffer::RefillBuffer: returning with no audio data buffered" << endl;
 		return;
 	}
-
-	alBufferData(buff, format, data, size, file_info->rate);
-	// Check for OpenAL errors here
+	else {
+// 		cout << "MusicBuffer::RefillBuffer: buffering data to buffer " << buffer << " with " << size << " bytes" << endl;
+		alBufferData(buffer, data_format, data, size, file_info->rate);
+		ALenum error_code = alGetError();
+		if (error_code != AL_NO_ERROR) {
+			cerr << GetALErrorString(error_code) << endl;
+		}
+	}
 }
 
 void MusicBuffer::DEBUG_PrintProperties() {
-	cout << ">>> MusicBuffer Properties <<<" << endl;
 	cout << "Vendor:          " << file_comment->vendor << endl;
 	cout << "Version:         " << file_info->version << endl;
 	cout << "Channels:        " << file_info->channels << endl;
@@ -191,12 +178,16 @@ MusicSource::MusicSource() {
 	}
 }
 
+
+
 // MusicSources are only destroyed by the GameAudio destructor
 MusicSource::~MusicSource() {
 	if (IsValid()) {
 		alDeleteSources(1, &source);
 	}
 }
+
+
 
 bool MusicSource::IsValid() {
 	if (alIsSource(source) == AL_TRUE) {
@@ -207,11 +198,13 @@ bool MusicSource::IsValid() {
 	}
 }
 
+
+
 void MusicSource::EmptyStreamQueue() {
 	int32 number_queued; // The number of buffers queued in the source
 
 	alGetSourcei(source, AL_BUFFERS_QUEUED, &number_queued);
-	while(number_queued > 0) {
+	while (number_queued > 0) {
 		ALuint buff;
 		alSourceUnqueueBuffers(source, 1, &buff);
 		number_queued--;
@@ -219,22 +212,38 @@ void MusicSource::EmptyStreamQueue() {
 	}
 }
 
+
+
 void MusicSource::UpdateStreamQueue() {
 	if (owner == NULL) { // If nothing owns this source, it certainly has no data to stream in
 		return;
 	}
 
-	int32 num_processed;
+	ALint number_buffers; // The number of buffers
+	ALenum error_code;
 
-	alGetSourcei(source, AL_BUFFERS_PROCESSED, &num_processed);
-	while(num_processed > 0) {
-		ALuint buff;
-		alSourceUnqueueBuffers(source, 1, &buff); // Unqueues one of the buffers in the MusicBuffer object
-		num_processed--;
-		// check for errors here
-		owner->_data->RefillBuffer(buff);
-		alSourceQueueBuffers(source, 1, &buff); // Requeues one of the buffers in the Musicbuffer object
-		// check for errors here
+	alGetSourcei(source, AL_BUFFERS_PROCESSED, &number_buffers);
+	while (number_buffers > 0) {
+		ALuint buffer;
+		alSourceUnqueueBuffers(source, 1, &buffer); // Unqueues one of the buffers in the MusicBuffer object
+		number_buffers--;
+		owner->_data->RefillBuffer(buffer);
+		alSourceQueueBuffers(source, 1, &buffer); // Requeues one of the buffers in the Musicbuffer object
+		
+		error_code = alGetError();
+		if (error_code != AL_NO_ERROR) {
+			cerr << GetALErrorString(error_code) << endl;
+		}
+	} // while (number_buffers > 0)
+	
+	alGetSourcei(source, AL_BUFFERS_QUEUED, &number_buffers);
+	
+	if (number_buffers == 0) {
+		cerr << "AUDIO ERROR: no buffers queued!!!" << endl;
+// 		for (uint32 i = 0; i < MUSIC_BUFFER_COUNT; i++) {
+// 			owner->_data->RefillBuffer(owner->_data->buffers[0]);
+// 			alSourceQueueBuffers(source, 1, &(owner->_data->buffers)); // Requeues one of the buffers in the Musicbuffer object
+// 		}
 	}
 }
 
@@ -258,6 +267,7 @@ MusicDescriptor::~MusicDescriptor() {
 		_data->RemoveReference();
 		_data = NULL;
 	}
+	
 	// TODO: Fix me later
 	if (_origin != NULL) {
 		_origin = NULL;
@@ -267,15 +277,19 @@ MusicDescriptor::~MusicDescriptor() {
 
 
 bool MusicDescriptor::LoadMusic(std::string fname) {
+	// If the music descriptor is using buffered audio data, reset the audio data reference.
 	if (_data != NULL) {
 		_data->RemoveReference();
 		_data = NULL;
 	}
+	
 	_data = AudioManager->_AcquireMusicBuffer(fname);
 	if (_data == NULL) {
 		return false;
 	}
-	return true;
+	else {
+		return true;
+	}
 }
 
 
@@ -283,9 +297,9 @@ bool MusicDescriptor::LoadMusic(std::string fname) {
 void MusicDescriptor::FreeMusic() {
 	if (_origin != NULL) {
 		StopMusic();
-		ALuint buff;
-		alSourceUnqueueBuffers(_origin->source, 1, &buff);
-		alSourceUnqueueBuffers(_origin->source, 1, &buff);
+		ALuint buffer;
+		alSourceUnqueueBuffers(_origin->source, 1, &buffer);
+		alSourceUnqueueBuffers(_origin->source, 1, &buffer);
 		_origin->owner = NULL; // Releases hold of the source
 		_origin = NULL; // To make sure we don't try to use the source again
 	}
@@ -330,10 +344,11 @@ void MusicDescriptor::PlayMusic() {
 		return;
 	}
 
-	_data->RefillBuffer(_data->buffers[0]);
-	_data->RefillBuffer(_data->buffers[1]);
+	for (uint32 i = 0; i < MUSIC_BUFFER_COUNT; i++) {
+		_data->RefillBuffer(_data->buffers[i]);
+	}
 
-	alSourceQueueBuffers(_origin->source, 2, _data->buffers);
+	alSourceQueueBuffers(_origin->source, MUSIC_BUFFER_COUNT, _data->buffers);
 	alSourcePlay(_origin->source);
 }
 
