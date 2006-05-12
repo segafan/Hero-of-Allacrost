@@ -470,7 +470,7 @@ void Editor::_TileDatabase()
 
 void Editor::_HelpHelp()
 {
-	_stat_bar->message(QString("Put URL to online editor docs here"), 5000);
+	_stat_bar->message(QString("See http://allacrost.sourceforge.net/wiki/index.php/Code_Documentation#Map_Editor_Documentation for more details"), 10000);
 } // _HelpHelp()
 
 void Editor::_HelpAbout()
@@ -478,7 +478,7 @@ void Editor::_HelpAbout()
     QMessageBox::about(this, "HoA Level Editor -- About",
 		"<center><h1><font color=blue>Hero of Allacrost Level Editor<font>"
 		"</h1></center>"
-		"<center><h2><font color=blue>Copyright (c) 2004<font></h2></center>"
+		"<center><h2><font color=blue>Copyright (c) 2004-2006<font></h2></center>"
 		"<p>A level editor created for the Hero of Allacrost project."
 		" See 'http://www.allacrost.org/' for more details</p>");
 } // _HelpAbout()
@@ -591,8 +591,8 @@ void Editor::_GenerateDatabase()
 		// Add default properties to individual tiles.
 		write_data.WriteComment("Properties of all possible tiles (valid range: 0-255, non-zero being walkable)");
 		write_data.BeginTable("tile_properties");
-		for (uint32 i = 1; i < tile_dir.count(); i++)
-			write_data.WriteInt(i, 255);
+		for (uint32 i = 0; i < tile_dir.count(); i++)
+			write_data.WriteInt(i+1, 255);
 		write_data.EndTable();
 		write_data.InsertNewLine();
 
@@ -1044,7 +1044,7 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, const QString& name)
 	: QTabDialog(parent, (const char*) name)
 {
 	setCaption("Tile Database...");
-	resize(500, 500);
+	resize(600, 500);
 
 	QDir tileset_dir("dat/tilesets");    // tileset directory
 
@@ -1071,7 +1071,7 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, const QString& name)
 			if (tileset_dir[i].contains("tileset") != 0)
 				tilesets_cbox->insertItem(tileset_dir[i].remove("tileset_").remove(".lua"));
 		} // looks for tileset files in the tileset directory
-		connect(tilesets_cbox, SIGNAL(activated(const QString&)), this, SLOT(_PopulateTileset(const QString&)));
+		connect(tilesets_cbox, SIGNAL(activated(const QString&)), this, SLOT(_TilesetsTabPopulateTileset(const QString&)));
 
 		// Create a QLineEdit and a QLabel for it.
 		_tileset_ledit        = new QLineEdit(tilesets_widget, "tileset_ledit");
@@ -1090,8 +1090,8 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, const QString& name)
 		_all_tiles->setItemsMovable(false);
 		_mod_tileset->setItemsMovable(false);
 		_mod_tileset->setSorting(true);
-		_all_tiles->setMaxItemWidth(300);
-		_mod_tileset->setMaxItemWidth(300);
+		_all_tiles->setGridX(300);
+		_mod_tileset->setGridX(300);
 		_mod_tileset->setAcceptDrops(true);
 
 		// Populate the QIconView for the global tileset.
@@ -1118,7 +1118,7 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, const QString& name)
 		connect(add_tile_pbut, SIGNAL(clicked()), this, SLOT(_AddTile()));
 		connect(del_tile_pbut, SIGNAL(clicked()), this, SLOT(_DelTile()));
 
-		// Create a QGridLayout amd add all the created widgets to it.
+		// Create a QGridLayout and add all the created widgets to it.
 		QGridLayout* tilesets_tab = new QGridLayout(tilesets_widget, 4, 2, 5);
 		tilesets_tab->addWidget(tilesets_label, 0, 0);
 		tilesets_tab->addWidget(tilesets_cbox, 0, 1);
@@ -1135,8 +1135,74 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, const QString& name)
 		// ***************************************************
 		// End of Tilesets tab creation.
 		// ***************************************************
+		
+		// ***************************************************
+		// The following creates the Properties tab of the Tile Database manager dialog.
+		// ***************************************************
 
-		// TODO: add other tab here
+		// Create a widget to put inside a tab of the dialog.
+		QWidget* properties_widget = new QWidget(this);
+
+		// Create a QLabel for a read-only QComboBox (drop-down list) and add all existing tilesets, and connect it to a slot.
+		QComboBox* proptsets_cbox  = new QComboBox(false, properties_widget, "proptsets_cbox");
+		proptsets_cbox->insertItem("Select Tileset...");
+		for (uint32 i = 0; i < tileset_dir.count(); i++)
+		{
+			if (tileset_dir[i].contains("tileset") != 0)
+				proptsets_cbox->insertItem(tileset_dir[i].remove("tileset_").remove(".lua"));
+		} // looks for tileset files in the tileset directory
+		connect(proptsets_cbox, SIGNAL(activated(const QString&)), this, SLOT(_PropertiesTabPopulateTileset(const QString&)));
+
+		// Create QIconView and set up its properties appropriately.
+		_prop_tileset = new QIconView(properties_widget, "prop_tileset_iview");
+		_prop_tileset->setItemTextPos(QIconView::Right);
+		_prop_tileset->setSelectionMode(QIconView::Single);
+		_prop_tileset->setWordWrapIconText(false);
+		_prop_tileset->setItemsMovable(false);
+		_prop_tileset->setSorting(true);
+		_prop_tileset->setGridX(300);
+		connect(_prop_tileset, SIGNAL(currentChanged(QIconViewItem *)), this, SLOT(_ProcessWalkability(QIconViewItem *)));
+		_tile_index = 0;    // no changes made yet
+
+		// Create the walkability checkboxes and add them to a QVBoxLayout.
+		QVButtonGroup* checkboxes = new QVButtonGroup("Walkability", properties_widget, "checkboxes");
+		_allwalk_checkbox = new QCheckBox("All", checkboxes, "allwalk_checkbox");
+		for (uint32 i = 0; i < 8; i++)
+			_walk_checkbox[i] = new QCheckBox(QString("Level %1").arg(i+1), checkboxes, QString("walk_checkbox[%1]").arg(i));
+		connect(_allwalk_checkbox, SIGNAL(toggled(bool)), this, SLOT(_ToggleWalkCheckboxes(bool)));
+
+		// Create the animation stuff. FIXME
+		QLabel* anim_label = new QLabel("Placeholder for animation settings", properties_widget, "anim_label");
+
+		// Create a QGridLayout and add all the created widgets to it.
+		QGridLayout* properties_tab = new QGridLayout(properties_widget, 2, 3, 5);
+		properties_tab->addWidget(proptsets_cbox,  0, 0);
+		properties_tab->addWidget(_prop_tileset,   1, 0);
+		properties_tab->addWidget(checkboxes,      1, 1);
+		properties_tab->addWidget(anim_label,      1, 2);
+
+		// Insert the tab into the dialog window.
+		addTab(properties_widget, "Properties");
+
+		// Initialize the _tile_properties array.
+		_tile_properties.clear();
+		// Read from global database to get the properties.
+		if (!read_data.OpenFile(QString("dat/tilesets/tiles_database.lua")))
+			QMessageBox::warning(this, "Tiles Database",
+				QString("ERROR: could not open dat/tilesets/tiles_database.lua for reading!"));
+		else
+		{
+			read_data.OpenTable("tile_properties");
+			uint32 table_size = read_data.GetTableSize();
+			for (uint32 i = 0; i < table_size; i++)
+				_tile_properties.push_back(read_data.ReadInt(i+1));
+			read_data.CloseTable();
+			read_data.CloseFile();
+		} // file was successfully opened
+		
+		// ***************************************************
+		// End of Properties tab creation.
+		// ***************************************************
 	} // tile image directory exists
 
 	// Create a Cancel button and connect the OK button to a useful slot.
@@ -1154,8 +1220,12 @@ DatabaseDialog::~DatabaseDialog()
 
 void DatabaseDialog::_UpdateData()
 {
+	// ***************************************************
+	// Saves data related to the Tilesets tab.
+	// ***************************************************
+	
 	// Assume if there is text in the QLineEdit then a modification has been made.
-	if (_tileset_ledit->text() != NULL)
+	if (_tileset_ledit->text() != NULL && _tileset_ledit->text() != "")
 	{
 		WriteDataDescriptor write_data;
 		if (!write_data.OpenFile(QString("dat/tilesets/tileset_%1.lua").arg(_tileset_ledit->text())))
@@ -1177,6 +1247,49 @@ void DatabaseDialog::_UpdateData()
 			write_data.CloseFile();
 		} // file was successfully opened
 	} // only if the QLineEdit is not empty
+
+	// ***************************************************
+	// End of saving data related to the Tilesets tab.
+	// ***************************************************
+	
+	// ***************************************************
+	// Saves data related to the Properties tab.
+	// ***************************************************
+	
+	// User might change some properties then immediately click Ok.
+	_ProcessWalkability(_prop_tileset->currentItem());
+	
+	QDir tile_dir("img/tiles/", "*.png");			// tile set directory
+	WriteDataDescriptor write_data;
+	if (!write_data.OpenFile("dat/tilesets/tiles_database.lua"))
+		QMessageBox::warning(this, "Tiles Database", "ERROR: could not open dat/tilesets/tiles_database.lua for writing!");
+	else
+	{
+		write_data.WriteComment("File: tiles_database.lua");
+		write_data.InsertNewLine();
+
+		// Add individual tiles to the database.
+		write_data.WriteComment("Names of all possible tile image files, with the path and file extension omitted (note that the indeces begin with 1, not 0)");
+		write_data.BeginTable("tile_filenames");
+		for (uint32 i = 0; i < tile_dir.count(); i++)
+			write_data.WriteString(i+1, tile_dir[i].remove(".png").ascii());
+		write_data.EndTable();
+		write_data.InsertNewLine();
+
+		// Writes new properties to individual tiles.
+		write_data.WriteComment("Properties of all possible tiles (valid range: 0-255, non-zero being walkable)");
+		write_data.BeginTable("tile_properties");
+		for (uint32 i = 0; i < tile_dir.count(); i++)
+			write_data.WriteInt(i+1, _tile_properties[i]);
+		write_data.EndTable();
+		write_data.InsertNewLine();
+
+		write_data.CloseFile();
+	} // file was opened successfully
+	
+	// ***************************************************
+	// End of saving data related to the Properties tab.
+	// ***************************************************
 } // _UpdateData()
 
 void DatabaseDialog::_AddTile()
@@ -1184,20 +1297,98 @@ void DatabaseDialog::_AddTile()
 	// Only add new tile if it doesn't already exist in the new tileset.
 	if (_mod_tileset->findItem(_all_tiles->currentItem()->text(), Qt::ExactMatch) == 0)
 		(void) new QIconViewItem(_mod_tileset, _all_tiles->currentItem()->text(), *_all_tiles->currentItem()->pixmap());
-} // _UpdateData()
+} // _AddTile()
 
 void DatabaseDialog::_DelTile()
 {
 	delete _mod_tileset->currentItem();
-} // _UpdateData()
+} // _DelTile()
 
-void DatabaseDialog::_PopulateTileset(const QString& name)
+void DatabaseDialog::_TilesetsTabPopulateTileset(const QString& name)
 {
 	if (name != "New Tileset" && name != "Select Tileset...")
 	{
 		// Fill in the QLineEdit.
 		_tileset_ledit->setText(name);
 
+		// Do the populating.
+		_PopulateTilesetHelper(_mod_tileset, name);
+	} // no populating necessary otherwise
+} // _TilesetsTabPopulateTileset(...)
+
+void DatabaseDialog::_PropertiesTabPopulateTileset(const QString& name)
+{
+	if (name != "Select Tileset...")
+		_PopulateTilesetHelper(_prop_tileset, name);
+} // _PropertiesTabPopulateTileset(...)
+
+void DatabaseDialog::_ProcessWalkability(QIconViewItem* item)
+{
+	if (item != NULL)
+	{
+		if (_tile_index != 0)
+		{
+			// Record the new walkability options.
+			_tile_properties[_tile_index-1] = 0;
+			for (uint8 i = 0; i < 8; i++)
+				if (_walk_checkbox[i]->isChecked())
+					_tile_properties[_tile_index-1] |= (1 << i);
+		} // must have made some changes in order to record them
+		
+		// Read from global database to get property of item.
+		ReadDataDescriptor read_data;
+		if (!read_data.OpenFile(QString("dat/tilesets/tiles_database.lua")))
+			QMessageBox::warning(this, "Tiles Database", "ERROR: could not open dat/tilesets/tiles_database.lua for reading!");
+		else
+		{
+			read_data.OpenTable("tile_filenames");
+			uint32 table_size = read_data.GetTableSize();
+			_tile_index = 0;
+			QString filename = "";
+			while (filename != item->text().remove(".png") && _tile_index < table_size)
+			{
+				_tile_index++;
+				filename = read_data.ReadString(_tile_index);
+			} // find index of current tile in the database
+			read_data.CloseTable();
+			read_data.CloseFile();
+			if (filename == item->text().remove(".png"))
+			{
+				if (_tile_properties[_tile_index-1] == 255)
+					_allwalk_checkbox->setChecked(true);
+				else
+					_allwalk_checkbox->setChecked(false);
+
+				for (uint8 i = 0; i < 8; i++)
+					if ((1 << i) & _tile_properties[_tile_index-1])
+						_walk_checkbox[i]->setChecked(true);
+					else
+						_walk_checkbox[i]->setChecked(false);
+			} // tile exists in the database
+		} // file was successfully opened
+	} // nothing to do otherwise
+} // _ProcessWalkability(...)
+
+void DatabaseDialog::_ToggleWalkCheckboxes(bool on)
+{
+	if (on)
+		for (uint8 i = 0; i < 8; i++)
+			_walk_checkbox[i]->setChecked(true);
+	else
+		for (uint8 i = 0; i < 8; i++)
+			_walk_checkbox[i]->setChecked(false);
+} // _ToggleWalkCheckboxes(...)
+
+
+
+// ********** Private function **********
+
+void DatabaseDialog::_PopulateTilesetHelper(QIconView *tileset, const QString& name)
+{
+	if (tileset != NULL)
+	{
+		tileset->clear();
+		
 		// Read from tileset Lua file to populate the QIconView.
 		ReadDataDescriptor read_data;
 		if (!read_data.OpenFile(QString("dat/tilesets/tileset_%1.lua").arg(name)))
@@ -1210,10 +1401,10 @@ void DatabaseDialog::_PopulateTileset(const QString& name)
 			for (uint32 i = 1; i <= table_size; i++)
 			{
 				QString filename = read_data.ReadString(i);
-				(void) new QIconViewItem(_mod_tileset, filename, QPixmap("img/tiles/" + filename.append(".png")));
+				(void) new QIconViewItem(tileset, filename, QPixmap("img/tiles/" + filename.append(".png")));
 			} // iterates through all tiles in the tileset
 			read_data.CloseTable();
 			read_data.CloseFile();
 		} // file was successfully opened
 	} // no populating necessary otherwise
-} // _UpdateData()
+} // _PopulateTilesetHelper()

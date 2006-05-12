@@ -43,6 +43,7 @@
 #include <qstringlist.h>
 #include <qtabdialog.h>
 #include <qtabwidget.h>
+#include <qvbuttongroup.h>
 
 //! All calls to the editor are wrapped in this namespace.
 namespace hoa_editor
@@ -270,17 +271,47 @@ class DatabaseDialog: public QTabDialog
 		void _AddTile();
 		//! Deletes a tile from a tileset.
 		void _DelTile();
-		//! Draws the tileset specified onto the window.
+		//! Draws the tileset specified onto the window in the Tilesets tab.
+		//! \note Also modifies the QLineEdit in the Tilesets tab.
 		//! \param name Name of the tileset to draw.
-		void _PopulateTileset(const QString& name);
+		void _TilesetsTabPopulateTileset(const QString& name);
+		//! Draws the tileset specified onto the window in the Properties tab.
+		//! \param name Name of the tileset to draw.
+		void _PropertiesTabPopulateTileset(const QString& name);
+		//! Reads and saves the walkable checkboxes according to the current
+		//! selection of the QIconView tileset in the Properties tab.
+		//! \param item Selected item in the tileset to check walkability.
+		void _ProcessWalkability(QIconViewItem *item);
+		//! Uses a single checkbox to toggle the remaining walkable checkboxes.
+		//! \param on True if the single checkbox is on, False otherwise.
+		void _ToggleWalkCheckboxes(bool on);
 
 	private:
-		//! Lists all available tiles to create new tileset.
+		//! Populates the tileset specified by one of the 2 PopulateTileset slots.
+		//! \param tileset Pointer to the tileset to draw.
+		//! \param name Name of the tileset to draw.
+		void _PopulateTilesetHelper(QIconView *tileset, const QString& name);
+		
+		//! Lists all available tiles to create new tileset in the Tilesets tab.
 		QIconView* _all_tiles; 
-		//! Lists tiles added to new/modified tileset.
+		//! Lists tiles added to new/modified tileset in the Tilesets tab.
 		QIconView* _mod_tileset; 
-		//! Editable name of the tileset.
+		//! Previously selected tile in the tileset of the Properties tab.
+		QIconViewItem* _prev_ivitem; 
+		//! Lists tiles in selected tileset in the Properties tab.
+		QIconView* _prop_tileset; 
+		//! Stores index into _tile_properties of previously selected tile in
+		//! tileset in the Properties tab.
+		uint32 _tile_index; 
+		//! Vector of global tile properties from tiles_database.lua. Used in the
+		//! Properties tab.
+		std::vector<uint8> _tile_properties; 
+		//! Editable name of the tileset in the Tilesets tab.
 		QLineEdit* _tileset_ledit; 
+		//! A checkbox capable of toggling all the other walkable checkboxes of the Properties tab.
+		QCheckBox* _allwalk_checkbox;
+		//! Array of walkability checkboxes of selected tile in the tileset of the Properties tab.
+		QCheckBox* _walk_checkbox[8];
 }; // class DatabaseDialog
 
 } // namespace hoa_editor
