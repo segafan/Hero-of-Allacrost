@@ -31,13 +31,20 @@
 #ifndef __DEFS_HEADER__
 #define __DEFS_HEADER__
 
-
 // Audio declarations, see audio.h/cpp
 namespace hoa_audio {
 	extern bool AUDIO_DEBUG;
 	class GameAudio;
 	class MusicDescriptor;
 	class SoundDescriptor;
+	
+	namespace private_audio {
+		class AudioState;
+		class MusicBuffer;
+		class MusicSource;
+		class SoundBuffer;
+		class SoundSource;
+	}
 }
 
 // Video declarations, see video.h/cpp
@@ -165,4 +172,4 @@ namespace hoa_utils {
 	extern bool UTILS_DEBUG;
 }
 
-#endif
+#endif /* #ifndef __DEFS_HEADER__ */

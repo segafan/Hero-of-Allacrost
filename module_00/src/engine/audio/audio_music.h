@@ -23,22 +23,22 @@
 #ifndef __AUDIO_MUSIC_HEADER__
 #define __AUDIO_MUSIC_HEADER__
 
+#include <vorbis/codec.h>
+#include <vorbis/vorbisfile.h>
+
 #include "utils.h"
 #include "defs.h"
-#include <AL/al.h>
-#include <AL/alc.h>
-#include <AL/alut.h>
-#include <ogg/ogg.h>
-#include <vorbis/codec.h>
-#include <vorbis/vorbisenc.h>
-#include <vorbis/vorbisfile.h>
+#include "audio.h"
 
 namespace hoa_audio {
 
 namespace private_audio {
 
-//! The size (in bytes) to make
+//! The size (in bytes) of music buffers.
 const uint32 MUSIC_BUFFER_SIZE = 32768;
+
+//! The number of OpenAL buffers to use for each piece of music.
+const uint32 MUSIC_BUFFER_COUNT = 2;
 
 /*!****************************************************************************
  * \brief An internal class used to manage music data information.
@@ -57,22 +57,20 @@ public:
 
 	//! The filename of the audio data the buffer holds.
 	std::string filename;
-	//! The number of MusicDescriptor objects that refer to this object
+	//! The number of MusicDescriptor objects that refer to this MusicBuffer object.
 	uint8 reference_count;
 
-	//! File pointer used by vorbis ogg calls
-	FILE* file_handle;
-	//! A handle for the streaming ogg data
+	//! A structure that defines the Ogg Vorbis file.
 	OggVorbis_File file_stream;
-	//! Various data about the open vorbis file.
+	//! A pointer to a container for various information about the open Ogg Vorbis file.
 	vorbis_info* file_info;
-	//! Comments left in the file by its creator.
+	//! A pointer to a structure containing comments left in the Ogg Vorbis file.
 	vorbis_comment* file_comment;
 
 	//! The buffers which will hold the streaming ogg data.
-	ALuint buffers[2];
-	//! Format for the data (number of channels and bit-width).
-	ALenum format;
+	ALuint buffers[MUSIC_BUFFER_COUNT];
+	//! Represents the format of the Ogg Vorbis data (the number of channels and the bit-width).
+	ALenum data_format;
 
 	//! Returns true if all OpenAL buffers are valid.
 	bool IsValid();
@@ -100,7 +98,7 @@ public:
 	bool IsValid();
 	//! Removes all pending buffers from the source.
 	void EmptyStreamQueue();
-	//! Updates the buffers that are being stream-fed data for the source to output.
+	//! Updates the buffers that are streaming data for the source to output.
 	void UpdateStreamQueue();
 	//! Displays the properties of the music source to standard output.
 	void DEBUG_PrintProperties() {}
@@ -160,4 +158,4 @@ public:
 
 } // namespace hoa_audio
 
-#endif
+#endif /* #ifndef __AUDIO_MUSIC_HEADER__ */

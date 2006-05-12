@@ -13,8 +13,12 @@
  * \brief   Source file for audio engine interface.
  *****************************************************************************/
 
+#include <AL/alut.h>
+#include <vorbis/codec.h>
+
 #include "audio.h"
-#include "data.h"
+#include "audio_sound.h"
+#include "audio_music.h"
 
 using namespace std;
 using namespace hoa_utils;
@@ -29,124 +33,123 @@ SINGLETON_INITIALIZE(GameAudio);
 namespace private_audio {
 
 // Returns an error string corresponding to a particular error code
-string GetALErrorString(ALenum err) {
-	switch (err) {
+const string GetALErrorString(ALenum error_code) {
+	switch (error_code) {
 		case AL_INVALID_NAME:
 			return "AL_INVALID_NAME";
-			break;
 		case AL_INVALID_ENUM:
 			return "AL_INVALID_ENUM";
-			break;
 		case AL_INVALID_VALUE:
 			return "AL_INVALID_VALUE";
-			break;
 		case AL_INVALID_OPERATION:
 			return "AL_INVALID_OPERATION";
-			break;
 		case AL_OUT_OF_MEMORY:
 			return "AL_OUT_OF_MEMORY";
-			break;
 		default:
 			return "AL_NO_ERROR";
-	}
-}
+	} // switch (error_code)
+} // const string GetALErrorString(ALenum error_code)
 
 // Returns an error string corresponding to a particular error code
-string GetALCErrorString(ALenum err) {
-	switch (err) {
+const string GetALCErrorString(ALenum error_code) {
+	switch (error_code) {
 		case ALC_INVALID_DEVICE:
 			return "ALC_INVALID_DEVICE";
-			break;
 		case ALC_INVALID_CONTEXT:
 			return "ALC_INVALID_CONTEXT";
-			break;
 		case ALC_INVALID_ENUM:
 			return "ALC_INVALID_ENUM";
-			break;
 		case ALC_INVALID_VALUE:
 			return "ALC_INVALID_VALUE";
-			break;
 		case ALC_OUT_OF_MEMORY:
 			return "ALC_OUT_OF_MEMORY";
-			break;
 		default:
 			return "AL_NO_ERROR";
-	}
-}
+	} // switch (error_code)
+} // const string GetALCErrorString(ALenum error_code)
 
 // Returns an error string corresponding to a particular error code
-string GetALUTErrorString(ALenum err) {
+const string GetALUTErrorString(ALenum error_code) {
 	// For OpenAL version 1.*, otherwise known as freealut
 	#ifdef ALUT_API_MAJOR_VERSION
-	switch (err) {
+	switch (error_code) {
 		case (ALUT_ERROR_NO_ERROR):
 			return "ALUT_ERROR_NO_ERROR: No ALUT error found";
-			break;
 		case (ALUT_ERROR_OUT_OF_MEMORY):
 			return "ALUT_ERROR_OUT_OF_MEMORY: ALUT ran out of memory";
-			break;
 		case (ALUT_ERROR_INVALID_ENUM):
 			return "ALUT_ERROR_INVALID_ENUM: ALUT was given an invalid enumeration token";
-			break;
 		case (ALUT_ERROR_INVALID_VALUE):
 			return "ALUT_ERROR_INVALID_VALUE: ALUT was given an invalid value.";
-			break;
 		case (ALUT_ERROR_INVALID_OPERATION):
 			return "ALUT_ERROR_INVALID_OPERATION: The operation is invalid in the current ALUT state";
-			break;
 		case (ALUT_ERROR_NO_CURRENT_CONTEXT):
 			return "ALUT_ERROR_NO_CURRENT_CONTEXT: There is no current AL context";
-			break;
 		case (ALUT_ERROR_AL_ERROR_ON_ENTRY):
 			return "ALUT_ERROR_AL_ERROR_ON_ENTRY: There was already an AL error on entry to alutCreateBufferFromFile";
-			break;
 		case (ALUT_ERROR_ALC_ERROR_ON_ENTRY):
 			return "ALUT_ERROR_ALC_ERROR_ON_ENTRY: There was already an ALC error on entry to alutCreateBufferFromFile";
-			break;
 		case (ALUT_ERROR_OPEN_DEVICE):
 			return "ALUT_ERROR_OPEN_DEVICE: There was an error opening the ALC device";
-			break;
 		case (ALUT_ERROR_CLOSE_DEVICE):
 			return "ALUT_ERROR_CLOSE_DEVICE: There was an error closing the ALC device";
-			break;
 		case (ALUT_ERROR_CREATE_CONTEXT):
 			return "ALUT_ERROR_CREATE_CONTEXT: There was an error creating an ALC context";
-			break;
 		case (ALUT_ERROR_MAKE_CONTEXT_CURRENT):
 			return "ALUT_ERROR_MAKE_CONTEXT_CURRENT: Could not change the current ALC context";
-			break;
 		case (ALUT_ERROR_DESTROY_CONTEXT):
 			return "ALUT_ERROR_DESTROY_CONTEXT: There was an error destroying the ALC context";
-			break;
 		case (ALUT_ERROR_GEN_BUFFERS):
 			return "ALUT_ERROR_GEN_BUFFERS: There was an error generating an AL buffer";
-			break;
 		case (ALUT_ERROR_BUFFER_DATA):
 			return "ALUT_ERROR_BUFFER_DATA: ALUT has not been initialized";
-			break;
 		case (ALUT_ERROR_IO_ERROR):
 			return "ALUT_ERROR_IO_ERROR: I/O error, consult errno for more details";
-			break;
 		case (ALUT_ERROR_UNSUPPORTED_FILE_TYPE):
 			return "ALUT_ERROR_UNSUPPORTED_FILE_TYPE: Unsupported file type";
-			break;
 		case (ALUT_ERROR_UNSUPPORTED_FILE_SUBTYPE):
 			return "ALUT_ERROR_UNSUPPORTED_FILE_SUBTYPE: Unsupported mode within an otherwise usable file type";
-			break;
 		case (ALUT_ERROR_CORRUPT_OR_TRUNCATED_DATA):
 			return "ALUT_ERROR_CORRUPT_OR_TRUNCATED_DATA: The sound data was corrupt or truncated";
-			break;
 		default:
 			return "ALUT Error: An unknown error code was returned";
-	} // switch (err)
+	} // switch (error_code)
 	
 	#else 
 		// This function will probably never be called if ALUT_API_MAJOR_VERSION is not defined, thus this
 		// statement should never be reached.
 		return "ALUT Error: This ALUT version does not support error codes";
 	#endif /* ALUT_API_MAJOR_VERSION */
-} // string GetALUTErrorString(ALenum err)
+} // const string GetALUTErrorString(ALenum error_codes)
 
+const string GetOVErrorString(int32 error_code) {
+	switch (error_code) {
+		case OV_FALSE:
+			return "OV_FALSE: no data available";
+		case OV_HOLE:
+			return "OV_HOLE: encoutered missing or corrupt data in the bitstream";
+		case OV_EREAD:
+			return "OV_EREAD: read error while fetching compressed data for decode";
+		case OV_EFAULT:
+			return "OV_EFAULT: internal inconsistency in decode state";
+		case OV_EIMPL:
+			return "OV_EIMPL: feature not implemented";
+		case OV_EINVAL:
+			return "OV_EINVAL: invalid argument, or incompletely initialized argument passed to libvorbisfile call";
+		case OV_ENOTVORBIS:
+			return "OV_ENOTVORBIS: the given file/data was not recognized as Ogg Vorbis data";
+		case OV_EBADHEADER:
+			return "OV_EBADHEADER: the file/data is apparently an Ogg Vorbis stream, but contains a corrupted or undecipherable header";
+		case OV_EVERSION:
+			return "OV_EVERSION: the bitstream format revision of the given stream is not supported";
+		case OV_EBADLINK:
+			return "OV_EBADLINK: the given link exists in the Vorbis data stream, but is not decipherable due to garbacge or corruption.";
+		case OV_ENOSEEK:
+			return "OV_ENOSEEK: the given stream is not seekable";
+		default:
+			return ("unknown error code: " + error_code);
+	}
+} // const string GetOggVorbisErrorString(int32 error_code)
 
 
 // ****************************************************************************

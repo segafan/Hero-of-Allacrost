@@ -13,7 +13,8 @@
  * \brief   Sound file for sound-related code in the audio engine.
  *****************************************************************************/
 
-#include "audio.h"
+#include <AL/alut.h>
+
 #include "audio_sound.h"
 
 using namespace std;
