@@ -27,6 +27,7 @@
 #include "mode_manager.h"
 #include "video.h"
 #include "boot_menu.h"
+#include "boot_credits.h"
 
 //! All calls to boot mode are wrapped in this namespace.
 namespace hoa_boot {
@@ -94,6 +95,9 @@ private:
 	std::vector<hoa_audio::SoundDescriptor> _boot_sounds;
 	//! Images that will be used at the boot screen.
 	std::vector<hoa_video::StillImage> _boot_images;
+
+	//! Credits screen window
+	CreditsScreen _credits_screen;
 	
 	//! A pointer to the current menu visible
 	BootMenu * _current_menu;
@@ -114,13 +118,34 @@ private:
 	/*!
 	 *  \brief Animates the game logo when this class is first initialized.
 	 *
-	 *  The logo animation consists of:
-	 *  - The logo flying in from somewhere, with the 't' sword in Allacrost cut into the word
-	 *  - The sword unsheating itself from the word (with sound)
-	 *  - The sword spinning up and around a few times (with sound)
-	 *  - The sword slicing down into its final position as a t (with sound)
+	 *  The logo animation sequences:
+	 *  1) When game first starts up, screen is totally black
+     *
+	 *  2) Logo gradually fades in from the background to appear on 
+	 *     the center of the screen, with the sword placed horizontally
+	 *	   as if it is "sheathed" inside the word Allacros
+     *
+     *  3) After logo fade in is complete, the sword slides out (unsheathes)
+	 *     and moves to the right
+	 *
+     *  4) After sword is completely removed, it moves upwards and makes 
+	 *     full 360 degree swings a few times (as if an invisible person was 
+	 *	   swinging/twirling it) with powerful "woosh" sounds cutting the air.
+     *
+     *  5) Sword slows down, then comes crashing into the logo (in its
+	 *     default vertical position) with a loud ka-ching
+	 *  
+	 *  6) A brilliant flash of white light eminates from the sword along 
+	 *     with the ka-ching sound, quickly whiting out the entire screen
+     *
+	 *  7) The light fades away, revealing the desert background image 
+	 *	   (instead of a blank screen) and the logo is now at the top 
+	 *	   center of the screen.
+     *
+     *  8) Finally, the copyright text at the very bottom of the 
+	 *     screen appears, along with the boot menu (New Game, etc.) 
 	 */
-	void _AnimateLogo(uint32 time_elapsed);
+	void _AnimateLogo();
 
 	/*!
 	 *  \brief Redefines a key to be mapped to another command.
@@ -158,7 +183,21 @@ private:
 	//! 'Video mode' confirmed
 	void OnVideoMode();
 
+	//! Sound volume down
+	void OnSoundLeft();
+	//! Sound volume up
+	void OnSoundRight();
+	//! Music volume down
+	void OnMusicLeft();
+	//! Music volume up
+	void OnMusicRight();
 
+
+	//! Updates the video options screen
+	void UpdateVideoOptions();
+
+	//! Updates the audio options screen
+	void UpdateAudioOptions();
 
 public:
 	//! Initializes class members and loads media data.

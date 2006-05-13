@@ -16,17 +16,12 @@
 #include "boot_menu.h"
 
 using namespace std;
-using namespace hoa_utils;
-using namespace hoa_audio;
 using namespace hoa_video;
-using namespace hoa_global;
-using namespace hoa_data;
-using namespace hoa_map;
-using namespace hoa_battle; // tmp
+
 
 namespace hoa_boot {
 
-// Static members
+// Static BootMenu members
 hoa_video::MenuWindow * BootMenu::_menu_window = 0;
 BootMode * BootMenu::_boot_mode = 0;
 
@@ -35,11 +30,14 @@ BootMenu::BootMenu(BootMenu * parent, bool windowed, BootMode * boot_mode) :
 _parent_menu(parent),
 _is_windowed(windowed)
 {
-	// Store the boot mode pointer
+	// Store pointer to the boot mode (used for member function pointer calls)
 	if (boot_mode != 0)
 		_boot_mode = boot_mode;
 
 	SetWindowed(_is_windowed);
+
+	// Init the menu window if it's not available yet
+	InitWindow();
 }
 
 
@@ -70,7 +68,7 @@ void BootMenu::AddOption(const hoa_utils::ustring & text, void (BootMode::*confi
 		_current_menu.SetSelection(0);
 	}
 
-	// Add key handlers (even if they're zero)
+	// Add key handlers (even if they're zero!)
 	_confirm_handlers.push_back(confirm_function);
 	_left_handlers.push_back(left_function);
 	_right_handlers.push_back(right_function);
@@ -83,6 +81,12 @@ void BootMenu::AddOption(const hoa_utils::ustring & text, void (BootMode::*confi
 void BootMenu::SetOptionText(uint32 index, const hoa_utils::ustring & text)
 {
 	_current_menu.SetOptionText(index, text);
+}
+
+// Disables a given option
+void BootMenu::EnableOption(int32 index, bool enable)
+{
+	_current_menu.EnableOption(index, enable);
 }
 
 
@@ -106,7 +110,7 @@ void BootMenu::SetWindowed(bool windowed)
 	else // windowed
 	{
 		_current_menu.SetFont("default");
-		_current_menu.SetCellSize(128.0f, 50.0f);
+		_current_menu.SetCellSize(192.0f, 50.0f);
 		_current_menu.SetPosition(410.0f, 200.0f);
 		_current_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 		_current_menu.SetOptionAlignment(VIDEO_X_RIGHT, VIDEO_Y_CENTER);
@@ -144,6 +148,13 @@ BootMenu * BootMenu::GetParent() const
 bool BootMenu::IsWindowed() const
 {
 	return _is_windowed;
+}
+
+
+// returns true if the currently selected option is enabled
+bool BootMenu::IsSelectionEnabled() const
+{
+	return _current_menu.IsEnabled(_current_menu.GetSelection());
 }
 
 
@@ -272,11 +283,11 @@ void BootMenu::InitWindow()
 	if (_menu_window == 0)
 	{
 		_menu_window = new hoa_video::MenuWindow();
+		_menu_window->Create(1024.0f, 400.0f);
+		_menu_window->SetPosition(0.0f, 560.0f);
+		_menu_window->SetDisplayMode(VIDEO_MENU_EXPAND_FROM_CENTER);
+		_menu_window->Hide(); // Hide on by default
 	}
-	_menu_window->Create(1024.0f, 400.0f);
-	_menu_window->SetPosition(0.0f, 560.0f);
-	_menu_window->SetDisplayMode(VIDEO_MENU_EXPAND_FROM_CENTER);
-	_menu_window->Hide();
 }
 
 

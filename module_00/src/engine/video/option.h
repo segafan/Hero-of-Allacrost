@@ -414,6 +414,13 @@ public:
 
 	bool IsScrolling() const;
 
+	
+	/*!
+	 *  \brief returns true if the given option is enabled
+	 *  \param index of the option to check
+	 */
+	bool IsEnabled(int32 index) const;
+
 
 	/*!
 	 *  \brief returns an integer which contains the code of an event that occurred, or

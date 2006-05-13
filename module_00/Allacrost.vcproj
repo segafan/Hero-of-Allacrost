@@ -202,6 +202,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\modes\boot\boot_credits.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\modes\boot\boot_menu.h"
 				>
 			</File>
@@ -411,6 +415,10 @@
 			</File>
 			<File
 				RelativePath=".\src\modes\boot\boot.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\boot\boot_credits.cpp"
 				>
 			</File>
 			<File
