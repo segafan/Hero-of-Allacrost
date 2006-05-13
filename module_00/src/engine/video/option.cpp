@@ -802,6 +802,15 @@ bool OptionBox::IsInitialized(string &errors)
 
 
 //-----------------------------------------------------------------------------
+// returns true if the given option is enabled
+//-----------------------------------------------------------------------------
+bool OptionBox::IsEnabled(int32 index) const
+{
+	return !_options[index].disabled;
+}
+
+
+//-----------------------------------------------------------------------------
 // _PlayConfirmSound: sound when user confirms an option
 //-----------------------------------------------------------------------------
 

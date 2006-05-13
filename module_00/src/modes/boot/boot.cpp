@@ -19,6 +19,7 @@
 #include <sstream>
 #include "boot.h"
 #include "boot_menu.h"
+#include "boot_credits.h"
 #include "audio.h"
 #include "video.h"
 #include "data.h"
@@ -150,7 +151,9 @@ _main_menu(0, false, this)
 	}
 
 	// Init the menu window
-	BootMenu::InitWindow();
+	//BootMenu::InitWindow();
+
+	// Init the credits window
 
 	// Setup every menu and their possible sub-menus
 	_SetupMainMenu();
@@ -188,44 +191,46 @@ void BootMode::Reset() {
 
 
 // Animates the logo when the boot mode starts up. Should not be called before LoadBootImages.
-void BootMode::_AnimateLogo(uint32 time_elapsed) {
-
+void BootMode::_AnimateLogo() {
 	// Sequence start times
-	static const uint32 SEQUENCE_ONE = 1000;
+	static const uint32 SEQUENCE_ONE = 0;
 	static const uint32 SEQUENCE_TWO = 1200;
-	static const uint32 SEQUENCE_THREE = 1800;
-	static const uint32 SEQUENCE_FOUR = 2000;
+	static const uint32 SEQUENCE_THREE = 4200;
+	static const uint32 SEQUENCE_FOUR = 5000;
 
 	// Total time in ms
 	static uint32 total_time = 0;
 
-	// sword velocity on the x-axis
-	static float sword_velocity_x = -2.0f;
+	// Get the frametime
+	uint32 time_elapsed = SettingsManager->GetUpdateTime();
 
-	// sword velocity on the y-axis
-	static float sword_velocity_y = -2.0f;
-
-	// Get the total time in ms
+	// Update total time
 	total_time += time_elapsed;
 
-	// Sequence one: unsheathe the sword
+	// Sequence one: black
 	if (total_time >= SEQUENCE_ONE && total_time < SEQUENCE_TWO)
 	{
-		sword_velocity_x -= 0.05f * time_elapsed;
-		_sword_x += sword_velocity_x;
 	}
+	// Sequence two: fade in logo+sword
 	else if (total_time >= SEQUENCE_TWO && total_time < SEQUENCE_THREE)
 	{
-		_sword_angle += 0.5f * time_elapsed;
-		_sword_x += sword_velocity_x;
-		_sword_y += sword_velocity_y;
+		float alpha = static_cast<float>((total_time - SEQUENCE_TWO)) / static_cast<float>(SEQUENCE_THREE);
+
+		VideoManager->Move(512.0f, 385.0f); // logo bg
+		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+		VideoManager->DrawImage(_boot_images[1], Color(alpha, alpha, alpha, 1.0f));
+
+		VideoManager->Move(465.0f, 365.0f); // sword
+		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+		VideoManager->Rotate(90.0f);
+		VideoManager->DrawImage(_boot_images[2], Color(alpha, alpha, alpha, 1.0f));
+
+		VideoManager->Move(512.0f, 385.0f); // text
+		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+		VideoManager->DrawImage(_boot_images[3], Color(alpha, alpha, alpha, 1.0f));
 	}
 	if (total_time >= SEQUENCE_FOUR)
 	{
-		_sword_scale = 1.0f;
-		_sword_angle = 0.0f;
-		_sword_x = 762.0f;
-		_sword_y = 578.0f;
 		_logo_animating = false;
 	}
 
@@ -311,6 +316,12 @@ void BootMode::_SetupOptionsMenu() {
 	_options_menu.AddOption(MakeWideString("Language"));
 	_options_menu.AddOption(MakeWideString("Key Settings"));
 	_options_menu.AddOption(MakeWideString("Joystick Settings"));
+
+	// Disable some of the options
+	_options_menu.EnableOption(2, false);
+	_options_menu.EnableOption(3, false);
+	_options_menu.EnableOption(4, false);
+
 	_options_menu.SetWindowed(true);
 	_options_menu.SetParent(&_main_menu);
 }
@@ -320,13 +331,13 @@ void BootMode::_SetupOptionsMenu() {
 void BootMode::_SetupVideoOptionsMenu()
 {
 	_video_options_menu.AddOption(MakeWideString("Resolution:"));
-
-	if (VideoManager->IsFullscreen())
-		_video_options_menu.AddOption(MakeWideString("Window mode: full-screen"), &BootMode::OnVideoMode);
-	else
-		_video_options_menu.AddOption(MakeWideString("Window mode: windowed"), &BootMode::OnVideoMode);
+	_video_options_menu.AddOption(MakeWideString("Window mode:"), &BootMode::OnVideoMode);	
 	_video_options_menu.AddOption(MakeWideString("Brightness:"));
 	_video_options_menu.AddOption(MakeWideString("Image quality:"));
+
+	_video_options_menu.EnableOption(2, false);
+	_video_options_menu.EnableOption(3, false);
+
 	_video_options_menu.SetWindowed(true);
 	_video_options_menu.SetParent(&_options_menu);
 }
@@ -335,14 +346,8 @@ void BootMode::_SetupVideoOptionsMenu()
 // Inits the audio-options menu
 void BootMode::_SetupAudioOptionsMenu()
 {
-	std::ostringstream sound_volume("");
-	sound_volume << "Sound Volume: " << static_cast<int>(AudioManager->GetSoundVolume() * 100.0f) << " %";
-
-	std::ostringstream music_volume("");
-	music_volume << "Music Volume: " << static_cast<int>(AudioManager->GetMusicVolume() * 100.0f) << " %";
-
-	_audio_options_menu.AddOption(MakeWideString(sound_volume.str()));
-	_audio_options_menu.AddOption(MakeWideString(music_volume.str()));
+	_audio_options_menu.AddOption(MakeWideString("Sound Volume: "), 0, &BootMode::OnSoundLeft, &BootMode::OnSoundRight);
+	_audio_options_menu.AddOption(MakeWideString("Music Volume: "), 0, &BootMode::OnMusicLeft, &BootMode::OnMusicRight);
 	_audio_options_menu.SetWindowed(true);
 	_audio_options_menu.SetParent(&_options_menu);
 }
@@ -384,8 +389,7 @@ void BootMode::OnOptions()
 // 'Credits' confirmed
 void BootMode::OnCredits()
 {
-	if (BOOT_DEBUG)
-		cout << "BOOT: Viewing credits now!" << endl;
+	_credits_screen.Show();
 }
 
 
@@ -400,13 +404,17 @@ void BootMode::OnQuit()
 void BootMode::OnVideoOptions()
 {
 	_current_menu = &_video_options_menu;
+	UpdateVideoOptions();
 }
 
 
 // 'Audio' confirmed
 void BootMode::OnAudioOptions()
 {
+	// Switch the current menu
 	_current_menu = &_audio_options_menu;
+
+	UpdateAudioOptions();
 }
 
 
@@ -417,11 +425,69 @@ void BootMode::OnVideoMode()
 	VideoManager->ToggleFullscreen();
 	VideoManager->ApplySettings();
 
-	// Change the text accordingly
+	UpdateVideoOptions();	
+}
+
+
+// Sound volume down
+void BootMode::OnSoundLeft()
+{
+	AudioManager->SetSoundVolume(AudioManager->GetSoundVolume() - 0.1f);
+	UpdateAudioOptions();
+}
+
+
+// Sound volume up
+void BootMode::OnSoundRight()
+{
+	AudioManager->SetSoundVolume(AudioManager->GetSoundVolume() + 0.1f);
+	UpdateAudioOptions();
+}
+
+
+// Music volume down
+void BootMode::OnMusicLeft()
+{
+	AudioManager->SetMusicVolume(AudioManager->GetMusicVolume() - 0.1f);
+	UpdateAudioOptions();
+}
+
+
+// Music volume up
+void BootMode::OnMusicRight()
+{
+	AudioManager->SetMusicVolume(AudioManager->GetMusicVolume() + 0.1f);
+	UpdateAudioOptions();
+}
+
+
+// Updates the video options screen
+void BootMode::UpdateVideoOptions()
+{
+	// Update resolution text
+	std::ostringstream resolution("");
+	resolution << "Resolution: " << VideoManager->GetWidth() << " x " << VideoManager->GetHeight();
+	_video_options_menu.SetOptionText(0, MakeWideString(resolution.str()));
+
+	// Update text on current video mode
 	if (VideoManager->IsFullscreen())
 		_video_options_menu.SetOptionText(1, MakeWideString("Window mode: full-screen"));
 	else
 		_video_options_menu.SetOptionText(1, MakeWideString("Window mode: windowed"));
+}
+
+
+// Updates the audio options screen
+void BootMode::UpdateAudioOptions()
+{
+	std::ostringstream sound_volume("");
+	sound_volume << "Sound Volume: " << static_cast<int>(AudioManager->GetSoundVolume() * 100.0f) << " %";
+
+	std::ostringstream music_volume("");
+	music_volume << "Music Volume: " << static_cast<int>(AudioManager->GetMusicVolume() * 100.0f) << " %";
+
+	_audio_options_menu.SetOptionText(0, MakeWideString(sound_volume.str()));
+	_audio_options_menu.SetOptionText(1, MakeWideString(music_volume.str()));
 }
 
 
@@ -442,20 +508,20 @@ void BootMode::Update() {
 		return;
 	}
 
-	// Main logo is animating at the moment
-	if (_logo_animating)
-	{
-		_AnimateLogo(time_elapsed);
-	}
-
 	// Update the menu window
 	BootMenu::UpdateWindow(time_elapsed);
 
-	// A key was pressed -> handle it 
-	if (InputManager->ConfirmPress()) 
+	// Update the credits window
+	_credits_screen.UpdateWindow(time_elapsed);
+
+	// A confirm-key was pressed -> handle it (but ONLY if the credits screen isn't visible)
+	if (InputManager->ConfirmPress() && !_credits_screen.IsVisible()) 
 	{
-		// Play the confirm sound (TODO: Perhaps we shouldn't play this if nothing happened on confirm?)
-		_boot_sounds.at(0).PlaySound();
+		// Play confirm sound if the option wasn't grayed out
+		if (_current_menu->IsSelectionEnabled())
+			_boot_sounds.at(0).PlaySound();
+		else
+			_boot_sounds.at(3).PlaySound(); // Otherwise play a silly bömp
 
 		_current_menu->ConfirmPressed();
 		
@@ -469,24 +535,29 @@ void BootMode::Update() {
 			BootMenu::ShowWindow(false);
 		}
 	}
-	else if (InputManager->LeftPress()) 
+	else if (InputManager->LeftPress() && !_credits_screen.IsVisible()) 
 	{
 		_current_menu->LeftPressed();
 	}
-	else if(InputManager->RightPress()) 
+	else if(InputManager->RightPress() && !_credits_screen.IsVisible()) 
 	{
 		_current_menu->RightPressed();
-	}
-	else if(InputManager->UpPress())
+	} 
+	else if(InputManager->UpPress() && !_credits_screen.IsVisible())
 	{
 		_current_menu->UpPressed();
 	}
-	else if(InputManager->DownPress())
+	else if(InputManager->DownPress() && !_credits_screen.IsVisible())
 	{
 		_current_menu->DownPressed();
 	}
 	else if(InputManager->CancelPress())
 	{
+		// Close the credits-screen if it was visible
+		if (_credits_screen.IsVisible())
+			_credits_screen.Hide();
+
+		// Otherwise the cancel was given for the main menu
 		_current_menu->CancelPressed();
 
 		// Go up in the menu hierarchy if possible
@@ -495,6 +566,7 @@ void BootMode::Update() {
 			// Play the cancel sound here
 			_boot_sounds.at(1).PlaySound();
 
+			// Go up a level in the menu hierarchy
 			_current_menu = _current_menu->GetParent();
 
 			// Update window status again
@@ -517,21 +589,26 @@ void BootMode::Update() {
 // Draws our next frame to the video back buffer
 void BootMode::Draw() {
 
+	// If we're animating logo at the moment, handle all drawing in there and simply return
+	if (_logo_animating)
+	{
+		_AnimateLogo();
+		return;
+	}
+
 	// Draw the background image
-	VideoManager->Move(512, 384);
+	VideoManager->Move(512.0f, 384.0f);
 	VideoManager->SetDrawFlags(VIDEO_NO_BLEND, 0);
 	VideoManager->DrawImage(_boot_images[0]);
 
 	// Draw the logo background
-	VideoManager->Move(512, 648);
+	VideoManager->Move(512.0f, 648.0f);
 	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 	VideoManager->DrawImage(_boot_images[1]);
 
-	// Draw the sword with it's custom angle and scale
-	VideoManager->Move(_sword_x, _sword_y);
+	// Draw the sword
+	VideoManager->Move(762.0f, 578.0f);
 	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-	VideoManager->Scale(_sword_scale, _sword_scale);
-	VideoManager->Rotate(_sword_angle);
 	VideoManager->DrawImage(_boot_images[2]);
 
 	// Draw the logo text on top of the sword
@@ -539,10 +616,11 @@ void BootMode::Draw() {
 	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 	VideoManager->DrawImage(_boot_images[3]);
 
-	// Draw the currently visible menu (and it's window if needed)
-	_current_menu->Draw();
-
-	return;
+	// Decide whether to draw the credits window or the main menu
+	if (_credits_screen.IsVisible())
+		_credits_screen.Draw();
+	else
+		_current_menu->Draw();
 }
 
 

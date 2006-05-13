@@ -27,10 +27,7 @@
 #include <vector>
 #include "video.h"
 #include "defs.h"
-#include "mode_manager.h"
-#include "gui.h"
-#include "global.h"
-#include "menu_views.h"
+
 
 //! All calls to boot mode are wrapped in this namespace.
 namespace hoa_boot {
@@ -62,6 +59,12 @@ public:
 	**/
 	void SetOptionText(uint32 index, const hoa_utils::ustring & text);
 
+	/** \brief Enables or disables the option with the given index
+	*** \param index index of the option to be disabled
+	*** \param enable enable or disable the option
+	**/
+	void EnableOption(int32 index, bool enable);
+
 	/** \brief Toggles this menu to be windowed (or not windowed)
 	*** \param windowed true == enable windowing
 	**/
@@ -86,6 +89,11 @@ public:
 	*** \return True if windowed. False if not
 	**/
 	bool IsWindowed() const;
+
+	/**
+	*** \brief returns true if the currently selected option is enabled
+	**/
+	bool IsSelectionEnabled() const;
 
 	//! Draws menu on the screen
 	bool Draw();

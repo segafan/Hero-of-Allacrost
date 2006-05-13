@@ -103,6 +103,7 @@ namespace hoa_boot {
 	extern bool BOOT_DEBUG;
 	class BootMode;
 	class BootMenu;
+	class CreditsScreen;
 }
 
 // Map mode declarations, see map.h/cpp
