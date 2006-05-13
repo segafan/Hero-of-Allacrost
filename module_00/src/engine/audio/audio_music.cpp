@@ -218,15 +218,19 @@ void MusicSource::UpdateStreamQueue() {
 	if (owner == NULL) { // If nothing owns this source, it certainly has no data to stream in
 		return;
 	}
+	
+	if (!is_playing) {
+		return;
+	}
 
-	ALint number_buffers; // The number of buffers
+	ALint src_info;
 	ALenum error_code;
 
-	alGetSourcei(source, AL_BUFFERS_PROCESSED, &number_buffers);
-	while (number_buffers > 0) {
+	alGetSourcei(source, AL_BUFFERS_PROCESSED, &src_info);
+	while (src_info > 0) { // Refill each buffer that has been processed
 		ALuint buffer;
 		alSourceUnqueueBuffers(source, 1, &buffer); // Unqueues one of the buffers in the MusicBuffer object
-		number_buffers--;
+		src_info--;
 		owner->_data->RefillBuffer(buffer);
 		alSourceQueueBuffers(source, 1, &buffer); // Requeues one of the buffers in the Musicbuffer object
 		
@@ -234,18 +238,15 @@ void MusicSource::UpdateStreamQueue() {
 		if (error_code != AL_NO_ERROR) {
 			cerr << GetALErrorString(error_code) << endl;
 		}
-	} // while (number_buffers > 0)
+	} // while (src_info > 0)
 	
-	alGetSourcei(source, AL_BUFFERS_QUEUED, &number_buffers);
-	
-	if (number_buffers == 0) {
-		cerr << "AUDIO ERROR: no buffers queued!!!" << endl;
-// 		for (uint32 i = 0; i < MUSIC_BUFFER_COUNT; i++) {
-// 			owner->_data->RefillBuffer(owner->_data->buffers[0]);
-// 			alSourceQueueBuffers(source, 1, &(owner->_data->buffers)); // Requeues one of the buffers in the Musicbuffer object
-// 		}
+	// Check for buffer underrun condition
+	alGetSourcei(source, AL_SOURCE_STATE, &src_info);
+	if (src_info != AL_PLAYING) {
+		if (AUDIO_DEBUG) cerr << "AUDIO WARNING: music buffer under-run occured, re-playing source" << endl;
+		alSourcePlay(source) ;
 	}
-}
+} // void MusicSource::UpdateStreamQueue()
 
 } // namespace private_audio
 
@@ -350,6 +351,7 @@ void MusicDescriptor::PlayMusic() {
 
 	alSourceQueueBuffers(_origin->source, MUSIC_BUFFER_COUNT, _data->buffers);
 	alSourcePlay(_origin->source);
+	_origin->is_playing = true;
 }
 
 void MusicDescriptor::PauseMusic() {
@@ -358,6 +360,7 @@ void MusicDescriptor::PauseMusic() {
 	}
 
 	alSourcePause(_origin->source);
+	_origin->is_playing = false;
 }
 
 void MusicDescriptor::ResumeMusic() {
@@ -375,6 +378,7 @@ void MusicDescriptor::ResumeMusic() {
 	}
 
 	alSourcePlay(_origin->source);
+	_origin->is_playing = true;
 }
 
 
@@ -384,6 +388,7 @@ void MusicDescriptor::StopMusic() {
 	}
 
 	alSourceStop(_origin->source);
+	_origin->is_playing = false;
 }
 
 void MusicDescriptor::RewindMusic() {

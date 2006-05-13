@@ -66,9 +66,10 @@ am__objects_3 = settings.$(OBJEXT) input.$(OBJEXT) \
 	mode_manager.$(OBJEXT) data.$(OBJEXT) global.$(OBJEXT) \
 	$(am__objects_1) $(am__objects_2)
 am__objects_4 = battle.$(OBJEXT) boot.$(OBJEXT) boot_menu.$(OBJEXT) \
-	map.$(OBJEXT) map_actions.$(OBJEXT) map_dialogue.$(OBJEXT) \
-	map_objects.$(OBJEXT) menu.$(OBJEXT) menu_views.$(OBJEXT) \
-	pause.$(OBJEXT) quit.$(OBJEXT) scene.$(OBJEXT)
+	boot_credits.$(OBJEXT) map.$(OBJEXT) map_actions.$(OBJEXT) \
+	map_dialogue.$(OBJEXT) map_objects.$(OBJEXT) menu.$(OBJEXT) \
+	menu_views.$(OBJEXT) pause.$(OBJEXT) quit.$(OBJEXT) \
+	scene.$(OBJEXT)
 am_allacrost_OBJECTS = main.$(OBJEXT) main_options.$(OBJEXT) \
 	utils.$(OBJEXT) $(am__objects_3) $(am__objects_4)
 allacrost_OBJECTS = $(am_allacrost_OBJECTS)
@@ -313,6 +314,8 @@ modes_SOURCES = \
 	$(MODES_DIR)/boot/boot.h \
 	$(MODES_DIR)/boot/boot_menu.cpp \
 	$(MODES_DIR)/boot/boot_menu.h \
+	$(MODES_DIR)/boot/boot_credits.cpp \
+	$(MODES_DIR)/boot/boot_credits.h \
 	$(MODES_DIR)/map/map.cpp \
 	$(MODES_DIR)/map/map.h \
 	$(MODES_DIR)/map/map_actions.cpp \
@@ -464,6 +467,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/audio_sound.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/battle.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/boot.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/boot_credits.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/boot_menu.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/data.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/draw.Po@am__quote@
@@ -939,6 +943,20 @@ boot_menu.obj: $(MODES_DIR)/boot/boot_menu.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MODES_DIR)/boot/boot_menu.cpp' object='boot_menu.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o boot_menu.obj `if test -f '$(MODES_DIR)/boot/boot_menu.cpp'; then $(CYGPATH_W) '$(MODES_DIR)/boot/boot_menu.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MODES_DIR)/boot/boot_menu.cpp'; fi`
+
+boot_credits.o: $(MODES_DIR)/boot/boot_credits.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT boot_credits.o -MD -MP -MF "$(DEPDIR)/boot_credits.Tpo" -c -o boot_credits.o `test -f '$(MODES_DIR)/boot/boot_credits.cpp' || echo '$(srcdir)/'`$(MODES_DIR)/boot/boot_credits.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/boot_credits.Tpo" "$(DEPDIR)/boot_credits.Po"; else rm -f "$(DEPDIR)/boot_credits.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MODES_DIR)/boot/boot_credits.cpp' object='boot_credits.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o boot_credits.o `test -f '$(MODES_DIR)/boot/boot_credits.cpp' || echo '$(srcdir)/'`$(MODES_DIR)/boot/boot_credits.cpp
+
+boot_credits.obj: $(MODES_DIR)/boot/boot_credits.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT boot_credits.obj -MD -MP -MF "$(DEPDIR)/boot_credits.Tpo" -c -o boot_credits.obj `if test -f '$(MODES_DIR)/boot/boot_credits.cpp'; then $(CYGPATH_W) '$(MODES_DIR)/boot/boot_credits.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MODES_DIR)/boot/boot_credits.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/boot_credits.Tpo" "$(DEPDIR)/boot_credits.Po"; else rm -f "$(DEPDIR)/boot_credits.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MODES_DIR)/boot/boot_credits.cpp' object='boot_credits.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o boot_credits.obj `if test -f '$(MODES_DIR)/boot/boot_credits.cpp'; then $(CYGPATH_W) '$(MODES_DIR)/boot/boot_credits.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MODES_DIR)/boot/boot_credits.cpp'; fi`
 
 map.o: $(MODES_DIR)/map/map.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT map.o -MD -MP -MF "$(DEPDIR)/map.Tpo" -c -o map.o `test -f '$(MODES_DIR)/map/map.cpp' || echo '$(srcdir)/'`$(MODES_DIR)/map/map.cpp; \

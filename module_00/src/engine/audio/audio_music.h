@@ -93,6 +93,14 @@ public:
 	ALuint source;
 	//! A pointer to the MusicDescriptor that currently owns this source.
 	MusicDescriptor *owner;
+	
+	/** \brief Indicates whether the source is being played or not.
+	*** \note The reason why this member is needed instead of just relying on OpenAL to tell us the state of
+	*** the source is because if a buffer under-run occurs while streaming in music data, the source will
+	*** stop playing if it does not have sufficient data, and this member allows us to detect that condition
+	*** and resume playing the music if it is needed.
+	**/
+	bool is_playing;
 
 	//! Returns true if OpenAL determines that the source is valid.
 	bool IsValid();
