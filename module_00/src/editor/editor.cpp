@@ -1098,7 +1098,7 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, const QString& name)
 		ReadDataDescriptor read_data;
 		if (!read_data.OpenFile("dat/tilesets/tiles_database.lua"))
 			QMessageBox::warning(this, "Tileset File",
-				QString("ERROR: could not open dat/tilesets/tiles_database.lua for writing!"));
+				QString("ERROR: could not open dat/tilesets/tiles_database.lua for reading!"));
 		else
 		{
 			read_data.OpenTable("tile_filenames");
