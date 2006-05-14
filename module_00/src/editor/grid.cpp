@@ -207,8 +207,8 @@ void Grid::SaveMap()
 		write_data.WriteComment("The names of the tilesets used, with the path and file extension omitted (note that the indeces begin with 1, not 0)");
 		write_data.BeginTable("tileset_names");
 		i = 0;
-		for (QValueListIterator<QString> qit = tileset_list.begin();
-				qit != tileset_list.end(); ++qit)
+		for (QStringList::Iterator qit = tileset_list.begin();
+		     qit != tileset_list.end(); ++qit)
 		{
 			i++;
 			write_data.WriteString(i, (*qit).ascii());
@@ -219,11 +219,13 @@ void Grid::SaveMap()
 		write_data.WriteComment("The names of the tile image files used, with the path and file extension omitted (note that the indeces begin with 1, not 0)");
 		write_data.BeginTable("tile_filenames");
 		i = 0;
-		for (QValueListIterator<QString> qit = file_name_list.begin();
-				qit != file_name_list.end(); ++qit)
+		for (QStringList::Iterator qit = file_name_list.begin();
+		     qit != file_name_list.end(); ++qit)
 		{
 			i++;
-			write_data.WriteString(i, (*qit).remove(".png").remove("img/tiles/").ascii());
+			QString temp = *qit;
+			temp.remove(".png").remove("img/tiles/");
+			write_data.WriteString(i, temp.ascii());
 		} // iterate through file_name_list writing each element
 		write_data.EndTable();
 		write_data.InsertNewLine();
@@ -307,17 +309,44 @@ void Grid::SaveMap()
 		write_data.EndTable();
 		write_data.InsertNewLine();
 
-		// Create vector of 255s.
-		vector<int32> vect_255s(_width, 255);
-
-		// FIXME: hard-coded for now
-		write_data.WriteComment("Walkablity status of tiles for 8 height levels. Non-zero indicates walkable. Valid range: [0-255]");
+		write_data.WriteComment("Walkability status of tiles for 8 height levels. Non-zero indicates walkable. Valid range: [0-255]");
 		write_data.BeginTable("tile_walkable");
-		for (i = 0; i < _height; i++)
+		ReadDataDescriptor read_data;
+		if (!read_data.OpenFile("dat/tilesets/tiles_database.lua"))
+			QMessageBox::warning(this, "Tiles Database",
+				QString("ERROR: could not open dat/tilesets/tiles_database.lua for reading!"));
+		else
 		{
-			sprintf(buffer, "%d", i);
-			write_data.WriteIntVector(buffer, vect_255s);
-		}
+			for (int row = 0; row < _height; row++)
+			{
+				for (int col = 0; col < _width; col++)
+				{
+					QString temp = file_name_list[lower_layer[row * _width + col]];
+					temp.remove(".png").remove("img/tiles/");
+					read_data.OpenTable("tile_filenames");
+					uint32 table_size = read_data.GetTableSize();
+					uint32 index = 0;
+					QString filename = "";
+					while (filename != temp && index < table_size)
+					{
+						index++;
+						filename = read_data.ReadString(index);
+					} // find index of current tile in the database
+					read_data.CloseTable();
+					
+					if (filename == temp)
+					{
+						read_data.OpenTable("tile_properties");
+						layer_row.push_back(read_data.ReadInt(index));
+						read_data.CloseTable();
+					} // tile exists in the database
+				} // iterate through the columns of the lower layer
+				sprintf(buffer, "%d", row);
+				write_data.WriteIntVector(buffer, layer_row);
+				layer_row.clear();
+			} // iterate through the rows of the lower layer
+			read_data.CloseFile();
+		} // file was successfully opened
 		write_data.EndTable();
 		write_data.InsertNewLine();
 

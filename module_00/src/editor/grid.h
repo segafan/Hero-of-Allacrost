@@ -38,7 +38,7 @@
 #include <qpopupmenu.h>
 #include <qradiobutton.h>
 #include <qstringlist.h>
-#include <qvaluevector.h>
+//#include <qvaluevector.h>
 #include <qvbuttongroup.h>
 #include <qwmatrix.h>
 
