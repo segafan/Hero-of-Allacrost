@@ -29,6 +29,7 @@ using namespace hoa_menu::private_menu;
 using namespace hoa_utils;
 using namespace hoa_audio;
 using namespace hoa_video;
+using namespace hoa_settings;
 using namespace hoa_mode_manager;
 using namespace hoa_input;
 using namespace hoa_global;
@@ -313,15 +314,31 @@ void MenuMode::_DrawBottomMenu()
 	// Draw currently active options box
 	_current_menu->Draw();
 		
-	// Draw 2nd menu text
-	VideoManager->Move(105, 615);
-	if (!VideoManager->DrawText("Time: 00:24:35"))
+	// Draw Played Time
+	VideoManager->Move(109, 615);
+	std::ostringstream os_time;
+	uint8 hours = SettingsManager->GetPlayHours();
+	uint8 minutes = SettingsManager->GetPlayMinutes();
+	uint8 seconds = SettingsManager->GetPlaySeconds();
+	os_time << (hours < 10 ? "0" : "") << (uint32)hours << ":";
+	os_time << (minutes < 10 ? "0" : "") << (uint32)minutes << ":";
+	os_time << (seconds < 10 ? "0" : "") << (uint32)seconds;
+	///////////////
+	// TEMP////////
+	//////////////
+	ostringstream os_inv;
+	os_inv << GlobalManager->GetInventory().size();
+	///////////////
+	///////////////
+	
+	std::string time = std::string("Time:  ") + os_time.str() + string("     Inv:") + os_inv.str();
+	if (!VideoManager->DrawText(MakeWideString(time)))
 		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
 	
 	// Get the money of the party
 	std::ostringstream os_money;
 	os_money << GlobalManager->GetMoney();
-	std::string money = std::string("Bling:") + os_money.str() + "B";
+	std::string money = std::string("Bling:  ") + os_money.str() + "B";
 	VideoManager->MoveRelative(0, 24);
 	if (!VideoManager->DrawText(MakeWideString(money)))
 		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
@@ -329,8 +346,8 @@ void MenuMode::_DrawBottomMenu()
 	VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, 0);
 	
 	// Display Location
-	VideoManager->Move(350, 670);
-	if (!VideoManager->DrawText("Harrvah Kingdom - Town"))
+	VideoManager->Move(355, 670);
+	if (!VideoManager->DrawText("Harrvah Kingdom - Desert Cave"))
 		cerr << "MENU: ERROR > Couldn't draw location!" << endl;
 	
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
@@ -398,6 +415,9 @@ void MenuMode::_HandleInventoryMenu()
 	switch (_menu_inventory.GetSelection())
 	{
 		case INV_USE:
+			// Make sure we have some items in the inventory.
+			if (GlobalManager->GetInventory().size() == 0)
+				return;
 			// TODO: Handle the use inventory command
 			_inventory_window.Activate(true);
 			_current_menu->SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
