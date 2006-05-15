@@ -68,7 +68,7 @@ bool CharacterWindow::Draw()
 		cerr << "CHARACTERWINDOW: ERROR > Couldn't draw Character Name!" << endl;
 	
 	// Draw Level
-	VideoManager->MoveRelative(100, 0);
+	VideoManager->MoveRelative(95, 0);
 	// Get the char's lvl
 	std::ostringstream os_level;
 	os_level << character->GetXPLevel();
@@ -188,10 +188,9 @@ InventoryWindow::InventoryWindow() : _inventory_active(false)
 	
 	for (uint32 i = 0; i < inv.size(); ++i)
 	{
-		// TODO: Eventually include the icon for the item.
+		// Create the item text
 		ostringstream os_obj_count;
 		os_obj_count << inv[i]->GetCount();
-		// Add in a bunch of spaces on the end to provide some spacing between columns
 		string inv_item_str = string("<") + inv[i]->GetIconPath() + string("><32>") + inv[i]->GetName() + string("<R>") + os_obj_count.str() + string("    ");
 		inv_names.push_back(MakeWideString(inv_item_str));
 	}

@@ -27,10 +27,12 @@
 #include <vector>
 #include "video.h"
 #include "defs.h"
+#include "settings.h"
 #include "mode_manager.h"
 #include "gui.h"
 #include "global.h"
 #include "menu_views.h"
+
 
 //! All calls to menu mode are wrapped in this namespace.
 namespace hoa_menu {
