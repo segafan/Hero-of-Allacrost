@@ -673,7 +673,7 @@ void MapMode::_FindPath(const TileNode& destination, vector<TileNode> &path) {
 		
 		// Check bottom tile
 		tcheck.direction = SOUTH;
-		tcheck.row = closed_list.back().row - 1;
+		tcheck.row = closed_list.back().row + 1;
 		tcheck.col = closed_list.back().col;
 		if (_TileMoveable(tcheck) && (!_IsNodeInList(tcheck, closed_list))) {
 			list_node = _FindNodeInList(tcheck, open_list);
