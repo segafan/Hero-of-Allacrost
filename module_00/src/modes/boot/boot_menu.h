@@ -91,7 +91,7 @@ public:
 	bool IsWindowed() const;
 
 	/**
-	*** \brief returns true if the currently selected option is enabled
+	*** \brief Returns true if the currently selected option is enabled
 	**/
 	bool IsSelectionEnabled() const;
 
@@ -127,10 +127,12 @@ public:
 	**/
 	static void ShowWindow(bool toggle);
 
-	//! Inits the menu window
-	static void  InitWindow();
 
 private:
+	//! Inits the menu window, called in the constructor of the class
+	static void _InitWindow();
+
+
 	//! A pointer to the boot mode
 	static BootMode * _boot_mode;
 

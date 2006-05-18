@@ -101,6 +101,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine=""
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -122,7 +123,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
-				DebugInformationFormat="3"
+				DebugInformationFormat="0"
 				CompileAs="2"
 				DisableSpecificWarnings="4996;4005;4800;4267;4355"
 				ForcedIncludeFiles=""

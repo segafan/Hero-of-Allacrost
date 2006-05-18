@@ -47,45 +47,43 @@ namespace hoa_boot {
 
 bool BOOT_DEBUG = false;
 
+
+// Initialize static members here
+bool BootMode::_logo_animating = true;
+
+
 // ****************************************************************************
 // *************************** GENERAL FUNCTIONS ******************************
 // ****************************************************************************
 
 // The constructor initializes variables and sets up the path names of the boot images
 BootMode::BootMode() :
-_main_menu(0, false, this)
+_main_menu(0, false, this),
+_fade_out(false), // No, we're not fading out yet!
+_sword_x(465.0f), // Sword setup
+_sword_y(365.0f),
+_sword_angle(90.0f),
+_sword_scale(1.0f)
 {
 	if (BOOT_DEBUG) cout << "BOOT: BootMode constructor invoked." << endl;
 
 	mode_type = MODE_MANAGER_BOOT_MODE;
-
-	// No, we're not fading out yet!
-	_fade_out = false;
-
-	// But yes, we want the darned animation already
-	_logo_animating = true;
 	
-	// Sword setup
-	_sword_x = 415.0f;
-	_sword_y = 700.0f;
-	_sword_angle = 90.0f;
-	_sword_scale = 1.0f;
-
 	ReadDataDescriptor read_data;
 	if (!read_data.OpenFile("dat/config/boot.lua")) {
 		cout << "BOOT ERROR: failed to load data file" << endl;
 	}
 
-	// Load all the bitmaps using this StillImage
+	// Load all bitmaps using this StillImage
 	StillImage im;
 
-	// The background
+	// background
 	im.SetFilename(read_data.ReadString("background_image"));
 	im.SetDimensions(read_data.ReadFloat("background_image_width"),
 	                 read_data.ReadFloat("background_image_height"));
 	_boot_images.push_back(im);
 
-	// The logo background
+	// logo background
 	im.SetFilename(read_data.ReadString("logo_background"));
 	im.SetDimensions(read_data.ReadFloat("logo_background_width"),
 	                 read_data.ReadFloat("logo_background_height"));
@@ -122,13 +120,14 @@ _main_menu(0, false, this)
 		cout << "BOOT ERROR: some error occured during reading of boot data file" << endl;
 	}
 
-	// Push all our new music onto the boot_music vector
+	// Load all music files used by the boot mode here
 	MusicDescriptor new_music;
 	for (uint32 i = 0; i < new_music_files.size(); i++) {
 		_boot_music.push_back(new_music);
 		_boot_music[i].LoadMusic(new_music_files[i]);
 	}
 
+	// Load all sounds
 	SoundDescriptor new_sound;
 	_boot_sounds.push_back(new_sound);
 	_boot_sounds.push_back(new_sound);
@@ -145,23 +144,18 @@ _main_menu(0, false, this)
 // 		_boot_sounds[i].LoadSound(new_sound_files[i]);
 // 	}
 
-
+	// Load all bitmaps
 	for (uint32 i = 0; i < _boot_images.size(); i++) {
 		VideoManager->LoadImage(_boot_images[i]);
 	}
 
-	// Init the menu window
-	//BootMenu::InitWindow();
-
-	// Init the credits window
-
-	// Setup every menu and their possible sub-menus
+	// Construct our menu hierarchy here
 	_SetupMainMenu();
 	_SetupOptionsMenu();
 	_SetupVideoOptionsMenu();
 	_SetupAudioOptionsMenu();
 
-	// Set main menu as our current menu
+	// Set the main menu as our currently selected menu
 	_current_menu = &_main_menu;
 }
 
@@ -170,11 +164,12 @@ _main_menu(0, false, this)
 BootMode::~BootMode() {
 	if (BOOT_DEBUG) cout << "BOOT: BootMode destructor invoked." << endl;
 
-	for (uint32 i = 0; i < _boot_music.size(); i++) {
+	for (uint32 i = 0; i < _boot_music.size(); i++)
 		_boot_music[i].FreeMusic();
-	}
+	
 	for (uint32 i = 0; i < _boot_sounds.size(); i++)
 		_boot_sounds[i].FreeSound();
+
 	for (uint32 i = 0; i < _boot_images.size(); i++)
 		VideoManager->DeleteImage(_boot_images[i]);
 }
@@ -182,8 +177,10 @@ BootMode::~BootMode() {
 
 // Resets appropriate class members.
 void BootMode::Reset() {
+
 	// Play the intro theme
 	_boot_music[0].PlayMusic();
+
 	// Set the coordinate system that BootMode uses
 	VideoManager->SetCoordSys(0, 1024, 0, 768);
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
@@ -194,9 +191,16 @@ void BootMode::Reset() {
 void BootMode::_AnimateLogo() {
 	// Sequence start times
 	static const uint32 SEQUENCE_ONE = 0;
-	static const uint32 SEQUENCE_TWO = 1200;
-	static const uint32 SEQUENCE_THREE = 4200;
-	static const uint32 SEQUENCE_FOUR = 5000;
+	static const uint32 SEQUENCE_TWO = SEQUENCE_ONE + 1000;
+	static const uint32 SEQUENCE_THREE = SEQUENCE_TWO + 2000;
+	static const uint32 SEQUENCE_FOUR = SEQUENCE_THREE + 860;
+	static const uint32 SEQUENCE_FIVE = SEQUENCE_FOUR + 2500;
+	static const uint32 SEQUENCE_SIX = SEQUENCE_FIVE + 3000;
+	static const uint32 SEQUENCE_SEVEN = SEQUENCE_SIX + 1000;
+	static const uint32 SEQUENCE_EIGHT = SEQUENCE_SEVEN + 1000;
+
+	static float scale = 0.0f;
+	static float rotation = 0.0f;
 
 	// Total time in ms
 	static uint32 total_time = 0;
@@ -214,30 +218,89 @@ void BootMode::_AnimateLogo() {
 	// Sequence two: fade in logo+sword
 	else if (total_time >= SEQUENCE_TWO && total_time < SEQUENCE_THREE)
 	{
-		float alpha = static_cast<float>((total_time - SEQUENCE_TWO)) / static_cast<float>(SEQUENCE_THREE);
+		float alpha = static_cast<float>((total_time - SEQUENCE_TWO)) / static_cast<float>(SEQUENCE_THREE - SEQUENCE_TWO);
 
 		VideoManager->Move(512.0f, 385.0f); // logo bg
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 		VideoManager->DrawImage(_boot_images[1], Color(alpha, alpha, alpha, 1.0f));
-
-		VideoManager->Move(465.0f, 365.0f); // sword
+		VideoManager->Move(465.0f, 360.0f); // sword
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-		VideoManager->Rotate(90.0f);
+		VideoManager->Rotate(-90.0f);
 		VideoManager->DrawImage(_boot_images[2], Color(alpha, alpha, alpha, 1.0f));
-
 		VideoManager->Move(512.0f, 385.0f); // text
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 		VideoManager->DrawImage(_boot_images[3], Color(alpha, alpha, alpha, 1.0f));
 	}
-	if (total_time >= SEQUENCE_FOUR)
+	// Sequence three: Sword unsheathe & slide
+	else if (total_time >= SEQUENCE_THREE && total_time < SEQUENCE_FOUR)
+	{
+		static float sword_velocity = 0.01f;
+		sword_velocity += static_cast<float>(time_elapsed) * 0.01f; // Move sword right
+		_sword_x += sword_velocity;
+		VideoManager->Move(512.0f, 385.0f); // logo bg
+		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+		VideoManager->DrawImage(_boot_images[1]);
+		VideoManager->Move(_sword_x, 360.0f); // sword
+		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+		VideoManager->Rotate(-90.0f);
+		VideoManager->DrawImage(_boot_images[2]);
+		VideoManager->Move(512.0f, 385.0f); // text
+		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+		VideoManager->DrawImage(_boot_images[3]);
+	}
+	// Sequence four: Spin around the sword
+	else if (total_time >= SEQUENCE_FOUR && total_time < SEQUENCE_FIVE)
+	{
+		_sword_x += static_cast<float>(time_elapsed) * 1.6f * -cos(total_time * 0.01f) - time_elapsed * 0.15f;
+		_sword_y += static_cast<float>(time_elapsed) * 1.2f * -sin(total_time * 0.01f) + time_elapsed * 0.03f;
+		scale = 1.5f * (2.0f + sin((total_time-SEQUENCE_FOUR) * 0.004f - VIDEO_QUARTER_PI));
+		rotation = -(90.0f + SEQUENCE_FOUR * 0.5f) + total_time * 0.5f;
+
+		VideoManager->Move(512.0f, 385.0f); // logo bg
+		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+		VideoManager->DrawImage(_boot_images[1]);
+		
+		VideoManager->Move(512.0f, 385.0f); // text
+		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+		VideoManager->DrawImage(_boot_images[3]);
+
+		VideoManager->Move(_sword_x, _sword_y); // sword
+		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+		VideoManager->Scale(scale, scale);
+		VideoManager->Rotate(rotation);		
+		VideoManager->DrawImage(_boot_images[2]);
+	}
+	// Sequence five: Sword comes back
+	else if (total_time >= SEQUENCE_FIVE && total_time < SEQUENCE_SIX)
+	{
+		// Delta goes from 0.0f to 1.0f
+		float delta = static_cast<float>((total_time - SEQUENCE_FIVE)) / static_cast<float>(SEQUENCE_SIX - SEQUENCE_FIVE);
+		float newScale = (1.0f - delta) * scale + 1.0f * delta;
+		static float rotationDifference = (float)(((int)rotation)%360);
+		float newRotation = rotation - (delta) * rotationDifference + 360.0f * delta;
+		float newX = (1.0f - delta) * _sword_x + 762.0f * delta;
+		float newY = (1.0f - delta) * _sword_y + 310.0f * delta;
+
+		VideoManager->Move(512.0f, 385.0f); // logo bg
+		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+		VideoManager->DrawImage(_boot_images[1]);
+
+		VideoManager->Move(512.0f, 385.0f); // text
+		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+		VideoManager->DrawImage(_boot_images[3]);
+
+		VideoManager->Move(newX, newY); // sword
+		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+		VideoManager->Scale(newScale, newScale);
+		VideoManager->Rotate(newRotation);		
+		VideoManager->DrawImage(_boot_images[2]);
+	}
+	// Sequence six: flash of light
+	else if (total_time >= SEQUENCE_SIX && total_time < SEQUENCE_SEVEN)
 	{
 		_logo_animating = false;
 	}
-
-	
 }
-
-
 
 
 // Redefines the change_key reference. Waits indefinitely for user to press any key.
@@ -469,6 +532,9 @@ void BootMode::UpdateVideoOptions()
 	resolution << "Resolution: " << VideoManager->GetWidth() << " x " << VideoManager->GetHeight();
 	_video_options_menu.SetOptionText(0, MakeWideString(resolution.str()));
 
+	// Disable resolution selection for now
+	_video_options_menu.EnableOption(0, false);
+
 	// Update text on current video mode
 	if (VideoManager->IsFullscreen())
 		_video_options_menu.SetOptionText(1, MakeWideString("Window mode: full-screen"));
@@ -506,6 +572,18 @@ void BootMode::Update() {
 			VideoManager->FadeScreen(Color::clear, 1.0f);
 		}
 		return;
+	}
+	else if (_logo_animating) // We're animating the opening logo
+	{
+		if (InputManager->ConfirmPress()) // Check here if we want to skip the demo
+		{
+			_logo_animating = false;
+			return;
+		}
+		else
+		{
+			return; // Otherwise skip rest of the event handling
+		}
 	}
 
 	// Update the menu window
