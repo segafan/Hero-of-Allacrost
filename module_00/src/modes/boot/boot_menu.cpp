@@ -37,7 +37,7 @@ _is_windowed(windowed)
 	SetWindowed(_is_windowed);
 
 	// Init the menu window if it's not available yet
-	InitWindow();
+	_InitWindow();
 }
 
 
@@ -123,7 +123,7 @@ void BootMenu::SetWindowed(bool windowed)
 }
 
 
-// brief Sets a new parent for this menu
+// Sets a new parent for this menu
 void BootMenu::SetParent(BootMenu * parent)
 {
 	_parent_menu = parent;
@@ -151,7 +151,7 @@ bool BootMenu::IsWindowed() const
 }
 
 
-// returns true if the currently selected option is enabled
+// Returns true if the currently selected option is enabled
 bool BootMenu::IsSelectionEnabled() const
 {
 	return _current_menu.IsEnabled(_current_menu.GetSelection());
@@ -277,8 +277,8 @@ void BootMenu::ShowWindow(bool toggle)
 }
 
 
-// Inits the menu window
-void BootMenu::InitWindow()
+// Inits the menu window, called in the constructor of the class
+void BootMenu::_InitWindow()
 {
 	if (_menu_window == 0)
 	{

@@ -75,7 +75,7 @@ private:
 	bool _fade_out;
 
 	//! If true, the logo is animating (sword flying and so on...)
-	bool _logo_animating;
+	static bool _logo_animating;
 
 	//! Sword X coordinate
 	float _sword_x;
