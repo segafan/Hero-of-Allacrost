@@ -28,6 +28,7 @@
 
 #include "defs.h"
 #include "utils.h"
+#include "video.h"
 
 //! All calls to global code are wrapped in this namespace.
 namespace hoa_global {
@@ -212,6 +213,8 @@ class GlobalWeapon : public GlobalObject {
 private:
 	GlobalWeapon(const GlobalWeapon&);
 	GlobalWeapon& operator=(const GlobalWeapon&);
+        
+        hoa_battle::BattleStatTypes *_damage_amount;
 public:
 	GlobalWeapon(std::string name, uint32 usable, uint32 id, uint32 count, std::string icon_path);
 	GlobalWeapon();
@@ -240,6 +243,9 @@ class GlobalArmor : public GlobalObject {
 private:
 	GlobalArmor(const GlobalArmor&);
 	GlobalArmor& operator=(const GlobalArmor&);
+        
+        //how many attack points are on this piece of armor
+        std::vector<GlobalAttackPoint> _attack_points;
 public:
 	GlobalArmor(std::string name, uint8 type, uint32 usable, uint32 id, uint32 count, std::string icon_path);
 	GlobalArmor();
@@ -262,24 +268,39 @@ public:
  *****************************************************************************/
 class GlobalSkill {
 private:
+        enum SKILL_TYPE { 
+                ATTACK = 0,
+                DEFENSE = 1,
+                SUPPORT = 2
+        };
 	//! The name of the skill, as will be displayed to the player on the screen.
 	std::string _skill_name;
+        //! The name of the script file to use
+        std::string _script_name;
 	//! The amount of skill points (SP) that the skill consumes (zero is valid).
 	uint32 _sp_usage;
 
-	uint32 _skill_type; //defined by the enums
+	uint32 _skill_type; //defined by the enums, attack/defense/support
 
-	uint32 _attack;
-	uint32 _defense;
-	uint32 _support;
+        //! The warm up time required for this skill
+        uint32 _warmup_time;
+        //! The cooldown time required for this skill
+        uint32 _cooldown_time;
 
 	//! The level required to use this skill
-	uint32 _levelRequired;
-	uint32 _numArguments;
+	uint32 _level_required;
+        
+        //! The number of targets the skill takes
+	uint32 _num_arguments;
+        
+        //! The potency of each element / physical ability of this skill
+        //  Not necessarily a resistance, because it may also be an attack
+        //  So simply "stats" for now
+        hoa_battle::BattleStatTypes *_stats;
 
 public:
 
-	GlobalSkill(std::string name, uint32 sp);
+	GlobalSkill(std::string script_name);
 	GlobalSkill();
 	~GlobalSkill();
 
@@ -316,21 +337,15 @@ private:
 	//! The y position of the attack point on the sprite.
 	float _y_position;
 
-	//! The amount of defense ability this attack point has.
-	uint32 _defense;
 	//! The amount of evade ability this attack point has.
 	uint32 _evade;
-	//! A bit-mask of elemental weaknesses of the attack point.
-	uint8 _elemental_weakness;
-	//! A bit-mask of elemental resistances of the attack point.
-	uint8 _elemental_resistance;
-	//! A bit-mask of status weaknesses of the attack point.
-	uint8 _status_weakness;
-	//! A bit-mask of status resistances of the attack point.
-	uint8 _status_resistance;
+
+        //! The resistances of the attack point
+        hoa_battle::BattleStatTypes *_resistance;
+        
 public:
-	GlobalAttackPoint(float x, float y, uint32 def, uint32 eva, uint8 elem_weak,
-	             uint8 elem_res, uint8 stat_weak, uint8 stat_res);
+	GlobalAttackPoint(float x, float y, uint32 volt, uint32 earth, uint32 water, uint32 fire, 
+                                        uint32 piercing, uint32 slashing, uint32 bludgeoning);
 	GlobalAttackPoint();
 	~GlobalAttackPoint();
 // 	GlobalAttackPoint(const GlobalAttackPoint&);
@@ -343,11 +358,12 @@ public:
 	float GetXPosition() { return _x_position; }
 	void SetYPosition(float y) { _y_position = y; }
 	float GetYPosition() { return _y_position; }
-	void SetDefense(uint32 def) { _defense = def; }
-	uint32 GetDefense() { return _defense; }
+	//void SetDefense(uint32 def) { _defense = def; }
+	//uint32 GetDefense() { return _defense; }
 	void SetEvade(uint32 eva) { _evade = eva; }
 	uint32 GetEvade() { return _evade; }
-	void SetElementWeakness(uint8 elem_weak) { _elemental_weakness = elem_weak; }
+	/*
+        void SetElementWeakness(uint8 elem_weak) { _elemental_weakness = elem_weak; }
 	uint8 GetElementWeakness() { return _elemental_weakness; }
 	void SetElementResistance(uint8 elem_res) { _elemental_resistance = elem_res; }
 	uint8 GetElementResistance() { return _elemental_resistance; }
@@ -355,6 +371,7 @@ public:
 	uint8 GetStatusWeakness() { return _status_weakness; }
 	void SetStatusResistance(uint8 stat_res) { _status_resistance = stat_res; }
 	uint8 GetStatusResistance() { return _status_resistance; }
+        */
 	//@}
 };
 
@@ -391,7 +408,7 @@ private:
 	//! The enemy's name, as seen by the player on the screen.
 	std::string _enemy_name;
 	//! The base of the character's file name, used to retrieve various data for the enemy.
-	std::string _filename;
+	std::string _file_name;
 	//! An identification number for the enemy type.
 	uint32 _enemy_id;
 	//! The width of the enemy sprite, in number of "virtual battle tiles".
@@ -405,8 +422,8 @@ private:
 	//! The frame images for the enemy sprite.
 	std::map<std::string, std::vector<hoa_video::StillImage> > _sprite_animations; 
 	//std::vector<hoa_video::StillImage> _sprite_frames;
-
-	//! The current number of hit points for the enemy.
+	
+        //! The current number of hit points for the enemy.
 	uint32 _hit_points;
 	//! The maximum number of hit points that the enemy may have.
 	uint32 _max_hit_points;
@@ -426,7 +443,7 @@ private:
 	uint32 _agility;
 	
 	//! The speed which the character should move in battle
-	uint32 _movementSpeed;
+	uint32 _movement_speed;
 
 	//! \name Starting Base Statistics
 	//@{
@@ -451,7 +468,7 @@ private:
 	//@}
 
 public:
-	GlobalEnemy();
+	GlobalEnemy(std::string file_name);
 	~GlobalEnemy();
 // 	GlobalEnemy(const GlobalEnemy&) {}
 // 	GlobalEnemy& operator=(const GlobalEnemy&) {}
@@ -498,8 +515,8 @@ public:
 	uint32 GetIntelligence() const { return _intelligence; }
 	void SetAgility(uint32 agi) { _agility = agi; }
 	uint32 GetAgility() const { return _agility; }
-	void SetMovementSpeed(uint32 ms) { _movementSpeed = ms; }
-	uint32 GetMovementSpeed() const { return _movementSpeed; }
+	void SetMovementSpeed(uint32 ms) { _movement_speed = ms; }
+	uint32 GetMovementSpeed() const { return _movement_speed; }
 	
 	uint32 GetBaseHitPoints() const { return _base_hit_points; }
 	uint32 GetBaseSkillPoints() const { return _base_skill_points; }
@@ -517,8 +534,10 @@ public:
 	const std::vector<GlobalAttackPoint> GetAttackPoints() const { return _attack_points; }
 
 	void AddSkill(GlobalSkill *sk) { _enemy_skills.push_back(sk); }
+        
 	void AddAnimation(std::string anim, std::vector<hoa_video::StillImage> v) { _sprite_animations[anim] = v; }
-	std::vector<hoa_video::StillImage> GetAnimation(std::string anim) { return _sprite_animations[anim]; }
+	std::vector<hoa_video::StillImage> GetAnimation(std::string anim) { 
+        return _sprite_animations[anim]; }
 	//@}
 }; // class GlobalEnemy
 
@@ -583,12 +602,12 @@ private:
 	uint32 _agility;
 	
 	//! The speed which the character should move in battle
-	uint32 _movementSpeed;
+	uint32 _movement_speed;
 
 	//! The frame images for the character's map sprite.
 	std::vector<hoa_video::StillImage> _map_frames;
 	//! The frame images for the character's battle sprite.
-	std::map<std::string, hoa_video::AnimatedImage> _battle_animation;
+	std::map<std::string, hoa_video::AnimatedImage > _battle_animation;
 public:
 	GlobalCharacter(std::string na, std::string fn, uint32 id);
 	~GlobalCharacter();
@@ -646,8 +665,13 @@ public:
 	void AddDefenseSkill(GlobalSkill *sk) { _defense_skills.push_back(sk); }
 	void AddSupportSkill(GlobalSkill *sk) { _support_skills.push_back(sk); }
 	
-	uint32 GetMovementSpeed() { return _movementSpeed; }
-	void SetMovementSpeed(uint32 ms) { _movementSpeed = ms; }
+	uint32 GetMovementSpeed() { return _movement_speed; }
+	void SetMovementSpeed(uint32 ms) { _movement_speed = ms; }
+        
+        void AddAnimation(std::string anim, hoa_video::AnimatedImage v) { _battle_animation[anim] = v; }
+	hoa_video::AnimatedImage GetAnimation(std::string anim) { 
+                return _battle_animation[anim]; 
+        }
 	//@}
 };
 
