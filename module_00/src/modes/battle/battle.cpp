@@ -65,8 +65,7 @@ Actor::Actor(BattleMode *ABattleMode, uint32 AXLocation, uint32 AYLocation) :
         _defensive_mode_bonus(0),
         _total_strength_modifier(0),
         _total_agility_modifier(0),
-        _total_intelligence_modifier(0),
-        _animation("NEUTRAL")
+        _total_intelligence_modifier(0)
 {
 
 }
@@ -172,16 +171,10 @@ void Actor::SetPerformingAction(bool AIsPerforming) {
 }
 
 /*!
-        GlobalCharacter and GlobalEnemy will use a Map of sorts
-        to map strings to image animations
-        This sets our characters animation
+        Empty method.  For scripting purposes only.
+        PlayerActor is animated.  Enemy is not.
 */
-void Actor::SetAnimation(std::string ACurrentAnimation) {
-        _animation = ACurrentAnimation;
-}
-
-const std::string Actor::GetAnimation() const {
-        return _animation;
+void Actor::SetAnimation(std::string AAnimation) {
 }
 
 
@@ -222,9 +215,38 @@ BattleUI::BattleUI(BattleMode * const ABattleMode) :
         _current_hover_selection(0),
         _number_menu_items(0)
 {
+        _general_menu_window.Create(68*4+20, 64*2+20);
+        _general_menu_window.SetPosition(10, 630);
+        _general_menu_window.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+        _general_menu_window.Show();
 
+        _general_menu.SetFont("default");
+        _general_menu.SetCellSize(68.0f, 64.0f);
+        _general_menu.SetSize(4, 2);
+        _general_menu.SetPosition(30.0f, 620.0f);
+        _general_menu.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+        _general_menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+        _general_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
+        _general_menu.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+        
+        vector<hoa_utils::ustring> formatText;
+        formatText.push_back(MakeWideString("<img/icons/battle/attack_menu_icon.png>"));
+        formatText.push_back(MakeWideString("<img/icons/battle/defense_menu_icon.png>"));
+        formatText.push_back(MakeWideString("<img/icons/battle/support_menu_icon.png>"));
+        formatText.push_back(MakeWideString("<img/icons/battle/item_menu_icon.png>"));
+        formatText.push_back(MakeWideString("Attack<C>"));
+        formatText.push_back(MakeWideString("Defense<C>"));
+        formatText.push_back(MakeWideString("Support<C>"));
+        formatText.push_back(MakeWideString("Item<C>"));
+        
+        _general_menu.SetOptions(formatText);
+        _general_menu.SetSelection(4);
 }
 		
+BattleUI::~BattleUI() {
+                _general_menu_window.Destroy();
+                //_general_menu.Destroy();
+}
 /*!
         Get the actor we are currently on
 */
@@ -274,6 +296,22 @@ void BattleUI::SetNumberNecessarySelections(uint32 ANumSelections) {
         _necessary_selections = ANumSelections;
 }
 
+/*!
+        Draw the actual windows
+*/
+void BattleUI::Draw() {
+        _general_menu_window.Draw();
+        _general_menu.Draw();
+}
+
+/*!
+        Update the windows
+*/
+void BattleUI::Update(uint32 AUpdateTime) {
+        _general_menu_window.Update(AUpdateTime);
+        _general_menu.Update(AUpdateTime);
+}
+
 /*! PlayerCharacter 
 
 
@@ -282,8 +320,10 @@ void BattleUI::SetNumberNecessarySelections(uint32 ANumSelections) {
 
 PlayerActor::PlayerActor(GlobalCharacter * const AWrapped, BattleMode * const ABattleMode, uint32 AXLoc, uint32 AYLoc) :
         Actor(ABattleMode, AXLoc, AYLoc),
-        _wrapped_character(AWrapped) {
+        _wrapped_character(AWrapped)
+         {
         
+        _current_animation = _wrapped_character->GetAnimation("IDLE");
 }
 
 PlayerActor::~PlayerActor() {
@@ -291,15 +331,19 @@ PlayerActor::~PlayerActor() {
 }
 
 void PlayerActor::Update(uint32 ATimeElapsed) {
-
+        _current_animation.Update(); //update the current animation
 }
 
 void PlayerActor::Draw() {
-
+        //move to x,y
+        VideoManager->Move(GetXLocation(),GetYLocation());
+        //draw the current animation
+        VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+        _current_animation.Draw();
 }
 
 /*!
-        Get the skills from GlobalCharacter
+        \brief Get the skills from GlobalCharacter
 */
 std::vector<GlobalSkill *> PlayerActor::GetAttackSkills() const {
        return _wrapped_character->GetAttackSkills();
@@ -314,7 +358,7 @@ std::vector<GlobalSkill *> PlayerActor::GetSupportSkills() const {
 }
 
 /*!
-        More getters from GlobalCharacter
+        \brief More getters from GlobalCharacter
 */
 const std::string PlayerActor::GetName() const {
         return _wrapped_character->GetName();
@@ -364,6 +408,10 @@ uint32 PlayerActor::GetMovementSpeed() const {
         return _wrapped_character->GetMovementSpeed();
 }
 
+void PlayerActor::SetAnimation(std::string ACurrentAnimation) {
+        _current_animation = _wrapped_character->GetAnimation(ACurrentAnimation);
+}
+
 
 /*! EnemyActor
 
@@ -373,8 +421,6 @@ EnemyActor::EnemyActor(GlobalEnemy AGlobalEnemy, BattleMode * const ABattleMode,
         Actor(ABattleMode, AXLoc, AYLoc),
         _wrapped_enemy(AGlobalEnemy) {
         
-        
-        
 }
 
 EnemyActor::~EnemyActor() {
@@ -382,11 +428,55 @@ EnemyActor::~EnemyActor() {
 }
 
 void EnemyActor::Update(uint32 ATimeElapsed) {
-
+        static double totalHealthLost = 0;
+        totalHealthLost += ATimeElapsed/300.0f;
+        
+        float health = GetHealth() - totalHealthLost;
+        if(health - (int)health > .5) 
+                health = (int)health + 1;
+        else
+                health = (int)health;
+        
+        if(GetHealth() > 0)
+                SetHealth(health);
+                
+        if(totalHealthLost > .5)
+                totalHealthLost = 0;
 }
 
 void EnemyActor::Draw() {
-
+        std::vector<hoa_video::StillImage> animations = _wrapped_enemy.GetAnimation("IDLE");
+        		
+	VideoManager->Move(GetXLocation(),GetYLocation());
+        VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+        
+        if(animations.size() == 1) {
+                VideoManager->DrawImage(animations[0]);
+                return;
+        }
+	uint32 health = GetHealth();
+	uint32 maxhealth = GetMaxHealth();
+	
+        double percent = health/(double)maxhealth;
+        
+	if(percent < 0.33) {
+		VideoManager->DrawImage(animations[2]);
+		double alpha = 1.0f-(percent*3);
+		VideoManager->DrawImage(animations[3], Color(1.0f, 1.0f, 1.0f, alpha));
+	}
+	else if(percent <= 0.66) {
+		VideoManager->DrawImage(animations[1]);
+		double alpha = 1.0f-((percent-0.33f)*3);
+		VideoManager->DrawImage(animations[2], Color(1.0f, 1.0f, 1.0f, alpha));
+	}
+	else if(percent < 1.0f){
+		VideoManager->DrawImage(animations[0]);
+		double alpha = 1.0f-((percent-0.66f)*3);
+		VideoManager->DrawImage(animations[1], Color(1.0f, 1.0f, 1.0f, alpha));
+	}
+        else {
+                VideoManager->DrawImage(animations[0]);
+        }
 }
 
 /*!
@@ -410,7 +500,7 @@ const std::vector<GlobalSkill *> EnemyActor::GetSkills() const {
         return _wrapped_enemy.GetSkills();
 }
 
-std::string EnemyActor::GetName() const {
+const std::string EnemyActor::GetName() const {
         return _wrapped_enemy.GetName();
 }
 
@@ -611,13 +701,9 @@ BattleMode::BattleMode() :
 {
         Reset();
         
-        //Test load a background
-        StillImage backgrd;
-	backgrd.SetFilename("img/backdrops/battle_screen.jpg");
-        backgrd.SetDimensions(SCREEN_LENGTH*TILE_SIZE, SCREEN_HEIGHT*TILE_SIZE);
-        _battle_images.push_back(backgrd);
-	if(!VideoManager->LoadImage(_battle_images[0]))
-		cerr << "Failed to load background image." << endl; //failed to laod image
+        _TEMP_LoadTestData();
+        
+        //from the global party average level, level up all global enemies passed in
 }
 
 BattleMode::~BattleMode() {
@@ -626,6 +712,13 @@ BattleMode::~BattleMode() {
 	for(; pc_itr != _player_actors.end(); pc_itr++) {
 		delete *pc_itr;
 	}
+        _player_actors.clear();
+        _players_characters_in_battle.clear();
+        
+        std::deque<private_battle::EnemyActor *>::iterator it = _enemy_actors.begin();
+        for(; it != _enemy_actors.end(); it++)
+                delete *it;
+        _enemy_actors.clear();
 
         //get rid of the battle images that we created (TEMP)
         for (uint32 i = 0; i < _battle_images.size(); i++) {
@@ -655,6 +748,8 @@ void BattleMode::Update() {
                 _enemy_actors[i]->DoAI();
         }
         
+        _user_interface.Update(updateTime);
+        
         //check if any scripts need to run here
 }
 
@@ -662,6 +757,7 @@ void BattleMode::Update() {
 void BattleMode::Draw() {
         _DrawBackground();
         _DrawCharacters();
+        _user_interface.Draw();
 }
 
 void BattleMode::_DrawBackground() {
@@ -727,6 +823,196 @@ std::deque<PlayerActor *> BattleMode::ReturnCharacters() const {
         return _players_characters_in_battle;
 }
 
+void BattleMode::_PlayerVictory() {
+        //stubbed for now ... go back to map mode?  Tell the GUI, show the player, pop the state
+}
+        
+void BattleMode::_PlayerDefeat() {
+        //tell the GUI, and either revert to last save, quit game, or reload battle
+}
+
+void BattleMode::_BuildPlayerCharacters() {
+        //from global party, get characters
+        //put them into PlayerCharacters
+        
+        //make sure the list is clean first
+        std::deque<PlayerActor *>::iterator pc_itr = _player_actors.begin();
+	for(; pc_itr != _player_actors.end(); pc_itr++) {
+		delete *pc_itr;
+	}
+        _player_actors.clear();
+        _players_characters_in_battle.clear();
+
+}
+
+void BattleMode::_BuildEnemyActors() {
+        //the x and y location of the enemies, based on how many enemies there are in the list
+        int x = 10; //dummy variables
+        int y = 10;
+        
+        //make sure the list is clean first
+        /*
+        std::deque<private_battle::EnemyActor *>::iterator it = _enemy_actors.begin();
+        for(; it != _enemy_actors.end(); it++)
+                delete *it;
+        _enemy_actors.clear();
+        
+        std::deque<hoa_global::GlobalEnemy>::iterator it = _global_enemies.begin();
+        for(; it != _global_enemies.end(); it++)
+        {
+                EnemyActor *enemy = new EnemyActor(*it, this, x, y);
+                _enemy_actors.push_back(enemy);
+        }
+        */
+}
+
+void BattleMode::SwapCharacters(private_battle::PlayerActor *AActorToRemove, private_battle::PlayerActor *AActorToAdd) {
+        //put AActorToAdd at AActorToRemove's location
+        std::deque<private_battle::PlayerActor *>::iterator it = _players_characters_in_battle.begin();
+        for(; it != _players_characters_in_battle.end(); it++) {
+                if(*it == AActorToRemove) {
+                        _players_characters_in_battle.erase(it);
+                        break;
+                }
+        }
+
+        //set location and origin to removing characters location
+        //and origin
+        AActorToAdd->SetXOrigin(AActorToRemove->GetXOrigin());
+        AActorToAdd->SetYOrigin(AActorToRemove->GetYOrigin());
+        AActorToAdd->SetXLocation(AActorToRemove->GetXOrigin());
+        AActorToAdd->SetYLocation(AActorToRemove->GetYOrigin());
+        
+        _players_characters_in_battle.push_back(AActorToAdd); //add the other character to battle
+}
+
+void BattleMode::_TEMP_LoadTestData() {
+        StillImage backgrd;
+	backgrd.SetFilename("img/backdrops/battle/battle_cave.png");
+        backgrd.SetDimensions(SCREEN_LENGTH*TILE_SIZE, SCREEN_HEIGHT*TILE_SIZE);
+        _battle_images.push_back(backgrd);
+	if(!VideoManager->LoadImage(_battle_images[0]))
+		cerr << "Failed to load background image." << endl; //failed to laod image
+                
+        std::vector<hoa_video::StillImage> enemyAnimation;
+	StillImage anim;
+	anim.SetDimensions(64, 64); 
+	anim.SetFilename("img/sprites/battle/enemies/spider_d0.png");
+	enemyAnimation.push_back(anim);
+	anim.SetFilename("img/sprites/battle/enemies/spider_d1.png");
+	enemyAnimation.push_back(anim);
+	anim.SetFilename("img/sprites/battle/enemies/spider_d2.png");
+	enemyAnimation.push_back(anim);
+	anim.SetFilename("img/sprites/battle/enemies/spider_d3.png");
+	enemyAnimation.push_back(anim);
+	
+	VideoManager->BeginImageLoadBatch();
+	for (uint32 i = 0; i < enemyAnimation.size(); i++) {
+		if(!VideoManager->LoadImage(enemyAnimation[i]))
+                        cerr << "Failed to load spider image." << endl; //failed to laod image
+	}
+	VideoManager->EndImageLoadBatch();
+        
+        std::vector<hoa_video::StillImage> enemyAnimation2;
+	StillImage anim2;
+	anim2.SetDimensions(64, 128); 
+	anim2.SetFilename("img/sprites/battle/enemies/skeleton_d0.png");
+	enemyAnimation2.push_back(anim2);
+        anim2.SetFilename("img/sprites/battle/enemies/skeleton_d1.png");
+	enemyAnimation2.push_back(anim2);
+        anim2.SetFilename("img/sprites/battle/enemies/skeleton_d2.png");
+	enemyAnimation2.push_back(anim2);
+        anim2.SetFilename("img/sprites/battle/enemies/skeleton_d3.png");
+	enemyAnimation2.push_back(anim2);
+	
+	VideoManager->BeginImageLoadBatch();
+	for (uint32 i = 0; i < enemyAnimation2.size(); i++) {
+		if(!VideoManager->LoadImage(enemyAnimation2[i]))
+                        cerr << "Failed to load skeleton image." << endl; //failed to laod image
+	}
+	VideoManager->EndImageLoadBatch();
+        
+                
+        std::vector<hoa_video::StillImage> enemyAnimation3;
+	StillImage anim3;
+	anim3.SetDimensions(128, 64); 
+	anim3.SetFilename("img/sprites/battle/enemies/greenslime_d0.png");
+	enemyAnimation3.push_back(anim3);
+        anim3.SetFilename("img/sprites/battle/enemies/greenslime_d1.png");
+	enemyAnimation3.push_back(anim3);
+        anim3.SetFilename("img/sprites/battle/enemies/greenslime_d2.png");
+	enemyAnimation3.push_back(anim3);
+        anim3.SetFilename("img/sprites/battle/enemies/greenslime_d3.png");
+	enemyAnimation3.push_back(anim3);
+	
+	VideoManager->BeginImageLoadBatch();
+	for (uint32 i = 0; i < enemyAnimation3.size(); i++) {
+		if(!VideoManager->LoadImage(enemyAnimation3[i]))
+                        cerr << "Failed to load green slime image." << endl; //failed to laod image
+	}
+	VideoManager->EndImageLoadBatch();
+        
+        std::vector<hoa_video::StillImage> playerAnimation;
+	StillImage anim4;
+	anim4.SetDimensions(64, 128); 
+	anim4.SetFilename("img/sprites/battle/characters/claudius_idle_f1.png");
+	playerAnimation.push_back(anim4);
+        anim4.SetFilename("img/sprites/battle/characters/claudius_idle_f2.png");
+	playerAnimation.push_back(anim4);
+        anim4.SetFilename("img/sprites/battle/characters/claudius_idle_f3.png");
+	playerAnimation.push_back(anim4);
+        anim4.SetFilename("img/sprites/battle/characters/claudius_idle_f4.png");
+	playerAnimation.push_back(anim4);
+        anim4.SetFilename("img/sprites/battle/characters/claudius_idle_f5.png");
+	playerAnimation.push_back(anim4);
+        anim4.SetFilename("img/sprites/battle/characters/claudius_idle_f6.png");
+	playerAnimation.push_back(anim4);
+	
+	VideoManager->BeginImageLoadBatch();
+	for (uint32 i = 0; i < playerAnimation.size(); i++) {
+		if(!VideoManager->LoadImage(playerAnimation[i]))
+                        cerr << "Failed to load spider image." << endl; //failed to laod image
+	}
+	VideoManager->EndImageLoadBatch();
+        
+        AnimatedImage ai;
+        for(uint32 i = 0; i < playerAnimation.size(); i++) {
+                ai.AddFrame(playerAnimation[i], 10);
+        }
+        
+        
+        GlobalCharacter *claud = GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS);
+        if(claud == 0) {
+                claud = new GlobalCharacter("Claudius", "claudius", GLOBAL_CLAUDIUS);
+                GlobalManager->AddCharacter(claud);
+        }
+        
+        ai.SetFrameIndex(0);
+        claud->AddAnimation("IDLE", ai);
+        
+	cerr << "Creating claudius player character." << endl;
+	PlayerActor *claudius = new PlayerActor(claud, this, 250, 200);
+	_player_actors.push_back(claudius);
+        _players_characters_in_battle.push_back(claudius);
+	
+	GlobalEnemy e("spider");
+	e.AddAnimation("IDLE", enemyAnimation);
+	EnemyActor *enemy = new EnemyActor(e, this, 770, 50);
+	_enemy_actors.push_back(enemy);
+	enemy->LevelUp(10);
+        
+        GlobalEnemy e2("skeleton");
+	e2.AddAnimation("IDLE", enemyAnimation2);
+	EnemyActor *enemy2 = new EnemyActor(e2, this, 805, 300);
+	_enemy_actors.push_back(enemy2);
+	enemy2->LevelUp(10);
+        
+        GlobalEnemy e3("slime");
+	e3.AddAnimation("IDLE", enemyAnimation3);
+	EnemyActor *enemy3 = new EnemyActor(e3, this, 860, 175);
+	_enemy_actors.push_back(enemy3);
+	enemy3->LevelUp(10);
+}
                 
 } // namespace hoa_battle
 
