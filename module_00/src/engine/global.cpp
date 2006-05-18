@@ -17,6 +17,9 @@
 #include "global.h"
 #include "utils.h"
 #include "video.h"
+#include "data.h"
+
+#include "battle.h"
 
 #include <string>
 
@@ -26,6 +29,8 @@ using namespace hoa_video;
 using namespace hoa_audio;
 using namespace hoa_utils;
 using namespace hoa_map;
+using namespace hoa_battle;
+using namespace hoa_data;
 
 namespace hoa_global {
 
@@ -88,18 +93,39 @@ GlobalItem::~GlobalItem() {}
 
 GlobalWeapon::GlobalWeapon(string name, uint32 usable, uint32 id, uint32 count, string icon_path) :
 	GlobalObject(name, GLOBAL_WEAPON, usable, id, count, icon_path) {
+        
+        _damage_amount = new BattleStatTypes();
+        
+        ReadDataDescriptor read_data;
+        string fileName = "dat/objects/" + name + ".lua";
+	if (!read_data.OpenFile(fileName.c_str())) {
+		cout << "GLOBAL ERROR: failed to load weapon file: " << name << endl;
+	}
+        else {
+                _damage_amount->volt = read_data.ReadInt("volt_damage");
+                _damage_amount->earth = read_data.ReadInt("earth_damage");
+                _damage_amount->water = read_data.ReadInt("water_damage");
+                _damage_amount->fire = read_data.ReadInt("fire_damage");
+                _damage_amount->piercing = read_data.ReadInt("piercing_damage");
+                _damage_amount->slashing = read_data.ReadInt("slashing_damage");
+                _damage_amount->bludgeoning = read_data.ReadInt("bludgeoning_damage");
+        }
 }
-
 
 
 GlobalWeapon::GlobalWeapon() :
 	GlobalObject() {
 	obj_type = GLOBAL_WEAPON;
+        _damage_amount = 0;
 }
 
 
 
-GlobalWeapon::~GlobalWeapon() {}
+GlobalWeapon::~GlobalWeapon() {
+        if(_damage_amount != 0)
+                delete _damage_amount;
+        _damage_amount = 0;
+}
 
 // ****************************************************************************
 // ******************************** GlobalArmor ************************************
@@ -107,6 +133,33 @@ GlobalWeapon::~GlobalWeapon() {}
 
 GlobalArmor::GlobalArmor(string name, uint8 type, uint32 usable, uint32 id, uint32 count, string icon_path) :
 	GlobalObject(name, type, usable, id, count, icon_path) {
+        
+        /*
+        float x, float y, uint32 volt, uint32 earth, uint32 water, uint32 fire, 
+                                        uint32 piercing, uint32 slashing, uint32 bludgeoning
+        */
+        ReadDataDescriptor read_data;
+        string fileName = "dat/objects/" + name + ".lua";
+	if (!read_data.OpenFile(fileName.c_str())) {
+		cout << "GLOBAL ERROR: failed to load weapon file: " << name << endl;
+	}
+        else {
+                uint32 numAttackPoints = read_data.ReadInt("number_of_attack_points");
+                for(uint32 i = 0; i < numAttackPoints; i++) {
+                        float x = read_data.ReadFloat(("x_"+i));
+                        float y = read_data.ReadFloat(("y_"+i));
+                        uint32 volt = read_data.ReadInt(("volt_defense_"+i));
+                        uint32 earth = read_data.ReadInt(("earth_defense_"+i));
+                        uint32 water = read_data.ReadInt(("water_defense_"+i));
+                        uint32 fire = read_data.ReadInt(("fire_defense_"+i));
+                        uint32 piercing = read_data.ReadInt(("piercing_defense_"+i));
+                        uint32 slashing = read_data.ReadInt(("slashing_defense_"+i));
+                        uint32 bludgeoning = read_data.ReadInt(("bludgeoning_defense_"+i));
+                        
+                        GlobalAttackPoint ap(x,y,volt,earth,water,fire,piercing,slashing,bludgeoning);
+                        _attack_points.push_back(ap);
+                }
+        }
 }
 
 
@@ -123,9 +176,43 @@ GlobalArmor::~GlobalArmor() {}
 // ******************************** GlobalSkill ************************************
 // ****************************************************************************
 
-GlobalSkill::GlobalSkill(string name, uint32 sp) {
-	_skill_name = name;
-	_sp_usage = sp;
+GlobalSkill::GlobalSkill(string script_name) {
+	_script_name = script_name;
+        
+        ReadDataDescriptor read_data;
+        string fileName = "dat/skills/" + _script_name + ".lua";
+	if (!read_data.OpenFile(fileName.c_str())) {
+		cout << "GLOBAL ERROR: failed to load skill file: " << _script_name << endl;
+	}
+        else {
+                _skill_name = read_data.ReadString("skill_name");
+                string type = read_data.ReadString("skill_type");
+                if(type == "ATTACK")
+                        _skill_type = ATTACK;
+                else if(type == "DEFENSE")
+                        _skill_type = DEFENSE;
+                else if(type == "SUPPORT")
+                        _skill_type = SUPPORT;
+                else {
+                        cout << "GLOBAL ERROR: Unknown type for skill: " << _script_name << endl;
+                }
+                
+                        
+                _sp_usage = read_data.ReadInt("sp_usage");
+                _warmup_time = read_data.ReadInt("warmup_time");
+                _cooldown_time = read_data.ReadInt("cooldown_time");
+                _level_required = read_data.ReadInt("level_required");
+                _num_arguments = read_data.ReadInt("num_arguments");
+                
+                _stats = new BattleStatTypes();
+                _stats->volt = read_data.ReadInt("volt_level");
+                _stats->earth = read_data.ReadInt("earth_level");
+                _stats->water = read_data.ReadInt("water_level");
+                _stats->fire = read_data.ReadInt("fire_level");
+                _stats->piercing = read_data.ReadInt("piercing_level");
+                _stats->slashing = read_data.ReadInt("slashing_level");
+                _stats->bludgeoning = read_data.ReadInt("bludgeoning_level");
+        }
 }
 
 
@@ -138,23 +225,28 @@ GlobalSkill::GlobalSkill() {
 
 
 GlobalSkill::~GlobalSkill() {
-
+        if(_stats != 0)
+                delete _stats;
+        _stats = 0;
 }
 
 // ****************************************************************************
 // ****************************** GlobalAttackPoint ********************************
 // ****************************************************************************
 
-GlobalAttackPoint::GlobalAttackPoint(float x, float y, uint32 def, uint32 eva, uint8 elem_weak,
-                           uint8 elem_res, uint8 stat_weak, uint8 stat_res) {
+GlobalAttackPoint::GlobalAttackPoint(float x, float y, uint32 volt, uint32 earth, uint32 water, uint32 fire, 
+                                        uint32 piercing, uint32 slashing, uint32 bludgeoning) {
 	_x_position = x;
 	_y_position = y;
-	_defense = def;
-	_evade = eva;
-	_elemental_weakness = elem_weak;
-	_elemental_resistance = elem_res;
-	_status_weakness = stat_weak;
-	_status_resistance = stat_res;
+	
+        _resistance = new BattleStatTypes();
+        _resistance->volt = volt;
+        _resistance->earth = earth;
+        _resistance->water = water;
+        _resistance->fire = fire;
+        _resistance->piercing = piercing;
+        _resistance->slashing = slashing;
+        _resistance->bludgeoning = bludgeoning;
 }
 
 
@@ -162,31 +254,77 @@ GlobalAttackPoint::GlobalAttackPoint(float x, float y, uint32 def, uint32 eva, u
 GlobalAttackPoint::GlobalAttackPoint() {
 	_x_position = 0;
 	_y_position = 0;
-	_defense = 0;
-	_evade = 0;
-	_elemental_weakness = GLOBAL_NO_ELEMENTAL;
-	_elemental_resistance = GLOBAL_NO_ELEMENTAL;
-	_status_weakness = GLOBAL_NO_STATUS;
-	_status_resistance = GLOBAL_NO_STATUS;
+	
+        _resistance = 0;
 }
 
 
 
-GlobalAttackPoint::~GlobalAttackPoint() {}
+GlobalAttackPoint::~GlobalAttackPoint() {
+        if(_resistance != 0)
+                delete _resistance;
+        _resistance = 0;
+}
 
 // ****************************************************************************
 // ******************************** GlobalEnemy ************************************
 // ****************************************************************************
 
-GlobalEnemy::GlobalEnemy() {
-	_base_hit_points = 20;
-	_growth_hit_points = 5;
-	_base_strength = 1;
-	_growth_strength = 1;
-	_base_intelligence = 1;
-	_growth_intelligence = 1;
-	_base_agility = 1;
-	_growth_agility = 1;
+GlobalEnemy::GlobalEnemy(string file_name) {
+        _file_name = file_name;
+        
+         ReadDataDescriptor read_data;
+        string fileName = "dat/enemies/" + _file_name + ".lua";
+	if (!read_data.OpenFile(fileName.c_str())) {
+		cout << "GLOBAL ERROR: failed to load enemy file: " << _file_name << endl;
+	}
+        else {
+                _enemy_id = read_data.ReadInt("id");
+                _enemy_width = read_data.ReadInt("width");
+                _enemy_height = read_data.ReadInt("height");
+                uint32 numSkills = read_data.ReadInt("number_of_skills");
+                for(uint32 i = 0; i < numSkills; i++) {
+                        _enemy_skills.push_back(new GlobalSkill(read_data.ReadString(("skill_" + i))));
+                }
+                
+                uint32 numAnimations = read_data.ReadInt("number_of_animations");
+                for(uint32 i = 0; i < numAnimations; i++) {
+                        string animationName = read_data.ReadString(("animation_name_" + i));
+                        vector<StillImage> animations;
+                        uint32 numFrames = read_data.ReadInt(("num_frames_" + i));
+                        for(uint32 j = 0; j < numFrames; j++) {
+                                string fileNameString = "file_name_" + i + '_' + j;
+                                string x_dimensionString = "x_dimension_" + i + '_' + j;
+                                string y_dimensionString = "y_dimension_" + i + '_' + j;
+                                string fileName = read_data.ReadString(fileNameString.c_str());
+                                uint32 x_dimension = read_data.ReadInt(x_dimensionString.c_str());
+                                uint32 y_dimension = read_data.ReadInt(y_dimensionString.c_str());
+                                
+                                StillImage i;
+                                i.SetFilename("img/sprites/battle/"+fileName);
+                                i.SetStatic(true);
+                                i.SetDimensions(x_dimension, y_dimension);
+
+                                VideoManager->LoadImage(i);
+                                animations.push_back(i);
+                        }
+                        _sprite_animations[animationName] = animations;
+                }
+                
+                _movement_speed = read_data.ReadInt("movement_speed");
+                _base_hit_points = read_data.ReadInt("base_hit_points");
+                _base_skill_points = read_data.ReadInt("base_skill_points");
+                _base_experience_points = read_data.ReadInt("base_experience_points");
+                _base_strength = read_data.ReadInt("base_strength");
+                _base_intelligence = read_data.ReadInt("base_intelligence");
+                _base_agility = read_data.ReadInt("base_agility");
+                _growth_hit_points = read_data.ReadInt("growth_hit_points");
+                _growth_skill_points = read_data.ReadInt("growth_skill_points");
+                _growth_experience_points = read_data.ReadInt("growth_experience_points");
+                _growth_strength = read_data.ReadInt("growth_strength");
+                _growth_intelligence = read_data.ReadInt("growth_intelligence");
+                _growth_agility = read_data.ReadInt("growth_agility");
+        }
 }
 
 GlobalEnemy::~GlobalEnemy() { }
@@ -210,7 +348,7 @@ void GlobalEnemy::LevelSimulator(uint32 lvl) {
 	_agility = GaussianValue(_agility, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
 	
 	_hit_points = _max_hit_points;
-	_movementSpeed = 5 + _agility%5;
+	//_movement_speed = 5 + _agility%5;
 }
 
 // ****************************************************************************
@@ -284,8 +422,24 @@ GlobalCharacter::GlobalCharacter(std::string na, std::string fn, uint32 id) {
 		VideoManager->LoadImage(_map_frames[i]);
 	}
 	VideoManager->EndImageLoadBatch();
+        
+        /*
+        std::vector<hoa_video::StillImage> claudiusAnimation;
+        StillImage si;
+        si.SetDimensions(64, 128);
+        si.SetFilename("img/sprites/battle/claudius_idle.png");
+        claudiusAnimation.push_back(si);
+
+        if(!VideoManager->LoadImage(claudiusAnimation[0]))
+                cerr << "Failed to load claudius image." << endl; //failed to laod image
+        else
+                 AddAnimation("IDLE", claudiusAnimation);
 	
-	_movementSpeed = 5;
+        std::cout << this << std::endl;
+        std::cout << _battle_animation.size() << std::endl;
+        */
+        
+       _movement_speed = 5;
 }
 
 
@@ -296,10 +450,10 @@ GlobalCharacter::~GlobalCharacter() {
 		VideoManager->DeleteImage(_battle_frames[i]);
 	}*/
 	
-	std::map<std::string, hoa_video::AnimatedImage>::iterator it = _battle_animation.begin();
-	for(; it != _battle_animation.end(); it++) {
+	//std::map<std::string, hoa_video::AnimatedImage>::iterator it = _battle_animation.begin();
+	//for(; it != _battle_animation.end(); it++) {
 		//VideoManager->DeleteImage((*it->second));
-	}
+	//}
 }
 
 // Add xp and increase lvl if necessary
