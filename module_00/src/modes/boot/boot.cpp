@@ -191,16 +191,16 @@ void BootMode::Reset() {
 void BootMode::_AnimateLogo() {
 	// Sequence start times
 	static const uint32 SEQUENCE_ONE = 0;
-	static const uint32 SEQUENCE_TWO = SEQUENCE_ONE + 1000;
+	static const uint32 SEQUENCE_TWO = SEQUENCE_ONE + 2000;
 	static const uint32 SEQUENCE_THREE = SEQUENCE_TWO + 2000;
 	static const uint32 SEQUENCE_FOUR = SEQUENCE_THREE + 860;
 	static const uint32 SEQUENCE_FIVE = SEQUENCE_FOUR + 2500;
 	static const uint32 SEQUENCE_SIX = SEQUENCE_FIVE + 3000;
-	static const uint32 SEQUENCE_SEVEN = SEQUENCE_SIX + 1000;
-	static const uint32 SEQUENCE_EIGHT = SEQUENCE_SEVEN + 1000;
+	static const uint32 SEQUENCE_SEVEN = SEQUENCE_SIX + 2000;
+	static const uint32 SEQUENCE_EIGHT = SEQUENCE_SEVEN + 2000;
 
-	static float scale = 0.0f;
-	static float rotation = 0.0f;
+	static float scale = 0.0f; // Sword scale
+	static float rotation = 0.0f; // Sword rotation
 
 	// Total time in ms
 	static uint32 total_time = 0;
@@ -259,11 +259,9 @@ void BootMode::_AnimateLogo() {
 		VideoManager->Move(512.0f, 385.0f); // logo bg
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 		VideoManager->DrawImage(_boot_images[1]);
-		
 		VideoManager->Move(512.0f, 385.0f); // text
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 		VideoManager->DrawImage(_boot_images[3]);
-
 		VideoManager->Move(_sword_x, _sword_y); // sword
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 		VideoManager->Scale(scale, scale);
@@ -275,8 +273,8 @@ void BootMode::_AnimateLogo() {
 	{
 		// Delta goes from 0.0f to 1.0f
 		float delta = static_cast<float>((total_time - SEQUENCE_FIVE)) / static_cast<float>(SEQUENCE_SIX - SEQUENCE_FIVE);
-		float newScale = (1.0f - delta) * scale + 1.0f * delta;
-		static float rotationDifference = (float)(((int)rotation)%360);
+		float newScale = (1.0f - delta) * scale + delta;
+		static float rotationDifference = static_cast<float>(((static_cast<int>(rotation))%360));
 		float newRotation = rotation - (delta) * rotationDifference + 360.0f * delta;
 		float newX = (1.0f - delta) * _sword_x + 762.0f * delta;
 		float newY = (1.0f - delta) * _sword_y + 310.0f * delta;
@@ -284,11 +282,9 @@ void BootMode::_AnimateLogo() {
 		VideoManager->Move(512.0f, 385.0f); // logo bg
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 		VideoManager->DrawImage(_boot_images[1]);
-
 		VideoManager->Move(512.0f, 385.0f); // text
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 		VideoManager->DrawImage(_boot_images[3]);
-
 		VideoManager->Move(newX, newY); // sword
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 		VideoManager->Scale(newScale, newScale);
@@ -298,7 +294,15 @@ void BootMode::_AnimateLogo() {
 	// Sequence six: flash of light
 	else if (total_time >= SEQUENCE_SIX && total_time < SEQUENCE_SEVEN)
 	{
-		_logo_animating = false;
+		// Delta goes from 1.0f to 0.0f
+		float delta = 1.0f - static_cast<float>((total_time - SEQUENCE_SIX)) / static_cast<float>(SEQUENCE_SEVEN - SEQUENCE_SIX);
+		VideoManager->SetFog(Color::white, delta);
+		_DrawBackgroundItems();
+	}
+	else if (total_time >= SEQUENCE_SEVEN)
+	{
+		_EndOpeningAnimation();
+		_DrawBackgroundItems();
 	}
 }
 
@@ -364,18 +368,18 @@ void BootMode::_RedefineKey(SDLKey& change_key) {
 void BootMode::_SetupMainMenu() {
 
 	// Add all the needed menu options to the main menu
-	_main_menu.AddOption(MakeWideString("New Game"), &BootMode::OnNewGame);
-	_main_menu.AddOption(MakeWideString("Battle-Mode"), &BootMode::OnLoadGame);
-	_main_menu.AddOption(MakeWideString("Options"), &BootMode::OnOptions);
-	_main_menu.AddOption(MakeWideString("Credits"), &BootMode::OnCredits);
-	_main_menu.AddOption(MakeWideString("Quit"), &BootMode::OnQuit);
+	_main_menu.AddOption(MakeWideString("New Game"), &BootMode::_OnNewGame);
+	_main_menu.AddOption(MakeWideString("Battle-Mode"), &BootMode::_OnLoadGame);
+	_main_menu.AddOption(MakeWideString("Options"), &BootMode::_OnOptions);
+	_main_menu.AddOption(MakeWideString("Credits"), &BootMode::_OnCredits);
+	_main_menu.AddOption(MakeWideString("Quit"), &BootMode::_OnQuit);
 }
 
 
 // Inits the options menu
 void BootMode::_SetupOptionsMenu() {
-	_options_menu.AddOption(MakeWideString("Video"), &BootMode::OnVideoOptions);
-	_options_menu.AddOption(MakeWideString("Audio"), &BootMode::OnAudioOptions);
+	_options_menu.AddOption(MakeWideString("Video"), &BootMode::_OnVideoOptions);
+	_options_menu.AddOption(MakeWideString("Audio"), &BootMode::_OnAudioOptions);
 	_options_menu.AddOption(MakeWideString("Language"));
 	_options_menu.AddOption(MakeWideString("Key Settings"));
 	_options_menu.AddOption(MakeWideString("Joystick Settings"));
@@ -394,7 +398,7 @@ void BootMode::_SetupOptionsMenu() {
 void BootMode::_SetupVideoOptionsMenu()
 {
 	_video_options_menu.AddOption(MakeWideString("Resolution:"));
-	_video_options_menu.AddOption(MakeWideString("Window mode:"), &BootMode::OnVideoMode);	
+	_video_options_menu.AddOption(MakeWideString("Window mode:"), &BootMode::_OnVideoMode);	
 	_video_options_menu.AddOption(MakeWideString("Brightness:"));
 	_video_options_menu.AddOption(MakeWideString("Image quality:"));
 
@@ -409,8 +413,8 @@ void BootMode::_SetupVideoOptionsMenu()
 // Inits the audio-options menu
 void BootMode::_SetupAudioOptionsMenu()
 {
-	_audio_options_menu.AddOption(MakeWideString("Sound Volume: "), 0, &BootMode::OnSoundLeft, &BootMode::OnSoundRight);
-	_audio_options_menu.AddOption(MakeWideString("Music Volume: "), 0, &BootMode::OnMusicLeft, &BootMode::OnMusicRight);
+	_audio_options_menu.AddOption(MakeWideString("Sound Volume: "), 0, &BootMode::_OnSoundLeft, &BootMode::_OnSoundRight);
+	_audio_options_menu.AddOption(MakeWideString("Music Volume: "), 0, &BootMode::_OnMusicLeft, &BootMode::_OnMusicRight);
 	_audio_options_menu.SetWindowed(true);
 	_audio_options_menu.SetParent(&_options_menu);
 }
@@ -418,7 +422,7 @@ void BootMode::_SetupAudioOptionsMenu()
 
 // Main menu handlers
 // 'New Game' confirmed
-void BootMode::OnNewGame()
+void BootMode::_OnNewGame()
 {
 	if (BOOT_DEBUG)
 		cout << "BOOT: Starting new game." << endl;
@@ -431,7 +435,7 @@ void BootMode::OnNewGame()
 
 
 // 'Load Game' confirmed
-void BootMode::OnLoadGame()
+void BootMode::_OnLoadGame()
 {
 	if (BOOT_DEBUG)
 		cout << "BOOT: Entering battle mode" << endl;
@@ -443,89 +447,89 @@ void BootMode::OnLoadGame()
 
 
 // 'Options' confirmed
-void BootMode::OnOptions()
+void BootMode::_OnOptions()
 {
 	_current_menu = &_options_menu;
 }
 
 
 // 'Credits' confirmed
-void BootMode::OnCredits()
+void BootMode::_OnCredits()
 {
 	_credits_screen.Show();
 }
 
 
 // 'Quit' confirmed
-void BootMode::OnQuit()
+void BootMode::_OnQuit()
 {
 	SettingsManager->ExitGame();
 }
 
 
 // 'Video' confirmed	
-void BootMode::OnVideoOptions()
+void BootMode::_OnVideoOptions()
 {
 	_current_menu = &_video_options_menu;
-	UpdateVideoOptions();
+	_UpdateVideoOptions();
 }
 
 
 // 'Audio' confirmed
-void BootMode::OnAudioOptions()
+void BootMode::_OnAudioOptions()
 {
 	// Switch the current menu
 	_current_menu = &_audio_options_menu;
 
-	UpdateAudioOptions();
+	_UpdateAudioOptions();
 }
 
 
 // 'Video mode' confirmed
-void BootMode::OnVideoMode()
+void BootMode::_OnVideoMode()
 {
 	// Toggle fullscreen / windowed
 	VideoManager->ToggleFullscreen();
 	VideoManager->ApplySettings();
 
-	UpdateVideoOptions();	
+	_UpdateVideoOptions();	
 }
 
 
 // Sound volume down
-void BootMode::OnSoundLeft()
+void BootMode::_OnSoundLeft()
 {
 	AudioManager->SetSoundVolume(AudioManager->GetSoundVolume() - 0.1f);
-	UpdateAudioOptions();
+	_UpdateAudioOptions();
 }
 
 
 // Sound volume up
-void BootMode::OnSoundRight()
+void BootMode::_OnSoundRight()
 {
 	AudioManager->SetSoundVolume(AudioManager->GetSoundVolume() + 0.1f);
-	UpdateAudioOptions();
+	_UpdateAudioOptions();
 }
 
 
 // Music volume down
-void BootMode::OnMusicLeft()
+void BootMode::_OnMusicLeft()
 {
 	AudioManager->SetMusicVolume(AudioManager->GetMusicVolume() - 0.1f);
-	UpdateAudioOptions();
+	_UpdateAudioOptions();
 }
 
 
 // Music volume up
-void BootMode::OnMusicRight()
+void BootMode::_OnMusicRight()
 {
 	AudioManager->SetMusicVolume(AudioManager->GetMusicVolume() + 0.1f);
-	UpdateAudioOptions();
+	_UpdateAudioOptions();
 }
 
 
 // Updates the video options screen
-void BootMode::UpdateVideoOptions()
+void BootMode::_UpdateVideoOptions()
 {
 	// Update resolution text
 	std::ostringstream resolution("");
@@ -544,7 +548,7 @@ void BootMode::UpdateVideoOptions()
 
 
 // Updates the audio options screen
-void BootMode::UpdateAudioOptions()
+void BootMode::_UpdateAudioOptions()
 {
 	std::ostringstream sound_volume("");
 	sound_volume << "Sound Volume: " << static_cast<int>(AudioManager->GetSoundVolume() * 100.0f) << " %";
@@ -554,6 +558,35 @@ void BootMode::UpdateAudioOptions()
 
 	_audio_options_menu.SetOptionText(0, MakeWideString(sound_volume.str()));
 	_audio_options_menu.SetOptionText(1, MakeWideString(music_volume.str()));
+}
+
+
+// Draws background image, logo and the sword in their default positions
+void BootMode::_DrawBackgroundItems()
+{
+	VideoManager->Move(512.0f, 384.0f);
+	VideoManager->SetDrawFlags(VIDEO_NO_BLEND, 0);
+	VideoManager->DrawImage(_boot_images[0]); // Draw the background image
+
+	VideoManager->Move(512.0f, 648.0f);
+	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+	VideoManager->DrawImage(_boot_images[1]); // Draw the logo background
+
+	VideoManager->Move(762.0f, 578.0f);
+	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+	VideoManager->DrawImage(_boot_images[2]); // Draw the sword
+
+	VideoManager->Move(512, 648);
+	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+	VideoManager->DrawImage(_boot_images[3]); // Draw the logo text
+}
+
+
+// Ends the opening animation playing
+void BootMode::_EndOpeningAnimation()
+{
+	VideoManager->SetFog(Color::black, 0.0f); // Turn off the fog
+	_logo_animating = false;
 }
 
 
@@ -577,7 +610,7 @@ void BootMode::Update() {
 	{
 		if (InputManager->ConfirmPress()) // Check here if we want to skip the demo
 		{
-			_logo_animating = false;
+			_EndOpeningAnimation();
 			return;
 		}
 		else
@@ -674,25 +707,7 @@ void BootMode::Draw() {
 		return;
 	}
 
-	// Draw the background image
-	VideoManager->Move(512.0f, 384.0f);
-	VideoManager->SetDrawFlags(VIDEO_NO_BLEND, 0);
-	VideoManager->DrawImage(_boot_images[0]);
-
-	// Draw the logo background
-	VideoManager->Move(512.0f, 648.0f);
-	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-	VideoManager->DrawImage(_boot_images[1]);
-
-	// Draw the sword
-	VideoManager->Move(762.0f, 578.0f);
-	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-	VideoManager->DrawImage(_boot_images[2]);
-
-	// Draw the logo text on top of the sword
-	VideoManager->Move(512, 648);
-	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-	VideoManager->DrawImage(_boot_images[3]);
+	_DrawBackgroundItems();	
 
 	// Decide whether to draw the credits window or the main menu
 	if (_credits_screen.IsVisible())

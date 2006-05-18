@@ -164,40 +164,47 @@ private:
 
 	// Main Menu handlers
 	//! 'New Game' confirmed
-	void OnNewGame();
+	void _OnNewGame();
 	//! 'Load Game' confirmed
-	void OnLoadGame();
+	void _OnLoadGame();
 	//! 'Options' confirmed
-	void OnOptions();
+	void _OnOptions();
 	//! 'Credits' confirmed
-	void OnCredits();
+	void _OnCredits();
 	//! 'Quit' confirmed
-	void OnQuit();
+	void _OnQuit();
 
 	// Options' handlers
 	//! 'Video' confirmed
-	void OnVideoOptions();
+	void _OnVideoOptions();
 	//! 'Audio' confirmed
-	void OnAudioOptions();
+	void _OnAudioOptions();
 
 	//! 'Video mode' confirmed
-	void OnVideoMode();
+	void _OnVideoMode();
 
 	//! Sound volume down
-	void OnSoundLeft();
+	void _OnSoundLeft();
 	//! Sound volume up
-	void OnSoundRight();
+	void _OnSoundRight();
 	//! Music volume down
-	void OnMusicLeft();
+	void _OnMusicLeft();
 	//! Music volume up
-	void OnMusicRight();
+	void _OnMusicRight();
 
 
 	//! Updates the video options screen
-	void UpdateVideoOptions();
+	void _UpdateVideoOptions();
 
 	//! Updates the audio options screen
-	void UpdateAudioOptions();
+	void _UpdateAudioOptions();
+
+
+	//! Draws background image, logo and the sword in their default positions
+	void _DrawBackgroundItems();
+
+	//! Ends the opening animation playing
+	void _EndOpeningAnimation();
 
 public:
 	//! Initializes class members and loads media data.
