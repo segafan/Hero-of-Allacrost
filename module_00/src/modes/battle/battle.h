@@ -119,9 +119,14 @@ class ActorEffect {
                                 uint32 AUpdateLength);
 		virtual ~ActorEffect();
 		
-		uint32 GetTTL() const;
+                //! Update the effect
 		void Update(uint32 ATimeElapsed);
-		
+                
+		/*!
+                       Some standard Getters
+                */
+                //@{
+                uint32 GetTTL() const;
 		private_battle::Actor * const GetHost() const;
 		std::string GetEffectName() const;
 		uint32 GetUpdateLength() const;
@@ -133,9 +138,11 @@ class ActorEffect {
                 uint32 GetStrengthModifier() const;
                 uint32 GetIntelligenceModifier() const;
                 uint32 GetAgilityModifier() const;
+                //@}
                 
 		void SetLastUpdate(uint32 ALastUpdate);
 		
+                //! Undo the effect on the host
 		void UndoEffect() const;
 };
 
@@ -180,9 +187,6 @@ class Actor {
                 uint32 _total_agility_modifier;
                 uint32 _total_intelligence_modifier;
 		
-                //! Our current animation to update and draw
-		std::string _animation;
-		
 	public:
 		Actor(BattleMode *ABattleMode, uint32 AXLocation, uint32 AYLocation);
 		
@@ -191,81 +195,88 @@ class Actor {
 		virtual void Draw() = 0;
 		
 		/*!
-			Stuff relating to, you know, death
+			\brief Stuff relating to, you know, death
 		*/
 		void Die();
 		bool IsAlive() const;
 		
                 /*!
-                        Get the mode we are currently fighting in
+                        \brief Get the mode we are currently fighting in
                 */
 		const BattleMode *GetOwnerBattleMode() const;
 		
 		/*!
-			Manage effects that the player is feeling
+			\brief Manage effects that the player is feeling
 		*/
+                //@{
 		void UpdateEffects(uint32 ATimeElapsed);
 		void PushEffect(const ActorEffect AEffect);
+                //@}
 		
 		/*!
-			Set the next action, action related methods
+			\brief Set the next action, action related methods
 		*/
+                //@{
 		void SetNextAction(Action * const ANextAction);
 		void PerformAction();
 		bool HasNextAction() const;
+                //@}
 		
 		/*!
-			Is the player frozen, asleep, et cetera?
+			\brief Is the player frozen, asleep, et cetera?
 		*/
+                //@{
 		bool IsMoveCapable() const;
 		void SetMoveCapable(bool AMoveCapable);
+                //@}
 		
 		/*!
-			If the player is warming up, it really can't do anything
-			Sort of a special case
+			\brief If the player is warming up, it really can't do anything. Sort of a special case
 		*/
+                //@{
 		bool IsWarmingUp() const;
 		void SetWarmupTime(uint32 AWarmupTime);
+                //@}
 		
 		/*!
-			Defensive mode boosts defense
+			\brief Defensive mode boosts defense
 		*/
+                //@{
                 bool IsInDefensiveMode() const;		
 		void SetDefensiveBonus(uint32 ADefensiveBonus);
+                //@}
 
 		/*!
-			If we are currently performing an action we can't do anything else
-			on the update
+			\brief If we are currently performing an action we can't do anything else on the update
 		*/
+                //@{
 		bool IsPerformingAction() const;
 		void SetPerformingAction(bool AIsPerforming);
+                //@}
+                
+                virtual void SetAnimation(std::string AAnimation);
 		
 		/*!
-			GlobalCharacter and GlobalEnemy will use a Map of sorts
-			to map strings to image animations
-			This sets our characters animation
+			\brief Specific getters for classes that inherit
 		*/
-		void SetAnimation(std::string ACurrentAnimation);
-		const std::string GetAnimation() const;
-		
-		/*!
-			Specific getters for classes that inherit
-		*/
-		virtual std::string GetName() = 0;
-		virtual std::vector<hoa_global::GlobalAttackPoint> GetAttackPoints() = 0;
-		virtual uint32 GetHealth() = 0;
+                //@{
+		virtual const std::string GetName() const = 0;
+		virtual const std::vector<hoa_global::GlobalAttackPoint> GetAttackPoints() const = 0;
+		virtual uint32 GetHealth() const = 0;
 		virtual void SetHealth(uint32 hp) = 0;
-		virtual uint32 GetMaxHealth() = 0;
-		virtual uint32 GetSkillPoints() = 0;
+		virtual uint32 GetMaxHealth() const = 0;
+		virtual uint32 GetSkillPoints() const = 0;
 		virtual void SetSkillPoints(uint32 sp) = 0;
-		virtual uint32 GetMaxSkillPoints() = 0;
-		virtual uint32 GetStrength() = 0;
-		virtual uint32 GetIntelligence() = 0;
-		virtual uint32 GetAgility() = 0;
+		virtual uint32 GetMaxSkillPoints() const = 0;
+		virtual uint32 GetStrength() const = 0;
+		virtual uint32 GetIntelligence() const = 0;
+		virtual uint32 GetAgility() const = 0;
+                //@}
 		
 		/*!
-			More getters and setters
+			\brief More getters and setters
 		*/
+                //@{
                 const uint32 GetXOrigin() const { return _x_origin; }
                 const uint32 GetYOrigin() const { return _y_origin; }
 		void SetXOrigin(uint32 x) { _x_origin = x; }
@@ -274,21 +285,24 @@ class Actor {
 		const double GetYLocation() const { return _y_location; }
 		void SetXLocation(double x) { _x_location = x; }
 		void SetYLocation(double y) { _y_location = y; }
-		
+		//@}
+                
 		/*!
-			Get the movement speed in battle for this character
+			\brief Get the movement speed in battle for this character
 		*/
-		virtual uint32 GetMovementSpeed() = 0;
+		virtual uint32 GetMovementSpeed() const = 0;
                 
                 /*!
-                        Getters and setters involved with totals
+                        \brief Getters and setters involved with totals
                 */
+                //@{
                 void SetTotalStrengthModifier(uint32 AStrengthModifier);
                 uint32 GetTotalStrengthModifier();
                 void SetTotalAgilityModifier(uint32 AAgilityModifier);
                 uint32 GetTotalAgilityModifier();
                 void SetTotalIntelligenceModifier(uint32 AIntelligenceModifier);
                 uint32 GetTotalIntelligenceModifier();
+                //@}
 };
 
 /*!
@@ -296,6 +310,12 @@ class Actor {
 */
 class BattleUI {
 	private:
+                enum CURSOR_STATE  {
+                        CURSOR_ON_PLAYER_CHARACTERS,
+                        CURSOR_ON_ENEMY_CHARACTERS,
+                        CURSOR_ON_MENU
+                };
+                
 		//! The battlemode we belong to
 		BattleMode *_bm;
 		//! The current actor we have clicked on
@@ -310,51 +330,78 @@ class BattleUI {
 		uint32 _current_hover_selection;
 		//! The number of items in this menu
 		uint32 _number_menu_items;
+                //! The state of our cursor
+                CURSOR_STATE _cursor_state;
+                //! The general menu window
+                hoa_video::MenuWindow _general_menu_window;
+                //! The general option box
+                hoa_video::OptionBox _general_menu;
 		
 	public:
 		BattleUI(BattleMode * const ABattleMode);
-		
+		~BattleUI();
 		/*!
-			Get the actor we are currently on
+			\brief Get the actor we are currently on
 		*/
 		Actor * const GetSelectedActor() const;
 		
 		/*!
-			We clicked on an actor
+			\brief We clicked on an actor
 		*/
 		void SetActorSelected(Actor * const AWhichActor);
 		
 		/*!
-			No actor is selected...we are now selecting an actor
+			\brief No actor is selected...we are now selecting an actor
 		*/
 		void DeselectActor();
 		
 		/*!
-			Get other people selected
+			\brief Get other people selected
 		*/
 		std::list<Actor *> GetSelectedArgumentActors() const;
 		
 		/*!
-			The actor we just selected is now an argument
+			\brief The actor we just selected is now an argument
 		*/
 		void SetActorAsArgument(Actor * const AActor);
 		
 		/*!
-			No longer do we want this actor as an argument
+			\brief No longer do we want this actor as an argument
 		*/
 		void RemoveActorAsArgument(Actor * const AActor);
 		
 		/*!
-			Sets the number of arguments we should be allowing
+			\brief Sets the number of arguments we should be allowing
 		*/
 		void SetNumberNecessarySelections(uint32 ANumSelections);
 
+                /*!
+                        \brief The player lost.  Show them the menu
+                */
+                void ShowPlayerDefeatMenu();
+                
+                /*!
+                        \brief The player won. Show them their loot
+                */
+                void ShowPlayerVictoryMenu();
+                
+                /*!
+                        \brief Draw the GUI images
+                */
+                void Draw();
+                
+                /*!
+                        \brief Update player info
+                */
+                void Update(uint32 AUpdateTime);
 };
 
 class PlayerActor : public Actor {
 	private:
 		//! The global character we have wrapped around
 		hoa_global::GlobalCharacter *_wrapped_character;
+                //! The current animation to draw
+                hoa_video::AnimatedImage _current_animation;
 	
 	public:
 		PlayerActor(hoa_global::GlobalCharacter * const AWrapped, BattleMode * const ABattleMode, uint32 AXLoc, uint32 AYLoc);
@@ -363,15 +410,18 @@ class PlayerActor : public Actor {
                 void Draw();
                 
 		/*!
-			Get the skills from GlobalCharacter
+			\brief Get the skills from GlobalCharacter
 		*/
+                //@{
 		std::vector<hoa_global::GlobalSkill *> GetAttackSkills() const;
 		std::vector<hoa_global::GlobalSkill *> GetDefenseSkills() const;
 		std::vector<hoa_global::GlobalSkill *> GetSupportSkills() const;
-		
+		//@}
+                
 		/*!
-			More getters from GlobalCharacter
+			\brief More getters from GlobalCharacter
 		*/
+                //@{
 		const std::string GetName() const;
 		const std::vector<hoa_global::GlobalAttackPoint> GetAttackPoints() const;
 		uint32 GetHealth() const;
@@ -385,6 +435,9 @@ class PlayerActor : public Actor {
 		uint32 GetAgility() const;
 		
 		uint32 GetMovementSpeed() const;
+                
+                void SetAnimation(std::string ACurrentAnimation);
+                //@}
                 
 
 };
@@ -401,21 +454,22 @@ class EnemyActor : public Actor {
                 void Draw();
 
 		/*!
-			Has the GlobalEnemy level up to average_level
+			\brief Has the GlobalEnemy level up to average_level
 		*/
 		void LevelUp(uint32 AAverageLevel);
 		
 		/*!
-			The AI routine
+			\brief The AI routine
 		*/
 		void DoAI();
 
 		/*!
-			GlobalEnemy getters
+			\brief GlobalEnemy getters
 		*/
+                //@{
 		const std::vector<hoa_global::GlobalSkill *> GetSkills() const;
 		
-		std::string GetName() const;
+		const std::string GetName() const;
 		const std::vector<hoa_global::GlobalAttackPoint> GetAttackPoints() const;
 		uint32 GetHealth() const;
 		void SetHealth(uint32 AHealth);
@@ -428,6 +482,7 @@ class EnemyActor : public Actor {
 		uint32 GetAgility() const;
 		
 		uint32 GetMovementSpeed() const;
+                //@}
                 
 };
 
@@ -488,6 +543,10 @@ private:
 	//! Current list of actors 
 	std::deque<private_battle::PlayerActor *> _player_actors;
 	
+        //! The global enemies used in this battle
+        //   Used for restoring the battle mode
+        std::deque<hoa_global::GlobalEnemy> _global_enemies;
+        
 	//actors actually in battle
 	std::deque<private_battle::EnemyActor *> _enemy_actors;
 	std::deque<private_battle::PlayerActor *> _players_characters_in_battle;
@@ -518,35 +577,48 @@ private:
 	
 	//!Are we performing an action
 	bool _IsPerformingScript();
+        
+        void _PlayerVictory();
+        
+        void _PlayerDefeat();
+        
+        void _TEMP_LoadTestData();
+        
+        void _BuildPlayerCharacters();
+        void _BuildEnemyActors();
 
 public:
 	BattleMode();
 	~BattleMode();
 
-	//! Resets appropriate class members. Called whenever BootMode is made the active game mode.
+	//! \brief Resets appropriate class members. Called whenever BootMode is made the active game mode.
 	void Reset();
-	//! Wrapper function that calls different update functions depending on the battle state.
+	//! \brief Wrapper function that calls different update functions depending on the battle state.
 	void Update();
-	//! Wrapper function that calls different draw functions depending on the battle state.
+	//! \brief Wrapper function that calls different draw functions depending on the battle state.
 	void Draw();
 	
-	//! Sets T/F whether an action is being performed
+	//! \brief Sets T/F whether an action is being performed
 	void SetPerformingScript(bool AIsPerforming);
 	
-	//! Adds an actor waiting to perform an action to the queue.
+	//! \brief Adds an actor waiting to perform an action to the queue.
 	void AddToActionQueue(private_battle::Actor *AActorToAdd);
 	
-	//! Removes an actor from the action queue (perhaps they died, et cetera)
+	//! \brief Removes an actor from the action queue (perhaps they died, et cetera)
 	void RemoveFromActionQueue(private_battle::Actor *AActorToRemove);
         
-        //! Added a scripted event to the queue
+        //! \brief Added a scripted event to the queue
         void AddScriptEventToQueue(private_battle::ScriptEvent AEventToAdd);
         
-        //! Remove all scripted events for an actor
+        //! \brief Remove all scripted events for an actor
         void RemoveScriptedEventsForActor(private_battle::Actor *AActorToRemove);
 
-	//! Returns all player actors
+	//! \brief Returns all player actors
 	std::deque<private_battle::PlayerActor *> ReturnCharacters() const;
+        
+        //! \brief Swap a character from _player_actors to _player_actors_in_battle
+        // This may become more complicated if it is done in a wierd graphical manner
+        void BattleMode::SwapCharacters(private_battle::PlayerActor *AActorToRemove, private_battle::PlayerActor *AActorToAdd);
 };
 
 
