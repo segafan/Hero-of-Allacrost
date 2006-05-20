@@ -40,12 +40,6 @@ dnl Check for libraries.
 AC_CHECK_LIB([openal], [alGetError], [], \
 	[echo "You need to install the OpenAL library."
 	 exit -1])
-AC_CHECK_LIB([alut], [alutInit], [], \
-   [echo "You need to install the ALUT library."
-    exit -1])
-AC_CHECK_LIB([vorbisfile], [ov_open], [], \
-   [echo "You need to install the ALUT library."
-    exit -1])
 AC_CHECK_LIB([GL], [glEnable], [], \
 	[echo "You need to install the GL library."
 	 exit -1])
@@ -75,19 +69,10 @@ AC_CHECK_LIB([lualib50], [luaopen_table], [], \
 AC_CHECK_LIB([m], [log], [], \
 	[echo "You need to install the math library."
 	 exit -1])
-#AC_CHECK_LIB([X11], [main], [], \
-#	[echo
-#	 echo "**********"
-#	 echo "You need to install the X11 library (comes with XFree or Xorg)" \
-#	 	  "in order to use the Map Editor."
-#	 echo "**********"
-#	 echo])
-#AC_CHECK_LIB([Xext], [main], [], \
-#	[echo
-#	 echo "**********"
-#	 echo "You need to install the Xext library in order to use the Map Editor."
-#	 echo "**********"
-#	 echo])
+AC_CHECK_LIB([alut], [alutInit], [], \
+	[echo "You should install the ALUT library for maximum performance."])
+AC_CHECK_LIB([vorbisfile], [ov_open], [], \
+	[echo "You should install the ALUT library for maximum performance."])
 
 dnl Checks for header files.
 AC_HEADER_STDC
@@ -102,9 +87,7 @@ dnl Checks for library functions.
 AC_CHECK_FUNCS([atexit sqrt])
 
 AC_CONFIG_FILES([Makefile])
-dnl				 src/Makefile
-dnl				 src/editor/Makefile])
-										  
+
 AC_OUTPUT
 
 echo ""
