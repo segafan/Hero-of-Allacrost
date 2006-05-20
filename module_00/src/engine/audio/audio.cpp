@@ -45,8 +45,10 @@ const string GetALErrorString(ALenum error_code) {
 			return "AL_INVALID_OPERATION";
 		case AL_OUT_OF_MEMORY:
 			return "AL_OUT_OF_MEMORY";
-		default:
+		case AL_NO_ERROR:
 			return "AL_NO_ERROR";
+		default:
+			return ("unknown AL error code: " + error_code);
 	} // switch (error_code)
 } // const string GetALErrorString(ALenum error_code)
 
@@ -64,7 +66,7 @@ const string GetALCErrorString(ALenum error_code) {
 		case ALC_OUT_OF_MEMORY:
 			return "ALC_OUT_OF_MEMORY";
 		default:
-			return "AL_NO_ERROR";
+			return ("unknown ALC error code: " + error_code);
 	} // switch (error_code)
 } // const string GetALCErrorString(ALenum error_code)
 
@@ -86,9 +88,9 @@ const string GetALUTErrorString(ALenum error_code) {
 		case (ALUT_ERROR_NO_CURRENT_CONTEXT):
 			return "ALUT_ERROR_NO_CURRENT_CONTEXT: There is no current AL context";
 		case (ALUT_ERROR_AL_ERROR_ON_ENTRY):
-			return "ALUT_ERROR_AL_ERROR_ON_ENTRY: There was already an AL error on entry to alutCreateBufferFromFile";
+			return "ALUT_ERROR_AL_ERROR_ON_ENTRY: There was already an AL error on entry to alutCreateBufferFromFile()";
 		case (ALUT_ERROR_ALC_ERROR_ON_ENTRY):
-			return "ALUT_ERROR_ALC_ERROR_ON_ENTRY: There was already an ALC error on entry to alutCreateBufferFromFile";
+			return "ALUT_ERROR_ALC_ERROR_ON_ENTRY: There was already an ALC error on entry to alutCreateBufferFromFile()";
 		case (ALUT_ERROR_OPEN_DEVICE):
 			return "ALUT_ERROR_OPEN_DEVICE: There was an error opening the ALC device";
 		case (ALUT_ERROR_CLOSE_DEVICE):
@@ -112,7 +114,7 @@ const string GetALUTErrorString(ALenum error_code) {
 		case (ALUT_ERROR_CORRUPT_OR_TRUNCATED_DATA):
 			return "ALUT_ERROR_CORRUPT_OR_TRUNCATED_DATA: The sound data was corrupt or truncated";
 		default:
-			return "ALUT Error: An unknown error code was returned";
+			return ("unknown ALUT error code: " + error_code);
 	} // switch (error_code)
 	
 	#else 
@@ -147,7 +149,7 @@ const string GetOVErrorString(int32 error_code) {
 		case OV_ENOSEEK:
 			return "OV_ENOSEEK: the given stream is not seekable";
 		default:
-			return ("unknown error code: " + error_code);
+			return ("unknown OV error code: " + error_code);
 	}
 } // const string GetOggVorbisErrorString(int32 error_code)
 

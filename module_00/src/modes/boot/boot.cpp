@@ -120,29 +120,25 @@ _sword_scale(1.0f)
 		cout << "BOOT ERROR: some error occured during reading of boot data file" << endl;
 	}
 
-	// Load all music files used by the boot mode here
-	MusicDescriptor new_music;
+	// Load all music files used in boot mode
+	_boot_music.resize(new_music_files.size(), MusicDescriptor());
 	for (uint32 i = 0; i < new_music_files.size(); i++) {
-		_boot_music.push_back(new_music);
-		_boot_music[i].LoadMusic(new_music_files[i]);
+		if (_boot_music[i].LoadMusic(new_music_files[i]) == false) {
+			cout << "BOOT: failed to load music file " << new_music_files[i] << endl;
+			SettingsManager->ExitGame();
+			return;
+		}
 	}
 
-	// Load all sounds
-	SoundDescriptor new_sound;
-	_boot_sounds.push_back(new_sound);
-	_boot_sounds.push_back(new_sound);
-	_boot_sounds.push_back(new_sound);
-	_boot_sounds.push_back(new_sound);
-	_boot_sounds[0].LoadSound(new_sound_files[0]);
-	_boot_sounds[1].LoadSound(new_sound_files[1]);
-	_boot_sounds[2].LoadSound(new_sound_files[2]);
-	_boot_sounds[3].LoadSound(new_sound_files[3]);
-	
-	// This loop causes a seg fault for an unknown reason. Roots is looking into it (04/01/2006)
-// 	for (uint32 i = 0; i < new_sound_files.size(); i++) {
-// 		_boot_sounds.push_back(new_sound);
-// 		_boot_sounds[i].LoadSound(new_sound_files[i]);
-// 	}
+	// Load all sound files used in boot mode
+	_boot_sounds.resize(new_sound_files.size(), SoundDescriptor());
+	for (uint32 i = 0; i < new_sound_files.size(); i++) {
+		if (_boot_sounds[i].LoadSound(new_sound_files[i]) == false) {
+			cout << "BOOT: failed to load sound file " << new_sound_files[i] << endl;
+			SettingsManager->ExitGame();
+			return;
+		}
+	}
 
 	// Load all bitmaps
 	for (uint32 i = 0; i < _boot_images.size(); i++) {
