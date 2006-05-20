@@ -33,7 +33,7 @@ MusicBuffer::MusicBuffer(string fname) {
 
 	file_handle = fopen(("mus/" + filename + ".ogg").c_str(), "rb");
 	if (file_handle == NULL) {
-		cerr << "AUDIO ERROR: Could not open music file: music/" << filename << ".ogg" << endl;
+		cerr << "AUDIO ERROR: Could not open Ogg Vorbis file: music/" << filename << ".ogg" << endl;
 		return;
 	}
 
@@ -41,9 +41,9 @@ MusicBuffer::MusicBuffer(string fname) {
 	result = ov_open(file_handle, &file_stream, NULL, 0);
 	if (result != 0) {
 		fclose(file_handle);
-		cerr << "AUDIO ERROR: Failed to open Ogg Vorbis file: music/" << filename << ".ogg." << endl;;
+		cerr << "AUDIO ERROR: Failed to open Ogg Vorbis file: mus/" << filename << ".ogg." << endl;;
 		GetOVErrorString(result);
-// 		reference_count = 0;
+		reference_count = 0;
 		return;
 	}
 
@@ -60,12 +60,15 @@ MusicBuffer::MusicBuffer(string fname) {
 	ALenum error_code = alGetError();
 	
 	if (error_code != AL_NO_ERROR) {
-		cerr << "AUDIO: error generating music buffers: " << alGetString(error_code) << endl;
-// 		reference_count = 0;
+		cerr << "AUDIO: failed to generate music buffers: " << GetALErrorString(error_code) << endl;
+		reference_count = 0;
+		return;
 	}
 	
-	if (AUDIO_DEBUG)
+	if (AUDIO_DEBUG) {
+		cout << "AUDIO: Successfully loaded Ogg Vorbis file: mus/" << filename << ".ogg" << endl;
 		DEBUG_PrintProperties();
+	}
 }
 
 
@@ -150,18 +153,20 @@ void MusicBuffer::RefillBuffer(ALuint buffer) {
 }
 
 void MusicBuffer::DEBUG_PrintProperties() {
-	cout << "Vendor:          " << file_comment->vendor << endl;
-	cout << "Version:         " << file_info->version << endl;
-	cout << "Channels:        " << file_info->channels << endl;
-	cout << "Rate:            " << file_info->rate << endl;
-	cout << "Bitrate Upper:   " << file_info->bitrate_upper << endl;
-	cout << "Bitrate Nominal: " << file_info->bitrate_nominal << endl;
-	cout << "Bitrate Lower:   " << file_info->bitrate_lower << endl;
-	cout << "Bitrate Window:  " << file_info->bitrate_window << endl;
+	cout << "--------------------------------------------------------------------------------" << endl;
+	cout << "Vendor:           " << file_comment->vendor << endl;
+	cout << "Version:          " << file_info->version << endl;
+	cout << "Channels:         " << file_info->channels << endl;
+	cout << "Rate:             " << file_info->rate << endl;
+	cout << "Bitrate Upper:    " << file_info->bitrate_upper << endl;
+	cout << "Bitrate Nominal:  " << file_info->bitrate_nominal << endl;
+	cout << "Bitrate Lower:    " << file_info->bitrate_lower << endl;
+	cout << "Bitrate Window:   " << file_info->bitrate_window << endl;
 	cout << "Comments: " << endl;
 	for (uint32 i = 0; i < static_cast<uint32>(file_comment->comments); i++) {
-		cout << "> " << file_comment->user_comments[i] << endl;
+		cout << "  > " << file_comment->user_comments[i] << endl;
 	}
+	cout << "--------------------------------------------------------------------------------" << endl;
 }
 
 // ****************************************************************************

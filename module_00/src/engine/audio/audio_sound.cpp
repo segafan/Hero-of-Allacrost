@@ -101,6 +101,11 @@ SoundBuffer::SoundBuffer(string fname) {
 		return;
 	}
 	#endif
+	
+	if (AUDIO_DEBUG) {
+		cout << "AUDIO: Successfully loaded WAV file: snd/" << filename << ".wav" << endl;
+		DEBUG_PrintProperties();
+	}
 }
 
 SoundBuffer::~SoundBuffer() {
@@ -129,22 +134,23 @@ bool SoundBuffer::IsValid() {
 }
 
 void SoundBuffer::DEBUG_PrintProperties() {
-	cout << ">>> SoundBuffer Properties <<<" << endl;
-	if (alIsBuffer(buffer) == AL_FALSE) {
-		cout << "ERROR: the buffer in question is not valid" << endl;
+	cout << "--------------------------------------------------------------------------------" << endl;
+	if (IsValid() == false) {
+		cout << "ERROR: the buffer for the file snd/" << filename << ".wav is not valid" << endl;
 	}
 	else {
 		ALint property;
-		cout << "> Filename:   snd/" << filename << ".wav" << endl;
+		cout << "Filename:    snd/" << filename << ".wav" << endl;
 		alGetBufferi(buffer, AL_FREQUENCY, &property);
-		cout << "> Frequency:  " << property << "(Hz)" << endl;
+		cout << "Frequency:   " << property << " Hz" << endl;
 		alGetBufferi(buffer, AL_BITS, &property);
-		cout << "> Bit depth:  " << property << endl;
+		cout << "Bit depth:   " << property << endl;
 		alGetBufferi(buffer, AL_CHANNELS, &property);
-		cout << "> Channels:   " << property << endl;
+		cout << "Channels:    " << property << endl;
 		alGetBufferi(buffer, AL_SIZE, &property);
-		cout << "> Size:       " << property << "(bytes)" << endl;
+		cout << "Size:        " << property << " bytes" << endl;
 	}
+	cout << "--------------------------------------------------------------------------------" << endl;
 }
 
 // ****************************************************************************

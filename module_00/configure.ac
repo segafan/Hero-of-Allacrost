@@ -19,7 +19,7 @@ debug_default="no"
 AC_ARG_ENABLE(debug, [  --enable-debug=[no/yes] will build with debugging capability [default=no]], , enable_debug=$debug_default)
 if test "x$enable_debug" = "xyes"; then
     AC_MSG_RESULT(yes)
-    CXXFLAGS="$CXXFLAGS -g"
+    CXXFLAGS="$CXXFLAGS -g -pg"
 else
     AC_MSG_RESULT(no)
 fi
