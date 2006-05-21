@@ -48,6 +48,8 @@ Grid::Grid(QWidget* parent, const QString& name, int width, int height)
 		lower_layer.push_back(-1);
 		middle_layer.push_back(-1);
 		upper_layer.push_back(-1);
+		tiles_walkable.push_back(-1);
+		indiv_walkable.push_back(-1);
 	} // -1 is used for no tiles
 
 	// Create the video engine's singleton
@@ -170,6 +172,20 @@ void Grid::LoadMap()
 	} // iterate through the rows of the lower layer
 	read_data.CloseTable();
 	
+	read_data.OpenTable("tile_walkable");
+	for (int32 i = 0; i < _height; i++)
+	{
+		read_data.FillIntVector(i, vect);
+		for (vector<int32>::iterator it = vect.begin(); it != vect.end(); it++)
+			tiles_walkable.push_back(*it);
+		vect.clear();
+	} // iterate through the rows of the walkability table
+	read_data.CloseTable();
+	
+	// Initialize individual tile walkability.
+	for (int i = 0; i < _width * _height; i++)
+		indiv_walkable.push_back(-1);
+
 	_grid_on = true;        // grid lines default to on
 	_ll_on = true;          // lower layer default to on
 	_ml_on = true;          // middle layer default to off
@@ -321,25 +337,33 @@ void Grid::SaveMap()
 			{
 				for (int col = 0; col < _width; col++)
 				{
-					QString temp = file_name_list[lower_layer[row * _width + col]];
-					temp.remove(".png").remove("img/tiles/");
-					read_data.OpenTable("tile_filenames");
-					uint32 table_size = read_data.GetTableSize();
-					uint32 index = 0;
-					QString filename = "";
-					while (filename != temp && index < table_size)
+					// Individual tile property supersedes anything else.
+					if (indiv_walkable[row * _width + col] != -1)
+						layer_row.push_back(indiv_walkable[row * _width + col]);
+					else if (tiles_walkable[row * _width + col] != -1)
+						layer_row.push_back(tiles_walkable[row * _width + col]);
+					else
 					{
-						index++;
-						filename = read_data.ReadString(index);
-					} // find index of current tile in the database
-					read_data.CloseTable();
-					
-					if (filename == temp)
-					{
-						read_data.OpenTable("tile_properties");
-						layer_row.push_back(read_data.ReadInt(index));
+						QString temp = file_name_list[lower_layer[row * _width + col]];
+						temp.remove(".png").remove("img/tiles/");
+						read_data.OpenTable("tile_filenames");
+						uint32 table_size = read_data.GetTableSize();
+						uint32 index = 0;
+						QString filename = "";
+						while (filename != temp && index < table_size)
+						{
+							index++;
+							filename = read_data.ReadString(index);
+						} // find index of current tile in the database
 						read_data.CloseTable();
-					} // tile exists in the database
+					
+						if (filename == temp)
+						{
+							read_data.OpenTable("tile_properties");
+							layer_row.push_back(read_data.ReadInt(index));
+							read_data.CloseTable();
+						} // tile exists in the database
+					} // falls back to global property in tile database
 				} // iterate through the columns of the lower layer
 				sprintf(buffer, "%d", row);
 				write_data.WriteIntVector(buffer, layer_row);

@@ -76,6 +76,8 @@ class Grid: public QGLWidget
 		std::vector<int32> lower_layer;     // vector of tiles in the lower layer
 		std::vector<int32> middle_layer;    // vector of tiles in the middle layer
 		std::vector<int32> upper_layer;     // vector of tiles in the upper layer
+		std::vector<int32> tiles_walkable;  // vector of walkability of tiles
+		std::vector<int32> indiv_walkable;  // vector of walkability of individual tiles
 
 	protected:
 		void initializeGL();                // sets up the rendering context

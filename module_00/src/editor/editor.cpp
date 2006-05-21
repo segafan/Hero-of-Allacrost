@@ -669,17 +669,37 @@ NewMapDialog::~NewMapDialog()
 EditorScrollView::EditorScrollView(QWidget* parent, const QString& name, int width,
 	int height) : QScrollView(parent, (const char*) name, WNoAutoErase|WStaticContents)
 {
-//	setAcceptDrops(true);                // enable drag'n'drop operations on the map
-//	viewport()->setMouseTracking(true);  // enable mouse tracking
-	_tile_mode  = PAINT_TILE;            // set the default tile edit mode to paint
-	_layer_edit = LOWER_LAYER;           // set the default layer edit mode to lower layer
-	_map = new Grid(viewport(), "Untitled", width, height);  // create a new map
+	// Set default editing modes.
+	_tile_mode  = PAINT_TILE;
+	_layer_edit = LOWER_LAYER;
+	
+	// Create a new map.
+	_map = new Grid(viewport(), "Untitled", width, height);
 	addChild(_map);
+
+	// Context menu creation.
+	_context_menu = new QPopupMenu(this);
+	// Create the walkability checkboxes and add them to a QVButtonGroup.
+	QVButtonGroup* checkboxes = new QVButtonGroup("Walkability", _context_menu,
+		"checkboxes");
+	_allwalk_checkbox = new QCheckBox("All", checkboxes, "allwalk_checkbox");
+	for (uint32 i = 0; i < 8; i++)
+		_walk_checkbox[i] = new QCheckBox(QString("Level %1").arg(i+1), checkboxes,
+			QString("walk_checkbox[%1]").arg(i));
+	connect(_allwalk_checkbox, SIGNAL(toggled(bool)), this,
+		SLOT(_ToggleWalkCheckboxes(bool)));
+	connect(_context_menu, SIGNAL(aboutToShow()), this, SLOT(_ContextMenuSetup()));
+	connect(_context_menu, SIGNAL(aboutToHide()), this, SLOT(_ContextMenuEvaluate()));
+	_context_menu->insertItem(checkboxes);
 } // EditorScrollView constructor
 
 EditorScrollView::~EditorScrollView()
 {
 	delete _map;
+	delete _allwalk_checkbox;
+	for (int i = 0; i < 8; i++)
+		delete _walk_checkbox[i];
+	delete _context_menu;
 } // EditorScrollView destructor
 
 void EditorScrollView::Resize(int width, int height)
@@ -925,7 +945,8 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 							// find other instances of the tile
 							vector<int32>::iterator it;
 							for (it = _map->lower_layer.begin();
-								it != _map->lower_layer.end() && *it != file_index; it++);
+								it != _map->lower_layer.end() && *it != file_index;
+								it++);
 							if (it == _map->lower_layer.end())
 							{
 								for (it = _map->middle_layer.begin();
@@ -952,7 +973,8 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 							// find other instances of the tile
 							vector<int32>::iterator it;
 							for (it = _map->lower_layer.begin();
-								it != _map->lower_layer.end() && *it != file_index; it++);
+								it != _map->lower_layer.end() && *it != file_index;
+								it++);
 							if (it == _map->lower_layer.end())
 							{
 								for (it = _map->middle_layer.begin();
@@ -979,7 +1001,8 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 							// find other instances of the tile
 							vector<int32>::iterator it;
 							for (it = _map->lower_layer.begin();
-								it != _map->lower_layer.end() && *it != file_index; it++);
+								it != _map->lower_layer.end() && *it != file_index;
+								it++);
 							if (it == _map->lower_layer.end())
 							{
 								for (it = _map->middle_layer.begin();
@@ -1030,9 +1053,107 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 	_map->updateGL();
 } // contentsMouseReleaseEvent(...)
 
-void EditorScrollView::contentsMouseDoubleClickEvent(QMouseEvent *evt)
+void EditorScrollView::contentsContextMenuEvent(QContextMenuEvent *evt)
 {
-} // contentsMouseDoubleClickEvent(...)
+	// Don't popup a menu outside the map.
+	if ((evt->y() / TILE_HEIGHT) >= _map->GetHeight() ||
+		(evt->x() / TILE_WIDTH)  >= _map->GetWidth())
+		return;
+
+	_tile_index = evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH;
+	_context_menu->exec(QCursor::pos());
+} // contentsContextMenuEvent(...)
+
+
+
+// ********** Private slots **********
+
+void EditorScrollView::_ContextMenuSetup()
+{
+	if (_map->indiv_walkable[_tile_index] != -1)
+	{
+		if (_map->indiv_walkable[_tile_index] == 255)
+			_allwalk_checkbox->setChecked(true);
+		else
+			_allwalk_checkbox->setChecked(false);
+
+		for (uint8 i = 0; i < 8; i++)
+			if (_map->indiv_walkable[_tile_index] & (1 << i))
+				_walk_checkbox[i]->setChecked(true);
+			else
+				_walk_checkbox[i]->setChecked(false);
+	} // individual walkability supersedes everything else
+	else if (_map->tiles_walkable[_tile_index] != -1)
+	{
+		if (_map->tiles_walkable[_tile_index] == 255)
+			_allwalk_checkbox->setChecked(true);
+		else
+			_allwalk_checkbox->setChecked(false);
+
+		for (uint8 i = 0; i < 8; i++)
+			if (_map->tiles_walkable[_tile_index] & (1 << i))
+				_walk_checkbox[i]->setChecked(true);
+			else
+				_walk_checkbox[i]->setChecked(false);
+	} // look up walkability property from the map
+	else
+	{
+		// Read from global database to get property of item.
+		ReadDataDescriptor read_data;
+		if (!read_data.OpenFile(QString("dat/tilesets/tiles_database.lua")))
+			QMessageBox::warning(this, "Tiles Database",
+				"ERROR: could not open dat/tilesets/tiles_database.lua for reading!");
+		else
+		{
+			read_data.OpenTable("tile_filenames");
+			uint32 table_size = read_data.GetTableSize();
+			uint32 index = 0;
+			QString filename = "";
+			while (filename != _map->file_name_list[
+					_map->lower_layer[_tile_index]] && index < table_size)
+			{
+				index++;
+				filename = read_data.ReadString(index);
+			} // find index of current tile in the database
+			read_data.CloseTable();
+			if (filename == _map->file_name_list[_map->lower_layer[_tile_index]])
+			{
+				read_data.OpenTable("tile_filenames");
+				uint8 walkable = read_data.ReadInt(index);
+				read_data.CloseTable();
+				if (walkable == 255)
+					_allwalk_checkbox->setChecked(true);
+				else
+					_allwalk_checkbox->setChecked(false);
+
+				for (uint8 i = 0; i < 8; i++)
+					if (walkable & (1 << i))
+						_walk_checkbox[i]->setChecked(true);
+					else
+						_walk_checkbox[i]->setChecked(false);
+			} // tile exists in the database
+			read_data.CloseFile();
+		} // file was successfully opened
+	} // look up walkability property in global tiles database
+} // _ContextMenuSetup()
+
+void EditorScrollView::_ContextMenuEvaluate()
+{
+	_map->indiv_walkable[_tile_index] = 0;
+	for (uint8 i = 0; i < 8; i++)
+		if (_walk_checkbox[i]->isChecked())
+			_map->indiv_walkable[_tile_index] |= (1 << i);
+} // _ContextMenuEvaluate()
+
+void EditorScrollView::_ToggleWalkCheckboxes(bool on)
+{
+	if (on)
+		for (uint8 i = 0; i < 8; i++)
+			_walk_checkbox[i]->setChecked(true);
+	else
+		for (uint8 i = 0; i < 8; i++)
+			_walk_checkbox[i]->setChecked(false);
+} // _ToggleWalkCheckboxes(...)
 
 
 
@@ -1164,7 +1285,7 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, const QString& name)
 		connect(_prop_tileset, SIGNAL(currentChanged(QIconViewItem *)), this, SLOT(_ProcessWalkability(QIconViewItem *)));
 		_tile_index = 0;    // no changes made yet
 
-		// Create the walkability checkboxes and add them to a QVBoxLayout.
+		// Create the walkability checkboxes and add them to a QVButtonGroup.
 		QVButtonGroup* checkboxes = new QVButtonGroup("Walkability", properties_widget, "checkboxes");
 		_allwalk_checkbox = new QCheckBox("All", checkboxes, "allwalk_checkbox");
 		for (uint32 i = 0; i < 8; i++)
@@ -1360,7 +1481,7 @@ void DatabaseDialog::_ProcessWalkability(QIconViewItem* item)
 					_allwalk_checkbox->setChecked(false);
 
 				for (uint8 i = 0; i < 8; i++)
-					if ((1 << i) & _tile_properties[_tile_index-1])
+					if (_tile_properties[_tile_index-1] & (1 << i))
 						_walk_checkbox[i]->setChecked(true);
 					else
 						_walk_checkbox[i]->setChecked(false);
