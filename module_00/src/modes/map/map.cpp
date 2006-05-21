@@ -336,14 +336,14 @@ void MapMode::LoadMap() {
 	npc->actions.push_back(apm1);
 	
 	ActionPathMove *apm2 = new ActionPathMove();
-	apm2->destination.row = 16;
+	apm2->destination.row = 10;
 	apm2->destination.col = 16;
 	apm2->destination.altitude = 1;
 	apm2->sprite = npc;
 	npc->actions.push_back(apm2);
 	
 	ActionPathMove *apm3 = new ActionPathMove();
-	apm3->destination.row = 16;
+	apm3->destination.row = 10;
 	apm3->destination.col = 4;
 	apm3->destination.altitude = 1;
 	apm3->sprite = npc;
