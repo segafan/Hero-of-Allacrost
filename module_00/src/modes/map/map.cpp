@@ -393,32 +393,32 @@ bool MapMode::_TileMoveable(const private_map::TileCheck& tcheck) {
 		case NORTHWEST:
 		case NW_NORTH:
 		case NW_WEST:
-			if ( !((_tile_layers[tcheck.row][tcheck.col + 1].walkable & tcheck.altitude) ||
-			      (_tile_layers[tcheck.row - 1][tcheck.col].walkable & tcheck.altitude)) ) {
+			if ( !((_tile_layers[tcheck.row][tcheck.col + 1].walkable & tcheck.altitude) &&
+			      (_tile_layers[tcheck.row + 1][tcheck.col].walkable & tcheck.altitude)) ) {
 				return false;
 			}
 			break;
 		case SOUTHWEST:
 		case SW_SOUTH:
 		case SW_WEST:
-			if ( !((_tile_layers[tcheck.row][tcheck.col + 1].walkable & tcheck.altitude) ||
-			      (_tile_layers[tcheck.row + 1][tcheck.col].walkable & tcheck.altitude)) ) {
+			if ( !((_tile_layers[tcheck.row][tcheck.col + 1].walkable & tcheck.altitude) &&
+			      (_tile_layers[tcheck.row - 1][tcheck.col].walkable & tcheck.altitude)) ) {
 				return false;
 			}
 			break;
 		case NORTHEAST:
 		case NE_NORTH:
 		case NE_EAST:
-			if ( !((_tile_layers[tcheck.row][tcheck.col - 1].walkable & tcheck.altitude) ||
-			      (_tile_layers[tcheck.row - 1][tcheck.col].walkable & tcheck.altitude)) ) {
+			if ( !((_tile_layers[tcheck.row][tcheck.col - 1].walkable & tcheck.altitude) &&
+			      (_tile_layers[tcheck.row + 1][tcheck.col].walkable & tcheck.altitude)) ) {
 				return false;
 			}
 			break;
 		case SOUTHEAST:
 		case SE_SOUTH:
 		case SE_EAST:
-			if ( !((_tile_layers[tcheck.row][tcheck.col - 1].walkable & tcheck.altitude) ||
-			      (_tile_layers[tcheck.row + 1][tcheck.col].walkable & tcheck.altitude)) ) {
+			if ( !((_tile_layers[tcheck.row][tcheck.col - 1].walkable & tcheck.altitude) &&
+			      (_tile_layers[tcheck.row - 1][tcheck.col].walkable & tcheck.altitude)) ) {
 				return false;
 			}
 			break;
@@ -526,7 +526,7 @@ void MapMode::_FindPath(const TileNode& destination, vector<TileNode> &path) {
 	while (closed_list.back() != destination) {
 		// Check bottom left tile
 		tcheck.direction = SOUTHWEST;
-		tcheck.row = closed_list.back().row - 1;
+		tcheck.row = closed_list.back().row + 1;
 		tcheck.col = closed_list.back().col - 1;
 		if (_TileMoveable(tcheck) && (!_IsNodeInList(tcheck, closed_list))) {
 			list_node = _FindNodeInList(tcheck, open_list);
@@ -568,7 +568,7 @@ void MapMode::_FindPath(const TileNode& destination, vector<TileNode> &path) {
 		
 		// Check top left tile
 		tcheck.direction = NORTHWEST;
-		tcheck.row = closed_list.back().row + 1;
+		tcheck.row = closed_list.back().row - 1;
 		tcheck.col = closed_list.back().col - 1;
 		if (_TileMoveable(tcheck) && (!_IsNodeInList(tcheck, closed_list))) {
 			list_node = _FindNodeInList(tcheck, open_list);
