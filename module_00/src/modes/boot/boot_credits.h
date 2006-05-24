@@ -12,13 +12,14 @@
  * \author  Viljami Korhonen, mindflayer@allacrost.org
  * \brief   Header file for the Credits screen
  *
- * This file includes a simple version of the credits screen-class for being
+ * This file includes a simple version of the credits screen class
  * used in the boot mode. 
  *****************************************************************************/
  
 #ifndef __BOOT_CREDITS__
 #define __BOOT_CREDITS__
 
+#include <string>
 #include "video.h"
 
 
@@ -61,6 +62,8 @@ private:
 	//! Is the window visible or not
 	bool _visible;
 
+	//! Text to be displayed
+	const std::string _credits_text;
 };
 
 
