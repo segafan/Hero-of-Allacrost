@@ -77,19 +77,7 @@ private:
 	//! If true, the logo is animating (sword flying and so on...)
 	static bool _logo_animating;
 
-	//! Sword X coordinate
-	float _sword_x;
-
-	//! Sword X coordinate
-	float _sword_y;
-
-	//! Sword rotation angle
-	float _sword_angle;
-
-	//! Sword scale
-	float _sword_scale;
-
-	//! Music to be used at the boot screen.
+	//! Music pieces to be used at the boot screen.
 	std::vector<hoa_audio::MusicDescriptor> _boot_music;
 	//! Sounds that will be used at the boot screen.
 	std::vector<hoa_audio::SoundDescriptor> _boot_sounds;
