@@ -394,7 +394,7 @@ bool MapMode::_TileMoveable(const private_map::TileCheck& tcheck) {
 		case NW_NORTH:
 		case NW_WEST:
 			if ( !((_tile_layers[tcheck.row][tcheck.col + 1].walkable & tcheck.altitude) ||
-			      (_tile_layers[tcheck.row + 1][tcheck.col].walkable & tcheck.altitude)) ) {
+			      (_tile_layers[tcheck.row - 1][tcheck.col].walkable & tcheck.altitude)) ) {
 				return false;
 			}
 			break;
@@ -402,7 +402,7 @@ bool MapMode::_TileMoveable(const private_map::TileCheck& tcheck) {
 		case SW_SOUTH:
 		case SW_WEST:
 			if ( !((_tile_layers[tcheck.row][tcheck.col + 1].walkable & tcheck.altitude) ||
-			      (_tile_layers[tcheck.row - 1][tcheck.col].walkable & tcheck.altitude)) ) {
+			      (_tile_layers[tcheck.row + 1][tcheck.col].walkable & tcheck.altitude)) ) {
 				return false;
 			}
 			break;
@@ -410,7 +410,7 @@ bool MapMode::_TileMoveable(const private_map::TileCheck& tcheck) {
 		case NE_NORTH:
 		case NE_EAST:
 			if ( !((_tile_layers[tcheck.row][tcheck.col - 1].walkable & tcheck.altitude) ||
-			      (_tile_layers[tcheck.row + 1][tcheck.col].walkable & tcheck.altitude)) ) {
+			      (_tile_layers[tcheck.row - 1][tcheck.col].walkable & tcheck.altitude)) ) {
 				return false;
 			}
 			break;
@@ -418,7 +418,7 @@ bool MapMode::_TileMoveable(const private_map::TileCheck& tcheck) {
 		case SE_SOUTH:
 		case SE_EAST:
 			if ( !((_tile_layers[tcheck.row][tcheck.col - 1].walkable & tcheck.altitude) ||
-			      (_tile_layers[tcheck.row - 1][tcheck.col].walkable & tcheck.altitude)) ) {
+			      (_tile_layers[tcheck.row + 1][tcheck.col].walkable & tcheck.altitude)) ) {
 				return false;
 			}
 			break;
