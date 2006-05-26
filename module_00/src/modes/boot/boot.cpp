@@ -181,14 +181,14 @@ void BootMode::Reset() {
 
 // Animates the logo when the boot mode starts up. Should not be called before LoadBootImages.
 void BootMode::_AnimateLogo() {
-	// Sequence starting times. Note: I've updated _every_ variable here to floats
+	// Sequence starting times. Note: I've changed _every_ variable here into floats
 	// to avoid type casts that would kill performance!
 	static const float SEQUENCE_ONE = 0.0f;
 	static const float SEQUENCE_TWO = SEQUENCE_ONE + 2000.0f;
 	static const float SEQUENCE_THREE = SEQUENCE_TWO + 2000.0f;
 	static const float SEQUENCE_FOUR = SEQUENCE_THREE + 525.0f;
-	static const float SEQUENCE_FIVE = SEQUENCE_FOUR + 2500.0f;
-	static const float SEQUENCE_SIX = SEQUENCE_FIVE + 3000.0f;
+	static const float SEQUENCE_FIVE = SEQUENCE_FOUR + 2325.0f;
+	static const float SEQUENCE_SIX = SEQUENCE_FIVE + 1800.0f;
 	static const float SEQUENCE_SEVEN = SEQUENCE_SIX + 2000.0f;
 	static const float SEQUENCE_EIGHT = SEQUENCE_SEVEN + 2000.0f;
 
@@ -230,9 +230,8 @@ void BootMode::_AnimateLogo() {
 	// Sequence three: Sword unsheathe & slide
 	else if (total_time >= SEQUENCE_THREE && total_time < SEQUENCE_FOUR)
 	{
-		static float sword_velocity = time_elapsed * 0.007f;
-		sword_velocity += (time_elapsed * 0.007f); // Move sword right
-		sword_x += sword_velocity;
+		float dt = (total_time - SEQUENCE_THREE) * 0.001f;
+		sword_x = 670.0f + (dt * dt) * 650.0f; // s = s0 + 0.5 * a * t^2
 		VideoManager->Move(512.0f, 385.0f); // logo bg
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 		VideoManager->DrawImage(_boot_images[1]);
@@ -247,9 +246,9 @@ void BootMode::_AnimateLogo() {
 	// Sequence four: Spin around the sword
 	else if (total_time >= SEQUENCE_FOUR && total_time < SEQUENCE_FIVE)
 	{
-		sword_x += time_elapsed * 1.6f * -cos(total_time * 0.01f) - time_elapsed * 0.27f;
-		sword_y += time_elapsed * 1.2f * -sin(total_time * 0.01f) + time_elapsed * 0.065f;
-		scale = 1.5f * (2.0f + sin((total_time-SEQUENCE_FOUR) * 0.004f - VIDEO_QUARTER_PI));
+		sword_x += time_elapsed * 1.6f * -cos(total_time * 0.01f) - time_elapsed * 0.275f;
+		sword_y += time_elapsed * 1.2f * -sin(total_time * 0.01f) + time_elapsed * 0.085f;
+		scale = 1.9f * (2.0f + sin((total_time-SEQUENCE_FOUR) * 0.004f - VIDEO_QUARTER_PI));
 		rotation = -(90.0f + SEQUENCE_FOUR * 0.50f) + total_time * 0.50f;
 
 		VideoManager->Move(512.0f, 385.0f); // logo bg
@@ -604,14 +603,14 @@ void BootMode::Update() {
 	}
 	else if (_logo_animating) // We're animating the opening logo
 	{
-		if (InputManager->ConfirmPress()) // Check here if we want to skip the demo
+		if (InputManager->ConfirmPress()) // Check if we want to skip the demo
 		{
 			_EndOpeningAnimation();
 			return;
 		}
 		else
 		{
-			return; // Otherwise skip rest of the event handling
+			return; // Otherwise skip rest of the event handling for now
 		}
 	}
 
