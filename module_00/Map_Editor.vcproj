@@ -92,7 +92,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="moc &quot;$(ProjectDir)\src\editor\editor.h&quot; &gt; &quot;$(ProjectDir)\src\editor\editor_moc.cpp&quot;&#x0D;&#x0A;moc &quot;$(ProjectDir)\src\editor\grid.h&quot; &gt; &quot;$(ProjectDir)\src\editor\grid_moc.cpp&quot;"
+				CommandLine="moc &quot;$(ProjectDir)\src\editor\editor.h&quot; &gt; &quot;$(ProjectDir)\src\editor\editor_moc.cpp&quot;&#x0D;&#x0A;moc &quot;$(ProjectDir)\src\editor\grid.h&quot; &gt; &quot;$(ProjectDir)\src\editor\grid_moc.cpp&quot;&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -108,6 +108,8 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				FavorSizeOrSpeed="1"
+				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="&quot;$(ProjectDir)\src&quot;;&quot;$(ProjectDir)\src\engine\video&quot;;&quot;$(ProjectDir)\src\editor&quot;;&quot;$(ProjectDir)\src\engine\audio&quot;;&quot;$(ProjectDir)\src\modes&quot;;&quot;$(ProjectDir)\src\engine&quot;;&quot;$(ProjectDir)\src\modes\battle&quot;;&quot;$(ProjectDir)\src\modes\boot&quot;;&quot;$(ProjectDir)\src\modes\map&quot;;&quot;$(ProjectDir)\src\modes\menu&quot;"
 				RuntimeLibrary="2"
 				WarningLevel="3"
@@ -129,6 +131,7 @@
 				IgnoreAllDefaultLibraries="false"
 				IgnoreDefaultLibraryNames=""
 				SubSystem="2"
+				LinkTimeCodeGeneration="1"
 			/>
 			<Tool
 				Name="VCALinkTool"

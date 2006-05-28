@@ -135,6 +135,13 @@ private:
 	 */
 	void _AnimateLogo();
 
+	//! Draws background image, logo and sword at their default locations
+	void _DrawBackgroundItems();
+
+	//! Stops playback of the opening animation
+	void _EndOpeningAnimation();
+
+
 	/*!
 	 *  \brief Redefines a key to be mapped to another command.
 	 *  \param &change_key The key to be re-mapped.
@@ -186,13 +193,6 @@ private:
 
 	//! Updates the audio options screen
 	void _UpdateAudioOptions();
-
-
-	//! Draws background image, logo and the sword in their default positions
-	void _DrawBackgroundItems();
-
-	//! Ends the opening animation playing
-	void _EndOpeningAnimation();
 
 public:
 	//! Initializes class members and loads media data.
