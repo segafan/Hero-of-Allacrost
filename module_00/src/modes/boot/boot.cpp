@@ -182,29 +182,26 @@ void BootMode::Reset() {
 // Animates the logo when the boot mode starts up. Should not be called before LoadBootImages.
 void BootMode::_AnimateLogo() {
 	// Sequence starting times. Note: I've changed _every_ variable here into floats
-	// to avoid type casts that would kill performance!
+	// to avoid unneccessary type casts that would kill performance! -Viljami
 	static const float SEQUENCE_ONE = 0.0f;
 	static const float SEQUENCE_TWO = SEQUENCE_ONE + 2000.0f;
 	static const float SEQUENCE_THREE = SEQUENCE_TWO + 2000.0f;
 	static const float SEQUENCE_FOUR = SEQUENCE_THREE + 525.0f;
-	static const float SEQUENCE_FIVE = SEQUENCE_FOUR + 2325.0f;
-	static const float SEQUENCE_SIX = SEQUENCE_FIVE + 1800.0f;
+	static const float SEQUENCE_FIVE = SEQUENCE_FOUR + 1900.0f;
+	static const float SEQUENCE_SIX = SEQUENCE_FIVE + 2800.0f;
 	static const float SEQUENCE_SEVEN = SEQUENCE_SIX + 2000.0f;
 	static const float SEQUENCE_EIGHT = SEQUENCE_SEVEN + 2000.0f;
 
 	// Sword setup
 	static float sword_x = 670.0f;
 	static float sword_y = 360.0f;
-	static float scale = 1.0f;
 	static float rotation = -90.0f;
 
 	// Total time in ms
 	static float total_time = 0.0f;
 
-	// Get the frametime
+	// Get the frametime and update total time
 	float time_elapsed = static_cast<float>(SettingsManager->GetUpdateTime());
-
-	// Update total time
 	total_time += time_elapsed;
 
 	// Sequence one: black
@@ -246,10 +243,17 @@ void BootMode::_AnimateLogo() {
 	// Sequence four: Spin around the sword
 	else if (total_time >= SEQUENCE_FOUR && total_time < SEQUENCE_FIVE)
 	{
-		sword_x += time_elapsed * 1.6f * -cos(total_time * 0.01f) - time_elapsed * 0.275f;
-		sword_y += time_elapsed * 1.2f * -sin(total_time * 0.01f) + time_elapsed * 0.085f;
-		scale = 1.9f * (2.0f + sin((total_time-SEQUENCE_FOUR) * 0.004f - VIDEO_QUARTER_PI));
-		rotation = -(90.0f + SEQUENCE_FOUR * 0.50f) + total_time * 0.50f;
+		const float ROTATION_SPEED = 310.0f;
+		const float SPEED_LEFT = 20.0f;
+		const float SPEED_UP = 750.0f;
+		const float GRAVITY = 120.0f;
+
+		// Delta goes from 0.0f to 1.0f
+		float delta = ((total_time - SEQUENCE_FOUR) / (SEQUENCE_FIVE - SEQUENCE_FOUR));
+		float dt = (total_time - SEQUENCE_FOUR) * 0.001f;
+		sword_x = 845.085f - dt*dt * SPEED_LEFT; // Small accelerated movement to left
+		sword_y = 360.0f   - dt*dt * GRAVITY + SPEED_UP * delta;
+		rotation = -90.0f + dt * ROTATION_SPEED - 90.0f * delta;
 
 		VideoManager->Move(512.0f, 385.0f); // logo bg
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
@@ -259,7 +263,6 @@ void BootMode::_AnimateLogo() {
 		VideoManager->DrawImage(_boot_images[3]);
 		VideoManager->Move(sword_x, sword_y); // sword
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-		VideoManager->Scale(scale, scale);
 		VideoManager->Rotate(rotation);		
 		VideoManager->DrawImage(_boot_images[2]);
 	}
@@ -267,10 +270,11 @@ void BootMode::_AnimateLogo() {
 	else if (total_time >= SEQUENCE_FIVE && total_time < SEQUENCE_SIX)
 	{
 		// Delta goes from 0.0f to 1.0f
-		float delta = (total_time - SEQUENCE_FIVE) / (SEQUENCE_SIX - SEQUENCE_FIVE);
-		float newScale = (1.0f - delta) * scale + delta;
+		float delta_root = (total_time - SEQUENCE_FIVE) / (SEQUENCE_SIX - SEQUENCE_FIVE);
+		float delta = delta_root * delta_root * delta_root * delta_root * delta_root;
+
 		static float rotationDifference = static_cast<float>(((static_cast<int32>(rotation))%360));
-		float newRotation = rotation - (delta) * rotationDifference + 360.0f * delta;
+		float newRotation = rotation - (delta_root) * rotationDifference + 360.0f * delta_root;
 		float newX = (1.0f - delta) * sword_x + 762.0f * delta;
 		float newY = (1.0f - delta) * sword_y + 310.0f * delta;
 
@@ -282,7 +286,6 @@ void BootMode::_AnimateLogo() {
 		VideoManager->DrawImage(_boot_images[3]);
 		VideoManager->Move(newX, newY); // sword
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-		VideoManager->Scale(newScale, newScale);
 		VideoManager->Rotate(newRotation);		
 		VideoManager->DrawImage(_boot_images[2]);
 	}
@@ -290,7 +293,8 @@ void BootMode::_AnimateLogo() {
 	else if (total_time >= SEQUENCE_SIX && total_time < SEQUENCE_SEVEN)
 	{
 		// Delta goes from 1.0f to 0.0f
-		float delta = 1.0f - (total_time - SEQUENCE_SIX) / (SEQUENCE_SEVEN - SEQUENCE_SIX);
+		float delta = (total_time - SEQUENCE_SIX) / (SEQUENCE_SEVEN - SEQUENCE_SIX);
+		delta = 1.0f - delta * delta;
 		VideoManager->SetFog(Color::white, delta);
 		_DrawBackgroundItems();
 	}
@@ -299,6 +303,35 @@ void BootMode::_AnimateLogo() {
 		_EndOpeningAnimation();
 		_DrawBackgroundItems();
 	}
+}
+
+
+// Draws background image, logo and sword at their default locations
+void BootMode::_DrawBackgroundItems()
+{
+	VideoManager->Move(512.0f, 384.0f);
+	VideoManager->SetDrawFlags(VIDEO_NO_BLEND, 0);
+	VideoManager->DrawImage(_boot_images[0]); // Draw background
+
+	VideoManager->Move(512.0f, 648.0f);
+	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+	VideoManager->DrawImage(_boot_images[1]); // Draw the logo background
+
+	VideoManager->Move(762.0f, 578.0f);
+	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+	VideoManager->DrawImage(_boot_images[2]); // Draw the sword
+
+	VideoManager->Move(512, 648);
+	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+	VideoManager->DrawImage(_boot_images[3]); // Draw the logo text
+}
+
+
+// Stops playback of the opening animation
+void BootMode::_EndOpeningAnimation()
+{
+	VideoManager->SetFog(Color::black, 0.0f); // Turn off the fog
+	_logo_animating = false;
 }
 
 
@@ -553,35 +586,6 @@ void BootMode::_UpdateAudioOptions()
 
 	_audio_options_menu.SetOptionText(0, MakeWideString(sound_volume.str()));
 	_audio_options_menu.SetOptionText(1, MakeWideString(music_volume.str()));
-}
-
-
-// Draws background image, logo and the sword in their default positions
-void BootMode::_DrawBackgroundItems()
-{
-	VideoManager->Move(512.0f, 384.0f);
-	VideoManager->SetDrawFlags(VIDEO_NO_BLEND, 0);
-	VideoManager->DrawImage(_boot_images[0]); // Draw the background image
-
-	VideoManager->Move(512.0f, 648.0f);
-	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-	VideoManager->DrawImage(_boot_images[1]); // Draw the logo background
-
-	VideoManager->Move(762.0f, 578.0f);
-	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-	VideoManager->DrawImage(_boot_images[2]); // Draw the sword
-
-	VideoManager->Move(512, 648);
-	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-	VideoManager->DrawImage(_boot_images[3]); // Draw the logo text
-}
-
-
-// Ends the opening animation playing
-void BootMode::_EndOpeningAnimation()
-{
-	VideoManager->SetFog(Color::black, 0.0f); // Turn off the fog
-	_logo_animating = false;
 }
 
 
