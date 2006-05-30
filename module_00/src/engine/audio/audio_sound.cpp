@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -13,7 +13,11 @@
  * \brief   Sound file for sound-related code in the audio engine.
  *****************************************************************************/
 
+#ifndef __APPLE__
 #include <AL/alut.h>
+#else
+#include <OpenAL/alut.h>
+#endif // #ifndef __APPLE__
 
 #include "audio_sound.h"
 
@@ -32,7 +36,7 @@ namespace private_audio {
 
 SoundBuffer::SoundBuffer(string fname) {
 	filename = fname;
-	
+
 	// Differences between OpenAL 1.* and earlier versions require this function
 	// to be written in very different ways depending on the OpenAL version.
 
@@ -46,7 +50,7 @@ SoundBuffer::SoundBuffer(string fname) {
 		return;
 	}
 	reference_count = 1;
-	
+
 	// For older versions of OpenAL prior to 1.*
 	#else
 	ALenum format;
@@ -56,7 +60,7 @@ SoundBuffer::SoundBuffer(string fname) {
 	ALboolean loop;
 	ALbyte *file;
 	ALenum error_check;
-	
+
 	// (1) Generate a new OpenAL buffer and set the _reference_count to one if successful.
 	alGenBuffers(1, &buffer);
 	error_check = alGetError();
@@ -101,7 +105,7 @@ SoundBuffer::SoundBuffer(string fname) {
 		return;
 	}
 	#endif
-	
+
 	if (AUDIO_DEBUG) {
 		cout << "AUDIO: Successfully loaded WAV file: snd/" << filename << ".wav" << endl;
 		DEBUG_PrintProperties();
@@ -110,7 +114,7 @@ SoundBuffer::SoundBuffer(string fname) {
 
 SoundBuffer::~SoundBuffer() {
 	if (reference_count != 0) {
-		cerr << "AUDIO WARNING: Audio engine is attempting to delete buffer " << filename 
+		cerr << "AUDIO WARNING: Audio engine is attempting to delete buffer " << filename
 		     << ", which still has " << reference_count << " number of references to it." << endl;
 	}
 	alDeleteBuffers(1, &buffer);

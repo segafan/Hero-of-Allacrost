@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -13,7 +13,11 @@
  * \brief   Source file for audio engine interface.
  *****************************************************************************/
 
+#ifndef __APPLE__
 #include <AL/alut.h>
+#else
+#include <OpenAL/alut.h>
+#endif // #ifndef __APPLE__
 #include <vorbis/codec.h>
 
 #include "audio.h"
@@ -116,8 +120,8 @@ const string GetALUTErrorString(ALenum error_code) {
 		default:
 			return ("unknown ALUT error code: " + error_code);
 	} // switch (error_code)
-	
-	#else 
+
+	#else
 		// This function will probably never be called if ALUT_API_MAJOR_VERSION is not defined, thus this
 		// statement should never be reached.
 		return "ALUT Error: This ALUT version does not support error codes";
@@ -217,7 +221,7 @@ void GameAudio::Update() {
 // Initializes OpenAL and creates the global audio context
 bool GameAudio::Initialize() {
 	// Open the default device
-	_device = alcOpenDevice(NULL); 
+	_device = alcOpenDevice(NULL);
 	if (_device == NULL) {
 		cerr << "AUDIO ERROR: Failed to initialize OpenAL and open a default device." << endl;
 		return false;
@@ -232,7 +236,7 @@ bool GameAudio::Initialize() {
 	}
 	alcMakeContextCurrent(_context);
 	alGetError(); // Clear the error code
-	
+
 	// Only necessary to initialize ALUT for version 1.*, aka freealut
 	#ifdef ALUT_API_MAJOR_VERSION
 	// Initialize ALUT without a context (it has already been created)
@@ -281,10 +285,10 @@ bool GameAudio::Initialize() {
 // Returns a pointer to the sound buffer for the file. Loads the file from memory if it isn't already. Returns NULL if there was an error.
 SoundBuffer* GameAudio::_AcquireSoundBuffer(string filename) {
 	// If the buffer in question is already loaded, return a pointer to it.
-	if (_sound_buffers.find(filename) != _sound_buffers.end()) { 
+	if (_sound_buffers.find(filename) != _sound_buffers.end()) {
 		return _sound_buffers[filename];
 	}
-	
+
 	// The buffer is not loaded, so create a new one, place it in the pool of buffers, and return a pointer to it
 	else {
 		SoundBuffer *SB = new SoundBuffer(filename);
@@ -305,10 +309,10 @@ SoundBuffer* GameAudio::_AcquireSoundBuffer(string filename) {
 // Returns a pointer to the music buffer for the file. Loads the file from memory if it isn't already. Returns NULL if there was an error.
 MusicBuffer* GameAudio::_AcquireMusicBuffer(string filename) {
 	// If the buffer in question is already loaded, return a pointer to it.
-	if (_music_buffers.find(filename) != _music_buffers.end()) { 
+	if (_music_buffers.find(filename) != _music_buffers.end()) {
 		return _music_buffers[filename];
 	}
-	
+
 	// The buffer is not loaded, so create a new one, place it in the pool of buffers, and return a pointer to it
 	else {
 		MusicBuffer *MB = new MusicBuffer(filename);
@@ -502,18 +506,20 @@ uint8 GameAudio::GetDistanceModel() {
 	switch (al_model) {
 		case AL_NONE:
 			return AUDIO_DISTANCE_NONE;
+		#ifdef AL_VERSION_1_1
 		case AL_LINEAR_DISTANCE:
 			return AUDIO_DISTANCE_LINEAR;
 		case AL_LINEAR_DISTANCE_CLAMPED:
 			return AUDIO_DISTANCE_LINEAR_CLAMPED;
-		case AL_INVERSE_DISTANCE:
-			return AUDIO_DISTANCE_INVERSE;
-		case AL_INVERSE_DISTANCE_CLAMPED:
-			return AUDIO_DISTANCE_INVERSE_CLAMPED;
 		case AL_EXPONENT_DISTANCE:
 			return AUDIO_DISTANCE_EXPONENT;
 		case AL_EXPONENT_DISTANCE_CLAMPED:
 			return AUDIO_DISTANCE_EXPONENT_CLAMPED;
+		#endif // AL_VERSION_1_1
+		case AL_INVERSE_DISTANCE:
+			return AUDIO_DISTANCE_INVERSE;
+		case AL_INVERSE_DISTANCE_CLAMPED:
+			return AUDIO_DISTANCE_INVERSE_CLAMPED;
 		default:
 			if (AUDIO_DEBUG) cerr << "AUDIO WARNING: engine is using an unknown distance model: " << al_model << endl;
 			return 0;
@@ -527,23 +533,25 @@ void GameAudio::SetDistanceModel(uint8 model) {
 		case AUDIO_DISTANCE_NONE:
 			dist_model = AL_NONE;
 			break;
+		#ifdef AL_VERSION_1_1
 		case AUDIO_DISTANCE_LINEAR:
 			dist_model = AL_LINEAR_DISTANCE;
 			break;
 		case AUDIO_DISTANCE_LINEAR_CLAMPED:
 			dist_model = AL_LINEAR_DISTANCE_CLAMPED;
 			break;
-		case AUDIO_DISTANCE_INVERSE:
-			dist_model = AL_INVERSE_DISTANCE;
-			break;
-		case AUDIO_DISTANCE_INVERSE_CLAMPED:
-			dist_model = AL_INVERSE_DISTANCE_CLAMPED;
-			break;
 		case AUDIO_DISTANCE_EXPONENT:
 			dist_model = AL_EXPONENT_DISTANCE;
 			break;
 		case AUDIO_DISTANCE_EXPONENT_CLAMPED:
 			dist_model = AL_EXPONENT_DISTANCE_CLAMPED;
+			break;
+		#endif // AL_VERSION_1_1
+		case AUDIO_DISTANCE_INVERSE:
+			dist_model = AL_INVERSE_DISTANCE;
+			break;
+		case AUDIO_DISTANCE_INVERSE_CLAMPED:
+			dist_model = AL_INVERSE_DISTANCE_CLAMPED;
 			break;
 		default:
 			if (AUDIO_DEBUG) cerr << "AUDIO WARNING: attempted to use an invalid distance model: " << model << endl;
@@ -563,7 +571,7 @@ void GameAudio::DEBUG_PrintInfo() {
 	cout << "OpenAL Renderer:             " << alGetString(AL_RENDERER) << endl;
 	cout << "OpenAL Vendor:               " << alGetString(AL_VENDOR) << endl;
 	cout << "OpenAL Available Extensions: " << alGetString(AL_EXTENSIONS) << endl;
-	
+
 	#ifdef ALUT_API_MAJOR_VERSION
 	cout << "ALUT Major Version:          " << alutGetMajorVersion() << endl;
 	cout << "ALUT Minor Version:          " << alutGetMinorVersion() << endl;
@@ -571,7 +579,7 @@ void GameAudio::DEBUG_PrintInfo() {
 	cout << "ALUT Major Version:          " << "not available" << endl;
 	cout << "ALUT Minor Version:          " << "not available" << endl;
 	#endif
-	
+
 	cout << "Audio sources created:       " << (_sound_sources.size() + 1) << endl;
 }
 

@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -16,6 +16,16 @@
  * This code includes various utility functions that are used across different
  * parts of the game. This file is included in every header file in the
  * Allacrost source tree, save for maybe some headers for the map editor code.
+ *
+ * \note Use the following macros for OS-dependent code:
+ *   - Windows:   #ifdef _WIN32
+ *   - Mac OS X:  #ifdef __APPLE__
+ *   - Linux:     ???
+ *   - Solaris:   #ifdef SOLARIS
+ *   - BeOS:      #ifdef __BEOS__
+ * \note Use the following macros for compiler-dependent code:
+ *   - MSVC:      #ifdef _MSC_VER
+ *   - g++:       ???
  *****************************************************************************/
 
 #ifndef __UTILS_HEADER__
