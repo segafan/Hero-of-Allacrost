@@ -184,13 +184,12 @@ void BootMode::_AnimateLogo() {
 	// Sequence starting times. Note: I've changed _every_ variable here into floats
 	// to avoid unneccessary type casts that would kill performance! -Viljami
 	static const float SEQUENCE_ONE = 0.0f;
-	static const float SEQUENCE_TWO = SEQUENCE_ONE + 2000.0f;
+	static const float SEQUENCE_TWO = SEQUENCE_ONE + 1000.0f;
 	static const float SEQUENCE_THREE = SEQUENCE_TWO + 2000.0f;
-	static const float SEQUENCE_FOUR = SEQUENCE_THREE + 525.0f;
+	static const float SEQUENCE_FOUR = SEQUENCE_THREE + 575.0f;
 	static const float SEQUENCE_FIVE = SEQUENCE_FOUR + 1900.0f;
-	static const float SEQUENCE_SIX = SEQUENCE_FIVE + 2800.0f;
-	static const float SEQUENCE_SEVEN = SEQUENCE_SIX + 2000.0f;
-	static const float SEQUENCE_EIGHT = SEQUENCE_SEVEN + 2000.0f;
+	static const float SEQUENCE_SIX = SEQUENCE_FIVE + 1400.0f;
+	static const float SEQUENCE_SEVEN = SEQUENCE_SIX + 1500.0f;
 
 	// Sword setup
 	static float sword_x = 670.0f;
@@ -228,7 +227,7 @@ void BootMode::_AnimateLogo() {
 	else if (total_time >= SEQUENCE_THREE && total_time < SEQUENCE_FOUR)
 	{
 		float dt = (total_time - SEQUENCE_THREE) * 0.001f;
-		sword_x = 670.0f + (dt * dt) * 650.0f; // s = s0 + 0.5 * a * t^2
+		sword_x = 670.0f + (dt * dt) * 660.0f; // s = s0 + 0.5 * a * t^2
 		VideoManager->Move(512.0f, 385.0f); // logo bg
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 		VideoManager->DrawImage(_boot_images[1]);
@@ -243,17 +242,17 @@ void BootMode::_AnimateLogo() {
 	// Sequence four: Spin around the sword
 	else if (total_time >= SEQUENCE_FOUR && total_time < SEQUENCE_FIVE)
 	{
-		const float ROTATION_SPEED = 310.0f;
-		const float SPEED_LEFT = 20.0f;
+		const float ROTATIONS = 360.0f + 90.0f;
+		const float SPEED_LEFT = 35.0f;
 		const float SPEED_UP = 750.0f;
 		const float GRAVITY = 120.0f;
 
 		// Delta goes from 0.0f to 1.0f
 		float delta = ((total_time - SEQUENCE_FOUR) / (SEQUENCE_FIVE - SEQUENCE_FOUR));
 		float dt = (total_time - SEQUENCE_FOUR) * 0.001f;
-		sword_x = 845.085f - dt*dt * SPEED_LEFT; // Small accelerated movement to left
+		sword_x = 885.941f - dt*dt * SPEED_LEFT; // Small accelerated movement to left
 		sword_y = 360.0f   - dt*dt * GRAVITY + SPEED_UP * delta;
-		rotation = -90.0f + dt * ROTATION_SPEED - 90.0f * delta;
+		rotation = -90.0f + delta * ROTATIONS;
 
 		VideoManager->Move(512.0f, 385.0f); // logo bg
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
@@ -271,10 +270,7 @@ void BootMode::_AnimateLogo() {
 	{
 		// Delta goes from 0.0f to 1.0f
 		float delta_root = (total_time - SEQUENCE_FIVE) / (SEQUENCE_SIX - SEQUENCE_FIVE);
-		float delta = delta_root * delta_root * delta_root * delta_root * delta_root;
-
-		static float rotationDifference = static_cast<float>(((static_cast<int32>(rotation))%360));
-		float newRotation = rotation - (delta_root) * rotationDifference + 360.0f * delta_root;
+		float delta = delta_root * delta_root * delta_root * delta_root;
 		float newX = (1.0f - delta) * sword_x + 762.0f * delta;
 		float newY = (1.0f - delta) * sword_y + 310.0f * delta;
 
@@ -285,8 +281,7 @@ void BootMode::_AnimateLogo() {
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 		VideoManager->DrawImage(_boot_images[3]);
 		VideoManager->Move(newX, newY); // sword
-		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-		VideoManager->Rotate(newRotation);		
+		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);	
 		VideoManager->DrawImage(_boot_images[2]);
 	}
 	// Sequence six: flash of light
