@@ -242,7 +242,7 @@ void BootMode::_AnimateLogo() {
 	// Sequence four: Spin around the sword
 	else if (total_time >= SEQUENCE_FOUR && total_time < SEQUENCE_FIVE)
 	{
-		const float ROTATIONS = 360.0f + 90.0f;
+		const float ROTATIONS = 720.0f + 90.0f;
 		const float SPEED_LEFT = 35.0f;
 		const float SPEED_UP = 750.0f;
 		const float GRAVITY = 120.0f;
