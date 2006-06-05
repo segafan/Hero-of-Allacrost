@@ -311,15 +311,18 @@ class Actor {
 class BattleUI {
 	private:
                 enum CURSOR_STATE  {
-                        CURSOR_ON_PLAYER_CHARACTERS,
-                        CURSOR_ON_ENEMY_CHARACTERS,
-                        CURSOR_ON_MENU
+                        CURSOR_ON_PLAYER_CHARACTERS = 0,
+                        CURSOR_ON_ENEMY_CHARACTERS = 1,
+                        CURSOR_ON_MENU = 2,
+                        CURSOR_ON_SUB_MENU = 3
                 };
                 
 		//! The battlemode we belong to
-		BattleMode *_bm;
+		BattleMode *_battle_mode;
 		//! The current actor we have clicked on
 		Actor *_currently_selected_actor;
+                //! Character index of the currently selected actor
+                int _player_character_index;
 		//! The actors we have selected as arguments
 		std::list<Actor *> _currently_selected_argument_actors;
 		//! A stack of menu selections we have gone through
@@ -332,10 +335,12 @@ class BattleUI {
 		uint32 _number_menu_items;
                 //! The state of our cursor
                 CURSOR_STATE _cursor_state;
-                //! The general menu window
-                hoa_video::MenuWindow _general_menu_window;
                 //! The general option box
                 hoa_video::OptionBox _general_menu;
+                //! The sub menu.  Recreated every time it is chosen
+                hoa_video::OptionBox _sub_menu;
+                //! The selected cursor
+                hoa_video::StillImage _player_selector_image;
 		
 	public:
 		BattleUI(BattleMode * const ABattleMode);
@@ -348,12 +353,12 @@ class BattleUI {
 		/*!
 			\brief We clicked on an actor
 		*/
-		void SetActorSelected(Actor * const AWhichActor);
+		void SetPlayerActorSelected(PlayerActor * const AWhichActor);
 		
 		/*!
 			\brief No actor is selected...we are now selecting an actor
 		*/
-		void DeselectActor();
+		void DeselectPlayerActor();
 		
 		/*!
 			\brief Get other people selected
@@ -588,6 +593,9 @@ private:
         void _BuildEnemyActors();
 
 public:
+        static int MAX_PLAYER_CHARACTERS_IN_BATTLE;
+        static int MAX_ENEMY_CHARACTERS_IN_BATTLE;
+        
 	BattleMode();
 	~BattleMode();
 
@@ -616,9 +624,18 @@ public:
 	//! \brief Returns all player actors
 	std::deque<private_battle::PlayerActor *> ReturnCharacters() const;
         
+        //! \brief The number of players alive
+        int NumberOfPlayerCharactersAlive();
+        
+        //! \brief Return the player character at the deque location 'index'
+        private_battle::PlayerActor* GetPlayerCharacterAt(int AIndex) const;
+        
+        //! \brief Returns the index of a player character 
+        int IndexLocationOfPlayerCharacter(private_battle::PlayerActor * const AActor);
+        
         //! \brief Swap a character from _player_actors to _player_actors_in_battle
         // This may become more complicated if it is done in a wierd graphical manner
-        void BattleMode::SwapCharacters(private_battle::PlayerActor *AActorToRemove, private_battle::PlayerActor *AActorToAdd);
+        void SwapCharacters(private_battle::PlayerActor *AActorToRemove, private_battle::PlayerActor *AActorToAdd);
 };
 
 
