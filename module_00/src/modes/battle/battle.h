@@ -337,6 +337,8 @@ class BattleUI {
                 CURSOR_STATE _cursor_state;
                 //! The general option box
                 hoa_video::OptionBox _general_menu;
+                //! The cursor location in the _general_menu.  For pure hackery reasons only
+                uint32 _general_menu_cursor_location;
                 //! The sub menu.  Recreated every time it is chosen
                 hoa_video::OptionBox _sub_menu;
                 //! The selected cursor
