@@ -235,7 +235,10 @@ BattleUI::BattleUI(BattleMode * const ABattleMode) :
         
         _general_menu.SetOptions(formatText);
         _general_menu.SetSelection(0);
+        _general_menu_cursor_location = 0;
         _general_menu.EnableOption(4, false);
+        
+        _general_menu.SetCursorOffset(-15,0);
         
         _player_selector_image.SetDimensions(109,78);
         _player_selector_image.SetFilename("img/icons/battle/character_selection.png");
@@ -357,10 +360,16 @@ void BattleUI::Update(uint32 AUpdateTime) {
         }
         else if(_cursor_state == CURSOR_ON_MENU) {
                 if(InputManager->LeftPress()) {
-                        _general_menu.HandleLeftKey();
+                        if(_general_menu_cursor_location > 0) {
+                                _general_menu.HandleLeftKey();
+                                _general_menu_cursor_location--;
+                        }
                 }
                 else if(InputManager->RightPress()) {
-                        _general_menu.HandleRightKey();
+                        if(_general_menu_cursor_location < 3) {
+                                _general_menu.HandleRightKey();
+                                _general_menu_cursor_location++;
+                        }
                 }
                 else if(InputManager->ConfirmPress()) {
                         //confirm the press
