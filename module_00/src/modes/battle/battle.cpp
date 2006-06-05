@@ -209,42 +209,42 @@ uint32 Actor::GetTotalIntelligenceModifier() {
 */
 
 BattleUI::BattleUI(BattleMode * const ABattleMode) :
-        _bm(ABattleMode),
+        _battle_mode(ABattleMode),
         _currently_selected_actor(NULL),
         _necessary_selections(0),
         _current_hover_selection(0),
-        _number_menu_items(0)
+        _number_menu_items(0),
+        _cursor_state(CURSOR_ON_PLAYER_CHARACTERS),
+        _player_character_index(0)
 {
-        _general_menu_window.Create(68*4+20, 64*2+20);
-        _general_menu_window.SetPosition(10, 630);
-        _general_menu_window.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-        _general_menu_window.Show();
-
         _general_menu.SetFont("default");
-        _general_menu.SetCellSize(68.0f, 64.0f);
-        _general_menu.SetSize(4, 2);
-        _general_menu.SetPosition(30.0f, 620.0f);
+        _general_menu.SetCellSize(50.0f, 79.0f);
+        _general_menu.SetSize(5, 1);
+        _general_menu.SetPosition(0.0f, 620.0f);
         _general_menu.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
         _general_menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
         _general_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
         _general_menu.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
         
         vector<hoa_utils::ustring> formatText;
-        formatText.push_back(MakeWideString("<img/icons/battle/attack_menu_icon.png>"));
-        formatText.push_back(MakeWideString("<img/icons/battle/defense_menu_icon.png>"));
-        formatText.push_back(MakeWideString("<img/icons/battle/support_menu_icon.png>"));
-        formatText.push_back(MakeWideString("<img/icons/battle/item_menu_icon.png>"));
-        formatText.push_back(MakeWideString("Attack<C>"));
-        formatText.push_back(MakeWideString("Defense<C>"));
-        formatText.push_back(MakeWideString("Support<C>"));
-        formatText.push_back(MakeWideString("Item<C>"));
+        formatText.push_back(MakeWideString("<img/icons/battle/icon_attack.png>"));
+        formatText.push_back(MakeWideString("<img/icons/battle/icon_defend.png>"));
+        formatText.push_back(MakeWideString("<img/icons/battle/icon_support.png>"));
+        formatText.push_back(MakeWideString("<img/icons/battle/icon_item.png>"));
+        formatText.push_back(MakeWideString("<img/icons/battle/icon_extra.png>"));
         
         _general_menu.SetOptions(formatText);
-        _general_menu.SetSelection(4);
+        _general_menu.SetSelection(0);
+        _general_menu.EnableOption(4, false);
+        
+        _player_selector_image.SetDimensions(109,78);
+        _player_selector_image.SetFilename("img/icons/battle/character_selection.png");
+        if(!VideoManager->LoadImage(_player_selector_image)) {
+                cerr << "Unable to load player selector image." << endl;
+        }
 }
 		
 BattleUI::~BattleUI() {
-                _general_menu_window.Destroy();
                 //_general_menu.Destroy();
 }
 /*!
@@ -257,14 +257,15 @@ Actor * const BattleUI::GetSelectedActor() const {
 /*!
         We clicked on an actor
 */
-void BattleUI::SetActorSelected(Actor * const AWhichActor) {
+void BattleUI::SetPlayerActorSelected(PlayerActor * const AWhichActor) {
         _currently_selected_actor = AWhichActor;
+        _player_character_index = _battle_mode->IndexLocationOfPlayerCharacter(AWhichActor);
 }
 
 /*!
         No actor is selected...we are now selecting an actor
 */
-void BattleUI::DeselectActor() {
+void BattleUI::DeselectPlayerActor() {
         _currently_selected_actor = NULL;
 }      
 
@@ -300,16 +301,93 @@ void BattleUI::SetNumberNecessarySelections(uint32 ANumSelections) {
         Draw the actual windows
 */
 void BattleUI::Draw() {
-        _general_menu_window.Draw();
-        _general_menu.Draw();
+        if(_cursor_state != CURSOR_ON_PLAYER_CHARACTERS) {
+           _general_menu.Draw();
+        }
+        
+        //always draw the currently selected character
+        VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+        VideoManager->Move(_currently_selected_actor->GetXLocation()-20, _currently_selected_actor->GetYLocation()-20);
+        _player_selector_image.Draw();
 }
 
 /*!
         Update the windows
 */
 void BattleUI::Update(uint32 AUpdateTime) {
-        _general_menu_window.Update(AUpdateTime);
         _general_menu.Update(AUpdateTime);
+        
+        if(_cursor_state == CURSOR_ON_PLAYER_CHARACTERS) {
+                if(_battle_mode->NumberOfPlayerCharactersAlive() == 1) {
+                        _cursor_state = CURSOR_ON_MENU;
+                }
+                else if(InputManager->UpPress() || InputManager->LeftPress()) {
+                        //select the character "to the top"
+                        int working_index = _player_character_index;
+                        while(working_index > 0) {
+                                if(_battle_mode->GetPlayerCharacterAt((working_index-1))->IsAlive()) {
+                                        _player_character_index = working_index-1;
+                                        break;
+                                }
+                                else {
+                                        --working_index;
+                                }
+                        }
+                }
+                else if(InputManager->DownPress() || InputManager->RightPress()) {
+                        //select the character "to the bottom"
+                        int working_index = _player_character_index;
+                        
+                        while(working_index < BattleMode::MAX_PLAYER_CHARACTERS_IN_BATTLE) {
+                                if(_battle_mode->GetPlayerCharacterAt((working_index+1))->IsAlive()) {
+                                        _player_character_index = working_index+1;
+                                        break;
+                                }
+                                else {
+                                        ++working_index;
+                                }
+                        }
+                }
+                else if(InputManager->ConfirmPress()) {
+                        _cursor_state = CURSOR_ON_MENU;
+                }
+        }
+        else if(_cursor_state == CURSOR_ON_ENEMY_CHARACTERS) {
+                
+        }
+        else if(_cursor_state == CURSOR_ON_MENU) {
+                if(InputManager->LeftPress()) {
+                        _general_menu.HandleLeftKey();
+                }
+                else if(InputManager->RightPress()) {
+                        _general_menu.HandleRightKey();
+                }
+                else if(InputManager->ConfirmPress()) {
+                        //confirm the press
+                        _cursor_state = CURSOR_ON_SUB_MENU;
+                }
+                else if(InputManager->CancelPress()) {
+                        _cursor_state = CURSOR_ON_PLAYER_CHARACTERS;
+                }
+        }
+        else if(_cursor_state == CURSOR_ON_SUB_MENU) {
+                if(InputManager->DownPress()) {
+                        _general_menu.HandleDownKey();
+                }
+                else if(InputManager->UpPress()) {
+                        _general_menu.HandleUpKey();
+                }
+                else if(InputManager->ConfirmPress()) {
+                        //if the skill is for the players, put the 
+                        //cursor on the player characters
+                        
+                        //other wise, put the cursor on the enemy
+                        //characters
+                }
+                else if(InputManager->CancelPress()) {
+                        _cursor_state = CURSOR_ON_MENU;
+                }
+        }
 }
 
 /*! PlayerCharacter 
@@ -432,13 +510,13 @@ void EnemyActor::Update(uint32 ATimeElapsed) {
         totalHealthLost += ATimeElapsed/300.0f;
         
         float health = GetHealth() - totalHealthLost;
-        if(health - (int)health > .5) 
-                health = (int)health + 1;
+        if(health - (uint32)health > .5) 
+                health = (uint32)health + 1;
         else
-                health = (int)health;
+                health = (uint32)health;
         
         if(GetHealth() > 0)
-                SetHealth(health);
+                SetHealth((uint32)health);
                 
         if(totalHealthLost > .5)
                 totalHealthLost = 0;
@@ -694,6 +772,8 @@ Actor *ScriptEvent::GetHost() {
         The actual battle mode
 */
 
+int BattleMode::MAX_PLAYER_CHARACTERS_IN_BATTLE = 4;
+int BattleMode::MAX_ENEMY_CHARACTERS_IN_BATTLE = 8;
 
 BattleMode::BattleMode() : 
         _user_interface(this),
@@ -756,8 +836,8 @@ void BattleMode::Update() {
 //! Wrapper function that calls different draw functions depending on the battle state.
 void BattleMode::Draw() {
         _DrawBackground();
-        _DrawCharacters();
         _user_interface.Draw();
+        _DrawCharacters();
 }
 
 void BattleMode::_DrawBackground() {
@@ -886,9 +966,39 @@ void BattleMode::SwapCharacters(private_battle::PlayerActor *AActorToRemove, pri
         _players_characters_in_battle.push_back(AActorToAdd); //add the other character to battle
 }
 
+int BattleMode::NumberOfPlayerCharactersAlive() {
+        int numAlive = 0;
+        
+        std::deque<private_battle::PlayerActor *>::iterator it = _players_characters_in_battle.begin();
+        for(; it != _players_characters_in_battle.end(); it++) {
+                if((*it)->IsAlive()) {
+                        numAlive++;
+                }
+        }
+        
+        return numAlive;
+}
+
+private_battle::PlayerActor* BattleMode::GetPlayerCharacterAt(int AIndex) const {
+        return _players_characters_in_battle[AIndex];
+}
+
+int BattleMode::IndexLocationOfPlayerCharacter(private_battle::PlayerActor * const AActor) {
+        int index = 0;
+        std::deque<private_battle::PlayerActor *>::iterator it = _players_characters_in_battle.begin();
+        for(; it != _players_characters_in_battle.end(); it++) {
+                if(*it == AActor) {
+                        return index; 
+                }
+                else 
+                        index++;
+        }
+        return -1;
+}
+
 void BattleMode::_TEMP_LoadTestData() {
         StillImage backgrd;
-	backgrd.SetFilename("img/backdrops/battle/battle_cave.png");
+	backgrd.SetFilename("img/backdrops/battle/battle_caveFIXED.jpg");
         backgrd.SetDimensions(SCREEN_LENGTH*TILE_SIZE, SCREEN_HEIGHT*TILE_SIZE);
         _battle_images.push_back(backgrd);
 	if(!VideoManager->LoadImage(_battle_images[0]))
@@ -935,7 +1045,7 @@ void BattleMode::_TEMP_LoadTestData() {
                 
         std::vector<hoa_video::StillImage> enemyAnimation3;
 	StillImage anim3;
-	anim3.SetDimensions(128, 64); 
+	anim3.SetDimensions(64, 64); 
 	anim3.SetFilename("img/sprites/battle/enemies/greenslime_d0.png");
 	enemyAnimation3.push_back(anim3);
         anim3.SetFilename("img/sprites/battle/enemies/greenslime_d1.png");
@@ -1012,6 +1122,8 @@ void BattleMode::_TEMP_LoadTestData() {
 	EnemyActor *enemy3 = new EnemyActor(e3, this, 860, 175);
 	_enemy_actors.push_back(enemy3);
 	enemy3->LevelUp(10);
+        
+        _user_interface.SetPlayerActorSelected(claudius);
 }
                 
 } // namespace hoa_battle
