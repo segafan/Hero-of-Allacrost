@@ -111,7 +111,7 @@ bool GameVideo::_LoadImage(StillImage &id)
 	if(id._filename.empty())
 	{
 		id._elements.clear();		
-		ImageElement quad(NULL, 0.0f, 0.0f, id._width, id._height, id._color);
+		ImageElement quad(NULL, 0.0f, 0.0f, id._width, id._height, 0.0f, 0.0f, 1.0f, 1.0f, id._color);
 		id._elements.push_back(quad);		
 		return true;
 	}
@@ -148,7 +148,7 @@ bool GameVideo::_LoadImage(StillImage &id)
 		if(id._height == 0.0f)
 			id._height = (float) img->height;
 		
-		ImageElement element(img, 0, 0, id._width, id._height, id._color);		
+		ImageElement element(img, 0, 0, id._width, id._height, 0.0f, 0.0f, 1.0f, 1.0f, id._color);		
 		id._elements.push_back(element);
 				
 		return true;
@@ -287,7 +287,7 @@ bool GameVideo::_LoadImageHelper(StillImage &id)
 		id._height = (float) h;
 
 	// store the new image element
-	ImageElement element(newImage, 0, 0, id._width, id._height, id._color);
+	ImageElement element(newImage, 0, 0, id._width, id._height, 0.0f, 0.0f, 1.0f, 1.0f, id._color);
 	id._elements.push_back(element);
 
 	// finally, delete the buffer DevIL used to load the image
@@ -679,7 +679,7 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 	Move(0.0f,0.0f);
 	glScalef(0.5f, 0.5f, 0.5f);
 
-	ImageElement elem(&img, 0.0f, 0.0f, (float)w, (float)h);
+	ImageElement elem(&img, 0.0f, 0.0f, (float)w, (float)h, 0.0f, 0.0f, 1.0f, 1.0f);
 	
 	StillImage id;
 	id._elements.push_back(elem);

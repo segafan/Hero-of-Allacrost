@@ -68,6 +68,10 @@ public:
 		width    = w;
 		height   = h;
 		refCount = 0;
+		u1 = 0.0f;
+		u2 = 1.0f;
+		v1 = 0.0f;
+		v2 = 1.0f;
 	}
 
 	Image
@@ -127,6 +131,10 @@ public:
 		float yOffset_, 
 		float width_, 
 		float height_,
+		float u1_,
+		float v1_,
+		float u2_,
+		float v2_,
 		Color color_[4]
 	)
 	{
@@ -135,6 +143,10 @@ public:
 		yOffset  = yOffset_;
 		width    = width_;
 		height   = height_;
+		u1       = u1_;
+		v1       = v1_;
+		u2       = u2_;
+		v2       = v2_;
 		
 		color[0] = color_[0];
 		
@@ -176,7 +188,11 @@ public:
 		float xOffset_, 
 		float yOffset_, 
 		float width_, 
-		float height_
+		float height_,
+		float u1_,
+		float v1_,
+		float u2_,
+		float v2_
 	)
 	{
 		image    = image_;
@@ -188,6 +204,10 @@ public:
 		oneColor = true;
 		blend    = false;
 		color[0] = Color::white;
+		u1       = u1_;
+		v1       = v1_;
+		u2       = u2_;
+		v2       = v2_;
 	}
 	
 	bool blend;
@@ -200,6 +220,8 @@ public:
 	
 	float width;
 	float height;
+	
+	float u1, v1, u2, v2;
 	
 	Color color[4];
 	
@@ -276,9 +298,19 @@ public:
 	//! AddImage allows you to create compound images. You start with a 
 	//! newly created StillImage, then call AddImage(), passing in
 	//! all the images you want to add, along with the x, y offsets they
-	//! should be positioned at.
+	//! should be positioned at. The u1,v1,u2,v2 tell which portion of the
+	//! image to use (usually 0,0,1,1)
 	
-	bool AddImage(const StillImage &id, float xOffset, float yOffset);
+	bool AddImage
+	(
+		const StillImage &id, 
+		float xOffset, 
+		float yOffset, 
+		float u1 = 0.0f, 
+		float v1 = 0.0f, 
+		float u2 = 1.0f, 
+		float v2 = 1.0f
+	);
 	
 	void Clear()
 	{
@@ -310,7 +342,9 @@ public:
 	void SetHeight       (float height)   {	_height = height; }
 	
 	virtual void SetStatic(bool isStatic)  { _isStatic = isStatic; }
-		
+	
+	std::string GetFilename() { return _filename; }
+	
 	float GetWidth() const  { return _width; }
 	float GetHeight() const { return _height; }
 	void  GetVertexColor(Color &c, int colorIndex) { c = _color[colorIndex]; }

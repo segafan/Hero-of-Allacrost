@@ -157,6 +157,7 @@ bool GameVideo::Initialize()
 	if(VIDEO_DEBUG)
 		cout << "VIDEO: Initializing SDL subsystem\n";
 		
+	// Set the window title and icon name
 	if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) 
 	{
 		fprintf(stderr, "Barf! SDL Video Initialization failed!\n");
@@ -986,8 +987,65 @@ bool GameVideo::SetMenuSkin
 		fillColor_TL,
 		fillColor_TR,
 		fillColor_BL,
-		fillColor_BR
+		fillColor_BR,
+		
+		""     // no background image
 	);
+}
+
+
+//-----------------------------------------------------------------------------
+// SetMenuSkin: sets the menu skin to use the menu border images starting with
+//              imageBaseName, and with a background image
+//-----------------------------------------------------------------------------
+
+bool GameVideo::SetMenuSkin
+(
+	const std::string &imgBaseName,
+	const std::string &backgroundImage,
+	const Color  &fillColor_TL,
+	const Color  &fillColor_TR,
+	const Color  &fillColor_BL,
+	const Color  &fillColor_BR	
+)
+{
+	return _gui->SetMenuSkin
+	(
+		imgBaseName + "_tl.png",
+		imgBaseName + "_t.png",
+		imgBaseName + "_tr.png",
+		imgBaseName + "_l.png",
+		imgBaseName + "_r.png",
+		imgBaseName + "_bl.png",
+		imgBaseName + "_b.png",
+		imgBaseName + "_br.png",
+		imgBaseName + "_tri_t.png",
+		imgBaseName + "_tri_l.png",
+		imgBaseName + "_tri_r.png",
+		imgBaseName + "_tri_b.png",
+		imgBaseName + "_quad.png",
+		fillColor_TL,
+		fillColor_TR,
+		fillColor_BL,
+		fillColor_BR,
+		backgroundImage
+	);
+}
+
+
+//-----------------------------------------------------------------------------
+// SetMenuSkin: sets the menu skin to use the menu border images starting with
+//              imageBaseName, a background image, and with an interior of fill color
+//-----------------------------------------------------------------------------
+
+bool GameVideo::SetMenuSkin
+(
+	const std::string &imgBaseName,
+	const std::string &backgroundImage,
+	const Color  &fillColor
+)
+{
+	return SetMenuSkin(imgBaseName, backgroundImage, fillColor, fillColor, fillColor, fillColor);
 }
 
 
@@ -1288,7 +1346,7 @@ bool GameVideo::CaptureScreen(StillImage &id)
 		id._height = (float) h;
 
 	// store the new image element
-	ImageElement element(newImage, 0, 0, id._width, id._height, id._color);
+	ImageElement element(newImage, 0, 0, id._width, id._height, 0.0f, 0.0f, 1.0f, 1.0f, id._color);
 	id._elements.push_back(element);
 
 	// finally, delete the buffer DevIL used to load the image

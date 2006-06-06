@@ -72,7 +72,8 @@ SoundBuffer::SoundBuffer(string fname) {
 	reference_count = 1;
 
 	// (2) Load the WAV file from main memory.
-	file = (ALbyte*)(("snd/" + fname + ".wav").c_str());
+	string filename = string("snd/") + fname + string(".wav");
+	file = (ALbyte*)(filename.c_str());
 	alutLoadWAVFile(file, &format, &data, &size, &freq, &loop);
 	error_check = alGetError();
 	if (error_check != AL_NO_ERROR) {

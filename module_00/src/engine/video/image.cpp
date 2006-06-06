@@ -37,9 +37,13 @@ namespace hoa_video
 
 bool StillImage::AddImage
 (
-	const StillImage &id, 
+	const StillImage &id,
 	float xOffset, 
-	float yOffset
+	float yOffset,
+	float u1,
+	float v1,
+	float u2,
+	float v2
 )
 {
 	if(xOffset < 0.0f || yOffset < 0.0f)
@@ -69,6 +73,13 @@ bool StillImage::AddImage
 		ImageElement elem = id._elements[iElement];
 		elem.xOffset += xOffset;
 		elem.yOffset += yOffset;
+		elem.u1 = u1;
+		elem.v1 = v1;
+		elem.u2 = u2;
+		elem.v2 = v2;
+		
+		elem.width *= (elem.u2-elem.u1);
+		elem.height *= (elem.v2-elem.v1);
 		
 		if(elem.image)
 		{
