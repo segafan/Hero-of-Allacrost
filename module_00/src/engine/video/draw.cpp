@@ -167,10 +167,10 @@ bool GameVideo::_DrawElement
 		// set texture coordinates	
 		float s0,s1,t0,t1;
 
-		s0 = img->u1;
-		s1 = img->u2;
-		t0 = img->v1;
-		t1 = img->v2;
+		s0 = img->u1 + element.u1 * (img->u2 - img->u1);
+		s1 = img->u1 + element.u2 * (img->u2 - img->u1);
+		t0 = img->v1 + element.v1 * (img->v2 - img->v1);
+		t1 = img->v1 + element.v2 * (img->v2 - img->v1);
 
 		// swap x texture coordinates for x flipping
 		if (_xflip) 
@@ -312,10 +312,10 @@ bool GameVideo::_DrawElement
 	{
 		// set texture coordinates	
 		float s0,s1,t0,t1;
-		s0 = img->u1;
-		s1 = img->u2;
-		t0 = img->v1;
-		t1 = img->v2;
+		s0 = img->u1 + element.u1 * (img->u2 - img->u1);
+		s1 = img->u1 + element.u2 * (img->u2 - img->u1);
+		t0 = img->v1 + element.v1 * (img->v2 - img->v1);
+		t1 = img->v1 + element.v2 * (img->v2 - img->v1);
 
 		// swap x texture coordinates for x flipping
 		if (_xflip) 

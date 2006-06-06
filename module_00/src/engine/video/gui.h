@@ -210,6 +210,9 @@ public:
 	// skin[2][2]: bottom right
 	
 	StillImage skin[3][3], tri_t, tri_l, tri_r, tri_b, quad;
+	
+	// background image
+	StillImage background;
 };
 
 
@@ -254,7 +257,8 @@ public:
 		const Color &fillColor_TL,     // color to fill the menu with. You can
 		const Color &fillColor_TR,     // make it transparent by setting alpha
 		const Color &fillColor_BL,
-		const Color &fillColor_BR
+		const Color &fillColor_BR,
+		const std::string &backgroundImage
 	);
 
 

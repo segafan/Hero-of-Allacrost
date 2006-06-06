@@ -766,7 +766,7 @@ public:
 	 *  \brief sets the current menu skin (borders+fill color). Assumes all four
 	 *         vertices of menu interior are same color
 	 *
-	 *  \param imgBaseName  name of images which form this skin.
+	 *  \param imgBaseName  name of images which form the border
 	 *                      For example if you pass in "/img/menus/chrome", then it will load:
 	 *                          /img/menus/chrome_tl.png
 	 *                          /img/menus/chrome_t.png
@@ -796,7 +796,7 @@ public:
 	 *         SetMenuSkin() allows the 4 vertices of the interior of the menu
 	 *         to have different colors so you can have gradients.
 	 *
-	 *  \param imgBaseName  name of images which form this skin.
+	 *  \param imgBaseName  name of images which form the border
 	 *                      For example if you pass in "/img/menus/chrome", then it will load:
 	 *                          /img/menus/chrome_tl.png
 	 *                          /img/menus/chrome_t.png
@@ -824,6 +824,75 @@ public:
 		const Color  &fillColor_TR,
 		const Color  &fillColor_BL,
 		const Color  &fillColor_BR
+	);
+
+
+	/*!
+	 *  \brief sets the current menu skin (borders+background image).
+	 *
+	 *  \param imgBaseName  name of images which form the border
+	 *                      For example if you pass in "/img/menus/chrome", then it will load:
+	 *                          /img/menus/chrome_tl.png
+	 *                          /img/menus/chrome_t.png
+	 *                          /img/menus/chrome_tr.png
+	 *                          /img/menus/chrome_l.png
+	 *                          /img/menus/chrome_r.png
+	 *                          /img/menus/chrome_bl.png
+	 *                          /img/menus/chrome_b.png
+	 *                          /img/menus/chrome_br.png
+	 *                          /img/menus/chrome_tri_t.png
+	 *                          /img/menus/chrome_tri_l.png
+	 *                          /img/menus/chrome_tri_r.png
+	 *                          /img/menus/chrome_tri_b.png
+	 *                          /img/menus/chrome_quad.png
+	 *	 
+	 *  \param backgroundImage image filename for the background of the menu window
+	 *	 
+	 *  \param fillColor_TL  color for upper left  vertex of interior
+	 *  \param fillColor_TR  color for upper right vertex of interior
+	 *  \param fillColor_BL  color for lower left  vertex of interior
+	 *  \param fillColor_BR  color for lower right vertex of interior
+	 */
+	bool SetMenuSkin
+	(
+		const std::string &imgBaseName,
+		const std::string &backgroundImage,
+		const Color  &fillColor_TL,
+		const Color  &fillColor_TR,
+		const Color  &fillColor_BL,
+		const Color  &fillColor_BR
+	);
+
+
+
+	/*!
+	 *  \brief sets the current menu skin (borders+background image).
+	 *
+	 *  \param imgBaseName  name of images which form the border
+	 *                      For example if you pass in "/img/menus/chrome", then it will load:
+	 *                          /img/menus/chrome_tl.png
+	 *                          /img/menus/chrome_t.png
+	 *                          /img/menus/chrome_tr.png
+	 *                          /img/menus/chrome_l.png
+	 *                          /img/menus/chrome_r.png
+	 *                          /img/menus/chrome_bl.png
+	 *                          /img/menus/chrome_b.png
+	 *                          /img/menus/chrome_br.png
+	 *                          /img/menus/chrome_tri_t.png
+	 *                          /img/menus/chrome_tri_l.png
+	 *                          /img/menus/chrome_tri_r.png
+	 *                          /img/menus/chrome_tri_b.png
+	 *                          /img/menus/chrome_quad.png
+	 *	 
+	 *  \param backgroundImage image filename for the background of the menu window
+	 *	 
+	 *  \param fillColor       color for for interior of window
+	 */
+	bool SetMenuSkin
+	(
+		const std::string &imgBaseName,
+		const std::string &backgroundImage,
+		const Color  &fillColor
 	);
 
 

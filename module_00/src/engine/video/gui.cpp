@@ -57,6 +57,8 @@ GUI::~GUI()
 			_videoManager->DeleteImage(_currentSkin.skin[y][x]);
 		}
 	}
+	
+	_videoManager->DeleteImage(_currentSkin.background);
 }
 
 
@@ -171,8 +173,8 @@ bool GUI::SetMenuSkin
 	const Color &fillColor_TL,
 	const Color &fillColor_TR,
 	const Color &fillColor_BL,
-	const Color &fillColor_BR
-
+	const Color &fillColor_BR,
+	const std::string &backgroundImage
 )
 {
 	int32 x, y;
@@ -190,19 +192,20 @@ bool GUI::SetMenuSkin
 			_currentSkin.skin[y][x].SetDimensions(0.0f, 0.0f);
 		}
 	}
-	
+		
 	_videoManager->DeleteImage(_currentSkin.tri_t);
 	_videoManager->DeleteImage(_currentSkin.tri_l);
 	_videoManager->DeleteImage(_currentSkin.tri_r);
 	_videoManager->DeleteImage(_currentSkin.tri_b);
 	_videoManager->DeleteImage(_currentSkin.quad);
+	_videoManager->DeleteImage(_currentSkin.background);
+	
 	_currentSkin.tri_t.SetDimensions(0.0f, 0.0f);
 	_currentSkin.tri_l.SetDimensions(0.0f, 0.0f);
 	_currentSkin.tri_r.SetDimensions(0.0f, 0.0f);
 	_currentSkin.tri_b.SetDimensions(0.0f, 0.0f);
 	_currentSkin.quad.SetDimensions(0.0f, 0.0f);
-
-
+	
 	map<int32, MenuWindow *>::iterator iMenu = MenuWindow::_menuMap.begin();
 	
 	while(iMenu != MenuWindow::_menuMap.end())
@@ -229,6 +232,8 @@ bool GUI::SetMenuSkin
 	_currentSkin.tri_b.SetFilename(imgFile_Tri_B);
 	_currentSkin.quad.SetFilename(imgFile_Quad);
 
+	_currentSkin.background.SetFilename(backgroundImage);
+
 	// the center doesn't have an image, it's just a colored quad
 	_currentSkin.skin[1][1].SetVertexColors
 	(
@@ -254,6 +259,8 @@ bool GUI::SetMenuSkin
 	_videoManager->LoadImage(_currentSkin.quad);
 
 	_videoManager->EndImageLoadBatch();
+	
+	_videoManager->LoadImage(_currentSkin.background);
 	
 	if(!_CheckSkinConsistency(_currentSkin))
 	{
@@ -407,6 +414,9 @@ bool GUI::CreateMenu
 		}
 		return false;
 	}
+
+	// true if there is a background image
+	bool backgroundLoaded = _currentSkin.background.GetWidth();
 	
 	// find how many times we have to tile the border images to fit the
 	// dimensions given
@@ -480,7 +490,7 @@ bool GUI::CreateMenu
 		id.AddImage(_currentSkin.skin[1][0], minX, minY);
 	else if(edgeVisibleFlags & VIDEO_MENU_EDGE_BOTTOM)
 		id.AddImage(_currentSkin.skin[0][1], minX, minY);
-	else
+	else if(!backgroundLoaded)
 		id.AddImage(_currentSkin.skin[1][1], minX, minY);
 	
 	
@@ -500,7 +510,7 @@ bool GUI::CreateMenu
 		id.AddImage(_currentSkin.skin[1][2], maxX, minY);
 	else if(edgeVisibleFlags & VIDEO_MENU_EDGE_BOTTOM)
 		id.AddImage(_currentSkin.skin[2][1], maxX, minY);
-	else
+	else if(!backgroundLoaded)
 		id.AddImage(_currentSkin.skin[1][1], maxX, minY);
 
 	// upper left
@@ -519,7 +529,7 @@ bool GUI::CreateMenu
 		id.AddImage(_currentSkin.skin[1][0], minX, maxY);
 	else if(edgeVisibleFlags & VIDEO_MENU_EDGE_TOP)
 		id.AddImage(_currentSkin.skin[0][1], minX, maxY);
-	else
+	else if(!backgroundLoaded)
 		id.AddImage(_currentSkin.skin[1][1], minX, maxY);
 
 	// upper right
@@ -538,7 +548,7 @@ bool GUI::CreateMenu
 		id.AddImage(_currentSkin.skin[0][1], maxX, maxY);
 	else if(edgeVisibleFlags & VIDEO_MENU_EDGE_RIGHT)
 		id.AddImage(_currentSkin.skin[1][2], maxX, maxY);
-	else
+	else if(!backgroundLoaded)
 		id.AddImage(_currentSkin.skin[1][1], maxX, maxY);
 
 	// iterate from left to right and fill in the horizontal borders
@@ -547,12 +557,12 @@ bool GUI::CreateMenu
 	{
 		if(edgeVisibleFlags & VIDEO_MENU_EDGE_TOP)
 			id.AddImage(_currentSkin.skin[0][1], leftBorderSize + topWidth * tileX, maxY);
-		else
+		else if(!backgroundLoaded)
 			id.AddImage(_currentSkin.skin[1][1], leftBorderSize + topWidth * tileX, maxY);
 
 		if(edgeVisibleFlags & VIDEO_MENU_EDGE_BOTTOM)
 			id.AddImage(_currentSkin.skin[2][1], leftBorderSize + topWidth * tileX, 0.0f);
-		else
+		else if(!backgroundLoaded)
 			id.AddImage(_currentSkin.skin[1][1], leftBorderSize + topWidth * tileX, 0.0f);
 	}
 	
@@ -562,25 +572,76 @@ bool GUI::CreateMenu
 	{
 		if(edgeVisibleFlags & VIDEO_MENU_EDGE_LEFT)
 			id.AddImage(_currentSkin.skin[1][0], 0.0f, bottomBorderSize + leftHeight * tileY);
-		else
+		else if(!backgroundLoaded)
 			id.AddImage(_currentSkin.skin[1][1], 0.0f, bottomBorderSize + leftHeight * tileY);
 		
 		if(edgeVisibleFlags & VIDEO_MENU_EDGE_RIGHT)
 			id.AddImage(_currentSkin.skin[1][2], maxX, bottomBorderSize + leftHeight * tileY);
-		else
+		else if(!backgroundLoaded)
 			id.AddImage(_currentSkin.skin[1][1], maxX, bottomBorderSize + leftHeight * tileY);
 	}
 
-
-	// re-create the overlay at the correct width and height
 	
-	_videoManager->DeleteImage(_currentSkin.skin[1][1]);
-	_currentSkin.skin[1][1].SetDimensions(innerWidth, innerHeight);
-	_currentSkin.skin[1][1].SetVertexColors(c[0], c[1], c[2], c[3]);
-	_videoManager->LoadImage(_currentSkin.skin[1][1]);
-	
-	id.AddImage(_currentSkin.skin[1][1], leftBorderSize, bottomBorderSize);
+	// if a valid background image is loaded (nonzero width), then tile the interior 
+	if(backgroundLoaded)
+	{
+		_currentSkin.background.SetVertexColors(c[0], c[1], c[2], c[3]);
 
+		float width = _currentSkin.background.GetWidth();
+		float height = _currentSkin.background.GetHeight();
+		
+		int tilesX = int(innerWidth / width + 0.999f);
+		int tilesY = int(innerHeight / height + 0.999f);
+		
+		for(int y = 0 ; y < tilesY; ++y)
+		{
+			for(int x = 0; x < tilesX; ++x)
+			{
+				float left = x * width;
+				if(edgeVisibleFlags & VIDEO_MENU_EDGE_LEFT)
+					left += leftBorderSize;
+
+				float bottom = (innerHeight - height) - y * height;				
+				if(edgeVisibleFlags & VIDEO_MENU_EDGE_BOTTOM)
+					bottom += bottomBorderSize;
+				if(!(edgeVisibleFlags & VIDEO_MENU_EDGE_TOP))
+					bottom += topBorderSize;
+
+				float right = innerWidth + leftBorderSize;
+				if(!(edgeVisibleFlags & VIDEO_MENU_EDGE_RIGHT))
+					right += rightBorderSize;
+					
+				float u1=0.0f, v1=0.0f, u2=1.0f, v2=1.0f;
+
+				if(left + width > innerWidth + leftBorderSize)
+					u2 = float(right-left) / width;
+				
+				float bottomBorder = bottomBorderSize;
+				
+				if(!(edgeVisibleFlags & VIDEO_MENU_EDGE_BOTTOM))
+					bottomBorder = 0;
+					
+				if(bottom < bottomBorder)
+				{
+					v2 = float(height-(bottomBorder-bottom)) / height;
+					bottom += (bottomBorder-bottom);
+				}
+					
+				id.AddImage(_currentSkin.background, left, bottom, u1, v1, u2, v2);
+			}
+		}
+	}
+	else
+	{
+		// re-create the overlay at the correct width and height
+		
+		_videoManager->DeleteImage(_currentSkin.skin[1][1]);
+		_currentSkin.skin[1][1].SetDimensions(innerWidth, innerHeight);
+		_currentSkin.skin[1][1].SetVertexColors(c[0], c[1], c[2], c[3]);
+		_videoManager->LoadImage(_currentSkin.skin[1][1]);
+		
+		id.AddImage(_currentSkin.skin[1][1], leftBorderSize, bottomBorderSize);
+	}
 
 	return true;
 }
