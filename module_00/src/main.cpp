@@ -175,5 +175,5 @@ int32 main(int32 argc, char *argv[]) {
 	GameAudio::Destroy();
 	GameVideo::Destroy();
 
-	return 0;
+	return EXIT_SUCCESS;
 } // int32 main(int32 argc, char *argv[])

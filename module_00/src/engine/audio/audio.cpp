@@ -195,12 +195,14 @@ GameAudio::~GameAudio() {
 	_sound_sources.clear();
 
 	// ************ (2) Delete all music and sound buffers ******************
-	for (std::map<string, MusicBuffer*>::iterator i = _music_buffers.begin(); i != _music_buffers.end(); i++) {
+	for (std::map<string, MusicBuffer*>::iterator i = _music_buffers.begin(); i != _music_buffers.end(); i = _music_buffers.begin()) {
 		delete(i->second);
+		_music_buffers.erase(i);
 	}
 	_music_buffers.clear();
-	for (std::map<string, SoundBuffer*>::iterator i = _sound_buffers.begin(); i != _sound_buffers.end(); i++) {
+	for (std::map<string, SoundBuffer*>::iterator i = _sound_buffers.begin(); i != _sound_buffers.end(); i = _sound_buffers.begin()) {
 		delete(i->second);
+		_sound_buffers.erase(i);
 	}
 	_sound_buffers.clear();
 
@@ -209,6 +211,7 @@ GameAudio::~GameAudio() {
 	alcDestroyContext(_context);
 	alcCloseDevice(_device);
 }
+
 
 // Update all of the streaming audio sources.
 void GameAudio::Update() {
@@ -220,12 +223,50 @@ void GameAudio::Update() {
 
 // Initializes OpenAL and creates the global audio context
 bool GameAudio::Initialize() {
-	// Open the default device
-	_device = alcOpenDevice(NULL);
-	if (_device == NULL) {
-		cerr << "AUDIO ERROR: Failed to initialize OpenAL and open a default device." << endl;
-		return false;
-	}
+	ALCint highest_version = 0; // Highest version number found
+   const ALCchar * best_device = NULL; // Name of the 'best' device
+
+   // Find the highest-version device available
+   const ALCchar * device_name = alcGetString(NULL, ALC_DEVICE_SPECIFIER); // Get list of all devices (terminated with two '0')
+   while (*device_name != NULL) // Loop until two terminating zeroes has been read
+   {
+      ALCint major_v=0, minor_v=0;
+      ALCdevice * _temp_device = alcOpenDevice(device_name); // Open a temporary device for reading in its version number
+      if (_temp_device == NULL) // Just keep looping if we couldn't open the device
+      {
+         if (AUDIO_DEBUG) cout << "AUDIO: Couldn't open a temporary device: " <<  device_name << endl;
+         device_name += strlen(device_name) + 1;
+         continue;
+      }
+      ALCcontext * temp_context = alcCreateContext(_temp_device, NULL); // Create a temporary context
+      if (temp_context == NULL) // Keep looping again if no context was created
+      {
+         if (AUDIO_DEBUG) cout << "AUDIO: Couldn't create a temporary context for device: " <<  device_name << endl;
+         alcCloseDevice(_temp_device);
+         device_name += strlen(device_name) + 1;
+         continue;
+      }
+      alcMakeContextCurrent(temp_context);
+      alGetError();
+      alcGetIntegerv(_temp_device, ALC_MAJOR_VERSION, sizeof(ALCint), &major_v); // Get the version number
+      alcGetIntegerv(_temp_device, ALC_MINOR_VERSION, sizeof(ALCint), &minor_v);
+      alcMakeContextCurrent(NULL); // Disable the temporary context
+      alcDestroyContext(temp_context); // Destroy the temporary context
+      alcCloseDevice(_temp_device); // Close the temporary device
+      if (highest_version < (major_v * 10 + minor_v)) // Check if we found a higher version
+      {
+         highest_version = (major_v * 10 + minor_v);
+         best_device = device_name;
+      }
+      device_name += strlen(device_name) + 1; // Go to the next device name in the list
+   }
+
+   // Open the 'best' device we found above
+   _device = alcOpenDevice(best_device);
+   if (_device == NULL) {
+      cerr << "AUDIO ERROR: Failed to initialize OpenAL and open a default device." << endl;
+      return false;
+   }
 
 	// Create an OpenAL context
 	_context = alcCreateContext(_device, NULL);
