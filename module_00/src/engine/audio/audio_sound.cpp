@@ -40,6 +40,7 @@ SoundBuffer::SoundBuffer(string fname) {
 	// Differences between OpenAL 1.* and earlier versions require this function
 	// to be written in very different ways depending on the OpenAL version.
 
+
 	// For OpenAL version 1.*, otherwise known as freealut
 	#ifdef ALUT_API_MAJOR_VERSION
 	buffer = alutCreateBufferFromFile(("snd/" + filename + ".wav").c_str());
@@ -116,9 +117,11 @@ SoundBuffer::SoundBuffer(string fname) {
 SoundBuffer::~SoundBuffer() {
 	if (reference_count != 0) {
 		cerr << "AUDIO WARNING: Audio engine is attempting to delete buffer " << filename
-		     << ", which still has " << reference_count << " number of references to it." << endl;
+		     << ", which still has " << (int32)reference_count << " number of references to it." << endl;
 	}
 	alDeleteBuffers(1, &buffer);
+	alGetError(); // Don't care if we couldn't delete the buffer! NOTE: I think this should be taken care of!
+
 	// Remove the element from the sound buffer map
 	AudioManager->_sound_buffers.erase(AudioManager->_sound_buffers.find(filename));
 }
