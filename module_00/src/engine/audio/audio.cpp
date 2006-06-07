@@ -196,13 +196,15 @@ GameAudio::~GameAudio() {
 
 	// ************ (2) Delete all music and sound buffers ******************
 	for (std::map<string, MusicBuffer*>::iterator i = _music_buffers.begin(); i != _music_buffers.end(); i = _music_buffers.begin()) {
-		delete(i->second);
+		MusicBuffer * music_buffer = i->second;
 		_music_buffers.erase(i);
+		delete music_buffer;
 	}
 	_music_buffers.clear();
 	for (std::map<string, SoundBuffer*>::iterator i = _sound_buffers.begin(); i != _sound_buffers.end(); i = _sound_buffers.begin()) {
-		delete(i->second);
+		SoundBuffer * sound_buffer = i->second;
 		_sound_buffers.erase(i);
+		delete sound_buffer;
 	}
 	_sound_buffers.clear();
 
@@ -310,6 +312,7 @@ bool GameAudio::Initialize() {
 			}
 		}
 		else {
+			alGetError(); // Clear the error flag caused by invalid creation of the SoundSource
 			delete(SS);
 			break;
 		}
@@ -319,6 +322,7 @@ bool GameAudio::Initialize() {
 		cout << "AUDIO: Allocated " << _sound_sources.size() + 1 << " audio sources." << endl;
 		DEBUG_PrintInfo();
 	}
+
 	return true;
 }
 
