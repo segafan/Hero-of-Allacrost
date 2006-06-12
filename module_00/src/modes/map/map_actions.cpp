@@ -22,6 +22,7 @@
 #include "audio.h"
 #include "video.h"
 #include "global.h"
+#include "settings.h"
 #include "data.h"
 #include "battle.h"
 #include "menu.h"
@@ -31,6 +32,7 @@ using namespace hoa_utils;
 using namespace hoa_audio;
 using namespace hoa_video;
 using namespace hoa_global;
+using namespace hoa_settings;
 using namespace hoa_data;
 using namespace hoa_battle;
 using namespace hoa_menu;
@@ -142,9 +144,38 @@ void ActionPathMove::Process() {
 		     it != new_path.end(); it++)
 			path.push_back(*it);
 	}
-}
+} // void ActionPathMove::Process()
 
 
+void ActionFrameDisplay::Load(uint32 table_key) {
+	ReadDataDescriptor *read_data; // Make this point to map data later
+
+	read_data->OpenTable(table_key);
+	display_time = read_data->ReadInt("display_time");
+	frame_index = read_data->ReadInt("frame_index");
+	read_data->CloseTable();
+
+	if (read_data->GetError() != DATA_NO_ERRORS) {
+		if (MAP_DEBUG) cerr << "MAP ERROR: Failed to load data for an ActionFrameDisplay object" << endl;
+	}
+} // void ActionFrameDisplay::Load(uint32 table_key)
+
+
+void ActionFrameDisplay::Process() {
+	static int32 wait_timer = display_time;
+	
+	wait_timer -= SettingsManager->GetUpdateTime();
+	if (wait_timer > 0) {
+		wait_timer -= display_time;
+	}
+	else {
+		wait_timer = display_time;
+		sprite->current_action = sprite->current_action + 1;
+		if (sprite->current_action >= sprite->actions.size()) {
+			sprite->current_action = 0;
+		}
+	}
+} // void ActionFrameDisplay::Process()
 
 } // namespace private_map
 

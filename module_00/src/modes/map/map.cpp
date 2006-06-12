@@ -279,88 +279,144 @@ void MapMode::LoadMap() {
 	if (_map_data.GetError() != DATA_NO_ERRORS) {
 		cout << "MAP ERROR: some error occured during reading of map file" << endl;
 	}
+	
+	MapSprite *sp;
+	SpriteDialogue *sd;
+	ActionPathMove *sa;
 
 	// Load player sprite and rest of map objects
-	MapSprite *player = new MapSprite();
-	player->SetName(MakeWideString("Claudius"));
-	player->SetID(0);
-	player->SetObjectType(PLAYER_SPRITE);
-	player->SetRowPosition(12);
-	player->SetColPosition(12);
-	player->SetStepSpeed(NORMAL_SPEED);
-	player->SetAltitude(ALTITUDE_1);
-	player->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
-	player->SetFilename("img/sprites/map/claudius");
-	player->SetDirection(SOUTH);
-	player->LoadFrames();
-	_tile_layers[player->GetColPosition()][player->GetRowPosition()].occupied |= player->GetAltitude();
-	_ground_objects.push_back(player);
-	_sprites[player->sprite_id] = player;
+	sp = new MapSprite();
+	sp->SetName(MakeWideString("Claudius"));
+	sp->SetID(0);
+	sp->SetObjectType(PLAYER_SPRITE);
+	sp->SetRowPosition(12);
+	sp->SetColPosition(12);
+	sp->SetAltitude(1);
+	sp->SetStepSpeed(NORMAL_SPEED);
+	sp->SetAltitude(ALTITUDE_1);
+	sp->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
+	sp->SetFilename("img/sprites/map/claudius");
+	sp->SetDirection(SOUTH);
+	sp->LoadFrames();
+	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied |= sp->GetAltitude();
+	_ground_objects.push_back(sp);
+	_sprites[sp->sprite_id] = sp;
+	_focused_object = sp;
 
-	MapSprite *npc = new MapSprite();
-	npc->SetName(MakeWideString("Laila"));
-	npc->SetID(1);
-	npc->SetObjectType(NPC_SPRITE);
-	npc->SetRowPosition(4);
-	npc->SetColPosition(4);
-	npc->SetStepSpeed(NORMAL_SPEED);
-	npc->SetAltitude(1);
-	npc->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
-	npc->SetFilename("img/sprites/map/laila");
-	npc->SetDirection(SOUTH);
-	npc->LoadFrames();
-	_tile_layers[npc->GetColPosition()][npc->GetRowPosition()].occupied |= npc->GetAltitude();
+	sp = new MapSprite();
+	sp->SetName(MakeWideString("Laila"));
+	sp->SetID(1);
+	sp->SetObjectType(NPC_SPRITE);
+	sp->SetRowPosition(4);
+	sp->SetColPosition(4);
+	sp->SetAltitude(1);
+	sp->SetStepSpeed(NORMAL_SPEED);
+	sp->SetAltitude(1);
+	sp->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
+	sp->SetFilename("img/sprites/map/laila");
+	sp->SetDirection(SOUTH);
+	sp->LoadFrames();
+	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied |= sp->GetAltitude();
 
-	SpriteDialogue *sd1 = new SpriteDialogue();
-	sd1->text.push_back(MakeWideString("This is not a real demo. There is no spoon."));
-	sd1->speakers.push_back(1); // NPC speaks
-	npc->dialogues.push_back(sd1);
+	sd = new SpriteDialogue();
+	sd->text.push_back(MakeWideString("This is not a real demo. There is no spoon."));
+	sd->speakers.push_back(1); // NPC speaks
+	sp->dialogues.push_back(sd);
 
-	SpriteDialogue *sd2 = new SpriteDialogue();
-	sd2->text.push_back(MakeWideString("I sure wish we had more art, don't you agree?"));
-	sd2->speakers.push_back(1); // NPC speaks
-	sd2->text.push_back(MakeWideString("Well, good pixel artists are difficult to find."));
-	sd2->speakers.push_back(0); // Player speaks
-	npc->dialogues.push_back(sd2);
+	sd = new SpriteDialogue();
+	sd->text.push_back(MakeWideString("I sure wish we had more art, don't you agree?"));
+	sd->speakers.push_back(1); // NPC speaks
+	sd->text.push_back(MakeWideString("Well, good pixel artists are difficult to find."));
+	sd->speakers.push_back(0); // Player speaks
+	sp->dialogues.push_back(sd);
 
-	SpriteDialogue *sd3 = new SpriteDialogue();
-	sd3->text.push_back(MakeWideString("Check out our website at http://www.allacrost.org/"));
-	sd3->speakers.push_back(1); // NPC speaks
-	npc->dialogues.push_back(sd3);
+	sd = new SpriteDialogue();
+	sd->text.push_back(MakeWideString("Check out our website at http://www.allacrost.org/"));
+	sd->speakers.push_back(1); // NPC speaks
+	sp->dialogues.push_back(sd);
 	
-	ActionPathMove *apm1 = new ActionPathMove();
-	apm1->destination.row = 4;
-	apm1->destination.col = 16;
-	apm1->destination.altitude = 1;
-	apm1->sprite = npc;
-	npc->actions.push_back(apm1);
+	sa = new ActionPathMove();
+	sa->destination.row = 4;
+	sa->destination.col = 16;
+	sa->destination.altitude = 1;
+	sa->sprite = sp;
+	sp->actions.push_back(sa);
 	
-	ActionPathMove *apm2 = new ActionPathMove();
-	apm2->destination.row = 10;
-	apm2->destination.col = 16;
-	apm2->destination.altitude = 1;
-	apm2->sprite = npc;
-	npc->actions.push_back(apm2);
+	sa = new ActionPathMove();
+	sa->destination.row = 10;
+	sa->destination.col = 16;
+	sa->destination.altitude = 1;
+	sa->sprite = sp;
+	sp->actions.push_back(sa);
 	
-	ActionPathMove *apm3 = new ActionPathMove();
-	apm3->destination.row = 10;
-	apm3->destination.col = 4;
-	apm3->destination.altitude = 1;
-	apm3->sprite = npc;
-	npc->actions.push_back(apm3);
+	sa = new ActionPathMove();
+	sa->destination.row = 10;
+	sa->destination.col = 4;
+	sa->destination.altitude = 1;
+	sa->sprite = sp;
+	sp->actions.push_back(sa);
 	
-	ActionPathMove *apm4 = new ActionPathMove();
-	apm4->destination.row = 4;
-	apm4->destination.col = 4;
-	apm4->destination.altitude = 1;
-	apm4->sprite = npc;
-	npc->actions.push_back(apm4);
+	sa = new ActionPathMove();
+	sa->destination.row = 4;
+	sa->destination.col = 4;
+	sa->destination.altitude = 1;
+	sa->sprite = sp;
+	sp->actions.push_back(sa);
 	
-	_ground_objects.push_back(npc);
-	_sprites[npc->sprite_id] = npc;
+	_ground_objects.push_back(sp);
+	_sprites[sp->sprite_id] = sp;
+	
+	sp = new MapSprite();
+	sp->SetName(MakeWideString("Marcus"));
+	sp->SetID(2);
+	sp->SetObjectType(NPC_SPRITE);
+	sp->SetRowPosition(18);
+	sp->SetColPosition(20);
+	sp->SetAltitude(1);
+	sp->SetStepSpeed(NORMAL_SPEED);
+	sp->SetAltitude(1);
+	sp->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
+	sp->SetFilename("img/sprites/map/marcus");
+	sp->SetDirection(WEST);
+	sp->LoadFrames();
+	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied |= sp->GetAltitude();
+	_ground_objects.push_back(sp);
+	_sprites[sp->sprite_id] = sp;
 
-	// If the _focused_object is ever NULL, the game will exit with a seg fault :(
-	_focused_object = player;
+	sp = new MapSprite();
+	sp->SetName(MakeWideString("Vanica"));
+	sp->SetID(3);
+	sp->SetObjectType(NPC_SPRITE);
+	sp->SetRowPosition(6);
+	sp->SetColPosition(24);
+	sp->SetAltitude(1);
+	sp->SetStepSpeed(NORMAL_SPEED);
+	sp->SetAltitude(1);
+	sp->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
+	sp->SetFilename("img/sprites/map/vanica");
+	sp->SetDirection(EAST);
+	sp->LoadFrames();
+	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied |= sp->GetAltitude();
+	_ground_objects.push_back(sp);
+	_sprites[sp->sprite_id] = sp;
+	
+	sp = new MapSprite();
+	sp->SetName(MakeWideString("Woman in Rags"));
+	sp->SetID(4);
+	sp->SetObjectType(NPC_SPRITE);
+	sp->SetRowPosition(10);
+	sp->SetColPosition(20);
+	sp->SetAltitude(1);
+	sp->SetStepSpeed(NORMAL_SPEED);
+	sp->SetAltitude(1);
+	sp->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
+	sp->SetFilename("img/sprites/map/rags_woman");
+	sp->SetDirection(NORTH);
+	sp->LoadFrames();
+	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied |= sp->GetAltitude();
+	_ground_objects.push_back(sp);
+	_sprites[sp->sprite_id] = sp;
+	
 } // _LoadMap()
 
 

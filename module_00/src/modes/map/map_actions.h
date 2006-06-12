@@ -97,15 +97,15 @@ public:
 class ActionFrameDisplay : public SpriteAction {
 public:
 	//! The amount of time to display each frame, in milliseconds.
-	std::vector<uint32> frame_times;
+	uint32 display_time;
 	//! The index in the sprite's image frame vector to display.
-	std::vector<uint32> frame_indeces;
+	uint32 frame_index;
 
 	ActionFrameDisplay() {}
 	~ActionFrameDisplay() {}
 
-	void Load(uint32 table_key) {}
-	void Process() {}
+	void Load(uint32 table_key);
+	void Process();
 };
 
 /*!****************************************************************************
