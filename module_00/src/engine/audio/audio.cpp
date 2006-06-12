@@ -227,7 +227,7 @@ void GameAudio::Update() {
 
 // Initializes OpenAL and creates the global audio context
 bool GameAudio::Initialize() {
-	ALCchar *best_device = NULL; // Name of the 'best' device
+	const ALCchar *best_device = NULL; // Name of the 'best' device
 
 	// Note: In Linux this causes a ALC_INVALID_DEVICE error. 
 	#ifdef _WIN32
