@@ -28,8 +28,6 @@ namespace private_map {
 
 /*!****************************************************************************
  * \brief A class for retaining and managing map dialogues.
- *
- * This 
  * 
  * \note The text, speakers, and events vectors are all the same size.
  *
