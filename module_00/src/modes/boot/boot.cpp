@@ -524,6 +524,7 @@ void BootMode::_OnSoundLeft()
 {
 	AudioManager->SetSoundVolume(AudioManager->GetSoundVolume() - 0.1f);
 	_UpdateAudioOptions();
+	_boot_sounds.at(0).PlaySound(); // Play a sound for user to hear new volume level. TODO: Find a better sound here!
 }
 
 
@@ -532,6 +533,7 @@ void BootMode::_OnSoundRight()
 {
 	AudioManager->SetSoundVolume(AudioManager->GetSoundVolume() + 0.1f);
 	_UpdateAudioOptions();
+	_boot_sounds.at(0).PlaySound(); // Play a sound for user to hear new volume level
 }
 
 
@@ -622,7 +624,7 @@ void BootMode::Update() {
 	// A confirm-key was pressed -> handle it (but ONLY if the credits screen isn't visible)
 	if (InputManager->ConfirmPress() && !_credits_screen.IsVisible()) 
 	{
-		// Play confirm sound if the option wasn't grayed out
+		// Play 'confirm sound' if the selection isn't grayed out and it has a confirm handler
 		if (_current_menu->IsSelectionEnabled())
 			_boot_sounds.at(0).PlaySound();
 		else

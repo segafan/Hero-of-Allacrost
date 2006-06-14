@@ -91,7 +91,7 @@ public:
 	bool IsWindowed() const;
 
 	/**
-	*** \brief Returns true if the currently selected option is enabled
+	*** \brief Returns true if the currently selected option is enabled and a confirm handler is available
 	**/
 	bool IsSelectionEnabled() const;
 

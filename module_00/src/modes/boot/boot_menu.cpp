@@ -151,10 +151,11 @@ bool BootMenu::IsWindowed() const
 }
 
 
-// Returns true if the currently selected option is enabled
+// Returns true if the currently selected option is enabled and a confirm handler is available
 bool BootMenu::IsSelectionEnabled() const
 {
-	return _current_menu.IsEnabled(_current_menu.GetSelection());
+	return _current_menu.IsEnabled(_current_menu.GetSelection()) && 
+		_confirm_handlers.at(_current_menu.GetSelection()) != 0;
 }
 
 
