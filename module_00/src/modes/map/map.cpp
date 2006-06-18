@@ -199,6 +199,7 @@ void MapMode::LoadMap() {
 	}
 
 	vector<int32> properties;
+
 	_map_data.OpenTable("lower_layer");
 	for (uint32 r = 0; r < _row_count; r++) {
 		_map_data.FillIntVector(r, properties);
@@ -283,6 +284,7 @@ void MapMode::LoadMap() {
 	MapSprite *sp;
 	SpriteDialogue *sd;
 	ActionPathMove *sa;
+	ActionFrameDisplay *sf;
 
 	// Load player sprite and rest of map objects
 	sp = new MapSprite();
@@ -341,21 +343,21 @@ void MapMode::LoadMap() {
 	sa->destination.altitude = 1;
 	sa->sprite = sp;
 	sp->actions.push_back(sa);
-	
+
 	sa = new ActionPathMove();
-	sa->destination.row = 10;
+	sa->destination.row = 12;
 	sa->destination.col = 16;
 	sa->destination.altitude = 1;
 	sa->sprite = sp;
 	sp->actions.push_back(sa);
-	
+
 	sa = new ActionPathMove();
-	sa->destination.row = 10;
+	sa->destination.row = 8;
 	sa->destination.col = 4;
 	sa->destination.altitude = 1;
 	sa->sprite = sp;
 	sp->actions.push_back(sa);
-	
+
 	sa = new ActionPathMove();
 	sa->destination.row = 4;
 	sa->destination.col = 4;
@@ -371,15 +373,51 @@ void MapMode::LoadMap() {
 	sp->SetID(2);
 	sp->SetObjectType(NPC_SPRITE);
 	sp->SetRowPosition(18);
-	sp->SetColPosition(20);
+	sp->SetColPosition(21);
 	sp->SetAltitude(1);
-	sp->SetStepSpeed(NORMAL_SPEED);
+	sp->SetStepSpeed(SLOW_SPEED);
 	sp->SetAltitude(1);
 	sp->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
 	sp->SetFilename("img/sprites/map/marcus");
 	sp->SetDirection(WEST);
 	sp->LoadFrames();
 	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied |= sp->GetAltitude();
+	
+	sa = new ActionPathMove();
+	sa->destination.row = 25;
+	sa->destination.col = 11;
+	sa->destination.altitude = 1;
+	sa->sprite = sp;
+	sp->actions.push_back(sa);
+
+	sa = new ActionPathMove();
+	sa->destination.row = 12;
+	sa->destination.col = 9;
+	sa->destination.altitude = 1;
+	sa->sprite = sp;
+	sp->actions.push_back(sa);
+
+	sa = new ActionPathMove();
+	sa->destination.row = 8;
+	sa->destination.col = 30;
+	sa->destination.altitude = 1;
+	sa->sprite = sp;
+	sp->actions.push_back(sa);
+
+	sa = new ActionPathMove();
+	sa->destination.row = 26;
+	sa->destination.col = 27;
+	sa->destination.altitude = 1;
+	sa->sprite = sp;
+	sp->actions.push_back(sa);
+
+	sf = new ActionFrameDisplay();
+	sf->display_time = 2000;
+	sf->remaining_time = 2000;
+	sf->frame_index = EAST;
+	sf->sprite = sp;
+	sp->actions.push_back(sf);
+	
 	_ground_objects.push_back(sp);
 	_sprites[sp->sprite_id] = sp;
 
@@ -387,16 +425,45 @@ void MapMode::LoadMap() {
 	sp->SetName(MakeWideString("Vanica"));
 	sp->SetID(3);
 	sp->SetObjectType(NPC_SPRITE);
-	sp->SetRowPosition(6);
-	sp->SetColPosition(24);
+	sp->SetRowPosition(24);
+	sp->SetColPosition(6);
 	sp->SetAltitude(1);
-	sp->SetStepSpeed(NORMAL_SPEED);
+	sp->SetStepSpeed(FAST_SPEED);
 	sp->SetAltitude(1);
 	sp->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
 	sp->SetFilename("img/sprites/map/vanica");
 	sp->SetDirection(EAST);
 	sp->LoadFrames();
 	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied |= sp->GetAltitude();
+	
+	sa = new ActionPathMove();
+	sa->destination.row = 8;
+	sa->destination.col = 5;
+	sa->destination.altitude = 1;
+	sa->sprite = sp;
+	sp->actions.push_back(sa);
+
+	sa = new ActionPathMove();
+	sa->destination.row = 7;
+	sa->destination.col = 13;
+	sa->destination.altitude = 1;
+	sa->sprite = sp;
+	sp->actions.push_back(sa);
+
+	sf = new ActionFrameDisplay();
+	sf->display_time = 2500;
+	sf->remaining_time = 2500;
+	sf->frame_index = NORTH;
+	sf->sprite = sp;
+	sp->actions.push_back(sf);
+
+	sa = new ActionPathMove();
+	sa->destination.row = 24;
+	sa->destination.col = 6;
+	sa->destination.altitude = 1;
+	sa->sprite = sp;
+	sp->actions.push_back(sa);
+	
 	_ground_objects.push_back(sp);
 	_sprites[sp->sprite_id] = sp;
 	
@@ -404,8 +471,8 @@ void MapMode::LoadMap() {
 	sp->SetName(MakeWideString("Woman in Rags"));
 	sp->SetID(4);
 	sp->SetObjectType(NPC_SPRITE);
-	sp->SetRowPosition(10);
-	sp->SetColPosition(20);
+	sp->SetRowPosition(32);
+	sp->SetColPosition(36);
 	sp->SetAltitude(1);
 	sp->SetStepSpeed(NORMAL_SPEED);
 	sp->SetAltitude(1);
@@ -414,6 +481,79 @@ void MapMode::LoadMap() {
 	sp->SetDirection(NORTH);
 	sp->LoadFrames();
 	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied |= sp->GetAltitude();
+	
+	sa = new ActionPathMove();
+	sa->destination.row = 32;
+	sa->destination.col = 26;
+	sa->destination.altitude = 1;
+	sa->sprite = sp;
+	sp->actions.push_back(sa);
+
+	sa = new ActionPathMove();
+	sa->destination.row = 32;
+	sa->destination.col = 36;
+	sa->destination.altitude = 1;
+	sa->sprite = sp;
+	sp->actions.push_back(sa);
+
+	sa = new ActionPathMove();
+	sa->destination.row = 32;
+	sa->destination.col = 26;
+	sa->destination.altitude = 1;
+	sa->sprite = sp;
+	sp->actions.push_back(sa);
+
+	sa = new ActionPathMove();
+	sa->destination.row = 32;
+	sa->destination.col = 36;
+	sa->destination.altitude = 1;
+	sa->sprite = sp;
+	sp->actions.push_back(sa);
+
+	sa = new ActionPathMove();
+	sa->destination.row = 32;
+	sa->destination.col = 26;
+	sa->destination.altitude = 1;
+	sa->sprite = sp;
+	sp->actions.push_back(sa);
+
+	sa = new ActionPathMove();
+	sa->destination.row = 32;
+	sa->destination.col = 36;
+	sa->destination.altitude = 1;
+	sa->sprite = sp;
+	sp->actions.push_back(sa);
+
+	sa = new ActionPathMove();
+	sa->destination.row = 32;
+	sa->destination.col = 31;
+	sa->destination.altitude = 1;
+	sa->sprite = sp;
+	sp->actions.push_back(sa);
+
+	// Wait here, looking west
+	sf = new ActionFrameDisplay();
+	sf->display_time = 1240;
+	sf->remaining_time = 1240;
+	sf->frame_index = WEST;
+	sf->sprite = sp;
+	sp->actions.push_back(sf);
+
+	sa = new ActionPathMove();
+	sa->destination.row = 38;
+	sa->destination.col = 33;
+	sa->destination.altitude = 1;
+	sa->sprite = sp;
+	sp->actions.push_back(sa);
+
+	// Wait again, looking south
+	sf = new ActionFrameDisplay();
+	sf->display_time = 3200;
+	sf->remaining_time = 3200;
+	sf->frame_index = SOUTH;
+	sf->sprite = sp;
+	sp->actions.push_back(sf);
+	
 	_ground_objects.push_back(sp);
 	_sprites[sp->sprite_id] = sp;
 	

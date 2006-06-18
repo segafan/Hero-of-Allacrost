@@ -100,6 +100,8 @@ public:
 	uint32 display_time;
 	//! The index in the sprite's image frame vector to display.
 	uint32 frame_index;
+	//! The amount of time remaining until the action is finished, in milliseconds
+	int32 remaining_time;
 
 	ActionFrameDisplay() {}
 	~ActionFrameDisplay() {}
