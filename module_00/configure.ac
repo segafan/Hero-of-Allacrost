@@ -24,6 +24,17 @@ else
     AC_MSG_RESULT(no)
 fi
 
+dnl Check for no optimization option
+AC_MSG_CHECKING(whether to turn off compiler optimization)
+optimize_default="yes"
+AC_ARG_ENABLE(debug, [  --no-optimization=[no/yes] will build with debugging capability [default=yes]], , enable_debug=$debug_default)
+if test "x$no_optimize" = "xyes"; then
+    AC_MSG_RESULT(yes)
+else
+    AC_MSG_RESULT(no)
+    CXXFLAGS="$CXXFLAGS -O3"
+fi
+
 dnl Check for map editor and Qt.
 AC_MSG_CHECKING(whether to enable usage of map editor)
 editor_default="no"

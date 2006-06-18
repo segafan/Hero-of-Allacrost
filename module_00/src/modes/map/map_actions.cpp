@@ -162,14 +162,12 @@ void ActionFrameDisplay::Load(uint32 table_key) {
 
 
 void ActionFrameDisplay::Process() {
-	static int32 wait_timer = display_time;
-	
-	wait_timer -= SettingsManager->GetUpdateTime();
-	if (wait_timer > 0) {
-		wait_timer -= display_time;
-	}
-	else {
-		wait_timer = display_time;
+
+	sprite->direction = frame_index;
+	remaining_time -= SettingsManager->GetUpdateTime();
+	if (remaining_time <= 0) {
+		remaining_time = display_time;
+
 		sprite->current_action = sprite->current_action + 1;
 		if (sprite->current_action >= sprite->actions.size()) {
 			sprite->current_action = 0;
