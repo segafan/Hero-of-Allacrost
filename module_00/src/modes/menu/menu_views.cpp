@@ -100,7 +100,7 @@ bool CharacterWindow::Draw()
 	std::string skill = std::string("Skill: ") + os_skill.str();
 	if (!VideoManager->DrawText(MakeWideString(skill)))
 		cerr << "CHARACTERWINDOW: ERROR > Couldn't draw skill!" << endl;
-		
+	
 	// Draw xp
 	VideoManager->MoveRelative(0, 40);
 	
