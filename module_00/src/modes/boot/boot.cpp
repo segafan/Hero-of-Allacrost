@@ -392,7 +392,7 @@ void BootMode::_SetupMainMenu() {
 
 	// Add all the needed menu options to the main menu
 	_main_menu.AddOption(MakeWideString("New Game"), &BootMode::_OnNewGame);
-	_main_menu.AddOption(MakeWideString("Battle-Mode"), &BootMode::_OnLoadGame);
+	_main_menu.AddOption(MakeWideString("Battle Mode"), &BootMode::_OnLoadGame);
 	_main_menu.AddOption(MakeWideString("Options"), &BootMode::_OnOptions);
 	_main_menu.AddOption(MakeWideString("Credits"), &BootMode::_OnCredits);
 	_main_menu.AddOption(MakeWideString("Quit"), &BootMode::_OnQuit);

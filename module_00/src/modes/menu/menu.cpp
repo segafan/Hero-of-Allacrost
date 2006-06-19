@@ -331,7 +331,7 @@ void MenuMode::_DrawBottomMenu()
 	///////////////
 	///////////////
 	
-	std::string time = std::string("Time:  ") + os_time.str() + string("     Inv:") + os_inv.str();
+	std::string time = std::string("Time:  ") + os_time.str();
 	if (!VideoManager->DrawText(MakeWideString(time)))
 		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
 	
@@ -347,7 +347,7 @@ void MenuMode::_DrawBottomMenu()
 	
 	// Display Location
 	VideoManager->Move(355, 670);
-	if (!VideoManager->DrawText("Harrvah Kingdom - Desert Cave"))
+	if (!VideoManager->DrawText("Harrvah Kingdom Desert Cave"))
 		cerr << "MENU: ERROR > Couldn't draw location!" << endl;
 	
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
