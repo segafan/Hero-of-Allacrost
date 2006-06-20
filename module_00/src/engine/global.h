@@ -54,10 +54,11 @@ const uint8 GLOBAL_LEGS_ARMOR = 0x40;
 //! \name Game Item Usage Types
 //@{
 //! \brief Constants for the numerous methods of application of game items.
-const uint8 GLOBAL_UNUSABLE_ITEM = 0x00;
-const uint8 GLOBAL_RECOVERY_ITEM = 0x01;
-const uint8 GLOBAL_BATTLE_ITEM   = 0x02;
-const uint8 GLOBAL_MAP_ITEM      = 0x04;
+const uint8 GLOBAL_UNUSABLE_ITEM	= 0x00;
+const uint8 GLOBAL_HP_RECOVERY_ITEM = 0x01;
+const uint8 GLOBAL_SP_RECOVERY_ITEM	= 0x02;
+const uint8 GLOBAL_BATTLE_ITEM		= 0x04;
+const uint8 GLOBAL_MAP_ITEM			= 0x08;
 //@}
 
 //! \name Game Character Types
@@ -133,6 +134,8 @@ protected:
 	uint32 obj_count;
 	//! The path of the icon for this object, may be null
 	std::string _icon_path;
+	//! The type of sub-class in this object
+	std::string _sub_class_type;
 public:
 	GlobalObject(std::string name, uint8 type, uint32 usable, uint32 id, uint32 count, std::string icon_path);
 	GlobalObject();
@@ -155,6 +158,7 @@ public:
 	void SetCount(uint32 amount) { obj_count = amount; if (obj_count < 0) obj_count = 0; }
 	void IncCount(uint32 amount) { obj_count += amount; }
 	void DecCount(uint32 amount) { obj_count -= amount; if (obj_count < 0) obj_count = 0; }
+	std::string GetSubClassType() { return _sub_class_type; }
 	//@}
 };
 
@@ -178,6 +182,9 @@ private:
 	//! See the Game Item Usage Type constants for a list of locations.
 	uint8 _use_case;
 
+	//! \brief The recovery amount this item may provide if it is a health or SP recovery item.
+	int32 _recovery_amount;
+
 	GlobalItem(const GlobalItem&);
 	GlobalItem& operator=(const GlobalItem&);
 public:
@@ -190,6 +197,8 @@ public:
 	//! \brief Used for setting and getting the values of the various class members.
 	void SetUseCase(uint8 use) { _use_case = use; }
 	uint8 GetUseCase() { return _use_case; }
+	void SetRecoveryAmount(int32 amount) { _recovery_amount = amount; }
+	int32 GetRecoveryAmount() { return _recovery_amount; }
 	//@}
 };
 
