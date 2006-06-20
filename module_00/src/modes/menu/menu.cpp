@@ -61,11 +61,12 @@ MenuMode::MenuMode()
 	
 	// DELETE THIS TOO!!
 	GlobalCharacter *laila = new GlobalCharacter("Laila", "laila", GLOBAL_LAILA);
-	GlobalManager->AddCharacter(laila);
-	GlobalCharacter *claud2 = new GlobalCharacter("Claudius", "claudius", GLOBAL_CLAUDIUS);
-	GlobalManager->AddCharacter(claud2);
-	GlobalCharacter *claud3 = new GlobalCharacter("Claudius", "claudius", GLOBAL_CLAUDIUS);
-	GlobalManager->AddCharacter(claud3);
+	if (GlobalManager->GetParty().size() < 2)
+		GlobalManager->AddCharacter(laila);
+	//GlobalCharacter *claud2 = new GlobalCharacter("Claudius", "claudius", GLOBAL_CLAUDIUS);
+	//GlobalManager->AddCharacter(claud2);
+	//GlobalCharacter *claud3 = new GlobalCharacter("Claudius", "claudius", GLOBAL_CLAUDIUS);
+	//GlobalManager->AddCharacter(claud3);
 	// DELETE this when we have real data.
 	GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetHP(80);
 	GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetMaxHP(340);
@@ -175,8 +176,8 @@ void MenuMode::Reset() {
 	_bottom_window.Show();
 	
 	// Setup the inventory window
-	_inventory_window.Create(win_width * 4 + 16, win_height, VIDEO_MENU_EDGE_ALL, VIDEO_MENU_EDGE_BOTTOM);
-	_inventory_window.SetPosition(start_x, start_y);
+	_inventory_window.Create((float)(win_width * 4 + 16), (float)win_height, VIDEO_MENU_EDGE_ALL, VIDEO_MENU_EDGE_BOTTOM);
+	_inventory_window.SetPosition((float)start_x, (float)start_y);
 	_inventory_window.Show();
 	
 	// Setup OptionBoxes
@@ -197,7 +198,7 @@ void MenuMode::Update() {
 	{
 		// See if cancel was pressed, duplicate code, but not really sure of an
 		// elegant way to do this.
-		if (InputManager->CancelPress())
+		if (_inventory_window.CanCancel() && InputManager->CancelPress())
 		{
 			_inventory_window.Activate(false);
 			_current_menu->SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
@@ -284,6 +285,8 @@ void MenuMode::Draw() {
 	// Draw the saved screen as the menu background
 	VideoManager->DrawImage(_saved_screen); 
 	
+	_DrawBottomMenu();
+
 	// Draw the four character menus
 	switch (_current_menu_showing)
 	{
@@ -301,8 +304,6 @@ void MenuMode::Draw() {
 			_inventory_window.Draw();
 		}
 	}
-
-	_DrawBottomMenu();
 }
 
 void MenuMode::_DrawBottomMenu()
@@ -323,14 +324,7 @@ void MenuMode::_DrawBottomMenu()
 	os_time << (hours < 10 ? "0" : "") << (uint32)hours << ":";
 	os_time << (minutes < 10 ? "0" : "") << (uint32)minutes << ":";
 	os_time << (seconds < 10 ? "0" : "") << (uint32)seconds;
-	///////////////
-	// TEMP////////
-	//////////////
-	ostringstream os_inv;
-	os_inv << GlobalManager->GetInventory().size();
-	///////////////
-	///////////////
-	
+
 	std::string time = std::string("Time:  ") + os_time.str();
 	if (!VideoManager->DrawText(MakeWideString(time)))
 		cerr << "MENU: ERROR > Couldn't draw text!" << endl;

@@ -59,6 +59,7 @@ GlobalObject::GlobalObject() {
 	usable_by = GLOBAL_NO_CHARACTERS;
 	obj_id = 0;
 	obj_count = 0;
+	_sub_class_type = "GlobalObject";
 }
 
 
@@ -74,6 +75,7 @@ GlobalObject::~GlobalObject() {
 GlobalItem::GlobalItem(string name, uint8 use, uint32 usable, uint32 id, uint32 count, string icon_path) :
 	GlobalObject(name, GLOBAL_ITEM, usable, id, count, icon_path) {
 	_use_case = use;
+	this->_sub_class_type = "GlobalItem";
 }
 
 
@@ -81,6 +83,7 @@ GlobalItem::GlobalItem(string name, uint8 use, uint32 usable, uint32 id, uint32 
 GlobalItem::GlobalItem() :
 	GlobalObject() {
 	_use_case = GLOBAL_UNUSABLE_ITEM;
+	this->_sub_class_type = "GlobalItem";
 }
 
 
@@ -117,6 +120,7 @@ GlobalWeapon::GlobalWeapon() :
 	GlobalObject() {
 	obj_type = GLOBAL_WEAPON;
         _damage_amount = 0;
+		this->_sub_class_type = "GlobalWeapon";
 }
 
 
@@ -166,6 +170,7 @@ GlobalArmor::GlobalArmor(string name, uint8 type, uint32 usable, uint32 id, uint
 
 GlobalArmor::GlobalArmor() :
 	GlobalObject() {
+		this->_sub_class_type = "GlobalArmor";
 }
 
 

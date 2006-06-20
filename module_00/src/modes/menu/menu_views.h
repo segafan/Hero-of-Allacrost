@@ -38,6 +38,47 @@ namespace hoa_menu {
 namespace private_menu {
 }
 
+/*!***************************************************************
+ * \brief Represents a window used to select a character to perform
+ *		  an action on.
+ *
+ * There should only ever be one of these active, usually used after
+ * selecting an item in the inventory, that needs a character to work
+ * on.
+ *****************************************************************/
+class MiniCharacterSelectWindow : public hoa_video::MenuWindow
+{
+private:
+	//! \brief specifies if the char select window is active
+	bool _char_window_active;
+	//! \brief pointer to the current character that the cursor is pointing to.
+	uint32 _current_char_selected;
+	//! \brief the item that was selected in the inventory.
+	uint32 _selected_item_index;
+	//! \brief Hide copy constructor.
+	MiniCharacterSelectWindow(MiniCharacterSelectWindow &other)
+	{}
+public:
+	//! \brief CharacterWindow main constructor
+	MiniCharacterSelectWindow();
+	//! \brief CharacterWindow Destructor
+	~MiniCharacterSelectWindow();
+	//! \brief render this window to the screen.
+	bool Draw();
+	//! \brief change the active status of the window
+	void Activate(bool new_status);
+	bool IsActive() { return _char_window_active; }
+
+	//! \brief Selected Index accessor
+	//@{
+	void SetSelectedIndex(uint32 selected) { _selected_item_index = selected; }
+	uint32 GetSelectedIndex() { return _selected_item_index; }
+	//@}
+
+
+	void Update();
+};
+
 /*!***********************************************************************
  * \brief Represents the inventory window to browse the party's inventory
  *
@@ -51,6 +92,11 @@ private:
 	hoa_video::OptionBox _inventory_items;
 	//! Flag to specify if the inventory is active
 	bool _inventory_active;
+	//! The MiniCharacterWindow to be shown when needed to select a character
+	MiniCharacterSelectWindow _char_window;
+
+	//! brief Method to update the item text in the inventory items
+	void UpdateItemText();
 public:
 	//! Class Constructor
 	InventoryWindow();
@@ -60,6 +106,9 @@ public:
 	//! Change the inventory active flag
 	void Activate(bool new_status);
 	bool IsActive() { return _inventory_active; }
+
+	//! If the inventory window is ready to cancel out, or cancel out a sub-window
+	bool CanCancel();
 	
 	void Update();
 
