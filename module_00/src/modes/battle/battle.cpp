@@ -15,6 +15,7 @@
 
 #include "utils.h"
 #include <iostream>
+#include <sstream>
 #include "battle.h"
 #include "audio.h"
 #include "video.h"
@@ -42,6 +43,13 @@ bool BATTLE_DEBUG = false;
 
 namespace private_battle {
 
+//Color(1.0f, 1.0f, 0.0f, 0.8f)
+void TEMP_Draw_Text(Color c, float x, float y, std::string text) {
+        VideoManager->SetFont("debug_font");
+        VideoManager->SetTextColor(c); // 80% translucent yellow text 
+        VideoManager->Move(x,y);
+        VideoManager->DrawText(text);
+}
 /*
 
         ACTOR
@@ -67,7 +75,7 @@ Actor::Actor(BattleMode *ABattleMode, uint32 AXLocation, uint32 AYLocation) :
         _total_agility_modifier(0),
         _total_intelligence_modifier(0)
 {
-
+        _TEMP_total_time_damaged = 0;
 }
 
 /*!
@@ -91,7 +99,7 @@ bool Actor::IsAlive() const {
 /*!
         Get the mode we are currently fighting in
 */
-const BattleMode *Actor::GetOwnerBattleMode() const {
+BattleMode *Actor::GetOwnerBattleMode() const {
         return _owner_battle_mode;
 }
 
@@ -202,6 +210,12 @@ uint32 Actor::GetTotalIntelligenceModifier() {
         return _total_intelligence_modifier;
 }
 
+void Actor::TEMP_Deal_Damage(uint32 damage) {
+        _owner_battle_mode->SetPerformingScript(true);
+        _TEMP_damage_dealt = damage;
+        _TEMP_total_time_damaged = 1;
+}
+
 /*
 
         BATTLEUI
@@ -215,7 +229,8 @@ BattleUI::BattleUI(BattleMode * const ABattleMode) :
         _current_hover_selection(0),
         _number_menu_items(0),
         _cursor_state(CURSOR_ON_PLAYER_CHARACTERS),
-        _player_character_index(0)
+        _player_character_index(0),
+        _sub_menu(NULL)
 {
         _general_menu.SetFont("default");
         _general_menu.SetCellSize(50.0f, 79.0f);
@@ -307,6 +322,14 @@ void BattleUI::Draw() {
         if(_cursor_state != CURSOR_ON_PLAYER_CHARACTERS) {
            _general_menu.Draw();
         }
+        if(_cursor_state == CURSOR_ON_SUB_MENU && _sub_menu) {
+                cerr << "Drawing sub menu." << endl;
+                _sub_menu->Draw();
+        }
+        
+        /*
+                draw damage information
+        */
         
         //always draw the currently selected character
         VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
@@ -320,9 +343,14 @@ void BattleUI::Draw() {
 void BattleUI::Update(uint32 AUpdateTime) {
         _general_menu.Update(AUpdateTime);
         
+        if(_sub_menu && _cursor_state == CURSOR_ON_SUB_MENU) {
+                cerr << "Updating sub menu" << endl;
+                _sub_menu->Update(AUpdateTime);
+        }
+        
         if(_cursor_state == CURSOR_ON_PLAYER_CHARACTERS) {
                 if(_battle_mode->NumberOfPlayerCharactersAlive() == 1) {
-                        _cursor_state = CURSOR_ON_MENU;
+                                _cursor_state = CURSOR_ON_MENU;
                 }
                 else if(InputManager->UpPress() || InputManager->LeftPress()) {
                         //select the character "to the top"
@@ -372,30 +400,149 @@ void BattleUI::Update(uint32 AUpdateTime) {
                         }
                 }
                 else if(InputManager->ConfirmPress()) {
+                        cerr << "Confirmed press on menu..." << endl;
                         //confirm the press
                         _cursor_state = CURSOR_ON_SUB_MENU;
+                        PlayerActor *p = _battle_mode->GetPlayerCharacterAt(_player_character_index);
+                        
+                        //if we have an old submenu, delete it
+                        if(_sub_menu)
+                                delete _sub_menu;
+                                
+                        _sub_menu = new OptionBox();
+                        _sub_menu->SetFont("default");
+                        _sub_menu->SetPosition(20.0f, 541.0f);
+                        _sub_menu->SetAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+                        _sub_menu->SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+                        _sub_menu->SetSelectMode(VIDEO_SELECT_SINGLE);
+                        _sub_menu->SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+                        _sub_menu->SetCellSize(100.0f, 50.0f);
+                        
+                        switch(_general_menu_cursor_location) {
+                                case 0: { //attack 
+                                        cerr << "Clicked on attack.  Building menu." << endl;
+                                        std::vector<hoa_global::GlobalSkill *> attack_skills = p->GetAttackSkills();
+                                        if(attack_skills.size() > 0) {
+                                                cerr << "Adding attack skills." << endl;
+                                                std::vector<ustring> attack_skill_names;
+                                                for(uint32 i = 0; i < attack_skills.size(); ++i) {
+                                                        std::ostringstream sp_usage;
+                                                        sp_usage << attack_skills[i]->GetSPUsage();
+                                                        std::string skill_string = attack_skills[i]->GetName() + std::string("     ") + sp_usage.str();
+                                                        attack_skill_names.push_back(MakeWideString(skill_string));
+                                                }
+                                                 cerr << "Setting options to sub menu" << endl;
+                                                _sub_menu->SetSize(1, attack_skill_names.size());
+                                                _sub_menu->SetOptions(attack_skill_names);
+                                                _sub_menu->SetSelection(0);
+                                        }
+                                        else {
+                                                 cerr << "No attack skills to add." << endl;
+                                                _cursor_state = CURSOR_ON_MENU;
+                                        }
+                                } break; 
+                                case 1: { //defend
+                                        std::vector<hoa_global::GlobalSkill *> defense_skills = p->GetDefenseSkills();
+                                        if(defense_skills.size() > 0) {
+                                                std::vector<ustring> defense_skill_names;
+                                                for(uint32 i = 0; i < defense_skills.size(); ++i) {
+                                                        std::ostringstream sp_usage;
+                                                        sp_usage << defense_skills[i]->GetSPUsage();
+                                                        std::string skill_string = defense_skills[i]->GetName() + std::string("     ") + sp_usage.str();
+                                                        defense_skill_names.push_back(MakeWideString(skill_string));
+                                                }
+                                                _sub_menu->SetOptions(defense_skill_names);
+                                                _sub_menu->SetSize(1, defense_skill_names.size());
+                                                _sub_menu->SetSelection(0);
+                                        }
+                                        else {
+                                                _cursor_state = CURSOR_ON_MENU;
+                                        }
+                                } break;
+                                case 2: { //support
+                                        std::vector<hoa_global::GlobalSkill *> support_skills = p->GetSupportSkills();
+                                        if(support_skills.size() > 0) {
+                                                std::vector<ustring> support_skill_names;
+                                                for(uint32 i = 0; i < support_skills.size(); ++i) {
+                                                        std::ostringstream sp_usage;
+                                                        sp_usage << support_skills[i]->GetSPUsage();
+                                                        std::string skill_string = support_skills[i]->GetName() + std::string("     ") + sp_usage.str();
+                                                        support_skill_names.push_back(MakeWideString(skill_string));
+                                                }
+                                                _sub_menu->SetOptions(support_skill_names);
+                                                _sub_menu->SetSize(1, support_skill_names.size());
+                                                _sub_menu->SetSelection(0);
+                                        }
+                                        else {
+                                               _cursor_state = CURSOR_ON_MENU;
+                                        }
+                                } break;
+                                case 3: { //item
+                                
+                                        //blatantly stolen from menu_views.cpp
+                                        vector<GlobalObject *> inv = GlobalManager->GetInventory();
+	
+                                        // Set the size of the option box
+                                        // Calculate the number of rows, this is dividing by 6, and if there is a remainder > 0
+                                        // add one more row for the remainder.
+                                        _sub_menu->SetSize(6, inv.size() / 6 + ((inv.size() % 6) > 0 ? 1 : 0));
+                                        
+                                        std::vector<ustring> inv_names;
+                                        
+                                        for (uint32 i = 0; i < inv.size(); ++i)
+                                        {
+                                                // Create the item text
+                                                std::ostringstream os_obj_count;
+                                                os_obj_count << inv[i]->GetCount();
+                                                string inv_item_str = string("<") + inv[i]->GetIconPath() + string("><32>") + inv[i]->GetName() + string("<R>") + os_obj_count.str() + string("    ");
+                                                inv_names.push_back(MakeWideString(inv_item_str));
+                                        }
+                                        _sub_menu->SetOptions(inv_names);
+                                        _sub_menu->SetSize(1, inv_names.size());
+                                        _sub_menu->SetSelection(0);
+                                } break;
+                        }
                 }
                 else if(InputManager->CancelPress()) {
-                        _cursor_state = CURSOR_ON_PLAYER_CHARACTERS;
+                        cerr << "Cancel press -- going back to player characters." << endl;
+                        
+                        if(_battle_mode->NumberOfPlayerCharactersAlive() > 1) {
+                                _cursor_state = CURSOR_ON_PLAYER_CHARACTERS;
+                        }
                 }
         }
         else if(_cursor_state == CURSOR_ON_SUB_MENU) {
                 if(InputManager->DownPress()) {
-                        _general_menu.HandleDownKey();
+                        _sub_menu->HandleDownKey();
                 }
                 else if(InputManager->UpPress()) {
-                        _general_menu.HandleUpKey();
+                        _sub_menu->HandleUpKey();
                 }
                 else if(InputManager->ConfirmPress()) {
+                        
+                        
+                        //get the skill
+                        
                         //if the skill is for the players, put the 
                         //cursor on the player characters
                         
                         //other wise, put the cursor on the enemy
                         //characters
+                        
+                        //put the skill in the battle script queue
+                        //get out of the menu
+                        
+                        
+                        
+                        _cursor_state = CURSOR_SELECT_TARGET;
                 }
                 else if(InputManager->CancelPress()) {
+                        cerr << "Cursor should now be back on menu..." << endl;
                         _cursor_state = CURSOR_ON_MENU;
                 }
+        }
+        else if (_cursor_state == CURSOR_SELECT_TARGET) {
+                
         }
 }
 
@@ -422,6 +569,20 @@ void PlayerActor::Update(uint32 ATimeElapsed) {
 }
 
 void PlayerActor::Draw() {
+        //more temporary crap
+        if(_TEMP_total_time_damaged > 0) {
+                _TEMP_total_time_damaged += SettingsManager->GetUpdateTime();
+                Color c(1.0f, 0.0f, 0.0f, 0.8f);
+                ostringstream damage_amount;
+                damage_amount << _TEMP_damage_dealt;
+                TEMP_Draw_Text(c, GetXLocation()+10, GetYLocation()-10, damage_amount.str()); 
+                if (_TEMP_total_time_damaged > 3000)
+                {
+                        _TEMP_total_time_damaged = 0;
+                        GetOwnerBattleMode()->SetPerformingScript(false);
+                }
+        }
+        
         //move to x,y
         VideoManager->Move(GetXLocation(),GetYLocation());
         //draw the current animation
@@ -515,6 +676,7 @@ EnemyActor::~EnemyActor() {
 }
 
 void EnemyActor::Update(uint32 ATimeElapsed) {
+        /*
         static double totalHealthLost = 0;
         totalHealthLost += ATimeElapsed/300.0f;
         
@@ -529,6 +691,7 @@ void EnemyActor::Update(uint32 ATimeElapsed) {
                 
         if(totalHealthLost > .5)
                 totalHealthLost = 0;
+        */
 }
 
 void EnemyActor::Draw() {
@@ -1108,6 +1271,8 @@ void BattleMode::_TEMP_LoadTestData() {
         
         ai.SetFrameIndex(0);
         claud->AddAnimation("IDLE", ai);
+        cerr << "Adding attack skill." << endl;
+        claud->AddAttackSkill(new GlobalSkill("sword_swipe"));
         
 	cerr << "Creating claudius player character." << endl;
 	PlayerActor *claudius = new PlayerActor(claud, this, 250, 200);
