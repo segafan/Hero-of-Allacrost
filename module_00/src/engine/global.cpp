@@ -187,11 +187,12 @@ GlobalSkill::GlobalSkill(string script_name) {
         ReadDataDescriptor read_data;
         string fileName = "dat/skills/" + _script_name + ".lua";
 	if (!read_data.OpenFile(fileName.c_str())) {
-		cout << "GLOBAL ERROR: failed to load skill file: " << _script_name << endl;
+		cerr << "GLOBAL ERROR: failed to load skill file: " << _script_name << endl;
 	}
-        else {
+        else { 
                 _skill_name = read_data.ReadString("skill_name");
                 string type = read_data.ReadString("skill_type");
+
                 if(type == "ATTACK")
                         _skill_type = ATTACK;
                 else if(type == "DEFENSE")
@@ -199,16 +200,15 @@ GlobalSkill::GlobalSkill(string script_name) {
                 else if(type == "SUPPORT")
                         _skill_type = SUPPORT;
                 else {
-                        cout << "GLOBAL ERROR: Unknown type for skill: " << _script_name << endl;
+                        cerr << "GLOBAL ERROR: Unknown type for skill: " << _script_name << endl;
                 }
-                
-                        
+                              
                 _sp_usage = read_data.ReadInt("sp_usage");
                 _warmup_time = read_data.ReadInt("warmup_time");
-                _cooldown_time = read_data.ReadInt("cooldown_time");
+                _cooldown_time = read_data.ReadInt("cooldown_time");  
                 _level_required = read_data.ReadInt("level_required");
                 _num_arguments = read_data.ReadInt("num_arguments");
-                
+                 
                 _stats = new BattleStatTypes();
                 _stats->volt = read_data.ReadInt("volt_level");
                 _stats->earth = read_data.ReadInt("earth_level");
@@ -230,7 +230,7 @@ GlobalSkill::GlobalSkill() {
 
 
 GlobalSkill::~GlobalSkill() {
-        if(_stats != 0)
+        if(_stats)
                 delete _stats;
         _stats = 0;
 }
