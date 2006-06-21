@@ -186,6 +186,10 @@ class Actor {
                 uint32 _total_strength_modifier;
                 uint32 _total_agility_modifier;
                 uint32 _total_intelligence_modifier;
+                
+        protected:
+                uint32 _TEMP_total_time_damaged;
+                uint32 _TEMP_damage_dealt;
 		
 	public:
 		Actor(BattleMode *ABattleMode, uint32 AXLocation, uint32 AYLocation);
@@ -203,7 +207,7 @@ class Actor {
                 /*!
                         \brief Get the mode we are currently fighting in
                 */
-		const BattleMode *GetOwnerBattleMode() const;
+		BattleMode *GetOwnerBattleMode() const;
 		
 		/*!
 			\brief Manage effects that the player is feeling
@@ -303,6 +307,8 @@ class Actor {
                 void SetTotalIntelligenceModifier(uint32 AIntelligenceModifier);
                 uint32 GetTotalIntelligenceModifier();
                 //@}
+                
+                void TEMP_Deal_Damage(uint32 damage);
 };
 
 /*!
@@ -314,7 +320,8 @@ class BattleUI {
                         CURSOR_ON_PLAYER_CHARACTERS = 0,
                         CURSOR_ON_ENEMY_CHARACTERS = 1,
                         CURSOR_ON_MENU = 2,
-                        CURSOR_ON_SUB_MENU = 3
+                        CURSOR_ON_SUB_MENU = 3,
+                        CURSOR_SELECT_TARGET = 4
                 };
                 
 		//! The battlemode we belong to
@@ -340,7 +347,7 @@ class BattleUI {
                 //! The cursor location in the _general_menu.  For pure hackery reasons only
                 uint32 _general_menu_cursor_location;
                 //! The sub menu.  Recreated every time it is chosen
-                hoa_video::OptionBox _sub_menu;
+                hoa_video::OptionBox *_sub_menu;
                 //! The selected cursor
                 hoa_video::StillImage _player_selector_image;
 		
