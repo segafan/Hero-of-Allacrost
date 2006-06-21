@@ -313,8 +313,13 @@ public:
 	GlobalSkill();
 	~GlobalSkill();
 
-	uint32 GetCooldownTime() { return 0; }
-	uint32 GetWarmupTime() { return 0; }
+	uint32 GetCooldownTime() { return _warmup_time; }
+	uint32 GetWarmupTime() { return _cooldown_time; }
+        
+        std::string GetName() { return _skill_name; }
+        uint32 GetSPUsage() { return _sp_usage; }
+        hoa_battle::BattleStatTypes *GetBattleStatTypes() { return _stats; }
+        uint32 GetNumArguments() { return _num_arguments; }
 };
 
 /*!****************************************************************************
