@@ -691,7 +691,7 @@ TileNode* MapMode::_FindNodeInList(const TileCheck& node, list<TileNode> &node_l
 
 
 // Finds a path for a sprite to take, using the A* algorithm.
-void MapMode::_FindPath(const TileNode& destination, vector<TileNode> &path) {
+void MapMode::_FindPath(/*const*/ TileNode& destination, vector<TileNode> &path) {
 // 	cout << "BEGIN FIND PATH" << endl;
 // 	cout << "Source: [" << path[0].col << ", " << path[0].row << "]" << endl;
 // 	cout << "Destination: [" << destination.col << ", " << destination.row << "]" << endl;
@@ -712,6 +712,13 @@ void MapMode::_FindPath(const TileNode& destination, vector<TileNode> &path) {
 		return;
 	}
 	
+	// Check if the destination is unwalkable
+	if (!(_tile_layers[destination.row][destination.col].walkable & path[0].altitude)) {
+		destination.row = path[0].row;
+		destination.col = path[0].col;
+		destination.altitude = path[0].altitude;
+	}
+
 	// This is the altitude to use for finding the path
 	tcheck.altitude = path[0].altitude;
 	new_node.altitude = path[0].altitude;
