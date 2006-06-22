@@ -381,7 +381,8 @@ private:
 	 * \param &path Contains a single element when passed as an argument (the source node). The result path is
 	 * placed into this vector.
 	 */
-	void _FindPath(const private_map::TileNode& destination, std::vector<private_map::TileNode> &path);
+	// FIXME: const commented out for temporary solution of path-finding destination bug
+	void _FindPath(/*const*/ private_map::TileNode& destination, std::vector<private_map::TileNode> &path);
 	
 
 	//@}
