@@ -32,7 +32,8 @@ coord_sys_nl = 1;
 -- -------------------------------------------------- --
 -- ----------------- AUDIO STUFF -------------------- --
 -- -------------------------------------------------- --
-music_files = { "Allacrost_Opening_Theme" };
+music_files = { "Allacrost_Opening_Theme",
+                "Opening_Effect" };
 
 sound_files = { "confirm",
                 "cancel",
