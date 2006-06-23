@@ -169,13 +169,15 @@ BootMode::~BootMode() {
 
 // Resets appropriate class members.
 void BootMode::Reset() {
-
-	// Play the intro theme
-	_boot_music[0].PlayMusic();
-
 	// Set the coordinate system that BootMode uses
 	VideoManager->SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
+
+	// Decide which music track to play
+	if (_logo_animating)
+		_boot_music.at(1).PlayMusic(); // Opening Effect
+	else
+		_boot_music.at(0).PlayMusic(); // Main theme
 }
 
 
@@ -327,6 +329,10 @@ void BootMode::_EndOpeningAnimation()
 {
 	VideoManager->SetFog(Color::black, 0.0f); // Turn off the fog
 	_logo_animating = false;
+
+	// Stop playing SFX and start playing the main theme
+	_boot_music.at(1).StopMusic();
+	_boot_music.at(0).PlayMusic();
 }
 
 
@@ -421,7 +427,7 @@ void BootMode::_SetupOptionsMenu() {
 void BootMode::_SetupVideoOptionsMenu()
 {
 	_video_options_menu.AddOption(MakeWideString("Resolution:"));
-	_video_options_menu.AddOption(MakeWideString("Window mode:"), &BootMode::_OnVideoMode);	
+	_video_options_menu.AddOption(MakeWideString("Window mode:"), &BootMode::_OnVideoMode);
 	_video_options_menu.AddOption(MakeWideString("Brightness:"));
 	_video_options_menu.AddOption(MakeWideString("Image quality:"));
 
@@ -457,7 +463,7 @@ void BootMode::_OnNewGame()
 }
 
 
-// 'Load Game' confirmed
+// 'Load Game' confirmed. Actually it simply loads battle mode demo at the moment :devil:
 void BootMode::_OnLoadGame()
 {
 	if (BOOT_DEBUG)
@@ -503,7 +509,6 @@ void BootMode::_OnAudioOptions()
 {
 	// Switch the current menu
 	_current_menu = &_audio_options_menu;
-
 	_UpdateAudioOptions();
 }
 
@@ -566,7 +571,7 @@ void BootMode::_UpdateVideoOptions()
 
 	// Update text on current video mode
 	if (VideoManager->IsFullscreen())
-		_video_options_menu.SetOptionText(1, MakeWideString("Window mode: full-screen"));
+		_video_options_menu.SetOptionText(1, MakeWideString("Window mode: fullscreen"));
 	else
 		_video_options_menu.SetOptionText(1, MakeWideString("Window mode: windowed"));
 }
@@ -618,11 +623,11 @@ void BootMode::Update() {
 	// Update the menu window
 	BootMenu::UpdateWindow(time_elapsed);
 
-	// Update the credits window
+	// Update the credits window (because it may be hiding/showing!)
 	_credits_screen.UpdateWindow(time_elapsed);
 
 	// A confirm-key was pressed -> handle it (but ONLY if the credits screen isn't visible)
-	if (InputManager->ConfirmPress() && !_credits_screen.IsVisible()) 
+	if (InputManager->ConfirmPress() && !_credits_screen.IsVisible())
 	{
 		// Play 'confirm sound' if the selection isn't grayed out and it has a confirm handler
 		if (_current_menu->IsSelectionEnabled())
@@ -662,7 +667,10 @@ void BootMode::Update() {
 	{
 		// Close the credits-screen if it was visible
 		if (_credits_screen.IsVisible())
-			_credits_screen.Hide();
+		{
+			_credits_screen.Hide();			
+			_boot_sounds.at(1).PlaySound(); // Play cancel sound here as well
+		}
 
 		// Otherwise the cancel was given for the main menu
 		_current_menu->CancelPressed();
@@ -670,7 +678,7 @@ void BootMode::Update() {
 		// Go up in the menu hierarchy if possible
 		if (_current_menu->GetParent() != 0)
 		{
-			// Play the cancel sound here
+			// Play cancel sound
 			_boot_sounds.at(1).PlaySound();
 
 			// Go up a level in the menu hierarchy
@@ -699,7 +707,7 @@ void BootMode::Draw() {
 		return;
 	}
 
-	_DrawBackgroundItems();	
+	_DrawBackgroundItems();
 
 	// Decide whether to draw the credits window or the main menu
 	if (_credits_screen.IsVisible())

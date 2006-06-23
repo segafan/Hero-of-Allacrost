@@ -12,7 +12,7 @@
  * \author  Viljami Korhonen, mindflayer@allacrost.org
  * \brief   Source file for the Credits screen
  *****************************************************************************/
- 
+
 #include "video.h"
 #include "boot_credits.h"
 
@@ -23,41 +23,46 @@ using namespace hoa_utils;
 namespace hoa_boot {
 
 
-CreditsScreen::CreditsScreen() :
+	CreditsScreen::CreditsScreen() :
 _visible(false),
 _credits_text(
-			  "Hero of Allacrost - development team\n"
+			  "Hero of Allacrost Development Team\n"
 			  "\n"
-			  "Tyler Olsen (Roots) - Project Leader a.k.a Dictator"
-			  "\n\n"
+			  "Tyler Olsen (Roots) ~ Project Leader a.k.a Dictator\n"
+			  "\n"
+			  "Emre Motan (emrebfg) ~ Team Manager\n"
+			  "\n"
 			  "Programming\n"
 			  "\n"
-			  "Corey Hoffstein (visage) - Programming Leader, \n"
-			  "Raj Sharma (roos) - Video Engine\n"
-			  "Philip Vorsilak (gorzuate) - Map editor, vice dictator\n"
-			  "Daniel Steuernol (Steu) - Menu mode, wikimaster\n"
-			  "Viljami Korhonen (MindFlayer) - Credits-screen (heh heh)\n"
-			  "Adam (Zorbfish) - Data and Scripting system\n"
+			  "Corey \"Pimpalicious\" Hoffstein (visage) ~ Programming Leader, Battle mode\n"
+			  "Raj Sharma (roos) ~ Video Engine\n"
+			  "Philip Vorsilak (gorzuate) ~ Map editor, Vice Dictator\n"
+			  "Daniel Steuernol (Steu) ~ Menu mode, wikimaster\n"
+			  "Viljami Korhonen (MindFlayer) ~ Boot mode\n"
+			  "Adam Lindquist (Zorbfish) ~ Data and Scripting system\n"
+			  "\n"
 			  "\n"
 			  "Graphics\n"
 			  "\n"
-			  "Joe Raucci (Sylon) - Artwork Leader\n"
-			  "Victoria Smith (alenacat) - Map sprite artist\n"
-			  "Jerimiah Short (BigPapaN0z) - Map tile artist\n"
-			  "Matthew James (nunvuru) - Web design, miscellaneous artwork\n"
-			  "Brett Steele (Safir-Kreuz) - Sprite art, character portraits\n"
+			  "Joe Raucci (Sylon) ~ Artwork Leader\n"
+			  "Victoria Smith (alenacat) ~ Map sprite art\n"
+			  "Jerimiah Short (BigPapaN0z) ~ Map tile art\n"
+			  "Matthew James (nunvuru) ~ Web design, miscellaneous artwork\n"
+			  "Brett Steele (SafirKreuz) ~ Sprite art, character portraits\n"
+			  "\n"
 			  "\n"
 			  "Audio\n"
 			  "\n"
-			  "Ryan Reilly (Rain) - Music Leader\n"
-			  "Joe (Loodwig)\n"
-			  "Zhe (shizeet) - sound effects\n"
+			  "Ryan Reilly (Rain) ~ Music Leader\n"
+			  "Joe Rouse (Loodwig) ~ \n"
+			  "Zhe #FULLNAME# (shizeet) ~ Sound effects\n"
 			  "\n"
-			  "Special thanks to our contributors:\n"
 			  "\n"
-			  "Jarks - Map tiles, icons\n"
-			  "Jetryl - Map sprites & tiles, art advisor\n"
-			  "wayfarer - Map sprites, menu design"
+			  "Special thanks to our contributors\n"
+			  "\n"
+			  "Parley #FULLNAME# (Jarks) ~ Map tiles, icons\n"
+			  "Richard Kettering (Jetryl) ~ Map sprites & tiles, art advisor\n"
+			  "Peter Geinitz (wayfarer) ~ Map sprites, menu design"
 			  )
 {
 	// Init the credits window
