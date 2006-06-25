@@ -1308,7 +1308,9 @@ void MapMode::Draw() {
 			(_sky_objects[i])->Draw();
 		}
 	}
-
+	
+	VideoManager->SetFog(Color::gray, 0.5f);
+	
 	// ************** (8) Draw the dialogue menu and text *************
 	if (_map_state == DIALOGUE) {
 		VideoManager->PushState();

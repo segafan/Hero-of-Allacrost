@@ -39,11 +39,8 @@ namespace hoa_audio {
 	class SoundDescriptor;
 	
 	namespace private_audio {
-		class AudioState;
-		class MusicBuffer;
-		class MusicSource;
-		class SoundBuffer;
-		class SoundSource;
+		class MusicData;
+		class SoundData;
 	}
 }
 

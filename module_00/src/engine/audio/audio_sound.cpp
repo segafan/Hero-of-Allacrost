@@ -13,12 +13,6 @@
  * \brief   Sound file for sound-related code in the audio engine.
  *****************************************************************************/
 
-#ifndef __APPLE__
-#include <AL/alut.h>
-#else
-#include <OpenAL/alut.h>
-#endif // #ifndef __APPLE__
-
 #include "audio_sound.h"
 
 using namespace std;
@@ -29,254 +23,68 @@ namespace hoa_audio {
 namespace private_audio {
 
 // ****************************************************************************
-// *********************** SoundBuffer Class Functions ************************
+// ************************ SoundData Class Functions *************************
 // ****************************************************************************
 
 // Creates a new buffer for the filename and loads the WAV data.
 
-SoundBuffer::SoundBuffer(string fname) {
+SoundData::SoundData(string fname) {
 	filename = fname;
 
-	// Differences between OpenAL 1.* and earlier versions require this function
-	// to be written in very different ways depending on the OpenAL version.
-
-
-	// For OpenAL version 1.*, otherwise known as freealut
-	#ifdef ALUT_API_MAJOR_VERSION
-	buffer = alutCreateBufferFromFile(("snd/" + filename + ".wav").c_str());
-	if (buffer == AL_NONE) {
-		cout << "AUDIO ERROR: ALUT could not load WAV file " << "snd/" + filename + ".wav" << endl;
-		cout << "> " << GetALUTErrorString(alutGetError()) << endl;
+	sound = Mix_LoadWAV(("snd/" + filename + ".wav").c_str());
+	if (sound == NULL) {
+		cout << "AUDIO ERROR: Could not open sound file " << filename << ": " << Mix_GetError() << endl;
 		reference_count = 0;
-		return;
 	}
-	reference_count = 1;
-
-	// For older versions of OpenAL prior to 1.*
-	#else
-	ALenum format;
-	ALsizei size;
-	ALvoid *data;
-	ALsizei freq;
-	ALboolean loop;
-	ALbyte *file;
-	ALenum error_check;
-
-	// (1) Generate a new OpenAL buffer and set the _reference_count to one if successful.
-	alGenBuffers(1, &buffer);
-	error_check = alGetError();
-	if (error_check != AL_NO_ERROR) {
-		cout << "AUDIO ERROR: OpenAL could not generate buffer, returned error code: "
-		     << GetALErrorString(error_check) << endl;
-		return;
-	}
-	reference_count = 1;
-
-	// (2) Load the WAV file from main memory.
-	string filename = string("snd/") + fname + string(".wav");
-	file = (ALbyte*)(filename.c_str());
-	alutLoadWAVFile(file, &format, &data, &size, &freq, &loop);
-	error_check = alGetError();
-	if (error_check != AL_NO_ERROR) {
-		cout << "AUDIO ERROR: OpenAL could not load WAV file " << filename << ". Returned error code: "
-		     << GetALErrorString(error_check) << endl;
-		alDeleteBuffers(1, &buffer);
-		reference_count = 0;
-		return;
-	}
-
-	// (3) Allocate the WAV data into the newly created buffer.
-	alBufferData(buffer, format, data, size, freq);
-	error_check = alGetError();
-	if (error_check != AL_NO_ERROR) {
-		cout << "AUDIO ERROR: OpenAL failed to send WAV data of file " << filename << " to buffer."
-		     << " Returned error code: " << GetALErrorString(error_check) << endl;
-		alDeleteBuffers(1, &buffer);
-		reference_count = 0;
-		return;
-	}
-
-	// (4) Unload the WAV file since we don't need it anymore.
-	alutUnloadWAV(format, data, size, freq);
-	error_check = alGetError();
-	if (error_check != AL_NO_ERROR) {
-		cout << "AUDIO ERROR: OpenAL failed to unload WAV file " << filename << ". Returned error code: "
-		     << GetALErrorString(error_check) << endl;
-		alDeleteBuffers(1, &buffer);
-		reference_count = 0;
-		return;
-	}
-	#endif
-
-	if (AUDIO_DEBUG) {
-		cout << "AUDIO: Successfully loaded WAV file: snd/" << filename << ".wav" << endl;
-		DEBUG_PrintProperties();
+	else {
+		reference_count = 1;
 	}
 }
 
-SoundBuffer::~SoundBuffer() {
-	if (reference_count != 0) {
+SoundData::~SoundData() {
+	if (reference_count > 0) {
 		cerr << "AUDIO WARNING: Audio engine is attempting to delete buffer " << filename
-		     << ", which still has " << (int32)reference_count << " number of references to it." << endl;
+		     << ", which still has " << reference_count << " number of references to it." << endl;
 	}
-	alDeleteBuffers(1, &buffer);
-	alGetError(); // Don't care if we couldn't delete the buffer! NOTE: I think this should be taken care of!
 
-	// Remove the element from the sound buffer map
-	AudioManager->_sound_buffers.erase(AudioManager->_sound_buffers.find(filename));
+	Mix_FreeChunk(sound);
+	sound = NULL;
 }
 
-// Remove a reference to this buffer object and delete it if there are no more references.
-void SoundBuffer::RemoveReference() {
+
+void SoundData::RemoveReference() {
 	reference_count--;
 	if (reference_count == 0) {
-		delete this;
+		// TODO: delete the class object and remove it from the sound_data map, but be careful
+		// delete this;
 	}
 }
 
-bool SoundBuffer::IsValid() {
-	if (alIsBuffer(buffer) == AL_TRUE) {
+
+bool SoundData::IsValid() {
+	if (sound != NULL && reference_count > 0) {
 		return true;
 	}
 	return false;
 }
 
-void SoundBuffer::DEBUG_PrintProperties() {
-	cout << "--------------------------------------------------------------------------------" << endl;
+
+void SoundData::DEBUG_PrintProperties() {
 	if (IsValid() == false) {
-		cout << "ERROR: the buffer for the file snd/" << filename << ".wav is not valid" << endl;
+		AudioManager->_audio_errors |= AUDIO_ERROR_NO_DATA;
+		cerr << "ERROR: the data for the file snd/" << filename << ".wav is not valid" << endl;
 	}
 	else {
-		ALint property;
+		cout << "--------------------------------------------------------------------------------" << endl;
 		cout << "Filename:    snd/" << filename << ".wav" << endl;
-		alGetBufferi(buffer, AL_FREQUENCY, &property);
-		cout << "Frequency:   " << property << " Hz" << endl;
-		alGetBufferi(buffer, AL_BITS, &property);
-		cout << "Bit depth:   " << property << endl;
-		alGetBufferi(buffer, AL_CHANNELS, &property);
-		cout << "Channels:    " << property << endl;
-		alGetBufferi(buffer, AL_SIZE, &property);
-		cout << "Size:        " << property << " bytes" << endl;
-	}
-	cout << "--------------------------------------------------------------------------------" << endl;
-}
-
-// ****************************************************************************
-// *********************** SoundSource Class Functions ************************
-// ****************************************************************************
-
-// SoundSources are only created in the GameAudio::Initialize() function
-SoundSource::SoundSource() {
-	owner = NULL;
-	alGenSources(1, &source);
-}
-
-// SoundSources are only destroyed by the GameAudio destructor
-SoundSource::~SoundSource() {
-	if (IsValid()) {
-		alSourceStop(source);
-		alDeleteSources(1, &source);
+		// These properties are not easily available with SDL_mixer
+// 		cout << "Frequency:   " << property << " Hz" << endl;
+// 		cout << "Bit depth:   " << property << endl;
+// 		cout << "Channels:    " << property << endl;
+		cout << "Size:        " << sound->alen << " bytes" << endl;
+		cout << "--------------------------------------------------------------------------------" << endl;
 	}
 }
-
-bool SoundSource::IsValid() {
-	if (alIsSource(source) == AL_TRUE) {
-		return true;
-	}
-	else {
-		return false;
-	}
-}
-
-void SoundSource::DEBUG_PrintProperties() {
-	ALint i_property;
-	ALfloat f_property;
-	ALfloat fv_property[3];
-
-	cout << ">>> SoundSource Properties <<<" << endl;
-
-	alGetSourcef(source, AL_GAIN, &f_property);
-	cout << "> Gain:                " << f_property << endl;
-	alGetSourcef(source, AL_PITCH, &f_property);
-	cout << "> Pitch:               " << f_property << endl;
-	alGetSourcef(source, AL_MIN_GAIN, &f_property);
-	cout << "> Min Gain:            " << f_property << endl;
-	alGetSourcef(source, AL_MAX_GAIN, &f_property);
-	cout << "> Max Gain:            " << f_property << endl;
-
-	// Max distance only works with inverse clamped distance model
-	alGetSourcef(source, AL_MAX_DISTANCE, &f_property);
-	cout << "> Max Distance:        " << f_property << endl;
-	alGetSourcef(source, AL_ROLLOFF_FACTOR, &f_property);
-	cout << "> Roll-off Factor:     " << f_property << endl;
-	alGetSourcef(source, AL_REFERENCE_DISTANCE, &f_property);
-	cout << "> Reference Distance:  " << f_property << endl;
-	alGetSourcei(source, AL_SOURCE_RELATIVE, &i_property);
-	cout << "> Source Relative:     ";
-	if (i_property == AL_TRUE)
-		cout << "true" << endl;
-	else
-		cout << "false" << endl;
-
-	alGetSourcefv(source, AL_POSITION, fv_property);
-	cout << "> Position:            " << "[" << fv_property[0] << ", " << fv_property[1] << ", " << fv_property[2] << "] ([X,Y,Z])" << endl;
-	alGetSourcefv(source, AL_DIRECTION, fv_property);
-	cout << "> Direction:           " << "[" << fv_property[0] << ", " << fv_property[1] << ", " << fv_property[2] << "] ([X,Y,Z])" << endl;
-	alGetSourcefv(source, AL_VELOCITY, fv_property);
-	cout << "> Velocity:            " << "[" << fv_property[0] << ", " << fv_property[1] << ", " << fv_property[2] << "] ([X,Y,Z])" << endl;
-	alGetSourcef(source, AL_CONE_OUTER_GAIN, &fv_property[0]);
-	alGetSourcef(source, AL_CONE_INNER_ANGLE, &fv_property[1]);
-	alGetSourcef(source, AL_CONE_OUTER_ANGLE, &fv_property[2]);
-	cout << "> Cone Properties:     " << "[" << fv_property[0] << " / " << fv_property[1] << " / " << fv_property[2]
-	     << "] ([Outer Gain / Inner Angle / Outer Angle])" << endl;
-
-	alGetSourcei(source, AL_SOURCE_TYPE, &i_property);
-	cout << "> Source Type:         ";
-	switch (i_property) {
-// 		case AL_STATIC:
-// 			cout << "static" << endl;
-		case AL_STREAMING:
-			cout << "streaming" << endl;
-			break;
-// 		case AL_UNDETERMINED:
-		default:
-			cout << "undetermined" << endl;
-			break;
-	}
-	alGetSourcei(source, AL_LOOPING, &i_property);
-	cout << "> Source Loops:        ";
-	if (i_property == AL_TRUE)
-		cout << "true" << endl;
-	else
-		cout << "false" << endl;
-	alGetSourcei(source, AL_SOURCE_STATE, &i_property);
-	cout << "> Source State:        ";
-	switch (i_property) {
-		case AL_INITIAL:
-			cout << "initial" << endl;
-			break;
-		case AL_STOPPED:
-			cout << "stopped" << endl;
-			break;
-		case AL_PLAYING:
-			cout << "playing" << endl;
-			break;
-		case AL_PAUSED:
-			cout << "paused" << endl;
-			break;
-		default: // this case should never occur
-			cout << "unknown" << endl;
-			break;
-	}
-	alGetSourcei(source, AL_BUFFERS_QUEUED, &i_property);
-	cout << "> Buffers Queued:      " << i_property << endl;
-	alGetSourcei(source, AL_BUFFERS_PROCESSED, &i_property);
-	cout << "> Buffers Processed:   " << i_property << endl;
-//	alGetSourcef(source, AL_SEC_OFFSET, &fv_property[0]);
-//	alGetSourcef(source, AL_SAMPLE_OFFSET, &fv_property[1]);
-//	alGetSourcef(source, AL_BYTE_OFFSET, &fv_property[2]);
-//	cout << "> Playback Offset:   " << fv_property[0] << "/" << fv_property[1] << "/" << fv_property[2] << " (Seconds/Samples/Bytes)" << endl;
-} // SoundSource::DEBUG_PrintProperties()
 
 } // namespace private_audio
 
@@ -288,8 +96,11 @@ using namespace hoa_audio::private_audio;
 
 // The constructor does not attempt to retrieve any resources.
 SoundDescriptor::SoundDescriptor() {
-	_origin = NULL;
 	_data = NULL;
+	_loop_count = 0;
+	_fade_in_time = 0;
+	_fade_out_time = 0;
+	_play_timeout = -1;
 }
 
 
@@ -298,11 +109,6 @@ SoundDescriptor::~SoundDescriptor() {
 	if (_data != NULL) {
 		_data->RemoveReference();
 		_data = NULL;
-	}
-
-	if (_origin != NULL) {
-		AudioManager->_ReleaseSoundSource(_origin);
-		_origin = NULL;
 	}
 }
 
@@ -314,7 +120,7 @@ bool SoundDescriptor::LoadSound(string fname) {
 		return false;
 	}
 
-	_data = AudioManager->_AcquireSoundBuffer(fname);
+	_data = AudioManager->_AcquireSoundData(fname);
 	if (_data == NULL) {
 		cerr << "AUDIO ERROR: Failed to get a buffer for sound file snd/" << fname << ".wav" << endl;
 		return false;
@@ -323,117 +129,103 @@ bool SoundDescriptor::LoadSound(string fname) {
 }
 
 
-// Retrieve the state of the audio
-uint8 SoundDescriptor::GetState() {
-	if (_data == NULL)
-		return AUDIO_STATE_UNLOADED;
-	if (_origin == NULL)
-		return AUDIO_STATE_STOPPED;
-
-	ALenum state;
-	alGetSourcei(_origin->source, AL_SOURCE_STATE, &state);
-	switch (state) {
-		case AL_PLAYING:
-			return AUDIO_STATE_PLAYING;
-		case AL_PAUSED:
-			return AUDIO_STATE_PAUSED;
-		case AL_STOPPED:
-		case AL_INITIAL:
-		default:
-			return AUDIO_STATE_STOPPED;
-	}
-}
-
-
-void SoundDescriptor::PlaySound() {
-	if (_data == NULL) {
-		if (AUDIO_DEBUG) cerr << "AUDIO WARNING: Attempted to play a sound that had no audio data." << endl;
-		return;
-	}
-
-	if (HasSource() == false) {
-		AllocateSource();
-		if (_origin == NULL) {
-			if (AUDIO_DEBUG) cerr << "AUDIO WARNING: Failed to allocate a sound source for playing a sound." << endl;
-			return;
-		}
-	}
-
-	alSourcePlay(_origin->source);
-}
-
-void SoundDescriptor::PauseSound() {
-	if (_origin == NULL) { // If there is no source, there won't be a buffer either.
-		return;
-	}
-	alSourcePause(_origin->source);
-}
-
-void SoundDescriptor::StopSound() {
-	if (_origin == NULL) { // If there is no source, there won't be a buffer either.
-		return;
-	}
-	alSourceStop(_origin->source);
-}
-
-void SoundDescriptor::RewindSound() {
-	if (_origin == NULL) { // If there is no source, there won't be a buffer either.
-		return;
-	}
-	alSourceRewind(_origin->source);
-}
-
-
-//
 void SoundDescriptor::FreeSound() {
 	if (_data != NULL) {
 		_data->RemoveReference();
 		_data = NULL;
 	}
-
-	if (_origin != NULL) {
-		AudioManager->_ReleaseSoundSource(_origin);
-		_origin = NULL;
-	}
 }
 
 
-
-void SoundDescriptor::SetLooping(bool loop) {
-	if (_origin == NULL) {
-		return;
-	}
-	if (loop == _looping) {
-		return;
+// Retrieve the state of the audio
+uint8 SoundDescriptor::GetSoundState() {
+	if (_data == NULL) {
+		return AUDIO_STATE_UNLOADED;
 	}
 
-	_looping = loop;
-	if (_looping) {
-		alSourcei(_origin->source, AL_LOOPING, AL_TRUE);
-		cout << "SET LOOP!" << endl;
+	// This is needed because there is currently no guarantee if the _channel is still playing the chunk...
+	if (Mix_GetChunk(_channel) != _data->sound) {
+		return AUDIO_STATE_STOPPED;
+	}
+
+	switch(Mix_FadingChannel(_channel)) {
+		case MIX_FADING_IN:
+			return AUDIO_STATE_FADING_IN;
+		case MIX_FADING_OUT:
+			return AUDIO_STATE_FADING_OUT;
+		default: // MIX_NO_FADING
+			break;
+	}
+	
+	if (Mix_Playing(_channel) != 0) {
+		return AUDIO_STATE_PLAYING;
+	}
+
+	if (Mix_Paused(_channel) != 0) {
+		return AUDIO_STATE_PAUSED;
+	}
+
+	return AUDIO_STATE_STOPPED;
+}
+
+
+void SoundDescriptor::PlaySound() {
+	if (_data == NULL) {
+		AudioManager->_audio_errors |= AUDIO_ERROR_NO_DATA;
+		return;
+	}
+
+	if (_fade_in_time != 0) {
+		_channel = Mix_FadeInChannelTimed(ANY_CHANNEL, _data->sound, _loop_count, _fade_in_time, _play_timeout);
 	}
 	else {
-		alSourcei(_origin->source, AL_LOOPING, AL_FALSE);
+		_channel = Mix_PlayChannelTimed(ANY_CHANNEL, _data->sound, _loop_count, _play_timeout);
+	}
+
+	if (_channel == -1) {
+		AudioManager->_audio_errors |= AUDIO_ERROR_PLAY_FAILURE;
 	}
 }
 
 
-
-void SoundDescriptor::AllocateSource() {
-	if (_origin != NULL || _data == NULL) {
+void SoundDescriptor::PauseSound() {
+	if (_data == NULL) {
+		AudioManager->_audio_errors |= AUDIO_ERROR_NO_DATA;
 		return;
 	}
-	_origin = AudioManager->_AcquireSoundSource();
-	if (_origin == NULL) {
-		if (AUDIO_DEBUG) cerr << "AUDIO WARNING: Failed to allocate sound source" << endl;
-		return;
-	}
-	alSourcei(_origin->source, AL_BUFFER, _data->buffer);
-// 	alSourcef(_origin->source,  AL_PITCH,    1.0f     );
-// 	alSourcef(_origin->source,  AL_GAIN,     1.0f     );
-// 	alSourcefv(_origin->source, AL_POSITION, SourcePos);
-// 	alSourcefv(_origin->source, AL_VELOCITY, SourceVel);
-// 	alSourcei(_origin->source,  AL_LOOPING,  loop     ););
+	
+	Mix_Pause(_channel);
 }
+
+
+void SoundDescriptor::ResumeSound() {
+	if (_data == NULL) {
+		AudioManager->_audio_errors |= AUDIO_ERROR_NO_DATA;
+		return;
+	}
+	
+	Mix_Resume(_channel);
+}
+
+
+void SoundDescriptor::StopSound() {
+	if (_data == NULL) {
+		AudioManager->_audio_errors |= AUDIO_ERROR_NO_DATA;
+		return;
+	}
+	
+	if (_fade_out_time != 0) {
+		Mix_FadeOutChannel(_channel, _fade_out_time);
+	}
+	else {
+		Mix_HaltChannel(_channel);
+	}
+}
+
+
+// void SoundDescriptor::RewindSound() {}
+
+// void SoundDescriptor::FreeSound() {}
+
 
 } // namespace hoa_audio
