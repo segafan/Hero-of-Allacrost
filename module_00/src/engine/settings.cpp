@@ -59,8 +59,8 @@ bool GameSettings::Initialize() {
 	settings_data.CloseTable();
 
 	settings_data.OpenTable("audio_settings");
-	AudioManager->SetMusicVolume(settings_data.ReadFloat("music_vol"));
-	AudioManager->SetSoundVolume(settings_data.ReadFloat("sound_vol"));
+	AudioManager->SetMusicVolume(settings_data.ReadInt("music_vol"));
+	AudioManager->SetSoundVolume(settings_data.ReadInt("sound_vol"));
 	settings_data.CloseTable();
 
 	if (settings_data.GetError() != DATA_NO_ERRORS) {

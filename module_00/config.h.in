@@ -6,9 +6,6 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
-/* Define to 1 if you have the `alut' library (-lalut). */
-#undef HAVE_LIBALUT
-
 /* Define to 1 if you have the `GL' library (-lGL). */
 #undef HAVE_LIBGL
 
@@ -36,17 +33,14 @@
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
 
-/* Define to 1 if you have the `openal' library (-lopenal). */
-#undef HAVE_LIBOPENAL
-
 /* Define to 1 if you have the `SDL' library (-lSDL). */
 #undef HAVE_LIBSDL
 
+/* Define to 1 if you have the `SDL_mixer' library (-lSDL_mixer). */
+#undef HAVE_LIBSDL_MIXER
+
 /* Define to 1 if you have the `SDL_ttf' library (-lSDL_ttf). */
 #undef HAVE_LIBSDL_TTF
-
-/* Define to 1 if you have the `vorbisfile' library (-lvorbisfile). */
-#undef HAVE_LIBVORBISFILE
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H

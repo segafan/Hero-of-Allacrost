@@ -7,24 +7,19 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-/*!****************************************************************************
- * \file    audio_music.h
- * \author  Tyler Olsen, roots@allacrost.org
- * \brief   Header file for music-related code in the audio engine.
- *
- * The classes in this file are used for management and processing of all sound
- * Vorbis Ogg data.
- *
- * \note This code uses the OpenAL audio library. See http://www.openal.com/
- *
- * \note This code uses the Vorbis Ogg audio libraries. See http://www.vorbis.org/
- *****************************************************************************/
+/** ***************************************************************************
+*** \file    audio_music.h
+*** \author  Tyler Olsen, roots@allacrost.org
+*** \brief   Header file for music-related code in the audio engine.
+***
+*** The classes in this file are used for management and processing of all music
+*** data and playback.
+***
+*** \note This code uses the SDL_mixer audio library.
+*** **************************************************************************/
 
 #ifndef __AUDIO_MUSIC_HEADER__
 #define __AUDIO_MUSIC_HEADER__
-
-#include <vorbis/codec.h>
-#include <vorbis/vorbisfile.h>
 
 #include "utils.h"
 #include "defs.h"
@@ -34,134 +29,97 @@ namespace hoa_audio {
 
 namespace private_audio {
 
-//! The size (in bytes) of music buffers.
-const uint32 MUSIC_BUFFER_SIZE = 32768;
-
-//! The number of OpenAL buffers to use for each piece of music.
-const uint32 MUSIC_BUFFER_COUNT = 2;
-
-/*!****************************************************************************
- * \brief An internal class used to manage music data information.
- *
- * This class serves as a wrapper to raw audio data information loaded by OpenAL.
- * Objects of this class are managed internally by the GameAudio class and are
- * never seen by the user.
- *
- * \note 1) It is assumed that all music loaded into this class is dual-channel,
- * and hence effects such as distance attenuation can be performed on it.
- *****************************************************************************/
-class MusicBuffer {
+/** ***************************************************************************
+*** \brief An internal class used to manage music data information.
+***
+*** This class manages information about music data loaded into the application.
+*** Objects of this class are managed internally by the audio engine and are
+*** never referred to by the user.
+*** **************************************************************************/
+class MusicData {
 public:
-	MusicBuffer(std::string fname);
-	~MusicBuffer();
+	MusicData(std::string fname);
+	~MusicData();
 
 	//! The filename of the audio data the buffer holds.
 	std::string filename;
-	//! The number of MusicDescriptor objects that refer to this MusicBuffer object.
+	//! The number of MusicDescriptor objects that refer to this MusicData object.
 	uint8 reference_count;
-
-	//! A structure that defines the Ogg Vorbis file.
-	OggVorbis_File file_stream;
-	//! A pointer to a container for various information about the open Ogg Vorbis file.
-	vorbis_info* file_info;
-	//! A pointer to a structure containing comments left in the Ogg Vorbis file.
-	vorbis_comment* file_comment;
-
-	//! The buffers which will hold the streaming ogg data.
-	ALuint buffers[MUSIC_BUFFER_COUNT];
-	//! Represents the format of the Ogg Vorbis data (the number of channels and the bit-width).
-	ALenum data_format;
-
+	//! A pointer to the chunk of sound data loaded in memory.
+	Mix_Music *music;
+	
 	//! Returns true if all OpenAL buffers are valid.
 	bool IsValid();
 	//! Removes a single reference to this buffer. If the reference count becomes zero, the buffer is destroyed.
 	void RemoveReference();
-	//! This function refills a buffer with the next segment in an audio stream.
-	//! \param buff The buffer to fill with audio data. This will always be one of the elements of buffers[].
-	void RefillBuffer(ALuint buff);
 
 	//! Displays the properties of the buffered data to standard output.
 	void DEBUG_PrintProperties();
-};
-
-class MusicSource {
-public:
-	MusicSource();
-	~MusicSource();
-
-	//! The OpenAL source that this class object maintains.
-	ALuint source;
-	//! A pointer to the MusicDescriptor that currently owns this source.
-	MusicDescriptor *owner;
-	
-	/** \brief Indicates whether the source is being played or not.
-	*** \note The reason why this member is needed instead of just relying on OpenAL to tell us the state of
-	*** the source is because if a buffer under-run occurs while streaming in music data, the source will
-	*** stop playing if it does not have sufficient data, and this member allows us to detect that condition
-	*** and resume playing the music if it is needed.
-	**/
-	bool is_playing;
-
-	//! Returns true if OpenAL determines that the source is valid.
-	bool IsValid();
-	//! Removes all pending buffers from the source.
-	void EmptyStreamQueue();
-	//! Updates the buffers that are streaming data for the source to output.
-	void UpdateStreamQueue();
-	//! Displays the properties of the music source to standard output.
-	void DEBUG_PrintProperties() {}
 };
 
 } // namespace private_audio
 
 class MusicDescriptor {
 	friend class GameAudio;
-	friend class private_audio::MusicBuffer;
-	friend class private_audio::MusicSource;
-private:
-	//! A pointer to the music buffer that is used.
-	private_audio::MusicBuffer *_data;
-	//! A pointer to the music source that is used.
-	private_audio::MusicSource *_origin;
-
 public:
 	MusicDescriptor();
 	~MusicDescriptor();
 
+	//! Returns a const reference to the filename of the buffer that the source points to.
 	const std::string &GetFilename()
 		{ if (_data != NULL) return _data->filename; }
-	//! Loads the music file from memory.
-	//! \param fname The name of the file to load, without path information or file extension attached.
+	/** \brief Loads the music file from memory.
+	*** \param fname The name of the file to load, without path information or file extension attached.
+	**/
 	bool LoadMusic(std::string fname);
-	/*! \brief Frees the audio data associated with this object.
-	 *  This function will do the following: delete the MusicBuffer it refers to (as long as nothing else
-	 *  is refering to the same buffer), release and re-initialize the music source it holds.
-	 */
+	/** \brief Removes a reference to the music data.
+	*** \note It is perfectly fine to call this function when the music is playing. If that is
+	*** the case, the music will first be stopped, and then freed.
+	**/
 	void FreeMusic();
-	/*! \brief Grabs a music source for the descriptor to use.
-	 *  \note Since there is only one music source, calling this can be dangerous because another MusicDescriptor
-	 *  may currently be using the source. If that is the case, calling this function will stop the currently
-	 *  playing music abruptly.
-	 */
-	void AllocateSource();
 
-	//! \name Standard Music Functions
-	//! \brief Common methods for standard manipulation of music data.
-	//! \note When the music is paused, both PlayMusic and ResumeMusic perform the same function.
+	/** \name Standard Music Operations
+	*** \brief The basic functions that can change the state of music playback.
+	*** \note Calling these functions when the music is already in a certain state results in a no-op.
+	**/
 	//@{
 	void PlayMusic();
 	void PauseMusic();
 	void ResumeMusic();
 	void StopMusic();
 	void RewindMusic();
+	void SeekMusic(float seconds);
 	//@}
+
+	/** \brief Retrieves the state of the music
+	*** \return A value indicating the state. Refer to the audio state constants in audio.h.
+	**/
+	uint8 GetMusicState();
 
 	//! Displays the properties of the music descriptor's buffer.
 	void DEBUG_dataProperties()
 		{ if (_data != NULL) _data->DEBUG_PrintProperties(); }
-	//! Displays the properties of the music descriptor's source.
-	void DEBUG_originProperties()
-		{ if (_origin != NULL) _origin->DEBUG_PrintProperties(); }
+private:
+	//! A pointer to the music data that is used.
+	private_audio::MusicData *_data;
+	/** \brief The number of loops to play the sound for
+	*** By default this member is set to -1, meaning it plays indefinitely until it is explicitly stopped.
+	***  - A value of 0 indicates no looping (plays the sound once and then stops)
+	***  - A value of -1 indicates infinite looping (until the user tells the sound to stop)
+	**/
+	int32 _loop_count;
+	/** \brief The number of milliseconds to fade in the sound when playing begins
+	*** A value of zero means that no fade in is done (this is the default).
+	**/
+	uint32 _fade_in_time;
+	/** \brief The number of milliseconds to fade out the sound when the sound is stopped
+	*** A value of zero means that no fade out is done (this is the default).
+	**/
+	uint32 _fade_out_time;
+	/** \brief The number of milliseconds to play a sound before timing out and stopping the sound
+	*** A value of -1 indicates no time out occurs (this is the default)
+	**/
+	int32 _play_timeout;
 }; // class MusicDescriptor
 
 } // namespace hoa_audio

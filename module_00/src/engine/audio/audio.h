@@ -7,28 +7,32 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-/*!****************************************************************************
- * \file    audio.h
- * \author  Tyler Olsen, roots@allacrost.org
- * \brief   Header file for audio engine interface.
- *
- * This code provides an easy-to-use API for managing all music and sounds used
- * in the game.
- *
- * \note This code uses the OpenAL audio library. See http://www.openal.com/
- *****************************************************************************/
+/** ***************************************************************************
+*** \file    audio.h
+*** \author  Tyler Olsen, roots@allacrost.org
+*** \brief   Header file for audio engine interface.
+***
+*** This code provides an easy-to-use API for managing all music and sounds used
+*** in the game.
+***
+*** \note This code uses the SDL_mixer audio library.
+***
+*** \note The audio engine code is temporary and, in fact, not implemented
+*** very well. For example, calling the PauseMusic() function on a MusicDescriptor
+*** class object will pause the music, even if the music that is playing is not the
+*** music referenced by that class object (this is because SDL_mixer has only one
+*** playback channel allocated for music).
+*** 
+*** These issues will be addressed at a later point in time, once our team
+*** makes a decision on the direction to take with our audio engine (which 
+*** may very well not use SDL_mixer at all). Until then, proceed with caution 
+*** when using this audio engine/
+*** **************************************************************************/
 
 #ifndef __AUDIO_HEADER__
 #define __AUDIO_HEADER__
 
-#ifndef __APPLE__
-#include <AL/al.h>
-#include <AL/alc.h>
-#else
-#include <OpenAL/al.h>
-#include <OpenAL/alc.h>
-#endif // _#ifndef __APPLE__
-
+#include <SDL/SDL_mixer.h>
 
 #include "utils.h"
 #include "defs.h"
@@ -37,113 +41,56 @@
 
 namespace hoa_audio {
 
+//! The singleton pointer responsible for all audio operations.
 extern GameAudio *AudioManager;
+//! Determines whether the code in the hoa_audio namespace should print debug statements or not.
 extern bool AUDIO_DEBUG;
 
-//! \name Audio State Constants
-//! \brief Used to determine what state a sound or music piece is in.
+/** \name Audio State Constants
+*** \brief Used to determine what state a sound or music piece is in.
+**/
 //@{
-const uint8 AUDIO_STATE_UNLOADED            = 0x01;
-const uint8 AUDIO_STATE_STOPPED             = 0x02;
-const uint8 AUDIO_STATE_PAUSED              = 0x04;
-const uint8 AUDIO_STATE_PLAYING             = 0x08;
+const uint8 AUDIO_STATE_UNLOADED     = 0x01;
+const uint8 AUDIO_STATE_STOPPED      = 0x02;
+const uint8 AUDIO_STATE_PAUSED       = 0x04;
+const uint8 AUDIO_STATE_PLAYING      = 0x08;
+const uint8 AUDIO_STATE_FADING_IN    = 0x10;
+const uint8 AUDIO_STATE_FADING_OUT   = 0x20;
 //@}
 
-//! \name Audio Distance Model Constants
-//! \brief Used to set the distance model used by OpenAL.
-//! \note The default distance model is AUDIO_DISTANCE_INVERSE_CLAMPED
+/** \name Audio Playback Property Constants
+*** \brief Used to alter the manner in which sounds or music is played.
+**/
 //@{
-const uint8 AUDIO_DISTANCE_NONE             = 0x01;
-const uint8 AUDIO_DISTANCE_LINEAR           = 0x02;
-const uint8 AUDIO_DISTANCE_LINEAR_CLAMPED   = 0x04;
-const uint8 AUDIO_DISTANCE_INVERSE          = 0x08;
-const uint8 AUDIO_DISTANCE_INVERSE_CLAMPED  = 0x10;
-const uint8 AUDIO_DISTANCE_EXPONENT         = 0x20;
-const uint8 AUDIO_DISTANCE_EXPONENT_CLAMPED = 0x40;
+//! Pass this as the <b>loop</b> argument in an audio function and the music or sound will loop indefinitely.
+const int32 AUDIO_LOOP_FOREVER = -1;
+//! Pass this as the <b>loop</b> argument in an audio function and the music or sound will play only once.
+const int32 AUDIO_LOOP_ONCE = 0;
+//! Pass this as the <b>fade_time</b> argument in an audio function for no fading in or out of the audio.
+const uint32 AUDIO_NO_FADE = 0;
+//! The standard amount of time to fade in/out music (500ms). Pass this as the <b>fade_time</b> argument in an audio function.
+const uint32 AUDIO_STANDARD_FADE = 500;
 //@}
 
-//! \name Audio Error Codes
-//! \brief These are error codes that the API user can query and handle as they wish.
-//! \note The default distance model is AUDIO_INVERSE_DISTANCE_CLAMPED
+/** \name Audio Error Constants
+*** \brief Used to determine what, if any, errors occured during audio playback
+**/
 //@{
-const uint32 AUDIO_NO_ERRORS                  = 0x00000000;
-const uint32 AUDIO_OUT_OF_MEMORY              = 0x00000001;
-const uint32 AUDIO_INVALID_OPERATION          = 0x00000002;
-//! Indicates that too many sounds are being played concurrently.
-const uint32 AUDIO_SOURCE_OVERUSAGE           = 0x00000000;
-const uint32 AUDIO_SOURCE_ACQUISITION_FAILURE = 0x00000000;
+const uint32 AUDIO_ERROR_NONE          = 0x00000000;
+const uint32 AUDIO_ERROR_NO_DATA       = 0x00000001;
+const uint32 AUDIO_ERROR_PLAY_FAILURE  = 0x00000002;
 //@}
 
 namespace private_audio {
 
-//! \name {Sound/Music}Descriptor Property Constants
-//! \brief Constants used interally to check whether a property is in a default state or not.
-//@{
-const uint16 SOURCE_BAD                = 0x0000;
-const uint16 SOURCE_OK                 = 0x0001;
-const uint16 SOURCE_LOOP               = 0x0002;
-const uint16 SOURCE_GAIN               = 0x0004;
-const uint16 SOURCE_PITCH              = 0x0008;
-const uint16 SOURCE_MIN_GAIN           = 0x0010;
-const uint16 SOURCE_MAX_GAIN           = 0x0020;
-const uint16 SOURCE_MAX_DISTANCE       = 0x0040;
-const uint16 SOURCE_REFERENCE_DISTANCE = 0x0080;
-const uint16 SOURCE_ROLLOFF_FACTOR     = 0x0100;
-const uint16 SOURCE_RELATIVE           = 0x0200;
-const uint16 SOURCE_CONE_INNER_ANGLE   = 0x0400;
-const uint16 SOURCE_CONE_OUTER_ANGLE   = 0x0800;
-const uint16 SOURCE_CONE_OUTER_GAIN    = 0x1000;
-//@}
-
-/** \brief Converts the OpenAL enum error codes into a string.
-*** \param error_code The error code providing by an OpenAL function.
-*** \return A string with a brief error message.
-**/
-const std::string GetALErrorString(ALenum error_code);
-/** \brief Converts the OpenALC enum error codes into a string.
-*** \param error_code The error code providing by an OpenALC function.
-*** \return A string with a brief error message.
-**/
-const std::string GetALCErrorString(ALenum error_code);
-/** \brief Converts the ALUT enum error codes into a string.
-*** \param error_code The error code providing by a libvorbisfile function.
-*** \return A string with a brief error message.
-*** \note ALUT provides a function alutGetErrorString that does this, but the precise text description varies between implementations
-**/
-const std::string GetALUTErrorString(ALenum error_code);
-/** \brief Gets the error string corresponding to an Ogg Vorbis error code.
-*** \param error_code The error code providing by a libvorbisfile function.
-*** \return A string with a brief error message.
-**/
-const std::string GetOVErrorString(int32 error_code);
-
-/*!****************************************************************************
- * \brief An internal class used for retaining audio state information.
- *
- * When a game mode is made to be the new active game mode of the stack, sometimes
- * we will wish to retain information about the audio state. This is so that when
- * we restore the previously active state again, the audio can resume as if no interruption
- * had occured.
- *
- * This class takes a snapshot of the audio state and saves the following information:
- *  - The listener properties
- *  - The attenutation distance model
- *  - Which sources are assigned to which buffers
- *  - The source properties
- *  - The position of each audio source that was playing when the call was made.
- *****************************************************************************/
-class AudioState {
-public:
-	AudioState();
-	~AudioState();
-private:
-	ALenum _distance_model;
-	ALfloat _listener_gain;
-	ALfloat _listener_position[3];
-	ALfloat _listener_velocity[3];
-	ALfloat _listener_orientation[6];
-	friend class GameAudio;
-};
+//! The number of sound channels to open for audio mixing (music automatically has its own channel)
+const uint32 SOUND_CHANNELS = 16;
+//! Used in function calls for pausing audio, halting audio, or changing the volume
+const int32 ALL_CHANNELS = -1;
+//! When playing a sound, passing this argument will play it on any open channel
+const int32 ANY_CHANNEL = -1;
+//! The size (in number of bytes) of audio buffers
+const int32 BUFFER_SIZE = 1024;
 
 } // namespace private_audio
 
@@ -167,26 +114,13 @@ private:
  * data.
  *****************************************************************************/
 class GameAudio {
-	friend class AudioState;
-	friend class private_audio::SoundBuffer;
-	friend class private_audio::SoundSource;
+	friend class private_audio::SoundData;
 	friend class SoundDescriptor;
-	friend class private_audio::MusicBuffer;
-	friend class private_audio::MusicSource;
+	friend class private_audio::MusicData;
 	friend class MusicDescriptor;
 
 public:
 	SINGLETON_METHODS(GameAudio);
-
-	/*! \brief Updates all streaming audio queues.
-	 *
-	 *  The purpose of this function is to refill buffers that are part of a streaming audio source. It
-	 *  is vital to prevent the player from hearing jumps or skips in the audio
-	 *
-	 *  \note This function is only called from one location: the main game loop. It should not be
-	 *  called anywhere else.
-	 */
-	void Update();
 
 	/*! \brief Returns a set of error codes and also clears the error code to a no-error state.
 	 *
@@ -195,7 +129,7 @@ public:
 	 *  group.
 	 */
 	uint32 CheckErrors()
-		{ uint32 return_code; return_code = _audio_errors; _audio_errors = AUDIO_NO_ERRORS; return return_code; }
+		{ uint32 return_code; return_code = _audio_errors; _audio_errors = AUDIO_ERROR_NONE; return return_code; }
 
 	/*! \name Volume Member Access Functions
 	 *  \brief Used for reading and modifying the volume of music/sound in the game.
@@ -211,12 +145,12 @@ public:
 	 *  will effect the volume level of \c all audio heard in the game.
 	 */
 	//@{
-	float GetMusicVolume()
+	uint8 GetMusicVolume()
 		{ return _music_volume; }
-	float GetSoundVolume()
+	uint8 GetSoundVolume()
 		{ return _sound_volume; }
-	void SetMusicVolume(float vol);
-	void SetSoundVolume(float vol);
+	void SetMusicVolume(uint8 vol);
+	void SetSoundVolume(uint8 vol);
 	//@}
 
 	/*! \name Global Audio Manipulation Functions
@@ -235,24 +169,23 @@ public:
 	void RewindAudio();
 	//@}
 
-	/*! \name Global Sound Manipulation Functions
-	 *  \brief Performs specified operation on all active sounds.
-	 */
+	/** \name Global Sound Manipulation Functions
+	*** \brief Performs specified operation on all active sounds.
+	**/
 	//@{
-	//! \note Make sure to resume these sounds, otherwise the sources that they hold will never be released!
 	void PauseAllSounds();
 	void ResumeAllSounds();
 	void StopAllSounds();
-	void RewindAllSounds();
+// 	void RewindAllSounds();
 	//@}
 
-	/*! \name Global Music Manipulation Functions
-	 *  \brief Performs specified operation on all active music.
-	 *
-	 *  Since there is only one music source, these functions only affect that source. They are equivalent
-	 *  to calling the {Pause/Resume/Stop/Rewind}Music functions on the MusicDescriptor which currently
-	 *  has posession of the source.
-	 */
+	/** \name Global Music Manipulation Functions
+	*** \brief Performs specified operation on all active music.
+	***
+	*** Since there is only one music source, these functions only affect that source. They are equivalent
+	*** to calling the {Pause/Resume/Stop/Rewind}Music functions on the MusicDescriptor which currently
+	*** has posession of the source.
+	**/
 	//@{
 	void PauseAllMusic();
 	void ResumeAllMusic();
@@ -260,118 +193,48 @@ public:
 	void RewindAllMusic();
 	//@}
 
-	/*! \name Listener Property Access Functions
-	 *  \brief Functions used for reading and  modifying the properties of the listener.
-	 */
-	//@{
-// 	void GetListenerPosition(float[3] pos)
-// 		{ alGetListenerfv(AL_POSITION, pos); }
-// 	void GetListenerVelocity(float[3] vel)
-// 		{ alGetListenerfv(AL_VELOCITY, vel); }
-// 	float GetListenerGain(float gain)
-// 		{ float g; alGetListenerf(AL_GAIN, &g); return g; }
-// 	void GetListenerOrientation(float[6] ori)
-// 		{ alGetListenerfv(AL_ORIENTATION, ori); }
-// 	void SetListenerPosition(float[3] pos)
-// 		{ alListenerfv(AL_POSITION, pos); }
-// 	void SetListenerVelocity(float[3] vel)
-// 		{ alListenerfv(AL_VELOCITY, vel); }
-// 	void SetListenerGain(float gain)
-// 		{ alListenerf(AL_GAIN, gain); }
-// 	void SetListenerOrientation(float[6] ori)
-// 		{ alListenerfv(AL_ORIENTATION, ori); }
-	//@}
-
-	/*! \brief Gets a value indicating what distance model is currently being used by OpenAL.
-	 *  \return A value representing the distance model. Refer to the Audio Distance Model Constants.
-	 */
-	uint8 GetDistanceModel();
-	/*! \brief Changes the distance model that will be used by OpenAL.
-	 *  \param model A value representing the distance model. Refer to the Audio Distance Model Constants.
-	 *  \note The new distance model will immediately take effect after this call.
-	 */
-	void SetDistanceModel(uint8 model);
-
-
-
-	/*! \brief Saves the audio state onto an internal stack.
-	 *  \return
-	 *  The state data that is saved includes: properties of the listener, the distance model used for
-	 *  attenuation, and which SoundDescriptors and MusicObjects are allocated to which sources.
-	 */
-	// uint32 SaveAudioState();
-	//! Restores the audio state properties from the stack.
-	//! \param state_id The identification number of the state to retrieve.
-	// void RestoreAudioState(uint32 state_id);
-
-	//! Prints information related to the system's audio capabilities as seen by OpenAL.
+	//! Prints information related to the system's audio capabilities as reported by SDL_mixer.
 	void DEBUG_PrintInfo();
 
 private:
 	SINGLETON_DECLARE(GameAudio)
 
-	//! The audio device opened and being operated on by OpenAL.
-	ALCdevice *_device;
-	//! The OpenAL context using the device.
-	ALCcontext *_context;
-
-	//! The volume (gain) for the music source. Valid range is between 0.0f and 1.0f.
-	float _music_volume;
-	//! The volume (gain) for all sound sources. Valid range is between 0.0f and 1.0f.
-	float _sound_volume;
-
+	//! The volume level for music playback. Valid range is between 0 and 128.
+	uint8 _music_volume;
+	//! The volume level for sound playback. Valid range is between 0 and 128.
+	uint8 _sound_volume;
 	//! Retains all the errors that have occured on audio-related function calls, except for loading errors.
 	uint32 _audio_errors;
 
-	//! \name Containers for Audio Data
-	//! \brief STL maps are used to hold both music and sounds.
+	/** \name Audio Data Containers
+	*** Sound (WAV) and music (OGG) data are stored in these container classes and referenced by the SoundDescriptor
+	*** and MusicDescriptor classes. They are stored in this manner to allow for optimized memory usage (in other
+	*** words, only one instance of .wav and .ogg data can be loaded in the application at any point in time). The 
+	*** sound or music filename string serves as the map key for determining if the data is loaded or not. The key
+	*** is a reference to the filename string (which is stored in the SoundData or MusicData class itself).
+	**/
 	//@{
-	std::map<std::string, private_audio::MusicBuffer*> _music_buffers;
-	std::map<std::string, private_audio::SoundBuffer*> _sound_buffers;
+	std::map<std::string, private_audio::MusicData*> _music_data;
+	std::map<std::string, private_audio::SoundData*> _sound_data;
 	//@}
 
-	//! The single source reserved for game music.
-	private_audio::MusicSource *_music_source;
-	//! All of the sources that are reserved for sound data.
-	std::list<private_audio::SoundSource*> _sound_sources;
-
-	// //! A map of the audio states we have saved. Probably will never be more than four or five elements.
-	// std::map<uint32, private_audio::AudioState> _saved_states;
-
-	/*! \name Buffer Retrieval Functions
-	 *  \brief Creates and loads new buffer data if the data is not already loaded.
-	 *  \param filename The filename of the file data to search for (not including the pathname or file extension).
-	 *  \return A pointer to the class object holding the new data. NULL may also be returned, indicating an error.
-	 *
-	 *  These functions are critical to ensuring efficient memory usage in the audio engine (in other words:
-	 *  making sure no more than one copy of audio data is loaded into the engine at any given time). When these
-	 *  functions are called, first the map of buffer objects is searched to see if the data is already found
-	 *  in there. If it is, a pointer to that object is returned. Otherwise, the function will attempt to create
-	 *  a new object and store that into the appropriate buffer object map. If that fails for some reason, the function
-	 *  will return NULL.
-	 */
+	/** \name Audio Data Retrieval Functions
+	*** \brief Creates and loads new audio data if the data is not already loaded.
+	*** \param filename The filename of the file data to search for (not including the pathname or file extension).
+	*** \return A pointer to the class object holding the new data. NULL may also be returned, indicating an error.
+	***
+	*** These functions are critical to ensuring efficient memory usage in the audio engine (in other words:
+	*** making sure no more than one copy of audio data is loaded into the engine at any given time). When these
+	*** functions are called, first the map of audio data objects is searched to see if the data is already found
+	*** in there. If it is, a pointer to that object is returned. Otherwise, the function will attempt to create
+	*** a new object and store that into the appropriate data object map. If that fails for some reason, the function
+	*** will return NULL.
+	**/
 	//@{
-	private_audio::SoundBuffer* _AcquireSoundBuffer(std::string filename);
-	private_audio::MusicBuffer* _AcquireMusicBuffer(std::string filename);
+	private_audio::SoundData* _AcquireSoundData(std::string filename);
+	private_audio::MusicData* _AcquireMusicData(std::string filename);
 	//@}
 
-	/*! \name Source Acquisition Functions
-	 *  \brief Retrieves an audio source that may be used for
-	 *  \return A pointer to a sound source that may be allocated. NULL may also be returned, indicating an error.
-	 */
-	//@{
-	private_audio::SoundSource* _AcquireSoundSource();
-	private_audio::MusicSource* _AcquireMusicSource();
-	//@}
-
-	/*! \name Source Release Functions
-	 *  \brief Releases an audio source from being allocated to a descriptor object.
-	 *  \param free_source A pointer to the audio source to free.
-	 */
-	//@{
-	void _ReleaseSoundSource(private_audio::SoundSource* free_source);
-	void _ReleaseMusicSource(private_audio::MusicSource* free_source);
-	//@}
 }; // class GameAudio
 
 } // namespace hoa_audio

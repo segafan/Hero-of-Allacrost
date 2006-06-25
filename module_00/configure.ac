@@ -2,7 +2,7 @@ dnl                                               -*- Autoconf -*-
 dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(Hero of Allacrost, 0.1, bugs@allacrost.org, allacrost)
+AC_INIT(Hero of Allacrost, 0.0.1, bugs@allacrost.org, allacrost)
 AC_CONFIG_SRCDIR([src/main.cpp])
 AC_CONFIG_HEADER([config.h])
 AM_INIT_AUTOMAKE
@@ -48,8 +48,11 @@ fi
 AM_CONDITIONAL([COND_EDITOR], [test "$enable_editor" = yes])
 
 dnl Check for libraries.
-AC_CHECK_LIB([openal], [alGetError], [], \
-	[echo "You need to install the OpenAL library."
+#AC_CHECK_LIB([openal], [alGetError], [], \
+#	[echo "You need to install the OpenAL library."
+#	 exit -1])
+AC_CHECK_LIB([SDL_mixer], [Mix_OpenAudio], [], \
+	[echo "You need to install the SDL_Mixer library."
 	 exit -1])
 AC_CHECK_LIB([GL], [glEnable], [], \
 	[echo "You need to install the GL library."
@@ -80,10 +83,10 @@ AC_CHECK_LIB([lualib50], [luaopen_table], [], \
 AC_CHECK_LIB([m], [log], [], \
 	[echo "You need to install the math library."
 	 exit -1])
-AC_CHECK_LIB([alut], [alutInit], [], \
-	[echo "You should install the ALUT library for maximum performance."])
-AC_CHECK_LIB([vorbisfile], [ov_open], [], \
-	[echo "You should install the ALUT library for maximum performance."])
+#AC_CHECK_LIB([alut], [alutInit], [], \
+#	[echo "You should install the ALUT library for maximum performance."])
+#AC_CHECK_LIB([vorbisfile], [ov_open], [], \
+#	[echo "You should install the ALUT library for maximum performance."])
 
 dnl Checks for header files.
 AC_HEADER_STDC
