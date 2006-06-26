@@ -71,6 +71,7 @@ MapSprite::MapSprite() {
 	wait_time = 0;
 	next_conversation = 0;
 	current_action = 0;
+	portrait = NULL;
 }
 
 
@@ -84,6 +85,11 @@ MapSprite::~MapSprite() {
 
 	for (uint32 i = 0; i < dialogues.size(); i++) {
 		delete(dialogues[i]);
+	}
+
+	if (portrait != NULL) {
+		VideoManager->DeleteImage(*portrait);
+		portrait = NULL;
 	}
 }
 
@@ -161,6 +167,9 @@ void MapSprite::SaveState() {
 	saved_valid = true;
 	saved_status = status;
 	saved_frame = frame;
+
+	status |= IN_CONVERSATION;
+	status &= ~IN_MOTION;
 }
 
 
@@ -413,37 +422,39 @@ void MapSprite::Move(uint16 move_direction) {
 
 // Updates the status of the sprite
 void MapSprite::Update() {
-	if (status & IN_MOTION) {
-		step_count += static_cast<float>(current_map->_time_elapsed);
+	if (!(status & IN_CONVERSATION)) {
+		if (status & IN_MOTION) {
+			step_count += static_cast<float>(current_map->_time_elapsed);
 
-		// Check whether we've reached a new tile and if so, update accordingly.
-		if (step_count >= step_speed) {
-			step_count -= step_speed;
-			status &= ~IN_MOTION;
-			status ^= STEP_SWAP; // This flips the step_swap bit
+			// Check whether we've reached a new tile and if so, update accordingly.
+			if (step_count >= step_speed) {
+				step_count -= step_speed;
+				status &= ~IN_MOTION;
+				status ^= STEP_SWAP; // This flips the step_swap bit
 
-			// ************************ Check For Tile Arrival Event ***********************
-			if (current_map->_tile_layers[row_position][col_position].arrive_event != 255) {
-				// Look-up and process the event associated with the tile.
-				cout << "Tile has an arrival event." << endl;
+				// ************************ Check For Tile Arrival Event ***********************
+				if (current_map->_tile_layers[row_position][col_position].arrive_event != 255) {
+					// Look-up and process the event associated with the tile.
+					cout << "Tile has an arrival event." << endl;
+				}
+
+				// Process the next action, which may be another tile move.
+				if (!actions.empty()) {
+					actions[current_action]->Process();
+				}
+
+				// If the sprite isn't going to move to another tile, reset the step offset to 0.0f
+				if (!(status & IN_MOTION)) {
+					step_count = 0.0f;
+				}
 			}
+		}
 
-			// Process the next action, which may be another tile move.
+		// Sprite is not in motion, process the sprite's action.
+		else {
 			if (!actions.empty()) {
 				actions[current_action]->Process();
 			}
-
-			// If the sprite isn't going to move to another tile, reset the step offset to 0.0f
-			if (!(status & IN_MOTION)) {
-				step_count = 0.0f;
-			}
-		}
-	}
-
-	// Sprite is not in motion, process the sprite's action.
-	else {
-		if (!actions.empty()) {
-			actions[current_action]->Process();
 		}
 	}
 }
@@ -502,7 +513,9 @@ void MapSprite::Draw() {
 
 		// TODO: Determine if the sprite is off-screen and if so, don't draw it.
 	VideoManager->Move(x_draw, y_draw);
-	FindFrame();
+	if (!(status & IN_CONVERSATION)) {
+		FindFrame();
+	}
 	VideoManager->DrawImage(frames[frame]);
 }
 

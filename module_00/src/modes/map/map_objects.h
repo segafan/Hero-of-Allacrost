@@ -121,6 +121,8 @@ const uint16 UPDATEABLE         = 0x0004;
 const uint16 VISIBLE            = 0x0008;
 //! If this bit is set to one, we continue to draw this object even when it is not in context.
 const uint16 ALWAYS_IN_CONTEXT  = 0x0010;
+//! This is for detecting whether the sprite is currently having a comversation.
+const uint16 IN_CONVERSATION    = 0x0020;
 //@}
 
 /*! \name Sprite Animation Vector Access Constants
@@ -223,7 +225,7 @@ public:
 	int16 GetRowPosition() { return row_position; }
 	int16 GetColPosition() { return col_position; }
 	uint8 GetAltitude() { return altitude; }
-	uint16 GetStatus() {return status; }
+	uint16 GetStatus() { return status; }
 	//@}
 
 	/*!
@@ -276,6 +278,8 @@ public:
 	std::string filename;
 	//! An identification number for the sprite.
 	uint32 sprite_id;
+	//! A pointer to the portrait of the sprite, as seen in dialogues and menus.
+	hoa_video::StillImage* portrait;
 
 	//! A bit-mask for various information regarding the sprite's draw orientation.
 	uint16 direction;
@@ -362,7 +366,7 @@ public:
 	void SaveState();
 	//! Restores the status and frame of the sprite (primarily used for dialogues).
 	void RestoreState();
-	// TODO: bool SeenAllDialogue() { return _see_all_dialogue; }
+	// TODO: bool SeenAllDialogue() { return seen_all_dialogue; }
 	
 	//! Increases the sprite's conversation index.
 	void UpdateConversationCounter();
@@ -379,6 +383,7 @@ public:
 	void SetName(hoa_utils::ustring na) { name = na; }
 	void SetID(uint8 id) { sprite_id = id; }
 	void SetFilename(std::string fn) { filename = fn; }
+	void SetPortrait(std::string pn) { portrait = new hoa_video::StillImage(); portrait->SetFilename(pn); hoa_video::VideoManager->LoadImage(*portrait); }
 	void SetDirection(uint16 di) { direction = di; }
 	void SetStepSpeed(float sp) { step_speed = sp; }
 	void SetDelayTime(uint32 delay) { delay_time = delay; }
