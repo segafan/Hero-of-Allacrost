@@ -91,6 +91,14 @@ int32 main(int32 argc, char *argv[]) {
 	VideoManager->SetFontShadowYOffset("default", -2);
 	VideoManager->SetFontShadowStyle("default", VIDEO_TEXT_SHADOW_BLACK);
 
+	if (!VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "map", 16)) {
+		return 1;
+	}
+
+	VideoManager->SetFontShadowXOffset("map", 1);
+	VideoManager->SetFontShadowYOffset("map", -1);
+	VideoManager->SetFontShadowStyle("map", VIDEO_TEXT_SHADOW_BLACK);
+
 	if (!AudioManager->Initialize()) {
 		cerr << "ERROR: unable to initialize AudioManager" << endl;
 		return 1;

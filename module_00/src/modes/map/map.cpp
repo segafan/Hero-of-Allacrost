@@ -89,7 +89,8 @@ MapMode::~MapMode() {
 		delete(_ground_objects[i]);
 	}
 
-	// Free up the dialogue menu
+	// Free up the dialogue window
+	VideoManager->DeleteImage(_dialogue_box);
 	_dialogue_window.Destroy();
 }
 
@@ -124,10 +125,13 @@ void MapMode::LoadMap() {
 	_dialogue_window.SetPosition(0.0f, 512.0f);
 // 	_dialogue_window.SetDisplayMode(VIDEO_MENU_EXPAND_FROM_CENTER);
 	
+	_dialogue_box.SetFilename("img/menus/black_sleet_npnt.png");
+	VideoManager->LoadImage(_dialogue_box);
+	
 	_dialogue_textbox.SetDisplaySpeed(30);
-	_dialogue_textbox.SetPosition(0.0f + 40.0f, 512.0f + 40.0f);
-	_dialogue_textbox.SetDimensions(1024.0f - 80.0f, 256.0f - 80.0f);
-	_dialogue_textbox.SetFont("default");
+	_dialogue_textbox.SetPosition(0.0f + 304.0f, 512.0f + 80.0f);
+	_dialogue_textbox.SetDimensions(1024.0f - 384.0f, 256.0f - 80.0f);
+	_dialogue_textbox.SetFont("map");
 	_dialogue_textbox.SetDisplayMode(VIDEO_TEXT_INSTANT);
 	_dialogue_textbox.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	VideoManager->PopState();
@@ -316,6 +320,7 @@ void MapMode::LoadMap() {
 	sp->SetAltitude(1);
 	sp->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
 	sp->SetFilename("img/sprites/map/laila");
+	sp->SetPortrait("img/portraits/Laila-Final-Ingame-ver2.png");
 	sp->SetDirection(SOUTH);
 	sp->LoadFrames();
 	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied |= sp->GetAltitude();
@@ -379,6 +384,7 @@ void MapMode::LoadMap() {
 	sp->SetAltitude(1);
 	sp->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
 	sp->SetFilename("img/sprites/map/marcus");
+	sp->SetPortrait("img/portraits/Laila-Father-ingame.png");
 	sp->SetDirection(WEST);
 	sp->LoadFrames();
 	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied |= sp->GetAltitude();
@@ -717,6 +723,7 @@ void MapMode::_FindPath(/*const*/ TileNode& destination, vector<TileNode> &path)
 		destination.row = path[0].row;
 		destination.col = path[0].col;
 		destination.altitude = path[0].altitude;
+		return;
 	}
 
 	// This is the altitude to use for finding the path
@@ -1032,6 +1039,19 @@ void MapMode::_UpdateExplore() {
 					MapSprite *sprite = dynamic_cast<MapSprite*>(obj);
 					if (sprite->dialogues.size() != 0) {
 						_map_state = DIALOGUE;
+						sprite->SaveState();
+						if (tcheck.row - _focused_object->row_position > 0) {
+							sprite->frame = UP_STANDING;
+						}
+						else if (tcheck.row - _focused_object->row_position < 0) {
+							sprite->frame = DOWN_STANDING;
+						}
+						else if (tcheck.col - _focused_object->col_position > 0) {
+							sprite->frame = LEFT_STANDING;
+						}
+						else {
+							sprite->frame = RIGHT_STANDING;
+						}
 						_dialogue_window.Show();
 						_current_dialogue = dynamic_cast<MapDialogue*>(sprite->dialogues[sprite->next_conversation]);
 // 						if (_current_dialogue == NULL) {
@@ -1308,14 +1328,23 @@ void MapMode::Draw() {
 			(_sky_objects[i])->Draw();
 		}
 	}
-	
-	VideoManager->SetFog(Color::gray, 0.5f);
-	
+
 	// ************** (8) Draw the dialogue menu and text *************
 	if (_map_state == DIALOGUE) {
 		VideoManager->PushState();
 		VideoManager->SetCoordSys(0, 1024, 768, 0);
-		_dialogue_window.Draw();
+//		_dialogue_window.Draw();
+		VideoManager->Move(0.0f, 768.0f);
+		_dialogue_box.Draw();
+		if (_sprites[_current_dialogue->speakers[_current_dialogue->current_line]]->portrait != NULL) {
+			VideoManager->Move(80.0f, 732.0f);
+			_sprites[_current_dialogue->speakers[_current_dialogue->current_line]]->portrait->Draw();
+		}
+		VideoManager->Move(144.0f, 724.0f);
+		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, 0);
+		VideoManager->SetTextColor(Color(Color::black));
+		VideoManager->SetFont("map");
+		VideoManager->DrawText(_sprites[_current_dialogue->speakers[_current_dialogue->current_line]]->name);
 		_dialogue_textbox.Draw();
 		VideoManager->PopState();
 	}

@@ -307,8 +307,8 @@ private:
 	//! The sounds that the map needs available.
 	std::vector<hoa_audio::SoundDescriptor> _map_sounds;
 
-	//! The dialogue menu used by map mode.
-	hoa_video::StillImage _dialogue_menu;
+	//! The dialogue box used by map mode.
+	hoa_video::StillImage _dialogue_box;
 	//! The window for sprite dialogues.
 	hoa_video::MenuWindow _dialogue_window;
 	//! The textbox for sprite dialogues.
