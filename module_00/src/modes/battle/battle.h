@@ -171,10 +171,8 @@ class Actor {
 		bool _is_move_capable;
 		//! Tells if the character is alive or dead
 		bool _is_alive;
-		//! The next action to perform
-		Action *_next_action;
-		//! Are we performing the action right now?
-		bool _performing_action;
+                //! Is the character attacking or queued to?
+                bool _is_queued_to_perform;
                 //! Are we warming up for the action?
                 uint32 _warmup_time;
                 //! Are we cooling down from an action?
@@ -218,20 +216,19 @@ class Actor {
                 //@}
 		
 		/*!
-			\brief Set the next action, action related methods
-		*/
-                //@{
-		void SetNextAction(Action * const ANextAction);
-		void PerformAction();
-		bool HasNextAction() const;
-                //@}
-		
-		/*!
 			\brief Is the player frozen, asleep, et cetera?
 		*/
                 //@{
 		bool IsMoveCapable() const;
 		void SetMoveCapable(bool AMoveCapable);
+                //@}
+                
+                /*!
+                        \brief Is the character already performing an action?
+                */
+                //@{
+                bool IsQueuedToPerform() const;
+                void SetQueuedToPerform(bool AQueuedToPerform);
                 //@}
 		
 		/*!
@@ -248,14 +245,6 @@ class Actor {
                 //@{
                 bool IsInDefensiveMode() const;		
 		void SetDefensiveBonus(uint32 ADefensiveBonus);
-                //@}
-
-		/*!
-			\brief If we are currently performing an action we can't do anything else on the update
-		*/
-                //@{
-		bool IsPerformingAction() const;
-		void SetPerformingAction(bool AIsPerforming);
                 //@}
                 
                 virtual void SetAnimation(std::string AAnimation);
@@ -327,11 +316,13 @@ class BattleUI {
 		//! The battlemode we belong to
 		BattleMode *_battle_mode;
 		//! The current actor we have clicked on
-		Actor *_currently_selected_actor;
+		PlayerActor *_currently_selected_player_actor;
                 //! Character index of the currently selected actor
-                int _player_character_index;
+                int _actor_index;
+                //! Argument selector
+                int _argument_actor_index;
 		//! The actors we have selected as arguments
-		std::list<Actor *> _currently_selected_argument_actors;
+		std::deque<Actor *> _currently_selected_argument_actors;
 		//! A stack of menu selections we have gone through
 		std::deque<uint32> _currently_selected_menu_item;
 		//! The number of selections that must be made for an action
@@ -348,6 +339,8 @@ class BattleUI {
                 uint32 _general_menu_cursor_location;
                 //! The sub menu.  Recreated every time it is chosen
                 hoa_video::OptionBox *_sub_menu;
+                //! The "loser" - menu
+                hoa_video::OptionBox _battle_lose_menu;
                 //! The selected cursor
                 hoa_video::StillImage _player_selector_image;
 		
@@ -372,17 +365,12 @@ class BattleUI {
 		/*!
 			\brief Get other people selected
 		*/
-		std::list<Actor *> GetSelectedArgumentActors() const;
+		std::deque<Actor *> GetSelectedArgumentActors() const;
 		
 		/*!
 			\brief The actor we just selected is now an argument
 		*/
 		void SetActorAsArgument(Actor * const AActor);
-		
-		/*!
-			\brief No longer do we want this actor as an argument
-		*/
-		void RemoveActorAsArgument(Actor * const AActor);
 		
 		/*!
 			\brief Sets the number of arguments we should be allowing
@@ -505,33 +493,15 @@ class EnemyActor : public Actor {
 	Action is fairly self explainatory.  They are verbs an actor can take:
 	use item, use a skill, swap with another actor on their team, et cetera.
 */
-class Action {
-	private:
-		//! The Host
-		Actor *_host;
-		//! A list of argument actors for the action
-		std::vector<Actor *> _arguments;
-                
-                std::string _skill_name;
-
-	public:
-		Action(Actor * const AHostActor, std::vector<Actor *> AArguments, const std::string ASkillName);
-		virtual ~Action();
-		
-		Actor * const GetHost() const;
-		const std::vector<Actor *> GetArguments() const;
-				
-		const std::string GetSkillName() const;
-};
 
 class ScriptEvent {
         private:
                 std::string _script_name;
                 Actor *_host;
-                std::list<Actor *> _arguments;
+                std::deque<Actor *> _arguments;
         
         public:
-                ScriptEvent(Actor *AHost, std::list<Actor *> AArguments, std::string AScriptName);
+                ScriptEvent(Actor *AHost, std::deque<Actor *> AArguments, std::string AScriptName);
                 ~ScriptEvent();
                 void RunScript();
                 
@@ -565,14 +535,17 @@ private:
 	std::deque<private_battle::EnemyActor *> _enemy_actors;
 	std::deque<private_battle::PlayerActor *> _players_characters_in_battle;
 	
-	//! a queue of actors trying to perform actions
-	std::list<private_battle::Actor *> _action_queue;
-	
         //! a queue of scripted events to perform
         std::list<private_battle::ScriptEvent> _script_queue;
         
 	//! the user interface belonging to this battle mode
 	private_battle::BattleUI _user_interface;
+        
+	//! Is the battle over
+	bool _battle_over;
+
+	//! if _battle_over == true the battle was either won or lost
+	bool _victorious_battle;
 	
 	//! Is an action being performed?
 	bool _performing_script;
@@ -591,10 +564,6 @@ private:
 	
 	//!Are we performing an action
 	bool _IsPerformingScript();
-        
-        void _PlayerVictory();
-        
-        void _PlayerDefeat();
         
         void _TEMP_LoadTestData();
         
@@ -617,12 +586,6 @@ public:
 	
 	//! \brief Sets T/F whether an action is being performed
 	void SetPerformingScript(bool AIsPerforming);
-	
-	//! \brief Adds an actor waiting to perform an action to the queue.
-	void AddToActionQueue(private_battle::Actor *AActorToAdd);
-	
-	//! \brief Removes an actor from the action queue (perhaps they died, et cetera)
-	void RemoveFromActionQueue(private_battle::Actor *AActorToRemove);
         
         //! \brief Added a scripted event to the queue
         void AddScriptEventToQueue(private_battle::ScriptEvent AEventToAdd);
@@ -634,13 +597,28 @@ public:
 	std::deque<private_battle::PlayerActor *> ReturnCharacters() const;
         
         //! \brief The number of players alive
-        int NumberOfPlayerCharactersAlive();
+        uint32 NumberOfPlayerCharactersAlive();
+        
+	//! Is the battle over?
+	bool IsBattleOver();
+	//! Was the battle victorious?
+	bool IsVictorious();
+        //! \brief Victory stuff
+        void PlayerVictory();
+        //! \brief Defeat stuff
+        void PlayerDefeat();
+        
+        uint32 GetNumberOfPlayerCharacters();
+        uint32 GetNumberOfEnemyActors();
+        uint32 GetIndexOfFirstAliveEnemy();
+        uint32 GetIndexOfFirstIdleCharacter();
         
         //! \brief Return the player character at the deque location 'index'
         private_battle::PlayerActor* GetPlayerCharacterAt(int AIndex) const;
+        private_battle::EnemyActor* BattleMode::GetEnemyActorAt(int AIndex) const;
         
         //! \brief Returns the index of a player character 
-        int IndexLocationOfPlayerCharacter(private_battle::PlayerActor * const AActor);
+        uint32 IndexLocationOfPlayerCharacter(private_battle::PlayerActor * const AActor);
         
         //! \brief Swap a character from _player_actors to _player_actors_in_battle
         // This may become more complicated if it is done in a wierd graphical manner
