@@ -302,6 +302,7 @@ void MapMode::LoadMap() {
 	sp->SetAltitude(ALTITUDE_1);
 	sp->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
 	sp->SetFilename("img/sprites/map/claudius");
+	sp->SetPortrait("img/portraits/Claudius-ingame.png");
 	sp->SetDirection(SOUTH);
 	sp->LoadFrames();
 	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied |= sp->GetAltitude();
@@ -320,7 +321,7 @@ void MapMode::LoadMap() {
 	sp->SetAltitude(1);
 	sp->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
 	sp->SetFilename("img/sprites/map/laila");
-	sp->SetPortrait("img/portraits/Laila-Final-Ingame-ver2.png");
+	sp->SetPortrait("img/portraits/Laila-Final-Ingame-ver3.png");
 	sp->SetDirection(SOUTH);
 	sp->LoadFrames();
 	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied |= sp->GetAltitude();
@@ -1336,12 +1337,12 @@ void MapMode::Draw() {
 //		_dialogue_window.Draw();
 		VideoManager->Move(0.0f, 768.0f);
 		_dialogue_box.Draw();
+		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, 0);
 		if (_sprites[_current_dialogue->speakers[_current_dialogue->current_line]]->portrait != NULL) {
-			VideoManager->Move(80.0f, 732.0f);
+			VideoManager->Move(144.0f, 712.0f);
 			_sprites[_current_dialogue->speakers[_current_dialogue->current_line]]->portrait->Draw();
 		}
 		VideoManager->Move(144.0f, 724.0f);
-		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, 0);
 		VideoManager->SetTextColor(Color(Color::black));
 		VideoManager->SetFont("map");
 		VideoManager->DrawText(_sprites[_current_dialogue->speakers[_current_dialogue->current_line]]->name);
