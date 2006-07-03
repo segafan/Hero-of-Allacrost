@@ -215,6 +215,7 @@ BattleUI::BattleUI(BattleMode * const ABattleMode) :
         _currently_selected_player_actor(NULL),
         _necessary_selections(0),
         _current_hover_selection(0),
+        _current_map_selection(0),
         _number_menu_items(0),
         _cursor_state(CURSOR_ON_PLAYER_CHARACTERS),
         _sub_menu(NULL)
@@ -341,10 +342,10 @@ void BattleUI::Draw() {
 		return;
 	}
 
-        if(_cursor_state != CURSOR_ON_PLAYER_CHARACTERS) {
+        if(_cursor_state > CURSOR_ON_PLAYER_CHARACTERS) {
            _general_menu.Draw();
         }
-        if(_cursor_state == CURSOR_ON_SUB_MENU && _sub_menu) {
+        if(_cursor_state >= CURSOR_ON_SUB_MENU && _sub_menu) {
                 _sub_menu->Draw();
         }
         
@@ -362,6 +363,21 @@ void BattleUI::Draw() {
                 EnemyActor *e = _battle_mode->GetEnemyActorAt(_argument_actor_index);
                 VideoManager->Move(e->GetXLocation()-20, e->GetYLocation()-20);
                 _player_selector_image.Draw();
+        }
+}
+
+void BattleUI::DrawTopElements() {
+        if(_cursor_state == CURSOR_ON_SELECT_MAP) {
+                EnemyActor *e = _battle_mode->GetEnemyActorAt(_argument_actor_index);
+                std::vector<GlobalAttackPoint*> global_attack_points = e->GetAttackPoints();
+                
+                VideoManager->Move(e->GetXLocation() + global_attack_points[_current_map_selection]->GetXPosition(), e->GetYLocation() + global_attack_points[_current_map_selection]->GetYPosition());
+                VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_TOP, 0);
+                VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+                VideoManager->DrawImage(*(VideoManager->GetDefaultCursor()));
+                VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
+                Color c(0.0f, 0.0f, 1.0f, 1.0f);
+                TEMP_Draw_Text(c, e->GetXLocation()-20, e->GetYLocation()+100, global_attack_points[_current_map_selection]->GetName());
         }
 }
 
@@ -615,6 +631,20 @@ void BattleUI::Update(uint32 AUpdateTime) {
                         }
                 }
                 else if( InputManager->ConfirmPress() ) {
+                        _cursor_state = CURSOR_ON_SELECT_MAP;
+                        _current_map_selection = 0;
+                }
+        
+                else if( InputManager->CancelPress() ) {
+                        _cursor_state = CURSOR_ON_SUB_MENU;
+                }
+        }
+        else if(_cursor_state == CURSOR_ON_SELECT_MAP) {
+                EnemyActor *e = _battle_mode->GetEnemyActorAt(_argument_actor_index);
+                std::vector<GlobalAttackPoint*> global_attack_points = e->GetAttackPoints();
+
+
+                if(InputManager->ConfirmPress()) {
                         SetActorAsArgument(dynamic_cast<Actor *>(_battle_mode->GetEnemyActorAt(_argument_actor_index)));
                         if( GetSelectedArgumentActors().size() == _necessary_selections) {
                                 _battle_mode->AddScriptEventToQueue(ScriptEvent(_currently_selected_player_actor, GetSelectedArgumentActors(), "sword_swipe"));
@@ -622,14 +652,32 @@ void BattleUI::Update(uint32 AUpdateTime) {
                                 _currently_selected_player_actor->SetQueuedToPerform(true);
                                 
                                 _currently_selected_argument_actors.clear();
-                                
+                        
                                 _actor_index = _battle_mode->GetIndexOfFirstIdleCharacter();
                                 _cursor_state = CURSOR_ON_PLAYER_CHARACTERS;
                         }
+                        else {
+                                _cursor_state = CURSOR_SELECT_TARGET;
+                        }
                 }
-        
-                else if( InputManager->CancelPress() ) {
-                        _cursor_state = CURSOR_ON_SUB_MENU;
+                else if(InputManager->UpPress() || InputManager->RightPress()) {
+                        if(_current_map_selection < global_attack_points.size() - 1) {
+                                _current_map_selection++;
+                        }
+                        else if(_current_map_selection == global_attack_points.size() - 1) {
+                                _current_map_selection = 0;
+                        }
+                }
+                else if(InputManager->DownPress() || InputManager->LeftPress()) {
+                        if(_current_map_selection > 0) {
+                                _current_map_selection--;
+                        }
+                        else if(_current_map_selection == 0) {
+                                _current_map_selection = global_attack_points.size() - 1;
+                        }
+                }
+                else if(InputManager->CancelPress()) {
+                        _cursor_state = CURSOR_SELECT_TARGET;
                 }
         }
 }
@@ -721,7 +769,7 @@ const std::string PlayerActor::GetName() const {
         return _wrapped_character->GetName();
 }
 
-const std::vector<GlobalAttackPoint> PlayerActor::GetAttackPoints() const {
+const std::vector<GlobalAttackPoint *> PlayerActor::GetAttackPoints() const {
         return _wrapped_character->GetAttackPoints();
 }
 
@@ -921,7 +969,7 @@ const std::string EnemyActor::GetName() const {
         return _wrapped_enemy.GetName();
 }
 
-const std::vector<GlobalAttackPoint> EnemyActor::GetAttackPoints() const {
+const std::vector<GlobalAttackPoint*> EnemyActor::GetAttackPoints() const {
         return _wrapped_enemy.GetAttackPoints();
 }
 
@@ -1193,9 +1241,11 @@ void BattleMode::Update() {
 
 //! Wrapper function that calls different draw functions depending on the battle state.
 void BattleMode::Draw() {
+        VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
         _DrawBackground();
         _user_interface.Draw();
         _DrawCharacters();
+        _user_interface.DrawTopElements();
 }
 
 void BattleMode::_DrawBackground() {
@@ -1377,8 +1427,8 @@ uint32 BattleMode::GetNumberOfEnemyActors() {
         return _enemy_actors.size();
 }
 
-uint32 BattleMode::GetIndexOfFirstAliveEnemy() {
-        uint32 index = -1;
+int32 BattleMode::GetIndexOfFirstAliveEnemy() {
+        int32 index = -1;
         
         std::deque<private_battle::EnemyActor *>::iterator it = _enemy_actors.begin();
         for(uint32 i = 0; it != _enemy_actors.end(); i++, it++) {
@@ -1390,8 +1440,8 @@ uint32 BattleMode::GetIndexOfFirstAliveEnemy() {
         return index;
 }
 
-uint32 BattleMode::GetIndexOfFirstIdleCharacter() {
-        int index = -1;
+int32 BattleMode::GetIndexOfFirstIdleCharacter() {
+        int32 index = -1;
         
         std::deque<private_battle::PlayerActor *>::iterator it = _players_characters_in_battle.begin();
         for(uint32 i = 0 ; it != _players_characters_in_battle.end(); i++, it++) {
@@ -1404,16 +1454,16 @@ uint32 BattleMode::GetIndexOfFirstIdleCharacter() {
         return index;
 }
 
-private_battle::PlayerActor* BattleMode::GetPlayerCharacterAt(int AIndex) const {
+private_battle::PlayerActor* BattleMode::GetPlayerCharacterAt(uint32 AIndex) const {
         return _players_characters_in_battle[AIndex];
 }
 
-private_battle::EnemyActor* BattleMode::GetEnemyActorAt(int AIndex) const {
+private_battle::EnemyActor* BattleMode::GetEnemyActorAt(uint32 AIndex) const {
         return _enemy_actors[AIndex];
 }
 
-uint32 BattleMode::IndexLocationOfPlayerCharacter(private_battle::PlayerActor * const AActor) {
-        int index = 0;
+int32 BattleMode::IndexLocationOfPlayerCharacter(private_battle::PlayerActor * const AActor) {
+        int32 index = 0;
         std::deque<private_battle::PlayerActor *>::iterator it = _players_characters_in_battle.begin();
         for(; it != _players_characters_in_battle.end(); it++) {
                 if(*it == AActor) {
