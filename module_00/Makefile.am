@@ -1,8 +1,8 @@
-EXTRA_DIST = configure dat fnt img mus snd
+EXTRA_DIST = configure dat img mus snd
 ACLOCAL_AMFLAGS = -I m4
 INCLUDES = \
 	-I/usr/include/SDL \
-	-I$(top_srcdir)/src/ \
+	-I$(top_srcdir)/src \
 	-I$(top_srcdir)/src/engine \
 	-I$(top_srcdir)/src/engine/audio \
 	-I$(top_srcdir)/src/engine/video \
