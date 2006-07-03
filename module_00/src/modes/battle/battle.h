@@ -254,7 +254,7 @@ class Actor {
 		*/
                 //@{
 		virtual const std::string GetName() const = 0;
-		virtual const std::vector<hoa_global::GlobalAttackPoint> GetAttackPoints() const = 0;
+		virtual const std::vector<hoa_global::GlobalAttackPoint*> GetAttackPoints() const = 0;
 		virtual uint32 GetHealth() const = 0;
 		virtual void SetHealth(uint32 hp) = 0;
 		virtual uint32 GetMaxHealth() const = 0;
@@ -310,7 +310,8 @@ class BattleUI {
                         CURSOR_ON_ENEMY_CHARACTERS = 1,
                         CURSOR_ON_MENU = 2,
                         CURSOR_ON_SUB_MENU = 3,
-                        CURSOR_SELECT_TARGET = 4
+                        CURSOR_SELECT_TARGET = 4,
+                        CURSOR_ON_SELECT_MAP = 5
                 };
                 
 		//! The battlemode we belong to
@@ -318,9 +319,9 @@ class BattleUI {
 		//! The current actor we have clicked on
 		PlayerActor *_currently_selected_player_actor;
                 //! Character index of the currently selected actor
-                int _actor_index;
+                int32 _actor_index;
                 //! Argument selector
-                int _argument_actor_index;
+                int32 _argument_actor_index;
 		//! The actors we have selected as arguments
 		std::deque<Actor *> _currently_selected_argument_actors;
 		//! A stack of menu selections we have gone through
@@ -329,6 +330,8 @@ class BattleUI {
 		uint32 _necessary_selections;
 		//! The menu item we are hovering over
 		uint32 _current_hover_selection;
+                //! The current MAP we are pointing to
+                uint32 _current_map_selection;
 		//! The number of items in this menu
 		uint32 _number_menu_items;
                 //! The state of our cursor
@@ -391,6 +394,7 @@ class BattleUI {
                         \brief Draw the GUI images
                 */
                 void Draw();
+                void DrawTopElements();
                 
                 /*!
                         \brief Update player info
@@ -425,7 +429,7 @@ class PlayerActor : public Actor {
 		*/
                 //@{
 		const std::string GetName() const;
-		const std::vector<hoa_global::GlobalAttackPoint> GetAttackPoints() const;
+		const std::vector<hoa_global::GlobalAttackPoint*> GetAttackPoints() const;
 		uint32 GetHealth() const;
 		void SetHealth(uint32 AHealth);
 		uint32 GetMaxHealth() const;
@@ -472,7 +476,7 @@ class EnemyActor : public Actor {
 		const std::vector<hoa_global::GlobalSkill *> GetSkills() const;
 		
 		const std::string GetName() const;
-		const std::vector<hoa_global::GlobalAttackPoint> GetAttackPoints() const;
+		const std::vector<hoa_global::GlobalAttackPoint*> GetAttackPoints() const;
 		uint32 GetHealth() const;
 		void SetHealth(uint32 AHealth);
 		uint32 GetMaxHealth() const;
@@ -610,15 +614,15 @@ public:
         
         uint32 GetNumberOfPlayerCharacters();
         uint32 GetNumberOfEnemyActors();
-        uint32 GetIndexOfFirstAliveEnemy();
-        uint32 GetIndexOfFirstIdleCharacter();
+        int32 GetIndexOfFirstAliveEnemy();
+        int32 GetIndexOfFirstIdleCharacter();
         
         //! \brief Return the player character at the deque location 'index'
-        private_battle::PlayerActor* GetPlayerCharacterAt(int AIndex) const;
-        private_battle::EnemyActor* BattleMode::GetEnemyActorAt(int AIndex) const;
+        private_battle::PlayerActor* GetPlayerCharacterAt(uint32 AIndex) const;
+        private_battle::EnemyActor* BattleMode::GetEnemyActorAt(uint32 AIndex) const;
         
         //! \brief Returns the index of a player character 
-        uint32 IndexLocationOfPlayerCharacter(private_battle::PlayerActor * const AActor);
+        int32 IndexLocationOfPlayerCharacter(private_battle::PlayerActor * const AActor);
         
         //! \brief Swap a character from _player_actors to _player_actors_in_battle
         // This may become more complicated if it is done in a wierd graphical manner
