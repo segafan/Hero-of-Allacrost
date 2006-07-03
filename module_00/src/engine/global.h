@@ -350,6 +350,8 @@ private:
 	float _x_position;
 	//! The y position of the attack point on the sprite.
 	float _y_position;
+        
+        std::string _name;
 
 	//! The amount of evade ability this attack point has.
 	uint32 _evade;
@@ -358,7 +360,7 @@ private:
         hoa_battle::BattleStatTypes *_resistance;
         
 public:
-	GlobalAttackPoint(float x, float y, uint32 volt, uint32 earth, uint32 water, uint32 fire, 
+	GlobalAttackPoint(std::string name, float x, float y, uint32 volt, uint32 earth, uint32 water, uint32 fire, 
                                         uint32 piercing, uint32 slashing, uint32 bludgeoning);
 	GlobalAttackPoint();
 	~GlobalAttackPoint();
@@ -369,13 +371,13 @@ public:
 	//@{
 	//! \brief Used for setting and getting the values of the various class members.
 	void SetXPosition(float x) { _x_position = x; }
-	float GetXPosition() { return _x_position; }
+	float GetXPosition() const { return _x_position; }
 	void SetYPosition(float y) { _y_position = y; }
-	float GetYPosition() { return _y_position; }
+	float GetYPosition() const { return _y_position; }
 	//void SetDefense(uint32 def) { _defense = def; }
 	//uint32 GetDefense() { return _defense; }
 	void SetEvade(uint32 eva) { _evade = eva; }
-	uint32 GetEvade() { return _evade; }
+	uint32 GetEvade() const { return _evade; }
 	/*
         void SetElementWeakness(uint8 elem_weak) { _elemental_weakness = elem_weak; }
 	uint8 GetElementWeakness() { return _elemental_weakness; }
@@ -387,6 +389,8 @@ public:
 	uint8 GetStatusResistance() { return _status_resistance; }
         */
 	//@}
+        
+        std::string GetName() const { return _name; } 
 };
 
 /*!****************************************************************************
@@ -432,7 +436,7 @@ private:
 	//! The skill set that the enemy may choose from to take actions.
 	std::vector<GlobalSkill *> _enemy_skills;
 	//! The various attack points for the enemy.
-	std::vector<GlobalAttackPoint> _attack_points;
+	std::vector<GlobalAttackPoint *> _attack_points;
 	//! The frame images for the enemy sprite.
 	std::map<std::string, std::vector<hoa_video::StillImage> > _sprite_animations; 
 	//std::vector<hoa_video::StillImage> _sprite_frames;
@@ -545,7 +549,7 @@ public:
 	uint32 GetGrowthIntelligence() const { return _growth_intelligence; }
 	uint32 GetGrowthAgility() const { return _growth_agility; }
 	const std::vector<GlobalSkill *> GetSkills() const { return _enemy_skills; }
-	const std::vector<GlobalAttackPoint> GetAttackPoints() const { return _attack_points; }
+	const std::vector<GlobalAttackPoint*> GetAttackPoints() const { return _attack_points; }
 
 	void AddSkill(GlobalSkill *sk) { _enemy_skills.push_back(sk); }
         
@@ -593,7 +597,7 @@ private:
 	//! The support skills the character can currently use.
 	std::vector<GlobalSkill *> _support_skills;
 	//! The (four) attack points of the character.
-	std::vector<GlobalAttackPoint> _attack_points;
+	std::vector<GlobalAttackPoint*> _attack_points;
 	//! The current number of hit points of the character.
 	uint32 _hit_points;
 	//! The maximum number of hit points the character may have.
@@ -673,7 +677,7 @@ public:
 	std::vector<GlobalSkill *> GetDefenseSkills() { return _defense_skills; }
 	std::vector<GlobalSkill *> GetSupportSkills() { return _support_skills; }
 
-	std::vector<GlobalAttackPoint> GetAttackPoints() { return _attack_points; }
+	std::vector<GlobalAttackPoint*> GetAttackPoints() { return _attack_points; }
 
 	void AddAttackSkill(GlobalSkill *sk) { _attack_skills.push_back(sk); }
 	void AddDefenseSkill(GlobalSkill *sk) { _defense_skills.push_back(sk); }
