@@ -22,6 +22,7 @@
 #include "battle.h"
 
 #include <string>
+#include <sstream>
 
 
 using namespace std;
@@ -150,6 +151,7 @@ GlobalArmor::GlobalArmor(string name, uint8 type, uint32 usable, uint32 id, uint
         else {
                 uint32 numAttackPoints = read_data.ReadInt("number_of_attack_points");
                 for(uint32 i = 0; i < numAttackPoints; i++) {
+                        std::string s = read_data.ReadString(("name_"+i));
                         float x = read_data.ReadFloat(("x_"+i));
                         float y = read_data.ReadFloat(("y_"+i));
                         uint32 volt = read_data.ReadInt(("volt_defense_"+i));
@@ -160,7 +162,7 @@ GlobalArmor::GlobalArmor(string name, uint8 type, uint32 usable, uint32 id, uint
                         uint32 slashing = read_data.ReadInt(("slashing_defense_"+i));
                         uint32 bludgeoning = read_data.ReadInt(("bludgeoning_defense_"+i));
                         
-                        GlobalAttackPoint ap(x,y,volt,earth,water,fire,piercing,slashing,bludgeoning);
+                        GlobalAttackPoint ap(s,x,y,volt,earth,water,fire,piercing,slashing,bludgeoning);
                         _attack_points.push_back(ap);
                 }
         }
@@ -239,9 +241,10 @@ GlobalSkill::~GlobalSkill() {
 // ****************************** GlobalAttackPoint ********************************
 // ****************************************************************************
 
-GlobalAttackPoint::GlobalAttackPoint(float x, float y, uint32 volt, uint32 earth, uint32 water, uint32 fire, 
+GlobalAttackPoint::GlobalAttackPoint(std::string name, float x, float y, uint32 volt, uint32 earth, uint32 water, uint32 fire, 
                                         uint32 piercing, uint32 slashing, uint32 bludgeoning) {
-	_x_position = x;
+	_name = name;
+        _x_position = x;
 	_y_position = y;
 	
         _resistance = new BattleStatTypes();
@@ -329,10 +332,29 @@ GlobalEnemy::GlobalEnemy(string file_name) {
                 _growth_strength = read_data.ReadInt("growth_strength");
                 _growth_intelligence = read_data.ReadInt("growth_intelligence");
                 _growth_agility = read_data.ReadInt("growth_agility");
+                
+                int num_maps = read_data.ReadInt("number_of_maps");
+                for(int i = 1; i <= num_maps; i++) {
+                        std::ostringstream os;
+                        os << "map_x_" << i;
+                        float x = read_data.ReadFloat(os.str().c_str());
+                        os.str("");
+                        os << "map_y_" << i;
+                        float y = read_data.ReadFloat(os.str().c_str());
+                        os.str("");
+                        os << "map_name_" << i;
+                        std::string name = read_data.ReadString(os.str().c_str());
+                        
+                        GlobalAttackPoint *gap = new GlobalAttackPoint(name,x,y,0,0,0,0,0,0,0);
+                        _attack_points.push_back(gap);
+                }
         }
 }
 
-GlobalEnemy::~GlobalEnemy() { }
+GlobalEnemy::~GlobalEnemy() { 
+        ///delete animations
+        //delete global attack points
+}
 
 // Simulate the leveling up of experience for the enemy from its base stats.
 void GlobalEnemy::LevelSimulator(uint32 lvl) {
