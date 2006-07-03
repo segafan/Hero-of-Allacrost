@@ -1304,14 +1304,15 @@ void BattleMode::AddScriptEventToQueue(ScriptEvent AEventToAdd) {
         
 //! Remove all scripted events for an actor
 void BattleMode::RemoveScriptedEventsForActor(Actor *AActorToRemove) {
-        std::list<ScriptEvent>::iterator it = _script_queue.begin();
+        std::list<private_battle::ScriptEvent>::iterator it = _script_queue.begin();
         
         while( it != _script_queue.end() ) { 
                 if((*it).GetHost() == AActorToRemove) {
-                        _script_queue.erase(it); //remove this location
+                        it = _script_queue.erase(it); //remove this location
                 }
-                else //otherwise, increment the iterator 
-                        it++; 
+                else { //otherwise, increment the iterator 
+                        it++;
+                }
         }
 }
 
