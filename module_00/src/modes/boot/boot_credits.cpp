@@ -23,7 +23,7 @@ using namespace hoa_utils;
 namespace hoa_boot {
 
 
-	CreditsScreen::CreditsScreen() :
+CreditsScreen::CreditsScreen() :
 _visible(false),
 _credits_text(
 			  "Hero of Allacrost Development Team\n"
@@ -34,7 +34,7 @@ _credits_text(
 			  "\n"
 			  "Programming\n"
 			  "\n"
-			  "Corey \"Pimpalicious\" Hoffstein (visage) ~ Programming Leader, Battle mode\n"
+			  "Corey Hoffstein (visage) ~ Programming Leader, Battle mode\n"
 			  "Raj Sharma (roos) ~ Video Engine\n"
 			  "Philip Vorsilak (gorzuate) ~ Map editor, Vice Dictator\n"
 			  "Daniel Steuernol (Steu) ~ Menu mode, wikimaster\n"
@@ -45,10 +45,10 @@ _credits_text(
 			  "Graphics\n"
 			  "\n"
 			  "Joe Raucci (Sylon) ~ Artwork Leader\n"
-			  "Victoria Smith (alenacat) ~ Map sprite art\n"
-			  "Jerimiah Short (BigPapaN0z) ~ Map tile art\n"
-			  "Matthew James (nunvuru) ~ Web design, miscellaneous artwork\n"
 			  "Brett Steele (SafirKreuz) ~ Sprite art, character portraits\n"
+			  "Matthew James (nunvuru) ~ Web design, miscellaneous artwork\n"
+			  "Victoria Smith (alenacat) ~ Map sprite art\n"
+			  "Jerimiah Short (BigPapaN0z) ~ Map tile art\n"			  
 			  "\n"
 			  "\n"
 			  "Audio\n"
@@ -60,8 +60,8 @@ _credits_text(
 			  "\n"
 			  "Special thanks to our contributors\n"
 			  "\n"
-			  "Parley #FULLNAME# (Jarks) ~ Map tiles, icons\n"
 			  "Richard Kettering (Jetryl) ~ Map sprites & tiles, art advisor\n"
+			  "Parley #FULLNAME# (Jarks) ~ Map tiles, icons\n"			  
 			  "Peter Geinitz (wayfarer) ~ Map sprites, menu design"
 			  )
 {
@@ -83,6 +83,8 @@ CreditsScreen::~CreditsScreen()
 void CreditsScreen::Draw()
 {
 	_window.Draw();
+	if (_window.GetState() != VIDEO_MENU_STATE_SHOWN)
+		return;
 
 	VideoManager->SetFont("default");
 	VideoManager->Move(512.0f, 550.0f);

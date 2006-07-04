@@ -134,29 +134,41 @@ MusicData* GameAudio::_AcquireMusicData(string filename) {
 }
 
 
-void GameAudio::SetMusicVolume(uint8 vol) {
-	if (vol > 128) {
+void GameAudio::SetMusicVolume(float vol) {
+	if (vol > 1.0f) {
 		if (AUDIO_DEBUG) cerr << "AUDIO WARNING: Tried to set music volume above maximum level" << endl;
-		_music_volume = 128;
+		_music_volume = 1.0f;
+	}
+	else if (vol < 0.0f)
+	{
+		if (AUDIO_DEBUG) cerr << "AUDIO WARNING: Tried to set music volume below minimum level" << endl;
+		_music_volume = 0.0f;
 	}
 	else {
 		_music_volume = vol;
 	}
 
-	Mix_VolumeMusic(_music_volume);
+	uint8 volume = static_cast<uint8>(_music_volume * 128.0f); // scale for SDL_Mixer
+	Mix_VolumeMusic(volume);
 }
 
 
-void GameAudio::SetSoundVolume(uint8 vol) {
-	if (vol > 128) {
+void GameAudio::SetSoundVolume(float vol) {
+	if (vol > 1.0f) {
 		if (AUDIO_DEBUG) cerr << "AUDIO WARNING: Tried to set sound volume above maximum level" << endl;
-		_sound_volume = 128;
+		_sound_volume = 1.0f;
+	}
+	else if (vol < 0.0f)
+	{
+		if (AUDIO_DEBUG) cerr << "AUDIO WARNING: Tried to set sound volume below minimum level" << endl;
+		_sound_volume = 0.0f;
 	}
 	else {
 		_sound_volume = vol;
 	}
 
-	Mix_Volume(ALL_CHANNELS, _sound_volume);
+	uint8 volume = static_cast<uint8>(_sound_volume * 128.0f); // scale for SDL_Mixer
+	Mix_Volume(ALL_CHANNELS, volume);
 }
 
 

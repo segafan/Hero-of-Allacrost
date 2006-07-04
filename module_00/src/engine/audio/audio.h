@@ -145,12 +145,12 @@ public:
 	 *  will effect the volume level of \c all audio heard in the game.
 	 */
 	//@{
-	uint8 GetMusicVolume()
+	float GetMusicVolume()
 		{ return _music_volume; }
-	uint8 GetSoundVolume()
+	float GetSoundVolume()
 		{ return _sound_volume; }
-	void SetMusicVolume(uint8 vol);
-	void SetSoundVolume(uint8 vol);
+	void SetMusicVolume(float vol);
+	void SetSoundVolume(float vol);
 	//@}
 
 	/*! \name Global Audio Manipulation Functions
@@ -199,10 +199,10 @@ public:
 private:
 	SINGLETON_DECLARE(GameAudio)
 
-	//! The volume level for music playback. Valid range is between 0 and 128.
-	uint8 _music_volume;
-	//! The volume level for sound playback. Valid range is between 0 and 128.
-	uint8 _sound_volume;
+	//! The volume level for music playback. Valid range is between 0.0f and 1.0f
+	float _music_volume;
+	//! The volume level for sound playback. Valid range is between 0.0f and 1.0f
+	float _sound_volume;
 	//! Retains all the errors that have occured on audio-related function calls, except for loading errors.
 	uint32 _audio_errors;
 
