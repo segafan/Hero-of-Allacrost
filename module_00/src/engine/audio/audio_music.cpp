@@ -141,6 +141,10 @@ void MusicDescriptor::PlayMusic() {
 		return;
 	}
 
+	if (GetMusicState() != AUDIO_STATE_STOPPED) {
+		AudioManager->StopAllMusic();
+	}
+
 	if (Mix_FadeInMusic(_data->music, _loop_count, _fade_in_time) == -1) {
 			cerr << "AUDIO ERROR: Could not play music" << endl;
 	}
