@@ -172,6 +172,8 @@ void BootMode::Reset() {
 	// Set the coordinate system that BootMode uses
 	VideoManager->SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
+	VideoManager->SetFog(Color::black, 0.0f); // Turn off any remaining fog
+	VideoManager->SetTextColor(Color::white);
 
 	// Decide which music track to play
 	if (_logo_animating)
@@ -398,10 +400,12 @@ void BootMode::_SetupMainMenu() {
 
 	// Add all the needed menu options to the main menu
 	_main_menu.AddOption(MakeWideString("New Game"), &BootMode::_OnNewGame);
-	_main_menu.AddOption(MakeWideString("Battle Mode"), &BootMode::_OnLoadGame);
+	_main_menu.AddOption(MakeWideString("Load Game"), &BootMode::_OnLoadGame);
 	_main_menu.AddOption(MakeWideString("Options"), &BootMode::_OnOptions);
 	_main_menu.AddOption(MakeWideString("Credits"), &BootMode::_OnCredits);
 	_main_menu.AddOption(MakeWideString("Quit"), &BootMode::_OnQuit);
+
+	_main_menu.EnableOption(1, false); // Disable "load game". TODO: Remove battle mode as well for the demo-release
 }
 
 
