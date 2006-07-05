@@ -175,6 +175,10 @@ void BootMode::Reset() {
 	VideoManager->SetFog(Color::black, 0.0f); // Turn off any remaining fog
 	VideoManager->SetTextColor(Color::white);
 
+	// Reset the game universe
+	GameGlobal::Destroy();
+	GlobalManager = GameGlobal::Create();
+
 	// Decide which music track to play
 	if (_logo_animating)
 		_boot_music.at(1).PlayMusic(); // Opening Effect

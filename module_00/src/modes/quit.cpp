@@ -91,7 +91,7 @@ QuitMode::QuitMode() {
 	
 	vector<ustring> options;
 	options.push_back(MakeWideString("Quit Game"));
-	options.push_back(MakeWideString("Quit to Boot Menu"));
+	options.push_back(MakeWideString("Quit to Main Menu"));
 	options.push_back(MakeWideString("Cancel"));
 	
 	_option_box.SetOptions(options);
