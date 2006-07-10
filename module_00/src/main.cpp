@@ -91,7 +91,7 @@ int32 main(int32 argc, char *argv[]) {
 	VideoManager->SetFontShadowYOffset("default", -2);
 	VideoManager->SetFontShadowStyle("default", VIDEO_TEXT_SHADOW_BLACK);
 
-	if (!VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "map", 16)) {
+	if (!VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "map", 24)) {
 		return 1;
 	}
 
@@ -137,6 +137,7 @@ int32 main(int32 argc, char *argv[]) {
 	#ifdef _WIN32
 		SDL_WM_SetIcon(SDL_LoadBMP("img/logos/program_icon.bmp"), NULL);
 	#else
+		// Later, add an icon here for non-Windows systems that is better
 		SDL_WM_SetIcon(SDL_LoadBMP("img/logos/program_icon.bmp"), NULL);
 	#endif
 

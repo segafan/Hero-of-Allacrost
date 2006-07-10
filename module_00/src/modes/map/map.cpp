@@ -97,8 +97,6 @@ MapMode::~MapMode() {
 
 // Resets appropriate class members.
 void MapMode::Reset() {
-	_current_dialogue = NULL;
-
 	// Reset active video engine properties
 	VideoManager->SetCoordSys(0.0f, SCREEN_COLS, SCREEN_ROWS, 0.0f);
 	//VideoManager->SetCoordSys(-SCREEN_COLS/2.0f, SCREEN_COLS/2.0f, -SCREEN_ROWS/2.0f, SCREEN_ROWS/2.0f);
@@ -107,8 +105,10 @@ void MapMode::Reset() {
 
 	// Let all map objects know that this is the current map
 	MapObject::current_map = this;
-	
-	_map_music[0].PlayMusic();
+
+	if (_map_music[0].GetMusicState() != AUDIO_STATE_PLAYING) {
+		_map_music[0].PlayMusic();
+	}
 }
 
 
@@ -125,12 +125,14 @@ void MapMode::LoadMap() {
 	_dialogue_window.SetPosition(0.0f, 512.0f);
 // 	_dialogue_window.SetDisplayMode(VIDEO_MENU_EXPAND_FROM_CENTER);
 	
-	_dialogue_box.SetFilename("img/menus/black_sleet_npnt.png");
+	_dialogue_box.SetFilename("img/menus/dialogue_box.png");
 	VideoManager->LoadImage(_dialogue_box);
+	_dialogue_nameplate.SetFilename("img/menus/dialogue_nameplate.png");
+	VideoManager->LoadImage(_dialogue_nameplate);
 	
 	_dialogue_textbox.SetDisplaySpeed(30);
-	_dialogue_textbox.SetPosition(0.0f + 304.0f, 512.0f + 80.0f);
-	_dialogue_textbox.SetDimensions(1024.0f - 384.0f, 256.0f - 80.0f);
+	_dialogue_textbox.SetPosition(300.0f, 768.0f - 180.0f);
+	_dialogue_textbox.SetDimensions(1024.0f - 300.0f - 60.0f, 180.0f - 70.0f);
 	_dialogue_textbox.SetFont("map");
 	_dialogue_textbox.SetDisplayMode(VIDEO_TEXT_INSTANT);
 	_dialogue_textbox.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
@@ -302,7 +304,7 @@ void MapMode::LoadMap() {
 	sp->SetAltitude(ALTITUDE_1);
 	sp->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
 	sp->SetFilename("img/sprites/map/claudius");
-	sp->SetPortrait("img/portraits/Claudius-ingame.png");
+	sp->SetPortrait("img/portraits/map/claudius.png");
 	sp->SetDirection(SOUTH);
 	sp->LoadFrames();
 	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied |= sp->GetAltitude();
@@ -321,7 +323,7 @@ void MapMode::LoadMap() {
 	sp->SetAltitude(1);
 	sp->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
 	sp->SetFilename("img/sprites/map/laila");
-	sp->SetPortrait("img/portraits/Laila-Final-Ingame-ver3.png");
+	sp->SetPortrait("img/portraits/map/laila.png");
 	sp->SetDirection(SOUTH);
 	sp->LoadFrames();
 	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied |= sp->GetAltitude();
@@ -389,7 +391,25 @@ void MapMode::LoadMap() {
 	sp->SetDirection(WEST);
 	sp->LoadFrames();
 	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied |= sp->GetAltitude();
-	
+
+	sd = new SpriteDialogue();
+	sd->text.push_back(MakeWideString("My moustache tickles me."));
+	sd->speakers.push_back(1); // NPC speaks
+	sd->text.push_back(MakeWideString("Why don't you shave it off then? Or at least trim it..."));
+	sd->speakers.push_back(0); // Player speaks
+	sd->text.push_back(MakeWideString("Because moustaches are fashionable these days. I have to keep up with the times!"));
+	sd->speakers.push_back(1); // NPC speaks
+	sd->text.push_back(MakeWideString("....."));
+	sd->speakers.push_back(0); // NPC speaks
+	sp->dialogues.push_back(sd);
+
+	sd = new SpriteDialogue();
+	sd->text.push_back(MakeWideString("I know kung fu."));
+	sd->speakers.push_back(1); // NPC speaks
+	sd->text.push_back(MakeWideString("Show me."));
+	sd->speakers.push_back(0); // Player speaks
+	sp->dialogues.push_back(sd);
+
 	sa = new ActionPathMove();
 	sa->destination.row = 25;
 	sa->destination.col = 11;
@@ -442,6 +462,11 @@ void MapMode::LoadMap() {
 	sp->SetDirection(EAST);
 	sp->LoadFrames();
 	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied |= sp->GetAltitude();
+
+	sd = new SpriteDialogue();
+	sd->text.push_back(MakeWideString("You will never be able to guess my real age."));
+	sd->speakers.push_back(1); // NPC speaks
+	sp->dialogues.push_back(sd);
 	
 	sa = new ActionPathMove();
 	sa->destination.row = 8;
@@ -488,6 +513,11 @@ void MapMode::LoadMap() {
 	sp->SetDirection(NORTH);
 	sp->LoadFrames();
 	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied |= sp->GetAltitude();
+
+	sd = new SpriteDialogue();
+	sd->text.push_back(MakeWideString("Is there no exit out of this stinking cave?"));
+	sd->speakers.push_back(1); // NPC speaks
+	sp->dialogues.push_back(sd);
 	
 	sa = new ActionPathMove();
 	sa->destination.row = 32;
@@ -995,7 +1025,36 @@ void MapMode::_UpdateExplore() {
 	bool user_move = false;
 	uint32 move_direction;
 
-	// (1) Check if the focused object is moving. If so, only process swap events from the user
+	if (InputManager->LeftSelectPress()) {
+		cout << "rand off" << endl;
+		_random_encounters = false;
+	}
+	if (InputManager->RightSelectPress()) {
+		cout << "rand on" << endl;
+		_random_encounters = true;
+	}
+
+	// Toggle run versus walk
+	if (InputManager->SwapPress()) {
+		static bool something = true;
+		if (something) {
+			_focused_object->step_speed /= 2;
+			something = false;
+		}
+		else {
+			_focused_object->step_speed *= 2;
+			something = true;
+		}
+	}
+
+	// Check for menu press events
+	if (InputManager->MenuPress()) {
+		MenuMode *MM = new MenuMode();
+		ModeManager->Push(MM);
+		return;
+	}
+
+	//  Check if the focused object is moving. If so, only process swap events from the user
 	if (_focused_object->status & IN_MOTION) {
 // 		if (InputManager->SwapPress()) {
 // 			// Change the character representing the player's party
@@ -1004,7 +1063,7 @@ void MapMode::_UpdateExplore() {
 		return;
 	}
 
-	// (2) Give highest priority to confirm events from the user
+	// Process confirm events from the user
 	if (InputManager->ConfirmPress()) {
 		// Check for a sprite present on the adjacent tile or a confirm event registerd to the tile
 		TileCheck tcheck;
@@ -1068,14 +1127,7 @@ void MapMode::_UpdateExplore() {
 		return;
 	}
 
-	// (3) Check for menu press events
-	if (InputManager->MenuPress()) {
-		MenuMode *MM = new MenuMode();
-		ModeManager->Push(MM);
-		return;
-	}
-
-	// (4) Handle movement input from user
+	// Handle movement input from user
 	// Handle west, northwest, and southwest movement
 	if (InputManager->LeftState()) {
 		user_move = true;
@@ -1111,6 +1163,14 @@ void MapMode::_UpdateExplore() {
 	}
 
 	if (user_move) {
+		if (_random_encounters) {
+			_steps_till_encounter--;
+			if (_steps_till_encounter == 0) {
+				_steps_till_encounter = GaussianValue(_encounter_rate, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
+				BattleMode *BM = new BattleMode();
+				ModeManager->Push(BM);
+			}
+		}
 		_focused_object->Move(move_direction);
 		// The move may be successful, or it may not be.
 	}
@@ -1337,15 +1397,18 @@ void MapMode::Draw() {
 //		_dialogue_window.Draw();
 		VideoManager->Move(0.0f, 768.0f);
 		_dialogue_box.Draw();
+		VideoManager->MoveRelative(47.0f, -42.0f);
+		_dialogue_nameplate.Draw();
+		
 		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, 0);
-		if (_sprites[_current_dialogue->speakers[_current_dialogue->current_line]]->portrait != NULL) {
-			VideoManager->Move(144.0f, 712.0f);
-			_sprites[_current_dialogue->speakers[_current_dialogue->current_line]]->portrait->Draw();
-		}
-		VideoManager->Move(144.0f, 724.0f);
 		VideoManager->SetTextColor(Color(Color::black));
 		VideoManager->SetFont("map");
+		VideoManager->MoveRelative(120.0f, -6.0f);
 		VideoManager->DrawText(_sprites[_current_dialogue->speakers[_current_dialogue->current_line]]->name);
+		if (_sprites[_current_dialogue->speakers[_current_dialogue->current_line]]->portrait != NULL) {
+			VideoManager->MoveRelative(0.0f, -26.0f);
+			_sprites[_current_dialogue->speakers[_current_dialogue->current_line]]->portrait->Draw();
+		}
 		_dialogue_textbox.Draw();
 		VideoManager->PopState();
 	}
