@@ -146,6 +146,7 @@ _fade_out(false) // No, we're not fading out yet!
 	_SetupOptionsMenu();
 	_SetupVideoOptionsMenu();
 	_SetupAudioOptionsMenu();
+	_SetupKeySetttingsMenu();
 
 	// Set the main menu as our currently selected menu
 	_current_menu = &_main_menu;
@@ -310,8 +311,7 @@ void BootMode::_AnimateLogo() {
 
 
 // Draws background image, logo and sword at their default locations
-void BootMode::_DrawBackgroundItems()
-{
+void BootMode::_DrawBackgroundItems() {
 	VideoManager->Move(512.0f, 384.0f);
 	VideoManager->SetDrawFlags(VIDEO_NO_BLEND, 0);
 	VideoManager->DrawImage(_boot_images[0]); // Draw background
@@ -331,8 +331,7 @@ void BootMode::_DrawBackgroundItems()
 
 
 // Stops playback of the opening animation
-void BootMode::_EndOpeningAnimation()
-{
+void BootMode::_EndOpeningAnimation() {
 	VideoManager->SetFog(Color::black, 0.0f); // Turn off the fog
 	_logo_animating = false;
 
@@ -342,62 +341,75 @@ void BootMode::_EndOpeningAnimation()
 }
 
 
-// Redefines the change_key reference. Waits indefinitely for user to press any key.
-void BootMode::_RedefineKey(SDLKey& change_key) {
-//	SDL_Event event;
 
-// 	KeyState *key_set = &(SettingsManager->InputStatus.key); // A shortcut
 
-// 	while (SDL_WaitEvent(&event)) { // Waits indefinitely for events to occur.
-// 		switch (event.type) {
-// 			case SDL_KEYDOWN:
-// 				// The following series of if statements ensure mutual exclusion of the key map
-// 				if (key_set->up == event.key.keysym.sym) {
-// 					key_set->up = change_key;
-// 					change_key = event.key.keysym.sym;
-// 					return;
-// 				}
-// 				if (key_set->down == event.key.keysym.sym) {
-// 					key_set->down = change_key;
-// 					change_key = event.key.keysym.sym;
-// 					return;
-// 				}
-// 				if (key_set->left == event.key.keysym.sym) {
-// 					key_set->left = change_key;
-// 					change_key = event.key.keysym.sym;
-// 					return;
-// 				}
-// 				if (key_set->right == event.key.keysym.sym) {
-// 					key_set->right = change_key;
-// 					change_key = event.key.keysym.sym;
-// 					return;
-// 				}
-// 				if (key_set->confirm == event.key.keysym.sym) {
-// 					key_set->confirm = change_key;
-// 					change_key = event.key.keysym.sym;
-// 					return;
-// 				}
-// 				if (key_set->cancel == event.key.keysym.sym) {
-// 					key_set->cancel = change_key;
-// 					change_key = event.key.keysym.sym;
-// 					return;
-// 				}
-// 				if (key_set->menu == event.key.keysym.sym) {
-// 					key_set->menu = change_key;
-// 					change_key = event.key.keysym.sym;
-// 					return;
-// 				}
-// 				if (key_set->pause == event.key.keysym.sym) {
-// 					key_set->pause = change_key;
-// 					change_key = event.key.keysym.sym;
-// 					return;
-// 				}
-// 				change_key = event.key.keysym.sym;
-// 				return;
-// 		}
-// 	}
+// Waits infinitely for a key press 
+SDLKey BootMode::_WaitKeyPress() {
+	SDL_Event event;
+	while (SDL_WaitEvent(&event)) {
+		if (event.type == SDL_KEYDOWN)
+			return event.key.keysym.sym;
+	}
+
+	return event.key.keysym.sym; // This line is actually never reached but the compiler will complain if it's removed :)
 }
 
+
+// Redefines a key to be mapped to another command. Waits for keypress using _WaitKeyPress()
+void BootMode::_RedefineUpKey() {
+	InputManager->SetUpKey(_WaitKeyPress());
+	_UpdateKeySettings();
+}
+
+void BootMode::_RedefineDownKey() {
+	InputManager->SetDownKey(_WaitKeyPress());
+	_UpdateKeySettings();
+}
+
+void BootMode::_RedefineLeftKey() {
+	InputManager->SetLeftKey(_WaitKeyPress());
+	_UpdateKeySettings();
+}
+
+void BootMode::_RedefineRightKey() {
+	InputManager->SetRightKey(_WaitKeyPress());
+	_UpdateKeySettings();
+}
+
+void BootMode::_RedefineConfirmKey() {
+	InputManager->SetConfirmKey(_WaitKeyPress());
+	_UpdateKeySettings();
+}
+
+void BootMode::_RedefineCancelKey() {
+	InputManager->SetCancelKey(_WaitKeyPress());
+	_UpdateKeySettings();
+}
+
+void BootMode::_RedefineMenuKey() {
+	InputManager->SetMenuKey(_WaitKeyPress());
+	_UpdateKeySettings();
+}
+
+void BootMode::_RedefineSwapKey() {
+	InputManager->SetSwapKey(_WaitKeyPress());
+	_UpdateKeySettings();
+}
+
+void BootMode::_RedefineLeftSelectKey() {
+	InputManager->SetLeftSelectKey(_WaitKeyPress());
+	_UpdateKeySettings();
+}
+
+void BootMode::_RedefineRightSelectKey() {
+	InputManager->SetRightSelectKey(_WaitKeyPress());
+	_UpdateKeySettings();
+}
+
+void BootMode::_RedefinePauseKey() {
+	InputManager->SetPauseKey(_WaitKeyPress());
+	_UpdateKeySettings();
+}
 
 // Inits the main menu
 void BootMode::_SetupMainMenu() {
@@ -418,13 +430,12 @@ void BootMode::_SetupOptionsMenu() {
 	_options_menu.AddOption(MakeWideString("Video"), &BootMode::_OnVideoOptions);
 	_options_menu.AddOption(MakeWideString("Audio"), &BootMode::_OnAudioOptions);
 	_options_menu.AddOption(MakeWideString("Language"));
-	_options_menu.AddOption(MakeWideString("Key Settings"));
+	_options_menu.AddOption(MakeWideString("Key Settings"), &BootMode::_OnKeySettings);
 	_options_menu.AddOption(MakeWideString("Joystick Settings"));
 
 	// Disable some of the options
-	_options_menu.EnableOption(2, false);
-	_options_menu.EnableOption(3, false);
-	_options_menu.EnableOption(4, false);
+	_options_menu.EnableOption(2, false); // Language
+	_options_menu.EnableOption(4, false); // Joystick
 
 	_options_menu.SetWindowed(true);
 	_options_menu.SetParent(&_main_menu);
@@ -457,6 +468,29 @@ void BootMode::_SetupAudioOptionsMenu()
 }
 
 
+// Inits the key-settings menu
+void BootMode::_SetupKeySetttingsMenu()
+{
+	_key_settings_menu.AddOption(MakeWideString("Up: "), &BootMode::_RedefineUpKey);
+	_key_settings_menu.AddOption(MakeWideString("Down: "), &BootMode::_RedefineDownKey);
+	_key_settings_menu.AddOption(MakeWideString("Left: "), &BootMode::_RedefineLeftKey);
+	_key_settings_menu.AddOption(MakeWideString("Right: "), &BootMode::_RedefineRightKey);
+	_key_settings_menu.AddOption(MakeWideString("Confirm: "), &BootMode::_RedefineConfirmKey);
+	_key_settings_menu.AddOption(MakeWideString("Cancel: "), &BootMode::_RedefineCancelKey);
+	_key_settings_menu.AddOption(MakeWideString("Menu: "), &BootMode::_RedefineMenuKey);
+	_key_settings_menu.AddOption(MakeWideString("Swap: "), &BootMode::_RedefineSwapKey);
+	_key_settings_menu.AddOption(MakeWideString("Left Select: "), &BootMode::_RedefineLeftSelectKey);
+	_key_settings_menu.AddOption(MakeWideString("Right Select: "), &BootMode::_RedefineRightSelectKey);
+	_key_settings_menu.AddOption(MakeWideString("Pause: "), &BootMode::_RedefinePauseKey);
+
+	_key_settings_menu.AddOption(MakeWideString("Restore default keys"), &BootMode::_OnRestoreDefaultKeys);
+	_key_settings_menu.SetWindowed(true);
+	_key_settings_menu.SetParent(&_options_menu);
+	_key_settings_menu.SetTextDensity(30.0f); // Shorten the distance between text lines
+
+}
+
+
 // Main menu handlers
 // 'New Game' confirmed
 void BootMode::_OnNewGame()
@@ -468,6 +502,8 @@ void BootMode::_OnNewGame()
 	GlobalManager->AddCharacter(claud);
 	_fade_out = true;
 	VideoManager->FadeScreen(Color::black, 1.0f);
+	_boot_music.at(0).SetFadeOutTime(500); // Fade out the music
+	_boot_music.at(0).StopMusic();
 }
 
 
@@ -521,6 +557,14 @@ void BootMode::_OnAudioOptions()
 }
 
 
+// 'Key settings' confirmed
+void BootMode::_OnKeySettings()
+{
+	_current_menu = &_key_settings_menu;
+	_UpdateKeySettings();
+}
+
+
 // 'Video mode' confirmed
 void BootMode::_OnVideoMode()
 {
@@ -566,6 +610,14 @@ void BootMode::_OnMusicRight()
 }
 
 
+// Restores default key settings
+void BootMode::_OnRestoreDefaultKeys()
+{
+	InputManager->RestoreDefaultKeys();
+	_UpdateKeySettings();
+}
+
+
 // Updates the video options screen
 void BootMode::_UpdateVideoOptions()
 {
@@ -596,6 +648,24 @@ void BootMode::_UpdateAudioOptions()
 
 	_audio_options_menu.SetOptionText(0, MakeWideString(sound_volume.str()));
 	_audio_options_menu.SetOptionText(1, MakeWideString(music_volume.str()));
+}
+
+
+// Updates the key settings screen
+void BootMode::_UpdateKeySettings()
+{
+	// Update key names
+	_key_settings_menu.SetOptionText(0, MakeWideString("Move Up: " + InputManager->GetUpKeyName()));
+	_key_settings_menu.SetOptionText(1, MakeWideString("Move Down: " + InputManager->GetDownKeyName()));
+	_key_settings_menu.SetOptionText(2, MakeWideString("Move Left: " + InputManager->GetLeftKeyName()));
+	_key_settings_menu.SetOptionText(3, MakeWideString("Move Right: " + InputManager->GetRightKeyName()));
+	_key_settings_menu.SetOptionText(4, MakeWideString("Confirm: " + InputManager->GetConfirmKeyName()));
+	_key_settings_menu.SetOptionText(5, MakeWideString("Cancel: " + InputManager->GetCancelKeyName()));
+	_key_settings_menu.SetOptionText(6, MakeWideString("Menu: " + InputManager->GetMenuKeyName()));
+	_key_settings_menu.SetOptionText(7, MakeWideString("Swap: " + InputManager->GetSwapKeyName()));
+	_key_settings_menu.SetOptionText(8, MakeWideString("Left Select: " + InputManager->GetLeftSelectKeyName()));
+	_key_settings_menu.SetOptionText(9, MakeWideString("Right Select: " + InputManager->GetRightSelectKeyName()));
+	_key_settings_menu.SetOptionText(10, MakeWideString("Pause: " + InputManager->GetPauseKeyName()));
 }
 
 

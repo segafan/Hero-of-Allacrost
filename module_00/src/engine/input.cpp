@@ -157,6 +157,37 @@ bool GameInput::Initialize() {
 }
 
 
+// Loads the default key settings from the lua file and sets them back
+bool GameInput::RestoreDefaultKeys() {
+	// Load the settings file
+	string in_filename = "dat/config/settings.lua";
+	ReadDataDescriptor settings_file;
+	if (!settings_file.OpenFile(in_filename.c_str())) {
+		cerr << "INPUT ERROR: failed to open data file for reading: " << in_filename << endl;
+		return false;
+	}
+
+	// Load all default keys from the table
+	settings_file.OpenTable("key_defaults");
+	_key.up           = static_cast<SDLKey>(settings_file.ReadInt("up"));
+	_key.down         = static_cast<SDLKey>(settings_file.ReadInt("down"));
+	_key.left         = static_cast<SDLKey>(settings_file.ReadInt("left"));
+	_key.right        = static_cast<SDLKey>(settings_file.ReadInt("right"));
+	_key.confirm      = static_cast<SDLKey>(settings_file.ReadInt("confirm"));
+	_key.cancel       = static_cast<SDLKey>(settings_file.ReadInt("cancel"));
+	_key.menu         = static_cast<SDLKey>(settings_file.ReadInt("menu"));
+	_key.swap         = static_cast<SDLKey>(settings_file.ReadInt("swap"));
+	_key.left_select  = static_cast<SDLKey>(settings_file.ReadInt("left_select"));
+	_key.right_select = static_cast<SDLKey>(settings_file.ReadInt("right_select"));
+	_key.pause        = static_cast<SDLKey>(settings_file.ReadInt("pause"));
+	settings_file.CloseTable();
+
+	settings_file.CloseFile();
+
+	return true;
+}
+
+
 // Handles all of the event processing for the game.
 void GameInput::EventHandler() {
 	SDL_Event event;	// Holds the game event
@@ -599,5 +630,80 @@ void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 	// SDL_JOYBALLMOTION and SDL_JOYHATMOTION are ignored for now. Should we process them?
 
 } // void GameInput::_JoystickEventHandler(SDL_Event& js_event)
+
+
+// Sets a new key over an older one. If the same key is used elsewhere, the older one is removed
+void GameInput::_SetNewKey(SDLKey & old_key, SDLKey new_key)
+{
+	if (_key.up == new_key)  // up key used already
+	{
+		_key.up = old_key;
+		old_key = new_key;
+		return;
+	}
+	if (_key.down == new_key)  // down key used already
+	{
+		_key.down = old_key;
+		old_key = new_key;
+		return;
+	}
+	if (_key.left == new_key)  // left key used already
+	{
+		_key.left = old_key;
+		old_key = new_key;
+		return;
+	}
+	if (_key.right == new_key)  // right key used already
+	{
+		_key.right = old_key;
+		old_key = new_key;
+		return;
+	}
+	if (_key.confirm == new_key)  // confirm key used already
+	{
+		_key.confirm = old_key;
+		old_key = new_key;
+		return;
+	}
+	if (_key.cancel == new_key)  // cancel key used already
+	{
+		_key.cancel = old_key;
+		old_key = new_key;
+		return;
+	}
+	if (_key.menu == new_key)  // menu key used already
+	{
+		_key.menu = old_key;
+		old_key = new_key;
+		return;
+	}
+	if (_key.swap == new_key)  // swap key used already
+	{
+		_key.swap = old_key;
+		old_key = new_key;
+		return;
+	}
+	if (_key.left_select == new_key)  // left_select key used already
+	{
+		_key.left_select = old_key;
+		old_key = new_key;
+		return;
+	}
+	if (_key.right_select == new_key)  // right_select key used already
+	{
+		_key.right_select = old_key;
+		old_key = new_key;
+		return;
+	}
+	if (_key.pause == new_key)  // pause key used already
+	{
+		_key.pause = old_key;
+		old_key = new_key;
+		return;
+	}
+
+	old_key = new_key; // Otherwise simply overwrite the old value
+} // end GameInput::_SetNewKey(SDLKey & old_key, SDLKey new_key)
+
 
 } // namespace hoa_input

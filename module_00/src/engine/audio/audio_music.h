@@ -96,6 +96,20 @@ public:
 	**/
 	uint8 GetMusicState();
 
+	/** \name Set Music Playback Properties Functions
+	*** \param The value to set the playback property in question.
+	**/
+	//@{
+	void SetLoopCount(int32 loops)
+		{ _loop_count = loops; }
+	void SetFadeInTime(uint32 fade_time)
+		{ _fade_in_time = fade_time; }
+	void SetFadeOutTime(uint32 fade_time)
+		{ _fade_out_time = fade_time; }
+	void SetPlayTimeout(uint32 timeout)
+		{ _play_timeout = timeout; }
+	//@}
+
 	//! Displays the properties of the music descriptor's buffer.
 	void DEBUG_dataProperties()
 		{ if (_data != NULL) _data->DEBUG_PrintProperties(); }
