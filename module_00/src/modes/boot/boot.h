@@ -105,6 +105,9 @@ private:
 	//! 'Key Settings' menu
 	BootMenu _key_settings_menu;
 
+	//! 'Joystick Settings' menu
+	BootMenu _joy_settings_menu;
+
 	
 	/*!
 	 *  \brief Animates the game logo when this class is first initialized.
@@ -147,6 +150,9 @@ private:
 	//! Waits infinitely for a key press 
 	SDLKey _WaitKeyPress();
 
+	//! Waits infinitely for a joystick press 
+	uint8 _WaitJoyPress();
+
 	/**
 	*** \brief Redefines a key to be mapped to another command. Waits for keypress using _WaitKeyPress()
 	**/
@@ -164,6 +170,19 @@ private:
 	void _RedefinePauseKey();
 	//@}
 
+	/**
+	*** \brief Redefines a joystick button to be mapped to another command. Waits for press using _WaitJoyPress()
+	**/
+	//@{	
+	void _RedefineConfirmJoy();
+	void _RedefineCancelJoy();
+	void _RedefineMenuJoy();
+	void _RedefineSwapJoy();
+	void _RedefineLeftSelectJoy();
+	void _RedefineRightSelectJoy();
+	void _RedefinePauseJoy();
+	//@}
+
 	//! Inits the main menu
 	void _SetupMainMenu();
 	//! Inits the options menu
@@ -174,6 +193,8 @@ private:
 	void _SetupAudioOptionsMenu();
 	//! Inits the key-settings menu
 	void _SetupKeySetttingsMenu();
+	//! Inits the joystick-settings menu
+	void _SetupJoySetttingsMenu();
 
 	// Main Menu handlers
 	//! 'New Game' confirmed
@@ -194,6 +215,8 @@ private:
 	void _OnAudioOptions();
 	//! 'Key settings' confirmed
 	void _OnKeySettings();
+	//! 'Joystick settings' confirmed
+	void _OnJoySettings();
 
 	//! 'Video mode' confirmed
 	void _OnVideoMode();
@@ -211,6 +234,9 @@ private:
 	//! Restores default key settings
 	void _OnRestoreDefaultKeys();
 
+	//! Restores default joystick settings
+	void _OnRestoreDefaultJoyButtons();
+
 	//! Updates the video options screen
 	void _UpdateVideoOptions();
 
@@ -219,6 +245,9 @@ private:
 
 	//! Updates the key settings screen
 	void _UpdateKeySettings();
+
+	//! Updates the joystick settings screen
+	void _UpdateJoySettings();
 
 public:
 	//! Initializes class members and loads media data.

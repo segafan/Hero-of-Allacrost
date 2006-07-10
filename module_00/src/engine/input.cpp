@@ -188,6 +188,34 @@ bool GameInput::RestoreDefaultKeys() {
 }
 
 
+// Loads the default joystick settings from the lua file and sets them back
+bool GameInput::RestoreDefaultJoyButtons()
+{
+	// Load the settings file
+	string in_filename = "dat/config/settings.lua";
+	ReadDataDescriptor settings_file;
+	if (!settings_file.OpenFile(in_filename.c_str())) {
+		cerr << "INPUT ERROR: failed to open data file for reading: " << in_filename << endl;
+		return false;
+	}
+
+	// Load all default buttons from the table
+	settings_file.OpenTable("joystick_defaults");
+	_joystick.confirm      = static_cast<uint8>(settings_file.ReadInt("confirm"));
+	_joystick.cancel       = static_cast<uint8>(settings_file.ReadInt("cancel"));
+	_joystick.menu         = static_cast<uint8>(settings_file.ReadInt("menu"));
+	_joystick.swap         = static_cast<uint8>(settings_file.ReadInt("swap"));
+	_joystick.left_select  = static_cast<uint8>(settings_file.ReadInt("left_select"));
+	_joystick.right_select = static_cast<uint8>(settings_file.ReadInt("right_select"));
+	_joystick.pause        = static_cast<uint8>(settings_file.ReadInt("pause"));
+	settings_file.CloseTable();
+
+	settings_file.CloseFile();
+
+	return true;
+}
+
+
 // Handles all of the event processing for the game.
 void GameInput::EventHandler() {
 	SDL_Event event;	// Holds the game event
@@ -704,6 +732,56 @@ void GameInput::_SetNewKey(SDLKey & old_key, SDLKey new_key)
 
 	old_key = new_key; // Otherwise simply overwrite the old value
 } // end GameInput::_SetNewKey(SDLKey & old_key, SDLKey new_key)
+
+
+// Sets a new joystick button over an older one. If the same button is used elsewhere, the older one is removed
+void GameInput::_SetNewJoyButton(uint8 & old_button, uint8 new_button)
+{
+	if (_joystick.confirm == new_button)  // confirm button used already
+	{
+		_joystick.confirm = old_button;
+		old_button = new_button;
+		return;
+	}
+	if (_joystick.cancel == new_button)  // cancel button used already
+	{
+		_joystick.cancel = old_button;
+		old_button = new_button;
+		return;
+	}
+	if (_joystick.menu == new_button)  // menu button used already
+	{
+		_joystick.menu = old_button;
+		old_button = new_button;
+		return;
+	}
+	if (_joystick.swap == new_button)  // swap button used already
+	{
+		_joystick.swap = old_button;
+		old_button = new_button;
+		return;
+	}
+	if (_joystick.left_select == new_button)  // left_select button used already
+	{
+		_joystick.left_select = old_button;
+		old_button = new_button;
+		return;
+	}
+	if (_joystick.right_select == new_button)  // right_select button used already
+	{
+		_joystick.right_select = old_button;
+		old_button = new_button;
+		return;
+	}
+	if (_joystick.pause == new_button)  // pause button used already
+	{
+		_joystick.pause = old_button;
+		old_button = new_button;
+		return;
+	}
+
+	old_button = new_button; // Otherwise simply overwrite the old value
+} // end GameInput::_SetNewJoyButton(uint8 & old_button, uint8 new_button)
 
 
 } // namespace hoa_input
