@@ -309,6 +309,8 @@ private:
 
 	//! The dialogue box used by map mode.
 	hoa_video::StillImage _dialogue_box;
+	//! The dialogue nameplate used by map mode.
+	hoa_video::StillImage _dialogue_nameplate;
 	//! The window for sprite dialogues.
 	hoa_video::MenuWindow _dialogue_window;
 	//! The textbox for sprite dialogues.

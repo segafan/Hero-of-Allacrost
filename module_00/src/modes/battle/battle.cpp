@@ -1144,6 +1144,9 @@ BattleMode::BattleMode() :
         _performing_script(false),
         _battle_over(false)
 {
+	MusicDescriptor MD;
+	MD.LoadMusic("Confrontation");
+	_battle_music.push_back(MD);
         Reset();
         
         _TEMP_LoadTestData();
@@ -1176,6 +1179,7 @@ void BattleMode::Reset() {
         //VideoManager->SetCoordSys(0.0f, (float)SCREEN_LENGTH, 0.0f, (float)SCREEN_HEIGHT);
         VideoManager->SetCoordSys(0.0f, (float)SCREEN_LENGTH*TILE_SIZE, 0.0f,  (float)SCREEN_HEIGHT*TILE_SIZE);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
+	_battle_music[0].PlayMusic();
 }
 
 //! Wrapper function that calls different update functions depending on the battle state.

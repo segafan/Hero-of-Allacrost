@@ -528,6 +528,8 @@ private:
 	std::vector<hoa_audio::MusicDescriptor> _battle_music;
 	//std::vector<hoa_audio::SoundDescriptor> _battle_sound;
 
+	//! The music that is played during the battle
+
 	//! Current list of actors 
 	std::deque<private_battle::PlayerActor *> _player_actors;
 	
