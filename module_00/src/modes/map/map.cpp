@@ -320,7 +320,6 @@ void MapMode::LoadMap() {
 	sp->SetColPosition(4);
 	sp->SetAltitude(1);
 	sp->SetStepSpeed(NORMAL_SPEED);
-	sp->SetAltitude(1);
 	sp->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
 	sp->SetFilename("img/sprites/map/laila");
 	sp->SetPortrait("img/portraits/map/laila.png");
@@ -384,7 +383,6 @@ void MapMode::LoadMap() {
 	sp->SetColPosition(21);
 	sp->SetAltitude(1);
 	sp->SetStepSpeed(SLOW_SPEED);
-	sp->SetAltitude(1);
 	sp->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
 	sp->SetFilename("img/sprites/map/marcus");
 	sp->SetPortrait("img/portraits/Laila-Father-ingame.png");
@@ -394,18 +392,18 @@ void MapMode::LoadMap() {
 
 	sd = new SpriteDialogue();
 	sd->text.push_back(MakeWideString("My moustache tickles me."));
-	sd->speakers.push_back(1); // NPC speaks
+	sd->speakers.push_back(2); // NPC speaks
 	sd->text.push_back(MakeWideString("Why don't you shave it off then? Or at least trim it..."));
 	sd->speakers.push_back(0); // Player speaks
 	sd->text.push_back(MakeWideString("Because moustaches are fashionable these days. I have to keep up with the times!"));
-	sd->speakers.push_back(1); // NPC speaks
+	sd->speakers.push_back(2); // NPC speaks
 	sd->text.push_back(MakeWideString("....."));
 	sd->speakers.push_back(0); // NPC speaks
 	sp->dialogues.push_back(sd);
 
 	sd = new SpriteDialogue();
 	sd->text.push_back(MakeWideString("I know kung fu."));
-	sd->speakers.push_back(1); // NPC speaks
+	sd->speakers.push_back(2); // NPC speaks
 	sd->text.push_back(MakeWideString("Show me."));
 	sd->speakers.push_back(0); // Player speaks
 	sp->dialogues.push_back(sd);
@@ -456,7 +454,6 @@ void MapMode::LoadMap() {
 	sp->SetColPosition(6);
 	sp->SetAltitude(1);
 	sp->SetStepSpeed(FAST_SPEED);
-	sp->SetAltitude(1);
 	sp->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
 	sp->SetFilename("img/sprites/map/vanica");
 	sp->SetDirection(EAST);
@@ -465,7 +462,7 @@ void MapMode::LoadMap() {
 
 	sd = new SpriteDialogue();
 	sd->text.push_back(MakeWideString("You will never be able to guess my real age."));
-	sd->speakers.push_back(1); // NPC speaks
+	sd->speakers.push_back(3); // NPC speaks
 	sp->dialogues.push_back(sd);
 	
 	sa = new ActionPathMove();
@@ -507,7 +504,6 @@ void MapMode::LoadMap() {
 	sp->SetColPosition(36);
 	sp->SetAltitude(1);
 	sp->SetStepSpeed(NORMAL_SPEED);
-	sp->SetAltitude(1);
 	sp->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
 	sp->SetFilename("img/sprites/map/rags_woman");
 	sp->SetDirection(NORTH);
@@ -516,7 +512,7 @@ void MapMode::LoadMap() {
 
 	sd = new SpriteDialogue();
 	sd->text.push_back(MakeWideString("Is there no exit out of this stinking cave?"));
-	sd->speakers.push_back(1); // NPC speaks
+	sd->speakers.push_back(4); // NPC speaks
 	sp->dialogues.push_back(sd);
 	
 	sa = new ActionPathMove();
@@ -1389,6 +1385,8 @@ void MapMode::Draw() {
 			(_sky_objects[i])->Draw();
 		}
 	}
+
+	VideoManager->DrawFullscreenOverlay(Color(0.0f, 0.0f, 0.0f, 0.5f));
 
 	// ************** (8) Draw the dialogue menu and text *************
 	if (_map_state == DIALOGUE) {
