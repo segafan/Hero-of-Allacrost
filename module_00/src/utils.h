@@ -60,6 +60,7 @@
 
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <vector>
 #include <list>
 #include <map>
@@ -250,6 +251,20 @@ bool MakeDirectory(const std::string &directoryName);
  ******************************************************************************/
 
 bool RemoveDirectory(const std::string &directoryName);
+
+
+/******************************************************************************
+ * std::string ToString(const T)
+ *
+ *	Converts any given integer type into a string using stringstreams
+ ******************************************************************************/
+template <typename T>
+std::string ToString(const T t)
+{
+	std::ostringstream text("");
+	text << static_cast<int32>(t);
+	return text.str();
+}
 
 
 /******************************************************************************

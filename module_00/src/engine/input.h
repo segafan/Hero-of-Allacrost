@@ -273,6 +273,12 @@ private:
 	*** \param new_key key to replace the old value
 	**/
 	void _SetNewKey(SDLKey & old_key, SDLKey new_key);
+
+	/** \brief Sets a new joystick button over an older one. If the same button is used elsewhere, the older one is removed
+	*** \param old_button to be replaced (_joystick.confirm for example)
+	*** \param new_button button to replace the old value
+	**/
+	void _SetNewJoyButton(uint8 & old_button, uint8 new_button);
 public:
 	SINGLETON_METHODS(GameInput);
 
@@ -280,6 +286,11 @@ public:
 	*** \return Returns false if the settings file couldn't be read
 	**/
 	bool RestoreDefaultKeys();
+
+	/** \brief Loads the default joystick settings from the lua file and sets them back
+	*** \return Returns false if the settings file couldn't be read
+	**/
+	bool RestoreDefaultJoyButtons();
 
 	/** \brief Examines the SDL queue for all user input events and calls appropriate sub-functions.
 	***
@@ -385,6 +396,19 @@ public:
 	std::string GetLeftSelectKeyName() const { return SDL_GetKeyName(_key.left_select); }
 	std::string GetRightSelectKeyName() const { return SDL_GetKeyName(_key.right_select); }
 	std::string GetPauseKeyName() const { return SDL_GetKeyName(_key.pause); }
+	//@}
+
+	/** \name   Currently set joystick buttons' access functions
+	*** \return Joystick button number for the action
+	**/
+	//@{
+	std::string GetConfirmJoy() const { return std::string("Button ") + hoa_utils::ToString(_joystick.confirm); }
+	std::string GetCancelJoy() const { return std::string("Button ") + hoa_utils::ToString(_joystick.cancel); }
+	std::string GetMenuJoy() const { return std::string("Button ") + hoa_utils::ToString(_joystick.menu); }
+	std::string GetSwapJoy() const { return std::string("Button ") + hoa_utils::ToString(_joystick.swap); }
+	std::string GetLeftSelectJoy() const { return std::string("Button ") + hoa_utils::ToString(_joystick.left_select); }
+	std::string GetRightSelectJoy() const { return std::string("Button ") + hoa_utils::ToString(_joystick.right_select); }
+	std::string GetPauseJoy() const { return std::string("Button ") + hoa_utils::ToString(_joystick.pause); }
 	//@}	
 
 	/** \name   Sets new keymappings
@@ -402,6 +426,19 @@ public:
 	void SetLeftSelectKey(const SDLKey & key) { _SetNewKey(_key.left_select, key); }
 	void SetRightSelectKey(const SDLKey & key) { _SetNewKey(_key.right_select, key); }
 	void SetPauseKey(const SDLKey & key) { _SetNewKey(_key.pause, key); }
+	//@}
+
+	/** \name   Sets new joystick buttons
+	*** \param	key New button for the action
+	**/
+	//@{
+	void SetConfirmJoy(uint8 button) { _SetNewJoyButton(_joystick.confirm, button); }
+	void SetCancelJoy(uint8 button) { _SetNewJoyButton(_joystick.cancel, button); }
+	void SetMenuJoy(uint8 button) { _SetNewJoyButton(_joystick.menu, button); }
+	void SetSwapJoy(uint8 button) { _SetNewJoyButton(_joystick.swap, button); }
+	void SetLeftSelectJoy(uint8 button) { _SetNewJoyButton(_joystick.left_select, button); }
+	void SetRightSelectJoy(uint8 button) { _SetNewJoyButton(_joystick.right_select, button); }
+	void SetPauseJoy(uint8 button) { _SetNewJoyButton(_joystick.pause, button); }
 	//@}
 
 }; // class GameInput

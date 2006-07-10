@@ -147,6 +147,7 @@ _fade_out(false) // No, we're not fading out yet!
 	_SetupVideoOptionsMenu();
 	_SetupAudioOptionsMenu();
 	_SetupKeySetttingsMenu();
+	_SetupJoySetttingsMenu();
 
 	// Set the main menu as our currently selected menu
 	_current_menu = &_main_menu;
@@ -355,6 +356,18 @@ SDLKey BootMode::_WaitKeyPress() {
 }
 
 
+// Waits infinitely for a joystick press 
+uint8 BootMode::_WaitJoyPress() {
+	SDL_Event event;
+	while (SDL_WaitEvent(&event)) {
+		if (event.type == SDL_JOYBUTTONDOWN)
+			return event.jbutton.button;
+	}
+
+	return event.jbutton.button;
+}
+
+
 // Redefines a key to be mapped to another command. Waits for keypress using _WaitKeyPress()
 void BootMode::_RedefineUpKey() {
 	InputManager->SetUpKey(_WaitKeyPress());
@@ -411,6 +424,38 @@ void BootMode::_RedefinePauseKey() {
 	_UpdateKeySettings();
 }
 
+
+// Redefines a joystick button to be mapped to another command. Waits for press using _WaitJoyPress()	
+void BootMode::_RedefineConfirmJoy() {
+	InputManager->SetConfirmJoy(_WaitJoyPress());
+	_UpdateJoySettings();
+}
+void BootMode::_RedefineCancelJoy() {
+	InputManager->SetCancelJoy(_WaitJoyPress());
+	_UpdateJoySettings();
+}
+void BootMode::_RedefineMenuJoy() {
+	InputManager->SetMenuJoy(_WaitJoyPress());
+	_UpdateJoySettings();
+}
+void BootMode::_RedefineSwapJoy() {
+	InputManager->SetSwapJoy(_WaitJoyPress());
+	_UpdateJoySettings();
+}
+void BootMode::_RedefineLeftSelectJoy() {
+	InputManager->SetLeftSelectJoy(_WaitJoyPress());
+	_UpdateJoySettings();
+}
+void BootMode::_RedefineRightSelectJoy() {
+	InputManager->SetRightSelectJoy(_WaitJoyPress());
+	_UpdateJoySettings();
+}
+void BootMode::_RedefinePauseJoy() {
+	InputManager->SetPauseJoy(_WaitJoyPress());
+	_UpdateJoySettings();
+}
+
+
 // Inits the main menu
 void BootMode::_SetupMainMenu() {
 
@@ -431,11 +476,10 @@ void BootMode::_SetupOptionsMenu() {
 	_options_menu.AddOption(MakeWideString("Audio"), &BootMode::_OnAudioOptions);
 	_options_menu.AddOption(MakeWideString("Language"));
 	_options_menu.AddOption(MakeWideString("Key Settings"), &BootMode::_OnKeySettings);
-	_options_menu.AddOption(MakeWideString("Joystick Settings"));
+	_options_menu.AddOption(MakeWideString("Joystick Settings"), &BootMode::_OnJoySettings);
 
 	// Disable some of the options
 	_options_menu.EnableOption(2, false); // Language
-	_options_menu.EnableOption(4, false); // Joystick
 
 	_options_menu.SetWindowed(true);
 	_options_menu.SetParent(&_main_menu);
@@ -469,8 +513,7 @@ void BootMode::_SetupAudioOptionsMenu()
 
 
 // Inits the key-settings menu
-void BootMode::_SetupKeySetttingsMenu()
-{
+void BootMode::_SetupKeySetttingsMenu() {
 	_key_settings_menu.AddOption(MakeWideString("Up: "), &BootMode::_RedefineUpKey);
 	_key_settings_menu.AddOption(MakeWideString("Down: "), &BootMode::_RedefineDownKey);
 	_key_settings_menu.AddOption(MakeWideString("Left: "), &BootMode::_RedefineLeftKey);
@@ -487,16 +530,29 @@ void BootMode::_SetupKeySetttingsMenu()
 	_key_settings_menu.SetWindowed(true);
 	_key_settings_menu.SetParent(&_options_menu);
 	_key_settings_menu.SetTextDensity(30.0f); // Shorten the distance between text lines
+}
 
+
+void BootMode::_SetupJoySetttingsMenu() {
+	_joy_settings_menu.AddOption(MakeWideString("Confirm: "), &BootMode::_RedefineConfirmJoy);
+	_joy_settings_menu.AddOption(MakeWideString("Cancel: "), &BootMode::_RedefineCancelJoy);
+	_joy_settings_menu.AddOption(MakeWideString("Menu: "), &BootMode::_RedefineMenuJoy);
+	_joy_settings_menu.AddOption(MakeWideString("Swap: "), &BootMode::_RedefineSwapJoy);
+	_joy_settings_menu.AddOption(MakeWideString("Left Select: "), &BootMode::_RedefineLeftSelectJoy);
+	_joy_settings_menu.AddOption(MakeWideString("Right Select: "), &BootMode::_RedefineRightSelectJoy);
+	_joy_settings_menu.AddOption(MakeWideString("Pause: "), &BootMode::_RedefinePauseJoy);
+
+	_joy_settings_menu.AddOption(MakeWideString("Restore default buttons"), &BootMode::_OnRestoreDefaultJoyButtons);
+	_joy_settings_menu.SetWindowed(true);
+	_joy_settings_menu.SetParent(&_options_menu);
+	_joy_settings_menu.SetTextDensity(40.0f); // Shorten the distance between text lines
 }
 
 
 // Main menu handlers
 // 'New Game' confirmed
-void BootMode::_OnNewGame()
-{
-	if (BOOT_DEBUG)
-		cout << "BOOT: Starting new game." << endl;
+void BootMode::_OnNewGame() {
+	if (BOOT_DEBUG)	cout << "BOOT: Starting new game." << endl;
 	
 	GlobalCharacter *claud = new GlobalCharacter("Claudius", "claudius", GLOBAL_CLAUDIUS);
 	GlobalManager->AddCharacter(claud);
@@ -508,10 +564,8 @@ void BootMode::_OnNewGame()
 
 
 // 'Load Game' confirmed. Actually it simply loads battle mode demo at the moment :devil:
-void BootMode::_OnLoadGame()
-{
-	if (BOOT_DEBUG)
-		cout << "BOOT: Entering battle mode" << endl;
+void BootMode::_OnLoadGame() {
+	if (BOOT_DEBUG) cout << "BOOT: Entering battle mode" << endl;
 
 	BattleMode *BM = new BattleMode();
 	ModeManager->Pop();
@@ -520,15 +574,13 @@ void BootMode::_OnLoadGame()
 
 
 // 'Options' confirmed
-void BootMode::_OnOptions()
-{
+void BootMode::_OnOptions() {
 	_current_menu = &_options_menu;
 }
 
 
 // 'Credits' confirmed
-void BootMode::_OnCredits()
-{
+void BootMode::_OnCredits() {
 	_credits_screen.Show();
 }
 
@@ -558,16 +610,21 @@ void BootMode::_OnAudioOptions()
 
 
 // 'Key settings' confirmed
-void BootMode::_OnKeySettings()
-{
+void BootMode::_OnKeySettings() {
 	_current_menu = &_key_settings_menu;
 	_UpdateKeySettings();
 }
 
 
+// 'Joystick settings' confirmed
+void BootMode::_OnJoySettings() {
+	_current_menu = &_joy_settings_menu;
+	_UpdateJoySettings();
+}
+
+
 // 'Video mode' confirmed
-void BootMode::_OnVideoMode()
-{
+void BootMode::_OnVideoMode() {
 	// Toggle fullscreen / windowed
 	VideoManager->ToggleFullscreen();
 	VideoManager->ApplySettings();
@@ -577,8 +634,7 @@ void BootMode::_OnVideoMode()
 
 
 // Sound volume down
-void BootMode::_OnSoundLeft()
-{
+void BootMode::_OnSoundLeft() {
 	AudioManager->SetSoundVolume(AudioManager->GetSoundVolume() - 0.1f);
 	_UpdateAudioOptions();
 	_boot_sounds.at(0).PlaySound(); // Play a sound for user to hear new volume level. TODO: Find a better sound here!
@@ -586,8 +642,7 @@ void BootMode::_OnSoundLeft()
 
 
 // Sound volume up
-void BootMode::_OnSoundRight()
-{
+void BootMode::_OnSoundRight() {
 	AudioManager->SetSoundVolume(AudioManager->GetSoundVolume() + 0.1f);
 	_UpdateAudioOptions();
 	_boot_sounds.at(0).PlaySound(); // Play a sound for user to hear new volume level
@@ -595,32 +650,35 @@ void BootMode::_OnSoundRight()
 
 
 // Music volume down
-void BootMode::_OnMusicLeft()
-{
+void BootMode::_OnMusicLeft() {
 	AudioManager->SetMusicVolume(AudioManager->GetMusicVolume() - 0.1f);
 	_UpdateAudioOptions();
 }
 
 
 // Music volume up
-void BootMode::_OnMusicRight()
-{
+void BootMode::_OnMusicRight() {
 	AudioManager->SetMusicVolume(AudioManager->GetMusicVolume() + 0.1f);
 	_UpdateAudioOptions();
 }
 
 
 // Restores default key settings
-void BootMode::_OnRestoreDefaultKeys()
-{
+void BootMode::_OnRestoreDefaultKeys() {
 	InputManager->RestoreDefaultKeys();
 	_UpdateKeySettings();
 }
 
 
+// Restores default joystick settings
+void BootMode::_OnRestoreDefaultJoyButtons() {
+	InputManager->RestoreDefaultJoyButtons();
+	_UpdateJoySettings();
+}
+
+
 // Updates the video options screen
-void BootMode::_UpdateVideoOptions()
-{
+void BootMode::_UpdateVideoOptions() {
 	// Update resolution text
 	std::ostringstream resolution("");
 	resolution << "Resolution: " << VideoManager->GetWidth() << " x " << VideoManager->GetHeight();
@@ -638,8 +696,7 @@ void BootMode::_UpdateVideoOptions()
 
 
 // Updates the audio options screen
-void BootMode::_UpdateAudioOptions()
-{
+void BootMode::_UpdateAudioOptions() {
 	std::ostringstream sound_volume("");
 	sound_volume << "Sound Volume: " << static_cast<int32>(AudioManager->GetSoundVolume() * 100.0f + 0.5f) << " %";
 
@@ -652,8 +709,7 @@ void BootMode::_UpdateAudioOptions()
 
 
 // Updates the key settings screen
-void BootMode::_UpdateKeySettings()
-{
+void BootMode::_UpdateKeySettings() {
 	// Update key names
 	_key_settings_menu.SetOptionText(0, MakeWideString("Move Up: " + InputManager->GetUpKeyName()));
 	_key_settings_menu.SetOptionText(1, MakeWideString("Move Down: " + InputManager->GetDownKeyName()));
@@ -666,6 +722,17 @@ void BootMode::_UpdateKeySettings()
 	_key_settings_menu.SetOptionText(8, MakeWideString("Left Select: " + InputManager->GetLeftSelectKeyName()));
 	_key_settings_menu.SetOptionText(9, MakeWideString("Right Select: " + InputManager->GetRightSelectKeyName()));
 	_key_settings_menu.SetOptionText(10, MakeWideString("Pause: " + InputManager->GetPauseKeyName()));
+}
+
+
+void BootMode::_UpdateJoySettings() {
+	_joy_settings_menu.SetOptionText(0, MakeWideString("Confirm: " + InputManager->GetConfirmJoy()));
+	_joy_settings_menu.SetOptionText(1, MakeWideString("Cancel: " + InputManager->GetCancelJoy()));
+	_joy_settings_menu.SetOptionText(2, MakeWideString("Menu: " + InputManager->GetMenuJoy()));
+	_joy_settings_menu.SetOptionText(3, MakeWideString("Swap: " + InputManager->GetSwapJoy()));
+	_joy_settings_menu.SetOptionText(4, MakeWideString("Left Select: " + InputManager->GetLeftSelectJoy()));
+	_joy_settings_menu.SetOptionText(5, MakeWideString("Right Select: " + InputManager->GetRightSelectJoy()));
+	_joy_settings_menu.SetOptionText(6, MakeWideString("Pause: " + InputManager->GetPauseJoy()));
 }
 
 
