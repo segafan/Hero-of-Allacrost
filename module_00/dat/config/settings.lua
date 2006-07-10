@@ -50,8 +50,8 @@ key_settings.confirm = 102
 key_settings.cancel = 100
 key_settings.menu = 115
 key_settings.swap = 97
-key_settings.right_select = 119
-key_settings.left_select = 101
+key_settings.left_select = 119
+key_settings.right_select = 101
 key_settings.pause = 32
 
 --[[ JOYSTICK CONFIGURATION NOTES --

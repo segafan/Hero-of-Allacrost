@@ -267,8 +267,19 @@ private:
 	*** \param js_event The event to process
 	**/
 	void _JoystickEventHandler(SDL_Event& js_event);
+
+	/** \brief Sets a new key over an older one. If the same key is used elsewhere, the older one is removed
+	*** \param old_key key to be replaced (_key.up for example)
+	*** \param new_key key to replace the old value
+	**/
+	void _SetNewKey(SDLKey & old_key, SDLKey new_key);
 public:
 	SINGLETON_METHODS(GameInput);
+
+	/** \brief Loads the default key settings from the lua file and sets them back
+	*** \return Returns false if the settings file couldn't be read
+	**/
+	bool RestoreDefaultKeys();
 
 	/** \brief Examines the SDL queue for all user input events and calls appropriate sub-functions.
 	***
@@ -358,6 +369,41 @@ public:
 	bool RightSelectRelease() 
 		{ return _right_select_release; }
 	//@}
+
+	/** \name   Currently set key names' access functions
+	*** \return SDLKey number according to the currently set key
+	**/
+	//@{
+	std::string GetUpKeyName() const { return SDL_GetKeyName(_key.up); }
+	std::string GetDownKeyName() const { return SDL_GetKeyName(_key.down); }
+	std::string GetLeftKeyName() const { return SDL_GetKeyName(_key.left); }
+	std::string GetRightKeyName() const { return SDL_GetKeyName(_key.right); }
+	std::string GetConfirmKeyName() const { return SDL_GetKeyName(_key.confirm); }
+	std::string GetCancelKeyName() const { return SDL_GetKeyName(_key.cancel); }
+	std::string GetMenuKeyName() const { return SDL_GetKeyName(_key.menu); }
+	std::string GetSwapKeyName() const { return SDL_GetKeyName(_key.swap); }
+	std::string GetLeftSelectKeyName() const { return SDL_GetKeyName(_key.left_select); }
+	std::string GetRightSelectKeyName() const { return SDL_GetKeyName(_key.right_select); }
+	std::string GetPauseKeyName() const { return SDL_GetKeyName(_key.pause); }
+	//@}	
+
+	/** \name   Sets new keymappings
+	*** \param	key New key for the action
+	**/
+	//@{
+	void SetUpKey(const SDLKey & key) { _SetNewKey(_key.up, key); }
+	void SetDownKey(const SDLKey & key) { _SetNewKey(_key.down, key); }
+	void SetLeftKey(const SDLKey & key) { _SetNewKey(_key.left, key); }
+	void SetRightKey(const SDLKey & key) { _SetNewKey(_key.right, key); }
+	void SetConfirmKey(const SDLKey & key) { _SetNewKey(_key.confirm, key); }
+	void SetCancelKey(const SDLKey & key) { _SetNewKey(_key.cancel, key); }
+	void SetMenuKey(const SDLKey & key) { _SetNewKey(_key.menu, key); }
+	void SetSwapKey(const SDLKey & key) { _SetNewKey(_key.swap, key); }
+	void SetLeftSelectKey(const SDLKey & key) { _SetNewKey(_key.left_select, key); }
+	void SetRightSelectKey(const SDLKey & key) { _SetNewKey(_key.right_select, key); }
+	void SetPauseKey(const SDLKey & key) { _SetNewKey(_key.pause, key); }
+	//@}
+
 }; // class GameInput
 
 } // namespace hoa_input

@@ -75,6 +75,11 @@ public:
 	**/
 	void SetParent(BootMenu * parent);
 
+	/** \brief Sets new text density
+	*** \param density A new density value
+	**/
+	void SetTextDensity(float density);
+
 	/** \brief Updates menu events. Call this every frame just like you would do on OptionBox!
 	*** \return The event code from OptionBox::GetEvent()
 	**/

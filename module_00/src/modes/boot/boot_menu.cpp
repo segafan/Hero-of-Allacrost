@@ -111,7 +111,7 @@ void BootMenu::SetWindowed(bool windowed)
 	{
 		_current_menu.SetFont("default");
 		_current_menu.SetCellSize(192.0f, 50.0f);
-		_current_menu.SetPosition(410.0f, 200.0f);
+		_current_menu.SetPosition(430.0f, 200.0f);
 		_current_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 		_current_menu.SetOptionAlignment(VIDEO_X_RIGHT, VIDEO_Y_CENTER);
 		_current_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
@@ -127,6 +127,16 @@ void BootMenu::SetWindowed(bool windowed)
 void BootMenu::SetParent(BootMenu * parent)
 {
 	_parent_menu = parent;
+}
+
+
+// Sets new text density
+void BootMenu::SetTextDensity(float density)
+{
+	if (_is_windowed)
+		_current_menu.SetCellSize(192.0f, density); // Vertical
+	else
+		_current_menu.SetCellSize(density, 50.0f); // Horizontal
 }
 
 

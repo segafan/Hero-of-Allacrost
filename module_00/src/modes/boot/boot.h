@@ -102,6 +102,9 @@ private:
 	//! 'Audio Options' menu
 	BootMenu _audio_options_menu;
 
+	//! 'Key Settings' menu
+	BootMenu _key_settings_menu;
+
 	
 	/*!
 	 *  \brief Animates the game logo when this class is first initialized.
@@ -141,12 +144,25 @@ private:
 	//! Stops playback of the opening animation
 	void _EndOpeningAnimation();
 
+	//! Waits infinitely for a key press 
+	SDLKey _WaitKeyPress();
 
-	/*!
-	 *  \brief Redefines a key to be mapped to another command.
-	 *  \param &change_key The key to be re-mapped.
-	 */
-	void _RedefineKey(SDLKey& change_key);
+	/**
+	*** \brief Redefines a key to be mapped to another command. Waits for keypress using _WaitKeyPress()
+	**/
+	//@{
+	void _RedefineUpKey();
+	void _RedefineDownKey();
+	void _RedefineLeftKey();
+	void _RedefineRightKey();
+	void _RedefineConfirmKey();
+	void _RedefineCancelKey();
+	void _RedefineMenuKey();
+	void _RedefineSwapKey();
+	void _RedefineLeftSelectKey();
+	void _RedefineRightSelectKey();
+	void _RedefinePauseKey();
+	//@}
 
 	//! Inits the main menu
 	void _SetupMainMenu();
@@ -156,6 +172,8 @@ private:
 	void _SetupVideoOptionsMenu();
 	//! Inits the audio-options menu
 	void _SetupAudioOptionsMenu();
+	//! Inits the key-settings menu
+	void _SetupKeySetttingsMenu();
 
 	// Main Menu handlers
 	//! 'New Game' confirmed
@@ -174,6 +192,8 @@ private:
 	void _OnVideoOptions();
 	//! 'Audio' confirmed
 	void _OnAudioOptions();
+	//! 'Key settings' confirmed
+	void _OnKeySettings();
 
 	//! 'Video mode' confirmed
 	void _OnVideoMode();
@@ -188,11 +208,17 @@ private:
 	void _OnMusicRight();
 
 
+	//! Restores default key settings
+	void _OnRestoreDefaultKeys();
+
 	//! Updates the video options screen
 	void _UpdateVideoOptions();
 
 	//! Updates the audio options screen
 	void _UpdateAudioOptions();
+
+	//! Updates the key settings screen
+	void _UpdateKeySettings();
 
 public:
 	//! Initializes class members and loads media data.
