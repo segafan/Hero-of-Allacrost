@@ -79,6 +79,34 @@ public:
 	void Update();
 };
 
+/*!***************************************************************
+ * \brief Represents the Status window, displaying all the information
+ *		  about the character.
+ *
+ * This window display all the attributes, and the equipment of a
+ * character.  You can scroll through them all as well, to view all
+ * the different characters.
+ *****************************************************************/
+class StatusWindow : public hoa_video::MenuWindow
+{
+private:
+	//! \brief char portraits
+	hoa_video::StillImage _head_portrait;
+	hoa_video::StillImage _full_portrait;
+	//! \brief the current character for this screen.
+	hoa_global::GlobalCharacter *_current_char;
+public:
+	//! \brief constructor
+	StatusWindow();
+	//! \brief destructor
+	~StatusWindow();
+	//! \brief render this window to the screen.
+	bool Draw();
+
+	//! \brief update function handles input to the window
+	void Update();
+};
+
 /*!***********************************************************************
  * \brief Represents the inventory window to browse the party's inventory
  *

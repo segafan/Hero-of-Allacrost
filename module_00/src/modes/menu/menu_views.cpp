@@ -85,7 +85,7 @@ bool CharacterWindow::Draw()
 	// Draw Health
 	VideoManager->Move(x + 34, y + 300);
 	// convert to std::string
-	std::ostringstream os_health;
+	ostringstream os_health;
 	os_health << character->GetHP() << " / " << character->GetMaxHP();
 	std::string health = std::string("Health: ") + os_health.str();
 	if (!VideoManager->DrawText(MakeWideString(health)))
@@ -95,7 +95,7 @@ bool CharacterWindow::Draw()
 	VideoManager->MoveRelative(0, 40);
 	
 	// convert to std::string
-	std::ostringstream os_skill;
+	ostringstream os_skill;
 	os_skill << character->GetSP() << " / " << character->GetMaxSP();
 	std::string skill = std::string("Skill: ") + os_skill.str();
 	if (!VideoManager->DrawText(MakeWideString(skill)))
@@ -105,7 +105,7 @@ bool CharacterWindow::Draw()
 	VideoManager->MoveRelative(0, 40);
 	
 	// Convert to std::string
-	std::ostringstream os_xp;
+	ostringstream os_xp;
 	os_xp << character->GetXPForNextLevel();
 	std::string xp = std::string("XP Remaining: ") + os_xp.str();
 	if (!VideoManager->DrawText(MakeWideString(xp)))
@@ -139,7 +139,7 @@ void CharacterWindow::SetCharacter(GlobalCharacter *character)
 	this->_char_id = character->GetID();
 	
 	// TODO: Load the portrait
-	this->_portrait.SetFilename("img/menus/blank.png");
+	this->_portrait.SetFilename(string("img/portraits/menu/") + character->GetName() + string("_full.png"));
 	this->_portrait.SetStatic(true);
 	this->_portrait.SetDimensions(150, 200);
 	//this->_portrait.SetDimensions(Get_The_Dimensions);
@@ -156,7 +156,7 @@ InventoryWindow::InventoryWindow() : _inventory_active(false)
 	/////////////// DELETE THIS ////////////////////////////
 	// ONCE INVENTORY IS ADDING THROUGH THE RIGHT SPOT /////
 	////////////////////////////////////////////////////////
-	GlobalItem *new_item = new GlobalItem("HP Potion", GLOBAL_HP_RECOVERY_ITEM, GLOBAL_ALL_CHARACTERS, 1, 1, "img/icons/helmet2.png");
+	GlobalItem *new_item = new GlobalItem("HP Potion", GLOBAL_HP_RECOVERY_ITEM, GLOBAL_ALL_CHARACTERS, 1, 1, "img/icons/potion-red.png");
 	new_item->SetRecoveryAmount(20);
 	GlobalManager->AddItemToInventory(new_item);
 	GlobalManager->AddItemToInventory(new GlobalWeapon("Broadsword", GLOBAL_ALL_CHARACTERS, 2, 4, "img/icons/sword.png"));
@@ -248,6 +248,18 @@ void InventoryWindow::UpdateItemText()
 //-------------------------------------
 void InventoryWindow::Update()
 {
+	// Load sound effects
+	SoundDescriptor confirm;
+	SoundDescriptor cancel;
+	if (confirm.LoadSound("confirm") == false) 
+	{
+		cerr << "MENUMODE::UPDATE - Unable to load confirm sound effect!" << endl;
+	}
+	if (cancel.LoadSound("cancel") == false) 
+	{
+		cerr << "MENUMODE::UPDATE - Unable to load cancel sound effect!" << endl;
+	}
+
 	// Character window is active, no processing is needed for 
 	// inventory window.
 	if (_char_window.IsActive())
@@ -255,9 +267,10 @@ void InventoryWindow::Update()
 		// char select window is now cancelled.
 		if (InputManager->CancelPress())
 		{
-			// reactivate it
+			// deactivate it
 			if (_char_window.IsActive())
 			{
+				cancel.PlaySound();
 				_char_window.Activate(false);
 				_char_window.Hide();
 				// update item text.
@@ -308,6 +321,9 @@ void InventoryWindow::Update()
 				(item->GetUseCase() && GLOBAL_SP_RECOVERY_ITEM == GLOBAL_SP_RECOVERY_ITEM)
 				)
 			{
+				// Play Sound
+				confirm.PlaySound();
+				// Activate char select window
 				_char_window.Show();
 				_char_window.Activate(true);
 				_char_window.SetSelectedIndex(item_selected);
@@ -377,7 +393,6 @@ bool MiniCharacterSelectWindow::Draw()
 		StillImage portrait;
 		// TODO: This needs optimization, move the LoadImage - DeleteImage calls into constructor/destructor
 		portrait.SetFilename(string("img/sprites/map/") + string(current->GetName()) + string("_d0.png"));
-		//portrait.SetFilename("img/sprites/map/claudius_d0.png");
 		portrait.SetDimensions(32, 64);
 		portrait.SetStatic(true);
 		VideoManager->LoadImage(portrait);
@@ -432,6 +447,18 @@ void MiniCharacterSelectWindow::Activate(bool new_status)
 //------------------------------------------------------
 void MiniCharacterSelectWindow::Update()
 {
+	// Load sound effects
+	SoundDescriptor confirm;
+	SoundDescriptor bump;
+	if (confirm.LoadSound("obtain") == false) 
+	{
+		cerr << "MINICHARWINDOW::UPDATE - Unable to load confirm sound effect!" << endl;
+	}
+	if (bump.LoadSound("bump") == false) 
+	{
+		cerr << "MINICHARWINDOW::UPDATE - Unable to load bump sound effect!" << endl;
+	}
+
 	// Check input values
 	if (InputManager->ConfirmPress())
 	{
@@ -440,7 +467,14 @@ void MiniCharacterSelectWindow::Update()
 		GlobalCharacter *ch = GlobalManager->GetParty()[_current_char_selected];
 
 		if (selected->GetCount() == 0)
+		{
+			// no more items to use
+			bump.PlaySound();
 			return;
+		}
+
+		// Play Sound
+		confirm.PlaySound();
 
 		// increase hp
 		if (selected->GetUseCase() && GLOBAL_HP_RECOVERY_ITEM == GLOBAL_HP_RECOVERY_ITEM)
@@ -488,6 +522,114 @@ void MiniCharacterSelectWindow::Update()
 		else
 			_current_char_selected = 0;
 	}
+}
+
+//----------------------------------
+// StatusWindow::StatusWindow()
+//----------------------------------
+StatusWindow::StatusWindow()
+{
+	// Get the current character
+	_current_char = GlobalManager->GetParty()[0];
+	// Set up the head picture
+	//string path = string("img/sprites/map/") + string(_current_char->GetName()) + string("_d0.png");
+	string head_path = string("img/portraits/map/") + _current_char->GetName() + string(".png");
+	_head_portrait.SetFilename(head_path);
+	_head_portrait.SetStatic(true);
+	_head_portrait.SetDimensions(150, 200);
+	// Set up the full body portrait
+	string full_path = string("img/portraits/menu/") + _current_char->GetName() + string("_full_large.png");
+	_full_portrait.SetFilename(full_path);
+	_full_portrait.SetStatic(true);
+	_full_portrait.SetDimensions(224,350);
+	// Load image
+	VideoManager->LoadImage(_head_portrait);
+	VideoManager->LoadImage(_full_portrait);
+}
+
+//----------------------------------
+// StatusWindow::~StatusWindow()
+//----------------------------------
+StatusWindow::~StatusWindow()
+{
+	VideoManager->DeleteImage(_head_portrait);
+	VideoManager->DeleteImage(_full_portrait);
+}
+
+//-----------------------------------
+// StatusWindow::Draw
+//-----------------------------------
+bool StatusWindow::Draw()
+{
+	if (!MenuWindow::Draw())
+		return false;
+
+	// Set drawing system
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
+
+	// window top corner is 72, 84
+	VideoManager->Move(92, 104);
+	VideoManager->DrawImage(_head_portrait);
+
+	VideoManager->MoveRelative(10, 220);
+	VideoManager->DrawText(_current_char->GetName());
+
+	VideoManager->MoveRelative(0, 24);
+	// Draw Health
+	ostringstream os_health;
+	os_health << _current_char->GetHP() << " / " << _current_char->GetMaxHP();
+	string health = string("Health: ") + os_health.str();
+	if (!VideoManager->DrawText(MakeWideString(health)))
+		cerr << "STATUSWINDOW: ERROR > Couldn't draw health!" << endl;
+		
+	// Draw skill
+	VideoManager->MoveRelative(0, 24);
+	
+	// convert to std::string
+	ostringstream os_skill;
+	os_skill << _current_char->GetSP() << " / " << _current_char->GetMaxSP();
+	string skill = string("Skill: ") + os_skill.str();
+	if (!VideoManager->DrawText(MakeWideString(skill)))
+		cerr << "STATUSWINDOW: ERROR > Couldn't draw skill!" << endl;
+	
+	// Draw xp
+	VideoManager->MoveRelative(0, 24);
+	
+	// Convert to std::string
+	ostringstream os_xp;
+	os_xp << _current_char->GetXPForNextLevel();
+	string xp = string("XP Remaining: ") + os_xp.str();
+	if (!VideoManager->DrawText(MakeWideString(xp)))
+		cerr << "STATUSWINDOW: ERROR > Couldn't draw xp!" << endl;
+
+	// Draw stremgth
+	VideoManager->MoveRelative(160, -48);
+	ostringstream os_str;
+	os_str << _current_char->GetStrength();
+	string str = string("Strength: ") + os_str.str();
+	if (!VideoManager->DrawText(MakeWideString(str)))
+		cerr << "STATUSWINDOW: ERROR > Couldn't draw character strength!" << endl;
+
+	// Draw Intelligence
+	VideoManager->MoveRelative(0, 24);
+	ostringstream os_int;
+	os_int << _current_char->GetIntelligence();
+	string intelligence = string("Intelligence: ") + os_int.str();
+	if (!VideoManager->DrawText(MakeWideString(intelligence)))
+		cerr << "STATUSWINDOW: ERROR > Couldn't draw character intelligence!" << endl;
+
+	// Draw Agility
+	VideoManager->MoveRelative(0, 24);
+	ostringstream os_agi;
+	os_agi << _current_char->GetAgility();
+	string agi = string("Agility: ") + os_agi.str();
+	if (!VideoManager->DrawText(MakeWideString(agi)))
+		cerr << "STATUSWINDOW: ERROR > Couldn't draw character agility!" << endl;
+
+	VideoManager->Move(400, 104);
+	VideoManager->DrawImage(_full_portrait);
+
+	return true;
 }
 
 } // end namespace hoa_menu

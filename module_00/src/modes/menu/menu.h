@@ -148,6 +148,7 @@ private:
 	CharacterWindow _character_window3;
 	hoa_video::MenuWindow _bottom_window;
 	InventoryWindow _inventory_window;
+	StatusWindow _status_window;
 	//@}
 		
 	//! \brief The current option box to display
