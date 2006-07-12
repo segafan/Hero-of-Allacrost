@@ -54,15 +54,15 @@ MenuMode::MenuMode()
 	}
 	
 	// Init the location picture
-	_location_picture.SetFilename("img/menus/blank.png");
+	_location_picture.SetFilename("img/menus/location/caveLocationBar.png");
 	_location_picture.SetDimensions(500, 125);
 	_location_picture.SetStatic(true);
 	VideoManager->LoadImage(_location_picture);
 	
 	// DELETE THIS TOO!!
-	GlobalCharacter *laila = new GlobalCharacter("Laila", "laila", GLOBAL_LAILA);
-	if (GlobalManager->GetParty().size() < 2)
-		GlobalManager->AddCharacter(laila);
+	//GlobalCharacter *laila = new GlobalCharacter("Laila", "laila", GLOBAL_LAILA);
+	//if (GlobalManager->GetParty().size() < 2)
+	//	GlobalManager->AddCharacter(laila);
 	//GlobalCharacter *claud2 = new GlobalCharacter("Claudius", "claudius", GLOBAL_CLAUDIUS);
 	//GlobalManager->AddCharacter(claud2);
 	//GlobalCharacter *claud3 = new GlobalCharacter("Claudius", "claudius", GLOBAL_CLAUDIUS);
@@ -75,13 +75,16 @@ MenuMode::MenuMode()
 	GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetXP(35);
 	GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetXPNextLevel(156);
 	GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetXPLevel(100);
-	GlobalManager->GetCharacter(hoa_global::GLOBAL_LAILA)->SetHP(300);
-	GlobalManager->GetCharacter(hoa_global::GLOBAL_LAILA)->SetMaxHP(440);
-	GlobalManager->GetCharacter(hoa_global::GLOBAL_LAILA)->SetSP(300);
-	GlobalManager->GetCharacter(hoa_global::GLOBAL_LAILA)->SetMaxSP(370);
-	GlobalManager->GetCharacter(hoa_global::GLOBAL_LAILA)->SetXP(124);
-	GlobalManager->GetCharacter(hoa_global::GLOBAL_LAILA)->SetXPNextLevel(357);
-	GlobalManager->GetCharacter(hoa_global::GLOBAL_LAILA)->SetXPLevel(75);
+	GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetAgility(56);
+	GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetIntelligence(67);
+	GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetStrength(120);
+	//GlobalManager->GetCharacter(hoa_global::GLOBAL_LAILA)->SetHP(300);
+	//GlobalManager->GetCharacter(hoa_global::GLOBAL_LAILA)->SetMaxHP(440);
+	//GlobalManager->GetCharacter(hoa_global::GLOBAL_LAILA)->SetSP(300);
+	//GlobalManager->GetCharacter(hoa_global::GLOBAL_LAILA)->SetMaxSP(370);
+	//GlobalManager->GetCharacter(hoa_global::GLOBAL_LAILA)->SetXP(124);
+	//GlobalManager->GetCharacter(hoa_global::GLOBAL_LAILA)->SetXPNextLevel(357);
+	//GlobalManager->GetCharacter(hoa_global::GLOBAL_LAILA)->SetXPLevel(75);
 	GlobalManager->SetMoney(4236);
 	///////////////////////////////////////////
 	//////////////////////////////////////////
@@ -179,6 +182,11 @@ void MenuMode::Reset() {
 	_inventory_window.Create((float)(win_width * 4 + 16), (float)win_height, VIDEO_MENU_EDGE_ALL, VIDEO_MENU_EDGE_BOTTOM);
 	_inventory_window.SetPosition((float)start_x, (float)start_y);
 	_inventory_window.Show();
+
+	// Setup the status window
+	_status_window.Create((float)(win_width * 4 + 16), (float)win_height, VIDEO_MENU_EDGE_ALL, VIDEO_MENU_EDGE_BOTTOM);
+	_status_window.SetPosition((float)start_x, (float)start_y);
+	_status_window.Show();
 	
 	// Setup OptionBoxes
 	this->_SetupMainOptionBox();
@@ -193,6 +201,17 @@ void MenuMode::Reset() {
 // MenuMode::Update
 //-------------------------------------------
 void MenuMode::Update() {
+	// Load sound effects
+	SoundDescriptor confirm;
+	SoundDescriptor cancel;
+	if (confirm.LoadSound("confirm") == false) 
+	{
+		cerr << "MENUMODE::UPDATE - Unable to load confirm sound effect!" << endl;
+	}
+	if (cancel.LoadSound("cancel") == false) 
+	{
+		cerr << "MENUMODE::UPDATE - Unable to load cancel sound effect!" << endl;
+	}
 	// See if inventory window is active
 	if (_inventory_window.IsActive())
 	{
@@ -200,6 +219,8 @@ void MenuMode::Update() {
 		// elegant way to do this.
 		if (_inventory_window.CanCancel() && InputManager->CancelPress())
 		{
+			// Play sound
+			cancel.PlaySound();
 			_inventory_window.Activate(false);
 			_current_menu->SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 			return;
@@ -211,6 +232,8 @@ void MenuMode::Update() {
 	
 	if (InputManager->CancelPress()) 
 	{
+		// Play sound.
+		cancel.PlaySound();
 		// If in main menu, return to previous Mode, else return to main menu.
 		if (_current_menu_showing == SHOW_MAIN)
 			ModeManager->Pop();
@@ -224,6 +247,7 @@ void MenuMode::Update() {
 	else if (InputManager->ConfirmPress())
 	{
 		// Play Sound
+		confirm.PlaySound();
 		_current_menu->HandleConfirmKey();
 	}
 	else if (InputManager->LeftPress())
@@ -277,7 +301,8 @@ void MenuMode::Update() {
 //----------------------
 // MenuMode::Draw
 //----------------------
-void MenuMode::Draw() {
+void MenuMode::Draw() 
+{
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
 	// Move to the top left corner
 	VideoManager->Move(0,0);
@@ -302,6 +327,12 @@ void MenuMode::Draw() {
 		case SHOW_INVENTORY:
 		{
 			_inventory_window.Draw();
+			break;
+		}
+		case SHOW_STATUS_EQUIP:
+		{
+			_status_window.Draw();
+			break;
 		}
 	}
 }
@@ -617,6 +648,7 @@ void MenuMode::_SetupStatusEquipOptionBox()
 {
 	// setup the status option box
 	this->_SetupOptionBoxCommonSettings(&_menu_status_equip);
+	_menu_status_equip.SetCellSize(150.0f, 50.0f);
 	_menu_status_equip.SetSize(STATUS_EQUIP_SIZE, 1);
 	
 	// Generate the strings
