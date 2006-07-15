@@ -13,8 +13,7 @@
  * \brief   Header file for boot mode interface.
  *
  * This code handles the game event processing and frame drawing when the user
- * is in boot mode (the boot screen and menus). It inherits from the GameMode class
- * and there will only ever be one BattleMode inside the game stack at any one time.
+ * is in boot mode (the boot screen and menus).
  *****************************************************************************/
 
 #ifndef __BOOT_HEADER__
@@ -38,23 +37,6 @@ extern bool BOOT_DEBUG;
 //! An internal namespace to be used only within the boot code. Don't use this namespace anywhere else!
 namespace private_boot {
 
-
-//! \name Default key settings
-//! \brief The default SDL key mapping used with Allacrost.
-//@{
-const uint32 UP_KEY_DEFAULT           = SDLK_UP;
-const uint32 DOWN_KEY_DEFAULT         = SDLK_DOWN;
-const uint32 LEFT_KEY_DEFAULT         = SDLK_LEFT;
-const uint32 RIGHT_KEY_DEFAULT        = SDLK_RIGHT;
-const uint32 CONFIRM_KEY_DEFAULT      = SDLK_f;
-const uint32 CANCEL_KEY_DEFAULT       = SDLK_d;
-const uint32 MENU_KEY_DEFAULT         = SDLK_s;
-const uint32 SWAP_KEY_DEFAULT         = SDLK_a;
-const uint32 PAUSE_KEY_DEFAULT        = SDLK_SPACE;
-const uint32 LEFT_SELECT_KEY_DEFAULT  = SDLK_w;
-const uint32 RIGHT_SELECT_KEY_DEFAULT = SDLK_e;
-//@}
-
 } // namespace private_boot
 
 /*!****************************************************************************
@@ -64,10 +46,6 @@ const uint32 RIGHT_SELECT_KEY_DEFAULT = SDLK_e;
  * Because the user can set various game settings from this game mode, it has a
  * heavy amount of interaction with the GameSettings class.
  *
- * \note Although the basic features are functional in this code, much remains
- * to be done. The reason it hasn't been done before was primarily our lack of
- * a GUI + text rendering, but now that that requirement has been met this code
- * should see a lot of development in the near future.
  *****************************************************************************/
 class BootMode : public hoa_mode_manager::GameMode {
 private:
@@ -87,7 +65,7 @@ private:
 	//! Credits screen window
 	CreditsScreen _credits_screen;
 	
-	//! A pointer to the current menu visible
+	//! A pointer to the currently visible menu
 	BootMenu * _current_menu;
 
 	//! Main menu
@@ -107,6 +85,9 @@ private:
 
 	//! 'Joystick Settings' menu
 	BootMenu _joy_settings_menu;
+
+	//! 'Resolution switcher' menu
+	BootMenu _resolution_menu;
 
 	
 	/*!
@@ -183,18 +164,18 @@ private:
 	void _RedefinePauseJoy();
 	//@}
 
-	//! Inits the main menu
+	/**
+	*** \brief Setups the corresponding menu (initialize menu members, set callbacks)
+	**/
+	//@{
 	void _SetupMainMenu();
-	//! Inits the options menu
 	void _SetupOptionsMenu();
-	//! Inits the video-options menu
 	void _SetupVideoOptionsMenu();
-	//! Inits the audio-options menu
 	void _SetupAudioOptionsMenu();
-	//! Inits the key-settings menu
 	void _SetupKeySetttingsMenu();
-	//! Inits the joystick-settings menu
 	void _SetupJoySetttingsMenu();
+	void _SetupResolutionMenu();
+	//@}
 
 	// Main Menu handlers
 	//! 'New Game' confirmed
@@ -218,6 +199,8 @@ private:
 	//! 'Joystick settings' confirmed
 	void _OnJoySettings();
 
+	//! 'Resolution' confirmed
+	void _OnResolution();
 	//! 'Video mode' confirmed
 	void _OnVideoMode();
 
@@ -231,11 +214,23 @@ private:
 	void _OnMusicRight();
 
 
+	/**
+	*** \brief Resolution switching functions
+	**/
+	//@{
+	void _SetResolution(int32 width, int32 height);
+	void _OnResolution640x480();
+	void _OnResolution800x600();
+	void _OnResolution1024x768();
+	void _OnResolution1280x1024();
+	//@}
+
+
 	//! Restores default key settings
 	void _OnRestoreDefaultKeys();
-
 	//! Restores default joystick settings
 	void _OnRestoreDefaultJoyButtons();
+
 
 	//! Updates the video options screen
 	void _UpdateVideoOptions();

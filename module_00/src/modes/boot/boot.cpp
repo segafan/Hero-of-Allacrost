@@ -148,6 +148,7 @@ _fade_out(false) // No, we're not fading out yet!
 	_SetupAudioOptionsMenu();
 	_SetupKeySetttingsMenu();
 	_SetupJoySetttingsMenu();
+	_SetupResolutionMenu();
 
 	// Set the main menu as our currently selected menu
 	_current_menu = &_main_menu;
@@ -489,14 +490,13 @@ void BootMode::_SetupOptionsMenu() {
 // Inits the video-options menu
 void BootMode::_SetupVideoOptionsMenu()
 {
-	_video_options_menu.AddOption(MakeWideString("Resolution:"));
+	_video_options_menu.AddOption(MakeWideString("Resolution:"), &BootMode::_OnResolution);
 	_video_options_menu.AddOption(MakeWideString("Window mode:"), &BootMode::_OnVideoMode);
 	_video_options_menu.AddOption(MakeWideString("Brightness:"));
 	_video_options_menu.AddOption(MakeWideString("Image quality:"));
-
-	_video_options_menu.EnableOption(2, false);
-	_video_options_menu.EnableOption(3, false);
-
+	
+	_video_options_menu.EnableOption(2, false); // disable brightness
+	_video_options_menu.EnableOption(3, false); // disable image quality
 	_video_options_menu.SetWindowed(true);
 	_video_options_menu.SetParent(&_options_menu);
 }
@@ -549,6 +549,16 @@ void BootMode::_SetupJoySetttingsMenu() {
 }
 
 
+void BootMode::_SetupResolutionMenu() {
+	_resolution_menu.AddOption(MakeWideString("640 x 480"), &BootMode::_OnResolution640x480);
+	_resolution_menu.AddOption(MakeWideString("800 x 600"), &BootMode::_OnResolution800x600);
+	_resolution_menu.AddOption(MakeWideString("1024 x 768"), &BootMode::_OnResolution1024x768);
+	_resolution_menu.AddOption(MakeWideString("1280 x 1024"), &BootMode::_OnResolution1280x1024);
+	_resolution_menu.SetParent(&_video_options_menu);
+	_resolution_menu.SetWindowed(true);
+}
+
+
 // Main menu handlers
 // 'New Game' confirmed
 void BootMode::_OnNewGame() {
@@ -586,9 +596,13 @@ void BootMode::_OnCredits() {
 
 
 // 'Quit' confirmed
-void BootMode::_OnQuit()
-{
+void BootMode::_OnQuit() {
 	SettingsManager->ExitGame();
+}
+
+// 'Resolution' confirmed
+void BootMode::_OnResolution() {
+	_current_menu = &_resolution_menu;
 }
 
 
@@ -662,6 +676,30 @@ void BootMode::_OnMusicRight() {
 	_UpdateAudioOptions();
 }
 
+// Resolution setters
+void BootMode::_SetResolution(int32 width, int32 height) {
+	VideoManager->SetResolution(width, height);
+	VideoManager->ApplySettings();
+	_current_menu = &_video_options_menu; // return back to video options
+	_UpdateVideoOptions();
+}
+
+void BootMode::_OnResolution640x480() {
+	_SetResolution(640, 480);
+}
+
+void BootMode::_OnResolution800x600() { 
+	_SetResolution(800, 600);
+}
+
+void BootMode::_OnResolution1024x768() {
+	_SetResolution(1024, 768);
+}
+
+void BootMode::_OnResolution1280x1024() {
+	_SetResolution(1280, 1024);
+}
+
 
 // Restores default key settings
 void BootMode::_OnRestoreDefaultKeys() {
@@ -683,9 +721,6 @@ void BootMode::_UpdateVideoOptions() {
 	std::ostringstream resolution("");
 	resolution << "Resolution: " << VideoManager->GetWidth() << " x " << VideoManager->GetHeight();
 	_video_options_menu.SetOptionText(0, MakeWideString(resolution.str()));
-
-	// Disable resolution selection for now
-	_video_options_menu.EnableOption(0, false);
 
 	// Update text on current video mode
 	if (VideoManager->IsFullscreen())
