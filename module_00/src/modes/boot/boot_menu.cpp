@@ -104,19 +104,19 @@ void BootMenu::SetWindowed(bool windowed)
 		_current_menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 		_current_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
 		_current_menu.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-		_current_menu.SetCursorOffset(-35.0f, -4.0f);
+		_current_menu.SetCursorOffset(-35.0f, 0.0f);
 		_current_menu.SetSize(_current_menu.GetNumOptions(), 1);
 	}
 	else // windowed
 	{
 		_current_menu.SetFont("default");
-		_current_menu.SetCellSize(192.0f, 50.0f);
-		_current_menu.SetPosition(430.0f, 200.0f);
+		_current_menu.SetCellSize(210.0f, 50.0f);
+		_current_menu.SetPosition(512.0f, 200.0f);
 		_current_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-		_current_menu.SetOptionAlignment(VIDEO_X_RIGHT, VIDEO_Y_CENTER);
+		_current_menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 		_current_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
 		_current_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-		_current_menu.SetCursorOffset(-35.0f, -4.0f);
+		_current_menu.SetCursorOffset(-35.0f, 0.0f);
 		_current_menu.SetSize(1, _current_menu.GetNumOptions());
 		_current_menu.SetOwner(_menu_window);
 	}
@@ -134,7 +134,7 @@ void BootMenu::SetParent(BootMenu * parent)
 void BootMenu::SetTextDensity(float density)
 {
 	if (_is_windowed)
-		_current_menu.SetCellSize(192.0f, density); // Vertical
+		_current_menu.SetCellSize(210.0f, density); // Vertical
 	else
 		_current_menu.SetCellSize(density, 50.0f); // Horizontal
 }
@@ -171,10 +171,12 @@ bool BootMenu::IsSelectionEnabled() const
 
 // Draws menu on the screen
 bool BootMenu::Draw()
-{
+{	
 	_menu_window->Draw();
 
+	VideoManager->EnableScissoring(false); // Scissoring is/was an issue when changing resolution. For now, disable it when drawing the menus :/
 	return _current_menu.Draw();
+	VideoManager->EnableScissoring(true);
 }
 
 
