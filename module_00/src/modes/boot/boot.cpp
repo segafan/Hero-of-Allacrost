@@ -526,7 +526,7 @@ void BootMode::_SetupKeySetttingsMenu() {
 	_key_settings_menu.AddOption(MakeWideString("Right Select: "), &BootMode::_RedefineRightSelectKey);
 	_key_settings_menu.AddOption(MakeWideString("Pause: "), &BootMode::_RedefinePauseKey);
 
-	_key_settings_menu.AddOption(MakeWideString("Restore default keys"), &BootMode::_OnRestoreDefaultKeys);
+	_key_settings_menu.AddOption(MakeWideString("Restore defaults"), &BootMode::_OnRestoreDefaultKeys);
 	_key_settings_menu.SetWindowed(true);
 	_key_settings_menu.SetParent(&_options_menu);
 	_key_settings_menu.SetTextDensity(30.0f); // Shorten the distance between text lines
@@ -542,7 +542,7 @@ void BootMode::_SetupJoySetttingsMenu() {
 	_joy_settings_menu.AddOption(MakeWideString("Right Select: "), &BootMode::_RedefineRightSelectJoy);
 	_joy_settings_menu.AddOption(MakeWideString("Pause: "), &BootMode::_RedefinePauseJoy);
 
-	_joy_settings_menu.AddOption(MakeWideString("Restore default buttons"), &BootMode::_OnRestoreDefaultJoyButtons);
+	_joy_settings_menu.AddOption(MakeWideString("Restore defaults"), &BootMode::_OnRestoreDefaultJoyButtons);
 	_joy_settings_menu.SetWindowed(true);
 	_joy_settings_menu.SetParent(&_options_menu);
 	_joy_settings_menu.SetTextDensity(40.0f); // Shorten the distance between text lines

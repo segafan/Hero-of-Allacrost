@@ -1089,7 +1089,7 @@ bool OptionBox::Draw()
 	if(_owner)
 		rect.Intersect(_owner->GetScissorRect());
 	rect.Intersect(video->GetScissorRect());
-	video->EnableScissoring(_owner || video->IsScissoringEnabled());
+	video->EnableScissoring(_owner && video->IsScissoringEnabled());
 	if(video->IsScissoringEnabled())
 		video->SetScissorRect(rect);
 
