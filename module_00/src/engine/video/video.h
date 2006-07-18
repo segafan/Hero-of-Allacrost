@@ -1039,6 +1039,19 @@ public:
 
 	//-- Miscellaneous --------------------------------------------------------
 
+
+	/*!
+	 *  \brief Sets a new gamma value using SDL_SetGamma()
+	 *
+	 *  \param value        Gamma value of 1.0f is the default value
+	 */
+	void SetGamma(float value);
+
+	/*!
+	 *  \brief Returns the gamma value
+	 */
+	float GetGamma();
+
 	/*!
 	 *  \brief updates the FPS counter with the given frame time and draws the
 	 *         current FPS on the screen.
@@ -1127,6 +1140,8 @@ private:
 	GLuint _lightOverlay;    //! lighting overlay texture
 
 	float  _shakeX, _shakeY; //! offsets to shake the screen by (if any)
+
+	float _gamma_value; //! Current gamma value
 	
 	std::list<private_video::ShakeForce> _shakeForces;  //! current shake forces affecting screen
 		

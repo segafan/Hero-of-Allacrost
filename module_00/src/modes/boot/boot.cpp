@@ -462,7 +462,7 @@ void BootMode::_SetupMainMenu() {
 
 	// Add all the needed menu options to the main menu
 	_main_menu.AddOption(MakeWideString("New Game"), &BootMode::_OnNewGame);
-	_main_menu.AddOption(MakeWideString("Load Game"), &BootMode::_OnLoadGame);
+	_main_menu.AddOption(MakeWideString("Load Game")/*, &BootMode::_OnLoadGame*/); // Battle mode removed! "Take that visage!"
 	_main_menu.AddOption(MakeWideString("Options"), &BootMode::_OnOptions);
 	_main_menu.AddOption(MakeWideString("Credits"), &BootMode::_OnCredits);
 	_main_menu.AddOption(MakeWideString("Quit"), &BootMode::_OnQuit);
@@ -491,11 +491,10 @@ void BootMode::_SetupOptionsMenu() {
 void BootMode::_SetupVideoOptionsMenu()
 {
 	_video_options_menu.AddOption(MakeWideString("Resolution:"), &BootMode::_OnResolution);
-	_video_options_menu.AddOption(MakeWideString("Window mode:"), &BootMode::_OnVideoMode);
-	_video_options_menu.AddOption(MakeWideString("Brightness:"));
+	_video_options_menu.AddOption(MakeWideString("Window mode:"), &BootMode::_OnVideoMode, &BootMode::_OnVideoMode, &BootMode::_OnVideoMode); // Left & right will change window mode as well as plain 'confirm' !
+	_video_options_menu.AddOption(MakeWideString("Brightness:"), 0, &BootMode::_OnBrightnessLeft, &BootMode::_OnBrightnessRight);
 	_video_options_menu.AddOption(MakeWideString("Image quality:"));
 	
-	_video_options_menu.EnableOption(2, false); // disable brightness
 	_video_options_menu.EnableOption(3, false); // disable image quality
 	_video_options_menu.SetWindowed(true);
 	_video_options_menu.SetParent(&_options_menu);
@@ -701,6 +700,19 @@ void BootMode::_OnResolution1280x1024() {
 }
 
 
+// Brightness increment. Actually the correct term is "gamma correction" but I think it's easier for the user to think of it just as brightness!
+void BootMode::_OnBrightnessLeft() {
+	VideoManager->SetGamma(VideoManager->GetGamma() - 0.1f);
+	_UpdateVideoOptions();
+}
+
+// Brightness decrement
+void BootMode::_OnBrightnessRight() {
+	VideoManager->SetGamma(VideoManager->GetGamma() + 0.1f);
+	_UpdateVideoOptions();
+}
+
+
 // Restores default key settings
 void BootMode::_OnRestoreDefaultKeys() {
 	InputManager->RestoreDefaultKeys();
@@ -727,6 +739,9 @@ void BootMode::_UpdateVideoOptions() {
 		_video_options_menu.SetOptionText(1, MakeWideString("Window mode: fullscreen"));
 	else
 		_video_options_menu.SetOptionText(1, MakeWideString("Window mode: windowed"));
+
+	// Update brightness
+	_video_options_menu.SetOptionText(2, MakeWideString("Brightness: " + ToString(VideoManager->GetGamma() * 100.0f + 0.5f) + " %"));
 }
 
 

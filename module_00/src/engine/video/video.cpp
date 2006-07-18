@@ -125,6 +125,7 @@ GameVideo::GameVideo()
 	_fpsDisplay = false;
 	_shakeX = 0;
 	_shakeY = 0;
+	_gamma_value = 1.0f;
 	_fogColor = Color(1.0f, 1.0f, 1.0f, 1.0f);
 	_fogIntensity = 0.0f;
 	_lightColor = Color(1.0f, 1.0f, 1.0f, 1.0f);
@@ -1363,6 +1364,38 @@ bool GameVideo::CaptureScreen(StillImage &id)
 		cout << "VIDEO: Exited CaptureScreen() successfully!" << endl;
 
 	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// SetGamma: Sets a new gamma value using SDL_SetGamma()
+//-----------------------------------------------------------------------------
+void GameVideo::SetGamma(float value)
+{
+	_gamma_value = value;
+
+	// Limit min/max gamma
+	if (_gamma_value > 2.0f)
+	{
+		if(VIDEO_DEBUG) cout << "VIDEO: Tried to set gamma over 2.0f!" << endl;
+		_gamma_value = 2.0f;
+	}
+	else if (_gamma_value < 0.0f)
+	{
+		if(VIDEO_DEBUG) cout << "VIDEO: Tried to set gamma below 0.0f!" << endl;
+		_gamma_value = 0.0f;
+	}
+
+	SDL_SetGamma(_gamma_value, _gamma_value, _gamma_value);
+}
+
+
+//-----------------------------------------------------------------------------
+// Returns the gamma value
+//-----------------------------------------------------------------------------
+float GameVideo::GetGamma()
+{
+	return _gamma_value;
 }
 
 
