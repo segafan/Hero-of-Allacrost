@@ -64,6 +64,9 @@ private:
 
 	//! Text to be displayed
 	const std::string _credits_text;
+
+	//! Text Y offset
+	float _text_offset_y;
 };
 
 

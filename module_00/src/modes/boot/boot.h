@@ -225,6 +225,12 @@ private:
 	void _OnResolution1280x1024();
 	//@}
 
+	//! Brightness increment
+	void _OnBrightnessLeft();
+
+	//! Brightness decrement
+	void _OnBrightnessRight();
+
 
 	//! Restores default key settings
 	void _OnRestoreDefaultKeys();
