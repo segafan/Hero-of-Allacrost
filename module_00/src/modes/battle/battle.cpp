@@ -45,7 +45,7 @@ namespace private_battle {
 
 //Color(1.0f, 1.0f, 0.0f, 0.8f)
 void TEMP_Draw_Text(Color c, float x, float y, std::string text) {
-        VideoManager->SetFont("debug_font");
+        VideoManager->SetFont("battle");
         VideoManager->SetTextColor(c);
         VideoManager->Move(x,y);
         VideoManager->DrawText(text);
@@ -218,10 +218,11 @@ BattleUI::BattleUI(BattleMode * const ABattleMode) :
         _current_map_selection(0),
         _number_menu_items(0),
         _cursor_state(CURSOR_ON_PLAYER_CHARACTERS),
-        _sub_menu(NULL)
+        _sub_menu(NULL),
+        _sub_menu_window(NULL)
 {
         _actor_index = _battle_mode->GetIndexOfFirstIdleCharacter();
-        _general_menu.SetFont("default");
+        _general_menu.SetFont("battle");
         _general_menu.SetCellSize(50.0f, 79.0f);
         _general_menu.SetSize(5, 1);
         _general_menu.SetPosition(0.0f, 620.0f);
@@ -244,7 +245,7 @@ BattleUI::BattleUI(BattleMode * const ABattleMode) :
         
         _general_menu.SetCursorOffset(-15,0);
         
-        _battle_lose_menu.SetFont("default");
+        _battle_lose_menu.SetFont("battle");
 	_battle_lose_menu.SetCellSize(128.0f, 50.0f);
 	_battle_lose_menu.SetPosition(530.0f, 380.0f);
 	_battle_lose_menu.SetSize(1, 1);
@@ -262,11 +263,22 @@ BattleUI::BattleUI(BattleMode * const ABattleMode) :
         _player_selector_image.SetFilename("img/icons/battle/character_selection.png");
         if(!VideoManager->LoadImage(_player_selector_image)) {
                 cerr << "Unable to load player selector image." << endl;
+                //kill the owner battle mode some how
         }
 }
 		
 BattleUI::~BattleUI() {
+                //_battle_lose_menu.Destroy();
                 //_general_menu.Destroy();
+                
+                if (_sub_menu) {
+                        //_sub_menu->Destroy();
+                        delete _sub_menu;
+                }
+                if (_sub_menu_window) {
+                        _sub_menu_window->Destroy();
+                        delete _sub_menu_window;
+                }
 }
 /*!
         Get the actor we are currently on
@@ -320,7 +332,7 @@ void BattleUI::Draw() {
 	{
 		if (_battle_mode->IsVictorious()) // Draw a victory screen along with the loot. TODO: Maybe do this in a separate function
 		{
-			VideoManager->SetFont("default");
+			VideoManager->SetFont("battle");
 			VideoManager->Move(520.0f, 400.0f);
 			VideoManager->SetDrawFlags(VIDEO_X_CENTER);
 			VideoManager->SetFog(Color::black, 0.0f); // Turn off the fog
@@ -330,7 +342,7 @@ void BattleUI::Draw() {
 		}
 		else // show the lose screen
 		{
-			VideoManager->SetFont("default");
+			VideoManager->SetFont("battle");
 			VideoManager->SetFog(Color::black, 0.0f); // Turn off the fog
 			VideoManager->SetDrawFlags(VIDEO_X_CENTER);
 			VideoManager->Move(520.0f, 430.0f);
@@ -342,11 +354,15 @@ void BattleUI::Draw() {
 		return;
 	}
 
-        if(_cursor_state > CURSOR_ON_PLAYER_CHARACTERS) {
-           _general_menu.Draw();
+        if(_cursor_state >= CURSOR_ON_SUB_MENU && _sub_menu_window) {
+                _sub_menu_window->Draw();
         }
         if(_cursor_state >= CURSOR_ON_SUB_MENU && _sub_menu) {
                 _sub_menu->Draw();
+        }
+        
+        if(_cursor_state > CURSOR_ON_PLAYER_CHARACTERS) {
+           _general_menu.Draw();
         }
         
         /*
@@ -473,17 +489,24 @@ void BattleUI::Update(uint32 AUpdateTime) {
                         PlayerActor *p = _battle_mode->GetPlayerCharacterAt(_actor_index);
                         
                         //if we have an old submenu, delete it
-                        if(_sub_menu)
+                        if(_sub_menu) {
+                                //_sub_menu->Destroy();
                                 delete _sub_menu;
+                        }
+                        if(_sub_menu_window) {
+                                _sub_menu_window->Destroy();
+                                delete _sub_menu_window;
+                        }
                                 
                         _sub_menu = new OptionBox();
-                        _sub_menu->SetFont("default");
-                        _sub_menu->SetPosition(20.0f, 541.0f);
+                        _sub_menu->SetFont("battle");
+                        _sub_menu->SetPosition(50.0f, 550.0f);
                         _sub_menu->SetAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
                         _sub_menu->SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
                         _sub_menu->SetSelectMode(VIDEO_SELECT_SINGLE);
                         _sub_menu->SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
                         _sub_menu->SetCellSize(100.0f, 50.0f);
+                        _sub_menu->SetCursorOffset(-30,-5);
                         
                         switch(_general_menu_cursor_location) {
                                 case 0: { //attack 
@@ -499,6 +522,11 @@ void BattleUI::Update(uint32 AUpdateTime) {
                                                 _sub_menu->SetSize(1, attack_skill_names.size());
                                                 _sub_menu->SetOptions(attack_skill_names);
                                                 _sub_menu->SetSelection(0);
+                                                
+                                                _sub_menu_window = new MenuWindow();
+                                                _sub_menu_window->Create(200.0f, 20.0f + 50.0f * attack_skill_names.size());
+                                                _sub_menu_window->SetPosition(0.0f, 600.0f);
+                                                _sub_menu_window->Show();
                                         }
                                         else {
                                                 _cursor_state = CURSOR_ON_MENU;
@@ -517,6 +545,11 @@ void BattleUI::Update(uint32 AUpdateTime) {
                                                 _sub_menu->SetOptions(defense_skill_names);
                                                 _sub_menu->SetSize(1, defense_skill_names.size());
                                                 _sub_menu->SetSelection(0);
+                                                
+                                                _sub_menu_window = new MenuWindow();
+                                                _sub_menu_window->Create(200.0f, 20.0f + 50.0f * defense_skill_names.size());
+                                                _sub_menu_window->SetPosition(0.0f, 600.0f);
+                                                _sub_menu_window->Show();
                                         }
                                         else {
                                                 _cursor_state = CURSOR_ON_MENU;
@@ -535,6 +568,11 @@ void BattleUI::Update(uint32 AUpdateTime) {
                                                 _sub_menu->SetOptions(support_skill_names);
                                                 _sub_menu->SetSize(1, support_skill_names.size());
                                                 _sub_menu->SetSelection(0);
+                                                
+                                                _sub_menu_window = new MenuWindow();
+                                                _sub_menu_window->Create(200.0f, 20.0f + 50.0f * support_skill_names.size());
+                                                _sub_menu_window->SetPosition(0.0f, 600.0f);
+                                                _sub_menu_window->Show();
                                         }
                                         else {
                                                _cursor_state = CURSOR_ON_MENU;
@@ -557,12 +595,17 @@ void BattleUI::Update(uint32 AUpdateTime) {
                                                 // Create the item text
                                                 std::ostringstream os_obj_count;
                                                 os_obj_count << inv[i]->GetCount();
-                                                string inv_item_str = string("<") + inv[i]->GetIconPath() + string("><32>") + inv[i]->GetName() + string("<R>") + os_obj_count.str() + string("    ");
+                                                string inv_item_str = string("<") + inv[i]->GetIconPath() + string("><32>") + inv[i]->GetName() + string("<R>") + string("    ") + os_obj_count.str();
                                                 inv_names.push_back(MakeWideString(inv_item_str));
                                         }
                                         _sub_menu->SetOptions(inv_names);
                                         _sub_menu->SetSize(1, inv_names.size());
                                         _sub_menu->SetSelection(0);
+                                        
+                                        _sub_menu_window = new MenuWindow();
+                                        _sub_menu_window->Create(200.0f, 20.0f + 50.0f * inv_names.size());
+                                        _sub_menu_window->SetPosition(0.0f, 600.0f);
+                                        _sub_menu_window->Show();
                                 } break;
                         }
                 }
@@ -733,7 +776,7 @@ void PlayerActor::Draw() {
                 ostringstream health_amount;
                 health_amount << "HP: " << GetHealth() << " / " << GetMaxHealth();
                                         
-                TEMP_Draw_Text(c, GetXLocation()+100, GetYLocation()+50, health_amount.str());
+                TEMP_Draw_Text(c, GetXLocation()-20, GetYLocation()-20, health_amount.str());
                 
                 //move to x,y
                 VideoManager->Move(GetXLocation(),GetYLocation());
@@ -878,7 +921,7 @@ void EnemyActor::Draw() {
                 ostringstream health_amount;
                 health_amount << "HP: " << GetHealth() << " / " << GetMaxHealth();
                                         
-                TEMP_Draw_Text(c, GetXLocation()+100, GetYLocation()+50, health_amount.str());
+                TEMP_Draw_Text(c, GetXLocation()-20, GetYLocation()-20, health_amount.str());
         
                 std::vector<hoa_video::StillImage> animations = _wrapped_enemy.GetAnimation("IDLE");
                 
@@ -948,7 +991,7 @@ void EnemyActor::DoAI() {
                 }
                 
                 //okay, we can perform another attack.  set us up as queued to perform.
-                cerr << this << " set to attack." << endl;
+                //cerr << this << " set to attack." << endl;
                 SetQueuedToPerform(true);
                 ScriptEvent s(dynamic_cast<Actor*>(this), final_targets, "sword_swipe");
                 GetOwnerBattleMode()->AddScriptEventToQueue(s);
@@ -1147,9 +1190,12 @@ BattleMode::BattleMode() :
 	MusicDescriptor MD;
 	MD.LoadMusic("Confrontation");
 	_battle_music.push_back(MD);
+        
         Reset();
         
         _TEMP_LoadTestData();
+        
+        //std::cout << "Well, everything is loaded." << std::endl;
         
         //from the global party average level, level up all global enemies passed in
 }
@@ -1179,6 +1225,7 @@ void BattleMode::Reset() {
         //VideoManager->SetCoordSys(0.0f, (float)SCREEN_LENGTH, 0.0f, (float)SCREEN_HEIGHT);
         VideoManager->SetCoordSys(0.0f, (float)SCREEN_LENGTH*TILE_SIZE, 0.0f,  (float)SCREEN_HEIGHT*TILE_SIZE);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
+        
 	_battle_music[0].PlayMusic();
 }
 
@@ -1233,7 +1280,7 @@ void BattleMode::Update() {
                 
                 //check here if any scripts need to be run or characters need to perform actions
                 if(!_IsPerformingScript() && _script_queue.size() > 0) {
-                        cerr << _script_queue.front().GetHost() << "'s script called." << endl;
+                        //cerr << _script_queue.front().GetHost() << "'s script called." << endl;
                         _script_queue.front().RunScript();
                         SetPerformingScript(true);
                 }
@@ -1485,8 +1532,10 @@ void BattleMode::_TEMP_LoadTestData() {
 	backgrd.SetFilename("img/backdrops/battle/battle_caveFIXED.jpg");
         backgrd.SetDimensions(SCREEN_LENGTH*TILE_SIZE, SCREEN_HEIGHT*TILE_SIZE);
         _battle_images.push_back(backgrd);
-	if(!VideoManager->LoadImage(_battle_images[0]))
+	if(!VideoManager->LoadImage(_battle_images[0])){
 		cerr << "Failed to load background image." << endl; //failed to laod image
+                _ShutDown();
+        }
                 
         std::vector<hoa_video::StillImage> enemyAnimation;
 	StillImage anim;
@@ -1504,6 +1553,7 @@ void BattleMode::_TEMP_LoadTestData() {
 	for (uint32 i = 0; i < enemyAnimation.size(); i++) {
 		if(!VideoManager->LoadImage(enemyAnimation[i]))
                         cerr << "Failed to load spider image." << endl; //failed to laod image
+                        _ShutDown();
 	}
 	VideoManager->EndImageLoadBatch();
         
@@ -1523,6 +1573,7 @@ void BattleMode::_TEMP_LoadTestData() {
 	for (uint32 i = 0; i < enemyAnimation2.size(); i++) {
 		if(!VideoManager->LoadImage(enemyAnimation2[i]))
                         cerr << "Failed to load skeleton image." << endl; //failed to laod image
+                        _ShutDown();
 	}
 	VideoManager->EndImageLoadBatch();
         
@@ -1543,63 +1594,47 @@ void BattleMode::_TEMP_LoadTestData() {
 	for (uint32 i = 0; i < enemyAnimation3.size(); i++) {
 		if(!VideoManager->LoadImage(enemyAnimation3[i]))
                         cerr << "Failed to load green slime image." << endl; //failed to laod image
+                        _ShutDown();
 	}
 	VideoManager->EndImageLoadBatch();
         
-        std::vector<hoa_video::StillImage> playerAnimation;
+        std::vector<hoa_video::StillImage> enemyAnimation4;
 	StillImage anim4;
-	anim4.SetDimensions(64, 128); 
-	anim4.SetFilename("img/sprites/battle/characters/claudius_idle_f1.png");
-	playerAnimation.push_back(anim4);
-        anim4.SetFilename("img/sprites/battle/characters/claudius_idle_f2.png");
-	playerAnimation.push_back(anim4);
-        anim4.SetFilename("img/sprites/battle/characters/claudius_idle_f3.png");
-	playerAnimation.push_back(anim4);
-        anim4.SetFilename("img/sprites/battle/characters/claudius_idle_f4.png");
-	playerAnimation.push_back(anim4);
-        anim4.SetFilename("img/sprites/battle/characters/claudius_idle_f5.png");
-	playerAnimation.push_back(anim4);
-        anim4.SetFilename("img/sprites/battle/characters/claudius_idle_f6.png");
-	playerAnimation.push_back(anim4);
+	anim4.SetDimensions(128, 64); 
+	anim4.SetFilename("img/sprites/battle/enemies/snake_d0.png");
+	enemyAnimation4.push_back(anim4);
+        anim4.SetFilename("img/sprites/battle/enemies/snake_d1.png");
+	enemyAnimation4.push_back(anim4);
+        anim4.SetFilename("img/sprites/battle/enemies/snake_d2.png");
+	enemyAnimation4.push_back(anim4);
+        anim4.SetFilename("img/sprites/battle/enemies/snake_d3.png");
+	enemyAnimation4.push_back(anim4);
 	
 	VideoManager->BeginImageLoadBatch();
-	for (uint32 i = 0; i < playerAnimation.size(); i++) {
-		if(!VideoManager->LoadImage(playerAnimation[i]))
-                        cerr << "Failed to load spider image." << endl; //failed to laod image
+	for (uint32 i = 0; i < enemyAnimation4.size(); i++) {
+		if(!VideoManager->LoadImage(enemyAnimation4[i]))
+                        cerr << "Failed to load snake image." << endl; //failed to laod image
+                        _ShutDown();
 	}
 	VideoManager->EndImageLoadBatch();
-        
-        AnimatedImage ai;
-        for(uint32 i = 0; i < playerAnimation.size(); i++) {
-                ai.AddFrame(playerAnimation[i], 10);
-        }
-        
-        
+   
         GlobalCharacter *claud = GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS);
-        if(claud == 0) {
-                claud = new GlobalCharacter("Claudius", "claudius", GLOBAL_CLAUDIUS);
-                GlobalManager->AddCharacter(claud);
+        if(claud == NULL) {
+                std::cerr << "No claudius character?  What?." << std::endl;
+                _ShutDown();
         }
-        //make sure he has health, et cetera
-        claud->SetMaxHP(200);
-        claud->SetHP(200);
-        claud->SetMaxSP(200);
-        claud->SetSP(200);
-        
-        ai.SetFrameIndex(0);
-        claud->AddAnimation("IDLE", ai);
-        //cerr << "Adding attack skill." << endl;
-        claud->AddAttackSkill(new GlobalSkill("sword_swipe"));
-        
+        else {
 	//cerr << "Creating claudius player character." << endl;
-	PlayerActor *claudius = new PlayerActor(claud, this, 250, 200);
-	_player_actors.push_back(claudius);
-        _players_characters_in_battle.push_back(claudius);
+                PlayerActor *claudius = new PlayerActor(claud, this, 250, 200);
+                _player_actors.push_back(claudius);
+                _players_characters_in_battle.push_back(claudius);
+                _user_interface.SetPlayerActorSelected(claudius);
+        }
 	
 	GlobalEnemy e("spider");
 	e.AddAnimation("IDLE", enemyAnimation);
         //e.AddAttackSkill(new GlobalSkill("sword_swipe"));
-	EnemyActor *enemy = new EnemyActor(e, this, 770, 50);
+	EnemyActor *enemy = new EnemyActor(e, this, 600, 100);
 	enemy->LevelUp(2);
         
         GlobalEnemy e2("skeleton");
@@ -1611,14 +1646,20 @@ void BattleMode::_TEMP_LoadTestData() {
         GlobalEnemy e3("slime");
 	e3.AddAnimation("IDLE", enemyAnimation3);
         //e3.AddAttackSkill(new GlobalSkill("sword_swipe"));
-	EnemyActor *enemy3 = new EnemyActor(e3, this, 810, 175);
+	EnemyActor *enemy3 = new EnemyActor(e3, this, 805, 140);
 	enemy3->LevelUp(2);
+        
+        GlobalEnemy e4("snake");
+	e4.AddAnimation("IDLE", enemyAnimation4);
+        //e3.AddAttackSkill(new GlobalSkill("sword_swipe"));
+	EnemyActor *enemy4 = new EnemyActor(e4, this, 600, 250);
+	enemy4->LevelUp(2);
         
         _enemy_actors.push_back(enemy);
         _enemy_actors.push_back(enemy3);
+        _enemy_actors.push_back(enemy4);
         _enemy_actors.push_back(enemy2);
-        
-        _user_interface.SetPlayerActorSelected(claudius);
+
 }
                 
 } // namespace hoa_battle
