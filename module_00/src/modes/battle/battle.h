@@ -347,6 +347,8 @@ class BattleUI {
                 hoa_video::OptionBox _battle_lose_menu;
                 //! The selected cursor
                 hoa_video::StillImage _player_selector_image;
+                //! The MAPS cursor
+                hoa_video::AnimatedImage _MAPS_indicator;
 		
 	public:
 		BattleUI(BattleMode * const ABattleMode);

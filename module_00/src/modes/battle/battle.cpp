@@ -222,6 +222,30 @@ BattleUI::BattleUI(BattleMode * const ABattleMode) :
         _sub_menu_window(NULL)
 {
         _actor_index = _battle_mode->GetIndexOfFirstIdleCharacter();
+        
+        std::vector<hoa_video::StillImage> attack_point_indicator;
+	StillImage frame;
+	frame.SetDimensions(16, 16); 
+	frame.SetFilename("img/icons/battle/indicator_1.png");
+	attack_point_indicator.push_back(frame);
+        frame.SetFilename("img/icons/battle/indicator_2.png");
+	attack_point_indicator.push_back(frame);
+        frame.SetFilename("img/icons/battle/indicator_3.png");
+	attack_point_indicator.push_back(frame);
+        frame.SetFilename("img/icons/battle/indicator_4.png");
+	attack_point_indicator.push_back(frame);
+	
+	VideoManager->BeginImageLoadBatch();
+	for (uint32 i = 0; i < attack_point_indicator.size(); i++) {
+		if(!VideoManager->LoadImage(attack_point_indicator[i]))
+                        cerr << "Failed to load MAPS indicator." << endl; //failed to laod image
+	}
+	VideoManager->EndImageLoadBatch();
+        
+        for(uint32 i = 0; i < attack_point_indicator.size(); i++) {
+                _MAPS_indicator.AddFrame(attack_point_indicator[i], 10);
+        }
+        
         _general_menu.SetFont("battle");
         _general_menu.SetCellSize(50.0f, 79.0f);
         _general_menu.SetSize(5, 1);
@@ -362,7 +386,7 @@ void BattleUI::Draw() {
         }
         
         if(_cursor_state > CURSOR_ON_PLAYER_CHARACTERS) {
-           _general_menu.Draw();
+                _general_menu.Draw();
         }
         
         /*
@@ -390,7 +414,7 @@ void BattleUI::DrawTopElements() {
                 VideoManager->Move(e->GetXLocation() + global_attack_points[_current_map_selection]->GetXPosition(), e->GetYLocation() + global_attack_points[_current_map_selection]->GetYPosition());
                 VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_TOP, 0);
                 VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-                VideoManager->DrawImage(*(VideoManager->GetDefaultCursor()));
+                VideoManager->DrawImage(_MAPS_indicator);
                 VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
                 Color c(0.0f, 0.0f, 1.0f, 1.0f);
                 TEMP_Draw_Text(c, e->GetXLocation()-20, e->GetYLocation()+100, global_attack_points[_current_map_selection]->GetName());
@@ -423,11 +447,17 @@ void BattleUI::Update(uint32 AUpdateTime) {
 
 		return; // No need to handle other menu events any more
 	} // end if battle over
-
-        _general_menu.Update(AUpdateTime);
+        
+        if(_cursor_state > CURSOR_ON_PLAYER_CHARACTERS) {
+                _general_menu.Update(AUpdateTime);
+        }
         
         if(_sub_menu && _cursor_state == CURSOR_ON_SUB_MENU) {
                 _sub_menu->Update(AUpdateTime);
+        }
+        
+        if(_cursor_state == CURSOR_ON_SELECT_MAP) {
+                _MAPS_indicator.Update();
         }
         
         if(_cursor_state == CURSOR_ON_PLAYER_CHARACTERS) {
