@@ -61,6 +61,9 @@ BootMode::BootMode() :
 _main_menu(0, false, this),
 _fade_out(false) // No, we're not fading out yet!
 {
+
+        VideoManager->SetFog(Color::black, 0.0f);
+
 	if (BOOT_DEBUG) cout << "BOOT: BootMode constructor invoked." << endl;
 
 	mode_type = MODE_MANAGER_BOOT_MODE;
@@ -125,16 +128,23 @@ _fade_out(false) // No, we're not fading out yet!
 			return;
 		}
 	}
-
-	// Load all sound files used in boot mode
-	_boot_sounds.resize(new_sound_files.size(), SoundDescriptor());
-	for (uint32 i = 0; i < new_sound_files.size(); i++) {
-		if (_boot_sounds[i].LoadSound(new_sound_files[i]) == false) {
-			cout << "BOOT: failed to load sound file " << new_sound_files[i] << endl;
-			SettingsManager->ExitGame();
-			return;
-		}
-	}
+        
+/*
+	SoundDescriptor new_sound;
+	_boot_sounds.push_back(new_sound);
+	_boot_sounds.push_back(new_sound);
+	_boot_sounds.push_back(new_sound);
+	_boot_sounds.push_back(new_sound);
+	_boot_sounds[0].LoadSound(new_sound_files[0]);
+	_boot_sounds[1].LoadSound(new_sound_files[1]);
+	_boot_sounds[2].LoadSound(new_sound_files[2]);
+	_boot_sounds[3].LoadSound(new_sound_files[3]);
+*/
+	// This loop causes a seg fault for an unknown reason. Roots is looking into it (04/01/2006)
+// 	for (uint32 i = 0; i < new_sound_files.size(); i++) {
+// 		_boot_sounds.push_back(new_sound);
+// 		_boot_sounds[i].LoadSound(new_sound_files[i]);
+// 	}
 
 	// Load all bitmaps
 	for (uint32 i = 0; i < _boot_images.size(); i++) {
@@ -462,7 +472,10 @@ void BootMode::_SetupMainMenu() {
 
 	// Add all the needed menu options to the main menu
 	_main_menu.AddOption(MakeWideString("New Game"), &BootMode::_OnNewGame);
-	_main_menu.AddOption(MakeWideString("Load Game")/*, &BootMode::_OnLoadGame*/); // Battle mode removed! "Take that visage!"
+        
+        _main_menu.AddOption(MakeWideString("Load Game")/*, &BootMode::_OnLoadGame*/); // Battle mode removed! "Take that visage!"
+	//_main_menu.AddOption(MakeWideString("Load Game"), &BootMode::_OnLoadGame); // Battle mode removed! "Take that visage!"
+        
 	_main_menu.AddOption(MakeWideString("Options"), &BootMode::_OnOptions);
 	_main_menu.AddOption(MakeWideString("Credits"), &BootMode::_OnCredits);
 	_main_menu.AddOption(MakeWideString("Quit"), &BootMode::_OnQuit);
@@ -562,9 +575,51 @@ void BootMode::_SetupResolutionMenu() {
 // 'New Game' confirmed
 void BootMode::_OnNewGame() {
 	if (BOOT_DEBUG)	cout << "BOOT: Starting new game." << endl;
+        
+        GlobalCharacter *claud = new GlobalCharacter("Claudius", "claudius", GLOBAL_CLAUDIUS);
+        
+        std::vector<hoa_video::StillImage> playerAnimation;
+	StillImage anim5;
+	anim5.SetDimensions(64, 128); 
+	anim5.SetFilename("img/sprites/battle/characters/claudius_idle_f1.png");
+	playerAnimation.push_back(anim5);
+        anim5.SetFilename("img/sprites/battle/characters/claudius_idle_f2.png");
+	playerAnimation.push_back(anim5);
+        anim5.SetFilename("img/sprites/battle/characters/claudius_idle_f3.png");
+	playerAnimation.push_back(anim5);
+        anim5.SetFilename("img/sprites/battle/characters/claudius_idle_f4.png");
+	playerAnimation.push_back(anim5);
+        anim5.SetFilename("img/sprites/battle/characters/claudius_idle_f5.png");
+	playerAnimation.push_back(anim5);
+        anim5.SetFilename("img/sprites/battle/characters/claudius_idle_f6.png");
+	playerAnimation.push_back(anim5);
 	
-	GlobalCharacter *claud = new GlobalCharacter("Claudius", "claudius", GLOBAL_CLAUDIUS);
-	GlobalManager->AddCharacter(claud);
+	VideoManager->BeginImageLoadBatch();
+	for (uint32 i = 0; i < playerAnimation.size(); i++) {
+		if(!VideoManager->LoadImage(playerAnimation[i]))
+                        cerr << "Failed to load claudius image." << endl; //failed to laod image
+	}
+	VideoManager->EndImageLoadBatch();
+        
+        AnimatedImage ai;
+        for(uint32 i = 0; i < playerAnimation.size(); i++) {
+                ai.AddFrame(playerAnimation[i], 10);
+        }
+
+        //make sure he has health, et cetera
+        claud->SetMaxHP(300);
+        claud->SetHP(300);
+        claud->SetMaxSP(200);
+        claud->SetSP(200);
+        
+        ai.SetFrameIndex(0);
+        claud->AddAnimation("IDLE", ai);
+        
+        //added by visage July 18th, 2006
+        claud->AddAttackSkill(new GlobalSkill("sword_swipe"));
+
+        GlobalManager->AddCharacter(claud);
+
 	_fade_out = true;
 	VideoManager->FadeScreen(Color::black, 1.0f);
 	_boot_music.at(0).SetFadeOutTime(500); // Fade out the music
@@ -575,6 +630,58 @@ void BootMode::_OnNewGame() {
 // 'Load Game' confirmed. Actually it simply loads battle mode demo at the moment :devil:
 void BootMode::_OnLoadGame() {
 	if (BOOT_DEBUG) cout << "BOOT: Entering battle mode" << endl;
+        
+                
+        /*
+        
+                Load claudius related stuff.  Added by visage, July 18th
+        
+        */
+        
+        	
+	GlobalCharacter *claud = new GlobalCharacter("Claudius", "claudius", GLOBAL_CLAUDIUS);
+        
+        std::vector<hoa_video::StillImage> playerAnimation;
+	StillImage anim5;
+	anim5.SetDimensions(64, 128); 
+	anim5.SetFilename("img/sprites/battle/characters/claudius_idle_f1.png");
+	playerAnimation.push_back(anim5);
+        anim5.SetFilename("img/sprites/battle/characters/claudius_idle_f2.png");
+	playerAnimation.push_back(anim5);
+        anim5.SetFilename("img/sprites/battle/characters/claudius_idle_f3.png");
+	playerAnimation.push_back(anim5);
+        anim5.SetFilename("img/sprites/battle/characters/claudius_idle_f4.png");
+	playerAnimation.push_back(anim5);
+        anim5.SetFilename("img/sprites/battle/characters/claudius_idle_f5.png");
+	playerAnimation.push_back(anim5);
+        anim5.SetFilename("img/sprites/battle/characters/claudius_idle_f6.png");
+	playerAnimation.push_back(anim5);
+	
+	VideoManager->BeginImageLoadBatch();
+	for (uint32 i = 0; i < playerAnimation.size(); i++) {
+		if(!VideoManager->LoadImage(playerAnimation[i]))
+                        cerr << "Failed to load claudius image." << endl; //failed to laod image
+	}
+	VideoManager->EndImageLoadBatch();
+        
+        AnimatedImage ai;
+        for(uint32 i = 0; i < playerAnimation.size(); i++) {
+                ai.AddFrame(playerAnimation[i], 10);
+        }
+
+        //make sure he has health, et cetera
+        claud->SetMaxHP(200);
+        claud->SetHP(200);
+        claud->SetMaxSP(200);
+        claud->SetSP(200);
+        
+        ai.SetFrameIndex(0);
+        claud->AddAnimation("IDLE", ai);
+        
+        //added by visage July 18th, 2006
+        claud->AddAttackSkill(new GlobalSkill("sword_swipe"));
+
+        GlobalManager->AddCharacter(claud);
 
 	BattleMode *BM = new BattleMode();
 	ModeManager->Pop();
@@ -825,11 +932,13 @@ void BootMode::Update() {
 	if (InputManager->ConfirmPress() && !_credits_screen.IsVisible())
 	{
 		// Play 'confirm sound' if the selection isn't grayed out and it has a confirm handler
-		if (_current_menu->IsSelectionEnabled())
+		/*
+                if (_current_menu->IsSelectionEnabled())
 			_boot_sounds.at(0).PlaySound();
 		else
 			_boot_sounds.at(3).PlaySound(); // Otherwise play a silly 'bömp'
-
+                */
+                
 		_current_menu->ConfirmPressed();
 		
 		// Update window status
@@ -874,7 +983,7 @@ void BootMode::Update() {
 		if (_current_menu->GetParent() != 0)
 		{
 			// Play cancel sound
-			_boot_sounds.at(1).PlaySound();
+			//_boot_sounds.at(1).PlaySound();
 
 			// Go up a level in the menu hierarchy
 			_current_menu = _current_menu->GetParent();

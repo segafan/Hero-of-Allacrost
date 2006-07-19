@@ -342,6 +342,7 @@ class BattleUI {
                 uint32 _general_menu_cursor_location;
                 //! The sub menu.  Recreated every time it is chosen
                 hoa_video::OptionBox *_sub_menu;
+                hoa_video::MenuWindow *_sub_menu_window;
                 //! The "loser" - menu
                 hoa_video::OptionBox _battle_lose_menu;
                 //! The selected cursor
