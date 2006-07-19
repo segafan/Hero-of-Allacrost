@@ -129,7 +129,6 @@ _fade_out(false) // No, we're not fading out yet!
 		}
 	}
         
-/*
 	SoundDescriptor new_sound;
 	_boot_sounds.push_back(new_sound);
 	_boot_sounds.push_back(new_sound);
@@ -139,7 +138,7 @@ _fade_out(false) // No, we're not fading out yet!
 	_boot_sounds[1].LoadSound(new_sound_files[1]);
 	_boot_sounds[2].LoadSound(new_sound_files[2]);
 	_boot_sounds[3].LoadSound(new_sound_files[3]);
-*/
+        
 	// This loop causes a seg fault for an unknown reason. Roots is looking into it (04/01/2006)
 // 	for (uint32 i = 0; i < new_sound_files.size(); i++) {
 // 		_boot_sounds.push_back(new_sound);
@@ -629,63 +628,6 @@ void BootMode::_OnNewGame() {
 
 // 'Load Game' confirmed. Actually it simply loads battle mode demo at the moment :devil:
 void BootMode::_OnLoadGame() {
-	if (BOOT_DEBUG) cout << "BOOT: Entering battle mode" << endl;
-        
-                
-        /*
-        
-                Load claudius related stuff.  Added by visage, July 18th
-        
-        */
-        
-        	
-	GlobalCharacter *claud = new GlobalCharacter("Claudius", "claudius", GLOBAL_CLAUDIUS);
-        
-        std::vector<hoa_video::StillImage> playerAnimation;
-	StillImage anim5;
-	anim5.SetDimensions(64, 128); 
-	anim5.SetFilename("img/sprites/battle/characters/claudius_idle_f1.png");
-	playerAnimation.push_back(anim5);
-        anim5.SetFilename("img/sprites/battle/characters/claudius_idle_f2.png");
-	playerAnimation.push_back(anim5);
-        anim5.SetFilename("img/sprites/battle/characters/claudius_idle_f3.png");
-	playerAnimation.push_back(anim5);
-        anim5.SetFilename("img/sprites/battle/characters/claudius_idle_f4.png");
-	playerAnimation.push_back(anim5);
-        anim5.SetFilename("img/sprites/battle/characters/claudius_idle_f5.png");
-	playerAnimation.push_back(anim5);
-        anim5.SetFilename("img/sprites/battle/characters/claudius_idle_f6.png");
-	playerAnimation.push_back(anim5);
-	
-	VideoManager->BeginImageLoadBatch();
-	for (uint32 i = 0; i < playerAnimation.size(); i++) {
-		if(!VideoManager->LoadImage(playerAnimation[i]))
-                        cerr << "Failed to load claudius image." << endl; //failed to laod image
-	}
-	VideoManager->EndImageLoadBatch();
-        
-        AnimatedImage ai;
-        for(uint32 i = 0; i < playerAnimation.size(); i++) {
-                ai.AddFrame(playerAnimation[i], 10);
-        }
-
-        //make sure he has health, et cetera
-        claud->SetMaxHP(200);
-        claud->SetHP(200);
-        claud->SetMaxSP(200);
-        claud->SetSP(200);
-        
-        ai.SetFrameIndex(0);
-        claud->AddAnimation("IDLE", ai);
-        
-        //added by visage July 18th, 2006
-        claud->AddAttackSkill(new GlobalSkill("sword_swipe"));
-
-        GlobalManager->AddCharacter(claud);
-
-	BattleMode *BM = new BattleMode();
-	ModeManager->Pop();
-	ModeManager->Push(BM);
 }
 
 
