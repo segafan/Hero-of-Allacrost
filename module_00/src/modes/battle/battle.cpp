@@ -238,7 +238,7 @@ BattleUI::BattleUI(BattleMode * const ABattleMode) :
 	VideoManager->BeginImageLoadBatch();
 	for (uint32 i = 0; i < attack_point_indicator.size(); i++) {
 		if(!VideoManager->LoadImage(attack_point_indicator[i]))
-                        cerr << "Failed to load MAPS indicator." << endl; //failed to laod image
+                        std::cerr << "Failed to load MAPS indicator." << std::endl; //failed to laod image
 	}
 	VideoManager->EndImageLoadBatch();
         
@@ -1333,6 +1333,9 @@ void BattleMode::_DrawBackground() {
         VideoManager->Move(0,0);
 	VideoManager->SetDrawFlags(VIDEO_NO_BLEND, 0);
 	VideoManager->DrawImage(_battle_images[0]);
+        
+        //_TEMP
+        VideoManager->DrawImage(_battle_images[1]);
 }
 
 void BattleMode::_DrawCharacters() {
@@ -1559,13 +1562,25 @@ int32 BattleMode::IndexLocationOfPlayerCharacter(private_battle::PlayerActor * c
 
 void BattleMode::_TEMP_LoadTestData() {
         StillImage backgrd;
-	backgrd.SetFilename("img/backdrops/battle/battle_caveFIXED.jpg");
+        StillImage overback;
+        
+        
+	backgrd.SetFilename("img/backdrops/battle/battle_cave.png");
         backgrd.SetDimensions(SCREEN_LENGTH*TILE_SIZE, SCREEN_HEIGHT*TILE_SIZE);
         _battle_images.push_back(backgrd);
 	if(!VideoManager->LoadImage(_battle_images[0])){
 		cerr << "Failed to load background image." << endl; //failed to laod image
                 _ShutDown();
         }
+        
+        overback.SetFilename("img/backdrops/battle/battle_bottom_menu.jpg");
+        overback.SetDimensions(1024, 128);
+        _battle_images.push_back(overback);
+	if(!VideoManager->LoadImage(_battle_images[1])){
+		cerr << "Failed to load background over image." << endl; //failed to laod image
+                _ShutDown();
+        }
+
                 
         std::vector<hoa_video::StillImage> enemyAnimation;
 	StillImage anim;
