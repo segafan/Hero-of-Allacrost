@@ -190,13 +190,14 @@ public:
 	int16 row_position;
 	//! The map column position for the bottom left corner of the object.
 	int16 col_position;
+	//! Draw offset between (-1.0f, 1.0f)
+	float row_offset;
+	//! Draw offset between (-1.0f, 1.0f)
+	float col_offset;
 	//! The width of the object's image, in number of tiles.
 	uint8 obj_width;
 	//! The height of the object's image, in number of tiles.
 	uint8 obj_height;
-	//! The altitude of the object.
-	//! \note This member is only used for objects in the ground object layer.
-	uint8 altitude;
 	//! A bit-mask for setting and detecting various conditions on the object.
 	uint16 status;
 	//! The map context for the object (determines whether sprites are inside, outside, etc.)
@@ -218,13 +219,11 @@ public:
 	void SetObjectType(uint8 type) { object_type = type; }
 	void SetRowPosition(int16 row) { row_position = row; }
 	void SetColPosition(int16 col) { col_position = col; }
-	void SetAltitude(uint8 alt) { altitude = alt; }
 	void SetStatus(uint16 stat) { status = stat; }
 
 	uint8 GetObjectType() { return object_type; }
 	int16 GetRowPosition() { return row_position; }
 	int16 GetColPosition() { return col_position; }
-	uint8 GetAltitude() { return altitude; }
 	uint16 GetStatus() { return status; }
 	//@}
 
@@ -287,10 +286,6 @@ public:
 	float step_speed;
 	//! A counter to keep track of a sprites actual position when moving between tiles.
 	float step_count;
-	//! The tile column position plus an offset between 0.0 and 1.0 (used for sprite movement).
-	float x_position;
-	//! The tile row position plus an offset between 0.0 and 1.0 (used for sprite movement).
-	float y_position;
 	//! The remaining amount of time to wait before moving the sprite again (used for NPCs).
 	int32 wait_time;
 	//! The average amount of time a sprite should remain still between tile moves.

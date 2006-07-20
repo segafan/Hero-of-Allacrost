@@ -66,20 +66,6 @@ const uint8 EXPLORE      = 0x00000001;
 const uint8 DIALOGUE     = 0x00000002;
 //@}
 
-//! \name Altitude Constants
-//! \brief Constants for accessing the eight different alititude levels of both tiles and objects.
-//! \note Higher numbers correspond to higher altitudes.
-//@{
-const uint8 ALTITUDE_1 = 0x01;
-const uint8 ALTITUDE_2 = 0x02;
-const uint8 ALTITUDE_3 = 0x04;
-const uint8 ALTITUDE_4 = 0x08;
-const uint8 ALTITUDE_5 = 0x10;
-const uint8 ALTITUDE_6 = 0x20;
-const uint8 ALTITUDE_7 = 0x40;
-const uint8 ALTITUDE_8 = 0x80;
-//@}
-
 // ********************** TILE CONSTANTS **************************
 
 //! \name Tile Property Constants
@@ -145,8 +131,6 @@ public:
 	int16 row;
 	//! The column index of the tile to check.
 	int16 col;
-	//! The altitude level of the tile to check.
-	uint8 altitude;
 	//! The direction of the action (this may go defunct).
 	uint16 direction;
 }; // class TileCheck
@@ -159,11 +143,10 @@ public:
  *****************************************************************************/
 class TileNode {
 public:
-	//! \brief Tile coordinates for this node (in X,Y,Z / R,C,A format).
+	//! \brief Tile coordinates for this node
 	//@{
 	int16 row;
 	int16 col;
-	uint8 altitude;
 	//@}
 
 	//! \brief Information used to assign the node a score on the path.
@@ -207,23 +190,14 @@ public:
 	int16 middle_layer;
 	int16 upper_layer;
 	//@}
-	//! \name Tile Events
-	//! \brief Events registered to the map tile, sorted by event type.
-	//! \note A value of 255 means that no event is registered to the tile.
-	//@{
-	uint8 arrive_event;
-	uint8 depart_event;
-	uint8 confirm_event;
-	//@}
-	//! A bit-mask for indicating whether a tile is walkable on each altitude level.
+
+	//! A bit-mask for indicating whether a tile is walkable
 	uint8 walkable;
 	//! A bit-mask for indicating that a tile is occupied by an object.
 	uint8 occupied;
 
 	MapTile()
-		{ lower_layer = -1; middle_layer = -1; upper_layer = -1;
-		  arrive_event = 255; depart_event = 255; confirm_event = 255;
-		  walkable = 0; occupied = 0; }
+		{ lower_layer = -1; middle_layer = -1; upper_layer = -1; walkable = 0; occupied = 0; }
 }; // class MapTile
 
 /*!****************************************************************************
@@ -350,13 +324,12 @@ private:
 	 * \brief Determines whether an object may be placed on a tile.
 	 * \param row The row index of the tile to check.
 	 * \param col The column index of the tile to check.
-	 * \param altitude_level The altitude level of the tile to check.
 	 * \return True if an object may move to the tile, false otherwise.
 	 */
 	bool _TileMoveable(const private_map::TileCheck& tcheck);
 	/*!
 	 * \brief Determines if an adjacent tile has some sort of interaction.
-	 * \param &tcheck Contains information about the tile row, column and altitude to check.
+	 * \param &tcheck Contains information about the tile row and column to check.
 	 * \return A constant that indicates what type of interaction is found on the tile.
 	 *
 	 * An interaction may be either an event bound to the tile or another
@@ -379,7 +352,7 @@ private:
 	
 	/*!
 	 * \brief Uses the A* algorithm to find a path from a source to a destination.
-	 * \param &destination The destination tile information, including row, column, and altitude information.
+	 * \param &destination The destination tile information, including row and column information.
 	 * \param &path Contains a single element when passed as an argument (the source node). The result path is
 	 * placed into this vector.
 	 */

@@ -49,7 +49,6 @@ MapObject::MapObject() {
 	object_type = EMPTY_OBJECT;
 	row_position = -1;
 	col_position = -1;
-	altitude = 0;
 	status = 0;
 }
 
@@ -72,6 +71,8 @@ MapSprite::MapSprite() {
 	next_conversation = 0;
 	current_action = 0;
 	portrait = NULL;
+	row_offset = 0.0f;
+	col_offset = 0.0f;
 }
 
 
@@ -393,27 +394,21 @@ void MapSprite::Move(uint16 move_direction) {
 			return;
 	}
 
-	tcheck.altitude = altitude;
 	tcheck.direction = direction;
 
 	if (current_map->_TileMoveable(tcheck)) {
-		// ************************ Check For Tile Departure Event ***********************
-		if (current_map->_tile_layers[row_position][col_position].depart_event != 255) {
-			// Look-up and process the event associated with the tile.
-			cout << "Tile had a departure event." << endl;
-		}
 
 		status |= IN_MOTION; // Set the sprite's motion flag
 
 		// For the tile the sprite is moving off of, clear off the occupied bit.
-		current_map->_tile_layers[row_position][col_position].occupied &= ~altitude;
+		current_map->_tile_layers[row_position][col_position].occupied = 0;
 
 		// Change the new tile row and column coordinates of the sprite.
 		row_position = tcheck.row;
 		col_position = tcheck.col;
 
 		// Set the occuped bit for the tile the sprite is moving on to.
-		current_map->_tile_layers[row_position][col_position].occupied |= altitude;
+		current_map->_tile_layers[row_position][col_position].occupied = 1;
 	}
 	else {
 		status &= ~IN_MOTION;
@@ -422,39 +417,74 @@ void MapSprite::Move(uint16 move_direction) {
 
 // Updates the status of the sprite
 void MapSprite::Update() {
-	if (!(status & IN_CONVERSATION)) {
-		if (status & IN_MOTION) {
-			step_count += static_cast<float>(current_map->_time_elapsed);
+	if (status & IN_CONVERSATION) {
+		return;
+	}
+	
+	if (status & IN_MOTION) {
+		step_count += static_cast<float>(current_map->_time_elapsed);
 
-			// Check whether we've reached a new tile and if so, update accordingly.
-			if (step_count >= step_speed) {
-				step_count -= step_speed;
-				status &= ~IN_MOTION;
-				status ^= STEP_SWAP; // This flips the step_swap bit
+		// Check whether we've reached a new tile and if so, update accordingly.
+		if (step_count >= step_speed) {
+			step_count -= step_speed;
+			status &= ~IN_MOTION;
+			status ^= STEP_SWAP; // This flips the step_swap bit
 
-				// ************************ Check For Tile Arrival Event ***********************
-				if (current_map->_tile_layers[row_position][col_position].arrive_event != 255) {
-					// Look-up and process the event associated with the tile.
-					cout << "Tile has an arrival event." << endl;
-				}
-
-				// Process the next action, which may be another tile move.
-				if (!actions.empty()) {
-					actions[current_action]->Process();
-				}
-
-				// If the sprite isn't going to move to another tile, reset the step offset to 0.0f
-				if (!(status & IN_MOTION)) {
-					step_count = 0.0f;
-				}
-			}
-		}
-
-		// Sprite is not in motion, process the sprite's action.
-		else {
+			// Process the next action, which may be another tile move.
 			if (!actions.empty()) {
 				actions[current_action]->Process();
 			}
+		}
+
+		// If the sprite isn't going to move to another tile, reset the step offset to 0.0f
+		if (!(status & IN_MOTION)) {
+			step_count = 0.0f;
+			col_offset = 0.0f;
+			row_offset = 0.0f;
+		}
+		else {
+			float position_offset = step_count / step_speed - 1.0f;
+			switch (direction) {
+				case EAST:
+					col_offset = position_offset;
+					break;
+				case WEST:
+					col_offset = -position_offset;
+					break;
+				case NORTH:
+					row_offset = -position_offset;
+					break;
+				case SOUTH:
+					row_offset = position_offset;
+					break;
+				case NW_NORTH:
+				case NW_WEST:
+					col_offset = -position_offset;
+					row_offset = -position_offset;
+					break;
+				case SW_SOUTH:
+				case SW_WEST:
+					col_offset = -position_offset;
+					row_offset = position_offset;
+					break;
+				case NE_NORTH:
+				case NE_EAST:
+					col_offset = position_offset;
+					row_offset = -position_offset;
+					break;
+				case SE_SOUTH:
+				case SE_EAST:
+					col_offset = position_offset;
+					row_offset = position_offset;
+					break;
+			}
+		}
+	} // if (status & IN_MOTION)
+
+	// Sprite is not in motion, process the sprite's action.
+	if (!(status & IN_MOTION)) {
+		if (!actions.empty()) {
+			actions[current_action]->Process();
 		}
 	}
 }
@@ -467,49 +497,8 @@ void MapSprite::Draw() {
 	float x_draw = 0.0;  // The x and y cursor position to draw the sprite to
 	float y_draw = 0.0;
 
-
-	// Find the x and y position (true positions when sprite is not in motion)
-	x_draw = current_map->_draw_info.c_pos + (static_cast<float>(col_position) - current_map->_draw_info.c_start);
-	y_draw = current_map->_draw_info.r_pos + (static_cast<float>(row_position) - current_map->_draw_info.r_start);
-
-	// When the sprite is in motion, we have to off-set the step positions
-	if (status & IN_MOTION) {
-		float position_offset = step_count / step_speed - 1.0f;
-		switch (direction) {
-			case EAST:
-				x_draw += position_offset;
-				break;
-			case WEST:
-				x_draw -= position_offset;
-				break;
-			case NORTH:
-				y_draw -= position_offset;
-				break;
-			case SOUTH:
-				y_draw += position_offset;
-				break;
-			case NW_NORTH:
-			case NW_WEST:
-				x_draw -= position_offset;
-				y_draw -= position_offset;
-				break;
-			case SW_SOUTH:
-			case SW_WEST:
-				x_draw -= position_offset;
-				y_draw += position_offset;
-				break;
-			case NE_NORTH:
-			case NE_EAST:
-				x_draw += position_offset;
-				y_draw -= position_offset;
-				break;
-			case SE_SOUTH:
-			case SE_EAST:
-				x_draw += position_offset;
-				y_draw += position_offset;
-				break;
-		}
-	}
+	x_draw = current_map->_draw_info.c_pos + (static_cast<float>(col_position) - current_map->_draw_info.c_start) + col_offset;
+	y_draw = current_map->_draw_info.r_pos + (static_cast<float>(row_position) - current_map->_draw_info.r_start) + row_offset;
 
 		// TODO: Determine if the sprite is off-screen and if so, don't draw it.
 	VideoManager->Move(x_draw, y_draw);
