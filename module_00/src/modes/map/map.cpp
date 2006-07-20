@@ -61,7 +61,6 @@ MapMode::MapMode() {
 	_map_camera->SetObjectType(MAP_CAMERA);
 	_map_camera->SetRowPosition(20);
 	_map_camera->SetColPosition(20);
-	_map_camera->SetAltitude(0);
 	_map_camera->SetStatus(0);
 	_map_camera->SetStepSpeed(NORMAL_SPEED);
 
@@ -254,33 +253,8 @@ void MapMode::LoadMap() {
 	}
 	_map_data.CloseTable();
 
-// 	_map_data.OpenTable("tile_properties");
-// 	for (uint32 r = 0; r < _row_count; r++) {
-// 		_map_data.FillIntVector(r, properties);
-//
-// 		for (uint32 c = 0; c < _col_count; c++) {
-// 			_tile_layers[r][c].properties = static_cast<uint8>(properties[c]);
-// 		}
-//
-// 		properties.clear();
-// 	}
-// 	_map_data.CloseTable();
-
 	// The occupied member of tiles are not set until we place map objects
 
-	_map_data.OpenTable("tile_events");
-	for (uint32 r = 0; r < _row_count; r++) {
-		_map_data.FillIntVector(r, properties);
-
-		for (uint32 c = 0; c < _col_count; c++) {
-			_tile_layers[r][c].arrive_event = static_cast<int16>(properties[c]);
-			_tile_layers[r][c].depart_event = static_cast<int16>(properties[c]);
-			_tile_layers[r][c].confirm_event = static_cast<int16>(properties[c]);
-		}
-
-		properties.clear();
-	}
-	_map_data.CloseTable();
 	_map_data.CloseFile();
 
 	if (_map_data.GetError() != DATA_NO_ERRORS) {
@@ -299,15 +273,13 @@ void MapMode::LoadMap() {
 	sp->SetObjectType(PLAYER_SPRITE);
 	sp->SetRowPosition(12);
 	sp->SetColPosition(12);
-	sp->SetAltitude(1);
 	sp->SetStepSpeed(NORMAL_SPEED);
-	sp->SetAltitude(ALTITUDE_1);
 	sp->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
 	sp->SetFilename("img/sprites/map/claudius");
 	sp->SetPortrait("img/portraits/map/claudius.png");
 	sp->SetDirection(SOUTH);
 	sp->LoadFrames();
-	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied |= sp->GetAltitude();
+	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied = 1;
 	_ground_objects.push_back(sp);
 	_sprites[sp->sprite_id] = sp;
 	_focused_object = sp;
@@ -318,14 +290,13 @@ void MapMode::LoadMap() {
 	sp->SetObjectType(NPC_SPRITE);
 	sp->SetRowPosition(4);
 	sp->SetColPosition(4);
-	sp->SetAltitude(1);
 	sp->SetStepSpeed(NORMAL_SPEED);
 	sp->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
 	sp->SetFilename("img/sprites/map/laila");
 	sp->SetPortrait("img/portraits/map/laila.png");
 	sp->SetDirection(SOUTH);
 	sp->LoadFrames();
-	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied |= sp->GetAltitude();
+	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied = 1;
 
 	sd = new SpriteDialogue();
 	sd->text.push_back(MakeWideString("This is not a real demo. There is no spoon."));
@@ -347,28 +318,24 @@ void MapMode::LoadMap() {
 	sa = new ActionPathMove();
 	sa->destination.row = 4;
 	sa->destination.col = 16;
-	sa->destination.altitude = 1;
 	sa->sprite = sp;
 	sp->actions.push_back(sa);
 
 	sa = new ActionPathMove();
 	sa->destination.row = 12;
 	sa->destination.col = 16;
-	sa->destination.altitude = 1;
 	sa->sprite = sp;
 	sp->actions.push_back(sa);
 
 	sa = new ActionPathMove();
 	sa->destination.row = 8;
 	sa->destination.col = 4;
-	sa->destination.altitude = 1;
 	sa->sprite = sp;
 	sp->actions.push_back(sa);
 
 	sa = new ActionPathMove();
 	sa->destination.row = 4;
 	sa->destination.col = 4;
-	sa->destination.altitude = 1;
 	sa->sprite = sp;
 	sp->actions.push_back(sa);
 	
@@ -381,14 +348,12 @@ void MapMode::LoadMap() {
 	sp->SetObjectType(NPC_SPRITE);
 	sp->SetRowPosition(18);
 	sp->SetColPosition(21);
-	sp->SetAltitude(1);
 	sp->SetStepSpeed(SLOW_SPEED);
 	sp->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
 	sp->SetFilename("img/sprites/map/marcus");
-	sp->SetPortrait("img/portraits/Laila-Father-ingame.png");
 	sp->SetDirection(WEST);
 	sp->LoadFrames();
-	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied |= sp->GetAltitude();
+	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied = 1;
 
 	sd = new SpriteDialogue();
 	sd->text.push_back(MakeWideString("My moustache tickles me."));
@@ -411,28 +376,24 @@ void MapMode::LoadMap() {
 	sa = new ActionPathMove();
 	sa->destination.row = 25;
 	sa->destination.col = 11;
-	sa->destination.altitude = 1;
 	sa->sprite = sp;
 	sp->actions.push_back(sa);
 
 	sa = new ActionPathMove();
 	sa->destination.row = 12;
 	sa->destination.col = 9;
-	sa->destination.altitude = 1;
 	sa->sprite = sp;
 	sp->actions.push_back(sa);
 
 	sa = new ActionPathMove();
 	sa->destination.row = 8;
 	sa->destination.col = 30;
-	sa->destination.altitude = 1;
 	sa->sprite = sp;
 	sp->actions.push_back(sa);
 
 	sa = new ActionPathMove();
 	sa->destination.row = 26;
 	sa->destination.col = 27;
-	sa->destination.altitude = 1;
 	sa->sprite = sp;
 	sp->actions.push_back(sa);
 
@@ -452,13 +413,12 @@ void MapMode::LoadMap() {
 	sp->SetObjectType(NPC_SPRITE);
 	sp->SetRowPosition(24);
 	sp->SetColPosition(6);
-	sp->SetAltitude(1);
 	sp->SetStepSpeed(FAST_SPEED);
 	sp->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
 	sp->SetFilename("img/sprites/map/vanica");
 	sp->SetDirection(EAST);
 	sp->LoadFrames();
-	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied |= sp->GetAltitude();
+	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied = 1;
 
 	sd = new SpriteDialogue();
 	sd->text.push_back(MakeWideString("You will never be able to guess my real age."));
@@ -468,14 +428,12 @@ void MapMode::LoadMap() {
 	sa = new ActionPathMove();
 	sa->destination.row = 8;
 	sa->destination.col = 5;
-	sa->destination.altitude = 1;
 	sa->sprite = sp;
 	sp->actions.push_back(sa);
 
 	sa = new ActionPathMove();
 	sa->destination.row = 7;
 	sa->destination.col = 13;
-	sa->destination.altitude = 1;
 	sa->sprite = sp;
 	sp->actions.push_back(sa);
 
@@ -489,7 +447,6 @@ void MapMode::LoadMap() {
 	sa = new ActionPathMove();
 	sa->destination.row = 24;
 	sa->destination.col = 6;
-	sa->destination.altitude = 1;
 	sa->sprite = sp;
 	sp->actions.push_back(sa);
 	
@@ -502,13 +459,12 @@ void MapMode::LoadMap() {
 	sp->SetObjectType(NPC_SPRITE);
 	sp->SetRowPosition(32);
 	sp->SetColPosition(36);
-	sp->SetAltitude(1);
 	sp->SetStepSpeed(NORMAL_SPEED);
 	sp->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
 	sp->SetFilename("img/sprites/map/rags_woman");
 	sp->SetDirection(NORTH);
 	sp->LoadFrames();
-	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied |= sp->GetAltitude();
+	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied = 1;
 
 	sd = new SpriteDialogue();
 	sd->text.push_back(MakeWideString("Is there no exit out of this stinking cave?"));
@@ -518,49 +474,42 @@ void MapMode::LoadMap() {
 	sa = new ActionPathMove();
 	sa->destination.row = 32;
 	sa->destination.col = 26;
-	sa->destination.altitude = 1;
 	sa->sprite = sp;
 	sp->actions.push_back(sa);
 
 	sa = new ActionPathMove();
 	sa->destination.row = 32;
 	sa->destination.col = 36;
-	sa->destination.altitude = 1;
 	sa->sprite = sp;
 	sp->actions.push_back(sa);
 
 	sa = new ActionPathMove();
 	sa->destination.row = 32;
 	sa->destination.col = 26;
-	sa->destination.altitude = 1;
 	sa->sprite = sp;
 	sp->actions.push_back(sa);
 
 	sa = new ActionPathMove();
 	sa->destination.row = 32;
 	sa->destination.col = 36;
-	sa->destination.altitude = 1;
 	sa->sprite = sp;
 	sp->actions.push_back(sa);
 
 	sa = new ActionPathMove();
 	sa->destination.row = 32;
 	sa->destination.col = 26;
-	sa->destination.altitude = 1;
 	sa->sprite = sp;
 	sp->actions.push_back(sa);
 
 	sa = new ActionPathMove();
 	sa->destination.row = 32;
 	sa->destination.col = 36;
-	sa->destination.altitude = 1;
 	sa->sprite = sp;
 	sp->actions.push_back(sa);
 
 	sa = new ActionPathMove();
 	sa->destination.row = 32;
 	sa->destination.col = 31;
-	sa->destination.altitude = 1;
 	sa->sprite = sp;
 	sp->actions.push_back(sa);
 
@@ -575,7 +524,6 @@ void MapMode::LoadMap() {
 	sa = new ActionPathMove();
 	sa->destination.row = 38;
 	sa->destination.col = 33;
-	sa->destination.altitude = 1;
 	sa->sprite = sp;
 	sp->actions.push_back(sa);
 
@@ -607,8 +555,8 @@ bool MapMode::_TileMoveable(const private_map::TileCheck& tcheck) {
 		return true;
 	}
 
-	// Check that the tile is walkable at this altitude
-	if (!(_tile_layers[tcheck.row][tcheck.col].walkable & tcheck.altitude)) {
+	// Check that the tile is walkable
+	if (!_tile_layers[tcheck.row][tcheck.col].walkable) {
 		return false;
 	}
 
@@ -622,32 +570,28 @@ bool MapMode::_TileMoveable(const private_map::TileCheck& tcheck) {
 		case NORTHWEST:
 		case NW_NORTH:
 		case NW_WEST:
-			if ( !((_tile_layers[tcheck.row][tcheck.col + 1].walkable & tcheck.altitude) &&
-			      (_tile_layers[tcheck.row + 1][tcheck.col].walkable & tcheck.altitude)) ) {
+			if (!(_tile_layers[tcheck.row][tcheck.col + 1].walkable && _tile_layers[tcheck.row + 1][tcheck.col].walkable)) {
 				return false;
 			}
 			break;
 		case SOUTHWEST:
 		case SW_SOUTH:
 		case SW_WEST:
-			if ( !((_tile_layers[tcheck.row][tcheck.col + 1].walkable & tcheck.altitude) &&
-			      (_tile_layers[tcheck.row - 1][tcheck.col].walkable & tcheck.altitude)) ) {
+			if (!(_tile_layers[tcheck.row][tcheck.col + 1].walkable && _tile_layers[tcheck.row - 1][tcheck.col].walkable)) {
 				return false;
 			}
 			break;
 		case NORTHEAST:
 		case NE_NORTH:
 		case NE_EAST:
-			if ( !((_tile_layers[tcheck.row][tcheck.col - 1].walkable & tcheck.altitude) &&
-			      (_tile_layers[tcheck.row + 1][tcheck.col].walkable & tcheck.altitude)) ) {
+			if (!(_tile_layers[tcheck.row][tcheck.col - 1].walkable && _tile_layers[tcheck.row + 1][tcheck.col].walkable)) {
 				return false;
 			}
 			break;
 		case SOUTHEAST:
 		case SE_SOUTH:
 		case SE_EAST:
-			if ( !((_tile_layers[tcheck.row][tcheck.col - 1].walkable & tcheck.altitude) &&
-			      (_tile_layers[tcheck.row - 1][tcheck.col].walkable & tcheck.altitude)) ) {
+			if (!(_tile_layers[tcheck.row][tcheck.col - 1].walkable && _tile_layers[tcheck.row - 1][tcheck.col].walkable)) {
 				return false;
 			}
 			break;
@@ -656,8 +600,8 @@ bool MapMode::_TileMoveable(const private_map::TileCheck& tcheck) {
 			return false;
 	}
 
-	// Check that no other objects occupy this tile at this altitude
-	if (_tile_layers[tcheck.row][tcheck.col].occupied & tcheck.altitude) {
+	// Check that no other objects occupy this tile
+	if (_tile_layers[tcheck.row][tcheck.col].occupied) {
 		return false;
 	}
 
@@ -674,13 +618,8 @@ const uint8 MapMode::_CheckInteraction(const private_map::TileCheck& tcheck) {
 	}
 	
 	// Check if an object occupies the tile
-	if (_tile_layers[tcheck.row][tcheck.col].occupied && tcheck.altitude) {
+	if (_tile_layers[tcheck.row][tcheck.col].occupied) {
 		return OBJECT_INTERACTION;
-	}
-
-	// Check if the tile in question has a confirm event registered to it.
-	if (_tile_layers[tcheck.row][tcheck.col].confirm_event != 255) {
-		return TILE_INTERACTION;
 	}
 
 	return NO_INTERACTION;
@@ -692,8 +631,7 @@ MapObject* MapMode::_FindTileOccupant(const TileCheck& tcheck) {
 	// TODO: Use a more sophisticated search algorithm here
 	for (uint32 i = 0; i < _ground_objects.size(); i++) {
 		if (_ground_objects[i]->row_position == tcheck.row &&
-				_ground_objects[i]->col_position == tcheck.col &&
-				_ground_objects[i]->altitude == tcheck.altitude) {
+				_ground_objects[i]->col_position == tcheck.col) {
 			return _ground_objects[i];
 		}
 	}
@@ -746,16 +684,12 @@ void MapMode::_FindPath(/*const*/ TileNode& destination, vector<TileNode> &path)
 	}
 	
 	// Check if the destination is unwalkable
-	if (!(_tile_layers[destination.row][destination.col].walkable & path[0].altitude)) {
+	if (!_tile_layers[destination.row][destination.col].walkable) {
 		destination.row = path[0].row;
 		destination.col = path[0].col;
-		destination.altitude = path[0].altitude;
 		return;
 	}
 
-	// This is the altitude to use for finding the path
-	tcheck.altitude = path[0].altitude;
-	new_node.altitude = path[0].altitude;
 	// Push the node that the sprite is currently standing on to the closed list
 	closed_list.push_back(path[0]);
 
@@ -1079,7 +1013,6 @@ void MapMode::_UpdateExplore() {
 			tcheck.row = _focused_object->row_position + 1;
 			tcheck.col = _focused_object->col_position;
 		}
-		tcheck.altitude = _focused_object->altitude;
 		tcheck.direction = _focused_object->direction;
 
 		// Check the tile the player is facing for events or other objects that can be interacted with.

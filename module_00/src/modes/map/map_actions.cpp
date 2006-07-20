@@ -49,7 +49,6 @@ void ActionPathMove::Load(uint32 table_key) {
 	read_data->OpenTable(table_key);
 	destination.row = read_data->ReadInt("row");
 	destination.col = read_data->ReadInt("col");
-	destination.altitude = read_data->ReadInt("alt");
 	read_data->CloseTable();
 
 	if (read_data->GetError() != DATA_NO_ERRORS) {
@@ -64,7 +63,6 @@ void ActionPathMove::Process() {
 		TileNode start;
 		start.row = sprite->row_position;
 		start.col = sprite->col_position;
-		start.altitude = sprite->altitude;
 		start.f_score = 0;
 		start.g_score = 0;
 		start.h_score = 0;
@@ -131,7 +129,6 @@ void ActionPathMove::Process() {
 		TileNode middle;
 		middle.row = sprite->row_position;
 		middle.col = sprite->col_position;
-		middle.altitude = sprite->altitude;
 		middle.f_score = 0;
 		middle.g_score = 0;
 		middle.h_score = 0;
