@@ -48,10 +48,6 @@ namespace private_map {
 
 // ************************ MAP CONSTANTS ****************************
 
-//! The rate at which tiles are animated, in milliseconds.
-//! \note This will become defunct later when the video engine handles the animation.
-const uint32 ANIMATION_RATE = 300;
-
 //! \name Screen Coordiante System Constants
 //! \brief The number of rows and columns of tiles that compose the screen.
 //@{
