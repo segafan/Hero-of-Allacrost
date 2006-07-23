@@ -351,6 +351,7 @@ void MapMode::LoadMap() {
 	sp->SetStepSpeed(SLOW_SPEED);
 	sp->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
 	sp->SetFilename("img/sprites/map/marcus");
+	sp->SetPortrait("img/portraits/map/marcus.png");
 	sp->SetDirection(WEST);
 	sp->LoadFrames();
 	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied = 1;
@@ -416,6 +417,7 @@ void MapMode::LoadMap() {
 	sp->SetStepSpeed(FAST_SPEED);
 	sp->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
 	sp->SetFilename("img/sprites/map/vanica");
+	sp->SetPortrait("img/portraits/map/vanica.png");
 	sp->SetDirection(EAST);
 	sp->LoadFrames();
 	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied = 1;
@@ -608,22 +610,6 @@ bool MapMode::_TileMoveable(const private_map::TileCheck& tcheck) {
 	return true;
 }
 
-
-// Checks if there is an interaction with a map object or event at the specified tile.
-const uint8 MapMode::_CheckInteraction(const private_map::TileCheck& tcheck) {
-	// Check that the row and col indeces are valid and not outside the map
-	if (tcheck.row < 1 || tcheck.col < 0 || tcheck.row >= _row_count || tcheck.col >= _col_count) {
-		cerr << "MAP: WARNING: Called _CheckInteraction() with out of bounds row or column" << endl;
-		return NO_INTERACTION;
-	}
-	
-	// Check if an object occupies the tile
-	if (_tile_layers[tcheck.row][tcheck.col].occupied) {
-		return OBJECT_INTERACTION;
-	}
-
-	return NO_INTERACTION;
-}
 
 
 // Searches the list of map objects to find the object occupying a tile.
@@ -955,25 +941,20 @@ void MapMode::_UpdateExplore() {
 	bool user_move = false;
 	uint32 move_direction;
 
-	if (InputManager->LeftSelectPress()) {
-		cout << "rand off" << endl;
-		_random_encounters = false;
-	}
-	if (InputManager->RightSelectPress()) {
-		cout << "rand on" << endl;
-		_random_encounters = true;
-	}
-
-	// Toggle run versus walk
 	if (InputManager->SwapPress()) {
-		static bool something = true;
-		if (something) {
+		cout << "random encounters swap" << endl;
+		_random_encounters = not _random_encounters;
+	}
+	// Toggle run versus walk
+	if (InputManager->CancelPress()) {
+		static bool speed_double = true;
+		if (speed_double) {
 			_focused_object->step_speed /= 2;
-			something = false;
+			speed_double = false;
 		}
 		else {
 			_focused_object->step_speed *= 2;
-			something = true;
+			speed_double = true;
 		}
 	}
 
@@ -986,75 +967,91 @@ void MapMode::_UpdateExplore() {
 
 	//  Check if the focused object is moving. If so, only process swap events from the user
 	if (_focused_object->status & IN_MOTION) {
-// 		if (InputManager->SwapPress()) {
-// 			// Change the character representing the player's party
-//
-// 		}
 		return;
 	}
 
 	// Process confirm events from the user
 	if (InputManager->ConfirmPress()) {
-		// Check for a sprite present on the adjacent tile or a confirm event registerd to the tile
-		TileCheck tcheck;
+		// Check for a sprite present within the space of one tile
+		int16 check_row;
+		int16 check_col;
 		if (_focused_object->direction & (WEST | NW_WEST | SW_WEST)) {
-			tcheck.row = _focused_object->row_position;
-			tcheck.col = _focused_object->col_position - 1;
+			check_row = _focused_object->row_position;
+			check_col = _focused_object->col_position - 1;
 		}
 		else if (_focused_object->direction & (EAST | NE_EAST | SE_EAST)) {
-			tcheck.row = _focused_object->row_position;
-			tcheck.col = _focused_object->col_position + 1;
+			check_row = _focused_object->row_position;
+			check_col = _focused_object->col_position + 1;
 		}
 		else if (_focused_object->direction & (NORTH | NW_NORTH | NE_NORTH)) {
-			tcheck.row = _focused_object->row_position - 1;
-			tcheck.col = _focused_object->col_position;
+			check_row = _focused_object->row_position - 1;
+			check_col = _focused_object->col_position;
 		}
 		else { // then => (_focused_object->_direction & (SOUTH | SW_SOUTH | SE_SOUTH)) == true
-			tcheck.row = _focused_object->row_position + 1;
-			tcheck.col = _focused_object->col_position;
+			check_row = _focused_object->row_position + 1;
+			check_col = _focused_object->col_position;
 		}
-		tcheck.direction = _focused_object->direction;
 
-		// Check the tile the player is facing for events or other objects that can be interacted with.
-		switch (_CheckInteraction(tcheck)) {
-			case NO_INTERACTION:
-				break;
-			case TILE_INTERACTION:
-				cout << "Tile with confirm event was flagged by player" << endl;
-				break;
-			case OBJECT_INTERACTION:
-				MapObject *obj = _FindTileOccupant(tcheck);
-				if (obj->object_type == NPC_SPRITE) {
-					MapSprite *sprite = dynamic_cast<MapSprite*>(obj);
-					if (sprite->dialogues.size() != 0) {
-						_map_state = DIALOGUE;
-						sprite->SaveState();
-						if (tcheck.row - _focused_object->row_position > 0) {
-							sprite->frame = UP_STANDING;
-						}
-						else if (tcheck.row - _focused_object->row_position < 0) {
-							sprite->frame = DOWN_STANDING;
-						}
-						else if (tcheck.col - _focused_object->col_position > 0) {
-							sprite->frame = LEFT_STANDING;
-						}
-						else {
-							sprite->frame = RIGHT_STANDING;
-						}
-						_dialogue_window.Show();
-						_current_dialogue = dynamic_cast<MapDialogue*>(sprite->dialogues[sprite->next_conversation]);
-// 						if (_current_dialogue == NULL) {
-// 							cout << "DIE!" << endl;
-// 						if (sprite->dialogues[sprite->next_conversation]->speaking_action == NULL) {
-// 							cout << 3.5 << endl;
-// 							sprite->SaveState();
-// 						}
-					}
-				}
-				break;
+		if (check_row < 0 || check_col < 0 || check_row > _row_count || check_col >_col_count) {
+			return;
 		}
+
+		MapSprite *sprite = NULL;
+		if (_tile_layers[check_row][check_col].occupied) {
+			for (uint32 i = 0; i < _ground_objects.size(); i++) {
+				if (_ground_objects[i]->row_position == check_row && _ground_objects[i]->col_position == check_col) {
+					sprite = dynamic_cast<MapSprite*>(_ground_objects[i]);
+					break;
+				}
+			}
+			if (MAP_DEBUG && sprite == NULL) {
+				cerr << "MAP ERROR: could not find sprite that should be occupying tile" << endl;
+			}
+		}
+
+		if (sprite == NULL) {
+			float first_row = static_cast<float>(check_row) +  _focused_object->row_offset;
+			float first_col = static_cast<float>(check_col) +  _focused_object->col_offset;
+			for (uint32 i = 0; i < _ground_objects.size(); i++) {
+				MapSprite *second = dynamic_cast<MapSprite*>(_ground_objects[i]);
+				float second_row = static_cast<float>(second->row_position) + second->row_offset;
+				float second_col = static_cast<float>(second->col_position) + second->col_offset;
+	
+				if (second_row <= first_row + 1.0f  && second_row >= first_row - 1.0f &&
+					second_col <= first_col + 1.0f  && second_col >= first_col - 1.0f) {
+					sprite = second;
+					break;
+				}
+			}
+		}
+
+		if (sprite != NULL) {
+			if (sprite->dialogues.size() != 0) {
+				_map_state = DIALOGUE;
+				sprite->SaveState();
+				if (_focused_object->direction & (SOUTH | SW_SOUTH | SE_SOUTH)) {
+					sprite->frame = UP_STANDING;
+				}
+				else if (_focused_object->direction & (NORTH | NW_NORTH | NE_NORTH)) {
+					sprite->frame = DOWN_STANDING;
+				}
+				else if (_focused_object->direction & (EAST | NE_EAST | SE_EAST)) {
+					sprite->frame = LEFT_STANDING;
+				}
+				else {
+					sprite->frame = RIGHT_STANDING;
+				}
+				_dialogue_window.Show();
+				_current_dialogue = dynamic_cast<MapDialogue*>(sprite->dialogues[sprite->next_conversation]);
+// 				if (sprite->dialogues[sprite->next_conversation]->speaking_action == NULL) {
+// 					cout << 3.5 << endl;
+// 					sprite->SaveState();
+// 				}
+			}
+		}
+
 		return;
-	}
+	} // if (InputManager->ConfirmPress())
 
 	// Handle movement input from user
 	// Handle west, northwest, and southwest movement
