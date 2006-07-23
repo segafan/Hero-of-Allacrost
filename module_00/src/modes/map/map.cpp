@@ -943,7 +943,7 @@ void MapMode::_UpdateExplore() {
 
 	if (InputManager->SwapPress()) {
 		cout << "random encounters swap" << endl;
-		_random_encounters = not _random_encounters;
+		_random_encounters = !_random_encounters;
 	}
 	// Toggle run versus walk
 	if (InputManager->CancelPress()) {
