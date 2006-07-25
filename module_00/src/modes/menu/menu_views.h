@@ -95,6 +95,11 @@ private:
 	hoa_video::StillImage _full_portrait;
 	//! \brief the current character for this screen.
 	hoa_global::GlobalCharacter *_current_char;
+	//! \brief if the window is active or not
+	bool _active;
+	//! \brief current cursor position
+	bool _cursor_x;
+	bool _cursor_y;
 public:
 	//! \brief constructor
 	StatusWindow();
@@ -105,6 +110,11 @@ public:
 
 	//! \brief update function handles input to the window
 	void Update();
+
+	//! \brief Check if status window is active
+	bool IsActive() { return _active; }
+	//! \brief Active this window
+	void Activate(bool new_value);
 };
 
 /*!***********************************************************************
