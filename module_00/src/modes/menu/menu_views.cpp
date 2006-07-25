@@ -139,7 +139,7 @@ void CharacterWindow::SetCharacter(GlobalCharacter *character)
 	this->_char_id = character->GetID();
 	
 	// TODO: Load the portrait
-	this->_portrait.SetFilename(string("img/portraits/menu/") + character->GetName() + string("_full.png"));
+	this->_portrait.SetFilename(string("img/portraits/menu/") + character->GetFilename() + string("_full.png"));
 	this->_portrait.SetStatic(true);
 	this->_portrait.SetDimensions(150, 200);
 	//this->_portrait.SetDimensions(Get_The_Dimensions);
@@ -159,8 +159,8 @@ InventoryWindow::InventoryWindow() : _inventory_active(false)
 	GlobalItem *new_item = new GlobalItem("HP Potion", GLOBAL_HP_RECOVERY_ITEM, GLOBAL_ALL_CHARACTERS, 1, 1, "img/icons/potion-red.png");
 	new_item->SetRecoveryAmount(20);
 	GlobalManager->AddItemToInventory(new_item);
-	GlobalManager->AddItemToInventory(new GlobalWeapon("Broadsword", GLOBAL_ALL_CHARACTERS, 2, 4, "img/icons/sword.png"));
-	GlobalManager->AddItemToInventory(new GlobalArmor("Breastplate", GLOBAL_BODY_ARMOR, GLOBAL_ALL_CHARACTERS, 3, 7, "img/icons/breastplate.png"));
+	//GlobalManager->AddItemToInventory(new GlobalWeapon("Broadsword", GLOBAL_ALL_CHARACTERS, 2, 4, "img/icons/sword.png"));
+	//GlobalManager->AddItemToInventory(new GlobalArmor("Breastplate", GLOBAL_BODY_ARMOR, GLOBAL_ALL_CHARACTERS, 3, 7, "img/icons/breastplate.png"));
 	////////////////////////////////////////////////////////
 	/////////////// DELETE THIS ////////////////////////////
 	// ONCE INVENTORY IS ADDING THROUGH THE RIGHT SPOT /////
@@ -318,8 +318,7 @@ void InventoryWindow::Update()
 		{
 			GlobalItem *item = (GlobalItem *)GlobalManager->GetInventory()[item_selected];
 			if ((item->GetUseCase() && GLOBAL_HP_RECOVERY_ITEM == GLOBAL_HP_RECOVERY_ITEM) ||
-				(item->GetUseCase() && GLOBAL_SP_RECOVERY_ITEM == GLOBAL_SP_RECOVERY_ITEM)
-				)
+				(item->GetUseCase() && GLOBAL_SP_RECOVERY_ITEM == GLOBAL_SP_RECOVERY_ITEM))
 			{
 				// Play Sound
 				confirm.PlaySound();
@@ -392,7 +391,7 @@ bool MiniCharacterSelectWindow::Draw()
 		// Get the portrait from the character eventually
 		StillImage portrait;
 		// TODO: This needs optimization, move the LoadImage - DeleteImage calls into constructor/destructor
-		portrait.SetFilename(string("img/sprites/map/") + string(current->GetName()) + string("_d0.png"));
+		portrait.SetFilename(string("img/sprites/map/") + string(current->GetFilename()) + string("_d0.png"));
 		portrait.SetDimensions(32, 64);
 		portrait.SetStatic(true);
 		VideoManager->LoadImage(portrait);
@@ -527,18 +526,18 @@ void MiniCharacterSelectWindow::Update()
 //----------------------------------
 // StatusWindow::StatusWindow()
 //----------------------------------
-StatusWindow::StatusWindow()
+StatusWindow::StatusWindow() : _active(false), _cursor_x(588), _cursor_y(324)
 {
 	// Get the current character
 	_current_char = GlobalManager->GetParty()[0];
 	// Set up the head picture
 	//string path = string("img/sprites/map/") + string(_current_char->GetName()) + string("_d0.png");
-	string head_path = string("img/portraits/map/") + _current_char->GetName() + string(".png");
+	string head_path = string("img/portraits/map/") + _current_char->GetFilename() + string(".png");
 	_head_portrait.SetFilename(head_path);
 	_head_portrait.SetStatic(true);
 	_head_portrait.SetDimensions(150, 200);
 	// Set up the full body portrait
-	string full_path = string("img/portraits/menu/") + _current_char->GetName() + string("_full_large.png");
+	string full_path = string("img/portraits/menu/") + _current_char->GetFilename() + string("_full_large.png");
 	_full_portrait.SetFilename(full_path);
 	_full_portrait.SetStatic(true);
 	_full_portrait.SetDimensions(224,350);
@@ -629,7 +628,82 @@ bool StatusWindow::Draw()
 	VideoManager->Move(400, 104);
 	VideoManager->DrawImage(_full_portrait);
 
+	// Draw Equipment
+	VideoManager->MoveRelative(220, 220);
+
+	// Draw Head Armor
+	string head_armour = string("Head Armor: "); // Currently doesn't work + _current_char->GetHeadArmor()->GetName();
+	if (!VideoManager->DrawText(MakeWideString(head_armour)))
+		cerr << "STATUSWINDOW: ERROR > Couldn't draw head armor text!" << endl;
+
+	// Draw body Armor
+	VideoManager->MoveRelative(0, 24);
+	string chest_armor = string("Body Armor: ");
+	if (!VideoManager->DrawText(MakeWideString(chest_armor)))
+		cerr << "STATUSWINDOW: ERROR > Couldn't draw chest armor text!" << endl;
+
+	// Draw Arms Armor
+	VideoManager->MoveRelative(0, 24);
+	string arms_armor = string("Arms Armor: ");
+	if (!VideoManager->DrawText(MakeWideString(arms_armor)))
+		cerr << "STATUSWINDOW: ERROR > Couldn't draw arms armor text!" << endl;
+
+	// Draw legs Armor
+	VideoManager->MoveRelative(0, 24);
+	string legs_armor = string("Legs Armor: ");
+	if (!VideoManager->DrawText(MakeWideString(legs_armor)))
+		cerr << "STATUSWINDOW: ERROR > Couldn't draw legs armor text!" << endl;
+
+	// Draw weapon
+	VideoManager->MoveRelative(0, 24);
+	string weapon = string("Weapon: ");
+	if (!VideoManager->DrawText(MakeWideString(weapon)))
+		cerr << "STATUSWINDOW: ERROR > Couldn't draw weapon text!" << endl;
+
+	if (_active)
+	{
+		VideoManager->Move(_cursor_x, _cursor_y);
+		VideoManager->DrawImage(*(VideoManager->GetDefaultCursor()));
+	}
+
 	return true;
+}
+
+//-----------------------------------
+// StatusWindow::Activate
+//-----------------------------------
+void StatusWindow::Activate(bool new_value)
+{
+	_active = new_value;
+}
+
+//-----------------------------------
+// StatusWindow::Activate
+//-----------------------------------
+void StatusWindow::Update()
+{
+	// Load sound effects
+	SoundDescriptor confirm;
+	SoundDescriptor cancel;
+	if (confirm.LoadSound("confirm") == false) 
+	{
+		cerr << "STATUSWINDOW::UPDATE - Unable to load confirm sound effect!" << endl;
+	}
+	if (cancel.LoadSound("cancel") == false) 
+	{
+		cerr << "STATUSWINDOW::UPDATE - Unable to load cancel sound effect!" << endl;
+	}
+
+	// check input values
+	if (InputManager->UpPress())
+	{
+	}
+	else if (InputManager->DownPress())
+	{
+	}
+	else if (InputManager->ConfirmPress())
+	{
+	}
 }
 
 } // end namespace hoa_menu

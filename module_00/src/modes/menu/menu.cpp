@@ -229,6 +229,12 @@ void MenuMode::Update() {
 		_inventory_window.Update();
 		return;
 	}
+	else if (_status_window.IsActive())
+	{
+		// Update status window.
+		_status_window.Update();
+		return;
+	}
 	
 	if (InputManager->CancelPress()) 
 	{

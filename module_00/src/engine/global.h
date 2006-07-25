@@ -642,6 +642,16 @@ public:
 	GlobalArmor* EquipLegsArmor(GlobalArmor *_new_eq);
 	//@}
 
+	//@{
+	//! \brief Get the equipment on the character
+	//! \return the equipped weapon or armor
+	GlobalWeapon *GetWeapon() { return _eq_weapon; }
+	GlobalArmor *GetHeadArmor() { return _eq_head; }
+	GlobalArmor *GetBodyArmor() { return _eq_body; }
+	GlobalArmor *GetArmsArmor() { return _eq_arms; }
+	GlobalArmor *GetLegArmor() { return _eq_legs; }
+	//@}
+
 	//! \name Public Member Access Functions
 	//@{
 	//! \brief Used for setting and getting the values of the various class members.
