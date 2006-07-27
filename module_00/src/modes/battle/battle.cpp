@@ -433,16 +433,17 @@ void BattleUI::Update(uint32 AUpdateTime) {
 		if (_battle_mode->IsVictorious())
 		{
 			if(InputManager->ConfirmPress()) {
-				_battle_mode->PlayerVictory();
-                        }
+				_battle_mode->PlayerVictory(); // Handle victory
+			}
 		}
 		else // Battle was lost :(
 		{
 			_battle_lose_menu.Update(AUpdateTime); // Update lose menu
-			if(InputManager->ConfirmPress()) {
-                                //get rid of the fog
-                                _battle_mode->PlayerDefeat();
-                        }
+			if(InputManager->ConfirmRelease()) {
+				//_battle_lose_menu.HandleConfirmKey(); // This needs to be handled when there's more than 1 option
+				InputManager->EventHandler(); // Clear input in here because we don't want confirm press in boot mode!
+				_battle_mode->PlayerDefeat(); // Handle defeat
+			}
 		}
 
 		return; // No need to handle other menu events any more
@@ -1350,7 +1351,11 @@ void BattleMode::_DrawCharacters() {
 
 //! Shutdown the battle mode
 void BattleMode::_ShutDown() {
-        ModeManager->Pop();
+	if (BATTLE_DEBUG) cout << "BATTLE: ShutDown() called!" << endl;
+	VideoManager->SetFog(Color::black, 0.0f); // Turn off any remaining fog
+	InputManager->EventHandler(); // Clear input
+	ModeManager->Pop(); // Pop out the BattleMode state
+	ModeManager->Update(); // Immediately continue with the *previous* state
 }
 
 // Is the battle over?
@@ -1420,21 +1425,17 @@ void BattleMode::PlayerVictory() {
 	{
 		claudius->AddXP(50);
 	}
-
-
-        VideoManager->SetFog(Color::black, 0.0f); // Turn off the fog
-                                        
+	
+	VideoManager->SetFog(Color::black, 0.0f); // Turn off the fog                                    
 	_ShutDown();
 }
         
 void BattleMode::PlayerDefeat() {
 	if (BATTLE_DEBUG) cout << "Player was defeaten in a battle!" << endl;
-
-	// TODO: code that returns game to the boot mode. Currently just a call to _ShutDown()
-        
-        VideoManager->SetFog(Color::black, 0.0f); // Turn off the fog
-	
-        _ShutDown();
+	VideoManager->SetFog(Color::black, 0.0f); // Turn off the fog
+	ModeManager->Pop(); // Pop out battle mode
+	ModeManager->Pop(); // Pop out map mode
+	ModeManager->Update(); // Make sure we're back in Viljami's lovely boot mode :)
 }
 
 void BattleMode::_BuildPlayerCharacters() {
@@ -1597,8 +1598,10 @@ void BattleMode::_TEMP_LoadTestData() {
 	VideoManager->BeginImageLoadBatch();
 	for (uint32 i = 0; i < enemyAnimation.size(); i++) {
 		if(!VideoManager->LoadImage(enemyAnimation[i]))
+		{
                         cerr << "Failed to load spider image." << endl; //failed to laod image
                         _ShutDown();
+		}
 	}
 	VideoManager->EndImageLoadBatch();
         
@@ -1617,8 +1620,10 @@ void BattleMode::_TEMP_LoadTestData() {
 	VideoManager->BeginImageLoadBatch();
 	for (uint32 i = 0; i < enemyAnimation2.size(); i++) {
 		if(!VideoManager->LoadImage(enemyAnimation2[i]))
+		{
                         cerr << "Failed to load skeleton image." << endl; //failed to laod image
                         _ShutDown();
+		}
 	}
 	VideoManager->EndImageLoadBatch();
         
@@ -1638,8 +1643,10 @@ void BattleMode::_TEMP_LoadTestData() {
 	VideoManager->BeginImageLoadBatch();
 	for (uint32 i = 0; i < enemyAnimation3.size(); i++) {
 		if(!VideoManager->LoadImage(enemyAnimation3[i]))
+		{
                         cerr << "Failed to load green slime image." << endl; //failed to laod image
                         _ShutDown();
+		}
 	}
 	VideoManager->EndImageLoadBatch();
         
@@ -1658,8 +1665,10 @@ void BattleMode::_TEMP_LoadTestData() {
 	VideoManager->BeginImageLoadBatch();
 	for (uint32 i = 0; i < enemyAnimation4.size(); i++) {
 		if(!VideoManager->LoadImage(enemyAnimation4[i]))
+		{
                         cerr << "Failed to load snake image." << endl; //failed to laod image
                         _ShutDown();
+		}
 	}
 	VideoManager->EndImageLoadBatch();
    

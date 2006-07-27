@@ -38,6 +38,7 @@ music_files = { "Allacrost_Opening_Theme",
 sound_files = { "confirm",
                 "cancel",
                 "obtain",
-                "bump" };
+                "bump",
+                "volumetest" };
 
 -- -------------------------------------------------- --

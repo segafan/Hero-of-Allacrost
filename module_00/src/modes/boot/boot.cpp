@@ -61,12 +61,10 @@ BootMode::BootMode() :
 _main_menu(0, false, this),
 _fade_out(false) // No, we're not fading out yet!
 {
-
-        VideoManager->SetFog(Color::black, 0.0f);
-
 	if (BOOT_DEBUG) cout << "BOOT: BootMode constructor invoked." << endl;
-
 	mode_type = MODE_MANAGER_BOOT_MODE;
+
+	VideoManager->SetFog(Color::black, 0.0f);
 	
 	ReadDataDescriptor read_data;
 	if (!read_data.OpenFile("dat/config/boot.lua")) {
@@ -134,10 +132,12 @@ _fade_out(false) // No, we're not fading out yet!
 	_boot_sounds.push_back(new_sound);
 	_boot_sounds.push_back(new_sound);
 	_boot_sounds.push_back(new_sound);
+	_boot_sounds.push_back(new_sound);
 	_boot_sounds[0].LoadSound(new_sound_files[0]);
 	_boot_sounds[1].LoadSound(new_sound_files[1]);
 	_boot_sounds[2].LoadSound(new_sound_files[2]);
 	_boot_sounds[3].LoadSound(new_sound_files[3]);
+	_boot_sounds[4].LoadSound(new_sound_files[4]);
         
 	// This loop causes a seg fault for an unknown reason. Roots is looking into it (04/01/2006)
 // 	for (uint32 i = 0; i < new_sound_files.size(); i++) {
@@ -471,15 +471,12 @@ void BootMode::_SetupMainMenu() {
 
 	// Add all the needed menu options to the main menu
 	_main_menu.AddOption(MakeWideString("New Game"), &BootMode::_OnNewGame);
-        
-        _main_menu.AddOption(MakeWideString("Load Game")/*, &BootMode::_OnLoadGame*/); // Battle mode removed! "Take that visage!"
-	//_main_menu.AddOption(MakeWideString("Load Game"), &BootMode::_OnLoadGame); // Battle mode removed! "Take that visage!"
-        
+	_main_menu.AddOption(MakeWideString("Load Game")/*, &BootMode::_OnLoadGame*/); // Battle mode removed! "Take that visage!"    
 	_main_menu.AddOption(MakeWideString("Options"), &BootMode::_OnOptions);
 	_main_menu.AddOption(MakeWideString("Credits"), &BootMode::_OnCredits);
 	_main_menu.AddOption(MakeWideString("Quit"), &BootMode::_OnQuit);
 
-	_main_menu.EnableOption(1, false); // Disable "load game". TODO: Remove battle mode as well for the demo-release
+	_main_menu.EnableOption(1, false); // gray out "load game" for now.
 }
 
 
@@ -626,7 +623,7 @@ void BootMode::_OnNewGame() {
 }
 
 
-// 'Load Game' confirmed. Actually it simply loads battle mode demo at the moment :devil:
+// 'Load Game' confirmed. Not done yet, sorry mate.
 void BootMode::_OnLoadGame() {
 }
 
@@ -699,7 +696,7 @@ void BootMode::_OnVideoMode() {
 void BootMode::_OnSoundLeft() {
 	AudioManager->SetSoundVolume(AudioManager->GetSoundVolume() - 0.1f);
 	_UpdateAudioOptions();
-	_boot_sounds.at(0).PlaySound(); // Play a sound for user to hear new volume level. TODO: Find a better sound here!
+	_boot_sounds.at(4).PlaySound(); // Play a sound for user to hear new volume level.
 }
 
 
@@ -707,7 +704,7 @@ void BootMode::_OnSoundLeft() {
 void BootMode::_OnSoundRight() {
 	AudioManager->SetSoundVolume(AudioManager->GetSoundVolume() + 0.1f);
 	_UpdateAudioOptions();
-	_boot_sounds.at(0).PlaySound(); // Play a sound for user to hear new volume level
+	_boot_sounds.at(4).PlaySound(); // Play a sound for user to hear new volume level
 }
 
 
@@ -874,15 +871,13 @@ void BootMode::Update() {
 	if (InputManager->ConfirmPress() && !_credits_screen.IsVisible())
 	{
 		// Play 'confirm sound' if the selection isn't grayed out and it has a confirm handler
-		/*
-                if (_current_menu->IsSelectionEnabled())
+		if (_current_menu->IsSelectionEnabled())
 			_boot_sounds.at(0).PlaySound();
 		else
 			_boot_sounds.at(3).PlaySound(); // Otherwise play a silly 'bömp'
-                */
-                
+
 		_current_menu->ConfirmPressed();
-		
+
 		// Update window status
 		if (_current_menu->IsWindowed())
 		{
@@ -925,7 +920,7 @@ void BootMode::Update() {
 		if (_current_menu->GetParent() != 0)
 		{
 			// Play cancel sound
-			//_boot_sounds.at(1).PlaySound();
+			_boot_sounds.at(1).PlaySound();
 
 			// Go up a level in the menu hierarchy
 			_current_menu = _current_menu->GetParent();
