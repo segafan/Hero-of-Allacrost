@@ -601,6 +601,29 @@ void BootMode::_OnNewGame() {
         for(uint32 i = 0; i < playerAnimation.size(); i++) {
                 ai.AddFrame(playerAnimation[i], 10);
         }
+        
+        std::vector<hoa_video::StillImage> characterHeadShot;
+	StillImage anim6;
+	anim6.SetDimensions(95, 95); 
+	anim6.SetFilename("img/portraits/battle/claudius_battle_0.png");
+	characterHeadShot.push_back(anim6);
+        anim6.SetFilename("img/portraits/battle/claudius_battle_1.png");
+	characterHeadShot.push_back(anim6);
+        anim6.SetFilename("img/portraits/battle/claudius_battle_2.png");
+	characterHeadShot.push_back(anim6);
+        anim6.SetFilename("img/portraits/battle/claudius_battle_3.png");
+	characterHeadShot.push_back(anim6);
+        anim6.SetFilename("img/portraits/battle/claudius_battle_4.png");
+	characterHeadShot.push_back(anim6);
+        anim6.SetFilename("img/portraits/battle/claudius_battle_5.png");
+	characterHeadShot.push_back(anim6);
+	
+	VideoManager->BeginImageLoadBatch();
+	for (uint32 i = 0; i < characterHeadShot.size(); i++) {
+		if(!VideoManager->LoadImage(characterHeadShot[i]))
+                        cerr << "Failed to load claudius head shot image." << endl; //failed to laod image
+	}
+	VideoManager->EndImageLoadBatch();
 
         //make sure he has health, et cetera
         claud->SetMaxHP(300);
@@ -610,6 +633,9 @@ void BootMode::_OnNewGame() {
         
         ai.SetFrameIndex(0);
         claud->AddAnimation("IDLE", ai);
+        for (uint32 i = 0; i < characterHeadShot.size(); i++) {
+                claud->AddBattleHeadShot(characterHeadShot[i]);
+        }
         
         //added by visage July 18th, 2006
         claud->AddAttackSkill(new GlobalSkill("sword_swipe"));
