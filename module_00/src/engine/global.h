@@ -624,6 +624,8 @@ private:
 
 	//! The frame images for the character's map sprite.
 	std::vector<hoa_video::StillImage> _map_frames;
+        //! Battle Head Shots
+        std::vector<hoa_video::StillImage> _battle_head_shot; 
 	//! The frame images for the character's battle sprite.
 	std::map<std::string, hoa_video::AnimatedImage > _battle_animation;
 public:
@@ -700,6 +702,9 @@ public:
 	hoa_video::AnimatedImage GetAnimation(std::string anim) { 
                 return _battle_animation[anim]; 
         }
+        
+        void AddBattleHeadShot(hoa_video::StillImage si) { _battle_head_shot.push_back(si); }
+        std::vector<hoa_video::StillImage> GetBattleHeadShots() { return _battle_head_shot; }
 	//@}
 };
 
