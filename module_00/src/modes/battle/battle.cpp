@@ -417,7 +417,7 @@ void BattleUI::DrawTopElements() {
                 VideoManager->DrawImage(_MAPS_indicator);
                 VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
                 Color c(0.0f, 0.0f, 1.0f, 1.0f);
-                TEMP_Draw_Text(c, e->GetXLocation()-20, e->GetYLocation()+100, global_attack_points[_current_map_selection]->GetName());
+                TEMP_Draw_Text(c, 850, 100, global_attack_points[_current_map_selection]->GetName());
         }
 }
 
@@ -784,6 +784,53 @@ void PlayerActor::Update(uint32 ATimeElapsed) {
 }
 
 void PlayerActor::Draw() {
+
+        //draw the blended face 
+        
+        std::vector<hoa_video::StillImage> head_shots = _wrapped_character->GetBattleHeadShots();
+        
+        VideoManager->Move(50,10);
+        VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+
+        uint32 health = GetHealth();
+        uint32 maxhealth = GetMaxHealth();
+
+        double percent = health/(double)maxhealth;
+
+        if(percent == 0) {
+                VideoManager->DrawImage(head_shots[5]);
+        }
+        if(percent < 0.1) {
+                VideoManager->DrawImage(head_shots[5]);
+                double alpha = percent*10;
+                VideoManager->DrawImage(head_shots[4], Color(1.0f, 1.0f, 1.0f, alpha));
+        }
+        else if(percent < 0.25f) {
+                VideoManager->DrawImage(head_shots[4]);
+                //.25 then alpha = 1
+                double alpha = (percent - 0.25f / .1);
+                VideoManager->DrawImage(head_shots[3], Color(1.0f, 1.0f, 1.0f, alpha));
+        }
+        else if(percent < 0.50f){
+                VideoManager->DrawImage(head_shots[3]);
+                double alpha = (percent - 0.25f / .25);
+                VideoManager->DrawImage(head_shots[2], Color(1.0f, 1.0f, 1.0f, alpha));
+        }
+        else if(percent < 0.75f){
+                VideoManager->DrawImage(head_shots[2]);
+                double alpha = (percent - 0.25f / .50);
+                VideoManager->DrawImage(head_shots[1], Color(1.0f, 1.0f, 1.0f, alpha));
+        }
+        else if(percent < 1.0f) {
+                VideoManager->DrawImage(head_shots[1]);
+                double alpha = (percent - 0.25f / .75);
+                VideoManager->DrawImage(head_shots[0], Color(1.0f, 1.0f, 1.0f, alpha));
+        }
+        else {
+                VideoManager->DrawImage(head_shots[0]);
+        }
+
+
         if(IsAlive()) {
                 //more temporary crap
                 
@@ -803,11 +850,11 @@ void PlayerActor::Draw() {
                         }
                 }
                 
-                Color c(0.0f, 1.0f, 0.0f, 1.0f);
+                Color c(1.0f, 1.0f, 1.0f, 1.0f);
                 ostringstream health_amount;
-                health_amount << "HP: " << GetHealth() << " / " << GetMaxHealth();
+                health_amount << GetHealth() << " / " << GetMaxHealth();
                                         
-                TEMP_Draw_Text(c, GetXLocation()-20, GetYLocation()-20, health_amount.str());
+                TEMP_Draw_Text(c, 320, 90, health_amount.str());
                 
                 //move to x,y
                 VideoManager->Move(GetXLocation(),GetYLocation());
@@ -949,10 +996,10 @@ void EnemyActor::Draw() {
 
         if ( IsAlive() ) {
                 Color c(0.0f, 1.0f, 0.0f, 1.0f);
-                ostringstream health_amount;
-                health_amount << "HP: " << GetHealth() << " / " << GetMaxHealth();
+                //ostringstream health_amount;
+                //health_amount << "HP: " << GetHealth() << " / " << GetMaxHealth();
                                         
-                TEMP_Draw_Text(c, GetXLocation()-20, GetYLocation()-20, health_amount.str());
+                //TEMP_Draw_Text(c, GetXLocation()-20, GetYLocation()-20, health_amount.str());
         
                 std::vector<hoa_video::StillImage> animations = _wrapped_enemy.GetAnimation("IDLE");
                 
@@ -1574,7 +1621,7 @@ void BattleMode::_TEMP_LoadTestData() {
                 _ShutDown();
         }
         
-        overback.SetFilename("img/backdrops/battle/battle_bottom_menu.jpg");
+        overback.SetFilename("img/menus/battle_bottom_menu.png");
         overback.SetDimensions(1024, 128);
         _battle_images.push_back(overback);
 	if(!VideoManager->LoadImage(_battle_images[1])){
@@ -1688,25 +1735,25 @@ void BattleMode::_TEMP_LoadTestData() {
 	GlobalEnemy e("spider");
 	e.AddAnimation("IDLE", enemyAnimation);
         //e.AddAttackSkill(new GlobalSkill("sword_swipe"));
-	EnemyActor *enemy = new EnemyActor(e, this, 600, 100);
+	EnemyActor *enemy = new EnemyActor(e, this, 600, 130);
 	enemy->LevelUp(2);
         
         GlobalEnemy e2("skeleton");
 	e2.AddAnimation("IDLE", enemyAnimation2);
         //e2.AddAttackSkill(new GlobalSkill("sword_swipe"));
-	EnemyActor *enemy2 = new EnemyActor(e2, this, 805, 300);
+	EnemyActor *enemy2 = new EnemyActor(e2, this, 805, 330);
 	enemy2->LevelUp(2);
         
         GlobalEnemy e3("slime");
 	e3.AddAnimation("IDLE", enemyAnimation3);
         //e3.AddAttackSkill(new GlobalSkill("sword_swipe"));
-	EnemyActor *enemy3 = new EnemyActor(e3, this, 805, 140);
+	EnemyActor *enemy3 = new EnemyActor(e3, this, 805, 170);
 	enemy3->LevelUp(2);
         
         GlobalEnemy e4("snake");
 	e4.AddAnimation("IDLE", enemyAnimation4);
         //e3.AddAttackSkill(new GlobalSkill("sword_swipe"));
-	EnemyActor *enemy4 = new EnemyActor(e4, this, 600, 250);
+	EnemyActor *enemy4 = new EnemyActor(e4, this, 600, 280);
 	enemy4->LevelUp(2);
         
         _enemy_actors.push_back(enemy);
