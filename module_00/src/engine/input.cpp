@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -70,7 +70,7 @@ GameInput::GameInput() {
 	_left_select_state    = false;
 	_left_select_press    = false;
 	_left_select_release  = false;
-	
+
 	_joyaxis_x_first      = true;
 	_joyaxis_y_first      = true;
 	_joystick.js          = NULL;
@@ -93,12 +93,12 @@ bool GameInput::Initialize() {
 		cerr << "INPUT ERROR: failed to initailize the SDL joystick subsystem" << endl;
 		return false;
 	}
-	
+
 	// Loads saved settings to setup the key and joystick configurations
 	string in_filename = "dat/config/settings.lua";
 	ReadDataDescriptor input_map_data;
 	if (input_map_data.OpenFile(in_filename.c_str()) == false) {
-		cerr << "INPUT ERROR: failed to open data file for reading: " 
+		cerr << "INPUT ERROR: failed to open data file for reading: "
 		     << in_filename << endl;
 		return false;
 	}
@@ -116,9 +116,9 @@ bool GameInput::Initialize() {
 	_key.right_select = static_cast<SDLKey>(input_map_data.ReadInt("right_select"));
 	_key.pause        = static_cast<SDLKey>(input_map_data.ReadInt("pause"));
 	input_map_data.CloseTable();
-	
+
 	if (input_map_data.GetError() != DATA_NO_ERRORS) {
-		cerr << "INPUT ERROR: failure while trying to retrieve key map " 
+		cerr << "INPUT ERROR: failure while trying to retrieve key map "
 		     << "information from file: " << in_filename << endl;
 		return false;
 	}
@@ -134,14 +134,14 @@ bool GameInput::Initialize() {
 	_joystick.pause        = static_cast<uint8>(input_map_data.ReadInt("pause"));
 	_joystick.quit         = static_cast<uint8>(input_map_data.ReadInt("quit"));
 	input_map_data.CloseTable();
-	
+
 	if (input_map_data.GetError() != DATA_NO_ERRORS) {
-		cerr << "INPUT: an error occured while trying to retrieve joystick mapping information " 
+		cerr << "INPUT: an error occured while trying to retrieve joystick mapping information "
 		     << "from file: " << in_filename << endl;
 		return false;
 	}
 	input_map_data.CloseFile();
-	
+
 	// Attempt to initialize and setup the joystick system
 	if (SDL_NumJoysticks() == 0) { // No joysticks found
 		SDL_JoystickEventState(SDL_IGNORE);
@@ -152,7 +152,7 @@ bool GameInput::Initialize() {
 		// TODO: need to allow user to specify which joystick to open, if multiple exist
 		_joystick.js = SDL_JoystickOpen(_joystick.joy_index);
 	}
-	
+
 	return true;
 }
 
@@ -243,11 +243,11 @@ void GameInput::EventHandler() {
 	_left_select_release  = false;
 
 	// Loops until there are no remaining events to process
-	while (SDL_PollEvent(&event)) { 
+	while (SDL_PollEvent(&event)) {
 		if (event.type == SDL_QUIT) {
 
 			// Quit the game without question if the active game mode is BootMode or QuitMode
-			if (ModeManager->GetGameType() == MODE_MANAGER_BOOT_MODE 
+			if (ModeManager->GetGameType() == MODE_MANAGER_BOOT_MODE
 				|| ModeManager->GetGameType() == MODE_MANAGER_QUIT_MODE) {
 				SettingsManager->ExitGame();
 			}
@@ -260,7 +260,7 @@ void GameInput::EventHandler() {
 		}
 		else if (event.type == SDL_ACTIVEEVENT) {
 			// Should we care about Active events?
-			if (INPUT_DEBUG) cout << "Active event" << endl;
+			// if (INPUT_DEBUG) cout << "Active event" << endl;
 			break;
 		}
 		else if (event.type == SDL_KEYUP || event.type == SDL_KEYDOWN) {
@@ -380,7 +380,7 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 			}
 			else if (key_event.keysym.sym == SDLK_q) {
 				// Quit the game without question if the current game mode is BootMode or QuitMode
-				if (ModeManager->GetGameType() == MODE_MANAGER_BOOT_MODE 
+				if (ModeManager->GetGameType() == MODE_MANAGER_BOOT_MODE
 					|| ModeManager->GetGameType() == MODE_MANAGER_QUIT_MODE) {
 					SettingsManager->ExitGame();
 				}
@@ -463,7 +463,7 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 		}
 		else if (key_event.keysym.sym == _key.pause) {
 			// Don't pause if the current game mode is BootMode or QuitMode
-			if (ModeManager->GetGameType() == MODE_MANAGER_BOOT_MODE 
+			if (ModeManager->GetGameType() == MODE_MANAGER_BOOT_MODE
 				|| ModeManager->GetGameType() == MODE_MANAGER_QUIT_MODE) {
 				return;
 			}
@@ -593,7 +593,7 @@ void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 		}
 		else if (js_event.jbutton.button == _joystick.pause) {
 			// Don't pause if the current game mode is BootMode or QuitMode
-			if (ModeManager->GetGameType() == MODE_MANAGER_BOOT_MODE 
+			if (ModeManager->GetGameType() == MODE_MANAGER_BOOT_MODE
 				|| ModeManager->GetGameType() == MODE_MANAGER_QUIT_MODE) {
 				return;
 			}
@@ -610,7 +610,7 @@ void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 		}
 		else if (js_event.jbutton.button == _joystick.quit) {
 			// Quit the game without question if the current game mode is BootMode or QuitMode
-			if (ModeManager->GetGameType() == MODE_MANAGER_BOOT_MODE 
+			if (ModeManager->GetGameType() == MODE_MANAGER_BOOT_MODE
 				|| ModeManager->GetGameType() == MODE_MANAGER_QUIT_MODE) {
 				SettingsManager->ExitGame();
 			}

@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -77,7 +77,7 @@ MapMode::~MapMode() {
 	for (uint32 i = 0; i < _map_music.size(); i++) {
 		_map_music[i].FreeMusic();
 	}
-	
+
 	// Delete all of the tile images
 	for (uint32 i = 0; i < _tile_images.size(); i++) {
 		VideoManager->DeleteImage(*(_tile_images[i]));
@@ -113,22 +113,22 @@ void MapMode::Reset() {
 
 // Loads the map from a Lua file.
 void MapMode::LoadMap() {
-	
+
 	_map_music.push_back(MusicDescriptor());
 	_map_music[0].LoadMusic("Seeking_New_Worlds");
-	
+
 	// *********** (1) Setup GUI items in 1024x768 coordinate system ************
 	VideoManager->PushState();
 	VideoManager->SetCoordSys(0, 1024, 768, 0);
 	_dialogue_window.Create(1024.0f, 256.0f);
 	_dialogue_window.SetPosition(0.0f, 512.0f);
 // 	_dialogue_window.SetDisplayMode(VIDEO_MENU_EXPAND_FROM_CENTER);
-	
+
 	_dialogue_box.SetFilename("img/menus/dialogue_box.png");
 	VideoManager->LoadImage(_dialogue_box);
 	_dialogue_nameplate.SetFilename("img/menus/dialogue_nameplate.png");
 	VideoManager->LoadImage(_dialogue_nameplate);
-	
+
 	_dialogue_textbox.SetDisplaySpeed(30);
 	_dialogue_textbox.SetPosition(300.0f, 768.0f - 180.0f);
 	_dialogue_textbox.SetDimensions(1024.0f - 300.0f - 60.0f, 180.0f - 70.0f);
@@ -260,7 +260,7 @@ void MapMode::LoadMap() {
 	if (_map_data.GetError() != DATA_NO_ERRORS) {
 		cout << "MAP ERROR: some error occured during reading of map file" << endl;
 	}
-	
+
 	MapSprite *sp;
 	SpriteDialogue *sd;
 	ActionPathMove *sa;
@@ -314,7 +314,7 @@ void MapMode::LoadMap() {
 	sd->text.push_back(MakeWideString("Check out our website at http://www.allacrost.org/"));
 	sd->speakers.push_back(1); // NPC speaks
 	sp->dialogues.push_back(sd);
-	
+
 	sa = new ActionPathMove();
 	sa->destination.row = 4;
 	sa->destination.col = 16;
@@ -338,10 +338,10 @@ void MapMode::LoadMap() {
 	sa->destination.col = 4;
 	sa->sprite = sp;
 	sp->actions.push_back(sa);
-	
+
 	_ground_objects.push_back(sp);
 	_sprites[sp->sprite_id] = sp;
-	
+
 	sp = new MapSprite();
 	sp->SetName(MakeWideString("Marcus"));
 	sp->SetID(2);
@@ -404,7 +404,7 @@ void MapMode::LoadMap() {
 	sf->frame_index = EAST;
 	sf->sprite = sp;
 	sp->actions.push_back(sf);
-	
+
 	_ground_objects.push_back(sp);
 	_sprites[sp->sprite_id] = sp;
 
@@ -426,7 +426,7 @@ void MapMode::LoadMap() {
 	sd->text.push_back(MakeWideString("You will never be able to guess my real age."));
 	sd->speakers.push_back(3); // NPC speaks
 	sp->dialogues.push_back(sd);
-	
+
 	sa = new ActionPathMove();
 	sa->destination.row = 8;
 	sa->destination.col = 5;
@@ -451,10 +451,10 @@ void MapMode::LoadMap() {
 	sa->destination.col = 6;
 	sa->sprite = sp;
 	sp->actions.push_back(sa);
-	
+
 	_ground_objects.push_back(sp);
 	_sprites[sp->sprite_id] = sp;
-	
+
 	sp = new MapSprite();
 	sp->SetName(MakeWideString("Woman in Rags"));
 	sp->SetID(4);
@@ -472,7 +472,7 @@ void MapMode::LoadMap() {
 	sd->text.push_back(MakeWideString("Is there no exit out of this stinking cave?"));
 	sd->speakers.push_back(4); // NPC speaks
 	sp->dialogues.push_back(sd);
-	
+
 	sa = new ActionPathMove();
 	sa->destination.row = 32;
 	sa->destination.col = 26;
@@ -536,10 +536,10 @@ void MapMode::LoadMap() {
 	sf->frame_index = SOUTH;
 	sf->sprite = sp;
 	sp->actions.push_back(sf);
-	
+
 	_ground_objects.push_back(sp);
 	_sprites[sp->sprite_id] = sp;
-	
+
 } // _LoadMap()
 
 
@@ -652,7 +652,7 @@ void MapMode::_FindPath(/*const*/ TileNode& destination, vector<TileNode> &path)
 // 	cout << "BEGIN FIND PATH" << endl;
 // 	cout << "Source: [" << path[0].col << ", " << path[0].row << "]" << endl;
 // 	cout << "Destination: [" << destination.col << ", " << destination.row << "]" << endl;
-	
+
 	// The tiles that we are considering for the next move
 	list<TileNode> open_list;
 	// The tiles which have already been visited once.
@@ -663,12 +663,12 @@ void MapMode::_FindPath(/*const*/ TileNode& destination, vector<TileNode> &path)
 	TileNode new_node;
 	// Used to temporarily hold a pointer to a node in a list
 	TileNode *list_node = NULL;
-	
+
 	// Check that the source is not equal to the destination
 	if (path[0].row == destination.row && path[0].col == destination.col) {
 		return;
 	}
-	
+
 	// Check if the destination is unwalkable
 	if (!_tile_layers[destination.row][destination.col].walkable) {
 		destination.row = path[0].row;
@@ -701,7 +701,7 @@ void MapMode::_FindPath(/*const*/ TileNode& destination, vector<TileNode> &path)
 				open_list.push_back(new_node);
 			}
 		}
-		
+
 		// Check left tile
 		tcheck.direction = WEST;
 		tcheck.row = closed_list.back().row;
@@ -722,7 +722,7 @@ void MapMode::_FindPath(/*const*/ TileNode& destination, vector<TileNode> &path)
 				open_list.push_back(new_node);
 			}
 		}
-		
+
 		// Check top left tile
 		tcheck.direction = NORTHWEST;
 		tcheck.row = closed_list.back().row - 1;
@@ -743,7 +743,7 @@ void MapMode::_FindPath(/*const*/ TileNode& destination, vector<TileNode> &path)
 				open_list.push_back(new_node);
 			}
 		}
-		
+
 		// Check top tile
 		tcheck.direction = NORTH;
 		tcheck.row = closed_list.back().row - 1;
@@ -764,7 +764,7 @@ void MapMode::_FindPath(/*const*/ TileNode& destination, vector<TileNode> &path)
 				open_list.push_back(new_node);
 			}
 		}
-		
+
 		// Check top right tile
 		tcheck.direction = NORTHEAST;
 		tcheck.row = closed_list.back().row - 1;
@@ -785,7 +785,7 @@ void MapMode::_FindPath(/*const*/ TileNode& destination, vector<TileNode> &path)
 				open_list.push_back(new_node);
 			}
 		}
-		
+
 		// Check right tile
 		tcheck.direction = EAST;
 		tcheck.row = closed_list.back().row;
@@ -806,7 +806,7 @@ void MapMode::_FindPath(/*const*/ TileNode& destination, vector<TileNode> &path)
 				open_list.push_back(new_node);
 			}
 		}
-		
+
 		// Check bottom right tile
 		tcheck.direction = SOUTHEAST;
 		tcheck.row = closed_list.back().row + 1;
@@ -827,7 +827,7 @@ void MapMode::_FindPath(/*const*/ TileNode& destination, vector<TileNode> &path)
 				open_list.push_back(new_node);
 			}
 		}
-		
+
 		// Check bottom tile
 		tcheck.direction = SOUTH;
 		tcheck.row = closed_list.back().row + 1;
@@ -848,13 +848,13 @@ void MapMode::_FindPath(/*const*/ TileNode& destination, vector<TileNode> &path)
 				open_list.push_back(new_node);
 			}
 		}
-		
+
 		// If there are no nodes on the open list, a path couldn't be found
 		if (open_list.empty()) {
 			cerr << "MAP ERROR: Couldn't find a path between two nodes" << endl;
 			return;
 		}
-		
+
 		// Find the node on the open list with the lowest F score, and move it to the closed list
 		list<TileNode>::iterator best_move = open_list.begin();
 		for (list<TileNode>::iterator i = open_list.begin(); i != open_list.end(); i++) {
@@ -866,12 +866,12 @@ void MapMode::_FindPath(/*const*/ TileNode& destination, vector<TileNode> &path)
 		closed_list.push_back(*best_move);
 		open_list.erase(best_move);
 	} // while (destination != end of closed list)
-	
+
 	// Save the new path by tracing it backwards
 	path.clear();
 	open_list.clear();
 	list_node = &(closed_list.back());
-	
+
 	// Reverse sort the closed_list into the open list
 	// First find the number of elements
 	while (list_node->parent != NULL) {
@@ -930,8 +930,8 @@ void MapMode::Update() {
 		}
 		_ground_objects[j+1] = tmp;
 	}
-	
-	
+
+
 }
 
 
@@ -1016,7 +1016,7 @@ void MapMode::_UpdateExplore() {
 				MapSprite *second = dynamic_cast<MapSprite*>(_ground_objects[i]);
 				float second_row = static_cast<float>(second->row_position) + second->row_offset;
 				float second_col = static_cast<float>(second->col_position) + second->col_offset;
-	
+
 				if (second_row <= first_row + 1.0f  && second_row >= first_row - 1.0f &&
 					second_col <= first_col + 1.0f  && second_col >= first_col - 1.0f) {
 					sprite = second;
@@ -1113,7 +1113,7 @@ void MapMode::_UpdateDialogue() {
 	if (InputManager->ConfirmPress()) {
 		// TODO: Check if the text is shown or not. If not, display it instantly.
 		bool not_finished = _current_dialogue->ReadNextLine();
-		
+
 		if (!not_finished) {
 			_dialogue_window.Hide();
 			_map_state = EXPLORE;
@@ -1327,7 +1327,7 @@ void MapMode::Draw() {
 		_dialogue_box.Draw();
 		VideoManager->MoveRelative(47.0f, -42.0f);
 		_dialogue_nameplate.Draw();
-		
+
 		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, 0);
 		VideoManager->SetTextColor(Color(Color::black));
 		VideoManager->SetFont("map");
