@@ -16,11 +16,11 @@ growth_strength = 5;
 growth_intelligence = 5;
 growth_agility = 5;
 	
-
 number_of_maps = 2;
-map_x_1 = 10;
-map_y_1 = 32;
+map_x_1 = 17;
+map_y_1 = 33;
 map_name_1 = "Head";
-map_x_2 = 32;
-map_y_2 = 32;
-map_name_2 = "Body";
+map_x_2 = 48;
+map_y_2 = 57;
+map_name_2 = "Abdomen";
+

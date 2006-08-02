@@ -18,9 +18,9 @@ growth_agility = 5;
 
 
 number_of_maps = 2;
-map_x_1 = 32;
-map_y_1 = 64;
+map_x_1 = 31;
+map_y_1 = 54;
 map_name_1 = "Head";
-map_x_2 = 32;
-map_y_2 = 32;
-map_name_2 = "Chest";
+map_x_2 = 37;
+map_y_2 = 34;
+map_name_2 = "Body";

@@ -18,12 +18,12 @@ growth_agility = 5;
 	
 
 number_of_maps = 3;
-map_x_1 = 5;
-map_y_1 = 63;
+map_x_1 = 24;
+map_y_1 = 60;
 map_name_1 = "Head";
-map_x_2 = 64;
-map_y_2 = 32;
+map_x_2 = 58;
+map_y_2 = 25;
 map_name_2 = "Body";
-map_x_3 = 120;
-map_y_3 = 32;
+map_x_3 = 78;
+map_y_3 = 38;
 map_name_3 = "Tail";

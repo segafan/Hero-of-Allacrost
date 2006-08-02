@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -12,9 +12,9 @@
 *** \author  Tyler Olsen, roots@allacrost.org
 *** \brief   Allacrost initialization code and main game loop.
 ***
-*** The code in this file is the first to execute when the game is started and 
-*** the last to execute before the game exits. The core engine of Allacrost 
-*** uses time-based updating, which basically means that the game state is 
+*** The code in this file is the first to execute when the game is started and
+*** the last to execute before the game exits. The core engine of Allacrost
+*** uses time-based updating, which basically means that the game state is
 *** updated by an amount based on how much time expired since the last update.
 *** The main game loop consists of the following steps.
 ***
@@ -52,7 +52,7 @@ using namespace hoa_map;
 int32 main(int32 argc, char *argv[]) {
 	// This variable is set by the ParseProgramOptions function
 	int32 return_code;
-	
+
 	// Parse command lines and exit out of the game if needed
 	if (hoa_main::ParseProgramOptions(return_code, argc, argv) == false) {
 		return return_code;
@@ -98,14 +98,14 @@ int32 main(int32 argc, char *argv[]) {
 	VideoManager->SetFontShadowXOffset("map", 1);
 	VideoManager->SetFontShadowYOffset("map", -1);
 	VideoManager->SetFontShadowStyle("map", VIDEO_TEXT_SHADOW_BLACK);
-        
-        if (!VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "battle", 16)) {
+
+	if (!VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "battle", 20)) {
 		return 1;
 	}
 
-	VideoManager->SetFontShadowXOffset("map", 1);
-	VideoManager->SetFontShadowYOffset("map", -1);
-	VideoManager->SetFontShadowStyle("map", VIDEO_TEXT_SHADOW_BLACK);
+	VideoManager->SetFontShadowXOffset("battle", 1);
+	VideoManager->SetFontShadowYOffset("battle", -1);
+	VideoManager->SetFontShadowStyle("battle", VIDEO_TEXT_SHADOW_BLACK);
 
 	if (!AudioManager->Initialize()) {
 		cerr << "ERROR: unable to initialize AudioManager" << endl;
@@ -161,7 +161,7 @@ int32 main(int32 argc, char *argv[]) {
 	SDL_EventState(SDL_USEREVENT, SDL_IGNORE);
 	// NOTE: SDL_ActiveEvent reports mouse focus, input focus, iconified status. Should we disable it???
 
-	SettingsManager->InitializeTimers();	
+	SettingsManager->InitializeTimers();
 
 	// This is the main loop for the game. The loop iterates once every frame drawn to the screen.
 	while (SettingsManager->NotDone()) {
