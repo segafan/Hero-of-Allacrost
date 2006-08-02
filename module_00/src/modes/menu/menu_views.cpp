@@ -317,8 +317,8 @@ void InventoryWindow::Update()
 		if (GlobalManager->GetInventory()[item_selected]->GetSubClassType() == "GlobalItem")
 		{
 			GlobalItem *item = (GlobalItem *)GlobalManager->GetInventory()[item_selected];
-			if ((item->GetUseCase() && GLOBAL_HP_RECOVERY_ITEM == GLOBAL_HP_RECOVERY_ITEM) ||
-				(item->GetUseCase() && GLOBAL_SP_RECOVERY_ITEM == GLOBAL_SP_RECOVERY_ITEM))
+			if (((item->GetUseCase() & GLOBAL_HP_RECOVERY_ITEM) == GLOBAL_HP_RECOVERY_ITEM) ||
+				((item->GetUseCase() & GLOBAL_SP_RECOVERY_ITEM) == GLOBAL_SP_RECOVERY_ITEM))
 			{
 				// Play Sound
 				confirm.PlaySound();
@@ -476,7 +476,9 @@ void MiniCharacterSelectWindow::Update()
 		confirm.PlaySound();
 
 		// increase hp
-		if (selected->GetUseCase() && GLOBAL_HP_RECOVERY_ITEM == GLOBAL_HP_RECOVERY_ITEM)
+		uint8 temp = selected->GetUseCase();
+		printf("Use Case:%x\tGLOBAL_HP_RECOVERY_ITEM:%x", temp, GLOBAL_HP_RECOVERY_ITEM);
+		if ((selected->GetUseCase() & GLOBAL_HP_RECOVERY_ITEM) == GLOBAL_HP_RECOVERY_ITEM)
 		{	
 			uint32 new_hp = ch->GetHP();
 			new_hp += selected->GetRecoveryAmount();
@@ -486,7 +488,8 @@ void MiniCharacterSelectWindow::Update()
 		}
 
 		// increase sp
-		if (selected->GetUseCase() && GLOBAL_SP_RECOVERY_ITEM == GLOBAL_SP_RECOVERY_ITEM)
+		printf("Use Case:%x\tGLOBAL_SP_RECOVERY_ITEM:%x", temp, GLOBAL_SP_RECOVERY_ITEM);
+		if ((selected->GetUseCase() & GLOBAL_SP_RECOVERY_ITEM) == GLOBAL_SP_RECOVERY_ITEM)
 		{
 			uint32 new_sp = ch->GetSP();
 			new_sp += selected->GetRecoveryAmount();
@@ -535,7 +538,7 @@ StatusWindow::StatusWindow() : _active(false), _cursor_x(588), _cursor_y(324)
 	string head_path = string("img/portraits/map/") + _current_char->GetFilename() + string(".png");
 	_head_portrait.SetFilename(head_path);
 	_head_portrait.SetStatic(true);
-	_head_portrait.SetDimensions(150, 200);
+	_head_portrait.SetDimensions(200, 200);
 	// Set up the full body portrait
 	string full_path = string("img/portraits/menu/") + _current_char->GetFilename() + string("_full_large.png");
 	_full_portrait.SetFilename(full_path);
