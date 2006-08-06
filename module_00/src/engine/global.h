@@ -38,6 +38,14 @@ extern GameGlobal *GlobalManager;
 //! Determines whether the code in the hoa_boot namespace should print debug statements or not.
 extern bool GLOBAL_DEBUG;
 
+//! \name Game Item ID's
+//@{
+//! \brief ID's to identify all the item constants
+enum GameItemID
+{
+	HP_POTION = 1,
+};
+
 //! \name Game Object Types
 //@{
 //! \brief Constants for different game object types
@@ -116,6 +124,7 @@ const uint32 GLOBAL_SOUND_BUMP    =  3;
  *****************************************************************************/
 class GlobalObject {
 private:
+	GlobalObject();
 	GlobalObject(const GlobalObject&);
 	GlobalObject& operator=(const GlobalObject&);
 protected:
@@ -129,7 +138,7 @@ protected:
 	uint32 usable_by;
 	//! \brief An identification number for each item.
 	//! Two of the same object will share the same ID number.
-	uint32 obj_id;
+	GameItemID obj_id;
 	//! The number of objects contained within this instance.
 	uint32 obj_count;
 	//! The path of the icon for this object, may be null
@@ -137,8 +146,7 @@ protected:
 	//! The type of sub-class in this object
 	std::string _sub_class_type;
 public:
-	GlobalObject(std::string name, uint8 type, uint32 usable, uint32 id, uint32 count, std::string icon_path);
-	GlobalObject();
+	GlobalObject(uint8 type, uint32 usable, GameItemID id, uint32 count);
 	~GlobalObject();
 
 	//! \name Public Member Access Functions
@@ -150,7 +158,7 @@ public:
 	uint8 GetType() { return obj_type; }
 	void SetUsableBy(uint32 use) { usable_by = use; }
 	uint32 GetUsableBy() { return usable_by; }
-	void SetID(uint32 id) { obj_id = id; }
+	void SetID(GameItemID id) { obj_id = id; }
 	uint32 GetID() { return obj_id; }
 	uint32 GetCount() { return obj_count; }
 	void SetIconPath(std::string icon_path) { _icon_path = icon_path; }
@@ -185,11 +193,11 @@ private:
 	//! \brief The recovery amount this item may provide if it is a health or SP recovery item.
 	int32 _recovery_amount;
 
+	GlobalItem();
 	GlobalItem(const GlobalItem&);
 	GlobalItem& operator=(const GlobalItem&);
 public:
-	GlobalItem(std::string name, uint8 use, uint32 usable, uint32 id, uint32 count, std::string icon_path);
-	GlobalItem();
+	GlobalItem(uint8 use, uint32 usable, GameItemID id, uint32 count);
 	~GlobalItem();
 
 	//! \name Public Member Access Functions
@@ -220,13 +228,13 @@ public:
  *****************************************************************************/
 class GlobalWeapon : public GlobalObject {
 private:
+	GlobalWeapon();
 	GlobalWeapon(const GlobalWeapon&);
 	GlobalWeapon& operator=(const GlobalWeapon&);
         
-        hoa_battle::BattleStatTypes *_damage_amount;
+	hoa_battle::BattleStatTypes *_damage_amount;
 public:
-	GlobalWeapon(std::string name, uint32 usable, uint32 id, uint32 count, std::string icon_path);
-	GlobalWeapon();
+	GlobalWeapon(uint32 usable, GameItemID id, uint32 count);
 	~GlobalWeapon();
 };
 
@@ -250,14 +258,15 @@ public:
  *****************************************************************************/
 class GlobalArmor : public GlobalObject {
 private:
+	GlobalArmor();
 	GlobalArmor(const GlobalArmor&);
 	GlobalArmor& operator=(const GlobalArmor&);
         
-        //how many attack points are on this piece of armor
-        std::vector<GlobalAttackPoint> _attack_points;
+	//how many attack points are on this piece of armor
+	std::vector<GlobalAttackPoint> _attack_points;
 public:
-	GlobalArmor(std::string name, uint8 type, uint32 usable, uint32 id, uint32 count, std::string icon_path);
-	GlobalArmor();
+	GlobalArmor(uint8 type, uint32 usable, GameItemID id, uint32 count);
+
 	~GlobalArmor();
 };
 
@@ -277,35 +286,35 @@ public:
  *****************************************************************************/
 class GlobalSkill {
 private:
-        enum SKILL_TYPE { 
-                ATTACK = 0,
-                DEFENSE = 1,
-                SUPPORT = 2
-        };
+	enum SKILL_TYPE { 
+		ATTACK = 0,
+		DEFENSE = 1,
+		SUPPORT = 2
+	};
 	//! The name of the skill, as will be displayed to the player on the screen.
 	std::string _skill_name;
-        //! The name of the script file to use
-        std::string _script_name;
+	//! The name of the script file to use
+	std::string _script_name;
 	//! The amount of skill points (SP) that the skill consumes (zero is valid).
 	uint32 _sp_usage;
+	//defined by the enums, attack/defense/support
+	uint32 _skill_type; 
 
-	uint32 _skill_type; //defined by the enums, attack/defense/support
-
-        //! The warm up time required for this skill
-        uint32 _warmup_time;
-        //! The cooldown time required for this skill
-        uint32 _cooldown_time;
+	//! The warm up time required for this skill
+	uint32 _warmup_time;
+	//! The cooldown time required for this skill
+	uint32 _cooldown_time;
 
 	//! The level required to use this skill
 	uint32 _level_required;
         
-        //! The number of targets the skill takes
+	//! The number of targets the skill takes
 	uint32 _num_arguments;
         
-        //! The potency of each element / physical ability of this skill
-        //  Not necessarily a resistance, because it may also be an attack
-        //  So simply "stats" for now
-        hoa_battle::BattleStatTypes *_stats;
+	//! The potency of each element / physical ability of this skill
+	//  Not necessarily a resistance, because it may also be an attack
+	//  So simply "stats" for now
+	hoa_battle::BattleStatTypes *_stats;
 
 public:
 
@@ -316,10 +325,10 @@ public:
 	uint32 GetCooldownTime() { return _warmup_time; }
 	uint32 GetWarmupTime() { return _cooldown_time; }
         
-        std::string GetName() { return _skill_name; }
-        uint32 GetSPUsage() { return _sp_usage; }
-        hoa_battle::BattleStatTypes *GetBattleStatTypes() { return _stats; }
-        uint32 GetNumArguments() { return _num_arguments; }
+	std::string GetName() { return _skill_name; }
+	uint32 GetSPUsage() { return _sp_usage; }
+	hoa_battle::BattleStatTypes *GetBattleStatTypes() { return _stats; }
+	uint32 GetNumArguments() { return _num_arguments; }
 };
 
 /*!****************************************************************************
@@ -351,13 +360,13 @@ private:
 	//! The y position of the attack point on the sprite.
 	float _y_position;
         
-        std::string _name;
+	std::string _name;
 
 	//! The amount of evade ability this attack point has.
 	uint32 _evade;
 
-        //! The resistances of the attack point
-        hoa_battle::BattleStatTypes *_resistance;
+	//! The resistances of the attack point
+	hoa_battle::BattleStatTypes *_resistance;
         
 public:
 	GlobalAttackPoint(std::string name, float x, float y, uint32 volt, uint32 earth, uint32 water, uint32 fire, 
@@ -390,7 +399,7 @@ public:
         */
 	//@}
         
-        std::string GetName() const { return _name; } 
+	std::string GetName() const { return _name; } 
 };
 
 /*!****************************************************************************
@@ -441,7 +450,7 @@ private:
 	std::map<std::string, std::vector<hoa_video::StillImage> > _sprite_animations; 
 	//std::vector<hoa_video::StillImage> _sprite_frames;
 	
-        //! The current number of hit points for the enemy.
+	//! The current number of hit points for the enemy.
 	uint32 _hit_points;
 	//! The maximum number of hit points that the enemy may have.
 	uint32 _max_hit_points;
@@ -698,13 +707,13 @@ public:
 	uint32 GetMovementSpeed() { return _movement_speed; }
 	void SetMovementSpeed(uint32 ms) { _movement_speed = ms; }
         
-        void AddAnimation(std::string anim, hoa_video::AnimatedImage v) { _battle_animation[anim] = v; }
+	void AddAnimation(std::string anim, hoa_video::AnimatedImage v) { _battle_animation[anim] = v; }
 	hoa_video::AnimatedImage GetAnimation(std::string anim) { 
-                return _battle_animation[anim]; 
-        }
+		return _battle_animation[anim]; 
+	}
         
-        void AddBattleHeadShot(hoa_video::StillImage si) { _battle_head_shot.push_back(si); }
-        std::vector<hoa_video::StillImage> GetBattleHeadShots() { return _battle_head_shot; }
+	void AddBattleHeadShot(hoa_video::StillImage si) { _battle_head_shot.push_back(si); }
+	std::vector<hoa_video::StillImage> GetBattleHeadShots() { return _battle_head_shot; }
 	//@}
 };
 
@@ -763,6 +772,10 @@ private:
 	uint32 _money;
 	//! The active party (currently only support for one party, may need to be changed)
 	GlobalParty _party;
+	//! \brief the string names of the items
+	std::map<GameItemID, std::string> _game_item_names;
+	//! \brief the icon path of the item
+	std::map<GameItemID, std::string> _game_item_icon_paths;
 
 // 	hoa_video::GameVideo *VideoManager;
 
@@ -796,8 +809,24 @@ public:
 	//! AddItemToInventory(GlobalObject &) adds the given object to the inventory
 	//@{
 	std::vector<GlobalObject *> &GetInventory() { return _inventory; }
-	void AddItemToInventory(GlobalObject *obj) 
-	{ _inventory.push_back(obj); }	
+	void AddItemToInventory(GlobalObject *obj);
+	//@}
+
+	//! Item functions
+	//! GetItemName returns the string name of the item
+	//! GetItemIconPath return the icon path for the given item id
+	//! SetItemName allows you to set an item's name
+	//! SetItemIconPath allows you to set an item's icon path
+	//@{
+	std::string GetItemName(GameItemID id)
+	{ return _game_item_names[id]; }
+	std::string GetItemIconPath(GameItemID id)
+	{ return _game_item_icon_paths[id]; }
+	void SetItemName(GameItemID key, std::string value)
+	{ _game_item_names[key] = value; }
+	void SetItemIconPath(GameItemID key, std::string value)
+	{ _game_item_icon_paths[key] = value; }
+	//@}
 	
 	//! Gets the Characters in the active party
 	//! \returns The Characters in the active party

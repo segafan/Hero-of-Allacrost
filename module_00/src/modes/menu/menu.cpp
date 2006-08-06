@@ -312,6 +312,10 @@ void MenuMode::Draw()
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
 	// Move to the top left corner
 	VideoManager->Move(0,0);
+
+	// Set our text colour
+	Color _old_colour = VideoManager->GetTextColor();
+	VideoManager->SetTextColor(Color(1.0f,1.0f,1.0f,1.0f));
 	
 	// Draw the saved screen as the menu background
 	VideoManager->DrawImage(_saved_screen); 
@@ -341,6 +345,9 @@ void MenuMode::Draw()
 			break;
 		}
 	}
+
+	// Restore Text color
+	VideoManager->SetTextColor(_old_colour);
 }
 
 void MenuMode::_DrawBottomMenu()

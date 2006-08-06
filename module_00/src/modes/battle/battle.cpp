@@ -2004,8 +2004,7 @@ BattleMode::BattleMode ():
     // Give player some loot
     GlobalItem *
       new_item =
-      new GlobalItem ("HP Potion", GLOBAL_HP_RECOVERY_ITEM,
-		      GLOBAL_ALL_CHARACTERS, 1, 1, "img/icons/potion-red.png");
+      new GlobalItem (GLOBAL_HP_RECOVERY_ITEM, GLOBAL_ALL_CHARACTERS, HP_POTION, 1);
     new_item->SetRecoveryAmount (20);
     GlobalManager->AddItemToInventory (new_item);
 
