@@ -156,7 +156,7 @@ InventoryWindow::InventoryWindow() : _inventory_active(false)
 	/////////////// DELETE THIS ////////////////////////////
 	// ONCE INVENTORY IS ADDING THROUGH THE RIGHT SPOT /////
 	////////////////////////////////////////////////////////
-	GlobalItem *new_item = new GlobalItem("HP Potion", GLOBAL_HP_RECOVERY_ITEM, GLOBAL_ALL_CHARACTERS, 1, 1, "img/icons/potion-red.png");
+	GlobalItem *new_item = new GlobalItem(GLOBAL_HP_RECOVERY_ITEM, GLOBAL_ALL_CHARACTERS, HP_POTION, 1);
 	new_item->SetRecoveryAmount(20);
 	GlobalManager->AddItemToInventory(new_item);
 	//GlobalManager->AddItemToInventory(new GlobalWeapon("Broadsword", GLOBAL_ALL_CHARACTERS, 2, 4, "img/icons/sword.png"));

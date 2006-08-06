@@ -43,27 +43,15 @@ SINGLETON_INITIALIZE(GameGlobal);
 // ******************************* GlobalObject ************************************
 // ****************************************************************************
 
-GlobalObject::GlobalObject(string name, uint8 type, uint32 usable, uint32 id, uint32 count, string icon_path) {
-	obj_name = name;
+GlobalObject::GlobalObject(uint8 type, uint32 usable, GameItemID id, uint32 count) 
+{
+	obj_name = GlobalManager->GetItemName(id);
 	obj_type = type;
 	usable_by = usable;
 	obj_id = id;
 	obj_count = count;
-	_icon_path = icon_path;
+	_icon_path = GlobalManager->GetItemIconPath(id);
 }
-
-
-
-GlobalObject::GlobalObject() {
-	obj_name = "unknown";
-	obj_type = GLOBAL_DUMMY_OBJ;
-	usable_by = GLOBAL_NO_CHARACTERS;
-	obj_id = 0;
-	obj_count = 0;
-	_sub_class_type = "GlobalObject";
-}
-
-
 
 GlobalObject::~GlobalObject() {
 	obj_count = 0;
@@ -73,80 +61,62 @@ GlobalObject::~GlobalObject() {
 // ******************************** GlobalItem *************************************
 // ****************************************************************************
 
-GlobalItem::GlobalItem(string name, uint8 use, uint32 usable, uint32 id, uint32 count, string icon_path) :
-	GlobalObject(name, GLOBAL_ITEM, usable, id, count, icon_path) {
+GlobalItem::GlobalItem(uint8 use, uint32 usable, GameItemID id, uint32 count) :
+	GlobalObject(GLOBAL_ITEM, usable, id, count) {
 	_use_case = use;
 	this->_sub_class_type = "GlobalItem";
 }
 
-
-
-GlobalItem::GlobalItem() :
-	GlobalObject() {
-	_use_case = GLOBAL_UNUSABLE_ITEM;
-	this->_sub_class_type = "GlobalItem";
+GlobalItem::~GlobalItem() 
+{
 }
-
-
-
-GlobalItem::~GlobalItem() {}
 
 // ****************************************************************************
 // ******************************* GlobalWeapon ************************************
 // ****************************************************************************
 
-GlobalWeapon::GlobalWeapon(string name, uint32 usable, uint32 id, uint32 count, string icon_path) :
-	GlobalObject(name, GLOBAL_WEAPON, usable, id, count, icon_path) {
+GlobalWeapon::GlobalWeapon(uint32 usable, GameItemID id, uint32 count) :
+	GlobalObject(GLOBAL_WEAPON, usable, id, count) {
         
-        _damage_amount = new BattleStatTypes();
+	_damage_amount = new BattleStatTypes();
         
-        ReadDataDescriptor read_data;
-        string fileName = "dat/objects/" + name + ".lua";
+	ReadDataDescriptor read_data;
+	string fileName = "dat/objects/" + GlobalManager->GetItemName(id) + ".lua";
 	if (!read_data.OpenFile(fileName.c_str())) {
-		cout << "GLOBAL ERROR: failed to load weapon file: " << name << endl;
+		cout << "GLOBAL ERROR: failed to load weapon file: " << GlobalManager->GetItemName(id) << endl;
 	}
-        else {
-                _damage_amount->volt = read_data.ReadInt("volt_damage");
-                _damage_amount->earth = read_data.ReadInt("earth_damage");
-                _damage_amount->water = read_data.ReadInt("water_damage");
-                _damage_amount->fire = read_data.ReadInt("fire_damage");
-                _damage_amount->piercing = read_data.ReadInt("piercing_damage");
-                _damage_amount->slashing = read_data.ReadInt("slashing_damage");
-                _damage_amount->bludgeoning = read_data.ReadInt("bludgeoning_damage");
-        }
+	else {
+		_damage_amount->volt = read_data.ReadInt("volt_damage");
+		_damage_amount->earth = read_data.ReadInt("earth_damage");
+		_damage_amount->water = read_data.ReadInt("water_damage");
+		_damage_amount->fire = read_data.ReadInt("fire_damage");
+		_damage_amount->piercing = read_data.ReadInt("piercing_damage");
+		_damage_amount->slashing = read_data.ReadInt("slashing_damage");
+		_damage_amount->bludgeoning = read_data.ReadInt("bludgeoning_damage");
+	}
 }
-
-
-GlobalWeapon::GlobalWeapon() :
-	GlobalObject() {
-	obj_type = GLOBAL_WEAPON;
-        _damage_amount = 0;
-		this->_sub_class_type = "GlobalWeapon";
-}
-
-
 
 GlobalWeapon::~GlobalWeapon() {
-        if(_damage_amount != 0)
-                delete _damage_amount;
-        _damage_amount = 0;
+	if(_damage_amount != 0)
+		delete _damage_amount;
+	_damage_amount = 0;
 }
 
 // ****************************************************************************
 // ******************************** GlobalArmor ************************************
 // ****************************************************************************
 
-GlobalArmor::GlobalArmor(string name, uint8 type, uint32 usable, uint32 id, uint32 count, string icon_path) :
-	GlobalObject(name, type, usable, id, count, icon_path) {
+GlobalArmor::GlobalArmor(uint8 type, uint32 usable, GameItemID id, uint32 count) :
+	GlobalObject(type, usable, id, count) {
         
         /*
         float x, float y, uint32 volt, uint32 earth, uint32 water, uint32 fire, 
                                         uint32 piercing, uint32 slashing, uint32 bludgeoning
         */
         ReadDataDescriptor read_data;
-        string fileName = "dat/objects/" + name + ".lua";
+        string fileName = "dat/objects/" + GlobalManager->GetItemName(id) + ".lua";
 	if (!read_data.OpenFile(fileName.c_str())) {
-		cout << "GLOBAL ERROR: failed to load weapon file: " << name << endl;
+		cout << "GLOBAL ERROR: failed to load weapon file: " << GlobalManager->GetItemName(id) << endl;
 	}
         else {
                 uint32 numAttackPoints = read_data.ReadInt("number_of_attack_points");
@@ -168,16 +138,9 @@ GlobalArmor::GlobalArmor(string name, uint8 type, uint32 usable, uint32 id, uint
         }
 }
 
-
-
-GlobalArmor::GlobalArmor() :
-	GlobalObject() {
-		this->_sub_class_type = "GlobalArmor";
+GlobalArmor::~GlobalArmor() 
+{
 }
-
-
-
-GlobalArmor::~GlobalArmor() {}
 
 // ****************************************************************************
 // ******************************** GlobalSkill ************************************
@@ -504,6 +467,9 @@ void GlobalCharacter::AddXP(uint32 xp)
 
 GameGlobal::GameGlobal() {
 	if (GLOBAL_DEBUG) cout << "GLOBAL: GameGlobal constructor invoked" << endl;
+	
+	SetItemName(HP_POTION, "HP Potion");
+	SetItemIconPath(HP_POTION, "img/icons/potion-red.png");
 }
 
 GameGlobal::~GameGlobal() {
@@ -619,6 +585,9 @@ void GlobalParty::AddCharacter(uint32 char_id)
 		cerr << "GLOBAL: Unable to add another char to party, it is already at 4 members!" << endl;
 }
 
+//-------------------------------------
+// GlobalParty::RemoveCharacter
+//-------------------------------------
 void GlobalParty::RemoveCharacter(uint32 char_id)
 {
 	// search for id and remove it
@@ -631,6 +600,23 @@ void GlobalParty::RemoveCharacter(uint32 char_id)
 		}
 	}
 	if (GLOBAL_DEBUG) cerr << "GLOBAL: No Character matching " << char_id << " found!" << endl;
+}
+
+//-------------------------------------
+// GlobalParty::AddItemToInventory
+//-------------------------------------
+void GameGlobal::AddItemToInventory(GlobalObject *obj)
+{
+	vector<GlobalObject *>::iterator i = _inventory.begin();
+	for (; i != _inventory.end(); i++)
+	{
+		if ((*i)->GetID() == obj->GetID())
+		{
+			(*i)->SetCount((*i)->GetCount() + 1);
+			return;
+		}
+	}
+	_inventory.push_back(obj);
 }
 
 }// namespace hoa_global
