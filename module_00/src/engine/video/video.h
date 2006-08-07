@@ -437,7 +437,7 @@ public:
 	 *  \param x  x coordinate to move to
 	 *  \param y  y coordinate to move to
 	 */
-	void Move   (float x, float y);
+	void Move(float x, float y);
 	
 	/*!
 	 *  \brief moves draw position (dx, dy) units
@@ -445,6 +445,9 @@ public:
 	 *  \param dy how many units to move in y direction
 	 */
 	void MoveRelative(float dx, float dy);
+
+	//! \brief Gets the location of the draw cursor
+	void GetDrawPosition(float &x, float &y);
 	
 	/*!
 	 *  \brief rotates images counterclockwise by 'angle' radians
@@ -1489,6 +1492,10 @@ private:
 	 *  \brief function solely for debugging, which displays the currently selected texture sheet. By using DEBUG_NextTexSheet() and DEBUG_PrevTexSheet(), you can change the current texture sheet so the sheet shown by this function cycles through all currently loaded sheets.
 	 */	
 	bool _DEBUG_ShowTexSheet();
+
+	//! \brief the current draw cursor position
+	float _x;
+	float _y;
 	
 	friend class TextBox;
 	friend class OptionBox;
