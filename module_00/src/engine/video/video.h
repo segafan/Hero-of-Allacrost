@@ -915,7 +915,8 @@ public:
 	 *  \param color  Color of the fog (alpha should be 1.0)
 	 *  \param intensity  Intensity of fog from 0.0f to 1.0f
 	 */	
-	bool SetFog      (const Color &color, float intensity);
+	bool EnableFog(const Color &color, float intensity);
+	void DisableFog();
 	
 	/*!
 	 *  \brief draws a halo at the given spot

@@ -607,7 +607,7 @@ bool GameVideo::ApplySettings()
 
 		ReloadTextures();
 		
-		SetFog(_fogColor, _fogIntensity);
+		EnableFog(_fogColor, _fogIntensity);
 		
 		return true;
 	}
@@ -1128,12 +1128,11 @@ void GameVideo::GetLighting(Color &color)
 
 
 //-----------------------------------------------------------------------------
-// SetFog: sets fog parameters. Fog color is usually gray, and intensity can
+// EnableFog: sets fog parameters. Fog color is usually gray, and intensity can
 //         be from 0.0 (no fog) to 1.0 (entire screen is gray)
 //         To turn off fog, just call this function with intensity of 0.0f
 //-----------------------------------------------------------------------------
-
-bool GameVideo::SetFog(const Color &color, float intensity)
+bool GameVideo::EnableFog(const Color &color, float intensity)
 {
 	// check if intensity is within bounds. If not, clamp it but display an
 	// error message
@@ -1152,12 +1151,10 @@ bool GameVideo::SetFog(const Color &color, float intensity)
 	}
 	
 	// set the parameters
-	
 	_fogColor = color;
 	_fogIntensity = intensity;
 	
 	// apply the new settings with OpenGL
-	
 	if(intensity == 0.0f)
 	{
 		glDisable(GL_FOG);
@@ -1173,6 +1170,14 @@ bool GameVideo::SetFog(const Color &color, float intensity)
 	}
 	
 	return true;	
+}
+
+//-----------------------------------------------------------------------------
+// DisableFog: Turns off fog
+//-----------------------------------------------------------------------------
+void GameVideo::DisableFog() 
+{
+	glDisable(GL_FOG);
 }
 
 

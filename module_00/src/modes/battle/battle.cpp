@@ -447,19 +447,19 @@ namespace
 	    {
 	      VideoManager->Move(520.0f, 384.0f);
 	      VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
-	      VideoManager->SetFog(Color::black, 0.0f);	// Turn off the fog
+	      VideoManager->DisableFog();	// Turn off the fog
 	      VideoManager->DrawText("You have won the battle!\n\n\Exp: +50\n\nLoot : 1 HP Potion");
-	      VideoManager->SetFog (Color::orange, 0.3f);	// golden
+	      VideoManager->EnableFog (Color::orange, 0.3f);	// golden
 	      VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 	    }
 	  else			// show the lose screen
 	    {
-	      VideoManager->SetFog (Color::black, 0.0f);	// Turn off the fog
+	      VideoManager->DisableFog();	// Turn off the fog
 	      VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 	      VideoManager->Move (520.0f, 430.0f);
 	      VideoManager->DrawText("You have lost the battle!");
 	      _battle_lose_menu.Draw ();
-	      VideoManager->SetFog (Color (0.6f, 0, 0, 1.0f), 0.6f);	// blood-red fog
+	      VideoManager->EnableFog(Color (0.6f, 0, 0, 1.0f), 0.6f);	// blood-red fog
 	      VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 	    }
 	  return;
@@ -1920,7 +1920,7 @@ BattleMode::BattleMode ():
   {
     if (BATTLE_DEBUG)
       cout << "BATTLE: ShutDown() called!" << endl;
-    VideoManager->SetFog (Color::black, 0.0f);	// Turn off any remaining fog
+    VideoManager->DisableFog();	// Turn off any remaining fog
     InputManager->EventHandler ();	// Clear input
     ModeManager->Pop ();	// Pop out the BattleMode state
   }
@@ -2016,7 +2016,7 @@ BattleMode::BattleMode ():
 	claudius->AddXP (50);
       }
 
-    VideoManager->SetFog (Color::black, 0.0f);	// Turn off the fog
+    VideoManager->DisableFog();	// Turn off the fog
     _ShutDown ();
   }
 
@@ -2025,7 +2025,7 @@ BattleMode::BattleMode ():
   {
     if (BATTLE_DEBUG)
       cout << "Player was defeaten in a battle!" << endl;
-    VideoManager->SetFog (Color::black, 0.0f);	// Turn off the fog
+    VideoManager->DisableFog();	// Turn off the fog
     ModeManager->Pop ();	// Pop out battle mode
     ModeManager->Pop ();	// Pop out map mode
   }

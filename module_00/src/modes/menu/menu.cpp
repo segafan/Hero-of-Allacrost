@@ -309,6 +309,7 @@ void MenuMode::Update() {
 //----------------------
 void MenuMode::Draw() 
 {
+
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
 	// Move to the top left corner
 	VideoManager->Move(0,0);
@@ -318,7 +319,7 @@ void MenuMode::Draw()
 	VideoManager->SetTextColor(Color(1.0f,1.0f,1.0f,1.0f));
 	
 	// Draw the saved screen as the menu background
-	VideoManager->DrawImage(_saved_screen); 
+	VideoManager->DrawImage(_saved_screen);
 	
 	_DrawBottomMenu();
 
