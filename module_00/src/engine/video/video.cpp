@@ -141,6 +141,8 @@ GameVideo::GameVideo()
 	_lightningCurTime = 0;
 	_lightningEndTime = 0;
 	_target = VIDEO_TARGET_SDL_WINDOW;
+	_x = 0;
+	_y = 0;
 
 	if (VIDEO_DEBUG) 
 		cout << "VIDEO: GameVideo constructor invoked\n";
@@ -866,12 +868,13 @@ void GameVideo::Move(float tx, float ty)
 #endif
 	glLoadIdentity();
 	glTranslatef(tx, ty, 0);
+	_x = tx;
+	_y = ty;
 }
 
 //-----------------------------------------------------------------------------
 // MoveRelative: 
 //-----------------------------------------------------------------------------
-
 void GameVideo::MoveRelative(float tx, float ty) 
 {
 #ifndef NDEBUG
@@ -880,8 +883,18 @@ void GameVideo::MoveRelative(float tx, float ty)
 	assert(matrixMode == GL_MODELVIEW);
 #endif
 	glTranslatef(tx, ty, 0);
+	_x += tx;
+	_y += ty;
 }
 
+//-----------------------------------------------------------------------------
+// GetDrawPosition: Get the location that the draw cursor is currently located at.
+//-----------------------------------------------------------------------------
+void GameVideo::GetDrawPosition(float &x, float &y)
+{
+	x = _x;
+	y = _y;
+}
 
 //-----------------------------------------------------------------------------
 // Rotate: rotates the coordinate axes anticlockwise by acAngle degrees, think 
@@ -1183,6 +1196,7 @@ bool GameVideo::EnableFog(const Color &color, float intensity)
 void GameVideo::DisableFog() 
 {
 	glDisable(GL_FOG);
+	_fogIntensity = 0.0f;
 }
 
 
