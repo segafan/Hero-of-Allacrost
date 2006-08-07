@@ -814,8 +814,8 @@ void BattleMode::SwapCharacters(private_battle::PlayerActor *AActorToRemove, pri
 	//set location and origin to removing characters location and origin
 	AActorToAdd->SetXOrigin(AActorToRemove->GetXOrigin());
 	AActorToAdd->SetYOrigin(AActorToRemove->GetYOrigin());
-	AActorToAdd->SetXLocation(AActorToRemove->GetXOrigin());
-	AActorToAdd->SetYLocation(AActorToRemove->GetYOrigin());
+	AActorToAdd->SetXLocation(static_cast<float>(AActorToRemove->GetXOrigin()));
+	AActorToAdd->SetYLocation(static_cast<float>(AActorToRemove->GetYOrigin()));
 
 	_players_characters_in_battle.push_back(AActorToAdd);	//add the other character to battle
 }

@@ -209,7 +209,7 @@ void BootMode::_AnimateLogo() {
 	static const float SEQUENCE_FOUR = SEQUENCE_THREE + 575.0f;
 	static const float SEQUENCE_FIVE = SEQUENCE_FOUR + 1900.0f;
 	static const float SEQUENCE_SIX = SEQUENCE_FIVE + 1400.0f;
-	static const float SEQUENCE_SEVEN = SEQUENCE_SIX + 1500.0f;
+	static const float SEQUENCE_SEVEN = SEQUENCE_SIX + 3500.0f;
 
 	// Sword setup
 	static float sword_x = 670.0f;
@@ -347,11 +347,11 @@ void BootMode::_EndOpeningAnimation() {
 	_logo_animating = false;
 
 	// Stop playing SFX and start playing the main theme
+	_boot_music.at(1).SetFadeOutTime(1000);
 	_boot_music.at(1).StopMusic();
+	_boot_music.at(0).SetFadeInTime(5000);
 	_boot_music.at(0).PlayMusic();
 }
-
-
 
 
 // Waits infinitely for a key press 
@@ -876,7 +876,7 @@ void BootMode::Update() {
 	}
 	else if (_logo_animating) // We're animating the opening logo
 	{
-		if (InputManager->ConfirmPress()) // Check if we want to skip the demo
+		if (InputManager->AnyKeyPress()) // Check if we want to skip the demo
 		{
 			_EndOpeningAnimation();
 			return;

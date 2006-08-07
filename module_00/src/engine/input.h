@@ -203,6 +203,13 @@ private:
 	//! Holds the current user-defined joystick settings
 	private_input::JoystickState _joystick;
 
+
+	//! Any key (or joystick button) pressed
+	bool _any_key_press;
+
+	//! Any key released
+	bool _any_key_release;
+
 	/** \name  Input State Members
 	*** \brief Retain whether an input key/button is currently being held down
 	**/	
@@ -291,6 +298,16 @@ public:
 	*** \return Returns false if the settings file couldn't be read
 	**/
 	bool RestoreDefaultJoyButtons();
+
+	/** \brief Checks if any keyboard key or joystick button is pressed
+	*** \return True if any key/button is pressed
+	**/
+	bool AnyKeyPress();
+
+	/** \brief Checks if any keyboard key or joystick button is released
+	*** \return True if any key/button is released
+	**/
+	bool AnyKeyRelease();
 
 	/** \brief Examines the SDL queue for all user input events and calls appropriate sub-functions.
 	***
