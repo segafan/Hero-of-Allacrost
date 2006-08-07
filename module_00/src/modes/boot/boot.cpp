@@ -64,7 +64,7 @@ _fade_out(false) // No, we're not fading out yet!
 	if (BOOT_DEBUG) cout << "BOOT: BootMode constructor invoked." << endl;
 	mode_type = MODE_MANAGER_BOOT_MODE;
 
-	VideoManager->SetFog(Color::black, 0.0f);
+	VideoManager->DisableFog();
 	
 	ReadDataDescriptor read_data;
 	if (!read_data.OpenFile("dat/config/boot.lua")) {
@@ -184,7 +184,7 @@ void BootMode::Reset() {
 	// Set the coordinate system that BootMode uses
 	VideoManager->SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
-	VideoManager->SetFog(Color::black, 0.0f); // Turn off any remaining fog
+	VideoManager->DisableFog(); // Turn off any remaining fog
 	VideoManager->SetTextColor(Color::white);
 
 	// Reset the game universe
@@ -310,7 +310,7 @@ void BootMode::_AnimateLogo() {
 		// Delta goes from 1.0f to 0.0f
 		float delta = (total_time - SEQUENCE_SIX) / (SEQUENCE_SEVEN - SEQUENCE_SIX);
 		delta = 1.0f - delta * delta;
-		VideoManager->SetFog(Color::white, delta);
+		VideoManager->EnableFog(Color::white, delta);
 		_DrawBackgroundItems();
 	}
 	else if (total_time >= SEQUENCE_SEVEN)
@@ -343,7 +343,7 @@ void BootMode::_DrawBackgroundItems() {
 
 // Stops playback of the opening animation
 void BootMode::_EndOpeningAnimation() {
-	VideoManager->SetFog(Color::black, 0.0f); // Turn off the fog
+	VideoManager->DisableFog(); // Turn off the fog
 	_logo_animating = false;
 
 	// Stop playing SFX and start playing the main theme
