@@ -201,6 +201,9 @@ bool InventoryWindow::Draw()
 	if (MenuWindow::Draw() == false)
 		return false;
 	
+	// Update the item text in case the number of items changed.
+	UpdateItemText();
+
 	// Draw the inventory text
 	_inventory_items.Draw();
 
@@ -529,7 +532,7 @@ void MiniCharacterSelectWindow::Update()
 //----------------------------------
 // StatusWindow::StatusWindow()
 //----------------------------------
-StatusWindow::StatusWindow() : _active(false), _cursor_x(588), _cursor_y(324)
+StatusWindow::StatusWindow() : _active(false), _cursor_x(588.0f), _cursor_y(324.0f)
 {
 	// Get the current character
 	_current_char = GlobalManager->GetParty()[0];

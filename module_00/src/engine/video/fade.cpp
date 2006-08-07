@@ -139,7 +139,6 @@ bool ScreenFader::Update(int32 t)
 //-----------------------------------------------------------------------------
 // FadeScreen: sets up a fade to the given color over "fadeTime" number of seconds
 //-----------------------------------------------------------------------------
-
 bool GameVideo::FadeScreen(const Color &color, float fadeTime)
 {
 	return _fader.FadeTo(color, fadeTime);

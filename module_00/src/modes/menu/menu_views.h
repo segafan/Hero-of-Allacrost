@@ -98,8 +98,8 @@ private:
 	//! \brief if the window is active or not
 	bool _active;
 	//! \brief current cursor position
-	bool _cursor_x;
-	bool _cursor_y;
+	float _cursor_x;
+	float _cursor_y;
 public:
 	//! \brief constructor
 	StatusWindow();

@@ -164,7 +164,7 @@ bool ParticleSystem::Draw()
 	
 	if(_system_def->_scene_lighting != 0.0f)
 	{
-		VideoManager->GetLighting(scene_light_modifier);
+		scene_light_modifier = VideoManager->GetSceneLightingColor();
 		
 		if(scene_light_modifier[0] != 1.0f ||
 		   scene_light_modifier[1] != 1.0f ||
