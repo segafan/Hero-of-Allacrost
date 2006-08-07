@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -37,7 +37,7 @@ namespace hoa_audio {
 	class GameAudio;
 	class MusicDescriptor;
 	class SoundDescriptor;
-	
+
 	namespace private_audio {
 		class MusicData;
 		class SoundData;
@@ -132,11 +132,10 @@ namespace hoa_battle {
 
 	namespace private_battle {
 		class ActorEffect;
-		class Actor;
-		class BattleUI;
+		class BattleActor;
 		class PlayerActor;
 		class EnemyActor;
-		class Action;
+		class BattleUI;
 		class ScriptEvent;
 	}
 }

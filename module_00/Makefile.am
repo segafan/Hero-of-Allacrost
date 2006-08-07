@@ -81,6 +81,8 @@ MODES_DIR = src/modes
 modes_SOURCES = \
 	$(MODES_DIR)/battle/battle.cpp \
 	$(MODES_DIR)/battle/battle.h \
+	$(MODES_DIR)/battle/battle_actors.cpp \
+	$(MODES_DIR)/battle/battle_acrots.h \
 	$(MODES_DIR)/boot/boot.cpp \
 	$(MODES_DIR)/boot/boot.h \
 	$(MODES_DIR)/boot/boot_menu.cpp \

@@ -65,11 +65,11 @@ am__objects_2 = draw.$(OBJEXT) effects.$(OBJEXT) fade.$(OBJEXT) \
 am__objects_3 = settings.$(OBJEXT) input.$(OBJEXT) \
 	mode_manager.$(OBJEXT) data.$(OBJEXT) global.$(OBJEXT) \
 	$(am__objects_1) $(am__objects_2)
-am__objects_4 = battle.$(OBJEXT) boot.$(OBJEXT) boot_menu.$(OBJEXT) \
-	boot_credits.$(OBJEXT) map.$(OBJEXT) map_actions.$(OBJEXT) \
-	map_dialogue.$(OBJEXT) map_objects.$(OBJEXT) menu.$(OBJEXT) \
-	menu_views.$(OBJEXT) pause.$(OBJEXT) quit.$(OBJEXT) \
-	scene.$(OBJEXT)
+am__objects_4 = battle.$(OBJEXT) battle_actors.$(OBJEXT) \
+	boot.$(OBJEXT) boot_menu.$(OBJEXT) boot_credits.$(OBJEXT) \
+	map.$(OBJEXT) map_actions.$(OBJEXT) map_dialogue.$(OBJEXT) \
+	map_objects.$(OBJEXT) menu.$(OBJEXT) menu_views.$(OBJEXT) \
+	pause.$(OBJEXT) quit.$(OBJEXT) scene.$(OBJEXT)
 am_allacrost_OBJECTS = main.$(OBJEXT) main_options.$(OBJEXT) \
 	utils.$(OBJEXT) $(am__objects_3) $(am__objects_4)
 allacrost_OBJECTS = $(am_allacrost_OBJECTS)
@@ -167,7 +167,6 @@ ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
-GREP = @GREP@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
@@ -196,9 +195,9 @@ SHELL = @SHELL@
 STRIP = @STRIP@
 UIC = @UIC@
 VERSION = @VERSION@
-XMKMF = @XMKMF@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
+ac_ct_STRIP = @ac_ct_STRIP@
 am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
 am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
 am__fastdepCXX_FALSE = @am__fastdepCXX_FALSE@
@@ -211,26 +210,19 @@ am__untar = @am__untar@
 bindir = @bindir@
 build_alias = @build_alias@
 datadir = @datadir@
-datarootdir = @datarootdir@
-docdir = @docdir@
-dvidir = @dvidir@
 exec_prefix = @exec_prefix@
 host_alias = @host_alias@
-htmldir = @htmldir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
 libdir = @libdir@
 libexecdir = @libexecdir@
-localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
-pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
-psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
@@ -318,6 +310,8 @@ MODES_DIR = src/modes
 modes_SOURCES = \
 	$(MODES_DIR)/battle/battle.cpp \
 	$(MODES_DIR)/battle/battle.h \
+	$(MODES_DIR)/battle/battle_actors.cpp \
+	$(MODES_DIR)/battle/battle_acrots.h \
 	$(MODES_DIR)/boot/boot.cpp \
 	$(MODES_DIR)/boot/boot.h \
 	$(MODES_DIR)/boot/boot_menu.cpp \
@@ -474,6 +468,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/audio_music.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/audio_sound.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/battle.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/battle_actors.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/boot.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/boot_credits.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/boot_menu.Po@am__quote@
@@ -923,6 +918,20 @@ battle.obj: $(MODES_DIR)/battle/battle.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MODES_DIR)/battle/battle.cpp' object='battle.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o battle.obj `if test -f '$(MODES_DIR)/battle/battle.cpp'; then $(CYGPATH_W) '$(MODES_DIR)/battle/battle.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MODES_DIR)/battle/battle.cpp'; fi`
+
+battle_actors.o: $(MODES_DIR)/battle/battle_actors.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT battle_actors.o -MD -MP -MF "$(DEPDIR)/battle_actors.Tpo" -c -o battle_actors.o `test -f '$(MODES_DIR)/battle/battle_actors.cpp' || echo '$(srcdir)/'`$(MODES_DIR)/battle/battle_actors.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/battle_actors.Tpo" "$(DEPDIR)/battle_actors.Po"; else rm -f "$(DEPDIR)/battle_actors.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MODES_DIR)/battle/battle_actors.cpp' object='battle_actors.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o battle_actors.o `test -f '$(MODES_DIR)/battle/battle_actors.cpp' || echo '$(srcdir)/'`$(MODES_DIR)/battle/battle_actors.cpp
+
+battle_actors.obj: $(MODES_DIR)/battle/battle_actors.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT battle_actors.obj -MD -MP -MF "$(DEPDIR)/battle_actors.Tpo" -c -o battle_actors.obj `if test -f '$(MODES_DIR)/battle/battle_actors.cpp'; then $(CYGPATH_W) '$(MODES_DIR)/battle/battle_actors.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MODES_DIR)/battle/battle_actors.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/battle_actors.Tpo" "$(DEPDIR)/battle_actors.Po"; else rm -f "$(DEPDIR)/battle_actors.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(MODES_DIR)/battle/battle_actors.cpp' object='battle_actors.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o battle_actors.obj `if test -f '$(MODES_DIR)/battle/battle_actors.cpp'; then $(CYGPATH_W) '$(MODES_DIR)/battle/battle_actors.cpp'; else $(CYGPATH_W) '$(srcdir)/$(MODES_DIR)/battle/battle_actors.cpp'; fi`
 
 boot.o: $(MODES_DIR)/boot/boot.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT boot.o -MD -MP -MF "$(DEPDIR)/boot.Tpo" -c -o boot.o `test -f '$(MODES_DIR)/boot/boot.cpp' || echo '$(srcdir)/'`$(MODES_DIR)/boot/boot.cpp; \
