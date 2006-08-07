@@ -40,6 +40,8 @@ SINGLETON_INITIALIZE(GameInput);
 // Initializes class members
 GameInput::GameInput() {
 	if (INPUT_DEBUG) cout << "INPUT: GameInput constructor invoked" << endl;
+	_any_key_press		  = false;
+	_any_key_release	  = false;
 	_up_state             = false;
 	_up_press             = false;
 	_up_release           = false;
@@ -216,11 +218,26 @@ bool GameInput::RestoreDefaultJoyButtons()
 }
 
 
+// Checks if any keyboard key or joystick button is pressed
+bool GameInput::AnyKeyPress() {
+	return _any_key_press;
+}
+
+
+// Checks if any keyboard key or joystick button is released
+bool GameInput::AnyKeyRelease() {
+	return _any_key_release;
+}
+
+
 // Handles all of the event processing for the game.
 void GameInput::EventHandler() {
 	SDL_Event event;	// Holds the game event
 
 	// Reset all of the press and release flags so that they don't get detected twice.
+	_any_key_press		  = false;
+	_any_key_release	  = false;
+
 	_up_press             = false;
 	_up_release           = false;
 	_down_press           = false;
@@ -366,6 +383,9 @@ void GameInput::EventHandler() {
 // Handles all keyboard events for the game
 void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 	if (key_event.type == SDL_KEYDOWN) { // Key was pressed
+		
+		_any_key_press = true;
+
 		if (key_event.keysym.mod & KMOD_CTRL) { // CTRL key was held down
 			if (key_event.keysym.sym == SDLK_a) {
 				// Toggle the display of advanced video engine information
@@ -407,6 +427,20 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 
 			else
 				return;
+		} // endif CTRL pressed
+
+		if (key_event.keysym.sym == SDLK_ESCAPE) // Same story as on Ctrl-Q
+		{
+			// Quit the game without question if the current game mode is BootMode or QuitMode
+			if (ModeManager->GetGameType() == MODE_MANAGER_BOOT_MODE
+				|| ModeManager->GetGameType() == MODE_MANAGER_QUIT_MODE) {
+					SettingsManager->ExitGame();
+			}
+			// Otherwise, enter QuitMode
+			else {
+				QuitMode *QM = new QuitMode();
+				ModeManager->Push(QM);
+			}
 		}
 
 		// Note: a switch-case statement won't work here because Key.up is not an
@@ -481,6 +515,10 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 	}
 
 	else { // Key was released
+
+		_any_key_press = false;
+		_any_key_release = true;
+
 		if (key_event.keysym.mod & KMOD_CTRL) // Don't recognize a key release if ctrl is down
 			return;
 
@@ -561,6 +599,9 @@ void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 		}
 	} // if (js_event.type == SDL_JOYAXISMOTION)
 	else if (js_event.type == SDL_JOYBUTTONDOWN) {
+
+		_any_key_press = true;
+
 		if (js_event.jbutton.button == _joystick.confirm) {
 			_confirm_state = true;
 			_confirm_press = true;
@@ -623,6 +664,10 @@ void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 		}
 	} // else if (js_event.type == JOYBUTTONDOWN)
 	else if (js_event.type == SDL_JOYBUTTONUP) {
+
+		_any_key_press = false;
+		_any_key_release = true;
+
 		if (js_event.jbutton.button == _joystick.confirm) {
 			_confirm_state = false;
 			_confirm_release = true;
