@@ -55,6 +55,14 @@ public:
 		       color[3] == c.color[3];
 	}
 
+	bool operator != (const Color &c) const
+	{
+		return color[0] != c.color[0] ||
+			   color[1] != c.color[1] ||
+			   color[2] != c.color[2] ||
+			   color[3] != c.color[3];
+	}
+
 	Color operator + (const Color &c) const
 	{
 		Color col = Color(color[0] + c.color[0],

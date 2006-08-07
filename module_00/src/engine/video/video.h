@@ -9,7 +9,7 @@
 
 /*!****************************************************************************
  * \file    video.h
- * \author  Raj Sharma, roos@allacrost.org
+ * \author  Raj Sharma, roos@allacrost.org, Daniel Steuernol, steu@allacrost.org
  * \brief   Header file for video engine interface.
  *
  * This code provides an easy-to-use API for managing all video and GUI stuff.
@@ -899,15 +899,16 @@ public:
 	//-- Lighting and fog -----------------------------------------------------
 	
 	/*!
-	 *  \brief sets the light color for the scene
+	 *  \brief turn on or off the ligt color for the scene
 	 */
-	bool SetLighting (const Color &color);
+	bool EnableSceneLighting(const Color &color);
+	void DisableSceneLighting();
 
 
 	/*!
 	 *  \brief returns the scene lighting color
 	 */
-	void GetLighting(Color &color);
+	Color &GetSceneLightingColor();
 
 	/*!
 	 *  \brief sets fog parameters
@@ -926,13 +927,7 @@ public:
 	 *  \param y     y coordinate of halo
 	 *  \param color color of halo
 	 */
-	bool DrawHalo
-	(
-		const StillImage &id, 
-		float x, 
-		float y, 
-		const Color &color = Color(1.0f, 1.0f, 1.0f, 1.0f)
-	);
+	bool DrawHalo(const StillImage &id, float x, float y, const Color &color = Color(1.0f, 1.0f, 1.0f, 1.0f));
 
 	/*!
 	 *  \brief draws a real light at the given spot
@@ -942,25 +937,21 @@ public:
 	 *  \param y     y coordinate of light
 	 *  \param color color of light
 	 */	
-	bool DrawLight
-	(
-		const StillImage &id, 
-		float x, 
-		float y, 
-		const Color &color = Color(1.0f, 1.0f, 1.0f, 1.0f)
-	);
+	bool DrawLight(const StillImage &id, float x, float y, const Color &color = Color(1.0f, 1.0f, 1.0f, 1.0f));
 
 	/*!
 	 *  \brief call with true if this map uses real lights, otherwise call with
 	 *         false
 	 */	
-	bool EnableRealLights(bool enable);
+	bool EnablePointLights();
+	void DisablePointLights();
 	
 
 	/*!
-	 *  \brief call after rendering all real lights
+	 *  \brief call after rendering all real lights.  This function renders all lights
+	 *		   to the lighting overlay texture, Moved into ApplyLightingOverlay
 	 */	
-	bool AccumulateLights();
+	//bool AccumulateLights();
 
 	/*!
 	 *  \brief call after all map images are drawn to apply lighting. All
@@ -1020,12 +1011,7 @@ public:
 	 *  \param falloff      Specifies the method of falloff. The default is
 	 *                      VIDEO_FALLOFF_NONE.
 	 */
-	bool ShakeScreen
-	(
-		float force, 
-		float falloffTime, 
-		ShakeFalloff falloff = VIDEO_FALLOFF_NONE
-	);	
+	bool ShakeScreen(float force, float falloffTime, ShakeFalloff falloff = VIDEO_FALLOFF_NONE);	
 
 	/*!
 	 *  \brief stops all shake effects

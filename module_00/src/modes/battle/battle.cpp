@@ -163,7 +163,7 @@ void BattleUI::Draw() {
 			VideoManager->Move(520.0f, 384.0f);
 			VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 			VideoManager->DisableFog();
-			VideoManager->DrawText("You have won the battle!\n\n\Exp: +50\n\nLoot : 1 HP Potion");
+			VideoManager->DrawText("You have won the battle!\n\nExp: +50\n\nLoot : 1 HP Potion");
 			VideoManager->EnableFog(Color::orange, 0.3f); // golden fog
 			VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 		}

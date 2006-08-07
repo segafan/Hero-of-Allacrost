@@ -681,8 +681,7 @@ bool GameVideo::Clear(const Color &c)
 //                   for each light, and then call AccumulateLights() to
 //                   save the lighting information into the overlay
 //-----------------------------------------------------------------------------
-
-bool GameVideo::AccumulateLights()
+/*bool GameVideo::AccumulateLights()
 {
 	if(_lightOverlay != 0xFFFFFFFF)
 	{
@@ -691,7 +690,7 @@ bool GameVideo::AccumulateLights()
 	}
 	
 	return true;
-}
+}*/
 
 
 //-----------------------------------------------------------------------------
@@ -1096,33 +1095,39 @@ bool GameVideo::_CreateMenu(StillImage &menu, float width, float height, int32 e
 
 
 //-----------------------------------------------------------------------------
-// SetLighting: sets lighting parameters for the scene, actually just a color
+// EnableSceneLighting: sets lighting parameters for the scene, actually just a color
 //              unless we change the lighting system later on.
 //              NOTE: the color's alpha value (i.e. color[3]) must be 1.0f
 //-----------------------------------------------------------------------------
-
-bool GameVideo::SetLighting(const Color &color)
+bool GameVideo::EnableSceneLighting(const Color &color)
 {
 	_lightColor = color;
 
 	if(color.color[3] != 1.0f)
 	{
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: color passed to SetLighting() had alpha other than 1.0f!" << endl;
+			cerr << "VIDEO ERROR: color passed to EnableSceneLighting() had alpha other than 1.0f!" << endl;
 		_lightColor.color[3] = 1.0f;		
 	}
 
 	return true;
 }
 
+//-----------------------------------------------------------------------------
+// DisableSceneLighting: Turn off scene lighting
+//-----------------------------------------------------------------------------
+void GameVideo::DisableSceneLighting()
+{
+	_lightColor = Color::white;
+}
 
 //-----------------------------------------------------------------------------
 // GetLighting: returns the scene lighting color
 //-----------------------------------------------------------------------------
 
-void GameVideo::GetLighting(Color &color)
+Color &GameVideo::GetSceneLightingColor()
 {
-	color = _lightColor;
+	return _lightColor;
 }
 
 
@@ -1185,7 +1190,6 @@ void GameVideo::DisableFog()
 // SetTransform: set current OpenGL modelview matrix to the 4x4 matrix (16 values)
 //               that's passed in
 //-----------------------------------------------------------------------------
-
 void GameVideo::SetTransform(float m[16])
 {
 	glMatrixMode(GL_MODELVIEW);
@@ -1193,30 +1197,31 @@ void GameVideo::SetTransform(float m[16])
 	glLoadMatrixf(m);
 }
 
-
 //-----------------------------------------------------------------------------
-// EnableRealLights: call with true if this map uses real lights
+// EnablePointLights: call if this map uses point lights
 //-----------------------------------------------------------------------------
-
-bool GameVideo::EnableRealLights(bool enable)
+bool GameVideo::EnablePointLights()
 {
-	if(enable)
-	{
-		_lightOverlay = _CreateBlankGLTexture(1024, 1024);
-	}
-	else
-	{
-		if(_lightOverlay != 0xFFFFFFFF)
-		{
-			_DeleteTexture(_lightOverlay);
-		}
-		
-		_lightOverlay = 0xFFFFFFFF;
-	}
+	_lightOverlay = _CreateBlankGLTexture(1024, 1024);
 
-	_usesLights = enable;
+	_usesLights = true;
 	
 	return true;	
+}
+
+//-----------------------------------------------------------------------------
+// DisablePointLights: call when done with point lights
+//-----------------------------------------------------------------------------
+void GameVideo::DisablePointLights()
+{
+	if(_lightOverlay != 0xFFFFFFFF)
+	{
+		_DeleteTexture(_lightOverlay);
+	}
+		
+	_lightOverlay = 0xFFFFFFFF;
+
+	_usesLights = false;
 }
 
 
@@ -1225,11 +1230,14 @@ bool GameVideo::EnableRealLights(bool enable)
 //                       All menu and text rendering should occur AFTER this 
 //                       call, so that they are not affected by lighting.
 //-----------------------------------------------------------------------------
-
 bool GameVideo::ApplyLightingOverlay()
 {
 	if(_lightOverlay != 0xFFFFFFFF)
 	{
+		// Copy light overlay to opengl texture
+		_BindTexture(_lightOverlay);
+		glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, 1024, 1024, 0);
+
 		CoordSys tempCoordSys = _coordSys;
 
 		SetCoordSys(0.0f, 1.0f, 0.0f, 1.0f);

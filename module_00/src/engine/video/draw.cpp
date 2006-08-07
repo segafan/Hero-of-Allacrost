@@ -31,7 +31,7 @@ bool GameVideo::_DrawStillImage(const StillImage &id)
 	// will take care of the modulation. If not, (i.e. no overlay is being used)
 	// then pass the light color so the vertex colors can do the modulation
 	
-	if(!_usesLights && !(_lightColor == Color::white))
+	if(!_usesLights && (_lightColor != Color::white))
 		return _DrawStillImage(id, _lightColor);
 	else
 		return _DrawStillImage(id, Color::white);
@@ -455,14 +455,7 @@ bool GameVideo::DrawHalo
 //           If you want to use center alignment, call SetDrawFlags yourself 
 //           with VIDEO_X_CENTER and VIDEO_Y_CENTER
 //-----------------------------------------------------------------------------
-
-bool GameVideo::DrawLight
-(
-	const StillImage &id, 
-	float x, 
-	float y, 
-	const Color &color
-)
+bool GameVideo::DrawLight(const StillImage &id, float x, float y, const Color &color)
 {
 	if(!_usesLights)
 	{
