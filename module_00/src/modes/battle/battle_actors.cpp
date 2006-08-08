@@ -181,11 +181,9 @@ void PlayerActor::Draw() {
 	if (IsAlive()) {
 		if (_TEMP_total_time_damaged > 0) {
 			_TEMP_total_time_damaged += SettingsManager->GetUpdateTime();
-			Color c ;
-			string damage_amount("" + _TEMP_damage_dealt);
 			VideoManager->SetTextColor(Color(1.0f, 0.0f, 0.0f, 1.0f));
 			VideoManager->Move(GetXLocation() + 100, GetYLocation() + 70);
-			VideoManager->DrawText(damage_amount);
+			VideoManager->DrawText(ToString(_TEMP_damage_dealt));
 
 			if (_TEMP_total_time_damaged > 3000) {
 				_TEMP_total_time_damaged = 0;
@@ -209,10 +207,9 @@ void PlayerActor::Draw() {
 	}
 
 	// Draw the character's health
-	string battle_text("" + GetHealth());
 	VideoManager->SetTextColor(Color(1.0f, 1.0f, 1.0f, 1.0f));
 	VideoManager->Move(310, 90);
-	VideoManager->DrawText(battle_text);
+	VideoManager->DrawText(ToString(GetHealth()));
 } // void PlayerActor::Draw()
 
 // *****************************************************************************
@@ -258,10 +255,9 @@ void EnemyActor::Draw() {
 	if (_TEMP_total_time_damaged > 0) {
 		_TEMP_total_time_damaged += SettingsManager->GetUpdateTime();
 
-		string damage_amount("" + _TEMP_damage_dealt);
 		VideoManager->SetTextColor(Color(1.0f, 0.0f, 0.0f, 1.0f));
 		VideoManager->Move(GetXLocation() + 100, GetYLocation() + 70);
-		VideoManager->DrawText(damage_amount);
+		VideoManager->DrawText(ToString(_TEMP_damage_dealt));
 
 		if (_TEMP_total_time_damaged > 3000) {
 			_TEMP_total_time_damaged = 0;
