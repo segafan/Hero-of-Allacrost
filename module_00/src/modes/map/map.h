@@ -277,6 +277,8 @@ private:
 	//! The sounds that the map needs available.
 	std::vector<hoa_audio::SoundDescriptor> _map_sounds;
 
+	//! A radial light image
+	hoa_video::StillImage _lighting_overlay;
 	//! The dialogue box used by map mode.
 	hoa_video::StillImage _dialogue_box;
 	//! The dialogue nameplate used by map mode.
