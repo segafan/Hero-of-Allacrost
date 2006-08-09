@@ -271,7 +271,7 @@ void MapMode::LoadMap() {
 	sp->SetName(MakeWideString("Claudius"));
 	sp->SetID(0);
 	sp->SetObjectType(PLAYER_SPRITE);
-	sp->SetRowPosition(12);
+        sp->SetRowPosition(12);
 	sp->SetColPosition(12);
 	sp->SetStepSpeed(NORMAL_SPEED);
 	sp->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
@@ -898,15 +898,9 @@ void MapMode::_UpdateVirtualSprite() {
 // Updates the game state when in map mode. Called from the main game loop.
 void MapMode::Update() {
 	_time_elapsed = SettingsManager->GetUpdateTime();
-
-	// ***************** (1) Update all objects on the map **************
-	for (uint32 i = 0; i < _ground_objects.size(); i++) {
-		if ((_ground_objects[i])->status & UPDATEABLE) {
-			_ground_objects[i]->Update();
-		}
-	}
-
-	// ***************** (2) Process user input **************
+        
+        
+	// ***************** (1) Process user input **************
 	switch (_map_state) {
 		case EXPLORE:
 			_UpdateExplore();
@@ -917,6 +911,13 @@ void MapMode::Update() {
 		default:
 			_UpdateExplore();
 			break;
+	}
+
+	// ***************** (2) Update all objects on the map **************
+	for (uint32 i = 0; i < _ground_objects.size(); i++) {
+		if ((_ground_objects[i])->status & UPDATEABLE) {
+			_ground_objects[i]->Update();
+		}
 	}
 
 	// ************ (3) Sort the objects so they are in the correct draw order ********
@@ -1089,7 +1090,7 @@ void MapMode::_UpdateExplore() {
 	}
 
 	if (user_move) {
-		if (_random_encounters) {
+                if (_random_encounters) {
 			_steps_till_encounter--;
 			if (_steps_till_encounter == 0) {
 				_steps_till_encounter = GaussianValue(_encounter_rate, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
@@ -1229,6 +1230,7 @@ void MapMode::_GetDrawInfo() {
 	if (_draw_info.r_pos == 1.0f) {
 		_draw_info.r_draw--;
 	}
+        
 } // MapMode::_GetDrawInfo()
 
 
@@ -1271,14 +1273,14 @@ void MapMode::Draw() {
 	}
 
 	// ************** (3) Draw the ground object layer (first pass) *************
-	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+        VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 	for (uint32 i = 0; i < _ground_objects.size(); i++) {
-		// Only draw objects that are visible
+                // Only draw objects that are visible
 		if (_ground_objects[i]->status & VISIBLE) {
 			(_ground_objects[i])->Draw();
 		}
 	}
-
+        
 	// ************** (4) Draw the middle object layer *************
 	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 	for (uint32 i = 0; i < _middle_objects.size(); i++) {
@@ -1289,12 +1291,13 @@ void MapMode::Draw() {
 	}
 
 	// ************** (5) Draw the ground object layer (second pass) *************
-// 	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-// 	for (uint32 i = 0; i < _ground_objects.size(); i++) {
-// 		// The following function call only draws the object if it is visible on the screen.
-// 		(_ground_objects[i])->Draw();
-// 	}
-
+/*
+ 	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+ 	for (uint32 i = 0; i < _ground_objects.size(); i++) {
+ 		// The following function call only draws the object if it is visible on the screen.
+ 		(_ground_objects[i])->Draw();
+ 	}
+*/
 	// ************** (6) Draw the upper tile layer *************
 	VideoManager->Move(_draw_info.c_pos, _draw_info.r_pos);
 	for (int32 r = _draw_info.r_start; r < _draw_info.r_start + _draw_info.r_draw; r++) {
