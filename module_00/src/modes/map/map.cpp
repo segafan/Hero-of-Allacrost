@@ -1320,6 +1320,7 @@ void MapMode::Draw() {
 
 	// ************** (8) Draw the dialogue menu and text *************
 	if (_map_state == DIALOGUE) {
+		_dialogue_textbox.Update(SettingsManager->GetUpdateTime());
 		VideoManager->PushState();
 		VideoManager->SetCoordSys(0, 1024, 768, 0);
 //		_dialogue_window.Draw();

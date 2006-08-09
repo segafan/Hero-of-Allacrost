@@ -49,12 +49,6 @@ bool BATTLE_DEBUG = false;
 
 namespace private_battle {
 
-void TEMP_Draw_Text(Color c, float x, float y, std::string text) {
-	VideoManager->SetTextColor(c);
-	VideoManager->Move(x, y);
-	VideoManager->DrawText(text);
-}
-
 // *****************************************************************************
 // BattleUI class
 // *****************************************************************************
@@ -216,8 +210,9 @@ void BattleUI::DrawTopElements() {
 	  VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 	  VideoManager->DrawImage(_MAPS_indicator);
 	  VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
-	  Color c(0.0f, 0.0f, 1.0f, 1.0f);
-	  TEMP_Draw_Text(c, 850, 100, global_attack_points[_current_map_selection]->GetName());
+	  VideoManager->SetTextColor(Color(0.0f, 0.0f, 1.0f, 1.0f));
+		VideoManager->Move(850, 100);
+		VideoManager->DrawText(global_attack_points[_current_map_selection]->GetName());
 	}
 } // void BattleUI::DrawTopElements()
 
@@ -439,42 +434,42 @@ void BattleUI::Update(uint32 AUpdateTime) {
 				_cursor_state = CURSOR_ON_PLAYER_CHARACTERS;
 			}
 		}
+	} // else if (_cursor_state == CURSOR_ON_MENU)
 
-		else if (_cursor_state == CURSOR_ON_SUB_MENU) {
-			if (InputManager->DownPress()) {
-				_sub_menu->HandleDownKey();
-			}
-			else if (InputManager->UpPress()) {
-				_sub_menu->HandleUpKey();
-			}
-			else if (InputManager->ConfirmPress()) {
-				// TEMP: only allows to select one target
-				SetNumberNecessarySelections(1);
-				_argument_actor_index = _battle_mode->GetIndexOfFirstAliveEnemy();
-
-				// TODO: retrieve the skill
-				// Place the cursor on either characters or enemies, depending on whom the skill should target
-				// Place the skill in the battle script queue
-				// Exit out of the menu
-
-				_cursor_state = CURSOR_SELECT_TARGET;
-			}
-			else if (InputManager->CancelPress()) {
-				_cursor_state = CURSOR_ON_MENU;
-			}
+	else if (_cursor_state == CURSOR_ON_SUB_MENU) {
+		if (InputManager->DownPress()) {
+			_sub_menu->HandleDownKey();
 		}
-		else if (_cursor_state == CURSOR_SELECT_TARGET) {
-			if (InputManager->DownPress() || InputManager->LeftPress()) {
-				// Select the character "to the top"
-				int32 working_index = _argument_actor_index;
-				while (working_index > 0) {
-					if (_battle_mode->GetEnemyActorAt((working_index - 1))->IsAlive()) {
-						_argument_actor_index = working_index - 1;
-						break;
-					}
-					else {
-						--working_index;
-					}
+		else if (InputManager->UpPress()) {
+			_sub_menu->HandleUpKey();
+		}
+		else if (InputManager->ConfirmPress()) {
+			// TEMP: only allows to select one target
+			SetNumberNecessarySelections(1);
+			_argument_actor_index = _battle_mode->GetIndexOfFirstAliveEnemy();
+
+			// TODO: retrieve the skill
+			// Place the cursor on either characters or enemies, depending on whom the skill should target
+			// Place the skill in the battle script queue
+			// Exit out of the menu
+
+			_cursor_state = CURSOR_SELECT_TARGET;
+		}
+		else if (InputManager->CancelPress()) {
+			_cursor_state = CURSOR_ON_MENU;
+		}
+	} // else if (_cursor_state == CURSOR_ON_SUB_MENU)
+	else if (_cursor_state == CURSOR_SELECT_TARGET) {
+		if (InputManager->DownPress() || InputManager->LeftPress()) {
+			// Select the character "to the top"
+			int32 working_index = _argument_actor_index;
+			while (working_index > 0) {
+				if (_battle_mode->GetEnemyActorAt((working_index - 1))->IsAlive()) {
+					_argument_actor_index = working_index - 1;
+					break;
+				}
+				else {
+					--working_index;
 				}
 			}
 		}
@@ -498,7 +493,7 @@ void BattleUI::Update(uint32 AUpdateTime) {
 		else if (InputManager->CancelPress()) {
 			_cursor_state = CURSOR_ON_SUB_MENU;
 		}
-	} // else if (_cursor_state == CURSOR_ON_MENU)
+	} // else if (_cursor_state == CURSOR_SELECT_TARGET)
 
 	else if (_cursor_state == CURSOR_ON_SELECT_MAP) {
 		EnemyActor *e = _battle_mode->GetEnemyActorAt(_argument_actor_index);
