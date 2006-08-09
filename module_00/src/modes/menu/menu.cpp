@@ -68,16 +68,16 @@ MenuMode::MenuMode()
 	//GlobalCharacter *claud3 = new GlobalCharacter("Claudius", "claudius", GLOBAL_CLAUDIUS);
 	//GlobalManager->AddCharacter(claud3);
 	// DELETE this when we have real data.
-	GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetHP(80);
-	GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetMaxHP(340);
-	GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetSP(35);
-	GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetMaxSP(65);
-	GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetXP(35);
-	GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetXPNextLevel(156);
-	GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetXPLevel(100);
-	GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetAgility(56);
-	GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetIntelligence(67);
-	GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetStrength(120);
+	//GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetHP(80);
+	//GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetMaxHP(340);
+	//GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetSP(35);
+	//GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetMaxSP(65);
+	//GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetXP(35);
+	//GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetXPNextLevel(156);
+	//GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetXPLevel(100);
+	//GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetAgility(56);
+	//GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetIntelligence(67);
+	//GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetStrength(120);
 	//GlobalManager->GetCharacter(hoa_global::GLOBAL_LAILA)->SetHP(300);
 	//GlobalManager->GetCharacter(hoa_global::GLOBAL_LAILA)->SetMaxHP(440);
 	//GlobalManager->GetCharacter(hoa_global::GLOBAL_LAILA)->SetSP(300);

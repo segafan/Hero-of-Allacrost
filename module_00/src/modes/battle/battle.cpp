@@ -157,6 +157,7 @@ void BattleUI::Draw() {
 			VideoManager->Move(520.0f, 384.0f);
 			VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 			VideoManager->DisableFog();
+			VideoManager->SetTextColor(Color::white);
 			VideoManager->DrawText("You have won the battle!\n\nExp: +50\n\nLoot : 1 HP Potion");
 			VideoManager->EnableFog(Color::orange, 0.3f); // golden fog
 			VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
@@ -674,10 +675,17 @@ void BattleMode::Update() {
 //! Wrapper function that calls different draw functions depending on the battle state.
 void BattleMode::Draw() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
+	if (IsBattleOver())
+		if (IsVictorious())
+			VideoManager->EnableFog(Color::orange, 0.3f); // golden fog
+		else
+			VideoManager->EnableFog(Color(0.6f, 0.0f, 0.0f, 1.0f), 0.6f); // blood-red fog
+
 	_DrawBackground();
 	_user_interface.Draw();
 	_DrawCharacters();
 	_user_interface.DrawTopElements();
+	VideoManager->DisableFog();
 }
 
 void BattleMode::_DrawBackground() {
