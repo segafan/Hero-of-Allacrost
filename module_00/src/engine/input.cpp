@@ -386,7 +386,10 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 		
 		_any_key_press = true;
 
-		if (key_event.keysym.mod & KMOD_CTRL) { // CTRL key was held down
+		if (key_event.keysym.mod & KMOD_CTRL || key_event.keysym.sym == SDLK_LCTRL || key_event.keysym.sym == SDLK_RCTRL) { // CTRL key was held down
+
+			_any_key_press = false; // CTRL isn't "any key"! :)
+
 			if (key_event.keysym.sym == SDLK_a) {
 				// Toggle the display of advanced video engine information
 				VideoManager->ToggleAdvancedDisplay();
@@ -424,9 +427,8 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 				VideoManager->DEBUG_NextTexSheet();
 				return;
 			}
-
-			else
-				return;
+			
+			return;
 		} // endif CTRL pressed
 
 		if (key_event.keysym.sym == SDLK_ESCAPE) // Same story as on Ctrl-Q

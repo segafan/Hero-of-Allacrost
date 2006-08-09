@@ -628,8 +628,14 @@ void BootMode::_OnNewGame() {
         //make sure he has health, et cetera
         claud->SetMaxHP(300);
         claud->SetHP(300);
-        claud->SetMaxSP(200);
-        claud->SetSP(200);
+		claud->SetMaxSP(200);
+		claud->SetSP(200);
+		claud->SetXP(35);
+		claud->SetXPNextLevel(156);
+		claud->SetXPLevel(100);
+		claud->SetAgility(56);
+		claud->SetIntelligence(67);
+		claud->SetStrength(120);
         
         ai.SetFrameIndex(0);
         claud->AddAnimation("IDLE", ai);
