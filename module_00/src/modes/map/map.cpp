@@ -133,7 +133,7 @@ void MapMode::LoadMap() {
 	_dialogue_textbox.SetPosition(300.0f, 768.0f - 180.0f);
 	_dialogue_textbox.SetDimensions(1024.0f - 300.0f - 60.0f, 180.0f - 70.0f);
 	_dialogue_textbox.SetFont("map");
-	_dialogue_textbox.SetDisplayMode(VIDEO_TEXT_INSTANT);
+	_dialogue_textbox.SetDisplayMode(VIDEO_TEXT_FADECHAR);
 	_dialogue_textbox.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	VideoManager->PopState();
 
@@ -1044,6 +1044,7 @@ void MapMode::_UpdateExplore() {
 				}
 				_dialogue_window.Show();
 				_current_dialogue = dynamic_cast<MapDialogue*>(sprite->dialogues[sprite->next_conversation]);
+				_dialogue_textbox.ShowText(_current_dialogue->text[_current_dialogue->current_line]);
 // 				if (sprite->dialogues[sprite->next_conversation]->speaking_action == NULL) {
 // 					cout << 3.5 << endl;
 // 					sprite->SaveState();
@@ -1109,7 +1110,6 @@ void MapMode::_UpdateExplore() {
 void MapMode::_UpdateDialogue() {
 	_dialogue_window.Update(_time_elapsed);
 	_dialogue_textbox.Update(_time_elapsed);
-	_dialogue_textbox.ShowText(_current_dialogue->text[_current_dialogue->current_line]);
 
 	if (InputManager->ConfirmPress()) {
 		// TODO: Check if the text is shown or not. If not, display it instantly.
@@ -1126,7 +1126,9 @@ void MapMode::_UpdateDialogue() {
 				_sprites[1]->UpdateConversationCounter();
 			_current_dialogue = NULL;
 		}
-		// Otherwise, the dialogue is automatically updated to the next line
+		else { // Otherwise, the dialogue is automatically updated to the next line
+			_dialogue_textbox.ShowText(_current_dialogue->text[_current_dialogue->current_line]);
+		}
 	}
 }
 
@@ -1323,10 +1325,8 @@ void MapMode::Draw() {
 
 	// ************** (8) Draw the dialogue menu and text *************
 	if (_map_state == DIALOGUE) {
-		_dialogue_textbox.Update(SettingsManager->GetUpdateTime());
 		VideoManager->PushState();
 		VideoManager->SetCoordSys(0, 1024, 768, 0);
-//		_dialogue_window.Draw();
 		VideoManager->Move(0.0f, 768.0f);
 		_dialogue_box.Draw();
 		VideoManager->MoveRelative(47.0f, -42.0f);
