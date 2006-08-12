@@ -309,7 +309,6 @@ void MenuMode::Update() {
 //----------------------
 void MenuMode::Draw() 
 {
-
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
 	// Move to the top left corner
 	VideoManager->Move(0,0);

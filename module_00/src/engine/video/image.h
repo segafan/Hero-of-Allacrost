@@ -57,12 +57,7 @@ class ParticleSystem;
 class Image
 {
 public:
-	Image
-	(
-		const std::string &fname,
-		int32 w, 
-		int32 h
-	) 
+	Image(const std::string &fname, int32 w, int32 h, bool grayscale) 
 	: filename(fname)
 	{ 
 		width    = w;
@@ -72,21 +67,10 @@ public:
 		u2 = 1.0f;
 		v1 = 0.0f;
 		v2 = 1.0f;
+		this->grayscale = grayscale;
 	}
 
-	Image
-	(
-		TexSheet *sheet,
-		const std::string &fname,
-		int32 x_,
-		int32 y_,
-		int32 w, 
-		int32 h,
-		float u1_,
-		float v1_,
-		float u2_,
-		float v2_
-	) 
+	Image(TexSheet *sheet, const std::string &fname, int32 x_, int32 y_, int32 w, int32 h, float u1_, float v1_, float u2_, float v2_) 
 	: filename(fname)
 	{
 		texSheet = sheet;
@@ -113,6 +97,8 @@ public:
 	float u2, v2;           //! redundant, but saves floating point calculations
 	
 	int32 refCount;         //! keep track of when this image can be deleted
+
+	bool grayscale;			// track whether this image is grayscale or not
 };
 
 
@@ -182,18 +168,7 @@ public:
 	}
 	
 	
-	ImageElement
-	(
-		Image *image_, 
-		float xOffset_, 
-		float yOffset_, 
-		float width_, 
-		float height_,
-		float u1_,
-		float v1_,
-		float u2_,
-		float v2_
-	)
+	ImageElement(Image *image_, float xOffset_, float yOffset_, float width_, float height_, float u1_, float v1_, float u2_, float v2_)
 	{
 		image    = image_;
 		xOffset  = xOffset_;
@@ -234,7 +209,6 @@ public:
 /*!***************************************************************************
  *  \brief base class for StillImage and AnimatedImage
  *****************************************************************************/
-
 class ImageDescriptor
 {
 public:
@@ -257,6 +231,9 @@ public:
 	bool Load();
 	bool Draw();
 
+	bool IsGrayScale()
+	{ return _grayscale; }
+
 protected:
 
 	Color _color[4];      //! used only as a parameter to LoadImage. Holds the color of the upper left, upper right, lower left, and lower right vertices respectively
@@ -271,6 +248,7 @@ protected:
 	                         //! refer to the entire compound           
 
 	bool _animated; 
+	bool _grayscale;
 	
 	friend class GameVideo;
 };
@@ -289,10 +267,11 @@ class StillImage : public ImageDescriptor
 {
 public:
 
-	StillImage() 
+	StillImage(bool grayscale = false) 
 	{
 		Clear();
 		_animated = false;
+		_grayscale = grayscale;
 	}
 	
 	//! AddImage allows you to create compound images. You start with a 
@@ -300,17 +279,7 @@ public:
 	//! all the images you want to add, along with the x, y offsets they
 	//! should be positioned at. The u1,v1,u2,v2 tell which portion of the
 	//! image to use (usually 0,0,1,1)
-	
-	bool AddImage
-	(
-		const StillImage &id, 
-		float xOffset, 
-		float yOffset, 
-		float u1 = 0.0f, 
-		float v1 = 0.0f, 
-		float u2 = 1.0f, 
-		float v2 = 1.0f
-	);
+	bool AddImage(const StillImage &id, float xOffset, float yOffset, float u1 = 0.0f, float v1 = 0.0f, float u2 = 1.0f, float v2 = 1.0f);
 	
 	void Clear()
 	{
@@ -380,10 +349,11 @@ class AnimatedImage : public ImageDescriptor
 {
 public:
 	
-	AnimatedImage()
+	AnimatedImage(bool grayscale = false)
 	{ 
 		Clear();
 		_animated = true; 
+		_grayscale = grayscale;
 	}
 
 

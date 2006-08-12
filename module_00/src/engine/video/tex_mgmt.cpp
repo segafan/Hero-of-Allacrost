@@ -57,20 +57,24 @@ bool GameVideo::LoadImage(ImageDescriptor &id)
 {
 	if(id._animated)
 	{
-		return _LoadImage(dynamic_cast<AnimatedImage &>(id));
+		if (id.IsGrayScale())
+			return _LoadImage(dynamic_cast<AnimatedImage &>(id), true);
+		else
+			return _LoadImage(dynamic_cast<AnimatedImage &>(id));
 	}
 	else
 	{
-		return _LoadImage(dynamic_cast<StillImage &>(id));
+		if (id.IsGrayScale())
+			return _LoadImage(dynamic_cast<StillImage &>(id), true);
+		else
+			return _LoadImage(dynamic_cast<StillImage &>(id));
 	}
 }
-
 
 //-----------------------------------------------------------------------------
 // _LoadImage: helper function to load an animated image
 //-----------------------------------------------------------------------------
-
-bool GameVideo::_LoadImage(AnimatedImage &id)
+bool GameVideo::_LoadImage(AnimatedImage &id, bool grayscale)
 {
 	uint32 numFrames = static_cast<uint32>(id._frames.size());
 	
@@ -87,13 +91,12 @@ bool GameVideo::_LoadImage(AnimatedImage &id)
 		
 		if(needToLoad)
 		{
-			success &= _LoadImage(id._frames[frame]._image);
+			success &= _LoadImage(id._frames[frame]._image, grayscale);
 		}
 	}
 	
 	return success;
 }
-
 
 //-----------------------------------------------------------------------------
 // _LoadImage: loads an image and returns it in the static image
@@ -103,11 +106,9 @@ bool GameVideo::_LoadImage(AnimatedImage &id)
 //             to remain in memory for the entire game, so place it in a
 //             special texture sheet reserved for things that don't change often.
 //-----------------------------------------------------------------------------
-
-bool GameVideo::_LoadImage(StillImage &id)
+bool GameVideo::_LoadImage(StillImage &id, bool grayscale)
 {
 	// 1. special case: if filename is empty, load a colored quad
-	
 	if(id._filename.empty())
 	{
 		id._elements.clear();		
@@ -116,11 +117,9 @@ bool GameVideo::_LoadImage(StillImage &id)
 		return true;
 	}
 	
-	
 	// 2. check if an image with the same filename has already been loaded
 	//    If so, point to that
-	
-	if(_images.find(id._filename) != _images.end())
+	if(_images.find(id._filename + string("_grayscale")) != _images.end())
 	{
 		id._elements.clear();		
 		
@@ -154,11 +153,9 @@ bool GameVideo::_LoadImage(StillImage &id)
 		return true;
 	}
 
-
 	// 3. If we're currently between a call of BeginTexLoadBatch() and
 	//    EndTexLoadBatch(), then instead of loading right now, push it onto
 	//    the batch vector so it can be processed at EndTexLoadBatch()
-
 	if(_batchLoading)
 	{
 		_batchLoadImages.push_back(&id);
@@ -166,8 +163,7 @@ bool GameVideo::_LoadImage(StillImage &id)
 	}
 
 	// 4. If we're not batching, then load the image right away
-	
-	bool success = _LoadImageHelper(id);
+	bool success = _LoadImageHelper(id, grayscale);
 	
 	if(!success)
 	{
@@ -184,7 +180,6 @@ bool GameVideo::_LoadImage(StillImage &id)
 //                    isn't loaded immediately but rather placed into a vector
 //                    and loaded on EndTexLoadBatch().
 //-----------------------------------------------------------------------------
-
 bool GameVideo::BeginImageLoadBatch()
 {
 	_batchLoading = true;
@@ -197,7 +192,6 @@ bool GameVideo::BeginImageLoadBatch()
 // EndImageLoadBatch: ends a batch load block
 //                    returns false if any of the images failed to load
 //-----------------------------------------------------------------------------
-
 bool GameVideo::EndImageLoadBatch()
 {	
 	_batchLoading = false;
@@ -231,14 +225,11 @@ bool GameVideo::EndImageLoadBatch()
 	return success;
 }
 
-
-
 //-----------------------------------------------------------------------------
 // _LoadImageHelper: private function which does the dirty work of actually
 //                     loading an image.
 //-----------------------------------------------------------------------------
-
-bool GameVideo::_LoadImageHelper(StillImage &id)
+bool GameVideo::_LoadImageHelper(StillImage &id, bool grayscale)
 {
 	bool isStatic = id._isStatic;
 	
@@ -247,16 +238,15 @@ bool GameVideo::_LoadImageHelper(StillImage &id)
 	ILuint pixelData;
 	uint32 w, h;
 	
-	if(!_LoadRawPixelData(id._filename, pixelData, w, h))
+	if(!_LoadRawPixelData(id._filename, pixelData, w, h, grayscale))
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: _LoadRawPixelData() failed in _LoadImageHelper()" << endl;
 		return false;
 	}
 
-
 	// create an Image structure and store it our std::map of images
-	Image *newImage = new Image(id._filename, w, h);
+	Image *newImage = new Image(id._filename, w, h, grayscale);
 
 	// try to insert the image in a texture sheet
 	TexSheet *sheet = _InsertImageInTexSheet(newImage, w, h, isStatic);
@@ -309,11 +299,9 @@ bool GameVideo::_LoadImageHelper(StillImage &id)
 //                   Returns the DevIL texture ID, width and height
 //                   Upon exit, leaves this image as the currently "bound" image
 //-----------------------------------------------------------------------------
-
-bool GameVideo::_LoadRawPixelData(const string &filename, ILuint &pixelData, uint32 &w, uint32 &h)
+bool GameVideo::_LoadRawPixelData(const string &filename, ILuint &pixelData, uint32 &w, uint32 &h, bool grayscale)
 {
 	// load the image using DevIL
-
 	ilGenImages(1, &pixelData);
 	
 	if(ilGetError())
@@ -337,11 +325,28 @@ bool GameVideo::_LoadRawPixelData(const string &filename, ILuint &pixelData, uin
 		ilDeleteImages(1, &pixelData);
 		return false;
 	}
-	
+
 	// find width and height
-	
 	w = ilGetInteger(IL_IMAGE_WIDTH);
 	h = ilGetInteger(IL_IMAGE_HEIGHT);
+
+	// Check if grayscale, if so convert pixels
+	if (grayscale)
+	{
+		ILubyte *pixels = ilGetData();
+		for (uint32 current = 0; current < h * w * 4; current += 4)
+		{
+			// Convert each pixel to it's grayscale equivalent using the equation
+			// 0.3 * Red Component + 0.59 * Green Component + 0.11 * Blue Component
+			ILubyte red = pixels[current];
+			ILubyte green = pixels[current + 1];
+			ILubyte blue = pixels[current + 2];
+			ILubyte grayvalue = static_cast<ILubyte>(0.3f * red + 0.59f * green + 0.11f * blue);
+			pixels[current] = pixels[current + 1] = pixels[current + 2] = grayvalue;
+		}
+		ilSetData(pixels);
+	}
+
 	
 	return true;
 }	
@@ -1389,11 +1394,9 @@ bool FixedTexMemMgr::Insert(Image *img)
 	return true;
 }
 
-
 //-----------------------------------------------------------------------------
 // CalculateBlockIndex: returns the block index used up by this image
 //-----------------------------------------------------------------------------
-
 int32 FixedTexMemMgr::CalculateBlockIndex(Image *img)
 {
 	int32 blockX = img->x / _imageWidth;
@@ -1403,14 +1406,12 @@ int32 FixedTexMemMgr::CalculateBlockIndex(Image *img)
 	return blockIndex;
 }
 
-
 //-----------------------------------------------------------------------------
 // Remove: completely remove an image.
 //         In other words:
 //           1. mark its block's image pointer to NULL
 //           2. remove it from the open list
 //-----------------------------------------------------------------------------
-
 bool FixedTexMemMgr::Remove(Image *img)
 {
 	// translate x,y coordinates into a block index
@@ -1436,11 +1437,9 @@ bool FixedTexMemMgr::Remove(Image *img)
 	return true;
 }
 
-
 //-----------------------------------------------------------------------------
 // DeleteNode: deletes a node from the open list with the given block index
 //-----------------------------------------------------------------------------
-
 void FixedTexMemMgr::DeleteNode(int32 blockIndex)
 {
 	if(blockIndex < 0)
@@ -1480,7 +1479,6 @@ void FixedTexMemMgr::DeleteNode(int32 blockIndex)
 	node->next = NULL;
 }
 
-
 //-----------------------------------------------------------------------------
 // Free: marks the block containing the image as free, i.e. on the open list
 //       but leaves the image pointer intact in case we decide to restore 
@@ -1488,7 +1486,6 @@ void FixedTexMemMgr::DeleteNode(int32 blockIndex)
 //
 //       NOTE: this assumes that the block isn't ALREADY free
 //-----------------------------------------------------------------------------
-
 bool FixedTexMemMgr::Free(Image *img)
 {
 	int32 blockIndex = CalculateBlockIndex(img);
@@ -1513,12 +1510,10 @@ bool FixedTexMemMgr::Free(Image *img)
 	return true;
 }
 
-
 //-----------------------------------------------------------------------------
 // Restore: takes a block that was freed and takes it off the open list to
 //          mark it as "used" again
 //-----------------------------------------------------------------------------
-
 bool FixedTexMemMgr::Restore(Image *img)
 {
 	int32 blockIndex = CalculateBlockIndex(img);	
@@ -1526,12 +1521,10 @@ bool FixedTexMemMgr::Restore(Image *img)
 	return true;
 }
 
-
 //-----------------------------------------------------------------------------
 // DEBUG_NextTexSheet: increments to the next texture sheet to show with
 //                     _DEBUG_ShowTexSheet().
 //-----------------------------------------------------------------------------
-
 void GameVideo::DEBUG_NextTexSheet()
 {
 	++_currentDebugTexSheet;
@@ -1542,12 +1535,10 @@ void GameVideo::DEBUG_NextTexSheet()
 	}
 }
 
-
 //-----------------------------------------------------------------------------
 // DEBUG_PrevTexSheet: cycles to the previous texturesheet to show with
 //                     _DEBUG_ShowTexSheet().
 //-----------------------------------------------------------------------------
-
 void GameVideo::DEBUG_PrevTexSheet()
 {
 	--_currentDebugTexSheet;
@@ -1564,7 +1555,6 @@ void GameVideo::DEBUG_PrevTexSheet()
 //                 most likely due to a change of video mode.
 //                 Returns false if any of the textures fail to reload
 //-----------------------------------------------------------------------------
-
 bool GameVideo::ReloadTextures() 
 {
 	// reload texture sheets
@@ -1606,13 +1596,11 @@ bool GameVideo::ReloadTextures()
 	return success;
 }
 
-
 //-----------------------------------------------------------------------------
 // UnloadTextures: frees the texture memory taken up by the texture sheets, 
 //                 but leaves the lists of images intact so we can reload them
 //                 Returns false if any of the textures fail to unload.
 //-----------------------------------------------------------------------------
-
 bool GameVideo::UnloadTextures() 
 {
 	// save temporary textures to disk, in other words textures which weren't
@@ -1664,7 +1652,6 @@ bool GameVideo::UnloadTextures()
 //                if we deleted the last texture we bound using _BindTexture(),
 //                then set the last tex ID to 0xffffffff
 //-----------------------------------------------------------------------------
-
 bool GameVideo::_DeleteTexture(GLuint texID)
 {
 	glDeleteTextures(1, &texID);
@@ -1678,13 +1665,11 @@ bool GameVideo::_DeleteTexture(GLuint texID)
 	return true;
 }
 
-
 //-----------------------------------------------------------------------------
 // Unload: unloads all memory used by OpenGL for this texture sheet
 //         Returns false if we fail to unload, or if the sheet was already
 //         unloaded
 //-----------------------------------------------------------------------------
-
 bool TexSheet::Unload()
 {
 	// check if we're already unloaded
@@ -1708,13 +1693,11 @@ bool TexSheet::Unload()
 	return true;
 }
 
-
 //-----------------------------------------------------------------------------
 // _CreateBlankGLTexture: creates a blank texture of the given width and height
 //                       and returns its OpenGL texture ID.
 //                       Returns 0xffffffff on failure
 //-----------------------------------------------------------------------------
-
 GLuint GameVideo::_CreateBlankGLTexture(int32 width, int32 height)
 {
 	// attempt to create a GL texture with the given width and height
@@ -1763,13 +1746,11 @@ GLuint GameVideo::_CreateBlankGLTexture(int32 width, int32 height)
 	return texID;
 }
 
-
 //-----------------------------------------------------------------------------
 // Reload: reallocate memory with OpenGL for this texture and load all the images
 //         back into it
 //         Returns false if we fail to reload or if the sheet was already loaded
 //-----------------------------------------------------------------------------
-
 bool TexSheet::Reload()
 {
 	// check if we're already loaded
@@ -1807,13 +1788,11 @@ bool TexSheet::Reload()
 	return true;
 }
 
-
 //-----------------------------------------------------------------------------
 // _ReloadImagesToSheet: helper function of the GameVideo class to
 //                      TexSheet::Reload() to do the dirty work of reloading
 //                      image data into the appropriate spots on the texture
 //-----------------------------------------------------------------------------
-
 bool GameVideo::_ReloadImagesToSheet(TexSheet *sheet)
 {
 	// delete images
@@ -1829,7 +1808,7 @@ bool GameVideo::_ReloadImagesToSheet(TexSheet *sheet)
 			ILuint pixelData;
 			uint32 w, h;
 			
-			if(!_LoadRawPixelData(i->filename, pixelData, w, h))
+			if(!_LoadRawPixelData(i->filename, pixelData, w, h, i->grayscale))
 			{
 				if(VIDEO_DEBUG)
 					cerr << "VIDEO ERROR: _LoadRawPixelData() failed in _ReloadImagesToSheet()!" << endl;
@@ -1849,11 +1828,9 @@ bool GameVideo::_ReloadImagesToSheet(TexSheet *sheet)
 	return success;
 }
 
-
 //-----------------------------------------------------------------------------
 // _SaveTempTextures: save all textures to disk which were not loaded from a file
 //-----------------------------------------------------------------------------
-
 bool GameVideo::_SaveTempTextures()
 {
 	map<string, Image*>::iterator iImage = _images.begin();
@@ -1874,21 +1851,17 @@ bool GameVideo::_SaveTempTextures()
 	return true;
 }
 
-
 //-----------------------------------------------------------------------------
 // _DeleteTempTextures: delete all the textures in the temp directory
 //-----------------------------------------------------------------------------
-
 bool GameVideo::_DeleteTempTextures()
 {
 	return CleanDirectory("temp");
 }
 
-
 //-----------------------------------------------------------------------------
 // SaveImage: saves the image to the given filename
 //-----------------------------------------------------------------------------
-
 bool TexSheet::SaveImage(Image *img)
 {
 	uint8 *pixels = new uint8[width*height*4];

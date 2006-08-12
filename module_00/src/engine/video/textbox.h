@@ -216,14 +216,14 @@ public:
 	 *
 	 *  \param text  text to draw
 	 */
-	bool ShowText(const hoa_utils::ustring &text);
+	bool SetDisplayText(const hoa_utils::ustring &text);
 
 
 	/*!
 	 *  \brief non-unicode version of ShowText(). See the unicode version for more
 	 *         details.
 	 */
-	bool ShowText(const std::string &text);
+	bool SetDisplayText(const std::string &text);
 
 
 	/*!

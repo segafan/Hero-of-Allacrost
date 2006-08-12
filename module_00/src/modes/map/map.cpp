@@ -1044,7 +1044,7 @@ void MapMode::_UpdateExplore() {
 				}
 				_dialogue_window.Show();
 				_current_dialogue = dynamic_cast<MapDialogue*>(sprite->dialogues[sprite->next_conversation]);
-				_dialogue_textbox.ShowText(_current_dialogue->text[_current_dialogue->current_line]);
+				_dialogue_textbox.SetDisplayText(_current_dialogue->text[_current_dialogue->current_line]);
 // 				if (sprite->dialogues[sprite->next_conversation]->speaking_action == NULL) {
 // 					cout << 3.5 << endl;
 // 					sprite->SaveState();
@@ -1127,7 +1127,7 @@ void MapMode::_UpdateDialogue() {
 			_current_dialogue = NULL;
 		}
 		else { // Otherwise, the dialogue is automatically updated to the next line
-			_dialogue_textbox.ShowText(_current_dialogue->text[_current_dialogue->current_line]);
+			_dialogue_textbox.SetDisplayText(_current_dialogue->text[_current_dialogue->current_line]);
 		}
 	}
 }
@@ -1321,7 +1321,7 @@ void MapMode::Draw() {
 		}
 	}
 
-	VideoManager->DrawFullscreenOverlay(Color(0.0f, 0.0f, 0.0f, 0.5f));
+	//VideoManager->DrawFullscreenOverlay(Color(0.0f, 0.0f, 0.0f, 0.5f));
 
 	// ************** (8) Draw the dialogue menu and text *************
 	if (_map_state == DIALOGUE) {
