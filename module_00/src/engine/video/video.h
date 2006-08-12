@@ -669,6 +669,7 @@ public:
 	 *  \param id  image descriptor to load- either a StillImage or AnimatedImage.
 	 */
 	bool LoadImage(ImageDescriptor &id);
+	bool LoadImageGrayScale(ImageDescriptor &id);
 
 
 	/*!
@@ -820,14 +821,7 @@ public:
 	 *  \param fillColor_BL  color for lower left  vertex of interior
 	 *  \param fillColor_BR  color for lower right vertex of interior
 	 */
-	bool SetMenuSkin
-	(
-		const std::string &imgBaseName,
-		const Color  &fillColor_TL,
-		const Color  &fillColor_TR,
-		const Color  &fillColor_BL,
-		const Color  &fillColor_BR
-	);
+	bool SetMenuSkin(const std::string &imgBaseName, const Color  &fillColor_TL, const Color  &fillColor_TR, const Color  &fillColor_BL, const Color  &fillColor_BR);
 
 
 	/*!
@@ -856,15 +850,7 @@ public:
 	 *  \param fillColor_BL  color for lower left  vertex of interior
 	 *  \param fillColor_BR  color for lower right vertex of interior
 	 */
-	bool SetMenuSkin
-	(
-		const std::string &imgBaseName,
-		const std::string &backgroundImage,
-		const Color  &fillColor_TL,
-		const Color  &fillColor_TR,
-		const Color  &fillColor_BL,
-		const Color  &fillColor_BR
-	);
+	bool SetMenuSkin(const std::string &imgBaseName, const std::string &backgroundImage, const Color  &fillColor_TL, const Color  &fillColor_TR, const Color  &fillColor_BL, const Color  &fillColor_BR);
 
 
 
@@ -891,12 +877,7 @@ public:
 	 *	 
 	 *  \param fillColor       color for for interior of window
 	 */
-	bool SetMenuSkin
-	(
-		const std::string &imgBaseName,
-		const std::string &backgroundImage,
-		const Color  &fillColor
-	);
+	bool SetMenuSkin(const std::string &imgBaseName, const std::string &backgroundImage, const Color &fillColor);
 
 
 	//-- Lighting and fog -----------------------------------------------------
@@ -1190,7 +1171,6 @@ private:
 	 *
 	 *  \param texID   integer handle to the OpenGL texture
 	 */	
-
 	bool _BindTexture(GLuint texID);
 
 	int32 _ConvertXAlign(int32 xalign);
@@ -1202,9 +1182,7 @@ private:
 	 *  \param width   desired width of the texture
 	 *  \param height  desired height of the texture
 	 */	
-
 	GLuint _CreateBlankGLTexture(int32 width, int32 height);
-
 
 	/*!
 	 *  \brief creates an StillImage of a menu which is the given size
@@ -1228,7 +1206,6 @@ private:
 		int32 edgeSharedFlags
 	);
 
-
 	/*!
 	 *  \brief returns a filename like TEMP_abcd1234.ext, and each time you call it, it increments the
 	 *         alphanumeric part of the filename. This way, during any particular run
@@ -1240,9 +1217,7 @@ private:
 	 *                     without an extension, that might cause stupid bugs like DevIL refusing
 	 *                     to load an image because it doesn't end with .png.
 	 */	
-
 	std::string _CreateTempFilename(const std::string &extension);
-
 
 	/*!
 	 *  \brief creates a texture sheet
@@ -1252,7 +1227,6 @@ private:
 	 *  \param type     specifies what type of images this texture sheet manages (e.g. 32x32 images, 64x64 images, any type, etc)
 	 *  \param isStatic if true, this texture sheet is meant to manage images which are not expected to be loaded and unloaded very often
 	 */	
-
 	private_video::TexSheet *_CreateTexSheet
 	(
 		int32 width,
@@ -1275,9 +1249,8 @@ private:
 	 *
 	 *  \param image  pointer to image
 	 */	
-	bool _DeleteImage    (private_video::Image *const image);
+	bool _DeleteImage(private_video::Image *const image);
 	
-
 	/*!
 	 *  \brief decreases ref count of an image
 	 *
@@ -1285,7 +1258,6 @@ private:
 	 */
 	bool _DeleteImage(StillImage &id);
 
-	
 	/*!
 	 *  \brief decreases ref count of an animated image
 	 *
@@ -1293,26 +1265,19 @@ private:
 	 */
 	bool _DeleteImage(AnimatedImage &id);
 
-	
 	/*!
 	 *  \brief deletes the temporary textures from the "temp" folder that were saved
 	 *         by _SaveTempTextures()
 	 */	
-	
 	bool _DeleteTempTextures();
 
-	
 	/*!
 	 *  \brief draws an image element, i.e. one image within an image descriptor which may contain multiple images
 	 *
 	 *  \param element        pointer to the image element to draw
 	 *  \param modulateColor  combination of color for this image, and our current fade color
 	 */		 
-	bool _DrawElement
-	(
-		const private_video::ImageElement &element, 
-		const Color &modulateColor
-	);
+	bool _DrawElement(const private_video::ImageElement &element, const Color &modulateColor);
 
 
 	/*!
@@ -1324,11 +1289,7 @@ private:
 	 *
 	 *  \param element        pointer to the image element to draw
 	 */		 
-	bool _DrawElement
-	(
-		const private_video::ImageElement &element
-	);
-
+	bool _DrawElement(const private_video::ImageElement &element);
 
 	/*!
 	 *  \brief helper function to DrawImage() to do the actual work of doing an image
@@ -1352,12 +1313,7 @@ private:
 	 *
 	 *  \param uText  Pointer to a unicode string holding the text to draw
 	 */	
-
-	bool _DrawTextHelper
-	(
-		const uint16 *const uText
-	);
-
+	bool _DrawTextHelper(const uint16 *const uText);
 
 	/*!
 	 *  \brief inserts an image into a texture sheet
@@ -1366,40 +1322,28 @@ private:
 	 *  \param w           width of image (in pixels)
 	 *  \param h           height of image (in pixels) 
 	 */	
-
-	private_video::TexSheet *_InsertImageInTexSheet
-	(
-		private_video::Image *image,
-		int32 w,
-		int32 h,
-		bool isStatic
-	);
-
+	private_video::TexSheet *_InsertImageInTexSheet(private_video::Image *image, int32 w, int32 h, bool isStatic);
 
 	/*!
 	 *  \brief loads an image
 	 *
 	 *  \param id  image descriptor to load. Can specify filename, color, width, height, and static as its parameters
 	 */
-	bool _LoadImage(StillImage &id);
-
+	bool _LoadImage(StillImage &id, bool grayscale = false);
 
 	/*!
 	 *  \brief loads an animated image. Assumes that you have called AddFrame for all the frames.
 	 *
 	 *  \param id  image descriptor to load
 	 */
-	bool _LoadImage(AnimatedImage &id);
-	
+	bool _LoadImage(AnimatedImage &id, bool grayscale = false);
 
 	/*!
 	 *  \brief does the actual work of loading an image
 	 *
 	 *  \param id  StillImage of the image to load. May specify a filename, color, width, height, and static
 	 */	
-
-	bool _LoadImageHelper(StillImage &id);
-
+	bool _LoadImageHelper(StillImage &id, bool grayscale = false);
 
 	/*!
 	 *  \brief use DevIL to load an image and return raw pixel data
@@ -1409,18 +1353,14 @@ private:
 	 *  \param width      The loaded image's width gets returned into this variable
 	 *  \param width      The loaded image's height gets returned into this variable
 	 */	
-
-	bool _LoadRawPixelData(const std::string &filename, ILuint &pixelData, uint32 &width, uint32 &height);
-
+	bool _LoadRawPixelData(const std::string &filename, ILuint &pixelData, uint32 &width, uint32 &height, bool grayscale);
 
 	/*!
 	 *  \brief loop through all currently loaded images and if they belong to the given tex sheet, reload them into it
 	 *
 	 *  \param texSheet   pointer to the tex sheet whose images we want to load
 	 */	
-
 	bool _ReloadImagesToSheet(private_video::TexSheet *texSheet);
-
 
 	/*!
 	 *  \brief removes the image from the STL map with the same pointer as the one passed in. Returns false on failure
@@ -1438,7 +1378,6 @@ private:
 	 */	
 	bool _RemoveSheet(private_video::TexSheet *sheetToRemove);
 
-
 	/*!
 	 *  \brief rounds a force value to the nearest integer. Rounding is based on probability. For example the number 2.85 has an 85% chance of rounding to 3 and a 15% chance of rounding to 2
 	 *
@@ -1446,18 +1385,14 @@ private:
 	 */	
 	float _RoundForce(float force);   // rounds a force value
 
-
 	/*!
 	 *  \brief restores coord system, draw flags, and transformations
 	 */	
-
 	void _PopContext();
-
 
 	/*!
 	 *  \brief saves coord system, draw flags, and transformations
 	 */	
-
 	void _PushContext();
 	
 	/*!
@@ -1466,9 +1401,7 @@ private:
 	 *         perhaps because we are switching from windowed to fullscreen. So, we need
 	 *         to save all textures to disk so we can reload them later.
 	 */	
-	
 	bool _SaveTempTextures();
-
 
 	int32 _ScreenCoordX(float x);
 	int32 _ScreenCoordY(float y);

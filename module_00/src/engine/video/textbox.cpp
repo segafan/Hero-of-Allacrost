@@ -362,7 +362,7 @@ float TextBox::GetDisplaySpeed()
 //-----------------------------------------------------------------------------
 // IsFinished: returns true if the textbox is done scrolling text and false
 //             if we haven't finished the gradual text drawing that was started
-//             when ShowText() was called. If SetText() hasn't been called yet, 
+//             when SetDisplayText() was called. If SetText() hasn't been called yet, 
 //             this is false by default.
 //-----------------------------------------------------------------------------
 
@@ -388,19 +388,19 @@ bool TextBox::ForceFinish()
 
 
 //-----------------------------------------------------------------------------
-// ShowText: shows some text in the textbox, gradually scrolling it on to the
+// SetDisplayText: shows some text in the textbox, gradually scrolling it on to the
 //           screen depending on the current text display mode.
 //           Returns false if the textbox isn't properly initialized,
 //           if the string passed is empty, or if the text doesn't fit in the box
 //-----------------------------------------------------------------------------
 
-bool TextBox::ShowText(const hoa_utils::ustring &text)
+bool TextBox::SetDisplayText(const hoa_utils::ustring &text)
 {
 	// fail if empty string was passed
 	if(text.empty())
 	{
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: empty string passed to TextBox::ShowText()!" << endl;
+			cerr << "VIDEO ERROR: empty string passed to TextBox::SetDisplayText()!" << endl;
 		return false;
 	}
 	
@@ -409,7 +409,7 @@ bool TextBox::ShowText(const hoa_utils::ustring &text)
 	if(!_initialized)
 	{
 		if(VIDEO_DEBUG)
-			cerr << "TextBox::ShowText() failed because the textbox was not initialized:" << endl << _initializeErrors << endl;
+			cerr << "TextBox::SetDisplayText() failed because the textbox was not initialized:" << endl << _initializeErrors << endl;
 			
 		return false;		
 	}
@@ -457,7 +457,7 @@ bool TextBox::ShowText(const hoa_utils::ustring &text)
 	{
 		if(VIDEO_DEBUG)
 		{
-			cerr << "VIDEO ERROR: Error in TextBox::ShowText()! Tried to display text of height (";
+			cerr << "VIDEO ERROR: Error in TextBox::SetDisplayText()! Tried to display text of height (";
 			cerr << textHeight << ")" << endl << "in a window of only height (" << _height << ")" << endl;
 		}
 			
@@ -502,7 +502,7 @@ bool TextBox::ShowText(const hoa_utils::ustring &text)
 		{
 			_endTime = 0;
 			if(VIDEO_DEBUG)		
-				cerr << "VIDEO ERROR: undetected display mode in TextBox::ShowText()!" << endl;
+				cerr << "VIDEO ERROR: undetected display mode in TextBox::SetDisplayText()!" << endl;
 			break;
 		}	
 	};
@@ -520,7 +520,6 @@ bool TextBox::ShowText(const hoa_utils::ustring &text)
 //-----------------------------------------------------------------------------
 // Clear: makes the textbox empty so it doesn't display any text.
 //-----------------------------------------------------------------------------
-
 bool TextBox::Clear()
 {
 	_finished = true;
@@ -533,7 +532,6 @@ bool TextBox::Clear()
 //-----------------------------------------------------------------------------
 // IsEmpty: returns true if the textbox is currently blank
 //-----------------------------------------------------------------------------
-
 bool TextBox::IsEmpty()
 {
 	return _text.empty();
@@ -546,7 +544,6 @@ bool TextBox::IsEmpty()
 //                we return false, and fill the "errors" string with a list of
 //                errors so they can be printed to the console
 //-----------------------------------------------------------------------------
-
 bool TextBox::IsInitialized(string &errors)
 {
 	bool success = true;
@@ -593,7 +590,6 @@ bool TextBox::IsInitialized(string &errors)
 // Note: this is a pretty low level function so it doesn't do any checking
 //       to see if the current font is actually valid
 //-----------------------------------------------------------------------------
-
 int32 TextBox::_CalculateTextHeight()
 {
 	if(_text.empty())
@@ -607,7 +603,6 @@ int32 TextBox::_CalculateTextHeight()
 // _AddLine: adds new line to the _text vector. If the line is too long, it
 //           word wraps and creates new lines
 //-----------------------------------------------------------------------------
-
 void TextBox::_AddLine(const hoa_utils::ustring &line)
 {
 	// perform word wrapping in a loop until all the text is added
@@ -707,13 +702,13 @@ bool TextBox::_IsBreakableChar(uint16 character)
 
 
 //-----------------------------------------------------------------------------
-// ShowText: non-unicode version
+// SetDisplayText: non-unicode version
 //-----------------------------------------------------------------------------
 
-bool TextBox::ShowText(const std::string &text)
+bool TextBox::SetDisplayText(const std::string &text)
 {
 	ustring wstr = MakeWideString(text);	
-	return ShowText(wstr);
+	return SetDisplayText(wstr);
 }
 
 

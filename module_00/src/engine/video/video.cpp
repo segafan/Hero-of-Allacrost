@@ -1343,7 +1343,7 @@ bool GameVideo::CaptureScreen(StillImage &id)
 	// note the "" for the filename indicates that this is an image which
 	// was not loaded from a file, so do not perform the same kind of
 	// resource management on it
-	Image *newImage = new Image(_CreateTempFilename(".png"), w, h);
+	Image *newImage = new Image(_CreateTempFilename(".png"), w, h, id.IsGrayScale());
 	id._filename = newImage->filename;
 
 	// try to insert the image in a texture sheet
@@ -1589,11 +1589,9 @@ int32 GameVideo::_ConvertXAlign(int32 xalign)
 	}
 }
 
-
 //-----------------------------------------------------------------------------
 // SetDefaultCursor: sets the default menu cursor, returns false if it fails
 //-----------------------------------------------------------------------------
-
 bool GameVideo::SetDefaultCursor(const std::string &cursorImageFilename)
 {
 	_defaultMenuCursor.SetFilename(cursorImageFilename);
@@ -1604,7 +1602,6 @@ bool GameVideo::SetDefaultCursor(const std::string &cursorImageFilename)
 //-----------------------------------------------------------------------------
 // GetDefaultCursor: sets the gefault menu cursor, returns NULL if none is set
 //-----------------------------------------------------------------------------
-
 StillImage *GameVideo::GetDefaultCursor()
 {
 	if(_defaultMenuCursor.GetWidth() != 0.0f)  // cheap test if image is valid
@@ -1618,30 +1615,25 @@ StillImage *GameVideo::GetDefaultCursor()
 // PushMatrix: pushes the current model view transformation on to stack
 //             Note, this assumes that glMatrixMode(GL_MODELVIEW) has been called
 //-----------------------------------------------------------------------------
-
 void GameVideo::PushMatrix()
 {
 	glPushMatrix();
 }
 
-
 //-----------------------------------------------------------------------------
 // PopMatrix: pops the current model view transformation from stack
 //            Note, this assumes that glMatrixMode(GL_MODELVIEW) has been called
 //-----------------------------------------------------------------------------
-
 void GameVideo::PopMatrix()
 {
 	glPopMatrix();
 }
-
 
 //-----------------------------------------------------------------------------
 // Intersect: intersects this rect with another, and stores the resulting
 //            rectangle. If the two rectangles don't intersect, then all
 //            member variables are zero
 //-----------------------------------------------------------------------------
-
 void ScreenRect::Intersect(const ScreenRect &rect)
 {
 	left   = max(left,   rect.left);
@@ -1661,11 +1653,9 @@ void ScreenRect::Intersect(const ScreenRect &rect)
 	}
 }
 
-
 //-----------------------------------------------------------------------------
 // EnableScissoring: enable/disable scissoring
 //-----------------------------------------------------------------------------
-
 void GameVideo::EnableScissoring(bool enable)
 {
 	_scissorEnabled = enable;
@@ -1681,14 +1671,7 @@ void GameVideo::EnableScissoring(bool enable)
 // SetScissorRect: set the scissoring rectangle, coordinates relative to the
 //                 current coord sys
 //-----------------------------------------------------------------------------
-
-void GameVideo::SetScissorRect
-(
-	float left,
-	float right,
-	float bottom,
-	float top
-)
+void GameVideo::SetScissorRect(float left, float right, float bottom, float top)
 {
 	_scissorRect = CalculateScreenRect(left, right, bottom, top);
 	glScissor(_scissorRect.left, _scissorRect.top, _scissorRect.width, _scissorRect.height);	
@@ -1698,7 +1681,6 @@ void GameVideo::SetScissorRect
 //-----------------------------------------------------------------------------
 // SetScissorRect: set the scissoring rectangle
 //-----------------------------------------------------------------------------
-
 void GameVideo::SetScissorRect(const ScreenRect &rect)
 {
 	_scissorRect = rect;
@@ -1709,7 +1691,6 @@ void GameVideo::SetScissorRect(const ScreenRect &rect)
 // CalculateScreenRect: calculate a rectangle in screen coordinates given one
 //                       using our current coordinate system
 //-----------------------------------------------------------------------------
-
 ScreenRect GameVideo::CalculateScreenRect(float left, float right, float bottom, float top)
 {
 	ScreenRect rect;

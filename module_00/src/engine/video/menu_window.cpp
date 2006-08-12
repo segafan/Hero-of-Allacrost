@@ -32,8 +32,8 @@ namespace hoa_video
 // MenuWindow
 //-----------------------------------------------------------------------------
 
-MenuWindow::MenuWindow()
-: _width(0),
+MenuWindow::MenuWindow() :
+  _width(0),
   _height(0),
   _state(VIDEO_MENU_STATE_HIDDEN),
   _currentTime(0),

@@ -428,13 +428,7 @@ bool GameVideo::_DrawElement
 //           with VIDEO_X_CENTER and VIDEO_Y_CENTER
 //-----------------------------------------------------------------------------
 
-bool GameVideo::DrawHalo
-(
-	const StillImage &id, 
-	float x, 
-	float y, 
-	const Color &color
-)
+bool GameVideo::DrawHalo(const StillImage &id, float x, float y, const Color &color)
 {
 	_PushContext();
 	Move(x, y);

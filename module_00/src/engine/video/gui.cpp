@@ -365,15 +365,7 @@ bool GUI::_CheckSkinConsistency(const MenuSkin &s)
 //       if you put them next to each other. This should be an OK assumption
 //       since we call _CheckSkinConsistency() when we set a new skin
 //-----------------------------------------------------------------------------
-
-bool GUI::CreateMenu
-(
-	StillImage &id, 
-	float width, 
-	float height, 
-	int32 edgeVisibleFlags,
-	int32 edgeSharedFlags
-)
+bool GUI::CreateMenu(StillImage &id, float width, float height, int32 edgeVisibleFlags, int32 edgeSharedFlags)
 {
 	id.Clear();
 	
