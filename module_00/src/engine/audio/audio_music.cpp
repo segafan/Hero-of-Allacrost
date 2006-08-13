@@ -26,9 +26,10 @@ namespace private_audio {
 // ************************ MusicData Class Functions *************************
 // ****************************************************************************
 
-MusicData::MusicData(string fname) {
-	filename = fname;
-
+MusicData::MusicData(const std::string & fname) :
+	filename(fname),
+	playing(false)
+{
 	music = Mix_LoadMUS(("mus/" + filename + ".ogg").c_str());
 	if (music == NULL) {
 		cout << "AUDIO ERROR: Could not open music file " << filename << ": " << Mix_GetError() << endl;
@@ -95,12 +96,13 @@ using namespace hoa_audio::private_audio;
 // ****************************************************************************
 
 
-MusicDescriptor::MusicDescriptor() {
-	_data = NULL;
-	_loop_count = -1;
-	_fade_in_time = 0;
-	_fade_out_time = 0;
-	_play_timeout = -1;
+MusicDescriptor::MusicDescriptor() :
+	_data(NULL),
+	_loop_count(-1),
+	_fade_in_time(0),
+	_fade_out_time(0),
+	_play_timeout(-1)
+{
 }
 
 
@@ -112,7 +114,7 @@ MusicDescriptor::~MusicDescriptor() {
 }
 
 
-bool MusicDescriptor::LoadMusic(std::string fname) {
+bool MusicDescriptor::LoadMusic(const std::string & fname) {
 	// If the music descriptor is already using other audio data, remove a reference to that data
 	if (_data != NULL) {
 		_data->RemoveReference();
@@ -148,6 +150,8 @@ void MusicDescriptor::PlayMusic() {
 	if (Mix_FadeInMusic(_data->music, _loop_count, _fade_in_time) == -1) {
 			cerr << "AUDIO ERROR: Could not play music" << endl;
 	}
+
+	_data->playing = true;
 }
 
 
@@ -158,6 +162,8 @@ void MusicDescriptor::PauseMusic() {
 	}
 
 	Mix_PauseMusic();
+
+	_data->playing = false;
 }
 
 
@@ -168,6 +174,8 @@ void MusicDescriptor::ResumeMusic() {
 	}
 
 	Mix_ResumeMusic();
+
+	_data->playing = true;
 }
 
 
@@ -178,6 +186,8 @@ void MusicDescriptor::StopMusic() {
 	}
 
 	Mix_FadeOutMusic(_fade_out_time);
+
+	_data->playing = false;
 }
 
 
@@ -225,5 +235,18 @@ uint8 MusicDescriptor::GetMusicState() {
 
 	return AUDIO_STATE_STOPPED;
 }
+
+
+bool MusicDescriptor::IsPlaying()
+{
+	if (_data != NULL) {
+		return _data->playing;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 
 } // namespace hoa_audio
