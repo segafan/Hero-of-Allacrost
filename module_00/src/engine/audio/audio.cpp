@@ -213,16 +213,25 @@ void GameAudio::StopAllSounds() {
 
 void GameAudio::PauseAllMusic() {
 	Mix_PauseMusic();
+	for (std::map<string, MusicData*>::iterator i = _music_data.begin(); i != _music_data.end(); i++) {
+		i->second->playing = false;
+	}
 }
 
 
 void GameAudio::ResumeAllMusic() {
 	Mix_ResumeMusic();
+	for (std::map<string, MusicData*>::iterator i = _music_data.begin(); i != _music_data.end(); i++) {
+		i->second->playing = true;
+	}
 }
 
 
 void GameAudio::StopAllMusic() {
 	Mix_HaltMusic();
+	for (std::map<string, MusicData*>::iterator i = _music_data.begin(); i != _music_data.end(); i++) {
+		i->second->playing = false;
+	}
 }
 
 

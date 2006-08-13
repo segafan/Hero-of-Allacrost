@@ -38,7 +38,7 @@ namespace private_audio {
 *** **************************************************************************/
 class MusicData {
 public:
-	MusicData(std::string fname);
+	MusicData(const std::string & fname);
 	~MusicData();
 
 	//! The filename of the audio data the buffer holds.
@@ -47,6 +47,8 @@ public:
 	uint8 reference_count;
 	//! A pointer to the chunk of sound data loaded in memory.
 	Mix_Music *music;
+	//! Is this piece of music currently playing
+	bool playing;
 	
 	//! Returns true if all OpenAL buffers are valid.
 	bool IsValid();
@@ -71,7 +73,7 @@ public:
 	/** \brief Loads the music file from memory.
 	*** \param fname The name of the file to load, without path information or file extension attached.
 	**/
-	bool LoadMusic(std::string fname);
+	bool LoadMusic(const std::string & fname);
 	/** \brief Removes a reference to the music data.
 	*** \note It is perfectly fine to call this function when the music is playing. If that is
 	*** the case, the music will first be stopped, and then freed.
@@ -95,6 +97,9 @@ public:
 	*** \return A value indicating the state. Refer to the audio state constants in audio.h.
 	**/
 	uint8 GetMusicState();
+
+	//! Returns true if this piece of music is currently playing
+	bool IsPlaying();
 
 	/** \name Set Music Playback Properties Functions
 	*** \param The value to set the playback property in question.
