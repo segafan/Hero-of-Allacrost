@@ -32,121 +32,95 @@ namespace hoa_battle {
 
 namespace private_battle {
 
-/** \brief Actor Effects affect the stats of an Actor, be it burn, sleep, frozen, poison, et cetera.
+/** ****************************************************************************
+*** \brief Represents postive and negative afflictions that affect actors in battle
 ***
-**/
-class ActorEffect {
+*** \note This class is place holder code right now and is not used. It will be
+*** fleshed out at a later time.
+*** ***************************************************************************/
+class BattleActorEffect {
 public:
-	ActorEffect(private_battle::BattleActor* const AHost, std::string AEffectName, StatusSeverity AHowSevere,
-		uint32 ATTL, bool ACanMove, uint32 AHealthModifier, uint32 ASkillPointModifier, uint32 AStrengthModifier,
-		uint32 AIntelligenceModifier, uint32 AAgilityModifier, uint32 AUpdateLength);
-
-	virtual ~ActorEffect()
+	BattleActorEffect(private_battle::BattleActor* const host)
+		{}
+	virtual ~BattleActorEffect()
 		{}
 
-	//! Update the effect
-	void Update(uint32 ATimeElapsed)
+	//! Updates the effect's timer and other status
+	void Update()
+		{}
+	//! Removes the effect from its host
+	void CureEffect() const
 		{}
 
+	//! \name BattleActorEffect class member access functionss
 	//@{
-	uint32 GetTTL () const
-		{ return _TTL; }
-	BattleActor * const GetHost () const
+	BattleActor* const GetHost() const
 		{ return _host; }
-	std::string GetEffectName () const
+	hoa_utils::ustring GetEffectName() const
 		{ return _effect_name; }
-	uint32 GetUpdateLength () const
-		{ return _update_length; }
-	uint32 GetLastUpdate () const
-		{ return _last_update; }
-	bool CanMove () const
-		{ return _can_move; }
-	uint32 GetHealthModifier () const
-		{ return _health_modifier; }
-	uint32 GetSkillPointModifier () const
-		{ return _skill_point_modifier; }
-	uint32 GetStrengthModifier () const
+
+	const int32 GetModifiedHealthPoints() const
+		{ return _health_points_modifier; }
+	const int32 GetModifiedSkillPoints() const
+		{ return _skill_points_modifier; }
+	const int32 GetModifiedStrength() const
 		{ return _strength_modifier; }
-	uint32 GetIntelligenceModifier () const
+	const int32 GetModifiedIntelligence() const
 		{ return _intelligence_modifier; }
-	uint32 GetAgilityModifier () const
+	const int32 GetModifiedAgility() const
 		{ return _agility_modifier; }
 	//@}
 
-	void SetLastUpdate (const uint32 ALastUpdate)
-		{ _last_update = ALastUpdate; }
-
-	//! Undo the effect on the host
-	void UndoEffect () const
-		{}
-
 private:
-	//! Who we are effecting
+	//! A pointer to the actor that the effect is afflicting
 	private_battle::BattleActor* _host;
 	//! The name of the effect
-	std::string _effect_name;
-	//! The length the effect will last
-	uint32 _TTL;
+	hoa_utils::ustring _effect_name;
+	//! The number of milliseconds remaining until the effect is removed
+	uint32 _time_till_expiration;
+	// //! Enum value to determine how severe the effect is
+	// hoa_global::GLOBAL_AFFLICTION_SEVERITY _severity;
 
-	StatusSeverity _severeness;
+	/** \name Status modification members
+	*** \brief Members which modifies various properties of the host's status
+	**/
+	//@{
+	int32 _health_points_modifier;
+	int32 _skill_points_modifier;
+	int32 _strength_modifier;
+	int32 _intelligence_modifier;
+	int32 _agility_modifier;
+	//@}
+}; // class BattleActorEffect
 
-	//! How often the effect does something -1 for update once
-	bool _can_move;
-
-	uint32 _health_modifier;
-	uint32 _skill_point_modifier;
-	uint32 _strength_modifier;
-	uint32 _intelligence_modifier;
-	uint32 _agility_modifier;
-
-	//how often to update the effect
-	uint32 _update_length;
-	//! How old the effect is
-	uint32 _age;
-	//! When the last update was
-	uint32 _last_update;
-	//! How many times this effect updated on the player
-	uint32 _times_updated;
-
-	void _SubtractTTL (uint32 dt);
-}; // class ActorEffect
-
-
-/** \brief Actor is the general entity partaking in battle.
-*** It will be inherited by player actors and enemy actors.
-**/
+/** ****************************************************************************
+*** \brief Represents the generic entity for an object taking part in a battle
+***
+*** This is a virtual class that must be inherited
+*** ***************************************************************************/
 class BattleActor {
 public:
-	BattleActor(BattleMode * ABattleMode, uint32 AXLocation, uint32 AYLocation);
+	BattleActor(uint32 x, uint32 y);
 	virtual ~BattleActor();
 
-	virtual void Update(uint32 ATimeElapsed) = 0;
-	virtual void Draw() = 0;
+	virtual void Update() = 0;
+	virtual void DrawSprite() = 0;
 
-	void Die();
+	//! Update the effects that the player is affected by
+	void UpdateEffects();
+
+	//! \name BattleActor class member access functions
+	//@{
 	const bool IsAlive() const
-		{ return _is_alive; }
-
-	//! \brief Get the mode we are currently fighting in
-	BattleMode *GetOwnerBattleMode() const
-		{ return _owner_battle_mode; }
-
-	//! \brief Manipulate the effects that the player is affected by
-	//@{
-	void UpdateEffects(uint32 ATimeElapsed);
-	void PushEffect(const ActorEffect AEffect);
-	//@}
-
-	//! \brief BattleActor class member access functions
-	//@{
-	bool IsMoveCapable() const
+		{ return (GetHealthPoints() != 0); }
+	const bool IsMoveCapable() const
 		{ return _is_move_capable; }
-	bool IsQueuedToPerform() const
+	const bool IsQueuedToPerform() const
 		{ return _is_queued_to_perform; }
-	bool IsWarmingUp() const
-		{ return _warmup_time != 0; }
-	bool IsInDefensiveMode() const
-		{ return _defensive_mode_bonus != 0; }
+	const bool IsWarmingUp() const
+		{ return (_warmup_time != 0); }
+	const bool IsInDefensiveMode() const
+		{ return (_defensive_mode_bonus != 0); }
 
 	void SetMoveCapable(bool AMoveCapable)
 		{ _is_move_capable = AMoveCapable; }
@@ -190,20 +164,20 @@ public:
 		{ return _total_intelligence_modifier; }
 
 	// The following accessor functions are meant for the inherited class to implement
-	virtual const std::string GetName() const = 0;
+	virtual const hoa_utils::ustring GetName() const = 0;
 	virtual const std::vector<hoa_global::GlobalAttackPoint*> GetAttackPoints() const = 0;
-	virtual uint32 GetHealth() const = 0;
-	virtual uint32 GetMaxHealth() const = 0;
-	virtual uint32 GetSkillPoints() const = 0;
-	virtual uint32 GetMaxSkillPoints() const = 0;
-	virtual uint32 GetStrength() const = 0;
-	virtual uint32 GetIntelligence() const = 0;
-	virtual uint32 GetAgility() const = 0;
-	virtual uint32 GetMovementSpeed() const = 0;
+	virtual const uint32 GetHealthPoints() const = 0;
+	virtual const uint32 GetMaxHealthPoints() const = 0;
+	virtual const uint32 GetSkillPoints() const = 0;
+	virtual const uint32 GetMaxSkillPoints() const = 0;
+	virtual const uint32 GetStrength() const = 0;
+	virtual const uint32 GetIntelligence() const = 0;
+	virtual const uint32 GetAgility() const = 0;
+	virtual const uint32 GetMovementSpeed() const = 0;
 
-	virtual void SetHealth(uint32 hp) = 0;
+	virtual void SetHealthPoints(uint32 hp) = 0;
 	virtual void SetSkillPoints(uint32 sp) = 0;
-	virtual void SetAnimation(std::string AAnimation) {}
+	virtual void SetAnimation(std::string animation) {}
 	//@}
 
 	void TEMP_Deal_Damage(uint32 damage);
@@ -213,26 +187,23 @@ protected:
 	uint32 _TEMP_damage_dealt;
 
 private:
-	//! The mode we belong to
-	BattleMode *_owner_battle_mode;
-	//! The original X location of the actor
-	uint32 _x_origin;
-	//! The original Y location of the actor
-	uint32 _y_origin;
-	//! The X location of the actor on the battle grid
+	//! A unique identification number for the actor
+	uint8 _actor_id;
+	//! The "home" X location for the actor
+	uint16 _x_origin;
+	//! The "home" Y location for the actor
+	uint16 _y_origin;
+	//! The actor's current X location on the battle grid
 	float _x_location;
-	//! The Y location of the actor on the battle grid
+	//! The actor's current Y location on the battle grid
 	float _y_location;
-	//! A list of effects and ailments on the character
-	std::deque<ActorEffect> _effects;
+
 	//! The maximum stamina
 	uint32 _max_skill_points;
 	//! The remaining level of stamina
 	uint32 _current_skill_points;
 	//! Tells whether the character can move (frozen, burned, et cetera)
 	bool _is_move_capable;
-	//! Tells if the character is alive or dead
-	bool _is_alive;
 	//! Is the character attacking or queued to?
 	bool _is_queued_to_perform;
 	//! Are we warming up for the action?
@@ -246,106 +217,136 @@ private:
 	uint32 _total_strength_modifier;
 	uint32 _total_agility_modifier;
 	uint32 _total_intelligence_modifier;
+
+//	//! A list of effects and ailments on the character
+// 	std::deque<ActorEffect> _effects;
 }; // class BattleActor
 
-
-class PlayerActor : public BattleActor {
+/** ****************************************************************************
+*** \brief Represents the entity for a character in the battle
+***
+*** This class is a wrapper around a GlobalCharacter object. 
+*** ***************************************************************************/
+class CharacterActor : public BattleActor {
 public:
-	PlayerActor(hoa_global::GlobalCharacter* const AWrapped, BattleMode* const ABattleMode, uint32 AXLoc, uint32 AYLoc);
-	~PlayerActor();
-	void Update(uint32 ATimeElapsed);
-	void Draw();
+	CharacterActor(hoa_global::GlobalCharacter* const AWrapped, uint32 AXLoc, uint32 AYLoc);
+	~CharacterActor();
 
-	//! \brief PlayerActor class member access functions
+	//! Updates the state of the character
+	void Update();
+
+	//! Draws the character's current sprite animation frame
+	void DrawSprite();
+	//! Draws the character's damage-blended face portrait
+	void DrawPortrait();
+	//! Draws the character's status information
+	void DrawStatus();
+
+	void SetAnimation(std::string animation)
+		{ _current_animation = _wrapped_character->GetAnimation(animation); }
+
+	//! \name CharacterActor class member access functions
 	//@{
+	const hoa_utils::ustring GetName() const
+		{ return _wrapped_character->GetName(); }
+		
+	const uint32 GetHealthPoints() const
+		{ return _wrapped_character->GetHP(); }
+	const uint32 GetMaxHealthPoints() const
+		{ return _wrapped_character->GetMaxHP(); }
+	const uint32 GetSkillPoints() const
+		{ return _wrapped_character->GetSP(); }
+	const uint32 GetMaxSkillPoints() const
+		{ return _wrapped_character->GetMaxSP(); }
+	void SetHealthPoints(uint32 hp)
+		{ _wrapped_character->SetHP(hp); }
+	void SetSkillPoints(uint32 sp)
+		{ _wrapped_character->SetSP(sp); }
+		
+	const uint32 GetStrength() const
+		{ return _wrapped_character->GetStrength(); }
+	const uint32 GetIntelligence() const
+		{ return _wrapped_character->GetIntelligence(); }
+	const uint32 GetAgility() const
+		{ return _wrapped_character->GetAgility(); }
+	const uint32 GetMovementSpeed() const
+		{ return _wrapped_character->GetMovementSpeed(); }
+
 	std::vector<hoa_global::GlobalSkill*> GetAttackSkills() const
 		{ return _wrapped_character->GetAttackSkills(); }
 	std::vector<hoa_global::GlobalSkill*> GetDefenseSkills() const
 		{ return _wrapped_character->GetDefenseSkills(); }
 	std::vector<hoa_global::GlobalSkill*> GetSupportSkills() const
 		{ return _wrapped_character->GetSupportSkills(); }
-	const std::string GetName() const
-		{ return _wrapped_character->GetName(); }
 	const std::vector<hoa_global::GlobalAttackPoint*> GetAttackPoints() const
 		{ return _wrapped_character->GetAttackPoints(); }
-	uint32 GetHealth() const
-		{ return _wrapped_character->GetHP(); }
-	uint32 GetMaxHealth() const
-		{ return _wrapped_character->GetMaxHP(); }
-	uint32 GetSkillPoints() const
-		{ return _wrapped_character->GetSP(); }
-	uint32 GetMaxSkillPoints() const
-		{ return _wrapped_character->GetMaxSP(); }
-	uint32 GetStrength() const
-		{ return _wrapped_character->GetStrength(); }
-	uint32 GetIntelligence() const
-		{ return _wrapped_character->GetIntelligence(); }
-	uint32 GetAgility() const
-		{ return _wrapped_character->GetAgility(); }
-	uint32 GetMovementSpeed() const
-		{ return _wrapped_character->GetMovementSpeed(); }
-
-	void SetHealth(uint32 AHealth)
-		{ _wrapped_character->SetHP(AHealth); }
-	void SetSkillPoints(uint32 ASkillPoints)
-		{ _wrapped_character->SetSP(ASkillPoints); }
-	void SetAnimation(std::string ACurrentAnimation)
-		{ _current_animation = _wrapped_character->GetAnimation(ACurrentAnimation); }
 	//@}
 
 private:
 	//! The global character we have wrapped around
-	hoa_global::GlobalCharacter * _wrapped_character;
-	//! The current animation to draw
+	hoa_global::GlobalCharacter* _wrapped_character;
+	//! The current sprite animation to draw
 	hoa_video::AnimatedImage _current_animation;
-}; // class PlayerActor
+}; // class CharacterActor : public BattleActor
 
+
+/** ****************************************************************************
+*** \brief Represents the entity for an enemy in the battle
+***
+*** This class is a wrapper around a GlobalEnemy object.
+*** ***************************************************************************/
 class EnemyActor : public BattleActor {
 public:
-	EnemyActor(hoa_global::GlobalEnemy AGlobalEnemy, BattleMode* const ABattleMode, uint32 AXLoc, uint32 AYLoc);
+	EnemyActor(hoa_global::GlobalEnemy enemy, uint32 x, uint32 y);
 	~EnemyActor();
-	void Update(uint32 ATimeElapsed);
-	void Draw();
 
-	//! \brief Has the GlobalEnemy level up to average_level
-	void LevelUp(uint32 AAverageLevel);
-	//! \todo
-	void DoAI();
+	//! Updates the action status of the enemy
+	void Update();
+
+	//! Draws the damage-blended enemy sprite
+	void DrawSprite();
+	//! Draws the enemy's status information
+	void DrawStatus();
 
 	//! \brief EnemyActor class member access functions
 	//@{
-	const std::vector<hoa_global::GlobalSkill*> GetSkills() const
-		{ return _wrapped_enemy.GetSkills(); }
-	const std::string GetName() const
+
+	const hoa_utils::ustring GetName() const
 		{ return _wrapped_enemy.GetName(); }
-	const std::vector <hoa_global::GlobalAttackPoint*> GetAttackPoints() const
-		{ return _wrapped_enemy.GetAttackPoints(); }
-	uint32 GetHealth() const
+
+	const uint32 GetHealthPoints() const
 		{ return _wrapped_enemy.GetHP(); }
-	uint32 GetMaxHealth() const
+	const uint32 GetMaxHealthPoints() const
 		{ return _wrapped_enemy.GetMaxHP(); }
-	uint32 GetSkillPoints() const
+	const uint32 GetSkillPoints() const
 		{ return _wrapped_enemy.GetSP(); }
-	uint32 GetMaxSkillPoints() const
+	const uint32 GetMaxSkillPoints() const
 		{ return _wrapped_enemy.GetMaxSP(); }
-	uint32 GetStrength() const
+
+	void SetHealthPoints(uint32 hp)
+		{ _wrapped_enemy.SetHP(hp); }
+	void SetSkillPoints(uint32 sp)
+		{ _wrapped_enemy.SetSP(sp); }
+
+	const uint32 GetStrength() const
 		{ return _wrapped_enemy.GetStrength(); }
-	uint32 GetIntelligence() const
+	const uint32 GetIntelligence() const
 		{ return _wrapped_enemy.GetIntelligence(); }
-	uint32 GetAgility() const
+	const uint32 GetAgility() const
 		{ return _wrapped_enemy.GetAgility(); }
-	uint32 GetMovementSpeed() const
+	const uint32 GetMovementSpeed() const
 		{ return _wrapped_enemy.GetMovementSpeed(); }
 
-	void SetHealth(uint32 AHealth)
-		{ _wrapped_enemy.SetHP(AHealth); }
-	void SetSkillPoints(uint32 ASkillPoints)
-		{ _wrapped_enemy.SetSP(ASkillPoints); }
+	const std::vector<hoa_global::GlobalSkill*> GetSkills() const
+		{ return _wrapped_enemy.GetSkills(); }
+	const std::vector <hoa_global::GlobalAttackPoint*> GetAttackPoints() const
+		{ return _wrapped_enemy.GetAttackPoints(); }
 	//@}
+
 private:
-	//! The enemy we have wrapped around
+	//! The GlobalEnemy object that this object is wrapped around
 	hoa_global::GlobalEnemy _wrapped_enemy;
-}; // class EnemyActor
+}; // class EnemyActor : public BattleActor
 
 } // namespace private_battle
 

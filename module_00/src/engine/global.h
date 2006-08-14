@@ -41,6 +41,7 @@ extern bool GLOBAL_DEBUG;
 //! \name Game Item ID's
 //@{
 //! \brief ID's to identify all the item constants
+//! \note This code is temporary and will be moved into the scripting infrastructure at a later time
 enum GameItemID
 {
 	HP_POTION = 1,
@@ -62,11 +63,11 @@ const uint8 GLOBAL_LEGS_ARMOR = 0x40;
 //! \name Game Item Usage Types
 //@{
 //! \brief Constants for the numerous methods of application of game items.
-const uint8 GLOBAL_UNUSABLE_ITEM	= 0x00;
+const uint8 GLOBAL_UNUSABLE_ITEM    = 0x00;
 const uint8 GLOBAL_HP_RECOVERY_ITEM = 0x01;
 const uint8 GLOBAL_SP_RECOVERY_ITEM	= 0x02;
-const uint8 GLOBAL_BATTLE_ITEM		= 0x04;
-const uint8 GLOBAL_MAP_ITEM			= 0x08;
+const uint8 GLOBAL_BATTLE_ITEM      = 0x04;
+const uint8 GLOBAL_MAP_ITEM         = 0x08;
 //@}
 
 //! \name Game Character Types
@@ -107,6 +108,28 @@ const uint32 GLOBAL_SOUND_CANCEL  =  1;
 const uint32 GLOBAL_SOUND_OBTAIN  =  2;
 const uint32 GLOBAL_SOUND_BUMP    =  3;
 //@}
+
+
+class GlobalStatusAfflictions {
+public:
+	int32 volt;  // strong against water, weak against earth
+	int32 earth; // strong against volt, weak against fire
+	int32 water; // strong against fire, weak against volt
+	int32 fire;  // strong against earth, weak against water
+
+	int32 piercing;
+	int32 slashing;
+	int32 bludgeoning;
+};
+
+enum GLOBAL_GLOBAL_AFFLICTION_SEVERITY {
+	LESSER   = 0,
+	NORMAL   = 1,
+	GREATER  = 2,
+	ULTIMATE = 3
+};
+
+
 
 /*!****************************************************************************
  * \brief A parent class that all the different item classes inherit from.
@@ -232,7 +255,7 @@ private:
 	GlobalWeapon(const GlobalWeapon&);
 	GlobalWeapon& operator=(const GlobalWeapon&);
         
-	hoa_battle::BattleStatTypes *_damage_amount;
+	GlobalStatusAfflictions* _damage_amount;
 public:
 	GlobalWeapon(uint32 usable, GameItemID id, uint32 count);
 	~GlobalWeapon();
@@ -314,7 +337,7 @@ private:
 	//! The potency of each element / physical ability of this skill
 	//  Not necessarily a resistance, because it may also be an attack
 	//  So simply "stats" for now
-	hoa_battle::BattleStatTypes *_stats;
+	GlobalStatusAfflictions *_stats;
 
 public:
 
@@ -327,7 +350,7 @@ public:
         
 	std::string GetName() { return _skill_name; }
 	uint32 GetSPUsage() { return _sp_usage; }
-	hoa_battle::BattleStatTypes *GetBattleStatTypes() { return _stats; }
+	GlobalStatusAfflictions* GetGlobalStatusAfflictions() { return _stats; }
 	uint32 GetNumArguments() { return _num_arguments; }
 };
 
@@ -366,7 +389,7 @@ private:
 	uint32 _evade;
 
 	//! The resistances of the attack point
-	hoa_battle::BattleStatTypes *_resistance;
+	GlobalStatusAfflictions* _resistance;
         
 public:
 	GlobalAttackPoint(std::string name, float x, float y, uint32 volt, uint32 earth, uint32 water, uint32 fire, 
@@ -431,9 +454,119 @@ public:
  * operator. For now they are left blank.
  *****************************************************************************/
 class GlobalEnemy {
+public:
+	GlobalEnemy(std::string file_name);
+	~GlobalEnemy();
+// 	GlobalEnemy(const GlobalEnemy&) {}
+// 	GlobalEnemy& operator=(const GlobalEnemy&) {}
+
+	/*!
+	 *  \brief Simulates the growth of the enemy from the base experience level.
+	 *  \param lvl The final level to simulate to.
+	 *
+	 *  This function "simulates" the growth of an enemy from its base xp level (level 1) to
+	 *  the specified level in the argument. It sounds more complicated than it really is. All
+	 *  that the function does is the following:
+	 *
+	 *  -# Start with the base statistics
+	 *  -# For every level gain, calculate a random number between 0.0 and 1.0
+	 *  -# If the random number is less than the rate member for the specific,
+	 *     increase that stat by the growth member.
+	 *
+	 *  In the end, its just number crunching to come up with a slightly different enemy for each
+	 *  battle, so the player doesn't keep fighting the same old enemy over and over, like the
+	 *  "level 5 scorpion with 60 HP".
+	 */
+	void LevelSimulator(uint32 level);
+
+	const hoa_utils::ustring GetName() const
+		{ return _enemy_name; }
+	void SetName(hoa_utils::ustring name)
+		{ _enemy_name = name; }
+	
+
+	//! \name Public Member Access Functions
+	//@{
+	//! \brief Used for setting and getting the values of the various class members.
+	void SetHP(uint32 hp)
+		{ _hit_points = hp; }
+	uint32 GetHP() const
+		{ return _hit_points; }
+	void SetMaxHP(uint32 max_hp)
+		{ _max_hit_points = max_hp; }
+	uint32 GetMaxHP() const
+		{ return _max_hit_points; }
+	void SetSP(uint32 sp)
+		{ _skill_points = sp; }
+	uint32 GetSP() const
+		{ return _skill_points; }
+	void SetMaxSP(uint32 sp)
+		{ _max_skill_points = sp; }
+	uint32 GetMaxSP() const
+		{ return _max_skill_points; }
+	void SetXP(uint32 xp)
+		{ _experience_points = xp; }
+	uint32 GetXP() const
+		{ return _experience_points; }
+	void SetXPLevel(uint32 xp_lvl)
+		{ _experience_level = xp_lvl; }
+	uint32 GetXPLevel() const
+		{ return _experience_level; }
+	void SetStrength(uint32 str)
+		{ _strength = str; }
+	uint32 GetStrength() const
+		{ return _strength; }
+	void SetIntelligence(uint32 intel)
+		{ _intelligence = intel; }
+	uint32 GetIntelligence() const
+		{ return _intelligence; }
+	void SetAgility(uint32 agi)
+		{ _agility = agi; }
+	uint32 GetAgility() const
+		{ return _agility; }
+	void SetMovementSpeed(uint32 ms)
+		{ _movement_speed = ms; }
+	uint32 GetMovementSpeed() const
+		{ return _movement_speed; }
+	
+	uint32 GetBaseHitPoints() const
+		{ return _base_hit_points; }
+	uint32 GetBaseSkillPoints() const
+		{ return _base_skill_points; }
+	uint32 GetBaseExperiencePoints() const
+		{ return _base_experience_points; }
+	uint32 GetBaseStrength() const
+		{ return _base_strength; }
+	uint32 GetBaseIntelligence() const
+		{ return _base_intelligence; }
+	uint32 GetBaseAgility() const
+		{ return _base_agility; }
+	uint32 GetGrowthHitPoints() const
+		{ return _growth_hit_points; }
+	uint32 GetGrowthSkillPoints() const
+		{ return _growth_skill_points; }
+	uint32 GetGrowthExperiencePoints() const
+		{ return _growth_experience_points; }
+	uint32 GetGrowthStrength() const
+		{ return _growth_strength; }
+	uint32 GetGrowthIntelligence() const
+		{ return _growth_intelligence; }
+	uint32 GetGrowthAgility() const
+		{ return _growth_agility; }
+	const std::vector<GlobalSkill*> GetSkills() const
+		{ return _enemy_skills; }
+	const std::vector<GlobalAttackPoint*> GetAttackPoints() const
+		{ return _attack_points; }
+	void AddSkill(GlobalSkill *skill)
+		{ _enemy_skills.push_back(skill); }
+	void AddAnimation(std::string anim, std::vector<hoa_video::StillImage> v)
+		{ _sprite_animations[anim] = v; }
+	std::vector<hoa_video::StillImage> GetAnimation(std::string anim)
+		{ return _sprite_animations[anim]; }
+	//@}
 private:
 	//! The enemy's name, as seen by the player on the screen.
-	std::string _enemy_name;
+	hoa_utils::ustring _enemy_name;
 	//! The base of the character's file name, used to retrieve various data for the enemy.
 	std::string _file_name;
 	//! An identification number for the enemy type.
@@ -493,79 +626,6 @@ private:
 	uint32 _growth_intelligence;
 	uint32 _growth_agility;
 	//@}
-
-public:
-	GlobalEnemy(std::string file_name);
-	~GlobalEnemy();
-// 	GlobalEnemy(const GlobalEnemy&) {}
-// 	GlobalEnemy& operator=(const GlobalEnemy&) {}
-
-	/*!
-	 *  \brief Simulates the growth of the enemy from the base experience level.
-	 *  \param lvl The final level to simulate to.
-	 *
-	 *  This function "simulates" the growth of an enemy from its base xp level (level 1) to
-	 *  the specified level in the argument. It sounds more complicated than it really is. All
-	 *  that the function does is the following:
-	 *
-	 *  -# Start with the base statistics
-	 *  -# For every level gain, calculate a random number between 0.0 and 1.0
-	 *  -# If the random number is less than the rate member for the specific,
-	 *     increase that stat by the growth member.
-	 *
-	 *  In the end, its just number crunching to come up with a slightly different enemy for each
-	 *  battle, so the player doesn't keep fighting the same old enemy over and over, like the
-	 *  "level 5 scorpion with 60 HP".
-	 */
-	void LevelSimulator(uint32 lvl);
-
-	std::string GetName() const { return _enemy_name; }
-
-	//! \name Public Member Access Functions
-	//@{
-	//! \brief Used for setting and getting the values of the various class members.
-	void SetHP(uint32 hp) { _hit_points = hp; }
-	uint32 GetHP() const { return _hit_points; }
-	void SetMaxHP(uint32 max_hp) { _max_hit_points = max_hp; }
-	uint32 GetMaxHP() const { return _max_hit_points; }
-	void SetSP(uint32 sp) { _skill_points = sp; }
-	uint32 GetSP() const { return _skill_points; }
-	void SetMaxSP(uint32 sp) { _max_skill_points = sp; }
-	uint32 GetMaxSP() const { return _max_skill_points; }
-	void SetXP(uint32 xp) { _experience_points = xp; }
-	uint32 GetXP() const { return _experience_points; }
-	void SetXPLevel(uint32 xp_lvl) { _experience_level = xp_lvl; }
-	uint32 GetXPLevel() const { return _experience_level; }
-	void SetStrength(uint32 str) { _strength = str; }
-	uint32 GetStrength() const { return _strength; }
-	void SetIntelligence(uint32 intel) { _intelligence = intel; }
-	uint32 GetIntelligence() const { return _intelligence; }
-	void SetAgility(uint32 agi) { _agility = agi; }
-	uint32 GetAgility() const { return _agility; }
-	void SetMovementSpeed(uint32 ms) { _movement_speed = ms; }
-	uint32 GetMovementSpeed() const { return _movement_speed; }
-	
-	uint32 GetBaseHitPoints() const { return _base_hit_points; }
-	uint32 GetBaseSkillPoints() const { return _base_skill_points; }
-	uint32 GetBaseExperiencePoints() const { return _base_experience_points; }
-	uint32 GetBaseStrength() const { return _base_strength; }
-	uint32 GetBaseIntelligence() const { return _base_intelligence; }
-	uint32 GetBaseAgility() const { return _base_agility; }
-	uint32 GetGrowthHitPoints() const { return _growth_hit_points; }
-	uint32 GetGrowthSkillPoints() const { return _growth_skill_points; }
-	uint32 GetGrowthExperiencePoints() const { return _growth_experience_points; }
-	uint32 GetGrowthStrength() const { return _growth_strength; }
-	uint32 GetGrowthIntelligence() const { return _growth_intelligence; }
-	uint32 GetGrowthAgility() const { return _growth_agility; }
-	const std::vector<GlobalSkill *> GetSkills() const { return _enemy_skills; }
-	const std::vector<GlobalAttackPoint*> GetAttackPoints() const { return _attack_points; }
-
-	void AddSkill(GlobalSkill *sk) { _enemy_skills.push_back(sk); }
-        
-	void AddAnimation(std::string anim, std::vector<hoa_video::StillImage> v) { _sprite_animations[anim] = v; }
-	std::vector<hoa_video::StillImage> GetAnimation(std::string anim) { 
-        return _sprite_animations[anim]; }
-	//@}
 }; // class GlobalEnemy
 
 /*!****************************************************************************
@@ -582,7 +642,7 @@ public:
 class GlobalCharacter {
 private:
 	//! The character's name, as seen by the player on the screen.
-	std::string _name;
+	hoa_utils::ustring _name;
 	//! The base of the character's file name, used to retrieve various data for the character.
 	std::string _filename;
 	//! \brief An identifier for the character.
@@ -592,20 +652,21 @@ private:
 	//! The weapon that the character currently has equipped.
 	GlobalWeapon *_eq_weapon;
 	//! The head armor that the character currently has equipped.
-        GlobalArmor *_eq_head;
+	GlobalArmor *_eq_head;
 	//! The body armor that the character currently has equipped.
 	GlobalArmor *_eq_body;
 	//! The arm armor that the character currently has equipped.
-        GlobalArmor *_eq_arms;
+	GlobalArmor *_eq_arms;
 	//! The leg armor that the character currently has equipped.
 	GlobalArmor *_eq_legs;
 	//! The attack skills the character can currently use.
-	std::vector<GlobalSkill *> _attack_skills;
+	std::vector<GlobalSkill*> _attack_skills;
 	//! The defense skills the character can currently use.
-	std::vector<GlobalSkill *> _defense_skills;
+	std::vector<GlobalSkill*> _defense_skills;
 	//! The support skills the character can currently use.
-	std::vector<GlobalSkill *> _support_skills;
-	//! The (four) attack points of the character.
+	std::vector<GlobalSkill*> _support_skills;
+	//! The attack points of the character.
+	//! There are four attack points for every character. They are located on the: head, torso, arms, and legs
 	std::vector<GlobalAttackPoint*> _attack_points;
 	//! The current number of hit points of the character.
 	uint32 _hit_points;
@@ -631,14 +692,18 @@ private:
 	//! The speed which the character should move in battle
 	uint32 _movement_speed;
 
-	//! The frame images for the character's map sprite.
+	//! The standard frame images for the character's map sprite.
 	std::vector<hoa_video::StillImage> _map_frames;
-        //! Battle Head Shots
-        std::vector<hoa_video::StillImage> _battle_head_shot; 
+	//! The character's standard map portrait image
+	hoa_video::StillImage _map_portrait;
+	//! The frame images for the character's battle portrait
+	std::vector<hoa_video::StillImage> _battle_portraits;
 	//! The frame images for the character's battle sprite.
-	std::map<std::string, hoa_video::AnimatedImage > _battle_animation;
+	std::map<std::string, hoa_video::AnimatedImage> _battle_animation;
+	//! The character's full-body menu portrait image
+	hoa_video::StillImage _menu_portrait;
 public:
-	GlobalCharacter(std::string na, std::string fn, uint32 id);
+	GlobalCharacter(hoa_utils::ustring na, std::string fn, uint32 id);
 	~GlobalCharacter();
 
 	//! \name Weapon and Armor Equip Functions
@@ -646,11 +711,11 @@ public:
 	//! \brief Swaps in and out equipment on the character.
 	//! \param *new_eq The new weapon or armor to equip.
 	//! \return The previously equipped weapon or armor.
-	GlobalWeapon* EquipWeapon(GlobalWeapon *_new_eq);
-	GlobalArmor* EquipHeadArmor(GlobalArmor *_new_eq);
-	GlobalArmor* EquipBodyArmor(GlobalArmor *_new_eq);
-	GlobalArmor* EquipArmsArmor(GlobalArmor *_new_eq);
-	GlobalArmor* EquipLegsArmor(GlobalArmor *_new_eq);
+	GlobalWeapon* EquipWeapon(GlobalWeapon* weapon);
+	GlobalArmor* EquipHeadArmor(GlobalArmor* head_armor);
+	GlobalArmor* EquipBodyArmor(GlobalArmor* body_armor);
+	GlobalArmor* EquipArmsArmor(GlobalArmor* arms_armor);
+	GlobalArmor* EquipLegsArmor(GlobalArmor* legs_armor);
 	//@}
 
 	//@{
@@ -666,66 +731,102 @@ public:
 	//! \name Public Member Access Functions
 	//@{
 	//! \brief Used for setting and getting the values of the various class members.
-	void SetName(std::string na) { _name = na; }
-	std::string GetName() { return _name; }
-	void SetFilename(std::string fn) { _filename = fn; }
-	std::string GetFilename() { return _filename; }
-	void SetID(uint32 id) { _char_id = id; }
-	uint32 GetID() { return _char_id; }
-	void SetHP(uint32 hp) { _hit_points = hp; }
-	uint32 GetHP() { return _hit_points; }
-	void SetMaxHP(uint32 max_hp) { _max_hit_points = max_hp; }
-	uint32 GetMaxHP() { return _max_hit_points; }
-	void SetSP(uint32 sp) { _skill_points = sp; }
-	uint32 GetSP() { return _skill_points; }
-	void SetMaxSP(uint32 sp) { _max_skill_points = sp; }
-	uint32 GetMaxSP() { return _max_skill_points; }
+	void SetName(hoa_utils::ustring name)
+		{ _name = name; }
+	const hoa_utils::ustring GetName() const
+		{ return _name; }
+	void SetFilename(std::string fn)
+		{ _filename = fn; }
+	std::string GetFilename()
+		{ return _filename; }
+	void SetID(uint32 id)
+		{ _char_id = id; }
+	uint32 GetID()
+		{ return _char_id; }
+	void SetHP(uint32 hp)
+		{ _hit_points = hp; }
+	uint32 GetHP()
+		{ return _hit_points; }
+	void SetMaxHP(uint32 max_hp)
+		{ _max_hit_points = max_hp; }
+	uint32 GetMaxHP()
+		{ return _max_hit_points; }
+	void SetSP(uint32 sp)
+		{ _skill_points = sp; }
+	uint32 GetSP()
+		{ return _skill_points; }
+	void SetMaxSP(uint32 sp)
+		{ _max_skill_points = sp; }
+	uint32 GetMaxSP()
+		{ return _max_skill_points; }
 	void AddXP(uint32 xp);
-	void SetXP(uint32 xp) { _experience_points = xp; }
-	uint32 GetXP() { return _experience_points; }
-	void SetXPLevel(uint32 xp_lvl) { _experience_level = xp_lvl; }
-	uint32 GetXPLevel() { return _experience_level; }
-	void SetXPNextLevel(uint32 xp_next) { _experience_next_level = xp_next; }
-	uint32 GetXPForNextLevel() { return _experience_next_level; }
-	void SetStrength(uint32 str) { _strength = str; }
-	uint32 GetStrength() { return _strength; }
-	void SetIntelligence(uint32 intel) { _intelligence = intel; }
-	uint32 GetIntelligence() { return _intelligence; }
-	void SetAgility(uint32 agi) { _agility = agi; }
-	uint32 GetAgility() { return _agility; }
+	void SetXP(uint32 xp)
+		{ _experience_points = xp; }
+	uint32 GetXP()
+		{ return _experience_points; }
+	void SetXPLevel(uint32 xp_lvl)
+		{ _experience_level = xp_lvl; }
+	uint32 GetXPLevel()
+		{ return _experience_level; }
+	void SetXPNextLevel(uint32 xp_next)
+		{ _experience_next_level = xp_next; }
+	uint32 GetXPForNextLevel()
+		{ return _experience_next_level; }
+	void SetStrength(uint32 str)
+		{ _strength = str; }
+	uint32 GetStrength()
+		{ return _strength; }
+	void SetIntelligence(uint32 intel)
+		{ _intelligence = intel; }
+	uint32 GetIntelligence()
+		{ return _intelligence; }
+	void SetAgility(uint32 agi)
+		{ _agility = agi; }
+	uint32 GetAgility()
+		{ return _agility; }
 	
-	std::vector<GlobalSkill *> GetAttackSkills() { return _attack_skills; }
-	std::vector<GlobalSkill *> GetDefenseSkills() { return _defense_skills; }
-	std::vector<GlobalSkill *> GetSupportSkills() { return _support_skills; }
+	std::vector<GlobalSkill *> GetAttackSkills()
+		{ return _attack_skills; }
+	std::vector<GlobalSkill *> GetDefenseSkills()
+		{ return _defense_skills; }
+	std::vector<GlobalSkill *> GetSupportSkills()
+		{ return _support_skills; }
 
-	std::vector<GlobalAttackPoint*> GetAttackPoints() { return _attack_points; }
+	std::vector<GlobalAttackPoint*> GetAttackPoints()
+		{ return _attack_points; }
 
-	void AddAttackSkill(GlobalSkill *sk) { _attack_skills.push_back(sk); }
-	void AddDefenseSkill(GlobalSkill *sk) { _defense_skills.push_back(sk); }
-	void AddSupportSkill(GlobalSkill *sk) { _support_skills.push_back(sk); }
+	void AddAttackSkill(GlobalSkill* skill)
+		{ _attack_skills.push_back(skill); }
+	void AddDefenseSkill(GlobalSkill* skill)
+		{ _defense_skills.push_back(skill); }
+	void AddSupportSkill(GlobalSkill* skill)
+		{ _support_skills.push_back(skill); }
 	
-	uint32 GetMovementSpeed() { return _movement_speed; }
-	void SetMovementSpeed(uint32 ms) { _movement_speed = ms; }
+	uint32 GetMovementSpeed()
+		{ return _movement_speed; }
+	void SetMovementSpeed(uint32 ms)
+		{ _movement_speed = ms; }
         
-	void AddAnimation(std::string anim, hoa_video::AnimatedImage v) { _battle_animation[anim] = v; }
-	hoa_video::AnimatedImage GetAnimation(std::string anim) { 
-		return _battle_animation[anim]; 
-	}
+	void AddAnimation(std::string anim, hoa_video::AnimatedImage v)
+		{ _battle_animation[anim] = v; }
+	hoa_video::AnimatedImage GetAnimation(std::string anim)
+		{ return _battle_animation[anim]; }
         
-	void AddBattleHeadShot(hoa_video::StillImage si) { _battle_head_shot.push_back(si); }
-	std::vector<hoa_video::StillImage> GetBattleHeadShots() { return _battle_head_shot; }
+	void AddBattlePortrait(hoa_video::StillImage image)
+		{ _battle_portraits.push_back(image); }
+	std::vector<hoa_video::StillImage> GetBattlePortraits()
+		{ return _battle_portraits; }
 	//@}
-};
+}; // class GlobalCharacter
 
-/*!**************************************************************************
- * \brief Represents a party of characters
- *
- * This class contains a group of characters.  There is generally only one 
- * active party, but there could be at times multiple parties, for example
- * some of the fights in FF VI.
- ***************************************************************************/
-class GlobalParty
-{
+/** ****************************************************************************
+*** \brief Represents a party of characters
+***
+*** This class contains a group of characters.  There is generally only one
+*** active party, but there could be at times multiple parties, for example
+*** some of the fights in FF VI.
+*** ***************************************************************************/
+class GlobalParty {
 private:
 	//! Character id's on those in the party (max of 4)
 	std::vector<uint32> _characters;
@@ -741,9 +842,7 @@ public:
 	std::vector<uint32> GetCharacters() { return _characters; }
 	//! Gets the party size
 	uint32 GetPartySize() { return _characters.size(); }
-};
-
-
+}; // class GlobalParty
 
 /*!****************************************************************************
  * \brief A class that retains all the state information about the active game.
@@ -762,23 +861,6 @@ public:
  * of these other files.
  *****************************************************************************/
 class GameGlobal {
-private:
-	SINGLETON_DECLARE(GameGlobal);
-	//! The characters currently in the party.
-	std::vector<GlobalCharacter*> _characters;
-	//! The inventory of the party.
-	std::vector<GlobalObject *> _inventory;
-	//! The amount of financial resources the party currently has.
-	uint32 _money;
-	//! The active party (currently only support for one party, may need to be changed)
-	GlobalParty _party;
-	//! \brief the string names of the items
-	std::map<GameItemID, std::string> _game_item_names;
-	//! \brief the icon path of the item
-	std::map<GameItemID, std::string> _game_item_icon_paths;
-
-// 	hoa_video::GameVideo *VideoManager;
-
 public:
 	SINGLETON_METHODS(GameGlobal);
 
@@ -808,7 +890,8 @@ public:
 	//!		This function returns a reference so the inventory can be edited directly
 	//! AddItemToInventory(GlobalObject &) adds the given object to the inventory
 	//@{
-	std::vector<GlobalObject *> &GetInventory() { return _inventory; }
+	std::vector<GlobalObject *> &GetInventory()
+		{ return _inventory; }
 	void AddItemToInventory(GlobalObject *obj);
 	//@}
 
@@ -819,18 +902,34 @@ public:
 	//! SetItemIconPath allows you to set an item's icon path
 	//@{
 	std::string GetItemName(GameItemID id)
-	{ return _game_item_names[id]; }
+		{ return _game_item_names[id]; }
 	std::string GetItemIconPath(GameItemID id)
-	{ return _game_item_icon_paths[id]; }
+		{ return _game_item_icon_paths[id]; }
 	void SetItemName(GameItemID key, std::string value)
-	{ _game_item_names[key] = value; }
+		{ _game_item_names[key] = value; }
 	void SetItemIconPath(GameItemID key, std::string value)
-	{ _game_item_icon_paths[key] = value; }
+		{ _game_item_icon_paths[key] = value; }
 	//@}
 	
 	//! Gets the Characters in the active party
 	//! \returns The Characters in the active party
 	std::vector<GlobalCharacter *> GetParty();
+
+private:
+	SINGLETON_DECLARE(GameGlobal);
+	//! The characters currently in the party.
+	std::vector<GlobalCharacter*> _characters;
+	//! The inventory of the party.
+	std::vector<GlobalObject*> _inventory;
+	//! The amount of financial resources the party currently has.
+	uint32 _money;
+	//! The active party (currently only support for one party, may need to be changed)
+	GlobalParty _party;
+	//! \brief the string names of the items
+	std::map<GameItemID, std::string> _game_item_names;
+	//! \brief the icon path of the item
+	std::map<GameItemID, std::string> _game_item_icon_paths;
+
 }; // class GameGlobal
 
 

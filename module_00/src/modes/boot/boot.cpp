@@ -58,8 +58,8 @@ bool BootMode::_logo_animating = true;
 
 // The constructor initializes variables and sets up the path names of the boot images
 BootMode::BootMode() :
-_main_menu(0, false, this),
-_fade_out(false) // No, we're not fading out yet!
+	_fade_out(false),
+	_main_menu(0, false, this)
 {
 	if (BOOT_DEBUG) cout << "BOOT: BootMode constructor invoked." << endl;
 	mode_type = MODE_MANAGER_BOOT_MODE;
@@ -571,82 +571,77 @@ void BootMode::_SetupResolutionMenu() {
 // 'New Game' confirmed
 void BootMode::_OnNewGame() {
 	if (BOOT_DEBUG)	cout << "BOOT: Starting new game." << endl;
-        
-        GlobalCharacter *claud = new GlobalCharacter("Claudius", "claudius", GLOBAL_CLAUDIUS);
-        
-        std::vector<hoa_video::StillImage> playerAnimation;
+	
+	GlobalCharacter *claud = new GlobalCharacter(MakeWideString("Claudius"), "claudius", GLOBAL_CLAUDIUS);
+	
+	std::vector<hoa_video::StillImage> playerAnimation;
 	StillImage anim5;
 	anim5.SetDimensions(64, 128); 
 	anim5.SetFilename("img/sprites/battle/characters/claudius_idle_f1.png");
 	playerAnimation.push_back(anim5);
-        anim5.SetFilename("img/sprites/battle/characters/claudius_idle_f2.png");
+	anim5.SetFilename("img/sprites/battle/characters/claudius_idle_f2.png");
 	playerAnimation.push_back(anim5);
-        anim5.SetFilename("img/sprites/battle/characters/claudius_idle_f3.png");
+	anim5.SetFilename("img/sprites/battle/characters/claudius_idle_f3.png");
 	playerAnimation.push_back(anim5);
-        anim5.SetFilename("img/sprites/battle/characters/claudius_idle_f4.png");
+	anim5.SetFilename("img/sprites/battle/characters/claudius_idle_f4.png");
 	playerAnimation.push_back(anim5);
-        anim5.SetFilename("img/sprites/battle/characters/claudius_idle_f5.png");
+	anim5.SetFilename("img/sprites/battle/characters/claudius_idle_f5.png");
 	playerAnimation.push_back(anim5);
-        anim5.SetFilename("img/sprites/battle/characters/claudius_idle_f6.png");
+	anim5.SetFilename("img/sprites/battle/characters/claudius_idle_f6.png");
 	playerAnimation.push_back(anim5);
 	
 	VideoManager->BeginImageLoadBatch();
 	for (uint32 i = 0; i < playerAnimation.size(); i++) {
-		if(!VideoManager->LoadImage(playerAnimation[i]))
-                        cerr << "Failed to load claudius image." << endl; //failed to laod image
+		if (!VideoManager->LoadImage(playerAnimation[i]))
+			cerr << "Failed to load claudius image." << endl; //failed to laod image
 	}
 	VideoManager->EndImageLoadBatch();
-        
-        AnimatedImage ai;
-        for(uint32 i = 0; i < playerAnimation.size(); i++) {
-                ai.AddFrame(playerAnimation[i], 10);
-        }
-        
-        std::vector<hoa_video::StillImage> characterHeadShot;
+
+	AnimatedImage ai;
+	for (uint32 i = 0; i < playerAnimation.size(); i++) {
+		ai.AddFrame(playerAnimation[i], 10);
+	}
+
+	vector<StillImage> battle_portraits;
 	StillImage anim6;
-	anim6.SetDimensions(95, 95); 
+	anim6.SetDimensions(100, 100);
 	anim6.SetFilename("img/portraits/battle/claudius_battle_0.png");
-	characterHeadShot.push_back(anim6);
-        anim6.SetFilename("img/portraits/battle/claudius_battle_1.png");
-	characterHeadShot.push_back(anim6);
-        anim6.SetFilename("img/portraits/battle/claudius_battle_2.png");
-	characterHeadShot.push_back(anim6);
-        anim6.SetFilename("img/portraits/battle/claudius_battle_3.png");
-	characterHeadShot.push_back(anim6);
-        anim6.SetFilename("img/portraits/battle/claudius_battle_4.png");
-	characterHeadShot.push_back(anim6);
-        anim6.SetFilename("img/portraits/battle/claudius_battle_5.png");
-	characterHeadShot.push_back(anim6);
+	battle_portraits.push_back(anim6);
+	anim6.SetFilename("img/portraits/battle/claudius_battle_1.png");
+	battle_portraits.push_back(anim6);
+	anim6.SetFilename("img/portraits/battle/claudius_battle_2.png");
+	battle_portraits.push_back(anim6);
+	anim6.SetFilename("img/portraits/battle/claudius_battle_3.png");
+	battle_portraits.push_back(anim6);
+	anim6.SetFilename("img/portraits/battle/claudius_battle_4.png");
+	battle_portraits.push_back(anim6);
 	
 	VideoManager->BeginImageLoadBatch();
-	for (uint32 i = 0; i < characterHeadShot.size(); i++) {
-		if(!VideoManager->LoadImage(characterHeadShot[i]))
-                        cerr << "Failed to load claudius head shot image." << endl; //failed to laod image
+	for (uint32 i = 0; i < battle_portraits.size(); i++) {
+		if (!VideoManager->LoadImage(battle_portraits[i]))
+			cerr << "Failed to load claudius battle portrait." << endl;
 	}
 	VideoManager->EndImageLoadBatch();
 
-        //make sure he has health, et cetera
-        claud->SetMaxHP(300);
-        claud->SetHP(300);
-		claud->SetMaxSP(200);
-		claud->SetSP(200);
-		claud->SetXP(35);
-		claud->SetXPNextLevel(156);
-		claud->SetXPLevel(100);
-		claud->SetAgility(56);
-		claud->SetIntelligence(67);
-		claud->SetStrength(120);
-        
-        ai.SetFrameIndex(0);
-        claud->AddAnimation("IDLE", ai);
-        for (uint32 i = 0; i < characterHeadShot.size(); i++) {
-                claud->AddBattleHeadShot(characterHeadShot[i]);
-        }
-        
-        //added by visage July 18th, 2006
-        claud->AddAttackSkill(new GlobalSkill("sword_swipe"));
+	claud->SetMaxHP(300);
+	claud->SetHP(300);
+	claud->SetMaxSP(200);
+	claud->SetSP(200);
+	claud->SetXP(35);
+	claud->SetXPNextLevel(156);
+	claud->SetXPLevel(100);
+	claud->SetAgility(56);
+	claud->SetIntelligence(67);
+	claud->SetStrength(120);
 
-        GlobalManager->AddCharacter(claud);
+	ai.SetFrameIndex(0);
+	claud->AddAnimation("IDLE", ai);
+	for (uint32 i = 0; i < battle_portraits.size(); i++) {
+		claud->AddBattlePortrait(battle_portraits[i]);
+	}
+
+	claud->AddAttackSkill(new GlobalSkill("sword_swipe"));
+	GlobalManager->AddCharacter(claud);
 
 	_fade_out = true;
 	VideoManager->FadeScreen(Color::black, 1.0f);

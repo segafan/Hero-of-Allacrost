@@ -31,10 +31,15 @@
 #ifndef __DEFS_HEADER__
 #define __DEFS_HEADER__
 
+////////////////////////////////////////////////////////////////////////////////
+// Game Engine Declarations
+////////////////////////////////////////////////////////////////////////////////
+
 // Audio declarations, see audio.h/cpp
 namespace hoa_audio {
 	extern bool AUDIO_DEBUG;
 	class GameAudio;
+
 	class MusicDescriptor;
 	class SoundDescriptor;
 
@@ -48,6 +53,7 @@ namespace hoa_audio {
 namespace hoa_video {
 	extern bool VIDEO_DEBUG;
 	class GameVideo;
+
 	class StillImage;
 	class AnimatedImage;
 }
@@ -56,6 +62,7 @@ namespace hoa_video {
 namespace hoa_data {
 	extern bool DATA_DEBUG;
 	class GameData;
+
 	class ReadDataDescriptor;
 	class WriteDataDescriptor;
 }
@@ -63,8 +70,9 @@ namespace hoa_data {
 // Mode manager declarations, see mode_manager.h/cpp
 namespace hoa_mode_manager {
 	extern bool MODE_MANAGER_DEBUG;
-	class GameMode;
 	class GameModeManager;
+
+	class GameMode;
 }
 
 // Input declarations, see input.h/cpp
@@ -73,26 +81,44 @@ namespace hoa_input {
 	class GameInput;
 }
 
-
 // Settings declarations, see settings.h/cpp
 namespace hoa_settings {
 	extern bool SETTINGS_DEBUG;
 	class GameSettings;
 }
 
-
 // Global declarations, see global.h/cpp
 namespace hoa_global {
 	extern bool GLOBAL_DEBUG;
+	class GameGlobal;
+
 	class GlobalObject;
 	class GlobalItem;
 	class GlobalWeapon;
 	class GlobalArmor;
 	class GlobalSkill;
+	class GlobalStatusAfflictions;
 	class GlobalAttackPoint;
 	class GlobalEnemy;
 	class GlobalCharacter;
-	class GameGlobal;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Game Mode Declarations
+////////////////////////////////////////////////////////////////////////////////
+
+// Battle mode declarations, see battle.h/cpp
+namespace hoa_battle {
+	extern bool BATTLE_DEBUG;
+	class BattleMode;
+
+	namespace private_battle {
+		class ActorEffect;
+		class BattleActor;
+		class CharacterActor;
+		class EnemyActor;
+		class ScriptEvent;
+	}
 }
 
 // Boot mode declarations, see boot.h/cpp
@@ -124,22 +150,6 @@ namespace hoa_map {
 	}
 }
 
-// Battle mode declarations, see battle.h/cpp
-namespace hoa_battle {
-	extern bool BATTLE_DEBUG;
-	class BattleMode;
-	class BattleStatTypes;
-
-	namespace private_battle {
-		class ActorEffect;
-		class BattleActor;
-		class PlayerActor;
-		class EnemyActor;
-		class BattleUI;
-		class ScriptEvent;
-	}
-}
-
 // Menu mode declarations, see menu.h/cpp
 namespace hoa_menu {
 	extern bool MENU_DEBUG;
@@ -152,17 +162,21 @@ namespace hoa_pause {
 	class PauseMode;
 }
 
+// Quit mode declarations, see quit.h/cpp
+namespace hoa_quit {
+	extern bool QUIT_DEBUG;
+	class QuitMode;
+}
+
 // Scene mode declarations, see scene.h/cpp
 namespace hoa_scene {
 	extern bool SCENE_DEBUG;
 	class SceneMode;
 }
 
-// Quit mode declarations, see quit.h/cpp
-namespace hoa_quit {
-	extern bool QUIT_DEBUG;
-	class QuitMode;
-}
+////////////////////////////////////////////////////////////////////////////////
+// Other Declarations
+////////////////////////////////////////////////////////////////////////////////
 
 // Utils declarations, see utils.h/cpp
 namespace hoa_utils {

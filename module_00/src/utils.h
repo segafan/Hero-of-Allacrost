@@ -7,56 +7,34 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-/*!****************************************************************************
- * \file    utils.h
- * \author  Tyler Olsen, roots@allacrost.org
- * \date    Last Updated: August 23rd, 2005
- * \brief   Header file for Allacrost utility code.
- *
- * This code includes various utility functions that are used across different
- * parts of the game. This file is included in every header file in the
- * Allacrost source tree, save for maybe some headers for the map editor code.
- *
- * \note Use the following macros for OS-dependent code:
- *   - Windows:   #ifdef _WIN32
- *   - Mac OS X:  #ifdef __APPLE__
- *   - Linux:     ???
- *   - Solaris:   #ifdef SOLARIS
- *   - BeOS:      #ifdef __BEOS__
- * \note Use the following macros for compiler-dependent code:
- *   - MSVC:      #ifdef _MSC_VER
- *   - g++:       ???
- *****************************************************************************/
+/** ***************************************************************************(
+*** \file    utils.h
+*** \author  Tyler Olsen, roots@allacrost.org
+*** \brief   Header file for Allacrost utility code.
+***
+*** This code includes various utility functions that are used across different
+*** parts of the game. This file is included in every header file in the
+*** Allacrost source tree, save for maybe some headers for the map editor code.
+***
+*** \note Use the following macros for OS-dependent code:
+***   - Windows:   #ifdef _WIN32
+***   - Mac OS X:  #ifdef __APPLE__
+***   - Linux:     ???
+***   - Solaris:   #ifdef SOLARIS
+***   - BeOS:      #ifdef __BEOS__
+*** \note Use the following macros for compiler-dependent code:
+***   - MSVC:      #ifdef _MSC_VER
+***   - g++:       ???
+*** ***************************************************************************/
 
 #ifndef __UTILS_HEADER__
 #define __UTILS_HEADER__
 
-#ifdef _WIN32
 
-// even though our game is platform independent, OpenGL on Windows requires
-// windows.h to be included, otherwise all sorts of bad things happen
-#include <windows.h>
-
-#ifdef _DEBUG
-
-// allow console logging on windows in debug mode
-#define getopt(a,b,c)  (EnableDebugging("all"), -1)
-#define optarg         (NULL)
-
-#else
-
-// disable console logging on windows in release mode
-#define getopt(a,b,c)  (-1)
-#define optarg         (NULL)
-
-#endif  //#ifdef _DEBUG
-
-#endif  //#ifdef _WIN32
-
-#include <stdexcept>
 #include <stdlib.h>
 #include <cstdlib>
 #include <cmath>
+#include <string.h> // For C string manipulation functions like strcmp
 
 #include <iostream>
 #include <string>
@@ -65,35 +43,39 @@
 #include <list>
 #include <map>
 #include <stack>
+#include <stdexcept>
+
+#ifdef _WIN32
+	// Even though Allacrost is platform independent, OpenGL on Windows requires windows.h to be included
+	#include <windows.h>
+#endif // #ifdef _WIN32
 
 #include <SDL/SDL.h>
 
-#include <string.h>   // C string manipulation functions like strcmp
-
 #ifdef _WIN32
-	#define strcasecmp stricmp  // for some reason, case-insensitive string compare is called strcasecmp on linux and stricmp on windows
+	// Case-insensitive string compare is called stricmp in Windows and strcasecmp everywhere else
+	#define strcasecmp stricmp
 #endif
 
-
-/*! \name Allacrost Integer Types.
- *  \brief These are the integer types you should use. Use of int, short, etc. is forbidden!
- *
- *  These types are just renamed types from SDL, because we don't like their named types.
- */
+/** \name Allacrost Integer Types
+*** \brief These are the integer types used throughout the Allacrost source code. 
+*** These types are created by redefining the SDL types (we do not like SDL's type-naming conventions).
+*** Use of the standard int, long, etc. is forbidden in Allacrost source code!
+**/
 //@{
-typedef Sint32  int32;
-typedef Uint32  uint32;
-typedef Sint16  int16;
-typedef Uint16  uint16;
-typedef Sint8   int8;
-typedef Uint8   uint8;
+typedef Sint32   int32;
+typedef Uint32   uint32;
+typedef Sint16   int16;
+typedef Uint16   uint16;
+typedef Sint8    int8;
+typedef Uint8    uint8;
 //@}
 
-#if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
-	const bool UTILS_SYSTEM_ENDIAN = true;
-#else
-	const bool UTILS_SYSTEM_ENDIAN = false;
-#endif
+// #if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
+// 	const bool UTILS_SYSTEM_ENDIAN = true;
+// #else
+// 	const bool UTILS_SYSTEM_ENDIAN = false;
+// #endif
 
 //! Contains utility code used across the entire
 namespace hoa_utils {
@@ -110,45 +92,46 @@ extern bool UTILS_DEBUG;
 const bool UTILS_ONLY_POSITIVE = true;
 const int32 UTILS_NO_BOUNDS = 0;
 
-/******************************************************************************
-	SINGLETON macros - used for turning a class into a singleton class
-
-	The following three macros turn a normal class into a singleton class. To
-	create a singleton class, perform the following steps.
-
-	1) The class' header file must #include "utils.h"
-	2) Place SINGLETON_DECLARE(class_name) in the class' private section.
-	3) Place SINGLETON_METHODS(class_name) in the class' public section.
-	4) Place SINGLETON_INITIALIZE(class_name) at the top of the class' source file.
-	5) *REQUIRED* Implement the class' constructor and destructor (even if it does nothing).
-
-	After performing these steps, your class with have 3 functions publicly avaiable to it:
-		- _Create():			creates the new singleton and returns a pointer to the class object
-		- _Destroy():			destroys the singleton class
-		- _GetRefCount(): returns a pointer to the class object
-
-	Notes and Usage:
-
-	1) The constructor and destructor *MUST* be defined! If you do not implement
-			them, then you will get a compilation error like:
-			> In function `SINGLETON::_Create()': undefined reference to `SINGLETON::SINGLETON[in-charge]()
-
-	2) You can not create or delete instances of this class normally. Ie, calling the constructor, copy
-			constructor, copy assignment operator, destructor, new/new[], or delete/delete[] operators will
-			result in a compilation error. Use the _Create(), _Destroy(), and _GetReference() functions instead.
-
-	3) The only place _Create() and _Destroy() should usually be called are in loader.cpp. But if a different
-			section of code detects a fatal error and needs to exit the game, _Destroy() should be called for *all*
-			Singletons.
-
-	4) FYI: _Create() and _Destroy() can be called multiple times without any problem. The only time you need
-			to worry is if _Destroy() is called and then a part of the code tries to reference a pointer to the old
-			singleton. Thus...
-
-			>>> ONLY CALL _Destroy() WHEN YOU ARE EXITING OR ABORTING THE ENTIRE APPLICATION!!! <<<
-
-	5) You can get a class object pointer like this: 'MYCLASS *test = MYCLASS::_GetReference();'
- *****************************************************************************/
+/** ****************************************************************************
+*** \name Class singleton macros
+*** \brief Used for defining a class as a singleton class
+***
+*** The following three macros turn a normal class into a singleton class. To
+*** create a singleton class, perform the following steps.
+***
+*** 1) The class' header file must #include "utils.h"
+*** 2) Place SINGLETON_DECLARE(class_name) in the class' private section.
+*** 3) Place SINGLETON_METHODS(class_name) in the class' public section.
+*** 4) Place SINGLETON_INITIALIZE(class_name) at the top of the class' source file.
+*** 5) *REQUIRED* Implement the class' constructor and destructor (even if it does nothing).
+***
+*** After performing these steps, your class with have 3 functions publicly avaiable to it:
+*** - _Create():      creates the new singleton and returns a pointer to the class object
+*** - _Destroy():     destroys the singleton class
+*** - _GetRefCount(): returns a pointer to the class object
+***
+*** Notes and Usage:
+***
+*** 1) The constructor and destructor *MUST* be defined! If you do not implement
+*** them, then you will get a compilation error like:
+*** > In function `SINGLETON::_Create()': undefined reference to `SINGLETON::SINGLETON[in-charge]()
+***
+*** 2) You can not create or delete instances of this class normally. Ie, calling the constructor, copy
+*** constructor, copy assignment operator, destructor, new/new[], or delete/delete[] operators will
+*** result in a compilation error. Use the _Create(), _Destroy(), and _GetReference() functions instead.
+***
+*** 3) The only place _Create() and _Destroy() should usually be called are in loader.cpp. But if a different
+*** section of code detects a fatal error and needs to exit the game, _Destroy() should be called for *all*
+*** Singletons.
+***
+*** 4) FYI: _Create() and _Destroy() can be called multiple times without any problem. The only time you need
+*** to worry is if _Destroy() is called and then a part of the code tries to reference a pointer to the old
+*** singleton. Thus...
+***
+*** >>> ONLY CALL _Destroy() WHEN YOU ARE EXITING OR ABORTING THE ENTIRE APPLICATION!!! <<<
+***
+*** 5) You can get a class object pointer like this: 'MYCLASS *test = MYCLASS::_GetReference();'
+*** ***************************************************************************/
 
 // Put in the private sector of the class definition
 #define SINGLETON_DECLARE(class_name) \
