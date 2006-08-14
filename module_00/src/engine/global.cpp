@@ -78,7 +78,7 @@ GlobalItem::~GlobalItem()
 GlobalWeapon::GlobalWeapon(uint32 usable, GameItemID id, uint32 count) :
 	GlobalObject(GLOBAL_WEAPON, usable, id, count) {
         
-	_damage_amount = new BattleStatTypes();
+	_damage_amount = new GlobalStatusAfflictions();
         
 	ReadDataDescriptor read_data;
 	string fileName = "dat/objects/" + GlobalManager->GetItemName(id) + ".lua";
@@ -148,41 +148,42 @@ GlobalArmor::~GlobalArmor()
 
 GlobalSkill::GlobalSkill(string script_name) {
 	_script_name = script_name;
-        
-        ReadDataDescriptor read_data;
-        string fileName = "dat/skills/" + _script_name + ".lua";
+	
+	ReadDataDescriptor read_data;
+	string fileName = "dat/skills/" + _script_name + ".lua";
+
 	if (!read_data.OpenFile(fileName.c_str())) {
 		cerr << "GLOBAL ERROR: failed to load skill file: " << _script_name << endl;
 	}
-        else { 
-                _skill_name = read_data.ReadString("skill_name");
-                string type = read_data.ReadString("skill_type");
+	else {
+		_skill_name = read_data.ReadString("skill_name");
+		string type = read_data.ReadString("skill_type");
 
-                if(type == "ATTACK")
-                        _skill_type = ATTACK;
-                else if(type == "DEFENSE")
-                        _skill_type = DEFENSE;
-                else if(type == "SUPPORT")
-                        _skill_type = SUPPORT;
-                else {
-                        cerr << "GLOBAL ERROR: Unknown type for skill: " << _script_name << endl;
-                }
-                              
-                _sp_usage = read_data.ReadInt("sp_usage");
-                _warmup_time = read_data.ReadInt("warmup_time");
-                _cooldown_time = read_data.ReadInt("cooldown_time");  
-                _level_required = read_data.ReadInt("level_required");
-                _num_arguments = read_data.ReadInt("num_arguments");
-                 
-                _stats = new BattleStatTypes();
-                _stats->volt = read_data.ReadInt("volt_level");
-                _stats->earth = read_data.ReadInt("earth_level");
-                _stats->water = read_data.ReadInt("water_level");
-                _stats->fire = read_data.ReadInt("fire_level");
-                _stats->piercing = read_data.ReadInt("piercing_level");
-                _stats->slashing = read_data.ReadInt("slashing_level");
-                _stats->bludgeoning = read_data.ReadInt("bludgeoning_level");
-        }
+		if (type == "ATTACK")
+			_skill_type = ATTACK;
+		else if (type == "DEFENSE")
+			_skill_type = DEFENSE;
+		else if (type == "SUPPORT")
+			_skill_type = SUPPORT;
+		else {
+			cerr << "GLOBAL ERROR: Unknown type for skill: " << _script_name << endl;
+		}
+		
+		_sp_usage = read_data.ReadInt("sp_usage");
+		_warmup_time = read_data.ReadInt("warmup_time");
+		_cooldown_time = read_data.ReadInt("cooldown_time");
+		_level_required = read_data.ReadInt("level_required");
+		_num_arguments = read_data.ReadInt("num_arguments");
+		
+		_stats = new GlobalStatusAfflictions();
+		_stats->volt = read_data.ReadInt("volt_level");
+		_stats->earth = read_data.ReadInt("earth_level");
+		_stats->water = read_data.ReadInt("water_level");
+		_stats->fire = read_data.ReadInt("fire_level");
+		_stats->piercing = read_data.ReadInt("piercing_level");
+		_stats->slashing = read_data.ReadInt("slashing_level");
+		_stats->bludgeoning = read_data.ReadInt("bludgeoning_level");
+	}
 }
 
 
@@ -204,20 +205,22 @@ GlobalSkill::~GlobalSkill() {
 // ****************************** GlobalAttackPoint ********************************
 // ****************************************************************************
 
-GlobalAttackPoint::GlobalAttackPoint(std::string name, float x, float y, uint32 volt, uint32 earth, uint32 water, uint32 fire, 
-                                        uint32 piercing, uint32 slashing, uint32 bludgeoning) {
+GlobalAttackPoint::GlobalAttackPoint(std::string name, float x, float y,
+	uint32 volt, uint32 earth, uint32 water, uint32 fire,
+	uint32 piercing, uint32 slashing, uint32 bludgeoning)
+{
 	_name = name;
-        _x_position = x;
+	_x_position = x;
 	_y_position = y;
 	
-        _resistance = new BattleStatTypes();
-        _resistance->volt = volt;
-        _resistance->earth = earth;
-        _resistance->water = water;
-        _resistance->fire = fire;
-        _resistance->piercing = piercing;
-        _resistance->slashing = slashing;
-        _resistance->bludgeoning = bludgeoning;
+	_resistance = new GlobalStatusAfflictions();
+	_resistance->volt = volt;
+	_resistance->earth = earth;
+	_resistance->water = water;
+	_resistance->fire = fire;
+	_resistance->piercing = piercing;
+	_resistance->slashing = slashing;
+	_resistance->bludgeoning = bludgeoning;
 }
 
 
@@ -241,78 +244,78 @@ GlobalAttackPoint::~GlobalAttackPoint() {
 // ******************************** GlobalEnemy ************************************
 // ****************************************************************************
 
-GlobalEnemy::GlobalEnemy(string file_name) {
-        _file_name = file_name;
-        
-         ReadDataDescriptor read_data;
-        string fileName = "dat/enemies/" + _file_name + ".lua";
+GlobalEnemy::GlobalEnemy(string file_name) :
+	_file_name(file_name)
+{
+	ReadDataDescriptor read_data;
+	string fileName = "dat/enemies/" + _file_name + ".lua";
 	if (!read_data.OpenFile(fileName.c_str())) {
-		cout << "GLOBAL ERROR: failed to load enemy file: " << _file_name << endl;
+		cerr << "GLOBAL ERROR: failed to load enemy file: " << _file_name << endl;
+		return;
 	}
-        else {
-                _enemy_id = read_data.ReadInt("id");
-                _enemy_width = read_data.ReadInt("width");
-                _enemy_height = read_data.ReadInt("height");
-                uint32 numSkills = read_data.ReadInt("number_of_skills");
-                for(uint32 i = 0; i < numSkills; i++) {
-                        _enemy_skills.push_back(new GlobalSkill(read_data.ReadString(("skill_" + i))));
-                }
-                
-                uint32 numAnimations = read_data.ReadInt("number_of_animations");
-                for(uint32 i = 0; i < numAnimations; i++) {
-                        string animationName = read_data.ReadString(("animation_name_" + i));
-                        vector<StillImage> animations;
-                        uint32 numFrames = read_data.ReadInt(("num_frames_" + i));
-                        for(uint32 j = 0; j < numFrames; j++) {
-                                string fileNameString = "file_name_" + i + '_' + j;
-                                string x_dimensionString = "x_dimension_" + i + '_' + j;
-                                string y_dimensionString = "y_dimension_" + i + '_' + j;
-                                string fileName = read_data.ReadString(fileNameString.c_str());
-                                uint32 x_dimension = read_data.ReadInt(x_dimensionString.c_str());
-                                uint32 y_dimension = read_data.ReadInt(y_dimensionString.c_str());
-                                
-                                StillImage i;
-                                i.SetFilename("img/sprites/battle/"+fileName);
-                                i.SetStatic(true);
-                                i.SetDimensions(x_dimension, y_dimension);
+	
+	_enemy_id = read_data.ReadInt("id");
+	_enemy_width = read_data.ReadInt("width");
+	_enemy_height = read_data.ReadInt("height");
+	uint32 numSkills = read_data.ReadInt("number_of_skills");
+	for (uint32 i = 0; i < numSkills; i++) {
+		_enemy_skills.push_back(new GlobalSkill(read_data.ReadString(("skill_" + i))));
+	}
+	
+	uint32 numAnimations = read_data.ReadInt("number_of_animations");
+	for (uint32 i = 0; i < numAnimations; i++) {
+		string animationName = read_data.ReadString(("animation_name_" + i));
+		vector<StillImage> animations;
+		uint32 numFrames = read_data.ReadInt(("num_frames_" + i));
+		for (uint32 j = 0; j < numFrames; j++) {
+			string fileNameString = "file_name_" + i + '_' + j;
+			string x_dimensionString = "x_dimension_" + i + '_' + j;
+			string y_dimensionString = "y_dimension_" + i + '_' + j;
+			string fileName = read_data.ReadString(fileNameString.c_str());
+			uint32 x_dimension = read_data.ReadInt(x_dimensionString.c_str());
+			uint32 y_dimension = read_data.ReadInt(y_dimensionString.c_str());
+			
+			StillImage i;
+			i.SetFilename("img/sprites/battle/"+fileName);
+			i.SetStatic(true);
+			i.SetDimensions(x_dimension, y_dimension);
 
-                                VideoManager->LoadImage(i);
-                                animations.push_back(i);
-                        }
-                        _sprite_animations[animationName] = animations;
-                }
-                
-                _movement_speed = read_data.ReadInt("movement_speed");
-                _base_hit_points = read_data.ReadInt("base_hit_points");
-                _base_skill_points = read_data.ReadInt("base_skill_points");
-                _base_experience_points = read_data.ReadInt("base_experience_points");
-                _base_strength = read_data.ReadInt("base_strength");
-                _base_intelligence = read_data.ReadInt("base_intelligence");
-                _base_agility = read_data.ReadInt("base_agility");
-                _growth_hit_points = read_data.ReadInt("growth_hit_points");
-                _growth_skill_points = read_data.ReadInt("growth_skill_points");
-                _growth_experience_points = read_data.ReadInt("growth_experience_points");
-                _growth_strength = read_data.ReadInt("growth_strength");
-                _growth_intelligence = read_data.ReadInt("growth_intelligence");
-                _growth_agility = read_data.ReadInt("growth_agility");
-                
-                int num_maps = read_data.ReadInt("number_of_maps");
-                for(int i = 1; i <= num_maps; i++) {
-                        std::ostringstream os;
-                        os << "map_x_" << i;
-                        float x = read_data.ReadFloat(os.str().c_str());
-                        os.str("");
-                        os << "map_y_" << i;
-                        float y = read_data.ReadFloat(os.str().c_str());
-                        os.str("");
-                        os << "map_name_" << i;
-                        std::string name = read_data.ReadString(os.str().c_str());
-                        
-                        GlobalAttackPoint *gap = new GlobalAttackPoint(name,x,y,0,0,0,0,0,0,0);
-                        _attack_points.push_back(gap);
-                }
-        }
-}
+			VideoManager->LoadImage(i);
+			animations.push_back(i);
+		}
+		_sprite_animations[animationName] = animations;
+	}
+	
+	_movement_speed = read_data.ReadInt("movement_speed");
+	_base_hit_points = read_data.ReadInt("base_hit_points");
+	_base_skill_points = read_data.ReadInt("base_skill_points");
+	_base_experience_points = read_data.ReadInt("base_experience_points");
+	_base_strength = read_data.ReadInt("base_strength");
+	_base_intelligence = read_data.ReadInt("base_intelligence");
+	_base_agility = read_data.ReadInt("base_agility");
+	_growth_hit_points = read_data.ReadInt("growth_hit_points");
+	_growth_skill_points = read_data.ReadInt("growth_skill_points");
+	_growth_experience_points = read_data.ReadInt("growth_experience_points");
+	_growth_strength = read_data.ReadInt("growth_strength");
+	_growth_intelligence = read_data.ReadInt("growth_intelligence");
+	_growth_agility = read_data.ReadInt("growth_agility");
+		
+	int num_maps = read_data.ReadInt("number_of_maps");
+	for (int i = 1; i <= num_maps; i++) {
+		std::ostringstream os;
+		os << "map_x_" << i;
+		float x = read_data.ReadFloat(os.str().c_str());
+		os.str("");
+		os << "map_y_" << i;
+		float y = read_data.ReadFloat(os.str().c_str());
+		os.str("");
+		os << "map_name_" << i;
+		std::string name = read_data.ReadString(os.str().c_str());
+		
+		GlobalAttackPoint *gap = new GlobalAttackPoint(name,x,y,0,0,0,0,0,0,0);
+		_attack_points.push_back(gap);
+	}
+} // GlobalEnemy::~GlobalEnemy()
 
 GlobalEnemy::~GlobalEnemy() { 
         ///delete animations
@@ -346,7 +349,7 @@ void GlobalEnemy::LevelSimulator(uint32 lvl) {
 // ****************************************************************************
 
 //
-GlobalCharacter::GlobalCharacter(std::string na, std::string fn, uint32 id) {
+GlobalCharacter::GlobalCharacter(hoa_utils::ustring na, std::string fn, uint32 id) {
 	if (GLOBAL_DEBUG) cout << "GLOBAL: GlobalCharacter constructor invoked" << endl;
 	_name = na;
 	_filename = fn;
@@ -491,7 +494,7 @@ bool GameGlobal::Initialize() {
 }
 
 void GameGlobal::AddCharacter(GlobalCharacter *ch) {
-	if (GLOBAL_DEBUG) cout << "GLOBAL: Adding new character to party: " << ch->GetName() << endl;
+	if (GLOBAL_DEBUG) cout << "GLOBAL: Adding new character to party: " << MakeByteString(ch->GetName()) << endl;
 	_characters.push_back(ch);
 	// Check size of active party if less then 4, add to party
 	if (_party.GetPartySize() < 4)
