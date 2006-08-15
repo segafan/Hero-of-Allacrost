@@ -54,7 +54,7 @@ MenuMode::MenuMode()
 	}
 	
 	// Init the location picture
-	_location_picture.SetFilename("img/menus/location/caveLocationBar.png");
+	_location_picture.SetFilename("img/menus/locations/desert_cave.png");
 	_location_picture.SetDimensions(500, 125);
 	_location_picture.SetStatic(true);
 	VideoManager->LoadImage(_location_picture);

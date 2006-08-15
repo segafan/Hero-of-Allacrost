@@ -135,7 +135,7 @@ void CharacterActor::DrawSprite() {
 	
 	if (IsAlive()) {
 		// Draw the actor selector graphic if this character is currently selected
-		if (this == current_battle->_selected_character) {
+		if (this == current_battle->_selected_character && current_battle->_cursor_state != CURSOR_IDLE) {
 			VideoManager->Move(GetXLocation() - 20, GetYLocation() - 20);
 			VideoManager->DrawImage(current_battle->_actor_selection_image);
 		}
@@ -313,14 +313,6 @@ void EnemyActor::DrawSprite() {
 	if (this == current_battle->_selected_enemy) {
 		VideoManager->Move(GetXLocation() - 20, GetYLocation() - 20);
 		VideoManager->DrawImage(current_battle->_actor_selection_image);
-
-		// Draw the attack point indicator if necessary
-		if (current_battle->_cursor_state == CURSOR_SELECT_ATTACK_POINT) {
-			vector<GlobalAttackPoint*> attack_points = GetAttackPoints();
-			VideoManager->Move(GetXLocation() + attack_points[current_battle->_attack_point_selected]->GetXPosition(),
-			GetYLocation() + attack_points[current_battle->_attack_point_selected]->GetYPosition());
-			VideoManager->DrawImage(current_battle->_attack_point_indicator);
-		}
 	}
 
 	// Draw the enemy's damage-blended sprite frames
@@ -346,6 +338,18 @@ void EnemyActor::DrawSprite() {
 	}
 	else { // Enemy is at full health
 		VideoManager->DrawImage(sprite_frames[0]);
+	}
+
+	// Draw the attack point indicator if necessary
+	if (this == current_battle->_selected_enemy && current_battle->_cursor_state == CURSOR_SELECT_ATTACK_POINT) {
+		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
+		vector<GlobalAttackPoint*> attack_points = GetAttackPoints();
+		VideoManager->Move(GetXLocation() + attack_points[current_battle->_attack_point_selected]->GetXPosition(),
+			GetYLocation() + attack_points[current_battle->_attack_point_selected]->GetYPosition());
+		VideoManager->DrawImage(current_battle->_attack_point_indicator);
+
+		// Reset default X and Y draw orientation
+		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 	}
 
 	// TEMP: Determine if enemy needs to have red damage text drawn next to it
@@ -376,7 +380,8 @@ void EnemyActor::DrawStatus() {
 	if (current_battle->_cursor_state == CURSOR_SELECT_ATTACK_POINT) {
 		vector<GlobalAttackPoint*> attack_points = GetAttackPoints();
 		VideoManager->MoveRelative(0, -25);
-		VideoManager->DrawText(attack_points[current_battle->_attack_point_selected]->GetName());
+		ustring attack_point = MakeWideString("(" + attack_points[current_battle->_attack_point_selected]->GetName() + ")");
+		VideoManager->DrawText(attack_point);
 	}
 
 	// TODO Draw the icons for any status afflictions that the enemy has
