@@ -95,7 +95,7 @@ BattleMode::BattleMode() :
 	_attack_point_selected(0),
 	_number_menu_items(0),
 	_cursor_state(CURSOR_IDLE),
-	_action_list_menu_window(NULL),
+	_action_menu_window(NULL),
 	_action_list_menu(NULL),
 	_current_number_swaps(0),
 	_swap_countdown_timer(300000) // 5 minutes
@@ -139,15 +139,15 @@ BattleMode::BattleMode() :
 
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 
-	_action_list_menu_window = new MenuWindow();
-	_action_list_menu_window->Create(192.0f, 384.0f);
-	_action_list_menu_window->SetPosition(0.0f, 544.0f);
-	_action_list_menu_window->SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
-	_action_list_menu_window->Hide();
+	_action_menu_window = new MenuWindow();
+	_action_menu_window->Create(192.0f, 384.0f);
+	_action_menu_window->SetPosition(0.0f, 544.0f);
+	_action_menu_window->SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_action_menu_window->Hide();
 
 	_action_type_menu_cursor_location = 0;
 
-	_action_type_menu.SetOwner(_action_list_menu_window);
+	_action_type_menu.SetOwner(_action_menu_window);
 	_action_type_menu.SetCursorOffset(-15, 0);
 	_action_type_menu.SetCellSize(100.0f, 80.0f);
 	_action_type_menu.SetSize(1, 4);
@@ -204,9 +204,9 @@ BattleMode::~BattleMode() {
 	if (_action_list_menu) {
 		delete _action_list_menu;
 	}
-	if (_action_list_menu_window) {
-		_action_list_menu_window->Destroy();
-		delete _action_list_menu_window;
+	if (_action_menu_window) {
+		_action_menu_window->Destroy();
+		delete _action_menu_window;
 	}
 } // BattleMode::~BattleMode()
 
@@ -501,7 +501,7 @@ void BattleMode::_UpdateCharacterSelection() {
 	// Return if the player does not have more than one character so select
 	if (_NumberCharactersAlive() == 1) {
 		_cursor_state = CURSOR_SELECT_ACTION_TYPE;
-		_action_list_menu_window->Show();
+		_action_menu_window->Show();
 		return;
 	}
 
@@ -537,7 +537,7 @@ void BattleMode::_UpdateCharacterSelection() {
 	else if (InputManager->ConfirmPress()) {
 		_selected_character = GetPlayerCharacterAt(_actor_index);
 		_cursor_state = CURSOR_SELECT_ACTION_TYPE;
-		_action_list_menu_window->Show();
+		_action_menu_window->Show();
 	}
 } // void BattleMode::_UpdateCharacterSelection()
 
@@ -567,7 +567,7 @@ void BattleMode::_UpdateActionTypeMenu() {
 		if (_NumberCharactersAlive() > 1) {
 			_actor_index = GetIndexOfFirstIdleCharacter();
 			_cursor_state = CURSOR_IDLE;
-			_action_list_menu_window->Hide();
+			_action_menu_window->Hide();
 		}
 	}
 } // void BattleMode::_UpdateActionTypeMenu()
@@ -652,7 +652,7 @@ void BattleMode::_UpdateAttackPointSelection() {
 
 			_actor_index = GetIndexOfFirstIdleCharacter();
 			_cursor_state = CURSOR_IDLE;
-			_action_list_menu_window->Hide();
+			_action_menu_window->Hide();
 		}
 		else {
 			_cursor_state = CURSOR_SELECT_TARGET;
@@ -794,8 +794,8 @@ void BattleMode::_DrawActionMenu() {
 	}
 
 	// Draw the action menu window
-	if (_cursor_state != CURSOR_IDLE && _action_list_menu_window) {
-		_action_list_menu_window->Draw();
+	if (_cursor_state != CURSOR_IDLE && _action_menu_window) {
+		_action_menu_window->Draw();
 	}
 
 	// Draw the action type menu
@@ -849,9 +849,9 @@ void BattleMode::_ConstructActionListMenu() {
 	if (_action_list_menu) {
 		delete _action_list_menu;
 	}
-// 	if (_action_list_menu_window) {
-// 		_action_list_menu_window->Destroy();
-// 		delete _action_list_menu_window;
+// 	if (_action_menu_window) {
+// 		_action_menu_window->Destroy();
+// 		delete _action_menu_window;
 // 	}
 
 	_action_list_menu = new OptionBox();
@@ -880,10 +880,10 @@ void BattleMode::_ConstructActionListMenu() {
 			_action_list_menu->SetSize(1, attack_skill_names.size());
 			_action_list_menu->SetOptions(attack_skill_names);
 
-// 			_action_list_menu_window = new MenuWindow();
-// 			_action_list_menu_window->Create(200.0f, 20.0f + 50.0f * attack_skill_names.size());
-// 			_action_list_menu_window->SetPosition(0.0f, 600.0f);
-// 			_action_list_menu_window->Show();
+// 			_action_menu_window = new MenuWindow();
+// 			_action_menu_window->Create(200.0f, 20.0f + 50.0f * attack_skill_names.size());
+// 			_action_menu_window->SetPosition(0.0f, 600.0f);
+// 			_action_menu_window->Show();
 		}
 	} // if (_action_type_menu_cursor_location == ACTION_TYPE_ATTACK)
 	
@@ -904,10 +904,10 @@ void BattleMode::_ConstructActionListMenu() {
 			_action_list_menu->SetSize(1, defense_skill_names.size());
 
 
-// 			_action_list_menu_window = new MenuWindow();
-// 			_action_list_menu_window->Create(200.0f, 20.0f + 50.0f * defense_skill_names.size());
-// 			_action_list_menu_window->SetPosition(0.0f, 600.0f);
-// 			_action_list_menu_window->Show();
+// 			_action_menu_window = new MenuWindow();
+// 			_action_menu_window->Create(200.0f, 20.0f + 50.0f * defense_skill_names.size());
+// 			_action_menu_window->SetPosition(0.0f, 600.0f);
+// 			_action_menu_window->Show();
 		}
 	} // else if (_action_type_menu_cursor_location == ACTION_TYPE_DEFEND)
 	
@@ -928,10 +928,10 @@ void BattleMode::_ConstructActionListMenu() {
 			_action_list_menu->SetOptions(support_skill_names);
 			_action_list_menu->SetSize(1, support_skill_names.size());
 
-// 			_action_list_menu_window = new MenuWindow();
-// 			_action_list_menu_window->Create(200.0f, 20.0f + 50.0f * support_skill_names.size());
-// 			_action_list_menu_window->SetPosition(0.0f, 600.0f);
-// 			_action_list_menu_window->Show();
+// 			_action_menu_window = new MenuWindow();
+// 			_action_menu_window->Create(200.0f, 20.0f + 50.0f * support_skill_names.size());
+// 			_action_menu_window->SetPosition(0.0f, 600.0f);
+// 			_action_menu_window->Show();
 		}
 	} // else if (_action_type_menu_cursor_location == ACTION_TYPE_SUPPORT)
 	
@@ -954,10 +954,10 @@ void BattleMode::_ConstructActionListMenu() {
 		_action_list_menu->SetOptions(inv_names);
 		_action_list_menu->SetSize(1, inv_names.size());
 
-// 		_action_list_menu_window = new MenuWindow();
-// 		_action_list_menu_window->Create(200.0f, 20.0f + 50.0f * inv_names.size());
-// 		_action_list_menu_window->SetPosition(0.0f, 600.0f);
-// 		_action_list_menu_window->Show();
+// 		_action_menu_window = new MenuWindow();
+// 		_action_menu_window->Create(200.0f, 20.0f + 50.0f * inv_names.size());
+// 		_action_menu_window->SetPosition(0.0f, 600.0f);
+// 		_action_menu_window->Show();
 	} // else if (_action_type_menu_cursor_location == ACTION_TYPE_ITEM)
 
 	else {

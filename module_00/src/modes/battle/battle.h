@@ -201,7 +201,7 @@ private:
 	//! The full-screen, static background image to be used for the battle
 	hoa_video::StillImage _battle_background;
 	//! Container for images (both still and animated) that are to be drawn in the background
-	std::vector<hoa_video::ImageDescriptor> _background_images;
+	std::vector<hoa_video::ImageDescriptor*> _background_images;
 	//@}
 
 	//! \name Battle Actors Data
@@ -279,7 +279,7 @@ private:
 	/** \brief The menu window used for action types and action lists
 	*** This menu window is always located on the left side of the screen.
 	**/
-	hoa_video::MenuWindow* _action_list_menu_window;
+	hoa_video::MenuWindow* _action_menu_window;
 	/** \brief The option menu that lists the types of actions that a character may take in battle
 	*** Typically this list includes "attack", "defend", "support", and "item". More types may appear
 	*** under special circumstances and conditions.
