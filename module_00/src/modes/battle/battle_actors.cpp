@@ -299,18 +299,21 @@ void EnemyActor::Update() {
 
 
 void EnemyActor::DrawSprite() {
-	// Do not draw the sprite if the enemy is expired
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+	
+	// Draw the sprite's final damage frame (it will be in gray scale) and return
 	if (!IsAlive()) {
+		VideoManager->Move(GetXLocation(), GetYLocation());
+		vector<StillImage> sprite_frames = _wrapped_enemy.GetAnimation("IDLE");
+		VideoManager->DrawImage(sprite_frames[3]);
 		return;
 	}
-
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 
 	// Draw the actor selector image over the currently selected enemy
 	if (this == current_battle->_selected_enemy) {
 		VideoManager->Move(GetXLocation() - 20, GetYLocation() - 20);
 		VideoManager->DrawImage(current_battle->_actor_selection_image);
-		
+
 		// Draw the attack point indicator if necessary
 		if (current_battle->_cursor_state == CURSOR_SELECT_ATTACK_POINT) {
 			vector<GlobalAttackPoint*> attack_points = GetAttackPoints();
