@@ -692,16 +692,19 @@ private:
 	//! The speed which the character should move in battle
 	uint32 _movement_speed;
 
+	//! \name Character Image Data
+	//@{
 	//! The standard frame images for the character's map sprite.
 	std::vector<hoa_video::StillImage> _map_frames;
 	//! The character's standard map portrait image
 	hoa_video::StillImage _map_portrait;
+		//! The frame images for the character's battle sprite.
+	std::map<std::string, hoa_video::AnimatedImage> _battle_animation;
 	//! The frame images for the character's battle portrait
 	std::vector<hoa_video::StillImage> _battle_portraits;
-	//! The frame images for the character's battle sprite.
-	std::map<std::string, hoa_video::AnimatedImage> _battle_animation;
 	//! The character's full-body menu portrait image
 	hoa_video::StillImage _menu_portrait;
+	//@}
 public:
 	GlobalCharacter(hoa_utils::ustring na, std::string fn, uint32 id);
 	~GlobalCharacter();
@@ -811,9 +814,7 @@ public:
 		{ _battle_animation[anim] = v; }
 	hoa_video::AnimatedImage GetAnimation(std::string anim)
 		{ return _battle_animation[anim]; }
-        
-	void AddBattlePortrait(hoa_video::StillImage image)
-		{ _battle_portraits.push_back(image); }
+
 	std::vector<hoa_video::StillImage> GetBattlePortraits()
 		{ return _battle_portraits; }
 	//@}

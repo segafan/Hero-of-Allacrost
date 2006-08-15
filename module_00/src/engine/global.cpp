@@ -355,7 +355,7 @@ GlobalCharacter::GlobalCharacter(hoa_utils::ustring na, std::string fn, uint32 i
 	_filename = fn;
 	_char_id = id;
 
-	// Prepare standard sprite animation frames (24 count)
+	// Load the character's standard set of map sprite frames (24 count)
 	StillImage imd;
 	imd.SetDimensions(1.0f, 2.0f);
 	imd.SetFilename("img/sprites/map/" + _filename + "_d0.png");
@@ -415,24 +415,80 @@ GlobalCharacter::GlobalCharacter(hoa_utils::ustring na, std::string fn, uint32 i
 		VideoManager->LoadImage(_map_frames[i]);
 	}
 	VideoManager->EndImageLoadBatch();
-        
-        /*
-        std::vector<hoa_video::StillImage> claudiusAnimation;
-        StillImage si;
-        si.SetDimensions(64, 128);
-        si.SetFilename("img/sprites/battle/claudius_idle.png");
-        claudiusAnimation.push_back(si);
 
-        if(!VideoManager->LoadImage(claudiusAnimation[0]))
-                cerr << "Failed to load claudius image." << endl; //failed to laod image
-        else
-                 AddAnimation("IDLE", claudiusAnimation);
-	
-        std::cout << this << std::endl;
-        std::cout << _battle_animation.size() << std::endl;
-        */
-        
-       _movement_speed = 5;
+	// Load the character's standard map portrait
+	_map_portrait.SetFilename("img/portraits/map/" + _filename + ".png");
+	if (! VideoManager->LoadImage(_map_portrait)) exit(1);
+
+	// Load the character's standard set of battle sprite frames (24 count)
+	vector<StillImage> idle_frames;
+	AnimatedImage idle;
+	imd.SetDimensions(64, 128);
+	imd.SetFilename("img/sprites/battle/characters/" + _filename + "_idle_fr0.png");
+	idle_frames.push_back(imd);
+	imd.SetFilename("img/sprites/battle/characters/" + _filename + "_idle_fr1.png");
+	idle_frames.push_back(imd);
+	imd.SetFilename("img/sprites/battle/characters/" + _filename + "_idle_fr2.png");
+	idle_frames.push_back(imd);
+	imd.SetFilename("img/sprites/battle/characters/" + _filename + "_idle_fr3.png");
+	idle_frames.push_back(imd);
+	imd.SetFilename("img/sprites/battle/characters/" + _filename + "_idle_fr4.png");
+	idle_frames.push_back(imd);
+	imd.SetFilename("img/sprites/battle/characters/" + _filename + "_idle_fr5.png");
+	idle_frames.push_back(imd);
+		
+	VideoManager->BeginImageLoadBatch();
+	for (uint32 i = 0; i < idle_frames.size(); i++) {
+		if (!VideoManager->LoadImage(idle_frames[i])) cerr << "Failed to load claudius image." << endl;
+			
+	}
+	VideoManager->EndImageLoadBatch();
+
+	for (uint32 i = 0; i < idle_frames.size(); i++) { idle.AddFrame(idle_frames[i], 10); }
+	idle.SetFrameIndex(0);
+	_battle_animation["IDLE"] = idle;
+
+	// Load the character's battle portrait frames
+	imd.SetDimensions(100, 100);
+	imd.SetFilename("img/portraits/battle/" + _filename + ".png");
+	_battle_portraits.push_back(imd);
+	imd.SetFilename("img/portraits/battle/" + _filename + "_hp75.png");
+	_battle_portraits.push_back(imd);
+	imd.SetFilename("img/portraits/battle/" + _filename + "_hp50.png");
+	_battle_portraits.push_back(imd);
+	imd.SetFilename("img/portraits/battle/" + _filename + "_hp25.png");
+	_battle_portraits.push_back(imd);
+	imd.SetFilename("img/portraits/battle/" + _filename + "_hp00.png");
+	_battle_portraits.push_back(imd);
+
+	VideoManager->BeginImageLoadBatch();
+	for (uint32 i = 0; i < _battle_portraits.size(); i++) {
+		if (!VideoManager->LoadImage(_battle_portraits[i]))
+			cerr << "Failed to load battle portrait." << endl;
+	}
+	VideoManager->EndImageLoadBatch();
+
+	// Load the character's menu portrait
+	_menu_portrait.SetFilename("img/portraits/menu/" + _filename + ".png");
+	if (! VideoManager->LoadImage(_menu_portrait)) exit(1);
+
+	// TEMP: Set character's stats
+	SetMaxHP(300);
+	SetHP(300);
+	SetMaxSP(200);
+	SetSP(200);
+	SetXP(35);
+	SetXPNextLevel(156);
+	SetXPLevel(100);
+	SetAgility(56);
+	SetIntelligence(67);
+	SetStrength(120);
+
+	// TEMP: Add new skills
+	AddAttackSkill(new GlobalSkill("sword_swipe"));
+	GlobalManager->AddCharacter(this);
+
+	_movement_speed = 5;
 }
 
 
@@ -472,7 +528,7 @@ GameGlobal::GameGlobal() {
 	if (GLOBAL_DEBUG) cout << "GLOBAL: GameGlobal constructor invoked" << endl;
 	
 	SetItemName(HP_POTION, "HP Potion");
-	SetItemIconPath(HP_POTION, "img/icons/potion-red.png");
+	SetItemIconPath(HP_POTION, "img/icons/inventory/health_potion.png");
 }
 
 GameGlobal::~GameGlobal() {

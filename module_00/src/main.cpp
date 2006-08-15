@@ -78,11 +78,7 @@ int32 main(int32 argc, char *argv[]) {
 		cerr << "ERROR: unable to initialize VideoManager" << endl;
 		return 1;
 	}
-	VideoManager->SetMenuSkin("img/menus/black_sleet",
-	                          Color(0.0f, 0.0f, 0.0f, 0.5f),
-	                          Color(0.0f, 0.0f, 0.0f, 0.5f),
-	                          Color(0.0f, 0.0f, 0.0f, 0.5f),
-	                          Color(0.0f, 0.0f, 0.0f, 0.5f));
+	VideoManager->SetMenuSkin("img/menus/black_sleet", "img/menus/black_sleet_texture.png", Color(0.0f, 0.0f, 0.0f, 0.0f));
 	if (!VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "default", 16)) {
 		return 1;
 	}
@@ -96,7 +92,7 @@ int32 main(int32 argc, char *argv[]) {
 	}
 
 	VideoManager->SetFontShadowXOffset("map", 1);
-	VideoManager->SetFontShadowYOffset("map", -1);
+	VideoManager->SetFontShadowYOffset("map", -2);
 	VideoManager->SetFontShadowStyle("map", VIDEO_TEXT_SHADOW_BLACK);
 
 	if (!VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "battle", 20)) {
@@ -104,7 +100,7 @@ int32 main(int32 argc, char *argv[]) {
 	}
 
 	VideoManager->SetFontShadowXOffset("battle", 1);
-	VideoManager->SetFontShadowYOffset("battle", -1);
+	VideoManager->SetFontShadowYOffset("battle", -2);
 	VideoManager->SetFontShadowStyle("battle", VIDEO_TEXT_SHADOW_BLACK);
 
 	if (!AudioManager->Initialize()) {

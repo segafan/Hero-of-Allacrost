@@ -139,7 +139,7 @@ void CharacterWindow::SetCharacter(GlobalCharacter *character)
 	this->_char_id = character->GetID();
 	
 	// TODO: Load the portrait
-	this->_portrait.SetFilename(string("img/portraits/menu/") + character->GetFilename() + string("_full.png"));
+	this->_portrait.SetFilename("img/portraits/menu/" + character->GetFilename() + ".png");
 	this->_portrait.SetStatic(true);
 	this->_portrait.SetDimensions(150, 200);
 	//this->_portrait.SetDimensions(Get_The_Dimensions);
@@ -543,7 +543,7 @@ StatusWindow::StatusWindow() : _active(false), _cursor_x(588.0f), _cursor_y(324.
 	_head_portrait.SetStatic(true);
 	_head_portrait.SetDimensions(200, 200);
 	// Set up the full body portrait
-	string full_path = string("img/portraits/menu/") + _current_char->GetFilename() + string("_full_large.png");
+	string full_path = string("img/portraits/menu/") + _current_char->GetFilename() + string("_large.png");
 	_full_portrait.SetFilename(full_path);
 	_full_portrait.SetStatic(true);
 	_full_portrait.SetDimensions(224,350);

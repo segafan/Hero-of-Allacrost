@@ -378,7 +378,8 @@ public:
 	void SetName(hoa_utils::ustring na) { name = na; }
 	void SetID(uint8 id) { sprite_id = id; }
 	void SetFilename(std::string fn) { filename = fn; }
-	void SetPortrait(std::string pn) { portrait = new hoa_video::StillImage(); portrait->SetFilename(pn); hoa_video::VideoManager->LoadImage(*portrait); }
+	void SetPortrait(std::string pn)
+		{ portrait = new hoa_video::StillImage(); portrait->SetFilename(pn); hoa_video::VideoManager->LoadImage(*portrait); }
 	void SetDirection(uint16 di) { direction = di; }
 	void SetStepSpeed(float sp) { step_speed = sp; }
 	void SetDelayTime(uint32 delay) { delay_time = delay; }

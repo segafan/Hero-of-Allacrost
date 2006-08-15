@@ -103,13 +103,13 @@ BattleMode::BattleMode() :
 	std::vector <hoa_video::StillImage> attack_point_indicator;
 	StillImage frame;
 	frame.SetDimensions(16, 16);
-	frame.SetFilename("img/icons/battle/indicator_1.png");
+	frame.SetFilename("img/icons/battle/ap_indicator_fr0.png");
 	attack_point_indicator.push_back(frame);
-	frame.SetFilename("img/icons/battle/indicator_2.png");
+	frame.SetFilename("img/icons/battle/ap_indicator_fr1.png");
 	attack_point_indicator.push_back(frame);
-	frame.SetFilename("img/icons/battle/indicator_3.png");
+	frame.SetFilename("img/icons/battle/ap_indicator_fr2.png");
 	attack_point_indicator.push_back(frame);
-	frame.SetFilename("img/icons/battle/indicator_4.png");
+	frame.SetFilename("img/icons/battle/ap_indicator_fr3.png");
 	attack_point_indicator.push_back(frame);
 
 	VideoManager->BeginImageLoadBatch();
@@ -117,23 +117,23 @@ BattleMode::BattleMode() :
 		if (!VideoManager->LoadImage(attack_point_indicator[i]))
 			cerr << "BATTLE ERROR: Failed to load attack point indicator." << endl;
 	}
-
+	VideoManager->EndImageLoadBatch();
+	
 	for (uint32 i = 0; i < attack_point_indicator.size(); i++) {
 		_attack_point_indicator.AddFrame(attack_point_indicator[i], 10);
 	}
 	
 	_actor_selection_image.SetDimensions(109, 78);
-	_actor_selection_image.SetFilename("img/icons/battle/character_selection.png");
+	_actor_selection_image.SetFilename("img/icons/battle/character_selector.png");
 	if (!VideoManager->LoadImage(_actor_selection_image)) {
 		cerr << "BATTLE ERROR: Unable to load player selector image." << endl;
 	}
-	VideoManager->EndImageLoadBatch();
 
 	vector<ustring> action_type_options;
-	action_type_options.push_back(MakeWideString("<img/icons/battle/attack_menu_icon.png><64>Attack"));
-	action_type_options.push_back(MakeWideString("<img/icons/battle/defend_menu_icon.png><64>Defend"));
-	action_type_options.push_back(MakeWideString("<img/icons/battle/support_menu_icon.png><64>Support"));
-	action_type_options.push_back(MakeWideString("<img/icons/battle/item_menu_icon.png><64>Item"));
+	action_type_options.push_back(MakeWideString("<img/icons/battle/attack.png><55>Attack"));
+	action_type_options.push_back(MakeWideString("<img/icons/battle/defend.png><55>Defend"));
+	action_type_options.push_back(MakeWideString("<img/icons/battle/support.png><55>Support"));
+	action_type_options.push_back(MakeWideString("<img/icons/battle/item.png><55>Item"));
 
 	_action_type_menu.SetOptions(action_type_options);
 
@@ -147,14 +147,14 @@ BattleMode::BattleMode() :
 
 	_action_type_menu_cursor_location = 0;
 
-	_action_type_menu.SetOwner(_action_menu_window);
+// 	_action_type_menu.SetOwner(_action_menu_window);
 	_action_type_menu.SetCursorOffset(-15, 0);
 	_action_type_menu.SetCellSize(100.0f, 80.0f);
 	_action_type_menu.SetSize(1, 4);
-	_action_type_menu.SetPosition(0.0f, 0.0f);
+	_action_type_menu.SetPosition(30.0f, 512.0f);
 	_action_type_menu.SetFont("battle");
 	_action_type_menu.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
-	_action_type_menu.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_action_type_menu.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	_action_type_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_action_type_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 // 	_action_type_menu.SetSelection(0); // This line may be causing a seg-fault!
@@ -225,7 +225,7 @@ void BattleMode::Reset() {
 
 void BattleMode::_TEMP_LoadTestData() {
 	// Load all background images
-	_battle_background.SetFilename("img/backdrops/battle/battle_cave.png");
+	_battle_background.SetFilename("img/backdrops/battle/desert_cave.png");
 	_battle_background.SetDimensions(SCREEN_LENGTH * TILE_SIZE, SCREEN_HEIGHT * TILE_SIZE);
 	if (!VideoManager->LoadImage(_battle_background)) {
 		cerr << "BATTLE ERROR: Failed to load background image: " << endl;
@@ -292,13 +292,13 @@ void BattleMode::_CreateEnemyActors() {
 	enemy = NULL;
 	
 	frame.SetDimensions(64, 64);
-	frame.SetFilename("img/sprites/battle/enemies/greenslime_d0.png");
+	frame.SetFilename("img/sprites/battle/enemies/green_slime.png");
 	sprite_frames.push_back(frame);
-	frame.SetFilename("img/sprites/battle/enemies/greenslime_d1.png");
+	frame.SetFilename("img/sprites/battle/enemies/green_slime_hp66.png");
 	sprite_frames.push_back(frame);
-	frame.SetFilename("img/sprites/battle/enemies/greenslime_d2.png");
+	frame.SetFilename("img/sprites/battle/enemies/green_slime_hp33.png");
 	sprite_frames.push_back(frame);
-	frame.SetFilename("img/sprites/battle/enemies/greenslime_d3.png");
+	frame.SetFilename("img/sprites/battle/enemies/green_slime_hp00.png");
 	sprite_frames.push_back(frame);
 
 	VideoManager->BeginImageLoadBatch();
@@ -322,13 +322,13 @@ void BattleMode::_CreateEnemyActors() {
 	enemy = NULL;
 	
 	frame.SetDimensions(64, 64);
-	frame.SetFilename("img/sprites/battle/enemies/spider_d0.png");
+	frame.SetFilename("img/sprites/battle/enemies/spider.png");
 	sprite_frames.push_back(frame);
-	frame.SetFilename("img/sprites/battle/enemies/spider_d1.png");
+	frame.SetFilename("img/sprites/battle/enemies/spider_hp66.png");
 	sprite_frames.push_back(frame);
-	frame.SetFilename("img/sprites/battle/enemies/spider_d2.png");
+	frame.SetFilename("img/sprites/battle/enemies/spider_hp33.png");
 	sprite_frames.push_back(frame);
-	frame.SetFilename("img/sprites/battle/enemies/spider_d3.png");
+	frame.SetFilename("img/sprites/battle/enemies/spider_hp00.png");
 	sprite_frames.push_back(frame);
 
 	VideoManager->BeginImageLoadBatch();
@@ -352,13 +352,13 @@ void BattleMode::_CreateEnemyActors() {
 	enemy = NULL;
 
 	frame.SetDimensions(128, 64);
-	frame.SetFilename("img/sprites/battle/enemies/snake_d0.png");
+	frame.SetFilename("img/sprites/battle/enemies/snake.png");
 	sprite_frames.push_back(frame);
-	frame.SetFilename("img/sprites/battle/enemies/snake_d1.png");
+	frame.SetFilename("img/sprites/battle/enemies/snake_hp66.png");
 	sprite_frames.push_back(frame);
-	frame.SetFilename("img/sprites/battle/enemies/snake_d2.png");
+	frame.SetFilename("img/sprites/battle/enemies/snake_hp33.png");
 	sprite_frames.push_back(frame);
-	frame.SetFilename("img/sprites/battle/enemies/snake_d3.png");
+	frame.SetFilename("img/sprites/battle/enemies/snake_hp00.png");
 	sprite_frames.push_back(frame);
 
 	VideoManager->BeginImageLoadBatch();
@@ -382,13 +382,13 @@ void BattleMode::_CreateEnemyActors() {
 	enemy = NULL;
 	
 	frame.SetDimensions(64, 128);
-	frame.SetFilename("img/sprites/battle/enemies/skeleton_d0.png");
+	frame.SetFilename("img/sprites/battle/enemies/skeleton.png");
 	sprite_frames.push_back(frame);
-	frame.SetFilename("img/sprites/battle/enemies/skeleton_d1.png");
+	frame.SetFilename("img/sprites/battle/enemies/skeleton_hp66.png");
 	sprite_frames.push_back(frame);
-	frame.SetFilename("img/sprites/battle/enemies/skeleton_d2.png");
+	frame.SetFilename("img/sprites/battle/enemies/skeleton_hp33.png");
 	sprite_frames.push_back(frame);
-	frame.SetFilename("img/sprites/battle/enemies/skeleton_d3.png");
+	frame.SetFilename("img/sprites/battle/enemies/skeleton_hp00.png");
 	sprite_frames.push_back(frame);
 
 	VideoManager->BeginImageLoadBatch();
@@ -586,11 +586,10 @@ void BattleMode::_UpdateActionListMenu() {
 		// TEMP: only allows to select one target
 		_necessary_selections = 1;
 		_argument_actor_index = GetIndexOfFirstAliveEnemy();
+		_selected_enemy = GetEnemyActorAt(_argument_actor_index);
 
-		// TODO: retrieve the skill
-		// Place the cursor on either characters or enemies, depending on whom the skill should target
-		// Place the skill in the battle script queue
-		// Exit out of the menu
+		// TODO: retrieve the selected skill, place the cursor on either characters or enemies,
+		// depending on whom that skill should target by default
 
 		_cursor_state = CURSOR_SELECT_TARGET;
 	}
@@ -608,6 +607,7 @@ void BattleMode::_UpdateTargetSelection() {
 		while (working_index > 0) {
 			if (GetEnemyActorAt((working_index - 1))->IsAlive()) {
 				_argument_actor_index = working_index - 1;
+				_selected_enemy = GetEnemyActorAt(_argument_actor_index);
 				break;
 			}
 			else {
@@ -621,6 +621,7 @@ void BattleMode::_UpdateTargetSelection() {
 		while (working_index < GetNumberOfEnemyActors() - 1) {
 			if (GetEnemyActorAt((working_index + 1))->IsAlive()) {
 				_argument_actor_index = working_index + 1;
+				_selected_enemy = GetEnemyActorAt(_argument_actor_index);
 				break;
 			}
 			else {
@@ -630,6 +631,7 @@ void BattleMode::_UpdateTargetSelection() {
 	}
 	else if (InputManager->ConfirmPress()) {
 		_cursor_state = CURSOR_SELECT_ATTACK_POINT;
+		// TODO: Implement cursor memory for attack points here
 		_attack_point_selected = 0;
 	}
 	else if (InputManager->CancelPress()) {
@@ -649,6 +651,7 @@ void BattleMode::_UpdateAttackPointSelection() {
 			AddScriptEventToQueue(ScriptEvent(_selected_character, _selected_actor_arguments, "sword_swipe"));
 			_selected_character->SetQueuedToPerform(true);
 			_selected_actor_arguments.clear();
+			_selected_enemy = NULL;
 
 			_actor_index = GetIndexOfFirstIdleCharacter();
 			_cursor_state = CURSOR_IDLE;
@@ -758,13 +761,6 @@ void BattleMode::_DrawBottomMenu() {
 	VideoManager->DrawImage(_bottom_menu_image);
 
 	// Draw the swap icon and any swap cards
-	// TODO: waiting on video engine support
-// 	if (_current_number_swaps == 0) {
-// 		// _swap_icon.SetGrayScale(true);
-// 	}
-// 	else {
-// 		// _swap_icon.SetGrayScale(false);
-// 	}
 	VideoManager->Move(6, 16);
 	VideoManager->DrawImage(_swap_icon);
 	VideoManager->Move(6, 68);
@@ -782,7 +778,9 @@ void BattleMode::_DrawBottomMenu() {
 	}
 
 	// Draw the status information of the selected enemy
-	// _selected_enemy->DrawStatus();
+	if (_selected_enemy != NULL) {
+		_selected_enemy->DrawStatus();
+	}
 } // void BattleMode::_DrawBottomMenu()
 
 
@@ -855,7 +853,7 @@ void BattleMode::_ConstructActionListMenu() {
 // 	}
 
 	_action_list_menu = new OptionBox();
-	_action_list_menu->SetPosition(0.0f, 600.0f);
+	_action_list_menu->SetPosition(30.0f, 512.0f);
 	_action_list_menu->SetFont("battle");
 	_action_list_menu->SetAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	_action_list_menu->SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
