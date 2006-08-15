@@ -115,20 +115,19 @@ BattleMode::BattleMode() :
 	VideoManager->BeginImageLoadBatch();
 	for (uint32 i = 0; i < attack_point_indicator.size(); i++) {
 		if (!VideoManager->LoadImage(attack_point_indicator[i]))
-			cerr << "BATTLE ERROR: Failed to load MAPS indicator." << endl;
+			cerr << "BATTLE ERROR: Failed to load attack point indicator." << endl;
 	}
 
 	for (uint32 i = 0; i < attack_point_indicator.size(); i++) {
 		_attack_point_indicator.AddFrame(attack_point_indicator[i], 10);
 	}
+	
 	_actor_selection_image.SetDimensions(109, 78);
 	_actor_selection_image.SetFilename("img/icons/battle/character_selection.png");
 	if (!VideoManager->LoadImage(_actor_selection_image)) {
 		cerr << "BATTLE ERROR: Unable to load player selector image." << endl;
 	}
 	VideoManager->EndImageLoadBatch();
-
-	_actor_index = GetIndexOfFirstIdleCharacter();
 
 	vector<ustring> action_type_options;
 	action_type_options.push_back(MakeWideString("<img/icons/battle/attack_menu_icon.png><64>Attack"));
@@ -138,14 +137,24 @@ BattleMode::BattleMode() :
 
 	_action_type_menu.SetOptions(action_type_options);
 
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
+
+	_action_list_menu_window = new MenuWindow();
+	_action_list_menu_window->Create(192.0f, 384.0f);
+	_action_list_menu_window->SetPosition(0.0f, 544.0f);
+	_action_list_menu_window->SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_action_list_menu_window->Hide();
+
 	_action_type_menu_cursor_location = 0;
+
+	_action_type_menu.SetOwner(_action_list_menu_window);
 	_action_type_menu.SetCursorOffset(-15, 0);
-	_action_type_menu.SetCellSize(400.0f, 80.0f);
+	_action_type_menu.SetCellSize(100.0f, 80.0f);
 	_action_type_menu.SetSize(1, 4);
-	_action_type_menu.SetPosition(0.0f, 600.0f);
+	_action_type_menu.SetPosition(0.0f, 0.0f);
 	_action_type_menu.SetFont("battle");
-	_action_type_menu.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-	_action_type_menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_action_type_menu.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_action_type_menu.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_action_type_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_action_type_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 // 	_action_type_menu.SetSelection(0); // This line may be causing a seg-fault!
@@ -264,7 +273,7 @@ void BattleMode::_CreateCharacterActors() {
 		_ShutDown();
 	}
 	else {
-		CharacterActor *claudius = new CharacterActor(GlobalManager->GetCharacter(GLOBAL_CLAUDIUS), 250, 200);
+		CharacterActor *claudius = new CharacterActor(GlobalManager->GetCharacter(GLOBAL_CLAUDIUS), 256, 320);
 		_character_actors.push_back(claudius);
 		_selected_character = claudius;
 		_actor_index = IndexLocationOfPlayerCharacter(claudius);
@@ -277,8 +286,6 @@ void BattleMode::_CreateEnemyActors() {
 	StillImage frame; // used for populating the sprite_frames vector
 	vector<StillImage> sprite_frames; // A vector to fill it with all four damage frames for each sprite
 	EnemyActor* enemy; // A pointer to the new enemy actor to add to the battle
-
-	VideoManager->BeginImageLoadBatch(); // Batch is ended after all enemies have been created
 
 	// Create the Green Slime EnemyActor
 	sprite_frames.clear();
@@ -294,18 +301,20 @@ void BattleMode::_CreateEnemyActors() {
 	frame.SetFilename("img/sprites/battle/enemies/greenslime_d3.png");
 	sprite_frames.push_back(frame);
 
+	VideoManager->BeginImageLoadBatch();
 	for (uint32 i = 0; i < sprite_frames.size(); i++) {
 		if (!VideoManager->LoadImage(sprite_frames[i])) {
 			cerr << "BATTLE ERROR: Failed to load sprite frame: " << endl;
 			_ShutDown();
 		}
 	}
-
+	VideoManager->EndImageLoadBatch();
+	
 	GlobalEnemy green_slime("slime");
 	green_slime.SetName(MakeWideString("Green Slime"));
 	green_slime.AddAnimation("IDLE", sprite_frames);
 	green_slime.LevelSimulator(2);
-	enemy = new EnemyActor(green_slime, 805, 170);
+	enemy = new EnemyActor(green_slime, 768, 256);
 	_enemy_actors.push_back(enemy);
 	
 	// Create the Spider EnemyActor
@@ -322,20 +331,21 @@ void BattleMode::_CreateEnemyActors() {
 	frame.SetFilename("img/sprites/battle/enemies/spider_d3.png");
 	sprite_frames.push_back(frame);
 
+	VideoManager->BeginImageLoadBatch();
 	for (uint32 i = 0; i < sprite_frames.size(); i++) {
 		if (!VideoManager->LoadImage(sprite_frames[i])) {
 			cerr << "BATTLE ERROR: Failed to load sprite image: " << endl;
 			_ShutDown();
 		}
 	}
-
+	VideoManager->EndImageLoadBatch();
+	
 	GlobalEnemy spider("spider");
 	spider.SetName(MakeWideString("Spider"));
 	spider.AddAnimation("IDLE", sprite_frames);
 	spider.LevelSimulator(2);
-	enemy = new EnemyActor(spider, 600, 130);
+	enemy = new EnemyActor(spider, 512, 320);
 	_enemy_actors.push_back(enemy);
-
 
 	// Create the Snake EnemyActor
 	sprite_frames.clear();
@@ -351,18 +361,20 @@ void BattleMode::_CreateEnemyActors() {
 	frame.SetFilename("img/sprites/battle/enemies/snake_d3.png");
 	sprite_frames.push_back(frame);
 
+	VideoManager->BeginImageLoadBatch();
 	for (uint32 i = 0; i < sprite_frames.size(); i++) {
 		if (!VideoManager->LoadImage(sprite_frames[i])) {
 			cerr << "BATTTLE ERROR: Failed to load snake sprite frame: " << endl;
 			_ShutDown();
 		}
 	}
-
+	VideoManager->EndImageLoadBatch();
+	
 	GlobalEnemy snake("snake");
 	snake.SetName(MakeWideString("Snake"));
 	snake.AddAnimation("IDLE", sprite_frames);
 	snake.LevelSimulator(2);
-	enemy = new EnemyActor(snake, 600, 280);
+	enemy = new EnemyActor(snake, 576, 192);
 	_enemy_actors.push_back(enemy);
 
 	// Create the Skeleton EnemyActor
@@ -379,21 +391,21 @@ void BattleMode::_CreateEnemyActors() {
 	frame.SetFilename("img/sprites/battle/enemies/skeleton_d3.png");
 	sprite_frames.push_back(frame);
 
+	VideoManager->BeginImageLoadBatch();
 	for (uint32 i = 0; i < sprite_frames.size(); i++) {
 		if (!VideoManager->LoadImage(sprite_frames[i])) {
 			cerr << "BATTLE ERROR: failed to load skeleton sprite frame: " << endl;
 			_ShutDown();
 		}
 	}
+	VideoManager->EndImageLoadBatch();
 
 	GlobalEnemy skeleton("skeleton");
 	skeleton.SetName(MakeWideString("Skeleton"));
 	skeleton.AddAnimation("IDLE", sprite_frames);
 	skeleton.LevelSimulator(2);
-	enemy = new EnemyActor(skeleton, 805, 330);
+	enemy = new EnemyActor(skeleton, 704, 384);
 	_enemy_actors.push_back(enemy);
-
-	VideoManager->EndImageLoadBatch();
 } // void BattleMode::_CreateEnemyActors()
 
 
@@ -489,6 +501,7 @@ void BattleMode::_UpdateCharacterSelection() {
 	// Return if the player does not have more than one character so select
 	if (_NumberCharactersAlive() == 1) {
 		_cursor_state = CURSOR_SELECT_ACTION_TYPE;
+		_action_list_menu_window->Show();
 		return;
 	}
 
@@ -524,6 +537,7 @@ void BattleMode::_UpdateCharacterSelection() {
 	else if (InputManager->ConfirmPress()) {
 		_selected_character = GetPlayerCharacterAt(_actor_index);
 		_cursor_state = CURSOR_SELECT_ACTION_TYPE;
+		_action_list_menu_window->Show();
 	}
 } // void BattleMode::_UpdateCharacterSelection()
 
@@ -553,6 +567,7 @@ void BattleMode::_UpdateActionTypeMenu() {
 		if (_NumberCharactersAlive() > 1) {
 			_actor_index = GetIndexOfFirstIdleCharacter();
 			_cursor_state = CURSOR_IDLE;
+			_action_list_menu_window->Hide();
 		}
 	}
 } // void BattleMode::_UpdateActionTypeMenu()
@@ -637,6 +652,7 @@ void BattleMode::_UpdateAttackPointSelection() {
 
 			_actor_index = GetIndexOfFirstIdleCharacter();
 			_cursor_state = CURSOR_IDLE;
+			_action_list_menu_window->Hide();
 		}
 		else {
 			_cursor_state = CURSOR_SELECT_TARGET;
@@ -777,18 +793,19 @@ void BattleMode::_DrawActionMenu() {
 		return;
 	}
 
-	// Draw normal menu windows if it is necessary to do so
+	// Draw the action menu window
+	if (_cursor_state != CURSOR_IDLE && _action_list_menu_window) {
+		_action_list_menu_window->Draw();
+	}
+
+	// Draw the action type menu
 	if (_cursor_state == CURSOR_SELECT_ACTION_TYPE) {
 		_action_type_menu.Draw();
 	}
 
-	if (_cursor_state >= CURSOR_SELECT_ACTION_LIST && _action_list_menu_window) {
-		if (_action_list_menu_window) {
-			_action_list_menu_window->Draw();
-		}
-		if (_action_list_menu) {
-			_action_list_menu->Draw();
-		}
+	// Draw the action list menu
+	if (_cursor_state >= CURSOR_SELECT_ACTION_LIST) {
+		_action_list_menu->Draw();
 	}
 } // void BattleMode::_DrawActionMenu()
 
@@ -832,10 +849,10 @@ void BattleMode::_ConstructActionListMenu() {
 	if (_action_list_menu) {
 		delete _action_list_menu;
 	}
-	if (_action_list_menu_window) {
-		_action_list_menu_window->Destroy();
-		delete _action_list_menu_window;
-	}
+// 	if (_action_list_menu_window) {
+// 		_action_list_menu_window->Destroy();
+// 		delete _action_list_menu_window;
+// 	}
 
 	_action_list_menu = new OptionBox();
 	_action_list_menu->SetPosition(0.0f, 600.0f);
@@ -862,11 +879,11 @@ void BattleMode::_ConstructActionListMenu() {
 			}
 			_action_list_menu->SetSize(1, attack_skill_names.size());
 			_action_list_menu->SetOptions(attack_skill_names);
-			_action_list_menu->SetSelection(0);
-			_action_list_menu_window = new MenuWindow();
-			_action_list_menu_window->Create(200.0f, 20.0f + 50.0f * attack_skill_names.size());
-			_action_list_menu_window->SetPosition(0.0f, 600.0f);
-			_action_list_menu_window->Show();
+
+// 			_action_list_menu_window = new MenuWindow();
+// 			_action_list_menu_window->Create(200.0f, 20.0f + 50.0f * attack_skill_names.size());
+// 			_action_list_menu_window->SetPosition(0.0f, 600.0f);
+// 			_action_list_menu_window->Show();
 		}
 	} // if (_action_type_menu_cursor_location == ACTION_TYPE_ATTACK)
 	
@@ -885,11 +902,12 @@ void BattleMode::_ConstructActionListMenu() {
 			}
 			_action_list_menu->SetOptions(defense_skill_names);
 			_action_list_menu->SetSize(1, defense_skill_names.size());
-			_action_list_menu->SetSelection(0);
-			_action_list_menu_window = new MenuWindow();
-			_action_list_menu_window->Create(200.0f, 20.0f + 50.0f * defense_skill_names.size());
-			_action_list_menu_window->SetPosition(0.0f, 600.0f);
-			_action_list_menu_window->Show();
+
+
+// 			_action_list_menu_window = new MenuWindow();
+// 			_action_list_menu_window->Create(200.0f, 20.0f + 50.0f * defense_skill_names.size());
+// 			_action_list_menu_window->SetPosition(0.0f, 600.0f);
+// 			_action_list_menu_window->Show();
 		}
 	} // else if (_action_type_menu_cursor_location == ACTION_TYPE_DEFEND)
 	
@@ -909,12 +927,11 @@ void BattleMode::_ConstructActionListMenu() {
 	
 			_action_list_menu->SetOptions(support_skill_names);
 			_action_list_menu->SetSize(1, support_skill_names.size());
-			_action_list_menu->SetSelection(0);
-	
-			_action_list_menu_window = new MenuWindow();
-			_action_list_menu_window->Create(200.0f, 20.0f + 50.0f * support_skill_names.size());
-			_action_list_menu_window->SetPosition(0.0f, 600.0f);
-			_action_list_menu_window->Show();
+
+// 			_action_list_menu_window = new MenuWindow();
+// 			_action_list_menu_window->Create(200.0f, 20.0f + 50.0f * support_skill_names.size());
+// 			_action_list_menu_window->SetPosition(0.0f, 600.0f);
+// 			_action_list_menu_window->Show();
 		}
 	} // else if (_action_type_menu_cursor_location == ACTION_TYPE_SUPPORT)
 	
@@ -936,12 +953,11 @@ void BattleMode::_ConstructActionListMenu() {
 
 		_action_list_menu->SetOptions(inv_names);
 		_action_list_menu->SetSize(1, inv_names.size());
-		_action_list_menu->SetSelection(0);
 
-		_action_list_menu_window = new MenuWindow();
-		_action_list_menu_window->Create(200.0f, 20.0f + 50.0f * inv_names.size());
-		_action_list_menu_window->SetPosition(0.0f, 600.0f);
-		_action_list_menu_window->Show();
+// 		_action_list_menu_window = new MenuWindow();
+// 		_action_list_menu_window->Create(200.0f, 20.0f + 50.0f * inv_names.size());
+// 		_action_list_menu_window->SetPosition(0.0f, 600.0f);
+// 		_action_list_menu_window->Show();
 	} // else if (_action_type_menu_cursor_location == ACTION_TYPE_ITEM)
 
 	else {
