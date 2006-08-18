@@ -1,5 +1,4 @@
--- Boot options, and all the stuff that needs to be loaded at boot time
--- Created by Vladimir Mitrovic (snipe714) on Feb 9th, 2005.
+-- Boot mode configuration parameters and data files to load
 
 -- -------------------------------------------------- --
 -- ----------------- VIDEO STUFF -------------------- --
@@ -32,13 +31,13 @@ coord_sys_nl = 1;
 -- -------------------------------------------------- --
 -- ----------------- AUDIO STUFF -------------------- --
 -- -------------------------------------------------- --
-music_files = { "Allacrost_Opening_Theme",
-                "Opening_Effect" };
+music_files = { "mus/Allacrost_Opening_Theme.ogg",
+                "mus/Opening_Effect.ogg" };
 
-sound_files = { "confirm",
-                "cancel",
-                "obtain",
-                "bump",
-                "volumetest" };
+sound_files = { "snd/confirm.wav",
+                "snd/cancel.wav",
+                "snd/obtain.wav",
+                "snd/bump.wav",
+                "snd/volumetest.wav" };
 
 -- -------------------------------------------------- --

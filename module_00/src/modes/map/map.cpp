@@ -115,7 +115,7 @@ void MapMode::Reset() {
 void MapMode::LoadMap() {
 
 	_map_music.push_back(MusicDescriptor());
-	_map_music[0].LoadMusic("Seeking_New_Worlds");
+	_map_music[0].LoadMusic("mus/Seeking_New_Worlds.ogg");
 
 	// *********** (1) Setup GUI items in 1024x768 coordinate system ************
 	VideoManager->PushState();

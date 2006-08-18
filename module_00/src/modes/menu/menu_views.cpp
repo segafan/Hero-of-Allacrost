@@ -254,11 +254,11 @@ void InventoryWindow::Update()
 	// Load sound effects
 	SoundDescriptor confirm;
 	SoundDescriptor cancel;
-	if (confirm.LoadSound("confirm") == false) 
+	if (confirm.LoadSound("snd/confirm.wav") == false) 
 	{
 		cerr << "MENUMODE::UPDATE - Unable to load confirm sound effect!" << endl;
 	}
-	if (cancel.LoadSound("cancel") == false) 
+	if (cancel.LoadSound("snd/cancel.wav") == false) 
 	{
 		cerr << "MENUMODE::UPDATE - Unable to load cancel sound effect!" << endl;
 	}
@@ -452,11 +452,11 @@ void MiniCharacterSelectWindow::Update()
 	// Load sound effects
 	SoundDescriptor confirm;
 	SoundDescriptor bump;
-	if (confirm.LoadSound("obtain") == false) 
+	if (confirm.LoadSound("snd/obtain.wav") == false) 
 	{
 		cerr << "MINICHARWINDOW::UPDATE - Unable to load confirm sound effect!" << endl;
 	}
-	if (bump.LoadSound("bump") == false) 
+	if (bump.LoadSound("snd/bump.wav") == false) 
 	{
 		cerr << "MINICHARWINDOW::UPDATE - Unable to load bump sound effect!" << endl;
 	}
@@ -691,11 +691,11 @@ void StatusWindow::Update()
 	// Load sound effects
 	SoundDescriptor confirm;
 	SoundDescriptor cancel;
-	if (confirm.LoadSound("confirm") == false) 
+	if (confirm.LoadSound("snd/confirm.wav") == false) 
 	{
 		cerr << "STATUSWINDOW::UPDATE - Unable to load confirm sound effect!" << endl;
 	}
-	if (cancel.LoadSound("cancel") == false) 
+	if (cancel.LoadSound("snd/cancel.wav") == false) 
 	{
 		cerr << "STATUSWINDOW::UPDATE - Unable to load cancel sound effect!" << endl;
 	}

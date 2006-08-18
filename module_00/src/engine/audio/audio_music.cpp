@@ -30,7 +30,7 @@ MusicData::MusicData(const std::string & fname) :
 	filename(fname),
 	playing(false)
 {
-	music = Mix_LoadMUS(("mus/" + filename + ".ogg").c_str());
+	music = Mix_LoadMUS(filename.c_str());
 	if (music == NULL) {
 		cout << "AUDIO ERROR: Could not open music file " << filename << ": " << Mix_GetError() << endl;
 		reference_count = 0;
@@ -72,11 +72,11 @@ void MusicData::RemoveReference() {
 void MusicData::DEBUG_PrintProperties() {
 	if (IsValid() == false) {
 		AudioManager->_audio_errors |= AUDIO_ERROR_NO_DATA;
-		cerr << "ERROR: the data for the file mus/" << filename << ".ogg is not valid" << endl;
+		cerr << "ERROR: the data for the file " << filename << " is not valid" << endl;
 	}
 	else {
 		cout << "--------------------------------------------------------------------------------" << endl;
-		cout << "Filename:    mus/" << filename << ".ogg" << endl;
+		cout << "Filename:      " << filename << endl;
 		// These properties are not easily available with SDL_mixer
 // 		cout << "Frequency:   " << property << " Hz" << endl;
 // 		cout << "Bit depth:   " << property << endl;
