@@ -53,8 +53,8 @@ _credits_text(
 			  "Josiah Tobin (Josiah Tobin) ~ Map tiles\n\n"
 			  "Matthew James (nunvuru) ~ Website graphics, GUI artwork, Hero of Allacrost logos\n\n"
 			  "Victoria Smith (alenacat) ~ Map sprites, map tiles\n\n"
+			  "Jerimiah Short (BigPapaN0z) ~ Map tiles\n\n"
 			  "Max Humber (zomby138) ~ Conceptual Art, Coloring, Computer Graphics\n\n"
-			  "Jon Williams (Jonatron) ~ Map sprites\n"
 			  "\n\n\n"
 			  "Music and Sound Team\n\n"
 			  "Ryan Reilly (Rain) ~ Music and sound lead, soundtrack composer\n\n"
@@ -78,7 +78,6 @@ _credits_text(
 			  "Adam Lindquist (Zorbfish) ~ Scripting engine\n"
 			  "\n\n\n"
 			  "Additional Artwork\n\n"
-			  "Jerimiah Short (BigPapaN0z) ~ Map tiles\n\n"
 			  "Tyler Stroud (gloomcover) ~ Map tiles\n\n"
 			  "Jason Frailey (Valdroni) ~ Concept art, map sprites\n\n"
 			  "Nathan Christie (Adarias) ~ Concept art, map sprites, map tiles\n\n"
@@ -86,6 +85,7 @@ _credits_text(
 			  "(Jarks) ~ Map tiles, inventory icons\n\n"
 			  "(wayfarer) ~ Concept art, map sprites\n\n"
 			  "Chris Luspo (Venndetta1) ~ Concept art\n"
+			  "Jon Williams (Jonatron) ~ Map sprites\n"
 			  "\n\n\n"
 			  "Additional Music and Sound\n\n"
 			  "Matt Dexter (Star Pilot) ~ Soundtrack composer\n\n"
@@ -129,7 +129,7 @@ void CreditsScreen::Draw()
 	VideoManager->Move(512.0f, 450 + _text_offset_y);
 	VideoManager->SetScissorRect(_window.GetScissorRect());
 	VideoManager->EnableScissoring(true);
-	VideoManager->DrawText(MakeWideString(_credits_text));
+	VideoManager->DrawText(MakeUnicodeString(_credits_text));
 	VideoManager->EnableScissoring(false);
 }
 

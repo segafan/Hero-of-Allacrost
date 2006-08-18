@@ -142,7 +142,7 @@ void MapMode::LoadMap() {
 	_random_encounters = _map_data.ReadBool("random_encounters");
 	if (_random_encounters) {
 		_encounter_rate = _map_data.ReadInt("encounter_rate");
-		_steps_till_encounter = GaussianValue(_encounter_rate, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
+		_steps_till_encounter = GaussianRandomValue(_encounter_rate, 5.0f);
 	}
 	else {
 		// Set some decent default values, just in case a script turns random encounters on later
@@ -268,7 +268,7 @@ void MapMode::LoadMap() {
 
 	// Load player sprite and rest of map objects
 	sp = new MapSprite();
-	sp->SetName(MakeWideString("Claudius"));
+	sp->SetName(MakeUnicodeString("Claudius"));
 	sp->SetID(0);
 	sp->SetObjectType(PLAYER_SPRITE);
         sp->SetRowPosition(12);
@@ -285,7 +285,7 @@ void MapMode::LoadMap() {
 	_focused_object = sp;
 
 	sp = new MapSprite();
-	sp->SetName(MakeWideString("Laila"));
+	sp->SetName(MakeUnicodeString("Laila"));
 	sp->SetID(1);
 	sp->SetObjectType(NPC_SPRITE);
 	sp->SetRowPosition(4);
@@ -299,19 +299,19 @@ void MapMode::LoadMap() {
 	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied = 1;
 
 	sd = new SpriteDialogue();
-	sd->text.push_back(MakeWideString("This is not a real demo. There is no spoon."));
+	sd->text.push_back(MakeUnicodeString("This is not a real demo. There is no spoon."));
 	sd->speakers.push_back(1); // NPC speaks
 	sp->dialogues.push_back(sd);
 
 	sd = new SpriteDialogue();
-	sd->text.push_back(MakeWideString("I sure wish we had more art, don't you agree?"));
+	sd->text.push_back(MakeUnicodeString("I sure wish we had more art, don't you agree?"));
 	sd->speakers.push_back(1); // NPC speaks
-	sd->text.push_back(MakeWideString("Well, good pixel artists are difficult to find."));
+	sd->text.push_back(MakeUnicodeString("Well, good pixel artists are difficult to find."));
 	sd->speakers.push_back(0); // Player speaks
 	sp->dialogues.push_back(sd);
 
 	sd = new SpriteDialogue();
-	sd->text.push_back(MakeWideString("Check out our website at http://www.allacrost.org/"));
+	sd->text.push_back(MakeUnicodeString("Check out our website at http://www.allacrost.org/"));
 	sd->speakers.push_back(1); // NPC speaks
 	sp->dialogues.push_back(sd);
 
@@ -343,7 +343,7 @@ void MapMode::LoadMap() {
 	_sprites[sp->sprite_id] = sp;
 
 	sp = new MapSprite();
-	sp->SetName(MakeWideString("Marcus"));
+	sp->SetName(MakeUnicodeString("Marcus"));
 	sp->SetID(2);
 	sp->SetObjectType(NPC_SPRITE);
 	sp->SetRowPosition(18);
@@ -357,20 +357,20 @@ void MapMode::LoadMap() {
 	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied = 1;
 
 	sd = new SpriteDialogue();
-	sd->text.push_back(MakeWideString("My moustache tickles me."));
+	sd->text.push_back(MakeUnicodeString("My moustache tickles me."));
 	sd->speakers.push_back(2); // NPC speaks
-	sd->text.push_back(MakeWideString("Why don't you shave it off then? Or at least trim it..."));
+	sd->text.push_back(MakeUnicodeString("Why don't you shave it off then? Or at least trim it..."));
 	sd->speakers.push_back(0); // Player speaks
-	sd->text.push_back(MakeWideString("Because moustaches are fashionable these days. I have to keep up with the times!"));
+	sd->text.push_back(MakeUnicodeString("Because moustaches are fashionable these days. I have to keep up with the times!"));
 	sd->speakers.push_back(2); // NPC speaks
-	sd->text.push_back(MakeWideString("....."));
+	sd->text.push_back(MakeUnicodeString("....."));
 	sd->speakers.push_back(0); // NPC speaks
 	sp->dialogues.push_back(sd);
 
 	sd = new SpriteDialogue();
-	sd->text.push_back(MakeWideString("I know kung fu."));
+	sd->text.push_back(MakeUnicodeString("I know kung fu."));
 	sd->speakers.push_back(2); // NPC speaks
-	sd->text.push_back(MakeWideString("Show me."));
+	sd->text.push_back(MakeUnicodeString("Show me."));
 	sd->speakers.push_back(0); // Player speaks
 	sp->dialogues.push_back(sd);
 
@@ -409,7 +409,7 @@ void MapMode::LoadMap() {
 	_sprites[sp->sprite_id] = sp;
 
 	sp = new MapSprite();
-	sp->SetName(MakeWideString("Vanica"));
+	sp->SetName(MakeUnicodeString("Vanica"));
 	sp->SetID(3);
 	sp->SetObjectType(NPC_SPRITE);
 	sp->SetRowPosition(24);
@@ -423,7 +423,7 @@ void MapMode::LoadMap() {
 	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied = 1;
 
 	sd = new SpriteDialogue();
-	sd->text.push_back(MakeWideString("You will never be able to guess my real age."));
+	sd->text.push_back(MakeUnicodeString("You will never be able to guess my real age."));
 	sd->speakers.push_back(3); // NPC speaks
 	sp->dialogues.push_back(sd);
 
@@ -456,7 +456,7 @@ void MapMode::LoadMap() {
 	_sprites[sp->sprite_id] = sp;
 
 	sp = new MapSprite();
-	sp->SetName(MakeWideString("Woman in Rags"));
+	sp->SetName(MakeUnicodeString("Woman in Rags"));
 	sp->SetID(4);
 	sp->SetObjectType(NPC_SPRITE);
 	sp->SetRowPosition(32);
@@ -469,7 +469,7 @@ void MapMode::LoadMap() {
 	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied = 1;
 
 	sd = new SpriteDialogue();
-	sd->text.push_back(MakeWideString("Is there no exit out of this stinking cave?"));
+	sd->text.push_back(MakeUnicodeString("Is there no exit out of this stinking cave?"));
 	sd->speakers.push_back(4); // NPC speaks
 	sp->dialogues.push_back(sd);
 
@@ -1094,7 +1094,7 @@ void MapMode::_UpdateExplore() {
                 if (_random_encounters) {
 			_steps_till_encounter--;
 			if (_steps_till_encounter == 0) {
-				_steps_till_encounter = GaussianValue(_encounter_rate, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
+				_steps_till_encounter = GaussianRandomValue(_encounter_rate, 5.0f);
 				BattleMode *BM = new BattleMode();
 				ModeManager->Push(BM);
 			}

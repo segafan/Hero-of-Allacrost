@@ -7,23 +7,20 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-/*!****************************************************************************
- * \file    utils.cpp
- * \author  Tyler Olsen, roots@allacrost.org
- * \date    Last Updated: August 12th, 2005
- * \brief   Source file for Allacrost utility code.
- *****************************************************************************/
+/** ****************************************************************************
+*** \file    utils.cpp
+*** \author  Tyler Olsen, roots@allacrost.org
+*** \brief   Source file for Allacrost utility code.
+*** ***************************************************************************/
 
 #include "utils.h"
 
-
-// Includes for directory manipulation. Note, windows has its own way of 
+// Headers included for directory manipulation. Windows has its own way of
 // dealing with directories, hence the need for conditional includes
-
 #ifdef _WIN32
-#include <direct.h>
+	#include <direct.h>
 #else
-#include <dirent.h>
+	#include <dirent.h>
 #endif
 
 #include <sys/stat.h>
@@ -33,373 +30,48 @@ using namespace std;
 namespace hoa_utils {
 
 bool UTILS_DEBUG = false;
-const size_t UnicodeString::npos = ~0;
 
+////////////////////////////////////////////////////////////////////////////////
+///// ustring Class
+////////////////////////////////////////////////////////////////////////////////
 
-// This will return a floating point number between -1 and 1. Its cute, really.
-inline float UnitRV() {
-	return 2 * (float) rand()/RAND_MAX - 1;
-}
-
-
-
-// Returns a floaing point number between 0.0 and 1.0
-float RandomUnit() {
-	return (static_cast<float>(rand()/RAND_MAX));
-}
+const size_t ustring::npos = ~0;
 
 
 
-// This will return a random integer between lower_bound and upper_bound (inclusive)
-int32 RandomNumber(int32 lower_bound, int32 upper_bound) {
-	int32 range;		// The number of possible values we may return
-	float result; // Our result (we cast it when we return)
-
-	range = upper_bound - lower_bound + 1;
-	if (range < 0) { // Oops, looks like someone accidentally switched the bound arguments
-		if (UTILS_DEBUG) cerr << "UTILS WARNING: Call to RandomNum had bound arguments swapped." << endl;
-		range = range * -1;
-	}
-
-	result = range * (float) rand()/RAND_MAX; // Compute a random floating point number in our range
-	result = result + lower_bound; // Shift our range so that it is within the correct bounds;
-
-	return static_cast<int32>(result);
-}
-
-
-
-// This returns a Gaussian random value in the range: [mean - range, mean + range]
-int32 GaussianValue(int32 mean, int32 range, bool positive_value) {
-	float x, y, r; // x and y are points on the unit circle. r is the radius
-	float z_value; // This is a Gaussian random variable on a normal distribution curve (mean 0, stand dev 1)
-	float result;	// This is the resulting Gaussian random variable we want to return
-	float std_dev; // This is the standard deviation, equal to 1/3 of range
-
-	if (range <= 0)		 // Use the default range of +/- 20% of the mean (= 6.667 standard deviation)
-		std_dev = (float) (mean * 0.20 / 3);
-	else								// Set standard deviation equal to one third of the range
-		std_dev = (float) (range / 3);
-
-	if (std_dev < 0)		// Make sure that we have a positive standard deviation
-		std_dev = -1 * std_dev;
-
-	// Computes a standard Gaussian random deviate using the polar method. The polar method is to
-	//	compute a random point (x, y) inside the unit circle centered at (0, 0) with radius 1. Then
-	//
-	//	 x * Math.sqrt(-2.0 * Math.log(r) / r)
-	//
-	//	is a Gaussian random variable with mean 0 and standard deviation 1.
-	//	 Reference: Knuth, The Art of Computer Programming, Volume 2, p. 122
-	do {
-		x = 2.0f * UnitRV() - 1.0f;            // Get the X-coordinate
-		y = 2.0f * UnitRV() - 1.0f;            // Get the Y-coordinate
-		r = x*x + y*y;                       // Compute the radius
-	} while (r > 1.0f || r == 0.0f);         // Loop is executed 4 / pi = 1.273 times on average
-	z_value = x * sqrt(-2.0f * log(r) / r); // Get the Gaussian random value with mean 0 and standard devation 1
-
-	// Compute a Gaussian value using our own mean and standard deviation
-	//result = floatnearbyintf((std_dev * z_value) + mean); this fn does rounding, but I can't get it to compile...
-	result = (std_dev * z_value) + mean;
-
-	// Reverses sign of result if we don't want a negative value returned
-	if (positive_value && result < 0.0f)
-		result = result * -1;
-
-	// If we have a zero or negative range argument, we don't apply bounds to the value returned.
-	if (range <= 0)
-		return (int32)result;
-
-	if (result < mean - range)      // Covers the case that we exceeded our lower bound (occurs 0.015% of the time)
-		result = float( mean - range );
-	else if (result > mean + range) // Covers the case that we exceeded our upper bound (occurs 0.015% of the time)
-		result = float( mean + range );
-
-	// Note: because we cast rather than round the mean + range value isn't chosen as often as mean - range
-	return (int32)result;	// Cast to an int32 and return
-}
-
-
-// This creates a directory of the given path (e.g. img/fonts)
-bool MakeDirectory(const std::string &directoryName)
-{
-	// don't do anything if folder already exists
-	struct stat buf;
-	int32 i = stat(directoryName.c_str(), &buf);	
-	if(i==0)	
-		return true;
-
-	// if not then create it with mkdir(). Note that linux requires
-	// file permissions to be set but windows doesn't
-
-#ifdef _WIN32
-	int32 success = mkdir(directoryName.c_str());
-#else
-	int32 success = mkdir(directoryName.c_str(), S_IRWXG | S_IRWXO | S_IRWXU);
-#endif
-	
-	if(success == -1)
-	{
-		if(UTILS_DEBUG)
-			cerr << "UTILS ERROR: could not create directory: " << directoryName.c_str() << endl;
-		
-		return false;
-	}
-	
-	return true;
-}
-
-
-// this removes all the files in the given directory
-bool CleanDirectory(const std::string &directoryName)
-{
-	// don't do anything if folder doesn't exist
-	struct stat buf;
-	int32 i = stat(directoryName.c_str(), &buf);	
-	if(i!=0)	
-		return true;
-
-#ifdef _WIN32
-
-//--- WINDOWS -------------------------------------------------------
-
-	// get the directory of the application	
-	char appPath[1024];
-	GetCurrentDirectoryA(1024, appPath);	
-	int32 appPathLen = (int32)strlen(appPath);	
-	if(appPathLen <= 0)
-		return false;	
-	if(appPath[appPathLen-1] == '\\')    // cut off ending slash if it's there
-		appPath[appPathLen-1] = '\0';
-		
-	string fullPath = appPath;
-	
-	if(directoryName[0] == '/' || directoryName[0] == '\\')
-	{
-		fullPath += directoryName;
-	}
-	else
-	{
-		fullPath += "/";
-		fullPath += directoryName;
-	}
-	
-	char fileFound[1024];
-	WIN32_FIND_DATAA info;
-	HANDLE hp;
-	sprintf(fileFound, "%s\\*.*", fullPath.c_str());
-	hp = FindFirstFileA(fileFound, &info);
-	
-	if(hp != INVALID_HANDLE_VALUE)
-	{
-		do
-		{
-			sprintf(fileFound, "%s\\%s", fullPath.c_str(), info.cFileName);			
-			DeleteFileA(fileFound);
-		} while(FindNextFileA(hp, &info));
-	}	
-	FindClose(hp);
-
-#else
-
-//--- LINUX / MACOS -------------------------------------------------------
-	
-	DIR *pDir;
-	struct dirent *pEnt;
-	
-	pDir = opendir(directoryName.c_str());   // open the directory we want to clean
-	if(!pDir)
-	{
-		if(UTILS_DEBUG)
-			cerr << "UTILS ERROR: failed to clean directory: " << directoryName << endl;
-		return false;
-	}
-
-	string baseDir = directoryName;
-	if(baseDir[baseDir.length()-1] != '/')
-		baseDir += "/";
-	
-	while((pEnt=readdir(pDir)))
-	{
-		string removedFile = baseDir + pEnt->d_name;
-		remove(removedFile.c_str());
-	}
-	
-	closedir(pDir);
-	
-#endif
-	
-	return true;
-}
-
-
-// this removes the given directory
-bool RemoveDirectory(const std::string &directoryName)
-{
-	// don't do anything if folder doesn't exist
-	struct stat buf;
-	int32 i = stat(directoryName.c_str(), &buf);	
-	if(i!=0)	
-		return true;
-
-	// if the folder is still there, make sure it doesn't have any files in it
-	CleanDirectory(directoryName);
- 
-	// finally, remove the folder itself with rmdir()
-	int32 success = rmdir(directoryName.c_str());
-	
-	if(success == -1)
-	{
-		if(UTILS_DEBUG)
-			cerr << "UTILS ERROR: could not delete directory: " << directoryName.c_str() << endl;
-		
-		return false;
-	}
-	
-	return true;
-}
-
-
-// converts a string to a wide string
-ustring MakeWideString(const string &text)
-{
-	int32 length = (int32) text.length();
-	uint16 *ustr = new uint16[length+1];
-	ustr[length] = uint16('\0');
-	
-	for(int32 c = 0; c < length; ++c)
-	{
-		ustr[c] = uint16(text[c]);
-	}
-	
-	ustring wstr(ustr);
-	delete [] ustr;
-	
-	return wstr;
-}
-
-
-// converts a wide string to a string
-string MakeByteString(const ustring &uText)
-{
-	int32 length = (int32) uText.length();
-	
-	unsigned char *str = new unsigned char[length+1];
-	str[length] = '\0';
-	
-	for(int32 c = 0; c < length; ++c)
-	{
-		uint16 curChar = uText[c];
-		
-		if(curChar > 0xff)
-			str[c] = '?';
-		else
-			str[c] = static_cast<unsigned char> (curChar);
-	}
-	
-	string byteString(reinterpret_cast<char *>(str));
-	delete [] str;
-	
-	return byteString;
-}
-
-
-// returns true if the given text is a number
-bool IsNumber(const std::string &text)
-{
-	if(text.empty())
-		return false;
-				
-	// keep track of whether decimal point is allowed. Basically it's allowed at any point
-	// except once it's been used once it can't be used again
-	bool isDecimalAllowed = true;
-	
-	size_t len = text.length();
-	
-	for(size_t c = 0; c < len; ++c)
-	{
-		// if the character is not a valid minus or plus sign, and it's not a
-		// digit, and it's not a valid decimal point, then this string isn't a number
-		
-		bool isNumeric = (c==0 && (text[c] == '-' || text[c] == '+')) ||
-		                 (isdigit(int32(text[c]))) ||
-		                 (isDecimalAllowed && text[c] == '.');
-		
-		if(!isNumeric)
-			return false;
-	}
-	
-	return true;
-}
-
-
-UnicodeString::UnicodeString()
-{
+ustring::ustring() {
 	_str.push_back(0);
 }
 
 
-UnicodeString::UnicodeString(const uint16 *s)
-{
+
+ustring::ustring(const uint16 *s) {
 	_str.clear();
 	
-	if(!s)
-	{
+	if (!s) {
 		_str.push_back(0);
 		return;
 	}
 	
-	while(*s != 0)
-	{
+	while (*s != 0) {
 		_str.push_back(*s);
 		++s;
 	}
 	
 	_str.push_back(0);
 }
-	
-	
-// clear to empty string
-void UnicodeString::clear()
-{
-	_str.clear();	
-	_str.push_back(0);
-}
 
 
-// return true if string is empty
-bool UnicodeString::empty() const
-{
-	return _str.size() <= 1;
-}
-	
-	
-// length of string
-size_t UnicodeString::length() const
-{
-	// note the -1, because we assume that there is always a null terminating character
-	return _str.size() - 1;
-}
-
-
-// length of string
-size_t UnicodeString::size() const
-{
-	return length();
-}
-	
-
-// return substring starting at pos, and continuing for n elements
-UnicodeString UnicodeString::substr(size_t pos, size_t n) const
+// Return a substring starting at pos, continuing for n elements
+ustring ustring::substr(size_t pos, size_t n) const
 {
 	size_t len = length();
 	
-	if(pos >= len)
+	if (pos >= len)
 		throw std::out_of_range("pos passed to substr() was too large");
 		
-	UnicodeString s;
-	while(n > 0 && pos < len)
-	{
+	ustring s;
+	while (n > 0 && pos < len) {
 		s += _str[pos];
 		++pos;
 		--n;
@@ -409,9 +81,8 @@ UnicodeString UnicodeString::substr(size_t pos, size_t n) const
 }
 
 
-// add a character to end of string	
-UnicodeString & UnicodeString::operator += (uint16 c)
-{
+// Adds a character to end of this string
+ustring & ustring::operator += (uint16 c) {
 	_str[length()] = c;
 	_str.push_back(0);
 	
@@ -419,11 +90,10 @@ UnicodeString & UnicodeString::operator += (uint16 c)
 }
 
 
-// concatenate another string onto this one
-UnicodeString & UnicodeString::operator += (const UnicodeString &s)	
-{
+// Concatenate another string on to the end of this string
+ustring & ustring::operator += (const ustring &s) {
 	// nothing to do for empty string
-	if(s.empty())
+	if (s.empty())
 		return *this;
 	
 	// add first character of string into the null character spot
@@ -431,170 +101,324 @@ UnicodeString & UnicodeString::operator += (const UnicodeString &s)
 	
 	// add rest of characters afterward		
 	size_t len = s.length();
-	for(size_t j = 1; j < len; ++j)
-	{
+	for (size_t j = 1; j < len; ++j) {
 		_str.push_back(s[j]);
 	}
 	
-	// finish off with a null character
+	// Finish off with a null character
 	_str.push_back(0);
 	
 	return *this;
 }
 
 
-// assign this string to another one
-UnicodeString & UnicodeString::operator = (const UnicodeString &s)
-{
+// Will assign the current string to this string
+ustring & ustring::operator = (const ustring &s) {
 	clear();	
 	operator += (s);
 	
 	return *this;
-}
+} // ustring & ustring::operator = (const ustring &s)
 
 
-// finds a character within a string, starting at pos. If nothing found, returns npos
-size_t UnicodeString::find(uint16 c, size_t pos) const
-{
+// Finds a character within a string, starting at pos. If nothing is found, npos is returned
+size_t ustring::find(uint16 c, size_t pos) const {
 	size_t len = length();
 	
-	for(size_t j = pos; j < len; ++j)
-	{
-		if(_str[j] == c)
+	for (size_t j = pos; j < len; ++j) {
+		if (_str[j] == c)
 			return j;
 	}
 	
 	return npos;
-}
+} // size_t ustring::find(uint16 c, size_t pos) const
 
 
-// finds a string within a string, starting at pos. If nothing found, returns npos
-size_t UnicodeString::find(const UnicodeString &s, size_t pos) const
-{
+// Finds a string within a string, starting at pos. If nothing is found, npos is returned
+size_t ustring::find(const ustring &s, size_t pos) const {
 	size_t len = length();
 	size_t total_chars = s.length();
 	size_t chars_found = 0;
 	
-	for(size_t j = pos; j < len; ++j)
-	{
-		if(_str[j] == s[chars_found])
-		{
+	for (size_t j = pos; j < len; ++j) {
+		if (_str[j] == s[chars_found]) {
 			++chars_found;
-			if(chars_found == total_chars)
-			{
-				return j - chars_found + 1;
+			if (chars_found == total_chars) {
+				return (j - chars_found + 1);
 			}
 		}
-		else
-		{
+		else {
 			chars_found = 0;
 		}
 	}
 	
 	return npos;
-}
+} // size_t ustring::find(const ustring &s, size_t pos) const
+
+////////////////////////////////////////////////////////////////////////////////
+///// string and ustring manipulator functions
+////////////////////////////////////////////////////////////////////////////////
+
+// Returns true if the given text is a number
+bool IsStringNumeric(const string& text) {
+	if (text.empty())
+		return false;
+				
+	// Keep track of whether decimal point is allowed. It is allowed to be present in the text zero or one times only.
+	bool decimal_allowed = true;
 	
+	size_t len = text.length();
 
-// returns raw pointer to string
-const uint16 * UnicodeString::c_str() const
-{
-	return &_str[0];
-}
+	// Check each character of the string one at a time
+	for (size_t c = 0; c < len; ++c) {
+		// The only non numeric characters allowed are a - or + as the first character, and one decimal point anywhere
+		bool numeric_char = (isdigit(static_cast<int32>(text[c]))) || (c==0 && (text[c] == '-' || text[c] == '+'));
 
+		if (!numeric_char) {
+			// Check if the 'bad' character is a decimal point first before labeling the string invalid
+			if (decimal_allowed && text[c] == '.') {
+				decimal_allowed = false; // Decimal points are now invalid for the rest of the string
+			}
+			else {
+				return false;
+			}
+		}
+	}
 	
-uint16 & UnicodeString::operator [] (size_t pos)
-{
-	return _str[pos];
+	return true;
+} // bool IsStringNumeric(const string& text)
+
+
+// Creates a ustring from a normal string
+ustring MakeUnicodeString(const string& text) {
+	int32 length = static_cast<int32>(text.length());
+	uint16 *ubuff = new uint16[length+1];
+	ubuff[length] = static_cast<uint16>('\0');
+	
+	for (int32 c = 0; c < length; ++c) {
+		ubuff[c] = static_cast<uint16>(text[c]);
+	}
+	
+	ustring new_ustr(ubuff);
+	delete[] ubuff;
+	
+	return new_ustr;
+} // ustring MakeUnicodeString(const string& text)
+
+
+// Creates a normal string from a ustring
+string MakeStandardString(const ustring& text) {
+	int32 length = static_cast<int32>(text.length());
+	
+	unsigned char *strbuff = new unsigned char[length+1];
+	strbuff[length] = '\0';
+	
+	for (int32 c = 0; c < length; ++c) {
+		uint16 curr_char = text[c];
+		
+		if(curr_char > 0xff)
+			strbuff[c] = '?';
+		else
+			strbuff[c] = static_cast<unsigned char>(curr_char);
+	}
+	
+	string new_str(reinterpret_cast<char*>(strbuff));
+	delete [] strbuff;
+	
+	return new_str;
+} // string MakeStandardString(const ustring& text)
+
+////////////////////////////////////////////////////////////////////////////////
+///// Random number generator functions
+////////////////////////////////////////////////////////////////////////////////
+
+float RandomFloat() {
+	return (static_cast<float>(rand()) / static_cast<float>(RAND_MAX));
 }
 
-const uint16 & UnicodeString::operator [] (size_t pos) const
-{
-	return _str[pos];
+
+// Returns a random integer between two inclusive bounds
+int32 RandomBoundedInteger(int32 lower_bound, int32 upper_bound) {
+	int32 range;  // The number of possible values we may return
+	float result;
+
+	range = upper_bound - lower_bound + 1;
+	if (range < 0) { // Oops, someone accidentally switched the lower/upper bound arguments
+		if (UTILS_DEBUG) cerr << "UTILS WARNING: Call to RandomNumber had bound arguments swapped." << endl;
+		range = range * -1;
+	}
+
+	result = range * RandomFloat();
+	result = result + lower_bound; // Shift result so that it is within the correct bounds
+
+	return static_cast<int32>(result);
+} // int32 RandomBoundedInteger(int32 lower_bound, int32 upper_bound)
+
+// Creates a Gaussian random interger value.
+// std_dev and positive_value are optional arguments with default values 10.0f and true respectively
+int32 GaussianRandomValue(int32 mean, float std_dev, bool positive_value) {
+	float x, y, r;  // x and y are coordinates on the unit circle
+	float grv_unit; // Used to hold a Gaussian random variable on a normal distribution curve (mean 0, stand dev 1)
+	float result;
+
+	// Make sure that the standard deviation is positive
+	if (std_dev < 0) {
+		cerr << "UTILS WARNING: negative value for standard deviation argument in function GaussianValue" << endl;
+		std_dev = -1.0f * std_dev;
+	}
+
+	// Computes a standard Gaussian random number using the the polar form of the Box-Muller transformation.
+	// The algorithm computes a random point (x, y) inside the unit circle centered at (0, 0) with radius 1.
+	// Then a Gaussian random variable with mean 0 and standard deviation 1 is computed by:
+	//
+	// x * sqrt(-2.0 * log(r) / r)
+	//
+	// Reference: Knuth, The Art of Computer Programming, Volume 2, p. 122
+
+	// This loop is executed 4 / pi = 1.273 times on average
+	do {
+		x = 2.0f * RandomFloat() - 1.0f;     // Get a random x-coordinate [-1.0f, 1.0f]
+		y = 2.0f * RandomFloat() - 1.0f;     // Get a random y-coordinate [-1.0f, 1.0f]
+		r = x*x + y*y;
+	} while (r > 1.0f || r == 0.0f);
+	grv_unit = x * sqrt(-2.0f * log(r) / r);
+
+	// Use the standard gaussian value to create a random number with the desired mean and standard deviation.
+	result = (grv_unit * std_dev) + mean;
+
+	// Return zero if a negative result was found and only positive values were to be returned
+	if (result < 0.0f && positive_value)
+		return 0;
+	else
+		return static_cast<int32>(result);
+} // int32 GaussianValue(int32 mean, float std_dev = 6.667f, bool positive_value = false)
+
+////////////////////////////////////////////////////////////////////////////////
+///// Directory manipulation functions
+////////////////////////////////////////////////////////////////////////////////
+
+bool MakeDirectory(const std::string& dir_name) {
+	// Don't do anything if the directory already exists
+	struct stat buf;
+	int32 i = stat(dir_name.c_str(), &buf);
+	if (i == 0)
+		return true;
+
+	// Create the directory with mkdir(). Note that Windows does not require file permissions to be set, but
+	// all other operating systems do.
+
+	#ifdef _WIN32
+		int32 success = mkdir(dir_name.c_str());
+	#else
+		int32 success = mkdir(dir_name.c_str(), S_IRWXG | S_IRWXO | S_IRWXU);
+	#endif
+	
+	if (success == -1) {
+		cerr << "UTILS ERROR: could not create directory: " << dir_name.c_str() << endl;
+		return false;
+	}
+	
+	return true;
 }
 
+
+
+bool CleanDirectory(const std::string& dir_name) {
+	// Don't do anything if the directory doesn't exist
+	struct stat buf;
+	int32 i = stat(dir_name.c_str(), &buf);
+	if (i != 0)	
+		return true;
+
+	#ifdef _WIN32
+		//--- WINDOWS --------------------------------------------------------------
+
+		// Get the current directory that the Allacrost application resides in
+		char app_path[1024];
+		GetCurrentDirectoryA(1024, app_path);
+		
+		int32 app_path_len = static_cast<int32>(strlen(app_path));
+		if (app_path_len <= 0)
+			return false;	
+		if(app_path[app_path_len-1] == '\\')    // Remove the ending slash if one is there
+			app_path[app_path_len-1] = '\0';
+			
+		string full_path = app_path;
+		
+		if (dir_name[0] == '/' || dir_name[0] == '\\') {
+			full_path += dir_name;
+		}
+		else {
+			full_path += "/";
+			full_path += dir_name;
+		}
+		
+		char file_found[1024];
+		WIN32_FIND_DATAA info;
+		HANDLE hp;
+		sprintf(file_found, "%s\\*.*", full_path.c_str());
+		hp = FindFirstFileA(file_found, &info);
+		
+		if (hp != INVALID_HANDLE_VALUE) {
+			// Remove each file from the full_path directory
+			do {
+				sprintf(file_found, "%s\\%s", full_path.c_str(), info.cFileName);
+				DeleteFileA(file_found);
+			} while(FindNextFileA(hp, &info));
+		}
+		FindClose(hp);
+
+	#else
+		//--- NOT WINDOWS ----------------------------------------------------------
+	
+	DIR *parent_dir;
+	struct dirent *dir_file;
+	
+	parent_dir = opendir(dir_name.c_str());   // open the directory we want to clean
+	if (!parent_dir) {
+		cerr << "UTILS ERROR: failed to clean directory: " << dir_name << endl;
+		return false;
+	}
+
+	string base_dir = dir_name;
+	if (base_dir[base_dir.length()-1] != '/')
+		base_dir += "/";
+
+	// Remove each file found in the parent directory
+	while ((dir_file = readdir(parent_dir))) {
+		string file_name = base_dir + dir_file->d_name;
+		remove(file_name.c_str());
+	}
+	
+	closedir(parent_dir);
+	
+	#endif
+	
+	return true;
+}
+
+
+
+bool RemoveDirectory(const std::string& dir_name)
+{
+	// Don't do anything if the directory doesn't exist
+	struct stat buf;
+	int32 i = stat(dir_name.c_str(), &buf);
+	if (i != 0)
+		return true;
+
+	// Remove any files that still reside in the directory
+	CleanDirectory(dir_name);
+ 
+	// Finally, remove the folder itself with rmdir()
+	int32 success = rmdir(dir_name.c_str());
+	
+	if (success == -1) {
+		cerr << "UTILS ERROR: could not delete directory: " << dir_name << endl;
+		return false;
+	}
+	
+	return true;
+}
 
 } // namespace utils
-
-
-
-// For those interested in seeing the results of some sample runs. Don't forget to #include <ctime>
-/*int main() {
-	int tmp;
-	int v15 = 0, v16 = 0, v17 = 0, v18 = 0, v19 = 0, v20 = 0, v21 = 0, v22 = 0, v23 = 0;
-	int v24 = 0, v25 = 0, v26 = 0, v27 = 0, v28 = 0, v29 = 0, v30 = 0, v31 = 0, v32 = 0, v33 = 0, v34 = 0, v35 = 0;
-
-	srand(time(NULL));
-	for (int i = 0; i < 100000; i++) {
-		tmp = GaussianValue(25, 10, false);
-		switch (tmp) {
-			case 15: v15++; break;
-			case 16: v16++; break;
-			case 17: v17++; break;
-			case 18: v18++; break;
-			case 19: v19++; break;
-			case 20: v20++; break;
-			case 21: v21++; break;
-			case 22: v22++; break;
-			case 23: v23++; break;
-			case 24: v24++; break;
-			case 25: v25++; break;
-			case 26: v26++; break;
-			case 27: v27++; break;
-			case 28: v28++; break;
-			case 29: v29++; break;
-			case 30: v30++; break;
-			case 31: v31++; break;
-			case 32: v32++; break;
-			case 33: v33++; break;
-			case 34: v34++; break;
-			case 35: v35++; break;
-			default: cout << "ERROR: Exceeded range on trial " << i << " value " << tmp << endl;
-		}
-	}
-
-	cout << "RESULTS FOR GAUSSIAN DISTRIBUTION:" << endl;
-	cout << v15 << ' ' << v16 << ' ' << v17 << ' ' << v18 << ' ' << v19 << ' ' << v20 << ' ' << v21 << ' ';
-	cout << v22 << ' ' << v23 << ' ' << v24 << '*' << v25 << '*' << v26 << ' ' << v27 << ' ' << v28 << ' ';
-	cout << v29 << ' ' << v30 << ' ' << v31 << ' ' << v32 << ' ' << v33 << ' ' << v34 << ' ' << v35 << endl;
-
-	int lower;
-	int upper;
-
-	v15 = 0; v16 = 0; v17 = 0; v18 = 0; v19 = 0; v20 = 0; v21 = 0; v22 = 0; v23 = 0; v24 = 0; v25 = 0;
-	v26 = 0; v27 = 0; v28 = 0; v29 = 0; v30 = 0; v31 = 0; v32 = 0; v33 = 0; v34 = 0; v35 = 0;
-	lower = 15;
-	upper = 35;
-	for (int i = 0; i < 100000; i++) {
-		tmp = RandomNum(lower, upper);
-		switch (tmp) {
-			case 15: v15++; break;
-			case 16: v16++; break;
-			case 17: v17++; break;
-			case 18: v18++; break;
-			case 19: v19++; break;
-			case 20: v20++; break;
-			case 21: v21++; break;
-			case 22: v22++; break;
-			case 23: v23++; break;
-			case 24: v24++; break;
-			case 25: v25++; break;
-			case 26: v26++; break;
-			case 27: v27++; break;
-			case 28: v28++; break;
-			case 29: v29++; break;
-			case 30: v30++; break;
-			case 31: v31++; break;
-			case 32: v32++; break;
-			case 33: v33++; break;
-			case 34: v34++; break;
-			case 35: v35++; break;
-			default: cout << "ERROR: Exceeded range on trial " << i << " value " << tmp << endl;
-		}
-	}
-
-	cout << "RESULTS FOR RANDOM NUMBER RANGE 15-35:" << endl;
-	cout << v15 << ' ' << v16 << ' ' << v17 << ' ' << v18 << ' ' << v19 << ' ' << v20 << ' ' << v21 << ' ';
-	cout << v22 << ' ' << v23 << ' ' << v24 << '*' << v25 << '*' << v26 << ' ' << v27 << ' ' << v28 << ' ';
-	cout << v29 << ' ' << v30 << ' ' << v31 << ' ' << v32 << ' ' << v33 << ' ' << v34 << ' ' << v35 << endl;
-	return 0;
-}*/

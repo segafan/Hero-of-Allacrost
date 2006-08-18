@@ -46,7 +46,7 @@ GameSettings::~GameSettings() {
 
 
 // Makes a call to the data manager for retrieving configured settings
-bool GameSettings::Initialize() {
+bool GameSettings::SingletonInitialize() {
 	ReadDataDescriptor settings_data;
 
 	if (!settings_data.OpenFile("dat/config/settings.lua")) {

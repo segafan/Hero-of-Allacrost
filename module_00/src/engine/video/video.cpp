@@ -152,10 +152,10 @@ GameVideo::GameVideo()
 
 
 //-----------------------------------------------------------------------------
-// Initialize: called to actually initialize the video engine
+// SingletonInitialize: called to actually initialize the video engine
 //-----------------------------------------------------------------------------
 
-bool GameVideo::Initialize()
+bool GameVideo::SingletonInitialize()
 {
 	if(VIDEO_DEBUG)
 		cout << "VIDEO: Initializing SDL subsystem\n";
@@ -178,7 +178,7 @@ bool GameVideo::Initialize()
 	if(!ilEnable(IL_ORIGIN_SET))
 	{
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: SERIOUS PROBLEM! ilEnable(IL_ORIGIN_SET) failed in GameVideo::Initialize()!" << endl;
+			cerr << "VIDEO ERROR: SERIOUS PROBLEM! ilEnable(IL_ORIGIN_SET) failed in GameVideo::SingletonInitialize()!" << endl;
 		return false;
 	}
 
@@ -193,7 +193,7 @@ bool GameVideo::Initialize()
 	if(!ilutRenderer(ILUT_OPENGL))
 	{
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: SERIOUS PROBLEM! ilutRenderer(ILUT_OPENGL) failed in GameVideo::Initialize()!" << endl;
+			cerr << "VIDEO ERROR: SERIOUS PROBLEM! ilutRenderer(ILUT_OPENGL) failed in GameVideo::SingletonInitialize()!" << endl;
 		// don't return false, since it's possible to play game w/o ilutRenderer
 	}
 	
@@ -220,7 +220,7 @@ bool GameVideo::Initialize()
 	if(!ApplySettings())
 	{
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: ChangeMode() failed in GameVideo::Initialize()!" << endl;
+			cerr << "VIDEO ERROR: ChangeMode() failed in GameVideo::SingletonInitialize()!" << endl;
 		return false;
 	}
 
@@ -306,26 +306,26 @@ bool GameVideo::Initialize()
 	if(!Clear())
 	{
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: first call to Clear() in GameVideo::Initialize() failed!" << endl;
+			cerr << "VIDEO ERROR: first call to Clear() in GameVideo::SingletonInitialize() failed!" << endl;
 		return false;
 	}
 	
 	if(!Display(0))
 	{
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: Display() in GameVideo::Initialize() failed!" << endl;
+			cerr << "VIDEO ERROR: Display() in GameVideo::SingletonInitialize() failed!" << endl;
 		return false;
 	}	
 
 	if(!Clear())
 	{
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: second call to Clear() in GameVideo::Initialize() failed!" << endl;
+			cerr << "VIDEO ERROR: second call to Clear() in GameVideo::SingletonInitialize() failed!" << endl;
 		return false;
 	}
 
 	if(VIDEO_DEBUG)
-		cout << "VIDEO: GameVideo::Initialize() returned successfully" << endl;
+		cout << "VIDEO: GameVideo::SingletonInitialize() returned successfully" << endl;
 	
 	
 	return true;

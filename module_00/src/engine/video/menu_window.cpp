@@ -16,7 +16,7 @@
 using namespace std;
 using namespace hoa_video;
 using namespace hoa_video::private_video;
-using hoa_utils::MakeWideString;
+using hoa_utils::MakeUnicodeString;
 using hoa_utils::ustring;
 
 
@@ -75,7 +75,7 @@ bool MenuWindow::Draw()
 	if(_state == VIDEO_MENU_STATE_HIDDEN)
 		return true;  // nothing to do
 
-	GameVideo *video = GameVideo::GetReference();
+	GameVideo *video = GameVideo::SingletonGetReference();
 
 	video->_PushContext();
 
@@ -155,7 +155,7 @@ bool MenuWindow::Update(int32 frameTime)
 	{
 		if(_mode == VIDEO_MENU_EXPAND_FROM_CENTER)
 		{
-			GameVideo *video = GameVideo::GetReference();
+			GameVideo *video = GameVideo::SingletonGetReference();
 
 			float left, right, bottom, top;
 			left = 0.0f;
@@ -288,7 +288,7 @@ bool MenuWindow::Create(float w, float h, int32 edgeVisibleFlags, int32 edgeShar
 
 bool MenuWindow::RecreateImage()
 {
-	GameVideo *video = GameVideo::GetReference();
+	GameVideo *video = GameVideo::SingletonGetReference();
 	video->DeleteImage(_menuImage);
 	return video->_CreateMenu(_menuImage, _width, _height, _edgeVisibleFlags, _edgeSharedFlags);
 }
@@ -352,7 +352,7 @@ void MenuWindow::Destroy()
 			cerr << "VIDEO ERROR: could not find menu in the menu map on MenuWindow::Destroy()!" << endl;
 	}
 	
-	GameVideo *video = GameVideo::GetReference();
+	GameVideo *video = GameVideo::SingletonGetReference();
 	video->DeleteImage(_menuImage);
 }
 

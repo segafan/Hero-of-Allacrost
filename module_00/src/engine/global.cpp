@@ -334,11 +334,11 @@ void GlobalEnemy::LevelSimulator(uint32 lvl) {
 	_agility = _base_agility + (_growth_agility * lvl);
 
 	// Randomize the stats using a guassian random variable, with the inital stats as the means
-	_max_hit_points = GaussianValue(_max_hit_points, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
-	_experience_points = GaussianValue(_experience_points, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
-	_strength = GaussianValue(_strength, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
-	_intelligence = GaussianValue(_intelligence, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
-	_agility = GaussianValue(_agility, UTILS_NO_BOUNDS, UTILS_ONLY_POSITIVE);
+	_max_hit_points = GaussianRandomValue(_max_hit_points);
+	_experience_points = GaussianRandomValue(_experience_points);
+	_strength = GaussianRandomValue(_strength);
+	_intelligence = GaussianRandomValue(_intelligence);
+	_agility = GaussianRandomValue(_agility);
 	
 	_hit_points = _max_hit_points;
 	//_movement_speed = 5 + _agility%5;
@@ -486,7 +486,6 @@ GlobalCharacter::GlobalCharacter(hoa_utils::ustring na, std::string fn, uint32 i
 
 	// TEMP: Add new skills
 	AddAttackSkill(new GlobalSkill("sword_swipe"));
-	GlobalManager->AddCharacter(this);
 
 	_movement_speed = 5;
 }
@@ -544,13 +543,12 @@ GameGlobal::~GameGlobal() {
 }
 
 // Initialize GameGlobal members
-bool GameGlobal::Initialize() {
-// 	VideoManager = GameVideo::GetReference();
+bool GameGlobal::SingletonInitialize() {
 	return true;
 }
 
 void GameGlobal::AddCharacter(GlobalCharacter *ch) {
-	if (GLOBAL_DEBUG) cout << "GLOBAL: Adding new character to party: " << MakeByteString(ch->GetName()) << endl;
+	if (GLOBAL_DEBUG) cout << "GLOBAL: Adding new character to party: " << MakeStandardString(ch->GetName()) << endl;
 	_characters.push_back(ch);
 	// Check size of active party if less then 4, add to party
 	if (_party.GetPartySize() < 4)

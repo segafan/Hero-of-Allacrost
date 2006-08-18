@@ -75,7 +75,7 @@ GameModeManager::~GameModeManager() {
 
 
 // Empties out the game stack and then initializes it by placing BootMode on the stack top.
-bool GameModeManager::Initialize() {
+bool GameModeManager::SingletonInitialize() {
 	// Delete any game modes on the stack
 	while (_game_stack.size() != 0) {
 		delete _game_stack.back();
@@ -166,7 +166,7 @@ void GameModeManager::Update() {
 		// Make sure there is a game mode on the stack, otherwise we'll get a segementation fault.
 		if (_game_stack.empty()) {
 			cerr << "MODE MANAGER ERROR: Game stack is empty! Now re-initializing boot mode." << endl;
-			Initialize();
+			SingletonInitialize();
 		}
 
 		// Call the newly active game mode's "AtTop()" function to re-initialize class members

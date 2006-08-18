@@ -370,7 +370,7 @@ void MenuMode::_DrawBottomMenu()
 	os_time << (seconds < 10 ? "0" : "") << (uint32)seconds;
 
 	std::string time = std::string("Time:  ") + os_time.str();
-	if (!VideoManager->DrawText(MakeWideString(time)))
+	if (!VideoManager->DrawText(MakeUnicodeString(time)))
 		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
 	
 	// Get the money of the party
@@ -378,7 +378,7 @@ void MenuMode::_DrawBottomMenu()
 	os_money << GlobalManager->GetMoney();
 	std::string money = std::string("Bling:  ") + os_money.str() + "B";
 	VideoManager->MoveRelative(0, 24);
-	if (!VideoManager->DrawText(MakeWideString(money)))
+	if (!VideoManager->DrawText(MakeUnicodeString(money)))
 		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
 	
 	VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, 0);
@@ -606,12 +606,12 @@ void MenuMode::_SetupMainOptionBox()
 	
 	// Generate the strings
 	vector<ustring> options;
-	options.push_back(MakeWideString("Inventory"));
-	options.push_back(MakeWideString("Skills"));
-	options.push_back(MakeWideString("Status/Equipment"));
-	options.push_back(MakeWideString("Options"));
-	options.push_back(MakeWideString("Save"));
-	options.push_back(MakeWideString("Exit"));
+	options.push_back(MakeUnicodeString("Inventory"));
+	options.push_back(MakeUnicodeString("Skills"));
+	options.push_back(MakeUnicodeString("Status/Equipment"));
+	options.push_back(MakeUnicodeString("Options"));
+	options.push_back(MakeUnicodeString("Save"));
+	options.push_back(MakeUnicodeString("Exit"));
 	
 	// Add strings and set default selection.
 	_main_options.SetOptions(options);
@@ -629,9 +629,9 @@ void MenuMode::_SetupInventoryOptionBox()
 	
 	// Generate the strings
 	vector<ustring> options;
-	options.push_back(MakeWideString("Use"));
-	options.push_back(MakeWideString("Sort"));
-	options.push_back(MakeWideString("Cancel"));
+	options.push_back(MakeUnicodeString("Use"));
+	options.push_back(MakeUnicodeString("Sort"));
+	options.push_back(MakeUnicodeString("Cancel"));
 	
 	_menu_inventory.SetOptions(options);
 	_menu_inventory.SetSelection(INV_USE);
@@ -648,7 +648,7 @@ void MenuMode::_SetupSkillsOptionBox()
 	
 	// Generate the strings
 	vector<ustring> options;
-	options.push_back(MakeWideString("Cancel"));
+	options.push_back(MakeUnicodeString("Cancel"));
 	
 	_menu_skills.SetOptions(options);
 	_menu_skills.SetSelection(SKILLS_CANCEL);
@@ -666,11 +666,11 @@ void MenuMode::_SetupStatusEquipOptionBox()
 	
 	// Generate the strings
 	vector<ustring> options;
-	options.push_back(MakeWideString("Equip"));
-	options.push_back(MakeWideString("Remove"));
-	options.push_back(MakeWideString("Next Character"));
-	options.push_back(MakeWideString("Prev Character"));
-	options.push_back(MakeWideString("Cancel"));
+	options.push_back(MakeUnicodeString("Equip"));
+	options.push_back(MakeUnicodeString("Remove"));
+	options.push_back(MakeUnicodeString("Next Character"));
+	options.push_back(MakeUnicodeString("Prev Character"));
+	options.push_back(MakeUnicodeString("Cancel"));
 	
 	_menu_status_equip.SetOptions(options);
 	_menu_status_equip.SetSelection(STATUS_EQUIP_EQUIP);
@@ -687,9 +687,9 @@ void MenuMode::_SetupOptionsOptionBox()
 	
 	// Generate the strings
 	vector<ustring> options;
-	options.push_back(MakeWideString("Edit"));
-	options.push_back(MakeWideString("Save"));
-	options.push_back(MakeWideString("Cancel"));
+	options.push_back(MakeUnicodeString("Edit"));
+	options.push_back(MakeUnicodeString("Save"));
+	options.push_back(MakeUnicodeString("Cancel"));
 	
 	_menu_options.SetOptions(options);
 	_menu_options.SetSelection(OPTIONS_EDIT);
@@ -706,8 +706,8 @@ void MenuMode::_SetupSaveOptionBox()
 	
 	// Generate the strings
 	vector<ustring> options;
-	options.push_back(MakeWideString("Save"));
-	options.push_back(MakeWideString("Cancel"));
+	options.push_back(MakeUnicodeString("Save"));
+	options.push_back(MakeUnicodeString("Cancel"));
 	
 	_menu_save.SetOptions(options);
 	_menu_save.SetSelection(SAVE_SAVE);

@@ -16,7 +16,7 @@
 
 using namespace std;
 using namespace hoa_video::private_video;
-using hoa_utils::MakeWideString;
+using hoa_utils::MakeUnicodeString;
 using hoa_utils::ustring;
 
 namespace hoa_video 
@@ -365,7 +365,7 @@ bool GameVideo::_DrawTextHelper
 
 bool GameVideo::DrawText(const string &txt)
 {
-	ustring wstr = MakeWideString(txt);
+	ustring wstr = MakeUnicodeString(txt);
 	return DrawText(wstr);
 }
 

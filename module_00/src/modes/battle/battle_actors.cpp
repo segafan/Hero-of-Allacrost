@@ -149,7 +149,7 @@ void CharacterActor::DrawSprite() {
 			_TEMP_total_time_damaged += SettingsManager->GetUpdateTime();
 			VideoManager->SetTextColor(Color::red);
 			VideoManager->Move(GetXLocation() + 100, GetYLocation() + 70);
-			VideoManager->DrawText(ToString(_TEMP_damage_dealt));
+			VideoManager->DrawText(IntegerToString(_TEMP_damage_dealt));
 
 			if (_TEMP_total_time_damaged > 3000) {
 				_TEMP_total_time_damaged = 0;
@@ -232,11 +232,11 @@ void CharacterActor::DrawStatus() {
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 
 	VideoManager->Move(355, 90 + y_offset);
-	VideoManager->DrawText(ToString(GetHealthPoints()));
+	VideoManager->DrawText(IntegerToString(GetHealthPoints()));
 
 	// Draw the character's current skill points on top of the middle of the SP bar
 	VideoManager->MoveRelative(100, 0);
-	VideoManager->DrawText(ToString(GetSkillPoints()));
+	VideoManager->DrawText(IntegerToString(GetSkillPoints()));
 
 	// Draw all of the character's current status afflictions
 	// TODO: waiting for ActorEffects class to be implemented
@@ -358,7 +358,7 @@ void EnemyActor::DrawSprite() {
 
 		VideoManager->SetTextColor(Color::red);
 		VideoManager->Move(GetXLocation() + 100, GetYLocation() + 70);
-		VideoManager->DrawText(ToString(_TEMP_damage_dealt));
+		VideoManager->DrawText(IntegerToString(_TEMP_damage_dealt));
 
 		if (_TEMP_total_time_damaged > 3000) {
 			_TEMP_total_time_damaged = 0;
@@ -380,7 +380,7 @@ void EnemyActor::DrawStatus() {
 	if (current_battle->_cursor_state == CURSOR_SELECT_ATTACK_POINT) {
 		vector<GlobalAttackPoint*> attack_points = GetAttackPoints();
 		VideoManager->MoveRelative(0, -25);
-		ustring attack_point = MakeWideString("(" + attack_points[current_battle->_attack_point_selected]->GetName() + ")");
+		ustring attack_point = MakeUnicodeString("(" + attack_points[current_battle->_attack_point_selected]->GetName() + ")");
 		VideoManager->DrawText(attack_point);
 	}
 
