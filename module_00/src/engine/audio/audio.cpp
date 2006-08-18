@@ -66,7 +66,7 @@ GameAudio::~GameAudio() {
 
 
 // Initializes OpenAL and creates the global audio context
-bool GameAudio::Initialize() {
+bool GameAudio::SingletonInitialize() {
 	if (AUDIO_DEBUG) cout << "AUDIO: GameAudio constructor" << endl;
 
 	if (SDL_InitSubSystem(SDL_INIT_AUDIO) == -1) {

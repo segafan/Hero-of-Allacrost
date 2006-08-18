@@ -89,7 +89,7 @@ GameInput::~GameInput() {
 }
 
 // Initialize singleton pointers and key/joystick systems.
-bool GameInput::Initialize() {
+bool GameInput::SingletonInitialize() {
 	// Initialize the SDL joystick subsystem
 	if (SDL_InitSubSystem(SDL_INIT_JOYSTICK) != 0) {
 		cerr << "INPUT ERROR: failed to initailize the SDL joystick subsystem" << endl;

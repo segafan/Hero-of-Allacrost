@@ -130,10 +130,10 @@ BattleMode::BattleMode() :
 	}
 
 	vector<ustring> action_type_options;
-	action_type_options.push_back(MakeWideString("<img/icons/battle/attack.png><55>Attack"));
-	action_type_options.push_back(MakeWideString("<img/icons/battle/defend.png><55>Defend"));
-	action_type_options.push_back(MakeWideString("<img/icons/battle/support.png><55>Support"));
-	action_type_options.push_back(MakeWideString("<img/icons/battle/item.png><55>Item"));
+	action_type_options.push_back(MakeUnicodeString("<img/icons/battle/attack.png><55>Attack"));
+	action_type_options.push_back(MakeUnicodeString("<img/icons/battle/defend.png><55>Defend"));
+	action_type_options.push_back(MakeUnicodeString("<img/icons/battle/support.png><55>Support"));
+	action_type_options.push_back(MakeUnicodeString("<img/icons/battle/item.png><55>Item"));
 
 	_action_type_menu.SetOptions(action_type_options);
 
@@ -168,7 +168,7 @@ BattleMode::BattleMode() :
 	_battle_lose_menu.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_battle_lose_menu.SetCursorOffset(-35.0f, -4.0f);
 	vector<ustring> loseText;
-	loseText.push_back(MakeWideString("Return to the main menu"));
+	loseText.push_back(MakeUnicodeString("Return to the main menu"));
 	_battle_lose_menu.SetOptions(loseText);
 // 	_battle_lose_menu.SetSelection(0); // This line may be causing a seg-fault!
 
@@ -311,7 +311,7 @@ void BattleMode::_CreateEnemyActors() {
 	VideoManager->EndImageLoadBatch();
 	
 	GlobalEnemy green_slime("slime");
-	green_slime.SetName(MakeWideString("Green Slime"));
+	green_slime.SetName(MakeUnicodeString("Green Slime"));
 	green_slime.AddAnimation("IDLE", sprite_frames);
 	green_slime.LevelSimulator(2);
 	enemy = new EnemyActor(green_slime, 768, 256);
@@ -341,7 +341,7 @@ void BattleMode::_CreateEnemyActors() {
 	VideoManager->EndImageLoadBatch();
 	
 	GlobalEnemy spider("spider");
-	spider.SetName(MakeWideString("Spider"));
+	spider.SetName(MakeUnicodeString("Spider"));
 	spider.AddAnimation("IDLE", sprite_frames);
 	spider.LevelSimulator(2);
 	enemy = new EnemyActor(spider, 512, 320);
@@ -371,7 +371,7 @@ void BattleMode::_CreateEnemyActors() {
 	VideoManager->EndImageLoadBatch();
 	
 	GlobalEnemy snake("snake");
-	snake.SetName(MakeWideString("Snake"));
+	snake.SetName(MakeUnicodeString("Snake"));
 	snake.AddAnimation("IDLE", sprite_frames);
 	snake.LevelSimulator(2);
 	enemy = new EnemyActor(snake, 576, 192);
@@ -401,7 +401,7 @@ void BattleMode::_CreateEnemyActors() {
 	VideoManager->EndImageLoadBatch();
 
 	GlobalEnemy skeleton("skeleton");
-	skeleton.SetName(MakeWideString("Skeleton"));
+	skeleton.SetName(MakeUnicodeString("Skeleton"));
 	skeleton.AddAnimation("IDLE", sprite_frames);
 	skeleton.LevelSimulator(2);
 	enemy = new EnemyActor(skeleton, 704, 384);
@@ -873,7 +873,7 @@ void BattleMode::_ConstructActionListMenu() {
 				ostringstream sp_usage;
 				sp_usage << attack_skills[i]->GetSPUsage();
 				string skill_string = attack_skills[i]->GetName() + string("     ") + sp_usage.str();
-				attack_skill_names.push_back(MakeWideString(skill_string));
+				attack_skill_names.push_back(MakeUnicodeString(skill_string));
 			}
 			_action_list_menu->SetSize(1, attack_skill_names.size());
 			_action_list_menu->SetOptions(attack_skill_names);
@@ -896,7 +896,7 @@ void BattleMode::_ConstructActionListMenu() {
 				ostringstream sp_usage;
 				sp_usage << defense_skills[i]->GetSPUsage();
 				string skill_string = defense_skills[i]->GetName() + string("     ") + sp_usage.str();
-				defense_skill_names.push_back(MakeWideString(skill_string));
+				defense_skill_names.push_back(MakeUnicodeString(skill_string));
 			}
 			_action_list_menu->SetOptions(defense_skill_names);
 			_action_list_menu->SetSize(1, defense_skill_names.size());
@@ -920,7 +920,7 @@ void BattleMode::_ConstructActionListMenu() {
 				ostringstream sp_usage;
 				sp_usage << support_skills[i]->GetSPUsage();
 				string skill_string = support_skills[i]->GetName() + string("     ") + sp_usage.str();
-				support_skill_names.push_back(MakeWideString(skill_string));
+				support_skill_names.push_back(MakeUnicodeString(skill_string));
 			}
 	
 			_action_list_menu->SetOptions(support_skill_names);
@@ -946,7 +946,7 @@ void BattleMode::_ConstructActionListMenu() {
 			os_obj_count << inv[i]->GetCount();
 			string inv_item_str = string("<") + inv[i]->GetIconPath() + string("><32>") + inv[i]->GetName()
 				+ string("<R>") + string("    ") + os_obj_count.str();
-			inv_names.push_back(MakeWideString(inv_item_str));
+			inv_names.push_back(MakeUnicodeString(inv_item_str));
 		}
 
 		_action_list_menu->SetOptions(inv_names);

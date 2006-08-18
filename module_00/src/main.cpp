@@ -48,8 +48,44 @@ using namespace hoa_data;
 using namespace hoa_boot;
 using namespace hoa_map;
 
-// If you don't know what main is, you shouldn't be looking at this code.
+
+/** \brief Frees all data allocated by Allacrost by destroying the singleton classes
+***
+*** \note <b>Do not attempt to call or otherwise reference this function.</b>
+*** It is for use in the application's main() function only.
+***
+*** Deleteing the singleton class objects is equivalent to deletion of all data structures.
+*** This is because all other classes and data structures in Allacrost should be managed
+*** by these singletons either directly, or in directly. For example, BattleMode is a
+*** class object that is managed by the GameModeManager class, and thus the GameModeManager
+*** destructor will also invoke the BattleMode destructor (as well as the destructors of any
+*** other game modes that exist).
+**/
+void QuitAllacrost() {
+	// NOTE: Even if the singleton objects do not exist when this function is called, invoking
+	// the static Destroy() function will do no harm (it checks that the object exists before deleting it).
+
+	// Delete the mode manager first so that all game modes free their data
+	GameModeManager::SingletonDestroy();
+	// Delete the global manager second to remove all object references corresponding to other engine subsystems
+	GameGlobal::SingletonDestroy();
+	// Delete all of the reamining independent engine components
+	GameAudio::SingletonDestroy();
+	GameInput::SingletonDestroy();
+	GameSettings::SingletonDestroy();
+	GameData::SingletonDestroy();
+	GameVideo::SingletonDestroy();
+}
+
+// Every great game begins with a single function :)
 int32 main(int32 argc, char *argv[]) {
+	// When the program exits, first the QuitAllacrost() function, followed by SDL_Quit()
+	atexit(SDL_Quit);
+	atexit(QuitAllacrost);
+
+	// Initialize the random number generator
+	srand(time(NULL));
+
 	// This variable is set by the ParseProgramOptions function
 	int32 return_code;
 
@@ -63,21 +99,22 @@ int32 main(int32 argc, char *argv[]) {
 		cerr << "MAIN ERROR: Unable to initialize SDL: " << SDL_GetError() << endl;
 		return 1;
 	}
-	atexit(SDL_Quit);
 
-	// Create all the game singletons
-	AudioManager = GameAudio::Create();
-	VideoManager = GameVideo::Create();
-	DataManager = GameData::Create();
-	ModeManager = GameModeManager::Create();
-	SettingsManager = GameSettings::Create();
-	InputManager = GameInput::Create();
-	GlobalManager = GameGlobal::Create();
+	// Create singleton class managers
+	AudioManager = GameAudio::SingletonCreate();
+	InputManager = GameInput::SingletonCreate();
+	VideoManager = GameVideo::SingletonCreate();
+	DataManager = GameData::SingletonCreate();
+	SettingsManager = GameSettings::SingletonCreate();
 
-	if (!VideoManager->Initialize()) {
+	// NOTE: The GlobalManager will not be created until the user actually starts a game instance
+	ModeManager = GameModeManager::SingletonCreate();
+
+	if (VideoManager->SingletonInitialize() == false) {
 		cerr << "ERROR: unable to initialize VideoManager" << endl;
 		return 1;
 	}
+	
 	VideoManager->SetMenuSkin("img/menus/black_sleet", "img/menus/black_sleet_texture.png", Color(0.0f, 0.0f, 0.0f, 0.0f));
 	if (!VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "default", 16)) {
 		return 1;
@@ -91,8 +128,8 @@ int32 main(int32 argc, char *argv[]) {
 		return 1;
 	}
 
-	VideoManager->SetFontShadowXOffset("map", 1);
-	VideoManager->SetFontShadowYOffset("map", -2);
+	VideoManager->SetFontShadowXOffset("map", 0);
+	VideoManager->SetFontShadowYOffset("map", 0);
 	VideoManager->SetFontShadowStyle("map", VIDEO_TEXT_SHADOW_BLACK);
 
 	if (!VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "battle", 20)) {
@@ -103,36 +140,26 @@ int32 main(int32 argc, char *argv[]) {
 	VideoManager->SetFontShadowYOffset("battle", -2);
 	VideoManager->SetFontShadowStyle("battle", VIDEO_TEXT_SHADOW_BLACK);
 
-	if (!AudioManager->Initialize()) {
+	if (AudioManager->SingletonInitialize() == false) {
 		cerr << "ERROR: unable to initialize AudioManager" << endl;
 		return 1;
 	}
-// 	AudioManager->SetMusicVolume(SettingsManager->music_vol);
-//  	AudioManager->SetSoundVolume(SettingsManager->sound_vol);
-
-	if (!DataManager->Initialize()) {
+	if (DataManager->SingletonInitialize() == false) {
 		cerr << "ERROR: unable to initialize DataManager" << endl;
 		return 1;
 	}
-	if (!ModeManager->Initialize()) {
+	if (ModeManager->SingletonInitialize() == false) {
 		cerr << "ERROR: unable to initialize ModeManager" << endl;
 		return 1;
 	}
-	if (!SettingsManager->Initialize()) {
+	if (SettingsManager->SingletonInitialize() == false) {
 		cerr << "ERROR: unable to initialize SettingsManager" << endl;
 		return 1;
 	}
-	if (!InputManager->Initialize()) {
+	if (InputManager->SingletonInitialize() == false) {
 		cerr << "ERROR: unable to initialize InputManager" << endl;
 		return 1;
 	}
-	if (!GlobalManager->Initialize()) {
-		cerr << "ERROR: unable to initialize GlobalManager" << endl;
-		return 1;
-	}
-
-	// Disable (hide) the mouse cursor
-	SDL_ShowCursor(SDL_DISABLE);
 
 	// Set the window title and icon name
 	SDL_WM_SetCaption("Hero of Allacrost", "Hero of Allacrost");
@@ -144,6 +171,9 @@ int32 main(int32 argc, char *argv[]) {
 		// Later, add an icon here for non-Windows systems that is better
 		SDL_WM_SetIcon(SDL_LoadBMP("img/logos/program_icon.bmp"), NULL);
 	#endif
+
+	// Hide the mouse cursor since we don't use or acknowledge mouse input from the user
+	SDL_ShowCursor(SDL_DISABLE);
 
 	// Enable unicode for multilingual keyboard support
 	SDL_EnableUNICODE(1);
@@ -178,15 +208,6 @@ int32 main(int32 argc, char *argv[]) {
 		// 5) Update the game status
 		ModeManager->Update();
 	} // while (SettingsManager->NotDone())
-
-	// Begin exit sequence and destroy the singleton classes
-	GameData::Destroy();
-	GameInput::Destroy();
-	GameModeManager::Destroy();
-	GameSettings::Destroy();
-	GameGlobal::Destroy();
-	GameAudio::Destroy();
-	GameVideo::Destroy();
 
 	return EXIT_SUCCESS;
 } // int32 main(int32 argc, char *argv[])

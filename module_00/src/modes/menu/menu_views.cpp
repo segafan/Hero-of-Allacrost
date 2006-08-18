@@ -73,7 +73,7 @@ bool CharacterWindow::Draw()
 	std::ostringstream os_level;
 	os_level << character->GetXPLevel();
 	std::string xp_level = std::string("Level: ") + os_level.str();
-	if (!VideoManager->DrawText(MakeWideString(xp_level)))
+	if (!VideoManager->DrawText(MakeUnicodeString(xp_level)))
 		cerr << "CHARACTERWINDOW: ERROR: > Couldn't draw xp level" << endl;
 	
 	
@@ -88,7 +88,7 @@ bool CharacterWindow::Draw()
 	ostringstream os_health;
 	os_health << character->GetHP() << " / " << character->GetMaxHP();
 	std::string health = std::string("Health: ") + os_health.str();
-	if (!VideoManager->DrawText(MakeWideString(health)))
+	if (!VideoManager->DrawText(MakeUnicodeString(health)))
 		cerr << "CHARACTERWINDOW: ERROR > Couldn't draw health!" << endl;
 		
 	// Draw skill
@@ -98,7 +98,7 @@ bool CharacterWindow::Draw()
 	ostringstream os_skill;
 	os_skill << character->GetSP() << " / " << character->GetMaxSP();
 	std::string skill = std::string("Skill: ") + os_skill.str();
-	if (!VideoManager->DrawText(MakeWideString(skill)))
+	if (!VideoManager->DrawText(MakeUnicodeString(skill)))
 		cerr << "CHARACTERWINDOW: ERROR > Couldn't draw skill!" << endl;
 	
 	// Draw xp
@@ -108,7 +108,7 @@ bool CharacterWindow::Draw()
 	ostringstream os_xp;
 	os_xp << character->GetXPForNextLevel();
 	std::string xp = std::string("XP Remaining: ") + os_xp.str();
-	if (!VideoManager->DrawText(MakeWideString(xp)))
+	if (!VideoManager->DrawText(MakeUnicodeString(xp)))
 		cerr << "CHARACTERWINDOW: ERROR > Couldn't draw xp!" << endl;
 	
 	return true;
@@ -235,7 +235,7 @@ void InventoryWindow::UpdateItemText()
 		ostringstream os_obj_count;
 		os_obj_count << inv[i]->GetCount();
 		string inv_item_str = string("<") + inv[i]->GetIconPath() + string("><32>") + inv[i]->GetName() + string("<R>") + os_obj_count.str() + string("   ");
-		inv_names.push_back(MakeWideString(inv_item_str));
+		inv_names.push_back(MakeUnicodeString(inv_item_str));
 	}
 	
 	_inventory_items.SetOptions(inv_names);
@@ -413,7 +413,7 @@ bool MiniCharacterSelectWindow::Draw()
 		ostringstream os_health;
 		os_health << current->GetHP() << " / " << current->GetMaxHP();
 		std::string health = std::string("Health: ") + os_health.str();
-		if (!VideoManager->DrawText(MakeWideString(health)))
+		if (!VideoManager->DrawText(MakeUnicodeString(health)))
 			cerr << "MINICHARACTERWINDOW: ERROR > Couldn't draw health!" << endl;
 
 		// Draw skill points
@@ -421,7 +421,7 @@ bool MiniCharacterSelectWindow::Draw()
 		ostringstream os_skill;
 		os_skill << current->GetSP() << " / " << current->GetMaxSP();
 		std::string skill = std::string("Skill: ") + os_skill.str();
-		if (!VideoManager->DrawText(MakeWideString(skill)))
+		if (!VideoManager->DrawText(MakeUnicodeString(skill)))
 			cerr << "CHARACTERWINDOW: ERROR > Couldn't draw skill!" << endl;
 
 		// This is the char the cursor is currently on, draw it
@@ -584,7 +584,7 @@ bool StatusWindow::Draw()
 	ostringstream os_health;
 	os_health << _current_char->GetHP() << " / " << _current_char->GetMaxHP();
 	string health = string("Health: ") + os_health.str();
-	if (!VideoManager->DrawText(MakeWideString(health)))
+	if (!VideoManager->DrawText(MakeUnicodeString(health)))
 		cerr << "STATUSWINDOW: ERROR > Couldn't draw health!" << endl;
 		
 	// Draw skill
@@ -594,7 +594,7 @@ bool StatusWindow::Draw()
 	ostringstream os_skill;
 	os_skill << _current_char->GetSP() << " / " << _current_char->GetMaxSP();
 	string skill = string("Skill: ") + os_skill.str();
-	if (!VideoManager->DrawText(MakeWideString(skill)))
+	if (!VideoManager->DrawText(MakeUnicodeString(skill)))
 		cerr << "STATUSWINDOW: ERROR > Couldn't draw skill!" << endl;
 	
 	// Draw xp
@@ -604,7 +604,7 @@ bool StatusWindow::Draw()
 	ostringstream os_xp;
 	os_xp << _current_char->GetXPForNextLevel();
 	string xp = string("XP Remaining: ") + os_xp.str();
-	if (!VideoManager->DrawText(MakeWideString(xp)))
+	if (!VideoManager->DrawText(MakeUnicodeString(xp)))
 		cerr << "STATUSWINDOW: ERROR > Couldn't draw xp!" << endl;
 
 	// Draw stremgth
@@ -612,7 +612,7 @@ bool StatusWindow::Draw()
 	ostringstream os_str;
 	os_str << _current_char->GetStrength();
 	string str = string("Strength: ") + os_str.str();
-	if (!VideoManager->DrawText(MakeWideString(str)))
+	if (!VideoManager->DrawText(MakeUnicodeString(str)))
 		cerr << "STATUSWINDOW: ERROR > Couldn't draw character strength!" << endl;
 
 	// Draw Intelligence
@@ -620,7 +620,7 @@ bool StatusWindow::Draw()
 	ostringstream os_int;
 	os_int << _current_char->GetIntelligence();
 	string intelligence = string("Intelligence: ") + os_int.str();
-	if (!VideoManager->DrawText(MakeWideString(intelligence)))
+	if (!VideoManager->DrawText(MakeUnicodeString(intelligence)))
 		cerr << "STATUSWINDOW: ERROR > Couldn't draw character intelligence!" << endl;
 
 	// Draw Agility
@@ -628,7 +628,7 @@ bool StatusWindow::Draw()
 	ostringstream os_agi;
 	os_agi << _current_char->GetAgility();
 	string agi = string("Agility: ") + os_agi.str();
-	if (!VideoManager->DrawText(MakeWideString(agi)))
+	if (!VideoManager->DrawText(MakeUnicodeString(agi)))
 		cerr << "STATUSWINDOW: ERROR > Couldn't draw character agility!" << endl;
 
 	VideoManager->Move(400, 104);
@@ -639,31 +639,31 @@ bool StatusWindow::Draw()
 
 	// Draw Head Armor
 	string head_armour = string("Head Armor: "); // Currently doesn't work + _current_char->GetHeadArmor()->GetName();
-	if (!VideoManager->DrawText(MakeWideString(head_armour)))
+	if (!VideoManager->DrawText(MakeUnicodeString(head_armour)))
 		cerr << "STATUSWINDOW: ERROR > Couldn't draw head armor text!" << endl;
 
 	// Draw body Armor
 	VideoManager->MoveRelative(0, 24);
 	string chest_armor = string("Body Armor: ");
-	if (!VideoManager->DrawText(MakeWideString(chest_armor)))
+	if (!VideoManager->DrawText(MakeUnicodeString(chest_armor)))
 		cerr << "STATUSWINDOW: ERROR > Couldn't draw chest armor text!" << endl;
 
 	// Draw Arms Armor
 	VideoManager->MoveRelative(0, 24);
 	string arms_armor = string("Arms Armor: ");
-	if (!VideoManager->DrawText(MakeWideString(arms_armor)))
+	if (!VideoManager->DrawText(MakeUnicodeString(arms_armor)))
 		cerr << "STATUSWINDOW: ERROR > Couldn't draw arms armor text!" << endl;
 
 	// Draw legs Armor
 	VideoManager->MoveRelative(0, 24);
 	string legs_armor = string("Legs Armor: ");
-	if (!VideoManager->DrawText(MakeWideString(legs_armor)))
+	if (!VideoManager->DrawText(MakeUnicodeString(legs_armor)))
 		cerr << "STATUSWINDOW: ERROR > Couldn't draw legs armor text!" << endl;
 
 	// Draw weapon
 	VideoManager->MoveRelative(0, 24);
 	string weapon = string("Weapon: ");
-	if (!VideoManager->DrawText(MakeWideString(weapon)))
+	if (!VideoManager->DrawText(MakeUnicodeString(weapon)))
 		cerr << "STATUSWINDOW: ERROR > Couldn't draw weapon text!" << endl;
 
 	if (_active)

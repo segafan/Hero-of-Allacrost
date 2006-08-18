@@ -188,8 +188,9 @@ void BootMode::Reset() {
 	VideoManager->SetTextColor(Color::white);
 
 	// Reset the game universe
-	GameGlobal::Destroy();
-	GlobalManager = GameGlobal::Create();
+	GameGlobal::SingletonDestroy();
+	GlobalManager = GameGlobal::SingletonCreate();
+	GlobalManager->SingletonInitialize();
 
 	// Decide which music track to play
 	if (_logo_animating)
@@ -470,11 +471,11 @@ void BootMode::_RedefinePauseJoy() {
 void BootMode::_SetupMainMenu() {
 
 	// Add all the needed menu options to the main menu
-	_main_menu.AddOption(MakeWideString("New Game"), &BootMode::_OnNewGame);
-	_main_menu.AddOption(MakeWideString("Load Game")/*, &BootMode::_OnLoadGame*/); // Battle mode removed! "Take that visage!"    
-	_main_menu.AddOption(MakeWideString("Options"), &BootMode::_OnOptions);
-	_main_menu.AddOption(MakeWideString("Credits"), &BootMode::_OnCredits);
-	_main_menu.AddOption(MakeWideString("Quit"), &BootMode::_OnQuit);
+	_main_menu.AddOption(MakeUnicodeString("New Game"), &BootMode::_OnNewGame);
+	_main_menu.AddOption(MakeUnicodeString("Load Game")/*, &BootMode::_OnLoadGame*/); // Battle mode removed! "Take that visage!"
+	_main_menu.AddOption(MakeUnicodeString("Options"), &BootMode::_OnOptions);
+	_main_menu.AddOption(MakeUnicodeString("Credits"), &BootMode::_OnCredits);
+	_main_menu.AddOption(MakeUnicodeString("Quit"), &BootMode::_OnQuit);
 
 	_main_menu.EnableOption(1, false); // gray out "load game" for now.
 }
@@ -482,11 +483,11 @@ void BootMode::_SetupMainMenu() {
 
 // Inits the options menu
 void BootMode::_SetupOptionsMenu() {
-	_options_menu.AddOption(MakeWideString("Video"), &BootMode::_OnVideoOptions);
-	_options_menu.AddOption(MakeWideString("Audio"), &BootMode::_OnAudioOptions);
-	_options_menu.AddOption(MakeWideString("Language"));
-	_options_menu.AddOption(MakeWideString("Key Settings"), &BootMode::_OnKeySettings);
-	_options_menu.AddOption(MakeWideString("Joystick Settings"), &BootMode::_OnJoySettings);
+	_options_menu.AddOption(MakeUnicodeString("Video"), &BootMode::_OnVideoOptions);
+	_options_menu.AddOption(MakeUnicodeString("Audio"), &BootMode::_OnAudioOptions);
+	_options_menu.AddOption(MakeUnicodeString("Language"));
+	_options_menu.AddOption(MakeUnicodeString("Key Settings"), &BootMode::_OnKeySettings);
+	_options_menu.AddOption(MakeUnicodeString("Joystick Settings"), &BootMode::_OnJoySettings);
 
 	// Disable some of the options
 	_options_menu.EnableOption(2, false); // Language
@@ -499,10 +500,10 @@ void BootMode::_SetupOptionsMenu() {
 // Inits the video-options menu
 void BootMode::_SetupVideoOptionsMenu()
 {
-	_video_options_menu.AddOption(MakeWideString("Resolution:"), &BootMode::_OnResolution);
-	_video_options_menu.AddOption(MakeWideString("Window mode:"), &BootMode::_OnVideoMode, &BootMode::_OnVideoMode, &BootMode::_OnVideoMode); // Left & right will change window mode as well as plain 'confirm' !
-	_video_options_menu.AddOption(MakeWideString("Brightness:"), 0, &BootMode::_OnBrightnessLeft, &BootMode::_OnBrightnessRight);
-	_video_options_menu.AddOption(MakeWideString("Image quality:"));
+	_video_options_menu.AddOption(MakeUnicodeString("Resolution:"), &BootMode::_OnResolution);
+	_video_options_menu.AddOption(MakeUnicodeString("Window mode:"), &BootMode::_OnVideoMode, &BootMode::_OnVideoMode, &BootMode::_OnVideoMode); // Left & right will change window mode as well as plain 'confirm' !
+	_video_options_menu.AddOption(MakeUnicodeString("Brightness:"), 0, &BootMode::_OnBrightnessLeft, &BootMode::_OnBrightnessRight);
+	_video_options_menu.AddOption(MakeUnicodeString("Image quality:"));
 	
 	_video_options_menu.EnableOption(3, false); // disable image quality
 	_video_options_menu.SetWindowed(true);
@@ -513,8 +514,8 @@ void BootMode::_SetupVideoOptionsMenu()
 // Inits the audio-options menu
 void BootMode::_SetupAudioOptionsMenu()
 {
-	_audio_options_menu.AddOption(MakeWideString("Sound Volume: "), 0, &BootMode::_OnSoundLeft, &BootMode::_OnSoundRight);
-	_audio_options_menu.AddOption(MakeWideString("Music Volume: "), 0, &BootMode::_OnMusicLeft, &BootMode::_OnMusicRight);
+	_audio_options_menu.AddOption(MakeUnicodeString("Sound Volume: "), 0, &BootMode::_OnSoundLeft, &BootMode::_OnSoundRight);
+	_audio_options_menu.AddOption(MakeUnicodeString("Music Volume: "), 0, &BootMode::_OnMusicLeft, &BootMode::_OnMusicRight);
 	_audio_options_menu.SetWindowed(true);
 	_audio_options_menu.SetParent(&_options_menu);
 }
@@ -522,19 +523,19 @@ void BootMode::_SetupAudioOptionsMenu()
 
 // Inits the key-settings menu
 void BootMode::_SetupKeySetttingsMenu() {
-	_key_settings_menu.AddOption(MakeWideString("Up: "), &BootMode::_RedefineUpKey);
-	_key_settings_menu.AddOption(MakeWideString("Down: "), &BootMode::_RedefineDownKey);
-	_key_settings_menu.AddOption(MakeWideString("Left: "), &BootMode::_RedefineLeftKey);
-	_key_settings_menu.AddOption(MakeWideString("Right: "), &BootMode::_RedefineRightKey);
-	_key_settings_menu.AddOption(MakeWideString("Confirm: "), &BootMode::_RedefineConfirmKey);
-	_key_settings_menu.AddOption(MakeWideString("Cancel: "), &BootMode::_RedefineCancelKey);
-	_key_settings_menu.AddOption(MakeWideString("Menu: "), &BootMode::_RedefineMenuKey);
-	_key_settings_menu.AddOption(MakeWideString("Swap: "), &BootMode::_RedefineSwapKey);
-	_key_settings_menu.AddOption(MakeWideString("Left Select: "), &BootMode::_RedefineLeftSelectKey);
-	_key_settings_menu.AddOption(MakeWideString("Right Select: "), &BootMode::_RedefineRightSelectKey);
-	_key_settings_menu.AddOption(MakeWideString("Pause: "), &BootMode::_RedefinePauseKey);
+	_key_settings_menu.AddOption(MakeUnicodeString("Up: "), &BootMode::_RedefineUpKey);
+	_key_settings_menu.AddOption(MakeUnicodeString("Down: "), &BootMode::_RedefineDownKey);
+	_key_settings_menu.AddOption(MakeUnicodeString("Left: "), &BootMode::_RedefineLeftKey);
+	_key_settings_menu.AddOption(MakeUnicodeString("Right: "), &BootMode::_RedefineRightKey);
+	_key_settings_menu.AddOption(MakeUnicodeString("Confirm: "), &BootMode::_RedefineConfirmKey);
+	_key_settings_menu.AddOption(MakeUnicodeString("Cancel: "), &BootMode::_RedefineCancelKey);
+	_key_settings_menu.AddOption(MakeUnicodeString("Menu: "), &BootMode::_RedefineMenuKey);
+	_key_settings_menu.AddOption(MakeUnicodeString("Swap: "), &BootMode::_RedefineSwapKey);
+	_key_settings_menu.AddOption(MakeUnicodeString("Left Select: "), &BootMode::_RedefineLeftSelectKey);
+	_key_settings_menu.AddOption(MakeUnicodeString("Right Select: "), &BootMode::_RedefineRightSelectKey);
+	_key_settings_menu.AddOption(MakeUnicodeString("Pause: "), &BootMode::_RedefinePauseKey);
 
-	_key_settings_menu.AddOption(MakeWideString("Restore defaults"), &BootMode::_OnRestoreDefaultKeys);
+	_key_settings_menu.AddOption(MakeUnicodeString("Restore defaults"), &BootMode::_OnRestoreDefaultKeys);
 	_key_settings_menu.SetWindowed(true);
 	_key_settings_menu.SetParent(&_options_menu);
 	_key_settings_menu.SetTextDensity(30.0f); // Shorten the distance between text lines
@@ -542,15 +543,15 @@ void BootMode::_SetupKeySetttingsMenu() {
 
 
 void BootMode::_SetupJoySetttingsMenu() {
-	_joy_settings_menu.AddOption(MakeWideString("Confirm: "), &BootMode::_RedefineConfirmJoy);
-	_joy_settings_menu.AddOption(MakeWideString("Cancel: "), &BootMode::_RedefineCancelJoy);
-	_joy_settings_menu.AddOption(MakeWideString("Menu: "), &BootMode::_RedefineMenuJoy);
-	_joy_settings_menu.AddOption(MakeWideString("Swap: "), &BootMode::_RedefineSwapJoy);
-	_joy_settings_menu.AddOption(MakeWideString("Left Select: "), &BootMode::_RedefineLeftSelectJoy);
-	_joy_settings_menu.AddOption(MakeWideString("Right Select: "), &BootMode::_RedefineRightSelectJoy);
-	_joy_settings_menu.AddOption(MakeWideString("Pause: "), &BootMode::_RedefinePauseJoy);
+	_joy_settings_menu.AddOption(MakeUnicodeString("Confirm: "), &BootMode::_RedefineConfirmJoy);
+	_joy_settings_menu.AddOption(MakeUnicodeString("Cancel: "), &BootMode::_RedefineCancelJoy);
+	_joy_settings_menu.AddOption(MakeUnicodeString("Menu: "), &BootMode::_RedefineMenuJoy);
+	_joy_settings_menu.AddOption(MakeUnicodeString("Swap: "), &BootMode::_RedefineSwapJoy);
+	_joy_settings_menu.AddOption(MakeUnicodeString("Left Select: "), &BootMode::_RedefineLeftSelectJoy);
+	_joy_settings_menu.AddOption(MakeUnicodeString("Right Select: "), &BootMode::_RedefineRightSelectJoy);
+	_joy_settings_menu.AddOption(MakeUnicodeString("Pause: "), &BootMode::_RedefinePauseJoy);
 
-	_joy_settings_menu.AddOption(MakeWideString("Restore defaults"), &BootMode::_OnRestoreDefaultJoyButtons);
+	_joy_settings_menu.AddOption(MakeUnicodeString("Restore defaults"), &BootMode::_OnRestoreDefaultJoyButtons);
 	_joy_settings_menu.SetWindowed(true);
 	_joy_settings_menu.SetParent(&_options_menu);
 	_joy_settings_menu.SetTextDensity(40.0f); // Shorten the distance between text lines
@@ -558,10 +559,10 @@ void BootMode::_SetupJoySetttingsMenu() {
 
 
 void BootMode::_SetupResolutionMenu() {
-	_resolution_menu.AddOption(MakeWideString("640 x 480"), &BootMode::_OnResolution640x480);
-	_resolution_menu.AddOption(MakeWideString("800 x 600"), &BootMode::_OnResolution800x600);
-	_resolution_menu.AddOption(MakeWideString("1024 x 768"), &BootMode::_OnResolution1024x768);
-	_resolution_menu.AddOption(MakeWideString("1280 x 1024"), &BootMode::_OnResolution1280x1024);
+	_resolution_menu.AddOption(MakeUnicodeString("640 x 480"), &BootMode::_OnResolution640x480);
+	_resolution_menu.AddOption(MakeUnicodeString("800 x 600"), &BootMode::_OnResolution800x600);
+	_resolution_menu.AddOption(MakeUnicodeString("1024 x 768"), &BootMode::_OnResolution1024x768);
+	_resolution_menu.AddOption(MakeUnicodeString("1280 x 1024"), &BootMode::_OnResolution1280x1024);
 	_resolution_menu.SetParent(&_video_options_menu);
 	_resolution_menu.SetWindowed(true);
 }
@@ -572,7 +573,7 @@ void BootMode::_SetupResolutionMenu() {
 void BootMode::_OnNewGame() {
 	if (BOOT_DEBUG)	cout << "BOOT: Starting new game." << endl;
 	
-	GlobalCharacter *claud = new GlobalCharacter(MakeWideString("Claudius"), "claudius", GLOBAL_CLAUDIUS);
+	GlobalManager->AddCharacter(new GlobalCharacter(MakeUnicodeString("Claudius"), "claudius", GLOBAL_CLAUDIUS));
 
 	_fade_out = true;
 	VideoManager->FadeScreen(Color::black, 1.0f);
@@ -736,16 +737,16 @@ void BootMode::_UpdateVideoOptions() {
 	// Update resolution text
 	std::ostringstream resolution("");
 	resolution << "Resolution: " << VideoManager->GetWidth() << " x " << VideoManager->GetHeight();
-	_video_options_menu.SetOptionText(0, MakeWideString(resolution.str()));
+	_video_options_menu.SetOptionText(0, MakeUnicodeString(resolution.str()));
 
 	// Update text on current video mode
 	if (VideoManager->IsFullscreen())
-		_video_options_menu.SetOptionText(1, MakeWideString("Window mode: fullscreen"));
+		_video_options_menu.SetOptionText(1, MakeUnicodeString("Window mode: fullscreen"));
 	else
-		_video_options_menu.SetOptionText(1, MakeWideString("Window mode: windowed"));
+		_video_options_menu.SetOptionText(1, MakeUnicodeString("Window mode: windowed"));
 
 	// Update brightness
-	_video_options_menu.SetOptionText(2, MakeWideString("Brightness: " + ToString(VideoManager->GetGamma() * 100.0f + 0.5f) + " %"));
+	_video_options_menu.SetOptionText(2, MakeUnicodeString("Brightness: " + IntegerToString(VideoManager->GetGamma() * 100.0f + 0.5f) + " %"));
 }
 
 
@@ -757,36 +758,36 @@ void BootMode::_UpdateAudioOptions() {
 	std::ostringstream music_volume("");
 	music_volume << "Music Volume: " << static_cast<int32>(AudioManager->GetMusicVolume() * 100.0f + 0.5f) << " %";
 
-	_audio_options_menu.SetOptionText(0, MakeWideString(sound_volume.str()));
-	_audio_options_menu.SetOptionText(1, MakeWideString(music_volume.str()));
+	_audio_options_menu.SetOptionText(0, MakeUnicodeString(sound_volume.str()));
+	_audio_options_menu.SetOptionText(1, MakeUnicodeString(music_volume.str()));
 }
 
 
 // Updates the key settings screen
 void BootMode::_UpdateKeySettings() {
 	// Update key names
-	_key_settings_menu.SetOptionText(0, MakeWideString("Move Up: " + InputManager->GetUpKeyName()));
-	_key_settings_menu.SetOptionText(1, MakeWideString("Move Down: " + InputManager->GetDownKeyName()));
-	_key_settings_menu.SetOptionText(2, MakeWideString("Move Left: " + InputManager->GetLeftKeyName()));
-	_key_settings_menu.SetOptionText(3, MakeWideString("Move Right: " + InputManager->GetRightKeyName()));
-	_key_settings_menu.SetOptionText(4, MakeWideString("Confirm: " + InputManager->GetConfirmKeyName()));
-	_key_settings_menu.SetOptionText(5, MakeWideString("Cancel: " + InputManager->GetCancelKeyName()));
-	_key_settings_menu.SetOptionText(6, MakeWideString("Menu: " + InputManager->GetMenuKeyName()));
-	_key_settings_menu.SetOptionText(7, MakeWideString("Swap: " + InputManager->GetSwapKeyName()));
-	_key_settings_menu.SetOptionText(8, MakeWideString("Left Select: " + InputManager->GetLeftSelectKeyName()));
-	_key_settings_menu.SetOptionText(9, MakeWideString("Right Select: " + InputManager->GetRightSelectKeyName()));
-	_key_settings_menu.SetOptionText(10, MakeWideString("Pause: " + InputManager->GetPauseKeyName()));
+	_key_settings_menu.SetOptionText(0, MakeUnicodeString("Move Up: " + InputManager->GetUpKeyName()));
+	_key_settings_menu.SetOptionText(1, MakeUnicodeString("Move Down: " + InputManager->GetDownKeyName()));
+	_key_settings_menu.SetOptionText(2, MakeUnicodeString("Move Left: " + InputManager->GetLeftKeyName()));
+	_key_settings_menu.SetOptionText(3, MakeUnicodeString("Move Right: " + InputManager->GetRightKeyName()));
+	_key_settings_menu.SetOptionText(4, MakeUnicodeString("Confirm: " + InputManager->GetConfirmKeyName()));
+	_key_settings_menu.SetOptionText(5, MakeUnicodeString("Cancel: " + InputManager->GetCancelKeyName()));
+	_key_settings_menu.SetOptionText(6, MakeUnicodeString("Menu: " + InputManager->GetMenuKeyName()));
+	_key_settings_menu.SetOptionText(7, MakeUnicodeString("Swap: " + InputManager->GetSwapKeyName()));
+	_key_settings_menu.SetOptionText(8, MakeUnicodeString("Left Select: " + InputManager->GetLeftSelectKeyName()));
+	_key_settings_menu.SetOptionText(9, MakeUnicodeString("Right Select: " + InputManager->GetRightSelectKeyName()));
+	_key_settings_menu.SetOptionText(10, MakeUnicodeString("Pause: " + InputManager->GetPauseKeyName()));
 }
 
 
 void BootMode::_UpdateJoySettings() {
-	_joy_settings_menu.SetOptionText(0, MakeWideString("Confirm: " + InputManager->GetConfirmJoy()));
-	_joy_settings_menu.SetOptionText(1, MakeWideString("Cancel: " + InputManager->GetCancelJoy()));
-	_joy_settings_menu.SetOptionText(2, MakeWideString("Menu: " + InputManager->GetMenuJoy()));
-	_joy_settings_menu.SetOptionText(3, MakeWideString("Swap: " + InputManager->GetSwapJoy()));
-	_joy_settings_menu.SetOptionText(4, MakeWideString("Left Select: " + InputManager->GetLeftSelectJoy()));
-	_joy_settings_menu.SetOptionText(5, MakeWideString("Right Select: " + InputManager->GetRightSelectJoy()));
-	_joy_settings_menu.SetOptionText(6, MakeWideString("Pause: " + InputManager->GetPauseJoy()));
+	_joy_settings_menu.SetOptionText(0, MakeUnicodeString("Confirm: " + InputManager->GetConfirmJoy()));
+	_joy_settings_menu.SetOptionText(1, MakeUnicodeString("Cancel: " + InputManager->GetCancelJoy()));
+	_joy_settings_menu.SetOptionText(2, MakeUnicodeString("Menu: " + InputManager->GetMenuJoy()));
+	_joy_settings_menu.SetOptionText(3, MakeUnicodeString("Swap: " + InputManager->GetSwapJoy()));
+	_joy_settings_menu.SetOptionText(4, MakeUnicodeString("Left Select: " + InputManager->GetLeftSelectJoy()));
+	_joy_settings_menu.SetOptionText(5, MakeUnicodeString("Right Select: " + InputManager->GetRightSelectJoy()));
+	_joy_settings_menu.SetOptionText(6, MakeUnicodeString("Pause: " + InputManager->GetPauseJoy()));
 }
 
 
@@ -799,8 +800,8 @@ void BootMode::Update() {
 	{
 		// When the screen is finished fading to black, create a new map mode and fade back in
 		if (!VideoManager->IsFading()) {
-			MapMode *MM = new MapMode();
 			ModeManager->Pop();
+			MapMode *MM = new MapMode();
 			ModeManager->Push(MM);
 			VideoManager->FadeScreen(Color::clear, 1.0f);
 		}

@@ -65,7 +65,7 @@ OptionBox::OptionBox()
 bool OptionBox::SetFont(const std::string &fontName)
 {
 	// try to get pointer to video manager
-	GameVideo *videoManager = GameVideo::GetReference();
+	GameVideo *videoManager = GameVideo::SingletonGetReference();
 	if(!videoManager)
 	{
 		if(VIDEO_DEBUG)
@@ -932,9 +932,9 @@ bool OptionBox::_ParseOption(const hoa_utils::ustring &formatString, Option &op)
 					// it's not a 1-letter tag, so we need to find the substring
 					// between the opening and closing brackets
 					
-					string tagText = MakeByteString(tmp.substr(1, endPos - 1));
+					string tagText = MakeStandardString(tmp.substr(1, endPos - 1));
 					
-					if(IsNumber(tagText))
+					if(IsStringNumeric(tagText))
 					{
 						// this must be a positioning tag
 						int32 position = atoi(tagText.c_str());
@@ -947,7 +947,7 @@ bool OptionBox::_ParseOption(const hoa_utils::ustring &formatString, Option &op)
 						
 						StillImage imd;
 						imd.SetFilename(tagText);
-						GameVideo *videoManager = GameVideo::GetReference();
+						GameVideo *videoManager = GameVideo::SingletonGetReference();
 						
 						if(videoManager->LoadImage(imd))
 						{
@@ -1027,7 +1027,7 @@ void OptionBox::_ClearOptions()
 	// firstly, go through each option and unreference any images it is
 	// holding on to
 	
-	GameVideo *videoManager = GameVideo::GetReference();
+	GameVideo *videoManager = GameVideo::SingletonGetReference();
 	for(int32 j = 0; j < static_cast<int32>(_options.size()); ++j)
 	{
 		for(int32 i = 0; i < static_cast<int32>(_options[j].images.size()); ++i)
@@ -1057,7 +1057,7 @@ bool OptionBox::Draw()
 		return false;		
 	}
 
-	GameVideo *video = GameVideo::GetReference();
+	GameVideo *video = GameVideo::SingletonGetReference();
 	video->_PushContext();	
 	video->SetDrawFlags(_xalign, _yalign, VIDEO_BLEND, 0);
 
@@ -1318,7 +1318,7 @@ bool OptionBox::Draw()
 
 void OptionBox::_SetupAlignment(int32 xalign, int32 yalign, const OptionCellBounds &bounds, float &x, float &y)
 {	
-	GameVideo *video = GameVideo::GetReference();
+	GameVideo *video = GameVideo::SingletonGetReference();
 	video->SetDrawFlags(xalign, yalign, 0);
 	
 	switch(xalign)

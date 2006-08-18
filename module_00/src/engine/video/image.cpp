@@ -130,7 +130,7 @@ void AnimatedImage::Update()
 	if(numFrames <= 1)
 		return;
 		
-	GameVideo *video = GameVideo::GetReference();
+	GameVideo *video = GameVideo::SingletonGetReference();
 	int32 frameChange = video->GetFrameChange();
 	
 	_frame_counter += frameChange;

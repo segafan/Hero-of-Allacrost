@@ -56,6 +56,10 @@ namespace hoa_video {
 
 	class StillImage;
 	class AnimatedImage;
+
+	class MenuWindow;
+	class TextBox;
+	class OptionBox;
 }
 
 // Data declarations, see data.h/cpp
@@ -133,6 +137,7 @@ namespace hoa_boot {
 namespace hoa_map {
 	extern bool MAP_DEBUG;
 	class MapMode;
+
 	namespace private_map {
 		class MapFrame;
 		class MapTile;
@@ -181,6 +186,8 @@ namespace hoa_scene {
 // Utils declarations, see utils.h/cpp
 namespace hoa_utils {
 	extern bool UTILS_DEBUG;
+
+	class ustring;
 }
 
 #endif /* #ifndef __DEFS_HEADER__ */

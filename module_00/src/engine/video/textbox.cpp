@@ -17,7 +17,7 @@
 using namespace std;
 using namespace hoa_video;
 using namespace hoa_video::private_video;
-using hoa_utils::MakeWideString;
+using hoa_utils::MakeUnicodeString;
 using hoa_utils::ustring;
 
 
@@ -93,7 +93,7 @@ bool TextBox::Draw()
 	// and draw flags in the video engine
 	
 	float left, right, top, bottom;
-	GameVideo *video = GameVideo::GetReference();
+	GameVideo *video = GameVideo::SingletonGetReference();
 	
 	video->_PushContext();
 	
@@ -256,7 +256,7 @@ void TextBox::GetTextAlignment(int32 &xalign, int32 &yalign)
 bool TextBox::SetFont(const string &fontName)
 {	
 	// try to get pointer to video manager
-	GameVideo *videoManager = GameVideo::GetReference();
+	GameVideo *videoManager = GameVideo::SingletonGetReference();
 	if(!videoManager)
 	{
 		if(VIDEO_DEBUG)
@@ -609,7 +609,7 @@ void TextBox::_AddLine(const hoa_utils::ustring &line)
 	
 	ustring tempLine = line;
 	
-	GameVideo *videoManager = GameVideo::GetReference();
+	GameVideo *videoManager = GameVideo::SingletonGetReference();
 	
 	while(!tempLine.empty())
 	{
@@ -707,7 +707,7 @@ bool TextBox::_IsBreakableChar(uint16 character)
 
 bool TextBox::SetDisplayText(const std::string &text)
 {
-	ustring wstr = MakeWideString(text);	
+	ustring wstr = MakeUnicodeString(text);
 	return SetDisplayText(wstr);
 }
 
@@ -719,7 +719,7 @@ bool TextBox::SetDisplayText(const std::string &text)
 
 void TextBox::_DrawTextLines(float textX, float textY, ScreenRect scissorRect)
 {
-	GameVideo *video = GameVideo::GetReference();
+	GameVideo *video = GameVideo::SingletonGetReference();
 	CoordSys  &cs    = video->_coordSys;
 	
 	int32 numCharsDrawn = 0;	

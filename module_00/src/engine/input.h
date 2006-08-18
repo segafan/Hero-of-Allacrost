@@ -419,13 +419,13 @@ public:
 	*** \return Joystick button number for the action
 	**/
 	//@{
-	std::string GetConfirmJoy() const { return std::string("Button ") + hoa_utils::ToString(_joystick.confirm); }
-	std::string GetCancelJoy() const { return std::string("Button ") + hoa_utils::ToString(_joystick.cancel); }
-	std::string GetMenuJoy() const { return std::string("Button ") + hoa_utils::ToString(_joystick.menu); }
-	std::string GetSwapJoy() const { return std::string("Button ") + hoa_utils::ToString(_joystick.swap); }
-	std::string GetLeftSelectJoy() const { return std::string("Button ") + hoa_utils::ToString(_joystick.left_select); }
-	std::string GetRightSelectJoy() const { return std::string("Button ") + hoa_utils::ToString(_joystick.right_select); }
-	std::string GetPauseJoy() const { return std::string("Button ") + hoa_utils::ToString(_joystick.pause); }
+	std::string GetConfirmJoy() const { return std::string("Button ") + hoa_utils::IntegerToString(_joystick.confirm); }
+	std::string GetCancelJoy() const { return std::string("Button ") + hoa_utils::IntegerToString(_joystick.cancel); }
+	std::string GetMenuJoy() const { return std::string("Button ") + hoa_utils::IntegerToString(_joystick.menu); }
+	std::string GetSwapJoy() const { return std::string("Button ") + hoa_utils::IntegerToString(_joystick.swap); }
+	std::string GetLeftSelectJoy() const { return std::string("Button ") + hoa_utils::IntegerToString(_joystick.left_select); }
+	std::string GetRightSelectJoy() const { return std::string("Button ") + hoa_utils::IntegerToString(_joystick.right_select); }
+	std::string GetPauseJoy() const { return std::string("Button ") + hoa_utils::IntegerToString(_joystick.pause); }
 	//@}	
 
 	/** \name   Sets new keymappings

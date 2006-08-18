@@ -296,18 +296,18 @@ string ReadDataDescriptor::ReadString(const int32 key) {
 
 ustring ReadDataDescriptor::ReadUString(const char *key, const char *lang) {
 	if (!_IsFileOpen()) {
-		return MakeWideString("");
+		return MakeUnicodeString("");
 	}
 	
-	return MakeWideString("");
+	return MakeUnicodeString("");
 }
 
 ustring ReadDataDescriptor::ReadUString(const int32 key, const char *lang) {
 	if (!_IsFileOpen()) {
-		return MakeWideString("");
+		return MakeUnicodeString("");
 	}
 	
-	return MakeWideString("");
+	return MakeUnicodeString("");
 }
 
 // ************************* Table Access Functions ***************************
@@ -1383,7 +1383,7 @@ GameData::~GameData() {
 }
 
 // Required method for all singletons
-bool GameData::Initialize() {
+bool GameData::SingletonInitialize() {
 	return true;
 }
 

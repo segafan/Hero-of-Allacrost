@@ -31,7 +31,7 @@ namespace hoa_main {
 
 bool ParseProgramOptions(int32 &return_code, int32 argc, char **argv) {
 	// Convert the argument list to a vector of strings for convenience
-	std::vector<std::string> options(argv, argv + argc);
+	vector<string> options(argv, argv + argc);
 	return_code = 0;
 	
 	for (uint32 i = 1; i < options.size(); i++) {
@@ -136,6 +136,9 @@ bool EnableDebugging(string vars) {
 	// Enable all specified debug variables
 	for (uint32 i = 0; i < args.size(); i++) {
 		if (args[i] == "all") {
+			// This causes every call to SDL_SetError to also print an error message on stderr.
+			SDL_putenv("SDL_DEBUG=1");
+			
 			hoa_audio::AUDIO_DEBUG                  = true;
 			hoa_battle::BATTLE_DEBUG                = true;
 			hoa_boot::BOOT_DEBUG                    = true;
@@ -262,15 +265,15 @@ bool PrintSystemInformation() {
 	//cout << "The best pixel format: " << user_video->vfmt << endl;
 
 	cout << " *** AUDIO INFORMATION *** " << endl;
-	hoa_audio::AudioManager = hoa_audio::GameAudio::Create();
-	if (!hoa_audio::AudioManager->Initialize()) {
+	hoa_audio::AudioManager = hoa_audio::GameAudio::SingletonCreate();
+	if (hoa_audio::AudioManager->SingletonInitialize() == false) {
 		cerr << "ERROR: unable to initialize AudioManager" << endl;
 		return false;
 	}
 	else {
 		hoa_audio::AudioManager->DEBUG_PrintInfo();
 	}
-	hoa_audio::GameAudio::Destroy();
+	hoa_audio::GameAudio::SingletonDestroy();
 
 	cout << " *** JOYSTICK INFORMATION *** " << endl;
 

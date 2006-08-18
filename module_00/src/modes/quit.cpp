@@ -7,29 +7,21 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-/*!****************************************************************************
- * \file    quit.cpp
- * \author  Tyler Olsen, roots@allacrost.org
- * \brief   Source file for quit mode interface.
- *****************************************************************************/
+/** ****************************************************************************
+*** \file    quit.cpp
+*** \author  Tyler Olsen, roots@allacrost.org
+*** \brief   Source file for quit mode interface.
+*** ***************************************************************************/
 
-/*
- * quit.cpp
- *  Code for Hero of Allacrost quit mode
- *  (C) 2005 by Tyler Olsen
- *
- *  This code is licensed under the GNU GPL. It is free software and you may modify it
- *   and/or redistribute it under the terms of this license. See http://www.gnu.org/copyleft/gpl.html
- *   for details.
- */
+#include <iostream>
 
 #include "utils.h"
-#include <iostream>
-#include "quit.h"
 #include "audio.h"
 #include "video.h"
 #include "input.h"
 #include "settings.h"
+
+#include "quit.h"
 #include "boot.h"
 
 using namespace std;
@@ -41,8 +33,6 @@ using namespace hoa_input;
 using namespace hoa_settings;
 using namespace hoa_boot;
 using namespace hoa_utils;
-
-
 
 namespace hoa_quit {
 
@@ -90,9 +80,9 @@ QuitMode::QuitMode() {
 	_option_box.SetCursorOffset(-35.0f, -4.0f);
 	
 	vector<ustring> options;
-	options.push_back(MakeWideString("Quit Game"));
-	options.push_back(MakeWideString("Quit to Main Menu"));
-	options.push_back(MakeWideString("Cancel"));
+	options.push_back(MakeUnicodeString("Quit Game"));
+	options.push_back(MakeUnicodeString("Quit to Main Menu"));
+	options.push_back(MakeUnicodeString("Cancel"));
 	
 	_option_box.SetOptions(options);
 	_option_box.SetSelection(QUIT_CANCEL);
@@ -194,15 +184,13 @@ void QuitMode::Draw() {
 
 
 // Quit the game completely
-void QuitMode::_QuitGame()
-{
+void QuitMode::_QuitGame() {
 	SettingsManager->ExitGame();
 }
 
 
 // Quit to the boot menu
-void QuitMode::_QuitToBootMenu()
-{
+void QuitMode::_QuitToBootMenu() {
 	// Restore the game audio, pop QuitMode off the stack, and push BootMode
 	switch (SettingsManager->GetPauseVolumeAction()) {
 		case SETTINGS_PAUSE_AUDIO:
@@ -222,8 +210,7 @@ void QuitMode::_QuitToBootMenu()
 
 
 // Cancel out of quit mode
-void QuitMode::_Cancel()
-{
+void QuitMode::_Cancel() {
 	// The user really doesn't want to quit after all, so restore the game audio and state
 	switch (SettingsManager->GetPauseVolumeAction()) {
 		case SETTINGS_PAUSE_AUDIO:
@@ -238,8 +225,5 @@ void QuitMode::_Cancel()
 	}
 	ModeManager->Pop();
 }
-
-
-
 
 } // namespace hoa_quit

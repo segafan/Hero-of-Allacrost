@@ -34,7 +34,7 @@ GUI::GUI()
 	_totalFPS      = 0;
 	
 	_curSample = _numSamples = 0;
-	_videoManager = GameVideo::GetReference();
+	_videoManager = GameVideo::SingletonGetReference();
 	
 	if(!_videoManager)
 	{
@@ -657,7 +657,7 @@ void GUIElement::CalculateAlignedRect(float &left, float &right, float &bottom, 
 	if(height < 0.0f)
 		height = -height;
 	
-	GameVideo *video = GameVideo::GetReference();	
+	GameVideo *video = GameVideo::SingletonGetReference();
 	CoordSys &cs = video->_coordSys;
 	
 	if(cs._upDir < 0.0f)
@@ -696,7 +696,7 @@ void GUIControl::CalculateAlignedRect(float &left, float &right, float &bottom, 
 		float menu_left, menu_right, menu_bottom, menu_top;
 		float menu_height, menu_width;
 		
-		GameVideo *video = GameVideo::GetReference();
+		GameVideo *video = GameVideo::SingletonGetReference();
 		_owner->GetDimensions(menu_width, menu_height);
 		menu_left = 0.0f;
 		menu_right = menu_width;
