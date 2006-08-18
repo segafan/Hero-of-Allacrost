@@ -255,7 +255,7 @@ void BattleMode::_TEMP_LoadTestData() {
 
 	// Load the battle music track
 	MusicDescriptor MD;
-	MD.LoadMusic("Confrontation");
+	MD.LoadMusic("mus/Confrontation.ogg");
 	_battle_music.push_back(MD);
 
 	// Construct all battle actors

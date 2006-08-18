@@ -31,7 +31,7 @@ namespace private_audio {
 SoundData::SoundData(string fname) {
 	filename = fname;
 
-	sound = Mix_LoadWAV(("snd/" + filename + ".wav").c_str());
+	sound = Mix_LoadWAV(filename.c_str());
 	if (sound == NULL) {
 		cout << "AUDIO ERROR: Could not open sound file " << filename << ": " << Mix_GetError() << endl;
 		reference_count = 0;
@@ -72,11 +72,11 @@ bool SoundData::IsValid() {
 void SoundData::DEBUG_PrintProperties() {
 	if (IsValid() == false) {
 		AudioManager->_audio_errors |= AUDIO_ERROR_NO_DATA;
-		cerr << "ERROR: the data for the file snd/" << filename << ".wav is not valid" << endl;
+		cerr << "ERROR: the data for the file " << filename << " is not valid" << endl;
 	}
 	else {
 		cout << "--------------------------------------------------------------------------------" << endl;
-		cout << "Filename:    snd/" << filename << ".wav" << endl;
+		cout << "Filename:      " << filename << endl;
 		// These properties are not easily available with SDL_mixer
 // 		cout << "Frequency:   " << property << " Hz" << endl;
 // 		cout << "Bit depth:   " << property << endl;
@@ -122,7 +122,7 @@ bool SoundDescriptor::LoadSound(string fname) {
 
 	_data = AudioManager->_AcquireSoundData(fname);
 	if (_data == NULL) {
-		cerr << "AUDIO ERROR: Failed to get a buffer for sound file snd/" << fname << ".wav" << endl;
+		cerr << "AUDIO ERROR: Failed to get a buffer for sound file " << fname << endl;
 		return false;
 	}
 	return true;

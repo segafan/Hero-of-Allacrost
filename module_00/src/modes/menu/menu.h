@@ -46,29 +46,29 @@ namespace private_menu {
 //! \name MenuMode OptionBox Main options
 //! \brief Constants used for the menu in the main menu mode
 //@{
-const uint32 MAIN_INVENTORY			= 0;
-const uint32 MAIN_SKILLS 			= 1;
-const uint32 MAIN_STATUS_EQUIP		= 2;
-const uint32 MAIN_OPTIONS			= 3;
-const uint32 MAIN_SAVE 				= 4;
-const uint32 MAIN_EXIT				= 5;
-const uint32 MAIN_SIZE				= 6;
+const uint32 MAIN_INVENTORY      = 0;
+const uint32 MAIN_SKILLS         = 1;
+const uint32 MAIN_STATUS_EQUIP   = 2;
+const uint32 MAIN_OPTIONS        = 3;
+const uint32 MAIN_SAVE           = 4;
+const uint32 MAIN_EXIT           = 5;
+const uint32 MAIN_SIZE           = 6;
 //@}
-	
+
 //! \name MenuMode Inventory Menu options
 //! \brief Constants used for the inventory menu
 //@{
-const uint32 INV_USE 	= 0;
-const uint32 INV_SORT 	= 1;
+const uint32 INV_USE    = 0;
+const uint32 INV_SORT   = 1;
 const uint32 INV_CANCEL = 2;
-const uint32 INV_SIZE 	= 3;
+const uint32 INV_SIZE   = 3;
 //@}
-	
+
 //! \name MenuMode Skills Menu options
 //! \brief Constants used for the skills menu
 //@{
-const uint32 SKILLS_CANCEL 	= 0;
-const uint32 SKILLS_SIZE	= 1;
+const uint32 SKILLS_CANCEL  = 0;
+const uint32 SKILLS_SIZE    = 1;
 //@}
 
 //! \name MenuMode Status Equipment Menu options

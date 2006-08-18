@@ -204,11 +204,11 @@ void MenuMode::Update() {
 	// Load sound effects
 	SoundDescriptor confirm;
 	SoundDescriptor cancel;
-	if (confirm.LoadSound("confirm") == false) 
+	if (confirm.LoadSound("snd/confirm.wav") == false) 
 	{
 		cerr << "MENUMODE::UPDATE - Unable to load confirm sound effect!" << endl;
 	}
-	if (cancel.LoadSound("cancel") == false) 
+	if (cancel.LoadSound("snd/cancel.wav") == false) 
 	{
 		cerr << "MENUMODE::UPDATE - Unable to load cancel sound effect!" << endl;
 	}
