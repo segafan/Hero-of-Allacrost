@@ -35,8 +35,6 @@ using namespace hoa_input;
 using namespace hoa_global;
 using namespace hoa_data;
 
-
-
 namespace hoa_menu {
 
 bool MENU_DEBUG = false;

@@ -74,40 +74,40 @@ const uint32 SKILLS_SIZE    = 1;
 //! \name MenuMode Status Equipment Menu options
 //! \brief Constants used for the status/equip menu
 //@{
-const uint32 STATUS_EQUIP_EQUIP		= 0;
-const uint32 STATUS_EQUIP_REMOVE	= 1;
-const uint32 STATUS_EQUIP_NEXT		= 2;
-const uint32 STATUS_EQUIP_PREV		= 3;
-const uint32 STATUS_EQUIP_CANCEL	= 4;
-const uint32 STATUS_EQUIP_SIZE		= 5;
+const uint32 STATUS_EQUIP_EQUIP   = 0;
+const uint32 STATUS_EQUIP_REMOVE  = 1;
+const uint32 STATUS_EQUIP_NEXT    = 2;
+const uint32 STATUS_EQUIP_PREV    = 3;
+const uint32 STATUS_EQUIP_CANCEL  = 4;
+const uint32 STATUS_EQUIP_SIZE    = 5;
 //@}
 
 //! \name MenuMode Options Menu options
 //! \brief Constants used for the options menu
 //@{
-const uint32 OPTIONS_EDIT	= 0;
-const uint32 OPTIONS_SAVE	= 1;
-const uint32 OPTIONS_CANCEL	= 2;
-const uint32 OPTIONS_SIZE	= 3;
+const uint32 OPTIONS_EDIT    = 0;
+const uint32 OPTIONS_SAVE    = 1;
+const uint32 OPTIONS_CANCEL  = 2;
+const uint32 OPTIONS_SIZE    = 3;
 //@}
 
 //! \name MenuMode Save Menu options
 //! \brief Constants used for the save menu
 //@{
-const uint32 SAVE_SAVE		= 0;
-const uint32 SAVE_CANCEL	= 1;
-const uint32 SAVE_SIZE		= 2;
+const uint32 SAVE_SAVE    = 0;
+const uint32 SAVE_CANCEL  = 1;
+const uint32 SAVE_SIZE    = 2;
 //@}
 	
 //! \name MenuMode OptionBox Show Flags
 //! \brief Constants to determine which option box is currently showing.
 //@{
-const uint32 SHOW_MAIN 				= 0;
-const uint32 SHOW_INVENTORY			= 1;
-const uint32 SHOW_SKILLS			= 2;
-const uint32 SHOW_STATUS_EQUIP		= 3;
-const uint32 SHOW_OPTIONS			= 4;
-const uint32 SHOW_SAVE				= 5;
+const uint32 SHOW_MAIN          = 0;
+const uint32 SHOW_INVENTORY     = 1;
+const uint32 SHOW_SKILLS        = 2;
+const uint32 SHOW_STATUS_EQUIP  = 3;
+const uint32 SHOW_OPTIONS       = 4;
+const uint32 SHOW_SAVE          = 5;
 //@}
 
 }

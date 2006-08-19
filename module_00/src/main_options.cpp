@@ -137,7 +137,8 @@ bool EnableDebugging(string vars) {
 	for (uint32 i = 0; i < args.size(); i++) {
 		if (args[i] == "all") {
 			// This causes every call to SDL_SetError to also print an error message on stderr.
-			SDL_putenv("SDL_DEBUG=1");
+			// NOTE: commented out because apparently SDL_putenv is not yet an available function on some systems
+			// SDL_putenv("SDL_DEBUG=1");
 			
 			hoa_audio::AUDIO_DEBUG                  = true;
 			hoa_battle::BATTLE_DEBUG                = true;
@@ -213,61 +214,96 @@ bool EnableDebugging(string vars) {
 // Prints version numbers for SDL libraries, video rendering information, and other info
 //  about the user's system (work in progress)
 bool PrintSystemInformation() {
-	cout << "_____Printing system information_____" << endl;
+	printf("\n===== System Information\n");
 
 	// Initialize SDL and its subsystems and make sure it shutdowns properly on exit
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) != 0) {
 		cerr << "ERROR: Unable to initialize SDL: " << SDL_GetError() << endl;
 		return false;
 	}
-	else {
-		cout << "SDL Initialized succesfully." << endl;
-	}
 	atexit(SDL_Quit);
 
-	cout << " *** VIDEO INFORMATION *** " << endl;
-	char video_driver[20];
-	SDL_VideoDriverName(video_driver, 20);
-	cout << "Video driver name: " << video_driver << "\n" << endl;
+	printf("SDL version (compiled):  %d.%d.%d\n", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL);
+	printf("SDL version (linked):    %d.%d.%d\n", SDL_Linked_Version()->major, SDL_Linked_Version()->minor, SDL_Linked_Version()->patch);
+
+	SDL_Joystick *js_test;
+	int32 js_num = SDL_NumJoysticks();
+	printf("Number of joysticks found:  %d\n", js_num);
+	for (int32 i = 0; i < js_num; i++) { // Print out information about each joystick
+		printf("  Joystick #%d\n", i);
+		printf("    Joystick Name: %s\n", SDL_JoystickName(i));
+		js_test = SDL_JoystickOpen(i);
+		if (js_test == NULL)
+			printf("    ERROR: SDL was unable to open joystick #%d!\n", i);
+		else {
+			printf("    Number Axes: %d\n", SDL_JoystickNumAxes(js_test));
+			printf("    Number Buttons: %d\n", SDL_JoystickNumButtons(js_test));
+			printf("    Number Trackballs: %d\n", SDL_JoystickNumBalls(js_test));
+			printf("    Number Hat Switches: %d\n", SDL_JoystickNumHats(js_test));
+			SDL_JoystickClose(js_test);
+		}
+	}
+
+	printf("\n===== Video Information\n");
+
+	// TODO: This code should be re-located to a function (DEBUG_PrintInfo()) in the video engine
+// 	hoa_video::VideoManager = hoa_video::GameVideo::SingletonCreate();
+// 	if (hoa_video::VideoManager->SingletonInitialize() == false) {
+// 		cerr << "ERROR: unable to initialize the VideoManager" << endl;
+// 		return false;
+// 	}
+// 	else {
+// 		hoa_video::VideoManager->DEBUG_PrintInfo();
+// 	}
+// 	hoa_video::GameVideo::SingletonDestroy();
+
+	// TODO: print the OpenGL version number here
+
+	printf("SDL_ttf version (compiled): %d.%d.%d\n", SDL_TTF_MAJOR_VERSION, SDL_TTF_MINOR_VERSION, SDL_TTF_PATCHLEVEL);
+	// printf("SDL_ttf version (linked):   %d.%d.%d\n", Ttf_Linked_Version()->major, Ttf_Linked_Version()->minor, Ttf_Linked_Version()->patch);
+
+	char video_driver[80];
+	SDL_VideoDriverName(video_driver, 80);
+	printf("Name of video driver: %s\n", video_driver);
 
 	const SDL_VideoInfo *user_video;
 	user_video = SDL_GetVideoInfo(); // Get information about the user's video system
-	cout << "Best available video mode" << endl;
-	cout << "> Creates hardware surfaces: ";
+	cout << "  Best available video mode" << endl;
+	cout << "    Creates hardware surfaces: ";
 	if (user_video->hw_available == 1) cout << "yes\n";
 	else cout << "no\n";
-	cout << "> Has window manager available: ";
+	cout << "    Has window manager available: ";
 	if (user_video->wm_available == 1) cout << "yes\n";
 	else cout << "no\n";
-	cout << "> Hardware to hardware blits accelerated: ";
+	cout << "    Hardware to hardware blits accelerated: ";
 	if (user_video->blit_hw == 1) cout << "yes\n";
 	else cout << "no\n";
-	cout << "> Hardware to hardware colorkey blits accelerated: ";
+	cout << "    Hardware to hardware colorkey blits accelerated: ";
 	if (user_video->blit_hw_CC == 1) cout << "yes\n";
 	else cout << "no\n";
-	cout << "> Hardware to hardware alpha blits accelerated: ";
+	cout << "    Hardware to hardware alpha blits accelerated: ";
 	if (user_video->blit_hw_A == 1) cout << "yes\n";
 	else cout << "no\n";
-	cout << "> Software to hardware blits acceleerated: ";
+	cout << "    Software to hardware blits acceleerated: ";
 	if (user_video->blit_sw == 1) cout << "yes\n";
 	else cout << "no\n";
-	cout << "> Software to hardware colorkey blits accelerated: ";
+	cout << "    Software to hardware colorkey blits accelerated: ";
 	if (user_video->blit_sw_CC == 1) cout << "yes\n";
 	else cout << "no\n";
-	cout << "> Software to hardware alpha blits accelerated: ";
+	cout << "    Software to hardware alpha blits accelerated: ";
 	if (user_video->blit_sw_A == 1) cout << "yes\n";
 	else cout << "no\n";
-	cout << "> Color fills accelerated: ";
+	cout << "    Color fills accelerated: ";
 	if (user_video->blit_fill == 1) cout << "yes\n";
 	else cout << "no\n";
-	cout << "> Total video memory: " << user_video->video_mem << " kilobytes" << "\n" << endl;
+	cout << "    Total video memory: " << user_video->video_mem << " kilobytes" << endl;
+	// cout << "    Best pixel format: " << user_video->vfmt << endl;
 
-	//cout << "The best pixel format: " << user_video->vfmt << endl;
+	printf("\n===== Audio Information\n");
 
-	cout << " *** AUDIO INFORMATION *** " << endl;
 	hoa_audio::AudioManager = hoa_audio::GameAudio::SingletonCreate();
 	if (hoa_audio::AudioManager->SingletonInitialize() == false) {
-		cerr << "ERROR: unable to initialize AudioManager" << endl;
+		cerr << "ERROR: unable to initialize the AudioManager" << endl;
 		return false;
 	}
 	else {
@@ -275,28 +311,8 @@ bool PrintSystemInformation() {
 	}
 	hoa_audio::GameAudio::SingletonDestroy();
 
-	cout << " *** JOYSTICK INFORMATION *** " << endl;
+	printf("\n");
 
-	SDL_Joystick *js_test;
-	int32 js_num = SDL_NumJoysticks(); // Get the number of joysticks available
-	cout << "SDL has recognized " << js_num << " joysticks on this system." << endl;
-	for (int32 i = 0; i < js_num; i++) { // Print out information about each joystick
-		js_test = SDL_JoystickOpen(i);
-		if (js_test == NULL)
-			cout << "ERROR: SDL was unable to open joystick #" << i << endl;
-		else {
-			cout << "Joystick #" << i << endl;
-			cout << "> Name:          " << SDL_JoystickName(i) << endl;
-			cout << "> Axes:          " << SDL_JoystickNumAxes(js_test) << endl;
-			cout << "> Buttons:       " << SDL_JoystickNumButtons(js_test) << endl;
-			cout << "> Trackballs:    " << SDL_JoystickNumBalls(js_test) << endl;
-			cout << "> Hat Switches:  " << SDL_JoystickNumHats(js_test) << endl;
-			SDL_JoystickClose(js_test);
-		}
-	}
-
-	cout << "User Event range: [" << SDL_USEREVENT << "," << SDL_NUMEVENTS-1 << "]: "
-			 << SDL_NUMEVENTS - SDL_USEREVENT << " distinct user events." << endl;
 	return true;
 } // bool PrintSystemInformation()
 
