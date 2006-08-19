@@ -30,7 +30,6 @@ extern uint32 RoundUpPow2(uint32 x);
 //
 //   Example:  gamevideo->LoadFont( "fonts/arial.ttf", "arial36", 36 );
 //-----------------------------------------------------------------------------
-
 bool GameVideo::LoadFont(const string &filename, const string &name, int32 size)
 {
 	// quit if font is already loaded

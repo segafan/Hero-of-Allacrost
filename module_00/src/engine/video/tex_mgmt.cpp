@@ -419,14 +419,7 @@ StillImage GameVideo::TilesToObject
 //                        Returns NULL on failure, which should only happen if
 //                        we run out of memory or bad argument is passed.
 //-----------------------------------------------------------------------------
-
-TexSheet *GameVideo::_InsertImageInTexSheet
-(
-	Image *image,
-	int32 w,
-	int32 h,
-	bool isStatic
-)
+TexSheet *GameVideo::_InsertImageInTexSheet(Image *image, int32 w, int32 h, bool isStatic)
 {
 	// if it's a large image size (>512x512) then we already know it's not going
 	// to fit in any of our existing texture sheets, so create a new one for it

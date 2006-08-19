@@ -541,7 +541,6 @@ bool OptionBox::SetSelection(int32 index)
 //             the text), it returns false and clears out the internal
 //             _options vector
 //-----------------------------------------------------------------------------
-
 bool OptionBox::SetOptions(const vector<ustring> &formatText)
 {
 	_options.clear();
@@ -578,7 +577,6 @@ bool OptionBox::SetOptions(const vector<ustring> &formatText)
 //-----------------------------------------------------------------------------
 // SetOptionText: changes the text for a given option
 //-----------------------------------------------------------------------------
-
 bool OptionBox::SetOptionText(int32 index, const hoa_utils::ustring &text)
 {
 	// check for bad index
@@ -818,39 +816,31 @@ void OptionBox::_PlayConfirmSound()
 {
 }
 
-
 //-----------------------------------------------------------------------------
 // _PlayNoConfirmSound: sound when user tries to confirm on a disabled option
 //-----------------------------------------------------------------------------
-
 void OptionBox::_PlayNoConfirmSound()
 {
 }
 
-
 //-----------------------------------------------------------------------------
 // _PlaySelectSound: sound when selection changes
 //-----------------------------------------------------------------------------
-
 void OptionBox::_PlaySelectSound() 
 {
 }
 
-
 //-----------------------------------------------------------------------------
 // _PlaySwitchSound: sound when two options are switched
 //-----------------------------------------------------------------------------
-
 void OptionBox::_PlaySwitchSound() 
 {
 }
-
 
 //-----------------------------------------------------------------------------
 // _ParseOption: helper function to SetOptions. Reads in option format string,
 //               and spits out an Option structure
 //-----------------------------------------------------------------------------
-
 bool OptionBox::_ParseOption(const hoa_utils::ustring &formatString, Option &op)
 {
 	// by default, option isn't disabled

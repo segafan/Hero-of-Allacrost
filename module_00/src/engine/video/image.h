@@ -262,7 +262,6 @@ protected:
  *         a large image, e.g. with TilesToObject(). Externally though,
  *         it's fine to think of compound images as just a single image.
  *****************************************************************************/
-
 class StillImage : public ImageDescriptor
 {
 public:
@@ -317,6 +316,17 @@ public:
 	float GetWidth() const  { return _width; }
 	float GetHeight() const { return _height; }
 	void  GetVertexColor(Color &c, int colorIndex) { c = _color[colorIndex]; }
+
+	void EnableGrayScale()
+	{ 
+		this->_grayscale = true; 
+		this->Load();
+	}
+	void DisableGrayScale()
+	{ 
+		this->_grayscale = false; 
+		this->Load();
+	}
 			
 private:
 
@@ -361,6 +371,9 @@ public:
 	 *  \brief clears the animated image
 	 */
 	void Clear();
+
+	void EnableGrayScale();
+	void DisableGrayScale();
 	
 
 	/*!
