@@ -53,14 +53,14 @@ Grid::Grid(QWidget* parent, const QString& name, int width, int height)
 	} // -1 is used for no tiles
 
 	// Create the video engine's singleton
-	VideoManager = GameVideo::Create();
+	VideoManager = GameVideo::SingletonCreate();
 } // Grid constructor
 
 Grid::~Grid()
 {
 	// FIXME
 //	VideoManager->DeleteImage();
-	GameVideo::Destroy();
+	GameVideo::SingletonDestroy();
 } // Grid destructor
 
 
@@ -401,7 +401,7 @@ void Grid::SaveMap()
 void Grid::initializeGL()
 {
 	VideoManager->SetTarget(VIDEO_TARGET_QT_WIDGET);
-	VideoManager->Initialize();
+	VideoManager->SingletonInitialize();
 	VideoManager->ToggleFPS();
 } // initializeGL()
 
