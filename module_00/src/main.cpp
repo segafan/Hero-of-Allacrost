@@ -35,6 +35,7 @@
 #include "global.h"
 #include "boot.h"
 #include "main_options.h"
+#include <ctime>
 
 using namespace std;
 using namespace hoa_utils;
