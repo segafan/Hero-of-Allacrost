@@ -395,4 +395,4 @@ bool RemoveDirectory(const std::string& dir_name);
 
 } // namespace hoa_utils
 
-#endif
+#endif // __UTILS_HEADER__

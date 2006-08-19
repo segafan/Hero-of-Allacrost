@@ -242,12 +242,13 @@ void GameAudio::RewindAllMusic() {
 
 // Prints information about that audio settings on the user's machine
 void GameAudio::DEBUG_PrintInfo() {
-	cout << "*** Audio Information ***" << endl;
-	cout << "SDL_mixer version: " << MIX_MAJOR_VERSION << '.' << MIX_MINOR_VERSION << '.' << MIX_PATCHLEVEL << endl;
-	cout << "Number of mixing channels:   " << MIX_CHANNELS << endl;
-	cout << "Number of playback channels: " << MIX_DEFAULT_CHANNELS << endl;
-	cout << "Playback frequency: " << MIX_DEFAULT_FREQUENCY << endl;
-	cout << "Playback format: " << MIX_DEFAULT_FORMAT << endl;
+	printf("SDL_mixer version (compiled): %d.%d.%d\n", MIX_MAJOR_VERSION, MIX_MINOR_VERSION, MIX_PATCHLEVEL);
+	printf("SDL_mixer version (linked):   %d.%d.%d\n", Mix_Linked_Version()->major, Mix_Linked_Version()->minor, Mix_Linked_Version()->patch);
+	printf("Number of playback channels:  %d\n", MIX_DEFAULT_CHANNELS);
+	printf("Number of mixing channels:  %d\n", MIX_CHANNELS);
+	printf("Playback frequency:  %d\n", MIX_DEFAULT_FREQUENCY);
+	printf("Playback format:  %d\n", MIX_DEFAULT_FORMAT);
+	printf("Maximum volume:  %d\n", MIX_MAX_VOLUME);
 }
 
 } // namespace hoa_audio
