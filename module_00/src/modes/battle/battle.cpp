@@ -148,7 +148,7 @@ BattleMode::BattleMode() :
 	_action_type_menu_cursor_location = 0;
 
 // 	_action_type_menu.SetOwner(_action_menu_window);
-	_action_type_menu.SetCursorOffset(-15, 0);
+	_action_type_menu.SetCursorOffset(-45, 0);
 	_action_type_menu.SetCellSize(100.0f, 80.0f);
 	_action_type_menu.SetSize(1, 4);
 	_action_type_menu.SetPosition(30.0f, 512.0f);
@@ -157,20 +157,21 @@ BattleMode::BattleMode() :
 	_action_type_menu.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	_action_type_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_action_type_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-// 	_action_type_menu.SetSelection(0); // This line may be causing a seg-fault!
+ 	_action_type_menu.SetSelection(0); // This line may be causing a seg-fault!
 
 	_battle_lose_menu.SetCellSize(128.0f, 50.0f);
 	_battle_lose_menu.SetPosition(530.0f, 380.0f);
 	_battle_lose_menu.SetSize(1, 1);
+	_battle_lose_menu.SetFont("battle");
 	_battle_lose_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_battle_lose_menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_battle_lose_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_battle_lose_menu.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-	_battle_lose_menu.SetCursorOffset(-35.0f, -4.0f);
+	_battle_lose_menu.SetCursorOffset(-45.0f, 0);
 	vector<ustring> loseText;
 	loseText.push_back(MakeUnicodeString("Return to the main menu"));
 	_battle_lose_menu.SetOptions(loseText);
-// 	_battle_lose_menu.SetSelection(0); // This line may be causing a seg-fault!
+ 	_battle_lose_menu.SetSelection(0); // This line may be causing a seg-fault!
 
 	_TEMP_LoadTestData();
 
@@ -187,11 +188,11 @@ BattleMode::~BattleMode() {
 	}
 
 	// Delete all character and enemy actors
-	for (deque<CharacterActor*>::iterator i = _character_actors.begin(); i != _character_actors.end(); i++) {
+	for (deque<CharacterActor*>::iterator i = _character_actors.begin(); i != _character_actors.end(); ++i) {
 		delete *i;
 	}
 	_character_actors.clear();
-	for (deque<EnemyActor*>::iterator i = _enemy_actors.begin(); i != _enemy_actors.end(); i++) {
+	for (deque<EnemyActor*>::iterator i = _enemy_actors.begin(); i != _enemy_actors.end(); ++i) {
 		delete *i;
 	}
 	_enemy_actors.clear();
@@ -199,14 +200,20 @@ BattleMode::~BattleMode() {
 	// Remove all of the battle images that were loaded
 	VideoManager->DeleteImage(_battle_background);
 	VideoManager->DeleteImage(_bottom_menu_image);
+	VideoManager->DeleteImage(_actor_selection_image);
+	VideoManager->DeleteImage(_attack_point_indicator);
+	VideoManager->DeleteImage(_swap_icon);
+	VideoManager->DeleteImage(_swap_card);
 
 	// Delete all GUI objects that are allocated
 	if (_action_list_menu) {
 		delete _action_list_menu;
+		_action_list_menu = 0;
 	}
 	if (_action_menu_window) {
 		_action_menu_window->Destroy();
 		delete _action_menu_window;
+		_action_menu_window = 0;
 	}
 } // BattleMode::~BattleMode()
 
@@ -424,7 +431,7 @@ void BattleMode::_ShutDown() {
 ////////////////////////////////////////////////////////////////////////////////
 
 void BattleMode::Update() {
-	_battle_over = (_NumberEnemiesAlive() == 0) ^ (_NumberCharactersAlive() == 0);
+	_battle_over = (_NumberEnemiesAlive() == 0) || (_NumberCharactersAlive() == 0);
 	
 	if (_battle_over) {
 		_victorious_battle = (_NumberEnemiesAlive() == 0);
@@ -441,7 +448,7 @@ void BattleMode::Update() {
 				PlayerDefeat();
 			}
 		}
-		// Do not update other battle componenets when the battle has already ended
+		// Do not update other battle components when the battle has already ended
 		return;
 	}
 
@@ -547,13 +554,13 @@ void BattleMode::_UpdateActionTypeMenu() {
 	// Handle user input commands: up, down, confirm, cancel
 	if (InputManager->UpPress()) {
 		if (_action_type_menu_cursor_location > 0) {
-				_action_type_menu.HandleLeftKey();
+				_action_type_menu.HandleUpKey();
 				_action_type_menu_cursor_location--;
 		}
 	}
 	else if (InputManager->DownPress()) {
 		if (_action_type_menu_cursor_location < 3) {
-			_action_type_menu.HandleRightKey();
+			_action_type_menu.HandleDownKey();
 			_action_type_menu_cursor_location++;
 		}
 	}
@@ -711,18 +718,15 @@ void BattleMode::Draw() {
 			VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 			VideoManager->SetTextColor(Color::white);
 			VideoManager->DrawText("Your party is victorious!\n\nExp: +50\n\nLoot : 1 HP Potion");
-
 		}
 		// Show the lose screen
 		else {
+				_battle_lose_menu.Draw();
 				VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 				VideoManager->Move(520.0f, 430.0f);
 				VideoManager->DrawText("Your party has been defeated!");
-				_battle_lose_menu.Draw();
 		}
-		// When the battle is over, none of the remaining menus need to be drawn
-	  return;
-	} // if (_battle_over)
+	} // endif (_battle_over)
 } // void BattleMode::Draw()
 
 
@@ -860,7 +864,7 @@ void BattleMode::_ConstructActionListMenu() {
 	_action_list_menu->SetSelectMode(VIDEO_SELECT_SINGLE);
 	_action_list_menu->SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_action_list_menu->SetCellSize(200.0f, 60.0f);
-	_action_list_menu->SetCursorOffset(-30, -5);
+	_action_list_menu->SetCursorOffset(-45.0f, 0);
 
 	if (_action_type_menu_cursor_location == ACTION_TYPE_ATTACK) {
 		vector<GlobalSkill*> attack_skills = p->GetAttackSkills();
@@ -870,13 +874,12 @@ void BattleMode::_ConstructActionListMenu() {
 		else {
 			vector<ustring> attack_skill_names;
 			for (uint32 i = 0; i < attack_skills.size(); ++i) {
-				ostringstream sp_usage;
-				sp_usage << attack_skills[i]->GetSPUsage();
-				string skill_string = attack_skills[i]->GetName() + string("     ") + sp_usage.str();
+				string skill_string = attack_skills[i]->GetName() + string("  ") + hoa_utils::IntegerToString(attack_skills[i]->GetSPUsage());
 				attack_skill_names.push_back(MakeUnicodeString(skill_string));
 			}
 			_action_list_menu->SetSize(1, attack_skill_names.size());
 			_action_list_menu->SetOptions(attack_skill_names);
+			_action_list_menu->SetSelection(0);
 
 // 			_action_menu_window = new MenuWindow();
 // 			_action_menu_window->Create(200.0f, 20.0f + 50.0f * attack_skill_names.size());
@@ -995,8 +998,7 @@ void BattleMode::RemoveScriptedEventsForActor(BattleActor *AActorToRemove) {
 
 
 void BattleMode::PlayerVictory() {
-	// stubbed for now ... go back to map mode?  Tell the GUI, show the player, pop the state
-	if (BATTLE_DEBUG) cout << "Player has won the battle!" << endl;
+	if (BATTLE_DEBUG) cout << "Player has won a battle!" << endl;
 
 	// Give player some loot
 	GlobalItem *new_item = new GlobalItem(GLOBAL_HP_RECOVERY_ITEM, GLOBAL_ALL_CHARACTERS, HP_POTION, 1);
@@ -1016,11 +1018,10 @@ void BattleMode::PlayerVictory() {
 
 
 void BattleMode::PlayerDefeat() {
-	if (BATTLE_DEBUG) cout << "Player was defeated in battle!" << endl;
-	ModeManager->PopAll(); // Pop out battle mode
+	if (BATTLE_DEBUG) cout << "Player was defeated in a battle!" << endl;
+	ModeManager->PopAll();
 	BootMode *BM = new BootMode();
 	ModeManager->Push(BM);
-// 	ModeManager->Pop(); // Pop out map mode
 }
 
 

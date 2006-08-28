@@ -1137,7 +1137,7 @@ bool OptionBox::Draw()
 		{
 			int32 index = row * _numColumns + col;
 			
-			if(index >= _numOptions)
+			if(index >= _numOptions || index < 0)
 			{
 				finished = true;
 				break;
@@ -1150,8 +1150,8 @@ bool OptionBox::Draw()
 			int32 yalign = _option_yalign;
 			
 			_SetupAlignment(xalign, yalign, bounds, x, y);
-					
-			Option &op = _options[index];
+
+			Option &op = _options.at(index);
 			
 			if(op.disabled)
 				video->SetTextColor(Color::gray);
