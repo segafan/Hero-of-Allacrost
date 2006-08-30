@@ -874,7 +874,7 @@ void BattleMode::_ConstructActionListMenu() {
 		else {
 			vector<ustring> attack_skill_names;
 			for (uint32 i = 0; i < attack_skills.size(); ++i) {
-				string skill_string = attack_skills[i]->GetName() + string("  ") + hoa_utils::IntegerToString(attack_skills[i]->GetSPUsage());
+				string skill_string = attack_skills[i]->GetName() + string("  ") + hoa_utils::NumberToString(attack_skills[i]->GetSPUsage());
 				attack_skill_names.push_back(MakeUnicodeString(skill_string));
 			}
 			_action_list_menu->SetSize(1, attack_skill_names.size());

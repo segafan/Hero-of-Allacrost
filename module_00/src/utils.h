@@ -169,7 +169,7 @@ private:
 *** \return A std::string containing the parameter in string form
 **/
 template <typename T>
-std::string IntegerToString(const T t)
+std::string NumberToString(const T t)
 {
 	std::ostringstream text("");
 	text << static_cast<int32>(t);
