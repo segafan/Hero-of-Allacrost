@@ -746,7 +746,7 @@ void BootMode::_UpdateVideoOptions() {
 		_video_options_menu.SetOptionText(1, MakeUnicodeString("Window mode: windowed"));
 
 	// Update brightness
-	_video_options_menu.SetOptionText(2, MakeUnicodeString("Brightness: " + IntegerToString(VideoManager->GetGamma() * 100.0f + 0.5f) + " %"));
+	_video_options_menu.SetOptionText(2, MakeUnicodeString("Brightness: " + NumberToString(VideoManager->GetGamma() * 100.0f + 0.5f) + " %"));
 }
 
 

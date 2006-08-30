@@ -495,7 +495,7 @@ void InventoryWindow::UpdateItemText()
 	vector<ustring> inv_names;
 	for (uint32 i = 0; i < inv.size(); ++i) {
 		inv_names.push_back(MakeUnicodeString("<" + inv[i]->GetIconPath() + "><32>"
-			+ inv[i]->GetName() + "<R>" + IntegerToString(inv[i]->GetCount()) + "   "));
+			+ inv[i]->GetName() + "<R>" + NumberToString(inv[i]->GetCount()) + "   "));
 	}
 	
 	_inventory_items.SetOptions(inv_names);
