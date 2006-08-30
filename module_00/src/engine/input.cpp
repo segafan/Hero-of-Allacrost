@@ -262,7 +262,6 @@ void GameInput::EventHandler() {
 	// Loops until there are no remaining events to process
 	while (SDL_PollEvent(&event)) {
 		if (event.type == SDL_QUIT) {
-
 			// Quit the game without question if the active game mode is BootMode or QuitMode
 			if (ModeManager->GetGameType() == MODE_MANAGER_BOOT_MODE
 				|| ModeManager->GetGameType() == MODE_MANAGER_QUIT_MODE) {
@@ -275,9 +274,15 @@ void GameInput::EventHandler() {
 			}
 			return;
 		}
-		else if (event.type == SDL_ACTIVEEVENT) {
-			// Should we care about Active events?
-			// if (INPUT_DEBUG) cout << "Active event" << endl;
+		// Check if the window was iconified/minimized or restored
+		else if (event.type == SDL_ACTIVEEVENT && (event.active.state & SDL_APPACTIVE)) {
+			// TODO: when the window is iconified/minimized, insert SDL_Delay() calls so that the game doesn't continue to suck up CPU time
+			if (event.active.gain == 0) { // Window was iconified/minimized
+				
+			}
+			else { // Window was restored
+				
+			}
 			break;
 		}
 		else if (event.type == SDL_KEYUP || event.type == SDL_KEYDOWN) {
