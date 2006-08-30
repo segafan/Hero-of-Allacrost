@@ -7,25 +7,26 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-/*!****************************************************************************
- * \file    menu.cpp
- * \author  Daniel Steuernol steu@allacrost.org
- * \brief   Source file for menu mode interface.
- *****************************************************************************/
+/** ****************************************************************************
+*** \file    menu.cpp
+*** \author  Daniel Steuernol steu@allacrost.org
+*** \brief   Source file for menu mode interface.
+*** ***************************************************************************/
 
-#include "utils.h"
 #include <iostream>
 #include <sstream>
+
+#include "utils.h"
+
 #include "menu.h"
 #include "audio.h"
 #include "video.h"
 #include "mode_manager.h"
 #include "input.h"
 #include "global.h"
-#include "data.h"
 
 using namespace std;
-using namespace hoa_menu::private_menu;
+
 using namespace hoa_utils;
 using namespace hoa_audio;
 using namespace hoa_video;
@@ -33,16 +34,20 @@ using namespace hoa_settings;
 using namespace hoa_mode_manager;
 using namespace hoa_input;
 using namespace hoa_global;
-using namespace hoa_data;
+
+using namespace hoa_menu::private_menu;
+
+
 
 namespace hoa_menu {
 
 bool MENU_DEBUG = false;
 
-//--------------------------
-// MenuMode::MenuMode
-//--------------------------
-MenuMode::MenuMode() 
+////////////////////////////////////////////////////////////////////////////////
+// MenuMode class -- Initialization and Destruction Code
+////////////////////////////////////////////////////////////////////////////////
+
+MenuMode::MenuMode()
 {
 	if (MENU_DEBUG) cout << "MENU: MenuMode constructor invoked." << endl;
 
@@ -56,39 +61,11 @@ MenuMode::MenuMode()
 	_location_picture.SetDimensions(500, 125);
 	_location_picture.SetStatic(true);
 	VideoManager->LoadImage(_location_picture);
-	
-	// DELETE THIS TOO!!
-	//GlobalCharacter *laila = new GlobalCharacter("Laila", "laila", GLOBAL_LAILA);
-	//if (GlobalManager->GetParty().size() < 2)
-	//	GlobalManager->AddCharacter(laila);
-	//GlobalCharacter *claud2 = new GlobalCharacter("Claudius", "claudius", GLOBAL_CLAUDIUS);
-	//GlobalManager->AddCharacter(claud2);
-	//GlobalCharacter *claud3 = new GlobalCharacter("Claudius", "claudius", GLOBAL_CLAUDIUS);
-	//GlobalManager->AddCharacter(claud3);
-	// DELETE this when we have real data.
-	//GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetHP(80);
-	//GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetMaxHP(340);
-	//GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetSP(35);
-	//GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetMaxSP(65);
-	//GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetXP(35);
-	//GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetXPNextLevel(156);
-	//GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetXPLevel(100);
-	//GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetAgility(56);
-	//GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetIntelligence(67);
-	//GlobalManager->GetCharacter(hoa_global::GLOBAL_CLAUDIUS)->SetStrength(120);
-	//GlobalManager->GetCharacter(hoa_global::GLOBAL_LAILA)->SetHP(300);
-	//GlobalManager->GetCharacter(hoa_global::GLOBAL_LAILA)->SetMaxHP(440);
-	//GlobalManager->GetCharacter(hoa_global::GLOBAL_LAILA)->SetSP(300);
-	//GlobalManager->GetCharacter(hoa_global::GLOBAL_LAILA)->SetMaxSP(370);
-	//GlobalManager->GetCharacter(hoa_global::GLOBAL_LAILA)->SetXP(124);
-	//GlobalManager->GetCharacter(hoa_global::GLOBAL_LAILA)->SetXPNextLevel(357);
-	//GlobalManager->GetCharacter(hoa_global::GLOBAL_LAILA)->SetXPLevel(75);
+
+	// TEMP: remove this eventually
 	GlobalManager->SetMoney(4236);
-	///////////////////////////////////////////
-	//////////////////////////////////////////
-	//////////////////////////////////////////
 	
-	vector<GlobalCharacter *> characters = GlobalManager->GetParty();
+	vector<GlobalCharacter*> characters = GlobalManager->GetParty();
 	if (characters.size() == 4)
 	{
 		_character_window0.SetCharacter(characters[0]);
@@ -111,16 +88,58 @@ MenuMode::MenuMode()
 	{
 		_character_window0.SetCharacter(characters[0]);
 	}
+	else
+	{
+		cerr << "MENU ERROR: no characters in party!" << endl;
+		exit(1);
+	}
+
+	//////////// Setup the menu windows
+	uint32 start_x = (1024 - 800) / 2 - 40;
+	uint32 start_y = (768 - 600) / 2;
+	uint32 win_width = 208;
+	uint32 win_height = 600 - 192;
+
+	_bottom_window.Create(208 * 4 + 16, 192, ~VIDEO_MENU_EDGE_TOP);
+	_bottom_window.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y) + static_cast<float>(win_height) + 8);
+
+
+	// Width of each character window is 200 px.
+	// Each char window will have an additional 16 px for the left border 
+	// The 4th (last) char window will have another 16 px for the right border
+	// Height of the char window is 408 px.
+	// The bottom window in the main view is 192 px high, and the full width which will be 216 * 4 + 16
+	_character_window0.Create(static_cast<float>(win_width), static_cast<float>(win_height),
+		~VIDEO_MENU_EDGE_RIGHT, VIDEO_MENU_EDGE_RIGHT);
+	_character_window0.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y));
+
+	_character_window1.Create(static_cast<float>(win_width), static_cast<float>(win_height),
+		~VIDEO_MENU_EDGE_RIGHT, VIDEO_MENU_EDGE_LEFT | VIDEO_MENU_EDGE_RIGHT);
+	_character_window1.SetPosition(static_cast<float>(start_x) + static_cast<float>(win_width), static_cast<float>(start_y));
 	
-	// Set the default menu to the main option box
+	_character_window2.Create(static_cast<float>(win_width), static_cast<float>(win_height),
+		~VIDEO_MENU_EDGE_RIGHT, VIDEO_MENU_EDGE_LEFT | VIDEO_MENU_EDGE_RIGHT);
+	_character_window2.SetPosition(static_cast<float>(start_x) + static_cast<float>(2 * win_width), static_cast<float>(start_y));
+	
+	_character_window3.Create(static_cast<float>(win_width) + 16, static_cast<float>(win_height),
+		VIDEO_MENU_EDGE_ALL, VIDEO_MENU_EDGE_LEFT);
+	_character_window3.SetPosition(static_cast<float>(start_x) + static_cast<float>(3 * win_width), static_cast<float>(start_y));
+
+	// Setup the inventory window
+	_inventory_window.Create(static_cast<float>(win_width * 4 + 16), static_cast<float>(win_height),
+		VIDEO_MENU_EDGE_ALL, VIDEO_MENU_EDGE_BOTTOM);
+	_inventory_window.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y));
+
+	// Setup the status window
+	_status_window.Create(static_cast<float>(win_width * 4 + 16), static_cast<float>(win_height),
+		VIDEO_MENU_EDGE_ALL, VIDEO_MENU_EDGE_BOTTOM);
+	_status_window.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y));
+
+	// Set the menu to show the main options
 	_current_menu_showing = SHOW_MAIN;
 	_current_menu = &_main_options;
-	
-	// Set Font
-	_font_name = "default";
-	
-	
-}
+
+} // MenuMode::MenuMode()
 
 
 MenuMode::~MenuMode() {
@@ -136,54 +155,33 @@ MenuMode::~MenuMode() {
 	// Unload location picture
 	VideoManager->DeleteImage(_location_picture);
 	
-	// Destroy menu windows
+	// Destroy all menu windows
+	_bottom_window.Destroy();
 	_character_window0.Destroy();
 	_character_window1.Destroy();
 	_character_window2.Destroy();
 	_character_window3.Destroy();
-	_bottom_window.Destroy();
-}
+	_inventory_window.Destroy();
+	_status_window.Destroy();
+} // MenuMode::~MenuMode()
 
-// Resets appropriate class members
+
+// Resets configuration/data for the class as appropriate
 void MenuMode::Reset() {
-	VideoManager->SetCoordSys(0, 1024, 768, 0); // Top left corner coordinates are (0,0)
-	if(!VideoManager->SetFont(_font_name)) 
-		cerr << "MAP: ERROR > Couldn't set menu font!" << endl;
-	
-	// Setup the menu windows
-	// Width of each char window is 200 px.
-	// each window will have an additional 16 px for the left border, and the 4th window
-	// will have another 16 px for the right border
-	// Height of the char window is 408 px.
-	// The bottom window in the main view is 192 px high, and the full width which will be 216 * 4 + 16
-	uint32 start_x = (1024-800)/2 - 40;
-	uint32 start_y = (768-600)/2;
-	uint32 win_width = 208;
-	uint32 win_height = 600-192;
-	_character_window0.Create(static_cast<float>(win_width), static_cast<float>(win_height), ~VIDEO_MENU_EDGE_RIGHT, VIDEO_MENU_EDGE_RIGHT);
-	_character_window0.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y));
-	_character_window0.Show();
-	_character_window1.Create(static_cast<float>(win_width), static_cast<float>(win_height), ~VIDEO_MENU_EDGE_RIGHT, VIDEO_MENU_EDGE_LEFT | VIDEO_MENU_EDGE_RIGHT);
-	_character_window1.SetPosition(static_cast<float>(start_x) + static_cast<float>(win_width), static_cast<float>(start_y));
-	_character_window1.Show();
-	_character_window2.Create(static_cast<float>(win_width), static_cast<float>(win_height), ~VIDEO_MENU_EDGE_RIGHT, VIDEO_MENU_EDGE_LEFT | VIDEO_MENU_EDGE_RIGHT);
-	_character_window2.SetPosition(static_cast<float>(start_x) + static_cast<float>((2 * win_width)), static_cast<float>(start_y));
-	_character_window2.Show();
-	_character_window3.Create(static_cast<float>(win_width) + 16, static_cast<float>(win_height), VIDEO_MENU_EDGE_ALL, VIDEO_MENU_EDGE_LEFT);
-	_character_window3.SetPosition(static_cast<float>(start_x) + static_cast<float>((3 * win_width)), static_cast<float>(start_y));
-	_character_window3.Show();
-	_bottom_window.Create(208 * 4 + 16, 192, ~VIDEO_MENU_EDGE_TOP);
-	_bottom_window.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y) + static_cast<float>(win_height) + 8);
-	_bottom_window.Show();
-	
-	// Setup the inventory window
-	_inventory_window.Create((float)(win_width * 4 + 16), (float)win_height, VIDEO_MENU_EDGE_ALL, VIDEO_MENU_EDGE_BOTTOM);
-	_inventory_window.SetPosition((float)start_x, (float)start_y);
-	_inventory_window.Show();
+	// Top left corner coordinates in menu mode are always (0,0)
+	VideoManager->SetCoordSys(0, 1024, 768, 0);
 
-	// Setup the status window
-	_status_window.Create((float)(win_width * 4 + 16), (float)win_height, VIDEO_MENU_EDGE_ALL, VIDEO_MENU_EDGE_BOTTOM);
-	_status_window.SetPosition((float)start_x, (float)start_y);
+	if (!VideoManager->SetFont("default")) {
+		cerr << "MAP: ERROR > Couldn't set menu font!" << endl;
+		exit(1);
+	}
+
+	_bottom_window.Show();
+	_character_window0.Show();
+	_character_window1.Show();
+	_character_window2.Show();
+	_character_window3.Show();
+	_inventory_window.Show();
 	_status_window.Show();
 	
 	// Setup OptionBoxes
@@ -193,26 +191,153 @@ void MenuMode::Reset() {
 	this->_SetupStatusEquipOptionBox();
 	this->_SetupOptionsOptionBox();
 	this->_SetupSaveOptionBox();
-}
+} // void MenuMode::Reset()
 
-//------------------------------------------
-// MenuMode::Update
-//-------------------------------------------
+
+
+void MenuMode::_SetupOptionBoxCommonSettings(OptionBox *ob)
+{
+	// Set all the default options
+	ob->SetFont("default");
+	ob->SetCellSize(115.0f, 50.0f);
+	ob->SetPosition(102.0f, 515.0f);
+	ob->SetAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	ob->SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	ob->SetSelectMode(VIDEO_SELECT_SINGLE);
+	ob->SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	ob->SetCursorOffset(-35.0f, 5.0f);
+} // void MenuMode::_SetupOptionBoxCommonSettings(OptionBox *ob)
+
+
+
+void MenuMode::_SetupMainOptionBox()
+{
+	// Setup the main options box
+	this->_SetupOptionBoxCommonSettings(&_main_options);
+	_main_options.SetSize(MAIN_SIZE, 1);
+	
+	// Generate the strings
+	vector<ustring> options;
+	options.push_back(MakeUnicodeString("Inventory"));
+	options.push_back(MakeUnicodeString("Skills"));
+	options.push_back(MakeUnicodeString("Equip"));
+	options.push_back(MakeUnicodeString("Options"));
+	options.push_back(MakeUnicodeString("Save"));
+	options.push_back(MakeUnicodeString("Exit"));
+	
+	// Add strings and set default selection.
+	_main_options.SetOptions(options);
+	_main_options.SetSelection(MAIN_INVENTORY);
+} // void MenuMode::_SetupMainOptionBox()
+
+
+
+void MenuMode::_SetupInventoryOptionBox()
+{
+	// Setup the option box
+	this->_SetupOptionBoxCommonSettings(&_menu_inventory);
+	_menu_inventory.SetSize(INV_SIZE, 1);
+	
+	// Generate the strings
+	vector<ustring> options;
+	options.push_back(MakeUnicodeString("Use"));
+	options.push_back(MakeUnicodeString("Sort"));
+	options.push_back(MakeUnicodeString("Cancel"));
+	
+	_menu_inventory.SetOptions(options);
+	_menu_inventory.SetSelection(INV_USE);
+} // void MenuMode::_SetupInventoryOptionBox()
+
+
+
+void MenuMode::_SetupSkillsOptionBox()
+{
+	// setup the option box
+	this->_SetupOptionBoxCommonSettings(&_menu_skills);
+	_menu_skills.SetSize(SKILLS_SIZE, 1);
+	
+	// Generate the strings
+	vector<ustring> options;
+	options.push_back(MakeUnicodeString("Cancel"));
+	
+	_menu_skills.SetOptions(options);
+	_menu_skills.SetSelection(SKILLS_CANCEL);
+} // void MenuMode::_SetupSkillsOptionBox()
+
+
+
+void MenuMode::_SetupStatusEquipOptionBox()
+{
+	// setup the status option box
+	this->_SetupOptionBoxCommonSettings(&_menu_status_equip);
+	_menu_status_equip.SetCellSize(150.0f, 50.0f);
+	_menu_status_equip.SetSize(STATUS_EQUIP_SIZE, 1);
+	
+	// Generate the strings
+	vector<ustring> options;
+	options.push_back(MakeUnicodeString("Equip"));
+	options.push_back(MakeUnicodeString("Remove"));
+	options.push_back(MakeUnicodeString("Next Character"));
+	options.push_back(MakeUnicodeString("Prev Character"));
+	options.push_back(MakeUnicodeString("Cancel"));
+	
+	_menu_status_equip.SetOptions(options);
+	_menu_status_equip.SetSelection(STATUS_EQUIP_EQUIP);
+} // void MenuMode::_SetupStatusEquipOptionBox()
+
+
+
+void MenuMode::_SetupOptionsOptionBox()
+{
+	// setup the options option box
+	this->_SetupOptionBoxCommonSettings(&_menu_options);
+	_menu_options.SetSize(OPTIONS_SIZE, 1);
+	
+	// Generate the strings
+	vector<ustring> options;
+	options.push_back(MakeUnicodeString("Edit"));
+	options.push_back(MakeUnicodeString("Save"));
+	options.push_back(MakeUnicodeString("Cancel"));
+	
+	_menu_options.SetOptions(options);
+	_menu_options.SetSelection(OPTIONS_EDIT);
+} // void MenuMode::_SetupOptionsOptionBox()
+
+
+
+void MenuMode::_SetupSaveOptionBox()
+{
+	// setup the save options box
+	this->_SetupOptionBoxCommonSettings(&_menu_save);
+	_menu_save.SetSize(SAVE_SIZE, 1);
+	
+	// Generate the strings
+	vector<ustring> options;
+	options.push_back(MakeUnicodeString("Save"));
+	options.push_back(MakeUnicodeString("Cancel"));
+	
+	_menu_save.SetOptions(options);
+	_menu_save.SetSelection(SAVE_SAVE);
+} // void MenuMode::_SetupSaveOptionBox()
+
+////////////////////////////////////////////////////////////////////////////////
+// MenuMode class -- Update Code
+////////////////////////////////////////////////////////////////////////////////
+
 void MenuMode::Update() {
 	// Load sound effects
 	SoundDescriptor confirm;
 	SoundDescriptor cancel;
-	if (confirm.LoadSound("snd/confirm.wav") == false) 
-	{
+	
+	if (confirm.LoadSound("snd/confirm.wav") == false) {
 		cerr << "MENUMODE::UPDATE - Unable to load confirm sound effect!" << endl;
 	}
-	if (cancel.LoadSound("snd/cancel.wav") == false) 
-	{
+	if (cancel.LoadSound("snd/cancel.wav") == false) {
 		cerr << "MENUMODE::UPDATE - Unable to load cancel sound effect!" << endl;
 	}
+	
 	// See if inventory window is active
-	if (_inventory_window.IsActive())
-	{
+	if (_inventory_window.IsActive()) {
 		// See if cancel was pressed, duplicate code, but not really sure of an
 		// elegant way to do this.
 		if (_inventory_window.CanCancel() && InputManager->CancelPress())
@@ -300,20 +425,20 @@ void MenuMode::Update() {
 				break;
 		}
 	}
-}
+} // void MenuMode::Update()
 
-//----------------------
-// MenuMode::Draw
-//----------------------
-void MenuMode::Draw() 
-{
+////////////////////////////////////////////////////////////////////////////////
+// MenuMode class -- Draw Code
+////////////////////////////////////////////////////////////////////////////////
+
+void MenuMode::Draw() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
+
 	// Move to the top left corner
 	VideoManager->Move(0,0);
 
-	// Set our text colour
-	Color _old_colour = VideoManager->GetTextColor();
-	VideoManager->SetTextColor(Color(1.0f,1.0f,1.0f,1.0f));
+	// Set the text colour to white
+	VideoManager->SetTextColor(Color(1.0f, 1.0f, 1.0f, 1.0f));
 	
 	// Draw the saved screen as the menu background
 	VideoManager->DrawImage(_saved_screen);
@@ -329,7 +454,6 @@ void MenuMode::Draw()
 			_character_window1.Draw();
 			_character_window2.Draw();
 			_character_window3.Draw();
-
 			break;
 		}
 		case SHOW_INVENTORY:
@@ -343,13 +467,11 @@ void MenuMode::Draw()
 			break;
 		}
 	}
+} // void MenuMode::Draw()
 
-	// Restore Text color
-	VideoManager->SetTextColor(_old_colour);
-}
 
-void MenuMode::_DrawBottomMenu()
-{
+
+void MenuMode::_DrawBottomMenu() {
 	_bottom_window.Draw();
 	
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
@@ -374,7 +496,7 @@ void MenuMode::_DrawBottomMenu()
 	// Get the money of the party
 	std::ostringstream os_money;
 	os_money << GlobalManager->GetMoney();
-	std::string money = std::string("Bling:  ") + os_money.str() + "B";
+	std::string money = std::string("Doran:  ") + os_money.str() + "D";
 	VideoManager->MoveRelative(0, 24);
 	if (!VideoManager->DrawText(MakeUnicodeString(money)))
 		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
@@ -390,11 +512,10 @@ void MenuMode::_DrawBottomMenu()
 		
 	VideoManager->MoveRelative(50, 0);
 	VideoManager->DrawImage(_location_picture);
-}
+} // void MenuMode::_DrawBottomMenu()
 
-//-------------------------------
-// MenuMode::HandleMainMenu
-//-------------------------------
+
+
 void MenuMode::_HandleMainMenu()
 {
 	// Change the based on which option was selected.
@@ -441,11 +562,10 @@ void MenuMode::_HandleMainMenu()
 			break;
 		}
 	}
-}
+} // void MenuMode::_HandleMainMenu()
 
-//--------------------------------
-// MenuMode::HandleInventoryMenu
-//--------------------------------
+
+
 void MenuMode::_HandleInventoryMenu()
 {
 	switch (_menu_inventory.GetSelection())
@@ -472,11 +592,10 @@ void MenuMode::_HandleInventoryMenu()
 			cerr << "MENU: ERROR: Invalid option in MenuMode::HandleInventoryMenu()!" << endl;
 			break;
 	}
-}
+} // void MenuMode::_HandleInventoryMenu()
 
-//--------------------------------
-// MenuMode::HandleSkillsMenu
-//--------------------------------
+
+
 void MenuMode::_HandleSkillsMenu()
 {
 	switch (_menu_skills.GetSelection())
@@ -491,11 +610,10 @@ void MenuMode::_HandleSkillsMenu()
 			cerr << "MENU: ERROR: Invalid option in MenuMode::HandleSkillsMenu()!" << endl;
 			break;
 	}
-}
+} // void MenuMode::_HandleSkillsMenu()
 
-//----------------------------------
-// MenuMode::HandleStatusMenu
-//----------------------------------
+
+
 void MenuMode::_HandleStatusEquipMenu()
 {
 	switch (_menu_status_equip.GetSelection())
@@ -526,11 +644,10 @@ void MenuMode::_HandleStatusEquipMenu()
 			cerr << "MENU: ERROR: Invalid option in MenuMode::HandleStatusMenu()!" << endl;
 			break;
 	}
-}
+} // void MenuMode::_HandleStatusEquipMenu()
 
-//----------------------------------
-// MenuMode::HandleOptionsMenu
-//----------------------------------
+
+
 void MenuMode::_HandleOptionsMenu()
 {
 	switch (_menu_options.GetSelection())
@@ -553,11 +670,10 @@ void MenuMode::_HandleOptionsMenu()
 			cerr << "MENU: ERROR: Invalid option in MenuMode::HandleOptionsMenu()!" << endl;
 			break;
 	}
-}
+} // void MenuMode::_HandleOptionsMenu()
 
-//---------------------------------
-// MenuMode::HandleSaveMenu
-//---------------------------------
+
+
 void MenuMode::_HandleSaveMenu()
 {
 	switch (_menu_save.GetSelection())
@@ -575,140 +691,6 @@ void MenuMode::_HandleSaveMenu()
 		default:
 			cerr << "MENU: ERROR: Invalid option in MenuMode::HandleSaveMenu()!" << endl;
 	}
-}
-
-//-----------------------------------------
-// MenuMode::SetupOptionBoxCommonSettings
-//-----------------------------------------
-void MenuMode::_SetupOptionBoxCommonSettings(OptionBox *ob)
-{
-	// Set all the default options
-	ob->SetFont(_font_name);
-	ob->SetCellSize(115.0f, 50.0f);
-	ob->SetPosition(102.0f, 515.0f);
-	ob->SetAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-	ob->SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-	ob->SetSelectMode(VIDEO_SELECT_SINGLE);
-	ob->SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-	ob->SetCursorOffset(-35.0f, 5.0f);
-}
-
-//-------------------------------
-// MenuMode::SetupMainOptionBox
-//-------------------------------
-void MenuMode::_SetupMainOptionBox()
-{
-	// Setup the main options box
-	this->_SetupOptionBoxCommonSettings(&_main_options);
-	_main_options.SetSize(MAIN_SIZE, 1);
-	
-	// Generate the strings
-	vector<ustring> options;
-	options.push_back(MakeUnicodeString("Inventory"));
-	options.push_back(MakeUnicodeString("Skills"));
-	options.push_back(MakeUnicodeString("Status/Equipment"));
-	options.push_back(MakeUnicodeString("Options"));
-	options.push_back(MakeUnicodeString("Save"));
-	options.push_back(MakeUnicodeString("Exit"));
-	
-	// Add strings and set default selection.
-	_main_options.SetOptions(options);
-	_main_options.SetSelection(MAIN_INVENTORY);
-}
-
-//-------------------------------------
-// MenuMode::SetupInventoryOptionBox
-//-------------------------------------
-void MenuMode::_SetupInventoryOptionBox()
-{
-	// Setup the option box
-	this->_SetupOptionBoxCommonSettings(&_menu_inventory);
-	_menu_inventory.SetSize(INV_SIZE, 1);
-	
-	// Generate the strings
-	vector<ustring> options;
-	options.push_back(MakeUnicodeString("Use"));
-	options.push_back(MakeUnicodeString("Sort"));
-	options.push_back(MakeUnicodeString("Cancel"));
-	
-	_menu_inventory.SetOptions(options);
-	_menu_inventory.SetSelection(INV_USE);
-}
-
-//------------------------------------
-// MenuMode::SetupSkillsOptionBox
-//------------------------------------
-void MenuMode::_SetupSkillsOptionBox()
-{
-	// setup the option box
-	this->_SetupOptionBoxCommonSettings(&_menu_skills);
-	_menu_skills.SetSize(SKILLS_SIZE, 1);
-	
-	// Generate the strings
-	vector<ustring> options;
-	options.push_back(MakeUnicodeString("Cancel"));
-	
-	_menu_skills.SetOptions(options);
-	_menu_skills.SetSelection(SKILLS_CANCEL);
-}
-
-//------------------------------------
-// MenuMode::SetupStatusEquipOptionBox
-//------------------------------------
-void MenuMode::_SetupStatusEquipOptionBox()
-{
-	// setup the status option box
-	this->_SetupOptionBoxCommonSettings(&_menu_status_equip);
-	_menu_status_equip.SetCellSize(150.0f, 50.0f);
-	_menu_status_equip.SetSize(STATUS_EQUIP_SIZE, 1);
-	
-	// Generate the strings
-	vector<ustring> options;
-	options.push_back(MakeUnicodeString("Equip"));
-	options.push_back(MakeUnicodeString("Remove"));
-	options.push_back(MakeUnicodeString("Next Character"));
-	options.push_back(MakeUnicodeString("Prev Character"));
-	options.push_back(MakeUnicodeString("Cancel"));
-	
-	_menu_status_equip.SetOptions(options);
-	_menu_status_equip.SetSelection(STATUS_EQUIP_EQUIP);
-}
-
-//-------------------------------------
-// MenuMode::SetupOptionsOptionBox
-//-------------------------------------
-void MenuMode::_SetupOptionsOptionBox()
-{
-	// setup the options option box
-	this->_SetupOptionBoxCommonSettings(&_menu_options);
-	_menu_options.SetSize(OPTIONS_SIZE, 1);
-	
-	// Generate the strings
-	vector<ustring> options;
-	options.push_back(MakeUnicodeString("Edit"));
-	options.push_back(MakeUnicodeString("Save"));
-	options.push_back(MakeUnicodeString("Cancel"));
-	
-	_menu_options.SetOptions(options);
-	_menu_options.SetSelection(OPTIONS_EDIT);
-}
-
-//-------------------------------------
-// MenuMode::SetupSaveOptionBox
-//-------------------------------------
-void MenuMode::_SetupSaveOptionBox()
-{
-	// setup the save options box
-	this->_SetupOptionBoxCommonSettings(&_menu_save);
-	_menu_save.SetSize(SAVE_SIZE, 1);
-	
-	// Generate the strings
-	vector<ustring> options;
-	options.push_back(MakeUnicodeString("Save"));
-	options.push_back(MakeUnicodeString("Cancel"));
-	
-	_menu_save.SetOptions(options);
-	_menu_save.SetSelection(SAVE_SAVE);
-}
+} // void MenuMode::_HandleSaveMenu()
 
 } // namespace hoa_menu
