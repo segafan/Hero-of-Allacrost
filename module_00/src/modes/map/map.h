@@ -350,12 +350,12 @@ private:
 	
 	/*!
 	 * \brief Uses the A* algorithm to find a path from a source to a destination.
-	 * \param &destination The destination tile information, including row and column information.
+	 * \param destination The destination tile information, including row and column information.
 	 * \param &path Contains a single element when passed as an argument (the source node). The result path is
 	 * placed into this vector.
+	 * \param &sprite The sprite the path is being calculated for.
 	 */
-	// FIXME: const commented out for temporary solution of path-finding destination bug
-	void _FindPath(/*const*/ private_map::TileNode& destination, std::vector<private_map::TileNode> &path);
+	void _FindPath(private_map::TileNode destination, std::vector<private_map::TileNode> &path, const private_map::MapSprite* sprite);
 	
 
 	//@}

@@ -648,11 +648,8 @@ TileNode* MapMode::_FindNodeInList(const TileCheck& node, list<TileNode> &node_l
 
 
 // Finds a path for a sprite to take, using the A* algorithm.
-void MapMode::_FindPath(/*const*/ TileNode& destination, vector<TileNode> &path) {
-// 	cout << "BEGIN FIND PATH" << endl;
-// 	cout << "Source: [" << path[0].col << ", " << path[0].row << "]" << endl;
-// 	cout << "Destination: [" << destination.col << ", " << destination.row << "]" << endl;
-
+void MapMode::_FindPath(TileNode destination, vector<TileNode> &path,
+		const MapSprite* sprite) {
 	// The tiles that we are considering for the next move
 	list<TileNode> open_list;
 	// The tiles which have already been visited once.
@@ -664,15 +661,26 @@ void MapMode::_FindPath(/*const*/ TileNode& destination, vector<TileNode> &path)
 	// Used to temporarily hold a pointer to a node in a list
 	TileNode *list_node = NULL;
 
-	// Check that the source is not equal to the destination
-	if (path[0].row == destination.row && path[0].col == destination.col) {
-		return;
+	// Check if the destination is occupied; if it is, keep changing the
+	// destination tile to the next closest tile to the source, until we find
+	// one that is walkable and not occupied.
+	while (!_tile_layers[destination.row][destination.col].walkable || 
+		   (_tile_layers[destination.row][destination.col].occupied &&
+			(sprite->row_position != destination.row ||
+			 sprite->col_position != destination.col))) {
+		if (destination.row > path[0].row)
+			destination.row--;
+		else if (destination.row < path[0].row)
+			destination.row++;
+		if (destination.col > path[0].col)
+			destination.col--;
+		else if (destination.col < path[0].col)
+			destination.col++;
 	}
 
-	// Check if the destination is unwalkable
-	if (!_tile_layers[destination.row][destination.col].walkable) {
-		destination.row = path[0].row;
-		destination.col = path[0].col;
+	// Check that the source is not equal to the destination
+	if (path[0].row == destination.row && path[0].col == destination.col) {
+		path.clear();
 		return;
 	}
 
@@ -862,7 +870,6 @@ void MapMode::_FindPath(/*const*/ TileNode& destination, vector<TileNode> &path)
 				best_move = i;
 			}
 		}
-		// cout << "> Adding new node to closed list: [" << best_move->col << ", " << best_move->row << "]" << endl;
 		closed_list.push_back(*best_move);
 		open_list.erase(best_move);
 	} // while (destination != end of closed list)
