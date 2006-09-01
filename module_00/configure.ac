@@ -88,6 +88,12 @@ AC_CHECK_LIB([m], [log], [], \
 #AC_CHECK_LIB([vorbisfile], [ov_open], [], \
 #	[echo "You should install the ALUT library for maximum performance."])
 
+AC_PATH_PROGS([LUA_CONFIG], [lua-config])
+if test "x$LUA_CONFIG" != "xnone"; then
+	LUA_CFLAGS="`$LUA_CONFIG --include`"
+	CXXFLAGS="$CXXFLAGS $LUA_CFLAGS"
+fi
+
 dnl Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS([stdlib.h string.h])
