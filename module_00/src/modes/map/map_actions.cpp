@@ -57,8 +57,9 @@ void ActionPathMove::Load(uint32 table_key) {
 }
 
 void ActionPathMove::Process() {
-	// Check if we already have a previously computed path and, if it is still valid, use it.
-	if (path.empty()) {// || !(sprite->status & IN_MOTION)) {
+	// Check if we already have a previously computed path and,
+	// if it is still valid, use it.
+	if (path.empty()) {
 		// Find a new path from scratch.
 		TileNode start;
 		start.row = sprite->row_position;
@@ -68,13 +69,7 @@ void ActionPathMove::Process() {
 		start.h_score = 0;
 		start.parent = NULL;
 		path.push_back(start);
-		sprite->current_map->_FindPath(destination, path);
-		
-// 		cout << ">>> FOUND PATH <<<" << endl;
-// 		for (uint32 i = 0; i < path.size(); i++) {
-// 			cout << "[" << path[i].col << ", " << path[i].row << "] ";
-// 		}
-// 		cout << endl;
+		sprite->current_map->_FindPath(destination, path, sprite);
 	}
 	
 	if (sprite->row_position > path[current_node].row) {
@@ -105,27 +100,18 @@ void ActionPathMove::Process() {
 	else if (sprite->col_position > path[current_node].col) {
 		sprite->Move(WEST);
 	}
-	// The else case should never happen. If it does, the sprite will stop moving
+	// Else case should never happen. If it does, the sprite will stop moving
 	
-	// Check if move was successful and if so, update the current_node for the path
+	// Check if move was successful; if so update the current_node for the path
 	if (sprite->status & IN_MOTION) {
 		current_node++;
-		// Check if this is the final node and if so, update the sprite's action index
-		if (current_node >= path.size()) {
-			path.clear();    // Results in recalculating the path every single time
-			current_node = 0;
-			sprite->current_action = sprite->current_action + 1;
-			if (sprite->current_action >= sprite->actions.size()) {
-				sprite->current_action = 0;
-			}
-		}
 	}
 	else {
-		// Move was unsuccessful, meaning the sprite has been blocked most likely
-		// by another sprite. So, clear the remaining, already calculated, path to
-		// the destination, and recompute it. Then add it back to the original path,
-		// creating a new way to get to the destination from somewhere in the middle
-		// of the path.
+		// Move was unsuccessful, meaning the sprite has been blocked most
+		// likely by another sprite. So, clear the remaining, already
+		// calculated, path to the destination, and recompute it. Then add it
+		// back to the original path, creating a new way to get to the
+		// destination from somewhere in the middle of the path.
 		TileNode middle;
 		middle.row = sprite->row_position;
 		middle.col = sprite->col_position;
@@ -135,11 +121,31 @@ void ActionPathMove::Process() {
 		middle.parent = NULL;
 		vector<TileNode> new_path;
 		new_path.push_back(middle);
-		sprite->current_map->_FindPath(destination, new_path);
+		sprite->current_map->_FindPath(destination, new_path, sprite);
 		path.erase(path.begin() + current_node, path.end());
 		for (vector<TileNode>::iterator it = new_path.begin();
-		     it != new_path.end(); it++)
+	    	 it != new_path.end(); it++)
 			path.push_back(*it);
+	}
+
+	// Check if this is the final node; if so update sprite's action index
+	if (current_node >= path.size()) {
+		// Push the destination onto the end of the path if it had been
+		// occupied and no longer is
+		if (!MapObject::current_map->
+			_tile_layers[destination.row][destination.col].occupied &&
+			(sprite->row_position != destination.row ||
+			 sprite->col_position != destination.col)) {
+			path.push_back(destination);
+		}
+		else {
+			path.clear(); // Results in recalculating the path every single time
+			current_node = 0;
+			sprite->current_action = sprite->current_action + 1;
+			if (sprite->current_action >= sprite->actions.size()) {
+				sprite->current_action = 0;
+			}
+		}
 	}
 } // void ActionPathMove::Process()
 
