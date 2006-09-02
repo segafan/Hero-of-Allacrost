@@ -1,28 +1,29 @@
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
 // This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
-/** ***************************************************************************
+/** ****************************************************************************
 *** \file    main.cpp
 *** \author  Tyler Olsen, roots@allacrost.org
 *** \brief   Allacrost initialization code and main game loop.
 ***
 *** The code in this file is the first to execute when the game is started and
 *** the last to execute before the game exits. The core engine of Allacrost
-*** uses time-based updating, which basically means that the game state is
-*** updated by an amount based on how much time expired since the last update.
+*** uses time-based updating, which means that the state of the game is
+*** updated based on how much time has expired since the last update.
+***
 *** The main game loop consists of the following steps.
 ***
 *** -# Render the newly drawn frame to the screen.
 *** -# Collect information on new user input events.
 *** -# Update the main loop timer.
 *** -# Update the game status based on how much time expired from the last update.
-*** **************************************************************************/
+*** ***************************************************************************/
 
 #include "utils.h"
 #include "defs.h"
@@ -78,6 +79,8 @@ void QuitAllacrost() {
 	GameVideo::SingletonDestroy();
 }
 
+
+
 // Every great game begins with a single function :)
 int32 main(int32 argc, char *argv[]) {
 	// When the program exits, first the QuitAllacrost() function, followed by SDL_Quit()
@@ -117,9 +120,13 @@ int32 main(int32 argc, char *argv[]) {
 	}
 	
 	VideoManager->SetMenuSkin("img/menus/black_sleet", "img/menus/black_sleet_texture.png", Color(0.0f, 0.0f, 0.0f, 0.0f));
-	if (!VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "default", 16)) {
+	if (!VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "default", 20)) {
 		return 1;
 	}
+
+	VideoManager->SetFontShadowXOffset("default", 1);
+	VideoManager->SetFontShadowYOffset("default", -2);
+	VideoManager->SetFontShadowStyle("default", VIDEO_TEXT_SHADOW_BLACK);
 
 	VideoManager->SetFontShadowXOffset("default", 1);
 	VideoManager->SetFontShadowYOffset("default", -2);
@@ -169,7 +176,7 @@ int32 main(int32 argc, char *argv[]) {
 	#ifdef _WIN32
 		SDL_WM_SetIcon(SDL_LoadBMP("img/logos/program_icon.bmp"), NULL);
 	#else
-		// Later, add an icon here for non-Windows systems that is better
+		// Later, add an icon here for non-Windows systems (which support more than 32x32 .bmp files)
 		SDL_WM_SetIcon(SDL_LoadBMP("img/logos/program_icon.bmp"), NULL);
 	#endif
 

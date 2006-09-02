@@ -63,8 +63,6 @@ BootMode::BootMode() :
 {
 	if (BOOT_DEBUG) cout << "BOOT: BootMode constructor invoked." << endl;
 	mode_type = MODE_MANAGER_BOOT_MODE;
-
-	VideoManager->DisableFog();
 	
 	ReadDataDescriptor read_data;
 	if (!read_data.OpenFile("dat/config/boot.lua")) {
@@ -473,7 +471,7 @@ void BootMode::_SetupMainMenu() {
 	// Add all the needed menu options to the main menu
 	_main_menu.AddOption(MakeUnicodeString("New Game"), &BootMode::_OnNewGame);
 	_main_menu.AddOption(MakeUnicodeString("Load Game")/*, &BootMode::_OnLoadGame*/); // Battle mode removed! "Take that visage!"
-	_main_menu.AddOption(MakeUnicodeString("Options"), &BootMode::_OnOptions);
+	_main_menu.AddOption(MakeUnicodeString(" Options"), &BootMode::_OnOptions);
 	_main_menu.AddOption(MakeUnicodeString("Credits"), &BootMode::_OnCredits);
 	_main_menu.AddOption(MakeUnicodeString("Quit"), &BootMode::_OnQuit);
 

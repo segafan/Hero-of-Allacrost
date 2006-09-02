@@ -506,6 +506,12 @@ void MapSprite::Draw() {
 		FindFrame();
 	}
 	VideoManager->DrawImage(frames[frame]);
+
+	// TEMP: Draw a "torch" point light over the sprite
+	VideoManager->Move(0.5f, 1.0f);
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
+	VideoManager->DrawLight(current_map->_lighting_overlay, x_draw + 0.5f, y_draw - 1.0f, Color(1.0f, 0.4f, 0.0f, 0.3f));
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 }
 
 } // namespace private_map

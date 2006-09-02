@@ -148,7 +148,7 @@ BattleMode::BattleMode() :
 	_action_type_menu_cursor_location = 0;
 
 // 	_action_type_menu.SetOwner(_action_menu_window);
-	_action_type_menu.SetCursorOffset(-45, 0);
+	_action_type_menu.SetCursorOffset(-20.0f, 25.0f);
 	_action_type_menu.SetCellSize(100.0f, 80.0f);
 	_action_type_menu.SetSize(1, 4);
 	_action_type_menu.SetPosition(30.0f, 512.0f);
@@ -167,7 +167,7 @@ BattleMode::BattleMode() :
 	_battle_lose_menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_battle_lose_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_battle_lose_menu.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-	_battle_lose_menu.SetCursorOffset(-45.0f, 0);
+	_battle_lose_menu.SetCursorOffset(-20.0f, 25.0f);
 	vector<ustring> loseText;
 	loseText.push_back(MakeUnicodeString("Return to the main menu"));
 	_battle_lose_menu.SetOptions(loseText);
@@ -864,7 +864,7 @@ void BattleMode::_ConstructActionListMenu() {
 	_action_list_menu->SetSelectMode(VIDEO_SELECT_SINGLE);
 	_action_list_menu->SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_action_list_menu->SetCellSize(200.0f, 60.0f);
-	_action_list_menu->SetCursorOffset(-45.0f, 0);
+	_action_list_menu->SetCursorOffset(-20.0f, 25.0f);
 
 	if (_action_type_menu_cursor_location == ACTION_TYPE_ATTACK) {
 		vector<GlobalSkill*> attack_skills = p->GetAttackSkills();
