@@ -113,6 +113,13 @@ void MapMode::Reset() {
 
 // Loads the map from a Lua file.
 void MapMode::LoadMap() {
+	// TEMP: load point light
+	_lighting_overlay.SetFilename("img/misc/torch_light_mask.png");
+	_lighting_overlay.SetDimensions(8, 8);
+	if (VideoManager->LoadImage(_lighting_overlay) == false) {
+		exit(1);
+	}
+
 
 	_map_music.push_back(MusicDescriptor());
 	_map_music[0].LoadMusic("mus/Seeking_New_Worlds.ogg");
@@ -1251,12 +1258,13 @@ void MapMode::Draw() {
 	// Calculate all the information we need for drawing this map frame
 	_GetDrawInfo();
 
+	// TEMP: Darken the cave scene
+	VideoManager->EnableSceneLighting(Color(0.75f, 0.75f, 0.75f, 1.0f)); // black, 75% transparent
+	VideoManager->EnablePointLights();
+
 	// ************** (1) Draw the lower tile layer *************
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_NO_BLEND, 0);
 	VideoManager->Move(_draw_info.c_pos, _draw_info.r_pos);
-// 	printf("moved cursor to: %1.2f, %1.2f\n", _draw_info.c_pos, _draw_info.r_pos);
-// 	printf("start tile: %d, %d\n", _draw_info.c_start, _draw_info.r_start);
-// 	printf("sprite pos: %d, %d\n", _focused_object->_col_position, _focused_object->_row_position);
 	for (uint32 r = static_cast<uint32>(_draw_info.r_start);
 	     r < static_cast<uint32>(_draw_info.r_start) + _draw_info.r_draw; r++) {
 		for (uint32 c = static_cast<uint32>(_draw_info.c_start);
@@ -1292,7 +1300,7 @@ void MapMode::Draw() {
 			(_ground_objects[i])->Draw();
 		}
 	}
-        
+
 	// ************** (4) Draw the middle object layer *************
 	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 	for (uint32 i = 0; i < _middle_objects.size(); i++) {
@@ -1331,7 +1339,11 @@ void MapMode::Draw() {
 		}
 	}
 
-	//VideoManager->DrawFullscreenOverlay(Color(0.0f, 0.0f, 0.0f, 0.5f));
+	VideoManager->ApplyLightingOverlay();
+
+	// Disable lighting for dialogue menus and GUI
+	VideoManager->DisableSceneLighting();
+	VideoManager->DisablePointLights();
 
 	// ************** (8) Draw the dialogue menu and text *************
 	if (_map_state == DIALOGUE) {

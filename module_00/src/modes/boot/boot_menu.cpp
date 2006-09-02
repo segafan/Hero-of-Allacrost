@@ -98,13 +98,13 @@ void BootMenu::SetWindowed(bool windowed)
 	if (!_is_windowed) // without a window
 	{
 		_current_menu.SetFont("default");
-		_current_menu.SetCellSize(128.0f, 50.0f);
-		_current_menu.SetPosition(512.0f, 50.0f);
+		_current_menu.SetCellSize(150.0f, 70.0f);
+		_current_menu.SetPosition(552.0f, 50.0f);
 		_current_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-		_current_menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+		_current_menu.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 		_current_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
 		_current_menu.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-		_current_menu.SetCursorOffset(-35.0f, 0.0f);
+		_current_menu.SetCursorOffset(-50.0f, 28.0f);
 		_current_menu.SetSize(_current_menu.GetNumOptions(), 1);
 	}
 	else // windowed
@@ -113,10 +113,10 @@ void BootMenu::SetWindowed(bool windowed)
 		_current_menu.SetCellSize(210.0f, 50.0f);
 		_current_menu.SetPosition(512.0f, 200.0f);
 		_current_menu.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-		_current_menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+		_current_menu.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 		_current_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
 		_current_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-		_current_menu.SetCursorOffset(-35.0f, 0.0f);
+		_current_menu.SetCursorOffset(-50.0f, 28.0f);
 		_current_menu.SetSize(1, _current_menu.GetNumOptions());
 		_current_menu.SetOwner(_menu_window);
 	}

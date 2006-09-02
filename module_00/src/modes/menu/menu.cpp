@@ -205,7 +205,7 @@ void MenuMode::_SetupOptionBoxCommonSettings(OptionBox *ob)
 	ob->SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	ob->SetSelectMode(VIDEO_SELECT_SINGLE);
 	ob->SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-	ob->SetCursorOffset(-35.0f, 5.0f);
+	ob->SetCursorOffset(-50.0f, -28.0f);
 } // void MenuMode::_SetupOptionBoxCommonSettings(OptionBox *ob)
 
 
@@ -277,12 +277,13 @@ void MenuMode::_SetupStatusEquipOptionBox()
 	vector<ustring> options;
 	options.push_back(MakeUnicodeString("Equip"));
 	options.push_back(MakeUnicodeString("Remove"));
-	options.push_back(MakeUnicodeString("Next Character"));
-	options.push_back(MakeUnicodeString("Prev Character"));
+	options.push_back(MakeUnicodeString("Next"));
+	options.push_back(MakeUnicodeString("Previous"));
 	options.push_back(MakeUnicodeString("Cancel"));
 	
 	_menu_status_equip.SetOptions(options);
 	_menu_status_equip.SetSelection(STATUS_EQUIP_EQUIP);
+// 	_menu_status_equip.SetCursor(
 } // void MenuMode::_SetupStatusEquipOptionBox()
 
 
@@ -443,7 +444,6 @@ void MenuMode::Draw() {
 	// Draw the saved screen as the menu background
 	VideoManager->DrawImage(_saved_screen);
 	
-	_DrawBottomMenu();
 
 	// Draw the four character menus
 	switch (_current_menu_showing)
@@ -467,6 +467,8 @@ void MenuMode::Draw() {
 			break;
 		}
 	}
+
+	_DrawBottomMenu();
 } // void MenuMode::Draw()
 
 
@@ -478,9 +480,14 @@ void MenuMode::_DrawBottomMenu() {
 	
 	// Draw currently active options box
 	_current_menu->Draw();
-		
+
+	// Display Location
+	VideoManager->Move(150, 575);
+	if (!VideoManager->DrawText("Desert Cave"))
+		cerr << "MENU: ERROR > Couldn't draw location!" << endl;
+
 	// Draw Played Time
-	VideoManager->Move(109, 615);
+	VideoManager->MoveRelative(-40, 60);
 	std::ostringstream os_time;
 	uint8 hours = SettingsManager->GetPlayHours();
 	uint8 minutes = SettingsManager->GetPlayMinutes();
@@ -489,28 +496,25 @@ void MenuMode::_DrawBottomMenu() {
 	os_time << (minutes < 10 ? "0" : "") << (uint32)minutes << ":";
 	os_time << (seconds < 10 ? "0" : "") << (uint32)seconds;
 
-	std::string time = std::string("Time:  ") + os_time.str();
+	std::string time = std::string("Time: ") + os_time.str();
 	if (!VideoManager->DrawText(MakeUnicodeString(time)))
 		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
 	
 	// Get the money of the party
 	std::ostringstream os_money;
 	os_money << GlobalManager->GetMoney();
-	std::string money = std::string("Doran:  ") + os_money.str() + "D";
-	VideoManager->MoveRelative(0, 24);
+	std::string money = std::string("Dorrun: ") + os_money.str();
+	VideoManager->MoveRelative(0, 30);
 	if (!VideoManager->DrawText(MakeUnicodeString(money)))
 		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
 	
 	VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, 0);
 	
-	// Display Location
-	VideoManager->Move(355, 670);
-	if (!VideoManager->DrawText("Harrvah Kingdom Desert Cave"))
-		cerr << "MENU: ERROR > Couldn't draw location!" << endl;
+
 	
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 		
-	VideoManager->MoveRelative(50, 0);
+	VideoManager->Move(350, 670);
 	VideoManager->DrawImage(_location_picture);
 } // void MenuMode::_DrawBottomMenu()
 

@@ -182,6 +182,8 @@ private:
 	float _cursor_x;
 	float _cursor_y;
 public:
+	std::vector<hoa_video::StillImage> images;
+
 	//! \brief constructor
 	StatusWindow();
 	//! \brief destructor

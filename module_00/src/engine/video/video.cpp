@@ -1119,7 +1119,7 @@ bool GameVideo::EnableSceneLighting(const Color &color)
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: color passed to EnableSceneLighting() had alpha other than 1.0f!" << endl;
-		_lightColor.color[3] = 1.0f;		
+		_lightColor.color[3] = 1.0f;
 	}
 
 	return true;

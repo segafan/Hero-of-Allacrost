@@ -547,6 +547,30 @@ StatusWindow::StatusWindow() : _active(false), _cursor_x(588.0f), _cursor_y(324.
 	// Load image
 	VideoManager->LoadImage(_head_portrait);
 	VideoManager->LoadImage(_full_portrait);
+
+	StillImage item;
+	item.SetDimensions(60, 60);
+	item.SetFilename("img/icons/weapons/karlate_sword.png");
+	images.push_back(item);
+	item.SetFilename("img/icons/armor/karlate_helmet.png");
+	images.push_back(item);
+	item.SetFilename("img/icons/armor/karlate_breastplate.png");
+	images.push_back(item);
+	item.SetFilename("img/icons/armor/karlate_shield.png");
+	images.push_back(item);
+	item.SetFilename("img/icons/armor/karlate_greaves.png");
+	images.push_back(item);
+	
+	if (!VideoManager->LoadImage(images[0]))
+		exit(1);
+	if (!VideoManager->LoadImage(images[1]))
+		exit(1);
+	if (!VideoManager->LoadImage(images[2]))
+		exit(1);
+	if (!VideoManager->LoadImage(images[3]))
+		exit(1);
+	if (!VideoManager->LoadImage(images[4]))
+		exit(1);
 }
 
 
@@ -596,84 +620,134 @@ bool StatusWindow::Draw()
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
 
 	// window top corner is 72, 84
-	VideoManager->Move(92, 104);
+	VideoManager->Move(95, 150);
 	VideoManager->DrawImage(_head_portrait);
 
-	VideoManager->MoveRelative(10, 220);
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, 0);
+	VideoManager->MoveRelative(100, 220);
 	VideoManager->DrawText(_current_char->GetName());
 
-	VideoManager->MoveRelative(0, 24);
-	// Draw Health
-	ostringstream os_health;
-	os_health << _current_char->GetHP() << " / " << _current_char->GetMaxHP();
-	string health = string("Health: ") + os_health.str();
-	if (!VideoManager->DrawText(MakeUnicodeString(health)))
-		cerr << "STATUSWINDOW: ERROR > Couldn't draw health!" << endl;
-		
-	// Draw skill
-	VideoManager->MoveRelative(0, 24);
+	VideoManager->MoveRelative(0, 25);
+	VideoManager->DrawText(MakeUnicodeString("Experience Level: 4"));
+
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, 0);
 	
-	// convert to std::string
-	ostringstream os_skill;
-	os_skill << _current_char->GetSP() << " / " << _current_char->GetMaxSP();
-	string skill = string("Skill: ") + os_skill.str();
-	if (!VideoManager->DrawText(MakeUnicodeString(skill)))
-		cerr << "STATUSWINDOW: ERROR > Couldn't draw skill!" << endl;
-	
-	// Draw xp
-	VideoManager->MoveRelative(0, 24);
-	
-	// Convert to std::string
-	ostringstream os_xp;
-	os_xp << _current_char->GetXPForNextLevel();
-	string xp = string("XP Remaining: ") + os_xp.str();
-	if (!VideoManager->DrawText(MakeUnicodeString(xp)))
-		cerr << "STATUSWINDOW: ERROR > Couldn't draw xp!" << endl;
+	VideoManager->MoveRelative(120, -240);
+	VideoManager->DrawText(MakeUnicodeString("HP: 246 (330)"));
+	VideoManager->MoveRelative(0, 25);
+	VideoManager->DrawText(MakeUnicodeString("SP: 189 (200)"));
+	VideoManager->MoveRelative(0, 25);
+	VideoManager->DrawText(MakeUnicodeString("XP to Level: 273"));
+	VideoManager->MoveRelative(0, 25);
+	VideoManager->DrawText(MakeUnicodeString("Strength: 105"));
+	VideoManager->MoveRelative(0, 25);
+	VideoManager->DrawText(MakeUnicodeString("Vigor: 72"));
+	VideoManager->MoveRelative(0, 25);
+	VideoManager->DrawText(MakeUnicodeString("Fortitude: 106"));
+	VideoManager->MoveRelative(0, 25);
+	VideoManager->DrawText(MakeUnicodeString("Resistance: 48"));
+	VideoManager->MoveRelative(0, 25);
+	VideoManager->DrawText(MakeUnicodeString("Agility: 26"));
+	VideoManager->MoveRelative(0, 25);
+	VideoManager->DrawText(MakeUnicodeString("Evade: 3%"));
 
-	// Draw stremgth
-	VideoManager->MoveRelative(160, -48);
-	ostringstream os_str;
-	os_str << _current_char->GetStrength();
-	string str = string("Strength: ") + os_str.str();
-	if (!VideoManager->DrawText(MakeUnicodeString(str)))
-		cerr << "STATUSWINDOW: ERROR > Couldn't draw character strength!" << endl;
-
-	// Draw Intelligence
-	VideoManager->MoveRelative(0, 24);
-	ostringstream os_int;
-	os_int << _current_char->GetIntelligence();
-	string intelligence = string("Intelligence: ") + os_int.str();
-	if (!VideoManager->DrawText(MakeUnicodeString(intelligence)))
-		cerr << "STATUSWINDOW: ERROR > Couldn't draw character intelligence!" << endl;
-
-	// Draw Agility
-	VideoManager->MoveRelative(0, 24);
-	ostringstream os_agi;
-	os_agi << _current_char->GetAgility();
-	string agi = string("Agility: ") + os_agi.str();
-	if (!VideoManager->DrawText(MakeUnicodeString(agi)))
-		cerr << "STATUSWINDOW: ERROR > Couldn't draw character agility!" << endl;
-
-	VideoManager->Move(400, 104);
+	VideoManager->Move(500, 105);
 	VideoManager->DrawImage(_full_portrait);
 
-	// Draw Equipment
-	VideoManager->MoveRelative(220, 220);
+	VideoManager->MoveRelative(175, 5);
+	VideoManager->DrawImage(images[0]);
+	VideoManager->MoveRelative(0, 70);
+	VideoManager->DrawImage(images[1]);
+	VideoManager->MoveRelative(0, 70);
+	VideoManager->DrawImage(images[2]);
+	VideoManager->MoveRelative(0, 70);
+	VideoManager->DrawImage(images[3]);
+	VideoManager->MoveRelative(0, 70);
+	VideoManager->DrawImage(images[4]);
 
-	VideoManager->MoveRelative(0, 24);
+	VideoManager->MoveRelative(75, -280 + 25);
 	VideoManager->DrawText(MakeUnicodeString("Weapon"));
-
-	VideoManager->MoveRelative(0, 24);
+	VideoManager->MoveRelative(0, 70);
 	VideoManager->DrawText(MakeUnicodeString("Head Armor"));
-
-	VideoManager->MoveRelative(0, 24);
+	VideoManager->MoveRelative(0, 70);
 	VideoManager->DrawText(MakeUnicodeString("Torso Armor"));
-
-	VideoManager->MoveRelative(0, 24);
+	VideoManager->MoveRelative(0, 70);
 	VideoManager->DrawText(MakeUnicodeString("Arm Armor"));
-
-	VideoManager->MoveRelative(0, 24);
+	VideoManager->MoveRelative(0, 70);
 	VideoManager->DrawText(MakeUnicodeString("Leg Armor"));
+
+
+	
+// 	// Draw Health
+// 	ostringstream os_health;
+// 	os_health << _current_char->GetHP() << " / " << _current_char->GetMaxHP();
+// 	string health = string("Health: ") + os_health.str();
+// 	if (!VideoManager->DrawText(MakeUnicodeString(health)))
+// 		cerr << "STATUSWINDOW: ERROR > Couldn't draw health!" << endl;
+// 		
+// 	// Draw skill
+// 	VideoManager->MoveRelative(0, 24);
+// 	
+// 	// convert to std::string
+// 	ostringstream os_skill;
+// 	os_skill << _current_char->GetSP() << " / " << _current_char->GetMaxSP();
+// 	string skill = string("Skill: ") + os_skill.str();
+// 	if (!VideoManager->DrawText(MakeUnicodeString(skill)))
+// 		cerr << "STATUSWINDOW: ERROR > Couldn't draw skill!" << endl;
+// 	
+// 	// Draw xp
+// 	VideoManager->MoveRelative(0, 24);
+	
+// 	// Convert to std::string
+// 	ostringstream os_xp;
+// 	os_xp << _current_char->GetXPForNextLevel();
+// 	string xp = string("XP Remaining: ") + os_xp.str();
+// 	if (!VideoManager->DrawText(MakeUnicodeString(xp)))
+// 		cerr << "STATUSWINDOW: ERROR > Couldn't draw xp!" << endl;
+// 
+// 	// Draw stremgth
+// 	VideoManager->MoveRelative(160, -48);
+// 	ostringstream os_str;
+// 	os_str << _current_char->GetStrength();
+// 	string str = string("Strength: ") + os_str.str();
+// 	if (!VideoManager->DrawText(MakeUnicodeString(str)))
+// 		cerr << "STATUSWINDOW: ERROR > Couldn't draw character strength!" << endl;
+// 
+// 	// Draw Intelligence
+// 	VideoManager->MoveRelative(0, 24);
+// 	ostringstream os_int;
+// 	os_int << _current_char->GetIntelligence();
+// 	string intelligence = string("Intelligence: ") + os_int.str();
+// 	if (!VideoManager->DrawText(MakeUnicodeString(intelligence)))
+// 		cerr << "STATUSWINDOW: ERROR > Couldn't draw character intelligence!" << endl;
+// 
+// 	// Draw Agility
+// 	VideoManager->MoveRelative(0, 24);
+// 	ostringstream os_agi;
+// 	os_agi << _current_char->GetAgility();
+// 	string agi = string("Agility: ") + os_agi.str();
+// 	if (!VideoManager->DrawText(MakeUnicodeString(agi)))
+// 		cerr << "STATUSWINDOW: ERROR > Couldn't draw character agility!" << endl;
+
+
+
+	// Draw Equipment
+// 	VideoManager->MoveRelative(220, 220);
+// 
+// 	VideoManager->MoveRelative(0, 24);
+// 	VideoManager->DrawText(MakeUnicodeString("Weapon"));
+// 
+// 	VideoManager->MoveRelative(0, 24);
+// 	VideoManager->DrawText(MakeUnicodeString("Head Armor"));
+// 
+// 	VideoManager->MoveRelative(0, 24);
+// 	VideoManager->DrawText(MakeUnicodeString("Torso Armor"));
+// 
+// 	VideoManager->MoveRelative(0, 24);
+// 	VideoManager->DrawText(MakeUnicodeString("Arm Armor"));
+// 
+// 	VideoManager->MoveRelative(0, 24);
+// 	VideoManager->DrawText(MakeUnicodeString("Leg Armor"));
 
 	if (_active) {
 		VideoManager->Move(_cursor_x, _cursor_y);

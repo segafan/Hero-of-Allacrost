@@ -473,10 +473,10 @@ GlobalCharacter::GlobalCharacter(hoa_utils::ustring na, std::string fn, uint32 i
 	if (! VideoManager->LoadImage(_menu_portrait)) exit(1);
 
 	// TEMP: Set character's stats
-	SetMaxHP(300);
-	SetHP(300);
+	SetMaxHP(200);
+	SetHP(200);
 	SetMaxSP(200);
-	SetSP(200);
+	SetSP(147);
 	SetXP(35);
 	SetXPNextLevel(156);
 	SetXPLevel(100);
@@ -527,7 +527,7 @@ GameGlobal::GameGlobal() {
 	if (GLOBAL_DEBUG) cout << "GLOBAL: GameGlobal constructor invoked" << endl;
 	
 	SetItemName(HP_POTION, "HP Potion");
-	SetItemIconPath(HP_POTION, "img/icons/inventory/health_potion.png");
+	SetItemIconPath(HP_POTION, "img/icons/items/health_potion.png");
 }
 
 GameGlobal::~GameGlobal() {
