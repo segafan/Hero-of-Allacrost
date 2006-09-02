@@ -1119,22 +1119,25 @@ void MapMode::_UpdateDialogue() {
 	_dialogue_textbox.Update(_time_elapsed);
 
 	if (InputManager->ConfirmPress()) {
-		// TODO: Check if the text is shown or not. If not, display it instantly.
-		bool not_finished = _current_dialogue->ReadNextLine();
-
-		if (!not_finished) {
-			_dialogue_window.Hide();
-			_map_state = EXPLORE;
-			// Restore the status of the map sprites
-			for (uint32 i = 0; i < _current_dialogue->speakers.size(); i++) {
-				_sprites[_current_dialogue->speakers[i]]->RestoreState();
-			}
-			// TMP_sprites[1]->UpdateConversationCounter();
-				_sprites[1]->UpdateConversationCounter();
-			_current_dialogue = NULL;
+		if (!_dialogue_textbox.IsFinished()) {
+			_dialogue_textbox.ForceFinish();
 		}
-		else { // Otherwise, the dialogue is automatically updated to the next line
-			_dialogue_textbox.SetDisplayText(_current_dialogue->text[_current_dialogue->current_line]);
+		else {
+			bool not_finished = _current_dialogue->ReadNextLine();
+
+			if (!not_finished) {
+				_dialogue_window.Hide();
+				_map_state = EXPLORE;
+				// Restore the status of the map sprites
+				for (uint32 i = 0; i < _current_dialogue->speakers.size(); i++) {
+					_sprites[_current_dialogue->speakers[i]]->RestoreState();
+				}
+				_sprites[1]->UpdateConversationCounter();
+				_current_dialogue = NULL;
+			}
+			else { // Otherwise, the dialogue is automatically updated to the next line
+				_dialogue_textbox.SetDisplayText(_current_dialogue->text[_current_dialogue->current_line]);
+			}
 		}
 	}
 }
