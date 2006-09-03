@@ -88,7 +88,7 @@ int32 main(int32 argc, char *argv[]) {
 	atexit(QuitAllacrost);
 
 	// Initialize the random number generator
-	srand(time(NULL));
+	srand(static_cast<unsigned int>(time(NULL)));
 
 	// This variable is set by the ParseProgramOptions function
 	int32 return_code;

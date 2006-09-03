@@ -305,51 +305,51 @@ void EnemyActor::DrawSprite() {
 	if (!IsAlive()) {
 		VideoManager->Move(GetXLocation(), GetYLocation());
 		vector<StillImage> sprite_frames = _wrapped_enemy.GetAnimation("IDLE");
-		VideoManager->DrawImage(sprite_frames[3]);
-		return;
+		VideoManager->DrawImage(sprite_frames[3], Color::gray);
 	}
+	else {
+		// Draw the actor selector image over the currently selected enemy
+		if (this == current_battle->_selected_enemy) {
+			VideoManager->Move(GetXLocation() - 20, GetYLocation() - 20);
+			VideoManager->DrawImage(current_battle->_actor_selection_image);
+		}
 
-	// Draw the actor selector image over the currently selected enemy
-	if (this == current_battle->_selected_enemy) {
-		VideoManager->Move(GetXLocation() - 20, GetYLocation() - 20);
-		VideoManager->DrawImage(current_battle->_actor_selection_image);
-	}
+		// Draw the enemy's damage-blended sprite frames
+		vector<StillImage> sprite_frames = _wrapped_enemy.GetAnimation("IDLE");
+		VideoManager->Move(GetXLocation(), GetYLocation());
+		float hp_percent = GetHealthPoints() / static_cast<float>(GetMaxHealthPoints());
 
-	// Draw the enemy's damage-blended sprite frames
-	vector<StillImage> sprite_frames = _wrapped_enemy.GetAnimation("IDLE");
-	VideoManager->Move(GetXLocation(), GetYLocation());
-	float hp_percent = GetHealthPoints() / static_cast<float>(GetMaxHealthPoints());
+		// Alpha will range from 1.0 to 0.0 in the following calculations
+		if (hp_percent < 0.33f) {
+			VideoManager->DrawImage(sprite_frames[3]);
+			float alpha = (hp_percent) * 3;
+			VideoManager->DrawImage(sprite_frames[2], Color(1.0f, 1.0f, 1.0f, alpha));
+		}
+		else if (hp_percent < 0.66f) {
+			VideoManager->DrawImage(sprite_frames[2]);
+			float alpha = (hp_percent - 0.33f) * 3;
+			VideoManager->DrawImage(sprite_frames[1], Color(1.0f, 1.0f, 1.0f, alpha));
+		}
+		else if (hp_percent < 1.00f) {
+			VideoManager->DrawImage(sprite_frames[1]);
+			float alpha = (hp_percent - 0.66f) * 3;
+			VideoManager->DrawImage(sprite_frames[0], Color (1.0f, 1.0f, 1.0f, alpha));
+		}
+		else { // Enemy is at full health
+			VideoManager->DrawImage(sprite_frames[0]);
+		}
 
-	// Alpha will range from 1.0 to 0.0 in the following calculations
-	if (hp_percent < 0.33f) {
-		VideoManager->DrawImage(sprite_frames[3]);
-		float alpha = (hp_percent) * 3;
-		VideoManager->DrawImage(sprite_frames[2], Color(1.0f, 1.0f, 1.0f, alpha));
-	}
-	else if (hp_percent < 0.66f) {
-		VideoManager->DrawImage(sprite_frames[2]);
-		float alpha = (hp_percent - 0.33f) * 3;
-		VideoManager->DrawImage(sprite_frames[1], Color(1.0f, 1.0f, 1.0f, alpha));
-	}
-	else if (hp_percent < 1.00f) {
-		VideoManager->DrawImage(sprite_frames[1]);
-		float alpha = (hp_percent - 0.66f) * 3;
-		VideoManager->DrawImage(sprite_frames[0], Color (1.0f, 1.0f, 1.0f, alpha));
-	}
-	else { // Enemy is at full health
-		VideoManager->DrawImage(sprite_frames[0]);
-	}
+		// Draw the attack point indicator if necessary
+		if (this == current_battle->_selected_enemy && current_battle->_cursor_state == CURSOR_SELECT_ATTACK_POINT) {
+			VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
+			vector<GlobalAttackPoint*> attack_points = GetAttackPoints();
+			VideoManager->Move(GetXLocation() + attack_points[current_battle->_attack_point_selected]->GetXPosition(),
+				GetYLocation() + attack_points[current_battle->_attack_point_selected]->GetYPosition());
+			VideoManager->DrawImage(current_battle->_attack_point_indicator);
 
-	// Draw the attack point indicator if necessary
-	if (this == current_battle->_selected_enemy && current_battle->_cursor_state == CURSOR_SELECT_ATTACK_POINT) {
-		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
-		vector<GlobalAttackPoint*> attack_points = GetAttackPoints();
-		VideoManager->Move(GetXLocation() + attack_points[current_battle->_attack_point_selected]->GetXPosition(),
-			GetYLocation() + attack_points[current_battle->_attack_point_selected]->GetYPosition());
-		VideoManager->DrawImage(current_battle->_attack_point_indicator);
-
-		// Reset default X and Y draw orientation
-		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
+			// Reset default X and Y draw orientation
+			VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
+		}
 	}
 
 	// TEMP: Determine if enemy needs to have red damage text drawn next to it
