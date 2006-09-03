@@ -19,7 +19,7 @@
 #include "utils.h"
 #include "audio.h"
 #include "video.h"
-#include "settings.h"
+#include "system.h"
 #include "global.h"
 #include "data.h"
 
@@ -30,7 +30,7 @@ using namespace std;
 using namespace hoa_utils;
 using namespace hoa_audio;
 using namespace hoa_video;
-using namespace hoa_settings;
+using namespace hoa_system;
 using namespace hoa_global;
 using namespace hoa_data;
 
@@ -81,7 +81,7 @@ BattleActor::~BattleActor() {
 void BattleActor::UpdateEffects() {
 	// TODO: ActorEffects not yet ready to be implemented
 // 	for (uint32 i = 0; i < _effects.size(); i++) {
-// 		_effects[i].Update(SettingsManager->GetUpdateTime());
+// 		_effects[i].Update(SystemManager->GetUpdateTime());
 // 	}
 }
 
@@ -146,7 +146,7 @@ void CharacterActor::DrawSprite() {
 
 		// TEMP: determine if character sprite needs red damage numbers drawn next to it
 		if (_TEMP_total_time_damaged > 0) {
-			_TEMP_total_time_damaged += SettingsManager->GetUpdateTime();
+			_TEMP_total_time_damaged += SystemManager->GetUpdateTime();
 			VideoManager->SetTextColor(Color::red);
 			VideoManager->Move(GetXLocation() + 100, GetYLocation() + 70);
 			VideoManager->DrawText(NumberToString(_TEMP_damage_dealt));
@@ -276,7 +276,7 @@ void EnemyActor::Update() {
 		last_attack = 0;
 	}
 
-	last_attack += SettingsManager->GetUpdateTime();
+	last_attack += SystemManager->GetUpdateTime();
 
 	if (last_attack > next_attack && !IsQueuedToPerform()) {
 		//we can perform another attack
@@ -354,7 +354,7 @@ void EnemyActor::DrawSprite() {
 
 	// TEMP: Determine if enemy needs to have red damage text drawn next to it
 	if (_TEMP_total_time_damaged > 0) {
-		_TEMP_total_time_damaged += SettingsManager->GetUpdateTime();
+		_TEMP_total_time_damaged += SystemManager->GetUpdateTime();
 
 		VideoManager->SetTextColor(Color::red);
 		VideoManager->Move(GetXLocation() + 100, GetYLocation() + 70);

@@ -25,6 +25,8 @@
 *** -# Update the game status based on how much time expired from the last update.
 *** ***************************************************************************/
 
+#include <ctime>
+
 #include "utils.h"
 #include "defs.h"
 #include "audio.h"
@@ -32,11 +34,10 @@
 #include "data.h"
 #include "mode_manager.h"
 #include "input.h"
-#include "settings.h"
+#include "system.h"
 #include "global.h"
 #include "boot.h"
 #include "main_options.h"
-#include <ctime>
 
 using namespace std;
 using namespace hoa_utils;
@@ -44,7 +45,7 @@ using namespace hoa_audio;
 using namespace hoa_video;
 using namespace hoa_mode_manager;
 using namespace hoa_input;
-using namespace hoa_settings;
+using namespace hoa_system;
 using namespace hoa_global;
 using namespace hoa_data;
 using namespace hoa_boot;
@@ -74,7 +75,7 @@ void QuitAllacrost() {
 	// Delete all of the reamining independent engine components
 	GameAudio::SingletonDestroy();
 	GameInput::SingletonDestroy();
-	GameSettings::SingletonDestroy();
+	GameSystem::SingletonDestroy();
 	GameData::SingletonDestroy();
 	GameVideo::SingletonDestroy();
 }
@@ -109,7 +110,7 @@ int32 main(int32 argc, char *argv[]) {
 	InputManager = GameInput::SingletonCreate();
 	VideoManager = GameVideo::SingletonCreate();
 	DataManager = GameData::SingletonCreate();
-	SettingsManager = GameSettings::SingletonCreate();
+	SystemManager = GameSystem::SingletonCreate();
 
 	// NOTE: The GlobalManager will not be created until the user actually starts a game instance
 	ModeManager = GameModeManager::SingletonCreate();
@@ -160,8 +161,8 @@ int32 main(int32 argc, char *argv[]) {
 		cerr << "ERROR: unable to initialize ModeManager" << endl;
 		return 1;
 	}
-	if (SettingsManager->SingletonInitialize() == false) {
-		cerr << "ERROR: unable to initialize SettingsManager" << endl;
+	if (SystemManager->SingletonInitialize() == false) {
+		cerr << "ERROR: unable to initialize SystemManager" << endl;
 		return 1;
 	}
 	if (InputManager->SingletonInitialize() == false) {
@@ -195,14 +196,14 @@ int32 main(int32 argc, char *argv[]) {
 	SDL_EventState(SDL_USEREVENT, SDL_IGNORE);
 	// NOTE: SDL_ActiveEvent reports mouse focus, input focus, iconified status. Should we disable it???
 
-	SettingsManager->InitializeTimers();
+	SystemManager->InitializeTimers();
 
 	// This is the main loop for the game. The loop iterates once every frame drawn to the screen.
-	while (SettingsManager->NotDone()) {
+	while (SystemManager->NotDone()) {
 		// 1) Render the scene
 		VideoManager->Clear();
 		ModeManager->Draw();
-		VideoManager->Display(SettingsManager->GetUpdateTime());
+		VideoManager->Display(SystemManager->GetUpdateTime());
 
 		// 2) Process all new events
 		InputManager->EventHandler();
@@ -211,11 +212,11 @@ int32 main(int32 argc, char *argv[]) {
 		// AudioManager->Update();
 
 		// 4) Update timers for correct time-based movement operation
-		SettingsManager->UpdateTimers();
+		SystemManager->UpdateTimers();
 
 		// 5) Update the game status
 		ModeManager->Update();
-	} // while (SettingsManager->NotDone())
+	} // while (SystemManager->NotDone())
 
 	return EXIT_SUCCESS;
 } // int32 main(int32 argc, char *argv[])

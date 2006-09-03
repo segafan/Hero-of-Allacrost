@@ -26,7 +26,7 @@
 #include "global.h"
 #include "mode_manager.h"
 #include "input.h"
-#include "settings.h"
+#include "system.h"
 #include "map.h"
 #include "battle.h" // tmp
 
@@ -37,7 +37,7 @@ using namespace hoa_audio;
 using namespace hoa_video;
 using namespace hoa_mode_manager;
 using namespace hoa_input;
-using namespace hoa_settings;
+using namespace hoa_system;
 using namespace hoa_global;
 using namespace hoa_data;
 using namespace hoa_map;
@@ -120,7 +120,7 @@ BootMode::BootMode() :
 	for (uint32 i = 0; i < new_music_files.size(); i++) {
 		if (_boot_music[i].LoadMusic(new_music_files[i]) == false) {
 			cout << "BOOT: failed to load music file " << new_music_files[i] << endl;
-			SettingsManager->ExitGame();
+			SystemManager->ExitGame();
 			return;
 		}
 	}
@@ -219,7 +219,7 @@ void BootMode::_AnimateLogo() {
 	static float total_time = 0.0f;
 
 	// Get the frametime and update total time
-	float time_elapsed = static_cast<float>(SettingsManager->GetUpdateTime());
+	float time_elapsed = static_cast<float>(SystemManager->GetUpdateTime());
 	total_time += time_elapsed;
 
 	// Sequence one: black
@@ -599,7 +599,7 @@ void BootMode::_OnCredits() {
 
 // 'Quit' confirmed
 void BootMode::_OnQuit() {
-	SettingsManager->ExitGame();
+	SystemManager->ExitGame();
 }
 
 // 'Resolution' confirmed
@@ -791,7 +791,7 @@ void BootMode::_UpdateJoySettings() {
 
 // This is called once every frame iteration to update the status of the game
 void BootMode::Update() {
-	uint32 time_elapsed = SettingsManager->GetUpdateTime();
+	uint32 time_elapsed = SystemManager->GetUpdateTime();
 
 	// Screen is in the process of fading out
 	if (_fade_out)

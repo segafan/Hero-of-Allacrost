@@ -1,11 +1,11 @@
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
 // This code is licensed under the GNU GPL version 2. It is free software 
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 /** ****************************************************************************
 *** \file    quit.cpp
@@ -19,7 +19,7 @@
 #include "audio.h"
 #include "video.h"
 #include "input.h"
-#include "settings.h"
+#include "system.h"
 
 #include "quit.h"
 #include "boot.h"
@@ -30,7 +30,7 @@ using namespace hoa_audio;
 using namespace hoa_video;
 using namespace hoa_mode_manager;
 using namespace hoa_input;
-using namespace hoa_settings;
+using namespace hoa_system;
 using namespace hoa_boot;
 using namespace hoa_utils;
 
@@ -42,21 +42,21 @@ QuitMode::QuitMode() {
 	if (QUIT_DEBUG) cout << "QUIT: QuitMode constructor invoked" << endl;
 	mode_type = MODE_MANAGER_QUIT_MODE;
 	
-	switch (SettingsManager->GetPauseVolumeAction()) {
-		case SETTINGS_PAUSE_AUDIO:
-			AudioManager->PauseAudio();
-			break;
-		case SETTINGS_ZERO_VOLUME:
-			AudioManager->SetMusicVolume(0);
-			AudioManager->SetSoundVolume(0);
-			break;
-		case SETTINGS_HALF_VOLUME:
-// 			AudioManager->SetMusicVolume(static_cast<int32>(SettingsManager->music_vol * 0.5));
-// 			AudioManager->SetSoundVolume(static_cast<int32>(SettingsManager->sound_vol * 0.5));
-			// Note that the music_vol/sound_vol members of SettingsManager aren't changed
-			break;
-		// Don't need to do anything for case SETTINGS_SAME_VOLUME
-	}
+// 	switch (SystemManager->GetPauseVolumeAction()) {
+// 		case SETTINGS_PAUSE_AUDIO:
+// 			AudioManager->PauseAudio();
+// 			break;
+// 		case SETTINGS_ZERO_VOLUME:
+// 			AudioManager->SetMusicVolume(0);
+// 			AudioManager->SetSoundVolume(0);
+// 			break;
+// 		case SETTINGS_HALF_VOLUME:
+// // 			AudioManager->SetMusicVolume(static_cast<int32>(SystemManager->music_vol * 0.5));
+// // 			AudioManager->SetSoundVolume(static_cast<int32>(SystemManager->sound_vol * 0.5));
+// 			// Note that the music_vol/sound_vol members of SystemManager aren't changed
+// 			break;
+// 		// Don't need to do anything for case SETTINGS_SAME_VOLUME
+// 	}
 
 	// Save a copy of the current screen to use as a backdrop
 	if (!VideoManager->CaptureScreen(_saved_screen)) 
@@ -71,7 +71,7 @@ QuitMode::QuitMode() {
 
 	// Initialize the option box
 	_option_box.SetFont("default");
-	_option_box.SetCellSize(150.0f, 50.0f);
+	_option_box.SetCellSize(250.0f, 50.0f);
 	_option_box.SetSize(3, 1);
 	_option_box.SetPosition(512.0f, 384.0f);
 	_option_box.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -111,7 +111,7 @@ void QuitMode::Reset() {
 
 // Restores volume or unpauses audio, then pops itself from the game stack
 void QuitMode::Update() {
-	uint32 time_elapsed = SettingsManager->GetUpdateTime();
+	uint32 time_elapsed = SystemManager->GetUpdateTime();
 	
 	// Dispatch input to option box
 	
@@ -177,7 +177,7 @@ void QuitMode::Draw() {
 	
 	VideoManager->Move(512, 384);
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
-//!@#	VideoManager->DrawImage(_quit_menu);	
+	VideoManager->DrawImage(_quit_menu);
 
 	_option_box.Draw();
 }
@@ -185,24 +185,24 @@ void QuitMode::Draw() {
 
 // Quit the game completely
 void QuitMode::_QuitGame() {
-	SettingsManager->ExitGame();
+	SystemManager->ExitGame();
 }
 
 
 // Quit to the boot menu
 void QuitMode::_QuitToBootMenu() {
 	// Restore the game audio, pop QuitMode off the stack, and push BootMode
-	switch (SettingsManager->GetPauseVolumeAction()) {
-		case SETTINGS_PAUSE_AUDIO:
-			AudioManager->ResumeAudio();
-			break;
-		case SETTINGS_ZERO_VOLUME:
-		case SETTINGS_HALF_VOLUME:
-// 			AudioManager->SetMusicVolume(SettingsManager->music_vol);
-// 			AudioManager->SetSoundVolume(SettingsManager->sound_vol);
-			break;
-		// We don't need to do anything for case SETTINGS_SAME_VOLUME
-	}
+// 	switch (SystemManager->GetPauseVolumeAction()) {
+// 		case SETTINGS_PAUSE_AUDIO:
+// 			AudioManager->ResumeAudio();
+// 			break;
+// 		case SETTINGS_ZERO_VOLUME:
+// 		case SETTINGS_HALF_VOLUME:
+// // 			AudioManager->SetMusicVolume(SystemManager->music_vol);
+// // 			AudioManager->SetSoundVolume(SystemManager->sound_vol);
+// 			break;
+// 		// We don't need to do anything for case SETTINGS_SAME_VOLUME
+// 	}
 	ModeManager->PopAll(); // Remove and free every game mode
 	BootMode *BM = new BootMode();
 	ModeManager->Push(BM);
@@ -212,17 +212,17 @@ void QuitMode::_QuitToBootMenu() {
 // Cancel out of quit mode
 void QuitMode::_Cancel() {
 	// The user really doesn't want to quit after all, so restore the game audio and state
-	switch (SettingsManager->GetPauseVolumeAction()) {
-		case SETTINGS_PAUSE_AUDIO:
-			AudioManager->ResumeAudio();
-			break;
-		case SETTINGS_ZERO_VOLUME:
-		case SETTINGS_HALF_VOLUME:
-// 			AudioManager->SetMusicVolume(SettingsManager->music_vol);
-// 			AudioManager->SetSoundVolume(SettingsManager->sound_vol);
-			break;
-		// Don't need to do anything for case SETTINGS_SAME_VOLUME
-	}
+// 	switch (SystemManager->GetPauseVolumeAction()) {
+// 		case SETTINGS_PAUSE_AUDIO:
+// 			AudioManager->ResumeAudio();
+// 			break;
+// 		case SETTINGS_ZERO_VOLUME:
+// 		case SETTINGS_HALF_VOLUME:
+// // 			AudioManager->SetMusicVolume(SystemManager->music_vol);
+// // 			AudioManager->SetSoundVolume(SystemManager->sound_vol);
+// 			break;
+// 		// Don't need to do anything for case SETTINGS_SAME_VOLUME
+// 	}
 	ModeManager->Pop();
 }
 

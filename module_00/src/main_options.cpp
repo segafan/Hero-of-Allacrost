@@ -20,7 +20,7 @@
 #include "data.h"
 #include "mode_manager.h"
 #include "input.h"
-#include "settings.h"
+#include "system.h"
 #include "global.h"
 #include "main_options.h"
 
@@ -146,7 +146,7 @@ bool EnableDebugging(string vars) {
 			hoa_data::DATA_DEBUG                    = true;
 			hoa_mode_manager::MODE_MANAGER_DEBUG    = true;
 			hoa_input::INPUT_DEBUG                  = true;
-			hoa_settings::SETTINGS_DEBUG            = true;
+			hoa_system::SYSTEM_DEBUG                = true;
 			hoa_global::GLOBAL_DEBUG                = true;
 			hoa_map::MAP_DEBUG                      = true;
 			hoa_menu::MENU_DEBUG                    = true;
@@ -174,8 +174,8 @@ bool EnableDebugging(string vars) {
 		else if (args[i] == "input") {
 			hoa_input::INPUT_DEBUG = true;
 		}
-		else if (args[i] == "settings") {
-			hoa_settings::SETTINGS_DEBUG = true;
+		else if (args[i] == "system") {
+			hoa_system::SYSTEM_DEBUG = true;
 		}
 		else if (args[i] == "global") {
 			hoa_global::GLOBAL_DEBUG = true;

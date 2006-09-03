@@ -23,7 +23,7 @@
 #include "global.h"
 #include "data.h"
 #include "input.h"
-#include "settings.h"
+#include "system.h"
 #include "battle.h"
 #include "menu.h"
 
@@ -34,7 +34,7 @@ using namespace hoa_audio;
 using namespace hoa_video;
 using namespace hoa_mode_manager;
 using namespace hoa_input;
-using namespace hoa_settings;
+using namespace hoa_system;
 using namespace hoa_input;
 using namespace hoa_global;
 using namespace hoa_data;
@@ -911,7 +911,7 @@ void MapMode::_UpdateVirtualSprite() {
 
 // Updates the game state when in map mode. Called from the main game loop.
 void MapMode::Update() {
-	_time_elapsed = SettingsManager->GetUpdateTime();
+	_time_elapsed = SystemManager->GetUpdateTime();
         
         
 	// ***************** (1) Process user input **************

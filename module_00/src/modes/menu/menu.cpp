@@ -22,6 +22,7 @@
 #include "audio.h"
 #include "video.h"
 #include "mode_manager.h"
+#include "system.h"
 #include "input.h"
 #include "global.h"
 
@@ -30,7 +31,7 @@ using namespace std;
 using namespace hoa_utils;
 using namespace hoa_audio;
 using namespace hoa_video;
-using namespace hoa_settings;
+using namespace hoa_system;
 using namespace hoa_mode_manager;
 using namespace hoa_input;
 using namespace hoa_global;
@@ -489,9 +490,9 @@ void MenuMode::_DrawBottomMenu() {
 	// Draw Played Time
 	VideoManager->MoveRelative(-40, 60);
 	std::ostringstream os_time;
-	uint8 hours = SettingsManager->GetPlayHours();
-	uint8 minutes = SettingsManager->GetPlayMinutes();
-	uint8 seconds = SettingsManager->GetPlaySeconds();
+	uint8 hours = SystemManager->GetPlayHours();
+	uint8 minutes = SystemManager->GetPlayMinutes();
+	uint8 seconds = SystemManager->GetPlaySeconds();
 	os_time << (hours < 10 ? "0" : "") << (uint32)hours << ":";
 	os_time << (minutes < 10 ? "0" : "") << (uint32)minutes << ":";
 	os_time << (seconds < 10 ? "0" : "") << (uint32)seconds;

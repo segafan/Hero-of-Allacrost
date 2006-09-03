@@ -1,27 +1,26 @@
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
 // This code is licensed under the GNU GPL version 2. It is free software 
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
-/*!****************************************************************************
- * \file    pause.h
- * \author  Tyler Olsen, roots@allacrost.org
- * \brief   Header file for pause mode interface.
- *
- * This code handles the game event processing and frame drawing when the user
- * is in pause mode (when the game is paused). In a nut-shell, all this code
- * does is save a copy of the frame being displayed when the user requests a
- * pause event, grays that image out, and then renders the text "PAUSED" while
- * waiting for the user to un-pause the game.
- *
- * \note I plan to make it so that when the user enters this mode, the game
- * will sleep every 100ms or so so that the game isn't using up 100% of the CPU
- * resources.
- *****************************************************************************/
+/** ****************************************************************************
+*** \file    pause.h
+*** \author  Tyler Olsen, roots@allacrost.org
+*** \brief   Header file for pause mode interface.
+***
+*** This code handles the game event processing and frame drawing when the user
+*** is in pause mode (when the game is paused). In a nut-shell, all this code
+*** does is save a copy of the frame being displayed when the user requests a
+*** pause event, grays that image out, and then renders the text "PAUSED" while
+*** waiting for the user to un-pause the game.
+***
+*** \note When the user enters this mode, the game will sleep for small periods
+*** of time so that the game isn't using up 100% of the CPU.
+*** ***************************************************************************/
 
 #ifndef __PAUSE_HEADER__
 #define __PAUSE_HEADER__
