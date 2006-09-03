@@ -1,56 +1,55 @@
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
 // This code is licensed under the GNU GPL version 2. It is free software 
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
-/** ***************************************************************************
-*** \file   settings.cpp
+/** ****************************************************************************
+*** \file   system.cpp
 *** \author Tyler Olsen, roots@allacrost.org
-*** \brief  Source file for managing user settings
-*** **************************************************************************/
+*** \brief  Source file for system code management
+*** ***************************************************************************/
 
-#include "settings.h"
+#include "system.h"
 #include "data.h"
 #include "audio.h"
 
 using namespace std;
 using namespace hoa_data;
 using namespace hoa_audio;
-using namespace hoa_settings::private_settings;
+using namespace hoa_system::private_system;
 
-namespace hoa_settings {
+namespace hoa_system {
 
-GameSettings *SettingsManager = NULL;
-bool SETTINGS_DEBUG = false;
-SINGLETON_INITIALIZE(GameSettings);
+GameSystem *SystemManager = NULL;
+bool SYSTEM_DEBUG = false;
+SINGLETON_INITIALIZE(GameSystem);
 
 
-// The constructor initalize all the data fields inside the GameSettings class
-GameSettings::GameSettings() {
-	if (SETTINGS_DEBUG) cout << "SETTINGS: GameSettings constructor invoked" << endl;
+// The constructor initalize all the data fields inside the GameSystem class
+GameSystem::GameSystem() {
+	if (SYSTEM_DEBUG) cout << "SETTINGS: GameSystem constructor invoked" << endl;
 	
-	_pause_volume_action = SETTINGS_SAME_VOLUME;
 	_not_done = true;
 	_language = "en"; // Default language is English
 }
 
 
 
-GameSettings::~GameSettings() {
-	if (SETTINGS_DEBUG) cout << "SETTINGS: GameSettings destructor invoked" << endl;
+GameSystem::~GameSystem() {
+	if (SYSTEM_DEBUG) cout << "SETTINGS: GameSystem destructor invoked" << endl;
 }
 
 
 // Makes a call to the data manager for retrieving configured settings
-bool GameSettings::SingletonInitialize() {
+bool GameSystem::SingletonInitialize() {
 	ReadDataDescriptor settings_data;
 
 	if (!settings_data.OpenFile("dat/config/settings.lua")) {
-		cout << "SETTINGS ERROR: failed to load settings from data file" << endl;
+		cout << "SYSTEM ERROR: failed to load settings from data file" << endl;
 		return false;
 	}
 
@@ -72,7 +71,7 @@ bool GameSettings::SingletonInitialize() {
 
 
 // Set up the timers before the main game loop begins
-void GameSettings::InitializeTimers() {
+void GameSystem::InitializeTimers() {
 	_last_update = SDL_GetTicks();
 	_update_time = 1; // Must be non-zero, otherwise bad things will happen...
 	_hours_played = 0;
@@ -83,7 +82,7 @@ void GameSettings::InitializeTimers() {
 
 
 // Returns the difference between the time now and last_update (in ms) and calculates frame rate
-void GameSettings::UpdateTimers() {
+void GameSystem::UpdateTimers() {
 	uint32 tmp;
 
 	tmp = _last_update;
@@ -106,7 +105,12 @@ void GameSettings::UpdateTimers() {
 }
 
 
-void GameSettings::SetLanguage(std::string lang) {
+
+void GameSystem::SetLanguage(std::string lang) {
+	// A 2 character string is the only allowable argument
+	if (lang.size() != 2) {
+		return;
+	}
 // 	for (uint32 i = 0; i < SUPPORTED_LANGUAGES.size(); i++) {
 // 		if (lang == SUPPORTED_LANGUAGES[i]) {
 // 			_language = lang;
@@ -115,6 +119,7 @@ void GameSettings::SetLanguage(std::string lang) {
 // 	}
 // 	
 // 	cerr << "SETTINGS ERROR: attempt to set unsupported language \"" << lang << "\" failed" << endl;
+	_language = lang;
 }
 
 } // namespace hoa_settings

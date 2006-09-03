@@ -86,9 +86,9 @@ namespace hoa_input {
 }
 
 // Settings declarations, see settings.h/cpp
-namespace hoa_settings {
-	extern bool SETTINGS_DEBUG;
-	class GameSettings;
+namespace hoa_system {
+	extern bool SYSTEM_DEBUG;
+	class GameSystem;
 }
 
 // Global declarations, see global.h/cpp

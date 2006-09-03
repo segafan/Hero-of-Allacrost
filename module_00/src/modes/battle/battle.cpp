@@ -21,7 +21,7 @@
 #include "video.h"
 #include "input.h"
 #include "mode_manager.h"
-#include "settings.h"
+#include "system.h"
 #include "global.h"
 #include "data.h"
 
@@ -36,7 +36,7 @@ using namespace hoa_audio;
 using namespace hoa_video;
 using namespace hoa_mode_manager;
 using namespace hoa_input;
-using namespace hoa_settings;
+using namespace hoa_system;
 using namespace hoa_global;
 using namespace hoa_data;
 
@@ -441,7 +441,7 @@ void BattleMode::Update() {
 			}
 		}
 		else { 
-			_battle_lose_menu.Update(SettingsManager->GetUpdateTime()); // Update lose menu
+			_battle_lose_menu.Update(SystemManager->GetUpdateTime()); // Update lose menu
 			if (InputManager->ConfirmRelease()) {
 				// _battle_lose_menu.HandleConfirmKey(); // This needs to be handled when there's more than 1 option
 				InputManager->EventHandler(); // Clear input in here because we don't want confirm press in boot mode!
@@ -468,10 +468,10 @@ void BattleMode::Update() {
 
 	// Update various menus and other GUI graphics as appropriate
 	if (_cursor_state == CURSOR_SELECT_ACTION_TYPE) {
-		_action_type_menu.Update(SettingsManager->GetUpdateTime());
+		_action_type_menu.Update(SystemManager->GetUpdateTime());
 	}
 	if (_action_list_menu && _cursor_state == CURSOR_SELECT_ACTION_LIST) {
-		_action_list_menu->Update(SettingsManager->GetUpdateTime());
+		_action_list_menu->Update(SystemManager->GetUpdateTime());
 	}
 	if (_cursor_state == CURSOR_SELECT_ATTACK_POINT) {
 		_attack_point_indicator.Update();

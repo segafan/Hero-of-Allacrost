@@ -22,7 +22,7 @@
 #include "audio.h"
 #include "video.h"
 #include "global.h"
-#include "settings.h"
+#include "system.h"
 #include "data.h"
 #include "battle.h"
 #include "menu.h"
@@ -32,7 +32,7 @@ using namespace hoa_utils;
 using namespace hoa_audio;
 using namespace hoa_video;
 using namespace hoa_global;
-using namespace hoa_settings;
+using namespace hoa_system;
 using namespace hoa_data;
 using namespace hoa_battle;
 using namespace hoa_menu;
@@ -167,7 +167,7 @@ void ActionFrameDisplay::Load(uint32 table_key) {
 void ActionFrameDisplay::Process() {
 
 	sprite->direction = frame_index;
-	remaining_time -= SettingsManager->GetUpdateTime();
+	remaining_time -= SystemManager->GetUpdateTime();
 	if (remaining_time <= 0) {
 		remaining_time = display_time;
 

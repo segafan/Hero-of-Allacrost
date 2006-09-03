@@ -19,12 +19,12 @@
 #include "audio.h"
 #include "video.h"
 #include "input.h"
-#include "settings.h"
+#include "system.h"
 
 using namespace std;
 using namespace hoa_mode_manager;
 using namespace hoa_input;
-using namespace hoa_settings;
+using namespace hoa_system;
 using namespace hoa_video;
 using namespace hoa_pause;
 using namespace hoa_scene::private_scene;
@@ -61,7 +61,7 @@ void SceneMode::Reset() {
 
 // Restores volume or unpauses audio, then pops itself from the game stack
 void SceneMode::Update() {
-	uint32 time_elapsed = SettingsManager->GetUpdateTime();
+	uint32 time_elapsed = SystemManager->GetUpdateTime();
 	_scene_timer += time_elapsed;
 
 	// User must wait 0.75 seconds before they can exit the scene

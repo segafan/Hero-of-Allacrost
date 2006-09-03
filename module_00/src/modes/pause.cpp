@@ -1,17 +1,17 @@
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
 // This code is licensed under the GNU GPL version 2. It is free software 
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
-/*!****************************************************************************
- * \file    pause.cpp
- * \author  Tyler Olsen, roots@allacrost.org
- * \brief   Source file for pause mode interface.
- *****************************************************************************/
+/** ****************************************************************************
+*** \file    pause.cpp
+*** \author  Tyler Olsen, roots@allacrost.org
+*** \brief   Source file for pause mode interface.
+*** ***************************************************************************/
 
 #include "utils.h"
 #include <iostream>
@@ -19,14 +19,14 @@
 #include "audio.h"
 #include "video.h"
 #include "input.h"
-#include "settings.h"
+#include "system.h"
 
 using namespace std;
 using namespace hoa_audio;
 using namespace hoa_video;
 using namespace hoa_mode_manager;
 using namespace hoa_input;
-using namespace hoa_settings;
+using namespace hoa_system;
 
 namespace hoa_pause {
 
@@ -38,20 +38,20 @@ PauseMode::PauseMode() {
 
 	mode_type = MODE_MANAGER_PAUSE_MODE;
 	// Adjust the volume while in paused mode acordingly
-	switch (SettingsManager->GetPauseVolumeAction()) {
-		case SETTINGS_PAUSE_AUDIO:
-			AudioManager->PauseAudio();
-			break;
-		case SETTINGS_ZERO_VOLUME:
-			AudioManager->SetMusicVolume(0);
-			AudioManager->SetSoundVolume(0);
-			break;
-		case SETTINGS_HALF_VOLUME:
-// 			AudioManager->SetMusicVolume(static_cast<int32>(SettingsManager->music_vol * 0.5));
-// 			AudioManager->SetSoundVolume(static_cast<int32>(SettingsManager->sound_vol * 0.5));
-			break;
-		// Don't need to do anything for the case SETTINGS_SAME_VOLUME
-	}
+// 	switch (SystemManager->GetPauseVolumeAction()) {
+// 		case SETTINGS_PAUSE_AUDIO:
+// 			AudioManager->PauseAudio();
+// 			break;
+// 		case SETTINGS_ZERO_VOLUME:
+// 			AudioManager->SetMusicVolume(0);
+// 			AudioManager->SetSoundVolume(0);
+// 			break;
+// 		case SETTINGS_HALF_VOLUME:
+// // 			AudioManager->SetMusicVolume(static_cast<int32>(SystemManager->music_vol * 0.5));
+// // 			AudioManager->SetSoundVolume(static_cast<int32>(SystemManager->sound_vol * 0.5));
+// 			break;
+// 		// Don't need to do anything for the case SETTINGS_SAME_VOLUME
+// 	}
 
 	// Save a copy of the current screen to use as a backdrop
 	if (!VideoManager->CaptureScreen(_saved_screen)) 
@@ -64,20 +64,20 @@ PauseMode::PauseMode() {
 PauseMode::~PauseMode() {
 	if (PAUSE_DEBUG) cout << "PAUSE: PauseMode destructor invoked" << endl;
 
-	// Restore the game audio/volume levels appropriately
-	switch (SettingsManager->GetPauseVolumeAction()) {
-		case SETTINGS_PAUSE_AUDIO:
-			AudioManager->ResumeAudio();
-			break;
-		case SETTINGS_ZERO_VOLUME:
-		case SETTINGS_HALF_VOLUME:
-// 			AudioManager->SetMusicVolume(SettingsManager->music_vol);
-// 			AudioManager->SetSoundVolume(SettingsManager->sound_vol);
-			break;
-		default: // Don't need to do anything for case SETTINGS_SAME_VOLUME
-			break;
-		
-	}
+// 	// Restore the game audio/volume levels appropriately
+// 	switch (SystemManager->GetPauseVolumeAction()) {
+// 		case SETTINGS_PAUSE_AUDIO:
+// 			AudioManager->ResumeAudio();
+// 			break;
+// 		case SETTINGS_ZERO_VOLUME:
+// 		case SETTINGS_HALF_VOLUME:
+// // 			AudioManager->SetMusicVolume(SystemManager->music_vol);
+// // 			AudioManager->SetSoundVolume(SystemManager->sound_vol);
+// 			break;
+// 		default: // Don't need to do anything for case SETTINGS_SAME_VOLUME
+// 			break;
+// 		
+// 	}
 
 	// Release the saved screen frame.
 	VideoManager->DeleteImage(_saved_screen);
@@ -94,7 +94,7 @@ void PauseMode::Reset() {
 }
 
 
-// The true logic is all handled in GameSettings::KeyEventHandler() instead of this function.
+// The true logic is all handled in GameSystem::KeyEventHandler() instead of this function.
 void PauseMode::Update() { 
 	// Don't eat up 100% of the CPU time when we're in pause mode
 	SDL_Delay(50);

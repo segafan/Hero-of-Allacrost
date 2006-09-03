@@ -17,7 +17,7 @@
 #include "video.h"
 #include "data.h"
 #include "mode_manager.h"
-#include "settings.h"
+#include "system.h"
 #include "quit.h"
 #include "pause.h"
 
@@ -25,7 +25,7 @@ using namespace std;
 using namespace hoa_video;
 using namespace hoa_data;
 using namespace hoa_mode_manager;
-using namespace hoa_settings;
+using namespace hoa_system;
 using namespace hoa_quit;
 using namespace hoa_pause;
 using namespace hoa_input::private_input;
@@ -265,7 +265,7 @@ void GameInput::EventHandler() {
 			// Quit the game without question if the active game mode is BootMode or QuitMode
 			if (ModeManager->GetGameType() == MODE_MANAGER_BOOT_MODE
 				|| ModeManager->GetGameType() == MODE_MANAGER_QUIT_MODE) {
-				SettingsManager->ExitGame();
+				SystemManager->ExitGame();
 			}
 			// Otherwise, we push QuitMode onto the stack
 			else {
@@ -410,7 +410,7 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 				// Quit the game without question if the current game mode is BootMode or QuitMode
 				if (ModeManager->GetGameType() == MODE_MANAGER_BOOT_MODE
 					|| ModeManager->GetGameType() == MODE_MANAGER_QUIT_MODE) {
-					SettingsManager->ExitGame();
+					SystemManager->ExitGame();
 				}
 				// Otherwise, enter QuitMode
 				else {
@@ -441,7 +441,7 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 			// Quit the game without question if the current game mode is BootMode or QuitMode
 			if (ModeManager->GetGameType() == MODE_MANAGER_BOOT_MODE
 				|| ModeManager->GetGameType() == MODE_MANAGER_QUIT_MODE) {
-					SettingsManager->ExitGame();
+					SystemManager->ExitGame();
 			}
 			// Otherwise, enter QuitMode
 			else {
@@ -660,7 +660,7 @@ void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 			// Quit the game without question if the current game mode is BootMode or QuitMode
 			if (ModeManager->GetGameType() == MODE_MANAGER_BOOT_MODE
 				|| ModeManager->GetGameType() == MODE_MANAGER_QUIT_MODE) {
-				SettingsManager->ExitGame();
+				SystemManager->ExitGame();
 			}
 			// Otherwise, enter QuitMode
 			else {

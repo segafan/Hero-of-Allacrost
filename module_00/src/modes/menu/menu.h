@@ -29,7 +29,6 @@
 
 #include "video.h"
 #include "gui.h"
-#include "settings.h"
 #include "mode_manager.h"
 #include "global.h"
 

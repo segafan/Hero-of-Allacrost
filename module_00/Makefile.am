@@ -63,8 +63,8 @@ audio_SOURCES = \
 
 ENGINE_DIR = src/engine
 engine_SOURCES = \
-	$(ENGINE_DIR)/settings.cpp \
-	$(ENGINE_DIR)/settings.h \
+	$(ENGINE_DIR)/system.cpp \
+	$(ENGINE_DIR)/system.h \
 	$(ENGINE_DIR)/input.cpp \
 	$(ENGINE_DIR)/input.h \
 	$(ENGINE_DIR)/mode_manager.cpp \
