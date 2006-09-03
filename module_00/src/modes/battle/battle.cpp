@@ -970,13 +970,14 @@ void BattleMode::_ConstructActionListMenu() {
 
 //! Sets T/F whether an action is being performed
 void BattleMode::SetPerformingScript(bool AIsPerforming) {
-	_performing_script = AIsPerforming;
-
+	
 	// Check if a script has just ended. Set the script to stop performing and pop the script from the front of the queue
-	if (_performing_script == false) {
+	if (AIsPerforming == false && _performing_script == true) {
 		_script_queue.front().GetSource()->SetQueuedToPerform(false);
 		_script_queue.pop_front();
 	}
+
+	_performing_script = AIsPerforming;
 }
 
 
@@ -1047,7 +1048,6 @@ void BattleMode::SwapCharacters(private_battle::CharacterActor *AActorToRemove, 
 
 
 int32 BattleMode::GetIndexOfFirstAliveEnemy() {
-	int32 index = -1;
 
 	std::deque<private_battle::EnemyActor*>::iterator it = _enemy_actors.begin();
 	for (uint32 i = 0; it != _enemy_actors.end(); i++, it++) {
@@ -1056,7 +1056,7 @@ int32 BattleMode::GetIndexOfFirstAliveEnemy() {
 		}
 	}
 
-	return index;
+	return -1;
 }
 
 
