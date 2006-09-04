@@ -215,8 +215,13 @@ bool GameVideo::_DrawTextHelper
 			return false;
 		}
 
+<<<<<<< .mine
+		w = RoundUpPow2(initial->w + 1);
+		h = RoundUpPow2(initial->h + 1);	
+=======
 		w = RoundUpPow2(initial->w);
 		h = RoundUpPow2(initial->h);	
+>>>>>>> .r373
 
 		uint32 rmask, gmask, bmask, amask;
 
@@ -283,8 +288,13 @@ bool GameVideo::_DrawTextHelper
 					 GL_UNSIGNED_BYTE, intermediary->pixels );
 		SDL_UnlockSurface(intermediary);
 
+<<<<<<< .mine
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);	
+=======
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);	
+>>>>>>> .r373
 
 		if(glGetError())
 		{
@@ -293,6 +303,34 @@ bool GameVideo::_DrawTextHelper
 			return false;
 		}
 
+<<<<<<< .mine
+		int minx, maxx;
+		int miny, maxy;
+		int advance;
+
+		if(TTF_GlyphMetrics(font, newglyphs[glyphindex], &minx, &maxx, &miny, &maxy, &advance))
+		{
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: glGetError() true after glTexImage2D() in _DrawTextHelper!" << endl;
+			return false;
+		}
+
+		FontGlyph * glyph = new FontGlyph;
+		glyph->texture = texture;
+		glyph->minx = minx;
+		glyph->miny = miny;
+		glyph->width = initial->w + 1;
+		glyph->height = initial->h + 1;
+		glyph->tx = (float)(((double)initial->w + 1) / ((double)w));
+		glyph->ty = (float)(((double)initial->h + 1) / ((double)h));
+		glyph->advance = advance;
+
+		fp->glyphcache->insert(std::pair<uint16, FontGlyph *>(newglyphs[glyphindex], glyph));
+
+		SDL_FreeSurface(initial);
+		SDL_FreeSurface(intermediary);
+
+=======
 		int minx, maxx;
 		int miny, maxy;
 		int advance;
@@ -319,6 +357,7 @@ bool GameVideo::_DrawTextHelper
 		SDL_FreeSurface(initial);
 		SDL_FreeSurface(intermediary);
 
+>>>>>>> .r373
 	}
 	
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -345,6 +384,59 @@ bool GameVideo::_DrawTextHelper
 	float modulation = _fader.GetFadeModulation();
 	Color textColor = _currentTextColor * modulation;
 
+<<<<<<< .mine
+	int xpos = 0;
+
+	for(const uint16 * glyph = uText; *glyph != 0; glyph++)
+	{
+		FontGlyph * glyphinfo = (*fp->glyphcache)[*glyph];
+		
+		int xhi = glyphinfo->width; 
+		int yhi = glyphinfo->height;
+		
+		if(cs._rightDir < 0.0f)
+			xhi = -xhi;
+		if(cs._upDir < 0.0f)
+			yhi = -yhi;
+			
+		float tx, ty;
+		tx = glyphinfo->tx;
+		ty = glyphinfo->ty;
+
+		int minx, miny;
+		minx = glyphinfo->minx * (int)cs._rightDir + xpos;
+		miny = glyphinfo->miny * (int)cs._upDir;
+		
+		_BindTexture(glyphinfo->texture);
+
+		if(glGetError())
+		{
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: glGetError() true after 2nd call to glBindTexture() in _DrawTextHelper!" << endl;
+			return false;
+		}
+		
+		glBegin(GL_QUADS);
+		glColor4fv((GLfloat *)&textColor);
+
+		glTexCoord2f(0.0, ty); 
+		glVertex2i(minx, miny);
+
+		glTexCoord2f(tx, ty); 
+		glVertex2i(minx + xhi, miny);
+
+		glTexCoord2f(tx, 0.0); 
+		glVertex2i(minx + xhi, miny + yhi);
+
+		glTexCoord2f(0.0, 0.0); 
+		glVertex2i(minx, miny + yhi);
+
+		glEnd();
+
+		xpos += glyphinfo->advance;
+	}
+
+=======
 	for(const uint16 * glyph = uText; *glyph != 0; glyph++)
 	{
 		FontGlyph * glyphinfo = (*fp->glyphcache)[*glyph];
@@ -394,6 +486,7 @@ bool GameVideo::_DrawTextHelper
 		MoveRelative(glyphinfo->advance  * cs._rightDir, 0);
 	}
 
+>>>>>>> .r373
 	glPopMatrix();
 	
 	if(_fogIntensity > 0.0f)
@@ -446,33 +539,29 @@ bool GameVideo::DrawText(const ustring &txt)
 	FontProperties * fp = _fontMap[_currentFont];
 	TTF_Font * font = fp->ttf_font;
 	
-	uint32 newline = uint32('\n');
-	
 	if(font)
 	{
 		_PushContext();
 		int32 lineSkip = fp->lineskip;
 		
-		// temporary so we can mess with it
-		ustring text = txt;
+		// Optimization: something seems to be wrong with ustring, using a buffer instead
+		uint16 buffer[2048];
+		uint16 newline('\n');
+
+		size_t lastline = 0;
 		
 		do
 		{
-			size_t newlinePos = text.find(wchar_t(newline));
-			ustring textToDraw;
-			
-			if(newlinePos != string::npos)
+			size_t nextline;
+			for(nextline = lastline; nextline < txt.length(); nextline++)
 			{
-				// if there's a newline, draw the text up to the newline			
-				textToDraw = text.substr(0, newlinePos);
-				text = text.substr(newlinePos+1, text.length()-newlinePos);
+				if(txt[nextline] == newline)
+					break;
+
+				buffer[nextline - lastline] = txt[nextline];
 			}
-			else
-			{
-				// if there's no newline, draw the entire string
-				textToDraw = text;
-				text.clear();
-			}
+			buffer[nextline - lastline] = 0;
+			lastline = nextline + 1;
 
 			glPushMatrix();
 			
@@ -518,7 +607,7 @@ bool GameVideo::DrawText(const ustring &txt)
 				MoveRelative(+_coordSys._rightDir * fp->shadowX, 0.0f);
 				MoveRelative(0.0f, _coordSys._upDir * fp->shadowY);
 				
-				if(!_DrawTextHelper(textToDraw.c_str()))
+				if(!_DrawTextHelper(buffer))
 				{
 					_PopContext();
 					return false;
@@ -529,21 +618,17 @@ bool GameVideo::DrawText(const ustring &txt)
 			SetTextColor(oldTextColor);
 
 			// draw the text itself
-			
-			if(!textToDraw.empty())
+			if(!_DrawTextHelper(buffer))
 			{
-				if(!_DrawTextHelper(textToDraw.c_str()))
-				{
-					_PopContext();
-					return false;
-				}
+				_PopContext();
+				return false;
 			}
 			
 			glPopMatrix();
 			
 			MoveRelative(0, -lineSkip * _coordSys._upDir);
 
-		} while(!text.empty());
+		} while(lastline < txt.length());
 		
 		_PopContext();
 	}
