@@ -1155,8 +1155,7 @@ private:
 	
 	std::map    <std::string, private_video::Image*>   _images;      //! STL map containing all the images currently being managed by the video engine	
 	std::vector <private_video::TexSheet *>     _texSheets;          //! vector containing all texture sheets currently being managed by the video engine
-	std::map    <std::string, TTF_Font *>       _fontMap;            //! STL map containing all the fonts currently being managed by the video engine
-	std::map    <std::string, FontProperties *> _fontProperties;     //! STL map containing properties for each font
+	std::map    <std::string, FontProperties *> _fontMap;			 //! STL map containing properties for each font (includeing TTF_Font *)
 
 	std::map <std::string, ParticleEffectDef *> _particle_effect_defs; //! STL map containing all loaded particle effect definitions
 	
