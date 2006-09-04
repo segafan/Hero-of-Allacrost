@@ -42,7 +42,7 @@ enum TextShadowStyle
  *  \brief this structure holds properties about a particular font glyph
  *****************************************************************************/
 
-<<<<<<< .mine
+
 
 class FontGlyph
 {
@@ -61,26 +61,7 @@ public:
 	int advance;
 };
 
-=======
 
-class FontGlyph
-{
-public:	
-	GLuint texture;		//! index of the GL texture for this glyph
-	
-	int32 width;		//! width of the glyph in pixels
-	int32 height;		//! height of the glyph in pixels
-
-	float minx;			//! minx of the glyph in pixels (see TTF_GlyphMetrics)
-	float miny;			//! miny of the glyph in pixels (see TTF_GlyphMetrics)
-
-	float tx;			//! maxx of the glyph in texture space (see TTF_GlyphMetrics)
-	float ty;			//! maxy of the glyph in texture space (see TTF_GlyphMetrics)
-
-	int advance;
-};
-
->>>>>>> .r373
 /*!***************************************************************************
  *  \brief this structure holds properties about fonts
  *****************************************************************************/
