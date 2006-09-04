@@ -360,11 +360,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\engine\settings.h"
+				RelativePath=".\src\engine\video\shake.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\engine\video\shake.h"
+				RelativePath=".\src\engine\system.h"
 				>
 			</File>
 			<File
@@ -548,11 +548,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\engine\settings.cpp"
+				RelativePath=".\src\engine\video\shake.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\engine\video\shake.cpp"
+				RelativePath=".\src\engine\system.cpp"
 				>
 			</File>
 			<File
