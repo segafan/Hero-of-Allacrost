@@ -215,13 +215,8 @@ bool GameVideo::_DrawTextHelper
 			return false;
 		}
 
-<<<<<<< .mine
 		w = RoundUpPow2(initial->w + 1);
 		h = RoundUpPow2(initial->h + 1);	
-=======
-		w = RoundUpPow2(initial->w);
-		h = RoundUpPow2(initial->h);	
->>>>>>> .r373
 
 		uint32 rmask, gmask, bmask, amask;
 
@@ -288,13 +283,9 @@ bool GameVideo::_DrawTextHelper
 					 GL_UNSIGNED_BYTE, intermediary->pixels );
 		SDL_UnlockSurface(intermediary);
 
-<<<<<<< .mine
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);	
-=======
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);	
->>>>>>> .r373
+
 
 		if(glGetError())
 		{
@@ -303,7 +294,6 @@ bool GameVideo::_DrawTextHelper
 			return false;
 		}
 
-<<<<<<< .mine
 		int minx, maxx;
 		int miny, maxy;
 		int advance;
@@ -330,34 +320,7 @@ bool GameVideo::_DrawTextHelper
 		SDL_FreeSurface(initial);
 		SDL_FreeSurface(intermediary);
 
-=======
-		int minx, maxx;
-		int miny, maxy;
-		int advance;
 
-		if(TTF_GlyphMetrics(font, newglyphs[glyphindex], &minx, &maxx, &miny, &maxy, &advance))
-		{
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: glGetError() true after glTexImage2D() in _DrawTextHelper!" << endl;
-			return false;
-		}
-
-		FontGlyph * glyph = new FontGlyph;
-		glyph->texture = texture;
-		glyph->minx = (float)minx;
-		glyph->miny = (float)miny;
-		glyph->width = initial->w;
-		glyph->height = initial->h;
-		glyph->tx = ((float)initial->w) / ((float)w);
-		glyph->ty = ((float)initial->h) / ((float)h);
-		glyph->advance = advance;
-
-		fp->glyphcache->insert(std::pair<uint16, FontGlyph *>(newglyphs[glyphindex], glyph));
-
-		SDL_FreeSurface(initial);
-		SDL_FreeSurface(intermediary);
-
->>>>>>> .r373
 	}
 	
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -384,7 +347,6 @@ bool GameVideo::_DrawTextHelper
 	float modulation = _fader.GetFadeModulation();
 	Color textColor = _currentTextColor * modulation;
 
-<<<<<<< .mine
 	int xpos = 0;
 
 	for(const uint16 * glyph = uText; *glyph != 0; glyph++)
@@ -436,57 +398,7 @@ bool GameVideo::_DrawTextHelper
 		xpos += glyphinfo->advance;
 	}
 
-=======
-	for(const uint16 * glyph = uText; *glyph != 0; glyph++)
-	{
-		FontGlyph * glyphinfo = (*fp->glyphcache)[*glyph];
-		
-		float xhi = (float)glyphinfo->width; 
-		float yhi = (float)glyphinfo->height;
-		
-		if(cs._rightDir < 0.0f)
-			xhi = -xhi;
-		if(cs._upDir < 0.0f)
-			yhi = -yhi;
-			
-		float tx, ty;
-		tx = glyphinfo->tx;
-		ty = glyphinfo->ty;
 
-		float minx, miny;
-		minx = glyphinfo->minx * cs._rightDir;
-		miny = glyphinfo->miny * cs._upDir;
-		
-		_BindTexture(glyphinfo->texture);
-
-		if(glGetError())
-		{
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: glGetError() true after 2nd call to glBindTexture() in _DrawTextHelper!" << endl;
-			return false;
-		}
-		
-		glBegin(GL_QUADS);
-		glColor4fv((GLfloat *)&textColor);
-
-		glTexCoord2f(0.0, ty); 
-		glVertex2f(minx, miny);
-
-		glTexCoord2f(tx, ty); 
-		glVertex2f(minx + xhi, miny);
-
-		glTexCoord2f(tx, 0.0); 
-		glVertex2f(minx + xhi, miny + yhi);
-
-		glTexCoord2f(0.0, 0.0); 
-		glVertex2f(minx, miny + yhi);
-
-		glEnd();
-
-		MoveRelative(glyphinfo->advance  * cs._rightDir, 0);
-	}
-
->>>>>>> .r373
 	glPopMatrix();
 	
 	if(_fogIntensity > 0.0f)
