@@ -416,30 +416,29 @@ GameVideo::~GameVideo()
 	// delete GUI
 	delete _gui;
 		
-	// delete TTF fonts
-	map<string, TTF_Font *>::iterator iFont    = _fontMap.begin();
-	map<string, TTF_Font *>::iterator iFontEnd = _fontMap.end();
-	
-	while(iFont != _fontMap.end())
-	{
-		TTF_Font *font = iFont->second;
-		
-		if(font)
-		{
-			TTF_CloseFont(font);
-		}
-		
-		++iFont;
-	}
-	
 	// delete font properties
 	
-	map<string, FontProperties *>::iterator iFontProp    = _fontProperties.begin();
-	map<string, FontProperties *>::iterator iFontPropEnd = _fontProperties.end();
+	map<string, FontProperties *>::iterator iFontProp    = _fontMap.begin();
+	map<string, FontProperties *>::iterator iFontPropEnd = _fontMap.end();
 	
-	while(iFontProp != _fontProperties.end())
+	while(iFontProp != _fontMap.end())
 	{
 		FontProperties *fp = iFontProp->second;		
+
+		if(fp->ttf_font)
+			TTF_CloseFont(fp->ttf_font);
+
+		if(fp->glyphcache)
+		{
+			for(std::map<uint16, FontGlyph *>::iterator glyphitr = fp->glyphcache->begin(); glyphitr != fp->glyphcache->end(); glyphitr++)
+			{
+				// Possibly de-init the GL texture
+				delete (*glyphitr).second;
+			}
+
+			delete fp->glyphcache;
+		}
+
 		delete fp;		
 		++iFontProp;
 	}

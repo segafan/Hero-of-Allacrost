@@ -13,6 +13,8 @@
 
 #include "utils.h"
 
+typedef struct _TTF_Font TTF_Font;
+
 
 namespace hoa_video
 {
@@ -36,6 +38,27 @@ enum TextShadowStyle
 	
 };
 
+/*!***************************************************************************
+ *  \brief this structure holds properties about a particular font glyph
+ *****************************************************************************/
+
+
+class FontGlyph
+{
+public:	
+	GLuint texture;		//! index of the GL texture for this glyph
+	
+	int32 width;		//! width of the glyph in pixels
+	int32 height;		//! height of the glyph in pixels
+
+	float minx;			//! minx of the glyph in pixels (see TTF_GlyphMetrics)
+	float miny;			//! miny of the glyph in pixels (see TTF_GlyphMetrics)
+
+	float tx;			//! maxx of the glyph in texture space (see TTF_GlyphMetrics)
+	float ty;			//! maxy of the glyph in texture space (see TTF_GlyphMetrics)
+
+	int advance;
+};
 
 /*!***************************************************************************
  *  \brief this structure holds properties about fonts
@@ -52,6 +75,10 @@ public:
 	int32 shadowY;  //! y offset of text shadow
 	
 	TextShadowStyle shadowStyle;  //! style of text shadow
+
+	TTF_Font * ttf_font; //! pointer fot STL's TTF Font structure
+
+	std::map<uint16, FontGlyph *> * glyphcache; //! cache of all glyphs used in this font
 };
 
 }  // namespace hoa_video
