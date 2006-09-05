@@ -104,7 +104,6 @@ bool GameVideo::_DrawStillImage(const StillImage &id, const Color &color)
 			success = _DrawElement(id._elements[iElement]);
 		else
 			success = _DrawElement(id._elements[iElement], color * fadeColor);
-
 		
 		if(!success)
 		{
@@ -132,6 +131,8 @@ bool GameVideo::_DrawElement
 )
 {	
 	Image *img = element.image;
+
+	
 	
 	// set vertex coordinates
 	float xlo,xhi,ylo,yhi;
@@ -197,12 +198,20 @@ bool GameVideo::_DrawElement
 		if(element.oneColor)
 		{
 			glColor4fv((GLfloat *)&element.color[0]);
+
+			//glColor3f(s0, t1, 0);
 			glTexCoord2f(s0, t1);
 			glVertex2f(xlo, ylo); //bl
+
+			//glColor3f(s1, t1, 0);
 			glTexCoord2f(s1, t1);
 			glVertex2f(xhi, ylo); //br
+
+			//glColor3f(s1, t0, 0);
 			glTexCoord2f(s1, t0);
 			glVertex2f(xhi, yhi); //tr
+
+			//glColor3f(s0, t0, 0);
 			glTexCoord2f(s0, t0);
 			glVertex2f(xlo, yhi); //tl
 		}
