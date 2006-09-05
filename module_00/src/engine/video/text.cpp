@@ -328,6 +328,9 @@ bool GameVideo::_DrawTextHelper
 	glEnable(GL_TEXTURE_2D);
 	glDisable(GL_FOG);
 
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0.1f);
+
 	glPushMatrix();
 
 	int fontwidth;
@@ -403,6 +406,8 @@ bool GameVideo::_DrawTextHelper
 	
 	if(_fogIntensity > 0.0f)
 		glEnable(GL_FOG);
+
+	glDisable(GL_ALPHA_TEST);
 
 	glFinish();
 
