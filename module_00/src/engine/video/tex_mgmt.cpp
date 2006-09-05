@@ -10,6 +10,7 @@
 #include "utils.h"
 #include <cassert>
 #include <cstdarg>
+#include <set>
 #include "video.h"
 #include <math.h>
 #include "gui.h"
@@ -113,7 +114,7 @@ bool GameVideo::_LoadImage(StillImage &id, bool grayscale)
 	{
 		id._elements.clear();		
 		ImageElement quad(NULL, 0.0f, 0.0f, id._width, id._height, 0.0f, 0.0f, 1.0f, 1.0f, id._color);
-		id._elements.push_back(quad);		
+		id._elements.push_back(quad);	
 		return true;
 	}
 	
@@ -616,7 +617,6 @@ VariableTexMemMgr::VariableTexMemMgr(TexSheet *sheet)
 	_sheetWidth  = sheet->width / 16;
 	_sheetHeight = sheet->height / 16;
 	_blocks      = new VariableImageNode[_sheetWidth*_sheetHeight];
-	
 }
 
 
@@ -681,6 +681,7 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 	
 	StillImage id;
 	id._elements.push_back(elem);
+
 	
 	if(!DrawImage(id))
 	{
@@ -1142,6 +1143,7 @@ FixedTexMemMgr::~FixedTexMemMgr()
 
 bool VariableTexMemMgr::Insert  (Image *img)
 {
+	
 	// don't allow insertions into a texture bigger than 512x512... 
 	// This way, if we have a 1024x1024 texture holding a fullscreen background,
 	// it is always safe to remove the texture sheet from memory when the
@@ -1178,7 +1180,7 @@ bool VariableTexMemMgr::Insert  (Image *img)
 			{
 				for(int32 dx = 0; dx < w; ++dx)
 				{
-					if(!_blocks[(x+dx)+(y+dy)*_sheetWidth].free)
+					if(!_blocks[(x+dx)+((y+dy)*_sheetWidth)].free)
 					{
 						furthestBlocker = x+dx;
 						goto endneighborsearch;
@@ -1209,26 +1211,32 @@ bool VariableTexMemMgr::Insert  (Image *img)
 	hoa_video::GameVideo *VideoManager = hoa_video::GameVideo::SingletonGetReference();
 
 	// update blocks
+	std::set<hoa_video::private_video::Image *> removeimages;
+
 	for(int32 y = blockY; y < blockY + h; ++y)
 	{
-		int32 index = y*_sheetHeight + blockX;
 		for(int32 x = blockX; x < blockX + w; ++x)
 		{			
+			int32 index = x + (y * _sheetWidth);
 			// check if there's already an image at the point we're
 			// trying to load at. If so, we need to tell GameVideo
 			// to update its internal vector
 			
 			if(_blocks[index].image)
 			{
-				VideoManager->_RemoveImage(_blocks[index].image);
+				removeimages.insert(_blocks[index].image);
 			}
-
 
 			_blocks[index].free  = false;
 			_blocks[index].image = img;
-			
-			++index;
+
 		}
+	}
+
+	for(std::set<hoa_video::private_video::Image *>::iterator itr = removeimages.begin(); itr != removeimages.end(); itr++)
+	{
+		Remove(*itr);
+		VideoManager->_RemoveImage(*itr);
 	}
 
 		
@@ -1292,10 +1300,13 @@ bool VariableTexMemMgr::SetBlockProperties
 	{
 		for(int32 x = blockX; x < blockX + w; ++x)
 		{
-			if(changeFree)
-				_blocks[x+y*_sheetWidth].free  = free;
-			if(changeImage)
-				_blocks[x+y*_sheetWidth].image = newImage;
+			if(_blocks[x+y*_sheetWidth].image == img)
+			{
+				if(changeFree)
+					_blocks[x+y*_sheetWidth].free  = free;
+				if(changeImage)
+					_blocks[x+y*_sheetWidth].image = newImage;
+			}
 		}	
 	}
 	

@@ -60,6 +60,8 @@ public:
 	Image(const std::string &fname, int32 w, int32 h, bool grayscale) 
 	: filename(fname)
 	{ 
+		x = 0;
+		y = 0;
 		width    = w;
 		height   = h;
 		refCount = 0;
@@ -85,7 +87,11 @@ public:
 		refCount = 0;
 	}
 
-
+	Image & operator = (Image & rhs)
+	{
+		int n = 0;
+		return *this;
+	}
 
 	TexSheet *texSheet;     //! texture sheet using this image
 	std::string filename;   //! stored for every image in case it needs to be reloaded
@@ -311,7 +317,7 @@ public:
 	
 	virtual void SetStatic(bool isStatic)  { _isStatic = isStatic; }
 	
-	std::string GetFilename() { return _filename; }
+	std::string GetFilename() const { return _filename; }
 	
 	float GetWidth() const  { return _width; }
 	float GetHeight() const { return _height; }
