@@ -341,6 +341,13 @@ void GlobalEnemy::LevelSimulator(uint32 lvl) {
 	_agility = GaussianRandomValue(_agility);
 	
 	_hit_points = _max_hit_points;
+
+	// Make sure there's always at least one hit point!
+	if (_hit_points <= 0) 
+		_hit_points = 1;
+	if (_max_hit_points <= 0) 
+		_max_hit_points = 1;
+
 	//_movement_speed = 5 + _agility%5;
 }
 
