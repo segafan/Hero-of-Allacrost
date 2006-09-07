@@ -222,7 +222,7 @@ void CharacterActor::DrawStatus() {
 	
 	// Draw the character's name
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-	VideoManager->Move(225, 90 + y_offset);
+	VideoManager->Move(225.0f, 90.0f + y_offset);
  	VideoManager->DrawText(GetName());
 
 	// Draw the character's HP, SP, and ST stamina bars
@@ -231,7 +231,7 @@ void CharacterActor::DrawStatus() {
 	// Draw the character's current health on top of the middle of the HP bar
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 
-	VideoManager->Move(355, 90 + y_offset);
+	VideoManager->Move(355.0f, 90.0f + y_offset);
 	VideoManager->DrawText(NumberToString(GetHealthPoints()));
 
 	// Draw the character's current skill points on top of the middle of the SP bar
@@ -272,7 +272,7 @@ void EnemyActor::Update() {
 
 	// make sure the enemy isn't queued to perform.  set the next attack time
 	if (next_attack == 0 && !IsQueuedToPerform()) {
-		next_attack = rand() % 30000;
+		next_attack = RandomBoundedInteger(5000, 30000);
 		last_attack = 0;
 	}
 
@@ -305,7 +305,8 @@ void EnemyActor::DrawSprite() {
 	if (!IsAlive()) {
 		VideoManager->Move(GetXLocation(), GetYLocation());
 		vector<StillImage> sprite_frames = _wrapped_enemy.GetAnimation("IDLE");
-		VideoManager->DrawImage(sprite_frames[3], Color::gray);
+		// TODO: FIX THIS SOMEHOW! Problem: Memory usage grows like hell! (probably because of bad vmem caching) sprite_frames[3].EnableGrayScale();
+		VideoManager->DrawImage(sprite_frames[3], Color::gray); // Temporary fix
 	}
 	else {
 		// Draw the actor selector image over the currently selected enemy

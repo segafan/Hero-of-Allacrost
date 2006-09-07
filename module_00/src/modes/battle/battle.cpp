@@ -788,7 +788,7 @@ void BattleMode::_DrawBottomMenu() {
 
 	// Draw the swap icon and any swap cards
 	VideoManager->Move(6, 16);
-	VideoManager->DrawImage(_swap_icon);
+	VideoManager->DrawImage(_swap_icon, Color::gray);
 	VideoManager->Move(6, 68);
 	for (uint8 i = 0; i < _current_number_swaps; i++) {
 		VideoManager->DrawImage(_swap_card);
