@@ -222,7 +222,7 @@ void CharacterActor::DrawStatus() {
 	
 	// Draw the character's name
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-	VideoManager->Move(225, 85 + y_offset);
+	VideoManager->Move(225, 90 + y_offset);
  	VideoManager->DrawText(GetName());
 
 	// Draw the character's HP, SP, and ST stamina bars
@@ -231,7 +231,7 @@ void CharacterActor::DrawStatus() {
 	// Draw the character's current health on top of the middle of the HP bar
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 
-	VideoManager->Move(355, 85 + y_offset);
+	VideoManager->Move(355, 90 + y_offset);
 	VideoManager->DrawText(NumberToString(GetHealthPoints()));
 
 	// Draw the character's current skill points on top of the middle of the SP bar

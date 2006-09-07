@@ -293,6 +293,16 @@ int32 GaussianRandomValue(int32 mean, float std_dev, bool positive_value) {
 		return static_cast<int32>(result);
 } // int32 GaussianValue(int32 mean, float std_dev = 6.667f, bool positive_value = false)
 
+// Returns true/false depending on the chance
+bool Probability(uint32 chance)
+{
+	uint32 value = static_cast<uint32>(RandomBoundedInteger(1, 100));
+	if (value <= chance)
+		return true;
+	else
+		return false;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 ///// Directory manipulation functions
 ////////////////////////////////////////////////////////////////////////////////
