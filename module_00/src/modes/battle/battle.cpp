@@ -136,11 +136,13 @@ BattleMode::BattleMode() :
 	action_type_options.push_back(MakeUnicodeString("<img/icons/battle/item.png><55>Item"));
 
 	_action_type_menu.SetOptions(action_type_options);
+	_action_type_menu.EnableOption(1, false); // Disable defend and support for now
+	_action_type_menu.EnableOption(2, false);
 
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 
 	_action_menu_window = new MenuWindow();
-	_action_menu_window->Create(192.0f, 384.0f);
+	_action_menu_window->Create(210.0f, 384.0f);
 	_action_menu_window->SetPosition(0.0f, 544.0f);
 	_action_menu_window->SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_action_menu_window->Hide();
@@ -167,7 +169,7 @@ BattleMode::BattleMode() :
 	_battle_lose_menu.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_battle_lose_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_battle_lose_menu.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-	_battle_lose_menu.SetCursorOffset(-20.0f, 25.0f);
+	_battle_lose_menu.SetCursorOffset(-60.0f, 25.0f);
 	vector<ustring> loseText;
 	loseText.push_back(MakeUnicodeString("Return to the main menu"));
 	_battle_lose_menu.SetOptions(loseText);
@@ -186,6 +188,12 @@ BattleMode::~BattleMode() {
 	if (current_battle == this) {
 		current_battle = NULL;
 	}
+
+	for (uint32 i = 0; i < _battle_music.size(); i++)
+		_battle_music[i].FreeMusic();
+
+	for (uint32 i = 0; i < _battle_sound.size(); i++)
+		_battle_sound[i].FreeSound();
 
 	// Delete all character and enemy actors
 	for (deque<CharacterActor*>::iterator i = _character_actors.begin(); i != _character_actors.end(); ++i) {
@@ -294,131 +302,146 @@ void BattleMode::_CreateEnemyActors() {
 	vector<StillImage> sprite_frames; // A vector to fill it with all four damage frames for each sprite
 	EnemyActor* enemy; // A pointer to the new enemy actor to add to the battle
 
-	// Create the Green Slime EnemyActor
-	sprite_frames.clear();
-	enemy = NULL;
-	
-	frame.SetDimensions(64, 64);
-	frame.SetFilename("img/sprites/battle/enemies/green_slime.png");
-	sprite_frames.push_back(frame);
-	frame.SetFilename("img/sprites/battle/enemies/green_slime_hp66.png");
-	sprite_frames.push_back(frame);
-	frame.SetFilename("img/sprites/battle/enemies/green_slime_hp33.png");
-	sprite_frames.push_back(frame);
-	frame.SetFilename("img/sprites/battle/enemies/green_slime_hp00.png");
-	sprite_frames.push_back(frame);
+	while (_enemy_actors.size() <= 0)
+	{
+		// Create the Green Slime EnemyActor
+		if (Probability(50))
+		{
+			sprite_frames.clear();
+			enemy = NULL;
 
-	VideoManager->BeginImageLoadBatch();
-	for (uint32 i = 0; i < sprite_frames.size(); i++) {
-		if (!VideoManager->LoadImage(sprite_frames[i])) {
-			cerr << "BATTLE ERROR: Failed to load sprite frame: " << endl;
-			_ShutDown();
+			frame.SetDimensions(64, 64);
+			frame.SetFilename("img/sprites/battle/enemies/green_slime.png");
+			sprite_frames.push_back(frame);
+			frame.SetFilename("img/sprites/battle/enemies/green_slime_hp66.png");
+			sprite_frames.push_back(frame);
+			frame.SetFilename("img/sprites/battle/enemies/green_slime_hp33.png");
+			sprite_frames.push_back(frame);
+			frame.SetFilename("img/sprites/battle/enemies/green_slime_hp00.png");
+			sprite_frames.push_back(frame);
+
+			VideoManager->BeginImageLoadBatch();
+			for (uint32 i = 0; i < sprite_frames.size(); i++) {
+				if (!VideoManager->LoadImage(sprite_frames[i])) {
+					cerr << "BATTLE ERROR: Failed to load sprite frame: " << endl;
+					_ShutDown();
+				}
+			}
+			VideoManager->EndImageLoadBatch();
+
+			GlobalEnemy green_slime("slime");
+			green_slime.SetName(MakeUnicodeString("Green Slime"));
+			green_slime.AddAnimation("IDLE", sprite_frames);
+			green_slime.LevelSimulator(2);
+			enemy = new EnemyActor(green_slime, 768, 256);
+			_enemy_actors.push_back(enemy);
+		}
+
+		// Create the Spider EnemyActor
+		if (Probability(50))
+		{
+			sprite_frames.clear();
+			enemy = NULL;
+			frame.SetDimensions(64, 64);
+			frame.SetFilename("img/sprites/battle/enemies/spider.png");
+			sprite_frames.push_back(frame);
+			frame.SetFilename("img/sprites/battle/enemies/spider_hp66.png");
+			sprite_frames.push_back(frame);
+			frame.SetFilename("img/sprites/battle/enemies/spider_hp33.png");
+			sprite_frames.push_back(frame);
+			frame.SetFilename("img/sprites/battle/enemies/spider_hp00.png");
+			sprite_frames.push_back(frame);
+
+			VideoManager->BeginImageLoadBatch();
+			for (uint32 i = 0; i < sprite_frames.size(); i++) {
+				if (!VideoManager->LoadImage(sprite_frames[i])) {
+					cerr << "BATTLE ERROR: Failed to load sprite image: " << endl;
+					_ShutDown();
+				}
+			}
+			VideoManager->EndImageLoadBatch();
+
+			GlobalEnemy spider("spider");
+			spider.SetName(MakeUnicodeString("Spider"));
+			spider.AddAnimation("IDLE", sprite_frames);
+			spider.LevelSimulator(2);
+			enemy = new EnemyActor(spider, 512, 320);
+			_enemy_actors.push_back(enemy);
+		}
+
+		// Create the Snake EnemyActor
+		if (Probability(50))
+		{	
+			sprite_frames.clear();
+			enemy = NULL;
+			frame.SetDimensions(128, 64);
+			frame.SetFilename("img/sprites/battle/enemies/snake.png");
+			sprite_frames.push_back(frame);
+			frame.SetFilename("img/sprites/battle/enemies/snake_hp66.png");
+			sprite_frames.push_back(frame);
+			frame.SetFilename("img/sprites/battle/enemies/snake_hp33.png");
+			sprite_frames.push_back(frame);
+			frame.SetFilename("img/sprites/battle/enemies/snake_hp00.png");
+			sprite_frames.push_back(frame);
+
+			VideoManager->BeginImageLoadBatch();
+			for (uint32 i = 0; i < sprite_frames.size(); i++) {
+				if (!VideoManager->LoadImage(sprite_frames[i])) {
+					cerr << "BATTTLE ERROR: Failed to load snake sprite frame: " << endl;
+					_ShutDown();
+				}
+			}
+			VideoManager->EndImageLoadBatch();
+
+			GlobalEnemy snake("snake");
+			snake.SetName(MakeUnicodeString("Snake"));
+			snake.AddAnimation("IDLE", sprite_frames);
+			snake.LevelSimulator(2);
+			enemy = new EnemyActor(snake, 576, 192);
+			_enemy_actors.push_back(enemy);
+		}
+
+		// Create the Skeleton EnemyActor
+		if (Probability(50))
+		{
+			sprite_frames.clear();
+			enemy = NULL;
+			frame.SetDimensions(64, 128);
+			frame.SetFilename("img/sprites/battle/enemies/skeleton.png");
+			sprite_frames.push_back(frame);
+			frame.SetFilename("img/sprites/battle/enemies/skeleton_hp66.png");
+			sprite_frames.push_back(frame);
+			frame.SetFilename("img/sprites/battle/enemies/skeleton_hp33.png");
+			sprite_frames.push_back(frame);
+			frame.SetFilename("img/sprites/battle/enemies/skeleton_hp00.png");
+			sprite_frames.push_back(frame);
+
+			VideoManager->BeginImageLoadBatch();
+			for (uint32 i = 0; i < sprite_frames.size(); i++) {
+				if (!VideoManager->LoadImage(sprite_frames[i])) {
+					cerr << "BATTLE ERROR: failed to load skeleton sprite frame: " << endl;
+					_ShutDown();
+				}
+			}
+			VideoManager->EndImageLoadBatch();
+
+			GlobalEnemy skeleton("skeleton");
+			skeleton.SetName(MakeUnicodeString("Skeleton"));
+			skeleton.AddAnimation("IDLE", sprite_frames);
+			skeleton.LevelSimulator(2);
+			enemy = new EnemyActor(skeleton, 704, 384);
+			_enemy_actors.push_back(enemy);
 		}
 	}
-	VideoManager->EndImageLoadBatch();
-	
-	GlobalEnemy green_slime("slime");
-	green_slime.SetName(MakeUnicodeString("Green Slime"));
-	green_slime.AddAnimation("IDLE", sprite_frames);
-	green_slime.LevelSimulator(2);
-	enemy = new EnemyActor(green_slime, 768, 256);
-	_enemy_actors.push_back(enemy);
-	
-	// Create the Spider EnemyActor
-	sprite_frames.clear();
-	enemy = NULL;
-	
-	frame.SetDimensions(64, 64);
-	frame.SetFilename("img/sprites/battle/enemies/spider.png");
-	sprite_frames.push_back(frame);
-	frame.SetFilename("img/sprites/battle/enemies/spider_hp66.png");
-	sprite_frames.push_back(frame);
-	frame.SetFilename("img/sprites/battle/enemies/spider_hp33.png");
-	sprite_frames.push_back(frame);
-	frame.SetFilename("img/sprites/battle/enemies/spider_hp00.png");
-	sprite_frames.push_back(frame);
-
-	VideoManager->BeginImageLoadBatch();
-	for (uint32 i = 0; i < sprite_frames.size(); i++) {
-		if (!VideoManager->LoadImage(sprite_frames[i])) {
-			cerr << "BATTLE ERROR: Failed to load sprite image: " << endl;
-			_ShutDown();
-		}
-	}
-	VideoManager->EndImageLoadBatch();
-	
-	GlobalEnemy spider("spider");
-	spider.SetName(MakeUnicodeString("Spider"));
-	spider.AddAnimation("IDLE", sprite_frames);
-	spider.LevelSimulator(2);
-	enemy = new EnemyActor(spider, 512, 320);
-	_enemy_actors.push_back(enemy);
-
-	// Create the Snake EnemyActor
-	sprite_frames.clear();
-	enemy = NULL;
-
-	frame.SetDimensions(128, 64);
-	frame.SetFilename("img/sprites/battle/enemies/snake.png");
-	sprite_frames.push_back(frame);
-	frame.SetFilename("img/sprites/battle/enemies/snake_hp66.png");
-	sprite_frames.push_back(frame);
-	frame.SetFilename("img/sprites/battle/enemies/snake_hp33.png");
-	sprite_frames.push_back(frame);
-	frame.SetFilename("img/sprites/battle/enemies/snake_hp00.png");
-	sprite_frames.push_back(frame);
-
-	VideoManager->BeginImageLoadBatch();
-	for (uint32 i = 0; i < sprite_frames.size(); i++) {
-		if (!VideoManager->LoadImage(sprite_frames[i])) {
-			cerr << "BATTTLE ERROR: Failed to load snake sprite frame: " << endl;
-			_ShutDown();
-		}
-	}
-	VideoManager->EndImageLoadBatch();
-	
-	GlobalEnemy snake("snake");
-	snake.SetName(MakeUnicodeString("Snake"));
-	snake.AddAnimation("IDLE", sprite_frames);
-	snake.LevelSimulator(2);
-	enemy = new EnemyActor(snake, 576, 192);
-	_enemy_actors.push_back(enemy);
-
-	// Create the Skeleton EnemyActor
-	sprite_frames.clear();
-	enemy = NULL;
-	
-	frame.SetDimensions(64, 128);
-	frame.SetFilename("img/sprites/battle/enemies/skeleton.png");
-	sprite_frames.push_back(frame);
-	frame.SetFilename("img/sprites/battle/enemies/skeleton_hp66.png");
-	sprite_frames.push_back(frame);
-	frame.SetFilename("img/sprites/battle/enemies/skeleton_hp33.png");
-	sprite_frames.push_back(frame);
-	frame.SetFilename("img/sprites/battle/enemies/skeleton_hp00.png");
-	sprite_frames.push_back(frame);
-
-	VideoManager->BeginImageLoadBatch();
-	for (uint32 i = 0; i < sprite_frames.size(); i++) {
-		if (!VideoManager->LoadImage(sprite_frames[i])) {
-			cerr << "BATTLE ERROR: failed to load skeleton sprite frame: " << endl;
-			_ShutDown();
-		}
-	}
-	VideoManager->EndImageLoadBatch();
-
-	GlobalEnemy skeleton("skeleton");
-	skeleton.SetName(MakeUnicodeString("Skeleton"));
-	skeleton.AddAnimation("IDLE", sprite_frames);
-	skeleton.LevelSimulator(2);
-	enemy = new EnemyActor(skeleton, 704, 384);
-	_enemy_actors.push_back(enemy);
 } // void BattleMode::_CreateEnemyActors()
 
 
 
 void BattleMode::_ShutDown() {
 	if (BATTLE_DEBUG) cout << "BATTLE: ShutDown() called!" << endl;
+
+	_battle_music[0].StopMusic();
+
 	// This call will clear the input state
 	InputManager->EventHandler();
 	
@@ -443,8 +466,7 @@ void BattleMode::Update() {
 		else { 
 			_battle_lose_menu.Update(SystemManager->GetUpdateTime()); // Update lose menu
 			if (InputManager->ConfirmRelease()) {
-				// _battle_lose_menu.HandleConfirmKey(); // This needs to be handled when there's more than 1 option
-				InputManager->EventHandler(); // Clear input in here because we don't want confirm press in boot mode!
+				// _battle_lose_menu.HandleConfirmKey(); // This needs to be handled when there's more than 1 option				
 				PlayerDefeat();
 			}
 		}
@@ -857,7 +879,7 @@ void BattleMode::_ConstructActionListMenu() {
 // 	}
 
 	_action_list_menu = new OptionBox();
-	_action_list_menu->SetPosition(30.0f, 512.0f);
+	_action_list_menu->SetPosition(10.0f, 512.0f);
 	_action_list_menu->SetFont("battle");
 	_action_list_menu->SetAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	_action_list_menu->SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -1020,6 +1042,7 @@ void BattleMode::PlayerVictory() {
 
 void BattleMode::PlayerDefeat() {
 	if (BATTLE_DEBUG) cout << "Player was defeated in a battle!" << endl;
+	_ShutDown();
 	ModeManager->PopAll();
 	BootMode *BM = new BootMode();
 	ModeManager->Push(BM);

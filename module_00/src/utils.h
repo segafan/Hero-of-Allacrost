@@ -335,6 +335,18 @@ int32 RandomBoundedInteger(int32 lower_bound, int32 upper_bound);
 *** \return An Gaussian random integer with a mean and standard deviation as specified by the user
 **/
 int32 GaussianRandomValue(int32 mean, float std_dev = 10.0f, bool positive_value = true);
+
+/******************************************************************************
+ * bool Probability(uint32 chance);
+ *
+ *	This function calculates a random number on a given chance and returns true if the chance occurs.
+ *  For example, if calling Probability(25), there is a probability of 25% on returning `true`.
+ ******************************************************************************/
+/** \brief Returns true/false depending on the chance
+*** \param chance Value between 0..100. 0 will always return false and >=100 will always return true.
+*** \return True if the chance occurs
+**/
+bool Probability(uint32 chance);
 //@}
 
 
