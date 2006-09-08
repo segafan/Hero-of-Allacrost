@@ -669,18 +669,44 @@ void GlobalParty::RemoveCharacter(uint32 char_id)
 //-------------------------------------
 // GlobalParty::AddItemToInventory
 //-------------------------------------
-void GameGlobal::AddItemToInventory(GlobalObject *obj)
+void GameGlobal::AddItemToInventory(GameItemID id)
 {
 	vector<GlobalObject *>::iterator i = _inventory.begin();
 	for (; i != _inventory.end(); i++)
 	{
-		if ((*i)->GetID() == obj->GetID())
+		if ((*i)->GetID() == id)
 		{
 			(*i)->SetCount((*i)->GetCount() + 1);
 			return;
 		}
 	}
-	_inventory.push_back(obj);
+	
+	//////////////////////////////////////////////////
+	// This needs to be a lua call to load the object
+	//////////////////////////////////////////////////
+	// hack to create potion for demo
+	if (id == HP_POTION)
+	{
+		GlobalItem *potion = new GlobalItem(GLOBAL_HP_RECOVERY_ITEM, GLOBAL_ALL_CHARACTERS, HP_POTION, 1);
+		potion->SetRecoveryAmount(180);
+		_inventory.push_back(potion);
+	}
+}
+
+//-------------------------------------
+// GlobalParty::RemoveItemFromInventory
+//-------------------------------------
+void GameGlobal::RemoveItemFromInventory(GameItemID id)
+{
+	// search through inventory and remove item
+	vector<GlobalObject *>::iterator i = _inventory.begin();
+	for (; i != _inventory.end(); i++)
+	{
+		if ((*i)->GetID() == id)
+			break;
+	}
+
+	_inventory.erase(i);
 }
 
 }// namespace hoa_global

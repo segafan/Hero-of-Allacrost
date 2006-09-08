@@ -281,7 +281,6 @@ void MiniCharacterSelectWindow::Update()
 
 		// increase hp
 		uint8 temp = selected->GetUseCase();
-		printf("Use Case:%x\tGLOBAL_HP_RECOVERY_ITEM:%x", temp, GLOBAL_HP_RECOVERY_ITEM);
 		if ((selected->GetUseCase() & GLOBAL_HP_RECOVERY_ITEM) == GLOBAL_HP_RECOVERY_ITEM)
 		{	
 			uint32 new_hp = ch->GetHP();
@@ -292,7 +291,6 @@ void MiniCharacterSelectWindow::Update()
 		}
 
 		// increase sp
-		printf("Use Case:%x\tGLOBAL_SP_RECOVERY_ITEM:%x", temp, GLOBAL_SP_RECOVERY_ITEM);
 		if ((selected->GetUseCase() & GLOBAL_SP_RECOVERY_ITEM) == GLOBAL_SP_RECOVERY_ITEM)
 		{
 			uint32 new_sp = ch->GetSP();
@@ -303,11 +301,11 @@ void MiniCharacterSelectWindow::Update()
 		}
 
 		// decrease item count
-		if (selected->GetCount() != 0) {
+		if (selected->GetCount() > 1) {
 			selected->DecCount(1);
 		}
 		else {
-			// GlobalManager->RemoveFromInventory(selected);
+			GlobalManager->RemoveItemFromInventory(HP_POTION);
 		}
 	}
 	else if (InputManager->LeftPress())
@@ -344,9 +342,7 @@ InventoryWindow::InventoryWindow() : _inventory_active(false)
 	/////////////// DELETE THIS ////////////////////////////
 	// ONCE INVENTORY IS ADDING THROUGH THE RIGHT SPOT /////
 	////////////////////////////////////////////////////////
-	GlobalItem *new_item = new GlobalItem(GLOBAL_HP_RECOVERY_ITEM, GLOBAL_ALL_CHARACTERS, HP_POTION, 1);
-	new_item->SetRecoveryAmount(20);
-	GlobalManager->AddItemToInventory(new_item);
+	GlobalManager->AddItemToInventory(HP_POTION);
 	//GlobalManager->AddItemToInventory(new GlobalWeapon("Broadsword", GLOBAL_ALL_CHARACTERS, 2, 4, "img/icons/sword.png"));
 	//GlobalManager->AddItemToInventory(new GlobalArmor("Breastplate", GLOBAL_BODY_ARMOR, GLOBAL_ALL_CHARACTERS, 3, 7, "img/icons/breastplate.png"));
 	////////////////////////////////////////////////////////

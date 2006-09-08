@@ -445,6 +445,7 @@ void MenuMode::Draw() {
 	// Draw the saved screen as the menu background
 	VideoManager->DrawImage(_saved_screen);
 	
+	_DrawBottomMenu();
 
 	// Draw the four character menus
 	switch (_current_menu_showing)
@@ -469,7 +470,8 @@ void MenuMode::Draw() {
 		}
 	}
 
-	_DrawBottomMenu();
+	// Draw currently active options box
+	_current_menu->Draw();
 } // void MenuMode::Draw()
 
 
@@ -478,9 +480,6 @@ void MenuMode::_DrawBottomMenu() {
 	_bottom_window.Draw();
 	
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
-	
-	// Draw currently active options box
-	_current_menu->Draw();
 
 	// Display Location
 	VideoManager->Move(150, 575);
