@@ -305,8 +305,9 @@ void EnemyActor::DrawSprite() {
 	if (!IsAlive()) {
 		VideoManager->Move(GetXLocation(), GetYLocation());
 		vector<StillImage> sprite_frames = _wrapped_enemy.GetAnimation("IDLE");
-		// TODO: FIX THIS SOMEHOW! Problem: Memory usage grows like hell! (probably because of bad vmem caching) sprite_frames[3].EnableGrayScale();
-		VideoManager->DrawImage(sprite_frames[3], Color::gray); // Temporary fix
+		// TODO: FIX THIS SOMEHOW! Problem: Memory usage grows like hell! (probably because of bad vmem caching) 
+		sprite_frames[3].EnableGrayScale();
+		//VideoManager->DrawImage(sprite_frames[3], Color::gray); // Temporary fix
 	}
 	else {
 		// Draw the actor selector image over the currently selected enemy

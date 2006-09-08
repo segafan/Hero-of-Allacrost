@@ -120,7 +120,7 @@ bool GameVideo::_LoadImage(StillImage &id, bool grayscale)
 	
 	// 2. check if an image with the same filename has already been loaded
 	//    If so, point to that
-	if(_images.find(id._filename + string("_grayscale")) != _images.end())
+	if(_images.find(id._filename + (grayscale ? string("") : string("_grayscale"))) != _images.end())
 	{
 		id._elements.clear();		
 		
