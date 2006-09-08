@@ -889,11 +889,13 @@ public:
 	//! Inventory Functions
 	//! GetInventory returns the entire inventory.
 	//!		This function returns a reference so the inventory can be edited directly
-	//! AddItemToInventory(GlobalObject &) adds the given object to the inventory
+	//! AddItemToInventory(GameItemID) adds the given object to the inventory
+	//! RemoveItemFromInventory(GameItemID) removes item completely from inventory.
 	//@{
 	std::vector<GlobalObject *> &GetInventory()
 		{ return _inventory; }
-	void AddItemToInventory(GlobalObject *obj);
+	void AddItemToInventory(GameItemID id);
+	void RemoveItemFromInventory(GameItemID id);
 	//@}
 
 	//! Item functions

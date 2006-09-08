@@ -1024,9 +1024,7 @@ void BattleMode::PlayerVictory() {
 	if (BATTLE_DEBUG) cout << "Player has won a battle!" << endl;
 
 	// Give player some loot
-	GlobalItem *new_item = new GlobalItem(GLOBAL_HP_RECOVERY_ITEM, GLOBAL_ALL_CHARACTERS, HP_POTION, 1);
-	new_item->SetRecoveryAmount(180);
-	GlobalManager->AddItemToInventory(new_item);
+	GlobalManager->AddItemToInventory(HP_POTION);
 
 	// Give some experience as well
 	GlobalCharacter *claudius = GlobalManager->GetCharacter(GLOBAL_CLAUDIUS);
