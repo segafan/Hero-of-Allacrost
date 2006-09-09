@@ -359,6 +359,9 @@ private:
 	
 
 	//@}
+
+	//! \brief variables to handle fading to battle mode
+	bool _fade_to_battle_mode;
 }; // class MapMode
 
 } // namespace hoa_map;
