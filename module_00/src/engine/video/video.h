@@ -37,11 +37,10 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 
-// DevIL includes
-#define ILUT_USE_OPENGL
-#include <IL/il.h>
-#include <IL/ilu.h>
-#include <IL/ilut.h>
+// Image loader includes
+#include <png.h>
+#include <jpeglib.h>
+
 
 #include "context.h"
 #include "color.h"
@@ -183,6 +182,7 @@ class TexMemMgr;
 class FixedTexMemMgr;
 class VariableTexMemMgr;
 class Image;
+class ImageLoadInfo;
 
 
 
@@ -1318,10 +1318,9 @@ private:
 	 *  \brief inserts an image into a texture sheet
 	 *
 	 *  \param image       pointer to the image to insert
-	 *  \param w           width of image (in pixels)
-	 *  \param h           height of image (in pixels) 
+	 *  \param loadInfo	   attributes of the image to be inserted
 	 */	
-	private_video::TexSheet *_InsertImageInTexSheet(private_video::Image *image, int32 w, int32 h, bool isStatic);
+	private_video::TexSheet *_InsertImageInTexSheet(private_video::Image *image, private_video::ImageLoadInfo & loadInfo, bool isStatic);
 
 	/*!
 	 *  \brief loads an image
@@ -1345,14 +1344,15 @@ private:
 	bool _LoadImageHelper(StillImage &id, bool grayscale = false);
 
 	/*!
-	 *  \brief use DevIL to load an image and return raw pixel data
+	 *  \brief Load raw image data from a file
 	 *
 	 *  \param filename   Filename of image to load
-	 *  \param pixelData  The loaded image's integer handle gets returned into this variable
-	 *  \param width      The loaded image's width gets returned into this variable
-	 *  \param width      The loaded image's height gets returned into this variable
+	 *  \param loadInfo   Returns with the image file attributes and pixels
 	 */	
-	bool _LoadRawPixelData(const std::string &filename, ILuint &pixelData, uint32 &width, uint32 &height, bool grayscale);
+
+	bool _LoadRawImage(const std::string & filename, private_video::ImageLoadInfo & loadInfo);
+	bool _LoadRawImageJpeg(const std::string & filename, private_video::ImageLoadInfo & loadInfo);
+	bool _LoadRawImagePng(const std::string & filename, private_video::ImageLoadInfo & loadInfo);
 
 	/*!
 	 *  \brief loop through all currently loaded images and if they belong to the given tex sheet, reload them into it

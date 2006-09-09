@@ -139,6 +139,8 @@ void MusicDescriptor::FreeMusic() {
 
 
 void MusicDescriptor::PlayMusic() {
+	
+
 	if (_data == NULL) {
 		return;
 	}

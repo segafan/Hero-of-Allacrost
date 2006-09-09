@@ -61,6 +61,7 @@ namespace private_video
 {
 
 class Image;
+class ImageLoadInfo;
 
 
 /*!***************************************************************************
@@ -117,12 +118,13 @@ public:
 
 	bool AddImage                   //! adds new image to the tex sheet
 	(
-		Image *img
+		Image *img,
+		ImageLoadInfo & loadInfo
 	);
 	
 	bool SaveImage(Image *img);
 	
-	bool CopyRect(int32 x, int32 y, int32 w, int32 h);
+	bool CopyRect(int32 x, int32 y, private_video::ImageLoadInfo & loadInfo);
 	
 	bool RemoveImage (Image *img);  //! removes an image completely
 	bool FreeImage   (Image *img);  //! marks the image as free
