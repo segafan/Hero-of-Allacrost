@@ -276,6 +276,8 @@ private:
 	std::vector<hoa_audio::MusicDescriptor> _map_music;
 	//! The sounds that the map needs available.
 	std::vector<hoa_audio::SoundDescriptor> _map_sounds;
+	//! The sounds for entering battle mode
+	std::vector<hoa_audio::SoundDescriptor> _battle_sounds;
 
 	//! A radial light image
 	hoa_video::StillImage _lighting_overlay;
