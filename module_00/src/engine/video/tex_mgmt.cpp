@@ -236,10 +236,9 @@ bool GameVideo::_LoadImageHelper(StillImage &id, bool grayscale)
 	
 	id._elements.clear();
 
-	ILuint pixelData;
-	uint32 w, h;
+	private_video::ImageLoadInfo loadInfo;
 	
-	if(!_LoadRawPixelData(id._filename, pixelData, w, h, grayscale))
+	if(!_LoadRawImage(id._filename, loadInfo))
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: _LoadRawPixelData() failed in _LoadImageHelper()" << endl;
@@ -247,10 +246,10 @@ bool GameVideo::_LoadImageHelper(StillImage &id, bool grayscale)
 	}
 
 	// create an Image structure and store it our std::map of images
-	Image *newImage = new Image(id._filename, w, h, grayscale);
+	Image *newImage = new Image(id._filename, loadInfo.width, loadInfo.height, grayscale);
 
 	// try to insert the image in a texture sheet
-	TexSheet *sheet = _InsertImageInTexSheet(newImage, w, h, isStatic);
+	TexSheet *sheet = _InsertImageInTexSheet(newImage, loadInfo, isStatic);
 	
 	if(!sheet)
 	{
@@ -260,7 +259,7 @@ bool GameVideo::_LoadImageHelper(StillImage &id, bool grayscale)
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO_DEBUG: GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
 		
-		ilDeleteImages(1, &pixelData);
+		free(loadInfo.pixels);
 		return false;
 	}
 	
@@ -272,85 +271,219 @@ bool GameVideo::_LoadImageHelper(StillImage &id, bool grayscale)
 
 	// if width or height are zero, that means to use the dimensions of image
 	if(id._width == 0.0f)
-		id._width = (float) w;
+		id._width = (float) loadInfo.width;
 	
 	if(id._height == 0.0f)
-		id._height = (float) h;
+		id._height = (float) loadInfo.height;
 
 	// store the new image element
 	ImageElement element(newImage, 0, 0, id._width, id._height, 0.0f, 0.0f, 1.0f, 1.0f, id._color);
 	id._elements.push_back(element);
 
-	// finally, delete the buffer DevIL used to load the image
-	ilDeleteImages(1, &pixelData);
-	
-	if(ilGetError())
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: ilGetError() true after ilDeleteImages() in _LoadImageHelper()!" << endl;
-		return false;
-	}
-	
+	// finally, delete the buffer used to hold the pixel data
+	free(loadInfo.pixels);
 	return true;
 }
 
 
 //-----------------------------------------------------------------------------
-// _LoadRawPixelData: uses DevIL to load the given filename.
-//                   Returns the DevIL texture ID, width and height
-//                   Upon exit, leaves this image as the currently "bound" image
+// _LoadRawImage: Determines which image loader to call
 //-----------------------------------------------------------------------------
-bool GameVideo::_LoadRawPixelData(const string &filename, ILuint &pixelData, uint32 &w, uint32 &h, bool grayscale)
+bool GameVideo::_LoadRawImage(const std::string & filename, private_video::ImageLoadInfo & loadInfo)
 {
-	// load the image using DevIL
-	ilGenImages(1, &pixelData);
-	
-	if(ilGetError())
-	{
-		if(VIDEO_DEBUG)
-			cerr << "ilGetError() true after ilGenImages() in _LoadImageHelper()!" << endl;
+	// Isolate the extension
+	size_t extpos = filename.rfind('.');
+
+	if(extpos == string::npos)
 		return false;
-	}
-	
-	ilBindImage(pixelData);
-	
-	if(ilGetError())
-	{
-		if(VIDEO_DEBUG)
-			cerr << "ilGetError() true after ilBindImage() in _LoadImageHelper()!" << endl;
-		return false;
-	}
 
-	if (!ilLoadImage((char *)filename.c_str())) 
-	{
-		ilDeleteImages(1, &pixelData);
-		return false;
-	}
+	std::string extension = std::string(filename, extpos, filename.length() - extpos);
 
-	// find width and height
-	w = ilGetInteger(IL_IMAGE_WIDTH);
-	h = ilGetInteger(IL_IMAGE_HEIGHT);
+	if(extension == ".jpeg" || extension == ".jpg")
+		return _LoadRawImageJpeg(filename, loadInfo);
+	if(extension == ".png")
+		return _LoadRawImagePng(filename, loadInfo) ;
 
-	// Check if grayscale, if so convert pixels
-	if (grayscale)
-	{
-		ILubyte *pixels = ilGetData();
-		for (uint32 current = 0; current < h * w * 4; current += 4)
-		{
-			// Convert each pixel to it's grayscale equivalent using the equation
-			// 0.3 * Red Component + 0.59 * Green Component + 0.11 * Blue Component
-			ILubyte red = pixels[current];
-			ILubyte green = pixels[current + 1];
-			ILubyte blue = pixels[current + 2];
-			ILubyte grayvalue = static_cast<ILubyte>(0.3f * red + 0.59f * green + 0.11f * blue);
-			pixels[current] = pixels[current + 1] = pixels[current + 2] = grayvalue;
-		}
-		ilSetData(pixels);
-	}
-
-	
-	return true;
+	return false;
 }	
+
+//-----------------------------------------------------------------------------
+// _LoadRawImagePng: Loads a PNG image to RGBA format
+//-----------------------------------------------------------------------------
+
+bool GameVideo::_LoadRawImagePng(const std::string &filename, hoa_video::private_video::ImageLoadInfo &loadInfo)
+{
+	FILE * fp = fopen(filename.c_str(), "rb");
+
+	if(fp == NULL)
+		return false;
+
+	unsigned char testbuffer[8];
+
+	fread(testbuffer, 1, 8, fp);
+	if(png_sig_cmp(testbuffer, 0, 8))
+	{
+		fclose(fp);
+		return false;
+	}
+
+	png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, 
+		(png_voidp)NULL, NULL, NULL);
+
+	if(!png_ptr)	
+	{
+		fclose(fp);
+		return false;
+	}
+
+	png_infop info_ptr = png_create_info_struct(png_ptr);
+
+	if(!info_ptr)
+	{
+		fclose(fp);
+		return false;
+	}
+
+	if(setjmp(png_jmpbuf(png_ptr)))
+	{
+		fclose(fp);
+		return false;
+	}
+
+	png_init_io(png_ptr, fp);
+	png_set_sig_bytes(png_ptr, 8);
+	png_read_png(png_ptr, info_ptr, PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_PACKING | PNG_TRANSFORM_EXPAND, NULL);
+	
+	unsigned char * * row_pointers = png_get_rows(png_ptr, info_ptr);
+
+	loadInfo.width = info_ptr->width;
+	loadInfo.height = info_ptr->height;
+	loadInfo.pixels = malloc(info_ptr->width * info_ptr->height * 4);
+
+	unsigned int bpp = info_ptr->channels;
+
+	for(unsigned int y = 0; y < info_ptr->height; y++)
+	{
+		for(unsigned int x = 0; x < info_ptr->width; x++)
+		{
+			unsigned char * imgpixel = row_pointers[y] + (x * bpp);
+			unsigned char * dstpixel = ((unsigned char *)loadInfo.pixels) + ((y * info_ptr->width) + x) * 4;
+
+			if(bpp == 4)
+			{
+				unsigned char r = imgpixel[0];
+				unsigned char g = imgpixel[1];
+				unsigned char b = imgpixel[2];
+				unsigned char a = imgpixel[3];
+
+				dstpixel[0] = r;
+				dstpixel[1] = g;
+				dstpixel[2] = b;
+				dstpixel[3] = a;
+			}
+			else if(bpp == 3)
+			{
+				unsigned char r = imgpixel[0];
+				unsigned char g = imgpixel[1];
+				unsigned char b = imgpixel[2];
+
+				dstpixel[0] = r;
+				dstpixel[1] = g;
+				dstpixel[2] = b;
+				dstpixel[3] = 0xFF;
+			}
+			else if(bpp == 1)
+			{
+				png_color c = info_ptr->palette[imgpixel[0]];
+
+				unsigned char r = c.red;
+				unsigned char g = c.green;
+				unsigned char b = c.blue;
+
+				dstpixel[0] = r;
+				dstpixel[1] = g;
+				dstpixel[2] = b;
+				dstpixel[3] = 0xFF;
+			}
+		}
+	}
+	
+
+	png_destroy_read_struct(&png_ptr, &info_ptr,
+		(png_infopp)NULL);
+
+	fclose(fp);
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+// _LoadRawImageJpeg: Loads a Jpeg image to RGBA format
+//-----------------------------------------------------------------------------
+
+bool GameVideo::_LoadRawImageJpeg(const std::string &filename, hoa_video::private_video::ImageLoadInfo &loadInfo)
+{
+	FILE * infile;
+	unsigned char ** buffer;
+
+	if((infile = fopen(filename.c_str(), "rb")) == NULL) 
+		return false;
+
+	jpeg_decompress_struct cinfo;
+	jpeg_error_mgr jerr;
+
+	cinfo.err = jpeg_std_error(&jerr);
+	jpeg_create_decompress(&cinfo);
+
+	jpeg_stdio_src(&cinfo, infile);
+	jpeg_read_header(&cinfo, TRUE);
+
+	jpeg_start_decompress(&cinfo);
+
+	JDIMENSION row_stride = cinfo.output_width * cinfo.output_components;
+
+	buffer = (*cinfo.mem->alloc_sarray)
+		((j_common_ptr) &cinfo, JPOOL_IMAGE, row_stride, 1);
+
+
+	loadInfo.width = cinfo.output_width;
+	loadInfo.height = cinfo.output_height;
+	loadInfo.pixels = malloc(cinfo.output_width * cinfo.output_height * 4);
+
+	unsigned int bpp = cinfo.output_components;
+
+	for(unsigned int y = 0; y < cinfo.output_height; y++)
+	{
+		jpeg_read_scanlines(&cinfo, buffer, 1);
+
+		for(unsigned int x = 0; x < cinfo.output_width; x++)
+		{
+			unsigned char * imgpixel = buffer[0] + (x * bpp);
+			unsigned char * dstpixel = ((unsigned char *)loadInfo.pixels) + ((y * cinfo.output_width) + x) * 4;
+
+			unsigned char r = imgpixel[0];
+			unsigned char g = imgpixel[1];
+			unsigned char b = imgpixel[2];
+
+			unsigned char a = imgpixel[3];
+
+			dstpixel[0] = r;
+			dstpixel[1] = g;
+			dstpixel[2] = b;
+
+			if(bpp == 4)
+				dstpixel[3] = a;
+			else
+				dstpixel[3] = 0xFF;
+		}
+	}
+
+	jpeg_finish_decompress(&cinfo);
+	jpeg_destroy_decompress(&cinfo);
+
+	fclose(infile);
+
+	return true;
+}
 
 
 //-----------------------------------------------------------------------------
@@ -412,7 +545,7 @@ StillImage GameVideo::TilesToObject
 
 
 //-----------------------------------------------------------------------------
-// _InsertImageInTexSheet: takes an image that was loaded with DevIL, finds
+// _InsertImageInTexSheet: takes an image that was loaded, finds
 //                        an available texture sheet, copies it to the sheet,
 //                        and returns a pointer to the texture sheet. If no
 //                        available texture sheet is found, a new one is created.
@@ -420,15 +553,15 @@ StillImage GameVideo::TilesToObject
 //                        Returns NULL on failure, which should only happen if
 //                        we run out of memory or bad argument is passed.
 //-----------------------------------------------------------------------------
-TexSheet *GameVideo::_InsertImageInTexSheet(Image *image, int32 w, int32 h, bool isStatic)
+TexSheet *GameVideo::_InsertImageInTexSheet(Image *image, private_video::ImageLoadInfo & loadInfo, bool isStatic)
 {
 	// if it's a large image size (>512x512) then we already know it's not going
 	// to fit in any of our existing texture sheets, so create a new one for it
 
-	if(w > 512 || h > 512)
+	if(loadInfo.width > 512 || loadInfo.height > 512)
 	{
-		int32 roundW = RoundUpPow2(w);
-		int32 roundH = RoundUpPow2(h);		
+		int32 roundW = RoundUpPow2(loadInfo.width);
+		int32 roundH = RoundUpPow2(loadInfo.height);		
 		TexSheet *sheet = _CreateTexSheet(roundW, roundH, VIDEO_TEXSHEET_ANY, false);
 
 		// ran out of memory!
@@ -439,7 +572,7 @@ TexSheet *GameVideo::_InsertImageInTexSheet(Image *image, int32 w, int32 h, bool
 			return NULL;
 		}
 					
-		if(sheet->AddImage(image))
+		if(sheet->AddImage(image, loadInfo))
 			return sheet;
 		else
 		{
@@ -454,11 +587,11 @@ TexSheet *GameVideo::_InsertImageInTexSheet(Image *image, int32 w, int32 h, bool
 	
 	TexSheetType type;
 	
-	if(w == 32 && h == 32)
+	if(loadInfo.width == 32 && loadInfo.height == 32)
 		type = VIDEO_TEXSHEET_32x32;
-	else if(w == 32 && h == 64)
+	else if(loadInfo.width == 32 && loadInfo.height == 64)
 		type = VIDEO_TEXSHEET_32x64;
-	else if(w == 64 && h == 64)
+	else if(loadInfo.width == 64 && loadInfo.height == 64)
 		type = VIDEO_TEXSHEET_64x64;
 	else
 		type = VIDEO_TEXSHEET_ANY;
@@ -480,7 +613,7 @@ TexSheet *GameVideo::_InsertImageInTexSheet(Image *image, int32 w, int32 h, bool
 		
 		if(sheet->type == type && sheet->isStatic == isStatic)
 		{
-			if(sheet->AddImage(image))
+			if(sheet->AddImage(image, loadInfo))
 			{
 				// added to a sheet successfully
 				return sheet;
@@ -505,7 +638,7 @@ TexSheet *GameVideo::_InsertImageInTexSheet(Image *image, int32 w, int32 h, bool
 
 	// now that we have a fresh texture sheet, AddImage() should work without
 	// any problem
-	if(sheet->AddImage(image))
+	if(sheet->AddImage(image, loadInfo))
 	{
 		return sheet;
 	}
@@ -825,7 +958,7 @@ bool GameVideo::_RemoveSheet(TexSheet *sheet)
 // NOTE: assumes that the image we're adding is still "bound" in DevIL
 //-----------------------------------------------------------------------------
 
-bool TexSheet::AddImage(Image *img)
+bool TexSheet::AddImage(Image *img, ImageLoadInfo & loadInfo)
 {
 	// try inserting into the texture memory manager
 	bool couldInsert = texMemManager->Insert(img);	
@@ -846,7 +979,7 @@ bool TexSheet::AddImage(Image *img)
 		return false;
 	}
 
-	if(!CopyRect(img->x, img->y, img->width, img->height))
+	if(!CopyRect(img->x, img->y, loadInfo))
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: CopyRect() failed in TexSheet::AddImage()!" << endl;
@@ -861,7 +994,7 @@ bool TexSheet::AddImage(Image *img)
 // CopyRect: copies an image into a sub-rectangle of the texture
 //-----------------------------------------------------------------------------
 
-bool TexSheet::CopyRect(int32 x, int32 y, int32 w, int32 h)
+bool TexSheet::CopyRect(int32 x, int32 y, private_video::ImageLoadInfo & loadInfo)
 {
 	int32 error;
 	
@@ -877,10 +1010,6 @@ bool TexSheet::CopyRect(int32 x, int32 y, int32 w, int32 h)
 		}
 		return false;
 	}
-	
-	ILubyte *pixels = ilGetData();
-	
-	GLenum format = ilGetInteger(IL_IMAGE_FORMAT);
 
 	glTexSubImage2D
 	(
@@ -888,11 +1017,11 @@ bool TexSheet::CopyRect(int32 x, int32 y, int32 w, int32 h)
 		0,                // level
 		x,                // x offset within tex sheet
 		y,                // y offset within tex sheet
-		w,                // width in pixels of image
-		h,                // height in pixels of image
-		format,           // format
+		loadInfo.width,   // width in pixels of image
+		loadInfo.height,  // height in pixels of image
+		GL_RGBA,		  // format
 		GL_UNSIGNED_BYTE, // type
-		pixels            // pixels of the sub image
+		loadInfo.pixels   // pixels of the sub image
 	);
 
 	error = glGetError();
@@ -1831,17 +1960,16 @@ bool GameVideo::_ReloadImagesToSheet(TexSheet *sheet)
 		Image *i = iImage->second;
 		if(i->texSheet == sheet)
 		{
-			ILuint pixelData;
-			uint32 w, h;
+			ImageLoadInfo loadInfo;
 			
-			if(!_LoadRawPixelData(i->filename, pixelData, w, h, i->grayscale))
+			if(!_LoadRawImage(i->filename, loadInfo))
 			{
 				if(VIDEO_DEBUG)
-					cerr << "VIDEO ERROR: _LoadRawPixelData() failed in _ReloadImagesToSheet()!" << endl;
+					cerr << "VIDEO ERROR: _LoadRawImage() failed in _ReloadImagesToSheet()!" << endl;
 				success = false;
 			}			
 			
-			if(!sheet->CopyRect(i->x, i->y, w, h))
+			if(!sheet->CopyRect(i->x, i->y, loadInfo))
 			{
 				if(VIDEO_DEBUG)
 					cerr << "VIDEO ERROR: sheet->CopyRect() failed in _ReloadImagesToSheet()!" << endl;
@@ -1893,39 +2021,9 @@ bool TexSheet::SaveImage(Image *img)
 	uint8 *pixels = new uint8[width*height*4];
 	GameVideo *videoManager = GameVideo::SingletonGetReference();
 	videoManager->_BindTexture(texID);
-	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+	//glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 	
-	if(glGetError())
-	{
-		if(VIDEO_DEBUG)	
-			cerr << "VIDEO ERROR: glGetTexImage() failed in TexSheet::SaveImage()\nImage filename: " << img->filename << endl;
-		return false;
-	}
-
-	ILuint pixelData;
-	ilGenImages(1, &pixelData);
-
-	if(ilGetError())
-	{
-		if(VIDEO_DEBUG)
-			cerr << "ilGetError() true after ilGenImages() in TexSheet::SaveImage()!" << endl;
-		return false;
-	}
-	
-	ilBindImage(pixelData);
-	
-	if(ilGetError())
-	{
-		if(VIDEO_DEBUG)
-			cerr << "ilGetError() true after ilBindImage() in TexSheet::SaveImage()!" << endl;
-		return false;
-	}
-	ilTexImage(img->width, img->height, 1, 4, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	ilSetPixels(-img->x, -img->y, 0, img->width, img->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-	iluFlipImage();
-	ilSaveImage((char *)img->filename.c_str());
-	ilDeleteImages(1, &pixelData);	
-	return true;
+	return false;
 }
 
 

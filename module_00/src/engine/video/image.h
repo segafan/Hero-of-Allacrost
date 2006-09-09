@@ -50,6 +50,21 @@ namespace private_video
 class ParticleSystem;
 
 /*!***************************************************************************
+ *  \brief stores information that is passed between image loaders and 
+ (		   OpenGL texture creation
+ *****************************************************************************/
+
+
+class ImageLoadInfo
+{
+public:
+	int32 width;
+	int32 height;
+
+	void * pixels;
+};
+
+/*!***************************************************************************
  *  \brief represents a single image. Internally it's a reference to a
  *         sub-rect within a texture sheet.
  *****************************************************************************/

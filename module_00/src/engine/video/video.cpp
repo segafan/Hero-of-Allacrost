@@ -167,42 +167,6 @@ bool GameVideo::SingletonInitialize()
 		exit(1);
 	}
 
-	if(VIDEO_DEBUG)
-		cout << "VIDEO: Initializing IL\n";
-
-
-	// initialize DevIL
-	ilInit();
-	ilOriginFunc(IL_ORIGIN_UPPER_LEFT);
-	
-	if(!ilEnable(IL_ORIGIN_SET))
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: SERIOUS PROBLEM! ilEnable(IL_ORIGIN_SET) failed in GameVideo::SingletonInitialize()!" << endl;
-		return false;
-	}
-
-	if(VIDEO_DEBUG)
-		cout << "VIDEO: Initializing ILU\n";
-	
-	iluInit();     // assume this function works since iluInit() doesn't return error codes! :(
-	
-	if(VIDEO_DEBUG)
-		cout << "VIDEO: Initializing ILUT\n";
-
-	if(!ilutRenderer(ILUT_OPENGL))
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: SERIOUS PROBLEM! ilutRenderer(ILUT_OPENGL) failed in GameVideo::SingletonInitialize()!" << endl;
-		// don't return false, since it's possible to play game w/o ilutRenderer
-	}
-	
-	// prevent certain NVidia cards from automatically converting to 16-bit bpp
-	ilutEnable(ILUT_OPENGL_CONV);
-
-	if(VIDEO_DEBUG)
-		cout << "VIDEO: Initializing SDL_ttf\n";
-
 	// initialize SDL_ttf
 	if(TTF_Init() < 0)
 	{
@@ -341,61 +305,66 @@ bool GameVideo::MakeScreenshot()
 	if(VIDEO_DEBUG)
 		cout << "VIDEO: Entering MakeScreenshot()" << endl;
 
-	ILuint screenshot;
-	ilGenImages(1, &screenshot);
-	
-	if(ilGetError())
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: ilGenImages() failed in MakeScreenshot()!" << endl;
-		return false;
-	}
-	
-	ilBindImage(screenshot);
-	if(ilGetError())
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: ilBindImage() failed in MakeScreenshot()!" << endl;
+	// Retrieve width/height of the viewport
+	GLint viewportDims[4];
+	glGetIntegerv(GL_VIEWPORT, viewportDims);
 
-		ilDeleteImages(1, &screenshot);
-		return false;
-	}
-	
-	if(!ilEnable(IL_FILE_OVERWRITE))
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: ilEnable() failed in MakeScreenshot()!" << endl;
+	// Buffer to store the image before it is flipped
+	void * buffer = malloc(viewportDims[2] * viewportDims[3] * 3);
 
-		ilDeleteImages(1, &screenshot);
-		return false;		
-	}
-	
-	if(!ilutGLScreen())
-	{
+	// Read pixel data
+	glReadPixels(0, 0, viewportDims[2], viewportDims[3], GL_RGB, GL_UNSIGNED_BYTE, buffer);
+
+	if(glGetError())
+	{	
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: ilutGLScreen() failed in MakeScreenshot()!" << endl;
-		ilDeleteImages(1, &screenshot);
+			cerr << "VIDEO_DEBUG: glReadPixels() returned an error inside GameVideo::CaptureScreen!" << endl;
+		
+		free(buffer);
 		return false;
 	}
 
-	if(!ilSaveImage("screenshot.jpg"))
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: ilSaveImage() failed in MakeScreenshot()!" << endl;
-		ilDeleteImages(1, &screenshot);
+
+	struct jpeg_compress_struct cinfo;
+	struct jpeg_error_mgr jerr;
+
+	cinfo.err = jpeg_std_error(&jerr);
+	jpeg_create_compress(&cinfo);
+
+	FILE * outfile;	
+	if((outfile = fopen("screenshot.jpg", "wb")) == NULL) 
+	{	
+		cerr << "Could not open screenshot.jpg for writing!" << endl;
+		free(buffer);
 		return false;
 	}
 
-	ilDeleteImages(1, &screenshot);
-	if(ilGetError())
+	jpeg_stdio_dest(&cinfo, outfile);
+
+	cinfo.image_width = viewportDims[2]; 	
+	cinfo.image_height = viewportDims[3];
+	cinfo.input_components = 3;		
+	cinfo.in_color_space = JCS_RGB; 	
+
+	jpeg_set_defaults(&cinfo);
+	jpeg_set_quality(&cinfo, 70, TRUE);
+	jpeg_start_compress(&cinfo, TRUE);
+
+	JSAMPLE ** row_pointers = (JSAMPLE **)malloc(sizeof(JSAMPLE *) * viewportDims[3]);
+
+	for(int32 line = 0; line < viewportDims[3]; line++)
 	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: ilDeleteImages() failed in MakeScreenshot()!" << endl;
-		return false;
+		row_pointers[line] = ((unsigned char *)buffer) + ((viewportDims[3] - line - 1) * viewportDims[2] * 3);
 	}
 
-	if(VIDEO_DEBUG)
-		cout << "VIDEO: Exiting MakeScreenshot() successfully (JPG file saved)" << endl;
+	jpeg_write_scanlines(&cinfo, row_pointers, viewportDims[3]);
+	jpeg_finish_compress(&cinfo);
+	fclose(outfile);
+
+	jpeg_destroy_compress(&cinfo);
+
+	free(buffer);
+	free(row_pointers);
 
 	return true;
 }
@@ -446,9 +415,6 @@ GameVideo::~GameVideo()
 		
 	// uninitialize SDL_ttf
 	TTF_Quit();
-	
-	// uninitiailize DevIL
-	ilShutDown();
 	
 	// delete texture sheets
 	vector<TexSheet *>::iterator iSheet      = _texSheets.begin();
@@ -1299,54 +1265,50 @@ bool GameVideo::CaptureScreen(StillImage &id)
 	if(VIDEO_DEBUG)
 		cout << "VIDEO: Entering CaptureScreen()" << endl;
 
-	ILuint screenshot;
-	ilGenImages(1, &screenshot);
-	
-	if(ilGetError())
-	{
+	// Retrieve width/height of the viewport
+	GLint viewportDims[4];
+	glGetIntegerv(GL_VIEWPORT, viewportDims);
+
+	// Set up the loadInfo struct
+	ImageLoadInfo loadInfo;
+	loadInfo.width = viewportDims[2];
+	loadInfo.height = viewportDims[3];
+	loadInfo.pixels = malloc(viewportDims[2] * viewportDims[3] * 4);
+
+	// Buffer to store the image before it is flipped
+	void * buffer = malloc(viewportDims[2] * viewportDims[3] * 4);
+
+	// Read pixel data
+	glReadPixels(0, 0, viewportDims[2], viewportDims[3], GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+
+	if(glGetError())
+	{	
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: ilGenImages() failed in CaptureScreen()!" << endl;
-		return false;
-	}
-	
-	ilBindImage(screenshot);
-	if(ilGetError())
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: ilBindImage() failed in CaptureScreen()!" << endl;
-		ilDeleteImages(1, &screenshot);
+			cerr << "VIDEO_DEBUG: glReadPixels() returned an error inside GameVideo::CaptureScreen!" << endl;
+		
+		free(buffer);
+		free(loadInfo.pixels);
 		return false;
 	}
 
-	if(!ilutGLScreen())
+	// Flip the image
+	for(int32 line = 0; line < viewportDims[3]; line++)
 	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: ilutGLScreen() failed in CaptureScreen()!" << endl;
-		ilDeleteImages(1, &screenshot);			
-		return false;
-	}
-	
-	// flip the image because our game uses coordinate system where
-	// bigger y is higher on the screen
-	iluFlipImage();	
+		unsigned char * srcline = ((unsigned char *)buffer) + (line * viewportDims[2] * 4);
+		unsigned char * destline = ((unsigned char *)loadInfo.pixels) + ((viewportDims[3] - line - 1) * viewportDims[2] * 4);
 
-	id._elements.clear();
-	
-	int32 w, h;
-	
-	w = ilGetInteger(IL_IMAGE_WIDTH);
-	h = ilGetInteger(IL_IMAGE_HEIGHT);
+		memcpy(destline, srcline, viewportDims[2] * 4);
+	}
+
+	// Free the buffer
+	free(buffer);
 
 	// create an Image structure and store it our std::map of images
-	// note the "" for the filename indicates that this is an image which
-	// was not loaded from a file, so do not perform the same kind of
-	// resource management on it
-	Image *newImage = new Image(_CreateTempFilename(".png"), w, h, id.IsGrayScale());
-	id._filename = newImage->filename;
+	Image *newImage = new Image(id._filename, loadInfo.width, loadInfo.height, false);
 
 	// try to insert the image in a texture sheet
-	TexSheet *sheet = _InsertImageInTexSheet(newImage, w, h, false);
-
+	TexSheet *sheet = _InsertImageInTexSheet(newImage, loadInfo, true);
+	
 	if(!sheet)
 	{
 		// this should never happen, unless we run out of memory or there
@@ -1355,38 +1317,25 @@ bool GameVideo::CaptureScreen(StillImage &id)
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO_DEBUG: GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
 		
-		ilDeleteImages(1, &screenshot);
+		free(loadInfo.pixels);
 		return false;
 	}
 	
 	newImage->refCount = 1;
 	
-	// store the image in our std::map
-	_images[id._filename] = newImage;
-
 	// if width or height are zero, that means to use the dimensions of image
 	if(id._width == 0.0f)
-		id._width = (float) w;
+		id._width = (float) loadInfo.width;
 	
 	if(id._height == 0.0f)
-		id._height = (float) h;
+		id._height = (float) loadInfo.height;
 
 	// store the new image element
-	ImageElement element(newImage, 0, 0, id._width, id._height, 0.0f, 0.0f, 1.0f, 1.0f, id._color);
+	ImageElement  element(newImage, 0, 0, id._width, id._height, 0.0f, 0.0f, 1.0f, 1.0f, id._color);
 	id._elements.push_back(element);
 
-	// finally, delete the buffer DevIL used to load the image
-	ilDeleteImages(1, &screenshot);
-	
-	if(ilGetError())
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: ilGetError() true after ilDeleteImages() in CaptureScreen()!" << endl;
-		return false;
-	}
-
-	if(VIDEO_DEBUG)
-		cout << "VIDEO: Exited CaptureScreen() successfully!" << endl;
+	// finally, delete the buffer used to hold the pixel data
+	free(loadInfo.pixels);
 
 	return true;
 }
