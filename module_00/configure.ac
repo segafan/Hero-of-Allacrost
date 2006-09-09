@@ -2,7 +2,7 @@ dnl                                               -*- Autoconf -*-
 dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(Hero of Allacrost, 0.0.1, gorzuate@allacrost.org, allacrost)
+AC_INIT(Hero of Allacrost - Demo, 0.0.1, gorzuate@allacrost.org, allacrost)
 AC_CONFIG_SRCDIR([src/main.cpp])
 AC_CONFIG_HEADER([config.h])
 AM_INIT_AUTOMAKE
@@ -49,44 +49,37 @@ AM_CONDITIONAL([COND_EDITOR], [test "$enable_editor" = yes])
 
 dnl Check for libraries.
 AC_CHECK_LIB([GL], [glEnable], [], \
-	[echo "You need to install the GL library."
+	[echo "Could not find the GL library. Check that it is properly installed on your system"
 	 exit -1])
 AC_CHECK_LIB([GLU], [gluBuild2DMipmaps], [], \
-	[echo "You need to install the GLU library."
+	[echo "Could not find the GLU library. Check that it is properly installed on your system"
 	 exit -1])
-AC_CHECK_LIB([IL], [ilInit], [], \
-	[echo "You need to install the IL library."
-	 exit -1])
-AC_CHECK_LIB([ILUT], [iluInit], [], \
-	[echo "You need to install the ILU library."
+AC_CHECK_LIB([png], [png_read_info], [], \
+	[echo "Could not find the png library. Check that it is properly installed on your system"
+	 exit -1])	
+AC_CHECK_LIB([jpeg], [jpeg_read_raw_data], [], \
+	[echo "Could not find the jpeg library. Check that it is properly installed on your system"
 	 exit -1])
 AC_CHECK_LIB([SDL], [SDL_InitSubSystem], [], \
-	[echo "You need to install the SDL library."
+	[echo "Could not find the SDL library. Check that it is properly installed on your system"
 	 exit -1])
 AC_CHECK_LIB([SDL_mixer], [Mix_OpenAudio], [], \
-	[echo "You need to install the SDL_Mixer library."
+	[echo "Could not find the SDL_mixer library. Check that it is properly installed on your system"
 	 exit -1])
 AC_CHECK_LIB([SDL_ttf], [TTF_Init], [], \
-	[echo "You need to install the SDL_ttf library."
+	[echo "Could not find the SDL_ttf library. Check that it is properly installed on your system"
 	 exit -1])
 AC_CHECK_LIB([lua50], [lua_open], [], \
 	[AC_CHECK_LIB([lua], [lua_open], [], \
-		[echo "You need to install the lua library."
+		[echo "Could not find the lua library. Check that it is properly installed on your system"
 		 exit -1])])
 AC_CHECK_LIB([lualib50], [luaopen_table], [], \
 	[AC_CHECK_LIB([lualib], [luaopen_table], [], \
-		[echo "You need to install the lualib library."
+		[echo "Could not find the lualib library. Check that it is properly installed on your system"
 		 exit -1])])
 AC_CHECK_LIB([m], [log], [], \
-	[echo "You need to install the math library."
+	[echo "Could not find the math library. Check that it is properly installed on your system"
 	 exit -1])
-#AC_CHECK_LIB([openal], [alGetError], [], \
-#	[echo "You need to install the OpenAL library."
-#	 exit -1])
-#AC_CHECK_LIB([alut], [alutInit], [], \
-#	[echo "You should install the ALUT library for maximum performance."])
-#AC_CHECK_LIB([vorbisfile], [ov_open], [], \
-#	[echo "You should install the ALUT library for maximum performance."])
 
 AC_PATH_PROGS([LUA_CONFIG], [lua-config])
 if test "x$LUA_CONFIG" != "xnone"; then

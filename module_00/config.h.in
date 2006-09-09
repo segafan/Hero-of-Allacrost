@@ -12,11 +12,8 @@
 /* Define to 1 if you have the `GLU' library (-lGLU). */
 #undef HAVE_LIBGLU
 
-/* Define to 1 if you have the `IL' library (-lIL). */
-#undef HAVE_LIBIL
-
-/* Define to 1 if you have the `ILUT' library (-lILUT). */
-#undef HAVE_LIBILUT
+/* Define to 1 if you have the `jpeg' library (-ljpeg). */
+#undef HAVE_LIBJPEG
 
 /* Define to 1 if you have the `lua' library (-llua). */
 #undef HAVE_LIBLUA
@@ -32,6 +29,9 @@
 
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
+
+/* Define to 1 if you have the `png' library (-lpng). */
+#undef HAVE_LIBPNG
 
 /* Define to 1 if you have the `SDL' library (-lSDL). */
 #undef HAVE_LIBSDL
