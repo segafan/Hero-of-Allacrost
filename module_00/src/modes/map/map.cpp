@@ -67,6 +67,16 @@ MapMode::MapMode() : _fade_to_battle_mode(false) {
 	_ground_objects.push_back(_map_camera);
 	// Loads all the map data
 	LoadMap();
+
+	SoundDescriptor battle1;
+	battle1.LoadSound("snd/battle1.ogg");
+	SoundDescriptor battle2;
+	battle2.LoadSound("snd/battle2.ogg");
+	SoundDescriptor battle3;
+	battle3.LoadSound("snd/battle3.ogg");
+	_battle_sounds.push_back(battle1);
+	_battle_sounds.push_back(battle2);
+	_battle_sounds.push_back(battle3);
 }
 
 
@@ -1124,6 +1134,10 @@ void MapMode::_UpdateExplore() {
 			_steps_till_encounter--;
 			if (_steps_till_encounter == 0) {
 				VideoManager->FadeScreen(Color::black, 1.0f);
+				// play battle sfx
+				_map_music[0].StopMusic();
+				_battle_sounds[RandomBoundedInteger(0, 2)].PlaySound();
+				
 				_fade_to_battle_mode = true;
 				_steps_till_encounter = GaussianRandomValue(_encounter_rate, 5.0f);
 			}
