@@ -253,11 +253,16 @@ void MiniCharacterSelectWindow::Update()
 	// Load sound effects
 	SoundDescriptor confirm;
 	SoundDescriptor bump;
+	SoundDescriptor potion;
 	if (confirm.LoadSound("snd/obtain.wav") == false) 
 	{
 		cerr << "MINICHARWINDOW::UPDATE - Unable to load confirm sound effect!" << endl;
 	}
 	if (bump.LoadSound("snd/bump.wav") == false) 
+	{
+		cerr << "MINICHARWINDOW::UPDATE - Unable to load bump sound effect!" << endl;
+	}
+	if (potion.LoadSound("snd/potiondrink.wav") == false)
 	{
 		cerr << "MINICHARWINDOW::UPDATE - Unable to load bump sound effect!" << endl;
 	}
@@ -277,10 +282,9 @@ void MiniCharacterSelectWindow::Update()
 		}
 
 		// Play Sound
-		confirm.PlaySound();
+		potion.PlaySound();
 
 		// increase hp
-		uint8 temp = selected->GetUseCase();
 		if ((selected->GetUseCase() & GLOBAL_HP_RECOVERY_ITEM) == GLOBAL_HP_RECOVERY_ITEM)
 		{	
 			uint32 new_hp = ch->GetHP();

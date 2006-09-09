@@ -51,7 +51,7 @@ bool MAP_DEBUG = false;
 // ***************************** GENERAL FUNCTIONS ****************************
 // ****************************************************************************
 
-MapMode::MapMode() {
+MapMode::MapMode() : _fade_to_battle_mode(false) {
 	if (MAP_DEBUG) cout << "MAP: MapMode constructor invoked" << endl;
 
 	mode_type = MODE_MANAGER_MAP_MODE;
@@ -1104,13 +1104,28 @@ void MapMode::_UpdateExplore() {
 		move_direction = SOUTH;
 	}
 
+	// Do the fade to battle mode
+	if (_fade_to_battle_mode)
+	{
+		// Only start battle mode once the fade is done.
+		if (!VideoManager->IsFading())
+		{
+			// clear fade instantly
+			VideoManager->FadeScreen(Color::clear, 0.0f);
+			_fade_to_battle_mode = false;
+			BattleMode *BM = new BattleMode();
+			ModeManager->Push(BM);
+		}
+		return;
+	}
+
 	if (user_move) {
-                if (_random_encounters) {
+		if (_random_encounters) {
 			_steps_till_encounter--;
 			if (_steps_till_encounter == 0) {
+				VideoManager->FadeScreen(Color::black, 1.0f);
+				_fade_to_battle_mode = true;
 				_steps_till_encounter = GaussianRandomValue(_encounter_rate, 5.0f);
-				BattleMode *BM = new BattleMode();
-				ModeManager->Push(BM);
 			}
 		}
 		_focused_object->Move(move_direction);

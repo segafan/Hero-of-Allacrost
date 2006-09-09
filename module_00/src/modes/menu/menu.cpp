@@ -229,6 +229,11 @@ void MenuMode::_SetupMainOptionBox()
 	// Add strings and set default selection.
 	_main_options.SetOptions(options);
 	_main_options.SetSelection(MAIN_INVENTORY);
+
+	// disable unused options 
+	_main_options.EnableOption(1, false);
+	_main_options.EnableOption(3, false);
+	_main_options.EnableOption(4, false);
 } // void MenuMode::_SetupMainOptionBox()
 
 
@@ -378,7 +383,8 @@ void MenuMode::Update() {
 	else if (InputManager->ConfirmPress())
 	{
 		// Play Sound
-		confirm.PlaySound();
+		if (_current_menu->IsEnabled(_current_menu->GetSelection()))
+			confirm.PlaySound();
 		_current_menu->HandleConfirmKey();
 	}
 	else if (InputManager->LeftPress())
