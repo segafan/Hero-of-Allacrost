@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="Allacrost"
 	ProjectGUID="{090248BB-5514-4846-A563-695576F3D685}"
 	RootNamespace="Allacrost"
@@ -17,7 +17,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)\Debug"
+			OutputDirectory="$(SolutionDir)"
 			IntermediateDirectory="Debug"
 			ConfigurationType="1"
 			>
@@ -62,7 +62,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/NODEFAULTLIB:LIBCMT&#x0D;&#x0A;/NODEFAULTLIB:msvcrt.lib"
-				AdditionalDependencies="SDL.lib SDL_TTF.lib SDL_mixer.lib SDLMain.lib Opengl32.lib glu32.lib Lua+lib.lib libpng.lib jpegd.lib zdll.lib"
+				AdditionalDependencies="SDL.lib SDL_TTF.lib SDL_mixer.lib SDLMain.lib Opengl32.lib glu32.lib libpng.lib jpegd.lib zdll.lib Lua+lib.lib"
 				LinkIncremental="0"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -95,7 +95,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)\Release"
+			OutputDirectory="$(SolutionDir)"
 			IntermediateDirectory="Release"
 			ConfigurationType="1"
 			>
@@ -117,10 +117,10 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="2"
-				EnableIntrinsicFunctions="false"
+				Optimization="3"
+				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="0"
-				WholeProgramOptimization="true"
+				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="&quot;$(ProjectDir)\src&quot;;&quot;$(ProjectDir)\src\engine\video&quot;;&quot;$(ProjectDir)\src\editor&quot;;&quot;$(ProjectDir)\src\engine\audio&quot;;&quot;$(ProjectDir)\src\modes&quot;;&quot;$(ProjectDir)\src\engine&quot;;&quot;$(ProjectDir)\src\modes\battle&quot;;&quot;$(ProjectDir)\src\modes\boot&quot;;&quot;$(ProjectDir)\src\modes\map&quot;;&quot;$(ProjectDir)\src\modes\menu&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;"
 				MinimalRebuild="false"
@@ -130,7 +130,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="3"
+				DebugInformationFormat="0"
 				CompileAs="2"
 				DisableSpecificWarnings="4996;4005;4800;4267;4355"
 				ForcedIncludeFiles=""
@@ -148,13 +148,13 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/NODEFAULTLIB:LIBCMT"
-				AdditionalDependencies="SDL.lib SDL_TTF.lib SDL_mixer.lib SDLMain.lib Opengl32.lib glu32.lib Lua+lib.lib libpng.lib jpeg.lib zdll.lib"
+				AdditionalDependencies="SDL.lib SDL_TTF.lib SDL_mixer.lib SDLMain.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib Lua+lib.lib"
 				LinkIncremental="0"
-				GenerateDebugInformation="true"
+				GenerateDebugInformation="false"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				LinkTimeCodeGeneration="0"
+				LinkTimeCodeGeneration="1"
 				TargetMachine="1"
 			/>
 			<Tool

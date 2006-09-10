@@ -10,6 +10,7 @@
 /** ****************************************************************************
 *** \file    battle.cpp
 *** \author  Corey Hoffstein, visage@allacrost.org
+*** \author  Viljami Korhonen, mindflayer@allacrost.org
 *** \brief   Source file for battle mode interface.
 *** ***************************************************************************/
 
@@ -72,8 +73,19 @@ void ScriptEvent::RunScript() {
 	// TEMP: do basic damage to the actors
 	for (uint8 i = 0; i < _targets.size(); i++) {
 		_targets[i]->TEMP_Deal_Damage(GaussianRandomValue(12, 2.0f));
+
+		// TODO: Do this better way! 
+		if (MakeStandardString(this->GetSource()->GetName()) == "Spider")
+			current_battle->_battle_sounds[0].PlaySound();
+		else if (MakeStandardString(this->GetSource()->GetName()) == "Green Slime")
+			current_battle->_battle_sounds[1].PlaySound();
+		else if (MakeStandardString(this->GetSource()->GetName()) == "Skeleton")
+			current_battle->_battle_sounds[2].PlaySound();
+		else if (MakeStandardString(this->GetSource()->GetName()) == "Claudius")
+			current_battle->_battle_sounds[3].PlaySound();
 	}
 	// TODO: get script from global script repository and run, passing in list of arguments and host actor
+
 }
 
 } // namespace private battle
@@ -136,8 +148,9 @@ BattleMode::BattleMode() :
 	action_type_options.push_back(MakeUnicodeString("<img/icons/battle/item.png><55>Item"));
 
 	_action_type_menu.SetOptions(action_type_options);
-	_action_type_menu.EnableOption(1, false); // Disable defend and support for now
+	_action_type_menu.EnableOption(1, false); // Disable defend, support and item for now
 	_action_type_menu.EnableOption(2, false);
+	_action_type_menu.EnableOption(3, false);
 
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 
@@ -192,8 +205,8 @@ BattleMode::~BattleMode() {
 	for (uint32 i = 0; i < _battle_music.size(); i++)
 		_battle_music[i].FreeMusic();
 
-	for (uint32 i = 0; i < _battle_sound.size(); i++)
-		_battle_sound[i].FreeSound();
+	for (uint32 i = 0; i < _battle_sounds.size(); i++)
+		_battle_sounds[i].FreeSound();
 
 	// Delete all character and enemy actors
 	for (deque<CharacterActor*>::iterator i = _character_actors.begin(); i != _character_actors.end(); ++i) {
@@ -272,6 +285,17 @@ void BattleMode::_TEMP_LoadTestData() {
 	MusicDescriptor MD;
 	MD.LoadMusic("mus/Confrontation.ogg");
 	_battle_music.push_back(MD);
+
+	// Load the battle sfx
+	SoundDescriptor SD;
+	_battle_sounds.push_back(SD);
+	_battle_sounds.push_back(SD);
+	_battle_sounds.push_back(SD);
+	_battle_sounds.push_back(SD);
+	_battle_sounds[0].LoadSound("snd/spider_attack.wav");
+	_battle_sounds[1].LoadSound("snd/slime_attack.wav");
+	_battle_sounds[2].LoadSound("snd/skeleton_attack.wav");
+	_battle_sounds[3].LoadSound("snd/sword_swipe.wav");
 
 	// Construct all battle actors
 	_CreateCharacterActors();
@@ -586,7 +610,7 @@ void BattleMode::_UpdateActionTypeMenu() {
 			_action_type_menu_cursor_location++;
 		}
 	}
-	else if (InputManager->ConfirmPress()) {
+	else if (InputManager->ConfirmPress() && _action_type_menu_cursor_location == 0) {
 		// Construct the action list menu for the action selected
 		_cursor_state = CURSOR_SELECT_ACTION_LIST;
 		_ConstructActionListMenu();
@@ -959,7 +983,7 @@ void BattleMode::_ConstructActionListMenu() {
 	} // else if (_action_type_menu_cursor_location == ACTION_TYPE_SUPPORT)
 	
 	else if (_action_type_menu_cursor_location == ACTION_TYPE_ITEM) {
-		vector<GlobalObject*> inv = GlobalManager->GetInventory();
+	/*	vector<GlobalObject*> inv = GlobalManager->GetInventory();
 
 		// Calculate the number of rows, this is dividing by 6, and if there is a remainder > 0, add one more row for the remainder
 		_action_list_menu->SetSize(6, inv.size() / 6 + ((inv.size() % 6) > 0 ? 1 : 0));
@@ -980,7 +1004,7 @@ void BattleMode::_ConstructActionListMenu() {
 // 		_action_menu_window = new MenuWindow();
 // 		_action_menu_window->Create(200.0f, 20.0f + 50.0f * inv_names.size());
 // 		_action_menu_window->SetPosition(0.0f, 600.0f);
-// 		_action_menu_window->Show();
+// 		_action_menu_window->Show();*/
 	} // else if (_action_type_menu_cursor_location == ACTION_TYPE_ITEM)
 
 	else {

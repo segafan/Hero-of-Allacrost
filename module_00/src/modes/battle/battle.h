@@ -10,6 +10,7 @@
 /** ****************************************************************************
 *** \file    battle.h
 *** \author  Corey Hoffstein, visage@allacrost.org
+*** \author  Viljami Korhonen, mindflayer@allacrost.org
 *** \brief   Header file for battle mode interface.
 ***
 *** This code handles event processing, game state updates, and video frame
@@ -194,7 +195,7 @@ private:
 	/** \brief Container for various sounds that need to be played during the battle
 	*** 
 	**/
-	std::vector<hoa_audio::SoundDescriptor> _battle_sound;
+	std::vector<hoa_audio::SoundDescriptor> _battle_sounds;
 
 	//! \name Battle Background Data
 	//@{

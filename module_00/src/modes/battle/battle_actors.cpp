@@ -10,6 +10,7 @@
 /** ****************************************************************************
 *** \file    battle_actors.cpp
 *** \author  Corey Hoffstein, visage@allacrost.org
+*** \author  Viljami Korhonen, mindflayer@allacrost.org
 *** \brief   Source file for actors present in battles.
 *** ***************************************************************************/
 
@@ -278,7 +279,7 @@ void EnemyActor::Update() {
 
 	last_attack += SystemManager->GetUpdateTime();
 
-	if (last_attack > next_attack && !IsQueuedToPerform()) {
+	if ( last_attack > next_attack && !IsQueuedToPerform() && IsAlive()) {
 		//we can perform another attack
 		deque<BattleActor*> final_targets;
 		deque<CharacterActor*> targets = current_battle->ReturnCharacters();
@@ -305,9 +306,9 @@ void EnemyActor::DrawSprite() {
 	if (!IsAlive()) {
 		VideoManager->Move(GetXLocation(), GetYLocation());
 		vector<StillImage> sprite_frames = _wrapped_enemy.GetAnimation("IDLE");
-		// TODO: FIX THIS SOMEHOW! Problem: Memory usage grows like hell! (probably because of bad vmem caching) 
 		sprite_frames[3].EnableGrayScale();
-		VideoManager->DrawImage(sprite_frames[3]);//, Color::gray); // Temporary fix
+		VideoManager->DrawImage(sprite_frames[3]);
+		sprite_frames[3].DisableGrayScale();
 	}
 	else {
 		// Draw the actor selector image over the currently selected enemy

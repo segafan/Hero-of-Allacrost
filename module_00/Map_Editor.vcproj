@@ -55,7 +55,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="SDL.lib SDL_TTF.lib SDLMain.lib qt-mt3.lib lua+lib.lib Opengl32.lib glu32.lib DevIL.lib ILUT.lib ILU.lib"
+				AdditionalDependencies="SDL.lib SDL_TTF.lib SDLMain.lib qt-mt3.lib lua+lib.lib Opengl32.lib glu32.lib libpng.lib jpegd.lib zdll.lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 			/>
@@ -128,11 +128,14 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="SDL.lib SDL_TTF.lib SDLMain.lib qt-mt3.lib lua+lib.lib Opengl32.lib glu32.lib DevIL.lib ILUT.lib ILU.lib"
+				AdditionalDependencies="SDL.lib SDL_TTF.lib SDLMain.lib qt-mt3.lib lua+lib.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib"
 				IgnoreAllDefaultLibraries="false"
 				IgnoreDefaultLibraryNames=""
 				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
 				LinkTimeCodeGeneration="0"
+				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
