@@ -69,11 +69,11 @@ MapMode::MapMode() : _fade_to_battle_mode(false) {
 	LoadMap();
 
 	SoundDescriptor battle1;
-	battle1.LoadSound("snd/battle_encouner_01.ogg");
+	battle1.LoadSound("snd/battle_encounter_01.ogg");
 	SoundDescriptor battle2;
-	battle2.LoadSound("snd/battle_encouner_02.ogg");
+	battle2.LoadSound("snd/battle_encounter_02.ogg");
 	SoundDescriptor battle3;
-	battle3.LoadSound("snd/battle_encouner_03.ogg");
+	battle3.LoadSound("snd/battle_encounter_03.ogg");
 	_battle_sounds.push_back(battle1);
 	_battle_sounds.push_back(battle2);
 	_battle_sounds.push_back(battle3);
