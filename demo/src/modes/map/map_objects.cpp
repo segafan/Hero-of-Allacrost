@@ -506,9 +506,22 @@ void MapSprite::Draw() {
 		FindFrame();
 	}
 	VideoManager->DrawImage(frames[frame]);
+}
 
-	// TEMP: Draw a "torch" point light over the sprite
-	VideoManager->Move(0.5f, 1.0f);
+
+// Draw the light for the sprite
+void MapSprite::DrawLight() {
+	if (!(status & VISIBLE))
+		return;
+
+	float x_draw = 0.0;  // The x and y cursor position to draw the sprite to
+	float y_draw = 0.0;
+
+	x_draw = current_map->_draw_info.c_pos + (static_cast<float>(col_position) - current_map->_draw_info.c_start) + col_offset;
+	y_draw = current_map->_draw_info.r_pos + (static_cast<float>(row_position) - current_map->_draw_info.r_start) + row_offset;
+
+		// TODO: Determine if the sprite is off-screen and if so, don't draw it.
+	VideoManager->Move(x_draw + 0.5f, y_draw + 1.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 	VideoManager->DrawLight(current_map->_lighting_overlay, x_draw + 0.5f, y_draw - 1.0f, Color(1.0f, 0.4f, 0.0f, 0.3f));
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);

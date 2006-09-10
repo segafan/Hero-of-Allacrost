@@ -51,10 +51,10 @@ _credits_text(
 			  "Brett Steele (Safir~Kreuz) ~ Map sprites, battle sprites, character portraits\n\n"
 			  "Richard Kettering (Jetryl) ~ Map tiles, map sprites, inventory icons, location graphics\n\n"
 			  "Josiah Tobin (Josiah Tobin) ~ Map tiles\n\n"
-			  "Matthew James (nunvuru) ~ Website graphics, GUI artwork, Hero of Allacrost logos\n\n"
+			  "Matthew James (nunvuru) ~ Website graphics, GUI artwork, Allacrost logos\n\n"
 			  "Victoria Smith (alenacat) ~ Map sprites, map tiles\n\n"
 			  "Jerimiah Short (BigPapaN0z) ~ Map tiles\n\n"
-			  "Max Humber (zomby138) ~ Conceptual Art, Coloring, Computer Graphics\n\n"
+			  "Max Humber (zomby138) ~ Conceptual Art, Computer Graphics\n\n"
 			  "\n\n\n"
 			  "Music and Sound Team\n\n"
 			  "Ryan Reilly (Rain) ~ Music and sound lead, soundtrack composer\n\n"
@@ -72,10 +72,11 @@ _credits_text(
 			  "Tim Hargreaves (Balthazar) ~ Editor\n"
 			  "\n\n\n"
 			  "Additional Programming\n\n"
+			  "Nick Weiss (nickw) ~ Video engine\n\n"
 			  "Vladimir Mitrovic (snipe714) ~ Scripting engine\n\n"
 			  "Farooq Mela (CamelJockey) ~ Video engine\n\n"
 			  "Kevin Martin (kev82) ~ Video engine, game engine\n\n"
-			  "Adam Lindquist (Zorbfish) ~ Scripting engine\n"
+
 			  "\n\n\n"
 			  "Additional Artwork\n\n"
 			  "Tyler Stroud (gloomcover) ~ Map tiles\n\n"
@@ -84,8 +85,8 @@ _credits_text(
 			  "(fmunoz) ~ Inventory icons\n\n"
 			  "(Jarks) ~ Map tiles, inventory icons\n\n"
 			  "(wayfarer) ~ Concept art, map sprites\n\n"
-			  "Chris Luspo (Venndetta1) ~ Concept art\n"
-			  "Jon Williams (Jonatron) ~ Map sprites\n"
+			  "Chris Luspo (Venndetta1) ~ Concept art\n\n"
+			  "Jon Williams (Jonatron) ~ Map sprites\n\n"
 			  "\n\n\n"
 			  "Additional Music and Sound\n\n"
 			  "Matt Dexter (Star Pilot) ~ Soundtrack composer\n\n"
@@ -99,11 +100,12 @@ _credits_text(
 			  "Mikko Hanninen (Burnsaber) ~ Finnish prologue\n"
 			  "\n\n\n"
 			  "Extra Thanks\n\n"
+			  "Adam Lindquist (Zorbfish) ~ Scripting engine\n\n"
 			  "(Melchior)\n\n"
 			  "(Egan1)"
 			  )
 {
-	// Init the bacground window
+	// Init the background window
 	_window.Create(1024.0f, 600.0f);
 	_window.SetPosition(0.0f, 630.0f);
 	_window.SetDisplayMode(VIDEO_MENU_EXPAND_FROM_CENTER);

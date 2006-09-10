@@ -38,6 +38,6 @@ sound_files = { "snd/confirm.wav",
                 "snd/cancel.wav",
                 "snd/obtain.wav",
                 "snd/bump.wav",
-                "snd/volumetest.wav" };
+                "snd/volume_test.wav" };
 
 -- -------------------------------------------------- --
