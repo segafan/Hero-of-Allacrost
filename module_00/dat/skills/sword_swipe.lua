@@ -1,6 +1,6 @@
 skill_name = "Sword Swipe"
 skill_type = "ATTACK"
-sp_usage = 15
+sp_usage = 0
 warmup_time = 0
 cooldown_time = 0
 level_required = 1
