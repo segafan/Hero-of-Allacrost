@@ -121,7 +121,7 @@ int32 main(int32 argc, char *argv[]) {
 	}
 	
 	VideoManager->SetMenuSkin("img/menus/black_sleet", "img/menus/black_sleet_texture.png", Color(0.0f, 0.0f, 0.0f, 0.0f));
-	if (!VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "default", 20)) {
+	if (!VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "default", 18)) {
 		return 1;
 	}
 
