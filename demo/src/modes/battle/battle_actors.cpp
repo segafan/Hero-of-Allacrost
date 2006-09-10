@@ -93,8 +93,8 @@ void BattleActor::TEMP_Deal_Damage(uint32 damage) {
 	_TEMP_total_time_damaged = 1;
 
 	if (_TEMP_damage_dealt >= GetHealthPoints()) {
-	  SetHealthPoints(0);
-	  current_battle->RemoveScriptedEventsForActor(this);
+		SetHealthPoints(0);
+		current_battle->RemoveScriptedEventsForActor(this);
 	}
 	else {
 		SetHealthPoints(GetHealthPoints() - _TEMP_damage_dealt);

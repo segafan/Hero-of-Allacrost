@@ -1045,7 +1045,7 @@ void BattleMode::RemoveScriptedEventsForActor(BattleActor *AActorToRemove) {
 
 
 void BattleMode::PlayerVictory() {
-	if (BATTLE_DEBUG) cout << "Player has won a battle!" << endl;
+	if (BATTLE_DEBUG) cerr << "BATTLE: Player has won a battle!" << endl;
 
 	// Give player some loot
 	GlobalManager->AddItemToInventory(HP_POTION);

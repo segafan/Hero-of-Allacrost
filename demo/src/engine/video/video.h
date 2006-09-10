@@ -31,11 +31,20 @@
 #include "defs.h"
 
 // SDL includes
-#include <SDL/SDL_ttf.h>
+#ifdef __APPLE__
+	#include <SDL_ttf/SDL_ttf.h>
+#else
+	#include <SDL/SDL_ttf.h>
+#endif
 
 // OpenGL includes
-#include <GL/gl.h>
-#include <GL/glu.h>
+#ifdef __APPLE__
+	#include <OpenGL/gl.h>
+	#include <OpenGL/glu.h>
+#else
+	#include <GL/gl.h>
+	#include <GL/glu.h>
+#endif
 
 // Image loader includes
 #include <png.h>

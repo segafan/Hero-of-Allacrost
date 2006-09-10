@@ -32,7 +32,11 @@
 #ifndef __AUDIO_HEADER__
 #define __AUDIO_HEADER__
 
-#include <SDL/SDL_mixer.h>
+#ifdef __APPLE__
+	#include <SDL_mixer/SDL_mixer.h>
+#else
+	#include <SDL/SDL_mixer.h>
+#endif
 
 #include "utils.h"
 #include "defs.h"
