@@ -310,6 +310,8 @@ void MiniCharacterSelectWindow::Update()
 		}
 		else {
 			GlobalManager->RemoveItemFromInventory(HP_POTION);
+			this->Activate(false);
+			this->Hide();
 		}
 	}
 	else if (InputManager->LeftPress())
@@ -341,19 +343,7 @@ void MiniCharacterSelectWindow::Update()
 ////////////////////////////////////////////////////////////////////////////////
 
 InventoryWindow::InventoryWindow() : _inventory_active(false)
-{
-	////////////////////////////////////////////////////////
-	/////////////// DELETE THIS ////////////////////////////
-	// ONCE INVENTORY IS ADDING THROUGH THE RIGHT SPOT /////
-	////////////////////////////////////////////////////////
-	GlobalManager->AddItemToInventory(HP_POTION);
-	//GlobalManager->AddItemToInventory(new GlobalWeapon("Broadsword", GLOBAL_ALL_CHARACTERS, 2, 4, "img/icons/sword.png"));
-	//GlobalManager->AddItemToInventory(new GlobalArmor("Breastplate", GLOBAL_BODY_ARMOR, GLOBAL_ALL_CHARACTERS, 3, 7, "img/icons/breastplate.png"));
-	////////////////////////////////////////////////////////
-	/////////////// DELETE THIS ////////////////////////////
-	// ONCE INVENTORY IS ADDING THROUGH THE RIGHT SPOT /////
-	////////////////////////////////////////////////////////
-	
+{	
 	// Set up the inventory option box
 	_inventory_items.SetCellSize(180.0f, 50.0f);
 	// This is dependant on the number of inventory items?
