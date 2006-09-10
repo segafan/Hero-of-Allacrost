@@ -1,0 +1,14 @@
+skill_name = "Sword Swipe"
+skill_type = "ATTACK"
+sp_usage = 0
+warmup_time = 0
+cooldown_time = 0
+level_required = 1
+num_arguments = 1
+volt_level = 5
+earth_level = 0
+water_level = 0
+fire_level = 0
+piercing_level = 1
+slashing_level = 5
+bludgeoning_level = 5
