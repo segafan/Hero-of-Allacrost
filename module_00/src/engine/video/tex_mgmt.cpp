@@ -120,7 +120,7 @@ bool GameVideo::_LoadImage(StillImage &id, bool grayscale)
 	
 	// 2. check if an image with the same filename has already been loaded
 	//    If so, point to that
-	if(_images.find(id._filename + (grayscale ? string("") : string("_grayscale"))) != _images.end())
+	if(_images.find(id._filename + (grayscale ? string("_grayscale") : string(""))) != _images.end())
 	{
 		id._elements.clear();		
 		
@@ -238,7 +238,7 @@ bool GameVideo::_LoadImageHelper(StillImage &id, bool grayscale)
 
 	private_video::ImageLoadInfo loadInfo;
 	
-	if(!_LoadRawImage(id._filename, loadInfo))
+	if(!_LoadRawImage(id._filename, loadInfo, grayscale))
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: _LoadRawPixelData() failed in _LoadImageHelper()" << endl;
@@ -289,7 +289,7 @@ bool GameVideo::_LoadImageHelper(StillImage &id, bool grayscale)
 //-----------------------------------------------------------------------------
 // _LoadRawImage: Determines which image loader to call
 //-----------------------------------------------------------------------------
-bool GameVideo::_LoadRawImage(const std::string & filename, private_video::ImageLoadInfo & loadInfo)
+bool GameVideo::_LoadRawImage(const std::string & filename, private_video::ImageLoadInfo & loadInfo, bool grayscale)
 {
 	// Isolate the extension
 	size_t extpos = filename.rfind('.');
@@ -300,9 +300,9 @@ bool GameVideo::_LoadRawImage(const std::string & filename, private_video::Image
 	std::string extension = std::string(filename, extpos, filename.length() - extpos);
 
 	if(extension == ".jpeg" || extension == ".jpg")
-		return _LoadRawImageJpeg(filename, loadInfo);
+		return _LoadRawImageJpeg(filename, loadInfo, grayscale);
 	if(extension == ".png")
-		return _LoadRawImagePng(filename, loadInfo) ;
+		return _LoadRawImagePng(filename, loadInfo, grayscale) ;
 
 	return false;
 }	
@@ -311,7 +311,7 @@ bool GameVideo::_LoadRawImage(const std::string & filename, private_video::Image
 // _LoadRawImagePng: Loads a PNG image to RGBA format
 //-----------------------------------------------------------------------------
 
-bool GameVideo::_LoadRawImagePng(const std::string &filename, hoa_video::private_video::ImageLoadInfo &loadInfo)
+bool GameVideo::_LoadRawImagePng(const std::string &filename, hoa_video::private_video::ImageLoadInfo &loadInfo, bool grayscale)
 {
 	FILE * fp = fopen(filename.c_str(), "rb");
 
@@ -376,10 +376,19 @@ bool GameVideo::_LoadRawImagePng(const std::string &filename, hoa_video::private
 				unsigned char b = imgpixel[2];
 				unsigned char a = imgpixel[3];
 
-				dstpixel[0] = r;
-				dstpixel[1] = g;
-				dstpixel[2] = b;
-				dstpixel[3] = a;
+				if (!grayscale)
+				{
+					dstpixel[0] = r;
+					dstpixel[1] = g;
+					dstpixel[2] = b;
+					dstpixel[3] = a;
+				}
+				else
+				{
+					unsigned char y = static_cast<unsigned char>(0.3 * r + 0.59 * g + 0.11 * b);
+					dstpixel[0] = dstpixel[1] = dstpixel[2] = y;
+					dstpixel[3] = a;
+				}
 			}
 			else if(bpp == 3)
 			{
@@ -387,10 +396,19 @@ bool GameVideo::_LoadRawImagePng(const std::string &filename, hoa_video::private
 				unsigned char g = imgpixel[1];
 				unsigned char b = imgpixel[2];
 
-				dstpixel[0] = r;
-				dstpixel[1] = g;
-				dstpixel[2] = b;
-				dstpixel[3] = 0xFF;
+				if (!grayscale)
+				{
+					dstpixel[0] = r;
+					dstpixel[1] = g;
+					dstpixel[2] = b;
+					dstpixel[3] = 0xFF;
+				}
+				else
+				{
+					unsigned char y = static_cast<unsigned char>(0.3 * r + 0.59 * g + 0.11 * b);
+					dstpixel[0] = dstpixel[1] = dstpixel[2] = y;
+					dstpixel[3] = 0xFF;
+				}
 			}
 			else if(bpp == 1)
 			{
@@ -400,10 +418,19 @@ bool GameVideo::_LoadRawImagePng(const std::string &filename, hoa_video::private
 				unsigned char g = c.green;
 				unsigned char b = c.blue;
 
-				dstpixel[0] = r;
-				dstpixel[1] = g;
-				dstpixel[2] = b;
-				dstpixel[3] = 0xFF;
+				if (!grayscale)
+				{
+					dstpixel[0] = r;
+					dstpixel[1] = g;
+					dstpixel[2] = b;
+					dstpixel[3] = 0xFF;
+				}
+				else
+				{
+					unsigned char y = static_cast<unsigned char>(0.3 * r + 0.59 * g + 0.11 * b);
+					dstpixel[0] = dstpixel[1] = dstpixel[2] = y;
+					dstpixel[3] = 0xFF;
+				}
 			}
 		}
 	}
@@ -420,7 +447,7 @@ bool GameVideo::_LoadRawImagePng(const std::string &filename, hoa_video::private
 // _LoadRawImageJpeg: Loads a Jpeg image to RGBA format
 //-----------------------------------------------------------------------------
 
-bool GameVideo::_LoadRawImageJpeg(const std::string &filename, hoa_video::private_video::ImageLoadInfo &loadInfo)
+bool GameVideo::_LoadRawImageJpeg(const std::string &filename, hoa_video::private_video::ImageLoadInfo &loadInfo, bool grayscale)
 {
 	FILE * infile;
 	unsigned char ** buffer;
@@ -466,9 +493,17 @@ bool GameVideo::_LoadRawImageJpeg(const std::string &filename, hoa_video::privat
 
 			unsigned char a = imgpixel[3];
 
-			dstpixel[0] = r;
-			dstpixel[1] = g;
-			dstpixel[2] = b;
+			if (!grayscale)
+			{
+				dstpixel[0] = r;
+				dstpixel[1] = g;
+				dstpixel[2] = b;
+			}
+			else
+			{
+				unsigned char y = static_cast<unsigned char>(0.3 * r + 0.59 * g + 0.11 * b);
+				dstpixel[0] = dstpixel[1] = dstpixel[2] = y;
+			}
 
 			if(bpp == 4)
 				dstpixel[3] = a;

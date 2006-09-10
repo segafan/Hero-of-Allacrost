@@ -1349,10 +1349,9 @@ private:
 	 *  \param filename   Filename of image to load
 	 *  \param loadInfo   Returns with the image file attributes and pixels
 	 */	
-
-	bool _LoadRawImage(const std::string & filename, private_video::ImageLoadInfo & loadInfo);
-	bool _LoadRawImageJpeg(const std::string & filename, private_video::ImageLoadInfo & loadInfo);
-	bool _LoadRawImagePng(const std::string & filename, private_video::ImageLoadInfo & loadInfo);
+	bool _LoadRawImage(const std::string & filename, private_video::ImageLoadInfo & loadInfo, bool grayscale = false);
+	bool _LoadRawImageJpeg(const std::string & filename, private_video::ImageLoadInfo & loadInfo, bool grayscale);
+	bool _LoadRawImagePng(const std::string & filename, private_video::ImageLoadInfo & loadInfo, bool grayscale);
 
 	/*!
 	 *  \brief loop through all currently loaded images and if they belong to the given tex sheet, reload them into it
