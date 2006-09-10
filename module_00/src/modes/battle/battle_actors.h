@@ -10,6 +10,7 @@
 /** ****************************************************************************
 *** \file    battle_actors.h
 *** \author  Corey Hoffstein, visage@allacrost.org
+*** \author  Viljami Korhonen, mindflayer@allacrost.org
 *** \brief   Header file for actors present in battles.
 ***
 *** This code contains the implementation of battle actors (characters and
