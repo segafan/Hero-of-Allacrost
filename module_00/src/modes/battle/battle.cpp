@@ -71,7 +71,7 @@ ScriptEvent::~ScriptEvent()
 void ScriptEvent::RunScript() {
 	// TEMP: do basic damage to the actors
 	for (uint8 i = 0; i < _targets.size(); i++) {
-		_targets[i]->TEMP_Deal_Damage(GaussianRandomValue(12, 2));
+		_targets[i]->TEMP_Deal_Damage(GaussianRandomValue(12, 2.0f));
 	}
 	// TODO: get script from global script repository and run, passing in list of arguments and host actor
 }
