@@ -244,6 +244,7 @@ public:
 	 *  and have their VISIBLE bit in the MapObject#_status member set.
 	 */
 	virtual void Draw() = 0;
+	virtual void DrawLight() = 0;
 };
 
 /*!****************************************************************************
@@ -336,6 +337,8 @@ public:
 	void Update();
 	//! Draws the appropriate sprite frame in the appropriate position on the screen, if at all.
 	void Draw();
+	//! Draws the light source for the sprite
+	void DrawLight();
 
 	//! Fills up the frames vector and loads the sprite image frames.
 	void LoadFrames();

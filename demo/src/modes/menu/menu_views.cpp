@@ -262,7 +262,7 @@ void MiniCharacterSelectWindow::Update()
 	{
 		cerr << "MINICHARWINDOW::UPDATE - Unable to load bump sound effect!" << endl;
 	}
-	if (potion.LoadSound("snd/potiondrink.wav") == false)
+	if (potion.LoadSound("snd/potion_drink.wav") == false)
 	{
 		cerr << "MINICHARWINDOW::UPDATE - Unable to load bump sound effect!" << endl;
 	}

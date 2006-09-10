@@ -69,11 +69,11 @@ MapMode::MapMode() : _fade_to_battle_mode(false) {
 	LoadMap();
 
 	SoundDescriptor battle1;
-	battle1.LoadSound("snd/battle1.ogg");
+	battle1.LoadSound("snd/battle_encouner_01.ogg");
 	SoundDescriptor battle2;
-	battle2.LoadSound("snd/battle2.ogg");
+	battle2.LoadSound("snd/battle_encouner_02.ogg");
 	SoundDescriptor battle3;
-	battle3.LoadSound("snd/battle3.ogg");
+	battle3.LoadSound("snd/battle_encouner_03.ogg");
 	_battle_sounds.push_back(battle1);
 	_battle_sounds.push_back(battle2);
 	_battle_sounds.push_back(battle3);
@@ -1327,6 +1327,7 @@ void MapMode::Draw() {
                 // Only draw objects that are visible
 		if (_ground_objects[i]->status & VISIBLE) {
 			(_ground_objects[i])->Draw();
+			(_ground_objects[i])->DrawLight();
 		}
 	}
 

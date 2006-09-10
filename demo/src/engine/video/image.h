@@ -104,7 +104,6 @@ public:
 
 	Image & operator = (Image & rhs)
 	{
-		int n = 0;
 		return *this;
 	}
 
