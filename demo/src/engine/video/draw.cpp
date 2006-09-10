@@ -439,14 +439,14 @@ bool GameVideo::_DrawElement
 
 bool GameVideo::DrawHalo(const StillImage &id, float x, float y, const Color &color)
 {
-	_PushContext();
+	PushMatrix();
 	Move(x, y);
 
 	char oldBlendMode = _blend;
 	_blend = VIDEO_BLEND_ADD;
 	DrawImage(id, color);
 	_blend = oldBlendMode;
-	_PopContext();
+	PopMatrix();
 	
 	return true;
 }
