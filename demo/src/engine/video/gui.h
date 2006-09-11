@@ -267,6 +267,8 @@ public:
 	 *
 	 *  \param width  desired width of menu, based on pixels in 1024x768 resolution
 	 *  \param height desired height of menu, based on pixels in 1024x768 resolution
+	 *  \param innerWidth return value for the width of the inside of the menu
+	 *  \param innerHeight return value for the height of the inside of the menu
 	 *
 	 *  \param edgeVisibleFlags specifies all the edges of the menu that should be drawn.
 	 *         In most cases, this should just be the default of VIDEO_MENU_EDGE_ALL.
@@ -289,8 +291,11 @@ public:
 		StillImage &id, 
 		float width, 
 		float height, 
+		float & innerHeight,
+		float & innerWidth,
 		int32 edgeVisibleFlags, 
 		int32 edgeSharedFlags
+
 	);
 
 private:

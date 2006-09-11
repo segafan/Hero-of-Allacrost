@@ -249,6 +249,7 @@ private:
 	
 	int32 _id;                       //! id of the menu, used to register and unregister it with the std::map when it is constructed/destructed
 	float _width, _height;           //! dimensions
+	float _innerWidth, _innerHeight; //! dimensions of the space inside the window
 	int32 _edgeVisibleFlags;         //! flags used to tell which edges are visible 
 	int32 _edgeSharedFlags;          //! flags used to tell which edges are shared
 	

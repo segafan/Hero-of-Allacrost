@@ -130,6 +130,32 @@ bool MenuWindow::Update(int32 frameTime)
 
 	if(_state == VIDEO_MENU_STATE_HIDDEN || _state == VIDEO_MENU_STATE_SHOWN) 
 	{
+		if(_isScissored == true)
+		{
+			float xBuffer = (_width - _innerWidth) / 2;
+			float yBuffer = (_height - _innerHeight) / 2;
+
+			float left, right, bottom, top;
+			left = 0.0f;
+			right = _width;
+			bottom = 0.0f;
+			top = _height;
+
+			GameVideo *video = GameVideo::SingletonGetReference();
+
+			video->PushState();
+			video->SetDrawFlags(_xalign, _yalign, 0);
+			MenuWindow::CalculateAlignedRect(left, right, bottom, top);
+			video->PopState();
+
+			_scissorRect = video->CalculateScreenRect(left, right, bottom, top);
+
+			_scissorRect.left += xBuffer;
+			_scissorRect.width -= (xBuffer * 2);
+			_scissorRect.top += yBuffer;
+			_scissorRect.height -= (yBuffer * 2);
+		}
+
 		_isScissored = false;
 		return true;
 	}
@@ -162,6 +188,7 @@ bool MenuWindow::Update(int32 frameTime)
 			right = _width;
 			bottom = 0.0f;
 			top = _height;
+
 			video->PushState();
 			video->SetDrawFlags(_xalign, _yalign, 0);
 			MenuWindow::CalculateAlignedRect(left, right, bottom, top);
@@ -175,8 +202,6 @@ bool MenuWindow::Update(int32 frameTime)
 			_scissorRect = video->CalculateScreenRect(left, right, bottom, top);
 		}
 	}
-	else
-		_isScissored = false;
 	
 	return true;
 }
@@ -290,7 +315,7 @@ bool MenuWindow::RecreateImage()
 {
 	GameVideo *video = GameVideo::SingletonGetReference();
 	video->DeleteImage(_menuImage);
-	return video->_CreateMenu(_menuImage, _width, _height, _edgeVisibleFlags, _edgeSharedFlags);
+	return video->_CreateMenu(_menuImage, _width, _height, _innerWidth, _innerHeight, _edgeVisibleFlags, _edgeSharedFlags);
 }
 
 
