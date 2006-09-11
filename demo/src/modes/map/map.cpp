@@ -557,6 +557,8 @@ void MapMode::LoadMap() {
 	_ground_objects.push_back(sp);
 	_sprites[sp->sprite_id] = sp;
 
+	speed_double = false;
+	_focused_object->step_speed /= 2;
 } // _LoadMap()
 
 
@@ -967,12 +969,10 @@ void MapMode::_UpdateExplore() {
 	uint32 move_direction;
 
 	if (InputManager->SwapPress()) {
-		cout << "random encounters swap" << endl;
 		_random_encounters = !_random_encounters;
 	}
 	// Toggle run versus walk
 	if (InputManager->CancelPress()) {
-		static bool speed_double = true;
 		if (speed_double) {
 			_focused_object->step_speed /= 2;
 			speed_double = false;

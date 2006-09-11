@@ -230,6 +230,9 @@ public:
 	void Draw();
 	//! Fills in all the map structures from a Lua data file.
 	void LoadMap();
+
+	//! Temporary
+	bool speed_double;
 private:
 	//! The name of the map, as will be read by the player in-game.
 	hoa_utils::ustring _map_name;
