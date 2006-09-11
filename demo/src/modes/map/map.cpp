@@ -316,19 +316,19 @@ void MapMode::LoadMap() {
 	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied = 1;
 
 	sd = new SpriteDialogue();
-	sd->text.push_back(MakeUnicodeString("This is not a real demo. There is no spoon."));
+	sd->text.push_back(MakeUnicodeString("It's really dark in here isn't it? I wonder how much longer our torches will last us..."));
 	sd->speakers.push_back(1); // NPC speaks
 	sp->dialogues.push_back(sd);
 
 	sd = new SpriteDialogue();
-	sd->text.push_back(MakeUnicodeString("I sure wish we had more art, don't you agree?"));
+	sd->text.push_back(MakeUnicodeString("If only we had more art, maybe the designers would have put in an exit in this cave!"));
 	sd->speakers.push_back(1); // NPC speaks
-	sd->text.push_back(MakeUnicodeString("Well, good pixel artists are difficult to find."));
+	sd->text.push_back(MakeUnicodeString("Well, they're really under staffed in the art department. We really can't blame them too much."));
 	sd->speakers.push_back(0); // Player speaks
 	sp->dialogues.push_back(sd);
 
 	sd = new SpriteDialogue();
-	sd->text.push_back(MakeUnicodeString("Check out our website at http://www.allacrost.org/"));
+	sd->text.push_back(MakeUnicodeString("Did you know that you can toggle off random encounters by pressing the swap key (default: a)?"));
 	sd->speakers.push_back(1); // NPC speaks
 	sp->dialogues.push_back(sd);
 
@@ -382,12 +382,9 @@ void MapMode::LoadMap() {
 	sd->speakers.push_back(2); // NPC speaks
 	sd->text.push_back(MakeUnicodeString("....."));
 	sd->speakers.push_back(0); // NPC speaks
-	sp->dialogues.push_back(sd);
-
-	sd = new SpriteDialogue();
-	sd->text.push_back(MakeUnicodeString("I know kung fu."));
+	sd->text.push_back(MakeUnicodeString("Claudius, I am your father!"));
 	sd->speakers.push_back(2); // NPC speaks
-	sd->text.push_back(MakeUnicodeString("Show me."));
+	sd->text.push_back(MakeUnicodeString("I...know dad. Why are you wearing that black mask and breathing heavily when you say that?"));
 	sd->speakers.push_back(0); // Player speaks
 	sp->dialogues.push_back(sd);
 
@@ -440,7 +437,7 @@ void MapMode::LoadMap() {
 	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied = 1;
 
 	sd = new SpriteDialogue();
-	sd->text.push_back(MakeUnicodeString("You will never be able to guess my real age."));
+	sd->text.push_back(MakeUnicodeString("I hope they put me in a star role in the game. I may not be at the peak of my youth, but I've been studying taichi lately you know!"));
 	sd->speakers.push_back(3); // NPC speaks
 	sp->dialogues.push_back(sd);
 
@@ -486,8 +483,14 @@ void MapMode::LoadMap() {
 	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied = 1;
 
 	sd = new SpriteDialogue();
-	sd->text.push_back(MakeUnicodeString("Is there no exit out of this stinking cave?"));
+	sd->text.push_back(MakeUnicodeString("Is there no exit out of this stinking..... hey, why don't I have a portrait?!"));
 	sd->speakers.push_back(4); // NPC speaks
+	sd->text.push_back(MakeUnicodeString("Probably because you're just a normal non playable character with no special role. I mean look at you, you're dressed in rags."));
+	sd->speakers.push_back(0); // Player speaks
+	sd->text.push_back(MakeUnicodeString("They can't do this to me! Just wait until the director hears from my agent! I've been nominated for six academy awards, how dare they disgrace me like this!"));
+	sd->speakers.push_back(4); // NPC speaks
+	sd->text.push_back(MakeUnicodeString("..... (I wonder who she thinks she is)"));
+	sd->speakers.push_back(0); // NPC speaks
 	sp->dialogues.push_back(sd);
 
 	sa = new ActionPathMove();
