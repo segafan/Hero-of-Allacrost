@@ -38,8 +38,6 @@ using namespace hoa_global;
 
 using namespace hoa_menu::private_menu;
 
-
-
 namespace hoa_menu {
 
 bool MENU_DEBUG = false;
@@ -47,7 +45,6 @@ bool MENU_DEBUG = false;
 ////////////////////////////////////////////////////////////////////////////////
 // MenuMode class -- Initialization and Destruction Code
 ////////////////////////////////////////////////////////////////////////////////
-
 MenuMode::MenuMode()
 {
 	if (MENU_DEBUG) cout << "MENU: MenuMode constructor invoked." << endl;
@@ -140,6 +137,32 @@ MenuMode::MenuMode()
 	_current_menu_showing = SHOW_MAIN;
 	_current_menu = &_main_options;
 
+	// Load sounds
+	SoundDescriptor confirm;
+	SoundDescriptor bump;
+	SoundDescriptor potion;
+	SoundDescriptor cancel;
+	if (confirm.LoadSound("snd/obtain.wav") == false) 
+	{
+		cerr << "MINICHARWINDOW::UPDATE - Unable to load confirm sound effect!" << endl;
+	}
+	if (bump.LoadSound("snd/bump.wav") == false) 
+	{
+		cerr << "MINICHARWINDOW::UPDATE - Unable to load bump sound effect!" << endl;
+	}
+	if (potion.LoadSound("snd/potion_drink.wav") == false)
+	{
+		cerr << "MINICHARWINDOW::UPDATE - Unable to load potion drink sound effect!" << endl;
+	}
+	if (cancel.LoadSound("snd/cancel.wav") == false)
+	{
+		cerr << "MINICHARWINDOW::UPDATE - Unable to load cancel sound effect!" << endl;
+	}
+	_menu_sounds["confirm"] = confirm;
+	_menu_sounds["bump"] = bump;
+	_menu_sounds["potion"] = potion;
+	_menu_sounds["cancel"] = cancel;
+
 } // MenuMode::MenuMode()
 
 
@@ -164,6 +187,12 @@ MenuMode::~MenuMode() {
 	_character_window3.Destroy();
 	_inventory_window.Destroy();
 	_status_window.Destroy();
+
+	// Clear sounds
+	_menu_sounds["confirm"].FreeSound();
+	_menu_sounds["bump"].FreeSound();
+	_menu_sounds["potion"].FreeSound();
+	_menu_sounds["cancel"].FreeSound();
 } // MenuMode::~MenuMode()
 
 
@@ -331,18 +360,8 @@ void MenuMode::_SetupSaveOptionBox()
 // MenuMode class -- Update Code
 ////////////////////////////////////////////////////////////////////////////////
 
-void MenuMode::Update() {
-	// Load sound effects
-	SoundDescriptor confirm;
-	SoundDescriptor cancel;
-	
-	if (confirm.LoadSound("snd/confirm.wav") == false) {
-		cerr << "MENUMODE::UPDATE - Unable to load confirm sound effect!" << endl;
-	}
-	if (cancel.LoadSound("snd/cancel.wav") == false) {
-		cerr << "MENUMODE::UPDATE - Unable to load cancel sound effect!" << endl;
-	}
-	
+void MenuMode::Update() 
+{	
 	// See if inventory window is active
 	if (_inventory_window.IsActive()) {
 		// See if cancel was pressed, duplicate code, but not really sure of an
@@ -350,7 +369,7 @@ void MenuMode::Update() {
 		if (_inventory_window.CanCancel() && InputManager->CancelPress())
 		{
 			// Play sound
-			cancel.PlaySound();
+			_menu_sounds["cancel"].PlaySound();
 			_inventory_window.Activate(false);
 			_current_menu->SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 			return;
@@ -369,7 +388,7 @@ void MenuMode::Update() {
 	if (InputManager->CancelPress()) 
 	{
 		// Play sound.
-		cancel.PlaySound();
+		_menu_sounds["cancel"].PlaySound();
 		// If in main menu, return to previous Mode, else return to main menu.
 		if (_current_menu_showing == SHOW_MAIN)
 			ModeManager->Pop();
@@ -384,7 +403,7 @@ void MenuMode::Update() {
 	{
 		// Play Sound
 		if (_current_menu->IsEnabled(_current_menu->GetSelection()))
-			confirm.PlaySound();
+			_menu_sounds["confirm"].PlaySound();
 		_current_menu->HandleConfirmKey();
 	}
 	else if (InputManager->LeftPress())
