@@ -1199,6 +1199,8 @@ private:
 	 *
 	 *  \param width  Width of menu, based on pixels in 1024x768 resolution
 	 *  \param height Height of menu, based on pixels in 1024x768 resolution.
+	 *  \param innerWidth return value for the width of the inside of the menu
+	 *  \param innerHeight return value for the height of the inside of the menu
 	 *  \param edgeVisibleFlags bit flags to tell which edges are visible
 	 *  \param edgeSharedFlags  bit flags to tell which edges are shared with other menus
 	 *
@@ -1210,6 +1212,8 @@ private:
 		StillImage &menu, 
 		float width, 
 		float height, 
+		float & innerWidth,
+		float & innerHeight,
 		int32 edgeVisibleFlags, 
 		int32 edgeSharedFlags
 	);

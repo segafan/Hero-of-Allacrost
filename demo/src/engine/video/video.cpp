@@ -1065,9 +1065,9 @@ bool GameVideo::ToggleAdvancedDisplay()
 //-----------------------------------------------------------------------------
 // _CreateMenu: creates menu image descriptor
 //-----------------------------------------------------------------------------
-bool GameVideo::_CreateMenu(StillImage &menu, float width, float height, int32 edgeVisibleFlags, int32 edgeSharedFlags)
+bool GameVideo::_CreateMenu(StillImage &menu, float width, float height, float & innerWidth, float & innerHeight, int32 edgeVisibleFlags, int32 edgeSharedFlags)
 {
-	return _gui->CreateMenu(menu, width, height, edgeVisibleFlags, edgeSharedFlags);
+	return _gui->CreateMenu(menu, width, height, innerWidth, innerHeight, edgeVisibleFlags, edgeSharedFlags);
 }
 
 

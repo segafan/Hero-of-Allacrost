@@ -72,7 +72,7 @@ _credits_text(
 			  "Tim Hargreaves (Balthazar) ~ Editor\n"
 			  "\n\n\n"
 			  "Additional Programming\n\n"
-			  "Nick Weiss (nickw) ~ Video engine\n\n"
+			  "Nick Weihs (nickw) ~ Video engine\n\n"
 			  "Vladimir Mitrovic (snipe714) ~ Scripting engine\n\n"
 			  "Farooq Mela (CamelJockey) ~ Video engine\n\n"
 			  "Kevin Martin (kev82) ~ Video engine, game engine\n\n"
