@@ -164,6 +164,32 @@ MiniCharacterSelectWindow::MiniCharacterSelectWindow() : _char_window_active(fal
 {
 	MenuWindow::Create(300, 472);
 	MenuWindow::SetPosition(724, 150);
+
+	// Load sounds
+	SoundDescriptor confirm;
+	SoundDescriptor bump;
+	SoundDescriptor potion;
+	SoundDescriptor cancel;
+	if (confirm.LoadSound("snd/obtain.wav") == false) 
+	{
+		cerr << "MINICHARWINDOW::UPDATE - Unable to load confirm sound effect!" << endl;
+	}
+	if (bump.LoadSound("snd/bump.wav") == false) 
+	{
+		cerr << "MINICHARWINDOW::UPDATE - Unable to load bump sound effect!" << endl;
+	}
+	if (potion.LoadSound("snd/potion_drink.wav") == false)
+	{
+		cerr << "MINICHARWINDOW::UPDATE - Unable to load potion drink sound effect!" << endl;
+	}
+	if (cancel.LoadSound("snd/cancel.wav") == false)
+	{
+		cerr << "MINICHARWINDOW::UPDATE - Unable to load cancel sound effect!" << endl;
+	}
+	_menu_sounds["confirm"] = confirm;
+	_menu_sounds["bump"] = bump;
+	_menu_sounds["potion"] = potion;
+	_menu_sounds["cancel"] = cancel;
 }
 
 //--------------------------------------------------------
@@ -171,6 +197,11 @@ MiniCharacterSelectWindow::MiniCharacterSelectWindow() : _char_window_active(fal
 //--------------------------------------------------------
 MiniCharacterSelectWindow::~MiniCharacterSelectWindow()
 {
+	// Clear sounds
+	_menu_sounds["confirm"].FreeSound();
+	_menu_sounds["bump"].FreeSound();
+	_menu_sounds["potion"].FreeSound();
+	_menu_sounds["cancel"].FreeSound();
 }
 
 //------------------------------------------------------
@@ -250,23 +281,6 @@ void MiniCharacterSelectWindow::Activate(bool new_status)
 //------------------------------------------------------
 void MiniCharacterSelectWindow::Update()
 {
-	// Load sound effects
-	SoundDescriptor confirm;
-	SoundDescriptor bump;
-	SoundDescriptor potion;
-	if (confirm.LoadSound("snd/obtain.wav") == false) 
-	{
-		cerr << "MINICHARWINDOW::UPDATE - Unable to load confirm sound effect!" << endl;
-	}
-	if (bump.LoadSound("snd/bump.wav") == false) 
-	{
-		cerr << "MINICHARWINDOW::UPDATE - Unable to load bump sound effect!" << endl;
-	}
-	if (potion.LoadSound("snd/potion_drink.wav") == false)
-	{
-		cerr << "MINICHARWINDOW::UPDATE - Unable to load bump sound effect!" << endl;
-	}
-
 	// Check input values
 	if (InputManager->ConfirmPress())
 	{
@@ -277,12 +291,20 @@ void MiniCharacterSelectWindow::Update()
 		if (selected->GetCount() == 0)
 		{
 			// no more items to use
-			bump.PlaySound();
+			_menu_sounds["bump"].PlaySound();
+			return;
+		}
+
+		// check character hp
+		if (ch->GetHP() == ch->GetMaxHP())
+		{
+			// don't use item we're full
+			_menu_sounds["bump"].PlaySound();
 			return;
 		}
 
 		// Play Sound
-		potion.PlaySound();
+		_menu_sounds["potion"].PlaySound();
 
 		// increase hp
 		if ((selected->GetUseCase() & GLOBAL_HP_RECOVERY_ITEM) == GLOBAL_HP_RECOVERY_ITEM)
@@ -361,16 +383,43 @@ InventoryWindow::InventoryWindow() : _inventory_active(false)
 	
 	// Initially hide the cursor
 	_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+
+	// Load sounds
+	SoundDescriptor confirm;
+	SoundDescriptor bump;
+	SoundDescriptor potion;
+	SoundDescriptor cancel;
+	if (confirm.LoadSound("snd/obtain.wav") == false) 
+	{
+		cerr << "MINICHARWINDOW::UPDATE - Unable to load confirm sound effect!" << endl;
+	}
+	if (bump.LoadSound("snd/bump.wav") == false) 
+	{
+		cerr << "MINICHARWINDOW::UPDATE - Unable to load bump sound effect!" << endl;
+	}
+	if (potion.LoadSound("snd/potion_drink.wav") == false)
+	{
+		cerr << "MINICHARWINDOW::UPDATE - Unable to load potion drink sound effect!" << endl;
+	}
+	if (cancel.LoadSound("snd/cancel.wav") == false)
+	{
+		cerr << "MINICHARWINDOW::UPDATE - Unable to load cancel sound effect!" << endl;
+	}
+	_menu_sounds["confirm"] = confirm;
+	_menu_sounds["bump"] = bump;
+	_menu_sounds["potion"] = potion;
+	_menu_sounds["cancel"] = cancel;
 	
 }
 
-
-
 InventoryWindow::~InventoryWindow()
 {
+	// Clear sounds
+	_menu_sounds["confirm"].FreeSound();
+	_menu_sounds["bump"].FreeSound();
+	_menu_sounds["potion"].FreeSound();
+	_menu_sounds["cancel"].FreeSound();
 }
-
-
 
 void InventoryWindow::Activate(bool new_status)
 {
@@ -393,16 +442,11 @@ bool InventoryWindow::CanCancel()
 
 void InventoryWindow::Update()
 {
-	// Load sound effects
-	SoundDescriptor confirm;
-	SoundDescriptor cancel;
-	if (confirm.LoadSound("snd/confirm.wav") == false) 
+	if (_inventory_items.GetNumOptions() == 0)
 	{
-		cerr << "MENUMODE::UPDATE - Unable to load confirm sound effect!" << endl;
-	}
-	if (cancel.LoadSound("snd/cancel.wav") == false) 
-	{
-		cerr << "MENUMODE::UPDATE - Unable to load cancel sound effect!" << endl;
+		// no more items in inventory, exit inventory window
+		Activate(false);
+		return;
 	}
 
 	// When the character select window is active, no processing is needed for the inventory window.
@@ -414,7 +458,7 @@ void InventoryWindow::Update()
 			// deactivate it
 			if (_char_window.IsActive())
 			{
-				cancel.PlaySound();
+				_menu_sounds["cancel"].PlaySound();
 				_char_window.Activate(false);
 				_char_window.Hide();
 				// update item text.
@@ -459,7 +503,7 @@ void InventoryWindow::Update()
 		GlobalItem *item = (GlobalItem*)(GlobalManager->GetInventory()[item_selected]);
 		if ((item->GetUseCase() & GLOBAL_HP_RECOVERY_ITEM) || (item->GetUseCase() & GLOBAL_SP_RECOVERY_ITEM))
 		{
-			confirm.PlaySound();
+			_menu_sounds["confirm"].PlaySound();
 			// Activate the character select window
 			_char_window.Show();
 			_char_window.Activate(true);
@@ -575,18 +619,6 @@ StatusWindow::~StatusWindow()
 
 void StatusWindow::Update()
 {
-	// Load sound effects
-	SoundDescriptor confirm;
-	SoundDescriptor cancel;
-	if (confirm.LoadSound("snd/confirm.wav") == false) 
-	{
-		cerr << "STATUSWINDOW::UPDATE - Unable to load confirm sound effect!" << endl;
-	}
-	if (cancel.LoadSound("snd/cancel.wav") == false) 
-	{
-		cerr << "STATUSWINDOW::UPDATE - Unable to load cancel sound effect!" << endl;
-	}
-
 	// check input values
 	if (InputManager->UpPress())
 	{

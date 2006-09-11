@@ -114,6 +114,8 @@ private:
 	uint32 _selected_item_index;
 	//! \brief Hide copy constructor.
 	MiniCharacterSelectWindow(MiniCharacterSelectWindow &other) {}
+	//! \brief the sounds for MenuMode
+	std::map<std::string, hoa_audio::SoundDescriptor> _menu_sounds;
 }; // class MiniCharacterSelectWindow : public hoa_video::MenuWindow
 
 /** ****************************************************************************
@@ -159,6 +161,9 @@ private:
 
 	//! Updates the item text in the inventory items
 	void UpdateItemText();
+
+	//! \brief the sounds for MenuMode
+	std::map<std::string, hoa_audio::SoundDescriptor> _menu_sounds;
 }; // class InventoryWindow : public hoa_video::MenuWindow
 
 /** ****************************************************************************

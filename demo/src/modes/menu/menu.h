@@ -135,10 +135,10 @@ private:
 	//! A graphic for the location (map) that the player is currently on
 	hoa_video::StillImage _location_picture;
 
-	
 	std::vector<hoa_video::StillImage> _menu_images;
-	std::vector<hoa_audio::SoundDescriptor> _menu_sound;
-	
+	//! \brief the sounds for MenuMode
+	std::map<std::string, hoa_audio::SoundDescriptor> _menu_sounds;
+
 	/** \name Main Display Windows
 	*** \brief The windows that are displayed in the menu mode.
 	**/
