@@ -98,8 +98,8 @@ MenuMode::MenuMode()
 	uint32 win_width = 208;
 	uint32 win_height = 600 - 192;
 
-	_bottom_window.Create(208 * 4 + 16, 192, ~VIDEO_MENU_EDGE_TOP);
-	_bottom_window.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y) + static_cast<float>(win_height) + 8);
+	_bottom_window.Create(208 * 4 + 16, 192 + 16, ~VIDEO_MENU_EDGE_TOP);
+	_bottom_window.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y) + static_cast<float>(win_height) - 16);
 
 
 	// Width of each character window is 200 px.
@@ -107,15 +107,15 @@ MenuMode::MenuMode()
 	// The 4th (last) char window will have another 16 px for the right border
 	// Height of the char window is 408 px.
 	// The bottom window in the main view is 192 px high, and the full width which will be 216 * 4 + 16
-	_character_window0.Create(static_cast<float>(win_width), static_cast<float>(win_height),
+	_character_window0.Create(static_cast<float>(win_width) + 16, static_cast<float>(win_height),
 		~VIDEO_MENU_EDGE_RIGHT, VIDEO_MENU_EDGE_RIGHT);
 	_character_window0.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y));
 
-	_character_window1.Create(static_cast<float>(win_width), static_cast<float>(win_height),
+	_character_window1.Create(static_cast<float>(win_width) + 16, static_cast<float>(win_height),
 		~VIDEO_MENU_EDGE_RIGHT, VIDEO_MENU_EDGE_LEFT | VIDEO_MENU_EDGE_RIGHT);
 	_character_window1.SetPosition(static_cast<float>(start_x) + static_cast<float>(win_width), static_cast<float>(start_y));
 	
-	_character_window2.Create(static_cast<float>(win_width), static_cast<float>(win_height),
+	_character_window2.Create(static_cast<float>(win_width) + 16, static_cast<float>(win_height),
 		~VIDEO_MENU_EDGE_RIGHT, VIDEO_MENU_EDGE_LEFT | VIDEO_MENU_EDGE_RIGHT);
 	_character_window2.SetPosition(static_cast<float>(start_x) + static_cast<float>(2 * win_width), static_cast<float>(start_y));
 	
