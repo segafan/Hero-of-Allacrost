@@ -43,8 +43,8 @@ SoundData::SoundData(string fname) {
 
 SoundData::~SoundData() {
 	if (reference_count > 0) {
-		fprintf(stderr, "AUDIO WARNING: Audio engine is attempting to delete buffer %s, which still has %d refereces to it\n",
-			filename.c_str(), NumberToString(reference_count).c_str());
+		cerr << "AUDIO WARNING: Audio engine is attempting to delete buffer " << filename <<
+			", which still has " << static_cast<int32>(reference_count) << " refereces to it\n";
 	}
 
 	Mix_FreeChunk(sound);
