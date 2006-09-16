@@ -1091,11 +1091,11 @@ private:
 	VIDEO_TARGET _target;
 
 	// draw flags	
-	char _blend;        //! blend flag which specifies normal alpha blending
-	char _xalign;       //! x align flag which tells if images should be left, center, or right aligned
-	char _yalign;       //! y align flag which tells if images should be top, center, or bottom aligned
-	char _xflip;        //! x flip flag. true if images should be flipped horizontally
-	char _yflip;        //! y flip flag. true if images should be flipped vertically
+	uint8 _blend;        //! blend flag which specifies normal alpha blending
+	uint8 _xalign;       //! x align flag which tells if images should be left, center, or right aligned
+	uint8 _yalign;       //! y align flag which tells if images should be top, center, or bottom aligned
+	uint8 _xflip;        //! x flip flag. true if images should be flipped horizontally
+	uint8 _yflip;        //! y flip flag. true if images should be flipped vertically
 
 	char _nextTempFile[9];    //! eight character name for temp files that increments every time you create a new one so they are always unique
 
