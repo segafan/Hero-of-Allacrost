@@ -1142,7 +1142,7 @@ void MapMode::_UpdateExplore() {
 				_battle_sounds[RandomBoundedInteger(0, 2)].PlaySound();
 				
 				_fade_to_battle_mode = true;
-				_steps_till_encounter = GaussianRandomValue(_encounter_rate, 5.0f);
+				_steps_till_encounter = GaussianRandomValue(_encounter_rate, 2.5f);
 			}
 		}
 		_focused_object->Move(move_direction);
