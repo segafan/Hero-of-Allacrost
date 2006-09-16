@@ -342,8 +342,8 @@ bool GameVideo::_DrawTextHelper
 		return false;
 	}
 
-	float xoff = ((_xalign+1) * fontwidth) * .5f * -cs._rightDir;
-	float yoff = ((_yalign+1) * fontheight) * .5f * -cs._upDir;
+	float xoff = ((_xalign+1) * fontwidth) * .5f * -cs.GetHorizontalDirection();
+	float yoff = ((_yalign+1) * fontheight) * .5f * -cs.GetVerticalDirection();
 
 	MoveRelative(xoff, yoff);
 
@@ -359,9 +359,9 @@ bool GameVideo::_DrawTextHelper
 		int xhi = glyphinfo->width; 
 		int yhi = glyphinfo->height;
 		
-		if(cs._rightDir < 0.0f)
+		if(cs.GetHorizontalDirection() < 0.0f)
 			xhi = -xhi;
-		if(cs._upDir < 0.0f)
+		if(cs.GetVerticalDirection() < 0.0f)
 			yhi = -yhi;
 			
 		float tx, ty;
@@ -369,8 +369,8 @@ bool GameVideo::_DrawTextHelper
 		ty = glyphinfo->ty;
 
 		int minx, miny;
-		minx = glyphinfo->minx * (int)cs._rightDir + xpos;
-		miny = glyphinfo->miny * (int)cs._upDir;
+		minx = glyphinfo->minx * (int)cs.GetHorizontalDirection() + xpos;
+		miny = glyphinfo->miny * (int)cs.GetVerticalDirection();
 		
 		_BindTexture(glyphinfo->texture);
 
@@ -521,8 +521,8 @@ bool GameVideo::DrawText(const ustring &txt)
 				
 				
 				glPushMatrix();
-				MoveRelative(+_coordSys._rightDir * fp->shadowX, 0.0f);
-				MoveRelative(0.0f, _coordSys._upDir * fp->shadowY);
+				MoveRelative(+_coordSys.GetHorizontalDirection() * fp->shadowX, 0.0f);
+				MoveRelative(0.0f, _coordSys.GetVerticalDirection() * fp->shadowY);
 				
 				if(!_DrawTextHelper(buffer))
 				{
@@ -543,7 +543,7 @@ bool GameVideo::DrawText(const ustring &txt)
 			
 			glPopMatrix();
 			
-			MoveRelative(0, -lineSkip * _coordSys._upDir);
+			MoveRelative(0, -lineSkip * _coordSys.GetVerticalDirection());
 
 		} while(lastline < txt.length());
 		

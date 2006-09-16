@@ -31,25 +31,37 @@ namespace hoa_video {
 *** as the game's default 1024x768 resolution.
 *** ***************************************************************************/
 class CoordSys {
-	friend class GUIElement;
-	friend class TextBox;
-	friend class OptionBox;
-	friend class GameVideo;
-
 public:
 	CoordSys()
 		{}
 	CoordSys(float left, float right, float bottom, float top)
-		{ _left = left; _right = right; _bottom = bottom; _top = top;
-			if(_right > _left) _rightDir = 1.0f; else _rightDir = -1.0f;
-			if(_top > _bottom) _upDir = 1.0f; else _upDir = -1.0f;
+		{
+			_left = left; _right = right; _bottom = bottom; _top = top;
+			if(_right > _left) _horizontal_direction = 1.0f; else _horizontal_direction = -1.0f;
+			if(_top > _bottom) _vertical_direction = 1.0f; else _vertical_direction = -1.0f;
 		}
-	
+
+	//! \brief Class member access functions
+	//@{
+	float GetVerticalDirection() const
+		{ return _vertical_direction; }
+	float GetHorizontalDirection() const
+		{ return _horizontal_direction; }
+	float GetLeft() const
+		{ return _left; }
+	float GetRight() const
+		{ return _right; }
+	float GetBottom() const
+		{ return _bottom; }
+	float GetTop() const
+		{ return _top; }
+	//@}
+
 private:
-	//! \brief This is 1.0f if increasing y coordinates are up, otherwise it's -1.0f.
-	float _upDir;
-	//! \brief this is 1.0f if increasing x coordinates are right, otherwise -1.0f.
-	float _rightDir;
+	//! \brief If the y-coordinates increase from bottom to top, this is 1.0f. Otherwise it is -1.0f.
+	float _vertical_direction;
+	//! \brief If the y-coordinates increase from left to right, this is 1.0f. Otherwise it is -1.0f.
+	float _horizontal_direction;
 
 	//! \brief The values of the four sides of the screen that determine the drawing coordinates
 	//@{

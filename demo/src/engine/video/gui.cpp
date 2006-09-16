@@ -650,16 +650,16 @@ void GUIElement::CalculateAlignedRect(float &left, float &right, float &bottom, 
 	GameVideo *video = GameVideo::SingletonGetReference();
 	CoordSys &cs = video->_coordSys;
 	
-	if(cs._upDir < 0.0f)
+	if(cs.GetVerticalDirection() < 0.0f)
 		top = -top;
 		
-	if(cs._rightDir < 0.0f)
+	if(cs.GetHorizontalDirection() < 0.0f)
 		right = -right;
 	
 	float xoff, yoff;
 	
-	xoff = _x + ((video->_xalign + 1) * width)  * 0.5f * -cs._rightDir;
-	yoff = _y + ((video->_yalign + 1) * height) * 0.5f * -cs._upDir;
+	xoff = _x + ((video->_xalign + 1) * width)  * 0.5f * -cs.GetHorizontalDirection();
+	yoff = _y + ((video->_yalign + 1) * height) * 0.5f * -cs.GetVerticalDirection();
 	
 	left   += xoff;
 	right  += xoff;
