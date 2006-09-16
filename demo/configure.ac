@@ -4,8 +4,8 @@ dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.59)
 AC_INIT(Hero of Allacrost - Demo, 0.1.0, gorzuate@allacrost.org, allacrost)
 AC_CONFIG_SRCDIR([src/main.cpp])
-AC_CONFIG_HEADER([config.h])
 AM_INIT_AUTOMAKE
+AM_MAINTAINER_MODE
 
 dnl Checks for programs.
 AC_PROG_CXX
