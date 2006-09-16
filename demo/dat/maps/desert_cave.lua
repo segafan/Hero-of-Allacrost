@@ -2,7 +2,7 @@
 
 -- Whether or not we have random encounters, and if so the rate of encounter
 random_encounters = 1
-encounter_rate = 12
+encounter_rate = 18
 
 -- The number of rows and columns of tiles that compose the map
 row_count = 48

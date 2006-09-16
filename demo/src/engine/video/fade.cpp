@@ -46,12 +46,12 @@ bool ScreenFader::FadeTo(const Color &final, float numSeconds)
 
 	_useFadeOverlay = true;	
 
-	if( (_initialColor.color[0] == 0.0f && 
-	     _initialColor.color[1] == 0.0f &&
-	     _initialColor.color[2] == 0.0f &&
-	     _finalColor.color[0]   == 0.0f && 
-	     _finalColor.color[1]   == 0.0f && 
-	     _finalColor.color[2]   == 0.0f))
+	if( (_initialColor[0] == 0.0f &&
+	     _initialColor[1] == 0.0f &&
+	     _initialColor[2] == 0.0f &&
+	     _finalColor[0]   == 0.0f &&
+	     _finalColor[1]   == 0.0f &&
+	     _finalColor[2]   == 0.0f))
 	{
 		_useFadeOverlay = false;
 	}
@@ -101,32 +101,32 @@ bool ScreenFader::Update(int32 t)
 		// calculate the new interpolated color
 		float a = (float)_currentTime / (float)_endTime;
 
-		_currentColor.color[3] = Lerp(a, _initialColor.color[3], _finalColor.color[3]);
+		_currentColor[3] = Lerp(a, _initialColor[3], _finalColor[3]);
 
 		
 		// if we are fading to or from clear, then only the alpha should get
 		// interpolated.
-		if(_finalColor.color[3] == 0.0f)
+		if(_finalColor[3] == 0.0f)
 		{
-			_currentColor.color[0] = _initialColor.color[0];
-			_currentColor.color[1] = _initialColor.color[1];
-			_currentColor.color[2] = _initialColor.color[2];
+			_currentColor[0] = _initialColor[0];
+			_currentColor[1] = _initialColor[1];
+			_currentColor[2] = _initialColor[2];
 		}
-		if(_initialColor.color[3] == 0.0f)
+		if(_initialColor[3] == 0.0f)
 		{
-			_currentColor.color[0] = _finalColor.color[0];
-			_currentColor.color[1] = _finalColor.color[1];
-			_currentColor.color[2] = _finalColor.color[2];
+			_currentColor[0] = _finalColor[0];
+			_currentColor[1] = _finalColor[1];
+			_currentColor[2] = _finalColor[2];
 		}
 		else
 		{
-			_currentColor.color[0] = Lerp(a, _initialColor.color[0], _finalColor.color[0]);
-			_currentColor.color[1] = Lerp(a, _initialColor.color[1], _finalColor.color[1]);
-			_currentColor.color[2] = Lerp(a, _initialColor.color[2], _finalColor.color[2]);
+			_currentColor[0] = Lerp(a, _initialColor[0], _finalColor[0]);
+			_currentColor[1] = Lerp(a, _initialColor[1], _finalColor[1]);
+			_currentColor[2] = Lerp(a, _initialColor[2], _finalColor[2]);
 		}
 		
 		if(!_useFadeOverlay)
-			_fadeModulation = 1.0f - _currentColor.color[3];
+			_fadeModulation = 1.0f - _currentColor[3];
 		else
 			_fadeOverlayColor = _currentColor;
 	}

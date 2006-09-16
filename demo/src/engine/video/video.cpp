@@ -1080,11 +1080,11 @@ bool GameVideo::EnableSceneLighting(const Color &color)
 {
 	_lightColor = color;
 
-	if(color.color[3] != 1.0f)
+	if(color[3] != 1.0f)
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: color passed to EnableSceneLighting() had alpha other than 1.0f!" << endl;
-		_lightColor.color[3] = 1.0f;
+		_lightColor[3] = 1.0f;
 	}
 
 	return true;
@@ -1148,7 +1148,7 @@ bool GameVideo::EnableFog(const Color &color, float intensity)
 		glFogf(GL_FOG_MODE, GL_LINEAR);
 		glFogf(GL_FOG_START, 0.0f - intensity);
 		glFogf(GL_FOG_END, 1.0f - intensity);
-		glFogfv(GL_FOG_COLOR, (GLfloat *)color.color);
+		glFogfv(GL_FOG_COLOR, (GLfloat *)color.GetColors());
 	}
 	
 	return true;	
