@@ -450,7 +450,7 @@ void GameVideo::SetCoordSys(const CoordSys &coordSys)
 	
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();	
-	glOrtho(_coordSys._left, _coordSys._right, _coordSys._bottom, _coordSys._top, -1, 1);
+	glOrtho(_coordSys.GetLeft(), _coordSys.GetRight(), _coordSys.GetBottom(), _coordSys.GetTop(), -1, 1);
 	
 	// Removed this code bleow
  	glMatrixMode(GL_MODELVIEW);
@@ -1239,7 +1239,7 @@ bool GameVideo::ApplyLightingOverlay()
 		glTexCoord2f(0.0f, my);
 		glVertex2f(xlo, yhi);//tl
 		glEnd();		
-		SetCoordSys(tempCoordSys._left, tempCoordSys._right, tempCoordSys._bottom, tempCoordSys._top);
+		SetCoordSys(tempCoordSys.GetLeft(), tempCoordSys.GetRight(), tempCoordSys.GetBottom(), tempCoordSys.GetTop());
 	}
 		
 	return true;
@@ -1678,10 +1678,10 @@ ScreenRect GameVideo::CalculateScreenRect(float left, float right, float bottom,
 int32 GameVideo::_ScreenCoordX(float x)
 {
 	float percent;
-	if(_coordSys._left < _coordSys._right)
-		percent = (x - _coordSys._left) / (_coordSys._right - _coordSys._left);
+	if(_coordSys.GetLeft() < _coordSys.GetRight())
+		percent = (x - _coordSys.GetLeft()) / (_coordSys.GetRight() - _coordSys.GetLeft());
 	else
-		percent = (x - _coordSys._right) / (_coordSys._left - _coordSys._right);
+		percent = (x - _coordSys.GetRight()) / (_coordSys.GetLeft() - _coordSys.GetRight());
 	
 	return int32(percent * float(_width));
 }
@@ -1694,10 +1694,10 @@ int32 GameVideo::_ScreenCoordX(float x)
 int32 GameVideo::_ScreenCoordY(float y)
 {
 	float percent;
-	if(_coordSys._top < _coordSys._bottom)
-		percent = (y - _coordSys._top) / (_coordSys._bottom - _coordSys._top);
+	if(_coordSys.GetTop() < _coordSys.GetBottom())
+		percent = (y - _coordSys.GetTop()) / (_coordSys.GetBottom() - _coordSys.GetTop());
 	else
-		percent = (y - _coordSys._bottom) / (_coordSys._top - _coordSys._bottom);
+		percent = (y - _coordSys.GetBottom()) / (_coordSys.GetTop() - _coordSys.GetBottom());
 	
 	return int32(percent * float(_height));
 }
@@ -1842,19 +1842,19 @@ void GameVideo::DrawGrid(float x, float y, float xstep, float ystep, const Color
 	glBegin(GL_LINES);
 	glColor4fv(&c[0]);
 	
-	float xMax = _coordSys._right;
-	float yMax = _coordSys._bottom;
+	float xMax = _coordSys.GetRight();
+	float yMax = _coordSys.GetBottom();
 	
 	for(; x <= xMax; x += xstep)
 	{
-		glVertex2f(x, _coordSys._bottom);
-		glVertex2f(x, _coordSys._top);
+		glVertex2f(x, _coordSys.GetBottom());
+		glVertex2f(x, _coordSys.GetTop());
 	}
 
 	for(; y <= yMax; y += ystep)
 	{
-		glVertex2f(_coordSys._left, y);
-		glVertex2f(_coordSys._right, y);
+		glVertex2f(_coordSys.GetLeft(), y);
+		glVertex2f(_coordSys.GetRight(), y);
 	}
 	
 	glEnd();

@@ -868,7 +868,7 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 	
 	char buf[200];
 	
-	Move(20, _coordSys._top - 30);
+	Move(20, _coordSys.GetTop() - 30);
 	if(!DrawText("Current Texture sheet:"))
 	{
 		_PopContext();
@@ -2053,7 +2053,7 @@ bool GameVideo::_DeleteTempTextures()
 //-----------------------------------------------------------------------------
 bool TexSheet::SaveImage(Image *img)
 {
-	uint8 *pixels = new uint8[width*height*4];
+	// uint8 *pixels = new uint8[width*height*4];
 	GameVideo *videoManager = GameVideo::SingletonGetReference();
 	videoManager->_BindTexture(texID);
 	//glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);

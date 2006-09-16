@@ -1104,25 +1104,25 @@ bool OptionBox::Draw()
 		rowMin = _scrollOffset;
 		rowMax = _scrollOffset + _numRows + 1;
 		
-		cellOffset = cs._upDir * (1.0f - (_scrollTime / (VIDEO_OPTION_SCROLL_TIME))) * _vSpacing;		
+		cellOffset = cs.GetVerticalDirection() * (1.0f - (_scrollTime / (VIDEO_OPTION_SCROLL_TIME))) * _vSpacing;
 	}
 	else  // scrolling down
 	{
 		rowMin = _scrollOffset - 1;
 		rowMax = _scrollOffset + _numRows;
 
-		cellOffset = cs._upDir * ((_scrollTime / (VIDEO_OPTION_SCROLL_TIME))) * _vSpacing;
+		cellOffset = cs.GetVerticalDirection() * ((_scrollTime / (VIDEO_OPTION_SCROLL_TIME))) * _vSpacing;
 	}
 
 
 	OptionCellBounds bounds;
 
 	bounds.cellYTop    = top + cellOffset;
-	bounds.cellYCenter = bounds.cellYTop - 0.5f * _vSpacing * cs._upDir;
+	bounds.cellYCenter = bounds.cellYTop - 0.5f * _vSpacing * cs.GetVerticalDirection();
 	bounds.cellYBottom = bounds.cellYCenter * 2.0f - bounds.cellYTop;
 
-	float yoff = -_vSpacing * cs._upDir;
-	float xoff = _hSpacing * cs._rightDir;
+	float yoff = -_vSpacing * cs.GetVerticalDirection();
+	float xoff = _hSpacing * cs.GetHorizontalDirection();
 	
 	bool finished = false;	
 	
@@ -1130,7 +1130,7 @@ bool OptionBox::Draw()
 	for(int32 row = rowMin; row < rowMax; ++row)
 	{
 		bounds.cellXLeft   = left;
-		bounds.cellXCenter = bounds.cellXLeft + 0.5f * _hSpacing * cs._rightDir;
+		bounds.cellXCenter = bounds.cellXLeft + 0.5f * _hSpacing * cs.GetHorizontalDirection();
 		bounds.cellXRight  = bounds.cellXCenter * 2.0f - bounds.cellXLeft;
 	
 		for(int32 col = 0; col < _numColumns; ++col)
@@ -1197,9 +1197,9 @@ bool OptionBox::Draw()
 							float edge = x - bounds.cellXLeft;
 							float width = op.images[imageIndex].GetWidth();
 							if(xalign == VIDEO_X_CENTER)
-								edge -= width * 0.5f * cs._rightDir;
+								edge -= width * 0.5f * cs.GetHorizontalDirection();
 							else if(xalign == VIDEO_X_RIGHT)
-								edge -= width * cs._rightDir;
+								edge -= width * cs.GetHorizontalDirection();
 							
 							if(edge < leftEdge)
 								leftEdge = edge;
@@ -1210,7 +1210,7 @@ bool OptionBox::Draw()
 
 					case VIDEO_OPTION_ELEMENT_POSITION:
 					{
-						x = bounds.cellXLeft + op.elements[opElem].value * cs._rightDir;
+						x = bounds.cellXLeft + op.elements[opElem].value * cs.GetHorizontalDirection();
 						video->Move(x, y);
 						break;
 					}
@@ -1226,9 +1226,9 @@ bool OptionBox::Draw()
 							float edge = x - bounds.cellXLeft;
 							
 							if(xalign == VIDEO_X_CENTER)
-								edge -= width * 0.5f * cs._rightDir;
+								edge -= width * 0.5f * cs.GetHorizontalDirection();
 							else if(xalign == VIDEO_X_RIGHT)
-								edge -= width * cs._rightDir;
+								edge -= width * cs.GetHorizontalDirection();
 							
 							if(edge < leftEdge)
 								leftEdge = edge;
@@ -1256,7 +1256,7 @@ bool OptionBox::Draw()
 					cursorOffset = -cellOffset;
 				}
 				else
-					cursorOffset = -cellOffset + cs._upDir * _vSpacing;
+					cursorOffset = -cellOffset + cs.GetVerticalDirection() * _vSpacing;
 			}
 
 			// if this is the index where we are supposed to show the switch cursor, show it			

@@ -138,12 +138,12 @@ bool TextBox::Draw()
 	}
 	else if(_yalign == VIDEO_Y_CENTER)
 	{
-		textY = top - cs._upDir * (_height - textHeight) * 0.5f;
+		textY = top - cs.GetVerticalDirection() * (_height - textHeight) * 0.5f;
 	}
 	else
 	{
 		// right alignment
-		textY = top - cs._upDir * (_height - textHeight);
+		textY = top - cs.GetVerticalDirection() * (_height - textHeight);
 	}
 	
 	
@@ -745,7 +745,7 @@ void TextBox::_DrawTextLines(float textX, float textY, ScreenRect scissorRect)
 	
 		int32 xAlign = video->_ConvertXAlign(_text_xalign);
 				
-		xOffset = textX + ((xAlign + 1) * lineWidth) * 0.5f * -cs._rightDir;
+		xOffset = textX + ((xAlign + 1) * lineWidth) * 0.5f * -cs.GetHorizontalDirection();
 		video->MoveRelative(xOffset, 0.0f);	
 	
 		int32 lineSize = (int32) _text[line].size();
@@ -896,21 +896,21 @@ void TextBox::_DrawTextLines(float textX, float textY, ScreenRect scissorRect)
 
 						// rectangle of the current character, in window coordinates
 						int32 charX, charY, charW, charH;
-						charX = int32(xOffset + cs._rightDir * video->CalculateTextWidth(_font, substring));
-						charY = int32(textY - cs._upDir * (_fontProperties.height + _fontProperties.descent));
+						charX = int32(xOffset + cs.GetHorizontalDirection() * video->CalculateTextWidth(_font, substring));
+						charY = int32(textY - cs.GetVerticalDirection() * (_fontProperties.height + _fontProperties.descent));
 						
-						if(cs._upDir < 0.0f)
-							charY = int32(cs._bottom) - charY;
+						if(cs.GetHorizontalDirection() < 0.0f)
+							charY = int32(cs.GetBottom()) - charY;
 
-						if(cs._rightDir < 0.0f)
-							charX = int32(cs._left) - charX;
+						if(cs.GetVerticalDirection() < 0.0f)
+							charX = int32(cs.GetLeft()) - charX;
 							
 						charW = video->CalculateTextWidth(_font, curCharString);
 						charH = _fontProperties.height;
 						
 						// multiply width by percentage done
 						charW = int32(curPct * charW);						
-						video->MoveRelative(cs._rightDir * video->CalculateTextWidth(_font, substring), 0.0f);
+						video->MoveRelative(cs.GetHorizontalDirection() * video->CalculateTextWidth(_font, substring), 0.0f);
 						
 						video->PushState();
 						ScreenRect charScissorRect(charX, charY, charW, charH);
@@ -941,7 +941,7 @@ void TextBox::_DrawTextLines(float textX, float textY, ScreenRect scissorRect)
 		numCharsDrawn += lineSize;
 		//video->MoveRelative(-xOffset, _fontProperties.lineskip * -cs._upDir);
 		
-		textY += _fontProperties.lineskip * -cs._upDir;
+		textY += _fontProperties.lineskip * -cs.GetVerticalDirection();
 		video->Move(0.0f, textY);
 	}
 }
