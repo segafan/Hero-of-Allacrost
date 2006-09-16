@@ -23,8 +23,8 @@
 
 #include <string>
 #include "utils.h"
-#include "coord_sys.h"
 #include "color.h"
+#include "coord_sys.h"
 #include "screen_rect.h"
 
 namespace hoa_video {
@@ -38,36 +38,36 @@ namespace private_video {
 *** transformations and the current coordinate system. The context must be
 *** pushed/popped by any GameVideo class function which modifies this context.
 ***
-*** \note Transformation is actually handled separately by the OpenGL
+*** \note Transformations are actually handled separately by the OpenGL
 *** transformation stack
 *** ***************************************************************************/
 class Context {
 public:
-	//! \brief
-	char blend;
-	//! \brief
+	//! \brief Flag to indicate whether normal alpha blending is to take place
+	uint8 blend;
+	//! \brief Draw alignment flags to determine where an element is drawn relative to the cursor
 	//@{
-	char xalign;
-	char yalign;
+	uint8 x_align;
+	uint8 y_align;
 	//@}
-	//! \brief
+	//! \brief Draw flip flags to determine if an element should be drawn flipped across an axis
 	//@{
-	char xflip;
-	char yflip;
+	uint8 x_flip;
+	uint8 y_flip;
 	//@}
 	
-	//! \brief
-	CoordSys coordSys;
-	//! \brief
-	std::string currentFont;
-	//! \brief
-	Color currentTextColor;
-	//! \brief
+	//! \brief The coordinate system being used by this context
+	CoordSys coordinate_system;
+	//! \brief The current font being used by this context
+	std::string font;
+	//! \brief The current font color being used by this context
+	Color text_color;
+	//! \brief Defines the screen subset to draw the graphics into
 	ScreenRect viewport;
-	//! \brief
-	ScreenRect scissorRect;
-	//! \brief
-	bool scissorEnabled;
+	//! \brief A rectangle to define which portions of the viewport should be cut away when drawing
+	ScreenRect scissor_rectangle;
+	//! \brief Used to enable or disable the scissoring rectangle
+	bool scissoring_enabled;
 }; // class Context
 
 } // namespace private_video

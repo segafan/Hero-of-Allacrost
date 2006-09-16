@@ -1441,19 +1441,19 @@ void GameVideo::_PushContext()
 	
 	// save context information
 	Context c;
-	c.coordSys = _coordSys;
+	c.coordinate_system = _coordSys;
 	c.blend    = _blend;
-	c.xalign   = _xalign;
-	c.yalign   = _yalign;
-	c.xflip    = _xflip;
-	c.yflip    = _yflip;
+	c.x_align   = _xalign;
+	c.y_align   = _yalign;
+	c.x_flip    = _xflip;
+	c.y_flip    = _yflip;
 	
 	c.viewport = _viewport;
-	c.scissorRect = _scissorRect;
-	c.scissorEnabled = _scissorEnabled;
+	c.scissor_rectangle = _scissorRect;
+	c.scissoring_enabled = _scissorEnabled;
 	
-	c.currentFont      = _currentFont;
-	c.currentTextColor = _currentTextColor;
+	c.font      = _currentFont;
+	c.text_color = _currentTextColor;
 	
 	_contextStack.push(c);
 }
@@ -1468,19 +1468,19 @@ void GameVideo::_PopContext()
 {
 	// restore context information and pop it from stack
 	Context c = _contextStack.top();
-	SetCoordSys(c.coordSys);
+	SetCoordSys(c.coordinate_system);
 	_blend  = c.blend;
-	_xalign = c.xalign;
-	_yalign = c.yalign;
-	_xflip  = c.xflip;
-	_yflip  = c.yflip;
+	_xalign = c.x_align;
+	_yalign = c.y_align;
+	_xflip  = c.x_flip;
+	_yflip  = c.y_flip;
 	
-	_currentFont      = c.currentFont;
-	_currentTextColor = c.currentTextColor;
+	_currentFont      = c.font;
+	_currentTextColor = c.text_color;
 	
 	_viewport = c.viewport;
-	_scissorRect = c.scissorRect;
-	_scissorEnabled = c.scissorEnabled;
+	_scissorRect = c.scissor_rectangle;
+	_scissorEnabled = c.scissoring_enabled;
 	_contextStack.pop();
 
 	// restore modelview transformation
