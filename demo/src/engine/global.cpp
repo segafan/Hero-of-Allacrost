@@ -80,9 +80,9 @@ GlobalWeapon::GlobalWeapon(uint32 usable, GameItemID id, uint32 count) :
         
 	_damage_amount = new GlobalStatusAfflictions();
         
-	ReadDataDescriptor read_data;
+	DataDescriptor read_data;
 	string fileName = "dat/objects/" + GlobalManager->GetItemName(id) + ".lua";
-	if (!read_data.OpenFile(fileName.c_str())) {
+	if (!read_data.OpenFile(fileName.c_str(), READ)) {
 		cout << "GLOBAL ERROR: failed to load weapon file: " << GlobalManager->GetItemName(id) << endl;
 	}
 	else {
@@ -109,33 +109,33 @@ GlobalWeapon::~GlobalWeapon() {
 GlobalArmor::GlobalArmor(uint8 type, uint32 usable, GameItemID id, uint32 count) :
 	GlobalObject(type, usable, id, count) {
         
-        /*
-        float x, float y, uint32 volt, uint32 earth, uint32 water, uint32 fire, 
-                                        uint32 piercing, uint32 slashing, uint32 bludgeoning
-        */
-        ReadDataDescriptor read_data;
-        string fileName = "dat/objects/" + GlobalManager->GetItemName(id) + ".lua";
-	if (!read_data.OpenFile(fileName.c_str())) {
+	/*
+		float x, float y, uint32 volt, uint32 earth, uint32 water, uint32 fire, 
+        uint32 piercing, uint32 slashing, uint32 bludgeoning
+	*/
+    DataDescriptor read_data;
+    string fileName = "dat/objects/" + GlobalManager->GetItemName(id) + ".lua";
+	if (!read_data.OpenFile(fileName.c_str(), READ)) {
 		cout << "GLOBAL ERROR: failed to load weapon file: " << GlobalManager->GetItemName(id) << endl;
 	}
-        else {
-                uint32 numAttackPoints = read_data.ReadInt("number_of_attack_points");
-                for(uint32 i = 0; i < numAttackPoints; i++) {
-                        std::string s = read_data.ReadString(("name_"+i));
-                        float x = read_data.ReadFloat(("x_"+i));
-                        float y = read_data.ReadFloat(("y_"+i));
-                        uint32 volt = read_data.ReadInt(("volt_defense_"+i));
-                        uint32 earth = read_data.ReadInt(("earth_defense_"+i));
-                        uint32 water = read_data.ReadInt(("water_defense_"+i));
-                        uint32 fire = read_data.ReadInt(("fire_defense_"+i));
-                        uint32 piercing = read_data.ReadInt(("piercing_defense_"+i));
-                        uint32 slashing = read_data.ReadInt(("slashing_defense_"+i));
-                        uint32 bludgeoning = read_data.ReadInt(("bludgeoning_defense_"+i));
+    else {
+		uint32 numAttackPoints = read_data.ReadInt("number_of_attack_points");
+		for(uint32 i = 0; i < numAttackPoints; i++) {
+			std::string s = read_data.ReadString(("name_"+i));
+			float x = read_data.ReadFloat(("x_"+i));
+			float y = read_data.ReadFloat(("y_"+i));
+			uint32 volt = read_data.ReadInt(("volt_defense_"+i));
+			uint32 earth = read_data.ReadInt(("earth_defense_"+i));
+			uint32 water = read_data.ReadInt(("water_defense_"+i));
+			uint32 fire = read_data.ReadInt(("fire_defense_"+i));
+			uint32 piercing = read_data.ReadInt(("piercing_defense_"+i));
+			uint32 slashing = read_data.ReadInt(("slashing_defense_"+i));
+			uint32 bludgeoning = read_data.ReadInt(("bludgeoning_defense_"+i));
                         
-                        GlobalAttackPoint ap(s,x,y,volt,earth,water,fire,piercing,slashing,bludgeoning);
-                        _attack_points.push_back(ap);
-                }
-        }
+			GlobalAttackPoint ap(s,x,y,volt,earth,water,fire,piercing,slashing,bludgeoning);
+			_attack_points.push_back(ap);
+		}
+	}
 }
 
 GlobalArmor::~GlobalArmor() 
@@ -149,10 +149,10 @@ GlobalArmor::~GlobalArmor()
 GlobalSkill::GlobalSkill(string script_name) {
 	_script_name = script_name;
 	
-	ReadDataDescriptor read_data;
+	DataDescriptor read_data;
 	string fileName = "dat/skills/" + _script_name + ".lua";
 
-	if (!read_data.OpenFile(fileName.c_str())) {
+	if (!read_data.OpenFile(fileName.c_str(), READ)) {
 		cerr << "GLOBAL ERROR: failed to load skill file: " << _script_name << endl;
 	}
 	else {
@@ -247,9 +247,9 @@ GlobalAttackPoint::~GlobalAttackPoint() {
 GlobalEnemy::GlobalEnemy(string file_name) :
 	_file_name(file_name)
 {
-	ReadDataDescriptor read_data;
+	DataDescriptor read_data;
 	string fileName = "dat/enemies/" + _file_name + ".lua";
-	if (!read_data.OpenFile(fileName.c_str())) {
+	if (!read_data.OpenFile(fileName.c_str(), READ)) {
 		cerr << "GLOBAL ERROR: failed to load enemy file: " << _file_name << endl;
 		return;
 	}

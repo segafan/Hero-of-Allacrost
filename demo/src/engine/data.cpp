@@ -29,10 +29,9 @@ SINGLETON_INITIALIZE(GameData);
 
 
 // ****************************************************************************
-// ************************** ReadDataDescriptor ******************************
+// ************************** DataDescriptor **********************************
 // ****************************************************************************
-
-bool ReadDataDescriptor::_IsFileOpen() {
+bool DataDescriptor::_IsFileOpen() {
 	if (_file_open == false) {
 		_error_code |= DATA_BAD_FILE_ACCESS;
 		if (DATA_DEBUG)
@@ -41,41 +40,78 @@ bool ReadDataDescriptor::_IsFileOpen() {
 	return _file_open;
 }
 
-bool ReadDataDescriptor::OpenFile(const char* file_name) {
+bool DataDescriptor::OpenFile(const char* file_name, DATA_ACCESS_MODE access_mode) {
 	_filename = file_name;
-	return OpenFile();
+	return OpenFile(access_mode);
 }
 
-bool ReadDataDescriptor::OpenFile() {
+bool DataDescriptor::OpenFile(DATA_ACCESS_MODE access_mode) {
 	// Open Lua first if it is not open already
-	if (_file_open == false) {
-		_lstack = lua_open();
-		// Load the Lua libraries
-		const luaL_reg *lib = LUALIBS;
-		for (; lib->func; lib++) {
-			lib->func(_lstack);      // open library
-			lua_settop(_lstack, 0);  // Clear the stack
+	_access_mode = access_mode;
+	if (_access_mode == READ)
+	{
+		if (_file_open == false) {
+			_lstack = lua_open();
+			// Load the Lua libraries
+			const luaL_reg *lib = LUALIBS;
+			for (; lib->func; lib++) {
+				lib->func(_lstack);      // open library
+				lua_settop(_lstack, 0);  // Clear the stack
+			}
+		}
+		
+		// Attempt to load the Lua file.
+		if (lua_dofile(_lstack, _filename.c_str())) {
+			cerr << "DATA ERROR: Could not load " << _filename << " :: " << lua_tostring(_lstack, STACK_TOP) << endl;
+			_file_open = false;
+			_filename = "";
+			return false;
+		}
+		else {
+			_file_open = true;
+		}
+		return _file_open;
+	}
+	else
+	{
+		if (_file_open) {
+			cerr << "DATA WARNING: Tried to open a write file when another was already open for writing" << endl;
+			return false;
+		}
+		
+		_outfile.open(_filename.c_str());
+		if (!_outfile) {
+			cerr << "DATA ERROR: Failed to open file " << _filename << " for writing." << endl;
+			_file_open = false;
+			_filename = "";
+		}
+		else {
+			_file_open = true;
+		}
+		
+		return _file_open;
+	}
+}
+
+void DataDescriptor::CloseFile() {
+	_open_tables.clear();
+	
+	if (_access_mode == READ)
+	{
+		lua_close(_lstack);
+		_lstack = NULL;
+		_file_open = false;
+	}
+	else
+	{
+		if (!_file_open) {
+			cerr << "DATA WARNING: Tried to close an output file when nothing was open" << endl;
+		}
+		else {
+			_outfile.close();
+			_file_open = false;
 		}
 	}
-	
-	// Attempt to load the Lua file.
-	if (luaL_loadfile(_lstack, _filename.c_str()) || lua_pcall(_lstack, 0, 0, 0)) {
-		cerr << "DATA ERROR: Could not load " << _filename << " :: " << lua_tostring(_lstack, STACK_TOP) << endl;
-		_file_open = false;
-		_filename = "";
-		return false;
-	}
-	else {
-		_file_open = true;
-	}
-	return _file_open;
-}
-
-void ReadDataDescriptor::CloseFile() {
-	_open_tables.clear();
-	lua_close(_lstack);
-	_lstack = NULL;
-	_file_open = false;
 }
 
 // ************************ Variable Access Functions *************************
@@ -83,7 +119,10 @@ void ReadDataDescriptor::CloseFile() {
 // TODO: All of the functions in this section need more complete error checking.
 // TODO: UString functions need to be implemented at some point
 
-bool ReadDataDescriptor::ReadBool(const char *key) {
+bool DataDescriptor::ReadBool(const char *key) {
+	if (_access_mode != READ)
+		return false;
+
 	if (!_IsFileOpen()) {
 		return false;
 	}
@@ -110,7 +149,10 @@ bool ReadDataDescriptor::ReadBool(const char *key) {
 	return value;
 }
 
-bool ReadDataDescriptor::ReadBool(const int32 key) {
+bool DataDescriptor::ReadBool(const int32 key) {
+	if (_access_mode != READ)
+		return false;
+
 	if (!_IsFileOpen()) {
 		return false;
 	}
@@ -135,7 +177,10 @@ bool ReadDataDescriptor::ReadBool(const int32 key) {
 	return value;
 }
 
-int32 ReadDataDescriptor::ReadInt(const char *key) {
+int32 DataDescriptor::ReadInt(const char *key) {
+	if (_access_mode != READ)
+		return 0;
+
 	if (!_IsFileOpen()) {
 		return 0;
 	}
@@ -162,7 +207,10 @@ int32 ReadDataDescriptor::ReadInt(const char *key) {
 	return value;
 }
 
-int32 ReadDataDescriptor::ReadInt(const int32 key) {
+int32 DataDescriptor::ReadInt(const int32 key) {
+	if (_access_mode != READ)
+		return 0;
+
 	if (!_IsFileOpen()) {
 		return 0;
 	}
@@ -188,7 +236,10 @@ int32 ReadDataDescriptor::ReadInt(const int32 key) {
 	return value;
 }
 
-float ReadDataDescriptor::ReadFloat(const char *key) {
+float DataDescriptor::ReadFloat(const char *key) {
+	if (_access_mode != READ)
+		return 0.0f;
+
 	if (!_IsFileOpen()) {
 		return 0.0f;
 	}
@@ -215,7 +266,10 @@ float ReadDataDescriptor::ReadFloat(const char *key) {
 	return value;
 }
 
-float ReadDataDescriptor::ReadFloat(const int32 key) {
+float DataDescriptor::ReadFloat(const int32 key) {
+	if (_access_mode != READ)
+		return 0.0f;
+
 	if (!_IsFileOpen()) {
 		return 0.0f;
 	}
@@ -241,7 +295,10 @@ float ReadDataDescriptor::ReadFloat(const int32 key) {
 	return value;
 }
 
-string ReadDataDescriptor::ReadString(const char *key) {
+string DataDescriptor::ReadString(const char *key) {
+	if (_access_mode != READ)
+		return "";
+
 	if (!_IsFileOpen()) {
 		return "";
 	}
@@ -268,7 +325,10 @@ string ReadDataDescriptor::ReadString(const char *key) {
 	return value;
 }
 
-string ReadDataDescriptor::ReadString(const int32 key) {
+string DataDescriptor::ReadString(const int32 key) {
+	if (_access_mode != READ)
+		return "";
+
 	if (!_IsFileOpen()) {
 		return "";
 	}
@@ -294,7 +354,10 @@ string ReadDataDescriptor::ReadString(const int32 key) {
 	return value;
 }
 
-ustring ReadDataDescriptor::ReadUString(const char *key, const char *lang) {
+ustring DataDescriptor::ReadUString(const char *key, const char *lang) {
+	if (_access_mode != READ)
+		return MakeUnicodeString("");
+
 	if (!_IsFileOpen()) {
 		return MakeUnicodeString("");
 	}
@@ -302,7 +365,10 @@ ustring ReadDataDescriptor::ReadUString(const char *key, const char *lang) {
 	return MakeUnicodeString("");
 }
 
-ustring ReadDataDescriptor::ReadUString(const int32 key, const char *lang) {
+ustring DataDescriptor::ReadUString(const int32 key, const char *lang) {
+	if (_access_mode != READ)
+		return MakeUnicodeString("");
+
 	if (!_IsFileOpen()) {
 		return MakeUnicodeString("");
 	}
@@ -312,7 +378,10 @@ ustring ReadDataDescriptor::ReadUString(const int32 key, const char *lang) {
 
 // ************************* Table Access Functions ***************************
 
-void ReadDataDescriptor::OpenTable(const char *key) {
+void DataDescriptor::OpenTable(const char *key) {
+	if (_access_mode != READ)
+		return;
+
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -340,7 +409,10 @@ void ReadDataDescriptor::OpenTable(const char *key) {
 	}
 }
 
-void ReadDataDescriptor::OpenTable(const int32 key) {
+void DataDescriptor::OpenTable(const int32 key) {
+	if (_access_mode != READ)
+		return;
+
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -362,7 +434,10 @@ void ReadDataDescriptor::OpenTable(const int32 key) {
 	_open_tables.push_back("numeric");
 }
 
-void ReadDataDescriptor::CloseTable() {
+void DataDescriptor::CloseTable() {
+	if (_access_mode != READ)
+		return;
+
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -375,7 +450,10 @@ void ReadDataDescriptor::CloseTable() {
 	lua_pop(_lstack, 1);
 }
 
-uint32 ReadDataDescriptor::GetTableSize(const char *key) {
+uint32 DataDescriptor::GetTableSize(const char *key) {
+	if (_access_mode != READ)
+		return 0;
+
 	if (!_IsFileOpen()) {
 		return 0;
 	}
@@ -394,7 +472,10 @@ uint32 ReadDataDescriptor::GetTableSize(const char *key) {
 	return size;
 }
 
-uint32 ReadDataDescriptor::GetTableSize(const int32 key) {
+uint32 DataDescriptor::GetTableSize(const int32 key) {
+	if (_access_mode != READ)
+		return 0;
+
 	if (!_IsFileOpen()) {
 		return 0;
 	}
@@ -414,7 +495,10 @@ uint32 ReadDataDescriptor::GetTableSize(const int32 key) {
 	return size;
 }
 
-uint32 ReadDataDescriptor::GetTableSize() {
+uint32 DataDescriptor::GetTableSize() {
+	if (_access_mode != READ)
+		return 0;
+
 	if (!_IsFileOpen()) {
 		return 0;
 	}
@@ -428,7 +512,10 @@ uint32 ReadDataDescriptor::GetTableSize() {
 
 // ************************* Vector Fill Functions ****************************
 
-void ReadDataDescriptor::FillIntVector(const char *key, std::vector<int32> &vect) {
+void DataDescriptor::FillIntVector(const char *key, std::vector<int32> &vect) {
+	if (_access_mode != READ)
+		return;
+	
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -472,7 +559,10 @@ void ReadDataDescriptor::FillIntVector(const char *key, std::vector<int32> &vect
 	}
 }
 
-void ReadDataDescriptor::FillFloatVector(const char *key, std::vector<float> &vect) {
+void DataDescriptor::FillFloatVector(const char *key, std::vector<float> &vect) {
+	if (_access_mode != READ)
+		return;
+
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -516,7 +606,10 @@ void ReadDataDescriptor::FillFloatVector(const char *key, std::vector<float> &ve
 	}
 }
 
-void ReadDataDescriptor::FillStringVector(const char *key, std::vector<std::string> &vect) {
+void DataDescriptor::FillStringVector(const char *key, std::vector<std::string> &vect) {
+	if (_access_mode != READ)
+		return;
+
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -560,7 +653,10 @@ void ReadDataDescriptor::FillStringVector(const char *key, std::vector<std::stri
 	}
 }
 
-void ReadDataDescriptor::FillIntVector(const int32 key, std::vector<int32> &vect) {
+void DataDescriptor::FillIntVector(const int32 key, std::vector<int32> &vect) {
+	if (_access_mode != READ)
+		return;
+
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -611,7 +707,10 @@ void ReadDataDescriptor::FillIntVector(const int32 key, std::vector<int32> &vect
 	}
 }
 
-void ReadDataDescriptor::FillFloatVector(const int32 key, std::vector<float> &vect) {
+void DataDescriptor::FillFloatVector(const int32 key, std::vector<float> &vect) {
+	if (_access_mode != READ)
+		return;
+
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -661,7 +760,10 @@ void ReadDataDescriptor::FillFloatVector(const int32 key, std::vector<float> &ve
 	}
 }
 
-void ReadDataDescriptor::FillStringVector(const int32 key, std::vector<std::string> &vect) {
+void DataDescriptor::FillStringVector(const int32 key, std::vector<std::string> &vect) {
+	if (_access_mode != READ)
+		return;
+
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -711,165 +813,10 @@ void ReadDataDescriptor::FillStringVector(const int32 key, std::vector<std::stri
 	}
 }
 
-// *************************** Lua Function Calls *****************************
-
-void ReadDataDescriptor::CallFunction(const char *func, const char *sig, ...) {
-	if (!_IsFileOpen()) {
-		return;
-	}
-	
-	va_list vl;
-	int narg, nres;  /* number of arguments and results */
-
-	va_start(vl, sig);
-	
-	if (_open_tables.size() == 0) { // This is a global function call
-		lua_getglobal(_lstack, func);  /* get function */
-	}
-	else {
-		// NOTE: Not sure if this is correct...
-		lua_pushstring(_lstack, func);
-		lua_gettable(_lstack, STACK_TOP - 1);
-	}
-		
-	/* push arguments */
-	narg = 0;
-	while (*sig) {  /* push arguments */
-		switch (*sig++) {
-
-		case 'd':  /* double argument */
-			lua_pushnumber(_lstack, va_arg(vl, double));
-			break;
-
-		case 'i':  /* int argument */
-			lua_pushnumber(_lstack, va_arg(vl, int));
-			break;
-
-		case 's':  /* string argument */
-			lua_pushstring(_lstack, va_arg(vl, char *));
-			break;
-
-		case '>':
-			goto endwhile;
-
-		default:
-			std::cout << "invalid option (" << *(sig - 1) << ")\n";
-		}
-		narg++;
-		luaL_checkstack(_lstack, 1, "too many arguments");
-	}
-
-endwhile:
-	/* do the call */
-	nres = strlen(sig);  /* number of expected results */
-	if (lua_pcall(_lstack, narg, nres, 0) != 0)  /* do the call */
-		std::cout << "error running function " << func << " : " << lua_tostring(_lstack, -1);
-
-	/* retrieve results */
-	nres = -nres;  /* stack index of first result */
-	while (*sig) {  /* get results */
-		switch (*sig++) {
-
-		case 'd':  /* double result */
-			if (!lua_isnumber(_lstack, nres))
-				std::cout << "wrong result type\n";
-			*va_arg(vl, double *) = lua_tonumber(_lstack, nres);
-			break;
-
-		case 'i':  /* int result */
-			if (!lua_isnumber(_lstack, nres))
-				std::cout << "wrong result type\n";
-			*va_arg(vl, int *) = (int)lua_tonumber(_lstack, nres);
-			break;
-
-		case 's':  /* string result */
-			if (!lua_isstring(_lstack, nres))
-				std::cout << "wrong result type\n";
-			*va_arg(vl, const char **) = lua_tostring(_lstack, nres);
-			break;
-
-		default:
-			std::cout << "invalid option (" << *(sig - 1) << ")\n";
-		}
-		nres++;
-	}
-	va_end(vl);
-}
-
-// *********************** Lua<->C++ binding functions ************************
-
-// Start the registration of member functions and objects
-void ReadDataDescriptor::RegisterClassStart() {
-	if (!_IsFileOpen()) {
-		return;
-	}
-	
-	lua_newtable(_lstack);
-	lua_pushstring(_lstack, "__index");
-	lua_pushvalue(_lstack, -2);
-	lua_settable(_lstack, -3);
-}
-
-// End the registration of member functions and objects
-void ReadDataDescriptor::RegisterClassEnd() {
-	if (!_IsFileOpen()) {
-		return;
-	}
-	
-	lua_pop(_lstack, 1);
-}
-
-// Register a class' (not objects!) member function to be used from Lua
-template <typename Class, typename Function>
-void ReadDataDescriptor::RegisterMemberFunction(const char *funcname, Class *obj, Function func) {
-	if (!_IsFileOpen()) {
-		return;
-	}
-	
-	lua_pushstring(_lstack, funcname);
-	lua_pushobjectdirectclosure((lua_State*)_lstack, (Class *)obj, func, (unsigned int)0);
-	lua_settable(_lstack, -3);
-	
-	// add error checking later
-}
-
-// Register the object of some class (which was previously registered) to be used from Lua
-template <typename Class>
-void ReadDataDescriptor::RegisterObject(const char *objname, Class *obj) {
-	if (!_IsFileOpen()) {
-		return;
-	}
-	
-	lua_pushstring(_lstack, objname);
-	lua_newtable(_lstack);
-	lua_pushstring(_lstack, "__object");
-	lua_pushlightuserdata(_lstack, (void*)obj);
-	lua_settable(_lstack, -3);
-	lua_pushvalue(_lstack, -3);
-	lua_setmetatable(_lstack, -2);
-	lua_settable(_lstack, LUA_GLOBALSINDEX);
-	
-	// add error checking later
-}
-
-// Register a (non-member or static) function to be used from Lua
-template <typename Function>
-void ReadDataDescriptor::RegisterFunction(const char* funcname, Function func) {
-	if (!_IsFileOpen()) {
-		return;
-	}
-	
-	lua_pushstring(_lstack, funcname);
-	lua_pushdirectclosure(_lstack, func, 0);
-	lua_settable(_lstack, LUA_GLOBALSINDEX);
-	
-	// add error checking later
-}
-
 // **************************** Debugging functions ***************************
 
 // This function is for DEBUGGING PURPOSES ONLY! It prints the contents of the Lua stack from top to bottom.
-void ReadDataDescriptor::DEBUG_PrintLuaStack() {
+void DataDescriptor::DEBUG_PrintLuaStack() {
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -913,21 +860,11 @@ void ReadDataDescriptor::DEBUG_PrintLuaStack() {
 	}
 }
 
-// ****************************************************************************
-// ************************* WriteDataDescriptor *****************************
-// ****************************************************************************
-
-bool WriteDataDescriptor::_IsFileOpen() {
-	if (_file_open == false) {
-		_error_code |= DATA_BAD_FILE_ACCESS;
-		if (DATA_DEBUG)
-			cerr << "DATA ERROR: Attempt to operate on unopened file: " << _filename << endl;
-	}
-	return _file_open;
-}
-
 // Writes the "path" for all the open tables. Ex) tbl1[tbl2][tbl3]
-void WriteDataDescriptor::_WriteTablePath() {
+void DataDescriptor::_WriteTablePath() {
+	if (_access_mode != WRITE)
+		return;
+
 	// No error checking is done since _IsWriteTableOpen is always called before it to make sure that
 	// at least one table is open, and the functions that call this function always check that _outfile
 	// is valid.
@@ -937,48 +874,12 @@ void WriteDataDescriptor::_WriteTablePath() {
 	}
 }
 
-// ************************** File Access Functions ***************************
-
-// Opens a file for writing permissions.
-bool WriteDataDescriptor::OpenFile(const char* file_name) {
-	_filename = file_name;
-	return OpenFile();
-}
-
-bool WriteDataDescriptor::OpenFile() {
-	if (_file_open) {
-		cerr << "DATA WARNING: Tried to open a write file when another was already open for writing" << endl;
-		return false;
-	}
-	
-	_outfile.open(_filename.c_str());
-	if (!_outfile) {
-		cerr << "DATA ERROR: Failed to open file " << _filename << " for writing." << endl;
-		_file_open = false;
-		_filename = "";
-	}
-	else {
-		_file_open = true;
-	}
-	
-	return _file_open;
-}
-
-// Closes the writing output file.
-void WriteDataDescriptor::CloseFile() {
-	_open_tables.clear();
-	if (!_file_open) {
-		cerr << "DATA WARNING: Tried to close an output file when nothing was open" << endl;
-	}
-	else {
-		_outfile.close();
-		_file_open = false;
-	}
-}
-
 // ************************* Comment Write Functions **************************
 
-void WriteDataDescriptor::InsertNewLine() {
+void DataDescriptor::InsertNewLine() {
+	if (_access_mode != WRITE)
+		return;
+
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -986,7 +887,10 @@ void WriteDataDescriptor::InsertNewLine() {
 	_outfile << endl;
 }
 
-void WriteDataDescriptor::WriteComment(const char* comment) {
+void DataDescriptor::WriteComment(const char* comment) {
+	if (_access_mode != WRITE)
+		return;
+
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -994,7 +898,10 @@ void WriteDataDescriptor::WriteComment(const char* comment) {
 	_outfile << "-- " << comment << endl;
 }
 
-void WriteDataDescriptor::WriteComment(std::string& comment) {
+void DataDescriptor::WriteComment(std::string& comment) {
+	if (_access_mode != WRITE)
+		return;
+
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -1002,7 +909,10 @@ void WriteDataDescriptor::WriteComment(std::string& comment) {
 	_outfile << "-- " << comment << endl;
 }
 
-void WriteDataDescriptor::BeginCommentBlock() {
+void DataDescriptor::BeginCommentBlock() {
+	if (_access_mode != WRITE)
+		return;
+
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -1010,7 +920,10 @@ void WriteDataDescriptor::BeginCommentBlock() {
 	_outfile << "--[[" << endl;
 }
 
-void WriteDataDescriptor::EndCommentBlock() {
+void DataDescriptor::EndCommentBlock() {
+	if (_access_mode != WRITE)
+		return;
+
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -1018,7 +931,10 @@ void WriteDataDescriptor::EndCommentBlock() {
 	_outfile << "--]]" << endl;
 }
 
-void WriteDataDescriptor::WriteLine(const char* comment) {
+void DataDescriptor::WriteLine(const char* comment) {
+	if (_access_mode != WRITE)
+		return;
+
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -1026,7 +942,10 @@ void WriteDataDescriptor::WriteLine(const char* comment) {
 	_outfile << comment << endl;
 }
 
-void WriteDataDescriptor::WriteLine(std::string& comment) {
+void DataDescriptor::WriteLine(std::string& comment) {
+	if (_access_mode != WRITE)
+		return;
+
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -1037,7 +956,10 @@ void WriteDataDescriptor::WriteLine(std::string& comment) {
 // ************************ Variable Write Functions **************************
 
 // This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
-void WriteDataDescriptor::WriteBool(const char *key, bool value) {
+void DataDescriptor::WriteBool(const char *key, bool value) {
+	if (_access_mode != WRITE)
+		return;
+
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -1060,7 +982,10 @@ void WriteDataDescriptor::WriteBool(const char *key, bool value) {
 }
 
 // This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
-void WriteDataDescriptor::WriteInt(const char *key, int32 value) {
+void DataDescriptor::WriteInt(const char *key, int32 value) {
+	if (_access_mode != WRITE)
+		return;
+
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -1075,7 +1000,10 @@ void WriteDataDescriptor::WriteInt(const char *key, int32 value) {
 }
 
 // This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
-void WriteDataDescriptor::WriteFloat(const char *key, float value) {
+void DataDescriptor::WriteFloat(const char *key, float value) {
+	if (_access_mode != WRITE)
+		return;
+
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -1092,7 +1020,10 @@ void WriteDataDescriptor::WriteFloat(const char *key, float value) {
 
 // This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
 // TODO: Check for bad strings (ie, if it contains puncutation charcters like , or ])
-void WriteDataDescriptor::WriteString(const char *key, const char* value) {
+void DataDescriptor::WriteString(const char *key, const char* value) {
+	if (_access_mode != WRITE)
+		return;
+
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -1109,7 +1040,10 @@ void WriteDataDescriptor::WriteString(const char *key, const char* value) {
 
 // This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
 // TODO: Check for bad strings (ie, if it contains puncutation charcters like , or ])
-void WriteDataDescriptor::WriteString(const char *key, std::string& value) {
+void DataDescriptor::WriteString(const char *key, std::string& value) {
+	if (_access_mode != WRITE)
+		return;
+
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -1124,7 +1058,10 @@ void WriteDataDescriptor::WriteString(const char *key, std::string& value) {
 }
 
 // This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
-void WriteDataDescriptor::WriteBool(const int32 key, bool value) {
+void DataDescriptor::WriteBool(const int32 key, bool value) {
+	if (_access_mode != WRITE)
+		return;
+
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -1145,7 +1082,10 @@ void WriteDataDescriptor::WriteBool(const int32 key, bool value) {
 }
 
 // This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
-void WriteDataDescriptor::WriteInt(const int32 key, int32 value) {
+void DataDescriptor::WriteInt(const int32 key, int32 value) {
+	if (_access_mode != WRITE)
+		return;
+
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -1162,7 +1102,10 @@ void WriteDataDescriptor::WriteInt(const int32 key, int32 value) {
 }
 
 // This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
-void WriteDataDescriptor::WriteFloat(const int32 key, float value) {
+void DataDescriptor::WriteFloat(const int32 key, float value) {
+	if (_access_mode != WRITE)
+		return;
+
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -1180,7 +1123,10 @@ void WriteDataDescriptor::WriteFloat(const int32 key, float value) {
 
 // This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
 // TODO: Check for bad strings (ie, if it contains puncutation charcters like , or ])
-void WriteDataDescriptor::WriteString(const int32 key, const char* value) {
+void DataDescriptor::WriteString(const int32 key, const char* value) {
+	if (_access_mode != WRITE)
+		return;
+
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -1198,7 +1144,10 @@ void WriteDataDescriptor::WriteString(const int32 key, const char* value) {
 
 // This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
 // TODO: Check for bad strings (ie, if it contains puncutation charcters like , or ])
-void WriteDataDescriptor::WriteString(const int32 key, std::string& value) {
+void DataDescriptor::WriteString(const int32 key, std::string& value) {
+	if (_access_mode != WRITE)
+		return;
+
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -1219,7 +1168,10 @@ void WriteDataDescriptor::WriteString(const int32 key, std::string& value) {
 // ****************************************************************************
 
 // Writes the new table name to the file and manages the state of the context
-void WriteDataDescriptor::BeginTable(const char *key) {
+void DataDescriptor::BeginTable(const char *key) {
+	if (_access_mode != WRITE)
+		return;
+
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -1237,7 +1189,10 @@ void WriteDataDescriptor::BeginTable(const char *key) {
 
 // Does internal scope handling of the lua file so things are written in the write global/table space.
 // This doesn't actually do any file write operations, but we still need to call it.
-void WriteDataDescriptor::EndTable() {
+void DataDescriptor::EndTable() {
+	if (_access_mode != WRITE)
+		return;
+
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -1254,7 +1209,10 @@ void WriteDataDescriptor::EndTable() {
 
 // ************************** Vector Write Functions **************************
 
-void WriteDataDescriptor::WriteBoolVector(const char *key, std::vector<bool> &vect) {
+void DataDescriptor::WriteBoolVector(const char *key, std::vector<bool> &vect) {
+	if (_access_mode != WRITE)
+		return;
+
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -1287,7 +1245,10 @@ void WriteDataDescriptor::WriteBoolVector(const char *key, std::vector<bool> &ve
 	_outfile << " }" << endl;
 }
 
-void WriteDataDescriptor::WriteIntVector(const char *key, std::vector<int32> &vect) {
+void DataDescriptor::WriteIntVector(const char *key, std::vector<int32> &vect) {
+	if (_access_mode != WRITE)
+		return;
+
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -1314,7 +1275,10 @@ void WriteDataDescriptor::WriteIntVector(const char *key, std::vector<int32> &ve
 	_outfile << " }" << endl;
 }
 
-void WriteDataDescriptor::WriteFloatVector(const char *key, std::vector<float> &vect) {
+void DataDescriptor::WriteFloatVector(const char *key, std::vector<float> &vect) {
+	if (_access_mode != WRITE)
+		return;
+
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -1343,7 +1307,10 @@ void WriteDataDescriptor::WriteFloatVector(const char *key, std::vector<float> &
 }
 
 // TODO: Check for bad strings (ie, if it contains puncutation charcters like , or ])
-void WriteDataDescriptor::WriteStringVector(const char *key, std::vector<std::string> &vect) {
+void DataDescriptor::WriteStringVector(const char *key, std::vector<std::string> &vect) {
+	if (_access_mode != WRITE)
+		return;
+
 	if (!_IsFileOpen()) {
 		return;
 	}

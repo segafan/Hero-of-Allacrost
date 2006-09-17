@@ -64,8 +64,8 @@ BootMode::BootMode() :
 	if (BOOT_DEBUG) cout << "BOOT: BootMode constructor invoked." << endl;
 	mode_type = MODE_MANAGER_BOOT_MODE;
 	
-	ReadDataDescriptor read_data;
-	if (!read_data.OpenFile("dat/config/boot.lua")) {
+	DataDescriptor read_data;
+	if (!read_data.OpenFile("dat/config/boot.lua", READ)) {
 		cout << "BOOT ERROR: failed to load data file" << endl;
 	}
 
