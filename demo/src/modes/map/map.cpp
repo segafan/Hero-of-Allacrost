@@ -155,7 +155,7 @@ void MapMode::LoadMap() {
 	VideoManager->PopState();
 
 	// ************* (2) Open data file and begin processing data ***************
-	_map_data.OpenFile("dat/maps/desert_cave.lua");
+	_map_data.OpenFile("dat/maps/desert_cave.lua", READ);
 	_random_encounters = _map_data.ReadBool("random_encounters");
 	if (_random_encounters) {
 		_encounter_rate = _map_data.ReadInt("encounter_rate");

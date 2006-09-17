@@ -44,7 +44,7 @@ namespace private_map {
 // ******************** ActionPathMove ***********************
 
 void ActionPathMove::Load(uint32 table_key) {
-	ReadDataDescriptor *read_data = &(sprite->current_map->_map_data);
+	DataDescriptor *read_data = &(sprite->current_map->_map_data);
 
 	read_data->OpenTable(table_key);
 	destination.row = read_data->ReadInt("row");
@@ -151,7 +151,7 @@ void ActionPathMove::Process() {
 
 
 void ActionFrameDisplay::Load(uint32 table_key) {
-	ReadDataDescriptor *read_data; // Make this point to map data later
+	DataDescriptor *read_data; // Make this point to map data later
 
 	read_data->OpenTable(table_key);
 	display_time = read_data->ReadInt("display_time");

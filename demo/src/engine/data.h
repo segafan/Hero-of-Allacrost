@@ -55,7 +55,6 @@ static const luaL_reg LUALIBS[] = {
 	{"string", luaopen_string},
 	{"math", luaopen_math},
 	{"debug", luaopen_debug},
-	{"loadlib", luaopen_loadlib},
 	{NULL, NULL} 
 };
 
@@ -78,18 +77,23 @@ const uint32 DATA_BAD_FILE_ACCESS     = 0x00000010;
 const uint32 DATA_BAD_VECTOR_SIZE     = 0x00000020;
 //@}
 
+//! \brief Data file access modes
+enum DATA_ACCESS_MODE
+{
+	READ,
+	WRITE,
+};
+
+
 /*!****************************************************************************
  *  \brief An abstract class for representing data files
  *
- *  This class serves as a parent class for readable and writeable data files.
+ *  This class serves to read and write data files.
  *  These data files are actually Lua scripts which are processed by the game
  *  engine. Files with a .lua extension are human-readable, uncompiled files
  *  and files with a .hoa extension are compiled files. 
  *
  *  \note 1) Compiled Lua files exhibit faster performance than uncompile files.
- *  
- *  \note 2) The members of this class can not be set within this class. The user
- *  may only modify the members of this class via the derived children classes.
  *****************************************************************************/
 class DataDescriptor {
 	friend class GameData;
@@ -102,6 +106,16 @@ protected:
 	uint32 _error_code;
 	//! The names of the Lua tables that are currently opened for operations.
 	std::vector<std::string> _open_tables;
+	//! The file access mode for the current open table
+	DATA_ACCESS_MODE _access_mode;
+	//! The Lua stack, which handles all data sharing between C++ and Lua.
+	lua_State *_lstack;
+	//! Returns true if the file is open. Otherwise sets the error code.
+	bool _IsFileOpen();
+	//! The output file stream to write to.
+	std::ofstream _outfile;
+	//! Writes the pathname of all open tables (ie, table1[table2][table3])
+	void _WriteTablePath();
 public:
 	DataDescriptor () { _filename = ""; _file_open = false; _error_code = 0; }
 	~DataDescriptor () {}
@@ -123,7 +137,7 @@ public:
 	 *  \note Everytime this function is called, the internal _error_code flag is cleared.
 	 */
 	uint32 GetError()
-		{ uint32 code = _error_code; _error_code = DATA_NO_ERRORS; return code; }
+	{ uint32 code = _error_code; _error_code = DATA_NO_ERRORS; return code; }
 	
 	//! \name Class Member Access Functions
 	//@{
@@ -132,28 +146,7 @@ public:
 	uint32 GetErrorCode() { return _error_code; }
 	std::vector<std::string> &GetOpenTables() { return _open_tables; }
 	//@}
-}; // class DataDescriptor
 
-/*!****************************************************************************
- *  \brief Manager of readable Lua data scripts.
- *
- *  This class manages Lua files that have read privledges. Each class object
- *  maintains and manages its own Lua state.
- *
- *  \note 1) Compiled Lua files exhibit faster performance than uncompile files.
- *****************************************************************************/
-class ReadDataDescriptor : public DataDescriptor {
-	friend class GameData;
-private:
-	//! The Lua stack, which handles all data sharing between C++ and Lua.
-	lua_State *_lstack;
-	
-	//! Returns true if the file is open. Otherwise sets the error code.
-	bool _IsFileOpen();
-public:
-	ReadDataDescriptor () { _lstack = NULL; }
-	~ReadDataDescriptor () {}
-	
 	//! \name File access functions
 	//! \brief Functions for opening and closing of readable Lua files.
 	//@{
@@ -161,15 +154,15 @@ public:
 	//! \return False on failure.
 	//! \note This is the only function that uses explicit error checking. In other words, an error in
 	//! this function call will not change the return value of the GetError() function
-	bool OpenFile(const char* file_name);
+	bool OpenFile(const char* file_name, DATA_ACCESS_MODE acess_mode);
 	//! OpenFile() with no argument assumes the correct filename is already loaded in the class object.
 	//! \return False on failure.
 	//! \note This is the only function that uses explicit error checking. In other words, an error in
 	//! this function call will not change the return value of the GetError() function
-	bool OpenFile();
+	bool OpenFile(DATA_ACCESS_MODE access_mode);
 	void CloseFile();
 	//@}
-	
+
 	/*! \name Variable Access Functions
 	 *  \brief These functions grab a basic data type from the Lua file and return its value.
 	 *  \param key The name of the Lua variable to access.
@@ -212,6 +205,7 @@ public:
 	uint32 GetTableSize();
 	//@}
 	
+	//! Read Data functions these can only be called when the access mode is READ
 	/*! \name Vector Fill Functions
 	 *  \brief These functions fill a vector with members of a table read from the Lua file.
 	 *  \param key The name of the table to use to fill the vector.	 
@@ -231,122 +225,9 @@ public:
 	void FillFloatVector(const int32 key, std::vector<float> &vect);
 	void FillStringVector(const int32 key, std::vector<std::string> &vect);
 	//@}
-	
-	/*! \name Lua Function Calling Wrapper
-	 *  \brief This function allows you to call arbitrary Lua functions from C++
-	 *  \param *func a string containing the name of the Lua function to be called
-	 *  \param *sig a string describing arguments and results. See below for explanation.
-	  
-	    This function is an almost identical copy of the call_va() function from the book
-	    "Programming In Lua", chapter 25.3. It lets you call an arbitrary Lua function with
-	    a desired number of arguments and results.
-	    
-	    Here's how the *sig string is used: for example, if you want to call a function that
-	    receives two integeres, and returns a double and a string, then *sig would equal "ii>ds".
-	    The ">" is used to delimit results from arguments. Here is a list of descriptors you can use:
-	    "i" - an integer value
-	    "d" - double precision floating point value
-	    "s" - a string. When supplying CallGlobalFunction with a variable to hold the return value of
-	          string type, you should supply the address of a char* . Example: 
-	            char *retval = 0;
-	            CallGlobalFunction("function_returning_a_string", ">s", &retval);
-	    The function allocates the space for the string.
-	*/
-	void CallFunction(const char *func, const char *sig, ...);
-	
-	/*! \name Lua<->C++ binding functions
-	 *  \brief Functions used to bind C++ class member functions and objects to be used directly from Lua.
-	 *  \param *obj the object to be registered (see notes below)
-	 *  \param *objname the name by which the object will be referred from Lua
-	 *  \param func a pointer to the function to be registered
-	 *  \param *funcname the name by which the function will be referred to from Lua
-	  
-	    Calling protocol:
-	    1. RegisterClassStart()
-	    2. RegisterMemberFunction(...), and/or RegisterObject(...), in any order.
-	    3. RegisterClassEnd()
-	    
-	    The RegisterFunction() function can be called at any time, independently of the other functions
-	    from this group.
-	    
-	    Notes on usage:
-	    
-	    - When calling RegisterMemberFunction, the second parameter (Class *obj) should be specified like this:
-	        (MyClass*)0
-	      For example:
-	      	RegisterMemberFunction("GetSomething", (MyClass*)0, &MyClass::GetSomething);
-	      Why add that argument when it's not used, you ask? Well, LuaPlus needs that cast because of it's
-	      template magic, and that's the easy way to let it know what class it's working with.
-	      But, when calling RegisterObject(), you specify a valid object pointer (don't forget the cast).
-	    
-	    - One RegisterClassStart/RegisterClassEnd block creates one Lua metatable and uses it to assign C++ stuff.
-	      What this means is that if you register all the members of a class and, say, one object of that class
-	      inside one RCS/RCE block, and then make a new block which just registers another object of the
-	      same class, that won't work, because that object will be assigned a NEW (and empty) metatable.
-	      The solution: either register all the objects you need inside one RCS/RCE block, or re-register all the
-	      class methods the object needs inside the second block too. This can be useful, actually.
-	      See the HTML documentation for a more detailed explanation. 
-	*/ 
-	//@{
-	void RegisterClassStart();
-	void RegisterClassEnd();
-	template <typename Class, typename Function>
-	void RegisterMemberFunction(const char *funcname, Class *obj, Function func);
-	template <typename Class>
-	void RegisterObject(const char *objname, Class *obj);
-	template <typename Function>
-	void RegisterFunction(const char* funcname, Function func);
-	//@}
-	
-	//! Prints the current contents of the Lua stack
+
 	void DEBUG_PrintLuaStack();
-}; // class ReadDataDescriptor
 
-
-/*!****************************************************************************
- *  \brief Manages writing to Lua files.
- *
- *  This class manages the creation and construction of new Lua files. Currently
- *  it is only capable of writing comments, global values, and tables, but may
- *  have more functionality included in the future, such as writing functions.
- *
- *  \note 1) There is currently no support for modifying or appending to existing
- *  files. This may be added in the future (or it may become a new class).
- *  
- *  \note 2) We may also provide a function to compile the written Lua file as well.
- *  
- *  \note 3) You are allowed to assign the same key a different value twice (ie first
- *  declaring that a = 0, then later declaring that a = "pizza". There is no error
- *  checking for this condition, so just be sure that you know what you are doing.
- *****************************************************************************/
-class WriteDataDescriptor : public DataDescriptor {
-	friend class GameData;
-private:
-	//! The output file stream to write to.
-	std::ofstream _outfile;
-	
-	//! \brief Checks if the output file for writing is open. 
-	//! Used by all the standard write functions to avoid segmentation faults.
-	//! \return True if the output file is open.
-	bool _IsFileOpen();
-	//! Writes the pathname of all open tables (ie, table1[table2][table3])
-	void _WriteTablePath();
-public:
-	WriteDataDescriptor () {}
-	~WriteDataDescriptor () {}
-	
-	/*! \name Lua File Write Functions
-	 *  \brief Opens files for write priveledges.
-	 *  \param file_name The name of the Lua file to be opened.
-	 *  \note These functions are only for overwriting existing files or writing new files. You can
-	 *   not append to or modify existing Lua files with these functions.
-	 */
-	//@{
-	bool OpenFile(const char* file_name);
-	bool OpenFile();
-	void CloseFile();
-	//@}
-	
 	/*! \name Lua CommentWrite Functions
 	 *  \brief Writes comments into a Lua file
 	 *  \param comment The comment to write to the file.
@@ -374,6 +255,7 @@ public:
 	void WriteLine(std::string& comment);
 	//@}
 	
+	//! Write Data functions
 	/*! \name Lua Variable Write Functions
 	 *  \brief These functions will write a single variable and its value to a Lua file.
 	 *  \param *key The name of the Lua variable to write.
@@ -417,8 +299,8 @@ public:
 	void WriteFloatVector(const char *key, std::vector<float> &vect);
 	void WriteStringVector(const char *key, std::vector<std::string> &vect);
 	//@}
-}; // class WriteDataDescriptor
 
+}; // class DataDescriptor
 
 /*!****************************************************************************
  *  \brief Singleton class that manages all open data files.

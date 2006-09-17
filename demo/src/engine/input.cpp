@@ -98,8 +98,8 @@ bool GameInput::SingletonInitialize() {
 
 	// Loads saved settings to setup the key and joystick configurations
 	string in_filename = "dat/config/settings.lua";
-	ReadDataDescriptor input_map_data;
-	if (input_map_data.OpenFile(in_filename.c_str()) == false) {
+	DataDescriptor input_map_data;
+	if (input_map_data.OpenFile(in_filename.c_str(), READ) == false) {
 		cerr << "INPUT ERROR: failed to open data file for reading: "
 		     << in_filename << endl;
 		return false;
@@ -163,8 +163,8 @@ bool GameInput::SingletonInitialize() {
 bool GameInput::RestoreDefaultKeys() {
 	// Load the settings file
 	string in_filename = "dat/config/settings.lua";
-	ReadDataDescriptor settings_file;
-	if (!settings_file.OpenFile(in_filename.c_str())) {
+	DataDescriptor settings_file;
+	if (!settings_file.OpenFile(in_filename.c_str(), READ)) {
 		cerr << "INPUT ERROR: failed to open data file for reading: " << in_filename << endl;
 		return false;
 	}
@@ -195,8 +195,8 @@ bool GameInput::RestoreDefaultJoyButtons()
 {
 	// Load the settings file
 	string in_filename = "dat/config/settings.lua";
-	ReadDataDescriptor settings_file;
-	if (!settings_file.OpenFile(in_filename.c_str())) {
+	DataDescriptor settings_file;
+	if (!settings_file.OpenFile(in_filename.c_str(), READ)) {
 		cerr << "INPUT ERROR: failed to open data file for reading: " << in_filename << endl;
 		return false;
 	}

@@ -296,9 +296,9 @@ private:
 	private_map::MapDialogue *_current_dialogue;
 
 	//! The interface to the file which contains all the map's stored data, sans unicode text.
-	hoa_data::ReadDataDescriptor _map_data;
+	hoa_data::DataDescriptor _map_data;
 	//! The data file which contains all of the on-screen text.
-	hoa_data::ReadDataDescriptor _map_text;
+	hoa_data::DataDescriptor _map_text;
 
 //	std::vector<hoa_global::GEnemy> _map_enemies;
 

@@ -46,9 +46,9 @@ GameSystem::~GameSystem() {
 
 // Makes a call to the data manager for retrieving configured settings
 bool GameSystem::SingletonInitialize() {
-	ReadDataDescriptor settings_data;
+	DataDescriptor settings_data;
 
-	if (!settings_data.OpenFile("dat/config/settings.lua")) {
+	if (!settings_data.OpenFile("dat/config/settings.lua", READ)) {
 		cout << "SYSTEM ERROR: failed to load settings from data file" << endl;
 		return false;
 	}
