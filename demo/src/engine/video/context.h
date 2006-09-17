@@ -44,16 +44,16 @@ namespace private_video {
 class Context {
 public:
 	//! \brief Flag to indicate whether normal alpha blending is to take place
-	uint8 blend;
+	int8 blend;
 	//! \brief Draw alignment flags to determine where an element is drawn relative to the cursor
 	//@{
-	uint8 x_align;
-	uint8 y_align;
+	int8 x_align;
+	int8 y_align;
 	//@}
 	//! \brief Draw flip flags to determine if an element should be drawn flipped across an axis
 	//@{
-	uint8 x_flip;
-	uint8 y_flip;
+	int8 x_flip;
+	int8 y_flip;
 	//@}
 	
 	//! \brief The coordinate system being used by this context
