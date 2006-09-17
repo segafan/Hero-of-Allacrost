@@ -151,3 +151,21 @@ allacrost_SOURCES = \
 	$(engine_SOURCES) \
 	$(modes_SOURCES)
 
+dist-hook:
+	rm -rf `find $(distdir) -name .svn`
+
+data_dirs = dat img mus snd
+find_filter = -name .svn -prune -o -name ".\#*" -o -type d
+find_datadirs = ( cd $(top_srcdir) && find $(data_dirs) $(find_filter) -print )
+find_data = ( cd $(top_srcdir) && find $(data_dirs) $(find_filter) -o -print )
+
+install-data-local:
+	@$(NORMAL_INSTALL)
+	test -z "$(datadir)" || $(mkdir_p) "$(DESTDIR)$(datadir)"
+	( $(find_datadirs) ) | while read dir; do \
+		$(mkdir_p) "$(DESTDIR)$(datadir)/$$dir"; \
+	done; \
+	( $(find_data) ) | while read file; do \
+		echo $(INSTALL_DATA) "$$file" "$(DESTDIR)$(datadir)/$$file"; \
+		$(INSTALL_DATA) "$$file" "$(DESTDIR)$(datadir)/$$file"; \
+	done 
