@@ -83,6 +83,8 @@ void ScriptEvent::RunScript() {
 			current_battle->_battle_sounds[2].PlaySound();
 		else if (MakeStandardString(this->GetSource()->GetName()) == "Claudius")
 			current_battle->_battle_sounds[3].PlaySound();
+		else if (MakeStandardString(this->GetSource()->GetName()) == "Snake")
+			current_battle->_battle_sounds[4].PlaySound();
 	}
 	// TODO: get script from global script repository and run, passing in list of arguments and host actor
 
@@ -292,10 +294,12 @@ void BattleMode::_TEMP_LoadTestData() {
 	_battle_sounds.push_back(SD);
 	_battle_sounds.push_back(SD);
 	_battle_sounds.push_back(SD);
+	_battle_sounds.push_back(SD);
 	_battle_sounds[0].LoadSound("snd/spider_attack.wav");
 	_battle_sounds[1].LoadSound("snd/slime_attack.wav");
 	_battle_sounds[2].LoadSound("snd/skeleton_attack.wav");
 	_battle_sounds[3].LoadSound("snd/sword_swipe.wav");
+	_battle_sounds[4].LoadSound("snd/snake_attack.wav");
 
 	// Construct all battle actors
 	_CreateCharacterActors();
@@ -326,7 +330,7 @@ void BattleMode::_CreateEnemyActors() {
 	vector<StillImage> sprite_frames; // A vector to fill it with all four damage frames for each sprite
 	EnemyActor* enemy; // A pointer to the new enemy actor to add to the battle
 
-	while (_enemy_actors.size() <= 0)
+	while (_enemy_actors.size() == 0)
 	{
 		// Create the Green Slime EnemyActor
 		if (Probability(50))
