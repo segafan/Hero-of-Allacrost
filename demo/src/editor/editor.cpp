@@ -572,8 +572,8 @@ void Editor::_GenerateDatabase()
 		_FileQuit();
 	} // make sure there are images in the directory
 
-	WriteDataDescriptor write_data;
-	if (!write_data.OpenFile("dat/tilesets/tiles_database.lua"))
+	DataDescriptor write_data;
+	if (!write_data.OpenFile("dat/tilesets/tiles_database.lua", WRITE))
 		QMessageBox::warning(this, "Tile Images", "ERROR: could not open dat/tilesets/tiles_database.lua for writing!");
 	else
 	{
@@ -1099,8 +1099,8 @@ void EditorScrollView::_ContextMenuSetup()
 	else
 	{
 		// Read from global database to get property of item.
-		ReadDataDescriptor read_data;
-		if (!read_data.OpenFile(QString("dat/tilesets/tiles_database.lua")))
+		DataDescriptor read_data;
+		if (!read_data.OpenFile("dat/tilesets/tiles_database.lua", READ))
 			QMessageBox::warning(this, "Tiles Database",
 				"ERROR: could not open dat/tilesets/tiles_database.lua for reading!");
 		else
@@ -1216,8 +1216,8 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, const QString& name)
 		_mod_tileset->setAcceptDrops(true);
 
 		// Populate the QIconView for the global tileset.
-		ReadDataDescriptor read_data;
-		if (!read_data.OpenFile("dat/tilesets/tiles_database.lua"))
+		DataDescriptor read_data;
+		if (!read_data.OpenFile("dat/tilesets/tiles_database.lua", READ))
 			QMessageBox::warning(this, "Tileset File",
 				QString("ERROR: could not open dat/tilesets/tiles_database.lua for reading!"));
 		else
@@ -1308,7 +1308,7 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, const QString& name)
 		// Initialize the _tile_properties array.
 		_tile_properties.clear();
 		// Read from global database to get the properties.
-		if (!read_data.OpenFile(QString("dat/tilesets/tiles_database.lua")))
+		if (!read_data.OpenFile("dat/tilesets/tiles_database.lua", READ))
 			QMessageBox::warning(this, "Tiles Database",
 				QString("ERROR: could not open dat/tilesets/tiles_database.lua for reading!"));
 		else
@@ -1348,8 +1348,8 @@ void DatabaseDialog::_UpdateData()
 	// Assume if there is text in the QLineEdit then a modification has been made.
 	if (_tileset_ledit->text() != NULL && _tileset_ledit->text() != "")
 	{
-		WriteDataDescriptor write_data;
-		if (!write_data.OpenFile(QString("dat/tilesets/tileset_%1.lua").arg(_tileset_ledit->text())))
+		DataDescriptor write_data;
+		if (!write_data.OpenFile(QString("dat/tilesets/tileset_%1.lua").arg(_tileset_ledit->text()), WRITE))
 			QMessageBox::warning(this, "Tileset File",
 				QString("ERROR: could not open dat/tilesets/tileset_%1.lua for writing!").arg(_tileset_ledit->text()));
 		else
@@ -1381,8 +1381,8 @@ void DatabaseDialog::_UpdateData()
 	_ProcessWalkability(_prop_tileset->currentItem());
 	
 	QDir tile_dir("img/tiles/", "*.png");			// tile set directory
-	WriteDataDescriptor write_data;
-	if (!write_data.OpenFile("dat/tilesets/tiles_database.lua"))
+	DataDescriptor write_data;
+	if (!write_data.OpenFile("dat/tilesets/tiles_database.lua", WRITE))
 		QMessageBox::warning(this, "Tiles Database", "ERROR: could not open dat/tilesets/tiles_database.lua for writing!");
 	else
 	{
@@ -1457,8 +1457,8 @@ void DatabaseDialog::_ProcessWalkability(QIconViewItem* item)
 		} // must have made some changes in order to record them
 		
 		// Read from global database to get property of item.
-		ReadDataDescriptor read_data;
-		if (!read_data.OpenFile(QString("dat/tilesets/tiles_database.lua")))
+		DataDescriptor read_data;
+		if (!read_data.OpenFile("dat/tilesets/tiles_database.lua", READ))
 			QMessageBox::warning(this, "Tiles Database", "ERROR: could not open dat/tilesets/tiles_database.lua for reading!");
 		else
 		{
@@ -1511,8 +1511,8 @@ void DatabaseDialog::_PopulateTilesetHelper(QIconView *tileset, const QString& n
 		tileset->clear();
 		
 		// Read from tileset Lua file to populate the QIconView.
-		ReadDataDescriptor read_data;
-		if (!read_data.OpenFile(QString("dat/tilesets/tileset_%1.lua").arg(name)))
+		DataDescriptor read_data;
+		if (!read_data.OpenFile(QString("dat/tilesets/tileset_%1.lua").arg(name), READ))
 			QMessageBox::warning(this, "Tileset File",
 				QString("ERROR: could not open dat/tilesets/tileset_%1.lua for reading!").arg(name));
 		else

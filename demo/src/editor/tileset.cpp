@@ -37,8 +37,8 @@ Tileset::Tileset(QWidget* parent, const QString& name)
 	else
 		file_name = name.lower().append(".lua").prepend("tileset_");
 
-	ReadDataDescriptor read_data;
-	if (!read_data.OpenFile(file_name.prepend("dat/tilesets/")))
+	DataDescriptor read_data;
+	if (!read_data.OpenFile(file_name.prepend("dat/tilesets/"), READ))
 		QMessageBox::warning(parent, "Tilesets", QString("ERROR: could not open %1 for reading!").arg(file_name));
 	else
 	{
