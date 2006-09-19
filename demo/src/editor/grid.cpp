@@ -115,10 +115,10 @@ void Grid::SetGridOn(bool value)
 
 void Grid::LoadMap()
 {
-	ReadDataDescriptor read_data;
+	DataDescriptor read_data;
 	vector<int32> vect;             // used to read in vectors from the file
 
-	if (!read_data.OpenFile(_file_name))
+	if (!read_data.OpenFile(_file_name, READ))
 		QMessageBox::warning(this, "Loading File...", QString("ERROR: could not open %1 for reading!").arg(_file_name));
 
 	file_name_list.clear();
@@ -201,9 +201,9 @@ void Grid::SaveMap()
 	int j;      // Loop counter variable FIXME: temporary!
 	vector<int32>::iterator it;  // used to iterate through the layers
 	vector<int32> layer_row;     // one row of a layer
-	WriteDataDescriptor write_data;
+	DataDescriptor write_data;
 	
-	if (!write_data.OpenFile(_file_name))
+	if (!write_data.OpenFile(_file_name, WRITE))
 		QMessageBox::warning(this, "Saving File...", QString("ERROR: could not open %1 for writing!").arg(_file_name));
 	else
 	{
@@ -327,8 +327,8 @@ void Grid::SaveMap()
 
 		write_data.WriteComment("Walkability status of tiles for 8 height levels. Non-zero indicates walkable. Valid range: [0-255]");
 		write_data.BeginTable("tile_walkable");
-		ReadDataDescriptor read_data;
-		if (!read_data.OpenFile("dat/tilesets/tiles_database.lua"))
+		DataDescriptor read_data;
+		if (!read_data.OpenFile("dat/tilesets/tiles_database.lua", READ))
 			QMessageBox::warning(this, "Tiles Database",
 				QString("ERROR: could not open dat/tilesets/tiles_database.lua for reading!"));
 		else
