@@ -1,4 +1,4 @@
-EXTRA_DIST = configure dat img mus snd
+EXTRA_DIST = MANUAL configure dat doc img mus snd
 ACLOCAL_AMFLAGS = -I m4
 INCLUDES = \
 	-I/usr/include/SDL \

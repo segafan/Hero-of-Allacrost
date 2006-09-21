@@ -46,7 +46,7 @@ bool ParseProgramOptions(int32 &return_code, int32 argc, char **argv) {
 		}
 		else if (options[i] == "-d" || options[i] == "--debug") {
 			if ((i + 1) >= options.size()) {
-				cerr << "Option " << options[i] << "requires an argument." << endl;
+				cerr << "Option " << options[i] << " requires an argument." << endl;
 				PrintUsage();
 				return_code = 1;
 				return false;
@@ -96,7 +96,11 @@ bool ParseProgramOptions(int32 &return_code, int32 argc, char **argv) {
 void PrintUsage() {
 	cout << "usage: allacrost [options]" << endl;
 	cout << "  --check/-c        :: checks all files for integrity" << endl;
-	cout << "  --debug/-d <args> :: enables debug statements in specifed sections of the program" << endl;
+	cout << "  --debug/-d <args> :: enables debug statements in specifed sections of the" << endl;
+	cout << "                       program, where <args> can be:" << endl;
+	cout << "                       all, audio, battle, boot, data, global, input," << endl;
+	cout << "                       map, mode_manager, pause, quit, scene, system" << endl;
+	cout << "                       utils, video" << endl;
 	cout << "  --help/-h         :: prints this help menu" << endl;
 	cout << "  --info/-i         :: prints information about the user's system" << endl;
 	cout << "  --reset/-r        :: resets game configuration to use default settings" << endl;
