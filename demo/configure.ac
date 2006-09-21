@@ -83,7 +83,7 @@ AC_CHECK_LIB([m], [log], [], \
 	 exit -1])
 
 AC_PATH_PROGS([LUA_CONFIG], [lua-config])
-if test "x$LUA_CONFIG" != "xnone"; then
+if test "x$LUA_CONFIG" != "xno"; then
 	LUA_CFLAGS="`$LUA_CONFIG --include`"
 	CXXFLAGS="$CXXFLAGS $LUA_CFLAGS"
 fi
