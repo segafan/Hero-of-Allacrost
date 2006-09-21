@@ -323,7 +323,7 @@ void MapMode::LoadMap() {
 	sd = new SpriteDialogue();
 	sd->text.push_back(MakeUnicodeString("If only we had more art, maybe the designers would have put in an exit in this cave!"));
 	sd->speakers.push_back(1); // NPC speaks
-	sd->text.push_back(MakeUnicodeString("Well, they're really under staffed in the art department. We really can't blame them too much."));
+	sd->text.push_back(MakeUnicodeString("Well, they're really under staffed in the art department. We can't blame them too much."));
 	sd->speakers.push_back(0); // Player speaks
 	sp->dialogues.push_back(sd);
 
@@ -487,7 +487,7 @@ void MapMode::LoadMap() {
 	sd->speakers.push_back(4); // NPC speaks
 	sd->text.push_back(MakeUnicodeString("Probably because you're just a normal non playable character with no special role. I mean look at you, you're dressed in rags."));
 	sd->speakers.push_back(0); // Player speaks
-	sd->text.push_back(MakeUnicodeString("They can't do this to me! Just wait until the director hears from my agent! I've been nominated for six academy awards, how dare they disgrace me like this!"));
+	sd->text.push_back(MakeUnicodeString("They can't do this to me! Just you wait until the director hears from my agent! How dare they disgrace me like this!"));
 	sd->speakers.push_back(4); // NPC speaks
 	sd->text.push_back(MakeUnicodeString("..... (I wonder who she thinks she is)"));
 	sd->speakers.push_back(0); // NPC speaks
@@ -1291,8 +1291,8 @@ void MapMode::Draw() {
 	_GetDrawInfo();
 
 	// TEMP: Darken the cave scene
-	VideoManager->EnableSceneLighting(Color(0.75f, 0.75f, 0.75f, 1.0f)); // black, 75% transparent
-	VideoManager->EnablePointLights();
+// 	VideoManager->EnableSceneLighting(Color(0.75f, 0.75f, 0.75f, 1.0f)); // black, 75% transparent
+// 	VideoManager->EnablePointLights();
 
 	// ************** (1) Draw the lower tile layer *************
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_NO_BLEND, 0);
@@ -1330,7 +1330,7 @@ void MapMode::Draw() {
                 // Only draw objects that are visible
 		if (_ground_objects[i]->status & VISIBLE) {
 			(_ground_objects[i])->Draw();
-			(_ground_objects[i])->DrawLight();
+// 			(_ground_objects[i])->DrawLight();
 		}
 	}
 
@@ -1372,11 +1372,11 @@ void MapMode::Draw() {
 		}
 	}
 
-	VideoManager->ApplyLightingOverlay();
+// 	VideoManager->ApplyLightingOverlay();
 
 	// Disable lighting for dialogue menus and GUI
-	VideoManager->DisableSceneLighting();
-	VideoManager->DisablePointLights();
+// 	VideoManager->DisableSceneLighting();
+// 	VideoManager->DisablePointLights();
 
 	// ************** (8) Draw the dialogue menu and text *************
 	if (_map_state == DIALOGUE) {
