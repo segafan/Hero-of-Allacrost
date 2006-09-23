@@ -61,16 +61,6 @@ enum TILE_MODE_TYPE
 	TOTAL_TILE   = 3
 };
 
-//! Different layer editing modes follow.
-enum LAYER_EDIT_TYPE
-{
-	INVALID_LAYER = -1,
-	LOWER_LAYER   = 0,
-	MIDDLE_LAYER  = 1,
-	UPPER_LAYER   = 2,
-	TOTAL_LAYER   = 3
-};
-
 class EditorScrollView;
 
 class Editor: public QMainWindow
@@ -148,7 +138,7 @@ class Editor: public QMainWindow
 		//! Sets current edit mode
 		void _SetEditMode(TILE_MODE_TYPE new_mode);
 		//! Sets currently edited layer
-		void _SetEditLayer(LAYER_EDIT_TYPE new_layer);
+		void _SetEditLayer(LAYER_TYPE new_layer);		
 
 		//! This is used to represent the File menu.
 		QPopupMenu* _file_menu;
@@ -188,7 +178,7 @@ class Editor: public QMainWindow
 		bool _ul_on;
 
 		//! Edit layer items in Tile menu
-		std::map<LAYER_EDIT_TYPE, int> _layer_ids;
+		std::map<LAYER_TYPE, int> _layer_ids;
 		//! Mode items in Tile menu
 		std::map<TILE_MODE_TYPE, int> _mode_ids;
 }; // class Editor
@@ -240,6 +230,9 @@ class EditorScrollView: public QScrollView
 		//! \param height Height of the map.
 		void Resize(int width, int height); 
 
+		//! Gets currently edited layer
+		std::vector<int32>& GetCurrentLayer();
+
 		//! Needed for changing the editing mode and painting.
 		friend class Editor;
 
@@ -269,12 +262,15 @@ class EditorScrollView: public QScrollView
 		void _ToggleWalkCheckboxes(bool on);
 
 	private:
+		//! Removes current tile if it is no longer used
+		void _RemoveIfUnused(int file_index);
+
 		//! Current working map.
 		Grid *_map;
 		//! Current tile edit mode being used.
 		TILE_MODE_TYPE  _tile_mode;
 		//! Current layer being edited.
-		LAYER_EDIT_TYPE _layer_edit;
+		LAYER_TYPE _layer_edit;
 		//! Mouse is at this tile index on the map.
 		int _tile_index;
 		//! Menu used on right-clicks of the mouse on the map.
@@ -284,6 +280,9 @@ class EditorScrollView: public QScrollView
 		QCheckBox *_allwalk_checkbox;
 		//! Array of walkability checkboxes in the context menu.
 		QCheckBox *_walk_checkbox[8];
+
+		//! Stores source index of moved tiles
+		int _move_source_index;
 }; // class EditorScrollView
 
 class DatabaseDialog: public QTabDialog

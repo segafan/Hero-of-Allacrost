@@ -15,12 +15,20 @@
  *****************************************************************************/
 			   
 #include <iostream>
-#include "grid.h"
+#include "grid2.h"
 
 using namespace hoa_data;
 using namespace hoa_editor;
 using namespace hoa_video;
 using namespace std;
+
+namespace hoa_editor
+{
+	LAYER_TYPE& operator++(LAYER_TYPE& value, int dummy) {
+		value=static_cast<LAYER_TYPE>(static_cast<int>(value)+1);
+		return value;
+	}
+}
 
 Grid::Grid(QWidget* parent, const QString& name, int width, int height)
 	: QGLWidget(parent, (const char*) name)
@@ -45,9 +53,9 @@ Grid::Grid(QWidget* parent, const QString& name, int width, int height)
 	// Initialize layers
 	for (int i = 0; i < _width * _height; i++)
 	{
-		lower_layer.push_back(-1);
-		middle_layer.push_back(-1);
-		upper_layer.push_back(-1);
+		_lower_layer.push_back(-1);
+		_middle_layer.push_back(-1);
+		_upper_layer.push_back(-1);
 		tiles_walkable.push_back(-1);
 		indiv_walkable.push_back(-1);
 	} // -1 is used for no tiles
@@ -113,6 +121,18 @@ void Grid::SetGridOn(bool value)
 	updateGL();
 } // SetGridOn(...)
 
+std::vector<int32>& Grid::GetLayer(LAYER_TYPE layer) {
+	switch(layer) {
+		case LOWER_LAYER:
+			return _lower_layer;
+		case MIDDLE_LAYER:
+			return _middle_layer;
+		case UPPER_LAYER:
+			return _upper_layer;
+	}
+	return _lower_layer;
+}
+
 void Grid::LoadMap()
 {
 	DataDescriptor read_data;
@@ -122,9 +142,9 @@ void Grid::LoadMap()
 		QMessageBox::warning(this, "Loading File...", QString("ERROR: could not open %1 for reading!").arg(_file_name));
 
 	file_name_list.clear();
-	lower_layer.clear();
-	middle_layer.clear();
-	upper_layer.clear();
+	_lower_layer.clear();
+	_middle_layer.clear();
+	_upper_layer.clear();
 	
 	_height = read_data.ReadInt("row_count");
 	_width  = read_data.ReadInt("col_count");
@@ -147,7 +167,7 @@ void Grid::LoadMap()
 	{
 		read_data.FillIntVector(i, vect);
 		for (vector<int32>::iterator it = vect.begin(); it != vect.end(); it++)
-			lower_layer.push_back(*it);
+			_lower_layer.push_back(*it);
 		vect.clear();
 	} // iterate through the rows of the lower layer
 	read_data.CloseTable();
@@ -157,7 +177,7 @@ void Grid::LoadMap()
 	{
 		read_data.FillIntVector(i, vect);
 		for (vector<int32>::iterator it = vect.begin(); it != vect.end(); it++)
-			middle_layer.push_back(*it);
+			_middle_layer.push_back(*it);
 		vect.clear();
 	} // iterate through the rows of the lower layer
 	read_data.CloseTable();
@@ -167,7 +187,7 @@ void Grid::LoadMap()
 	{
 		read_data.FillIntVector(i, vect);
 		for (vector<int32>::iterator it = vect.begin(); it != vect.end(); it++)
-			upper_layer.push_back(*it);
+			_upper_layer.push_back(*it);
 		vect.clear();
 	} // iterate through the rows of the lower layer
 	read_data.CloseTable();
@@ -262,7 +282,7 @@ void Grid::SaveMap()
 
 		write_data.WriteComment("The lower tile layer. The numbers are indeces to the tile_mappings table.");
 		write_data.BeginTable("lower_layer");
-		it = lower_layer.begin();
+		it = _lower_layer.begin();
 		for (int row = 0; row < _height; row++)
 		{
 			for (int col = 0; col < _width; col++)
@@ -279,7 +299,7 @@ void Grid::SaveMap()
 
 		write_data.WriteComment("The middle tile layer. The numbers are indeces to the tile_mappings table.");
 		write_data.BeginTable("middle_layer");
-		it = middle_layer.begin();
+		it = _middle_layer.begin();
 		for (int row = 0; row < _height; row++)
 		{
 			for (int col = 0; col < _width; col++)
@@ -296,7 +316,7 @@ void Grid::SaveMap()
 
 		write_data.WriteComment("The upper tile layer. The numbers are indeces to the tile_mappings table.");
 		write_data.BeginTable("upper_layer");
-		it = upper_layer.begin();
+		it = _upper_layer.begin();
 		for (int row = 0; row < _height; row++)
 		{
 			for (int col = 0; col < _width; col++)
@@ -344,7 +364,7 @@ void Grid::SaveMap()
 						layer_row.push_back(tiles_walkable[row * _width + col]);
 					else
 					{
-						QString temp = file_name_list[lower_layer[row * _width + col]];
+						QString temp = file_name_list[_lower_layer[row * _width + col]];
 						temp.remove(".png").remove("img/tiles/");
 						read_data.OpenTable("tile_filenames");
 						uint32 table_size = read_data.GetTableSize();
@@ -423,7 +443,7 @@ void Grid::paintGL()
 	{
 		VideoManager->Move(0.0f, 0.0f);
 		col = 0;
-		for (it = lower_layer.begin(); it != lower_layer.end(); it++)
+		for (it = _lower_layer.begin(); it != _lower_layer.end(); it++)
 		{
 			if (*it != -1)
 			{
@@ -444,7 +464,7 @@ void Grid::paintGL()
 	{
 		VideoManager->Move(0.0f, 0.0f);
 		col = 0;
-		for (it = middle_layer.begin(); it != middle_layer.end(); it++)
+		for (it = _middle_layer.begin(); it != _middle_layer.end(); it++)
 		{
 			if (*it != -1)
 			{
@@ -465,7 +485,7 @@ void Grid::paintGL()
 	{
 		VideoManager->Move(0.0f, 0.0f);
 		col = 0;
-		for (it = upper_layer.begin(); it != upper_layer.end(); it++)
+		for (it = _upper_layer.begin(); it != _upper_layer.end(); it++)
 		{
 			if (*it != -1)
 			{
