@@ -56,11 +56,11 @@ Editor::Editor() : QMainWindow(0, 0, WDestructiveClose)
 	_mode_ids.insert(std::pair<TILE_MODE_TYPE,int>(DELETE_TILE,delete_mode_id));
 	_tiles_menu->insertSeparator();
 	int edit_ll_id = _tiles_menu->insertItem("Edit &lower layer", this, SLOT(_TileEditLL()));
-	_layer_ids.insert(std::pair<LAYER_EDIT_TYPE,int>(LOWER_LAYER,edit_ll_id));
+	_layer_ids.insert(std::pair<LAYER_TYPE,int>(LOWER_LAYER,edit_ll_id));
 	int edit_ml_id = _tiles_menu->insertItem("Edit &middle layer", this, SLOT(_TileEditML()));
-	_layer_ids.insert(std::pair<LAYER_EDIT_TYPE,int>(MIDDLE_LAYER,edit_ml_id));
+	_layer_ids.insert(std::pair<LAYER_TYPE,int>(MIDDLE_LAYER,edit_ml_id));
 	int edit_ul_id = _tiles_menu->insertItem("Edit &upper layer", this, SLOT(_TileEditUL()));
-	_layer_ids.insert(std::pair<LAYER_EDIT_TYPE,int>(UPPER_LAYER,edit_ul_id));
+	_layer_ids.insert(std::pair<LAYER_TYPE,int>(UPPER_LAYER,edit_ul_id));
 	_tiles_menu->insertSeparator();
 	_tiles_menu->insertItem("&Manage database...", this, SLOT(_TileDatabase()), CTRL+Key_D);
 	
@@ -385,59 +385,19 @@ void Editor::_TileLayerFill()
 	} // add tile filename to the list in use
 
 	vector<int32>::iterator it;    // used to iterate over an entire layer
-	switch (_ed_scrollview->_layer_edit)
-	{
-		case LOWER_LAYER:
-			for (it = _ed_scrollview->_map->lower_layer.begin();
-					it != _ed_scrollview->_map->lower_layer.end(); it++)
+	vector<int32>& CurrentLayer=_ed_scrollview->GetCurrentLayer();
+	for (it = CurrentLayer.begin();
+					it != CurrentLayer.end(); it++)
 				*it = file_index;
-			break;
-
-		case MIDDLE_LAYER:
-			for (it = _ed_scrollview->_map->middle_layer.begin();
-					it != _ed_scrollview->_map->middle_layer.end(); it++)
-				*it = file_index;
-			break;
-
-		case UPPER_LAYER:
-			for (it = _ed_scrollview->_map->upper_layer.begin();
-					it != _ed_scrollview->_map->upper_layer.end(); it++)
-				*it = file_index;
-			break;
-
-		default:
-			QMessageBox::warning(this, "Layer editing mode",
-				"ERROR: Invalid layer editing mode!");
-	} // switch on layer editing mode
 } // _TileLayerFill()
 
 void Editor::_TileLayerClear()
 {
 	vector<int32>::iterator it;    // used to iterate over an entire layer
-	switch (_ed_scrollview->_layer_edit)
-	{
-		case LOWER_LAYER:
-			for (it = _ed_scrollview->_map->lower_layer.begin();
-					it != _ed_scrollview->_map->lower_layer.end(); it++)
+	vector<int32>& CurrentLayer=_ed_scrollview->GetCurrentLayer();
+	for (it = CurrentLayer.begin();
+					it != CurrentLayer.end(); it++)
 				*it = -1;
-			break;
-
-		case MIDDLE_LAYER:
-			for (it = _ed_scrollview->_map->middle_layer.begin();
-					it != _ed_scrollview->_map->middle_layer.end(); it++)
-				*it = -1;
-			break;
-
-		case UPPER_LAYER:
-			for (it = _ed_scrollview->_map->upper_layer.begin();
-					it != _ed_scrollview->_map->upper_layer.end(); it++)
-				*it = -1;
-			break;
-
-		default:
-			QMessageBox::warning(this, "Layer editing mode",
-				"ERROR: Invalid layer editing mode!");
-	} // switch on layer editing mode
 } // _TileLayerClear()
 
 void Editor::_SetEditMode(TILE_MODE_TYPE new_mode)
@@ -471,7 +431,7 @@ void Editor::_TileModeDelete()
 		_SetEditMode(DELETE_TILE);
 } // _TileModeDelete()
 
-void Editor::_SetEditLayer(LAYER_EDIT_TYPE new_layer)
+void Editor::_SetEditLayer(LAYER_TYPE new_layer)
 {
 	if(_ed_scrollview == NULL)
 		return;
@@ -750,7 +710,10 @@ void EditorScrollView::Resize(int width, int height)
 	_map->SetWidth(width);
 } // Resize(...)
 
-
+std::vector<int32>& EditorScrollView::GetCurrentLayer()
+{
+	return _map->GetLayer(_layer_edit);
+}
 
 // ********** Protected slots **********
 
@@ -783,30 +746,14 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 					file_index = _map->file_name_list.findIndex(name);
 				} // add tile filename to the list in use
 
-				switch (_layer_edit)
-				{
-					case LOWER_LAYER:
-						_map->lower_layer[_tile_index] = file_index;
-						break;
-
-					case MIDDLE_LAYER:
-						_map->middle_layer[_tile_index] = file_index;
-						break;
-
-					case UPPER_LAYER:
-						_map->upper_layer[_tile_index] = file_index;
-						break;
-
-					default:
-						QMessageBox::warning(this, "Layer editing mode",
-							"ERROR: Invalid layer editing mode!");
-				} // switch on layer editing mode
+				GetCurrentLayer()[_tile_index] = file_index;
 			} // left mouse button was pressed
 			break;
 		} // edit mode PAINT_TILE
 
 		case MOVE_TILE: // start moving a tile
 		{
+			_move_source_index=_tile_index;
 			break;
 		} // edit mode MOVE_TILE
 
@@ -814,93 +761,12 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 		{
 			if (evt->button() == Qt::LeftButton)
 			{
-				switch (_layer_edit)
-				{
-					case LOWER_LAYER:
-					{
-						int file_index = _map->lower_layer[_tile_index];
-						// delete the tile
-						_map->lower_layer[_tile_index] = -1;
+				int file_index = GetCurrentLayer()[_tile_index];
 
-						// find other instances of the tile
-						vector<int32>::iterator it;
-						for (it = _map->lower_layer.begin();
-							it != _map->lower_layer.end() && *it != file_index; it++);
-						if (it == _map->lower_layer.end())
-						{
-							for (it = _map->middle_layer.begin();
-								it != _map->middle_layer.end() && *it != file_index; it++);
-							if (it == _map->middle_layer.end())
-							{
-								for (it = _map->upper_layer.begin();
-									it != _map->upper_layer.end() && *it != file_index; it++);
-								// no other instances were found, delete tile filename
-								if (it == _map->upper_layer.end())
-									_map->file_name_list.erase(
-										_map->file_name_list.at(file_index));
-							} // no instances found in the middle layer
-						} // no instances found in the lower layer
-						break;
-					} // layer LOWER_LAYER
+				// delete the tile
+				GetCurrentLayer()[_tile_index] = -1;
 
-					case MIDDLE_LAYER:
-					{
-						int file_index = _map->middle_layer[_tile_index];
-						// delete the tile
-						_map->middle_layer[_tile_index] = -1;
-
-						// find other instances of the tile
-						vector<int32>::iterator it;
-						for (it = _map->lower_layer.begin();
-							it != _map->lower_layer.end() && *it != file_index; it++);
-						if (it == _map->lower_layer.end())
-						{
-							for (it = _map->middle_layer.begin();
-								it != _map->middle_layer.end() && *it != file_index; it++);
-							if (it == _map->middle_layer.end())
-							{
-								for (it = _map->upper_layer.begin();
-									it != _map->upper_layer.end() && *it != file_index; it++);
-								// no other instances were found, delete tile filename
-								if (it == _map->upper_layer.end())
-									_map->file_name_list.erase(
-										_map->file_name_list.at(file_index));
-							} // no instances found in the middle layer
-						} // no instances found in the lower layer
-						break;
-					} // layer MIDDLE_LAYER
-
-					case UPPER_LAYER:
-					{
-						int file_index = _map->upper_layer[_tile_index];
-						// delete the tile
-						_map->upper_layer[_tile_index] = -1;
-
-						// find other instances of the tile
-						vector<int32>::iterator it;
-						for (it = _map->lower_layer.begin();
-							it != _map->lower_layer.end() && *it != file_index; it++);
-						if (it == _map->lower_layer.end())
-						{
-							for (it = _map->middle_layer.begin();
-								it != _map->middle_layer.end() && *it != file_index; it++);
-							if (it == _map->middle_layer.end())
-							{
-								for (it = _map->upper_layer.begin();
-									it != _map->upper_layer.end() && *it != file_index; it++);
-								// no other instances were found, delete tile filename
-								if (it == _map->upper_layer.end())
-									_map->file_name_list.erase(
-										_map->file_name_list.at(file_index));
-							} // no instances found in the middle layer
-						} // no instances found in the lower layer
-						break;
-					} // layer UPPER_LAYER
-
-					default:
-						QMessageBox::warning(this, "Layer editing mode",
-							"ERROR: Invalid layer editing mode!");
-				} // switch on layer editing mode
+				_RemoveIfUnused(file_index);
 			} // left mouse button was pressed
 			break;
 		} // edit mode DELETE_TILE
@@ -944,24 +810,7 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 						file_index = _map->file_name_list.findIndex(name);
 					} // add tile filename to the list in use
 
-					switch (_layer_edit)
-					{
-						case LOWER_LAYER:
-							_map->lower_layer[_tile_index] = file_index;
-							break;
-
-						case MIDDLE_LAYER:
-							_map->middle_layer[_tile_index] = file_index;
-							break;
-
-						case UPPER_LAYER:
-							_map->upper_layer[_tile_index] = file_index;
-							break;
-
-						default:
-							QMessageBox::warning(this, "Layer editing mode",
-								"ERROR: Invalid layer editing mode!");
-					} // switch on layer editing mode
+					GetCurrentLayer()[_tile_index] = file_index;
 				} // left mouse button was pressed
 				break;
 			} // edit mode PAINT_TILE
@@ -975,96 +824,12 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 			{
 				if (evt->state() == Qt::LeftButton)
 				{
-					switch (_layer_edit)
-					{
-						case LOWER_LAYER:
-						{
-							int file_index = _map->lower_layer[_tile_index];
-							// delete the tile
-							_map->lower_layer[_tile_index] = -1;
+					int file_index = GetCurrentLayer()[_tile_index];
 
-							// find other instances of the tile
-							vector<int32>::iterator it;
-							for (it = _map->lower_layer.begin();
-								it != _map->lower_layer.end() && *it != file_index;
-								it++);
-							if (it == _map->lower_layer.end())
-							{
-								for (it = _map->middle_layer.begin();
-									it != _map->middle_layer.end() && *it != file_index; it++);
-								if (it == _map->middle_layer.end())
-								{
-									for (it = _map->upper_layer.begin();
-										it != _map->upper_layer.end() && *it != file_index; it++);
-									// no other instances were found, delete tile filename
-									if (it == _map->upper_layer.end())
-										_map->file_name_list.erase(
-											_map->file_name_list.at(file_index));
-								} // no instances found in the middle layer
-							} // no instances found in the lower layer
-							break;
-						} // layer LOWER_LAYER
+					// delete the tile
+					GetCurrentLayer()[_tile_index] = -1;
 
-						case MIDDLE_LAYER:
-						{
-							int file_index = _map->middle_layer[_tile_index];
-							// delete the tile
-							_map->middle_layer[_tile_index] = -1;
-
-							// find other instances of the tile
-							vector<int32>::iterator it;
-							for (it = _map->lower_layer.begin();
-								it != _map->lower_layer.end() && *it != file_index;
-								it++);
-							if (it == _map->lower_layer.end())
-							{
-								for (it = _map->middle_layer.begin();
-									it != _map->middle_layer.end() && *it != file_index; it++);
-								if (it == _map->middle_layer.end())
-								{
-									for (it = _map->upper_layer.begin();
-										it != _map->upper_layer.end() && *it != file_index; it++);
-									// no other instances were found, delete tile filename
-									if (it == _map->upper_layer.end())
-										_map->file_name_list.erase(
-											_map->file_name_list.at(file_index));
-								} // no instances found in the middle layer
-							} // no instances found in the lower layer
-							break;
-						} // layer MIDDLE_LAYER
-
-						case UPPER_LAYER:
-						{
-							int file_index = _map->upper_layer[_tile_index];
-							// delete the tile
-							_map->upper_layer[_tile_index] = -1;
-
-							// find other instances of the tile
-							vector<int32>::iterator it;
-							for (it = _map->lower_layer.begin();
-								it != _map->lower_layer.end() && *it != file_index;
-								it++);
-							if (it == _map->lower_layer.end())
-							{
-								for (it = _map->middle_layer.begin();
-									it != _map->middle_layer.end() && *it != file_index; it++);
-								if (it == _map->middle_layer.end())
-								{
-									for (it = _map->upper_layer.begin();
-										it != _map->upper_layer.end() && *it != file_index; it++);
-									// no other instances were found, delete tile filename
-									if (it == _map->upper_layer.end())
-										_map->file_name_list.erase(
-											_map->file_name_list.at(file_index));
-								} // no instances found in the middle layer
-							} // no instances found in the lower layer
-							break;
-						} // layer UPPER_LAYER
-
-						default:
-							QMessageBox::warning(this, "Layer editing mode",
-								"ERROR: Invalid layer editing mode!");
-					} // switch on layer editing mode
+					_RemoveIfUnused(file_index);
 				} // left mouse button was pressed
 				break;
 			} // edit mode DELETE_TILE
@@ -1083,8 +848,13 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 {
 	// Should already be finished painting or deleting tiles.
 
+	_tile_index = evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH;
+
 	if (_tile_mode == MOVE_TILE)
 	{
+		std::vector<int32>& layer=GetCurrentLayer();
+		layer[_tile_index] = layer[_move_source_index];
+		layer[_move_source_index] = -1;
 	} // finish moving a tile
 	else if (_tile_mode == INVALID_TILE)
 		QMessageBox::warning(this, "Tile editing mode",
@@ -1151,13 +921,13 @@ void EditorScrollView::_ContextMenuSetup()
 			uint32 index = 0;
 			QString filename = "";
 			while (filename != _map->file_name_list[
-					_map->lower_layer[_tile_index]] && index < table_size)
+					_map->GetLayer(LOWER_LAYER)[_tile_index]] && index < table_size)
 			{
 				index++;
 				filename = read_data.ReadString(index);
 			} // find index of current tile in the database
 			read_data.CloseTable();
-			if (filename == _map->file_name_list[_map->lower_layer[_tile_index]])
+			if (filename == _map->file_name_list[_map->GetLayer(LOWER_LAYER)[_tile_index]])
 			{
 				read_data.OpenTable("tile_filenames");
 				uint8 walkable = read_data.ReadInt(index);
@@ -1196,6 +966,25 @@ void EditorScrollView::_ToggleWalkCheckboxes(bool on)
 			_walk_checkbox[i]->setChecked(false);
 } // _ToggleWalkCheckboxes(...)
 
+// *************** Private Functions ***************
+void EditorScrollView::_RemoveIfUnused(int file_index) 
+{
+	// find other instances of the tile 
+	bool Found=false;
+	for(LAYER_TYPE layer=LOWER_LAYER;layer<=UPPER_LAYER && !Found;layer++) {
+		vector<int32>::iterator it;
+		vector<int32>& CurrentLayer=_map->GetLayer(layer);
+		// Loop until we either find something or we are at the end of the vector
+		for (it = CurrentLayer.begin(); 
+			it != CurrentLayer.end() && *it != file_index; it++);
+			if(it!=CurrentLayer.end())
+				Found=true;
+	}
+
+	// If tile was not found, remove it from the list
+	if(!Found)
+		_map->file_name_list.erase(_map->file_name_list.at(file_index));
+}
 
 
 /************************

@@ -46,6 +46,18 @@
 namespace hoa_editor
 {
 
+	//! Different layers
+enum LAYER_TYPE
+{
+	INVALID_LAYER = -1,
+	LOWER_LAYER   = 0,
+	MIDDLE_LAYER  = 1,
+	UPPER_LAYER   = 2,
+	TOTAL_LAYER   = 3
+};
+
+LAYER_TYPE& operator++(LAYER_TYPE& value, int dummy);
+
 class Grid: public QGLWidget
 {
 	Q_OBJECT     // macro needed to use QT's slots and signals
@@ -68,14 +80,13 @@ class Grid: public QGLWidget
 		void SetULOn(bool value);           // sets upper layer on/off
 		void SetGridOn(bool value);         // sets grid on/off
 
+		std::vector<int32>& GetLayer(LAYER_TYPE layer);
+
 		void LoadMap();                     // loads a map from a config file
 		void SaveMap();                     // saves the map to a config file
 
 		QStringList file_name_list;         // list of tile file names
 		QStringList tileset_list;           // list of tileset names
-		std::vector<int32> lower_layer;     // vector of tiles in the lower layer
-		std::vector<int32> middle_layer;    // vector of tiles in the middle layer
-		std::vector<int32> upper_layer;     // vector of tiles in the upper layer
 		std::vector<int32> tiles_walkable;  // vector of walkability of tiles
 		std::vector<int32> indiv_walkable;  // vector of walkability of individual tiles
 
@@ -158,6 +169,10 @@ class Grid: public QGLWidget
 		bool _ll_on;            // TRUE = lower layer is displayer, else FALSE
 		bool _ml_on;            // TRUE = middle layer is displayer, else FALSE
 		bool _ul_on;            // TRUE = upper layer is displayer, else FALSE
+
+		std::vector<int32> _lower_layer;     // vector of tiles in the lower layer
+		std::vector<int32> _middle_layer;    // vector of tiles in the middle layer
+		std::vector<int32> _upper_layer;     // vector of tiles in the upper layer
 /*		//bool _drag_on;		// TRUE = dragging is enabled, else painting
 		bool _walk_on;			// TRUE = walkable is set, else not-walkable
 */}; // class Grid
