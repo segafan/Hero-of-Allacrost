@@ -15,7 +15,7 @@
  *****************************************************************************/
 			   
 #include <iostream>
-#include "grid2.h"
+#include "grid.h"
 
 using namespace hoa_data;
 using namespace hoa_editor;
@@ -24,7 +24,8 @@ using namespace std;
 
 namespace hoa_editor
 {
-	LAYER_TYPE& operator++(LAYER_TYPE& value, int dummy) {
+	LAYER_TYPE& operator++(LAYER_TYPE& value, int dummy) 
+	{
 		value=static_cast<LAYER_TYPE>(static_cast<int>(value)+1);
 		return value;
 	}
@@ -121,7 +122,8 @@ void Grid::SetGridOn(bool value)
 	updateGL();
 } // SetGridOn(...)
 
-std::vector<int32>& Grid::GetLayer(LAYER_TYPE layer) {
+std::vector<int32>& Grid::GetLayer(LAYER_TYPE layer) 
+{
 	switch(layer) {
 		case LOWER_LAYER:
 			return _lower_layer;
