@@ -47,13 +47,20 @@ Editor::Editor() : QMainWindow(0, 0, WDestructiveClose)
 	_tiles_menu->insertItem("&Fill current layer", this, SLOT(_TileLayerFill()));
 	_tiles_menu->insertItem("&Clear current layer", this, SLOT(_TileLayerClear()));
 	_tiles_menu->insertSeparator();
-	_tiles_menu->insertItem("&Paint mode", this, SLOT(_TileModePaint()));
-	_tiles_menu->insertItem("&Move mode", this, SLOT(_TileModeMove()));
-	_tiles_menu->insertItem("&Delete mode", this, SLOT(_TileModeDelete()));
+	// store id's for setting and removing checks
+	int paint_mode_id = _tiles_menu->insertItem("&Paint mode", this, SLOT(_TileModePaint()));
+	_mode_ids.insert(std::pair<TILE_MODE_TYPE,int>(PAINT_TILE,paint_mode_id));
+	int move_mode_id = _tiles_menu->insertItem("&Move mode", this, SLOT(_TileModeMove()));
+	_mode_ids.insert(std::pair<TILE_MODE_TYPE,int>(MOVE_TILE,move_mode_id));
+	int delete_mode_id = _tiles_menu->insertItem("&Delete mode", this, SLOT(_TileModeDelete()));
+	_mode_ids.insert(std::pair<TILE_MODE_TYPE,int>(DELETE_TILE,delete_mode_id));
 	_tiles_menu->insertSeparator();
-	_tiles_menu->insertItem("Edit &lower layer", this, SLOT(_TileEditLL()));
-	_tiles_menu->insertItem("Edit &middle layer", this, SLOT(_TileEditML()));
-	_tiles_menu->insertItem("Edit &upper layer", this, SLOT(_TileEditUL()));
+	int edit_ll_id = _tiles_menu->insertItem("Edit &lower layer", this, SLOT(_TileEditLL()));
+	_layer_ids.insert(std::pair<LAYER_EDIT_TYPE,int>(LOWER_LAYER,edit_ll_id));
+	int edit_ml_id = _tiles_menu->insertItem("Edit &middle layer", this, SLOT(_TileEditML()));
+	_layer_ids.insert(std::pair<LAYER_EDIT_TYPE,int>(MIDDLE_LAYER,edit_ml_id));
+	int edit_ul_id = _tiles_menu->insertItem("Edit &upper layer", this, SLOT(_TileEditUL()));
+	_layer_ids.insert(std::pair<LAYER_EDIT_TYPE,int>(UPPER_LAYER,edit_ul_id));
 	_tiles_menu->insertSeparator();
 	_tiles_menu->insertItem("&Manage database...", this, SLOT(_TileDatabase()), CTRL+Key_D);
 	
@@ -170,6 +177,10 @@ void Editor::_FileNew()
 			_ed_layout->addWidget(_ed_tabs);
 			_ed_scrollview->show();
 			_ed_tabs->show();
+
+			// Set default edit mode
+			_SetEditLayer(LOWER_LAYER);
+			_SetEditMode(PAINT_TILE);
 		} // only if the user pressed OK
 		else
 			_stat_bar->message("No map created!",5000);
@@ -223,6 +234,10 @@ void Editor::_FileOpen()
 			_ViewToggleUL();
 			_stat_bar->message(QString("Opened \'%1\'").
 				arg(_ed_scrollview->_map->GetFileName()), 5000);
+
+			// Set default edit mode
+			_SetEditLayer(LOWER_LAYER);
+			_SetEditMode(PAINT_TILE);
 		} // file must exist in order to open it
 	} // make sure an unsaved map is not lost
 } // _FileOpen()
@@ -425,40 +440,66 @@ void Editor::_TileLayerClear()
 	} // switch on layer editing mode
 } // _TileLayerClear()
 
+void Editor::_SetEditMode(TILE_MODE_TYPE new_mode)
+{
+	if(_ed_scrollview==NULL)
+		return;
+
+	// Unset old check
+	_tiles_menu->setItemChecked(_mode_ids[_ed_scrollview->_tile_mode], false);
+
+	// Change mode and apply new check
+	_ed_scrollview->_tile_mode = new_mode;
+	_tiles_menu->setItemChecked(_mode_ids[_ed_scrollview->_tile_mode], true);
+} // _SetEditMode(TILE_MODE_TYPE new_mode)
+
 void Editor::_TileModePaint()
 {
 	if (_ed_scrollview != NULL)
-		_ed_scrollview->_tile_mode = PAINT_TILE;
+		_SetEditMode(PAINT_TILE);
 } // _TileModePaint()
 
 void Editor::_TileModeMove()
 {
 	if (_ed_scrollview != NULL)
-		_ed_scrollview->_tile_mode = MOVE_TILE;
+		_SetEditMode(MOVE_TILE);
 } // _TileModeMove()
 
 void Editor::_TileModeDelete()
 {
 	if (_ed_scrollview != NULL)
-		_ed_scrollview->_tile_mode = DELETE_TILE;
+		_SetEditMode(DELETE_TILE);
 } // _TileModeDelete()
+
+void Editor::_SetEditLayer(LAYER_EDIT_TYPE new_layer)
+{
+	if(_ed_scrollview == NULL)
+		return;
+
+	// Unset old check
+	_tiles_menu->setItemChecked(_layer_ids[_ed_scrollview->_layer_edit],false);
+
+	// Set new edit layer and set check
+	_ed_scrollview->_layer_edit=new_layer;
+	_tiles_menu->setItemChecked(_layer_ids[_ed_scrollview->_layer_edit],true);
+}
 
 void Editor::_TileEditLL()
 {
 	if (_ed_scrollview != NULL)
-		_ed_scrollview->_layer_edit = LOWER_LAYER;
+		_SetEditLayer(LOWER_LAYER);
 } // _TileEditLL()
 
 void Editor::_TileEditML()
 {
 	if (_ed_scrollview != NULL)
-		_ed_scrollview->_layer_edit = MIDDLE_LAYER;
+		_SetEditLayer(MIDDLE_LAYER);
 } // _TileEditML()
 
 void Editor::_TileEditUL()
 {
 	if (_ed_scrollview != NULL)
-		_ed_scrollview->_layer_edit = UPPER_LAYER;
+		_SetEditLayer(UPPER_LAYER);
 } // _TileEditUL()
 
 void Editor::_TileDatabase()
@@ -1415,8 +1456,13 @@ void DatabaseDialog::_UpdateData()
 
 void DatabaseDialog::_AddTile()
 {
-	// Only add new tile if it doesn't already exist in the new tileset.
-	if (_mod_tileset->findItem(_all_tiles->currentItem()->text(), Qt::ExactMatch) == 0)
+	QIconViewItem* CurrentItem=_all_tiles->currentItem();
+	//If no item is selected, show a warning
+	if(CurrentItem == 0) {
+		QMessageBox::warning(this,"Error","No tile selected!");
+	}
+	// Otherwise: Only add new tile if it doesn't already exist in the new tileset.
+	else if (_mod_tileset->findItem(CurrentItem->text(), Qt::ExactMatch) == 0)
 		(void) new QIconViewItem(_mod_tileset, _all_tiles->currentItem()->text(), *_all_tiles->currentItem()->pixmap());
 } // _AddTile()
 

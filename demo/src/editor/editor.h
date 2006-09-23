@@ -45,6 +45,8 @@
 #include <qtabwidget.h>
 #include <qvbuttongroup.h>
 
+#include <map>
+
 //! All calls to the editor are wrapped in this namespace.
 namespace hoa_editor
 {
@@ -143,6 +145,10 @@ class Editor: public QMainWindow
 		void _CreateTileDatabase();
 		//! Adds tiles to the database.
 		void _GenerateDatabase();
+		//! Sets current edit mode
+		void _SetEditMode(TILE_MODE_TYPE new_mode);
+		//! Sets currently edited layer
+		void _SetEditLayer(LAYER_EDIT_TYPE new_layer);
 
 		//! This is used to represent the File menu.
 		QPopupMenu* _file_menu;
@@ -180,6 +186,11 @@ class Editor: public QMainWindow
 		bool _ml_on;
 		//! Upper layer toggle view switch.
 		bool _ul_on;
+
+		//! Edit layer items in Tile menu
+		std::map<LAYER_EDIT_TYPE, int> _layer_ids;
+		//! Mode items in Tile menu
+		std::map<TILE_MODE_TYPE, int> _mode_ids;
 }; // class Editor
 
 class NewMapDialog: public QDialog
