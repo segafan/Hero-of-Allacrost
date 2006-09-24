@@ -62,7 +62,7 @@ bool DataDescriptor::OpenFile(DATA_ACCESS_MODE access_mode) {
 		
 		// Attempt to load the Lua file.
 		if (lua_dofile(_lstack, _filename.c_str())) {
-			cerr << "DATA ERROR: Could not load " << _filename << " :: " << lua_tostring(_lstack, STACK_TOP) << endl;
+			cerr << "DATA ERROR: Could not load " << _filename << endl;
 			_file_open = false;
 			_filename = "";
 			return false;
