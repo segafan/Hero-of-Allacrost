@@ -55,7 +55,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="SDL.lib SDL_TTF.lib SDLMain.lib qt-mt3.lib lua+lib.lib Opengl32.lib glu32.lib libpng.lib jpegd.lib zdll.lib"
+				AdditionalDependencies="SDL.lib SDL_TTF.lib SDLMain.lib qt-mt3.lib lua+lib.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 			/>

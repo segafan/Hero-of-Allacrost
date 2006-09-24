@@ -912,6 +912,13 @@ void BootMode::Draw() {
 		_credits_screen.Draw();
 	else
 		_current_menu->Draw();
+
+	VideoManager->Move(65.0f, 10.0f);
+	VideoManager->SetFont("default");
+	VideoManager->SetTextColor(Color::gray);
+	VideoManager->DrawText("Tech Demo");
+	VideoManager->MoveRelative(730.0f, 0.0f);
+	VideoManager->DrawText("Copyright (C) 2004-2006 The Allacrost Project");
 }
 
 

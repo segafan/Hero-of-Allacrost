@@ -295,6 +295,13 @@ void EnemyActor::Update() {
 		last_attack = 0;
 		next_attack = 0;
 	}
+
+	// If we're attacking, update the offset a little
+	if (IsQueuedToPerform())
+		SetXLocation(GetXLocation() - 0.8f * static_cast<float>(SystemManager->GetUpdateTime()));
+	else
+		SetXLocation(static_cast<float>(GetXOrigin())); // Restore original place
+
 } // void EnemyActor::Update()
 
 
