@@ -983,12 +983,16 @@ public:
 	//-- Fading ---------------------------------------------------------------
 
 	/*!
-	 *  \brief fade screen to color in fadeTime number of seconds
+	 *  \brief Begins a screen fade.
+	 *  \param color - color to fade to.
+	 *  \param fade_time - the fade will last this number of seconds
+	 *  \return True if fade was successful, false otherwise.
 	 */
-	bool FadeScreen(const Color &color, float fadeTime);
+	bool FadeScreen(const Color &color, float fade_time);
 	
 	/*!
-	 *  \brief returns true if screen fade is currently in progress
+	 *  \brief Determines if a fade is currently occurring.
+	 *  \return True if screen fade is currently in progress, false otherwise.
 	 */
 	bool IsFading();
 	
