@@ -115,7 +115,7 @@ void MapMode::Reset() {
 	// Let all map objects know that this is the current map
 	MapObject::current_map = this;
 
-	if (_map_music[0].GetMusicState() != AUDIO_STATE_PLAYING) {
+	if (_map_music.size()>0 && _map_music[0].GetMusicState() != AUDIO_STATE_PLAYING) {
 		_map_music[0].PlayMusic();
 	}
 }
@@ -129,10 +129,6 @@ void MapMode::LoadMap() {
 	if (VideoManager->LoadImage(_lighting_overlay) == false) {
 		exit(1);
 	}
-
-
-	_map_music.push_back(MusicDescriptor());
-	_map_music[0].LoadMusic("mus/Seeking_New_Worlds.ogg");
 
 	// *********** (1) Setup GUI items in 1024x768 coordinate system ************
 	VideoManager->PushState();
@@ -166,6 +162,14 @@ void MapMode::LoadMap() {
 		_encounter_rate = 10;
 		_steps_till_encounter = 10;
 	}
+
+	// Load music filename(s)
+	_map_data.OpenTable("music_filenames");
+	if(_map_data.GetTableSize()>0) {
+		_map_music.push_back(MusicDescriptor());
+		_map_music[0].LoadMusic(_map_data.ReadString(1));
+	}
+	_map_data.CloseTable();
 
 	_row_count = _map_data.ReadInt("row_count");
 	_col_count = _map_data.ReadInt("col_count");
@@ -1138,7 +1142,9 @@ void MapMode::_UpdateExplore() {
 			if (_steps_till_encounter == 0) {
 				VideoManager->FadeScreen(Color::black, 1.0f);
 				// play battle sfx
-				_map_music[0].StopMusic();
+				if(_map_music.size()>0) {
+					_map_music[0].StopMusic();
+				}
 				_battle_sounds[RandomBoundedInteger(0, 2)].PlaySound();
 				
 				_fade_to_battle_mode = true;

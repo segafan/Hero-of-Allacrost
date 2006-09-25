@@ -120,6 +120,12 @@ class Editor: public QMainWindow
 		void _TileDatabase();
 		//@}
 
+		//! \name Map Menu Item Slots
+		//! \brief These slots process selection for their item in the Map menu.
+		//{@
+		void _MapSelectMusic();
+		//@}
+
 		//! \name Help Menu Item Slots
 		//! \brief These slots process selection for their item in the Help menu.
 		//{@
@@ -146,6 +152,8 @@ class Editor: public QMainWindow
 		QPopupMenu* _view_menu;
 		//! This is used to represent the Tiles menu.
 		QPopupMenu* _tiles_menu;
+		//! This is used to represent the Tiles menu.
+		QPopupMenu* _map_menu;
 		//! This is used to represent the Help menu.
 		QPopupMenu* _help_menu;
 
@@ -180,7 +188,7 @@ class Editor: public QMainWindow
 		//! Edit layer items in Tile menu
 		std::map<LAYER_TYPE, int> _layer_ids;
 		//! Mode items in Tile menu
-		std::map<TILE_MODE_TYPE, int> _mode_ids;
+		std::map<TILE_MODE_TYPE, int> _mode_ids;		
 }; // class Editor
 
 class NewMapDialog: public QDialog
@@ -215,6 +223,28 @@ class NewMapDialog: public QDialog
 		QGridLayout* _dia_layout;
 }; // class NewMapDialog
 
+class MusicDialog: public QDialog
+{
+public:
+	MusicDialog(QWidget* parent, const QString& name, const std::string& selected_music);
+	~MusicDialog();
+
+	std::string GetSelectedFile();
+private:
+	//! A pushbutton for canceling the new map dialog.
+	QPushButton* _cancel_pbut;
+	//! A pushbutton for okaying the new map dialog.
+	QPushButton* _ok_pbut;
+	//! Label telling you to select some music
+	QLabel* _select_label;
+	//! A layout to manage all the labels, spinboxes, and listviews.
+	QGridLayout* _dia_layout;
+	//! List with all music files
+	QListView* _music_list;
+
+	void _PopulateMusicList(const std::string& selected);
+}; // class MusicDialog
+
 class EditorScrollView: public QScrollView
 {
 	//! Macro needed to use Qt's slots and signals.
@@ -231,7 +261,7 @@ class EditorScrollView: public QScrollView
 		void Resize(int width, int height); 
 
 		//! Gets currently edited layer
-		std::vector<int32>& GetCurrentLayer();
+		std::vector<int32>& GetCurrentLayer();		
 
 		//! Needed for changing the editing mode and painting.
 		friend class Editor;

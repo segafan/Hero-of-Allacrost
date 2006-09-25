@@ -135,6 +135,16 @@ std::vector<int32>& Grid::GetLayer(LAYER_TYPE layer)
 	return _lower_layer;
 }
 
+void Grid::SetMusic(const std::string& music_file) 
+{
+	_music_file = music_file;
+}
+
+const std::string& Grid::GetMusic() const 
+{
+	return _music_file;
+}
+
 void Grid::LoadMap()
 {
 	DataDescriptor read_data;
@@ -208,6 +218,18 @@ void Grid::LoadMap()
 	for (int i = 0; i < _width * _height; i++)
 		indiv_walkable.push_back(-1);
 
+	// Load music
+	read_data.OpenTable("music_filenames");
+	if(read_data.GetErrorCode() == DATA_NO_ERRORS)
+	{
+		int Size=read_data.GetTableSize();
+		if(Size==0)
+			_music_file="None";
+		else
+			_music_file=read_data.ReadString(1);
+		read_data.CloseTable();
+	}
+
 	_grid_on = true;        // grid lines default to on
 	_ll_on = true;          // lower layer default to on
 	_ml_on = true;          // middle layer default to off
@@ -235,6 +257,13 @@ void Grid::SaveMap()
 		write_data.WriteComment("Whether or not we have random encounters, and if so the rate of encounter");
 		write_data.WriteInt("random_encounters", false);// FIXME: hard-coded for now
 		write_data.WriteInt("encounter_rate", 12);      // FIXME: hard-coded for now
+		write_data.InsertNewLine();
+
+		write_data.WriteComment("The music files used as background music on this map.");
+		write_data.BeginTable("music_filenames");
+		if(_music_file!="None")
+			write_data.WriteString(1,_music_file);
+		write_data.EndTable();
 		write_data.InsertNewLine();
 
 		write_data.WriteComment("The number of rows and columns of tiles that compose the map");

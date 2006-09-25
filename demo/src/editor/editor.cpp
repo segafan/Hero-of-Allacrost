@@ -64,6 +64,11 @@ Editor::Editor() : QMainWindow(0, 0, WDestructiveClose)
 	_tiles_menu->insertSeparator();
 	_tiles_menu->insertItem("&Manage database...", this, SLOT(_TileDatabase()), CTRL+Key_D);
 	
+	// map menu creation
+	_map_menu = new QPopupMenu(this);
+	menuBar()->insertItem("&Map",_map_menu);
+	_map_menu->insertItem("Set background &music...", this, SLOT(_MapSelectMusic()));
+
 	// help menu creation
 	_help_menu = new QPopupMenu(this);
 	menuBar()->insertSeparator();
@@ -469,6 +474,19 @@ void Editor::_TileDatabase()
 	delete tile_db;
 } // _TileDatabase()
 
+void Editor::_MapSelectMusic()
+{
+	if(_ed_scrollview == NULL)
+		return;
+
+	MusicDialog* music = new MusicDialog(this, "music_dialog", _ed_scrollview->_map->GetMusic());
+	if(music->exec() == QDialog::Accepted) {
+		_ed_scrollview->_map->SetMusic(music->GetSelectedFile());
+		_ed_scrollview->_map->SetChanged(true);
+	}
+	delete music;
+}
+
 void Editor::_HelpHelp()
 {
 	_stat_bar->message(QString("See http://allacrost.sourceforge.net/wiki/index.php/Code_Documentation#Map_Editor_Documentation for more details"), 10000);
@@ -661,7 +679,68 @@ NewMapDialog::~NewMapDialog()
 	delete _dia_layout;
 } // NewMapDialog destructor
 
+/************************
+  MusicDialog class functions follow
+************************/
 
+MusicDialog::MusicDialog(QWidget* parent, const QString& name, const std::string& selected_music)
+	: QDialog(parent,name)
+{
+	setCaption("Select map music");
+	_dia_layout    = new QGridLayout(this, 7, 2, 5);
+
+	_cancel_pbut   = new QPushButton("Cancel", this);
+	_ok_pbut       = new QPushButton("OK", this);
+	_select_label  = new QLabel("Select the music for this map:",this);
+	_music_list    = new QListView(this, "tileset_lview", WStaticContents|WNoAutoErase);
+
+	connect(_ok_pbut,     SIGNAL(released()), this, SLOT(accept()));
+	connect(_cancel_pbut, SIGNAL(released()), this, SLOT(reject()));
+
+	_dia_layout->addWidget(_select_label,0,0);
+	_dia_layout->addWidget(_music_list,1,0);
+	_dia_layout->addWidget(_ok_pbut,2,0);
+	_dia_layout->addWidget(_cancel_pbut,2,1);
+
+	_PopulateMusicList(selected_music);
+}
+
+MusicDialog::~MusicDialog() {
+	delete _cancel_pbut;
+	delete _ok_pbut;
+	delete _select_label;
+	delete _music_list;
+	delete _dia_layout;
+}
+
+void MusicDialog::_PopulateMusicList(const std::string& selected) {
+	QString selected_str(selected);
+
+	QDir music_dir("mus");
+	_music_list->addColumn("Filename");
+
+	// Add "None" option
+	(void) new QListViewItem(_music_list, "None");
+
+	// Add music files
+	for(int i=0; i<music_dir.count(); i++) {
+		if(music_dir[i].contains(".ogg"))
+		{
+			QString file_name=music_dir[i];
+			QListViewItem* Item=new QListViewItem(_music_list, file_name);
+			if(selected_str.endsWith(file_name) && !selected_str.isEmpty()) {
+				_music_list->setSelected(Item,true);
+			}
+		}
+	}
+}
+
+std::string MusicDialog::GetSelectedFile() {
+	if(_music_list->currentItem() == 0)
+		return "None";
+
+	return "mus/"+_music_list->currentItem()->text(0);
+}
 
 /************************
   EditorScrollView class functions follow
