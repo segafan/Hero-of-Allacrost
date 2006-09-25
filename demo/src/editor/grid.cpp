@@ -157,6 +157,9 @@ void Grid::LoadMap()
 	_lower_layer.clear();
 	_middle_layer.clear();
 	_upper_layer.clear();
+
+	_random_encounters=read_data.ReadBool("random_encounters");
+	_encounter_rate=read_data.ReadInt("encounter_rate");
 	
 	_height = read_data.ReadInt("row_count");
 	_width  = read_data.ReadInt("col_count");
@@ -255,8 +258,8 @@ void Grid::SaveMap()
 		write_data.InsertNewLine();
 
 		write_data.WriteComment("Whether or not we have random encounters, and if so the rate of encounter");
-		write_data.WriteInt("random_encounters", false);// FIXME: hard-coded for now
-		write_data.WriteInt("encounter_rate", 12);      // FIXME: hard-coded for now
+		write_data.WriteBool("random_encounters", _random_encounters);
+		write_data.WriteInt("encounter_rate", _encounter_rate);
 		write_data.InsertNewLine();
 
 		write_data.WriteComment("The music files used as background music on this map.");

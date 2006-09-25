@@ -242,6 +242,8 @@ private:
 	//! List with all music files
 	QListView* _music_list;
 
+	//! Puts music files in the QListView and selects the specified file.
+	//! \param selected 
 	void _PopulateMusicList(const std::string& selected);
 }; // class MusicDialog
 
