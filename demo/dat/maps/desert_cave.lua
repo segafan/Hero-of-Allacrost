@@ -1,8 +1,12 @@
--- /home/philip/allacrost/dat/maps/desert_cave.lua
+-- C:/Prog/allacrost-clean/dat/maps/desert_cave.lua
 
 -- Whether or not we have random encounters, and if so the rate of encounter
-random_encounters = 1
-encounter_rate = 18
+random_encounters = 0
+encounter_rate = 12
+
+-- The music files used as background music on this map.
+music_filenames = {}
+music_filenames[1] = "mus/Seeking_New_Worlds.ogg"
 
 -- The number of rows and columns of tiles that compose the map
 row_count = 48

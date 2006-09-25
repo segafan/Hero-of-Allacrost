@@ -82,6 +82,11 @@ class Grid: public QGLWidget
 
 		std::vector<int32>& GetLayer(LAYER_TYPE layer);
 
+		//! Sets background music
+		void SetMusic(const std::string& music_file);
+		//! Gets background music
+		const std::string& GetMusic() const;
+
 		void LoadMap();                     // loads a map from a config file
 		void SaveMap();                     // saves the map to a config file
 
@@ -173,6 +178,10 @@ class Grid: public QGLWidget
 		std::vector<int32> _lower_layer;     // vector of tiles in the lower layer
 		std::vector<int32> _middle_layer;    // vector of tiles in the middle layer
 		std::vector<int32> _upper_layer;     // vector of tiles in the upper layer
+
+		
+		//! Stores background music
+		std::string _music_file;
 /*		//bool _drag_on;		// TRUE = dragging is enabled, else painting
 		bool _walk_on;			// TRUE = walkable is set, else not-walkable
 */}; // class Grid
