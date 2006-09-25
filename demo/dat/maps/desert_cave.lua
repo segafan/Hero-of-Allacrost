@@ -1,7 +1,7 @@
 -- C:/Prog/allacrost-clean/dat/maps/desert_cave.lua
 
 -- Whether or not we have random encounters, and if so the rate of encounter
-random_encounters = 0
+random_encounters = true
 encounter_rate = 12
 
 -- The music files used as background music on this map.

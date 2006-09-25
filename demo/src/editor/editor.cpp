@@ -694,6 +694,9 @@ MusicDialog::MusicDialog(QWidget* parent, const QString& name, const std::string
 	_select_label  = new QLabel("Select the music for this map:",this);
 	_music_list    = new QListView(this, "tileset_lview", WStaticContents|WNoAutoErase);
 
+	//Turn off sorting
+	_music_list->setSorting(-1);
+
 	connect(_ok_pbut,     SIGNAL(released()), this, SLOT(accept()));
 	connect(_cancel_pbut, SIGNAL(released()), this, SLOT(reject()));
 
@@ -703,7 +706,7 @@ MusicDialog::MusicDialog(QWidget* parent, const QString& name, const std::string
 	_dia_layout->addWidget(_cancel_pbut,2,1);
 
 	_PopulateMusicList(selected_music);
-}
+} // MusicDialog::MusicDialog
 
 MusicDialog::~MusicDialog() {
 	delete _cancel_pbut;
@@ -711,7 +714,7 @@ MusicDialog::~MusicDialog() {
 	delete _select_label;
 	delete _music_list;
 	delete _dia_layout;
-}
+} // MusicDialog::~MusicDialog
 
 void MusicDialog::_PopulateMusicList(const std::string& selected) {
 	QString selected_str(selected);
@@ -719,11 +722,9 @@ void MusicDialog::_PopulateMusicList(const std::string& selected) {
 	QDir music_dir("mus");
 	_music_list->addColumn("Filename");
 
-	// Add "None" option
-	(void) new QListViewItem(_music_list, "None");
-
 	// Add music files
-	for(int i=0; i<music_dir.count(); i++) {
+	for(int i=0; i<music_dir.count(); i++) 
+	{
 		if(music_dir[i].contains(".ogg"))
 		{
 			QString file_name=music_dir[i];
@@ -731,16 +732,21 @@ void MusicDialog::_PopulateMusicList(const std::string& selected) {
 			if(selected_str.endsWith(file_name) && !selected_str.isEmpty()) {
 				_music_list->setSelected(Item,true);
 			}
-		}
-	}
-}
+		} // if .ogg
+	} // for i
+
+	// Add "None" option
+	QListViewItem* NoneItem = new QListViewItem(_music_list, "None");
+	if(selected.empty() || selected == "None")
+		_music_list->setSelected(NoneItem,true);
+} // MusicDialog::_PopulateMusicList
 
 std::string MusicDialog::GetSelectedFile() {
 	if(_music_list->currentItem() == 0)
 		return "None";
 
 	return "mus/"+_music_list->currentItem()->text(0);
-}
+} // MusicDialog::GetSelectedFile
 
 /************************
   EditorScrollView class functions follow

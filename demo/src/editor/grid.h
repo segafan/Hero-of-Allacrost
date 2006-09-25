@@ -182,6 +182,9 @@ class Grid: public QGLWidget
 		
 		//! Stores background music
 		std::string _music_file;
+		bool _random_encounters;
+		int _encounter_rate;
+
 /*		//bool _drag_on;		// TRUE = dragging is enabled, else painting
 		bool _walk_on;			// TRUE = walkable is set, else not-walkable
 */}; // class Grid
