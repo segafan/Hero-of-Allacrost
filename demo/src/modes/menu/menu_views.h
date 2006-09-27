@@ -40,6 +40,10 @@ namespace hoa_menu {
 //! This namespace is for private menu stuff only
 namespace private_menu {
 
+	enum ITEM_CATEGORY { ALL = 0, FIELD = 1, BATTLE = 2, EQUIPMENT = 3, KEY = 4,
+		ITEM_CATEGORY_SIZE = 5};
+
+
 /** ****************************************************************************
 *** \brief Represents an individual character window for the in-game menu.
 ***
@@ -138,10 +142,10 @@ public:
 	*** \return True if the inventory window is in the active context
 	**/
 	bool IsActive()
-		{ return _inventory_active; }
+		{ return (_inventory_active || _char_select_active || _item_categories_active); }
 
 	//! If the inventory window is ready to cancel out, or cancel out a sub-window
-	bool CanCancel();
+	//bool CanCancel();
 	
 	void Update();
 
@@ -150,20 +154,43 @@ public:
 	bool Draw();
 
 private:
+	
 	//! Flag to specify if the inventory window is active
 	bool _inventory_active;
+
+	//! Flag to specify if the character select window is active
+	bool _char_select_active;
+
+	//! Flag to specify if the item category select window is active
+	bool _item_categories_active;
 
 	//! OptionBox to display all of the items
 	hoa_video::OptionBox _inventory_items;
 
+	//! OptionBox to choose character
+	hoa_video::OptionBox _char_select;
+
+	//! OptionBox to choose item category
+	hoa_video::OptionBox _item_categories;
+
+	//! \brief the sounds for MenuMode
+	std::map<std::string, hoa_audio::SoundDescriptor> _menu_sounds;
+
 	//! The MiniCharacterWindow to be shown when needed to select a character
-	MiniCharacterSelectWindow _char_window;
+	//MiniCharacterSelectWindow _char_window;
 
 	//! Updates the item text in the inventory items
 	void UpdateItemText();
 
-	//! \brief the sounds for MenuMode
-	std::map<std::string, hoa_audio::SoundDescriptor> _menu_sounds;
+	//! Initializes inventory items option box
+	void InitInventoryItems();
+
+	//! Initializes char select option box
+	void InitCharSelect();
+
+	//! Initializes item category select option box
+	void InitCategory();
+
 }; // class InventoryWindow : public hoa_video::MenuWindow
 
 /** ****************************************************************************
@@ -177,17 +204,28 @@ class StatusWindow : public hoa_video::MenuWindow
 {
 private:
 	//! \brief char portraits
-	hoa_video::StillImage _head_portrait;
-	hoa_video::StillImage _full_portrait;
+	//hoa_video::StillImage _head_portrait;
+	std::vector<hoa_video::StillImage> _full_portraits;
+
+	//! \brief the sounds for MenuMode
+	std::map<std::string, hoa_audio::SoundDescriptor> _menu_sounds;
+
 	//! \brief the current character for this screen.
 	hoa_global::GlobalCharacter *_current_char;
+
 	//! \brief if the window is active or not
-	bool _active;
+	bool _char_select_active;
 	//! \brief current cursor position
-	float _cursor_x;
-	float _cursor_y;
+	//float _cursor_x;
+	//float _cursor_y;
+
+	//! \brief character selection option box
+	hoa_video::OptionBox _char_select;
+
+	//! \brief initialize character selection option box
+	void InitCharSelect();
 public:
-	std::vector<hoa_video::StillImage> images;
+	//std::vector<hoa_video::StillImage> images;
 
 	//! \brief constructor
 	StatusWindow();
@@ -200,10 +238,10 @@ public:
 	void Update();
 
 	//! \brief Check if status window is active
-	bool IsActive() { return _active; }
+	bool IsActive() { return _char_select_active; }
 	//! \brief Active this window
-	void Activate(bool new_value)
-		{ _active = new_value; }
+	void Activate(bool new_value);
+		
 }; // class StatusWindow : public hoa_video::MenuWindow
 
 } // namespace private_menu

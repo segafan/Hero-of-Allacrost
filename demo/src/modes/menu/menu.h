@@ -47,9 +47,11 @@ namespace private_menu {
 //@{
 const uint32 MAIN_INVENTORY      = 0;
 const uint32 MAIN_SKILLS         = 1;
-const uint32 MAIN_STATUS_EQUIP   = 2;
-const uint32 MAIN_OPTIONS        = 3;
-const uint32 MAIN_SAVE           = 4;
+const uint32 MAIN_EQUIP			 = 2;
+const uint32 MAIN_STATUS		 = 3;
+//const uint32 MAIN_OPTIONS        = 3;
+//const uint32 MAIN_SAVE           = 4;
+const uint32 MAIN_FORMATION		 = 4;
 const uint32 MAIN_EXIT           = 5;
 const uint32 MAIN_SIZE           = 6;
 //@}
@@ -65,17 +67,28 @@ const uint32 INV_SIZE   = 3;
 //! \name Skills Menu Options Constants
 //@{
 const uint32 SKILLS_CANCEL  = 0;
-const uint32 SKILLS_SIZE    = 1;
+const uint32 SKILLS_USE		= 1;
+const uint32 SKILLS_SIZE    = 2;
 //@}
 
 //! \name Equipment Menu Options Constants
 //@{
-const uint32 STATUS_EQUIP_EQUIP   = 0;
-const uint32 STATUS_EQUIP_REMOVE  = 1;
-const uint32 STATUS_EQUIP_NEXT    = 2;
-const uint32 STATUS_EQUIP_PREV    = 3;
-const uint32 STATUS_EQUIP_CANCEL  = 4;
-const uint32 STATUS_EQUIP_SIZE    = 5;
+const uint32 EQUIP_EQUIP   = 0;
+const uint32 EQUIP_REMOVE  = 1;
+//const uint32 STATUS_EQUIP_NEXT    = 2;
+//const uint32 STATUS_EQUIP_PREV    = 3;
+const uint32 EQUIP_CANCEL  = 2;
+const uint32 EQUIP_SIZE    = 3;
+//@}
+
+//! \name Status Menu Options Constants
+//@{
+const uint32 STATUS_VIEW    = 0;
+const uint32 STATUS_CANCEL  = 1;
+//const uint32 STATUS_EQUIP_NEXT    = 2;
+//const uint32 STATUS_EQUIP_PREV    = 3;
+//const uint32 EQUIP_CANCEL  = 2;
+const uint32 STATUS_SIZE    = 2;
 //@}
 
 //! \name Options Menu Options Constants
@@ -99,9 +112,21 @@ const uint32 SAVE_SIZE    = 2;
 const uint32 SHOW_MAIN          = 0;
 const uint32 SHOW_INVENTORY     = 1;
 const uint32 SHOW_SKILLS        = 2;
-const uint32 SHOW_STATUS_EQUIP  = 3;
-const uint32 SHOW_OPTIONS       = 4;
-const uint32 SHOW_SAVE          = 5;
+const uint32 SHOW_EQUIP			= 3;
+const uint32 SHOW_STATUS		= 4;
+const uint32 SHOW_OPTIONS       = 5;
+const uint32 SHOW_SAVE          = 6;
+const uint32 SHOW_FORMATION     = 7;
+//@}
+
+//! \name MenuMode Window Active Flags
+//! \brief Constants used to determine which window is currently showing.
+//@{
+const uint32 WIN_INVENTORY		= 1;
+const uint32 WIN_SKILLS			= 2;
+const uint32 WIN_STATUS			= 3;
+const uint32 WIN_EQUIP			= 4;
+const uint32 WIN_FORMATION		= 5;
 //@}
 
 } // namespace private_menu
@@ -127,6 +152,7 @@ public:
 	void Update();
 	void Draw();
 
+
 private:
 	/** \brief Retains a snap-shot of the screen just prior to when menu mode was entered
 	*** This image is perpetually drawn as the background while in menu mode
@@ -137,13 +163,16 @@ private:
 
 	std::vector<hoa_video::StillImage> _menu_images;
 	//! \brief the sounds for MenuMode
-	std::map<std::string, hoa_audio::SoundDescriptor> _menu_sounds;
+	//std::map<std::string, hoa_audio::SoundDescriptor> _menu_sounds;
 
 	/** \name Main Display Windows
 	*** \brief The windows that are displayed in the menu mode.
 	**/
 	//@{
 	hoa_video::MenuWindow _bottom_window;
+	hoa_video::MenuWindow _main_options_window;
+	//hoa_video::MenuWindow _item_list_header_window;
+	//std::vector<private_menu::CharacterWindow> _character_windows;
 	private_menu::CharacterWindow _character_window0;
 	private_menu::CharacterWindow _character_window1;
 	private_menu::CharacterWindow _character_window2;
@@ -151,9 +180,24 @@ private:
 	private_menu::InventoryWindow _inventory_window;
 	private_menu::StatusWindow _status_window;
 	//@}
+
+	//! \brief the sounds for MenuMode
+	std::map<std::string, hoa_audio::SoundDescriptor> _menu_sounds;
+	//! \brief The selected character
+	uint32 _char_selected;
+	//! \brief The selected item/skill/equipment
+	uint32 _item_selected;
 		
 	//! \brief The current option box to display
 	uint32 _current_menu_showing;
+
+	//! \breif The current window being drawn
+	uint32 _current_window;
+
+	//! \brief Maintains a queue of OptionBoxes
+	//std::vector<hoa_video::OptionBox *> _menu_queue;
+	//! \brief Maintains a queue of which OptionBox is showing
+	//std::vector<uint32> _menu_showing_queue;
 	
 	//! A pointer to the current options menu
 	hoa_video::OptionBox *_current_menu;
@@ -165,9 +209,12 @@ private:
 	//@{
 	hoa_video::OptionBox _menu_inventory;
 	hoa_video::OptionBox _menu_skills;
-	hoa_video::OptionBox _menu_status_equip;
+	hoa_video::OptionBox _menu_status;
 	hoa_video::OptionBox _menu_options;
 	hoa_video::OptionBox _menu_save;
+	hoa_video::OptionBox _menu_equip;
+	//hoa_video::OptionBox _menu_char_select;
+	//hoa_video::OptionBox _menu_item_list;
 	//@}
 	
 	//! \brief Functions to set up the option boxes
@@ -176,9 +223,12 @@ private:
 	void _SetupMainOptionBox();
 	void _SetupInventoryOptionBox();
 	void _SetupSkillsOptionBox();
-	void _SetupStatusEquipOptionBox();
+	void _SetupStatusOptionBox();
 	void _SetupOptionsOptionBox();
 	void _SetupSaveOptionBox();
+	void _SetupEquipOptionBox();
+	//void _SetupCharSelectOptionBox();
+	//void _SetupItemListOptionBox();
 	//@}
 
 	/** \name Menu Handle Functions
@@ -188,13 +238,18 @@ private:
 	void _HandleMainMenu();
 	void _HandleInventoryMenu();
 	void _HandleSkillsMenu();
-	void _HandleStatusEquipMenu();
+	//void _HandleItemListMenu();
+	//void _HandleCharSelectMenu();
+	void _HandleStatusMenu();
 	void _HandleOptionsMenu();
 	void _HandleSaveMenu();
+	void _HandleEquipMenu();
 	//@}
 
 	//! \brief Draws the bottom part of the menu mode.
 	void _DrawBottomMenu();
+	//! \brief Draws the 'Name' and 'Qty' tags for the item list.
+	void _DrawItemListHeader();
 };
 
 } // namespace hoa_menu
