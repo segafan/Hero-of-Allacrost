@@ -77,7 +77,7 @@ QuitMode::QuitMode() {
 	_option_box.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_option_box.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_option_box.SetSelectMode(VIDEO_SELECT_SINGLE);
-	_option_box.SetCursorOffset(-35.0f, -4.0f);
+	_option_box.SetCursorOffset(-58.0f, 18.0f);
 	
 	vector<ustring> options;
 	options.push_back(MakeUnicodeString("Quit Game"));
