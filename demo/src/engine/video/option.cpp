@@ -1083,7 +1083,7 @@ bool OptionBox::Draw()
 	if(video->IsScissoringEnabled())
 		video->SetScissorRect(rect);
 
-	CoordSys &cs = video->_coordSys;
+	CoordSys &cs = video->_coord_sys;
 	
 	video->SetFont(_font);
 	

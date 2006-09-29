@@ -131,7 +131,7 @@ GameVideo::GameVideo()
 	_lightColor = Color(1.0f, 1.0f, 1.0f, 1.0f);
 	_currentTextColor = Color(1.0f, 1.0f, 1.0f, 1.0f);
 	_textShadow = false;
-	_coordSys = CoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
+	_coord_sys = CoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
 	_scissorEnabled = false;
 	_viewport = ScreenRect(0, 0, 100, 100);
 	_scissorRect = ScreenRect(0, 0, 1024, 768);
@@ -191,10 +191,10 @@ bool GameVideo::SingletonInitialize()
 	if(VIDEO_DEBUG)
 		cout << "VIDEO: Loading default font\n";
 
-	if(!LoadFont("img/fonts/cour.ttf", "debug_font", 16))
+	if(!LoadFont("img/fonts/tarnhalo.ttf", "debug_font", 16))
 	{
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: Could not load cour.ttf file!" << endl;
+			cerr << "VIDEO ERROR: Could not load tarnhalo.ttf file!" << endl;
 		return false;
 	}
 
@@ -446,11 +446,11 @@ GameVideo::~GameVideo()
 
 void GameVideo::SetCoordSys(const CoordSys &coordSys)
 {
-	_coordSys = coordSys;
+	_coord_sys = coordSys;
 	
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();	
-	glOrtho(_coordSys.GetLeft(), _coordSys.GetRight(), _coordSys.GetBottom(), _coordSys.GetTop(), -1, 1);
+	glOrtho(_coord_sys.GetLeft(), _coord_sys.GetRight(), _coord_sys.GetBottom(), _coord_sys.GetTop(), -1, 1);
 	
 	// Removed this code bleow
  	glMatrixMode(GL_MODELVIEW);
@@ -1216,7 +1216,7 @@ bool GameVideo::ApplyLightingOverlay()
 		_BindTexture(_lightOverlay);
 		glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, 1024, 1024, 0);
 
-		CoordSys tempCoordSys = _coordSys;
+		CoordSys tempCoordSys = _coord_sys;
 
 		SetCoordSys(0.0f, 1.0f, 0.0f, 1.0f);
 		float xlo = 0.0f, ylo = 0.0f, xhi = 1.0f, yhi = 1.0f;
@@ -1441,7 +1441,7 @@ void GameVideo::_PushContext()
 	
 	// save context information
 	Context c;
-	c.coordinate_system = _coordSys;
+	c.coordinate_system = _coord_sys;
 	c.blend    = _blend;
 	c.x_align   = _xalign;
 	c.y_align   = _yalign;
@@ -1678,10 +1678,10 @@ ScreenRect GameVideo::CalculateScreenRect(float left, float right, float bottom,
 int32 GameVideo::_ScreenCoordX(float x)
 {
 	float percent;
-	if(_coordSys.GetLeft() < _coordSys.GetRight())
-		percent = (x - _coordSys.GetLeft()) / (_coordSys.GetRight() - _coordSys.GetLeft());
+	if(_coord_sys.GetLeft() < _coord_sys.GetRight())
+		percent = (x - _coord_sys.GetLeft()) / (_coord_sys.GetRight() - _coord_sys.GetLeft());
 	else
-		percent = (x - _coordSys.GetRight()) / (_coordSys.GetLeft() - _coordSys.GetRight());
+		percent = (x - _coord_sys.GetRight()) / (_coord_sys.GetLeft() - _coord_sys.GetRight());
 	
 	return int32(percent * float(_width));
 }
@@ -1694,10 +1694,10 @@ int32 GameVideo::_ScreenCoordX(float x)
 int32 GameVideo::_ScreenCoordY(float y)
 {
 	float percent;
-	if(_coordSys.GetTop() < _coordSys.GetBottom())
-		percent = (y - _coordSys.GetTop()) / (_coordSys.GetBottom() - _coordSys.GetTop());
+	if(_coord_sys.GetTop() < _coord_sys.GetBottom())
+		percent = (y - _coord_sys.GetTop()) / (_coord_sys.GetBottom() - _coord_sys.GetTop());
 	else
-		percent = (y - _coordSys.GetBottom()) / (_coordSys.GetTop() - _coordSys.GetBottom());
+		percent = (y - _coord_sys.GetBottom()) / (_coord_sys.GetTop() - _coord_sys.GetBottom());
 	
 	return int32(percent * float(_height));
 }
@@ -1842,19 +1842,19 @@ void GameVideo::DrawGrid(float x, float y, float xstep, float ystep, const Color
 	glBegin(GL_LINES);
 	glColor4fv(&c[0]);
 	
-	float xMax = _coordSys.GetRight();
-	float yMax = _coordSys.GetBottom();
+	float xMax = _coord_sys.GetRight();
+	float yMax = _coord_sys.GetBottom();
 	
 	for(; x <= xMax; x += xstep)
 	{
-		glVertex2f(x, _coordSys.GetBottom());
-		glVertex2f(x, _coordSys.GetTop());
+		glVertex2f(x, _coord_sys.GetBottom());
+		glVertex2f(x, _coord_sys.GetTop());
 	}
 
 	for(; y <= yMax; y += ystep)
 	{
-		glVertex2f(_coordSys.GetLeft(), y);
-		glVertex2f(_coordSys.GetRight(), y);
+		glVertex2f(_coord_sys.GetLeft(), y);
+		glVertex2f(_coord_sys.GetRight(), y);
 	}
 	
 	glEnd();

@@ -245,7 +245,7 @@ private:
 	bool RecreateImage();
 
 	static int32 _currentMenuID;                    //! hand out new IDs to each menu that is created
-	static std::map<int32, MenuWindow *> _menuMap;  //! keep a registered std::map of menus in case they need to be updated when the skin changes
+	static std::map<int32, MenuWindow *> _menu_map; //! keep a registered std::map of menus in case they need to be updated when the skin changes
 	
 	int32 _id;                       //! id of the menu, used to register and unregister it with the std::map when it is constructed/destructed
 	float _width, _height;           //! dimensions
@@ -255,7 +255,7 @@ private:
 	
 	MenuState _state;                //! menu state (hidden, shown, hiding, showing)
 	int32  _currentTime;             //! milliseconds that passed since menu was shown
-	StillImage _menuImage;      //! image descriptor of the menu
+	StillImage _menu_image;          //! image descriptor of the menu
 	MenuDisplayMode _mode;           //! text display mode (one character at a time, fading in, instant, etc.)
 	
 	bool       _isScissored;         //! true if scissoring needs to be used

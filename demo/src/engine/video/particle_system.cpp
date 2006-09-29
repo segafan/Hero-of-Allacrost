@@ -924,7 +924,7 @@ void ParticleSystem::_RespawnParticle(int32 i, const EffectParameters &params)
 	
 	// figure out the orientation
 	
-	float angle;
+	float angle = 0.0f;
 	
 	if(emitter._omnidirectional)
 	{
