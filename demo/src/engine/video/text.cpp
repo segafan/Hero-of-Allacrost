@@ -190,7 +190,7 @@ bool GameVideo::_DrawTextHelper
 	int32 w,h;
 	GLuint texture;
 
-	CoordSys &cs = _coordSys;
+	CoordSys &cs = _coord_sys;
 
 	// Figure out which glyphs are not already cached
 	std::vector<uint16> newglyphs;
@@ -521,8 +521,8 @@ bool GameVideo::DrawText(const ustring &txt)
 				
 				
 				glPushMatrix();
-				MoveRelative(+_coordSys.GetHorizontalDirection() * fp->shadowX, 0.0f);
-				MoveRelative(0.0f, _coordSys.GetVerticalDirection() * fp->shadowY);
+				MoveRelative(+_coord_sys.GetHorizontalDirection() * fp->shadowX, 0.0f);
+				MoveRelative(0.0f, _coord_sys.GetVerticalDirection() * fp->shadowY);
 				
 				if(!_DrawTextHelper(buffer))
 				{
@@ -543,7 +543,7 @@ bool GameVideo::DrawText(const ustring &txt)
 			
 			glPopMatrix();
 			
-			MoveRelative(0, -lineSkip * _coordSys.GetVerticalDirection());
+			MoveRelative(0, -lineSkip * _coord_sys.GetVerticalDirection());
 
 		} while(lastline < txt.length());
 		

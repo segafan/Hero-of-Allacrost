@@ -21,7 +21,7 @@ using hoa_utils::ustring;
 
 
 int32 MenuWindow::_currentMenuID = 0;
-map<int32, MenuWindow *> MenuWindow::_menuMap;
+map<int32, MenuWindow *> MenuWindow::_menu_map;
 
 
 namespace hoa_video
@@ -42,7 +42,7 @@ MenuWindow::MenuWindow() :
 {
 	_id = _currentMenuID;
 	++_currentMenuID;	
-	_initialized = IsInitialized(_initializeErrors);
+	_initialized = IsInitialized(_initialize_errors);
 
 }
 
@@ -68,7 +68,7 @@ bool MenuWindow::Draw()
 	if(!_initialized)
 	{
 		if(VIDEO_DEBUG)
-			cerr << "MenuWindow::Draw() failed because the menu window was not initialized:" << endl << _initializeErrors << endl;
+			cerr << "MenuWindow::Draw() failed because the menu window was not initialized:" << endl << _initialize_errors << endl;
 		return false;		
 	}
 
@@ -97,7 +97,7 @@ bool MenuWindow::Draw()
 	}
 
 	video->Move(_x, _y);
-	if(!video->DrawImage(_menuImage, Color::white))
+	if(!video->DrawImage(_menu_image, Color::white))
 	{
 		if(VIDEO_DEBUG)
 			cerr << "MenuMode::Draw() failed because GameVideo::DrawImage() returned false!" << endl;
@@ -150,10 +150,10 @@ bool MenuWindow::Update(int32 frameTime)
 
 			_scissorRect = video->CalculateScreenRect(left, right, bottom, top);
 
-			_scissorRect.left += xBuffer;
-			_scissorRect.width -= (xBuffer * 2);
-			_scissorRect.top += yBuffer;
-			_scissorRect.height -= (yBuffer * 2);
+			_scissorRect.left   += static_cast<int32> (xBuffer);
+			_scissorRect.width  -= static_cast<int32> (xBuffer * 2);
+			_scissorRect.top    += static_cast<int32> (yBuffer);
+			_scissorRect.height -= static_cast<int32> (yBuffer * 2);
 		}
 
 		_isScissored = false;
@@ -218,7 +218,7 @@ bool MenuWindow::Show()
 	if(!_initialized)
 	{
 		if(VIDEO_DEBUG)
-			cerr << "MenuWindow::Draw() failed because the menu window was not initialized:" << endl << _initializeErrors << endl;
+			cerr << "MenuWindow::Draw() failed because the menu window was not initialized:" << endl << _initialize_errors << endl;
 		return false;		
 	}
 
@@ -250,7 +250,7 @@ bool MenuWindow::Hide()
 	if(!_initialized)
 	{
 		if(VIDEO_DEBUG)
-			cerr << "MenuWindow::Draw() failed because the menu window was not initialized:" << endl << _initializeErrors << endl;
+			cerr << "MenuWindow::Draw() failed because the menu window was not initialized:" << endl << _initialize_errors << endl;
 		return false;		
 	}
 
@@ -299,9 +299,9 @@ bool MenuWindow::Create(float w, float h, int32 edgeVisibleFlags, int32 edgeShar
 	
 	// add the menu to the std::map
 	
-	_menuMap[_id] = this;
+	_menu_map[_id] = this;
 
-	_initialized = IsInitialized(_initializeErrors);
+	_initialized = IsInitialized(_initialize_errors);
 	return true;	
 }
 
@@ -314,8 +314,8 @@ bool MenuWindow::Create(float w, float h, int32 edgeVisibleFlags, int32 edgeShar
 bool MenuWindow::RecreateImage()
 {
 	GameVideo *video = GameVideo::SingletonGetReference();
-	video->DeleteImage(_menuImage);
-	return video->_CreateMenu(_menuImage, _width, _height, _innerWidth, _innerHeight, _edgeVisibleFlags, _edgeSharedFlags);
+	video->DeleteImage(_menu_image);
+	return video->_CreateMenu(_menu_image, _width, _height, _innerWidth, _innerHeight, _edgeVisibleFlags, _edgeSharedFlags);
 }
 
 
@@ -350,7 +350,7 @@ bool MenuWindow::IsInitialized(string &errors)
 		s << "* Invalid state (" << _state << ")" << endl;
 		
 	// check to see a valid image is loaded
-	if(_menuImage.GetWidth() == 0)
+	if(_menu_image.GetWidth() == 0)
 		s << "* Menu image is not loaded" << endl;
 
 	_initialized = success;	
@@ -365,11 +365,11 @@ bool MenuWindow::IsInitialized(string &errors)
 void MenuWindow::Destroy()
 {
 	// get rid of the entry in the std::map
-	map<int32, MenuWindow *>::iterator menuIterator = _menuMap.find(_id);
+	map<int32, MenuWindow *>::iterator menuIterator = _menu_map.find(_id);
 	
-	if(menuIterator != _menuMap.end())
+	if(menuIterator != _menu_map.end())
 	{
-		_menuMap.erase(menuIterator);
+		_menu_map.erase(menuIterator);
 	}
 	else
 	{
@@ -378,7 +378,7 @@ void MenuWindow::Destroy()
 	}
 	
 	GameVideo *video = GameVideo::SingletonGetReference();
-	video->DeleteImage(_menuImage);
+	video->DeleteImage(_menu_image);
 }
 
 
@@ -397,7 +397,7 @@ bool MenuWindow::SetDisplayMode(MenuDisplayMode mode)
 	
 	_mode = mode;
 	
-	_initialized = IsInitialized(_initializeErrors);
+	_initialized = IsInitialized(_initialize_errors);
 	return true;
 }
 

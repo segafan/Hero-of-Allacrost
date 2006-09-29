@@ -868,7 +868,7 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 	
 	char buf[200];
 	
-	Move(20, _coordSys.GetTop() - 30);
+	Move(20, _coord_sys.GetTop() - 30);
 	if(!DrawText("Current Texture sheet:"))
 	{
 		_PopContext();

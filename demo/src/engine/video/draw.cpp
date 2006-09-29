@@ -54,11 +54,11 @@ bool GameVideo::_DrawStillImage(const StillImage &id, const Color &color)
 	float modulation = _fader.GetFadeModulation();
 	Color fadeColor(modulation, modulation, modulation, 1.0f);
 
-	float shakeX = _shakeX * (_coordSys.GetRight() - _coordSys.GetLeft()) / 1024.0f;
-	float shakeY = _shakeY * (_coordSys.GetTop()   - _coordSys.GetBottom()) / 768.0f;
+	float shakeX = _shakeX * (_coord_sys.GetRight() - _coord_sys.GetLeft()) / 1024.0f;
+	float shakeY = _shakeY * (_coord_sys.GetTop()   - _coord_sys.GetBottom()) / 768.0f;
 
-	float xAlignOffset = ((_xalign+1) * id._width)  * 0.5f * -_coordSys.GetHorizontalDirection();
-	float yAlignOffset = ((_yalign+1) * id._height) * 0.5f * -_coordSys.GetVerticalDirection();
+	float xAlignOffset = ((_xalign+1) * id._width)  * 0.5f * -_coord_sys.GetHorizontalDirection();
+	float yAlignOffset = ((_yalign+1) * id._height) * 0.5f * -_coord_sys.GetVerticalDirection();
 
 	glPushMatrix();
 	MoveRelative(xAlignOffset, yAlignOffset);	
@@ -86,14 +86,14 @@ bool GameVideo::_DrawStillImage(const StillImage &id, const Color &color)
 		xoff += shakeX;
 		yoff += shakeY;
 
-		MoveRelative(xoff * _coordSys.GetHorizontalDirection(), yoff * _coordSys.GetVerticalDirection());
+		MoveRelative(xoff * _coord_sys.GetHorizontalDirection(), yoff * _coord_sys.GetVerticalDirection());
 		
 		float xscale = id._elements[iElement].width;
 		float yscale = id._elements[iElement].height;
 		
-		if(_coordSys.GetHorizontalDirection() < 0.0f)
+		if(_coord_sys.GetHorizontalDirection() < 0.0f)
 			xscale = -xscale;
-		if(_coordSys.GetVerticalDirection() < 0.0f)
+		if(_coord_sys.GetVerticalDirection() < 0.0f)
 			yscale = -yscale;
 		
 		glScalef(xscale, yscale, 1.0f);

@@ -1103,7 +1103,7 @@ private:
 
 	char _nextTempFile[9];    //! eight character name for temp files that increments every time you create a new one so they are always unique
 
-	CoordSys    _coordSys;    //! current coordinate system
+	CoordSys    _coord_sys;   //! current coordinate system
 	
 	ScreenRect _viewport;     //! current viewport
 	ScreenRect _scissorRect;  //! current scissor rectangle

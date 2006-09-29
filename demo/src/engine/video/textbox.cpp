@@ -36,7 +36,7 @@ TextBox::TextBox()
 	_mode = VIDEO_TEXT_INVALID;
 	_displaySpeed = 0.0f;
 	_numChars = 0;
-	_initialized = IsInitialized(_initializeErrors);
+	_initialized = IsInitialized(_initialize_errors);
 	_width = _height = 0.0f;
 	_text_xalign = VIDEO_X_LEFT;
 	_text_yalign = VIDEO_Y_BOTTOM;
@@ -85,7 +85,7 @@ bool TextBox::Draw()
 	if(!_initialized)
 	{
 		if(VIDEO_DEBUG)
-			cerr << "TextBox::Draw() failed because the textbox was not initialized:" << endl << _initializeErrors << endl;			
+			cerr << "TextBox::Draw() failed because the textbox was not initialized:" << endl << _initialize_errors << endl;			
 		return false;
 	}
 		
@@ -125,7 +125,7 @@ bool TextBox::Draw()
 	if(video->IsScissoringEnabled())
 		video->SetScissorRect(rect);
 	
-	CoordSys &cs = video->_coordSys;
+	CoordSys &cs = video->_coord_sys;
 
 	// figure out where the top of the rendered text is
 	
@@ -203,7 +203,7 @@ bool TextBox::SetDimensions(float w, float h)
 	_width = w;
 	_height = h;
 
-	_initialized = IsInitialized(_initializeErrors);
+	_initialized = IsInitialized(_initialize_errors);
 	
 	return true;
 }
@@ -231,7 +231,7 @@ bool TextBox::SetTextAlignment(int32 xalign, int32 yalign)
 	_text_xalign = xalign;
 	_text_yalign = yalign;	
 	
-	_initialized = IsInitialized(_initializeErrors);
+	_initialized = IsInitialized(_initialize_errors);
 	
 	return success;
 }
@@ -274,7 +274,7 @@ bool TextBox::SetFont(const string &fontName)
 	}
 
 	_font = fontName;
-	_initialized = IsInitialized(_initializeErrors);
+	_initialized = IsInitialized(_initialize_errors);
 	
 	return true;
 }
@@ -305,7 +305,7 @@ bool TextBox::SetDisplayMode(const TextDisplayMode &mode)
 	}
 	
 	_mode = mode;
-	_initialized = IsInitialized(_initializeErrors);
+	_initialized = IsInitialized(_initialize_errors);
 	return true;
 }
 
@@ -344,7 +344,7 @@ bool TextBox::SetDisplaySpeed(float displaySpeed)
 	}
 	
 	_displaySpeed = displaySpeed;
-	_initialized = IsInitialized(_initializeErrors);
+	_initialized = IsInitialized(_initialize_errors);
 	return true;
 }
 
@@ -409,7 +409,7 @@ bool TextBox::SetDisplayText(const hoa_utils::ustring &text)
 	if(!_initialized)
 	{
 		if(VIDEO_DEBUG)
-			cerr << "TextBox::SetDisplayText() failed because the textbox was not initialized:" << endl << _initializeErrors << endl;
+			cerr << "TextBox::SetDisplayText() failed because the textbox was not initialized:" << endl << _initialize_errors << endl;
 			
 		return false;		
 	}
@@ -720,7 +720,7 @@ bool TextBox::SetDisplayText(const std::string &text)
 void TextBox::_DrawTextLines(float textX, float textY, ScreenRect scissorRect)
 {
 	GameVideo *video = GameVideo::SingletonGetReference();
-	CoordSys  &cs    = video->_coordSys;
+	CoordSys  &cs    = video->_coord_sys;
 	
 	int32 numCharsDrawn = 0;	
 	
