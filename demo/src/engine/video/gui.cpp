@@ -25,14 +25,14 @@ namespace private_video
 GUI::GUI()
 {
 	for (int32 sample = 0; sample < VIDEO_FPS_SAMPLES; ++sample)
-		 _fps_samples[sample] = 0;
+		 fps_samples[sample] = 0;
 		
-	_total_FPS = 0;
+	total_FPS = 0;
 	
-	_cur_sample = _num_samples = 0;
-	_video_manager = GameVideo::SingletonGetReference();
+	cur_sample = num_samples = 0;
+	video_manager = GameVideo::SingletonGetReference();
 	
-	if (!_video_manager)
+	if (!video_manager)
 	{
 		if (VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: in GUI constructor, got NULL for GameVideo reference!" << endl;
@@ -49,11 +49,11 @@ GUI::~GUI()
 	{
 		for (int32 x = 0; x < 3; ++x)
 		{
-			_video_manager->DeleteImage(_current_skin.skin[y][x]);
+			video_manager->DeleteImage(current_skin.skin[y][x]);
 		}
 	}
 	
-	_video_manager->DeleteImage(_current_skin.background);
+	video_manager->DeleteImage(current_skin.background);
 }
 
 
@@ -64,7 +64,7 @@ GUI::~GUI()
 //-----------------------------------------------------------------------------
 bool GUI::DrawFPS(int32 frame_time)
 {
-	_video_manager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_X_NOFLIP, VIDEO_Y_NOFLIP, VIDEO_BLEND, 0);
+	video_manager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_X_NOFLIP, VIDEO_Y_NOFLIP, VIDEO_BLEND, 0);
 	
 	// calculate the FPS for current frame	
 	int32 fps = 1000;		
@@ -76,12 +76,12 @@ bool GUI::DrawFPS(int32 frame_time)
 	
 	int32 n_iter;
 	
-	if (_num_samples == 0)
+	if (num_samples == 0)
 	{
 		// If the FPS display is uninitialized, set the entire FPS array to the
 		// current FPS
 		
-		_num_samples = n_iter = VIDEO_FPS_SAMPLES;
+		num_samples = n_iter = VIDEO_FPS_SAMPLES;
 	}
 	else if (frame_time < 2)
 		n_iter = 1;    // if the game is going at 500 fps or faster, 1 iteration is enough
@@ -92,7 +92,7 @@ bool GUI::DrawFPS(int32 frame_time)
 		// modes (e.g. going from boot screen to map), so add extra samples so the
 		// FPS display "catches up" more quickly
 		
-		float avg_frame_time = 1000.0f * VIDEO_FPS_SAMPLES / _total_FPS;
+		float avg_frame_time = 1000.0f * VIDEO_FPS_SAMPLES / total_FPS;
 		int32 diff_time = ((int32)avg_frame_time - frame_time);
 		
 		if (diff_time < 0)
@@ -109,33 +109,33 @@ bool GUI::DrawFPS(int32 frame_time)
 	{	
 		// insert newly calculated FPS into fps buffer
 		
-		if (_cur_sample < 0 || _cur_sample >= VIDEO_FPS_SAMPLES)
+		if (cur_sample < 0 || cur_sample >= VIDEO_FPS_SAMPLES)
 		{
 			if (VIDEO_DEBUG)
 				cerr << "VIDEO ERROR: out of bounds _curSample in DrawFPS()!" << endl;
 			return false;
 		}		
 		
-		_total_FPS -= _fps_samples[_cur_sample];
-		_total_FPS += fps;		
-		_fps_samples[_cur_sample] = fps;
-		_cur_sample = (_cur_sample+1) % VIDEO_FPS_SAMPLES;
+		total_FPS -= fps_samples[cur_sample];
+		total_FPS += fps;		
+		fps_samples[cur_sample] = fps;
+		cur_sample = (cur_sample+1) % VIDEO_FPS_SAMPLES;
 	}		
 		
 	// find the average FPS
-	int32 avg_FPS = _total_FPS / VIDEO_FPS_SAMPLES;
+	int32 avg_FPS = total_FPS / VIDEO_FPS_SAMPLES;
 
 	// display to screen	 
 	char fps_text[16];
 	sprintf(fps_text, "fps: %d", avg_FPS);
 	
-	if (!_video_manager->SetFont("debug_font"))
+	if (!video_manager->SetFont("debug_font"))
 	{
 		return false;
 	}
 	
-	_video_manager->Move(930.0f, 720.0f);
-	if (!_video_manager->DrawText(fps_text))
+	video_manager->Move(930.0f, 720.0f);
+	if (!video_manager->DrawText(fps_text))
 	{
 		return false;
 	}		
@@ -177,57 +177,57 @@ bool GUI::SetMenuSkin
 	{
 		for (x = 0; x < 3; ++x)
 		{
-			_video_manager->DeleteImage(_current_skin.skin[y][x]);
+			video_manager->DeleteImage(current_skin.skin[y][x]);
 			
 			// setting width/height to zero means to fall back to the
 			// width and height of the images in pixels			
-			_current_skin.skin[y][x].SetDimensions(0.0f, 0.0f);
+			current_skin.skin[y][x].SetDimensions(0.0f, 0.0f);
 		}
 	}
 		
-	_video_manager->DeleteImage(_current_skin.tri_t);
-	_video_manager->DeleteImage(_current_skin.tri_l);
-	_video_manager->DeleteImage(_current_skin.tri_r);
-	_video_manager->DeleteImage(_current_skin.tri_b);
-	_video_manager->DeleteImage(_current_skin.quad);
-	_video_manager->DeleteImage(_current_skin.background);
+	video_manager->DeleteImage(current_skin.tri_t);
+	video_manager->DeleteImage(current_skin.tri_l);
+	video_manager->DeleteImage(current_skin.tri_r);
+	video_manager->DeleteImage(current_skin.tri_b);
+	video_manager->DeleteImage(current_skin.quad);
+	video_manager->DeleteImage(current_skin.background);
 	
-	_current_skin.tri_t.SetDimensions(0.0f, 0.0f);
-	_current_skin.tri_l.SetDimensions(0.0f, 0.0f);
-	_current_skin.tri_r.SetDimensions(0.0f, 0.0f);
-	_current_skin.tri_b.SetDimensions(0.0f, 0.0f);
-	_current_skin.quad.SetDimensions(0.0f, 0.0f);
+	current_skin.tri_t.SetDimensions(0.0f, 0.0f);
+	current_skin.tri_l.SetDimensions(0.0f, 0.0f);
+	current_skin.tri_r.SetDimensions(0.0f, 0.0f);
+	current_skin.tri_b.SetDimensions(0.0f, 0.0f);
+	current_skin.quad.SetDimensions(0.0f, 0.0f);
 	
 	map<int32, MenuWindow *>::iterator i_menu = MenuWindow::_menu_map.begin();
 	
 	while (i_menu != MenuWindow::_menu_map.end())
 	{
 		MenuWindow *menu = i_menu->second;
-		_video_manager->DeleteImage(menu->_menu_image);
+		video_manager->DeleteImage(menu->_menu_image);
 		++i_menu;
 	}
 	
 	// now load the new images
 	
-	_current_skin.skin[0][0].SetFilename(img_file_TL);
-	_current_skin.skin[0][1].SetFilename(img_file_T);
-	_current_skin.skin[0][2].SetFilename(img_file_TR);
-	_current_skin.skin[1][0].SetFilename(img_file_L);
-	_current_skin.skin[1][2].SetFilename(img_file_R);
-	_current_skin.skin[2][0].SetFilename(img_file_BL);
-	_current_skin.skin[2][1].SetFilename(img_file_B);
-	_current_skin.skin[2][2].SetFilename(img_file_BR);
+	current_skin.skin[0][0].SetFilename(img_file_TL);
+	current_skin.skin[0][1].SetFilename(img_file_T);
+	current_skin.skin[0][2].SetFilename(img_file_TR);
+	current_skin.skin[1][0].SetFilename(img_file_L);
+	current_skin.skin[1][2].SetFilename(img_file_R);
+	current_skin.skin[2][0].SetFilename(img_file_BL);
+	current_skin.skin[2][1].SetFilename(img_file_B);
+	current_skin.skin[2][2].SetFilename(img_file_BR);
 
-	_current_skin.tri_t.SetFilename(img_file_Tri_T);
-	_current_skin.tri_l.SetFilename(img_file_Tri_L);
-	_current_skin.tri_r.SetFilename(img_file_Tri_R);
-	_current_skin.tri_b.SetFilename(img_file_Tri_B);
-	_current_skin.quad.SetFilename(img_file_Quad);
+	current_skin.tri_t.SetFilename(img_file_Tri_T);
+	current_skin.tri_l.SetFilename(img_file_Tri_L);
+	current_skin.tri_r.SetFilename(img_file_Tri_R);
+	current_skin.tri_b.SetFilename(img_file_Tri_B);
+	current_skin.quad.SetFilename(img_file_Quad);
 
-	_current_skin.background.SetFilename(background_image);
+	current_skin.background.SetFilename(background_image);
 
 	// the center doesn't have an image, it's just a colored quad
-	_current_skin.skin[1][1].SetVertexColors
+	current_skin.skin[1][1].SetVertexColors
 	(
 		fill_color_TL,
 		fill_color_TR,
@@ -235,26 +235,26 @@ bool GUI::SetMenuSkin
 		fill_color_BR
 	);
 		
-	_video_manager->BeginImageLoadBatch();
+	video_manager->BeginImageLoadBatch();
 	for (y = 0; y < 3; ++y)
 	{
 		for (x = 0; x < 3; ++x)
 		{
-			_video_manager->LoadImage(_current_skin.skin[y][x]);
+			video_manager->LoadImage(current_skin.skin[y][x]);
 		}
 	}
 
-	_video_manager->LoadImage(_current_skin.tri_t);
-	_video_manager->LoadImage(_current_skin.tri_l);
-	_video_manager->LoadImage(_current_skin.tri_r);
-	_video_manager->LoadImage(_current_skin.tri_b);
-	_video_manager->LoadImage(_current_skin.quad);
+	video_manager->LoadImage(current_skin.tri_t);
+	video_manager->LoadImage(current_skin.tri_l);
+	video_manager->LoadImage(current_skin.tri_r);
+	video_manager->LoadImage(current_skin.tri_b);
+	video_manager->LoadImage(current_skin.quad);
 
-	_video_manager->EndImageLoadBatch();
+	video_manager->EndImageLoadBatch();
 	
-	_video_manager->LoadImage(_current_skin.background);
+	video_manager->LoadImage(current_skin.background);
 	
-	if (!_CheckSkinConsistency(_current_skin))
+	if (!CheckSkinConsistency(current_skin))
 	{
 		return false;			
 	}
@@ -273,11 +273,11 @@ bool GUI::SetMenuSkin
 
 
 //-----------------------------------------------------------------------------
-// _CheckSkinConsistency: runs some simple checks on a skin to make sure its
-//                        images are properly sized. If it finds any errors
-//                        it'll return false and output an error message
+// CheckSkinConsistency: runs some simple checks on a skin to make sure its
+//                       images are properly sized. If it finds any errors
+//                       it'll return false and output an error message
 //-----------------------------------------------------------------------------
-bool GUI::_CheckSkinConsistency(const MenuSkin &s)
+bool GUI::CheckSkinConsistency(const MenuSkin &s)
 {
 	// check #1: widths of top and bottom borders are equal
 	if (s.skin[2][1].GetWidth() != s.skin[0][1].GetWidth())
@@ -346,23 +346,23 @@ bool GUI::_CheckSkinConsistency(const MenuSkin &s)
 //
 // NOTE: this function assumes that the skin images actually WOULD fit together
 //       if you put them next to each other. This should be an OK assumption
-//       since we call _CheckSkinConsistency() when we set a new skin
+//       since we call CheckSkinConsistency() when we set a new skin
 //-----------------------------------------------------------------------------
 bool GUI::CreateMenu(StillImage &id, float width, float height, float & inner_width, float & inner_height, int32 edge_visible_flags, int32 edge_shared_flags)
 {
 	id.Clear();
 	
 	// get all the border size information
-	float left_border_size   = _current_skin.skin[1][0].GetWidth();
-	float right_border_size  = _current_skin.skin[1][2].GetWidth();
-	float top_border_size    = _current_skin.skin[2][1].GetHeight();
-	float bottom_border_size = _current_skin.skin[0][1].GetHeight();
+	float left_border_size   = current_skin.skin[1][0].GetWidth();
+	float right_border_size  = current_skin.skin[1][2].GetWidth();
+	float top_border_size    = current_skin.skin[2][1].GetHeight();
+	float bottom_border_size = current_skin.skin[0][1].GetHeight();
 
 	float horizontal_border_size = left_border_size + right_border_size;
 	float vertical_border_size   = top_border_size  + bottom_border_size;
 	
-	float top_width   = _current_skin.skin[2][1].GetWidth();
-	float left_height = _current_skin.skin[1][0].GetHeight();
+	float top_width   = current_skin.skin[2][1].GetWidth();
+	float left_height = current_skin.skin[1][0].GetHeight();
 		
 	// calculate how many times the top/bottom images have to be tiled
 	// to make up the width of the window
@@ -389,60 +389,60 @@ bool GUI::CreateMenu(StillImage &id, float width, float height, float & inner_wi
 	}
 
 	// true if there is a background image
-	bool background_loaded = _current_skin.background.GetWidth();
+	bool background_loaded = current_skin.background.GetWidth();
 	
 	// find how many times we have to tile the border images to fit the
 	// dimensions given
 	float num_x_tiles = inner_width  / top_width;
 	float num_y_tiles = inner_height / left_height;
 	
-	int32 i_num_x_tiles = int32(num_x_tiles);
-	int32 i_num_y_tiles = int32(num_y_tiles);
+	int32 inum_x_tiles = int32(num_x_tiles);
+	int32 inum_y_tiles = int32(num_y_tiles);
 	
 	// ideally, num_top and friends should all divide evenly into integers,
 	// but the person who called this function might have passed in a bogus
 	// width and height, so we may have to extend the dimensions a little
-	float d_num_x_tiles = num_x_tiles - i_num_x_tiles;
-	float d_num_y_tiles = num_y_tiles - i_num_y_tiles;
+	float dnum_x_tiles = num_x_tiles - inum_x_tiles;
+	float dnum_y_tiles = num_y_tiles - inum_y_tiles;
 	
-	if (d_num_x_tiles > 0.001f)
+	if (dnum_x_tiles > 0.001f)
 	{
-		float width_adjust = (1.0f - d_num_x_tiles) * top_width;
+		float width_adjust = (1.0f - dnum_x_tiles) * top_width;
 		width += width_adjust;
 		inner_width += width_adjust;
-		++i_num_x_tiles;		
+		++inum_x_tiles;		
 	}
 	
-	if (d_num_y_tiles > 0.001f)
+	if (dnum_y_tiles > 0.001f)
 	{
-		float height_adjust = (1.0f - d_num_y_tiles) * top_width;
+		float height_adjust = (1.0f - dnum_y_tiles) * top_width;
 		height += height_adjust;
 		inner_height += height_adjust;
-		++i_num_y_tiles;
+		++inum_y_tiles;
 	}
 	
 	// now we have all the information we need to create the menu!
 
 	// re-create the overlay at the correct width and height	
 	Color c[4];
-	_current_skin.skin[1][1].GetVertexColor(c[0], 0);
-	_current_skin.skin[1][1].GetVertexColor(c[1], 1);
-	_current_skin.skin[1][1].GetVertexColor(c[2], 2);
-	_current_skin.skin[1][1].GetVertexColor(c[3], 3);
+	current_skin.skin[1][1].GetVertexColor(c[0], 0);
+	current_skin.skin[1][1].GetVertexColor(c[1], 1);
+	current_skin.skin[1][1].GetVertexColor(c[2], 2);
+	current_skin.skin[1][1].GetVertexColor(c[3], 3);
 	
-	_video_manager->DeleteImage(_current_skin.skin[1][1]);	
-	_current_skin.skin[1][1].SetDimensions(left_border_size, top_border_size);
-	_current_skin.skin[1][1].SetVertexColors(c[0], c[1], c[2], c[3]);
-	_video_manager->LoadImage(_current_skin.skin[1][1]);
+	video_manager->DeleteImage(current_skin.skin[1][1]);	
+	current_skin.skin[1][1].SetDimensions(left_border_size, top_border_size);
+	current_skin.skin[1][1].SetVertexColors(c[0], c[1], c[2], c[3]);
+	video_manager->LoadImage(current_skin.skin[1][1]);
 	
 
 	// if a valid background image is loaded (nonzero width), then tile the interior 
 	if (background_loaded)
 	{
-		_current_skin.background.SetVertexColors(c[0], c[1], c[2], c[3]);
+		current_skin.background.SetVertexColors(c[0], c[1], c[2], c[3]);
 
-		float width = _current_skin.background.GetWidth();
-		float height = _current_skin.background.GetHeight();
+		float width = current_skin.background.GetWidth();
+		float height = current_skin.background.GetHeight();
 
 		float min_x = 0;
 		float min_y = 0;
@@ -471,24 +471,24 @@ bool GUI::CreateMenu(StillImage &id, float width, float height, float & inner_wi
 				if(y + height > max_y)
 					v = (max_y - y) / height;
 
-				id.AddImage(_current_skin.background, x, y, 0, 0, u, v);
+				id.AddImage(current_skin.background, x, y, 0, 0, u, v);
 			}
 		}
 	} // if (background_loaded) ...
 	else
 	{
 		// re-create the overlay at the correct width and height
-		_video_manager->DeleteImage(_current_skin.skin[1][1]);
-		_current_skin.skin[1][1].SetDimensions(inner_width, inner_height);
-		_current_skin.skin[1][1].SetVertexColors(c[0], c[1], c[2], c[3]);
-		_video_manager->LoadImage(_current_skin.skin[1][1]);
+		video_manager->DeleteImage(current_skin.skin[1][1]);
+		current_skin.skin[1][1].SetDimensions(inner_width, inner_height);
+		current_skin.skin[1][1].SetVertexColors(c[0], c[1], c[2], c[3]);
+		video_manager->LoadImage(current_skin.skin[1][1]);
 		
-		id.AddImage(_current_skin.skin[1][1], left_border_size, bottom_border_size);
+		id.AddImage(current_skin.skin[1][1], left_border_size, bottom_border_size);
 	}
 	
 	// first add the corners
-	float max_x = left_border_size + i_num_x_tiles * top_width;
-	float max_y = bottom_border_size + i_num_y_tiles * left_height;
+	float max_x = left_border_size + inum_x_tiles * top_width;
+	float max_y = bottom_border_size + inum_y_tiles * left_height;
 	float min_x = 0.0f;
 	float min_y = 0.0f;	
 
@@ -496,104 +496,104 @@ bool GUI::CreateMenu(StillImage &id, float width, float height, float & inner_wi
 	if (edge_visible_flags & VIDEO_MENU_EDGE_LEFT && edge_visible_flags & VIDEO_MENU_EDGE_BOTTOM)
 	{
 		if (edge_shared_flags & VIDEO_MENU_EDGE_LEFT && edge_shared_flags & VIDEO_MENU_EDGE_BOTTOM)
-			id.AddImage(_current_skin.quad, min_x, min_y);
+			id.AddImage(current_skin.quad, min_x, min_y);
 		else if (edge_shared_flags & VIDEO_MENU_EDGE_LEFT)
-			id.AddImage(_current_skin.tri_b, min_x, min_y);
+			id.AddImage(current_skin.tri_b, min_x, min_y);
 		else if (edge_shared_flags & VIDEO_MENU_EDGE_BOTTOM)
-			id.AddImage(_current_skin.tri_l, min_x, min_y);
+			id.AddImage(current_skin.tri_l, min_x, min_y);
 		else
-			id.AddImage(_current_skin.skin[2][0], min_x, min_y);
+			id.AddImage(current_skin.skin[2][0], min_x, min_y);
 	}
 	else if (edge_visible_flags & VIDEO_MENU_EDGE_LEFT)	
-		id.AddImage(_current_skin.skin[1][0], min_x, min_y);
+		id.AddImage(current_skin.skin[1][0], min_x, min_y);
 	else if (edge_visible_flags & VIDEO_MENU_EDGE_BOTTOM)
-		id.AddImage(_current_skin.skin[0][1], min_x, min_y);
+		id.AddImage(current_skin.skin[0][1], min_x, min_y);
 	else if (!background_loaded)
-		id.AddImage(_current_skin.skin[1][1], min_x, min_y);
+		id.AddImage(current_skin.skin[1][1], min_x, min_y);
 	
 	// lower right
 	if (edge_visible_flags & VIDEO_MENU_EDGE_RIGHT && edge_visible_flags & VIDEO_MENU_EDGE_BOTTOM)	
 	{
 		if (edge_shared_flags & VIDEO_MENU_EDGE_RIGHT && edge_shared_flags & VIDEO_MENU_EDGE_BOTTOM)
-			id.AddImage(_current_skin.quad, max_x, min_y);            
+			id.AddImage(current_skin.quad, max_x, min_y);            
 		else if (edge_shared_flags & VIDEO_MENU_EDGE_RIGHT)
-			id.AddImage(_current_skin.tri_b, max_x, min_y);            
+			id.AddImage(current_skin.tri_b, max_x, min_y);            
 		else if (edge_shared_flags & VIDEO_MENU_EDGE_BOTTOM)
-			id.AddImage(_current_skin.tri_r, max_x, min_y);            
+			id.AddImage(current_skin.tri_r, max_x, min_y);            
 		else
-			id.AddImage(_current_skin.skin[2][2], max_x, min_y);            
+			id.AddImage(current_skin.skin[2][2], max_x, min_y);            
 	}
 	else if (edge_visible_flags & VIDEO_MENU_EDGE_RIGHT)
-		id.AddImage(_current_skin.skin[1][2], max_x, min_y);
+		id.AddImage(current_skin.skin[1][2], max_x, min_y);
 	else if (edge_visible_flags & VIDEO_MENU_EDGE_BOTTOM)
-		id.AddImage(_current_skin.skin[2][1], max_x, min_y);
+		id.AddImage(current_skin.skin[2][1], max_x, min_y);
 	else if (!background_loaded)
-		id.AddImage(_current_skin.skin[1][1], max_x, min_y);
+		id.AddImage(current_skin.skin[1][1], max_x, min_y);
 
 	// upper left
 	if (edge_visible_flags & VIDEO_MENU_EDGE_LEFT && edge_visible_flags & VIDEO_MENU_EDGE_TOP)
 	{
 		if (edge_shared_flags & VIDEO_MENU_EDGE_LEFT && edge_shared_flags & VIDEO_MENU_EDGE_TOP)
-			id.AddImage(_current_skin.quad, min_x, max_y);
+			id.AddImage(current_skin.quad, min_x, max_y);
 		else if (edge_shared_flags & VIDEO_MENU_EDGE_LEFT)
-			id.AddImage(_current_skin.tri_t, min_x, max_y);
+			id.AddImage(current_skin.tri_t, min_x, max_y);
 		else if (edge_shared_flags & VIDEO_MENU_EDGE_TOP)
-			id.AddImage(_current_skin.tri_l, min_x, max_y);
+			id.AddImage(current_skin.tri_l, min_x, max_y);
 		else
-			id.AddImage(_current_skin.skin[0][0], min_x, max_y);
+			id.AddImage(current_skin.skin[0][0], min_x, max_y);
 	}
 	else if (edge_visible_flags & VIDEO_MENU_EDGE_LEFT)
-		id.AddImage(_current_skin.skin[1][0], min_x, max_y);
+		id.AddImage(current_skin.skin[1][0], min_x, max_y);
 	else if (edge_visible_flags & VIDEO_MENU_EDGE_TOP)
-		id.AddImage(_current_skin.skin[0][1], min_x, max_y);
+		id.AddImage(current_skin.skin[0][1], min_x, max_y);
 	else if (!background_loaded)
-		id.AddImage(_current_skin.skin[1][1], min_x, max_y);
+		id.AddImage(current_skin.skin[1][1], min_x, max_y);
 
 	// upper right
 	if (edge_visible_flags & VIDEO_MENU_EDGE_TOP && edge_visible_flags & VIDEO_MENU_EDGE_RIGHT)	
 	{		
 		if (edge_shared_flags & VIDEO_MENU_EDGE_RIGHT && edge_shared_flags & VIDEO_MENU_EDGE_TOP)
-			id.AddImage(_current_skin.quad, max_x, max_y);
+			id.AddImage(current_skin.quad, max_x, max_y);
 		else if (edge_shared_flags & VIDEO_MENU_EDGE_RIGHT)
-			id.AddImage(_current_skin.tri_t, max_x, max_y);
+			id.AddImage(current_skin.tri_t, max_x, max_y);
 		else if (edge_shared_flags & VIDEO_MENU_EDGE_TOP)
-			id.AddImage(_current_skin.tri_r, max_x, max_y);
+			id.AddImage(current_skin.tri_r, max_x, max_y);
 		else
-			id.AddImage(_current_skin.skin[0][2], max_x, max_y);
+			id.AddImage(current_skin.skin[0][2], max_x, max_y);
 	}
 	else if (edge_visible_flags & VIDEO_MENU_EDGE_TOP)
-		id.AddImage(_current_skin.skin[0][1], max_x, max_y);
+		id.AddImage(current_skin.skin[0][1], max_x, max_y);
 	else if (edge_visible_flags & VIDEO_MENU_EDGE_RIGHT)
-		id.AddImage(_current_skin.skin[1][2], max_x, max_y);
+		id.AddImage(current_skin.skin[1][2], max_x, max_y);
 	else if (!background_loaded)
-		id.AddImage(_current_skin.skin[1][1], max_x, max_y);
+		id.AddImage(current_skin.skin[1][1], max_x, max_y);
 
 	// iterate from left to right and fill in the horizontal borders
-	for (int32 tile_x = 0; tile_x < i_num_x_tiles; ++tile_x)
+	for (int32 tile_x = 0; tile_x < inum_x_tiles; ++tile_x)
 	{
 		if (edge_visible_flags & VIDEO_MENU_EDGE_TOP)
-			id.AddImage(_current_skin.skin[0][1], left_border_size + top_width * tile_x, max_y);
+			id.AddImage(current_skin.skin[0][1], left_border_size + top_width * tile_x, max_y);
 		else if (!background_loaded)
-			id.AddImage(_current_skin.skin[1][1], left_border_size + top_width * tile_x, max_y);
+			id.AddImage(current_skin.skin[1][1], left_border_size + top_width * tile_x, max_y);
 
 		if (edge_visible_flags & VIDEO_MENU_EDGE_BOTTOM)
-			id.AddImage(_current_skin.skin[2][1], left_border_size + top_width * tile_x, 0.0f);
+			id.AddImage(current_skin.skin[2][1], left_border_size + top_width * tile_x, 0.0f);
 		else if (!background_loaded)
-			id.AddImage(_current_skin.skin[1][1], left_border_size + top_width * tile_x, 0.0f);
+			id.AddImage(current_skin.skin[1][1], left_border_size + top_width * tile_x, 0.0f);
 	}
 	
 	// iterate from bottom to top and fill in the vertical borders
-	for (int32 tile_y = 0; tile_y < i_num_y_tiles; ++tile_y)
+	for (int32 tile_y = 0; tile_y < inum_y_tiles; ++tile_y)
 	{
 		if (edge_visible_flags & VIDEO_MENU_EDGE_LEFT)
-			id.AddImage(_current_skin.skin[1][0], 0.0f, bottom_border_size + left_height * tile_y);
+			id.AddImage(current_skin.skin[1][0], 0.0f, bottom_border_size + left_height * tile_y);
 		else if (!background_loaded)
-			id.AddImage(_current_skin.skin[1][1], 0.0f, bottom_border_size + left_height * tile_y);
+			id.AddImage(current_skin.skin[1][1], 0.0f, bottom_border_size + left_height * tile_y);
 		
 		if (edge_visible_flags & VIDEO_MENU_EDGE_RIGHT)
-			id.AddImage(_current_skin.skin[1][2], max_x, bottom_border_size + left_height * tile_y);
+			id.AddImage(current_skin.skin[1][2], max_x, bottom_border_size + left_height * tile_y);
 		else if (!background_loaded)
-			id.AddImage(_current_skin.skin[1][1], max_x, bottom_border_size + left_height * tile_y);
+			id.AddImage(current_skin.skin[1][1], max_x, bottom_border_size + left_height * tile_y);
 	}
 
 	return true;

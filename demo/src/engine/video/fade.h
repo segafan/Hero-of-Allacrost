@@ -36,12 +36,12 @@ class ScreenFader
 {
 public:
 	ScreenFader()
-	: _current_color(0.0f, 0.0f, 0.0f, 0.0f),
-	  _is_fading(false)
+	: current_color(0.0f, 0.0f, 0.0f, 0.0f),
+	  is_fading(false)
 	{
-		_current_time = _end_time = 0;
-		_fade_modulation = 1.0f;
-		_use_fade_overlay = false;
+		current_time = end_time = 0;
+		fade_modulation = 1.0f;
+		use_fade_overlay = false;
 	} // constructor
 	
 	/** \brief Begins a screen fade.
@@ -64,40 +64,39 @@ public:
 	*** factors to use.
 	**/
 	//@{
-	bool  ShouldUseFadeOverlay() { return _use_fade_overlay;   }
-	Color GetFadeOverlayColor()  { return _fade_overlay_color; }
-	float GetFadeModulation()    { return _fade_modulation;    }
+	bool  ShouldUseFadeOverlay() { return use_fade_overlay;   }
+	Color GetFadeOverlayColor()  { return fade_overlay_color; }
+	float GetFadeModulation()    { return fade_modulation;    }
 	//@}
 
 	/** \brief Determines if a fade is currently occurring.
 	*** \return True if currently doing a fade, false otherwise.
 	**/
-	bool  IsFading() { return _is_fading; }
+	bool  IsFading() { return is_fading; }
 
-private:
 	//! The color the screen is currently faded to.
-	Color  _current_color;
+	Color current_color;
 	//! The color we started from.
-	Color  _initial_color;
+	Color initial_color;
 	//! The color we are fading to.
-	Color  _final_color;
+	Color final_color;
 	//! Number of milliseconds that have passed since this fade started.
-	int32  _current_time;
+	int32 current_time;
 	//! Number of milliseconds that this fade was set to last for.
-	int32  _end_time;
+	int32 end_time;
 	//! True if we're in the middle of a fade.
-	bool   _is_fading;
+	bool  is_fading;
 	
 	/** \name Fade-type variables
 	*** \brief Used for the type of fading done, either an overlay or modulation.
 	**/
 	//@{
 	//! True if using an overlay, false if using modulation.
-	bool  _use_fade_overlay;
+	bool  use_fade_overlay;
 	//! Color of the overlay.
-	Color _fade_overlay_color;
+	Color fade_overlay_color;
 	//! A float determining the degree of modulation.
-	float _fade_modulation;
+	float fade_modulation;
 	//@}
 }; // class ScreenFader
 
