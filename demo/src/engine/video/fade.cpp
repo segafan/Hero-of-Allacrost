@@ -29,13 +29,13 @@ bool ScreenFader::FadeTo(const Color &final, float num_seconds)
 	if(num_seconds < 0.0f)
 		return false;
 	
-	_initial_color = _current_color;
-	_final_color   = final;
+	initial_color = current_color;
+	final_color   = final;
 	
-	_current_time = 0;
-	_end_time     = int32(num_seconds * 1000);  // convert seconds to milliseconds here
+	current_time = 0;
+	end_time     = int32(num_seconds * 1000);  // convert seconds to milliseconds here
 	
-	_is_fading = true;
+	is_fading = true;
 	
 	// figure out if this is a simple fade or if an overlay is required
 	// A simple fade is defined as a fade from clear to black, from black
@@ -43,20 +43,20 @@ bool ScreenFader::FadeTo(const Color &final, float num_seconds)
 	// or black. More simply, it's a fade where both the initial and final
 	// color's RGB values are zeroed out
 
-	_use_fade_overlay = true;	
+	use_fade_overlay = true;	
 
-	if( (_initial_color[0] == 0.0f &&
-	     _initial_color[1] == 0.0f &&
-	     _initial_color[2] == 0.0f &&
-	     _final_color[0]   == 0.0f &&
-	     _final_color[1]   == 0.0f &&
-	     _final_color[2]   == 0.0f))
+	if( (initial_color[0] == 0.0f &&
+	     initial_color[1] == 0.0f &&
+	     initial_color[2] == 0.0f &&
+	     final_color[0]   == 0.0f &&
+	     final_color[1]   == 0.0f &&
+	     final_color[2]   == 0.0f))
 	{
-		_use_fade_overlay = false;
+		use_fade_overlay = false;
 	}
 	else
 	{
-		_fade_modulation = 1.0f;
+		fade_modulation = 1.0f;
 	}
 	
 	Update(0);  // do initial update
@@ -71,64 +71,64 @@ bool ScreenFader::FadeTo(const Color &final, float num_seconds)
 //-----------------------------------------------------------------------------
 bool ScreenFader::Update(int32 t)
 {
-	if(!_is_fading)
+	if(!is_fading)
 		return true;
 				
-	if(_current_time >= _end_time)
+	if(current_time >= end_time)
 	{
-		_current_color = _final_color;
-		_is_fading     = false;
+		current_color = final_color;
+		is_fading     = false;
 		
-		if(_use_fade_overlay)
+		if(use_fade_overlay)
 		{
 			// check if we have faded to black or clear. If so, we can use modulation
-			if(_final_color[3] == 0.0f ||
-			  (_final_color[0] == 0.0f &&
-			   _final_color[1] == 0.0f &&
-			   _final_color[2] == 0.0f))
+			if(final_color[3] == 0.0f ||
+			  (final_color[0] == 0.0f &&
+			   final_color[1] == 0.0f &&
+			   final_color[2] == 0.0f))
 			{
-				_use_fade_overlay = false;
-				_fade_modulation = 1.0f - _final_color[3];
+				use_fade_overlay = false;
+				fade_modulation = 1.0f - final_color[3];
 			}
 		}
 		else
-			_fade_modulation = 1.0f - _final_color[3];
+			fade_modulation = 1.0f - final_color[3];
 	}
 	else
 	{
 		// calculate the new interpolated color
-		float a = (float)_current_time / (float)_end_time;
+		float a = (float)current_time / (float)end_time;
 
-		_current_color[3] = Lerp(a, _initial_color[3], _final_color[3]);
+		current_color[3] = Lerp(a, initial_color[3], final_color[3]);
 
 		// if we are fading to or from clear, then only the alpha should get
 		// interpolated.
-		if(_final_color[3] == 0.0f)
+		if(final_color[3] == 0.0f)
 		{
-			_current_color[0] = _initial_color[0];
-			_current_color[1] = _initial_color[1];
-			_current_color[2] = _initial_color[2];
+			current_color[0] = initial_color[0];
+			current_color[1] = initial_color[1];
+			current_color[2] = initial_color[2];
 		}
-		if(_initial_color[3] == 0.0f)
+		if(initial_color[3] == 0.0f)
 		{
-			_current_color[0] = _final_color[0];
-			_current_color[1] = _final_color[1];
-			_current_color[2] = _final_color[2];
+			current_color[0] = final_color[0];
+			current_color[1] = final_color[1];
+			current_color[2] = final_color[2];
 		}
 		else
 		{
-			_current_color[0] = Lerp(a, _initial_color[0], _final_color[0]);
-			_current_color[1] = Lerp(a, _initial_color[1], _final_color[1]);
-			_current_color[2] = Lerp(a, _initial_color[2], _final_color[2]);
+			current_color[0] = Lerp(a, initial_color[0], final_color[0]);
+			current_color[1] = Lerp(a, initial_color[1], final_color[1]);
+			current_color[2] = Lerp(a, initial_color[2], final_color[2]);
 		}
 		
-		if(!_use_fade_overlay)
-			_fade_modulation = 1.0f - _current_color[3];
+		if(!use_fade_overlay)
+			fade_modulation = 1.0f - current_color[3];
 		else
-			_fade_overlay_color = _current_color;
+			fade_overlay_color = current_color;
 	}
 
-	_current_time += t;
+	current_time += t;
 	return true;
 }
 

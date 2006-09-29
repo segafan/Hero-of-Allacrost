@@ -344,19 +344,18 @@ public:
 		int32 edge_shared_flags
 	);
 
-private:
 	//! Current skin
-	MenuSkin _current_skin;
+	MenuSkin current_skin;
 	//! A pointer to the video manager
-	GameVideo *_video_manager;
+	GameVideo *video_manager;
 	//! Keeps track of the sum of FPS values over the last VIDEO_FPS_SAMPLES frames. Used to simplify averaged FPS calculations
-	int32 _total_FPS;
+	int32 total_FPS;
 	//! A circular array of FPS samples used in calculating averaged FPS
-	int32 _fps_samples[VIDEO_FPS_SAMPLES];
+	int32 fps_samples[VIDEO_FPS_SAMPLES];
 	//! An index variable to keep track of the start of the circular array
-	int32 _cur_sample;
+	int32 cur_sample;
 	//! The number of FPS samples currently recorded. This value should always be VIDEO_FPS_SAMPLES, unless the game has just started, in which case it could be anywhere from 0 to VIDEO_FPS_SAMPLES depending on how many frames have been displayed.
-	int32 _num_samples;
+	int32 num_samples;
 
 	/*!
 	 *  \brief Checks a menu skin to make sure its border image sizes are consistent. If it finds any mistakes it will return false, and also spit out debug error messages if VIDEO_DEBUG is true.
@@ -365,7 +364,7 @@ private:
 	 *  \param skin The skin you want to check
 	 *  \return True if skin is consisten, false otherwise.
 	 */	
-	bool _CheckSkinConsistency(const MenuSkin &skin);
+	bool CheckSkinConsistency(const MenuSkin &skin);
 }; // class GUI
 
 } // namespace private_video
