@@ -39,7 +39,6 @@ extern GameGlobal *GlobalManager;
 extern bool GLOBAL_DEBUG;
 
 //! \name Game Item ID's
-//@{
 //! \brief ID's to identify all the item constants
 //! \note This code is temporary and will be moved into the scripting infrastructure at a later time
 enum GameItemID
@@ -182,7 +181,7 @@ public:
 	void SetUsableBy(uint32 use) { usable_by = use; }
 	uint32 GetUsableBy() { return usable_by; }
 	void SetID(GameItemID id) { obj_id = id; }
-	uint32 GetID() { return obj_id; }
+	GameItemID GetID() { return obj_id; }
 	uint32 GetCount() { return obj_count; }
 	void SetIconPath(std::string icon_path) { _icon_path = icon_path; }
 	std::string GetIconPath() { return _icon_path; }

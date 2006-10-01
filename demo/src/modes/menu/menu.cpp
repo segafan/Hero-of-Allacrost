@@ -108,7 +108,7 @@ MenuMode::MenuMode()
 	uint32 start_x = (1024 - 800) / 2 - 40;
 	uint32 start_y = (768 - 600) / 2 + 15;
 	uint32 win_width = 208;
-	uint32 win_height = 600 - 192;
+//	uint32 win_height = 600 - 192;
 
 	//FIX ME: Make bottom window dynamic
 	_bottom_window.Create(static_cast<float>(win_width * 4 + 16), 140 + 16, VIDEO_MENU_EDGE_ALL);

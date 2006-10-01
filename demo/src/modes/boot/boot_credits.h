@@ -62,11 +62,11 @@ private:
 	//! Is the window visible or not
 	bool _visible;
 
-	//! Text to be displayed
-	const std::string _credits_text;
-
 	//! Text Y offset
 	float _text_offset_y;
+
+	//! Text to be displayed
+	const std::string _credits_text;
 };
 
 
