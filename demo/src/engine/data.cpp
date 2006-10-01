@@ -248,7 +248,7 @@ float DataDescriptor::ReadFloat(const char *key) {
 	if (_open_tables.size() == 0) { // Then this is a global variable we are fetching
 		lua_getglobal(_lstack, key);
 
-		value = static_cast<int32>(lua_tonumber(_lstack, STACK_TOP));
+		value = static_cast<float>(lua_tonumber(_lstack, STACK_TOP));
 		lua_pop(_lstack, 1);
 	}
 	else { // This is a table element we are fetching

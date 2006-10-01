@@ -1886,6 +1886,7 @@ bool FormationWindow::Draw() {
 	if (MenuWindow::Draw() == false) {
 		return false;
 	}
+	return true;
 }
 
 } // namespace private_menu
