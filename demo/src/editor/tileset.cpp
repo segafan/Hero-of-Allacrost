@@ -159,7 +159,10 @@ void TileDatabase::Save(const std::string& file_name)
 	for(std::map<std::string,DbTile>::iterator it=_tiles.begin(); it!=_tiles.end(); it++)
 	{
 		// Ugly work around, can't currently begin tables with int index
-		write_data.BeginTable(boost::lexical_cast<std::string>(index).c_str());
+		//write_data.BeginTable(boost::lexical_cast<std::string>(index).c_str());
+		std::ostringstream index_str;
+		index_str<<index;
+		write_data.BeginTable(index_str.str().c_str());
 		write_data.WriteString(0,(*it).second.file_name);
 		write_data.WriteInt(1, (*it).second.walkability);
 		write_data.EndTable();
