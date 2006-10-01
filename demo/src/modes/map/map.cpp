@@ -975,6 +975,22 @@ void MapMode::_UpdateExplore() {
 	bool user_move = false;
 	uint32 move_direction;
 
+	// Do the fade to battle mode
+	// Doing this first should prevent user input
+	if (_fade_to_battle_mode)
+	{
+		// Only start battle mode once the fade is done.
+		if (!VideoManager->IsFading())
+		{
+			// clear fade instantly
+			VideoManager->FadeScreen(Color::clear, 0.0f);
+			_fade_to_battle_mode = false;
+			BattleMode *BM = new BattleMode();
+			ModeManager->Push(BM);
+		}
+		return;
+	}
+
 	if (InputManager->SwapPress()) {
 		_random_encounters = !_random_encounters;
 	}
@@ -1119,21 +1135,6 @@ void MapMode::_UpdateExplore() {
 	else if (InputManager->DownState()) {
 		user_move = true;
 		move_direction = SOUTH;
-	}
-
-	// Do the fade to battle mode
-	if (_fade_to_battle_mode)
-	{
-		// Only start battle mode once the fade is done.
-		if (!VideoManager->IsFading())
-		{
-			// clear fade instantly
-			VideoManager->FadeScreen(Color::clear, 0.0f);
-			_fade_to_battle_mode = false;
-			BattleMode *BM = new BattleMode();
-			ModeManager->Push(BM);
-		}
-		return;
 	}
 
 	if (user_move) {
