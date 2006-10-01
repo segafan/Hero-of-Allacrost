@@ -66,8 +66,8 @@ const uint32 INV_SIZE   = 3;
 
 //! \name Skills Menu Options Constants
 //@{
-const uint32 SKILLS_CANCEL  = 0;
-const uint32 SKILLS_USE		= 1;
+const uint32 SKILLS_USE		= 0;
+const uint32 SKILLS_CANCEL  = 1;
 const uint32 SKILLS_SIZE    = 2;
 //@}
 
@@ -89,6 +89,13 @@ const uint32 STATUS_CANCEL  = 1;
 //const uint32 STATUS_EQUIP_PREV    = 3;
 //const uint32 EQUIP_CANCEL  = 2;
 const uint32 STATUS_SIZE    = 2;
+//@}
+
+//! \name Formation Menu Options Constants
+//@{
+const uint32 FORMATION_SWITCH    = 0;
+const uint32 FORMATION_CANCEL  = 1;
+const uint32 FORMATION_SIZE    = 2;
 //@}
 
 //! \name Options Menu Options Constants
@@ -114,9 +121,10 @@ const uint32 SHOW_INVENTORY     = 1;
 const uint32 SHOW_SKILLS        = 2;
 const uint32 SHOW_EQUIP			= 3;
 const uint32 SHOW_STATUS		= 4;
-const uint32 SHOW_OPTIONS       = 5;
-const uint32 SHOW_SAVE          = 6;
-const uint32 SHOW_FORMATION     = 7;
+//const uint32 SHOW_OPTIONS       = 5;
+//const uint32 SHOW_SAVE          = 6;
+const uint32 SHOW_FORMATION     = 5;
+const uint32 SHOW_EXIT			= 6;
 //@}
 
 //! \name MenuMode Window Active Flags
@@ -162,9 +170,7 @@ private:
 	hoa_video::StillImage _location_picture;
 
 	std::vector<hoa_video::StillImage> _menu_images;
-	//! \brief the sounds for MenuMode
-	//std::map<std::string, hoa_audio::SoundDescriptor> _menu_sounds;
-
+	
 	/** \name Main Display Windows
 	*** \brief The windows that are displayed in the menu mode.
 	**/
@@ -179,6 +185,12 @@ private:
 	private_menu::CharacterWindow _character_window3;
 	private_menu::InventoryWindow _inventory_window;
 	private_menu::StatusWindow _status_window;
+	private_menu::SkillsWindow _skills_window;
+	private_menu::EquipWindow _equip_window;
+	//std::vector<private_menu::FormationWindow> _formation_windows;
+	//FIX ME
+	private_menu::FormationWindow _formation_window;
+
 	//@}
 
 	//! \brief the sounds for MenuMode
@@ -194,11 +206,6 @@ private:
 	//! \breif The current window being drawn
 	uint32 _current_window;
 
-	//! \brief Maintains a queue of OptionBoxes
-	//std::vector<hoa_video::OptionBox *> _menu_queue;
-	//! \brief Maintains a queue of which OptionBox is showing
-	//std::vector<uint32> _menu_showing_queue;
-	
 	//! A pointer to the current options menu
 	hoa_video::OptionBox *_current_menu;
 	

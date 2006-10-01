@@ -145,6 +145,20 @@ MenuMode::MenuMode()
 		VIDEO_MENU_EDGE_ALL);
 	_status_window.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y) + 10);
 
+	//Set up the skills window
+	_skills_window.Create(static_cast<float>(win_width * 4 + 16), 448,
+		VIDEO_MENU_EDGE_ALL);
+	_skills_window.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y) + 10);
+
+	//Set up the equipment window
+	_equip_window.Create(static_cast<float>(win_width * 4 + 16), 448,
+		VIDEO_MENU_EDGE_ALL);
+	_equip_window.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y) + 10);
+
+	_formation_window.Create(static_cast<float>(win_width * 4 + 16), 448,
+		VIDEO_MENU_EDGE_ALL);
+	_formation_window.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y) + 10);
+
 	// Set up the item list header window
 	/*_item_list_header_window.Create(static_cast<float>(win_width * 4), 40,
 		~(VIDEO_MENU_EDGE_LEFT | VIDEO_MENU_EDGE_RIGHT),VIDEO_MENU_EDGE_LEFT | VIDEO_MENU_EDGE_RIGHT);
@@ -236,7 +250,10 @@ MenuMode::~MenuMode() {
 	_character_window3.Destroy();
 	_inventory_window.Destroy();
 	_status_window.Destroy();
+	_skills_window.Destroy();
 	_main_options_window.Destroy();
+	_equip_window.Destroy();
+	_formation_window.Destroy();
 	//_item_list_header_window.Destroy();
 
 	// Clear sounds
@@ -265,6 +282,9 @@ void MenuMode::Reset() {
 	_character_window3.Show();
 	_inventory_window.Show();
 	_status_window.Show();
+	_skills_window.Show();
+	_equip_window.Show();
+	_formation_window.Show();
 	//_item_list_header_window.Show();
 	
 	// Setup OptionBoxes
@@ -289,7 +309,7 @@ void MenuMode::_SetupOptionBoxCommonSettings(OptionBox *ob)
 	ob->SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	ob->SetSelectMode(VIDEO_SELECT_SINGLE);
 	ob->SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-	ob->SetCursorOffset(-50.0f, -28.0f);
+	ob->SetCursorOffset(-52.0f, -20.0f);
 } // void MenuMode::_SetupOptionBoxCommonSettings(OptionBox *ob)
 
 
@@ -313,7 +333,7 @@ void MenuMode::_SetupMainOptionBox()
 	_main_options.SetOptions(options);
 	_main_options.SetSelection(MAIN_INVENTORY);
 
-	// disable unused options 
+	// disable unused options
 	_main_options.EnableOption(1, false);
 	_main_options.EnableOption(2, false);
 	_main_options.EnableOption(4, false);
@@ -371,8 +391,9 @@ void MenuMode::_SetupEquipOptionBox()
 	options.push_back(MakeUnicodeString("Cancel"));
 	
 	_menu_equip.SetOptions(options);
+	_menu_equip.EnableOption(EQUIP_REMOVE, false);
 	_menu_equip.SetSelection(EQUIP_EQUIP);
-// 	_menu_status_equip.SetCursor(
+
 } // void MenuMode::_SetupEquipOptionBox()
 
 void MenuMode::_SetupStatusOptionBox()
@@ -385,14 +406,11 @@ void MenuMode::_SetupStatusOptionBox()
 	// Generate the strings
 	vector<ustring> options;
 	options.push_back(MakeUnicodeString("View"));
-	//options.push_back(MakeUnicodeString("Remove"));
-	//options.push_back(MakeUnicodeString("Next"));
-	//options.push_back(MakeUnicodeString("Previous"));
 	options.push_back(MakeUnicodeString("Cancel"));
 	
 	_menu_status.SetOptions(options);
 	_menu_status.SetSelection(STATUS_VIEW);
-// 	_menu_status_equip.SetCursor(
+
 } // void MenuMode::_SetupEquipOptionBox()
 
 
@@ -437,18 +455,10 @@ void MenuMode::_SetupSaveOptionBox()
 void MenuMode::Update() 
 {	
 	// See if inventory window is active
+	//FIX ME: Use a var to track active window and switch?
+
 	if (_inventory_window.IsActive()) {
-		// See if cancel was pressed, duplicate code, but not really sure of an
-		// elegant way to do this.
-		/*if (_inventory_window.CanCancel() && InputManager->CancelPress())
-		{
-			// Play sound
-			_menu_sounds["cancel"].PlaySound();
-			_inventory_window.Activate(false);
-			_current_menu->SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-			return;
-		}*/
-		
+		//Update inventory window
 		_inventory_window.Update();
 		return;
 	}
@@ -456,6 +466,14 @@ void MenuMode::Update()
 	{
 		// Update status window.
 		_status_window.Update();
+		return;
+	}
+	else if (_skills_window.IsActive()) {
+		_skills_window.Update();
+		return;
+	}
+	else if (_equip_window.IsActive()) {
+		_equip_window.Update();
 		return;
 	}
 
@@ -469,12 +487,8 @@ void MenuMode::Update()
 			ModeManager->Pop();
 		else
 		{
-			//_menu_queue.pop_back();
-			//_menu_showing_queue.pop_back();
-			//if (_menu_queue.size() == 1)
 			_current_menu_showing = SHOW_MAIN;
 			_current_menu = &_main_options;
-			//_current_menu
 		}
 	}
 	else if (InputManager->ConfirmPress())
@@ -482,6 +496,7 @@ void MenuMode::Update()
 		// Play Sound
 		if (_current_menu->IsEnabled(_current_menu->GetSelection()))
 			_menu_sounds["confirm"].PlaySound();
+
 		_current_menu->HandleConfirmKey();
 	}
 	else if (InputManager->LeftPress())
@@ -494,11 +509,11 @@ void MenuMode::Update()
 		// Play Sound
 		_current_menu->HandleRightKey();
 	}
-	else if (InputManager->UpPress() && _current_menu_showing == SHOW_MAIN)
+	/*else if (InputManager->UpPress() && _current_menu_showing == SHOW_MAIN)
 	{
 		// Up was pressed
 		//_current_menu->SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-	}
+	}*/
 	
 	// Get the latest event from the current menu
 	int32 event = _current_menu->GetEvent();
@@ -515,11 +530,8 @@ void MenuMode::Update()
 			case SHOW_INVENTORY:
 				this->_HandleInventoryMenu();
 				break;
-			/*case SHOW_ITEM_LIST:
-				this->_HandleItemListMenu();
-				break;*/
 			case SHOW_SKILLS:
-				//this->_HandleSkillsMenu();
+				this->_HandleSkillsMenu();
 				break;
 			case SHOW_STATUS:
 				this->_HandleStatusMenu();
@@ -527,12 +539,12 @@ void MenuMode::Update()
 			case SHOW_EQUIP:
 				this->_HandleEquipMenu();
 				break;
-			case SHOW_OPTIONS:
+			/*case SHOW_OPTIONS:
 				this->_HandleOptionsMenu();
 				break;
 			case SHOW_SAVE:
 				this->_HandleSaveMenu();
-				break;
+				break;*/
 			default:
 				cerr << "MENU: ERROR: Invalid menu showing!" << endl;
 				break;
@@ -606,24 +618,30 @@ void MenuMode::Draw() {
 		}
 		case SHOW_SKILLS:
 		{
-			//this->_HandleSkillsMenu();
+			_skills_window.Draw();
 			break;
 		}
 		case SHOW_EQUIP:
 		{
-			//this->_HandleEquipMenu();
+			_equip_window.Draw();
 			break;
 		}
-		case SHOW_OPTIONS:
+		/*case SHOW_OPTIONS:
 		{
 			//this->_HandleOptionsMenu();
 			break;
+		}*/
+		case SHOW_FORMATION:
+		case SHOW_EXIT:
+		{
+			_formation_window.Draw();
+			break;
 		}
-		case SHOW_SAVE:
+		/*case SHOW_SAVE:
 		{
 			//this->_HandleSaveMenu();
 			break;
-		}
+		}*/
 	}
 
 	
@@ -748,17 +766,13 @@ void MenuMode::_HandleMainMenu()
 	{
 		case MAIN_INVENTORY:
 		{
-			//_menu_showing_queue.push_back(SHOW_INVENTORY);
 			_current_menu_showing = SHOW_INVENTORY;
-			//_menu_queue.push_back(&_menu_inventory);
 			_current_menu = &_menu_inventory;
 			break;
 		}
 		case MAIN_SKILLS:
 		{
-			//_menu_showing_queue.push_back(SHOW_SKILLS);
 			_current_menu_showing = SHOW_SKILLS;
-			//_menu_queue.push_back(&_menu_skills);
 			_current_menu = &_menu_skills;
 			break;
 		}
@@ -776,18 +790,16 @@ void MenuMode::_HandleMainMenu()
 		}*/
 		case MAIN_STATUS:
 		{
-			//_menu_showing_queue.push_back(SHOW_STATUS);
 			_current_menu_showing = SHOW_STATUS;
-			//_menu_queue.push_back(&_menu_char_select);
 			_current_menu = &_menu_status;
 			break;
 		}
-		/*case MAIN_EQUIP:
+		case MAIN_EQUIP:
 		{
 			_current_menu_showing = SHOW_EQUIP;
 			_current_menu = &_menu_equip;
 			break;
-		}*/
+		}
 		/*case MAIN_SAVE:
 		{
 			_current_menu_showing = SHOW_SAVE;
@@ -816,7 +828,6 @@ void MenuMode::_HandleStatusMenu() {
 		case STATUS_CANCEL:
 			_current_menu_showing = SHOW_MAIN;
 			_current_menu = &_main_options;
-			//_status_window.Activate(false);
 			break;
 		default:
 			cerr << "MENU: ERROR: Invalid option in MenuMode::HandleStatusMenu()!" << endl;
@@ -871,7 +882,10 @@ void MenuMode::_HandleSkillsMenu()
 		}
 		case SKILLS_USE:
 		{
-			//TODO
+			//_current_menu_showing = SHOW_SKILLS;
+			//_current_menu = &_menu_skills;
+			_skills_window.Activate(true);
+			_current_menu->SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
 			break;
 		}
 		default:
@@ -887,8 +901,8 @@ void MenuMode::_HandleEquipMenu()
 	switch (_menu_equip.GetSelection())
 	{
 		case EQUIP_EQUIP:
-			// TODO: Handle the equip command
-			cout << "MENU: Equip command!" << endl;
+			_equip_window.Activate(true);
+			_current_menu->SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
 			break;
 		case EQUIP_REMOVE:
 			// TODO: Handle the remove command
