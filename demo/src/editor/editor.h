@@ -138,9 +138,7 @@ class Editor: public QMainWindow
 		//! Saves the map if it is unsaved.
 		bool _EraseOK();
 		//! Sets up the tile database.
-		void _CreateTileDatabase();
-		//! Adds tiles to the database.
-		void _GenerateDatabase();
+		void _OpenTileDatabase();
 		//! Sets current edit mode
 		void _SetEditMode(TILE_MODE_TYPE new_mode);
 		//! Sets currently edited layer
@@ -188,7 +186,10 @@ class Editor: public QMainWindow
 		//! Edit layer items in Tile menu
 		std::map<LAYER_TYPE, int> _layer_ids;
 		//! Mode items in Tile menu
-		std::map<TILE_MODE_TYPE, int> _mode_ids;		
+		std::map<TILE_MODE_TYPE, int> _mode_ids;
+
+		//! Tile database
+		TileDatabase* _tile_db;
 }; // class Editor
 
 class NewMapDialog: public QDialog
@@ -254,7 +255,7 @@ class EditorScrollView: public QScrollView
 	
 	public:
 		EditorScrollView(QWidget* parent, const QString& name, int width,
-			int height);                     // constructor
+			int height, TileDatabase* db);                     // constructor
 		~EditorScrollView();                 // destructor
 
 		//! Resizes the map.
@@ -315,6 +316,8 @@ class EditorScrollView: public QScrollView
 
 		//! Stores source index of moved tiles
 		int _move_source_index;
+
+		TileDatabase* _db;
 }; // class EditorScrollView
 
 class DatabaseDialog: public QTabDialog
@@ -323,7 +326,7 @@ class DatabaseDialog: public QTabDialog
 	Q_OBJECT 
 
 	public:
-		DatabaseDialog(QWidget* parent, const QString& name);    // constructor
+		DatabaseDialog(QWidget* parent, const QString& name, TileDatabase* db);    // constructor
 		~DatabaseDialog();                                       // destructor
 
 	private slots:
@@ -347,12 +350,14 @@ class DatabaseDialog: public QTabDialog
 		//! Uses a single checkbox to toggle the remaining walkable checkboxes.
 		//! \param on True if the single checkbox is on, False otherwise.
 		void _ToggleWalkCheckboxes(bool on);
+		void _CreateTileSet();
 
 	private:
 		//! Populates the tileset specified by one of the 2 PopulateTileset slots.
 		//! \param tileset Pointer to the tileset to draw.
 		//! \param name Name of the tileset to draw.
 		void _PopulateTilesetHelper(QIconView *tileset, const QString& name);
+		void _SwitchTileset(TileSet* new_set);
 		
 		//! Lists all available tiles to create new tileset in the Tilesets tab.
 		QIconView* _all_tiles; 
@@ -364,10 +369,7 @@ class DatabaseDialog: public QTabDialog
 		QIconView* _prop_tileset; 
 		//! Stores index into _tile_properties of previously selected tile in
 		//! tileset in the Properties tab.
-		uint32 _tile_index; 
-		//! Vector of global tile properties from tiles_database.lua. Used in the
-		//! Properties tab.
-		std::vector<uint8> _tile_properties; 
+		uint32 _tile_index;
 		//! Editable name of the tileset in the Tilesets tab.
 		QLineEdit* _tileset_ledit; 
 		//! A checkbox capable of toggling all the other walkable checkboxes of the
@@ -376,6 +378,13 @@ class DatabaseDialog: public QTabDialog
 		//! Array of walkability checkboxes of selected tile in the tileset of the
 		//! Properties tab.
 		QCheckBox* _walk_checkbox[8];
+		QComboBox* _proptsets_cbox;
+		QComboBox* _tilesets_cbox;
+
+		TileDatabase* _db;
+		TileSet* _selected_set;
+		std::string _selected_item;
+		bool _set_modified;
 }; // class DatabaseDialog
 
 } // namespace hoa_editor
