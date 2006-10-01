@@ -16,8 +16,6 @@
 
 #include "tileset.h"
 
-#include <boost/lexical_cast.hpp>
-
 using namespace std;
 using namespace hoa_data;
 using namespace hoa_editor;
