@@ -292,7 +292,7 @@ void MapMode::LoadMap() {
 	sp->SetName(MakeUnicodeString("Claudius"));
 	sp->SetID(0);
 	sp->SetObjectType(PLAYER_SPRITE);
-        sp->SetRowPosition(12);
+	sp->SetRowPosition(12);
 	sp->SetColPosition(12);
 	sp->SetStepSpeed(NORMAL_SPEED);
 	sp->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);

@@ -278,7 +278,7 @@ GlobalEnemy::GlobalEnemy(string file_name) :
 			StillImage i;
 			i.SetFilename("img/sprites/battle/"+fileName);
 			i.SetStatic(true);
-			i.SetDimensions(x_dimension, y_dimension);
+			i.SetDimensions(static_cast<float>(x_dimension), static_cast<float>(y_dimension));
 
 			VideoManager->LoadImage(i);
 			animations.push_back(i);
