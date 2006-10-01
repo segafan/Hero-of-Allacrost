@@ -1147,9 +1147,10 @@ bool StatusWindow::Draw()
 } // bool StatusWindow::Draw()
 
 
-SkillsWindow::SkillsWindow()  : _skills_list_active(false), _char_select_active(false), 
+SkillsWindow::SkillsWindow()  : _char_select_active(false),
+									_char_select_apply_active(false),
 									_skills_categories_active(false), 
-									_char_select_apply_active(false)
+									_skills_list_active(false)
 {
 	InitCharSelect();
 	InitSkillsList();
@@ -1435,7 +1436,8 @@ bool SkillsWindow::Draw() {
 }
 
 
-EquipWindow::EquipWindow()  : _equip_select_active(false), _char_select_active(false), 
+EquipWindow::EquipWindow() : _char_select_active(false),
+									_equip_select_active(false),
 									_equip_list_active(false)
 {
 	InitCharSelect();
@@ -1577,8 +1579,9 @@ void EquipWindow::InitEquipmentSelect() {
 } // void EquipWindow::InitEquipmentSelect()
 
 void EquipWindow::Update() {
-
-	hoa_video::OptionBox *_active_option;
+	// FIXME: may cause a seg. fault, however when not initialized gcc spits out a
+	// warning saying it might be used uninitialized in this function.
+	hoa_video::OptionBox *_active_option = NULL;
 
 	//choose correct menu
 	if (_char_select_active) {
@@ -1680,8 +1683,8 @@ void EquipWindow::Update() {
 } // void EquipWindow::Update()
 
 void EquipWindow::UpdateEquipList() {
-	
-	hoa_global::GlobalCharacter* ch = GlobalManager->GetCharacter(_char_select.GetSelection());
+	// FIXME: warning, unused variable
+	//hoa_global::GlobalCharacter* ch = GlobalManager->GetCharacter(_char_select.GetSelection());
 	std::vector<ustring> options;
 
 	if (_equip_list_active) {
@@ -1849,7 +1852,8 @@ bool EquipWindow::Draw() {
 	else {
 		_equip_select.Draw();
 
-		hoa_global::GlobalCharacter *ch = GlobalManager->GetParty()[_char_select.GetSelection()];
+		// FIXME: warning: unused variable
+		//hoa_global::GlobalCharacter *ch = GlobalManager->GetParty()[_char_select.GetSelection()];
 
 		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 		VideoManager->Move(450.0f, 170.0f);
