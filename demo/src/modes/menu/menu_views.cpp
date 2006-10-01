@@ -566,7 +566,7 @@ void InventoryWindow::Update() {
 		return;
 	}
 
-	hoa_video::OptionBox *_active_option;
+	hoa_video::OptionBox *_active_option = NULL;
 
 	// When the character select window is active, no processing is needed for the inventory window.
 	/*if (_char_window.IsActive())
