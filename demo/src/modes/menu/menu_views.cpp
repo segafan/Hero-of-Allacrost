@@ -78,8 +78,8 @@ bool CharacterWindow::Draw()
 	if (MenuWindow::Draw() == false)
 		return false;
 	// Window is hidden return true
-	if (MenuWindow::GetState() == hoa_video::VIDEO_MENU_STATE_HIDDEN)
-		return true;
+	/*if (MenuWindow::GetState() == hoa_video::VIDEO_MENU_STATE_HIDDEN)
+		return true;*/
 	
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 	
@@ -401,15 +401,16 @@ void MiniCharacterSelectWindow::Update()
 ////////////////////////////////////////////////////////////////////////////////
 
 
-InventoryWindow::InventoryWindow() : _inventory_active(false), _char_select_active(false)
+InventoryWindow::InventoryWindow() : _inventory_active(false), _char_select_active(false), 
+									_item_categories_active(false)
 {
 	InitInventoryItems();
 	InitCharSelect();
 	InitCategory();
 
-	_item_categories_active = false;
-	_inventory_active = false;
-	_char_select_active = false;
+	//_item_categories_active = false;
+	//_inventory_active = false;
+	//_char_select_active = false;
 	
 	// Load sounds
 	SoundDescriptor confirm;
@@ -437,7 +438,7 @@ InventoryWindow::InventoryWindow() : _inventory_active(false), _char_select_acti
 	_menu_sounds["potion"] = potion;
 	_menu_sounds["cancel"] = cancel;
 	
-}// void InventoryWindow::Initialize
+}// void InventoryWindow::InventoryWindow
 
 InventoryWindow::~InventoryWindow()
 {
@@ -515,7 +516,7 @@ void InventoryWindow::InitCategory() {
 		
 
 	_item_categories.SetOptions(options);
-	_item_categories.SetSelection(ALL);
+	_item_categories.SetSelection(ITEM_ALL);
 	_item_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 
 	/*VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
@@ -540,12 +541,18 @@ void InventoryWindow::InitCategory() {
 void InventoryWindow::Activate(bool new_status)
 {
 	// Set new status
-	_item_categories_active = new_status; 
-	// Update cursor state
-	if (_item_categories_active)
-		_item_categories.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-	else
-		_item_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+	if (_inventory_items.GetNumOptions() > 0) {
+		_item_categories_active = new_status; 
+		// Update cursor state
+		if (_item_categories_active)
+			_item_categories.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+		else
+			_item_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+	}
+	else {
+		//FIX ME: Play N/A noise
+		_item_categories_active = false;
+	}
 }
 
 
@@ -634,7 +641,12 @@ void InventoryWindow::Update() {
 	if (_char_select_active) {
 		if (event == VIDEO_OPTION_CONFIRM) {
 			//TODO Use Item
-			_menu_sounds["confirm"].PlaySound();
+			/*GlobalItem *item = (GlobalItem*)(GlobalManager->GetInventory()[item_selected]);
+			if ((item->GetUseCase() & GLOBAL_HP_RECOVERY_ITEM) || (item->GetUseCase() & GLOBAL_SP_RECOVERY_ITEM))
+			{*/
+				ApplyItem();
+			//}
+			//_menu_sounds["confirm"].PlaySound();
 		}
 		else if (event == VIDEO_OPTION_CANCEL) {
 			_char_select_active = false;
@@ -693,6 +705,72 @@ void InventoryWindow::Update() {
 
 } // void InventoryWindow::Update()
 
+void InventoryWindow::ApplyItem() {
+// Use the passed in item, to update values
+	GlobalItem *selected = static_cast<GlobalItem *>(GlobalManager->GetInventory()[_inventory_items.GetSelection()]);
+	GlobalCharacter *ch = GlobalManager->GetParty()[_char_select.GetSelection()];
+
+	if (selected->GetCount() == 0)
+	{
+		// no more items to use
+		_menu_sounds["bump"].PlaySound();
+		return;
+	}
+
+	// check character hp
+	if (ch->GetHP() == ch->GetMaxHP())
+	{
+		// don't use item we're full
+		_menu_sounds["bump"].PlaySound();
+		return;
+	}
+
+	// Play Sound
+	_menu_sounds["potion"].PlaySound();
+
+	// increase hp
+	if ((selected->GetUseCase() & GLOBAL_HP_RECOVERY_ITEM) == GLOBAL_HP_RECOVERY_ITEM)
+	{	
+		uint32 new_hp = ch->GetHP();
+		new_hp += selected->GetRecoveryAmount();
+		if (new_hp > ch->GetMaxHP())
+			new_hp = ch->GetMaxHP();
+		ch->SetHP(new_hp);
+	}
+
+	// increase sp
+	if ((selected->GetUseCase() & GLOBAL_SP_RECOVERY_ITEM) == GLOBAL_SP_RECOVERY_ITEM)
+	{
+		uint32 new_sp = ch->GetSP();
+		new_sp += selected->GetRecoveryAmount();
+		if (new_sp > ch->GetMaxSP())
+			new_sp = ch->GetMaxSP();
+		ch->SetSP(new_sp);
+	}
+
+	// decrease item count
+	if (selected->GetCount() > 1) {
+		selected->DecCount(1);
+	}
+	else {
+		GlobalManager->RemoveItemFromInventory(HP_POTION);
+		_char_select_active = false;
+		if (GlobalManager->GetInventory().size() > 0) {
+			_inventory_active = true;
+			_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+			_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+		}
+		else {
+			_char_select_active = false;
+			_inventory_active = false;
+			_item_categories_active = false;
+			_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+			_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+		}
+		//this->Activate(false);
+		//this->Hide();
+	}
+}
 
 
 void InventoryWindow::UpdateItemText()
@@ -708,6 +786,8 @@ void InventoryWindow::UpdateItemText()
 	// add one more row for the remainder.
 	//uint32 row_width = 4;
 	//_inventory_items.SetSize(row_width, inv.size() / row_width + ((inv.size() % row_width) > 0 ? 1 : 0));
+
+	_inventory_items.SetSize(1,inv.size());
 
 	// Construct the option names using the item icon image, the item name, and the item count
 	vector<ustring> inv_names;
@@ -1066,6 +1146,747 @@ bool StatusWindow::Draw()
 	return true;
 } // bool StatusWindow::Draw()
 
+
+SkillsWindow::SkillsWindow()  : _skills_list_active(false), _char_select_active(false), 
+									_skills_categories_active(false), 
+									_char_select_apply_active(false)
+{
+	InitCharSelect();
+	InitSkillsList();
+	InitSkillsCategories();
+	
+	// Load sounds
+	SoundDescriptor confirm;
+	SoundDescriptor cancel;
+
+	if (confirm.LoadSound("snd/obtain.wav") == false) 
+	{
+		cerr << "SKILLSWINDOW::UPDATE - Unable to load confirm sound effect!" << endl;
+	}
+	
+	if (cancel.LoadSound("snd/cancel.wav") == false)
+	{
+		cerr << "SKILLSWINDOW::UPDATE - Unable to load cancel sound effect!" << endl;
+	}
+
+	_menu_sounds["confirm"] = confirm;
+	_menu_sounds["cancel"] = cancel;
+	
+}// SkillsWindow::SkillsWindow()
+
+SkillsWindow::~SkillsWindow()
+{
+	// Clear sounds
+	_menu_sounds["confirm"].FreeSound();
+	_menu_sounds["cancel"].FreeSound();
+
+}// SkillsWindow::~SkillsWindow()
+
+
+void SkillsWindow::Activate(bool new_status) {
+	//Activate window and first option box...or deactivate both
+	_char_select_active = new_status;
+
+	if (_char_select_active) {
+		_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+	}
+	else {
+		_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+	}
+}
+
+
+void SkillsWindow::InitSkillsList() {
+	// Set up the inventory option box
+	_skills_list.SetCellSize(180.0f, 30.0f);
+		
+	_skills_list.SetPosition(500.0f, 170.0f);
+	_skills_list.SetFont("default");
+	
+	_skills_list.SetCursorOffset(-52.0f, -20.0f);
+	_skills_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
+	_skills_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_skills_list.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	// Update the skills list
+	UpdateSkillList();
+	_skills_list.SetSelection(0);
+	// Initially hide the cursor
+	_skills_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+
+} // void SkillsWindow::InitInventoryItems()
+
+void SkillsWindow::InitCharSelect() {
+	//character selection set up
+	vector<ustring> options;
+	uint32 size = GlobalManager->GetParty().size();
+	
+	_char_select.SetCursorOffset(-50.0f, -6.0f);
+	_char_select.SetFont("default");
+	_char_select.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
+	_char_select.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_char_select.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	_char_select.SetSize(1, ((size >= 4) ? 4 : size));
+	//_char_select.SetSize(1, 4);
+	_char_select.SetCellSize(360, 108);
+	_char_select.SetPosition(72.0f, 109.0f);
+
+	//Use blank strings....won't be seen anyway
+	for (uint32 i = 0; i < size; i++) {
+		options.push_back(MakeUnicodeString(" "));
+	}
+
+	//Set options, selection and cursor state
+	_char_select.SetOptions(options);
+	_char_select.SetSelection(0);
+	_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+	
+} //SkillsWindow::InitCharSelect()
+
+void SkillsWindow::InitSkillsCategories() {
+	//Set params
+	_skills_categories.SetCellSize(105.0f,30.0f);
+	_skills_categories.SetPosition(510.0f, 120.0f);
+	_skills_categories.SetFont("default");
+	_skills_categories.SetSize(SKILL_CATEGORY_SIZE,1);
+	
+	_skills_categories.SetCursorOffset(-52.0f, -20.0f);
+	_skills_categories.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
+	_skills_categories.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_skills_categories.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+
+	//Create options
+	vector<ustring> options;
+	options.push_back(MakeUnicodeString("All"));
+	options.push_back(MakeUnicodeString("Field"));
+	options.push_back(MakeUnicodeString("Battle"));
+		
+	//Set options and default selection
+	_skills_categories.SetOptions(options);
+	_skills_categories.SetSelection(SKILL_ALL);
+	_skills_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+
+	
+} // void SkillsWindow::InitSkillsCategories()
+
+void SkillsWindow::Update() {
+
+	//FIX ME: Need support for skills
+	return;
+
+	hoa_video::OptionBox *_active_option;
+
+	//choose correct menu
+	if (_char_select_active || _char_select_apply_active) {
+		_active_option = &_char_select;
+	}
+	else if (_skills_categories_active) {
+		_active_option = &_skills_categories;
+	}
+	else if (_skills_list_active) {
+		_active_option = &_skills_list;
+	}
+	
+	// Handle the appropriate input events
+	if (InputManager->ConfirmPress())
+	{
+		_active_option->HandleConfirmKey();
+	}
+	else if (InputManager->CancelPress())
+	{
+		_active_option->HandleCancelKey();
+	}
+	else if (InputManager->LeftPress())
+	{
+		_active_option->HandleLeftKey();
+	}
+	else if (InputManager->RightPress())
+	{
+		_active_option->HandleRightKey();
+	}
+	else if (InputManager->UpPress())
+	{
+		_active_option->HandleUpKey();
+	}
+	else if (InputManager->DownPress())
+	{
+		_active_option->HandleDownKey();
+	}
+
+	uint32 event = _active_option->GetEvent();
+
+	//Handle skill application
+	if (_char_select_apply_active) {
+		if (event == VIDEO_OPTION_CONFIRM) {
+			//TODO Use Skill
+			_menu_sounds["confirm"].PlaySound();
+		}
+		else if (event == VIDEO_OPTION_CANCEL) {
+			_char_select_apply_active = false;
+			_skills_list_active = true;
+			_skills_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+			_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+			_menu_sounds["cancel"].PlaySound();
+		}
+	}
+
+	//Choose character for skillset
+	else if (_char_select_active) {
+
+		if (event == VIDEO_OPTION_CONFIRM) {
+			_char_select_active = false;
+			_skills_categories_active = true;
+			_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+			_skills_categories.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+			_char_skillset = _char_select.GetSelection();
+			_menu_sounds["confirm"].PlaySound();
+		}
+		else if (event == VIDEO_OPTION_CANCEL) {
+			Activate(false);
+			_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+			_menu_sounds["cancel"].PlaySound();
+		}
+	}
+	
+	//Choose skill
+	else if (_skills_list_active)
+	{
+		
+		if (event == VIDEO_OPTION_CONFIRM) {
+			_char_select_apply_active = true;
+			_skills_list_active = false;
+			_skills_list.SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
+			_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+			_menu_sounds["confirm"].PlaySound();
+		}
+		else if (event == VIDEO_OPTION_CANCEL) {
+			_skills_list_active = false;
+			_menu_sounds["cancel"].PlaySound();
+			_skills_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+			_skills_categories.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+			_skills_categories_active = true;
+		}
+	}
+
+	//Choose skill type
+	else if (_skills_categories_active) {
+		if (event == VIDEO_OPTION_CONFIRM) {
+			_skills_categories_active = false;
+			_skills_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+			_skills_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+			_skills_list_active = true;
+			_menu_sounds["confirm"].PlaySound();
+		}
+		else if (event == VIDEO_OPTION_CANCEL) {
+			_skills_categories_active = false;
+			_char_select_active = true;
+			_menu_sounds["cancel"].PlaySound();
+			_skills_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+			_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+			_char_select.SetSelection(_char_skillset);
+		}
+	}
+
+	UpdateSkillList();
+} // void SkillsWindow::Update()
+
+void SkillsWindow::UpdateSkillList() {
+	//uint32 partysize = GlobalManager->GetParty().size();
+
+	//hoa_global::GlobalCharacter* ch = GlobalManager->GetCharacter(_char_select.GetSelection());
+	std::vector<ustring> options;
+
+	//FIX ME Need new categories
+	/*std::vector<hoa_global::GlobalSkill*> skills = ch->GetAttackSkills();
+	uint32 skillsize = skills.size();
+
+	
+
+	_skills_list.SetSize(1,skillsize);
+	
+
+	for (uint32 i = 0; i < skillsize; i++) {
+		os.clear();
+		os << skills[i]->GetName() << "              " << skills[i]->GetSPUsage() << "SP";
+		options.push_back(MakeUnicodeString(os.str()));
+	}*/
+
+	//FIX ME: Test code
+	/*for (uint32 i = 0; i < 12; i++) {
+		options.push_back(MakeUnicodeString("Sword Strike                       30 SP"));
+	}
+*/
+	_skills_list.SetSize(1,12);
+
+	_skills_list.SetOptions(options);
+
+}
+
+bool SkillsWindow::Draw() {
+	if (MenuWindow::Draw() == false)
+		return false;
+
+	//Draw option boxes
+	_char_select.Draw();
+	_skills_categories.Draw();
+	_skills_list.Draw();
+
+	return true;
+
+}
+
+
+EquipWindow::EquipWindow()  : _equip_select_active(false), _char_select_active(false), 
+									_equip_list_active(false)
+{
+	InitCharSelect();
+	InitEquipmentSelect();
+	InitEquipmentList();
+	
+	// Load sounds
+	SoundDescriptor confirm;
+	SoundDescriptor cancel;
+
+	if (confirm.LoadSound("snd/obtain.wav") == false) 
+	{
+		cerr << "SKILLSWINDOW::UPDATE - Unable to load confirm sound effect!" << endl;
+	}
+	
+	if (cancel.LoadSound("snd/cancel.wav") == false)
+	{
+		cerr << "SKILLSWINDOW::UPDATE - Unable to load cancel sound effect!" << endl;
+	}
+
+	_menu_sounds["confirm"] = confirm;
+	_menu_sounds["cancel"] = cancel;
+
+	StillImage i;
+
+	i.SetFilename("img/icons/weapons/karlate_sword.png");
+	_equip_images.push_back(i);
+
+	i.SetFilename("img/icons/armor/karlate_helmet.png");
+	_equip_images.push_back(i);
+
+	i.SetFilename("img/icons/armor/karlate_breastplate.png");
+	_equip_images.push_back(i);
+
+	i.SetFilename("img/icons/armor/karlate_shield.png");
+	_equip_images.push_back(i);
+
+	i.SetFilename("img/icons/armor/karlate_greaves.png");
+	_equip_images.push_back(i);
+
+	for (uint32 i = 0; i < EQUIP_CATEGORY_SIZE; i++) {
+		_equip_images[i].SetDimensions(60, 60);
+		VideoManager->LoadImage(_equip_images[i]);
+	}
+	
+}// EquipWindow::EquipWindow()
+
+EquipWindow::~EquipWindow()
+{
+	// Clear sounds
+	_menu_sounds["confirm"].FreeSound();
+	_menu_sounds["cancel"].FreeSound();
+
+	for (uint32 i = 0; i < EQUIP_CATEGORY_SIZE; i++) {
+		VideoManager->DeleteImage(_equip_images[i]);
+	}
+
+}// EquipWindow::~EquipWindow()
+
+
+void EquipWindow::Activate(bool new_status) {
+	//Activate window and first option box...or deactivate both
+	_char_select_active = new_status;
+
+	if (_char_select_active) {
+		_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+	}
+	else {
+		_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+	}
+}
+
+
+void EquipWindow::InitEquipmentList() {
+	// Set up the inventory option box
+	_equip_list.SetCellSize(180.0f, 30.0f);
+		
+	_equip_list.SetPosition(500.0f, 170.0f);
+	_equip_list.SetFont("default");
+	
+	_equip_list.SetCursorOffset(-52.0f, -20.0f);
+	_equip_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
+	_equip_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_equip_list.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	// Update the equipment list
+	//UpdateEquipList();
+	_equip_list.SetSelection(0);
+	// Initially hide the cursor
+	_equip_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+
+} // void EquipWindow::InitInventoryItems()
+
+void EquipWindow::InitCharSelect() {
+	//character selection set up
+	vector<ustring> options;
+	uint32 size = GlobalManager->GetParty().size();
+	
+	_char_select.SetCursorOffset(-50.0f, -6.0f);
+	_char_select.SetFont("default");
+	_char_select.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
+	_char_select.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_char_select.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	_char_select.SetSize(1, ((size >= 4) ? 4 : size));
+	//_char_select.SetSize(1, 4);
+	_char_select.SetCellSize(360, 108);
+	_char_select.SetPosition(72.0f, 109.0f);
+
+	//Use blank strings....won't be seen anyway
+	for (uint32 i = 0; i < size; i++) {
+		options.push_back(MakeUnicodeString(" "));
+	}
+
+	//Set options, selection and cursor state
+	_char_select.SetOptions(options);
+	_char_select.SetSelection(0);
+	_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+	
+} // void EquipWindow::InitCharSelect()
+
+void EquipWindow::InitEquipmentSelect() {
+	//Set params
+	_equip_select.SetCellSize(105.0f,70.0f);
+	_equip_select.SetPosition(680.0f, 145.0f);
+	_equip_select.SetFont("default");
+	_equip_select.SetSize(1,EQUIP_CATEGORY_SIZE);
+	
+	_equip_select.SetCursorOffset(-132.0f, -20.0f);
+	_equip_select.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
+	_equip_select.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_equip_select.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+
+	//Set options and default selection
+	
+	_equip_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+	UpdateEquipList();
+	_equip_select.SetSelection(EQUIP_WEAPON);
+
+	
+} // void EquipWindow::InitEquipmentSelect()
+
+void EquipWindow::Update() {
+
+	hoa_video::OptionBox *_active_option;
+
+	//choose correct menu
+	if (_char_select_active) {
+		_active_option = &_char_select;
+	}
+	else if (_equip_select_active) {
+		_active_option = &_equip_select;
+	}
+	else if (_equip_list_active) {
+		_active_option = &_equip_list;
+	}
+	
+	// Handle the appropriate input events
+	if (InputManager->ConfirmPress())
+	{
+		_active_option->HandleConfirmKey();
+	}
+	else if (InputManager->CancelPress())
+	{
+		_active_option->HandleCancelKey();
+	}
+	else if (InputManager->LeftPress())
+	{
+		_active_option->HandleLeftKey();
+	}
+	else if (InputManager->RightPress())
+	{
+		_active_option->HandleRightKey();
+	}
+	else if (InputManager->UpPress())
+	{
+		_active_option->HandleUpKey();
+	}
+	else if (InputManager->DownPress())
+	{
+		_active_option->HandleDownKey();
+	}
+
+	uint32 event = _active_option->GetEvent();
+
+	//Choose character
+	if (_char_select_active) {
+		if (event == VIDEO_OPTION_CONFIRM) {
+			_char_select_active = false;
+			_char_select.SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
+			_equip_select_active = true;
+			_equip_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+			_menu_sounds["confirm"].PlaySound();
+		}
+		else if (event == VIDEO_OPTION_CANCEL) {
+			Activate(false);
+			_menu_sounds["cancel"].PlaySound();
+		}
+	}
+
+	//Choose equipment to replace
+	else if (_equip_select_active) {
+
+		if (event == VIDEO_OPTION_CONFIRM) {
+			_equip_select_active = false;
+			_equip_list_active = true;
+			_equip_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+			_equip_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+			_menu_sounds["confirm"].PlaySound();
+		}
+		else if (event == VIDEO_OPTION_CANCEL) {
+			_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+			_char_select_active = true;
+			_equip_select_active = false;
+			_equip_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+			_menu_sounds["cancel"].PlaySound();
+		}
+	}
+	
+	//Choose replacement
+	else if (_equip_list_active)
+	{
+		
+		if (event == VIDEO_OPTION_CONFIRM) {
+			//TODO Change Equipment, handle removal
+			_equip_select_active = true;
+			_equip_list_active = false;
+			_equip_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+			_equip_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+			_menu_sounds["confirm"].PlaySound();
+		}
+		else if (event == VIDEO_OPTION_CANCEL) {
+			//_skills_list_active = false;
+			_menu_sounds["cancel"].PlaySound();
+			_equip_select_active = true;
+			_equip_list_active = false;
+			_equip_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+			_equip_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+		}
+
+	}
+
+	//UpdateEquipList();
+} // void EquipWindow::Update()
+
+void EquipWindow::UpdateEquipList() {
+	
+	hoa_global::GlobalCharacter* ch = GlobalManager->GetCharacter(_char_select.GetSelection());
+	std::vector<ustring> options;
+
+	if (_equip_list_active) {
+		uint32 gearsize;
+		std::vector<hoa_global::GlobalWeapon*> weapons;
+		std::vector<hoa_global::GlobalArmor*> armor;
+		std::vector<hoa_global::GlobalObject*> inv = GlobalManager->GetInventory();
+		uint32 invsize = inv.size();
+
+		switch (_equip_select.GetSelection()) {
+			case EQUIP_WEAPON:
+				for (uint32 i = 0; i < invsize; i++) {
+					if (inv[i]->GetType() == GLOBAL_WEAPON) { // && usable by cur char
+						weapons.push_back(static_cast<GlobalWeapon*>(inv[i]));
+					}
+				}
+
+				gearsize = weapons.size();
+
+				for (uint32 j = 0; j < gearsize; j++) {
+					options.push_back(MakeUnicodeString(weapons[j]->GetName()));
+				}
+
+				_equip_list.SetOptions(options);				
+				break;
+
+			case EQUIP_HEADGEAR:
+				for (uint32 i = 0; i < invsize; i++) {
+					if (inv[i]->GetType() == GLOBAL_HEAD_ARMOR) { // && usable by cur char
+						armor.push_back(static_cast<GlobalArmor*>(inv[i]));
+					}
+				}
+
+				gearsize = armor.size();
+
+				for (uint32 j = 0; j < gearsize; j++) {
+					options.push_back(MakeUnicodeString(armor[j]->GetName()));
+				}
+
+				_equip_list.SetOptions(options);
+				break;
+
+			case EQUIP_BODYARMOR:
+				for (uint32 i = 0; i < invsize; i++) {
+					if (inv[i]->GetType() == GLOBAL_BODY_ARMOR) { // && usable by cur char
+						armor.push_back(static_cast<GlobalArmor*>(inv[i]));
+					}
+				}
+
+				gearsize = armor.size();
+
+				for (uint32 j = 0; j < gearsize; j++) {
+					options.push_back(MakeUnicodeString(armor[j]->GetName()));
+				}
+
+				_equip_list.SetOptions(options);
+				break;
+
+			case EQUIP_OFFHAND:
+				for (uint32 i = 0; i < invsize; i++) {
+					if (inv[i]->GetType() == GLOBAL_ARMS_ARMOR) { // && usable by cur char
+						armor.push_back(static_cast<GlobalArmor*>(inv[i]));
+					}
+				}
+
+				gearsize = armor.size();
+
+				for (uint32 j = 0; j < gearsize; j++) {
+					options.push_back(MakeUnicodeString(armor[j]->GetName()));
+				}
+
+				_equip_list.SetOptions(options);
+				break;
+
+			case EQUIP_LEGGINGS:
+				for (uint32 i = 0; i < invsize; i++) {
+					if (inv[i]->GetType() == GLOBAL_LEGS_ARMOR) { // && usable by cur char
+						armor.push_back(static_cast<GlobalArmor*>(inv[i]));
+					}
+				}
+
+				gearsize = armor.size();
+
+				for (uint32 j = 0; j < gearsize; j++) {
+					options.push_back(MakeUnicodeString(armor[j]->GetName()));
+				}
+
+				_equip_list.SetOptions(options);
+				break;
+		}
+	}
+
+	else {
+		/*options.push_back(MakeUnicodeString(ch->GetWeapon()->GetName()));
+		options.push_back(MakeUnicodeString(ch->GetHeadArmor()->GetName()));
+		options.push_back(MakeUnicodeString(ch->GetBodyArmor()->GetName()));
+		options.push_back(MakeUnicodeString(ch->GetArmsArmor()->GetName()));
+		options.push_back(MakeUnicodeString(ch->GetLegArmor()->GetName()));*/
+		options.push_back(MakeUnicodeString("Karlate Sword"));
+		options.push_back(MakeUnicodeString("Karlate Helmet"));
+		options.push_back(MakeUnicodeString("Karlate Breastplate"));
+		options.push_back(MakeUnicodeString("Karlate Shield"));
+		options.push_back(MakeUnicodeString("Karlate Greaves"));
+		
+		_equip_select.SetOptions(options);
+	}
+
+
+	//FIX ME Need new categories
+	/*std::vector<hoa_global::GlobalSkill*> skills = ch->GetAttackSkills();
+	uint32 skillsize = skills.size();
+
+	
+
+	_skills_list.SetSize(1,skillsize);
+	
+	ostringstream os;
+
+	for (uint32 i = 0; i < skillsize; i++) {
+		os.clear();
+		os << skills[i]->GetName() << "              " << skills[i]->GetSPUsage() << "SP";
+		options.push_back(MakeUnicodeString(os.str()));
+	}*/
+
+	//FIX ME: Test code
+	/*for (uint32 i = 0; i < 12; i++) {
+		options.push_back(MakeUnicodeString("Karlate Katana                       30 SP"));
+	}
+
+	_equip_list.SetSize(1,12);
+
+	_equip_list.SetOptions(options);*/
+
+}
+
+bool EquipWindow::Draw() {
+	if (MenuWindow::Draw() == false)
+		return false;
+
+	//Draw option boxes
+	_char_select.Draw();
+
+	if (_equip_list_active) {
+		_equip_list.Draw();
+		VideoManager->Move(660.0f, 135.0f);
+		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
+		switch (_equip_select.GetSelection()) {
+			case EQUIP_WEAPON: 
+				VideoManager->DrawText(MakeUnicodeString("Weapons"));
+				break;
+			case EQUIP_HEADGEAR:
+				VideoManager->DrawText(MakeUnicodeString("Headgear"));
+				break;
+			case EQUIP_BODYARMOR:
+				VideoManager->DrawText(MakeUnicodeString("Body Armor"));
+				break;
+			case EQUIP_OFFHAND:
+				VideoManager->DrawText(MakeUnicodeString("Offhand"));
+				break;
+			case EQUIP_LEGGINGS:
+				VideoManager->DrawText(MakeUnicodeString("Leggings"));
+				break;
+		}
+	}
+	else {
+		_equip_select.Draw();
+
+		hoa_global::GlobalCharacter *ch = GlobalManager->GetParty()[_char_select.GetSelection()];
+
+		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
+		VideoManager->Move(450.0f, 170.0f);
+		VideoManager->DrawText(MakeUnicodeString("Weapon"));
+		VideoManager->MoveRelative(0.0f, 70.0f);
+		VideoManager->DrawText(MakeUnicodeString("Headgear"));
+		VideoManager->MoveRelative(0.0f, 70.0f);
+		VideoManager->DrawText(MakeUnicodeString("Body Armor"));
+		VideoManager->MoveRelative(0.0f, 70.0f);
+		VideoManager->DrawText(MakeUnicodeString("Offhand"));
+		VideoManager->MoveRelative(0.0f, 70.0f);
+		VideoManager->DrawText(MakeUnicodeString("Leggings"));
+
+		VideoManager->MoveRelative(150.0f, -370.0f);
+		
+		for (uint32 i = 0; i < _equip_images.size(); i++) {
+			VideoManager->MoveRelative(0.0f, 70.0f);
+			VideoManager->DrawImage(_equip_images[i]);
+		}
+	}
+
+	return true;
+
+} // bool EquipWindow::Draw()
+
+
+FormationWindow::FormationWindow() {
+}
+
+FormationWindow::~FormationWindow() {
+}
+
+bool FormationWindow::Draw() {
+	if (MenuWindow::Draw() == false) {
+		return false;
+	}
+}
 
 } // namespace private_menu
 
