@@ -275,6 +275,7 @@ void EnemyActor::Update() {
 	if (next_attack == 0 && !IsQueuedToPerform()) {
 		next_attack = RandomBoundedInteger(5000, 30000);
 		last_attack = 0;
+		SetXLocation(static_cast<float>(GetXOrigin())); // Always attack from the starting location
 	}
 
 	last_attack += SystemManager->GetUpdateTime();
@@ -291,13 +292,14 @@ void EnemyActor::Update() {
 		// okay, we can perform another attack.  set us up as queued to perform.
 		SetQueuedToPerform(true);
 		current_battle->AddScriptEventToQueue(ScriptEvent(dynamic_cast<BattleActor*>(this), final_targets, "sword_swipe"));
+		SetXLocation(static_cast<float>(GetXOrigin())); // Always attack from the starting location
 
 		last_attack = 0;
 		next_attack = 0;
 	}
 
 	// If we're attacking, update the offset a little
-	if (IsQueuedToPerform())
+	if (IsAttacking())
 		SetXLocation(GetXLocation() - 0.8f * static_cast<float>(SystemManager->GetUpdateTime()));
 	else
 		SetXLocation(static_cast<float>(GetXOrigin())); // Restore original place
@@ -402,6 +404,20 @@ void EnemyActor::DrawStatus() {
 // 		VideoManager->MoveRel(25, 0);
 // 	}
 } // void EnemyActor::DrawStatus()
+
+//! Is the monster attacking right now
+const bool EnemyActor::IsAttacking() const
+{
+	if (current_battle && !current_battle->_script_queue.empty())
+	{
+		BattleActor * first_attacker = (current_battle->_script_queue.front()).GetSource();
+		if (IsQueuedToPerform() && (this == first_attacker))
+			return true;
+	}
+
+	return false;
+}
+
 
 } // namespace private_battle
 
