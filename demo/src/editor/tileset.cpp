@@ -223,7 +223,7 @@ DbTile& TileSet::GetTile(const std::string& tile_name)
 	return _db->GetTile(tile_name);
 }
 
-std::list<DbTile> TileSet::GetTiles()
+std::list<DbTile> TileSet::GetTiles() const
 {
 	std::list<DbTile> ret;
 	for(std::list<std::string>::const_iterator it=_tile_names.begin(); it!=_tile_names.end(); it++)
@@ -235,6 +235,12 @@ std::list<DbTile> TileSet::GetTiles()
 
 void TileSet::Save()
 {
+	if(_name=="") 
+	{
+		QMessageBox::warning(NULL,"Error","tileset needs to have a name in order to save it!");
+		return;
+	}
+
 	DataDescriptor write_data;
 	write_data.OpenFile(("dat/tilesets/tileset_"+_name+".lua").c_str(),WRITE);
 
