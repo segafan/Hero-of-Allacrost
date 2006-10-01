@@ -309,6 +309,10 @@ public:
 	//! Draws the enemy's status information
 	void DrawStatus();
 
+
+	//! Is the monster attacking right now
+	const bool IsAttacking() const;
+
 	//! \brief EnemyActor class member access functions
 	//@{
 
