@@ -26,6 +26,10 @@
 *** ***************************************************************************/
 
 #include <ctime>
+#ifdef __MACH__
+#include <unistd.h>
+#include <string>
+#endif
 
 #include "utils.h"
 #include "defs.h"
@@ -87,6 +91,18 @@ int32 main(int32 argc, char *argv[]) {
 	// When the program exits, first the QuitAllacrost() function, followed by SDL_Quit()
 	atexit(SDL_Quit);
 	atexit(QuitAllacrost);
+
+#ifdef __MACH__
+	string path;
+	path = argv[0];
+	// remove the binary name
+	path.erase(path.find_last_of('/'));
+	// remove the MacOS directory
+	path.erase(path.find_last_of('/'));
+	// we are now in app/Contents
+	path.append ( "/Resources/" );
+	chdir ( path.c_str() );
+#endif
 
 	// Initialize the random number generator
 	srand(static_cast<unsigned int>(time(NULL)));
