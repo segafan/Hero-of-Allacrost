@@ -33,7 +33,7 @@ using namespace hoa_audio;
 using namespace hoa_video;
 using namespace hoa_global;
 using namespace hoa_system;
-using namespace hoa_data;
+using namespace hoa_script;
 using namespace hoa_battle;
 using namespace hoa_menu;
 
@@ -44,7 +44,7 @@ namespace private_map {
 // ******************** ActionPathMove ***********************
 
 void ActionPathMove::Load(uint32 table_key) {
-	DataDescriptor *read_data = &(sprite->current_map->_map_data);
+	ScriptDescriptor *read_data = &(sprite->current_map->_map_data);
 
 	read_data->OpenTable(table_key);
 	destination.row = read_data->ReadInt("row");
@@ -152,8 +152,8 @@ void ActionPathMove::Process() {
 
 void ActionFrameDisplay::Load(uint32 table_key) {
 	//  FIXME: why is this a pointer???
-	//	DataDescriptor *read_data; // Make this point to map data later
-	DataDescriptor read_data;
+	//	ScriptDescriptor *read_data; // Make this point to map data later
+	ScriptDescriptor read_data;
 
 	read_data.OpenTable(table_key);
 	display_time = read_data.ReadInt("display_time");

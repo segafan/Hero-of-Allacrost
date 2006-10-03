@@ -19,45 +19,39 @@
 
 using namespace std;
 using namespace hoa_utils;
-using namespace hoa_data::private_data;
+using namespace hoa_script::private_script;
 
-namespace hoa_data {
+namespace hoa_script {
 
-GameData *DataManager = NULL;
-bool DATA_DEBUG = false;
-SINGLETON_INITIALIZE(GameData);
+GameScript *ScriptManager = NULL;
+bool SCRIPT_DEBUG = false;
+SINGLETON_INITIALIZE(GameScript);
 
 
 // ****************************************************************************
-// ************************** DataDescriptor **********************************
+// ************************** ScriptDescriptor **********************************
 // ****************************************************************************
-bool DataDescriptor::_IsFileOpen() {
+bool ScriptDescriptor::_IsFileOpen() {
 	if (_file_open == false) {
 		_error_code |= DATA_BAD_FILE_ACCESS;
-		if (DATA_DEBUG)
+		if (SCRIPT_DEBUG)
 			cerr << "DATA ERROR: Attempt to operate on un-opened file " << _filename << endl;
 	}
 	return _file_open;
 }
 
-bool DataDescriptor::OpenFile(const char* file_name, DATA_ACCESS_MODE access_mode) {
+bool ScriptDescriptor::OpenFile(std::string file_name, DATA_ACCESS_MODE access_mode) {
 	_filename = file_name;
 	return OpenFile(access_mode);
 }
 
-bool DataDescriptor::OpenFile(DATA_ACCESS_MODE access_mode) {
+bool ScriptDescriptor::OpenFile(DATA_ACCESS_MODE access_mode) {
 	// Open Lua first if it is not open already
 	_access_mode = access_mode;
 	if (_access_mode == READ)
 	{
 		if (_file_open == false) {
-			_lstack = lua_open();
-			// Load the Lua libraries
-			const luaL_reg *lib = LUALIBS;
-			for (; lib->func; lib++) {
-				lib->func(_lstack);      // open library
-				lua_settop(_lstack, 0);  // Clear the stack
-			}
+			_lstack = lua_newthread(ScriptManager->GetGlobalState());
 		}
 		
 		// Attempt to load the Lua file.
@@ -93,12 +87,11 @@ bool DataDescriptor::OpenFile(DATA_ACCESS_MODE access_mode) {
 	}
 }
 
-void DataDescriptor::CloseFile() {
+void ScriptDescriptor::CloseFile() {
 	_open_tables.clear();
 	
 	if (_access_mode == READ)
 	{
-		lua_close(_lstack);
 		_lstack = NULL;
 		_file_open = false;
 	}
@@ -114,271 +107,8 @@ void DataDescriptor::CloseFile() {
 	}
 }
 
-// ************************ Variable Access Functions *************************
-
-// TODO: All of the functions in this section need more complete error checking.
-// TODO: UString functions need to be implemented at some point
-
-bool DataDescriptor::ReadBool(const char *key) {
-	if (_access_mode != READ)
-		return false;
-
-	if (!_IsFileOpen()) {
-		return false;
-	}
-	
-	bool value = false;
-	if (_open_tables.size() == 0) { // Then this is a global variable we are fetching
-		lua_getglobal(_lstack, key);
-		value = (0 != lua_toboolean(_lstack, STACK_TOP));
-		lua_pop(_lstack, 1);
-	}
-	
-	else { // This is a table element we are fetching
-		lua_pushstring(_lstack, key);
-		lua_gettable(_lstack, STACK_TOP - 1);
-		if (!lua_isboolean(_lstack, STACK_TOP)) {
-			cerr << "DATA ERROR: Invalid table field" << endl;
-			_error_code |= DATA_INVALID_TABLE_KEY;
-		}
-		else {
-			value = (0 != lua_toboolean(_lstack, STACK_TOP));
-		}
-		lua_pop(_lstack, 1);
-	}
-	return value;
-}
-
-bool DataDescriptor::ReadBool(const int32 key) {
-	if (_access_mode != READ)
-		return false;
-
-	if (!_IsFileOpen()) {
-		return false;
-	}
-	
-	bool value = false;
-	// At least one table must be open to use a numerical key
-	if (_open_tables.size() == 0) {
-		_error_code |= DATA_BAD_GLOBAL;
-		return false;
-	}
-	
-	lua_pushnumber(_lstack, key);
-	lua_gettable(_lstack, STACK_TOP - 1);
-	if (!lua_isboolean(_lstack, STACK_TOP)) {
-		cerr << "DATA ERROR: Invalid table field" << endl;
-		_error_code |= DATA_INVALID_TABLE_KEY;
-	}
-	else {
-		value = (0 != lua_toboolean(_lstack, STACK_TOP));
-	}
-	lua_pop(_lstack, 1);
-	return value;
-}
-
-int32 DataDescriptor::ReadInt(const char *key) {
-	if (_access_mode != READ)
-		return 0;
-
-	if (!_IsFileOpen()) {
-		return 0;
-	}
-	
-	int32 value = 0;
-	if (_open_tables.size() == 0) { // Then this is a global variable we are fetching
-		lua_getglobal(_lstack, key);
-
-		value = static_cast<int32>(lua_tonumber(_lstack, STACK_TOP));
-		lua_pop(_lstack, 1);
-	}
-	else { // This is a table element we are fetching
-		lua_pushstring(_lstack, key);
-		lua_gettable(_lstack, STACK_TOP - 1);
-		if (!lua_isnumber(_lstack, STACK_TOP)) {
-			cerr << "DATA ERROR: Invalid table field" << endl;
-			_error_code |= DATA_INVALID_TABLE_KEY;
-		}
-		else {
-			value = static_cast<int32>(lua_tonumber(_lstack, STACK_TOP));
-		}
-		lua_pop(_lstack, 1);
-	}
-	return value;
-}
-
-int32 DataDescriptor::ReadInt(const int32 key) {
-	if (_access_mode != READ)
-		return 0;
-
-	if (!_IsFileOpen()) {
-		return 0;
-	}
-	
-	int32 value = 0;
-	// At least one table must be open to use a numerical key
-	if (_open_tables.size() == 0) {
-		_error_code |= DATA_BAD_GLOBAL;
-		return 0;
-	}
-	
-	lua_pushnumber(_lstack, key);
-	lua_gettable(_lstack, STACK_TOP - 1);
-	if (!lua_isnumber(_lstack, STACK_TOP)) {
-		cerr << "DATA ERROR: Invalid table field" << endl;
-		_error_code |= DATA_INVALID_TABLE_KEY;
-	}
-	else {
-		value = static_cast<int32>(lua_tonumber(_lstack, STACK_TOP));
-	}
-	lua_pop(_lstack, 1);
-	
-	return value;
-}
-
-float DataDescriptor::ReadFloat(const char *key) {
-	if (_access_mode != READ)
-		return 0.0f;
-
-	if (!_IsFileOpen()) {
-		return 0.0f;
-	}
-	
-	float value = 0.0f;
-	if (_open_tables.size() == 0) { // Then this is a global variable we are fetching
-		lua_getglobal(_lstack, key);
-
-		value = static_cast<float>(lua_tonumber(_lstack, STACK_TOP));
-		lua_pop(_lstack, 1);
-	}
-	else { // This is a table element we are fetching
-		lua_pushstring(_lstack, key);
-		lua_gettable(_lstack, STACK_TOP - 1);
-		if (!lua_isnumber(_lstack, STACK_TOP)) {
-			cerr << "DATA ERROR: Invalid table field" << endl;
-			_error_code |= DATA_INVALID_TABLE_KEY;
-		}
-		else {
-			value = static_cast<float>(lua_tonumber(_lstack, STACK_TOP));
-		}
-		lua_pop(_lstack, 1);
-	}
-	return value;
-}
-
-float DataDescriptor::ReadFloat(const int32 key) {
-	if (_access_mode != READ)
-		return 0.0f;
-
-	if (!_IsFileOpen()) {
-		return 0.0f;
-	}
-	
-	float value = 0.0f;
-	// At least one table must be open to use a numerical key
-	if (_open_tables.size() == 0) {
-		_error_code |= DATA_BAD_GLOBAL;
-		return false;
-	}
-	
-	lua_pushnumber(_lstack, key);
-	lua_gettable(_lstack, STACK_TOP - 1);
-	if (!lua_isnumber(_lstack, STACK_TOP)) {
-		cerr << "DATA ERROR: Invalid table field" << endl;
-		_error_code |= DATA_INVALID_TABLE_KEY;
-	}
-	else {
-		value = static_cast<float>(lua_tonumber(_lstack, STACK_TOP));
-	}
-	lua_pop(_lstack, 1);
-	
-	return value;
-}
-
-string DataDescriptor::ReadString(const char *key) {
-	if (_access_mode != READ)
-		return "";
-
-	if (!_IsFileOpen()) {
-		return "";
-	}
-	
-	string value = "";
-	if (_open_tables.size() == 0) { // Then this is a global variable we are fetching
-		lua_getglobal(_lstack, key);
-
-		value = lua_tostring(_lstack, STACK_TOP);
-		lua_pop(_lstack, 1);
-	}
-	else { // This is a table element we are fetching
-		lua_pushstring(_lstack, key);
-		lua_gettable(_lstack, STACK_TOP - 1);
-		if (!lua_isstring(_lstack, STACK_TOP)) {
-			cerr << "DATA ERROR: Invalid table field" << endl;
-			_error_code |= DATA_INVALID_TABLE_KEY;
-		}
-		else {
-			value = lua_tostring(_lstack, STACK_TOP);
-		}
-		lua_pop(_lstack, 1);
-	}
-	return value;
-}
-
-string DataDescriptor::ReadString(const int32 key) {
-	if (_access_mode != READ)
-		return "";
-
-	if (!_IsFileOpen()) {
-		return "";
-	}
-	
-	string value = "";
-	// At least one table must be open to use a numerical key
-	if (_open_tables.size() == 0) {
-		_error_code |= DATA_BAD_GLOBAL;
-		return false;
-	}
-	
-	lua_pushnumber(_lstack, key);
-	lua_gettable(_lstack, STACK_TOP - 1);
-	if (!lua_isstring(_lstack, STACK_TOP)) {
-		cerr << "DATA ERROR: Invalid table field" << endl;
-		_error_code |= DATA_INVALID_TABLE_KEY;
-	}
-	else {
-		value = lua_tostring(_lstack, STACK_TOP);
-	}
-	lua_pop(_lstack, 1);
-	
-	return value;
-}
-
-ustring DataDescriptor::ReadUString(const char *key, const char *lang) {
-	if (_access_mode != READ)
-		return MakeUnicodeString("");
-
-	if (!_IsFileOpen()) {
-		return MakeUnicodeString("");
-	}
-	
-	return MakeUnicodeString("");
-}
-
-ustring DataDescriptor::ReadUString(const int32 key, const char *lang) {
-	if (_access_mode != READ)
-		return MakeUnicodeString("");
-
-	if (!_IsFileOpen()) {
-		return MakeUnicodeString("");
-	}
-	
-	return MakeUnicodeString("");
-}
-
 // ************************* Table Access Functions ***************************
-
-void DataDescriptor::OpenTable(const char *key) {
+void ScriptDescriptor::OpenTable(std::string key) {
 	if (_access_mode != READ)
 		return;
 
@@ -387,7 +117,7 @@ void DataDescriptor::OpenTable(const char *key) {
 	}
 	
 	if (_open_tables.size() == 0) { // Then fetch the table from the global space
-		lua_getglobal(_lstack, key);
+		lua_getglobal(_lstack, key.c_str());
 		if (!lua_istable(_lstack, STACK_TOP)) {
 			cerr << "DATA ERROR: could not retrieve table \"" << key << "\"" << endl;
 			_error_code |= DATA_OPEN_TABLE_FAILURE;
@@ -398,7 +128,7 @@ void DataDescriptor::OpenTable(const char *key) {
 	
 	// Then the table to fetch is an element of another table
 	else {
-		lua_pushstring(_lstack, key);
+		lua_pushstring(_lstack, key.c_str());
 		lua_gettable(_lstack, STACK_TOP - 1);
 		if (!lua_istable(_lstack, STACK_TOP)) {
 			cerr << "DATA ERROR: could not retreive sub-table using string key " << key << endl;
@@ -409,7 +139,7 @@ void DataDescriptor::OpenTable(const char *key) {
 	}
 }
 
-void DataDescriptor::OpenTable(const int32 key) {
+void ScriptDescriptor::OpenTable(const int32 key) {
 	if (_access_mode != READ)
 		return;
 
@@ -434,7 +164,7 @@ void DataDescriptor::OpenTable(const int32 key) {
 	_open_tables.push_back("numeric");
 }
 
-void DataDescriptor::CloseTable() {
+void ScriptDescriptor::CloseTable() {
 	if (_access_mode != READ)
 		return;
 
@@ -450,7 +180,7 @@ void DataDescriptor::CloseTable() {
 	lua_pop(_lstack, 1);
 }
 
-uint32 DataDescriptor::GetTableSize(const char *key) {
+uint32 ScriptDescriptor::GetTableSize(std::string key) {
 	if (_access_mode != READ)
 		return 0;
 
@@ -472,7 +202,7 @@ uint32 DataDescriptor::GetTableSize(const char *key) {
 	return size;
 }
 
-uint32 DataDescriptor::GetTableSize(const int32 key) {
+uint32 ScriptDescriptor::GetTableSize(const int32 key) {
 	if (_access_mode != READ)
 		return 0;
 
@@ -495,7 +225,7 @@ uint32 DataDescriptor::GetTableSize(const int32 key) {
 	return size;
 }
 
-uint32 DataDescriptor::GetTableSize() {
+uint32 ScriptDescriptor::GetTableSize() {
 	if (_access_mode != READ)
 		return 0;
 
@@ -510,313 +240,11 @@ uint32 DataDescriptor::GetTableSize() {
 	return static_cast<uint32>(luaL_getn(_lstack, STACK_TOP));
 }
 
-// ************************* Vector Fill Functions ****************************
-
-void DataDescriptor::FillIntVector(const char *key, std::vector<int32> &vect) {
-	if (_access_mode != READ)
-		return;
-	
-	if (!_IsFileOpen()) {
-		return;
-	}
-	
-	// Reset the error code and try to open the table
-	uint32 error_save = _error_code;
-	_error_code = DATA_NO_ERRORS;
-	OpenTable(key);
-	if (_error_code != DATA_NO_ERRORS) {
-		_error_code |= error_save;
-		if (DATA_DEBUG)
-			cerr << "DATA ERROR: table " << key << " does not exist, or " << key << "isn't a table" << endl;
-		return;
-	}
-	_error_code = error_save;
-
-	// Check to see if there is an element for key == 0. If so, push an empty element first
-	bool zero_first = false;
-	lua_pushnumber(_lstack, 0);
-	lua_gettable(_lstack, STACK_TOP - 1);
-	if (lua_isnumber(_lstack, STACK_TOP)) {
-		zero_first = true;
-		vect.push_back(0);
-	}
-	lua_pop(_lstack, 1);
-	
-	// Fetch all the values of the table
-	int32 t = lua_gettop(_lstack);
-	lua_pushnil(_lstack);
-	while (lua_next(_lstack, t)) {
-		vect.push_back(static_cast<int32>(lua_tonumber(_lstack, STACK_TOP)));
-		lua_pop(_lstack, 1);
-	}
-	
-	CloseTable();
-	
-	// If we had an element at key == 0, remove the last element and make it the first
-	if (zero_first) {
-		vect[0] = vect.back();
-		vect.pop_back();
-	}
-}
-
-void DataDescriptor::FillFloatVector(const char *key, std::vector<float> &vect) {
-	if (_access_mode != READ)
-		return;
-
-	if (!_IsFileOpen()) {
-		return;
-	}
-	
-	// Reset the error code and try to open the table
-	uint32 error_save = _error_code;
-	_error_code = DATA_NO_ERRORS;
-	OpenTable(key);
-	if (_error_code != DATA_NO_ERRORS) {
-		_error_code |= error_save;
-		if (DATA_DEBUG)
-			cerr << "DATA ERROR: table " << key << " does not exist, or " << key << "isn't a table" << endl;
-		return;
-	}
-	_error_code = error_save;
-
-	// Check to see if there is an element for key == 0. If so, push an empty element first
-	bool zero_first = false;
-	lua_pushnumber(_lstack, 0);
-	lua_gettable(_lstack, STACK_TOP - 1);
-	if (lua_isnumber(_lstack, STACK_TOP)) {
-		zero_first = true;
-		vect.push_back(0);
-	}
-	lua_pop(_lstack, 1);
-	
-	// Fetch all the values of the table
-	int32 t = lua_gettop(_lstack);
-	lua_pushnil(_lstack);
-	while (lua_next(_lstack, t)) {
-		vect.push_back(static_cast<float>(lua_tonumber(_lstack, STACK_TOP)));
-		lua_pop(_lstack, 1);
-	}
-	
-	CloseTable();
-	
-	// If we had an element at key == 0, remove the last element and make it the first
-	if (zero_first) {
-		vect[0] = vect.back();
-		vect.pop_back();
-	}
-}
-
-void DataDescriptor::FillStringVector(const char *key, std::vector<std::string> &vect) {
-	if (_access_mode != READ)
-		return;
-
-	if (!_IsFileOpen()) {
-		return;
-	}
-	
-	// Reset the error code and try to open the table
-	uint32 error_save = _error_code;
-	_error_code = DATA_NO_ERRORS;
-	OpenTable(key);
-	if (_error_code != DATA_NO_ERRORS) {
-		_error_code |= error_save;
-		if (DATA_DEBUG)
-			cerr << "DATA ERROR: table " << key << " does not exist, or " << key << "isn't a table" << endl;
-		return;
-	}
-	_error_code = error_save;
-	
-	// Check to see if there is an element for key == 0. If so, push an empty element first
-	bool zero_first = false;
-	lua_pushnumber(_lstack, 0);
-	lua_gettable(_lstack, STACK_TOP - 1);
-	if (lua_isstring(_lstack, STACK_TOP)) {
-		zero_first = true;
-		vect.push_back("");
-	}
-	lua_pop(_lstack, 1);
-	
-	// Fetch all the values of the table
-	int32 t = lua_gettop(_lstack);
-	lua_pushnil(_lstack);
-	while (lua_next(_lstack, t)) {
-		vect.push_back(lua_tostring(_lstack, STACK_TOP));
-		lua_pop(_lstack, 1);
-	}
-	
-	CloseTable();
-	
-	// If we had an element at key == 0, remove the last element and make it the first
-	if (zero_first) {
-		vect[0] = vect.back();
-		vect.pop_back();
-	}
-}
-
-void DataDescriptor::FillIntVector(const int32 key, std::vector<int32> &vect) {
-	if (_access_mode != READ)
-		return;
-
-	if (!_IsFileOpen()) {
-		return;
-	}
-	
-	// Must have at least one open table to use a numerical key
-	if (_open_tables.size() == 0) {
-		cout << "FillIntVector(int32, vect) thinks that the table size is zero..." << endl;
-		_error_code |= DATA_BAD_GLOBAL;
-		return;
-	}
-	
-	// Reset the error code and try to open the table
-	uint32 error_save = _error_code;
-	_error_code = DATA_NO_ERRORS;
-	OpenTable(key);
-	if (_error_code != DATA_NO_ERRORS) {
-		_error_code |= error_save;
-		if (DATA_DEBUG)
-			cerr << "DATA ERROR: table " << key << " does not exist, or " << key << "isn't a table" << endl;
-		return;
-	}
-	_error_code = error_save;
-
-	// Check to see if there is an element for key == 0. If so, push an empty element first
-	bool zero_first = false;
-	lua_pushnumber(_lstack, 0);
-	lua_gettable(_lstack, STACK_TOP - 1);
-	if (lua_isnumber(_lstack, STACK_TOP)) {
-		zero_first = true;
-		vect.push_back(0);
-	}
-	lua_pop(_lstack, 1);
-	
-	// Fetch all the values of the table
-	int32 t = lua_gettop(_lstack);
-	lua_pushnil(_lstack);
-	while (lua_next(_lstack, t)) {
-		vect.push_back(static_cast<int32>(lua_tonumber(_lstack, STACK_TOP)));
-		lua_pop(_lstack, 1);
-	}
-	
-	CloseTable();
-	
-	// If we had an element at key == 0, remove the last element and make it the first
-	if (zero_first) {
-		vect[0] = vect.back();
-		vect.pop_back();
-	}
-}
-
-void DataDescriptor::FillFloatVector(const int32 key, std::vector<float> &vect) {
-	if (_access_mode != READ)
-		return;
-
-	if (!_IsFileOpen()) {
-		return;
-	}
-	
-	// Must have at least one open table to use a numerical key
-	if (_open_tables.size() == 0) {
-		_error_code |= DATA_BAD_GLOBAL;
-		return;
-	}
-	
-	// Reset the error code and try to open the table
-	uint32 error_save = _error_code;
-	_error_code = DATA_NO_ERRORS;
-	OpenTable(key);
-	if (_error_code != DATA_NO_ERRORS) {
-		_error_code |= error_save;
-		if (DATA_DEBUG)
-			cerr << "DATA ERROR: table " << key << " does not exist, or " << key << "isn't a table" << endl;
-		return;
-	}
-	_error_code = error_save;
-
-	// Check to see if there is an element for key == 0. If so, push an empty element first
-	bool zero_first = false;
-	lua_pushnumber(_lstack, 0);
-	lua_gettable(_lstack, STACK_TOP - 1);
-	if (lua_isnumber(_lstack, STACK_TOP)) {
-		zero_first = true;
-		vect.push_back(0);
-	}
-	lua_pop(_lstack, 1);
-	
-	// Fetch all the values of the table
-	int32 t = lua_gettop(_lstack);
-	lua_pushnil(_lstack);
-	while (lua_next(_lstack, t)) {
-		vect.push_back(static_cast<float>(lua_tonumber(_lstack, STACK_TOP)));
-		lua_pop(_lstack, 1);
-	}
-	
-	CloseTable();
-	
-	// If we had an element at key == 0, remove the last element and make it the first
-	if (zero_first) {
-		vect[0] = vect.back();
-		vect.pop_back();
-	}
-}
-
-void DataDescriptor::FillStringVector(const int32 key, std::vector<std::string> &vect) {
-	if (_access_mode != READ)
-		return;
-
-	if (!_IsFileOpen()) {
-		return;
-	}
-	
-	// Must have at least one open table to use a numerical key
-	if (_open_tables.size() == 0) {
-		_error_code |= DATA_BAD_GLOBAL;
-		return;
-	}
-	
-	// Reset the error code and try to open the table
-	uint32 error_save = _error_code;
-	_error_code = DATA_NO_ERRORS;
-	OpenTable(key);
-	if (_error_code != DATA_NO_ERRORS) {
-		_error_code |= error_save;
-		if (DATA_DEBUG)
-			cerr << "DATA ERROR: table " << key << " does not exist, or " << key << "isn't a table" << endl;
-		return;
-	}
-	_error_code = error_save;
-
-	// Check to see if there is an element for key == 0. If so, push an empty element first
-	bool zero_first = false;
-	lua_pushnumber(_lstack, 0);
-	lua_gettable(_lstack, STACK_TOP - 1);
-	if (lua_isstring(_lstack, STACK_TOP)) {
-		zero_first = true;
-		vect.push_back("");
-	}
-	lua_pop(_lstack, 1);
-	
-	// Fetch all the values of the table
-	int32 t = lua_gettop(_lstack);
-	lua_pushnil(_lstack);
-	while (lua_next(_lstack, t)) {
-		vect.push_back(lua_tostring(_lstack, STACK_TOP));
-		lua_pop(_lstack, 1);
-	}
-	
-	CloseTable();
-	
-	// If we had an element at key == 0, remove the last element and make it the first
-	if (zero_first) {
-		vect[0] = vect.back();
-		vect.pop_back();
-	}
-}
 
 // **************************** Debugging functions ***************************
 
 // This function is for DEBUGGING PURPOSES ONLY! It prints the contents of the Lua stack from top to bottom.
-void DataDescriptor::DEBUG_PrintLuaStack() {
+void ScriptDescriptor::DEBUG_PrintLuaStack() {
 	if (!_IsFileOpen()) {
 		return;
 	}
@@ -861,7 +289,7 @@ void DataDescriptor::DEBUG_PrintLuaStack() {
 }
 
 // Writes the "path" for all the open tables. Ex) tbl1[tbl2][tbl3]
-void DataDescriptor::_WriteTablePath() {
+void ScriptDescriptor::_WriteTablePath() {
 	if (_access_mode != WRITE)
 		return;
 
@@ -876,7 +304,7 @@ void DataDescriptor::_WriteTablePath() {
 
 // ************************* Comment Write Functions **************************
 
-void DataDescriptor::InsertNewLine() {
+void ScriptDescriptor::InsertNewLine() {
 	if (_access_mode != WRITE)
 		return;
 
@@ -887,7 +315,7 @@ void DataDescriptor::InsertNewLine() {
 	_outfile << endl;
 }
 
-void DataDescriptor::WriteComment(const char* comment) {
+void ScriptDescriptor::WriteComment(const char* comment) {
 	if (_access_mode != WRITE)
 		return;
 
@@ -898,7 +326,7 @@ void DataDescriptor::WriteComment(const char* comment) {
 	_outfile << "-- " << comment << endl;
 }
 
-void DataDescriptor::WriteComment(std::string& comment) {
+void ScriptDescriptor::WriteComment(std::string& comment) {
 	if (_access_mode != WRITE)
 		return;
 
@@ -909,7 +337,7 @@ void DataDescriptor::WriteComment(std::string& comment) {
 	_outfile << "-- " << comment << endl;
 }
 
-void DataDescriptor::BeginCommentBlock() {
+void ScriptDescriptor::BeginCommentBlock() {
 	if (_access_mode != WRITE)
 		return;
 
@@ -920,7 +348,7 @@ void DataDescriptor::BeginCommentBlock() {
 	_outfile << "--[[" << endl;
 }
 
-void DataDescriptor::EndCommentBlock() {
+void ScriptDescriptor::EndCommentBlock() {
 	if (_access_mode != WRITE)
 		return;
 
@@ -931,7 +359,7 @@ void DataDescriptor::EndCommentBlock() {
 	_outfile << "--]]" << endl;
 }
 
-void DataDescriptor::WriteLine(const char* comment) {
+void ScriptDescriptor::WriteLine(const char* comment) {
 	if (_access_mode != WRITE)
 		return;
 
@@ -942,7 +370,7 @@ void DataDescriptor::WriteLine(const char* comment) {
 	_outfile << comment << endl;
 }
 
-void DataDescriptor::WriteLine(std::string& comment) {
+void ScriptDescriptor::WriteLine(std::string& comment) {
 	if (_access_mode != WRITE)
 		return;
 
@@ -956,7 +384,7 @@ void DataDescriptor::WriteLine(std::string& comment) {
 // ************************ Variable Write Functions **************************
 
 // This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
-void DataDescriptor::WriteBool(const char *key, bool value) {
+void ScriptDescriptor::WriteBool(const char *key, bool value) {
 	if (_access_mode != WRITE)
 		return;
 
@@ -982,7 +410,7 @@ void DataDescriptor::WriteBool(const char *key, bool value) {
 }
 
 // This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
-void DataDescriptor::WriteInt(const char *key, int32 value) {
+void ScriptDescriptor::WriteInt(const char *key, int32 value) {
 	if (_access_mode != WRITE)
 		return;
 
@@ -1000,7 +428,7 @@ void DataDescriptor::WriteInt(const char *key, int32 value) {
 }
 
 // This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
-void DataDescriptor::WriteFloat(const char *key, float value) {
+void ScriptDescriptor::WriteFloat(const char *key, float value) {
 	if (_access_mode != WRITE)
 		return;
 
@@ -1020,7 +448,7 @@ void DataDescriptor::WriteFloat(const char *key, float value) {
 
 // This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
 // TODO: Check for bad strings (ie, if it contains puncutation charcters like , or ])
-void DataDescriptor::WriteString(const char *key, const char* value) {
+void ScriptDescriptor::WriteString(const char *key, const char* value) {
 	if (_access_mode != WRITE)
 		return;
 
@@ -1040,7 +468,7 @@ void DataDescriptor::WriteString(const char *key, const char* value) {
 
 // This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
 // TODO: Check for bad strings (ie, if it contains puncutation charcters like , or ])
-void DataDescriptor::WriteString(const char *key, std::string& value) {
+void ScriptDescriptor::WriteString(const char *key, std::string& value) {
 	if (_access_mode != WRITE)
 		return;
 
@@ -1058,7 +486,7 @@ void DataDescriptor::WriteString(const char *key, std::string& value) {
 }
 
 // This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
-void DataDescriptor::WriteBool(const int32 key, bool value) {
+void ScriptDescriptor::WriteBool(const int32 key, bool value) {
 	if (_access_mode != WRITE)
 		return;
 
@@ -1068,7 +496,7 @@ void DataDescriptor::WriteBool(const int32 key, bool value) {
 	
 	if (_open_tables.empty()) {
 		_error_code |= DATA_BAD_GLOBAL;
-		if (DATA_DEBUG)
+		if (SCRIPT_DEBUG)
 			cerr << "DATA ERROR: Attempt to write a numerical value as a global key" << endl;
 		return;
 	}
@@ -1082,7 +510,7 @@ void DataDescriptor::WriteBool(const int32 key, bool value) {
 }
 
 // This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
-void DataDescriptor::WriteInt(const int32 key, int32 value) {
+void ScriptDescriptor::WriteInt(const int32 key, int32 value) {
 	if (_access_mode != WRITE)
 		return;
 
@@ -1092,7 +520,7 @@ void DataDescriptor::WriteInt(const int32 key, int32 value) {
 	
 	if (_open_tables.empty()) {
 		_error_code |= DATA_BAD_GLOBAL;
-		if (DATA_DEBUG)
+		if (SCRIPT_DEBUG)
 			cerr << "DATA ERROR: Attempt to write a numerical value as a global key" << endl;
 		return;
 	}
@@ -1102,7 +530,7 @@ void DataDescriptor::WriteInt(const int32 key, int32 value) {
 }
 
 // This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
-void DataDescriptor::WriteFloat(const int32 key, float value) {
+void ScriptDescriptor::WriteFloat(const int32 key, float value) {
 	if (_access_mode != WRITE)
 		return;
 
@@ -1112,7 +540,7 @@ void DataDescriptor::WriteFloat(const int32 key, float value) {
 	
 	if (_open_tables.empty()) {
 		_error_code |= DATA_BAD_GLOBAL;
-		if (DATA_DEBUG)
+		if (SCRIPT_DEBUG)
 			cerr << "DATA ERROR: Attempt to write a numerical value as a global key" << endl;
 		return;
 	}
@@ -1123,7 +551,7 @@ void DataDescriptor::WriteFloat(const int32 key, float value) {
 
 // This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
 // TODO: Check for bad strings (ie, if it contains puncutation charcters like , or ])
-void DataDescriptor::WriteString(const int32 key, const char* value) {
+void ScriptDescriptor::WriteString(const int32 key, const char* value) {
 	if (_access_mode != WRITE)
 		return;
 
@@ -1133,7 +561,7 @@ void DataDescriptor::WriteString(const int32 key, const char* value) {
 	
 	if (_open_tables.empty()) {
 		_error_code |= DATA_BAD_GLOBAL;
-		if (DATA_DEBUG)
+		if (SCRIPT_DEBUG)
 			cerr << "DATA ERROR: Attempt to write a numerical value as a global key" << endl;
 		return;
 	}
@@ -1144,7 +572,7 @@ void DataDescriptor::WriteString(const int32 key, const char* value) {
 
 // This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
 // TODO: Check for bad strings (ie, if it contains puncutation charcters like , or ])
-void DataDescriptor::WriteString(const int32 key, std::string& value) {
+void ScriptDescriptor::WriteString(const int32 key, std::string& value) {
 	if (_access_mode != WRITE)
 		return;
 
@@ -1154,7 +582,7 @@ void DataDescriptor::WriteString(const int32 key, std::string& value) {
 	
 	if (_open_tables.empty()) {
 		_error_code |= DATA_BAD_GLOBAL;
-		if (DATA_DEBUG)
+		if (SCRIPT_DEBUG)
 			cerr << "DATA ERROR: Attempt to write a numerical value as a global key" << endl;
 		return;
 	}
@@ -1168,7 +596,7 @@ void DataDescriptor::WriteString(const int32 key, std::string& value) {
 // ****************************************************************************
 
 // Writes the new table name to the file and manages the state of the context
-void DataDescriptor::BeginTable(const char *key) {
+void ScriptDescriptor::BeginTable(const char *key) {
 	if (_access_mode != WRITE)
 		return;
 
@@ -1189,7 +617,7 @@ void DataDescriptor::BeginTable(const char *key) {
 
 // Does internal scope handling of the lua file so things are written in the write global/table space.
 // This doesn't actually do any file write operations, but we still need to call it.
-void DataDescriptor::EndTable() {
+void ScriptDescriptor::EndTable() {
 	if (_access_mode != WRITE)
 		return;
 
@@ -1199,7 +627,7 @@ void DataDescriptor::EndTable() {
 	
 	if (_open_tables.empty()) {
 		_error_code |= DATA_CLOSE_TABLE_FAILURE;
-		if (DATA_DEBUG) 
+		if (SCRIPT_DEBUG) 
 			cerr << "DATA WARNING: Tried to close a table during writing when no table was open" << endl;
 	}
 	else {
@@ -1209,7 +637,7 @@ void DataDescriptor::EndTable() {
 
 // ************************** Vector Write Functions **************************
 
-void DataDescriptor::WriteBoolVector(const char *key, std::vector<bool> &vect) {
+void ScriptDescriptor::WriteBoolVector(const char *key, std::vector<bool> &vect) {
 	if (_access_mode != WRITE)
 		return;
 
@@ -1219,7 +647,7 @@ void DataDescriptor::WriteBoolVector(const char *key, std::vector<bool> &vect) {
 	
 	if (vect.empty()) {
 		_error_code |= DATA_BAD_VECTOR_SIZE;
-		if (DATA_DEBUG) 
+		if (SCRIPT_DEBUG) 
 			cerr << "DATA WARNING: passed a vector of size zero for writing." << endl;
 		return;
 	}
@@ -1245,7 +673,7 @@ void DataDescriptor::WriteBoolVector(const char *key, std::vector<bool> &vect) {
 	_outfile << " }" << endl;
 }
 
-void DataDescriptor::WriteIntVector(const char *key, std::vector<int32> &vect) {
+void ScriptDescriptor::WriteIntVector(const char *key, std::vector<int32> &vect) {
 	if (_access_mode != WRITE)
 		return;
 
@@ -1255,7 +683,7 @@ void DataDescriptor::WriteIntVector(const char *key, std::vector<int32> &vect) {
 	
 	if (vect.empty()) {
 		_error_code |= DATA_BAD_VECTOR_SIZE;
-		if (DATA_DEBUG) 
+		if (SCRIPT_DEBUG) 
 			cerr << "DATA WARNING: passed a vector of size zero for writing." << endl;
 		return;
 	}
@@ -1275,7 +703,7 @@ void DataDescriptor::WriteIntVector(const char *key, std::vector<int32> &vect) {
 	_outfile << " }" << endl;
 }
 
-void DataDescriptor::WriteFloatVector(const char *key, std::vector<float> &vect) {
+void ScriptDescriptor::WriteFloatVector(const char *key, std::vector<float> &vect) {
 	if (_access_mode != WRITE)
 		return;
 
@@ -1285,7 +713,7 @@ void DataDescriptor::WriteFloatVector(const char *key, std::vector<float> &vect)
 	
 	if (vect.empty()) {
 		_error_code |= DATA_BAD_VECTOR_SIZE;
-		if (DATA_DEBUG) 
+		if (SCRIPT_DEBUG) 
 			cerr << "DATA WARNING: passed a vector of size zero for writing." << endl;
 		return;
 	}
@@ -1307,7 +735,7 @@ void DataDescriptor::WriteFloatVector(const char *key, std::vector<float> &vect)
 }
 
 // TODO: Check for bad strings (ie, if it contains puncutation charcters like , or ])
-void DataDescriptor::WriteStringVector(const char *key, std::vector<std::string> &vect) {
+void ScriptDescriptor::WriteStringVector(const char *key, std::vector<std::string> &vect) {
 	if (_access_mode != WRITE)
 		return;
 
@@ -1317,7 +745,7 @@ void DataDescriptor::WriteStringVector(const char *key, std::vector<std::string>
 	
 	if (vect.empty()) {
 		_error_code |= DATA_BAD_VECTOR_SIZE;
-		if (DATA_DEBUG) 
+		if (SCRIPT_DEBUG) 
 			cerr << "DATA WARNING: passed a vector of size zero for writing." << endl;
 		return;
 	}
@@ -1338,20 +766,27 @@ void DataDescriptor::WriteStringVector(const char *key, std::vector<std::string>
 }
 
 // ****************************************************************************
-// *********************** GameData Class Functions ***************************
+// *********************** GameScript Class Functions ***************************
 // ****************************************************************************
 
-GameData::GameData() {
-	if (DATA_DEBUG) cout << "DATA: GameData constructor invoked." << endl;
+GameScript::GameScript() {
+	if (SCRIPT_DEBUG) cout << "SCRIPT: GameScript constructor invoked." << endl;
+
+	// Init lua
+	_global_state = lua_open();
+	luabind::open(_global_state);
 }
 
-GameData::~GameData() {
-	if (DATA_DEBUG) cout << "DATA: GameData destructor invoked." << endl;
+GameScript::~GameScript() {
+	if (SCRIPT_DEBUG) cout << "SCRIPT: GameScript destructor invoked." << endl;
+
+	lua_close(_global_state);
+	_global_state = NULL;
 }
 
 // Required method for all singletons
-bool GameData::SingletonInitialize() {
+bool GameScript::SingletonInitialize() {
 	return true;
 }
 
-} // namespace hoa_data
+} // namespace hoa_script

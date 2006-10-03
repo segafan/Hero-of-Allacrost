@@ -17,7 +17,7 @@
 #include <iostream>
 #include "grid.h"
 
-using namespace hoa_data;
+using namespace hoa_script;
 using namespace hoa_editor;
 using namespace hoa_video;
 using namespace std;
@@ -147,7 +147,7 @@ const std::string& Grid::GetMusic() const
 
 void Grid::LoadMap()
 {
-	DataDescriptor read_data;
+	ScriptDescriptor read_data;
 	vector<int32> vect;             // used to read in vectors from the file
 
 	if (!read_data.OpenFile(_file_name, READ))
@@ -248,7 +248,7 @@ void Grid::SaveMap()
 	int j;      // Loop counter variable FIXME: temporary!
 	vector<int32>::iterator it;  // used to iterate through the layers
 	vector<int32> layer_row;     // one row of a layer
-	DataDescriptor write_data;
+	ScriptDescriptor write_data;
 	
 	if (!write_data.OpenFile(_file_name, WRITE))
 		QMessageBox::warning(this, "Saving File...", QString("ERROR: could not open %1 for writing!").arg(_file_name));
@@ -381,7 +381,7 @@ void Grid::SaveMap()
 
 		write_data.WriteComment("Walkability status of tiles for 8 height levels. Non-zero indicates walkable. Valid range: [0-255]");
 		write_data.BeginTable("tile_walkable");
-		DataDescriptor read_data;
+		ScriptDescriptor read_data;
 		if (!read_data.OpenFile("dat/tilesets/tiles_database.lua", READ))
 			QMessageBox::warning(this, "Tiles Database",
 				QString("ERROR: could not open dat/tilesets/tiles_database.lua for reading!"));

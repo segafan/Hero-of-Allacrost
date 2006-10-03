@@ -37,7 +37,7 @@ using namespace hoa_input;
 using namespace hoa_system;
 using namespace hoa_input;
 using namespace hoa_global;
-using namespace hoa_data;
+using namespace hoa_script;
 using namespace hoa_battle;
 using namespace hoa_menu;
 

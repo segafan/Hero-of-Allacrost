@@ -18,7 +18,7 @@
 #include "audio.h"
 
 using namespace std;
-using namespace hoa_data;
+using namespace hoa_script;
 using namespace hoa_audio;
 using namespace hoa_system::private_system;
 
@@ -46,7 +46,7 @@ GameSystem::~GameSystem() {
 
 // Makes a call to the data manager for retrieving configured settings
 bool GameSystem::SingletonInitialize() {
-	DataDescriptor settings_data;
+	ScriptDescriptor settings_data;
 
 	if (!settings_data.OpenFile("dat/config/settings.lua", READ)) {
 		cout << "SYSTEM ERROR: failed to load settings from data file" << endl;

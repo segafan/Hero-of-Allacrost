@@ -19,7 +19,7 @@
 
 using namespace std;
 using namespace hoa_utils;
-using namespace hoa_data;
+using namespace hoa_script;
 
 namespace hoa_audio {
 

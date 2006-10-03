@@ -33,7 +33,7 @@ using namespace hoa_audio;
 using namespace hoa_video;
 using namespace hoa_system;
 using namespace hoa_global;
-using namespace hoa_data;
+using namespace hoa_script;
 
 using namespace hoa_battle::private_battle;
 

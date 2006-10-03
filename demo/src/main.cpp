@@ -51,7 +51,7 @@ using namespace hoa_mode_manager;
 using namespace hoa_input;
 using namespace hoa_system;
 using namespace hoa_global;
-using namespace hoa_data;
+using namespace hoa_script;
 using namespace hoa_boot;
 using namespace hoa_map;
 
@@ -80,7 +80,7 @@ void QuitAllacrost() {
 	GameAudio::SingletonDestroy();
 	GameInput::SingletonDestroy();
 	GameSystem::SingletonDestroy();
-	GameData::SingletonDestroy();
+	GameScript::SingletonDestroy();
 	GameVideo::SingletonDestroy();
 }
 
@@ -125,7 +125,7 @@ int32 main(int32 argc, char *argv[]) {
 	AudioManager = GameAudio::SingletonCreate();
 	InputManager = GameInput::SingletonCreate();
 	VideoManager = GameVideo::SingletonCreate();
-	DataManager = GameData::SingletonCreate();
+	ScriptManager = GameScript::SingletonCreate();
 	SystemManager = GameSystem::SingletonCreate();
 
 	// NOTE: The GlobalManager will not be created until the user actually starts a game instance
@@ -169,8 +169,8 @@ int32 main(int32 argc, char *argv[]) {
 		cerr << "ERROR: unable to initialize AudioManager" << endl;
 		return 1;
 	}
-	if (DataManager->SingletonInitialize() == false) {
-		cerr << "ERROR: unable to initialize DataManager" << endl;
+	if (ScriptManager->SingletonInitialize() == false) {
+		cerr << "ERROR: unable to initialize ScriptManager" << endl;
 		return 1;
 	}
 	if (ModeManager->SingletonInitialize() == false) {

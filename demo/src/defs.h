@@ -63,12 +63,12 @@ namespace hoa_video {
 }
 
 // Data declarations, see data.h/cpp
-namespace hoa_data {
-	extern bool DATA_DEBUG;
-	class GameData;
+namespace hoa_script {
+	extern bool SCRIPT_DEBUG;
+	class GameScript;
 
-	class ReadDataDescriptor;
-	class WriteDataDescriptor;
+	class ReadScriptDescriptor;
+	class WriteScriptDescriptor;
 }
 
 // Mode manager declarations, see mode_manager.h/cpp
