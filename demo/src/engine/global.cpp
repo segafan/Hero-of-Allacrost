@@ -17,7 +17,7 @@
 #include "global.h"
 #include "utils.h"
 #include "video.h"
-#include "data.h"
+#include "script.h"
 
 #include "battle.h"
 

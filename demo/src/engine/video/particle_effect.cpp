@@ -10,7 +10,7 @@
 #include "particle_effect.h"
 #include "particle_system.h"
 #include "video.h"
-#include "data.h"
+#include "script.h"
 
 using namespace std;
 using namespace hoa_script;

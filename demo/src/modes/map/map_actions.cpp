@@ -23,7 +23,7 @@
 #include "video.h"
 #include "global.h"
 #include "system.h"
-#include "data.h"
+#include "script.h"
 #include "battle.h"
 #include "menu.h"
 

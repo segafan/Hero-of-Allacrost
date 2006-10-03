@@ -14,7 +14,7 @@
 *** ***************************************************************************/
 
 #include "system.h"
-#include "data.h"
+#include "script.h"
 #include "audio.h"
 
 using namespace std;

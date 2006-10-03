@@ -20,7 +20,7 @@
 #include "audio.h"
 #include "video.h"
 #include "global.h"
-#include "data.h"
+#include "script.h"
 #include "battle.h"
 #include "menu.h"
 

@@ -15,7 +15,7 @@
 
 #include "input.h"
 #include "video.h"
-#include "data.h"
+#include "script.h"
 #include "mode_manager.h"
 #include "system.h"
 #include "quit.h"
