@@ -17,7 +17,7 @@
 #include "tileset.h"
 
 using namespace std;
-using namespace hoa_data;
+using namespace hoa_script;
 using namespace hoa_editor;
 
 TilesetTable::TilesetTable(QWidget* parent, const QString& name, TileDatabase* db)
@@ -90,7 +90,7 @@ TileDatabase::TileDatabase() : _global_set(this)
 
 TileDatabase::TileDatabase(const std::string& db_file_name) : _global_set(this)
 {
-	DataDescriptor read_data;
+	ScriptDescriptor read_data;
 	read_data.OpenFile(db_file_name.c_str(), READ);
 
 	// Read filenames and add tiles
@@ -147,7 +147,7 @@ void TileDatabase::Update(const std::string& tile_dir_name)
 
 void TileDatabase::Save(const std::string& file_name)
 {
-	DataDescriptor write_data;
+	ScriptDescriptor write_data;
 	write_data.OpenFile(file_name.c_str(),WRITE);
 
 	//Write tiles
@@ -196,7 +196,7 @@ TileSet::TileSet(TileDatabase* db, const std::string& name)
 	_db=db;
 	_name=name;
 
-	DataDescriptor read_data;
+	ScriptDescriptor read_data;
 	read_data.OpenFile(("dat/tilesets/tileset_"+name+".lua").c_str(),READ);
 	read_data.OpenTable("tile_names");
 	for(int i=1; i<=read_data.GetTableSize(); i++)
@@ -241,7 +241,7 @@ void TileSet::Save()
 		return;
 	}
 
-	DataDescriptor write_data;
+	ScriptDescriptor write_data;
 	write_data.OpenFile(("dat/tilesets/tileset_"+_name+".lua").c_str(),WRITE);
 
 	write_data.BeginTable("tile_names");

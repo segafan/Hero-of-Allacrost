@@ -23,7 +23,7 @@ extern "C" {
 
 
 using namespace std;
-using namespace hoa_data;
+using namespace hoa_script;
 using namespace hoa_video;
 
 
@@ -130,7 +130,7 @@ namespace private_video
 
 //-----------------------------------------------------------------------------
 // Loads the effect, returns false on failure. This is a temporary function, until
-// the GameData code is finished
+// the GameScript code is finished
 //-----------------------------------------------------------------------------
 
 bool TEMP_LoadEffectHelper(const string &filename, lua_State *L, ParticleEffectDef *def)

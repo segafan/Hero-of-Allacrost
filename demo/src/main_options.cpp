@@ -147,7 +147,7 @@ bool EnableDebugging(string vars) {
 			hoa_audio::AUDIO_DEBUG                  = true;
 			hoa_battle::BATTLE_DEBUG                = true;
 			hoa_boot::BOOT_DEBUG                    = true;
-			hoa_data::DATA_DEBUG                    = true;
+			hoa_script::SCRIPT_DEBUG                    = true;
 			hoa_mode_manager::MODE_MANAGER_DEBUG    = true;
 			hoa_input::INPUT_DEBUG                  = true;
 			hoa_system::SYSTEM_DEBUG                = true;
@@ -170,7 +170,7 @@ bool EnableDebugging(string vars) {
 			hoa_boot::BOOT_DEBUG = true;
 		}
 		else if (args[i] == "data") {
-			hoa_data::DATA_DEBUG = true;
+			hoa_script::SCRIPT_DEBUG = true;
 		}
 		else if (args[i] == "mode_manager") {
 			hoa_mode_manager::MODE_MANAGER_DEBUG = true;

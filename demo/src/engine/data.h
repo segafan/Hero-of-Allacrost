@@ -8,8 +8,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 /*!****************************************************************************
- * \file    data.h
- * \author  Vladimir Mitrovic, snipe714@allacrost.org
+ * \file    scipt.h
+ * \author  Vladimir Mitrovic, snipe714@allacrost.org, Daniel Steuernol steu@allacrost.org
  * \brief   Header file for data and scripting engine.
  *
  * This code serves as the bridge between the game engine (written in C++) and
@@ -21,8 +21,8 @@
  * that you need.
  *****************************************************************************/
 
-#ifndef __DATA_HEADER__
-#define __DATA_HEADER__
+#ifndef __SCRIPT_HEADER__
+#define __SCRIPT_HEADER__
 
 #include <fstream>
 extern "C" {
@@ -30,35 +30,26 @@ extern "C" {
 	#include <lauxlib.h>
 	#include <lualib.h>
 }
+#include <luabind/luabind.hpp>
+#include <luabind/object.hpp>
 #include "utils.h"
 #include "defs.h"
 
 //! All calls to the data engine are wrapped in this namespace.
-namespace hoa_data {
+namespace hoa_script {
 
 //! The singleton pointer responsible for the interaction between the C++ engine and Lua scripts.
-extern GameData *DataManager;
-//! Determines whether the code in the hoa_data namespace should print debug statements or not.
-extern bool DATA_DEBUG;
+extern GameScript *ScriptManager;
+//! Determines whether the code in the hoa_script namespace should print debug statements or not.
+extern bool SCRIPT_DEBUG;
 
 //! An internal namespace to be used only by the data engine itself. Don't use this namespace anywhere else!
-namespace private_data {
+namespace private_script {
 
 //! For quick reference to the top of the Lua stack.
 const int32 STACK_TOP = -1;
 
-//! A list of Lua libraries to expose for use in scripts.
-static const luaL_reg LUALIBS[] = {
-	{"base", luaopen_base},
-	{"table", luaopen_table},
-	{"io", luaopen_io},
-	{"string", luaopen_string},
-	{"math", luaopen_math},
-	{"debug", luaopen_debug},
-	{NULL, NULL} 
-};
-
-} // namespace private_data
+} // namespace private_script
 
 //! \name Data Error Codes
 //@{
@@ -95,8 +86,8 @@ enum DATA_ACCESS_MODE
  *
  *  \note 1) Compiled Lua files exhibit faster performance than uncompile files.
  *****************************************************************************/
-class DataDescriptor {
-	friend class GameData;
+class ScriptDescriptor {
+	friend class GameScript;
 protected:
 	//! The name of the file that is being operating on.
 	std::string _filename;
@@ -117,14 +108,14 @@ protected:
 	//! Writes the pathname of all open tables (ie, table1[table2][table3])
 	void _WriteTablePath();
 public:
-	DataDescriptor () { _filename = ""; _file_open = false; _error_code = 0; }
-	~DataDescriptor () {}
+	ScriptDescriptor () { _filename = ""; _file_open = false; _error_code = 0; _lstack = NULL; }
+	~ScriptDescriptor () {}
 	
 	/*! \brief Used to check if any error occured in previous operations.
 	 *  \return A bit-mask value of all error conditions that have been detected.
 	 *
 	 *  It is good practice to call this function after chunks of function calls to the
-	 *  children of this class (ReadDataDescriptor, WriteDataDescriptor) to detect if
+	 *  children of this class (ReadScriptDescriptor, WriteScriptDescriptor) to detect if
 	 *  anything went wrong. The bit-mask values returned by this function are all listed
 	 *  in the constants called "Data Error Codes" at the top of this file. It is perfectly
 	 *  acceptable (although maybe pedantic) to call this function after every function call 
@@ -154,7 +145,7 @@ public:
 	//! \return False on failure.
 	//! \note This is the only function that uses explicit error checking. In other words, an error in
 	//! this function call will not change the return value of the GetError() function
-	bool OpenFile(const char* file_name, DATA_ACCESS_MODE acess_mode);
+	bool OpenFile(std::string file_name, DATA_ACCESS_MODE acess_mode);
 	//! OpenFile() with no argument assumes the correct filename is already loaded in the class object.
 	//! \return False on failure.
 	//! \note This is the only function that uses explicit error checking. In other words, an error in
@@ -170,16 +161,129 @@ public:
 	 *  \note The integer keys are only valid for variables stored in a table, not for global variables.
 	 */
 	//@{
-	bool ReadBool(const char *key);
-	bool ReadBool(const int32 key);
-	int32 ReadInt(const char *key);
-	int32 ReadInt(const int32 key);
-	float ReadFloat(const char *key);
-	float ReadFloat(const int32 key);
-	std::string ReadString(const char *key);
-	std::string ReadString(const int32 key);
-	hoa_utils::ustring ReadUString(const char *key, const char *lang);
-	hoa_utils::ustring ReadUString(const int32 key, const char *lang);
+	bool ReadBool(std::string key)
+	{ return Read<bool>(key.c_str(), false); }
+	bool ReadBool(const int32 key)
+	{ return Read<bool>(key, false); }
+	int32 ReadInt(std::string key)
+	{ return Read<int32>(key.c_str(), 0); }
+	int32 ReadInt(const int32 key)
+	{ return Read<int32>(key, 0); }
+	float ReadFloat(std::string key)
+	{ return Read<float>(key.c_str(), 0.0f); }
+	float ReadFloat(const int32 key)
+	{ return Read<float>(key, 0.0f); }
+	std::string ReadString(std::string key)
+	{ return Read<std::string>(key.c_str(), ""); }
+	std::string ReadString(const int32 key)
+	{ return Read<std::string>(key, ""); }
+	hoa_utils::ustring ReadUString(std::string key)
+	{ return Read<hoa_utils::ustring>(key.c_str(), hoa_utils::MakeUnicodeString("")); }
+	hoa_utils::ustring ReadUString(const int32 key)
+	{ return Read<hoa_utils::ustring>(key, hoa_utils::MakeUnicodeString("")); }
+
+	template <class T> T Read(int32 key, T default_value)
+	{
+		if (_access_mode != READ)
+			return false;
+
+		if (!_IsFileOpen())
+			return false;
+
+		if (_open_tables.size() == 0)
+		{
+			// there needs to be a table
+			if (SCRIPT_DEBUG)
+				std::cerr << "SCRIPTDESCRIPTOR: No open tables to read from." << std::endl;
+			_error_code = DATA_OPEN_TABLE_FAILURE;
+			return default_value;
+		}
+
+		luabind::object o(luabind::from_stack(_lstack, private_script::STACK_TOP));
+		if (luabind::type(o) != LUA_TTABLE)
+		{
+			// table not on top of stack
+			if (SCRIPT_DEBUG)
+				std::cerr << "SCRIPTDESCRIPTOR: Top of stack is not a table." << std::endl;
+			_error_code = DATA_BAD_GLOBAL;
+			return default_value;
+		}
+
+		try
+		{
+			return luabind::object_cast<T>(o[key]);
+		}
+		catch (...)
+		{
+			if (SCRIPT_DEBUG)
+				std::cerr << "SCRIPTDESCRIPTOR: Unable to cast value to correct type." << std::endl;
+			_error_code = DATA_INVALID_TABLE_KEY;
+		}
+
+		return default_value;
+	}
+
+	template <class T> T Read(const char *key, T default_value)
+	{
+		if (_access_mode != READ)
+			return false;
+
+		if (!_IsFileOpen())
+			return false;
+
+		// Global value
+		if (_open_tables.size() == 0)
+		{
+			lua_getglobal(_lstack, key);
+			luabind::object o(luabind::from_stack(_lstack, private_script::STACK_TOP));
+
+			if (!o)
+			{
+				if (SCRIPT_DEBUG)
+					std::cerr << "SCRIPTDESCRIPTOR: Unable to access global " << key << std::endl;
+				_error_code = DATA_BAD_GLOBAL;
+				return default_value;
+			}
+
+			try
+			{
+				T ret_val = luabind::object_cast<T>(o);
+				lua_pop(_lstack, 1);
+				return ret_val;
+			}
+			catch (...)
+			{
+				if (SCRIPT_DEBUG)
+					std::cerr << "SCRIPTDESCRIPTOR: Unable to cast value to correct type." << std::endl;
+				_error_code = DATA_BAD_GLOBAL;
+			}
+		}
+		// there is an open table, get the key from the table
+		else
+		{
+			luabind::object o(luabind::from_stack(_lstack, private_script::STACK_TOP));
+			if (luabind::type(o) != LUA_TTABLE)
+			{
+				// table not on top of stack
+				if (SCRIPT_DEBUG)
+					std::cerr << "SCRIPTDESCRIPTOR: Top of stack is not a table." << std::endl;
+				_error_code = DATA_BAD_GLOBAL;
+				return default_value;
+			}
+
+			try
+			{
+				return luabind::object_cast<T>(o[key]);
+			}
+			catch (...)
+			{
+				if (SCRIPT_DEBUG)
+					std::cerr << "SCRIPTDESCRIPTOR: Unable to cast value to correct type." << std::endl;
+				_error_code = DATA_INVALID_TABLE_KEY;
+			}
+		}
+		return default_value;
+	}
 	//@}
 	
 	/*! \name Lua Table Access Functions
@@ -196,10 +300,10 @@ public:
 	 *  table that is in the global space.
 	 */
 	//@{
-	void OpenTable(const char *key);
+	void OpenTable(std::string key);
 	void OpenTable(const int32 key);
 	void CloseTable();
-	uint32 GetTableSize(const char *key);
+	uint32 GetTableSize(std::string key);
 	uint32 GetTableSize(const int32 key);
 	//! The function call with no arguments attempts to get the size of the most recently opened table.
 	uint32 GetTableSize();
@@ -218,12 +322,68 @@ public:
 	 *  They can not be used to access tables in the global space.
 	 */
 	//@{
-	void FillIntVector(const char *key, std::vector<int32> &vect);
-	void FillFloatVector(const char *key, std::vector<float> &vect);	
-	void FillStringVector(const char *key, std::vector<std::string> &vect);
-	void FillIntVector(const int32 key, std::vector<int32> &vect);
-	void FillFloatVector(const int32 key, std::vector<float> &vect);
-	void FillStringVector(const int32 key, std::vector<std::string> &vect);
+	void FillIntVector(std::string key, std::vector<int32> &vect)
+	{ FillVector<std::string, int32>(key, vect); }
+	void FillFloatVector(std::string key, std::vector<float> &vect)
+	{ FillVector<std::string, float>(key, vect); }
+	void FillStringVector(std::string key, std::vector<std::string> &vect)
+	{ FillVector<std::string, std::string>(key, vect); }
+	void FillIntVector(const int32 key, std::vector<int32> &vect)
+	{ FillVector<int32>(key, vect); }
+	void FillFloatVector(const int32 key, std::vector<float> &vect)
+	{ FillVector<float>(key, vect); }
+	void FillStringVector(const int32 key, std::vector<std::string> &vect)
+	{ FillVector<std::string>(key, vect); }
+
+	template <class T> void FillVector(int32 key, std::vector<T> &vect)
+	{
+		// need at least one open table
+		if (_open_tables.size() == 0)
+		{
+			if (SCRIPT_DEBUG)
+				std::cerr << "SCRIPTDESCRIPTOR: Need at least one table open to use a numerical key." << std::endl;
+			_error_code |= DATA_BAD_GLOBAL;
+			return;
+		}
+
+		FillVector<int32, T>(key, vect);
+	}
+
+	template <class T, class U> void FillVector(T key, std::vector<U> &vect)
+	{
+		if (_access_mode != READ)
+			return;
+
+		if (!_IsFileOpen())
+			return;
+
+		OpenTable(key);
+		// Grab the table off the stack
+		luabind::object o(luabind::from_stack(_lstack, private_script::STACK_TOP));
+		if (luabind::type(o) != LUA_TTABLE)
+		{
+			if (SCRIPT_DEBUG)
+				std::cerr << "SCRIPTDESCRIPTOR: No table on top of stack, unable to continue." << std::endl;
+			_error_code = DATA_INVALID_TABLE_KEY;
+			return;
+		}
+		// We have a table loop through all items
+		for (luabind::iterator it(o), end; it != end; it++)
+		{
+			try
+			{
+				vect.push_back(luabind::object_cast<U>((*it)));
+			}
+			catch (...)
+			{
+				if (SCRIPT_DEBUG)
+					std::cerr << "SCRIPTDESCRIPTOR: Unable to cast value to correct type." << std::endl;
+				_error_code = DATA_INVALID_TABLE_KEY;
+			}
+		}
+
+		CloseTable();
+	}
 	//@}
 
 	void DEBUG_PrintLuaStack();
@@ -300,7 +460,7 @@ public:
 	void WriteStringVector(const char *key, std::vector<std::string> &vect);
 	//@}
 
-}; // class DataDescriptor
+}; // class ScriptDescriptor
 
 /*!****************************************************************************
  *  \brief Singleton class that manages all open data files.
@@ -312,23 +472,32 @@ public:
  *  \note 2) In the future, this class will manage all the open data files and
  *  make sure that no file is opened more than once at the same time.
  *****************************************************************************/
-class GameData {
-	friend class ReadDataDescriptor;
-	friend class WriteDataDescriptor;
+class GameScript {
+	friend class ScriptDescriptor;
 private:
-	SINGLETON_DECLARE(GameData);
+	SINGLETON_DECLARE(GameScript);
 	
 	//! Maintains a list of all data files currently open.
-	std::map<std::string, DataDescriptor*> _open_files;
+	std::map<std::string, ScriptDescriptor*> _open_files;
+	//! Global lua state
+	lua_State *_global_state;
 public:
-	SINGLETON_METHODS(GameData);
+	SINGLETON_METHODS(GameScript);
 	
-	//! Checks if a file is already in use by a DataDescriptor object.
-	//! \param filename The name of the file to check.
-	//! \return True if the filename is registered to a DataDescriptor object who has the file opeend.
-	bool CheckOpenFile(std::string filename) { return false; }
-}; // class GameData
+	//! Gets the global lua state
+	lua_State *GetGlobalState()
+	{ return _global_state; }
 
-} // namespace hoa_data
+	//! Adds an open file to the list of open files
+	void AddOpenFile(const ScriptDescriptor &sd);
+	//! Removes an open file from the list of open files
+	void RemoveOpenFile(const ScriptDescriptor &sd);
+	//! Checks if a file is already in use by a ScriptDescriptor object.
+	//! \param filename The name of the file to check.
+	//! \return True if the filename is registered to a ScriptDescriptor object who has the file opeend.
+	bool CheckOpenFile(std::string filename) { return false; }
+}; // class GameScript
+
+} // namespace hoa_script
 
 #endif

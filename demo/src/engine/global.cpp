@@ -31,7 +31,7 @@ using namespace hoa_audio;
 using namespace hoa_utils;
 using namespace hoa_map;
 using namespace hoa_battle;
-using namespace hoa_data;
+using namespace hoa_script;
 
 namespace hoa_global {
 
@@ -80,7 +80,7 @@ GlobalWeapon::GlobalWeapon(uint32 usable, GameItemID id, uint32 count) :
         
 	_damage_amount = new GlobalStatusAfflictions();
         
-	DataDescriptor read_data;
+	ScriptDescriptor read_data;
 	string fileName = "dat/objects/" + GlobalManager->GetItemName(id) + ".lua";
 	if (!read_data.OpenFile(fileName.c_str(), READ)) {
 		cout << "GLOBAL ERROR: failed to load weapon file: " << GlobalManager->GetItemName(id) << endl;
@@ -113,7 +113,7 @@ GlobalArmor::GlobalArmor(uint8 type, uint32 usable, GameItemID id, uint32 count)
 		float x, float y, uint32 volt, uint32 earth, uint32 water, uint32 fire, 
         uint32 piercing, uint32 slashing, uint32 bludgeoning
 	*/
-    DataDescriptor read_data;
+    ScriptDescriptor read_data;
     string fileName = "dat/objects/" + GlobalManager->GetItemName(id) + ".lua";
 	if (!read_data.OpenFile(fileName.c_str(), READ)) {
 		cout << "GLOBAL ERROR: failed to load weapon file: " << GlobalManager->GetItemName(id) << endl;
@@ -149,7 +149,7 @@ GlobalArmor::~GlobalArmor()
 GlobalSkill::GlobalSkill(string script_name) {
 	_script_name = script_name;
 	
-	DataDescriptor read_data;
+	ScriptDescriptor read_data;
 	string fileName = "dat/skills/" + _script_name + ".lua";
 
 	if (!read_data.OpenFile(fileName.c_str(), READ)) {
@@ -247,7 +247,7 @@ GlobalAttackPoint::~GlobalAttackPoint() {
 GlobalEnemy::GlobalEnemy(string file_name) :
 	_file_name(file_name)
 {
-	DataDescriptor read_data;
+	ScriptDescriptor read_data;
 	string fileName = "dat/enemies/" + _file_name + ".lua";
 	if (!read_data.OpenFile(fileName.c_str(), READ)) {
 		cerr << "GLOBAL ERROR: failed to load enemy file: " << _file_name << endl;

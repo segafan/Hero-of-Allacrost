@@ -18,11 +18,15 @@
 
 using namespace hoa_editor;
 
+hoa_script::GameScript *ScriptManager = NULL;
+
 int main(int argc, char **argv)
 {
 	QApplication app(argc, argv);
 	Editor* editor = new Editor();
 	editor->setCaption("Hero of Allacrost Level Editor");
+	ScriptManager = hoa_script::GameScript::SingletonCreate();
+	ScriptManager->SingletonInitialize();
 	app.setMainWidget(editor);
 	editor->show();
 	return app.exec();

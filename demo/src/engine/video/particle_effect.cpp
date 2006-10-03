@@ -13,7 +13,7 @@
 #include "data.h"
 
 using namespace std;
-using namespace hoa_data;
+using namespace hoa_script;
 using namespace hoa_video::private_video;
 
 namespace hoa_video

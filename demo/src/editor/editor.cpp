@@ -15,7 +15,7 @@
 
 #include "editor.h"
 
-using namespace hoa_data;
+using namespace hoa_script;
 using namespace hoa_utils;
 using namespace hoa_editor;
 using namespace hoa_video;

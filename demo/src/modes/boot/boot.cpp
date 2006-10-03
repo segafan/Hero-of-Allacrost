@@ -39,7 +39,7 @@ using namespace hoa_mode_manager;
 using namespace hoa_input;
 using namespace hoa_system;
 using namespace hoa_global;
-using namespace hoa_data;
+using namespace hoa_script;
 using namespace hoa_map;
 using namespace hoa_battle; // tmp
 
@@ -64,7 +64,7 @@ BootMode::BootMode() :
 	if (BOOT_DEBUG) cout << "BOOT: BootMode constructor invoked." << endl;
 	mode_type = MODE_MANAGER_BOOT_MODE;
 	
-	DataDescriptor read_data;
+	ScriptDescriptor read_data;
 	if (!read_data.OpenFile("dat/config/boot.lua", READ)) {
 		cout << "BOOT ERROR: failed to load data file" << endl;
 	}
