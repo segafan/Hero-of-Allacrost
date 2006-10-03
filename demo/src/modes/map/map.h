@@ -32,7 +32,7 @@
 
 #include "utils.h"
 #include "defs.h"
-#include "data.h"
+#include "script.h"
 #include "mode_manager.h"
 #include "video.h"
 #include "gui.h"

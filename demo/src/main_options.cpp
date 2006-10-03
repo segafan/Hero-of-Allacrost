@@ -17,7 +17,7 @@
 #include "defs.h"
 #include "audio.h"
 #include "video.h"
-#include "data.h"
+#include "script.h"
 #include "mode_manager.h"
 #include "input.h"
 #include "system.h"

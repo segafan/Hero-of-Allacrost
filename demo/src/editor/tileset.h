@@ -19,7 +19,7 @@
 
 #include "utils.h"
 #include "defs.h"
-#include "data.h"
+#include "script.h"
 #include "tile.h"
 
 #include <qmessagebox.h>

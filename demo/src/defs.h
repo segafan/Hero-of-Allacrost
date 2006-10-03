@@ -62,7 +62,7 @@ namespace hoa_video {
 	class OptionBox;
 }
 
-// Data declarations, see data.h/cpp
+// Data declarations, see script.h/cpp
 namespace hoa_script {
 	extern bool SCRIPT_DEBUG;
 	class GameScript;

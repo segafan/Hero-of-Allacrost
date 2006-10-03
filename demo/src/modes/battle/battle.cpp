@@ -24,7 +24,7 @@
 #include "mode_manager.h"
 #include "system.h"
 #include "global.h"
-#include "data.h"
+#include "script.h"
 
 #include "battle.h"
 #include "battle_actors.h"

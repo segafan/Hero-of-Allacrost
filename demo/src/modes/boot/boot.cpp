@@ -22,7 +22,7 @@
 #include "boot_credits.h"
 #include "audio.h"
 #include "video.h"
-#include "data.h"
+#include "script.h"
 #include "global.h"
 #include "mode_manager.h"
 #include "input.h"

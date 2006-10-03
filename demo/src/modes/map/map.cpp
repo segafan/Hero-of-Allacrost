@@ -21,7 +21,7 @@
 #include "video.h"
 #include "gui.h"
 #include "global.h"
-#include "data.h"
+#include "script.h"
 #include "input.h"
 #include "system.h"
 #include "battle.h"
