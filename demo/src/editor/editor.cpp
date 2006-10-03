@@ -1007,7 +1007,6 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, const QString& name, TileDatabas
 	: QTabDialog(parent, (const char*) name)
 {
 	_db=db;
-	_selected_set=NULL;
 	_set_modified=false;
 
 	setCaption("Tile Database...");
@@ -1155,8 +1154,6 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, const QString& name, TileDatabas
 
 DatabaseDialog::~DatabaseDialog()
 {
-	if(_selected_set!=NULL)
-		delete _selected_set;
 } // DatabaseDialog destructor
 
 
@@ -1165,7 +1162,7 @@ DatabaseDialog::~DatabaseDialog()
 
 void DatabaseDialog::_CreateTileSet()
 {
-	if(_selected_set==NULL)
+	if(_selected_set)
 	{
 		TileSet* new_set=new TileSet(_db);
 		new_set->SetName(_tileset_ledit->text());
@@ -1237,7 +1234,6 @@ void DatabaseDialog::_TilesetsTabPopulateTileset(const QString& name)
 	} // no populating necessary otherwise
 	else
 	{
-		_selected_set=NULL;
 		_tileset_ledit->setText("");
 		if(name=="New Tileset")
 		{
@@ -1323,14 +1319,13 @@ void DatabaseDialog::_PopulateTilesetHelper(QIconView *tileset, const QString& n
 void DatabaseDialog::_SwitchTileset(TileSet* new_set)
 {
 	// If the tileset has been modified, ask if it should be saved
-	if(_set_modified && _selected_set!=NULL)
+	if(_set_modified && _selected_set)
 	{
 		int ret=QMessageBox::question(this,"Tileset has been changed","Do you want to save your changes?",QMessageBox::Yes,QMessageBox::No);
 		if(ret == QMessageBox::Yes)
 			_selected_set->Save();
-		delete _selected_set;
 	}
 
-	_selected_set=new_set;
+	_selected_set.reset(new_set);
 	_set_modified=false;
 }

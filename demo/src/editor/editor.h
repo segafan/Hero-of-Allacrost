@@ -46,6 +46,7 @@
 #include <qvbuttongroup.h>
 
 #include <map>
+#include <boost/scoped_ptr.hpp>
 
 //! All calls to the editor are wrapped in this namespace.
 namespace hoa_editor
@@ -382,7 +383,7 @@ class DatabaseDialog: public QTabDialog
 		QComboBox* _tilesets_cbox;
 
 		TileDatabase* _db;
-		TileSet* _selected_set;
+		boost::scoped_ptr<TileSet> _selected_set;
 		std::string _selected_item;
 		bool _set_modified;
 }; // class DatabaseDialog
