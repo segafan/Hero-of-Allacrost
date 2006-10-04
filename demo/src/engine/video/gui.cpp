@@ -64,6 +64,7 @@ GUI::~GUI()
 //-----------------------------------------------------------------------------
 bool GUI::DrawFPS(int32 frame_time)
 {
+	video_manager->SetTextColor(Color::white);
 	video_manager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_X_NOFLIP, VIDEO_Y_NOFLIP, VIDEO_BLEND, 0);
 	
 	// calculate the FPS for current frame	

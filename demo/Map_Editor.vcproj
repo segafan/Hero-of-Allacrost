@@ -55,7 +55,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="SDL.lib SDL_TTF.lib SDLMain.lib qt-mt3.lib lua+lib.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib"
+				AdditionalDependencies="SDL.lib SDL_TTF.lib SDLMain.lib qt-mt3.lib LuaBind.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 			/>
@@ -128,7 +128,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="SDL.lib SDL_TTF.lib SDLMain.lib qt-mt3.lib lua+lib.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib"
+				AdditionalDependencies="SDL.lib SDL_TTF.lib SDLMain.lib qt-mt3.lib LuaBind.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib"
 				IgnoreAllDefaultLibraries="false"
 				IgnoreDefaultLibraryNames=""
 				SubSystem="2"
@@ -171,10 +171,6 @@
 			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
-			<File
-				RelativePath=".\src\engine\data.cpp"
-				>
-			</File>
 			<File
 				RelativePath=".\src\engine\video\draw.cpp"
 				>
@@ -240,6 +236,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\engine\script.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\engine\video\shake.cpp"
 				>
 			</File>
@@ -287,10 +287,6 @@
 			</File>
 			<File
 				RelativePath=".\src\engine\video\coord_sys.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\engine\data.h"
 				>
 			</File>
 			<File
@@ -351,6 +347,10 @@
 			</File>
 			<File
 				RelativePath=".\src\engine\video\screen_rect.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\script.h"
 				>
 			</File>
 			<File
