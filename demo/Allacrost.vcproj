@@ -62,7 +62,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/NODEFAULTLIB:LIBCMT&#x0D;&#x0A;/NODEFAULTLIB:msvcrt.lib"
-				AdditionalDependencies="SDL.lib SDL_TTF.lib SDL_mixer.lib SDLMain.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib Lua+lib.lib"
+				AdditionalDependencies="SDL.lib SDL_TTF.lib SDL_mixer.lib SDLMain.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib LuaBind.lib"
 				LinkIncremental="0"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -148,7 +148,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/NODEFAULTLIB:LIBCMT"
-				AdditionalDependencies="SDL.lib SDL_TTF.lib SDL_mixer.lib SDLMain.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib Lua+lib.lib"
+				AdditionalDependencies="SDL.lib SDL_TTF.lib SDL_mixer.lib SDLMain.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib LuaBind.lib"
 				LinkIncremental="0"
 				GenerateDebugInformation="false"
 				SubSystem="2"
@@ -233,10 +233,6 @@
 			</File>
 			<File
 				RelativePath=".\src\engine\video\coord_sys.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\engine\data.h"
 				>
 			</File>
 			<File
@@ -360,6 +356,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\engine\script.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\engine\video\shake.h"
 				>
 			</File>
@@ -441,10 +441,6 @@
 			</File>
 			<File
 				RelativePath=".\src\modes\boot\boot_menu.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\engine\data.cpp"
 				>
 			</File>
 			<File
@@ -545,6 +541,10 @@
 			</File>
 			<File
 				RelativePath=".\src\modes\scene.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\script.cpp"
 				>
 			</File>
 			<File
