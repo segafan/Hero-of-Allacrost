@@ -78,6 +78,9 @@ AC_CHECK_LIB([lualib50], [luaopen_table], [], \
 	[AC_CHECK_LIB([lualib], [luaopen_table], [], \
 		[echo "Could not find the lualib library. Check that it is properly installed on your system"
 		 exit -1])])
+AC_CHECK_LIB([luabind], [open], [], \
+	[echo "Could not find the luabind library. Check that it is properly installed on your system"
+	 exit -1])
 AC_CHECK_LIB([m], [log], [], \
 	[echo "Could not find the math library. Check that it is properly installed on your system"
 	 exit -1])
