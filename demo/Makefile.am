@@ -69,9 +69,8 @@ engine_SOURCES = \
 	$(ENGINE_DIR)/input.h \
 	$(ENGINE_DIR)/mode_manager.cpp \
 	$(ENGINE_DIR)/mode_manager.h \
-	$(ENGINE_DIR)/data.cpp \
-	$(ENGINE_DIR)/data.h \
-	$(ENGINE_DIR)/data_bind.h \
+	$(ENGINE_DIR)/script.cpp \
+	$(ENGINE_DIR)/script.h \
 	$(ENGINE_DIR)/global.cpp \
 	$(ENGINE_DIR)/global.h \
 	$(audio_SOURCES) \
