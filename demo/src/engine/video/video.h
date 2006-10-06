@@ -48,8 +48,9 @@
 
 // Image loader includes
 #include <png.h>
+extern "C" {
 #include <jpeglib.h>
-
+}
 
 #include "context.h"
 #include "color.h"

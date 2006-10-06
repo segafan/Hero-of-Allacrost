@@ -2,7 +2,7 @@
 
 -- Whether or not we have random encounters, and if so the rate of encounter
 random_encounters = true
-encounter_rate = 12
+encounter_rate = 20
 
 -- The music files used as background music on this map.
 music_filenames = {}
