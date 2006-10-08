@@ -6,6 +6,7 @@ INCLUDES = \
 	-I$(top_srcdir)/src/engine \
 	-I$(top_srcdir)/src/engine/audio \
 	-I$(top_srcdir)/src/engine/video \
+	-I$(top_srcdir)/src/global \
 	-I$(top_srcdir)/src/modes \
 	-I$(top_srcdir)/src/modes/battle \
 	-I$(top_srcdir)/src/modes/boot \
@@ -71,10 +72,19 @@ engine_SOURCES = \
 	$(ENGINE_DIR)/mode_manager.h \
 	$(ENGINE_DIR)/script.cpp \
 	$(ENGINE_DIR)/script.h \
-	$(ENGINE_DIR)/global.cpp \
-	$(ENGINE_DIR)/global.h \
 	$(audio_SOURCES) \
 	$(video_SOURCES)
+
+GLOBAL_DIR = src/global
+global_SOURCES = \
+	$(GLOBAL_DIR)/global.cpp \
+	$(GLOBAL_DIR)/global.h \
+	$(GLOBAL_DIR)/global_actors.cpp \
+	$(GLOBAL_DIR)/global_actors.h \
+	$(GLOBAL_DIR)/global_objects.cpp \
+	$(GLOBAL_DIR)/global_objects.h \
+	$(GLOBAL_DIR)/global_skills.cpp \
+	$(GLOBAL_DIR)/global_skills.h
 
 MODES_DIR = src/modes
 modes_SOURCES = \
@@ -127,8 +137,8 @@ allacrost_editor_SOURCES = \
 	$(EDITOR_DIR)/tileset.cpp \
 	$(EDITOR_DIR)/tileset.h \
 	$(video_SOURCES) \
-	$(ENGINE_DIR)/data.cpp \
-	$(ENGINE_DIR)/data.h \
+	$(ENGINE_DIR)/script.cpp \
+	$(ENGINE_DIR)/script.h \
 	src/defs.h \
 	src/utils.cpp \
 	src/utils.h
@@ -148,6 +158,7 @@ allacrost_SOURCES = \
 	src/utils.cpp \
 	src/utils.h \
 	$(engine_SOURCES) \
+	$(global_SOURCES) \
 	$(modes_SOURCES)
 
 dist-hook:

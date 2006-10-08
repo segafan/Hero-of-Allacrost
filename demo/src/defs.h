@@ -91,7 +91,7 @@ namespace hoa_system {
 	class GameSystem;
 }
 
-// Global declarations, see global.h/cpp
+// Global declarations, see src/global/*
 namespace hoa_global {
 	extern bool GLOBAL_DEBUG;
 	class GameGlobal;
@@ -100,11 +100,16 @@ namespace hoa_global {
 	class GlobalItem;
 	class GlobalWeapon;
 	class GlobalArmor;
+
+	class GlobalStatusEffect;
+	class GlobalElementalEffect;
 	class GlobalSkill;
-	class GlobalStatusAfflictions;
+
 	class GlobalAttackPoint;
+	class GlobalActor;
 	class GlobalEnemy;
 	class GlobalCharacter;
+	class GlobalCharacterParty;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
