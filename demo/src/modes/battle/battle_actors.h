@@ -244,7 +244,8 @@ public:
 	void DrawStatus();
 
 	void SetAnimation(std::string animation)
-		{ _current_animation = _wrapped_character->GetAnimation(animation); }
+		{ _current_animation = _wrapped_character->RetrieveBattleAnimation(animation); }
+//		{ _current_animation = _wrapped_character->GetAnimation(animation); }
 
 	//! \name CharacterActor class member access functions
 	//@{

@@ -22,8 +22,7 @@
 
 #include "defs.h"
 #include "utils.h"
-
-
+#include "image.h"
 
 namespace hoa_global {
 

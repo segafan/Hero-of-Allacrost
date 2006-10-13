@@ -113,7 +113,7 @@ public:
 		{ return _icon_image; }
 
 	void SetType(uint8 type);
-	void SetIntensity(uint8 intensity_level);
+	void SetIntensityLevel(uint8 intensity_level);
 	//@}
 
 	/** \brief Increments the status effect intensity by a positive amount
@@ -326,6 +326,9 @@ private:
 	*** Zero is a valid value for this member and simply means that no skill points are required
 	*** to use the skill. These are called "innate skills".
 	**/
+	uint8 _sp_usage;
+	/** \brief Don't know for sure. My best guess would be the amount of skill points lost 
+	 */
 	uint32 _skill_points_required;
 	/** \brief The amount of time that must expire before a skill can be used from when it is selected
 	*** When a character or enemy is determined to use a skill, this member tells how many milliseconds must

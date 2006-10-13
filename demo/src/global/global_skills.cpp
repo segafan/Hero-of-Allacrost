@@ -17,7 +17,7 @@
 
 #include "utils.h"
 #include "video.h"
-#include "data.h"
+#include "script.h"
 
 #include "global.h"
 
@@ -25,7 +25,7 @@ using namespace std;
 
 using namespace hoa_utils;
 using namespace hoa_video;
-using namespace hoa_data;
+using namespace hoa_script;
 
 
 
@@ -74,7 +74,9 @@ void GlobalStatusEffect::SetIntensityLevel(uint8 intensity) {
 	if (intensity <= GLOBAL_INTENSITY_EXTREME) {
 		if (_intensity_level != intensity) {
 			_intensity_level = intensity;
-			_UpdateIconImage();
+			// TODO Raging_Hog: Whatever his function should do,
+			// it should be first declared in global_skills.h
+			//_UpdateIconImage();
 		}
 	}
 	
@@ -83,7 +85,7 @@ void GlobalStatusEffect::SetIntensityLevel(uint8 intensity) {
 		if (GLOBAL_DEBUG) fprintf(stderr, "WARNING: Tried to set status effect intensity level above maximum\n");
 		if (_intensity_level != GLOBAL_INTENSITY_EXTREME) {
 			_intensity_level = GLOBAL_INTENSITY_EXTREME;
-			_UpdateIconImage();
+			//_UpdateIconImage();
 		}
 	}
 }
@@ -101,10 +103,11 @@ bool GlobalStatusEffect::IncrementIntensity(uint8 amount) {
 		return false;
 	}
 
+// Raging_Hog: changed these _intensity -variables to _intesity_level -variables
 	if (amount < 10) {
-		_intensity += amount;
-		if (_intensity > GLOBAL_INTENSITY_EXTREME) {
-			_intensity = GLOBAL_INTENSITY_EXTREME;
+		_intensity_level += amount;
+		if (_intensity_level > GLOBAL_INTENSITY_EXTREME) {
+			_intensity_level = GLOBAL_INTENSITY_EXTREME;
 			_CreateIconImage();
 			return false;
 		}
@@ -153,17 +156,19 @@ bool GlobalStatusEffect::DecrementIntensity(uint8 amount) {
 } // bool GlobalStatusEffect::DecrementIntensity(uint8 amount)
 
 
-
+// ?? This is defined about 100 rows from here with more meat
+/*
 static bool CheckValidType(uint8 type) {
 	switch (type) {
 		case GLOBAL_STATUS_POISON:
 		case GLOBAL_STATUS_SLOW:
 			return true;
 		case GLOBAL_STATUS_NONE:
-		case default;
+		default:
 			return false;
 	}
 } // static bool CheckValidType(uint8 type)
+*/
 
 
 
@@ -227,9 +232,9 @@ GlobalElementalEffect::GlobalElementalEffect() :
 
 GlobalElementalEffect::GlobalElementalEffect(uint8 type, uint32 strength) :
 	_type(type),
-	_strength(strength),
+	_strength(strength)
 {
-	if (_CheckValidType(_type) == false) {
+	if (CheckValidType(_type) == false) {
 		fprintf(stderr, "ERROR: Invalid type in GlobalElementalEffect constructor\n");
 		_type = GLOBAL_ELEMENTAL_NONE;
 	}
@@ -237,9 +242,10 @@ GlobalElementalEffect::GlobalElementalEffect(uint8 type, uint32 strength) :
 }
 
 
-
+/*
 GlobalElementalEffect::~GlobalElementalEffect()
 {}
+*/
 
 void GlobalElementalEffect::SetType(uint8 type) {
 	if (_type == type) {
@@ -251,9 +257,10 @@ void GlobalElementalEffect::SetType(uint8 type) {
 
 }
 
-void GlobalElementalEffect::IncrementStrength(uint32 amount)
+// These are already defined
+//void GlobalElementalEffect::IncrementStrength(uint32 amount)
 
-void GlobalElementalEffect::DecrementStrength(uint32 amount)
+//void GlobalElementalEffect::DecrementStrength(uint32 amount)
 
 static bool CheckValidType(uint8 type) {
 	switch (type) {
@@ -267,7 +274,7 @@ static bool CheckValidType(uint8 type) {
 		case GLOBAL_ELEMENTAL_PIERCING:
 			return true;
 		case GLOBAL_ELEMENTAL_NONE:
-		case default;
+		default:
 			return false;
 	}
 } // static bool CheckValidType(uint8 type)
@@ -280,8 +287,9 @@ void GlobalElementalEffect::_SetIconImage() {
 		return;
 	}
 
+	// GetElementalIcon commented out. Not defined in global_skills.h
 	// The type is not checked before this call, but it is checked by the following GameGlobal function
-	_icon_image = GlobalManager->GetElementalIcon(_type);
+	//_icon_image = GlobalManager->GetElementalIcon(_type);
 }
 
 // ****************************************************************************
@@ -290,13 +298,13 @@ void GlobalElementalEffect::_SetIconImage() {
 
 GlobalSkill::GlobalSkill() {
 	// TEMP: Only one type of skill is defined: Sword Slash
-	_name = MakeUnicodeString("Sword Slash");
+	_skill_name = MakeUnicodeString("Sword Slash");
 	_skill_type = GLOBAL_SKILL_ATTACK;
 	_sp_usage = 10;
 	_warmup_time = 0;
 	_cooldown_time = 0;
 	_level_required = 1;
-	_num_targets = 1;
+	_number_targets = 1;
 }
 
 
@@ -309,7 +317,6 @@ GlobalSkill::GlobalSkill(string script_name) {
 // 	string fileName = "dat/skills/" + _script_name + ".lua";
 // 
 	}
-}
 
 
 

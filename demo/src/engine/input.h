@@ -309,6 +309,7 @@ public:
 	**/
 	bool AnyKeyRelease();
 
+	void TogglePause();
 	/** \brief Examines the SDL queue for all user input events and calls appropriate sub-functions.
 	***
 	*** This function handles all the meta keyboard events (events when a modifier key like Ctrl or
