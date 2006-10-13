@@ -187,6 +187,9 @@ public:
 	std::vector<std::pair<float, GlobalStatusEffect*> >& GetStatusDefenseBonuses()
 		{ return _status_defense_bonuses; }
 
+	hoa_utils::ustring GetName() const
+		{ return _name; }
+
 	void SetHitPoints(uint32 hp)
 		{ if (hp > _max_hit_points) _hit_points = _max_hit_points; else _hit_points = hp; }
 	void SetSkillPoints(uint32 sp)
@@ -428,6 +431,18 @@ protected:
 	uint32 _sprite_height;
 	//@}
 	
+	// TODO CHECK Raging_Hog: These variables demanded by compiler. No clue what they do.
+	// Please check especially the data type!
+	//std::string _sprite_animations[];
+	
+	uint32 _movement_speed;
+	uint32 _base_hit_points;
+	uint32 _base_skill_points;
+	uint32 _base_experience_points;
+	uint32 _base_strength;
+	uint32 _base_intelligence;
+	uint32 _base_agility;
+
 	/** \brief The set of skills that the enemy may choose from to take actions.
 	*** Unlike with characters, there is no need to discern between the various types of skills for enemies.
 	*** An enemy must have <b>at least</b> one skill in order to do anything useful in battle.
@@ -459,6 +474,16 @@ protected:
 	float _growth_agility;
 	float _growth_evade;
 	float _growth_experience_points;
+
+	// TODO CHECK Raging_Hog: Added these. Not sure if they're the same as _growth_max_hit_points or _growth_max_skill_points.
+	//
+	float _growth_hit_points;
+	float _growth_skill_points;
+
+	float _growth_intelligence;
+
+	// TODO CHECK Raging_Hog: Should this be _growth_resistance?
+	uint32 _resistance;
 	//@}
 }; // class GlobalEnemy : public GlobalActor
 
@@ -508,6 +533,14 @@ public:
 	GlobalArmor* GetEquippedLegArmor()
 		{ return _armor_equipped[3]; }
 
+	// Raging_Hog
+	uint32 GetHP(){ return _hp; };
+	uint32 GetMaxHP(){ return _max_hp; };
+	uint32 GetSP(){ return _sp; };
+	uint32 GetMaxSP(){ return _max_sp; };
+	void SetHP( uint32 hp ) { _hp = hp; } 
+	void SetSP( uint32 sp ) { _hp = sp; } 
+
 // 	std::vector<GlobalSkill*>& GetAttackSkills() const
 // 		{ return _attack_skills; }
 // 	std::vector<GlobalSkill*>& GetDefenseSkills() const
@@ -541,6 +574,13 @@ protected:
 	*** Refer to the Game Character Type constants at the top of this file
 	**/
 	uint32 _id;
+	
+
+	// Raging_Hog
+	uint32 _hp;
+	uint32 _max_hp;
+	uint32 _sp;
+	uint32 _max_sp;
 
 	GlobalWeapon* _equipped_weapon;
 	GlobalArmor* _equipped_armor[4];

@@ -17,15 +17,19 @@
 
 #include "utils.h"
 #include "video.h"
-#include "data.h"
+#include "script.h"
 
 #include "global.h"
+
+// TODO CHECK Raging_Hog: I've got no idea where to put this enumeration or 
+// how. Please clean up after me my mother isn't here to do it.
+enum NO_IDEA {GLOBAL_HP_RECOVERY_ITEM = 119};
 
 using namespace std;
 
 using namespace hoa_utils;
 using namespace hoa_video;
-using namespace hoa_data;
+using namespace hoa_script;
 
 namespace hoa_global {
 
@@ -42,7 +46,7 @@ GlobalObject::GlobalObject(uint32 id, uint32 count)
 		_usable_by = 0;
 		_count = 0;
 		_name = 0;
-		_icon_path = 0;
+		_icon_path = "";
 		return;
 	}
 	

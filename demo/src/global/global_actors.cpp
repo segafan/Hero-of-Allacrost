@@ -17,6 +17,7 @@
 
 #include "utils.h"
 #include "video.h"
+#include "script.h"
 
 #include "global.h"
 
@@ -24,6 +25,7 @@ using namespace std;
 
 using namespace hoa_utils;
 using namespace hoa_video;
+using namespace hoa_script;
 
 namespace hoa_global {
 
@@ -50,7 +52,7 @@ GlobalAttackPoint::GlobalAttackPoint(ustring name, uint16 x, uint16 y) :
 
 GlobalAttackPoint::~GlobalAttackPoint() {
 	for (uint32 i = 0; i < _status_weaknesses.size(); i++) {
-		delete _status_weaknesses[i];
+		//delete _status_weaknesses[i];
 	}
 	_status_weaknesses.clear();
 }
@@ -60,15 +62,16 @@ GlobalAttackPoint::~GlobalAttackPoint() {
 // ****************************************************************************
 // ***** GlobalActor
 // ****************************************************************************
-
 GlobalWeapon* GlobalActor::EquipWeapon(GlobalWeapon* weapon) {
 	// TODO
+	return NULL;
 }
 
 
 
 GlobalArmor* GlobalActor::EquipArmor(GlobalArmor* armor, uint32 ap_index) {
 	// TODO
+	return NULL;
 }
 
 
@@ -94,19 +97,19 @@ void GlobalActor::_CalculateEvadeRatings() {
 // ****************************************************************************
 
 GlobalEnemy::GlobalEnemy(string file_name) :
-	_file_name(file_name)
+	_filename(file_name)
 {
 	// TODO: This is temporary code
-	ReadDataDescriptor read_data;
-	string fileName = "dat/enemies/" + _file_name + ".lua";
-	if (!read_data.OpenFile(fileName.c_str())) {
-		cerr << "GLOBAL ERROR: failed to load enemy file: " << _file_name << endl;
+	ScriptDescriptor read_data;
+	string fileName = "dat/enemies/" + _filename + ".lua";
+	if (!read_data.OpenFile(fileName.c_str(), READ)) {
+		cerr << "GLOBAL ERROR: failed to load enemy file: " << _filename << endl;
 		return;
 	}
 	
 	_enemy_id = read_data.ReadInt("id");
-	_enemy_width = read_data.ReadInt("width");
-	_enemy_height = read_data.ReadInt("height");
+	_sprite_width = read_data.ReadInt("width");
+	_sprite_height = read_data.ReadInt("height");
 	uint32 numSkills = read_data.ReadInt("number_of_skills");
 	for (uint32 i = 0; i < numSkills; i++) {
 		_enemy_skills.push_back(new GlobalSkill(read_data.ReadString(("skill_" + i))));
@@ -133,9 +136,10 @@ GlobalEnemy::GlobalEnemy(string file_name) :
 			VideoManager->LoadImage(i);
 			animations.push_back(i);
 		}
-		_sprite_animations[animationName] = animations;
+		// Raging_Hog: TODO CHECK This array isn't used anywhere and compiler complains about it.
+		// Should declare it in the global_actors.h I guess
+		//_sprite_animations[animationName] = animations;
 	}
-	
 	_movement_speed = read_data.ReadInt("movement_speed");
 	_base_hit_points = read_data.ReadInt("base_hit_points");
 	_base_skill_points = read_data.ReadInt("base_skill_points");
@@ -162,7 +166,7 @@ GlobalEnemy::GlobalEnemy(string file_name) :
 		os << "map_name_" << i;
 		std::string name = read_data.ReadString(os.str().c_str());
 		
-		GlobalAttackPoint *ap = new GlobalAttackPoint(name, x, y);
+		GlobalAttackPoint *ap = new GlobalAttackPoint(hoa_utils::MakeUnicodeString(name), (uint16)x, (uint16)y);
 		_attack_points.push_back(ap);
 	}
 } // GlobalEnemy::~GlobalEnemy()
@@ -201,7 +205,11 @@ void GlobalEnemy::LevelSimulator(uint32 level) {
 	_fortitude = GaussianRandomValue(_fortitude, _fortitude / 10);
 	_resistance = GaussianRandomValue(_resistance, _resistance / 10);
 	_agility = GaussianRandomValue(_agility, _agility / 10);
-	_evade = GaussianRandomValue(_evade, _evade / 10);
+
+	// TODO CHECK Raging_Hog: _evade is between 0.0 to 1.0 and GaussianRandomValue expects integer??
+	// I fixed it with a kludge, please fix. Don't think evasion works right now too well...
+	//_evade = GaussianRandomValue(_evade, _evade / 10);
+	_evade = GaussianRandomValue(static_cast<uint32>(_evade), static_cast<uint32>(_evade) / 10);
 	_experience_points = GaussianRandomValue(_experience_points, _experience_points / 10);
 
 	// The current hit points and skill points are automatically set to their new maximum value
@@ -215,15 +223,24 @@ void GlobalEnemy::LevelSimulator(uint32 level) {
 // ****************************************************************************
 // ***** GlobalCharacter
 // ****************************************************************************
-
+// TODO CHECK Raging_Hog: _name doesn't exist and isn't needed anywhere? I'm taking it out damn it.
+/*
 GlobalCharacter::GlobalCharacter(hoa_utils::ustring name, std::string filename, uint32 id) :
 	_name(name),
 	_filename(filename),
 	_id(id)
+*/
+GlobalCharacter::GlobalCharacter(hoa_utils::ustring name, std::string filename, uint32 id)
 {
+	_filename = filename;
+	_id = id;
+
 	// TODO: Use the character's id or filename to look up the character's stats in a Lua file
 
+// TODO CHECK Raging_Hog: were these functions just typed wrong? Some are also missing from global_actors.h
+
 	// TEMP: Set character's stats
+	/*
 	SetMaxHP(300);
 	SetHP(300);
 	SetMaxSP(200);
@@ -234,6 +251,14 @@ GlobalCharacter::GlobalCharacter(hoa_utils::ustring name, std::string filename, 
 	SetAgility(56);
 	SetIntelligence(67);
 	SetStrength(120);
+	*/
+	SetMaxHitPoints(300);
+	SetHitPoints(300);
+	SetMaxSkillPoints(200);
+	SetSkillPoints(200);
+	SetExperienceLevel(35);
+	SetAgility(56);
+	SetStrength(120);
 
 	// TEMP: Add new skills
 	AddAttackSkill(new GlobalSkill("sword_slash"));
@@ -242,68 +267,68 @@ GlobalCharacter::GlobalCharacter(hoa_utils::ustring name, std::string filename, 
 	StillImage imd;
 	imd.SetDimensions(1.0f, 2.0f);
 	imd.SetFilename("img/sprites/map/" + _filename + "_d0.png");
-	_map_frames.push_back(imd);
+	_map_frames_standard.push_back(imd);
 	imd.SetFilename("img/sprites/map/" + _filename + "_d1.png");
-	_map_frames.push_back(imd);
+	_map_frames_standard.push_back(imd);
 	imd.SetFilename("img/sprites/map/" + _filename + "_d2.png");
-	_map_frames.push_back(imd);
+	_map_frames_standard.push_back(imd);
 	imd.SetFilename("img/sprites/map/" + _filename + "_d3.png");
-	_map_frames.push_back(imd);
+	_map_frames_standard.push_back(imd);
 	imd.SetFilename("img/sprites/map/" + _filename + "_d4.png");
-	_map_frames.push_back(imd);
+	_map_frames_standard.push_back(imd);
 	imd.SetFilename("img/sprites/map/" + _filename + "_d5.png");
-	_map_frames.push_back(imd);
+	_map_frames_standard.push_back(imd);
 
 	imd.SetFilename("img/sprites/map/" + _filename + "_u0.png");
-	_map_frames.push_back(imd);
+	_map_frames_standard.push_back(imd);
 	imd.SetFilename("img/sprites/map/" + _filename + "_u1.png");
-	_map_frames.push_back(imd);
+	_map_frames_standard.push_back(imd);
 	imd.SetFilename("img/sprites/map/" + _filename + "_u2.png");
-	_map_frames.push_back(imd);
+	_map_frames_standard.push_back(imd);
 	imd.SetFilename("img/sprites/map/" + _filename + "_u3.png");
-	_map_frames.push_back(imd);
+	_map_frames_standard.push_back(imd);
 	imd.SetFilename("img/sprites/map/" + _filename + "_u4.png");
-	_map_frames.push_back(imd);
+	_map_frames_standard.push_back(imd);
 	imd.SetFilename("img/sprites/map/" + _filename + "_u5.png");
-	_map_frames.push_back(imd);
+	_map_frames_standard.push_back(imd);
 
 	imd.SetFilename("img/sprites/map/" + _filename + "_l0.png");
-	_map_frames.push_back(imd);
+	_map_frames_standard.push_back(imd);
 	imd.SetFilename("img/sprites/map/" + _filename + "_l1.png");
-	_map_frames.push_back(imd);
+	_map_frames_standard.push_back(imd);
 	imd.SetFilename("img/sprites/map/" + _filename + "_l2.png");
-	_map_frames.push_back(imd);
+	_map_frames_standard.push_back(imd);
 	imd.SetFilename("img/sprites/map/" + _filename + "_l3.png");
-	_map_frames.push_back(imd);
+	_map_frames_standard.push_back(imd);
 	imd.SetFilename("img/sprites/map/" + _filename + "_l4.png");
-	_map_frames.push_back(imd);
+	_map_frames_standard.push_back(imd);
 	imd.SetFilename("img/sprites/map/" + _filename + "_l5.png");
-	_map_frames.push_back(imd);
+	_map_frames_standard.push_back(imd);
 
 	imd.SetFilename("img/sprites/map/" + _filename + "_r0.png");
-	_map_frames.push_back(imd);
+	_map_frames_standard.push_back(imd);
 	imd.SetFilename("img/sprites/map/" + _filename + "_r1.png");
-	_map_frames.push_back(imd);
+	_map_frames_standard.push_back(imd);
 	imd.SetFilename("img/sprites/map/" + _filename + "_r2.png");
-	_map_frames.push_back(imd);
+	_map_frames_standard.push_back(imd);
 	imd.SetFilename("img/sprites/map/" + _filename + "_r3.png");
-	_map_frames.push_back(imd);
+	_map_frames_standard.push_back(imd);
 	imd.SetFilename("img/sprites/map/" + _filename + "_r4.png");
-	_map_frames.push_back(imd);
+	_map_frames_standard.push_back(imd);
 	imd.SetFilename("img/sprites/map/" + _filename + "_r5.png");
-	_map_frames.push_back(imd);
+	_map_frames_standard.push_back(imd);
 
 	VideoManager->BeginImageLoadBatch();
-	for (uint32 i = 0; i < _map_frames.size(); i++) {
-		if (VideoManager->LoadImage(_map_frames[i]) == false) {
+	for (uint32 i = 0; i < _map_frames_standard.size(); i++) {
+		if (VideoManager->LoadImage(_map_frames_standard[i]) == false) {
 			exit(1);
 		}
 	}
 	VideoManager->EndImageLoadBatch();
 
 	// Load the character's standard map portrait
-	_map_portrait.SetFilename("img/portraits/map/" + _filename + ".png");
-	if (VideoManager->LoadImage(_map_portrait) == false) {
+	_map_portrait_standard.SetFilename("img/portraits/map/" + _filename + ".png");
+	if (VideoManager->LoadImage(_map_portrait_standard) == false) {
 		exit(1);
 	}
 

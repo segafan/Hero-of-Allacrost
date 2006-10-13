@@ -41,7 +41,7 @@ extern GameGlobal *GlobalManager;
 extern bool GLOBAL_DEBUG;
 
 
-
+enum TESTI {HP_POTION = 991};
 /** ****************************************************************************
 *** \brief Represents a party of characters
 ***
@@ -85,6 +85,9 @@ public:
 	*** \return A pointer to the character that was removed, or NULL if the character was not found in the party
 	**/
 	GlobalCharacter* RemoveCharacter(GlobalCharacter* character);
+
+	// Raging_Hog: Is this good?
+	std::vector<GlobalCharacter*> GetCharacters(){ return _characters; }
 
 private:
 	//! \brief The characters that are in this party
@@ -172,7 +175,7 @@ private:
 	*** This map contains all characters that the player has met with, regardless of whether or not they are in the party.
 	*** The map key is the character's unique ID number.
 	**/
-	std::map<uint32, GlobalCharacter*> _characters;
+	std::vector<GlobalCharacter*> _characters;
 	//! The inventory of the party.
 	std::vector<GlobalObject*> _inventory;
 	//! \brief The amount of financial resources the party currently has.

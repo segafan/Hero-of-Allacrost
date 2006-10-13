@@ -229,6 +229,17 @@ bool GameInput::AnyKeyRelease() {
 	return _any_key_release;
 }
 
+void GameInput::TogglePause(){
+	// If the current game mode is PauseMode, unpause the game
+	if (ModeManager->GetGameType() == MODE_MANAGER_PAUSE_MODE) {
+		ModeManager->Pop();
+	}
+	// Otherwise, make PauseMode the active game mode
+	else {
+		PauseMode *PM = new PauseMode();
+		ModeManager->Push(PM);
+	}
+}
 
 // Handles all of the event processing for the game.
 void GameInput::EventHandler() {
@@ -276,12 +287,15 @@ void GameInput::EventHandler() {
 		}
 		// Check if the window was iconified/minimized or restored
 		else if (event.type == SDL_ACTIVEEVENT && (event.active.state & SDL_APPACTIVE)) {
-			// TODO: when the window is iconified/minimized, insert SDL_Delay() calls so that the game doesn't continue to suck up CPU time
 			if (event.active.gain == 0) { // Window was iconified/minimized
-				
+				// Check if the game is in pause mode. Otherwise the player might put pause on,
+				// minimize the window and then the pause is off.
+				if (ModeManager->GetGameType() != MODE_MANAGER_PAUSE_MODE) {
+					TogglePause();
+				}
 			}
 			else { // Window was restored
-				
+				TogglePause();
 			}
 			break;
 		}
@@ -508,16 +522,7 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 				|| ModeManager->GetGameType() == MODE_MANAGER_QUIT_MODE) {
 				return;
 			}
-			// If the current game mode is PauseMode, unpause the game
-			else if (ModeManager->GetGameType() == MODE_MANAGER_PAUSE_MODE) {
-				ModeManager->Pop();
-			}
-			// Otherwise, make PauseMode the active game mode
-			else {
-				PauseMode *PM = new PauseMode();
-				ModeManager->Push(PM);
-			}
-			return;
+			TogglePause();
 		}
 	}
 

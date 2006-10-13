@@ -554,18 +554,27 @@ bool GameVideo::ApplySettings()
 
 		if (!SDL_SetVideoMode(_temp_width, _temp_height, 0, flags)) 
 		{	
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: SDL_SetVideoMode() failed in ApplySettings()!" << endl;
+		// RGB values of 1 for each and 8 for depth seemed to be sufficient.
+		// 565 and 16 here because it works with them on this computer. 
+			SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5); 
+			SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 6);
+			SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
+			SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
+			SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0);
+			if (!SDL_SetVideoMode(_temp_width, _temp_height, 0, flags)){ 
+				if(VIDEO_DEBUG)
+					cerr << "VIDEO ERROR: SDL_SetVideoMode() failed in ApplySettings()!" << endl;
 
-			_temp_fullscreen = _fullscreen;
-			_temp_width      = _width;
-			_temp_height     = _height;
+				_temp_fullscreen = _fullscreen;
+				_temp_width      = _width;
+				_temp_height     = _height;
 
-			if(_width > 0)   // quick test to see if we already had a valid video mode
-			{
-				ReloadTextures();					
-			}
-			return false;		
+				if(_width > 0)   // quick test to see if we already had a valid video mode
+				{
+					ReloadTextures();					
+				}
+				return false;		
+			   }
 		} 
 
 		_width      = _temp_width;

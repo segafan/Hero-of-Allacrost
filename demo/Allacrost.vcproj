@@ -252,7 +252,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\engine\global.h"
+				RelativePath=".\src\global\global.h"
 				>
 			</File>
 			<File
@@ -456,7 +456,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\engine\global.cpp"
+				RelativePath=".\src\global\global.cpp"
 				>
 			</File>
 			<File

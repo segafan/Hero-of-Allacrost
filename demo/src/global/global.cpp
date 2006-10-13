@@ -18,7 +18,7 @@
 #include "global.h"
 #include "utils.h"
 #include "video.h"
-#include "data.h"
+#include "script.h"
 
 
 using namespace std;
@@ -41,7 +41,7 @@ SINGLETON_INITIALIZE(GameGlobal);
 // ***** GameParty
 // ****************************************************************************
 
-void GlobalParty::AddCharacter(GameCharacter* character) {
+void GlobalCharacterParty::AddCharacter(GlobalCharacter* character) {
 	// Make sure that the character is not already in the party
 	for (uint32 i = 0; i < _characters.size(); i++) {
 		if (_characters[i] == character)
@@ -49,11 +49,11 @@ void GlobalParty::AddCharacter(GameCharacter* character) {
 	}
 
 	_characters.push_back(character);
-} // void GlobalParty::AddCharacter(GameCharacter* character)
+} // void GlobalCharacterParty::AddCharacter(GlobalCharacter* character)
 
 
-GameCharacter* GlobalParty::RemoveCharacter(GameCharacter* character) {
-	GameCharacter* removed = NULL;
+GlobalCharacter* GlobalCharacterParty::RemoveCharacter(GlobalCharacter* character) {
+	GlobalCharacter* removed = NULL;
 
 	for (uint32 i = 0; i < _characters.size(); i++) {
 		if (_characters[i] == character) {
@@ -72,7 +72,7 @@ GameCharacter* GlobalParty::RemoveCharacter(GameCharacter* character) {
 	}
 
 	return removed;
-} // GameCharacter* GlobalParty::RemoveCharacter(GameCharacter* character)
+} // GlobalCharacter* GlobalCharacterParty::RemoveCharacter(GlobalCharacter* character)
 
 // ****************************************************************************
 // ***** GameGlobal
@@ -107,7 +107,7 @@ void GameGlobal::AddCharacter(GlobalCharacter *ch) {
 	_characters.push_back(ch);
 	// Check size of active party if less then 4, add to party
 	if (_party.GetPartySize() < 4)
-		_party.AddCharacter(ch->GetID());
+		_party.AddCharacter(ch);
 }
 
 GlobalCharacter* GameGlobal::GetCharacter(uint32 id) {
@@ -123,30 +123,37 @@ GlobalCharacter* GameGlobal::GetCharacter(uint32 id) {
 //-------------------------------
 // GameGlobal::GetMoney
 //-------------------------------
+/*
 uint32 GameGlobal::GetMoney()
 {
 	return _money;
 }
+*/
 
 //------------------------------
 // GameGlobal::SetMoney
 //------------------------------
+/*
 void GameGlobal::SetMoney(uint32 amount)
 {
 	_money = amount;
 }
+*/
 
 //-----------------------------
 // GameGlobal::AddMoney
 //-----------------------------
+/*
 void GameGlobal::AddMoney(uint32 amount)
 {
 	_money += amount;
 }
+*/
 
 //------------------------------
 // GameGlobal::SubtractMoney
 //------------------------------
+/*
 void GameGlobal::SubtractMoney(uint32 amount)
 {
 	// check to make amount is less then current amount of money
@@ -155,40 +162,49 @@ void GameGlobal::SubtractMoney(uint32 amount)
 	else
 		if (GLOBAL_DEBUG) cerr << "GLOBAL: SubtractMoney tried to subtract more money then we had! Current amount left alone." << endl;
 }
+*/
 
 //----------------------------------------------
 // GameGlobal::GetParty
 //----------------------------------------------
 vector<GlobalCharacter *> GameGlobal::GetParty()
 {
+/*
 	vector<uint32> characters = _party.GetCharacters();
 	vector<GlobalCharacter *> ret;
 	for (vector<uint32>::iterator p = characters.begin(); p != characters.end(); ++p)
 		ret.push_back(GetCharacter((*p)));
 	
 	return ret;
+*/
+	return _party.GetCharacters();
 }
 
 //-----------------------
-// GlobalParty::GlobalParty
+// GlobalCharacterParty::GlobalCharacterParty
 //-----------------------
-GlobalParty::GlobalParty()
+/*
+GlobalCharacterParty::GlobalCharacterParty()
 {
 	// Nothing to do here yet.
 }
+*/
 
 //-----------------------
-// GlobalParty::~GlobalParty
+// GlobalCharacterParty::~GlobalCharacterParty
 //-----------------------
-GlobalParty::~GlobalParty()
+/*
+GlobalCharacterParty::~GlobalCharacterParty()
 {
 	// Nothing to do here yet.
 }
+*/
 
 //-------------------------------------
-// GlobalParty::AddCharacter
+// GlobalCharacterParty::AddCharacter
 //-------------------------------------
-void GlobalParty::AddCharacter(uint32 char_id)
+/*
+void GlobalCharacterParty::AddCharacter(uint32 char_id)
 {
 	// Only add the new char if there is less then 4 members in the party.
 	if (_characters.size() < 4)
@@ -196,11 +212,12 @@ void GlobalParty::AddCharacter(uint32 char_id)
 	else
 		cerr << "GLOBAL: Unable to add another char to party, it is already at 4 members!" << endl;
 }
-
+*/
 //-------------------------------------
-// GlobalParty::RemoveCharacter
+// GlobalCharacterParty::RemoveCharacter
 //-------------------------------------
-void GlobalParty::RemoveCharacter(uint32 char_id)
+/*
+void GlobalCharacterParty::RemoveCharacter(uint32 char_id)
 {
 	// search for id and remove it
 	for (vector<uint32>::iterator p = _characters.begin(); p != _characters.end(); ++p)
@@ -213,9 +230,9 @@ void GlobalParty::RemoveCharacter(uint32 char_id)
 	}
 	if (GLOBAL_DEBUG) cerr << "GLOBAL: No Character matching " << char_id << " found!" << endl;
 }
-
+*/
 //-------------------------------------
-// GlobalParty::AddItemToInventory
+// GlobalCharacterParty::AddItemToInventory
 //-------------------------------------
 void GameGlobal::AddItemToInventory(GlobalObject *obj)
 {
