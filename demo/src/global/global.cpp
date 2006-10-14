@@ -20,7 +20,6 @@
 #include "video.h"
 #include "script.h"
 
-
 using namespace std;
 using namespace hoa_video;
 using namespace hoa_utils;
@@ -38,7 +37,7 @@ SINGLETON_INITIALIZE(GameGlobal);
 
 
 // ****************************************************************************
-// ***** GameParty
+// ***** GlobalCharacterParty
 // ****************************************************************************
 
 void GlobalCharacterParty::AddCharacter(GlobalCharacter* character) {
@@ -72,7 +71,8 @@ GlobalCharacter* GlobalCharacterParty::RemoveCharacter(GlobalCharacter* characte
 	}
 
 	return removed;
-} // GlobalCharacter* GlobalCharacterParty::RemoveCharacter(GlobalCharacter* character)
+
+} // GlobalCharacterParty* GlobalCharacterParty::RemoveCharacter(GlobalCharacter* character)
 
 // ****************************************************************************
 // ***** GameGlobal
@@ -120,49 +120,6 @@ GlobalCharacter* GameGlobal::GetCharacter(uint32 id) {
 	return NULL;
 }
 
-//-------------------------------
-// GameGlobal::GetMoney
-//-------------------------------
-/*
-uint32 GameGlobal::GetMoney()
-{
-	return _money;
-}
-*/
-
-//------------------------------
-// GameGlobal::SetMoney
-//------------------------------
-/*
-void GameGlobal::SetMoney(uint32 amount)
-{
-	_money = amount;
-}
-*/
-
-//-----------------------------
-// GameGlobal::AddMoney
-//-----------------------------
-/*
-void GameGlobal::AddMoney(uint32 amount)
-{
-	_money += amount;
-}
-*/
-
-//------------------------------
-// GameGlobal::SubtractMoney
-//------------------------------
-/*
-void GameGlobal::SubtractMoney(uint32 amount)
-{
-	// check to make amount is less then current amount of money
-	if (amount <= _money)
-		_money -= amount;
-	else
-		if (GLOBAL_DEBUG) cerr << "GLOBAL: SubtractMoney tried to subtract more money then we had! Current amount left alone." << endl;
-}
-*/
 
 //----------------------------------------------
 // GameGlobal::GetParty
@@ -180,57 +137,8 @@ vector<GlobalCharacter *> GameGlobal::GetParty()
 	return _party.GetCharacters();
 }
 
-//-----------------------
-// GlobalCharacterParty::GlobalCharacterParty
-//-----------------------
-/*
-GlobalCharacterParty::GlobalCharacterParty()
-{
-	// Nothing to do here yet.
-}
-*/
 
-//-----------------------
-// GlobalCharacterParty::~GlobalCharacterParty
-//-----------------------
-/*
-GlobalCharacterParty::~GlobalCharacterParty()
-{
-	// Nothing to do here yet.
-}
-*/
 
-//-------------------------------------
-// GlobalCharacterParty::AddCharacter
-//-------------------------------------
-/*
-void GlobalCharacterParty::AddCharacter(uint32 char_id)
-{
-	// Only add the new char if there is less then 4 members in the party.
-	if (_characters.size() < 4)
-		_characters.push_back(char_id);
-	else
-		cerr << "GLOBAL: Unable to add another char to party, it is already at 4 members!" << endl;
-}
-*/
-//-------------------------------------
-// GlobalCharacterParty::RemoveCharacter
-//-------------------------------------
-/*
-void GlobalCharacterParty::RemoveCharacter(uint32 char_id)
-{
-	// search for id and remove it
-	for (vector<uint32>::iterator p = _characters.begin(); p != _characters.end(); ++p)
-	{
-		if ((*p) == char_id)
-		{
-			_characters.erase(p);
-			return;
-		}
-	}
-	if (GLOBAL_DEBUG) cerr << "GLOBAL: No Character matching " << char_id << " found!" << endl;
-}
-*/
 //-------------------------------------
 // GlobalCharacterParty::AddItemToInventory
 //-------------------------------------
