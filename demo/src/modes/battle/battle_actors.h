@@ -24,6 +24,7 @@
 #include "defs.h"
 #include "mode_manager.h"
 #include "global.h"
+#include "global_actors.h"
 #include "video.h"
 #include "audio.h"
 
