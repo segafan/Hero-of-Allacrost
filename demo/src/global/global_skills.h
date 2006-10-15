@@ -24,8 +24,6 @@
 #include "defs.h"
 #include "utils.h"
 
-
-
 namespace hoa_global {
 
 /** \name Status Effect Types

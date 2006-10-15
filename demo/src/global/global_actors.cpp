@@ -394,5 +394,43 @@ GlobalCharacter::~GlobalCharacter() {
 	// TODO: delete all dynamically allocated data
 }
 
+// ****************************************************************************
+// ***** GlobalCharacterParty
+// ****************************************************************************
+
+void GlobalCharacterParty::AddCharacter(GlobalCharacter* character) {
+	// Make sure that the character is not already in the party
+	for (uint32 i = 0; i < _characters.size(); i++) {
+		if (_characters[i] == character)
+			return;
+	}
+
+	_characters.push_back(character);
+} // void GlobalCharacterParty::AddCharacter(GlobalCharacter* character)
+
+
+
+GlobalCharacter* GlobalCharacterParty::RemoveCharacter(GlobalCharacter* character) {
+	GlobalCharacter* removed = NULL;
+
+	for (uint32 i = 0; i < _characters.size(); i++) {
+		if (_characters[i] == character) {
+			removed = _characters[i];
+		}
+
+		// Shift all other characters in the vector if the character to remove has already been found
+		if (removed != NULL) {
+			_characters[i-1] = _characters[i];
+		}
+	}
+
+	// If the removed character was found, remove the last element from the vector
+	if (removed != NULL) {
+		_characters.pop_back();
+	}
+
+	return removed;
+
+} // GlobalCharacterParty* GlobalCharacterParty::RemoveCharacter(GlobalCharacter* character)
 
 } // namespace hoa_global

@@ -7,21 +7,18 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ////////////////////////////////////////////////////////////////////////////////
 
-/*!****************************************************************************
- * \file    global.h
- * \author  Tyler Olsen, roots@allacrost.org
- * \brief   Header file for the global game manager
- *
- * This file contains several classes that need to be used "globally" by all
- * the inherited game mode classes. This includes classes that represent things
- * like items, playable characters, foes, and a game instance manager, which
- * serves to hold all the party's current status information (play time, item
- * inventory, etc).
- *
- * \note As of this moment, the code and structure in this file is pre-mature
- * and subject to major changes/additions as we find new needs of these classes.
- * Be aware that frequent changes to this code will be seen for a while.
- *****************************************************************************/
+/** ****************************************************************************
+*** \file    global.h
+*** \author  Tyler Olsen, roots@allacrost.org
+*** \brief   Header file for the global game manager
+***
+*** This file contains the GameGlobal class, which is used to manage all data
+*** that is shared "globally" by the various game modes. For example, it 
+*** contains the current characters in the party, the party's inventory, etc.
+*** The definition of characters, items, and other related global data are
+*** implemented in the other global header files (e.g. global_actors.h). All
+*** of these global files share the same hoa_global namespace.
+*** ***************************************************************************/
 
 #ifndef __GLOBAL_HEADER__
 #define __GLOBAL_HEADER__
@@ -37,69 +34,15 @@ namespace hoa_global {
 
 //! The singleton pointer responsible for the management of global game data.
 extern GameGlobal *GlobalManager;
-//! Determines whether the code in the hoa_boot namespace should print debug statements or not.
+//! Determines whether the code in the hoa_global namespace should print debug statements or not.
 extern bool GLOBAL_DEBUG;
 
-
-enum TESTI {HP_POTION = 991};
-/** ****************************************************************************
-*** \brief Represents a party of characters
-***
-*** This class contains a group or "party" of characters. The purpose of this class
-*** is tied mostly to convience for the GameGlobal class, as characters may need
-*** to be organized into groups. For example, the characters that are in the active
-*** party versus the "reserved" party, or in the case of when the characters split
-*** into multiple parties according with the story or to achieve a particular goal.
-***
-*** \note The characters that are in the party are not deleted by this class. Remember
-*** this because it may lead to memory leaks if one is not careful.
-***
-*** \todo Perhaps this class should be placed in the private_global namespace since
-*** the only need for it seems to be in the GameGlobal class?
-*** ***************************************************************************/
-class GlobalCharacterParty {
-public:
-	GlobalCharacterParty()
-		{}
-	~GlobalCharacterParty()
-		{}
-
-	//! \name Class member access functions
-	//@{
-// 	std::vector<GlobalCharacter*>& GetCharacters() const
-// 		{ return _characters; }
-	uint32 GetPartySize() const
-		{ return _characters.size(); }
-	bool IsPartyEmpty() const
-		{ return (_characters.size() == 0); }
-	//@}
-
-	/** \brief Adds a character to the party
-	*** \param character A pointer to the character to add
-	*** Note that if the character is found to already be in the party, the character will not
-	*** be added a second time.
-	**/
-	void AddCharacter(GlobalCharacter* character);
-	/** \brief Removes a character from the party
-	*** \param character A pointer to the character to remove
-	*** \return A pointer to the character that was removed, or NULL if the character was not found in the party
-	**/
-	GlobalCharacter* RemoveCharacter(GlobalCharacter* character);
-
-	// Raging_Hog: Is this good?
-	std::vector<GlobalCharacter*> GetCharacters(){ return _characters; }
-
-private:
-	//! \brief The characters that are in this party
-	std::vector<GlobalCharacter*> _characters;
-}; // class GlobalCharacterParty
-
-
+// enum TESTI {HP_POTION = 991};
 
 /** ****************************************************************************
 *** \brief Retains all the state information about the player's active game
 ***
-*** This class is best viewed as a resource manager for the current game that is
+*** This class is a resource manager for the current state of the game that is
 *** being played. It retains all of the characters in the player's party, the
 *** elapsed time, the party's inventory, and much more. This class assists the
 *** various game modes by allowing them to share data with each other on a "global"
@@ -107,85 +50,74 @@ private:
 ***
 *** \note This class is a singleton, even though it is technically not an engine
 *** manager class. There can only be one game instance that the player is playing
-*** at any given time
+*** at any given time. The singleton object for this class is both created and
+*** destroyed from the BootMode class, which is where the player selects to
+*** either begin a new game or load an existing one.
 *** ***************************************************************************/
 class GameGlobal {
 public:
 	SINGLETON_METHODS(GameGlobal);
 
-	//! Adds a new character to the party.
-	//! \param *ch A pointer to the GlobalCharacter object to add to the party.
+	/** \brief Adds a new character to the party.
+	*** \param *ch A pointer to the GlobalCharacter object to add to the party.
+	**/
 	void AddCharacter(GlobalCharacter *ch);
 	
-	//! Returns a pointer to a character currently in the party.
-	//! \param id The ID number of the character to retrieve.
-	//! \return A pointer to the character, or NULL if the character was not found.
+	/** \brief Returns a pointer to a character currently in the party.
+	*** \param id The ID number of the character to retrieve.
+	*** \return A pointer to the character, or NULL if the character was not found.
+	***/
 	GlobalCharacter* GetCharacter(uint32 id);
 
-	//! Money handling functions, 
-	//! Get, returns the current amount
-	//! Set, sets the money to the specified amount
-	//! Add, adds the specified amount to the current amount
-	//! Subtract, takes away the specified amount from the current amount
+	//! \name Funds Manipulation Functions
 	//@{
-	const uint32 GetMoney()
-		{ return _money; }
-	void SetMoney(uint32 amount)
-		{ _money = amount; }
-	void AddMoney(uint32 amount)
-		{ _money += amount; }
-	void SubtractMoney(uint32 amount)
-		{ if (_money > amount) _money -= amount; }
+	const uint32 GetFunds() const
+		{ return _funds; }
+	void SetFunds(uint32 amount)
+		{ _funds = amount; }
+	//! \note The overflow condition is not checked here: we just assume it will never occur
+	void AddFunds(uint32 amount)
+		{ _funds += amount; }
+	//! \note The amount is only subtracted if the current funds is equal to or exceeds the amount to subtract
+	void SubtractFunds(uint32 amount)
+		{ if (_funds >= amount) _funds -= amount; }
 	// @}
 
-	//! Inventory Functions
-	//! GetInventory returns the entire inventory.
-	//!		This function returns a reference so the inventory can be edited directly
-	//! AddItemToInventory(GlobalObject &) adds the given object to the inventory
+	//! \name Inventory Manipulation Functions
 	//@{
-	std::vector<GlobalObject *> &GetInventory()
+	std::map<uint32, GlobalObject*> GetInventory() const
 		{ return _inventory; }
 	void AddItemToInventory(GlobalObject *obj);
 	void RemoveFromInventory(GlobalObject *obj);
 	//@}
-
-	//! Item functions
-	//! GetItemName returns the string name of the item
-	//! GetItemIconPath return the icon path for the given item id
-	//! SetItemName allows you to set an item's name
-	//! SetItemIconPath allows you to set an item's icon path
-	//@{
-	std::string GetItemName(uint32 id)
-		{ return _game_item_names[id]; }
-	std::string GetItemIconPath(uint32 id)
-		{ return _game_item_icon_paths[id]; }
-	void SetItemName(uint32 key, std::string value)
-		{ _game_item_names[key] = value; }
-	void SetItemIconPath(uint32 key, std::string value)
-		{ _game_item_icon_paths[key] = value; }
-	//@}
 	
-	//! Gets the Characters in the active party
-	//! \returns The Characters in the active party
-	std::vector<GlobalCharacter *> GetParty();
+	//! \brief Gets all of the characters in the active party
+	GlobalCharacterParty GetActiveParty() const
+		{ return _active_party; }
 
 private:
 	SINGLETON_DECLARE(GameGlobal);
+	//! \brief The amount of financial resources the party currently has.
+	uint32 _funds;
+
 	/** \brief A map containing all characters that the player has discovered
 	*** This map contains all characters that the player has met with, regardless of whether or not they are in the party.
 	*** The map key is the character's unique ID number.
 	**/
-	std::vector<GlobalCharacter*> _characters;
-	//! The inventory of the party.
-	std::vector<GlobalObject*> _inventory;
-	//! \brief The amount of financial resources the party currently has.
-	uint32 _money;
-	//! The active party (currently only support for one party, may need to be changed)
-	GlobalCharacterParty _party;
-	//! \brief the string names of the items
-	std::map<uint32, std::string> _game_item_names;
-	//! \brief the icon path of the item
-	std::map<uint32, std::string> _game_item_icon_paths;
+	std::map<uint32, GlobalCharacter*> _characters;
+	/** \brief The entire inventory of the party
+	*** This inventory stores all items, weapons, armor, etc. for the entire party in a map. The map key is the unique ID
+	*** number for the object, which is duplicated in the GlobalObject class itself. The objects in this inventory have a
+	*** count member associated with them that retains how many of that particular object is contained in the inventory.
+	*** Once the count member reaches zero, the object is removed from this container.
+	**/
+	std::map<uint32, GlobalObject*> _inventory;
+
+	/** \brief The active party of characters
+	*** The active party contains the group of characters that will fight when a battle begins. This party can be up to
+	*** four characters, and should always contain at least one character.
+	**/
+	GlobalCharacterParty _active_party;
 }; // class GameGlobal
 
 } // namespace hoa_global

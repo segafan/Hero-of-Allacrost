@@ -50,7 +50,6 @@ const uint8 GLOBAL_MAP_USAGE        = 0x08;
 const uint8 GLOBAL_MENU_USAGE       = 0x01;
 //@}
 
-
 /** ****************************************************************************
 *** \brief An abstract parent class for representing a game object
 ***
@@ -158,7 +157,7 @@ private:
 *** ***************************************************************************/
 class GlobalItem : public GlobalObject {
 public:
-	GlobalItem(uint32 id, uint32 count = 0);
+	GlobalItem(uint32 id, uint32 count = 1);
 	~GlobalItem()
 		{}
 
