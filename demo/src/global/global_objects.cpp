@@ -21,10 +21,6 @@
 
 #include "global.h"
 
-// TODO CHECK Raging_Hog: I've got no idea where to put this enumeration or 
-// how. Please clean up after me my mother isn't here to do it.
-enum NO_IDEA {GLOBAL_HP_RECOVERY_ITEM = 119};
-
 using namespace std;
 
 using namespace hoa_utils;
@@ -75,7 +71,8 @@ GlobalItem::GlobalItem(uint32 id, uint32 count) : GlobalObject(id, count)
 	if (_icon_image.Load() == false) {
 		cerr << "ERROR: In GlobalWeapon constructor, failed to load icon image" << endl;
 	}
-	_usage = GLOBAL_HP_RECOVERY_ITEM;
+	_usage = 0;
+	// End TEMP
 
 	// TODO: use the id to load the item properties from a Lua file
 }

@@ -174,10 +174,10 @@ public:
 		{ return _metaphysical_attack_rating; }
 	GlobalWeapon* GetWeaponEquipped() const
 		{ return _weapon_equipped; }
-// 	std::vector<GlobalArmor*>& GetArmorEquipped() const
-// 		{ return _armor_equipped; }
-// 	std::vector<GlobalAttackPoint*>& GetAttackPoints() const
-// 		{ return _attack_points; }
+	std::vector<GlobalArmor*> GetArmorEquipped() const
+		{ return _armor_equipped; }
+	std::vector<GlobalAttackPoint*> GetAttackPoints() const
+		{ return _attack_points; }
 	std::vector<GlobalElementalEffect*>& GetElementalAttackBonuses()
 		{ return _elemental_attack_bonuses; }
 	std::vector<std::pair<float, GlobalStatusEffect*> >& GetStatusAttackBonuses()
@@ -392,8 +392,8 @@ public:
 		{ return _filename; }
 	uint32 GetExperiencePoints() const
 		{ return _experience_points; }
-// 	std::vector<GlobalSkill*>& GetSkills() const
-// 		{ return _enemy_skills; }
+	std::vector<GlobalSkill*> GetSkills() const
+		{ return _enemy_skills; }
 	//@}
 
 	//! \brief Gives the enemy a new skill to use in battle
@@ -541,15 +541,15 @@ public:
 	void SetHP( uint32 hp ) { _hp = hp; } 
 	void SetSP( uint32 sp ) { _hp = sp; } 
 
-// 	std::vector<GlobalSkill*>& GetAttackSkills() const
-// 		{ return _attack_skills; }
-// 	std::vector<GlobalSkill*>& GetDefenseSkills() const
-// 		{ return _defense_skills; }
-// 	std::vector<GlobalSkill*>& GetSupportSkills() const
-// 		{ return _support_skills; }
+	std::vector<GlobalSkill*> GetAttackSkills() const
+		{ return _attack_skills; }
+	std::vector<GlobalSkill*> GetDefenseSkills() const
+		{ return _defense_skills; }
+	std::vector<GlobalSkill*> GetSupportSkills() const
+		{ return _support_skills; }
 
-// 	std::vector<hoa_video::StillImage>& GetBattlePortraits() const
-// 		{ return _battle_portraits; }
+	std::vector<hoa_video::StillImage> GetBattlePortraits() const
+		{ return _battle_portraits; }
 	void SetExperienceNextLevel(uint32 xp_next)
 		{ _experience_next_level = xp_next; }
 	//@}
@@ -637,6 +637,54 @@ protected:
 	hoa_video::StillImage _menu_portrait;
 	//@}
 }; // class GlobalCharacter : public GlobalActor
+
+/** ****************************************************************************
+*** \brief Represents a party of characters
+***
+*** This class is a container for a group or "party" of characters. The purpose of 
+*** this class is tied mostly to convience for the GameGlobal class, as characters
+*** may need to be organized into groups. For example, the characters that are in the 
+*** active party versus the "reserved" party, or in the case of when the characters split
+*** into multiple parties according with the story or to achieve a particular goal.
+***
+*** \note When this class is destroyed, the characters contained within the class are
+*** <i>not</i> destroyed. Do not assume otherwise.
+***
+*** \todo Perhaps this class should be placed in the private_global namespace since
+*** the only need for it seems to be in the GameGlobal class?
+*** ***************************************************************************/
+class GlobalCharacterParty {
+public:
+	GlobalCharacterParty()
+		{}
+	~GlobalCharacterParty()
+		{}
+
+	//! \name Class member access functions
+	//@{
+	std::vector<GlobalCharacter*> GetCharacters() const
+		{ return _characters; }
+	uint32 GetPartySize() const
+		{ return _characters.size(); }
+	bool IsPartyEmpty() const
+		{ return (_characters.size() == 0); }
+	//@}
+
+	/** \brief Adds a character to the party
+	*** \param character A pointer to the character to add
+	*** Note that if the character is found to already be in the party, the character will <b>not</b>
+	*** be added a second time.
+	**/
+	void AddCharacter(GlobalCharacter* character);
+	/** \brief Removes a character from the party
+	*** \param character A pointer to the character to remove
+	*** \return A pointer to the character that was removed, or NULL if the character was not found in the party
+	**/
+	GlobalCharacter* RemoveCharacter(GlobalCharacter* character);
+private:
+	//! \brief The characters that are in this party
+	std::vector<GlobalCharacter*> _characters;
+}; // class GlobalCharacterParty
 
 } // namespace hoa_global
 
