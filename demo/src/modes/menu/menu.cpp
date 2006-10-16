@@ -9,7 +9,7 @@
 
 /** ****************************************************************************
 *** \file    menu.cpp
-*** \author  Daniel Steuernol steu@allacrost.org
+*** \author  Daniel Steuernol steu@allacrost.org, Andy Gardner chopperdave@allacrost.org
 *** \brief   Source file for menu mode interface.
 *** ***************************************************************************/
 
@@ -55,22 +55,23 @@ MenuMode::MenuMode()
 	}
 	
 	// Init the location picture
-	_location_picture.SetFilename("img/menus/locations/desert_cave.png");
-	_location_picture.SetDimensions(500, 125);
-	_location_picture.SetStatic(true);
-	VideoManager->LoadImage(_location_picture);
+	//_location_picture.SetFilename("img/menus/locations/desert_cave.png");
+	//_location_picture.SetDimensions(500, 125);
+	//_location_picture.SetStatic(true);
+	//VideoManager->LoadImage(_location_picture);
 
-	// TEMP: remove this eventually
-	GlobalManager->SetMoney(4236);
+	// FIXME: remove this eventually
+	GlobalManager->SetFunds(4236);
+	//GlobalManager->SetMoney(4236);
 	_current_window = WIN_INVENTORY;
 		
-	vector<GlobalCharacter*> characters = GlobalManager->GetParty();
+	hoa_global::GlobalCharacterParty characters = GlobalManager->GetActiveParty();
 
-	switch (characters.size()) {
-		case 4: _character_window3.SetCharacter(characters[3]);
-		case 3: _character_window2.SetCharacter(characters[2]);
-		case 2: _character_window1.SetCharacter(characters[1]);
-		case 1: _character_window0.SetCharacter(characters[0]);
+	switch (characters.GetPartySize()) {
+		case 4: _character_window3.SetCharacter(characters.GetCharacters()[3]);
+		case 3: _character_window2.SetCharacter(characters.GetCharacters()[2]);
+		case 2: _character_window1.SetCharacter(characters.GetCharacters()[1]);
+		case 1: _character_window0.SetCharacter(characters.GetCharacters()[0]);
 			break;
 		default: cerr << "MENU ERROR: no characters in party!" << endl;
 			exit(1);
@@ -155,6 +156,12 @@ MenuMode::MenuMode()
 		VIDEO_MENU_EDGE_ALL);
 	_equip_window.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y) + 10);
 
+	// Set up the inventory window
+	_inventory_window.Create(static_cast<float>(win_width * 4 + 16), 448,
+		VIDEO_MENU_EDGE_ALL);
+	_inventory_window.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y) + 10);
+
+	//FIXME: Set up the formation window
 	_formation_window.Create(static_cast<float>(win_width * 4 + 16), 448,
 		VIDEO_MENU_EDGE_ALL);
 	_formation_window.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y) + 10);
@@ -163,10 +170,6 @@ MenuMode::MenuMode()
 	/*_item_list_header_window.Create(static_cast<float>(win_width * 4), 40,
 		~(VIDEO_MENU_EDGE_LEFT | VIDEO_MENU_EDGE_RIGHT),VIDEO_MENU_EDGE_LEFT | VIDEO_MENU_EDGE_RIGHT);
 	_item_list_header_window.SetPosition(static_cast<float>(start_x) + 10, static_cast<float>(start_y) + 10);*/
-	// Set up the inventory window
-	_inventory_window.Create(static_cast<float>(win_width * 4 + 16), 448,
-		VIDEO_MENU_EDGE_ALL);
-	_inventory_window.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y) + 10);
 
 	/*_character_window0.Create(static_cast<float>(win_width) + 16, static_cast<float>(win_height),
 		~VIDEO_MENU_EDGE_RIGHT, VIDEO_MENU_EDGE_RIGHT);
@@ -235,12 +238,12 @@ MenuMode::~MenuMode() {
 	// Remove saved images
 	VideoManager->DeleteImage(_saved_screen);
 	
-	for (uint32 i = 0; i < _menu_images.size(); i++) {
-		VideoManager->DeleteImage(_menu_images[i]);
-	}
+	//for (uint32 i = 0; i < _menu_images.size(); i++) {
+	//	VideoManager->DeleteImage(_menu_images[i]);
+	//}
 	
 	// Unload location picture
-	VideoManager->DeleteImage(_location_picture);
+	//VideoManager->DeleteImage(_location_picture);
 	
 	// Destroy all menu windows
 	_bottom_window.Destroy();
@@ -681,10 +684,10 @@ void MenuMode::Draw() {
 void MenuMode::_DrawBottomMenu() {
 	_bottom_window.Draw();
 
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
+	/*VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 	VideoManager->Move(150, 577);
 
-	/*if (_current_menu_showing == SHOW_INVENTORY || _current_menu_showing == SHOW_EQUIP
+	if (_current_menu_showing == SHOW_INVENTORY || _current_menu_showing == SHOW_EQUIP
 		|| _current_menu_showing == SHOW_SKILLS) {
 			VideoManager->DrawText(MakeUnicodeString("STR: 105 (+1)"));
 
@@ -717,7 +720,7 @@ void MenuMode::_DrawBottomMenu() {
 			VideoManager->LoadImage(i);
 			VideoManager->MoveRelative(260, 30);
 			VideoManager->DrawImage(i);
-	}*/
+	}
 	
 
 	// Display Location
@@ -752,7 +755,7 @@ void MenuMode::_DrawBottomMenu() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 		
 	VideoManager->Move(390, 685);
-	VideoManager->DrawImage(_location_picture);
+	VideoManager->DrawImage(_location_picture);*/
 } // void MenuMode::_DrawBottomMenu()
 
 
