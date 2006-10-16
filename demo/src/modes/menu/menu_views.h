@@ -49,8 +49,21 @@ namespace private_menu {
 		SKILL_CATEGORY_SIZE = 3 };
 
 	//! \brief The different equipment categories
-	enum EQUIP_CATEGORIES { EQUIP_WEAPON = 0, EQUIP_HEADGEAR = 1, EQUIP_BODYARMOR = 2,
+	enum EQUIP_CATEGORY { EQUIP_WEAPON = 0, EQUIP_HEADGEAR = 1, EQUIP_BODYARMOR = 2,
 		EQUIP_OFFHAND = 3, EQUIP_LEGGINGS = 4, EQUIP_CATEGORY_SIZE = 5 };
+
+	//! \brief The different option boxes that can be active for items
+	enum ITEM_ACTIVE_OPTION { ITEM_ACTIVE_NONE = 0, ITEM_ACTIVE_CATEGORY = 1, 
+		ITEM_ACTIVE_LIST = 2, ITEM_ACTIVE_CHAR = 3, ITEM_ACTIVE_SIZE = 4};
+
+	//! \brief The different option boxes that can be active for skills
+	enum SKILL_ACTIVE_OPTION { SKILL_ACTIVE_NONE = 0, SKILL_ACTIVE_CHAR = 1, 
+		SKILL_ACTIVE_CATEGORY = 2, SKILL_ACTIVE_LIST = 3, SKILL_ACTIVE_CHAR_APPLY = 4,
+		SKILL_ACTIVE_SIZE = 5};
+
+	//! \brief The different option boxes that can be active for equipment
+	enum EQUIP_ACTIVE_OPTION { EQUIP_ACTIVE_NONE = 0, EQUIP_ACTIVE_CHAR = 1, 
+		EQUIP_ACTIVE_SELECT = 2, EQUIP_ACTIVE_LIST = 3, EQUIP_ACTIVE_SIZE = 4};
 
 
 /** ****************************************************************************
@@ -150,7 +163,7 @@ public:
 	*** \return True if the inventory window is in the active context
 	**/
 	inline bool IsActive()
-		{ return (_inventory_active || _char_select_active || _item_categories_active); }
+		{ return _active_box; }
 
 	//! If the inventory window is ready to cancel out, or cancel out a sub-window
 	//bool CanCancel();
@@ -164,13 +177,22 @@ public:
 private:
 	
 	//! Flag to specify if the inventory window is active
-	bool _inventory_active;
+	//bool _inventory_active;
 
 	//! Flag to specify if the character select window is active
-	bool _char_select_active;
+	//bool _char_select_active;
 
 	//! Flag to specify if the item category select window is active
-	bool _item_categories_active;
+	//bool _item_categories_active;
+
+	//! \brief Used for char portraits in bottom menu
+	std::vector<hoa_video::StillImage> _portraits;
+
+	//! \brief Used fo rthe current dungeon
+	hoa_video::StillImage _location_picture;
+
+	//! \brief Flag to specify the active option box
+	uint32 _active_box;
 
 	//! OptionBox to display all of the items
 	hoa_video::OptionBox _inventory_items;
@@ -199,6 +221,9 @@ private:
 	//! Initializes item category select option box
 	void InitCategory();
 
+	//! \brief Draw contents of bottom menu
+	void DrawBottomMenu();
+
 	//! FIX ME
 	void ApplyItem();
 
@@ -216,6 +241,9 @@ private:
 	//! \brief char portraits
 	std::vector<hoa_video::StillImage> _full_portraits;
 
+	//! A graphic for the location (map) that the player is currently on
+	hoa_video::StillImage _location_picture;
+
 	//! \brief the sounds for MenuMode
 	std::map<std::string, hoa_audio::SoundDescriptor> _menu_sounds;
 
@@ -230,6 +258,9 @@ private:
 
 	//! \brief initialize character selection option box
 	void InitCharSelect();
+
+	//! \brief Draw contents of bottom menu
+	void DrawBottomMenu();
 public:
 
 	StatusWindow();
@@ -272,24 +303,27 @@ public:
 	void Activate(bool new_status);
 
 	//! \brief Checks to see if the skills window is active
-	inline bool IsActive() { return _skills_categories_active || 
+	inline bool IsActive() { return _active_box;/*_skills_categories_active || 
 							_skills_list_active ||
 							_char_select_active ||
-							_char_select_apply_active;}
+							_char_select_apply_active;*/}
 
 private:
 
 	//! \brief If the character select option box is active
-	bool _char_select_active;
+	//bool _char_select_active;
 
 	//! \brief If we're choosing the character to apply the skill to
-	bool _char_select_apply_active;
+	//bool _char_select_apply_active;
 
 	//! \brief If the skills categories option box is active
-	bool _skills_categories_active;
+	//bool _skills_categories_active;
 
 	//! \brief If the skills list option box is active
-	bool _skills_list_active;
+	//bool _skills_list_active;
+
+	//! \brief Flag to specify the active option box
+	uint32 _active_box;
 
 	//! brief The character select option box
 	hoa_video::OptionBox _char_select;
@@ -318,6 +352,9 @@ private:
 	//! \brief Sets up the skills that comprise the different categories
 	void UpdateSkillList();
 
+	//! \brief Draw contents of bottom menu
+	void DrawBottomMenu();
+
 }; //class SkillsWindow : public hoa_video::MenuWindow
 
 
@@ -340,9 +377,7 @@ public:
 	void Update();
 
 	//! Is window active?
-	inline bool IsActive() { return _char_select_active 
-							|| _equip_select_active
-							|| _equip_list_active; }
+	inline bool IsActive() { return _active_box; }
 
 	//! Activate/deactivate window
 	void Activate(bool new_status);
@@ -356,11 +391,13 @@ private:
 	hoa_video::OptionBox _equip_list;
 
 	//! \brief Char selector active
-	bool _char_select_active;
+	//bool _char_select_active;
 	//! \brief Equipment selector active
-	bool _equip_select_active;
+	//bool _equip_select_active;
 	//! \brief Replacement selector active
-	bool _equip_list_active;
+	//bool _equip_list_active;
+	//! \brief Flag to specify the active option box
+	uint32 _active_box;
 
 	//! \brief the sounds for MenuMode
 	std::map<std::string, hoa_audio::SoundDescriptor> _menu_sounds;
@@ -376,6 +413,9 @@ private:
 
 	//! \brief Updates the equipment list
 	void UpdateEquipList();
+
+	//! \brief Draw contents of bottom menu
+	void DrawBottomMenu();
 
 }; // class EquipWindow : public hoa_video::MenuWindow
 

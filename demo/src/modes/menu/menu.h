@@ -9,7 +9,7 @@
 
 /** ****************************************************************************
 *** \file    menu.h
-*** \author  Daniel Steuernol steu@allacrost.org
+*** \author  Daniel Steuernol steu@allacrost.org, Andy Gardner chopperdave@allacrost.org
 *** \brief   Header file for menu mode interface.
 ***
 *** This code handles the game event processing and frame drawing when the user
@@ -166,10 +166,9 @@ private:
 	*** This image is perpetually drawn as the background while in menu mode
 	**/
 	hoa_video::StillImage _saved_screen;
-	//! A graphic for the location (map) that the player is currently on
-	hoa_video::StillImage _location_picture;
+	
 
-	std::vector<hoa_video::StillImage> _menu_images;
+	//std::vector<hoa_video::StillImage> _menu_images;
 	
 	/** \name Main Display Windows
 	*** \brief The windows that are displayed in the menu mode.
