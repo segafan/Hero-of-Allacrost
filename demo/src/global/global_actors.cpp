@@ -131,7 +131,7 @@ GlobalEnemy::GlobalEnemy(string file_name) :
 			StillImage i;
 			i.SetFilename("img/sprites/battle/"+fileName);
 			i.SetStatic(true);
-			i.SetDimensions(x_dimension, y_dimension);
+			i.SetDimensions(static_cast<float>(x_dimension), static_cast<float>(y_dimension));
 
 			VideoManager->LoadImage(i);
 			animations.push_back(i);
@@ -147,12 +147,12 @@ GlobalEnemy::GlobalEnemy(string file_name) :
 	_base_strength = read_data.ReadInt("base_strength");
 	_base_intelligence = read_data.ReadInt("base_intelligence");
 	_base_agility = read_data.ReadInt("base_agility");
-	_growth_hit_points = read_data.ReadInt("growth_hit_points");
-	_growth_skill_points = read_data.ReadInt("growth_skill_points");
-	_growth_experience_points = read_data.ReadInt("growth_experience_points");
-	_growth_strength = read_data.ReadInt("growth_strength");
-	_growth_intelligence = read_data.ReadInt("growth_intelligence");
-	_growth_agility = read_data.ReadInt("growth_agility");
+	_growth_hit_points = static_cast<float>(read_data.ReadInt("growth_hit_points"));
+	_growth_skill_points = static_cast<float>(read_data.ReadInt("growth_skill_points"));
+	_growth_experience_points = static_cast<float>(read_data.ReadInt("growth_experience_points"));
+	_growth_strength = static_cast<float>(read_data.ReadInt("growth_strength"));
+	_growth_intelligence = static_cast<float>(read_data.ReadInt("growth_intelligence"));
+	_growth_agility = static_cast<float>(read_data.ReadInt("growth_agility"));
 		
 	int32 num_maps = read_data.ReadInt("number_of_maps");
 	for (int32 i = 1; i <= num_maps; i++) {
@@ -198,19 +198,19 @@ void GlobalEnemy::LevelSimulator(uint32 level) {
 	_experience_points += static_cast<uint32>(_growth_experience_points * level);
 
 	// Randomize the stats using a guassian random variable, with the inital stats as the means and a standard deviation of 10% of the mean
-	_max_hit_points = GaussianRandomValue(_max_hit_points, _max_hit_points / 10);
-	_max_skill_points = GaussianRandomValue(_max_skill_points, _max_skill_points / 10);
-	_strength = GaussianRandomValue(_strength, _strength / 10);
-	_vigor = GaussianRandomValue(_strength, _strength / 10);
-	_fortitude = GaussianRandomValue(_fortitude, _fortitude / 10);
-	_resistance = GaussianRandomValue(_resistance, _resistance / 10);
-	_agility = GaussianRandomValue(_agility, _agility / 10);
+	_max_hit_points = GaussianRandomValue(_max_hit_points, _max_hit_points / 10.0f);
+	_max_skill_points = GaussianRandomValue(_max_skill_points, _max_skill_points / 10.0f);
+	_strength = GaussianRandomValue(_strength, _strength / 10.0f);
+	_vigor = GaussianRandomValue(_strength, _strength / 10.0f);
+	_fortitude = GaussianRandomValue(_fortitude, _fortitude / 10.0f);
+	_resistance = GaussianRandomValue(_resistance, _resistance / 10.0f);
+	_agility = GaussianRandomValue(_agility, _agility / 10.0f);
 
 	// TODO CHECK Raging_Hog: _evade is between 0.0 to 1.0 and GaussianRandomValue expects integer??
 	// I fixed it with a kludge, please fix. Don't think evasion works right now too well...
 	//_evade = GaussianRandomValue(_evade, _evade / 10);
-	_evade = GaussianRandomValue(static_cast<uint32>(_evade), static_cast<uint32>(_evade) / 10);
-	_experience_points = GaussianRandomValue(_experience_points, _experience_points / 10);
+	_evade = static_cast<float>(GaussianRandomValue(static_cast<int32>(_evade), _evade / 10.0f));
+	_experience_points = GaussianRandomValue(_experience_points, _experience_points / 10.0f);
 
 	// The current hit points and skill points are automatically set to their new maximum value
 	_hit_points = _max_hit_points;

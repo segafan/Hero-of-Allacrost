@@ -571,7 +571,7 @@ void BootMode::_SetupResolutionMenu() {
 void BootMode::_OnNewGame() {
 	if (BOOT_DEBUG)	cout << "BOOT: Starting new game." << endl;
 	
-	GlobalManager->AddCharacter(new GlobalCharacter(MakeUnicodeString("Claudius"), "claudius", GLOBAL_CLAUDIUS));
+	GlobalManager->AddCharacter(new GlobalCharacter(MakeUnicodeString("Claudius"), "claudius", GLOBAL_CHARACTER_CLAUDIUS));
 
 	_fade_out = true;
 	VideoManager->FadeScreen(Color::black, 1.0f);
