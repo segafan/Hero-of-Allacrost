@@ -54,7 +54,7 @@ const uint32 GLOBAL_CHARACTER_ALL         = 0xFFFFFFFF;
 class GlobalAttackPoint {
 public:
 	GlobalAttackPoint();
-	GlobalAttackPoint(hoa_utils::ustring name, uint16 x, uint16 y);
+	GlobalAttackPoint(const hoa_utils::ustring & name, uint16 x, uint16 y);
 
 	~GlobalAttackPoint();
 
@@ -142,7 +142,7 @@ private:
 *** ***************************************************************************/
 class GlobalActor {
 public:
-		~GlobalActor();
+	virtual ~GlobalActor();
 
 	//! \name Class member access functions
 	//@{
@@ -383,8 +383,8 @@ protected:
 *** ***************************************************************************/
 class GlobalEnemy : public GlobalActor {
 public:
-	GlobalEnemy(std::string file_name);
-	~GlobalEnemy();
+	GlobalEnemy(const std::string & file_name);
+	virtual ~GlobalEnemy();
 
 	//! \name Class member access functions
 	//@{
@@ -395,6 +395,10 @@ public:
 	std::vector<GlobalSkill*> GetSkills() const
 		{ return _enemy_skills; }
 	//@}
+
+	//! Returns the enemy's sprite frames
+	std::vector<hoa_video::StillImage> GetSpriteFrames() const
+	{ return _sprite_frames; }
 
 	//! \brief Gives the enemy a new skill to use in battle
 	void AddSkill(GlobalSkill *skill)
@@ -503,8 +507,8 @@ protected:
 *** ***************************************************************************/
 class GlobalCharacter : public GlobalActor {
 public:
-	GlobalCharacter(hoa_utils::ustring na, std::string fn, uint32 id);
-	~GlobalCharacter();
+	GlobalCharacter(const hoa_utils::ustring & name, std::string fn, uint32 id);
+	virtual ~GlobalCharacter();
 
 	//@{
 	//! \brief Get the equipment on the character
@@ -532,14 +536,6 @@ public:
 		{ return _armor_equipped[2]; }
 	GlobalArmor* GetEquippedLegArmor()
 		{ return _armor_equipped[3]; }
-
-	// Raging_Hog
-	uint32 GetHP(){ return _hp; };
-	uint32 GetMaxHP(){ return _max_hp; };
-	uint32 GetSP(){ return _sp; };
-	uint32 GetMaxSP(){ return _max_sp; };
-	void SetHP( uint32 hp ) { _hp = hp; } 
-	void SetSP( uint32 sp ) { _hp = sp; } 
 
 	std::vector<GlobalSkill*> GetAttackSkills() const
 		{ return _attack_skills; }
@@ -575,13 +571,6 @@ protected:
 	**/
 	uint32 _id;
 	
-
-	// Raging_Hog
-	uint32 _hp;
-	uint32 _max_hp;
-	uint32 _sp;
-	uint32 _max_sp;
-
 	GlobalWeapon* _equipped_weapon;
 	GlobalArmor* _equipped_armor[4];
 

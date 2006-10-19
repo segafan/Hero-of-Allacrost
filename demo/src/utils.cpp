@@ -81,6 +81,29 @@ ustring ustring::substr(size_t pos, size_t n) const
 }
 
 
+// Concatenates string to another
+ustring & ustring::operator + (const ustring& s)
+{
+	// nothing to do for empty string
+	if (s.empty())
+		return *this;
+	
+	// add first character of string into the null character spot
+	_str[length()] = s[0];
+	
+	// add rest of characters afterward		
+	size_t len = s.length();
+	for (size_t j = 1; j < len; ++j) {
+		_str.push_back(s[j]);
+	}
+	
+	// Finish off with a null character
+	_str.push_back(0);
+	
+	return *this;
+}
+
+
 // Adds a character to end of this string
 ustring & ustring::operator += (uint16 c) {
 	_str[length()] = c;

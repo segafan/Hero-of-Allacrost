@@ -83,7 +83,8 @@ enum CURSOR_STATE {
 *** ***************************************************************************/
 class ScriptEvent {
 public:
-	ScriptEvent(BattleActor* source, std::deque<BattleActor*> targets, std::string name);
+	ScriptEvent(hoa_global::GlobalActor * source, std::deque<hoa_global::GlobalActor*> targets, const std::string & script_name);
+
 	~ScriptEvent();
 
 	//! Executes the script
@@ -91,16 +92,16 @@ public:
 
 	//! \name Class member access functions
 	//@{
-	BattleActor* GetSource()
+	hoa_global::GlobalActor * GetSource()
 		{ return _source; }
 	//@}
 private:
 	//! The name of the executing script
 	std::string _script_name;
 	//! The actor whom is initiating this script
-	BattleActor *_source;
+	hoa_global::GlobalActor * _source;
 	//! The targets of the script
-	std::deque<BattleActor*> _targets;
+	std::deque<hoa_global::GlobalActor *> _targets;
 };
 
 } // namespace private_battle
@@ -112,8 +113,8 @@ private:
 *** ***************************************************************************/
 class BattleMode : public hoa_mode_manager::GameMode {
 	friend class private_battle::BattleActor;
-	friend class private_battle::CharacterActor;
-	friend class private_battle::EnemyActor;
+	friend class private_battle::BattleCharacterActor;
+	friend class private_battle::BattleEnemyActor;
 	friend class private_battle::ScriptEvent;
 public:
 	static int32 MAX_PLAYER_CHARACTERS_IN_BATTLE;
@@ -140,10 +141,10 @@ public:
 	void AddScriptEventToQueue(private_battle::ScriptEvent event)
 		{ _script_queue.push_back(event); }
 	//! \brief Remove all scripted events for an actor
-	void RemoveScriptedEventsForActor(private_battle::BattleActor *actor);
+	void RemoveScriptedEventsForActor(hoa_global::GlobalActor * actor);
 
 	//! \brief Returns all player actors
-	std::deque<private_battle::CharacterActor*> ReturnCharacters() const
+	std::deque<private_battle::BattleCharacterActor*> ReturnCharacters() const
 		{ return _character_actors; }
 	//! Is the battle over?
 	const bool IsBattleOver() const
@@ -165,17 +166,17 @@ public:
 	int32 GetIndexOfFirstIdleCharacter();
 
 	//! \brief Return the player character at the deque location 'index'
-	private_battle::CharacterActor *GetPlayerCharacterAt(uint32 index) const
+	private_battle::BattleCharacterActor *GetPlayerCharacterAt(uint32 index) const
 		{ return _character_actors[index]; }
-	private_battle::EnemyActor* GetEnemyActorAt(uint32 index) const
+	private_battle::BattleEnemyActor* GetEnemyActorAt(uint32 index) const
 		{ return _enemy_actors[index]; }
 
 	//! \brief Returns the index of a player character
-	int32 IndexLocationOfPlayerCharacter(private_battle::CharacterActor *const actor);
+	int32 IndexLocationOfPlayerCharacter(private_battle::BattleCharacterActor *const actor);
 
 	//! \brief Swap a character from _player_actors to _player_actors_in_battle
 	// This may become more complicated if it is done in a wierd graphical manner
-	void SwapCharacters(private_battle::CharacterActor* actor_swap_out, private_battle::CharacterActor* actor_swap_in);
+	void SwapCharacters(private_battle::BattleCharacterActor* actor_swap_out, private_battle::BattleCharacterActor* actor_swap_in);
 
 private:
 	////////////////////////////// PRIVATE MEMBERS ///////////////////////////////
@@ -233,27 +234,27 @@ private:
 	*** that are in the party, but not actively fighting in the battle. This structure includes characters
 	*** that have zero hit points.
 	**/
-	std::deque<private_battle::CharacterActor*> _character_actors;
+	std::deque<private_battle::BattleCharacterActor*> _character_actors;
 	/** \brief Enemies that are presently fighting in the battle
 	*** There is a theoretical limit on how many enemies may fight in one battle, but that is dependent upon
 	*** the sprite size of all active enemies and this limit will be detected by the BattleMode class.
 	*** This structure includes enemies that have zero hit points.
 	**/
-	std::deque<private_battle::EnemyActor*> _enemy_actors;
+	std::deque<private_battle::BattleEnemyActor*> _enemy_actors;
 
 	/** \brief Characters that are in the party reserves
 	*** This structure contains characters which are in the current party, but are not fighting in the battle.
 	*** They may be swapped into the battle by the player.
 	**/
-	std::deque<private_battle::CharacterActor*> _reserve_characters;
+	std::deque<private_battle::BattleCharacterActor*> _reserve_characters;
 	//@}
 
 	//! \name Player Selection Data
 	//@{
 	//! The current CharacterActor that is selected by the player
-	private_battle::CharacterActor* _selected_character;
+	private_battle::BattleCharacterActor * _selected_character;
 	//! The current/last EnemyActor that is/was selected by the player
-	private_battle::EnemyActor* _selected_enemy;
+	private_battle::BattleEnemyActor * _selected_enemy;
 
 	//! The number of selections that must be made for an action
 	uint32 _necessary_selections;
@@ -271,7 +272,7 @@ private:
 	//! Argument selector
 	int32 _argument_actor_index;
 	//! The actors we have selected as arguments
-	std::deque<private_battle::BattleActor*> _selected_actor_arguments;
+	std::deque<hoa_global::GlobalActor*> _selected_actor_arguments;
 	//@}
 
 	//! \name Battle GUI Objects and Images

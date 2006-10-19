@@ -56,23 +56,25 @@ BattleMode* current_battle = NULL;
 // SCRIPTEVENT CLASS
 ////////////////////////////////////////////////////////////////////////////////
 
-ScriptEvent::ScriptEvent(BattleActor* source, deque<BattleActor*> targets, string script_name) :
+ScriptEvent::ScriptEvent(hoa_global::GlobalActor * source, std::deque<hoa_global::GlobalActor*> targets, const std::string & script_name) :
 	_script_name(script_name),
 	_source(source),
 	_targets(targets)
-{}
+{
+}
 
 
 
 ScriptEvent::~ScriptEvent()
-{}
+{
+}
 
 
 
 void ScriptEvent::RunScript() {
 	// TEMP: do basic damage to the actors
 	for (uint8 i = 0; i < _targets.size(); i++) {
-		_targets[i]->TEMP_Deal_Damage(GaussianRandomValue(12, 2.0f));
+		// TODO: DEAL DAMAGE! _targets[i]->TEMP_Deal_Damage(GaussianRandomValue(12, 2.0f));
 
 		// TODO: Do this better way! 
 		if (MakeStandardString(this->GetSource()->GetName()) == "Spider")
@@ -211,11 +213,11 @@ BattleMode::~BattleMode() {
 		_battle_sounds[i].FreeSound();
 
 	// Delete all character and enemy actors
-	for (deque<CharacterActor*>::iterator i = _character_actors.begin(); i != _character_actors.end(); ++i) {
+	for (deque<BattleCharacterActor*>::iterator i = _character_actors.begin(); i != _character_actors.end(); ++i) {
 		delete *i;
 	}
 	_character_actors.clear();
-	for (deque<EnemyActor*>::iterator i = _enemy_actors.begin(); i != _enemy_actors.end(); ++i) {
+	for (deque<BattleEnemyActor*>::iterator i = _enemy_actors.begin(); i != _enemy_actors.end(); ++i) {
 		delete *i;
 	}
 	_enemy_actors.clear();
@@ -311,12 +313,12 @@ void BattleMode::_TEMP_LoadTestData() {
 void BattleMode::_CreateCharacterActors() {
 	_character_actors.clear();
 
-	if (GlobalManager->GetCharacter(GLOBAL_CLAUDIUS) == NULL) {
+	if (GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS) == NULL) {
 		cerr << "BATTLE ERROR: could not retrieve Claudius character" << endl;
 		_ShutDown();
 	}
 	else {
-		CharacterActor *claudius = new CharacterActor(GlobalManager->GetCharacter(GLOBAL_CLAUDIUS), 256, 320);
+		BattleCharacterActor * claudius = new BattleCharacterActor(MakeUnicodeString("Claudius"), "Filename", GLOBAL_CHARACTER_CLAUDIUS, 256, 320);
 		_character_actors.push_back(claudius);
 		_selected_character = claudius;
 		_actor_index = IndexLocationOfPlayerCharacter(claudius);
@@ -326,10 +328,10 @@ void BattleMode::_CreateCharacterActors() {
 
 
 void BattleMode::_CreateEnemyActors() {
-	StillImage frame; // used for populating the sprite_frames vector
-	vector<StillImage> sprite_frames; // A vector to fill it with all four damage frames for each sprite
-	EnemyActor* enemy; // A pointer to the new enemy actor to add to the battle
-
+	//StillImage frame; // used for populating the sprite_frames vector
+	//vector<StillImage> sprite_frames; // A vector to fill it with all four damage frames for each sprite
+	//BattleEnemyActor * enemy; // A pointer to the new enemy actor to add to the battle
+/*
 	while (_enemy_actors.size() == 0)
 	{
 		// Create the Green Slime EnemyActor
@@ -460,7 +462,7 @@ void BattleMode::_CreateEnemyActors() {
 			enemy = new EnemyActor(skeleton, 704, 384);
 			_enemy_actors.push_back(enemy);
 		}
-	}
+	}*/
 } // void BattleMode::_CreateEnemyActors()
 
 
@@ -699,11 +701,11 @@ void BattleMode::_UpdateTargetSelection() {
 
 
 void BattleMode::_UpdateAttackPointSelection() {
-	EnemyActor *e = GetEnemyActorAt(_argument_actor_index);
+	BattleEnemyActor * e = GetEnemyActorAt(_argument_actor_index);
 	vector<GlobalAttackPoint*>global_attack_points = e->GetAttackPoints();
 
 	if (InputManager->ConfirmPress()) {
-		_selected_actor_arguments.push_back(dynamic_cast<BattleActor*>(GetEnemyActorAt(_argument_actor_index)));
+		_selected_actor_arguments.push_back(dynamic_cast<GlobalActor*>(GetEnemyActorAt(_argument_actor_index)));
 		if (_selected_actor_arguments.size() == _necessary_selections) {
 			AddScriptEventToQueue(ScriptEvent(_selected_character, _selected_actor_arguments, "sword_swipe"));
 			_selected_character->SetQueuedToPerform(true);
@@ -896,7 +898,7 @@ const uint8 BattleMode::_NumberCharactersAlive() const {
 
 
 void BattleMode::_ConstructActionListMenu() {
-	CharacterActor *p = GetPlayerCharacterAt(_actor_index);
+	BattleCharacterActor * p = GetPlayerCharacterAt(_actor_index);
 	// If an old submenu exists, delete it
 	if (_action_list_menu) {
 		delete _action_list_menu;
@@ -924,7 +926,7 @@ void BattleMode::_ConstructActionListMenu() {
 		else {
 			vector<ustring> attack_skill_names;
 			for (uint32 i = 0; i < attack_skills.size(); ++i) {
-				string skill_string = attack_skills[i]->GetName() + string("  ") + hoa_utils::NumberToString(attack_skills[i]->GetSPUsage());
+				string skill_string = MakeStandardString(attack_skills[i]->GetSkillName() + MakeUnicodeString("  ") + MakeUnicodeString(hoa_utils::NumberToString(attack_skills[i]->GetSkillPointsRequired())));
 				attack_skill_names.push_back(MakeUnicodeString(skill_string));
 			}
 			_action_list_menu->SetSize(1, attack_skill_names.size());
@@ -947,8 +949,8 @@ void BattleMode::_ConstructActionListMenu() {
 			vector<ustring> defense_skill_names;
 			for (uint32 i = 0; i < defense_skills.size(); ++i) {
 				ostringstream sp_usage;
-				sp_usage << defense_skills[i]->GetSPUsage();
-				string skill_string = defense_skills[i]->GetName() + string("     ") + sp_usage.str();
+				sp_usage << defense_skills[i]->GetSkillPointsRequired();
+				string skill_string = MakeStandardString(defense_skills[i]->GetSkillName()) + string("     ") + sp_usage.str();
 				defense_skill_names.push_back(MakeUnicodeString(skill_string));
 			}
 			_action_list_menu->SetOptions(defense_skill_names);
@@ -971,8 +973,8 @@ void BattleMode::_ConstructActionListMenu() {
 			vector<ustring> support_skill_names;
 			for (uint32 i = 0; i < support_skills.size(); ++i) {
 				ostringstream sp_usage;
-				sp_usage << support_skills[i]->GetSPUsage();
-				string skill_string = support_skills[i]->GetName() + string("     ") + sp_usage.str();
+				sp_usage << support_skills[i]->GetSkillPointsRequired();
+				string skill_string = MakeStandardString(support_skills[i]->GetSkillName()) + string("     ") + sp_usage.str();
 				support_skill_names.push_back(MakeUnicodeString(skill_string));
 			}
 	
@@ -1023,7 +1025,17 @@ void BattleMode::SetPerformingScript(bool AIsPerforming) {
 	
 	// Check if a script has just ended. Set the script to stop performing and pop the script from the front of the queue
 	if (AIsPerforming == false && _performing_script == true) {
-		_script_queue.front().GetSource()->SetQueuedToPerform(false);
+
+		// Remove the first scripted event from the queue
+		// _script_queue.front().GetSource() is either BattleEnemyActor or BattleCharacterActor
+		try {
+		BattleEnemyActor * source = dynamic_cast<BattleEnemyActor*>(_script_queue.front().GetSource());
+		source->SetQueuedToPerform(false);
+		}
+		catch(std::bad_cast e) {
+		BattleCharacterActor * source = dynamic_cast<BattleCharacterActor*>(_script_queue.front().GetSource());
+		source->SetQueuedToPerform(false);
+		}
 		_script_queue.pop_front();
 	}
 
@@ -1032,11 +1044,11 @@ void BattleMode::SetPerformingScript(bool AIsPerforming) {
 
 
 
-void BattleMode::RemoveScriptedEventsForActor(BattleActor *AActorToRemove) {
+void BattleMode::RemoveScriptedEventsForActor(hoa_global::GlobalActor * actor) {
 	std::list<private_battle::ScriptEvent>::iterator it = _script_queue.begin();
 
 	while (it != _script_queue.end()) {
-		if ((*it).GetSource() == AActorToRemove) {
+		if ((*it).GetSource() == actor) {
 			it = _script_queue.erase(it);	//remove this location
 		}
 		else {
@@ -1052,12 +1064,12 @@ void BattleMode::PlayerVictory() {
 	if (BATTLE_DEBUG) cerr << "BATTLE: Player has won a battle!" << endl;
 
 	// Give player some loot
-	GlobalManager->AddItemToInventory(HP_POTION);
+	// TODO: FIX THIS GlobalManager->AddItemToInventory(HP_POTION);
 
 	// Give some experience as well
-	GlobalCharacter *claudius = GlobalManager->GetCharacter(GLOBAL_CLAUDIUS);
+	GlobalCharacter *claudius = GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS);
 	if (claudius != 0) {
-		claudius->AddXP(50);
+		claudius->AddExperienceLevel(1); // TODO: Add only experience, NOT exp LEVEL!
 	}
 
 	VideoManager->DisableFog();
@@ -1076,9 +1088,9 @@ void BattleMode::PlayerDefeat() {
 
 
 
-void BattleMode::SwapCharacters(private_battle::CharacterActor *AActorToRemove, private_battle::CharacterActor *AActorToAdd) {
+void BattleMode::SwapCharacters(BattleCharacterActor *AActorToRemove, BattleCharacterActor *AActorToAdd) {
 	//put AActorToAdd at AActorToRemove's location
-	for (std::deque < private_battle::CharacterActor * >::iterator it = _character_actors.begin(); it != _character_actors.end(); it++) {
+	for (std::deque < BattleCharacterActor * >::iterator it = _character_actors.begin(); it != _character_actors.end(); it++) {
 		if (*it == AActorToRemove) {
 			_character_actors.erase(it);
 			break;
@@ -1098,7 +1110,7 @@ void BattleMode::SwapCharacters(private_battle::CharacterActor *AActorToRemove, 
 
 int32 BattleMode::GetIndexOfFirstAliveEnemy() {
 
-	std::deque<private_battle::EnemyActor*>::iterator it = _enemy_actors.begin();
+	std::deque<private_battle::BattleEnemyActor*>::iterator it = _enemy_actors.begin();
 	for (uint32 i = 0; it != _enemy_actors.end(); i++, it++) {
 		if ((*it)->IsAlive()) {
 			return i;
@@ -1113,7 +1125,7 @@ int32 BattleMode::GetIndexOfFirstAliveEnemy() {
 int32 BattleMode::GetIndexOfFirstIdleCharacter() {
 	int32 index = -1;
 
-	deque<CharacterActor*>::iterator it = _character_actors.begin();
+	deque<BattleCharacterActor*>::iterator it = _character_actors.begin();
 	for (uint32 i = 0; it != _character_actors.end(); i++, it++) {
 		if (!(*it)->IsQueuedToPerform() && (*it)->IsAlive()) {
 			index = i;
@@ -1126,9 +1138,9 @@ int32 BattleMode::GetIndexOfFirstIdleCharacter() {
 
 
 
-int32 BattleMode::IndexLocationOfPlayerCharacter(private_battle::CharacterActor* const AActor) {
+int32 BattleMode::IndexLocationOfPlayerCharacter(private_battle::BattleCharacterActor* const AActor) {
 	int32 index = 0;
-	deque<CharacterActor*>::iterator it = _character_actors.begin();
+	deque<BattleCharacterActor*>::iterator it = _character_actors.begin();
 	for (; it != _character_actors.end(); it++) {
 		if (*it == AActor) {
 			return index;

@@ -206,13 +206,13 @@ void GlobalStatusEffect::_CreateIconImage() {
 	}
 
 	// TODO: Here draw the second part of the image based on the type
-	switch (_type) {
+//	switch (_type) {
 // 		case GLOBAL_STATUS_SOMETHING:
 // 			break;
-		default:
+//		default:
 			// This is not a good case to happen because we'll end up with a blank icon
-			if (GLOBAL_DEBUG) fprintf(stderr, "WARNING: could not determine icon image to draw for status effect\n");
-	}
+	//		if (GLOBAL_DEBUG) fprintf(stderr, "WARNING: could not determine icon image to draw for status effect\n");
+//	}
 
 	// TODO: Perhaps here the green up-arrow or red down-arrow will be drawn, if we decide not to include those arrows
 	// in the status images themselves
@@ -242,10 +242,11 @@ GlobalElementalEffect::GlobalElementalEffect(uint8 type, uint32 strength) :
 }
 
 
-/*
+
 GlobalElementalEffect::~GlobalElementalEffect()
-{}
-*/
+{
+}
+
 
 void GlobalElementalEffect::SetType(uint8 type) {
 	if (_type == type) {
@@ -262,7 +263,7 @@ void GlobalElementalEffect::SetType(uint8 type) {
 
 //void GlobalElementalEffect::DecrementStrength(uint32 amount)
 
-static bool CheckValidType(uint8 type) {
+bool GlobalElementalEffect::CheckValidType(uint8 type) {
 	switch (type) {
 		case GLOBAL_ELEMENTAL_FIRE:
 		case GLOBAL_ELEMENTAL_WATER:
