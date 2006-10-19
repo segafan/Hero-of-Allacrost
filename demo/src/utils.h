@@ -146,6 +146,7 @@ public:
 	size_t find(const ustring &s, size_t pos = 0) const;
 	ustring substr(size_t pos = 0, size_t n = npos) const;
 	
+	ustring & operator + (const ustring& s);
 	ustring & operator += (uint16 c);
 	ustring & operator += (const ustring& s);
 	ustring & operator = (const ustring& s);

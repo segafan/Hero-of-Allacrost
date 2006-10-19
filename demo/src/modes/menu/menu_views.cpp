@@ -113,14 +113,14 @@ bool CharacterWindow::Draw()
 
 	VideoManager->MoveRelative(0,20);
 	ostringstream os_health;
-	os_health << character->GetHP() << " / " << character->GetMaxHP();
+	os_health << character->GetHitPoints() << " / " << character->GetMaxHitPoints();
 	std::string health = std::string("HP: ") + os_health.str();
 	if (!VideoManager->DrawText(MakeUnicodeString(health)))
 		cerr << "CHARACTERWINDOW: ERROR > Couldn't draw health!" << endl;
 
 	VideoManager->MoveRelative(0,20);
 	ostringstream os_skill;
-	os_skill << character->GetSP() << " / " << character->GetMaxSP();
+	os_skill << character->GetSkillPoints() << " / " << character->GetMaxSkillPoints();
 	std::string skill = std::string("SP: ") + os_skill.str();
 	if (!VideoManager->DrawText(MakeUnicodeString(skill)))
 		cerr << "CHARACTERWINDOW: ERROR > Couldn't draw skill!" << endl;
@@ -281,7 +281,7 @@ bool MiniCharacterSelectWindow::Draw()
 		// Draw health
 		VideoManager->MoveRelative(0, 30);
 		ostringstream os_health;
-		os_health << current->GetHP() << " / " << current->GetMaxHP();
+		os_health << current->GetHitPoints() << " / " << current->GetMaxHitPoints();
 		std::string health = std::string("Health: ") + os_health.str();
 		if (!VideoManager->DrawText(MakeUnicodeString(health)))
 			cerr << "MINICHARACTERWINDOW: ERROR > Couldn't draw health!" << endl;
@@ -289,7 +289,7 @@ bool MiniCharacterSelectWindow::Draw()
 		// Draw skill points
 		VideoManager->MoveRelative(0, 30);
 		ostringstream os_skill;
-		os_skill << current->GetSP() << " / " << current->GetMaxSP();
+		os_skill << current->GetSkillPoints() << " / " << current->GetMaxSkillPoints();
 		std::string skill = std::string("Skill: ") + os_skill.str();
 		if (!VideoManager->DrawText(MakeUnicodeString(skill)))
 			cerr << "CHARACTERWINDOW: ERROR > Couldn't draw skill!" << endl;
@@ -334,7 +334,7 @@ void MiniCharacterSelectWindow::Update()
 		}
 
 		// check character hp
-		if (ch->GetHP() == ch->GetMaxHP())
+		if (ch->GetHitPoints() == ch->GetMaxHitPoints())
 		{
 			// don't use item we're full
 			_menu_sounds["bump"].PlaySound();
@@ -347,11 +347,11 @@ void MiniCharacterSelectWindow::Update()
 		// increase hp FIXME
 		if (selected->GetUsage() == GLOBAL_MENU_USAGE)
 		{	
-			uint32 new_hp = ch->GetHP();
+			uint32 new_hp = ch->GetHitPoints();
 			//new_hp += selected->GetRecoveryAmount();
-			if (new_hp > ch->GetMaxHP())
-				new_hp = ch->GetMaxHP();
-			ch->SetHP(new_hp);
+			if (new_hp > ch->GetMaxHitPoints())
+				new_hp = ch->GetMaxHitPoints();
+			ch->SetHitPoints(new_hp);
 		}
 
 		// increase sp
@@ -816,7 +816,7 @@ void InventoryWindow::ApplyItem() {
 	}
 
 	// check character hp
-	if (ch->GetHP() == ch->GetMaxHP())
+	if (ch->GetHitPoints() == ch->GetMaxHitPoints())
 	{
 		// don't use item we're full
 		_menu_sounds["bump"].PlaySound();
@@ -829,11 +829,11 @@ void InventoryWindow::ApplyItem() {
 	// increase hp
 	if (selected->GetUsage() == GLOBAL_MENU_USAGE)
 	{	
-		uint32 new_hp = ch->GetHP();
+		uint32 new_hp = ch->GetHitPoints();
 		new_hp += 180;//selected->->GetRecoveryAmount();
-		if (new_hp > ch->GetMaxHP())
-			new_hp = ch->GetMaxHP();
-		ch->SetHP(new_hp);
+		if (new_hp > ch->GetMaxHitPoints())
+			new_hp = ch->GetMaxHitPoints();
+		ch->SetHitPoints(new_hp);
 	}
 
 	// increase sp
@@ -1272,12 +1272,12 @@ bool StatusWindow::Draw()
 	VideoManager->MoveRelative(-55, 60);
 	
 	ostringstream ohp;
-	ohp << "HP: " << _current_char->GetHP() << " (" << _current_char->GetMaxHP() << ")";
+	ohp << "HP: " << _current_char->GetHitPoints() << " (" << _current_char->GetMaxHitPoints() << ")";
 	VideoManager->DrawText(MakeUnicodeString(ohp.str()));
 
 	VideoManager->MoveRelative(0, 25);
 	ostringstream osp;
-	osp << "SP: " << _current_char->GetSP() << " (" << _current_char->GetMaxSP() << ")";
+	osp << "SP: " << _current_char->GetSkillPoints() << " (" << _current_char->GetMaxSkillPoints() << ")";
 	VideoManager->DrawText(MakeUnicodeString(osp.str()));
 
 	VideoManager->MoveRelative(0, 25);

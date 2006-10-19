@@ -197,8 +197,7 @@ public:
 	**/
 	GlobalElementalEffect();
 	GlobalElementalEffect(uint8 type, uint32 value = 0);
-	~GlobalElementalEffect()
-		{}
+	~GlobalElementalEffect();
 
 	/** \brief Class Member Access Functions
 	*** \note The "Set" functions may also change the _icon_image member of this class

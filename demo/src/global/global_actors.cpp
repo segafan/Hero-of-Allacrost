@@ -42,7 +42,7 @@ GlobalAttackPoint::GlobalAttackPoint() {
 
 
 
-GlobalAttackPoint::GlobalAttackPoint(ustring name, uint16 x, uint16 y) :
+GlobalAttackPoint::GlobalAttackPoint(const hoa_utils::ustring & name, uint16 x, uint16 y) :
 	_name(name),
 	_x_position(x),
 	_y_position(y)
@@ -62,6 +62,16 @@ GlobalAttackPoint::~GlobalAttackPoint() {
 // ****************************************************************************
 // ***** GlobalActor
 // ****************************************************************************
+GlobalActor::GlobalActor()
+{
+}
+
+
+GlobalActor::~GlobalActor()
+{
+}
+
+
 GlobalWeapon* GlobalActor::EquipWeapon(GlobalWeapon* weapon) {
 	// TODO
 	return NULL;
@@ -96,7 +106,7 @@ void GlobalActor::_CalculateEvadeRatings() {
 // ***** GlobalEnemy
 // ****************************************************************************
 
-GlobalEnemy::GlobalEnemy(string file_name) :
+GlobalEnemy::GlobalEnemy(const std::string & file_name) :
 	_filename(file_name)
 {
 	// TODO: This is temporary code
@@ -230,7 +240,7 @@ GlobalCharacter::GlobalCharacter(hoa_utils::ustring name, std::string filename, 
 	_filename(filename),
 	_id(id)
 */
-GlobalCharacter::GlobalCharacter(hoa_utils::ustring name, std::string filename, uint32 id)
+GlobalCharacter::GlobalCharacter(const hoa_utils::ustring & name, std::string filename, uint32 id)
 {
 	_filename = filename;
 	_id = id;

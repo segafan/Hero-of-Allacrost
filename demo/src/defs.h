@@ -124,8 +124,8 @@ namespace hoa_battle {
 	namespace private_battle {
 		class ActorEffect;
 		class BattleActor;
-		class CharacterActor;
-		class EnemyActor;
+		class BattleCharacterActor;
+		class BattleEnemyActor;
 		class ScriptEvent;
 	}
 }
