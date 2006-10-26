@@ -34,7 +34,7 @@ class GUI;
 class MenuWindow;
 
 
-// !how many milliseconds it takes for a menu to scroll in or out of view
+//! how many milliseconds it takes for a menu to scroll in or out of view
 const int32 VIDEO_MENU_SCROLL_TIME = 200;
 
 
@@ -105,19 +105,27 @@ class MenuWindow : public GUIElement
 {
 public:
 
+	/*!
+	 *  \brief Constructor
+	 */
 	MenuWindow();
+	
+	/*!
+	 *  \brief Destructor
+	 */
 	~MenuWindow();
 	
 	/*!
 	 *  \brief draws menu window on screen
+	 * \return success/failure
 	 */
 	bool Draw();
 
 
 	/*!
 	 *  \brief updates the menu window, used for gradual show/hide effects
-	 *
 	 *  \param frameTime time elapsed during this frame, in milliseconds
+	 * \return success/failure
 	 */
 	bool Update(int32 frameTime);
 
@@ -129,6 +137,7 @@ public:
 	 *         VIDEO_MENU_STATE_SHOWN (Until then, it is VIDOE_MENU_STATE_SHOWING)
 	 *
 	 *  \note  The time it takes for the menu to show is VIDEO_MENU_SCROLL_TIME
+	 * \return success/failure
 	 */
 	bool Show();
 
@@ -142,6 +151,7 @@ public:
 	 *         VIDEO_MENU_STATE_HIDING)
 	 *
 	 *  \note  The time it takes for the menu to show is VIDEO_MENU_SCROLL_TIME
+	 * \return success/failure
 	 */
 	bool Hide();
 	
@@ -154,6 +164,7 @@ public:
 	 *         so they can be displayed
 	 *
 	 *  \param errors reference to a string to be filled if any errors are found
+	 * \return true if initialized, false if not
 	 */
 	bool IsInitialized(std::string &errors);
 
@@ -168,6 +179,7 @@ public:
 	 *  \param edgeSharedFlags  a combination of bitflags, VIDEO_MENU_EDGE_LEFT, etc. This tells which edges are shared with other menus so they can use the appropriate connector images
 	 *
 	 *  \note  this MUST be called before you try drawing it
+	 * \return success/failure
 	 */
 	bool Create(float w, float h, int32 edgeVisibleFlags = VIDEO_MENU_EDGE_ALL, int32 edgeSharedFlags = 0);
 
@@ -178,6 +190,7 @@ public:
 	 *         since it has to recreate the image descriptor
 	 *
 	 *  \param edgeVisibleFlags bit flags to specify which edges are visible
+	 * \return success/failure
 	 */
 	bool ChangeEdgeVisibleFlags(int32 edgeVisibleFlags);
 
@@ -188,6 +201,7 @@ public:
 	 *         since it has to recreate the image descriptor
 	 *
 	 *  \param edgeSharedFlags bit flags to specify which edges are shared
+	 * \return success/failure
 	 */
 	bool ChangeEdgeSharedFlags(int32 edgeSharedFlags);
 
@@ -202,7 +216,8 @@ public:
 	/*!
 	 *  \brief gets the width and height of the menu. Returns false if SetDimensions() hasn't
 	 *         been called yet
-	 *
+	 * \param w variable to store width of menu window
+	 * \param h variable to store height of menu window
 	 *  \note  w and h are in terms of a 1024x768 coordinate system
 	 */
 	void GetDimensions(float &w, float &h);
@@ -214,17 +229,20 @@ public:
 	 *
 	 *  \param mode  menu display mode to use, e.g. VIDEO_MENU_INSTANT, 
 	 *               VIDEO_MENU_EXPAND_FROM_CENTER, etc.
+	 * \return success/failure
 	 */
 	bool SetDisplayMode(MenuDisplayMode mode);
 	
 	
 	/*!
 	 *  \brief get the current menu display mode set for this menu
+	 * \return the menu display mode
 	 */
 	MenuDisplayMode GetDisplayMode();	
 	
 	/*!
 	 *  \brief get the current state for this menu (hidden, shown, hiding, showing)
+	 * \return the menu state
 	 */
 	MenuState GetState();
 
@@ -233,6 +251,7 @@ public:
 	 *  \brief get the current screen rectangle for scissoring used by this menu.
 	 *         This is mainly used so that controls owned by a menu obey the parent
 	 *         window's scissor rectangle
+	 * \return scissor rectangle for menu window
 	 */
 	ScreenRect GetScissorRect() { return _scissorRect; }
 
@@ -241,30 +260,54 @@ private:
 	/*!
 	 *  \brief used to recreate the menu image descriptor when the menu is created
 	 *         for the first time, or if the menu skin changes
+	 * \return success/failure
 	 */
-	bool RecreateImage();
+	bool _RecreateImage();
 
-	static int32 _currentMenuID;                    //! hand out new IDs to each menu that is created
-	static std::map<int32, MenuWindow *> _menu_map; //! keep a registered std::map of menus in case they need to be updated when the skin changes
+	//! hand out new IDs to each menu that is created
+	static int32 _currentMenuID;
 	
-	int32 _id;                       //! id of the menu, used to register and unregister it with the std::map when it is constructed/destructed
-	float _width, _height;           //! dimensions
-	float _innerWidth, _innerHeight; //! dimensions of the space inside the window
-	int32 _edgeVisibleFlags;         //! flags used to tell which edges are visible 
-	int32 _edgeSharedFlags;          //! flags used to tell which edges are shared
+	//! keep a registered std::map of menus in case they need to be updated when the skin changes
+	static std::map<int32, MenuWindow *> _menu_map;
 	
-	MenuState _state;                //! menu state (hidden, shown, hiding, showing)
-	int32  _currentTime;             //! milliseconds that passed since menu was shown
-	StillImage _menu_image;          //! image descriptor of the menu
-	MenuDisplayMode _mode;           //! text display mode (one character at a time, fading in, instant, etc.)
+	//! id of the menu, used to register and unregister it with the std::map when it is constructed/destructed
+	int32 _id;
 	
-	bool       _isScissored;         //! true if scissoring needs to be used
-	ScreenRect _scissorRect;         //! rectangle used for scissoring, set during each call to Update()
+	//! dimensions
+	float _width, _height;
+	
+	//! dimensions of the space inside the window
+	float _innerWidth, _innerHeight;
+	
+	//! flags used to tell which edges are visible 
+	int32 _edgeVisibleFlags;
+	
+	//! flags used to tell which edges are shared
+	int32 _edgeSharedFlags;
+	
+	//! menu state (hidden, shown, hiding, showing)
+	MenuState _state;
+	
+	//! milliseconds that passed since menu was shown
+	int32  _currentTime;
+	
+	//! image descriptor of the menu
+	StillImage _menu_image;
+	
+	//! text display mode (one character at a time, fading in, instant, etc.)
+	MenuDisplayMode _mode;
+	
+	//! true if scissoring needs to be used
+	bool       _isScissored;
+	
+	//! rectangle used for scissoring, set during each call to Update()
+	ScreenRect _scissorRect;
+	
 	friend class private_video::GUI;
-};
+}; //class MenuWindow : public GUIElement
 
 
 } // namespace hoa_video
 
 
-#endif  // !__MENU_WINDOW_HEADER__
+#endif  //! __MENU_WINDOW_HEADER__

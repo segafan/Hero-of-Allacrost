@@ -36,10 +36,10 @@ ParticleEffect::ParticleEffect()
 
 
 //-----------------------------------------------------------------------------
-// Draw: draws the effect. This is called by ParticleManager, not by API user
+// _Draw: draws the effect. This is called by ParticleManager, not by API user
 //-----------------------------------------------------------------------------
 
-bool ParticleEffect::Draw()
+bool ParticleEffect::_Draw()
 {
 	bool success = true;
 
@@ -56,7 +56,7 @@ bool ParticleEffect::Draw()
 			VideoManager->PopMatrix();
 			success = false;			
 			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: failed to draw system in ParticleEffect::Update()" << endl;
+				cerr << "VIDEO ERROR: failed to draw system in ParticleEffect::_Update()" << endl;
 		}		
 		
 		VideoManager->PopMatrix();
@@ -76,7 +76,7 @@ bool ParticleEffect::Draw()
 // Update: updates particle effect. Called by ParticleManager, not by user.
 //-----------------------------------------------------------------------------
 
-bool ParticleEffect::Update(float frame_time)
+bool ParticleEffect::_Update(float frame_time)
 {
 	_age += frame_time;
 	_num_particles = 0;
@@ -112,7 +112,7 @@ bool ParticleEffect::Update(float frame_time)
 			{
 				success = false;
 				if(VIDEO_DEBUG)
-					cerr << "VIDEO ERROR: failed to update system in ParticleEffect::Update()" << endl;				
+					cerr << "VIDEO ERROR: failed to update system in ParticleEffect::_Update()" << endl;				
 			}
 			
 			_num_particles += (*iSystem)->GetNumParticles();			
@@ -125,11 +125,11 @@ bool ParticleEffect::Update(float frame_time)
 
 
 //-----------------------------------------------------------------------------
-// Destroy: destroys the effect. Called by ParticleManager during Update(), if
+// Destroy: destroys the effect. Called by ParticleManager during _Update(), if
 //          this effect is not alive (i.e. IsAlive() returns false)
 //-----------------------------------------------------------------------------
 
-void ParticleEffect::Destroy()
+void ParticleEffect::_Destroy()
 {
 	list<ParticleSystem *>::iterator iSystem = _systems.begin();
 	

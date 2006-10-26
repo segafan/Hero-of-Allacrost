@@ -45,43 +45,43 @@ class ParticleKeyframe
 public:
 
 	ParticleKeyframe()
-	: _size_x(0.0f),
-	  _size_y(0.0f),
-	  _color(0.0f, 0.0f, 0.0f, 0.0f),
-	  _rotation_speed(0.0f),
-	  _size_variation_x(0.0f),
-	  _size_variation_y(0.0f),
-	  _rotation_speed_variation(0.0f),
-	  _color_variation(0.0f, 0.0f, 0.0f, 0.0f)
+	: size_x(0.0f),
+	  size_y(0.0f),
+	  color(0.0f, 0.0f, 0.0f, 0.0f),
+	  rotation_speed(0.0f),
+	  size_variation_x(0.0f),
+	  size_variation_y(0.0f),
+	  rotation_speed_variation(0.0f),
+	  color_variation(0.0f, 0.0f, 0.0f, 0.0f)
 	{
 	}
 
 	//! width and height scale. 1.0 means to use the normal height
-	float _size_x;
-	float _size_y;
+	float size_x;
+	float size_y;
 	
 	//! color (includes alpha)
-	Color _color;
+	Color color;
 	
 	//! rotation speed, radians per second clockwise
-	float _rotation_speed;
+	float rotation_speed;
 
 	//! random variation added to size
-	float _size_variation_x;
-	float _size_variation_y;
+	float size_variation_x;
+	float size_variation_y;
 	
 	//! random variation added to rotation speed
-	float _rotation_speed_variation;
+	float rotation_speed_variation;
 	
 	//! random variation added to color (each channel contains
 	//! the variation for that channel)
-	Color _color_variation;
+	Color color_variation;
 
-	float _time;	
+	float time;	
 };
 
 
 }  // namespace private_video
 }  // namespace hoa_video
 
-#endif  // !__PARTICLE_KEYFRAME_HEADER__
+#endif  //! __PARTICLE_KEYFRAME_HEADER__

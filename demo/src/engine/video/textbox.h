@@ -79,6 +79,8 @@ public:
 
 	/*!
 	 *  \brief must be called every frame to update the gradual text display
+	 *  \param frameTime   milliseconds since the last frame
+	 * \return success/failure
 	 */
 	bool Update(int32 frameTime);
 
@@ -86,6 +88,7 @@ public:
 	/*!
 	 *  \brief renders the textbox. Note that it is not affected by draw flags or coord sys settings,
 	 *         it uses whatever has been set for it using the Set*() calls
+	 * \return success/failure
 	 */
 	bool Draw();
 
@@ -95,6 +98,9 @@ public:
 	 *         if the width or height are negative or larger than 1024 or 768 respectively
 	 *
 	 *  \note  w and h are in terms of a 1024x768 coordinate system
+	 * \param w width for text box
+	 * \param h height for text box
+	 * \return success/failure
 	 */
 	bool SetDimensions(float w, float h);
 
@@ -104,6 +110,8 @@ public:
 	 *         been called yet
 	 *
 	 *  \note  w and h are in terms of a 1024x768 coordinate system
+	 * \param w variable to store the width
+	 * \param h variable to store the height
 	 */
 	void GetDimensions(float &w, float &h);
 
@@ -113,6 +121,7 @@ public:
 	 *
 	 *  \param xalign x alignment, e.g. VIDEO_X_LEFT
 	 *  \param yalign y alignment, e.g. VIDEO_Y_TOP
+	 * \return success/failure
 	 */
 	bool SetTextAlignment(int32 xalign, int32 yalign);
 
@@ -130,6 +139,7 @@ public:
 	 *  \brief sets the font for this textbox. Returns false on failure
 	 *
 	 *  \param fontName the label associated with the font when you called LoadFont()
+	 * \return success/failure
 	 */
 
 	bool SetFont(const std::string &fontName);
@@ -137,6 +147,7 @@ public:
 
 	/*!
 	 *  \brief gets the font for this textbox
+	 * \return string containing the font name
 	 */
 
 	std::string GetFont();
@@ -148,6 +159,7 @@ public:
 	 *
 	 *  \param mode  display mode to use, e.g. VIDEO_TEXT_CHAR for one character
 	 *               at a time
+	 * \return success/failure
 	 */
 	bool SetDisplayMode(const TextDisplayMode &mode);
 	
@@ -155,8 +167,7 @@ public:
 	/*!
 	 *  \brief get the current text display mode set for this textbox.
 	 *
-	 *  \param mode  display mode to use, e.g. VIDEO_TEXT_CHAR for one character
-	 *               at a time
+	 *  \return the current text display mode
 	 */
 	TextDisplayMode GetDisplayMode();
 	
@@ -173,12 +184,14 @@ public:
 	 *
 	 *  \note  This has no effect for textboxes using the VIDEO_TEXT_INSTANT
 	 *         display mode.
+	 * \return success/failure
 	 */
 	bool SetDisplaySpeed(float displaySpeed);
 	
 	
 	/*!
 	 *  \brief get the current text display speed, in characters per second
+	 * \return the current display speed
 	 */
 	float GetDisplaySpeed();
 
@@ -189,6 +202,7 @@ public:
 	 *  \note  If you create a textbox but don't draw any text on it, the
 	 *         finished property is false. Only after text is drawn to it
 	 *         does this return true
+	 * \return true if finished, false if not
 	 */
 	bool IsFinished();
 
@@ -198,6 +212,7 @@ public:
 	 *         This is useful if a player gets impatient while text is scrolling
 	 *         to the screen. Returns false if we're not in the middle of a text
 	 *         render operation.
+	 * \return success/failure
 	 */
 	bool ForceFinish();
 
@@ -215,6 +230,7 @@ public:
 	 *         to the console if debugging is turned on, and false is returned
 	 *
 	 *  \param text  text to draw
+	 * \return success/failure
 	 */
 	bool SetDisplayText(const hoa_utils::ustring &text);
 
@@ -222,24 +238,29 @@ public:
 	/*!
 	 *  \brief non-unicode version of ShowText(). See the unicode version for more
 	 *         details.
+	 * \param text text to be set in the box (non-unicode)
+	 * \return success/failure
 	 */
 	bool SetDisplayText(const std::string &text);
 
 
 	/*!
 	 *  \brief returns the text currently being displayed by textbox
+	 * \return text in the display box
 	 */
 	hoa_utils::ustring GetText();
 
 
 	/*!
 	 *  \brief clears the textbox so it's not displaying anything
+	 * \return success/failure
 	 */
 	bool Clear();
 
 
 	/*!
 	 *  \brief returns true if this text box is empty (either because ShowText() has never been called, or because Clear() was called)
+	 * \return true if empty, false if not
 	 */
 	bool IsEmpty();
 
@@ -251,31 +272,49 @@ public:
 	 *         so they can be displayed
 	 *
 	 *  \param errors reference to a string to be filled if any errors are found
+	 * \return true if initialized, false if not
 	 */
 	bool IsInitialized(std::string &errors);
 
 private:
 
-	float _width, _height;            //! dimensions of the text box
+	//! dimensions of the text box
+	float _width, _height;
 
-	float _displaySpeed;              //! characters per second to display text
-						   
-	int32 _text_xalign, _text_yalign; //! alignment flags for text
-	int32 _numChars;                  //! hold the number of characters for the entire text
-						   
-	bool    _finished;                //! true if the text being drawn by ShowText() is done displaying in the case of gradual rendering
-	int32   _currentTime;             //! milliseconds that passed since ShowText() was called
-	int32   _endTime;                 //! milliseconds from the time since ShowText() was called until the text display will be complete
-								   
-	std::string    _font;             //! font used for this textbox
-	FontProperties _fontProperties;   //! structure containing properties of the current font like height, etc.
+	//! characters per second to display text
+	float _displaySpeed;
 
-	TextDisplayMode _mode;                 //! text display mode (one character at a time, fading in, instant, etc.)
-	std::vector<hoa_utils::ustring> _text; //! array of strings, one for each line
+	//! alignment flags for text
+	int32 _text_xalign, _text_yalign;
+	
+	//! hold the number of characters for the entire text
+	int32 _numChars;
+
+	//! true if the text being drawn by ShowText() is done displaying in the case of gradual rendering
+	bool    _finished;
+	
+	//! milliseconds that passed since ShowText() was called
+	int32   _currentTime;
+	
+	//! milliseconds from the time since ShowText() was called until the text display will be complete
+	int32   _endTime;
+
+	//! font used for this textbox
+	std::string    _font;
+	
+	//! structure containing properties of the current font like height, etc.
+	FontProperties _fontProperties;
+
+	//! text display mode (one character at a time, fading in, instant, etc.)
+	TextDisplayMode _mode;
+	
+	//! array of strings, one for each line
+	std::vector<hoa_utils::ustring> _text;
 
 
 	/*!
 	 *  \brief returns the height of the text when it's rendered with the current font
+	 * \return height of text rendered in current font
 	 */
 	int32 _CalculateTextHeight();
 
@@ -286,6 +325,7 @@ private:
 	 *         Other languages might have space characters corresponding to other unicode values
 	 *
 	 *  \param character the character you want to check
+	 * \return true if character can be wrapped, false if not
 	 */
 	bool _IsBreakableChar(uint16 character);
 
@@ -307,7 +347,8 @@ private:
 	 *  \param scissorRect  scissor rectangle used for the textbox
 	 */
 	void _DrawTextLines(float textX, float textY, ScreenRect scissorRect);
-};
+	
+}; // class TextBox : public GUIControl
 
 
 

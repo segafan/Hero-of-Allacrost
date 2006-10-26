@@ -76,20 +76,27 @@ class ParticleEffect
 {
 public:
 
+	/*!
+	 *  \brief Constructor
+	 */
 	ParticleEffect();
 	
 
 	/*!
-	 *  \brief moves to the effect to the specified position on the screen,
+	 *  \brief moves the effect to the specified position on the screen,
 	 *         This can be used if you want to move a particle system around
 	 *         on some flight path, or if you want to attach the system to an
 	 *         object. (e.g. smoke to a jet)
+	 * \param x movement of system in x direction
+	 * \param y movement of system in y direction
 	 */		
 	void Move(float x, float y);
 	
 
 	/*!
 	 *  \brief moves the effect dx and dy units relative to its current position
+	 * \param dx x offset to move to from current x position
+	 * \param dy y offset to move to from current y position
 	 */			
 	void MoveRelative(float dx, float dy);
 	
@@ -101,6 +108,7 @@ public:
 	 *         smoke coming out of a jet, set the emitter orientation to zero degrees (right)
 	 *         when you create the effect. Then, at runtime just call SetOrientation() every
 	 *         frame with the angle the jet is facing.
+	 * \param angle rotation of particle system
 	 */			
 	void SetOrientation(float angle);
 	
@@ -112,6 +120,8 @@ public:
 	 *
 	 *  \note  a positive radial acceleration will move a particle away from the attractor,
 	 *         and negative will move it towards it.
+	 * \param x x coordiante of gravitation point
+	 * \param y y coordiante of gravitation point
 	 */			
 	void SetAttractorPoint(float x, float y);
 
@@ -120,6 +130,7 @@ public:
 	 *  \brief returns true if the system is alive, i.e. the number of active
 	 *         particles is more than zero. This is used by the particle manager
 	 *         so it knows when to destroy an effect.
+	 * \return true if system is alive, false if dead
 	 */			
 	bool IsAlive();
 	
@@ -137,12 +148,15 @@ public:
 
 	/*!
 	 *  \brief return the number of active particles in this effect
+	 * \return number of particles in the system
 	 */				
 	int32 GetNumParticles() const;
 	
 
 	/*!
 	 *  \brief return the position of the effect into x and y
+	 * \param x parameter to store x value of system in
+	 * \param y parameter to store y value of system in
 	 */				
 	void  GetPosition(float &x, float &y) const;
 
@@ -150,6 +164,7 @@ public:
 	/*!
 	 *  \brief return the age of the system, i.e. how many seconds it has been since
 	 *         it was created
+	 * \return age of the system
 	 */			
 	float GetAge() const;
 
@@ -158,22 +173,25 @@ private:
 	/*!
 	 *  \brief draws the effect. This is private so that only the ParticleManager class
 	 *         can draw effects.
+	 * \return success/failure
 	 */			
-	bool Draw();
+	bool _Draw();
 
 
 	/*!
 	 *  \brief updates the effect. This is private so that only the ParticleManager class
 	 *         can update effects.
+	 * \param the new frame time
+	 * \return success/failure
 	 */			
-	bool Update(float frame_time);
+	bool _Update(float frame_time);
 
 
 	/*!
 	 *  \brief destroys the effect. This is private so that only the ParticleManager class
 	 *         can destroy effects.
 	 */			
-	void Destroy();
+	void _Destroy();
 	
 	
 	//! pointer to the effect definition
@@ -202,8 +220,9 @@ private:
 	int32 _num_particles;
 	
 	friend class private_video::ParticleManager;
-};
+	
+}; // class ParticleEffect
 
 }  // namespace hoa_video
 
-#endif  // !__PARTICLE_EFFECT_HEADER__
+#endif  //! __PARTICLE_EFFECT_HEADER__

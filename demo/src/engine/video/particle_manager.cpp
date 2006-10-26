@@ -195,60 +195,60 @@ bool TEMP_LoadEffectHelper(const string &filename, lua_State *L, ParticleEffectD
 		
 		ParticleSystemDef *sys_def = new ParticleSystemDef;
 		
-		LOAD_FLOAT("x", sys_def->_emitter._x);
-		LOAD_FLOAT("y", sys_def->_emitter._y);
-		LOAD_FLOAT("x2", sys_def->_emitter._x2);
-		LOAD_FLOAT("y2", sys_def->_emitter._y2);
-		LOAD_FLOAT("center_x", sys_def->_emitter._center_x);
-		LOAD_FLOAT("center_y", sys_def->_emitter._center_y);
-		LOAD_FLOAT("x_variation", sys_def->_emitter._x_variation);
-		LOAD_FLOAT("y_variation", sys_def->_emitter._y_variation);
-		LOAD_FLOAT("radius", sys_def->_emitter._radius);
+		LOAD_FLOAT("x", sys_def->emitter._x);
+		LOAD_FLOAT("y", sys_def->emitter._y);
+		LOAD_FLOAT("x2", sys_def->emitter._x2);
+		LOAD_FLOAT("y2", sys_def->emitter._y2);
+		LOAD_FLOAT("center_x", sys_def->emitter._center_x);
+		LOAD_FLOAT("center_y", sys_def->emitter._center_y);
+		LOAD_FLOAT("x_variation", sys_def->emitter._x_variation);
+		LOAD_FLOAT("y_variation", sys_def->emitter._y_variation);
+		LOAD_FLOAT("radius", sys_def->emitter._radius);
 		
 		string shape_string;
 		LOAD_STRING("shape", shape_string);
 		
 		if(!strcasecmp(shape_string.c_str(), "point"))
-			sys_def->_emitter._shape = EMITTER_SHAPE_POINT;
+			sys_def->emitter._shape = EMITTER_SHAPE_POINT;
 		else if(!strcasecmp(shape_string.c_str(), "line"))
-			sys_def->_emitter._shape = EMITTER_SHAPE_LINE;
+			sys_def->emitter._shape = EMITTER_SHAPE_LINE;
 		else if(!strcasecmp(shape_string.c_str(), "circle outline"))
-			sys_def->_emitter._shape = EMITTER_SHAPE_CIRCLE;
+			sys_def->emitter._shape = EMITTER_SHAPE_CIRCLE;
 		else if(!strcasecmp(shape_string.c_str(), "circle"))
-			sys_def->_emitter._shape = EMITTER_SHAPE_FILLED_CIRCLE;
+			sys_def->emitter._shape = EMITTER_SHAPE_FILLED_CIRCLE;
 		else if(!strcasecmp(shape_string.c_str(), "rectangle"))
-			sys_def->_emitter._shape = EMITTER_SHAPE_FILLED_RECTANGLE;
+			sys_def->emitter._shape = EMITTER_SHAPE_FILLED_RECTANGLE;
 		
-		LOAD_BOOL("omnidirectional", sys_def->_emitter._omnidirectional);
-		LOAD_FLOAT("orientation", sys_def->_emitter._orientation);
-		LOAD_FLOAT("outer_cone", sys_def->_emitter._outer_cone);
-		LOAD_FLOAT("inner_cone", sys_def->_emitter._inner_cone);
-		LOAD_FLOAT("initial_speed", sys_def->_emitter._initial_speed);
-		LOAD_FLOAT("initial_speed_variation", sys_def->_emitter._initial_speed_variation);
-		LOAD_FLOAT("emission_rate", sys_def->_emitter._emission_rate);
-		LOAD_FLOAT("start_time", sys_def->_emitter._start_time);
+		LOAD_BOOL("omnidirectional", sys_def->emitter._omnidirectional);
+		LOAD_FLOAT("orientation", sys_def->emitter._orientation);
+		LOAD_FLOAT("outer_cone", sys_def->emitter._outer_cone);
+		LOAD_FLOAT("inner_cone", sys_def->emitter._inner_cone);
+		LOAD_FLOAT("initial_speed", sys_def->emitter._initial_speed);
+		LOAD_FLOAT("initial_speed_variation", sys_def->emitter._initial_speed_variation);
+		LOAD_FLOAT("emission_rate", sys_def->emitter._emission_rate);
+		LOAD_FLOAT("start_time", sys_def->emitter._start_time);
 		
 		string emitter_mode_string;
 		LOAD_STRING("emitter_mode", emitter_mode_string);
 		
 		if(!strcasecmp(emitter_mode_string.c_str(), "looping"))
-			sys_def->_emitter._emitter_mode = EMITTER_MODE_LOOPING;
+			sys_def->emitter._emitter_mode = EMITTER_MODE_LOOPING;
 		else if(!strcasecmp(emitter_mode_string.c_str(), "one shot"))
-			sys_def->_emitter._emitter_mode = EMITTER_MODE_ONE_SHOT;
+			sys_def->emitter._emitter_mode = EMITTER_MODE_ONE_SHOT;
 		else if(!strcasecmp(emitter_mode_string.c_str(), "burst"))
-			sys_def->_emitter._emitter_mode = EMITTER_MODE_BURST;
+			sys_def->emitter._emitter_mode = EMITTER_MODE_BURST;
 		else //.. if(!strcasecmp(emitter_mode_string.c_str(), "always"))
-			sys_def->_emitter._emitter_mode = EMITTER_MODE_ALWAYS;
+			sys_def->emitter._emitter_mode = EMITTER_MODE_ALWAYS;
 		
 		string spin_string;
 		LOAD_STRING("spin", spin_string);
 		
 		if(!strcasecmp(spin_string.c_str(), "random"))
-			sys_def->_emitter._spin = EMITTER_SPIN_RANDOM;
+			sys_def->emitter._spin = EMITTER_SPIN_RANDOM;
 		else if(!strcasecmp(spin_string.c_str(), "counterclockwise"))
-			sys_def->_emitter._spin = EMITTER_SPIN_COUNTERCLOCKWISE;
+			sys_def->emitter._spin = EMITTER_SPIN_COUNTERCLOCKWISE;
 		else //..if(!strcasecmp(spin_string.c_str(), "clockwise"))
-			sys_def->_emitter._spin = EMITTER_SPIN_CLOCKWISE;
+			sys_def->emitter._spin = EMITTER_SPIN_CLOCKWISE;
 
 		// OK! done loading the emitter data. Now, load the keyframes
 		
@@ -265,25 +265,25 @@ bool TEMP_LoadEffectHelper(const string &filename, lua_State *L, ParticleEffectD
 
 		int32 num_keyframes = luaL_getn(L, -1);				
 		
-		sys_def->_keyframes.resize(num_keyframes);
+		sys_def->keyframes.resize(num_keyframes);
 		
 		
 		for(int32 kf = 0; kf < num_keyframes; ++kf)
 		{
-			sys_def->_keyframes[kf] = new ParticleKeyframe;
+			sys_def->keyframes[kf] = new ParticleKeyframe;
 			
 			// get the kf'th keyframe table
 			lua_rawgeti(L, -1, kf+1);
 			
-			LOAD_FLOAT("size_x", sys_def->_keyframes[kf]->_size_x);
-			LOAD_FLOAT("size_y", sys_def->_keyframes[kf]->_size_y);
-			LOAD_COLOR("color", sys_def->_keyframes[kf]->_color);
-			LOAD_FLOAT("rotation_speed", sys_def->_keyframes[kf]->_rotation_speed);
-			LOAD_FLOAT("size_variation_x", sys_def->_keyframes[kf]->_size_variation_x);
-			LOAD_FLOAT("size_variation_y", sys_def->_keyframes[kf]->_size_variation_y);
-			LOAD_COLOR("color_variation", sys_def->_keyframes[kf]->_color_variation);
-			LOAD_FLOAT("rotation_speed_variation", sys_def->_keyframes[kf]->_rotation_speed_variation);
-			LOAD_FLOAT("time", sys_def->_keyframes[kf]->_time);
+			LOAD_FLOAT("size_x", sys_def->keyframes[kf]->size_x);
+			LOAD_FLOAT("size_y", sys_def->keyframes[kf]->size_y);
+			LOAD_COLOR("color", sys_def->keyframes[kf]->color);
+			LOAD_FLOAT("rotation_speed", sys_def->keyframes[kf]->rotation_speed);
+			LOAD_FLOAT("size_variation_x", sys_def->keyframes[kf]->size_variation_x);
+			LOAD_FLOAT("size_variation_y", sys_def->keyframes[kf]->size_variation_y);
+			LOAD_COLOR("color_variation", sys_def->keyframes[kf]->color_variation);
+			LOAD_FLOAT("rotation_speed_variation", sys_def->keyframes[kf]->rotation_speed_variation);
+			LOAD_FLOAT("time", sys_def->keyframes[kf]->time);
 			
 			// pop the current keyframe
 			lua_pop(L, 1);			
@@ -323,7 +323,7 @@ bool TEMP_LoadEffectHelper(const string &filename, lua_State *L, ParticleEffectD
 			}			
 			
 			string anim_filename = lua_tostring(L, -1);
-			sys_def->_animation_frame_filenames.push_back(anim_filename);
+			sys_def->animation_frame_filenames.push_back(anim_filename);
 			
 			// pop the current animation frame filename
 			lua_pop(L, 1);
@@ -363,7 +363,7 @@ bool TEMP_LoadEffectHelper(const string &filename, lua_State *L, ParticleEffectD
 			}			
 			
 			int32 anim_frame_time = (int32)lua_tonumber(L, -1);
-			sys_def->_animation_frame_times.push_back(anim_frame_time);
+			sys_def->animation_frame_times.push_back(anim_frame_time);
 			
 			// pop the current animation frame time
 			lua_pop(L, 1);
@@ -372,58 +372,58 @@ bool TEMP_LoadEffectHelper(const string &filename, lua_State *L, ParticleEffectD
 		// pop the animation_frame times table
 		lua_pop(L, 1);
 		
-		LOAD_BOOL("enabled", sys_def->_enabled);
-		LOAD_INT ("blend_mode", sys_def->_blend_mode);
-		LOAD_FLOAT("system_lifetime", sys_def->_system_lifetime);
+		LOAD_BOOL("enabled", sys_def->enabled);
+		LOAD_INT ("blend_mode", sys_def->blend_mode);
+		LOAD_FLOAT("system_lifetime", sys_def->system_lifetime);
 
-		LOAD_FLOAT("particle_lifetime", sys_def->_particle_lifetime);
-		LOAD_FLOAT("particle_lifetime_variation", sys_def->_particle_lifetime_variation);
-		LOAD_INT  ("max_particles", sys_def->_max_particles);		
-		LOAD_FLOAT("damping", sys_def->_damping);
-		LOAD_FLOAT("damping_variation", sys_def->_damping_variation);
-		LOAD_FLOAT("acceleration_x", sys_def->_acceleration_x);
-		LOAD_FLOAT("acceleration_y", sys_def->_acceleration_y);
-		LOAD_FLOAT("acceleration_variation_x", sys_def->_acceleration_variation_x);
-		LOAD_FLOAT("acceleration_variation_y", sys_def->_acceleration_variation_y);
-		LOAD_FLOAT("wind_velocity_x", sys_def->_wind_velocity_x);
-		LOAD_FLOAT("wind_velocity_y", sys_def->_wind_velocity_y);
-		LOAD_FLOAT("wind_velocity_variation_x", sys_def->_wind_velocity_variation_x);
-		LOAD_FLOAT("wind_velocity_variation_y", sys_def->_wind_velocity_variation_y);
-		LOAD_BOOL ("wave_motion_used", sys_def->_wave_motion_used);
-		LOAD_FLOAT("wave_length", sys_def->_wave_length);
-		LOAD_FLOAT("wave_length_variation", sys_def->_wave_length_variation);
-		LOAD_FLOAT("wave_amplitude", sys_def->_wave_amplitude);
-		LOAD_FLOAT("wave_amplitude_variation", sys_def->_wave_amplitude_variation);
-		LOAD_FLOAT("tangential_acceleration", sys_def->_tangential_acceleration);
-		LOAD_FLOAT("tangential_acceleration_variation", sys_def->_tangential_acceleration_variation);
-		LOAD_FLOAT("radial_acceleration", sys_def->_radial_acceleration);
-		LOAD_FLOAT("radial_acceleration_variation", sys_def->_radial_acceleration_variation);
-		LOAD_BOOL ("user_defined_attractor", sys_def->_user_defined_attractor);
-		LOAD_FLOAT("attractor_falloff", sys_def->_attractor_falloff);
-		LOAD_BOOL ("rotation_used", sys_def->_rotation_used);
-		LOAD_BOOL ("rotate_to_velocity", sys_def->_rotate_to_velocity);
-		LOAD_BOOL ("speed_scale_used", sys_def->_speed_scale_used);
-		LOAD_FLOAT("speed_scale", sys_def->_speed_scale);
-		LOAD_FLOAT("min_speed_scale", sys_def->_min_speed_scale);		
-		LOAD_FLOAT("max_speed_scale", sys_def->_max_speed_scale);
-		LOAD_BOOL ("smooth_animation", sys_def->_smooth_animation);
-		LOAD_BOOL ("modify_stencil", sys_def->_modify_stencil);
+		LOAD_FLOAT("particle_lifetime", sys_def->particle_lifetime);
+		LOAD_FLOAT("particle_lifetime_variation", sys_def->particle_lifetime_variation);
+		LOAD_INT  ("max_particles", sys_def->max_particles);		
+		LOAD_FLOAT("damping", sys_def->damping);
+		LOAD_FLOAT("damping_variation", sys_def->damping_variation);
+		LOAD_FLOAT("acceleration_x", sys_def->acceleration_x);
+		LOAD_FLOAT("acceleration_y", sys_def->acceleration_y);
+		LOAD_FLOAT("acceleration_variation_x", sys_def->acceleration_variation_x);
+		LOAD_FLOAT("acceleration_variation_y", sys_def->acceleration_variation_y);
+		LOAD_FLOAT("wind_velocity_x", sys_def->wind_velocity_x);
+		LOAD_FLOAT("wind_velocity_y", sys_def->wind_velocity_y);
+		LOAD_FLOAT("wind_velocity_variation_x", sys_def->wind_velocity_variation_x);
+		LOAD_FLOAT("wind_velocity_variation_y", sys_def->wind_velocity_variation_y);
+		LOAD_BOOL ("wave_motion_used", sys_def->wave_motion_used);
+		LOAD_FLOAT("wave_length", sys_def->wave_length);
+		LOAD_FLOAT("wave_length_variation", sys_def->wave_length_variation);
+		LOAD_FLOAT("wave_amplitude", sys_def->wave_amplitude);
+		LOAD_FLOAT("wave_amplitude_variation", sys_def->wave_amplitude_variation);
+		LOAD_FLOAT("tangential_acceleration", sys_def->tangential_acceleration);
+		LOAD_FLOAT("tangential_acceleration_variation", sys_def->tangential_acceleration_variation);
+		LOAD_FLOAT("radial_acceleration", sys_def->radial_acceleration);
+		LOAD_FLOAT("radial_acceleration_variation", sys_def->radial_acceleration_variation);
+		LOAD_BOOL ("user_defined_attractor", sys_def->user_defined_attractor);
+		LOAD_FLOAT("attractor_falloff", sys_def->attractor_falloff);
+		LOAD_BOOL ("rotation_used", sys_def->rotation_used);
+		LOAD_BOOL ("rotate_to_velocity", sys_def->rotate_to_velocity);
+		LOAD_BOOL ("speed_scale_used", sys_def->speed_scale_used);
+		LOAD_FLOAT("speed_scale", sys_def->speed_scale);
+		LOAD_FLOAT("min_speed_scale", sys_def->min_speed_scale);		
+		LOAD_FLOAT("max_speed_scale", sys_def->max_speed_scale);
+		LOAD_BOOL ("smooth_animation", sys_def->smooth_animation);
+		LOAD_BOOL ("modify_stencil", sys_def->modify_stencil);
 		
 		string stencil_op_string;
 		LOAD_STRING("stencil_op", stencil_op_string);		
 		
 		if(!strcasecmp(stencil_op_string.c_str(), "incr"))
-			sys_def->_stencil_op = VIDEO_STENCIL_OP_INCREASE;
+			sys_def->stencil_op = VIDEO_STENCIL_OP_INCREASE;
 		else if(!strcasecmp(stencil_op_string.c_str(), "decr"))
-			sys_def->_stencil_op = VIDEO_STENCIL_OP_DECREASE;
+			sys_def->stencil_op = VIDEO_STENCIL_OP_DECREASE;
 		else if(!strcasecmp(stencil_op_string.c_str(), "zero"))
-			sys_def->_stencil_op = VIDEO_STENCIL_OP_ZERO;
+			sys_def->stencil_op = VIDEO_STENCIL_OP_ZERO;
 		else //..if(!strcasecmp(stencil_op_string.c_str(), "one"))
-			sys_def->_stencil_op = VIDEO_STENCIL_OP_ONE;
+			sys_def->stencil_op = VIDEO_STENCIL_OP_ONE;
 		
-		LOAD_BOOL("use_stencil", sys_def->_use_stencil);
-		LOAD_FLOAT("scene_lighting", sys_def->_scene_lighting);
-		LOAD_BOOL ("random_initial_angle", sys_def->_random_initial_angle);
+		LOAD_BOOL("use_stencil", sys_def->use_stencil);
+		LOAD_FLOAT("scene_lighting", sys_def->scene_lighting);
+		LOAD_BOOL ("random_initial_angle", sys_def->random_initial_angle);
 
 		// pop the system table
 		lua_pop(L, 1);
@@ -514,7 +514,7 @@ bool ParticleManager::Draw()
 	
 	while(iEffect != _effects.end())
 	{
-		if(!(iEffect->second)->Draw())
+		if(!(iEffect->second)->_Draw())
 		{
 			success = false;
 			if(VIDEO_DEBUG)
@@ -546,7 +546,7 @@ bool ParticleManager::Update(int32 frame_time)
 	{
 		if(!(iEffect->second)->IsAlive())
 		{
-			(iEffect->second)->Destroy();
+			(iEffect->second)->_Destroy();
 			
 			map<ParticleEffectID, ParticleEffect *>::iterator iEffectNext = iEffect;
 			++iEffectNext;
@@ -556,7 +556,7 @@ bool ParticleManager::Update(int32 frame_time)
 		}
 		else
 		{
-			if(!(iEffect->second)->Update(frame_time_seconds))
+			if(!(iEffect->second)->_Update(frame_time_seconds))
 			{
 				success = false;
 				if(VIDEO_DEBUG)
@@ -597,7 +597,7 @@ void ParticleManager::Destroy()
 	
 	while(iEffect != _effects.end())
 	{
-		(iEffect->second)->Destroy();
+		(iEffect->second)->_Destroy();
 		delete (iEffect->second);
 		++iEffect;
 	}
@@ -659,7 +659,7 @@ ParticleEffect *ParticleManager::_CreateEffect(const ParticleEffectDef *def)
 	
 	while(iSystem != iEnd)
 	{
-		if((*iSystem)->_enabled)
+		if((*iSystem)->enabled)
 		{
 			ParticleSystem *sys = new ParticleSystem;
 			if(!sys->Create(*iSystem))

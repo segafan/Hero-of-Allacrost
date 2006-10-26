@@ -27,14 +27,25 @@ enum TextShadowStyle
 {
 	VIDEO_TEXT_SHADOW_INVALID = -1,
 	
-	VIDEO_TEXT_SHADOW_NONE,       //! no text shadow, even if shadows are enabled
-	VIDEO_TEXT_SHADOW_DARK,       //! shadowed area is darkened (default)
-	VIDEO_TEXT_SHADOW_LIGHT,      //! shadowed area is lightened
-	VIDEO_TEXT_SHADOW_BLACK,      //! shadowed area is completely black
-	VIDEO_TEXT_SHADOW_COLOR,      //! shadowed area is the color of the text, but less alpha
-	VIDEO_TEXT_SHADOW_INVCOLOR,   //! shadowed area is the inverse of the text's color (e.g. white text, black shadow)
+	//! no text shadow, even if shadows are enabled
+	VIDEO_TEXT_SHADOW_NONE = 0,
 	
-	VIDEO_TEXT_SHADOW_TOTAL
+	//! shadowed area is darkened (default)
+	VIDEO_TEXT_SHADOW_DARK = 1,
+	
+	//! shadowed area is lightened
+	VIDEO_TEXT_SHADOW_LIGHT = 2,
+	
+	//! shadowed area is completely black
+	VIDEO_TEXT_SHADOW_BLACK = 3,
+	
+	//! shadowed area is the color of the text, but less alpha
+	VIDEO_TEXT_SHADOW_COLOR = 4,
+	
+	//! shadowed area is the inverse of the text's color (e.g. white text, black shadow)
+	VIDEO_TEXT_SHADOW_INVCOLOR = 5,
+	
+	VIDEO_TEXT_SHADOW_TOTAL = 6
 	
 };
 
@@ -43,21 +54,32 @@ enum TextShadowStyle
  *****************************************************************************/
 
 
-
 class FontGlyph
 {
 public:	
-	GLuint texture;		//! index of the GL texture for this glyph
+
+	//! index of the GL texture for this glyph
+	GLuint texture;
 	
-	int32 width;		//! width of the glyph in pixels
-	int32 height;		//! height of the glyph in pixels
+	//! width of the glyph in pixels
+	int32 width;
+	
+	//! height of the glyph in pixels
+	int32 height;
 
-	int minx;			//! minx of the glyph in pixels (see TTF_GlyphMetrics)
-	int miny;			//! miny of the glyph in pixels (see TTF_GlyphMetrics)
+	//! minx of the glyph in pixels (see TTF_GlyphMetrics)
+	int minx;
+	
+	//! miny of the glyph in pixels (see TTF_GlyphMetrics)
+	int miny;
 
-	float tx;			//! maxx of the glyph in texture space (see TTF_GlyphMetrics)
-	float ty;			//! maxy of the glyph in texture space (see TTF_GlyphMetrics)
+	//! maxx of the glyph in texture space (see TTF_GlyphMetrics)
+	float tx;
+	
+	//! maxy of the glyph in texture space (see TTF_GlyphMetrics)
+	float ty;
 
+	//! space between glyphs
 	int advance;
 };
 
@@ -69,18 +91,33 @@ public:
 class FontProperties
 {
 public:
-	int32 height;   //! maximum height of all glyphs
-	int32 lineskip; //! SDL_ttf's recommended amount of spacing between lines
-	int32 ascent;   //! height above baseline of font
-	int32 descent;  //! height below baseline of font
-	int32 shadowX;  //! x offset of text shadow
-	int32 shadowY;  //! y offset of text shadow
+
+	//! maximum height of all glyphs
+	int32 height;
 	
-	TextShadowStyle shadowStyle;  //! style of text shadow
+	//! SDL_ttf's recommended amount of spacing between lines
+	int32 lineskip;
+	
+	//! height above baseline of font
+	int32 ascent;
+	
+	//! height below baseline of font
+	int32 descent;
+	
+	//! x offset of text shadow
+	int32 shadowX;
+	
+	//! y offset of text shadow
+	int32 shadowY;
+	
+	//! style of text shadow
+	TextShadowStyle shadowStyle;
 
-	TTF_Font * ttf_font; //! pointer fot STL's TTF Font structure
+	//! pointer fot STL's TTF Font structure
+	TTF_Font * ttf_font;
 
-	std::map<uint16, FontGlyph *> * glyphcache; //! cache of all glyphs used in this font
+	//! cache of all glyphs used in this font
+	std::map<uint16, FontGlyph *> * glyphcache;
 };
 
 }  // namespace hoa_video

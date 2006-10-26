@@ -72,12 +72,12 @@ enum TexSheetType
 {
 	VIDEO_TEXSHEET_INVALID = -1,
 	
-	VIDEO_TEXSHEET_32x32,
-	VIDEO_TEXSHEET_32x64,
-	VIDEO_TEXSHEET_64x64,
-	VIDEO_TEXSHEET_ANY,
+	VIDEO_TEXSHEET_32x32 = 0,
+	VIDEO_TEXSHEET_32x64 = 1,
+	VIDEO_TEXSHEET_64x64 = 2,
+	VIDEO_TEXSHEET_ANY = 3,
 	
-	VIDEO_TEXSHEET_TOTAL
+	VIDEO_TEXSHEET_TOTAL = 4
 };
 
 
@@ -92,9 +92,32 @@ public:
 	
 	virtual ~TexMemMgr() {}
 
+	/*!******************************************************************
+	*  \brief Inserts a new block into the texture
+	* \param img the image to insert
+	* \return success/failure
+	*********************************************************************/
 	virtual bool Insert  (Image *img)=0;
+	
+	/*!******************************************************************
+	*  \brief Removes a block from the texture
+	* \param img the image to remove
+	* \return success/failure
+	*********************************************************************/
 	virtual bool Remove  (Image *img)=0;
+	
+	/*!******************************************************************
+	*  \brief Marks a block as free
+	* \param img the image to free
+	* \return success/failure
+	*********************************************************************/
 	virtual bool Free    (Image *img)=0;
+	
+	/*!******************************************************************
+	*  \brief Marks a block previously freed as used
+	* \param img the image to restore
+	* \return success/failure
+	*********************************************************************/
 	virtual bool Restore (Image *img)=0;
 	
 };
@@ -116,32 +139,82 @@ public:
 	TexSheet(int32 w, int32 h, GLuint texID_, TexSheetType type_, bool isStatic_);
 	~TexSheet();
 
-	bool AddImage                   //! adds new image to the tex sheet
+	/*!******************************************************************
+	*  \brief Adds new image to the tex sheet
+	* \param img the image to add
+	* \param loadInfo the image loading info
+	* \return success/failure
+	*********************************************************************/
+	bool AddImage
 	(
 		Image *img,
 		ImageLoadInfo & loadInfo
 	);
 	
+	//FIXME Unused
 	bool SaveImage(Image *img);
 	
+	/*!******************************************************************
+	*  \brief copies an image into a sub-rectangle of the texture
+	* \param x x coordinate of rectangle to copy image to
+	* \param y y coordinate of rectangle to copy image to
+	* \param loadInfo the image loading info
+	* \return success/failure
+	*********************************************************************/
 	bool CopyRect(int32 x, int32 y, private_video::ImageLoadInfo & loadInfo);
 	
-	bool RemoveImage (Image *img);  //! removes an image completely
-	bool FreeImage   (Image *img);  //! marks the image as free
-	bool RestoreImage (Image *img); //! marks a previously freed image as "used"
+	/*!******************************************************************
+	*  \brief removes an image completely
+	* \param img the image to remove
+	* \return success/failure
+	*********************************************************************/
+	bool RemoveImage (Image *img);
 	
-	bool Unload();  //! unloads texture memory used by this sheet
-	bool Reload();  //! reloads all the images into the sheet
+	/*!******************************************************************
+	*  \brief marks the image as free
+	* \param img the image to mark as free
+	* \return success/failure
+	*********************************************************************/
+	bool FreeImage   (Image *img);
+	
+	/*!******************************************************************
+	*  \brief marks a previously freed image as "used"
+	* \param img the image to mark as used
+	* \return success/failure
+	*********************************************************************/
+	bool RestoreImage (Image *img);
+	
+	/*!******************************************************************
+	*  \brief unloads texture memory used by this sheet
+	* \return success/failure
+	*********************************************************************/
+	bool Unload();
+	
+	/*!******************************************************************
+	*  \brief reloads all the images into the sheet
+	* \return success/failure
+	*********************************************************************/
+	bool Reload();
 
+	//! width of the texsheet
 	int32 width;
+	
+	//! height of the texsheet
 	int32 height;
 
-	bool isStatic;       //! if true, images in this sheet that are unlikely to change
-	TexSheetType type;   //! does it hold 32x32, 32x64, 64x64, or any kind
+	//! if true, images in this sheet that are unlikely to change
+	bool isStatic;
+	
+	//! does it hold 32x32, 32x64, 64x64, or any kind
+	TexSheetType type;
 
-	TexMemMgr *texMemManager;  //! manages which areas of the texture are free
+	//! manages which areas of the texture are free
+	TexMemMgr *texMemManager;
 
-	GLuint texID;     //! number OpenGL uses to refer to this texture
+	//! number OpenGL uses to refer to this texture
+	GLuint texID;
+	
+	//! if texsheet is loaded
 	bool loaded;		
 };
 
@@ -156,10 +229,17 @@ public:
 class FixedImageNode
 {
 public:
+
+	//! the image that belongs to the block
 	Image          *image;
+	
+	//! the next node in the list
 	FixedImageNode *next;
+	
+	//! the previous node in the list
 	FixedImageNode *prev;
 	
+	//! the block index
 	int32 blockIndex;
 };
 
@@ -179,15 +259,48 @@ public:
 	FixedTexMemMgr(TexSheet *texSheet, int32 imgW, int32 imgH);
 	~FixedTexMemMgr();
 	
+	/*!******************************************************************
+	*  \brief Inserts a new block into the texture
+	* \param img the image to insert
+	* \return success/failure
+	*********************************************************************/
 	bool Insert  (Image *img);
+	
+	/*!******************************************************************
+	*  \brief Removes a block from the texture
+	* \param img the image to remove
+	* \return success/failure
+	*********************************************************************/
 	bool Remove  (Image *img);
+	
+	/*!******************************************************************
+	*  \brief Marks a block as free
+	* \param img the image to free
+	* \return success/failure
+	*********************************************************************/
 	bool Free    (Image *img);
+	
+	/*!******************************************************************
+	*  \brief Marks a block previously freed as used
+	* \param img the image to restore
+	* \return success/failure
+	*********************************************************************/
 	bool Restore (Image *img);
 
 private:
 
-	int32 CalculateBlockIndex(Image *img);
-	void DeleteNode(int32 blockIndex);
+	/*!******************************************************************
+	*  \brief Grabs the block index based off of the image
+	* \param img the image to look for
+	* \return the block index for that image
+	*********************************************************************/
+	int32 _CalculateBlockIndex(Image *img);
+	
+	/*!******************************************************************
+	*  \brief Grabs the block index based off of the image
+	* \param blockIndex the node in the list to delete
+	*********************************************************************/
+	void _DeleteNode(int32 blockIndex);
 	
 	//! store dimensions of both the texture sheet, and the images that
 	//! it contains
@@ -238,7 +351,10 @@ public:
 		free  = true;
 	}
 
+	//! the image
 	Image *image;
+	
+	//! is the image freed?
 	bool   free;
 };
 
@@ -260,13 +376,46 @@ public:
 	VariableTexMemMgr(TexSheet *sheet);
 	~VariableTexMemMgr();
 
+	/*!******************************************************************
+	*  \brief Inserts a new block into the texture
+	* \param img the image to insert
+	* \return success/failure
+	*********************************************************************/
 	bool Insert  (Image *img);
+	
+	/*!******************************************************************
+	*  \brief Removes a block from the texture
+	* \param img the image to remove
+	* \return success/failure
+	*********************************************************************/
 	bool Remove  (Image *img);
+	
+	/*!******************************************************************
+	*  \brief Marks a block as free
+	* \param img the image to free
+	* \return success/failure
+	*********************************************************************/
 	bool Free    (Image *img);
+	
+	/*!******************************************************************
+	*  \brief Marks a block previously freed as used
+	* \param img the image to restore
+	* \return success/failure
+	*********************************************************************/
 	bool Restore (Image *img);
 
 private:
 
+	/*!******************************************************************
+	*  \brief goes through all the blocks associated with img, and
+	*             updates their "free" and "image" properties if
+	*             changeFree and changeImage are true, respectively
+	* \param img the image to use for the block
+	* \param changeFree the block's free status has changed
+	* \param changeImage the block's image has changed
+	* \param free the block's free status
+	* \param newImage the new image to use if changeImage is true
+	*********************************************************************/
 	bool SetBlockProperties
 	(
 		Image *img, 
@@ -276,7 +425,10 @@ private:
 		Image *newImage
 	);
 
+	//! the texhseet it's using
 	TexSheet *_texSheet;
+	
+	//! it's list of blocks
 	VariableImageNode *_blocks;
 	
 	//! Sheet's dimensions

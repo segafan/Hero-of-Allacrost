@@ -265,7 +265,7 @@ bool GUI::SetMenuSkin
 	while (i_menu != MenuWindow::_menu_map.end())
 	{
 		MenuWindow *menu = i_menu->second;
-		menu->RecreateImage();
+		menu->_RecreateImage();
 		++i_menu;
 	}
 

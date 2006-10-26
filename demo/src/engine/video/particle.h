@@ -77,95 +77,95 @@ class Particle
 public:
 
 	//! position
-	float  _x;
-	float  _y;
+	float  x;
+	float  y;
 	
 	//! size
-	float  _size_x;
-	float  _size_y;
+	float  size_x;
+	float  size_y;
 	
 	//! velocity
-	float  _velocity_x;
-	float  _velocity_y;
+	float  velocity_x;
+	float  velocity_y;
 	
-	// store the combined velocity (particle + wind + wave) so we only have
-	// to calculate it once
-	float _combined_velocity_x;
-	float _combined_velocity_y;
+	//! store the combined velocity (particle + wind + wave) so we only have
+	//! to calculate it once
+	float combined_velocity_x;
+	float combined_velocity_y;
 	
 	//! color
-	Color  _color;
+	Color  color;
 		
 	//! current rotation angle
-	float  _rotation_angle;
+	float  rotation_angle;
 	
 	//! rotation speed
-	float  _rotation_speed;
+	float  rotation_speed;
 	
 	//! seconds since particle was spawned
-	float  _time;
+	float  time;
 	
 	//! lifetime (when the particle is supposed to die)
-	float  _lifetime;
+	float  lifetime;
 	
 	//! this is 2 * pi / wavelength. The reason we store this weird
 	//! number instead of the wavelength is because that's what we
 	//! will ultimately plug into the sin function
-	float _wave_length_coefficient;	
+	float wave_length_coefficient;	
 	
 	//! half the amplitude of the wave. We store half the amplitude
 	//! instead of the whole amplitude because that's what gets multiplied
 	//! with the sin function
-	float _wave_half_amplitude;
+	float wave_half_amplitude;
 
 	//! acceleration, i.e. change in velocity per second. The most common use
 	//! for this is for simulating gravity. If you have multiple constant
 	//! forces acting on particles, then this vector should be the sum of
 	//! those forces.
-	float _acceleration_x;
-	float _acceleration_y;
+	float acceleration_x;
+	float acceleration_y;
 	
 	//! tangential acceleration- just like normal acceleration, except it
 	//! is applied in the tangent direction. positive = clockwise.
-	float _tangential_acceleration;
+	float tangential_acceleration;
 	
 	//! radial acceleration- acceleration towards (negative) or away (positive)
 	//! from an attractor. Note that the default attractor is the emitter position.
 	//! The client can set an attractor for the entire effect by calling
 	//! ParticleEffect::SetAttractor(x,y)
-	float _radial_acceleration;
+	float radial_acceleration;
 	
 	//! wind velocity. this gets added to the particle's velocity each frame.
 	//! note that different particles might also have a slightly different wind
 	//! velocity, if the system has some wind velocity variation	
-	float _wind_velocity_x;
-	float _wind_velocity_y;
+	float wind_velocity_x;
+	float wind_velocity_y;
 	
 	//! damping- the particle's velocity gets multiplied by this value each second.
 	//! So for example, a damping of .6 means that a particle slows down by 40% each
 	//! second.
-	float _damping;	
+	float damping;	
 	
-	// when a particle is created, it is given a rotation direction: either
-	// 1 (clockwise) or -1 (counterclockwise)
-	float _rotation_direction;
+	//! when a particle is created, it is given a rotation direction: either
+	//! 1 (clockwise) or -1 (counterclockwise)
+	float rotation_direction;
 		
-	// property variations	
-	float _current_size_variation_x;
-	float _current_size_variation_y;
-	float _next_size_variation_x;
-	float _next_size_variation_y;	
-	float _current_rotation_speed_variation;
-	float _next_rotation_speed_variation;	
-	Color _current_color_variation;
-	Color _next_color_variation;
+	//! property variations	
+	float current_size_variation_x;
+	float current_size_variation_y;
+	float next_size_variation_x;
+	float next_size_variation_y;	
+	float current_rotation_speed_variation;
+	float next_rotation_speed_variation;	
+	Color current_color_variation;
+	Color next_color_variation;
 	
-	// keep track of current and next keyframes
-	ParticleKeyframe *_current_keyframe;
-	ParticleKeyframe *_next_keyframe;
+	//! keep track of current and next keyframes
+	ParticleKeyframe *current_keyframe;
+	ParticleKeyframe *next_keyframe;
 };
 
 }
 }
 
-#endif  //!__PARTICLE_HEADER__
+#endif  //! __PARTICLE_HEADER__
