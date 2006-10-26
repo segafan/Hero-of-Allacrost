@@ -1,5 +1,5 @@
 id = 1;
-width = 64;
+width = 128;
 height = 64;
 number_of_skills = 0;
 movement_speed = 5;
@@ -27,3 +27,11 @@ map_name_2 = "Body";
 map_x_3 = 78;
 map_y_3 = 38;
 map_name_3 = "Tail";
+
+
+number_of_animations = 1;
+animation_name_ = "idle";
+num_frames_ = 4;
+file_name_ = "snake";
+x_dimension_ = 128;
+y_dimension_ = 64;

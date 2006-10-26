@@ -24,3 +24,10 @@ map_name_1 = "Head";
 map_x_2 = 37;
 map_y_2 = 34;
 map_name_2 = "Body";
+
+number_of_animations = 1;
+animation_name_ = "idle";
+num_frames_ = 4;
+file_name_ = "slime";
+x_dimension_ = 64;
+y_dimension_ = 64;

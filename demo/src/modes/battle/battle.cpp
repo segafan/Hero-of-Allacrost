@@ -318,7 +318,7 @@ void BattleMode::_CreateCharacterActors() {
 		_ShutDown();
 	}
 	else {
-		BattleCharacterActor * claudius = new BattleCharacterActor(MakeUnicodeString("Claudius"), "Filename", GLOBAL_CHARACTER_CLAUDIUS, 256, 320);
+		BattleCharacterActor * claudius = new BattleCharacterActor(GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS), 256, 320);
 		_character_actors.push_back(claudius);
 		_selected_character = claudius;
 		_actor_index = IndexLocationOfPlayerCharacter(claudius);
@@ -331,139 +331,46 @@ void BattleMode::_CreateEnemyActors() {
 	//StillImage frame; // used for populating the sprite_frames vector
 	//vector<StillImage> sprite_frames; // A vector to fill it with all four damage frames for each sprite
 	//BattleEnemyActor * enemy; // A pointer to the new enemy actor to add to the battle
-/*
+
 	while (_enemy_actors.size() == 0)
 	{
 		// Create the Green Slime EnemyActor
 		if (Probability(50))
 		{
-			sprite_frames.clear();
-			enemy = NULL;
-
-			frame.SetDimensions(64, 64);
-			frame.SetFilename("img/sprites/battle/enemies/green_slime.png");
-			sprite_frames.push_back(frame);
-			frame.SetFilename("img/sprites/battle/enemies/green_slime_hp66.png");
-			sprite_frames.push_back(frame);
-			frame.SetFilename("img/sprites/battle/enemies/green_slime_hp33.png");
-			sprite_frames.push_back(frame);
-			frame.SetFilename("img/sprites/battle/enemies/green_slime_hp00.png");
-			sprite_frames.push_back(frame);
-
-			VideoManager->BeginImageLoadBatch();
-			for (uint32 i = 0; i < sprite_frames.size(); i++) {
-				if (!VideoManager->LoadImage(sprite_frames[i])) {
-					cerr << "BATTLE ERROR: Failed to load sprite frame: " << endl;
-					_ShutDown();
-				}
-			}
-			VideoManager->EndImageLoadBatch();
-
-			GlobalEnemy green_slime("slime");
-			green_slime.SetName(MakeUnicodeString("Green Slime"));
-			green_slime.AddAnimation("IDLE", sprite_frames);
-			green_slime.LevelSimulator(2);
-			enemy = new EnemyActor(green_slime, 768, 256);
-			_enemy_actors.push_back(enemy);
+			BattleEnemyActor * green_slime = new BattleEnemyActor("green_slime", 768, 256);
+			green_slime->SetName(MakeUnicodeString("Green Slime"));
+			green_slime->LevelSimulator(2);
+			_enemy_actors.push_back(green_slime);
 		}
 
 		// Create the Spider EnemyActor
 		if (Probability(50))
 		{
-			sprite_frames.clear();
-			enemy = NULL;
-			frame.SetDimensions(64, 64);
-			frame.SetFilename("img/sprites/battle/enemies/spider.png");
-			sprite_frames.push_back(frame);
-			frame.SetFilename("img/sprites/battle/enemies/spider_hp66.png");
-			sprite_frames.push_back(frame);
-			frame.SetFilename("img/sprites/battle/enemies/spider_hp33.png");
-			sprite_frames.push_back(frame);
-			frame.SetFilename("img/sprites/battle/enemies/spider_hp00.png");
-			sprite_frames.push_back(frame);
-
-			VideoManager->BeginImageLoadBatch();
-			for (uint32 i = 0; i < sprite_frames.size(); i++) {
-				if (!VideoManager->LoadImage(sprite_frames[i])) {
-					cerr << "BATTLE ERROR: Failed to load sprite image: " << endl;
-					_ShutDown();
-				}
-			}
-			VideoManager->EndImageLoadBatch();
-
-			GlobalEnemy spider("spider");
-			spider.SetName(MakeUnicodeString("Spider"));
-			spider.AddAnimation("IDLE", sprite_frames);
-			spider.LevelSimulator(2);
-			enemy = new EnemyActor(spider, 512, 320);
-			_enemy_actors.push_back(enemy);
+			BattleEnemyActor * spider = new BattleEnemyActor("spider", 512, 320);
+			spider->SetName(MakeUnicodeString("Spider"));
+			spider->LevelSimulator(2);
+			_enemy_actors.push_back(spider);
 		}
 
 		// Create the Snake EnemyActor
 		if (Probability(50))
 		{	
-			sprite_frames.clear();
-			enemy = NULL;
-			frame.SetDimensions(128, 64);
-			frame.SetFilename("img/sprites/battle/enemies/snake.png");
-			sprite_frames.push_back(frame);
-			frame.SetFilename("img/sprites/battle/enemies/snake_hp66.png");
-			sprite_frames.push_back(frame);
-			frame.SetFilename("img/sprites/battle/enemies/snake_hp33.png");
-			sprite_frames.push_back(frame);
-			frame.SetFilename("img/sprites/battle/enemies/snake_hp00.png");
-			sprite_frames.push_back(frame);
-
-			VideoManager->BeginImageLoadBatch();
-			for (uint32 i = 0; i < sprite_frames.size(); i++) {
-				if (!VideoManager->LoadImage(sprite_frames[i])) {
-					cerr << "BATTTLE ERROR: Failed to load snake sprite frame: " << endl;
-					_ShutDown();
-				}
-			}
-			VideoManager->EndImageLoadBatch();
-
-			GlobalEnemy snake("snake");
-			snake.SetName(MakeUnicodeString("Snake"));
-			snake.AddAnimation("IDLE", sprite_frames);
-			snake.LevelSimulator(2);
-			enemy = new EnemyActor(snake, 576, 192);
-			_enemy_actors.push_back(enemy);
+			BattleEnemyActor * snake = new BattleEnemyActor("snake", 576, 192);
+			snake->SetName(MakeUnicodeString("Snake"));
+			snake->LevelSimulator(2);
+			_enemy_actors.push_back(snake);
 		}
 
 		// Create the Skeleton EnemyActor
 		if (Probability(50))
 		{
-			sprite_frames.clear();
-			enemy = NULL;
-			frame.SetDimensions(64, 128);
-			frame.SetFilename("img/sprites/battle/enemies/skeleton.png");
-			sprite_frames.push_back(frame);
-			frame.SetFilename("img/sprites/battle/enemies/skeleton_hp66.png");
-			sprite_frames.push_back(frame);
-			frame.SetFilename("img/sprites/battle/enemies/skeleton_hp33.png");
-			sprite_frames.push_back(frame);
-			frame.SetFilename("img/sprites/battle/enemies/skeleton_hp00.png");
-			sprite_frames.push_back(frame);
-
-			VideoManager->BeginImageLoadBatch();
-			for (uint32 i = 0; i < sprite_frames.size(); i++) {
-				if (!VideoManager->LoadImage(sprite_frames[i])) {
-					cerr << "BATTLE ERROR: failed to load skeleton sprite frame: " << endl;
-					_ShutDown();
-				}
-			}
-			VideoManager->EndImageLoadBatch();
-
-			GlobalEnemy skeleton("skeleton");
-			skeleton.SetName(MakeUnicodeString("Skeleton"));
-			skeleton.AddAnimation("IDLE", sprite_frames);
-			skeleton.LevelSimulator(2);
-			enemy = new EnemyActor(skeleton, 704, 384);
-			_enemy_actors.push_back(enemy);
+			BattleEnemyActor * skeleton = new BattleEnemyActor("skeleton", 704, 384);
+			skeleton->SetName(MakeUnicodeString("Skeleton"));
+			skeleton->LevelSimulator(2);
+			_enemy_actors.push_back(skeleton);
 		}
-	}*/
-} // void BattleMode::_CreateEnemyActors()
+	}
+}
 
 
 
@@ -477,7 +384,7 @@ void BattleMode::_ShutDown() {
 	
 	// Remove this BattleMode instance from the game stack
 	ModeManager->Pop(); 
-} // void BattleMode::_ShutDown()
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // BattleMode class -- Update Code

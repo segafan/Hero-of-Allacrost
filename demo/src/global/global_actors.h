@@ -212,6 +212,8 @@ public:
 		{ _agility = ag; }
 	void SetEvade(float ev)
 		{ _evade = ev; _CalculateEvadeRatings(); }
+	void SetName(const hoa_utils::ustring & name)
+		{ _name = name; }
 	//@}
 
 	/** \brief Determines if a character is "alive" and can fight in battles
@@ -397,8 +399,8 @@ public:
 	//@}
 
 	//! Returns the enemy's sprite frames
-	std::vector<hoa_video::StillImage> GetSpriteFrames() const
-	{ return _sprite_frames; }
+	std::vector<hoa_video::StillImage> * GetSpriteFrames()
+	{ return &_sprite_frames; }
 
 	//! \brief Gives the enemy a new skill to use in battle
 	void AddSkill(GlobalSkill *skill)
@@ -507,7 +509,7 @@ protected:
 *** ***************************************************************************/
 class GlobalCharacter : public GlobalActor {
 public:
-	GlobalCharacter(const hoa_utils::ustring & name, std::string fn, uint32 id);
+	GlobalCharacter(const hoa_utils::ustring & name, const std::string & filename, uint32 id);
 	virtual ~GlobalCharacter();
 
 	//@{
@@ -557,10 +559,10 @@ public:
 	void AddSupportSkill(GlobalSkill* skill)
 		{ if (skill != NULL) _support_skills.push_back(skill); }
 
-	void AddBattleAnimation(std::string name, hoa_video::AnimatedImage anim)
+	void AddBattleAnimation(const std::string & name, hoa_video::AnimatedImage anim)
 		{ _battle_animation[name] = anim; }
-	hoa_video::AnimatedImage RetrieveBattleAnimation(std::string anim)
-		{ return _battle_animation[anim]; }
+	hoa_video::AnimatedImage * RetrieveBattleAnimation(const std::string & name)
+		{ return &_battle_animation[name]; }
 
 protected:
 	//! \brief The name used to retrieve the characters's data and other information from various sources
