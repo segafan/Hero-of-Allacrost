@@ -289,12 +289,12 @@ bool MenuWindow::Create(float w, float h, int32 edgeVisibleFlags, int32 edgeShar
 	_edgeVisibleFlags = edgeVisibleFlags;
 	_edgeSharedFlags = edgeSharedFlags;
 	
-	bool couldRecreate = RecreateImage();
+	bool couldRecreate = _RecreateImage();
 	
 	if(!couldRecreate)
 	{
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: MenuWindow::Create() failed because RecreateImage() returned false" << endl;
+			cerr << "VIDEO ERROR: MenuWindow::Create() failed because _RecreateImage() returned false" << endl;
 	}
 	
 	// add the menu to the std::map
@@ -307,11 +307,11 @@ bool MenuWindow::Create(float w, float h, int32 edgeVisibleFlags, int32 edgeShar
 
 
 //-----------------------------------------------------------------------------
-// RecreateImage: recreates the menu image descriptor. Assumes that
+// _RecreateImage: recreates the menu image descriptor. Assumes that
 //                width, height, and edgeflags have proper values
 //-----------------------------------------------------------------------------
 
-bool MenuWindow::RecreateImage()
+bool MenuWindow::_RecreateImage()
 {
 	GameVideo *video = GameVideo::SingletonGetReference();
 	video->DeleteImage(_menu_image);
@@ -440,7 +440,7 @@ void MenuWindow::GetDimensions(float &w, float &h)
 bool MenuWindow::ChangeEdgeVisibleFlags(int32 edgeVisibleFlags)
 {
 	_edgeVisibleFlags = edgeVisibleFlags;
-	RecreateImage();
+	_RecreateImage();
 
 	return true;
 }
@@ -453,7 +453,7 @@ bool MenuWindow::ChangeEdgeVisibleFlags(int32 edgeVisibleFlags)
 bool MenuWindow::ChangeEdgeSharedFlags(int32 edgeSharedFlags)
 {
 	_edgeSharedFlags = edgeSharedFlags;
-	RecreateImage();
+	_RecreateImage();
 
 	return true;
 }

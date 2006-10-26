@@ -157,4 +157,4 @@ public:
 	EMITTER_SPIN _spin;
 };
 
-#endif  //!__PARTICLE_EMITTER_HEADER__
+#endif  //! __PARTICLE_EMITTER_HEADER__

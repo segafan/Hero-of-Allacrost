@@ -35,14 +35,20 @@ enum InterpolationMethod
 {
 	VIDEO_INTERPOLATE_INVALID = -1,
 	
-	VIDEO_INTERPOLATE_EASE,   //! rise from A to B and then down to A again
-	VIDEO_INTERPOLATE_SRCA,   //! constant value of A
-	VIDEO_INTERPOLATE_SRCB,   //! constant value of B
-	VIDEO_INTERPOLATE_FAST,   //! rises quickly at the beginning and levels out
-	VIDEO_INTERPOLATE_SLOW,   //! rises slowly at the beginning then shoots up
-	VIDEO_INTERPOLATE_LINEAR, //! simple linear interpolation between A and B
+	//! rise from A to B and then down to A again
+	VIDEO_INTERPOLATE_EASE = 0,
+	//! constant value of A
+	VIDEO_INTERPOLATE_SRCA = 1,
+	//! constant value of B
+	VIDEO_INTERPOLATE_SRCB = 2,
+	//! rises quickly at the beginning and levels out
+	VIDEO_INTERPOLATE_FAST = 3,
+	//! rises slowly at the beginning then shoots up
+	VIDEO_INTERPOLATE_SLOW = 4,
+	//! simple linear interpolation between A and B
+	VIDEO_INTERPOLATE_LINEAR = 5,
 	
-	VIDEO_INTERPOLATE_TOTAL
+	VIDEO_INTERPOLATE_TOTAL = 6
 };
 
 
@@ -57,35 +63,95 @@ class Interpolator
 {
 public:
 
+	/*!***************************************************************************
+	*  \brief Constructor
+	*****************************************************************************/
 	Interpolator();
 
-	//! call to begin an interpolation
+	/*!***************************************************************************
+	*  \brief Begins interpolation
+	* \param a start value of interpolation
+	* \param b end value of interpolation
+	* \param milliseconds amount of time to interpolate over
+	* \return success/failure
+	*****************************************************************************/
 	bool Start(float a, float b, int32 milliseconds);
 
-	//! set the method of the interpolator. If you don't call it, the default
-	//! is VIDEO_INTERPOLATION_LINEAR
+	/*!***************************************************************************
+	*  \brief Sets the interpolation method.  If this is not called, VIDEO_INTERPOLATION_LINEAR
+	*	     is assumed
+	* \param method interpolation method to use
+	* \return success/failure
+	*****************************************************************************/
 	bool  SetMethod(InterpolationMethod method);
 	
-	float GetValue();              //! get the current value
-	bool  Update(int32 frameTime);   //! call this every frame
-	bool  IsFinished();            //! returns true if interpolation is done
+	/*!***************************************************************************
+	*  \brief Gets the current interpolated value
+	* \return the current interpolated value
+	*****************************************************************************/
+	float GetValue();
+	
+	/*!***************************************************************************
+	*  \brief Increments time by frameTime and updates the interpolation
+	* \param frameTime amount to update the time value by
+	* \return success/failure
+	*****************************************************************************/
+	bool  Update(int32 frameTime);
+	
+	/*!***************************************************************************
+	*  \brief Is interpolation finished?
+	* \return true if done, false if not
+	*****************************************************************************/
+	bool  IsFinished();
 
 private:
 
-	float FastTransform(float t);
-	float SlowTransform(float t);
-	float EaseTransform(float t);
-
-	bool ValidMethod();
+	/*!***************************************************************************
+	*  \brief Interpolates logarithmically.  Increases quickly then levels off.
+	* \param t float value to interpolate
+	* \return interpolated value
+	*****************************************************************************/
+	float _FastTransform(float t);
 	
+	/*!***************************************************************************
+	*  \brief Interpolates exponentially.  Increases slowly then skyrockets.
+	* \param t float value to interpolate
+	* \return interpolated value
+	*****************************************************************************/
+	float _SlowTransform(float t);
+	
+	/*!***************************************************************************
+	*  \brief Interpolates periodically.  Increases slowly to 1.0 then back down to 0.0
+	* \param t float value to interpolate
+	* \return interpolated value
+	*****************************************************************************/
+	float _EaseTransform(float t);
+
+	/*!***************************************************************************
+	*  \brief Verifies the interpolation method is valid.
+	* \return true for valid, false for not
+	*****************************************************************************/
+	bool _ValidMethod();
+	
+	//! Interpolation method used
 	InterpolationMethod _method;
 	
+	//! the two numbers to interpolate between
 	float _a, _b;
+	
+	//! The current time in the interpolation
 	int32   _currentTime;
+	
+	//! The end of the interpolation
 	int32   _endTime;
+	
+	//! If the interpolation is finished
 	bool  _finished;
+	
+	//! The current interpolated value
 	float _currentValue;
-};
+	
+}; // class Interpolator
 
 }  // namespace hoa_video
 

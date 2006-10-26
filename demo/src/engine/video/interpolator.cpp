@@ -52,7 +52,7 @@ Interpolator::Interpolator()
 
 bool Interpolator::Start(float a, float b, int32 milliseconds)
 {
-	if(!ValidMethod())
+	if(!_ValidMethod())
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: tried to start interpolation with invalid method!" << endl;
@@ -95,7 +95,7 @@ bool Interpolator::SetMethod(InterpolationMethod method)
 		return false;
 	}
 		
-	if(!ValidMethod())
+	if(!_ValidMethod())
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: passed an invalid method to Interpolator::SetMethod()!" << endl;
@@ -135,7 +135,7 @@ bool Interpolator::Update(int32 frameTime)
 		return false;
 	}
 	
-	if(!ValidMethod())
+	if(!_ValidMethod())
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: called Interpolator::Update(), but method was invalid!" << endl;
@@ -175,7 +175,7 @@ bool Interpolator::Update(int32 frameTime)
 	switch(_method)
 	{
 		case VIDEO_INTERPOLATE_EASE:
-			t = EaseTransform(t);			
+			t = _EaseTransform(t);			
 			break;
 		case VIDEO_INTERPOLATE_SRCA:
 			t = 0.0f;
@@ -184,10 +184,10 @@ bool Interpolator::Update(int32 frameTime)
 			t = 1.0f;
 			break;
 		case VIDEO_INTERPOLATE_FAST:
-			t = FastTransform(t);
+			t = _FastTransform(t);
 			break;
 		case VIDEO_INTERPOLATE_SLOW:
-			t = SlowTransform(t);			
+			t = _SlowTransform(t);			
 			break;
 		case VIDEO_INTERPOLATE_LINEAR:
 			// nothing to do, just use t value as it is!
@@ -207,11 +207,11 @@ bool Interpolator::Update(int32 frameTime)
 
 
 //-----------------------------------------------------------------------------
-// FastTransform: rescales the range of t so that it looks like a sqrt function
+// _FastTransform: rescales the range of t so that it looks like a sqrt function
 //                from 0.0 to 1.0, i.e. it increases quickly then levels off
 //-----------------------------------------------------------------------------
 
-float Interpolator::FastTransform(float t)
+float Interpolator::_FastTransform(float t)
 {
 	// the fast transform power is some number above 0.0 and less than 1.0
 	return powf(t, VIDEO_FAST_TRANSFORM_POWER);
@@ -219,11 +219,11 @@ float Interpolator::FastTransform(float t)
 
 
 //-----------------------------------------------------------------------------
-// SlowTransform: rescales the range of t so it looks like a power function
+// _SlowTransform: rescales the range of t so it looks like a power function
 //                from 0.0 to 1.0, i.e. it increases slowly then rockets up
 //-----------------------------------------------------------------------------
 
-float Interpolator::SlowTransform(float t)
+float Interpolator::_SlowTransform(float t)
 {
 	// the slow transform power is a number above 1.0
 	return powf(t, VIDEO_SLOW_TRANSFORM_POWER);
@@ -231,11 +231,11 @@ float Interpolator::SlowTransform(float t)
 
 
 //-----------------------------------------------------------------------------
-// EaseTransform: rescales the range of t so it increases slowly, rises to 1.0
+// _EaseTransform: rescales the range of t so it increases slowly, rises to 1.0
 //                then falls back to 0.0
 //-----------------------------------------------------------------------------
 
-float Interpolator::EaseTransform(float t)
+float Interpolator::_EaseTransform(float t)
 {
 	return 0.5f * (1.0f + sinf(VIDEO_2PI * (t - 0.25f)));
 }
@@ -253,10 +253,10 @@ bool Interpolator::IsFinished()
 
 
 //-----------------------------------------------------------------------------
-// ValidMethod: private function to check that the current method is valid
+// _ValidMethod: private function to check that the current method is valid
 //-----------------------------------------------------------------------------
 
-bool Interpolator::ValidMethod()
+bool Interpolator::_ValidMethod()
 {
 	return (_method < VIDEO_INTERPOLATE_TOTAL && 
 	        _method > VIDEO_INTERPOLATE_INVALID);	

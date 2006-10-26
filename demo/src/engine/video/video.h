@@ -75,8 +75,10 @@ namespace hoa_video
 {
 
 class GameVideo;
+
 //! The singleton pointer responsible for all video operations.
 extern GameVideo *VideoManager;
+
 //! Determines whether the code in the hoa_video namespace should print
 extern bool VIDEO_DEBUG;
 
@@ -84,12 +86,18 @@ extern bool VIDEO_DEBUG;
 
 /*!
  *  \brief Creates a random float between a and b.
+ * \param a lower bound of random selection
+ * \param b upper bound of random selection
+ * \return the randomly generated float
  */
 float RandomFloat(float a, float b);
 
 
 /*!
  *  \brief Rotates a point (x,y) around the origin (0,0), by angle radians
+ * \param x x coordinate of point to rotate
+ * \param y y coordinate of point to rotate
+ * \param angle amount to rotate by (in radians)
  */
 void RotatePoint(float &x, float &y, float angle);
 
@@ -100,6 +108,7 @@ void RotatePoint(float &x, float &y, float angle);
  *  \param alpha    controls the linear interpolation
  *  \param initial  initial value
  *  \param final    final value
+ * \return the linear interpolated value
  */	
 float Lerp(float alpha, float initial, float final);
 
@@ -118,21 +127,23 @@ const float VIDEO_2PI        = 6.283185307f;
 const int32 VIDEO_ANIMATION_FRAME_PERIOD = 10;
 
 //! Draw flags to control x,y alignment, flipping, and blending
-enum
+enum VIDEO_DRAW_FLAGS
 {
 	VIDEO_X_LEFT = 1,
-	VIDEO_X_CENTER,
-	VIDEO_X_RIGHT,
-	VIDEO_Y_TOP,
-	VIDEO_Y_CENTER,
-	VIDEO_Y_BOTTOM,
-	VIDEO_X_FLIP,
-	VIDEO_X_NOFLIP,
-	VIDEO_Y_FLIP,
-	VIDEO_Y_NOFLIP,
-	VIDEO_NO_BLEND,
-	VIDEO_BLEND,
-	VIDEO_BLEND_ADD
+	VIDEO_X_CENTER = 2,
+	VIDEO_X_RIGHT = 3,
+	VIDEO_Y_TOP = 4,
+	VIDEO_Y_CENTER = 5,
+	VIDEO_Y_BOTTOM = 6,
+	VIDEO_X_FLIP = 7,
+	VIDEO_X_NOFLIP = 8,
+	VIDEO_Y_FLIP = 9,
+	VIDEO_Y_NOFLIP = 10,
+	VIDEO_NO_BLEND = 11,
+	VIDEO_BLEND = 12,
+	VIDEO_BLEND_ADD = 13,
+	VIDEO_DRAW_FLAGS_TOTAL = 14
+	
 };
 
 
@@ -145,8 +156,11 @@ enum VIDEO_TARGET
 {
 	VIDEO_TARGET_INVALID = -1,
 
-	VIDEO_TARGET_SDL_WINDOW = 0,   //! SDL window
-	VIDEO_TARGET_QT_WIDGET  = 1,   //! QT widget
+	//! SDL window
+	VIDEO_TARGET_SDL_WINDOW = 0,
+	
+	//! QT widget
+	VIDEO_TARGET_QT_WIDGET  = 1,
 	
 	VIDEO_TARGET_TOTAL = 2
 };
@@ -160,10 +174,17 @@ enum VIDEO_STENCIL_OP
 {
 	VIDEO_STENCIL_OP_INVALID = -1,
 	
-	VIDEO_STENCIL_OP_ONE      = 0,  //! set stencil value to one
-	VIDEO_STENCIL_OP_ZERO     = 1,  //! set stencil value to zero
-	VIDEO_STENCIL_OP_INCREASE = 2,  //! increase stencil value
-	VIDEO_STENCIL_OP_DECREASE = 3,  //! decrease stencil value
+	//! set stencil value to one
+	VIDEO_STENCIL_OP_ONE      = 0,
+	
+	//! set stencil value to zero
+	VIDEO_STENCIL_OP_ZERO     = 1,
+	
+	//! increase stencil value
+	VIDEO_STENCIL_OP_INCREASE = 2,
+	
+	//! decrease stencil value
+	VIDEO_STENCIL_OP_DECREASE = 3,
 	
 	VIDEO_STENCIL_OP_TOTAL = 4
 };
@@ -220,6 +241,7 @@ public:
 
 	/*!
 	 *  \brief call at beginning of every frame
+	 * \return success/failure
 	 */
 	bool Clear();
 
@@ -227,12 +249,15 @@ public:
 	/*!
 	 *  \brief call this version of clear if you want to clear the screen
 	 *         to some specific color
+	 * \param c color to clear the screen to
+	 * \return success/failure
 	 */
 	bool Clear(const Color &c);
 		
 	/*!
 	 *  \brief call at end of every frame
 	 *  \param frameTime   milliseconds since the last frame
+	 * \return success/failure
 	 */
 	bool Display(int32 frameTime);
 	
@@ -243,6 +268,7 @@ public:
 	 *         differences, so the video engine needs to know).
 	 *
 	 *  \param target can be VIDEO_TARGET_QT_WIDGET, or VIDEO_TARGET_SDL_WINDOW
+	 * \return success/failure
 	 *
 	 *  \note  If you don't call this function, the default target is SDL window
 	 *         Also, note that you MUST call this before calling Initialize()
@@ -260,6 +286,8 @@ public:
 	 *
 	 *  \param width new screen width
 	 *  \param height new screen height
+	 * \return success/failure
+	 *
 	 *  \note  you must call ApplySettings() to actually apply the change
 	 */	
 	bool SetResolution(int32 width, int32 height);	
@@ -267,17 +295,20 @@ public:
 	
 	/*!
 	 *  \brief returns width, (whatever was set with SetResolution)
+	 * \return width of the screen
 	 */	
 	int32 GetWidth() { return _width; }
 
 
 	/*!
 	 *  \brief returns height, (whatever was set with SetResolution)
+	 * \return height of the screen
 	 */	
 	int32 GetHeight() { return _height; }
 
 	/*!
 	 *  \brief returns true if game is in fullscreen mode
+	 * \return true if in fullscreen mode, false if in windowed mode
 	 */	
 	bool IsFullscreen();
 	
@@ -292,7 +323,7 @@ public:
 	
 	/*!
 	 *  \brief toggles fullscreen on and off
-	 *
+	 * \return success/failure
 	 *  \note  you must call ApplySettings() to actually apply the change
 	 */	
 	bool ToggleFullscreen();
@@ -302,6 +333,7 @@ public:
 	 *         fullscreen. If the changes fail, then this function returns
 	 *         false, and the video settings are reset to whatever the last
 	 *         working setting was.
+	 * \return success/failure
 	 */	
 	bool ApplySettings();
 
@@ -365,6 +397,7 @@ public:
 
 	/*!
 	 *  \brief returns true if scissoring's enabled
+	 * \return true if enabled, false if not
 	 */   	                  
 	
 	bool IsScissoringEnabled() { return _scissorEnabled; }
@@ -373,6 +406,10 @@ public:
 	 *  \brief sets the rectangle to use for scissorring, where you can specify an
 	 *         area of the screen for draw operations to affect. Note, the coordinates
 	 *         you pass in are based on the current coordinate system, not screen coords
+	 * \param left coordinate for left side of rectanlge
+	 * \param right coordinate for right side of rectanlge
+	 * \param bottom coordinate for bottom side of rectanlge
+	 * \param top coordinate for top side of rectanlge
 	 */   	                  
 	void SetScissorRect
 	(
@@ -389,6 +426,7 @@ public:
 	 *         transformed to integer values (pixel unit) with (0,0) as the upper left
 	 *         and (w-1, h-1) as the lower right, where w and h are the current screen
 	 *         dimensions
+	 * \param rect rectangle to set the scissor rectangle to
 	 */   	                  
 	void SetScissorRect
 	(
@@ -398,6 +436,7 @@ public:
 
 	/*!
 	 *  \brief returns scissor rect
+	 * \return the scissor rectangle
 	 */   	                  
 	ScreenRect GetScissorRect() { return _scissorRect; }
 
@@ -407,6 +446,7 @@ public:
 	 *         "screen coordinates", which are in pixel units with (0,0) as the
 	 *         top left and (w-1, h-1) as the lower-right, where w and h are the
 	 *         dimensions of the screen
+	 * \return the screen rectangle
 	 */   	                  
 
 	ScreenRect CalculateScreenRect(float left, float right, float bottom, float top);
@@ -456,7 +496,10 @@ public:
 	 */
 	void MoveRelative(float dx, float dy);
 
-	//! \brief Gets the location of the draw cursor
+	/*! \brief Gets the location of the draw cursor
+	* \param x stores x position of the cursor
+	* \param y stores y position of the cursor
+	*/
 	void GetDrawPosition(float &x, float &y);
 	
 	/*!
@@ -497,6 +540,7 @@ public:
 	 *  \param TTF_filename  the filename of the TTF file to load
 	 *  \param name          name of the font (e.g. "courier24")
 	 *  \param size          point size of the font
+	 * \return success/failure
 	 */
 	bool LoadFont
 	(
@@ -509,6 +553,7 @@ public:
 	/*!
 	 *  \brief returns true if the font with the given name has been successfully loaded
 	 *  \param name   name of the font (e.g. "courier24")
+	 * \return true if valid, false if not
 	 */
 	bool IsValidFont(const std::string &name);
 
@@ -519,6 +564,7 @@ public:
 	 *
 	 *  \param fontName  name of the font, e.g. "courier24"
 	 *  \param fp        reference to font properties structure to return information into
+	 * \return success/failure
 	 */
 	bool GetFontProperties(const std::string &fontName, FontProperties &fp);
 
@@ -529,6 +575,7 @@ public:
 	 *
 	 *  \param fontName  the font to use
 	 *  \param text      the text string in unicode
+	 * \return width of the given text
 	 */
 
 	int32 CalculateTextWidth(const std::string &fontName, const hoa_utils::ustring &text);
@@ -540,6 +587,7 @@ public:
 	 *
 	 *  \param fontName  the font to use
 	 *  \param text      the text string in multi-byte character format
+	 * \return width of the given text
 	 */
 
 	int32 CalculateTextWidth(const std::string &fontName, const std::string  &text);
@@ -548,6 +596,7 @@ public:
 	/*!
 	 *  \brief sets current font
 	 *  \param name  name of the font to set to
+	 * \return success/failure
 	 */
 	bool SetFont(const std::string &name);
 
@@ -562,6 +611,7 @@ public:
 	/*!
 	 *  \brief sets current text color
 	 *  \param color  color to set to
+	 * \return success/failure
 	 */
 	bool SetTextColor(const Color &color);
 		
@@ -574,6 +624,7 @@ public:
 	 *
 	 *  \param fontName  label of the font you want to set the shadow offset for
 	 *  \param x         x offset in pixels (based on 1024x768)
+	 * \return success/failure
 	 */
 	bool SetFontShadowXOffset(const std::string &fontName, int32 x);
 
@@ -586,6 +637,7 @@ public:
 	 *
 	 *  \param fontName  label of the font you want to set the shadow offset for
 	 *  \param y         y offset in pixels (based on 1024x768)
+	 * \return success/failure
 	 */
 	bool SetFontShadowYOffset(const std::string &fontName, int32 y);
 
@@ -595,17 +647,20 @@ public:
 	 *
 	 *  \param fontName  label of the font you want to set the shadow style for
 	 *  \param style     the shadow style you want (e.g. VIDEO_TEXT_SHADOW_BLACK)
+	 * \return success/failure
 	 */
 	bool SetFontShadowStyle(const std::string &fontName, TextShadowStyle style);
 
 
 	/*!
 	 *  \brief get name of current font
+	 * \return string containing the name of the font
 	 */
 	std::string GetFont      () const;
 	
 	/*!
 	 *  \brief get current text color
+	 * \return the color fo the text
 	 */
 	Color       GetTextColor () const;
 	
@@ -614,6 +669,7 @@ public:
 	 *         output or other things which don't have to be localized
 	 *
 	 *  \param text   text string to draw
+	 * \return success/failure
 	 */
 	bool DrawText(const std::string &text);
 	
@@ -623,6 +679,7 @@ public:
 	 *         (game dialogue, interface text, etc.)
 	 *
 	 *  \param uText  unicode text string to draw
+	 * \return success/failure
 	 */
 	bool DrawText(const hoa_utils::ustring &uText);
 
@@ -632,6 +689,11 @@ public:
 
 	/*!
 	 *  \brief add a particle effect at the given point x and y
+	 *  \param filename - file containing the particle effect definition
+	 *  \param x - X coordinate of the effect
+	 *  \param y - Y coordinate of the effect
+	 *  \param reload - reload the effect from file if it already exists
+	 *  \return id corresponding to the loaded particle effect
 	 *  \note  set the reload parameter to true to reload the effect definition file
 	 *         every time the effect is played. This is useful if you are working on an
 	 *         effect and want to see how it looks. When we actually release the game,
@@ -642,6 +704,7 @@ public:
 
 	/*!
 	 *  \brief draws all active particle effects
+	 * \return success/failure
 	 */
 	bool DrawParticleEffects();
 
@@ -657,12 +720,14 @@ public:
 
 	/*!
 	 *  \brief get pointer to an effect given its ID
+	 * \return the particle effect with the given ID
 	 */
 	ParticleEffect *GetParticleEffect(ParticleEffectID id);
 
 
 	/*!
 	 *  \brief get number of live particles
+	 * \return the number of live particles in the system
 	 */
 	int32 GetNumParticles();
 
@@ -677,8 +742,20 @@ public:
 	 *         color. In the case of an animated image, it means calling AddFrame().
 	 *
 	 *  \param id  image descriptor to load- either a StillImage or AnimatedImage.
+	 * \return success/failure
 	 */
 	bool LoadImage(ImageDescriptor &id);
+	
+	/*!
+	 *  \brief loads an image (static or animated image). Assumes that you have already called
+	 *         all the appropriate functions to initialize the image. In the case of a static image,
+	 *         this means setting its filename, and possibly other properties like width, height, and
+	 *         color. In the case of an animated image, it means calling AddFrame().  The image is
+	 *	  loaded in grayscale.
+	 *
+	 *  \param id  image descriptor to load- either a StillImage or AnimatedImage.
+	 * \return success/failure
+	 */
 	bool LoadImageGrayScale(ImageDescriptor &id);
 
 
@@ -687,6 +764,7 @@ public:
 	 *         descriptor
 	 *
 	 *  \param id  image descriptor to capture to
+	 * \return success/failure
 	 */
 	bool CaptureScreen(StillImage &id);
 
@@ -695,6 +773,7 @@ public:
 	 *  \brief decreases ref count of an image (static or animated)
 	 *
 	 *  \param id  image descriptor to decrease the reference count of
+	 * \return success/failure
 	 */
 	bool DeleteImage(ImageDescriptor &id);
 	
@@ -703,23 +782,27 @@ public:
 	 *  \brief marks the start of an image loading batch. Use for loading
 	 *         map tiles for instance, where many images are being loaded at
 	 *         once
+	 * \return success/failure
 	 */
 	bool BeginImageLoadBatch();
 	
 	/*!
 	 *  \brief marks the end of image loading batch.
+	 * \return success/failure
 	 */
 	bool EndImageLoadBatch();
 
 	/*!
 	 *  \brief unloads all texture sheets from memory when we lose the GL
 	 *         context, so textures can be properly reloaded
+	 * \return success/failure
 	 */
 	bool UnloadTextures();
 	
 	/*!
 	 *  \brief reloads textures that have been unloaded after a video
 	 *         settings change
+	 * \return success/failure
 	 */
 	bool ReloadTextures();
 
@@ -729,6 +812,8 @@ public:
 	 *         in as many parameters as you want, as long as the last
 	 *         parameter is a zero.
 	 *         e.g. SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, 0);
+	 * \param firstflag the first of many draw flags
+	 * \param .. specify as many draw flags as you want.  Terminate with a 0.
 	 */
 	void SetDrawFlags(int32 firstflag, ...);
 
@@ -737,6 +822,7 @@ public:
 	 *  \brief draws an image which is modulated by the scene's light color
 	 *
 	 *  \param id  image descriptor to draw (either StillImage or AnimatedImage)
+	 * \return success/failure
 	 */	
 	bool DrawImage(const ImageDescriptor &id);
 
@@ -745,6 +831,7 @@ public:
 	 *  \brief draws an image which is modulated by a custom color
 	 *
 	 *  \param id  image descriptor to draw (either StillImage or AnimatedImage)
+	 * \return success/failure
 	 */	
 	bool DrawImage(const ImageDescriptor &id, const Color &color);
 	
@@ -755,6 +842,7 @@ public:
 	 *  \param tiles   a vector of image descriptors (the tiles)
 	 *  \param indices a 2D vector in row-column order (e.g. indices[y][x])
 	 *         which forms a rectangular array of tiles
+	 * \return the image built out of the 2D array of tiles
 	 */
 	StillImage TilesToObject
 	( 
@@ -767,11 +855,15 @@ public:
 	 *  \brief returns the amount of animation frames that have passed since the last
 	 *         call to GameVideo::Display(). This number is based on VIDEO_ANIMATION_FRAME_PERIOD,
 	 *         and is used so that AnimatedImages know how many frames to increment themselves by.
+	 * \return the number of nimations frames passed since last GameVideo::Display() call
 	 */
 	int32 GetFrameChange() { return _current_frame_diff; }
 
-	void DEBUG_NextTexSheet();    // These cycle through the currently loaded
-	void DEBUG_PrevTexSheet();    // texture sheets so they can be viewed on screen
+	/*!
+	 *  \brief These cycle through the currently loaded texture sheets so they can be viewed on screen
+	 */
+	void DEBUG_NextTexSheet();
+	void DEBUG_PrevTexSheet();
 	
 	
 	//-- Menus -----------------------------------------------------------------
@@ -797,6 +889,7 @@ public:
 	 *                          /img/menus/chrome_quad.png
 	 *	 
 	 *  \param fillColor    color for inner area of menu. can be transparent
+	 * \return success/failure
 	 */
 	bool SetMenuSkin
 	(
@@ -830,6 +923,7 @@ public:
 	 *  \param fillColor_TR  color for upper right vertex of interior
 	 *  \param fillColor_BL  color for lower left  vertex of interior
 	 *  \param fillColor_BR  color for lower right vertex of interior
+	 * \return success/failure
 	 */
 	bool SetMenuSkin(const std::string &imgBaseName, const Color  &fillColor_TL, const Color  &fillColor_TR, const Color  &fillColor_BL, const Color  &fillColor_BR);
 
@@ -859,6 +953,7 @@ public:
 	 *  \param fillColor_TR  color for upper right vertex of interior
 	 *  \param fillColor_BL  color for lower left  vertex of interior
 	 *  \param fillColor_BR  color for lower right vertex of interior
+	 * \return success/failure
 	 */
 	bool SetMenuSkin(const std::string &imgBaseName, const std::string &backgroundImage, const Color  &fillColor_TL, const Color  &fillColor_TR, const Color  &fillColor_BL, const Color  &fillColor_BR);
 
@@ -886,6 +981,7 @@ public:
 	 *  \param backgroundImage image filename for the background of the menu window
 	 *	 
 	 *  \param fillColor       color for for interior of window
+	 * \return success/failure
 	 */
 	bool SetMenuSkin(const std::string &imgBaseName, const std::string &backgroundImage, const Color &fillColor);
 
@@ -893,14 +989,21 @@ public:
 	//-- Lighting and fog -----------------------------------------------------
 	
 	/*!
-	 *  \brief turn on or off the ligt color for the scene
+	 *  \brief turn on the ligt color for the scene
+	 * \param color the light color to use
+	 * \return success/failure
 	 */
 	bool EnableSceneLighting(const Color &color);
+	
+	/*!
+	* \brief disables scene lighting
+	*/
 	void DisableSceneLighting();
 
 
 	/*!
 	 *  \brief returns the scene lighting color
+	 * \return the light color used in the scene
 	 */
 	Color &GetSceneLightingColor();
 
@@ -909,8 +1012,13 @@ public:
 	 *
 	 *  \param color  Color of the fog (alpha should be 1.0)
 	 *  \param intensity  Intensity of fog from 0.0f to 1.0f
+	 * \return success/failure
 	 */	
 	bool EnableFog(const Color &color, float intensity);
+	
+	/*!
+	* \brief disables fog
+	*/
 	void DisableFog();
 	
 	/*!
@@ -920,6 +1028,7 @@ public:
 	 *  \param x     x coordinate of halo
 	 *  \param y     y coordinate of halo
 	 *  \param color color of halo
+	 * \return success/failure
 	 */
 	bool DrawHalo(const StillImage &id, float x, float y, const Color &color = Color(1.0f, 1.0f, 1.0f, 1.0f));
 
@@ -930,20 +1039,26 @@ public:
 	 *  \param x     x coordinate of light
 	 *  \param y     y coordinate of light
 	 *  \param color color of light
+	 * \return success/failure
 	 */	
 	bool DrawLight(const StillImage &id, float x, float y, const Color &color = Color(1.0f, 1.0f, 1.0f, 1.0f));
 
 	/*!
-	 *  \brief call with true if this map uses real lights, otherwise call with
-	 *         false
+	 *  \brief call if this map uses real lights
+	 * \return always returns true
 	 */	
 	bool EnablePointLights();
+	
+	/*!
+	* \brief disables point lights
+	*/
 	void DisablePointLights();
 	
 
 	/*!
 	 *  \brief call after rendering all real lights.  This function renders all lights
 	 *		   to the lighting overlay texture, Moved into ApplyLightingOverlay
+	 * \return success/failure
 	 */	
 	//bool AccumulateLights();
 
@@ -951,6 +1066,7 @@ public:
 	 *  \brief call after all map images are drawn to apply lighting. All
 	 *         menu and text rendering should occur AFTER this call, so that
 	 *         they are not affected by lighting.
+	 * \return success/failure
 	 */	
 	bool ApplyLightingOverlay();
 
@@ -961,6 +1077,7 @@ public:
 	/*!
 	 *  \brief draws a full screen overlay of the given color
 	 *  \note  This is very slow, so use sparingly!
+	 * \return success/failure
 	 */	
 	bool DrawFullscreenOverlay(const Color &color);
 
@@ -969,6 +1086,7 @@ public:
 	 *  \brief call to create lightning effect
 	 *  \param litFile a .lit file which contains lightning intensities stored
 	 *                 as bytes (0-255).
+	 * \return success/failure
 	 */	
 	bool MakeLightning(const std::string &litFile);
 
@@ -977,6 +1095,7 @@ public:
 	 *  \brief call this every frame to draw any lightning effects. You should make
 	 *         sure to place this call in an appropriate spot. In particular, you should
 	 *         draw the lightning before drawing the GUI.
+	 * \return success/failure
 	 */	
 	bool DrawLightning();
 
@@ -1008,16 +1127,19 @@ public:
 	 *                      a shake that doesn't end until you stop it manually
 	 *  \param falloff      Specifies the method of falloff. The default is
 	 *                      VIDEO_FALLOFF_NONE.
+	 * \return success/failure
 	 */
 	bool ShakeScreen(float force, float falloffTime, ShakeFalloff falloff = VIDEO_FALLOFF_NONE);	
 
 	/*!
 	 *  \brief stops all shake effects
+	 * \return success/failure
 	 */
 	bool StopShaking();
 	
 	/*!
 	 *  \brief returns true if screen is shaking
+	 * \return true if the screen is shaking, false if it's not
 	 */
 	bool IsShaking();
 	
@@ -1034,12 +1156,14 @@ public:
 
 	/*!
 	 *  \brief Returns the gamma value
+	 * \return the gamma value
 	 */
 	float GetGamma();
 
 	/*!
 	 *  \brief updates the FPS counter with the given frame time and draws the
 	 *         current FPS on the screen.
+	 * \return success/failure
 	 */
 	bool DrawFPS(int32 frameTime);
 	
@@ -1059,6 +1183,11 @@ public:
 	 *
 	 *  \note  xMax and yMax are not inputs to the function- they are taken
 	 *         from the current coord sys
+	 * \param x x coordinate to start grid at
+	 * \param y y coordinate to start grid at
+	 * \param xstep width of grid squares
+	 * \param ystep height of grid squares
+	 * \param c color of the grid
 	 */
 	void DrawGrid(float x, float y, float xstep, float ystep, const Color &c);
 	
@@ -1066,19 +1195,35 @@ public:
 	/*!
 	 *  \brief makes a screenshot, saves it as screenshot.jpg in the directory
 	 *         of the game
+	 * \return success/failure
 	 */
 	bool MakeScreenshot();
 	
 	/*!
 	 *  \brief toggles advanced information display for video engine, shows
 	 *         things like number of texture switches per frame, etc.
+	 * \return always returns true
 	 */
 	bool ToggleAdvancedDisplay();
 
+	/*!
+	* \brief sets the default cursor to the image in the given filename
+	* \param cursorImageFilename file containing the cursor image
+	*/
 	bool SetDefaultCursor(const std::string &cursorImageFilename);
+	
+	/*!
+	* \brief returns the cursor image
+	* \return the cursor image
+	*/
 	StillImage *GetDefaultCursor();
 
 private:
+
+	/*!
+	* \brief creates a single instance of the GameVideo object
+	* \param GameVideo the class to create a Singleton instance of
+	*/
 	SINGLETON_DECLARE(GameVideo);
 	
 	//-- Private variables ----------------------------------------------------
@@ -1087,93 +1232,164 @@ private:
 	// for now the game gui class is a member of video so that
 	// externally people only have to deal with GameVideo.
 
-	private_video::GUI *_gui;    //! pointer to GUI class which implements all GUI functionality
+	//! pointer to GUI class which implements all GUI functionality
+	private_video::GUI *_gui;
 
-	// particle manager, does dirty work of managing particle effects
+	//! particle manager, does dirty work of managing particle effects
 	private_video::ParticleManager _particle_manager;
 
-	// target (QT widget or SDL window)
+	//! target (QT widget or SDL window)
 	VIDEO_TARGET _target;
 
 	// draw flags	
-	int8 _blend;        //! blend flag which specifies normal alpha blending
-	int8 _xalign;       //! x align flag which tells if images should be left, center, or right aligned
-	int8 _yalign;       //! y align flag which tells if images should be top, center, or bottom aligned
-	int8 _xflip;        //! x flip flag. true if images should be flipped horizontally
-	int8 _yflip;        //! y flip flag. true if images should be flipped vertically
+	
+	//! blend flag which specifies normal alpha blending
+	int8 _blend;
+	
+	//! x align flag which tells if images should be left, center, or right aligned
+	int8 _xalign;
+	
+	//! y align flag which tells if images should be top, center, or bottom aligned
+	int8 _yalign;
+	
+	//! x flip flag. true if images should be flipped horizontally
+	int8 _xflip;
+	
+	//! y flip flag. true if images should be flipped vertically
+	int8 _yflip;
 
-	char _nextTempFile[9];    //! eight character name for temp files that increments every time you create a new one so they are always unique
+	//! eight character name for temp files that increments every time you create a new one so they are always unique
+	char _nextTempFile[9];
 
-	CoordSys    _coord_sys;   //! current coordinate system
+	//! current coordinate system
+	CoordSys    _coord_sys;
 	
-	ScreenRect _viewport;     //! current viewport
-	ScreenRect _scissorRect;  //! current scissor rectangle
+	//! current viewport
+	ScreenRect _viewport;
 	
-	bool _scissorEnabled;   //! is scissoring enabled or not
+	//! current scissor rectangle
+	ScreenRect _scissorRect;
 	
-	private_video::ScreenFader _fader;  //! fader class which implements screen fading
+	//! is scissoring enabled or not
+	bool _scissorEnabled;
 	
-	bool   _advancedDisplay;       //! advanced display flag. If true, info about the video engine is shown on screen
-	bool   _fpsDisplay;            //! fps display flag. If true, FPS is displayed
+	//! fader class which implements screen fading
+	private_video::ScreenFader _fader;
 	
-	int32  _currentDebugTexSheet;  //! current debug texture sheet
-	int32  _numTexSwitches;        //! keep track of number of texture switches per frame
-	int32  _numDrawCalls;          //! keep track of number of draw calls per frame
-	bool   _batchLoading;          //! if true, we are in batch mode
+	//! advanced display flag. If true, info about the video engine is shown on screen
+	bool   _advancedDisplay;
 	
-	bool   _usesLights;      //! true if real lights are enabled
-	GLuint _lightOverlay;    //! lighting overlay texture
+	//! fps display flag. If true, FPS is displayed
+	bool   _fpsDisplay;
+	
+	//! current debug texture sheet
+	int32  _currentDebugTexSheet;
+	
+	//! keep track of number of texture switches per frame
+	int32  _numTexSwitches;
+	
+	//! keep track of number of draw calls per frame
+	int32  _numDrawCalls;
+	
+	//! if true, we are in batch mode
+	bool   _batchLoading;
+	
+	//! true if real lights are enabled
+	bool   _usesLights;
+	
+	//! lighting overlay texture
+	GLuint _lightOverlay;
 
-	float  _shakeX, _shakeY; //! offsets to shake the screen by (if any)
+	//! offsets to shake the screen by (if any)
+	float  _shakeX, _shakeY;
 
-	float _gamma_value; //! Current gamma value
+	//! Current gamma value
+	float _gamma_value;
 	
-	std::list<private_video::ShakeForce> _shakeForces;  //! current shake forces affecting screen
-		
-	bool _fullscreen;     //! true if game is currently running fullscreen
-	int32  _width;        //! current screen width
-	int32  _height;       //! current screen height
+	//! current shake forces affecting screen
+	std::list<private_video::ShakeForce> _shakeForces;
+	
+    //! true if game is currently running fullscreen
+	bool _fullscreen;
+	
+	//! current screen width
+	int32  _width;
+	
+	//! current screen height
+	int32  _height;
 	
 	// changing the video settings does not actually do anything until
 	// you call ApplySettings(). Up til that point, store them in temp
 	// variables so if the new settings are invalid, we can roll back.
 	
-	bool   _temp_fullscreen;   //! holds the desired fullscreen status (true=fullscreen, false=windowed). Not actually applied until ApplySettings() is called
-	int32  _temp_width;        //! holds the desired screen width. Not actually applied until ApplySettings() is called
-	int32  _temp_height;       //! holds the desired screen height. Not actually applied until ApplySettings() is called
-		
-	GLuint _lastTexID;    //! ID of the last texture that was bound. Used to eliminate redundant binding of textures
-
-	std::string _currentFont;          //! current font name
-	Color       _currentTextColor;     //! current text color
-
-	StillImage _defaultMenuCursor;  //! image which is to be used as the cursor
+	//! holds the desired fullscreen status (true=fullscreen, false=windowed). Not actually applied until ApplySettings() is called
+	bool   _temp_fullscreen;
 	
-	bool _textShadow;   //! if true, text shadow effect is enabled
-
-	Color _fogColor;        //! current fog color (set by SetFog())
-	float _fogIntensity;    //! current fog intensity (set by SetFog())
+	//! holds the desired screen width. Not actually applied until ApplySettings() is called
+	int32  _temp_width;
 	
-	Color _lightColor;      //! current scene lighting color (essentially just modulates vertex colors of all the images)
-
-	bool  _lightningActive;  //! true if a lightning effect is active
-	int32 _lightningCurTime; //! current time of lightning effect (time since it started)
-	int32 _lightningEndTime; //! how many milliseconds to do the lightning effect for
+	//! holds the desired screen height. Not actually applied until ApplySettings() is called
+	int32  _temp_height;
 	
-	std::vector <float> _lightningData;  //! intensity data for lightning effect
+	//! ID of the last texture that was bound. Used to eliminate redundant binding of textures
+	GLuint _lastTexID;
 
-	int32 _animation_counter;   //! counter to keep track of milliseconds since game started for animations
-	int32 _current_frame_diff;  //! keeps track of the number of frames animations should increment by for the current frame
-
-	std::vector <StillImage *>    _batchLoadImages;    //! vector of images in a batch which are to be loaded
+	//! current font name
+	std::string _currentFont;
 	
-	std::map    <std::string, private_video::Image*>   _images;      //! STL map containing all the images currently being managed by the video engine	
-	std::vector <private_video::TexSheet *>     _texSheets;          //! vector containing all texture sheets currently being managed by the video engine
-	std::map    <std::string, FontProperties *> _fontMap;			 //! STL map containing properties for each font (includeing TTF_Font *)
+	//! current text color
+	Color       _currentTextColor;
 
-	std::map <std::string, ParticleEffectDef *> _particle_effect_defs; //! STL map containing all loaded particle effect definitions
+	//! image which is to be used as the cursor
+	StillImage _defaultMenuCursor;
 	
-	std::stack  <private_video::Context>      _contextStack;         //! stack containing context, i.e. draw flags plus coord sys. Context is pushed and popped by any GameVideo functions that clobber these settings
+	//! if true, text shadow effect is enabled
+	bool _textShadow;
+
+	//! current fog color (set by SetFog())
+	Color _fogColor;
+	
+	//! current fog intensity (set by SetFog())
+	float _fogIntensity;
+	
+	//! current scene lighting color (essentially just modulates vertex colors of all the images)
+	Color _lightColor;
+
+	//! true if a lightning effect is active
+	bool  _lightningActive;
+	
+	//! current time of lightning effect (time since it started)
+	int32 _lightningCurTime;
+	
+	//! how many milliseconds to do the lightning effect for
+	int32 _lightningEndTime;
+	
+	//! intensity data for lightning effect
+	std::vector <float> _lightningData;
+
+	//! counter to keep track of milliseconds since game started for animations
+	int32 _animation_counter;
+	
+	//! keeps track of the number of frames animations should increment by for the current frame
+	int32 _current_frame_diff;
+
+	//! vector of images in a batch which are to be loaded
+	std::vector <StillImage *>    _batchLoadImages;
+	
+	//! STL map containing all the images currently being managed by the video engine	
+	std::map    <std::string, private_video::Image*>   _images;
+	
+	//! vector containing all texture sheets currently being managed by the video engine
+	std::vector <private_video::TexSheet *>     _texSheets;
+	
+	//! STL map containing properties for each font (includeing TTF_Font *)
+	std::map    <std::string, FontProperties *> _fontMap;
+
+	//! STL map containing all loaded particle effect definitions
+	std::map <std::string, ParticleEffectDef *> _particle_effect_defs;
+	
+	//! stack containing context, i.e. draw flags plus coord sys. Context is pushed and popped by any GameVideo functions that clobber these settings
+	std::stack  <private_video::Context>      _contextStack;
 
 
 	//-- Private methods ------------------------------------------------------
@@ -1183,10 +1399,22 @@ private:
 	 *  \brief wraps a call to glBindTexture(), except it adds checking to eliminate redundant texture binding. Redundancy checks are already implemented by most drivers, but this is a double check "just in case"
 	 *
 	 *  \param texID   integer handle to the OpenGL texture
+	 * \return success/failure
 	 */	
 	bool _BindTexture(GLuint texID);
 
+	/*!
+	* \brief converts VIDEO_DRAW_LEFT or VIDEO_DRAW_RIGHT flags to a numerical offset
+	* \param xalign the draw flag
+	* \return the numerical offset
+	*/
 	int32 _ConvertXAlign(int32 xalign);
+	
+	/*!
+	* \brief converts VIDEO_DRAW_TOP or VIDEO_DRAW_BOTTOM flags to a numerical offset
+	* \param yalign the draw flag
+	* \return the numerical offset
+	*/
 	int32 _ConvertYAlign(int32 yalign);
 
 	/*!
@@ -1194,6 +1422,7 @@ private:
 	 *
 	 *  \param width   desired width of the texture
 	 *  \param height  desired height of the texture
+	 * \return OpenGL ID for this texture or 0xffffffff for failure.
 	 */	
 	GLuint _CreateBlankGLTexture(int32 width, int32 height);
 
@@ -1211,6 +1440,7 @@ private:
 	 *
 	 *  \note  this is only meant to be used by the Menu class, not by users of
 	 *         the video engine.
+	 * \return success/failure
 	 */
 	bool _CreateMenu
 	(
@@ -1233,6 +1463,7 @@ private:
 	 *  \param extension   The extension for the temp file. Although we could just save temp files
 	 *                     without an extension, that might cause stupid bugs like DevIL refusing
 	 *                     to load an image because it doesn't end with .png.
+	 * \return name of the generated temp file
 	 */	
 	std::string _CreateTempFilename(const std::string &extension);
 
@@ -1243,6 +1474,7 @@ private:
 	 *  \param height   height of the sheet
 	 *  \param type     specifies what type of images this texture sheet manages (e.g. 32x32 images, 64x64 images, any type, etc)
 	 *  \param isStatic if true, this texture sheet is meant to manage images which are not expected to be loaded and unloaded very often
+	 * \return the newly created texsheet
 	 */	
 	private_video::TexSheet *_CreateTexSheet
 	(
@@ -1257,6 +1489,7 @@ private:
 	 *  \brief wraps a call to glDeleteTextures(), except it adds some checking related to eliminating redundant texture binding.
 	 *
 	 *  \param texID   integer handle to the OpenGL texture
+	 * \return success/failure
 	 */	
 	bool _DeleteTexture(GLuint texID);
 
@@ -1265,6 +1498,7 @@ private:
 	 *  \brief decreases the reference count of an image
 	 *
 	 *  \param image  pointer to image
+	 * \return success/failure
 	 */	
 	bool _DeleteImage(private_video::Image *const image);
 	
@@ -1272,6 +1506,7 @@ private:
 	 *  \brief decreases ref count of an image
 	 *
 	 *  \param id  image descriptor to decrease the reference count of
+	 * \return success/failure
 	 */
 	bool _DeleteImage(StillImage &id);
 
@@ -1279,12 +1514,14 @@ private:
 	 *  \brief decreases ref count of an animated image
 	 *
 	 *  \param id  image descriptor to decrease the reference count of
+	 * \return success/failure
 	 */
 	bool _DeleteImage(AnimatedImage &id);
 
 	/*!
 	 *  \brief deletes the temporary textures from the "temp" folder that were saved
 	 *         by _SaveTempTextures()
+	 * \return success/failure
 	 */	
 	bool _DeleteTempTextures();
 
@@ -1293,6 +1530,7 @@ private:
 	 *
 	 *  \param element        pointer to the image element to draw
 	 *  \param modulateColor  combination of color for this image, and our current fade color
+	 * \return success/failure
 	 */		 
 	bool _DrawElement(const private_video::ImageElement &element, const Color &modulateColor);
 
@@ -1305,6 +1543,7 @@ private:
 	 *         we can skip all the nasty modulation math for a bit of extra efficiency
 	 *
 	 *  \param element        pointer to the image element to draw
+	 * \return success/failure
 	 */		 
 	bool _DrawElement(const private_video::ImageElement &element);
 
@@ -1312,6 +1551,7 @@ private:
 	 *  \brief helper function to DrawImage() to do the actual work of doing an image
 	 *
 	 *  \param img static image to draw
+	 * \return success/failure
 	 */	
 	bool _DrawStillImage(const StillImage &img);
 
@@ -1321,6 +1561,7 @@ private:
 	 *
 	 *  \param img static image to draw
 	 *  \param color color to modulate image by
+	 * \return success/failure
 	 */	
 	bool _DrawStillImage(const StillImage &img, const Color &color);  
 
@@ -1329,6 +1570,7 @@ private:
 	 *  \brief does the actual work of drawing text
 	 *
 	 *  \param uText  Pointer to a unicode string holding the text to draw
+	 * \return success/failure
 	 */	
 	bool _DrawTextHelper(const uint16 *const uText);
 
@@ -1337,6 +1579,7 @@ private:
 	 *
 	 *  \param image       pointer to the image to insert
 	 *  \param loadInfo	   attributes of the image to be inserted
+	 * \return a new texsheet with the image in it
 	 */	
 	private_video::TexSheet *_InsertImageInTexSheet(private_video::Image *image, private_video::ImageLoadInfo & loadInfo, bool isStatic);
 
@@ -1344,6 +1587,7 @@ private:
 	 *  \brief loads an image
 	 *
 	 *  \param id  image descriptor to load. Can specify filename, color, width, height, and static as its parameters
+	 * \return success/failure
 	 */
 	bool _LoadImage(StillImage &id, bool grayscale = false);
 
@@ -1351,6 +1595,7 @@ private:
 	 *  \brief loads an animated image. Assumes that you have called AddFrame for all the frames.
 	 *
 	 *  \param id  image descriptor to load
+	 * \return success/failure
 	 */
 	bool _LoadImage(AnimatedImage &id, bool grayscale = false);
 
@@ -1358,6 +1603,7 @@ private:
 	 *  \brief does the actual work of loading an image
 	 *
 	 *  \param id  StillImage of the image to load. May specify a filename, color, width, height, and static
+	 * \return success/failure
 	 */	
 	bool _LoadImageHelper(StillImage &id, bool grayscale = false);
 
@@ -1366,15 +1612,33 @@ private:
 	 *
 	 *  \param filename   Filename of image to load
 	 *  \param loadInfo   Returns with the image file attributes and pixels
+	 * \return success/failure
 	 */	
 	bool _LoadRawImage(const std::string & filename, private_video::ImageLoadInfo & loadInfo, bool grayscale = false);
+	
+	/*!
+	 *  \brief Load raw image data from a JPG file
+	 *
+	 *  \param filename   Filename of image to load
+	 *  \param loadInfo   Returns with the image file attributes and pixels
+	 * \return success/failure
+	 */
 	bool _LoadRawImageJpeg(const std::string & filename, private_video::ImageLoadInfo & loadInfo, bool grayscale);
+	
+	/*!
+	 *  \brief Load raw image data from a PNG file
+	 *
+	 *  \param filename   Filename of image to load
+	 *  \param loadInfo   Returns with the image file attributes and pixels
+	 * \return success/failure
+	 */
 	bool _LoadRawImagePng(const std::string & filename, private_video::ImageLoadInfo & loadInfo, bool grayscale);
 
 	/*!
 	 *  \brief loop through all currently loaded images and if they belong to the given tex sheet, reload them into it
 	 *
 	 *  \param texSheet   pointer to the tex sheet whose images we want to load
+	 * \return success/failure
 	 */	
 	bool _ReloadImagesToSheet(private_video::TexSheet *texSheet);
 
@@ -1382,6 +1646,7 @@ private:
 	 *  \brief removes the image from the STL map with the same pointer as the one passed in. Returns false on failure
 	 *
 	 *  \param imageToRemove   pointer to the image we want to remove
+	 * \return success/failure
 	 */	
 
 	bool _RemoveImage(private_video::Image *imageToRemove);
@@ -1391,6 +1656,7 @@ private:
 	 *  \brief removes a texture sheet from our vector of sheets and deletes it
 	 *
 	 *  \param sheetToRemove  pointer to the sheet we want to remove
+	 * \return success/failure
 	 */	
 	bool _RemoveSheet(private_video::TexSheet *sheetToRemove);
 
@@ -1398,6 +1664,7 @@ private:
 	 *  \brief rounds a force value to the nearest integer. Rounding is based on probability. For example the number 2.85 has an 85% chance of rounding to 3 and a 15% chance of rounding to 2
 	 *
 	 *  \param force  The force to round
+	 * \return the rounded force value
 	 */	
 	float _RoundForce(float force);   // rounds a force value
 
@@ -1416,10 +1683,20 @@ private:
 	 *         loaded to a file. This is used when the GL context is being destroyed,
 	 *         perhaps because we are switching from windowed to fullscreen. So, we need
 	 *         to save all textures to disk so we can reload them later.
+	 * \return success/failure
 	 */	
 	bool _SaveTempTextures();
 
+	/*!
+	* \brief takes an x value and converts it into screen coordinates
+	* \return the converted value
+	*/
 	int32 _ScreenCoordX(float x);
+	
+	/*!
+	* \brief takes an x value and converts it into screen coordinates
+	* \return the converted value
+	*/
 	int32 _ScreenCoordY(float y);
 
 	/*!
@@ -1433,12 +1710,14 @@ private:
 	/*!
 	 *  \brief function solely for debugging, which shows number of texture switches made during a frame,
 	 *         and other statistics useful for performance tweaking, etc.
+	 * \return success/failure
 	 */	
 	bool _DEBUG_ShowAdvancedStats();
 
 
 	/*!
 	 *  \brief function solely for debugging, which displays the currently selected texture sheet. By using DEBUG_NextTexSheet() and DEBUG_PrevTexSheet(), you can change the current texture sheet so the sheet shown by this function cycles through all currently loaded sheets.
+	 * \return success/failure
 	 */	
 	bool _DEBUG_ShowTexSheet();
 
@@ -1455,7 +1734,8 @@ private:
 	friend class private_video::VariableTexMemMgr;
 	friend class private_video::TexSheet;
 	friend class private_video::ParticleSystem;
-};
+	
+}; // class GameVideo
 
 }   // namespace hoa_video
 

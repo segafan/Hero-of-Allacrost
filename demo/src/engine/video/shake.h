@@ -36,13 +36,22 @@ enum ShakeFalloff
 {
 	VIDEO_FALLOFF_INVALID = -1,
 	
-	VIDEO_FALLOFF_NONE,     //! shake remains at constant force
-	VIDEO_FALLOFF_EASE,     //! shake starts out small, builds up, then dies down
-	VIDEO_FALLOFF_LINEAR,   //! shake strength decreases linear til the end
-	VIDEO_FALLOFF_GRADUAL,  //! shake decreases slowly and drops off at the end
-	VIDEO_FALLOFF_SUDDEN,   //! shake suddenly falls off, for "impacts" like meteors
+	//! shake remains at constant force
+	VIDEO_FALLOFF_NONE = 0,
 	
-	VIDEO_FALLOFF_TOTAL
+	//! shake starts out small, builds up, then dies down
+	VIDEO_FALLOFF_EASE = 1,
+	
+	//! shake strength decreases linear til the end
+	VIDEO_FALLOFF_LINEAR = 2,
+	
+	//! shake decreases slowly and drops off at the end
+	VIDEO_FALLOFF_GRADUAL = 3,
+	
+	//! shake suddenly falls off, for "impacts" like meteors
+	VIDEO_FALLOFF_SUDDEN = 4,
+	
+	VIDEO_FALLOFF_TOTAL = 5
 };
 
 
@@ -57,12 +66,18 @@ namespace private_video
 class ShakeForce
 {
 public:
-	float initialForce;  //! initial force of the shake
+
+	//! initial force of the shake
+	float initialForce;
 	
-	
+	//! used to interpolate the shake
 	Interpolator interpolator;
-	int32   currentTime;   //! milliseconds that passed since this shake started
-	int32   endTime;       //! milliseconds that this shake was set to last for
+	
+	//! milliseconds that passed since this shake started
+	int32   currentTime;
+	
+	//! milliseconds that this shake was set to last for
+	int32   endTime;
 };
 
 

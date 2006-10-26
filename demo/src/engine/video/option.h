@@ -30,10 +30,10 @@ class GUI;
 class OptionBox;
 
 
-// !how often the menu cursor blinks (assuming it's in blinking state), in milliseconds
+//! how often the menu cursor blinks (assuming it's in blinking state), in milliseconds
 const int32 VIDEO_CURSOR_BLINK_RATE = 40;
 
-// !how many milliseconds it takes to scroll when the cursor goes past the end of an option box
+//! how many milliseconds it takes to scroll when the cursor goes past the end of an option box
 const int32 VIDEO_OPTION_SCROLL_TIME = 100;
 
 
@@ -166,8 +166,11 @@ class OptionElement
 {
 public:
 
-	OptionElementType type;    //! type of option element
-	int32 value;               //! value, like an offset for a position tag, etc.
+	//! type of option element
+	OptionElementType type;
+	
+	//! value, like an offset for a position tag, etc.
+	int32 value;
 };
 
 
@@ -179,13 +182,24 @@ public:
 class OptionCellBounds
 {
 public:
-	float cellYTop;     //! y coordinate of top of cell
-	float cellYCenter;  //! y coordinate of center of cell
-	float cellYBottom;  //! y coordinate of bottom of cell
+
+	//! y coordinate of top of cell
+	float cellYTop;
 	
-	float cellXLeft;    //! x coordinate of left of cell
-	float cellXCenter;  //! x coordinate of center of cell
-	float cellXRight;	//! x coordinate of right of cell
+	//! y coordinate of center of cell
+	float cellYCenter;
+	
+	//! y coordinate of bottom of cell
+	float cellYBottom;
+	
+	//! x coordinate of left of cell
+	float cellXLeft;
+	
+	//! x coordinate of center of cell
+	float cellXCenter;
+	
+	//! x coordinate of right of cell
+	float cellXRight;
 };
 
 
@@ -200,11 +214,17 @@ class Option
 {
 public:
 	
-	std::vector<OptionElement>      elements;  //! vector of option elements
-	std::vector<hoa_utils::ustring> text;      //! vector of text
-	std::vector<StillImage>    images;    //! vector of images
+	//! vector of option elements
+	std::vector<OptionElement>      elements;
 	
-	bool disabled;   //! flag to specify whether this option is disabled or not
+	//! vector of text
+	std::vector<hoa_utils::ustring> text;
+	
+	//! vector of images
+	std::vector<StillImage>    images;
+	
+	//! flag to specify whether this option is disabled or not
+	bool disabled;
 };
 
 
@@ -218,13 +238,20 @@ class OptionBox : public GUIControl
 {
 public:
 	
+	/*!
+	 *  \brief Constructor
+	 */
 	OptionBox();
+	
+	/*!
+	 *  \brief Destructor
+	 */
 	~OptionBox();
 	
 	/*!
 	 *  \brief updates the option box control
-	 *
 	 *  \param frameTime number of milliseconds elapsed this frame
+	 * \return success/failure
 	 */
 	
 	bool Update(int32 frameTime);
@@ -232,6 +259,7 @@ public:
 
 	/*!
 	 *  \brief draws the control
+	 * \return success/failure
 	 */
 		
 	bool Draw();
@@ -239,8 +267,8 @@ public:
 	
 	/*!
 	 *  \brief sets the font for this control
-	 *
-	 *  \fontName label to a valid, already-loaded font
+	 *  \param fontName label to a valid, already-loaded font
+	 * \return success/failure
 	 */
 	
 	bool SetFont(const std::string &fontName);
@@ -290,6 +318,8 @@ public:
 
 	/*!
 	 *  \brief sets the cell width and height
+	 * \param hSpacing horizontal spacing between cells
+	 * \param vSpacing vertical spacing between cells
 	 */
 
 	void SetCellSize(float hSpacing, float vSpacing);
@@ -297,6 +327,8 @@ public:
 
 	/*!
 	 *  \brief sets the size of the box in terms of number of columns and rows
+	 * \param columns number of columns in the options box
+	 * \param rows number of rows in the options box
 	 */
 
 	void SetSize(int32 columns, int32 rows);
@@ -304,6 +336,8 @@ public:
 
 	/*!
 	 *  \brief sets the alignment of the option text
+	 * \param xalign left/right alignment of text in the cell
+	 * \param yalign top/bottom alignment of text in the cell
 	 */
 
 	void SetOptionAlignment(int32 xalign, int32 yalign);
@@ -311,6 +345,7 @@ public:
 
 	/*!
 	 *  \brief sets the selection mode (single or double confirm mode)
+	 * \param mode the select mode
 	 */
 
 	void SetSelectMode(SelectMode mode);
@@ -319,6 +354,7 @@ public:
 	/*!
 	 *  \brief enables/disables switching, where player can confirm on one item, then
 	 *         confirm on another item to switch them
+	 * \param enable true for enabling switching, false for no
 	 */
 
 	void EnableSwitching(bool enable);
@@ -326,6 +362,7 @@ public:
 
 	/*!
 	 *  \brief sets the behavior to use for vertical wrapping
+	 * \param mode the wrap mode
 	 */
 
 	void SetVerticalWrapMode(WrapMode mode);
@@ -333,6 +370,7 @@ public:
 
 	/*!
 	 *  \brief sets the behavior to use for horizontal wrapping
+	 * \param mode the wrap mode
 	 */
 
 	void SetHorizontalWrapMode(WrapMode mode);
@@ -340,6 +378,8 @@ public:
 
 	/*!
 	 *  \brief sets the cursor state to be visible, hidden, or blinking
+	 * \param state the cursor state
+	 * \return success/failure
 	 */
 
 	bool SetCursorState(CursorState state);
@@ -347,6 +387,9 @@ public:
 
 	/*!
 	 *  \brief sets the cursor offset relative to the text positions
+	 * \param x left/right offset
+	 * \param y top/bottom offset
+	 * \return success/failure
 	 */
 
 	bool SetCursorOffset(float x, float y);	
@@ -354,6 +397,8 @@ public:
 
 	/*!
 	 *  \brief sets the current selection (0 to _numOptions-1)
+	 * \param index the desired selection
+	 * \return success/failure...could fail if SetOptions() was not called
 	 */
 
 	bool SetSelection(int32 index);
@@ -366,6 +411,7 @@ public:
 	 *         for each item, along with any formatting tags
 	 *
 	 *         For example: "<img/weapons/mythril.png>Mythril knife<r>500 Gil"
+	 * \return success/failure
 	 */
 
 	bool SetOptions(const std::vector<hoa_utils::ustring> &formatText);
@@ -396,6 +442,8 @@ public:
 
 	/*!
 	 *  \brief enables/disables the option with the given index
+	 * \param index the option to enable/disable
+	 * \param enable true to enable, false to disable.  Options are enabled by default.
 	 */
 
 	bool EnableOption(int32 index, bool enable);
@@ -403,6 +451,7 @@ public:
 
 	/*!
 	 *  \brief sorts the option list alphabetically
+	 * \return success/failure
 	 */
 
 	bool Sort();
@@ -410,6 +459,7 @@ public:
 
 	/*!
 	 *  \brief returns true if the option box is in the middle of scrolling
+	 * \return true if scrolling option box, false if not
 	 */
 
 	bool IsScrolling() const;
@@ -418,6 +468,7 @@ public:
 	/*!
 	 *  \brief returns true if the given option is enabled
 	 *  \param index of the option to check
+	 * \return true if option is enabled, false if it's not
 	 */
 	bool IsEnabled(int32 index) const;
 
@@ -428,6 +479,7 @@ public:
 	 *         anything new happened, like the player confirming or canceling, etc. Do
 	 *         not call it more than once per frame though, because it clears the event
 	 *         flag.
+	 * \return int representing an option box event (i.e. cancel, confirm, left, right, etc.)
 	 */
 
 	int32 GetEvent();
@@ -435,6 +487,7 @@ public:
 
 	/*!
 	 *  \brief returns the index of the currently selected option
+	 * \return the current selection
 	 */
 
 	int32 GetSelection() const;
@@ -444,6 +497,7 @@ public:
 	 *  \brief if double-confirm mode is enabled and one item has been confirmed but
 	 *         we're waiting for the player to confirm the other, then GetSwitchSelection()
 	 *         returns the index of the already-confirmed item
+	 * \return index of already confirmed option
 	 */
 
 	int32 GetSwitchSelection() const;
@@ -451,6 +505,7 @@ public:
 
 	/*!
 	 *  \brief returns the number of rows
+	 * \return number of rows in option box
 	 */
 
 	int32 GetNumRows() const;
@@ -458,6 +513,7 @@ public:
 
 	/*!
 	 *  \brief returns the number of columns
+	 * \return number of columns in option box
 	 */
 
 	int32 GetNumColumns() const;
@@ -465,6 +521,7 @@ public:
 
 	/*!
 	 *  \brief returns the number of options that were set using SetOptions()
+	 * \return number of options in option box
 	 */
 
 	int32 GetNumOptions() const;
@@ -474,6 +531,8 @@ public:
 	 *  \brief used mostly internally to determine if the option box is initialized.
 	 *         If not, then "errors" is filled with a list of reasons why it is not
 	 *         initialized.
+	 * \param errors string to hold any error info produced by this function
+	 * \return true if initialized, false if not
 	 */
 
 	bool IsInitialized(std::string &errors);
@@ -484,6 +543,12 @@ private:
 	 *  \brief given an alignment and the bounds of an option cell, it sets up the correct
 	 *         flags to render into that cell, and returns the x and y values where the
 	 *         text should be rendered.
+	 * \param xalign left/right alignement of text in option box
+	 * \param yalign top/bottom alignement of text in option box
+	 * \param bounds bounds of the option box, used in conjunction with xalign and yalign
+	 *	      to determine x and y coordinates for the cursor
+	 * \param x x position of the cursor
+	 * \param y y position of the cursor
 	 */
 
 	void _SetupAlignment(int32 xalign, int32 yalign, const OptionCellBounds &bounds, float &x, float &y);
@@ -498,6 +563,9 @@ private:
 
 	/*!
 	 *  \brief helper function to parse text for an option box, and fill an Option structure
+	 * \param formatString the formatted string, using the XML structure described by SetOptions()
+	 * \param option which option the string corresponds to
+	 * \return success/failure
 	 */
 
 	bool _ParseOption(const hoa_utils::ustring &formatString, Option &option);
@@ -512,6 +580,8 @@ private:
 
 	/*!
 	 *  \brief increments or decrements the current selection by offset
+	 * \param offset amount to move in specified direction
+	 * \param horizontal true if moving horizontally, false if moving vertically
 	 *  \return false if the selection does not change
 	 */
 
@@ -546,49 +616,100 @@ private:
 	void _PlaySwitchSound();
 
 
-	bool   _initialized;                  //! after every change to any of the settings, check if the textbox is in a valid state and update this bool
-	std::string _initializeErrors;        //! if the option box is in an invalid state (not ready for drawing), then this string contains the errors that need to be resolved
-	std::string _font;                    //! font used for the options
-	float _cursorX, _cursorY;             //! cursor offset
-	float _switchCursorX, _switchCursorY; //! switch cursor offset (relative to the normal cursor offset)
+	//! after every change to any of the settings, check if the textbox is in a valid state and update this bool
+	bool   _initialized;
 	
-	float _hSpacing;            //! horizontal spacing
-	float _vSpacing;            //! vertical spacing
-	int32 _numColumns;          //! number of columns
-	int32 _numRows;             //! numer of rows
-	int32 _option_xalign;       //! horizontal alignment for text
-	int32 _option_yalign;       //! vertical alignment for text
+	//! if the option box is in an invalid state (not ready for drawing), then this string contains the errors that need to be resolved
+	std::string _initializeErrors;
 	
-	bool _blink;                //! when Update() is called, blink is set to true on frames that cursor should blink (i.e. not be visible)
-							 
-	int32 _blinkTime;           //! timer used for controlling blink effect
-	int32 _scrollTime;          //! timer used for controlling scrolling effect
+	//! font used for the options
+	std::string _font;
 	
-	int32 _scrollStartOffset;   //! offset we're scrolling from
-	int32 _scrollEndOffset;     //! offset we're scrolling to
+	//! cursor offset
+	float _cursorX, _cursorY;
 	
-	int32 _scrollDirection;     //! 1 for down, -1 for up
+	//! switch cursor offset (relative to the normal cursor offset)
+	float _switchCursorX, _switchCursorY;
 	
-	int32 _scrollOffset;        //! current scroll offset
-							 
-	SelectMode _selectMode;     //! selection mode
-	bool _switching;            //! allow switching
-							 
-	CursorState _cursorState;   //! current cursor state (blinking, visible, hidden, etc)
-							 
-	WrapMode   _hWrapMode;      //! horizontal wrapping mode
-	WrapMode   _vWrapMode;      //! vertical wrapping mode
+	//! horizontal spacing
+	float _hSpacing;
 	
-	int32 _event;                    //! event that occurred during a frame
-	int32 _selection;                //! current selection
-	int32 _switchSelection;          //! if a switch event happens, switch selection is one of the elements being switched, and the other is _selection
-	int32 _firstSelection;           //! first selection that player confirmed on in double-confirm mode
+	//! vertical spacing
+	float _vSpacing;
 	
-	std::vector <Option> _options;   //! vector containing each option
-	int32 _numOptions;               //! how many options there are in this box
-	bool  _scrolling;                //! true if the box is currently in the middle of scrolling
-	FontProperties _fontProperties;  //! structure containing properties of the current font like height, etc.
-};
+	//! number of columns
+	int32 _numColumns;
+	
+	//! numer of rows
+	int32 _numRows;
+	
+	//! horizontal alignment for text
+	int32 _option_xalign;
+	
+	//! vertical alignment for text
+	int32 _option_yalign;
+	
+	//! when Update() is called, blink is set to true on frames that cursor should blink (i.e. not be visible)
+	bool _blink;
+	
+	//! timer used for controlling blink effect
+	int32 _blinkTime;
+	
+	//! timer used for controlling scrolling effect
+	int32 _scrollTime;
+	
+	//! offset we're scrolling from
+	int32 _scrollStartOffset;
+	
+	//! offset we're scrolling to
+	int32 _scrollEndOffset;
+	
+	//! 1 for down, -1 for up
+	int32 _scrollDirection;
+	
+	//! current scroll offset
+	int32 _scrollOffset;
+	
+	//! selection mode
+	SelectMode _selectMode;
+	
+	//! allow switching
+	bool _switching;
+	
+	//! current cursor state (blinking, visible, hidden, etc)
+	CursorState _cursorState;
+	
+	//! horizontal wrapping mode
+	WrapMode   _hWrapMode;
+	
+	//! vertical wrapping mode
+	WrapMode   _vWrapMode;
+	
+	//! event that occurred during a frame
+	int32 _event;
+	
+	//! current selection
+	int32 _selection;
+	
+	//! if a switch event happens, switch selection is one of the elements being switched, and the other is _selection
+	int32 _switchSelection;
+	
+	//! first selection that player confirmed on in double-confirm mode
+	int32 _firstSelection;
+	
+	//! vector containing each option
+	std::vector <Option> _options;
+	
+	//! how many options there are in this box
+	int32 _numOptions;
+	
+	//! true if the box is currently in the middle of scrolling
+	bool  _scrolling;
+	
+	//! structure containing properties of the current font like height, etc.
+	FontProperties _fontProperties;
+	
+}; // class OptionBox : public GUIControl
 
 
 } // namespace hoa_video

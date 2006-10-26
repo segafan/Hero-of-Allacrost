@@ -1565,7 +1565,7 @@ bool FixedTexMemMgr::Insert(Image *img)
 //-----------------------------------------------------------------------------
 // CalculateBlockIndex: returns the block index used up by this image
 //-----------------------------------------------------------------------------
-int32 FixedTexMemMgr::CalculateBlockIndex(Image *img)
+int32 FixedTexMemMgr::_CalculateBlockIndex(Image *img)
 {
 	int32 blockX = img->x / _imageWidth;
 	int32 blockY = img->y / _imageHeight;
@@ -1583,7 +1583,7 @@ int32 FixedTexMemMgr::CalculateBlockIndex(Image *img)
 bool FixedTexMemMgr::Remove(Image *img)
 {
 	// translate x,y coordinates into a block index
-	int32 blockIndex = CalculateBlockIndex(img);
+	int32 blockIndex = _CalculateBlockIndex(img);
 	
 	// check to make sure the block is actually owned by this image
 	if(_blocks[blockIndex].image != img)
@@ -1600,7 +1600,7 @@ bool FixedTexMemMgr::Remove(Image *img)
 	_blocks[blockIndex].image = NULL;
 	
 	// remove block from the open list	
-	DeleteNode(blockIndex);
+	_DeleteNode(blockIndex);
 	
 	return true;
 }
@@ -1608,7 +1608,7 @@ bool FixedTexMemMgr::Remove(Image *img)
 //-----------------------------------------------------------------------------
 // DeleteNode: deletes a node from the open list with the given block index
 //-----------------------------------------------------------------------------
-void FixedTexMemMgr::DeleteNode(int32 blockIndex)
+void FixedTexMemMgr::_DeleteNode(int32 blockIndex)
 {
 	if(blockIndex < 0)
 		return;
@@ -1656,7 +1656,7 @@ void FixedTexMemMgr::DeleteNode(int32 blockIndex)
 //-----------------------------------------------------------------------------
 bool FixedTexMemMgr::Free(Image *img)
 {
-	int32 blockIndex = CalculateBlockIndex(img);
+	int32 blockIndex = _CalculateBlockIndex(img);
 	
 	FixedImageNode *node = &_blocks[blockIndex];
 	
@@ -1684,8 +1684,8 @@ bool FixedTexMemMgr::Free(Image *img)
 //-----------------------------------------------------------------------------
 bool FixedTexMemMgr::Restore(Image *img)
 {
-	int32 blockIndex = CalculateBlockIndex(img);	
-	DeleteNode(blockIndex);	
+	int32 blockIndex = _CalculateBlockIndex(img);	
+	_DeleteNode(blockIndex);	
 	return true;
 }
 
@@ -2049,7 +2049,7 @@ bool GameVideo::_DeleteTempTextures()
 }
 
 //-----------------------------------------------------------------------------
-// SaveImage: saves the image to the given filename
+// FIXME: Unused?  Wrong definition? SaveImage: saves the image to the given filename
 //-----------------------------------------------------------------------------
 bool TexSheet::SaveImage(Image *img)
 {

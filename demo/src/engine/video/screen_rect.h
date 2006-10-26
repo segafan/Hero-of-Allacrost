@@ -46,6 +46,7 @@ public:
 	 *         rectangles is of course, another smaller rectangle). Note that
 	 *         if the two rectangles don't intersect at all, then a "zero rectangle"
 	 *         results where left, top, width, and height are all zero.
+	 * \param rect the rectangle to intersect with
 	 */	
 	
 	void Intersect(const ScreenRect &rect);	
@@ -55,4 +56,4 @@ public:
 
 }  // namespace hoa_video
 
-#endif   // !__SCREEN_RECT_HEADER__
+#endif   //! __SCREEN_RECT_HEADER__
