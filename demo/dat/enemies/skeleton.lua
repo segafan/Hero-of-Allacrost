@@ -1,6 +1,6 @@
 id = 1;
 width = 64;
-height = 64;
+height = 128;
 number_of_skills = 0;
 movement_speed = 5;
 base_hit_points = 10;
@@ -26,3 +26,10 @@ map_name_2 = "Chest";
 map_x_3 = 6;
 map_y_3 = 56;
 map_name_3 = "Legs";
+
+number_of_animations = 1;
+animation_name_ = "idle";
+num_frames_ = 4;
+file_name_ = "skeleton";
+x_dimension_ = 64;
+y_dimension_ = 128;

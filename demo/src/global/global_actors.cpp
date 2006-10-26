@@ -109,7 +109,7 @@ void GlobalActor::_CalculateEvadeRatings() {
 GlobalEnemy::GlobalEnemy(const std::string & file_name) :
 	_filename(file_name)
 {
-	// TODO: This is temporary code
+	// TODO: This is unfinished code
 	ScriptDescriptor read_data;
 	string fileName = "dat/enemies/" + _filename + ".lua";
 	if (!read_data.OpenFile(fileName.c_str(), READ)) {
@@ -125,31 +125,32 @@ GlobalEnemy::GlobalEnemy(const std::string & file_name) :
 		_enemy_skills.push_back(new GlobalSkill(read_data.ReadString(("skill_" + i))));
 	}
 	
-	uint32 numAnimations = read_data.ReadInt("number_of_animations");
-	for (uint32 i = 0; i < numAnimations; i++) {
-		string animationName = read_data.ReadString(("animation_name_" + i));
-		vector<StillImage> animations;
-		uint32 numFrames = read_data.ReadInt(("num_frames_" + i));
-		for (uint32 j = 0; j < numFrames; j++) {
-			string fileNameString = "file_name_" + i + '_' + j;
-			string x_dimensionString = "x_dimension_" + i + '_' + j;
-			string y_dimensionString = "y_dimension_" + i + '_' + j;
-			string fileName = read_data.ReadString(fileNameString.c_str());
-			uint32 x_dimension = read_data.ReadInt(x_dimensionString.c_str());
-			uint32 y_dimension = read_data.ReadInt(y_dimensionString.c_str());
-			
-			StillImage i;
-			i.SetFilename("img/sprites/battle/"+fileName);
-			i.SetStatic(true);
-			i.SetDimensions(static_cast<float>(x_dimension), static_cast<float>(y_dimension));
+	// Load damage frames for the enemy. TODO: Do these images need to be deleted as well somewhere?!
+	StillImage i;
+	i.SetFilename("img/sprites/battle/enemies/" + _filename + ".png");
+	i.SetStatic(true);
+	i.SetDimensions(static_cast<float>(_sprite_width), static_cast<float>(_sprite_height));
+	VideoManager->LoadImage(i);
+	_sprite_frames.push_back(i);
 
-			VideoManager->LoadImage(i);
-			animations.push_back(i);
-		}
-		// Raging_Hog: TODO CHECK This array isn't used anywhere and compiler complains about it.
-		// Should declare it in the global_actors.h I guess
-		//_sprite_animations[animationName] = animations;
-	}
+	i.SetFilename("img/sprites/battle/enemies/" + _filename + "_hp66.png");
+	i.SetStatic(true);
+	i.SetDimensions(static_cast<float>(_sprite_width), static_cast<float>(_sprite_height));
+	VideoManager->LoadImage(i);
+	_sprite_frames.push_back(i);
+
+	i.SetFilename("img/sprites/battle/enemies/" + _filename + "_hp33.png");
+	i.SetStatic(true);
+	i.SetDimensions(static_cast<float>(_sprite_width), static_cast<float>(_sprite_height));
+	VideoManager->LoadImage(i);
+	_sprite_frames.push_back(i);
+
+	i.SetFilename("img/sprites/battle/enemies/" + _filename + "_hp00.png");
+	i.SetStatic(true);
+	i.SetDimensions(static_cast<float>(_sprite_width), static_cast<float>(_sprite_height));
+	VideoManager->LoadImage(i);
+	_sprite_frames.push_back(i);
+
 	_movement_speed = read_data.ReadInt("movement_speed");
 	_base_hit_points = read_data.ReadInt("base_hit_points");
 	_base_skill_points = read_data.ReadInt("base_skill_points");
@@ -240,8 +241,9 @@ GlobalCharacter::GlobalCharacter(hoa_utils::ustring name, std::string filename, 
 	_filename(filename),
 	_id(id)
 */
-GlobalCharacter::GlobalCharacter(const hoa_utils::ustring & name, std::string filename, uint32 id)
+GlobalCharacter::GlobalCharacter(const hoa_utils::ustring & name, const std::string & filename, uint32 id)
 {
+	_name = name;
 	_filename = filename;
 	_id = id;
 
@@ -361,7 +363,7 @@ GlobalCharacter::GlobalCharacter(const hoa_utils::ustring & name, std::string fi
 		
 	VideoManager->BeginImageLoadBatch();
 	for (uint32 i = 0; i < idle_frames.size(); i++) {
-		if (!VideoManager->LoadImage(idle_frames[i])) cerr << "Failed to load claudius image." << endl;
+		if (!VideoManager->LoadImage(idle_frames[i])) cerr << "Failed to load battle sprite." << endl;
 			
 	}
 	VideoManager->EndImageLoadBatch();

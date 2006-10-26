@@ -70,7 +70,7 @@ void GameGlobal::AddCharacter(GlobalCharacter *ch) {
 
 GlobalCharacter* GameGlobal::GetCharacter(uint32 id) {
 	for (uint32 i = 0; i < _characters.size(); i++) {
-		if (_characters[i]->GetID() == id) {
+		if (_characters[i] != 0 && _characters[i]->GetID() == id) {
 			return _characters[i];
 		}
 	}

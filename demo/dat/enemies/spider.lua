@@ -24,3 +24,9 @@ map_x_2 = 48;
 map_y_2 = 57;
 map_name_2 = "Abdomen";
 
+number_of_animations = 1;
+animation_name_ = "idle";
+num_frames_ = 4;
+file_name_ = "spider";
+x_dimension_ = 64;
+y_dimension_ = 64;

@@ -100,7 +100,7 @@ private:
 *** ***************************************************************************/
 class BattleCharacterActor : public hoa_global::GlobalCharacter {
 public:
-	BattleCharacterActor(const hoa_utils::ustring & name, const std::string & filename, uint32 id, float XLocation, float YLocation);
+	BattleCharacterActor(GlobalCharacter * character, float XLocation, float YLocation);
 
 	virtual ~BattleCharacterActor();
 
@@ -153,6 +153,9 @@ public:
 
 	
 private:
+	//! A Pointer to the 'real' GlobalCharacter. TODO: This is very bad design and probably should be fixed...
+	GlobalCharacter * global_character_;
+
 	//! Character's X-coordinate on the screen
 	float _x_location;
 
@@ -183,7 +186,7 @@ private:
 *** ***************************************************************************/
 class BattleEnemyActor : public hoa_global::GlobalEnemy {
 public:
-	BattleEnemyActor(const std::string & file_name, float XLocation, float YLocation);
+	BattleEnemyActor(const std::string & filename, float XLocation, float YLocation);
 
 	virtual ~BattleEnemyActor();
 

@@ -42,8 +42,9 @@ namespace private_battle {
 // *****************************************************************************
 // BattleCharacterActor class
 // *****************************************************************************
-BattleCharacterActor::BattleCharacterActor(const hoa_utils::ustring & name, const std::string & filename, uint32 id, float XLocation, float YLocation) :
-GlobalCharacter(name, filename, id),
+BattleCharacterActor::BattleCharacterActor(GlobalCharacter * character, float XLocation, float YLocation) :
+GlobalCharacter(character->GetName(), character->GetFilename(), character->GetID()),
+global_character_(character),
 _x_location(XLocation),
 _y_location(YLocation),
 _x_origin(_x_location),
@@ -65,7 +66,7 @@ void BattleCharacterActor::Update() {
 	if (!IsAlive()) {
 		current_battle->RemoveScriptedEventsForActor(this);
 		}
-	RetrieveBattleAnimation("").Update();
+	global_character_->RetrieveBattleAnimation("idle")->Update();
 }
 
 
@@ -81,7 +82,7 @@ void BattleCharacterActor::DrawSprite() {
 		}
 		// Draw the character sprite
 		VideoManager->Move(_x_location, _y_location);
-		RetrieveBattleAnimation("").Draw();
+		global_character_->RetrieveBattleAnimation("idle")->Draw();
 		
 
 		// TEMP: determine if character sprite needs red damage numbers drawn next to it
@@ -105,7 +106,7 @@ void BattleCharacterActor::DrawSprite() {
 
 // Draws the character's damage-blended face portrait
 void BattleCharacterActor::DrawPortrait() {
-	std::vector<StillImage> & portrait_frames = GetBattlePortraits();
+	std::vector<StillImage> & portrait_frames = global_character_->GetBattlePortraits();
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 	VideoManager->Move(48, 9);
 
@@ -258,7 +259,7 @@ void BattleEnemyActor::DrawSprite() {
 	// Draw the sprite's final damage frame in grayscale and return
 	if (!IsAlive()) {
 		VideoManager->Move(_x_location, _y_location);
-		std::vector<StillImage> & sprite_frames = GetSpriteFrames();
+		std::vector<StillImage> & sprite_frames = *GetSpriteFrames();
 		sprite_frames[3].EnableGrayScale();
 		VideoManager->DrawImage(sprite_frames[3]);
 		sprite_frames[3].DisableGrayScale();
@@ -272,7 +273,7 @@ void BattleEnemyActor::DrawSprite() {
 		}
 
 		// Draw the enemy's damage-blended sprite frames
-		std::vector<StillImage> & sprite_frames = GetSpriteFrames();
+		std::vector<StillImage> & sprite_frames = *GetSpriteFrames();
 		VideoManager->Move(_x_location, _y_location);
 		float hp_percent = static_cast<float>(GetHitPoints()) / static_cast<float>(GetMaxHitPoints());
 
