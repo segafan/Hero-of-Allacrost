@@ -1,0 +1,401 @@
+// !$*UTF8*$!
+{
+	4941A4A10AC1D76400D65B8E /* Project object */ = {
+		activeBuildConfigurationName = Release;
+		activeExecutable = 4941A4B20AC1D77600D65B8E /* Allacrost */;
+		activeTarget = 4941A4AF0AC1D77500D65B8E /* Allacrost */;
+		addToTargets = (
+			4941A4AF0AC1D77500D65B8E /* Allacrost */,
+		);
+		breakpoints = (
+		);
+		breakpointsGroup = 4941A78C0AC1E06500D65B8E /* XCBreakpointsBucket */;
+		codeSenseManager = 4941A4A60AC1D76400D65B8E /* Code sense */;
+		executables = (
+			4941A4B20AC1D77600D65B8E /* Allacrost */,
+		);
+		ignoreBreakpointsInProjectsDict = {
+		};
+		perUserDictionary = {
+			PBXConfiguration.PBXFileTableDataSource3.PBXFileTableDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					168,
+					20,
+					48,
+					43,
+					43,
+					20,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+					PBXFileDataSource_Target_ColumnID,
+				);
+			};
+			PBXConfiguration.PBXTargetDataSource.PBXTargetDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					200,
+					10,
+					20,
+					48,
+					43,
+					43,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXTargetDataSource_PrimaryAttribute,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+				);
+			};
+			PBXPerProjectTemplateStateSaveDate = 183763810;
+			PBXWorkspaceStateSaveDate = 183763810;
+		};
+		sourceControlManager = 4941A4A50AC1D76400D65B8E /* Source Control */;
+		userBuildSettings = {
+		};
+	};
+	4941A4A50AC1D76400D65B8E /* Source Control */ = {
+		isa = PBXSourceControlManager;
+		fallbackIsa = XCSourceControlManager;
+		isSCMEnabled = 0;
+		scmConfiguration = {
+		};
+		scmType = "";
+	};
+	4941A4A60AC1D76400D65B8E /* Code sense */ = {
+		isa = PBXCodeSenseManager;
+		indexTemplatePath = "";
+	};
+	4941A4AF0AC1D77500D65B8E /* Allacrost */ = {
+		activeExec = 0;
+		executables = (
+			4941A4B20AC1D77600D65B8E /* Allacrost */,
+		);
+	};
+	4941A4B20AC1D77600D65B8E /* Allacrost */ = {
+		isa = PBXExecutable;
+		activeArgIndex = 2147483647;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		dylibVariantSuffix = "";
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = Allacrost;
+		savedGlobals = {
+			/Users/alistairlynn/svn/allacrost/trunk/demo/build/Debug/Allacrost.app/Contents/MacOS/Allacrost = (
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/data.cpp;
+					name = "hoa_data::DataManager";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/data.cpp;
+					name = "hoa_data::DATA_DEBUG";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/audio/audio.cpp;
+					name = "hoa_audio::AudioManager";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/audio/audio.cpp;
+					name = "hoa_audio::AUDIO_DEBUG";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/audio/audio.cpp;
+					name = "hoa_audio::GameAudio::_ref";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/data.cpp;
+					name = "hoa_data::GameData::_ref";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/global.cpp;
+					name = "hoa_global::GLOBAL_DEBUG";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/global.cpp;
+					name = "hoa_global::GlobalManager";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/global.cpp;
+					name = "hoa_global::GameGlobal::_ref";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/input.cpp;
+					name = "hoa_input::GameInput::_ref";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/input.cpp;
+					name = "hoa_input::InputManager";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/input.cpp;
+					name = "hoa_input::INPUT_DEBUG";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/mode_manager.cpp;
+					name = "hoa_mode_manager::GameModeManager::_ref";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/mode_manager.cpp;
+					name = "hoa_mode_manager::ModeManager";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/mode_manager.cpp;
+					name = "hoa_mode_manager::MODE_MANAGER_DEBUG";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/system.cpp;
+					name = "hoa_system::SYSTEM_DEBUG";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/system.cpp;
+					name = "hoa_system::GameSystem::_ref";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/system.cpp;
+					name = "hoa_system::SystemManager";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/menu_window.cpp;
+					name = "hoa_video::MenuWindow::_currentMenuID";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/menu_window.cpp;
+					name = "hoa_video::MenuWindow::_menuMap";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/video.cpp;
+					name = "hoa_video::Color::red";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/video.cpp;
+					name = "hoa_video::Color::gray";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/video.cpp;
+					name = "hoa_video::Color::yellow";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/video.cpp;
+					name = "hoa_video::Color::violet";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/video.cpp;
+					name = "hoa_video::Color::aqua";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/video.cpp;
+					name = "hoa_video::GameVideo::_ref";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/video.cpp;
+					name = "hoa_video::Color::clear";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/video.cpp;
+					name = "hoa_video::VideoManager";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/video.cpp;
+					name = "hoa_video::VIDEO_DEBUG";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/video.cpp;
+					name = "hoa_video::Color::black";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/video.cpp;
+					name = "hoa_video::Color::orange";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/video.cpp;
+					name = "hoa_video::Color::green";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/video.cpp;
+					name = "hoa_video::Color::blue";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/video.cpp;
+					name = "hoa_video::Color::brown";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/video.cpp;
+					name = "hoa_video::Color::white";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/modes/battle/battle.cpp;
+					name = "hoa_battle::BattleMode::MAX_PLAYER_CHARACTERS_IN_BATTLE";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/modes/battle/battle.cpp;
+					name = "hoa_battle::BattleMode::MAX_ENEMY_CHARACTERS_IN_BATTLE";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/modes/battle/battle.cpp;
+					name = "hoa_battle::BATTLE_DEBUG";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/modes/battle/battle.cpp;
+					name = "hoa_battle::private_battle::current_battle";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/modes/boot/boot.cpp;
+					name = "hoa_boot::BOOT_DEBUG";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/modes/boot/boot.cpp;
+					name = "hoa_boot::BootMode::_logo_animating";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/modes/boot/boot_menu.cpp;
+					name = "hoa_boot::BootMenu::_menu_window";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/modes/boot/boot_menu.cpp;
+					name = "hoa_boot::BootMenu::_boot_mode";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/modes/map/map_objects.cpp;
+					name = "hoa_map::private_map::MapObject::current_map";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/modes/map/map.cpp;
+					name = "hoa_map::MAP_DEBUG";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/modes/menu/menu.cpp;
+					name = "hoa_menu::MENU_DEBUG";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/modes/quit.cpp;
+					name = "hoa_quit::QUIT_DEBUG";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/modes/pause.cpp;
+					name = "hoa_pause::PAUSE_DEBUG";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/modes/scene.cpp;
+					name = "hoa_scene::SCENE_DEBUG";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/utils.cpp;
+					name = "hoa_utils::UTILS_DEBUG";
+				},
+				{
+					display = 1;
+					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/utils.cpp;
+					name = "hoa_utils::ustring::npos";
+				},
+			);
+		};
+		sourceDirectories = (
+		);
+		variableFormatDictionary = {
+		};
+	};
+	4941A68B0AC1D86400D65B8E /* main.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {459, 3850}}";
+			sepNavSelRange = "{3662, 0}";
+			sepNavVisRect = "{{0, 1559}, {459, 201}}";
+		};
+	};
+	4941A6950AC1D86400D65B8E /* boot.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {752, 12964}}";
+			sepNavSelRange = "{29021, 0}";
+			sepNavVisRect = "{{0, 11945}, {752, 205}}";
+		};
+	};
+	4941A6990AC1D86400D65B8E /* boot_menu.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {908, 4326}}";
+			sepNavSelRange = "{5160, 0}";
+			sepNavVisRect = "{{0, 2388}, {908, 222}}";
+		};
+	};
+	4941A78C0AC1E06500D65B8E /* XCBreakpointsBucket */ = {
+		isa = XCBreakpointsBucket;
+		name = "Project Breakpoints";
+		objects = (
+		);
+	};
+}
