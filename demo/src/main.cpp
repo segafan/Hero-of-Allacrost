@@ -88,6 +88,7 @@ void QuitAllacrost() {
 
 // Every great game begins with a single function :)
 int32 main(int32 argc, char *argv[]) {
+	chdir(DATADIR);
 	// When the program exits, first the QuitAllacrost() function, followed by SDL_Quit()
 	atexit(SDL_Quit);
 	atexit(QuitAllacrost);
