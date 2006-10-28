@@ -1,4 +1,5 @@
 EXTRA_DIST = MANUAL configure dat doc img mus snd
+AM_CPPFLAGS = -DDATADIR=\"$(datadir)\"
 ACLOCAL_AMFLAGS = -I m4
 INCLUDES = \
 	-I/usr/include/SDL \
@@ -169,15 +170,17 @@ find_filter = -name .svn -prune -o -name ".\#*" -o -type d
 find_datadirs = ( cd $(top_srcdir) && find $(data_dirs) $(find_filter) -print )
 find_data = ( cd $(top_srcdir) && find $(data_dirs) $(find_filter) -o -print )
 
-pkgdatadir = $(datadir)/allacrost
-
 install-data-local:
 	@$(NORMAL_INSTALL)
-	test -z "$(pkgdatadir)" || $(mkdir_p) "$(DESTDIR)$(pkgdatadir)"
+	test -z "$(datadir)" || $(mkdir_p) "$(DESTDIR)$(datadir)"
 	( $(find_datadirs) ) | while read dir; do \
-		$(mkdir_p) "$(DESTDIR)$(pkgdatadir)/$$dir"; \
+		$(mkdir_p) "$(DESTDIR)$(datadir)/$$dir"; \
 	done; \
 	( $(find_data) ) | while read file; do \
-		echo $(INSTALL_DATA) "$$file" "$(DESTDIR)$(pkgdatadir)/$$file"; \
-		$(INSTALL_DATA) "$$file" "$(DESTDIR)$(pkgdatadir)/$$file"; \
+		echo $(INSTALL_DATA) "$$file" "$(DESTDIR)$(datadir)/$$file"; \
+		$(INSTALL_DATA) "$$file" "$(DESTDIR)$(datadir)/$$file"; \
 	done 
+
+uninstall-local:
+	@$(NORMAL_UNINSTALL)
+	rm -r "$(DESTDIR)$(datadir)"

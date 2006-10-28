@@ -14,6 +14,9 @@ AC_PROG_CC
 AC_PROG_INSTALL
 CXXFLAGS="-Wall"
 
+datadir=${datadir}/${PACKAGE}-${VERSION}
+AC_SUBST(datadir)
+
 dnl Check for compiler optimization option.
 AC_MSG_CHECKING(whether to enable -O3 compiler optimization)
 optimize_default="yes"
@@ -49,12 +52,16 @@ fi
 AM_CONDITIONAL([COND_EDITOR], [test "$enable_editor" = yes])
 
 dnl Check for libraries.
-AC_CHECK_LIB([GL], [glEnable], [], \
-	[echo "Could not find the GL library. Check that it is properly installed on your system"
-	 exit -1])
-AC_CHECK_LIB([GLU], [gluBuild2DMipmaps], [], \
-	[echo "Could not find the GLU library. Check that it is properly installed on your system"
-	 exit -1])
+AC_PATH_XTRA
+X_LIBS="$X_LIBS -L/usr/X11R6/lib"
+X_CFLAGS="$X_CFLAGS -L/usr/X11R6/lib"
+LIBS="$LIBS $X_LIBS"
+CPPFLAGS="$CPPFLAGS $X_CFLAGS"
+
+AC_CHECK_LIB([X11], [XCreateWindow], [], [AC_MSG_ERROR([X11 GLX not found])])
+AC_CHECK_LIB([GL], [glGetString], [], [AC_MSG_ERROR([OpenGL not found])])
+AC_CHECK_LIB([GLU], [gluGetString], [], [AC_MSG_ERROR([GLU not found])])
+
 AC_CHECK_LIB([png], [png_read_info], [], \
 	[echo "Could not find the png library. Check that it is properly installed on your system"
 	 exit -1])	
@@ -86,7 +93,7 @@ AC_CHECK_LIB([m], [log], [], \
 	 exit -1])
 
 AC_PATH_PROGS([LUA_CONFIG], [lua-config])
-if test "x$LUA_CONFIG" != "xno"; then
+if test "x$LUA_CONFIG" != "xno" -a -x "$LUA_CONFIG"; then
 	LUA_CFLAGS="`$LUA_CONFIG --include`"
 	CXXFLAGS="$CXXFLAGS $LUA_CFLAGS"
 fi

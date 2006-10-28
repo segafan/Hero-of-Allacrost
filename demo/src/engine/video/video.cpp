@@ -244,8 +244,6 @@ bool GameVideo::SingletonInitialize()
 
 	// make a temp directory and make sure it doesn't contain any files
 	// (in case the game crashed during a previous run, leaving stuff behind)
-	MakeDirectory("temp");		
-	CleanDirectory("temp");
 
 	// enable text shadows
 	EnableTextShadow(true);
@@ -435,8 +433,6 @@ GameVideo::~GameVideo()
 		delete iImage->second;
 		++iImage;
 	}
-	
-	RemoveDirectory("temp");	
 }
 
 
@@ -1399,7 +1395,7 @@ void GameVideo::ToggleFPS()
 string GameVideo::_CreateTempFilename(const string &extension)
 {
 	// figure out the temp filename to return
-	string filename = "temp/TEMP_";
+	string filename = "/tmp/allacrost_TEMP_";
 	filename += _nextTempFile;
 	filename += extension;
 	
