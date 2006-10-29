@@ -936,12 +936,12 @@ void BattleMode::SetPerformingScript(bool AIsPerforming) {
 		// Remove the first scripted event from the queue
 		// _script_queue.front().GetSource() is either BattleEnemyActor or BattleCharacterActor
 		try {
-		BattleEnemyActor * source = dynamic_cast<BattleEnemyActor*>(_script_queue.front().GetSource());
-		source->SetQueuedToPerform(false);
+			BattleEnemyActor * source = dynamic_cast<BattleEnemyActor*>(_script_queue.front().GetSource());
+			source->SetQueuedToPerform(false);
 		}
 		catch(std::bad_cast e) {
-		BattleCharacterActor * source = dynamic_cast<BattleCharacterActor*>(_script_queue.front().GetSource());
-		source->SetQueuedToPerform(false);
+			BattleCharacterActor * source = dynamic_cast<BattleCharacterActor*>(_script_queue.front().GetSource());
+			source->SetQueuedToPerform(false);
 		}
 		_script_queue.pop_front();
 	}
