@@ -39,64 +39,36 @@
 		4941A7650AC1DCA500D65B8E /* SDLMain.m in Sources */ = {isa = PBXBuildFile; fileRef = 4941A7630AC1DCA500D65B8E /* SDLMain.m */; };
 		4941A7680AC1DCE000D65B8E /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4941A7670AC1DCDF00D65B8E /* Cocoa.framework */; };
 		4996296A0AF50B1F00B6A328 /* global_skills.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 499629620AF50B1F00B6A328 /* global_skills.cpp */; };
-		4996296B0AF50B1F00B6A328 /* global_objects.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 499629630AF50B1F00B6A328 /* global_objects.h */; };
 		4996296C0AF50B1F00B6A328 /* global.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 499629640AF50B1F00B6A328 /* global.cpp */; };
-		4996296D0AF50B1F00B6A328 /* global_actors.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 499629650AF50B1F00B6A328 /* global_actors.h */; };
-		4996296E0AF50B1F00B6A328 /* global.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 499629660AF50B1F00B6A328 /* global.h */; };
 		4996296F0AF50B1F00B6A328 /* global_objects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 499629670AF50B1F00B6A328 /* global_objects.cpp */; };
-		499629700AF50B1F00B6A328 /* global_skills.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 499629680AF50B1F00B6A328 /* global_skills.h */; };
 		499629710AF50B1F00B6A328 /* global_actors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 499629690AF50B1F00B6A328 /* global_actors.cpp */; };
-		4999AC500AF407BE004DD3A3 /* audio_sound.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4999AC1C0AF407BD004DD3A3 /* audio_sound.h */; };
 		4999AC510AF407BE004DD3A3 /* audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC1D0AF407BD004DD3A3 /* audio.cpp */; };
 		4999AC520AF407BE004DD3A3 /* audio_music.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC1E0AF407BD004DD3A3 /* audio_music.cpp */; };
-		4999AC530AF407BE004DD3A3 /* audio.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4999AC1F0AF407BD004DD3A3 /* audio.h */; };
-		4999AC540AF407BE004DD3A3 /* audio_music.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4999AC200AF407BD004DD3A3 /* audio_music.h */; };
 		4999AC550AF407BE004DD3A3 /* audio_sound.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC210AF407BD004DD3A3 /* audio_sound.cpp */; };
 		4999AC560AF407BE004DD3A3 /* video.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC230AF407BD004DD3A3 /* video.cpp */; };
 		4999AC570AF407BE004DD3A3 /* fade.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC240AF407BD004DD3A3 /* fade.cpp */; };
-		4999AC580AF407BE004DD3A3 /* shake.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4999AC250AF407BD004DD3A3 /* shake.h */; };
-		4999AC590AF407BE004DD3A3 /* particle_emitter.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4999AC260AF407BD004DD3A3 /* particle_emitter.h */; };
-		4999AC5A0AF407BE004DD3A3 /* menu_window.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4999AC270AF407BD004DD3A3 /* menu_window.h */; };
-		4999AC5B0AF407BE004DD3A3 /* screen_rect.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4999AC280AF407BD004DD3A3 /* screen_rect.h */; };
-		4999AC5C0AF407BE004DD3A3 /* particle_manager.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4999AC290AF407BD004DD3A3 /* particle_manager.h */; };
 		4999AC5D0AF407BE004DD3A3 /* particle_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC2A0AF407BD004DD3A3 /* particle_system.cpp */; };
-		4999AC5E0AF407BE004DD3A3 /* particle.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4999AC2B0AF407BD004DD3A3 /* particle.h */; };
 		4999AC5F0AF407BE004DD3A3 /* option.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC2C0AF407BD004DD3A3 /* option.cpp */; };
-		4999AC600AF407BE004DD3A3 /* coord_sys.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4999AC2D0AF407BD004DD3A3 /* coord_sys.h */; };
 		4999AC610AF407BE004DD3A3 /* interpolator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC2E0AF407BD004DD3A3 /* interpolator.cpp */; };
 		4999AC620AF407BE004DD3A3 /* tex_mgmt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC2F0AF407BD004DD3A3 /* tex_mgmt.cpp */; };
-		4999AC630AF407BE004DD3A3 /* particle_effect.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4999AC300AF407BD004DD3A3 /* particle_effect.h */; };
 		4999AC640AF407BE004DD3A3 /* gui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC310AF407BD004DD3A3 /* gui.cpp */; };
-		4999AC650AF407BE004DD3A3 /* image.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4999AC320AF407BD004DD3A3 /* image.h */; };
-		4999AC660AF407BE004DD3A3 /* text.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4999AC330AF407BD004DD3A3 /* text.h */; };
 		4999AC670AF407BE004DD3A3 /* shake.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC340AF407BE004DD3A3 /* shake.cpp */; };
-		4999AC680AF407BE004DD3A3 /* particle_keyframe.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4999AC350AF407BE004DD3A3 /* particle_keyframe.h */; };
 		4999AC690AF407BE004DD3A3 /* menu_window.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC360AF407BE004DD3A3 /* menu_window.cpp */; };
 		4999AC6A0AF407BE004DD3A3 /* particle_manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC370AF407BE004DD3A3 /* particle_manager.cpp */; };
-		4999AC6B0AF407BE004DD3A3 /* textbox.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4999AC380AF407BE004DD3A3 /* textbox.h */; };
-		4999AC6C0AF407BE004DD3A3 /* fade.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4999AC390AF407BE004DD3A3 /* fade.h */; };
-		4999AC6D0AF407BE004DD3A3 /* video.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4999AC3A0AF407BE004DD3A3 /* video.h */; };
-		4999AC6E0AF407BE004DD3A3 /* particle_system.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4999AC3B0AF407BE004DD3A3 /* particle_system.h */; };
-		4999AC6F0AF407BE004DD3A3 /* option.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4999AC3C0AF407BE004DD3A3 /* option.h */; };
 		4999AC700AF407BE004DD3A3 /* particle_effect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC3D0AF407BE004DD3A3 /* particle_effect.cpp */; };
 		4999AC710AF407BE004DD3A3 /* effects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC3E0AF407BE004DD3A3 /* effects.cpp */; };
 		4999AC720AF407BE004DD3A3 /* image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC3F0AF407BE004DD3A3 /* image.cpp */; };
-		4999AC730AF407BE004DD3A3 /* color.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4999AC400AF407BE004DD3A3 /* color.h */; };
 		4999AC740AF407BE004DD3A3 /* text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC410AF407BE004DD3A3 /* text.cpp */; };
-		4999AC750AF407BE004DD3A3 /* interpolator.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4999AC420AF407BE004DD3A3 /* interpolator.h */; };
-		4999AC760AF407BE004DD3A3 /* tex_mgmt.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4999AC430AF407BE004DD3A3 /* tex_mgmt.h */; };
-		4999AC770AF407BE004DD3A3 /* context.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4999AC440AF407BE004DD3A3 /* context.h */; };
-		4999AC780AF407BE004DD3A3 /* gui.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4999AC450AF407BE004DD3A3 /* gui.h */; };
 		4999AC790AF407BE004DD3A3 /* draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC460AF407BE004DD3A3 /* draw.cpp */; };
 		4999AC7A0AF407BE004DD3A3 /* textbox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC470AF407BE004DD3A3 /* textbox.cpp */; };
 		4999AC7B0AF407BE004DD3A3 /* input.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC480AF407BE004DD3A3 /* input.cpp */; };
 		4999AC7C0AF407BE004DD3A3 /* script.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC490AF407BE004DD3A3 /* script.cpp */; };
 		4999AC7D0AF407BE004DD3A3 /* mode_manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC4A0AF407BE004DD3A3 /* mode_manager.cpp */; };
-		4999AC7E0AF407BE004DD3A3 /* script.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4999AC4B0AF407BE004DD3A3 /* script.h */; };
-		4999AC7F0AF407BE004DD3A3 /* mode_manager.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4999AC4C0AF407BE004DD3A3 /* mode_manager.h */; };
-		4999AC800AF407BE004DD3A3 /* input.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4999AC4D0AF407BE004DD3A3 /* input.h */; };
 		4999AC810AF407BE004DD3A3 /* system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC4E0AF407BE004DD3A3 /* system.cpp */; };
-		4999AC820AF407BE004DD3A3 /* system.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4999AC4F0AF407BE004DD3A3 /* system.h */; };
+		49BDC4260AF540AE00940A6C /* SDL_net.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 49BDC4250AF540AE00940A6C /* SDL_net.framework */; };
+		49BDC4480AF540E400940A6C /* SDL_net.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 49BDC4250AF540AE00940A6C /* SDL_net.framework */; };
+		49BDC4520AF5412600940A6C /* socket.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 49BDC4500AF5412600940A6C /* socket.h */; };
+		49BDC4530AF5412600940A6C /* socket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49BDC4510AF5412600940A6C /* socket.cpp */; };
 		49DEC4270AD18E9800DC8362 /* Allacrost-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 49DEC4260AD18E9800DC8362 /* Allacrost-Info.plist */; };
 /* End PBXBuildFile section */
 
@@ -107,41 +79,11 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				49BDC4480AF540E400940A6C /* SDL_net.framework in Copy Frameworks */,
 				4941A7440AC1D8BA00D65B8E /* SDL_mixer.framework in Copy Frameworks */,
 				4941A7450AC1D8BA00D65B8E /* SDL_ttf.framework in Copy Frameworks */,
 				4941A7460AC1D8BA00D65B8E /* SDL.framework in Copy Frameworks */,
-				4999AC500AF407BE004DD3A3 /* audio_sound.h in Copy Frameworks */,
-				4999AC530AF407BE004DD3A3 /* audio.h in Copy Frameworks */,
-				4999AC540AF407BE004DD3A3 /* audio_music.h in Copy Frameworks */,
-				4999AC580AF407BE004DD3A3 /* shake.h in Copy Frameworks */,
-				4999AC590AF407BE004DD3A3 /* particle_emitter.h in Copy Frameworks */,
-				4999AC5A0AF407BE004DD3A3 /* menu_window.h in Copy Frameworks */,
-				4999AC5B0AF407BE004DD3A3 /* screen_rect.h in Copy Frameworks */,
-				4999AC5C0AF407BE004DD3A3 /* particle_manager.h in Copy Frameworks */,
-				4999AC5E0AF407BE004DD3A3 /* particle.h in Copy Frameworks */,
-				4999AC600AF407BE004DD3A3 /* coord_sys.h in Copy Frameworks */,
-				4999AC630AF407BE004DD3A3 /* particle_effect.h in Copy Frameworks */,
-				4999AC650AF407BE004DD3A3 /* image.h in Copy Frameworks */,
-				4999AC660AF407BE004DD3A3 /* text.h in Copy Frameworks */,
-				4999AC680AF407BE004DD3A3 /* particle_keyframe.h in Copy Frameworks */,
-				4999AC6B0AF407BE004DD3A3 /* textbox.h in Copy Frameworks */,
-				4999AC6C0AF407BE004DD3A3 /* fade.h in Copy Frameworks */,
-				4999AC6D0AF407BE004DD3A3 /* video.h in Copy Frameworks */,
-				4999AC6E0AF407BE004DD3A3 /* particle_system.h in Copy Frameworks */,
-				4999AC6F0AF407BE004DD3A3 /* option.h in Copy Frameworks */,
-				4999AC730AF407BE004DD3A3 /* color.h in Copy Frameworks */,
-				4999AC750AF407BE004DD3A3 /* interpolator.h in Copy Frameworks */,
-				4999AC760AF407BE004DD3A3 /* tex_mgmt.h in Copy Frameworks */,
-				4999AC770AF407BE004DD3A3 /* context.h in Copy Frameworks */,
-				4999AC780AF407BE004DD3A3 /* gui.h in Copy Frameworks */,
-				4999AC7E0AF407BE004DD3A3 /* script.h in Copy Frameworks */,
-				4999AC7F0AF407BE004DD3A3 /* mode_manager.h in Copy Frameworks */,
-				4999AC800AF407BE004DD3A3 /* input.h in Copy Frameworks */,
-				4999AC820AF407BE004DD3A3 /* system.h in Copy Frameworks */,
-				4996296B0AF50B1F00B6A328 /* global_objects.h in Copy Frameworks */,
-				4996296D0AF50B1F00B6A328 /* global_actors.h in Copy Frameworks */,
-				4996296E0AF50B1F00B6A328 /* global.h in Copy Frameworks */,
-				499629700AF50B1F00B6A328 /* global_skills.h in Copy Frameworks */,
+				49BDC4520AF5412600940A6C /* socket.h in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -255,6 +197,9 @@
 		4999AC4D0AF407BE004DD3A3 /* input.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = input.h; sourceTree = "<group>"; };
 		4999AC4E0AF407BE004DD3A3 /* system.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = system.cpp; sourceTree = "<group>"; };
 		4999AC4F0AF407BE004DD3A3 /* system.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = system.h; sourceTree = "<group>"; };
+		49BDC4250AF540AE00940A6C /* SDL_net.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_net.framework; path = /Library/Frameworks/SDL_net.framework; sourceTree = "<absolute>"; };
+		49BDC4500AF5412600940A6C /* socket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = socket.h; sourceTree = "<group>"; };
+		49BDC4510AF5412600940A6C /* socket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = socket.cpp; sourceTree = "<group>"; };
 		49DEC4260AD18E9800DC8362 /* Allacrost-Info.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xml; path = "Allacrost-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -268,6 +213,7 @@
 				4941A71B0AC1D8B300D65B8E /* SDL_ttf.framework in Frameworks */,
 				4941A71C0AC1D8B300D65B8E /* SDL.framework in Frameworks */,
 				4941A7680AC1DCE000D65B8E /* Cocoa.framework in Frameworks */,
+				49BDC4260AF540AE00940A6C /* SDL_net.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -277,8 +223,8 @@
 		4941A49F0AC1D76400D65B8E = {
 			isa = PBXGroup;
 			children = (
-				4941A4BD0AC1D7BA00D65B8E /* Resources */,
 				4941A4BC0AC1D7B300D65B8E /* Source Files */,
+				4941A4BD0AC1D7BA00D65B8E /* Resources */,
 				4941A4BB0AC1D7AF00D65B8E /* Linkings */,
 				4941A4B10AC1D77600D65B8E /* Products */,
 			);
@@ -409,6 +355,7 @@
 		4941A7120AC1D87200D65B8E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				49BDC4250AF540AE00940A6C /* SDL_net.framework */,
 				4941A7670AC1DCDF00D65B8E /* Cocoa.framework */,
 				4941A7170AC1D8B300D65B8E /* SDL_mixer.framework */,
 				4941A7180AC1D8B300D65B8E /* SDL_ttf.framework */,
@@ -446,6 +393,8 @@
 				4999AC4D0AF407BE004DD3A3 /* input.h */,
 				4999AC4E0AF407BE004DD3A3 /* system.cpp */,
 				4999AC4F0AF407BE004DD3A3 /* system.h */,
+				49BDC4500AF5412600940A6C /* socket.h */,
+				49BDC4510AF5412600940A6C /* socket.cpp */,
 			);
 			path = engine;
 			sourceTree = "<group>";
@@ -610,6 +559,7 @@
 				4996296C0AF50B1F00B6A328 /* global.cpp in Sources */,
 				4996296F0AF50B1F00B6A328 /* global_objects.cpp in Sources */,
 				499629710AF50B1F00B6A328 /* global_actors.cpp in Sources */,
+				49BDC4530AF5412600940A6C /* socket.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

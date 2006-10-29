@@ -73,6 +73,8 @@ engine_SOURCES = \
 	$(ENGINE_DIR)/mode_manager.h \
 	$(ENGINE_DIR)/script.cpp \
 	$(ENGINE_DIR)/script.h \
+	$(ENGINE_DIR)/socket.cpp \
+	$(ENGINE_DIR)/socket.h \
 	$(audio_SOURCES) \
 	$(video_SOURCES)
 
