@@ -54,7 +54,7 @@ AM_CONDITIONAL([COND_EDITOR], [test "$enable_editor" = yes])
 dnl Check for libraries.
 AC_PATH_XTRA
 X_LIBS="$X_LIBS -L/usr/X11R6/lib"
-X_CFLAGS="$X_CFLAGS -L/usr/X11R6/lib"
+X_CFLAGS="$X_CFLAGS -I/usr/X11R6/include"
 LIBS="$LIBS $X_LIBS"
 CPPFLAGS="$CPPFLAGS $X_CFLAGS"
 
@@ -114,7 +114,7 @@ dnl Check for library functions.
 AC_FUNC_CLOSEDIR_VOID
 AC_FUNC_MALLOC
 AC_FUNC_STAT
-AC_CHECK_FUNCS([atexit mkdir rmdir sqrt strcasecmp])
+AC_CHECK_FUNCS([atexit chdir mkdir rmdir sqrt strcasecmp])
 
 AC_CONFIG_FILES([Makefile])
 
