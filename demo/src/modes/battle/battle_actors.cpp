@@ -106,7 +106,7 @@ void BattleCharacterActor::DrawSprite() {
 
 // Draws the character's damage-blended face portrait
 void BattleCharacterActor::DrawPortrait() {
-	std::vector<StillImage> portrait_frames = global_character_->GetBattlePortraits();
+	std::vector<StillImage> & portrait_frames = *global_character_->GetBattlePortraits();
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 	VideoManager->Move(48, 9);
 

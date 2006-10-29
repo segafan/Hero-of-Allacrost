@@ -546,8 +546,8 @@ public:
 	std::vector<GlobalSkill*> GetSupportSkills() const
 		{ return _support_skills; }
 
-	std::vector<hoa_video::StillImage> GetBattlePortraits() const
-		{ return _battle_portraits; }
+	std::vector<hoa_video::StillImage> * GetBattlePortraits()
+		{ return &_battle_portraits; }
 	void SetExperienceNextLevel(uint32 xp_next)
 		{ _experience_next_level = xp_next; }
 	//@}
