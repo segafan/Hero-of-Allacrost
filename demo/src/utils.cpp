@@ -454,4 +454,52 @@ bool RemoveDirectory(const std::string& dir_name)
 	return true;
 }
 
+#define VERSION_URL "http://rabidtinker.mine.nu/~alistair/allacrost-version.txt"
+#define ALLACROST_MAJOR_VERSION 0
+#define ALLACROST_MINOR_VERSION 1
+#define ALLACROST_PATCH 0
+
+static std::string temp_version_str;
+
+bool IsLatestVersion ()
+{
+#ifdef WIN32
+	return true; // No Doze version yet, so assume we're using the latest ver
+#else
+	uint32 rversionmajor;
+	uint32 rversionminor;
+	uint32 rpatch;
+	/*rversion = atof ( system(VERSION_URL) );
+	rpatch = atoi ( system(PATCH_URL) );*/
+	FILE* fp = popen ( "curl -s " VERSION_URL, "r" );
+	if (!fp)
+		return true;
+	fscanf ( fp, "%d.%d.%d", &rversionmajor, &rversionminor, &rpatch );
+	pclose ( fp );
+	
+	char vstring[255];
+	sprintf ( vstring, "%d.%d.%d", rversionmajor, rversionminor, rpatch );
+	temp_version_str = vstring;
+	
+	if (rversionmajor > ALLACROST_MAJOR_VERSION)
+		return false;
+	else if (rversionmajor == ALLACROST_MAJOR_VERSION)
+	{
+		if (rversionminor > ALLACROST_MINOR_VERSION)
+			return false;
+		else if (rversionminor == ALLACROST_MINOR_VERSION)
+		{
+			if (rpatch > ALLACROST_PATCH)
+				return false;
+		}
+	}
+	return true;
+#endif
+}
+
+string GetLatestVersion ()
+{
+	return temp_version_str;
+}
+
 } // namespace utils

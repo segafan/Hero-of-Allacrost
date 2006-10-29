@@ -81,6 +81,13 @@ bool ParseProgramOptions(int32 &return_code, int32 argc, char **argv) {
 			return_code = 0;
 			return false;
 		}
+		else if (options[i] == "-V" || options[i] == "--check-ver") {
+			if (IsLatestVersion())
+				cout << "This is the latest version of Allacrost" << endl;
+			else
+				cout << "A newer version of Allacrost (" << GetLatestVersion() << ") is available!" << endl;
+			return false;
+		}
 		else {
 			cerr << "Unrecognized option: " << options[i] << endl;
 			PrintUsage();
@@ -104,6 +111,7 @@ void PrintUsage() {
 	cout << "  --help/-h         :: prints this help menu" << endl;
 	cout << "  --info/-i         :: prints information about the user's system" << endl;
 	cout << "  --reset/-r        :: resets game configuration to use default settings" << endl;
+	cout << "  --check-ver/-V    :: checks for newer versions of Allacrost online" << endl;
 }
 
 
