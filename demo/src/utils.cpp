@@ -27,6 +27,10 @@
 
 using namespace std;
 
+#include "socket.h"
+
+using namespace hoa_socket;
+
 namespace hoa_utils {
 
 bool UTILS_DEBUG = false;
@@ -454,7 +458,8 @@ bool RemoveDirectory(const std::string& dir_name)
 	return true;
 }
 
-#define VERSION_URL "http://rabidtinker.mine.nu/~alistair/allacrost-version.txt"
+#define VERSION_HOST "rabidtinker.mine.nu"
+#define VERSION_PATH "/~alistair/allacrost-version.txt"
 #define ALLACROST_MAJOR_VERSION 0
 #define ALLACROST_MINOR_VERSION 1
 #define ALLACROST_PATCH 0
@@ -463,15 +468,12 @@ static std::string temp_version_str;
 
 bool IsLatestVersion ()
 {
-#ifdef WIN32
-	return true; // No Doze version yet, so assume we're using the latest ver
-#else
 	uint32 rversionmajor;
 	uint32 rversionminor;
 	uint32 rpatch;
 	/*rversion = atof ( system(VERSION_URL) );
 	rpatch = atoi ( system(PATCH_URL) );*/
-	FILE* fp = popen ( "curl -s " VERSION_URL, "r" );
+	/*FILE* fp = popen ( "curl -s " VERSION_URL, "r" );
 	if (!fp)
 		return true;
 	fscanf ( fp, "%d.%d.%d", &rversionmajor, &rversionminor, &rpatch );
@@ -479,7 +481,15 @@ bool IsLatestVersion ()
 	
 	char vstring[255];
 	sprintf ( vstring, "%d.%d.%d", rversionmajor, rversionminor, rpatch );
-	temp_version_str = vstring;
+	temp_version_str = vstring;*/
+	Socket conn;
+	conn.Connect ( VERSION_HOST, 80 );
+	if (!conn.IsConnected()) // could not connect
+		return true; // assume latest version
+	conn.Write ( "GET http://%s%s\r\n", VERSION_HOST, VERSION_PATH );
+	conn.IsQueued ( 300 );
+	conn.ScanLine ( "%d.%d.%d", &rversionmajor, &rversionminor, &rpatch );
+	conn.Disconnect();
 	
 	if (rversionmajor > ALLACROST_MAJOR_VERSION)
 		return false;
@@ -494,7 +504,6 @@ bool IsLatestVersion ()
 		}
 	}
 	return true;
-#endif
 }
 
 string GetLatestVersion ()

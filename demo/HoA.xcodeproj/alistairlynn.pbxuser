@@ -1,7 +1,7 @@
 // !$*UTF8*$!
 {
 	4941A4A10AC1D76400D65B8E /* Project object */ = {
-		activeBuildConfigurationName = Release;
+		activeBuildConfigurationName = Debug;
 		activeExecutable = 4941A4B20AC1D77600D65B8E /* Allacrost */;
 		activeTarget = 4941A4AF0AC1D77500D65B8E /* Allacrost */;
 		addToTargets = (
@@ -17,12 +17,56 @@
 		ignoreBreakpointsInProjectsDict = {
 		};
 		perUserDictionary = {
+			"PBXConfiguration.PBXBreakpointsDataSource.v1:1CA1AED706398EBD00589147" = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXBreakpointsDataSource_BreakpointID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					20,
+					210,
+					20,
+					110,
+					109,
+					20,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXBreakpointsDataSource_ActionID,
+					PBXBreakpointsDataSource_TypeID,
+					PBXBreakpointsDataSource_BreakpointID,
+					PBXBreakpointsDataSource_UseID,
+					PBXBreakpointsDataSource_LocationID,
+					PBXBreakpointsDataSource_ConditionID,
+					PBXBreakpointsDataSource_ContinueID,
+				);
+			};
+			"PBXConfiguration.PBXBreakpointsDataSource.v1:1CA23EDF0692099D00951B8B" = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXBreakpointsDataSource_BreakpointID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					20,
+					300,
+					20,
+					199,
+					199,
+					20,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXBreakpointsDataSource_ActionID,
+					PBXBreakpointsDataSource_TypeID,
+					PBXBreakpointsDataSource_BreakpointID,
+					PBXBreakpointsDataSource_UseID,
+					PBXBreakpointsDataSource_LocationID,
+					PBXBreakpointsDataSource_ConditionID,
+					PBXBreakpointsDataSource_ContinueID,
+				);
+			};
 			PBXConfiguration.PBXFileTableDataSource3.PBXFileTableDataSource = {
 				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
 				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
 				PBXFileTableDataSourceColumnWidthsKey = (
 					20,
-					168,
+					584,
 					20,
 					48,
 					43,
@@ -61,8 +105,39 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 183835682;
-			PBXWorkspaceStateSaveDate = 183835682;
+			PBXPerProjectTemplateStateSaveDate = 183851212;
+			PBXWorkspaceStateSaveDate = 183851212;
+		};
+		perUserProjectItems = {
+			49CDFDD10AF55C75004D58B2 /* PBXTextBookmark */ = 49CDFDD10AF55C75004D58B2 /* PBXTextBookmark */;
+			49CDFDD20AF55C75004D58B2 /* PBXTextBookmark */ = 49CDFDD20AF55C75004D58B2 /* PBXTextBookmark */;
+			49CDFDD40AF55C79004D58B2 /* PBXTextBookmark */ = 49CDFDD40AF55C79004D58B2 /* PBXTextBookmark */;
+			49CDFDD60AF55C88004D58B2 /* PBXTextBookmark */ = 49CDFDD60AF55C88004D58B2 /* PBXTextBookmark */;
+			49CDFDE80AF55D09004D58B2 /* PBXTextBookmark */ = 49CDFDE80AF55D09004D58B2 /* PBXTextBookmark */;
+			49CDFDE90AF55D09004D58B2 /* PBXTextBookmark */ = 49CDFDE90AF55D09004D58B2 /* PBXTextBookmark */;
+			49CDFDEA0AF55D09004D58B2 /* PBXTextBookmark */ = 49CDFDEA0AF55D09004D58B2 /* PBXTextBookmark */;
+			49CDFDEB0AF55D09004D58B2 /* PBXTextBookmark */ = 49CDFDEB0AF55D09004D58B2 /* PBXTextBookmark */;
+			49CDFDEC0AF55D09004D58B2 /* PBXTextBookmark */ = 49CDFDEC0AF55D09004D58B2 /* PBXTextBookmark */;
+			49CDFDED0AF55D09004D58B2 /* PBXTextBookmark */ = 49CDFDED0AF55D09004D58B2 /* PBXTextBookmark */;
+			49CDFDEE0AF55D09004D58B2 /* PBXTextBookmark */ = 49CDFDEE0AF55D09004D58B2 /* PBXTextBookmark */;
+			49CDFDEF0AF55D09004D58B2 /* PBXTextBookmark */ = 49CDFDEF0AF55D09004D58B2 /* PBXTextBookmark */;
+			49CDFDF00AF55D09004D58B2 /* PBXTextBookmark */ = 49CDFDF00AF55D09004D58B2 /* PBXTextBookmark */;
+			49CDFDF10AF55D09004D58B2 /* PBXTextBookmark */ = 49CDFDF10AF55D09004D58B2 /* PBXTextBookmark */;
+			49CDFDF20AF55D09004D58B2 /* PBXTextBookmark */ = 49CDFDF20AF55D09004D58B2 /* PBXTextBookmark */;
+			49CDFDF30AF55D0A004D58B2 /* PBXTextBookmark */ = 49CDFDF30AF55D0A004D58B2 /* PBXTextBookmark */;
+			49CDFDF40AF55D0A004D58B2 /* PBXTextBookmark */ = 49CDFDF40AF55D0A004D58B2 /* PBXTextBookmark */;
+			49CDFDFB0AF55D29004D58B2 /* PBXTextBookmark */ = 49CDFDFB0AF55D29004D58B2 /* PBXTextBookmark */;
+			49CDFDFC0AF55D29004D58B2 /* PBXTextBookmark */ = 49CDFDFC0AF55D29004D58B2 /* PBXTextBookmark */;
+			49CDFDFD0AF55D29004D58B2 /* PBXTextBookmark */ = 49CDFDFD0AF55D29004D58B2 /* PBXTextBookmark */;
+			49CDFDFE0AF55D2E004D58B2 /* PBXTextBookmark */ = 49CDFDFE0AF55D2E004D58B2 /* PBXTextBookmark */;
+			49CDFDFF0AF55D2E004D58B2 /* PBXTextBookmark */ = 49CDFDFF0AF55D2E004D58B2 /* PBXTextBookmark */;
+			49CDFE000AF55D2E004D58B2 /* PBXTextBookmark */ = 49CDFE000AF55D2E004D58B2 /* PBXTextBookmark */;
+			49CDFE030AF55DC7004D58B2 /* PBXTextBookmark */ = 49CDFE030AF55DC7004D58B2 /* PBXTextBookmark */;
+			49CDFE040AF55DC7004D58B2 /* PBXTextBookmark */ = 49CDFE040AF55DC7004D58B2 /* PBXTextBookmark */;
+			49CDFE050AF55E5A004D58B2 /* PBXTextBookmark */ = 49CDFE050AF55E5A004D58B2 /* PBXTextBookmark */;
+			49CDFE070AF55E5D004D58B2 /* PBXTextBookmark */ = 49CDFE070AF55E5D004D58B2 /* PBXTextBookmark */;
+			49CDFE080AF55E5D004D58B2 /* PBXTextBookmark */ = 49CDFE080AF55E5D004D58B2 /* PBXTextBookmark */;
+			49CDFE090AF55E5D004D58B2 /* PBXTextBookmark */ = 49CDFE090AF55E5D004D58B2 /* PBXTextBookmark */;
 		};
 		sourceControlManager = 4941A4A50AC1D76400D65B8E /* Source Control */;
 		userBuildSettings = {
@@ -108,263 +183,6 @@
 		libgmallocEnabled = 0;
 		name = Allacrost;
 		savedGlobals = {
-			/Users/alistairlynn/svn/allacrost/trunk/demo/build/Debug/Allacrost.app/Contents/MacOS/Allacrost = (
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/data.cpp;
-					name = "hoa_data::DataManager";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/data.cpp;
-					name = "hoa_data::DATA_DEBUG";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/audio/audio.cpp;
-					name = "hoa_audio::AudioManager";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/audio/audio.cpp;
-					name = "hoa_audio::AUDIO_DEBUG";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/audio/audio.cpp;
-					name = "hoa_audio::GameAudio::_ref";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/data.cpp;
-					name = "hoa_data::GameData::_ref";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/global.cpp;
-					name = "hoa_global::GLOBAL_DEBUG";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/global.cpp;
-					name = "hoa_global::GlobalManager";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/global.cpp;
-					name = "hoa_global::GameGlobal::_ref";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/input.cpp;
-					name = "hoa_input::GameInput::_ref";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/input.cpp;
-					name = "hoa_input::InputManager";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/input.cpp;
-					name = "hoa_input::INPUT_DEBUG";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/mode_manager.cpp;
-					name = "hoa_mode_manager::GameModeManager::_ref";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/mode_manager.cpp;
-					name = "hoa_mode_manager::ModeManager";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/mode_manager.cpp;
-					name = "hoa_mode_manager::MODE_MANAGER_DEBUG";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/system.cpp;
-					name = "hoa_system::SYSTEM_DEBUG";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/system.cpp;
-					name = "hoa_system::GameSystem::_ref";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/system.cpp;
-					name = "hoa_system::SystemManager";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/menu_window.cpp;
-					name = "hoa_video::MenuWindow::_currentMenuID";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/menu_window.cpp;
-					name = "hoa_video::MenuWindow::_menuMap";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/video.cpp;
-					name = "hoa_video::Color::red";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/video.cpp;
-					name = "hoa_video::Color::gray";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/video.cpp;
-					name = "hoa_video::Color::yellow";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/video.cpp;
-					name = "hoa_video::Color::violet";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/video.cpp;
-					name = "hoa_video::Color::aqua";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/video.cpp;
-					name = "hoa_video::GameVideo::_ref";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/video.cpp;
-					name = "hoa_video::Color::clear";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/video.cpp;
-					name = "hoa_video::VideoManager";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/video.cpp;
-					name = "hoa_video::VIDEO_DEBUG";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/video.cpp;
-					name = "hoa_video::Color::black";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/video.cpp;
-					name = "hoa_video::Color::orange";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/video.cpp;
-					name = "hoa_video::Color::green";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/video.cpp;
-					name = "hoa_video::Color::blue";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/video.cpp;
-					name = "hoa_video::Color::brown";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/engine/video/video.cpp;
-					name = "hoa_video::Color::white";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/modes/battle/battle.cpp;
-					name = "hoa_battle::BattleMode::MAX_PLAYER_CHARACTERS_IN_BATTLE";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/modes/battle/battle.cpp;
-					name = "hoa_battle::BattleMode::MAX_ENEMY_CHARACTERS_IN_BATTLE";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/modes/battle/battle.cpp;
-					name = "hoa_battle::BATTLE_DEBUG";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/modes/battle/battle.cpp;
-					name = "hoa_battle::private_battle::current_battle";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/modes/boot/boot.cpp;
-					name = "hoa_boot::BOOT_DEBUG";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/modes/boot/boot.cpp;
-					name = "hoa_boot::BootMode::_logo_animating";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/modes/boot/boot_menu.cpp;
-					name = "hoa_boot::BootMenu::_menu_window";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/modes/boot/boot_menu.cpp;
-					name = "hoa_boot::BootMenu::_boot_mode";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/modes/map/map_objects.cpp;
-					name = "hoa_map::private_map::MapObject::current_map";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/modes/map/map.cpp;
-					name = "hoa_map::MAP_DEBUG";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/modes/menu/menu.cpp;
-					name = "hoa_menu::MENU_DEBUG";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/modes/quit.cpp;
-					name = "hoa_quit::QUIT_DEBUG";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/modes/pause.cpp;
-					name = "hoa_pause::PAUSE_DEBUG";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/modes/scene.cpp;
-					name = "hoa_scene::SCENE_DEBUG";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/utils.cpp;
-					name = "hoa_utils::UTILS_DEBUG";
-				},
-				{
-					display = 1;
-					filename = /Users/alistairlynn/svn/allacrost/trunk/demo/src/utils.cpp;
-					name = "hoa_utils::ustring::npos";
-				},
-			);
 		};
 		sourceDirectories = (
 		);
@@ -380,9 +198,9 @@
 	};
 	4941A68C0AC1D86400D65B8E /* main_options.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {707, 4956}}";
-			sepNavSelRange = "{11931, 0}";
-			sepNavVisRect = "{{0, 1079}, {707, 209}}";
+			sepNavIntBoundsRect = "{{0, 0}, {707, 4942}}";
+			sepNavSelRange = "{11904, 0}";
+			sepNavVisRect = "{{0, 1078}, {707, 209}}";
 		};
 	};
 	4941A6950AC1D86400D65B8E /* boot.cpp */ = {
@@ -399,6 +217,13 @@
 			sepNavVisRect = "{{0, 2388}, {908, 222}}";
 		};
 	};
+	4941A6AF0AC1D86400D65B8E /* utils.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {776, 7266}}";
+			sepNavSelRange = "{13446, 0}";
+			sepNavVisRect = "{{0, 0}, {0, 0}}";
+		};
+	};
 	4941A78C0AC1E06500D65B8E /* XCBreakpointsBucket */ = {
 		isa = XCBreakpointsBucket;
 		name = "Project Breakpoints";
@@ -411,5 +236,299 @@
 			sepNavSelRange = "{1384, 0}";
 			sepNavVisRect = "{{0, 359}, {599, 192}}";
 		};
+	};
+	49BDC4510AF5412600940A6C /* socket.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {776, 1974}}";
+			sepNavSelRange = "{1455, 0}";
+			sepNavVisRect = "{{0, 0}, {0, 0}}";
+		};
+	};
+	49CDFDD10AF55C75004D58B2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 49BDC4510AF5412600940A6C /* socket.cpp */;
+		rLen = 0;
+		rLoc = 59;
+		rType = 1;
+	};
+	49CDFDD20AF55C75004D58B2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 49BDC4510AF5412600940A6C /* socket.cpp */;
+		name = "socket.cpp: 60";
+		rLen = 0;
+		rLoc = 1455;
+		rType = 0;
+		vrLen = 233;
+		vrLoc = 1313;
+	};
+	49CDFDD40AF55C79004D58B2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 49BDC4510AF5412600940A6C /* socket.cpp */;
+		name = "socket.cpp: 60";
+		rLen = 0;
+		rLoc = 1455;
+		rType = 0;
+		vrLen = 0;
+		vrLoc = 0;
+	};
+	49CDFDD60AF55C88004D58B2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 49BDC4510AF5412600940A6C /* socket.cpp */;
+		name = "socket.cpp: 60";
+		rLen = 0;
+		rLoc = 1455;
+		rType = 0;
+		vrLen = 233;
+		vrLoc = 1313;
+	};
+	49CDFDE80AF55D09004D58B2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 4999AC2F0AF407BD004DD3A3 /* tex_mgmt.cpp */;
+		name = "tex_mgmt.cpp: 316";
+		rLen = 0;
+		rLoc = 9467;
+		rType = 0;
+		vrLen = 524;
+		vrLoc = 9117;
+	};
+	49CDFDE90AF55D09004D58B2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 4941A6AF0AC1D86400D65B8E /* utils.cpp */;
+		name = "utils.cpp: 492";
+		rLen = 0;
+		rLoc = 13356;
+		rType = 0;
+		vrLen = 482;
+		vrLoc = 13356;
+	};
+	49CDFDEA0AF55D09004D58B2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 49BDC4510AF5412600940A6C /* socket.cpp */;
+		name = "socket.cpp: 68";
+		rLen = 0;
+		rLoc = 1545;
+		rType = 0;
+		vrLen = 249;
+		vrLoc = 1419;
+	};
+	49CDFDEB0AF55D09004D58B2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 49BDC4510AF5412600940A6C /* socket.cpp */;
+		name = "socket.cpp: 60";
+		rLen = 0;
+		rLoc = 1455;
+		rType = 0;
+		vrLen = 233;
+		vrLoc = 1313;
+	};
+	49CDFDEC0AF55D09004D58B2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 4941A6AF0AC1D86400D65B8E /* utils.cpp */;
+		name = IsLatestVersion;
+		rLen = 15;
+		rLoc = 12670;
+		rType = 0;
+		vrLen = 647;
+		vrLoc = 13009;
+	};
+	49CDFDED0AF55D09004D58B2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 49BDC4510AF5412600940A6C /* socket.cpp */;
+		name = "socket.cpp: 60";
+		rLen = 0;
+		rLoc = 1455;
+		rType = 0;
+		vrLen = 233;
+		vrLoc = 1313;
+	};
+	49CDFDEE0AF55D09004D58B2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 4941A6AF0AC1D86400D65B8E /* utils.cpp */;
+		name = "utils.cpp: 492";
+		rLen = 0;
+		rLoc = 13356;
+		rType = 0;
+		vrLen = 496;
+		vrLoc = 13356;
+	};
+	49CDFDEF0AF55D09004D58B2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 49BDC4510AF5412600940A6C /* socket.cpp */;
+		name = "socket.cpp: 68";
+		rLen = 0;
+		rLoc = 1545;
+		rType = 0;
+		vrLen = 249;
+		vrLoc = 1419;
+	};
+	49CDFDF00AF55D09004D58B2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 4999AC2F0AF407BD004DD3A3 /* tex_mgmt.cpp */;
+		name = "tex_mgmt.cpp: 316";
+		rLen = 0;
+		rLoc = 9467;
+		rType = 0;
+		vrLen = 524;
+		vrLoc = 9117;
+	};
+	49CDFDF10AF55D09004D58B2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 4941A6AF0AC1D86400D65B8E /* utils.cpp */;
+		name = "utils.cpp: 492";
+		rLen = 0;
+		rLoc = 13356;
+		rType = 0;
+		vrLen = 482;
+		vrLoc = 13356;
+	};
+	49CDFDF20AF55D09004D58B2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 49BDC4510AF5412600940A6C /* socket.cpp */;
+		name = "socket.cpp: 71";
+		rLen = 0;
+		rLoc = 1618;
+		rType = 0;
+		vrLen = 248;
+		vrLoc = 1419;
+	};
+	49CDFDF30AF55D0A004D58B2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 49BDC4510AF5412600940A6C /* socket.cpp */;
+		name = "socket.cpp: 60";
+		rLen = 0;
+		rLoc = 1455;
+		rType = 0;
+		vrLen = 0;
+		vrLoc = 0;
+	};
+	49CDFDF40AF55D0A004D58B2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 49BDC4510AF5412600940A6C /* socket.cpp */;
+		name = "socket.cpp: 71";
+		rLen = 0;
+		rLoc = 1618;
+		rType = 0;
+		vrLen = 0;
+		vrLoc = 0;
+	};
+	49CDFDFB0AF55D29004D58B2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 49BDC4510AF5412600940A6C /* socket.cpp */;
+		name = "SDLNet_TCP_Close(sock);";
+		rLen = 25;
+		rLoc = 1546;
+		rType = 0;
+		vrLen = 271;
+		vrLoc = 1483;
+	};
+	49CDFDFC0AF55D29004D58B2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 49BDC4510AF5412600940A6C /* socket.cpp */;
+		name = "SDLNet_TCP_Close(sock);";
+		rLen = 25;
+		rLoc = 1546;
+		rType = 0;
+		vrLen = 271;
+		vrLoc = 1483;
+	};
+	49CDFDFD0AF55D29004D58B2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 4941A6AF0AC1D86400D65B8E /* utils.cpp */;
+		name = "utils.cpp: 492";
+		rLen = 0;
+		rLoc = 13356;
+		rType = 0;
+		vrLen = 594;
+		vrLoc = 13219;
+	};
+	49CDFDFE0AF55D2E004D58B2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 49BDC4510AF5412600940A6C /* socket.cpp */;
+		name = "socket.cpp: 60";
+		rLen = 0;
+		rLoc = 1455;
+		rType = 0;
+		vrLen = 0;
+		vrLoc = 0;
+	};
+	49CDFDFF0AF55D2E004D58B2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 49BDC4510AF5412600940A6C /* socket.cpp */;
+		name = "socket.cpp: 71";
+		rLen = 0;
+		rLoc = 1618;
+		rType = 0;
+		vrLen = 0;
+		vrLoc = 0;
+	};
+	49CDFE000AF55D2E004D58B2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 4941A6AF0AC1D86400D65B8E /* utils.cpp */;
+		name = "utils.cpp: 492";
+		rLen = 0;
+		rLoc = 13356;
+		rType = 0;
+		vrLen = 0;
+		vrLoc = 0;
+	};
+	49CDFE030AF55DC7004D58B2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 49BDC4510AF5412600940A6C /* socket.cpp */;
+		name = "socket.cpp: 60";
+		rLen = 0;
+		rLoc = 1455;
+		rType = 0;
+		vrLen = 0;
+		vrLoc = 0;
+	};
+	49CDFE040AF55DC7004D58B2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 4941A6AF0AC1D86400D65B8E /* utils.cpp */;
+		name = "utils.cpp: 492";
+		rLen = 0;
+		rLoc = 13356;
+		rType = 0;
+		vrLen = 0;
+		vrLoc = 0;
+	};
+	49CDFE050AF55E5A004D58B2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 4941A6AF0AC1D86400D65B8E /* utils.cpp */;
+		name = "utils.cpp: 493";
+		rLen = 0;
+		rLoc = 13446;
+		rType = 0;
+		vrLen = 564;
+		vrLoc = 13094;
+	};
+	49CDFE070AF55E5D004D58B2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 49BDC4510AF5412600940A6C /* socket.cpp */;
+		name = "socket.cpp: 60";
+		rLen = 0;
+		rLoc = 1455;
+		rType = 0;
+		vrLen = 0;
+		vrLoc = 0;
+	};
+	49CDFE080AF55E5D004D58B2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 4941A6AF0AC1D86400D65B8E /* utils.cpp */;
+		name = "utils.cpp: 493";
+		rLen = 0;
+		rLoc = 13446;
+		rType = 0;
+		vrLen = 0;
+		vrLoc = 0;
+	};
+	49CDFE090AF55E5D004D58B2 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 4941A6AF0AC1D86400D65B8E /* utils.cpp */;
+		name = "utils.cpp: 492";
+		rLen = 0;
+		rLoc = 13356;
+		rType = 0;
+		vrLen = 0;
+		vrLoc = 0;
 	};
 }
