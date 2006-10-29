@@ -38,6 +38,14 @@
 		4941A7520AC1D9A200D65B8E /* mac_logo.icns in Resources */ = {isa = PBXBuildFile; fileRef = 4941A7510AC1D9A200D65B8E /* mac_logo.icns */; };
 		4941A7650AC1DCA500D65B8E /* SDLMain.m in Sources */ = {isa = PBXBuildFile; fileRef = 4941A7630AC1DCA500D65B8E /* SDLMain.m */; };
 		4941A7680AC1DCE000D65B8E /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4941A7670AC1DCDF00D65B8E /* Cocoa.framework */; };
+		4996296A0AF50B1F00B6A328 /* global_skills.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 499629620AF50B1F00B6A328 /* global_skills.cpp */; };
+		4996296B0AF50B1F00B6A328 /* global_objects.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 499629630AF50B1F00B6A328 /* global_objects.h */; };
+		4996296C0AF50B1F00B6A328 /* global.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 499629640AF50B1F00B6A328 /* global.cpp */; };
+		4996296D0AF50B1F00B6A328 /* global_actors.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 499629650AF50B1F00B6A328 /* global_actors.h */; };
+		4996296E0AF50B1F00B6A328 /* global.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 499629660AF50B1F00B6A328 /* global.h */; };
+		4996296F0AF50B1F00B6A328 /* global_objects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 499629670AF50B1F00B6A328 /* global_objects.cpp */; };
+		499629700AF50B1F00B6A328 /* global_skills.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 499629680AF50B1F00B6A328 /* global_skills.h */; };
+		499629710AF50B1F00B6A328 /* global_actors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 499629690AF50B1F00B6A328 /* global_actors.cpp */; };
 		4999AC500AF407BE004DD3A3 /* audio_sound.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 4999AC1C0AF407BD004DD3A3 /* audio_sound.h */; };
 		4999AC510AF407BE004DD3A3 /* audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC1D0AF407BD004DD3A3 /* audio.cpp */; };
 		4999AC520AF407BE004DD3A3 /* audio_music.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC1E0AF407BD004DD3A3 /* audio_music.cpp */; };
@@ -130,6 +138,10 @@
 				4999AC7F0AF407BE004DD3A3 /* mode_manager.h in Copy Frameworks */,
 				4999AC800AF407BE004DD3A3 /* input.h in Copy Frameworks */,
 				4999AC820AF407BE004DD3A3 /* system.h in Copy Frameworks */,
+				4996296B0AF50B1F00B6A328 /* global_objects.h in Copy Frameworks */,
+				4996296D0AF50B1F00B6A328 /* global_actors.h in Copy Frameworks */,
+				4996296E0AF50B1F00B6A328 /* global.h in Copy Frameworks */,
+				499629700AF50B1F00B6A328 /* global_skills.h in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -137,7 +149,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		4941A4B00AC1D77500D65B8E /* Allacrost.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Allacrost.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4941A4B00AC1D77500D65B8E /* Allacrost.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Allacrost.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4941A4D70AC1D80800D65B8E /* dat */ = {isa = PBXFileReference; lastKnownFileType = folder; path = dat; sourceTree = "<group>"; };
 		4941A4EB0AC1D83500D65B8E /* img */ = {isa = PBXFileReference; lastKnownFileType = folder; path = img; sourceTree = "<group>"; };
 		4941A62E0AC1D84600D65B8E /* mus */ = {isa = PBXFileReference; lastKnownFileType = folder; path = mus; sourceTree = "<group>"; };
@@ -184,6 +196,14 @@
 		4941A7620AC1DCA500D65B8E /* SDLMain.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SDLMain.h; path = src/SDLMain.h; sourceTree = "<group>"; };
 		4941A7630AC1DCA500D65B8E /* SDLMain.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = SDLMain.m; path = src/SDLMain.m; sourceTree = "<group>"; };
 		4941A7670AC1DCDF00D65B8E /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
+		499629620AF50B1F00B6A328 /* global_skills.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = global_skills.cpp; sourceTree = "<group>"; };
+		499629630AF50B1F00B6A328 /* global_objects.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = global_objects.h; sourceTree = "<group>"; };
+		499629640AF50B1F00B6A328 /* global.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = global.cpp; sourceTree = "<group>"; };
+		499629650AF50B1F00B6A328 /* global_actors.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = global_actors.h; sourceTree = "<group>"; };
+		499629660AF50B1F00B6A328 /* global.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = global.h; sourceTree = "<group>"; };
+		499629670AF50B1F00B6A328 /* global_objects.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = global_objects.cpp; sourceTree = "<group>"; };
+		499629680AF50B1F00B6A328 /* global_skills.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = global_skills.h; sourceTree = "<group>"; };
+		499629690AF50B1F00B6A328 /* global_actors.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = global_actors.cpp; sourceTree = "<group>"; };
 		4999AC1C0AF407BD004DD3A3 /* audio_sound.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = audio_sound.h; sourceTree = "<group>"; };
 		4999AC1D0AF407BD004DD3A3 /* audio.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = audio.cpp; sourceTree = "<group>"; };
 		4999AC1E0AF407BD004DD3A3 /* audio_music.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = audio_music.cpp; sourceTree = "<group>"; };
@@ -306,6 +326,7 @@
 		4941A6460AC1D86300D65B8E /* src */ = {
 			isa = PBXGroup;
 			children = (
+				499629610AF50B1F00B6A328 /* global */,
 				4999AC1A0AF407BD004DD3A3 /* engine */,
 				4941A6470AC1D86300D65B8E /* defs.h */,
 				4941A68B0AC1D86400D65B8E /* main.cpp */,
@@ -395,6 +416,21 @@
 				4941A7130AC1D89300D65B8E /* OpenGL.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		499629610AF50B1F00B6A328 /* global */ = {
+			isa = PBXGroup;
+			children = (
+				499629620AF50B1F00B6A328 /* global_skills.cpp */,
+				499629630AF50B1F00B6A328 /* global_objects.h */,
+				499629640AF50B1F00B6A328 /* global.cpp */,
+				499629650AF50B1F00B6A328 /* global_actors.h */,
+				499629660AF50B1F00B6A328 /* global.h */,
+				499629670AF50B1F00B6A328 /* global_objects.cpp */,
+				499629680AF50B1F00B6A328 /* global_skills.h */,
+				499629690AF50B1F00B6A328 /* global_actors.cpp */,
+			);
+			path = global;
 			sourceTree = "<group>";
 		};
 		4999AC1A0AF407BD004DD3A3 /* engine */ = {
@@ -570,6 +606,10 @@
 				4999AC7C0AF407BE004DD3A3 /* script.cpp in Sources */,
 				4999AC7D0AF407BE004DD3A3 /* mode_manager.cpp in Sources */,
 				4999AC810AF407BE004DD3A3 /* system.cpp in Sources */,
+				4996296A0AF50B1F00B6A328 /* global_skills.cpp in Sources */,
+				4996296C0AF50B1F00B6A328 /* global.cpp in Sources */,
+				4996296F0AF50B1F00B6A328 /* global_objects.cpp in Sources */,
+				499629710AF50B1F00B6A328 /* global_actors.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -609,6 +649,7 @@
 				HEADER_SEARCH_PATHS = (
 					/opt/local/include,
 					/sw/include,
+					src/global,
 				);
 				INFOPLIST_FILE = "Allacrost-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
@@ -624,6 +665,7 @@
 					"-ljpeg",
 					"-llualib",
 					"-lz",
+					"-lluabind",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Allacrost;
@@ -649,6 +691,7 @@
 				HEADER_SEARCH_PATHS = (
 					/opt/local/include,
 					/sw/include,
+					src/global,
 				);
 				INFOPLIST_FILE = "Allacrost-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
@@ -665,6 +708,7 @@
 					"-ljpeg",
 					"-llualib",
 					"-lz",
+					"-lluabind",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Allacrost;

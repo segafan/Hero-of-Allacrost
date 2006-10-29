@@ -61,8 +61,8 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 183763810;
-			PBXWorkspaceStateSaveDate = 183763810;
+			PBXPerProjectTemplateStateSaveDate = 183830093;
+			PBXWorkspaceStateSaveDate = 183830093;
 		};
 		sourceControlManager = 4941A4A50AC1D76400D65B8E /* Source Control */;
 		userBuildSettings = {
@@ -373,9 +373,16 @@
 	};
 	4941A68B0AC1D86400D65B8E /* main.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {459, 3850}}";
-			sepNavSelRange = "{3662, 0}";
-			sepNavVisRect = "{{0, 1559}, {459, 201}}";
+			sepNavIntBoundsRect = "{{0, 0}, {599, 3528}}";
+			sepNavSelRange = "{1608, 0}";
+			sepNavVisRect = "{{0, 479}, {599, 205}}";
+		};
+	};
+	4941A68C0AC1D86400D65B8E /* main_options.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {599, 4886}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRect = "{{0, 0}, {599, 205}}";
 		};
 	};
 	4941A6950AC1D86400D65B8E /* boot.cpp */ = {
@@ -397,5 +404,12 @@
 		name = "Project Breakpoints";
 		objects = (
 		);
+	};
+	4999AC4B0AF407BE004DD3A3 /* script.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {599, 7462}}";
+			sepNavSelRange = "{1384, 0}";
+			sepNavVisRect = "{{0, 359}, {599, 192}}";
+		};
 	};
 }
