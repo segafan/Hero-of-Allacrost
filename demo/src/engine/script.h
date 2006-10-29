@@ -30,6 +30,9 @@ extern "C" {
 	#include <lauxlib.h>
 	#include <lualib.h>
 }
+#ifdef __MACH__
+#undef check
+#endif
 #include <luabind/luabind.hpp>
 #include <luabind/object.hpp>
 #include "utils.h"
