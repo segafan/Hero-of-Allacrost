@@ -77,6 +77,9 @@ AC_CHECK_LIB([SDL_mixer], [Mix_OpenAudio], [], \
 AC_CHECK_LIB([SDL_ttf], [TTF_Init], [], \
 	[echo "Could not find the SDL_ttf library. Check that it is properly installed on your system"
 	 exit -1])
+AC_CHECK_LIB([SDL_net], [SDLNet_Init], [], \
+	[echo "Could not find the SDL_net library. Check that it is properly installed on your system"
+	 exit -1])
 AC_CHECK_LIB([lua50], [lua_open], [], \
 	[AC_CHECK_LIB([lua], [lua_open], [], \
 		[echo "Could not find the lua library. Check that it is properly installed on your system"
