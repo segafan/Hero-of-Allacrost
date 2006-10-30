@@ -477,11 +477,7 @@ bool IsLatestVersion ()
 	if (!fp)
 		return true;
 	fscanf ( fp, "%d.%d.%d", &rversionmajor, &rversionminor, &rpatch );
-	pclose ( fp );
-	
-	char vstring[255];
-	sprintf ( vstring, "%d.%d.%d", rversionmajor, rversionminor, rpatch );
-	temp_version_str = vstring;*/
+	pclose ( fp );*/
 	Socket conn;
 	conn.Connect ( VERSION_HOST, 80 );
 	if (!conn.IsConnected()) // could not connect
@@ -490,6 +486,10 @@ bool IsLatestVersion ()
 	conn.IsQueued ( 300 );
 	conn.ScanLine ( "%d.%d.%d", &rversionmajor, &rversionminor, &rpatch );
 	conn.Disconnect();
+	
+	char vstring[255];
+	sprintf ( vstring, "%d.%d.%d", rversionmajor, rversionminor, rpatch );
+	temp_version_str = vstring;
 	
 	if (rversionmajor > ALLACROST_MAJOR_VERSION)
 		return false;

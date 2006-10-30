@@ -136,6 +136,13 @@ BootMode::BootMode() :
 	_boot_sounds[2].LoadSound(new_sound_files[2]);
 	_boot_sounds[3].LoadSound(new_sound_files[3]);
 	_boot_sounds[4].LoadSound(new_sound_files[4]);
+	
+	// Check the version
+	_latest_version = IsLatestVersion();
+	if (!_latest_version)
+		_latest_version_number = GetLatestVersion();
+	else
+		_latest_version_number = "";
         
 	// This loop causes a seg fault for an unknown reason. Roots is looking into it (04/01/2006)
 // 	for (uint32 i = 0; i < new_sound_files.size(); i++) {
@@ -912,6 +919,13 @@ void BootMode::Draw() {
 		_credits_screen.Draw();
 	else
 		_current_menu->Draw();
+
+	if (!_latest_version)
+	{
+		VideoManager->SetTextColor(Color::green);
+		VideoManager->Move(482.0f, 553.0f);
+		VideoManager->DrawText("New version available from allacrost.org: " + _latest_version_number);
+	}
 
 	VideoManager->Move(65.0f, 10.0f);
 	VideoManager->SetFont("default");
