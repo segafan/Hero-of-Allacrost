@@ -249,6 +249,12 @@ private:
 
 	//! Updates the joystick settings screen
 	void _UpdateJoySettings();
+	
+	//! Latest version? (according to version check)
+	bool _latest_version;
+	
+	//! If this isn't the latest version, what is?
+	std::string _latest_version_number;
 
 public:
 	//! Initializes class members and loads media data.
