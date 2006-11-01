@@ -26,6 +26,7 @@
 #else
 #include <SDL/SDL_net.h>
 #endif
+#include <stdarg.h>
 
 namespace hoa_socket
 {
