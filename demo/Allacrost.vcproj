@@ -376,6 +376,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\engine\socket.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\engine\system.h"
 				>
 			</File>
@@ -573,6 +577,10 @@
 			</File>
 			<File
 				RelativePath=".\src\engine\video\shake.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\socket.cpp"
 				>
 			</File>
 			<File
