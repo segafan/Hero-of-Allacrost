@@ -767,7 +767,7 @@ void ScriptDescriptor::WriteStringVector(const char *key, std::vector<std::strin
 
 // ****************************************************************************
 // *********************** GameScript Class Functions ***************************
-// ****************************************************************************
+// ****************************************************************************                 
 
 GameScript::GameScript() {
 	if (SCRIPT_DEBUG) cout << "SCRIPT: GameScript constructor invoked." << endl;

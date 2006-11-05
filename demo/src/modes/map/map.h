@@ -233,7 +233,15 @@ public:
 
 	//! Temporary
 	bool speed_double;
+
+	//! Add ground object (used for lua binding)
+	static void AddGroundObject(hoa_map::private_map::MapSprite *sp);
+	static void SetOccupied(uint32 col, uint32 row);
+
+	static void BindToLua();
 private:
+	//! reference to the current instance of MapMode, used for callbacks from lua
+	static MapMode *_current_instance;
 	//! The name of the map, as will be read by the player in-game.
 	hoa_utils::ustring _map_name;
 	//! Indicates special conditions that the map is currently in (e.g. a dialogue is taking place)

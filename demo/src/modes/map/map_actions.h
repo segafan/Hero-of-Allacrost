@@ -72,6 +72,8 @@ public:
  *****************************************************************************/
 class ActionPathMove : public SpriteAction {
 public:
+	//! bind this class to lua
+	static void BindToLua();
 	//! The destination tile of this path movement
 	TileNode destination;
 	//! The path we need to traverse from source to destination
@@ -84,6 +86,12 @@ public:
 
 	void Load(uint32 table_key);
 	void Process();
+
+	//! functions for lua
+	void SetDestination(int16 row, int16 col)
+	{ destination.row = row; destination.col = col; }
+	void SetSprite(MapSprite *sp)
+	{ this->sprite = sp; }
 };
 
 /*!****************************************************************************

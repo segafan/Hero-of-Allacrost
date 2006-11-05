@@ -32,6 +32,7 @@ using namespace hoa_global;
 using namespace hoa_script;
 using namespace hoa_battle;
 using namespace hoa_menu;
+using namespace luabind;
 
 namespace hoa_map {
 
@@ -82,6 +83,17 @@ SpriteDialogue::~SpriteDialogue() {
 	
 	if (speaking_action != NULL)
 		delete (speaking_action);
+}
+
+void SpriteDialogue::BindToLua()
+{
+	module(ScriptManager->GetGlobalState())
+	[
+		class_<SpriteDialogue>("SpriteDialogue")
+		.def(constructor<>())
+		.def("AddText", &SpriteDialogue::AddText)
+		.def("AddSpeaker", &SpriteDialogue::AddSpeaker)
+	];
 }
 
 } // namespace private_map
