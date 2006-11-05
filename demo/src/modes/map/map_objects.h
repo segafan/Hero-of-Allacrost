@@ -272,6 +272,8 @@ public:
  *****************************************************************************/
 class MapSprite : public MapObject {
 public:
+	//! Setup lua bindings.
+	static void BindToLua();
 	//! The name of the sprite, as seen by the player in the game.
 	hoa_utils::ustring name;
 	//! The base filename of the sprite, used to load various data for the sprite.
@@ -379,6 +381,7 @@ public:
 	 */
 	//@{
 	void SetName(hoa_utils::ustring na) { name = na; }
+	void SetName(std::string str) { SetName(hoa_utils::MakeUnicodeString(str)); }
 	void SetID(uint8 id) { sprite_id = id; }
 	void SetFilename(std::string fn) { filename = fn; }
 	void SetPortrait(std::string pn)
@@ -394,6 +397,11 @@ public:
 	float GetStepSpeed() { return step_speed; }
 	uint32 GetDelayTime() { return delay_time; }
 	//@}
+
+	void AddDialogue(SpriteDialogue *sd)
+	{ dialogues.push_back(sd); }
+	void AddAction(ActionPathMove *sa)
+	{ actions.push_back(sa); }
 }; // class MapSprite
 
 } // namespace private_map

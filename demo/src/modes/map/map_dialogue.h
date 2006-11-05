@@ -50,11 +50,11 @@ public:
 	uint32 current_line;
 
 	const bool IsSeenDialogue()
-		{ return seen; }
+	{ return seen; }
 	void SetSeenDialogue()
-		{ seen = true; }
+	{ seen = true; }
 	void ClearSeenDialogue()
-		{ seen = false; }
+	{ seen = false; }
 		
 	const bool ReadNextLine();
 }; // class MapDialogue
@@ -77,6 +77,12 @@ public:
 	
 	SpriteDialogue();
 	~SpriteDialogue();
+
+	void AddText(std::string text) 
+	{ this->text.push_back(hoa_utils::MakeUnicodeString(text)); }
+	void AddSpeaker(uint32 id)
+	{ speakers.push_back(id); }
+	static void BindToLua();
 }; // class SpriteDialogue
 
 } // namespace private_map

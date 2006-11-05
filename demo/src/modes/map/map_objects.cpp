@@ -33,6 +33,7 @@ using namespace hoa_global;
 using namespace hoa_script;
 using namespace hoa_battle;
 using namespace hoa_menu;
+using namespace luabind;
 
 namespace hoa_map {
 
@@ -59,6 +60,29 @@ MapObject::~MapObject() {}
 // ****************************************************************************
 // ************************ MapSprite Class Functions *************************
 // ****************************************************************************
+void MapSprite::BindToLua()
+{
+	module(ScriptManager->GetGlobalState())
+	[
+		class_<MapSprite>("MapSprite")
+		.def(constructor<>())
+		.def("SetName", (void(MapSprite::*)(std::string))&MapSprite::SetName)
+		.def("SetID", &MapSprite::SetID)
+		.def("SetObjectType", &MapSprite::SetObjectType)
+		.def("SetRowPosition", &MapSprite::SetRowPosition)
+		.def("GetRowPosition", &MapSprite::GetRowPosition)
+		.def("SetColPosition", &MapSprite::SetColPosition)
+		.def("GetColPosition", &MapSprite::GetColPosition)
+		.def("SetStepSpeed", &MapSprite::SetStepSpeed)
+		.def("SetStatus", &MapSprite::SetStatus)
+		.def("SetFilename", &MapSprite::SetFilename)
+		.def("SetPortrait", &MapSprite::SetPortrait)
+		.def("SetDirection", &MapSprite::SetDirection)
+		.def("LoadFrames", &MapSprite::LoadFrames)
+		.def("AddDialogue", &MapSprite::AddDialogue)
+		.def("AddAction", &MapSprite::AddAction)
+	];
+}
 
 // Constructor for critical class members. Other members are initialized via support functions
 MapSprite::MapSprite() {

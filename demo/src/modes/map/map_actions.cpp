@@ -36,12 +36,23 @@ using namespace hoa_system;
 using namespace hoa_script;
 using namespace hoa_battle;
 using namespace hoa_menu;
+using namespace luabind;
 
 namespace hoa_map {
 
 namespace private_map {
 
 // ******************** ActionPathMove ***********************
+void ActionPathMove::BindToLua()
+{
+	module(ScriptManager->GetGlobalState())
+	[
+		class_<ActionPathMove>("ActionPathMove")
+		.def(constructor<>())
+		.def("SetDestination", &ActionPathMove::SetDestination)
+		.def("SetSprite", &ActionPathMove::SetSprite)
+	];
+}
 
 void ActionPathMove::Load(uint32 table_key) {
 	ScriptDescriptor *read_data = &(sprite->current_map->_map_data);

@@ -40,10 +40,13 @@ using namespace hoa_global;
 using namespace hoa_script;
 using namespace hoa_battle;
 using namespace hoa_menu;
+using namespace luabind;
 
 namespace hoa_map {
 
 bool MAP_DEBUG = false;
+// Initialize static variable
+MapMode *MapMode::_current_instance = NULL;
 
 // ****************************************************************************
 // ************************** MapMode Class Functions *************************
@@ -51,8 +54,30 @@ bool MAP_DEBUG = false;
 // ***************************** GENERAL FUNCTIONS ****************************
 // ****************************************************************************
 
+void MapMode::BindToLua()
+{
+	module(ScriptManager->GetGlobalState())
+	[
+		def("AddGroundObject", &MapMode::AddGroundObject)
+	];
+}
+
+void MapMode::AddGroundObject(MapSprite *sp)
+{	
+	MapMode *m = MapMode::_current_instance;
+	int col = sp->GetColPosition();
+	int row = sp->GetRowPosition();
+	MapTile mt = m->_tile_layers[col][row];
+	mt.occupied = 1;
+	m->_ground_objects.push_back(sp);
+	m->_sprites[sp->sprite_id] = sp;
+}
+
 MapMode::MapMode() : _fade_to_battle_mode(false) {
 	if (MAP_DEBUG) cout << "MAP: MapMode constructor invoked" << endl;
+
+	// Set instance reference
+	MapMode::_current_instance = this;
 
 	mode_type = MODE_MANAGER_MAP_MODE;
 	_map_state = EXPLORE;
@@ -281,6 +306,15 @@ void MapMode::LoadMap() {
 	if (_map_data.GetError() != DATA_NO_ERRORS) {
 		cout << "MAP ERROR: some error occured during reading of map file" << endl;
 	}
+	
+	// These will probably need to be moved somewhere.  They bind all necessary functions to lua 
+	// for the sprite scripts
+	ActionPathMove::BindToLua();
+	MapSprite::BindToLua();
+	SpriteDialogue::BindToLua();
+	MapMode::BindToLua();
+
+	ScriptDescriptor script;
 
 	MapSprite *sp;
 	SpriteDialogue *sd;
@@ -305,63 +339,65 @@ void MapMode::LoadMap() {
 	_sprites[sp->sprite_id] = sp;
 	_focused_object = sp;
 
-	sp = new MapSprite();
-	sp->SetName(MakeUnicodeString("Laila"));
-	sp->SetID(1);
-	sp->SetObjectType(NPC_SPRITE);
-	sp->SetRowPosition(4);
-	sp->SetColPosition(4);
-	sp->SetStepSpeed(NORMAL_SPEED);
-	sp->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
-	sp->SetFilename("img/sprites/map/laila");
-	sp->SetPortrait("img/portraits/map/laila.png");
-	sp->SetDirection(SOUTH);
-	sp->LoadFrames();
-	_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied = 1;
+	// Load laila
+	script.OpenFile("dat/maps/sprites/laila.lua", READ);
+	//sp = new MapSprite();
+	//sp->SetName(MakeUnicodeString("Laila"));
+	//sp->SetID(1);
+	//sp->SetObjectType(NPC_SPRITE);
+	//sp->SetRowPosition(4);
+	//sp->SetColPosition(4);
+	//sp->SetStepSpeed(NORMAL_SPEED);
+	//sp->SetStatus(UPDATEABLE | VISIBLE | ALWAYS_IN_CONTEXT);
+	//sp->SetFilename("img/sprites/map/laila");
+	//sp->SetPortrait("img/portraits/map/laila.png");
+	//sp->SetDirection(SOUTH);
+	//sp->LoadFrames();
+	//_tile_layers[sp->GetColPosition()][sp->GetRowPosition()].occupied = 1;
 
-	sd = new SpriteDialogue();
-	sd->text.push_back(MakeUnicodeString("It's really dark in here isn't it? I wonder how much longer our torches will last us..."));
-	sd->speakers.push_back(1); // NPC speaks
-	sp->dialogues.push_back(sd);
+	//sd = new SpriteDialogue();
+	//sd->text.push_back(MakeUnicodeString("It's really dark in here isn't it? I wonder how much longer our torches will last us..."));
+	//sd->speakers.push_back(1); // NPC speaks
+	//sp->dialogues.push_back(sd);
 
-	sd = new SpriteDialogue();
-	sd->text.push_back(MakeUnicodeString("If only we had more art, maybe the designers would have put in an exit in this cave!"));
-	sd->speakers.push_back(1); // NPC speaks
-	sd->text.push_back(MakeUnicodeString("Well, they're really under staffed in the art department. We can't blame them too much."));
-	sd->speakers.push_back(0); // Player speaks
-	sp->dialogues.push_back(sd);
+	//sd = new SpriteDialogue();
+	//sd->text.push_back(MakeUnicodeString("If only we had more art, maybe the designers would have put in an exit in this cave!"));
+	//sd->speakers.push_back(1); // NPC speaks
+	//sd->text.push_back(MakeUnicodeString("Well, they're really under staffed in the art department. We can't blame them too much."));
+	//sd->speakers.push_back(0); // Player speaks
+	//sp->dialogues.push_back(sd);
 
-	sd = new SpriteDialogue();
-	sd->text.push_back(MakeUnicodeString("Did you know that you can toggle off random encounters by pressing the swap key (default: a)?"));
-	sd->speakers.push_back(1); // NPC speaks
-	sp->dialogues.push_back(sd);
+	//sd = new SpriteDialogue();
+	//sd->text.push_back(MakeUnicodeString("Did you know that you can toggle off random encounters by pressing the swap key (default: a)?"));
+	//sd->speakers.push_back(1); // NPC speaks
+	//sp->dialogues.push_back(sd);
 
-	sa = new ActionPathMove();
-	sa->destination.row = 4;
-	sa->destination.col = 16;
-	sa->sprite = sp;
-	sp->actions.push_back(sa);
+	//sa = new ActionPathMove();
+	//sa->destination.row = 4;
+	//sa->destination.col = 16;
+	//sa->sprite = sp;
+	//sp->actions.push_back(sa);
 
-	sa = new ActionPathMove();
-	sa->destination.row = 12;
-	sa->destination.col = 16;
-	sa->sprite = sp;
-	sp->actions.push_back(sa);
+	//sa = new ActionPathMove();
+	//sa->destination.row = 12;
+	//sa->destination.col = 16;
+	//sa->sprite = sp;
+	//sp->actions.push_back(sa);
 
-	sa = new ActionPathMove();
-	sa->destination.row = 8;
-	sa->destination.col = 4;
-	sa->sprite = sp;
-	sp->actions.push_back(sa);
+	//sa = new ActionPathMove();
+	//sa->destination.row = 8;
+	//sa->destination.col = 4;
+	//sa->sprite = sp;
+	//sp->actions.push_back(sa);
 
-	sa = new ActionPathMove();
-	sa->destination.row = 4;
-	sa->destination.col = 4;
-	sa->sprite = sp;
-	sp->actions.push_back(sa);
+	//sa = new ActionPathMove();
+	//sa->destination.row = 4;
+	//sa->destination.col = 4;
+	//sa->sprite = sp;
+	//sp->actions.push_back(sa);
 
-	_ground_objects.push_back(sp);
-	_sprites[sp->sprite_id] = sp;
+	//_ground_objects.push_back(sp);
+	//_sprites[sp->sprite_id] = sp;
 
 	sp = new MapSprite();
 	sp->SetName(MakeUnicodeString("Marcus"));
