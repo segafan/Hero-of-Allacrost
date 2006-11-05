@@ -138,7 +138,7 @@ BootMode::BootMode() :
 	_boot_sounds[4].LoadSound(new_sound_files[4]);
 	
 	// Check the version
-	_latest_version = IsLatestVersion();
+	_latest_version = true; //IsLatestVersion();
 	if (!_latest_version)
 		_latest_version_number = GetLatestVersion();
 	else

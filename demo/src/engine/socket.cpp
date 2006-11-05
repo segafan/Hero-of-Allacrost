@@ -98,7 +98,7 @@ void Socket::Write ( const char* fmt, ... )
 	va_start ( va, fmt );
 	
 	char* buffer;
-	vasprintf ( &buffer, fmt, va );
+	//vasprintf ( &buffer, fmt, va );
 	
 	SendBinary ( buffer, strlen(buffer) );
 	
@@ -133,7 +133,7 @@ void Socket::ScanLine ( const char* format, ... )
 	
 	std::string line = ReadLine ();
 	
-	vsscanf ( line.c_str(), format, va );
+	//vsscanf ( line.c_str(), format, va );
 	
 	va_end ( va );
 }
