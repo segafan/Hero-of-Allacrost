@@ -178,7 +178,37 @@ bool GameVideo::SingletonInitialize()
 	if(VIDEO_DEBUG)
 		cout << "VIDEO: setting video mode\n";
 
-	SetResolution(1024, 768);
+	
+	// Get the current system color depth and resolution
+	const SDL_VideoInfo* video_info (0);
+	video_info = SDL_GetVideoInfo ();
+
+	if (video_info)
+	{
+		// Set the resolution to be the highest possible (lower than the user one)
+		if (video_info->current_w > 1280 && video_info->current_h > 1024)
+		{
+			SetResolution (1280, 1024);
+		}
+		else if (video_info->current_w > 1024 && video_info->current_h > 768)
+		{
+			SetResolution (1024, 768);
+		}
+		else if (video_info->current_w > 800 && video_info->current_h > 600)
+		{
+			SetResolution (800, 600);
+		}
+		else
+		{
+			SetResolution (640, 480);
+		}
+	}
+	else
+	{
+		// Default resoltion if we could not retrieve the resolution of the user
+		SetResolution(1024, 768);
+	}
+
 	SetFullscreen(false);
 	
 	if(!ApplySettings())

@@ -90,15 +90,15 @@ void GameSystem::UpdateTimers() {
 	_update_time = _last_update - tmp;
 
 	_milliseconds_played += _update_time;
-	if (_milliseconds_played > 1000) {
-		_milliseconds_played -= 1000;
-		_seconds_played += 1;
-		if (_seconds_played > 60) {
-			_seconds_played -= 60;
-			_minutes_played += 1;
-			if (_minutes_played > 60) {
-				_minutes_played -= 60;
-				_hours_played += 1;
+	if (_milliseconds_played >= 1000) {
+		_seconds_played += _milliseconds_played / 1000;
+		_milliseconds_played = _milliseconds_played % 1000;
+		if (_seconds_played >= 60) {
+			_minutes_played += _seconds_played / 60;
+			_seconds_played = _seconds_played % 60;
+			if (_minutes_played >= 60) {
+				_hours_played += _minutes_played / 60;
+				_minutes_played = _minutes_played % 60;
 			}
 		}
 	}
