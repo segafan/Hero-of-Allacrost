@@ -105,12 +105,20 @@ void PauseMode::Update() {
 // Nothing to draw since the screen never changes in pause mode (maybe we should call SDL_Delay here?)
 void PauseMode::Draw() {
 	// Draw the background image
+	// For that, set the system coordinates to the size of the window (same with the save-screen)
+	int32 width = VideoManager->GetWidth();
+	int32 height = VideoManager->GetHeight();
+	VideoManager->SetCoordSys (0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height));
+
 	Color grayed(0.35f, 0.35f, 0.35f, 1.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, 0);
 	VideoManager->Move(0,0);
 	VideoManager->DrawImage(_saved_screen, grayed);
 	
 	// Render the "Paused" text to appear on the center of the screen
+	// Restore the Coordinate system (that one is quit mode coodinate system)
+	VideoManager->SetCoordSys (0.0f, 1024.0f, 0.0f, 768.0f);
+
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, 0);
 	VideoManager->Move(512, 384);
 	VideoManager->DrawText("Paused");
