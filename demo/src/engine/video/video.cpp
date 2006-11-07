@@ -178,7 +178,8 @@ bool GameVideo::SingletonInitialize()
 	if(VIDEO_DEBUG)
 		cout << "VIDEO: setting video mode\n";
 
-	
+	// UNCOMMENT THIS WHEN UPDATING SDL TO AT LEAST 1.2.10
+/*	
 	// Get the current system color depth and resolution
 	const SDL_VideoInfo* video_info (0);
 	video_info = SDL_GetVideoInfo ();
@@ -208,7 +209,9 @@ bool GameVideo::SingletonInitialize()
 		// Default resoltion if we could not retrieve the resolution of the user
 		SetResolution(1024, 768);
 	}
+*/
 
+	SetResolution(1024, 768);
 	SetFullscreen(false);
 	
 	if(!ApplySettings())
