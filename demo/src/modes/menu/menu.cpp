@@ -65,7 +65,7 @@ MenuMode::MenuMode()
 	//GlobalManager->SetMoney(4236);
 	_current_window = WIN_INVENTORY;
 		
-	hoa_global::GlobalCharacterParty characters = GlobalManager->GetActiveParty();
+	hoa_global::GlobalCharacterParty & characters = *GlobalManager->GetActiveParty();
 
 	switch (characters.GetPartySize()) {
 		case 4: _character_window3.SetCharacter(characters.GetCharacters()[3]);
