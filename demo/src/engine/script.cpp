@@ -615,6 +615,26 @@ void ScriptDescriptor::BeginTable(const char *key) {
 	_open_tables.push_back(key);
 }
 
+// Writes the new tables using an integer as the key
+void ScriptDescriptor::BeginTable(int key) 
+{
+	if (_access_mode != WRITE)
+		return;
+
+	if (!_IsFileOpen())
+		return;
+
+	if (_open_tables.size() == 0)
+		_outfile << key << " = {}" << endl;
+	else
+	{
+		_WriteTablePath();
+		_outfile << '[' << key << "] = {}" << endl;
+	}
+
+	_open_tables.push_back(NumberToString<int>(key));	
+}
+
 // Does internal scope handling of the lua file so things are written in the write global/table space.
 // This doesn't actually do any file write operations, but we still need to call it.
 void ScriptDescriptor::EndTable() {

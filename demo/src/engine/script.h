@@ -448,6 +448,7 @@ public:
 	 */
 	//@{
 	void BeginTable(const char *key);
+	void BeginTable(int key);
 	void EndTable();
 	//@}
 	
