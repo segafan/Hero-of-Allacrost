@@ -92,8 +92,8 @@ public:
 	//@}
 	
 	//! \brief Gets all of the characters in the active party
-	GlobalCharacterParty GetActiveParty() const
-		{ return _active_party; }
+	GlobalCharacterParty * GetActiveParty()
+		{ return &_active_party; }
 
 private:
 	SINGLETON_DECLARE(GameGlobal);

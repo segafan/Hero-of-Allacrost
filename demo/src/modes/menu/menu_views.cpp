@@ -256,11 +256,11 @@ bool MiniCharacterSelectWindow::Draw()
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 
 	// Draw Portraits of the party
-	for (uint32 i = 0; i < GlobalManager->GetActiveParty().GetPartySize(); ++i)
+	for (uint32 i = 0; i < GlobalManager->GetActiveParty()->GetPartySize(); ++i)
 	{
 		VideoManager->Move(765, 180);
 
-		GlobalCharacter *current = GlobalManager->GetActiveParty().GetCharacters()[i];
+		GlobalCharacter *current = GlobalManager->GetActiveParty()->GetCharacters()[i];
 		// Get the portrait from the character eventually
 		StillImage portrait;
 		// TODO: This needs optimization, move the LoadImage - DeleteImage calls into constructor/destructor
@@ -324,7 +324,7 @@ void MiniCharacterSelectWindow::Update()
 	{
 		// Use the passed in item, to update values
 		GlobalItem *selected = static_cast<GlobalItem *>(GlobalManager->GetInventory()[_selected_item_index]);
-		GlobalCharacter *ch = GlobalManager->GetActiveParty().GetCharacters()[_current_char_selected];
+		GlobalCharacter *ch = GlobalManager->GetActiveParty()->GetCharacters()[_current_char_selected];
 
 		if (selected->GetCount() == 0)
 		{
@@ -387,11 +387,11 @@ void MiniCharacterSelectWindow::Update()
 		if (_current_char_selected > 0)
 			_current_char_selected--;
 		else
-			_current_char_selected = GlobalManager->GetActiveParty().GetPartySize() - 1;
+			_current_char_selected = GlobalManager->GetActiveParty()->GetPartySize() - 1;
 	}
 	else if (InputManager->DownPress())
 	{
-		if (_current_char_selected < GlobalManager->GetActiveParty().GetPartySize() - 1)
+		if (_current_char_selected < GlobalManager->GetActiveParty()->GetPartySize() - 1)
 			_current_char_selected++;
 		else
 			_current_char_selected = 0;
@@ -491,7 +491,7 @@ void InventoryWindow::InitCharSelect() {
 	//character selection set up
 	//float w, h;
 	vector<ustring> options;
-	uint32 size = GlobalManager->GetActiveParty().GetPartySize();
+	uint32 size = GlobalManager->GetActiveParty()->GetPartySize();
 	//_character_window0.GetDimensions(w, h);
 	
 	_char_select.SetCursorOffset(-50.0f, -6.0f);
@@ -806,7 +806,7 @@ void InventoryWindow::Update() {
 void InventoryWindow::ApplyItem() {
 // Use the passed in item, to update values
 	GlobalItem *selected = static_cast<GlobalItem *>(GlobalManager->GetInventory()[_inventory_items.GetSelection()]);
-	GlobalCharacter *ch = GlobalManager->GetActiveParty().GetCharacters()[_char_select.GetSelection()];
+	GlobalCharacter *ch = GlobalManager->GetActiveParty()->GetCharacters()[_char_select.GetSelection()];
 
 	if (selected->GetCount() == 0)
 	{
@@ -986,7 +986,7 @@ void InventoryWindow::DrawBottomMenu() {
 
 	switch (_active_box) {
 		case ITEM_ACTIVE_CHAR:
-			_current_char = GlobalManager->GetActiveParty().GetCharacters()[_char_select.GetSelection()];
+			_current_char = GlobalManager->GetActiveParty()->GetCharacters()[_char_select.GetSelection()];
 			VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 			VideoManager->Move(115, 670);
 
@@ -1075,7 +1075,7 @@ StatusWindow::StatusWindow() : _char_select_active(false)//, _cursor_x(588.0f), 
 {
 	// Get the current character
 	//_current_char = GlobalManager->GetParty()[0];
-	uint32 partysize = GlobalManager->GetActiveParty().GetCharacters().size();
+	uint32 partysize = GlobalManager->GetActiveParty()->GetCharacters().size();
 	StillImage portrait;
 	// Set up the head picture
 	//string path = string("img/sprites/map/") + string(_current_char->GetName()) + string("_d0.png");
@@ -1085,7 +1085,7 @@ StatusWindow::StatusWindow() : _char_select_active(false)//, _cursor_x(588.0f), 
 	//_head_portrait.SetDimensions(200, 200);
 	// Set up the full body portrait
 	for (uint32 i = 0; i < partysize; i++) {
-		_current_char = GlobalManager->GetActiveParty().GetCharacters()[i];
+		_current_char = GlobalManager->GetActiveParty()->GetCharacters()[i];
 		string full_path = string("img/portraits/menu/") + _current_char->GetFilename() + string("_large.png");
 		portrait.SetFilename(full_path);
 		portrait.SetStatic(true);
@@ -1166,7 +1166,7 @@ StatusWindow::StatusWindow() : _char_select_active(false)//, _cursor_x(588.0f), 
 StatusWindow::~StatusWindow()
 {
 	//VideoManager->DeleteImage(_head_portrait);
-	uint32 partysize = GlobalManager->GetActiveParty().GetCharacters().size();
+	uint32 partysize = GlobalManager->GetActiveParty()->GetCharacters().size();
 	for (uint32 i = 0; i < partysize; i++) {
 		VideoManager->DeleteImage(_full_portraits[i]);
 	}
@@ -1196,7 +1196,7 @@ void StatusWindow::InitCharSelect() {
 	//character selection set up
 	//float w, h;
 	vector<ustring> options;
-	uint32 size = GlobalManager->GetActiveParty().GetCharacters().size();
+	uint32 size = GlobalManager->GetActiveParty()->GetCharacters().size();
 	//_character_window0.GetDimensions(w, h);
 	
 	_char_select.SetCursorOffset(-50.0f, -6.0f);
@@ -1474,7 +1474,7 @@ void SkillsWindow::InitSkillsList() {
 void SkillsWindow::InitCharSelect() {
 	//character selection set up
 	vector<ustring> options;
-	uint32 size = GlobalManager->GetActiveParty().GetCharacters().size();
+	uint32 size = GlobalManager->GetActiveParty()->GetCharacters().size();
 	
 	_char_select.SetCursorOffset(-50.0f, -6.0f);
 	_char_select.SetFont("default");
@@ -1920,7 +1920,7 @@ void EquipWindow::InitEquipmentList() {
 void EquipWindow::InitCharSelect() {
 	//character selection set up
 	vector<ustring> options;
-	uint32 size = GlobalManager->GetActiveParty().GetCharacters().size();
+	uint32 size = GlobalManager->GetActiveParty()->GetCharacters().size();
 	
 	_char_select.SetCursorOffset(-50.0f, -6.0f);
 	_char_select.SetFont("default");
