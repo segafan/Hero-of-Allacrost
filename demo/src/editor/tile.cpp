@@ -30,12 +30,12 @@ using namespace hoa_editor;
  *  Outputs: none
  *
  *****************************************************************************/
-Tile::Tile(QString name, QImage img, QCanvas *canvas) : QCanvasRectangle(canvas)
+Tile::Tile(QString name, QImage img, Q3Canvas *canvas) : Q3CanvasRectangle(canvas)
 {
 	_file_name = name;
 	_image = img;
 	setSize(_image.width(), _image.height());
-	_pixmap.convertFromImage(_image, OrderedAlphaDither);
+	_pixmap.convertFromImage(_image, Qt::OrderedAlphaDither);
 } // Tile constructor
 
 /******************************************************************************

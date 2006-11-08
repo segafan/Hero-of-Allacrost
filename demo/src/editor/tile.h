@@ -17,11 +17,11 @@
 #ifndef __TILE_HEADER__
 #define __TILE_HEADER__
 
-#include <qcanvas.h>
-#include <qimage.h>
-#include <qpainter.h>
-#include <qpixmap.h>
-#include <qstring.h>
+#include <Q3Canvas>
+#include <QImage>
+#include <QPainter>
+#include <QPixmap>
+#include <QString>
 
 //! All calls to the editor are wrapped in this namespace.
 namespace hoa_editor
@@ -40,10 +40,10 @@ const int TILE_HEIGHT = 32;
  *
  * \note Inherits QCanvasRectangle.
  *****************************************************************************/
-class Tile: public QCanvasRectangle
+class Tile: public Q3CanvasRectangle
 {
 	public:
-    	Tile(QString name, QImage img, QCanvas *canvas);
+    	Tile(QString name, QImage img, Q3Canvas *canvas);
 
 		/*!
 		 *  \brief Reimplemented Qt function used to easily identify objects on

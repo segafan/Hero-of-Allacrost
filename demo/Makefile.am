@@ -123,7 +123,7 @@ modes_SOURCES = \
 if COND_EDITOR
 EDITOR_DIR = src/editor
 EDITOR_BIN = allacrost-editor
-AM_CXXFLAGS := $(CXXFLAGS) $(QT_CXXFLAGS) -DQT_CLEAN_NAMESPACE
+AM_CXXFLAGS := $(CXXFLAGS) $(QT_CXXFLAGS) -DQT_CLEAN_NAMESPACE -DQT_NO_DEBUG -DQT_GUI_LIB -DQT_CORE_LIB -DQT3_SUPPORT -DQT_SHARED
 BUILT_SOURCES = $(allacrost_editor_MOC)
 CLEANFILES = $(BUILT_SOURCES)
 $(EDITOR_DIR)%.moc.cpp: $(EDITOR_DIR)%.h
@@ -142,6 +142,8 @@ allacrost_editor_SOURCES = \
 	$(video_SOURCES) \
 	$(ENGINE_DIR)/script.cpp \
 	$(ENGINE_DIR)/script.h \
+	$(ENGINE_DIR)/socket.cpp \
+	$(ENGINE_DIR)/socket.h \
 	src/defs.h \
 	src/utils.cpp \
 	src/utils.h

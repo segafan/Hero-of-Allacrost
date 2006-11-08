@@ -21,7 +21,7 @@ using namespace hoa_editor;
 using namespace hoa_video;
 using namespace std;
 
-Editor::Editor() : QMainWindow(0, 0, WDestructiveClose)
+Editor::Editor() : Q3MainWindow(0, 0, Qt::WDestructiveClose)
 {
 	_tile_db=NULL;
 
@@ -29,12 +29,12 @@ Editor::Editor() : QMainWindow(0, 0, WDestructiveClose)
 	_stat_bar = new QStatusBar(this);
 	
 	// file menu creation
-	_file_menu = new QPopupMenu(this);
+	_file_menu = new Q3PopupMenu(this);
 	connect(_file_menu, SIGNAL(aboutToShow()), this, SLOT(_FileMenuSetup()));
 	menuBar()->insertItem("&File", _file_menu);
 
 	// view menu creation
-	_view_menu = new QPopupMenu(this);
+	_view_menu = new Q3PopupMenu(this);
 	menuBar()->insertItem("&View", _view_menu);
 	_grid_id = _view_menu->insertItem("&Grid", this, SLOT(_ViewToggleGrid()));
 	_view_menu->insertSeparator();
@@ -44,7 +44,7 @@ Editor::Editor() : QMainWindow(0, 0, WDestructiveClose)
 	_view_menu->setCheckable(true);
 
 	// tile menu creation
-	_tiles_menu = new QPopupMenu(this);
+	_tiles_menu = new Q3PopupMenu(this);
 	menuBar()->insertItem("&Tiles", _tiles_menu);
 	_tiles_menu->insertItem("&Fill current layer", this, SLOT(_TileLayerFill()));
 	_tiles_menu->insertItem("&Clear current layer", this, SLOT(_TileLayerClear()));
@@ -64,18 +64,18 @@ Editor::Editor() : QMainWindow(0, 0, WDestructiveClose)
 	int edit_ul_id = _tiles_menu->insertItem("Edit &upper layer", this, SLOT(_TileEditUL()));
 	_layer_ids.insert(std::pair<LAYER_TYPE,int>(UPPER_LAYER,edit_ul_id));
 	_tiles_menu->insertSeparator();
-	_tiles_menu->insertItem("&Manage database...", this, SLOT(_TileDatabase()), CTRL+Key_D);
+	_tiles_menu->insertItem("&Manage database...", this, SLOT(_TileDatabase()), Qt::CTRL+Qt::Key_D);
 	
 	// map menu creation
-	_map_menu = new QPopupMenu(this);
+	_map_menu = new Q3PopupMenu(this);
 	menuBar()->insertItem("&Map",_map_menu);
 	_map_menu->insertItem("Set background &music...", this, SLOT(_MapSelectMusic()));
 
 	// help menu creation
-	_help_menu = new QPopupMenu(this);
+	_help_menu = new Q3PopupMenu(this);
 	menuBar()->insertSeparator();
 	menuBar()->insertItem("&Help", _help_menu);
-	_help_menu->insertItem("&Help", this, SLOT(_HelpHelp()), Key_F1);
+	_help_menu->insertItem("&Help", this, SLOT(_HelpHelp()), Qt::Key_F1);
 	_help_menu->insertItem("&About", this, SLOT(_HelpAbout()));
 	_help_menu->insertItem("About &Qt", this, SLOT(_HelpAboutQt()));
 
@@ -91,7 +91,7 @@ Editor::Editor() : QMainWindow(0, 0, WDestructiveClose)
 
 	// create the main widget and layout
 	_ed_widget = new QWidget(this);
-	_ed_layout = new QVBoxLayout(_ed_widget);
+	_ed_layout = new Q3VBoxLayout(_ed_widget);
 	_ed_scrollview = NULL;
 	_ed_tabs = NULL;
 	setCentralWidget(_ed_widget);
@@ -129,14 +129,14 @@ void Editor::closeEvent(QCloseEvent*)
 void Editor::_FileMenuSetup()
 {
 	_file_menu->clear();
-	_file_menu->insertItem("&New...", this, SLOT(_FileNew()), CTRL+Key_N);
-	_file_menu->insertItem("&Open...", this, SLOT(_FileOpen()), CTRL+Key_O);
-	int save_id = _file_menu->insertItem("&Save", this, SLOT(_FileSave()), CTRL+Key_S);
+	_file_menu->insertItem("&New...", this, SLOT(_FileNew()), Qt::CTRL+Qt::Key_N);
+	_file_menu->insertItem("&Open...", this, SLOT(_FileOpen()), Qt::CTRL+Qt::Key_O);
+	int save_id = _file_menu->insertItem("&Save", this, SLOT(_FileSave()), Qt::CTRL+Qt::Key_S);
 	int save_as_id = _file_menu->insertItem("Save &As...", this, SLOT(_FileSaveAs()));
 	_file_menu->insertSeparator();
 	int resize_id = _file_menu->insertItem("&Resize Map...", this, SLOT(_FileResize()));
 	_file_menu->insertSeparator();
-	_file_menu->insertItem("&Quit", this, SLOT(_FileQuit()), CTRL+Key_Q);
+	_file_menu->insertItem("&Quit", this, SLOT(_FileQuit()), Qt::CTRL+Qt::Key_Q);
 
 	if (_ed_scrollview != NULL && _ed_scrollview->_map != NULL)
 	{
@@ -170,9 +170,9 @@ void Editor::_FileNew()
 			if (_ed_tabs != NULL)
 				delete _ed_tabs;
 			_ed_tabs = new QTabWidget(_ed_widget);
-			_ed_tabs->setTabPosition(QTabWidget::Bottom);
+			_ed_tabs->setTabPosition(QTabWidget::South);
 
-			QCheckListItem* tiles = static_cast<QCheckListItem*> (new_map->GetTilesetListView()->firstChild());
+			Q3CheckListItem* tiles = static_cast<Q3CheckListItem*> (new_map->GetTilesetListView()->firstChild());
 			while (tiles)
 			{
 				if (tiles->isOn())
@@ -180,7 +180,7 @@ void Editor::_FileNew()
 					_ed_tabs->addTab(new TilesetTable(_ed_widget, tiles->text(), _tile_db), tiles->text());
 					_ed_scrollview->_map->tileset_list.push_back(tiles->text());
 				} // tileset must be selected
-				tiles = static_cast<QCheckListItem*> (tiles->nextSibling());
+				tiles = static_cast<Q3CheckListItem*> (tiles->nextSibling());
 			} // iterate through all possible tilesets
 	
 			_ed_layout->addWidget(_ed_scrollview);
@@ -205,7 +205,7 @@ void Editor::_FileOpen()
 	if (_EraseOK())
 	{
 		// file to open
-		QString file_name = QFileDialog::getOpenFileName(
+		QString file_name = Q3FileDialog::getOpenFileName(
 			"dat/maps", "Maps (*.lua)", this, "file open",
 			"HoA Level Editor -- File Open");
 
@@ -218,7 +218,7 @@ void Editor::_FileOpen()
 			if (_ed_tabs != NULL)
 				delete _ed_tabs;
 			_ed_tabs = new QTabWidget(_ed_widget);
-			_ed_tabs->setTabPosition(QTabWidget::Bottom);
+			_ed_tabs->setTabPosition(QTabWidget::South);
 
 			_ed_layout->addWidget(_ed_scrollview);
 			_ed_layout->addWidget(_ed_tabs);
@@ -227,7 +227,7 @@ void Editor::_FileOpen()
 			_ed_scrollview->_map->SetFileName(file_name);
 			_ed_scrollview->_map->LoadMap();
 
-			for (QValueListIterator<QString> it = _ed_scrollview->_map->tileset_list.begin();
+			for (QStringList::ConstIterator it = _ed_scrollview->_map->tileset_list.begin();
 				it != _ed_scrollview->_map->tileset_list.end(); it++)
 				_ed_tabs->addTab(new TilesetTable(_ed_widget, *it, _tile_db), *it);
 			_ed_tabs->show();
@@ -255,7 +255,7 @@ void Editor::_FileOpen()
 void Editor::_FileSaveAs()
 {
 	// get the file name from the user
-	QString file_name = QFileDialog::getSaveFileName(
+	QString file_name = Q3FileDialog::getSaveFileName(
 		"dat/maps", "Maps (*.lua)", this, "file save",
 		"HoA Level Editor -- File Save");
 		
@@ -309,9 +309,9 @@ void Editor::_FileResize()
 		if (_ed_tabs != NULL)
 			delete _ed_tabs;
 		_ed_tabs = new QTabWidget(_ed_widget);
-		_ed_tabs->setTabPosition(QTabWidget::Bottom);
+		_ed_tabs->setTabPosition(QTabWidget::South);
 
-		QCheckListItem* tiles = static_cast<QCheckListItem*> (resize->GetTilesetListView()->firstChild());
+		Q3CheckListItem* tiles = static_cast<Q3CheckListItem*> (resize->GetTilesetListView()->firstChild());
 		_ed_scrollview->_map->tileset_list.clear();
 		while (tiles)
 		{
@@ -320,7 +320,7 @@ void Editor::_FileResize()
 				_ed_tabs->addTab(new TilesetTable(_ed_widget, tiles->text(), _tile_db), tiles->text());
 				_ed_scrollview->_map->tileset_list.push_back(tiles->text());
 			} // tileset must be selected
-			tiles = static_cast<QCheckListItem*> (tiles->nextSibling());
+			tiles = static_cast<Q3CheckListItem*> (tiles->nextSibling());
 		} // iterate through all possible tilesets
 	
 		_ed_layout->addWidget(_ed_tabs);
@@ -383,7 +383,7 @@ void Editor::_TileLayerFill()
 {
 	// get reference to current tileset
 	//Editor* editor = static_cast<Editor*> (topLevelWidget());
-	QTable* table = static_cast<QTable*> (this->_ed_tabs->currentPage());
+	Q3Table* table = static_cast<Q3Table*> (this->_ed_tabs->currentPage());
 
 	// put selected tile from tileset into tile array at correct position
 	QString name = table->text(table->currentRow(), table->currentColumn());
@@ -595,14 +595,14 @@ NewMapDialog::NewMapDialog(QWidget* parent, const QString& name)
 {
 	setCaption("Map Properties...");
 
-	_dia_layout    = new QGridLayout(this, 7, 2, 5);
+	_dia_layout    = new Q3GridLayout(this, 7, 2, 5);
 	
 	_height_label  = new QLabel("Height (in tiles):", this);
 	_height_sbox   = new QSpinBox(1, 1000, 1, this);
 	_width_label   = new QLabel(" Width (in tiles):", this);
 	_width_sbox    = new QSpinBox(1, 1000, 1, this);
 	
-	_tileset_lview = new QListView(this, "tileset_lview", WStaticContents|WNoAutoErase);
+	_tileset_lview = new Q3ListView(this, "tileset_lview", Qt::WStaticContents|Qt::WNoAutoErase);
 	
 	_cancel_pbut   = new QPushButton("Cancel", this);
 	_ok_pbut       = new QPushButton("OK", this);
@@ -613,14 +613,14 @@ NewMapDialog::NewMapDialog(QWidget* parent, const QString& name)
 
 	QDir tileset_dir("dat/tilesets");
 	_tileset_lview->addColumn("Tilesets");
-	QCheckListItem* global = new QCheckListItem(_tileset_lview, "Global", QCheckListItem::CheckBox);
+	Q3CheckListItem* global = new Q3CheckListItem(_tileset_lview, "Global", Q3CheckListItem::CheckBox);
 	global->setOn(true);
 	for (uint32 i = 0; i < tileset_dir.count(); i++)
 	{
 		if (tileset_dir[i].contains("tileset") != 0)
 		{
-			(void) new QCheckListItem(_tileset_lview, tileset_dir[i].remove("tileset_").remove(".lua"),
-				QCheckListItem::CheckBox);
+			(void) new Q3CheckListItem(_tileset_lview, tileset_dir[i].remove("tileset_").remove(".lua"),
+				Q3CheckListItem::CheckBox);
 		}
 	} // looks for tileset files in the tileset directory
 	
@@ -648,16 +648,16 @@ NewMapDialog::~NewMapDialog()
   MusicDialog class functions follow
 ************************/
 
-MusicDialog::MusicDialog(QWidget* parent, const QString& name, const std::string& selected_music)
+MusicDialog::MusicDialog(QWidget* parent, const QString& name, const QString& selected_music)
 	: QDialog(parent,name)
 {
 	setCaption("Select map music");
-	_dia_layout    = new QGridLayout(this, 7, 2, 5);
+	_dia_layout    = new Q3GridLayout(this, 7, 2, 5);
 
 	_cancel_pbut   = new QPushButton("Cancel", this);
 	_ok_pbut       = new QPushButton("OK", this);
 	_select_label  = new QLabel("Select the music for this map:",this);
-	_music_list    = new QListView(this, "tileset_lview", WStaticContents|WNoAutoErase);
+	_music_list    = new Q3ListView(this, "tileset_lview", Qt::WStaticContents|Qt::WNoAutoErase);
 
 	//Turn off sorting
 	_music_list->setSorting(-1);
@@ -673,7 +673,8 @@ MusicDialog::MusicDialog(QWidget* parent, const QString& name, const std::string
 	_PopulateMusicList(selected_music);
 } // MusicDialog::MusicDialog
 
-MusicDialog::~MusicDialog() {
+MusicDialog::~MusicDialog()
+{
 	delete _cancel_pbut;
 	delete _ok_pbut;
 	delete _select_label;
@@ -681,36 +682,35 @@ MusicDialog::~MusicDialog() {
 	delete _dia_layout;
 } // MusicDialog::~MusicDialog
 
-void MusicDialog::_PopulateMusicList(const std::string& selected) {
-	QString selected_str(selected);
-
+void MusicDialog::_PopulateMusicList(const QString& selected_str)
+{
 	QDir music_dir("mus");
 	_music_list->addColumn("Filename");
 
 	// Add music files
-	for(int i=0; i<music_dir.count(); i++) 
+	for (unsigned int i = 0; i < music_dir.count(); i++) 
 	{
-		if(music_dir[i].contains(".ogg"))
+		if (music_dir[i].contains(".ogg"))
 		{
 			QString file_name=music_dir[i];
-			QListViewItem* Item=new QListViewItem(_music_list, file_name);
-			if(selected_str.endsWith(file_name) && !selected_str.isEmpty()) {
-				_music_list->setSelected(Item,true);
-			}
+			Q3ListViewItem* Item=new Q3ListViewItem(_music_list, file_name);
+			if (selected_str.endsWith(file_name) && !selected_str.isEmpty())
+				_music_list->setSelected(Item, true);
 		} // if .ogg
 	} // for i
 
 	// Add "None" option
-	QListViewItem* NoneItem = new QListViewItem(_music_list, "None");
-	if(selected.empty() || selected == "None")
-		_music_list->setSelected(NoneItem,true);
+	Q3ListViewItem* NoneItem = new Q3ListViewItem(_music_list, "None");
+	if (selected_str.isEmpty() || selected_str == "None")
+		_music_list->setSelected(NoneItem, true);
 } // MusicDialog::_PopulateMusicList
 
-std::string MusicDialog::GetSelectedFile() {
-	if(_music_list->currentItem() == 0)
-		return "None";
+QString MusicDialog::GetSelectedFile()
+{
+	if (_music_list->currentItem() == 0)
+		return QString("None");
 
-	return "mus/"+_music_list->currentItem()->text(0);
+	return QString("mus/" + _music_list->currentItem()->text(0));
 } // MusicDialog::GetSelectedFile
 
 /************************
@@ -718,7 +718,7 @@ std::string MusicDialog::GetSelectedFile() {
 ************************/
 
 EditorScrollView::EditorScrollView(QWidget* parent, const QString& name, int width,
-	int height, TileDatabase* db) : QScrollView(parent, (const char*) name, WNoAutoErase|WStaticContents)
+	int height, TileDatabase* db) : Q3ScrollView(parent, (const char*) name, Qt::WNoAutoErase|Qt::WStaticContents)
 {
 	_db=db;
 
@@ -731,9 +731,9 @@ EditorScrollView::EditorScrollView(QWidget* parent, const QString& name, int wid
 	addChild(_map);
 
 	// Context menu creation.
-	_context_menu = new QPopupMenu(this);
+	_context_menu = new Q3PopupMenu(this);
 	// Create the walkability checkboxes and add them to a QVButtonGroup.
-	QVButtonGroup* checkboxes = new QVButtonGroup("Walkability", _context_menu,
+	Q3VButtonGroup* checkboxes = new Q3VButtonGroup("Walkability", _context_menu,
 		"checkboxes");
 	_allwalk_checkbox = new QCheckBox("All", checkboxes, "allwalk_checkbox");
 	for (uint32 i = 0; i < 8; i++)
@@ -743,7 +743,7 @@ EditorScrollView::EditorScrollView(QWidget* parent, const QString& name, int wid
 		SLOT(_ToggleWalkCheckboxes(bool)));
 	connect(_context_menu, SIGNAL(aboutToShow()), this, SLOT(_ContextMenuSetup()));
 	connect(_context_menu, SIGNAL(aboutToHide()), this, SLOT(_ContextMenuEvaluate()));
-	_context_menu->insertItem(checkboxes);
+	_context_menu->insertItem("Walkability", checkboxes, NULL);
 } // EditorScrollView constructor
 
 EditorScrollView::~EditorScrollView()
@@ -787,7 +787,7 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 			{
 				// get reference to current tileset
 				Editor* editor = static_cast<Editor*> (topLevelWidget());
-				QTable* table = static_cast<QTable*> (editor->_ed_tabs->currentPage());
+				Q3Table* table = static_cast<Q3Table*> (editor->_ed_tabs->currentPage());
 
 				// put selected tile from tileset into tile array at correct position
 				QString name = table->text(table->currentRow(), table->currentColumn());
@@ -851,7 +851,7 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 				{
 					// get reference to current tileset
 					Editor* editor = static_cast<Editor*> (topLevelWidget());
-					QTable* table = static_cast<QTable*> (editor->_ed_tabs->currentPage());
+					Q3Table* table = static_cast<Q3Table*> (editor->_ed_tabs->currentPage());
 
 					// put selected tile from tileset into tile array at correct position
 					QString name = table->text(table->currentRow(), table->currentColumn());
@@ -933,19 +933,20 @@ void EditorScrollView::contentsContextMenuEvent(QContextMenuEvent *evt)
 
 void EditorScrollView::_ContextMenuSetup()
 {
-	uint walkable=0;
-	// individual walkability supersedes everything else
+	unsigned int walkable = 0;
+	
+	// Individual walkability supersedes everything else
 	if (_map->indiv_walkable[_tile_index] != -1)
-		walkable=_map->indiv_walkable[_tile_index];
-	// look up walkability property from the map
+		walkable = _map->indiv_walkable[_tile_index];
+	// Look up walkability property from the map
 	else if (_map->tiles_walkable[_tile_index] != -1)
-		walkable=_map->tiles_walkable[_tile_index];
-	// look up walkability property in global tiles database
+		walkable = _map->tiles_walkable[_tile_index];
+	// Look up walkability property in global tiles database
 	else
 	{
-		std::string tile_name=_map->file_name_list[
+		QString tile_name = _map->file_name_list[
 			_map->GetLayer(LOWER_LAYER)[_tile_index]];
-			walkable=_db->GetGlobalSet().GetTile(tile_name).walkability;
+		walkable = _db->GetGlobalSet().GetTile(tile_name).walkability;
 	}
 
 	// Set checkboxes
@@ -978,25 +979,28 @@ void EditorScrollView::_ToggleWalkCheckboxes(bool on)
 			_walk_checkbox[i]->setChecked(false);
 } // _ToggleWalkCheckboxes(...)
 
-// *************** Private Functions ***************
+
+
+// ********** Private Functions **********
+
 void EditorScrollView::_RemoveIfUnused(int file_index) 
 {
 	// find other instances of the tile 
-	bool Found=false;
-	for(LAYER_TYPE layer=LOWER_LAYER;layer<=UPPER_LAYER && !Found;layer++) {
+	bool found = false;
+	for (LAYER_TYPE layer = LOWER_LAYER;layer <= UPPER_LAYER && !found; layer++)
+	{
 		vector<int32>::iterator it;
-		vector<int32>& CurrentLayer=_map->GetLayer(layer);
+		vector<int32>& CurrentLayer = _map->GetLayer(layer);
 		// Loop until we either find something or we are at the end of the vector
-		for (it = CurrentLayer.begin(); 
-			it != CurrentLayer.end() && *it != file_index; it++);
-			if(it!=CurrentLayer.end())
-				Found=true;
+		for (it = CurrentLayer.begin(); it != CurrentLayer.end() && *it != file_index; it++);
+		if (it != CurrentLayer.end())
+			found = true;
 	}
 
 	// If tile was not found, remove it from the list
-	if(!Found)
-		_map->file_name_list.erase(_map->file_name_list.at(file_index));
-}
+	if (!found)
+		_map->file_name_list.removeAt(file_index);
+} // _RemoveIfUnused(...)
 
 
 /************************
@@ -1004,7 +1008,7 @@ void EditorScrollView::_RemoveIfUnused(int file_index)
 ************************/
 
 DatabaseDialog::DatabaseDialog(QWidget* parent, const QString& name, TileDatabase* db)
-	: QTabDialog(parent, (const char*) name)
+	: Q3TabDialog(parent, (const char*) name)
 {
 	_db=db;
 	_set_modified=false;
@@ -1026,7 +1030,8 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, const QString& name, TileDatabas
 		// Create a widget to put inside a tab of the dialog.
 		QWidget* tilesets_widget = new QWidget(this);
 
-		// Create a QLabel for a read-only QComboBox (drop-down list) and add all existing tilesets, and connect it to a slot.
+		// Create a QLabel for a read-only QComboBox (drop-down list) and add all existing tilesets,
+		// and connect it to a slot.
 		QLabel* tilesets_label   = new QLabel("Tileset to modify:", tilesets_widget, "tilesets_label");
 		tilesets_label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
 		_tilesets_cbox = new QComboBox(false, tilesets_widget, "tilesets_cbox");
@@ -1046,12 +1051,12 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, const QString& name, TileDatabas
 		tileset_label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
 
 		// Create QIconViews and set up their properties appropriately.
-		_all_tiles   = new QIconView(tilesets_widget, "all_tiles_iview");
-		_mod_tileset = new QIconView(tilesets_widget, "new_tileset_iview");
-		_all_tiles->setItemTextPos(QIconView::Right);
-		_mod_tileset->setItemTextPos(QIconView::Right);
-		_all_tiles->setSelectionMode(QIconView::Single);
-		_mod_tileset->setSelectionMode(QIconView::Single);
+		_all_tiles   = new Q3IconView(tilesets_widget, "all_tiles_iview");
+		_mod_tileset = new Q3IconView(tilesets_widget, "new_tileset_iview");
+		_all_tiles->setItemTextPos(Q3IconView::Right);
+		_mod_tileset->setItemTextPos(Q3IconView::Right);
+		_all_tiles->setSelectionMode(Q3IconView::Single);
+		_mod_tileset->setSelectionMode(Q3IconView::Single);
 		_all_tiles->setWordWrapIconText(false);
 		_mod_tileset->setWordWrapIconText(false);
 		_all_tiles->setItemsMovable(false);
@@ -1067,7 +1072,7 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, const QString& name, TileDatabas
 		std::list<DbTile> global_set_files=_db->GetGlobalSet().GetTiles();
 		for(std::list<DbTile>::const_iterator it=global_set_files.begin(); it!=global_set_files.end(); it++)
 		{
-			(void) new QIconViewItem(_all_tiles, (*it).file_name, QPixmap("img/tiles/" + (*it).file_name));
+			(void) new Q3IconViewItem(_all_tiles, (*it).file_name, QPixmap("img/tiles/" + (*it).file_name));
 		}		
 
 		// Create QPushButtons and connect them to their appropriate slots.
@@ -1077,7 +1082,7 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, const QString& name, TileDatabas
 		connect(del_tile_pbut, SIGNAL(clicked()), this, SLOT(_DelTile()));
 
 		// Create a QGridLayout and add all the created widgets to it.
-		QGridLayout* tilesets_tab = new QGridLayout(tilesets_widget, 4, 2, 5);
+		Q3GridLayout* tilesets_tab = new Q3GridLayout(tilesets_widget, 4, 2, 5);
 		tilesets_tab->addWidget(tilesets_label, 0, 0);
 		tilesets_tab->addWidget(_tilesets_cbox, 0, 1);
 		tilesets_tab->addWidget(tileset_label, 1, 0);
@@ -1112,18 +1117,18 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, const QString& name, TileDatabas
 		connect(_proptsets_cbox, SIGNAL(activated(const QString&)), this, SLOT(_PropertiesTabPopulateTileset(const QString&)));
 
 		// Create QIconView and set up its properties appropriately.
-		_prop_tileset = new QIconView(properties_widget, "prop_tileset_iview");
-		_prop_tileset->setItemTextPos(QIconView::Right);
-		_prop_tileset->setSelectionMode(QIconView::Single);
+		_prop_tileset = new Q3IconView(properties_widget, "prop_tileset_iview");
+		_prop_tileset->setItemTextPos(Q3IconView::Right);
+		_prop_tileset->setSelectionMode(Q3IconView::Single);
 		_prop_tileset->setWordWrapIconText(false);
 		_prop_tileset->setItemsMovable(false);
 		_prop_tileset->setSorting(true);
 		_prop_tileset->setGridX(300);
-		connect(_prop_tileset, SIGNAL(currentChanged(QIconViewItem *)), this, SLOT(_ProcessWalkability(QIconViewItem *)));
+		connect(_prop_tileset, SIGNAL(currentChanged(Q3IconViewItem *)), this, SLOT(_ProcessWalkability(Q3IconViewItem *)));
 		_tile_index = 0;    // no changes made yet
 
 		// Create the walkability checkboxes and add them to a QVButtonGroup.
-		QVButtonGroup* checkboxes = new QVButtonGroup("Walkability", properties_widget, "checkboxes");
+		Q3VButtonGroup* checkboxes = new Q3VButtonGroup("Walkability", properties_widget, "checkboxes");
 		_allwalk_checkbox = new QCheckBox("All", checkboxes, "allwalk_checkbox");
 		for (uint32 i = 0; i < 8; i++)
 			_walk_checkbox[i] = new QCheckBox(QString("Level %1").arg(i+1), checkboxes, QString("walk_checkbox[%1]").arg(i));
@@ -1133,7 +1138,7 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, const QString& name, TileDatabas
 		QLabel* anim_label = new QLabel("Placeholder for animation settings", properties_widget, "anim_label");
 
 		// Create a QGridLayout and add all the created widgets to it.
-		QGridLayout* properties_tab = new QGridLayout(properties_widget, 2, 3, 5);
+		Q3GridLayout* properties_tab = new Q3GridLayout(properties_widget, 2, 3, 5);
 		properties_tab->addWidget(_proptsets_cbox,  0, 0);
 		properties_tab->addWidget(_prop_tileset,   1, 0);
 		properties_tab->addWidget(checkboxes,      1, 1);
@@ -1175,8 +1180,8 @@ void DatabaseDialog::_CreateTileSet()
 
 void DatabaseDialog::_UpdateData()
 {
-	// Save current tileset if necessary
-	if (_set_modified && _tileset_ledit->text() != NULL && _tileset_ledit->text() != "" && _selected_set!=NULL)
+	// Save current tileset if necessary.
+	if (_set_modified && !_tileset_ledit->text().isNull() && _tileset_ledit->text() != "" && _selected_set != NULL)
 	{
 		_selected_set->SetName(_tileset_ledit->text());
 		_selected_set->Save();
@@ -1197,15 +1202,15 @@ void DatabaseDialog::_AddTile()
 {
 	_CreateTileSet();
 
-	QIconViewItem* CurrentItem=_all_tiles->currentItem();
+	Q3IconViewItem* CurrentItem=_all_tiles->currentItem();
 	//If no item is selected, show a warning
 	if(CurrentItem == 0) {
 		QMessageBox::warning(this,"Error","No tile selected!");
 	}
 	// Otherwise: Only add new tile if it doesn't already exist in the new tileset.
-	else if (_mod_tileset->findItem(CurrentItem->text(), Qt::ExactMatch) == 0)
+	else if (_mod_tileset->findItem(CurrentItem->text(), Q3IconView::ExactMatch) == 0)
 	{
-		(void) new QIconViewItem(_mod_tileset, _all_tiles->currentItem()->text(), *_all_tiles->currentItem()->pixmap());
+		(void) new Q3IconViewItem(_mod_tileset, _all_tiles->currentItem()->text(), *_all_tiles->currentItem()->pixmap());
 		_selected_set->AddTile(_all_tiles->currentItem()->text());
 		_set_modified=true;
 	}
@@ -1235,7 +1240,7 @@ void DatabaseDialog::_TilesetsTabPopulateTileset(const QString& name)
 	else
 	{
 		_tileset_ledit->setText("");
-		if(name=="New Tileset")
+		if (name == "New Tileset")
 		{
 			_tileset_ledit->setEnabled(true);
 			_mod_tileset->setEnabled(true);
@@ -1256,7 +1261,7 @@ void DatabaseDialog::_PropertiesTabPopulateTileset(const QString& name)
 		_PopulateTilesetHelper(_prop_tileset, name);
 } // _PropertiesTabPopulateTileset(...)
 
-void DatabaseDialog::_ProcessWalkability(QIconViewItem* item)
+void DatabaseDialog::_ProcessWalkability(Q3IconViewItem* item)
 {
 	if (item != NULL)
 	{
@@ -1301,7 +1306,7 @@ void DatabaseDialog::_ToggleWalkCheckboxes(bool on)
 
 // ********** Private function **********
 
-void DatabaseDialog::_PopulateTilesetHelper(QIconView *tileset, const QString& name)
+void DatabaseDialog::_PopulateTilesetHelper(Q3IconView *tileset, const QString& name)
 {
 	if (tileset != NULL)
 	{
@@ -1311,21 +1316,22 @@ void DatabaseDialog::_PopulateTilesetHelper(QIconView *tileset, const QString& n
 		std::list<DbTile> tiles=_selected_set->GetTiles();
 		for(std::list<DbTile>::const_iterator it=tiles.begin(); it!=tiles.end(); it++)
 		{
-			(void) new QIconViewItem(tileset, (*it).file_name, QPixmap("img/tiles/" + (*it).file_name));
+			(void) new Q3IconViewItem(tileset, (*it).file_name, QPixmap("img/tiles/" + (*it).file_name));
 		}		
 	} // no populating necessary otherwise
 } // _PopulateTilesetHelper()
 
 void DatabaseDialog::_SwitchTileset(TileSet* new_set)
 {
-	// If the tileset has been modified, ask if it should be saved
+	// If the tileset has been modified, ask if it should be saved.
 	if(_set_modified && _selected_set)
 	{
-		int ret=QMessageBox::question(this,"Tileset has been changed","Do you want to save your changes?",QMessageBox::Yes,QMessageBox::No);
-		if(ret == QMessageBox::Yes)
+		int ret = QMessageBox::question(this, "Tileset has been changed",
+			"Do you want to save your changes?", QMessageBox::Yes, QMessageBox::No);
+		if (ret == QMessageBox::Yes)
 			_selected_set->Save();
-	}
+	} // must not be NULL
 
 	_selected_set.reset(new_set);
 	_set_modified=false;
-}
+} // _SwitchTileset(...)
