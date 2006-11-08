@@ -39,24 +39,33 @@ else
     AC_MSG_RESULT(no)
 fi
 
-dnl Check for map editor and Qt.
-AC_MSG_CHECKING(whether to enable usage of map editor)
-editor_default="no"
-AC_ARG_ENABLE(editor, [  --enable-editor=[no/yes]    will build the map editor [default=no]], , enable_editor=$editor_default)
-if test "x$enable_editor" = "xyes"; then
-    AC_MSG_RESULT(yes)
-    gw_CHECK_QT
-else
-    AC_MSG_RESULT(no)
-fi
-AM_CONDITIONAL([COND_EDITOR], [test "$enable_editor" = yes])
-
 dnl Check for libraries.
 AC_PATH_XTRA
 X_LIBS="$X_LIBS -L/usr/X11R6/lib"
 X_CFLAGS="$X_CFLAGS -I/usr/X11R6/include"
 LIBS="$LIBS $X_LIBS"
 CPPFLAGS="$CPPFLAGS $X_CFLAGS"
+
+dnl Check for map editor and Qt.
+AC_MSG_CHECKING(whether to enable usage of map editor)
+editor_default="no"
+AC_ARG_ENABLE(editor, [  --enable-editor=[no/yes]    will build the map editor [default=no]], , enable_editor=$editor_default)
+if test "x$enable_editor" = "xyes"; then
+    AC_MSG_RESULT(yes)
+	HOA_FIND_QT4(HOA_QT4,,)
+    dnl gw_CHECK_QT
+	dnl QT_LIBS="-L/usr/lib/qt4"
+	dnl QT_CFLAGS="-I/usr/include/qt4"
+	dnl LIBS="$LIBS $QT_LIBS"
+	dnl CPPFLAGS="$CPPFLAGS $QT_CFLAGS"
+	dnl AC_CHECK_LIB([Qt3Support], [Q3Table::currentRow], [], [AC_MSG_ERROR([Qt3Support not found])])
+	dnl AC_CHECK_LIB([QtCore], [QDir], [], [AC_MSG_ERROR([QtCore not found])])
+	dnl AC_CHECK_LIB([QtGui], [QCheckBox], [], [AC_MSG_ERROR([QtGui not found])])
+	dnl AC_CHECK_LIB([QtOpenGL], [QGLWidget], [], [AC_MSG_ERROR([QtOpenGL not found])])
+else
+    AC_MSG_RESULT(no)
+fi
+AM_CONDITIONAL([COND_EDITOR], [test "$enable_editor" = yes])
 
 AC_CHECK_LIB([X11], [XCreateWindow], [], [AC_MSG_ERROR([X11 GLX not found])])
 AC_CHECK_LIB([GL], [glGetString], [], [AC_MSG_ERROR([OpenGL not found])])

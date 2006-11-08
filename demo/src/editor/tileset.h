@@ -22,11 +22,9 @@
 #include "script.h"
 #include "tile.h"
 
-#include <qmessagebox.h>
-#include <qpixmap.h>
-#include <qstring.h>
-#include <qtable.h>
-#include <qdir.h>
+#include <QMessageBox>
+#include <Q3Table>
+#include <QDir>
 
 //! All calls to the editor are wrapped in this namespace.
 namespace hoa_editor
@@ -40,7 +38,7 @@ class TileDatabase;
  * 
  * \note Inherits QTable.
  *****************************************************************************/
-class TilesetTable : public QTable
+class TilesetTable : public Q3Table
 {
 	public:
 		//! TilesetTable constructor. Name needs to be the name, not the filename.
@@ -52,72 +50,73 @@ class TilesetTable : public QTable
 
 class DbTile
 {
-public:
-	DbTile();
-	DbTile(const std::string& filename, int walkable);
+	public:
+		DbTile();
+		DbTile(const QString& filename, int walkable);
 
-	std::string file_name;
-	int walkability;
+		QString file_name;
+		int walkability;
 };
 
 class TileSet
 {
-public:
-	//! Creates a new tileset attached to a database
-	TileSet(TileDatabase* db);
-	//! Loads a tileset using the specified database. name is just the name of the tileset,
-	//! not the filename!
-	TileSet(TileDatabase* db, const std::string& name);
+	public:
+		//! Creates a new tileset attached to a database
+		TileSet(TileDatabase* db);
+		//! Loads a tileset using the specified database. name is just the name of the tileset,
+		//! not the filename!
+		TileSet(TileDatabase* db, const QString& name);
 
-	//! Adds a tile from the database to the tileset.
-	void AddTile(const std::string& tile_name);
-	//! Removes a tile from the tileset.
-	void RemoveTile(const std::string& tile_name);
-	//! Returns a reference to the specified tile.
-	DbTile& GetTile(const std::string& tile_name);
-	//! Returns a list with all tiles in this tileset.
-	std::list<DbTile> GetTiles() const;
+		//! Adds a tile from the database to the tileset.
+		void AddTile(const QString& tile_name);
+		//! Removes a tile from the tileset.
+		void RemoveTile(const QString& tile_name);
+		//! Returns a reference to the specified tile.
+		DbTile& GetTile(const QString& tile_name);
+		//! Returns a list with all tiles in this tileset.
+		std::list<DbTile> GetTiles() const;
 
-	//! Writes the set to the tileset-file. On new tilesets, this will only work after
-	//! a name has been set.
-	void Save();
+		//! Writes the set to the tileset-file. On new tilesets, this will only work after
+		//! a name has been set.
+		void Save();
 
-	//! Sets the name of the tileset.
-	void SetName(const std::string& name);
-	//! Returns the name of the tileset.
-	const std::string& GetName() const;
-private:
-	TileDatabase* _db;
-	std::list<std::string> _tile_names;
-	std::string _name;
+		//! Sets the name of the tileset.
+		void SetName(const QString& name);
+		//! Returns the name of the tileset.
+		const QString& GetName() const;
+		
+	private:
+		TileDatabase* _db;
+		std::list<QString> _tile_names;
+		QString _name;
 };
 
 class TileDatabase
 {
-public:
-	//! Create a new TileDatabase
-	TileDatabase();
-	//! Load database from the specified path
-	TileDatabase(const std::string& db_file_name);
+	public:
+		//! Create a new TileDatabase
+		TileDatabase();
+		//! Load database from the specified path
+		TileDatabase(const QString& db_file_name);
 
-	//! Synchronizes the TileDatabase with the specified directory. This will both add new
-	//! files and also remove files that do not exist anymore.
-	void Update(const std::string& tile_dir_name);
+		//! Synchronizes the TileDatabase with the specified directory. This will both add new
+		//! files and also remove files that do not exist anymore.
+		void Update(const QString& tile_dir_name);
 
-	//! Writes database to disk
-	void Save(const std::string& file_name);
+		//! Writes database to disk
+		void Save(const QString& file_name);
 
-	//! Returns a reference to the tile with the specified name.
-	DbTile& GetTile(const std::string& tile_name);
-	//! Returns true if the tile exists in the db.
-	bool TileExists(const std::string& tile_name);
+		//! Returns a reference to the tile with the specified name.
+		DbTile& GetTile(const QString& tile_name);
+		//! Returns true if the tile exists in the db.
+		bool TileExists(const QString& tile_name);
 
-	//! Return a reference to the special global tileset which contains all tiles in the db.
-	TileSet& GetGlobalSet();
+		//! Return a reference to the special global tileset which contains all tiles in the db.
+		TileSet& GetGlobalSet();
 
-private:
-	std::map<std::string, DbTile> _tiles;
-	TileSet _global_set;
+	private:
+		std::map<QString, DbTile> _tiles;
+		TileSet _global_set;
 };
 
 } // namespace hoa_editor

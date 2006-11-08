@@ -131,26 +131,32 @@ std::vector<int32>& Grid::GetLayer(LAYER_TYPE layer)
 			return _middle_layer;
 		case UPPER_LAYER:
 			return _upper_layer;
-	}
-	return _lower_layer;
-}
+		case INVALID_LAYER:
+			/* FALLTHRU */
+		case TOTAL_LAYER:
+			/* FALLTHRU */
+		default:
+			return _lower_layer;
+	} // switch on the current layer
+	//return _lower_layer;
+} // GetLayer(...)
 
-void Grid::SetMusic(const std::string& music_file) 
+void Grid::SetMusic(const QString& music_file) 
 {
 	_music_file = music_file;
-}
+} // SetMusic(...)
 
-const std::string& Grid::GetMusic() const 
+const QString& Grid::GetMusic() const 
 {
 	return _music_file;
-}
+} // GetMusic()
 
 void Grid::LoadMap()
 {
 	ScriptDescriptor read_data;
 	vector<int32> vect;             // used to read in vectors from the file
 
-	if (!read_data.OpenFile(_file_name, READ))
+	if (!read_data.OpenFile(_file_name.toStdString(), READ))
 		QMessageBox::warning(this, "Loading File...", QString("ERROR: could not open %1 for reading!").arg(_file_name));
 
 	file_name_list.clear();
@@ -168,13 +174,13 @@ void Grid::LoadMap()
 	read_data.OpenTable("tileset_names");
 	uint32 table_size = read_data.GetTableSize();
 	for (uint32 i = 1; i <= table_size; i++)
-		tileset_list.append(read_data.ReadString(i));
+		tileset_list.append(QString::fromStdString(read_data.ReadString(i)));
 	read_data.CloseTable();
 
 	read_data.OpenTable("tile_filenames");
 	table_size = read_data.GetTableSize();
 	for (uint32 i = 1; i <= table_size; i++)
-		file_name_list.append(QString(read_data.ReadString(i)).prepend("img/tiles/").append(".png"));
+		file_name_list.append(QString::fromStdString(read_data.ReadString(i)).prepend("img/tiles/").append(".png"));
 	read_data.CloseTable();
 
 	read_data.OpenTable("lower_layer");
@@ -223,13 +229,13 @@ void Grid::LoadMap()
 
 	// Load music
 	read_data.OpenTable("music_filenames");
-	if(read_data.GetErrorCode() == DATA_NO_ERRORS)
+	if (read_data.GetErrorCode() == DATA_NO_ERRORS)
 	{
-		int Size=read_data.GetTableSize();
-		if(Size==0)
-			_music_file="None";
+		int size = read_data.GetTableSize();
+		if (size == 0)
+			_music_file = "None";
 		else
-			_music_file=read_data.ReadString(1);
+			_music_file = QString::fromStdString(read_data.ReadString(1));
 		read_data.CloseTable();
 	}
 
@@ -250,7 +256,7 @@ void Grid::SaveMap()
 	vector<int32> layer_row;     // one row of a layer
 	ScriptDescriptor write_data;
 	
-	if (!write_data.OpenFile(_file_name, WRITE))
+	if (!write_data.OpenFile(_file_name.toStdString(), WRITE))
 		QMessageBox::warning(this, "Saving File...", QString("ERROR: could not open %1 for writing!").arg(_file_name));
 	else
 	{
@@ -407,7 +413,7 @@ void Grid::SaveMap()
 						while (filename != temp && index < table_size)
 						{
 							index++;
-							filename = read_data.ReadString(index);
+							filename = QString::fromStdString(read_data.ReadString(index));
 						} // find index of current tile in the database
 						read_data.CloseTable();
 					
@@ -481,7 +487,7 @@ void Grid::paintGL()
 		{
 			if (*it != -1)
 			{
-				tile.SetFilename(file_name_list[*it]);
+				tile.SetFilename(file_name_list[*it].toStdString());
 				VideoManager->LoadImage(tile);
 				VideoManager->DrawImage(tile);
 			} // a tile exists to draw
@@ -502,7 +508,7 @@ void Grid::paintGL()
 		{
 			if (*it != -1)
 			{
-				tile.SetFilename(file_name_list[*it]);
+				tile.SetFilename(file_name_list[*it].toStdString());
 				VideoManager->LoadImage(tile);
 				VideoManager->DrawImage(tile);
 			} // a tile exists to draw
@@ -523,7 +529,7 @@ void Grid::paintGL()
 		{
 			if (*it != -1)
 			{
-				tile.SetFilename(file_name_list[*it]);
+				tile.SetFilename(file_name_list[*it].toStdString());
 				VideoManager->LoadImage(tile);
 				VideoManager->DrawImage(tile);
 			} // a tile exists to draw

@@ -24,23 +24,20 @@
 
 #include "tile.h"
 
-#include <qcanvas.h>
-#include <qcheckbox.h>
-#include <qcolor.h>
-#include <qcursor.h>
-#include <qdragobject.h>
-#include <qfile.h>
-#include <qgl.h>
-#include <qlayout.h>
-#include <qmessagebox.h>
-#include <qpen.h>
-#include <qpixmap.h>
-#include <qpopupmenu.h>
-#include <qradiobutton.h>
-#include <qstringlist.h>
-//#include <qvaluevector.h>
-#include <qvbuttongroup.h>
-#include <qwmatrix.h>
+#include <QCheckBox>
+#include <QColor>
+#include <QCursor>
+#include <Q3DragObject>
+#include <QFile>
+#include <QGLWidget>
+#include <QLayout>
+#include <QMessageBox>
+#include <QPen>
+#include <Q3PopupMenu>
+#include <QRadioButton>
+#include <QStringList>
+#include <Q3VButtonGroup>
+#include <QMatrix>
 
 //! All calls to the editor are wrapped in this namespace.
 namespace hoa_editor
@@ -83,9 +80,9 @@ class Grid: public QGLWidget
 		std::vector<int32>& GetLayer(LAYER_TYPE layer);
 
 		//! Sets background music
-		void SetMusic(const std::string& music_file);
+		void SetMusic(const QString& music_file);
 		//! Gets background music
-		const std::string& GetMusic() const;
+		const QString& GetMusic() const;
 
 		void LoadMap();                     // loads a map from a config file
 		void SaveMap();                     // saves the map to a config file
@@ -179,9 +176,8 @@ class Grid: public QGLWidget
 		std::vector<int32> _middle_layer;    // vector of tiles in the middle layer
 		std::vector<int32> _upper_layer;     // vector of tiles in the upper layer
 
-		
 		//! Stores background music
-		std::string _music_file;
+		QString _music_file;
 		bool _random_encounters;
 		int _encounter_rate;
 

@@ -19,31 +19,32 @@
 #include "grid.h"
 #include "tileset.h"
 
-#include <qapplication.h>
-#include <qcombobox.h>
-#include <qdialog.h>
-#include <qdir.h>
-#include <qfiledialog.h>
-#include <qgl.h>
-#include <qiconview.h>
-#include <qimage.h>
-#include <qlabel.h>
-#include <qlayout.h>
-#include <qlineedit.h>
-#include <qlistview.h>
-#include <qmainwindow.h>
-#include <qmenubar.h>
-#include <qmessagebox.h>
-#include <qpopupmenu.h>
-#include <qpushbutton.h>
-#include <qscrollview.h>
-#include <qspinbox.h>
-#include <qstatusbar.h>
-#include <qstring.h>
-#include <qstringlist.h>
-#include <qtabdialog.h>
-#include <qtabwidget.h>
-#include <qvbuttongroup.h>
+#include <QApplication>
+#include <QComboBox>
+#include <QDialog>
+#include <Q3FileDialog>
+#include <QGLWidget>
+#include <Q3IconView>
+#include <QLabel>
+#include <QLayout>
+#include <QLineEdit>
+#include <Q3ListView>
+#include <Q3MainWindow>
+#include <QMenuBar>
+#include <QMessageBox>
+#include <Q3PopupMenu>
+#include <QPushButton>
+#include <Q3ScrollView>
+#include <QSpinBox>
+#include <QStatusBar>
+#include <QStringList>
+#include <Q3TabDialog>
+#include <QTabWidget>
+#include <QContextMenuEvent>
+#include <QCloseEvent>
+#include <Q3GridLayout>
+#include <QMouseEvent>
+#include <Q3VBoxLayout>
 
 #include <map>
 #include <boost/scoped_ptr.hpp>
@@ -64,7 +65,7 @@ enum TILE_MODE_TYPE
 
 class EditorScrollView;
 
-class Editor: public QMainWindow
+class Editor: public Q3MainWindow
 {
 	//! Macro needed to use Qt's slots and signals.
 	Q_OBJECT
@@ -146,15 +147,15 @@ class Editor: public QMainWindow
 		void _SetEditLayer(LAYER_TYPE new_layer);		
 
 		//! This is used to represent the File menu.
-		QPopupMenu* _file_menu;
+		Q3PopupMenu* _file_menu;
 		//! This is used to represent the View menu.
-		QPopupMenu* _view_menu;
+		Q3PopupMenu* _view_menu;
 		//! This is used to represent the Tiles menu.
-		QPopupMenu* _tiles_menu;
+		Q3PopupMenu* _tiles_menu;
 		//! This is used to represent the Tiles menu.
-		QPopupMenu* _map_menu;
+		Q3PopupMenu* _map_menu;
 		//! This is used to represent the Help menu.
-		QPopupMenu* _help_menu;
+		Q3PopupMenu* _help_menu;
 
 		//! This is used to display status messages.
 		QStatusBar*       _stat_bar;
@@ -163,7 +164,7 @@ class Editor: public QMainWindow
 		//! Used to add scrollbars to the QGLWidget of the map.
 		EditorScrollView* _ed_scrollview;
 		//! Main window layout.
-		QBoxLayout*       _ed_layout;
+		Q3BoxLayout*       _ed_layout;
 		//! Needed for _ed_layout for it's children.
 		QWidget*          _ed_widget;
 
@@ -204,11 +205,11 @@ class NewMapDialog: public QDialog
 		//! Public accessor to get the map width from the width spinbox.
 		int GetWidth()  const { return  _width_sbox->value(); }
 		//! Public accessor to get the listview containing checkable tilesets.
-		QListView* GetTilesetListView() const { return _tileset_lview; }
+		Q3ListView* GetTilesetListView() const { return _tileset_lview; }
 
 	private:
 		//! A listview for showing all available tilesets.
-		QListView* _tileset_lview;
+		Q3ListView* _tileset_lview;
 		//! A spinbox for specifying the map's height.
 		QSpinBox* _height_sbox;
 		//! A spinbox for specifying the map's width.
@@ -222,16 +223,16 @@ class NewMapDialog: public QDialog
 		//! A pushbutton for okaying the new map dialog.
 		QPushButton* _ok_pbut;
 		//! A layout to manage all the labels, spinboxes, and listviews.
-		QGridLayout* _dia_layout;
+		Q3GridLayout* _dia_layout;
 }; // class NewMapDialog
 
 class MusicDialog: public QDialog
 {
 public:
-	MusicDialog(QWidget* parent, const QString& name, const std::string& selected_music);
+	MusicDialog(QWidget* parent, const QString& name, const QString& selected_music);
 	~MusicDialog();
 
-	std::string GetSelectedFile();
+	QString GetSelectedFile();
 private:
 	//! A pushbutton for canceling the new map dialog.
 	QPushButton* _cancel_pbut;
@@ -240,16 +241,16 @@ private:
 	//! Label telling you to select some music
 	QLabel* _select_label;
 	//! A layout to manage all the labels, spinboxes, and listviews.
-	QGridLayout* _dia_layout;
+	Q3GridLayout* _dia_layout;
 	//! List with all music files
-	QListView* _music_list;
+	Q3ListView* _music_list;
 
 	//! Puts music files in the QListView and selects the specified file.
-	//! \param selected 
-	void _PopulateMusicList(const std::string& selected);
+	//! \param selected_str - this file will be selected
+	void _PopulateMusicList(const QString& selected_str);
 }; // class MusicDialog
 
-class EditorScrollView: public QScrollView
+class EditorScrollView: public Q3ScrollView
 {
 	//! Macro needed to use Qt's slots and signals.
 	Q_OBJECT 
@@ -308,7 +309,7 @@ class EditorScrollView: public QScrollView
 		//! Mouse is at this tile index on the map.
 		int _tile_index;
 		//! Menu used on right-clicks of the mouse on the map.
-		QPopupMenu *_context_menu;
+		Q3PopupMenu *_context_menu;
 		//! A checkbox capable of toggling all the other walkable checkboxes in the
 		//! context menu.
 		QCheckBox *_allwalk_checkbox;
@@ -321,7 +322,7 @@ class EditorScrollView: public QScrollView
 		TileDatabase* _db;
 }; // class EditorScrollView
 
-class DatabaseDialog: public QTabDialog
+class DatabaseDialog: public Q3TabDialog
 {
 	//! Macro needed to use Qt's slots and signals.
 	Q_OBJECT 
@@ -347,7 +348,7 @@ class DatabaseDialog: public QTabDialog
 		//! Reads and saves the walkable checkboxes according to the current
 		//! selection of the QIconView tileset in the Properties tab.
 		//! \param item Selected item in the tileset to check walkability.
-		void _ProcessWalkability(QIconViewItem *item);
+		void _ProcessWalkability(Q3IconViewItem *item);
 		//! Uses a single checkbox to toggle the remaining walkable checkboxes.
 		//! \param on True if the single checkbox is on, False otherwise.
 		void _ToggleWalkCheckboxes(bool on);
@@ -357,17 +358,17 @@ class DatabaseDialog: public QTabDialog
 		//! Populates the tileset specified by one of the 2 PopulateTileset slots.
 		//! \param tileset Pointer to the tileset to draw.
 		//! \param name Name of the tileset to draw.
-		void _PopulateTilesetHelper(QIconView *tileset, const QString& name);
+		void _PopulateTilesetHelper(Q3IconView *tileset, const QString& name);
 		void _SwitchTileset(TileSet* new_set);
 		
 		//! Lists all available tiles to create new tileset in the Tilesets tab.
-		QIconView* _all_tiles; 
+		Q3IconView* _all_tiles; 
 		//! Lists tiles added to new/modified tileset in the Tilesets tab.
-		QIconView* _mod_tileset; 
+		Q3IconView* _mod_tileset; 
 		//! Previously selected tile in the tileset of the Properties tab.
-		QIconViewItem* _prev_ivitem; 
+		Q3IconViewItem* _prev_ivitem; 
 		//! Lists tiles in selected tileset in the Properties tab.
-		QIconView* _prop_tileset; 
+		Q3IconView* _prop_tileset; 
 		//! Stores index into _tile_properties of previously selected tile in
 		//! tileset in the Properties tab.
 		uint32 _tile_index;
@@ -384,7 +385,7 @@ class DatabaseDialog: public QTabDialog
 
 		TileDatabase* _db;
 		boost::scoped_ptr<TileSet> _selected_set;
-		std::string _selected_item;
+		QString _selected_item;
 		bool _set_modified;
 }; // class DatabaseDialog
 

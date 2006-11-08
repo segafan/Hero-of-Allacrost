@@ -13,7 +13,7 @@
  * \brief   Source file for editor's main() function: from here the editor is
  *          started and exited.
  *****************************************************************************/
-			   
+
 #include "editor.h"
 
 using namespace hoa_editor;
