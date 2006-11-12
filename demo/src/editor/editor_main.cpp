@@ -14,19 +14,40 @@
  *          started and exited.
  *****************************************************************************/
 
+#ifdef __MACH__
+	#include <unistd.h>
+	#include <string>
+#endif
+
 #include "editor.h"
 
 using namespace hoa_editor;
 
-hoa_script::GameScript *ScriptManager = NULL;
-
 int main(int argc, char **argv)
 {
+#ifndef _WIN32
+#ifndef __MACH__
+	chdir(DATADIR);
+#endif
+#endif
+
+#ifdef __MACH__
+	string path;
+	path = argv[0];
+	// remove the binary name
+	path.erase(path.find_last_of('/'));
+	// remove the MacOS directory
+	path.erase(path.find_last_of('/'));
+	// we are now in app/Contents
+	path.append ( "/Resources/" );
+	chdir ( path.c_str() );
+#endif
+
 	QApplication app(argc, argv);
 	Editor* editor = new Editor();
 	editor->setCaption("Hero of Allacrost Level Editor");
-	ScriptManager = hoa_script::GameScript::SingletonCreate();
-	ScriptManager->SingletonInitialize();
+	hoa_script::ScriptManager = hoa_script::GameScript::SingletonCreate();
+	hoa_script::ScriptManager->SingletonInitialize();
 	app.setMainWidget(editor);
 	editor->show();
 	return app.exec();

@@ -575,14 +575,12 @@ void Editor::_OpenTileDatabase()
 	} // make sure tile database directory exists
 
 	if (QFile::exists("dat/tilesets/tiles_database.lua"))
-	{
-		_tile_db=new TileDatabase("dat/tilesets/tiles_database.lua");
-	} 
+		_tile_db = new TileDatabase("dat/tilesets/tiles_database.lua");
 	else 
 	{
 		QMessageBox::warning(this, "Tile Database", "Tile database does not exist. Creating one now...");
 		_stat_bar->message("Please wait...");
-		_tile_db=new TileDatabase();
+		_tile_db = new TileDatabase();
 		_tile_db->Update("img/tiles");
 		_tile_db->Save("dat/tilesets/tiles_database.lua");
 		_stat_bar->message("Database successfully created!", 5000);
