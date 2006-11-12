@@ -38,6 +38,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;$(ProjectDir)\src&quot;;&quot;$(ProjectDir)\src\engine\video&quot;;&quot;$(ProjectDir)\src\editor&quot;;&quot;$(ProjectDir)\src\engine\audio&quot;;&quot;$(ProjectDir)\src\modes&quot;;&quot;$(ProjectDir)\src\engine&quot;;&quot;$(ProjectDir)\src\modes\battle&quot;;&quot;$(ProjectDir)\src\modes\boot&quot;;&quot;$(ProjectDir)\src\modes\map&quot;;&quot;$(ProjectDir)\src\modes\menu&quot;"
+				PreprocessorDefinitions="QT3_SUPPORT;QT_CLEAN_NAMESPACE;QT_NO_DEBUG;QT_GUI_LIB;QT_CORE_LIB;QT_SHARED"
 				RuntimeLibrary="2"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
@@ -55,7 +56,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="SDL.lib SDL_Net.lib SDL_TTF.lib SDLMain.lib qt-mt3.lib LuaBind.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib"
+				AdditionalDependencies="QtGui4.lib QtCore4.lib QtOpenGL4.lib Qt3Support4.lib SDL.lib SDL_Net.lib SDL_TTF.lib SDLMain.lib LuaBind_debug.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 			/>
@@ -112,6 +113,7 @@
 				FavorSizeOrSpeed="0"
 				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="&quot;$(ProjectDir)\src&quot;;&quot;$(ProjectDir)\src\engine\video&quot;;&quot;$(ProjectDir)\src\editor&quot;;&quot;$(ProjectDir)\src\engine\audio&quot;;&quot;$(ProjectDir)\src\modes&quot;;&quot;$(ProjectDir)\src\engine&quot;;&quot;$(ProjectDir)\src\modes\battle&quot;;&quot;$(ProjectDir)\src\modes\boot&quot;;&quot;$(ProjectDir)\src\modes\map&quot;;&quot;$(ProjectDir)\src\modes\menu&quot;"
+				PreprocessorDefinitions="QT3_SUPPORT;QT_CLEAN_NAMESPACE;QT_NO_DEBUG;QT_GUI_LIB;QT_CORE_LIB;QT_SHARED"
 				RuntimeLibrary="2"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
@@ -128,7 +130,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="SDL.lib SDL_Net.lib SDL_TTF.lib SDLMain.lib qt-mt3.lib LuaBind.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib"
+				AdditionalDependencies="QtGui4.lib QtCore4.lib QtOpenGL4.lib Qt3Support4.lib SDL.lib SDL_Net.lib SDL_TTF.lib SDLMain.lib LuaBind.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib"
 				IgnoreAllDefaultLibraries="false"
 				IgnoreDefaultLibraryNames=""
 				SubSystem="2"
