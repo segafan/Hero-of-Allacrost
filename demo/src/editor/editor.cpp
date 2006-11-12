@@ -96,6 +96,9 @@ Editor::Editor() : Q3MainWindow(0, 0, Qt::WDestructiveClose)
 	_ed_tabs = NULL;
 	setCentralWidget(_ed_widget);
 	resize(600, 400);
+
+	// Set the window icon
+	setWindowIcon(QIcon("img/logos/program_icon.bmp"));
 } // Editor constructor
 
 Editor::~Editor()
