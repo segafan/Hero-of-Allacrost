@@ -286,16 +286,30 @@ void GameInput::EventHandler() {
 			return;
 		}
 		// Check if the window was iconified/minimized or restored
-		else if (event.type == SDL_ACTIVEEVENT && (event.active.state & SDL_APPACTIVE)) {
-			if (event.active.gain == 0) { // Window was iconified/minimized
-				// Check if the game is in pause mode. Otherwise the player might put pause on,
-				// minimize the window and then the pause is off.
-				if (ModeManager->GetGameType() != MODE_MANAGER_PAUSE_MODE) {
+		else if (event.type == SDL_ACTIVEEVENT) {
+			if (event.active.state & SDL_APPACTIVE) {
+				if (event.active.gain == 0) { // Window was iconified/minimized
+					// Check if the game is in pause mode. Otherwise the player might put pause on,
+					// minimize the window and then the pause is off.
+					if (ModeManager->GetGameType() != MODE_MANAGER_PAUSE_MODE) {
+						TogglePause();
+					}
+				}
+				else if (ModeManager->GetGameType() == MODE_MANAGER_PAUSE_MODE) { // Window was restored
 					TogglePause();
 				}
 			}
-			else { // Window was restored
-				TogglePause();
+			else if (event.active.state & SDL_APPINPUTFOCUS) {
+				if (event.active.gain == 0) { // Window lost keyboard focus (another application was made active)
+					// Check if the game is in pause mode. Otherwise the player might put pause on,
+					// minimize the window and then the pause is off.
+					if (ModeManager->GetGameType() != MODE_MANAGER_PAUSE_MODE) {
+						TogglePause();
+					}
+				}
+				else if (ModeManager->GetGameType() == MODE_MANAGER_PAUSE_MODE) { // Window gain keyboard focus (not sure)
+					TogglePause();
+				}
 			}
 			break;
 		}
