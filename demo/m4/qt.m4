@@ -169,9 +169,9 @@ else
 fi
 
 dnl Check that moc is in path
-AC_CHECK_PROG(MOC, moc, moc)
+AC_CHECK_PROG(MOC, moc-qt4, moc-qt4)
 if test x$MOC = x ; then
-	AC_CHECK_PROG(MOC, moc-qt4, moc-qt4)
+	AC_CHECK_PROG(MOC, moc, moc)
 	if test x$MOC = x ; then
 		AC_MSG_ERROR([*** moc must be in path])
 	fi
