@@ -9,8 +9,8 @@
 
 /** ****************************************************************************
 *** \file    battle.h
-*** \author  Corey Hoffstein, visage@allacrost.org
 *** \author  Viljami Korhonen, mindflayer@allacrost.org
+*** \author  Corey Hoffstein, visage@allacrost.org
 *** \brief   Header file for battle mode interface.
 ***
 *** This code handles event processing, game state updates, and video frame
@@ -116,46 +116,53 @@ class BattleMode : public hoa_mode_manager::GameMode {
 	friend class private_battle::BattleCharacterActor;
 	friend class private_battle::BattleEnemyActor;
 	friend class private_battle::ScriptEvent;
-public:
-	static int32 MAX_PLAYER_CHARACTERS_IN_BATTLE;
-	static int32 MAX_ENEMY_CHARACTERS_IN_BATTLE;
 
+public:
 	BattleMode();
 	~BattleMode();
 
-	//! \brief Resets appropriate class members. Called whenever BootMode is made the active game mode.
+	/**
+	*** \brief Overloaded gamestate methods for the battle mode
+	**/
+	//@{
+	//! Resets appropriate class members. Called whenever BattleMode is made the active game mode.
 	void Reset();
-	//! \brief Wrapper function that calls different update functions depending on the battle state.
+	//! This method calls different update functions depending on the battle state.
 	void Update();
-	//! \brief Wrapper function that calls different draw functions depending on the battle state.
+	//! This method calls different draw functions depending on the battle state.
 	void Draw();
+	//@}
 
 	//! Are we performing an action
-	const bool _IsPerformingScript() const
+	bool _IsPerformingScript() const
 		{ return _performing_script; }
 
-	//! \brief Sets T/F whether an action is being performed
-	void SetPerformingScript(bool perform_script);
+	//! Sets whether an action is being performed or not
+	void SetPerformingScript(bool is_performing);
 
-	//! \brief Added a scripted event to the queue
+	//! Added a scripted event to the queue
 	void AddScriptEventToQueue(private_battle::ScriptEvent event)
 		{ _script_queue.push_back(event); }
-	//! \brief Remove all scripted events for an actor
+
+	//! Remove all scripted events for an actor
 	void RemoveScriptedEventsForActor(hoa_global::GlobalActor * actor);
 
-	//! \brief Returns all player actors
+	//! Returns all player actors
 	std::deque<private_battle::BattleCharacterActor*> ReturnCharacters() const
 		{ return _character_actors; }
+
 	//! Is the battle over?
-	const bool IsBattleOver() const
+	bool IsBattleOver() const
 		{ return _battle_over; }
+
 	//! Was the battle victorious?
-	const bool IsVictorious() const
+	bool IsVictorious() const
 		{ return _victorious_battle; }
 
-	//! \brief Victory stuff
+	//! Handle player victory
 	void PlayerVictory();
-	//! \brief Defeat stuff
+	
+	//! Handle player defeat
 	void PlayerDefeat();
 
 	uint32 GetNumberOfCharacterActors()
@@ -165,13 +172,15 @@ public:
 	int32 GetIndexOfFirstAliveEnemy();
 	int32 GetIndexOfFirstIdleCharacter();
 
-	//! \brief Return the player character at the deque location 'index'
-	private_battle::BattleCharacterActor *GetPlayerCharacterAt(uint32 index) const
-		{ return _character_actors[index]; }
-	private_battle::BattleEnemyActor* GetEnemyActorAt(uint32 index) const
-		{ return _enemy_actors[index]; }
+	//! Returns the player actor at the deque location 'index'
+	private_battle::BattleCharacterActor * GetPlayerCharacterAt(uint32 index) const
+		{ return _character_actors.at(index); }
 
-	//! \brief Returns the index of a player character
+	//! Returns the enemy actor at the deque location 'index'
+	private_battle::BattleEnemyActor * GetEnemyActorAt(uint32 index) const
+		{ return _enemy_actors.at(index); }
+
+	//! Returns the index of a player character
 	int32 IndexLocationOfPlayerCharacter(private_battle::BattleCharacterActor *const actor);
 
 	//! \brief Swap a character from _player_actors to _player_actors_in_battle
@@ -179,13 +188,13 @@ public:
 	void SwapCharacters(private_battle::BattleCharacterActor* actor_swap_out, private_battle::BattleCharacterActor* actor_swap_in);
 
 private:
-	////////////////////////////// PRIVATE MEMBERS ///////////////////////////////
-
-	//! Set to true when an actor is performing an action
+	//! Set to true whenever an actor (player or enemy) is performing an action
 	bool _performing_script;
-	//! Set to true when either party in the battle has expired
+
+	//! Set to true when either side of the battle is dead
 	bool _battle_over;
-	//! Set to true when the player has won the battle
+
+	//! Set to true if it was player who won the battle.
 	bool _victorious_battle;
 
 	/** \brief Container for all music to be played during the battle
@@ -194,9 +203,7 @@ private:
 	**/
 	std::vector<hoa_audio::MusicDescriptor> _battle_music;
 
-	/** \brief Container for various sounds that need to be played during the battle
-	*** 
-	**/
+	//! Container for various sounds that need to be played during the battle
 	std::vector<hoa_audio::SoundDescriptor> _battle_sounds;
 
 	//! \name Battle Background Data
@@ -355,11 +362,11 @@ private:
 	void _ShutDown();
 
 	//! \brief Returns the number of enemies that are still alive in the battle
-	const uint8 _NumberEnemiesAlive() const;
+	const uint32 _NumberEnemiesAlive() const;
 	/** \brief Returns the number of characters that are still alive in the battle
 	*** \note This function only counts the characters on the screen, not characters in the party reserves
 	**/
-	const uint8 _NumberCharactersAlive() const;
+	const uint32 _NumberCharactersAlive() const;
 
 	/** \brief Creates the action list menu depending upon which action type the player has chosen
 	***

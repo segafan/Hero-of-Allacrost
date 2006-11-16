@@ -9,8 +9,8 @@
 
 /** ****************************************************************************
 *** \file    battle.cpp
-*** \author  Corey Hoffstein, visage@allacrost.org
 *** \author  Viljami Korhonen, mindflayer@allacrost.org
+*** \author  Corey Hoffstein, visage@allacrost.org
 *** \brief   Source file for battle mode interface.
 *** ***************************************************************************/
 
@@ -50,7 +50,7 @@ bool BATTLE_DEBUG = false;
 
 namespace private_battle {
 
-BattleMode* current_battle = NULL;
+BattleMode * current_battle = NULL;
 
 ////////////////////////////////////////////////////////////////////////////////
 // SCRIPTEVENT CLASS
@@ -94,12 +94,10 @@ void ScriptEvent::RunScript() {
 
 } // namespace private battle
 
+
 ////////////////////////////////////////////////////////////////////////////////
 // BattleMode class -- Initialization and Destruction Code
 ////////////////////////////////////////////////////////////////////////////////
-
-int32 BattleMode::MAX_PLAYER_CHARACTERS_IN_BATTLE = 4;
-int32 BattleMode::MAX_ENEMY_CHARACTERS_IN_BATTLE  = 8;
 
 BattleMode::BattleMode() :
 	_performing_script(false),
@@ -207,16 +205,17 @@ BattleMode::~BattleMode() {
 	}
 
 	for (uint32 i = 0; i < _battle_music.size(); i++)
-		_battle_music[i].FreeMusic();
+		_battle_music.at(i).FreeMusic();
 
 	for (uint32 i = 0; i < _battle_sounds.size(); i++)
-		_battle_sounds[i].FreeSound();
+		_battle_sounds.at(i).FreeSound();
 
 	// Delete all character and enemy actors
 	for (deque<BattleCharacterActor*>::iterator i = _character_actors.begin(); i != _character_actors.end(); ++i) {
 		delete *i;
 	}
 	_character_actors.clear();
+
 	for (deque<BattleEnemyActor*>::iterator i = _enemy_actors.begin(); i != _enemy_actors.end(); ++i) {
 		delete *i;
 	}
@@ -328,9 +327,6 @@ void BattleMode::_CreateCharacterActors() {
 
 
 void BattleMode::_CreateEnemyActors() {
-	//StillImage frame; // used for populating the sprite_frames vector
-	//vector<StillImage> sprite_frames; // A vector to fill it with all four damage frames for each sprite
-	//BattleEnemyActor * enemy; // A pointer to the new enemy actor to add to the battle
 
 	while (_enemy_actors.size() == 0)
 	{
@@ -736,7 +732,7 @@ void BattleMode::_DrawBottomMenu() {
 	_selected_character->DrawPortrait();
 
 	// Draw the status information of all character actors
-	for (uint8 i = 0; i < _character_actors.size(); i++) {
+	for (uint32 i = 0; i < _character_actors.size(); i++) {
 		_character_actors[i]->DrawStatus();
 	}
 
@@ -755,7 +751,7 @@ void BattleMode::_DrawActionMenu() {
 	}
 
 	// Draw the action menu window
-	if (_cursor_state != CURSOR_IDLE && _action_menu_window) {
+	if (_cursor_state != CURSOR_IDLE && _action_menu_window != 0) {
 		_action_menu_window->Draw();
 	}
 
@@ -780,9 +776,9 @@ void BattleMode::_DrawDialogueMenu() {
 // BattleMode class -- Miscellaneous Code
 ////////////////////////////////////////////////////////////////////////////////
 
-const uint8 BattleMode::_NumberEnemiesAlive() const {
-	uint8 enemy_count = 0;
-	for (uint8 i = 0; i < _enemy_actors.size(); i++) {
+const uint32 BattleMode::_NumberEnemiesAlive() const {
+	uint32 enemy_count = 0;
+	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
 		if (_enemy_actors[i]->IsAlive()) {
 			enemy_count++;
 		}
@@ -792,9 +788,9 @@ const uint8 BattleMode::_NumberEnemiesAlive() const {
 
 
 
-const uint8 BattleMode::_NumberCharactersAlive() const {
-	uint8 character_count = 0;
-	for (uint8 i = 0; i < _character_actors.size(); i++) {
+const uint32 BattleMode::_NumberCharactersAlive() const {
+	uint32 character_count = 0;
+	for (uint32 i = 0; i < _character_actors.size(); i++) {
 		if (_character_actors[i]->IsAlive()) {
 			character_count++;
 		}
@@ -927,11 +923,11 @@ void BattleMode::_ConstructActionListMenu() {
 	}
 } // void BattleMode::_ConstructActionListMenu()
 
-//! Sets T/F whether an action is being performed
-void BattleMode::SetPerformingScript(bool AIsPerforming) {
+// Sets whether an action is being performed or not
+void BattleMode::SetPerformingScript(bool is_performing) {
 	
 	// Check if a script has just ended. Set the script to stop performing and pop the script from the front of the queue
-	if (AIsPerforming == false && _performing_script == true) {
+	if (is_performing == false && _performing_script == true) {
 
 		// Remove the first scripted event from the queue
 		// _script_queue.front().GetSource() is either BattleEnemyActor or BattleCharacterActor
@@ -946,7 +942,7 @@ void BattleMode::SetPerformingScript(bool AIsPerforming) {
 		_script_queue.pop_front();
 	}
 
-	_performing_script = AIsPerforming;
+	_performing_script = is_performing;
 }
 
 
@@ -966,7 +962,7 @@ void BattleMode::RemoveScriptedEventsForActor(hoa_global::GlobalActor * actor) {
 }
 
 
-
+// Handle player victory
 void BattleMode::PlayerVictory() {
 	if (BATTLE_DEBUG) cerr << "BATTLE: Player has won a battle!" << endl;
 
@@ -984,7 +980,7 @@ void BattleMode::PlayerVictory() {
 }
 
 
-
+// Handle player defeat
 void BattleMode::PlayerDefeat() {
 	if (BATTLE_DEBUG) cout << "Player was defeated in a battle!" << endl;
 	_ShutDown();
@@ -992,7 +988,6 @@ void BattleMode::PlayerDefeat() {
 	BootMode *BM = new BootMode();
 	ModeManager->Push(BM);
 }
-
 
 
 void BattleMode::SwapCharacters(BattleCharacterActor *AActorToRemove, BattleCharacterActor *AActorToAdd) {
