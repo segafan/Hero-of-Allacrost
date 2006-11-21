@@ -386,6 +386,7 @@ class DatabaseDialog: public Q3TabDialog
 		TileDatabase* _db;
 		boost::scoped_ptr<TileSet> _selected_set;
 		QString _selected_item;
+		//! True if the current tileset has been modified, false otherwise.
 		bool _set_modified;
 }; // class DatabaseDialog
 

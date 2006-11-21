@@ -21,6 +21,7 @@
 
 #include "editor.h"
 
+using namespace std;
 using namespace hoa_editor;
 
 int main(int argc, char **argv)

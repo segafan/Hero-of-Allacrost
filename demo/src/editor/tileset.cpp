@@ -130,11 +130,11 @@ void TileDatabase::Update(const QString& tile_dir_name)
 	}
 
 	// iterate through all files in the directory and add new ones
-	for(QStringList::const_iterator it = files.begin(); it != files.end(); it++)
+	for (QStringList::const_iterator it = files.begin(); it != files.end(); it++)
 	{
 		QString tile_file = *it;
 		// if it does not exist in the database yet, add it
-		if(_tiles.find(tile_file) == _tiles.end())
+		if (_tiles.find(tile_file) == _tiles.end())
 		{
 			DbTile new_tile(tile_file, 255);
 			_tiles.insert(std::pair<QString, DbTile> (tile_file, new_tile));
