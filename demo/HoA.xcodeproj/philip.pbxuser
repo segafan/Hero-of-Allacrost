@@ -1,11 +1,18 @@
 // !$*UTF8*$!
 {
 	4941A4A10AC1D76400D65B8E /* Project object */ = {
-		activeBuildConfigurationName = Release;
+		activeBuildConfigurationName = Debug;
 		activeExecutable = D4D1BA4A0B02B1DB0052BF1E /* Editor */;
 		activeTarget = D4D1BA480B02B1DB0052BF1E /* Editor */;
 		addToTargets = (
 			D4D1BA480B02B1DB0052BF1E /* Editor */,
+		);
+		breakpoints = (
+			D4F71FAC0B06BE2A00361DA9 /* editor.cpp:554 */,
+			D4F71FCF0B06C0EC00361DA9 /* qsystemtrayicon_mac.mm:346 */,
+			D4D6DB5B0B12845E002F33F2 /* tileset.cpp:102 */,
+			D4D6DB620B12852C002F33F2 /* editor.cpp:1078 */,
+			D4D6DBA50B12907D002F33F2 /* tileset.cpp:224 */,
 		);
 		breakpointsGroup = D404C6AB0B02F27D00827A19 /* XCBreakpointsBucket */;
 		codeSenseManager = D43082580AF9831800A5173A /* Code sense */;
@@ -14,6 +21,28 @@
 			D4D1BA4A0B02B1DB0052BF1E /* Editor */,
 		);
 		perUserDictionary = {
+			"PBXConfiguration.PBXBreakpointsDataSource.v1:1CA1AED706398EBD00589147" = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXBreakpointsDataSource_BreakpointID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					20,
+					210,
+					20,
+					110,
+					109,
+					20,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXBreakpointsDataSource_ActionID,
+					PBXBreakpointsDataSource_TypeID,
+					PBXBreakpointsDataSource_BreakpointID,
+					PBXBreakpointsDataSource_UseID,
+					PBXBreakpointsDataSource_LocationID,
+					PBXBreakpointsDataSource_ConditionID,
+					PBXBreakpointsDataSource_ContinueID,
+				);
+			};
 			PBXConfiguration.PBXFileTableDataSource3.PBXErrorsWarningsDataSource = {
 				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
 				PBXFileTableDataSourceColumnSortingKey = PBXErrorsWarningsDataSource_LocationID;
@@ -126,8 +155,8 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 184964783;
-			PBXWorkspaceStateSaveDate = 184964783;
+			PBXPerProjectTemplateStateSaveDate = 185760642;
+			PBXWorkspaceStateSaveDate = 185760642;
 		};
 		sourceControlManager = D43082570AF9831800A5173A /* Source Control */;
 		userBuildSettings = {
@@ -142,8 +171,8 @@
 	4941A68B0AC1D86400D65B8E /* main.cpp */ = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {758, 3430}}";
-			sepNavSelRange = "{0, 0}";
-			sepNavVisRect = "{{0, 1006}, {711, 429}}";
+			sepNavSelRange = "{1386, 60}";
+			sepNavVisRect = "{{0, 390}, {711, 429}}";
 			sepNavWindowFrame = "{{107, 131}, {750, 558}}";
 		};
 	};
@@ -198,6 +227,11 @@
 		isa = XCBreakpointsBucket;
 		name = "Project Breakpoints";
 		objects = (
+			D4F71FAC0B06BE2A00361DA9 /* editor.cpp:554 */,
+			D4F71FCF0B06C0EC00361DA9 /* qsystemtrayicon_mac.mm:346 */,
+			D4D6DB5B0B12845E002F33F2 /* tileset.cpp:102 */,
+			D4D6DB620B12852C002F33F2 /* editor.cpp:1078 */,
+			D4D6DBA50B12907D002F33F2 /* tileset.cpp:224 */,
 		);
 	};
 	D404C6E90B02FD3E00827A19 /* editor.moc.cpp */ = {
@@ -271,6 +305,7 @@
 		customDataFormattersEnabled = 1;
 		debuggerPlugin = GDBDebugging;
 		disassemblyDisplayState = 0;
+		dylibVariantSuffix = "";
 		enableDebugStr = 1;
 		environmentEntries = (
 		);
@@ -278,14 +313,66 @@
 		executableUserSymbolLevel = 0;
 		libgmallocEnabled = 0;
 		name = Editor;
+		savedGlobals = {
+		};
 		sourceDirectories = (
 		);
+		variableFormatDictionary = {
+			$cs = 1;
+			$ds = 1;
+			$eax = 1;
+			$ebp = 1;
+			$ebx = 1;
+			$ecx = 1;
+			$edi = 1;
+			$edx = 1;
+			$eflags = 1;
+			$eip = 1;
+			$es = 1;
+			$esi = 1;
+			$esp = 1;
+			$gs = 1;
+			$mm0 = 1;
+			$mm1 = 1;
+			$mm2 = 1;
+			$mm3 = 1;
+			$mm4 = 1;
+			$mm5 = 1;
+			$mm6 = 1;
+			$mm7 = 1;
+			$mxcsr = 1;
+			$ss = 1;
+			$xmm0 = 1;
+			$xmm1 = 1;
+			$xmm2 = 1;
+			$xmm3 = 1;
+			$xmm4 = 1;
+			$xmm5 = 1;
+			$xmm6 = 1;
+			$xmm7 = 1;
+		};
+	};
+	D4D1BA650B02B27F0052BF1E /* editor.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {950, 18788}}";
+			sepNavSelRange = "{6037, 0}";
+			sepNavVisRect = "{{0, 2166}, {638, 219}}";
+			sepNavWindowFrame = "{{15, 215}, {750, 558}}";
+		};
+	};
+	D4D1BA660B02B27F0052BF1E /* editor.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {711, 5558}}";
+			sepNavSelRange = "{12279, 0}";
+			sepNavVisRect = "{{0, 5042}, {711, 429}}";
+			sepNavWindowFrame = "{{61, 173}, {750, 558}}";
+		};
 	};
 	D4D1BA670B02B27F0052BF1E /* editor_main.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {711, 476}}";
-			sepNavSelRange = "{0, 0}";
-			sepNavVisRect = "{{0, 0}, {711, 429}}";
+			sepNavIntBoundsRect = "{{0, 0}, {711, 784}}";
+			sepNavSelRange = "{1654, 0}";
+			sepNavVisRect = "{{0, 355}, {711, 429}}";
 			sepNavWindowFrame = "{{84, 152}, {750, 558}}";
 		};
 	};
@@ -295,5 +382,102 @@
 			sepNavSelRange = "{936, 20}";
 			sepNavVisRect = "{{0, 208}, {459, 186}}";
 		};
+	};
+	D4D1BA6C0B02B27F0052BF1E /* tileset.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {711, 3682}}";
+			sepNavSelRange = "{4048, 0}";
+			sepNavVisRect = "{{0, 1991}, {711, 429}}";
+			sepNavWindowFrame = "{{38, 194}, {750, 558}}";
+		};
+	};
+	D4D1BA6D0B02B27F0052BF1E /* tileset.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {711, 1764}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRect = "{{0, 1279}, {711, 429}}";
+			sepNavWindowFrame = "{{15, 215}, {750, 558}}";
+		};
+	};
+	D4D6DB5B0B12845E002F33F2 /* tileset.cpp:102 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		delayBeforeContinue = 0;
+		fileReference = D4D1BA6C0B02B27F0052BF1E /* tileset.cpp */;
+		functionName = "TileDatabase::TileDatabase()";
+		hitCount = 1;
+		lineNumber = 102;
+		location = Editor;
+		modificationTime = 185773813.607008;
+		state = 1;
+	};
+	D4D6DB620B12852C002F33F2 /* editor.cpp:1078 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		delayBeforeContinue = 0;
+		fileReference = D4D1BA650B02B27F0052BF1E /* editor.cpp */;
+		functionName = "DatabaseDialog::DatabaseDialog()";
+		hitCount = 1;
+		lineNumber = 1078;
+		location = Editor;
+		modificationTime = 185773813.607047;
+		state = 1;
+	};
+	D4D6DBA50B12907D002F33F2 /* tileset.cpp:224 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		delayBeforeContinue = 0;
+		fileReference = D4D1BA6C0B02B27F0052BF1E /* tileset.cpp */;
+		functionName = "TileSet::GetTiles()";
+		hitCount = 1;
+		lineNumber = 224;
+		location = Editor;
+		modificationTime = 185773813.607054;
+		state = 1;
+	};
+	D4F71FAC0B06BE2A00361DA9 /* editor.cpp:554 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		delayBeforeContinue = 0;
+		fileReference = D4D1BA650B02B27F0052BF1E /* editor.cpp */;
+		functionName = "Editor::_OpenTileDatabase()";
+		hitCount = 1;
+		lineNumber = 554;
+		location = Editor;
+		modificationTime = 185773813.606949;
+		state = 1;
+	};
+	D4F71FCD0B06C0EC00361DA9 /* qsystemtrayicon_mac.mm */ = {
+		isa = PBXFileReference;
+		lastKnownFileType = sourcecode.cpp.objcpp;
+		name = qsystemtrayicon_mac.mm;
+		path = "/Users/philip/Desktop/qt-mac-opensource-src-4.2.0/src/gui/util/qsystemtrayicon_mac.mm";
+		sourceTree = "<absolute>";
+	};
+	D4F71FCF0B06C0EC00361DA9 /* qsystemtrayicon_mac.mm:346 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		delayBeforeContinue = 0;
+		fileReference = D4F71FCD0B06C0EC00361DA9 /* qsystemtrayicon_mac.mm */;
+		functionName = "-menuNeedsUpdate:";
+		hitCount = 1;
+		lineNumber = 346;
+		modificationTime = 185773852.822664;
+		state = 1;
 	};
 }
