@@ -44,6 +44,11 @@
 namespace hoa_video
 {
 
+
+// Forward declarations
+class StillImage;
+class AnimatedImage;
+
 namespace private_video
 {
 
@@ -63,6 +68,9 @@ public:
 
 	void * pixels;
 };
+
+
+
 
 /*!***************************************************************************
  *  \brief represents a single image. Internally it's a reference to a
@@ -292,6 +300,55 @@ public:
 	//! give AnimatedImage direct access
 	friend class AnimatedImage;
 };
+
+
+/*!***************************************************************************
+ *  \brief Information for a multi image (used for load in batch mode)
+ *****************************************************************************/
+
+class MultiImage
+{
+public:
+	MultiImage (AnimatedImage& id, const std::string& filename, const uint32 rows, const uint32 cols, const float width=0.0f, const float height=0.0f, const bool grayscale=false) :
+		_cols (cols),
+		_rows (rows),
+		_filename (filename),
+		_width (width),
+		_height (height),
+		_grayscale (grayscale),
+		_animated_image (&id),
+		_still_images (0)
+	{
+	}
+
+	MultiImage (std::vector <StillImage>& id, const std::string& filename, const uint32 rows, const uint32 cols, const float width=0.0f, const float height=0.0f, const bool grayscale=false) :
+		_cols (cols),
+		_rows (rows),
+		_filename (filename),
+		_width (width),
+		_height (height),
+		_grayscale (grayscale),
+		_animated_image (0),
+		_still_images (&id)
+	{
+	}
+
+	uint32 _cols;		//!< Number of columns.
+	uint32 _rows;		//!< Number of rows.
+
+	float _width;	//!< Width of the image.
+	float _height;	//!< Height of the image.
+
+	std::string _filename;	//!< Name of the image file.
+	
+	//! track whether this multi-image is grayscale or not
+	bool _grayscale;
+
+	// Just one of this structures will be used, depending if the image is a multi-image o an animated image
+	AnimatedImage* _animated_image;			//!< Pointer to an animated image, where the cut image will be loaded
+	std::vector <StillImage>* _still_images;	//!< Pointer to an array of still images, where the cut image will be loaded
+};
+
 
 }
 
@@ -780,6 +837,7 @@ private:
 	//! give GameVideo direct access
 	friend class GameVideo;
 };
+
 
 
 }  // namespace hoa_video

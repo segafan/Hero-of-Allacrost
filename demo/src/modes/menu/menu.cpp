@@ -560,6 +560,21 @@ void MenuMode::Update()
 ////////////////////////////////////////////////////////////////////////////////
 
 void MenuMode::Draw() {
+	// Draw the saved screen background
+	// For that, set the system coordinates to the size of the window (same with the save-screen)
+	int32 width = VideoManager->GetWidth();
+	int32 height = VideoManager->GetHeight();
+	VideoManager->SetCoordSys (0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height));
+
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
+	Color grayed(0.35f, 0.35f, 0.35f, 1.0f);
+	VideoManager->Move(0, 0);
+	VideoManager->DrawImage(_saved_screen);
+
+	// Restore the Coordinate system (that one is menu mode coodinate system)
+	VideoManager->SetCoordSys (0.0f, 1024.0f, 768.0f, 0.0f);
+
+
 	uint32 drawwindow;
 
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
@@ -569,9 +584,6 @@ void MenuMode::Draw() {
 
 	// Set the text colour to white
 	VideoManager->SetTextColor(Color(1.0f, 1.0f, 1.0f, 1.0f));
-	
-	// Draw the saved screen as the menu background
-	VideoManager->DrawImage(_saved_screen);
 	
 	//FIX ME:  Test
 	_DrawBottomMenu();
