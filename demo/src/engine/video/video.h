@@ -759,6 +759,11 @@ public:
 	bool LoadImageGrayScale(ImageDescriptor &id);
 
 
+	bool LoadMultiImage(std::vector<StillImage> &id, const std::string filename, const uint32 rows, const uint32 cols, const float width, const float height);
+	
+	bool LoadAnimatedImage(AnimatedImage &id, const std::string filename, const uint32 rows, const uint32 cols, const float width, const float height);
+
+
 	/*!
 	 *  \brief captures the contents of the screen and saves it to an image
 	 *         descriptor
@@ -1375,6 +1380,9 @@ private:
 
 	//! vector of images in a batch which are to be loaded
 	std::vector <StillImage *>    _batchLoadImages;
+
+	//! vector of multimages in a bacth which are to be loaded
+	std::vector <private_video::MultiImage>    _batchLoadMultiImages;
 	
 	//! STL map containing all the images currently being managed by the video engine	
 	std::map    <std::string, private_video::Image*>   _images;
@@ -1607,6 +1615,10 @@ private:
 	 */	
 	bool _LoadImageHelper(StillImage &id, bool grayscale = false);
 
+
+	bool _LoadMultiImage (private_video::MultiImage &id);
+
+
 	/*!
 	 *  \brief Load raw image data from a file
 	 *
@@ -1740,3 +1752,4 @@ private:
 }   // namespace hoa_video
 
 #endif // !_VIDEO_HEADER_
+

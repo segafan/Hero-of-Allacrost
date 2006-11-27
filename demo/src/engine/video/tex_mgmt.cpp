@@ -49,6 +49,33 @@ bool IsPowerOfTwo(uint32 x)
 }
 
 
+//!	\brief Converts an integer to string
+void IntegerToString(std::string &s, const int32 num)
+{
+	static char digits[10] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+
+	if (num == 0)
+	{
+		s = "0";
+		return;
+	}
+
+	s.clear ();
+	uint32 value = abs(num);
+
+	while (value > 0)
+	{
+		s = s + digits[value%10];
+		value /= 10;
+	}
+
+	if (num < 0)
+	{
+		s = s + "-";
+	}
+}
+
+
 //-----------------------------------------------------------------------------
 // LoadImage: loads an image (static image or animated image) and returns true
 //            on success
@@ -176,6 +203,218 @@ bool GameVideo::_LoadImage(StillImage &id, bool grayscale)
 	return success;
 }
 
+
+
+bool GameVideo::LoadMultiImage(std::vector<StillImage> &id, const std::string filename, const uint32 rows, const uint32 cols, const float width, const float height)
+{
+	bool success = true;
+
+	private_video::MultiImage image (id, filename, rows, cols, width, height, false);
+
+
+	if (_batchLoading)
+	{
+		_batchLoadMultiImages.push_back (image);
+	}
+	else
+	{
+		success = _LoadMultiImage (image);
+	}
+
+	return success;
+}
+
+	
+bool GameVideo::LoadAnimatedImage(AnimatedImage &id, const std::string filename, const uint32 rows, const uint32 cols, const float width, const float height)
+{
+	bool success = true;
+
+	std::vector <StillImage> v;
+	private_video::MultiImage image (v, filename, rows, cols, width, height, false);
+
+	if (_batchLoading)
+	{
+		_batchLoadMultiImages.push_back (image);
+	}
+	else
+	{
+		success = _LoadMultiImage (image);
+	}
+
+	// Attach the images to the frames of the animated image
+	if (success)
+	{
+		for (uint32 i=0; i<rows*cols; i++)
+		{
+			id.AddFrame (v[i], i*5);
+		}
+	}
+
+	return success;
+}
+
+
+bool GameVideo::_LoadMultiImage (private_video::MultiImage &id)
+{
+	std::string filename = id._filename;
+	uint32 rows = id._rows;
+	uint32 cols = id._cols;
+	bool grayscale = id._grayscale;
+	std::vector <StillImage>& images = *id._still_images;
+
+	if (filename.empty())
+	{
+		cerr << "Unexpected error loading multi image" << endl;
+		return false;
+	}
+
+	std::string image_name;
+	std::string s;
+	uint32 current_image;
+	uint32 x, y;
+
+	images.resize (rows * cols);
+
+	// Check if we have loaded all the sub-images
+	for (x=0; x<rows; x++)
+	{
+		for (y=0; y<rows; y++)
+		{
+			image_name = filename;
+			IntegerToString(s,x);
+			image_name += "_X" + s;
+			IntegerToString(s,y);
+			image_name += "_Y" + s;
+			image_name += (grayscale ? string("_grayscale") : string(""));
+		
+			// If this image exists, don't do anything else
+			if(_images.find(image_name) == _images.end())
+			{
+				break;
+			}
+		}
+	}
+
+	// If not all the images are loaded, then load the image
+	private_video::ImageLoadInfo loadInfo;
+	if (x*y != rows*cols)
+	{
+		if(!_LoadRawImage(filename, loadInfo, grayscale))
+			return false;
+	}
+
+	for (x=0; x<rows; x++)
+	{
+		for (y=0; y<cols; y++)
+		{
+			current_image = x*cols + y;
+			image_name = filename;
+			IntegerToString(s,x);
+			image_name += "_X" + s;
+			IntegerToString(s,y);
+			image_name += "_Y" + s;
+			image_name += (grayscale ? string("_grayscale") : string(""));
+
+			// If the image exists, take the information from it
+			if(_images.find(image_name) != _images.end())
+			{
+				images.at(current_image)._elements.clear();
+		
+				Image *img = _images[images.at(current_image)._filename];
+		
+				if(!img)
+				{
+					if(VIDEO_DEBUG)
+						cerr << "VIDEO ERROR: got a NULL Image from images map in LoadImage()" << endl;
+					return false;
+				}
+
+				if(img->refCount == 0)
+				{
+					// if ref count is zero, it means this image was freed, but
+					// not removed, so restore it
+					if(!img->texSheet->RestoreImage(img))
+					{
+						return false;
+					}
+				}
+			
+				++img->refCount;
+		
+				if(images.at(current_image)._width < 0.0f)
+					images.at(current_image)._width = (float) img->width;
+				if(images.at(current_image)._height < 0.0f)
+					images.at(current_image)._height = (float) img->height;
+		
+				ImageElement element(img, 0, 0, images.at(current_image)._width, images.at(current_image)._height, 0.0f, 0.0f, 1.0f, 1.0f, images.at(current_image)._color);
+				images.at(current_image)._elements.push_back(element);
+			}
+			else	// If the image is not present, take the piece from the loaded image
+			{
+				images.at(current_image)._filename = image_name;
+				images.at(current_image)._elements.clear();
+				images.at(current_image)._animated = false;
+				images.at(current_image)._grayscale = grayscale;
+				images.at(current_image)._isStatic = false;
+				if (id._height == 0.0f)
+					images.at(current_image)._height = (float)((x == rows-1 && loadInfo.height%rows) ? loadInfo.height-(x*loadInfo.height/rows) : loadInfo.height/rows);
+				else
+					images.at(current_image)._height = id._height;
+				if (id._width == 0.0f)
+					images.at(current_image)._width = (float)((y == cols-1 && loadInfo.width%cols) ? loadInfo.width-(y*loadInfo.width/cols) : loadInfo.width/cols);
+				else
+					images.at(current_image)._width = id._width;
+
+				private_video::ImageLoadInfo info;
+				info.width = ((y == cols-1 && loadInfo.width%cols) ? loadInfo.width-(y*loadInfo.width/cols) : loadInfo.width/cols);
+				info.height = ((x == rows-1 && loadInfo.height%rows) ? loadInfo.height-(x*loadInfo.height/rows) : loadInfo.height/rows);
+				info.pixels = new uint8 [info.width*info.height*4];
+				for (int i=0; i<info.height; i++)
+				{
+					memcpy ((uint8*)info.pixels+4*info.width*i, (uint8*)loadInfo.pixels+(((x*loadInfo.height/rows)+i)*loadInfo.width+y*loadInfo.width/cols)*4, 4*info.width);
+				}
+				
+				// create an Image structure and store it our std::map of images
+				Image *newImage = new Image(image_name, info.width, info.height, grayscale);
+
+				// try to insert the image in a texture sheet
+				TexSheet *sheet = _InsertImageInTexSheet(newImage, info, images.at(current_image)._isStatic);
+				
+				if(!sheet)
+				{
+					// this should never happen, unless we run out of memory or there
+					// is a bug in the _InsertImageInTexSheet() function
+		
+					if(VIDEO_DEBUG)
+					cerr << "VIDEO_DEBUG: GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
+		
+					free(info.pixels);
+					return false;
+				}
+				
+				newImage->refCount = 1;
+				
+				// store the image in our std::map
+				_images[image_name] = newImage;
+
+				// store the new image element
+				ImageElement element(newImage, 0, 0, images.at(current_image)._width, images.at(current_image)._height, 0.0f, 0.0f, 1.0f, 1.0f, images.at(current_image)._color);
+				images.at(current_image)._elements.push_back(element);
+
+				// finally, delete the buffer used to hold the pixel data
+			}
+		}
+	}
+
+	// Free loaded image, in case we used it
+	if (loadInfo.pixels)
+		free (loadInfo.pixels);
+
+	return true;
+}
+
+
+
 //-----------------------------------------------------------------------------
 // BeginImageLoadBatch: enables "batching mode" so when you load an image, it
 //                    isn't loaded immediately but rather placed into a vector
@@ -185,6 +424,7 @@ bool GameVideo::BeginImageLoadBatch()
 {
 	_batchLoading = true;
 	_batchLoadImages.clear();  // this should already be clear, but just in case...
+	_batchLoadMultiImages.clear();
 
 	return true;
 }
@@ -221,7 +461,25 @@ bool GameVideo::EndImageLoadBatch()
 		++iImage;
 	}
 
-	_batchLoadImages.clear();	
+	_batchLoadImages.clear();
+
+
+
+	// go through vector of multi-images waiting to be loaded and load them
+
+	std::vector<MultiImage>::iterator iMultiImage = _batchLoadMultiImages.begin();
+	std::vector<MultiImage>::iterator iMultiImageEnd = _batchLoadMultiImages.end();
+	
+	while(iMultiImage != iMultiImageEnd)
+	{		
+		if(!_LoadMultiImage(*iMultiImage))
+			success = false;
+		
+		++iMultiImage;
+	}
+
+	_batchLoadMultiImages.clear();
+
 	
 	return success;
 }
@@ -2063,3 +2321,4 @@ bool TexSheet::SaveImage(Image *img)
 
 
 }  // namespace hoa_video
+
