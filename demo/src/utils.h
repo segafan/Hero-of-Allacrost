@@ -18,19 +18,20 @@
 ***
 *** \note Use the following macros for OS-dependent code.
 ***   - Windows    #ifdef _WIN32
-***   - Mac OS X   #ifdef __APPLE__
-***   - Linux      ???
+***   - Mac OS X   #ifdef __MACH__
+***   - OpenDarwin #ifdef __MACH__
+***   - Linux      #ifdef __linux__
 ***   - Solaris    #ifdef SOLARIS
 ***   - BeOS       #ifdef __BEOS__
 ***
 *** \note Use the following macros for compiler-dependent code.
 ***   - MSVC       #ifdef _MSC_VER
-***   - g++        ???
+***   - g++        #ifdef __GNUC__
 ***
 *** \note Use the following statements to determine system endianess.
-***   - Big endian      SDL_BYTEORDER == SDL_BIG_ENDIAN
-***   - Little endian   SDL_BYTEORDER == SDL_LITTLE_ENDIAN
-*** 
+***   - Big endian      if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
+***   - Little endian   if (SDL_BYTEORDER == SDL_LITTLE_ENDIAN)
+***
 *** \note Use the following integer types throughout the entire Allacrost code.
 ***   - int32
 ***   - uint32

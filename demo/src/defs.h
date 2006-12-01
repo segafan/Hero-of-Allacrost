@@ -191,7 +191,6 @@ namespace hoa_scene {
 // Utils declarations, see utils.h/cpp
 namespace hoa_utils {
 	extern bool UTILS_DEBUG;
-
 	class ustring;
 }
 

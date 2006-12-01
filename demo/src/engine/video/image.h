@@ -310,9 +310,10 @@ class MultiImage
 {
 public:
 	MultiImage (AnimatedImage& id, const std::string& filename, const uint32 rows, const uint32 cols, const float width=0.0f, const float height=0.0f, const bool grayscale=false) :
-		_cols (cols),
-		_rows (rows),
 		_filename (filename),
+		_rows (rows),
+		_cols (cols),
+		
 		_width (width),
 		_height (height),
 		_grayscale (grayscale),
@@ -322,9 +323,9 @@ public:
 	}
 
 	MultiImage (std::vector <StillImage>& id, const std::string& filename, const uint32 rows, const uint32 cols, const float width=0.0f, const float height=0.0f, const bool grayscale=false) :
-		_cols (cols),
-		_rows (rows),
 		_filename (filename),
+		_rows (rows),
+		_cols (cols),
 		_width (width),
 		_height (height),
 		_grayscale (grayscale),
@@ -333,13 +334,13 @@ public:
 	{
 	}
 
-	uint32 _cols;		//!< Number of columns.
+	std::string _filename;	//!< Name of the image file.
+
 	uint32 _rows;		//!< Number of rows.
+	uint32 _cols;		//!< Number of columns.
 
 	float _width;	//!< Width of the image.
 	float _height;	//!< Height of the image.
-
-	std::string _filename;	//!< Name of the image file.
 	
 	//! track whether this multi-image is grayscale or not
 	bool _grayscale;

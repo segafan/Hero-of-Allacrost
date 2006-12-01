@@ -61,26 +61,28 @@ using namespace hoa_map;
 *** \note <b>Do not attempt to call or otherwise reference this function.</b>
 *** It is for use in the application's main() function only.
 ***
-*** Deleteing the singleton class objects is equivalent to deletion of all data structures.
-*** This is because all other classes and data structures in Allacrost should be managed
-*** by these singletons either directly, or in directly. For example, BattleMode is a
+*** Deleteing the singleton class objects will free all of the memory that the game uses.
+*** This is because all other classes and data structures in Allacrost are managed
+*** by these singletons either directly or in directly. For example, BattleMode is a
 *** class object that is managed by the GameModeManager class, and thus the GameModeManager
 *** destructor will also invoke the BattleMode destructor (as well as the destructors of any
 *** other game modes that exist).
 **/
 void QuitAllacrost() {
-	// NOTE: Even if the singleton objects do not exist when this function is called, invoking
-	// the static Destroy() function will do no harm (it checks that the object exists before deleting it).
+	// NOTE: Even if the singleton objects do not exist when this function is called, invoking the
+	// static Destroy() singleton function will do no harm (it checks that the object exists before deleting it).
 
-	// Delete the mode manager first so that all game modes free their data
+	// Delete the mode manager first so that all game modes free their resources
 	GameModeManager::SingletonDestroy();
+
 	// Delete the global manager second to remove all object references corresponding to other engine subsystems
 	GameGlobal::SingletonDestroy();
+
 	// Delete all of the reamining independent engine components
 	GameAudio::SingletonDestroy();
 	GameInput::SingletonDestroy();
-	GameSystem::SingletonDestroy();
 	GameScript::SingletonDestroy();
+	GameSystem::SingletonDestroy();
 	GameVideo::SingletonDestroy();
 }
 
@@ -94,7 +96,7 @@ int32 main(int32 argc, char *argv[]) {
 #endif
 #endif
 	
-	// When the program exits, first the QuitAllacrost() function, followed by SDL_Quit()
+	// When the program exits, first the QuitAllacrost() function is called, followed by SDL_Quit()
 	atexit(SDL_Quit);
 	atexit(QuitAllacrost);
 
@@ -216,11 +218,10 @@ int32 main(int32 argc, char *argv[]) {
 	SDL_EventState(SDL_SYSWMEVENT, SDL_IGNORE);
 	SDL_EventState(SDL_VIDEOEXPOSE, SDL_IGNORE);
 	SDL_EventState(SDL_USEREVENT, SDL_IGNORE);
-	// NOTE: SDL_ActiveEvent reports mouse focus, input focus, iconified status. Should we disable it???
 
 	SystemManager->InitializeTimers();
 
-	// This is the main loop for the game. The loop iterates once every frame drawn to the screen.
+	// This is the main loop for the game. The loop iterates once for every frame drawn to the screen.
 	while (SystemManager->NotDone()) {
 		// 1) Render the scene
 		VideoManager->Clear();

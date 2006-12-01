@@ -243,11 +243,11 @@ void GameInput::TogglePause(){
 
 // Handles all of the event processing for the game.
 void GameInput::EventHandler() {
-	SDL_Event event;	// Holds the game event
+	SDL_Event event; // Holds the game event
 
 	// Reset all of the press and release flags so that they don't get detected twice.
-	_any_key_press		  = false;
-	_any_key_release	  = false;
+	_any_key_press   = false;
+	_any_key_release = false;
 
 	_up_press             = false;
 	_up_release           = false;

@@ -35,14 +35,6 @@ extern bool SYSTEM_DEBUG;
 //! An internal namespace to be used only within the system code.
 namespace private_system {
 
-/** \brief An array containing two-character language identifier strings that the game supports
-***
-**/
-// const std::string[] SUPPORTED_LANGUAGUES = {
-// 	"en", // American English
-// 	"de", // German
-// 	"sp"  // Spanish
-// }; // SUPPORTED_LANGUAGES
 
 } // namespace private_system
 

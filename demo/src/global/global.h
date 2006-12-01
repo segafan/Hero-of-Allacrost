@@ -37,8 +37,6 @@ extern GameGlobal *GlobalManager;
 //! Determines whether the code in the hoa_global namespace should print debug statements or not.
 extern bool GLOBAL_DEBUG;
 
-// enum TESTI {HP_POTION = 991};
-
 /** ****************************************************************************
 *** \brief Retains all the state information about the player's active game
 ***
@@ -92,7 +90,7 @@ public:
 	//@}
 	
 	//! \brief Gets all of the characters in the active party
-	GlobalCharacterParty * GetActiveParty()
+	GlobalCharacterParty* GetActiveParty()
 		{ return &_active_party; }
 
 private:
