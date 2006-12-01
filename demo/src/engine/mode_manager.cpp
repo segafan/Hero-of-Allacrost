@@ -144,7 +144,7 @@ GameMode* GameModeManager::GetTop() {
 void GameModeManager::Update() {
 	// If a Push() or Pop() function was called, we need to adjust the state of the game stack.
 	if (_state_change == true) {
-		// Pop however many game modes we need to from the stop of thes tack
+		// Pop however many game modes we need to from the stop of the stack
 		while (_pop_count != 0) {
 			if (_game_stack.empty()) {
 				if (MODE_MANAGER_DEBUG) {
@@ -169,12 +169,12 @@ void GameModeManager::Update() {
 			SingletonInitialize();
 		}
 
-		// Call the newly active game mode's "AtTop()" function to re-initialize class members
+		// Call the newly active game mode's Reset() function to re-initialize the game mode
 		_game_stack.back()->Reset();
 
 		// Reset the state change variable
 		_state_change = false;
-	}
+	} // if (_state_change == true)
 
 	// Call the Update function on the top stack mode (the active game mode)
 	_game_stack.back()->Update();

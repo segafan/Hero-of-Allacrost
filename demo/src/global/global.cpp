@@ -64,6 +64,9 @@ bool GameGlobal::SingletonInitialize() {
 
 void GameGlobal::AddCharacter(GlobalCharacter *ch) {
 	_characters[ch->GetID()] = ch;
+// 	if (_active_party.GetPartySize() < 4) {
+// 		_active_party.AddCharacter(ch);
+// 	}
 }
 
 

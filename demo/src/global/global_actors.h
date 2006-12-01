@@ -361,7 +361,7 @@ protected:
 	void _CalculateDefenseRatings();
 	/** \brief Calculates the evade rating for each attack point
 	*** This function is called whenever the evade member is modified. It updates the evade
-	*** ratings of all attack poitns that belong to the actor.
+	*** ratings of all attack points that belong to the actor.
 	**/
 	void _CalculateEvadeRatings();
 }; // class GlobalActor
