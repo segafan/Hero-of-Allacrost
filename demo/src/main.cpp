@@ -27,8 +27,8 @@
 
 #include <ctime>
 #ifdef __MACH__
-#include <unistd.h>
-#include <string>
+	#include <unistd.h>
+	#include <string>
 #endif
 
 #include "utils.h"
@@ -90,32 +90,29 @@ void QuitAllacrost() {
 
 // Every great game begins with a single function :)
 int32 main(int32 argc, char *argv[]) {
-#ifndef _WIN32
-#ifndef __MACH__
-	chdir(DATADIR);
-#endif
-#endif
-	
 	// When the program exits, first the QuitAllacrost() function is called, followed by SDL_Quit()
 	atexit(SDL_Quit);
 	atexit(QuitAllacrost);
 
-#ifdef __MACH__
-	string path;
-	path = argv[0];
-	// remove the binary name
-	path.erase(path.find_last_of('/'));
-	// remove the MacOS directory
-	path.erase(path.find_last_of('/'));
-	// we are now in app/Contents
-	path.append ( "/Resources/" );
-	chdir ( path.c_str() );
-#endif
+	// Change to the directory where the Allacrost data is stored
+	#ifdef __MACH__
+		string path;
+		path = argv[0];
+		// Remove the binary name
+		path.erase(path.find_last_of('/'));
+		// Remove the MacOS directory
+		path.erase(path.find_last_of('/'));
+		// Now the program should be in app/Contents
+		path.append ("/Resources/");
+		chdir(path.c_str());
+	#elsif __linux__
+		chdir(DATADIR);
+	#endif
 
-	// Initialize the random number generator
+	// Initialize the random number generator (note: 'unsigned int' is a required usage in this case)
 	srand(static_cast<unsigned int>(time(NULL)));
 
-	// This variable is set by the ParseProgramOptions function
+	// This variable will be set by the ParseProgramOptions function
 	int32 return_code;
 
 	// Parse command lines and exit out of the game if needed
@@ -208,7 +205,7 @@ int32 main(int32 argc, char *argv[]) {
 	// Hide the mouse cursor since we don't use or acknowledge mouse input from the user
 	SDL_ShowCursor(SDL_DISABLE);
 
-	// Enable unicode for multilingual keyboard support
+	// Enabled for multilingual keyboard support
 	SDL_EnableUNICODE(1);
 
 	// Ignore the events that we don't care about so they never appear in the event queue

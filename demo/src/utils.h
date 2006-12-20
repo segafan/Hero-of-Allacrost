@@ -66,14 +66,11 @@
 #ifdef _WIN32
 	// Even though Allacrost is platform independent, OpenGL on Windows requires windows.h to be included
 	#include <windows.h>
-#endif // #ifdef _WIN32
-
-#include <SDL/SDL.h>
-
-#ifdef _WIN32
 	// Case-insensitive string compare is called stricmp in Windows and strcasecmp everywhere else
 	#define strcasecmp stricmp
 #endif
+
+#include <SDL/SDL.h>
 
 /** \name Allacrost Integer Types
 *** \brief These are the integer types used throughout the Allacrost source code. 
@@ -157,9 +154,7 @@ public:
 		{ return _str[pos]; }
 
 private:
-	/** \brief The structure containing the actual unicode string data. 
-	*** 
-	**/
+	//! \brief The structure containing the unicode string data.
 	std::vector<uint16> _str;
 }; // class ustring
 
@@ -300,7 +295,6 @@ std::string MakeStandardString(const hoa_utils::ustring& text);
 template <typename T, size_t N>
 size_t NumberElementsArray(T (&)[N])
 	{ return N; }
-	
 
 //! \name Random Variable Genreator Fucntions
 //@{

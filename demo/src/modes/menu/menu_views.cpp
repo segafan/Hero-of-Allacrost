@@ -369,7 +369,7 @@ void MiniCharacterSelectWindow::Update()
 			selected->DecrementCount(1);
 		}
 		else {
-			GlobalManager->RemoveFromInventory(selected);
+			GlobalManager->RemoveFromInventory(selected->GetID());
 			this->Activate(false);
 			this->Hide();
 		}
@@ -738,7 +738,7 @@ void InventoryWindow::Update() {
 
 		/*if (event == VIDEO_OPTION_CONFIRM) {
 			//TODO Use Item
-			/*GlobalItem *item = (GlobalItem*)(GlobalManager->GetInventory()[item_selected]);
+			GlobalItem *item = (GlobalItem*)(GlobalManager->GetInventory()[item_selected]);
 			if ((item->GetUseCase() & GLOBAL_HP_RECOVERY_ITEM) || (item->GetUseCase() & GLOBAL_SP_RECOVERY_ITEM))
 			{
 				ApplyItem();
@@ -852,7 +852,7 @@ void InventoryWindow::ApplyItem() {
 	}
 	else {
 		//GlobalManager->RemoveItemFromInventory(HP_POTION);
-		GlobalManager->RemoveFromInventory(selected);
+		GlobalManager->RemoveFromInventory(selected->GetID());
 		//_char_select_active = false;
 		if (GlobalManager->GetInventory().size() > 0) {
 			//_inventory_active = true;
