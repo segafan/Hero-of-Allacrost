@@ -83,30 +83,62 @@ GlobalCharacter* GameGlobal::GetCharacter(uint32 id) {
 }
 
 // ****************************************************************************
-// ***** GameGlobal class - Item and Inventory Manipulations
+// ***** GameGlobal class - Inventory Manipulations
 // ****************************************************************************
 
-void GameGlobal::AddItemToInventory(GlobalObject *obj) {
-	// Add object to the inventory if it is not already there
-	if (_inventory.count(obj->GetID()) == 0) {
-		_inventory[obj->GetID()] = obj;
+void GameGlobal::AddToInventory(GlobalObject *obj) {
+	// If the object isn't already in the inventory, insert it
+	if (_inventory.find(obj->GetID()) == _inventory.end()) {
+		_inventory.insert(make_pair(obj->GetID(), obj));
 	}
+
 	// Otherwise increment the count of the object instance already in the inventory
 	else {
 		_inventory[obj->GetID()]->IncrementCount(obj->GetCount());
+		// Delete the object parameter since it is no longer valid
+		delete(obj);
 	}
-}
+} // void GameGlobal::AddToInventory(GlobalObject *obj)
 
 
 
-void GameGlobal::RemoveFromInventory(GlobalObject *obj) {
-	if (_inventory.count(obj->GetID()) != 0) {
-		cerr << "GLOBAL ERROR: requested to remove an inventory item that was not in the inventory" << endl;
+void GameGlobal::RemoveFromInventory(uint32 item_id) {
+	if (_inventory.find(item_id) != _inventory.end()) {
+		// Delete the object pointer in the inventory and then remove it from the map
+		delete _inventory[item_id];
+		_inventory.erase(item_id);
+	}
+} // void GameGlobal::RemoveFromInventory(uint32 item_id)
+
+
+
+void GameGlobal::IncrementObjectCount(uint32 item_id, uint32 count) {
+	// Do nothing if the item does not exist in the inventory
+	if (_inventory.find(item_id) == _inventory.end()) {
+		return;
 	}
 
-	// Delete the object pointer in the inventory and then remove it from the map
-	delete _inventory[obj->GetID()];
-	_inventory.erase(obj->GetID());
-}
+	_inventory[item_id]->IncrementCount(count);
+} // void GameGlobal::IncrementObjectCount(uint32 item_id, uint32 count)
+
+
+
+void GameGlobal::DecrementObjectCount(uint32 item_id, uint32 count) {
+	// Do nothing if the item does not exist in the inventory
+	if (_inventory.find(item_id) == _inventory.end()) {
+		return;
+	}
+
+	// Remove the object from the inventory if the count argument is greater than the number of objects
+	if (count >= _inventory[item_id]->GetCount()) {
+		delete _inventory[item_id];
+		_inventory.erase(item_id);
+	}
+
+	// Otherwise, simply decrement the number of objects
+	else {
+		_inventory[item_id]->DecrementCount(count);
+	}
+} // void GameGlobal::DecrementObjectCount(uint32 item_id, uint32 count)
 
 } // namespace hoa_global

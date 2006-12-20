@@ -56,6 +56,13 @@ class GameGlobal {
 public:
 	SINGLETON_METHODS(GameGlobal);
 
+	/** \brief Deletes all data stored within the GameGlobal class object
+	*** This function is meant to be called when the user quits the current game instance
+	*** and returns to boot mode. It will delete all character, inventory, and other data
+	*** relevant to the current game.
+	**/
+	void ClearAllData();
+
 	/** \brief Adds a new character to the party.
 	*** \param *ch A pointer to the GlobalCharacter object to add to the party.
 	**/
@@ -83,13 +90,58 @@ public:
 
 	//! \name Inventory Manipulation Functions
 	//@{
+	//! \todo return an iterator to the inventory, not the inventory itself
 	std::map<uint32, GlobalObject*> GetInventory() const
 		{ return _inventory; }
-	void AddItemToInventory(GlobalObject *obj);
-	void RemoveFromInventory(GlobalObject *obj);
+
+	/** \brief Adds a new item to the inventory
+	*** \param *obj A pointer to the new object to add
+	*** 
+	*** If the item already exists in the inventory, then instead the GlobalObject#_count member is used to
+	*** increment the count of the stored item. When this is the case, the object parameter is deleted, thus
+	*** one should never attempt to reference the object pointer after passing it into this function.
+	***
+	*** \note If the GlobalObject#_count member of *obj is zero, this function will immediately return and
+	*** do nothing.
+	**/
+	void AddToInventory(GlobalObject *obj);
+
+	/** \brief Removes an item from the inventory
+	*** \param item_id The integer identifier of the item to remove
+	*** 
+	*** If the item is not in the inventory, the function will do nothing. Note that this function 
+	***
+	*** \note This function removes the item regardless of what the GlobalObject#_count member is set to.
+	*** If you want to remove only a certain number of instances of the item, use the function
+	*** GameGlobal#DecrementObjectCount.
+	**/
+	void RemoveFromInventory(uint32 item_id);
+
+	/** \brief Increments the number (count) of an object in the inventory
+	*** \param item_id The integer identifier of the item that will have its count incremented
+	*** \param count The amount to increase the object's count by
+	***
+	*** If the item does not exist in the inventory, this function will do nothing. If the count parameter
+	*** is set to zero, no change will take place. Overflow conditions are not checked.
+	***
+	*** \note The callee can not assume that the function call succeeded, but rather has to check this themselves.
+	**/
+	void IncrementObjectCount(uint32 item_id, uint32 count);
+
+	/** \brief Decrements the number (count) of an object in the inventory
+	*** \param item_id The integer identifier of the item that will have its count decremented
+	*** \param count The amount to decrease the object's count by
+	***
+	*** If the item does not exist in the inventory, this function will do nothing. If the count parameter
+	*** is set to zero, no change will take place. If the count parameter is greater than or equal to the
+	*** current count of the object, the object will be removed from the inventory.
+	***
+	*** \note The callee can not assume that the function call succeeded, but rather has to check this themselves.
+	**/
+	void DecrementObjectCount(uint32 item_id, uint32 count);
 	//@}
 	
-	//! \brief Gets all of the characters in the active party
+	//! \brief Returns a pointer to the active party
 	GlobalCharacterParty* GetActiveParty()
 		{ return &_active_party; }
 
@@ -99,10 +151,11 @@ private:
 	uint32 _funds;
 
 	/** \brief A map containing all characters that the player has discovered
-	*** This map contains all characters that the player has met with, regardless of whether or not they are in the party.
+	*** This map contains all characters that the player has met with, regardless of whether or not they are in the active party.
 	*** The map key is the character's unique ID number.
 	**/
 	std::map<uint32, GlobalCharacter*> _characters;
+
 	/** \brief The entire inventory of the party
 	*** This inventory stores all items, weapons, armor, etc. for the entire party in a map. The map key is the unique ID
 	*** number for the object, which is duplicated in the GlobalObject class itself. The objects in this inventory have a
