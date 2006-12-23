@@ -81,7 +81,7 @@ bool ParseProgramOptions(int32 &return_code, int32 argc, char **argv) {
 			return_code = 0;
 			return false;
 		}
-		else if (options[i] == "-V" || options[i] == "--check-ver") {
+		else if (options[i] == "-V" || options[i] == "--version") {
 			if (IsLatestVersion())
 				cout << "This is the latest version of Allacrost" << endl;
 			else
@@ -155,7 +155,7 @@ bool EnableDebugging(string vars) {
 			hoa_audio::AUDIO_DEBUG                  = true;
 			hoa_battle::BATTLE_DEBUG                = true;
 			hoa_boot::BOOT_DEBUG                    = true;
-			hoa_script::SCRIPT_DEBUG                    = true;
+			hoa_script::SCRIPT_DEBUG                = true;
 			hoa_mode_manager::MODE_MANAGER_DEBUG    = true;
 			hoa_input::INPUT_DEBUG                  = true;
 			hoa_system::SYSTEM_DEBUG                = true;

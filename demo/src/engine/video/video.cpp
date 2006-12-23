@@ -552,23 +552,16 @@ done:
 
 bool GameVideo::ApplySettings()
 {
-	if(_target == VIDEO_TARGET_QT_WIDGET)
-	{
-		_width      = _temp_width;
-		_height     = _temp_height;
-		_fullscreen = _temp_fullscreen;		
-		
-		return true;
-	}
-	else if(_target == VIDEO_TARGET_SDL_WINDOW)
-	{
+	// Used by the game Hero of Allacrost, an SDL application
+	if (_target == VIDEO_TARGET_SDL_WINDOW) {
 		// Losing GL context, so unload images first
 		UnloadTextures();
 
 		int32 flags = SDL_OPENGL;
 		
-		if(_temp_fullscreen)
+		if (_temp_fullscreen == true) {
 			flags |= SDL_FULLSCREEN;
+		}
 
 		SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 		SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
@@ -577,8 +570,7 @@ bool GameVideo::ApplySettings()
 		SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-		if (!SDL_SetVideoMode(_temp_width, _temp_height, 0, flags)) 
-		{	
+		if (!SDL_SetVideoMode(_temp_width, _temp_height, 0, flags)) {
 		// RGB values of 1 for each and 8 for depth seemed to be sufficient.
 		// 565 and 16 here because it works with them on this computer. 
 			SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5); 
@@ -586,21 +578,21 @@ bool GameVideo::ApplySettings()
 			SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
 			SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
 			SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0);
-			if (!SDL_SetVideoMode(_temp_width, _temp_height, 0, flags)){ 
-				if(VIDEO_DEBUG)
-					cerr << "VIDEO ERROR: SDL_SetVideoMode() failed in ApplySettings()!" << endl;
 
+			if (!SDL_SetVideoMode(_temp_width, _temp_height, 0, flags)) {
+				if (VIDEO_DEBUG) {
+					cerr << "VIDEO ERROR: SDL_SetVideoMode() failed with error: " << SDL_GetError() << endl;
+				}
 				_temp_fullscreen = _fullscreen;
 				_temp_width      = _width;
 				_temp_height     = _height;
 
-				if(_width > 0)   // quick test to see if we already had a valid video mode
-				{
-					ReloadTextures();					
+				if (_width > 0) { // Test to see if we already had a valid video mode
+					ReloadTextures();
 				}
-				return false;		
-			   }
-		} 
+				return false;
+			}
+		}
 
 		_width      = _temp_width;
 		_height     = _temp_height;
@@ -609,6 +601,16 @@ bool GameVideo::ApplySettings()
 		ReloadTextures();
 		
 		EnableFog(_fogColor, _fogIntensity);
+		
+		return true;
+	} // if (_target == VIDEO_TARGET_SDL_WINDOW)
+
+	// Used by the Allacrost editor, which uses QT4
+	else if (_target == VIDEO_TARGET_QT_WIDGET)
+	{
+		_width      = _temp_width;
+		_height     = _temp_height;
+		_fullscreen = _temp_fullscreen;
 		
 		return true;
 	}
@@ -818,9 +820,9 @@ bool GameVideo::ToggleFullscreen()
 
 bool GameVideo::SetResolution(int32 width, int32 height)
 {
-	if(width <= 0 || height <= 0)
+	if (width <= 0 || height <= 0)
 	{
-		if(VIDEO_DEBUG)
+		if (VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: invalid width and/or height passed to SetResolution!" << endl;
 		return false;
 	}

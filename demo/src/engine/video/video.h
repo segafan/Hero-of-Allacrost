@@ -17,8 +17,7 @@
  * \note This code uses the SDL_ttf 2.0 extension library. The documentation
  *       for it may be found here: http://jcatki.no-ip.org/SDL_ttf
  *
- * \note This code uses the DevIL library, v.1.6.7. This library can be found
- *       at http://openil.sourceforge.net
+ * \note This code uses the libpng and libjpeg libraries.
  *
  * \note Full documentation for video engine can be found at:
  *       http://www.allacrost.org/staff/user/roos/video.html

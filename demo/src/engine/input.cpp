@@ -287,30 +287,35 @@ void GameInput::EventHandler() {
 		}
 		// Check if the window was iconified/minimized or restored
 		else if (event.type == SDL_ACTIVEEVENT) {
-			if (event.active.state & SDL_APPACTIVE) {
-				if (event.active.gain == 0) { // Window was iconified/minimized
-					// Check if the game is in pause mode. Otherwise the player might put pause on,
-					// minimize the window and then the pause is off.
-					if (ModeManager->GetGameType() != MODE_MANAGER_PAUSE_MODE) {
-						TogglePause();
-					}
-				}
-				else if (ModeManager->GetGameType() == MODE_MANAGER_PAUSE_MODE) { // Window was restored
-					TogglePause();
-				}
-			}
-			else if (event.active.state & SDL_APPINPUTFOCUS) {
-				if (event.active.gain == 0) { // Window lost keyboard focus (another application was made active)
-					// Check if the game is in pause mode. Otherwise the player might put pause on,
-					// minimize the window and then the pause is off.
-					if (ModeManager->GetGameType() != MODE_MANAGER_PAUSE_MODE) {
-						TogglePause();
-					}
-				}
-				else if (ModeManager->GetGameType() == MODE_MANAGER_PAUSE_MODE) { // Window gain keyboard focus (not sure)
-					TogglePause();
-				}
-			}
+			// TEMP: pausing the game on a context switch between another application proved to
+			// be rather annoying. The code which did this is commented out below. I think it would
+			// be better if instead the application yielded for a certain amount of time when the
+			// application looses context.
+			
+// 			if (event.active.state & SDL_APPACTIVE) {
+// 				if (event.active.gain == 0) { // Window was iconified/minimized
+// 					// Check if the game is in pause mode. Otherwise the player might put pause on,
+// 					// minimize the window and then the pause is off.
+// 					if (ModeManager->GetGameType() != MODE_MANAGER_PAUSE_MODE) {
+// 						TogglePause();
+// 					}
+// 				}
+// 				else if (ModeManager->GetGameType() == MODE_MANAGER_PAUSE_MODE) { // Window was restored
+// 					TogglePause();
+// 				}
+// 			}
+// 			else if (event.active.state & SDL_APPINPUTFOCUS) {
+// 				if (event.active.gain == 0) { // Window lost keyboard focus (another application was made active)
+// 					// Check if the game is in pause mode. Otherwise the player might put pause on,
+// 					// minimize the window and then the pause is off.
+// 					if (ModeManager->GetGameType() != MODE_MANAGER_PAUSE_MODE) {
+// 						TogglePause();
+// 					}
+// 				}
+// 				else if (ModeManager->GetGameType() == MODE_MANAGER_PAUSE_MODE) { // Window gain keyboard focus (not sure)
+// 					TogglePause();
+// 				}
+// 			}
 			break;
 		}
 		else if (event.type == SDL_KEYUP || event.type == SDL_KEYDOWN) {
