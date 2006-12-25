@@ -80,9 +80,12 @@ SpriteDialogue::SpriteDialogue() {
 
 SpriteDialogue::~SpriteDialogue() {
 	if (MAP_DEBUG) cout << "MAP: SpriteDialogue destructor invoked" << endl;
-	
-	if (speaking_action != NULL)
+
+	if (speaking_action)
+	{
 		delete (speaking_action);
+		speaking_action = 0;
+	}
 }
 
 void SpriteDialogue::BindToLua()

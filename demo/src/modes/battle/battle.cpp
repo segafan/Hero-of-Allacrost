@@ -56,7 +56,7 @@ BattleMode * current_battle = NULL;
 // SCRIPTEVENT CLASS
 ////////////////////////////////////////////////////////////////////////////////
 
-ScriptEvent::ScriptEvent(hoa_global::GlobalActor * source, std::deque<hoa_global::GlobalActor*> targets, const std::string & script_name) :
+ScriptEvent::ScriptEvent(hoa_global::GlobalActor * source, std::deque<IBattleActor*> targets, const std::string & script_name) :
 	_script_name(script_name),
 	_source(source),
 	_targets(targets)
@@ -74,7 +74,11 @@ ScriptEvent::~ScriptEvent()
 void ScriptEvent::RunScript() {
 	// TEMP: do basic damage to the actors
 	for (uint8 i = 0; i < _targets.size(); i++) {
-		// TODO: DEAL DAMAGE! _targets[i]->TEMP_Deal_Damage(GaussianRandomValue(12, 2.0f));
+		try {
+		IBattleActor * actor = _targets[i];
+		actor->TakeDamage(GaussianRandomValue(12, 2.0f));
+		}
+		catch(std::bad_cast e) {}
 
 		// TODO: Do this better way! 
 		if (MakeStandardString(this->GetSource()->GetName()) == "Spider")
@@ -608,7 +612,7 @@ void BattleMode::_UpdateAttackPointSelection() {
 	vector<GlobalAttackPoint*>global_attack_points = e->GetAttackPoints();
 
 	if (InputManager->ConfirmPress()) {
-		_selected_actor_arguments.push_back(dynamic_cast<GlobalActor*>(GetEnemyActorAt(_argument_actor_index)));
+		_selected_actor_arguments.push_back(dynamic_cast<IBattleActor*>(GetEnemyActorAt(_argument_actor_index)));
 		if (_selected_actor_arguments.size() == _necessary_selections) {
 			AddScriptEventToQueue(ScriptEvent(_selected_character, _selected_actor_arguments, "sword_swipe"));
 			_selected_character->SetQueuedToPerform(true);
@@ -931,14 +935,14 @@ void BattleMode::SetPerformingScript(bool is_performing) {
 
 		// Remove the first scripted event from the queue
 		// _script_queue.front().GetSource() is either BattleEnemyActor or BattleCharacterActor
-		try {
-			BattleEnemyActor * source = dynamic_cast<BattleEnemyActor*>(_script_queue.front().GetSource());
-			source->SetQueuedToPerform(false);
-		}
-		catch(std::bad_cast e) {
-			BattleCharacterActor * source = dynamic_cast<BattleCharacterActor*>(_script_queue.front().GetSource());
-			source->SetQueuedToPerform(false);
-		}
+		BattleEnemyActor * source1 = dynamic_cast<BattleEnemyActor*>(_script_queue.front().GetSource());
+		if (source1)
+			source1->SetQueuedToPerform(false);
+
+		BattleCharacterActor * source2 = dynamic_cast<BattleCharacterActor*>(_script_queue.front().GetSource());
+		if (source2)
+			source2->SetQueuedToPerform(false);
+
 		_script_queue.pop_front();
 	}
 
