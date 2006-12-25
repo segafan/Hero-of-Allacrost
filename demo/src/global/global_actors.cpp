@@ -164,6 +164,8 @@ GlobalEnemy::GlobalEnemy(const std::string & file_name) :
 	_growth_strength = static_cast<float>(read_data.ReadInt("growth_strength"));
 	_growth_intelligence = static_cast<float>(read_data.ReadInt("growth_intelligence"));
 	_growth_agility = static_cast<float>(read_data.ReadInt("growth_agility"));
+	_max_hit_points = _growth_hit_points;
+	_max_skill_points = _growth_skill_points;
 		
 	int32 num_maps = read_data.ReadInt("number_of_maps");
 	for (int32 i = 1; i <= num_maps; i++) {

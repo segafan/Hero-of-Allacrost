@@ -123,6 +123,7 @@ namespace hoa_battle {
 
 	namespace private_battle {
 		class ActorEffect;
+		class IBattleActor;
 		class BattleActor;
 		class BattleCharacterActor;
 		class BattleEnemyActor;

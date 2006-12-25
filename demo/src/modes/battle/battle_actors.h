@@ -96,9 +96,30 @@ private:
 
 
 /** ****************************************************************************
+*** \brief This is an interface class for all the battle actors (eg. the player and the monsters)
+***
+*** \note This class is used because we no longer need try-catch blocks when converting
+*** pointers from GlobalActor to either BattleCharacterActor or BattleEnemyActor.
+*** Of course it helps to keep things a bit more generic and maintainable as well. ;)
+*** ***************************************************************************/
+class IBattleActor
+{
+public:
+	IBattleActor() {}
+	virtual ~IBattleActor() {}
+
+	//! Gives a specific amount of damage for the object
+	virtual void TakeDamage(uint32 damage) = 0;
+
+	//! Sets queued to perform
+	virtual void SetQueuedToPerform(bool QueuedToPerform) = 0;
+};
+
+
+/** ****************************************************************************
 *** \brief Represents the player-controlled character in the battle
 *** ***************************************************************************/
-class BattleCharacterActor : public hoa_global::GlobalCharacter {
+class BattleCharacterActor : public hoa_global::GlobalCharacter, public IBattleActor {
 public:
 	BattleCharacterActor(GlobalCharacter * character, float XLocation, float YLocation);
 
@@ -115,6 +136,9 @@ public:
 
 	//! Draws the character's status information
 	void DrawStatus();
+
+	//! Gives a specific amount of damage for the character
+	void TakeDamage(uint32 damage);
 
 	//! Is the character queued to attack?
 	bool IsQueuedToPerform() const
@@ -184,7 +208,7 @@ private:
 ***
 *** This class is a wrapper around a GlobalEnemy object.
 *** ***************************************************************************/
-class BattleEnemyActor : public hoa_global::GlobalEnemy {
+class BattleEnemyActor : public hoa_global::GlobalEnemy, public IBattleActor {
 public:
 	BattleEnemyActor(const std::string & filename, float XLocation, float YLocation);
 
@@ -198,6 +222,9 @@ public:
 
 	//! Draws the enemy's status information
 	void DrawStatus();
+
+	//! Gives a specific amount of damage for the enemy
+	void TakeDamage(uint32 damage);
 
 	//! Is the monster attacking right now
 	bool IsAttacking() const;

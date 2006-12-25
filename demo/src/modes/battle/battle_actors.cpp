@@ -53,6 +53,7 @@ _total_time_damaged(0),
 _damage_dealt(0),
 _is_queued_to_perform(false)
 {
+	SetHitPoints(character->GetHitPoints());
 }
 
 
@@ -187,6 +188,22 @@ void BattleCharacterActor::DrawStatus() {
 }
 
 
+// Gives a specific amount of damage for the character
+void BattleCharacterActor::TakeDamage(uint32 damage)
+{
+	_total_time_damaged = 1;
+	_damage_dealt = damage;
+	if (damage >= GetHitPoints()) // Was it a killing blow?
+	{
+		SetHitPoints(0);
+		current_battle->RemoveScriptedEventsForActor(this);
+	}
+	else {
+		SetHitPoints(GetHitPoints() - damage);
+	}
+}
+
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // EnemyActor class
@@ -227,11 +244,11 @@ void BattleEnemyActor::Update() {
 
 	if ( last_attack > next_attack && !IsQueuedToPerform() && IsAlive()) {
 		//we can perform another attack
-		std::deque<GlobalActor*> final_targets;
+		std::deque<IBattleActor*> final_targets;
 		std::deque<BattleCharacterActor*> targets = current_battle->ReturnCharacters();
 
 		for (uint8 i = 0; i < targets.size(); i++) {
-			final_targets.push_back(dynamic_cast<GlobalActor*>(targets[i]));
+			final_targets.push_back(dynamic_cast<IBattleActor*>(targets[i]));
 		}
 
 		// okay, we can perform another attack.  set us up as queued to perform.
@@ -349,6 +366,22 @@ void BattleEnemyActor::DrawStatus() {
 // 		VideoManager->DrawImage(_effects[i].image);
 // 		VideoManager->MoveRel(25, 0);
 // 	}
+}
+
+
+// Gives a specific amount of damage for the enemy
+void BattleEnemyActor::TakeDamage(uint32 damage)
+{
+	_total_time_damaged = 1;
+	_damage_dealt = damage;
+	if (damage >= GetHitPoints()) // Was it a killing blow?
+	{
+		SetHitPoints(0);
+		current_battle->RemoveScriptedEventsForActor(this);
+	}
+	else {
+		SetHitPoints(GetHitPoints() - damage);
+	}
 }
 
 

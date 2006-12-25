@@ -83,7 +83,7 @@ enum CURSOR_STATE {
 *** ***************************************************************************/
 class ScriptEvent {
 public:
-	ScriptEvent(hoa_global::GlobalActor * source, std::deque<hoa_global::GlobalActor*> targets, const std::string & script_name);
+	ScriptEvent(hoa_global::GlobalActor * source, std::deque<IBattleActor*> targets, const std::string & script_name);
 
 	~ScriptEvent();
 
@@ -101,7 +101,7 @@ private:
 	//! The actor whom is initiating this script
 	hoa_global::GlobalActor * _source;
 	//! The targets of the script
-	std::deque<hoa_global::GlobalActor *> _targets;
+	std::deque<IBattleActor *> _targets;
 };
 
 } // namespace private_battle
@@ -177,7 +177,7 @@ public:
 		{ return _character_actors.at(index); }
 
 	//! Returns the enemy actor at the deque location 'index'
-	private_battle::BattleEnemyActor * GetEnemyActorAt(uint32 index) const
+	private_battle::BattleEnemyActor * GetEnemyActorAt(uint32 index)
 		{ return _enemy_actors.at(index); }
 
 	//! Returns the index of a player character
@@ -279,7 +279,7 @@ private:
 	//! Argument selector
 	int32 _argument_actor_index;
 	//! The actors we have selected as arguments
-	std::deque<hoa_global::GlobalActor*> _selected_actor_arguments;
+	std::deque<private_battle::IBattleActor*> _selected_actor_arguments;
 	//@}
 
 	//! \name Battle GUI Objects and Images
