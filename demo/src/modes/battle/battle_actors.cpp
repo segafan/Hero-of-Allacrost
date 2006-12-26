@@ -53,7 +53,6 @@ _total_time_damaged(0),
 _damage_dealt(0),
 _is_queued_to_perform(false)
 {
-	SetHitPoints(character->GetHitPoints());
 }
 
 
@@ -64,7 +63,7 @@ BattleCharacterActor::~BattleCharacterActor() {
 
 // Updates the state of the character. Must be called every frame!
 void BattleCharacterActor::Update() {
-	if (!IsAlive()) {
+	if (GetActor()->IsAlive() == false) {
 		current_battle->RemoveScriptedEventsForActor(this);
 		}
 	global_character_->RetrieveBattleAnimation("idle")->Update();
@@ -75,7 +74,7 @@ void BattleCharacterActor::Update() {
 void BattleCharacterActor::DrawSprite() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 	
-	if (IsAlive()) {
+	if (GetActor()->IsAlive()) {
 		// Draw the actor selector image if this character is currently selected
 		if (this == current_battle->_selected_character && current_battle->_cursor_state != CURSOR_IDLE) {
 			VideoManager->Move(_x_location - 20.0f, _y_location - 20.0f);
@@ -111,9 +110,9 @@ void BattleCharacterActor::DrawPortrait() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 	VideoManager->Move(48, 9);
 
-	float hp_percent =  static_cast<float>(GetHitPoints()) / static_cast<float>(GetMaxHitPoints());
+	float hp_percent =  static_cast<float>(GetActor()->GetHitPoints()) / static_cast<float>(GetActor()->GetMaxHitPoints());
 
-	if (GetHitPoints() == 0) {
+	if (GetActor()->GetHitPoints() == 0) {
 	  VideoManager->DrawImage(portrait_frames[4]);
 	}
 	// The blend alpha will range from 1.0 to 0.0 in the following calculations
@@ -164,7 +163,7 @@ void BattleCharacterActor::DrawStatus() {
 	// Draw the character's name
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 	VideoManager->Move(225.0f, 90.0f + y_offset);
- 	VideoManager->DrawText(GetName());
+ 	VideoManager->DrawText(GetActor()->GetName());
 
 	// TODO: HP, SP, and ST stamina bars
 
@@ -172,11 +171,11 @@ void BattleCharacterActor::DrawStatus() {
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 
 	VideoManager->Move(355.0f, 90.0f + y_offset);
-	VideoManager->DrawText(NumberToString(GetHitPoints()));
+	VideoManager->DrawText(NumberToString(GetActor()->GetHitPoints()));
 
 	// Draw the character's current skill points on top of the middle of the SP bar
 	VideoManager->MoveRelative(100, 0);
-	VideoManager->DrawText(NumberToString(GetSkillPoints()));
+	VideoManager->DrawText(NumberToString(GetActor()->GetSkillPoints()));
 
 	// Draw all of the character's current status afflictions
 	// TODO: waiting for ActorEffects class to be implemented
@@ -193,13 +192,13 @@ void BattleCharacterActor::TakeDamage(uint32 damage)
 {
 	_total_time_damaged = 1;
 	_damage_dealt = damage;
-	if (damage >= GetHitPoints()) // Was it a killing blow?
+	if (damage >= GetActor()->GetHitPoints()) // Was it a killing blow?
 	{
-		SetHitPoints(0);
+		GetActor()->SetHitPoints(0);
 		current_battle->RemoveScriptedEventsForActor(this);
 	}
 	else {
-		SetHitPoints(GetHitPoints() - damage);
+		GetActor()->SetHitPoints(GetActor()->GetHitPoints() - damage);
 	}
 }
 
@@ -253,7 +252,7 @@ void BattleEnemyActor::Update() {
 
 		// okay, we can perform another attack.  set us up as queued to perform.
 		SetQueuedToPerform(true);
-		current_battle->AddScriptEventToQueue(ScriptEvent(dynamic_cast<GlobalActor*>(this), final_targets, "sword_swipe"));
+		current_battle->AddScriptEventToQueue(ScriptEvent(this, final_targets, "sword_swipe"));
 		SetXLocation(GetXOrigin()); // Always attack from the starting location
 
 		last_attack = 0;
@@ -280,7 +279,6 @@ void BattleEnemyActor::DrawSprite() {
 		sprite_frames[3].EnableGrayScale();
 		VideoManager->DrawImage(sprite_frames[3]);
 		sprite_frames[3].DisableGrayScale();
-		return;
 	}
 	else {
 		// Draw the actor selector image over the currently selected enemy

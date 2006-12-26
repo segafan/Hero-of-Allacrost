@@ -113,6 +113,9 @@ public:
 
 	//! Sets queued to perform
 	virtual void SetQueuedToPerform(bool QueuedToPerform) = 0;
+
+	//! Gets a pointer to the GlobalActor
+	virtual hoa_global::GlobalActor * GetActor() = 0;
 };
 
 
@@ -121,7 +124,7 @@ public:
 *** ***************************************************************************/
 class BattleCharacterActor : public hoa_global::GlobalCharacter, public IBattleActor {
 public:
-	BattleCharacterActor(GlobalCharacter * character, float XLocation, float YLocation);
+	BattleCharacterActor(hoa_global::GlobalCharacter * character, float XLocation, float YLocation);
 
 	virtual ~BattleCharacterActor();
 
@@ -175,10 +178,14 @@ public:
 	{ _y_origin = y_origin; }
 	//@}
 
+	// Gets a pointer to the GlobalActor
+	virtual hoa_global::GlobalCharacter * GetActor()
+	{ return global_character_; }
+
 	
 private:
 	//! A Pointer to the 'real' GlobalCharacter. TODO: This is very bad design and probably should be fixed...
-	GlobalCharacter * global_character_;
+	hoa_global::GlobalCharacter * global_character_;
 
 	//! Character's X-coordinate on the screen
 	float _x_location;
@@ -263,6 +270,10 @@ public:
 	void SetYOrigin(float y_origin)
 	{ _y_origin = y_origin; }
 	//@}
+
+	// Gets a pointer to the GlobalActor
+	virtual hoa_global::GlobalActor * GetActor()
+	{ return this; }
 
 private:
 	//! Enemy's X-coordinate on the screen
