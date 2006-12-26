@@ -74,11 +74,9 @@ ScriptEvent::~ScriptEvent()
 void ScriptEvent::RunScript() {
 	// TEMP: do basic damage to the actors
 	for (uint8 i = 0; i < _targets.size(); i++) {
-		try {
+		
 		IBattleActor * actor = _targets[i];
-		actor->TakeDamage(GaussianRandomValue(12, 2.0f));
-		}
-		catch(std::bad_cast e) {}
+		actor->TakeDamage(GaussianRandomValue(12, 2.0f));	
 
 		// TODO: Do this better way! 
 		if (MakeStandardString(this->GetSource()->GetName()) == "Spider")
@@ -477,7 +475,7 @@ void BattleMode::_UpdateCharacterSelection() {
 		// If no such character exists, the selected character will remain selected
 		uint32 working_index = _actor_index;
 		while (working_index < GetNumberOfCharacterActors()) {
-			if (GetPlayerCharacterAt((working_index + 1))->IsAlive()) {
+			if (GetPlayerCharacterAt((working_index + 1))->GetActor()->IsAlive()) {
 				_actor_index = working_index + 1;
 				break;
 			}
@@ -491,7 +489,7 @@ void BattleMode::_UpdateCharacterSelection() {
 		// If no such character exists, the selected character will remain selected
 		uint32 working_index = _actor_index;
 		while (working_index > 0) {
-			if (GetPlayerCharacterAt((working_index - 1))->IsAlive()) {
+			if (GetPlayerCharacterAt((working_index - 1))->GetActor()->IsAlive()) {
 				_actor_index = working_index - 1;
 				break;
 			}
@@ -612,7 +610,7 @@ void BattleMode::_UpdateAttackPointSelection() {
 	vector<GlobalAttackPoint*>global_attack_points = e->GetAttackPoints();
 
 	if (InputManager->ConfirmPress()) {
-		_selected_actor_arguments.push_back(dynamic_cast<IBattleActor*>(GetEnemyActorAt(_argument_actor_index)));
+		_selected_actor_arguments.push_back(GetEnemyActorAt(_argument_actor_index));
 		if (_selected_actor_arguments.size() == _necessary_selections) {
 			AddScriptEventToQueue(ScriptEvent(_selected_character, _selected_actor_arguments, "sword_swipe"));
 			_selected_character->SetQueuedToPerform(true);
@@ -795,7 +793,7 @@ const uint32 BattleMode::_NumberEnemiesAlive() const {
 const uint32 BattleMode::_NumberCharactersAlive() const {
 	uint32 character_count = 0;
 	for (uint32 i = 0; i < _character_actors.size(); i++) {
-		if (_character_actors[i]->IsAlive()) {
+		if (_character_actors[i]->GetActor()->IsAlive()) {
 			character_count++;
 		}
 	}
@@ -826,7 +824,7 @@ void BattleMode::_ConstructActionListMenu() {
 	_action_list_menu->SetCursorOffset(-20.0f, 25.0f);
 
 	if (_action_type_menu_cursor_location == ACTION_TYPE_ATTACK) {
-		vector<GlobalSkill*> attack_skills = p->GetAttackSkills();
+		vector<GlobalSkill*> attack_skills = p->GetActor()->GetAttackSkills();
 		if (attack_skills.size() <= 0) {
 			_cursor_state = CURSOR_SELECT_ACTION_TYPE;
 		}
@@ -848,7 +846,7 @@ void BattleMode::_ConstructActionListMenu() {
 	} // if (_action_type_menu_cursor_location == ACTION_TYPE_ATTACK)
 	
 	else if (_action_type_menu_cursor_location == ACTION_TYPE_DEFEND) {
-		vector <GlobalSkill*> defense_skills = p->GetDefenseSkills();
+		vector <GlobalSkill*> defense_skills = p->GetActor()->GetDefenseSkills();
 		if (defense_skills.size() <= 0) {
 			_cursor_state = CURSOR_SELECT_ACTION_TYPE;
 		}
@@ -872,7 +870,7 @@ void BattleMode::_ConstructActionListMenu() {
 	} // else if (_action_type_menu_cursor_location == ACTION_TYPE_DEFEND)
 	
 	else if (_action_type_menu_cursor_location == ACTION_TYPE_SUPPORT) {
-		vector<GlobalSkill*> support_skills = p->GetSupportSkills();
+		vector<GlobalSkill*> support_skills = p->GetActor()->GetSupportSkills();
 		if (support_skills.size() <= 0) {
 			_cursor_state = CURSOR_SELECT_ACTION_TYPE;
 		}
@@ -934,16 +932,13 @@ void BattleMode::SetPerformingScript(bool is_performing) {
 	if (is_performing == false && _performing_script == true) {
 
 		// Remove the first scripted event from the queue
-		// _script_queue.front().GetSource() is either BattleEnemyActor or BattleCharacterActor
-		BattleEnemyActor * source1 = dynamic_cast<BattleEnemyActor*>(_script_queue.front().GetSource());
-		if (source1)
-			source1->SetQueuedToPerform(false);
-
-		BattleCharacterActor * source2 = dynamic_cast<BattleCharacterActor*>(_script_queue.front().GetSource());
-		if (source2)
-			source2->SetQueuedToPerform(false);
-
-		_script_queue.pop_front();
+		// _script_queue.front().GetSource() is always either BattleEnemyActor or BattleCharacterActor
+		IBattleActor * source = dynamic_cast<IBattleActor*>(_script_queue.front().GetSource());
+		if (source)
+		{
+			source->SetQueuedToPerform(false);
+			_script_queue.pop_front();
+		}
 	}
 
 	_performing_script = is_performing;
@@ -959,7 +954,6 @@ void BattleMode::RemoveScriptedEventsForActor(hoa_global::GlobalActor * actor) {
 			it = _script_queue.erase(it);	//remove this location
 		}
 		else {
-			//otherwise, increment the iterator
 			it++;
 		}
 	}
@@ -1033,7 +1027,7 @@ int32 BattleMode::GetIndexOfFirstIdleCharacter() {
 
 	deque<BattleCharacterActor*>::iterator it = _character_actors.begin();
 	for (uint32 i = 0; it != _character_actors.end(); i++, it++) {
-		if (!(*it)->IsQueuedToPerform() && (*it)->IsAlive()) {
+		if (!(*it)->IsQueuedToPerform() && (*it)->GetActor()->IsAlive()) {
 			index = i;
 			break;
 		}
