@@ -302,6 +302,7 @@ GlobalSkill::GlobalSkill() {
 	_skill_name = MakeUnicodeString("Sword Slash");
 	_skill_type = GLOBAL_SKILL_ATTACK;
 	_sp_usage = 10;
+	_skill_points_required = 10;
 	_warmup_time = 0;
 	_cooldown_time = 0;
 	_level_required = 1;

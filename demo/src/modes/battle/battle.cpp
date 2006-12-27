@@ -698,7 +698,6 @@ void BattleMode::_DrawBackgroundVisuals() {
 } // void BattleMode::_DrawBackgroundVisuals()
 
 
-
 void BattleMode::_DrawSprites() {
 	// TODO: Draw sprites in order based on their x and y coordinates on the screen (bottom to top, then left to right)
 
@@ -712,7 +711,6 @@ void BattleMode::_DrawSprites() {
 		_enemy_actors[i]->DrawSprite();
 	}
 } // void BattleMode::_DrawSprites()
-
 
 
 void BattleMode::_DrawBottomMenu() {
@@ -743,7 +741,6 @@ void BattleMode::_DrawBottomMenu() {
 		_selected_enemy->DrawStatus();
 	}
 } // void BattleMode::_DrawBottomMenu()
-
 
 
 void BattleMode::_DrawActionMenu() {
@@ -789,7 +786,6 @@ const uint32 BattleMode::_NumberEnemiesAlive() const {
 }
 
 
-
 const uint32 BattleMode::_NumberCharactersAlive() const {
 	uint32 character_count = 0;
 	for (uint32 i = 0; i < _character_actors.size(); i++) {
@@ -799,7 +795,6 @@ const uint32 BattleMode::_NumberCharactersAlive() const {
 	}
 	return character_count;
 }
-
 
 
 void BattleMode::_ConstructActionListMenu() {
@@ -925,6 +920,7 @@ void BattleMode::_ConstructActionListMenu() {
 	}
 } // void BattleMode::_ConstructActionListMenu()
 
+
 // Sets whether an action is being performed or not
 void BattleMode::SetPerformingScript(bool is_performing) {
 	
@@ -934,10 +930,12 @@ void BattleMode::SetPerformingScript(bool is_performing) {
 		// Remove the first scripted event from the queue
 		// _script_queue.front().GetSource() is always either BattleEnemyActor or BattleCharacterActor
 		IBattleActor * source = dynamic_cast<IBattleActor*>(_script_queue.front().GetSource());
-		if (source)
-		{
+		if (source) {			
 			source->SetQueuedToPerform(false);
 			_script_queue.pop_front();
+		}
+		else {
+			if (BATTLE_DEBUG) { cerr << "Invalid IBattleActor pointer in SetPerformingScript()" << endl; }
 		}
 	}
 
@@ -1035,7 +1033,6 @@ int32 BattleMode::GetIndexOfFirstIdleCharacter() {
 
 		return index;
 }
-
 
 
 int32 BattleMode::IndexLocationOfPlayerCharacter(private_battle::BattleCharacterActor* const AActor) {
