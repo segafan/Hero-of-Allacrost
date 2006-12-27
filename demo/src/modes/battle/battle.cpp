@@ -568,28 +568,32 @@ void BattleMode::_UpdateTargetSelection() {
 	if (InputManager->DownPress() || InputManager->LeftPress()) {
 		// Select the character "to the top"
 		int32 working_index = _argument_actor_index;
-		while (working_index > 0) {
-			if (GetEnemyActorAt((working_index - 1))->IsAlive()) {
-				_argument_actor_index = working_index - 1;
+		while (true) {
+			if (working_index > 0)
+				--working_index;
+			else
+				working_index = GetIndexOfLastAliveEnemy();
+
+			if (GetEnemyActorAt((working_index))->IsAlive()) {
+				_argument_actor_index = working_index;
 				_selected_enemy = GetEnemyActorAt(_argument_actor_index);
 				break;
-			}
-			else {
-				--working_index;
 			}
 		}
 	}
 	else if (InputManager->UpPress() || InputManager->RightPress()) {
 		// Select the character "to the bottom"
 		uint32 working_index = _argument_actor_index;
-		while (working_index < GetNumberOfEnemyActors() - 1) {
-			if (GetEnemyActorAt((working_index + 1))->IsAlive()) {
-				_argument_actor_index = working_index + 1;
+		while (true) {
+			if (working_index < GetNumberOfEnemyActors() - 1)
+				working_index++;
+			else
+				working_index = GetIndexOfFirstAliveEnemy();
+
+			if (GetEnemyActorAt((working_index))->IsAlive()) {
+				_argument_actor_index = working_index;
 				_selected_enemy = GetEnemyActorAt(_argument_actor_index);
 				break;
-			}
-			else {
-				++working_index;
 			}
 		}
 	}
@@ -1010,6 +1014,19 @@ int32 BattleMode::GetIndexOfFirstAliveEnemy() {
 
 	std::deque<private_battle::BattleEnemyActor*>::iterator it = _enemy_actors.begin();
 	for (uint32 i = 0; it != _enemy_actors.end(); i++, it++) {
+		if ((*it)->IsAlive()) {
+			return i;
+		}
+	}
+
+	return -1;
+}
+
+
+int32 BattleMode::GetIndexOfLastAliveEnemy() {
+
+	std::deque<private_battle::BattleEnemyActor*>::iterator it = _enemy_actors.end()-1;
+	for (int32 i = _enemy_actors.size()-1; it != _enemy_actors.begin(); i--, it--) {
 		if ((*it)->IsAlive()) {
 			return i;
 		}

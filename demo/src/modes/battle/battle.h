@@ -170,6 +170,7 @@ public:
 	uint32 GetNumberOfEnemyActors()
 		{ return _enemy_actors.size(); }
 	int32 GetIndexOfFirstAliveEnemy();
+	int32 GetIndexOfLastAliveEnemy();
 	int32 GetIndexOfFirstIdleCharacter();
 
 	//! Returns the player actor at the deque location 'index'

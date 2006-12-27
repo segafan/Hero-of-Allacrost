@@ -260,8 +260,10 @@ void BattleEnemyActor::Update() {
 	}
 
 	// If we're attacking, update the offset a little
-	if (IsAttacking())
-		_x_location -= 0.8f * static_cast<float>(SystemManager->GetUpdateTime());
+	if (IsAttacking()) {
+		if ((_x_origin - _x_location) < 50)
+			_x_location -= 0.8f * static_cast<float>(SystemManager->GetUpdateTime());
+	}
 	else
 		SetXLocation(GetXOrigin()); // Restore original place
 
