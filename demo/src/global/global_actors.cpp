@@ -275,7 +275,7 @@ GlobalCharacter::GlobalCharacter(const hoa_utils::ustring & name, const std::str
 	SetStrength(120);
 
 	// TEMP: Add new skills
-	AddAttackSkill(new GlobalSkill("sword_slash"));
+	AddAttackSkill(new GlobalSkill()); // removed text "sword_slash" because that constructor isn't implemented yet -MF
 
 	// Load the character's standard set of map sprite frames
 	StillImage imd;
