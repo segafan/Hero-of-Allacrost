@@ -37,6 +37,14 @@ extern GameGlobal *GlobalManager;
 //! Determines whether the code in the hoa_global namespace should print debug statements or not.
 extern bool GLOBAL_DEBUG;
 
+/** \brief The Inventory type definition
+*** This inventory stores all items, weapons, armor, etc. for the entire party in a map. The map key is the unique ID
+*** number for the object, which is duplicated in the GlobalObject class itself. The objects in this inventory have a
+*** count member associated with them that retains how many of that particular object is contained in the inventory.
+*** Once the count member reaches zero, the object is removed from this container.
+**/
+typedef std::map<uint32, GlobalObject*> Inventory;
+
 /** ****************************************************************************
 *** \brief Retains all the state information about the player's active game
 ***
@@ -91,7 +99,7 @@ public:
 	//! \name Inventory Manipulation Functions
 	//@{
 	//! \todo return an iterator to the inventory, not the inventory itself
-	std::map<uint32, GlobalObject*> GetInventory() const
+	Inventory GetInventory() const
 		{ return _inventory; }
 
 	/** \brief Adds a new item to the inventory
@@ -143,7 +151,7 @@ public:
 	
 	//! \brief Returns a pointer to the active party
 	GlobalCharacterParty* GetActiveParty()
-		{ return &_active_party; }
+		{ return &_active_party; }	
 
 private:
 	SINGLETON_DECLARE(GameGlobal);
@@ -156,13 +164,8 @@ private:
 	**/
 	std::map<uint32, GlobalCharacter*> _characters;
 
-	/** \brief The entire inventory of the party
-	*** This inventory stores all items, weapons, armor, etc. for the entire party in a map. The map key is the unique ID
-	*** number for the object, which is duplicated in the GlobalObject class itself. The objects in this inventory have a
-	*** count member associated with them that retains how many of that particular object is contained in the inventory.
-	*** Once the count member reaches zero, the object is removed from this container.
-	**/
-	std::map<uint32, GlobalObject*> _inventory;
+	//! The entire inventory of the party
+	Inventory _inventory;
 
 	/** \brief The active party of characters
 	*** The active party contains the group of characters that will fight when a battle begins. This party can be up to
