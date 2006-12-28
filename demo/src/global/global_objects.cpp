@@ -66,8 +66,8 @@ GlobalItem::GlobalItem(uint32 id, uint32 count) : GlobalObject(id, count)
 	// TEMP: there is only one type of item
 	_type = GLOBAL_ITEM;
 	_name = MakeUnicodeString("Healing Potion");
-	_icon_path = "img/icons/items/healing_potion.png";
-	_icon_image.SetFilename("img/icons/items/healing_potion.png");
+	_icon_path = "img/icons/items/health_potion.png";
+	_icon_image.SetFilename("img/icons/items/health_potion.png");
 	if (_icon_image.Load() == false) {
 		cerr << "ERROR: In GlobalWeapon constructor, failed to load icon image" << endl;
 	}

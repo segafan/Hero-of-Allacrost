@@ -154,7 +154,7 @@ BattleMode::BattleMode() :
 	_action_type_menu.SetOptions(action_type_options);
 	_action_type_menu.EnableOption(1, false); // Disable defend, support and item for now
 	_action_type_menu.EnableOption(2, false);
-	_action_type_menu.EnableOption(3, false);
+	//_action_type_menu.EnableOption(3, false);
 
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 
@@ -521,10 +521,17 @@ void BattleMode::_UpdateActionTypeMenu() {
 			_action_type_menu_cursor_location++;
 		}
 	}
-	else if (InputManager->ConfirmPress() && _action_type_menu_cursor_location == 0) {
+	else if (InputManager->ConfirmPress() ) {
 		// Construct the action list menu for the action selected
-		_cursor_state = CURSOR_SELECT_ACTION_LIST;
-		_ConstructActionListMenu();
+		if (_action_type_menu_cursor_location == 0) {
+			_cursor_state = CURSOR_SELECT_ACTION_LIST;
+			_ConstructActionListMenu();
+		}
+		else if (_action_type_menu_cursor_location == ACTION_TYPE_ITEM) {
+			_cursor_state = CURSOR_SELECT_ACTION_LIST;
+			_ConstructActionListMenu();
+		}
+
 	}
 	else if (InputManager->CancelPress()) {
 		// Only return to selecting characters if there is more than one character
@@ -547,15 +554,17 @@ void BattleMode::_UpdateActionListMenu() {
 		_action_list_menu->HandleUpKey();
 	}
 	else if (InputManager->ConfirmPress()) {
+		// If attacking, select target
 		// TEMP: only allows to select one target
-		_necessary_selections = 1;
-		_argument_actor_index = GetIndexOfFirstAliveEnemy();
-		_selected_enemy = GetEnemyActorAt(_argument_actor_index);
+		if (_action_type_menu_cursor_location == ACTION_TYPE_ATTACK) {
+			_necessary_selections = 1;
+			_argument_actor_index = GetIndexOfFirstAliveEnemy();
+			_selected_enemy = GetEnemyActorAt(_argument_actor_index);
+			_cursor_state = CURSOR_SELECT_TARGET;
+		}
 
 		// TODO: retrieve the selected skill, place the cursor on either characters or enemies,
 		// depending on whom that skill should target by default
-
-		_cursor_state = CURSOR_SELECT_TARGET;
 	}
 	else if (InputManager->CancelPress()) {
 		_cursor_state = CURSOR_SELECT_ACTION_TYPE;
@@ -893,34 +902,33 @@ void BattleMode::_ConstructActionListMenu() {
 	} // else if (_action_type_menu_cursor_location == ACTION_TYPE_SUPPORT)
 	
 	else if (_action_type_menu_cursor_location == ACTION_TYPE_ITEM) {
-	/*	vector<GlobalObject*> inv = GlobalManager->GetInventory();
+		Inventory inv = GlobalManager->GetInventory();
 
 		// Calculate the number of rows, this is dividing by 6, and if there is a remainder > 0, add one more row for the remainder
 		_action_list_menu->SetSize(6, inv.size() / 6 + ((inv.size() % 6) > 0 ? 1 : 0));
 		vector<ustring> inv_names;
 
-		for (uint32 i = 0; i < inv.size(); ++i) {
-			// Create the item text
-			ostringstream os_obj_count;
-			os_obj_count << inv[i]->GetCount();
-			string inv_item_str = string("<") + inv[i]->GetIconPath() + string("><32>") + inv[i]->GetName()
-				+ string("<R>") + string("    ") + os_obj_count.str();
+		// Get the name of each item in the inventory
+		for (Inventory::iterator it = inv.begin(); it != inv.end(); ++it) {
+			GlobalObject * item = it->second;
+			string inv_item_str = string("<") + item->GetIconPath() + string("><32>") + MakeStandardString(item->GetName()) + string("<R>") + string("    ") + NumberToString(item->GetCount());
 			inv_names.push_back(MakeUnicodeString(inv_item_str));
 		}
 
 		_action_list_menu->SetOptions(inv_names);
 		_action_list_menu->SetSize(1, inv_names.size());
+		_action_list_menu->SetSelection(0);
 
 // 		_action_menu_window = new MenuWindow();
 // 		_action_menu_window->Create(200.0f, 20.0f + 50.0f * inv_names.size());
 // 		_action_menu_window->SetPosition(0.0f, 600.0f);
 // 		_action_menu_window->Show();*/
-	} // else if (_action_type_menu_cursor_location == ACTION_TYPE_ITEM)
+	}
 
 	else {
 		cerr << "BATTLE ERROR: Unknown action type number: " << _action_type_menu_cursor_location << endl;
 		cerr << "> Exiting game" << endl;
-		exit(1);
+		SystemManager->ExitGame();
 	}
 } // void BattleMode::_ConstructActionListMenu()
 
@@ -939,7 +947,8 @@ void BattleMode::SetPerformingScript(bool is_performing) {
 			_script_queue.pop_front();
 		}
 		else {
-			if (BATTLE_DEBUG) { cerr << "Invalid IBattleActor pointer in SetPerformingScript()" << endl; }
+			cerr << "Invalid IBattleActor pointer in SetPerformingScript()" << endl;
+			SystemManager->ExitGame();
 		}
 	}
 
@@ -964,10 +973,11 @@ void BattleMode::RemoveScriptedEventsForActor(hoa_global::GlobalActor * actor) {
 
 // Handle player victory
 void BattleMode::PlayerVictory() {
-	if (BATTLE_DEBUG) cerr << "BATTLE: Player has won a battle!" << endl;
+	if (BATTLE_DEBUG) cout << "BATTLE: Player has won a battle!" << endl;
 
 	// Give player some loot
-	// TODO: FIX THIS GlobalManager->AddItemToInventory(HP_POTION);
+	// TODO: Fix this with proper ID's!
+	GlobalManager->AddToInventory(new GlobalItem(1, 1));
 
 	// Give some experience as well
 	GlobalCharacter *claudius = GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS);
