@@ -48,21 +48,21 @@ GameSystem::~GameSystem() {
 bool GameSystem::SingletonInitialize() {
 	ScriptDescriptor settings_data;
 
-	if (!settings_data.OpenFile("dat/config/settings.lua", READ)) {
+	if (!settings_data.OpenFile("dat/config/settings.lua", SCRIPT_READ)) {
 		cout << "SYSTEM ERROR: failed to load settings from data file" << endl;
 		return false;
 	}
 
-	settings_data.OpenTable("video_settings");
+	settings_data.ReadOpenTable("video_settings");
 // 	SetFullScreen(settings_data.ReadBool("full_screen"));
-	settings_data.CloseTable();
+	settings_data.ReadCloseTable();
 
-	settings_data.OpenTable("audio_settings");
+	settings_data.ReadOpenTable("audio_settings");
 	AudioManager->SetMusicVolume(settings_data.ReadFloat("music_vol"));
 	AudioManager->SetSoundVolume(settings_data.ReadFloat("sound_vol"));
-	settings_data.CloseTable();
+	settings_data.ReadCloseTable();
 
-	if (settings_data.GetError() != DATA_NO_ERRORS) {
+	if (settings_data.GetError() != SCRIPT_NO_ERRORS) {
 		cout << "SETTINGS WARNING: some error occured during read operations from data file" << endl;
 	}
 	settings_data.CloseFile();

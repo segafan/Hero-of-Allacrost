@@ -176,7 +176,7 @@ void MapMode::LoadMap() {
 	VideoManager->PopState();
 
 	// ************* (2) Open data file and begin processing data ***************
-	_map_data.OpenFile("dat/maps/desert_cave.lua", READ);
+	_map_data.OpenFile("dat/maps/desert_cave.lua", SCRIPT_READ);
 	_random_encounters = _map_data.ReadBool("random_encounters");
 	if (_random_encounters) {
 		_encounter_rate = _map_data.ReadInt("encounter_rate");
@@ -189,19 +189,19 @@ void MapMode::LoadMap() {
 	}
 
 	// Load music filename(s)
-	_map_data.OpenTable("music_filenames");
-	if(_map_data.GetTableSize()>0) {
+	_map_data.ReadOpenTable("music_filenames");
+	if(_map_data.ReadGetTableSize()>0) {
 		_map_music.push_back(MusicDescriptor());
 		_map_music[0].LoadMusic(_map_data.ReadString(1));
 	}
-	_map_data.CloseTable();
+	_map_data.ReadCloseTable();
 
 	_row_count = _map_data.ReadInt("row_count");
 	_col_count = _map_data.ReadInt("col_count");
 
 	// ********************** (3) Load in tile filenames ************************
 	vector<string> tile_filenames;
-	_map_data.FillStringVector("tile_filenames", tile_filenames);
+	_map_data.ReadStringVector("tile_filenames", tile_filenames);
 	for (uint32 i = 0; i < tile_filenames.size(); i++) {
 		// Prepend the pathname and append the file extension for all the file names
 		tile_filenames[i] = "img/tiles/" + tile_filenames[i] + ".png";
@@ -209,12 +209,12 @@ void MapMode::LoadMap() {
 
 	// ******************** (4) Setup tile image mappings ***********************
 	vector<int32> tile_mappings;
-	_map_data.OpenTable("tile_mappings");
+	_map_data.ReadOpenTable("tile_mappings");
 	int32 mapping_count = tile_filenames.size(); // TMP
 	//int32 mapping_count = _map_data.GetTableSize("tile_mappings");
 	//cout << "mapping_count == " << mapping_count << endl;
 	for (uint32 i = 0; i < static_cast<uint32>(mapping_count); i++) {
-		_map_data.FillIntVector(i, tile_mappings);
+		_map_data.ReadIntVector(i, tile_mappings);
 
 		if (tile_mappings.size() == 1) { // Then add a new static image
 			StillImage *static_tile = new StillImage();
@@ -232,7 +232,7 @@ void MapMode::LoadMap() {
 		}
 		tile_mappings.clear();
 	}
-	_map_data.CloseTable();
+	_map_data.ReadCloseTable();
 
 	// **************** (5) Load all tile images from memory ********************
 	VideoManager->BeginImageLoadBatch();
@@ -251,9 +251,9 @@ void MapMode::LoadMap() {
 
 	vector<int32> properties;
 
-	_map_data.OpenTable("lower_layer");
+	_map_data.ReadOpenTable("lower_layer");
 	for (uint32 r = 0; r < _row_count; r++) {
-		_map_data.FillIntVector(r, properties);
+		_map_data.ReadIntVector(r, properties);
 
 		for (uint32 c = 0; c < _col_count; c++) {
 			_tile_layers[r][c].lower_layer = static_cast<int16>(properties[c]);
@@ -261,11 +261,11 @@ void MapMode::LoadMap() {
 
 		properties.clear();
 	}
-	_map_data.CloseTable();
+	_map_data.ReadCloseTable();
 
-	_map_data.OpenTable("middle_layer");
+	_map_data.ReadOpenTable("middle_layer");
 	for (uint32 r = 0; r < _row_count; r++) {
-		_map_data.FillIntVector(r, properties);
+		_map_data.ReadIntVector(r, properties);
 
 		for (uint32 c = 0; c < _col_count; c++) {
 			_tile_layers[r][c].middle_layer = static_cast<int16>(properties[c]);
@@ -273,11 +273,11 @@ void MapMode::LoadMap() {
 
 		properties.clear();
 	}
-	_map_data.CloseTable();
+	_map_data.ReadCloseTable();
 
-	_map_data.OpenTable("upper_layer");
+	_map_data.ReadOpenTable("upper_layer");
 	for (uint32 r = 0; r < _row_count; r++) {
-		_map_data.FillIntVector(r, properties);
+		_map_data.ReadIntVector(r, properties);
 
 		for (uint32 c = 0; c < _col_count; c++) {
 			_tile_layers[r][c].upper_layer = static_cast<int16>(properties[c]);
@@ -285,11 +285,11 @@ void MapMode::LoadMap() {
 
 		properties.clear();
 	}
-	_map_data.CloseTable();
+	_map_data.ReadCloseTable();
 
-	_map_data.OpenTable("tile_walkable");
+	_map_data.ReadOpenTable("tile_walkable");
 	for (uint32 r = 0; r < _row_count; r++) {
-		_map_data.FillIntVector(r, properties);
+		_map_data.ReadIntVector(r, properties);
 
 		for (uint32 c = 0; c < _col_count; c++) {
 			_tile_layers[r][c].walkable = static_cast<uint8>(properties[c]);
@@ -297,13 +297,13 @@ void MapMode::LoadMap() {
 
 		properties.clear();
 	}
-	_map_data.CloseTable();
+	_map_data.ReadCloseTable();
 
 	// The occupied member of tiles are not set until we place map objects
 
 	_map_data.CloseFile();
 
-	if (_map_data.GetError() != DATA_NO_ERRORS) {
+	if (_map_data.GetError() != SCRIPT_NO_ERRORS) {
 		cout << "MAP ERROR: some error occured during reading of map file" << endl;
 	}
 	
@@ -340,7 +340,7 @@ void MapMode::LoadMap() {
 	_focused_object = sp;
 
 	// Load laila
-	script.OpenFile("dat/maps/sprites/laila.lua", READ);
+	script.OpenFile("dat/maps/sprites/laila.lua", SCRIPT_READ);
 	//sp = new MapSprite();
 	//sp->SetName(MakeUnicodeString("Laila"));
 	//sp->SetID(1);

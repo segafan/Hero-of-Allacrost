@@ -57,12 +57,12 @@ void ActionPathMove::BindToLua()
 void ActionPathMove::Load(uint32 table_key) {
 	ScriptDescriptor *read_data = &(sprite->current_map->_map_data);
 
-	read_data->OpenTable(table_key);
+	read_data->ReadOpenTable(table_key);
 	destination.row = read_data->ReadInt("row");
 	destination.col = read_data->ReadInt("col");
-	read_data->CloseTable();
+	read_data->ReadCloseTable();
 
-	if (read_data->GetError() != DATA_NO_ERRORS) {
+	if (read_data->GetError() != SCRIPT_NO_ERRORS) {
 		if (MAP_DEBUG) cerr << "MAP ERROR: Failed to load data for an ActionPathMove object" << endl;
 	}
 }
@@ -166,12 +166,12 @@ void ActionFrameDisplay::Load(uint32 table_key) {
 	//	ScriptDescriptor *read_data; // Make this point to map data later
 	ScriptDescriptor read_data;
 
-	read_data.OpenTable(table_key);
+	read_data.ReadOpenTable(table_key);
 	display_time = read_data.ReadInt("display_time");
 	frame_index = read_data.ReadInt("frame_index");
-	read_data.CloseTable();
+	read_data.ReadCloseTable();
 
-	if (read_data.GetError() != DATA_NO_ERRORS) {
+	if (read_data.GetError() != SCRIPT_NO_ERRORS) {
 		if (MAP_DEBUG) cerr << "MAP ERROR: Failed to load data for an ActionFrameDisplay object" << endl;
 	}
 } // void ActionFrameDisplay::Load(uint32 table_key)

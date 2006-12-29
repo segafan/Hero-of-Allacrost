@@ -17,8 +17,7 @@
 
 static uint32 num_sockets = 0;
 
-namespace hoa_socket
-{
+namespace hoa_socket {
 
 Socket::Socket ()
 {
@@ -71,29 +70,25 @@ void Socket::Disconnect ()
 	connected = false;
 }
 
-bool Socket::IsQueued ( uint32 wait_time )
-{
+bool Socket::IsQueued(uint32 wait_time) {
 	if (!IsConnected())
 		return false;
 	return SDLNet_CheckSockets ( set, wait_time );
 }
 
-uint32 Socket::SendBinary ( void* data, uint32 len )
-{
+uint32 Socket::SendBinary(void* data, uint32 len) {
 	if (!IsConnected())
 		return 0;
 	return SDLNet_TCP_Send(sock, data, len);
 }
 
-uint32 Socket::RecvBinary ( void* location, uint32 len )
-{
+uint32 Socket::RecvBinary(void* location, uint32 len) {
 	if (!IsConnected())
 		return 0;
 	return SDLNet_TCP_Recv ( sock, location, len );
 }
 
-void Socket::Write ( const char* fmt, ... )
-{
+void Socket::Write (const char* fmt, ... ) {
 	va_list va;
 	va_start ( va, fmt );
 	
@@ -107,35 +102,33 @@ void Socket::Write ( const char* fmt, ... )
 	va_end ( va );
 }
 
-std::string Socket::ReadLine ()
-{
+std::string Socket::ReadLine() {
 	std::string ret;
 	char* res = (char*)malloc(1);
-	while (RecvBinary((void*)res, 1))
-	{
+
+	while (RecvBinary((void*)res, 1)) {
 		if (*res == '\n')
 			break;
 		ret.append ( 1, *res );
 	}
+
 	std::string::size_type pos;
-	if ((pos = ret.find_last_of('\r')) != std::string::npos)
-	{
-		ret.erase ( pos, 1 );
+	if ((pos = ret.find_last_of('\r')) != std::string::npos) {
+		ret.erase(pos, 1);
 	}
-	free ((void*)res);
+	free((void*)res);
 	return ret;
 }
 
-void Socket::ScanLine ( const char* format, ... )
-{
+void Socket::ScanLine ( const char* format, ... ) {
 	va_list va;
-	va_start ( va, format );
+	va_start(va, format);
 	
 	std::string line = ReadLine ();
 	
 	//vsscanf ( line.c_str(), format, va );
 	
-	va_end ( va );
+	va_end(va);
 }
 
-}
+} // namespace hoa_socket

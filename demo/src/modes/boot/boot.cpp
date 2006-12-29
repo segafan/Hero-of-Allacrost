@@ -65,7 +65,7 @@ BootMode::BootMode() :
 	mode_type = MODE_MANAGER_BOOT_MODE;
 	
 	ScriptDescriptor read_data;
-	if (!read_data.OpenFile("dat/config/boot.lua", READ)) {
+	if (!read_data.OpenFile("dat/config/boot.lua", SCRIPT_READ)) {
 		cout << "BOOT ERROR: failed to load data file" << endl;
 	}
 
@@ -106,12 +106,12 @@ BootMode::BootMode() :
 	// Load the audio stuff
 	// Make a call to the config code that loads in two vectors of strings
 	vector<string> new_music_files;
-	read_data.FillStringVector("music_files", new_music_files);
+	read_data.ReadStringVector("music_files", new_music_files);
 
 	vector<string> new_sound_files;
-	read_data.FillStringVector("sound_files", new_sound_files);
+	read_data.ReadStringVector("sound_files", new_sound_files);
 
-	if (read_data.GetError() != DATA_NO_ERRORS) {
+	if (read_data.GetError() != SCRIPT_NO_ERRORS) {
 		cout << "BOOT ERROR: some error occured during reading of boot data file" << endl;
 	}
 
@@ -839,7 +839,7 @@ void BootMode::Update() {
 		if (_current_menu->IsSelectionEnabled())
 			_boot_sounds.at(0).PlaySound();
 		else
-			_boot_sounds.at(3).PlaySound(); // Otherwise play a silly 'bömp'
+			_boot_sounds.at(3).PlaySound(); // Otherwise play a silly 'bï¿½p'
 
 		_current_menu->ConfirmPressed();
 

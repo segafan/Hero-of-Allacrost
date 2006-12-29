@@ -86,6 +86,7 @@ SpriteDialogue::~SpriteDialogue() {
 		delete (speaking_action);
 		speaking_action = 0;
 	}
+	cout << "MAP: SD destructor done" << endl;
 }
 
 void SpriteDialogue::BindToLua()
