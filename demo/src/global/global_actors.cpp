@@ -112,7 +112,7 @@ GlobalEnemy::GlobalEnemy(const std::string & file_name) :
 	// TODO: This is unfinished code
 	ScriptDescriptor read_data;
 	string fileName = "dat/enemies/" + _filename + ".lua";
-	if (!read_data.OpenFile(fileName.c_str(), READ)) {
+	if (!read_data.OpenFile(fileName.c_str(), SCRIPT_READ)) {
 		cerr << "GLOBAL ERROR: failed to load enemy file: " << _filename << endl;
 		return;
 	}
@@ -164,8 +164,8 @@ GlobalEnemy::GlobalEnemy(const std::string & file_name) :
 	_growth_strength = static_cast<float>(read_data.ReadInt("growth_strength"));
 	_growth_intelligence = static_cast<float>(read_data.ReadInt("growth_intelligence"));
 	_growth_agility = static_cast<float>(read_data.ReadInt("growth_agility"));
-	_max_hit_points = _growth_hit_points;
-	_max_skill_points = _growth_skill_points;
+	_max_hit_points = static_cast<uint32>(_growth_hit_points);
+	_max_skill_points = static_cast<uint32>(_growth_skill_points);
 		
 	int32 num_maps = read_data.ReadInt("number_of_maps");
 	for (int32 i = 1; i <= num_maps; i++) {

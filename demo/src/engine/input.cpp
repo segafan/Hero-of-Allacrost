@@ -99,13 +99,13 @@ bool GameInput::SingletonInitialize() {
 	// Loads saved settings to setup the key and joystick configurations
 	string in_filename = "dat/config/settings.lua";
 	ScriptDescriptor input_map_data;
-	if (input_map_data.OpenFile(in_filename.c_str(), READ) == false) {
+	if (input_map_data.OpenFile(in_filename.c_str(), SCRIPT_READ) == false) {
 		cerr << "INPUT ERROR: failed to open data file for reading: "
 		     << in_filename << endl;
 		return false;
 	}
 
-	input_map_data.OpenTable("key_settings");
+	input_map_data.ReadOpenTable("key_settings");
 	_key.up           = static_cast<SDLKey>(input_map_data.ReadInt("up"));
 	_key.down         = static_cast<SDLKey>(input_map_data.ReadInt("down"));
 	_key.left         = static_cast<SDLKey>(input_map_data.ReadInt("left"));
@@ -117,15 +117,15 @@ bool GameInput::SingletonInitialize() {
 	_key.left_select  = static_cast<SDLKey>(input_map_data.ReadInt("left_select"));
 	_key.right_select = static_cast<SDLKey>(input_map_data.ReadInt("right_select"));
 	_key.pause        = static_cast<SDLKey>(input_map_data.ReadInt("pause"));
-	input_map_data.CloseTable();
+	input_map_data.ReadCloseTable();
 
-	if (input_map_data.GetError() != DATA_NO_ERRORS) {
+	if (input_map_data.GetError() != SCRIPT_NO_ERRORS) {
 		cerr << "INPUT ERROR: failure while trying to retrieve key map "
 		     << "information from file: " << in_filename << endl;
 		return false;
 	}
 
-	input_map_data.OpenTable("joystick_settings");
+	input_map_data.ReadOpenTable("joystick_settings");
 	_joystick.joy_index    = static_cast<int32>(input_map_data.ReadInt("index"));
 	_joystick.confirm      = static_cast<uint8>(input_map_data.ReadInt("confirm"));
 	_joystick.cancel       = static_cast<uint8>(input_map_data.ReadInt("cancel"));
@@ -135,9 +135,9 @@ bool GameInput::SingletonInitialize() {
 	_joystick.right_select = static_cast<uint8>(input_map_data.ReadInt("right_select"));
 	_joystick.pause        = static_cast<uint8>(input_map_data.ReadInt("pause"));
 	_joystick.quit         = static_cast<uint8>(input_map_data.ReadInt("quit"));
-	input_map_data.CloseTable();
+	input_map_data.ReadCloseTable();
 
-	if (input_map_data.GetError() != DATA_NO_ERRORS) {
+	if (input_map_data.GetError() != SCRIPT_NO_ERRORS) {
 		cerr << "INPUT: an error occured while trying to retrieve joystick mapping information "
 		     << "from file: " << in_filename << endl;
 		return false;
@@ -164,13 +164,13 @@ bool GameInput::RestoreDefaultKeys() {
 	// Load the settings file
 	string in_filename = "dat/config/settings.lua";
 	ScriptDescriptor settings_file;
-	if (!settings_file.OpenFile(in_filename.c_str(), READ)) {
+	if (!settings_file.OpenFile(in_filename.c_str(), SCRIPT_READ)) {
 		cerr << "INPUT ERROR: failed to open data file for reading: " << in_filename << endl;
 		return false;
 	}
 
 	// Load all default keys from the table
-	settings_file.OpenTable("key_defaults");
+	settings_file.ReadOpenTable("key_defaults");
 	_key.up           = static_cast<SDLKey>(settings_file.ReadInt("up"));
 	_key.down         = static_cast<SDLKey>(settings_file.ReadInt("down"));
 	_key.left         = static_cast<SDLKey>(settings_file.ReadInt("left"));
@@ -182,7 +182,7 @@ bool GameInput::RestoreDefaultKeys() {
 	_key.left_select  = static_cast<SDLKey>(settings_file.ReadInt("left_select"));
 	_key.right_select = static_cast<SDLKey>(settings_file.ReadInt("right_select"));
 	_key.pause        = static_cast<SDLKey>(settings_file.ReadInt("pause"));
-	settings_file.CloseTable();
+	settings_file.ReadCloseTable();
 
 	settings_file.CloseFile();
 
@@ -196,13 +196,13 @@ bool GameInput::RestoreDefaultJoyButtons()
 	// Load the settings file
 	string in_filename = "dat/config/settings.lua";
 	ScriptDescriptor settings_file;
-	if (!settings_file.OpenFile(in_filename.c_str(), READ)) {
+	if (!settings_file.OpenFile(in_filename.c_str(), SCRIPT_READ)) {
 		cerr << "INPUT ERROR: failed to open data file for reading: " << in_filename << endl;
 		return false;
 	}
 
 	// Load all default buttons from the table
-	settings_file.OpenTable("joystick_defaults");
+	settings_file.ReadOpenTable("joystick_defaults");
 	_joystick.confirm      = static_cast<uint8>(settings_file.ReadInt("confirm"));
 	_joystick.cancel       = static_cast<uint8>(settings_file.ReadInt("cancel"));
 	_joystick.menu         = static_cast<uint8>(settings_file.ReadInt("menu"));
@@ -210,7 +210,7 @@ bool GameInput::RestoreDefaultJoyButtons()
 	_joystick.left_select  = static_cast<uint8>(settings_file.ReadInt("left_select"));
 	_joystick.right_select = static_cast<uint8>(settings_file.ReadInt("right_select"));
 	_joystick.pause        = static_cast<uint8>(settings_file.ReadInt("pause"));
-	settings_file.CloseTable();
+	settings_file.ReadCloseTable();
 
 	settings_file.CloseFile();
 
@@ -229,6 +229,8 @@ bool GameInput::AnyKeyRelease() {
 	return _any_key_release;
 }
 
+
+
 void GameInput::TogglePause(){
 	// If the current game mode is PauseMode, unpause the game
 	if (ModeManager->GetGameType() == MODE_MANAGER_PAUSE_MODE) {
@@ -240,6 +242,8 @@ void GameInput::TogglePause(){
 		ModeManager->Push(PM);
 	}
 }
+
+
 
 // Handles all of the event processing for the game.
 void GameInput::EventHandler() {
