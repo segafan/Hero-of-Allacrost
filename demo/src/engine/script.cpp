@@ -10,16 +10,22 @@
 /*!****************************************************************************
  * \file    data.cpp
  * \author  Vladimir Mitrovic, snipe714@allacrost.org
+ *			Daniel Steuernol, steu@allacrost.org
  * \brief   Source file for data and scripting engine.
  *****************************************************************************/
 
 #include <iostream>
 #include <stdarg.h>
 #include "script.h"
+#include "map.h"
+#include "map_actions.h"
+#include "map_objects.h"
+#include "map_dialogue.h"
 
 using namespace std;
 using namespace hoa_utils;
 using namespace hoa_script::private_script;
+using namespace luabind;
 
 namespace hoa_script {
 
@@ -79,7 +85,7 @@ bool ScriptDescriptor::OpenFile(std::string file_name, SCRIPT_ACCESS_MODE mode) 
 
 	// Case for opening with write permissions
 	else if (mode == SCRIPT_WRITE) {
-		_outfile.open(_filename.c_str());
+		_outfile.open(file_name.c_str());
 
 		if (!_outfile) {
 			cerr << "SCRIPT ERROR: Failed to open file " << _filename << " for writing." << endl;
@@ -385,6 +391,13 @@ void ScriptDescriptor::WriteBool(const char *key, bool value) {
 			_outfile << "true" << endl;
 		else
 			_outfile << "false" << endl;
+		//lua_getglobal(_lstack, key);
+		//if (lua_type(_lstack, STACK_TOP) == LUA_TNIL)
+		//{
+		//	// global does not exist, add to stack
+		//	lua_pushboolean(_lstack, value);
+		//	lua_setglobal(_lstack, key);
+		//}
 	}
 	else {
 		_WriteTablePath();
@@ -415,6 +428,11 @@ void ScriptDescriptor::WriteBool(const int32 key, bool value) {
 		_outfile << "true" << endl;
 	else
 		_outfile << "false" << endl;
+}
+
+void ScriptDescriptor::WriteBool(string &key, bool value)
+{
+	this->WriteBool(key.c_str(), value);
 }
 
 
@@ -449,6 +467,11 @@ void ScriptDescriptor::WriteInt(const int32 key, int32 value) {
 	_outfile << '[' << key << ']' << " = " << value << endl;
 }
 
+void ScriptDescriptor::WriteInt(string &key, int32 value)
+{
+	this->WriteInt(key.c_str(), value);
+}
+
 
 // This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
 void ScriptDescriptor::WriteFloat(const char *key, float value) {
@@ -480,6 +503,11 @@ void ScriptDescriptor::WriteFloat(const int32 key, float value) {
 	
 	_WriteTablePath();
 	_outfile << '[' << key << ']' << " = " << value << endl;
+}
+
+void ScriptDescriptor::WriteFloat(string &key, float value)
+{
+	this->WriteFloat(key.c_str(), value);
 }
 
 // This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
@@ -545,6 +573,16 @@ void ScriptDescriptor::WriteString(const int32 key, std::string& value) {
 	
 	_WriteTablePath();
 	_outfile << '[' << key << ']' << " = \"" << value << "\"" << endl;
+}
+
+void ScriptDescriptor::WriteString(string &key, const char *value)
+{
+	this->WriteString(key.c_str(), value);
+}
+
+void ScriptDescriptor::WriteString(string &key, string &value)
+{
+	this->WriteString(key.c_str(), value);
 }
 
 
@@ -666,6 +704,78 @@ void ScriptDescriptor::WriteStringVector(const char *key, std::vector<std::strin
 	_outfile << " }" << endl;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// ScriptDescriptor::ShowGlobals()
+//////////////////////////////////////////////////////////////////////////////
+void ScriptDescriptor::ShowGlobals()
+{
+	cout << "Writing out globals." << endl;
+	object o(from_stack(_lstack, LUA_GLOBALSINDEX));
+	for (luabind::iterator it(o), end; it != end; ++it)
+	{
+		cout << it.key() << "=" << (*it) << "  TYPE:" << type(*it) << endl;
+		if (luabind::type(*it) == LUA_TTABLE)
+		{
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// ScriptDescriptor::ShowGlobals()
+//////////////////////////////////////////////////////////////////////////////
+void ScriptDescriptor::SaveStack(const std::string &filename)
+{
+	ScriptDescriptor sd;
+	sd.OpenFile(filename, SCRIPT_WRITE);
+	object o(luabind::from_stack(_lstack, LUA_GLOBALSINDEX));
+	this->ShowGlobals();
+	for (luabind::iterator it(o), end; it != end; ++it)
+	{
+		switch(luabind::type(*it))
+		{
+		case LUA_TBOOLEAN:
+			sd.WriteBool(object_cast<string>(it.key()), object_cast<bool>(*it));
+			break;
+		case LUA_TNUMBER:
+			sd.WriteFloat(object_cast<string>(it.key()), object_cast<float>(*it));
+			break;
+		case LUA_TSTRING:
+			sd.WriteString(object_cast<string>(it.key()), object_cast<string>(*it));
+			break;
+		case LUA_TTABLE:
+			//this->_SaveStackProcessTable(sd, object_cast<string>(it.key()), object(*it));
+			break;
+		}
+	}
+	sd.CloseFile();
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+// ScriptDescriptor::_SaveStackProcessTable
+/////////////////////////////////////////////////////////////////////////////////
+void ScriptDescriptor::_SaveStackProcessTable(ScriptDescriptor &sd, string &name, luabind::object table)
+{
+	sd.WriteBeginTable(name.c_str());
+	for (luabind::iterator it(table), end; it != end; ++it)
+	{
+		switch(luabind::type(*it))
+		{
+		case LUA_TBOOLEAN:
+			sd.WriteBool(object_cast<string>(it.key()), object_cast<bool>(*it));
+			break;
+		case LUA_TNUMBER:
+			sd.WriteFloat(object_cast<string>(it.key()), object_cast<float>(*it));
+			break;
+		case LUA_TSTRING:
+			sd.WriteString(object_cast<string>(it.key()), object_cast<string>(*it));
+			break;
+		case LUA_TTABLE:
+			this->_SaveStackProcessTable(sd, object_cast<string>(it.key()), object(*it));
+			break;
+		}
+	}
+	sd.WriteEndTable();
+}
 
 // Writes the new table name to the file and manages the state of the context
 void ScriptDescriptor::WriteBeginTable(const char *key) {
@@ -720,7 +830,6 @@ void ScriptDescriptor::WriteEndTable() {
 // *****************************************************************************
 // *********************** GameScript Class Functions **************************
 // *****************************************************************************
-
 GameScript::GameScript() {
 	if (SCRIPT_DEBUG) cout << "SCRIPT: GameScript constructor invoked." << endl;
 
