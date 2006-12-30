@@ -106,7 +106,9 @@ const int32 STACK_TOP = -1;
 *** ***************************************************************************/
 class ScriptDescriptor {
 	friend class GameScript;
-
+private:
+	//! Functions to print out a table during stack output.
+	void _SaveStackProcessTable(ScriptDescriptor &sd, std::string &name, luabind::object table);
 public:
 	ScriptDescriptor ()
 		{ _filename = ""; _access_mode = SCRIPT_CLOSED; _error_code = 0; _lstack = NULL; }
@@ -260,8 +262,33 @@ public:
 	uint32 ReadGetTableSize();
 	//@}
 
-	// ----- Write Access Functions -----
+	//! This function will update the globals array with the specified key, value pair
+	//! If the key varname does not exist in the lua stack, it will be added.
+	//! \param varname the key of the variable to be change
+	//! \param variable the new value for the key
+	template <class T> void ChangeSetting(const std::string &varname, T variable)
+	{
+		// Get the table of globals
+		luabind::object o(luabind::from_stack(_lstack, LUA_GLOBALSINDEX));
+		for (luabind::iterator it(o), end; it != end; ++it)
+		{
+			// check to see if global variable exists
+			if (luabind::object_cast<std::string>(it.key()) == varname)
+			{
+				// if so change it
+				*it = variable;
+				return;
+			}
+		}
 
+		// if we get here, then varname does not exist in the globals so add it
+		luabind::settable(o, varname, variable);
+	}
+
+	//! Writes out the stack to disk
+	void SaveStack(const std::string &filename);
+
+	// ----- Write Access Functions -----
 	/*! \name Lua CommentWrite Functions
 	 *  \brief Writes comments into a Lua file
 	 *  \param comment The comment to write to the file.
@@ -299,14 +326,19 @@ public:
 	//@{
 	void WriteBool(const char *key, bool value);
 	void WriteBool(const int32 key, bool value);
+	void WriteBool(std::string &key, bool value);
 	void WriteInt(const char *key, int32 value);
 	void WriteInt(const int32 key, int32 value);
+	void WriteInt(std::string &key, int32 value);
 	void WriteFloat(const char *key, float value);
 	void WriteFloat(const int32 key, float value);
+	void WriteFloat(std::string &key, float value);
 	void WriteString(const char *key, const char* value);
 	void WriteString(const char *key, std::string& value);
 	void WriteString(const int32 key, const char* value);
 	void WriteString(const int32 key, std::string& value);
+	void WriteString(std::string &key, const char *value);
+	void WriteString(std::string &key, std::string &value);
 	//@}
 
 	/** \name Lua Vector Write Functions
@@ -320,6 +352,9 @@ public:
 	void WriteFloatVector(const char *key, std::vector<float> &vect);
 	void WriteStringVector(const char *key, std::vector<std::string> &vect);
 	//@}
+
+	//! Debug function to show all global variable names
+	void ShowGlobals();
 
 	/** \name Lua Table Write Functions
 	*** \brief These functions write Lua tables and their members
