@@ -1024,6 +1024,7 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, const QString& name, TileDatabas
 	: Q3TabDialog(parent, (const char*) name)
 {
 	_db = db;
+	_selected_set = NULL;
 	_set_modified = false;
 
 	setCaption("Tile Database...");
@@ -1166,6 +1167,17 @@ DatabaseDialog::DatabaseDialog(QWidget* parent, const QString& name, TileDatabas
 
 DatabaseDialog::~DatabaseDialog()
 {
+	delete _tilesets_cbox;
+	delete _tileset_ledit;
+	delete _all_tiles;
+	delete _mod_tileset;
+	delete _proptsets_cbox;
+	delete _prop_tileset;
+	delete _allwalk_checkbox;
+	for (uint32 i = 0; i < 8; i++)
+		delete _walk_checkbox[i];
+	if(_selected_set != NULL) 	 
+		delete _selected_set;
 } // DatabaseDialog destructor
 
 
@@ -1174,9 +1186,14 @@ DatabaseDialog::~DatabaseDialog()
 
 void DatabaseDialog::_CreateTileSet()
 {
-	if(_selected_set)
+	if(_selected_set == NULL)
 	{
-		qDebug("ninja");
+		if (_tileset_ledit->text().isEmpty() || _tileset_ledit->text().isNull())
+		{
+			QMessageBox::warning(this, "Error", "You must enter a name for this new tileset!");
+			return;
+		} // must have a name for this tileset
+		
 		TileSet* new_set = new TileSet(_db);
 		new_set->SetName(_tileset_ledit->text());
 		_SwitchTileset(new_set);
@@ -1193,6 +1210,7 @@ void DatabaseDialog::_UpdateData()
 	{
 		_selected_set->SetName(_tileset_ledit->text());
 		_selected_set->Save();
+		_set_modified = false;
 	} // only if the QLineEdit is not empty
 	
 	// User might change some properties then immediately click Ok.
@@ -1212,7 +1230,7 @@ void DatabaseDialog::_AddTile()
 
 	Q3IconViewItem* current_item = _all_tiles->currentItem();
 	// If no item is selected, show a warning.
-	if(current_item == 0)
+	if (current_item == 0)
 		QMessageBox::warning(this, "Error", "No tile selected!");
 	else if (_mod_tileset->findItem(current_item->text(), Q3IconView::ExactMatch) == 0)
 	{
@@ -1224,9 +1242,12 @@ void DatabaseDialog::_AddTile()
 
 void DatabaseDialog::_DelTile()
 {
-	_selected_set->RemoveTile(_mod_tileset->currentItem()->text());
-	delete _mod_tileset->currentItem();
-	_set_modified = true;
+	if (_mod_tileset->currentItem() != 0)
+	{
+		_selected_set->RemoveTile(_mod_tileset->currentItem()->text());
+		delete _mod_tileset->currentItem();
+		_set_modified = true;
+	} // only delete if there's something to delete
 } // _DelTile()
 
 void DatabaseDialog::_TilesetsTabPopulateTileset(const QString& name)
@@ -1245,15 +1266,19 @@ void DatabaseDialog::_TilesetsTabPopulateTileset(const QString& name)
 	} // no populating necessary otherwise
 	else
 	{
+		_selected_set = NULL;
 		_tileset_ledit->setText("");
+		qDebug("blooie");
 		if (name == "New Tileset")
 		{
+			qDebug("poop");
 			_tileset_ledit->setEnabled(true);
 			_mod_tileset->setEnabled(true);
 			_all_tiles->setEnabled(true);
 		}
 		else
 		{
+			qDebug("hi");
 			_tileset_ledit->setEnabled(false);
 			_mod_tileset->setEnabled(false);
 			_all_tiles->setEnabled(false);
@@ -1310,7 +1335,7 @@ void DatabaseDialog::_ToggleWalkCheckboxes(bool on)
 
 
 
-// ********** Private function **********
+// ********** Private functions **********
 
 void DatabaseDialog::_PopulateTilesetHelper(Q3IconView *tileset, const QString& name)
 {
@@ -1320,7 +1345,7 @@ void DatabaseDialog::_PopulateTilesetHelper(Q3IconView *tileset, const QString& 
 		_SwitchTileset(new TileSet(_db, name));
 
 		std::list<DbTile> tiles = _selected_set->GetTiles();
-		for(std::list<DbTile>::const_iterator it=tiles.begin(); it!=tiles.end(); it++)
+		for(std::list<DbTile>::const_iterator it = tiles.begin(); it != tiles.end(); it++)
 			(void) new Q3IconViewItem(tileset, (*it).file_name, QPixmap("img/tiles/" + (*it).file_name));
 	} // no populating necessary otherwise
 } // _PopulateTilesetHelper()
@@ -1334,8 +1359,9 @@ void DatabaseDialog::_SwitchTileset(TileSet* new_set)
 			"Do you want to save your changes?", QMessageBox::Yes, QMessageBox::No);
 		if (ret == QMessageBox::Yes)
 			_selected_set->Save();
+		delete _selected_set;
 	} // must not be NULL
 
-	_selected_set.reset(new_set);
+	_selected_set = new_set;
 	_set_modified = false;
 } // _SwitchTileset(...)

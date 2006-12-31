@@ -29,19 +29,18 @@ TilesetTable::TilesetTable(QWidget* parent, const QString& name, TileDatabase* d
 	setSelectionMode(Q3Table::Single);
 	setTopMargin(0);
 	setLeftMargin(0);
-
-	std::list<DbTile> tiles;
 	
 	// Create filename from name.
+	std::list<DbTile> tiles;
 	if (name == "Global")
 		tiles = db->GetGlobalSet().GetTiles();
 	else
 	{
-		TileSet Set(db, name);
-		tiles = Set.GetTiles();
+		TileSet tset(db, name);
+		tiles = tset.GetTiles();
 	}
 
-	// Set up the table
+	// Set up the table.
 	int num_columns = visibleWidth() / TILE_WIDTH - 1;
 	setNumCols(num_columns);
 	setNumRows(static_cast<int> (ceil(
@@ -51,7 +50,7 @@ TilesetTable::TilesetTable(QWidget* parent, const QString& name, TileDatabase* d
 	for (int i = 0; i < numCols(); i++)
 		setColumnWidth(i, TILE_WIDTH);
 
-	// Read in tiles and create table items
+	// Read in tiles and create table items.
 	int row = 0;
 	int col = 0;
 	for (std::list<DbTile>::const_iterator it=tiles.begin(); it!=tiles.end(); it++)
@@ -74,6 +73,11 @@ TilesetTable::~TilesetTable()
 {
 } // Tileset destructor
 
+
+
+//*******************************************************
+// DbTile class public functions follow
+//*******************************************************
 DbTile::DbTile()
 {
 } // DbTile default constructor
@@ -84,6 +88,15 @@ DbTile::DbTile(const QString& filename, int walkable)
 	walkability = walkable;
 } // DbTile constructor
 
+DbTile::~DbTile()
+{
+} // DbTile destructor
+
+
+
+//*******************************************************
+// TileDatabase class public functions follow
+//*******************************************************
 TileDatabase::TileDatabase() : _global_set(this)
 {
 } // TileDatabase default constructor
@@ -113,12 +126,17 @@ TileDatabase::TileDatabase(const QString& db_file_name) : _global_set(this)
 	read_data.CloseFile();
 } // TileDatabase constructor
 
+TileDatabase::~TileDatabase()
+{
+	_tiles.clear();
+} // TileDatabase destructor
+
 void TileDatabase::Update(const QString& tile_dir_name)
 {
 	QDir tile_dir(tile_dir_name);	
 	QStringList files = tile_dir.entryList("*.png");
 
-	// iterate through the tiles in the database and delete ones that do not exist
+	// Iterate through the tiles in the database and delete ones that do not exist
 	for (std::map<QString, DbTile>::iterator it = _tiles.begin(); it != _tiles.end(); it++)
 	{
 		if (files.find((*it).first) == files.end())
@@ -126,10 +144,10 @@ void TileDatabase::Update(const QString& tile_dir_name)
 			// Remove from global set
 			_global_set.RemoveTile((*it).first);
 			_tiles.erase(it);
-		}
-	}
+		} // tile not found
+	} // go through all tiles in the database
 
-	// iterate through all files in the directory and add new ones
+	// Iterate through all files in the directory and add new ones
 	for (QStringList::const_iterator it = files.begin(); it != files.end(); it++)
 	{
 		QString tile_file = *it;
@@ -139,8 +157,8 @@ void TileDatabase::Update(const QString& tile_dir_name)
 			DbTile new_tile(tile_file, 255);
 			_tiles.insert(std::pair<QString, DbTile> (tile_file, new_tile));
 			_global_set.AddTile(tile_file);
-		}
-	}	
+		} // tile not found
+	} // go through all files in the directory
 } // Update(...)
 
 void TileDatabase::Save(const QString& file_name)
@@ -149,7 +167,7 @@ void TileDatabase::Save(const QString& file_name)
 	write_data.OpenFile(file_name.toStdString(), SCRIPT_WRITE);
 
 	// Write tiles
-	write_data.WriteComment("Stores names and properties of all files in the database");
+	write_data.WriteComment("Stores names and properties of all tiles in the database");
 	write_data.WriteBeginTable("tile_filenames");
 	int index = 1;
 	for(std::map<QString, DbTile>::iterator it = _tiles.begin(); it != _tiles.end(); it++)
@@ -180,6 +198,11 @@ bool TileDatabase::TileExists(const QString& tile_name)
 	return (_tiles.find(tile_name) != _tiles.end());
 } // TileExists(...)
 
+
+
+//*******************************************************
+// TileSet class public functions follow
+//*******************************************************
 TileSet::TileSet(TileDatabase* db)
 {
 	_db = db;
@@ -201,6 +224,13 @@ TileSet::TileSet(TileDatabase* db, const QString& name)
 	read_data.ReadCloseTable();
 	read_data.CloseFile();
 } // TileSet constructor
+
+TileSet::~TileSet()
+{
+	_db = NULL;
+	_name = "";
+	_tile_names.clear();
+} // TileSet destructor
 
 void TileSet::AddTile(const QString& tile_name)
 {

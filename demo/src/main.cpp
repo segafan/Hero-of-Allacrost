@@ -105,7 +105,7 @@ int32 main(int32 argc, char *argv[]) {
 		// Now the program should be in app/Contents
 		path.append ("/Resources/");
 		chdir(path.c_str());
-	#elsif __linux__
+	#elif __linux__
 		chdir(DATADIR);
 	#endif
 

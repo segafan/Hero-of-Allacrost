@@ -47,7 +47,6 @@
 #include <Q3VBoxLayout>
 
 #include <map>
-#include <boost/scoped_ptr.hpp>
 
 //! All calls to the editor are wrapped in this namespace.
 namespace hoa_editor
@@ -384,7 +383,7 @@ class DatabaseDialog: public Q3TabDialog
 		QComboBox* _tilesets_cbox;
 
 		TileDatabase* _db;
-		boost::scoped_ptr<TileSet> _selected_set;
+		TileSet* _selected_set;
 		QString _selected_item;
 		//! True if the current tileset has been modified, false otherwise.
 		bool _set_modified;

@@ -51,10 +51,14 @@ class TilesetTable : public Q3Table
 class DbTile
 {
 	public:
-		DbTile();
+		DbTile();   // constructor
+		//! Constructs a database tile with file_name filename and walkability property of walkable.
 		DbTile(const QString& filename, int walkable);
+		~DbTile();  // destructor
 
+		//! The file name of this tile.
 		QString file_name;
+		//! An integer from 0-255 specifying how many layers of this tile are walkable.
 		int walkability;
 };
 
@@ -66,6 +70,7 @@ class TileSet
 		//! Loads a tileset using the specified database. name is just the name of the tileset,
 		//! not the filename!
 		TileSet(TileDatabase* db, const QString& name);
+		~TileSet();  // destructor
 
 		//! Adds a tile from the database to the tileset.
 		void AddTile(const QString& tile_name);
@@ -86,8 +91,11 @@ class TileSet
 		const QString& GetName() const;
 		
 	private:
+		//! The tile database this tileset is associated with.
 		TileDatabase* _db;
+		//! A list of tile filenames associated with this tileset.
 		std::list<QString> _tile_names;
+		//! The name of the tileset. This is not the filename associated with the tileset.
 		QString _name;
 };
 
@@ -98,12 +106,13 @@ class TileDatabase
 		TileDatabase();
 		//! Load database from the specified path
 		TileDatabase(const QString& db_file_name);
+		~TileDatabase();  // destructor
 
 		//! Synchronizes the TileDatabase with the specified directory. This will both add new
 		//! files and also remove files that do not exist anymore.
 		void Update(const QString& tile_dir_name);
 
-		//! Writes database to disk
+		//! Writes database to disk.
 		void Save(const QString& file_name);
 
 		//! Returns a reference to the tile with the specified name.
@@ -115,7 +124,9 @@ class TileDatabase
 		TileSet& GetGlobalSet();
 
 	private:
+		//! A map with tile name as a key to a DbTile. This map contains all tiles in the database.
 		std::map<QString, DbTile> _tiles;
+		//! The special global tileset, always present, contains all existing tiles.
 		TileSet _global_set;
 };
 
