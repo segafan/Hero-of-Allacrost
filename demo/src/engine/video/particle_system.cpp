@@ -140,9 +140,9 @@ bool ParticleSystem::Draw()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	
-	StillImage *id = _animation.GetFrame(_animation.GetCurFrameIndex());
+	StillImage *id = _animation.GetFrame(_animation.GetCurrentFrameIndex());
 	Image *img = id->_elements[0].image;
-	VideoManager->_BindTexture(img->texSheet->texID);
+	VideoManager->_BindTexture(img->texture_sheet->texID);
 
 
 	float frame_progress = _animation.GetFrameProgress();
@@ -343,12 +343,12 @@ bool ParticleSystem::Draw()
 	{
 		glEnableClientState(GL_VERTEX_ARRAY);
 
-		int findex = _animation.GetCurFrameIndex();
+		int findex = _animation.GetCurrentFrameIndex();
 		findex = (findex + 1) % _animation.GetNumFrames();
 		
 		StillImage *id2 = _animation.GetFrame(findex);
 		Image *img2 = id2->_elements[0].image;
-		VideoManager->_BindTexture(img2->texSheet->texID);
+		VideoManager->_BindTexture(img2->texture_sheet->texID);
 
 
 		u1 = img2->u1;
