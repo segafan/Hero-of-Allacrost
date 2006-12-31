@@ -519,7 +519,7 @@ public:
 	*** what you are doing.
 	**/
 	StillImage *GetFrame(uint32 index) const
-		{ if (index < _frames.size()) return NULL; else return const_cast<StillImage*>(&(_frames[index]._image)); }
+		{ if (index >= _frames.size()) return NULL; else return const_cast<StillImage*>(&(_frames[index]._image)); }
 	/** \brief Returns the percentage of timing complete for the current frame being shown.
 	*** \return A float from 0.0f to 1.0f, indicate how much of its allotted time this frame has spent.
 	**/

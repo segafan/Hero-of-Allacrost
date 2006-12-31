@@ -45,10 +45,11 @@ bool GameVideo::_DrawStillImage(const StillImage &id)
 
 bool GameVideo::_DrawStillImage(const StillImage &id, const Color &color)
 {
-	// don't do anything if this image is completely transparent (invisible)
-	if(color[3] == 0.0f)
+	// Don't do anything if this image is completely transparent (invisible)
+	if (color[3] == 0.0f) {
 		return true;
-		
+	}
+
 	size_t numElements = id._elements.size();
 	
 	float modulation = _fader.GetFadeModulation();
@@ -125,14 +126,8 @@ bool GameVideo::_DrawStillImage(const StillImage &id, const Color &color)
 // _DrawElement: draws an image element. This is only used privately.
 //-----------------------------------------------------------------------------
 
-bool GameVideo::_DrawElement
-(
-	const ImageElement &element
-)
-{	
+bool GameVideo::_DrawElement(const ImageElement &element) {
 	Image *img = element.image;
-
-	
 	
 	// set vertex coordinates
 	float xlo,xhi,ylo,yhi;
@@ -490,15 +485,12 @@ bool GameVideo::DrawFPS(int32 frameTime)
 //            animated image), modulating the colors by the scene lighting
 //-----------------------------------------------------------------------------
 
-bool GameVideo::DrawImage(const ImageDescriptor &id)
-{
-	if(id._animated)
-	{
-		const AnimatedImage &anim = dynamic_cast<const AnimatedImage &>(id);		
+bool GameVideo::DrawImage(const ImageDescriptor &id) {
+	if (id._animated) {
+		const AnimatedImage &anim = dynamic_cast<const AnimatedImage &>(id);
 		return _DrawStillImage(*anim.GetFrame(anim.GetCurrentFrameIndex()));
 	}
-	else
-	{
+	else {
 		return _DrawStillImage(dynamic_cast<const StillImage &>(id));
 	}
 }
