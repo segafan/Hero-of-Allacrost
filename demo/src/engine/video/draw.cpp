@@ -70,8 +70,8 @@ bool GameVideo::_DrawStillImage(const StillImage &id, const Color &color)
 	{		
 		glPushMatrix();
 		
-		float xoff = (float)id._elements[iElement].xOffset;
-		float yoff = (float)id._elements[iElement].yOffset;
+		float xoff = (float)id._elements[iElement].x_offset;
+		float yoff = (float)id._elements[iElement].y_offset;
 
 		if(_xflip)
 		{
@@ -191,11 +191,11 @@ bool GameVideo::_DrawElement
 
 		// set up blending parameters
 		glEnable(GL_TEXTURE_2D);
-		_BindTexture(img->texSheet->texID);
+		_BindTexture(img->texture_sheet->texID);
 
 		glBegin(GL_QUADS);
 
-		if(element.oneColor)
+		if (element.one_color)
 		{
 			glColor4fv((GLfloat *)&element.color[0]);
 
@@ -234,7 +234,7 @@ bool GameVideo::_DrawElement
 	else
 	{
 		glBegin(GL_QUADS);
-		if(element.oneColor)
+		if (element.one_color)
 		{
 			glColor4fv((GLfloat *)&element.color[0]);
 			glVertex2f(xlo, ylo); //bl
@@ -344,10 +344,10 @@ bool GameVideo::_DrawElement
 
 		// set up texture parameters
 		glEnable(GL_TEXTURE_2D);
-		_BindTexture(img->texSheet->texID);
+		_BindTexture(img->texture_sheet->texID);
 
 		glBegin(GL_QUADS);
-		if(element.oneColor)
+		if(element.one_color)
 		{
 			Color color = element.color[0] * modulateColor;
 			glColor4fv((GLfloat *)&color);
@@ -385,7 +385,7 @@ bool GameVideo::_DrawElement
 	else
 	{
 		glBegin(GL_QUADS);
-		if(element.oneColor)
+		if(element.one_color)
 		{
 			Color color = element.color[0] * modulateColor;			
 			glColor4fv((GLfloat *)&color);
@@ -495,7 +495,7 @@ bool GameVideo::DrawImage(const ImageDescriptor &id)
 	if(id._animated)
 	{
 		const AnimatedImage &anim = dynamic_cast<const AnimatedImage &>(id);		
-		return _DrawStillImage(*anim.GetFrame(anim.GetCurFrameIndex()));
+		return _DrawStillImage(*anim.GetFrame(anim.GetCurrentFrameIndex()));
 	}
 	else
 	{
@@ -514,7 +514,7 @@ bool GameVideo::DrawImage(const ImageDescriptor &id, const Color &color)
 	if(id._animated)
 	{
 		const AnimatedImage &anim = dynamic_cast<const AnimatedImage &>(id);		
-		return _DrawStillImage(*anim.GetFrame(anim.GetCurFrameIndex()), color);
+		return _DrawStillImage(*anim.GetFrame(anim.GetCurrentFrameIndex()), color);
 	}
 	else
 	{

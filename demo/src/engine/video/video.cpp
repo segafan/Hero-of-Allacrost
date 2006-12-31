@@ -1357,7 +1357,7 @@ bool GameVideo::CaptureScreen(StillImage &id)
 		return false;
 	}
 	
-	newImage->refCount = 1;
+	newImage->ref_count = 1;
 	
 	// if width or height are zero, that means to use the dimensions of image
 	if(id._width == 0.0f)

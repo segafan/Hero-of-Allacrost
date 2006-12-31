@@ -734,13 +734,13 @@ void ScriptDescriptor::SaveStack(const std::string &filename)
 		switch(luabind::type(*it))
 		{
 		case LUA_TBOOLEAN:
-			sd.WriteBool(object_cast<string>(it.key()), object_cast<bool>(*it));
+// 			sd.WriteBool(object_cast<string>(it.key()), object_cast<bool>(*it));
 			break;
 		case LUA_TNUMBER:
-			sd.WriteFloat(object_cast<string>(it.key()), object_cast<float>(*it));
+// 			sd.WriteFloat(object_cast<string>(it.key()), object_cast<float>(*it));
 			break;
 		case LUA_TSTRING:
-			sd.WriteString(object_cast<string>(it.key()), object_cast<string>(*it));
+// 			sd.WriteString(object_cast<string>(it.key()), object_cast<string>(*it));
 			break;
 		case LUA_TTABLE:
 			//this->_SaveStackProcessTable(sd, object_cast<string>(it.key()), object(*it));
@@ -761,16 +761,16 @@ void ScriptDescriptor::_SaveStackProcessTable(ScriptDescriptor &sd, string &name
 		switch(luabind::type(*it))
 		{
 		case LUA_TBOOLEAN:
-			sd.WriteBool(object_cast<string>(it.key()), object_cast<bool>(*it));
+// 			sd.WriteBool(object_cast<string>(it.key()), object_cast<bool>(*it));
 			break;
 		case LUA_TNUMBER:
-			sd.WriteFloat(object_cast<string>(it.key()), object_cast<float>(*it));
+// 			sd.WriteFloat(object_cast<string>(it.key()), object_cast<float>(*it));
 			break;
 		case LUA_TSTRING:
-			sd.WriteString(object_cast<string>(it.key()), object_cast<string>(*it));
+// 			sd.WriteString(object_cast<string>(it.key()), object_cast<string>(*it));
 			break;
 		case LUA_TTABLE:
-			this->_SaveStackProcessTable(sd, object_cast<string>(it.key()), object(*it));
+// 			this->_SaveStackProcessTable(sd, object_cast<string>(it.key()), object(*it));
 			break;
 		}
 	}

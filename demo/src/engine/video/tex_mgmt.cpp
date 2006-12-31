@@ -140,7 +140,7 @@ bool GameVideo::_LoadImage(StillImage &id, bool grayscale)
 	if(id._filename.empty())
 	{
 		id._elements.clear();		
-		ImageElement quad(NULL, 0.0f, 0.0f, id._width, id._height, 0.0f, 0.0f, 1.0f, 1.0f, id._color);
+		ImageElement quad(NULL, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, id._width, id._height, id._color);
 		id._elements.push_back(quad);	
 		return true;
 	}
@@ -160,22 +160,22 @@ bool GameVideo::_LoadImage(StillImage &id, bool grayscale)
 			return false;
 		}
 
-		if(img->refCount == 0)
+		if (img->ref_count == 0)
 		{
 			// if ref count is zero, it means this image was freed, but
 			// not removed, so restore it
-			if(!img->texSheet->RestoreImage(img))
+			if(!img->texture_sheet->RestoreImage(img))
 				return false;
 		}
 		
-		++img->refCount;
+		++(img->ref_count);
 		
 		if(id._width == 0.0f)
 			id._width = (float) img->width;
 		if(id._height == 0.0f)
 			id._height = (float) img->height;
 		
-		ImageElement element(img, 0, 0, id._width, id._height, 0.0f, 0.0f, 1.0f, 1.0f, id._color);		
+		ImageElement element(img, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f, id._width, id._height, id._color);
 		id._elements.push_back(element);
 				
 		return true;
@@ -256,11 +256,11 @@ bool GameVideo::LoadAnimatedImage(AnimatedImage &id, const std::string filename,
 
 bool GameVideo::_LoadMultiImage (private_video::MultiImage &id)
 {
-	std::string filename = id._filename;
-	uint32 rows = id._rows;
-	uint32 cols = id._cols;
-	bool grayscale = id._grayscale;
-	std::vector <StillImage>& images = *id._still_images;
+	std::string filename = id.filename;
+	uint32 rows = id.rows;
+	uint32 cols = id.cols;
+	bool grayscale = id.grayscale;
+	std::vector <StillImage>& images = *id.still_images;
 
 	if (filename.empty())
 	{
@@ -329,24 +329,25 @@ bool GameVideo::_LoadMultiImage (private_video::MultiImage &id)
 					return false;
 				}
 
-				if(img->refCount == 0)
+				if(img->ref_count == 0)
 				{
 					// if ref count is zero, it means this image was freed, but
 					// not removed, so restore it
-					if(!img->texSheet->RestoreImage(img))
+					if(!img->texture_sheet->RestoreImage(img))
 					{
 						return false;
 					}
 				}
 			
-				++img->refCount;
+				++(img->ref_count);
 		
 				if(images.at(current_image)._width < 0.0f)
 					images.at(current_image)._width = (float) img->width;
 				if(images.at(current_image)._height < 0.0f)
 					images.at(current_image)._height = (float) img->height;
 		
-				ImageElement element(img, 0, 0, images.at(current_image)._width, images.at(current_image)._height, 0.0f, 0.0f, 1.0f, 1.0f, images.at(current_image)._color);
+				ImageElement element(img, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f,
+					images.at(current_image)._width, images.at(current_image)._height, images.at(current_image)._color);
 				images.at(current_image)._elements.push_back(element);
 			}
 			else	// If the image is not present, take the piece from the loaded image
@@ -355,15 +356,15 @@ bool GameVideo::_LoadMultiImage (private_video::MultiImage &id)
 				images.at(current_image)._elements.clear();
 				images.at(current_image)._animated = false;
 				images.at(current_image)._grayscale = grayscale;
-				images.at(current_image)._isStatic = false;
-				if (id._height == 0.0f)
+				images.at(current_image)._is_static = false;
+				if (id.height == 0.0f)
 					images.at(current_image)._height = (float)((x == rows-1 && loadInfo.height%rows) ? loadInfo.height-(x*loadInfo.height/rows) : loadInfo.height/rows);
 				else
-					images.at(current_image)._height = id._height;
-				if (id._width == 0.0f)
+					images.at(current_image)._height = id.height;
+				if (id.width == 0.0f)
 					images.at(current_image)._width = (float)((y == cols-1 && loadInfo.width%cols) ? loadInfo.width-(y*loadInfo.width/cols) : loadInfo.width/cols);
 				else
-					images.at(current_image)._width = id._width;
+					images.at(current_image)._width = id.width;
 
 				private_video::ImageLoadInfo info;
 				info.width = ((y == cols-1 && loadInfo.width%cols) ? loadInfo.width-(y*loadInfo.width/cols) : loadInfo.width/cols);
@@ -378,7 +379,7 @@ bool GameVideo::_LoadMultiImage (private_video::MultiImage &id)
 				Image *newImage = new Image(image_name, info.width, info.height, grayscale);
 
 				// try to insert the image in a texture sheet
-				TexSheet *sheet = _InsertImageInTexSheet(newImage, info, images.at(current_image)._isStatic);
+				TexSheet *sheet = _InsertImageInTexSheet(newImage, info, images.at(current_image)._is_static);
 				
 				if(!sheet)
 				{
@@ -392,13 +393,14 @@ bool GameVideo::_LoadMultiImage (private_video::MultiImage &id)
 					return false;
 				}
 				
-				newImage->refCount = 1;
+				newImage->ref_count = 1;
 				
 				// store the image in our std::map
 				_images[image_name] = newImage;
 
 				// store the new image element
-				ImageElement element(newImage, 0, 0, images.at(current_image)._width, images.at(current_image)._height, 0.0f, 0.0f, 1.0f, 1.0f, images.at(current_image)._color);
+				ImageElement element(newImage, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f,
+					images.at(current_image)._width, images.at(current_image)._height, images.at(current_image)._color);
 				images.at(current_image)._elements.push_back(element);
 
 				// finally, delete the buffer used to hold the pixel data
@@ -490,7 +492,7 @@ bool GameVideo::EndImageLoadBatch()
 //-----------------------------------------------------------------------------
 bool GameVideo::_LoadImageHelper(StillImage &id, bool grayscale)
 {
-	bool isStatic = id._isStatic;
+	bool isStatic = id._is_static;
 	
 	id._elements.clear();
 
@@ -521,7 +523,7 @@ bool GameVideo::_LoadImageHelper(StillImage &id, bool grayscale)
 		return false;
 	}
 	
-	newImage->refCount = 1;
+	newImage->ref_count = 1;
 	
 	// store the image in our std::map
 	_images[id._filename] = newImage;
@@ -535,7 +537,7 @@ bool GameVideo::_LoadImageHelper(StillImage &id, bool grayscale)
 		id._height = (float) loadInfo.height;
 
 	// store the new image element
-	ImageElement element(newImage, 0, 0, id._width, id._height, 0.0f, 0.0f, 1.0f, 1.0f, id._color);
+	ImageElement element(newImage, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f, id._width, id._height, id._color);
 	id._elements.push_back(element);
 
 	// finally, delete the buffer used to hold the pixel data
@@ -812,7 +814,7 @@ StillImage GameVideo::TilesToObject
 	id._width  = (float) w * tileWidth;   // total width/height of compound
 	id._height = (float) h * tileHeight;
 	
-	id._isStatic = tiles[0]._isStatic;
+	id._is_static = tiles[0]._is_static;
 	
 	for(int32 y = 0; y < h; ++y)
 	{
@@ -1091,7 +1093,7 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 	int32 w = sheet->width;
 	int32 h = sheet->height;
 	
-	Image img( sheet, string(), 0, 0, w, h, 0.0f, 0.0f, 1.0f, 1.0f );
+	Image img(sheet, string(), 0, 0, 0.0f, 0.0f, 1.0f, 1.0f, w, h, false);
 
 
 	_PushContext();	
@@ -1103,7 +1105,7 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 	Move(0.0f,0.0f);
 	glScalef(0.5f, 0.5f, 0.5f);
 
-	ImageElement elem(&img, 0.0f, 0.0f, (float)w, (float)h, 0.0f, 0.0f, 1.0f, 1.0f);
+	ImageElement elem(&img, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, (float)w, (float)h);
 	
 	StillImage id;
 	id._elements.push_back(elem);
@@ -1198,16 +1200,16 @@ bool GameVideo::_DeleteImage(Image *const img)
 	if(img->width > 512 || img->height > 512)
 	{
 		// remove the image and texture sheet completely
-		_RemoveSheet(img->texSheet);
+		_RemoveSheet(img->texture_sheet);
 		_RemoveImage(img);
 	}
 	else
 	{
 		// for smaller images, simply mark them as free in the memory manager
-		--img->refCount;
-		if(img->refCount <= 0)
+		--(img->ref_count);
+		if(img->ref_count <= 0)
 		{
-			img->texSheet->FreeImage(img);
+			img->texture_sheet->FreeImage(img);
 		}
 	}
 	
@@ -1261,7 +1263,7 @@ bool TexSheet::AddImage(Image *img, ImageLoadInfo & loadInfo)
 	// now img contains the x, y, width, and height of the subrectangle
 	// inside the texture sheet, so go ahead and copy that area
 		
-	TexSheet *texSheet = img->texSheet;
+	TexSheet *texSheet = img->texture_sheet;
 	if(!texSheet)
 	{
 		// technically this should never happen since Insert() returned true
@@ -1426,16 +1428,16 @@ bool GameVideo::_DeleteImage(StillImage &id)
 		
 		if(img)
 		{				
-			if(img->refCount <= 0)
+			if(img->ref_count <= 0)
 			{
 				if(VIDEO_DEBUG)		
 					cerr << "VIDEO ERROR: Called DeleteImage() when refcount was already <= 0!" << endl;
 				return false;
 			}
 
-			--img->refCount;	
+			--(img->ref_count);
 			
-			if(img->refCount == 0)
+			if(img->ref_count == 0)
 			{
 				// 1. If it's on a large tex sheet (> 512x512), delete it
 				// Note: We can assume that this is the only image on that texture
@@ -1449,7 +1451,7 @@ bool GameVideo::_DeleteImage(StillImage &id)
 
 				// 2. otherwise, mark it as "freed"
 				
-				else if(!img->texSheet->FreeImage(img))
+				else if(!img->texture_sheet->FreeImage(img))
 				{
 					if(VIDEO_DEBUG)		
 						cerr << "VIDEO ERROR: Could not remove image from texture sheet!" << endl;
@@ -1464,7 +1466,7 @@ bool GameVideo::_DeleteImage(StillImage &id)
 	id._elements.clear();
 	id._filename = "";
 	id._height = id._width = 0;
-	id._isStatic = 0;
+	id._is_static = 0;
 	
 	return true;
 }
@@ -1678,7 +1680,7 @@ bool VariableTexMemMgr::Insert  (Image *img)
 	img->v1 = float(img->y + 0.5f)               / sheetH;
 	img->v2 = float(img->y + img->height - 0.5f) / sheetH;
 
-	img->texSheet = _texSheet;
+	img->texture_sheet = _texSheet;
 	return true;
 }
 
@@ -1815,7 +1817,7 @@ bool FixedTexMemMgr::Insert(Image *img)
 	img->v1 = float(img->y + 0.5f)               / sheetH;
 	img->v2 = float(img->y + img->height - 0.5f) / sheetH;
 
-	img->texSheet = _texSheet;
+	img->texture_sheet = _texSheet;
 	
 	return true;
 }
@@ -2251,7 +2253,7 @@ bool GameVideo::_ReloadImagesToSheet(TexSheet *sheet)
 	while(iImage != iImageEnd)
 	{
 		Image *i = iImage->second;
-		if(i->texSheet == sheet)
+		if(i->texture_sheet == sheet)
 		{
 			ImageLoadInfo loadInfo;
 			
@@ -2290,7 +2292,7 @@ bool GameVideo::_SaveTempTextures()
 		// it's a temporary texture!!
 		if(image->filename.find("TEMP_") != string::npos)
 		{
-			image->texSheet->SaveImage(image);			
+			image->texture_sheet->SaveImage(image);
 		}
 		
 		++iImage;
