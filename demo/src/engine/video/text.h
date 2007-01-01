@@ -7,118 +7,88 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
+/** ****************************************************************************
+*** \file    text.h
+*** \author  Raj Sharma, roos@allacrost.org
+*** \brief   Header file for text rendering
+***
+*** This code makes use of the SDL_ttf font library for representing fonts,
+*** font glyphs, and text.
+*** ***************************************************************************/
+
 #ifndef __TEXT_HEADER__
 #define __TEXT_HEADER__
-
 
 #include "utils.h"
 
 typedef struct _TTF_Font TTF_Font;
 
+namespace hoa_video {
 
-namespace hoa_video
-{
-
-/*!***************************************************************************
- *  \brief Styles for text shadows
- *****************************************************************************/
-
-enum TextShadowStyle
-{
-	VIDEO_TEXT_SHADOW_INVALID = -1,
-	
-	//! no text shadow, even if shadows are enabled
+//! \brief Styles for setting the type of text shadows.
+enum TextShadowStyle {
+	//! \brief No text shadow, even if shadows are enabled
 	VIDEO_TEXT_SHADOW_NONE = 0,
-	
-	//! shadowed area is darkened (default)
+	//! \brief Shadowed area is darkened (default)
 	VIDEO_TEXT_SHADOW_DARK = 1,
-	
-	//! shadowed area is lightened
+	//! \brief Shadowed area is lightened
 	VIDEO_TEXT_SHADOW_LIGHT = 2,
-	
-	//! shadowed area is completely black
+	//! \brief Shadowed area is completely black
 	VIDEO_TEXT_SHADOW_BLACK = 3,
-	
-	//! shadowed area is the color of the text, but less alpha
+	//! \brief Shadowed area is the color of the text, but less alpha
 	VIDEO_TEXT_SHADOW_COLOR = 4,
-	
-	//! shadowed area is the inverse of the text's color (e.g. white text, black shadow)
-	VIDEO_TEXT_SHADOW_INVCOLOR = 5,
-	
-	VIDEO_TEXT_SHADOW_TOTAL = 6
-	
+	//! \brief Shadowed area is the inverse of the text's color (e.g. white text, black shadow)
+	VIDEO_TEXT_SHADOW_INVCOLOR = 5
 };
 
-/*!***************************************************************************
- *  \brief this structure holds properties about a particular font glyph
- *****************************************************************************/
-
-
-class FontGlyph
-{
-public:	
-
-	//! index of the GL texture for this glyph
-	GLuint texture;
-	
-	//! width of the glyph in pixels
-	int32 width;
-	
-	//! height of the glyph in pixels
-	int32 height;
-
-	//! minx of the glyph in pixels (see TTF_GlyphMetrics)
-	int minx;
-	
-	//! miny of the glyph in pixels (see TTF_GlyphMetrics)
-	int miny;
-
-	//! maxx of the glyph in texture space (see TTF_GlyphMetrics)
-	float tx;
-	
-	//! maxy of the glyph in texture space (see TTF_GlyphMetrics)
-	float ty;
-
-	//! space between glyphs
-	int advance;
-};
-
-
-/*!***************************************************************************
- *  \brief this structure holds properties about fonts
- *****************************************************************************/
-
-class FontProperties
-{
+/** ****************************************************************************
+*** \brief A structure to hold properties about a particular font glyph
+*** ***************************************************************************/
+class FontGlyph {
 public:
-
-	//! maximum height of all glyphs
+	//! \brief The index of the GL texture for this glyph.
+	GLuint texture;
+	//! \brief The width of the glyph in pixels.
+	int32 width;
+	//! \brief The height of the glyph in pixels.
 	int32 height;
-	
-	//! SDL_ttf's recommended amount of spacing between lines
-	int32 lineskip;
-	
-	//! height above baseline of font
+	//! \brief The minx of the glyph in pixels (see TTF_GlyphMetrics).
+	int min_x;
+	//! \brief The miny of the glyph in pixels (see TTF_GlyphMetrics).
+	int min_y;
+	//! \brief The maxx of the glyph in texture space (see TTF_GlyphMetrics).
+	float max_x;
+	//! \brief The maxy of the glyph in texture space (see TTF_GlyphMetrics).
+	float max_y;
+	//! \brief The amount of space between glyphs.
+	int32 advance;
+}; // class FontGlyph
+
+
+/** ****************************************************************************
+*** \brief A structure which holds properties about fonts
+*** ***************************************************************************/
+class FontProperties {
+public:
+	//! \brief The maximum height of all of the glyphs for this font.
+	int32 height;
+	//! \brief SDL_ttf's recommended amount of spacing between lines.
+	int32 line_skip;
+	//! \brief The height above baseline of font
 	int32 ascent;
-	
-	//! height below baseline of font
+	//! \brief The height below baseline of font
 	int32 descent;
-	
-	//! x offset of text shadow
-	int32 shadowX;
-	
-	//! y offset of text shadow
-	int32 shadowY;
-	
-	//! style of text shadow
-	TextShadowStyle shadowStyle;
-
-	//! pointer fot STL's TTF Font structure
-	TTF_Font * ttf_font;
-
-	//! cache of all glyphs used in this font
-	std::map<uint16, FontGlyph *> * glyphcache;
-};
+	//! \brief The x offset of the text shadow.
+	int32 shadow_x;
+	//! \brief The y offset of the text shadow.
+	int32 shadow_y;
+	//! \brief The style of the text shadow.
+	TextShadowStyle shadow_style;
+	//! \brief A pointer to SDL_TTF's font structure.
+	TTF_Font* ttf_font;
+	//! \brief A pointer to a cache which holds all of the glyphs used in this font.
+	std::map<uint16, FontGlyph*>* glyph_cache;
+}; // class FontProperties
 
 }  // namespace hoa_video
 

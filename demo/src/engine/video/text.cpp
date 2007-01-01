@@ -7,124 +7,89 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "utils.h"
+/** ****************************************************************************
+*** \file    text.cpp
+*** \author  Raj Sharma, roos@allacrost.org
+*** \brief   Source file for text rendering
+***
+*** This code makes use of the SDL_ttf font library for representing fonts,
+*** font glyphs, and text.
+*** ***************************************************************************/
+
 #include <cassert>
 #include <cstdarg>
-#include "video.h"
 #include <math.h>
+#include "utils.h"
+#include "video.h"
 #include "gui.h"
 
 using namespace std;
+using namespace hoa_utils;
 using namespace hoa_video::private_video;
-using hoa_utils::MakeUnicodeString;
-using hoa_utils::ustring;
 
-namespace hoa_video 
-{
+namespace hoa_video {
 
 extern uint32 RoundUpPow2(uint32 x);
 
-//-----------------------------------------------------------------------------
-// LoadFont: loads a font of a given size. The name parameter is a string which
-//           you use to refer to the font when calling SetFont().
-//
-//   Example:  gamevideo->LoadFont( "fonts/arial.ttf", "arial36", 36 );
-//-----------------------------------------------------------------------------
-bool GameVideo::LoadFont(const string &filename, const string &name, int32 size)
-{
-	// quit if font is already loaded
-	if( _fontMap.find(filename) != _fontMap.end() )
-	{
+
+
+bool GameVideo::LoadFont(const string &filename, const string &name, uint32 size) {
+	// Return true if the font is already loaded
+	if (_font_map.find(filename) != _font_map.end()) {
 		return true;
 	}
 
-	// load the font
+	// Attempt to load the font
 	TTF_Font *font = TTF_OpenFont(filename.c_str(), size);
 	
-	if(!font)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: TTF_OpenFont() failed for filename:\n" << filename.c_str() << endl;
+	if (!font) {
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: TTF_OpenFont() failed for font file: " << filename.c_str() << endl;
 		return false;
 	}
 
+	// Create a new FontProperties object for the font, and add it to the font map
 	FontProperties *fp = new FontProperties;
-	
-	_fontMap[name] = fp;
+	_font_map[name] = fp;
 
+	// Set all of the font's properties
+	fp->ttf_font = font;
+	fp->height = TTF_FontHeight(font);
+	fp->line_skip = TTF_FontLineSkip(font);
+	fp->ascent = TTF_FontAscent(font);
+	fp->descent = TTF_FontDescent(font);
 
-	// figure out all the font's properties
-	
-	fp->ttf_font  = font;
-	fp->height    = TTF_FontHeight(font);
-	fp->lineskip  = TTF_FontLineSkip(font);
-	fp->ascent    = TTF_FontAscent(font);
-	fp->descent   = TTF_FontDescent(font);
-	
-	fp->shadowX   = max(fp->height / 8, 1);
-	fp->shadowY   = -fp->shadowX;
-	
-	fp->shadowStyle = VIDEO_TEXT_SHADOW_DARK;
-	fp->glyphcache = new std::map<uint16, FontGlyph *>;
+	// Set default shadow: x to be 1/8th of the font's height (or 1 pixel), y to be -x
+	fp->shadow_x = max(fp->height / 8, 1);
+	fp->shadow_y = -fp->shadow_x;
+
+	// Set default shadow style and create the glyph cache
+	fp->shadow_style = VIDEO_TEXT_SHADOW_DARK;
+	fp->glyph_cache = new std::map<uint16, FontGlyph*>;
 		
 	return true;
-}
+} // bool GameVideo::LoadFont(const string &filename, const string &name, int32 size)
 
 
-//-----------------------------------------------------------------------------
-// IsValidFont: returns true if the font with the given name has been
-//              successfully loaded
-//-----------------------------------------------------------------------------
 
-bool GameVideo::IsValidFont(const std::string &name)
-{
-	// simple check, if it's in the std::map of fonts, it must be loaded
-	return (_fontMap.find(name) != _fontMap.end());
-}
-
-
-//-----------------------------------------------------------------------------
-// GetFontProperties: given font name, return properties into fp
-//-----------------------------------------------------------------------------
-
-bool GameVideo::GetFontProperties(const std::string &fontName, FontProperties &fp)
-{
-	if(!IsValidFont(fontName))
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: GameVideo::GetFontProperties() failed becase an invalid font name was passed:" << endl << "(" << fontName << ")" << endl;
-		return false;
+FontProperties* GameVideo::GetFontProperties(const std::string &font_name) {
+	if (!IsValidFont(font_name)) {
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: GetFontProperties() failed becase an invalid font name was passed: " << font_name << endl;
+		return NULL;
 	}
 	
-	fp = *(_fontMap[fontName]);
-	
-	return true;
+	return _font_map[font_name];
 }
 
 
-//-----------------------------------------------------------------------------
-// SetFont: sets the current font. The name parameter is the name that was
-//          passed to LoadFont() when it was loaded
-//-----------------------------------------------------------------------------
 
-bool GameVideo::SetFont(const std::string &name)
-{
+bool GameVideo::SetFont(const std::string &name) {
 	// check if font is loaded before setting it
-	if( _fontMap.find(name) == _fontMap.end())
+	if ( _font_map.find(name) == _font_map.end())
 		return false;
 		
-	_currentFont = name;
-	return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// SetTextColor: sets the color to use when rendering text
-//-----------------------------------------------------------------------------
-
-bool GameVideo::SetTextColor (const Color &color)
-{
-	_currentTextColor = color;
+	_current_font = name;
 	return true;
 }
 
@@ -135,7 +100,7 @@ bool GameVideo::SetTextColor (const Color &color)
 
 std::string GameVideo::GetFont() const
 {
-	return _currentFont;
+	return _current_font;
 }
 
 
@@ -162,7 +127,7 @@ bool GameVideo::_DrawTextHelper
 )
 {
 
-	if(_fontMap.empty())
+	if(_font_map.empty())
 		return false;
 		
 	// empty string, do nothing
@@ -171,10 +136,10 @@ bool GameVideo::_DrawTextHelper
 		
 	SDL_Color color;
 	
-	if(_fontMap.find(_currentFont) == _fontMap.end())
+	if(_font_map.find(_current_font) == _font_map.end())
 		return false;
 	
-	FontProperties * fp = _fontMap[_currentFont];
+	FontProperties * fp = _font_map[_current_font];
 	TTF_Font * font = fp->ttf_font;
 	
 	color.r = 255;
@@ -196,7 +161,7 @@ bool GameVideo::_DrawTextHelper
 	std::vector<uint16> newglyphs;
 	for(const uint16 * glyph = uText; *glyph != 0; glyph++)
 	{
-		if(fp->glyphcache->find(*glyph) != fp->glyphcache->end())
+		if(fp->glyph_cache->find(*glyph) != fp->glyph_cache->end())
 			continue;
 
 		newglyphs.push_back(*glyph);
@@ -307,15 +272,15 @@ bool GameVideo::_DrawTextHelper
 
 		FontGlyph * glyph = new FontGlyph;
 		glyph->texture = texture;
-		glyph->minx = minx;
-		glyph->miny = miny;
+		glyph->min_x = minx;
+		glyph->min_y = miny;
 		glyph->width = initial->w + 1;
 		glyph->height = initial->h + 1;
-		glyph->tx = (float)(((double)initial->w + 1) / ((double)w));
-		glyph->ty = (float)(((double)initial->h + 1) / ((double)h));
+		glyph->max_x = (float)(((double)initial->w + 1) / ((double)w));
+		glyph->max_y = (float)(((double)initial->h + 1) / ((double)h));
 		glyph->advance = advance;
 
-		fp->glyphcache->insert(std::pair<uint16, FontGlyph *>(newglyphs[glyphindex], glyph));
+		fp->glyph_cache->insert(std::pair<uint16, FontGlyph *>(newglyphs[glyphindex], glyph));
 
 		SDL_FreeSurface(initial);
 		SDL_FreeSurface(intermediary);
@@ -354,7 +319,7 @@ bool GameVideo::_DrawTextHelper
 
 	for(const uint16 * glyph = uText; *glyph != 0; glyph++)
 	{
-		FontGlyph * glyphinfo = (*fp->glyphcache)[*glyph];
+		FontGlyph * glyphinfo = (*fp->glyph_cache)[*glyph];
 		
 		int xhi = glyphinfo->width; 
 		int yhi = glyphinfo->height;
@@ -365,12 +330,12 @@ bool GameVideo::_DrawTextHelper
 			yhi = -yhi;
 			
 		float tx, ty;
-		tx = glyphinfo->tx;
-		ty = glyphinfo->ty;
+		tx = glyphinfo->max_x;
+		ty = glyphinfo->max_y;
 
 		int minx, miny;
-		minx = glyphinfo->minx * (int)cs.GetHorizontalDirection() + xpos;
-		miny = glyphinfo->miny * (int)cs.GetVerticalDirection();
+		minx = glyphinfo->min_x * (int)cs.GetHorizontalDirection() + xpos;
+		miny = glyphinfo->min_y * (int)cs.GetVerticalDirection();
 		
 		_BindTexture(glyphinfo->texture);
 
@@ -445,21 +410,21 @@ bool GameVideo::DrawText(const ustring &txt)
 		return true;
 	}
 
-	if(_fontMap.find(_currentFont) == _fontMap.end())
+	if(_font_map.find(_current_font) == _font_map.end())
 	{
 		if(VIDEO_DEBUG)
 			cerr << "GameVideo::DrawText() failed because font passed was either not loaded or improperly loaded!\n" <<
-			        "  *fontname: " << _currentFont << endl;
+			        "  *fontname: " << _current_font << endl;
 		return false;
 	}
 
-	FontProperties * fp = _fontMap[_currentFont];
+	FontProperties * fp = _font_map[_current_font];
 	TTF_Font * font = fp->ttf_font;
 	
 	if(font)
 	{
 		_PushContext();
-		int32 lineSkip = fp->lineskip;
+		int32 lineSkip = fp->line_skip;
 		
 		// Optimization: something seems to be wrong with ustring, using a buffer instead
 		uint16 buffer[2048];
@@ -485,11 +450,11 @@ bool GameVideo::DrawText(const ustring &txt)
 			Color oldTextColor = _currentTextColor;
 
 			// if text shadows are enabled, draw the shadow
-			if(_textShadow && fp->shadowStyle != VIDEO_TEXT_SHADOW_NONE)
+			if(_textShadow && fp->shadow_style != VIDEO_TEXT_SHADOW_NONE)
 			{
 				Color textColor;
 				
-				switch(fp->shadowStyle)
+				switch(fp->shadow_style)
 				{
 					case VIDEO_TEXT_SHADOW_DARK:
 						textColor = Color::black;
@@ -513,7 +478,7 @@ bool GameVideo::DrawText(const ustring &txt)
 					default:
 					{
 						if(VIDEO_DEBUG)
-							cerr << "VIDEO ERROR: Unknown text shadow style (" << fp->shadowStyle << ") found in GameVideo::DrawText()!" << endl;
+							cerr << "VIDEO ERROR: Unknown text shadow style (" << fp->shadow_style << ") found in GameVideo::DrawText()!" << endl;
 						break;
 					}
 				};
@@ -521,8 +486,8 @@ bool GameVideo::DrawText(const ustring &txt)
 				
 				
 				glPushMatrix();
-				MoveRelative(+_coord_sys.GetHorizontalDirection() * fp->shadowX, 0.0f);
-				MoveRelative(0.0f, _coord_sys.GetVerticalDirection() * fp->shadowY);
+				MoveRelative(+_coord_sys.GetHorizontalDirection() * fp->shadow_x, 0.0f);
+				MoveRelative(0.0f, _coord_sys.GetVerticalDirection() * fp->shadow_y);
 				
 				if(!_DrawTextHelper(buffer))
 				{
@@ -564,7 +529,7 @@ int32 GameVideo::CalculateTextWidth(const std::string &fontName, const hoa_utils
 		return -1;
 		
 	int32 w;	
-	if(-1 == TTF_SizeUNICODE(_fontMap[fontName]->ttf_font, text.c_str(), &w, NULL))
+	if(-1 == TTF_SizeUNICODE(_font_map[fontName]->ttf_font, text.c_str(), &w, NULL))
 		return -1;
 		
 	return w;
@@ -581,7 +546,7 @@ int32 GameVideo::CalculateTextWidth(const std::string &fontName, const std::stri
 		return -1;
 
 	int32 w;	
-	if(-1 == TTF_SizeText(_fontMap[fontName]->ttf_font, text.c_str(), &w, NULL))
+	if(-1 == TTF_SizeText(_font_map[fontName]->ttf_font, text.c_str(), &w, NULL))
 		return -1;
 		
 	return w;
@@ -604,14 +569,14 @@ void GameVideo::EnableTextShadow(bool enable)
 
 bool GameVideo::SetFontShadowXOffset(const std::string &fontName, int32 x)
 {
-	if(_fontMap.find(fontName) == _fontMap.end())
+	if(_font_map.find(fontName) == _font_map.end())
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: GameVideo::SetFontShadowXOffset() failed for font (" << fontName << ") because the font's properties could not be found!" << endl;
 		return false;
 	}
 	
-	FontProperties *fp = _fontMap[fontName];
+	FontProperties *fp = _font_map[fontName];
 	
 	if(!fp)
 	{
@@ -620,7 +585,7 @@ bool GameVideo::SetFontShadowXOffset(const std::string &fontName, int32 x)
 		return false;
 	}
 
-	fp->shadowX = x;
+	fp->shadow_x = x;
 	return true;
 }
 
@@ -631,14 +596,14 @@ bool GameVideo::SetFontShadowXOffset(const std::string &fontName, int32 x)
 
 bool GameVideo::SetFontShadowYOffset(const std::string &fontName, int32 y)
 {
-	if(_fontMap.find(fontName) == _fontMap.end())
+	if(_font_map.find(fontName) == _font_map.end())
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: GameVideo::SetFontShadowYOffset() failed for font (" << fontName << ") because the font's properties could not be found!" << endl;
 		return false;
 	}
 
-	FontProperties *fp = _fontMap[fontName];
+	FontProperties *fp = _font_map[fontName];
 	
 	if(!fp)
 	{
@@ -647,7 +612,7 @@ bool GameVideo::SetFontShadowYOffset(const std::string &fontName, int32 y)
 		return false;
 	}
 	
-	fp->shadowY = y;
+	fp->shadow_y = y;
 	return true;
 }
 
@@ -658,14 +623,14 @@ bool GameVideo::SetFontShadowYOffset(const std::string &fontName, int32 y)
 
 bool GameVideo::SetFontShadowStyle(const std::string &fontName, TextShadowStyle style)
 {
-	if(_fontMap.find(fontName) == _fontMap.end())
+	if(_font_map.find(fontName) == _font_map.end())
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: GameVideo::SetFontShadowYOffset() failed for font (" << fontName << ") because the font's properties could not be found!" << endl;
 		return false;
 	}
 
-	FontProperties *fp = _fontMap[fontName];
+	FontProperties *fp = _font_map[fontName];
 	
 	if(!fp)
 	{
@@ -674,7 +639,7 @@ bool GameVideo::SetFontShadowStyle(const std::string &fontName, TextShadowStyle 
 		return false;
 	}
 	
-	fp->shadowStyle = style;
+	fp->shadow_style = style;
 	return true;
 }
 

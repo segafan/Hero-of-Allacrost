@@ -414,25 +414,25 @@ GameVideo::~GameVideo()
 		
 	// delete font properties
 	
-	map<string, FontProperties *>::iterator iFontProp    = _fontMap.begin();
-	map<string, FontProperties *>::iterator iFontPropEnd = _fontMap.end();
+	map<string, FontProperties *>::iterator iFontProp    = _font_map.begin();
+	map<string, FontProperties *>::iterator iFontPropEnd = _font_map.end();
 	
-	while(iFontProp != _fontMap.end())
+	while(iFontProp != _font_map.end())
 	{
 		FontProperties *fp = iFontProp->second;		
 
 		if(fp->ttf_font)
 			TTF_CloseFont(fp->ttf_font);
 
-		if(fp->glyphcache)
+		if(fp->glyph_cache)
 		{
-			for(std::map<uint16, FontGlyph *>::iterator glyphitr = fp->glyphcache->begin(); glyphitr != fp->glyphcache->end(); glyphitr++)
+			for(std::map<uint16, FontGlyph *>::iterator glyphitr = fp->glyph_cache->begin(); glyphitr != fp->glyph_cache->end(); glyphitr++)
 			{
 				// Possibly de-init the GL texture
 				delete (*glyphitr).second;
 			}
 
-			delete fp->glyphcache;
+			delete fp->glyph_cache;
 		}
 
 		delete fp;		
@@ -1488,7 +1488,7 @@ void GameVideo::_PushContext()
 	c.scissor_rectangle = _scissorRect;
 	c.scissoring_enabled = _scissorEnabled;
 	
-	c.font      = _currentFont;
+	c.font      = _current_font;
 	c.text_color = _currentTextColor;
 	
 	_contextStack.push(c);
@@ -1511,7 +1511,7 @@ void GameVideo::_PopContext()
 	_xflip  = c.x_flip;
 	_yflip  = c.y_flip;
 	
-	_currentFont      = c.font;
+	_current_font      = c.font;
 	_currentTextColor = c.text_color;
 	
 	_viewport = c.viewport;

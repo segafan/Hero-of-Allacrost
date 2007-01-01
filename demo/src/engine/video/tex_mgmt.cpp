@@ -2022,22 +2022,22 @@ bool GameVideo::ReloadTextures()
 		_lightOverlay = _CreateBlankGLTexture(1024, 1024);
 
 	// Clear all font caches
-	map<string, FontProperties *>::iterator iFontProp    = _fontMap.begin();
-	map<string, FontProperties *>::iterator iFontPropEnd = _fontMap.end();
+	map<string, FontProperties *>::iterator iFontProp    = _font_map.begin();
+	map<string, FontProperties *>::iterator iFontPropEnd = _font_map.end();
 	
-	while(iFontProp != _fontMap.end())
+	while(iFontProp != _font_map.end())
 	{
 		FontProperties *fp = iFontProp->second;		
 
-		if(fp->glyphcache)
+		if(fp->glyph_cache)
 		{
-			for(std::map<uint16, FontGlyph *>::iterator glyphitr = fp->glyphcache->begin(); glyphitr != fp->glyphcache->end(); glyphitr++)
+			for(std::map<uint16, FontGlyph *>::iterator glyphitr = fp->glyph_cache->begin(); glyphitr != fp->glyph_cache->end(); glyphitr++)
 			{
 				_DeleteTexture((*glyphitr).second->texture);
 				delete (*glyphitr).second;
 			}
 
-			fp->glyphcache->clear();
+			fp->glyph_cache->clear();
 		}
 
 		++iFontProp;

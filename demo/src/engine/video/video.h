@@ -534,38 +534,26 @@ public:
 
 	//-- Text -----------------------------------------------------------------
 
-	/*!
-	 *  \brief loads a font from a TTF file
-	 *  \param TTF_filename  the filename of the TTF file to load
-	 *  \param name          name of the font (e.g. "courier24")
-	 *  \param size          point size of the font
-	 * \return success/failure
-	 */
-	bool LoadFont
-	(
-		const std::string &TTF_filename, 
-		const std::string &name, 
-		int32 size
-	);
-	
+	/** \brief Loads a font from a .ttf file with a specific size
+	*** \param TTF_filename The filename of the .ttf file to load.
+	*** \param name The name which to refer to the font (e.g. "courier24", "default", etc.)
+	*** \param size The point size of the font
+	*** \return success/failure
+	**/
+	bool LoadFont(const std::string &TTF_filename, const std::string &name, uint32 size);
 
-	/*!
-	 *  \brief returns true if the font with the given name has been successfully loaded
-	 *  \param name   name of the font (e.g. "courier24")
-	 * \return true if valid, false if not
-	 */
-	bool IsValidFont(const std::string &name);
+	/** \brief Returns true if a font has already been successfully loaded
+	*** \param name The name which to refer to the loaded font (e.g. "courier24").
+	*** \return True if font is valid, false if it is not.
+	**/
+	bool IsValidFont(const std::string &name)
+		{ return (_font_map.find(name) != _font_map.end()); }
 
-
-	/*!
-	 *  \brief given the name of a font, fill in a font properties structure with info
-	 *         like the height of the font, etc.
-	 *
-	 *  \param fontName  name of the font, e.g. "courier24"
-	 *  \param fp        reference to font properties structure to return information into
-	 * \return success/failure
-	 */
-	bool GetFontProperties(const std::string &fontName, FontProperties &fp);
+	/** \brief Get the font properties for a previously loaded font
+	*** \param fontName  The referred name of the loaded font (e.g. "courier24").
+	*** \return A pointer to the FontProperties object with the requested data, or NULL if an error occurred.
+	**/
+	FontProperties* GetFontProperties(const std::string &fontName);
 
 
 	/*!
@@ -612,7 +600,8 @@ public:
 	 *  \param color  color to set to
 	 * \return success/failure
 	 */
-	bool SetTextColor(const Color &color);
+	void SetTextColor(const Color &color)
+		{ _currentTextColor = color; }
 		
 
 	/*!
@@ -1339,7 +1328,7 @@ private:
 	GLuint _lastTexID;
 
 	//! current font name
-	std::string _currentFont;
+	std::string _current_font;
 	
 	//! current text color
 	Color       _currentTextColor;
@@ -1390,7 +1379,7 @@ private:
 	std::vector <private_video::TexSheet *>     _texSheets;
 	
 	//! STL map containing properties for each font (includeing TTF_Font *)
-	std::map    <std::string, FontProperties *> _fontMap;
+	std::map    <std::string, FontProperties *> _font_map;
 
 	//! STL map containing all loaded particle effect definitions
 	std::map <std::string, ParticleEffectDef *> _particle_effect_defs;
