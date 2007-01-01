@@ -103,6 +103,10 @@ BootMode::BootMode() :
 	                          read_data.ReadFloat("coord_sys_y_top"));
 
 
+	read_data.ChangeSetting<float>("coord_sys_x_right",800.0f);
+	read_data.ChangeSetting<std::string>("new_setting", "this is a new setting");
+	read_data.SaveStack("dat/config/boot_new.lua");
+
 	// Load the audio stuff
 	// Make a call to the config code that loads in two vectors of strings
 	vector<string> new_music_files;
