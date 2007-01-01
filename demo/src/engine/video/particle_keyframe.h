@@ -22,6 +22,7 @@
 #ifndef __PARTICLE_KEYFRAME_HEADER__
 #define __PARTICLE_KEYFRAME_HEADER__
 
+#include "defs.h"
 #include "utils.h"
 #include "color.h"
 

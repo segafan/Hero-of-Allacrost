@@ -20,6 +20,7 @@
 #ifndef __PARTICLE_MANAGER_HEADER__
 #define __PARTICLE_MANAGER_HEADER__
 
+#include "defs.h"
 #include "utils.h"
 
 //! \brief A particle effet ID is an int
@@ -30,9 +31,6 @@ const ParticleEffectID VIDEO_INVALID_EFFECT = -1;
 
 namespace hoa_video
 {
-
-class ParticleEffectDef;
-class ParticleEffect;
 
 namespace private_video
 {

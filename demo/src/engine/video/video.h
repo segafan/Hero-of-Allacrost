@@ -26,8 +26,9 @@
 #ifndef _VIDEO_HEADER_
 #define _VIDEO_HEADER_
 
-#include "utils.h"
 #include "defs.h"
+#include "utils.h"
+
 
 // SDL includes
 #ifdef __APPLE__
@@ -72,8 +73,6 @@ extern "C" {
 //! All calls to the video engine are wrapped in this namespace.
 namespace hoa_video 
 {
-
-class GameVideo;
 
 //! The singleton pointer responsible for all video operations.
 extern GameVideo *VideoManager;
@@ -187,37 +186,6 @@ enum VIDEO_STENCIL_OP
 	
 	VIDEO_STENCIL_OP_TOTAL = 4
 };
-
-
-
-// forward declarations
-class StillImage;
-class GameVideo;
-class Color;
-
-
-/*!***************************************************************************
- *  \brief class for representing colors, with common operations like
- *         multiplying, adding, etc.
- *****************************************************************************/
-
-
-//! private_video namespace, hides things which are used internally
-namespace private_video
-{
-
-class GUI;
-class TexSheet;
-class TexMemMgr;
-class FixedTexMemMgr;
-class VariableTexMemMgr;
-class Image;
-class ImageLoadInfo;
-
-
-
-
-} // namespace private_video
 
 
 
@@ -637,7 +605,7 @@ public:
 	 *  \param style     the shadow style you want (e.g. VIDEO_TEXT_SHADOW_BLACK)
 	 * \return success/failure
 	 */
-	bool SetFontShadowStyle(const std::string &fontName, TextShadowStyle style);
+	bool SetFontShadowStyle(const std::string &fontName, TEXT_SHADOW_STYLE style);
 
 
 	/*!

@@ -19,6 +19,7 @@
 #ifndef __TEXT_HEADER__
 #define __TEXT_HEADER__
 
+#include "defs.h"
 #include "utils.h"
 
 typedef struct _TTF_Font TTF_Font;
@@ -26,19 +27,23 @@ typedef struct _TTF_Font TTF_Font;
 namespace hoa_video {
 
 //! \brief Styles for setting the type of text shadows.
-enum TextShadowStyle {
-	//! \brief No text shadow, even if shadows are enabled
+enum TEXT_SHADOW_STYLE {
+	VIDEO_TEXT_SHADOW_INVALID = -1,
+
+	//! \brief No text shadow is drawn, even if shadows are enabled.
 	VIDEO_TEXT_SHADOW_NONE = 0,
-	//! \brief Shadowed area is darkened (default)
+	//! \brief Shadowed area is darkened (this is the default).
 	VIDEO_TEXT_SHADOW_DARK = 1,
-	//! \brief Shadowed area is lightened
+	//! \brief Shadowed area is lightened.
 	VIDEO_TEXT_SHADOW_LIGHT = 2,
-	//! \brief Shadowed area is completely black
+	//! \brief Shadowed area is completely black.
 	VIDEO_TEXT_SHADOW_BLACK = 3,
-	//! \brief Shadowed area is the color of the text, but less alpha
+	//! \brief Shadowed area is the same color of the text, but has less alpha.
 	VIDEO_TEXT_SHADOW_COLOR = 4,
-	//! \brief Shadowed area is the inverse of the text's color (e.g. white text, black shadow)
-	VIDEO_TEXT_SHADOW_INVCOLOR = 5
+	//! \brief Shadowed area is the inverse of the text's color (e.g. white text, black shadow).
+	VIDEO_TEXT_SHADOW_INVCOLOR = 5,
+
+	VIDEO_TEXT_SHADOW_TOTAL = 6
 };
 
 /** ****************************************************************************
@@ -83,7 +88,7 @@ public:
 	//! \brief The y offset of the text shadow.
 	int32 shadow_y;
 	//! \brief The style of the text shadow.
-	TextShadowStyle shadow_style;
+	TEXT_SHADOW_STYLE shadow_style;
 	//! \brief A pointer to SDL_TTF's font structure.
 	TTF_Font* ttf_font;
 	//! \brief A pointer to a cache which holds all of the glyphs used in this font.

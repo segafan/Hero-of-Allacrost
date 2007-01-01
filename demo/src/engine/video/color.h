@@ -16,6 +16,7 @@
 #ifndef __COLOR_HEADER__
 #define __COLOR_HEADER__
 
+#include "defs.h"
 #include "utils.h"
 
 namespace hoa_video {

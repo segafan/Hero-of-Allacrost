@@ -7,18 +7,21 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "utils.h"
+
 #include <cassert>
 #include <cstdarg>
-#include "video.h"
 #include <math.h>
+#include "utils.h"
+#include "fade.h"
+#include "video.h"
 #include "gui.h"
 
 using namespace std;
 using namespace hoa_video::private_video;
 
-namespace hoa_video 
-{
+namespace hoa_video {
+
+namespace private_video {
 
 //-----------------------------------------------------------------------------
 // FadeTo: Begins a fade to the given color in num_seconds
@@ -132,7 +135,7 @@ bool ScreenFader::Update(int32 t)
 	return true;
 }
 
-
+} // namespace private_video
 
 //-----------------------------------------------------------------------------
 // FadeScreen: sets up a fade to the given color over "fade_time" number of seconds

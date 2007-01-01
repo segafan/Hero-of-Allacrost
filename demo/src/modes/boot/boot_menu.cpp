@@ -175,7 +175,9 @@ bool BootMenu::Draw()
 	_menu_window->Draw();
 
 	VideoManager->EnableScissoring(false); // Scissoring is/was an issue when changing resolution. For now, disable it when drawing the menus :/
-	return _current_menu.Draw();
+	_current_menu.Draw();
+	return true;
+	// NOTE: this statement does not do anything!
 	VideoManager->EnableScissoring(true);
 }
 

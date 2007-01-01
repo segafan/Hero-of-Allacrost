@@ -47,6 +47,7 @@
 #ifndef __TEX_MGMT_HEADER__
 #define __TEX_MGMT_HEADER__
 
+#include "defs.h"
 #include "utils.h"
 
 // OpenGL includes
@@ -63,9 +64,6 @@ namespace hoa_video
 
 namespace private_video
 {
-
-class Image;
-class ImageLoadInfo;
 
 
 /*!***************************************************************************

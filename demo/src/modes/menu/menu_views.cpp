@@ -74,11 +74,10 @@ void CharacterWindow::SetCharacter(GlobalCharacter *character)
 
 
 // Draw the window to the screen
-bool CharacterWindow::Draw()
+void CharacterWindow::Draw()
 {
 	// Call parent Draw method, if failed pass on fail result
-	if (MenuWindow::Draw() == false)
-		return false;
+	MenuWindow::Draw();
 	// Window is hidden return true
 	/*if (MenuWindow::GetState() == hoa_video::VIDEO_MENU_STATE_HIDDEN)
 		return true;*/
@@ -93,7 +92,7 @@ bool CharacterWindow::Draw()
 	// check to see if this window is an actual character
 	if (_char_id == hoa_global::GLOBAL_CHARACTER_NONE)
 		// no more to do here
-		return true;
+		return;
 	
 	GlobalCharacter *character = GlobalManager->GetCharacter(_char_id);
 	
@@ -181,7 +180,7 @@ bool CharacterWindow::Draw()
 	if (!VideoManager->DrawText(MakeUnicodeString(xp)))
 		cerr << "CHARACTERWINDOW: ERROR > Couldn't draw xp!" << endl;
 	*/
-	return true;
+	return;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -245,13 +244,12 @@ MiniCharacterSelectWindow::~MiniCharacterSelectWindow()
 //------------------------------------------------------
 // MiniCharacterSelectWindow::Draw()
 //------------------------------------------------------
-bool MiniCharacterSelectWindow::Draw()
+void MiniCharacterSelectWindow::Draw()
 {
-	if (MenuWindow::Draw() == false)
-		return false;
+	MenuWindow::Draw();
 
 	if (!_char_window_active)
-		return true;
+		return;
 
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 
@@ -302,7 +300,7 @@ bool MiniCharacterSelectWindow::Draw()
 		}
 	}
 
-	return true;
+	return;
 }
 
 //------------------------------------------------------
@@ -928,10 +926,9 @@ void InventoryWindow::UpdateItemText()
 
 
 
-bool InventoryWindow::Draw()
+void InventoryWindow::Draw()
 {
-	if (MenuWindow::Draw() == false)
-		return false;
+	MenuWindow::Draw();
 	
 	// Update the item text in case the number of items changed.
 	
@@ -948,9 +945,9 @@ bool InventoryWindow::Draw()
 
 	DrawBottomMenu();
 	
-	return true;
+	return;
 	// Draw the char window
-	///_char_window.Draw();
+	// _char_window.Draw();
 	
 
 	//VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
@@ -1246,10 +1243,9 @@ void StatusWindow::Update()
 
 
 
-bool StatusWindow::Draw()
+void StatusWindow::Draw()
 {
-	if (!MenuWindow::Draw())
-		return false;
+	MenuWindow::Draw();
 
 	// Set drawing system
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
@@ -1354,9 +1350,7 @@ bool StatusWindow::Draw()
 // 	VideoManager->MoveRelative(0, 24);
 // 	VideoManager->DrawText(MakeUnicodeString("Leg Armor"));
 
-	
-	return true;
-} // bool StatusWindow::Draw()
+} // void StatusWindow::Draw()
 
 void StatusWindow::DrawBottomMenu() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
@@ -1775,16 +1769,13 @@ void SkillsWindow::UpdateSkillList() {
 
 }
 
-bool SkillsWindow::Draw() {
-	if (MenuWindow::Draw() == false)
-		return false;
+void SkillsWindow::Draw() {
+	MenuWindow::Draw();
 
 	//Draw option boxes
 	_char_select.Draw();
 	_skills_categories.Draw();
 	_skills_list.Draw();
-
-	return true;
 
 }
 
@@ -2247,9 +2238,8 @@ void EquipWindow::UpdateEquipList() {
 
 }
 
-bool EquipWindow::Draw() {
-	if (MenuWindow::Draw() == false)
-		return false;
+void EquipWindow::Draw() {
+	MenuWindow::Draw();
 
 	//Draw option boxes
 	_char_select.Draw();
@@ -2303,9 +2293,7 @@ bool EquipWindow::Draw() {
 		}
 	}
 
-	return true;
-
-} // bool EquipWindow::Draw()
+} // void EquipWindow::Draw()
 
 
 FormationWindow::FormationWindow() {
@@ -2314,11 +2302,8 @@ FormationWindow::FormationWindow() {
 FormationWindow::~FormationWindow() {
 }
 
-bool FormationWindow::Draw() {
-	if (MenuWindow::Draw() == false) {
-		return false;
-	}
-	return true;
+void FormationWindow::Draw() {
+	MenuWindow::Draw();
 }
 
 } // namespace private_menu

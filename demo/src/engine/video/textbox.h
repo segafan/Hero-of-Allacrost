@@ -7,353 +7,251 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-/*!****************************************************************************
- * \file    textbox.h
- * \author  Raj Sharma, roos@allacrost.org
- * \brief   Header file for TextBox class
- *
- * The TextBox class is a GUI control which lets you define a rectangular area
- * of the screen to display text in.
- *****************************************************************************/ 
+/** ****************************************************************************
+*** \file    textbox.h
+*** \author  Raj Sharma, roos@allacrost.org
+*** \brief   Header file for TextBox class
+***
+*** The TextBox class is a GUI control which lets you define a rectangular area
+*** of the screen to display text in.
+*** ***************************************************************************/
 
 
 #ifndef __TEXTBOX_HEADER__
 #define __TEXTBOX_HEADER__
 
+#include "defs.h"
 #include "utils.h"
 #include "gui.h"
 
-//! All calls to the video engine are wrapped in this namespace.
-namespace hoa_video
-{
+namespace hoa_video {
 
-class GUI;
-class TextBox;
-
-
-/*!****************************************************************************
- *  \brief These text display modes control how the text is rendered:
- *   VIDEO_TEXT_INSTANT: render the text instantly
- *   VIDEO_TEXT_CHAR: render the text one character at a time
- *   VIDEO_TEXT_FADELINE: fade each line in one at a time
- *   VIDEO_TEXT_FADECHAR: fades in each character at a time
- *   VIDEO_TEXT_REVEAL: goes left to right and reveals the text one pixel column at a time
- *   VIDEO_TEXT_FADEREVEAL: like REVEAL, except as text gets revealed it fades in
- *****************************************************************************/
-
-enum TextDisplayMode
-{
-	VIDEO_TEXT_INVALID = -1,
-	
+/** ****************************************************************************
+*** \brief These text display modes control how the text is rendered.
+*** - VIDEO_TEXT_INSTANT: render the text instantly
+*** - VIDEO_TEXT_CHAR: render the text one character at a time
+*** - VIDEO_TEXT_FADELINE: fade each line in one at a time
+*** - VIDEO_TEXT_FADECHAR: fades in each character at a time
+*** - VIDEO_TEXT_REVEAL: goes left to right and reveals the text one pixel column at a time
+*** - VIDEO_TEXT_FADEREVEAL: like REVEAL, except as text gets revealed it fades in
+*** ***************************************************************************/
+enum TEXT_DISPLAY_MODE {
+	VIDEO_TEXT_INVALID    = -1,
 	VIDEO_TEXT_INSTANT    = 0,
 	VIDEO_TEXT_CHAR       = 1,
 	VIDEO_TEXT_FADELINE   = 2,
 	VIDEO_TEXT_FADECHAR   = 3,
 	VIDEO_TEXT_REVEAL     = 4,
 	VIDEO_TEXT_FADEREVEAL = 5,
-	
-	VIDEO_TEXT_TOTAL = 6
+	VIDEO_TEXT_TOTAL      = 6
 };
 
 
-/*!****************************************************************************
- *  \brief Although we have a DrawText() function, for any non-trivial text
- *         display, the TextBox class is used. This class provides a couple
- *         of things which aren't handled by DrawText(), namely word wrapping,
- *         and "gradual display" like drawing one character at a time, or fading
- *         each line of text in individually.
- *
- *  \note  The alignment flags affect the textbox as a whole, not the actual text
- *
- *  \note  This class is based on UNICODE text. If you try to use it for regular
- *         text, that's fine but it will store it internally as wide strings
- *****************************************************************************/
-
-class TextBox : public GUIControl
-{
+/** ****************************************************************************
+*** \brief Class for representing an invisible box for rendering text to.
+*** Although the video engine has an easy-to-use DrawText() function, for any
+*** non-trivial text display, the TextBox class must be used. This class provides
+*** a few things which aren't handled by DrawText(), namely word wrapping, and
+*** "gradual display", such as drawing one character at a time or fading each line
+*** of text in individually.
+***
+*** \note The alignment flags affect the textbox as a whole, but not the actual text
+*** drawn in the textbox.
+*** \note This class is based on UNICODE text. If you try to use it for regular
+*** strings, it will automatically convert it and store it internally as wide strings.
+*** ***************************************************************************/
+class TextBox : public GUIControl {
 public:
-
 	TextBox();
 	~TextBox();
 
+	//! \brief Clears the textbox of all of its data.
+	void Clear();
 
-	/*!
-	 *  \brief must be called every frame to update the gradual text display
-	 *  \param frameTime   milliseconds since the last frame
-	 * \return success/failure
-	 */
-	bool Update(int32 frameTime);
+	/** \brief Updates the amount of text that has been rendered.
+	*** \param frame_time The amount of milliseconds that have transpired since the last frame.
+	*** This must be called every frame in order to update the gradual display of text.
+	**/
+	void Update(uint32 frame_time);
 
+	/** \brief Renders the textbox to the screen back buffer.
+	*** Note that the rendering is not affected by any draw flags or coordinate system settings,.
+	*** This function will use whatever has been set for it using the Set*() calls
+	**/
+	void Draw();
 
-	/*!
-	 *  \brief renders the textbox. Note that it is not affected by draw flags or coord sys settings,
-	 *         it uses whatever has been set for it using the Set*() calls
-	 * \return success/failure
-	 */
-	bool Draw();
+	/** \brief If text is in the middle of gradual rendering, this forces it to complete.
+	*** This is useful if a player gets impatient while text is scrolling to the screen.
+	**/
+	void ForceFinish()
+		{ if (_text.empty()) return; _finished = true; }
 
+	/** \brief Sets the width and height of the text box. Returns false and prints an error message
+	*** \param w The width to set for the text box (for a 1024x768 coordinate system).
+	*** \param h The height to set for the text box (for a 1024x768 coordinate system).
+	*** If the width or height are negative, or if they are larger than 1024 or 768 respectively,
+	*** then the function will print an error message and will not change the properties of the
+	*** textbox.
+	**/
+	void SetDimensions(float w, float h);
 
-	/*!
-	 *  \brief sets the width and height of the text box. Returns false and prints an error message
-	 *         if the width or height are negative or larger than 1024 or 768 respectively
-	 *
-	 *  \note  w and h are in terms of a 1024x768 coordinate system
-	 * \param w width for text box
-	 * \param h height for text box
-	 * \return success/failure
-	 */
-	bool SetDimensions(float w, float h);
+	/** \brief Set the x and y alignments for the text.
+	*** \param xalign The x alignment, e.g. VIDEO_X_LEFT
+	*** \param yalign The y alignment, e.g. VIDEO_Y_TOP
+	**/
+	void SetTextAlignment(int32 xalign, int32 yalign);
 
+	/** \brief Sets the font to use for this textbox.
+	*** \param font_name The label associated with the font when you called LoadFont()
+	**/
+	void SetFont(const std::string &font_name);
 
-	/*!
-	 *  \brief gets the width and height of the text box. Returns false if SetDimensions() hasn't
-	 *         been called yet
-	 *
-	 *  \note  w and h are in terms of a 1024x768 coordinate system
-	 * \param w variable to store the width
-	 * \param h variable to store the height
-	 */
-	void GetDimensions(float &w, float &h);
+	/** \brief Sets the current text display mode (e.g. fading lines of text, etc.)
+	*** \param mode The display mode to use for the text.
+	**/
+	void SetDisplayMode(const TEXT_DISPLAY_MODE &mode);
 
+	/** \brief Sets the text display speed (in characters per second).
+	*** \param display_speed The display speed, in terms ofcharacters per second.
+	*** If the current display mode is one line at a time, then the display speed is based
+	*** on VIDEO_CHARS_PER_LINE characters per line, so for example, a display speed of 10
+	*** would mean 3 seconds per line if VIDEO_CHARS_PER_LINE is 30.
+	*** \note This has no effect for textboxes using the VIDEO_TEXT_INSTANT display mode.
+	**/
+	void SetDisplaySpeed(float display_speed);
 
-	/*!
-	 *  \brief set the alignment for text. Returns false if invalid value is passed
-	 *
-	 *  \param xalign x alignment, e.g. VIDEO_X_LEFT
-	 *  \param yalign y alignment, e.g. VIDEO_Y_TOP
-	 * \return success/failure
-	 */
-	bool SetTextAlignment(int32 xalign, int32 yalign);
+	/** \brief Sets the text for this box to the string passed in.
+	*** \param text The text to display for the textbox
+	*** \note If you use a gradual text display mode like VIDEO_TEXT_CHAR, then the text
+	*** will be displayed gradually and when it's done displaying, IsFinished() will return true.
+	*** \note This function checks the text passed in if it's too big for the textbox and inserts
+	*** new lines where appropriate. If the text is so big that it can't fit even with word
+	*** wrapping, an error is printed to the console if debugging is enabled.
+	**/
+	void SetDisplayText(const hoa_utils::ustring &text);
 
+	/** \brief A non-unicode version of SetDisplayText().
+	*** \param text The text to be set in the box (a standard non-unicode string).
+	*** See the unicode version of ShowText for more details.
+	**/
+	void SetDisplayText(const std::string &text);
 
-	/*!
-	 *  \brief get the alignment for text
-	 *
-	 *  \param xalign x alignment, e.g. VIDEO_X_LEFT
-	 *  \param yalign y alignment, e.g. VIDEO_Y_TOP
-	 */
-	void GetTextAlignment(int32 &xalign, int32 &yalign);
+	/** \brief Obtains the width and height of the text box.
+	*** \param w A reference to the variable in which to store the width.
+	*** \param h A reference to the variable in which to store the height.
+	*** If the dimensions are invalid because SetDimensions has not yet been called, neither
+	*** w nor h will be modified.
+	**/
+	void GetDimensions(float &w, float &h)
+		{ w = _width; h = _height; }
 
+	/** \brief Retrieve the current x and y alignments for the text
+	*** \param xalign The member to hold the x alignment (e.g. VIDEO_X_LEFT).
+	*** \param yalign The member to hold the y alignment (e.g. VIDEO_Y_TOP).
+	**/
+	void GetTextAlignment(int32 &xalign, int32 &yalign)
+		{ xalign = _text_xalign; yalign = _text_yalign; }
 
-	/*!
-	 *  \brief sets the font for this textbox. Returns false on failure
-	 *
-	 *  \param fontName the label associated with the font when you called LoadFont()
-	 * \return success/failure
-	 */
-
-	bool SetFont(const std::string &fontName);
-
-
-	/*!
-	 *  \brief gets the font for this textbox
-	 * \return string containing the font name
-	 */
-
-	std::string GetFont();
-
-
-	/*!
-	 *  \brief sets the current text display mode, e.g. one character at a time,
-	 *         fading the text from left to right, etc.
-	 *
-	 *  \param mode  display mode to use, e.g. VIDEO_TEXT_CHAR for one character
-	 *               at a time
-	 * \return success/failure
-	 */
-	bool SetDisplayMode(const TextDisplayMode &mode);
+	/** \brief Gets the font label for this textbox.
+	*** \return The string containing the font label.
+	**/
+	std::string GetFont() const
+		{ return _font; }
 	
+	//! \brief Return the current text display mode that is set for this textbox.
+	TEXT_DISPLAY_MODE GetDisplayMode() const
+		{ return _mode; }
 	
-	/*!
-	 *  \brief get the current text display mode set for this textbox.
-	 *
-	 *  \return the current text display mode
-	 */
-	TextDisplayMode GetDisplayMode();
-	
+	//! \brief Return the current text display speed, in characters per second.
+	float GetDisplaySpeed() const
+		{ return _display_speed; }
 
-	/*!
-	 *  \brief sets the current text display speed
-	 *
-	 *  \param displaySpeed The display speed, always based on characters per
-	 *                      second. If the current display mode is one line at a time,
-	 *                      then the display speed is based on VIDEO_CHARS_PER_LINE 
-	 *                      characters per line, so for example, a display speed of 10 
-	 *                      would mean 3 seconds per line if VIDEO_CHARS_PER_LINE is 30.
-	 *                      
-	 *
-	 *  \note  This has no effect for textboxes using the VIDEO_TEXT_INSTANT
-	 *         display mode.
-	 * \return success/failure
-	 */
-	bool SetDisplaySpeed(float displaySpeed);
-	
-	
-	/*!
-	 *  \brief get the current text display speed, in characters per second
-	 * \return the current display speed
-	 */
-	float GetDisplaySpeed();
+	//! \brief Returns the text currently being displayed by the textbox.
+	void GetText(std::vector<hoa_utils::ustring>& text) const
+		{ text = _text; }
 
+	/** \brief Returns true if this textbox is finished with its gradual display of text
+	*** \note If you create a textbox but don't draw any text on it, the finished property
+	*** will be false. Only after the text is drawn to it will this method return true.
+	**/
+	bool IsFinished() const
+		{ return _finished; }
 
-	/*!
-	 *  \brief returns true if this textbox is finished scrolling text
-	 *
-	 *  \note  If you create a textbox but don't draw any text on it, the
-	 *         finished property is false. Only after text is drawn to it
-	 *         does this return true
-	 * \return true if finished, false if not
-	 */
-	bool IsFinished();
+	//! \brief Returns true if this text box contains no text empty.
+	bool IsEmpty() const
+		{ return _text.empty(); }
 
-
-	/*!
-	 *  \brief if text is in the middle of scrolling, this forces it to complete.
-	 *         This is useful if a player gets impatient while text is scrolling
-	 *         to the screen. Returns false if we're not in the middle of a text
-	 *         render operation.
-	 * \return success/failure
-	 */
-	bool ForceFinish();
-
-
-	/*!
-	 *  \brief sets the text for this box to the string passed in.
-	 *
-	 *  \note  if you use a gradual text display mode like VIDEO_TEXT_CHAR, then
-	 *         the text will be displayed gradually and when it's done displaying,
-	 *         IsFinished() will return true.
-	 *
-	 *  \note  this function checks the text passed in if it's too big for the
-	 *         textbox and inserts newlines where appropriate. If the text is so
-	 *         big that it can't fit even with word wrapping, an error is printed
-	 *         to the console if debugging is turned on, and false is returned
-	 *
-	 *  \param text  text to draw
-	 * \return success/failure
-	 */
-	bool SetDisplayText(const hoa_utils::ustring &text);
-
-
-	/*!
-	 *  \brief non-unicode version of ShowText(). See the unicode version for more
-	 *         details.
-	 * \param text text to be set in the box (non-unicode)
-	 * \return success/failure
-	 */
-	bool SetDisplayText(const std::string &text);
-
-
-	/*!
-	 *  \brief returns the text currently being displayed by textbox
-	 * \return text in the display box
-	 */
-	hoa_utils::ustring GetText();
-
-
-	/*!
-	 *  \brief clears the textbox so it's not displaying anything
-	 * \return success/failure
-	 */
-	bool Clear();
-
-
-	/*!
-	 *  \brief returns true if this text box is empty (either because ShowText() has never been called, or because Clear() was called)
-	 * \return true if empty, false if not
-	 */
-	bool IsEmpty();
-
-	/*!
-	 *  \brief does a self-check on all its members to see if all its members have been
-	 *         set to valid values. This is used internally to make sure we have a valid
-	 *         object before doing any complicated operations. If it detects
-	 *         any problems, it generates a list of errors and returns it by reference
-	 *         so they can be displayed
-	 *
-	 *  \param errors reference to a string to be filled if any errors are found
-	 * \return true if initialized, false if not
-	 */
+	/** \brief Checks all class members to see if all members have been set to valid values.
+	*** \param errors A reference to a string to be filled if any errors are found.
+	*** \return True if object is initialized, orfalse if it is not.
+	*** This is used internally to make sure we have a valid object before doing any
+	*** complicated operations. If it detects any problems, it generates a list of errors
+	*** and returns it by reference so they can be displayed.
+	**/
 	bool IsInitialized(std::string &errors);
 
 private:
-
-	//! dimensions of the text box
+	//! \brief The dimensions of the text box, in pixels.
 	float _width, _height;
 
-	//! characters per second to display text
-	float _displaySpeed;
+	//! \brief The display speed of the text, in characters per second.
+	float _display_speed;
 
-	//! alignment flags for text
+	//! \brief Alignment flags for the textbox.
 	int32 _text_xalign, _text_yalign;
 	
-	//! hold the number of characters for the entire text
-	int32 _numChars;
+	//! \brief Hold the number of characters in the entire text.
+	uint32 _num_chars;
 
-	//! true if the text being drawn by ShowText() is done displaying in the case of gradual rendering
-	bool    _finished;
+	//! \brief True if the text being drawn by ShowText() is done (in the case of gradual rendering).
+	bool _finished;
 	
-	//! milliseconds that passed since ShowText() was called
-	int32   _currentTime;
+	//! \brief The number of milliseconds that have passed since ShowText() was called.
+	uint32 _current_time;
 	
-	//! milliseconds from the time since ShowText() was called until the text display will be complete
-	int32   _endTime;
+	//! \brief The number of milliseconds remaining until the gradual text display will be complete.
+	uint32 _end_time;
 
-	//! font used for this textbox
-	std::string    _font;
+	//! \brief The font name to use for this textbox.
+	std::string _font;
 	
-	//! structure containing properties of the current font like height, etc.
-	FontProperties _fontProperties;
+	//! \brief A structure containing properties of the current font such as its height, etc.
+	FontProperties _font_properties;
 
-	//! text display mode (one character at a time, fading in, instant, etc.)
-	TextDisplayMode _mode;
+	//! \brief The display mode for the text (one character at a time, fading in, instant, etc.).
+	TEXT_DISPLAY_MODE _mode;
 	
-	//! array of strings, one for each line
+	//! \brief An array of wide strings, one for each line of text.
 	std::vector<hoa_utils::ustring> _text;
 
+	/** \brief Returns the height of the text when it's rendered with the current font
+	*** \return height of text rendered in current font
+	**/
+	uint32 _CalculateTextHeight();
 
-	/*!
-	 *  \brief returns the height of the text when it's rendered with the current font
-	 * \return height of text rendered in current font
-	 */
-	int32 _CalculateTextHeight();
-
-	
-	/*!
-	 *  \brief returns true if the given unicode character can be interrupted for a word wrap.
-	 *         For example in English, you can do a word wrap wherever there is a space (code 0x20).
-	 *         Other languages might have space characters corresponding to other unicode values
-	 *
-	 *  \param character the character you want to check
-	 * \return true if character can be wrapped, false if not
-	 */
+	/** \brief Returns true if the given unicode character can be interrupted for a word wrap.
+	*** \param character The character you wish to check.
+	*** \return True if character can be wrapped, false if it can not.
+	*** For example in English, you can do a word wrap wherever there is a space (code 0x20).
+	*** Other languages might have space characters corresponding to other unicode values.
+	**/
 	bool _IsBreakableChar(uint16 character);
 
-
-	/*!
-	 *  \brief adds a new line of text to the _text vector. If the line is too long to fit in
-	 *         the width of the textbox, automatically split it into multiple lines (i.e. word wrap)
-	 *
-	 *  \param line unicode text string to add as a new line
-	 */
+	/** \brief Adds a new line of text to the _text vector.
+	*** \param line The unicode text string to add as a new line
+	*** If the line is too long to fit in the width of the textbox, it will automatically
+	*** be split into multiple lines (i.e. word wrapping).
+	**/
 	void _AddLine(const hoa_utils::ustring &line);
-	
 
-	/*!
-	 *  \brief does dirtywork of drawing the text, taking the display mode into account
-	 *
-	 *  \param textX x value to use depending on the alignment
-	 *  \param textY y value to use depending on the alignment
-	 *  \param scissorRect  scissor rectangle used for the textbox
-	 */
-	void _DrawTextLines(float textX, float textY, ScreenRect scissorRect);
-	
+	/** \brief Draws the textbox text, taking the display mode into account.
+	*** \param text_x The x value to use, depending on the alignment.
+	*** \param text_y The y value to use, depending on the alignment.
+	*** \param scissor_rect The scissor rectangle used for this textbox.
+	**/
+	void _DrawTextLines(float text_x, float text_y, ScreenRect scissor_rect);
 }; // class TextBox : public GUIControl
-
-
 
 } // namespace hoa_video
 
-
-#endif  // !__TEXTBOX_HEADER__
-
+#endif  // __TEXTBOX_HEADER__

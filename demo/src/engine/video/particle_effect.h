@@ -34,18 +34,11 @@
 #ifndef __PARTICLE_EFFECT_HEADER__
 #define __PARTICLE_EFFECT_HEADER__
 
+#include "defs.h"
 #include "utils.h"
 
 namespace hoa_video
 {
-
-
-namespace private_video
-{
-class ParticleManager;
-class ParticleSystemDef;
-class ParticleSystem;
-}
 
 using private_video::ParticleSystem;
 using private_video::ParticleSystemDef;

@@ -22,6 +22,7 @@
 #define __CONTEXT_HEADER__
 
 #include <string>
+#include "defs.h"
 #include "utils.h"
 #include "color.h"
 #include "coord_sys.h"

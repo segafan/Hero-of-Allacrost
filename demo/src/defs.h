@@ -54,12 +54,64 @@ namespace hoa_video {
 	extern bool VIDEO_DEBUG;
 	class GameVideo;
 
+	class Color;
+	class CoordSys;
+	class ScreenRect;
+
+	class FixedImageNode;
+	class VariableImageNode;
+
+	class ImageDescriptor;
 	class StillImage;
 	class AnimatedImage;
 
+	class FontGlyph;
+	class FontProperties;
+
+	class GUIElement;
+	class GUIControl;
+	class Option;
+	class OptionElement;
+	class OptionCellBounds;
 	class MenuWindow;
 	class TextBox;
 	class OptionBox;
+
+	class Interpolator;
+
+	class ParticleEffect;
+	class ParticleEffectDef;
+	class ParticleEmitter;
+	class EffectParameters;
+
+	namespace private_video {
+		class Context;
+
+		class TexSheet;
+		class TexMemMgr;
+		class FixedTexMemMgr;
+		class VariableTexMemMgr;
+
+		class ImageLoadInfo;
+		class Image;
+		class ImageElement;
+		class MultiImage;
+		class AnimationFrame;
+
+		class GUI;
+		class MenuSkin;
+
+		class ParticleManager;
+		class ParticleSystem;
+		class ParticleSystemDef;
+		class Particle;
+		class ParticleVertex;
+		class ParticleTexCoord;
+		class ParticleKeyframe;
+
+		class ScreenFader;
+		class ShakeForce;
+	}
 }
 
 // Data declarations, see script.h/cpp

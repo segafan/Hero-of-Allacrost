@@ -20,6 +20,7 @@
 #ifndef __MENU_WINDOW_HEADER__
 #define __MENU_WINDOW_HEADER__
 
+#include "defs.h"
 #include "utils.h"
 #include "gui.h"
 #include "screen_rect.h"
@@ -29,9 +30,6 @@
 //! All calls to the video engine are wrapped in this namespace.
 namespace hoa_video
 {
-
-class GUI;
-class MenuWindow;
 
 
 //! how many milliseconds it takes for a menu to scroll in or out of view
@@ -119,7 +117,7 @@ public:
 	 *  \brief draws menu window on screen
 	 * \return success/failure
 	 */
-	bool Draw();
+	void Draw();
 
 
 	/*!
@@ -127,7 +125,7 @@ public:
 	 *  \param frameTime time elapsed during this frame, in milliseconds
 	 * \return success/failure
 	 */
-	bool Update(int32 frameTime);
+	void Update(uint32 frameTime);
 
 
 	/*!
@@ -231,7 +229,7 @@ public:
 	 *               VIDEO_MENU_EXPAND_FROM_CENTER, etc.
 	 * \return success/failure
 	 */
-	bool SetDisplayMode(MenuDisplayMode mode);
+	void SetDisplayMode(MenuDisplayMode mode);
 	
 	
 	/*!
