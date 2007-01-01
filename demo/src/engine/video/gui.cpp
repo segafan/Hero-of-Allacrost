@@ -701,26 +701,26 @@ void GUIControl::CalculateAlignedRect(float &left, float &right, float &bottom, 
 //-----------------------------------------------------------------------------
 // SetAlignment: sets the x, y alignment. Returns false if invalid value is passed
 //-----------------------------------------------------------------------------
-bool GUIElement::SetAlignment(int32 xalign, int32 yalign)
+void GUIElement::SetAlignment(int32 xalign, int32 yalign)
 {
 	if (_xalign != VIDEO_X_LEFT && _xalign != VIDEO_X_CENTER && _xalign != VIDEO_X_RIGHT)
 	{
 		if (VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: Invalid xalign value (" << xalign << ") passed to GUIElement::SetAlignment()" << endl;
-		return false;
+		return;
 	}
 	
 	if (_yalign != VIDEO_Y_TOP && _yalign != VIDEO_Y_CENTER && _yalign != VIDEO_Y_BOTTOM)
 	{
 		if (VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: Invalid yalign value (" << yalign << ") passed to GUIElement::SetAlignment()" << endl;
-		return false;
+		return;
 	}
 	
 	_xalign = xalign;
 	_yalign = yalign;
 	
-	return true;
+	return;
 }
 
 

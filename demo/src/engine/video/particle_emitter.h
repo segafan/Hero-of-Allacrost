@@ -30,8 +30,10 @@
 #ifndef __PARTICLE_EMITTER_HEADER__
 #define __PARTICLE_EMITTER_HEADER__
 
+#include "defs.h"
 #include "utils.h"
 
+namespace hoa_video {
 
 /*!***************************************************************************
  *  \brief Specifies whether the orientation for particle rotations should be
@@ -157,4 +159,6 @@ public:
 	EMITTER_SPIN _spin;
 };
 
-#endif  //! __PARTICLE_EMITTER_HEADER__
+} // namespace hoa_video
+
+#endif  // __PARTICLE_EMITTER_HEADER__

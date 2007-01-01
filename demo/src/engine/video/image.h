@@ -47,19 +47,14 @@
 #ifndef __IMAGE_HEADER__
 #define __IMAGE_HEADER__
 
+#include "defs.h"
 #include "utils.h"
 #include "color.h"
 #include "tex_mgmt.h"
 
 namespace hoa_video {
 
-// Forward declarations
-class StillImage;
-class AnimatedImage;
-
 namespace private_video {
-
-class ParticleSystem;
 
 /** ****************************************************************************
 *** \brief A container to store information about an image being loaded.

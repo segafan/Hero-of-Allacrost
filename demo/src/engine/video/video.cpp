@@ -13,11 +13,14 @@
  * \brief   Source file for video engine interface.
  *****************************************************************************/ 
 
-#include "utils.h"
+
 #include <cassert>
 #include <cstdarg>
-#include "video.h"
 #include <math.h>
+
+#include "utils.h"
+#include "video.h"
+#include "context.h"
 #include "gui.h"
 
 using namespace std;
@@ -1476,7 +1479,7 @@ void GameVideo::_PushContext()
 	glPushMatrix();
 	
 	// save context information
-	Context c;
+	private_video::Context c;
 	c.coordinate_system = _coord_sys;
 	c.blend    = _blend;
 	c.x_align   = _xalign;
@@ -1503,7 +1506,7 @@ void GameVideo::_PushContext()
 void GameVideo::_PopContext()
 {
 	// restore context information and pop it from stack
-	Context c = _contextStack.top();
+	private_video::Context c = _contextStack.top();
 	SetCoordSys(c.coordinate_system);
 	_blend  = c.blend;
 	_xalign = c.x_align;

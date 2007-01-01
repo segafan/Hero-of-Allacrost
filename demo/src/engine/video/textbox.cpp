@@ -32,10 +32,10 @@ namespace hoa_video
 TextBox::TextBox() 
 {
 	_finished = false;
-	_currentTime = 0;
+	_current_time = 0;
 	_mode = VIDEO_TEXT_INVALID;
-	_displaySpeed = 0.0f;
-	_numChars = 0;
+	_display_speed = 0.0f;
+	_num_chars = 0;
 	_initialized = IsInitialized(_initialize_errors);
 	_width = _height = 0.0f;
 	_text_xalign = VIDEO_X_LEFT;
@@ -58,14 +58,12 @@ TextBox::~TextBox()
 //         Returns false on unexpected failure
 //-----------------------------------------------------------------------------
 
-bool TextBox::Update(int32 frameTime)
+void TextBox::Update(uint32 frameTime)
 {
-	_currentTime += frameTime;
+	_current_time += frameTime;
 	
-	if(!_text.empty() && _currentTime > _endTime)
+	if(!_text.empty() && _current_time > _end_time)
 		_finished = true;
-	
-	return true;
 }
 
 
@@ -74,11 +72,11 @@ bool TextBox::Update(int32 frameTime)
 //       Returns false on unexpected failure
 //-----------------------------------------------------------------------------
 
-bool TextBox::Draw()
+void TextBox::Draw()
 {
 	// quit if we have nothing to do
 	if(_text.empty())
-		return true;
+		return;
 		
 
 	// fail if text box isn't initialized properly
@@ -86,7 +84,7 @@ bool TextBox::Draw()
 	{
 		if(VIDEO_DEBUG)
 			cerr << "TextBox::Draw() failed because the textbox was not initialized:" << endl << _initialize_errors << endl;			
-		return false;
+		return;
 	}
 		
 	// determine the rectangle of the textbox based on the position, dimensions,
@@ -175,7 +173,6 @@ bool TextBox::Draw()
 	_DrawTextLines(textX,textY, rect);
 			
 	video->_PopContext();
-	return true;
 }
 
 
@@ -184,40 +181,28 @@ bool TextBox::Draw()
 //                w are negative or larger than 1024 and 768 respectively
 //-----------------------------------------------------------------------------
 
-bool TextBox::SetDimensions(float w, float h)
+void TextBox::SetDimensions(float w, float h)
 {
 	if(w <= 0.0f || w > 1024.0f)
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: TextBox::SetDimensions() failed, invalid width: " << w << endl;
-		return false;
+		return;
 	}
 
 	if(h <= 0.0f || h > 768.0f)
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: TextBox::SetDimensions() failed, invalid height: " << h << endl;
-		return false;
+		return;
 	}
 	
 	_width = w;
 	_height = h;
 
 	_initialized = IsInitialized(_initialize_errors);
-	
-	return true;
 }
 
-
-//-----------------------------------------------------------------------------
-// GetDimensions: return the width and height of the textbox into w and h
-//-----------------------------------------------------------------------------
-
-void TextBox::GetDimensions(float &w, float &h)
-{
-	w = _width;
-	h = _height;
-}
 
 
 //-----------------------------------------------------------------------------
@@ -225,27 +210,15 @@ void TextBox::GetDimensions(float &w, float &h)
 //                   returns false if any invalid alignment flag is passed
 //-----------------------------------------------------------------------------
 
-bool TextBox::SetTextAlignment(int32 xalign, int32 yalign)
+void TextBox::SetTextAlignment(int32 xalign, int32 yalign)
 {
-	bool success = true;
 	_text_xalign = xalign;
 	_text_yalign = yalign;	
 	
 	_initialized = IsInitialized(_initialize_errors);
-	
-	return success;
 }
 
 
-//-----------------------------------------------------------------------------
-// GetTextAlignment: returns the alignment flags into xalign and yalign
-//-----------------------------------------------------------------------------
-
-void TextBox::GetTextAlignment(int32 &xalign, int32 &yalign)
-{
-	xalign = _text_xalign;
-	yalign = _text_yalign;
-}
 
 
 //-----------------------------------------------------------------------------
@@ -253,40 +226,22 @@ void TextBox::GetTextAlignment(int32 &xalign, int32 &yalign)
 //          font loaded with LoadFont()
 //-----------------------------------------------------------------------------
 
-bool TextBox::SetFont(const string &fontName)
-{	
-	// try to get pointer to video manager
-	GameVideo *videoManager = GameVideo::SingletonGetReference();
-	if(!videoManager)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: TextBox::SetFont() failed, couldn't get pointer to GameVideo!" << endl;
-		return false;
-	}
-
+void TextBox::SetFont(const string &fontName)
+{
 	// try to get properties about the current font. Note we don't bother calling IsValidFont() to see
 	// if this font has been loaded since GetFontProperties() implements that check
-	if(videoManager->GetFontProperties(fontName) == NULL)
+	if(VideoManager->GetFontProperties(fontName) == NULL)
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: TextBox::SetFont() failed because GameVideo::GetFontProperties() returned false for the font:\n" << fontName << endl;
-		return false;
+		return;
 	}
 
 	_font = fontName;
 	_initialized = IsInitialized(_initialize_errors);
 	
-	return true;
 }
 
-
-//-----------------------------------------------------------------------------
-// GetFont: returns the name of the font used for this textbox
-//-----------------------------------------------------------------------------
-string TextBox::GetFont()
-{
-	return _font;
-}
 
 
 //-----------------------------------------------------------------------------
@@ -296,28 +251,18 @@ string TextBox::GetFont()
 //                 default display mode is VIDEO_TEXT_INVALID
 //-----------------------------------------------------------------------------
 
-bool TextBox::SetDisplayMode(const TextDisplayMode &mode)
+void TextBox::SetDisplayMode(const TEXT_DISPLAY_MODE &mode)
 {
 	if(mode <= VIDEO_TEXT_INVALID || mode >= VIDEO_TEXT_TOTAL)
 	{
 		cerr << "VIDEO ERROR: TextBox::SetDisplayMode() failed because a mode with the value of " << mode << " was passed in!" << endl;
-		return false;
+		return;
 	}
 	
 	_mode = mode;
 	_initialized = IsInitialized(_initialize_errors);
-	return true;
 }
 
-
-//-----------------------------------------------------------------------------
-// GetDisplayMode: returns the current display mode
-//-----------------------------------------------------------------------------
-
-TextDisplayMode TextBox::GetDisplayMode()
-{
-	return _mode;
-}
 
 
 //-----------------------------------------------------------------------------
@@ -334,57 +279,22 @@ TextDisplayMode TextBox::GetDisplayMode()
 //                  Returns false if displaySpeed is negative or zero.
 //-----------------------------------------------------------------------------
 
-bool TextBox::SetDisplaySpeed(float displaySpeed)
+void TextBox::SetDisplaySpeed(float displaySpeed)
 {
 	if(displaySpeed <= 0.0f)
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: TextBox::SetDisplaySpeed() failed, tried to set a display speed of " << displaySpeed << endl;
-		return false;
+		return;
 	}
 	
-	_displaySpeed = displaySpeed;
+	_display_speed = displaySpeed;
 	_initialized = IsInitialized(_initialize_errors);
-	return true;
 }
 
 
-//-----------------------------------------------------------------------------
-// GetDisplaySpeed: return the current display speed
-//-----------------------------------------------------------------------------
-
-float TextBox::GetDisplaySpeed()
-{
-	return _displaySpeed;
-}
 
 
-//-----------------------------------------------------------------------------
-// IsFinished: returns true if the textbox is done scrolling text and false
-//             if we haven't finished the gradual text drawing that was started
-//             when SetDisplayText() was called. If SetText() hasn't been called yet, 
-//             this is false by default.
-//-----------------------------------------------------------------------------
-
-bool TextBox::IsFinished()
-{
-	return _finished;
-}
-
-
-//-----------------------------------------------------------------------------
-// ForceFinish: force the textbox to complete its current text scrolling. If
-//              the textbox is empty (no text to display), this returns false
-//-----------------------------------------------------------------------------
-
-bool TextBox::ForceFinish()
-{
-	if(IsEmpty())
-		return false;
-		
-	_finished = true;
-	return true;
-}
 
 
 //-----------------------------------------------------------------------------
@@ -394,14 +304,14 @@ bool TextBox::ForceFinish()
 //           if the string passed is empty, or if the text doesn't fit in the box
 //-----------------------------------------------------------------------------
 
-bool TextBox::SetDisplayText(const hoa_utils::ustring &text)
+void TextBox::SetDisplayText(const hoa_utils::ustring &text)
 {
 	// fail if empty string was passed
 	if(text.empty())
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: empty string passed to TextBox::SetDisplayText()!" << endl;
-		return false;
+		return;
 	}
 	
 	
@@ -411,7 +321,7 @@ bool TextBox::SetDisplayText(const hoa_utils::ustring &text)
 		if(VIDEO_DEBUG)
 			cerr << "TextBox::SetDisplayText() failed because the textbox was not initialized:" << endl << _initialize_errors << endl;
 			
-		return false;		
+		return;		
 	}
 	
 	
@@ -426,7 +336,7 @@ bool TextBox::SetDisplayText(const hoa_utils::ustring &text)
 	uint16 newline = static_cast<uint16>('\n');
 
 	_text.clear();	
-	_numChars = 0;
+	_num_chars = 0;
 	
 	do
 	{
@@ -465,7 +375,7 @@ bool TextBox::SetDisplayText(const hoa_utils::ustring &text)
 	}
 	
 	// reset variables to indicate a new text display is in progress
-	_currentTime = 0;
+	_current_time = 0;
 	
 	// figure out how much time the text will take to display
 	
@@ -473,7 +383,7 @@ bool TextBox::SetDisplayText(const hoa_utils::ustring &text)
 	{
 		case VIDEO_TEXT_INSTANT:    // instant
 		{
-			_endTime = 0;
+			_end_time = 0;
 			break;
 		}		
 		
@@ -486,21 +396,21 @@ bool TextBox::SetDisplayText(const hoa_utils::ustring &text)
 			// numChars is characters per string
 			// 1000 is milliseconds per second
 			
-			_endTime = int32(1000.0f * _numChars / _displaySpeed);
+			_end_time = int32(1000.0f * _num_chars / _display_speed);
 			break;
 		}
 
 		case VIDEO_TEXT_FADELINE:   // One line at a time
 		{
-			// same calculation as one character at a time, except instead of _numChars,
+			// same calculation as one character at a time, except instead of _num_chars,
 			// we use number of lines, times VIDEO_CHARS_PER_LINE
 			
-			_endTime = int32(1000.0f * (_text.size() * VIDEO_CHARS_PER_LINE) / _displaySpeed);			
+			_end_time = int32(1000.0f * (_text.size() * VIDEO_CHARS_PER_LINE) / _display_speed);
 			break;
 		}
 		default:
 		{
-			_endTime = 0;
+			_end_time = 0;
 			if(VIDEO_DEBUG)		
 				cerr << "VIDEO ERROR: undetected display mode in TextBox::SetDisplayText()!" << endl;
 			break;
@@ -512,29 +422,18 @@ bool TextBox::SetDisplayText(const hoa_utils::ustring &text)
 		_finished = true;
 	else
 		_finished = false;
-
-	return success;
 }
 
 
 //-----------------------------------------------------------------------------
 // Clear: makes the textbox empty so it doesn't display any text.
 //-----------------------------------------------------------------------------
-bool TextBox::Clear()
+void TextBox::Clear()
 {
 	_finished = true;
 	_text.clear();
-	_numChars = 0;
-	return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// IsEmpty: returns true if the textbox is currently blank
-//-----------------------------------------------------------------------------
-bool TextBox::IsEmpty()
-{
-	return _text.empty();
+	_num_chars = 0;
+	return;
 }
 
 
@@ -560,8 +459,8 @@ bool TextBox::IsInitialized(string &errors)
 		s << "* Invalid height (" << _height << ")" << endl;
 	
 	// check display speed
-	if(_displaySpeed <= 0.0f)
-		s << "* Invalid display speed (" << _displaySpeed << ")" << endl;
+	if(_display_speed <= 0.0f)
+		s << "* Invalid display speed (" << _display_speed << ")" << endl;
 	
 	// check alignment flags
 	if(_text_xalign < VIDEO_X_LEFT || _text_xalign > VIDEO_X_RIGHT)
@@ -590,12 +489,12 @@ bool TextBox::IsInitialized(string &errors)
 // Note: this is a pretty low level function so it doesn't do any checking
 //       to see if the current font is actually valid
 //-----------------------------------------------------------------------------
-int32 TextBox::_CalculateTextHeight()
+uint32 TextBox::_CalculateTextHeight()
 {
 	if(_text.empty())
 		return 0;
 	else
-		return _fontProperties.height + _fontProperties.line_skip * ((int32)_text.size()-1);
+		return _font_properties.height + _font_properties.line_skip * ((int32)_text.size()-1);
 }
 
 
@@ -619,7 +518,7 @@ void TextBox::_AddLine(const hoa_utils::ustring &line)
 		if(textWidth < _width)
 		{
 			_text.push_back(tempLine);
-			_numChars += (int32) tempLine.size();
+			_num_chars += (int32) tempLine.size();
 			return;
 		}
 		
@@ -677,7 +576,7 @@ void TextBox::_AddLine(const hoa_utils::ustring &line)
 		// and truncate tempLine
 		
 		_text.push_back(wrappedLine);
-		_numChars += (int32) wrappedLine.size();
+		_num_chars += (int32) wrappedLine.size();
 		if(numWrappedChars == lineLength)
 			return;
 		
@@ -705,10 +604,10 @@ bool TextBox::_IsBreakableChar(uint16 character)
 // SetDisplayText: non-unicode version
 //-----------------------------------------------------------------------------
 
-bool TextBox::SetDisplayText(const std::string &text)
+void TextBox::SetDisplayText(const std::string &text)
 {
 	ustring wstr = MakeUnicodeString(text);
-	return SetDisplayText(wstr);
+	SetDisplayText(wstr);
 }
 
 
@@ -719,12 +618,11 @@ bool TextBox::SetDisplayText(const std::string &text)
 
 void TextBox::_DrawTextLines(float textX, float textY, ScreenRect scissorRect)
 {
-	GameVideo *video = GameVideo::SingletonGetReference();
-	CoordSys  &cs    = video->_coord_sys;
+	CoordSys  &cs    = VideoManager->_coord_sys;
 	
 	int32 numCharsDrawn = 0;	
 	
-	TextDisplayMode mode = _mode;
+	TEXT_DISPLAY_MODE mode = _mode;
 	
 	if(_finished)
 		mode = VIDEO_TEXT_INSTANT;	
@@ -734,19 +632,19 @@ void TextBox::_DrawTextLines(float textX, float textY, ScreenRect scissorRect)
 	if(_finished)
 		percentComplete = 1.0f;
 	else
-		percentComplete = (float)_currentTime / (float)_endTime;
+		percentComplete = (float)_current_time / (float)_end_time;
 	
 	for(int32 line = 0; line < (int32)_text.size(); ++line)
 	{	
 		float xOffset;
 		
 		// calculate the xOffset for this line
-		float lineWidth = (float) video->CalculateTextWidth(_font, _text[line]);
+		float lineWidth = (float) VideoManager->CalculateTextWidth(_font, _text[line]);
 	
-		int32 xAlign = video->_ConvertXAlign(_text_xalign);
+		int32 xAlign = VideoManager->_ConvertXAlign(_text_xalign);
 				
 		xOffset = textX + ((xAlign + 1) * lineWidth) * 0.5f * -cs.GetHorizontalDirection();
-		video->MoveRelative(xOffset, 0.0f);	
+		VideoManager->MoveRelative(xOffset, 0.0f);
 	
 		int32 lineSize = (int32) _text[line].size();
 		
@@ -754,18 +652,18 @@ void TextBox::_DrawTextLines(float textX, float textY, ScreenRect scissorRect)
 		{
 			case VIDEO_TEXT_INSTANT:
 			{
-				video->DrawText(_text[line]);
+				VideoManager->DrawText(_text[line]);
 				break;
 			}
 			case VIDEO_TEXT_CHAR:
 			{
 				// figure out which character is currently being rendered
-				int32 curChar = int32(percentComplete * _numChars);
+				int32 curChar = int32(percentComplete * _num_chars);
 				
 				if(numCharsDrawn + lineSize < curChar)
 				{
 					// if this line is before the current character, just render the whole thing
-					video->DrawText(_text[line]);
+					VideoManager->DrawText(_text[line]);
 				}
 				else
 				{
@@ -778,7 +676,7 @@ void TextBox::_DrawTextLines(float textX, float textY, ScreenRect scissorRect)
 					if(numCompletedChars > 0)
 					{					
 						ustring substring = _text[line].substr(0, numCompletedChars);					
-						video->DrawText(substring);
+						VideoManager->DrawText(substring);
 					}
 				}				
 				
@@ -787,14 +685,14 @@ void TextBox::_DrawTextLines(float textX, float textY, ScreenRect scissorRect)
 			case VIDEO_TEXT_FADECHAR:
 			{
 				// figure out which character is currently being rendered
-				float fCurChar = percentComplete * _numChars;
+				float fCurChar = percentComplete * _num_chars;
 				int32 curChar = int32(fCurChar);
 				float curPct  = fCurChar - curChar;
 				
 				if(numCharsDrawn + lineSize <= curChar)
 				{
 					// if this line is before the current character, just render the whole thing
-					video->DrawText(_text[line]);
+					VideoManager->DrawText(_text[line]);
 				}
 				else
 				{
@@ -813,18 +711,18 @@ void TextBox::_DrawTextLines(float textX, float textY, ScreenRect scissorRect)
 						if(numCompletedChars > 0)
 						{
 							substring = _text[line].substr(0, numCompletedChars);
-							video->DrawText(substring);
+							VideoManager->DrawText(substring);
 						}
 						
 						// now draw the current character from this line (faded)
-						Color oldColor = video->GetTextColor();
+						Color oldColor = VideoManager->GetTextColor();
 						Color newColor = oldColor;
 						newColor[3] *= curPct;
 						
-						video->SetTextColor(newColor);
-						video->MoveRelative((float)video->CalculateTextWidth(_font, substring), 0.0f);
-						video->DrawText(_text[line].substr(numCompletedChars, 1));
-						video->SetTextColor(oldColor);
+						VideoManager->SetTextColor(newColor);
+						VideoManager->MoveRelative((float)VideoManager->CalculateTextWidth(_font, substring), 0.0f);
+						VideoManager->DrawText(_text[line].substr(numCompletedChars, 1));
+						VideoManager->SetTextColor(oldColor);
 					}
 				}				
 				
@@ -841,18 +739,18 @@ void TextBox::_DrawTextLines(float textX, float textY, ScreenRect scissorRect)
 				if(line < lines)
 				{
 					// if this line is before the current character, just render the whole thing
-					video->DrawText(_text[line]);
+					VideoManager->DrawText(_text[line]);
 				}
 				else if(line == lines)
 				{
-					Color oldColor = video->GetTextColor();
+					Color oldColor = VideoManager->GetTextColor();
 					Color newColor = oldColor;
 					newColor[3] *= curPct;
 					
-					video->SetTextColor(newColor);
+					VideoManager->SetTextColor(newColor);
 					//video->MoveRelative(video->CalculateTextWidth(_font, _text[line]), 0.0f);
-					video->DrawText(_text[line]);						
-					video->SetTextColor(oldColor);
+					VideoManager->DrawText(_text[line]);
+					VideoManager->SetTextColor(oldColor);
 				}				
 				
 				break;
@@ -861,14 +759,14 @@ void TextBox::_DrawTextLines(float textX, float textY, ScreenRect scissorRect)
 			case VIDEO_TEXT_REVEAL:
 			{			
 				// figure out which character is currently being rendered
-				float fCurChar = percentComplete * _numChars;
+				float fCurChar = percentComplete * _num_chars;
 				int32 curChar = int32(fCurChar);
 				float curPct  = fCurChar - curChar;
 				
 				if(numCharsDrawn + lineSize <= curChar)
 				{
 					// if this line is before the current character, just render the whole thing
-					video->DrawText(_text[line]);
+					VideoManager->DrawText(_text[line]);
 				}
 				else
 				{
@@ -887,7 +785,7 @@ void TextBox::_DrawTextLines(float textX, float textY, ScreenRect scissorRect)
 						if(numCompletedChars > 0)
 						{
 							substring = _text[line].substr(0, numCompletedChars);
-							video->DrawText(substring);
+							VideoManager->DrawText(substring);
 						}
 						
 						// now draw the current character from this line (scissored)
@@ -896,8 +794,8 @@ void TextBox::_DrawTextLines(float textX, float textY, ScreenRect scissorRect)
 
 						// rectangle of the current character, in window coordinates
 						int32 charX, charY, charW, charH;
-						charX = int32(xOffset + cs.GetHorizontalDirection() * video->CalculateTextWidth(_font, substring));
-						charY = int32(textY - cs.GetVerticalDirection() * (_fontProperties.height + _fontProperties.descent));
+						charX = int32(xOffset + cs.GetHorizontalDirection() * VideoManager->CalculateTextWidth(_font, substring));
+						charY = int32(textY - cs.GetVerticalDirection() * (_font_properties.height + _font_properties.descent));
 						
 						if(cs.GetHorizontalDirection() < 0.0f)
 							charY = int32(cs.GetBottom()) - charY;
@@ -905,20 +803,20 @@ void TextBox::_DrawTextLines(float textX, float textY, ScreenRect scissorRect)
 						if(cs.GetVerticalDirection() < 0.0f)
 							charX = int32(cs.GetLeft()) - charX;
 							
-						charW = video->CalculateTextWidth(_font, curCharString);
-						charH = _fontProperties.height;
+						charW = VideoManager->CalculateTextWidth(_font, curCharString);
+						charH = _font_properties.height;
 						
 						// multiply width by percentage done
 						charW = int32(curPct * charW);						
-						video->MoveRelative(cs.GetHorizontalDirection() * video->CalculateTextWidth(_font, substring), 0.0f);
+						VideoManager->MoveRelative(cs.GetHorizontalDirection() * VideoManager->CalculateTextWidth(_font, substring), 0.0f);
 						
-						video->PushState();
+						VideoManager->PushState();
 						ScreenRect charScissorRect(charX, charY, charW, charH);
 						scissorRect.Intersect(charScissorRect);
-						video->EnableScissoring(true);
-						video->SetScissorRect(scissorRect);
-						video->DrawText(curCharString);
-						video->PopState();
+						VideoManager->EnableScissoring(true);
+						VideoManager->SetScissorRect(scissorRect);
+						VideoManager->DrawText(curCharString);
+						VideoManager->PopState();
 					}
 				}				
 				
@@ -927,7 +825,7 @@ void TextBox::_DrawTextLines(float textX, float textY, ScreenRect scissorRect)
 			
 			default:
 			{
-				video->DrawText(_text[line]);
+				VideoManager->DrawText(_text[line]);
 				
 				if(VIDEO_DEBUG)
 				{
@@ -941,8 +839,8 @@ void TextBox::_DrawTextLines(float textX, float textY, ScreenRect scissorRect)
 		numCharsDrawn += lineSize;
 		//video->MoveRelative(-xOffset, _fontProperties.line_skip * -cs._upDir);
 		
-		textY += _fontProperties.line_skip * -cs.GetVerticalDirection();
-		video->Move(0.0f, textY);
+		textY += _font_properties.line_skip * -cs.GetVerticalDirection();
+		VideoManager->Move(0.0f, textY);
 	}
 }
 

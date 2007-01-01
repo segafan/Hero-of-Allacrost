@@ -86,7 +86,7 @@ bool ParticleEffect::_Update(float frame_time)
 	
 	bool success = true;
 
-	EffectParameters effect_parameters;
+	private_video::EffectParameters effect_parameters;
 	effect_parameters.orientation = _orientation;
 	
 	// note we subtract the effect position to put the attractor point in effect

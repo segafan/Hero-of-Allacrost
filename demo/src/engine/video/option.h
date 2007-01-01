@@ -19,15 +19,13 @@
 #ifndef __OPTION_HEADER__
 #define __OPTION_HEADER__
 
+#include "defs.h"
 #include "utils.h"
 #include "gui.h"
 
 //! All calls to the video engine are wrapped in this namespace.
 namespace hoa_video
 {
-
-class GUI;
-class OptionBox;
 
 
 //! how often the menu cursor blinks (assuming it's in blinking state), in milliseconds
@@ -254,7 +252,7 @@ public:
 	 * \return success/failure
 	 */
 	
-	bool Update(int32 frameTime);
+	void Update(uint32 frameTime);
 
 
 	/*!
@@ -262,7 +260,7 @@ public:
 	 * \return success/failure
 	 */
 		
-	bool Draw();
+	void Draw();
 	
 	
 	/*!

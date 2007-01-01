@@ -62,18 +62,18 @@ MenuWindow::~MenuWindow()
 //       current coordinate system and alignment flags the API user has set
 //-----------------------------------------------------------------------------
 
-bool MenuWindow::Draw()
+void MenuWindow::Draw()
 {
 	// fail if menu window isn't initialized properly
 	if(!_initialized)
 	{
 		if(VIDEO_DEBUG)
 			cerr << "MenuWindow::Draw() failed because the menu window was not initialized:" << endl << _initialize_errors << endl;
-		return false;		
+		return;
 	}
 
 	if(_state == VIDEO_MENU_STATE_HIDDEN)
-		return true;  // nothing to do
+		return;  // nothing to do
 
 	GameVideo *video = GameVideo::SingletonGetReference();
 
@@ -102,12 +102,12 @@ bool MenuWindow::Draw()
 		if(VIDEO_DEBUG)
 			cerr << "MenuMode::Draw() failed because GameVideo::DrawImage() returned false!" << endl;
 		video->_PopContext();
-		return false;
+		return;
 	}
 	
 	video->_PopContext();	
 	
-	return true;
+	return;
 }
 
 
@@ -116,7 +116,7 @@ bool MenuWindow::Draw()
 //         Returns false on unexpected failure
 //-----------------------------------------------------------------------------
 
-bool MenuWindow::Update(int32 frameTime)
+void MenuWindow::Update(uint32 frameTime)
 {
 	_currentTime += frameTime;
 	
@@ -157,7 +157,7 @@ bool MenuWindow::Update(int32 frameTime)
 		}
 
 		_isScissored = false;
-		return true;
+		return;
 	}
 
 	_isScissored = true;
@@ -203,7 +203,7 @@ bool MenuWindow::Update(int32 frameTime)
 		}
 	}
 	
-	return true;
+	return;
 }
 
 
@@ -386,19 +386,18 @@ void MenuWindow::Destroy()
 // SetDisplayMode
 //-----------------------------------------------------------------------------
 
-bool MenuWindow::SetDisplayMode(MenuDisplayMode mode)
+void MenuWindow::SetDisplayMode(MenuDisplayMode mode)
 {
 	if(mode <= VIDEO_MENU_INVALID || mode >= VIDEO_MENU_TOTAL)
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: MenuWindow::SetDisplayMode() failed because an invalid mode (" << mode << ") was passed in!" << endl;
-		return false;
+		return;
 	}
 	
 	_mode = mode;
 	
 	_initialized = IsInitialized(_initialize_errors);
-	return true;
 }
 
 

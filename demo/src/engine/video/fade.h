@@ -19,7 +19,9 @@
 #ifndef __FADE_HEADER__
 #define __FADE_HEADER__
 
+#include "defs.h"
 #include "utils.h"
+#include "color.h"
 
 namespace hoa_video
 {

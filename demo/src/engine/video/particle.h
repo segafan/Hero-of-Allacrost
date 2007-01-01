@@ -22,6 +22,7 @@
 #ifndef __PARTICLE_HEADER__
 #define __PARTICLE_HEADER__
 
+#include "defs.h"
 #include "utils.h"
 #include "color.h"
 #include "particle_keyframe.h"

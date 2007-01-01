@@ -1037,14 +1037,14 @@ void OptionBox::_ClearOptions()
 //       video engine into account, as well as the current coordinate system
 //-----------------------------------------------------------------------------
 
-bool OptionBox::Draw()
+void OptionBox::Draw()
 {
 	// fail if option box isn't initialized properly
 	if(!_initialized)
 	{
 		if(VIDEO_DEBUG)
 			cerr << "OptionBox::Draw() failed because the option box was not initialized:" << endl << _initializeErrors << endl;			
-		return false;		
+		return;		
 	}
 
 	GameVideo *video = GameVideo::SingletonGetReference();
@@ -1297,7 +1297,6 @@ bool OptionBox::Draw()
 	}
 	
 	video->_PopContext();
-	return true;
 }
 
 
@@ -1345,7 +1344,7 @@ void OptionBox::_SetupAlignment(int32 xalign, int32 yalign, const OptionCellBoun
 // Update: update any blinking or scrolling effects for the option box
 //-----------------------------------------------------------------------------
 
-bool OptionBox::Update(int32 frameTime)
+void OptionBox::Update(uint32 frameTime)
 {
 	_blink = ((_blinkTime / VIDEO_CURSOR_BLINK_RATE) % 2) == 1;	
 	_blinkTime += frameTime;
@@ -1360,7 +1359,6 @@ bool OptionBox::Update(int32 frameTime)
 			_scrolling = false;
 		}
 	}
-	return true;
 } 
 
 } // namespace hoa_video

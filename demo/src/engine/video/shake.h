@@ -20,6 +20,7 @@
 #ifndef __SHAKE_HEADER__
 #define __SHAKE_HEADER__
 
+#include "defs.h"
 #include "utils.h"
 
 

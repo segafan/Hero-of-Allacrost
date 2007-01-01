@@ -96,7 +96,7 @@ public:
 	/*!
 	 * \brief render this window to the screen.
 	 */
-	bool Draw();
+	void Draw();
 }; // class CharacterWindow : public hoa_video::MenuWindow
 
 /** ****************************************************************************
@@ -114,7 +114,7 @@ public:
 	//! \brief CharacterWindow Destructor
 	~MiniCharacterSelectWindow();
 	//! \brief render this window to the screen.
-	bool Draw();
+	void Draw();
 	//! \brief change the active status of the window
 	void Activate(bool new_status);
 	bool IsActive()
@@ -172,7 +172,7 @@ public:
 
 	//! \brief Draw the inventory window
 	//! Takes care of drawing the inventory window to the screen.
-	bool Draw();
+	void Draw();
 
 private:
 	
@@ -266,7 +266,7 @@ public:
 	StatusWindow();
 	~StatusWindow();
 	//! \brief render this window to the screen.
-	bool Draw();
+	void Draw();
 
 	//! \brief update function handles input to the window
 	void Update();
@@ -297,7 +297,7 @@ public:
 	void Update();
 
 	//! \brief Draws the windows and option boxes
-	bool Draw();
+	void Draw();
 
 	//! \brief Activates the window
 	void Activate(bool new_status);
@@ -371,7 +371,7 @@ public:
 	~EquipWindow();
 
 	//! \brief Draws window
-	bool Draw();
+	void Draw();
 
 	//! \brief Performs updates
 	void Update();
@@ -424,7 +424,7 @@ public:
 	FormationWindow();
 	~FormationWindow();
 	void Update();
-	bool Draw();
+	void Draw();
 
 private:
 

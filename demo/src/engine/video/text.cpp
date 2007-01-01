@@ -621,7 +621,7 @@ bool GameVideo::SetFontShadowYOffset(const std::string &fontName, int32 y)
 // SetFontShadowStyle: sets the shadow style for the given font
 //-----------------------------------------------------------------------------
 
-bool GameVideo::SetFontShadowStyle(const std::string &fontName, TextShadowStyle style)
+bool GameVideo::SetFontShadowStyle(const std::string &fontName, TEXT_SHADOW_STYLE style)
 {
 	if(_font_map.find(fontName) == _font_map.end())
 	{

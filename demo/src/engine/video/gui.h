@@ -19,22 +19,14 @@
 #ifndef __GUI_HEADER__
 #define __GUI_HEADER__
 
+#include "defs.h"
 #include "utils.h"
 #include "screen_rect.h"
 #include "image.h"
 #include "text.h"
  
 //! All calls to the video engine are wrapped in this namespace.
-namespace hoa_video
-{
-
-namespace private_video
-{
-class GUI;
-}
-
-class MenuWindow;
-class GameVideo;
+namespace hoa_video {
 
 //! Determines whether the code in the hoa_video namespace should print debug statements or not.
 extern bool VIDEO_DEBUG;
@@ -62,7 +54,7 @@ public:
 	 *
 	 *  \note This function must be reimplemented in all children of this class.
 	 */
-	virtual bool Draw() = 0;
+	virtual void Draw() = 0;
 
 
 	/*!
@@ -73,7 +65,7 @@ public:
 	 *
 	 *  \note This function must be reimplemented in all children of this class.
 	 */
-	virtual bool Update(int32 frame_time) = 0;
+	virtual void Update(uint32 frame_time) = 0;
 
 
 	/*!
@@ -119,7 +111,7 @@ public:
 	 *
 	 *  \return false if invalid value is passed
 	 */
-	bool SetAlignment(int32 xalign, int32 yalign);
+	void SetAlignment(int32 xalign, int32 yalign);
 	
 
 	/*!

@@ -19,7 +19,7 @@
 #ifndef __INTERPOLATOR_HEADER__
 #define __INTERPOLATOR_HEADER__
 
-
+#include "defs.h"
 #include "utils.h"
 
 namespace hoa_video
