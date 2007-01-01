@@ -266,7 +266,7 @@ bool TextBox::SetFont(const string &fontName)
 
 	// try to get properties about the current font. Note we don't bother calling IsValidFont() to see
 	// if this font has been loaded since GetFontProperties() implements that check
-	if(!videoManager->GetFontProperties(fontName, _fontProperties))
+	if(videoManager->GetFontProperties(fontName) == NULL)
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: TextBox::SetFont() failed because GameVideo::GetFontProperties() returned false for the font:\n" << fontName << endl;
@@ -595,7 +595,7 @@ int32 TextBox::_CalculateTextHeight()
 	if(_text.empty())
 		return 0;
 	else
-		return _fontProperties.height + _fontProperties.lineskip * ((int32)_text.size()-1);
+		return _fontProperties.height + _fontProperties.line_skip * ((int32)_text.size()-1);
 }
 
 
@@ -939,9 +939,9 @@ void TextBox::_DrawTextLines(float textX, float textY, ScreenRect scissorRect)
 
 
 		numCharsDrawn += lineSize;
-		//video->MoveRelative(-xOffset, _fontProperties.lineskip * -cs._upDir);
+		//video->MoveRelative(-xOffset, _fontProperties.line_skip * -cs._upDir);
 		
-		textY += _fontProperties.lineskip * -cs.GetVerticalDirection();
+		textY += _fontProperties.line_skip * -cs.GetVerticalDirection();
 		video->Move(0.0f, textY);
 	}
 }

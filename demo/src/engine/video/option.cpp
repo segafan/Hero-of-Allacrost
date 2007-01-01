@@ -75,7 +75,7 @@ bool OptionBox::SetFont(const std::string &fontName)
 
 	// try to get properties about the current font. Note we don't bother calling IsValidFont() to see
 	// if this font has been loaded since GetFontProperties() implements that check
-	if(!videoManager->GetFontProperties(fontName, _fontProperties))
+	if(videoManager->GetFontProperties(fontName) == NULL)
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: OptionBox::SetFont() failed because GameVideo::GetFontProperties() returned false for the font:\n" << fontName << endl;
