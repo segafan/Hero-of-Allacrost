@@ -89,6 +89,12 @@ private:
 	//! 'Resolution switcher' menu
 	BootMenu _resolution_menu;
 
+	//! Latest version according to version check
+	bool _latest_version;
+	
+	//! If this isn't the latest version, what is?
+	std::string _latest_version_number;
+
 	
 	/*!
 	 *  \brief Animates the game logo when this class is first initialized.
@@ -249,12 +255,9 @@ private:
 
 	//! Updates the joystick settings screen
 	void _UpdateJoySettings();
-	
-	//! Latest version? (according to version check)
-	bool _latest_version;
-	
-	//! If this isn't the latest version, what is?
-	std::string _latest_version_number;
+
+	//! Saves all the game settings into a .lua file
+	void _SaveSettingsFile();
 
 public:
 	//! Initializes class members and loads media data.

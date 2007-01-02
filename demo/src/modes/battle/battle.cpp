@@ -152,9 +152,10 @@ BattleMode::BattleMode() :
 	action_type_options.push_back(MakeUnicodeString("<img/icons/battle/item.png><55>Item"));
 
 	_action_type_menu.SetOptions(action_type_options);
-	_action_type_menu.EnableOption(1, false); // Disable defend, support and item for now
+	_action_type_menu.EnableOption(1, false); // Disable defend & support
 	_action_type_menu.EnableOption(2, false);
-	//_action_type_menu.EnableOption(3, false);
+	if (GlobalManager->GetInventory().empty())
+		_action_type_menu.EnableOption(3, false);
 
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 
@@ -322,7 +323,7 @@ void BattleMode::_CreateCharacterActors() {
 		BattleCharacterActor * claudius = new BattleCharacterActor(GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS), 256, 320);
 		_character_actors.push_back(claudius);
 		_selected_character = claudius;
-		_actor_index = IndexLocationOfPlayerCharacter(claudius);
+		_actor_index = GetIndexOfCharacter(claudius);
 	}
 } // void BattleMode::_CreateCharacterActors()
 
@@ -330,12 +331,12 @@ void BattleMode::_CreateCharacterActors() {
 
 void BattleMode::_CreateEnemyActors() {
 
-	while (_enemy_actors.size() == 0)
+	while (_enemy_actors.empty())
 	{
 		// Create the Green Slime EnemyActor
 		if (Probability(50))
 		{
-			BattleEnemyActor * green_slime = new BattleEnemyActor("green_slime", 768, 256);
+			BattleEnemyActor * green_slime = new BattleEnemyActor("green_slime", RandomBoundedInteger(400, 600), RandomBoundedInteger(200, 400));
 			green_slime->SetName(MakeUnicodeString("Green Slime"));
 			green_slime->LevelSimulator(2);
 			_enemy_actors.push_back(green_slime);
@@ -344,7 +345,7 @@ void BattleMode::_CreateEnemyActors() {
 		// Create the Spider EnemyActor
 		if (Probability(50))
 		{
-			BattleEnemyActor * spider = new BattleEnemyActor("spider", 512, 320);
+			BattleEnemyActor * spider = new BattleEnemyActor("spider", RandomBoundedInteger(400, 600), RandomBoundedInteger(200, 400));
 			spider->SetName(MakeUnicodeString("Spider"));
 			spider->LevelSimulator(2);
 			_enemy_actors.push_back(spider);
@@ -353,7 +354,7 @@ void BattleMode::_CreateEnemyActors() {
 		// Create the Snake EnemyActor
 		if (Probability(50))
 		{	
-			BattleEnemyActor * snake = new BattleEnemyActor("snake", 576, 192);
+			BattleEnemyActor * snake = new BattleEnemyActor("snake", RandomBoundedInteger(400, 600), RandomBoundedInteger(200, 400));
 			snake->SetName(MakeUnicodeString("Snake"));
 			snake->LevelSimulator(2);
 			_enemy_actors.push_back(snake);
@@ -362,7 +363,7 @@ void BattleMode::_CreateEnemyActors() {
 		// Create the Skeleton EnemyActor
 		if (Probability(50))
 		{
-			BattleEnemyActor * skeleton = new BattleEnemyActor("skeleton", 704, 384);
+			BattleEnemyActor * skeleton = new BattleEnemyActor("skeleton", RandomBoundedInteger(400, 600), RandomBoundedInteger(200, 400));
 			skeleton->SetName(MakeUnicodeString("Skeleton"));
 			skeleton->LevelSimulator(2);
 			_enemy_actors.push_back(skeleton);
@@ -389,7 +390,7 @@ void BattleMode::_ShutDown() {
 ////////////////////////////////////////////////////////////////////////////////
 
 void BattleMode::Update() {
-	_battle_over = (_NumberEnemiesAlive() == 0) || (_NumberCharactersAlive() == 0);
+	_battle_over = (_NumberEnemiesAlive() == 0) || (_NumberOfCharactersAlive() == 0);
 	
 	if (_battle_over) {
 		_victorious_battle = (_NumberEnemiesAlive() == 0);
@@ -463,7 +464,7 @@ void BattleMode::_UpdateCharacterSelection() {
 		return;
 	}
 	// Return if the player does not have more than one character so select
-	if (_NumberCharactersAlive() == 1) {
+	if (_NumberOfCharactersAlive() == 1) {
 		_cursor_state = CURSOR_SELECT_ACTION_TYPE;
 		_action_menu_window->Show();
 		return;
@@ -474,7 +475,7 @@ void BattleMode::_UpdateCharacterSelection() {
 		// Select the next character above the currently selected one
 		// If no such character exists, the selected character will remain selected
 		uint32 working_index = _actor_index;
-		while (working_index < GetNumberOfCharacterActors()) {
+		while (working_index < GetNumberOfCharacters()) {
 			if (GetPlayerCharacterAt((working_index + 1))->GetActor()->IsAlive()) {
 				_actor_index = working_index + 1;
 				break;
@@ -523,7 +524,7 @@ void BattleMode::_UpdateActionTypeMenu() {
 	}
 	else if (InputManager->ConfirmPress() ) {
 		// Construct the action list menu for the action selected
-		if (_action_type_menu_cursor_location == 0) {
+		if (_action_type_menu_cursor_location == ACTION_TYPE_ATTACK) {
 			_cursor_state = CURSOR_SELECT_ACTION_LIST;
 			_ConstructActionListMenu();
 		}
@@ -535,7 +536,7 @@ void BattleMode::_UpdateActionTypeMenu() {
 	}
 	else if (InputManager->CancelPress()) {
 		// Only return to selecting characters if there is more than one character
-		if (_NumberCharactersAlive() > 1) {
+		if (_NumberOfCharactersAlive() > 1) {
 			_actor_index = GetIndexOfFirstIdleCharacter();
 			_cursor_state = CURSOR_IDLE;
 			_action_menu_window->Hide();
@@ -594,7 +595,7 @@ void BattleMode::_UpdateTargetSelection() {
 		// Select the character "to the bottom"
 		uint32 working_index = _argument_actor_index;
 		while (true) {
-			if (working_index < GetNumberOfEnemyActors() - 1)
+			if (working_index < GetNumberOfEnemies() - 1)
 				working_index++;
 			else
 				working_index = GetIndexOfFirstAliveEnemy();
@@ -799,7 +800,7 @@ const uint32 BattleMode::_NumberEnemiesAlive() const {
 }
 
 
-const uint32 BattleMode::_NumberCharactersAlive() const {
+const uint32 BattleMode::_NumberOfCharactersAlive() const {
 	uint32 character_count = 0;
 	for (uint32 i = 0; i < _character_actors.size(); i++) {
 		if (_character_actors[i]->GetActor()->IsAlive()) {
@@ -815,11 +816,8 @@ void BattleMode::_ConstructActionListMenu() {
 	// If an old submenu exists, delete it
 	if (_action_list_menu) {
 		delete _action_list_menu;
+		_action_list_menu = 0;
 	}
-// 	if (_action_menu_window) {
-// 		_action_menu_window->Destroy();
-// 		delete _action_menu_window;
-// 	}
 
 	_action_list_menu = new OptionBox();
 	_action_list_menu->SetPosition(10.0f, 512.0f);
@@ -833,8 +831,9 @@ void BattleMode::_ConstructActionListMenu() {
 
 	if (_action_type_menu_cursor_location == ACTION_TYPE_ATTACK) {
 		vector<GlobalSkill*> attack_skills = p->GetActor()->GetAttackSkills();
-		if (attack_skills.size() <= 0) {
+		if (attack_skills.empty()) {
 			_cursor_state = CURSOR_SELECT_ACTION_TYPE;
+			return;
 		}
 		else {
 			vector<ustring> attack_skill_names;
@@ -845,64 +844,48 @@ void BattleMode::_ConstructActionListMenu() {
 			_action_list_menu->SetSize(1, attack_skill_names.size());
 			_action_list_menu->SetOptions(attack_skill_names);
 			_action_list_menu->SetSelection(0);
-
-// 			_action_menu_window = new MenuWindow();
-// 			_action_menu_window->Create(200.0f, 20.0f + 50.0f * attack_skill_names.size());
-// 			_action_menu_window->SetPosition(0.0f, 600.0f);
-// 			_action_menu_window->Show();
 		}
-	} // if (_action_type_menu_cursor_location == ACTION_TYPE_ATTACK)
+	}
 	
 	else if (_action_type_menu_cursor_location == ACTION_TYPE_DEFEND) {
 		vector <GlobalSkill*> defense_skills = p->GetActor()->GetDefenseSkills();
-		if (defense_skills.size() <= 0) {
+		if (defense_skills.empty()) {
 			_cursor_state = CURSOR_SELECT_ACTION_TYPE;
 		}
 		else {
 			vector<ustring> defense_skill_names;
 			for (uint32 i = 0; i < defense_skills.size(); ++i) {
-				ostringstream sp_usage;
-				sp_usage << defense_skills[i]->GetSkillPointsRequired();
-				string skill_string = MakeStandardString(defense_skills[i]->GetSkillName()) + string("     ") + sp_usage.str();
+				string skill_string = MakeStandardString(defense_skills[i]->GetSkillName()) + string("     ") + NumberToString(defense_skills[i]->GetSkillPointsRequired());
 				defense_skill_names.push_back(MakeUnicodeString(skill_string));
 			}
 			_action_list_menu->SetOptions(defense_skill_names);
 			_action_list_menu->SetSize(1, defense_skill_names.size());
-
-
-// 			_action_menu_window = new MenuWindow();
-// 			_action_menu_window->Create(200.0f, 20.0f + 50.0f * defense_skill_names.size());
-// 			_action_menu_window->SetPosition(0.0f, 600.0f);
-// 			_action_menu_window->Show();
 		}
-	} // else if (_action_type_menu_cursor_location == ACTION_TYPE_DEFEND)
+	}
 	
 	else if (_action_type_menu_cursor_location == ACTION_TYPE_SUPPORT) {
 		vector<GlobalSkill*> support_skills = p->GetActor()->GetSupportSkills();
-		if (support_skills.size() <= 0) {
+		if (support_skills.empty()) {
 			_cursor_state = CURSOR_SELECT_ACTION_TYPE;
 		}
 		else {
 			vector<ustring> support_skill_names;
 			for (uint32 i = 0; i < support_skills.size(); ++i) {
-				ostringstream sp_usage;
-				sp_usage << support_skills[i]->GetSkillPointsRequired();
-				string skill_string = MakeStandardString(support_skills[i]->GetSkillName()) + string("     ") + sp_usage.str();
+				string skill_string = MakeStandardString(support_skills[i]->GetSkillName()) + string("     ") + NumberToString(support_skills[i]->GetSkillPointsRequired());
 				support_skill_names.push_back(MakeUnicodeString(skill_string));
 			}
 	
 			_action_list_menu->SetOptions(support_skill_names);
 			_action_list_menu->SetSize(1, support_skill_names.size());
-
-// 			_action_menu_window = new MenuWindow();
-// 			_action_menu_window->Create(200.0f, 20.0f + 50.0f * support_skill_names.size());
-// 			_action_menu_window->SetPosition(0.0f, 600.0f);
-// 			_action_menu_window->Show();
 		}
-	} // else if (_action_type_menu_cursor_location == ACTION_TYPE_SUPPORT)
-	
+	}
+
 	else if (_action_type_menu_cursor_location == ACTION_TYPE_ITEM) {
 		Inventory inv = GlobalManager->GetInventory();
+		if (inv.empty()) {
+			_cursor_state = CURSOR_SELECT_ACTION_TYPE;
+			return;
+		}
 
 		// Calculate the number of rows, this is dividing by 6, and if there is a remainder > 0, add one more row for the remainder
 		_action_list_menu->SetSize(6, inv.size() / 6 + ((inv.size() % 6) > 0 ? 1 : 0));
@@ -911,23 +894,18 @@ void BattleMode::_ConstructActionListMenu() {
 		// Get the name of each item in the inventory
 		for (Inventory::iterator it = inv.begin(); it != inv.end(); ++it) {
 			GlobalObject * item = it->second;
-			string inv_item_str = string("<") + item->GetIconPath() + string("><32>") + MakeStandardString(item->GetName()) + string("<R>") + string("    ") + NumberToString(item->GetCount());
+			string inv_item_str = string("<") + item->GetIconPath() + string("><42>") + MakeStandardString(item->GetName()) + string(" ") + NumberToString(item->GetCount());
 			inv_names.push_back(MakeUnicodeString(inv_item_str));
 		}
 
 		_action_list_menu->SetOptions(inv_names);
 		_action_list_menu->SetSize(1, inv_names.size());
 		_action_list_menu->SetSelection(0);
-
-// 		_action_menu_window = new MenuWindow();
-// 		_action_menu_window->Create(200.0f, 20.0f + 50.0f * inv_names.size());
-// 		_action_menu_window->SetPosition(0.0f, 600.0f);
-// 		_action_menu_window->Show();*/
 	}
 
 	else {
 		cerr << "BATTLE ERROR: Unknown action type number: " << _action_type_menu_cursor_location << endl;
-		cerr << "> Exiting game" << endl;
+		cerr << "Exiting game" << endl;
 		SystemManager->ExitGame();
 	}
 } // void BattleMode::_ConstructActionListMenu()
@@ -979,12 +957,11 @@ void BattleMode::PlayerVictory() {
 	// TODO: Fix this with proper ID's!
 	GlobalManager->AddToInventory(new GlobalItem(1, 1));
 
-	// Give some experience as well
-	GlobalCharacter *claudius = GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS);
-	if (claudius != 0) {
-		claudius->AddExperienceLevel(1); // TODO: Add only experience, NOT exp LEVEL!
+	// Give some experience for each character in the party
+	for (uint32 i = 0; i < _character_actors.size(); ++i) {
+		_character_actors.at(i)->GetActor()->AddExperienceLevel(1); // TODO: Add only experience, NOT exp LEVEL!
 	}
-
+	
 	VideoManager->DisableFog();
 	_ShutDown();
 }
@@ -1000,29 +977,29 @@ void BattleMode::PlayerDefeat() {
 }
 
 
-void BattleMode::SwapCharacters(BattleCharacterActor *AActorToRemove, BattleCharacterActor *AActorToAdd) {
-	//put AActorToAdd at AActorToRemove's location
+void BattleMode::SwapCharacters(BattleCharacterActor * ActorToRemove, BattleCharacterActor * ActorToAdd) {
+	// Remove 'ActorToRemove'
 	for (std::deque < BattleCharacterActor * >::iterator it = _character_actors.begin(); it != _character_actors.end(); it++) {
-		if (*it == AActorToRemove) {
+		if (*it == ActorToRemove) {
 			_character_actors.erase(it);
 			break;
 		}
 	}
 
-	//set location and origin to removing characters location and origin
-	AActorToAdd->SetXOrigin(AActorToRemove->GetXOrigin());
-	AActorToAdd->SetYOrigin(AActorToRemove->GetYOrigin());
-	AActorToAdd->SetXLocation(static_cast<float>(AActorToRemove->GetXOrigin()));
-	AActorToAdd->SetYLocation(static_cast<float>(AActorToRemove->GetYOrigin()));
+	// set location and origin to removing characters location and origin
+	ActorToAdd->SetXOrigin(ActorToRemove->GetXOrigin());
+	ActorToAdd->SetYOrigin(ActorToRemove->GetYOrigin());
+	ActorToAdd->SetXLocation(static_cast<float>(ActorToRemove->GetXOrigin()));
+	ActorToAdd->SetYLocation(static_cast<float>(ActorToRemove->GetYOrigin()));
 
-	_character_actors.push_back(AActorToAdd);	//add the other character to battle
+	_character_actors.push_back(ActorToAdd);	//add the other character to battle
 }
 
 
 
-int32 BattleMode::GetIndexOfFirstAliveEnemy() {
+int32 BattleMode::GetIndexOfFirstAliveEnemy() const {
 
-	std::deque<private_battle::BattleEnemyActor*>::iterator it = _enemy_actors.begin();
+	std::deque<private_battle::BattleEnemyActor*>::const_iterator it = _enemy_actors.begin();
 	for (uint32 i = 0; it != _enemy_actors.end(); i++, it++) {
 		if ((*it)->IsAlive()) {
 			return i;
@@ -1033,10 +1010,10 @@ int32 BattleMode::GetIndexOfFirstAliveEnemy() {
 }
 
 
-int32 BattleMode::GetIndexOfLastAliveEnemy() {
+int32 BattleMode::GetIndexOfLastAliveEnemy() const {
 
-	std::deque<private_battle::BattleEnemyActor*>::iterator it = _enemy_actors.end()-1;
-	for (int32 i = _enemy_actors.size()-1; it != _enemy_actors.begin(); i--, it--) {
+	std::deque<private_battle::BattleEnemyActor*>::const_iterator it = _enemy_actors.end()-1;
+	for (int32 i = _enemy_actors.size()-1; i >= 0; i--, it--) {
 		if ((*it)->IsAlive()) {
 			return i;
 		}
@@ -1047,30 +1024,25 @@ int32 BattleMode::GetIndexOfLastAliveEnemy() {
 
 
 
-int32 BattleMode::GetIndexOfFirstIdleCharacter() {
-	int32 index = -1;
+int32 BattleMode::GetIndexOfFirstIdleCharacter() const {
 
-	deque<BattleCharacterActor*>::iterator it = _character_actors.begin();
+	deque<BattleCharacterActor*>::const_iterator it = _character_actors.begin();
 	for (uint32 i = 0; it != _character_actors.end(); i++, it++) {
 		if (!(*it)->IsQueuedToPerform() && (*it)->GetActor()->IsAlive()) {
-			index = i;
-			break;
+			return i;
 		}
 	}
 
-		return index;
+	return -1;
 }
 
 
-int32 BattleMode::IndexLocationOfPlayerCharacter(private_battle::BattleCharacterActor* const AActor) {
-	int32 index = 0;
-	deque<BattleCharacterActor*>::iterator it = _character_actors.begin();
-	for (; it != _character_actors.end(); it++) {
-		if (*it == AActor) {
-			return index;
-		} else {
-			index++;
-		}
+int32 BattleMode::GetIndexOfCharacter(BattleCharacterActor * const Actor) const {
+	
+	deque<BattleCharacterActor*>::const_iterator it = _character_actors.begin();
+	for (int32 i = 0; it != _character_actors.end(); i++, it++) {
+		if (*it == Actor)
+			return i;
 	}
 	return -1;
 }
