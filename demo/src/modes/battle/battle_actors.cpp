@@ -66,7 +66,7 @@ void BattleCharacterActor::Update() {
 	if (GetActor()->IsAlive() == false) {
 		current_battle->RemoveScriptedEventsForActor(this);
 		}
-	global_character_->RetrieveBattleAnimation("idle")->Update();
+	GetActor()->RetrieveBattleAnimation("idle")->Update();
 }
 
 
@@ -82,7 +82,7 @@ void BattleCharacterActor::DrawSprite() {
 		}
 		// Draw the character sprite
 		VideoManager->Move(_x_location, _y_location);
-		global_character_->RetrieveBattleAnimation("idle")->Draw();
+		GetActor()->RetrieveBattleAnimation("idle")->Draw();
 		
 
 		// TEMP: determine if character sprite needs red damage numbers drawn next to it
@@ -106,7 +106,7 @@ void BattleCharacterActor::DrawSprite() {
 
 // Draws the character's damage-blended face portrait
 void BattleCharacterActor::DrawPortrait() {
-	std::vector<StillImage> & portrait_frames = *global_character_->GetBattlePortraits();
+	std::vector<StillImage> & portrait_frames = *(GetActor()->GetBattlePortraits());
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 	VideoManager->Move(48, 9);
 
@@ -192,6 +192,7 @@ void BattleCharacterActor::TakeDamage(uint32 damage)
 {
 	_total_time_damaged = 1;
 	_damage_dealt = damage;
+	VideoManager->ShakeScreen(2.0f, 0.75f); // TODO: remove this line! Only for testing =)
 	if (damage >= GetActor()->GetHitPoints()) // Was it a killing blow?
 	{
 		GetActor()->SetHitPoints(0);
@@ -244,7 +245,7 @@ void BattleEnemyActor::Update() {
 	if ( last_attack > next_attack && !IsQueuedToPerform() && IsAlive()) {
 		//we can perform another attack
 		std::deque<IBattleActor*> final_targets;
-		std::deque<BattleCharacterActor*> targets = current_battle->ReturnCharacters();
+		std::deque<BattleCharacterActor*> targets = current_battle->GetCharacters();
 
 		for (uint8 i = 0; i < targets.size(); i++) {
 			final_targets.push_back(dynamic_cast<IBattleActor*>(targets[i]));

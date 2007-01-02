@@ -148,7 +148,7 @@ public:
 	void RemoveScriptedEventsForActor(hoa_global::GlobalActor * actor);
 
 	//! Returns all player actors
-	std::deque<private_battle::BattleCharacterActor*> ReturnCharacters() const
+	std::deque<private_battle::BattleCharacterActor*> GetCharacters() const
 		{ return _character_actors; }
 
 	//! Is the battle over?
@@ -165,28 +165,28 @@ public:
 	//! Handle player defeat
 	void PlayerDefeat();
 
-	uint32 GetNumberOfCharacterActors()
+	uint32 GetNumberOfCharacters() const
 		{ return _character_actors.size(); }
-	uint32 GetNumberOfEnemyActors()
+	uint32 GetNumberOfEnemies() const
 		{ return _enemy_actors.size(); }
-	int32 GetIndexOfFirstAliveEnemy();
-	int32 GetIndexOfLastAliveEnemy();
-	int32 GetIndexOfFirstIdleCharacter();
+	int32 GetIndexOfFirstAliveEnemy() const;
+	int32 GetIndexOfLastAliveEnemy() const;
+	int32 GetIndexOfFirstIdleCharacter() const;
 
 	//! Returns the player actor at the deque location 'index'
 	private_battle::BattleCharacterActor * GetPlayerCharacterAt(uint32 index) const
 		{ return _character_actors.at(index); }
 
 	//! Returns the enemy actor at the deque location 'index'
-	private_battle::BattleEnemyActor * GetEnemyActorAt(uint32 index)
+	private_battle::BattleEnemyActor * GetEnemyActorAt(uint32 index) const
 		{ return _enemy_actors.at(index); }
 
 	//! Returns the index of a player character
-	int32 IndexLocationOfPlayerCharacter(private_battle::BattleCharacterActor *const actor);
+	int32 GetIndexOfCharacter(private_battle::BattleCharacterActor * const Actor) const;
 
 	//! \brief Swap a character from _player_actors to _player_actors_in_battle
 	// This may become more complicated if it is done in a wierd graphical manner
-	void SwapCharacters(private_battle::BattleCharacterActor* actor_swap_out, private_battle::BattleCharacterActor* actor_swap_in);
+	void SwapCharacters(private_battle::BattleCharacterActor * ActorToRemove, private_battle::BattleCharacterActor * ActorToAdd);
 
 private:
 	//! Set to true whenever an actor (player or enemy) is performing an action
@@ -367,7 +367,7 @@ private:
 	/** \brief Returns the number of characters that are still alive in the battle
 	*** \note This function only counts the characters on the screen, not characters in the party reserves
 	**/
-	const uint32 _NumberCharactersAlive() const;
+	const uint32 _NumberOfCharactersAlive() const;
 
 	/** \brief Creates the action list menu depending upon which action type the player has chosen
 	***

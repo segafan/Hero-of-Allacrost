@@ -102,11 +102,6 @@ BootMode::BootMode() :
 	                          read_data.ReadFloat("coord_sys_y_bottom"),
 	                          read_data.ReadFloat("coord_sys_y_top"));
 
-
-	read_data.ChangeSetting<float>("coord_sys_x_right",800.0f);
-	read_data.ChangeSetting<std::string>("new_setting", "this is a new setting");
-	read_data.SaveStack("dat/config/boot_new.lua");
-
 	// Load the audio stuff
 	// Make a call to the config code that loads in two vectors of strings
 	vector<string> new_music_files;
@@ -581,6 +576,8 @@ void BootMode::_SetupResolutionMenu() {
 // 'New Game' confirmed
 void BootMode::_OnNewGame() {
 	if (BOOT_DEBUG)	cout << "BOOT: Starting new game." << endl;
+
+	_SaveSettingsFile();
 	
 	GlobalManager->AddCharacter(new GlobalCharacter(MakeUnicodeString("Claudius"), "claudius", GLOBAL_CHARACTER_CLAUDIUS));
 	GlobalManager->GetActiveParty()->AddCharacter(GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS));
@@ -611,6 +608,8 @@ void BootMode::_OnCredits() {
 
 // 'Quit' confirmed
 void BootMode::_OnQuit() {
+	// Save settings before quitting
+	_SaveSettingsFile();
 	SystemManager->ExitGame();
 }
 
@@ -798,6 +797,22 @@ void BootMode::_UpdateJoySettings() {
 	_joy_settings_menu.SetOptionText(4, MakeUnicodeString("Left Select: " + InputManager->GetLeftSelectJoy()));
 	_joy_settings_menu.SetOptionText(5, MakeUnicodeString("Right Select: " + InputManager->GetRightSelectJoy()));
 	_joy_settings_menu.SetOptionText(6, MakeUnicodeString("Pause: " + InputManager->GetPauseJoy()));
+}
+
+
+// Saves all the game settings into a .lua file
+void BootMode::_SaveSettingsFile() {
+	ScriptDescriptor settings_lua;
+	if (!settings_lua.OpenFile("dat/config/settings.lua", SCRIPT_READ)) {
+		cout << "BOOT ERROR: failed to load the settings file!" << endl;
+	}
+
+	// TODO: Write everything properly in the settings file!
+
+	// Example code:
+	//settings_lua.ChangeSetting<float>("coord_sys_x_right", 800.0f);
+	//settings_lua.ChangeSetting<std::string>("new_setting", "this is a new setting");
+	//settings_lua.SaveStack("dat/config/new_settings.lua");
 }
 
 
