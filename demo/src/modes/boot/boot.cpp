@@ -952,7 +952,7 @@ void BootMode::Draw() {
 	VideoManager->SetTextColor(Color::gray);
 	VideoManager->DrawText("Tech Demo");
 	VideoManager->MoveRelative(730.0f, 0.0f);
-	VideoManager->DrawText("Copyright (C) 2004..2006 The Allacrost Project");
+	VideoManager->DrawText("Copyright (C) 2004..2007 The Allacrost Project");
 }
 
 
