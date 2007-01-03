@@ -29,10 +29,6 @@ using namespace hoa_video::private_video;
 
 namespace hoa_video {
 
-extern uint32 RoundUpPow2(uint32 x);
-
-
-
 bool GameVideo::LoadFont(const string &filename, const string &name, uint32 size) {
 	// Return true if the font is already loaded
 	if (_font_map.find(filename) != _font_map.end()) {

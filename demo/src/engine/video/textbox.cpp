@@ -230,15 +230,17 @@ void TextBox::SetFont(const string &fontName)
 {
 	// try to get properties about the current font. Note we don't bother calling IsValidFont() to see
 	// if this font has been loaded since GetFontProperties() implements that check
-	if(VideoManager->GetFontProperties(fontName) == NULL)
-	{
+	_font_properties = VideoManager->GetFontProperties(fontName);
+	if (_font_properties == NULL) {
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: TextBox::SetFont() failed because GameVideo::GetFontProperties() returned false for the font:\n" << fontName << endl;
 		return;
 	}
 
+	cout << "Loaded font: " << fontName << endl;
 	_font = fontName;
 	_initialized = IsInitialized(_initialize_errors);
+	cout << _font_properties->height << ", " << _font_properties->line_skip << endl;
 	
 }
 
@@ -489,12 +491,12 @@ bool TextBox::IsInitialized(string &errors)
 // Note: this is a pretty low level function so it doesn't do any checking
 //       to see if the current font is actually valid
 //-----------------------------------------------------------------------------
-uint32 TextBox::_CalculateTextHeight()
+int32 TextBox::_CalculateTextHeight()
 {
-	if(_text.empty())
+	if (_text.empty())
 		return 0;
 	else
-		return _font_properties.height + _font_properties.line_skip * ((int32)_text.size()-1);
+		return _font_properties->height + _font_properties->line_skip * (static_cast<int32>(_text.size()) - 1);
 }
 
 
@@ -795,7 +797,7 @@ void TextBox::_DrawTextLines(float textX, float textY, ScreenRect scissorRect)
 						// rectangle of the current character, in window coordinates
 						int32 charX, charY, charW, charH;
 						charX = int32(xOffset + cs.GetHorizontalDirection() * VideoManager->CalculateTextWidth(_font, substring));
-						charY = int32(textY - cs.GetVerticalDirection() * (_font_properties.height + _font_properties.descent));
+						charY = int32(textY - cs.GetVerticalDirection() * (_font_properties->height + _font_properties->descent));
 						
 						if(cs.GetHorizontalDirection() < 0.0f)
 							charY = int32(cs.GetBottom()) - charY;
@@ -804,7 +806,7 @@ void TextBox::_DrawTextLines(float textX, float textY, ScreenRect scissorRect)
 							charX = int32(cs.GetLeft()) - charX;
 							
 						charW = VideoManager->CalculateTextWidth(_font, curCharString);
-						charH = _font_properties.height;
+						charH = _font_properties->height;
 						
 						// multiply width by percentage done
 						charW = int32(curPct * charW);						
@@ -839,7 +841,7 @@ void TextBox::_DrawTextLines(float textX, float textY, ScreenRect scissorRect)
 		numCharsDrawn += lineSize;
 		//video->MoveRelative(-xOffset, _fontProperties.line_skip * -cs._upDir);
 		
-		textY += _font_properties.line_skip * -cs.GetVerticalDirection();
+		textY += _font_properties->line_skip * -cs.GetVerticalDirection();
 		VideoManager->Move(0.0f, textY);
 	}
 }

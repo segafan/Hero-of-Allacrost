@@ -23,31 +23,6 @@ using namespace hoa_utils;
 namespace hoa_video 
 {
 
-//-----------------------------------------------------------------------------
-// RoundUpPow2: rounds up a number to the nearest power of 2
-//-----------------------------------------------------------------------------
-
-uint32 RoundUpPow2(uint32 x)
-{
-	x -= 1;
-	x |= x >>  1;
-	x |= x >>  2;
-	x |= x >>  4;
-	x |= x >>  8;
-	x |= x >> 16;
-	return x + 1;
-}
-
-
-//-----------------------------------------------------------------------------
-// IsPowerOfTwo: returns true if given number is a power of 2
-//-----------------------------------------------------------------------------
-
-bool IsPowerOfTwo(uint32 x)
-{
-	return ((x & (x-1)) == 0);
-}
-
 
 //!	\brief Converts an integer to string
 void IntegerToString(std::string &s, const int32 num)

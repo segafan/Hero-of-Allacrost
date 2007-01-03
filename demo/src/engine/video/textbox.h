@@ -215,8 +215,8 @@ private:
 	//! \brief The font name to use for this textbox.
 	std::string _font;
 	
-	//! \brief A structure containing properties of the current font such as its height, etc.
-	FontProperties _font_properties;
+	//! \brief A pointer to the structure containing properties of the current font such as its height, etc.
+	FontProperties* _font_properties;
 
 	//! \brief The display mode for the text (one character at a time, fading in, instant, etc.).
 	TEXT_DISPLAY_MODE _mode;
@@ -227,7 +227,7 @@ private:
 	/** \brief Returns the height of the text when it's rendered with the current font
 	*** \return height of text rendered in current font
 	**/
-	uint32 _CalculateTextHeight();
+	int32 _CalculateTextHeight();
 
 	/** \brief Returns true if the given unicode character can be interrupted for a word wrap.
 	*** \param character The character you wish to check.

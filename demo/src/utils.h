@@ -94,6 +94,18 @@ namespace hoa_utils {
 //! Determines whether the code in the hoa_utils namespace should print debug statements or not.
 extern bool UTILS_DEBUG;
 
+/** \brief Rounds an unsigned integer up to the nearest power of two.
+*** \param x The number to round up.
+*** \return The nearest power of two rounded up from the argument.
+**/
+uint32 RoundUpPow2(uint32 x);
+
+/** \brief Determines if an unsigned integer is a power of two or not.
+*** \param x The number to examine.
+*** \return True if the number if a power of two, false otherwise.
+**/
+bool IsPowerOfTwo(uint32 x);
+
 /** ****************************************************************************
 *** \brief Implements unicode strings with uint16 as the character type
 ***
