@@ -117,8 +117,7 @@ bool IsPowerOfTwo(uint32 x);
 *** sized range. For example, if you want to detect if a number is 1.0f, try 0.999f and 1.001f for
 *** the bound arguments.
 **/
-bool IsFloatInRange(float value, float lower, float upper)
-	{ return (value >= lower && value <= upper); }
+bool IsFloatInRange(float value, float lower, float upper);
 
 /** ****************************************************************************
 *** \brief Implements unicode strings with uint16 as the character type
