@@ -328,7 +328,7 @@ void AnimatedImage::Update() {
 	while (_frame_counter >= _frames[_frame_index]._frame_time) {
 		frame_change = _frame_counter - _frames[_frame_index]._frame_time;
 		_frame_index++;
-		if (_frame_index > _frames.size()) {
+		if (_frame_index >= _frames.size()) {
 				// Check if the animation has looping enabled and if so, increment the loop counter
 				// and cease the animation if the number of animation loops have finished
 			if (_number_loops >= 0 && ++_loop_counter >= _number_loops) {
