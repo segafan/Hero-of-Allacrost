@@ -1,9 +1,9 @@
 // !$*UTF8*$!
 {
 	4941A4A10AC1D76400D65B8E /* Project object */ = {
-		activeBuildConfigurationName = Release;
-		activeExecutable = D43080DE0AF982F800A5173A /* Allacrost */;
-		activeTarget = 4941A4AF0AC1D77500D65B8E /* Allacrost */;
+		activeBuildConfigurationName = Debug;
+		activeExecutable = D4D1BA4A0B02B1DB0052BF1E /* Editor */;
+		activeTarget = D4D1BA480B02B1DB0052BF1E /* Editor */;
 		addToTargets = (
 			D4D1BA480B02B1DB0052BF1E /* Editor */,
 		);
@@ -150,17 +150,8 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 189278570;
-			PBXWorkspaceStateSaveDate = 189278570;
-		};
-		perUserProjectItems = {
-			D4D91F090B482B1C007997EC /* PBXTextBookmark */ = D4D91F090B482B1C007997EC /* PBXTextBookmark */;
-			D4D91F0B0B482B1C007997EC /* PBXTextBookmark */ = D4D91F0B0B482B1C007997EC /* PBXTextBookmark */;
-			D4D91F220B482B6C007997EC /* PBXTextBookmark */ = D4D91F220B482B6C007997EC /* PBXTextBookmark */;
-			D4D91F2A0B482BA0007997EC /* PBXTextBookmark */ = D4D91F2A0B482BA0007997EC /* PBXTextBookmark */;
-			D4D91F2C0B482BA8007997EC /* PBXTextBookmark */ = D4D91F2C0B482BA8007997EC /* PBXTextBookmark */;
-			D4D91F310B482C90007997EC /* PBXTextBookmark */ = D4D91F310B482C90007997EC /* PBXTextBookmark */;
-			D4D91F320B482C96007997EC /* PBXTextBookmark */ = D4D91F320B482C96007997EC /* PBXTextBookmark */;
+			PBXPerProjectTemplateStateSaveDate = 189635165;
+			PBXWorkspaceStateSaveDate = 189635165;
 		};
 		sourceControlManager = D43082570AF9831800A5173A /* Source Control */;
 		userBuildSettings = {
@@ -221,18 +212,18 @@
 	};
 	4999AC490AF407BE004DD3A3 /* script.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {698, 11382}}";
-			sepNavSelRange = "{0, 0}";
-			sepNavVisRect = "{{0, 0}, {459, 186}}";
-			sepNavWindowFrame = "{{38, 194}, {750, 558}}";
+			sepNavIntBoundsRect = "{{0, 0}, {711, 12390}}";
+			sepNavSelRange = "{19588, 0}";
+			sepNavVisRect = "{{0, 10151}, {711, 429}}";
+			sepNavWindowFrame = "{{222, 96}, {750, 558}}";
 		};
 	};
 	4999AC4B0AF407BE004DD3A3 /* script.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {710, 7112}}";
-			sepNavSelRange = "{1286, 18}";
-			sepNavVisRect = "{{0, 306}, {459, 186}}";
-			sepNavWindowFrame = "{{5, 109}, {750, 558}}";
+			sepNavIntBoundsRect = "{{0, 0}, {770, 8274}}";
+			sepNavSelRange = "{13882, 0}";
+			sepNavVisRect = "{{0, 4368}, {711, 429}}";
+			sepNavWindowFrame = "{{222, 96}, {750, 558}}";
 		};
 	};
 	D404C6AB0B02F27D00827A19 /* XCBreakpointsBucket */ = {
@@ -362,8 +353,8 @@
 	D4D1BA650B02B27F0052BF1E /* editor.cpp */ = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {950, 19152}}";
-			sepNavSelRange = "{41572, 0}";
-			sepNavVisRect = "{{0, 17617}, {711, 429}}";
+			sepNavSelRange = "{19287, 0}";
+			sepNavVisRect = "{{0, 8283}, {711, 429}}";
 			sepNavWindowFrame = "{{222, 96}, {750, 558}}";
 		};
 	};
@@ -371,7 +362,7 @@
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {711, 5544}}";
 			sepNavSelRange = "{1485, 0}";
-			sepNavVisRect = "{{0, 2450}, {711, 429}}";
+			sepNavVisRect = "{{0, 481}, {711, 429}}";
 			sepNavWindowFrame = "{{444, 48}, {750, 558}}";
 		};
 	};
@@ -422,109 +413,5 @@
 			sepNavVisRect = "{{0, 0}, {711, 429}}";
 			sepNavWindowFrame = "{{408, 43}, {750, 558}}";
 		};
-	};
-	D4D91F090B482B1C007997EC /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		comments = "warning: #warning \"Unknown compiler version - please run the configure tests and report the results\"";
-		fRef = D4D91F0A0B482B1C007997EC /* gcc.hpp */;
-		rLen = 1;
-		rLoc = 91;
-		rType = 1;
-	};
-	D4D91F0A0B482B1C007997EC /* gcc.hpp */ = {
-		isa = PBXFileReference;
-		lastKnownFileType = sourcecode.cpp.h;
-		name = gcc.hpp;
-		path = /sw/include/boost/config/compiler/gcc.hpp;
-		sourceTree = "<absolute>";
-		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {638, 1358}}";
-			sepNavSelRange = "{2744, 97}";
-			sepNavVisRect = "{{0, 1139}, {638, 219}}";
-		};
-	};
-	D4D91F0B0B482B1C007997EC /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = D4D91F0C0B482B1C007997EC /* gcc.hpp */;
-		name = "#     warning \"Unknown compiler version - please run the configure tests and report the results\"";
-		rLen = 97;
-		rLoc = 2744;
-		rType = 0;
-		vrLen = 514;
-		vrLoc = 2345;
-	};
-	D4D91F0C0B482B1C007997EC /* gcc.hpp */ = {
-		isa = PBXFileReference;
-		name = gcc.hpp;
-		path = /sw/include/boost/config/compiler/gcc.hpp;
-		sourceTree = "<absolute>";
-	};
-	D4D91F220B482B6C007997EC /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = D4D91F230B482B6C007997EC /* gcc.hpp */;
-		name = "#     warning \"Unknown compiler version - please run the configure tests and report the results\"";
-		rLen = 97;
-		rLoc = 2744;
-		rType = 0;
-		vrLen = 514;
-		vrLoc = 2345;
-	};
-	D4D91F230B482B6C007997EC /* gcc.hpp */ = {
-		isa = PBXFileReference;
-		name = gcc.hpp;
-		path = /sw/include/boost/config/compiler/gcc.hpp;
-		sourceTree = "<absolute>";
-	};
-	D4D91F2A0B482BA0007997EC /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = D4D91F2B0B482BA0007997EC /* gcc.hpp */;
-		name = "#     warning \"Unknown compiler version - please run the configure tests and report the results\"";
-		rLen = 97;
-		rLoc = 2744;
-		rType = 0;
-		vrLen = 514;
-		vrLoc = 2345;
-	};
-	D4D91F2B0B482BA0007997EC /* gcc.hpp */ = {
-		isa = PBXFileReference;
-		name = gcc.hpp;
-		path = /sw/include/boost/config/compiler/gcc.hpp;
-		sourceTree = "<absolute>";
-	};
-	D4D91F2C0B482BA8007997EC /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = D4D91F2D0B482BA8007997EC /* gcc.hpp */;
-		name = "#     warning \"Unknown compiler version - please run the configure tests and report the results\"";
-		rLen = 97;
-		rLoc = 2744;
-		rType = 0;
-		vrLen = 514;
-		vrLoc = 2345;
-	};
-	D4D91F2D0B482BA8007997EC /* gcc.hpp */ = {
-		isa = PBXFileReference;
-		name = gcc.hpp;
-		path = /sw/include/boost/config/compiler/gcc.hpp;
-		sourceTree = "<absolute>";
-	};
-	D4D91F310B482C90007997EC /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = D4D91F0A0B482B1C007997EC /* gcc.hpp */;
-		name = "#     warning \"Unknown compiler version - please run the configure tests and report the results\"";
-		rLen = 97;
-		rLoc = 2744;
-		rType = 0;
-		vrLen = 514;
-		vrLoc = 2345;
-	};
-	D4D91F320B482C96007997EC /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = D4D91F0A0B482B1C007997EC /* gcc.hpp */;
-		name = "#     warning \"Unknown compiler version - please run the configure tests and report the results\"";
-		rLen = 97;
-		rLoc = 2744;
-		rType = 0;
-		vrLen = 514;
-		vrLoc = 2345;
 	};
 }
