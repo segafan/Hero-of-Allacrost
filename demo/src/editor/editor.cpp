@@ -607,12 +607,12 @@ NewMapDialog::NewMapDialog(QWidget* parent, const QString& name)
 	
 	_height_label  = new QLabel("Height (in tiles):", this);
 	_height_sbox   = new QSpinBox(this);
-	_height_sbox->setMinimum(1);
+	_height_sbox->setMinimum(24);
 	_height_sbox->setMaximum(1000);
 	
 	_width_label   = new QLabel(" Width (in tiles):", this);
 	_width_sbox    = new QSpinBox(this);
-	_width_sbox->setMinimum(1);
+	_width_sbox->setMinimum(32);
 	_width_sbox->setMaximum(1000);
 	
 	_tileset_lview = new Q3ListView(this, "tileset_lview", Qt::WStaticContents|Qt::WNoAutoErase);
