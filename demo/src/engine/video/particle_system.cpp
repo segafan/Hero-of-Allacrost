@@ -145,7 +145,7 @@ bool ParticleSystem::Draw()
 	VideoManager->_BindTexture(img->texture_sheet->texID);
 
 
-	float frame_progress = _animation.GetFrameProgress();
+	float frame_progress = _animation.GetPercentProgress();
 		
 	float u1 = img->u1;
 	float u2 = img->u2;

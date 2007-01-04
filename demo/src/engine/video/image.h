@@ -65,8 +65,10 @@ class ImageLoadInfo {
 public:
 	//! \brief The width of the image (in pixels?)
 	int32 width;
+
 	//! \brief The height of the image (in pixels?)
 	int32 height;
+
 	//! \todo Needs a comment
 	void* pixels;
 }; // class ImageLoadInfo
@@ -79,12 +81,15 @@ class Image {
 public:
 	//! \brief A pointer to the texture sheet where the image is contained.
 	TexSheet* texture_sheet;
+
 	/** \brief The filename for the image.
 	*** This is stored for every image in case it needs to be reloaded.
 	**/
 	std::string filename;
+
 	//! \brief The coordiates of where the image is located in the texture sheet
 	int32 x, y;
+
 	/** \brief The actual uv coordinates.
 	*** This is a little redundant, but saves effort on floating point calcuations.
 	*** u1 and v1 are the upper-left UV coordinates, while u2 and v2 correspond to
@@ -94,6 +99,7 @@ public:
 
 	//! \brief The image's width and height, in pixels
 	int32 width, height;
+
 	//! \brief Determines whether this image is in grayscale mode or not
 	bool grayscale;
 
@@ -128,8 +134,10 @@ public:
 
 	//! \brief The x offset in the image stack.
 	float x_offset;
+
 	//! \brief The y offset in the image stack.
 	float y_offset;
+
 	/** \brief The texture coordinates for the image.
 	*** u1, v1 describes the upper-left corner while u2, v2 describes the bottom-right.
 	**/
@@ -137,6 +145,7 @@ public:
 
 	//! \brief The width of the image in the stack.
 	float width;
+
 	//! \brief The height of the image in the stack.
 	float height;
 
@@ -145,8 +154,10 @@ public:
 
 	//! \brief A true value indicates to perform blending with this element.
 	bool blend;
+
 	//! \brief True if all of the vertices are the same color.
 	bool one_color;
+
 	//! \brief Set to true if the vertices are all white.
 	bool white;
 
@@ -174,21 +185,23 @@ public:
 
 	//! \brief The number of rows of images in the file.
 	uint32 rows;
+
 	//! \brief The number of columns of images in the file.
 	uint32 cols;
 
 	//! \brief The width of the entire image in the file.
 	float width;
+
 	//! \brief The height of the entire image in the file.
 	float height;
 	
 	//! \brief Tracks whether this multi-image should be grayscale or not.
 	bool grayscale;
 
-
 	//! \brief A pointer to an animated image where the cut image will be loaded into
 	//! \note This structure is only used if the user called the constructor with an AnimatedImage argument.
 	AnimatedImage* animated_image;
+
 	//! \brief A pointer to a vector of still images where the cut image will be loaded into
 	//! \note This structure is only used if the user called the constructor with a StillImage vector argument.
 	std::vector<StillImage>* still_images;
@@ -196,6 +209,7 @@ public:
 	//! \brief This constructor is used if the multi-image contains animation frames.
 	MultiImage(AnimatedImage& id, const std::string& filename, const uint32 rows, const uint32 cols,
 		const float width = 0.0f, const float height = 0.0f, const bool grayscale = false);
+
 	//! \brief This constructor is used if the multi-image contains several still images.
 	MultiImage(std::vector <StillImage>& id, const std::string& filename, const uint32 rows, const uint32 cols,
 		const float width = 0.0f, const float height = 0.0f, const bool grayscale = false);
@@ -221,23 +235,28 @@ public:
 	*** \param is_static Set to true to make the image static.
 	**/
 	virtual void SetStatic(bool is_static) = 0;
+
 	/** \brief Sets the image's width.
 	*** \param width The desired width of the image.
 	**/
 	virtual void SetWidth(float width) = 0;
+
 	/** \brief Sets the image's height.
 	*** \param height The desired height of the image.
 	**/
 	virtual void SetHeight(float height) = 0;
+
 	/** \brief Sets the image's dimensions.
 	*** \param width desired width of the image
 	*** \param height desired height of the image
 	**/
 	virtual void SetDimensions(float width, float height) = 0;
+
 	/** \brief Sets the image's color.
 	*** \param color The desired color of the image.
 	**/
 	virtual void SetColor(const Color &color) = 0;
+
 	/** \brief Sets the image's vertex colors
 	*** \param tl The top left vertex color..
 	*** \param tr The top right vertex color.
@@ -251,11 +270,14 @@ public:
 	//@{
 	//! \brief Returns the image width
 	virtual float GetWidth() const = 0;
+
 	//! \brief Returns image height
 	virtual float GetHeight() const = 0;
+
 	//! \brief Returns true if the image is grayscale.
 	bool IsGrayScale() const
 		{ return _grayscale; }
+
 	/** \brief Returns true if the image is animated.
 	*** \note This can also be used to determine whether an ImageDescriptor pointer is a StillImage
 	*** or an AnimatedImage. This would be a better solution than trying to do a dynamic_cast on
@@ -267,6 +289,7 @@ public:
 
 	//! \brief Loads the image file, and returns true if it was successful.
 	bool Load();
+
 	//! \brief Draws the image to the display buffer.
 	void Draw();
 
@@ -284,9 +307,11 @@ protected:
 
 	//! \brief Indicates whether the image being loaded should be loaded into a non-volatile area of texture memory.
 	bool  _is_static;
+
 	//! \brief True if this image is grayscale.
 	bool _grayscale;
-	//! \brief True if this image is animated .
+
+	//! \brief True if this image is animated.
 	bool _animated;
 }; // class ImageDescriptor
 
@@ -310,6 +335,7 @@ public:
 
 	//!  \brief Enables grayscaling for the image then reloads it
 	void EnableGrayScale();
+
 	//!  \brief Disables grayscaling for the image then reloads it
 	void DisableGrayScale();
 
@@ -334,21 +360,27 @@ public:
 	//! \brief Sets the filename of the image
 	void SetFilename(const std::string &filename)
 		{ _filename = filename; }
+
 	//! \brief Sets width of the image
 	void SetWidth(float width)
 		{ _width = width; }
+
 	//! \brief Sets height of the image
 	void SetHeight(float height)
 		{ _height = height; }
+
 	//! \brief Sets the dimensions (width + height) of the image.
 	void SetDimensions(float width, float height)
 		{ _width  = width; _height = height; }
+
 	//! \brief Sets image to static/animated
 	void SetStatic(bool is_static)
 		{ _is_static = is_static; }
+
 	//! \brief Sets the color for the image (for all four verteces).
 	void SetColor(const Color &color)
 		{ _color[0] = _color[1] = _color[2] = _color[3] = color; }
+
 	/** \brief Sets individual vertex colors in the image.
 	*** \param tl top left vertex color
 	*** \param tr top right vertex color
@@ -364,12 +396,15 @@ public:
 	//! \brief Returns the filename of the image.
 	std::string GetFilename() const
 		{ return _filename; }
+
 	//! \brief Returns the width of the image.
 	float GetWidth() const
 		{ return _width; }
+
 	//! \brief Returns the height of the image.
 	float GetHeight() const
-		{ return _height; }	
+		{ return _height; }
+
 	/** \brief Returns the color of a particular vertex
 	*** \param c The Color object to place the color in.
 	*** \param index The vertex index of the color to fetch
@@ -378,6 +413,7 @@ public:
 	void GetVertexColor(Color &c, uint8 index)
 		{ if (index > 3) return; else c = _color[index]; }
 	//@}
+
 private:
 	/** \brief The name of the image file from which this image was created
 	*** \todo What happens to this member if this is a compound image???
@@ -400,8 +436,8 @@ namespace private_video {
 class AnimationFrame {
 public:
 	//! \brief The time to display this frame image, in milliseconds.
-	//! \note This is relative to VIDEO_ANIMTION_FRAME_PERIOD.
 	uint32 _frame_time;
+
 	//! \brief The StillImage used for this frame in the animation.
 	StillImage _image;
 }; // class AnimationFrame
@@ -427,8 +463,10 @@ public:
 
 	//! \brief Removes the data and properties allocated to the animated image
 	void Clear();
+
 	//! \brief Enables grayscale for the image
 	void EnableGrayScale();
+
 	//! \brief Disables grayscale for the image
 	void DisableGrayScale();
 
@@ -439,12 +477,17 @@ public:
 	**/
 	void Update();
 
+	//! \brief Resets the animation's frame, counter, and looping.
+	void ResetAnimation()
+		{ _frame_index = 0; _frame_counter = 0; _loop_counter = 0; _loops_finished = false; }
+
 	/** \brief Adds an animation frame by using an existing static image.
 	*** \param frame The still image to use as the frame image.
 	*** \param frame_time The amount of millseconds to display the frame.
 	*** \return True on success, false on failure.
 	**/
 	bool AddFrame(const StillImage &frame, uint32 frame_time);
+
 	/** \brief Adds an animation frame using the filename of the image to add.
 	*** \param frame The filename of the frame image to add.
 	*** \param frame_time The number of milliseconds that this animation should last for
@@ -462,12 +505,16 @@ public:
 	//@{
 	//! \brief Sets all animation frames to be a certain width.
 	void SetWidth(float width);
+
 	//! \brief Sets all animation frames to be a certain height
 	void SetHeight(float height);
+
 	//! \brief Sets all animation frames to be a certain width and height.
 	void SetDimensions(float width, float height);
+
 	//! \brief sets All frames to be of a certain color (all vertices are set to the same color)
 	void SetColor(const Color &color);
+
 	/** \brief sets all frames to have the specified vertex colors
 	*** \param tl The top left vertex color
 	*** \param tr The top right vertex color
@@ -475,18 +522,39 @@ public:
 	*** \param br The bottom right vertex color
 	**/
 	void SetVertexColors(const Color &tl, const Color &tr, const Color &bl, const Color &br);
+
 	/** \brief Sets the static member for all animation frame images.
 	*** \note If the frames are already loaded, it doesn't bother to try to unload them
 	*** and then reload them again statically.
 	**/
 	void SetStatic(bool is_static)
 		{ _is_static = is_static; }
+
 	/** \brief Sets the current frame index of the animation.
 	*** \param frame_index The index of the frame to access
 	*** \note Passing in an invalid value for the index will not change the current frame
 	**/
 	void SetFrameIndex(uint32 index)
 		{ if (index > _frames.size()) return; _frame_index = index; _frame_counter = 0; }
+
+	//! \brief Returns the number of milliseconds that the current frame has been shown for.
+	void SetTimeProgress(uint32 time)
+		{ _frame_counter = time; }
+
+	/** \brief Set the number of loops for the animation.
+	*** A value less than zero indicates to loop forever. Zero indicates do not loop: just run the
+	*** animation from beginning to end and stop.
+	**/
+	void SetNumberLoops(int32 loops)
+		{ _number_loops = loops; }
+
+	//! \brief Set the current number of loops that the animation has completed.
+	void SetLoopCounter(int32 loops)
+		{ _loop_counter = loops; }
+
+	//! \brief Effectively stops the animation in its track if this member is set to true.
+	void SetLoopsFinished(bool loops)
+		{ _loops_finished = loops; }
 	//@}
 
 	//! \name Class Member Get Functions
@@ -495,16 +563,20 @@ public:
 	//! \note Function will return 0.0f if there are no animation frames.
 	float GetWidth() const
 		{ if (_frames.size() == 0) return 0.0f; else return _frames[0]._image.GetWidth(); }
+
 	//! \brief Returns the height of the 1st frame of animation.
 	//! \note Function will return 0.0f if there are no animation frames.
 	float GetHeight() const
 		{ if (_frames.size() == 0) return 0.0f; else return _frames[0]._image.GetHeight(); }
+
 	//! \brief Returns the number of frames in this animation
 	uint32 GetNumFrames() const
 		{ return _frames.size(); }
+
 	//! \brief Returns the index number of the current frame in the animation.
 	uint32 GetCurrentFrameIndex() const
 		{ return _frame_index; }
+
 	/** \brief Returns a pointer to the StillImage at a specified frame. 
 	*** \param index index of the frame you want
 	*** \return A pointer to the image at that index
@@ -515,18 +587,41 @@ public:
 	**/
 	StillImage *GetFrame(uint32 index) const
 		{ if (index >= _frames.size()) return NULL; else return const_cast<StillImage*>(&(_frames[index]._image)); }
+
+	//! \brief Returns the number of milliseconds that the current frame has been shown for.
+	uint32 GetTimeProgress() const
+		{ return _frame_counter; }
+
 	/** \brief Returns the percentage of timing complete for the current frame being shown.
 	*** \return A float from 0.0f to 1.0f, indicate how much of its allotted time this frame has spent.
 	**/
-	float GetFrameProgress() const
-		{ return (float)_frame_counter / _frames[_frame_index]._frame_time; }
+	float GetPercentProgress() const
+		{ return static_cast<float>(_frame_counter) / _frames[_frame_index]._frame_time; }
+
+	bool IsLoopsFinished() const
+		{ return _loops_finished; }
 	//@}
 
 private:
 	//! \brief The index of which animation frame to display.
 	uint32 _frame_index;
+
     //! \brief Counts how long each frame has been shown for.
 	uint32 _frame_counter;
+
+	/** \brief The number of times to loop the animation frames.
+	*** A value less than zero indicates to loop forever, which is the default.
+	**/
+	int32 _number_loops;
+
+	//! \brief Counts the number of loops remaining for the animation.
+	int32 _loop_counter;
+
+	/** \brief Set to true when the loop counter has expired.
+	*** This member will remain eternally false if the looping is set to infinite mode.
+	**/
+	bool _loops_finished;
+
 	//! \brief The vector of animation frames (both frame images and frame timing).
 	std::vector<private_video::AnimationFrame> _frames;
 };
