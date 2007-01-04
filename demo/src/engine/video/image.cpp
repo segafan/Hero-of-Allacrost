@@ -269,6 +269,9 @@ AnimatedImage::AnimatedImage(bool grayscale) {
 	Clear();
 	_animated = true;
 	_grayscale = grayscale;
+	_number_loops = -1;
+	_loop_counter = 0;
+	_loops_finished = false;
 }
 
 
@@ -280,6 +283,9 @@ void AnimatedImage::Clear() {
 	_is_static = false;
 	_width = 0.0f;
 	_height = 0.0f;
+	_number_loops = -1;
+	_loop_counter = 0;
+	_loops_finished = false;
 	SetColor(Color::white);
 }
 
@@ -311,14 +317,27 @@ void AnimatedImage::Update() {
 	if (_frames.size() <= 1)
 		return;
 
+	if (_loops_finished)
+		return;
+
 	// Get the amount of time that expired since the last frame
 	uint32 frame_change = VideoManager->GetFrameChange();
 	_frame_counter += frame_change;
 
-	// If the frame time has expired, update the frame index and counter
+	// If the frame time has expired, update the frame index and counter.
 	while (_frame_counter >= _frames[_frame_index]._frame_time) {
 		frame_change = _frame_counter - _frames[_frame_index]._frame_time;
-		_frame_index = (_frame_index + 1) % _frames.size();
+		_frame_index++;
+		if (_frame_index > _frames.size()) {
+				// Check if the animation has looping enabled and if so, increment the loop counter
+				// and cease the animation if the number of animation loops have finished
+			if (_number_loops >= 0 && ++_loop_counter >= _number_loops) {
+				_loops_finished = true;
+				_frame_counter = 0;
+				return;
+			}
+			_frame_index = 0;
+		}
 		_frame_counter = frame_change;
 	}
 }

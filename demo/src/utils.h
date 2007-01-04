@@ -106,6 +106,20 @@ uint32 RoundUpPow2(uint32 x);
 **/
 bool IsPowerOfTwo(uint32 x);
 
+/** \brief Determines if a floating point number is within a range of two numbers.
+*** \param value The floating point value to compare.
+*** \param lower The minimum bound (inclusive).
+*** \param upper The maximum bound (inclusive).
+*** \return True if the value lies within the two bounds.
+*** This function should be used in place of direct comparison of two floating point
+*** values. The reason for this is that there are small variations in floating point representation
+*** across systems and different rounding schemes, so its best to examine numbers within a reasonably
+*** sized range. For example, if you want to detect if a number is 1.0f, try 0.999f and 1.001f for
+*** the bound arguments.
+**/
+bool IsFloatInRange(float value, float lower, float upper)
+	{ return (value >= lower && value <= upper); }
+
 /** ****************************************************************************
 *** \brief Implements unicode strings with uint16 as the character type
 ***
