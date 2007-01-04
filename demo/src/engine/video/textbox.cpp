@@ -237,11 +237,8 @@ void TextBox::SetFont(const string &fontName)
 		return;
 	}
 
-	cout << "Loaded font: " << fontName << endl;
 	_font = fontName;
 	_initialized = IsInitialized(_initialize_errors);
-	cout << _font_properties->height << ", " << _font_properties->line_skip << endl;
-	
 }
 
 
