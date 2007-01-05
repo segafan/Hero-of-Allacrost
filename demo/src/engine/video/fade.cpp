@@ -23,20 +23,31 @@ namespace hoa_video {
 
 namespace private_video {
 
+ScreenFader::ScreenFader()
+	: current_color(0.0f, 0.0f, 0.0f, 0.0f),
+	is_fading(false)
+{
+	current_time = 0;
+	end_time = 0;
+	fade_modulation = 1.0f;
+	use_fade_overlay = false;
+}
+
 //-----------------------------------------------------------------------------
 // FadeTo: Begins a fade to the given color in num_seconds
 //         returns false if invalid parameter is passed
 //-----------------------------------------------------------------------------
-bool ScreenFader::FadeTo(const Color &final, float num_seconds)
+void ScreenFader::FadeTo(const Color &final, float num_seconds)
 {
-	if(num_seconds < 0.0f)
-		return false;
-	
+	if (num_seconds <= 0.0f)
+		end_time = 0;
+	else
+		end_time = static_cast<int32>(num_seconds * 1000); // Convert seconds to milliseconds
+
 	initial_color = current_color;
 	final_color   = final;
-	
 	current_time = 0;
-	end_time     = int32(num_seconds * 1000);  // convert seconds to milliseconds here
+
 	
 	is_fading = true;
 	
@@ -63,7 +74,6 @@ bool ScreenFader::FadeTo(const Color &final, float num_seconds)
 	}
 	
 	Update(0);  // do initial update
-	return true;
 }
 
 
@@ -72,10 +82,10 @@ bool ScreenFader::FadeTo(const Color &final, float num_seconds)
 // Update: updates screen fader- figures out new interpolated fade color,
 //         whether to fade using overlays or modulation, etc.
 //-----------------------------------------------------------------------------
-bool ScreenFader::Update(int32 t)
+void ScreenFader::Update(int32 t)
 {
 	if(!is_fading)
-		return true;
+		return;
 				
 	if(current_time >= end_time)
 	{
@@ -132,17 +142,16 @@ bool ScreenFader::Update(int32 t)
 	}
 
 	current_time += t;
-	return true;
-}
+} // void FadeScreen::Update(int32 t)
 
 } // namespace private_video
 
 //-----------------------------------------------------------------------------
 // FadeScreen: sets up a fade to the given color over "fade_time" number of seconds
 //-----------------------------------------------------------------------------
-bool GameVideo::FadeScreen(const Color &color, float fade_time)
+void GameVideo::FadeScreen(const Color &color, float fade_time)
 {
-	return _fader.FadeTo(color, fade_time);
+	_fader.FadeTo(color, fade_time);
 }
 
 
