@@ -89,17 +89,17 @@ uint32 Socket::RecvBinary(void* location, uint32 len) {
 }
 
 void Socket::Write (const char* fmt, ... ) {
-	va_list va;
+	/*va_list va;
 	va_start ( va, fmt );
 	
 	char* buffer;
-	//vasprintf ( &buffer, fmt, va );
+	vasprintf ( &buffer, fmt, va );
 	
 	SendBinary ( buffer, strlen(buffer) );
 	
 	free ( (void*)buffer );
 	
-	va_end ( va );
+	va_end ( va );*/
 }
 
 std::string Socket::ReadLine() {
