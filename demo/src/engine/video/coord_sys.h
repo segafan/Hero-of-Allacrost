@@ -10,7 +10,7 @@
 /** ****************************************************************************
 *** \file    coord_sys.h
 *** \author  Raj Sharma, roos@allacrost.org
-*** \brief   Header file for CoordSys class
+*** \brief   Header file for CoordSys class.
 *** ***************************************************************************/
 
 #ifndef __COORD_SYS_HEADER__
@@ -35,25 +35,31 @@ class CoordSys {
 public:
 	CoordSys()
 		{}
+
 	CoordSys(float left, float right, float bottom, float top)
 		{
 			_left = left; _right = right; _bottom = bottom; _top = top;
-			if(_right > _left) _horizontal_direction = 1.0f; else _horizontal_direction = -1.0f;
-			if(_top > _bottom) _vertical_direction = 1.0f; else _vertical_direction = -1.0f;
+			if (_right > _left) _horizontal_direction = 1.0f; else _horizontal_direction = -1.0f;
+			if (_top > _bottom) _vertical_direction = 1.0f; else _vertical_direction = -1.0f;
 		}
 
 	//! \brief Class member access functions
 	//@{
 	float GetVerticalDirection() const
 		{ return _vertical_direction; }
+
 	float GetHorizontalDirection() const
 		{ return _horizontal_direction; }
+
 	float GetLeft() const
 		{ return _left; }
+
 	float GetRight() const
 		{ return _right; }
+
 	float GetBottom() const
 		{ return _bottom; }
+
 	float GetTop() const
 		{ return _top; }
 	//@}
@@ -61,16 +67,12 @@ public:
 private:
 	//! \brief If the y-coordinates increase from bottom to top, this is 1.0f. Otherwise it is -1.0f.
 	float _vertical_direction;
+
 	//! \brief If the y-coordinates increase from left to right, this is 1.0f. Otherwise it is -1.0f.
 	float _horizontal_direction;
 
-	//! \brief The values of the four sides of the screen that determine the drawing coordinates
-	//@{
-	float _left;
-	float _right;
-	float _bottom;
-	float _top;
-	//@}
+	//! \brief The values of the four sides of the screen that determine the drawing coordinates.
+	float _left, _right, _bottom, _top;
 }; // class CoordSys
 
 }  // namespace hoa_video

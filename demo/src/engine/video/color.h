@@ -10,7 +10,7 @@
 /** ****************************************************************************
 *** \file    color.h
 *** \author  Raj Sharma, roos@allacrost.org
-*** \brief   Header file for the Color class
+*** \brief   Header file for the Color class.
 *** ***************************************************************************/
 
 #ifndef __COLOR_HEADER__
@@ -22,14 +22,14 @@
 namespace hoa_video {
 
 /** ****************************************************************************
-*** \brief Representation of a RGBA color
+*** \brief Representation of a single RGBA color.
 ***
 *** This class encapsulates an array of 4 floats, and allows you to do basic
 *** operations like adding and multiplying colors.
 *** ***************************************************************************/
 class Color {
 public:
-	/** \brief Default colors for ease of use
+	/** \brief Default colors for user convenience.
 	*** These are defined in the file video.cpp. All colors are opaque (0.0f alpha value)
 	**/
 	//@{
@@ -49,6 +49,7 @@ public:
 
 	Color()
 		{ colors_[0] = 0.0f; colors_[1] = 0.0f; colors_[2] = 0.0f; colors_[3] = 1.0f; }
+
 	Color(float r, float g, float b, float a)
 		{ colors_[0] = r; colors_[1] = g; colors_[2] = b; colors_[3] = a; }
 
@@ -56,28 +57,35 @@ public:
 	//@{
 	bool operator == (const Color &c) const
 		{ return colors_[0] == c.colors_[0] && colors_[1] == c.colors_[1] && colors_[2] == c.colors_[2] && colors_[3] == c.colors_[3]; }
+
 	bool operator != (const Color &c) const
 		{ return colors_[0] != c.colors_[0] || colors_[1] != c.colors_[1] || colors_[2] != c.colors_[2] || colors_[3] != c.colors_[3]; }
+
 	Color operator + (const Color &c) const
 		{
 			Color col = Color(colors_[0] + c.colors_[0], colors_[1] + c.colors_[1], colors_[2] + c.colors_[2], colors_[3] + c.colors_[3]);
-			if(col[0] > 1.0f) col[0] = 1.0f;
-			if(col[1] > 1.0f) col[1] = 1.0f;
-			if(col[2] > 1.0f) col[2] = 1.0f;
-			if(col[3] > 1.0f) col[3] = 1.0f;
+			if (col[0] > 1.0f) col[0] = 1.0f; else if (col[0] < 0.0f) col[0] = 0.0f;
+			if (col[1] > 1.0f) col[1] = 1.0f; else if (col[1] < 0.0f) col[1] = 0.0f;
+			if (col[2] > 1.0f) col[2] = 1.0f; else if (col[2] < 0.0f) col[2] = 0.0f;
+			if (col[3] > 1.0f) col[3] = 1.0f; else if (col[3] < 0.0f) col[3] = 0.0f;
 			return col;
 		}
+
 	Color operator *= (const Color &c)
 		{ return Color(colors_[0] * c.colors_[0], colors_[1] * c.colors_[1], colors_[2] * c.colors_[2], colors_[3] * c.colors_[3]); }
+
 	Color operator * (const Color &c) const
 		{ return Color(colors_[0] * c.colors_[0], colors_[1] * c.colors_[1], colors_[2] * c.colors_[2], colors_[3] * c.colors_[3]); }
+
 	Color operator * (float f) const
 		{ return Color(colors_[0] * f, colors_[1] * f, colors_[2] * f, colors_[3]); }
+
 	/** \note No checking of array bounds are done here for efficiency reasons. If safety is a concern, use the
 	*** class member access functions instead.
 	**/
 	float &operator[](int32 i)
 		{ return colors_[i]; }
+
 	/** \note No checking of array bounds are done here for efficiency reasons. If safety is a concern, use the
 	*** class member access functions instead.
 	**/
@@ -89,21 +97,28 @@ public:
 	//@{
 	const float* GetColors() const
 		{ return colors_; }
+
 	float GetRed() const
 		{ return colors_[0]; }
+
 	float GetGreen() const
 		{ return colors_[1]; }
+
 	float GetBlue() const
 		{ return colors_[2]; }
+
 	float GetAlpha() const
 		{ return colors_[3]; }
 
 	void SetRed(float r)
 		{ colors_[0] = r; if (colors_[0] > 1.0f) colors_[0] = 1.0f; else if (colors_[0] < 0.0f) colors_[0] = 0.0f; }
+
 	void SetGreen(float g)
 		{ colors_[1] = g; if (colors_[1] > 1.0f) colors_[1] = 1.0f; else if (colors_[1] < 0.0f) colors_[1] = 0.0f; }
+
 	void SetBlue(float b)
 		{ colors_[2] = b; if (colors_[2] > 1.0f) colors_[2] = 1.0f; else if (colors_[2] < 0.0f) colors_[2] = 0.0f; }
+
 	void SetAlpha(float a)
 		{ colors_[3] = a; if (colors_[3] > 1.0f) colors_[3] = 1.0f; else if (colors_[3] < 0.0f) colors_[3] = 0.0f; }
 	//@}
@@ -118,4 +133,4 @@ private:
 
 }  // namespace hoa_video
 
-#endif  // __COLOR_HEADER__
+#endif // __COLOR_HEADER__

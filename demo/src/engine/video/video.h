@@ -1069,7 +1069,7 @@ public:
 	 *  \param fade_time - the fade will last this number of seconds
 	 *  \return True if fade was successful, false otherwise.
 	 */
-	bool FadeScreen(const Color &color, float fade_time);
+	void FadeScreen(const Color &color, float fade_time);
 	
 	/*!
 	 *  \brief Determines if a fade is currently occurring.
