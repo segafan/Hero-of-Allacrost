@@ -57,8 +57,19 @@ bool IsPowerOfTwo(uint32 x) {
 
 
 
-bool IsFloatInRange(float value, float lower, float upper)
-	{ return (value >= lower && value <= upper); }
+bool IsOddNumber(uint32 x) {
+	#if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
+		return (x & 0x10000000);
+	#else // SDL_BYTEORDER == SDL_LITTLE_ENDIAN
+		return (x & 0x00000001);
+	#endif
+}
+
+
+
+bool IsFloatInRange(float value, float lower, float upper) {
+	return (value >= lower && value <= upper);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///// ustring Class

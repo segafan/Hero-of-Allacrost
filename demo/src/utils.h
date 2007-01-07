@@ -106,6 +106,13 @@ uint32 RoundUpPow2(uint32 x);
 **/
 bool IsPowerOfTwo(uint32 x);
 
+/** \brief Determines if an integer is an odd number or not.
+*** \param x The unsigned integer to examine.
+*** \return True if the number is odd, false if it is not.
+*** \note Using a signed integer with this function will yield the same result.
+**/
+bool IsOddNumber(uint32 x);
+
 /** \brief Determines if a floating point number is within a range of two numbers.
 *** \param value The floating point value to compare.
 *** \param lower The minimum bound (inclusive).

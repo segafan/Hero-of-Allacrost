@@ -7,11 +7,11 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-/*!****************************************************************************
- * \file    map_dialogue.cpp
- * \author  Tyler Olsen, roots@allacrost.org
- * \brief   Source file for map mode dialogue.
- *****************************************************************************/
+/** ****************************************************************************
+*** \file    map_dialogue.cpp
+*** \author  Tyler Olsen, roots@allacrost.org
+*** \brief   Source file for map mode dialogue.
+*** ***************************************************************************/
 
 #include "utils.h"
 #include "map.h"
@@ -38,16 +38,12 @@ namespace hoa_map {
 
 namespace private_map {
 
-
-
 // ****************************************************************************
 // *********************** MapDialogue Class Functions ************************
 // ****************************************************************************
 
 MapDialogue::MapDialogue() {
 	if (MAP_DEBUG) cout << "MAP: MapDialogue constructor invoked" << endl;
-	seen = false;
-	current_line = 0;
 }
 
 
@@ -64,39 +60,6 @@ const bool MapDialogue::ReadNextLine() {
 		return false; 
 	} 
 	return true;
-}
-
-// ****************************************************************************
-// ********************** SpriteDialogue Class Functions **********************
-// ****************************************************************************
-
-SpriteDialogue::SpriteDialogue() {
-	if (MAP_DEBUG) cout << "MAP: SpriteDialogue constructor invoked" << endl;
-	
-	speaking_action = NULL;
-}
-
-
-
-SpriteDialogue::~SpriteDialogue() {
-	if (MAP_DEBUG) cout << "MAP: SpriteDialogue destructor invoked" << endl;
-
-	if (speaking_action)
-	{
-		delete (speaking_action);
-		speaking_action = 0;
-	}
-}
-
-void SpriteDialogue::BindToLua()
-{
-	module(ScriptManager->GetGlobalState())
-	[
-		class_<SpriteDialogue>("SpriteDialogue")
-		.def(constructor<>())
-		.def("AddText", &SpriteDialogue::AddText)
-		.def("AddSpeaker", &SpriteDialogue::AddSpeaker)
-	];
 }
 
 } // namespace private_map
