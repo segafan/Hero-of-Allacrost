@@ -7,91 +7,85 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-/*!****************************************************************************
- * \file    map_actions.h
- * \author  Tyler Olsen, roots@allacrost.org
- * \brief   Header file for map mode actions.
- *****************************************************************************/
+/** ****************************************************************************
+*** \file    map_actions.h
+*** \author  Tyler Olsen, roots@allacrost.org
+*** \brief   Header file for map mode actions.
+*** ***************************************************************************/
 
 #ifndef __MAP_ACTIONS_HEADER__
 #define __MAP_ACTIONS_HEADER__
 
-#include "utils.h"
 #include <string>
 #include <vector>
+
 #include "defs.h"
+#include "utils.h"
 #include "video.h"
 #include "map.h"
 
-//! All calls to map mode are wrapped in this namespace.
+//! \brief All calls to map mode are wrapped in this namespace.
 namespace hoa_map {
 
-//! An internal namespace to be used only within the boot code. Don't use this namespace anywhere else!
+//! \brief An internal namespace to be used only within the boot code. Don't use this namespace anywhere else!
 namespace private_map {
 
-/*!****************************************************************************
- * \brief Abstract class for sprite actions.
- *
- * Map sprites can perform a variety of different actions, from movement to
- * emotional animation. This class serves as a parent class for the different
- * actions that sprites can take. These actions include:
- *
- * -# Intelligent pathfinding for moving between two tiles seperated by any distance
- * -# Displaying specific sprite frames for a specified period of time.
- * -# Executing code from a Lua script
- * -# Random movement
- *****************************************************************************/
+/** ****************************************************************************
+*** \brief An abstract class for sprite actions.
+***
+*** Map sprites can perform a variety of different actions, from movement to
+*** emotional animation. This class serves as a parent class for the common
+*** actions that sprites can take. The children classes are provided as a
+*** convenience to the map designer and for code re-usablity. The map script
+*** may also create custom actions for sprites to take in addition to the
+*** actions provided in this class.
+*** ***************************************************************************/
 class SpriteAction {
 public:
-	//! A pointer to the map sprite that holds this action.
+	//! \brief A pointer to the map sprite that this action is performed upon.
 	MapSprite *sprite;
-	//! An identifier for the type of action (the children that inherit from this class).
-	uint8 type;
 
-	SpriteAction() {}
-	virtual ~SpriteAction() {}
+	SpriteAction()
+		{}
+	virtual ~SpriteAction()
+		{}
 
-	//! Loads the data for this action from the map's data file.
-	//! \param table_key The index of the table in the map data file that contains this action's data.
+	/** \brief Loads the data for this action from the map's data file.
+	*** \param table_key The index of the table in the map script file that contains the action's data.
+	**/
 	virtual void Load(uint32 table_key) = 0;
-	//! The process function executes the said action.
-	virtual void Process() = 0;
+	//! \brief Executes the sprite's action.
+	virtual void Execute() = 0;
 };
 
-/*!****************************************************************************
- * \brief Action involving movement between a source and destination tile.
- *
- * This class retains and processes information needed for a sprite to move between
- * a source and a destination tile. Pathfinding is done between source and
- * destination via the A* algorithm. Once a path is found, it is saved and used by
- * the sprite. If the sprite needs to traverse between the same source->destination
- * once again, this path is first checked to make sure it is still valid, and if so
- * it is automatically used once again.
- *
- *
- *****************************************************************************/
+/** ****************************************************************************
+*** \brief Action involving movement between a source and destination tile.
+***
+*** This class enables a sprite to move between a source and a destination node.
+*** Pathfinding is done between source and destination via the A* algorithm.
+*** Once a path is found, it is saved and then used by the sprite. If the sprite
+*** needs to traverse between the same source->destination once again, this path
+*** is first checked to make sure it is still valid and if so, it is
+*** automatically used once more.
+*** *****************************************************************************/
 class ActionPathMove : public SpriteAction {
 public:
-	//! bind this class to lua
+	//! \brief bind this class to lua
 	static void BindToLua();
-	//! The destination tile of this path movement
-	TileNode destination;
-	//! The path we need to traverse from source to destination
-	std::vector<TileNode> path;
-	//! An index to the path vector containing the node that the sprite is currently on.
+	//! \brief The destination tile of this path movement
+	PathNode destination;
+	//! \brief The path we need to traverse from source to destination
+	std::vector<PathNode> path;
+	//! \brief An index to the path vector containing the node that the sprite is currently on.
 	uint32 current_node;
 
-	ActionPathMove() { current_node = 0; }
-	~ActionPathMove() {}
+	ActionPathMove()
+		{ current_node = 0; }
+	~ActionPathMove()
+		{}
 
 	void Load(uint32 table_key);
-	void Process();
-
-	//! functions for lua
-	void SetDestination(int16 row, int16 col)
-	{ destination.row = row; destination.col = col; }
-	void SetSprite(MapSprite *sp)
-	{ this->sprite = sp; }
+	void Execute();
 };
 
 /*!****************************************************************************
@@ -102,66 +96,46 @@ public:
  *
  * \note The _frame_times and _frame_indeces vectors should \c always be the same size.
  *****************************************************************************/
-class ActionFrameDisplay : public SpriteAction {
+class ActionAnimate : public SpriteAction {
 public:
-	//! The amount of time to display each frame, in milliseconds.
-	uint32 display_time;
-	//! The index in the sprite's image frame vector to display.
-	uint32 frame_index;
-	//! The amount of time remaining until the action is finished, in milliseconds
-	int32 remaining_time;
+	/** \brief The sprite animation to display for this action.
+	*** Because this is a pointer, it
+	**/
+	hoa_video::AnimatedImage *animation;
+	/** \brief Indicates to destroy the animation image on class destruction
+	*** If a new animation image is created by this class, this member should
+	*** be set to true. If it is false, however, this means that the animation
+	*** creation/destruction is handled elsewhere, most likely in the MapSprite#_images
+	*** vector.
+	**/
+	bool destroy_image;
+	/** \brief The number of times to loop the animation before finishing.
+	*** A value less than zero indicates to loop forever.
+	**/
+	int8 loop;
 
-	ActionFrameDisplay() {}
-	~ActionFrameDisplay() {}
+	ActionAnimate() {}
+	~ActionAnimate() {}
 
 	void Load(uint32 table_key);
-	void Process();
-};
+	void Execute();
+}; // class ActionAnimate : public SpriteAction
 
-/*!****************************************************************************
- * \brief Action that runs a Lua script.
- *
- * This kind of action is nothing more than a vector of pointers to a Lua function
- * in the map file. The Lua function is part of the map sprite's representation in
- * the Lua file. This type of action lets the sprite do virtually anything, or it
- * could even operate on other sprites or the map itself (although this could
- * cause problems if not used carefully).
- *
- *****************************************************************************/
+/** ****************************************************************************
+*** \brief Action that calls a Lua subroutine
+***
+*** ***************************************************************************/
 class ActionScriptFunction : public SpriteAction {
 public:
-	//! The function index of the sprite object containing the function to execute.
-	std::vector<uint32> function_index;
+	ActionScriptFunction()
+		{}
+	~ActionScriptFunction()
+		{}
 
-	ActionScriptFunction() {}
-	~ActionScriptFunction() {}
-
-	void Load(uint32 table_key) {}
-	void Process() {}
-};
-
-/*!****************************************************************************
- * \brief Action that moves a sprite in a random direction.
- *
- * This action initiates "random movement" for a sprite. This action will likely
- * be the least-used sprite action since maps don't seem very "alive" when all
- * the sprites are just walking around randomly, but it will be appropriate to
- * use in some portions of the game.
- *
- *****************************************************************************/
-class ActionRandomMove : public SpriteAction {
-public:
-	//! The number of times to move to a random tile.
-	//! \note If this value is less than zero, random movement is continued until acted on by an outside force.
-	int32 number_moves;
-	//! The number of milliseconds to wait between successive moves.
-	uint32 wait_time;
-
-	ActionRandomMove() {}
-	~ActionRandomMove() {}
-
-	void Load(uint32 table_key) {}
-	void Process() {}
+	void Load(uint32 table_key)
+		{}
+	void Execute()
+		{}
 };
 
 } // namespace private_map
