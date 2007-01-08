@@ -470,7 +470,7 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 				return;
 			}
 			
-			return;
+			//return;
 		} // endif CTRL pressed
 
 		if (key_event.keysym.sym == SDLK_ESCAPE) // Same story as on Ctrl-Q
@@ -554,8 +554,8 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 		_any_key_press = false;
 		_any_key_release = true;
 
-		if (key_event.keysym.mod & KMOD_CTRL) // Don't recognize a key release if ctrl is down
-			return;
+		//if (key_event.keysym.mod & KMOD_CTRL) // Don't recognize a key release if ctrl is down
+		//	return;
 
 		if (key_event.keysym.sym == _key.up) {
 			_up_state = false;
