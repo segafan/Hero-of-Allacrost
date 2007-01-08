@@ -212,6 +212,8 @@ public:
 class MapMode : public hoa_mode_manager::GameMode {
 	friend class private_map::MapFrame;
 	friend class private_map::MapObject;
+	friend class private_map::PhysicalObject;
+	friend class private_map::VirtualSprite;
 	friend class private_map::MapSprite;
 public:
 	MapMode();
@@ -313,7 +315,7 @@ private:
 	*** map objects. The MapMode#_virtual_focus member can be used to emulate that
 	*** focus.
 	**/
-	private_map::MapSprite* _camera;
+	private_map::VirtualSprite* _camera;
 
 	/** \brief A "virtual sprite" that can serve as a focus point for the camera.
 	*** This sprite is not visible to the player nor does it have any collision
@@ -321,7 +323,7 @@ private:
 	*** rather than this object, but it is useful for scripted sequences and other
 	*** things.
 	**/
-	private_map::MapSprite *_virtual_focus;
+	private_map::VirtualSprite *_virtual_focus;
 
 	//! \brief Contains the images for all map tiles, both still and animate.
 	std::vector<hoa_video::ImageDescriptor*> _tile_images;
@@ -376,7 +378,7 @@ private:
 	*** \note This function does <b>not</b> check if the MapSprite argument has its no_collision member
 	*** set to false, but it <b>does</b> check that of the other MapObjects.
 	**/
-	bool _DetectCollision(private_map::MapSprite* sprite);
+	bool _DetectCollision(private_map::VirtualSprite* sprite);
 
 	// -------------------- Draw Methods
 

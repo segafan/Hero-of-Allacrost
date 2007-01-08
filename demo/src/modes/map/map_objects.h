@@ -31,13 +31,13 @@ namespace private_map {
 /** \name Map Sprite Speeds
 *** \brief Common speeds for sprite movement.
 *** These values are the time (in milliseconds) that it takes a sprite to walk
-*** the distance of a single tile (32 pixels).
+*** the distance of one map grid (16 pixels).
 **/
 //@{
-const float VERY_SLOW_SPEED = 500.0f;
-const float SLOW_SPEED      = 400.0f;
-const float NORMAL_SPEED    = 300.0f;
-const float FAST_SPEED      = 200.0f;
+const float VERY_SLOW_SPEED = 300.0f;
+const float SLOW_SPEED      = 250.0f;
+const float NORMAL_SPEED    = 200.0f;
+const float FAST_SPEED      = 150.0f;
 const float VERY_FAST_SPEED = 100.0f;
 //@}
 
@@ -96,6 +96,7 @@ const uint32 ANIM_WALKING_NORTH  = 5;
 const uint32 ANIM_WALKING_WEST   = 6;
 const uint32 ANIM_WALKING_EAST   = 7;
 //@}
+
 
 /** ****************************************************************************
 *** \brief Abstract class that represents objects on a map
@@ -222,6 +223,16 @@ public:
 	**/
 	virtual void Draw() = 0;
 
+	/** \brief Assists with the drawing of map objects
+	*** \return True if the object should be drawn, or false if it is not visible on the screen.
+	***
+	*** This method performs the common drawing operations of identifying whether or not the object
+	*** is visible on the screen and moving the drawing cursor to its location. The children classes
+	*** of this class may choose to make use of it (or not). All that needs to be done after this
+	*** method returns true is to draw the object's image on the screen.
+	**/
+	bool DrawHelper();
+
 	//! \name Class Member Access Functions
 	void SetObjectID(int16 id)
 		{ object_id = id; }
@@ -257,20 +268,55 @@ public:
 
 
 /** ****************************************************************************
-*** \brief A mobile map object with which the player can interact with.
+*** \brief Represents visible objects on the map that have no motion.
 ***
-*** Map sprites are animate, mobile, living map objects. Although there is
-*** but this single class to represent all the map sprites in the game, they can
-*** divided into types such as NPCs, friendly creatures, and enemies. The fact
-*** that there is only one class for representing several sprite types is the
-*** reason why many of these class members are pointers. For example, we don't
-*** need dialogue for a dog sprite.
+*** This class represents both still image and animated objects. These objects
+*** are fixed in place and can not move. The object must have at least one
+*** entry in its image vector, otherwise a segmentation fault will occur if the
+*** Update or Draw functions are called.
+***
+*** \note If the object does not have any animated images, set the updatable
+*** member of this class to false. Forgetting to do this will do no harm, but
+*** it will do an extra function call that it shouldn't need to do.
 *** ***************************************************************************/
-class MapSprite : public MapObject {
-public:
-	//! \brief The name of the sprite, as seen by the player in the game.
-	hoa_utils::ustring name;
+class PhysicalObject : public MapObject {
+	//! \brief The index to the animations vector that contains the current image to display
+	uint8 current_animation;
 
+	/** \brief A vector containing all the object's animations.
+	*** Note that these need not be actual animations. An AnimatedImage object may consist
+	*** of only a single frame. Usually an object will only need a single image or animation,
+	*** but a vector is used here in case others are needed.
+	**/
+	std::vector<hoa_video::AnimatedImage> animations;
+
+	PhysicalObject();
+
+	~PhysicalObject();
+
+	//! \brief Updates the object's animation frames if it is animated.
+	void Update();
+
+	//! \brief Draws the object to the screen, if it is visible.
+	void Draw();
+}; // class PhysicalObject : public MapObject
+
+
+/** ****************************************************************************
+*** \brief An invisible and possible mobile sprite on a map
+***
+*** The VirtualSprite is a special type of MapObject because it has no physical
+*** form (no image). Virtual sprites may be manipulated to move around on the screen,
+*** or they may remain stationary. VirtualSprites do take collision detection into account
+*** by default, unless the no_collision member is set to true. Here are some examples of
+*** where virtual sprites may be of use:
+***
+*** - As a mobile focusing point for the map camera
+*** - As an impassible map location for ground objects in a specific context only
+*** - To set impassible locations for objects in the sky layer
+*** ***************************************************************************/
+class VirtualSprite : public MapObject {
+public:
 	/** \brief A bit-mask for the sprite's draw orientation and direction vector.
 	*** This member determines both where to move the sprite (8 directions) and
 	*** which way the sprite is facing (4 directions). See the Sprite Directions
@@ -287,7 +333,43 @@ public:
 	**/
 	bool moving;
 
-	//! \brief Holds the previous value of MapSprite#moving from the last call to MapSprite#Update().
+	/** \brief When set to true, indicates that the object exists on the sky object layer (default = false).
+	*** This member is necessary for collision detection purposes. When a sprite needs to detect
+	*** if it has encountered a collision, that collision must be examined with other objects on
+	*** the appropriate layer (the ground or sky layer).
+	**/
+	bool sky_object;
+
+	VirtualSprite();
+
+	~VirtualSprite()
+		{}
+
+	//! \brief Updates the virtual object's position if it is moving, otherwise does nothing.
+	virtual void Update();
+
+	//! \brief Does nothing since a virtual object has nothing to draw.
+	virtual void Draw()
+		{ return; }
+}; // class VirtualMapObject : public MapObject
+
+
+/** ****************************************************************************
+*** \brief A mobile map object with which the player can interact with.
+***
+*** Map sprites are animate, mobile, living map objects. Although there is
+*** but this single class to represent all the map sprites in the game, they can
+*** divided into types such as NPCs, friendly creatures, and enemies. The fact
+*** that there is only one class for representing several sprite types is the
+*** reason why many of the class members are pointers. For example, we don't
+*** need dialogue for a dog sprite.
+*** ***************************************************************************/
+class MapSprite : public VirtualSprite {
+public:
+	//! \brief The name of the sprite, as seen by the player in the game.
+	hoa_utils::ustring name;
+
+	//! \brief Holds the previous value of VirtualSprite#moving from the last call to MapSprite#Update().
 	bool was_moving;
 
 	/** \brief The sound that will play when the sprite walks.
@@ -325,7 +407,7 @@ public:
 
 	//! \brief Draws the sprite frame in the appropriate position on the screen, if it is visible.
 	void Draw();
-}; // class MapSprite : public MapObject
+}; // class MapSprite : public VirtualSprite
 
 } // namespace private_map
 

@@ -60,10 +60,11 @@ MapMode::MapMode() {
 
 	_map_state = EXPLORE;
 
-	_virtual_focus = new MapSprite();
+	_virtual_focus = new VirtualSprite();
 	_virtual_focus->SetXPosition(0, 0.0f);
 	_virtual_focus->SetYPosition(0, 0.0f);
-	_virtual_focus->movement_speed = VERY_FAST_SPEED;
+	_virtual_focus->movement_speed = NORMAL_SPEED;
+	_virtual_focus->SetNoCollision(true);
 	_virtual_focus->SetVisible(false);
 
 	// TODO: Load the map data in a seperate thread
@@ -172,7 +173,7 @@ void MapMode::Load() {
 	}
 
 	for (uint16 r = 0; r < _num_tile_rows * 2; r++) {
-		_map_grid.push_back(vector<bool>(_num_tile_rows * 2, false));
+		_map_grid.push_back(vector<bool>(_num_tile_cols * 2, false));
 	}
 
 	// Uncomment this loop to test out tile-collision detection
@@ -436,7 +437,7 @@ void MapMode::_UpdateDialogue() {
 } // void MapMode::_UpdateDialogue()
 
 
-bool MapMode::_DetectCollision(MapSprite* sprite) {
+bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 	// NOTE: Whether the argument pointer is valid is not checked here, since the object pointer
 	// itself presumably called this function.
 
@@ -455,6 +456,11 @@ bool MapMode::_DetectCollision(MapSprite* sprite) {
 	if (cr_left < 0.0f || cr_top < 0.0f || cr_right >= static_cast<float>(_num_tile_cols * 2) ||
 		y_location >= static_cast<float>(_num_tile_rows * 2)) {
 		return true;
+	}
+
+	// Do not do tile or object based collision detection if this member is set
+	if (sprite->no_collision == true) {
+		return false;
 	}
 
 	// ---------- (2): Determine if the sprite's collision rectangle overlaps any unwalkable tiles
