@@ -361,6 +361,23 @@ private:
 	//! \brief Updates the map when in the dialogue state.
 	void _UpdateDialogue();
 
+	/** \brief Determines if a map sprite's position is invalid because of a collision
+	*** \param sprite A pointer to the map sprite to check
+	*** \return True if a collision was detected, false if one was not
+	***
+	*** This method is invoked by the map sprite who wishes to check for its own collision. The
+	*** collision detection is performed agains three types of obstacles:
+	***
+	*** -# Boundary conditions: where the sprite has walked off the map
+	*** -# Tile collisions: where the sprite's collision rectangle overlaps with an unwalkable map grid tile.
+	*** -# Object collision: where the sprite's collision rectangle overlaps that of another object's,
+	***    where the object is in the same draw layer and context as the original sprite.
+	***
+	*** \note This function does <b>not</b> check if the MapSprite argument has its no_collision member
+	*** set to false, but it <b>does</b> check that of the other MapObjects.
+	**/
+	bool _DetectCollision(private_map::MapSprite* sprite);
+
 	// -------------------- Draw Methods
 
 	//! \brief Calculates information about how to draw the next map frame.

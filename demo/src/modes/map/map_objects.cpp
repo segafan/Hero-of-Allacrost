@@ -170,7 +170,7 @@ void MapSprite::Update() {
 		return;
 	}
 
-	// Set the sprite's animation to the standing still position
+	// Set the sprite's animation to the standing still position if movement has just stopped
 	if (!moving & was_moving) {
 		// Set the movement animation to zero progress
 		animations[current_animation].SetTimeProgress(0);
@@ -265,42 +265,29 @@ void MapSprite::Update() {
 
 		animations[current_animation].Update();
 
-		// TODO: Call collision detection routine here
-
-		// TEMP: Detect out-of-map boundaries
-		float x_location = static_cast<float>(x_position) + x_offset;
-		float y_location = static_cast<float>(y_position) + y_offset;
-
-		if (x_location - coll_half_width < 0.0f) {
+		// Call collision detection routine to see if the sprite may move to this new position
+		if (MapMode::_current_map->_DetectCollision(this) == true) {
 			x_offset = tmp_x;
-		}
-		else if (x_location + coll_half_width >= static_cast<float>(MapMode::_current_map->_num_tile_cols * 2)) {
-			x_offset = tmp_x;
-		}
-
-		if (y_location - coll_height < 0.0f) {
 			y_offset = tmp_y;
 		}
-		else if (y_location >= static_cast<float>(MapMode::_current_map->_num_tile_rows * 2)) {
-			y_offset = tmp_y;
-		}
-
-		// Roll-over position offsets if necessary
-		while (x_offset < 0.0f) {
-			x_position -= 1;
-			x_offset += 1.0f;
-		}
-		while (x_offset > 1.0f) {
-			x_position += 1;
-			x_offset -= 1.0f;
-		}
-		while (y_offset < 0.0f) {
-			y_position -= 1;
-			y_offset += 1.0f;
-		}
-		while (y_offset > 1.0f) {
-			y_position += 1;
-			y_offset -= 1.0f;
+		else {
+			// Roll-over position offsets if necessary
+			while (x_offset < 0.0f) {
+				x_position -= 1;
+				x_offset += 1.0f;
+			}
+			while (x_offset > 1.0f) {
+				x_position += 1;
+				x_offset -= 1.0f;
+			}
+			while (y_offset < 0.0f) {
+				y_position -= 1;
+				y_offset += 1.0f;
+			}
+			while (y_offset > 1.0f) {
+				y_position += 1;
+				y_offset -= 1.0f;
+			}
 		}
 	} // if (moving)
 

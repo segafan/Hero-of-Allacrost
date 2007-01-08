@@ -171,6 +171,19 @@ void MapMode::Load() {
 		}
 	}
 
+	for (uint16 r = 0; r < _num_tile_rows * 2; r++) {
+		_map_grid.push_back(vector<bool>(_num_tile_rows * 2, false));
+	}
+
+	// Uncomment this loop to test out tile-collision detection
+// 	for (uint16 r = 0; r < _num_tile_rows * 2; r++) {
+// 		for (uint16 c = 0; c < _num_tile_cols * 2; c++) {
+// 			if ((r + c) % 70 == 0) {
+// 				_map_grid[r][c] = true;
+// 			}
+// 		}
+// 	}
+
 	MapSprite *sp;
 
 	// Load player sprite and rest of map objects
@@ -421,6 +434,49 @@ void MapMode::_UpdateDialogue() {
 // 		}
 // 	}
 } // void MapMode::_UpdateDialogue()
+
+
+bool MapMode::_DetectCollision(MapSprite* sprite) {
+	// NOTE: Whether the argument pointer is valid is not checked here, since the object pointer
+	// itself presumably called this function.
+
+	// The single X,Y floating point coordinates of the sprite
+	float x_location = static_cast<float>(sprite->x_position) + sprite->x_offset;
+	float y_location = static_cast<float>(sprite->y_position) + sprite->y_offset;
+
+	// The coordinates corresponding to the four sides of the sprite's collision rectangle (cr)
+	float cr_left = x_location - sprite->coll_half_width;
+	float cr_right = x_location + sprite->coll_half_width;
+	float cr_top = y_location - sprite->coll_height;
+	// The bottom of the sprite's collision rectangle is its y_location
+
+	// ---------- (1): Check if the sprite's position has gone out of bounds
+
+	if (cr_left < 0.0f || cr_top < 0.0f || cr_right >= static_cast<float>(_num_tile_cols * 2) ||
+		y_location >= static_cast<float>(_num_tile_rows * 2)) {
+		return true;
+	}
+
+	// ---------- (2): Determine if the sprite's collision rectangle overlaps any unwalkable tiles
+
+	// NOTE: Because the sprite's collision rectangle was determined to be within the map bounds,
+	// the map grid tile indeces referenced in this loop are all valid entries.
+
+	for (uint32 r = static_cast<uint32>(cr_top); r <= static_cast<uint32>(y_location); r++) {
+		for (uint32 c = static_cast<uint32>(cr_left); c <= static_cast<uint32>(cr_right); c++) {
+			if (_map_grid[r][c] == true) { // Then this overlapping tile is unwalkable
+				return true;
+			}
+		}
+	}
+
+	// ---------- (3): Determine if two sprite's collision rectangles overlap
+
+	// TODO
+
+	// No collision was detected
+	return false;
+} // bool MapMode::_DetectCollision(MapSprite* sprite)
 
 // ****************************************************************************
 // **************************** DRAW FUNCTIONS ********************************
