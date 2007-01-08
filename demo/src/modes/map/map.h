@@ -120,8 +120,7 @@ public:
 	*** each element is a 16x16 pixel space on the map.
 	**/
 	//@{
-	int16 row;
-	int16 col;
+	int16 row, col;
 	//@}
 
 	//! \name Path Scoring Members
@@ -178,9 +177,7 @@ public:
 	*** \note A value less than zero means that no image is registered to that tile layer.
 	**/
 	//@{
-	int16 lower_layer;
-	int16 middle_layer;
-	int16 upper_layer;
+	int16 lower_layer, middle_layer, upper_layer;
 	//@}
 
 	MapTile()

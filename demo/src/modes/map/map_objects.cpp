@@ -34,49 +34,53 @@ namespace private_map {
 // ************************ MapObject Class Functions **************************
 // *****************************************************************************
 
-MapObject::MapObject() {
-	context = 0;
-	object_id = -1;
-	x_position = -1;
-	y_position = -1;
-	x_offset = 0.0f;
-	y_offset = 0.0f;
-	coll_half_width = 0.0f;
-	coll_height = 0.0f;
-}
+MapObject::MapObject() :
+	object_id(-1),
+	context(-1),
+	x_position(-1),
+	y_position(-1),
+	x_offset(0.0f),
+	y_offset(0.0f),
+	img_half_width(0.0f),
+	img_height(0.0f),
+	coll_half_width(0.0f),
+	coll_height(0.0f),
+	updatable(true),
+	visible(true),
+	no_collision(false),
+	draw_on_second_pass(false)
+{}
 
 // ****************************************************************************
 // ************************ MapSprite Class Functions *************************
 // ****************************************************************************
 
 // Constructor for critical class members. Other members are initialized via support functions
-MapSprite::MapSprite() {
+MapSprite::MapSprite() :
+	direction(SOUTH),
+	movement_speed(NORMAL_SPEED),
+	current_animation(ANIM_STANDING_SOUTH),
+	face_portrait(NULL)
+{
 	if (MAP_DEBUG)
 		cout << "MAP: MapSprite constructor invoked" << endl;
-
-	direction = SOUTH;
-	movement_speed = NORMAL_SPEED;
-	current_animation = ANIM_STANDING_SOUTH;
-	face_portrait = NULL;
-	updatable = true;
-	visible = true;
 }
 
 
-// Free all allocated images and other structures
+// Free all allocated images and other data
 MapSprite::~MapSprite() {
 	if (MAP_DEBUG)
 		cout << "MAP: MapSprite destructor invoked" << endl;
-
-	if (face_portrait != NULL) {
-		VideoManager->DeleteImage(*face_portrait);
-		face_portrait = NULL;
-	}
 
 	for (uint32 i = 0; i < animations.size(); i++) {
 		VideoManager->DeleteImage(animations[i]);
 	}
 	animations.clear();
+
+	if (face_portrait != NULL) {
+		VideoManager->DeleteImage(*face_portrait);
+		face_portrait = NULL;
+	}
 
 // 	for (uint32 i = 0; i < dialogues.size(); i++) {
 // 		delete(dialogues[i]);
@@ -92,22 +96,22 @@ bool MapSprite::Load() {
 	// TEMP
 	img.Clear();
 	img.AddFrame(string("img/sprites/map/claudius_d0.png"), frame_speed);
-	img.SetDimensions(2.0f, 4.0f);
+	img.SetDimensions(img_half_width * 2, img_height);
 	animations.push_back(img);
 
 	img.Clear();
 	img.AddFrame(string("img/sprites/map/claudius_u0.png"), frame_speed);
-	img.SetDimensions(2.0f, 4.0f);
+	img.SetDimensions(img_half_width * 2, img_height);
 	animations.push_back(img);
 
 	img.Clear();
 	img.AddFrame(string("img/sprites/map/claudius_l0.png"), frame_speed);
-	img.SetDimensions(2.0f, 4.0f);
+	img.SetDimensions(img_half_width * 2, img_height);
 	animations.push_back(img);
 
 	img.Clear();
 	img.AddFrame(string("img/sprites/map/claudius_r0.png"), frame_speed);
-	img.SetDimensions(2.0f, 4.0f);
+	img.SetDimensions(img_half_width * 2, img_height);
 	animations.push_back(img);
 
 	img.Clear();
@@ -117,7 +121,7 @@ bool MapSprite::Load() {
 	img.AddFrame(string("img/sprites/map/claudius_d1.png"), frame_speed);
 	img.AddFrame(string("img/sprites/map/claudius_d4.png"), frame_speed);
 	img.AddFrame(string("img/sprites/map/claudius_d5.png"), frame_speed);
-	img.SetDimensions(2.0f, 4.0f);
+	img.SetDimensions(img_half_width * 2, img_height);
 	animations.push_back(img);
 
 	img.Clear();
@@ -127,7 +131,7 @@ bool MapSprite::Load() {
 	img.AddFrame(string("img/sprites/map/claudius_u1.png"), frame_speed);
 	img.AddFrame(string("img/sprites/map/claudius_u4.png"), frame_speed);
 	img.AddFrame(string("img/sprites/map/claudius_u5.png"), frame_speed);
-	img.SetDimensions(2.0f, 4.0f);
+	img.SetDimensions(img_half_width * 2, img_height);
 	animations.push_back(img);
 
 	img.Clear();
@@ -137,7 +141,7 @@ bool MapSprite::Load() {
 	img.AddFrame(string("img/sprites/map/claudius_l1.png"), frame_speed);
 	img.AddFrame(string("img/sprites/map/claudius_l4.png"), frame_speed);
 	img.AddFrame(string("img/sprites/map/claudius_l5.png"), frame_speed);
-	img.SetDimensions(2.0f, 4.0f);
+	img.SetDimensions(img_half_width * 2, img_height);
 	animations.push_back(img);
 
 	img.Clear();
@@ -147,7 +151,7 @@ bool MapSprite::Load() {
 	img.AddFrame(string("img/sprites/map/claudius_r1.png"), frame_speed);
 	img.AddFrame(string("img/sprites/map/claudius_r4.png"), frame_speed);
 	img.AddFrame(string("img/sprites/map/claudius_r5.png"), frame_speed);
-	img.SetDimensions(2.0f, 4.0f);
+	img.SetDimensions(img_half_width * 2, img_height);
 	animations.push_back(img);
 
 	for (uint32 i = 0; i < animations.size(); i++) {
@@ -162,7 +166,7 @@ bool MapSprite::Load() {
 
 // Updates the state of the sprite
 void MapSprite::Update() {
-	if (updatable == false || animations.size() == 0) {
+	if (updatable == false || animations.size() == 0) { // TEMP: remove animations.size() == 0 later
 		return;
 	}
 
@@ -252,7 +256,7 @@ void MapSprite::Update() {
 		}
 
 		// If the direction of movement changed in mid-flight, update the animation timer on the
-		// new animated image to reflect the old, so the walking animations do not appear to 
+		// new animated image to reflect the old, so the walking animations do not appear to
 		// "start and stop" whenever the direction is changed.
 		if (current_animation != last_animation) {
 			animations[current_animation].SetTimeProgress(animations[last_animation].GetTimeProgress());
@@ -274,7 +278,7 @@ void MapSprite::Update() {
 			x_offset = tmp_x;
 		}
 
-		if (y_location + coll_height < 0.0f) {
+		if (y_location - coll_height < 0.0f) {
 			y_offset = tmp_y;
 		}
 		else if (y_location >= static_cast<float>(MapMode::_current_map->_num_tile_rows * 2)) {
@@ -315,18 +319,10 @@ void MapSprite::Draw() {
 
 	// ---------- (1) Determine if the sprite is off-screen and if so, don't draw it.
 
-	if (x_pos + half_width < MapMode::_current_map->_draw_info.left_edge  ||
-		x_pos - half_width > MapMode::_current_map->_draw_info.right_edge ||
-		y_pos + height > MapMode::_current_map->_draw_info.bottom_edge    ||
+	if (x_pos + img_half_width < MapMode::_current_map->_draw_info.left_edge  ||
+		x_pos - img_half_width > MapMode::_current_map->_draw_info.right_edge ||
+		y_pos - img_height > MapMode::_current_map->_draw_info.bottom_edge    ||
 		y_pos < MapMode::_current_map->_draw_info.top_edge) {
-// 		if (x_pos + half_width < MapMode::_current_map->_draw_info.left_edge)
-// 			printf("Too far left:  %f < %f\n", x_pos + half_width, MapMode::_current_map->_draw_info.left_edge);
-// 		if (x_pos - half_width > MapMode::_current_map->_draw_info.right_edge)
-// 			printf("Too far right: %f > %f\n", x_pos - half_width, MapMode::_current_map->_draw_info.right_edge);
-// 		if (y_pos + height < MapMode::_current_map->_draw_info.bottom_edge)
-// 			printf("Too far below: %f < %f\n", y_pos + height, MapMode::_current_map->_draw_info.bottom_edge);
-// 		if (y_pos > MapMode::_current_map->_draw_info.top_edge)
-// 			printf("Too far above: %f > %f\n", y_pos, MapMode::_current_map->_draw_info.top_edge);
 		return;
 	}
 
