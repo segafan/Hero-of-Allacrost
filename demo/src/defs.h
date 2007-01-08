@@ -197,18 +197,20 @@ namespace hoa_map {
 	class MapMode;
 
 	namespace private_map {
-		class MapFrame;
 		class MapTile;
+		class MapFrame;
+		class PathNode;
+
 		class MapObject;
+		class PhysicalObject;
+		class VirtualSprite;
 		class MapSprite;
+
 		class MapDialogue;
-		class TileCheck;
-		class TileNode;
-		class SpriteDialogue;
+
 		class SpriteAction;
 		class ActionPathMove;
-		class ActionFrameDisplay;
-		class ActionRandomMove;
+		class ActionAnimate;
 		class ActionScriptFunction;
 	}
 }
