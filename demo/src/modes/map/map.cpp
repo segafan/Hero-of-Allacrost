@@ -177,10 +177,13 @@ void MapMode::Load() {
 	sp = new MapSprite();
 	sp->name = MakeUnicodeString("Claudius");
 	sp->SetObjectID(555);
+	sp->SetContext(1);
 	sp->SetXPosition(55, 0.5f);
 	sp->SetYPosition(55, 0.5f);
-	sp->half_width = 1.0f;
-	sp->height = 4.0f;
+	sp->SetCollHalfWidth(1.0f);
+	sp->SetCollHeight(2.0f);
+	sp->img_half_width = 1.0f;
+	sp->img_height = 4.0f;
 	sp->movement_speed = NORMAL_SPEED;
 	sp->direction = SOUTH;
 	if (sp->Load() == false)
@@ -484,7 +487,7 @@ void MapMode::_CalculateDrawInfo() {
 	}
 	// Camera exceeds the bottom boundary of the map
 	else if (_draw_info.starting_row + TILE_ROWS >= _num_tile_rows) {
-		_draw_info.starting_row = static_cast<int16>(_num_tile_rows - static_cast<int32>(SCREEN_ROWS));
+		_draw_info.starting_row = static_cast<int16>(_num_tile_rows - TILE_ROWS);
 		_draw_info.tile_y_start = 2.0f;
 		_draw_info.bottom_edge = static_cast<float>(_num_tile_rows * 2);
 		_draw_info.top_edge = _draw_info.bottom_edge - SCREEN_ROWS;

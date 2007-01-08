@@ -22,10 +22,8 @@
 #include "map_actions.h"
 #include "map_dialogue.h"
 
-//! \brief All calls to map mode are wrapped in this namespace.
 namespace hoa_map {
 
-//! \brief An internal namespace to be used only within the boot code. Don't use this namespace anywhere else!
 namespace private_map {
 
 // *********************** SPRITE CONSTANTS **************************
@@ -36,20 +34,23 @@ namespace private_map {
 *** the distance of a single tile (32 pixels).
 **/
 //@{
-const float VERY_SLOW_SPEED = 1000.0f;
-const float SLOW_SPEED      = 800.0f;
-const float NORMAL_SPEED    = 400.0f;
-const float FAST_SPEED      = 300.0f;
+const float VERY_SLOW_SPEED = 500.0f;
+const float SLOW_SPEED      = 400.0f;
+const float NORMAL_SPEED    = 300.0f;
+const float FAST_SPEED      = 200.0f;
 const float VERY_FAST_SPEED = 100.0f;
 //@}
 
-/** \name Sprite Directions
-*** \brief Constants used for sprite directions
+/** \name Sprite Direction Constants
+*** \brief Constants used for setting and determining sprite directions
 *** Sprites are allowed to travel in eight different directions, however the sprite itself
 *** can only be facing one of four ways: north, south, east, or west. Because of this, it
-*** is possible to travel, for instance, northwest facing north or northwest facing west.
+*** is possible to travel, for instance, northwest facing north <i>or</i> northwest facing west.
 *** The "NW_NORTH" constant means that the sprite is traveling to the northwest and is
 *** facing towards the north.
+*** 
+*** \note The set of "FACING_DIRECTION" and "MOVING_DIRECTION" constants are only meant to be 
+*** used as shorthands. You shouldn't assign the MapSprite#direction member to any of these values.
 **/
 //@{
 const uint16 NORTH     = 0x0001;
@@ -64,7 +65,6 @@ const uint16 SW_SOUTH  = 0x0100;
 const uint16 SW_WEST   = 0x0200;
 const uint16 SE_SOUTH  = 0x0400;
 const uint16 SE_EAST   = 0x0800;
-//@}
 
 const uint16 FACING_NORTH = NORTH | NW_NORTH | NE_NORTH;
 const uint16 FACING_SOUTH = SOUTH | SW_SOUTH | SE_SOUTH;
@@ -79,7 +79,14 @@ const uint16 MOVING_NORTHWEST = NW_NORTH | NW_WEST;
 const uint16 MOVING_NORTHEAST = NE_NORTH | NE_EAST;
 const uint16 MOVING_SOUTHWEST = SW_SOUTH | SW_WEST;
 const uint16 MOVING_SOUTHEAST = SE_SOUTH | SE_EAST;
+//@}
 
+/** \name Map Sprite Animation Constants
+*** These constants are used to index the MapSprite#animations vector to display the correct
+*** animation. The first 8 entries in this vector always represent the same sets of animations
+*** for each map sprite.
+**/
+//@{
 const uint32 ANIM_STANDING_SOUTH = 0;
 const uint32 ANIM_STANDING_NORTH = 1;
 const uint32 ANIM_STANDING_WEST  = 2;
@@ -88,15 +95,22 @@ const uint32 ANIM_WALKING_SOUTH  = 4;
 const uint32 ANIM_WALKING_NORTH  = 5;
 const uint32 ANIM_WALKING_WEST   = 6;
 const uint32 ANIM_WALKING_EAST   = 7;
+//@}
 
 /** ****************************************************************************
 *** \brief Abstract class that represents objects on a map
 ***
-*** A map object can be anything from a sprite to a house. To summarize it simply,
-*** a map object is a map image that is not tiled and not fixed in place. Map
-*** objects are drawn in one of three layers: ground, pass, and sky object layers.
-*** There are many different types of map objects, defined by the Map Object Types
-*** constants above.
+*** A map object can be anything from a sprite to a tree to a house. To state
+*** it simply, a map object is a map image that is not tiled and may not be fixed
+*** in place. Map objects are drawn in one of three layers: ground, pass, and sky
+*** object layers. Every map object has a collision rectangle associated with it.
+*** The collision rectangle indicates what parts of the object may not overlap with
+*** other collision rectangles.
+***
+*** \note It is advised not to attempt to make map objects with dynamic sizes (i.e.
+*** the various image frames that compose the object are all the same size). In
+*** theory, dynamically sized objects are feasible to implement in maps, but they
+*** are much more vulnerable to bugs
 *** ***************************************************************************/
 class MapObject {
 public:
@@ -109,21 +123,30 @@ public:
 	int16 object_id;
 
 	/** \brief The map context that the object currently resides in.
-	*** Context helps to determine where an object is. Objects can only interact with one another
-	*** if they both reside in the same context.
-	***
+	*** Context helps to determine where an object "resides". For example, inside of a house or
+	*** outside of a house. The context member determines if the object should be drawn or not,
+	*** since objects are only drawn if they are in the same context as the map's camera.
+	*** Objects can only interact with one another if they both reside in the same context.
+	*** 
+	*** \note The default value for this member is -1. A negative context indicates that the
+	*** object is invalid and it does not exist anywhere. Objects with a negative context are never
+	*** drawn to the screen. A value equal to zero indicates that the object is "always in
+	*** context", meaning that the object will be drawn regardless of the current context. An
+	*** example of where this is useful is a bridge, which shouldn't simply disappear because the
+	*** player walks inside a nearby home.
 	**/
-	uint8 context;
+	int8 context;
 
 	/** \brief Coordinates for the object's origin/position.
 	*** The origin of every map object is the bottom center point of the object. These
 	*** origin coordinates are used to determine where the object is on the map as well
-	*** as where the objects collision area lies. One map grid tile is equal to 1.0f on this
-	*** coordinate system, with the x, y origin of 0.0f, 0.0f lying in the upper-left
-	*** hand corner of the map.
+	*** as where the objects collision rectangle lies.
 	*** 
-	*** The position coordinates are described by an integer and an offset. The offset will always
-	*** range from 0.0f and 1.0f.
+	*** The position coordinates are described by an integer (position) and a float (offset).
+	*** The position coordinates point to the map grid tile that the object currently occupies
+	*** and may range from 0 to the number of columns or rows of grid tiles on the map. The
+	*** offset member will always range from 0.0f and 1.0f to indicate the exact position of
+	*** the object within that tile.
 	**/
 	//@{
 	uint16 x_position, y_position;
@@ -131,28 +154,15 @@ public:
 	//@}
 
 	/** \brief The half-width and height of the image, in map grid coordinates.
-	*** The half_width member is indeed just that: half the width of the sprite. We keep the half
-	*** width and not the full width because the origin of the sprite is the bottom center, and
-	*** it is more convenient to store only half the sprite's width as a result
+	*** The half_width member is indeed just that: half the width of the object's image. We keep
+	*** the half width rather than the full width because the origin of the object is its bottom
+	*** center, and it is more convenient to store only half the sprite's width as a result.
+	***
+	*** \note These members assume that the object retains the same width and height regardless
+	*** of the current animation or image being drawn. If the object's image changes size, the
+	*** API user must remember to change these values accordingly.
 	**/
-	float half_width, height;
-
-	//! \brief When set to false, the Update() function will do nothing
-	bool updatable;
-
-	//! \brief When set to false, the Draw() function will do nothing
-	bool visible;
-
-	/** \brief When set to true, the object will always be drawn regardless of the map's current context
-	*** \note If visible is set to false however, the object will not be drawn.
-	**/
-	bool always_in_context;
-
-	/** \brief When set to true, objects in the ground object layer will be drawn after the pass objects
-	*** This member is only checked for ground objects. It has no meaning for objects in the pass or 
-	*** sky layers.
-	**/
-	bool draw_on_second_pass;
+	float img_half_width, img_height;
 
 	/** \brief Determines the collision rectangle for the object.
 	*** The collision area determines what portion of the map object may not be overlapped
@@ -162,13 +172,38 @@ public:
 	*** of 1.0f means that the collision area exists from the origin to 1 tile's length
 	*** above.
 	***
-	*** \note If these members are set to zero, then the object will not have a collision
-	*** rectangle. This is useful for immaterial objects such as ghosts, which can pass
-	*** through objects.
+	*** \note These members should always be positive. Setting these members to zero does *not*
+	*** eliminate collision detection for the object, and therefore they should usually never
+	*** be zero.
 	**/
 	float coll_half_width, coll_height;
 
+	//! \brief When set to false, the Update() function will do nothing (default = true).
+	bool updatable;
+
+	//! \brief When set to false, the Draw() function will do nothing (default = true).
+	bool visible;
+
+	/** \brief When set to true, the object will not be examined for collision detection (default = false).
+	*** Setting this member to true really has two effects. First, the object may exist anywhere on
+	*** the map, including where the collision rectangles of other objects are located. Second, the
+	*** object is ignored when other objects are performing their collision detection. This property
+	*** is useful for virtual objects or objects with an image but no "physical form" (i.e. ghosts
+	*** that other sprites may walk through). Note that while this member is set to true, the object's
+	*** collision rectangle members are ignored.
+	**/
+	bool no_collision;
+
+	/** \brief When set to true, objects in the ground object layer will be drawn after the pass objects
+	*** \note This member is only checked for objects that exist in the ground layer. It has no meaning
+	*** for objects in the pass or sky layers.
+	**/
+	bool draw_on_second_pass;
+
+	// ---------- Methods
+
 	MapObject();
+
 	virtual ~MapObject()
 		{}
 
@@ -187,10 +222,11 @@ public:
 	**/
 	virtual void Draw() = 0;
 
+	//! \name Class Member Access Functions
 	void SetObjectID(int16 id)
 		{ object_id = id; }
 
-	void SetContext(uint8 ctxt)
+	void SetContext(int8 ctxt)
 		{ context = ctxt; }
 
 	void SetXPosition(uint16 x, float offset)
@@ -199,10 +235,10 @@ public:
 	void SetYPosition(uint16 y, float offset)
 		{ y_position = y; y_offset = offset; }
 
-	void SetXCollision(float collision)
+	void SetCollHalfWidth(float collision)
 		{ coll_half_width = collision; }
 
-	void SetYCollision(float collision)
+	void SetCollHeight(float collision)
 		{ coll_height = collision; }
 
 	void SetUpdatable(bool update)
@@ -211,11 +247,12 @@ public:
 	void SetVisible(bool vis)
 		{ visible = vis; }
 
-	void SetAlwaysInContext(bool in_context)
-		{ always_in_context = in_context; }
+	void SetNoCollision(bool coll)
+		{ no_collision = coll; }
 
 	void SetDrawOnSecondPass(bool pass)
 		{ draw_on_second_pass = pass; }
+	//@}
 }; // class MapObject
 
 
@@ -254,21 +291,20 @@ public:
 	bool was_moving;
 
 	/** \brief The sound that will play when the sprite walks.
-	*** This member references the MapMode#_map_sounds vector as the sound to play. If
-	*** this member is less than zero, no sound is played when objects walk upon this
-	*** tile.
+	*** This member references the MapMode#_map_sounds vector as the sound to play. If this member
+	*** is less than zero, no sound is played when the object is walking.
 	**/
 	int8 walk_sound;
 
-	/** \brief A pointer to a vector containing all the sprite's animation frames.
+	//! \brief The index to the animations vector containing the current sprite image to display
+	uint8 current_animation;
+
+	/** \brief A vector containing all the sprite's various animations.
 	*** The first four entries in this vector are the walking animation frames.
 	*** They are ordered from index 0 to 3 as: down, up, left, right. Additional
 	*** animations may follow.
 	**/
 	std::vector<hoa_video::AnimatedImage> animations;
-
-	//! \brief The index to the animations vector containing the current sprite image to display
-	uint8 current_animation;
 
 	//! \brief A pointer to the face portrait of the sprite, as seen in dialogues and menus.
 	hoa_video::StillImage* face_portrait;
@@ -276,9 +312,10 @@ public:
 	// -------------------------------- Methods --------------------------------
 
 	MapSprite();
+
 	~MapSprite();
 
-	/** \brief Fills up the frames vector and loads the sprite image frames.
+	/** \brief Fills up the animations vector and loads the sprite image frames.
 	*** \return False if there was a problem loading the sprite.
 	**/
 	bool Load();
@@ -288,15 +325,6 @@ public:
 
 	//! \brief Draws the sprite frame in the appropriate position on the screen, if it is visible.
 	void Draw();
-
-	/** \brief Attempts to move a sprite in an indicated direction.
-	*** \param direction The direction in which the sprite wishes to move.
-	***
-	*** This function is only called for sprites that are located in the
-	*** ground object layer. It finds the tile to move to based on the direction that
-	*** the sprite is currently facing, and won't move the sprite if the tile is occupied.
-	**/
-	// void Move(uint16 direction);
 }; // class MapSprite : public MapObject
 
 } // namespace private_map
