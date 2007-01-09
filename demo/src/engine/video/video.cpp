@@ -50,7 +50,7 @@ Color Color::yellow(1.0f, 1.0f, 0.0f, 1.0f);
 Color Color::green (0.0f, 1.0f, 0.0f, 1.0f);
 Color Color::aqua  (0.0f, 1.0f, 1.0f, 1.0f);
 Color Color::blue  (1.0f, 0.0f, 1.0f, 1.0f);
-Color Color::violet(1.0f, 0.0f, 1.0f, 1.0f);
+Color Color::violet(0.0f, 0.0f, 1.0f, 1.0f);
 Color Color::brown (0.6f, 0.3f, 0.1f, 1.0f);
 
 
@@ -321,6 +321,13 @@ bool GameVideo::SingletonInitialize()
 	if(VIDEO_DEBUG)
 		cout << "VIDEO: GameVideo::SingletonInitialize() returned successfully" << endl;
 	
+	_rectangle_image.SetFilename("img/misc/rectangle_primitive.png");
+	if (!_rectangle_image.Load())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: image for rendering rectangles could not be opened" << endl;
+		return false;
+	}
 	
 	return true;
 }
@@ -1900,6 +1907,13 @@ void GameVideo::DrawGrid(float x, float y, float xstep, float ystep, const Color
 	PopState();
 }
 
-
+//-----------------------------------------------------------------------------
+// Draws a solid rectangle of a given color.
+//-----------------------------------------------------------------------------
+void GameVideo::DrawRectangle(const float width, const float height, const Color &color) const
+{
+	VideoManager->Scale(width, height);
+	VideoManager->DrawImage(_rectangle_image, color);
+}
 
 }  // namespace hoa_video

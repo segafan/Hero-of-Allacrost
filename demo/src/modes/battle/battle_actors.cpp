@@ -165,7 +165,39 @@ void BattleCharacterActor::DrawStatus() {
 	VideoManager->Move(225.0f, 90.0f + y_offset);
  	VideoManager->DrawText(GetActor()->GetName());
 
-	// TODO: HP, SP, and ST stamina bars
+	// Shrinking bars (HP, SP) TODO: STAMINA
+	float bar_size;
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_NO_BLEND, 0);
+	bar_size = 83*GetActor()->GetHitPoints()/GetActor()->GetMaxHitPoints();
+
+	// HP, green bar
+	VideoManager->PushMatrix();
+	VideoManager->Move(312, 90 + y_offset);
+	VideoManager->Scale(bar_size,6);
+	VideoManager->DrawRectangle(1,1,Color::green);
+	VideoManager->PopMatrix();
+	// HP, black bar
+	VideoManager->PushMatrix();
+	VideoManager->Move(312+bar_size, 90 + y_offset);
+	VideoManager->Scale(83-bar_size,6);
+	VideoManager->DrawRectangle(1,1,Color::black);
+	VideoManager->PopMatrix();
+
+	// SP, blue bar
+	bar_size = 84*GetActor()->GetSkillPoints()/GetActor()->GetMaxSkillPoints();
+	VideoManager->PushMatrix();
+	VideoManager->Move(413, 90 + y_offset);
+	VideoManager->Scale(bar_size,6);
+	VideoManager->DrawRectangle(1,1,Color::blue);
+	VideoManager->PopMatrix();
+	// SP, black bar
+	VideoManager->PushMatrix();
+	VideoManager->Move(413, 90 + y_offset);
+	VideoManager->Scale(84-bar_size,6);
+	VideoManager->DrawRectangle(1,1,Color::blue);
+	VideoManager->PopMatrix();
+
+
 
 	// Draw the character's current health on top of the middle of the HP bar
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);

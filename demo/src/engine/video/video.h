@@ -1152,6 +1152,16 @@ public:
 	 */
 	void DrawGrid(float x, float y, float xstep, float ystep, const Color &c);
 	
+	//! \brief Draws a solid rectangle of a given color.
+	/*!
+	 * Draws a solid rectangle of a given color. For that, the lower-left corner 
+	 * of the rectangle has to be specified, and also its size. The parameters depends
+	 * on the current Coordinate System.
+	 * \param width Width of the rectangle.
+	 * \param height Height of the rectangle.
+	 * \param color Color to paint the rectangle.
+	 */
+	void DrawRectangle(const float width, const float height, const Color &color) const;
 
 	/*!
 	 *  \brief makes a screenshot, saves it as screenshot.jpg in the directory
@@ -1303,6 +1313,9 @@ private:
 
 	//! image which is to be used as the cursor
 	StillImage _defaultMenuCursor;
+
+	//! Image used for rendering rectangles
+	StillImage _rectangle_image;
 	
 	//! if true, text shadow effect is enabled
 	bool _textShadow;
