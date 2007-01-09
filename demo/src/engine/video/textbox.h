@@ -60,7 +60,7 @@ enum TEXT_DISPLAY_MODE {
 *** \note This class is based on UNICODE text. If you try to use it for regular
 *** strings, it will automatically convert it and store it internally as wide strings.
 *** ***************************************************************************/
-class TextBox : public GUIControl {
+class TextBox : public private_video::GUIControl {
 public:
 	TextBox();
 	~TextBox();

@@ -49,7 +49,7 @@
 // Image loader includes
 #include <png.h>
 extern "C" {
-#include <jpeglib.h>
+	#include <jpeglib.h>
 }
 
 #include "context.h"
@@ -69,7 +69,7 @@ extern "C" {
 #include "option.h"
 #include "textbox.h"
 
- 
+
 //! All calls to the video engine are wrapped in this namespace.
 namespace hoa_video 
 {
@@ -1695,8 +1695,8 @@ private:
 	
 	friend class TextBox;
 	friend class OptionBox;
-	friend class GUIElement;
 	friend class MenuWindow;
+	friend class private_video::GUIElement;
 	friend class private_video::GUI;	
 	friend class private_video::FixedTexMemMgr;
 	friend class private_video::VariableTexMemMgr;
