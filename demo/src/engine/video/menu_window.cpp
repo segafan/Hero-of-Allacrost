@@ -96,7 +96,7 @@ void MenuWindow::Draw()
 		video->SetScissorRect(rect);
 	}
 
-	video->Move(_x, _y);
+	video->Move(_x_position, _y_position);
 	if(!video->DrawImage(_menu_image, Color::white))
 	{
 		if(VIDEO_DEBUG)

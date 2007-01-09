@@ -99,7 +99,7 @@ enum MenuState
  *         in Final Fantasy games
  *****************************************************************************/
 
-class MenuWindow : public GUIElement
+class MenuWindow : public private_video::GUIElement
 {
 public:
 

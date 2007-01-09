@@ -473,10 +473,10 @@ bool GameVideo::DrawLight(const StillImage &id, float x, float y, const Color &c
 bool GameVideo::DrawFPS(int32 frameTime)
 {
 	_PushContext();
-	bool success = _gui->DrawFPS(frameTime);
+	_gui->DrawFPS(frameTime);
 	_PopContext();
 	
-	return success;
+	return true;
 }
 
 

@@ -68,8 +68,6 @@ namespace hoa_video {
 	class FontGlyph;
 	class FontProperties;
 
-	class GUIElement;
-	class GUIControl;
 	class Option;
 	class OptionElement;
 	class OptionCellBounds;
@@ -98,8 +96,10 @@ namespace hoa_video {
 		class MultiImage;
 		class AnimationFrame;
 
-		class GUI;
+		class GUIElement;
+		class GUIControl;
 		class MenuSkin;
+		class GUI;
 
 		class ParticleManager;
 		class ParticleSystem;

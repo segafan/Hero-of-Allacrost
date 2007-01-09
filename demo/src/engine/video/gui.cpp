@@ -13,47 +13,142 @@
 
 using namespace std;
 
-namespace hoa_video
-{
+namespace hoa_video {
 
-namespace private_video
-{
+namespace private_video {
 
-//-----------------------------------------------------------------------------
-// Constructor
-//-----------------------------------------------------------------------------
-GUI::GUI()
-{
-	for (int32 sample = 0; sample < VIDEO_FPS_SAMPLES; ++sample)
-		 fps_samples[sample] = 0;
-		
-	total_FPS = 0;
-	
-	cur_sample = num_samples = 0;
-	video_manager = GameVideo::SingletonGetReference();
-	
-	if (!video_manager)
-	{
+// *****************************************************************************
+// ******************************* GUIElement **********************************
+// *****************************************************************************
+
+GUIElement::GUIElement() :
+	_xalign(VIDEO_X_LEFT),
+	_yalign(VIDEO_Y_TOP),
+	_x_position(0.0f),
+	_y_position(0.0f),
+	_initialized(false)
+{}
+
+
+
+void GUIElement::SetAlignment(int32 xalign, int32 yalign) {
+	if (_xalign != VIDEO_X_LEFT && _xalign != VIDEO_X_CENTER && _xalign != VIDEO_X_RIGHT) {
 		if (VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: in GUI constructor, got NULL for GameVideo reference!" << endl;
+			cerr << "VIDEO ERROR: Invalid xalign value (" << xalign << ") passed to GUIElement::SetAlignment()" << endl;
+		return;
 	}
+	
+	if (_yalign != VIDEO_Y_TOP && _yalign != VIDEO_Y_CENTER && _yalign != VIDEO_Y_BOTTOM) {
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: Invalid yalign value (" << yalign << ") passed to GUIElement::SetAlignment()" << endl;
+		return;
+	}
+	
+	_xalign = xalign;
+	_yalign = yalign;
 }
 
 
-//-----------------------------------------------------------------------------
-// Destructor
-//-----------------------------------------------------------------------------
-GUI::~GUI()
-{
-	for (int32 y = 0; y < 3; ++y)
-	{
-		for (int32 x = 0; x < 3; ++x)
-		{
-			video_manager->DeleteImage(current_skin.skin[y][x]);
+
+void GUIElement::CalculateAlignedRect(float &left, float &right, float &bottom, float &top) {
+	float width  = right - left;
+	float height = top - bottom;
+
+	if (width < 0.0f)
+		width = -width;
+	
+	if (height < 0.0f)
+		height = -height;
+
+	if (VideoManager->_coord_sys.GetVerticalDirection() < 0.0f)
+		top = -top;
+		
+	if (VideoManager->_coord_sys.GetHorizontalDirection() < 0.0f)
+		right = -right;
+	
+	float xoff, yoff;
+	
+	xoff = _x_position + ((VideoManager->_xalign + 1) * width)  * 0.5f * -VideoManager->_coord_sys.GetHorizontalDirection();
+	yoff = _y_position + ((VideoManager->_yalign + 1) * height) * 0.5f * -VideoManager->_coord_sys.GetVerticalDirection();
+	
+	left   += xoff;
+	right  += xoff;
+	
+	top    += yoff;
+	bottom += yoff;		
+} // void GUIElement::CalculateAlignedRect(float &left, float &right, float &bottom, float &top)
+
+// *****************************************************************************
+// ******************************* GUIControl **********************************
+// *****************************************************************************
+
+void GUIControl::CalculateAlignedRect(float &left, float &right, float &bottom, float &top) {
+	GUIElement::CalculateAlignedRect(left, right, bottom, top);
+
+	// calculate the position offsets due to the owner window
+	if (_owner) {
+		// first, calculate the owner menu's rectangle
+		float menu_left, menu_right, menu_bottom, menu_top;
+		float menu_height, menu_width;
+		
+		_owner->GetDimensions(menu_width, menu_height);
+		menu_left = 0.0f;
+		menu_right = menu_width;
+		menu_bottom = 0.0f;
+		menu_top = menu_height;
+		VideoManager->PushState();
+		
+		int32 xalign, yalign;
+		_owner->GetAlignment(xalign, yalign);
+		
+		VideoManager->SetDrawFlags(xalign, yalign, 0);
+		_owner->CalculateAlignedRect(menu_left, menu_right, menu_bottom, menu_top);
+		VideoManager->PopState();
+		
+		// now, depending on the alignment of the control, add an offset
+		if (menu_left < menu_right) {
+			left += menu_left;
+			right += menu_left;
+		}
+		else {
+			left += menu_right;
+			right += menu_right;
+		}
+		
+		if (menu_top < menu_bottom) {
+			top += menu_top;
+			bottom += menu_top;
+		}
+		else {
+			top += menu_bottom;
+			bottom += menu_bottom;
+		}
+	} // if (_owner)
+}
+
+// *****************************************************************************
+// *********************************** GUI *************************************
+// *****************************************************************************
+
+GUI::GUI() {
+	for (int32 sample = 0; sample < VIDEO_FPS_SAMPLES; ++sample)
+		 fps_samples[sample] = 0;
+		
+	total_fps = 0;
+	
+	cur_sample = num_samples = 0;
+}
+
+
+
+GUI::~GUI() {
+	for (uint32 y = 0; y < 3; ++y) {
+		for (uint32 x = 0; x < 3; ++x) {
+			VideoManager->DeleteImage(current_skin.skin[y][x]);
 		}
 	}
 	
-	video_manager->DeleteImage(current_skin.background);
+	VideoManager->DeleteImage(current_skin.background);
 }
 
 
@@ -62,15 +157,14 @@ GUI::~GUI()
 //          To make the FPS more "steady", the FPS that's displayed on the
 //          screen is actually the average over the last VIDEO_FPS_SAMPLES frames.
 //-----------------------------------------------------------------------------
-bool GUI::DrawFPS(int32 frame_time)
+void GUI::DrawFPS(int32 frame_time)
 {
-	video_manager->SetTextColor(Color::white);
-	video_manager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_X_NOFLIP, VIDEO_Y_NOFLIP, VIDEO_BLEND, 0);
+	VideoManager->SetTextColor(Color::white);
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_X_NOFLIP, VIDEO_Y_NOFLIP, VIDEO_BLEND, 0);
 	
 	// calculate the FPS for current frame	
-	int32 fps = 1000;		
-	if (frame_time)   
-	{
+	int32 fps = 1000;
+	if (frame_time) {
 		fps /= frame_time;
 	}	
 	
@@ -93,7 +187,7 @@ bool GUI::DrawFPS(int32 frame_time)
 		// modes (e.g. going from boot screen to map), so add extra samples so the
 		// FPS display "catches up" more quickly
 		
-		float avg_frame_time = 1000.0f * VIDEO_FPS_SAMPLES / total_FPS;
+		float avg_frame_time = 1000.0f * VIDEO_FPS_SAMPLES / total_fps;
 		int32 diff_time = ((int32)avg_frame_time - frame_time);
 		
 		if (diff_time < 0)
@@ -114,35 +208,30 @@ bool GUI::DrawFPS(int32 frame_time)
 		{
 			if (VIDEO_DEBUG)
 				cerr << "VIDEO ERROR: out of bounds _curSample in DrawFPS()!" << endl;
-			return false;
+			return;
 		}		
 		
-		total_FPS -= fps_samples[cur_sample];
-		total_FPS += fps;		
+		total_fps -= fps_samples[cur_sample];
+		total_fps += fps;
 		fps_samples[cur_sample] = fps;
 		cur_sample = (cur_sample+1) % VIDEO_FPS_SAMPLES;
 	}		
 		
 	// find the average FPS
-	int32 avg_FPS = total_FPS / VIDEO_FPS_SAMPLES;
+	int32 avg_FPS = total_fps / VIDEO_FPS_SAMPLES;
 
 	// display to screen	 
 	char fps_text[16];
 	sprintf(fps_text, "fps: %d", avg_FPS);
 	
-	if (!video_manager->SetFont("debug_font"))
+	if (!VideoManager->SetFont("debug_font"))
 	{
-		return false;
+		return;
 	}
 	
-	video_manager->Move(930.0f, 720.0f);
-	if (!video_manager->DrawText(fps_text))
-	{
-		return false;
-	}		
-
-	return true; 
-} // DrawFPS(...)
+	VideoManager->Move(930.0f, 720.0f);
+	VideoManager->DrawText(fps_text);
+} // void GUI::DrawFPS(int32 frame_time)
 
 
 //-----------------------------------------------------------------------------
@@ -178,7 +267,7 @@ bool GUI::SetMenuSkin
 	{
 		for (x = 0; x < 3; ++x)
 		{
-			video_manager->DeleteImage(current_skin.skin[y][x]);
+			VideoManager->DeleteImage(current_skin.skin[y][x]);
 			
 			// setting width/height to zero means to fall back to the
 			// width and height of the images in pixels			
@@ -186,12 +275,12 @@ bool GUI::SetMenuSkin
 		}
 	}
 		
-	video_manager->DeleteImage(current_skin.tri_t);
-	video_manager->DeleteImage(current_skin.tri_l);
-	video_manager->DeleteImage(current_skin.tri_r);
-	video_manager->DeleteImage(current_skin.tri_b);
-	video_manager->DeleteImage(current_skin.quad);
-	video_manager->DeleteImage(current_skin.background);
+	VideoManager->DeleteImage(current_skin.tri_t);
+	VideoManager->DeleteImage(current_skin.tri_l);
+	VideoManager->DeleteImage(current_skin.tri_r);
+	VideoManager->DeleteImage(current_skin.tri_b);
+	VideoManager->DeleteImage(current_skin.quad);
+	VideoManager->DeleteImage(current_skin.background);
 	
 	current_skin.tri_t.SetDimensions(0.0f, 0.0f);
 	current_skin.tri_l.SetDimensions(0.0f, 0.0f);
@@ -204,7 +293,7 @@ bool GUI::SetMenuSkin
 	while (i_menu != MenuWindow::_menu_map.end())
 	{
 		MenuWindow *menu = i_menu->second;
-		video_manager->DeleteImage(menu->_menu_image);
+		VideoManager->DeleteImage(menu->_menu_image);
 		++i_menu;
 	}
 	
@@ -236,28 +325,28 @@ bool GUI::SetMenuSkin
 		fill_color_BR
 	);
 		
-	video_manager->BeginImageLoadBatch();
+	VideoManager->BeginImageLoadBatch();
 	for (y = 0; y < 3; ++y)
 	{
 		for (x = 0; x < 3; ++x)
 		{
-			video_manager->LoadImage(current_skin.skin[y][x]);
+			VideoManager->LoadImage(current_skin.skin[y][x]);
 		}
 	}
 
-	video_manager->LoadImage(current_skin.tri_t);
-	video_manager->LoadImage(current_skin.tri_l);
-	video_manager->LoadImage(current_skin.tri_r);
-	video_manager->LoadImage(current_skin.tri_b);
-	video_manager->LoadImage(current_skin.quad);
+	VideoManager->LoadImage(current_skin.tri_t);
+	VideoManager->LoadImage(current_skin.tri_l);
+	VideoManager->LoadImage(current_skin.tri_r);
+	VideoManager->LoadImage(current_skin.tri_b);
+	VideoManager->LoadImage(current_skin.quad);
 
-	video_manager->EndImageLoadBatch();
+	VideoManager->EndImageLoadBatch();
 	
-	video_manager->LoadImage(current_skin.background);
+	VideoManager->LoadImage(current_skin.background);
 	
-	if (!CheckSkinConsistency(current_skin))
+	if (!_CheckSkinConsistency(current_skin))
 	{
-		return false;			
+		return false;
 	}
 
 	i_menu = MenuWindow::_menu_map.begin();
@@ -273,68 +362,7 @@ bool GUI::SetMenuSkin
 } // SetMenuSkin(...)
 
 
-//-----------------------------------------------------------------------------
-// CheckSkinConsistency: runs some simple checks on a skin to make sure its
-//                       images are properly sized. If it finds any errors
-//                       it'll return false and output an error message
-//-----------------------------------------------------------------------------
-bool GUI::CheckSkinConsistency(const MenuSkin &s)
-{
-	// check #1: widths of top and bottom borders are equal
-	if (s.skin[2][1].GetWidth() != s.skin[0][1].GetWidth())
-	{
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: widths of top and bottom border of skin are mismatched!" << endl;
-		return false;
-	}
-	
-	// check #2: heights of left and right borders are equal
-	if (s.skin[1][0].GetHeight() != s.skin[1][2].GetHeight())
-	{
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: heights of left and right border of skin are mismatched!" << endl;
-		return false;
-	}
 
-	// check #3: widths of upper-left, left, and bottom-left border are equal
-	if ( (s.skin[2][0].GetWidth() != s.skin[1][0].GetWidth()) ||  // UL, L
-	     (s.skin[2][0].GetWidth() != s.skin[0][0].GetWidth()))    // UL, BL
-	{
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: upper-left, left, and lower-left of menu skin must have equal width!" << endl;
-		return false;
-	}
-	                                           
-	// check #4: widths of upper-right, right, and bottom-right border are equal
-	if ( (s.skin[2][2].GetWidth() != s.skin[1][2].GetWidth()) ||  // UR, R
-	     (s.skin[2][2].GetWidth() != s.skin[0][2].GetWidth()))    // UR, BR
-	{
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: upper-right, right, and lower-right of menu skin must have equal width!" << endl;
-		return false;
-	}
-	
-	// check #5: heights of upper-left, top, and upper-right are equal
-	if ( (s.skin[2][0].GetHeight() != s.skin[2][1].GetHeight()) || // UL, U
-	     (s.skin[2][0].GetHeight() != s.skin[2][2].GetHeight()))   // UL, UR
-	{
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: upper-left, top, and upper-right of menu skin must have equal height!" << endl;
-		return false;
-	}
-
-	// check #6: heights of lower-left, bottom, and lower-right are equal
-	if ( (s.skin[0][0].GetHeight() != s.skin[0][1].GetHeight()) || // LL, L
-	     (s.skin[0][0].GetHeight() != s.skin[0][2].GetHeight()))   // LL, LR
-	{
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: lower-left, bottom, and lower-right of menu skin must have equal height!" << endl;
-		return false;
-	}
-
-	// phew!
-	return true;
-} // CheckSkinConsistency(...)
 
 
 //-----------------------------------------------------------------------------
@@ -349,8 +377,8 @@ bool GUI::CheckSkinConsistency(const MenuSkin &s)
 //       if you put them next to each other. This should be an OK assumption
 //       since we call CheckSkinConsistency() when we set a new skin
 //-----------------------------------------------------------------------------
-bool GUI::CreateMenu(StillImage &id, float width, float height, float & inner_width, float & inner_height, int32 edge_visible_flags, int32 edge_shared_flags)
-{
+bool GUI::CreateMenu(StillImage &id, float width, float height, float& inner_width, float& inner_height,
+	int32 edge_visible_flags, int32 edge_shared_flags) {
 	id.Clear();
 	
 	// get all the border size information
@@ -431,10 +459,10 @@ bool GUI::CreateMenu(StillImage &id, float width, float height, float & inner_wi
 	current_skin.skin[1][1].GetVertexColor(c[2], 2);
 	current_skin.skin[1][1].GetVertexColor(c[3], 3);
 	
-	video_manager->DeleteImage(current_skin.skin[1][1]);	
+	VideoManager->DeleteImage(current_skin.skin[1][1]);
 	current_skin.skin[1][1].SetDimensions(left_border_size, top_border_size);
 	current_skin.skin[1][1].SetVertexColors(c[0], c[1], c[2], c[3]);
-	video_manager->LoadImage(current_skin.skin[1][1]);
+	VideoManager->LoadImage(current_skin.skin[1][1]);
 	
 
 	// if a valid background image is loaded (nonzero width), then tile the interior 
@@ -479,10 +507,10 @@ bool GUI::CreateMenu(StillImage &id, float width, float height, float & inner_wi
 	else
 	{
 		// re-create the overlay at the correct width and height
-		video_manager->DeleteImage(current_skin.skin[1][1]);
+		VideoManager->DeleteImage(current_skin.skin[1][1]);
 		current_skin.skin[1][1].SetDimensions(inner_width, inner_height);
 		current_skin.skin[1][1].SetVertexColors(c[0], c[1], c[2], c[3]);
-		video_manager->LoadImage(current_skin.skin[1][1]);
+		VideoManager->LoadImage(current_skin.skin[1][1]);
 		
 		id.AddImage(current_skin.skin[1][1], left_border_size, bottom_border_size);
 	}
@@ -600,150 +628,64 @@ bool GUI::CreateMenu(StillImage &id, float width, float height, float & inner_wi
 	return true;
 } // CreateMenu(...)
 
-}  // namespace private_video
 
-
-//-----------------------------------------------------------------------------
-// CalculateAlignedRect: transforms a rectangle based on the coordinate system
-//                       and alignment flags
-//-----------------------------------------------------------------------------
-void GUIElement::CalculateAlignedRect(float &left, float &right, float &bottom, float &top)
-{
-	float width  = right - left;
-	float height = top - bottom;
-
-	if (width < 0.0f)
-		width = -width;
-	
-	if (height < 0.0f)
-		height = -height;
-	
-	GameVideo *video = GameVideo::SingletonGetReference();
-	CoordSys &cs = video->_coord_sys;
-	
-	if (cs.GetVerticalDirection() < 0.0f)
-		top = -top;
-		
-	if (cs.GetHorizontalDirection() < 0.0f)
-		right = -right;
-	
-	float xoff, yoff;
-	
-	xoff = _x + ((video->_xalign + 1) * width)  * 0.5f * -cs.GetHorizontalDirection();
-	yoff = _y + ((video->_yalign + 1) * height) * 0.5f * -cs.GetVerticalDirection();
-	
-	left   += xoff;
-	right  += xoff;
-	
-	top    += yoff;
-	bottom += yoff;		
-} // CalculateAlignedRect(...)
-
-
-//-----------------------------------------------------------------------------
-// CalculateAlignedRect: calculates the rectangle for a GUI control. The difference
-//                        between this function and the one for GUI elements is that
-//                        controls must take their owner window into account
-//-----------------------------------------------------------------------------
-void GUIControl::CalculateAlignedRect(float &left, float &right, float &bottom, float &top)
-{
-	GUIElement::CalculateAlignedRect(left, right, bottom, top);
-
-	// calculate the position offsets due to the owner window
-	if (_owner)
-	{
-		// first, calculate the owner menu's rectangle
-		float menu_left, menu_right, menu_bottom, menu_top;
-		float menu_height, menu_width;
-		
-		GameVideo *video = GameVideo::SingletonGetReference();
-		_owner->GetDimensions(menu_width, menu_height);
-		menu_left = 0.0f;
-		menu_right = menu_width;
-		menu_bottom = 0.0f;
-		menu_top = menu_height;
-		video->PushState();
-		
-		int32 xalign, yalign;
-		_owner->GetAlignment(xalign, yalign);
-		
-		video->SetDrawFlags(xalign, yalign, 0);
-		_owner->CalculateAlignedRect(menu_left, menu_right, menu_bottom, menu_top);
-		video->PopState();
-		
-		// now, depending on the alignment of the control, add an offset
-		if (menu_left < menu_right)
-		{
-			left += menu_left;
-			right += menu_left;
-		}
-		else
-		{
-			left += menu_right;
-			right += menu_right;
-		}
-		
-		if (menu_top < menu_bottom)
-		{
-			top += menu_top;
-			bottom += menu_top;
-		}
-		else
-		{
-			top += menu_bottom;
-			bottom += menu_bottom;
-		}		
-
-	}
-}
-
-
-//-----------------------------------------------------------------------------
-// SetAlignment: sets the x, y alignment. Returns false if invalid value is passed
-//-----------------------------------------------------------------------------
-void GUIElement::SetAlignment(int32 xalign, int32 yalign)
-{
-	if (_xalign != VIDEO_X_LEFT && _xalign != VIDEO_X_CENTER && _xalign != VIDEO_X_RIGHT)
+bool GUI::_CheckSkinConsistency(const MenuSkin &s) {
+	// check #1: widths of top and bottom borders are equal
+	if (s.skin[2][1].GetWidth() != s.skin[0][1].GetWidth())
 	{
 		if (VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: Invalid xalign value (" << xalign << ") passed to GUIElement::SetAlignment()" << endl;
-		return;
+			cerr << "VIDEO ERROR: widths of top and bottom border of skin are mismatched!" << endl;
+		return false;
 	}
 	
-	if (_yalign != VIDEO_Y_TOP && _yalign != VIDEO_Y_CENTER && _yalign != VIDEO_Y_BOTTOM)
+	// check #2: heights of left and right borders are equal
+	if (s.skin[1][0].GetHeight() != s.skin[1][2].GetHeight())
 	{
 		if (VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: Invalid yalign value (" << yalign << ") passed to GUIElement::SetAlignment()" << endl;
-		return;
+			cerr << "VIDEO ERROR: heights of left and right border of skin are mismatched!" << endl;
+		return false;
+	}
+
+	// check #3: widths of upper-left, left, and bottom-left border are equal
+	if ( (s.skin[2][0].GetWidth() != s.skin[1][0].GetWidth()) ||  // UL, L
+	     (s.skin[2][0].GetWidth() != s.skin[0][0].GetWidth()))    // UL, BL
+	{
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: upper-left, left, and lower-left of menu skin must have equal width!" << endl;
+		return false;
 	}
 	
-	_xalign = xalign;
-	_yalign = yalign;
+	// check #4: widths of upper-right, right, and bottom-right border are equal
+	if ( (s.skin[2][2].GetWidth() != s.skin[1][2].GetWidth()) ||  // UR, R
+	     (s.skin[2][2].GetWidth() != s.skin[0][2].GetWidth()))    // UR, BR
+	{
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: upper-right, right, and lower-right of menu skin must have equal width!" << endl;
+		return false;
+	}
 	
-	return;
-}
+	// check #5: heights of upper-left, top, and upper-right are equal
+	if ( (s.skin[2][0].GetHeight() != s.skin[2][1].GetHeight()) || // UL, U
+	     (s.skin[2][0].GetHeight() != s.skin[2][2].GetHeight()))   // UL, UR
+	{
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: upper-left, top, and upper-right of menu skin must have equal height!" << endl;
+		return false;
+	}
 
+	// check #6: heights of lower-left, bottom, and lower-right are equal
+	if ( (s.skin[0][0].GetHeight() != s.skin[0][1].GetHeight()) || // LL, L
+	     (s.skin[0][0].GetHeight() != s.skin[0][2].GetHeight()))   // LL, LR
+	{
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: lower-left, bottom, and lower-right of menu skin must have equal height!" << endl;
+		return false;
+	}
 
-//-----------------------------------------------------------------------------
-// GetAlignment: returns the x, y alignment
-//-----------------------------------------------------------------------------
-void GUIElement::GetAlignment(int32 &xalign, int32 &yalign)
-{
-	xalign = _xalign;
-	yalign = _yalign;
-}
+	// phew!
+	return true;
+} // bool GUI::_CheckSkinConsistency(const MenuSkin &s)
 
+} // namespace private_video
 
-//-----------------------------------------------------------------------------
-// GUIElement constructor
-//-----------------------------------------------------------------------------
-GUIElement::GUIElement()
-: _xalign(VIDEO_X_LEFT),
-  _yalign(VIDEO_Y_TOP),
-  _x(0.0f),
-  _y(0.0f),
-  _initialized(false)
-{
-}
-
-}  // namespace hoa_video
+} // namespace hoa_video

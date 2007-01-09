@@ -232,7 +232,7 @@ public:
  *         want and pressing the confirm key.
  *****************************************************************************/
 
-class OptionBox : public GUIControl
+class OptionBox : public private_video::GUIControl
 {
 public:
 	
@@ -707,7 +707,7 @@ private:
 	//! structure containing properties of the current font like height, etc.
 	FontProperties _fontProperties;
 	
-}; // class OptionBox : public GUIControl
+}; // class OptionBox : public private_video::GUIControl
 
 
 } // namespace hoa_video
