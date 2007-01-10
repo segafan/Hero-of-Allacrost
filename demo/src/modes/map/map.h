@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -132,7 +132,7 @@ public:
 	//! \brief The Manhattan distance from this node to the destination.
 	int16 h_score;
 	//@}
-	
+
 	//! \brief The parent node of this node.
 	PathNode *parent;
 
@@ -156,8 +156,8 @@ public:
 *** information about walkability. That information is kept in a seperate vector
 *** in the MapMode class.
 ***
-*** \note The reason that tiles do not contain walkability information is that 
-*** each tile is 32x32 pixels, but walkability is defined on a 16x16 granularity, 
+*** \note The reason that tiles do not contain walkability information is that
+*** each tile is 32x32 pixels, but walkability is defined on a 16x16 granularity,
 *** meaning that there are four "walkable" sections to each tile. Code such as
 *** pathfinding is more simple if all walkability information is kept in a seperate
 *** container.
@@ -182,6 +182,9 @@ public:
 
 	MapTile()
 		{ lower_layer = -1; middle_layer = -1; upper_layer = -1; }
+
+	MapTile(int16 lower, int16 middle, int16 upper)
+		{ lower_layer = lower; middle_layer = middle; upper_layer = upper; }
 }; // class MapTile
 
 /** ****************************************************************************
@@ -217,10 +220,22 @@ class MapMode : public hoa_mode_manager::GameMode {
 	friend class private_map::MapSprite;
 public:
 	MapMode();
+
 	~MapMode();
 
-	//! \brief Loads all map data as specified in the Lua file that defines the map.
-	void Load();
+	/** \brief Makes all relevant map classes and methods available to Lua.
+	*** This function only needs to be called once when the game begins.
+	**/
+	void BindToLua();
+
+	/** \brief Loads all map data as specified in the Lua file that defines the map.
+	*** \param filename The name of the map script file to load.
+	*** \return True if the map loaded successfully, false otherwise.
+	*** \note If no argument is given for the filename, the function will attempt to use the
+	*** MapMode::_map_filename member. If that name is not valid, the function will report an
+	*** error.
+	**/
+	bool Load(std::string filename = "");
 
 	//! \brief Resets appropriate class members. Called whenever the MapMode object is made the active game mode.
 	void Reset();
@@ -282,10 +297,10 @@ private:
 
 	/** \brief A map containing pointers to all of the sprites on a map.
 	*** This map does not include a pointer to the MapMode#_camera nor MapMode#_virtual_focus
-	*** sprites. The map key is used as the sprite's unique identifier for the map. Keys 
+	*** sprites. The map key is used as the sprite's unique identifier for the map. Keys
 	*** 1000 and above are reserved for map sprites that correspond to the character's party.
 	**/
-	std::map<uint16, private_map::MapSprite*> _sprites;
+	std::map<uint16, private_map::MapObject*> _all_objects;
 
 	/** \brief A container for all of the map objects located on the ground layer.
 	*** The ground object layer is where most objects and sprites exist in Allacrost.
@@ -380,10 +395,41 @@ private:
 	**/
 	bool _DetectCollision(private_map::VirtualSprite* sprite);
 
+	// void _FindPath(VirtualSprite* sprite, std::vector<PathNode>& path, PathNode dest);
+
 	// -------------------- Draw Methods
 
 	//! \brief Calculates information about how to draw the next map frame.
 	void _CalculateDrawInfo();
+
+	// -------------------- Lua Binding Functions
+	/** \name Lua Access Functions
+	*** These methods exist not to allow outside C++ classes to access map data, but instead to
+	*** allow Lua to make function calls to examine and modify the map's state. All of these
+	*** methods are bound in the implementation of the MapMode::BindToLua() function.
+	**/
+	//@{
+	void AddGroundObject(private_map::MapObject *obj);
+
+	void AddPassObject(private_map::MapObject *obj);
+
+	void AddSkyObject(private_map::MapObject *obj);
+
+	void _SetMapState(uint8 state)
+		{ _map_state = state; }
+
+	void _SetCameraFocus(private_map::VirtualSprite *sprite)
+		{ _camera = sprite; }
+
+	uint8 _GetMapState() const
+		{ return _map_state; }
+
+	uint32 _GetTimeElapsed() const
+		{ return _time_elapsed; }
+
+	private_map::VirtualSprite* _GetCameraFocus() const
+		{ return _camera; }
+	//@}
 }; // class MapMode
 
 } // namespace hoa_map;

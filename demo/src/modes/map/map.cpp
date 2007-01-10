@@ -86,7 +86,7 @@ MapMode::~MapMode() {
 
 	// Delete all of the tile images
 	for (uint32 i = 0; i < _tile_images.size(); i++) {
-		VideoManager->DeleteImage(*(_tile_images[i]));
+		delete(_tile_images[i]);
 	}
 
 	// Delete all of the map objects
@@ -94,9 +94,11 @@ MapMode::~MapMode() {
 		delete(_ground_objects[i]);
 	}
 	for (uint32 i = 0; i < _pass_objects.size(); i++) {
+		cout << "before delete pass objects" << endl;
 		delete(_pass_objects[i]);
 	}
 	for (uint32 i = 0; i < _sky_objects.size(); i++) {
+		cout << "before delete sky objects" << _sky_objects.size() << endl;
 		delete(_sky_objects[i]);
 	}
 	delete(_virtual_focus);
@@ -126,8 +128,83 @@ void MapMode::Reset() {
 }
 
 
+
+void MapMode::BindToLua() {
+	module(ScriptManager->GetGlobalState(), "hoa_map")
+	[
+		class_<MapMode>("MapMode")
+			.def(constructor<>())
+			.def("Load", &MapMode::Load)
+			.def("AddGroundObject", &MapMode::AddGroundObject)
+			.def("AddPassObject", &MapMode::AddPassObject)
+			.def("AddSkyObject", &MapMode::AddSkyObject)
+	];
+
+	module(ScriptManager->GetGlobalState(), "hoa_map")
+	[
+		class_<MapObject>("MapObject")
+			.def("SetObjectID", &MapObject::SetObjectID)
+			.def("SetContext", &MapObject::SetContext)
+			.def("SetXPosition", &MapObject::SetXPosition)
+			.def("SetYPosition", &MapObject::SetYPosition)
+			.def("SetImgHalfWidth", &MapObject::SetImgHalfWidth)
+			.def("SetImgHeight", &MapObject::SetImgHeight)
+			.def("SetCollHalfWidth", &MapObject::SetCollHalfWidth)
+			.def("SetCollHeight", &MapObject::SetCollHeight)
+			.def("SetUpdatable", &MapObject::SetUpdatable)
+			.def("SetVisible", &MapObject::SetVisible)
+			.def("SetNoCollision", &MapObject::SetNoCollision)
+			.def("SetDrawOnSecondPass", &MapObject::SetDrawOnSecondPass)
+			.def("GetObjectID", &MapObject::GetObjectID)
+			.def("GetContext", &MapObject::GetContext)
+			.def("GetXPosition", &MapObject::GetXPosition)
+			.def("GetYPosition", &MapObject::GetYPosition)
+			.def("GetImgHalfWidth", &MapObject::GetImgHalfWidth)
+			.def("GetImgHeight", &MapObject::GetImgHeight)
+			.def("GetCollHalfWidth", &MapObject::GetCollHalfWidth)
+			.def("GetCollHeight", &MapObject::GetCollHeight)
+			.def("IsUpdatable", &MapObject::IsUpdatable)
+			.def("IsVisible", &MapObject::IsVisible)
+			.def("IsNoCollision", &MapObject::IsNoCollision)
+			.def("IsDrawOnSecondPass", &MapObject::IsDrawOnSecondPass)
+	];
+
+	module(ScriptManager->GetGlobalState(), "hoa_map")
+	[
+		class_<PhysicalObject, MapObject>("PhysicalObject")
+			.def(constructor<>())
+			.def("AddAnimation", &PhysicalObject::AddAnimation)
+			.def("SetCurrentAnimation", &PhysicalObject::SetCurrentAnimation)
+			.def("SetAnimationProgress", &PhysicalObject::SetAnimationProgress)
+			.def("GetCurrentAnimation", &PhysicalObject::GetCurrentAnimation)
+	];
+
+	module(ScriptManager->GetGlobalState(), "hoa_map")
+	[
+		class_<VirtualSprite, MapObject>("VirtualSprite")
+			.def(constructor<>())
+			.def("SetDirection", &VirtualSprite::SetDirection)
+			.def("SetMovementSpeed", &VirtualSprite::SetMovementSpeed)
+			.def("GetDirection", &VirtualSprite::GetDirection)
+			.def("GetMovementSpeed", &VirtualSprite::GetMovementSpeed)
+	];
+
+	module(ScriptManager->GetGlobalState(), "hoa_map")
+	[
+		class_<MapSprite, VirtualSprite>("MapSprite")
+			.def(constructor<>())
+			.def("SetName", &MapSprite::SetName)
+			.def("SetWalkSound", &MapSprite::SetWalkSound)
+			.def("SetCurrentAnimation", &MapSprite::SetCurrentAnimation)
+			.def("SetFacePortrait", &MapSprite::SetFacePortrait)
+			.def("GetWalkSound", &MapSprite::GetWalkSound)
+			.def("GetCurrentAnimation", &MapSprite::GetCurrentAnimation)
+	];
+} // void MapMode::BindToLua()
+
+
 // Loads the map from a Lua file.
-void MapMode::Load() {
+bool MapMode::Load(string filename) {
 	// TEMP: All of this is temporary, and will be replaced later
 	_map_filename = "dat/maps/nofile.lua";
 
@@ -201,7 +278,7 @@ void MapMode::Load() {
 	sp->movement_speed = NORMAL_SPEED;
 	sp->direction = SOUTH;
 	if (sp->Load() == false)
-		return;
+		return false;
 	_ground_objects.push_back(sp);
 	_camera = sp;
 
@@ -217,7 +294,7 @@ void MapMode::Load() {
 		cerr << "MAP ERROR: failed to load image: " << _dialogue_box.GetFilename() << endl;
 
 	_dialogue_nameplate.SetFilename("img/menus/dialogue_nameplate.png");
-	if (_dialogue_nameplate.Load() == false) 
+	if (_dialogue_nameplate.Load() == false)
 		cerr << "MAP ERROR: failed to load image: " << _dialogue_nameplate.GetFilename() << endl;
 
 	_dialogue_textbox.SetDisplaySpeed(30);
@@ -227,7 +304,8 @@ void MapMode::Load() {
 	_dialogue_textbox.SetDisplayMode(VIDEO_TEXT_FADECHAR);
 	_dialogue_textbox.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	VideoManager->PopState();
-} // Load()
+	return true;
+} // bool MapMode::Load(string filename)
 
 // ****************************************************************************
 // **************************** UPDATE FUNCTIONS ******************************
@@ -326,18 +404,18 @@ void MapMode::_UpdateExplore() {
 // 		// Check for a sprite present within the space of one tile
 // 		int16 check_row, check_col;
 // 		if (_camera->direction & FACING_WEST) {
-// 
+//
 // 		}
 // 		else if (_camera->direction & FACING_EAST) {
-// 
+//
 // 		}
 // 		else if (_camera->direction & FACING_NORTH) {
-// 
+//
 // 		}
 // 		else { // then => (_camera->direction & FACING_SOUTH)) == true
-// 
+//
 // 		}
-// 
+//
 // 		return;
 // 	} // if (InputManager->ConfirmPress())
 
@@ -411,14 +489,14 @@ void MapMode::_UpdateExplore() {
 void MapMode::_UpdateDialogue() {
 // 	_dialogue_window.Update(_time_elapsed);
 // 	_dialogue_textbox.Update(_time_elapsed);
-// 
+//
 // 	if (InputManager->ConfirmPress()) {
 // 		if (!_dialogue_textbox.IsFinished()) {
 // 			_dialogue_textbox.ForceFinish();
 // 		}
 // 		else {
 // 			bool not_finished = _current_dialogue->ReadNextLine();
-// 
+//
 // 			if (!not_finished) {
 // 				_dialogue_window.Hide();
 // 				_map_state = EXPLORE;
@@ -458,27 +536,56 @@ bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 		return true;
 	}
 
-	// Do not do tile or object based collision detection if this member is set
+	// Do not do tile or object based collision detection for this sprite if it has this member set
 	if (sprite->no_collision == true) {
 		return false;
 	}
 
-	// ---------- (2): Determine if the sprite's collision rectangle overlaps any unwalkable tiles
+	// A pointer to the layer of objects to do the collision detection with
+	vector<MapObject*>* objects;
 
-	// NOTE: Because the sprite's collision rectangle was determined to be within the map bounds,
-	// the map grid tile indeces referenced in this loop are all valid entries.
+	if (sprite->sky_object == false) { // Do tile collision detection for ground objects only
 
-	for (uint32 r = static_cast<uint32>(cr_top); r <= static_cast<uint32>(y_location); r++) {
-		for (uint32 c = static_cast<uint32>(cr_left); c <= static_cast<uint32>(cr_right); c++) {
-			if (_map_grid[r][c] == true) { // Then this overlapping tile is unwalkable
-				return true;
+		// ---------- (2): Determine if the sprite's collision rectangle overlaps any unwalkable tiles
+
+		// NOTE: Because the sprite's collision rectangle was determined to be within the map bounds,
+		// the map grid tile indeces referenced in this loop are all valid entries.
+
+		for (uint32 r = static_cast<uint32>(cr_top); r <= static_cast<uint32>(y_location); r++) {
+			for (uint32 c = static_cast<uint32>(cr_left); c <= static_cast<uint32>(cr_right); c++) {
+				if (_map_grid[r][c] == true) { // Then this overlapping tile is unwalkable
+					return true;
+				}
 			}
 		}
+
+		objects = &_ground_objects;
+	}
+	else {
+		objects = &_sky_objects;
 	}
 
-	// ---------- (3): Determine if two sprite's collision rectangles overlap
+	// ---------- (3): Determine if two object's collision rectangles overlap
 
-	// TODO
+	for (uint32 i = 0; i < objects->size(); i++) {
+		// Skip over this object if it is the same object as the sprite
+		if ((*objects)[i]->object_id == sprite->object_id)
+			break;
+		// Skip over this object if it has no_collision set to true
+		if ((*objects)[i]->no_collision)
+			break;
+
+		// Compute the full position coordinates of the other object
+		float other_x_location = static_cast<float>((*objects)[i]->x_position) + (*objects)[i]->x_offset;
+		float other_y_location = static_cast<float>((*objects)[i]->y_position) + (*objects)[i]->y_offset;
+
+		if (other_x_location - (*objects)[i]->coll_half_width > cr_right ||
+			other_x_location + (*objects)[i]->coll_half_width < cr_left  ||
+			other_y_location - (*objects)[i]->coll_height > y_location   ||
+			other_y_location < cr_top) {
+			return true;
+		}
+	}
 
 	// No collision was detected
 	return false;
@@ -657,5 +764,28 @@ void MapMode::Draw() {
 	}
 
 } // void MapMode::_Draw()
+
+// ****************************************************************************
+// ************************* LUA BINDING FUNCTIONS ****************************
+// ****************************************************************************
+
+void MapMode::AddGroundObject(private_map::MapObject *obj) {
+	_ground_objects.push_back(obj);
+	_all_objects.insert(make_pair(obj->object_id, obj));
+}
+
+
+
+void MapMode::AddPassObject(private_map::MapObject *obj) {
+	_pass_objects.push_back(obj);
+	_all_objects.insert(make_pair(obj->object_id, obj));
+}
+
+
+
+void MapMode::AddSkyObject(private_map::MapObject *obj) {
+	_sky_objects.push_back(obj);
+	_all_objects.insert(make_pair(obj->object_id, obj));
+}
 
 } // namespace hoa_map
