@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -11,7 +11,7 @@
  * \file    video.cpp
  * \author  Raj Sharma, roos@allacrost.org
  * \brief   Source file for video engine interface.
- *****************************************************************************/ 
+ *****************************************************************************/
 
 
 #include <cassert>
@@ -27,7 +27,7 @@ using namespace std;
 using namespace hoa_video::private_video;
 using namespace hoa_utils;
 
-namespace hoa_video 
+namespace hoa_video
 {
 
 GameVideo *VideoManager = NULL;
@@ -72,16 +72,16 @@ float RandomFloat(float a, float b)
 {
 	if(a == b)
 		return a;
-	
+
 	if(a > b)
 	{
 		float c = a;  // swap
 		a = b;
 		b = c;
 	}
-	
+
 	float r = float(rand()%10001);
-	
+
 	return a + (b - a) * r / 10000.0f;
 }
 
@@ -95,7 +95,7 @@ void RotatePoint(float &x, float &y, float angle)
 	float old_x = x;
 	float cos_angle = cosf(angle);
 	float sin_angle = sinf(angle);
-	
+
 	x = x * cos_angle - y * sin_angle;
 	y = y * cos_angle + old_x * sin_angle;
 }
@@ -106,19 +106,18 @@ void RotatePoint(float &x, float &y, float angle)
 
 GameVideo::GameVideo()
 {
-	_width = 0; 
+	_width = 0;
 	_height = 0;
 	_fullscreen = false;
 	_temp_width = 0;
 	_temp_height = 0;
 	_temp_fullscreen = false;
-	_blend = 0; 
-	_xalign = -1; 
-	_yalign = -1; 
-	_xflip = 0; 
+	_blend = 0;
+	_xalign = -1;
+	_yalign = -1;
+	_xflip = 0;
 	_yflip = 0;
 	_currentDebugTexSheet = -1;
-	_batchLoading = false;
 	_usesLights = false;
 	_lightOverlay = 0xFFFFFFFF;
 	_gui = NULL;
@@ -147,10 +146,10 @@ GameVideo::GameVideo()
 	_x = 0;
 	_y = 0;
 
-	if (VIDEO_DEBUG) 
+	if (VIDEO_DEBUG)
 		cout << "VIDEO: GameVideo constructor invoked\n";
-	
-	strcpy(_nextTempFile, "00000000");	
+
+	strcpy(_nextTempFile, "00000000");
 }
 
 
@@ -162,9 +161,9 @@ bool GameVideo::SingletonInitialize()
 {
 	if(VIDEO_DEBUG)
 		cout << "VIDEO: Initializing SDL subsystem\n";
-		
+
 	// Set the window title and icon name
-	if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) 
+	if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0)
 	{
 		fprintf(stderr, "Barf! SDL Video Initialization failed!\n");
 		exit(1);
@@ -212,7 +211,7 @@ bool GameVideo::SingletonInitialize()
 	}
 
 	SetFullscreen(false);
-	
+
 	if(!ApplySettings())
 	{
 		if(VIDEO_DEBUG)
@@ -233,7 +232,7 @@ bool GameVideo::SingletonInitialize()
 	if(VIDEO_DEBUG)
 		cout << "VIDEO: Creating texture sheets\n";
 
-	
+
 	// create our default texture sheets
 
 	if(!_CreateTexSheet(512, 512, VIDEO_TEXSHEET_32x32, false))
@@ -242,7 +241,7 @@ bool GameVideo::SingletonInitialize()
 			cerr << "VIDEO ERROR: could not create default 32x32 tex sheet!" << endl;
 		return false;
 	}
-	
+
 	if(!_CreateTexSheet(512, 512, VIDEO_TEXSHEET_32x64, false))
 	{
 		if(VIDEO_DEBUG)
@@ -281,16 +280,16 @@ bool GameVideo::SingletonInitialize()
 	EnableTextShadow(true);
 
 	// set default menu cursor
-	
+
 	if(VIDEO_DEBUG)
 		cout << "VIDEO: Setting default menu cursor" << endl;
-	
+
 	if(!SetDefaultCursor("img/menus/cursor.png"))
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: problem loading default menu cursor" << endl;
 	}
-	
+
 
 	if(VIDEO_DEBUG)
 		cout << "VIDEO: Erasing the screen\n";
@@ -303,13 +302,13 @@ bool GameVideo::SingletonInitialize()
 			cerr << "VIDEO ERROR: first call to Clear() in GameVideo::SingletonInitialize() failed!" << endl;
 		return false;
 	}
-	
+
 	if(!Display(0))
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: Display() in GameVideo::SingletonInitialize() failed!" << endl;
 		return false;
-	}	
+	}
 
 	if(!Clear())
 	{
@@ -320,7 +319,7 @@ bool GameVideo::SingletonInitialize()
 
 	if(VIDEO_DEBUG)
 		cout << "VIDEO: GameVideo::SingletonInitialize() returned successfully" << endl;
-	
+
 	_rectangle_image.SetFilename("img/misc/rectangle_primitive.png");
 	if (!_rectangle_image.Load())
 	{
@@ -328,7 +327,7 @@ bool GameVideo::SingletonInitialize()
 			cerr << "VIDEO ERROR: image for rendering rectangles could not be opened" << endl;
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -353,10 +352,10 @@ bool GameVideo::MakeScreenshot()
 	glReadPixels(0, 0, viewportDims[2], viewportDims[3], GL_RGB, GL_UNSIGNED_BYTE, buffer);
 
 	if(glGetError())
-	{	
+	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO_DEBUG: glReadPixels() returned an error inside GameVideo::CaptureScreen!" << endl;
-		
+
 		free(buffer);
 		return false;
 	}
@@ -368,9 +367,9 @@ bool GameVideo::MakeScreenshot()
 	cinfo.err = jpeg_std_error(&jerr);
 	jpeg_create_compress(&cinfo);
 
-	FILE * outfile;	
-	if((outfile = fopen("screenshot.jpg", "wb")) == NULL) 
-	{	
+	FILE * outfile;
+	if((outfile = fopen("screenshot.jpg", "wb")) == NULL)
+	{
 		cerr << "Could not open screenshot.jpg for writing!" << endl;
 		free(buffer);
 		return false;
@@ -378,10 +377,10 @@ bool GameVideo::MakeScreenshot()
 
 	jpeg_stdio_dest(&cinfo, outfile);
 
-	cinfo.image_width = viewportDims[2]; 	
+	cinfo.image_width = viewportDims[2];
 	cinfo.image_height = viewportDims[3];
-	cinfo.input_components = 3;		
-	cinfo.in_color_space = JCS_RGB; 	
+	cinfo.input_components = 3;
+	cinfo.in_color_space = JCS_RGB;
 
 	jpeg_set_defaults(&cinfo);
 	jpeg_set_quality(&cinfo, 70, TRUE);
@@ -411,25 +410,25 @@ bool GameVideo::MakeScreenshot()
 // ~GameVideo
 //-----------------------------------------------------------------------------
 
-GameVideo::~GameVideo() 
-{ 
-	if (VIDEO_DEBUG) 
+GameVideo::~GameVideo()
+{
+	if (VIDEO_DEBUG)
 		cout << "VIDEO: GameVideo destructor invoked" << endl;
 
 	// destroy particle manager
-	_particle_manager.Destroy();	
-	
+	_particle_manager.Destroy();
+
 	// delete GUI
 	delete _gui;
-		
+
 	// delete font properties
-	
+
 	map<string, FontProperties *>::iterator iFontProp    = _font_map.begin();
 	map<string, FontProperties *>::iterator iFontPropEnd = _font_map.end();
-	
+
 	while(iFontProp != _font_map.end())
 	{
-		FontProperties *fp = iFontProp->second;		
+		FontProperties *fp = iFontProp->second;
 
 		if(fp->ttf_font)
 			TTF_CloseFont(fp->ttf_font);
@@ -445,14 +444,14 @@ GameVideo::~GameVideo()
 			delete fp->glyph_cache;
 		}
 
-		delete fp;		
+		delete fp;
 		++iFontProp;
 	}
-	
-		
+
+
 	// uninitialize SDL_ttf
 	TTF_Quit();
-	
+
 	// delete texture sheets
 	vector<TexSheet *>::iterator iSheet      = _texSheets.begin();
 	vector<TexSheet *>::iterator iSheetEnd   = _texSheets.end();
@@ -462,7 +461,7 @@ GameVideo::~GameVideo()
 		delete *iSheet;
 		++iSheet;
 	}
-	
+
 	// delete images
 	map<string, Image *>::iterator iImage     = _images.begin();
 	map<string, Image *>::iterator iImageEnd  = _images.end();
@@ -482,11 +481,11 @@ GameVideo::~GameVideo()
 void GameVideo::SetCoordSys(const CoordSys &coordSys)
 {
 	_coord_sys = coordSys;
-	
+
 	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();	
+	glLoadIdentity();
 	glOrtho(_coord_sys.GetLeft(), _coord_sys.GetRight(), _coord_sys.GetBottom(), _coord_sys.GetTop(), -1, 1);
-	
+
 	// Removed this code bleow
  	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -499,13 +498,13 @@ void GameVideo::SetCoordSys(const CoordSys &coordSys)
 
 void GameVideo::SetCoordSys
 (
-	float left, 
-	float right, 
-	float bottom, 
+	float left,
+	float right,
+	float bottom,
 	float top
 )
 {
-	SetCoordSys(CoordSys(left, right, bottom, top));	
+	SetCoordSys(CoordSys(left, right, bottom, top));
 }
 
 
@@ -520,7 +519,7 @@ void GameVideo::SetDrawFlags(int32 firstflag, ...)
 	va_list args;
 
 	va_start(args, firstflag);
-	for (n=0;;n++) 
+	for (n=0;;n++)
 	{
 		flag = (n==0) ? firstflag : va_arg(args, int32);
 		switch (flag) {
@@ -568,7 +567,7 @@ bool GameVideo::ApplySettings()
 		UnloadTextures();
 
 		int32 flags = SDL_OPENGL;
-		
+
 		if (_temp_fullscreen == true) {
 			flags |= SDL_FULLSCREEN;
 		}
@@ -582,8 +581,8 @@ bool GameVideo::ApplySettings()
 
 		if (!SDL_SetVideoMode(_temp_width, _temp_height, 0, flags)) {
 		// RGB values of 1 for each and 8 for depth seemed to be sufficient.
-		// 565 and 16 here because it works with them on this computer. 
-			SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5); 
+		// 565 and 16 here because it works with them on this computer.
+			SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
 			SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 6);
 			SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
 			SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
@@ -609,9 +608,9 @@ bool GameVideo::ApplySettings()
 		_fullscreen = _temp_fullscreen;
 
 		ReloadTextures();
-		
+
 		EnableFog(_fogColor, _fogIntensity);
-		
+
 		return true;
 	} // if (_target == VIDEO_TARGET_SDL_WINDOW)
 
@@ -621,21 +620,21 @@ bool GameVideo::ApplySettings()
 		_width      = _temp_width;
 		_height     = _temp_height;
 		_fullscreen = _temp_fullscreen;
-		
+
 		return true;
 	}
-	
+
 	return false;
 }
 
 
 //-----------------------------------------------------------------------------
-// SetViewport: set the rectangle of the screen onto which all drawing maps to, 
-//              the arguments are percentages so 0, 0, 100, 100 would mean the 
+// SetViewport: set the rectangle of the screen onto which all drawing maps to,
+//              the arguments are percentages so 0, 0, 100, 100 would mean the
 //              whole screen
 //-----------------------------------------------------------------------------
 
-void GameVideo::SetViewport(float left, float right, float bottom, float top) 
+void GameVideo::SetViewport(float left, float right, float bottom, float top)
 {
 	assert(left < right);
 	assert(bottom < top);
@@ -656,11 +655,11 @@ void GameVideo::SetViewport(float left, float right, float bottom, float top)
 
 
 //-----------------------------------------------------------------------------
-// Clear: clear the screen to black, it doesnt clear other buffers, that can be 
+// Clear: clear the screen to black, it doesnt clear other buffers, that can be
 //        done by videostates that use them
 //-----------------------------------------------------------------------------
 
-bool GameVideo::Clear() 
+bool GameVideo::Clear()
 {
 	if(_usesLights)
 		return Clear(_lightColor);
@@ -671,21 +670,21 @@ bool GameVideo::Clear()
 
 
 //-----------------------------------------------------------------------------
-// Clear: clear the screen to given color, it doesnt clear other buffers, that can be 
+// Clear: clear the screen to given color, it doesnt clear other buffers, that can be
 //        done by videostates that use them
 //-----------------------------------------------------------------------------
 
-bool GameVideo::Clear(const Color &c) 
+bool GameVideo::Clear(const Color &c)
 {
 	SetViewport(0,100,0,100);
 	glClearColor(c[0], c[1], c[2], c[3]);
 	glClear(GL_COLOR_BUFFER_BIT);
-		
+
 	_numTexSwitches = 0;
-	
+
 	if(glGetError())
 		return false;
-		
+
 	return true;
 }
 
@@ -701,32 +700,32 @@ bool GameVideo::Clear(const Color &c)
 		_BindTexture(_lightOverlay);
 		glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, 1024, 1024, 0);
 	}
-	
+
 	return true;
 }*/
 
 
 //-----------------------------------------------------------------------------
-// Display: if running in double buffered mode then flip the other buffer to the 
+// Display: if running in double buffered mode then flip the other buffer to the
 //          screen
 //-----------------------------------------------------------------------------
 
-bool GameVideo::Display(int32 frameTime) 
+bool GameVideo::Display(int32 frameTime)
 {
 	// update particle effects
 	_particle_manager.Update(frameTime);
 
-	// update shaking effect	
+	// update shaking effect
 	_PushContext();
 	SetCoordSys(0, 1024, 0, 768);
 	_UpdateShake(frameTime);
-	
+
 	// update lightning timer
 	_lightningCurTime += frameTime;
-	
+
 	if(_lightningCurTime > _lightningEndTime)
 		_lightningActive = false;
-	
+
 	// show an overlay over the screen if we're fading
 	if(_fader.ShouldUseFadeOverlay())
 	{
@@ -734,11 +733,11 @@ bool GameVideo::Display(int32 frameTime)
 		StillImage fadeOverlay;
 		fadeOverlay.SetDimensions(1024.0f, 768.0f);
 		fadeOverlay.SetColor(c);
-		LoadImage(fadeOverlay);		
+		LoadImage(fadeOverlay);
 		SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 		PushState();
 		Move(0, 0);
-		DrawImage(fadeOverlay);		
+		DrawImage(fadeOverlay);
 		PopState();
 		DeleteImage(fadeOverlay);
 	}
@@ -746,13 +745,13 @@ bool GameVideo::Display(int32 frameTime)
 	// this must be called before DrawFPS and all, because we only
 	// want to count texture switches related to the game itself, not the
 	// ones used to draw debug text and things like that.
-	
+
 	if(_advancedDisplay)
 		_DEBUG_ShowAdvancedStats();
 
 	if(_fpsDisplay)
 		DrawFPS(frameTime);
-		
+
 	if(!_DEBUG_ShowTexSheet())
 	{
 		if(VIDEO_DEBUG)
@@ -761,7 +760,7 @@ bool GameVideo::Display(int32 frameTime)
 			// If we've shown it once, stop showing it so we don't clog up
 			// the debug output with the same message 1000 times
 			static bool hasFailed = false;
-			
+
 			if(!hasFailed)
 			{
 				cerr << "VIDEO ERROR: _DEBUG_ShowTexSheet() failed\n";
@@ -773,17 +772,17 @@ bool GameVideo::Display(int32 frameTime)
 	_PopContext();
 
 	SDL_GL_SwapBuffers();
-	
-	_fader.Update(frameTime);	
-	
+
+	_fader.Update(frameTime);
+
 	// update animation timers
-	
+
 	int32 oldFrameIndex = _animation_counter / VIDEO_ANIMATION_FRAME_PERIOD;
 	_animation_counter += frameTime;
 	int32 currentFrameIndex = _animation_counter / VIDEO_ANIMATION_FRAME_PERIOD;
-	
+
 	_current_frame_diff = currentFrameIndex - oldFrameIndex;
-	
+
 	return true;
 }
 
@@ -807,7 +806,7 @@ bool GameVideo::IsFullscreen()
 bool GameVideo::SetFullscreen(bool fullscreen)
 {
 	_temp_fullscreen = fullscreen;
-	return true;	
+	return true;
 }
 
 
@@ -836,7 +835,7 @@ bool GameVideo::SetResolution(int32 width, int32 height)
 			cerr << "VIDEO ERROR: invalid width and/or height passed to SetResolution!" << endl;
 		return false;
 	}
-	
+
 	_temp_width  = width;
 	_temp_height = height;
 	return true;
@@ -850,17 +849,17 @@ bool GameVideo::SetResolution(int32 width, int32 height)
 
 bool GameVideo::_DEBUG_ShowAdvancedStats()
 {
-	// display to screen	
+	// display to screen
 	char text[50];
 	sprintf(text, "Switches: %d\nParticles: %d", _numTexSwitches, _particle_manager.GetNumParticles());
-	
+
 	if( !SetFont("debug_font"))
 		return false;
-		
+
 	Move(896.0f, 690.0f);
 	if( !DrawText(text))
 		return false;
-			
+
 	return true;
 }
 
@@ -870,7 +869,7 @@ bool GameVideo::_DEBUG_ShowAdvancedStats()
 // Move: move relativly x+=rx, y+=ry
 //-----------------------------------------------------------------------------
 
-void GameVideo::Move(float tx, float ty) 
+void GameVideo::Move(float tx, float ty)
 {
 #ifndef NDEBUG
 	GLint matrixMode;
@@ -884,9 +883,9 @@ void GameVideo::Move(float tx, float ty)
 }
 
 //-----------------------------------------------------------------------------
-// MoveRelative: 
+// MoveRelative:
 //-----------------------------------------------------------------------------
-void GameVideo::MoveRelative(float tx, float ty) 
+void GameVideo::MoveRelative(float tx, float ty)
 {
 #ifndef NDEBUG
 	GLint matrixMode;
@@ -908,11 +907,11 @@ void GameVideo::GetDrawPosition(float &x, float &y)
 }
 
 //-----------------------------------------------------------------------------
-// Rotate: rotates the coordinate axes anticlockwise by acAngle degrees, think 
+// Rotate: rotates the coordinate axes anticlockwise by acAngle degrees, think
 //         about this CARFULLY before you call it
 //-----------------------------------------------------------------------------
 
-void GameVideo::Rotate(float acAngle) 
+void GameVideo::Rotate(float acAngle)
 {
 #ifndef NDEBUG
 	GLint matrixMode;
@@ -941,11 +940,11 @@ void GameVideo::Scale(float xScale, float yScale)
 
 
 //-----------------------------------------------------------------------------
-// PushState: saves your current position in a stack, bewarned this stack is 
+// PushState: saves your current position in a stack, bewarned this stack is
 //            small ~32 so use it wisely
 //-----------------------------------------------------------------------------
 
-void GameVideo::PushState() 
+void GameVideo::PushState()
 {
 	_PushContext();
 }
@@ -955,7 +954,7 @@ void GameVideo::PushState()
 // PopState: restores last position, read PushState()
 //-----------------------------------------------------------------------------
 
-void GameVideo::PopState() 
+void GameVideo::PopState()
 {
 	_PopContext();
 }
@@ -968,7 +967,7 @@ void GameVideo::PopState()
 
 bool GameVideo::SetMenuSkin
 (
-	const std::string &imgBaseName,	
+	const std::string &imgBaseName,
 	const Color  &fillColor
 )
 {
@@ -1007,12 +1006,12 @@ bool GameVideo::SetMenuSkin
 		imgBaseName + "_tri_r.png",
 		imgBaseName + "_tri_b.png",
 		imgBaseName + "_quad.png",
-		
+
 		fillColor_TL,
 		fillColor_TR,
 		fillColor_BL,
 		fillColor_BR,
-		
+
 		""     // no background image
 	);
 }
@@ -1030,7 +1029,7 @@ bool GameVideo::SetMenuSkin
 	const Color  &fillColor_TL,
 	const Color  &fillColor_TR,
 	const Color  &fillColor_BL,
-	const Color  &fillColor_BR	
+	const Color  &fillColor_BR
 )
 {
 	return _gui->SetMenuSkin
@@ -1086,10 +1085,10 @@ bool GameVideo::_BindTexture(GLuint texID)
 		glBindTexture(GL_TEXTURE_2D, texID);
 		++_numTexSwitches;
 	}
-	
+
 	if(glGetError())
 		return false;
-	
+
 	return true;
 }
 
@@ -1164,7 +1163,7 @@ bool GameVideo::EnableFog(const Color &color, float intensity)
 {
 	// check if intensity is within bounds. If not, clamp it but display an
 	// error message
-	
+
 	if(intensity < 0.0f)
 	{
 		intensity = 0.0f;
@@ -1177,11 +1176,11 @@ bool GameVideo::EnableFog(const Color &color, float intensity)
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: intensity larger than 1.0f passed to SetFog()" << endl;
 	}
-	
+
 	// set the parameters
 	_fogColor = color;
 	_fogIntensity = intensity;
-	
+
 	// apply the new settings with OpenGL
 	if(intensity == 0.0f)
 	{
@@ -1196,14 +1195,14 @@ bool GameVideo::EnableFog(const Color &color, float intensity)
 		glFogf(GL_FOG_END, 1.0f - intensity);
 		glFogfv(GL_FOG_COLOR, (GLfloat *)color.GetColors());
 	}
-	
-	return true;	
+
+	return true;
 }
 
 //-----------------------------------------------------------------------------
 // DisableFog: Turns off fog
 //-----------------------------------------------------------------------------
-void GameVideo::DisableFog() 
+void GameVideo::DisableFog()
 {
 	glDisable(GL_FOG);
 	_fogIntensity = 0.0f;
@@ -1229,8 +1228,8 @@ bool GameVideo::EnablePointLights()
 	_lightOverlay = _CreateBlankGLTexture(1024, 1024);
 
 	_usesLights = true;
-	
-	return true;	
+
+	return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -1242,7 +1241,7 @@ void GameVideo::DisablePointLights()
 	{
 		_DeleteTexture(_lightOverlay);
 	}
-		
+
 	_lightOverlay = 0xFFFFFFFF;
 
 	_usesLights = false;
@@ -1250,8 +1249,8 @@ void GameVideo::DisablePointLights()
 
 
 //-----------------------------------------------------------------------------
-// ApplyLightingOverlay: call after all map images are drawn to apply lighting. 
-//                       All menu and text rendering should occur AFTER this 
+// ApplyLightingOverlay: call after all map images are drawn to apply lighting.
+//                       All menu and text rendering should occur AFTER this
 //                       call, so that they are not affected by lighting.
 //-----------------------------------------------------------------------------
 bool GameVideo::ApplyLightingOverlay()
@@ -1267,16 +1266,16 @@ bool GameVideo::ApplyLightingOverlay()
 		SetCoordSys(0.0f, 1.0f, 0.0f, 1.0f);
 		float xlo = 0.0f, ylo = 0.0f, xhi = 1.0f, yhi = 1.0f;
 		glEnable(GL_TEXTURE_2D);
-		
+
 		float mx = _width / 1024.0f;
 		float my = _height / 1024.0f;
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_DST_COLOR, GL_ZERO);
-		
+
 		_BindTexture(_lightOverlay);
 		glBegin(GL_QUADS);
-		glTexCoord2f(0.0f, 0.0f);	
+		glTexCoord2f(0.0f, 0.0f);
 		glVertex2f(xlo, ylo); //bl
 		glTexCoord2f(mx, 0.0f);
 		glVertex2f(xhi, ylo); //br
@@ -1284,10 +1283,10 @@ bool GameVideo::ApplyLightingOverlay()
 		glVertex2f(xhi, yhi);//tr
 		glTexCoord2f(0.0f, my);
 		glVertex2f(xlo, yhi);//tl
-		glEnd();		
+		glEnd();
 		SetCoordSys(tempCoordSys.GetLeft(), tempCoordSys.GetRight(), tempCoordSys.GetBottom(), tempCoordSys.GetTop());
 	}
-		
+
 	return true;
 }
 
@@ -1328,10 +1327,10 @@ bool GameVideo::CaptureScreen(StillImage &id)
 	glReadPixels(0, 0, viewportDims[2], viewportDims[3], GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 
 	if(glGetError())
-	{	
+	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO_DEBUG: glReadPixels() returned an error inside GameVideo::CaptureScreen!" << endl;
-		
+
 		free(buffer);
 		free(loadInfo.pixels);
 		return false;
@@ -1354,25 +1353,25 @@ bool GameVideo::CaptureScreen(StillImage &id)
 
 	// try to insert the image in a texture sheet
 	TexSheet *sheet = _InsertImageInTexSheet(newImage, loadInfo, true);
-	
+
 	if(!sheet)
 	{
 		// this should never happen, unless we run out of memory or there
 		// is a bug in the _InsertImageInTexSheet() function
-		
+
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO_DEBUG: GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
-		
+
 		free(loadInfo.pixels);
 		return false;
 	}
-	
+
 	newImage->ref_count = 1;
-	
+
 	// if width or height are zero, that means to use the dimensions of image
 	if(id._width == 0.0f)
 		id._width = (float) loadInfo.width;
-	
+
 	if(id._height == 0.0f)
 		id._height = (float) loadInfo.height;
 
@@ -1439,16 +1438,16 @@ string GameVideo::_CreateTempFilename(const string &extension)
 	string filename = "/tmp/allacrost_TEMP_";
 	filename += _nextTempFile;
 	filename += extension;
-	
+
 	// increment the 8-character temp name
 	// Note: assume that the temp name is currently set to
 	//       a valid name
-	
-	
+
+
 	for(int digit = 7; digit >= 0; --digit)
 	{
-		++_nextTempFile[digit];		
-		
+		++_nextTempFile[digit];
+
 		if(_nextTempFile[digit] > 'z')
 		{
 			if(digit==0)
@@ -1457,19 +1456,19 @@ string GameVideo::_CreateTempFilename(const string &extension)
 					cerr << "VIDEO ERROR: _nextTempFile went past 'zzzzzzzz'" << endl;
 				return filename;
 			}
-			
+
 			_nextTempFile[digit] = '0';
 		}
 		else
 		{
 			if(_nextTempFile[digit] > '9' && _nextTempFile[digit] < 'a')
 				_nextTempFile[digit] = 'a';
-		
+
 			// if the digit did not overflow, then we don't need to carry over
 			break;
-		}		
-	}	
-	
+		}
+	}
+
 	return filename;
 }
 
@@ -1484,7 +1483,7 @@ void GameVideo::_PushContext()
 	// push current modelview transformation
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
-	
+
 	// save context information
 	private_video::Context c;
 	c.coordinate_system = _coord_sys;
@@ -1493,14 +1492,14 @@ void GameVideo::_PushContext()
 	c.y_align   = _yalign;
 	c.x_flip    = _xflip;
 	c.y_flip    = _yflip;
-	
+
 	c.viewport = _viewport;
 	c.scissor_rectangle = _scissorRect;
 	c.scissoring_enabled = _scissorEnabled;
-	
+
 	c.font      = _current_font;
 	c.text_color = _currentTextColor;
-	
+
 	_contextStack.push(c);
 }
 
@@ -1520,10 +1519,10 @@ void GameVideo::_PopContext()
 	_yalign = c.y_align;
 	_xflip  = c.x_flip;
 	_yflip  = c.y_flip;
-	
+
 	_current_font      = c.font;
 	_currentTextColor = c.text_color;
-	
+
 	_viewport = c.viewport;
 	_scissorRect = c.scissor_rectangle;
 	_scissorEnabled = c.scissoring_enabled;
@@ -1532,9 +1531,9 @@ void GameVideo::_PopContext()
 	// restore modelview transformation
 	glMatrixMode(GL_MODELVIEW);
 	glPopMatrix();
-	
+
 	glViewport(_viewport.left, _viewport.top, _viewport.width, _viewport.height);
-	
+
 	if(_scissorEnabled)
 	{
 		glEnable(GL_SCISSOR_TEST);
@@ -1634,7 +1633,7 @@ void ScreenRect::Intersect(const ScreenRect &rect)
 
 	int32 right  = min(left + width - 1,  rect.left + rect.width - 1);
 	int32 bottom = min(top + height - 1, rect.top + rect.height - 1);
-	
+
 	if(left > right || top > bottom)
 	{
 		left = right = width = height = 0;
@@ -1652,7 +1651,7 @@ void ScreenRect::Intersect(const ScreenRect &rect)
 void GameVideo::EnableScissoring(bool enable)
 {
 	_scissorEnabled = enable;
-	
+
 	if(enable)
 		glEnable(GL_SCISSOR_TEST);
 	else
@@ -1667,7 +1666,7 @@ void GameVideo::EnableScissoring(bool enable)
 void GameVideo::SetScissorRect(float left, float right, float bottom, float top)
 {
 	_scissorRect = CalculateScreenRect(left, right, bottom, top);
-	glScissor(_scissorRect.left, _scissorRect.top, _scissorRect.width, _scissorRect.height);	
+	glScissor(_scissorRect.left, _scissorRect.top, _scissorRect.width, _scissorRect.height);
 }
 
 
@@ -1687,12 +1686,12 @@ void GameVideo::SetScissorRect(const ScreenRect &rect)
 ScreenRect GameVideo::CalculateScreenRect(float left, float right, float bottom, float top)
 {
 	ScreenRect rect;
-	
+
 	int32 scr_left    = _ScreenCoordX(left);
 	int32 scr_right   = _ScreenCoordX(right);
 	int32 scr_bottom  = _ScreenCoordY(bottom);
 	int32 scr_top     = _ScreenCoordY(top);
-	
+
 	int32 temp;
 	if(scr_left > scr_right)
 	{
@@ -1700,7 +1699,7 @@ ScreenRect GameVideo::CalculateScreenRect(float left, float right, float bottom,
 		scr_left = scr_right;
 		scr_right = temp;
 	}
-	
+
 	if(scr_top > scr_bottom)
 	{
 		temp = scr_top;
@@ -1709,10 +1708,10 @@ ScreenRect GameVideo::CalculateScreenRect(float left, float right, float bottom,
 	}
 
 	rect.top    = scr_top;
-	rect.left   = scr_left;	
+	rect.left   = scr_left;
 	rect.width  = scr_right - scr_left;
 	rect.height = scr_bottom - scr_top;
-	
+
 	return rect;
 }
 
@@ -1728,7 +1727,7 @@ int32 GameVideo::_ScreenCoordX(float x)
 		percent = (x - _coord_sys.GetLeft()) / (_coord_sys.GetRight() - _coord_sys.GetLeft());
 	else
 		percent = (x - _coord_sys.GetRight()) / (_coord_sys.GetLeft() - _coord_sys.GetRight());
-	
+
 	return int32(percent * float(_width));
 }
 
@@ -1744,7 +1743,7 @@ int32 GameVideo::_ScreenCoordY(float y)
 		percent = (y - _coord_sys.GetTop()) / (_coord_sys.GetBottom() - _coord_sys.GetTop());
 	else
 		percent = (y - _coord_sys.GetBottom()) / (_coord_sys.GetTop() - _coord_sys.GetBottom());
-	
+
 	return int32(percent * float(_height));
 }
 
@@ -1758,7 +1757,7 @@ bool GameVideo::MakeLightning(const std::string &litFile)
 	FILE *fp = fopen(litFile.c_str(), "rb");
 	if(!fp)
 		return false;
-	
+
 	int32 dataSize;
 	if(!fread(&dataSize, 4, 1, fp))
 	{
@@ -1770,37 +1769,37 @@ bool GameVideo::MakeLightning(const std::string &litFile)
 	// Check if this processor uses big endian, and reorder bytes if so.
 
 	#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-		dataSize = ((dataSize & 0xFF000000) >> 24) | 
-		           ((dataSize & 0x00FF0000) >> 8) | 
+		dataSize = ((dataSize & 0xFF000000) >> 24) |
+		           ((dataSize & 0x00FF0000) >> 8) |
 		           ((dataSize & 0x0000FF00) << 8) |
 		           ((dataSize & 0x000000FF) << 24);
 	#endif
 
 	uint8 *data = new uint8[dataSize];
-	
+
 	if(!fread(data, dataSize, 1, fp))
 	{
 		delete [] data;
 		fclose(fp);
 		return false;
 	}
-	
+
 	fclose(fp);
-	
+
 	_lightningData.clear();
-	
+
 	for(int32 j = 0; j < dataSize; ++j)
 	{
 		float f = float(data[j]) / 255.0f;
 		_lightningData.push_back(f);
 	}
-	
-	delete [] data;	
-	
+
+	delete [] data;
+
 	_lightningActive = true;
 	_lightningCurTime = 0;
 	_lightningEndTime = dataSize * 1000 / 100;
-	
+
 	return true;
 }
 
@@ -1813,23 +1812,23 @@ bool GameVideo::DrawLightning()
 {
 	if(!_lightningActive)
 		return true;
-	
+
 	// convert milliseconds elapsed into data points elapsed
-	
+
 	float t = _lightningCurTime * 100.0f / 1000.0f;
-	
+
 	int32 roundedT = static_cast<int32>(t);
 	t -= roundedT;
-	
+
 	// get 2 separate data points and blend together (linear interpolation)
-	
+
 	float data1 = _lightningData[roundedT];
 	float data2 = _lightningData[roundedT+1];
 
 	float intensity = data1 * (1-t) + data2 * t;
 
 	DrawFullscreenOverlay(Color(1.0f, 1.0f, 1.0f, intensity));
-	
+
 	return true;
 }
 
@@ -1841,17 +1840,17 @@ bool GameVideo::DrawLightning()
 bool GameVideo::DrawFullscreenOverlay(const Color &color)
 {
 	PushState();
-	
+
 	SetCoordSys(0.0f, 1.0f, 0.0f, 1.0f);
 	SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 	Move(0.0f, 0.0f);
 	StillImage img;
 	img.SetDimensions(1.0f, 1.0f);
-	LoadImage(img);	
-	DrawImage(img, color);	
-	
+	LoadImage(img);
+	DrawImage(img, color);
+
 	PopState();
-	
+
 	return true;
 }
 
@@ -1870,7 +1869,7 @@ bool GameVideo::SetTarget(VIDEO_TARGET target)
 		return false;
 	}
 
-	_target = target;	
+	_target = target;
 	return true;
 }
 
@@ -1883,14 +1882,14 @@ bool GameVideo::SetTarget(VIDEO_TARGET target)
 void GameVideo::DrawGrid(float x, float y, float xstep, float ystep, const Color &c)
 {
 	PushState();
-	
+
 	Move(0, 0);
 	glBegin(GL_LINES);
 	glColor4fv(&c[0]);
-	
+
 	float xMax = _coord_sys.GetRight();
 	float yMax = _coord_sys.GetBottom();
-	
+
 	for(; x <= xMax; x += xstep)
 	{
 		glVertex2f(x, _coord_sys.GetBottom());
@@ -1902,7 +1901,7 @@ void GameVideo::DrawGrid(float x, float y, float xstep, float ystep, const Color
 		glVertex2f(_coord_sys.GetLeft(), y);
 		glVertex2f(_coord_sys.GetRight(), y);
 	}
-	
+
 	glEnd();
 	PopState();
 }

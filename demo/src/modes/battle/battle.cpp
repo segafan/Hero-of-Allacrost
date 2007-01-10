@@ -74,11 +74,11 @@ ScriptEvent::~ScriptEvent()
 void ScriptEvent::RunScript() {
 	// TEMP: do basic damage to the actors
 	for (uint8 i = 0; i < _targets.size(); i++) {
-		
-		IBattleActor * actor = _targets[i];
-		actor->TakeDamage(GaussianRandomValue(12, 2.0f));	
 
-		// TODO: Do this better way! 
+		IBattleActor * actor = _targets[i];
+		actor->TakeDamage(GaussianRandomValue(12, 2.0f));
+
+		// TODO: Do this better way!
 		if (MakeStandardString(this->GetSource()->GetName()) == "Spider")
 			current_battle->_battle_sounds[0].PlaySound();
 		else if (MakeStandardString(this->GetSource()->GetName()) == "Green Slime")
@@ -128,17 +128,15 @@ BattleMode::BattleMode() :
 	frame.SetFilename("img/icons/battle/ap_indicator_fr3.png");
 	attack_point_indicator.push_back(frame);
 
-	VideoManager->BeginImageLoadBatch();
 	for (uint32 i = 0; i < attack_point_indicator.size(); i++) {
 		if (!VideoManager->LoadImage(attack_point_indicator[i]))
 			cerr << "BATTLE ERROR: Failed to load attack point indicator." << endl;
 	}
-	VideoManager->EndImageLoadBatch();
-	
+
 	for (uint32 i = 0; i < attack_point_indicator.size(); i++) {
 		_attack_point_indicator.AddFrame(attack_point_indicator[i], 10);
 	}
-	
+
 	_actor_selection_image.SetDimensions(109, 78);
 	_actor_selection_image.SetFilename("img/icons/battle/character_selector.png");
 	if (!VideoManager->LoadImage(_actor_selection_image)) {
@@ -279,7 +277,7 @@ void BattleMode::_TEMP_LoadTestData() {
 		cerr << "BATTLE ERROR: Failed to load swap icon: " << endl;
 		_ShutDown();
 	}
-	
+
 	_swap_card.SetFilename("img/icons/battle/swap_card.png");
 	_swap_card.SetDimensions(25, 37);
 	if (!VideoManager->LoadImage(_swap_card)) {
@@ -353,7 +351,7 @@ void BattleMode::_CreateEnemyActors() {
 
 		// Create the Snake EnemyActor
 		if (Probability(50))
-		{	
+		{
 			BattleEnemyActor * snake = new BattleEnemyActor("snake", RandomBoundedInteger(400, 600), RandomBoundedInteger(200, 400));
 			snake->SetName(MakeUnicodeString("Snake"));
 			snake->LevelSimulator(2);
@@ -380,9 +378,9 @@ void BattleMode::_ShutDown() {
 
 	// This call will clear the input state
 	InputManager->EventHandler();
-	
+
 	// Remove this BattleMode instance from the game stack
-	ModeManager->Pop(); 
+	ModeManager->Pop();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -391,7 +389,7 @@ void BattleMode::_ShutDown() {
 
 void BattleMode::Update() {
 	_battle_over = (_NumberEnemiesAlive() == 0) || (_NumberOfCharactersAlive() == 0);
-	
+
 	if (_battle_over) {
 		_victorious_battle = (_NumberEnemiesAlive() == 0);
 		if (_victorious_battle) {
@@ -399,10 +397,10 @@ void BattleMode::Update() {
 				PlayerVictory();
 			}
 		}
-		else { 
+		else {
 			_battle_lose_menu.Update(SystemManager->GetUpdateTime()); // Update lose menu
 			if (InputManager->ConfirmRelease()) {
-				// _battle_lose_menu.HandleConfirmKey(); // This needs to be handled when there's more than 1 option				
+				// _battle_lose_menu.HandleConfirmKey(); // This needs to be handled when there's more than 1 option
 				PlayerDefeat();
 			}
 		}
@@ -680,7 +678,7 @@ void BattleMode::Draw() {
 	_DrawBottomMenu();
 	_DrawActionMenu();
 	_DrawDialogueMenu();
-	
+
 	if (_battle_over) {
 		VideoManager->DisableSceneLighting();
 		// Draw a victory screen along with the loot. TODO: Maybe do this in a separate function
@@ -741,7 +739,7 @@ void BattleMode::_DrawBottomMenu() {
 		VideoManager->DrawImage(_swap_card);
 		VideoManager->MoveRelative(4, -4);
 	}
-	
+
 	// Draw the selected character's portrait, blended according to the character's current HP level
 	_selected_character->DrawPortrait();
 
@@ -846,7 +844,7 @@ void BattleMode::_ConstructActionListMenu() {
 			_action_list_menu->SetSelection(0);
 		}
 	}
-	
+
 	else if (_action_type_menu_cursor_location == ACTION_TYPE_DEFEND) {
 		vector <GlobalSkill*> defense_skills = p->GetActor()->GetDefenseSkills();
 		if (defense_skills.empty()) {
@@ -862,7 +860,7 @@ void BattleMode::_ConstructActionListMenu() {
 			_action_list_menu->SetSize(1, defense_skill_names.size());
 		}
 	}
-	
+
 	else if (_action_type_menu_cursor_location == ACTION_TYPE_SUPPORT) {
 		vector<GlobalSkill*> support_skills = p->GetActor()->GetSupportSkills();
 		if (support_skills.empty()) {
@@ -874,7 +872,7 @@ void BattleMode::_ConstructActionListMenu() {
 				string skill_string = MakeStandardString(support_skills[i]->GetSkillName()) + string("     ") + NumberToString(support_skills[i]->GetSkillPointsRequired());
 				support_skill_names.push_back(MakeUnicodeString(skill_string));
 			}
-	
+
 			_action_list_menu->SetOptions(support_skill_names);
 			_action_list_menu->SetSize(1, support_skill_names.size());
 		}
@@ -913,14 +911,14 @@ void BattleMode::_ConstructActionListMenu() {
 
 // Sets whether an action is being performed or not
 void BattleMode::SetPerformingScript(bool is_performing) {
-	
+
 	// Check if a script has just ended. Set the script to stop performing and pop the script from the front of the queue
 	if (is_performing == false && _performing_script == true) {
 
 		// Remove the first scripted event from the queue
 		// _script_queue.front().GetSource() is always either BattleEnemyActor or BattleCharacterActor
 		IBattleActor * source = dynamic_cast<IBattleActor*>(_script_queue.front().GetSource());
-		if (source) {			
+		if (source) {
 			source->SetQueuedToPerform(false);
 			_script_queue.pop_front();
 		}
@@ -961,7 +959,7 @@ void BattleMode::PlayerVictory() {
 	for (uint32 i = 0; i < _character_actors.size(); ++i) {
 		_character_actors.at(i)->GetActor()->AddExperienceLevel(1); // TODO: Add only experience, NOT exp LEVEL!
 	}
-	
+
 	VideoManager->DisableFog();
 	_ShutDown();
 }
@@ -1038,7 +1036,7 @@ int32 BattleMode::GetIndexOfFirstIdleCharacter() const {
 
 
 int32 BattleMode::GetIndexOfCharacter(BattleCharacterActor * const Actor) const {
-	
+
 	deque<BattleCharacterActor*>::const_iterator it = _character_actors.begin();
 	for (int32 i = 0; it != _character_actors.end(); i++, it++) {
 		if (*it == Actor)
