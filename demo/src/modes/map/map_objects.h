@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -48,8 +48,8 @@ const float VERY_FAST_SPEED = 100.0f;
 *** is possible to travel, for instance, northwest facing north <i>or</i> northwest facing west.
 *** The "NW_NORTH" constant means that the sprite is traveling to the northwest and is
 *** facing towards the north.
-*** 
-*** \note The set of "FACING_DIRECTION" and "MOVING_DIRECTION" constants are only meant to be 
+***
+*** \note The set of "FACING_DIRECTION" and "MOVING_DIRECTION" constants are only meant to be
 *** used as shorthands. You shouldn't assign the MapSprite#direction member to any of these values.
 **/
 //@{
@@ -128,7 +128,7 @@ public:
 	*** outside of a house. The context member determines if the object should be drawn or not,
 	*** since objects are only drawn if they are in the same context as the map's camera.
 	*** Objects can only interact with one another if they both reside in the same context.
-	*** 
+	***
 	*** \note The default value for this member is -1. A negative context indicates that the
 	*** object is invalid and it does not exist anywhere. Objects with a negative context are never
 	*** drawn to the screen. A value equal to zero indicates that the object is "always in
@@ -142,7 +142,7 @@ public:
 	*** The origin of every map object is the bottom center point of the object. These
 	*** origin coordinates are used to determine where the object is on the map as well
 	*** as where the objects collision rectangle lies.
-	*** 
+	***
 	*** The position coordinates are described by an integer (position) and a float (offset).
 	*** The position coordinates point to the map grid tile that the object currently occupies
 	*** and may range from 0 to the number of columns or rows of grid tiles on the map. The
@@ -233,7 +233,11 @@ public:
 	**/
 	bool DrawHelper();
 
-	//! \name Class Member Access Functions
+	/** \name Lua Access Functions
+	*** These functions are specifically written for Lua binding, to enable Lua to access the
+	*** members of this class.
+	**/
+	//@{
 	void SetObjectID(int16 id)
 		{ object_id = id; }
 
@@ -245,6 +249,12 @@ public:
 
 	void SetYPosition(uint16 y, float offset)
 		{ y_position = y; y_offset = offset; }
+
+	void SetImgHalfWidth(float width)
+		{ img_half_width = width; }
+
+	void SetImgHeight(float height)
+		{ img_height = height; }
 
 	void SetCollHalfWidth(float collision)
 		{ coll_half_width = collision; }
@@ -263,6 +273,42 @@ public:
 
 	void SetDrawOnSecondPass(bool pass)
 		{ draw_on_second_pass = pass; }
+
+	int16 GetObjectID() const
+		{ return object_id; }
+
+	int8 GetContext() const
+		{ return context; }
+
+	void GetXPosition(uint16 &x, float &offset) const
+		{ x = x_position; offset = x_offset; }
+
+	void GetYPosition(uint16 &y, float &offset) const
+		{ y = y_position; offset = y_offset; }
+
+	float GetImgHalfWidth() const
+		{ return img_half_width; }
+
+	float GetImgHeight() const
+		{ return img_height; }
+
+	float GetCollHalfWidth() const
+		{ return coll_half_width; }
+
+	float GetCollHeight() const
+		{ return coll_height; }
+
+	bool IsUpdatable() const
+		{ return updatable; }
+
+	bool IsVisible() const
+		{ return visible; }
+
+	bool IsNoCollision() const
+		{ return no_collision; }
+
+	bool IsDrawOnSecondPass() const
+		{ return draw_on_second_pass; }
 	//@}
 }; // class MapObject
 
@@ -280,6 +326,7 @@ public:
 *** it will do an extra function call that it shouldn't need to do.
 *** ***************************************************************************/
 class PhysicalObject : public MapObject {
+public:
 	//! \brief The index to the animations vector that contains the current image to display
 	uint8 current_animation;
 
@@ -299,6 +346,24 @@ class PhysicalObject : public MapObject {
 
 	//! \brief Draws the object to the screen, if it is visible.
 	void Draw();
+
+	/** \name Lua Access Functions
+	*** These functions are specifically written for Lua binding, to enable Lua to access the
+	*** members of this class.
+	**/
+	//@{
+	void AddAnimation(hoa_video::AnimatedImage new_img)
+		{ animations.push_back(new_img); }
+
+	void SetCurrentAnimation(uint8 current)
+		{ animations[current_animation].SetTimeProgress(0); current_animation = current; }
+
+	void SetAnimationProgress(uint32 progress)
+		{ animations[current_animation].SetTimeProgress(progress); }
+
+	uint8 GetCurrentAnimation() const
+		{ return current_animation; }
+	//@}
 }; // class PhysicalObject : public MapObject
 
 
@@ -351,6 +416,24 @@ public:
 	//! \brief Does nothing since a virtual object has nothing to draw.
 	virtual void Draw()
 		{ return; }
+
+	/** \name Lua Access Functions
+	*** These functions are specifically written for Lua binding, to enable Lua to access the
+	*** members of this class.
+	**/
+	//@{
+	void SetDirection(uint16 dir)
+		{ direction = dir; }
+
+	void SetMovementSpeed(float speed)
+		{ movement_speed = speed; }
+
+	uint16 GetDirection() const
+		{ return direction; }
+
+	float GetMovementSpeed() const
+		{ return movement_speed; }
+	//@}
 }; // class VirtualMapObject : public MapObject
 
 
@@ -407,6 +490,30 @@ public:
 
 	//! \brief Draws the sprite frame in the appropriate position on the screen, if it is visible.
 	void Draw();
+
+	/** \name Lua Access Functions
+	*** These functions are specifically written for Lua binding, to enable Lua to access the
+	*** members of this class.
+	**/
+	//@{
+	void SetName(hoa_utils::ustring na)
+		{ name = na; }
+
+	void SetWalkSound(int8 sound)
+		{ walk_sound = sound; }
+
+	void SetCurrentAnimation(uint8 anim)
+		{ current_animation = anim; }
+
+	void SetFacePortrait(hoa_video::StillImage* face)
+		{ face_portrait = face; }
+
+	int8 GetWalkSound() const
+		{ return walk_sound; }
+
+	uint8 GetCurrentAnimation() const
+		{ return current_animation; }
+	//@}
 }; // class MapSprite : public VirtualSprite
 
 } // namespace private_map
