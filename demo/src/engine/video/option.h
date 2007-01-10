@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,7 +14,7 @@
  *
  * The OptionBox class is a GUI control which allows you to create several
  * choices, which the player can select from by using the arrow keys
- *****************************************************************************/ 
+ *****************************************************************************/
 
 #ifndef __OPTION_HEADER__
 #define __OPTION_HEADER__
@@ -50,9 +50,9 @@ const int32 VIDEO_OPTION_SCROLL_TIME = 100;
 enum OptionBoxEvent
 {
 	VIDEO_OPTION_INVALID = -1,
-	
+
 	VIDEO_OPTION_NO_EVENT = 0,
-	
+
 	VIDEO_OPTION_SELECTION_CHANGE = 0,
 	VIDEO_OPTION_CONFIRM          = 1,
 	VIDEO_OPTION_CANCEL           = 2,
@@ -61,7 +61,7 @@ enum OptionBoxEvent
 	VIDEO_OPTION_BOUNDS_DOWN      = 5,
 	VIDEO_OPTION_BOUNDS_LEFT      = 6,
 	VIDEO_OPTION_BOUNDS_RIGHT     = 7,
-	
+
 	VIDEO_OPTION_TOTAL = 8
 };
 
@@ -81,12 +81,12 @@ enum OptionBoxEvent
 enum OptionElementType
 {
 	VIDEO_OPTION_ELEMENT_INVALID = -1,
-	
+
 	VIDEO_OPTION_ELEMENT_LEFT_ALIGN   = 0,
 	VIDEO_OPTION_ELEMENT_CENTER_ALIGN = 1,
-	VIDEO_OPTION_ELEMENT_RIGHT_ALIGN  = 2,	
+	VIDEO_OPTION_ELEMENT_RIGHT_ALIGN  = 2,
 
-	VIDEO_OPTION_ELEMENT_POSITION = 3,	
+	VIDEO_OPTION_ELEMENT_POSITION = 3,
 	VIDEO_OPTION_ELEMENT_IMAGE    = 4,
 	VIDEO_OPTION_ELEMENT_TEXT     = 5,
 
@@ -104,11 +104,11 @@ enum OptionElementType
 enum CursorState
 {
 	VIDEO_CURSOR_STATE_INVALID = -1,
-	
+
 	VIDEO_CURSOR_STATE_HIDDEN   = 0,
 	VIDEO_CURSOR_STATE_VISIBLE  = 1,
 	VIDEO_CURSOR_STATE_BLINKING = 2,
-	
+
 	VIDEO_CURSOR_STATE_TOTAL = 3
 };
 
@@ -127,11 +127,11 @@ enum CursorState
 enum WrapMode
 {
 	VIDEO_WRAP_MODE_INVALID = -1,
-	
+
 	VIDEO_WRAP_MODE_NONE     = 0,
 	VIDEO_WRAP_MODE_STRAIGHT = 1,
 	VIDEO_WRAP_MODE_SHIFTED  = 2,
-	
+
 	VIDEO_WRAP_MODE_TOTAL = 3
 };
 
@@ -147,10 +147,10 @@ enum WrapMode
 enum SelectMode
 {
 	VIDEO_SELECT_INVALID = -1,
-	
+
 	VIDEO_SELECT_SINGLE = 0,
 	VIDEO_SELECT_DOUBLE = 1,
-	
+
 	VIDEO_SELECT_TOTAL = 2
 };
 
@@ -166,7 +166,7 @@ public:
 
 	//! type of option element
 	OptionElementType type;
-	
+
 	//! value, like an offset for a position tag, etc.
 	int32 value;
 };
@@ -183,19 +183,19 @@ public:
 
 	//! y coordinate of top of cell
 	float cellYTop;
-	
+
 	//! y coordinate of center of cell
 	float cellYCenter;
-	
+
 	//! y coordinate of bottom of cell
 	float cellYBottom;
-	
+
 	//! x coordinate of left of cell
 	float cellXLeft;
-	
+
 	//! x coordinate of center of cell
 	float cellXCenter;
-	
+
 	//! x coordinate of right of cell
 	float cellXRight;
 };
@@ -211,16 +211,16 @@ public:
 class Option
 {
 public:
-	
+
 	//! vector of option elements
 	std::vector<OptionElement>      elements;
-	
+
 	//! vector of text
 	std::vector<hoa_utils::ustring> text;
-	
+
 	//! vector of images
 	std::vector<StillImage>    images;
-	
+
 	//! flag to specify whether this option is disabled or not
 	bool disabled;
 };
@@ -235,23 +235,23 @@ public:
 class OptionBox : public private_video::GUIControl
 {
 public:
-	
+
 	/*!
 	 *  \brief Constructor
 	 */
 	OptionBox();
-	
+
 	/*!
 	 *  \brief Destructor
 	 */
 	~OptionBox();
-	
+
 	/*!
 	 *  \brief updates the option box control
 	 *  \param frameTime number of milliseconds elapsed this frame
 	 * \return success/failure
 	 */
-	
+
 	void Update(uint32 frameTime);
 
 
@@ -259,16 +259,16 @@ public:
 	 *  \brief draws the control
 	 * \return success/failure
 	 */
-		
+
 	void Draw();
-	
-	
+
+
 	/*!
 	 *  \brief sets the font for this control
 	 *  \param fontName label to a valid, already-loaded font
 	 * \return success/failure
 	 */
-	
+
 	bool SetFont(const std::string &fontName);
 
 
@@ -321,7 +321,7 @@ public:
 	 */
 
 	void SetCellSize(float hSpacing, float vSpacing);
-	
+
 
 	/*!
 	 *  \brief sets the size of the box in terms of number of columns and rows
@@ -390,7 +390,7 @@ public:
 	 * \return success/failure
 	 */
 
-	bool SetCursorOffset(float x, float y);	
+	bool SetCursorOffset(float x, float y);
 
 
 	/*!
@@ -462,7 +462,7 @@ public:
 
 	bool IsScrolling() const;
 
-	
+
 	/*!
 	 *  \brief returns true if the given option is enabled
 	 *  \param index of the option to check
@@ -473,7 +473,7 @@ public:
 
 	/*!
 	 *  \brief returns an integer which contains the code of an event that occurred, or
-	 *         zero if no event occurred. This should be called every frame to see if 
+	 *         zero if no event occurred. This should be called every frame to see if
 	 *         anything new happened, like the player confirming or canceling, etc. Do
 	 *         not call it more than once per frame though, because it clears the event
 	 *         flag.
@@ -616,97 +616,94 @@ private:
 
 	//! after every change to any of the settings, check if the textbox is in a valid state and update this bool
 	bool   _initialized;
-	
-	//! if the option box is in an invalid state (not ready for drawing), then this string contains the errors that need to be resolved
-	std::string _initializeErrors;
-	
+
 	//! font used for the options
 	std::string _font;
-	
+
 	//! cursor offset
 	float _cursorX, _cursorY;
-	
+
 	//! switch cursor offset (relative to the normal cursor offset)
 	float _switchCursorX, _switchCursorY;
-	
+
 	//! horizontal spacing
 	float _hSpacing;
-	
+
 	//! vertical spacing
 	float _vSpacing;
-	
+
 	//! number of columns
 	int32 _numColumns;
-	
+
 	//! numer of rows
 	int32 _numRows;
-	
+
 	//! horizontal alignment for text
 	int32 _option_xalign;
-	
+
 	//! vertical alignment for text
 	int32 _option_yalign;
-	
+
 	//! when Update() is called, blink is set to true on frames that cursor should blink (i.e. not be visible)
 	bool _blink;
-	
+
 	//! timer used for controlling blink effect
 	int32 _blinkTime;
-	
+
 	//! timer used for controlling scrolling effect
 	int32 _scrollTime;
-	
+
 	//! offset we're scrolling from
 	int32 _scrollStartOffset;
-	
+
 	//! offset we're scrolling to
 	int32 _scrollEndOffset;
-	
+
 	//! 1 for down, -1 for up
 	int32 _scrollDirection;
-	
+
 	//! current scroll offset
 	int32 _scrollOffset;
-	
+
 	//! selection mode
 	SelectMode _selectMode;
-	
+
 	//! allow switching
 	bool _switching;
-	
+
 	//! current cursor state (blinking, visible, hidden, etc)
 	CursorState _cursorState;
-	
+
 	//! horizontal wrapping mode
 	WrapMode   _hWrapMode;
-	
+
 	//! vertical wrapping mode
 	WrapMode   _vWrapMode;
-	
+
 	//! event that occurred during a frame
 	int32 _event;
-	
+
 	//! current selection
 	int32 _selection;
-	
+
 	//! if a switch event happens, switch selection is one of the elements being switched, and the other is _selection
 	int32 _switchSelection;
-	
+
 	//! first selection that player confirmed on in double-confirm mode
 	int32 _firstSelection;
-	
+
 	//! vector containing each option
 	std::vector <Option> _options;
-	
+
 	//! how many options there are in this box
 	int32 _numOptions;
-	
+
 	//! true if the box is currently in the middle of scrolling
 	bool  _scrolling;
-	
+
 	//! structure containing properties of the current font like height, etc.
 	FontProperties _fontProperties;
-	
+
 }; // class OptionBox : public private_video::GUIControl
 
 

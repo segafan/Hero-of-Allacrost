@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -120,7 +120,7 @@ protected:
 	bool  _initialized;
 
 	//! \brief Contains the errors that need to be resolved if the object is in an invalid state (not ready for rendering).
-	std::string _initialize_errors;
+	std::string _initialization_errors;
 }; // class GUIElement
 
 
@@ -250,7 +250,7 @@ public:
 	*** \param frame_time The number of milliseconds it took for the last frame.
 	**/
 	void DrawFPS(int32 frame_time);
-	
+
 	/** \brief Sets the current menu skin for GUI objects to use
 	*** \param &img_file_* image filenames for the skin
 	*** \param &fill_color_* color to fill the menu with. You can make it transparent by setting alpha
