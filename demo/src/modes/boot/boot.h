@@ -91,6 +91,9 @@ private:
 
 	//! Latest version according to version check
 	bool _latest_version;
+
+	//! Has the user modified game settings?
+	bool _has_modified_settings;
 	
 	//! If this isn't the latest version, what is?
 	std::string _latest_version_number;

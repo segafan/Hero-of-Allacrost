@@ -400,7 +400,7 @@ public:
 	//@}
 
 	/** \name   Currently set key names' access functions
-	*** \return SDLKey number according to the currently set key
+	*** \return Name of the key in char* format
 	**/
 	//@{
 	std::string GetUpKeyName() const { return SDL_GetKeyName(_key.up); }
@@ -420,13 +420,13 @@ public:
 	*** \return Joystick button number for the action
 	**/
 	//@{
-	std::string GetConfirmJoy() const { return std::string("Button ") + hoa_utils::NumberToString(_joystick.confirm); }
-	std::string GetCancelJoy() const { return std::string("Button ") + hoa_utils::NumberToString(_joystick.cancel); }
-	std::string GetMenuJoy() const { return std::string("Button ") + hoa_utils::NumberToString(_joystick.menu); }
-	std::string GetSwapJoy() const { return std::string("Button ") + hoa_utils::NumberToString(_joystick.swap); }
-	std::string GetLeftSelectJoy() const { return std::string("Button ") + hoa_utils::NumberToString(_joystick.left_select); }
-	std::string GetRightSelectJoy() const { return std::string("Button ") + hoa_utils::NumberToString(_joystick.right_select); }
-	std::string GetPauseJoy() const { return std::string("Button ") + hoa_utils::NumberToString(_joystick.pause); }
+	int32 GetConfirmJoy() const { return _joystick.confirm; }
+	int32 GetCancelJoy() const { return _joystick.cancel; }
+	int32 GetMenuJoy() const { return _joystick.menu; }
+	int32 GetSwapJoy() const { return _joystick.swap; }
+	int32 GetLeftSelectJoy() const { return _joystick.left_select; }
+	int32 GetRightSelectJoy() const { return _joystick.right_select; }
+	int32 GetPauseJoy() const { return _joystick.pause; }
 	//@}	
 
 	/** \name   Sets new keymappings
@@ -457,6 +457,23 @@ public:
 	void SetLeftSelectJoy(uint8 button) { _SetNewJoyButton(_joystick.left_select, button); }
 	void SetRightSelectJoy(uint8 button) { _SetNewJoyButton(_joystick.right_select, button); }
 	void SetPauseJoy(uint8 button) { _SetNewJoyButton(_joystick.pause, button); }
+	//@}
+
+	/** \name   Returns currently set keys' virtual key codes (SDLKeys)
+	*** \return Integer according to the currently set key
+	**/
+	//@{
+	int32 GetUpKey() const { return _key.up; }
+	int32 GetDownKey() const { return _key.down; }
+	int32 GetLeftKey() const { return _key.left; }
+	int32 GetRightKey() const { return _key.right; }
+	int32 GetConfirmKey() const { return _key.confirm; }
+	int32 GetCancelKey() const { return _key.cancel; }
+	int32 GetMenuKey() const { return _key.menu; }
+	int32 GetSwapKey() const { return _key.swap; }
+	int32 GetLeftSelectKey() const { return _key.left_select; }
+	int32 GetRightSelectKey() const { return _key.right_select; }
+	int32 GetPauseKey() const { return _key.pause; }
 	//@}
 
 }; // class GameInput

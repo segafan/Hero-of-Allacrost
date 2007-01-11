@@ -59,6 +59,8 @@ bool BootMode::_logo_animating = true;
 // The constructor initializes variables and sets up the path names of the boot images
 BootMode::BootMode() :
 	_fade_out(false),
+	_latest_version(true),
+	_has_modified_settings(false),
 	_main_menu(0, false, this)
 {
 	if (BOOT_DEBUG) cout << "BOOT: BootMode constructor invoked." << endl;
@@ -597,6 +599,7 @@ void BootMode::_OnLoadGame() {
 // 'Options' confirmed
 void BootMode::_OnOptions() {
 	_current_menu = &_options_menu;
+	_has_modified_settings = true; // Lazy way to check if we've changed anything. The correct way is to move this line in every setting-modifying function...
 }
 
 
@@ -790,29 +793,63 @@ void BootMode::_UpdateKeySettings() {
 
 
 void BootMode::_UpdateJoySettings() {
-	_joy_settings_menu.SetOptionText(0, MakeUnicodeString("Confirm: " + InputManager->GetConfirmJoy()));
-	_joy_settings_menu.SetOptionText(1, MakeUnicodeString("Cancel: " + InputManager->GetCancelJoy()));
-	_joy_settings_menu.SetOptionText(2, MakeUnicodeString("Menu: " + InputManager->GetMenuJoy()));
-	_joy_settings_menu.SetOptionText(3, MakeUnicodeString("Swap: " + InputManager->GetSwapJoy()));
-	_joy_settings_menu.SetOptionText(4, MakeUnicodeString("Left Select: " + InputManager->GetLeftSelectJoy()));
-	_joy_settings_menu.SetOptionText(5, MakeUnicodeString("Right Select: " + InputManager->GetRightSelectJoy()));
-	_joy_settings_menu.SetOptionText(6, MakeUnicodeString("Pause: " + InputManager->GetPauseJoy()));
+	_joy_settings_menu.SetOptionText(0, MakeUnicodeString("Confirm: Button " + NumberToString(InputManager->GetConfirmJoy())));
+	_joy_settings_menu.SetOptionText(1, MakeUnicodeString("Cancel: Button " + NumberToString(InputManager->GetCancelJoy())));
+	_joy_settings_menu.SetOptionText(2, MakeUnicodeString("Menu: Button " + NumberToString(InputManager->GetMenuJoy())));
+	_joy_settings_menu.SetOptionText(3, MakeUnicodeString("Swap: Button " + NumberToString(InputManager->GetSwapJoy())));
+	_joy_settings_menu.SetOptionText(4, MakeUnicodeString("Left Select : Button " + NumberToString(InputManager->GetLeftSelectJoy())));
+	_joy_settings_menu.SetOptionText(5, MakeUnicodeString("Right Select: Button " + NumberToString(InputManager->GetRightSelectJoy())));
+	_joy_settings_menu.SetOptionText(6, MakeUnicodeString("Pause: Button " + NumberToString(InputManager->GetPauseJoy())));
 }
 
 
 // Saves all the game settings into a .lua file
 void BootMode::_SaveSettingsFile() {
+
+	// No need to save the settings if we haven't edited anything!
+	// TODO: Uncomment the next line when the lua tables are saved correctly!
+	//if (!_has_modified_settings)
+		return;
+
+	// Load the settings file for reading in the original data
 	ScriptDescriptor settings_lua;
 	if (!settings_lua.OpenFile("dat/config/settings.lua", SCRIPT_READ)) {
 		cout << "BOOT ERROR: failed to load the settings file!" << endl;
 	}
 
-	// TODO: Write everything properly in the settings file!
+	// Write the current settings into the .lua file
+	// video
+	settings_lua.ChangeSetting<int32>("video_settings.screen_resx", VideoManager->GetWidth());
+	settings_lua.ChangeSetting<int32>("video_settings.screen_resy", VideoManager->GetHeight());
+	settings_lua.ChangeSetting<std::string>("video_settings.full_screen", VideoManager->IsFullscreen() ? "true" : "false");
+	settings_lua.ChangeSetting<float>("video_settings.brightness", VideoManager->GetGamma());
+	
+	// audio
+	settings_lua.ChangeSetting<float>("audio_settings.music_vol", AudioManager->GetMusicVolume());
+	settings_lua.ChangeSetting<float>("audio_settings.sound_vol", AudioManager->GetSoundVolume());
 
-	// Example code:
-	//settings_lua.ChangeSetting<float>("coord_sys_x_right", 800.0f);
-	//settings_lua.ChangeSetting<std::string>("new_setting", "this is a new setting");
-	//settings_lua.SaveStack("dat/config/new_settings.lua");
+	// input
+	settings_lua.ChangeSetting<int32>("key_settings.up", InputManager->GetUpKey());
+	settings_lua.ChangeSetting<int32>("key_settings.down", InputManager->GetDownKey());
+	settings_lua.ChangeSetting<int32>("key_settings.left", InputManager->GetLeftKey());
+	settings_lua.ChangeSetting<int32>("key_settings.right", InputManager->GetRightKey());
+	settings_lua.ChangeSetting<int32>("key_settings.confirm", InputManager->GetConfirmKey());
+	settings_lua.ChangeSetting<int32>("key_settings.cancel", InputManager->GetCancelKey());
+	settings_lua.ChangeSetting<int32>("key_settings.menu", InputManager->GetMenuKey());
+	settings_lua.ChangeSetting<int32>("key_settings.swap", InputManager->GetSwapKey());
+	settings_lua.ChangeSetting<int32>("key_settings.left_select", InputManager->GetLeftSelectKey());
+	settings_lua.ChangeSetting<int32>("key_settings.right_select", InputManager->GetRightSelectKey());
+	settings_lua.ChangeSetting<int32>("key_settings.pause", InputManager->GetPauseKey());
+	settings_lua.ChangeSetting<int32>("joystick_settings.confirm", InputManager->GetConfirmJoy());
+	settings_lua.ChangeSetting<int32>("joystick_settings.cancel", InputManager->GetCancelJoy());
+	settings_lua.ChangeSetting<int32>("joystick_settings.menu", InputManager->GetMenuJoy());
+	settings_lua.ChangeSetting<int32>("joystick_settings.swap", InputManager->GetSwapJoy());
+	settings_lua.ChangeSetting<int32>("joystick_settings.left_select", InputManager->GetLeftSelectJoy());
+	settings_lua.ChangeSetting<int32>("joystick_settings.right_select", InputManager->GetRightSelectJoy());
+	settings_lua.ChangeSetting<int32>("joystick_settings.pause", InputManager->GetPauseJoy());	
+	
+	// and save it!
+	settings_lua.SaveStack("dat/config/new_settings.lua");
 }
 
 
