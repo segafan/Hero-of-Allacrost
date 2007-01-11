@@ -29,6 +29,7 @@
 #include "system.h"
 #include "map.h"
 #include "battle.h" // tmp
+#include "menu.h" // even more tmp
 
 using namespace std;
 using namespace hoa_boot::private_boot;
@@ -483,6 +484,10 @@ void BootMode::_SetupMainMenu() {
 	_main_menu.AddOption(MakeUnicodeString("Credits"), &BootMode::_OnCredits);
 	_main_menu.AddOption(MakeUnicodeString("Quit"), &BootMode::_OnQuit);
 
+	_main_menu.AddOption(MakeUnicodeString("Battle"), &BootMode::_OnBattleDebug);
+	_main_menu.AddOption(MakeUnicodeString("Menu"), &BootMode::_OnMenuDebug);
+	
+
 	_main_menu.EnableOption(1, false); // gray out "load game" for now.
 }
 
@@ -615,6 +620,25 @@ void BootMode::_OnQuit() {
 	_SaveSettingsFile();
 	SystemManager->ExitGame();
 }
+
+// Battle debug confirmed
+void BootMode::_OnBattleDebug() {
+	ModeManager->Pop();
+	GlobalManager->AddCharacter(new GlobalCharacter(MakeUnicodeString("Claudius"), "claudius", GLOBAL_CHARACTER_CLAUDIUS));
+	GlobalManager->GetActiveParty()->AddCharacter(GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS));
+	BattleMode *BM = new BattleMode();
+	ModeManager->Push(BM);
+}
+
+// Menu debug confirmed
+void BootMode::_OnMenuDebug() {
+	ModeManager->Pop();
+	GlobalManager->AddCharacter(new GlobalCharacter(MakeUnicodeString("Claudius"), "claudius", GLOBAL_CHARACTER_CLAUDIUS));
+	GlobalManager->GetActiveParty()->AddCharacter(GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS));
+	hoa_menu::MenuMode *MM = new hoa_menu::MenuMode();
+	ModeManager->Push(MM);
+}
+
 
 // 'Resolution' confirmed
 void BootMode::_OnResolution() {
