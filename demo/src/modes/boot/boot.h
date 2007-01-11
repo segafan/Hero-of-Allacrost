@@ -197,6 +197,10 @@ private:
 	void _OnCredits();
 	//! 'Quit' confirmed
 	void _OnQuit();
+	//! Battle debug confirmed
+	void _OnBattleDebug();
+	//! Menu debug confirmed
+	void _OnMenuDebug();
 
 	// Options' handlers
 	//! 'Video' confirmed
