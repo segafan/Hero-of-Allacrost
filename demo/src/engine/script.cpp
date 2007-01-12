@@ -2,17 +2,19 @@
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-/*!****************************************************************************
- * \file    data.cpp
- * \author  Vladimir Mitrovic, snipe714@allacrost.org
- *			Daniel Steuernol, steu@allacrost.org
- * \brief   Source file for data and scripting engine.
- *****************************************************************************/
+/** ****************************************************************************
+*** \file    script.cpp
+*** \author  Daniel Steuernol, steu@allacrost.org
+***          Tyler Olsen, roots@allacrost.org
+***          Vladimir Mitrovic, snipe714@allacrost.org
+***
+*** \brief   Source file for scripting engine.
+*** ***************************************************************************/
 
 #include <iostream>
 #include <stdarg.h>
@@ -67,7 +69,7 @@ bool ScriptDescriptor::OpenFile(std::string file_name, SCRIPT_ACCESS_MODE mode) 
 	if (mode == SCRIPT_READ) {
 		// Needs a comment: what does this do exactly?
 		_lstack = lua_newthread(ScriptManager->GetGlobalState());
-		
+
 		// Attempt to load the Lua file.
 		if (lua_dofile(_lstack, file_name.c_str())) {
 			cerr << "SCRIPT ERROR: Could not load file " << file_name << " for reading. " << endl;
@@ -140,7 +142,7 @@ void ScriptDescriptor::CloseFile() {
 void ScriptDescriptor::DEBUG_PrintLuaStack() {
 	if (_CheckFileAccess(SCRIPT_READ) == false)
 		return;
-	
+
 	int32 type;
 	cout << "SCRIPT DEBUG: Printing lua stack" << endl;
 	for (int32 i = lua_gettop(_lstack); i > 0; i--) {  // Print each element starting from the top
@@ -180,12 +182,25 @@ void ScriptDescriptor::DEBUG_PrintLuaStack() {
 	}
 } // void ScriptDescriptor::DEBUG_PrintLuaStack()
 
+
+void ScriptDescriptor::DEBUG_ShowGlobals() {
+	cout << "SCRIPT DEBUG: Writing out globals." << endl;
+	object o(from_stack(_lstack, LUA_GLOBALSINDEX));
+	for (luabind::iterator it(o), end; it != end; ++it)
+	{
+		cout << it.key() << " = " << (*it) << "   TYPE: " << type(*it) << endl;
+		if (luabind::type(*it) == LUA_TTABLE) {
+			// TODO: what needs to go here? Printing out the table contents?
+		}
+	}
+}
+
 // ****************************** Read Functions *******************************
 
 void ScriptDescriptor::ReadOpenTable(std::string key) {
 	if (_CheckFileAccess(SCRIPT_READ) == false)
 		return;
-	
+
 	if (_open_tables.size() == 0) { // Fetch the table from the global space
 		lua_getglobal(_lstack, key.c_str());
 		if (!lua_istable(_lstack, STACK_TOP)) {
@@ -195,7 +210,7 @@ void ScriptDescriptor::ReadOpenTable(std::string key) {
 		}
 		_open_tables.push_back(key);
 	}
-	
+
 	else { // The table to fetch is an element of another table
 		lua_pushstring(_lstack, key.c_str());
 		lua_gettable(_lstack, STACK_TOP - 1);
@@ -213,13 +228,13 @@ void ScriptDescriptor::ReadOpenTable(std::string key) {
 void ScriptDescriptor::ReadOpenTable(const int32 key) {
 	if (_CheckFileAccess(SCRIPT_READ) == false)
 		return;
-	
+
 	// At least one table must be open to use a numerical key
 	if (_open_tables.size() == 0) {
 		_error_code |= SCRIPT_BAD_GLOBAL;
 		return;
 	}
-	
+
 	lua_pushnumber(_lstack, key);
 	lua_gettable(_lstack, STACK_TOP - 1);
 	if (!lua_istable(_lstack, STACK_TOP)) {
@@ -236,7 +251,7 @@ void ScriptDescriptor::ReadOpenTable(const int32 key) {
 void ScriptDescriptor::ReadCloseTable() {
 	if (_CheckFileAccess(SCRIPT_READ) == false)
 		return;
-	
+
 	if (_open_tables.size() == 0) {
 		_error_code |= SCRIPT_CLOSE_TABLE_FAILURE;
 		return;
@@ -251,7 +266,7 @@ void ScriptDescriptor::ReadCloseTable() {
 uint32 ScriptDescriptor::ReadGetTableSize(std::string key) {
 	if (_CheckFileAccess(SCRIPT_READ) == false)
 		return 0;
-	
+
 	uint32 size = 0;
 	uint32 error_save = _error_code; // Temporarily save the error code
 	_error_code = SCRIPT_NO_ERRORS;
@@ -271,10 +286,10 @@ uint32 ScriptDescriptor::ReadGetTableSize(std::string key) {
 uint32 ScriptDescriptor::ReadGetTableSize(const int32 key) {
 	if (_CheckFileAccess(SCRIPT_READ) != true)
 		return 0;
-	
+
 	uint32 error_save = _error_code; // Temporarily save the error code
 	uint32 size = 0;
-	
+
 	_error_code = SCRIPT_NO_ERRORS;
 	ReadOpenTable(key);
 	// Only grab the size if the operation was successful.
@@ -292,7 +307,7 @@ uint32 ScriptDescriptor::ReadGetTableSize(const int32 key) {
 uint32 ScriptDescriptor::ReadGetTableSize() {
 	if (_CheckFileAccess(SCRIPT_READ) != true)
 		return 0;
-	
+
 	// Attempt to get the size of the most recently opened table
 	if (_open_tables.size() == 0) {
 		return 0;
@@ -300,7 +315,7 @@ uint32 ScriptDescriptor::ReadGetTableSize() {
 	return static_cast<uint32>(luaL_getn(_lstack, STACK_TOP));
 }
 
-// ************************* Comment Write Functions **************************
+// ***************************** Write Functions *******************************
 
 // Writes the "path" for all the open tables. Ex) table01[table02][table03]
 void ScriptDescriptor::_WriteTablePath() {
@@ -321,7 +336,7 @@ void ScriptDescriptor::_WriteTablePath() {
 void ScriptDescriptor::WriteInsertNewLine() {
 	if (_CheckFileAccess(SCRIPT_WRITE) != true)
 		return;
-	
+
 	_outfile << endl;
 }
 
@@ -330,7 +345,7 @@ void ScriptDescriptor::WriteInsertNewLine() {
 void ScriptDescriptor::WriteComment(const char* comment) {
 	if (_CheckFileAccess(SCRIPT_WRITE) != true)
 		return;
-	
+
 	_outfile << "-- " << comment << endl;
 }
 
@@ -348,7 +363,7 @@ void ScriptDescriptor::WriteComment(std::string& comment) {
 void ScriptDescriptor::WriteBeginCommentBlock() {
 	if (_CheckFileAccess(SCRIPT_WRITE) != true)
 		return;
-	
+
 	_outfile << "--[[" << endl;
 }
 
@@ -357,7 +372,7 @@ void ScriptDescriptor::WriteBeginCommentBlock() {
 void ScriptDescriptor::WriteEndCommentBlock() {
 	if (_CheckFileAccess(SCRIPT_WRITE) != true)
 		return;
-	
+
 	_outfile << "--]]" << endl;
 }
 
@@ -366,7 +381,7 @@ void ScriptDescriptor::WriteEndCommentBlock() {
 void ScriptDescriptor::WriteLine(const char* comment) {
 	if (_CheckFileAccess(SCRIPT_WRITE) != true)
 		return;
-	
+
 	_outfile << comment << endl;
 }
 
@@ -375,7 +390,7 @@ void ScriptDescriptor::WriteLine(const char* comment) {
 void ScriptDescriptor::WriteLine(std::string& comment) {
 	if (_CheckFileAccess(SCRIPT_WRITE) != true)
 		return;
-	
+
 	_outfile << comment << endl;
 }
 
@@ -384,7 +399,7 @@ void ScriptDescriptor::WriteLine(std::string& comment) {
 void ScriptDescriptor::WriteBool(const char *key, bool value) {
 	if (_CheckFileAccess(SCRIPT_WRITE) != true)
 		return;
-	
+
 	if (_open_tables.size() == 0) {
 		_outfile << key << " = ";
 		if (value)
@@ -414,14 +429,14 @@ void ScriptDescriptor::WriteBool(const char *key, bool value) {
 void ScriptDescriptor::WriteBool(const int32 key, bool value) {
 	if (_CheckFileAccess(SCRIPT_WRITE) != true)
 		return;
-	
+
 	if (_open_tables.empty()) {
 		_error_code |= SCRIPT_BAD_GLOBAL;
 		if (SCRIPT_DEBUG)
 			cerr << "SCRIPT ERROR: Attempt to write a numerical value as a global key" << endl;
 		return;
 	}
-	
+
 	_WriteTablePath();
 	_outfile << '[' << key << ']' << " = ";
 	if (value)
@@ -429,6 +444,8 @@ void ScriptDescriptor::WriteBool(const int32 key, bool value) {
 	else
 		_outfile << "false" << endl;
 }
+
+
 
 void ScriptDescriptor::WriteBool(string &key, bool value)
 {
@@ -440,7 +457,7 @@ void ScriptDescriptor::WriteBool(string &key, bool value)
 void ScriptDescriptor::WriteInt(const char *key, int32 value) {
 	if (_CheckFileAccess(SCRIPT_WRITE) != true)
 		return;
-	
+
 	if (_open_tables.size() == 0) {
 		_outfile << key << " = " << value << endl;
 	}
@@ -455,17 +472,19 @@ void ScriptDescriptor::WriteInt(const char *key, int32 value) {
 void ScriptDescriptor::WriteInt(const int32 key, int32 value) {
 	if (_CheckFileAccess(SCRIPT_WRITE) != true)
 		return;
-	
+
 	if (_open_tables.empty()) {
 		_error_code |= SCRIPT_BAD_GLOBAL;
 		if (SCRIPT_DEBUG)
 			cerr << "SCRIPT ERROR: Attempt to write a numerical value as a global key" << endl;
 		return;
 	}
-	
+
 	_WriteTablePath();
 	_outfile << '[' << key << ']' << " = " << value << endl;
 }
+
+
 
 void ScriptDescriptor::WriteInt(string &key, int32 value)
 {
@@ -477,11 +496,11 @@ void ScriptDescriptor::WriteInt(string &key, int32 value)
 void ScriptDescriptor::WriteFloat(const char *key, float value) {
 	if (_CheckFileAccess(SCRIPT_WRITE) != true)
 		return;
-	
+
 	if (_open_tables.size() == 0) {
 		_outfile << key << " = " << value << endl;
 	}
-	
+
 	else {
 		_WriteTablePath();
 		_outfile << '[' << key << ']' << " = " << value << endl;
@@ -493,17 +512,19 @@ void ScriptDescriptor::WriteFloat(const char *key, float value) {
 void ScriptDescriptor::WriteFloat(const int32 key, float value) {
 	if (_CheckFileAccess(SCRIPT_WRITE) != true)
 		return;
-	
+
 	if (_open_tables.empty()) {
 		_error_code |= SCRIPT_BAD_GLOBAL;
 		if (SCRIPT_DEBUG)
 			cerr << "SCRIPT ERROR: Attempt to write a numerical value as a global key" << endl;
 		return;
 	}
-	
+
 	_WriteTablePath();
 	_outfile << '[' << key << ']' << " = " << value << endl;
 }
+
+
 
 void ScriptDescriptor::WriteFloat(string &key, float value)
 {
@@ -515,10 +536,10 @@ void ScriptDescriptor::WriteFloat(string &key, float value)
 void ScriptDescriptor::WriteString(const char *key, const char* value) {
 	if (_CheckFileAccess(SCRIPT_WRITE) != true)
 		return;
-	
+
 	if (_open_tables.size() == 0) {
 		_outfile << key << " = \"" << value << "\"" << endl;
-		
+
 	}
 	else {
 		_WriteTablePath();
@@ -531,7 +552,7 @@ void ScriptDescriptor::WriteString(const char *key, const char* value) {
 void ScriptDescriptor::WriteString(const char *key, std::string& value) {
 	if (_CheckFileAccess(SCRIPT_WRITE) != true)
 		return;
-	
+
 	if (_open_tables.size() == 0) {
 		_outfile << key << " = \"" << value << "\"" << endl;
 	}
@@ -546,14 +567,14 @@ void ScriptDescriptor::WriteString(const char *key, std::string& value) {
 void ScriptDescriptor::WriteString(const int32 key, const char* value) {
 	if (_CheckFileAccess(SCRIPT_WRITE) != true)
 		return;
-	
+
 	if (_open_tables.empty()) {
 		_error_code |= SCRIPT_BAD_GLOBAL;
 		if (SCRIPT_DEBUG)
 			cerr << "SCRIPT ERROR: Attempt to write a numerical value as a global key" << endl;
 		return;
 	}
-	
+
 	_WriteTablePath();
 	_outfile << '[' << key << ']' << " = \"" << value << "\"" << endl;
 }
@@ -563,22 +584,26 @@ void ScriptDescriptor::WriteString(const int32 key, const char* value) {
 void ScriptDescriptor::WriteString(const int32 key, std::string& value) {
 	if (_CheckFileAccess(SCRIPT_WRITE) != true)
 		return;
-	
+
 	if (_open_tables.empty()) {
 		_error_code |= SCRIPT_BAD_GLOBAL;
 		if (SCRIPT_DEBUG)
 			cerr << "SCRIPT ERROR: Attempt to write a numerical value as a global key" << endl;
 		return;
 	}
-	
+
 	_WriteTablePath();
 	_outfile << '[' << key << ']' << " = \"" << value << "\"" << endl;
 }
+
+
 
 void ScriptDescriptor::WriteString(string &key, const char *value)
 {
 	this->WriteString(key.c_str(), value);
 }
+
+
 
 void ScriptDescriptor::WriteString(string &key, string &value)
 {
@@ -590,14 +615,14 @@ void ScriptDescriptor::WriteString(string &key, string &value)
 void ScriptDescriptor::WriteBoolVector(const char *key, std::vector<bool> &vect) {
 	if (_CheckFileAccess(SCRIPT_WRITE) != true)
 		return;
-	
+
 	if (vect.empty()) {
 		_error_code |= SCRIPT_BAD_VECTOR_SIZE;
-		if (SCRIPT_DEBUG) 
+		if (SCRIPT_DEBUG)
 			cerr << "SCRIPT WARNING: passed a vector of size zero for writing." << endl;
 		return;
 	}
-	
+
 	if (_open_tables.size() == 0) {
 		_outfile << key << " = { ";
 	}
@@ -605,8 +630,8 @@ void ScriptDescriptor::WriteBoolVector(const char *key, std::vector<bool> &vect)
 		_WriteTablePath();
 		_outfile << '[' << key << "] = { ";
 	}
-	
-	if (vect[0]) 
+
+	if (vect[0])
 		_outfile << "true";
 	else
 		_outfile << "false";
@@ -624,14 +649,14 @@ void ScriptDescriptor::WriteBoolVector(const char *key, std::vector<bool> &vect)
 void ScriptDescriptor::WriteIntVector(const char *key, std::vector<int32> &vect) {
 	if (_CheckFileAccess(SCRIPT_WRITE) != true)
 		return;
-	
+
 	if (vect.empty()) {
 		_error_code |= SCRIPT_BAD_VECTOR_SIZE;
-		if (SCRIPT_DEBUG) 
+		if (SCRIPT_DEBUG)
 			cerr << "SCRIPT WARNING: passed a vector of size zero for writing." << endl;
 		return;
 	}
-	
+
 	if (_open_tables.size() == 0) {
 			_outfile << key << " = { ";
 		}
@@ -639,7 +664,7 @@ void ScriptDescriptor::WriteIntVector(const char *key, std::vector<int32> &vect)
 		_WriteTablePath();
 		_outfile << '[' << key << "] = { ";
 	}
-	
+
 	_outfile << vect[0];
 	for (uint32 i = 1; i < vect.size(); i++) {
 		_outfile << ", " << vect[i];
@@ -652,14 +677,14 @@ void ScriptDescriptor::WriteIntVector(const char *key, std::vector<int32> &vect)
 void ScriptDescriptor::WriteFloatVector(const char *key, std::vector<float> &vect) {
 	if (_CheckFileAccess(SCRIPT_WRITE) != true)
 		return;
-	
+
 	if (vect.empty()) {
 		_error_code |= SCRIPT_BAD_VECTOR_SIZE;
-		if (SCRIPT_DEBUG) 
+		if (SCRIPT_DEBUG)
 			cerr << "SCRIPT WARNING: passed a vector of size zero for writing." << endl;
 		return;
 	}
-	
+
 	if (_open_tables.size() == 0) {
 		_outfile << key << " = { ";
 
@@ -668,7 +693,7 @@ void ScriptDescriptor::WriteFloatVector(const char *key, std::vector<float> &vec
 		_WriteTablePath();
 		_outfile << '[' << key << "] = { ";
 	}
-	
+
 	_outfile << vect[0];
 	for (uint32 i = 1; i < vect.size() - 1; i++) {
 		_outfile << ", " << vect[i];
@@ -681,14 +706,14 @@ void ScriptDescriptor::WriteFloatVector(const char *key, std::vector<float> &vec
 void ScriptDescriptor::WriteStringVector(const char *key, std::vector<std::string> &vect) {
 	if (_CheckFileAccess(SCRIPT_WRITE) != true)
 		return;
-	
+
 	if (vect.empty()) {
 		_error_code |= SCRIPT_BAD_VECTOR_SIZE;
-		if (SCRIPT_DEBUG) 
+		if (SCRIPT_DEBUG)
 			cerr << "SCRIPT WARNING: passed a vector of size zero for writing." << endl;
 		return;
 	}
-	
+
 	if (_open_tables.size() == 0) {
 		_outfile << key << " = { ";
 	}
@@ -696,7 +721,7 @@ void ScriptDescriptor::WriteStringVector(const char *key, std::vector<std::strin
 		_WriteTablePath();
 		_outfile << '[' << key << "] = { ";
 	}
-	
+
 	_outfile << "\"" << vect[0] << "\"";
 	for (uint32 i = 1; i < vect.size(); i++) {
 		_outfile << ", \"" << vect[i] << "\"";
@@ -704,35 +729,66 @@ void ScriptDescriptor::WriteStringVector(const char *key, std::vector<std::strin
 	_outfile << " }" << endl;
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// ScriptDescriptor::ShowGlobals()
-//////////////////////////////////////////////////////////////////////////////
-void ScriptDescriptor::ShowGlobals()
+
+// Writes the new table name to the file and manages the state of the context
+void ScriptDescriptor::WriteBeginTable(const char *key) {
+	if (_CheckFileAccess(SCRIPT_WRITE) != true)
+		return;
+
+	if (_open_tables.size() == 0) {
+		_outfile << key << " = {}" << endl;
+	}
+	else {
+		_WriteTablePath();
+		_outfile << '[' << key << "] = {}" << endl;
+	}
+
+	_open_tables.push_back(key);
+}
+
+
+// Writes the new tables using an integer as the key
+void ScriptDescriptor::WriteBeginTable(int key)
 {
-	cout << "Writing out globals." << endl;
-	object o(from_stack(_lstack, LUA_GLOBALSINDEX));
-	for (luabind::iterator it(o), end; it != end; ++it)
+	if (_CheckFileAccess(SCRIPT_WRITE) != true)
+		return;
+
+	if (_open_tables.size() == 0)
+		_outfile << key << " = {}" << endl;
+	else
 	{
-		cout << it.key() << "=" << (*it) << "  TYPE:" << type(*it) << endl;
-		if (luabind::type(*it) == LUA_TTABLE)
-		{
-		}
+		_WriteTablePath();
+		_outfile << '[' << key << "] = {}" << endl;
+	}
+
+	_open_tables.push_back(NumberToString<int>(key));
+}
+
+// Does internal scope handling of the lua file so things are written in the write global/table space.
+// This doesn't actually do any file write operations, but we still need to call it.
+void ScriptDescriptor::WriteEndTable() {
+	if (_CheckFileAccess(SCRIPT_WRITE) != true)
+		return;
+
+	if (_open_tables.empty()) {
+		_error_code |= SCRIPT_CLOSE_TABLE_FAILURE;
+		if (SCRIPT_DEBUG)
+			cerr << "SCRIPT WARNING: Tried to close a table during writing when no table was open" << endl;
+	}
+	else {
+		_open_tables.pop_back();
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// ScriptDescriptor::ShowGlobals()
-//////////////////////////////////////////////////////////////////////////////
-void ScriptDescriptor::SaveStack(const std::string &filename)
-{
+// ***************************** Modify Functions ******************************
+
+void ScriptDescriptor::SaveStack(const std::string &filename) {
 	ScriptDescriptor sd;
 	sd.OpenFile(filename, SCRIPT_WRITE);
 	object o(luabind::from_stack(_lstack, LUA_GLOBALSINDEX));
-	this->ShowGlobals();
-	for (luabind::iterator it(o), end; it != end; ++it)
-	{
-		switch(luabind::type(*it))
-		{
+	this->DEBUG_ShowGlobals();
+	for (luabind::iterator it(o), end; it != end; ++it) {
+		switch(luabind::type(*it)) {
 		case LUA_TBOOLEAN:
 // 			sd.WriteBool(object_cast<string>(it.key()), object_cast<bool>(*it));
 			break;
@@ -750,16 +806,12 @@ void ScriptDescriptor::SaveStack(const std::string &filename)
 	sd.CloseFile();
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-// ScriptDescriptor::_SaveStackProcessTable
-/////////////////////////////////////////////////////////////////////////////////
-void ScriptDescriptor::_SaveStackProcessTable(ScriptDescriptor &sd, string &name, luabind::object table)
-{
+
+
+void ScriptDescriptor::_SaveStackProcessTable(ScriptDescriptor &sd, string &name, luabind::object table) {
 	sd.WriteBeginTable(name.c_str());
-	for (luabind::iterator it(table), end; it != end; ++it)
-	{
-		switch(luabind::type(*it))
-		{
+	for (luabind::iterator it(table), end; it != end; ++it) {
+		switch(luabind::type(*it)) {
 		case LUA_TBOOLEAN:
 // 			sd.WriteBool(object_cast<string>(it.key()), object_cast<bool>(*it));
 			break;
@@ -777,59 +829,10 @@ void ScriptDescriptor::_SaveStackProcessTable(ScriptDescriptor &sd, string &name
 	sd.WriteEndTable();
 }
 
-// Writes the new table name to the file and manages the state of the context
-void ScriptDescriptor::WriteBeginTable(const char *key) {
-	if (_CheckFileAccess(SCRIPT_WRITE) != true)
-		return;
-	
-	if (_open_tables.size() == 0) {
-		_outfile << key << " = {}" << endl;
-	}
-	else {
-		_WriteTablePath();
-		_outfile << '[' << key << "] = {}" << endl;
-	}
-	
-	_open_tables.push_back(key);
-}
-
-
-// Writes the new tables using an integer as the key
-void ScriptDescriptor::WriteBeginTable(int key) 
-{
-	if (_CheckFileAccess(SCRIPT_WRITE) != true)
-		return;
-
-	if (_open_tables.size() == 0)
-		_outfile << key << " = {}" << endl;
-	else
-	{
-		_WriteTablePath();
-		_outfile << '[' << key << "] = {}" << endl;
-	}
-
-	_open_tables.push_back(NumberToString<int>(key));	
-}
-
-// Does internal scope handling of the lua file so things are written in the write global/table space.
-// This doesn't actually do any file write operations, but we still need to call it.
-void ScriptDescriptor::WriteEndTable() {
-	if (_CheckFileAccess(SCRIPT_WRITE) != true)
-		return;
-	
-	if (_open_tables.empty()) {
-		_error_code |= SCRIPT_CLOSE_TABLE_FAILURE;
-		if (SCRIPT_DEBUG) 
-			cerr << "SCRIPT WARNING: Tried to close a table during writing when no table was open" << endl;
-	}
-	else {
-		_open_tables.pop_back();
-	}
-}
-
 // *****************************************************************************
 // *********************** GameScript Class Functions **************************
 // *****************************************************************************
+
 GameScript::GameScript() {
 	if (SCRIPT_DEBUG) cout << "SCRIPT: GameScript constructor invoked." << endl;
 
@@ -851,6 +854,19 @@ GameScript::~GameScript() {
 
 
 bool GameScript::SingletonInitialize() {
+// 	// Call all binding functions to make classes, functions, etc. available to Lua
+// 	GameVideo::BindToLua();
+// 	GameAudio::BindToLua();
+// 	GameModeManager::BindToLua();
+// 	GameSystem::BindToLua();
+// 	GameInput::BindToLua();
+// 	GameGlobal::BindToLua();
+//
+// 	BootMode::BindToLua();
+// 	BattleMode::BindToLua();
+// 	MapMode::BindToLua();
+// 	MenuMode::BindToLua();
+
 	// TODO: Open the user setting's file and apply those settings
 	return true;
 }

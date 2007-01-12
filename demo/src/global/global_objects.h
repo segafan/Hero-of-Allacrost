@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ////////////////////////////////////////////////////////////////////////////////
@@ -12,7 +12,7 @@
 *** \author  Tyler Olsen, roots@allacrost.org
 *** \brief   Header file for global game objects.
 ***
-*** This file contains several representations of "objects" that need to be 
+*** This file contains several representations of "objects" that need to be
 *** used by many of the game mode classes. In this context, an object can be an
 *** item, a weapon, a piece of armor, etc.
 *** ***************************************************************************/
@@ -34,10 +34,10 @@ namespace hoa_global {
 const uint8 GLOBAL_BAD_OBJECT  = 0x00;
 const uint8 GLOBAL_ITEM        = 0x01;
 const uint8 GLOBAL_WEAPON      = 0x02;
-const uint8 GLOBAL_HEAD_ARMOR  = 0x10;
-const uint8 GLOBAL_TORSO_ARMOR = 0x20;
-const uint8 GLOBAL_ARMS_ARMOR  = 0x40;
-const uint8 GLOBAL_LEGS_ARMOR  = 0x80;
+const uint8 GLOBAL_HEAD_ARMOR  = 0x04;
+const uint8 GLOBAL_TORSO_ARMOR = 0x08;
+const uint8 GLOBAL_ARMS_ARMOR  = 0x10;
+const uint8 GLOBAL_LEGS_ARMOR  = 0x20;
 //@}
 
 /** \name GameItem Usage Types
@@ -45,9 +45,8 @@ const uint8 GLOBAL_LEGS_ARMOR  = 0x80;
 **/
 //@{
 const uint8 GLOBAL_BAD_USAGE        = 0x00;
-const uint8 GLOBAL_BATTLE_USAGE     = 0x04;
-const uint8 GLOBAL_MAP_USAGE        = 0x08;
-const uint8 GLOBAL_MENU_USAGE       = 0x01;
+const uint8 GLOBAL_MENU_USAGE       = 0x0F;
+const uint8 GLOBAL_BATTLE_USAGE     = 0xF0;
 //@}
 
 /** ****************************************************************************
@@ -64,7 +63,11 @@ const uint8 GLOBAL_MENU_USAGE       = 0x01;
 *** ***************************************************************************/
 class GlobalObject {
 public:
+	GlobalObject()
+		{}
+
 	GlobalObject(uint32 id, uint32 count = 0);
+
 	~GlobalObject()
 		{}
 
@@ -72,14 +75,19 @@ public:
 	//@{
 	uint32 GetID() const
 		{ return _id; }
+
 	hoa_utils::ustring GetName() const
 		{ return _name; }
+
 	uint8 GetType() const
 		{ return _type; }
+
 	uint32 GetUsableBy() const
 		{ return _usable_by; }
+
 	uint32 GetCount() const
 		{ return _count; }
+
 	std::string GetIconPath() const
 		{ return _icon_path; }
 
@@ -89,14 +97,19 @@ public:
 	// further.
 	void SetID(const uint32 id)
 		{ _id = id; }
+
 	void SetName(const hoa_utils::ustring name)
 		{ _name = name; }
+
 	void SetType(const uint8 type)
 		{ _type = type; }
+
 	void SetCount(const uint32 count)
 		{ _count = count; }
+
 	void SetUsableBy(const uint32 use)
 		{ _usable_by = use; }
+
 	void SetIconPath(const std::string icon_path)
 		{ _icon_path = icon_path; }
 	//@}
@@ -119,29 +132,35 @@ protected:
 	*** \note The ID number zero does not correspond to a valid item
 	**/
 	uint32 _id;
+
 	//! \brief The name of the object as it would be displayed on a screen
 	hoa_utils::ustring _name;
+
 	/** \brief A numerical value that defines what type of object this is.
 	*** See the GameObject Types constants for a list of the different object types.
 	**/
 	uint8 _type;
+
 	//! \brief How many items are represented within this class object instance
 	uint32 _count;
+
 	/** \brief A bit-mask that determines which characters can use the said object.
 	*** See the "Game Character Types" constants in global_characters.h for more information
 	**/
 	uint32 _usable_by;
+
 	/** \brief The file path of the icon image for this object
 	*** \note This string should never be empty
 	*** \todo This member will eventually become defunct
 	**/
 	std::string _icon_path;
+
 	//! \brief An image icon of the object
 	hoa_video::StillImage _icon_image;
 
 private:
-	GlobalObject();
 	GlobalObject(const GlobalObject&);
+
 	GlobalObject& operator=(const GlobalObject&);
 }; // class GlobalObject
 
@@ -236,7 +255,9 @@ private:
 class GlobalArmor : public GlobalObject {
 public:
 	GlobalArmor(uint32 id, uint8 type, uint32 count);
-	~GlobalArmor();
+
+	~GlobalArmor()
+		{}
 
 private:
 	//! The amount of physical defense that the armor allows

@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ////////////////////////////////////////////////////////////////////////////////
@@ -13,7 +13,7 @@
 *** \brief   Header file for the global game manager
 ***
 *** This file contains the GameGlobal class, which is used to manage all data
-*** that is shared "globally" by the various game modes. For example, it 
+*** that is shared "globally" by the various game modes. For example, it
 *** contains the current characters in the party, the party's inventory, etc.
 *** The definition of characters, items, and other related global data are
 *** implemented in the other global header files (e.g. global_actors.h). All
@@ -64,6 +64,11 @@ class GameGlobal {
 public:
 	SINGLETON_METHODS(GameGlobal);
 
+	/** \brief Makes all relevant global classes and methods available to Lua.
+	*** This function only needs to be called once when the application starts.
+	**/
+	void BindToLua();
+
 	/** \brief Deletes all data stored within the GameGlobal class object
 	*** This function is meant to be called when the user quits the current game instance
 	*** and returns to boot mode. It will delete all character, inventory, and other data
@@ -75,7 +80,7 @@ public:
 	*** \param *ch A pointer to the GlobalCharacter object to add to the party.
 	**/
 	void AddCharacter(GlobalCharacter *ch);
-	
+
 	/** \brief Returns a pointer to a character currently in the party.
 	*** \param id The ID number of the character to retrieve.
 	*** \return A pointer to the character, or NULL if the character was not found.
@@ -104,7 +109,7 @@ public:
 
 	/** \brief Adds a new item to the inventory
 	*** \param *obj A pointer to the new object to add
-	*** 
+	***
 	*** If the item already exists in the inventory, then instead the GlobalObject#_count member is used to
 	*** increment the count of the stored item. When this is the case, the object parameter is deleted, thus
 	*** one should never attempt to reference the object pointer after passing it into this function.
@@ -116,8 +121,8 @@ public:
 
 	/** \brief Removes an item from the inventory
 	*** \param item_id The integer identifier of the item to remove
-	*** 
-	*** If the item is not in the inventory, the function will do nothing. Note that this function 
+	***
+	*** If the item is not in the inventory, the function will do nothing. Note that this function
 	***
 	*** \note This function removes the item regardless of what the GlobalObject#_count member is set to.
 	*** If you want to remove only a certain number of instances of the item, use the function
@@ -148,10 +153,10 @@ public:
 	**/
 	void DecrementObjectCount(uint32 item_id, uint32 count);
 	//@}
-	
+
 	//! \brief Returns a pointer to the active party
 	GlobalCharacterParty* GetActiveParty()
-		{ return &_active_party; }	
+		{ return &_active_party; }
 
 private:
 	SINGLETON_DECLARE(GameGlobal);

@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ////////////////////////////////////////////////////////////////////////////////
@@ -45,7 +45,7 @@ GlobalObject::GlobalObject(uint32 id, uint32 count)
 		_icon_path = "";
 		return;
 	}
-	
+
 	_id = id;
 	_count = count;
 
@@ -61,8 +61,7 @@ GlobalObject::GlobalObject(uint32 id, uint32 count)
 // ***** GlobalItem Class
 // ****************************************************************************
 
-GlobalItem::GlobalItem(uint32 id, uint32 count) : GlobalObject(id, count)
-{
+GlobalItem::GlobalItem(uint32 id, uint32 count) : GlobalObject(id, count) {
 	// TEMP: there is only one type of item
 	_type = GLOBAL_ITEM;
 	_name = MakeUnicodeString("Healing Potion");
@@ -138,7 +137,7 @@ GlobalArmor::GlobalArmor(uint32 id, uint8 type, uint32 count) : GlobalObject(id,
 		cerr << "ERROR: GlobalArmor constructor received bad type in constructor" << endl;
 		return;
 	}
-	
+
 	// TODO: use the id to load the armor properties from a Lua file
 } // GlobalArmor::GlobalArmor(uint32 id, uint8 type, uint32 count)
 
