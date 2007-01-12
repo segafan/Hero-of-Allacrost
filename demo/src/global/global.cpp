@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ////////////////////////////////////////////////////////////////////////////////
@@ -17,12 +17,14 @@
 
 #include "global.h"
 #include "utils.h"
-#include "video.h"
 #include "script.h"
+#include "video.h"
 
 using namespace std;
-using namespace hoa_video;
 using namespace hoa_utils;
+using namespace hoa_script;
+using namespace hoa_video;
+using namespace luabind;
 
 namespace hoa_global {
 
@@ -45,7 +47,7 @@ GameGlobal::~GameGlobal() {
 	for (uint32 i = 0; i < _characters.size(); i++) {
 		delete _characters[i];
 	}
-	
+
 	// Clean up inventory items
 	for (uint32 i = 0; i < _inventory.size(); ++i) {
 		delete _inventory[i];
@@ -56,6 +58,103 @@ GameGlobal::~GameGlobal() {
 
 bool GameGlobal::SingletonInitialize() {
 	return true;
+}
+
+
+
+void GameGlobal::BindToLua() {
+// 	module(ScriptManager->GetGlobalState(), "hoa_global")
+// 	[
+// 		class_<GameGlobal>("GameGlobal")
+// 			.def(constructor<>())
+// 			.def("AddCharacter", &GameGlobal::AddCharacter)
+// 			.def("GetCharacter", &GameGlobal::GetCharacter)
+// 			.def("GetFunds", &GameGlobal::GetFunds)
+// 			.def("SetFunds", &GameGlobal::SetFunds)
+// 			.def("AddFunds", &GameGlobal::AddFunds)
+// 			.def("SubtractFunds", &GameGlobal::SubtractFunds)
+// 			.def("AddToInventory", &GameGlobal::AddToInventory)
+// 			.def("RemoveFromInventory", &GameGlobal::RemoveFromInventory)
+// 			.def("IncrementObjectCount", &GameGlobal::IncrementObjectCount)
+// 			.def("DecrementObjectCount", &GameGlobal::DecrementObjectCount)
+// 	];
+
+// 	module(ScriptManager->GetGlobalState(), "hoa_global")
+// 	[
+// 		class_<GlobalAttackPoint>("GlobalAttackPoint")
+// 	];
+//
+// 	module(ScriptManager->GetGlobalState(), "hoa_global")
+// 	[
+// 		class_<GlobalActor>("GlobalActor")
+// 	];
+//
+// 	module(ScriptManager->GetGlobalState(), "hoa_global")
+// 	[
+// 		class_<GlobalEnemy, GlobalActor>("GlobalEnemy")
+// 	];
+//
+// 	module(ScriptManager->GetGlobalState(), "hoa_global")
+// 	[
+// 		class_<GlobalCharacter, GlobalActor>("GlobalCharacter")
+// 	];
+//
+// 	module(ScriptManager->GetGlobalState(), "hoa_global")
+// 	[
+// 		class_<GlobalCharacterParty>("GlobalCharacterParty")
+// 	];
+//
+	module(ScriptManager->GetGlobalState(), "hoa_global")
+	[
+		class_<GlobalObject>("GlobalObject")
+			.def("GetID", &GlobalObject::GetID)
+			.def("GetName", &GlobalObject::GetName)
+			.def("GetType", &GlobalObject::GetType)
+			.def("GetUsableBy", &GlobalObject::GetUsableBy)
+			.def("GetCount", &GlobalObject::GetCount)
+			.def("GetIconPath", &GlobalObject::GetIconPath)
+			.def("SetID", &GlobalObject::SetID)
+			.def("SetName", &GlobalObject::SetName)
+			.def("SetType", &GlobalObject::SetType)
+			.def("SetUsableBy", &GlobalObject::SetUsableBy)
+			.def("SetCount", &GlobalObject::SetCount)
+			.def("SetIconPath", &GlobalObject::SetIconPath)
+			.def("IncrementCount", &GlobalObject::IncrementCount)
+			.def("DecrementCount", &GlobalObject::DecrementCount)
+	];
+//
+// 	module(ScriptManager->GetGlobalState(), "hoa_global")
+// 	[
+// 		class_<GlobalItem, GlobalObject>("GlobalItem")
+// 			.def(constructor<>())
+// 	];
+//
+// 	module(ScriptManager->GetGlobalState(), "hoa_global")
+// 	[
+// 		class_<GlobalWeapon, GlobalObject>("GlobalWeapon")
+// 			.def(constructor<>())
+// 	];
+//
+// 	module(ScriptManager->GetGlobalState(), "hoa_global")
+// 	[
+// 		class_<GlobalArmor, GlobalObject>("GlobalArmor")
+// 			.def(constructor<>())
+// 	];
+//
+// 	module(ScriptManager->GetGlobalState(), "hoa_global")
+// 	[
+// 		class_<GlobalStatusEffect>("GlobalStatusEffect")
+// 	];
+//
+// 	module(ScriptManager->GetGlobalState(), "hoa_global")
+// 	[
+// 		class_<GlobalElementalEffect>("GlobalElementalEffect")
+// 	];
+//
+// 	module(ScriptManager->GetGlobalState(), "hoa_global")
+// 	[
+// 		class_<GlobalSkill>("GlobalSkill")
+// 	];
 }
 
 // ****************************************************************************

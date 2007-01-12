@@ -2,26 +2,26 @@
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-/*!****************************************************************************
- * \file    scipt.h
- * \author  Daniel Steuernol - steu@allacrost.org,
- *          Tyler Olsen - roots@allacrost.org,
- *          Vladimir Mitrovi -, snipe714@allacrost.org
- * \brief   Header file for data and scripting engine.
- *
- * This code serves as the bridge between the game engine (written in C++) and
- * the data and scripting files (written in Lua).
- *
- * \note You shouldn't need to modify this code if you are wishing to extend
- * the game (either for a new inherited GameMode class, or a new data/scripting
- * file). Contact the author of this code if you feel it lacks functionality
- * that you need.
- *****************************************************************************/
+/** ****************************************************************************
+*** \file    scipt.h
+*** \author  Daniel Steuernol - steu@allacrost.org,
+***          Tyler Olsen - roots@allacrost.org,
+***          Vladimir Mitrovi - snipe714@allacrost.org
+*** \brief   Header file for scripting engine.
+***
+*** This code serves as the bridge between the game engine (written in C++) and
+*** the data and scripting files (written in Lua).
+***
+*** \note You shouldn't need to modify this code if you are wishing to extend
+*** the game (either for a new inherited GameMode class, or a new data/scripting
+*** file). Contact the author of this code if you feel it lacks functionality
+*** that you need.
+*** ***************************************************************************/
 
 #ifndef __SCRIPT_HEADER__
 #define __SCRIPT_HEADER__
@@ -112,6 +112,7 @@ private:
 public:
 	ScriptDescriptor ()
 		{ _filename = ""; _access_mode = SCRIPT_CLOSED; _error_code = 0; _lstack = NULL; }
+
 	~ScriptDescriptor ()
 		{}
 
@@ -119,10 +120,13 @@ public:
 	//@{
 	bool IsFileOpen()
 		{ return (_access_mode != SCRIPT_CLOSED); }
+
 	std::string GetFilename()
 		{ return _filename; }
+
 	uint32 GetErrorCode()
 		{ return _error_code; }
+
 	std::vector<std::string>& GetOpenTables()
 		{ return _open_tables; }
 	//@}
@@ -138,11 +142,13 @@ public:
 	*** an error in this function call will not change the return value of the GetError() function.
 	**/
 	bool OpenFile(std::string file_name, SCRIPT_ACCESS_MODE mode);
+
 	/** \brief Opens the file identified by the _filename class member
 	*** \param mode The mode with which to access the file with (read, write)
 	*** \return False on failure, true on success.
 	**/
 	bool OpenFile(SCRIPT_ACCESS_MODE mode);
+
 	//! \brief Closes the script file and sets the _access_mode member to SCRIPT_CLOSED.
 	void CloseFile();
 	//@}
@@ -150,7 +156,7 @@ public:
 	/** \brief Used to check if any error occured in previous operations.
 	*** \return A bit-mask value of all error conditions that have been detected.
 	*** \note Everytime this function is called, the internal _error_code flag is cleared.
-	*** 
+	***
 	*** It is good practice to call this function after chunks of function calls to the
 	*** children of this class (ReadScriptDescriptor, WriteScriptDescriptor) to detect if
 	*** anything went wrong. The bit-mask values returned by this function are all listed
@@ -158,20 +164,24 @@ public:
 	*** acceptable (although maybe pedantic) to call this function after every member function
 	*** of this class is invoked.
 	***
-	*** It is up to the user of this API to figure out how to recover when they detect an error 
+	*** It is up to the user of this API to figure out how to recover when they detect an error
 	*** condition. The only thing that the code in the script management classes do is to
 	*** prevent errors from causing segmentation faults.
 	***
 	**/
 	uint32 GetError()
 		{ uint32 code = _error_code; _error_code = SCRIPT_NO_ERRORS; return code; }
+
 	/** \brief Prints out the contents of the Lua stack mechanism to standard output
 	*** The elements are printed from stack top to stack bottom. As the function name
 	*** indicates, this function exists for debugging purposes.
 	**/
 	void DEBUG_PrintLuaStack();
 
-	// ----- Read Access Functions -----
+	//! \brief Debug function that prints out all global variable names to standard output.
+	void DEBUG_ShowGlobals();
+
+	// -------------------- Read Access Functions
 
 	/** \name Variable Read Access Functions
 	*** \brief These functions grab a basic data type from the Lua file and return its value.
@@ -184,22 +194,31 @@ public:
 	//@{
 	bool ReadBool(std::string key)
 		{ return _Read<bool>(key.c_str(), false); }
+
 	bool ReadBool(const int32 key)
 		{ return _Read<bool>(key, false); }
+
 	int32 ReadInt(std::string key)
 		{ return _Read<int32>(key.c_str(), 0); }
+
 	int32 ReadInt(const int32 key)
 		{ return _Read<int32>(key, 0); }
+
 	float ReadFloat(std::string key)
 		{ return _Read<float>(key.c_str(), 0.0f); }
+
 	float ReadFloat(const int32 key)
 		{ return _Read<float>(key, 0.0f); }
+
 	std::string ReadString(std::string key)
 		{ return _Read<std::string>(key.c_str(), ""); }
+
 	std::string ReadString(const int32 key)
 		{ return _Read<std::string>(key, ""); }
+
 	hoa_utils::ustring ReadUString(std::string key)
 		{ return _Read<hoa_utils::ustring>(key.c_str(), hoa_utils::MakeUnicodeString("")); }
+
 	hoa_utils::ustring ReadUString(const int32 key)
 		{ return _Read<hoa_utils::ustring>(key, hoa_utils::MakeUnicodeString("")); }
 	//@}
@@ -219,22 +238,31 @@ public:
 	//@{
 	void ReadBoolVector(std::string key, std::vector<bool> &vect)
 		{ _ReadVector<std::string, bool>(key, vect); }
+
 	void ReadBoolVector(const int32 key, std::vector<bool> &vect)
 		{ _ReadVector<bool>(key, vect); }
+
 	void ReadIntVector(std::string key, std::vector<int32> &vect)
 		{ _ReadVector<std::string, int32>(key, vect); }
+
 	void ReadIntVector(const int32 key, std::vector<int32> &vect)
 		{ _ReadVector<int32>(key, vect); }
+
 	void ReadFloatVector(std::string key, std::vector<float> &vect)
 		{ _ReadVector<std::string, float>(key, vect); }
+
 	void ReadFloatVector(const int32 key, std::vector<float> &vect)
 		{ _ReadVector<float>(key, vect); }
+
 	void ReadStringVector(std::string key, std::vector<std::string> &vect)
 		{ _ReadVector<std::string, std::string>(key, vect); }
+
 	void ReadStringVector(const int32 key, std::vector<std::string> &vect)
 		{ _ReadVector<std::string>(key, vect); }
+
 	void ReadUStringVector(std::string key, std::vector<hoa_utils::ustring> &vect)
 		{ _ReadVector<std::string, hoa_utils::ustring>(key, vect); }
+
 	void ReadUStringVector(const int32 key, std::vector<hoa_utils::ustring> &vect)
 		{ _ReadVector<hoa_utils::ustring>(key, vect); }
 	//@}
@@ -254,60 +282,42 @@ public:
 	**/
 	//@{
 	void ReadOpenTable(std::string key);
+
 	void ReadOpenTable(const int32 key);
+
 	void ReadCloseTable();
+
 	uint32 ReadGetTableSize(std::string key);
+
 	uint32 ReadGetTableSize(const int32 key);
+
 	//! \note This will attempt to get the size of the most recently opened table.
 	uint32 ReadGetTableSize();
 	//@}
 
-	//! This function will update the globals array with the specified key, value pair
-	//! If the key varname does not exist in the lua stack, it will be added.
-	//! \param varname the key of the variable to be change
-	//! \param variable the new value for the key
-	template <class T> void ChangeSetting(const std::string &varname, T variable)
-	{
-		// Get the table of globals
-		luabind::object o(luabind::from_stack(_lstack, LUA_GLOBALSINDEX));
-		for (luabind::iterator it(o), end; it != end; ++it)
-		{
-			// check to see if global variable exists
-			if (luabind::object_cast<std::string>(it.key()) == varname)
-			{
-				// if so change it
-				*it = variable;
-				return;
-			}
-		}
+	// -------------------- Write Access Functions
 
-		// if we get here, then varname does not exist in the globals so add it
-		luabind::settable(o, varname, variable);
-	}
-
-	//! Writes out the stack to disk
-	void SaveStack(const std::string &filename);
-
-	// ----- Write Access Functions -----
 	/*! \name Lua CommentWrite Functions
 	 *  \brief Writes comments into a Lua file
 	 *  \param comment The comment to write to the file.
 	 *
 	 *  \note All functions automatically insert and append a new line character before returning.
-	 *  
-	 *  \note There is no support for writing unicode string comments (yet). May be implemented in the
-	 *  future.
+	 *
 	 */
 	//@{
 	//! Inserts a blank line into the text.
 	void WriteInsertNewLine();
+
 	//! Writes a string of text and prepends it with a comment. Equivalent to `// comment` in C++.
 	void WriteComment(const char* comment);
 	void WriteComment(std::string& comment);
+
 	//! After this function is invoked, every single function call will be a comment. Equivalent to `/*` in C++.
 	void WriteBeginCommentBlock();
+
 	//! Ends a comment block. Equivalent to `*/` in C++
 	void WriteEndCommentBlock();
+
 	/*! \brief Writes the plain string of text to the file with no modification, except for a newline.
 	 *  \note Typically, unless you \c really know what you are doing, you should only call this between
 	 *  the beginning and end of a comment block.
@@ -315,7 +325,7 @@ public:
 	void WriteLine(const char* comment);
 	void WriteLine(std::string& comment);
 	//@}
-	
+
 	/** \name Lua Variable Write Functions
 	*** \brief These functions will write a single variable and its value to a Lua file.
 	*** \param *key The name of the Lua variable to write.
@@ -353,9 +363,6 @@ public:
 	void WriteStringVector(const char *key, std::vector<std::string> &vect);
 	//@}
 
-	//! Debug function to show all global variable names
-	void ShowGlobals();
-
 	/** \name Lua Table Write Functions
 	*** \brief These functions write Lua tables and their members
 	*** \param key The name of the table to write.
@@ -369,17 +376,35 @@ public:
 	void WriteEndTable();
 	//@}
 
+	// -------------------- Modify Access Functions
+
+	/** \brief This function updates the global table with the specified key, value pair.
+	*** \param varname The key name of the variable to be change
+	*** \param variable The new value to set the key
+	*** \note If the key varname does not exist in the lua stack, it will be added as a new key
+	*** with the specified value.
+	**/
+	template <class T> void ChangeSetting(const std::string &varname, T variable);
+
+	//! \brief Writes out the stack to disk
+	void SaveStack(const std::string &filename);
+
 private:
 	//! \brief The name of the file that the class object represents.
 	std::string _filename;
+
 	//! \brief The access mode for the file, including if the file is not opened.
 	SCRIPT_ACCESS_MODE _access_mode;
+
 	//! \brief A bit-mask that is used to set and detect various error conditions.
 	uint32 _error_code;
+
 	//! \brief The names of the Lua tables that are currently open.
 	std::vector<std::string> _open_tables;
+
 	//! \brief The Lua stack, which handles all data sharing between C++ and Lua.
 	lua_State *_lstack;
+
 	//! \brief The output file stream to write to for when the file is opened in write mode.
 	std::ofstream _outfile;
 
@@ -391,6 +416,7 @@ private:
 	*** ScriptDescriptor#_access_mode member.
 	**/
 	bool _CheckFileAccess(SCRIPT_ACCESS_MODE mode);
+
 	//! \brief Writes the pathname of all open tables (i.e., table1[table2][table3])
 	void _WriteTablePath();
 
@@ -420,6 +446,7 @@ private:
 
 }; // class ScriptDescriptor
 
+
 /** ****************************************************************************
 *** \brief Singleton class that manages all open script files.
 ***
@@ -431,9 +458,10 @@ private:
 *** ***************************************************************************/
 class GameScript {
 	friend class ScriptDescriptor;
+
 public:
 	SINGLETON_METHODS(GameScript);
-	
+
 	//! \brief Returns a pointer to the global lua state
 	lua_State *GetGlobalState()
 		{ return _global_state; }
@@ -446,14 +474,16 @@ public:
 
 private:
 	SINGLETON_DECLARE(GameScript);
-	
+
 	//! \brief Maintains a list of all data files that are currently open.
 	std::map<std::string, ScriptDescriptor*> _open_files;
+
 	//! \brief The lua state shared globally by all files
 	lua_State *_global_state;
 
 	//! \brief Adds an open file to the list of open files
 	void _AddOpenFile(ScriptDescriptor* sd);
+
 	//! \brief Removes an open file from the list of open files
 	void _RemoveOpenFile(ScriptDescriptor* sd);
 }; // class GameScript
@@ -584,6 +614,23 @@ template <class T, class U> void ScriptDescriptor::_ReadVector(T key, std::vecto
 	ReadCloseTable();
 } // template <class T, class U> void ScriptDescriptor::_ReadVector(T key, std::vector<U> &vect)
 
+
+
+template <class T> void ScriptDescriptor::ChangeSetting(const std::string &varname, T variable) {
+	// Get the table of globals
+	luabind::object o(luabind::from_stack(_lstack, LUA_GLOBALSINDEX));
+	for (luabind::iterator it(o), end; it != end; ++it) {
+		// Check to see if global variable exists
+		if (luabind::object_cast<std::string>(it.key()) == varname) {
+			// Change the global variable if it is found
+			*it = variable;
+			return;
+		}
+	}
+
+	// If we arrive here, then varname does not exist in the globals so add it
+	luabind::settable(o, varname, variable);
+}
 
 } // namespace hoa_script
 
