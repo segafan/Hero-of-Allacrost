@@ -475,15 +475,20 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 
 		if (key_event.keysym.sym == SDLK_ESCAPE) // Same story as on Ctrl-Q
 		{
-			// Quit the game without question if the current game mode is BootMode or QuitMode
-			if (ModeManager->GetGameType() == MODE_MANAGER_BOOT_MODE
-				|| ModeManager->GetGameType() == MODE_MANAGER_QUIT_MODE) {
+			// Quit the game without question if the current game mode is BootMode
+			if (ModeManager->GetGameType() == MODE_MANAGER_BOOT_MODE) {
 					SystemManager->ExitGame();
 			}
-			// Otherwise, enter QuitMode
 			else {
-				QuitMode *QM = new QuitMode();
-				ModeManager->Push(QM);
+				// Cancel QuitMode if it is the active game mode
+				if(ModeManager->GetGameType() == MODE_MANAGER_QUIT_MODE) {
+					ModeManager->Pop();
+				}
+				// Otherwise, enter QuitMode
+				else {
+					QuitMode *QM = new QuitMode();
+					ModeManager->Push(QM);
+				}
 			}
 		}
 

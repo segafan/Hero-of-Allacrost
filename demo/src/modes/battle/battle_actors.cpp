@@ -88,14 +88,16 @@ void BattleCharacterActor::DrawSprite() {
 		// TEMP: determine if character sprite needs red damage numbers drawn next to it
 		if (_total_time_damaged > 0) {
 			_total_time_damaged += SystemManager->GetUpdateTime();
+			VideoManager->SetFont( "battle_dmg" );
 			VideoManager->SetTextColor(Color::red);
-			VideoManager->Move(GetXLocation() + 100.0f, GetYLocation() + 70.0f);
+			VideoManager->Move(GetXLocation() + 40.0f, GetYLocation() + ( _total_time_damaged / 35.0f ) + 100.0f);
 			VideoManager->DrawText(NumberToString(_damage_dealt));
+			VideoManager->SetFont( "battle" );
 
 			if (_total_time_damaged > 3000) { // Show it for three seconds
 				_total_time_damaged = 0;
 				current_battle->SetPerformingScript (false);
-			}
+			}	
 		}
 	}
 	else {
@@ -364,14 +366,16 @@ void BattleEnemyActor::DrawSprite() {
 	if (_total_time_damaged > 0) {
 		_total_time_damaged += SystemManager->GetUpdateTime();
 
+		VideoManager->SetFont( "battle_dmg" );
 		VideoManager->SetTextColor(Color::red);
-		VideoManager->Move(GetXLocation() + 100.0f, GetYLocation() + 70.0f);
+		VideoManager->Move(GetXLocation() + 25.0f, GetYLocation() + ( _total_time_damaged / 35.0f ) + 80.0f);
 		VideoManager->DrawText(NumberToString(_damage_dealt));
-
+		VideoManager->SetFont( "battle" );
+		
 		if (_total_time_damaged > 3000) {
 			_total_time_damaged = 0;
 			current_battle->SetPerformingScript(false);
-		}
+		}	
 	}
 }
 
