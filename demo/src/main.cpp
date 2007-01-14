@@ -170,6 +170,15 @@ int32 main(int32 argc, char *argv[]) {
 	VideoManager->SetFontShadowYOffset("battle", -2);
 	VideoManager->SetFontShadowStyle("battle", VIDEO_TEXT_SHADOW_BLACK);
 
+	// Font used to show damage received / given in battle mode
+	if (!VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "battle_dmg", 24)) {
+		return 1;
+	}
+
+	VideoManager->SetFontShadowXOffset("battle_dmg", 1);
+	VideoManager->SetFontShadowYOffset("battle_dmg", -2);
+	VideoManager->SetFontShadowStyle("battle_dmg", VIDEO_TEXT_SHADOW_BLACK);
+
 	if (AudioManager->SingletonInitialize() == false) {
 		cerr << "ERROR: unable to initialize AudioManager" << endl;
 		return 1;
