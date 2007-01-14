@@ -133,8 +133,14 @@ public:
 	int16 h_score;
 	//@}
 
-	//! \brief The parent node of this node.
+	//! \brief The node which this notde
 	PathNode *parent;
+
+	PathNode() :
+		row(-1), col(-1), f_score(0), g_score(0), h_score(0), parent(NULL) {}
+
+	PathNode(int16 r, int16 c) :
+		row(r), col(c), f_score(0), g_score(0), h_score(0), parent(NULL) {}
 
 	//! \brief Overloaded comparison operator checks that tile.row and tile.col are equal
 	bool operator==(const PathNode& that) const
@@ -395,7 +401,28 @@ private:
 	**/
 	bool _DetectCollision(private_map::VirtualSprite* sprite);
 
-	// void _FindPath(VirtualSprite* sprite, std::vector<PathNode>& path, PathNode dest);
+	/** \brief Returns a pointer to a PathNode, if it is in a list
+	*** \param &node The PathNode to check for, with its row and col members set.
+	*** \param &node_list The list of PathNodes where the node may be found
+	*** \return A pointer to the node when it is found, or NULL if it is not found.
+	***
+	*** The list is checked for an element that has the same value of its rol and col
+	*** members as the argument node.
+	**/
+	private_map::PathNode* _FindNodeInList(const private_map::PathNode& node, std::list<private_map::PathNode>& node_list);
+
+	/** \brief Finds a path from a sprite's current position to a destination
+	*** \param sprite A pointer of the sprite to find the path for
+	*** \param path A reference to a vector of PathNode objects to store the path
+	*** \param dest The destination coordinates
+	***
+	*** This algorithm uses the A* algorithm to find a path from a source to a destination.
+	*** This function ignores the position of all other objects and only concerns itself with
+	*** which map grid elements are walkable.
+	***
+	*** \note If an error is detected, the function will return an empty path argument.
+	**/
+	void _FindPath(const private_map::VirtualSprite* sprite, std::vector<private_map::PathNode>& path, const private_map::PathNode& dest);
 
 	// -------------------- Draw Methods
 

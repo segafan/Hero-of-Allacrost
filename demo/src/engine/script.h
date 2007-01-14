@@ -295,6 +295,16 @@ public:
 	uint32 ReadGetTableSize();
 	//@}
 
+	/** \brief A generic method that calls a function that exists in Lua
+	*** \param *function The name of the function in Lua
+	*** \param *sig The function's signature. Ex. "ii>s" takes two integer arguments
+	*** and returns a string.
+	*** \param ... A list of arguments and pointers to store return values
+	*** \todo Does not use luabind's mechanisms....maybe it should?
+	*** \todo Support functions that are embedded in tables
+	**/
+	void ReadCallFunction(const char *function, const char *sig, ...);
+
 	// -------------------- Write Access Functions
 
 	/*! \name Lua CommentWrite Functions

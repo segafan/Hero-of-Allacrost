@@ -315,6 +315,77 @@ uint32 ScriptDescriptor::ReadGetTableSize() {
 	return static_cast<uint32>(luaL_getn(_lstack, STACK_TOP));
 }
 
+
+
+void ScriptDescriptor::ReadCallFunction(const char *function, const char *sig, ...) {
+	va_list vlist;
+	int32 narg, nres;  // The number of arguments and results
+
+	va_start(vlist, sig);
+	lua_getglobal(_lstack, function);  // Get function from the Lua stack
+
+	// Push the function arguments onto the stack
+	narg = 0;
+	while (*sig) {
+		switch (*sig++) {
+		case 'd':  // double argument
+			lua_pushnumber(_lstack, va_arg(vlist, double));
+			break;
+
+		case 'i':  // int argument
+			lua_pushnumber(_lstack, va_arg(vlist, int));
+			break;
+
+		case 's':  // string argument
+			lua_pushstring(_lstack, va_arg(vlist, char *));
+			break;
+
+		case '>': // Denotes end of argument list
+			goto endwhile;
+
+		default:
+			fprintf(stderr, "SCRIPT ERROR: invalid option (%c) in function call argument list\n", *(sig-1));
+		}
+		narg++;
+		luaL_checkstack(_lstack, 1, "SCRIPT ERROR: too many arguments given in function call");
+	} endwhile:
+
+	// Perform the function call
+	nres = strlen(sig);
+	if (lua_pcall(_lstack, narg, nres, 0) != 0)
+		fprintf(stderr, "SCRIPT ERROR: function call \"%s\" failed: %s\n", function, lua_tostring(_lstack, -1));
+
+	// Retrieve the function results
+	nres = -nres;  // Stack index of first result
+	while (*sig) {
+		switch (*sig++) {
+
+		case 'd':  // double result
+			if (!lua_isnumber(_lstack, nres))
+				fprintf(stderr, "SCRIPT ERROR: incorrect result type (float)\n");
+			*va_arg(vlist, double*) = lua_tonumber(_lstack, nres);
+			break;
+
+		case 'i':  // int result
+			if (!lua_isnumber(_lstack, nres))
+				fprintf(stderr, "SCRIPT ERROR: incorrect result type (int)\n");
+			*va_arg(vlist, int*) = (int)lua_tonumber(_lstack, nres);
+			break;
+
+		case 's':  // string result
+			if (!lua_isstring(_lstack, nres))
+				fprintf(stderr, "SCRIPT ERROR: incorrect result type (string)\n");
+			*va_arg(vlist, const char**) = lua_tostring(_lstack, nres);
+			break;
+
+		default:
+			fprintf(stderr, "SCRIPT ERROR: invalid option (%c) in function call result list\n", *(sig-1));
+		}
+		nres++;
+	}
+	va_end(vlist);
+} // void ScriptDescriptor::ReadCallFunction(const char *function, const char *sig, ...)
+
 // ***************************** Write Functions *******************************
 
 // Writes the "path" for all the open tables. Ex) table01[table02][table03]

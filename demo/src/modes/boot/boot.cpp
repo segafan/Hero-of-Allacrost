@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -60,13 +60,13 @@ bool BootMode::_logo_animating = true;
 // The constructor initializes variables and sets up the path names of the boot images
 BootMode::BootMode() :
 	_fade_out(false),
+	_main_menu(0, false, this),
 	_latest_version(true),
-	_has_modified_settings(false),
-	_main_menu(0, false, this)
+	_has_modified_settings(false)
 {
 	if (BOOT_DEBUG) cout << "BOOT: BootMode constructor invoked." << endl;
 	mode_type = MODE_MANAGER_BOOT_MODE;
-	
+
 	ScriptDescriptor read_data;
 	if (!read_data.OpenFile("dat/config/boot.lua", SCRIPT_READ)) {
 		cout << "BOOT ERROR: failed to load data file" << endl;
@@ -126,7 +126,7 @@ BootMode::BootMode() :
 			return;
 		}
 	}
-        
+
 	SoundDescriptor new_sound;
 	_boot_sounds.push_back(new_sound);
 	_boot_sounds.push_back(new_sound);
@@ -138,14 +138,14 @@ BootMode::BootMode() :
 	_boot_sounds[2].LoadSound(new_sound_files[2]);
 	_boot_sounds[3].LoadSound(new_sound_files[3]);
 	_boot_sounds[4].LoadSound(new_sound_files[4]);
-	
+
 	// Check the version
 	_latest_version = true; //IsLatestVersion();
 	if (!_latest_version)
 		_latest_version_number = GetLatestVersion();
 	else
 		_latest_version_number = "";
-        
+
 	// This loop causes a seg fault for an unknown reason. Roots is looking into it (04/01/2006)
 // 	for (uint32 i = 0; i < new_sound_files.size(); i++) {
 // 		_boot_sounds.push_back(new_sound);
@@ -177,7 +177,7 @@ BootMode::~BootMode() {
 
 	for (uint32 i = 0; i < _boot_music.size(); i++)
 		_boot_music[i].FreeMusic();
-	
+
 	for (uint32 i = 0; i < _boot_sounds.size(); i++)
 		_boot_sounds[i].FreeSound();
 
@@ -290,7 +290,7 @@ void BootMode::_AnimateLogo() {
 		VideoManager->DrawImage(_boot_images[3]);
 		VideoManager->Move(sword_x, sword_y); // sword
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-		VideoManager->Rotate(rotation);		
+		VideoManager->Rotate(rotation);
 		VideoManager->DrawImage(_boot_images[2]);
 	}
 	// Sequence five: Sword comes back
@@ -309,7 +309,7 @@ void BootMode::_AnimateLogo() {
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 		VideoManager->DrawImage(_boot_images[3]);
 		VideoManager->Move(newX, newY); // sword
-		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);	
+		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 		VideoManager->DrawImage(_boot_images[2]);
 	}
 	// Sequence six: flash of light
@@ -362,7 +362,7 @@ void BootMode::_EndOpeningAnimation() {
 }
 
 
-// Waits infinitely for a key press 
+// Waits infinitely for a key press
 SDLKey BootMode::_WaitKeyPress() {
 	SDL_Event event;
 	while (SDL_WaitEvent(&event)) {
@@ -374,7 +374,7 @@ SDLKey BootMode::_WaitKeyPress() {
 }
 
 
-// Waits infinitely for a joystick press 
+// Waits infinitely for a joystick press
 uint8 BootMode::_WaitJoyPress() {
 	SDL_Event event;
 	while (SDL_WaitEvent(&event)) {
@@ -443,7 +443,7 @@ void BootMode::_RedefinePauseKey() {
 }
 
 
-// Redefines a joystick button to be mapped to another command. Waits for press using _WaitJoyPress()	
+// Redefines a joystick button to be mapped to another command. Waits for press using _WaitJoyPress()
 void BootMode::_RedefineConfirmJoy() {
 	InputManager->SetConfirmJoy(_WaitJoyPress());
 	_UpdateJoySettings();
@@ -486,7 +486,7 @@ void BootMode::_SetupMainMenu() {
 
 	_main_menu.AddOption(MakeUnicodeString("Battle"), &BootMode::_OnBattleDebug);
 	_main_menu.AddOption(MakeUnicodeString("Menu"), &BootMode::_OnMenuDebug);
-	
+
 
 	_main_menu.EnableOption(1, false); // gray out "load game" for now.
 }
@@ -515,7 +515,7 @@ void BootMode::_SetupVideoOptionsMenu()
 	_video_options_menu.AddOption(MakeUnicodeString("Window mode:"), &BootMode::_OnVideoMode, &BootMode::_OnVideoMode, &BootMode::_OnVideoMode); // Left & right will change window mode as well as plain 'confirm' !
 	_video_options_menu.AddOption(MakeUnicodeString("Brightness:"), 0, &BootMode::_OnBrightnessLeft, &BootMode::_OnBrightnessRight);
 	_video_options_menu.AddOption(MakeUnicodeString("Image quality:"));
-	
+
 	_video_options_menu.EnableOption(3, false); // disable image quality
 	_video_options_menu.SetWindowed(true);
 	_video_options_menu.SetParent(&_options_menu);
@@ -585,7 +585,7 @@ void BootMode::_OnNewGame() {
 	if (BOOT_DEBUG)	cout << "BOOT: Starting new game." << endl;
 
 	_SaveSettingsFile();
-	
+
 	GlobalManager->AddCharacter(new GlobalCharacter(MakeUnicodeString("Claudius"), "claudius", GLOBAL_CHARACTER_CLAUDIUS));
 	GlobalManager->GetActiveParty()->AddCharacter(GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS));
 
@@ -728,7 +728,7 @@ void BootMode::_OnResolution640x480() {
 	_SetResolution(640, 480);
 }
 
-void BootMode::_OnResolution800x600() { 
+void BootMode::_OnResolution800x600() {
 	_SetResolution(800, 600);
 }
 
@@ -847,7 +847,7 @@ void BootMode::_SaveSettingsFile() {
 	settings_lua.ChangeSetting<int32>("video_settings.screen_resy", VideoManager->GetHeight());
 	settings_lua.ChangeSetting<std::string>("video_settings.full_screen", VideoManager->IsFullscreen() ? "true" : "false");
 	settings_lua.ChangeSetting<float>("video_settings.brightness", VideoManager->GetGamma());
-	
+
 	// audio
 	settings_lua.ChangeSetting<float>("audio_settings.music_vol", AudioManager->GetMusicVolume());
 	settings_lua.ChangeSetting<float>("audio_settings.sound_vol", AudioManager->GetSoundVolume());
@@ -870,8 +870,8 @@ void BootMode::_SaveSettingsFile() {
 	settings_lua.ChangeSetting<int32>("joystick_settings.swap", InputManager->GetSwapJoy());
 	settings_lua.ChangeSetting<int32>("joystick_settings.left_select", InputManager->GetLeftSelectJoy());
 	settings_lua.ChangeSetting<int32>("joystick_settings.right_select", InputManager->GetRightSelectJoy());
-	settings_lua.ChangeSetting<int32>("joystick_settings.pause", InputManager->GetPauseJoy());	
-	
+	settings_lua.ChangeSetting<int32>("joystick_settings.pause", InputManager->GetPauseJoy());
+
 	// and save it!
 	settings_lua.SaveStack("dat/config/new_settings.lua");
 }
@@ -933,14 +933,14 @@ void BootMode::Update() {
 			BootMenu::ShowWindow(false);
 		}
 	}
-	else if (InputManager->LeftPress() && !_credits_screen.IsVisible()) 
+	else if (InputManager->LeftPress() && !_credits_screen.IsVisible())
 	{
 		_current_menu->LeftPressed();
 	}
-	else if(InputManager->RightPress() && !_credits_screen.IsVisible()) 
+	else if(InputManager->RightPress() && !_credits_screen.IsVisible())
 	{
 		_current_menu->RightPressed();
-	} 
+	}
 	else if(InputManager->UpPress() && !_credits_screen.IsVisible())
 	{
 		_current_menu->UpPressed();
@@ -954,7 +954,7 @@ void BootMode::Update() {
 		// Close the credits-screen if it was visible
 		if (_credits_screen.IsVisible())
 		{
-			_credits_screen.Hide();			
+			_credits_screen.Hide();
 			_boot_sounds.at(1).PlaySound(); // Play cancel sound here as well
 		}
 
@@ -979,7 +979,7 @@ void BootMode::Update() {
 	}
 
 	// Update menu events
-	_current_menu->GetEvent();	
+	_current_menu->GetEvent();
 }
 
 
