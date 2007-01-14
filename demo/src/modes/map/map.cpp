@@ -377,11 +377,11 @@ void MapMode::_UpdateExplore() {
 // 	}
 
 	// Go to menu mode if the user requested it
-// 	if (InputManager->MenuPress()) {
-// 		MenuMode *MM = new MenuMode();
-// 		ModeManager->Push(MM);
-// 		return;
-// 	}
+	if (InputManager->MenuPress()) {
+		MenuMode *MM = new MenuMode();
+		ModeManager->Push(MM);
+		return;
+	}
 
 	// TEMPORARY: disable random encounters
 // 	if (InputManager->SwapPress()) {
@@ -515,6 +515,7 @@ void MapMode::_UpdateDialogue() {
 } // void MapMode::_UpdateDialogue()
 
 
+
 bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 	// NOTE: Whether the argument pointer is valid is not checked here, since the object pointer
 	// itself presumably called this function.
@@ -590,6 +591,147 @@ bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 	// No collision was detected
 	return false;
 } // bool MapMode::_DetectCollision(MapSprite* sprite)
+
+
+
+PathNode* MapMode::_FindNodeInList(const PathNode& node, list<PathNode>& node_list) {
+	for (list<PathNode>::iterator i = node_list.begin(); i != node_list.end(); i++) {
+			if (node == *i) {
+					return &(*i);
+			}
+	}
+	return NULL;
+}
+
+
+
+void MapMode::_FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path, const PathNode& dest) {
+	// NOTE: The key to the lists
+	// The tiles that we are considering for the next move
+	list<PathNode> open_list;
+	// The tiles which have already been visited once.
+	list<PathNode> closed_list;
+	// A new node to construct and add to the path
+	PathNode new_node;
+	// Used to temporarily hold a pointer to a node in a list
+	PathNode *list_node = NULL;
+	// The number of nodes that the sprite's collision rectangle spans away from the origin
+	int16 x_span, y_span;
+
+	// Check that the destination is walkable
+	if (_map_grid[dest.row][dest.col] == true) {
+		if (MAP_DEBUG)
+			cerr << "MAP ERROR: path destination is unwalkable in MapMode::_FindPath()" << endl;
+		path.clear();
+		return;
+	}
+
+	new_node.row = static_cast<int16>(sprite->y_position);
+	new_node.col = static_cast<int16>(sprite->x_position);
+	x_span = static_cast<int16>(sprite->coll_half_width);
+	y_span = static_cast<int16>(sprite->coll_height);
+
+	// Check that the source is not equal to the destination
+	if (new_node == dest) {
+		if (MAP_DEBUG)
+			cerr << "MAP ERROR: path destination is the same as the path source" << endl;
+		path.clear();
+		return;
+	}
+
+	// Push the source node on to the closed list
+	closed_list.push_back(new_node);
+
+	// A vector of nodes used to temporarily hold the adjacent nodes of the node to examine
+	vector<PathNode> nodes(8, PathNode());
+	// The value to add to the g_score of the node (10 for lateral, 15 for diagonal)
+	int16 g_add;
+
+	while (closed_list.back() != dest) {
+		// ---------- (1): Add valid nodes to the open list that are adjacent to the last node in the closed list
+
+		// First found entries in "nodes" are for lateral movement, final four are diagonal movement
+		nodes[0].row = closed_list.back().row - 1;
+		nodes[1].row = closed_list.back().row + 1;
+		nodes[2].col = closed_list.back().col - 1;
+		nodes[3].col = closed_list.back().col + 1;
+		nodes[4].row = closed_list.back().row - 1; nodes[4].col = closed_list.back().row - 1;
+		nodes[5].row = closed_list.back().row - 1; nodes[5].col = closed_list.back().row + 1;
+		nodes[6].row = closed_list.back().row + 1; nodes[6].col = closed_list.back().row - 1;
+		nodes[7].row = closed_list.back().row + 1; nodes[7].col = closed_list.back().row + 1;
+
+
+		for (uint8 i = 0; i < nodes.size(); i++) {
+			// ---------- (A): Check that the sprite's collision rectangle will be within the map boundaries
+			if (nodes[i].col - x_span < 0 || nodes[i].row - y_span < 0 ||
+				nodes[i].col + x_span >= (_num_tile_cols * 2) || nodes[i].row >= (_num_tile_rows * 2)) {
+				break;
+			}
+
+			// ---------- (B): Check that the node is not already in the closed list
+			if (_FindNodeInList(nodes[i], closed_list) != NULL) {
+				break;
+			}
+
+			// ---------- (C): Check that all grid nodes that the sprite's collision rectangle will overlap are walkable
+			bool continue_loop = true;
+			for (int16 r = nodes[i].row - y_span; r < nodes[i].row && continue_loop; r++) {
+				for (int16 c = nodes[i].col - x_span; c < nodes[i].col + x_span; c++) {
+					if (_map_grid[r][c] == true) {
+						continue_loop = false;
+						break;
+					}
+				}
+			}
+			if (continue_loop == false) { // This node is invalid
+				break;
+			}
+
+			// NOTE: If this point in the loop has been reached, then this node is valid
+			if (i < 4) // This is a lateral node
+				g_add = 10;
+			else // This is a diagonal node
+				g_add = 15;
+
+			// ---------- (D): If the node is already in the open list, update its parent and g and f scores
+			list_node = _FindNodeInList(nodes[i], open_list);
+			if (list_node != NULL) {
+				list_node->g_score = closed_list.back().g_score + g_add;
+				list_node->f_score = list_node->g_score + list_node->h_score;
+				list_node->parent = &(closed_list.back());
+			}
+
+			// ---------- (E): Otherwise, calculate the scores of the node, set the parent, and add it to the open list
+			else {
+				nodes[i].g_score = closed_list.back().g_score + g_add;
+				nodes[i].h_score = abs(dest.row - nodes[i].row) + abs(dest.col - nodes[i].col);
+				nodes[i].f_score = nodes[i].g_score + nodes[i].h_score;
+				nodes[i].parent = &(closed_list.back());
+				open_list.push_back(nodes[i]);
+			}
+		} // for (uint8 i = 0; i < nodes.size(); i++)
+
+		// ---------- (2): Find the node with the lowest f_score on the open list and add it to the closed list
+
+		if (open_list.empty()) {
+			if (MAP_DEBUG)
+				cerr << "MAP ERROR: Couldn't find a path between two nodes" << endl;
+			path.clear();
+			return;
+		}
+
+		list<PathNode>::iterator best_move = open_list.begin();
+		for (list<PathNode>::iterator i = open_list.begin(); i != open_list.end(); ++i) {
+			if (i->f_score < best_move->f_score) {
+					best_move = i;
+			}
+		}
+		closed_list.push_back(*best_move);
+		open_list.erase(best_move);
+	} // while (closed_list.back() != dest)
+
+
+} // void _FindPath(VirtualSprite* sprite, std::vector<PathNode>& path, PathNode dest)
 
 // ****************************************************************************
 // **************************** DRAW FUNCTIONS ********************************
@@ -670,7 +812,7 @@ void MapMode::_CalculateDrawInfo() {
 		_draw_info.num_draw_rows--;
 	}
 
-// 	printf("--- DRAW INFO ---\n");
+// 	printf("--- MAP DRAW INFO ---\n");
 // 	printf("Starting row, col: [%d, %d]\n", _draw_info.starting_row, _draw_info.starting_col);
 // 	printf("# draw rows, cols: [%d, %d]\n", _draw_info.num_draw_rows, _draw_info.num_draw_cols);
 // 	printf("Camera position:   [%f, %f]\n", camera_x, camera_y);
