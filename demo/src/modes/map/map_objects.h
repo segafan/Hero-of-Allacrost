@@ -310,8 +310,19 @@ public:
 	bool IsDrawOnSecondPass() const
 		{ return draw_on_second_pass; }
 	//@}
+
 }; // class MapObject
 
+/** \brief This is a predicate used to sort MapObjects in correct draw order
+*** \return True if the MapObject pointed by a should be drawn behind MapObject pointed by b
+**/
+struct MapObject_Ptr_Less
+{
+	const bool operator()( const MapObject * a, const MapObject * b )
+	{
+		return ( a->y_position + a->y_offset ) <  ( b->y_position + b->y_offset );		
+	}
+};
 
 /** ****************************************************************************
 *** \brief Represents visible objects on the map that have no motion.
