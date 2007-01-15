@@ -282,6 +282,29 @@ bool MapMode::Load(string filename) {
 	_ground_objects.push_back(sp);
 	_camera = sp;
 
+	MapSprite *DialogueSprite;
+
+	// Load player sprite and rest of map objects
+	DialogueSprite = new MapSprite();
+	DialogueSprite->name = MakeUnicodeString("NPC");
+	DialogueSprite->SetObjectID(1);
+	DialogueSprite->SetContext(1);
+	DialogueSprite->SetXPosition(45, 0.5f);
+	DialogueSprite->SetYPosition(45, 0.5f);
+	DialogueSprite->SetCollHalfWidth(1.0f);
+	DialogueSprite->SetCollHeight(2.0f);
+	DialogueSprite->img_half_width = 1.0f;
+	DialogueSprite->img_height = 4.0f;
+	DialogueSprite->movement_speed = NORMAL_SPEED;
+	DialogueSprite->direction = EAST;
+	//DialogueSprite->no_collision = true;
+	if (DialogueSprite->Load() == false)
+		return false;
+	_ground_objects.push_back(DialogueSprite);
+	_all_objects[ 1 ] = DialogueSprite;
+
+
+
 	// ---------- (1) Setup GUI items (in a 1024x768 coordinate system)
 	VideoManager->PushState();
 	VideoManager->SetCoordSys(0, 1024, 768, 0);
@@ -344,19 +367,10 @@ void MapMode::Update() {
 	for (uint32 i = 0; i < _sky_objects.size(); i++) {
 		_sky_objects[i]->Update();
 	}
-
+	
 	// ---------- (4) Sort the objects so they are in the correct draw order ********
+	std::sort( _ground_objects.begin(), _ground_objects.end(), MapObject_Ptr_Less() );
 
-	//! \todo Optimize this sorting algorithm
-// 	for (uint32 i = 1; i < _ground_objects.size(); i++) {
-// 		MapObject *tmp = _ground_objects[i];
-// 		int32 j = static_cast<int32>(i) - 1;
-// 		while (j >= 0 && (_ground_objects[j])->row_position > tmp->row_position) {
-// 			_ground_objects[j+1] = _ground_objects[j];
-// 			j--;
-// 		}
-// 		_ground_objects[j+1] = tmp;
-// 	}
 } // void MapMode::Update()
 
 
@@ -559,7 +573,6 @@ bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 				}
 			}
 		}
-
 		objects = &_ground_objects;
 	}
 	else {
@@ -567,24 +580,40 @@ bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 	}
 
 	// ---------- (3): Determine if two object's collision rectangles overlap
-
 	for (uint32 i = 0; i < objects->size(); i++) {
-		// Skip over this object if it is the same object as the sprite
-		if ((*objects)[i]->object_id == sprite->object_id)
-			break;
-		// Skip over this object if it has no_collision set to true
-		if ((*objects)[i]->no_collision)
-			break;
+		// Only verify this object if it is not the same object as the sprite
+		if ((*objects)[i]->object_id != sprite->object_id)
+		{
+			// Only do this object if it has no_collision set to false
+			if ( !(*objects)[i]->no_collision )
+			{
+				// Compute the full position coordinates of the other object
+				float other_x_location = static_cast<float>((*objects)[i]->x_position) + (*objects)[i]->x_offset;
+				float other_y_location = static_cast<float>((*objects)[i]->y_position) + (*objects)[i]->y_offset;
 
-		// Compute the full position coordinates of the other object
-		float other_x_location = static_cast<float>((*objects)[i]->x_position) + (*objects)[i]->x_offset;
-		float other_y_location = static_cast<float>((*objects)[i]->y_position) + (*objects)[i]->y_offset;
-
-		if (other_x_location - (*objects)[i]->coll_half_width > cr_right ||
-			other_x_location + (*objects)[i]->coll_half_width < cr_left  ||
-			other_y_location - (*objects)[i]->coll_height > y_location   ||
-			other_y_location < cr_top) {
-			return true;
+				// Presume there is a collision at first
+				bool bNoColl = false;
+				// If the the right side of one is to the left of the other or if the left side of one
+				// is to the right of the other, they cannot collide.
+				if( other_x_location - (*objects)[i]->coll_half_width > cr_right 
+					|| other_x_location + (*objects)[i]->coll_half_width < cr_left ) {			
+					bNoColl = true;
+				}
+				
+				// They still might collide, check the top and bottom
+				if( !bNoColl ) {
+					// If the bottom of one is higher then the other one or if the top of
+					// on is lower then the other one, they cannot collide
+					if( other_y_location - (*objects)[i]->coll_height > y_location
+						|| other_y_location  < cr_top ) {
+						bNoColl = true;
+					}
+					else {
+						// There is a collision
+						return true;
+					}
+				}
+			}
 		}
 	}
 
