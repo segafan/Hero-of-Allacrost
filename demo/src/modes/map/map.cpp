@@ -748,19 +748,19 @@ void MapMode::_CalculateDrawInfo() {
 	// Determine the draw coordinates of the top left corner using the camera's current position
 	_draw_info.tile_x_start = 1.0f - _camera->x_offset;
 	if (IsOddNumber(_camera->x_position))
-		_draw_info.tile_x_start += -1.0f;
+		_draw_info.tile_x_start -= 1.0f;
 
 	_draw_info.tile_y_start = 2.0f - _camera->y_offset;
 	if (IsOddNumber(_camera->y_position))
-		_draw_info.tile_y_start += -1.0;
+		_draw_info.tile_y_start -= 1.0f;
 
 	// By default the map draws 32 + 1 columns and 24 + 1 rows of tiles, the maximum that can fit on the screen.
 	_draw_info.num_draw_cols = TILE_COLS + 1;
 	_draw_info.num_draw_rows = TILE_ROWS + 1;
 
 	// The default starting tile row and column is relative to the map camera's current position.
-	_draw_info.starting_col = static_cast<int16>(camera_x / 2.0f) - HALF_TILE_COLS;
-	_draw_info.starting_row = static_cast<int16>(camera_y / 2.0f) - HALF_TILE_ROWS;
+	_draw_info.starting_col = (_camera->x_position / 2) - HALF_TILE_COLS;
+	_draw_info.starting_row = (_camera->y_position / 2) - HALF_TILE_ROWS;
 
 	// ---------- (2) Determine the coordinates for the screen edges on the map grid
 
