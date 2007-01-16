@@ -263,6 +263,8 @@ bool MapMode::Load(string filename) {
 // 		}
 // 	}
 
+	_current_dialogue = 0;
+
 	MapSprite *sp;
 
 	// Load player sprite and rest of map objects
@@ -278,12 +280,18 @@ bool MapMode::Load(string filename) {
 	sp->img_height = 4.0f;
 	sp->movement_speed = NORMAL_SPEED;
 	sp->direction = SOUTH;
+	sp->SetPortrait( "img/portraits/map/claudius.png" );
 	if (sp->Load() == false)
 		return false;
+	_all_objects[ 555 ] = sp;
 	_ground_objects.push_back(sp);
 	_camera = sp;
 
+
 	MapSprite *DialogueSprite;
+	MapDialogue *Dialogue = new MapDialogue();
+	Dialogue->AddText( 1, MakeUnicodeString( "This is a test" ) );
+	Dialogue->AddText( 555, MakeUnicodeString( "Oh really?!" ) );
 
 	// Load player sprite and rest of map objects
 	DialogueSprite = new MapSprite();
@@ -319,7 +327,9 @@ bool MapMode::Load(string filename) {
 	DialogueSprite->actions.push_back(new_act);
 	DialogueSprite->current_action = 0;
 
-	//DialogueSprite->no_collision = true;
+	DialogueSprite->AddDialogue( Dialogue );
+	DialogueSprite->SetDialogue( 0 );
+	DialogueSprite->SetPortrait( "img/portraits/map/laila.png" );
 	if (DialogueSprite->Load() == false)
 		return false;
 	_ground_objects.push_back(DialogueSprite);
@@ -436,7 +446,25 @@ void MapMode::_UpdateExplore() {
 // 		}
 // 	}
 
-// 	if (InputManager->ConfirmPress()) {
+		if (InputManager->ConfirmPress()) {
+			if( _all_objects[ 1 ]->GetType() == VIRTUAL_TYPE || _all_objects[ 1 ]->GetType() == SPRITE_TYPE )
+			{ 
+				VirtualSprite * sp = reinterpret_cast< VirtualSprite * >( _all_objects[ 1 ] );
+
+				if( sp->HasDialogue() )
+				{
+					_current_dialogue = sp->GetCurrentDialogue();
+					_dialogue_textbox.SetDisplayText( _current_dialogue->GetLine() );
+					// TODO: add SaveState / LoadState for sprites
+					sp->updatable = false;
+					_all_objects[ 555 ]->updatable = false;
+					_map_state = DIALOGUE;
+				}
+			}
+		}
+			
+		//}
+// 		if (InputManager->ConfirmPress()) {
 // 		// Check for a sprite present within the space of one tile
 // 		int16 check_row, check_col;
 // 		if (_camera->direction & FACING_WEST) {
@@ -501,31 +529,31 @@ void MapMode::_UpdateExplore() {
 
 // Updates the game status when MapMode is in the 'dialogue' state
 void MapMode::_UpdateDialogue() {
-// 	_dialogue_window.Update(_time_elapsed);
-// 	_dialogue_textbox.Update(_time_elapsed);
-//
-// 	if (InputManager->ConfirmPress()) {
-// 		if (!_dialogue_textbox.IsFinished()) {
-// 			_dialogue_textbox.ForceFinish();
-// 		}
-// 		else {
-// 			bool not_finished = _current_dialogue->ReadNextLine();
-//
-// 			if (!not_finished) {
-// 				_dialogue_window.Hide();
-// 				_map_state = EXPLORE;
-// 				// Restore the status of the map sprites
-// 				for (uint32 i = 0; i < _current_dialogue->speakers.size(); i++) {
-// 					_sprites[_current_dialogue->speakers[i]]->RestoreState();
-// 				}
-// 				_sprites[1]->UpdateConversationCounter();
-// 				_current_dialogue = NULL;
-// 			}
-// 			else { // Otherwise, the dialogue is automatically updated to the next line
-// 				_dialogue_textbox.SetDisplayText(_current_dialogue->text[_current_dialogue->current_line]);
-// 			}
-// 		}
-// 	}
+ 	_dialogue_window.Update(_time_elapsed);
+ 	_dialogue_textbox.Update(_time_elapsed);
+
+ 	if (InputManager->ConfirmPress()) {
+ 		if (!_dialogue_textbox.IsFinished()) {
+ 			_dialogue_textbox.ForceFinish();
+ 		}
+ 		else {
+ 			bool not_finished = _current_dialogue->ReadNextLine();
+
+ 			if (!not_finished) {
+ 				_dialogue_window.Hide();
+ 				_map_state = EXPLORE;
+ 				// Restore the status of the map sprites
+ 				for (uint32 i = 0; i < _current_dialogue->GetNumLines(); i++) {
+					_all_objects[ _current_dialogue->GetSpeaker( i ) ]->updatable = true;
+ 				}
+ 				//_sprites[1]->UpdateConversationCounter();
+ 				_current_dialogue = NULL;
+ 			}
+ 			else { // Otherwise, the dialogue is automatically updated to the next line
+ 				_dialogue_textbox.SetDisplayText(_current_dialogue->GetLine());
+ 			}
+ 		}
+ 	}
 } // void MapMode::_UpdateDialogue()
 
 
@@ -580,37 +608,26 @@ bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 	}
 
 	// ---------- (3): Determine if two object's collision rectangles overlap
+	
 	for (uint32 i = 0; i < objects->size(); i++) {
 		// Only verify this object if it is not the same object as the sprite
 		if ((*objects)[i]->object_id != sprite->object_id)
 		{
-			// Only do this object if it has no_collision set to false
+			// Only verify this object if it has no_collision set to false
 			if ( !(*objects)[i]->no_collision )
 			{
 				// Compute the full position coordinates of the other object
 				float other_x_location = static_cast<float>((*objects)[i]->x_position) + (*objects)[i]->x_offset;
 				float other_y_location = static_cast<float>((*objects)[i]->y_position) + (*objects)[i]->y_offset;
 
-				// Presume there is a collision at first
-				bool bNoColl = false;
-				// If the the right side of one is to the left of the other or if the left side of one
-				// is to the right of the other, they cannot collide.
-				if( other_x_location - (*objects)[i]->coll_half_width > cr_right
-					|| other_x_location + (*objects)[i]->coll_half_width < cr_left ) {
-					bNoColl = true;
-				}
-
-				// They still might collide, check the top and bottom
-				if( !bNoColl ) {
-					// If the bottom of one is higher then the other one or if the top of
-					// on is lower then the other one, they cannot collide
-					if( other_y_location - (*objects)[i]->coll_height > y_location
-						|| other_y_location  < cr_top ) {
-						bNoColl = true;
-					}
-					else {
-						// There is a collision
-						return true;
+				// Verify that the bounding boxes overlap on the horizontal axis
+				if( !( other_x_location - (*objects)[i]->coll_half_width > cr_right
+					|| other_x_location + (*objects)[i]->coll_half_width < cr_left ) ) {
+					// Verify that the bounding boxes overlap on the vertical axis
+					if( !( other_y_location - (*objects)[i]->coll_height > y_location
+						|| other_y_location  < cr_top ) ) {
+							// Boxes overlap on both axis, there is a colision
+							return true;
 					}
 				}
 			}
@@ -619,7 +636,7 @@ bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 
 	// No collision was detected
 	return false;
-} // bool MapMode::_DetectCollision(MapSprite* sprite)
+} // bool MapMode::_DetectCollision(VirtualSprite* sprite) 
 
 //////////////// new ver
 void MapMode::_FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path, const PathNode& dest) 
@@ -837,10 +854,10 @@ void MapMode::_CalculateDrawInfo() {
 	}
 
 	// Check for the conditions where the tile images align perfectly with the screen and one less row or column of tiles is drawn
-	if (IsFloatInRange(_draw_info.tile_x_start, 0.999, 1.001)) { // Is the value approximately equal to 1.0f?
+	if (IsFloatInRange(_draw_info.tile_x_start, 0.999f, 1.001f)) { // Is the value approximately equal to 1.0f?
 		_draw_info.num_draw_cols--;
 	}
-	if (IsFloatInRange(_draw_info.tile_y_start, 1.999, 2.001)) { // Is the value approximately equal to 2.0f?
+	if (IsFloatInRange(_draw_info.tile_y_start, 1.999f, 2.001f)) { // Is the value approximately equal to 2.0f?
 		_draw_info.num_draw_rows--;
 	}
 
@@ -934,9 +951,27 @@ void MapMode::Draw() {
 
 	// ---------- (9) Draw the dialogue menu and text if necessary
 	if (_map_state == DIALOGUE) {
-		// TODO
-	}
+		VideoManager->PushState();
+		VideoManager->SetCoordSys(0.0f, 1024.0f, 768.0f, 0.0f);
+		VideoManager->SetDrawFlags( VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0 );
+		VideoManager->Move(0.0f, 768.0f);
+		_dialogue_box.Draw();
+		VideoManager->MoveRelative(47.0f, -42.0f);
+		_dialogue_nameplate.Draw();
 
+		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, 0);
+		VideoManager->SetTextColor(Color(Color::black));
+		VideoManager->SetFont("map");
+		VideoManager->MoveRelative(120.0f, -6.0f);
+		VideoManager->DrawText( reinterpret_cast< VirtualSprite* >( _all_objects[ _current_dialogue->GetSpeaker() ] )->name );
+		if ( reinterpret_cast< VirtualSprite* >( _all_objects[ _current_dialogue->GetSpeaker() ] )->face_portrait != NULL) {
+			VideoManager->MoveRelative(0.0f, -26.0f);
+			reinterpret_cast< VirtualSprite* >( _all_objects[ _current_dialogue->GetSpeaker() ] )->face_portrait->Draw();
+		}
+		//_dialogue_window.Show();
+		_dialogue_textbox.Draw();
+		VideoManager->PopState();
+	}
 } // void MapMode::_Draw()
 
 // ****************************************************************************

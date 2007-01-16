@@ -33,31 +33,44 @@ public:
 
 	~MapDialogue();
 
+	const bool IsSeenDialogue()
+		{ return _seen; }
+	void SetSeenDialogue()
+		{ _seen = true; }
+	void ClearSeenDialogue()
+		{ _seen = false; }
+
+	void AddText( const uint32 speaker_id, const hoa_utils::ustring text );
+	
+	uint32 GetSpeaker() const
+		{ return _speakers[ _current_line ]; }
+
+	uint32 GetSpeaker( uint32 line ) const
+		{ return _speakers[ line ]; }
+	
+	hoa_utils::ustring GetLine() const
+		{ return _text[ _current_line ]; }
+		
+	const bool ReadNextLine();
+
+	const uint32 GetNumLines() const
+		{ return _speakers.size(); }
+
+private:
 	//! \brief The text of the conversation, split up into multiple lines.
-	std::vector<hoa_utils::ustring> text;
+	std::vector<hoa_utils::ustring> _text;
 
 	//! \brief A list of sprite ID numbers for who speaks what lines.
-	std::vector<uint32> speakers;
+	std::vector<uint32> _speakers;
 
 	// A list of events that may occur after each line.
 	// std::vector<SpriteAction*> events
 
 	//! \brief True if the player has already read this dialogue.
-	bool seen;
+	bool _seen;
 
 	//! \brief An index to the current line to read.
-	uint32 current_line;
-
-	const bool IsSeenDialogue()
-		{ return seen; }
-
-	void SetSeenDialogue()
-		{ seen = true; }
-
-	void ClearSeenDialogue()
-		{ seen = false; }
-
-	const bool ReadNextLine();
+	uint32 _current_line;
 }; // class MapDialogue
 
 } // namespace private_map
