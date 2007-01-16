@@ -301,13 +301,14 @@ bool MapMode::Load(string filename) {
 
 	ActionPathMove *new_act;
 	new_act = new ActionPathMove(DialogueSprite);
-	new_act->destination.row = 55;
-	new_act->destination.col = 70;
+	new_act->destination.row = 45;
+	new_act->destination.col = 50;
 	DialogueSprite->actions.push_back(new_act);
 	new_act = new ActionPathMove(DialogueSprite);
-	new_act->destination.row = 4;
-	new_act->destination.col = 10;
+	new_act->destination.row = 50;
+	new_act->destination.col = 45;
 	DialogueSprite->actions.push_back(new_act);
+	
 	new_act = new ActionPathMove(DialogueSprite);
 	new_act->destination.row = 47;
 	new_act->destination.col = 22;
@@ -620,86 +621,71 @@ bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 	return false;
 } // bool MapMode::_DetectCollision(MapSprite* sprite)
 
+//////////////// new ver
+void MapMode::_FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path, const PathNode& dest) 
+{
+	//OpenList
+	std::vector<PathNode> OpenList;
+	//ClosedList
+	std::vector<PathNode> ClosedList;
 
+	PathNode TempNode( static_cast<int16>(sprite->y_position), static_cast<int16>(sprite->x_position) );
+	uint32 x_delta;
+	uint32 y_delta;
+	
+	
+	PathNode BestNode;
+	PathNode nodes[8];
 
-PathNode* MapMode::_FindNodeInList(const PathNode& node, list<PathNode>& node_list) {
-	for (list<PathNode>::iterator i = node_list.begin(); i != node_list.end(); i++) {
-			if (node == *i) {
-					return &(*i);
-			}
-	}
-	return NULL;
-}
-
-
-
-void MapMode::_FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path, const PathNode& dest) {
-	// NOTE: The key to the lists
-	// The tiles that we are considering for the next move
-	list<PathNode> open_list;
-	// The tiles which have already been visited once.
-	list<PathNode> closed_list;
-
-	// Used to temporarily hold a pointer to a node in a list
-	PathNode *list_node = NULL;
-	// The number of nodes that the sprite's collision rectangle spans away from the origin
 	int16 x_span, y_span;
-
-	// Check that the destination is walkable
-	if (_map_grid[dest.row][dest.col] == true) {
-		if (MAP_DEBUG)
-			cerr << "MAP ERROR: path destination is unwalkable in MapMode::_FindPath()" << endl;
-		path.clear();
-		return;
-	}
-
-	// The source node to construct and add to the path
-	PathNode source_node;
-	source_node.row = static_cast<int16>(sprite->y_position);
-	source_node.col = static_cast<int16>(sprite->x_position);
-	// Push the source node on to the closed list
-	closed_list.push_back(source_node);
-
-	// Check that the source is not equal to the destination
-	if (source_node == dest) {
-		if (MAP_DEBUG)
-			cerr << "MAP ERROR: path destination is the same as the path source" << endl;
-		path.clear();
-		return;
-	}
 
 	x_span = static_cast<int16>(sprite->coll_half_width);
 	y_span = static_cast<int16>(sprite->coll_height);
 
-	// A vector of nodes used to temporarily hold the adjacent nodes of the node to examine
-	vector<PathNode> nodes(8, PathNode());
-	// The value to add to the g_score of the node (10 for lateral, 15 for diagonal)
 	int16 g_add;
 
-	while (closed_list.back() != dest) {
-		printf("\nnode x/y: [%d, %d]   ", closed_list.back().col, closed_list.back().row);
-		printf("closed size: %d :: open size: %d\n", closed_list.size(), open_list.size());
-		// ---------- (1): Add valid nodes to the open list that are adjacent to the last node in the closed list
+	OpenList.push_back( TempNode );
+	//make_heap( OpenList.begin(), OpenList.end() );	//Create heap for fast sorting
 
-		// First found entries in "nodes" are for lateral movement, final four are diagonal movement
-		nodes[0].row = closed_list.back().row - 1; nodes[0].col = closed_list.back().col;
-		nodes[1].row = closed_list.back().row + 1; nodes[1].col = closed_list.back().col;
-		nodes[2].row = closed_list.back().row;     nodes[2].col = closed_list.back().col - 1;
-		nodes[3].row = closed_list.back().row;     nodes[3].col = closed_list.back().col + 1;
-		nodes[4].row = closed_list.back().row - 1; nodes[4].col = closed_list.back().col - 1;
-		nodes[5].row = closed_list.back().row - 1; nodes[5].col = closed_list.back().col + 1;
-		nodes[6].row = closed_list.back().row + 1; nodes[6].col = closed_list.back().col - 1;
-		nodes[7].row = closed_list.back().row + 1; nodes[7].col = closed_list.back().col + 1;
+	while( !OpenList.empty() )
+	{
+		//sort_heap( OpenList.begin(), OpenList.end() );	//Sort
+		std::sort( OpenList.begin(), OpenList.end() );  //This sort uses the < operator, 
+														//but < operator does an a.f_score > b.f_score
+														// so it is sorted in the other order, needs fixing
+		BestNode = OpenList.back();					//Get smallest // with an heap it would be front
+		
+		//pop_heap( OpenList.begin(), OpenList.end() );	//Remove from
+		OpenList.pop_back();							//the list
 
-		for (uint8 i = 0; i < nodes.size(); i++) {
+		ClosedList.push_back( BestNode );		//Add the current node to the closed
+
+
+		printf("\nnode x/y: [%d, %d]   ", ClosedList.back().col, ClosedList.back().row);
+		printf("closed size: %d :: open size: %d\n", ClosedList.size(), OpenList.size());
+	
+		//End condition
+		if( BestNode == dest )
+		{
+			break;
+		}
+
+		nodes[0].row = ClosedList.back().row - 1; nodes[0].col = ClosedList.back().col;
+		nodes[1].row = ClosedList.back().row + 1; nodes[1].col = ClosedList.back().col;
+		nodes[2].row = ClosedList.back().row;     nodes[2].col = ClosedList.back().col - 1;
+		nodes[3].row = ClosedList.back().row;     nodes[3].col = ClosedList.back().col + 1;
+		nodes[4].row = ClosedList.back().row - 1; nodes[4].col = ClosedList.back().col - 1;
+		nodes[5].row = ClosedList.back().row - 1; nodes[5].col = ClosedList.back().col + 1;
+		nodes[6].row = ClosedList.back().row + 1; nodes[6].col = ClosedList.back().col - 1;
+		nodes[7].row = ClosedList.back().row + 1; nodes[7].col = ClosedList.back().col + 1;
+
+		//Check the four adjacent Nodes
+		for (uint8 i = 0; i < 8; ++i) 
+		{			
+			//Check to see if the node is walkable
 			// ---------- (A): Check that the sprite's collision rectangle will be within the map boundaries
 			if ((nodes[i].col - x_span < 0) || (nodes[i].row - y_span < 0) ||
 				(nodes[i].col + x_span >= (_num_tile_cols * 2)) || (nodes[i].row >= (_num_tile_rows * 2))) {
-				continue;
-			}
-
-			// ---------- (B): Check that the node is not already in the closed list
-			if (_FindNodeInList(nodes[i], closed_list) != NULL) {
 				continue;
 			}
 
@@ -717,80 +703,67 @@ void MapMode::_FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path
 				continue;
 			}
 
-			// NOTE: If this point in the loop has been reached, then this node is valid to move to
-			if (i < 4) // This is a lateral node
+			if( i < 4 )
 				g_add = 10;
-			else // This is a diagonal node
+			else
 				g_add = 14;
 
-			// ---------- (D): If the node is already in the open list, see if it needs to be updated
-			list_node = _FindNodeInList(nodes[i], open_list);
-			if (list_node != NULL) {
-				// Update only if the original g_score is higher than what it could be for this path
-				if (list_node->g_score > closed_list.back().g_score + g_add) {
-					list_node->g_score = closed_list.back().g_score + g_add;
-					list_node->f_score = list_node->g_score + list_node->h_score;
-					list_node->parent = &(closed_list.back());
-				}
-				else {
-					continue;
-				}
-			}
+			//Check if the Node is already in the closed list
+			std::vector<PathNode>::iterator iterClosed = find( ClosedList.begin(), ClosedList.end(), nodes[i] );	
+			if( iterClosed == ClosedList.end() )
+			{	//The node is not
+				//Calculate the F G H of the new node
+				nodes[i].g_score = BestNode.g_score + g_add;
+				x_delta = abs(dest.col - nodes[i].col);
+				y_delta = abs(dest.row - nodes[i].row);
+				if (x_delta > y_delta)
+					nodes[i].h_score = 14 * y_delta + 10 * (x_delta - y_delta);
+				else
+					nodes[i].h_score = 14 * x_delta + 10 * (y_delta - x_delta);
 
-			// ---------- (E): Otherwise, calculate the scores of the node, set the parent, and add it to the open list
-			else {
-				nodes[i].g_score = closed_list.back().g_score + g_add;
-				nodes[i].h_score = abs(dest.row - nodes[i].row) + abs(dest.col - nodes[i].col);
-				// TODO: diagonal shortcut heuristic instead of manhattan distance
-// 				int32 x_delta = abs(dest.col - nodes[i].col);
-// 				int32 y_delta = abs(dest.row - nodes[i].row);
-// 				if (x_delta > y_delta)
-// 					nodes[i].h_score = 14 * y_delta + 10 * (x_delta - y_delta);
-// 				else
-// 					nodes[i].h_score = 14 * x_delta + 10 * (y_delta - x_delta);
+				//nodes[i].h_score = abs(dest.row - nodes[i].row) + abs(dest.col - nodes[i].col);
 				nodes[i].f_score = nodes[i].g_score + nodes[i].h_score;
-				nodes[i].parent = &(closed_list.back());
-				open_list.push_back(nodes[i]);
-// 				printf("add open [%d, %d]\n", nodes[i].col, nodes[i].row);
-			}
-		} // for (uint8 i = 0; i < nodes.size(); i++)
+				nodes[i].parent = &BestNode;
 
-		// ---------- (2): Find the node with the lowest f_score on the open list and add it to the closed list
+				//Check to see if the node is already on the open list
+				std::vector<PathNode>::iterator iter = find( OpenList.begin(), OpenList.end(), nodes[i] );
+				if( iter != OpenList.end() )
+				{	//It is 
+					//If its G is higher, it means that the path we are on is better, so switch the parent
+					if( iter->g_score > nodes[i].g_score )
+					{
+						iter->g_score = nodes[i].g_score;
+						iter->f_score = nodes[i].g_score + iter->h_score;
+						iter->parent = nodes[i].parent;
+					}
+				}
+				else
+				{
+					OpenList.push_back( nodes[i] );
+					//push_heap( OpenList.begin(), OpenList.end() );
+					//make_heap( OpenList.begin(), OpenList.end() );
+				}
+			}	//If node no in CLosedList
+		}	//For DIRS
+	}	//While !found
 
-		if (open_list.empty()) {
-			if (MAP_DEBUG)
-				cerr << "MAP ERROR: Couldn't find a path between two nodes" << endl;
-			path.clear();
-			return;
-		}
-
-		list<PathNode>::iterator best_move = open_list.begin();
-		for (list<PathNode>::iterator i = open_list.begin(); i != open_list.end(); ++i) {
-			if (i->f_score < best_move->f_score) {
-					best_move = i;
-			}
-		}
-		closed_list.push_back(*best_move);
-		open_list.erase(best_move);
-	} // while (closed_list.back() != dest)
-
-	// Save the new path by tracing it backwards
 	path.clear();
-	open_list.clear();
-	list_node = &(closed_list.back());
+	if( !OpenList.empty() )	{//Clear the vector received in ref
+		path.push_back( ClosedList.back() );		//Add the the goal to the vector
+		PathNode* Parent = ClosedList.back().parent;	//Keep its Parent Position 
+		ClosedList.pop_back();						//Pop it
 
-	// Reverse sort the closed_list into the open list
-	while (list_node->parent != NULL) {
-		open_list.push_back(*list_node);
-		list_node = list_node->parent;
+		for( std::vector<PathNode>::iterator iter = ClosedList.end() - 1;	//Go through the Closed List
+			iter != ClosedList.begin(); --iter )					//backwards
+		{
+			if( *iter == *Parent )			//Find the parent of the goal
+			{
+				path.push_back( *iter );		//Once found add it to the vector by ref
+				Parent = iter->parent;		//Keep its parent pos
+			}
+		}
 	}
-	// Now put the open list elements into the path vector
-	while (!open_list.empty()) {
-		path.push_back(open_list.back());
-		open_list.pop_back();
-	}
-
-} // void _FindPath(VirtualSprite* sprite, std::vector<PathNode>& path, PathNode dest)
+}
 
 // ****************************************************************************
 // **************************** DRAW FUNCTIONS ********************************

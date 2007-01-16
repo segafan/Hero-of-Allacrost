@@ -148,6 +148,10 @@ public:
 	//! \brief Overloaded comparison operator checks that tile.row or tile.col are not equal
 	bool operator!=(const PathNode& that) const
 		{ return ((this->row != that.row) || (this->col != that.col)); }
+	
+	//! \brief Overloaded comparison operator only used for PathFinding. It checks if the f_score is GREATER
+	bool operator<(const PathNode& that) const
+		{ return this->f_score > that.f_score; }
 }; // class PathNode
 
 } // namespace private_map
@@ -403,16 +407,6 @@ private:
 	*** set to false, but it <b>does</b> check that of the other MapObjects.
 	**/
 	bool _DetectCollision(private_map::VirtualSprite* sprite);
-
-	/** \brief Returns a pointer to a PathNode, if it is in a list
-	*** \param &node The PathNode to check for, with its row and col members set.
-	*** \param &node_list The list of PathNodes where the node may be found
-	*** \return A pointer to the node when it is found, or NULL if it is not found.
-	***
-	*** The list is checked for an element that has the same value of its rol and col
-	*** members as the argument node.
-	**/
-	private_map::PathNode* _FindNodeInList(const private_map::PathNode& node, std::list<private_map::PathNode>& node_list);
 
 	/** \brief Finds a path from a sprite's current position to a destination
 	*** \param sprite A pointer of the sprite to find the path for
