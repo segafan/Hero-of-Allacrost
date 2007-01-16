@@ -66,19 +66,15 @@ const uint16 SW_WEST   = 0x0200;
 const uint16 SE_SOUTH  = 0x0400;
 const uint16 SE_EAST   = 0x0800;
 
+const uint16 NORTHWEST = NW_NORTH | NW_WEST;
+const uint16 NORTHEAST = NE_NORTH | NE_EAST;
+const uint16 SOUTHWEST = SW_SOUTH | SW_WEST;
+const uint16 SOUTHEAST = SE_SOUTH | SE_EAST;
+
 const uint16 FACING_NORTH = NORTH | NW_NORTH | NE_NORTH;
 const uint16 FACING_SOUTH = SOUTH | SW_SOUTH | SE_SOUTH;
 const uint16 FACING_WEST = WEST | NW_WEST | SW_WEST;
 const uint16 FACING_EAST = EAST | NE_EAST | SE_EAST;
-
-const uint16 MOVING_NORTH = NORTH;
-const uint16 MOVING_SOUTH = SOUTH;
-const uint16 MOVING_WEST = WEST;
-const uint16 MOVING_EAST = EAST;
-const uint16 MOVING_NORTHWEST = NW_NORTH | NW_WEST;
-const uint16 MOVING_NORTHEAST = NE_NORTH | NE_EAST;
-const uint16 MOVING_SOUTHWEST = SW_SOUTH | SW_WEST;
-const uint16 MOVING_SOUTHEAST = SE_SOUTH | SE_EAST;
 //@}
 
 /** \name Map Sprite Animation Constants
@@ -320,7 +316,7 @@ struct MapObject_Ptr_Less
 {
 	const bool operator()( const MapObject * a, const MapObject * b )
 	{
-		return ( a->y_position + a->y_offset ) <  ( b->y_position + b->y_offset );		
+		return ( a->y_position + a->y_offset ) <  ( b->y_position + b->y_offset );
 	}
 };
 
@@ -416,10 +412,19 @@ public:
 	**/
 	bool sky_object;
 
+	/** \brief An index to the actions vector, representing the current sprite action being performed.
+	*** A negative value indicates that the sprite is taking no action. If the sprite has no entries
+	*** in its actions vector, this member should remain negative, otherwise a segmentation fault
+	*** will occur.
+	**/
+	int8 current_action;
+
+	//! \brief A container for all of the actions this sprite performs.
+	std::vector<SpriteAction*> actions;
+
 	VirtualSprite();
 
-	~VirtualSprite()
-		{}
+	~VirtualSprite();
 
 	//! \brief Updates the virtual object's position if it is moving, otherwise does nothing.
 	virtual void Update();
@@ -433,8 +438,12 @@ public:
 	*** members of this class.
 	**/
 	//@{
-	void SetDirection(uint16 dir)
-		{ direction = dir; }
+	/** \note This method takes into account the current direction when setting the new direction
+	*** in the case of diagonal movement. For example, if the sprite is currently facing north
+	*** and this function indicates that the sprite should move northwest, it will face north
+	*** during the northwest movement.
+	**/
+	void SetDirection(uint16 dir);
 
 	void SetMovementSpeed(float speed)
 		{ movement_speed = speed; }

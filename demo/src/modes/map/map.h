@@ -193,6 +193,7 @@ public:
 		{ lower_layer = lower; middle_layer = middle; upper_layer = upper; }
 }; // class MapTile
 
+
 /** ****************************************************************************
 *** \brief Handles the game execution while the player is exploring maps.
 ***
@@ -224,6 +225,8 @@ class MapMode : public hoa_mode_manager::GameMode {
 	friend class private_map::PhysicalObject;
 	friend class private_map::VirtualSprite;
 	friend class private_map::MapSprite;
+	friend class private_map::SpriteAction;
+	friend class private_map::ActionPathMove;
 public:
 	MapMode();
 
@@ -232,7 +235,7 @@ public:
 	/** \brief Makes all relevant map classes and methods available to Lua.
 	*** This function only needs to be called once when the game begins.
 	**/
-	void BindToLua();
+	static void BindToLua();
 
 	/** \brief Loads all map data as specified in the Lua file that defines the map.
 	*** \param filename The name of the map script file to load.
@@ -436,11 +439,11 @@ private:
 	*** methods are bound in the implementation of the MapMode::BindToLua() function.
 	**/
 	//@{
-	void AddGroundObject(private_map::MapObject *obj);
+	void _AddGroundObject(private_map::MapObject *obj);
 
-	void AddPassObject(private_map::MapObject *obj);
+	void _AddPassObject(private_map::MapObject *obj);
 
-	void AddSkyObject(private_map::MapObject *obj);
+	void _AddSkyObject(private_map::MapObject *obj);
 
 	void _SetMapState(uint8 state)
 		{ _map_state = state; }

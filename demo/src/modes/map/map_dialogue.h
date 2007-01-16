@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -20,10 +20,8 @@
 #include "defs.h"
 #include "video.h"
 
-//! \brief All calls to map mode are wrapped in this namespace.
 namespace hoa_map {
 
-//! \brief An internal namespace to be used only within the boot code. Don't use this namespace anywhere else!
 namespace private_map {
 
 /** ****************************************************************************
@@ -32,27 +30,33 @@ namespace private_map {
 class MapDialogue {
 public:
 	MapDialogue();
+
 	~MapDialogue();
 
 	//! \brief The text of the conversation, split up into multiple lines.
 	std::vector<hoa_utils::ustring> text;
+
 	//! \brief A list of sprite ID numbers for who speaks what lines.
 	std::vector<uint32> speakers;
+
 	// A list of events that may occur after each line.
 	// std::vector<SpriteAction*> events
 
 	//! \brief True if the player has already read this dialogue.
 	bool seen;
+
 	//! \brief An index to the current line to read.
 	uint32 current_line;
 
 	const bool IsSeenDialogue()
 		{ return seen; }
+
 	void SetSeenDialogue()
 		{ seen = true; }
+
 	void ClearSeenDialogue()
 		{ seen = false; }
-		
+
 	const bool ReadNextLine();
 }; // class MapDialogue
 
