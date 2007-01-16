@@ -146,10 +146,11 @@ public:
 	//! \brief Overloaded comparison operator checks that tile.row and tile.col are equal
 	bool operator==(const PathNode& that) const
 		{ return ((this->row == that.row) && (this->col == that.col)); }
+
 	//! \brief Overloaded comparison operator checks that tile.row or tile.col are not equal
 	bool operator!=(const PathNode& that) const
 		{ return ((this->row != that.row) || (this->col != that.col)); }
-	
+
 	//! \brief Overloaded comparison operator only used for PathFinding. It checks if the f_score is GREATER
 	bool operator<(const PathNode& that) const
 		{ return this->f_score > that.f_score; }
