@@ -93,6 +93,10 @@ const uint32 ANIM_WALKING_WEST   = 6;
 const uint32 ANIM_WALKING_EAST   = 7;
 //@}
 
+const uint8 PHYSICAL_TYPE = 0;
+const uint8 VIRTUAL_TYPE = 1;
+const uint8 SPRITE_TYPE = 2;
+
 
 /** ****************************************************************************
 *** \brief Abstract class that represents objects on a map
@@ -229,6 +233,7 @@ public:
 	**/
 	bool DrawHelper();
 
+
 	/** \name Lua Access Functions
 	*** These functions are specifically written for Lua binding, to enable Lua to access the
 	*** members of this class.
@@ -306,6 +311,12 @@ public:
 	bool IsDrawOnSecondPass() const
 		{ return draw_on_second_pass; }
 	//@}
+
+	uint8 GetType() const
+	{ return _object_type; }
+
+	protected:
+		uint8 _object_type;
 
 }; // class MapObject
 
@@ -412,6 +423,12 @@ public:
 	**/
 	bool sky_object;
 
+	//! \brief The name of the sprite, as seen by the player in the game.
+	hoa_utils::ustring name;
+
+	//! \brief A pointer to the face portrait of the sprite, as seen in dialogues and menus.
+	hoa_video::StillImage* face_portrait;
+
 	/** \brief An index to the actions vector, representing the current sprite action being performed.
 	*** A negative value indicates that the sprite is taking no action. If the sprite has no entries
 	*** in its actions vector, this member should remain negative, otherwise a segmentation fault
@@ -454,6 +471,23 @@ public:
 	float GetMovementSpeed() const
 		{ return movement_speed; }
 	//@}
+
+	void SetPortrait(std::string pn)
+		{ face_portrait = new hoa_video::StillImage(); face_portrait->SetFilename(pn); hoa_video::VideoManager->LoadImage(*face_portrait); }
+	// Dialogues
+	std::vector< MapDialogue* > dialogues;
+	int8 current_dialogue;
+
+	// Dialogues
+	void AddDialogue( MapDialogue* dialogue )
+		{ dialogues.push_back( dialogue ); }
+	bool HasDialogue() const
+		{ return dialogues.size() > 0; }
+	MapDialogue* GetCurrentDialogue() const
+		{ return dialogues[ current_dialogue ]; }
+	void SetDialogue( const int8 dialogue )
+		{ current_dialogue = dialogue; }
+
 }; // class VirtualMapObject : public MapObject
 
 
@@ -469,8 +503,6 @@ public:
 *** ***************************************************************************/
 class MapSprite : public VirtualSprite {
 public:
-	//! \brief The name of the sprite, as seen by the player in the game.
-	hoa_utils::ustring name;
 
 	//! \brief Holds the previous value of VirtualSprite#moving from the last call to MapSprite#Update().
 	bool was_moving;
@@ -490,9 +522,6 @@ public:
 	*** animations may follow.
 	**/
 	std::vector<hoa_video::AnimatedImage> animations;
-
-	//! \brief A pointer to the face portrait of the sprite, as seen in dialogues and menus.
-	hoa_video::StillImage* face_portrait;
 
 	// -------------------------------- Methods --------------------------------
 

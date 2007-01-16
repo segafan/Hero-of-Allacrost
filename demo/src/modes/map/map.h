@@ -33,6 +33,7 @@
 #include "video.h"
 #include "gui.h"
 
+
 //! All calls to map mode are wrapped in this namespace.
 namespace hoa_map {
 
@@ -229,6 +230,7 @@ class MapMode : public hoa_mode_manager::GameMode {
 	friend class private_map::PhysicalObject;
 	friend class private_map::VirtualSprite;
 	friend class private_map::MapSprite;
+	friend class private_map::MapDialogue;
 	friend class private_map::SpriteAction;
 	friend class private_map::ActionPathMove;
 public:
@@ -373,6 +375,8 @@ private:
 
 	//! \brief The textbox for character dialogues.
 	hoa_video::TextBox _dialogue_textbox;
+
+	private_map::MapDialogue* _current_dialogue;
 
 	// -------------------- Battle Data Retained by the Map
 

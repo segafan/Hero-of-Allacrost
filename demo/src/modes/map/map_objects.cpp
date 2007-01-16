@@ -81,8 +81,10 @@ bool MapObject::DrawHelper() {
 // ****************************************************************************
 
 PhysicalObject::PhysicalObject() :
-	current_animation(0)
-{}
+	current_animation(0)	
+{
+	MapObject::_object_type = PHYSICAL_TYPE;
+}
 
 
 
@@ -113,18 +115,25 @@ VirtualSprite::VirtualSprite() :
 	movement_speed(NORMAL_SPEED),
 	moving(false),
 	sky_object(false),
+	face_portrait( NULL ),
 	current_action(-1)
-{}
+{
+	MapObject::_object_type = VIRTUAL_TYPE;
+}
 
+VirtualSprite::~VirtualSprite()
+{
+	if( face_portrait )
+	{
+		VideoManager->DeleteImage(*face_portrait);
+		face_portrait = 0;
+	}
 
-
-VirtualSprite::~VirtualSprite() {
 	for (uint32 i = 0; i < actions.size(); i++) {
 		delete actions[i];
 	}
 	actions.clear();
 }
-
 
 void VirtualSprite::Update() {
 	if (!updatable) {
@@ -263,11 +272,13 @@ void VirtualSprite::SetDirection(uint16 dir) {
 MapSprite::MapSprite() :
 	was_moving(false),
 	walk_sound(-1),
-	current_animation(ANIM_STANDING_SOUTH),
-	face_portrait(NULL)
+	current_animation(ANIM_STANDING_SOUTH)
 {
 	if (MAP_DEBUG)
 		cout << "MAP: MapSprite constructor invoked" << endl;
+
+	MapObject::_object_type = SPRITE_TYPE;
+	VirtualSprite::face_portrait = 0;
 }
 
 
