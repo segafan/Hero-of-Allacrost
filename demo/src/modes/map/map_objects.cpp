@@ -136,7 +136,7 @@ void VirtualSprite::Update() {
 		actions[current_action]->Execute();
 		if (actions[current_action]->IsFinished()) {
 			current_action++;
-			if (static_cast<uint8>(current_action) > actions.size())
+			if (static_cast<uint8>(current_action) >= actions.size())
 				current_action = 0;
 		}
 	}
