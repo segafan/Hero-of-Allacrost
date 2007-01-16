@@ -112,87 +112,148 @@ VirtualSprite::VirtualSprite() :
 	direction(SOUTH),
 	movement_speed(NORMAL_SPEED),
 	moving(false),
-	sky_object(false)
+	sky_object(false),
+	current_action(-1)
 {}
 
 
 
+VirtualSprite::~VirtualSprite() {
+	for (uint32 i = 0; i < actions.size(); i++) {
+		delete actions[i];
+	}
+	actions.clear();
+}
+
+
 void VirtualSprite::Update() {
-	if (!updatable || !moving) {
+	if (!updatable) {
 		return;
 	}
 
-	// Save the previous sprite's position temporarily
-	float tmp_x = x_offset;
-	float tmp_y = y_offset;
+	// Execute the sprite's action and if it is finished, update the action counter
+	if (current_action >= 0) {
+		actions[current_action]->Execute();
+		if (actions[current_action]->IsFinished()) {
+			current_action++;
+			if (static_cast<uint8>(current_action) > actions.size())
+				current_action = 0;
+		}
+	}
 
-	float distance_moved = static_cast<float>(MapMode::_current_map->_time_elapsed) / movement_speed;
+	if (moving) {
+		// Save the previous sprite's position temporarily
+		float tmp_x = x_offset;
+		float tmp_y = y_offset;
 
-	// Move the sprite the appropriate distance in the appropriate direction
-	switch (direction) {
-		case NORTH:
-			y_offset -= distance_moved;
-			break;
-		case SOUTH:
-			y_offset += distance_moved;
-			break;
-		case WEST:
-			x_offset -= distance_moved;
-			break;
-		case EAST:
-			x_offset += distance_moved;
-			break;
-		case NW_NORTH:
-		case NW_WEST:
-			x_offset -= distance_moved;
-			y_offset -= distance_moved;
-			break;
-		case SW_SOUTH:
-		case SW_WEST:
-			x_offset -= distance_moved;
-			y_offset += distance_moved;
-			break;
-		case NE_NORTH:
-		case NE_EAST:
-			x_offset += distance_moved;
-			y_offset -= distance_moved;
-			break;
-		case SE_SOUTH:
-		case SE_EAST:
-			x_offset += distance_moved;
-			y_offset += distance_moved;
-			break;
-		default:
-			cerr << "MAP ERROR: sprite trying to move in an invalid direction" << endl;
+		float distance_moved = static_cast<float>(MapMode::_current_map->_time_elapsed) / movement_speed;
+
+		// Move the sprite the appropriate distance in the appropriate direction
+		switch (direction) {
+			case NORTH:
+				y_offset -= distance_moved;
+				break;
+			case SOUTH:
+				y_offset += distance_moved;
+				break;
+			case WEST:
+				x_offset -= distance_moved;
+				break;
+			case EAST:
+				x_offset += distance_moved;
+				break;
+			case NW_NORTH:
+			case NW_WEST:
+				x_offset -= distance_moved;
+				y_offset -= distance_moved;
+				break;
+			case SW_SOUTH:
+			case SW_WEST:
+				x_offset -= distance_moved;
+				y_offset += distance_moved;
+				break;
+			case NE_NORTH:
+			case NE_EAST:
+				x_offset += distance_moved;
+				y_offset -= distance_moved;
+				break;
+			case SE_SOUTH:
+			case SE_EAST:
+				x_offset += distance_moved;
+				y_offset += distance_moved;
+				break;
+			default:
+				cerr << "MAP ERROR: sprite trying to move in an invalid direction" << endl;
+				return;
+		} // switch (direction)
+
+		// Determine if the sprite may move to this new position
+		if (MapMode::_current_map->_DetectCollision(this) == true) {
+			// Restore the original position of the sprite
+			x_offset = tmp_x;
+			y_offset = tmp_y;
 			return;
-	} // switch (direction)
+		}
 
-	// Determine if the sprite may move to this new position
-	if (MapMode::_current_map->_DetectCollision(this) == true) {
-		// Restore the original position of the sprite
-		x_offset = tmp_x;
-		y_offset = tmp_y;
+		// Roll-over position offsets if necessary
+		while (x_offset < 0.0f) {
+			x_position -= 1;
+			x_offset += 1.0f;
+		}
+		while (x_offset > 1.0f) {
+			x_position += 1;
+			x_offset -= 1.0f;
+		}
+		while (y_offset < 0.0f) {
+			y_position -= 1;
+			y_offset += 1.0f;
+		}
+		while (y_offset > 1.0f) {
+			y_position += 1;
+			y_offset -= 1.0f;
+		}
+	} // if (moving)
+} // void VirtualSprite::Update()
+
+
+
+void VirtualSprite::SetDirection(uint16 dir) {
+	// If the direction is a lateral one, simply set it and return
+	if (dir & (NORTH | SOUTH | EAST | WEST)) {
+		direction = dir;
 		return;
 	}
 
-	// Roll-over position offsets if necessary
-	while (x_offset < 0.0f) {
-		x_position -= 1;
-		x_offset += 1.0f;
+	// Otherwise the direction is diagonal, and we must figure out which way the sprite should face.
+	if (dir & NORTHWEST) {
+		if (direction & (FACING_NORTH | FACING_EAST))
+			direction = NW_NORTH;
+		else
+			direction = NW_WEST;
 	}
-	while (x_offset > 1.0f) {
-		x_position += 1;
-		x_offset -= 1.0f;
+	else if (dir & SOUTHWEST) {
+		if (direction & (FACING_SOUTH | FACING_EAST))
+			direction = SW_SOUTH;
+		else
+			direction = SW_WEST;
 	}
-	while (y_offset < 0.0f) {
-		y_position -= 1;
-		y_offset += 1.0f;
+	else if (dir & NORTHEAST) {
+		if (direction & (FACING_NORTH | FACING_WEST))
+			direction = NE_NORTH;
+		else
+			direction = NE_EAST;
 	}
-	while (y_offset > 1.0f) {
-		y_position += 1;
-		y_offset -= 1.0f;
+	else if (dir & SOUTHEAST) {
+		if (direction & (FACING_SOUTH | FACING_WEST))
+			direction = SE_SOUTH;
+		else
+			direction = SE_EAST;
 	}
-} // void VirtualSprite::Update()
+	else { // Invalid
+		if (MAP_DEBUG)
+			fprintf(stderr, "ERROR: in VirtualSprite::SetDirection tried to set an invalid direction (%d)\n", dir);
+	}
+} // void VirtualSprite::SetDirection(uint16 dir)
 
 // ****************************************************************************
 // ************************ MapSprite Class Functions *************************
@@ -337,43 +398,43 @@ void MapSprite::Update() {
 			}
 			was_moving = false;
 		} // if (was_moving)
-
-		return;
 	} // if (!moving)
 
 	// This call will update the sprite's position and perform collision detection
 	VirtualSprite::Update();
 
-	// Save the previous state
-	uint8 last_animation = current_animation;
+	if (moving) {
+		// Save the previous animation
+		uint8 last_animation = current_animation;
 
-	// Determine the correct animation to display
-	if (direction & FACING_NORTH) {
-		current_animation = ANIM_WALKING_NORTH;
-	}
-	else if (direction & FACING_SOUTH) {
-		current_animation = ANIM_WALKING_SOUTH;
-	}
-	else if (direction & FACING_WEST) {
-		current_animation = ANIM_WALKING_WEST;
-	}
-	else if (direction & FACING_EAST) {
-		current_animation = ANIM_WALKING_EAST;
-	}
-	else {
-		cerr << "MAP ERROR: could not find proper movement animation to draw" << endl;
-	}
+		// Determine the correct animation to display
+		if (direction & FACING_NORTH) {
+			current_animation = ANIM_WALKING_NORTH;
+		}
+		else if (direction & FACING_SOUTH) {
+			current_animation = ANIM_WALKING_SOUTH;
+		}
+		else if (direction & FACING_WEST) {
+			current_animation = ANIM_WALKING_WEST;
+		}
+		else if (direction & FACING_EAST) {
+			current_animation = ANIM_WALKING_EAST;
+		}
+		else {
+			cerr << "MAP ERROR: could not find proper movement animation to draw" << endl;
+		}
 
-	// If the direction of movement changed in mid-flight, update the animation timer on the
-	// new animated image to reflect the old, so the walking animations do not appear to
-	// "start and stop" whenever the direction is changed.
-	if (current_animation != last_animation) {
-		animations[current_animation].SetTimeProgress(animations[last_animation].GetTimeProgress());
-		animations[last_animation].SetTimeProgress(0);
-	}
-	animations[current_animation].Update();
+		// If the direction of movement changed in mid-flight, update the animation timer on the
+		// new animated image to reflect the old, so the walking animations do not appear to
+		// "start and stop" whenever the direction is changed.
+		if (current_animation != last_animation) {
+			animations[current_animation].SetTimeProgress(animations[last_animation].GetTimeProgress());
+			animations[last_animation].SetTimeProgress(0);
+		}
+		animations[current_animation].Update();
 
-	was_moving = true;
+		was_moving = true;
+	} // if (moving)
 } // void MapSprite::Update()
 
 

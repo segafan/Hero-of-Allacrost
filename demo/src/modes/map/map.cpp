@@ -39,7 +39,6 @@ using namespace hoa_global;
 using namespace hoa_script;
 using namespace hoa_battle;
 using namespace hoa_menu;
-using namespace luabind;
 
 namespace hoa_map {
 
@@ -130,14 +129,16 @@ void MapMode::Reset() {
 
 
 void MapMode::BindToLua() {
+	using namespace luabind;
+
 	module(ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<MapMode>("MapMode")
 			.def(constructor<>())
 			.def("Load", &MapMode::Load)
-			.def("AddGroundObject", &MapMode::AddGroundObject)
-			.def("AddPassObject", &MapMode::AddPassObject)
-			.def("AddSkyObject", &MapMode::AddSkyObject)
+			.def("_AddGroundObject", &MapMode::_AddGroundObject)
+			.def("_AddPassObject", &MapMode::_AddPassObject)
+			.def("_AddSkyObject", &MapMode::_AddSkyObject)
 	];
 
 	module(ScriptManager->GetGlobalState(), "hoa_map")
@@ -296,7 +297,27 @@ bool MapMode::Load(string filename) {
 	DialogueSprite->img_half_width = 1.0f;
 	DialogueSprite->img_height = 4.0f;
 	DialogueSprite->movement_speed = NORMAL_SPEED;
-	DialogueSprite->direction = EAST;
+	DialogueSprite->SetDirection(EAST);
+
+	ActionPathMove *new_act;
+	new_act = new ActionPathMove(DialogueSprite);
+	new_act->destination.row = 55;
+	new_act->destination.col = 70;
+	DialogueSprite->actions.push_back(new_act);
+	new_act = new ActionPathMove(DialogueSprite);
+	new_act->destination.row = 4;
+	new_act->destination.col = 10;
+	DialogueSprite->actions.push_back(new_act);
+	new_act = new ActionPathMove(DialogueSprite);
+	new_act->destination.row = 47;
+	new_act->destination.col = 22;
+	DialogueSprite->actions.push_back(new_act);
+	new_act = new ActionPathMove(DialogueSprite);
+	new_act->destination.row = 8;
+	new_act->destination.col = 8;
+	DialogueSprite->actions.push_back(new_act);
+	DialogueSprite->current_action = 0;
+
 	//DialogueSprite->no_collision = true;
 	if (DialogueSprite->Load() == false)
 		return false;
@@ -367,7 +388,7 @@ void MapMode::Update() {
 	for (uint32 i = 0; i < _sky_objects.size(); i++) {
 		_sky_objects[i]->Update();
 	}
-	
+
 	// ---------- (4) Sort the objects so they are in the correct draw order ********
 	std::sort( _ground_objects.begin(), _ground_objects.end(), MapObject_Ptr_Less() );
 
@@ -447,54 +468,32 @@ void MapMode::_UpdateExplore() {
 	if (_camera->moving == true) {
 		if (InputManager->UpState()) {
 			if (InputManager->LeftState()) {
-				// The sprite is moving northwest: determine if it should be facing north or west
-				if (_camera->direction == (NW_NORTH | NORTH | NE_NORTH | NE_EAST | EAST | SE_EAST))
-					_camera->direction = NW_NORTH;
-				else
-					_camera->direction = NW_WEST;
+				_camera->SetDirection(NORTHWEST);
 			}
 			else if (InputManager->RightState()) {
-				// The sprite is moving northeast: determine if it should be facing north or east
-				if (_camera->direction == (NE_NORTH | NORTH | NW_NORTH | NW_WEST | WEST | SW_WEST))
-					_camera->direction = NE_NORTH;
-				else
-					_camera->direction = NE_EAST;
+				_camera->SetDirection(NORTHEAST);
 			}
 			else {
-				_camera->direction = NORTH;
+				_camera->SetDirection(NORTH);
 			}
 		}
 		else if (InputManager->DownState()) {
 			if (InputManager->LeftState()) {
-				// The sprite is moving southwest: determine if it should be facing south or west
-				if (_camera->direction == (SW_SOUTH | SOUTH | SE_SOUTH | SE_EAST | EAST | NE_EAST))
-					_camera->direction = SW_SOUTH;
-				else
-					_camera->direction = SW_WEST;
+				_camera->SetDirection(SOUTHWEST);
 			}
 			else if (InputManager->RightState()) {
-				// The sprite is moving southeast: determine if it should be facing south or east
-				if (_camera->direction == (SE_SOUTH | SOUTH | SW_SOUTH | SW_WEST | WEST | NW_WEST))
-					_camera->direction = SE_SOUTH;
-				else
-					_camera->direction = SE_EAST;
+				_camera->SetDirection(SOUTHEAST);
 			}
 			else {
-				_camera->direction = SOUTH;
+				_camera->SetDirection(SOUTH);
 			}
 		}
 		else if (InputManager->LeftState()) {
-			_camera->direction = WEST;
+			_camera->SetDirection(WEST);
 		}
 		else if (InputManager->RightState()) {
-			_camera->direction = EAST;
+			_camera->SetDirection(EAST);
 		}
-
-		// TEMP: random encounters will be removed at some point
-// 		if (_random_encounters) {
-			// todo: subtract the encounter timer based on the update time, and start a battle if
-			// the time expired
-// 		}
 	} // if (_camera->moving == true)
 } // void MapMode::_UpdateExplore()
 
@@ -595,11 +594,11 @@ bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 				bool bNoColl = false;
 				// If the the right side of one is to the left of the other or if the left side of one
 				// is to the right of the other, they cannot collide.
-				if( other_x_location - (*objects)[i]->coll_half_width > cr_right 
-					|| other_x_location + (*objects)[i]->coll_half_width < cr_left ) {			
+				if( other_x_location - (*objects)[i]->coll_half_width > cr_right
+					|| other_x_location + (*objects)[i]->coll_half_width < cr_left ) {
 					bNoColl = true;
 				}
-				
+
 				// They still might collide, check the top and bottom
 				if( !bNoColl ) {
 					// If the bottom of one is higher then the other one or if the top of
@@ -640,8 +639,7 @@ void MapMode::_FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path
 	list<PathNode> open_list;
 	// The tiles which have already been visited once.
 	list<PathNode> closed_list;
-	// A new node to construct and add to the path
-	PathNode new_node;
+
 	// Used to temporarily hold a pointer to a node in a list
 	PathNode *list_node = NULL;
 	// The number of nodes that the sprite's collision rectangle spans away from the origin
@@ -655,21 +653,23 @@ void MapMode::_FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path
 		return;
 	}
 
-	new_node.row = static_cast<int16>(sprite->y_position);
-	new_node.col = static_cast<int16>(sprite->x_position);
-	x_span = static_cast<int16>(sprite->coll_half_width);
-	y_span = static_cast<int16>(sprite->coll_height);
+	// The source node to construct and add to the path
+	PathNode source_node;
+	source_node.row = static_cast<int16>(sprite->y_position);
+	source_node.col = static_cast<int16>(sprite->x_position);
+	// Push the source node on to the closed list
+	closed_list.push_back(source_node);
 
 	// Check that the source is not equal to the destination
-	if (new_node == dest) {
+	if (source_node == dest) {
 		if (MAP_DEBUG)
 			cerr << "MAP ERROR: path destination is the same as the path source" << endl;
 		path.clear();
 		return;
 	}
 
-	// Push the source node on to the closed list
-	closed_list.push_back(new_node);
+	x_span = static_cast<int16>(sprite->coll_half_width);
+	y_span = static_cast<int16>(sprite->coll_height);
 
 	// A vector of nodes used to temporarily hold the adjacent nodes of the node to examine
 	vector<PathNode> nodes(8, PathNode());
@@ -677,29 +677,30 @@ void MapMode::_FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path
 	int16 g_add;
 
 	while (closed_list.back() != dest) {
+		printf("\nnode x/y: [%d, %d]   ", closed_list.back().col, closed_list.back().row);
+		printf("closed size: %d :: open size: %d\n", closed_list.size(), open_list.size());
 		// ---------- (1): Add valid nodes to the open list that are adjacent to the last node in the closed list
 
 		// First found entries in "nodes" are for lateral movement, final four are diagonal movement
-		nodes[0].row = closed_list.back().row - 1;
-		nodes[1].row = closed_list.back().row + 1;
-		nodes[2].col = closed_list.back().col - 1;
-		nodes[3].col = closed_list.back().col + 1;
-		nodes[4].row = closed_list.back().row - 1; nodes[4].col = closed_list.back().row - 1;
-		nodes[5].row = closed_list.back().row - 1; nodes[5].col = closed_list.back().row + 1;
-		nodes[6].row = closed_list.back().row + 1; nodes[6].col = closed_list.back().row - 1;
-		nodes[7].row = closed_list.back().row + 1; nodes[7].col = closed_list.back().row + 1;
-
+		nodes[0].row = closed_list.back().row - 1; nodes[0].col = closed_list.back().col;
+		nodes[1].row = closed_list.back().row + 1; nodes[1].col = closed_list.back().col;
+		nodes[2].row = closed_list.back().row;     nodes[2].col = closed_list.back().col - 1;
+		nodes[3].row = closed_list.back().row;     nodes[3].col = closed_list.back().col + 1;
+		nodes[4].row = closed_list.back().row - 1; nodes[4].col = closed_list.back().col - 1;
+		nodes[5].row = closed_list.back().row - 1; nodes[5].col = closed_list.back().col + 1;
+		nodes[6].row = closed_list.back().row + 1; nodes[6].col = closed_list.back().col - 1;
+		nodes[7].row = closed_list.back().row + 1; nodes[7].col = closed_list.back().col + 1;
 
 		for (uint8 i = 0; i < nodes.size(); i++) {
 			// ---------- (A): Check that the sprite's collision rectangle will be within the map boundaries
-			if (nodes[i].col - x_span < 0 || nodes[i].row - y_span < 0 ||
-				nodes[i].col + x_span >= (_num_tile_cols * 2) || nodes[i].row >= (_num_tile_rows * 2)) {
-				break;
+			if ((nodes[i].col - x_span < 0) || (nodes[i].row - y_span < 0) ||
+				(nodes[i].col + x_span >= (_num_tile_cols * 2)) || (nodes[i].row >= (_num_tile_rows * 2))) {
+				continue;
 			}
 
 			// ---------- (B): Check that the node is not already in the closed list
 			if (_FindNodeInList(nodes[i], closed_list) != NULL) {
-				break;
+				continue;
 			}
 
 			// ---------- (C): Check that all grid nodes that the sprite's collision rectangle will overlap are walkable
@@ -713,30 +714,44 @@ void MapMode::_FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path
 				}
 			}
 			if (continue_loop == false) { // This node is invalid
-				break;
+				continue;
 			}
 
-			// NOTE: If this point in the loop has been reached, then this node is valid
+			// NOTE: If this point in the loop has been reached, then this node is valid to move to
 			if (i < 4) // This is a lateral node
 				g_add = 10;
 			else // This is a diagonal node
-				g_add = 15;
+				g_add = 14;
 
-			// ---------- (D): If the node is already in the open list, update its parent and g and f scores
+			// ---------- (D): If the node is already in the open list, see if it needs to be updated
 			list_node = _FindNodeInList(nodes[i], open_list);
 			if (list_node != NULL) {
-				list_node->g_score = closed_list.back().g_score + g_add;
-				list_node->f_score = list_node->g_score + list_node->h_score;
-				list_node->parent = &(closed_list.back());
+				// Update only if the original g_score is higher than what it could be for this path
+				if (list_node->g_score > closed_list.back().g_score + g_add) {
+					list_node->g_score = closed_list.back().g_score + g_add;
+					list_node->f_score = list_node->g_score + list_node->h_score;
+					list_node->parent = &(closed_list.back());
+				}
+				else {
+					continue;
+				}
 			}
 
 			// ---------- (E): Otherwise, calculate the scores of the node, set the parent, and add it to the open list
 			else {
 				nodes[i].g_score = closed_list.back().g_score + g_add;
 				nodes[i].h_score = abs(dest.row - nodes[i].row) + abs(dest.col - nodes[i].col);
+				// TODO: diagonal shortcut heuristic instead of manhattan distance
+// 				int32 x_delta = abs(dest.col - nodes[i].col);
+// 				int32 y_delta = abs(dest.row - nodes[i].row);
+// 				if (x_delta > y_delta)
+// 					nodes[i].h_score = 14 * y_delta + 10 * (x_delta - y_delta);
+// 				else
+// 					nodes[i].h_score = 14 * x_delta + 10 * (y_delta - x_delta);
 				nodes[i].f_score = nodes[i].g_score + nodes[i].h_score;
 				nodes[i].parent = &(closed_list.back());
 				open_list.push_back(nodes[i]);
+// 				printf("add open [%d, %d]\n", nodes[i].col, nodes[i].row);
 			}
 		} // for (uint8 i = 0; i < nodes.size(); i++)
 
@@ -759,6 +774,21 @@ void MapMode::_FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path
 		open_list.erase(best_move);
 	} // while (closed_list.back() != dest)
 
+	// Save the new path by tracing it backwards
+	path.clear();
+	open_list.clear();
+	list_node = &(closed_list.back());
+
+	// Reverse sort the closed_list into the open list
+	while (list_node->parent != NULL) {
+		open_list.push_back(*list_node);
+		list_node = list_node->parent;
+	}
+	// Now put the open list elements into the path vector
+	while (!open_list.empty()) {
+		path.push_back(open_list.back());
+		open_list.pop_back();
+	}
 
 } // void _FindPath(VirtualSprite* sprite, std::vector<PathNode>& path, PathNode dest)
 
@@ -940,21 +970,21 @@ void MapMode::Draw() {
 // ************************* LUA BINDING FUNCTIONS ****************************
 // ****************************************************************************
 
-void MapMode::AddGroundObject(private_map::MapObject *obj) {
+void MapMode::_AddGroundObject(private_map::MapObject *obj) {
 	_ground_objects.push_back(obj);
 	_all_objects.insert(make_pair(obj->object_id, obj));
 }
 
 
 
-void MapMode::AddPassObject(private_map::MapObject *obj) {
+void MapMode::_AddPassObject(private_map::MapObject *obj) {
 	_pass_objects.push_back(obj);
 	_all_objects.insert(make_pair(obj->object_id, obj));
 }
 
 
 
-void MapMode::AddSkyObject(private_map::MapObject *obj) {
+void MapMode::_AddSkyObject(private_map::MapObject *obj) {
 	_sky_objects.push_back(obj);
 	_all_objects.insert(make_pair(obj->object_id, obj));
 }
