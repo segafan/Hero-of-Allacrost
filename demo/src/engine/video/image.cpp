@@ -124,49 +124,49 @@ ImageElement::ImageElement(Image *image_, float x_offset_, float y_offset_, floa
 	}
 } // ImageElement::ImageElement()
 
-// *****************************************************************************
-// ******************************* MultiImage **********************************
-// *****************************************************************************
-
-MultiImage::MultiImage(AnimatedImage& id, const std::string& filename, const uint32 rows, const uint32 cols,
-	const float width, const float height, const bool grayscale) :
-	filename(filename),
-	rows(rows),
-	cols(cols),
-	width(width),
-	height(height),
-	grayscale(grayscale),
-	animated_image(&id),
-	still_images(0)
-{}
-
-MultiImage::MultiImage(std::vector <StillImage>& id, const std::string& filename, const uint32 rows, const uint32 cols,
-	const float width, const float height, const bool grayscale) :
-	filename(filename),
-	rows(rows),
-	cols(cols),
-	width(width),
-	height(height),
-	grayscale(grayscale),
-	animated_image(0),
-	still_images(&id)
-{}
 
 } // namespace private_video
+
+
+
 
 // *****************************************************************************
 // ***************************** ImageDescriptor *******************************
 // *****************************************************************************
+
+ImageDescriptor::ImageDescriptor() :
+_width (0.0f),
+_height (0.0f),
+_is_static (false),
+_grayscale (false),
+_animated (false),
+_loaded (false)
+{
+	_color[0] = _color[1] = _color[2] = _color[3] = Color::white;
+}
+
 
 bool ImageDescriptor::Load() {
 	return VideoManager->LoadImage(*this);
 }
 
 
-
 void ImageDescriptor::Draw() {
 	VideoManager->DrawImage(*this);
 }
+
+
+void ImageDescriptor::_Clear()
+{
+	_width = 0.0f;
+	_height = 0.0f;
+	_is_static = false;
+	_grayscale = false;
+	_color[0] = _color[1] = _color[2] = _color[3] = Color::white;
+
+	_loaded = false;
+}
+
 
 // *****************************************************************************
 // ******************************** StillImage *********************************
@@ -181,11 +181,10 @@ StillImage::StillImage(bool grayscale) {
 
 
 void StillImage::Clear() {
+	_Clear();
 	_filename.clear();
-	_width = 0.0f;
-	_height = 0.0f;
-	_is_static = false;
 	_elements.clear();
+
 	SetColor(Color::white);
 }
 
@@ -277,15 +276,14 @@ AnimatedImage::AnimatedImage(bool grayscale) {
 
 
 void AnimatedImage::Clear() {
+	_Clear();
 	_frame_index = 0;
 	_frame_counter = 0;
 	_frames.clear();
-	_is_static = false;
-	_width = 0.0f;
-	_height = 0.0f;
 	_number_loops = -1;
 	_loop_counter = 0;
 	_loops_finished = false;
+
 	SetColor(Color::white);
 }
 
