@@ -74,6 +74,16 @@ const uint8 DIALOGUE     = 0x02;
 const uint8 OBSERVATION  = 0x04;
 //@}
 
+/** \name Collision Detection Constants
+*** These are used only in collision detection routines. They determine in which direction an
+*** object has collided.
+**/
+//@{
+const uint8 COLLISION_NONE = 0x00;
+const uint8 COLLISION_X    = 0x0F;
+const uint8 COLLISION_Y    = 0xF0;
+const uint8 COLLISION_BOTH = 0xFF;
+//@}
 
 /** ****************************************************************************
 *** \brief Retains information about how the next map frame should be drawn.
@@ -409,7 +419,7 @@ private:
 
 	/** \brief Determines if a map sprite's position is invalid because of a collision
 	*** \param sprite A pointer to the map sprite to check
-	*** \return True if a collision was detected, false if one was not
+	*** \return A collision detection constant indicating if and where the collision took place
 	***
 	*** This method is invoked by the map sprite who wishes to check for its own collision. The
 	*** collision detection is performed agains three types of obstacles:
@@ -422,7 +432,7 @@ private:
 	*** \note This function does <b>not</b> check if the MapSprite argument has its no_collision member
 	*** set to false, but it <b>does</b> check that of the other MapObjects.
 	**/
-	bool _DetectCollision(private_map::VirtualSprite* sprite);
+	uint8 _DetectCollision(private_map::VirtualSprite* sprite);
 
 	/** \brief Finds a path from a sprite's current position to a destination
 	*** \param sprite A pointer of the sprite to find the path for

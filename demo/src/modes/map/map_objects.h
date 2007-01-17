@@ -93,10 +93,14 @@ const uint32 ANIM_WALKING_WEST   = 6;
 const uint32 ANIM_WALKING_EAST   = 7;
 //@}
 
+/** \name Map Sprite Type Constants
+*** These constants are used to identify the type of object of a map sprite
+**/
+//@{
 const uint8 PHYSICAL_TYPE = 0;
 const uint8 VIRTUAL_TYPE = 1;
 const uint8 SPRITE_TYPE = 2;
-
+//@}
 
 /** ****************************************************************************
 *** \brief Abstract class that represents objects on a map

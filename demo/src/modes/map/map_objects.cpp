@@ -81,7 +81,7 @@ bool MapObject::DrawHelper() {
 // ****************************************************************************
 
 PhysicalObject::PhysicalObject() :
-	current_animation(0)	
+	current_animation(0)
 {
 	MapObject::_object_type = PHYSICAL_TYPE;
 }
@@ -197,11 +197,15 @@ void VirtualSprite::Update() {
 		} // switch (direction)
 
 		// Determine if the sprite may move to this new position
-		if (MapMode::_current_map->_DetectCollision(this) == true) {
+		uint8 collision = MapMode::_current_map->_DetectCollision(this);
+		if (collision != COLLISION_NONE) {
 			// Restore the original position of the sprite
-			x_offset = tmp_x;
-			y_offset = tmp_y;
-			return;
+			if (collision & COLLISION_X)
+				x_offset = tmp_x;
+			if (collision & COLLISION_Y)
+				y_offset = tmp_y;
+			if (collision == COLLISION_BOTH)
+				return;
 		}
 
 		// Roll-over position offsets if necessary
