@@ -390,11 +390,22 @@ private:
 
 	// -------------------- Update Methods
 
-	//! \brief Updates the map when in the explore state.
-	void _UpdateExplore();
+	//! \brief Handles user input when the map is in the explore state.
+	void _HandleInputExplore();
 
-	//! \brief Updates the map when in the dialogue state.
-	void _UpdateDialogue();
+	//! \brief Handles user input when the map is in the dialogue state.
+	void _HandleInputDialogue();
+
+	/** \brief Finds the nearest interactable object within a certain distance.
+	*** \param *sprite The sprite who is trying to find its nearest object.
+	*** \return A pointer to the nearest interactable map object, or NULL if no such object was found.
+	***
+	*** An interactable object must be in the same context as the function argument is. For an object
+	*** to be valid, it's collision rectangle must be no greater than 3 grid elements from the sprite's
+	*** "calling" axis, and th
+	***
+	**/
+	private_map::MapObject* _FindNearestObject(const private_map::VirtualSprite* sprite);
 
 	/** \brief Determines if a map sprite's position is invalid because of a collision
 	*** \param sprite A pointer to the map sprite to check
