@@ -655,9 +655,12 @@ MapObject* MapMode::_FindNearestObject(const VirtualSprite* sprite) {
 
 
 
-bool MapMode::_DetectCollision(VirtualSprite* sprite) {
+uint8 MapMode::_DetectCollision(VirtualSprite* sprite) {
 	// NOTE: Whether the argument pointer is valid is not checked here, since the object pointer
 	// itself presumably called this function.
+
+	// Retains the collision return value
+	uint8 collide = COLLISION_NONE;
 
 	// The single X,Y floating point coordinates of the sprite
 	float x_location = sprite->ComputeXLocation();
@@ -671,14 +674,14 @@ bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 
 	// ---------- (1): Check if the sprite's position has gone out of bounds
 
-	if (cr_left < 0.0f || cr_top < 0.0f || cr_right >= static_cast<float>(_num_tile_cols * 2) ||
-		y_location >= static_cast<float>(_num_tile_rows * 2)) {
-		return true;
+	if (cr_left < 0.0f || cr_right >= static_cast<float>(_num_tile_cols * 2) ||
+		cr_top < 0.0f || y_location >= static_cast<float>(_num_tile_rows * 2)) {
+		return COLLISION_BOTH;
 	}
 
 	// Do not do tile or object based collision detection for this sprite if it has this member set
 	if (sprite->no_collision == true) {
-		return false;
+		return collide;
 	}
 
 	// A pointer to the layer of objects to do the collision detection with
@@ -694,7 +697,7 @@ bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 		for (uint32 r = static_cast<uint32>(cr_top); r <= static_cast<uint32>(y_location); r++) {
 			for (uint32 c = static_cast<uint32>(cr_left); c <= static_cast<uint32>(cr_right); c++) {
 				if (_map_grid[r][c] == true) { // Then this overlapping tile is unwalkable
-					return true;
+					return COLLISION_BOTH;
 				}
 			}
 		}
@@ -703,6 +706,10 @@ bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 	else {
 		objects = &_sky_objects;
 	}
+
+	// Return if a collision has already been detected on both axes
+	if (collide == COLLISION_BOTH)
+		return collide;
 
 	// ---------- (3): Determine if two object's collision rectangles overlap
 
@@ -722,15 +729,14 @@ bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 					if (!(other_y_location - (*objects)[i]->coll_height > y_location
 						|| other_y_location < cr_top )) {
 						// Boxes overlap on both axis, there is a colision
-						return true;
+						return COLLISION_BOTH;
 					}
 				}
 			}
 		}
 	}
 
-	// No collision was detected
-	return false;
+	return collide;
 } // bool MapMode::_DetectCollision(VirtualSprite* sprite)
 
 
