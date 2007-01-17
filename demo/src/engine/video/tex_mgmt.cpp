@@ -52,6 +52,35 @@ void IntegerToString(std::string &s, const int32 num)
 
 
 //-----------------------------------------------------------------------------
+// ConvertImageToGrayscale: Converts an image from color to gray mode
+//-----------------------------------------------------------------------------
+void GameVideo::_ConvertImageToGrayscale(const ImageLoadInfo& src, ImageLoadInfo &dst)
+{
+	dst.width = src.width;
+	dst.height = src.height;
+
+	if (!dst.width || !dst.height)	// Return if there are no pixels in the image
+		return;
+
+	// Reserve memory for the grayscale structure
+	dst.pixels = malloc(dst.width * dst.height * 4); 
+
+	// Convert the pixels to grayscale while copying
+	unsigned char* src_pix = static_cast<unsigned char*>(src.pixels);
+	unsigned char* src_end = static_cast<unsigned char*>(src.pixels) + (src.width * src.height * 4);
+	unsigned char* dst_pix = static_cast<unsigned char*>(dst.pixels);
+	unsigned char value;
+
+	for (; src_pix<src_end; src_pix+=4,dst_pix+=4)
+	{
+		value = static_cast<unsigned char>((30 * *(src_pix) + 59 * *(src_pix+1) + 11 * *(src_pix+2))*0.01f);	// Get grayscale value
+		*dst_pix = *(dst_pix+1) = *(dst_pix+2) = value;		// Assign it
+		*(dst_pix+3) = *(src_pix+3);					// Assign alpha value
+	}
+}
+
+
+//-----------------------------------------------------------------------------
 // LoadImage: loads an image (static image or animated image) and returns true
 //            on success
 //-----------------------------------------------------------------------------
@@ -126,7 +155,8 @@ bool GameVideo::_LoadImage(StillImage &id, bool grayscale)
 	{
 		id._elements.clear();
 
-		Image *img = _images[id._filename];
+		// Get the image
+		Image *img = _images[id._filename + (grayscale ? string("_grayscale") : string(""))];
 
 		if(!img)
 		{
@@ -144,6 +174,16 @@ bool GameVideo::_LoadImage(StillImage &id, bool grayscale)
 		}
 
 		++(img->ref_count);
+	
+		// If the image is grayscale, increment also the counter for the color image
+		if (grayscale)
+		{
+			map<string, Image*>::iterator it = _images.find(id._filename);
+			if (it != _images.end())
+			{
+				++(it->second->ref_count);
+			}
+		}
 
 		if(id._width == 0.0f)
 			id._width = (float) img->width;
@@ -171,48 +211,8 @@ bool GameVideo::_LoadImage(StillImage &id, bool grayscale)
 
 
 
-bool GameVideo::LoadMultiImage(std::vector<StillImage> &id, const std::string filename, const uint32 rows, const uint32 cols, const float width, const float height)
+bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::string &filename, const uint32 rows, const uint32 cols)
 {
-	bool success = true;
-
-	private_video::MultiImage image (id, filename, rows, cols, width, height, false);
-
-	success = _LoadMultiImage (image);
-
-	return success;
-}
-
-
-bool GameVideo::LoadAnimatedImage(AnimatedImage &id, const std::string filename, const uint32 rows, const uint32 cols, const float width, const float height)
-{
-	bool success = true;
-
-	std::vector <StillImage> v;
-	private_video::MultiImage image (v, filename, rows, cols, width, height, false);
-
-	success = _LoadMultiImage (image);
-
-	// Attach the images to the frames of the animated image
-	if (success)
-	{
-		for (uint32 i=0; i<rows*cols; i++)
-		{
-			id.AddFrame (v[i], i*5);
-		}
-	}
-
-	return success;
-}
-
-
-bool GameVideo::_LoadMultiImage (private_video::MultiImage &id)
-{
-	std::string filename = id.filename;
-	uint32 rows = id.rows;
-	uint32 cols = id.cols;
-	bool grayscale = id.grayscale;
-	std::vector <StillImage>& images = *id.still_images;
-
 	if (filename.empty())
 	{
 		cerr << "Unexpected error loading multi image" << endl;
@@ -229,14 +229,14 @@ bool GameVideo::_LoadMultiImage (private_video::MultiImage &id)
 	// Check if we have loaded all the sub-images
 	for (x=0; x<rows; x++)
 	{
-		for (y=0; y<rows; y++)
+		for (y=0; y<cols; y++)
 		{
 			image_name = filename;
 			IntegerToString(s,x);
 			image_name += "_X" + s;
 			IntegerToString(s,y);
 			image_name += "_Y" + s;
-			image_name += (grayscale ? string("_grayscale") : string(""));
+			image_name += (images[x*cols+y]._grayscale ? string("_grayscale") : string(""));
 
 			// If this image exists, don't do anything else
 			if(_images.find(image_name) == _images.end())
@@ -250,7 +250,7 @@ bool GameVideo::_LoadMultiImage (private_video::MultiImage &id)
 	private_video::ImageLoadInfo loadInfo;
 	if (x*y != rows*cols)
 	{
-		if(!_LoadRawImage(filename, loadInfo, grayscale))
+		if(!_LoadRawImage(filename, loadInfo))
 			return false;
 	}
 
@@ -264,6 +264,7 @@ bool GameVideo::_LoadMultiImage (private_video::MultiImage &id)
 			image_name += "_X" + s;
 			IntegerToString(s,y);
 			image_name += "_Y" + s;
+			bool grayscale = images[x*cols+y]._grayscale;
 			image_name += (grayscale ? string("_grayscale") : string(""));
 
 			// If the image exists, take the information from it
@@ -292,10 +293,8 @@ bool GameVideo::_LoadMultiImage (private_video::MultiImage &id)
 
 				++(img->ref_count);
 
-				if(images.at(current_image)._width < 0.0f)
-					images.at(current_image)._width = (float) img->width;
-				if(images.at(current_image)._height < 0.0f)
-					images.at(current_image)._height = (float) img->height;
+				images.at(current_image)._width = (float) img->width;
+				images.at(current_image)._height = (float) img->height;
 
 				ImageElement element(img, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f,
 					images.at(current_image)._width, images.at(current_image)._height, images.at(current_image)._color);
@@ -304,18 +303,12 @@ bool GameVideo::_LoadMultiImage (private_video::MultiImage &id)
 			else	// If the image is not present, take the piece from the loaded image
 			{
 				images.at(current_image)._filename = image_name;
-				images.at(current_image)._elements.clear();
 				images.at(current_image)._animated = false;
-				images.at(current_image)._grayscale = grayscale;
-				images.at(current_image)._is_static = false;
-				if (id.height == 0.0f)
+
+				if (images.at(current_image)._height == 0.0f)
 					images.at(current_image)._height = (float)((x == rows-1 && loadInfo.height%rows) ? loadInfo.height-(x*loadInfo.height/rows) : loadInfo.height/rows);
-				else
-					images.at(current_image)._height = id.height;
-				if (id.width == 0.0f)
+				if (images.at(current_image)._width == 0.0f)
 					images.at(current_image)._width = (float)((y == cols-1 && loadInfo.width%cols) ? loadInfo.width-(y*loadInfo.width/cols) : loadInfo.width/cols);
-				else
-					images.at(current_image)._width = id.width;
 
 				private_video::ImageLoadInfo info;
 				info.width = ((y == cols-1 && loadInfo.width%cols) ? loadInfo.width-(y*loadInfo.width/cols) : loadInfo.width/cols);
@@ -353,8 +346,6 @@ bool GameVideo::_LoadMultiImage (private_video::MultiImage &id)
 				ImageElement element(newImage, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f,
 					images.at(current_image)._width, images.at(current_image)._height, images.at(current_image)._color);
 				images.at(current_image)._elements.push_back(element);
-
-				// finally, delete the buffer used to hold the pixel data
 			}
 		}
 	}
@@ -364,6 +355,28 @@ bool GameVideo::_LoadMultiImage (private_video::MultiImage &id)
 		free (loadInfo.pixels);
 
 	return true;
+}
+
+
+bool GameVideo::LoadAnimatedImage(AnimatedImage &id, const std::string &filename, const uint32 rows, const uint32 cols)
+{
+	bool success = true;
+
+	std::vector <StillImage> v;
+	success = LoadMultiImage(v, filename, rows, cols);
+
+
+	// Attach the images to the frames of the animated image
+	if (success)
+	{
+		for (uint32 i=0; i<rows*cols; i++)
+		{
+			v[i]._animated = false;
+			id.AddFrame (v[i], i*5);
+		}
+	}
+
+	return success;
 }
 
 
@@ -378,20 +391,20 @@ bool GameVideo::_LoadImageHelper(StillImage &id, bool grayscale)
 
 	id._elements.clear();
 
-	private_video::ImageLoadInfo loadInfo;
+	private_video::ImageLoadInfo load_info;
 
-	if(!_LoadRawImage(id._filename, loadInfo, grayscale))
+	if(!_LoadRawImage(id._filename, load_info))
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: _LoadRawPixelData() failed in _LoadImageHelper()" << endl;
 		return false;
 	}
 
-	// create an Image structure and store it our std::map of images
-	Image *newImage = new Image(id._filename, loadInfo.width, loadInfo.height, grayscale);
+	// create an Image structure and store it our std::map of images (for the color copy, always present)
+	Image *newImage = new Image(id._filename, load_info.width, load_info.height, false);
 
 	// try to insert the image in a texture sheet
-	TexSheet *sheet = _InsertImageInTexSheet(newImage, loadInfo, isStatic);
+	TexSheet *sheet = _InsertImageInTexSheet(newImage, load_info, isStatic);
 
 	if(!sheet)
 	{
@@ -401,8 +414,40 @@ bool GameVideo::_LoadImageHelper(StillImage &id, bool grayscale)
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO_DEBUG: GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
 
-		free(loadInfo.pixels);
+		delete newImage;
+		free(load_info.pixels);
 		return false;
+	}
+
+	// If the image is grayscale, also add to the map a copy of the grayscale one
+	Image *new_image_gray (0);
+	if (grayscale)
+	{
+		private_video::ImageLoadInfo load_info_gray;
+		_ConvertImageToGrayscale(load_info,load_info_gray);
+	
+		new_image_gray = new Image(id._filename+"_grayscale", load_info_gray.width, load_info_gray.height, true);
+
+		TexSheet *sheet = _InsertImageInTexSheet(new_image_gray, load_info_gray, isStatic);
+
+		if(!sheet)
+		{
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO_DEBUG: GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
+
+			delete newImage;
+			free(load_info.pixels);
+
+			delete new_image_gray;
+			free(load_info_gray.pixels);
+
+			return false;
+		}
+
+		new_image_gray->ref_count = 1;
+		_images[id._filename+"_grayscale"] = new_image_gray;
+
+		free(load_info_gray.pixels);
 	}
 
 	newImage->ref_count = 1;
@@ -410,20 +455,27 @@ bool GameVideo::_LoadImageHelper(StillImage &id, bool grayscale)
 	// store the image in our std::map
 	_images[id._filename] = newImage;
 
-
 	// if width or height are zero, that means to use the dimensions of image
 	if(id._width == 0.0f)
-		id._width = (float) loadInfo.width;
+		id._width = (float) load_info.width;
 
 	if(id._height == 0.0f)
-		id._height = (float) loadInfo.height;
+		id._height = (float) load_info.height;
 
 	// store the new image element
-	ImageElement element(newImage, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f, id._width, id._height, id._color);
-	id._elements.push_back(element);
+	if (grayscale)
+	{
+		ImageElement element(new_image_gray, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f, id._width, id._height, id._color);
+		id._elements.push_back(element);
+	}
+	else
+	{
+		ImageElement element(newImage, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f, id._width, id._height, id._color);
+		id._elements.push_back(element);
+	}
 
 	// finally, delete the buffer used to hold the pixel data
-	free(loadInfo.pixels);
+	free(load_info.pixels);
 	return true;
 }
 
@@ -431,7 +483,7 @@ bool GameVideo::_LoadImageHelper(StillImage &id, bool grayscale)
 //-----------------------------------------------------------------------------
 // _LoadRawImage: Determines which image loader to call
 //-----------------------------------------------------------------------------
-bool GameVideo::_LoadRawImage(const std::string & filename, private_video::ImageLoadInfo & loadInfo, bool grayscale)
+bool GameVideo::_LoadRawImage(const std::string & filename, private_video::ImageLoadInfo & loadInfo)
 {
 	// Isolate the extension
 	size_t extpos = filename.rfind('.');
@@ -442,9 +494,9 @@ bool GameVideo::_LoadRawImage(const std::string & filename, private_video::Image
 	std::string extension = std::string(filename, extpos, filename.length() - extpos);
 
 	if(extension == ".jpeg" || extension == ".jpg")
-		return _LoadRawImageJpeg(filename, loadInfo, grayscale);
+		return _LoadRawImageJpeg(filename, loadInfo);
 	if(extension == ".png")
-		return _LoadRawImagePng(filename, loadInfo, grayscale) ;
+		return _LoadRawImagePng(filename, loadInfo) ;
 
 	return false;
 }
@@ -453,7 +505,7 @@ bool GameVideo::_LoadRawImage(const std::string & filename, private_video::Image
 // _LoadRawImagePng: Loads a PNG image to RGBA format
 //-----------------------------------------------------------------------------
 
-bool GameVideo::_LoadRawImagePng(const std::string &filename, hoa_video::private_video::ImageLoadInfo &loadInfo, bool grayscale)
+bool GameVideo::_LoadRawImagePng(const std::string &filename, hoa_video::private_video::ImageLoadInfo &loadInfo)
 {
 	FILE * fp = fopen(filename.c_str(), "rb");
 
@@ -513,66 +565,26 @@ bool GameVideo::_LoadRawImagePng(const std::string &filename, hoa_video::private
 
 			if(bpp == 4)
 			{
-				unsigned char r = imgpixel[0];
-				unsigned char g = imgpixel[1];
-				unsigned char b = imgpixel[2];
-				unsigned char a = imgpixel[3];
-
-				if (!grayscale)
-				{
-					dstpixel[0] = r;
-					dstpixel[1] = g;
-					dstpixel[2] = b;
-					dstpixel[3] = a;
-				}
-				else
-				{
-					unsigned char y = static_cast<unsigned char>(0.3 * r + 0.59 * g + 0.11 * b);
-					dstpixel[0] = dstpixel[1] = dstpixel[2] = y;
-					dstpixel[3] = a;
-				}
+				dstpixel[0] = imgpixel[0];
+				dstpixel[1] = imgpixel[1];
+				dstpixel[2] = imgpixel[2];
+				dstpixel[3] = imgpixel[3];
 			}
 			else if(bpp == 3)
 			{
-				unsigned char r = imgpixel[0];
-				unsigned char g = imgpixel[1];
-				unsigned char b = imgpixel[2];
-
-				if (!grayscale)
-				{
-					dstpixel[0] = r;
-					dstpixel[1] = g;
-					dstpixel[2] = b;
-					dstpixel[3] = 0xFF;
-				}
-				else
-				{
-					unsigned char y = static_cast<unsigned char>(0.3 * r + 0.59 * g + 0.11 * b);
-					dstpixel[0] = dstpixel[1] = dstpixel[2] = y;
-					dstpixel[3] = 0xFF;
-				}
+				dstpixel[0] = imgpixel[0];
+				dstpixel[1] = imgpixel[1];
+				dstpixel[2] = imgpixel[2];
+				dstpixel[3] = 0xFF;
 			}
 			else if(bpp == 1)
 			{
 				png_color c = info_ptr->palette[imgpixel[0]];
 
-				unsigned char r = c.red;
-				unsigned char g = c.green;
-				unsigned char b = c.blue;
-
-				if (!grayscale)
-				{
-					dstpixel[0] = r;
-					dstpixel[1] = g;
-					dstpixel[2] = b;
-					dstpixel[3] = 0xFF;
-				}
-				else
-				{
-					unsigned char y = static_cast<unsigned char>(0.3 * r + 0.59 * g + 0.11 * b);
-					dstpixel[0] = dstpixel[1] = dstpixel[2] = y;
-					dstpixel[3] = 0xFF;
-				}
+				dstpixel[0] = c.red;
+				dstpixel[1] = c.green;
+				dstpixel[2] = c.blue;
+				dstpixel[3] = 0xFF;
 			}
 		}
 	}
@@ -589,7 +601,7 @@ bool GameVideo::_LoadRawImagePng(const std::string &filename, hoa_video::private
 // _LoadRawImageJpeg: Loads a Jpeg image to RGBA format
 //-----------------------------------------------------------------------------
 
-bool GameVideo::_LoadRawImageJpeg(const std::string &filename, hoa_video::private_video::ImageLoadInfo &loadInfo, bool grayscale)
+bool GameVideo::_LoadRawImageJpeg(const std::string &filename, hoa_video::private_video::ImageLoadInfo &loadInfo)
 {
 	FILE * infile;
 	unsigned char ** buffer;
@@ -629,26 +641,12 @@ bool GameVideo::_LoadRawImageJpeg(const std::string &filename, hoa_video::privat
 			unsigned char * imgpixel = buffer[0] + (x * bpp);
 			unsigned char * dstpixel = ((unsigned char *)loadInfo.pixels) + ((y * cinfo.output_width) + x) * 4;
 
-			unsigned char r = imgpixel[0];
-			unsigned char g = imgpixel[1];
-			unsigned char b = imgpixel[2];
-
-			unsigned char a = imgpixel[3];
-
-			if (!grayscale)
-			{
-				dstpixel[0] = r;
-				dstpixel[1] = g;
-				dstpixel[2] = b;
-			}
-			else
-			{
-				unsigned char y = static_cast<unsigned char>(0.3 * r + 0.59 * g + 0.11 * b);
-				dstpixel[0] = dstpixel[1] = dstpixel[2] = y;
-			}
+			dstpixel[0] = imgpixel[0];
+			dstpixel[1] = imgpixel[1];
+			dstpixel[2] = imgpixel[2];
 
 			if(bpp == 4)
-				dstpixel[3] = a;
+				dstpixel[3] = imgpixel[3];
 			else
 				dstpixel[3] = 0xFF;
 		}
@@ -1079,6 +1077,22 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 
 bool GameVideo::_DeleteImage(Image *const img)
 {
+	// If the image is grayscale, also perform a delete for the color image one
+	if (img->grayscale)
+	{
+		// The filename of the color image is the grayscale one but without "_grayscale" (10 characters) at the end
+		string filename (img->filename,0,img->filename.length()-10);
+
+		map<string,Image*>::iterator it = _images.find(filename);
+		if (it == _images.end())
+		{
+			cerr << "Attemp to delete a color copy didn't work" << endl;
+			return false;
+		}
+
+		_DeleteImage(it->second);
+	}
+
 	if(img->width > 512 || img->height > 512)
 	{
 		// remove the image and texture sheet completely

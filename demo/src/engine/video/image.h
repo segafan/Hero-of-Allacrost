@@ -173,48 +173,6 @@ public:
 }; // class ImageElement
 
 
-/** ****************************************************************************
-*** \brief Representation for multiple images contained within a single file
-*** This is used for loading tileset images, sprite sheets, and other image
-*** files where there are multiple images embedded within the file.
-*** ***************************************************************************/
-class MultiImage {
-public:
-	//! \brief The name of the image file
-	std::string filename;
-
-	//! \brief The number of rows of images in the file.
-	uint32 rows;
-
-	//! \brief The number of columns of images in the file.
-	uint32 cols;
-
-	//! \brief The width of the entire image in the file.
-	float width;
-
-	//! \brief The height of the entire image in the file.
-	float height;
-	
-	//! \brief Tracks whether this multi-image should be grayscale or not.
-	bool grayscale;
-
-	//! \brief A pointer to an animated image where the cut image will be loaded into
-	//! \note This structure is only used if the user called the constructor with an AnimatedImage argument.
-	AnimatedImage* animated_image;
-
-	//! \brief A pointer to a vector of still images where the cut image will be loaded into
-	//! \note This structure is only used if the user called the constructor with a StillImage vector argument.
-	std::vector<StillImage>* still_images;
-
-	//! \brief This constructor is used if the multi-image contains animation frames.
-	MultiImage(AnimatedImage& id, const std::string& filename, const uint32 rows, const uint32 cols,
-		const float width = 0.0f, const float height = 0.0f, const bool grayscale = false);
-
-	//! \brief This constructor is used if the multi-image contains several still images.
-	MultiImage(std::vector <StillImage>& id, const std::string& filename, const uint32 rows, const uint32 cols,
-		const float width = 0.0f, const float height = 0.0f, const bool grayscale = false);
-}; // class MultiImage
-
 } // namespace private_video
 
 /** ****************************************************************************
@@ -223,6 +181,8 @@ public:
 class ImageDescriptor {
 	friend class GameVideo;
 public:
+	ImageDescriptor();
+
 	virtual ~ImageDescriptor()
 		{}
 
@@ -313,6 +273,13 @@ protected:
 
 	//! \brief True if this image is animated.
 	bool _animated;
+
+	//! \brief Flag indicating if the image is already loaded
+	bool _loaded;
+
+
+	//! \brief Clears the data elements of the descriptor
+	void _Clear ();
 }; // class ImageDescriptor
 
 

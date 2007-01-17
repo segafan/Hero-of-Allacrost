@@ -715,9 +715,28 @@ public:
 	bool LoadImageGrayScale(ImageDescriptor &id);
 
 
-	bool LoadMultiImage(std::vector<StillImage> &id, const std::string filename, const uint32 rows, const uint32 cols, const float width, const float height);
+	/*! \brief Loads a MultiImage in a vector of StillImages.
+	/*!	This function loads an image and cut it in pieces, loading each of 
+	 *	that on separate StillImage objects.
+	 *  \param images  Vector of StillImages where the cut images will be loaded.
+	 *	\param filename Name of the file to be opened to read.
+	 *	\param rows Number of rows of sub-images in the MultiImage.
+	 *	\param rows Number of columns of sub-images in the MultiImage.
+	 *	\return success/failure
+	 */
+	bool LoadMultiImage(std::vector<StillImage> &images, const std::string &filename, const uint32 rows, const uint32 cols);
 
-	bool LoadAnimatedImage(AnimatedImage &id, const std::string filename, const uint32 rows, const uint32 cols, const float width, const float height);
+
+	/*! \brief Loads a MultiImage in an AnimatedImage as frames.
+	/*!	This function loads an image and cut it in pieces, loading each of 
+	 *	that on frames of an AnimatedImage.
+	 *  \param image  AnimatedImage where the cut images will be loaded.
+	 *	\param filename Name of the file to be opened to read.
+	 *	\param rows Number of rows of sub-images in the MultiImage.
+	 *	\param rows Number of columns of sub-images in the MultiImage.
+	 *	\return success/failure
+	 */
+	bool LoadAnimatedImage(AnimatedImage &image, const std::string &filename, const uint32 rows, const uint32 cols);
 
 
 	/*!
@@ -1571,7 +1590,7 @@ private:
 	 *  \param loadInfo   Returns with the image file attributes and pixels
 	 * \return success/failure
 	 */
-	bool _LoadRawImage(const std::string & filename, private_video::ImageLoadInfo & loadInfo, bool grayscale = false);
+	bool _LoadRawImage(const std::string & filename, private_video::ImageLoadInfo & loadInfo);
 
 	/*!
 	 *  \brief Load raw image data from a JPG file
@@ -1580,7 +1599,7 @@ private:
 	 *  \param loadInfo   Returns with the image file attributes and pixels
 	 * \return success/failure
 	 */
-	bool _LoadRawImageJpeg(const std::string & filename, private_video::ImageLoadInfo & loadInfo, bool grayscale);
+	bool _LoadRawImageJpeg(const std::string & filename, private_video::ImageLoadInfo & loadInfo);
 
 	/*!
 	 *  \brief Load raw image data from a PNG file
@@ -1589,7 +1608,7 @@ private:
 	 *  \param loadInfo   Returns with the image file attributes and pixels
 	 * \return success/failure
 	 */
-	bool _LoadRawImagePng(const std::string & filename, private_video::ImageLoadInfo & loadInfo, bool grayscale);
+	bool _LoadRawImagePng(const std::string & filename, private_video::ImageLoadInfo & loadInfo);
 
 	/*!
 	 *  \brief loop through all currently loaded images and if they belong to the given tex sheet, reload them into it
@@ -1607,6 +1626,16 @@ private:
 	 */
 
 	bool _RemoveImage(private_video::Image *imageToRemove);
+
+
+	/*!
+	 * \brief Converts a color image to a grayscale one;
+	 * Converts a colored image in a grayscale one. Actually, it converts not an image, but
+	 * an ImageLoadInfo structure. This is used internally when creating grayscale images.
+	 * \param src Information of a color image
+	 * \param dst ImageLoadInfo struct where the grayscale image will be stored
+	 */
+	void _ConvertImageToGrayscale(const private_video::ImageLoadInfo& src, private_video::ImageLoadInfo &dst);
 
 
 	/*!
