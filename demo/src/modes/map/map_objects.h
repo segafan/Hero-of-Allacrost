@@ -233,6 +233,19 @@ public:
 	**/
 	bool DrawHelper();
 
+	/** \brief Computes the full floating-point location coordinates of the object
+	*** \return The full x or y coordinate location of the object
+	***
+	*** Since an object's position is stored as an integer component and an offset component, this
+	*** method simply returns a single floating point value representing the full x and y positions
+	*** of the object in a single variable.
+	**/
+	//@{
+	float ComputeXLocation() const
+		{ return (static_cast<float>(x_position) + x_offset); }
+	float ComputeYLocation() const
+		{ return (static_cast<float>(y_position) + y_offset); }
+	//@}
 
 	/** \name Lua Access Functions
 	*** These functions are specifically written for Lua binding, to enable Lua to access the

@@ -374,13 +374,13 @@ void MapMode::Update() {
 
 	switch (_map_state) {
 		case EXPLORE:
-			_UpdateExplore();
+			_HandleInputExplore();
 			break;
 		case DIALOGUE:
-			_UpdateDialogue();
+			_HandleInputDialogue();
 			break;
 		default:
-			_UpdateExplore();
+			_HandleInputExplore();
 			break;
 	}
 
@@ -407,7 +407,7 @@ void MapMode::Update() {
 
 
 // Updates the game status when MapMode is in the 'explore' state
-void MapMode::_UpdateExplore() {
+void MapMode::_HandleInputExplore() {
 	// Do the fade to battle mode
 	// Doing this first should prevent user input
 // 	if (_fade_to_battle_mode) {
@@ -524,11 +524,11 @@ void MapMode::_UpdateExplore() {
 			_camera->SetDirection(EAST);
 		}
 	} // if (_camera->moving == true)
-} // void MapMode::_UpdateExplore()
+} // void MapMode::_HandleInputExplore()
 
 
 // Updates the game status when MapMode is in the 'dialogue' state
-void MapMode::_UpdateDialogue() {
+void MapMode::_HandleInputDialogue() {
  	_dialogue_window.Update(_time_elapsed);
  	_dialogue_textbox.Update(_time_elapsed);
 
@@ -554,7 +554,104 @@ void MapMode::_UpdateDialogue() {
  			}
  		}
  	}
-} // void MapMode::_UpdateDialogue()
+} // void MapMode::_HandleInputDialogue()
+
+
+
+MapObject* MapMode::_FindNearestObject(const VirtualSprite* sprite) {
+	// The edges of the collision rectangle to check
+	float top, bottom, left, right;
+
+	// ---------- (1): Using the sprite's direction, determine the area to check for other objects
+	if (sprite->direction & FACING_NORTH) {
+		bottom = sprite->ComputeYLocation() - sprite->coll_height;
+		top = bottom - 3.0f;
+		left = sprite->ComputeXLocation() - sprite->coll_half_width;
+		right = sprite->ComputeXLocation() + sprite->coll_half_width;
+	}
+	else if (sprite->direction & FACING_SOUTH) {
+		top = sprite->ComputeYLocation();
+		bottom = top + 3.0f;
+		left = sprite->ComputeXLocation() - sprite->coll_half_width;
+		right = sprite->ComputeXLocation() + sprite->coll_half_width;
+	}
+	else if (sprite->direction & FACING_WEST) {
+		right = sprite->ComputeXLocation() - sprite->coll_half_width;
+		left = right - 3.0f;
+		bottom = sprite->ComputeYLocation();
+		top = bottom - sprite->coll_height;
+	}
+	else if (sprite->direction & FACING_EAST) {
+		left = sprite->ComputeXLocation() + sprite->coll_half_width;
+		right = left + 3.0f;
+		bottom = sprite->ComputeYLocation();
+		top = bottom - sprite->coll_height;
+	}
+	else {
+		if (MAP_DEBUG)
+			cerr << "MAP ERROR: sprite was set to invalid direction in MapMode::_FindNearestObject()" << endl;
+		return NULL;
+	}
+
+	// A vector to contain objects which are valid for the sprite to interact with
+	vector<MapObject*> valid_objects;
+	// A pointer to the object which has been found to be the closest to the sprite within valid_objs
+	MapObject* closest = NULL;
+
+	// ---------- (2): Go through all objects and determine which (if any) are valid
+	for (map<uint16, MapObject*>::iterator i = _all_objects.begin(); i != _all_objects.end(); i++) {
+		MapObject* obj = i->second;
+		if (obj->context != sprite->context) // Objects in different contexts can not interact with one another
+			continue;
+
+		// Compute the full position coordinates for the object under study
+		float other_x_location = obj->ComputeXLocation();
+		float other_y_location = obj->ComputeYLocation();
+
+		// Verify that the bounding boxes overlap on the horizontal axis
+		if (!(other_x_location - obj->coll_half_width > right
+			|| other_x_location + obj->coll_half_width < left)) {
+			// Verify that the bounding boxes overlap on the vertical axis
+			if (!(other_y_location - obj->coll_height > bottom
+				|| other_y_location < top )) {
+				// Boxes overlap on both axes, it is a valid interaction
+				valid_objects.push_back(obj);
+			}
+		}
+	} // for (map<MapObject*>::iterator i = _all_objects.begin(); i != _all_objects.end(); i++)
+
+	// If there are one or less objects that are valid, then we are done here.
+	if (valid_objects.empty()) {
+		return NULL;
+	}
+	else if (valid_objects.size() == 1) {
+		return valid_objects[0];
+	}
+
+	// ---------- (3): Figure out which of the valid objects is the closest to the sprite
+
+	// NOTE: For simplicity, we simply find which object has the location coordinates which are
+	// closest to the sprite's coordinates using the Manhattan distance.
+
+	// Used to hold the full position coordinates of the sprite
+	float source_x = sprite->ComputeXLocation();
+	float source_y = sprite->ComputeYLocation();
+
+	closest = valid_objects[0];
+	float min_distance = fabs(source_x - closest->ComputeXLocation())
+		+ fabs(source_y - closest->ComputeYLocation());
+
+	// Determine which object's position is closest to the sprite
+	for (uint32 i = 1; i < valid_objects.size(); i++) {
+		float dist = fabs(source_x - valid_objects[i]->ComputeXLocation())
+			+ fabs(source_y - valid_objects[i]->ComputeYLocation());
+		if (dist < min_distance) {
+			closest = valid_objects[i];
+			min_distance = dist;
+		}
+	}
+	return closest;
+} // MapObject* MapMode::_FindNearestObject(VirtualSprite* sprite)
 
 
 
@@ -563,8 +660,8 @@ bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 	// itself presumably called this function.
 
 	// The single X,Y floating point coordinates of the sprite
-	float x_location = static_cast<float>(sprite->x_position) + sprite->x_offset;
-	float y_location = static_cast<float>(sprite->y_position) + sprite->y_offset;
+	float x_location = sprite->ComputeXLocation();
+	float y_location = sprite->ComputeYLocation();
 
 	// The coordinates corresponding to the four sides of the sprite's collision rectangle (cr)
 	float cr_left = x_location - sprite->coll_half_width;
@@ -611,23 +708,21 @@ bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 
 	for (uint32 i = 0; i < objects->size(); i++) {
 		// Only verify this object if it is not the same object as the sprite
-		if ((*objects)[i]->object_id != sprite->object_id)
-		{
+		if ((*objects)[i]->object_id != sprite->object_id) {
 			// Only verify this object if it has no_collision set to false
-			if ( !(*objects)[i]->no_collision )
-			{
+			if ( !(*objects)[i]->no_collision ) {
 				// Compute the full position coordinates of the other object
-				float other_x_location = static_cast<float>((*objects)[i]->x_position) + (*objects)[i]->x_offset;
-				float other_y_location = static_cast<float>((*objects)[i]->y_position) + (*objects)[i]->y_offset;
+				float other_x_location = (*objects)[i]->ComputeXLocation();
+				float other_y_location = (*objects)[i]->ComputeYLocation();;
 
 				// Verify that the bounding boxes overlap on the horizontal axis
-				if( !( other_x_location - (*objects)[i]->coll_half_width > cr_right
-					|| other_x_location + (*objects)[i]->coll_half_width < cr_left ) ) {
+				if (!(other_x_location - (*objects)[i]->coll_half_width > cr_right
+					|| other_x_location + (*objects)[i]->coll_half_width < cr_left)) {
 					// Verify that the bounding boxes overlap on the vertical axis
-					if( !( other_y_location - (*objects)[i]->coll_height > y_location
-						|| other_y_location  < cr_top ) ) {
-							// Boxes overlap on both axis, there is a colision
-							return true;
+					if (!(other_y_location - (*objects)[i]->coll_height > y_location
+						|| other_y_location < cr_top )) {
+						// Boxes overlap on both axis, there is a colision
+						return true;
 					}
 				}
 			}
@@ -805,8 +900,8 @@ void MapMode::_CalculateDrawInfo() {
 	// ---------- (1) Set the default starting draw positions for the tiles (top left tile)
 
 	// The camera's position is in terms of the 16x16 grid, which needs to be converted into 32x32 coordinates.
-	float camera_x = static_cast<float>(_camera->x_position) + _camera->x_offset;
-	float camera_y = static_cast<float>(_camera->y_position) + _camera->y_offset;
+	float camera_x = _camera->ComputeXLocation();
+	float camera_y = _camera->ComputeYLocation();
 
 	// Determine the draw coordinates of the top left corner using the camera's current position
 	_draw_info.tile_x_start = 1.0f - _camera->x_offset;
