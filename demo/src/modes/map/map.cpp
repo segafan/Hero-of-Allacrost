@@ -255,13 +255,13 @@ bool MapMode::Load(string filename) {
 	}
 
 	// Uncomment this loop to test out tile-collision detection
-// 	for (uint16 r = 0; r < _num_tile_rows * 2; r++) {
-// 		for (uint16 c = 0; c < _num_tile_cols * 2; c++) {
-// 			if ((r + c) % 70 == 0) {
-// 				_map_grid[r][c] = true;
-// 			}
-// 		}
-// 	}
+ 	//for (uint16 r = 0; r < _num_tile_rows * 2; r++) {
+ 	//	for (uint16 c = 0; c < _num_tile_cols * 2; c++) {
+ 	//		if ((r + c) % 70 == 0) {
+ 	//			_map_grid[r][c] = true;
+ 	//		}
+ 	//	}
+ 	//}
 
 	_current_dialogue = 0;
 
@@ -270,7 +270,7 @@ bool MapMode::Load(string filename) {
 	// Load player sprite and rest of map objects
 	sp = new MapSprite();
 	sp->name = MakeUnicodeString("Claudius");
-	sp->SetObjectID(555);
+	sp->SetObjectID(0);
 	sp->SetContext(1);
 	sp->SetXPosition(55, 0.5f);
 	sp->SetYPosition(55, 0.5f);
@@ -283,15 +283,13 @@ bool MapMode::Load(string filename) {
 	sp->SetPortrait( "img/portraits/map/claudius.png" );
 	if (sp->Load() == false)
 		return false;
-	_all_objects[ 555 ] = sp;
-	_ground_objects.push_back(sp);
+	_all_objects[ 0 ] = sp;
 	_camera = sp;
-
+	_ground_objects.push_back(sp);
 
 	MapSprite *DialogueSprite;
 	MapDialogue *Dialogue = new MapDialogue();
-	Dialogue->AddText( 1, MakeUnicodeString( "This is a test" ) );
-	Dialogue->AddText( 555, MakeUnicodeString( "Oh really?!" ) );
+	
 
 	// Load player sprite and rest of map objects
 	DialogueSprite = new MapSprite();
@@ -307,8 +305,14 @@ bool MapMode::Load(string filename) {
 	DialogueSprite->movement_speed = NORMAL_SPEED;
 	DialogueSprite->SetDirection(EAST);
 
-	ActionPathMove *new_act;
-	new_act = new ActionPathMove(DialogueSprite);
+	ActionPathMove *new_act = new ActionPathMove( DialogueSprite, 1, true );
+	new_act->destination.row = 35;
+	new_act->destination.col = 45;
+	Dialogue->AddText( 1, MakeUnicodeString( "This is a test" ) );
+	Dialogue->AddText( 0, MakeUnicodeString( "Oh really?!" ), new_act );
+
+	//ActionPathMove *new_act;
+	/*new_act = new ActionPathMove(DialogueSprite);
 	new_act->destination.row = 45;
 	new_act->destination.col = 50;
 	DialogueSprite->actions.push_back(new_act);
@@ -324,8 +328,8 @@ bool MapMode::Load(string filename) {
 	new_act = new ActionPathMove(DialogueSprite);
 	new_act->destination.row = 8;
 	new_act->destination.col = 8;
-	DialogueSprite->actions.push_back(new_act);
-	DialogueSprite->current_action = 0;
+	DialogueSprite->actions.push_back(new_act);*/
+	//DialogueSprite->current_action = 0;
 
 	DialogueSprite->AddDialogue( Dialogue );
 	DialogueSprite->SetDialogue( 0 );
@@ -401,7 +405,7 @@ void MapMode::Update() {
 	}
 
 	// ---------- (4) Sort the objects so they are in the correct draw order ********
-	std::sort( _ground_objects.begin(), _ground_objects.end(), MapObject_Ptr_Less() );
+	std::sort( _ground_objects.begin(), _ground_objects.end(), MapObject::MapObject_Ptr_Less() );
 
 } // void MapMode::Update()
 
@@ -446,42 +450,27 @@ void MapMode::_HandleInputExplore() {
 // 		}
 // 	}
 
-		if (InputManager->ConfirmPress()) {
-			if( _all_objects[ 1 ]->GetType() == VIRTUAL_TYPE || _all_objects[ 1 ]->GetType() == SPRITE_TYPE )
-			{
-				VirtualSprite * sp = reinterpret_cast< VirtualSprite * >( _all_objects[ 1 ] );
+	if (InputManager->ConfirmPress()) {
+		MapObject * obj = _FindNearestObject( _camera );
+		if( obj && ( obj->GetType() == VIRTUAL_TYPE || obj->GetType() == SPRITE_TYPE ) )
+		{
+			VirtualSprite * sp = reinterpret_cast< VirtualSprite * >( obj );
 
-				if( sp->HasDialogue() )
-				{
-					_current_dialogue = sp->GetCurrentDialogue();
-					_dialogue_textbox.SetDisplayText( _current_dialogue->GetLine() );
-					// TODO: add SaveState / LoadState for sprites
-					sp->updatable = false;
-					_all_objects[ 555 ]->updatable = false;
-					_map_state = DIALOGUE;
-				}
+			if( sp->HasDialogue() )
+			{
+				_camera->SaveState();
+				sp->SaveState();
+				_camera->moving = false;
+				
+				sp->moving = false;
+				sp->SetDirection( VirtualSprite::CalculateOppositeDirection( _camera->GetDirection() ) );
+				_current_dialogue = sp->GetCurrentDialogue();
+				_dialogue_textbox.SetDisplayText( _current_dialogue->GetLine() );					
+				_map_state = DIALOGUE;
+				return;
 			}
 		}
-
-		//}
-// 		if (InputManager->ConfirmPress()) {
-// 		// Check for a sprite present within the space of one tile
-// 		int16 check_row, check_col;
-// 		if (_camera->direction & FACING_WEST) {
-//
-// 		}
-// 		else if (_camera->direction & FACING_EAST) {
-//
-// 		}
-// 		else if (_camera->direction & FACING_NORTH) {
-//
-// 		}
-// 		else { // then => (_camera->direction & FACING_SOUTH)) == true
-//
-// 		}
-//
-// 		return;
-// 	} // if (InputManager->ConfirmPress())
+	}
 
 	// Detect and handle movement input from the user
 	if (InputManager->UpState() || InputManager->DownState() || InputManager->LeftState() || InputManager->RightState()) {
@@ -532,28 +521,40 @@ void MapMode::_HandleInputDialogue() {
  	_dialogue_window.Update(_time_elapsed);
  	_dialogue_textbox.Update(_time_elapsed);
 
- 	if (InputManager->ConfirmPress()) {
- 		if (!_dialogue_textbox.IsFinished()) {
- 			_dialogue_textbox.ForceFinish();
- 		}
- 		else {
- 			bool not_finished = _current_dialogue->ReadNextLine();
+	if( _current_dialogue )
+	{
+		if( _current_dialogue->GetAction() ) {
+			if( !_current_dialogue->GetAction()->IsFinished() )
+			{
+				_current_dialogue->GetAction()->Execute();
+				if( _current_dialogue->GetAction()->_forced )
+					return;
+			}
+		}
+ 		if (InputManager->ConfirmPress()) {
+ 			if (!_dialogue_textbox.IsFinished()) {
+ 				_dialogue_textbox.ForceFinish();
+ 			}
+ 			else {
+ 				bool not_finished = _current_dialogue->ReadNextLine();
 
- 			if (!not_finished) {
- 				_dialogue_window.Hide();
- 				_map_state = EXPLORE;
- 				// Restore the status of the map sprites
- 				for (uint32 i = 0; i < _current_dialogue->GetNumLines(); i++) {
-					_all_objects[ _current_dialogue->GetSpeaker( i ) ]->updatable = true;
+ 				if (!not_finished) {
+ 					_dialogue_window.Hide();
+ 					_map_state = EXPLORE;
+ 					// Restore the status of the map sprites
+ 					for (uint32 i = 0; i < _current_dialogue->GetNumLines(); i++) {
+						static_cast< VirtualSprite* >( _all_objects[ _current_dialogue->GetSpeaker( i ) ] )->LoadState();
+ 					}
+ 					//_sprites[1]->UpdateConversationCounter();
+ 					_current_dialogue = NULL;
  				}
- 				//_sprites[1]->UpdateConversationCounter();
- 				_current_dialogue = NULL;
- 			}
- 			else { // Otherwise, the dialogue is automatically updated to the next line
- 				_dialogue_textbox.SetDisplayText(_current_dialogue->GetLine());
+ 				else { // Otherwise, the dialogue is automatically updated to the next line
+ 					_dialogue_textbox.SetDisplayText(_current_dialogue->GetLine());
+					//If an action was set, execute it.
+ 				}
  			}
  		}
- 	}
+	}
 } // void MapMode::_HandleInputDialogue()
 
 
@@ -601,6 +602,8 @@ MapObject* MapMode::_FindNearestObject(const VirtualSprite* sprite) {
 	// ---------- (2): Go through all objects and determine which (if any) are valid
 	for (map<uint16, MapObject*>::iterator i = _all_objects.begin(); i != _all_objects.end(); i++) {
 		MapObject* obj = i->second;
+		if( obj == sprite ) //A sprite can't target itself
+			continue;
 		if (obj->context != sprite->context) // Objects in different contexts can not interact with one another
 			continue;
 
@@ -655,12 +658,9 @@ MapObject* MapMode::_FindNearestObject(const VirtualSprite* sprite) {
 
 
 
-uint8 MapMode::_DetectCollision(VirtualSprite* sprite) {
+bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 	// NOTE: Whether the argument pointer is valid is not checked here, since the object pointer
 	// itself presumably called this function.
-
-	// Retains the collision return value
-	uint8 collide = COLLISION_NONE;
 
 	// The single X,Y floating point coordinates of the sprite
 	float x_location = sprite->ComputeXLocation();
@@ -674,14 +674,14 @@ uint8 MapMode::_DetectCollision(VirtualSprite* sprite) {
 
 	// ---------- (1): Check if the sprite's position has gone out of bounds
 
-	if (cr_left < 0.0f || cr_right >= static_cast<float>(_num_tile_cols * 2) ||
-		cr_top < 0.0f || y_location >= static_cast<float>(_num_tile_rows * 2)) {
-		return COLLISION_BOTH;
+	if (cr_left < 0.0f || cr_top < 0.0f || cr_right >= static_cast<float>(_num_tile_cols * 2) ||
+		y_location >= static_cast<float>(_num_tile_rows * 2)) {
+		return true;
 	}
 
 	// Do not do tile or object based collision detection for this sprite if it has this member set
 	if (sprite->no_collision == true) {
-		return collide;
+		return false;
 	}
 
 	// A pointer to the layer of objects to do the collision detection with
@@ -693,11 +693,10 @@ uint8 MapMode::_DetectCollision(VirtualSprite* sprite) {
 
 		// NOTE: Because the sprite's collision rectangle was determined to be within the map bounds,
 		// the map grid tile indeces referenced in this loop are all valid entries.
-
 		for (uint32 r = static_cast<uint32>(cr_top); r <= static_cast<uint32>(y_location); r++) {
 			for (uint32 c = static_cast<uint32>(cr_left); c <= static_cast<uint32>(cr_right); c++) {
 				if (_map_grid[r][c] == true) { // Then this overlapping tile is unwalkable
-					return COLLISION_BOTH;
+					return true;
 				}
 			}
 		}
@@ -707,15 +706,14 @@ uint8 MapMode::_DetectCollision(VirtualSprite* sprite) {
 		objects = &_sky_objects;
 	}
 
-	// Return if a collision has already been detected on both axes
-	if (collide == COLLISION_BOTH)
-		return collide;
-
 	// ---------- (3): Determine if two object's collision rectangles overlap
 
 	for (uint32 i = 0; i < objects->size(); i++) {
 		// Only verify this object if it is not the same object as the sprite
-		if ((*objects)[i]->object_id != sprite->object_id) {
+		if ((*objects)[i]->object_id != sprite->object_id
+			&& !(*objects)[i]->no_collision
+			&& (*objects)[i]->context == sprite->context ) 
+		{
 			// Only verify this object if it has no_collision set to false
 			if ( !(*objects)[i]->no_collision ) {
 				// Compute the full position coordinates of the other object
@@ -729,14 +727,15 @@ uint8 MapMode::_DetectCollision(VirtualSprite* sprite) {
 					if (!(other_y_location - (*objects)[i]->coll_height > y_location
 						|| other_y_location < cr_top )) {
 						// Boxes overlap on both axis, there is a colision
-						return COLLISION_BOTH;
+						return true;
 					}
 				}
 			}
 		}
 	}
 
-	return collide;
+	// No collision was detected
+	return false;
 } // bool MapMode::_DetectCollision(VirtualSprite* sprite)
 
 
@@ -792,7 +791,7 @@ void MapMode::_FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path
 	open_list.push_back(source_node);
 
 	while (!open_list.empty()) {
-		sort(open_list.begin(), open_list.end());
+		sort(open_list.begin(), open_list.end(), PathNode::NodePred());
 		best_node = open_list.back();
 		open_list.pop_back();
 		closed_list.push_back(best_node);
@@ -848,7 +847,8 @@ void MapMode::_FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path
 				g_add = 14;
 
 			// Set the node's parent and calculate its g_score
-			nodes[i].parent = &best_node;
+			nodes[i].parent_row = best_node.row;
+			nodes[i].parent_col = best_node.col;
 			nodes[i].g_score = best_node.g_score + g_add;
 
 			// ---------- (E): Check to see if the node is already on the open list and update it if necessary
@@ -858,7 +858,8 @@ void MapMode::_FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path
 				if (iter->g_score > nodes[i].g_score) {
 					iter->g_score = nodes[i].g_score;
 					iter->f_score = nodes[i].g_score + iter->h_score;
-					iter->parent = nodes[i].parent;
+					iter->parent_row = nodes[i].parent_row;
+					iter->parent_col = nodes[i].parent_col;
 				}
 			}
 			// ---------- (F): Add the new node to the open list
@@ -880,21 +881,26 @@ void MapMode::_FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path
 	if (open_list.empty()) {
 		if (MAP_DEBUG)
 			cerr << "MAP ERROR: could not find path to destination" << endl;
+		path.push_back( source_node );
 		return;
 	}
 
 	// Add the destination node to the vector, retain its parent, and remove it from the closed list
 	path.push_back(closed_list.back());
-	PathNode* parent = closed_list.back().parent;
+	int16 parent_row = closed_list.back().parent_row;
+	int16 parent_col = closed_list.back().parent_col;
+	//PathNode* parent = closed_list.back().parent;
 	closed_list.pop_back();
 
 	// Go backwards through the closed list to construct the path
 	for (vector<PathNode>::iterator iter = closed_list.end() - 1; iter != closed_list.begin(); --iter) {
-		if (*iter == *parent) { // Find the parent of the node, add it to the path, and then set a new parent node
+		if ( iter->col == parent_col && iter->row == parent_row ) { // Find the parent of the node, add it to the path, and then set a new parent node
 			path.push_back(*iter);
-			parent = iter->parent;
+			parent_col = iter->parent_col;
+			parent_row = iter->parent_row;
 		}
 	}
+	std::reverse( path.begin(), path.end() );
 } // void MapMode::_FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path, const PathNode& dest)
 
 // ****************************************************************************

@@ -74,16 +74,6 @@ const uint8 DIALOGUE     = 0x02;
 const uint8 OBSERVATION  = 0x04;
 //@}
 
-/** \name Collision Detection Constants
-*** These are used only in collision detection routines. They determine in which direction an
-*** object has collided.
-**/
-//@{
-const uint8 COLLISION_NONE = 0x00;
-const uint8 COLLISION_X    = 0x0F;
-const uint8 COLLISION_Y    = 0xF0;
-const uint8 COLLISION_BOTH = 0xFF;
-//@}
 
 /** ****************************************************************************
 *** \brief Retains information about how the next map frame should be drawn.
@@ -144,14 +134,14 @@ public:
 	int16 h_score;
 	//@}
 
-	//! \brief The node which this notde
-	PathNode *parent;
+	//PathNode *parent;
+	int16 parent_row, parent_col;
 
 	PathNode() :
-		row(-1), col(-1), f_score(0), g_score(0), h_score(0), parent(NULL) {}
+		row(-1), col(-1), f_score(0), g_score(0), h_score(0), parent_row( 0 ), parent_col( 0 ) {}
 
 	PathNode(int16 r, int16 c) :
-		row(r), col(c), f_score(0), g_score(0), h_score(0), parent(NULL) {}
+		row(r), col(c), f_score(0), g_score(0), h_score(0), parent_row( 0 ), parent_col( 0 ) {}
 
 	//! \brief Overloaded comparison operator checks that tile.row and tile.col are equal
 	bool operator==(const PathNode& that) const
@@ -161,9 +151,15 @@ public:
 	bool operator!=(const PathNode& that) const
 		{ return ((this->row != that.row) || (this->col != that.col)); }
 
-	//! \brief Overloaded comparison operator only used for PathFinding. It checks if the f_score is GREATER
+	//! \brief Overloaded comparison operator only used for PathFinding. It checks if the f_score is lower
 	bool operator<(const PathNode& that) const
-		{ return this->f_score > that.f_score; }
+		{ return this->f_score < that.f_score; }
+
+	static struct NodePred
+	{
+		const bool operator()( const PathNode& a, const PathNode& b )
+			{ return a.f_score > b.f_score; }
+	};
 }; // class PathNode
 
 } // namespace private_map
@@ -389,6 +385,8 @@ private:
 
 	private_map::MapDialogue* _current_dialogue;
 
+
+
 	// -------------------- Battle Data Retained by the Map
 
 	/** \brief A container for the various foes which may appear on this map.
@@ -419,7 +417,7 @@ private:
 
 	/** \brief Determines if a map sprite's position is invalid because of a collision
 	*** \param sprite A pointer to the map sprite to check
-	*** \return A collision detection constant indicating if and where the collision took place
+	*** \return True if a collision was detected, false if one was not
 	***
 	*** This method is invoked by the map sprite who wishes to check for its own collision. The
 	*** collision detection is performed agains three types of obstacles:
@@ -432,7 +430,7 @@ private:
 	*** \note This function does <b>not</b> check if the MapSprite argument has its no_collision member
 	*** set to false, but it <b>does</b> check that of the other MapObjects.
 	**/
-	uint8 _DetectCollision(private_map::VirtualSprite* sprite);
+	bool _DetectCollision(private_map::VirtualSprite* sprite);
 
 	/** \brief Finds a path from a sprite's current position to a destination
 	*** \param sprite A pointer of the sprite to find the path for

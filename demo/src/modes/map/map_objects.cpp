@@ -116,7 +116,9 @@ VirtualSprite::VirtualSprite() :
 	moving(false),
 	sky_object(false),
 	face_portrait( NULL ),
-	current_action(-1)
+	current_action(-1),
+	forced_action(-1),
+	_saved(false)
 {
 	MapObject::_object_type = VIRTUAL_TYPE;
 }
@@ -135,18 +137,43 @@ VirtualSprite::~VirtualSprite()
 	actions.clear();
 }
 
+uint16 VirtualSprite::CalculateOppositeDirection( const uint16 direction )
+{
+	switch( direction )
+	{
+	case NORTH:		return SOUTH;
+	case SOUTH:		return NORTH;
+	case WEST:		return EAST;
+	case EAST:		return WEST;
+	case NW_NORTH:	return SE_SOUTH;
+	case NW_WEST:	return SE_EAST;
+	case NE_NORTH:	return SW_SOUTH;
+	case NE_EAST:	return SW_WEST;
+	case SW_SOUTH:	return NE_NORTH;
+	case SW_WEST:	return NE_EAST;
+	case SE_SOUTH:	return NW_NORTH;
+	case SE_EAST:	return NW_WEST;
+	default:
+		cerr << "MAP_OBJ ERROR: CalcOppDir: received invalid direction" << endl;
+		return SOUTH;
+	}
+}
+
 void VirtualSprite::Update() {
 	if (!updatable) {
 		return;
 	}
 
-	// Execute the sprite's action and if it is finished, update the action counter
-	if (current_action >= 0) {
-		actions[current_action]->Execute();
-		if (actions[current_action]->IsFinished()) {
-			current_action++;
-			if (static_cast<uint8>(current_action) >= actions.size())
-				current_action = 0;
+	// If the sprite was not forced to do a certain action
+	if (forced_action < 0 ) {
+		// Execute the sprite's action and if it is finished, update the action counter
+		if (current_action >= 0) {
+			actions[current_action]->Execute();
+			if (actions[current_action]->IsFinishedReset()) {
+				current_action++;
+				if (static_cast<uint8>(current_action) >= actions.size())
+					current_action = 0;
+			}
 		}
 	}
 
@@ -158,65 +185,36 @@ void VirtualSprite::Update() {
 		float distance_moved = static_cast<float>(MapMode::_current_map->_time_elapsed) / movement_speed;
 
 		// Move the sprite the appropriate distance in the appropriate direction
+		// Y movements
 		switch (direction) {
-			case NORTH:
-				y_offset -= distance_moved;
-				break;
+			case NORTH: 
+				y_offset -= distance_moved; break;
 			case SOUTH:
-				y_offset += distance_moved;
-				break;
-			case WEST:
-				x_offset -= distance_moved;
-				break;
-			case EAST:
-				x_offset += distance_moved;
-				break;
+				y_offset += distance_moved; break;
+			case WEST: break;
+			case EAST: break;
 			case NW_NORTH:
 			case NW_WEST:
-				x_offset -= distance_moved;
-				y_offset -= distance_moved;
-				break;
+				y_offset -= distance_moved; break;
 			case SW_SOUTH:
 			case SW_WEST:
-				x_offset -= distance_moved;
-				y_offset += distance_moved;
-				break;
+				y_offset += distance_moved; break;
 			case NE_NORTH:
 			case NE_EAST:
-				x_offset += distance_moved;
-				y_offset -= distance_moved;
-				break;
+				y_offset -= distance_moved; break;
 			case SE_SOUTH:
 			case SE_EAST:
-				x_offset += distance_moved;
-				y_offset += distance_moved;
-				break;
+				y_offset += distance_moved; break;
 			default:
 				cerr << "MAP ERROR: sprite trying to move in an invalid direction" << endl;
 				return;
 		} // switch (direction)
 
-		// Determine if the sprite may move to this new position
-		uint8 collision = MapMode::_current_map->_DetectCollision(this);
-		if (collision != COLLISION_NONE) {
-			// Restore the original position of the sprite
-			if (collision & COLLISION_X)
-				x_offset = tmp_x;
-			if (collision & COLLISION_Y)
-				y_offset = tmp_y;
-			if (collision == COLLISION_BOTH)
-				return;
-		}
+		// Determine if the sprite may move to this new Y position
+		if ( MapMode::_current_map->_DetectCollision(this) )
+			y_offset = tmp_y;
 
-		// Roll-over position offsets if necessary
-		while (x_offset < 0.0f) {
-			x_position -= 1;
-			x_offset += 1.0f;
-		}
-		while (x_offset > 1.0f) {
-			x_position += 1;
-			x_offset -= 1.0f;
-		}
+		// Roll-over Y position offsets if necessary
 		while (y_offset < 0.0f) {
 			y_position -= 1;
 			y_offset += 1.0f;
@@ -225,6 +223,45 @@ void VirtualSprite::Update() {
 			y_position += 1;
 			y_offset -= 1.0f;
 		}
+
+		// Move the sprite the appropriate distance in the appropriate X direction
+		switch (direction) {
+			case NORTH: break;
+			case SOUTH: break;
+			case WEST:
+				x_offset -= distance_moved; break;
+			case EAST:
+				x_offset += distance_moved; break;
+			case NW_NORTH:
+			case NW_WEST:
+				x_offset -= distance_moved; break;
+			case SW_SOUTH:
+			case SW_WEST:
+				x_offset -= distance_moved; break;
+			case NE_NORTH:
+			case NE_EAST:
+				x_offset += distance_moved; break;
+			case SE_SOUTH:
+			case SE_EAST:
+				x_offset += distance_moved; break;
+			default:
+				cerr << "MAP ERROR: sprite trying to move in an invalid direction" << endl;
+				return;
+		} // switch (direction)
+
+		// Determine if the sprite may move to this new X position
+		if ( MapMode::_current_map->_DetectCollision(this) )
+			x_offset = tmp_x;
+
+		// Roll-over X position offsets if necessary
+		while (x_offset < 0.0f) {
+			x_position -= 1;
+			x_offset += 1.0f;
+		}
+		while (x_offset > 1.0f) {
+			x_position += 1;
+			x_offset -= 1.0f;
+		}		
 	} // if (moving)
 } // void VirtualSprite::Update()
 
@@ -267,6 +304,31 @@ void VirtualSprite::SetDirection(uint16 dir) {
 			fprintf(stderr, "ERROR: in VirtualSprite::SetDirection tried to set an invalid direction (%d)\n", dir);
 	}
 } // void VirtualSprite::SetDirection(uint16 dir)
+
+void VirtualSprite::SaveState()
+{
+	_saved = true;
+	
+	_saved_direction = direction;
+	_saved_movement_speed = movement_speed;
+	_saved_moving = moving;
+	_saved_name = name;
+	_saved_current_action = current_action;
+}
+
+bool VirtualSprite::LoadState()
+{
+	if( !_saved )
+		return false;
+
+	 direction = _saved_direction;
+	 movement_speed = _saved_movement_speed;
+	 moving = _saved_moving;
+	 name = _saved_name;
+	 current_action = _saved_current_action;
+
+	 return true;
+}
 
 // ****************************************************************************
 // ************************ MapSprite Class Functions *************************
@@ -385,34 +447,33 @@ bool MapSprite::Load() {
 
 // Updates the state of the sprite
 void MapSprite::Update() {
-	if (updatable == false) {
+	if ( !updatable )
 		return;
-	}
 
 	// Set the sprite's animation to the standing still position if movement has just stopped
 	if (!moving) {
 		if (was_moving) {
 			// Set the current movement animation to zero progress
 			animations[current_animation].SetTimeProgress(0);
-
-			// Determine the correct standing frame to display
-			if (direction & FACING_NORTH) {
-				current_animation = ANIM_STANDING_NORTH;
-			}
-			else if (direction & FACING_SOUTH) {
-				current_animation = ANIM_STANDING_SOUTH;
-			}
-			else if (direction & FACING_WEST) {
-				current_animation = ANIM_STANDING_WEST;
-			}
-			else if (direction & FACING_EAST) {
-				current_animation = ANIM_STANDING_EAST;
-			}
-			else {
-				cerr << "MAP ERROR: could not find proper standing animation to draw" << endl;
-			}
 			was_moving = false;
-		} // if (was_moving)
+		}
+
+		// Determine the correct standing frame to display
+		if (direction & FACING_NORTH) {
+			current_animation = ANIM_STANDING_NORTH;
+		}
+		else if (direction & FACING_SOUTH) {
+			current_animation = ANIM_STANDING_SOUTH;
+		}
+		else if (direction & FACING_WEST) {
+			current_animation = ANIM_STANDING_WEST;
+		}
+		else if (direction & FACING_EAST) {
+			current_animation = ANIM_STANDING_EAST;
+		}
+		else {
+			cerr << "MAP ERROR: could not find proper standing animation to draw" << endl;
+		}
 	} // if (!moving)
 
 	// This call will update the sprite's position and perform collision detection
@@ -458,6 +519,29 @@ void MapSprite::Draw() {
 	if (MapObject::DrawHelper() == true)
 		VideoManager->DrawImage(animations[current_animation]);
 }
+
+void MapSprite::SaveState()
+{
+	VirtualSprite::SaveState();
+
+	_saved_was_moving = was_moving;
+	_saved_walk_sound = walk_sound;
+	_saved_current_animation = current_animation;
+}
+
+bool MapSprite::LoadState()
+{
+	if( !VirtualSprite::LoadState() )
+		return false;
+
+	was_moving = _saved_was_moving;
+	walk_sound = _saved_walk_sound;
+	current_animation = _saved_current_animation;
+
+	return true;
+}
+
+
 
 } // namespace private_map
 

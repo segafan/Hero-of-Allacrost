@@ -332,21 +332,22 @@ public:
 	uint8 GetType() const
 	{ return _object_type; }
 
-	protected:
-		uint8 _object_type;
+	/** \brief This is a predicate used to sort MapObjects in correct draw order
+	*** \return True if the MapObject pointed by a should be drawn behind MapObject pointed by b
+	**/
+	static struct MapObject_Ptr_Less
+	{
+		const bool operator()( const MapObject * a, const MapObject * b )
+		{
+			return ( a->y_position + a->y_offset ) <  ( b->y_position + b->y_offset );
+		}
+	};
+
+protected:
+	uint8 _object_type;
 
 }; // class MapObject
 
-/** \brief This is a predicate used to sort MapObjects in correct draw order
-*** \return True if the MapObject pointed by a should be drawn behind MapObject pointed by b
-**/
-struct MapObject_Ptr_Less
-{
-	const bool operator()( const MapObject * a, const MapObject * b )
-	{
-		return ( a->y_position + a->y_offset ) <  ( b->y_position + b->y_offset );
-	}
-};
 
 /** ****************************************************************************
 *** \brief Represents visible objects on the map that have no motion.
@@ -453,6 +454,8 @@ public:
 	**/
 	int8 current_action;
 
+	int8 forced_action;
+
 	//! \brief A container for all of the actions this sprite performs.
 	std::vector<SpriteAction*> actions;
 
@@ -489,8 +492,25 @@ public:
 		{ return movement_speed; }
 	//@}
 
+	// These need to be protected
+	/** \name Saved state attributes
+	*** These attributes are used to save and load the state of a VirtualSprite
+	**/
+	//@{
+	bool _saved;
+	uint16 _saved_direction;
+	float _saved_movement_speed;
+	bool _saved_moving;
+	hoa_utils::ustring _saved_name;
+	int8 _saved_current_action;
+	//@}
+	
+	virtual void SaveState();
+	virtual bool LoadState();
+
 	void SetPortrait(std::string pn)
 		{ face_portrait = new hoa_video::StillImage(); face_portrait->SetFilename(pn); hoa_video::VideoManager->LoadImage(*face_portrait); }
+	
 	// Dialogues
 	std::vector< MapDialogue* > dialogues;
 	int8 current_dialogue;
@@ -504,6 +524,8 @@ public:
 		{ return dialogues[ current_dialogue ]; }
 	void SetDialogue( const int8 dialogue )
 		{ current_dialogue = dialogue; }
+
+	static uint16 CalculateOppositeDirection( const uint16 direction );
 
 }; // class VirtualMapObject : public MapObject
 
@@ -580,6 +602,14 @@ public:
 	uint8 GetCurrentAnimation() const
 		{ return current_animation; }
 	//@}
+
+	bool _saved_was_moving;
+	int8 _saved_walk_sound;
+	uint8 _saved_current_animation;
+
+	virtual void SaveState();
+	virtual bool LoadState();
+
 }; // class MapSprite : public VirtualSprite
 
 } // namespace private_map

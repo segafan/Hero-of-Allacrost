@@ -53,19 +53,30 @@ public:
 	//! \brief Executes the sprite's action.
 	virtual void Execute() = 0;
 
+	/** \brief Inidicates if the action is finished or not.
+	*** \return True if the action is finished, false if it is not.
+	**/
+	const bool IsFinished()
+	{ return _finished; }
+
 	/** \brief Inidicates if the action is finished or not and resets the finished member if it is.
 	*** \return True if the action is finished, false if it is not.
 	*** \note This is not a normal class member act
 	**/
-	const bool IsFinished()
+	const bool IsFinishedReset()
 		{ if (!_finished) return false; _finished = false; return true; }
 
+	bool _forced;
+
+	int16 _count;
 protected:
 	//! \brief A pointer to the map sprite that this action is performed upon.
 	VirtualSprite *_sprite;
 
 	//! \brief Set to true when the action has finished its execution.
 	bool _finished;
+
+	
 };
 
 
@@ -90,8 +101,12 @@ public:
 	//! \brief An index to the path vector containing the node that the sprite is currently on.
 	uint32 current_node;
 
-	ActionPathMove(VirtualSprite* sprite) :
-		SpriteAction(sprite), current_node(0) {}
+	ActionPathMove(VirtualSprite* sprite, int16 count = 1, bool forced = false) :
+	SpriteAction(sprite), current_node(0) {
+		_forced = forced;
+		_count = count;
+		
+	}
 
 	~ActionPathMove()
 		{}
