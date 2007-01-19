@@ -297,6 +297,12 @@ private:
 	**/
 	uint16 _num_tile_cols;
 
+	/** \brief The number of elements in the map grid
+	*** The number of map grid rows and columns is always equal to twice that of the number of
+	*** tile rows and tile columns.
+	**/
+	uint16 _num_grid_rows, _num_grid_cols;
+
 	//! \brief Retains information needed to correctly draw the next map frame.
 	private_map::MapFrame _draw_info;
 

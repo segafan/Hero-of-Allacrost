@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,9 +14,11 @@
 #include <math.h>
 
 using namespace std;
+using namespace hoa_utils;
 using namespace hoa_video::private_video;
 
-namespace hoa_video 
+
+namespace hoa_video
 {
 
 // controls how slow the slow transform is. The greater the number, the "slower" it is.
@@ -58,21 +60,21 @@ bool Interpolator::Start(float a, float b, int32 milliseconds)
 			cerr << "VIDEO ERROR: tried to start interpolation with invalid method!" << endl;
 		return false;
 	}
-	
+
 	if(milliseconds < 0)
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: passed negative time value to Interpolator::Start()!" << endl;
 		return false;
 	}
-	
+
 	_a = a;
-	_b = b;	
-	
+	_b = b;
+
 	_currentTime = 0;
 	_endTime     = milliseconds;
 	_finished    = false;
-	
+
 	Update(0);  // do initial update so we have a valid value for GetValue()
 	return true;
 }
@@ -94,14 +96,14 @@ bool Interpolator::SetMethod(InterpolationMethod method)
 			cerr << "VIDEO ERROR: tried to call SetMethod() on an interpolator that was still in progress!" << endl;
 		return false;
 	}
-		
+
 	if(!_ValidMethod())
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: passed an invalid method to Interpolator::SetMethod()!" << endl;
 		return false;
 	}
-	
+
 	_method = method;
 	return true;
 }
@@ -134,26 +136,26 @@ bool Interpolator::Update(int32 frameTime)
 			cerr << "VIDEO ERROR: called Interpolator::Update() with negative frameTime!" << endl;
 		return false;
 	}
-	
+
 	if(!_ValidMethod())
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: called Interpolator::Update(), but method was invalid!" << endl;
 		return false;
 	}
-	
+
 	// update current time
 	_currentTime += frameTime;
-	
+
 	if(_currentTime > _endTime)
 	{
 		_currentTime = _endTime;
 		_finished    = true;
 	}
-	
-	// calculate a value from 0.0f to 1.0f of how far we are in the interpolation	
+
+	// calculate a value from 0.0f to 1.0f of how far we are in the interpolation
 	float t;
-	
+
 	if(_endTime == 0)
 	{
 		t = 1.0f;
@@ -162,20 +164,20 @@ bool Interpolator::Update(int32 frameTime)
 	{
 		t = (float)_currentTime / (float)_endTime;
 	}
-	
+
 	if(t > 1.0f)
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: calculated value of 't' was more than 1.0!" << endl;
 		t = 1.0f;
 	}
-	
+
 	// now apply a transformation based on the interpolation method
-	
+
 	switch(_method)
 	{
 		case VIDEO_INTERPOLATE_EASE:
-			t = _EaseTransform(t);			
+			t = _EaseTransform(t);
 			break;
 		case VIDEO_INTERPOLATE_SRCA:
 			t = 0.0f;
@@ -187,7 +189,7 @@ bool Interpolator::Update(int32 frameTime)
 			t = _FastTransform(t);
 			break;
 		case VIDEO_INTERPOLATE_SLOW:
-			t = _SlowTransform(t);			
+			t = _SlowTransform(t);
 			break;
 		case VIDEO_INTERPOLATE_LINEAR:
 			// nothing to do, just use t value as it is!
@@ -199,9 +201,9 @@ bool Interpolator::Update(int32 frameTime)
 			return false;
 		}
 	};
-	
+
 	_currentValue = Lerp(t, _a, _b);
-	
+
 	return true;
 }
 
@@ -237,7 +239,7 @@ float Interpolator::_SlowTransform(float t)
 
 float Interpolator::_EaseTransform(float t)
 {
-	return 0.5f * (1.0f + sinf(VIDEO_2PI * (t - 0.25f)));
+	return 0.5f * (1.0f + sinf(UTILS_2PI * (t - 0.25f)));
 }
 
 
@@ -258,8 +260,8 @@ bool Interpolator::IsFinished()
 
 bool Interpolator::_ValidMethod()
 {
-	return (_method < VIDEO_INTERPOLATE_TOTAL && 
-	        _method > VIDEO_INTERPOLATE_INVALID);	
+	return (_method < VIDEO_INTERPOLATE_TOTAL &&
+	        _method > VIDEO_INTERPOLATE_INVALID);
 }
 
 

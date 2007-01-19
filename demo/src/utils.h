@@ -73,7 +73,7 @@
 #include <SDL/SDL.h>
 
 /** \name Allacrost Integer Types
-*** \brief These are the integer types used throughout the Allacrost source code. 
+*** \brief These are the integer types used throughout the Allacrost source code.
 *** These types are created by redefining the SDL types (we do not like SDL's type-naming conventions).
 *** Use of the standard int, long, etc. is forbidden in Allacrost source code! Don't attempt to use any
 *** 64-bit types either, since a large population of PCs in our target audience are not a 64-bit
@@ -93,6 +93,18 @@ namespace hoa_utils {
 
 //! Determines whether the code in the hoa_utils namespace should print debug statements or not.
 extern bool UTILS_DEBUG;
+
+/** \name Multiples of Pi constants
+*** \brief PI and multiples of PI. Used in various math calculations such as interpolations.
+***
+*** These constants are mostly used in the video engine.
+**/
+//@{
+const float UTILS_QUARTER_PI = 0.785398163f;
+const float UTILS_HALF_PI    = 1.570796326f;
+const float UTILS_PI         = 3.141592653f;
+const float UTILS_2PI        = 6.283185307f;
+//@}
 
 /** \brief Rounds an unsigned integer up to the nearest power of two.
 *** \param x The number to round up.
@@ -136,7 +148,7 @@ bool IsFloatInRange(float value, float lower, float upper);
 ***
 *** \note This class intentionally ignores the code standard convention for class
 *** names because the class objects are to be used as if they were a standard C++ type.
-*** 
+***
 *** \note This class does not implement a destructor because the only data member
 *** (a std::vector) will automatically destroy itself when the no-arg destructor is invoked.
 ***
@@ -175,7 +187,7 @@ public:
 	size_t find(uint16 c, size_t pos = 0) const;
 	size_t find(const ustring &s, size_t pos = 0) const;
 	ustring substr(size_t pos = 0, size_t n = npos) const;
-	
+
 	ustring & operator + (const ustring& s);
 	ustring & operator += (uint16 c);
 	ustring & operator += (const ustring& s);
@@ -438,7 +450,7 @@ bool RemoveDirectory(const std::string& dir_name);
 /** \brief Checks version against a remote server
 *** \return A boolean indicating whether the user is running the latest version
 ***
-*** This function will return true to indicate that the user is using the latest 
+*** This function will return true to indicate that the user is using the latest
 *** version OR that an error occured.
 **/
 bool IsLatestVersion ();
