@@ -40,16 +40,26 @@ public:
 	void ClearSeenDialogue()
 		{ _seen = false; }
 
-	void AddText( const uint32 speaker_id, const hoa_utils::ustring text );
+	void AddText( const uint32 speaker_id, const hoa_utils::ustring text, SpriteAction* action = 0 );
 	
 	uint32 GetSpeaker() const
 		{ return _speakers[ _current_line ]; }
-
-	uint32 GetSpeaker( uint32 line ) const
-		{ return _speakers[ line ]; }
 	
 	hoa_utils::ustring GetLine() const
 		{ return _text[ _current_line ]; }
+
+	SpriteAction* GetAction() const
+		{ return _actions[ _current_line ]; }
+
+	//TODO: These are unsafe, might have to add checks
+	uint32 GetSpeaker( uint32 line ) const
+		{ return _speakers[ line ]; }
+	
+	hoa_utils::ustring GetLine( uint32 line ) const
+		{ return _text[ line ]; }
+
+	SpriteAction* GetAction( uint32 line ) const
+		{ return _actions[ line ]; }
 		
 	const bool ReadNextLine();
 
@@ -60,17 +70,21 @@ private:
 	//! \brief The text of the conversation, split up into multiple lines.
 	std::vector<hoa_utils::ustring> _text;
 
-	//! \brief A list of sprite ID numbers for who speaks what lines.
+	//! \brief A list of object ID numbers for who speaks what lines.
 	std::vector<uint32> _speakers;
 
 	// A list of events that may occur after each line.
-	// std::vector<SpriteAction*> events
+	std::vector<SpriteAction*> _actions;
 
 	//! \brief True if the player has already read this dialogue.
 	bool _seen;
 
 	//! \brief An index to the current line to read.
 	uint32 _current_line;
+
+	bool _blocked;
+
+	uint32 _time_left;
 }; // class MapDialogue
 
 } // namespace private_map

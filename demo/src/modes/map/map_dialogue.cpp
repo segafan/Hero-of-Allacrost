@@ -45,6 +45,7 @@ namespace private_map {
 MapDialogue::MapDialogue() {
 	if (MAP_DEBUG) cout << "MAP: MapDialogue constructor invoked" << endl;
 	_current_line = 0;
+	_seen = false;
 }
 
 
@@ -56,16 +57,18 @@ MapDialogue::~MapDialogue() {
 
 const bool MapDialogue::ReadNextLine() {
 	if ( ++_current_line >= _text.size() ) { 
-		_current_line = 0; 
+		_current_line = 0;
+		_seen = true;
 		return false; 
 	} 
 	return true;
 }
 
-void MapDialogue::AddText( const uint32 speaker_id, const hoa_utils::ustring text )
+void MapDialogue::AddText( const uint32 speaker_id, const hoa_utils::ustring text, SpriteAction* action )
 {
 	_speakers.push_back( speaker_id );
 	_text.push_back( text );
+	_actions.push_back( action );
 }
 
 } // namespace private_map
