@@ -90,8 +90,10 @@ MapMode::~MapMode() {
 
 	// Delete all of the map objects
 	for (uint32 i = 0; i < _ground_objects.size(); i++) {
-		delete(_ground_objects[i]);
+		if (_ground_objects[i] != NULL)
+			delete(_ground_objects[i]);
 	}
+
 	for (uint32 i = 0; i < _pass_objects.size(); i++) {
 		cout << "before delete pass objects" << endl;
 		delete(_pass_objects[i]);
@@ -101,6 +103,8 @@ MapMode::~MapMode() {
 		delete(_sky_objects[i]);
 	}
 	delete(_virtual_focus);
+
+	_map_script.CloseFile();
 
 	// Free up the dialogue window
 	VideoManager->DeleteImage(_dialogue_box);
@@ -193,7 +197,7 @@ void MapMode::BindToLua() {
 	module(ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<MapSprite, VirtualSprite>("MapSprite")
-			.def(constructor<>())
+			.def(constructor<>(), adopt(result))
 			.def("SetName", &MapSprite::SetName)
 			.def("SetWalkSound", &MapSprite::SetWalkSound)
 			.def("SetCurrentAnimation", &MapSprite::SetCurrentAnimation)
@@ -207,7 +211,10 @@ void MapMode::BindToLua() {
 // Loads the map from a Lua file.
 bool MapMode::Load(string filename) {
 	// TEMP: All of this is temporary, and will be replaced later
-	_map_filename = "dat/maps/nofile.lua";
+	_map_filename = "dat/maps/demo_town.lua";
+	if (_map_script.OpenFile(_map_filename, SCRIPT_READ) == false) {
+		cerr << "MAP ERROR: unable to open map script file " << _map_filename << endl;
+	}
 
 	// ---------- (1) Open map script file and begin loading data
 	_num_tile_rows = 50;
@@ -263,11 +270,16 @@ bool MapMode::Load(string filename) {
  	//	}
  	//}
 
+	// TODO: Need a "ReadCallFunction" for scripting engine to replace raw luabind call
+	// _map_script.ReadCallFunction("Load", "");
+// 	luabind::call_function<void>(_map_script.GetLuaState(), "Load", this);
+
 	_current_dialogue = 0;
 
-	MapSprite *sp;
+
 
 	// Load player sprite and rest of map objects
+	MapSprite *sp;
 	sp = new MapSprite();
 	sp->name = MakeUnicodeString("Claudius");
 	sp->SetObjectID(0);
@@ -287,9 +299,10 @@ bool MapMode::Load(string filename) {
 	_camera = sp;
 	_ground_objects.push_back(sp);
 
+
 	MapSprite *DialogueSprite;
 	MapDialogue *Dialogue = new MapDialogue();
-	
+
 
 	// Load player sprite and rest of map objects
 	DialogueSprite = new MapSprite();
@@ -334,12 +347,19 @@ bool MapMode::Load(string filename) {
 	DialogueSprite->AddDialogue( Dialogue );
 	DialogueSprite->SetDialogue( 0 );
 	DialogueSprite->SetPortrait( "img/portraits/map/laila.png" );
-	if (DialogueSprite->Load() == false)
-		return false;
-	_ground_objects.push_back(DialogueSprite);
-	_all_objects[ 1 ] = DialogueSprite;
+	_AddGroundObject(DialogueSprite);
+// 	if (DialogueSprite->Load() == false)
+// 		return false;
+// 	_ground_objects.push_back(DialogueSprite);
+// 	_all_objects[ 1 ] = DialogueSprite;
 
+	for (uint32 i = 0; i < _ground_objects.size(); i++) {
+		if (_ground_objects[i]->Load() == false) {
+			cerr << "MAP ERROR: failed to load ground object" << endl;
+		}
+	}
 
+	_camera = DialogueSprite;
 
 	// ---------- (1) Setup GUI items (in a 1024x768 coordinate system)
 	VideoManager->PushState();
@@ -405,7 +425,8 @@ void MapMode::Update() {
 	}
 
 	// ---------- (4) Sort the objects so they are in the correct draw order ********
-	std::sort( _ground_objects.begin(), _ground_objects.end(), MapObject::MapObject_Ptr_Less() );
+// 	std::sort( _ground_objects.begin(), _ground_objects.end(), MapObject::MapObject_Ptr_Less() );
+	std::sort( _ground_objects.begin(), _ground_objects.end());
 
 } // void MapMode::Update()
 
@@ -461,11 +482,11 @@ void MapMode::_HandleInputExplore() {
 				_camera->SaveState();
 				sp->SaveState();
 				_camera->moving = false;
-				
+
 				sp->moving = false;
 				sp->SetDirection( VirtualSprite::CalculateOppositeDirection( _camera->GetDirection() ) );
 				_current_dialogue = sp->GetCurrentDialogue();
-				_dialogue_textbox.SetDisplayText( _current_dialogue->GetLine() );					
+				_dialogue_textbox.SetDisplayText( _current_dialogue->GetLine() );
 				_map_state = DIALOGUE;
 				return;
 			}
@@ -712,7 +733,7 @@ bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 		// Only verify this object if it is not the same object as the sprite
 		if ((*objects)[i]->object_id != sprite->object_id
 			&& !(*objects)[i]->no_collision
-			&& (*objects)[i]->context == sprite->context ) 
+			&& (*objects)[i]->context == sprite->context )
 		{
 			// Only verify this object if it has no_collision set to false
 			if ( !(*objects)[i]->no_collision ) {
@@ -791,7 +812,8 @@ void MapMode::_FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path
 	open_list.push_back(source_node);
 
 	while (!open_list.empty()) {
-		sort(open_list.begin(), open_list.end(), PathNode::NodePred());
+// 		sort(open_list.begin(), open_list.end(), PathNode::NodePred());
+		sort(open_list.begin(), open_list.end());
 		best_node = open_list.back();
 		open_list.pop_back();
 		closed_list.push_back(best_node);

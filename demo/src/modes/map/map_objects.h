@@ -212,6 +212,11 @@ public:
 	virtual ~MapObject()
 		{}
 
+	/** \brief Loads any data that the object requires.
+	*** \return False if there was a failure in loading any of the data.
+	**/
+	virtual bool Load() = 0;
+
 	/** \brief Updates the state of an object.
 	*** Many map objects may not actually have a use for this function. For example, animated objects like a
 	*** tree automatically have their frames updated by the video engine, so there is no need to
@@ -332,16 +337,22 @@ public:
 	uint8 GetType() const
 	{ return _object_type; }
 
+	/** \brief Overloaded operator used for sorting objects by their y location. Used for determining draw order.
+	*** \return True if this MapObject should be drawn behind that MapObject
+	**/
+	bool operator<(const MapObject* that) const
+		{ return (this->ComputeYLocation() <  that->ComputeYLocation()); }
+
 	/** \brief This is a predicate used to sort MapObjects in correct draw order
 	*** \return True if the MapObject pointed by a should be drawn behind MapObject pointed by b
 	**/
-	static struct MapObject_Ptr_Less
-	{
-		const bool operator()( const MapObject * a, const MapObject * b )
-		{
-			return ( a->y_position + a->y_offset ) <  ( b->y_position + b->y_offset );
-		}
-	};
+// 	static struct MapObject_Ptr_Less
+// 	{
+// 		const bool operator()( const MapObject * a, const MapObject * b )
+// 		{
+// 			return ( a->y_position + a->y_offset ) <  ( b->y_position + b->y_offset );
+// 		}
+// 	};
 
 protected:
 	uint8 _object_type;
@@ -376,6 +387,11 @@ public:
 	PhysicalObject();
 
 	~PhysicalObject();
+
+	/** \brief Loads the objects animation images
+	*** \return False if the images failed to load.
+	**/
+	bool Load() { return true; }
 
 	//! \brief Updates the object's animation frames if it is animated.
 	void Update();
@@ -463,6 +479,11 @@ public:
 
 	~VirtualSprite();
 
+	/** \brief Loads the sprite's face portrait image, if it has one
+	*** \return False if the image failed to load.
+	**/
+	virtual bool Load() { return true; }
+
 	//! \brief Updates the virtual object's position if it is moving, otherwise does nothing.
 	virtual void Update();
 
@@ -504,13 +525,13 @@ public:
 	hoa_utils::ustring _saved_name;
 	int8 _saved_current_action;
 	//@}
-	
+
 	virtual void SaveState();
 	virtual bool LoadState();
 
 	void SetPortrait(std::string pn)
 		{ face_portrait = new hoa_video::StillImage(); face_portrait->SetFilename(pn); hoa_video::VideoManager->LoadImage(*face_portrait); }
-	
+
 	// Dialogues
 	std::vector< MapDialogue* > dialogues;
 	int8 current_dialogue;

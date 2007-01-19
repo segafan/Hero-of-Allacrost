@@ -20,9 +20,6 @@
 #include <stdarg.h>
 #include "script.h"
 #include "map.h"
-#include "map_actions.h"
-#include "map_objects.h"
-#include "map_dialogue.h"
 
 using namespace std;
 using namespace hoa_utils;
@@ -910,6 +907,10 @@ GameScript::GameScript() {
 	// Initialize Lua and LuaBind
 	_global_state = lua_open();
 	luabind::open(_global_state);
+	lua_baselibopen(_global_state);
+	lua_iolibopen(_global_state);
+	lua_strlibopen(_global_state);
+	lua_mathlibopen(_global_state);
 }
 
 
@@ -926,17 +927,17 @@ GameScript::~GameScript() {
 
 bool GameScript::SingletonInitialize() {
 // 	// Call all binding functions to make classes, functions, etc. available to Lua
-// 	GameVideo::BindToLua();
-// 	GameAudio::BindToLua();
-// 	GameModeManager::BindToLua();
-// 	GameSystem::BindToLua();
-// 	GameInput::BindToLua();
-// 	GameGlobal::BindToLua();
+// 	hoa_video::GameVideo::BindToLua();
+// 	hoa_audio::GameAudio::BindToLua();
+// 	hoa_mode_manager::GameModeManager::BindToLua();
+// 	hoa_system::GameSystem::BindToLua();
+// 	hoa_input::GameInput::BindToLua();
+// 	hoa_global::GameGlobal::BindToLua();
 //
-// 	BootMode::BindToLua();
-// 	BattleMode::BindToLua();
-// 	MapMode::BindToLua();
-// 	MenuMode::BindToLua();
+// 	hoa_boot::BootMode::BindToLua();
+// 	hoa_battle::BattleMode::BindToLua();
+	hoa_map::MapMode::BindToLua();
+// 	hoa_menu::MenuMode::BindToLua();
 
 	// TODO: Open the user setting's file and apply those settings
 	return true;
