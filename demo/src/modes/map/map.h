@@ -151,15 +151,15 @@ public:
 	bool operator!=(const PathNode& that) const
 		{ return ((this->row != that.row) || (this->col != that.col)); }
 
-	//! \brief Overloaded comparison operator only used for PathFinding. It checks if the f_score is lower
+	//! \brief Overloaded comparison operator only used for pathFinding. It compares the two f_scores.
 	bool operator<(const PathNode& that) const
-		{ return this->f_score < that.f_score; }
+		{ return this->f_score > that.f_score; }
 
-	static struct NodePred
-	{
-		const bool operator()( const PathNode& a, const PathNode& b )
-			{ return a.f_score > b.f_score; }
-	};
+// 	static struct NodePred
+// 	{
+// 		const bool operator()( const PathNode& a, const PathNode& b )
+// 			{ return a.f_score > b.f_score; }
+// 	};
 }; // class PathNode
 
 } // namespace private_map

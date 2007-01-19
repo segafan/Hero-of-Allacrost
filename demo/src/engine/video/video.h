@@ -716,7 +716,7 @@ public:
 
 
 	/*! \brief Loads a MultiImage in a vector of StillImages.
-	/*!	This function loads an image and cut it in pieces, loading each of 
+	 *	This function loads an image and cut it in pieces, loading each of
 	 *	that on separate StillImage objects.
 	 *  \param images  Vector of StillImages where the cut images will be loaded.
 	 *	\param filename Name of the file to be opened to read.
@@ -728,7 +728,7 @@ public:
 
 
 	/*! \brief Loads a MultiImage in an AnimatedImage as frames.
-	/*!	This function loads an image and cut it in pieces, loading each of 
+	 *	This function loads an image and cut it in pieces, loading each of
 	 *	that on frames of an AnimatedImage.
 	 *  \param image  AnimatedImage where the cut images will be loaded.
 	 *	\param filename Name of the file to be opened to read.

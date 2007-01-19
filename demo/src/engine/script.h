@@ -40,6 +40,7 @@ extern "C" {
 
 #include <luabind/luabind.hpp>
 #include <luabind/object.hpp>
+#include <luabind/adopt_policy.hpp>
 
 #include "utils.h"
 #include "defs.h"
@@ -115,6 +116,10 @@ public:
 
 	~ScriptDescriptor ()
 		{}
+
+	//! \brief Returns a pointer to the local lua state
+	lua_State* GetLuaState()
+		{ return _lstack; }
 
 	//! \name Class Member Access Functions
 	//@{
@@ -394,7 +399,7 @@ public:
 	*** \note If the key varname does not exist in the lua stack, it will be added as a new key
 	*** with the specified value.
 	**/
-	template <class T> void ChangeSetting(const std::string &varname, T variable);
+	template<class T> void ChangeSetting(const std::string &varname, T variable);
 
 	//! \brief Writes out the stack to disk
 	void SaveStack(const std::string &filename);
