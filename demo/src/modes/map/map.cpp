@@ -95,11 +95,9 @@ MapMode::~MapMode() {
 	}
 
 	for (uint32 i = 0; i < _pass_objects.size(); i++) {
-		cout << "before delete pass objects" << endl;
 		delete(_pass_objects[i]);
 	}
 	for (uint32 i = 0; i < _sky_objects.size(); i++) {
-		cout << "before delete sky objects" << _sky_objects.size() << endl;
 		delete(_sky_objects[i]);
 	}
 	delete(_virtual_focus);
@@ -140,9 +138,9 @@ void MapMode::BindToLua() {
 		class_<MapMode>("MapMode")
 			.def(constructor<>())
 			.def("Load", &MapMode::Load)
-			.def("_AddGroundObject", &MapMode::_AddGroundObject)
-			.def("_AddPassObject", &MapMode::_AddPassObject)
-			.def("_AddSkyObject", &MapMode::_AddSkyObject)
+			.def("_AddGroundObject", &MapMode::_AddGroundObject, adopt(_2))
+			.def("_AddPassObject", &MapMode::_AddPassObject, adopt(_2))
+			.def("_AddSkyObject", &MapMode::_AddSkyObject, adopt(_2))
 	];
 
 	module(ScriptManager->GetGlobalState(), "hoa_map")
@@ -197,7 +195,7 @@ void MapMode::BindToLua() {
 	module(ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<MapSprite, VirtualSprite>("MapSprite")
-			.def(constructor<>(), adopt(result))
+			.def(constructor<>())
 			.def("SetName", &MapSprite::SetName)
 			.def("SetWalkSound", &MapSprite::SetWalkSound)
 			.def("SetCurrentAnimation", &MapSprite::SetCurrentAnimation)
@@ -211,19 +209,39 @@ void MapMode::BindToLua() {
 // Loads the map from a Lua file.
 bool MapMode::Load(string filename) {
 	// TEMP: All of this is temporary, and will be replaced later
+
+	// ---------- (1) Open map script file and begin loading data
 	_map_filename = "dat/maps/demo_town.lua";
 	if (_map_script.OpenFile(_map_filename, SCRIPT_READ) == false) {
 		cerr << "MAP ERROR: unable to open map script file " << _map_filename << endl;
 	}
 
-	// ---------- (1) Open map script file and begin loading data
+// 	_encounters = _map_script.ReadBool("encounters");
+// 	_num_tile_rows = _map_script.ReadInt("num_tile_rows");
+// 	_num_tile_cols = _map_script.ReadInt("num_tile_cols");
 	_num_tile_rows = 50;
 	_num_tile_cols = 60;
 
-	// ---------- (2) Load in the map tileset images
-	vector<string> tileset_filenames;
-	vector<StillImage> tile_images;
+	_num_grid_rows = _num_tile_rows * 2;
+	_num_grid_cols = _num_tile_cols * 2;
 
+	vector<string> sound_filenames;
+	_map_script.ReadStringVector("sound_filenames", sound_filenames);
+
+	vector<string> music_filenames;
+	_map_script.ReadStringVector("music_filenames", music_filenames);
+
+	// ---------- (2) Load in the map tileset images
+// 	_map_script.ReadOpenTable("tileset_filenames");
+// 	vector<bool> grid_row;
+// 	for (uint32 i = 0; i < _map_script.GetTableSize(); i++) {
+// 		_map_script.ReadBoolVector(i, grid_row);
+// 		_map_grid.push_back(grid_row);
+// 		grid_row.clear();
+// 	}
+
+	vector<StillImage> tile_images;
+	vector<string> tileset_filenames;
 	tileset_filenames.push_back("img/tiles/ll_floor1.png");
 	tileset_filenames.push_back("img/tiles/ll_floor2.png");
 	tileset_filenames.push_back("img/tiles/ll_floor_horizontal_sand_left.png");
@@ -257,13 +275,13 @@ bool MapMode::Load(string filename) {
 		}
 	}
 
-	for (uint16 r = 0; r < _num_tile_rows * 2; r++) {
-		_map_grid.push_back(vector<bool>(_num_tile_cols * 2, false));
+	for (uint16 r = 0; r < _num_grid_rows; r++) {
+		_map_grid.push_back(vector<bool>(_num_grid_cols, false));
 	}
 
 	// Uncomment this loop to test out tile-collision detection
- 	//for (uint16 r = 0; r < _num_tile_rows * 2; r++) {
- 	//	for (uint16 c = 0; c < _num_tile_cols * 2; c++) {
+ 	//for (uint16 r = 0; r < _num_grid_rows; r++) {
+ 	//	for (uint16 c = 0; c < _num_grid_cols; c++) {
  	//		if ((r + c) % 70 == 0) {
  	//			_map_grid[r][c] = true;
  	//		}
@@ -272,32 +290,32 @@ bool MapMode::Load(string filename) {
 
 	// TODO: Need a "ReadCallFunction" for scripting engine to replace raw luabind call
 	// _map_script.ReadCallFunction("Load", "");
-// 	luabind::call_function<void>(_map_script.GetLuaState(), "Load", this);
+	luabind::call_function<void>(_map_script.GetLuaState(), "Load", this);
 
 	_current_dialogue = 0;
 
 
 
 	// Load player sprite and rest of map objects
-	MapSprite *sp;
-	sp = new MapSprite();
-	sp->name = MakeUnicodeString("Claudius");
-	sp->SetObjectID(0);
-	sp->SetContext(1);
-	sp->SetXPosition(55, 0.5f);
-	sp->SetYPosition(55, 0.5f);
-	sp->SetCollHalfWidth(1.0f);
-	sp->SetCollHeight(2.0f);
-	sp->img_half_width = 1.0f;
-	sp->img_height = 4.0f;
-	sp->movement_speed = NORMAL_SPEED;
-	sp->direction = SOUTH;
-	sp->SetPortrait( "img/portraits/map/claudius.png" );
-	if (sp->Load() == false)
-		return false;
-	_all_objects[ 0 ] = sp;
-	_camera = sp;
-	_ground_objects.push_back(sp);
+// 	MapSprite *sp;
+// 	sp = new MapSprite();
+// 	sp->name = MakeUnicodeString("Claudius");
+// 	sp->SetObjectID(0);
+// 	sp->SetContext(1);
+// 	sp->SetXPosition(55, 0.5f);
+// 	sp->SetYPosition(55, 0.5f);
+// 	sp->SetCollHalfWidth(1.0f);
+// 	sp->SetCollHeight(2.0f);
+// 	sp->img_half_width = 1.0f;
+// 	sp->img_height = 4.0f;
+// 	sp->movement_speed = NORMAL_SPEED;
+// 	sp->direction = SOUTH;
+// 	sp->SetPortrait( "img/portraits/map/claudius.png" );
+// 	if (sp->Load() == false)
+// 		return false;
+// 	_all_objects[ 0 ] = sp;
+// 	_camera = sp;
+// 	_ground_objects.push_back(sp);
 
 
 	MapSprite *DialogueSprite;
@@ -695,8 +713,8 @@ bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 
 	// ---------- (1): Check if the sprite's position has gone out of bounds
 
-	if (cr_left < 0.0f || cr_top < 0.0f || cr_right >= static_cast<float>(_num_tile_cols * 2) ||
-		y_location >= static_cast<float>(_num_tile_rows * 2)) {
+	if (cr_left < 0.0f || cr_top < 0.0f || cr_right >= static_cast<float>(_num_grid_cols) ||
+		y_location >= static_cast<float>(_num_grid_rows)) {
 		return true;
 	}
 
@@ -794,7 +812,7 @@ void MapMode::_FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path
 
 	// Check that the destination is valid for the sprite to move to
 	if ((dest.col - x_span < 0) || (dest.row - y_span < 0) ||
-		(dest.col + x_span >= (_num_tile_cols * 2)) || (dest.row >= (_num_tile_rows * 2))) {
+		(dest.col + x_span >= (_num_grid_cols)) || (dest.row >= (_num_grid_rows))) {
 		if (MAP_DEBUG)
 			cerr << "MAP ERROR: sprite can not move to destination node on path because it exceeds map boundaries" << endl;
 		return;
@@ -837,7 +855,7 @@ void MapMode::_FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path
 		for (uint8 i = 0; i < 8; ++i) {
 			// ---------- (A): Check that the sprite's collision rectangle will be within the map boundaries
 			if ((nodes[i].col - x_span < 0) || (nodes[i].row - y_span < 0) ||
-				(nodes[i].col + x_span >= (_num_tile_cols * 2)) || (nodes[i].row >= (_num_tile_rows * 2))) {
+				(nodes[i].col + x_span >= _num_grid_cols) || (nodes[i].row >= _num_grid_rows)) {
 				continue;
 			}
 
@@ -977,7 +995,7 @@ void MapMode::_CalculateDrawInfo() {
 	else if (_draw_info.starting_col + TILE_COLS >= _num_tile_cols) {
 		_draw_info.starting_col = static_cast<int16>(_num_tile_cols - TILE_COLS);
 		_draw_info.tile_x_start = 1.0f;
-		_draw_info.right_edge = static_cast<float>(_num_tile_cols * 2);
+		_draw_info.right_edge = static_cast<float>(_num_grid_cols);
 		_draw_info.left_edge = _draw_info.right_edge - SCREEN_COLS;
 	}
 
@@ -992,7 +1010,7 @@ void MapMode::_CalculateDrawInfo() {
 	else if (_draw_info.starting_row + TILE_ROWS >= _num_tile_rows) {
 		_draw_info.starting_row = static_cast<int16>(_num_tile_rows - TILE_ROWS);
 		_draw_info.tile_y_start = 2.0f;
-		_draw_info.bottom_edge = static_cast<float>(_num_tile_rows * 2);
+		_draw_info.bottom_edge = static_cast<float>(_num_grid_rows);
 		_draw_info.top_edge = _draw_info.bottom_edge - SCREEN_ROWS;
 	}
 
