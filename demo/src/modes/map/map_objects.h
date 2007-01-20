@@ -332,32 +332,30 @@ public:
 
 	bool IsDrawOnSecondPass() const
 		{ return draw_on_second_pass; }
-	//@}
 
 	uint8 GetType() const
 	{ return _object_type; }
+	//@}
 
-	/** \brief Overloaded operator used for sorting objects by their y location. Used for determining draw order.
-	*** \return True if this MapObject should be drawn behind that MapObject
-	**/
-	bool operator<(const MapObject* that) const
-		{ return (this->ComputeYLocation() <  that->ComputeYLocation()); }
-
-	/** \brief This is a predicate used to sort MapObjects in correct draw order
-	*** \return True if the MapObject pointed by a should be drawn behind MapObject pointed by b
-	**/
-// 	static struct MapObject_Ptr_Less
-// 	{
-// 		const bool operator()( const MapObject * a, const MapObject * b )
-// 		{
-// 			return ( a->y_position + a->y_offset ) <  ( b->y_position + b->y_offset );
-// 		}
-// 	};
+	
 
 protected:
+	//! \brief This holds the the type of sprite this is.
 	uint8 _object_type;
 
 }; // class MapObject
+
+/** \brief This is a predicate used to sort MapObjects in correct draw order
+*** \note A simple < operator cannot be used with the sorting algorithm because it is sorting pointers.
+*** \return True if the MapObject pointed by a should be drawn behind MapObject pointed by b
+**/
+struct MapObject_Ptr_Less
+{
+	const bool operator()( const MapObject * a, const MapObject * b )
+	{
+		return ( a->y_position + a->y_offset ) < ( b->y_position + b->y_offset );		
+	}
+};
 
 
 /** ****************************************************************************
@@ -471,17 +469,36 @@ public:
 	**/
 	int8 current_action;
 
+	//TODO: change how forced action work
 	int8 forced_action;
 
 	//! \brief A container for all of the actions this sprite performs.
 	std::vector<SpriteAction*> actions;
 
-	int8 current_dialogue;
+	/** \name Saved state attributes
+	*** These attributes are used to save and load the state of a VirtualSprite
+	**/
+	//@{
+	//! \brief This indicates if a state was saved or not.
+	bool _saved;
+	uint16 _saved_direction;
+	float _saved_movement_speed;
+	bool _saved_moving;
+	hoa_utils::ustring _saved_name;
+	int8 _saved_current_action;
+	//@}
 
-	std::vector<MapDialogue*> dialogues;
+	//! \brief This vector contains all the dialogues of the sprite
+	std::vector< MapDialogue* > dialogues;
+
+	/** \brief An index to the dialogues vector, representing the current sprite dialogue to
+	*** display when talked to by the player. A negative value indicates that the sprite has no dialogue.
+	*** \note If the sprite has no entries in its dialogues vector, this member should remain negative, 
+	*** otherwise a segmentation fault will occur.
+	**/
+	int16 current_dialogue;
 
 	// -------------------- Publice methods
-
 	VirtualSprite();
 
 	~VirtualSprite();
@@ -519,32 +536,32 @@ public:
 
 	float GetMovementSpeed() const
 		{ return movement_speed; }
+
+	void SetFacePortrait(std::string pn);
+
 	//@}
 
+	/** \brief This method will save the state of a sprite.
+	*** Attributes saved: direction, speed, moving state, name, current action.
+	**/
+	virtual void SaveState();
+
+	/** \brief This method will load the saved state of a sprite.
+	*** Attributes loaded: direction, speed, moving state, name, current action.
+	*** \return false if there was no saved state, true otherwise.
+	**/
+	virtual bool LoadState();
+
+	
+	/** \name Dialogue control methods
+	*** These methods are used to add and control which dialogue should the sprite speak.
+	**/
+	//@{
 	void AddAction(SpriteAction* act)
 		{ actions.push_back(act); }
 
 	void AddDialogue(MapDialogue* md)
 		{ dialogues.push_back(md); }
-
-	// These need to be protected
-	/** \name Saved state attributes
-	*** These attributes are used to save and load the state of a VirtualSprite
-	**/
-	//@{
-	bool _saved;
-	uint16 _saved_direction;
-	float _saved_movement_speed;
-	bool _saved_moving;
-	hoa_utils::ustring _saved_name;
-	int8 _saved_current_action;
-	//@}
-
-	virtual void SaveState();
-
-	virtual bool LoadState();
-
-	void SetFacePortrait(std::string pn);
 
 	bool HasDialogue() const
 		{ return dialogues.size() > 0; }
@@ -552,10 +569,18 @@ public:
 	MapDialogue* GetCurrentDialogue() const
 		{ return dialogues[ current_dialogue ]; }
 
-	void SetDialogue(const int8 dialogue)
+	void SetDialogue( const int16 dialogue )
 		{ current_dialogue = dialogue; }
+	
+	int16 GetNumDialogues() const
+		{ return dialogues.size(); }
+	//@}
 
-	static uint16 CalculateOppositeDirection(const uint16 direction);
+	/** \brief This static class function returns the opposite direction of the
+	*** direction given in parameter.
+	*** \note This is mostly used as an helper function to make sprites face each other.
+	**/
+	static uint16 CalculateOppositeDirection( const uint16 direction );
 }; // class VirtualMapObject : public MapObject
 
 
@@ -590,6 +615,16 @@ public:
 	*** animations may follow.
 	**/
 	std::vector<hoa_video::AnimatedImage> animations;
+
+	/** \name Saved state attributes
+	*** These attributes are used to save and load the state of a VirtualSprite
+	**/
+	//@{
+	bool _saved_was_moving;
+	int8 _saved_walk_sound;
+	uint8 _saved_current_animation;
+	//@}
+
 
 	// -------------------------------- Methods --------------------------------
 
@@ -629,11 +664,17 @@ public:
 		{ return current_animation; }
 	//@}
 
-	bool _saved_was_moving;
-	int8 _saved_walk_sound;
-	uint8 _saved_current_animation;
-
+	/** \brief This method will save the state of a sprite.
+	*** Attributes saved: direction, speed, moving state, name, current action,
+	*** current animation, current walk sound.
+	**/
 	virtual void SaveState();
+
+	/** \brief This method will load the saved state of a sprite.
+	*** Attributes loaded: direction, speed, moving state, name, current action,
+	*** current animation, current walk sound.
+	*** \return false if there was no saved state, true otherwise.
+	**/
 	virtual bool LoadState();
 
 }; // class MapSprite : public VirtualSprite

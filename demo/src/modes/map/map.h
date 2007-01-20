@@ -155,11 +155,6 @@ public:
 	bool operator<(const PathNode& that) const
 		{ return this->f_score > that.f_score; }
 
-// 	static struct NodePred
-// 	{
-// 		const bool operator()( const PathNode& a, const PathNode& b )
-// 			{ return a.f_score > b.f_score; }
-// 	};
 }; // class PathNode
 
 } // namespace private_map
@@ -389,8 +384,8 @@ private:
 	//! \brief The textbox for character dialogues.
 	hoa_video::TextBox _dialogue_textbox;
 
+	//! \brief This keeps a pointer to the active dialogue.
 	private_map::MapDialogue* _current_dialogue;
-
 
 
 	// -------------------- Battle Data Retained by the Map

@@ -42,38 +42,53 @@ namespace private_map {
 // *********************** MapDialogue Class Functions ************************
 // ****************************************************************************
 
-MapDialogue::MapDialogue() {
+MapDialogue::MapDialogue( const bool save_state ) : 
+	_current_line(0),
+	_seen(0),
+	_blocked(false)
+{
 	if (MAP_DEBUG)
 		cout << "MAP: MapDialogue constructor invoked" << endl;
-	_current_line = 0;
-	_seen = false;
+	_save_state = save_state;
 }
-
-
 
 MapDialogue::~MapDialogue() {
 	if (MAP_DEBUG)
 		cout << "MAP: MapDialogue destructor invoked" << endl;
+	
+	for( uint32 i = 0; i < _actions.size(); ++i )
+	{
+		for( uint32 j = 0; j < _actions[i].size(); ++j )
+		{
+			delete _actions[i][j];
+		}
+	}
 }
 
-
-
-const bool MapDialogue::ReadNextLine() {
+bool MapDialogue::ReadNextLine() {
 	if ( ++_current_line >= _text.size() ) {
 		_current_line = 0;
-		_seen = true;
+		SetSeenDialogue();
 		return false;
 	}
 	return true;
 }
 
-
-
-void MapDialogue::AddText( const uint32 speaker_id, const hoa_utils::ustring text, SpriteAction* action )
+void MapDialogue::AddText( const uint32 speaker_id, const hoa_utils::ustring text, const int32 time, SpriteAction* action )
 {
 	_speakers.push_back( speaker_id );
 	_text.push_back( text );
-	_actions.push_back( action );
+	_time.push_back( time );
+	_actions.resize( _actions.size() + 1 );
+	_actions.back().push_back( action );
+}
+
+void MapDialogue::AddTextActions(const uint32 speaker_id, const hoa_utils::ustring text, const std::vector<SpriteAction*> & actions, const int32 time )
+{
+	_speakers.push_back( speaker_id );
+	_text.push_back( text );
+	_time.push_back( time );
+	_actions.push_back( actions );
 }
 
 } // namespace private_map
