@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ////////////////////////////////////////////////////////////////////////////////
@@ -32,7 +32,7 @@ SINGLETON_INITIALIZE(GameSystem);
 // The constructor initalize all the data fields inside the GameSystem class
 GameSystem::GameSystem() {
 	if (SYSTEM_DEBUG) cout << "SETTINGS: GameSystem constructor invoked" << endl;
-	
+
 	_not_done = true;
 	_language = "en"; // Default language is English
 }
@@ -46,6 +46,11 @@ GameSystem::~GameSystem() {
 
 // Makes a call to the data manager for retrieving configured settings
 bool GameSystem::SingletonInitialize() {
+	// Initialize the gettext library
+// 	setlocale(LC_ALL, "");
+// 	bindtextdomain(PACKAGE, DATADIR);
+// 	textdomain(PACKAGE);
+
 	ScriptDescriptor settings_data;
 
 	if (!settings_data.OpenFile("dat/config/settings.lua", SCRIPT_READ)) {
@@ -117,7 +122,7 @@ void GameSystem::SetLanguage(std::string lang) {
 // 			return;
 // 		}
 // 	}
-// 	
+//
 // 	cerr << "SETTINGS ERROR: attempt to set unsupported language \"" << lang << "\" failed" << endl;
 	_language = lang;
 }

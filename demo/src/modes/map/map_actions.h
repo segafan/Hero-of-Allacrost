@@ -45,10 +45,8 @@ public:
 	virtual ~SpriteAction()
 		{}
 
-	/** \brief Loads the data for this action from the map's data file.
-	*** \param table_key The index of the table in the map script file that contains the action's data.
-	**/
-	virtual void Load(uint32 table_key) = 0;
+	//! \brief Loads the data for this action from the map's data file.
+	virtual void Load() = 0;
 
 	//! \brief Executes the sprite's action.
 	virtual void Execute() = 0;
@@ -57,7 +55,7 @@ public:
 	*** \return True if the action is finished, false if it is not.
 	**/
 	const bool IsFinished()
-	{ return _finished; }
+		{ return _finished; }
 
 	/** \brief Inidicates if the action is finished or not and resets the finished member if it is.
 	*** \return True if the action is finished, false if it is not.
@@ -75,9 +73,7 @@ protected:
 
 	//! \brief Set to true when the action has finished its execution.
 	bool _finished;
-
-	
-};
+}; // class SpriteAction
 
 
 /** ****************************************************************************
@@ -102,53 +98,67 @@ public:
 	uint32 current_node;
 
 	ActionPathMove(VirtualSprite* sprite, int16 count = 1, bool forced = false) :
-	SpriteAction(sprite), current_node(0) {
+		SpriteAction(sprite), current_node(0) {
 		_forced = forced;
 		_count = count;
-		
 	}
 
 	~ActionPathMove()
 		{}
 
-	void Load(uint32 table_key);
+	void Load();
 
 	void Execute();
-};
+
+	void SetDestination(int16 x, int16 y)
+		{ destination.col = x; destination.row = y; }
+}; // class ActionPathMove : public SpriteAction
 
 
-/*!****************************************************************************
- * \brief Action that displays specific sprite frames for a certain period of time.
- *
- * This type of sprite action is usually reserved for displaying emotional reactions
- * in a sprite. It specifies a series of frames and the time to display those frames.
- *
- * \note The _frame_times and _frame_indeces vectors should \c always be the same size.
- *****************************************************************************/
-// class ActionAnimate : public SpriteAction {
-// public:
-// 	/** \brief The sprite animation to display for this action.
-// 	*** Because this is a pointer, it
-// 	**/
-// 	hoa_video::AnimatedImage *animation;
-// 	/** \brief Indicates to destroy the animation image on class destruction
-// 	*** If a new animation image is created by this class, this member should
-// 	*** be set to true. If it is false, however, this means that the animation
-// 	*** creation/destruction is handled elsewhere, most likely in the MapSprite#_images
-// 	*** vector.
-// 	**/
-// 	bool destroy_image;
-// 	/** \brief The number of times to loop the animation before finishing.
-// 	*** A value less than zero indicates to loop forever.
-// 	**/
-// 	int8 loop;
-//
-// 	ActionAnimate() {}
-// 	~ActionAnimate() {}
-//
-// 	void Load(uint32 table_key);
-// 	void Execute();
-// }; // class ActionAnimate : public SpriteAction
+/** ****************************************************************************
+*** \brief Action that displays specific sprite frames for a certain period of time.
+***
+*** This action displays a certain animation in a sprite for a certain amount of time.
+*** It supports multiple animation + time combinations as well as looping through these
+*** animations. Its primary purpose is to allow complete control over how a sprite
+*** reacts to its surroundings, such as flipping through a book taken from a bookshelf.
+***
+*** \note The vectors ins this class should <b>always</b> be of the same size.
+***
+*** \note These actions can not be used with VirtualSprite objects, since this
+*** class explicitly needs animation images to work and virtual sprites have no
+*** sprite images to work with.
+*** ***************************************************************************/
+class ActionAnimate : public SpriteAction {
+public:
+	/** \brief The sprite animation to display for this action.
+	*** This is an index to the sprite's animations vector.
+	**/
+	std::vector<uint16> frames;
+
+	std::vector<uint32> timers;
+
+	/** \brief The number of times to loop the animation before finishing.
+	*** A value less than zero indicates to loop forever. Be careful with this,
+	*** because that means that the action would never arrive at the "finished"
+	*** state.
+	***
+	*** \note The default value of this member is zero, which indicates that the
+	*** animations will not be looped.
+	**/
+	int8 loops;
+
+	ActionAnimate(VirtualSprite* sprite) :
+		SpriteAction(sprite) {}
+
+	~ActionAnimate()
+		{}
+
+	void Load();
+
+	void Execute();
+}; // class ActionAnimate : public SpriteAction
+
 
 /** ****************************************************************************
 *** \brief Action that calls a Lua subroutine

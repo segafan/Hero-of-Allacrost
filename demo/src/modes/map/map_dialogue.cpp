@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -43,7 +43,8 @@ namespace private_map {
 // ****************************************************************************
 
 MapDialogue::MapDialogue() {
-	if (MAP_DEBUG) cout << "MAP: MapDialogue constructor invoked" << endl;
+	if (MAP_DEBUG)
+		cout << "MAP: MapDialogue constructor invoked" << endl;
 	_current_line = 0;
 	_seen = false;
 }
@@ -51,18 +52,22 @@ MapDialogue::MapDialogue() {
 
 
 MapDialogue::~MapDialogue() {
-	if (MAP_DEBUG) cout << "MAP: MapDialogue destructor invoked" << endl;
+	if (MAP_DEBUG)
+		cout << "MAP: MapDialogue destructor invoked" << endl;
 }
+
 
 
 const bool MapDialogue::ReadNextLine() {
-	if ( ++_current_line >= _text.size() ) { 
+	if ( ++_current_line >= _text.size() ) {
 		_current_line = 0;
 		_seen = true;
-		return false; 
-	} 
+		return false;
+	}
 	return true;
 }
+
+
 
 void MapDialogue::AddText( const uint32 speaker_id, const hoa_utils::ustring text, SpriteAction* action )
 {
