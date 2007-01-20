@@ -320,7 +320,7 @@ bool MapMode::Load(string filename) {
 	// _map_script.ReadCallFunction("Load", "");
 	luabind::call_function<void>(_map_script.GetLuaState(), "Load", this);
 
-	_current_dialogue = 0;
+	_current_dialogue = NULL;
 
 
 
@@ -345,9 +345,11 @@ bool MapMode::Load(string filename) {
 // 	_camera = sp;
 // 	_ground_objects.push_back(sp);
 
+	_camera = reinterpret_cast< VirtualSprite* >( _all_objects[ 1000 ] );
+
 
 	MapSprite *DialogueSprite;
-	MapDialogue *Dialogue = new MapDialogue();
+	MapDialogue *Dialogue = new MapDialogue( false );
 
 
 	// Load player sprite and rest of map objects
@@ -364,11 +366,22 @@ bool MapMode::Load(string filename) {
 	DialogueSprite->movement_speed = NORMAL_SPEED;
 	DialogueSprite->SetDirection(EAST);
 
-	ActionPathMove *new_act = new ActionPathMove( DialogueSprite, 1, true );
+	ActionPathMove *new_act = new ActionPathMove( DialogueSprite, true );
 	new_act->destination.row = 35;
 	new_act->destination.col = 45;
-	Dialogue->AddText( 1, MakeUnicodeString( "This is a test" ) );
-	Dialogue->AddText( 0, MakeUnicodeString( "Oh really?!" ), new_act );
+	
+	std::vector<SpriteAction *> testvec;
+	testvec.push_back( new_act );
+
+	new_act = new ActionPathMove( DialogueSprite, true );
+	new_act->destination.row = 35;
+	new_act->destination.col = 40;
+	testvec.push_back( new_act );
+
+
+	
+	Dialogue->AddText( 1, MakeUnicodeString( "This is a test" ), 5000 );
+	Dialogue->AddTextActions( 1000, MakeUnicodeString( "Oh really?!" ), testvec );
 
 	//ActionPathMove *new_act;
 	/*new_act = new ActionPathMove(DialogueSprite);
@@ -404,8 +417,6 @@ bool MapMode::Load(string filename) {
 			cerr << "MAP ERROR: failed to load ground object" << endl;
 		}
 	}
-
-// 	_camera = DialogueSprite;
 
 	// ---------- (1) Setup GUI items (in a 1024x768 coordinate system)
 	VideoManager->PushState();
@@ -471,8 +482,7 @@ void MapMode::Update() {
 	}
 
 	// ---------- (4) Sort the objects so they are in the correct draw order ********
-// 	std::sort( _ground_objects.begin(), _ground_objects.end(), MapObject::MapObject_Ptr_Less() );
-	std::sort( _ground_objects.begin(), _ground_objects.end());
+ 	std::sort( _ground_objects.begin(), _ground_objects.end(), MapObject_Ptr_Less() );
 
 } // void MapMode::Update()
 
@@ -583,43 +593,115 @@ void MapMode::_HandleInputExplore() {
 
 // Updates the game status when MapMode is in the 'dialogue' state
 void MapMode::_HandleInputDialogue() {
- 	_dialogue_window.Update(_time_elapsed);
- 	_dialogue_textbox.Update(_time_elapsed);
-
+	static int32 timeleft = 0; //Time left to the curent line
+	static MapDialogue* last_dialogue = 0; //Used to detect if the dialogue changed
 	if( _current_dialogue )
 	{
-		if( _current_dialogue->GetAction() ) {
-			if( !_current_dialogue->GetAction()->IsFinished() )
+		if( _current_dialogue != last_dialogue )
+		{
+			timeleft = _current_dialogue->LineTime();
+			last_dialogue = _current_dialogue;
+		}
+
+		_dialogue_textbox.Update(_time_elapsed);
+		//Only update if it has some time left
+		if( timeleft > 0 ) {
+			timeleft -= _time_elapsed;
+			//If it get below 0, clip it to 0 as -1 means infinite
+			if( timeleft < 0 )
+				timeleft = 0;
+		}
+		
+		// Get the actions
+		std::vector<SpriteAction*> * actions = &_current_dialogue->GetActions();
+		for( std::vector<SpriteAction*>::iterator i = actions->begin();
+			 i != actions->end(); ++i )
+		{
+			// Note order is important here, check if the pointer is valid
+			// then check if the action is not finished
+			if( (*i) && !(*i)->IsFinished() )
 			{
-				_current_dialogue->GetAction()->Execute();
-				if( _current_dialogue->GetAction()->_forced )
+				//Unfinished, then execute the action.
+				(*i)->Execute();
+				//If the action is forced, return now to ignore user input.
+				if( (*i)->IsForced() )
 					return;
 			}
 		}
- 		if (InputManager->ConfirmPress()) {
- 			if (!_dialogue_textbox.IsFinished()) {
- 				_dialogue_textbox.ForceFinish();
- 			}
- 			else {
- 				bool not_finished = _current_dialogue->ReadNextLine();
 
- 				if (!not_finished) {
- 					_dialogue_window.Hide();
- 					_map_state = EXPLORE;
- 					// Restore the status of the map sprites
- 					for (uint32 i = 0; i < _current_dialogue->GetNumLines(); i++) {
-						static_cast< VirtualSprite* >( _all_objects[ _current_dialogue->GetSpeaker( i ) ] )->LoadState();
- 					}
- 					//_sprites[1]->UpdateConversationCounter();
+		// If the dialogue is blocked, ignore user input
+		if( _current_dialogue->IsBlocked() ) {
+			if( timeleft <= 0 ) {
+				if( _current_dialogue->ReadNextLine() ) {
+					// There is no time elft, change line
+					timeleft = _current_dialogue->LineTime();
+					_dialogue_textbox.SetDisplayText(_current_dialogue->GetLine());
+				}
+				else {
+					// The dialogue is over
+					_map_state = EXPLORE;
+ 					
+					// Restore the status of the map sprites if the dialogue should reset them.
+					if( _current_dialogue->IsSaving() ) {
+ 						for (uint32 i = 0; i < _current_dialogue->GetNumLines(); i++) {
+							static_cast< VirtualSprite* >( _all_objects[ _current_dialogue->GetSpeaker( i ) ] )->LoadState();
+ 						}
+					}
  					_current_dialogue = NULL;
+					last_dialogue = NULL;
+				}
+			}
+		} // if( _current_dialogue->IsBlocked() )
+		else {
+			if( timeleft != 0 ) {
+ 				if (InputManager->ConfirmPress()) {
+					// The line isn't finished, but user sent an input
+ 					if (!_dialogue_textbox.IsFinished()) {
+						// Force the text to show completly
+ 						_dialogue_textbox.ForceFinish();
+ 					}
+ 					else {
+						// IF the text is already show, change line
+ 						if ( _current_dialogue->ReadNextLine() ) {
+ 							timeleft = _current_dialogue->LineTime();
+							_dialogue_textbox.SetDisplayText(_current_dialogue->GetLine());
+ 						}
+ 						else { 
+							// The is no more line, the dialogue is over
+ 							_map_state = EXPLORE;
+ 							// Restore the status of the map sprites
+							if( _current_dialogue->IsSaving() ) { 
+ 								for (uint32 i = 0; i < _current_dialogue->GetNumLines(); i++) {
+									static_cast< VirtualSprite* >( _all_objects[ _current_dialogue->GetSpeaker( i ) ] )->LoadState();
+ 								}
+							}
+ 							_current_dialogue = NULL;
+							last_dialogue = NULL;
+ 						}
+ 					}
  				}
- 				else { // Otherwise, the dialogue is automatically updated to the next line
- 					_dialogue_textbox.SetDisplayText(_current_dialogue->GetLine());
-					//If an action was set, execute it.
- 				}
- 			}
- 		}
-	}
+			} // if( timeleft != 0 )
+			else {
+				// There is no more time left, too bad we change line
+				if ( _current_dialogue->ReadNextLine() ) {
+					timeleft = _current_dialogue->LineTime();
+					_dialogue_textbox.SetDisplayText(_current_dialogue->GetLine());	
+				}
+				else { 
+					// No more line, the dialogue is over
+					_map_state = EXPLORE;
+					if( _current_dialogue->IsSaving() ) {
+						// Restore the status of the map sprites
+						for (uint32 i = 0; i < _current_dialogue->GetNumLines(); i++) {
+							static_cast< VirtualSprite* >( _all_objects[ _current_dialogue->GetSpeaker( i ) ] )->LoadState();
+						}
+					}
+					_current_dialogue = NULL;
+					last_dialogue = NULL;
+				}
+			} // if( timeleft == 0 )
+		} // if( !_current_dialogue->IsBlocked() )
+	} // if( _current_dialogue ) 
 } // void MapMode::_HandleInputDialogue()
 
 
@@ -1149,7 +1231,7 @@ void MapMode::Draw() {
 		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, 0);
 		VideoManager->SetTextColor(Color(Color::black));
 		VideoManager->SetFont("map");
-		VideoManager->MoveRelative(120.0f, -6.0f);
+		VideoManager->MoveRelative(120.0f, -10.0f);
 		VideoManager->DrawText( reinterpret_cast< VirtualSprite* >( _all_objects[ _current_dialogue->GetSpeaker() ] )->name );
 		if ( reinterpret_cast< VirtualSprite* >( _all_objects[ _current_dialogue->GetSpeaker() ] )->face_portrait != NULL) {
 			VideoManager->MoveRelative(0.0f, -26.0f);

@@ -44,7 +44,8 @@ void ActionPathMove::Execute() {
 		MapMode::_current_map->_FindPath(_sprite, path, destination);
 	}
 
-	if (!path.empty() && _count != 0) {
+	if( !path.empty() )
+	{
 		_sprite->moving = true;
 		if (_sprite->y_position > path[current_node].row) { // Need to move north
 			if (_sprite->x_position > path[current_node].col) { // Need to move northwest
@@ -78,7 +79,6 @@ void ActionPathMove::Execute() {
 			if (current_node >= path.size()) { // Destination has been reached
 				current_node = 0;
 				_finished = true;
-				_count--;
 				_sprite->moving = false;
 			}
 		}

@@ -135,6 +135,11 @@ VirtualSprite::~VirtualSprite()
 		delete actions[i];
 	}
 	actions.clear();
+
+	for( uint32 i = 0; i < dialogues.size(); ++i )
+	{
+		delete dialogues[i];
+	}
 }
 
 uint16 VirtualSprite::CalculateOppositeDirection( const uint16 direction )
