@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ////////////////////////////////////////////////////////////////////////////////
@@ -11,13 +11,18 @@
 *** \file   system.h
 *** \author Tyler Olsen, roots@allacrost.org
 *** \brief  Header file for system code management
-*** 
+***
 *** The system code handles a wide variety of tasks, including timing, threads
-*** and timed functions.
+*** and translation functions.
+***
+*** \note This code uses the GNU gettext library for internationalization and
+*** localization support.
 *** ***************************************************************************/
 
 #ifndef __SYSTEM_HEADER__
 #define __SYSTEM_HEADER__
+
+// #include "gettext.h"
 
 #include "utils.h"
 #include "defs.h"
@@ -30,7 +35,6 @@ extern GameSystem *SystemManager;
 
 //! Determines whether the code in the hoa_system namespace should print debug statements or not.
 extern bool SYSTEM_DEBUG;
-
 
 //! An internal namespace to be used only within the system code.
 namespace private_system {
@@ -54,17 +58,17 @@ public:
 	SINGLETON_METHODS(GameSystem);
 
 	/** \brief Initializes the timers used in the game.
-	*** 
+	***
 	*** This function should only be called \b once in main.cpp, just before the main game loop begins.
 	**/
 	void InitializeTimers();
 	//! Updates the game time variables.
 	void UpdateTimers();
-	
+
 	/** \brief Retrieves the amount of time that the game should be updated by for time-based movement.
 	*** This function should \b only be called in the main game loop, located in main.cpp.
 	*** \return The number of milliseconds that have transpired since the last update.
-	*** 
+	***
 	*** \note There's a chance we could get errors in other parts of the program code if the
 	*** value returned by this function is zero. We can prevent this if we always make sure the
 	*** function returns at least one, but I'm not sure there exists a computer fast enough
@@ -78,7 +82,7 @@ public:
 	*** \param h The amount of hours to set.
 	*** \param m The amount of minutes to set.
 	*** \param s The amount of seconds to set.
-	*** 
+	***
 	*** This function is meant to be called whenever the user loads a saved game.
 	**/
 	void SetPlayTime(const uint8 h, const uint8 m, const uint8 s)
@@ -95,28 +99,28 @@ public:
 	const uint8 GetPlaySeconds() const
 		{ return _seconds_played; }
 	//@}
-	
+
 	/** \brief  Used to determine what language the game is running in.
 	*** \return The language that the game is running in.
 	**/
 	const std::string GetLanguage() const
 		{ return _language; }
-		
+
 	/** \brief Sets the language that the game should use.
 	*** \param lang A two-character string representing the language to execute the game in
 	**/
 	void SetLanguage(std::string lang);
-		
+
 	/** \brief  Determines whether the user is done with the game.
 	*** \return False if the user would like to exit the game.
 	**/
 	const bool NotDone() const
 		{ return _not_done; }
-		
+
 	/** \brief The function to call to initialize the exit process of the game.
 	*** \note  The game will exit the main loop once it reaches the end of its current iteration
 	**/
-	void ExitGame() 
+	void ExitGame()
 		{ _not_done = false; }
 
 private:

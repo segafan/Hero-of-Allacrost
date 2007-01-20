@@ -391,7 +391,8 @@ public:
 	/** \brief Loads the objects animation images
 	*** \return False if the images failed to load.
 	**/
-	bool Load() { return true; }
+	bool Load()
+		{ return true; }
 
 	//! \brief Updates the object's animation frames if it is animated.
 	void Update();
@@ -475,6 +476,12 @@ public:
 	//! \brief A container for all of the actions this sprite performs.
 	std::vector<SpriteAction*> actions;
 
+	int8 current_dialogue;
+
+	std::vector<MapDialogue*> dialogues;
+
+	// -------------------- Publice methods
+
 	VirtualSprite();
 
 	~VirtualSprite();
@@ -482,7 +489,8 @@ public:
 	/** \brief Loads the sprite's face portrait image, if it has one
 	*** \return False if the image failed to load.
 	**/
-	virtual bool Load() { return true; }
+	virtual bool Load()
+		{ return true; }
 
 	//! \brief Updates the virtual object's position if it is moving, otherwise does nothing.
 	virtual void Update();
@@ -513,6 +521,12 @@ public:
 		{ return movement_speed; }
 	//@}
 
+	void AddAction(SpriteAction* act)
+		{ actions.push_back(act); }
+
+	void AddDialogue(MapDialogue* md)
+		{ dialogues.push_back(md); }
+
 	// These need to be protected
 	/** \name Saved state attributes
 	*** These attributes are used to save and load the state of a VirtualSprite
@@ -527,27 +541,21 @@ public:
 	//@}
 
 	virtual void SaveState();
+
 	virtual bool LoadState();
 
-	void SetPortrait(std::string pn)
-		{ face_portrait = new hoa_video::StillImage(); face_portrait->SetFilename(pn); hoa_video::VideoManager->LoadImage(*face_portrait); }
+	void SetFacePortrait(std::string pn);
 
-	// Dialogues
-	std::vector< MapDialogue* > dialogues;
-	int8 current_dialogue;
-
-	// Dialogues
-	void AddDialogue( MapDialogue* dialogue )
-		{ dialogues.push_back( dialogue ); }
 	bool HasDialogue() const
 		{ return dialogues.size() > 0; }
+
 	MapDialogue* GetCurrentDialogue() const
 		{ return dialogues[ current_dialogue ]; }
-	void SetDialogue( const int8 dialogue )
+
+	void SetDialogue(const int8 dialogue)
 		{ current_dialogue = dialogue; }
 
-	static uint16 CalculateOppositeDirection( const uint16 direction );
-
+	static uint16 CalculateOppositeDirection(const uint16 direction);
 }; // class VirtualMapObject : public MapObject
 
 
@@ -605,17 +613,14 @@ public:
 	*** members of this class.
 	**/
 	//@{
-	void SetName(hoa_utils::ustring na)
-		{ name = na; }
+	void SetName(std::string na)
+		{ name = hoa_utils::MakeUnicodeString(na); }
 
 	void SetWalkSound(int8 sound)
 		{ walk_sound = sound; }
 
 	void SetCurrentAnimation(uint8 anim)
 		{ current_animation = anim; }
-
-	void SetFacePortrait(hoa_video::StillImage* face)
-		{ face_portrait = face; }
 
 	int8 GetWalkSound() const
 		{ return walk_sound; }

@@ -187,7 +187,7 @@ void VirtualSprite::Update() {
 		// Move the sprite the appropriate distance in the appropriate direction
 		// Y movements
 		switch (direction) {
-			case NORTH: 
+			case NORTH:
 				y_offset -= distance_moved; break;
 			case SOUTH:
 				y_offset += distance_moved; break;
@@ -261,7 +261,7 @@ void VirtualSprite::Update() {
 		while (x_offset > 1.0f) {
 			x_position += 1;
 			x_offset -= 1.0f;
-		}		
+		}
 	} // if (moving)
 } // void VirtualSprite::Update()
 
@@ -305,16 +305,32 @@ void VirtualSprite::SetDirection(uint16 dir) {
 	}
 } // void VirtualSprite::SetDirection(uint16 dir)
 
+
+
+void VirtualSprite::SetFacePortrait(std::string pn) {
+	if (face_portrait != NULL) {
+		delete face_portrait;
+	}
+
+	face_portrait = new StillImage();
+	face_portrait->SetFilename(pn);
+	VideoManager->LoadImage(*face_portrait);
+}
+
+
+
 void VirtualSprite::SaveState()
 {
 	_saved = true;
-	
+
 	_saved_direction = direction;
 	_saved_movement_speed = movement_speed;
 	_saved_moving = moving;
 	_saved_name = name;
 	_saved_current_action = current_action;
 }
+
+
 
 bool VirtualSprite::LoadState()
 {
@@ -520,8 +536,9 @@ void MapSprite::Draw() {
 		VideoManager->DrawImage(animations[current_animation]);
 }
 
-void MapSprite::SaveState()
-{
+
+
+void MapSprite::SaveState() {
 	VirtualSprite::SaveState();
 
 	_saved_was_moving = was_moving;
@@ -529,8 +546,9 @@ void MapSprite::SaveState()
 	_saved_current_animation = current_animation;
 }
 
-bool MapSprite::LoadState()
-{
+
+
+bool MapSprite::LoadState() {
 	if( !VirtualSprite::LoadState() )
 		return false;
 
@@ -540,8 +558,6 @@ bool MapSprite::LoadState()
 
 	return true;
 }
-
-
 
 } // namespace private_map
 

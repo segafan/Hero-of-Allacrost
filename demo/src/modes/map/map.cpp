@@ -141,6 +141,9 @@ void MapMode::BindToLua() {
 			.def("_AddGroundObject", &MapMode::_AddGroundObject, adopt(_2))
 			.def("_AddPassObject", &MapMode::_AddPassObject, adopt(_2))
 			.def("_AddSkyObject", &MapMode::_AddSkyObject, adopt(_2))
+			.def("_SetCameraFocus", &MapMode::_SetCameraFocus)
+			.def("_SetMapState", &MapMode::_SetMapState)
+			.def("_GetMapState", &MapMode::_GetMapState)
 	];
 
 	module(ScriptManager->GetGlobalState(), "hoa_map")
@@ -188,8 +191,11 @@ void MapMode::BindToLua() {
 			.def(constructor<>())
 			.def("SetDirection", &VirtualSprite::SetDirection)
 			.def("SetMovementSpeed", &VirtualSprite::SetMovementSpeed)
+			.def("SetFacePortrait", &VirtualSprite::SetFacePortrait)
 			.def("GetDirection", &VirtualSprite::GetDirection)
 			.def("GetMovementSpeed", &VirtualSprite::GetMovementSpeed)
+			.def("AddAction", &VirtualSprite::AddAction, adopt(_2))
+			.def("AddDialogue", &VirtualSprite::AddDialogue, adopt(_2))
 	];
 
 	module(ScriptManager->GetGlobalState(), "hoa_map")
@@ -199,10 +205,32 @@ void MapMode::BindToLua() {
 			.def("SetName", &MapSprite::SetName)
 			.def("SetWalkSound", &MapSprite::SetWalkSound)
 			.def("SetCurrentAnimation", &MapSprite::SetCurrentAnimation)
-			.def("SetFacePortrait", &MapSprite::SetFacePortrait)
 			.def("GetWalkSound", &MapSprite::GetWalkSound)
 			.def("GetCurrentAnimation", &MapSprite::GetCurrentAnimation)
 	];
+
+	module(ScriptManager->GetGlobalState(), "hoa_map")
+	[
+		class_<MapDialogue>("MapDialogue")
+			.def(constructor<>())
+	];
+
+	module(ScriptManager->GetGlobalState(), "hoa_map")
+	[
+		class_<SpriteAction>("SpriteAction")
+	];
+
+// 	module(ScriptManager->GetGlobalState(), "hoa_map")
+// 	[
+// 		class_<ActionPathMove, SpriteAction>("ActionPathMove")
+// 			.def(constructor<>())
+// 	];
+
+// 	module(ScriptManager->GetGlobalState(), "hoa_map")
+// 	[
+// 		class_<ActionAnimate, SpriteAction>("ActionAnimate")
+// 			.def(constructor<>())
+// 	];
 } // void MapMode::BindToLua()
 
 
@@ -310,7 +338,7 @@ bool MapMode::Load(string filename) {
 // 	sp->img_height = 4.0f;
 // 	sp->movement_speed = NORMAL_SPEED;
 // 	sp->direction = SOUTH;
-// 	sp->SetPortrait( "img/portraits/map/claudius.png" );
+// 	sp->SetFacePortrait( "img/portraits/map/claudius.png" );
 // 	if (sp->Load() == false)
 // 		return false;
 // 	_all_objects[ 0 ] = sp;
@@ -364,7 +392,7 @@ bool MapMode::Load(string filename) {
 
 	DialogueSprite->AddDialogue( Dialogue );
 	DialogueSprite->SetDialogue( 0 );
-	DialogueSprite->SetPortrait( "img/portraits/map/laila.png" );
+	DialogueSprite->SetFacePortrait( "img/portraits/map/laila.png" );
 	_AddGroundObject(DialogueSprite);
 // 	if (DialogueSprite->Load() == false)
 // 		return false;
@@ -377,7 +405,7 @@ bool MapMode::Load(string filename) {
 		}
 	}
 
-	_camera = DialogueSprite;
+// 	_camera = DialogueSprite;
 
 	// ---------- (1) Setup GUI items (in a 1024x768 coordinate system)
 	VideoManager->PushState();
@@ -490,13 +518,11 @@ void MapMode::_HandleInputExplore() {
 // 	}
 
 	if (InputManager->ConfirmPress()) {
-		MapObject * obj = _FindNearestObject( _camera );
-		if( obj && ( obj->GetType() == VIRTUAL_TYPE || obj->GetType() == SPRITE_TYPE ) )
-		{
-			VirtualSprite * sp = reinterpret_cast< VirtualSprite * >( obj );
+		MapObject * obj = _FindNearestObject(_camera);
+		if (obj && (obj->GetType() == VIRTUAL_TYPE || obj->GetType() == SPRITE_TYPE)) {
+			VirtualSprite *sp = reinterpret_cast<VirtualSprite*>(obj);
 
-			if( sp->HasDialogue() )
-			{
+			if (sp->HasDialogue()) {
 				_camera->SaveState();
 				sp->SaveState();
 				_camera->moving = false;

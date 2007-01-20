@@ -196,7 +196,7 @@ function Load(m)
 
 	-- Create the player's sprite
 	local sprite = hoa_map.MapSprite();
---	sprite:SetName("Claudius");
+	sprite:SetName("Claudius");
 	sprite:SetObjectID(1000);
 	sprite:SetContext(1);
 	sprite:SetXPosition(55, 0.5);
@@ -205,16 +205,17 @@ function Load(m)
 	sprite:SetCollHeight(2.0);
 	sprite:SetImgHalfWidth(1.0);
 	sprite:SetImgHeight(4.0);
-	sprite:SetMovementSpeed(1000.0);
+	sprite:SetMovementSpeed(200.0);
 	sprite:SetDirection(8);
---	sprite:SetPortrait("img/portraits/map/claudius.png");
+	sprite:SetFacePortrait("img/portraits/map/claudius.png");
 	map:_AddGroundObject(sprite);
 
---	map:_SetCameraFocus(sprite);
+	-- Set the camera to focus on the player's sprite
+	map:_SetCameraFocus(sprite);
 
 	-- Create a NPC sprite
 	sprite = hoa_map.MapSprite();
---	sprite:SetName("NPC");
+	sprite:SetName("NPC");
 	sprite:SetObjectID(2);
 	sprite:SetContext(1);
 	sprite:SetXPosition(17, 0.5);
@@ -223,8 +224,8 @@ function Load(m)
 	sprite:SetCollHeight(2.0);
 	sprite:SetImgHalfWidth(1.0);
 	sprite:SetImgHeight(4.0);
-	sprite:SetMovementSpeed(1000.0);
+	sprite:SetMovementSpeed(200.0);
 	sprite:SetDirection(2);
---	sprite:SetPortrait("img/portraits/map/claudius.png");
+	sprite:SetFacePortrait("img/portraits/map/claudius.png");
 	map:_AddGroundObject(sprite);
 end -- function Load()

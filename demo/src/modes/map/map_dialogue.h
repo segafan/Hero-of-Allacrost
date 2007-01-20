@@ -35,16 +35,18 @@ public:
 
 	const bool IsSeenDialogue()
 		{ return _seen; }
+
 	void SetSeenDialogue()
 		{ _seen = true; }
+
 	void ClearSeenDialogue()
 		{ _seen = false; }
 
 	void AddText( const uint32 speaker_id, const hoa_utils::ustring text, SpriteAction* action = 0 );
-	
+
 	uint32 GetSpeaker() const
 		{ return _speakers[ _current_line ]; }
-	
+
 	hoa_utils::ustring GetLine() const
 		{ return _text[ _current_line ]; }
 
@@ -54,13 +56,13 @@ public:
 	//TODO: These are unsafe, might have to add checks
 	uint32 GetSpeaker( uint32 line ) const
 		{ return _speakers[ line ]; }
-	
+
 	hoa_utils::ustring GetLine( uint32 line ) const
 		{ return _text[ line ]; }
 
 	SpriteAction* GetAction( uint32 line ) const
 		{ return _actions[ line ]; }
-		
+
 	const bool ReadNextLine();
 
 	const uint32 GetNumLines() const

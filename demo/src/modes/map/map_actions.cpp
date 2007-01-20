@@ -31,19 +31,8 @@ namespace private_map {
 // **************************** ActionPathMove *********************************
 // *****************************************************************************
 
-void ActionPathMove::Load(uint32 table_key) {
+void ActionPathMove::Load() {
 	// TODO
-// 	ScriptDescriptor *read_data = &(sprite->current_map->_map_data);
-//
-// 	read_data->ReadOpenTable(table_key);
-// 	destination.row = read_data->ReadInt("row");
-// 	destination.col = read_data->ReadInt("col");
-// 	read_data->ReadCloseTable();
-//
-// 	if (read_data->GetError() != SCRIPT_NO_ERRORS) {
-// 		if (MAP_DEBUG) cerr << "MAP ERROR: Failed to load data for an ActionPathMove object" << endl;
-// 	}
-
 }
 
 
@@ -51,13 +40,11 @@ void ActionPathMove::Load(uint32 table_key) {
 void ActionPathMove::Execute() {
 	// TODO: Check if we already have a previously computed path and if it is still valid, use it.
 
-	if (path.empty()) 
-	{
+	if (path.empty()) {
 		MapMode::_current_map->_FindPath(_sprite, path, destination);
 	}
 
-	if( !path.empty() && _count != 0 )
-	{
+	if (!path.empty() && _count != 0) {
 		_sprite->moving = true;
 		if (_sprite->y_position > path[current_node].row) { // Need to move north
 			if (_sprite->x_position > path[current_node].col) { // Need to move northwest
@@ -102,36 +89,15 @@ void ActionPathMove::Execute() {
 // ************************** ActionAnimate *******************************
 // *****************************************************************************
 
-// void ActionAnimate::Load(uint32 table_key) {
+void ActionAnimate::Load() {
 	// TODO
-// 	//  FIXME: why is this a pointer???
-// 	//	ScriptDescriptor *read_data; // Make this point to map data later
-// 	ScriptDescriptor read_data;
-//
-// 	read_data.ReadOpenTable(table_key);
-// 	display_time = read_data.ReadInt("display_time");
-// 	frame_index = read_data.ReadInt("frame_index");
-// 	read_data.ReadCloseTable();
-//
-// 	if (read_data.GetError() != SCRIPT_NO_ERRORS) {
-// 		if (MAP_DEBUG) cerr << "MAP ERROR: Failed to load data for an ActionFrameDisplay object" << endl;
-// 	}
-// } // void ActionAnimate::Load(uint32 table_key)
+} // void ActionAnimate::Load(uint32 table_key)
 
 
-// void ActionAnimate::Execute() {
+void ActionAnimate::Execute() {
 	// TODO
-// 	sprite->direction = frame_index;
-// 	remaining_time -= SystemManager->GetUpdateTime();
-// 	if (remaining_time <= 0) {
-// 		remaining_time = display_time;
-//
-// 		sprite->current_action = sprite->current_action + 1;
-// 		if (sprite->current_action >= sprite->actions.size()) {
-// 			sprite->current_action = 0;
-// 		}
-// 	}
-// } // void ActionAnimate::Execute()
+
+} // void ActionAnimate::Execute()
 
 } // namespace private_map
 
