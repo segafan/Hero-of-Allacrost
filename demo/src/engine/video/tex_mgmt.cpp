@@ -207,7 +207,7 @@ bool GameVideo::_LoadImage(StillImage &id, bool grayscale)
 
 bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::string &filename, const uint32 rows, const uint32 cols)
 {
-	if (filename.empty())
+	if (filename.empty() || images.size()!=rows*cols)
 	{
 		cerr << "Unexpected error loading multi image" << endl;
 		return false;
@@ -218,8 +218,6 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 	std::string s;
 	uint32 current_image;
 	uint32 x, y;
-
-	images.resize (rows * cols);
 
 	bool need_load = false;
 
