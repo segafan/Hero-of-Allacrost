@@ -396,8 +396,11 @@ bool MapSprite::Load() {
 	uint32 frame_speed = static_cast<uint32>(movement_speed / 10.0f);
 
 	// Broken multi-image loading code
-	/*
-	vector<StillImage> frames;
+
+	vector<StillImage> frames (24);
+	for (uint8 i=0; i<24; i++)
+		frames[i].SetDimensions(img_half_width * 2, img_height);
+
 	if (VideoManager->LoadMultiImage(frames, "img/sprites/map/claudius_walk.png", 4, 6) == false) {
 		return false;
 	}
@@ -407,19 +410,15 @@ bool MapSprite::Load() {
 
 	img.Clear();
 	img.AddFrame(frames[0], frame_speed);
-	animations.push_back(img);
 
 	img.Clear();
 	img.AddFrame(frames[6], frame_speed);
-	animations.push_back(img);
 
 	img.Clear();
 	img.AddFrame(frames[12], frame_speed);
-	animations.push_back(img);
 
 	img.Clear();
 	img.AddFrame(frames[18], frame_speed);
-	animations.push_back(img);
 
 	img.Clear();
 	img.AddFrame(frames[1], frame_speed);
@@ -427,7 +426,6 @@ bool MapSprite::Load() {
 	img.AddFrame(frames[3], frame_speed);
 	img.AddFrame(frames[4], frame_speed);
 	img.AddFrame(frames[5], frame_speed);
-	animations.push_back(img);
 
 	img.Clear();
 	img.AddFrame(frames[7], frame_speed);
@@ -435,7 +433,6 @@ bool MapSprite::Load() {
 	img.AddFrame(frames[9], frame_speed);
 	img.AddFrame(frames[10], frame_speed);
 	img.AddFrame(frames[11], frame_speed);
-	animations.push_back(img);
 
 	img.Clear();
 	img.AddFrame(frames[13], frame_speed);
@@ -443,7 +440,6 @@ bool MapSprite::Load() {
 	img.AddFrame(frames[15], frame_speed);
 	img.AddFrame(frames[16], frame_speed);
 	img.AddFrame(frames[17], frame_speed);
-	animations.push_back(img);
 
 	img.Clear();
 	img.AddFrame(frames[19], frame_speed);
@@ -451,16 +447,7 @@ bool MapSprite::Load() {
 	img.AddFrame(frames[21], frame_speed);
 	img.AddFrame(frames[22], frame_speed);
 	img.AddFrame(frames[23], frame_speed);
-	animations.push_back(img);
-
-	for (uint32 i = 0; i < animations.size(); i++) {
-		animations[i].SetDimensions(img_half_width * 2, img_height);
-		if (animations[i].Load() == false) {
-			cerr << "MAP ERROR: failed to load sprite animation" << endl;
-			return false;
-		}
-	}
-	*/
+	
 
 	// TEMP
 	img.Clear();
