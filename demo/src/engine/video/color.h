@@ -33,18 +33,18 @@ public:
 	*** These are defined in the file video.cpp. All colors are opaque (0.0f alpha value)
 	**/
 	//@{
-	static Color clear;
-	static Color white;
-	static Color gray;
-	static Color black;
-	static Color red;
-	static Color orange;
-	static Color yellow;
-	static Color green;
-	static Color aqua;
-	static Color blue;
-	static Color violet;
-	static Color brown;
+	static Color clear;		//!< Clear (transparent) color (r=0.0, g=0.0, b=0.0, a=0.0)
+	static Color white;		//!< White color (r=1.0, g=1.0, b=1.0, a=1.0)
+	static Color gray;		//!< Gray color (r=0.5, g=0.5, b=0.5, a=1.0)
+	static Color black;		//!< Black color (r=0.0, g=0.0, b=0.0, a=1.0)
+	static Color red;		//!< Red color (r=1.0, g=0.0, b=0.0, a=1.0)
+	static Color orange;	//!< Orangecolor (r=1.0, g=0.4, b=0.0, a=1.0)
+	static Color yellow;	//!< Yellow color (r=1.0, g=1.0, b=0.0, a=1.0)
+	static Color green;		//!< Green color (r=0.0, g=1.0, b=0.0, a=1.0)
+	static Color aqua;		//!< Aqua color (r=0.0, g=1.0, b=1.0, a=1.0)
+	static Color blue;		//!< Blue color (r=0.0, g=0.0, b=1.0, a=1.0)
+	static Color violet;	//!< Violet color (r=1.0, g=0.0, b=1.0, a=1.0)
+	static Color brown;		//!< Brown color (r=0.6, g=0.3, b=0.1, a=1.0)
 	//@}
 
 	Color()

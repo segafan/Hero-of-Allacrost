@@ -71,6 +71,14 @@ public:
 
 	//! \todo Needs a comment
 	void* pixels;
+
+	//! Constructor for intializing the class data members
+	ImageLoadInfo () :
+		width (0),
+		height (0),
+		pixels (NULL)
+	{}
+
 }; // class ImageLoadInfo
 
 
