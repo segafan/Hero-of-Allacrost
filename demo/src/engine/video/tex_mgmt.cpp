@@ -56,14 +56,8 @@ void IntegerToString(std::string &s, const int32 num)
 //-----------------------------------------------------------------------------
 void GameVideo::_ConvertImageToGrayscale(const ImageLoadInfo& src, ImageLoadInfo &dst)
 {
-	dst.width = src.width;
-	dst.height = src.height;
-
 	if (!dst.width || !dst.height)	// Return if there are no pixels in the image
 		return;
-
-	// Reserve memory for the grayscale structure
-	dst.pixels = malloc(dst.width * dst.height * 4); 
 
 	// Convert the pixels to grayscale while copying
 	unsigned char* src_pix = static_cast<unsigned char*>(src.pixels);
@@ -220,16 +214,19 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 	}
 
 	std::string image_name;
+	std::string image_name_color;
 	std::string s;
 	uint32 current_image;
 	uint32 x, y;
 
 	images.resize (rows * cols);
 
+	bool need_load = false;
+
 	// Check if we have loaded all the sub-images
-	for (x=0; x<rows; x++)
+	for (x=0; x<rows && !need_load; x++)
 	{
-		for (y=0; y<cols; y++)
+		for (y=0; y<cols && !need_load; y++)
 		{
 			image_name = filename;
 			IntegerToString(s,x);
@@ -238,17 +235,17 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 			image_name += "_Y" + s;
 			image_name += (images[x*cols+y]._grayscale ? string("_grayscale") : string(""));
 
-			// If this image exists, don't do anything else
+			// If this image doesn't exist, don't do anything else
 			if(_images.find(image_name) == _images.end())
 			{
-				break;
+				need_load = true;
 			}
 		}
 	}
 
 	// If not all the images are loaded, then load the image
 	private_video::ImageLoadInfo loadInfo;
-	if (x*y != rows*cols)
+	if (need_load)
 	{
 		if(!_LoadRawImage(filename, loadInfo))
 			return false;
@@ -265,6 +262,7 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 			IntegerToString(s,y);
 			image_name += "_Y" + s;
 			bool grayscale = images[x*cols+y]._grayscale;
+			image_name_color = image_name;
 			image_name += (grayscale ? string("_grayscale") : string(""));
 
 			// If the image exists, take the information from it
@@ -272,12 +270,14 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 			{
 				images.at(current_image)._elements.clear();
 
-				Image *img = _images[images.at(current_image)._filename];
+				Image *img = _images[image_name];
 
 				if(!img)
 				{
 					if(VIDEO_DEBUG)
 						cerr << "VIDEO ERROR: got a NULL Image from images map in LoadImage()" << endl;
+
+					free(loadInfo.pixels);
 					return false;
 				}
 
@@ -287,11 +287,31 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 					// not removed, so restore it
 					if(!img->texture_sheet->RestoreImage(img))
 					{
+						if (loadInfo.pixels)
+							free(loadInfo.pixels);
 						return false;
 					}
 				}
 
 				++(img->ref_count);
+
+				// If the image is in grayscale mode, also increment the counter for the color one
+				if (grayscale)
+				{
+					Image *img = _images[image_name_color];
+
+					// If the image doesn't exist, we had a problem with the ref-counter system
+					if (!img)
+					{
+						cerr << "VIDEO ERROR: grayscale image exists but not color one" << endl;
+
+						if (loadInfo.pixels)
+							free(loadInfo.pixels);
+						return false;
+					}
+
+					++(img->ref_count);
+				}
 
 				images.at(current_image)._width = (float) img->width;
 				images.at(current_image)._height = (float) img->height;
@@ -319,8 +339,10 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 					memcpy ((uint8*)info.pixels+4*info.width*i, (uint8*)loadInfo.pixels+(((x*loadInfo.height/rows)+i)*loadInfo.width+y*loadInfo.width/cols)*4, 4*info.width);
 				}
 
-				// create an Image structure and store it our std::map of images
-				Image *newImage = new Image(image_name, info.width, info.height, grayscale);
+				// First, place a color copy of the image
+
+				//create an Image structure and store it our std::map of images
+				Image *newImage = new Image(image_name_color, info.width, info.height, false);
 
 				// try to insert the image in a texture sheet
 				TexSheet *sheet = _InsertImageInTexSheet(newImage, info, images.at(current_image)._is_static);
@@ -333,19 +355,54 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 					if(VIDEO_DEBUG)
 					cerr << "VIDEO_DEBUG: GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
 
-					free(info.pixels);
+					if (loadInfo.pixels)
+						free(loadInfo.pixels);
 					return false;
 				}
 
 				newImage->ref_count = 1;
 
 				// store the image in our std::map
-				_images[image_name] = newImage;
+				_images[image_name_color] = newImage;
 
-				// store the new image element
-				ImageElement element(newImage, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f,
-					images.at(current_image)._width, images.at(current_image)._height, images.at(current_image)._color);
-				images.at(current_image)._elements.push_back(element);
+				// If grayscale, make a grayscale version of the image
+				if (grayscale)
+				{
+					// Obtain a grayscale buffer
+					_ConvertImageToGrayscale (info, info);
+
+					//create an Image structure and store it our std::map of images
+					Image *new_image_gray = new Image(image_name, info.width, info.height, true);
+
+					// try to insert the image in a texture sheet
+					TexSheet *sheet_gray = _InsertImageInTexSheet(new_image_gray, info, images.at(current_image)._is_static);
+
+					if(!sheet_gray)
+					{
+						if(VIDEO_DEBUG)
+						cerr << "VIDEO_DEBUG: GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
+
+						free(loadInfo.pixels);
+						return false;
+					}
+
+					new_image_gray->ref_count = 1;
+
+					// store the image in our std::map
+					_images[image_name] = new_image_gray;
+
+					// store the new image element
+					ImageElement element(new_image_gray, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f,
+						images.at(current_image)._width, images.at(current_image)._height, images.at(current_image)._color);
+					images.at(current_image)._elements.push_back(element);
+				}
+				else
+				{
+					// store the new image element
+					ImageElement element(newImage, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f,
+						images.at(current_image)._width, images.at(current_image)._height, images.at(current_image)._color);
+					images.at(current_image)._elements.push_back(element);
+				}
 			}
 		}
 	}
@@ -360,21 +417,24 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 
 bool GameVideo::LoadAnimatedImage(AnimatedImage &id, const std::string &filename, const uint32 rows, const uint32 cols)
 {
+	// If the number of frames and the number of sub-images doesn't match, return
+	if (id.GetNumFrames() != rows*cols)
+	{
+		cerr << "VIDEO ERROR: The animated image don't have enough frames to hold the data" << endl;
+		return false;
+	}
+
 	bool success = true;
 
+	// Get the vector of images
 	std::vector <StillImage> v;
-	success = LoadMultiImage(v, filename, rows, cols);
-
-
-	// Attach the images to the frames of the animated image
-	if (success)
+	for (uint32 frame=0; frame<id.GetNumFrames(); ++frame)
 	{
-		for (uint32 i=0; i<rows*cols; i++)
-		{
-			v[i]._animated = false;
-			id.AddFrame (v[i], i*5);
-		}
+		v.push_back(id.GetFrame(frame));
 	}
+
+	// Load the frames via LoadMultiImage
+	success = LoadMultiImage(v, filename, rows, cols);
 
 	return success;
 }
