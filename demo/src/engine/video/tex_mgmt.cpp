@@ -482,37 +482,6 @@ bool GameVideo::_LoadImageHelper(StillImage &id, bool grayscale)
 		return false;
 	}
 
-	// If the image is grayscale, also add to the map a copy of the grayscale one
-	Image *new_image_gray (0);
-	if (grayscale)
-	{
-		private_video::ImageLoadInfo load_info_gray;
-		_ConvertImageToGrayscale(load_info,load_info_gray);
-	
-		new_image_gray = new Image(id._filename+"_grayscale", load_info_gray.width, load_info_gray.height, true);
-
-		TexSheet *sheet = _InsertImageInTexSheet(new_image_gray, load_info_gray, isStatic);
-
-		if(!sheet)
-		{
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO_DEBUG: GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
-
-			delete newImage;
-			free(load_info.pixels);
-
-			delete new_image_gray;
-			free(load_info_gray.pixels);
-
-			return false;
-		}
-
-		new_image_gray->ref_count = 1;
-		_images[id._filename+"_grayscale"] = new_image_gray;
-
-		free(load_info_gray.pixels);
-	}
-
 	newImage->ref_count = 1;
 
 	// store the image in our std::map
@@ -525,20 +494,52 @@ bool GameVideo::_LoadImageHelper(StillImage &id, bool grayscale)
 	if(id._height == 0.0f)
 		id._height = (float) load_info.height;
 
-	// store the new image element
+	// If the image is grayscale, also add to the map a copy of the grayscale one
 	if (grayscale)
 	{
+		Image *new_image_gray (0);
+		_ConvertImageToGrayscale(load_info,load_info);
+	
+		new_image_gray = new Image(id._filename+"_grayscale", load_info.width, load_info.height, true);
+
+		TexSheet *sheet = _InsertImageInTexSheet(new_image_gray, load_info, isStatic);
+
+		if(!sheet)
+		{
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO_DEBUG: GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
+
+			delete newImage;
+			delete new_image_gray;
+
+			if (load_info.pixels)
+				free(load_info.pixels);
+
+			return false;
+		}
+
+		new_image_gray->ref_count = 1;
+		_images[id._filename+"_grayscale"] = new_image_gray;
+
+		// Store the image element
 		ImageElement element(new_image_gray, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f, id._width, id._height, id._color);
 		id._elements.push_back(element);
 	}
-	else
+	else	// If is color, store the image element
 	{
 		ImageElement element(newImage, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f, id._width, id._height, id._color);
 		id._elements.push_back(element);
 	}
 
+	newImage->ref_count = 1;
+
+	// store the image in our std::map
+	_images[id._filename] = newImage;
+
 	// finally, delete the buffer used to hold the pixel data
-	free(load_info.pixels);
+	if (load_info.pixels)
+		free(load_info.pixels);
+
 	return true;
 }
 
