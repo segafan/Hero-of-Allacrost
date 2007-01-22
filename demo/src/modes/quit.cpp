@@ -93,6 +93,9 @@ QuitMode::QuitMode() {
 // The destructor might possibly have to free any text textures we create...
 QuitMode::~QuitMode() {
 	if (QUIT_DEBUG) cout << "QUIT: QuitMode destructor invoked" << endl;
+
+	// Delete the background image
+	VideoManager->DeleteImage(_saved_screen);
 }
 
 
@@ -192,6 +195,7 @@ void QuitMode::Draw() {
 
 // Quit the game completely
 void QuitMode::_QuitGame() {
+
 	SystemManager->ExitGame();
 }
 
@@ -210,6 +214,7 @@ void QuitMode::_QuitToBootMenu() {
 // 			break;
 // 		// We don't need to do anything for case SETTINGS_SAME_VOLUME
 // 	}
+
 	ModeManager->PopAll(); // Remove and free every game mode
 	BootMode *BM = new BootMode();
 	ModeManager->Push(BM);
@@ -230,6 +235,7 @@ void QuitMode::_Cancel() {
 // 			break;
 // 		// Don't need to do anything for case SETTINGS_SAME_VOLUME
 // 	}
+
 	ModeManager->Pop();
 }
 

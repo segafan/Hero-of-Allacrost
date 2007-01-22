@@ -1375,7 +1375,7 @@ bool GameVideo::CaptureScreen(StillImage &id)
 		id._height = (float) loadInfo.height;
 
 	// store the new image element
-	ImageElement  element(newImage, 0, 0, id._width, id._height, 0.0f, 0.0f, 1.0f, 1.0f, id._color);
+	ImageElement  element(newImage, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f, id._width, id._height, id._color);
 	id._elements.push_back(element);
 
 	// finally, delete the buffer used to hold the pixel data
