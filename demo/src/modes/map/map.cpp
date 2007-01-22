@@ -213,11 +213,14 @@ void MapMode::BindToLua() {
 	[
 		class_<MapDialogue>("MapDialogue")
 			.def(constructor<>())
+			.def("AddText", &MapDialogue::AddText)
 	];
 
 	module(ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<SpriteAction>("SpriteAction")
+			.def("Load", &SpriteAction::Load)
+			.def("Execute", &SpriteAction::Execute)
 	];
 
 // 	module(ScriptManager->GetGlobalState(), "hoa_map")
@@ -366,20 +369,22 @@ bool MapMode::Load(string filename) {
 	DialogueSprite->movement_speed = NORMAL_SPEED;
 	DialogueSprite->SetDirection(EAST);
 
-	ActionPathMove *new_act = new ActionPathMove( DialogueSprite, true );
+	ActionPathMove *new_act = new ActionPathMove(DialogueSprite);
+	new_act->SetForced(true);
 	new_act->destination.row = 35;
 	new_act->destination.col = 45;
-	
-	std::vector<SpriteAction *> testvec;
-	testvec.push_back( new_act );
 
-	new_act = new ActionPathMove( DialogueSprite, true );
+	std::vector<SpriteAction *> testvec;
+	testvec.push_back(new_act);
+
+	new_act = new ActionPathMove(DialogueSprite);
+	new_act->SetForced(true);
 	new_act->destination.row = 35;
 	new_act->destination.col = 40;
 	testvec.push_back( new_act );
 
 
-	
+
 	Dialogue->AddText( 1, MakeUnicodeString( "This is a test" ), 5000 );
 	Dialogue->AddTextActions( 1000, MakeUnicodeString( "Oh really?!" ), testvec );
 
@@ -611,7 +616,7 @@ void MapMode::_HandleInputDialogue() {
 			if( timeleft < 0 )
 				timeleft = 0;
 		}
-		
+
 		// Get the actions
 		std::vector<SpriteAction*> * actions = &_current_dialogue->GetActions();
 		for( std::vector<SpriteAction*>::iterator i = actions->begin();
@@ -640,7 +645,7 @@ void MapMode::_HandleInputDialogue() {
 				else {
 					// The dialogue is over
 					_map_state = EXPLORE;
- 					
+
 					// Restore the status of the map sprites if the dialogue should reset them.
 					if( _current_dialogue->IsSaving() ) {
  						for (uint32 i = 0; i < _current_dialogue->GetNumLines(); i++) {
@@ -666,11 +671,11 @@ void MapMode::_HandleInputDialogue() {
  							timeleft = _current_dialogue->LineTime();
 							_dialogue_textbox.SetDisplayText(_current_dialogue->GetLine());
  						}
- 						else { 
+ 						else {
 							// The is no more line, the dialogue is over
  							_map_state = EXPLORE;
  							// Restore the status of the map sprites
-							if( _current_dialogue->IsSaving() ) { 
+							if( _current_dialogue->IsSaving() ) {
  								for (uint32 i = 0; i < _current_dialogue->GetNumLines(); i++) {
 									static_cast< VirtualSprite* >( _all_objects[ _current_dialogue->GetSpeaker( i ) ] )->LoadState();
  								}
@@ -685,9 +690,9 @@ void MapMode::_HandleInputDialogue() {
 				// There is no more time left, too bad we change line
 				if ( _current_dialogue->ReadNextLine() ) {
 					timeleft = _current_dialogue->LineTime();
-					_dialogue_textbox.SetDisplayText(_current_dialogue->GetLine());	
+					_dialogue_textbox.SetDisplayText(_current_dialogue->GetLine());
 				}
-				else { 
+				else {
 					// No more line, the dialogue is over
 					_map_state = EXPLORE;
 					if( _current_dialogue->IsSaving() ) {
@@ -701,7 +706,7 @@ void MapMode::_HandleInputDialogue() {
 				}
 			} // if( timeleft == 0 )
 		} // if( !_current_dialogue->IsBlocked() )
-	} // if( _current_dialogue ) 
+	} // if( _current_dialogue )
 } // void MapMode::_HandleInputDialogue()
 
 

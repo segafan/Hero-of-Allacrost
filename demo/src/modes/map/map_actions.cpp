@@ -32,20 +32,18 @@ namespace private_map {
 // *****************************************************************************
 
 void ActionPathMove::Load() {
-	// TODO
+	MapMode::_current_map->_FindPath(_sprite, path, destination);
 }
 
 
 
 void ActionPathMove::Execute() {
 	// TODO: Check if we already have a previously computed path and if it is still valid, use it.
-
 	if (path.empty()) {
 		MapMode::_current_map->_FindPath(_sprite, path, destination);
 	}
 
-	if( !path.empty() )
-	{
+	if (!path.empty()) {
 		_sprite->moving = true;
 		if (_sprite->y_position > path[current_node].row) { // Need to move north
 			if (_sprite->x_position > path[current_node].col) { // Need to move northwest
