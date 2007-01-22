@@ -311,8 +311,13 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 					++(img->ref_count);
 				}
 
-				images.at(current_image)._width = (float) img->width;
-				images.at(current_image)._height = (float) img->height;
+				if (images.at(current_image)._height == 0.0f)
+					images.at(current_image)._height = (float)((x == rows-1 && loadInfo.height%rows) ? loadInfo.height-(x*loadInfo.height/rows) : loadInfo.height/rows);
+				if (images.at(current_image)._width == 0.0f)
+					images.at(current_image)._width = (float)((y == cols-1 && loadInfo.width%cols) ? loadInfo.width-(y*loadInfo.width/cols) : loadInfo.width/cols);
+				
+	//			images.at(current_image)._width = (float) img->width;
+	//			images.at(current_image)._height = (float) img->height;
 
 				ImageElement element(img, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f,
 					images.at(current_image)._width, images.at(current_image)._height, images.at(current_image)._color);
