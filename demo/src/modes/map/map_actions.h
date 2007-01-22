@@ -40,7 +40,7 @@ namespace private_map {
 class SpriteAction {
 public:
 	SpriteAction(VirtualSprite *sprite) :
-		_sprite(sprite), _finished(false) {}
+		_sprite(sprite), _finished(false), _forced(false) {}
 
 	virtual ~SpriteAction()
 		{}
@@ -64,22 +64,30 @@ public:
 	const bool IsFinishedReset()
 		{ if (!_finished) return false; _finished = false; return true; }
 
-
 	/** \brief This method returns if this action is forced (true) or not (false).
 	*** A forced action will have to finish in order to let a dialogue continue to its next line.
 	**/
 	bool IsForced() const
 		{ return _forced; }
 
+	void SetFinished(bool fin)
+		{ _finished = fin; }
+
+	void SetForced(bool forc)
+		{ _forced = forc; }
+
+	void SetSprite(VirtualSprite* sp)
+		{ _sprite = sp; }
+
 protected:
 	//! \brief A pointer to the map sprite that this action is performed upon.
 	VirtualSprite *_sprite;
 
-	//! \brief This contains if the action should be forced to finish or not duri9ng a dialogue.
-	bool _forced;
-
 	//! \brief Set to true when the action has finished its execution.
 	bool _finished;
+
+	//! \brief This contains if the action should be forced to finish or not duri9ng a dialogue.
+	bool _forced;
 }; // class SpriteAction
 
 
@@ -104,10 +112,11 @@ public:
 	//! \brief An index to the path vector containing the node that the sprite is currently on.
 	uint32 current_node;
 
-	ActionPathMove(VirtualSprite* sprite, bool forced = false) :
-		SpriteAction(sprite), current_node(0) {
-		_forced = forced;
-	}
+	ActionPathMove() :
+		SpriteAction(NULL), current_node(0) {}
+
+	ActionPathMove(VirtualSprite* sprite) :
+		SpriteAction(sprite), current_node(0) {}
 
 	~ActionPathMove()
 		{}

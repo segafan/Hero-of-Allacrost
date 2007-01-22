@@ -168,32 +168,44 @@ bool IsFloatInRange(float value, float lower, float upper);
 class ustring {
 public:
 	ustring();
+
 	ustring(const uint16*);
 
 	static const size_t npos;
 
 	void clear()
 		{ _str.clear(); _str.push_back(0); }
+
 	bool empty() const
 		{ return _str.size() <= 1; }
+
 	size_t length() const
 		// We assume that there is always a null terminating character, hence the -1 subtracted from the size
 		{ return _str.size() - 1; }
+
 	size_t size() const
 		{ return length(); }
+
 	const uint16* c_str() const
 		{ return &_str[0]; }
 
 	size_t find(uint16 c, size_t pos = 0) const;
+
 	size_t find(const ustring &s, size_t pos = 0) const;
+
 	ustring substr(size_t pos = 0, size_t n = npos) const;
 
 	ustring & operator + (const ustring& s);
+
 	ustring & operator += (uint16 c);
+
 	ustring & operator += (const ustring& s);
+
 	ustring & operator = (const ustring& s);
+
 	uint16 & operator [] (size_t pos)
 		{ return _str[pos]; }
+
 	const uint16 & operator [] (size_t pos) const
 		{ return _str[pos]; }
 

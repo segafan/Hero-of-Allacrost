@@ -337,7 +337,7 @@ public:
 	{ return _object_type; }
 	//@}
 
-	
+
 
 protected:
 	//! \brief This holds the the type of sprite this is.
@@ -353,7 +353,7 @@ struct MapObject_Ptr_Less
 {
 	const bool operator()( const MapObject * a, const MapObject * b )
 	{
-		return ( a->y_position + a->y_offset ) < ( b->y_position + b->y_offset );		
+		return ( a->y_position + a->y_offset ) < ( b->y_position + b->y_offset );
 	}
 };
 
@@ -493,7 +493,7 @@ public:
 
 	/** \brief An index to the dialogues vector, representing the current sprite dialogue to
 	*** display when talked to by the player. A negative value indicates that the sprite has no dialogue.
-	*** \note If the sprite has no entries in its dialogues vector, this member should remain negative, 
+	*** \note If the sprite has no entries in its dialogues vector, this member should remain negative,
 	*** otherwise a segmentation fault will occur.
 	**/
 	int16 current_dialogue;
@@ -552,13 +552,13 @@ public:
 	**/
 	virtual bool LoadState();
 
-	
+
 	/** \name Dialogue control methods
 	*** These methods are used to add and control which dialogue should the sprite speak.
 	**/
 	//@{
 	void AddAction(SpriteAction* act)
-		{ actions.push_back(act); }
+		{ act->SetSprite(this); actions.push_back(act); }
 
 	void AddDialogue(MapDialogue* md)
 		{ dialogues.push_back(md); }
@@ -567,11 +567,11 @@ public:
 		{ return dialogues.size() > 0; }
 
 	MapDialogue* GetCurrentDialogue() const
-		{ return dialogues[ current_dialogue ]; }
+		{ return dialogues[current_dialogue]; }
 
-	void SetDialogue( const int16 dialogue )
+	void SetDialogue(const int16 dialogue)
 		{ current_dialogue = dialogue; }
-	
+
 	int16 GetNumDialogues() const
 		{ return dialogues.size(); }
 	//@}
