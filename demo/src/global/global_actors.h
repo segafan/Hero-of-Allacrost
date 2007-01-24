@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ////////////////////////////////////////////////////////////////////////////////
@@ -54,6 +54,7 @@ const uint32 GLOBAL_CHARACTER_ALL         = 0xFFFFFFFF;
 class GlobalAttackPoint {
 public:
 	GlobalAttackPoint();
+
 	GlobalAttackPoint(const hoa_utils::ustring & name, uint16 x, uint16 y);
 
 	~GlobalAttackPoint();
@@ -62,10 +63,13 @@ public:
 	//@{
 	hoa_utils::ustring GetName() const
 		{ return _name; }
+
 	uint16 GetXPosition() const
 		{ return _x_position; }
+
 	uint16 GetYPosition() const
 		{ return _y_position; }
+
 	float GetEvade() const
 		{ return _evade; }
 	//@}
@@ -132,12 +136,12 @@ private:
 *** provide a consistent interface between the two and to effectively re-use code.
 *** It is intended to be an abstract class and therefmore an instance of this class
 *** should never exist on its own.
-*** 
+***
 *** \note The constructor for this class is in the protected space because the class
 *** is abstract, and should only be able to be created by the classes which inherit
 *** from it.
 ***
-*** \note This class does not include any GlobalSkill objects. That is reserved 
+*** \note This class does not include any GlobalSkill objects. That is reserved
 *** for the inherited class to implement as appropriate.
 *** ***************************************************************************/
 class GlobalActor {
@@ -148,42 +152,61 @@ public:
 	//@{
 	uint32 GetHitPoints() const
 		{ return _hit_points; }
+
 	uint32 GetMaxHitPoints() const
 		{ return _max_hit_points; }
+
 	uint32 GetSkillPoints() const
 		{ return _skill_points; }
+
 	uint32 GetMaxSkillPoints() const
 		{ return _max_skill_points; }
+
 	uint32 GetExperienceLevel() const
 		{ return _experience_level; }
+
 	uint32 GetStrength() const
 		{ return _strength; }
+
 	uint32 GetVigor() const
 		{ return _vigor; }
+
 	uint32 GetFortitude() const
 		{ return _fortitude; }
+
 	uint32 GetResistance() const
 		{ return _protection; }
+
 	uint32 GetAgility() const
 		{ return _agility; }
+
 	float GetEvade() const
 		{ return _evade; }
+
 	uint32 GetPhysicalAttackRating() const
 		{ return _physical_attack_rating; }
+
 	uint32 GetMetaphysicalAttackRating() const
 		{ return _metaphysical_attack_rating; }
+
 	GlobalWeapon* GetWeaponEquipped() const
 		{ return _weapon_equipped; }
+
 	std::vector<GlobalArmor*> GetArmorEquipped() const
 		{ return _armor_equipped; }
+
 	std::vector<GlobalAttackPoint*> GetAttackPoints() const
 		{ return _attack_points; }
+
 	std::vector<GlobalElementalEffect*>& GetElementalAttackBonuses()
 		{ return _elemental_attack_bonuses; }
+
 	std::vector<std::pair<float, GlobalStatusEffect*> >& GetStatusAttackBonuses()
 		{ return _status_attack_bonuses; }
+
 	std::vector<GlobalElementalEffect*>& GetElementalDefenseBonuses()
 		{ return _elemental_defense_bonuses; }
+
 	std::vector<std::pair<float, GlobalStatusEffect*> >& GetStatusDefenseBonuses()
 		{ return _status_defense_bonuses; }
 
@@ -192,26 +215,37 @@ public:
 
 	void SetHitPoints(uint32 hp)
 		{ if (hp > _max_hit_points) _hit_points = _max_hit_points; else _hit_points = hp; }
+
 	void SetSkillPoints(uint32 sp)
 		{ if (sp > _max_skill_points) _skill_points = _max_skill_points; else _skill_points = sp; }
+
 	void SetMaxHitPoints(uint32 hp)
 		{ _max_hit_points = hp; }
+
 	void SetMaxSkillPoints(uint32 sp)
 		{ _max_skill_points = sp; }
+
 	void SetExperienceLevel(uint32 xp_level)
 		{ _experience_level = xp_level; }
+
 	void SetStrength(uint32 st)
 		{ _strength = st; _CalculateAttackRatings(); }
+
 	void SetVigor(uint32 vi)
 		{ _vigor = vi; _CalculateAttackRatings(); }
+
 	void SetFortitude(uint32 fo)
 		{ _fortitude = fo; _CalculateDefenseRatings(); }
+
 	void SetProtection(uint32 pr)
 		{ _protection = pr; _CalculateDefenseRatings(); }
+
 	void SetAgility(uint32 ag)
 		{ _agility = ag; }
+
 	void SetEvade(float ev)
 		{ _evade = ev; _CalculateEvadeRatings(); }
+
 	void SetName(const hoa_utils::ustring & name)
 		{ _name = name; }
 	//@}
@@ -226,22 +260,31 @@ public:
 	//@{
 	void AddHitPoints(uint32 hp)
 		{ _hit_points += hp; if (_hit_points > _max_hit_points) _hit_points = _max_hit_points; }
+
 	void AddSkillPoints(uint32 sp)
 		{ _skill_points += sp; if (_skill_points > _max_skill_points) _skill_points = _max_skill_points; }
+
 	void AddMaxHitPoints(uint32 hp)
 		{ _max_hit_points += hp; }
+
 	void AddMaxSkillPoints(uint32 sp)
 		{ _max_skill_points += sp; }
+
 	void AddExperienceLevel(uint32 xp_level)
 		{ _experience_level += xp_level; }
+
 	void AddStrength(uint32 st)
 		{ _strength += st; }
+
 	void AddVigor(uint32 vi)
 		{ _vigor += vi; }
+
 	void AddFortitude(uint32 fo)
 		{ _fortitude += fo; }
+
 	void AddProtection(uint32 pr)
 		{ _protection += pr; }
+
 	void AddAgility(uint32 ag)
 		{ _agility += ag; }
 	//@}
@@ -253,6 +296,7 @@ public:
 	*** NULL will be returned if no weapon is already equipped.
 	**/
 	GlobalWeapon* EquipWeapon(GlobalWeapon* weapon);
+
 	/** \brief Equips a new armor on the actor
 	*** \param armor The piece of armor to equip
 	*** \param ap_index The actor's attack point index to equip the armor on
@@ -273,30 +317,41 @@ protected:
 	//@{
 	//! \brief The current number of hit points that the actor has
 	uint32 _hit_points;
+
 	//! \brief The maximum number of hit points that the actor may have
 	uint32 _max_hit_points;
+
 	//! \brief The current number of skill points that the actor has
 	uint32 _skill_points;
+
 	//! \brief The maximum number of skill points that the actor may have
 	uint32 _max_skill_points;
+
 	//! \brief The current experience level of the actor
 	uint32 _experience_level;
+
 	//! \brief The strength index of the actor, used in part to determine physical attack rating
 	uint32 _strength;
+
 	//! \brief The vigor index of the actor, used in part to determine metaphysical attack rating
 	uint32 _vigor;
+
 	//! \brief The fortitude index of the actor, used in part to determine physical defense ratings
 	uint32 _fortitude;
+
 	//! \brief The protection index of the actor, used in part to determine metaphysical defense ratings.
 	uint32 _protection;
+
 	//! \brief The agility of the actor, used to calculate the speed in which stamina recovers
 	uint32 _agility;
+
 	//! \brief The attack evade percentage of the actor, ranged from 0.0 to 1.0
 	float _evade;
 	//@}
 
 	//! \brief The sum of the character's strength and their weapon's physical attack
 	uint32 _physical_attack_rating;
+
 	//! \brief The sum of the character's vigor and their weapon's metaphysical attack
 	uint32 _metaphysical_attack_rating;
 
@@ -307,16 +362,18 @@ protected:
 	*** and likewise those bonuses are removed when the weapon is unequipped.
 	**/
 	GlobalWeapon* _weapon_equipped;
+
 	/** \brief The various armors that the actor has equipped
 	*** Again, actors are not required to have armor of any sort equipped. Note that the defense bonuses that
 	*** are afforded by the armors are not directly applied to the character's defense ratings, but rather to
 	*** the defense ratings of their attack points. However the elemental and status bonuses of the armor are
 	*** applied to the character as a whole. The armor must be equipped on one of the actor's attack points to
 	*** really afford any kind of defensive bonus.
-	*** 
+	***
 	*** \note The size of this vector is always equal to the size of the _attack_points vector
 	**/
 	std::vector<GlobalArmor*> _armor_equipped;
+
 	/** \brief The attack points that are located on the actor
 	*** Every actor <b>must have at least one</b> attack point, otherwise it is impossible for that actor to
 	*** be harmed in battle. The attack points carry the defense bonuses from the armor that the actor has
@@ -329,6 +386,7 @@ protected:
 	*** those that are brought upon by the weapon that the character may have equipped.
 	**/
 	std::vector<GlobalElementalEffect*> _elemental_attack_bonuses;
+
 	/** \brief The status effects added to the actor's attack
 	*** Actors may carry various status attack bonuses, or they may carry none. These bonuses include
 	*** those that are brought upon by the weapon that the character may have equipped. The first member
@@ -336,11 +394,13 @@ protected:
 	*** effect upon a targeted foe.
 	**/
 	std::vector<std::pair<float, GlobalStatusEffect*> > _status_attack_bonuses;
+
 	/** \brief The elemental effects added to the actor's defense
 	*** Actors may carry various elemental defense bonuses, or they may carry none. These bonuses include
 	*** those that are brought upon by all of the armors that the character may have equipped.
 	**/
 	std::vector<GlobalElementalEffect*> _elemental_defense_bonuses;
+
 	/** \brief The status effects added to the actor's defense
 	*** Actors may carry various status defense bonuses, or they may carry none. These bonuses include
 	*** those that are brought upon by the armors that the character may have equipped. The first member
@@ -354,11 +414,13 @@ protected:
 	*** and places the result in the classes two attack ratings members.
 	**/
 	void _CalculateAttackRatings();
+
 	/** \brief Calculates the physical and metaphysical defense ratings for each attack point
 	*** This function is called whenever the fortitude or protection members are modified.
 	*** It will update the defense ratings of each attack point that belongs to the actor.
 	**/
 	void _CalculateDefenseRatings();
+
 	/** \brief Calculates the evade rating for each attack point
 	*** This function is called whenever the evade member is modified. It updates the evade
 	*** ratings of all attack points that belong to the actor.
@@ -386,21 +448,24 @@ protected:
 class GlobalEnemy : public GlobalActor {
 public:
 	GlobalEnemy(const std::string & file_name);
+
 	virtual ~GlobalEnemy();
 
 	//! \name Class member access functions
 	//@{
 	std::string GetFilename() const
 		{ return _filename; }
+
 	uint32 GetExperiencePoints() const
 		{ return _experience_points; }
+
 	std::vector<GlobalSkill*> GetSkills() const
 		{ return _enemy_skills; }
 	//@}
 
-	//! Returns the enemy's sprite frames
-	std::vector<hoa_video::StillImage> * GetSpriteFrames()
-	{ return &_sprite_frames; }
+	//! \brief Returns the enemy's sprite frames
+	std::vector<hoa_video::StillImage>* GetSpriteFrames()
+		{ return &_sprite_frames; }
 
 	//! \brief Gives the enemy a new skill to use in battle
 	void AddSkill(GlobalSkill *skill)
@@ -422,6 +487,7 @@ public:
 protected:
 	//! \brief The name used to retrieve the enemy's data and other information
 	std::string _filename;
+
 	//! \brief An unique identification number for the enemy type.
 	uint32 _enemy_id;
 
@@ -436,11 +502,11 @@ protected:
 	uint32 _sprite_width;
 	uint32 _sprite_height;
 	//@}
-	
+
 	// TODO CHECK Raging_Hog: These variables demanded by compiler. No clue what they do.
 	// Please check especially the data type!
 	//std::string _sprite_animations[];
-	
+
 	uint32 _movement_speed;
 	uint32 _base_hit_points;
 	uint32 _base_skill_points;
@@ -454,6 +520,7 @@ protected:
 	*** An enemy must have <b>at least</b> one skill in order to do anything useful in battle.
 	**/
 	std::vector<GlobalSkill*> _enemy_skills;
+
 	/** \brief The battle sprite frames for the enemy
 	*** Each enemy has four frames representing damage levels of 0%, 33%, 66%, and 100%. Thus, this vector
 	*** always has four elements contained within it, where the 0th element is 0% damage, the 1st element
@@ -499,7 +566,7 @@ protected:
 *** \brief Represents playable game characters
 ***
 *** This calls represents playable game characters only (those that you can control,
-*** equip, and send into battle). It does not cover NPCs. This class also holds 
+*** equip, and send into battle). It does not cover NPCs. This class also holds
 *** numerous images that represent the character in a variety of contexts (maps, battle,
 *** menus, etc.). This class may be used as a parent class by game modes that need
 *** to add further data or methods to manipulate the character than is provided here.
@@ -567,12 +634,12 @@ public:
 protected:
 	//! \brief The name used to retrieve the characters's data and other information from various sources
 	std::string _filename;
-	
+
 	/** \brief An identification number for the character
 	*** Refer to the Game Character Type constants at the top of this file
 	**/
 	uint32 _id;
-	
+
 	GlobalWeapon* _equipped_weapon;
 	GlobalArmor* _equipped_armor[4];
 
@@ -632,9 +699,9 @@ protected:
 /** ****************************************************************************
 *** \brief Represents a party of characters
 ***
-*** This class is a container for a group or "party" of characters. The purpose of 
+*** This class is a container for a group or "party" of characters. The purpose of
 *** this class is tied mostly to convience for the GameGlobal class, as characters
-*** may need to be organized into groups. For example, the characters that are in the 
+*** may need to be organized into groups. For example, the characters that are in the
 *** active party versus the "reserved" party, or in the case of when the characters split
 *** into multiple parties according with the story or to achieve a particular goal.
 ***

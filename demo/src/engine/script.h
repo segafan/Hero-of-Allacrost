@@ -70,6 +70,8 @@ const uint32 SCRIPT_CLOSE_TABLE_FAILURE = 0x00000008;
 const uint32 SCRIPT_INVALID_TABLE_KEY   = 0x00000010;
 //! Occurs when user attempts to write a vector of size 0, or read a vector that is not initially empty.
 const uint32 SCRIPT_BAD_VECTOR_SIZE     = 0x00000020;
+//! Occurs when a value retrieved from the Lua stack is an incorrect type
+const uint32 SCRIPT_BAD_TYPE            = 0x00000040;
 //@}
 
 /** \name Script File Access Modes
@@ -300,15 +302,19 @@ public:
 	uint32 ReadGetTableSize();
 	//@}
 
-	/** \brief A generic method that calls a function that exists in Lua
-	*** \param *function The name of the function in Lua
-	*** \param *sig The function's signature. Ex. "ii>s" takes two integer arguments
-	*** and returns a string.
-	*** \param ... A list of arguments and pointers to store return values
-	*** \todo Does not use luabind's mechanisms....maybe it should?
-	*** \todo Support functions that are embedded in tables
+	/** \name Read Function Access Functions
+	*** \param key The name of the function if it is contained in the global space, or the key
+	*** if the function is embedded in a table.
+	*** \return A luabind::object class object, which can be used to call the function
+	***
+	***
 	**/
-	void ReadCallFunction(const char *function, const char *sig, ...);
+	//@{
+	luabind::object ReadFunction(std::string key);
+
+	//! \note The calling function may <b>not</b> be contained within the global space.
+	luabind::object ReadFunction(int32 key);
+	//@}
 
 	// -------------------- Write Access Functions
 
