@@ -126,30 +126,18 @@ GlobalEnemy::GlobalEnemy(const std::string & file_name) :
 	}
 
 	// Load damage frames for the enemy. TODO: Do these images need to be deleted as well somewhere?!
-	StillImage i;
-	i.SetFilename("img/sprites/battle/enemies/" + _filename + ".png");
-	i.SetStatic(true);
-	i.SetDimensions(static_cast<float>(_sprite_width), static_cast<float>(_sprite_height));
-	VideoManager->LoadImage(i);
-	_sprite_frames.push_back(i);
+	StillImage img;
+	img.SetDimensions(static_cast<float>(_sprite_width), static_cast<float>(_sprite_height));
+	_sprite_frames.push_back(img);
+	_sprite_frames.push_back(img);
+	_sprite_frames.push_back(img);
+	_sprite_frames.push_back(img);
 
-	i.SetFilename("img/sprites/battle/enemies/" + _filename + "_hp66.png");
-	i.SetStatic(true);
-	i.SetDimensions(static_cast<float>(_sprite_width), static_cast<float>(_sprite_height));
-	VideoManager->LoadImage(i);
-	_sprite_frames.push_back(i);
-
-	i.SetFilename("img/sprites/battle/enemies/" + _filename + "_hp33.png");
-	i.SetStatic(true);
-	i.SetDimensions(static_cast<float>(_sprite_width), static_cast<float>(_sprite_height));
-	VideoManager->LoadImage(i);
-	_sprite_frames.push_back(i);
-
-	i.SetFilename("img/sprites/battle/enemies/" + _filename + "_hp00.png");
-	i.SetStatic(true);
-	i.SetDimensions(static_cast<float>(_sprite_width), static_cast<float>(_sprite_height));
-	VideoManager->LoadImage(i);
-	_sprite_frames.push_back(i);
+	if (VideoManager->LoadMultiImage(_sprite_frames, ("img/sprites/battle/enemies/" + _filename + ".png"), 1, 4) == false) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL ERROR: failed to load sprite frames for GlobalEnemy: " << _filename << endl;
+			return;
+	}
 
 	_movement_speed = read_data.ReadInt("movement_speed");
 	_base_hit_points = read_data.ReadInt("base_hit_points");

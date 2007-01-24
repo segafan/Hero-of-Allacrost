@@ -314,74 +314,66 @@ uint32 ScriptDescriptor::ReadGetTableSize() {
 
 
 
-void ScriptDescriptor::ReadCallFunction(const char *function, const char *sig, ...) {
-	va_list vlist;
-	int32 narg, nres;  // The number of arguments and results
+object ScriptDescriptor::ReadFunction(string key) {
+	object o;
+	if (_CheckFileAccess(SCRIPT_READ) == false)
+		return o;
 
-	va_start(vlist, sig);
-	lua_getglobal(_lstack, function);  // Get function from the Lua stack
+	// Global value
+	if (_open_tables.size() == 0) {
+		lua_getglobal(_lstack, key.c_str());
+		o(from_stack(_lstack, STACK_TOP));
 
-	// Push the function arguments onto the stack
-	narg = 0;
-	while (*sig) {
-		switch (*sig++) {
-		case 'd':  // double argument
-			lua_pushnumber(_lstack, va_arg(vlist, double));
-			break;
-
-		case 'i':  // int argument
-			lua_pushnumber(_lstack, va_arg(vlist, int));
-			break;
-
-		case 's':  // string argument
-			lua_pushstring(_lstack, va_arg(vlist, char *));
-			break;
-
-		case '>': // Denotes end of argument list
-			goto endwhile;
-
-		default:
-			fprintf(stderr, "SCRIPT ERROR: invalid option (%c) in function call argument list\n", *(sig-1));
+		if (!o) {
+			if (SCRIPT_DEBUG)
+				cerr << "SCRIPT DESCRIPTOR: Unable to access global " << key << endl;
+			_error_code |= SCRIPT_BAD_GLOBAL;
+			return o;
 		}
-		narg++;
-		luaL_checkstack(_lstack, 1, "SCRIPT ERROR: too many arguments given in function call");
-	} endwhile:
 
-	// Perform the function call
-	nres = strlen(sig);
-	if (lua_pcall(_lstack, narg, nres, 0) != 0)
-		fprintf(stderr, "SCRIPT ERROR: function call \"%s\" failed: %s\n", function, lua_tostring(_lstack, -1));
-
-	// Retrieve the function results
-	nres = -nres;  // Stack index of first result
-	while (*sig) {
-		switch (*sig++) {
-
-		case 'd':  // double result
-			if (!lua_isnumber(_lstack, nres))
-				fprintf(stderr, "SCRIPT ERROR: incorrect result type (float)\n");
-			*va_arg(vlist, double*) = lua_tonumber(_lstack, nres);
-			break;
-
-		case 'i':  // int result
-			if (!lua_isnumber(_lstack, nres))
-				fprintf(stderr, "SCRIPT ERROR: incorrect result type (int)\n");
-			*va_arg(vlist, int*) = (int)lua_tonumber(_lstack, nres);
-			break;
-
-		case 's':  // string result
-			if (!lua_isstring(_lstack, nres))
-				fprintf(stderr, "SCRIPT ERROR: incorrect result type (string)\n");
-			*va_arg(vlist, const char**) = lua_tostring(_lstack, nres);
-			break;
-
-		default:
-			fprintf(stderr, "SCRIPT ERROR: invalid option (%c) in function call result list\n", *(sig-1));
+		if (type(o) == LUA_TFUNCTION) {
+			lua_pop(_lstack, 1);
 		}
-		nres++;
+		else {
+			if (SCRIPT_DEBUG)
+				cerr << "SCRIPT DESCRIPTOR: Unexpected type for retrieved value " << key << endl;
+			_error_code |= SCRIPT_BAD_TYPE;
+		}
+
+		return o;
 	}
-	va_end(vlist);
-} // void ScriptDescriptor::ReadCallFunction(const char *function, const char *sig, ...)
+
+	// There is an open table, get the key from the table
+	else {
+		o(from_stack(_lstack, STACK_TOP));
+		if (type(o) != LUA_TTABLE) {
+			// table not on top of stack
+			if (SCRIPT_DEBUG)
+				cerr << "SCRIPT DESCRIPTOR: Top of stack is not a table." << endl;
+			_error_code |= SCRIPT_BAD_GLOBAL;
+			return o;
+		}
+
+		if (type(o[key]) == LUA_TFUNCTION) {
+			lua_pop(_lstack, 1);
+		}
+		else {
+			if (SCRIPT_DEBUG)
+				cerr << "SCRIPT DESCRIPTOR: Unexpected type for retrieved value " << key << endl;
+			_error_code |= SCRIPT_BAD_TYPE;
+		}
+		return o[key];
+	}
+} // object ScriptDescriptor::ReadFunction(string key)
+
+
+
+object ScriptDescriptor::ReadFunction(int32 key) {
+	object o;
+	// TODO
+
+	return o;
+} // object ScriptDescriptor::ReadFunction(int32 key)
 
 // ***************************** Write Functions *******************************
 
