@@ -75,8 +75,6 @@ const uint32 SKILLS_SIZE    = 2;
 //@{
 const uint32 EQUIP_EQUIP   = 0;
 const uint32 EQUIP_REMOVE  = 1;
-//const uint32 STATUS_EQUIP_NEXT    = 2;
-//const uint32 STATUS_EQUIP_PREV    = 3;
 const uint32 EQUIP_CANCEL  = 2;
 const uint32 EQUIP_SIZE    = 3;
 //@}
@@ -85,15 +83,12 @@ const uint32 EQUIP_SIZE    = 3;
 //@{
 const uint32 STATUS_VIEW    = 0;
 const uint32 STATUS_CANCEL  = 1;
-//const uint32 STATUS_EQUIP_NEXT    = 2;
-//const uint32 STATUS_EQUIP_PREV    = 3;
-//const uint32 EQUIP_CANCEL  = 2;
 const uint32 STATUS_SIZE    = 2;
 //@}
 
 //! \name Formation Menu Options Constants
 //@{
-const uint32 FORMATION_SWITCH    = 0;
+const uint32 FORMATION_SWITCH  = 0;
 const uint32 FORMATION_CANCEL  = 1;
 const uint32 FORMATION_SIZE    = 2;
 //@}
@@ -156,8 +151,19 @@ public:
 	MenuMode();
 	~MenuMode();
 
+	/*!
+	* \brief Resets the menu mode back to its default setup
+	*/
 	void Reset();
+	
+	/*!
+	* \brief Updates the menu.  Calls Update() on active window if there is one
+	*/
 	void Update();
+	
+	/*!
+	* \brief Draws the menu.  Calls Draw() on active window if there is one.
+	*/
 	void Draw();
 
 
@@ -167,7 +173,6 @@ private:
 	**/
 	hoa_video::StillImage _saved_screen;
 	
-
 	//std::vector<hoa_video::StillImage> _menu_images;
 	
 	/** \name Main Display Windows
@@ -176,7 +181,6 @@ private:
 	//@{
 	hoa_video::MenuWindow _bottom_window;
 	hoa_video::MenuWindow _main_options_window;
-	//hoa_video::MenuWindow _item_list_header_window;
 	//std::vector<private_menu::CharacterWindow> _character_windows;
 	private_menu::CharacterWindow _character_window0;
 	private_menu::CharacterWindow _character_window1;
@@ -192,17 +196,19 @@ private:
 
 	//@}
 
-	//! \brief the sounds for MenuMode
+	//! the sounds for MenuMode
 	std::map<std::string, hoa_audio::SoundDescriptor> _menu_sounds;
-	//! \brief The selected character
+	
+	//! The selected character
 	uint32 _char_selected;
-	//! \brief The selected item/skill/equipment
+	
+	//! The selected item/skill/equipment
 	uint32 _item_selected;
 		
-	//! \brief The current option box to display
+	//! The current option box to display
 	uint32 _current_menu_showing;
 
-	//! \breif The current window being drawn
+	//! The current window being drawn
 	uint32 _current_window;
 
 	//! A pointer to the current options menu
@@ -219,8 +225,6 @@ private:
 	hoa_video::OptionBox _menu_options;
 	hoa_video::OptionBox _menu_save;
 	hoa_video::OptionBox _menu_equip;
-	//hoa_video::OptionBox _menu_char_select;
-	//hoa_video::OptionBox _menu_item_list;
 	//@}
 	
 	//! \brief Functions to set up the option boxes
@@ -233,8 +237,6 @@ private:
 	void _SetupOptionsOptionBox();
 	void _SetupSaveOptionBox();
 	void _SetupEquipOptionBox();
-	//void _SetupCharSelectOptionBox();
-	//void _SetupItemListOptionBox();
 	//@}
 
 	/** \name Menu Handle Functions
@@ -244,8 +246,6 @@ private:
 	void _HandleMainMenu();
 	void _HandleInventoryMenu();
 	void _HandleSkillsMenu();
-	//void _HandleItemListMenu();
-	//void _HandleCharSelectMenu();
 	void _HandleStatusMenu();
 	void _HandleOptionsMenu();
 	void _HandleSaveMenu();
@@ -254,9 +254,11 @@ private:
 
 	//! \brief Draws the bottom part of the menu mode.
 	void _DrawBottomMenu();
+	
 	//! \brief Draws the 'Name' and 'Qty' tags for the item list.
 	void _DrawItemListHeader();
-};
+	
+}; // class MenuMode : public hoa_mode_manager::GameMode
 
 } // namespace hoa_menu
 

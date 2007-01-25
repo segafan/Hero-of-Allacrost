@@ -291,6 +291,11 @@ private:
 	*** This menu window is always located on the left side of the screen.
 	**/
 	hoa_video::MenuWindow* _action_menu_window;
+	/** \brief The menu window used to list your currently selected action
+	*** It's placed at the top of the left menu, reserving the bottom for
+	*** the action list
+	**/
+	hoa_video::MenuWindow _action_type_window;
 	/** \brief The option menu that lists the types of actions that a character may take in battle
 	*** Typically this list includes "attack", "defend", "support", and "item". More types may appear
 	*** under special circumstances and conditions.
@@ -314,6 +319,12 @@ private:
 	*** attack point, <b>not</b> just any attack points present.
 	**/
 	hoa_video::AnimatedImage _attack_point_indicator;
+	/** \brief The icons used for representing each of the possible action types in battle
+	*** This vector is used solely for the purpose of drawing the chosen action above the
+	*** action list in battle.  For example, if they choose attack, then the attack icon along
+	*** with the word 'Attack' will appear at the top of the window, followed by the action list
+	**/
+	std::vector<hoa_video::StillImage> _action_type_icons;
 	//@}
 
 	//! \name Character Swap Card Data
@@ -420,6 +431,10 @@ private:
 	*** \TODO Dialogues are currently not supported in battles. The feature will be added sometime in the future.
 	**/
 	void _DrawDialogueMenu();
+	/** \brief Draws the small window above the action list
+	*** This window is for indicatinig what your current action is, in case you forgot what you chose
+	**/
+	void _DrawActionTypeWindow();
 	//@}
 }; // class BattleMode : public hoa_mode_manager::GameMode
 

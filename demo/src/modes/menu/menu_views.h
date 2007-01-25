@@ -86,15 +86,19 @@ public:
 	 */
 	CharacterWindow();
 	/*!
-     * \brief CharacterWindow Destructor
+	* \brief CharacterWindow Destructor
 	 */
 	~CharacterWindow();
 
-	//! Set the character for this window
+	/*!
+	* \brief Set the character for this window
+	* \param character the character to associate with this window
+	*/
 	void SetCharacter(hoa_global::GlobalCharacter *character);
 
 	/*!
-	 * \brief render this window to the screen.
+	 * \brief render this window to the screen
+	 * \return success/failure
 	 */
 	void Draw();
 }; // class CharacterWindow : public hoa_video::MenuWindow
@@ -155,43 +159,42 @@ public:
 	InventoryWindow();
 	~InventoryWindow();
 
-	/** \brief Toggles the inventory window being in the active context for the player
-	*** \param new_status Activates the inventory window when true, de-activates it when false
-	**/
+	/*!
+	* \brief Toggles the inventory window being in the active context for the player
+	* \param new_status Activates the inventory window when true, de-activates it when false
+	*/
 	void Activate(bool new_status);
-	/** \brief Indicates whether the inventory window is in the active context
-	*** \return True if the inventory window is in the active context
-	**/
+	
+	/*!
+	* \brief Indicates whether the inventory window is in the active context
+	* \return True if the inventory window is in the active context
+	*/
 	inline bool IsActive()
 		{ return _active_box; }
 
 	//! If the inventory window is ready to cancel out, or cancel out a sub-window
 	//bool CanCancel();
 	
+	/*!
+	* \brief Updates the inventory window.  Handles key presses, switches window context, etc.
+	*/
 	void Update();
 
-	//! \brief Draw the inventory window
-	//! Takes care of drawing the inventory window to the screen.
+	/*!
+	* \brief Draw the inventory window
+	* \return success/failure
+	*/
 	void Draw();
 
 private:
 	
-	//! Flag to specify if the inventory window is active
-	//bool _inventory_active;
-
-	//! Flag to specify if the character select window is active
-	//bool _char_select_active;
-
-	//! Flag to specify if the item category select window is active
-	//bool _item_categories_active;
-
-	//! \brief Used for char portraits in bottom menu
+	//! Used for char portraits in bottom menu
 	std::vector<hoa_video::StillImage> _portraits;
 
-	//! \brief Used fo rthe current dungeon
+	//! Used for the current dungeon
 	hoa_video::StillImage _location_picture;
 
-	//! \brief Flag to specify the active option box
+	//! Flag to specify the active option box
 	uint32 _active_box;
 
 	//! OptionBox to display all of the items
@@ -206,26 +209,33 @@ private:
 	//! \brief the sounds for MenuMode
 	std::map<std::string, hoa_audio::SoundDescriptor> _menu_sounds;
 
-	//! The MiniCharacterWindow to be shown when needed to select a character
-	//MiniCharacterSelectWindow _char_window;
+	/*!
+	* \brief Updates the item text in the inventory items
+	*/
+	void _UpdateItemText();
 
-	//! Updates the item text in the inventory items
-	void UpdateItemText();
+	/*!
+	* \brief Initializes inventory items option box
+	*/
+	void _InitInventoryItems();
 
-	//! Initializes inventory items option box
-	void InitInventoryItems();
+	/*!
+	* \brief Initializes char select option box
+	*/
+	void _InitCharSelect();
 
-	//! Initializes char select option box
-	void InitCharSelect();
+	/*!
+	* \brief Initializes item category select option box
+	*/
+	void _InitCategory();
 
-	//! Initializes item category select option box
-	void InitCategory();
-
-	//! \brief Draw contents of bottom menu
-	void DrawBottomMenu();
+	/*!
+	* \brief Draw contents of bottom menu
+	*/
+	void _DrawBottomMenu();
 
 	//! FIX ME
-	void ApplyItem();
+	void _TEMP_ApplyItem();
 
 }; // class InventoryWindow : public hoa_video::MenuWindow
 
@@ -238,42 +248,60 @@ private:
 class StatusWindow : public hoa_video::MenuWindow
 {
 private:
-	//! \brief char portraits
+	//! char portraits
 	std::vector<hoa_video::StillImage> _full_portraits;
 
 	//! A graphic for the location (map) that the player is currently on
 	hoa_video::StillImage _location_picture;
 
-	//! \brief the sounds for MenuMode
+	//! the sounds for MenuMode
 	std::map<std::string, hoa_audio::SoundDescriptor> _menu_sounds;
 
-	//! \brief the current character for this screen.
+	//! the current character for this screen.
 	hoa_global::GlobalCharacter *_current_char;
 
-	//! \brief if the window is active or not
+	//! if the window is active or not
 	bool _char_select_active;
 	
-	//! \brief character selection option box
+	//! character selection option box
 	hoa_video::OptionBox _char_select;
 
-	//! \brief initialize character selection option box
-	void InitCharSelect();
+	/*!
+	* \brief initialize character selection option box
+	*/
+	void _InitCharSelect();
 
-	//! \brief Draw contents of bottom menu
-	void DrawBottomMenu();
+	/*!
+	* \brief Draw contents of bottom menu
+	*/
+	void _DrawBottomMenu();
+	
 public:
 
 	StatusWindow();
 	~StatusWindow();
-	//! \brief render this window to the screen.
+	
+	/*!
+	* \brief render this window to the screen
+	* \return success/failure
+	*/
 	void Draw();
 
-	//! \brief update function handles input to the window
+	/*!
+	* \brief update function handles input to the window
+	*/
 	void Update();
 
-	//! \brief Check if status window is active
+	/*!
+	* \brief Check if status window is active
+	* \return true if the window is active, false if it's not
+	*/
 	inline bool IsActive() { return _char_select_active; }
-	//! \brief Active this window
+	
+	/*!
+	* \brief Active this window
+	* \param new_value true to activate window, false to deactivate window
+	*/
 	void Activate(bool new_value);
 		
 }; // class StatusWindow : public hoa_video::MenuWindow
@@ -293,67 +321,73 @@ public:
 	SkillsWindow();
 	~SkillsWindow();
 
-	//! \brief Updates key presses and window states
+	/*!
+	* \brief Updates key presses and window states
+	*/
 	void Update();
 
-	//! \brief Draws the windows and option boxes
+	/*!
+	* \brief Draws the windows and option boxes
+	* \return success/failure
+	*/
 	void Draw();
 
-	//! \brief Activates the window
+	/*!
+	* \brief Activates the window
+	* \param new_value true to activate window, false to deactivate window
+	*/
 	void Activate(bool new_status);
 
-	//! \brief Checks to see if the skills window is active
-	inline bool IsActive() { return _active_box;/*_skills_categories_active || 
-							_skills_list_active ||
-							_char_select_active ||
-							_char_select_apply_active;*/}
+	/*!
+	* \brief Checks to see if the skills window is active
+	* \return true if the window is active, false if it's not
+	*/
+	inline bool IsActive() { return _active_box; }
 
 private:
 
-	//! \brief If the character select option box is active
-	//bool _char_select_active;
-
-	//! \brief If we're choosing the character to apply the skill to
-	//bool _char_select_apply_active;
-
-	//! \brief If the skills categories option box is active
-	//bool _skills_categories_active;
-
-	//! \brief If the skills list option box is active
-	//bool _skills_list_active;
-
-	//! \brief Flag to specify the active option box
+	//! Flag to specify the active option box
 	uint32 _active_box;
 
-	//! brief The character select option box
+	//! The character select option box
 	hoa_video::OptionBox _char_select;
 
-	//! brief The skills categories option box
+	//! The skills categories option box
 	hoa_video::OptionBox _skills_categories;
 
-	//! \brief The skills list option box
+	//! The skills list option box
 	hoa_video::OptionBox _skills_list;
 
 	//! Menu sounds
 	std::map<std::string, hoa_audio::SoundDescriptor> _menu_sounds;
 
-	//! \brief Track whihc character's skillset was chosen
+	//! Track whihc character's skillset was chosen
 	int32 _char_skillset;
 
-	//! \brief Initializes the skills category chooser
-	void InitSkillsCategories();
+	/*!
+	* \brief Initializes the skills category chooser
+	*/
+	void _InitSkillsCategories();
 
-	//! \brief Initializes the skills chooser
-	void InitSkillsList();
+	/*!
+	* \brief Initializes the skills chooser
+	*/
+	void _InitSkillsList();
 
-	//! \brief Initializes the character selector
-	void InitCharSelect();
+	/*!
+	* \brief Initializes the character selector
+	*/
+	void _InitCharSelect();
 
-	//! \brief Sets up the skills that comprise the different categories
-	void UpdateSkillList();
+	/*!
+	* \brief Sets up the skills that comprise the different categories
+	*/
+	void _UpdateSkillList();
 
-	//! \brief Draw contents of bottom menu
-	void DrawBottomMenu();
+	/*!
+	* \brief Draw contents of bottom menu
+	*/
+	void _DrawBottomMenu();
 
 }; //class SkillsWindow : public hoa_video::MenuWindow
 
@@ -370,52 +404,73 @@ public:
 	EquipWindow();
 	~EquipWindow();
 
-	//! \brief Draws window
+	/*!
+	* \brief Draws window
+	* \return success/failure
+	*/
 	void Draw();
 
-	//! \brief Performs updates
+	/*!
+	* \brief Performs updates
+	*/
 	void Update();
 
-	//! Is window active?
+	/*!
+	* \brief Checks to see if the equipment window is active
+	* \return true if the window is active, false if it's not
+	*/
 	inline bool IsActive() { return _active_box; }
 
-	//! Activate/deactivate window
+	/*!
+	* \brief Activates the window
+	* \param new_value true to activate window, false to deactivate window
+	*/
 	void Activate(bool new_status);
 
 private:
-	//! \brief Character selector
+
+	//! Character selector
 	hoa_video::OptionBox _char_select;
-	//! \brief Equipment selector
+	
+	//! Equipment selector
 	hoa_video::OptionBox _equip_select;
-	//! \brief Replacement selector
+	
+	//! Replacement selector
 	hoa_video::OptionBox _equip_list;
 
-	//! \brief Char selector active
-	//bool _char_select_active;
-	//! \brief Equipment selector active
-	//bool _equip_select_active;
-	//! \brief Replacement selector active
-	//bool _equip_list_active;
-	//! \brief Flag to specify the active option box
+	//! Flag to specify the active option box
 	uint32 _active_box;
 
-	//! \brief the sounds for MenuMode
+	//! the sounds for MenuMode
 	std::map<std::string, hoa_audio::SoundDescriptor> _menu_sounds;
-	//! \brief equipment images
+	
+	//! equipment images
 	std::vector<hoa_video::StillImage> _equip_images;
 
-	//! \brief Set up char selector
-	void InitCharSelect();
-	//! \brief Set up equipment selector
-	void InitEquipmentSelect();
-	//! \brief Set up replacement selector
-	void InitEquipmentList();
+	/*!
+	* \brief Set up char selector
+	*/
+	void _InitCharSelect();
+	
+	/*!
+	* \brief Set up equipment selector
+	*/
+	void _InitEquipmentSelect();
+	
+	/*!
+	* \brief Set up replacement selector
+	*/
+	void _InitEquipmentList();
 
-	//! \brief Updates the equipment list
-	void UpdateEquipList();
+	/*!
+	* \brief Updates the equipment list
+	*/
+	void _UpdateEquipList();
 
-	//! \brief Draw contents of bottom menu
-	void DrawBottomMenu();
+	/*!
+	* \brief Draw contents of bottom menu
+	*/
+	void _DrawBottomMenu();
 
 }; // class EquipWindow : public hoa_video::MenuWindow
 

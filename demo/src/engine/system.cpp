@@ -9,7 +9,7 @@
 
 /** ****************************************************************************
 *** \file   system.cpp
-*** \author Tyler Olsen, roots@allacrost.org
+*** \author Tyler Olsen, roots@allacrost.org; Andy Gardner, chopperdave@allacrost.org
 *** \brief  Source file for system code management
 *** ***************************************************************************/
 
@@ -125,6 +125,37 @@ void GameSystem::SetLanguage(std::string lang) {
 //
 // 	cerr << "SETTINGS ERROR: attempt to set unsupported language \"" << lang << "\" failed" << endl;
 	_language = lang;
+}
+
+Timer::Timer( uint32 duration )
+{
+	_duration = duration;
+	_time_left = duration;
+	_expiration_time = 0;
+}
+
+void Timer::Play()
+{
+	_expiration_time = SDL_GetTicks() + _time_left;
+}
+
+void Timer::Pause()
+{
+	_time_left = _expiration_time - SDL_GetTicks();
+}
+
+void Timer::Reset()
+{
+	_time_left = _duration;
+	_expiration_time = 0;
+}
+
+bool Timer::HasExpired()
+{
+	if ( _expiration_time && ( SDL_GetTicks() > _expiration_time ) )
+		return true;
+
+	return false;
 }
 
 } // namespace hoa_settings
