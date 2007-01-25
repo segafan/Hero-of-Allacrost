@@ -170,7 +170,7 @@ void BattleCharacterActor::DrawStatus() {
 	// Shrinking bars (HP, SP) TODO: STAMINA
 	float bar_size;
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_NO_BLEND, 0);
-	bar_size = 83*GetActor()->GetHitPoints()/GetActor()->GetMaxHitPoints();
+	bar_size = static_cast<float>(83*GetActor()->GetHitPoints())/static_cast<float>(GetActor()->GetMaxHitPoints());
 
 	// HP, green bar
 	VideoManager->PushMatrix();
@@ -186,7 +186,7 @@ void BattleCharacterActor::DrawStatus() {
 	VideoManager->PopMatrix();
 
 	// SP, blue bar
-	bar_size = 84*GetActor()->GetSkillPoints()/GetActor()->GetMaxSkillPoints();
+	bar_size = static_cast<float>(84*GetActor()->GetSkillPoints())/static_cast<float>(GetActor()->GetMaxSkillPoints());
 	VideoManager->PushMatrix();
 	VideoManager->Move(413, 90 + y_offset);
 	VideoManager->Scale(bar_size,6);

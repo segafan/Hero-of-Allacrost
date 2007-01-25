@@ -137,6 +137,22 @@ BattleMode::BattleMode() :
 		_attack_point_indicator.AddFrame(attack_point_indicator[i], 10);
 	}
 
+	//Load in action type icons, FIXME add more later
+	frame.SetDimensions(45, 45);
+	frame.SetFilename("img/icons/battle/attack.png");
+	_action_type_icons.push_back(frame);
+	frame.SetFilename("img/icons/battle/defend.png");
+	_action_type_icons.push_back(frame);
+	frame.SetFilename("img/icons/battle/support.png");
+	_action_type_icons.push_back(frame);
+	frame.SetFilename("img/icons/battle/item.png");
+	_action_type_icons.push_back(frame);
+
+	for (uint16 i = 0; i < _action_type_icons.size(); i++) {
+		if (!VideoManager->LoadImage(_action_type_icons[i]))
+			cerr << "BATTLE ERROR: Failed to load action type icons." << endl;
+	}
+
 	_actor_selection_image.SetDimensions(109, 78);
 	_actor_selection_image.SetFilename("img/icons/battle/character_selector.png");
 	if (!VideoManager->LoadImage(_actor_selection_image)) {
@@ -157,11 +173,16 @@ BattleMode::BattleMode() :
 
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 
-	_action_menu_window = new MenuWindow();
-	_action_menu_window->Create(210.0f, 384.0f);
+	_action_menu_window = new MenuWindow();//384
+	_action_menu_window->Create(210.0f, 430.0f);
 	_action_menu_window->SetPosition(0.0f, 544.0f);
 	_action_menu_window->SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_action_menu_window->Hide();
+
+	_action_type_window.Create(210.0f, 75.0f);
+	_action_type_window.SetPosition(0.0f, 544.0f);
+	_action_type_window.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	_action_type_window.Show();
 
 	_action_type_menu_cursor_location = 0;
 
@@ -169,7 +190,7 @@ BattleMode::BattleMode() :
 	_action_type_menu.SetCursorOffset(-20.0f, 25.0f);
 	_action_type_menu.SetCellSize(100.0f, 80.0f);
 	_action_type_menu.SetSize(1, 4);
-	_action_type_menu.SetPosition(30.0f, 512.0f);
+	_action_type_menu.SetPosition(30.0f, 542.0f);
 	_action_type_menu.SetFont("battle");
 	_action_type_menu.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_action_type_menu.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
@@ -230,6 +251,11 @@ BattleMode::~BattleMode() {
 	VideoManager->DeleteImage(_swap_icon);
 	VideoManager->DeleteImage(_swap_card);
 
+	//Remove action type icons
+	for (uint16 i = 0; i < _action_type_icons.size(); i++) {
+		VideoManager->DeleteImage(_action_type_icons[i]);
+	}
+
 	// Delete all GUI objects that are allocated
 	if (_action_list_menu) {
 		delete _action_list_menu;
@@ -240,6 +266,8 @@ BattleMode::~BattleMode() {
 		delete _action_menu_window;
 		_action_menu_window = 0;
 	}
+
+	_action_type_window.Destroy();
 } // BattleMode::~BattleMode()
 
 
@@ -334,7 +362,7 @@ void BattleMode::_CreateEnemyActors() {
 		// Create the Green Slime EnemyActor
 		if (Probability(50))
 		{
-			BattleEnemyActor * green_slime = new BattleEnemyActor("green_slime", RandomBoundedInteger(400, 600), RandomBoundedInteger(200, 400));
+			BattleEnemyActor * green_slime = new BattleEnemyActor("green_slime", static_cast<float> (RandomBoundedInteger(400, 600)), static_cast<float> (RandomBoundedInteger(200, 400)));
 			green_slime->SetName(MakeUnicodeString("Green Slime"));
 			green_slime->LevelSimulator(2);
 			_enemy_actors.push_back(green_slime);
@@ -343,7 +371,7 @@ void BattleMode::_CreateEnemyActors() {
 		// Create the Spider EnemyActor
 		if (Probability(50))
 		{
-			BattleEnemyActor * spider = new BattleEnemyActor("spider", RandomBoundedInteger(400, 600), RandomBoundedInteger(200, 400));
+			BattleEnemyActor * spider = new BattleEnemyActor("spider", static_cast<float> (RandomBoundedInteger(400, 600)), static_cast<float> (RandomBoundedInteger(200, 400)));
 			spider->SetName(MakeUnicodeString("Spider"));
 			spider->LevelSimulator(2);
 			_enemy_actors.push_back(spider);
@@ -352,7 +380,7 @@ void BattleMode::_CreateEnemyActors() {
 		// Create the Snake EnemyActor
 		if (Probability(50))
 		{
-			BattleEnemyActor * snake = new BattleEnemyActor("snake", RandomBoundedInteger(400, 600), RandomBoundedInteger(200, 400));
+			BattleEnemyActor * snake = new BattleEnemyActor("snake", static_cast<float> (RandomBoundedInteger(400, 600)), static_cast<float> (RandomBoundedInteger(200, 400)));
 			snake->SetName(MakeUnicodeString("Snake"));
 			snake->LevelSimulator(2);
 			_enemy_actors.push_back(snake);
@@ -361,7 +389,7 @@ void BattleMode::_CreateEnemyActors() {
 		// Create the Skeleton EnemyActor
 		if (Probability(50))
 		{
-			BattleEnemyActor * skeleton = new BattleEnemyActor("skeleton", RandomBoundedInteger(400, 600), RandomBoundedInteger(200, 400));
+			BattleEnemyActor * skeleton = new BattleEnemyActor("skeleton", static_cast<float> (RandomBoundedInteger(400, 600)), static_cast<float> (RandomBoundedInteger(200, 400)));
 			skeleton->SetName(MakeUnicodeString("Skeleton"));
 			skeleton->LevelSimulator(2);
 			_enemy_actors.push_back(skeleton);
@@ -561,7 +589,11 @@ void BattleMode::_UpdateActionListMenu() {
 			_selected_enemy = GetEnemyActorAt(_argument_actor_index);
 			_cursor_state = CURSOR_SELECT_TARGET;
 		}
-
+		else if (_action_type_menu_cursor_location == ACTION_TYPE_ITEM) {
+			//_PopulateItemList();, ignore anything not useable in battle
+			//Set cursor to first index
+			//
+		}
 		// TODO: retrieve the selected skill, place the cursor on either characters or enemies,
 		// depending on whom that skill should target by default
 	}
@@ -773,10 +805,57 @@ void BattleMode::_DrawActionMenu() {
 
 	// Draw the action list menu
 	if (_cursor_state >= CURSOR_SELECT_ACTION_LIST) {
+		_DrawActionTypeWindow();
 		_action_list_menu->Draw();
 	}
 } // void BattleMode::_DrawActionMenu()
 
+void BattleMode::_DrawActionTypeWindow() {
+	_action_type_window.Draw();
+
+	VideoManager->Move(30.0f, 525.0f);
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	VideoManager->DrawImage(_action_type_icons[_action_type_menu_cursor_location]);
+	VideoManager->MoveRelative(55.0f, -20.0f);
+	VideoManager->SetDrawFlags(VIDEO_Y_CENTER);
+
+	switch (_action_type_menu_cursor_location)
+	{
+	case ACTION_TYPE_ATTACK:
+		VideoManager->DrawText("Attack");
+		break;
+	case ACTION_TYPE_DEFEND:
+		VideoManager->DrawText("Defend");
+		break;
+	case ACTION_TYPE_SUPPORT:
+		VideoManager->DrawText("Support");
+		break;
+	case ACTION_TYPE_ITEM:
+		VideoManager->DrawText("Item");
+		break;
+	/*case ACTION_TYPE_EQUIP:
+		break;
+	case ACTION_TYPE_FLEE:
+		break;*/
+	default: cerr << "BATTLE ERROR: Unknown action type number: " << _action_type_menu_cursor_location << endl;
+		break;
+	}
+
+	if (_action_type_menu_cursor_location <= ACTION_TYPE_SUPPORT)
+	{
+		VideoManager->MoveRelative(-55.0f, -30.0f);
+		VideoManager->DrawText("Action");
+		VideoManager->MoveRelative(154.0f, 0.0f);
+		VideoManager->DrawText("SP");
+	}
+	else if (_action_type_menu_cursor_location == ACTION_TYPE_ITEM)
+	{
+		VideoManager->MoveRelative(-55.0f, -30.0f);
+		VideoManager->DrawText("Item");
+		VideoManager->MoveRelative(155.0f, 0.0f);
+		VideoManager->DrawText("Qty");
+	}
+}
 
 // TODO: This feature is not yet supported
 void BattleMode::_DrawDialogueMenu() {
@@ -818,7 +897,7 @@ void BattleMode::_ConstructActionListMenu() {
 	}
 
 	_action_list_menu = new OptionBox();
-	_action_list_menu->SetPosition(10.0f, 512.0f);
+	_action_list_menu->SetPosition(10.0f, 445.0f);
 	_action_list_menu->SetFont("battle");
 	_action_list_menu->SetAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	_action_list_menu->SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -836,7 +915,7 @@ void BattleMode::_ConstructActionListMenu() {
 		else {
 			vector<ustring> attack_skill_names;
 			for (uint32 i = 0; i < attack_skills.size(); ++i) {
-				string skill_string = MakeStandardString(attack_skills[i]->GetSkillName() + MakeUnicodeString("  ") + MakeUnicodeString(hoa_utils::NumberToString(attack_skills[i]->GetSkillPointsRequired())));
+				string skill_string = MakeStandardString(MakeUnicodeString("<L> ") + attack_skills[i]->GetSkillName() + MakeUnicodeString("<R>") + MakeUnicodeString(hoa_utils::NumberToString(attack_skills[i]->GetSkillPointsRequired())) + MakeUnicodeString(" "));
 				attack_skill_names.push_back(MakeUnicodeString(skill_string));
 			}
 			_action_list_menu->SetSize(1, attack_skill_names.size());
