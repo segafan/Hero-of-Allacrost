@@ -63,47 +63,110 @@ bool GameGlobal::SingletonInitialize() {
 
 
 void GameGlobal::BindToLua() {
-// 	module(ScriptManager->GetGlobalState(), "hoa_global")
-// 	[
-// 		class_<GameGlobal>("GameGlobal")
-// 			.def(constructor<>())
-// 			.def("AddCharacter", &GameGlobal::AddCharacter)
-// 			.def("GetCharacter", &GameGlobal::GetCharacter)
-// 			.def("GetFunds", &GameGlobal::GetFunds)
-// 			.def("SetFunds", &GameGlobal::SetFunds)
-// 			.def("AddFunds", &GameGlobal::AddFunds)
-// 			.def("SubtractFunds", &GameGlobal::SubtractFunds)
-// 			.def("AddToInventory", &GameGlobal::AddToInventory)
-// 			.def("RemoveFromInventory", &GameGlobal::RemoveFromInventory)
-// 			.def("IncrementObjectCount", &GameGlobal::IncrementObjectCount)
-// 			.def("DecrementObjectCount", &GameGlobal::DecrementObjectCount)
-// 	];
+	module(ScriptManager->GetGlobalState(), "hoa_global")
+	[
+		class_<GameGlobal>("GameGlobal")
+			.def("AddCharacter", &GameGlobal::AddCharacter)
+			.def("GetCharacter", &GameGlobal::GetCharacter)
+			.def("GetFunds", &GameGlobal::GetFunds)
+			.def("SetFunds", &GameGlobal::SetFunds)
+			.def("AddFunds", &GameGlobal::AddFunds)
+			.def("SubtractFunds", &GameGlobal::SubtractFunds)
+			.def("AddToInventory", &GameGlobal::AddToInventory)
+			.def("RemoveFromInventory", &GameGlobal::RemoveFromInventory)
+			.def("IncrementObjectCount", &GameGlobal::IncrementObjectCount)
+			.def("DecrementObjectCount", &GameGlobal::DecrementObjectCount)
 
-// 	module(ScriptManager->GetGlobalState(), "hoa_global")
-// 	[
-// 		class_<GlobalAttackPoint>("GlobalAttackPoint")
-// 	];
-//
-// 	module(ScriptManager->GetGlobalState(), "hoa_global")
-// 	[
-// 		class_<GlobalActor>("GlobalActor")
-// 	];
-//
-// 	module(ScriptManager->GetGlobalState(), "hoa_global")
-// 	[
-// 		class_<GlobalEnemy, GlobalActor>("GlobalEnemy")
-// 	];
-//
-// 	module(ScriptManager->GetGlobalState(), "hoa_global")
-// 	[
-// 		class_<GlobalCharacter, GlobalActor>("GlobalCharacter")
-// 	];
-//
-// 	module(ScriptManager->GetGlobalState(), "hoa_global")
-// 	[
-// 		class_<GlobalCharacterParty>("GlobalCharacterParty")
-// 	];
-//
+			// Namespace constants
+			.enum_("constants") [
+				// Object type constants
+				value("GLOBAL_BAD_OBJECT", GLOBAL_BAD_OBJECT),
+				value("GLOBAL_ITEM", GLOBAL_ITEM),
+				value("GLOBAL_WEAPON", GLOBAL_WEAPON),
+				value("GLOBAL_HEAD_ARMOR", GLOBAL_HEAD_ARMOR),
+				value("GLOBAL_TORSO_ARMOR", GLOBAL_TORSO_ARMOR),
+				value("GLOBAL_ARMS_ARMOR", GLOBAL_ARMS_ARMOR),
+				value("GLOBAL_LEGS_ARMOR", GLOBAL_LEGS_ARMOR),
+				// Object usage constants
+				value("GLOBAL_BAD_USAGE", GLOBAL_BAD_USAGE),
+				value("GLOBAL_MENU_USAGE", GLOBAL_MENU_USAGE),
+				value("GLOBAL_BATTLE_USAGE", GLOBAL_BATTLE_USAGE),
+				// Elemental type constants
+				value("GLOBAL_ELEMENTAL_NONE", GLOBAL_ELEMENTAL_NONE),
+				value("GLOBAL_ELEMENTAL_FIRE", GLOBAL_ELEMENTAL_FIRE),
+				value("GLOBAL_ELEMENTAL_WATER", GLOBAL_ELEMENTAL_WATER),
+				value("GLOBAL_ELEMENTAL_VOLT", GLOBAL_ELEMENTAL_VOLT),
+				value("GLOBAL_ELEMENTAL_EARTH", GLOBAL_ELEMENTAL_EARTH),
+				value("GLOBAL_ELEMENTAL_SLICING", GLOBAL_ELEMENTAL_SLICING),
+				value("GLOBAL_ELEMENTAL_SMASHING", GLOBAL_ELEMENTAL_SMASHING),
+				value("GLOBAL_ELEMENTAL_MAULING", GLOBAL_ELEMENTAL_MAULING),
+				value("GLOBAL_ELEMENTAL_PIERCING", GLOBAL_ELEMENTAL_PIERCING)
+			]
+	];
+
+	module(ScriptManager->GetGlobalState(), "hoa_global")
+	[
+		class_<GlobalAttackPoint>("GlobalAttackPoint")
+	];
+
+	module(ScriptManager->GetGlobalState(), "hoa_global")
+	[
+		class_<GlobalActor>("GlobalActor")
+			.def("GetName", &GlobalActor::GetName)
+			.def("GetHitPoints", &GlobalActor::GetHitPoints)
+			.def("GetMaxHitPoints", &GlobalActor::GetMaxHitPoints)
+			.def("GetSkillPoints", &GlobalActor::GetSkillPoints)
+			.def("GetMaxSkillPoints", &GlobalActor::GetMaxSkillPoints)
+			.def("GetExperienceLevel", &GlobalActor::GetExperienceLevel)
+			.def("GetStrength", &GlobalActor::GetStrength)
+			.def("GetVigor", &GlobalActor::GetVigor)
+			.def("GetFortitude", &GlobalActor::GetFortitude)
+			.def("GetResistance", &GlobalActor::GetResistance)
+			.def("GetAgility", &GlobalActor::GetAgility)
+			.def("GetEvade", &GlobalActor::GetEvade)
+			.def("GetPhysicalAttackRating", &GlobalActor::GetPhysicalAttackRating)
+			.def("GetMetaphysicalAttackRating", &GlobalActor::GetMetaphysicalAttackRating)
+			.def("GetWeaponEquipped", &GlobalActor::GetWeaponEquipped)
+			.def("GetArmorEquipped", &GlobalActor::GetArmorEquipped)
+			.def("GetAttackPoints", &GlobalActor::GetAttackPoints)
+			.def("GetElementalAttackBonuses", &GlobalActor::GetElementalAttackBonuses)
+			.def("GetStatusAttackBonuses", &GlobalActor::GetStatusAttackBonuses)
+			.def("GetElementalDefenseBonuses", &GlobalActor::GetElementalDefenseBonuses)
+			.def("GetStatusDefenseBonuses", &GlobalActor::GetStatusDefenseBonuses)
+
+			.def("SetName", &GlobalActor::SetName)
+			.def("SetHitPoints", &GlobalActor::SetHitPoints)
+			.def("SetSkillPoints", &GlobalActor::SetSkillPoints)
+			.def("SetMaxHitPoints", &GlobalActor::SetMaxHitPoints)
+			.def("SetMaxSkillPoints", &GlobalActor::SetMaxSkillPoints)
+			.def("SetExperienceLevel", &GlobalActor::SetExperienceLevel)
+			.def("SetStrength", &GlobalActor::SetStrength)
+			.def("SetVigor", &GlobalActor::SetVigor)
+			.def("SetFortitude", &GlobalActor::SetFortitude)
+			.def("SetProtection", &GlobalActor::SetProtection)
+			.def("SetAgility", &GlobalActor::SetAgility)
+			.def("SetEvade", &GlobalActor::SetEvade)
+
+			.def("IsAlive", &GlobalActor::IsAlive)
+			.def("EquipWeapon", &GlobalActor::EquipWeapon)
+			.def("EquipArmor", &GlobalActor::EquipArmor)
+	];
+
+	module(ScriptManager->GetGlobalState(), "hoa_global")
+	[
+		class_<GlobalEnemy, GlobalActor>("GlobalEnemy")
+	];
+
+	module(ScriptManager->GetGlobalState(), "hoa_global")
+	[
+		class_<GlobalCharacter, GlobalActor>("GlobalCharacter")
+	];
+
+	module(ScriptManager->GetGlobalState(), "hoa_global")
+	[
+		class_<GlobalCharacterParty>("GlobalCharacterParty")
+	];
+
 	module(ScriptManager->GetGlobalState(), "hoa_global")
 	[
 		class_<GlobalObject>("GlobalObject")
@@ -122,39 +185,39 @@ void GameGlobal::BindToLua() {
 			.def("IncrementCount", &GlobalObject::IncrementCount)
 			.def("DecrementCount", &GlobalObject::DecrementCount)
 	];
-//
-// 	module(ScriptManager->GetGlobalState(), "hoa_global")
-// 	[
-// 		class_<GlobalItem, GlobalObject>("GlobalItem")
-// 			.def(constructor<>())
-// 	];
-//
-// 	module(ScriptManager->GetGlobalState(), "hoa_global")
-// 	[
-// 		class_<GlobalWeapon, GlobalObject>("GlobalWeapon")
-// 			.def(constructor<>())
-// 	];
-//
-// 	module(ScriptManager->GetGlobalState(), "hoa_global")
-// 	[
-// 		class_<GlobalArmor, GlobalObject>("GlobalArmor")
-// 			.def(constructor<>())
-// 	];
-//
-// 	module(ScriptManager->GetGlobalState(), "hoa_global")
-// 	[
-// 		class_<GlobalStatusEffect>("GlobalStatusEffect")
-// 	];
-//
-// 	module(ScriptManager->GetGlobalState(), "hoa_global")
-// 	[
-// 		class_<GlobalElementalEffect>("GlobalElementalEffect")
-// 	];
-//
-// 	module(ScriptManager->GetGlobalState(), "hoa_global")
-// 	[
-// 		class_<GlobalSkill>("GlobalSkill")
-// 	];
+
+	module(ScriptManager->GetGlobalState(), "hoa_global")
+	[
+		class_<GlobalItem, GlobalObject>("GlobalItem")
+			.def(constructor<>())
+	];
+
+	module(ScriptManager->GetGlobalState(), "hoa_global")
+	[
+		class_<GlobalWeapon, GlobalObject>("GlobalWeapon")
+			.def(constructor<>())
+	];
+
+	module(ScriptManager->GetGlobalState(), "hoa_global")
+	[
+		class_<GlobalArmor, GlobalObject>("GlobalArmor")
+			.def(constructor<>())
+	];
+
+	module(ScriptManager->GetGlobalState(), "hoa_global")
+	[
+		class_<GlobalStatusEffect>("GlobalStatusEffect")
+	];
+
+	module(ScriptManager->GetGlobalState(), "hoa_global")
+	[
+		class_<GlobalElementalEffect>("GlobalElementalEffect")
+	];
+
+	module(ScriptManager->GetGlobalState(), "hoa_global")
+	[
+		class_<GlobalSkill>("GlobalSkill")
+	];
 }
 
 // ****************************************************************************

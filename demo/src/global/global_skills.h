@@ -45,6 +45,7 @@ const uint8 GLOBAL_INTENSITY_LESSER    = 1;
 const uint8 GLOBAL_INTENSITY_MODERATE  = 2;
 const uint8 GLOBAL_INTENSITY_GREATER   = 3;
 const uint8 GLOBAL_INTENSITY_EXTREME   = 4;
+const uint8 GLOBAL_INTENSITY_INVALID   = 5;
 //@}
 
 /** \name Elemental Effect Types

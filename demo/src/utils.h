@@ -282,19 +282,20 @@ std::string MakeStandardString(const hoa_utils::ustring& text);
 ***
 *** - void SingletonDestroy()          destroys the singleton class (as long as one currently exists)
 ***
-*** - CLASS* SingletonGetReference()   returns a pointer to the class object
+*** - CLASS* SingletonGetReference()   returns a pointer to the singleton class object
 ***
 *** \note Do not use any other method of creating a singleton class in the code.
 *** These macros are the one and only way you are allowed to create singleton classes.
 ***
-*** \note The constructor and destructor <b>must</b> be defined. Failure to implement
+*** \note The constructor and destructor for a class <b>must</b> be defined. Failure to implement
 *** them yields a compilation error that will look similar to the following.
 *** `In function `SINGLETON::SingletonCreate()': undefined reference to `SINGLETON::SINGLETON[in-charge]()`
 ***
-*** \note You can not create or delete instances of this class normally. The constructor, copy
-*** constructor, copy assignment operator, destructor, new/new[], and delete/delete[] operators are
-*** all declared in the private section of the class. Use the SingletonCreate(), SingletonDestroy(),
-*** and SingletonGetReference() functions instead.
+*** \note The constructor and destructor are defined in the public section of the class because the Luabind
+*** library requires this in order to bind the class. You should <b>not</b>, however, create or delete instances
+*** of this class by use of the constructor or destructor. The copy constructor, copy assignment operator,
+*** new/new[], and delete/delete[] operators are  all declared in the private section of the class.
+*** Use the SingletonCreate(), SingletonDestroy(), and SingletonGetReference() methods instead.
 ***
 *** \note Usually, you shouldn't need to do much of anything in the class constructor. This is because the
 *** public SingletonInitialize() function should handle the true initialization of the class. This function
@@ -303,7 +304,7 @@ std::string MakeStandardString(const hoa_utils::ustring& text);
 *** other singletons objects exist.
 ***
 *** \note For most singleton classes, SingletonCreate() and SingletonDestroy() should only be called in
-*** main.cpp. There may be qualified exceptions to this practice however.
+*** main.cpp. There may be qualified exceptions to this practice, however.
 ***
 *** \note Most, if not all, singleton classes also define a pointer to their singleton object inside the
 *** source file of the class. For example, the GameAudio singleton contains the AudioManager class object
@@ -314,13 +315,13 @@ std::string MakeStandardString(const hoa_utils::ustring& text);
 //! Place this macro in the private sector of the class definition
 #define SINGLETON_DECLARE(class_name) \
 	static class_name *_ref; \
-	class_name(); \
-	~class_name(); \
 	class_name(const class_name&); \
 	class_name& operator=(const class_name&);
 
 //! Place this macro in the public sector of the class definition
 #define SINGLETON_METHODS(class_name) \
+	class_name(); \
+	~class_name(); \
 	static class_name* SingletonCreate() { \
 			if (_ref == NULL) { \
 				_ref = new class_name(); \

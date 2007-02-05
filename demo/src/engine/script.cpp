@@ -926,10 +926,8 @@ bool GameScript::SingletonInitialize() {
 // 	hoa_input::GameInput::BindToLua();
 // 	hoa_global::GameGlobal::BindToLua();
 //
-// 	hoa_boot::BootMode::BindToLua();
 // 	hoa_battle::BattleMode::BindToLua();
 	hoa_map::MapMode::BindToLua();
-// 	hoa_menu::MenuMode::BindToLua();
 
 	// TODO: Open the user setting's file and apply those settings
 	return true;
