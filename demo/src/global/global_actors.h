@@ -91,12 +91,21 @@ private:
 	uint16 _y_position;
 	//@}
 
-	/** \brief The defense ratings that the attack point has
-	*** The values of these members may also include the defense ratings from an equipped piece of armor.
+	/** \brief The natural defense ratings that the attack point affords.
+	*** These are static properties of the attack point and rarely change.
 	**/
 	//@{
-	uint32 _physical_defense;
-	uint32 _metaphysical_defense;
+	uint32 _native_physical_defense;
+	uint32 _native_metaphysical_defense;
+	//@}
+
+	/** \brief The total defense ratings that the attack point affords.
+	*** These members hold the sum of the attack point's native defense, the actor's defense, and the defense
+	*** provided by any armor equipped on the attack point.
+	**/
+	//@{
+	uint32 _total_physical_defense;
+	uint32 _total_metaphysical_defense;
 	//@}
 
 	/** \brief The attack evade percentage for the attack point
@@ -133,9 +142,8 @@ private:
 *** \brief Represents an actor that can participate in battles
 ***
 *** This is a parent class that both playable characters and enemies inherit from to
-*** provide a consistent interface between the two and to effectively re-use code.
-*** It is intended to be an abstract class and therefmore an instance of this class
-*** should never exist on its own.
+*** provide a consistent interface. It is an abstract class and therefore an
+*** instance of this class should never exist on its own.
 ***
 *** \note The constructor for this class is in the protected space because the class
 *** is abstract, and should only be able to be created by the classes which inherit
@@ -150,6 +158,9 @@ public:
 
 	//! \name Class member access functions
 	//@{
+	hoa_utils::ustring GetName() const
+		{ return _name; }
+
 	uint32 GetHitPoints() const
 		{ return _hit_points; }
 
@@ -210,8 +221,10 @@ public:
 	std::vector<std::pair<float, GlobalStatusEffect*> >& GetStatusDefenseBonuses()
 		{ return _status_defense_bonuses; }
 
-	hoa_utils::ustring GetName() const
-		{ return _name; }
+
+
+	void SetName(const hoa_utils::ustring & name)
+		{ _name = name; }
 
 	void SetHitPoints(uint32 hp)
 		{ if (hp > _max_hit_points) _hit_points = _max_hit_points; else _hit_points = hp; }
@@ -245,9 +258,6 @@ public:
 
 	void SetEvade(float ev)
 		{ _evade = ev; _CalculateEvadeRatings(); }
-
-	void SetName(const hoa_utils::ustring & name)
-		{ _name = name; }
 	//@}
 
 	/** \brief Determines if a character is "alive" and can fight in battles
@@ -255,39 +265,6 @@ public:
 	**/
 	bool IsAlive() const
 		{ return (_hit_points != 0); }
-
-	//! \name Class member add and sub functions
-	//@{
-	void AddHitPoints(uint32 hp)
-		{ _hit_points += hp; if (_hit_points > _max_hit_points) _hit_points = _max_hit_points; }
-
-	void AddSkillPoints(uint32 sp)
-		{ _skill_points += sp; if (_skill_points > _max_skill_points) _skill_points = _max_skill_points; }
-
-	void AddMaxHitPoints(uint32 hp)
-		{ _max_hit_points += hp; }
-
-	void AddMaxSkillPoints(uint32 sp)
-		{ _max_skill_points += sp; }
-
-	void AddExperienceLevel(uint32 xp_level)
-		{ _experience_level += xp_level; }
-
-	void AddStrength(uint32 st)
-		{ _strength += st; }
-
-	void AddVigor(uint32 vi)
-		{ _vigor += vi; }
-
-	void AddFortitude(uint32 fo)
-		{ _fortitude += fo; }
-
-	void AddProtection(uint32 pr)
-		{ _protection += pr; }
-
-	void AddAgility(uint32 ag)
-		{ _agility += ag; }
-	//@}
 
 	/** \brief Equips a new weapon on the actor
 	*** \param weapon The new weapon to equip on the actor
@@ -310,39 +287,39 @@ public:
 protected:
 	GlobalActor();
 
-	//! \brief The name of the actor as it will be displayed upon the screen
+	//! \brief The name of the actor as it will be displayed upon the screen.
 	hoa_utils::ustring _name;
 
-	//! \name Basic Actor Stats
+	//! \name Base Actor Stats
 	//@{
-	//! \brief The current number of hit points that the actor has
+	//! \brief The current number of hit points that the actor has.
 	uint32 _hit_points;
 
-	//! \brief The maximum number of hit points that the actor may have
+	//! \brief The maximum number of hit points that the actor may have.
 	uint32 _max_hit_points;
 
-	//! \brief The current number of skill points that the actor has
+	//! \brief The current number of skill points that the actor has.
 	uint32 _skill_points;
 
-	//! \brief The maximum number of skill points that the actor may have
+	//! \brief The maximum number of skill points that the actor may have.
 	uint32 _max_skill_points;
 
-	//! \brief The current experience level of the actor
+	//! \brief The current experience level of the actor.
 	uint32 _experience_level;
 
-	//! \brief The strength index of the actor, used in part to determine physical attack rating
+	//! \brief The strength index of the actor, used in part to determine physical attack rating.
 	uint32 _strength;
 
-	//! \brief The vigor index of the actor, used in part to determine metaphysical attack rating
+	//! \brief The vigor index of the actor, used in part to determine metaphysical attack rating.
 	uint32 _vigor;
 
-	//! \brief The fortitude index of the actor, used in part to determine physical defense ratings
+	//! \brief The fortitude index of the actor, used in part to determine physical defense ratings.
 	uint32 _fortitude;
 
 	//! \brief The protection index of the actor, used in part to determine metaphysical defense ratings.
 	uint32 _protection;
 
-	//! \brief The agility of the actor, used to calculate the speed in which stamina recovers
+	//! \brief The agility of the actor, used to calculate the time it takes to recover stamina.
 	uint32 _agility;
 
 	//! \brief The attack evade percentage of the actor, ranged from 0.0 to 1.0
@@ -354,6 +331,13 @@ protected:
 
 	//! \brief The sum of the character's vigor and their weapon's metaphysical attack
 	uint32 _metaphysical_attack_rating;
+
+	/** \brief The attack points that are located on the actor
+	*** Every actor <b>must have at least one</b> attack point, otherwise it is impossible for that actor to
+	*** be harmed in battle. The attack points carry the defense bonuses from the armor that the actor has
+	*** equipped, if any.
+	**/
+	std::vector<GlobalAttackPoint*> _attack_points;
 
 	/** \brief The weapon that the actor has equipped
 	*** Actors are not required to have weapons equipped, and indeed most enemies will probably not have any
@@ -373,13 +357,6 @@ protected:
 	*** \note The size of this vector is always equal to the size of the _attack_points vector
 	**/
 	std::vector<GlobalArmor*> _armor_equipped;
-
-	/** \brief The attack points that are located on the actor
-	*** Every actor <b>must have at least one</b> attack point, otherwise it is impossible for that actor to
-	*** be harmed in battle. The attack points carry the defense bonuses from the armor that the actor has
-	*** equipped, if any.
-	**/
-	std::vector<GlobalAttackPoint*> _attack_points;
 
 	/** \brief The elemental effects added to the actor's attack
 	*** Actors may carry various elemental attack bonuses, or they may carry none. These bonuses include
@@ -409,6 +386,7 @@ protected:
 	**/
 	std::vector<std::pair<float, GlobalStatusEffect*> > _status_defense_bonuses;
 
+
 	/** \brief Calculates an actor's physical and metaphysical attack ratings
 	*** This function simply sums the actor's strength/vigor with their weapon's attack ratings
 	*** and places the result in the classes two attack ratings members.
@@ -428,6 +406,144 @@ protected:
 	void _CalculateEvadeRatings();
 }; // class GlobalActor
 
+
+
+/** ****************************************************************************
+*** \brief Represents playable game characters
+***
+*** This calls represents playable game characters only (those that you can control,
+*** equip, and send into battle). It does not cover NPCs. This class also holds
+*** numerous images that represent the character in a variety of contexts (maps, battle,
+*** menus, etc.). This class may be used as a parent class by game modes that need
+*** to add further data or methods to manipulate the character than is provided here.
+***
+*** \note A character has four, and only four, attack points. They are the head,
+*** torso, arms, and legs of the character.
+*** ***************************************************************************/
+class GlobalCharacter : public GlobalActor {
+public:
+	GlobalCharacter(const hoa_utils::ustring & name, const std::string & filename, uint32 id);
+	virtual ~GlobalCharacter();
+
+	//@{
+	//! \brief Get the equipment on the character
+	//! \return the equipped weapon or armor
+
+	//@}
+
+	//! \name Public Member Access Functions
+	//@{
+	//! \brief Used for setting and getting the values of the various class members.
+	std::string GetFilename() const
+		{ return _filename; }
+	uint32 GetID() const
+		{ return _id; }
+	uint32 GetExperienceForNextLevel() const
+		{ return _experience_next_level; }
+
+	GlobalWeapon* GetWeapon() const
+		{ return _equipped_weapon; }
+	GlobalArmor* GetEquippedHeadArmor()
+		{ return _armor_equipped[0]; }
+	GlobalArmor* GetEquippedTorsoArmor()
+		{ return _armor_equipped[1]; }
+	GlobalArmor* GetEquippedArmsArmor()
+		{ return _armor_equipped[2]; }
+	GlobalArmor* GetEquippedLegArmor()
+		{ return _armor_equipped[3]; }
+
+	std::vector<GlobalSkill*> GetAttackSkills() const
+		{ return _attack_skills; }
+	std::vector<GlobalSkill*> GetDefenseSkills() const
+		{ return _defense_skills; }
+	std::vector<GlobalSkill*> GetSupportSkills() const
+		{ return _support_skills; }
+
+	std::vector<hoa_video::StillImage> * GetBattlePortraits()
+		{ return &_battle_portraits; }
+
+	void SetExperienceNextLevel(uint32 xp_next)
+		{ _experience_next_level = xp_next; }
+	//@}
+
+	void AddAttackSkill(GlobalSkill* skill)
+		{ if (skill != NULL) _attack_skills.push_back(skill); }
+	void AddDefenseSkill(GlobalSkill* skill)
+		{ if (skill != NULL) _defense_skills.push_back(skill); }
+	void AddSupportSkill(GlobalSkill* skill)
+		{ if (skill != NULL) _support_skills.push_back(skill); }
+	void AddExperienceLevel(uint32 lvl = 1)
+		{ _experience_level += lvl; }
+
+	void AddBattleAnimation(const std::string & name, hoa_video::AnimatedImage anim)
+		{ _battle_animation[name] = anim; }
+	hoa_video::AnimatedImage * RetrieveBattleAnimation(const std::string & name)
+		{ return &_battle_animation[name]; }
+
+protected:
+	//! \brief The name used to retrieve the characters's data and other information from various sources
+	std::string _filename;
+
+	/** \brief An identification number for the character
+	*** Refer to the Game Character Type constants at the top of this file
+	**/
+	uint32 _id;
+
+	GlobalWeapon* _equipped_weapon;
+	GlobalArmor* _equipped_armor[4];
+
+	/** \brief The skills that the character may use
+	*** Skills are broken up into three types: attack, defense, and support. There is really no distinguishment
+	*** between the various skill types, they just serve an organizational means and are used to identify a
+	*** skill's general purpose/use. Characters keep their skills in these seperate containers because they
+	*** are presented in this way to the player.
+	**/
+	//@{
+	std::vector<GlobalSkill*> _attack_skills;
+	std::vector<GlobalSkill*> _defense_skills;
+	std::vector<GlobalSkill*> _support_skills;
+	//@}
+
+	//! \brief The number of experience points needed to reach the next experience level.
+	uint32 _experience_next_level;
+
+	/** \name Character Images
+	*** \note Although many of the names of these members would imply that they are only used in one particular
+	*** mode of operation (map, battle, etc.), these members may be freely used by different game modes for
+	*** which they were not specifically designed for. The names are simply meant to indicate the primary game
+	*** mode where the images are intended to be used.
+	**/
+	//@{
+	/** \brief The standard frame images for the character's map sprite.
+	*** This container holds the standard frames for the character's map sprite, which include standing and
+	*** walking frames. This set includes 24 frames in total, 6 each for the down, up, left, and right
+	*** orientations.
+	**/
+	std::vector<hoa_video::StillImage> _map_frames_standard;
+	/** \brief The character's standard map portrait image
+	*** The standard map portrait is ususally used in dialogues, but may also be used in other modes where
+	*** appropriate. The size of the map portrait is 200x200 pixels.
+	**/
+	hoa_video::StillImage _map_portrait_standard;
+	/** \brief The frame images for the character's battle sprite.
+	*** This map container contains various animated images for the character's battle sprites. The key to the
+	*** map is a simple string which describes the animation, such as "idle".
+	**/
+	std::map<std::string, hoa_video::AnimatedImage> _battle_animation;
+	/** \brief The frame images for the character's battle portrait
+	*** Each character has 5 battle portraits which represent the character's health with damage levels of 0%,
+	*** 25%, 50%, 75%, and 100% (this is also the order in which the frames are stored, starting with the 0%
+	*** frame at index 0). Thus, the size of this vector is always five elements. Each portait is 100x100
+	*** pixels in size.
+	**/
+	std::vector<hoa_video::StillImage> _battle_portraits;
+	/** \brief The character's full-body portrait image for use in menu mode
+	*** This image is a detailed, full-scale portait of the character and is intended for use in menu mode.
+	*** The size of the image is 150x350 pixels.
+	**/
+	hoa_video::StillImage _menu_portrait;
+	//@}
+}; // class GlobalCharacter : public GlobalActor
 
 
 /** ****************************************************************************
@@ -561,140 +677,6 @@ protected:
 }; // class GlobalEnemy : public GlobalActor
 
 
-
-/** ****************************************************************************
-*** \brief Represents playable game characters
-***
-*** This calls represents playable game characters only (those that you can control,
-*** equip, and send into battle). It does not cover NPCs. This class also holds
-*** numerous images that represent the character in a variety of contexts (maps, battle,
-*** menus, etc.). This class may be used as a parent class by game modes that need
-*** to add further data or methods to manipulate the character than is provided here.
-***
-*** \note A character has four, and only four, attack points. They are the head,
-*** torso, arms, and legs of the character.
-*** ***************************************************************************/
-class GlobalCharacter : public GlobalActor {
-public:
-	GlobalCharacter(const hoa_utils::ustring & name, const std::string & filename, uint32 id);
-	virtual ~GlobalCharacter();
-
-	//@{
-	//! \brief Get the equipment on the character
-	//! \return the equipped weapon or armor
-
-	//@}
-
-	//! \name Public Member Access Functions
-	//@{
-	//! \brief Used for setting and getting the values of the various class members.
-	std::string GetFilename() const
-		{ return _filename; }
-	uint32 GetID() const
-		{ return _id; }
-	uint32 GetExperienceForNextLevel() const
-		{ return _experience_next_level; }
-
-	GlobalWeapon* GetWeapon() const
-		{ return _equipped_weapon; }
-	GlobalArmor* GetEquippedHeadArmor()
-		{ return _armor_equipped[0]; }
-	GlobalArmor* GetEquippedTorsoArmor()
-		{ return _armor_equipped[1]; }
-	GlobalArmor* GetEquippedArmsArmor()
-		{ return _armor_equipped[2]; }
-	GlobalArmor* GetEquippedLegArmor()
-		{ return _armor_equipped[3]; }
-
-	std::vector<GlobalSkill*> GetAttackSkills() const
-		{ return _attack_skills; }
-	std::vector<GlobalSkill*> GetDefenseSkills() const
-		{ return _defense_skills; }
-	std::vector<GlobalSkill*> GetSupportSkills() const
-		{ return _support_skills; }
-
-	std::vector<hoa_video::StillImage> * GetBattlePortraits()
-		{ return &_battle_portraits; }
-	void SetExperienceNextLevel(uint32 xp_next)
-		{ _experience_next_level = xp_next; }
-	//@}
-
-	void AddAttackSkill(GlobalSkill* skill)
-		{ if (skill != NULL) _attack_skills.push_back(skill); }
-	void AddDefenseSkill(GlobalSkill* skill)
-		{ if (skill != NULL) _defense_skills.push_back(skill); }
-	void AddSupportSkill(GlobalSkill* skill)
-		{ if (skill != NULL) _support_skills.push_back(skill); }
-
-	void AddBattleAnimation(const std::string & name, hoa_video::AnimatedImage anim)
-		{ _battle_animation[name] = anim; }
-	hoa_video::AnimatedImage * RetrieveBattleAnimation(const std::string & name)
-		{ return &_battle_animation[name]; }
-
-protected:
-	//! \brief The name used to retrieve the characters's data and other information from various sources
-	std::string _filename;
-
-	/** \brief An identification number for the character
-	*** Refer to the Game Character Type constants at the top of this file
-	**/
-	uint32 _id;
-
-	GlobalWeapon* _equipped_weapon;
-	GlobalArmor* _equipped_armor[4];
-
-	/** \brief The skills that the character may use
-	*** Skills are broken up into three types: attack, defense, and support. There is really no distinguishment
-	*** between the various skill types, they just serve an organizational means and are used to identify a
-	*** skill's general purpose/use. Characters keep their skills in these seperate containers because they
-	*** are presented in this way to the player.
-	**/
-	//@{
-	std::vector<GlobalSkill*> _attack_skills;
-	std::vector<GlobalSkill*> _defense_skills;
-	std::vector<GlobalSkill*> _support_skills;
-	//@}
-
-	//! \brief The number of experience points needed to reach the next experience level.
-	uint32 _experience_next_level;
-
-	/** \name Character Images
-	*** \note Although many of the names of these members would imply that they are only used in one particular
-	*** mode of operation (map, battle, etc.), these members may be freely used by different game modes for
-	*** which they were not specifically designed for. The names are simply meant to indicate the primary game
-	*** mode where the images are intended to be used.
-	**/
-	//@{
-	/** \brief The standard frame images for the character's map sprite.
-	*** This container holds the standard frames for the character's map sprite, which include standing and
-	*** walking frames. This set includes 24 frames in total, 6 each for the down, up, left, and right
-	*** orientations.
-	**/
-	std::vector<hoa_video::StillImage> _map_frames_standard;
-	/** \brief The character's standard map portrait image
-	*** The standard map portrait is ususally used in dialogues, but may also be used in other modes where
-	*** appropriate. The size of the map portrait is 200x200 pixels.
-	**/
-	hoa_video::StillImage _map_portrait_standard;
-	/** \brief The frame images for the character's battle sprite.
-	*** This map container contains various animated images for the character's battle sprites. The key to the
-	*** map is a simple string which describes the animation, such as "idle".
-	**/
-	std::map<std::string, hoa_video::AnimatedImage> _battle_animation;
-	/** \brief The frame images for the character's battle portrait
-	*** Each character has 5 battle portraits which represent the character's health with damage levels of 0%,
-	*** 25%, 50%, 75%, and 100% (this is also the order in which the frames are stored, starting with the 0%
-	*** frame at index 0). Thus, the size of this vector is always five elements. Each portait is 100x100
-	*** pixels in size.
-	**/
-	std::vector<hoa_video::StillImage> _battle_portraits;
-	/** \brief The character's full-body portrait image for use in menu mode
-	*** This image is a detailed, full-scale portait of the character and is intended for use in menu mode.
-	*** The size of the image is 150x350 pixels.
-	**/
-	hoa_video::StillImage _menu_portrait;
-	//@}
-}; // class GlobalCharacter : public GlobalActor
 
 /** ****************************************************************************
 *** \brief Represents a party of characters

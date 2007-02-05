@@ -176,7 +176,11 @@ private:
 *** ***************************************************************************/
 class GlobalItem : public GlobalObject {
 public:
+	GlobalItem()
+		{}
+
 	GlobalItem(uint32 id, uint32 count = 1);
+	
 	~GlobalItem()
 		{}
 
@@ -196,7 +200,7 @@ private:
 	// TODO: A reference to the script function to execute for this item
 	// ScriptFunction *_script;
 
-	GlobalItem();
+
 	GlobalItem(const GlobalItem&);
 	GlobalItem& operator=(const GlobalItem&);
 }; // class GlobalItem : public GlobalObject
@@ -212,6 +216,8 @@ private:
 *** ***************************************************************************/
 class GlobalWeapon : public GlobalObject {
 public:
+	GlobalWeapon()
+		{}
 	GlobalWeapon(uint32 id, uint32 count = 0);
 	~GlobalWeapon()
 		{}
@@ -227,7 +233,6 @@ private:
 	// TODO: Add affliction bonuses
 	// std::vector<GlobalStatusEffect*> _status_attacks;
 
-	GlobalWeapon();
 	GlobalWeapon(const GlobalWeapon&);
 	GlobalWeapon& operator=(const GlobalWeapon&);
 }; // class GlobalWeapon : public GlobalObject
@@ -254,6 +259,9 @@ private:
  *****************************************************************************/
 class GlobalArmor : public GlobalObject {
 public:
+	GlobalArmor()
+		{}
+
 	GlobalArmor(uint32 id, uint8 type, uint32 count);
 
 	~GlobalArmor()
@@ -270,8 +278,6 @@ private:
 	// TODO: Add status effect bonuses
 	// std::vector<GlobalStatusEffect*> _status_defenses;
 
-
-	GlobalArmor();
 	GlobalArmor(const GlobalArmor&);
 	GlobalArmor& operator=(const GlobalArmor&);
 }; // class GlobalArmor : public GlobalObject

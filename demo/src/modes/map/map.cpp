@@ -144,6 +144,42 @@ void MapMode::BindToLua() {
 			.def("_SetCameraFocus", &MapMode::_SetCameraFocus)
 			.def("_SetMapState", &MapMode::_SetMapState)
 			.def("_GetMapState", &MapMode::_GetMapState)
+
+			// Namespace constants
+			.enum_("constants") [
+				// Map states
+				value("EXPLORE", EXPLORE),
+				value("DIALOGUE", DIALOGUE),
+				value("OBSERVATION", OBSERVATION),
+				// Object types
+				value("PHYSICAL_TYPE", PHYSICAL_TYPE),
+				value("VIRTUAL_TYPE", VIRTUAL_TYPE),
+				value("SPRITE_TYPE", SPRITE_TYPE),
+				// Object directions
+				value("NORTH", NORTH),
+				value("SOUTH", SOUTH),
+				value("EAST", WEST),
+				value("WEST", EAST),
+				value("NW_NORTH", NW_NORTH),
+				value("NW_WEST", NW_WEST),
+				value("NE_NORTH", NE_NORTH),
+				value("NE_EAST", NE_EAST),
+				value("SW_SOUTH", SW_SOUTH),
+				value("SW_WEST", SW_WEST),
+				value("SE_SOUTH", SE_SOUTH),
+				value("SE_EAST", SE_EAST),
+				// Object animations
+				value("ANIM_STANDING_SOUTH", ANIM_STANDING_SOUTH),
+				value("ANIM_STANDING_NORTH", ANIM_STANDING_NORTH),
+				value("ANIM_STANDING_WEST", ANIM_STANDING_WEST),
+				value("ANIM_STANDING_EAST", ANIM_STANDING_EAST),
+				value("ANIM_WALKING_SOUTH", ANIM_WALKING_SOUTH),
+				value("ANIM_WALKING_NORTH", ANIM_WALKING_NORTH),
+				value("ANIM_WALKING_WEST", ANIM_WALKING_WEST),
+				value("ANIM_WALKING_EAST", ANIM_WALKING_EAST),
+				// Map dialogue constants
+				value("DIALOGUE_INFINITE", DIALOGUE_INFINITE)
+			]
 	];
 
 	module(ScriptManager->GetGlobalState(), "hoa_map")
