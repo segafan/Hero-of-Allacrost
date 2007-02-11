@@ -48,7 +48,7 @@ Color Color::orange(1.0f, 0.4f, 0.0f, 1.0f);
 Color Color::yellow(1.0f, 1.0f, 0.0f, 1.0f);
 Color Color::green (0.0f, 1.0f, 0.0f, 1.0f);
 Color Color::aqua  (0.0f, 1.0f, 1.0f, 1.0f);
-Color Color::blue  (1.0f, 0.0f, 1.0f, 1.0f);
+Color Color::blue  (0.0f, 0.0f, 1.0f, 1.0f);
 Color Color::violet(0.0f, 0.0f, 1.0f, 1.0f);
 Color Color::brown (0.6f, 0.3f, 0.1f, 1.0f);
 
@@ -319,11 +319,11 @@ bool GameVideo::SingletonInitialize()
 	if(VIDEO_DEBUG)
 		cout << "VIDEO: GameVideo::SingletonInitialize() returned successfully" << endl;
 
-	_rectangle_image.SetFilename("img/misc/rectangle_primitive.png");
+	_rectangle_image.SetFilename("");
 	if (!_rectangle_image.Load())
 	{
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: image for rendering rectangles could not be opened" << endl;
+			cerr << "VIDEO ERROR: quad StillImage for rendering rectangles could not be created" << endl;
 		return false;
 	}
 
@@ -1908,9 +1908,11 @@ void GameVideo::DrawGrid(float x, float y, float xstep, float ystep, const Color
 //-----------------------------------------------------------------------------
 // Draws a solid rectangle of a given color.
 //-----------------------------------------------------------------------------
-void GameVideo::DrawRectangle(const float width, const float height, const Color &color) const
+void GameVideo::DrawRectangle(const float width, const float height, const Color &color)
 {
-	VideoManager->Scale(width, height);
+	_rectangle_image._elements[0].width = width;
+	_rectangle_image._elements[0].height = height;
+
 	VideoManager->DrawImage(_rectangle_image, color);
 }
 

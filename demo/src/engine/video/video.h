@@ -1004,7 +1004,7 @@ public:
 	 * \param height Height of the rectangle.
 	 * \param color Color to paint the rectangle.
 	 */
-	void DrawRectangle(const float width, const float height, const Color &color) const;
+	void DrawRectangle(const float width, const float height, const Color &color);
 
 	/** \brief makes a screenshot, saves it as screenshot.jpg in the directory
 	 *         of the game

@@ -175,28 +175,26 @@ void BattleCharacterActor::DrawStatus() {
 	// HP, green bar
 	VideoManager->PushMatrix();
 	VideoManager->Move(312, 90 + y_offset);
-	VideoManager->Scale(bar_size,6);
-	VideoManager->DrawRectangle(1,1,Color::green);
+	VideoManager->DrawRectangle(bar_size,6,Color::green);
 	VideoManager->PopMatrix();
+
 	// HP, black bar
 	VideoManager->PushMatrix();
 	VideoManager->Move(312+bar_size, 90 + y_offset);
-	VideoManager->Scale(83-bar_size,6);
-	VideoManager->DrawRectangle(1,1,Color::black);
+	VideoManager->DrawRectangle(83-bar_size,6,Color::black);
 	VideoManager->PopMatrix();
 
 	// SP, blue bar
 	bar_size = static_cast<float>(84*GetActor()->GetSkillPoints())/static_cast<float>(GetActor()->GetMaxSkillPoints());
 	VideoManager->PushMatrix();
 	VideoManager->Move(413, 90 + y_offset);
-	VideoManager->Scale(bar_size,6);
-	VideoManager->DrawRectangle(1,1,Color::blue);
+	VideoManager->DrawRectangle(bar_size,6,Color::blue);
 	VideoManager->PopMatrix();
+
 	// SP, black bar
 	VideoManager->PushMatrix();
 	VideoManager->Move(413, 90 + y_offset);
-	VideoManager->Scale(84-bar_size,6);
-	VideoManager->DrawRectangle(1,1,Color::blue);
+	VideoManager->DrawRectangle(84-bar_size,6,Color::black);
 	VideoManager->PopMatrix();
 
 
