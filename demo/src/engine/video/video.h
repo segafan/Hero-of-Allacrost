@@ -610,7 +610,7 @@ public:
 	 *  \param images  Vector of StillImages where the cut images will be loaded.
 	 *	\param filename Name of the file to be opened to read.
 	 *	\param rows Number of rows of sub-images in the MultiImage.
-	 *	\param rows Number of columns of sub-images in the MultiImage.
+	 *	\param cols Number of columns of sub-images in the MultiImage.
 	 *	\return success/failure
 	 */
 	bool LoadMultiImage(std::vector<StillImage> &images, const std::string &filename, const uint32 rows, const uint32 cols);
@@ -625,6 +625,26 @@ public:
 	 *	\return success/failure
 	 */
 	bool LoadAnimatedImage(AnimatedImage &image, const std::string &filename, const uint32 rows, const uint32 cols);
+
+	//! \brief Saves a vector of images in a single file.
+	/*	This function stores a vector of images as a single image. This is useful for creating multiimage 
+	 *	images. The image can be stored in JPEG or PNG, which is decided by the filename.
+	 *  \param image Vector of images to save
+	 *	\param filename Name of the file to be opened to read.
+	 *	\param rows Number of rows of sub-images in the MultiImage.
+	 *	\param cols Number of columns of sub-images in the MultiImage.
+	 *	\return success/failure
+	 */
+	bool SaveImage (const std::string &file_name, const std::vector<StillImage*> &image, const uint32 rows, const uint32 columns) const;
+
+	//! \brief Saves and image into a file.
+	/*	This function stores a vector of images as a single image. This is useful for creating multiimage 
+	 *	images. The image can be stored in JPEG or PNG, which is decided by the filename.
+	 *  \param image Image to store.
+	 *	\param filename Name of the file to be opened to read.
+	 *	\return success/failure
+	 */
+	bool SaveImage (const std::string &file_name, const StillImage &image) const;
 
 	/** \brief captures the contents of the screen and saves it to an image
 	 *         descriptor
@@ -1346,6 +1366,7 @@ private:
 	 */
 	bool _LoadImageHelper(StillImage &id, bool grayscale = false);
 
+
 	/**
 	**/
 	bool _LoadMultiImage (private_video::MultiImage &id);
@@ -1374,6 +1395,20 @@ private:
 	 */
 	bool _LoadRawImagePng(const std::string & filename, private_video::ImageLoadInfo & loadInfo);
 
+	/*! \brief Saves Raw data in a Png file
+	 *	\param file_name Name of the file, without the extension
+	 *	\param info Structure of the information to store
+	 *	\return True if the process was carried out with no problem, false otherwise
+	 */
+	bool _SavePng (const std::string& file_name, hoa_video::private_video::ImageLoadInfo &info) const;
+
+	/*! \brief Saves Raw data in a Jpeg file
+	 *	\param file_name Name of the file, without the extension
+	 *	\param info Structure of the information to store
+	 *	\return True if the process was carried out with no problem, false otherwise
+	 */
+	bool _SaveJpeg (const std::string& file_name, hoa_video::private_video::ImageLoadInfo &info) const;
+
 	/** \brief loop through all currently loaded images and if they belong to the given tex sheet, reload them into it
 	 *
 	 *  \param texSheet   pointer to the tex sheet whose images we want to load
@@ -1395,7 +1430,14 @@ private:
 	 * \param src Information of a color image
 	 * \param dst ImageLoadInfo struct where the grayscale image will be stored
 	 */
-	void _ConvertImageToGrayscale(const private_video::ImageLoadInfo& src, private_video::ImageLoadInfo &dst);
+	void _ConvertImageToGrayscale(const private_video::ImageLoadInfo& src, private_video::ImageLoadInfo &dst) const;
+
+
+	/** \brief Converts a RGBA buffer to a RGB one
+	 * \param src Information of a RGBA buffer
+	 * \param dst ImageLoadInfo struct where the RGB buffer will be stored
+	 */
+	void _RGBAToRGB (const private_video::ImageLoadInfo& src, private_video::ImageLoadInfo &dst) const;
 
 	/** \brief removes a texture sheet from our vector of sheets and deletes it
 	 *
