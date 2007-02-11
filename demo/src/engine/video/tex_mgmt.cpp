@@ -54,7 +54,7 @@ void IntegerToString(std::string &s, const int32 num)
 //-----------------------------------------------------------------------------
 // ConvertImageToGrayscale: Converts an image from color to gray mode
 //-----------------------------------------------------------------------------
-void GameVideo::_ConvertImageToGrayscale(const ImageLoadInfo& src, ImageLoadInfo &dst)
+void GameVideo::_ConvertImageToGrayscale(const ImageLoadInfo& src, ImageLoadInfo &dst) const
 {
 	if (!dst.width || !dst.height)	// Return if there are no pixels in the image
 		return;
@@ -70,6 +70,30 @@ void GameVideo::_ConvertImageToGrayscale(const ImageLoadInfo& src, ImageLoadInfo
 		value = static_cast<unsigned char>((30 * *(src_pix) + 59 * *(src_pix+1) + 11 * *(src_pix+2))*0.01f);	// Get grayscale value
 		*dst_pix = *(dst_pix+1) = *(dst_pix+2) = value;		// Assign it
 		*(dst_pix+3) = *(src_pix+3);					// Assign alpha value
+	}
+}
+
+
+//-----------------------------------------------------------------------------
+// RGBAToRGB: Converts a buffer from RGBA to RGB
+//-----------------------------------------------------------------------------
+void GameVideo::_RGBAToRGB (const private_video::ImageLoadInfo& src, private_video::ImageLoadInfo &dst) const
+{
+	if (!dst.width || !dst.height)	// Return if there are no pixels in the image
+		return;
+
+	unsigned char* pSrc = static_cast<unsigned char*>(src.pixels);
+	unsigned char* pDst = static_cast<unsigned char*>(dst.pixels);
+
+	int32 iSrc;
+	int32 iDst;
+	for (int32 i=0; i<src.height*src.width; i++)
+	{
+		iSrc = 4 * i;
+		iDst = 3 * i;
+		pDst[iDst] = pSrc[iSrc];
+		pDst[iDst+1] = pSrc[iSrc+1];
+		pDst[iDst+2] = pSrc[iSrc+2];
 	}
 }
 
@@ -658,6 +682,7 @@ bool GameVideo::_LoadRawImagePng(const std::string &filename, hoa_video::private
 		(png_infopp)NULL);
 
 	fclose(fp);
+
 	return true;
 }
 
@@ -720,6 +745,338 @@ bool GameVideo::_LoadRawImageJpeg(const std::string &filename, hoa_video::privat
 	jpeg_destroy_decompress(&cinfo);
 
 	fclose(infile);
+
+	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// _SavePng: Stores a buffer in Png format
+//-----------------------------------------------------------------------------
+
+bool GameVideo::_SavePng (const std::string& file_name, hoa_video::private_video::ImageLoadInfo &info) const
+{
+	FILE * fp = fopen(file_name.c_str(), "wb");
+
+	if(fp == NULL)
+		return false;
+
+	png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING,
+		(png_voidp)NULL, NULL, NULL);
+
+	if(!png_ptr)
+	{
+		fclose(fp);
+		return false;
+	}
+
+	png_infop info_ptr = png_create_info_struct(png_ptr);
+
+	if(!info_ptr)
+	{
+		fclose(fp);
+		return false;
+	}
+
+	if(setjmp(png_jmpbuf(png_ptr)))
+	{
+		fclose(fp);
+		return false;
+	}
+
+	png_init_io(png_ptr, fp);
+
+	png_set_IHDR (png_ptr, info_ptr, info.width, info.height, 8, PNG_COLOR_TYPE_RGB_ALPHA,
+				  PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
+
+	png_byte** row_pointers = new png_byte* [info.height];
+	int32 bytes_per_row = info.width * 4;
+	for (int32 i=0; i<info.height; i++)
+	{
+		row_pointers[i] = (png_byte*)info.pixels + bytes_per_row * i;
+	}
+	png_set_rows(png_ptr, info_ptr, row_pointers);
+
+	png_write_png (png_ptr, info_ptr, PNG_TRANSFORM_IDENTITY, NULL);
+
+	png_destroy_write_struct (&png_ptr, &info_ptr);
+
+	delete[] row_pointers;
+
+	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// _SaveJpeg: Stores a buffer in Jpeg file
+//-----------------------------------------------------------------------------
+
+bool GameVideo::_SaveJpeg (const std::string& file_name, hoa_video::private_video::ImageLoadInfo &info) const
+{
+	FILE * outfile;
+	if((outfile = fopen(file_name.c_str(), "wb")) == NULL)
+	{
+		cerr << "Game Video: could not save '" << file_name.c_str() << "'" << endl;
+		return false;
+	}
+
+	jpeg_compress_struct cinfo;
+	jpeg_error_mgr jerr;
+
+	cinfo.err = jpeg_std_error(&jerr);
+	jpeg_create_compress(&cinfo);
+
+	cinfo.in_color_space = JCS_RGB;
+	cinfo.image_width = info.width;
+	cinfo.image_height = info.height;
+	cinfo.input_components = 3;
+	jpeg_set_defaults (&cinfo);
+
+	jpeg_stdio_dest(&cinfo, outfile);
+
+	jpeg_start_compress (&cinfo, TRUE);
+
+	JSAMPROW row_pointer;				// pointer to a single row 
+	int row_stride = info.width * 3;	// physical row width in buffer
+
+	// Note that the lines have to be stored from top to bottom
+	while (cinfo.next_scanline < cinfo.image_height)
+	{
+		row_pointer = (unsigned char*)info.pixels + cinfo.next_scanline * row_stride;
+	    jpeg_write_scanlines(&cinfo, &row_pointer, 1);
+	}
+
+	jpeg_finish_compress(&cinfo);
+	jpeg_destroy_compress(&cinfo);
+
+	fclose(outfile);
+
+	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// SaveImage: Saves a vector of images in a single file
+//-----------------------------------------------------------------------------
+bool GameVideo::SaveImage (const std::string &file_name, const std::vector<StillImage*> &image,
+						   const uint32 rows, const uint32 columns) const
+{
+	enum eLoadType
+	{
+		NONE	= 0,
+		JPEG	= 1,
+		PNG		= 2
+	} type (NONE);
+
+	// Isolate the extension
+	size_t extpos = file_name.rfind('.');
+
+	if(extpos == string::npos)
+		return false;
+
+	std::string extension = std::string(file_name, extpos, file_name.length() - extpos);
+
+	if(extension == ".jpeg" || extension == ".jpg")
+		type = JPEG;
+	if(extension == ".png")
+		type = PNG;
+
+	if (type == NONE)
+	{
+		cerr << "Game Video: Don't know which format to use for storage of an image" << endl;
+		return false;
+	}
+
+	// Check there are elements to store
+	if (image.empty())
+	{
+		cerr << "Game Video: Attempt to store no image" << endl;
+		return false;
+	}
+
+	// Check if the number of images is compatible with the number of rows and columns 
+	if (image.size() != rows*columns)
+	{
+		cerr << "Game Video: Can't store " << image.size() << " in " << rows << " rows and " << columns << " columns" << endl;
+		return false;
+	}
+
+	// Check all the images have just 1 ImageElement
+	for (uint32 i=0 ; i<image.size(); i++)
+	{
+		if (image[i]->_elements.size() != 1)
+		{
+			cerr << "Game Video: one of the images didn't have 1 ImageElement" << endl;
+			return false;
+		}
+	}
+
+	// Check all the images are of the same size
+	uint32 width = image[0]->_elements[0].image->width;
+	uint32 height = image[0]->_elements[0].image->height;
+	for (uint32 i=0 ; i<image.size(); i++)
+	{
+		if (!image[i]->_elements[0].image || image[i]->_elements[0].image->width != width ||
+			image[i]->_elements[0].image->height != height)
+		{
+			cerr << "Game Video: not all the images where of the same size" << endl;
+			return false;
+		}
+	}
+
+	// Structure for the image buffer to save
+	hoa_video::private_video::ImageLoadInfo info;
+	info.height = rows*height;
+	info.width = columns*width;
+	info.pixels = new uint8 [info.width * info.height * 4];
+
+	GameVideo *videoManager = GameVideo::SingletonGetReference();
+	hoa_video::private_video::Image* img;
+	GLuint ID;
+	hoa_video::private_video::ImageLoadInfo texture;
+
+	// Do that for the first image (on later ones, maybe we don't need to get again
+	// the texture, since it might be the same)
+	img = const_cast<Image*>(image[0]->_elements[0].image);
+	ID = img->texture_sheet->texID;
+	texture.width = img->texture_sheet->width;
+	texture.height = img->texture_sheet->height;
+	texture.pixels = new uint8 [texture.width * texture.height * 4];
+	videoManager->_BindTexture(ID);
+	glGetTexImage (GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.pixels);
+
+	uint32 i=0;
+	for (uint32 x=0; x<rows; x++)
+	{
+		for (uint32 y=0; y<columns; y++)
+		{
+			img = const_cast<Image*>(image[i]->_elements[0].image);
+			if (ID != img->texture_sheet->texID)
+			{
+				// Get new texture ID
+				videoManager->_BindTexture(img->texture_sheet->texID);
+				ID = img->texture_sheet->texID;
+
+				// If the new texture is bigger, reallocate memory
+				if (texture.height * texture.width < img->texture_sheet->height * img->texture_sheet->width * 4)
+				{
+					delete[] texture.pixels;
+					texture.width = img->texture_sheet->width;
+					texture.height = img->texture_sheet->height;
+					texture.pixels = new uint8 [texture.width * texture.height * 4];
+				}
+				glGetTexImage (GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.pixels);
+			}
+
+			// Copy the part of the texture we are interested in
+			uint32 copy_bytes = width * 4;
+			uint32 dst_offset = x*height*width*columns*4 + y*width*4;
+			uint32 dst_bytes = width*columns*4;
+			uint32 src_bytes = texture.width * 4;
+			uint32 src_offset = img->x * texture.width * 4 + img->y * 4;
+			for (uint32 j=0; j<height; j++)
+			{
+				memcpy ((uint8*)info.pixels+j*dst_bytes+dst_offset, (uint8*)texture.pixels+j*src_bytes+src_offset, copy_bytes);
+			}
+
+			i++;
+		}
+	}
+
+	// Store the resultant buffer
+	if (type == JPEG)
+	{
+		_RGBAToRGB (info, info);
+		_SaveJpeg (file_name, info);
+	}
+	else
+	{
+		_SavePng (file_name, info);
+	}
+
+	return true;
+}
+
+
+
+//-----------------------------------------------------------------------------
+// SaveImage: Saves an image in a file
+//-----------------------------------------------------------------------------
+bool GameVideo::SaveImage (const std::string &file_name, const StillImage &image) const
+{
+	enum eLoadType
+	{
+		NONE	= 0,
+		JPEG	= 1,
+		PNG		= 2
+	} type (NONE);
+
+	// Isolate the extension
+	size_t extpos = file_name.rfind('.');
+
+	if(extpos == string::npos)
+		return false;
+
+	std::string extension = std::string(file_name, extpos, file_name.length() - extpos);
+
+	if(extension == ".jpeg" || extension == ".jpg")
+		type = JPEG;
+	if(extension == ".png")
+		type = PNG;
+
+	if (type == NONE)
+	{
+		cerr << "Game Video: Don't know which format to use for storage of an image" << endl;
+		return false;
+	}
+
+	// Check there are elements to store
+	if (image._elements.empty())
+	{
+		cerr << "Game Video: Attempt to store empty image" << endl;
+		return false;
+	}
+
+	// Still can't store compound images
+	if (image._elements.size() > 1)
+	{
+		cerr << "Game Video: Compound images can't be stored yet" << endl;
+		return false;
+	}
+
+	hoa_video::private_video::ImageLoadInfo texture;
+	hoa_video::private_video::Image* img = const_cast<Image*>(image._elements[0].image);
+
+	// Get the texture as a buffer
+	texture.height = img->texture_sheet->height;
+	texture.width = img->texture_sheet->width;
+	texture.pixels = new uint8 [texture.height * texture.width * 4];
+	GameVideo *videoManager = GameVideo::SingletonGetReference();
+	videoManager->_BindTexture(img->texture_sheet->texID);
+	glGetTexImage (GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.pixels);
+
+	// Get the part of the texture we are interested in, by copying the rows
+	hoa_video::private_video::ImageLoadInfo info;
+	info.width = img->width;
+	info.height = img->height;
+	info.pixels = new uint8 [img->width * img->height * 4];
+	uint32 dst_bytes = info.width * 4;
+	uint32 src_bytes = texture.width * 4;
+	uint32 src_offset = img->x * texture.width * 4 + img->y * 4;
+	for (int32 i=0; i<info.height; i++)
+	{
+		memcpy ((uint8*)info.pixels+i*dst_bytes, (uint8*)texture.pixels+i*src_bytes+src_offset, dst_bytes);
+	}
+
+	if (type == JPEG)
+	{
+		_RGBAToRGB (info, info);
+		_SaveJpeg (file_name, info);
+	}
+	else
+	{
+		_SavePng (file_name, info);
+	}
 
 	return true;
 }
