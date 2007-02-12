@@ -11,6 +11,7 @@
 *** \file    battle_actors.h
 *** \author  Viljami Korhonen, mindflayer@allacrost.org
 *** \author  Corey Hoffstein, visage@allacrost.org
+*** \author  Andy Gardner, chopperdave@allacrost.org
 *** \brief   Header file for actors present in battles.
 ***
 *** This code contains the implementation of battle actors (characters and
@@ -32,6 +33,16 @@
 namespace hoa_battle {
 
 namespace private_battle {
+
+// FIX ME
+/** \brief Temporary enum used to determine which phase of the time meter a character/enemy
+*** is in.
+**/
+/*enum TEMP_ACTION_STATE {
+	ACTION_IDLE = 0,
+	ACTION_WARM_UP = 1,
+	ACTION_COOL_DOWN = 2
+};*/
 
 /** ****************************************************************************
 *** \brief Represents postive and negative afflictions that affect actors in battle
@@ -116,6 +127,21 @@ public:
 
 	//! Gets a pointer to the GlobalActor
 	virtual hoa_global::GlobalActor * GetActor() = 0;
+
+	// \brief Resets the wait time and time meter portrait
+	virtual void ResetWaitTime() = 0;
+
+	// \brief Sets the location of the time meter portrait
+	// \param new_val new value for the location
+	virtual void SetTimePortraitLocation(float new_val) = 0;
+
+	// \brief Gets the location of the time meter portrait
+	// \return The location of the time portrait
+	virtual float GetTimePortraitLocation() = 0;
+
+	// \brief Gets the wait time
+	// \return the wait time
+	virtual hoa_system::Timer* GetWaitTime() = 0;
 };
 
 
@@ -136,6 +162,10 @@ public:
 
 	//! Draws the character's damage-blended face portrait
 	void DrawPortrait();
+
+	// \brief Draws the character's portrait for the time meter
+	// \param is_selected If the enemy is selected for an action, highlight it
+	void DrawTimePortrait(bool is_selected);
 
 	//! Draws the character's status information
 	void DrawStatus();
@@ -182,6 +212,21 @@ public:
 	virtual hoa_global::GlobalCharacter * GetActor()
 	{ return global_character_; }
 
+	// \brief Sets the location of the time meter portrait
+	// \param new_val new value for the location
+	virtual void SetTimePortraitLocation(float new_val) { _time_portrait_location = new_val; }
+
+	// \brief Gets the location of the time meter portrait
+	// \return The location of the time portrait
+	virtual float GetTimePortraitLocation() { return _time_portrait_location; }
+
+	// \brief Gets the wait time
+	// \return the wait time
+	virtual hoa_system::Timer* GetWaitTime() { return &_wait_time; }
+
+	// \brief Resets the wait time and time meter portrait
+	void ResetWaitTime();
+	//inline void SetWaitTime(uint32 wait_time) { _wait_time = wait_time; }
 	
 private:
 	//! A Pointer to the 'real' GlobalCharacter. TODO: This is very bad design and probably should be fixed...
@@ -200,13 +245,32 @@ private:
 	float _y_origin;
 
 	//! Variable for tracking time (ms) on how long to show the damage text
+	//FIX ME this has to go
 	uint32 _total_time_damaged;
 
 	//! How much damage was dealt on the last strike
+	//FIX ME this has to go unless we have good cause for it
 	uint32 _damage_dealt;
 
 	//! Is the character queued to attack?
 	bool _is_queued_to_perform;
+
+	//! Portrait for the time meter
+	hoa_video::StillImage _time_meter_portrait;
+
+	//! The image used to highlight time portraits for selected actors
+	hoa_video::StillImage _time_portrait_selected;
+
+	//! The y-value of it's location, since x is fixed
+	float _time_portrait_location;
+
+	//! Amount of time character spends in the idle phase
+	//FIX ME for now, will also be used for cool down times?
+	hoa_system::Timer _wait_time;
+
+	//! Which action state the char is in for the time meter.  TEMPORARY!!!
+	//uint8 _action_state;
+
 }; // end BattleCharacterActor
 
 
@@ -226,6 +290,10 @@ public:
 
 	//! Draws the damage-blended enemy sprite
 	void DrawSprite();
+
+	// \brief Draws the enemy's portrait for the time meter
+	// \param is_selected If the enemy is selected for an action, highlight it
+	void DrawTimePortrait(bool is_selected);
 
 	//! Draws the enemy's status information
 	void DrawStatus();
@@ -275,6 +343,22 @@ public:
 	virtual hoa_global::GlobalActor * GetActor()
 	{ return this; }
 
+	// \brief Sets the location of the time meter portrait
+	// \param new_val new value for the location
+	virtual void SetTimePortraitLocation(float new_val) { _time_portrait_location = new_val; }
+
+	// \brief Gets the location of the time meter portrait
+	// \return The location of the time portrait
+	virtual float GetTimePortraitLocation() { return _time_portrait_location; }
+
+	// \brief Gets the wait time
+	// \return the wait time
+	virtual hoa_system::Timer* GetWaitTime() { return &_wait_time; }
+
+	// \brief Resets the wait time and time meter portrait
+	void ResetWaitTime();
+	//inline void SetWaitTime(uint32 wait_time) { _wait_time = wait_time; }
+
 private:
 	//! Enemy's X-coordinate on the screen
 	float _x_location;
@@ -289,13 +373,32 @@ private:
 	float _y_origin;
 
 	//! Variable for tracking time (ms) on how long to show the damage text
+	//FIX ME this has to go
 	uint32 _total_time_damaged;
 
 	//! How much damage was dealt on the last strike
+	//FIX ME this has to go unless we have good cause for it
 	uint32 _damage_dealt;
 
 	//! Is the enemy queued to attack?
 	bool _is_queued_to_perform;
+
+	//! Portrait for the time meter
+	hoa_video::StillImage _time_meter_portrait;
+
+	//! The image used to highlight time portraits for selected actors
+	hoa_video::StillImage _time_portrait_selected;
+
+	//! The y-value of it's location, since x is fixed
+	float _time_portrait_location;
+
+	//! Amount of time enemy spends in the idle phase
+	//FIX ME for now, will also be used for cool down times?
+	hoa_system::Timer _wait_time;
+
+	//! Which action state the char is in for the time meter.  TEMPORARY!!!
+	//uint8 _action_state;
+
 }; // end BattleEnemyActor
 
 } // namespace private_battle

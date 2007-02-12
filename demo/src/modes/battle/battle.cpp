@@ -11,6 +11,7 @@
 *** \file    battle.cpp
 *** \author  Viljami Korhonen, mindflayer@allacrost.org
 *** \author  Corey Hoffstein, visage@allacrost.org
+*** \author  Andy Gardner, chopperdave@allacrost.org
 *** \brief   Source file for battle mode interface.
 *** ***************************************************************************/
 
@@ -56,11 +57,15 @@ BattleMode * current_battle = NULL;
 // SCRIPTEVENT CLASS
 ////////////////////////////////////////////////////////////////////////////////
 
-ScriptEvent::ScriptEvent(hoa_global::GlobalActor * source, std::deque<IBattleActor*> targets, const std::string & script_name) :
+//ScriptEvent::ScriptEvent(hoa_global::GlobalActor * source, std::deque<IBattleActor*> targets, const std::string & script_name) :
+ScriptEvent::ScriptEvent(IBattleActor* source, std::deque<IBattleActor*> targets, const std::string & script_name, uint32 warm_up_time) :
 	_script_name(script_name),
 	_source(source),
 	_targets(targets)
 {
+	_warm_up_time.SetDuration(warm_up_time);
+	_warm_up_time.Reset();
+	_warm_up_time.Play();
 }
 
 
@@ -70,6 +75,14 @@ ScriptEvent::~ScriptEvent()
 }
 
 
+void ScriptEvent::Update()
+{
+	//_warm_up_time -= SystemManager->GetUpdateTime();
+	//FIX ME use char stats
+	float offset = SystemManager->GetUpdateTime() * (107.f / _warm_up_time.GetDuration());
+	_source->SetTimePortraitLocation(_source->GetTimePortraitLocation() + offset); 
+	//TODO Any warm up animations
+}
 
 void ScriptEvent::RunScript() {
 	// TEMP: do basic damage to the actors
@@ -79,15 +92,15 @@ void ScriptEvent::RunScript() {
 		actor->TakeDamage(GaussianRandomValue(12, 2.0f));
 
 		// TODO: Do this better way!
-		if (MakeStandardString(this->GetSource()->GetName()) == "Spider")
+		if (MakeStandardString(this->GetSource()->GetActor()->GetName()) == "Spider")
 			current_battle->_battle_sounds[0].PlaySound();
-		else if (MakeStandardString(this->GetSource()->GetName()) == "Green Slime")
+		else if (MakeStandardString(this->GetSource()->GetActor()->GetName()) == "Green Slime")
 			current_battle->_battle_sounds[1].PlaySound();
-		else if (MakeStandardString(this->GetSource()->GetName()) == "Skeleton")
+		else if (MakeStandardString(this->GetSource()->GetActor()->GetName()) == "Skeleton")
 			current_battle->_battle_sounds[2].PlaySound();
-		else if (MakeStandardString(this->GetSource()->GetName()) == "Claudius")
+		else if (MakeStandardString(this->GetSource()->GetActor()->GetName()) == "Claudius")
 			current_battle->_battle_sounds[3].PlaySound();
-		else if (MakeStandardString(this->GetSource()->GetName()) == "Snake")
+		else if (MakeStandardString(this->GetSource()->GetActor()->GetName()) == "Snake")
 			current_battle->_battle_sounds[4].PlaySound();
 	}
 	// TODO: get script from global script repository and run, passing in list of arguments and host actor
@@ -113,6 +126,7 @@ BattleMode::BattleMode() :
 	_cursor_state(CURSOR_IDLE),
 	_action_menu_window(NULL),
 	_action_list_menu(NULL),
+	_active_se(NULL),
 	_current_number_swaps(0),
 	_swap_countdown_timer(300000) // 5 minutes
 {
@@ -136,6 +150,12 @@ BattleMode::BattleMode() :
 	for (uint32 i = 0; i < attack_point_indicator.size(); i++) {
 		_attack_point_indicator.AddFrame(attack_point_indicator[i], 10);
 	}
+
+	//Load the universal time meter image
+	_universal_time_meter.SetDimensions(10, 512);
+	_universal_time_meter.SetFilename("img/menus/stamina_bar.png");
+	if (VideoManager->LoadImage(_universal_time_meter))
+		cerr << "BATTLE ERROR: Failed to load time meter." << endl;
 
 	//Load in action type icons, FIXME add more later
 	frame.SetDimensions(45, 45);
@@ -243,6 +263,11 @@ BattleMode::~BattleMode() {
 	}
 	_enemy_actors.clear();
 
+	for (std::list<ScriptEvent*>::iterator i = _script_queue.begin(); i != _script_queue.end(); ++i) {
+		delete *i;
+	}
+	_script_queue.clear();
+
 	// Remove all of the battle images that were loaded
 	VideoManager->DeleteImage(_battle_background);
 	VideoManager->DeleteImage(_bottom_menu_image);
@@ -250,6 +275,7 @@ BattleMode::~BattleMode() {
 	VideoManager->DeleteImage(_attack_point_indicator);
 	VideoManager->DeleteImage(_swap_icon);
 	VideoManager->DeleteImage(_swap_card);
+	VideoManager->DeleteImage(_universal_time_meter);
 
 	//Remove action type icons
 	for (uint16 i = 0; i < _action_type_icons.size(); i++) {
@@ -350,6 +376,7 @@ void BattleMode::_CreateCharacterActors() {
 		_character_actors.push_back(claudius);
 		_selected_character = claudius;
 		_actor_index = GetIndexOfCharacter(claudius);
+		claudius->ResetWaitTime();
 	}
 } // void BattleMode::_CreateCharacterActors()
 
@@ -365,6 +392,8 @@ void BattleMode::_CreateEnemyActors() {
 			BattleEnemyActor * green_slime = new BattleEnemyActor("green_slime", static_cast<float> (RandomBoundedInteger(400, 600)), static_cast<float> (RandomBoundedInteger(200, 400)));
 			green_slime->SetName(MakeUnicodeString("Green Slime"));
 			green_slime->LevelSimulator(2);
+			green_slime->GetWaitTime()->SetDuration(10000);
+			green_slime->ResetWaitTime();
 			_enemy_actors.push_back(green_slime);
 		}
 
@@ -374,6 +403,8 @@ void BattleMode::_CreateEnemyActors() {
 			BattleEnemyActor * spider = new BattleEnemyActor("spider", static_cast<float> (RandomBoundedInteger(400, 600)), static_cast<float> (RandomBoundedInteger(200, 400)));
 			spider->SetName(MakeUnicodeString("Spider"));
 			spider->LevelSimulator(2);
+			spider->GetWaitTime()->SetDuration(9000);
+			spider->ResetWaitTime();
 			_enemy_actors.push_back(spider);
 		}
 
@@ -383,6 +414,8 @@ void BattleMode::_CreateEnemyActors() {
 			BattleEnemyActor * snake = new BattleEnemyActor("snake", static_cast<float> (RandomBoundedInteger(400, 600)), static_cast<float> (RandomBoundedInteger(200, 400)));
 			snake->SetName(MakeUnicodeString("Snake"));
 			snake->LevelSimulator(2);
+			snake->GetWaitTime()->SetDuration(8000);
+			snake->ResetWaitTime();
 			_enemy_actors.push_back(snake);
 		}
 
@@ -392,6 +425,8 @@ void BattleMode::_CreateEnemyActors() {
 			BattleEnemyActor * skeleton = new BattleEnemyActor("skeleton", static_cast<float> (RandomBoundedInteger(400, 600)), static_cast<float> (RandomBoundedInteger(200, 400)));
 			skeleton->SetName(MakeUnicodeString("Skeleton"));
 			skeleton->LevelSimulator(2);
+			skeleton->GetWaitTime()->SetDuration(7000);
+			skeleton->ResetWaitTime();
 			_enemy_actors.push_back(skeleton);
 		}
 	}
@@ -445,9 +480,30 @@ void BattleMode::Update() {
 	}
 
 	// Run any scripts that are sitting in the queue
-	if (!_IsPerformingScript() && _script_queue.size() > 0) {
-		_script_queue.front().RunScript();
-		SetPerformingScript(true);
+	if (_script_queue.size()) {
+	//if (!_IsPerformingScript() && _script_queue.size() > 0) {
+		std::list<private_battle::ScriptEvent*>::iterator it;
+		bool ran_script = false;
+		//for (uint8 i = 0; i < _script_queue.size(); i++)
+		for (it = _script_queue.begin(); it != _script_queue.end(); it++)
+		{
+			ScriptEvent* se = (*it);//_script_queue.front();
+			se->Update();
+			//(*it).Update();
+			//se._warm_up_time -= SystemManager->GetUpdateTime();
+			if (se->GetWarmUpTime().HasExpired() && !_IsPerformingScript())
+			{
+				SetPerformingScript(true,se);
+				se->RunScript();
+				ran_script = true;
+				//Later have battle mode call UpdateActiveScriptEvent instead
+				//_script_queue.pop_front();
+			}
+		}
+
+		//Do this out here so iterator doesnt get screwed up mid-loop
+		if (ran_script)
+			SetPerformingScript(false,NULL);
 	}
 
 	// Update various menus and other GUI graphics as appropriate
@@ -485,6 +541,10 @@ void BattleMode::Update() {
 
 void BattleMode::_UpdateCharacterSelection() {
 	// NOTE: Comment needed here, when would this situation occur and why do we need to return?
+	// ANDY: This is the first time that character selection comes into focus, so we don't want
+	// to process user input on the same loop.  This is because the input is from the previous
+	// loop and isn't valid for the menu.
+
 	if (_actor_index == -1) {
 		_actor_index = GetIndexOfFirstIdleCharacter();
 		return;
@@ -501,28 +561,44 @@ void BattleMode::_UpdateCharacterSelection() {
 		// Select the next character above the currently selected one
 		// If no such character exists, the selected character will remain selected
 		uint32 working_index = _actor_index;
+		BattleCharacterActor *bca;
+
 		while (working_index < GetNumberOfCharacters()) {
-			if (GetPlayerCharacterAt((working_index + 1))->GetActor()->IsAlive()) {
+			bca = GetPlayerCharacterAt(working_index + 1);
+			if (bca->GetActor()->IsAlive() && bca->GetWaitTime()->HasExpired() && !bca->IsQueuedToPerform())
+			{
 				_actor_index = working_index + 1;
 				break;
 			}
-			else {
-				++working_index;
-			}
+			/*if (GetPlayerCharacterAt((working_index + 1))->GetActor()->IsAlive()) {
+				_actor_index = working_index + 1;
+				break;
+			}*/
+			//else {
+			++working_index;
+			//}
 		}
 	}
 	else if (InputManager->DownPress() || InputManager->LeftPress()) {
 		// Select the next character below the currently selected one.
 		// If no such character exists, the selected character will remain selected
 		uint32 working_index = _actor_index;
+		BattleCharacterActor *bca;
+
 		while (working_index > 0) {
-			if (GetPlayerCharacterAt((working_index - 1))->GetActor()->IsAlive()) {
+			bca = GetPlayerCharacterAt(working_index + 1);
+			if (bca->GetActor()->IsAlive() && bca->GetWaitTime()->HasExpired() && !bca->IsQueuedToPerform())
+			{
 				_actor_index = working_index - 1;
 				break;
 			}
-			else {
-				--working_index;
+			/*if (GetPlayerCharacterAt((working_index - 1))->GetActor()->IsAlive()) {
+				_actor_index = working_index - 1;
+				break;
 			}
+			else {*/
+			--working_index;
+			//}
 		}
 	}
 	else if (InputManager->ConfirmPress()) {
@@ -656,7 +732,9 @@ void BattleMode::_UpdateAttackPointSelection() {
 	if (InputManager->ConfirmPress()) {
 		_selected_actor_arguments.push_back(GetEnemyActorAt(_argument_actor_index));
 		if (_selected_actor_arguments.size() == _necessary_selections) {
-			AddScriptEventToQueue(ScriptEvent(_selected_character, _selected_actor_arguments, "sword_swipe"));
+			
+			//AddScriptEventToQueue(ScriptEvent(_selected_character, _selected_actor_arguments, "sword_swipe", 2000));
+			AddScriptEventToQueue(new ScriptEvent(GetPlayerCharacterAt(_actor_index), _selected_actor_arguments, "sword_swipe", 1000));
 			_selected_character->SetQueuedToPerform(true);
 			_selected_actor_arguments.clear();
 			_selected_enemy = NULL;
@@ -707,6 +785,7 @@ void BattleMode::Draw() {
 
 	_DrawBackgroundVisuals();
 	_DrawSprites();
+	_DrawTimeMeter();
 	_DrawBottomMenu();
 	_DrawActionMenu();
 	_DrawDialogueMenu();
@@ -753,6 +832,59 @@ void BattleMode::_DrawSprites() {
 	// Draw all enemy sprites
 	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
 		_enemy_actors[i]->DrawSprite();
+	}
+} // void BattleMode::_DrawSprites()
+
+
+void BattleMode::_DrawTimeMeter() {
+
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM);
+	VideoManager->Move(1010, 128);
+	VideoManager->DrawImage(_universal_time_meter);
+	// Draw all character portraits
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	//BattleEnemyActor * e = GetEnemyActorAt(_argument_actor_index);
+
+	//FIX ME Below is the logic that should be used...requires change to UpdateTargetSelection code
+	for (uint32 i = 0; i < _character_actors.size(); i++)
+	{
+		bool selected = false;
+		
+		if (CURSOR_SELECT_TARGET || CURSOR_SELECT_ATTACK_POINT)
+		{
+			for (uint8 j = 0; j < _selected_actor_arguments.size(); j++)
+			{
+				if (_selected_actor_arguments[j] == _character_actors[i])
+				{
+					selected = true;
+					break;
+				}
+			}
+		}
+		_character_actors[i]->DrawTimePortrait(selected);
+	}
+
+	// Draw all enemy sprites
+	// FIX ME use some logic for targeting highlight, loop on _selected_actor_arguments
+	for (uint32 i = 0; i < _enemy_actors.size(); i++)
+	{
+		bool selected = false;
+
+		if (CURSOR_SELECT_TARGET || CURSOR_SELECT_ATTACK_POINT)
+		{
+			/*for (uint8 j = 0; j < _selected_actor_arguments.size(); j++)
+			{
+				if (_selected_actor_arguments[j] == _enemy_actors[i])
+				{
+					selected = true;
+					break;
+				}
+			}*/
+			//FIX ME Temp code below
+			if (_selected_enemy && _enemy_actors[i] == _selected_enemy)
+				selected = true;
+		}
+		_enemy_actors[i]->DrawTimePortrait(selected);
 	}
 } // void BattleMode::_DrawSprites()
 
@@ -989,34 +1121,71 @@ void BattleMode::_ConstructActionListMenu() {
 
 
 // Sets whether an action is being performed or not
-void BattleMode::SetPerformingScript(bool is_performing) {
+void BattleMode::SetPerformingScript(bool is_performing, ScriptEvent* se)
+{
 
 	// Check if a script has just ended. Set the script to stop performing and pop the script from the front of the queue
-	if (is_performing == false && _performing_script == true) {
+	// ANDY: Only one script will be running at a time, so only need to check the incoming bool
+
+	if (!is_performing)// == false && _performing_script == true)
+	{
 
 		// Remove the first scripted event from the queue
 		// _script_queue.front().GetSource() is always either BattleEnemyActor or BattleCharacterActor
-		IBattleActor * source = dynamic_cast<IBattleActor*>(_script_queue.front().GetSource());
+		//IBattleActor * source = dynamic_cast<IBattleActor*>(_script_queue.front().GetSource());
+		//IBattleActor* source = _script_queue.front().GetSource();
+		IBattleActor* source = (*_active_se).GetSource();
 		if (source) {
 			source->SetQueuedToPerform(false);
-			_script_queue.pop_front();
+			//ScriptEvent t = *_active_se;
+
+			std::list<private_battle::ScriptEvent*>::iterator it = _script_queue.begin();
+			while (it != _script_queue.end())
+			{
+				if ((*it) == _active_se)
+				{
+					_script_queue.erase(it);
+					break;
+				}
+				it++;
+			}
+			//_script_queue.erase(_active_se);
+			//_script_queue.pop_front();
+			//_script_queue.remove(t);
+			//FIX ME Use char and enemy stats
+			source->ResetWaitTime();
+			_active_se = NULL;
 		}
 		else {
 			cerr << "Invalid IBattleActor pointer in SetPerformingScript()" << endl;
 			SystemManager->ExitGame();
 		}
 	}
+	else// if (is_performing && !_performing_script)
+	{
+		/*if (se == NULL)
+			_active_se = se;
+		else
+		{*/
+		if (se == NULL)
+		{
+			cerr << "Invalid IBattleActor pointer in SetPerformingScript()" << endl;
+			SystemManager->ExitGame();
+		}
+	}
 
 	_performing_script = is_performing;
+	_active_se = se;
 }
 
 
 
-void BattleMode::RemoveScriptedEventsForActor(hoa_global::GlobalActor * actor) {
-	std::list<private_battle::ScriptEvent>::iterator it = _script_queue.begin();
+//void BattleMode::RemoveScriptedEventsForActor(hoa_global::GlobalActor * actor) {
+void BattleMode::RemoveScriptedEventsForActor(IBattleActor * actor) {
+	std::list<private_battle::ScriptEvent*>::iterator it = _script_queue.begin();
 
 	while (it != _script_queue.end()) {
-		if ((*it).GetSource() == actor) {
+		if ((*it)->GetSource() == actor) {
 			it = _script_queue.erase(it);	//remove this location
 		}
 		else {
@@ -1103,9 +1272,13 @@ int32 BattleMode::GetIndexOfLastAliveEnemy() const {
 
 int32 BattleMode::GetIndexOfFirstIdleCharacter() const {
 
+	BattleCharacterActor *bca;
 	deque<BattleCharacterActor*>::const_iterator it = _character_actors.begin();
+
 	for (uint32 i = 0; it != _character_actors.end(); i++, it++) {
-		if (!(*it)->IsQueuedToPerform() && (*it)->GetActor()->IsAlive()) {
+		bca = (*it);
+		if (!bca->IsQueuedToPerform() && bca->GetActor()->IsAlive() && bca->GetWaitTime()->HasExpired())
+		{
 			return i;
 		}
 	}

@@ -10,6 +10,7 @@
 /** ****************************************************************************
 *** \file   system.h
 *** \author Tyler Olsen, roots@allacrost.org
+*** \author Andy Gardner, chopperdave@allacrost.org
 *** \brief  Header file for system code management
 ***
 *** The system code handles a wide variety of tasks, including timing, threads
@@ -153,14 +154,7 @@ private:
 
 
 /** ****************************************************************************
-*** \brief Manages system information and functions
-***
-*** The GameModeManager class keeps a stack of GameMode objects, where the object
-*** on the top of the stack is the active GameMode (there can only be one active
-*** game mode at any time). The virtual Update() and Draw() functions are invoked
-*** on the game mode that is on the top of the stack.
-***
-*** \note 1) This class is a singleton.
+*** \brief This is a system level class that allows the user to easily control timed events
 *** ***************************************************************************/
 class Timer {
 public:
@@ -169,9 +163,14 @@ public:
 	 * \brief The only constructor that should be used
 	 * \param duration How long (in milliseconds) the timer should live
 	 *
-	 * \note Does not auto-play.  Must explicitly call Play();
+	 * \note Does not auto-play.  Must explicitly call Play().
 	**/
 	Timer(uint32 duration);
+
+	/**
+	 * \brief Only used by classes that have a timer as a member variable
+	**/
+	Timer() {}
 
 	/**
 	 * \brief Destructor
@@ -181,19 +180,19 @@ public:
 	/**
 	 * \brief Starts the timer (used for resuming too)
 	**/
-	inline void Play();
+	void Play();
 
 	/**
 	 * \brief Pauses the timer
 	**/
-	inline void Pause();
+	void Pause();
 
 	/**
 	 * \brief Resets the timer
 	 *
 	 * \note Does not auto-play.  Must explicitly call Play().
 	**/
-	inline void Reset();
+	void Reset();
 
 	/**
 	 * \brief Returns the duration of the timer
@@ -202,10 +201,16 @@ public:
 	inline uint32 GetDuration() { return _duration; }
 
 	/**
+	 * \brief Sets the duration of the timer
+	 * \param duration the duration of the timer
+	**/
+	inline void SetDuration(uint32 duration) { _duration = duration; }
+
+	/**
 	 * \brief Returns the amount of time left on the timer
 	 * \return the time left on the timer
 	**/
-	inline uint32 GetTimeLeft() { return _time_left; }
+	inline uint32 GetTimeLeft() { return _expiration_time - SDL_GetTicks(); }
 
 	/**
 	 * \brief Resets the timer
@@ -218,12 +223,7 @@ private:
 	/**
 	 * \brief Privatized so it's not used
 	**/
-	Timer();
-
-	/**
-	 * \brief Privatized so it's not used
-	**/
-	Timer(const hoa_system::Timer &T);
+	//Timer(const hoa_system::Timer &T);
 
 	//! The duration of the timer (in milliseconds)
 	uint32 _duration;
@@ -236,6 +236,6 @@ private:
 
 }; // class Timer
 
-} // namepsace hoa_settings
+} // namepsace hoa_system
 
 #endif
