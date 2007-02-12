@@ -21,7 +21,7 @@
 #include "video.h"
 #include "global.h"
 #include "script.h"
-#include "battle.h"
+//#include "battle.h"
 #include "menu.h"
 
 using namespace std;
@@ -30,7 +30,7 @@ using namespace hoa_audio;
 using namespace hoa_video;
 using namespace hoa_global;
 using namespace hoa_script;
-using namespace hoa_battle;
+using namespace hoa_system;
 using namespace hoa_menu;
 using namespace luabind;
 

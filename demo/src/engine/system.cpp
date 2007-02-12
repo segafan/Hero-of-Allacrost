@@ -9,7 +9,8 @@
 
 /** ****************************************************************************
 *** \file   system.cpp
-*** \author Tyler Olsen, roots@allacrost.org; Andy Gardner, chopperdave@allacrost.org
+*** \author Tyler Olsen, roots@allacrost.org
+*** \author Andy Gardner, chopperdave@allacrost.org
 *** \brief  Source file for system code management
 *** ***************************************************************************/
 
@@ -127,11 +128,14 @@ void GameSystem::SetLanguage(std::string lang) {
 	_language = lang;
 }
 
+/////////////////////////////
+// TIMER CLASS IMPLEMENTATION
+/////////////////////////////
 Timer::Timer( uint32 duration )
 {
 	_duration = duration;
 	_time_left = duration;
-	_expiration_time = 0;
+	_expiration_time = -1;
 }
 
 void Timer::Play()
@@ -147,12 +151,12 @@ void Timer::Pause()
 void Timer::Reset()
 {
 	_time_left = _duration;
-	_expiration_time = 0;
+	_expiration_time = -1;
 }
 
 bool Timer::HasExpired()
 {
-	if ( _expiration_time && ( SDL_GetTicks() > _expiration_time ) )
+	if ( _expiration_time >= 0 && ( SDL_GetTicks() > _expiration_time ) )
 		return true;
 
 	return false;

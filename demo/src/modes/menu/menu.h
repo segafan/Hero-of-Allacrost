@@ -9,7 +9,8 @@
 
 /** ****************************************************************************
 *** \file    menu.h
-*** \author  Daniel Steuernol steu@allacrost.org, Andy Gardner chopperdave@allacrost.org
+*** \author  Daniel Steuernol steu@allacrost.org
+*** \author  Andy Gardner chopperdave@allacrost.org
 *** \brief   Header file for menu mode interface.
 ***
 *** This code handles the game event processing and frame drawing when the user

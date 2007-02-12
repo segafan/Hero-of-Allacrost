@@ -9,7 +9,8 @@
 
 /*!****************************************************************************
  * \file    menu_views.cpp
- * \author  Daniel Steuernol steu@allacrost.org, Andy Gardner chopperdave@allacrost.org
+ * \author  Daniel Steuernol steu@allacrost.org
+ * \author  Andy Gardner chopperdave@allacrost.org
  * \brief   Source file for various menu views.
  *****************************************************************************/
 

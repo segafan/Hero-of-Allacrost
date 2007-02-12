@@ -11,6 +11,7 @@
 *** \file    battle_actors.cpp
 *** \author  Viljami Korhonen, mindflayer@allacrost.org
 *** \author  Corey Hoffstein, visage@allacrost.org
+*** \author  Andy Gardner, chopperdave@allacrost.org
 *** \brief   Source file for actors present in battles.
 *** ***************************************************************************/
 
@@ -53,20 +54,81 @@ _total_time_damaged(0),
 _damage_dealt(0),
 _is_queued_to_perform(false)
 {
+	//FIX ME
+	_time_meter_portrait.SetFilename("img/menus/stamina_icon.png");
+	_time_meter_portrait.SetDimensions(45,45);
+	VideoManager->LoadImage(_time_meter_portrait);
+
+	//Load time portrait selector
+	_time_portrait_selected.SetDimensions(45,45);
+	_time_portrait_selected.SetFilename("img/menus/stamina_icon_selected.png");
+	VideoManager->LoadImage(_time_portrait_selected);
+	
+	//_time_portrait_location = 128;
+	//FIX ME Use char stats to determine wait time
+	//FIX ME #2 Do not initialize here.  Have BattleMode loop through all actors
+	// and scale wait time based on slowest actor
+	_wait_time.SetDuration(5000);
+	//ResetWaitTime();
+	//_wait_time.Play();
+	//_action_state = ACTION_IDLE;
 }
 
 
 BattleCharacterActor::~BattleCharacterActor() {
-	// TODO: !
+	//FIX ME
+	VideoManager->DeleteImage(_time_meter_portrait);
+	VideoManager->DeleteImage(_time_portrait_selected);
 }
 
 
+void BattleCharacterActor::ResetWaitTime()
+{
+	_wait_time.Reset();// = 5000;
+	_wait_time.Play();
+
+	//Sets time meter portrait position
+	_time_portrait_location = 128.f;
+}
+
 // Updates the state of the character. Must be called every frame!
 void BattleCharacterActor::Update() {
-	if (GetActor()->IsAlive() == false) {
+
+	if (GetActor()->IsAlive() == false)
+	{
 		current_battle->RemoveScriptedEventsForActor(this);
-		}
+	}
+
 	GetActor()->RetrieveBattleAnimation("idle")->Update();
+
+	//FIX ME have to use char stats
+	if (!_wait_time.HasExpired() && GetActor()->IsAlive() && !IsQueuedToPerform())
+		_time_portrait_location += SystemManager->GetUpdateTime() * .081f;
+
+	/*if (_wait_time)
+		_wait_time -= SystemManager->GetUpdateTime();
+
+	if (_wait_time < 0)
+		_wait_time = 0;*/
+
+	//if (_wait_time <= 0)
+	//{
+	//	_wait_time//FIX ME set as active character for menu
+	//}
+		/*switch(_action_state)
+		{
+		case ACTION_IDLE:
+			//We have to sit until he makes a move w/ the menu
+			_wait_time = 0;
+			break;
+		case ACTION_WARM_UP:
+			break;
+		case ACTION_COOL_DOWN:
+			break;
+		default: //I screwed up somewheres
+			cerr << "Invalid value for _action_state in BattleCharacterActor\n";
+			break;
+		}*/
 }
 
 
@@ -96,8 +158,9 @@ void BattleCharacterActor::DrawSprite() {
 
 			if (_total_time_damaged > 3000) { // Show it for three seconds
 				_total_time_damaged = 0;
-				current_battle->SetPerformingScript (false);
-			}	
+			}
+				//current_battle->SetPerformingScript (false);
+			//}	
 		}
 	}
 	else {
@@ -144,6 +207,18 @@ void BattleCharacterActor::DrawPortrait() {
 }
 
 
+// Draws the character's portrait on the time meter
+void BattleCharacterActor::DrawTimePortrait(bool is_selected) {
+
+	if (GetActor()->IsAlive()) {
+		VideoManager->Move(995, _time_portrait_location);
+
+		VideoManager->DrawImage(_time_meter_portrait);
+
+		if (is_selected)
+			VideoManager->DrawImage(_time_portrait_selected);
+	}
+}
 // Draws the character's status information
 void BattleCharacterActor::DrawStatus() {
 	// Used to determine where to draw the character's status
@@ -250,19 +325,69 @@ _total_time_damaged(0),
 _damage_dealt(0),
 _is_queued_to_perform(false)
 {
-	// TODO
+	//FIX ME
+	_time_meter_portrait.SetFilename("img/menus/stamina_icon.png");
+	_time_meter_portrait.SetDimensions(45,45);
+	VideoManager->LoadImage(_time_meter_portrait);
+
+	//Load time portrait selector
+	_time_portrait_selected.SetDimensions(45,45);
+	_time_portrait_selected.SetFilename("img/menus/stamina_icon_selected.png");
+	VideoManager->LoadImage(_time_portrait_selected);
+
+	//GetWaitTime()->SetDuration(2000);
+	//ResetWaitTime();
 }
 
 
 
 BattleEnemyActor::~BattleEnemyActor() {
-	// TODO
+	// FIX ME
+	VideoManager->DeleteImage(_time_meter_portrait);
+	VideoManager->DeleteImage(_time_portrait_selected);
 }
 
 
+void BattleEnemyActor::ResetWaitTime()
+{
+	_wait_time.Reset();
+	_wait_time.Play();
+	//Sets time meter portrait position
+
+	_time_portrait_location = 128.f;
+}
+
 // Updates the action status of the enemy
 void BattleEnemyActor::Update() {
-	static uint32 next_attack = 0;
+
+	//if (_wait_time)
+	//	_wait_time -= SystemManager->GetUpdateTime();
+
+	if (GetActor()->IsAlive() && !IsQueuedToPerform())
+	{
+		if (_wait_time.HasExpired())
+		{
+			//_wait_time = 0;
+			//FIX ME Needs real AI decisions
+			//we can perform another attack
+			std::deque<IBattleActor*> final_targets;
+			std::deque<BattleCharacterActor*> targets = current_battle->GetCharacters();
+
+			for (uint8 i = 0; i < targets.size(); i++) {
+				final_targets.push_back(dynamic_cast<IBattleActor*>(targets[i]));
+			}
+
+			// okay, we can perform another attack.  set us up as queued to perform.
+			SetQueuedToPerform(true);
+			current_battle->AddScriptEventToQueue(new ScriptEvent(this, final_targets, "sword_swipe", 3000));
+			SetXLocation(GetXOrigin()); // Always attack from the starting location
+		}
+		//FIX ME have to use char stats
+		else
+			_time_portrait_location += SystemManager->GetUpdateTime() * (405.f / _wait_time.GetDuration());//.081f;
+	}
+	
+	/*static uint32 next_attack = 0;
 	static uint32 last_attack = 0;
 
 	// make sure the enemy isn't queued to perform.  set the next attack time
@@ -285,12 +410,12 @@ void BattleEnemyActor::Update() {
 
 		// okay, we can perform another attack.  set us up as queued to perform.
 		SetQueuedToPerform(true);
-		current_battle->AddScriptEventToQueue(ScriptEvent(this, final_targets, "sword_swipe"));
+		current_battle->AddScriptEventToQueue(ScriptEvent(this, final_targets, "sword_swipe", 2000));
 		SetXLocation(GetXOrigin()); // Always attack from the starting location
 
 		last_attack = 0;
 		next_attack = 0;
-	}
+	}*/
 
 	// If we're attacking, update the offset a little
 	if (IsAttacking()) {
@@ -372,11 +497,23 @@ void BattleEnemyActor::DrawSprite() {
 		
 		if (_total_time_damaged > 3000) {
 			_total_time_damaged = 0;
-			current_battle->SetPerformingScript(false);
+			//current_battle->SetPerformingScript(false);
 		}	
 	}
 }
 
+// Draws the enemy's time meter portrait
+void BattleEnemyActor::DrawTimePortrait(bool is_selected)
+{
+	if (GetActor()->IsAlive()) {
+		VideoManager->Move(995, _time_portrait_location);
+
+		VideoManager->DrawImage(_time_meter_portrait);
+
+		if (is_selected)
+			VideoManager->DrawImage(_time_portrait_selected);
+	}
+}
 
 // Draws the enemy's status information
 void BattleEnemyActor::DrawStatus() {
@@ -425,9 +562,13 @@ bool BattleEnemyActor::IsAttacking() const
 {
 	if (current_battle && !current_battle->_script_queue.empty())
 	{
-		GlobalActor * first_attacker = (current_battle->_script_queue.front()).GetSource();
-		if (IsQueuedToPerform() && (this == first_attacker))
-			return true;
+		//GlobalActor * first_attacker = (current_battle->_script_queue.front()).GetSource();
+		if (current_battle->GetActiveScript())
+		{
+			IBattleActor * first_attacker = current_battle->GetActiveScript()->GetSource();
+			if (IsQueuedToPerform() && (this == first_attacker))
+				return true;
+		}
 	}
 
 	return false;

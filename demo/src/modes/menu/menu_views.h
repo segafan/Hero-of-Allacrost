@@ -9,7 +9,8 @@
 
 /** ****************************************************************************
 *** \file    menu_views.h
-*** \author  Daniel Steuernol steu@allacrost.org, Andy Gardner chopperdave@allacrost.org
+*** \author  Daniel Steuernol steu@allacrost.org
+*** \author  Andy Gardner chopperdave@allacrost.org
 *** \brief   Header file for various menu views.
 ***
 *** This code handles the different views that the user will see while the

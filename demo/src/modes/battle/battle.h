@@ -11,6 +11,7 @@
 *** \file    battle.h
 *** \author  Viljami Korhonen, mindflayer@allacrost.org
 *** \author  Corey Hoffstein, visage@allacrost.org
+*** \author  Andy Gardner, chopperdave@allacrost.org
 *** \brief   Header file for battle mode interface.
 ***
 *** This code handles event processing, game state updates, and video frame
@@ -83,7 +84,7 @@ enum CURSOR_STATE {
 *** ***************************************************************************/
 class ScriptEvent {
 public:
-	ScriptEvent(hoa_global::GlobalActor * source, std::deque<IBattleActor*> targets, const std::string & script_name);
+	ScriptEvent(IBattleActor* source, std::deque<IBattleActor*> targets, const std::string & script_name, uint32 warm_up_time);
 
 	~ScriptEvent();
 
@@ -92,16 +93,36 @@ public:
 
 	//! \name Class member access functions
 	//@{
-	hoa_global::GlobalActor * GetSource()
-		{ return _source; }
+	//hoa_global::GlobalActor * GetSource()
+	//	{ return _source; }
 	//@}
+
+	//! \name Class member access functions
+	//@{
+	hoa_battle::private_battle::IBattleActor * GetSource() { return _source; }
+	//@}
+
+	//! \brief Updates the script
+	void Update();
+
+	// \brief Returns the amount of time left in warm up
+	// \return warm up time left
+	inline hoa_system::Timer GetWarmUpTime() const { return _warm_up_time; }
+
+	//! \brief Gets the BattleActor hosting this script
+	//inline IBattleActor* GetActor() { return _actor_source; }
+
 private:
 	//! The name of the executing script
 	std::string _script_name;
 	//! The actor whom is initiating this script
-	hoa_global::GlobalActor * _source;
+	IBattleActor* _source;
+	//hoa_global::GlobalActor * _source;
 	//! The targets of the script
 	std::deque<IBattleActor *> _targets;
+	//! The amount of time to wait to execute the script
+	hoa_system::Timer _warm_up_time;
+	//! If the script is ready to run or not
 };
 
 } // namespace private_battle
@@ -137,19 +158,24 @@ public:
 	bool _IsPerformingScript() const
 		{ return _performing_script; }
 
-	//! Sets whether an action is being performed or not
-	void SetPerformingScript(bool is_performing);
+	//! Sets whether an action is being performed or not, and what that action is
+	void SetPerformingScript(bool is_performing, private_battle::ScriptEvent* se);
 
 	//! Added a scripted event to the queue
-	void AddScriptEventToQueue(private_battle::ScriptEvent event)
+	void AddScriptEventToQueue(private_battle::ScriptEvent* event)
 		{ _script_queue.push_back(event); }
 
 	//! Remove all scripted events for an actor
-	void RemoveScriptedEventsForActor(hoa_global::GlobalActor * actor);
+	void RemoveScriptedEventsForActor(hoa_battle::private_battle::IBattleActor * actor);
+	//void RemoveScriptedEventsForActor(hoa_global::GlobalActor * actor);
 
 	//! Returns all player actors
 	std::deque<private_battle::BattleCharacterActor*> GetCharacters() const
 		{ return _character_actors; }
+
+	//! Returns all targeted actors
+	//inline std::deque<private_battle::IBattleActor*> GetSelectedActors() const
+	//	{ return _selected_actor_arguments; }
 
 	//! Is the battle over?
 	bool IsBattleOver() const
@@ -188,9 +214,16 @@ public:
 	// This may become more complicated if it is done in a wierd graphical manner
 	void SwapCharacters(private_battle::BattleCharacterActor * ActorToRemove, private_battle::BattleCharacterActor * ActorToAdd);
 
+	// \brief Gets the active ScriptEvent
+	// \param se the ScriptEvent to designate as active
+	inline private_battle::ScriptEvent* GetActiveScript() { return _active_se; }
+
 private:
 	//! Set to true whenever an actor (player or enemy) is performing an action
 	bool _performing_script;
+
+	//! The script currently being performed
+	private_battle::ScriptEvent* _active_se;
 
 	//! Set to true when either side of the battle is dead
 	bool _battle_over;
@@ -325,6 +358,12 @@ private:
 	*** with the word 'Attack' will appear at the top of the window, followed by the action list
 	**/
 	std::vector<hoa_video::StillImage> _action_type_icons;
+	/** \brief The universal stamina bar that all battle actors proceed along
+	*** All battle actors have a portrait that moves along this meter to signify their
+	*** turn in the rotation.  The meter and corresponding portraits must be drawn after the
+	*** character sprites.
+	**/
+	hoa_video::StillImage _universal_time_meter;
 	//@}
 
 	//! \name Character Swap Card Data
@@ -356,7 +395,7 @@ private:
 	//! \name Actor Action Processing
 	//@{
 	//! A FIFO queue of actor actions to perform
-	std::list<private_battle::ScriptEvent> _script_queue;
+	std::list<private_battle::ScriptEvent*> _script_queue;
 	//@}
 
 	////////////////////////////// PRIVATE METHODS ///////////////////////////////
@@ -415,6 +454,10 @@ private:
 	*** For example, the actor selector image and any visible action effects like magic.
 	**/
 	void _DrawSprites();
+	/** \brief Draws the universal time meter and the portraits attached to it
+	*** Portraits are retrieved from the battle actors.
+	**/
+	void _DrawTimeMeter();
 	/** \brief Draws the bottom menu visuals and information
 	*** The bottom menu contains a wide array of information, including swap cards, character portraits, character names,
 	*** and both character and enemy status. This menu is perpetually drawn on the battle screen.
