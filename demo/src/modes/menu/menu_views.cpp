@@ -299,7 +299,7 @@ void MiniCharacterSelectWindow::Update()
 		_menu_sounds["potion"].PlaySound();
 
 		// increase hp FIXME
-		if (selected->GetUsage() == GLOBAL_MENU_USAGE)
+		if (selected->GetUsage() == GLOBAL_ITEM_USE_MENU)
 		{	
 			uint32 new_hp = ch->GetHitPoints();
 			//new_hp += selected->GetRecoveryAmount();
@@ -724,7 +724,7 @@ void InventoryWindow::_TEMP_ApplyItem() {
 	_menu_sounds["potion"].PlaySound();
 
 	// increase hp
-	if (selected->GetUsage() == GLOBAL_MENU_USAGE)
+	if (selected->GetUsage() == GLOBAL_ITEM_USE_MENU)
 	{	
 		uint32 new_hp = ch->GetHitPoints();
 		new_hp += 180;//selected->->GetRecoveryAmount();
@@ -796,12 +796,13 @@ void InventoryWindow::_UpdateItemText()
 		case ITEM_ALL:
 			for (i = inv.begin(), count = 0; i != inv.end(); i++, count++) {
 				obj = i->second;
-				if (obj->GetType() == GLOBAL_ITEM) {
+				if (obj->GetType() == GLOBAL_OBJECT_ITEM) {
 					item = (GlobalItem*)obj;
-					text ="<" + item->GetIconPath() + "><32>" + MakeStandardString(item->GetName()) +
+					// NOTE: item->GetIconPath is defunct
+					text = "TEMP:insert icon" + MakeStandardString(item->GetName()) +
 						"<R><350>" + NumberToString(item->GetCount()) + "   ";
 					inv_names.push_back(MakeUnicodeString(text));
-					if (item->GetUsage() != GLOBAL_MENU_USAGE) {
+					if (item->GetUsage() != GLOBAL_ITEM_USE_MENU) {
 						_inventory_items.EnableOption(count,false);
 					}
 				}
@@ -812,10 +813,11 @@ void InventoryWindow::_UpdateItemText()
 		case ITEM_FIELD:
 			for (i = inv.begin(), count = 0; i != inv.end(); i++) {
 				obj = i->second;
-				if (obj->GetType() == GLOBAL_ITEM) {
+				if (obj->GetType() == GLOBAL_OBJECT_ITEM) {
 					item = (GlobalItem*)obj;
-					if (item->GetUsage() == GLOBAL_MENU_USAGE) {
-						text ="<" + item->GetIconPath() + "><32>" + MakeStandardString(item->GetName()) +
+					if (item->GetUsage() == GLOBAL_ITEM_USE_MENU) {
+						// NOTE: item->GetIconPath is defunct
+						text = "TEMP:insert icon" + MakeStandardString(item->GetName()) +
 							"<R><350>" + NumberToString(item->GetCount()) + "   ";
 						inv_names.push_back(MakeUnicodeString(text));
 						count++;
@@ -828,10 +830,11 @@ void InventoryWindow::_UpdateItemText()
 		case ITEM_BATTLE:
 			for (i = inv.begin(), count = 0; i != inv.end(); i++) {
 				obj = i->second;
-				if (obj->GetType() == GLOBAL_ITEM) {
+				if (obj->GetType() == GLOBAL_OBJECT_ITEM) {
 					item = (GlobalItem*)obj;
-					if (item->GetUsage() == GLOBAL_BATTLE_USAGE) {
-						text ="<" + item->GetIconPath() + "><32>" + MakeStandardString(item->GetName()) +
+					if (item->GetUsage() == GLOBAL_ITEM_USE_BATTLE) {
+						// NOTE: item->GetIconPath is defunct
+						text = "TEMP:insert icon" + MakeStandardString(item->GetName()) +
 							"<R><350>" + NumberToString(item->GetCount()) + "   ";
 						inv_names.push_back(MakeUnicodeString(text));
 						_inventory_items.EnableOption(count,false);
@@ -845,15 +848,16 @@ void InventoryWindow::_UpdateItemText()
 		case ITEM_EQUIPMENT:
 			for (i = inv.begin(), count = 0; i != inv.end(); i++) {
 				obj = i->second;
-				if (obj->GetType() >= GLOBAL_WEAPON &&
-					obj->GetType() <= GLOBAL_LEGS_ARMOR) {
+				if (obj->GetType() >= GLOBAL_OBJECT_WEAPON &&
+					obj->GetType() <= GLOBAL_OBJECT_LEG_ARMOR) {
 						/*if (item->GetType() & GLOBAL_WEAPON) {
 							item = (GlobalWeapon*)obj;
 						}
 						else {
 							item = (GlobalArmor*)obj;
 						}*/
-						text ="<" + obj->GetIconPath() + "><32>" + MakeStandardString(obj->GetName()) +
+						// NOTE: item->GetIconPath is defunct
+						text = "TEMP:insert icon" + MakeStandardString(obj->GetName()) +
 							"<R><350>" + NumberToString(obj->GetCount()) + "   ";
 						inv_names.push_back(MakeUnicodeString(text));
 						_inventory_items.EnableOption(count,false);
@@ -1857,7 +1861,7 @@ void EquipWindow::_UpdateEquipList() {
 		switch (_equip_select.GetSelection()) {
 			case EQUIP_WEAPON:
 				for (uint32 i = 0; i < invsize; i++) {
-					if (inv[i]->GetType() == GLOBAL_WEAPON) { // && usable by cur char
+					if (inv[i]->GetType() == GLOBAL_OBJECT_WEAPON) { // && usable by cur char
 						weapons.push_back(static_cast<GlobalWeapon*>(inv[i]));
 					}
 				}
@@ -1873,7 +1877,7 @@ void EquipWindow::_UpdateEquipList() {
 
 			case EQUIP_HEADGEAR:
 				for (uint32 i = 0; i < invsize; i++) {
-					if (inv[i]->GetType() == GLOBAL_HEAD_ARMOR) { // && usable by cur char
+					if (inv[i]->GetType() == GLOBAL_OBJECT_HEAD_ARMOR) { // && usable by cur char
 						armor.push_back(static_cast<GlobalArmor*>(inv[i]));
 					}
 				}
@@ -1889,7 +1893,7 @@ void EquipWindow::_UpdateEquipList() {
 
 			case EQUIP_BODYARMOR:
 				for (uint32 i = 0; i < invsize; i++) {
-					if (inv[i]->GetType() == GLOBAL_TORSO_ARMOR) { // && usable by cur char
+					if (inv[i]->GetType() == GLOBAL_OBJECT_TORSO_ARMOR) { // && usable by cur char
 						armor.push_back(static_cast<GlobalArmor*>(inv[i]));
 					}
 				}
@@ -1905,7 +1909,7 @@ void EquipWindow::_UpdateEquipList() {
 
 			case EQUIP_OFFHAND:
 				for (uint32 i = 0; i < invsize; i++) {
-					if (inv[i]->GetType() == GLOBAL_ARMS_ARMOR) { // && usable by cur char
+					if (inv[i]->GetType() == GLOBAL_OBJECT_ARM_ARMOR) { // && usable by cur char
 						armor.push_back(static_cast<GlobalArmor*>(inv[i]));
 					}
 				}
@@ -1921,7 +1925,7 @@ void EquipWindow::_UpdateEquipList() {
 
 			case EQUIP_LEGGINGS:
 				for (uint32 i = 0; i < invsize; i++) {
-					if (inv[i]->GetType() == GLOBAL_LEGS_ARMOR) { // && usable by cur char
+					if (inv[i]->GetType() == GLOBAL_OBJECT_LEG_ARMOR) { // && usable by cur char
 						armor.push_back(static_cast<GlobalArmor*>(inv[i]));
 					}
 				}

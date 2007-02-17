@@ -23,31 +23,39 @@
 #include "defs.h"
 #include "utils.h"
 #include "image.h"
+#include "script.h"
+#include "global_skills.h"
 
 namespace hoa_global {
 
-/** \name GameObject Types
-*** \brief Constants used for identification of different game object types
-*** \note All armor types are identified using the upper nibble
+/** \name GlobalObject Types
+*** \brief Used for identification of different game object types
 **/
-//@{
-const uint8 GLOBAL_BAD_OBJECT  = 0x00;
-const uint8 GLOBAL_ITEM        = 0x01;
-const uint8 GLOBAL_WEAPON      = 0x02;
-const uint8 GLOBAL_HEAD_ARMOR  = 0x04;
-const uint8 GLOBAL_TORSO_ARMOR = 0x08;
-const uint8 GLOBAL_ARMS_ARMOR  = 0x10;
-const uint8 GLOBAL_LEGS_ARMOR  = 0x20;
-//@}
+enum GLOBAL_OBJECT {
+	GLOBAL_OBJECT_INVALID     = -1,
+	GLOBAL_OBJECT_ITEM        =  0,
+	GLOBAL_OBJECT_WEAPON      =  1,
+	GLOBAL_OBJECT_HEAD_ARMOR  =  2,
+	GLOBAL_OBJECT_TORSO_ARMOR =  3,
+	GLOBAL_OBJECT_ARM_ARMOR   =  4,
+	GLOBAL_OBJECT_LEG_ARMOR   =  5,
+	GLOBAL_OBJECT_JEWEL       =  6,
+	GLOBAL_OBJECT_KEY_ITEM    =  7,
+	GLOBAL_OBJECT_TOTAL       =  8
+};
 
-/** \name GameItem Usage Types
-*** \brief Constants for the numerous methods of application of game items
+/** \name GlobalItem Usage Cases
+*** \brief Enum values used for identification of different game object types
 **/
-//@{
-const uint8 GLOBAL_BAD_USAGE        = 0x00;
-const uint8 GLOBAL_MENU_USAGE       = 0x0F;
-const uint8 GLOBAL_BATTLE_USAGE     = 0xF0;
-//@}
+enum GLOBAL_ITEM_USE {
+	GLOBAL_ITEM_USE_INVALID = -1,
+	GLOBAL_ITEM_USE_MENU    =  0,
+	GLOBAL_ITEM_USE_BATTLE  =  1,
+	GLOBAL_ITEM_USE_ALL     =  2,
+	GLOBAL_ITEM_USE_TOTAL   =  3
+};
+
+
 
 /** ****************************************************************************
 *** \brief An abstract parent class for representing a game object
@@ -64,12 +72,30 @@ const uint8 GLOBAL_BATTLE_USAGE     = 0xF0;
 class GlobalObject {
 public:
 	GlobalObject()
+		{ _id = 0; }
+
+	virtual ~GlobalObject()
 		{}
 
-	GlobalObject(uint32 id, uint32 count = 0);
+	/** \brief Loads the item's data from a file and sets the members of the class
+	*** \param id The unique integer id of the item which to fetch the data for
+	*** \return True upon success, or false in the case of a failure.
+	**/
+	virtual bool Load(uint32 id) = 0;
 
-	~GlobalObject()
-		{}
+	/** \brief Increments the number of objects represented by the specified amount
+	*** \param count The number of objects to add (a positive integer)
+	**/
+	void IncrementCount(uint32 count)
+		{ _count += count; }
+
+	/** \brief Decrements the number of objects represented by the specified amount
+	*** \param count The number of objects to remove (a positive integer)
+	*** \note When the count reaches zero, this class object will <b>not</b> self-destruct. It is the user's
+	*** responsiblity to check if the count becomes zero, and to destroy the object if it is appropriate to do so.
+	**/
+	void DecrementCount(uint32 count)
+		{ if (count > _count) _count = 0; else _count -= count; }
 
 	//! \name Class Member Access Functions
 	//@{
@@ -79,7 +105,10 @@ public:
 	hoa_utils::ustring GetName() const
 		{ return _name; }
 
-	uint8 GetType() const
+	hoa_utils::ustring GetDescription() const
+		{ return _description; }
+
+	GLOBAL_OBJECT GetType() const
 		{ return _type; }
 
 	uint32 GetUsableBy() const
@@ -87,45 +116,7 @@ public:
 
 	uint32 GetCount() const
 		{ return _count; }
-
-	std::string GetIconPath() const
-		{ return _icon_path; }
-
-	// NOTE: I think that some of these functions are potentially very dangerous. Changing
-	// an object's ID changes the very object itself, and it should also change the name
-	// and icon path of the object when the ID changes. We need to discuss these functions
-	// further.
-	void SetID(const uint32 id)
-		{ _id = id; }
-
-	void SetName(const hoa_utils::ustring name)
-		{ _name = name; }
-
-	void SetType(const uint8 type)
-		{ _type = type; }
-
-	void SetCount(const uint32 count)
-		{ _count = count; }
-
-	void SetUsableBy(const uint32 use)
-		{ _usable_by = use; }
-
-	void SetIconPath(const std::string icon_path)
-		{ _icon_path = icon_path; }
 	//@}
-
-	/** \brief Increments the number of objects represented by the specified amount
-	*** \param count The number of objects to add (a positive integer)
-	**/
-	void IncrementCount(uint32 count)
-		{ _count += count; }
-	/** \brief Decrements the number of objects represented by the specified amount
-	*** \param count The number of objects to remove (a positive integer)
-	*** \note When the count reaches zero, this class will not self-destruct. It is the user's
-	*** responsiblity to destroy the class when it is appropriate to do so.
-	**/
-	void DecrementCount(uint32 count)
-		{ if (count > _count) _count = 0; else _count -= count; }
 
 protected:
 	/** \brief An identification number for each unique item
@@ -133,13 +124,16 @@ protected:
 	**/
 	uint32 _id;
 
-	//! \brief The name of the object as it would be displayed on a screen
-	hoa_utils::ustring _name;
-
 	/** \brief A numerical value that defines what type of object this is.
 	*** See the GameObject Types constants for a list of the different object types.
 	**/
-	uint8 _type;
+	GLOBAL_OBJECT _type;
+
+	//! \brief The name of the object as it would be displayed on a screen
+	hoa_utils::ustring _name;
+
+	//! \brief A short description of the item to display to the player
+	hoa_utils::ustring _description;
 
 	//! \brief How many items are represented within this class object instance
 	uint32 _count;
@@ -149,18 +143,11 @@ protected:
 	**/
 	uint32 _usable_by;
 
-	/** \brief The file path of the icon image for this object
-	*** \note This string should never be empty
-	*** \todo This member will eventually become defunct
-	**/
-	std::string _icon_path;
-
 	//! \brief An image icon of the object
 	hoa_video::StillImage _icon_image;
 
 private:
 	GlobalObject(const GlobalObject&);
-
 	GlobalObject& operator=(const GlobalObject&);
 }; // class GlobalObject
 
@@ -177,29 +164,48 @@ private:
 class GlobalItem : public GlobalObject {
 public:
 	GlobalItem()
-		{}
-
-	GlobalItem(uint32 id, uint32 count = 1);
+		{ _id = 0; _type = GLOBAL_OBJECT_ITEM; _usable_by = 0; _count = 0; _usage = GLOBAL_ITEM_USE_INVALID; _target_type = GLOBAL_TARGET_INVALID; }
 	
 	~GlobalItem()
 		{}
 
+	/** \brief Loads the item's data from a file and sets the members of the class
+	*** \param id The unique integer id of the item which to fetch the data for
+	*** \return True upon success, or false in the case of a failure.
+	**/
+	bool Load(uint32 id);
+
+	/** \brief Calls the script function which performs the item's use
+	*** \param target A void pointer to the target, which should be either a pointer to a
+	*** GlobalAttackPoint, GlobalActor, or GlobalParty class object
+	*** \note This will reduce the count member by zero. If the count member is already zero,
+	*** this function will return without doing anything.
+	**/
+	void Use(void* target);
+
 	//! \name Class Member Access Functions
 	//@{
-	uint8 GetUsage() const
+	GLOBAL_ITEM_USE GetUsage() const
 		{ return _usage; }
-	void SetUsage(uint8 use)
-		{ _usage = use; }
+
+	GLOBAL_TARGET GetTargetType() const
+		{ return _target_type; }
 	//@}
 
 private:
-	//! \brief Indicates where the item may be used.
-	//! See the GameItem Usage Types constants for a list of locations.
-	uint8 _usage;
+	/** \brief Values to indicate where the item may be used
+	*** Items may only be used in either menu mode or battle mode. If an item is to be used in another game mode,
+	*** then it must rely on either the menu or battle use values.
+	**/
+	GLOBAL_ITEM_USE _usage;
 
-	// TODO: A reference to the script function to execute for this item
-	// ScriptFunction *_script;
+	/** \brief The type of target for the item.
+	*** Target types include attack points, actors, and parties. This enum  type is defined in global_skills.h
+	**/
+	GLOBAL_TARGET _target_type;
 
+	//! \brief A reference to the script function that performs the items action.
+	luabind::object _function;
 
 	GlobalItem(const GlobalItem&);
 	GlobalItem& operator=(const GlobalItem&);
@@ -217,10 +223,16 @@ private:
 class GlobalWeapon : public GlobalObject {
 public:
 	GlobalWeapon()
-		{}
-	GlobalWeapon(uint32 id, uint32 count = 0);
+		{ _id = 0; _type = GLOBAL_OBJECT_WEAPON; _usable_by = 0; _count = 0; }
+
 	~GlobalWeapon()
 		{}
+
+	/** \brief Loads the weapon's data from a file and sets the members of the class
+	*** \param id The unique integer id of the weapon which to fetch the data for
+	*** \return True upon success, or false in the case of a failure.
+	**/
+	bool Load(uint32 id);
 
 private:
 	//! The amount of physical damage that the weapon causes
@@ -228,10 +240,9 @@ private:
 	//! The amount of metaphysical damage that the weapon causes
 	uint32 _metaphysical_attack;
 
-	// TODO: Add elemental bonuses
-	// std::vector<GlobalElementalEffect*> _elemental_attacks;
-	// TODO: Add affliction bonuses
-	// std::vector<GlobalStatusEffect*> _status_attacks;
+	std::map<GLOBAL_ELEMENTAL, uint32> _elemental_bonuses;
+	std::map<GLOBAL_STATUS, uint32> _status_bonuses;
+	// std::vector<GlobalGem*> _sockets;
 
 	GlobalWeapon(const GlobalWeapon&);
 	GlobalWeapon& operator=(const GlobalWeapon&);
@@ -239,33 +250,30 @@ private:
 
 
 
- /*!****************************************************************************
- * \brief A class for representing armor found in the game.
- *
- * It should be fairly obvious, but not all armor can be equipped by all
- * characters. Even though there's only one armor class, there are actually four
- * types of armor: head, body, arms, and legs. The GlobalObject#obj_type member is used
- * to identify what armor category an instance of this class belongs to. All armor
- * have the same members/properties, so it doesn't make any sense to make four
- * identical classes different only in name for the four armor types.
- *
- * \note 1) The copy constructor and copy assignment operator are private because
- * we don't want to accidentally allow the player to find a hack for duplicating
- * objects in their inventory.
- *
- * \note 2) There are several member access functions to safe-guard the
- * programmer against accidentally changing the important values of the class
- * members.
- *****************************************************************************/
+/** ****************************************************************************
+*** \brief Represents the four types of armor found in the game
+***
+*** Not all pieces of armor can be equipped by all characters. Even though there's
+*** only one armor class, there are actually four types of armor: head, torso, arm,
+*** and leg. The GlobalObject#_type member is used to identify what armor category
+*** an instance of this class belongs to. All armor have the same members/properties, so it doesn't make any sense to make four
+*** identical classes different only in name for the four armor types.
+*** ***************************************************************************/
 class GlobalArmor : public GlobalObject {
 public:
 	GlobalArmor()
-		{}
+		{ _id = 0; _type = GLOBAL_OBJECT_INVALID; _usable_by = 0; _count = 0; }
 
 	GlobalArmor(uint32 id, uint8 type, uint32 count);
 
 	~GlobalArmor()
 		{}
+
+	/** \brief Loads the armor's data from a file and sets the members of the class
+	*** \param id The unique integer id of the weapon which to fetch the data for
+	*** \return True upon success, or false in the case of a failure.
+	**/
+	bool Load(uint32 id);
 
 private:
 	//! The amount of physical defense that the armor allows

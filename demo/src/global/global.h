@@ -25,6 +25,7 @@
 
 #include "defs.h"
 #include "utils.h"
+#include "script.h"
 
 #include "global_objects.h"
 #include "global_actors.h"
@@ -61,13 +62,17 @@ typedef std::map<uint32, GlobalObject*> Inventory;
 *** either begin a new game or load an existing one.
 *** ***************************************************************************/
 class GameGlobal {
+	friend class GlobalItem;
+	friend class GlobalWeapon;
+	friend class GlobalArmor;
+
 public:
 	SINGLETON_METHODS(GameGlobal);
 
 	/** \brief Makes all relevant global classes and methods available to Lua.
 	*** This function only needs to be called once when the application starts.
 	**/
-	void BindToLua();
+	static void BindToLua();
 
 	/** \brief Deletes all data stored within the GameGlobal class object
 	*** This function is meant to be called when the user quits the current game instance
@@ -177,6 +182,13 @@ private:
 	*** four characters, and should always contain at least one character.
 	**/
 	GlobalCharacterParty _active_party;
+
+	//! \brief Script files that hold data for various global objects
+	//@{
+	hoa_script::ScriptDescriptor _items_script;
+	hoa_script::ScriptDescriptor _weapons_script;
+	hoa_script::ScriptDescriptor _armor_script;
+	//@}
 }; // class GameGlobal
 
 } // namespace hoa_global

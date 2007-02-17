@@ -126,14 +126,6 @@ private:
 
 	//! \brief A pointer to the actor which the attack point belongs to
 	GlobalActor* _actor;
-
-	/** \brief The armor that is protecting the attack point, if any
-	*** The armor equipped provides changes to the physical and metaphysical defense members. When it is
-	*** unequipped, the amount of protection that it provided is subtracted from the defense members.
-	*** Usually enemies will not have armor equipped (instead their attack points are just given high defense
-	*** values), but characters will almost always have armor equipped.
-	**/
-	GlobalArmor* _armor_equipped;
 }; // class GlobalAttackPoint
 
 

@@ -30,115 +30,128 @@ using namespace hoa_script;
 namespace hoa_global {
 
 // ****************************************************************************
-// ***** GlobalObject Class
-// ****************************************************************************
-
-GlobalObject::GlobalObject(uint32 id, uint32 count)
-{
-	if (id == 0) {
-		if (GLOBAL_DEBUG) cerr << "WARNING: GlobalObject constructor called with invalid ID member (0)" << endl;
-		_id = 0;
-		_type = 0;
-		_usable_by = 0;
-		_count = 0;
-		_name = 0;
-		_icon_path = "";
-		return;
-	}
-
-	_id = id;
-	_count = count;
-
-	// The remaining data members are set by reading in the object's data contained within a Lua file
-	// TODO: Waiting on support from script manager
-// 	_type = ;
-// 	_usable_by = ;
-// 	_name = ;
-// 	_icon_path = ;
-} // GlobalObject::GlobalObject(uint32 id, uint32 count)
-
-// ****************************************************************************
 // ***** GlobalItem Class
 // ****************************************************************************
 
-GlobalItem::GlobalItem(uint32 id, uint32 count) : GlobalObject(id, count) {
-	// TEMP: there is only one type of item
-	_type = GLOBAL_ITEM;
-	_name = MakeUnicodeString("Healing Potion");
-	_icon_path = "img/icons/items/health_potion.png";
-	_icon_image.SetFilename("img/icons/items/health_potion.png");
-	if (_icon_image.Load() == false) {
-		cerr << "ERROR: In GlobalWeapon constructor, failed to load icon image" << endl;
+bool GlobalItem::Load(uint32 id) {
+	if (id < 1 || id > 9999) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL ERROR: GlobalItem::Load has an invalid value for its id: " << id << endl;
+		return false;
 	}
-	_usage = 0;
-	// End TEMP
 
-	// TODO: use the id to load the item properties from a Lua file
+	// Load the item data from the script
+	GlobalManager->_items_script.ReadOpenTable(id);
+	_name = MakeUnicodeString(GlobalManager->_items_script.ReadString("name"));
+	_description = MakeUnicodeString(GlobalManager->_items_script.ReadString("description"));
+	_icon_image.SetFilename(GlobalManager->_items_script.ReadString("icon"));
+	_usage = static_cast<GLOBAL_ITEM_USE>(GlobalManager->_items_script.ReadInt("usage"));
+	_target_type = static_cast<GLOBAL_TARGET>(GlobalManager->_items_script.ReadInt("target_type"));
+	// _function = GlobalManager->_items_script.ReadFunctionPointer("use_function");
+	GlobalManager->_items_script.ReadCloseTable();
+
+	if (GlobalManager->_items_script.GetErrorCode() != SCRIPT_NO_ERRORS) {
+		return false;
+	}
+	if (_icon_image.Load() == false) {
+		return false;
+	}
+	return true;
+} // bool GlobalItem::Load(uint32 id)
+
+
+
+void GlobalItem::Use(void* target) {
+	if (_count == 0) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL ERROR: tried to use item " << MakeStandardString(_name) << " which had a count of zero" << endl;
+		return;
+	}
+
+	luabind::call_function<void>(_function);
+	_count--;
 }
 
 // ****************************************************************************
 // ***** GlobalWeapon Class
 // ****************************************************************************
 
-GlobalWeapon::GlobalWeapon(uint32 id, uint32 count) : GlobalObject(id, count)
-{
-	// TEMP: there is only one type of weapon
-	_type = GLOBAL_WEAPON;
-	_name = MakeUnicodeString("Karlate Sword");
-	_icon_path = "img/icons/inventory/karlate_sword.png";
-	_icon_image.SetFilename("img/icons/weapons/karlate_sword.png");
-	if (_icon_image.Load() == false) {
-		cerr << "ERROR: In GlobalWeapon constructor, failed to load icon image" << endl;
+bool GlobalWeapon::Load(uint32 id) {
+	if (id < 10000 || id > 19999) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL ERROR: GlobalWeapon::Load has an invalid value for its id: " << id << endl;
+		return false;
 	}
-	// TODO: use the id to load the weapon properties from a Lua file
-} // GlobalWeapon::GlobalWeapon(uint32 id, uint32 count)
+
+	// Load the weapon data from the script
+	GlobalManager->_weapons_script.ReadOpenTable(id);
+	
+	_name = MakeUnicodeString(GlobalManager->_weapons_script.ReadString("name"));
+	_description = MakeUnicodeString(GlobalManager->_weapons_script.ReadString("description"));
+	_icon_image.SetFilename(GlobalManager->_weapons_script.ReadString("icon"));
+	_usable_by = static_cast<uint32>(GlobalManager->_weapons_script.ReadInt("usable_by"));
+	_physical_attack = GlobalManager->_weapons_script.ReadInt("physical_attack");
+	_metaphysical_attack = GlobalManager->_weapons_script.ReadInt("metaphysical_attack");
+	
+	GlobalManager->_weapons_script.ReadCloseTable();
+
+	if (GlobalManager->_weapons_script.GetErrorCode() != SCRIPT_NO_ERRORS) {
+		return false;
+	}
+	if (_icon_image.Load() == false) {
+		return false;
+	}
+	return true;
+} // bool GlobalWeapon::Load(uint32 id)
 
 // ****************************************************************************
 // ***** GlobalArmor Class
 // ****************************************************************************
 
-GlobalArmor::GlobalArmor(uint32 id, uint8 type, uint32 count) : GlobalObject(id, count)
-{
-	// TEMP: there is only one type of each class of armor
-	_usable_by = GLOBAL_CHARACTER_CLAUDIUS;
-	if (type == GLOBAL_HEAD_ARMOR) {
-		_name = MakeUnicodeString("Karlate Helmet");
-		_icon_path = "img/icons/armor/karlate_helmet.png";
-		_icon_image.SetFilename("img/icons/armor/karlate_helmet.png");
-		if (_icon_image.Load() == false) {
-			cerr << "ERROR: In GlobalWeapon constructor, failed to load icon image" << endl;
-		}
-	}
-	else if (type == GLOBAL_TORSO_ARMOR) {
-		_name = MakeUnicodeString("Karlate Chest Guard");
-		_icon_path = "img/icons/inventory/karlate_chest_guard.png";
-		_icon_image.SetFilename("img/icons/armor/karlate_chest_guard.png");
-		if (_icon_image.Load() == false) {
-			cerr << "ERROR: In GlobalWeapon constructor, failed to load icon image" << endl;
-		}
-	}
-	else if (type == GLOBAL_ARMS_ARMOR) {
-		_name = MakeUnicodeString("Karlate Gauntlets");
-		_icon_path = "img/icons/inventory/karlate_gauntlets.png";
-		_icon_image.SetFilename("img/icons/armor/karlate_gauntlets.png");
-		if (_icon_image.Load() == false) {
-			cerr << "ERROR: In GlobalArmor constructor, failed to load icon image" << endl;
-		}
-	}
-	else if (type == GLOBAL_LEGS_ARMOR) {
-		_name = MakeUnicodeString("Karlate Greaves");
-		_icon_path = "img/icons/inventory/karlate_greaves.png";
-		_icon_image.SetFilename("img/icons/armor/karlate_greaves.png");
-		if (_icon_image.Load() == false) {
-			cerr << "ERROR: In GlobalArmor constructor, failed to load icon image" << endl;
-		}
-	}
-	else {
-		cerr << "ERROR: GlobalArmor constructor received bad type in constructor" << endl;
-		return;
+bool GlobalArmor::Load(uint32 id) {
+	if (id < 20000 || id > 29999) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL ERROR: GlobalArmor::Load has an invalid value for its id: " << id << endl;
+		return false;
 	}
 
-	// TODO: use the id to load the armor properties from a Lua file
-} // GlobalArmor::GlobalArmor(uint32 id, uint8 type, uint32 count)
+	// Set the _type member according to the id value
+	if (id < 22000) {
+		_type = GLOBAL_OBJECT_HEAD_ARMOR;
+	}
+	else if (id < 24000) {
+		_type = GLOBAL_OBJECT_TORSO_ARMOR;
+	}
+	else if (id < 26000) {
+		_type = GLOBAL_OBJECT_ARM_ARMOR;
+	}
+	else if (id < 28000) {
+		_type = GLOBAL_OBJECT_LEG_ARMOR;
+	}
+	else {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL ERROR: GlobalArmor::Load has an unknown id range: " << id << endl;
+		return false;
+	}
+
+	GlobalManager->_armor_script.ReadOpenTable(id);
+	
+	_name = MakeUnicodeString(GlobalManager->_armor_script.ReadString("name"));
+	_description = MakeUnicodeString(GlobalManager->_armor_script.ReadString("description"));
+	_icon_image.SetFilename(GlobalManager->_armor_script.ReadString("icon"));
+	_usable_by = static_cast<uint32>(GlobalManager->_armor_script.ReadInt("usable_by"));
+	_physical_defense = GlobalManager->_armor_script.ReadInt("physical_defense");
+	_metaphysical_defense = GlobalManager->_armor_script.ReadInt("metaphysical_defense");
+	
+	GlobalManager->_armor_script.ReadCloseTable();
+
+	if (GlobalManager->_armor_script.GetErrorCode() != SCRIPT_NO_ERRORS) {
+		return false;
+	}
+	if (_icon_image.Load() == false) {
+		return false;
+	}
+	return true;
+} // bool GlobalArmor::Load(uint32 id)
 
 } // namespace hoa_global

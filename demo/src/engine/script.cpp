@@ -19,6 +19,8 @@
 #include <iostream>
 #include <stdarg.h>
 #include "script.h"
+
+#include "global.h"
 #include "map.h"
 
 using namespace std;
@@ -314,7 +316,7 @@ uint32 ScriptDescriptor::ReadGetTableSize() {
 
 
 
-object ScriptDescriptor::ReadFunction(string key) {
+object ScriptDescriptor::ReadFunctionPointer(string key) {
 	object o;
 	if (_CheckFileAccess(SCRIPT_READ) == false)
 		return o;
@@ -345,15 +347,15 @@ object ScriptDescriptor::ReadFunction(string key) {
 
 	// There is an open table, get the key from the table
 	else {
+		// TODO: for some reason the following line causes a seg fault
 		o(from_stack(_lstack, STACK_TOP));
 		if (type(o) != LUA_TTABLE) {
-			// table not on top of stack
+			// Table not on top of stack
 			if (SCRIPT_DEBUG)
 				cerr << "SCRIPT DESCRIPTOR: Top of stack is not a table." << endl;
 			_error_code |= SCRIPT_BAD_GLOBAL;
 			return o;
 		}
-
 		if (type(o[key]) == LUA_TFUNCTION) {
 			lua_pop(_lstack, 1);
 		}
@@ -364,16 +366,16 @@ object ScriptDescriptor::ReadFunction(string key) {
 		}
 		return o[key];
 	}
-} // object ScriptDescriptor::ReadFunction(string key)
+} // object ScriptDescriptor::ReadFunctionPointer(string key)
 
 
 
-object ScriptDescriptor::ReadFunction(int32 key) {
+object ScriptDescriptor::ReadFunctionPointer(int32 key) {
 	object o;
 	// TODO
 
 	return o;
-} // object ScriptDescriptor::ReadFunction(int32 key)
+} // object ScriptDescriptor::ReadFunctionPointer(int32 key)
 
 // ***************************** Write Functions *******************************
 
@@ -924,7 +926,7 @@ bool GameScript::SingletonInitialize() {
 // 	hoa_mode_manager::GameModeManager::BindToLua();
 // 	hoa_system::GameSystem::BindToLua();
 // 	hoa_input::GameInput::BindToLua();
-// 	hoa_global::GameGlobal::BindToLua();
+	hoa_global::GameGlobal::BindToLua();
 //
 // 	hoa_battle::BattleMode::BindToLua();
 	hoa_map::MapMode::BindToLua();
