@@ -45,6 +45,9 @@ extern "C" {
 #include "utils.h"
 #include "defs.h"
 
+//! A macro for a reference to a Lua function
+#define ScriptFunction luabind::object;
+
 //! All calls to the scripting engine are wrapped in this namespace.
 namespace hoa_script {
 
@@ -305,15 +308,14 @@ public:
 	/** \name Read Function Access Functions
 	*** \param key The name of the function if it is contained in the global space, or the key
 	*** if the function is embedded in a table.
-	*** \return A luabind::object class object, which can be used to call the function
-	***
-	***
+	*** \return A luabind::object class object, which can be used to call the function. It effectively
+	*** serves as a function pointer.
 	**/
 	//@{
-	luabind::object ReadFunction(std::string key);
+	luabind::object ReadFunctionPointer(std::string key);
 
-	//! \note The calling function may <b>not</b> be contained within the global space.
-	luabind::object ReadFunction(int32 key);
+	//! \note The calling function may <b>not</b> be contained within the global space for an integer key.
+	luabind::object ReadFunctionPointer(int32 key);
 	//@}
 
 	// -------------------- Write Access Functions

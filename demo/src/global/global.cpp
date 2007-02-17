@@ -52,11 +52,33 @@ GameGlobal::~GameGlobal() {
 	for (uint32 i = 0; i < _inventory.size(); ++i) {
 		delete _inventory[i];
 	}
+
+	_items_script.CloseFile();
+	_weapons_script.CloseFile();
+	_armor_script.CloseFile();
 }
 
 
 
 bool GameGlobal::SingletonInitialize() {
+	if (_items_script.OpenFile("dat/items.lua", SCRIPT_READ) == false) {
+		cerr << "GLOBAL ERROR: could not open script: dat/items.lua" << endl;
+		return false;
+	}
+	_items_script.ReadOpenTable("items");
+
+	if (_weapons_script.OpenFile("dat/weapons.lua", SCRIPT_READ) == false) {
+		cerr << "GLOBAL ERROR: could not open script: dat/weapons.lua" << endl;
+		return false;
+	}
+	_weapons_script.ReadOpenTable("weapons");
+
+	if (_armor_script.OpenFile("dat/armor.lua", SCRIPT_READ) == false) {
+		cerr << "GLOBAL ERROR: could not open script: dat/armor.lua" << endl;
+		return false;
+	}
+	_armor_script.ReadOpenTable("armor");
+
 	return true;
 }
 
@@ -79,20 +101,24 @@ void GameGlobal::BindToLua() {
 
 			// Namespace constants
 			.enum_("constants") [
+				// Character type constants
+				value("GLOBAL_CHARACTER_CLAUDIUS", GLOBAL_CHARACTER_CLAUDIUS),
 				// Object type constants
-				value("GLOBAL_BAD_OBJECT", GLOBAL_BAD_OBJECT),
-				value("GLOBAL_ITEM", GLOBAL_ITEM),
-				value("GLOBAL_WEAPON", GLOBAL_WEAPON),
-				value("GLOBAL_HEAD_ARMOR", GLOBAL_HEAD_ARMOR),
-				value("GLOBAL_TORSO_ARMOR", GLOBAL_TORSO_ARMOR),
-				value("GLOBAL_ARMS_ARMOR", GLOBAL_ARMS_ARMOR),
-				value("GLOBAL_LEGS_ARMOR", GLOBAL_LEGS_ARMOR),
-				// Object usage constants
-				value("GLOBAL_BAD_USAGE", GLOBAL_BAD_USAGE),
-				value("GLOBAL_MENU_USAGE", GLOBAL_MENU_USAGE),
-				value("GLOBAL_BATTLE_USAGE", GLOBAL_BATTLE_USAGE),
+				value("GLOBAL_OBJECT_INVALID", GLOBAL_OBJECT_INVALID),
+				value("GLOBAL_OBJECT_ITEM", GLOBAL_OBJECT_ITEM),
+				value("GLOBAL_OBJECT_WEAPON", GLOBAL_OBJECT_WEAPON),
+				value("GLOBAL_OBJECT_HEAD_ARMOR", GLOBAL_OBJECT_HEAD_ARMOR),
+				value("GLOBAL_OBJECT_TORSO_ARMOR", GLOBAL_OBJECT_TORSO_ARMOR),
+				value("GLOBAL_OBJECT_ARM_ARMOR", GLOBAL_OBJECT_ARM_ARMOR),
+				value("GLOBAL_OBJECT_LEG_ARMOR", GLOBAL_OBJECT_LEG_ARMOR),
+				value("GLOBAL_OBJECT_JEWEL", GLOBAL_OBJECT_JEWEL),
+				value("GLOBAL_OBJECT_KEY_ITEM", GLOBAL_OBJECT_KEY_ITEM),
+				// Item usage constants
+				value("GLOBAL_ITEM_USE_MENU", GLOBAL_ITEM_USE_INVALID),
+				value("GLOBAL_ITEM_USE_MENU", GLOBAL_ITEM_USE_MENU),
+				value("GLOBAL_ITEM_USE_BATTLE", GLOBAL_ITEM_USE_BATTLE),
+				value("GLOBAL_ITEM_USE_ALL", GLOBAL_ITEM_USE_ALL),
 				// Elemental type constants
-				value("GLOBAL_ELEMENTAL_NONE", GLOBAL_ELEMENTAL_NONE),
 				value("GLOBAL_ELEMENTAL_FIRE", GLOBAL_ELEMENTAL_FIRE),
 				value("GLOBAL_ELEMENTAL_WATER", GLOBAL_ELEMENTAL_WATER),
 				value("GLOBAL_ELEMENTAL_VOLT", GLOBAL_ELEMENTAL_VOLT),
@@ -100,7 +126,12 @@ void GameGlobal::BindToLua() {
 				value("GLOBAL_ELEMENTAL_SLICING", GLOBAL_ELEMENTAL_SLICING),
 				value("GLOBAL_ELEMENTAL_SMASHING", GLOBAL_ELEMENTAL_SMASHING),
 				value("GLOBAL_ELEMENTAL_MAULING", GLOBAL_ELEMENTAL_MAULING),
-				value("GLOBAL_ELEMENTAL_PIERCING", GLOBAL_ELEMENTAL_PIERCING)
+				value("GLOBAL_ELEMENTAL_PIERCING", GLOBAL_ELEMENTAL_PIERCING),
+				// Target constants
+				value("GLOBAL_TARGET_INVALID", GLOBAL_TARGET_INVALID),
+				value("GLOBAL_TARGET_ATTACK_POINT", GLOBAL_TARGET_ATTACK_POINT),
+				value("GLOBAL_TARGET_ACTOR", GLOBAL_TARGET_ACTOR),
+				value("GLOBAL_TARGET_PARTY", GLOBAL_TARGET_PARTY)
 			]
 	];
 
@@ -175,13 +206,6 @@ void GameGlobal::BindToLua() {
 			.def("GetType", &GlobalObject::GetType)
 			.def("GetUsableBy", &GlobalObject::GetUsableBy)
 			.def("GetCount", &GlobalObject::GetCount)
-			.def("GetIconPath", &GlobalObject::GetIconPath)
-			.def("SetID", &GlobalObject::SetID)
-			.def("SetName", &GlobalObject::SetName)
-			.def("SetType", &GlobalObject::SetType)
-			.def("SetUsableBy", &GlobalObject::SetUsableBy)
-			.def("SetCount", &GlobalObject::SetCount)
-			.def("SetIconPath", &GlobalObject::SetIconPath)
 			.def("IncrementCount", &GlobalObject::IncrementCount)
 			.def("DecrementCount", &GlobalObject::DecrementCount)
 	];

@@ -29,39 +29,59 @@ namespace hoa_global {
 /** \name Status Effect Types
 *** \brief Used to identify all of the numerous types of status effects
 **/
-//@{
-const uint8 GLOBAL_STATUS_NONE   = 0;
-const uint8 GLOBAL_STATUS_POISON = 1;
-const uint8 GLOBAL_STATUS_SLOW   = 2;
-//@}
+enum GLOBAL_STATUS {
+	GLOBAL_STATUS_INVALID    = -1,
+	GLOBAL_STATUS_POISON     = 0,
+	GLOBAL_STATUS_SLOW       = 1,
+	GLOBAL_STATUS_TOTAL      = 2
+};
 
-/** \name Status Effect Intensity Levels
-*** \brief Used to reflect the stengeth/potency of status effects
-*** Each valid intensity level has a different color associated with it.
-**/
-//@{
-const uint8 GLOBAL_INTENSITY_NONE      = 0;
-const uint8 GLOBAL_INTENSITY_LESSER    = 1;
-const uint8 GLOBAL_INTENSITY_MODERATE  = 2;
-const uint8 GLOBAL_INTENSITY_GREATER   = 3;
-const uint8 GLOBAL_INTENSITY_EXTREME   = 4;
-const uint8 GLOBAL_INTENSITY_INVALID   = 5;
-//@}
 
 /** \name Elemental Effect Types
 *** \brief Constants used to identify the various elementals
 **/
-//@{
-const uint8 GLOBAL_ELEMENTAL_NONE      = 0x00;
-const uint8 GLOBAL_ELEMENTAL_FIRE      = 0x01;
-const uint8 GLOBAL_ELEMENTAL_WATER     = 0x02;
-const uint8 GLOBAL_ELEMENTAL_VOLT      = 0x04;
-const uint8 GLOBAL_ELEMENTAL_EARTH     = 0x08;
-const uint8 GLOBAL_ELEMENTAL_SLICING   = 0x10;
-const uint8 GLOBAL_ELEMENTAL_SMASHING  = 0x20;
-const uint8 GLOBAL_ELEMENTAL_MAULING   = 0x40;
-const uint8 GLOBAL_ELEMENTAL_PIERCING  = 0x80;
-//@}
+enum GLOBAL_ELEMENTAL {
+	GLOBAL_ELEMENTAL_INVALID    = 0,
+	GLOBAL_ELEMENTAL_FIRE       = 1,
+	GLOBAL_ELEMENTAL_WATER      = 2,
+	GLOBAL_ELEMENTAL_VOLT       = 3,
+	GLOBAL_ELEMENTAL_EARTH      = 4,
+	GLOBAL_ELEMENTAL_SLICING    = 5,
+	GLOBAL_ELEMENTAL_SMASHING   = 6,
+	GLOBAL_ELEMENTAL_MAULING    = 7,
+	GLOBAL_ELEMENTAL_PIERCING   = 8,
+	GLOBAL_ELEMENTAL_TOTAL      = 9
+};
+
+
+/** \name EffectIntensity Levels
+*** \brief Used to reflect the stengeth/potency of status effects
+*** Each valid intensity level has a different color associated with it.
+**/
+enum GLOBAL_INTENSITY {
+	GLOBAL_INTENSITY_INVALID       = -5,
+	GLOBAL_INTENSITY_NEG_EXTREME   = -4,
+	GLOBAL_INTENSITY_NEG_GREATER   = -3,
+	GLOBAL_INTENSITY_NEG_MODERATE  = -2,
+	GLOBAL_INTENSITY_NEG_LESSER    = -1,
+	GLOBAL_INTENSITY_NEUTRAL       = 0,
+	GLOBAL_INTENSITY_POS_LESSER    = 1,
+	GLOBAL_INTENSITY_POS_MODERATE  = 2,
+	GLOBAL_INTENSITY_POS_GREATER   = 3,
+	GLOBAL_INTENSITY_POS_EXTREME   = 4,
+	GLOBAL_INTENSITY_TOTAL         = 5
+};
+
+/** \name Target Types
+*** \brief Enum values used for declaring the type of target of items, skills, and actions.
+**/
+enum GLOBAL_TARGET {
+	GLOBAL_TARGET_INVALID      = -1,
+	GLOBAL_TARGET_ATTACK_POINT =  0,
+	GLOBAL_TARGET_ACTOR        =  1,
+	GLOBAL_TARGET_PARTY        =  2,
+	GLOBAL_TARGET_TOTAL        =  3
+};
 
 /** \name Skill Types
 *** \brief Constants used to identify the type of a skills
@@ -96,7 +116,7 @@ public:
 	*** however it is here just in case.
 	**/
 	GlobalStatusEffect();
-	GlobalStatusEffect(uint8 type, uint8 intensity_level = GLOBAL_INTENSITY_NONE);
+	GlobalStatusEffect(uint8 type, GLOBAL_INTENSITY intensity_level = GLOBAL_INTENSITY_NEUTRAL);
 	~GlobalStatusEffect();
 
 	/** \brief Class Member Access Functions
@@ -112,7 +132,7 @@ public:
 		{ return _icon_image; }
 
 	void SetType(uint8 type);
-	void SetIntensityLevel(uint8 intensity_level);
+	void SetIntensityLevel(GLOBAL_INTENSITY level);
 	//@}
 
 	/** \brief Increments the status effect intensity by a positive amount
@@ -155,7 +175,7 @@ private:
 	*** There are four levels of intensity, as indicated by the Status Effect Intensities constants.
 	*** This member should only ever equal one of those values
 	**/
-	uint8 _intensity_level;
+	GLOBAL_INTENSITY _intensity_level;
 
 	/** \brief A pointer to an icon image that represents the status effect
 	*** The _icon_image is not a single image file, but rather a conglomeration of different images.
@@ -197,7 +217,7 @@ public:
 	*** however it is here just in case.
 	**/
 	GlobalElementalEffect();
-	GlobalElementalEffect(uint8 type, uint32 value = 0);
+	GlobalElementalEffect(GLOBAL_ELEMENTAL type, uint32 value = 0);
 	~GlobalElementalEffect();
 
 	/** \brief Class Member Access Functions
@@ -230,14 +250,14 @@ public:
 	/** \brief Checks that the argument is a valid elemental type
 	*** \return True if the type is valid, false if it is not recognized or is equal to GLOBAL_ELEMENTAL_NONE
 	**/
-	static bool CheckValidType(uint8 type);
+	static bool CheckValidType(GLOBAL_ELEMENTAL type);
 
 private:
 	/** \brief The type (identifier) of elemental that the object represents
 	*** Refer to the Elemental Effect Types for a list of the valid types and values that
 	*** this member may be.
 	**/
-	uint8 _type;
+	GLOBAL_ELEMENTAL _type;
 
 	/** \brief The amount of strength that the elemental effect has
 	*** Note that this member only includes positive values since it is an unsigned integer. This is

@@ -1103,7 +1103,8 @@ void BattleMode::_ConstructActionListMenu() {
 		// Get the name of each item in the inventory
 		for (Inventory::iterator it = inv.begin(); it != inv.end(); ++it) {
 			GlobalObject * item = it->second;
-			string inv_item_str = string("<") + item->GetIconPath() + string("><42>") + MakeStandardString(item->GetName()) + string(" ") + NumberToString(item->GetCount());
+			// NOTE: item->GetIconPath is defunct. Option box will be able to take image arguments in the future
+			string inv_item_str = string("<") + "TEMP:ITEM" + string("><42>") + MakeStandardString(item->GetName()) + string(" ") + NumberToString(item->GetCount());
 			inv_names.push_back(MakeUnicodeString(inv_item_str));
 		}
 
@@ -1201,7 +1202,7 @@ void BattleMode::PlayerVictory() {
 
 	// Give player some loot
 	// TODO: Fix this with proper ID's!
-	GlobalManager->AddToInventory(new GlobalItem(1, 1));
+	GlobalManager->AddToInventory(new GlobalItem());
 
 	// Give some experience for each character in the party
 	for (uint32 i = 0; i < _character_actors.size(); ++i) {

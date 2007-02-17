@@ -36,14 +36,14 @@ namespace hoa_global {
 // ****************************************************************************
 
 GlobalStatusEffect::GlobalStatusEffect() :
-	_type(GLOBAL_STATUS_NONE),
-	_intensity_level(GLOBAL_INTENSITY_NONE),
+	_type(GLOBAL_STATUS_INVALID),
+	_intensity_level(GLOBAL_INTENSITY_NEUTRAL),
 	_icon_image(NULL)
 {}
 
 
 
-GlobalStatusEffect::GlobalStatusEffect(uint8 type, uint8 intensity_level) :
+GlobalStatusEffect::GlobalStatusEffect(uint8 type, GLOBAL_INTENSITY intensity_level) :
 	_type(type),
 	_intensity_level(intensity_level)
 {
@@ -70,8 +70,8 @@ void GlobalStatusEffect::SetType(uint8 type) {
 
 
 
-void GlobalStatusEffect::SetIntensityLevel(uint8 intensity) {
-	if (intensity <= GLOBAL_INTENSITY_EXTREME) {
+void GlobalStatusEffect::SetIntensityLevel(GLOBAL_INTENSITY intensity) {
+	if (intensity <= GLOBAL_INTENSITY_POS_EXTREME) {
 		if (_intensity_level != intensity) {
 			_intensity_level = intensity;
 			// TODO Raging_Hog: Whatever his function should do,
@@ -83,8 +83,8 @@ void GlobalStatusEffect::SetIntensityLevel(uint8 intensity) {
 	// To make sure that the intensity level does not exceed the maximum upper bound
 	else {
 		if (GLOBAL_DEBUG) fprintf(stderr, "WARNING: Tried to set status effect intensity level above maximum\n");
-		if (_intensity_level != GLOBAL_INTENSITY_EXTREME) {
-			_intensity_level = GLOBAL_INTENSITY_EXTREME;
+		if (_intensity_level != GLOBAL_INTENSITY_POS_EXTREME) {
+			_intensity_level = GLOBAL_INTENSITY_POS_EXTREME;
 			//_UpdateIconImage();
 		}
 	}
@@ -94,7 +94,7 @@ void GlobalStatusEffect::SetIntensityLevel(uint8 intensity) {
 
 bool GlobalStatusEffect::IncrementIntensity(uint8 amount) {
 	// Intensity can not be increased beyond the upper bound "extreme"
-	if (_intensity_level == GLOBAL_INTENSITY_EXTREME) {
+	if (_intensity_level == GLOBAL_INTENSITY_POS_EXTREME) {
 		return false;
 	}
 
@@ -105,9 +105,9 @@ bool GlobalStatusEffect::IncrementIntensity(uint8 amount) {
 
 // Raging_Hog: changed these _intensity -variables to _intesity_level -variables
 	if (amount < 10) {
-		_intensity_level += amount;
-		if (_intensity_level > GLOBAL_INTENSITY_EXTREME) {
-			_intensity_level = GLOBAL_INTENSITY_EXTREME;
+		// _intensity_level += amount;
+		if (_intensity_level > GLOBAL_INTENSITY_POS_EXTREME) {
+			_intensity_level = GLOBAL_INTENSITY_POS_EXTREME;
 			_CreateIconImage();
 			return false;
 		}
@@ -120,8 +120,8 @@ bool GlobalStatusEffect::IncrementIntensity(uint8 amount) {
 	else {
 		if (GLOBAL_DEBUG) fprintf(stderr, "WARNING: amount argument was > 10 to increase intensity of status effect\n");
 
-		if (_intensity_level != GLOBAL_INTENSITY_EXTREME) {
-			_intensity_level = GLOBAL_INTENSITY_EXTREME;
+		if (_intensity_level != GLOBAL_INTENSITY_POS_EXTREME) {
+			_intensity_level = GLOBAL_INTENSITY_POS_EXTREME;
 			_CreateIconImage();
 		}
 		return false;
@@ -131,7 +131,7 @@ bool GlobalStatusEffect::IncrementIntensity(uint8 amount) {
 
 
 bool GlobalStatusEffect::DecrementIntensity(uint8 amount) {
-	if (_intensity_level == GLOBAL_INTENSITY_NONE) {
+	if (_intensity_level == GLOBAL_INTENSITY_INVALID) {
 		return false;
 	}
 
@@ -141,14 +141,14 @@ bool GlobalStatusEffect::DecrementIntensity(uint8 amount) {
 	}
 
 	if (amount <= _intensity_level) {
-		_intensity_level -= amount;
+		// _intensity_level -= amount;
 		_CreateIconImage();
 		return true;
 	}
 	// This is done to protect against the possibility of an overflow condition
 	else {
-		if (_intensity_level != GLOBAL_INTENSITY_NONE) {
-			_intensity_level = GLOBAL_INTENSITY_NONE;
+		if (_intensity_level != GLOBAL_INTENSITY_NEUTRAL) {
+			_intensity_level = GLOBAL_INTENSITY_NEUTRAL;
 			_CreateIconImage();
 		}
 		return false;
@@ -179,31 +179,31 @@ void GlobalStatusEffect::_CreateIconImage() {
 		_icon_image = NULL;
 	}
 
-	if (_type == GLOBAL_STATUS_NONE) {
-		return;
-	}
+// 	if (_type == GLOBAL_STATUS_INVALID) {
+// 		return;
+// 	}
 
 	_icon_image = new StillImage();
 	_icon_image->SetDimensions(25, 25); // All icon images are 25x25 pixels
 	
 	// TODO: Here construct the first part of the image based on the intensity
-	switch (_intensity_level) {
-		case GLOBAL_INTENSITY_EXTREME:
-			// Draw a red image border
-			break;
-		case GLOBAL_INTENSITY_GREATER:
-			// Draw an orange image border
-			break;
-		case GLOBAL_INTENSITY_MODERATE:
-			// Draw a yellow image border
-			break;
-		case GLOBAL_INTENSITY_LESSER:
-			// Draw a green image border
-			break;
-
-		// For the default case (including GLOBAL_INTENSITY_NONE) nothing is drawn.
-		// No warning message is issued since this is a valid case
-	}
+// 	switch (_intensity_level) {
+// 		case GLOBAL_INTENSITY_EXTREME:
+// 			// Draw a red image border
+// 			break;
+// 		case GLOBAL_INTENSITY_GREATER:
+// 			// Draw an orange image border
+// 			break;
+// 		case GLOBAL_INTENSITY_MODERATE:
+// 			// Draw a yellow image border
+// 			break;
+// 		case GLOBAL_INTENSITY_LESSER:
+// 			// Draw a green image border
+// 			break;
+// 
+// 		// For the default case (including GLOBAL_INTENSITY_NONE) nothing is drawn.
+// 		// No warning message is issued since this is a valid case
+// 	}
 
 	// TODO: Here draw the second part of the image based on the type
 //	switch (_type) {
@@ -223,20 +223,20 @@ void GlobalStatusEffect::_CreateIconImage() {
 // ****************************************************************************
 
 GlobalElementalEffect::GlobalElementalEffect() :
-	_type(GLOBAL_ELEMENTAL_NONE),
+	_type(GLOBAL_ELEMENTAL_INVALID),
 	_strength(0),
 	_icon_image(NULL)
 {}
 
 
 
-GlobalElementalEffect::GlobalElementalEffect(uint8 type, uint32 strength) :
+GlobalElementalEffect::GlobalElementalEffect(GLOBAL_ELEMENTAL type, uint32 strength) :
 	_type(type),
 	_strength(strength)
 {
 	if (CheckValidType(_type) == false) {
 		fprintf(stderr, "ERROR: Invalid type in GlobalElementalEffect constructor\n");
-		_type = GLOBAL_ELEMENTAL_NONE;
+		_type = GLOBAL_ELEMENTAL_INVALID;
 	}
 	_SetIconImage();
 }
@@ -263,7 +263,7 @@ void GlobalElementalEffect::SetType(uint8 type) {
 
 //void GlobalElementalEffect::DecrementStrength(uint32 amount)
 
-bool GlobalElementalEffect::CheckValidType(uint8 type) {
+bool GlobalElementalEffect::CheckValidType(GLOBAL_ELEMENTAL type) {
 	switch (type) {
 		case GLOBAL_ELEMENTAL_FIRE:
 		case GLOBAL_ELEMENTAL_WATER:
@@ -274,7 +274,6 @@ bool GlobalElementalEffect::CheckValidType(uint8 type) {
 		case GLOBAL_ELEMENTAL_MAULING:
 		case GLOBAL_ELEMENTAL_PIERCING:
 			return true;
-		case GLOBAL_ELEMENTAL_NONE:
 		default:
 			return false;
 	}
@@ -283,7 +282,7 @@ bool GlobalElementalEffect::CheckValidType(uint8 type) {
 
 
 void GlobalElementalEffect::_SetIconImage() {
-	if (_type == GLOBAL_ELEMENTAL_NONE) {
+	if (_type == GLOBAL_ELEMENTAL_INVALID) {
 		_icon_image = NULL;
 		return;
 	}
