@@ -72,6 +72,13 @@ _is_queued_to_perform(false)
 	//ResetWaitTime();
 	//_wait_time.Play();
 	//_action_state = ACTION_IDLE;
+
+	// Load images for the down menu
+	_status_bar_cover_image.SetFilename("img/menus/bar_cover.png");
+	VideoManager->LoadImage(_status_bar_cover_image);
+
+	_status_menu_image.SetFilename("img/menus/battle_character_menu.png");
+	VideoManager->LoadImage(_status_menu_image);
 }
 
 
@@ -79,6 +86,8 @@ BattleCharacterActor::~BattleCharacterActor() {
 	//FIX ME
 	VideoManager->DeleteImage(_time_meter_portrait);
 	VideoManager->DeleteImage(_time_portrait_selected);
+	VideoManager->DeleteImage(_status_bar_cover_image);
+	VideoManager->DeleteImage(_status_menu_image);
 }
 
 
@@ -235,44 +244,68 @@ void BattleCharacterActor::DrawStatus() {
 		y_offset = -75.0f;
 	}
 
+	// Shrinking bars (HP, SP) TODO: STAMINA
+	float bar_size;
+
+	// HP, green bar
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_NO_BLEND, 0);
+	bar_size = static_cast<float>(83*GetActor()->GetHitPoints())/static_cast<float>(GetActor()->GetMaxHitPoints());
+	VideoManager->Move(312, 90 + y_offset);
+	if (GetActor()->GetHitPoints() > 0)		// Draw color bar (if needed)
+	{
+		VideoManager->DrawRectangle(bar_size,6,Color(0.133f,0.455f,0.133f,1.0f));
+	}
+	if (GetActor()->GetHitPoints() != GetActor()->GetMaxHitPoints())	// Draw black bar (if needed)
+	{
+		VideoManager->MoveRelative(bar_size, 0.0f);
+		VideoManager->DrawRectangle(83.0f-bar_size,6,Color::black);
+		VideoManager->Move(312, 90 + y_offset);
+	}
+
+	VideoManager->SetDrawFlags(VIDEO_BLEND_ADD, 0);
+	VideoManager->DrawImage(_status_bar_cover_image);
+
+	// SP, blue bar
+	VideoManager->SetDrawFlags(VIDEO_NO_BLEND, 0);
+	bar_size = static_cast<float>(84*GetActor()->GetSkillPoints())/static_cast<float>(GetActor()->GetMaxSkillPoints());
+	VideoManager->Move(412, 90 + y_offset);
+	if (GetActor()->GetSkillPoints() > 0)	// Draw color bar (if needed)
+	{
+		VideoManager->DrawRectangle(bar_size,6,Color(0.129f,0.263f,0.451f,1.0f));
+	}
+	if (GetActor()->GetHitPoints() != GetActor()->GetMaxHitPoints())	// Draw black bar (if needed)
+	{
+		VideoManager->MoveRelative(bar_size,0.0f);
+		VideoManager->DrawRectangle(83.0f-bar_size,6,Color::black);
+		VideoManager->Move(412, 90 + y_offset);
+	}
+
+	VideoManager->SetDrawFlags(VIDEO_BLEND_ADD, 0);
+	VideoManager->DrawImage(_status_bar_cover_image);
+
+	// ST, yellow bar
+	VideoManager->SetDrawFlags(VIDEO_NO_BLEND, 0);
+//	bar_size = static_cast<float>(84*GetActor()->GetSkillPoints())/static_cast<float>(GetActor()->GetMaxSkillPoints());
+	VideoManager->Move(512, 90 + y_offset);
+	VideoManager->DrawRectangle(83,6,Color(0.643f,0.624f,0.0f,1.0f));	// Draw color bar (if needed)
+	VideoManager->Move(512, 90 + y_offset);
+	VideoManager->DrawRectangle(83.0f-bar_size,6,Color::black);	// Draw black bar (if needed)
+
+	VideoManager->Move(512, 90 + y_offset);
+	VideoManager->SetDrawFlags(VIDEO_BLEND_ADD, 0);
+	VideoManager->DrawImage(_status_bar_cover_image);
+
+	// Draw the background of the menu
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+	VideoManager->Move(149, 84.0f + y_offset);
+	VideoManager->DrawImage(_status_menu_image);
+
 	VideoManager->SetTextColor(Color::white);
-	
+
 	// Draw the character's name
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 	VideoManager->Move(225.0f, 90.0f + y_offset);
  	VideoManager->DrawText(GetActor()->GetName());
-
-	// Shrinking bars (HP, SP) TODO: STAMINA
-	float bar_size;
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_NO_BLEND, 0);
-	bar_size = static_cast<float>(83*GetActor()->GetHitPoints())/static_cast<float>(GetActor()->GetMaxHitPoints());
-
-	// HP, green bar
-	VideoManager->PushMatrix();
-	VideoManager->Move(312, 90 + y_offset);
-	VideoManager->DrawRectangle(bar_size,6,Color::green);
-	VideoManager->PopMatrix();
-
-	// HP, black bar
-	VideoManager->PushMatrix();
-	VideoManager->Move(312+bar_size, 90 + y_offset);
-	VideoManager->DrawRectangle(83-bar_size,6,Color::black);
-	VideoManager->PopMatrix();
-
-	// SP, blue bar
-	bar_size = static_cast<float>(84*GetActor()->GetSkillPoints())/static_cast<float>(GetActor()->GetMaxSkillPoints());
-	VideoManager->PushMatrix();
-	VideoManager->Move(413, 90 + y_offset);
-	VideoManager->DrawRectangle(bar_size,6,Color::blue);
-	VideoManager->PopMatrix();
-
-	// SP, black bar
-	VideoManager->PushMatrix();
-	VideoManager->Move(413, 90 + y_offset);
-	VideoManager->DrawRectangle(84-bar_size,6,Color::black);
-	VideoManager->PopMatrix();
-
-
 
 	// Draw the character's current health on top of the middle of the HP bar
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);

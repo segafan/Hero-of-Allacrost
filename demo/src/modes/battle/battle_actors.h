@@ -261,6 +261,12 @@ private:
 	//! The image used to highlight time portraits for selected actors
 	hoa_video::StillImage _time_portrait_selected;
 
+	//! Image of the cover of the bottom menu shrinking bar
+	hoa_video::StillImage _status_bar_cover_image;
+
+	//! Image of the menu status
+	hoa_video::StillImage _status_menu_image;
+
 	//! The y-value of it's location, since x is fixed
 	float _time_portrait_location;
 
