@@ -65,14 +65,14 @@ MenuMode::MenuMode()
 	GlobalManager->SetFunds(4236);
 	_current_window = WIN_INVENTORY;
 		
-	hoa_global::GlobalCharacterParty & characters = *GlobalManager->GetActiveParty();
+	GlobalParty & characters = *GlobalManager->GetActiveParty();
 
 	// Setup character windows based on active party size
 	switch (characters.GetPartySize()) {
-		case 4: _character_window3.SetCharacter(characters.GetCharacters()[3]);
-		case 3: _character_window2.SetCharacter(characters.GetCharacters()[2]);
-		case 2: _character_window1.SetCharacter(characters.GetCharacters()[1]);
-		case 1: _character_window0.SetCharacter(characters.GetCharacters()[0]);
+		case 4: _character_window3.SetCharacter(dynamic_cast<GlobalCharacter*>(characters.GetActor(3)));
+		case 3: _character_window2.SetCharacter(dynamic_cast<GlobalCharacter*>(characters.GetActor(2)));
+		case 2: _character_window1.SetCharacter(dynamic_cast<GlobalCharacter*>(characters.GetActor(1)));
+		case 1: _character_window0.SetCharacter(dynamic_cast<GlobalCharacter*>(characters.GetActor(0)));
 			break;
 		default: cerr << "MENU ERROR: no characters in party!" << endl;
 			exit(1);

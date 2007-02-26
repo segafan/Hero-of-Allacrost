@@ -10,7 +10,7 @@
 -- and keep some space between groups. This way, we won't get a garbled mess of
 -- weapons.
 --
--- Note (2): Valid ids for armors are 20000-29999. Do not go out of bounds with
+-- Note (2): Valid ids for armors are 20001-60000. Do not go out of bounds with
 -- this limit, as other value ranges correspond to other types of objects
 -- (items, weapons, etc.)
 ------------------------------------------------------------------------------]]
@@ -20,10 +20,10 @@ armor = {}
 
 
 -- -----------------------------------------------------------------------------
--- IDs 2000-21999 are reserved for head armor
+-- IDs 20001-30000 are reserved for head armor
 -- -----------------------------------------------------------------------------
 
-armor[20000] = {
+armor[20001] = {
 	name = "Karlate Helmet",
 	description = "Standard Karlate issued equipment",
 	icon = "img/icons/armor/karlate_helmet.png",
@@ -35,10 +35,10 @@ armor[20000] = {
 
 
 -- -----------------------------------------------------------------------------
--- IDs 22000-23999 are reserved for torso armor
+-- IDs 30001-40000 are reserved for torso armor
 -- -----------------------------------------------------------------------------
 
-armor[22000] = {
+armor[30001] = {
 	name = "Karlate Breastplate",
 	description = "Standard Karlate issued equipment",
 	icon = "img/icons/armor/karlate_breastplate.png",
@@ -50,10 +50,10 @@ armor[22000] = {
 
 
 -- -----------------------------------------------------------------------------
--- IDs 24000-25999 are reserved for arm armor
+-- IDs 40001-50000 are reserved for arm armor
 -- -----------------------------------------------------------------------------
 
-armor[24000] = {
+armor[40001] = {
 	name = "Karlate Shield",
 	description = "Standard Karlate issued equipment",
 	icon = "img/icons/armor/karlate_shield.png",
@@ -65,10 +65,10 @@ armor[24000] = {
 
 
 -- -----------------------------------------------------------------------------
--- IDs 26000-27999 are reserved for leg armor
+-- IDs 50001-60000 are reserved for leg armor
 -- -----------------------------------------------------------------------------
 
-armor[26000] = {
+armor[50001] = {
 	name = "Karlate Greaves",
 	description = "Standard Karlate issued equipment",
 	icon = "img/icons/armor/karlate_greaves.png",

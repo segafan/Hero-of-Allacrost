@@ -116,6 +116,7 @@ void ScriptEvent::RunScript() {
 
 BattleMode::BattleMode() :
 	_performing_script(false),
+	_active_se(NULL),
 	_battle_over(false),
 	_victorious_battle(false),
 	_selected_character(NULL),
@@ -126,7 +127,6 @@ BattleMode::BattleMode() :
 	_cursor_state(CURSOR_IDLE),
 	_action_menu_window(NULL),
 	_action_list_menu(NULL),
-	_active_se(NULL),
 	_current_number_swaps(0),
 	_swap_countdown_timer(300000) // 5 minutes
 {
@@ -188,7 +188,8 @@ BattleMode::BattleMode() :
 	_action_type_menu.SetOptions(action_type_options);
 	_action_type_menu.EnableOption(1, false); // Disable defend & support
 	_action_type_menu.EnableOption(2, false);
-	if (GlobalManager->GetInventory().empty())
+	// TEMP: inventory not ready yet from GlobalManager
+// 	if (GlobalManager->GetInventory().empty())
 		_action_type_menu.EnableOption(3, false);
 
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
@@ -389,7 +390,7 @@ void BattleMode::_CreateEnemyActors() {
 		// Create the Green Slime EnemyActor
 		if (Probability(50))
 		{
-			BattleEnemyActor * green_slime = new BattleEnemyActor("green_slime", static_cast<float> (RandomBoundedInteger(400, 600)), static_cast<float> (RandomBoundedInteger(200, 400)));
+			BattleEnemyActor * green_slime = new BattleEnemyActor(1, static_cast<float> (RandomBoundedInteger(400, 600)), static_cast<float> (RandomBoundedInteger(200, 400)));
 			green_slime->SetName(MakeUnicodeString("Green Slime"));
 			green_slime->LevelSimulator(2);
 			green_slime->GetWaitTime()->SetDuration(10000);
@@ -400,7 +401,7 @@ void BattleMode::_CreateEnemyActors() {
 		// Create the Spider EnemyActor
 		if (Probability(50))
 		{
-			BattleEnemyActor * spider = new BattleEnemyActor("spider", static_cast<float> (RandomBoundedInteger(400, 600)), static_cast<float> (RandomBoundedInteger(200, 400)));
+			BattleEnemyActor * spider = new BattleEnemyActor(2, static_cast<float> (RandomBoundedInteger(400, 600)), static_cast<float> (RandomBoundedInteger(200, 400)));
 			spider->SetName(MakeUnicodeString("Spider"));
 			spider->LevelSimulator(2);
 			spider->GetWaitTime()->SetDuration(9000);
@@ -411,7 +412,7 @@ void BattleMode::_CreateEnemyActors() {
 		// Create the Snake EnemyActor
 		if (Probability(50))
 		{
-			BattleEnemyActor * snake = new BattleEnemyActor("snake", static_cast<float> (RandomBoundedInteger(400, 600)), static_cast<float> (RandomBoundedInteger(200, 400)));
+			BattleEnemyActor * snake = new BattleEnemyActor(3, static_cast<float> (RandomBoundedInteger(400, 600)), static_cast<float> (RandomBoundedInteger(200, 400)));
 			snake->SetName(MakeUnicodeString("Snake"));
 			snake->LevelSimulator(2);
 			snake->GetWaitTime()->SetDuration(8000);
@@ -422,7 +423,7 @@ void BattleMode::_CreateEnemyActors() {
 		// Create the Skeleton EnemyActor
 		if (Probability(50))
 		{
-			BattleEnemyActor * skeleton = new BattleEnemyActor("skeleton", static_cast<float> (RandomBoundedInteger(400, 600)), static_cast<float> (RandomBoundedInteger(200, 400)));
+			BattleEnemyActor * skeleton = new BattleEnemyActor(4, static_cast<float> (RandomBoundedInteger(400, 600)), static_cast<float> (RandomBoundedInteger(200, 400)));
 			skeleton->SetName(MakeUnicodeString("Skeleton"));
 			skeleton->LevelSimulator(2);
 			skeleton->GetWaitTime()->SetDuration(7000);
@@ -1047,7 +1048,8 @@ void BattleMode::_ConstructActionListMenu() {
 		else {
 			vector<ustring> attack_skill_names;
 			for (uint32 i = 0; i < attack_skills.size(); ++i) {
-				string skill_string = MakeStandardString(MakeUnicodeString("<L> ") + attack_skills[i]->GetSkillName() + MakeUnicodeString("<R>") + MakeUnicodeString(hoa_utils::NumberToString(attack_skills[i]->GetSkillPointsRequired())) + MakeUnicodeString(" "));
+				string skill_string = MakeStandardString(MakeUnicodeString("<L> ") + attack_skills[i]->GetName() + MakeUnicodeString("<R>") +
+					MakeUnicodeString(hoa_utils::NumberToString(attack_skills[i]->GetSPRequired())) + MakeUnicodeString(" "));
 				attack_skill_names.push_back(MakeUnicodeString(skill_string));
 			}
 			_action_list_menu->SetSize(1, attack_skill_names.size());
@@ -1064,7 +1066,7 @@ void BattleMode::_ConstructActionListMenu() {
 		else {
 			vector<ustring> defense_skill_names;
 			for (uint32 i = 0; i < defense_skills.size(); ++i) {
-				string skill_string = MakeStandardString(defense_skills[i]->GetSkillName()) + string("     ") + NumberToString(defense_skills[i]->GetSkillPointsRequired());
+				string skill_string = MakeStandardString(defense_skills[i]->GetName()) + string("     ") + NumberToString(defense_skills[i]->GetSPRequired());
 				defense_skill_names.push_back(MakeUnicodeString(skill_string));
 			}
 			_action_list_menu->SetOptions(defense_skill_names);
@@ -1080,7 +1082,7 @@ void BattleMode::_ConstructActionListMenu() {
 		else {
 			vector<ustring> support_skill_names;
 			for (uint32 i = 0; i < support_skills.size(); ++i) {
-				string skill_string = MakeStandardString(support_skills[i]->GetSkillName()) + string("     ") + NumberToString(support_skills[i]->GetSkillPointsRequired());
+				string skill_string = MakeStandardString(support_skills[i]->GetName()) + string("     ") + NumberToString(support_skills[i]->GetSPRequired());
 				support_skill_names.push_back(MakeUnicodeString(skill_string));
 			}
 
@@ -1090,23 +1092,25 @@ void BattleMode::_ConstructActionListMenu() {
 	}
 
 	else if (_action_type_menu_cursor_location == ACTION_TYPE_ITEM) {
-		Inventory inv = GlobalManager->GetInventory();
-		if (inv.empty()) {
-			_cursor_state = CURSOR_SELECT_ACTION_TYPE;
+		// TEMP: GlobalManager inventory is not ready yet
+// 		Inventory inv = GlobalManager->GetInventory();
+// 		if (inv.empty()) {
+// 			_cursor_state = CURSOR_SELECT_ACTION_TYPE;
 			return;
-		}
+// 		}
 
 		// Calculate the number of rows, this is dividing by 6, and if there is a remainder > 0, add one more row for the remainder
-		_action_list_menu->SetSize(6, inv.size() / 6 + ((inv.size() % 6) > 0 ? 1 : 0));
+// 		_action_list_menu->SetSize(6, inv.size() / 6 + ((inv.size() % 6) > 0 ? 1 : 0));
 		vector<ustring> inv_names;
 
 		// Get the name of each item in the inventory
-		for (Inventory::iterator it = inv.begin(); it != inv.end(); ++it) {
-			GlobalObject * item = it->second;
-			// NOTE: item->GetIconPath is defunct. Option box will be able to take image arguments in the future
-			string inv_item_str = string("<") + "TEMP:ITEM" + string("><42>") + MakeStandardString(item->GetName()) + string(" ") + NumberToString(item->GetCount());
-			inv_names.push_back(MakeUnicodeString(inv_item_str));
-		}
+		// TEMP: commented this out until inventory management in GameGlobal is finished
+// 		for (Inventory::iterator it = inv.begin(); it != inv.end(); ++it) {
+// 			GlobalObject * item = it->second;
+// 			// NOTE: item->GetIconPath is defunct. Option box will be able to take image arguments in the future
+// 			string inv_item_str = string("<") + "TEMP:ITEM" + string("><42>") + MakeStandardString(item->GetName()) + string(" ") + NumberToString(item->GetCount());
+// 			inv_names.push_back(MakeUnicodeString(inv_item_str));
+// 		}
 
 		_action_list_menu->SetOptions(inv_names);
 		_action_list_menu->SetSize(1, inv_names.size());
@@ -1202,7 +1206,7 @@ void BattleMode::PlayerVictory() {
 
 	// Give player some loot
 	// TODO: Fix this with proper ID's!
-	GlobalManager->AddToInventory(new GlobalItem());
+	GlobalManager->AddToInventory(1); // adds one healing potion
 
 	// Give some experience for each character in the party
 	for (uint32 i = 0; i < _character_actors.size(); ++i) {

@@ -48,7 +48,7 @@ namespace private_menu {
 
 CharacterWindow::CharacterWindow()
 {
-	_char_id = GLOBAL_CHARACTER_NONE;
+	_char_id = GLOBAL_CHARACTER_INVALID;
 }
 
 
@@ -81,7 +81,7 @@ void CharacterWindow::Draw()
 	MenuWindow::Draw();
 		
 	// check to see if this window is an actual character
-	if (_char_id == hoa_global::GLOBAL_CHARACTER_NONE)
+	if (_char_id == hoa_global::GLOBAL_CHARACTER_INVALID)
 		// no more to do here
 		return;
 	
@@ -95,7 +95,7 @@ void CharacterWindow::Draw()
 =======
 
 	// check to see if this window is an actual character
-	if (_char_id == hoa_global::GLOBAL_CHARACTER_NONE)
+	if (_char_id == hoa_global::GLOBAL_CHARACTER_INVALID)
 		// no more to do here
 		return;
 >>>>>>> .r528*/
@@ -214,7 +214,7 @@ void MiniCharacterSelectWindow::Draw()
 	{
 		VideoManager->Move(765, 180);
 
-		GlobalCharacter *current = GlobalManager->GetActiveParty()->GetCharacters()[i];
+		GlobalCharacter *current = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActor(i));
 		// Get the portrait from the character eventually
 		StillImage portrait;
 		// TODO: This needs optimization, move the LoadImage - DeleteImage calls into constructor/destructor
@@ -277,8 +277,8 @@ void MiniCharacterSelectWindow::Update()
 	if (InputManager->ConfirmPress())
 	{
 		// Use the passed in item, to update values
-		GlobalItem *selected = static_cast<GlobalItem *>(GlobalManager->GetInventory()[_selected_item_index]);
-		GlobalCharacter *ch = GlobalManager->GetActiveParty()->GetCharacters()[_current_char_selected];
+		GlobalItem *selected = (*GlobalManager->GetInventoryItems())[_selected_item_index];
+		GlobalCharacter *ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActor(_current_char_selected));
 
 		if (selected->GetCount() == 0)
 		{
@@ -702,8 +702,8 @@ void InventoryWindow::Update() {
 void InventoryWindow::_TEMP_ApplyItem() {
 
 	// Use the passed in item to update values
-	GlobalItem *selected = static_cast<GlobalItem *>(GlobalManager->GetInventory()[_inventory_items.GetSelection()]);
-	GlobalCharacter *ch = GlobalManager->GetActiveParty()->GetCharacters()[_char_select.GetSelection()];
+	GlobalItem *selected = (*GlobalManager->GetInventoryItems())[_inventory_items.GetSelection()];
+	GlobalCharacter *ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActor(_char_select.GetSelection()));
 
 	if (selected->GetCount() == 0)
 	{
@@ -751,7 +751,7 @@ void InventoryWindow::_TEMP_ApplyItem() {
 		//GlobalManager->RemoveItemFromInventory(HP_POTION);
 		GlobalManager->RemoveFromInventory(selected->GetID());
 		//_char_select_active = false;
-		if (GlobalManager->GetInventory().size() > 0) {
+		if (GlobalManager->GetInventoryItems()->size() > 0) {
 			//_inventory_active = true;
 			_active_box = ITEM_ACTIVE_LIST;
 			_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
@@ -773,111 +773,111 @@ void InventoryWindow::_TEMP_ApplyItem() {
 // Updates the item list
 void InventoryWindow::_UpdateItemText()
 {
-	// Get the inventory items
-	map<uint32, GlobalObject*> inv = GlobalManager->GetInventory();
-
-	// For item names
-	vector<ustring> inv_names;
-	// For iterating through items
-	map<uint32,GlobalObject*>::iterator i;
-	// Temp var to hold the current object
-	GlobalObject* obj;
-	// If the object is an item, cast and store here to check usage
-	GlobalItem* item;
-	// Temp var to hold option
-	string text;
-	// Determines the number of selections (see the for loops)
-	uint16 count = 0;
-
-	//FIX ME - When video engine is fixed, take out MakeStandardString
-	switch (_item_categories.GetSelection()) {
-
-		//Index all items
-		case ITEM_ALL:
-			for (i = inv.begin(), count = 0; i != inv.end(); i++, count++) {
-				obj = i->second;
-				if (obj->GetType() == GLOBAL_OBJECT_ITEM) {
-					item = (GlobalItem*)obj;
-					// NOTE: item->GetIconPath is defunct
-					text = "TEMP:insert icon" + MakeStandardString(item->GetName()) +
-						"<R><350>" + NumberToString(item->GetCount()) + "   ";
-					inv_names.push_back(MakeUnicodeString(text));
-					if (item->GetUsage() != GLOBAL_ITEM_USE_MENU) {
-						_inventory_items.EnableOption(count,false);
-					}
-				}
-			}
-			break;
-
-		//Index menu items only
-		case ITEM_FIELD:
-			for (i = inv.begin(), count = 0; i != inv.end(); i++) {
-				obj = i->second;
-				if (obj->GetType() == GLOBAL_OBJECT_ITEM) {
-					item = (GlobalItem*)obj;
-					if (item->GetUsage() == GLOBAL_ITEM_USE_MENU) {
-						// NOTE: item->GetIconPath is defunct
-						text = "TEMP:insert icon" + MakeStandardString(item->GetName()) +
-							"<R><350>" + NumberToString(item->GetCount()) + "   ";
-						inv_names.push_back(MakeUnicodeString(text));
-						count++;
-					}
-				}
-			}
-			break;
-
-		//Index battle items only
-		case ITEM_BATTLE:
-			for (i = inv.begin(), count = 0; i != inv.end(); i++) {
-				obj = i->second;
-				if (obj->GetType() == GLOBAL_OBJECT_ITEM) {
-					item = (GlobalItem*)obj;
-					if (item->GetUsage() == GLOBAL_ITEM_USE_BATTLE) {
-						// NOTE: item->GetIconPath is defunct
-						text = "TEMP:insert icon" + MakeStandardString(item->GetName()) +
-							"<R><350>" + NumberToString(item->GetCount()) + "   ";
-						inv_names.push_back(MakeUnicodeString(text));
-						_inventory_items.EnableOption(count,false);
-						count++;
-					}
-				}
-			}
-			break;
-
-		//Index equipment only
-		case ITEM_EQUIPMENT:
-			for (i = inv.begin(), count = 0; i != inv.end(); i++) {
-				obj = i->second;
-				if (obj->GetType() >= GLOBAL_OBJECT_WEAPON &&
-					obj->GetType() <= GLOBAL_OBJECT_LEG_ARMOR) {
-						/*if (item->GetType() & GLOBAL_WEAPON) {
-							item = (GlobalWeapon*)obj;
-						}
-						else {
-							item = (GlobalArmor*)obj;
-						}*/
-						// NOTE: item->GetIconPath is defunct
-						text = "TEMP:insert icon" + MakeStandardString(obj->GetName()) +
-							"<R><350>" + NumberToString(obj->GetCount()) + "   ";
-						inv_names.push_back(MakeUnicodeString(text));
-						_inventory_items.EnableOption(count,false);
-						count++;
-				}
-			}
-			break;
-
-		case ITEM_KEY:
-			break;
-	}
-
-	_inventory_items.SetSize(1,count);
-	_inventory_items.SetOptions(inv_names);
-
-	// Make sure we have at least one item before setting selection
-	if (inv.size() > 0) {
-		_inventory_items.SetSelection(0);
-	}
-	
+// 	// Get the inventory items
+// 	map<uint32, GlobalObject*> inv = GlobalManager->GetInventory();
+// 
+// 	// For item names
+// 	vector<ustring> inv_names;
+// 	// For iterating through items
+// 	map<uint32,GlobalObject*>::iterator i;
+// 	// Temp var to hold the current object
+// 	GlobalObject* obj;
+// 	// If the object is an item, cast and store here to check usage
+// 	GlobalItem* item;
+// 	// Temp var to hold option
+// 	string text;
+// 	// Determines the number of selections (see the for loops)
+// 	uint16 count = 0;
+// 
+// 	//FIX ME - When video engine is fixed, take out MakeStandardString
+// 	switch (_item_categories.GetSelection()) {
+// 
+// 		//Index all items
+// 		case ITEM_ALL:
+// 			for (i = inv.begin(), count = 0; i != inv.end(); i++, count++) {
+// 				obj = i->second;
+// 				if (obj->GetType() == GLOBAL_OBJECT_ITEM) {
+// 					item = (GlobalItem*)obj;
+// 					// NOTE: item->GetIconPath is defunct
+// 					text = "TEMP:insert icon" + MakeStandardString(item->GetName()) +
+// 						"<R><350>" + NumberToString(item->GetCount()) + "   ";
+// 					inv_names.push_back(MakeUnicodeString(text));
+// 					if (item->GetUsage() != GLOBAL_ITEM_USE_MENU) {
+// 						_inventory_items.EnableOption(count,false);
+// 					}
+// 				}
+// 			}
+// 			break;
+// 
+// 		//Index menu items only
+// 		case ITEM_FIELD:
+// 			for (i = inv.begin(), count = 0; i != inv.end(); i++) {
+// 				obj = i->second;
+// 				if (obj->GetType() == GLOBAL_OBJECT_ITEM) {
+// 					item = (GlobalItem*)obj;
+// 					if (item->GetUsage() == GLOBAL_ITEM_USE_MENU) {
+// 						// NOTE: item->GetIconPath is defunct
+// 						text = "TEMP:insert icon" + MakeStandardString(item->GetName()) +
+// 							"<R><350>" + NumberToString(item->GetCount()) + "   ";
+// 						inv_names.push_back(MakeUnicodeString(text));
+// 						count++;
+// 					}
+// 				}
+// 			}
+// 			break;
+// 
+// 		//Index battle items only
+// 		case ITEM_BATTLE:
+// 			for (i = inv.begin(), count = 0; i != inv.end(); i++) {
+// 				obj = i->second;
+// 				if (obj->GetType() == GLOBAL_OBJECT_ITEM) {
+// 					item = (GlobalItem*)obj;
+// 					if (item->GetUsage() == GLOBAL_ITEM_USE_BATTLE) {
+// 						// NOTE: item->GetIconPath is defunct
+// 						text = "TEMP:insert icon" + MakeStandardString(item->GetName()) +
+// 							"<R><350>" + NumberToString(item->GetCount()) + "   ";
+// 						inv_names.push_back(MakeUnicodeString(text));
+// 						_inventory_items.EnableOption(count,false);
+// 						count++;
+// 					}
+// 				}
+// 			}
+// 			break;
+// 
+// 		//Index equipment only
+// 		case ITEM_EQUIPMENT:
+// 			for (i = inv.begin(), count = 0; i != inv.end(); i++) {
+// 				obj = i->second;
+// 				if (obj->GetType() >= GLOBAL_OBJECT_WEAPON &&
+// 					obj->GetType() <= GLOBAL_OBJECT_LEG_ARMOR) {
+// 						/*if (item->GetType() & GLOBAL_WEAPON) {
+// 							item = (GlobalWeapon*)obj;
+// 						}
+// 						else {
+// 							item = (GlobalArmor*)obj;
+// 						}*/
+// 						// NOTE: item->GetIconPath is defunct
+// 						text = "TEMP:insert icon" + MakeStandardString(obj->GetName()) +
+// 							"<R><350>" + NumberToString(obj->GetCount()) + "   ";
+// 						inv_names.push_back(MakeUnicodeString(text));
+// 						_inventory_items.EnableOption(count,false);
+// 						count++;
+// 				}
+// 			}
+// 			break;
+// 
+// 		case ITEM_KEY:
+// 			break;
+// 	}
+// 
+// 	_inventory_items.SetSize(1,count);
+// 	_inventory_items.SetOptions(inv_names);
+// 
+// 	// Make sure we have at least one item before setting selection
+// 	if (inv.size() > 0) {
+// 		_inventory_items.SetSelection(0);
+// 	}
+// 	
 } // void InventoryWindow::UpdateItemText()
 
 
@@ -911,7 +911,7 @@ void InventoryWindow::Draw()
 
 // Draw contents of bottom menu based on what option box is active
 void InventoryWindow::_DrawBottomMenu() {
-
+/*
 	GlobalCharacter* _current_char;
 	GlobalItem* _current_item;
 	// FIXME dont use these
@@ -919,7 +919,7 @@ void InventoryWindow::_DrawBottomMenu() {
 
 	switch (_active_box) {
 		case ITEM_ACTIVE_CHAR:
-			_current_char = GlobalManager->GetActiveParty()->GetCharacters()[_char_select.GetSelection()];
+			_current_char = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActor(_char_select.GetSelection()));
 			VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 			VideoManager->Move(115, 670);
 
@@ -949,7 +949,7 @@ void InventoryWindow::_DrawBottomMenu() {
 			VideoManager->DrawText(MakeUnicodeString("Evade: 3%"));
 
 		case ITEM_ACTIVE_LIST:
-			_current_item = static_cast<GlobalItem*>(GlobalManager->GetInventory()[_inventory_items.GetSelection()]);
+			_current_item = (*GlobalManager->GetInventory())[_inventory_items.GetSelection()]);
 			VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 			VideoManager->Move(670,577);
 
@@ -966,7 +966,7 @@ void InventoryWindow::_DrawBottomMenu() {
 
 			//FIX ME: Make dynamic
 			//Display Location
-			
+
 			if (!VideoManager->DrawText(MakeUnicodeString("Desert Cave")))
 				cerr << "MENU: ERROR > Couldn't draw location!" << endl;
 
@@ -984,7 +984,7 @@ void InventoryWindow::_DrawBottomMenu() {
 			std::string time = std::string("Time: ") + os_time.str();
 			if (!VideoManager->DrawText(MakeUnicodeString(time)))
 				cerr << "MENU: ERROR > Couldn't draw text!" << endl;
-			
+
 			// Get the money of the party
 			std::ostringstream os_money;
 			os_money << GlobalManager->GetFunds();
@@ -997,7 +997,7 @@ void InventoryWindow::_DrawBottomMenu() {
 			VideoManager->DrawImage(_location_picture);
 
 			break;
-	}
+	}*/
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1006,55 +1006,55 @@ void InventoryWindow::_DrawBottomMenu() {
 
 StatusWindow::StatusWindow() : _char_select_active(false)
 {
-	// Get party size for iteration
-	uint32 partysize = GlobalManager->GetActiveParty()->GetCharacters().size();
-	StillImage portrait;
-	
-	// Set up the full body portrait
-	for (uint32 i = 0; i < partysize; i++) {
-		_current_char = GlobalManager->GetActiveParty()->GetCharacters()[i];
-		string full_path = string("img/portraits/menu/") + _current_char->GetFilename() + string("_large.png");
-		portrait.SetFilename(full_path);
-		portrait.SetStatic(true);
-		portrait.SetDimensions(150, 350);
-		VideoManager->LoadImage(portrait);
-		_full_portraits.push_back(portrait);
-	}
-
-	// FIXME Init the location picture
-	_location_picture.SetFilename("img/menus/locations/desert_cave.png");
-	_location_picture.SetDimensions(500, 125);
-	_location_picture.SetStatic(true);
-	VideoManager->LoadImage(_location_picture);
-
-	//Init char select option box
-	_InitCharSelect();
-
-	// Load sounds
-	SoundDescriptor confirm;
-	SoundDescriptor bump;
-	SoundDescriptor potion;
-	SoundDescriptor cancel;
-	if (confirm.LoadSound("snd/obtain.wav") == false) 
-	{
-		cerr << "INVENTORYWINDOW::UPDATE - Unable to load confirm sound effect!" << endl;
-	}
-	if (bump.LoadSound("snd/bump.wav") == false) 
-	{
-		cerr << "INVENTORYWINDOW::UPDATE - Unable to load bump sound effect!" << endl;
-	}
-	if (potion.LoadSound("snd/potion_drink.wav") == false)
-	{
-		cerr << "INVENTORYWINDOW::UPDATE - Unable to load potion drink sound effect!" << endl;
-	}
-	if (cancel.LoadSound("snd/cancel.wav") == false)
-	{
-		cerr << "INVENTORYWINDOW::UPDATE - Unable to load cancel sound effect!" << endl;
-	}
-	_menu_sounds["confirm"] = confirm;
-	_menu_sounds["bump"] = bump;
-	_menu_sounds["potion"] = potion;
-	_menu_sounds["cancel"] = cancel;
+// 	// Get party size for iteration
+// 	uint32 partysize = GlobalManager->GetActiveParty()->GetCharacters().size();
+// 	StillImage portrait;
+// 	
+// 	// Set up the full body portrait
+// 	for (uint32 i = 0; i < partysize; i++) {
+// 		_current_char = GlobalManager->GetActiveParty()->GetCharacters()[i];
+// 		string full_path = string("img/portraits/menu/") + _current_char->GetFilename() + string("_large.png");
+// 		portrait.SetFilename(full_path);
+// 		portrait.SetStatic(true);
+// 		portrait.SetDimensions(150, 350);
+// 		VideoManager->LoadImage(portrait);
+// 		_full_portraits.push_back(portrait);
+// 	}
+// 
+// 	// FIXME Init the location picture
+// 	_location_picture.SetFilename("img/menus/locations/desert_cave.png");
+// 	_location_picture.SetDimensions(500, 125);
+// 	_location_picture.SetStatic(true);
+// 	VideoManager->LoadImage(_location_picture);
+// 
+// 	//Init char select option box
+// 	_InitCharSelect();
+// 
+// 	// Load sounds
+// 	SoundDescriptor confirm;
+// 	SoundDescriptor bump;
+// 	SoundDescriptor potion;
+// 	SoundDescriptor cancel;
+// 	if (confirm.LoadSound("snd/obtain.wav") == false) 
+// 	{
+// 		cerr << "INVENTORYWINDOW::UPDATE - Unable to load confirm sound effect!" << endl;
+// 	}
+// 	if (bump.LoadSound("snd/bump.wav") == false) 
+// 	{
+// 		cerr << "INVENTORYWINDOW::UPDATE - Unable to load bump sound effect!" << endl;
+// 	}
+// 	if (potion.LoadSound("snd/potion_drink.wav") == false)
+// 	{
+// 		cerr << "INVENTORYWINDOW::UPDATE - Unable to load potion drink sound effect!" << endl;
+// 	}
+// 	if (cancel.LoadSound("snd/cancel.wav") == false)
+// 	{
+// 		cerr << "INVENTORYWINDOW::UPDATE - Unable to load cancel sound effect!" << endl;
+// 	}
+// 	_menu_sounds["confirm"] = confirm;
+// 	_menu_sounds["bump"] = bump;
+// 	_menu_sounds["potion"] = potion;
+// 	_menu_sounds["cancel"] = cancel;
 	
 } // StatusWindow::StatusWindow()
 
@@ -1062,19 +1062,19 @@ StatusWindow::StatusWindow() : _char_select_active(false)
 
 StatusWindow::~StatusWindow()
 {
-	uint32 partysize = GlobalManager->GetActiveParty()->GetCharacters().size();
-	
-	for (uint32 i = 0; i < partysize; i++) {
-		VideoManager->DeleteImage(_full_portraits[i]);
-	}
-
-	VideoManager->DeleteImage(_location_picture);
-
-	// Clear sounds
-	_menu_sounds["confirm"].FreeSound();
-	_menu_sounds["bump"].FreeSound();
-	_menu_sounds["potion"].FreeSound();
-	_menu_sounds["cancel"].FreeSound();
+// 	uint32 partysize = GlobalManager->GetActiveParty()->GetCharacters().size();
+// 	
+// 	for (uint32 i = 0; i < partysize; i++) {
+// 		VideoManager->DeleteImage(_full_portraits[i]);
+// 	}
+// 
+// 	VideoManager->DeleteImage(_location_picture);
+// 
+// 	// Clear sounds
+// 	_menu_sounds["confirm"].FreeSound();
+// 	_menu_sounds["bump"].FreeSound();
+// 	_menu_sounds["potion"].FreeSound();
+// 	_menu_sounds["cancel"].FreeSound();
 }
 
 // Activate/deactivate window
@@ -1088,27 +1088,27 @@ void StatusWindow::Activate(bool new_value) {
 }
 
 void StatusWindow::_InitCharSelect() {
-	//character selection set up
-	vector<ustring> options;
-	uint32 size = GlobalManager->GetActiveParty()->GetCharacters().size();
-	
-	_char_select.SetCursorOffset(-50.0f, -6.0f);
-	_char_select.SetFont("default");
-	_char_select.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
-	_char_select.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-	_char_select.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-	_char_select.SetSize(1, ((size >= 4) ? 4 : size));
-	_char_select.SetCellSize(360, 108);
-	_char_select.SetPosition(72.0f, 109.0f);
-
-	// Use blank string so cursor can point somewhere
-	for (uint32 i = 0; i < size; i++) {
-		options.push_back(MakeUnicodeString(" "));
-	}
-
-	_char_select.SetOptions(options);
-	_char_select.SetSelection(0);
-	_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+// 	//character selection set up
+// 	vector<ustring> options;
+// 	uint32 size = GlobalManager->GetActiveParty()->GetCharacters().size();
+// 	
+// 	_char_select.SetCursorOffset(-50.0f, -6.0f);
+// 	_char_select.SetFont("default");
+// 	_char_select.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
+// 	_char_select.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+// 	_char_select.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+// 	_char_select.SetSize(1, ((size >= 4) ? 4 : size));
+// 	_char_select.SetCellSize(360, 108);
+// 	_char_select.SetPosition(72.0f, 109.0f);
+// 
+// 	// Use blank string so cursor can point somewhere
+// 	for (uint32 i = 0; i < size; i++) {
+// 		options.push_back(MakeUnicodeString(" "));
+// 	}
+// 
+// 	_char_select.SetOptions(options);
+// 	_char_select.SetSelection(0);
+// 	_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 }
 
 // Updates the status window
@@ -1321,28 +1321,28 @@ void SkillsWindow::_InitSkillsList() {
 
 // Initialize character select
 void SkillsWindow::_InitCharSelect() {
-	//character selection set up
-	vector<ustring> options;
-	uint32 size = GlobalManager->GetActiveParty()->GetCharacters().size();
-	
-	_char_select.SetCursorOffset(-50.0f, -6.0f);
-	_char_select.SetFont("default");
-	_char_select.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
-	_char_select.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-	_char_select.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-	_char_select.SetSize(1, ((size >= 4) ? 4 : size));
-	_char_select.SetCellSize(360, 108);
-	_char_select.SetPosition(72.0f, 109.0f);
-
-	//Use blank strings....won't be seen anyway
-	for (uint32 i = 0; i < size; i++) {
-		options.push_back(MakeUnicodeString(" "));
-	}
-
-	//Set options, selection and cursor state
-	_char_select.SetOptions(options);
-	_char_select.SetSelection(0);
-	_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+// 	//character selection set up
+// 	vector<ustring> options;
+// 	uint32 size = GlobalManager->GetActiveParty()->GetCharacters().size();
+// 	
+// 	_char_select.SetCursorOffset(-50.0f, -6.0f);
+// 	_char_select.SetFont("default");
+// 	_char_select.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
+// 	_char_select.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+// 	_char_select.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+// 	_char_select.SetSize(1, ((size >= 4) ? 4 : size));
+// 	_char_select.SetCellSize(360, 108);
+// 	_char_select.SetPosition(72.0f, 109.0f);
+// 
+// 	//Use blank strings....won't be seen anyway
+// 	for (uint32 i = 0; i < size; i++) {
+// 		options.push_back(MakeUnicodeString(" "));
+// 	}
+// 
+// 	//Set options, selection and cursor state
+// 	_char_select.SetOptions(options);
+// 	_char_select.SetSelection(0);
+// 	_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 	
 }
 
@@ -1691,30 +1691,30 @@ void EquipWindow::_InitEquipmentList() {
 
 // Initialize character select
 void EquipWindow::_InitCharSelect() {
-	//character selection set up
-	vector<ustring> options;
-	uint32 size = GlobalManager->GetActiveParty()->GetCharacters().size();
-	
-	_char_select.SetCursorOffset(-50.0f, -6.0f);
-	_char_select.SetFont("default");
-	_char_select.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
-	_char_select.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-	_char_select.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-	_char_select.SetSize(1, ((size >= 4) ? 4 : size));
-	//_char_select.SetSize(1, 4);
-	_char_select.SetCellSize(360, 108);
-	_char_select.SetPosition(72.0f, 109.0f);
-
-	//Use blank strings....won't be seen anyway
-	for (uint32 i = 0; i < size; i++) {
-		options.push_back(MakeUnicodeString(" "));
-	}
-
-	//Set options, selection and cursor state
-	_char_select.SetOptions(options);
-	_char_select.SetSelection(0);
-	_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-	
+// 	//character selection set up
+// 	vector<ustring> options;
+// 	uint32 size = GlobalManager->GetActiveParty()->GetCharacters().size();
+// 	
+// 	_char_select.SetCursorOffset(-50.0f, -6.0f);
+// 	_char_select.SetFont("default");
+// 	_char_select.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
+// 	_char_select.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+// 	_char_select.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+// 	_char_select.SetSize(1, ((size >= 4) ? 4 : size));
+// 	//_char_select.SetSize(1, 4);
+// 	_char_select.SetCellSize(360, 108);
+// 	_char_select.SetPosition(72.0f, 109.0f);
+// 
+// 	//Use blank strings....won't be seen anyway
+// 	for (uint32 i = 0; i < size; i++) {
+// 		options.push_back(MakeUnicodeString(" "));
+// 	}
+// 
+// 	//Set options, selection and cursor state
+// 	_char_select.SetOptions(options);
+// 	_char_select.SetSelection(0);
+// 	_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+// 	
 } // void EquipWindow::InitCharSelect()
 
 // Initialize equipment select (use to choose which piece to replace)
@@ -1847,114 +1847,114 @@ void EquipWindow::Update() {
 
 // Updates list of available replacements
 void EquipWindow::_UpdateEquipList() {
-	// FIXME: warning, unused variable
-	//hoa_global::GlobalCharacter* ch = GlobalManager->GetCharacter(_char_select.GetSelection());
-	std::vector<ustring> options;
-
-	if (_active_box == EQUIP_ACTIVE_LIST) {
-		uint32 gearsize;
-		vector<hoa_global::GlobalWeapon*> weapons;
-		vector<hoa_global::GlobalArmor*> armor;
-		map<uint32, hoa_global::GlobalObject*> inv = GlobalManager->GetInventory();
-		uint32 invsize = inv.size();
-
-		switch (_equip_select.GetSelection()) {
-			case EQUIP_WEAPON:
-				for (uint32 i = 0; i < invsize; i++) {
-					if (inv[i]->GetType() == GLOBAL_OBJECT_WEAPON) { // && usable by cur char
-						weapons.push_back(static_cast<GlobalWeapon*>(inv[i]));
-					}
-				}
-
-				gearsize = weapons.size();
-
-				for (uint32 j = 0; j < gearsize; j++) {
-					options.push_back(weapons[j]->GetName());
-				}
-
-				_equip_list.SetOptions(options);				
-				break;
-
-			case EQUIP_HEADGEAR:
-				for (uint32 i = 0; i < invsize; i++) {
-					if (inv[i]->GetType() == GLOBAL_OBJECT_HEAD_ARMOR) { // && usable by cur char
-						armor.push_back(static_cast<GlobalArmor*>(inv[i]));
-					}
-				}
-
-				gearsize = armor.size();
-
-				for (uint32 j = 0; j < gearsize; j++) {
-					options.push_back(armor[j]->GetName());
-				}
-
-				_equip_list.SetOptions(options);
-				break;
-
-			case EQUIP_BODYARMOR:
-				for (uint32 i = 0; i < invsize; i++) {
-					if (inv[i]->GetType() == GLOBAL_OBJECT_TORSO_ARMOR) { // && usable by cur char
-						armor.push_back(static_cast<GlobalArmor*>(inv[i]));
-					}
-				}
-
-				gearsize = armor.size();
-
-				for (uint32 j = 0; j < gearsize; j++) {
-					options.push_back(armor[j]->GetName());
-				}
-
-				_equip_list.SetOptions(options);
-				break;
-
-			case EQUIP_OFFHAND:
-				for (uint32 i = 0; i < invsize; i++) {
-					if (inv[i]->GetType() == GLOBAL_OBJECT_ARM_ARMOR) { // && usable by cur char
-						armor.push_back(static_cast<GlobalArmor*>(inv[i]));
-					}
-				}
-
-				gearsize = armor.size();
-
-				for (uint32 j = 0; j < gearsize; j++) {
-					options.push_back(armor[j]->GetName());
-				}
-
-				_equip_list.SetOptions(options);
-				break;
-
-			case EQUIP_LEGGINGS:
-				for (uint32 i = 0; i < invsize; i++) {
-					if (inv[i]->GetType() == GLOBAL_OBJECT_LEG_ARMOR) { // && usable by cur char
-						armor.push_back(static_cast<GlobalArmor*>(inv[i]));
-					}
-				}
-
-				gearsize = armor.size();
-
-				for (uint32 j = 0; j < gearsize; j++) {
-					options.push_back(armor[j]->GetName());
-				}
-
-				_equip_list.SetOptions(options);
-				break;
-		}
-	}
-
-	else {
-		/*options.push_back(MakeUnicodeString(ch->GetWeapon()->GetName()));
-		options.push_back(MakeUnicodeString(ch->GetHeadArmor()->GetName()));
-		options.push_back(MakeUnicodeString(ch->GetBodyArmor()->GetName()));
-		options.push_back(MakeUnicodeString(ch->GetArmsArmor()->GetName()));
-		options.push_back(MakeUnicodeString(ch->GetLegArmor()->GetName()));*/
-		options.push_back(MakeUnicodeString("Karlate Sword"));
-		options.push_back(MakeUnicodeString("Karlate Helmet"));
-		options.push_back(MakeUnicodeString("Karlate Breastplate"));
-		options.push_back(MakeUnicodeString("Karlate Shield"));
-		options.push_back(MakeUnicodeString("Karlate Greaves"));
-		
-		_equip_select.SetOptions(options);
-	}
+// 	// FIXME: warning, unused variable
+// 	//hoa_global::GlobalCharacter* ch = GlobalManager->GetCharacter(_char_select.GetSelection());
+// 	std::vector<ustring> options;
+// 
+// 	if (_active_box == EQUIP_ACTIVE_LIST) {
+// 		uint32 gearsize;
+// 		vector<hoa_global::GlobalWeapon*> weapons;
+// 		vector<hoa_global::GlobalArmor*> armor;
+// 		map<uint32, hoa_global::GlobalObject*> inv = GlobalManager->GetInventory();
+// 		uint32 invsize = inv.size();
+// 
+// 		switch (_equip_select.GetSelection()) {
+// 			case EQUIP_WEAPON:
+// 				for (uint32 i = 0; i < invsize; i++) {
+// 					if (inv[i]->GetType() == GLOBAL_OBJECT_WEAPON) { // && usable by cur char
+// 						weapons.push_back(static_cast<GlobalWeapon*>(inv[i]));
+// 					}
+// 				}
+// 
+// 				gearsize = weapons.size();
+// 
+// 				for (uint32 j = 0; j < gearsize; j++) {
+// 					options.push_back(weapons[j]->GetName());
+// 				}
+// 
+// 				_equip_list.SetOptions(options);				
+// 				break;
+// 
+// 			case EQUIP_HEADGEAR:
+// 				for (uint32 i = 0; i < invsize; i++) {
+// 					if (inv[i]->GetType() == GLOBAL_OBJECT_HEAD_ARMOR) { // && usable by cur char
+// 						armor.push_back(static_cast<GlobalArmor*>(inv[i]));
+// 					}
+// 				}
+// 
+// 				gearsize = armor.size();
+// 
+// 				for (uint32 j = 0; j < gearsize; j++) {
+// 					options.push_back(armor[j]->GetName());
+// 				}
+// 
+// 				_equip_list.SetOptions(options);
+// 				break;
+// 
+// 			case EQUIP_BODYARMOR:
+// 				for (uint32 i = 0; i < invsize; i++) {
+// 					if (inv[i]->GetType() == GLOBAL_OBJECT_TORSO_ARMOR) { // && usable by cur char
+// 						armor.push_back(static_cast<GlobalArmor*>(inv[i]));
+// 					}
+// 				}
+// 
+// 				gearsize = armor.size();
+// 
+// 				for (uint32 j = 0; j < gearsize; j++) {
+// 					options.push_back(armor[j]->GetName());
+// 				}
+// 
+// 				_equip_list.SetOptions(options);
+// 				break;
+// 
+// 			case EQUIP_OFFHAND:
+// 				for (uint32 i = 0; i < invsize; i++) {
+// 					if (inv[i]->GetType() == GLOBAL_OBJECT_ARM_ARMOR) { // && usable by cur char
+// 						armor.push_back(static_cast<GlobalArmor*>(inv[i]));
+// 					}
+// 				}
+// 
+// 				gearsize = armor.size();
+// 
+// 				for (uint32 j = 0; j < gearsize; j++) {
+// 					options.push_back(armor[j]->GetName());
+// 				}
+// 
+// 				_equip_list.SetOptions(options);
+// 				break;
+// 
+// 			case EQUIP_LEGGINGS:
+// 				for (uint32 i = 0; i < invsize; i++) {
+// 					if (inv[i]->GetType() == GLOBAL_OBJECT_LEG_ARMOR) { // && usable by cur char
+// 						armor.push_back(static_cast<GlobalArmor*>(inv[i]));
+// 					}
+// 				}
+// 
+// 				gearsize = armor.size();
+// 
+// 				for (uint32 j = 0; j < gearsize; j++) {
+// 					options.push_back(armor[j]->GetName());
+// 				}
+// 
+// 				_equip_list.SetOptions(options);
+// 				break;
+// 		}
+// 	}
+// 
+// 	else {
+// 		/*options.push_back(MakeUnicodeString(ch->GetWeapon()->GetName()));
+// 		options.push_back(MakeUnicodeString(ch->GetHeadArmor()->GetName()));
+// 		options.push_back(MakeUnicodeString(ch->GetBodyArmor()->GetName()));
+// 		options.push_back(MakeUnicodeString(ch->GetArmsArmor()->GetName()));
+// 		options.push_back(MakeUnicodeString(ch->GetLegArmor()->GetName()));*/
+// 		options.push_back(MakeUnicodeString("Karlate Sword"));
+// 		options.push_back(MakeUnicodeString("Karlate Helmet"));
+// 		options.push_back(MakeUnicodeString("Karlate Breastplate"));
+// 		options.push_back(MakeUnicodeString("Karlate Shield"));
+// 		options.push_back(MakeUnicodeString("Karlate Greaves"));
+// 		
+// 		_equip_select.SetOptions(options);
+// 	}
 
 } // void EquipWindow::UpdateEquipList()
 

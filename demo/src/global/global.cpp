@@ -24,7 +24,6 @@ using namespace std;
 using namespace hoa_utils;
 using namespace hoa_script;
 using namespace hoa_video;
-using namespace luabind;
 
 namespace hoa_global {
 
@@ -37,22 +36,19 @@ SINGLETON_INITIALIZE(GameGlobal);
 // ****************************************************************************
 
 GameGlobal::GameGlobal() {
-	if (GLOBAL_DEBUG) cout << "GLOBAL: GameGlobal constructor invoked" << endl;
+	if (GLOBAL_DEBUG)
+		cout << "GLOBAL: GameGlobal constructor invoked" << endl;
 }
 
 
 
 GameGlobal::~GameGlobal() {
-	if (GLOBAL_DEBUG) cout << "GLOBAL: GameGlobal destructor invoked" << endl;
-	for (uint32 i = 0; i < _characters.size(); i++) {
-		delete _characters[i];
-	}
+	if (GLOBAL_DEBUG)
+		cout << "GLOBAL: GameGlobal destructor invoked" << endl;
 
-	// Clean up inventory items
-	for (uint32 i = 0; i < _inventory.size(); ++i) {
-		delete _inventory[i];
-	}
+	ClearAllData();
 
+	// Close all persistent script files
 	_items_script.CloseFile();
 	_weapons_script.CloseFile();
 	_armor_script.CloseFile();
@@ -61,19 +57,20 @@ GameGlobal::~GameGlobal() {
 
 
 bool GameGlobal::SingletonInitialize() {
-	if (_items_script.OpenFile("dat/items.lua", SCRIPT_READ) == false) {
+	// Open up the persistent script files
+	if (_items_script.OpenFile("dat/objects/items.lua", SCRIPT_READ) == false) {
 		cerr << "GLOBAL ERROR: could not open script: dat/items.lua" << endl;
 		return false;
 	}
 	_items_script.ReadOpenTable("items");
 
-	if (_weapons_script.OpenFile("dat/weapons.lua", SCRIPT_READ) == false) {
+	if (_weapons_script.OpenFile("dat/objects/weapons.lua", SCRIPT_READ) == false) {
 		cerr << "GLOBAL ERROR: could not open script: dat/weapons.lua" << endl;
 		return false;
 	}
 	_weapons_script.ReadOpenTable("weapons");
 
-	if (_armor_script.OpenFile("dat/armor.lua", SCRIPT_READ) == false) {
+	if (_armor_script.OpenFile("dat/objects/armor.lua", SCRIPT_READ) == false) {
 		cerr << "GLOBAL ERROR: could not open script: dat/armor.lua" << endl;
 		return false;
 	}
@@ -85,6 +82,8 @@ bool GameGlobal::SingletonInitialize() {
 
 
 void GameGlobal::BindToLua() {
+	using namespace luabind;
+
 	module(ScriptManager->GetGlobalState(), "hoa_global")
 	[
 		class_<GameGlobal>("GameGlobal")
@@ -160,12 +159,11 @@ void GameGlobal::BindToLua() {
 			.def("GetWeaponEquipped", &GlobalActor::GetWeaponEquipped)
 			.def("GetArmorEquipped", &GlobalActor::GetArmorEquipped)
 			.def("GetAttackPoints", &GlobalActor::GetAttackPoints)
-			.def("GetElementalAttackBonuses", &GlobalActor::GetElementalAttackBonuses)
-			.def("GetStatusAttackBonuses", &GlobalActor::GetStatusAttackBonuses)
-			.def("GetElementalDefenseBonuses", &GlobalActor::GetElementalDefenseBonuses)
-			.def("GetStatusDefenseBonuses", &GlobalActor::GetStatusDefenseBonuses)
+// 			.def("GetElementalAttackBonuses", &GlobalActor::GetElementalAttackBonuses)
+// 			.def("GetStatusAttackBonuses", &GlobalActor::GetStatusAttackBonuses)
+// 			.def("GetElementalDefenseBonuses", &GlobalActor::GetElementalDefenseBonuses)
+// 			.def("GetStatusDefenseBonuses", &GlobalActor::GetStatusDefenseBonuses)
 
-			.def("SetName", &GlobalActor::SetName)
 			.def("SetHitPoints", &GlobalActor::SetHitPoints)
 			.def("SetSkillPoints", &GlobalActor::SetSkillPoints)
 			.def("SetMaxHitPoints", &GlobalActor::SetMaxHitPoints)
@@ -179,8 +177,8 @@ void GameGlobal::BindToLua() {
 			.def("SetEvade", &GlobalActor::SetEvade)
 
 			.def("IsAlive", &GlobalActor::IsAlive)
-			.def("EquipWeapon", &GlobalActor::EquipWeapon)
-			.def("EquipArmor", &GlobalActor::EquipArmor)
+// 			.def("EquipWeapon", &GlobalActor::EquipWeapon)
+// 			.def("EquipArmor", &GlobalActor::EquipArmor)
 	];
 
 	module(ScriptManager->GetGlobalState(), "hoa_global")
@@ -195,7 +193,7 @@ void GameGlobal::BindToLua() {
 
 	module(ScriptManager->GetGlobalState(), "hoa_global")
 	[
-		class_<GlobalCharacterParty>("GlobalCharacterParty")
+		class_<GlobalParty>("GlobalParty")
 	];
 
 	module(ScriptManager->GetGlobalState(), "hoa_global")
@@ -213,19 +211,19 @@ void GameGlobal::BindToLua() {
 	module(ScriptManager->GetGlobalState(), "hoa_global")
 	[
 		class_<GlobalItem, GlobalObject>("GlobalItem")
-			.def(constructor<>())
+// 			.def(constructor<>(uint32, uint32))
 	];
 
 	module(ScriptManager->GetGlobalState(), "hoa_global")
 	[
 		class_<GlobalWeapon, GlobalObject>("GlobalWeapon")
-			.def(constructor<>())
+// 			.def(constructor<>(uint32, uint32))
 	];
 
 	module(ScriptManager->GetGlobalState(), "hoa_global")
 	[
 		class_<GlobalArmor, GlobalObject>("GlobalArmor")
-			.def(constructor<>())
+// 			.def(constructor<>(uint32, uint32))
 	];
 
 	module(ScriptManager->GetGlobalState(), "hoa_global")
@@ -242,17 +240,45 @@ void GameGlobal::BindToLua() {
 	[
 		class_<GlobalSkill>("GlobalSkill")
 	];
-}
+} // void GameGlobal::BindToLua()
+
+
+
+void GameGlobal::ClearAllData() {
+	// Delete all inventory objects
+	for (map<uint32, GlobalObject*>::iterator i = _inventory.begin(); i != _inventory.end(); i++) {
+		delete i->second;
+	}
+	_inventory.clear();
+	_inventory_items.clear();
+	_inventory_weapons.clear();
+	_inventory_head_armor.clear();
+	_inventory_torso_armor.clear();
+	_inventory_arm_armor.clear();
+	_inventory_leg_armor.clear();
+// 	_inventory_shards.clear();
+// 	_inventory_key_items.clear();
+
+	// Delete all characters
+	for (map<uint32, GlobalCharacter*>::iterator i = _characters.begin(); i != _characters.end(); i++) {
+		delete i->second;
+	}
+	_characters.clear();
+} // void GameGlobal::ClearAllData()
 
 // ****************************************************************************
 // ***** GameGlobal class - Character and Party Manipulations
 // ****************************************************************************
 
-void GameGlobal::AddCharacter(GlobalCharacter *ch) {
-	_characters[ch->GetID()] = ch;
-// 	if (_active_party.GetPartySize() < 4) {
-// 		_active_party.AddCharacter(ch);
-// 	}
+void GameGlobal::AddCharacter(uint32 id) {
+	if (_characters.find(id) != _characters.end()) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: attempted to add a character that already existed" << endl;
+		return;
+	}
+
+	GlobalCharacter *ch = new GlobalCharacter(id);
+	_characters.insert(make_pair(id, ch));
 }
 
 
@@ -264,7 +290,8 @@ GlobalCharacter* GameGlobal::GetCharacter(uint32 id) {
 		}
 	}
 
-	if (GLOBAL_DEBUG) cerr << "GLOBAL WARNING: No character matching id #" << id << " found in party" << endl;
+	if (GLOBAL_DEBUG)
+		cerr << "GLOBAL WARNING: No character matching id #" << id << " found in party" << endl;
 	return NULL;
 }
 
@@ -272,59 +299,121 @@ GlobalCharacter* GameGlobal::GetCharacter(uint32 id) {
 // ***** GameGlobal class - Inventory Manipulations
 // ****************************************************************************
 
-void GameGlobal::AddToInventory(GlobalObject *obj) {
-	// If the object isn't already in the inventory, insert it
-	if (_inventory.find(obj->GetID()) == _inventory.end()) {
-		_inventory.insert(make_pair(obj->GetID(), obj));
-	}
-
-	// Otherwise increment the count of the object instance already in the inventory
-	else {
-		_inventory[obj->GetID()]->IncrementCount(obj->GetCount());
-		// Delete the object parameter since it is no longer valid
-		delete(obj);
-	}
-} // void GameGlobal::AddToInventory(GlobalObject *obj)
-
-
-
-void GameGlobal::RemoveFromInventory(uint32 item_id) {
-	if (_inventory.find(item_id) != _inventory.end()) {
-		// Delete the object pointer in the inventory and then remove it from the map
-		delete _inventory[item_id];
-		_inventory.erase(item_id);
-	}
-} // void GameGlobal::RemoveFromInventory(uint32 item_id)
-
-
-
-void GameGlobal::IncrementObjectCount(uint32 item_id, uint32 count) {
-	// Do nothing if the item does not exist in the inventory
-	if (_inventory.find(item_id) == _inventory.end()) {
+void GameGlobal::AddToInventory(uint32 obj_id, uint32 obj_count) {
+	// If the object is already in the inventory, increment the count of the object 
+	if (_inventory.find(obj_id) != _inventory.end()) {
+		_inventory[obj_id]->IncrementCount(obj_count);
 		return;
 	}
 
-	_inventory[item_id]->IncrementCount(count);
-} // void GameGlobal::IncrementObjectCount(uint32 item_id, uint32 count)
+	// Otherwise create a new object instance and add it to the inventory
+	// Use the id value to figure out what type of object it is
+	if (obj_id == 0) {
+		cerr << "GLOBAL ERROR: Attempted to add invalid object to inventory with id: " << obj_id << endl;
+	} else if (obj_id < 10000) { // Item
+		GlobalItem *new_obj = new GlobalItem(obj_id, obj_count);
+		new_obj->IncrementCount(obj_count);
+		_inventory.insert(make_pair(obj_id, new_obj));
+		_inventory_items.push_back(new_obj);
+	} else if (obj_id < 20000) { // Weapon
+		GlobalWeapon *new_obj = new GlobalWeapon(obj_id, obj_count);
+		new_obj->IncrementCount(obj_count);
+		_inventory.insert(make_pair(obj_id, new_obj));
+		_inventory_weapons.push_back(new_obj);
+	} else if (obj_id < 30000) { // Head Armor
+		GlobalArmor *new_obj = new GlobalArmor(obj_id, obj_count);
+		new_obj->IncrementCount(obj_count);
+		_inventory.insert(make_pair(obj_id, new_obj));
+		_inventory_head_armor.push_back(new_obj);
+	} else if (obj_id < 40000) { // Torso Armor
+		GlobalArmor *new_obj = new GlobalArmor(obj_id, obj_count);
+		new_obj->IncrementCount(obj_count);
+		_inventory.insert(make_pair(obj_id, new_obj));
+		_inventory_torso_armor.push_back(new_obj);
+	} else if (obj_id < 50000) { // Arm Armor
+		GlobalArmor *new_obj = new GlobalArmor(obj_id, obj_count);
+		new_obj->IncrementCount(obj_count);
+		_inventory.insert(make_pair(obj_id, new_obj));
+		_inventory_arm_armor.push_back(new_obj);
+	} else if (obj_id < 60000) { // Leg Armor
+		GlobalArmor *new_obj = new GlobalArmor(obj_id, obj_count);
+		new_obj->IncrementCount(obj_count);
+		_inventory.insert(make_pair(obj_id, new_obj));
+		_inventory_leg_armor.push_back(new_obj);
+	} else if (obj_id < 70000) { // Shard
+		// TODO
+	} else if (obj_id < 80000) { // Key Item
+		// TODO
+	} else {
+		cerr << "GLOBAL ERROR: Attempted to add invalid object to inventory with id: " << obj_id << endl;
+	}
+} // void GameGlobal::AddToInventory(uint32 obj_id)
 
 
 
-void GameGlobal::DecrementObjectCount(uint32 item_id, uint32 count) {
+void GameGlobal::RemoveFromInventory(uint32 obj_id) {
+	if (_inventory.find(obj_id) == _inventory.end()) {
+		cerr << "GLOBAL WARNING: attempted to delete an object from inventory that didn't exist, with id: " << obj_id << endl;
+	}
+
+	delete _inventory[obj_id];
+	_inventory.erase(obj_id);
+
+	// Use the id value to figure out what type of object it is, and remove it from the object vector
+	if (obj_id == 0) {
+		cerr << "GLOBAL WARNING: attempted to remove invalid object to inventory with id: " << obj_id << endl;
+	} else if (obj_id < 10000) { // Item
+		// TODO
+	} else if (obj_id < 20000) { // Weapon
+		// TODO
+	} else if (obj_id < 30000) { // Head Armor
+		// TODO
+	} else if (obj_id < 40000) { // Torso Armor
+		// TODO
+	} else if (obj_id < 50000) { // Arm Armor
+		// TODO
+	} else if (obj_id < 60000) { // Leg Armor
+		// TODO
+	} else if (obj_id < 70000) { // Shard
+		// TODO
+	} else if (obj_id < 80000) { // Key Item
+		// TODO
+	} else {
+		cerr << "GLOBAL WARNING: attempted to remove invalid object to inventory with id: " << obj_id << endl;
+	}
+} // void GameGlobal::RemoveFromInventory(uint32 obj_id)
+
+
+
+void GameGlobal::IncrementObjectCount(uint32 obj_id, uint32 count) {
 	// Do nothing if the item does not exist in the inventory
-	if (_inventory.find(item_id) == _inventory.end()) {
+	if (_inventory.find(obj_id) == _inventory.end()) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL ERROR: attempted to increment object count for an object that wasn't in the inventory, id: " << obj_id << endl;
 		return;
 	}
 
-	// Remove the object from the inventory if the count argument is greater than the number of objects
-	if (count >= _inventory[item_id]->GetCount()) {
-		delete _inventory[item_id];
-		_inventory.erase(item_id);
+	_inventory[obj_id]->IncrementCount(count);
+} // void GameGlobal::IncrementObjectCount(uint32 obj_id, uint32 count)
+
+
+
+void GameGlobal::DecrementObjectCount(uint32 obj_id, uint32 count) {
+	// Do nothing if the item does not exist in the inventory
+	if (_inventory.find(obj_id) == _inventory.end()) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: attempted to decrement object count for an object that wasn't in the inventory, id: " << obj_id << endl;
+		return;
 	}
 
-	// Otherwise, simply decrement the number of objects
-	else {
-		_inventory[item_id]->DecrementCount(count);
+	// Decrement the number of objects so long as the number to decrement by does not equal or exceed the count
+	if (count < _inventory[obj_id]->GetCount()) {
+		_inventory[obj_id]->DecrementCount(count);
 	}
-} // void GameGlobal::DecrementObjectCount(uint32 item_id, uint32 count)
+	// Remove the object from the inventory otherwise
+	else {
+		RemoveFromInventory(obj_id);
+	}
+} // void GameGlobal::DecrementObjectCount(uint32 obj_id, uint32 count)
 
 } // namespace hoa_global

@@ -158,10 +158,11 @@ namespace hoa_global {
 	class GlobalSkill;
 
 	class GlobalAttackPoint;
+	class GlobalAttackPoint;
 	class GlobalActor;
 	class GlobalEnemy;
 	class GlobalCharacter;
-	class GlobalCharacterParty;
+	class GlobalParty;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

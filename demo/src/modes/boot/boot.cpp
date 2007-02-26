@@ -586,8 +586,7 @@ void BootMode::_OnNewGame() {
 
 	_SaveSettingsFile();
 
-	GlobalManager->AddCharacter(new GlobalCharacter(MakeUnicodeString("Claudius"), "claudius", GLOBAL_CHARACTER_CLAUDIUS));
-	GlobalManager->GetActiveParty()->AddCharacter(GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS));
+	GlobalManager->AddCharacter(GLOBAL_CHARACTER_CLAUDIUS);
 
 	_fade_out = true;
 	VideoManager->FadeScreen(Color::black, 1.0f);
@@ -624,8 +623,7 @@ void BootMode::_OnQuit() {
 // Battle debug confirmed
 void BootMode::_OnBattleDebug() {
 	ModeManager->Pop();
-	GlobalManager->AddCharacter(new GlobalCharacter(MakeUnicodeString("Claudius"), "claudius", GLOBAL_CHARACTER_CLAUDIUS));
-	GlobalManager->GetActiveParty()->AddCharacter(GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS));
+	GlobalManager->AddCharacter(GLOBAL_CHARACTER_CLAUDIUS);
 	BattleMode *BM = new BattleMode();
 	ModeManager->Push(BM);
 }
@@ -633,8 +631,7 @@ void BootMode::_OnBattleDebug() {
 // Menu debug confirmed
 void BootMode::_OnMenuDebug() {
 	ModeManager->Pop();
-	GlobalManager->AddCharacter(new GlobalCharacter(MakeUnicodeString("Claudius"), "claudius", GLOBAL_CHARACTER_CLAUDIUS));
-	GlobalManager->GetActiveParty()->AddCharacter(GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS));
+	GlobalManager->AddCharacter(GLOBAL_CHARACTER_CLAUDIUS);
 	hoa_menu::MenuMode *MM = new hoa_menu::MenuMode();
 	ModeManager->Push(MM);
 }

@@ -45,8 +45,12 @@ extern "C" {
 #include "utils.h"
 #include "defs.h"
 
-//! A macro for a reference to a Lua function
-#define ScriptFunction luabind::object;
+/** \brief A macro for a reference to a Lua object
+*** The object may be any type of Lua data, including booleans, integers, floats, strings, tables,
+*** functions, etc. This member is typically used outside of this engine as a reference to make
+*** Lua function calls.
+**/
+#define ScriptObject luabind::object;
 
 //! All calls to the scripting engine are wrapped in this namespace.
 namespace hoa_script {
@@ -133,6 +137,9 @@ public:
 
 	std::string GetFilename()
 		{ return _filename; }
+
+	SCRIPT_ACCESS_MODE GetAccessMode()
+		{ return _access_mode; }
 
 	uint32 GetErrorCode()
 		{ return _error_code; }

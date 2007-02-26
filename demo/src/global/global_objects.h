@@ -24,6 +24,8 @@
 #include "utils.h"
 #include "image.h"
 #include "script.h"
+
+#include "global_actors.h"
 #include "global_skills.h"
 
 namespace hoa_global {
@@ -76,12 +78,6 @@ public:
 
 	virtual ~GlobalObject()
 		{}
-
-	/** \brief Loads the item's data from a file and sets the members of the class
-	*** \param id The unique integer id of the item which to fetch the data for
-	*** \return True upon success, or false in the case of a failure.
-	**/
-	virtual bool Load(uint32 id) = 0;
 
 	/** \brief Increments the number of objects represented by the specified amount
 	*** \param count The number of objects to add (a positive integer)
@@ -149,6 +145,14 @@ protected:
 private:
 	GlobalObject(const GlobalObject&);
 	GlobalObject& operator=(const GlobalObject&);
+
+	/** \brief Loads the item's data from a file and sets the members of the class
+	***
+	*** This function is essentially an assitant to the class constructor. It is
+	*** required because GlobalObject requires at least one purely virtual function
+	*** to be an abstract class.
+	**/
+	virtual void _Load() = 0;
 }; // class GlobalObject
 
 /** ****************************************************************************
@@ -163,17 +167,11 @@ private:
 *** ***************************************************************************/
 class GlobalItem : public GlobalObject {
 public:
-	GlobalItem()
-		{ _id = 0; _type = GLOBAL_OBJECT_ITEM; _usable_by = 0; _count = 0; _usage = GLOBAL_ITEM_USE_INVALID; _target_type = GLOBAL_TARGET_INVALID; }
+	GlobalItem(uint32 id, uint32 count = 1)
+		{ _id = id; _type = GLOBAL_OBJECT_ITEM; _count = count; _Load(); }
 	
 	~GlobalItem()
 		{}
-
-	/** \brief Loads the item's data from a file and sets the members of the class
-	*** \param id The unique integer id of the item which to fetch the data for
-	*** \return True upon success, or false in the case of a failure.
-	**/
-	bool Load(uint32 id);
 
 	/** \brief Calls the script function which performs the item's use
 	*** \param target A void pointer to the target, which should be either a pointer to a
@@ -209,6 +207,9 @@ private:
 
 	GlobalItem(const GlobalItem&);
 	GlobalItem& operator=(const GlobalItem&);
+
+	//! \brief Loads the item's data from a file and sets the members of the class
+	void _Load();
 }; // class GlobalItem : public GlobalObject
 
 
@@ -222,30 +223,30 @@ private:
 *** ***************************************************************************/
 class GlobalWeapon : public GlobalObject {
 public:
-	GlobalWeapon()
-		{ _id = 0; _type = GLOBAL_OBJECT_WEAPON; _usable_by = 0; _count = 0; }
+	GlobalWeapon(uint32 id, uint32 count = 1)
+		{  _id = id; _type = GLOBAL_OBJECT_WEAPON; _count = count; _Load(); }
 
 	~GlobalWeapon()
 		{}
 
-	/** \brief Loads the weapon's data from a file and sets the members of the class
-	*** \param id The unique integer id of the weapon which to fetch the data for
-	*** \return True upon success, or false in the case of a failure.
-	**/
-	bool Load(uint32 id);
-
 private:
 	//! The amount of physical damage that the weapon causes
 	uint32 _physical_attack;
+
 	//! The amount of metaphysical damage that the weapon causes
 	uint32 _metaphysical_attack;
 
 	std::map<GLOBAL_ELEMENTAL, uint32> _elemental_bonuses;
+
 	std::map<GLOBAL_STATUS, uint32> _status_bonuses;
-	// std::vector<GlobalGem*> _sockets;
+
+	// TODO std::vector<GlobalGem*> _sockets;
 
 	GlobalWeapon(const GlobalWeapon&);
 	GlobalWeapon& operator=(const GlobalWeapon&);
+
+	//! \brief Loads the weapons's data from a file and sets the members of the class
+	void _Load();
 }; // class GlobalWeapon : public GlobalObject
 
 
@@ -261,34 +262,35 @@ private:
 *** ***************************************************************************/
 class GlobalArmor : public GlobalObject {
 public:
-	GlobalArmor()
-		{ _id = 0; _type = GLOBAL_OBJECT_INVALID; _usable_by = 0; _count = 0; }
-
-	GlobalArmor(uint32 id, uint8 type, uint32 count);
+	GlobalArmor(uint32 id, uint32 count = 1)
+		{  _id = id; _count = count; _Load(); }
 
 	~GlobalArmor()
 		{}
 
-	/** \brief Loads the armor's data from a file and sets the members of the class
-	*** \param id The unique integer id of the weapon which to fetch the data for
-	*** \return True upon success, or false in the case of a failure.
-	**/
-	bool Load(uint32 id);
-
 private:
 	//! The amount of physical defense that the armor allows
 	uint32 _physical_defense;
+
 	//! The amount of metaphysical defense that the armor allows
 	uint32 _metaphysical_defense;
 
 	// TODO: Add elemental bonuses
 	// std::vector<GlobalElementalEffect*> _elemental_defenses;
+
 	// TODO: Add status effect bonuses
 	// std::vector<GlobalStatusEffect*> _status_defenses;
 
 	GlobalArmor(const GlobalArmor&);
 	GlobalArmor& operator=(const GlobalArmor&);
+
+	//! \brief Loads the armor's data from a file and sets the members of the class
+	void _Load();
 }; // class GlobalArmor : public GlobalObject
+
+
+
+// TODO: write two more clases: GlobalShard and GlobalKeyItem
 
 } // namespace hoa_global
 
