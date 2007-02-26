@@ -24,21 +24,14 @@
 #include "defs.h"
 #include "utils.h"
 
+#include "global_actors.h"
+#include "global_objects.h"
+
 namespace hoa_global {
-
-/** \name Status Effect Types
-*** \brief Used to identify all of the numerous types of status effects
-**/
-enum GLOBAL_STATUS {
-	GLOBAL_STATUS_INVALID    = -1,
-	GLOBAL_STATUS_POISON     = 0,
-	GLOBAL_STATUS_SLOW       = 1,
-	GLOBAL_STATUS_TOTAL      = 2
-};
-
 
 /** \name Elemental Effect Types
 *** \brief Constants used to identify the various elementals
+*** There are a total of eight elementals: four physical and four metaphysical.
 **/
 enum GLOBAL_ELEMENTAL {
 	GLOBAL_ELEMENTAL_INVALID    = 0,
@@ -53,10 +46,20 @@ enum GLOBAL_ELEMENTAL {
 	GLOBAL_ELEMENTAL_TOTAL      = 9
 };
 
+/** \name Status Effect Types
+*** \brief Used to identify all of the numerous types of status effects
+**/
+enum GLOBAL_STATUS {
+	GLOBAL_STATUS_INVALID    = -1,
+	GLOBAL_STATUS_POISON     = 0,
+	GLOBAL_STATUS_SLOW       = 1,
+	GLOBAL_STATUS_TOTAL      = 2
+};
 
 /** \name EffectIntensity Levels
-*** \brief Used to reflect the stengeth/potency of status effects
-*** Each valid intensity level has a different color associated with it.
+*** \brief Used to reflect the potency of elemental and status effects
+***
+***
 **/
 enum GLOBAL_INTENSITY {
 	GLOBAL_INTENSITY_INVALID       = -5,
@@ -72,26 +75,79 @@ enum GLOBAL_INTENSITY {
 	GLOBAL_INTENSITY_TOTAL         = 5
 };
 
-/** \name Target Types
-*** \brief Enum values used for declaring the type of target of items, skills, and actions.
+/** \name Skill Types
+*** \brief Enum values used to identify the type of a skill.
 **/
-enum GLOBAL_TARGET {
-	GLOBAL_TARGET_INVALID      = -1,
-	GLOBAL_TARGET_ATTACK_POINT =  0,
-	GLOBAL_TARGET_ACTOR        =  1,
-	GLOBAL_TARGET_PARTY        =  2,
-	GLOBAL_TARGET_TOTAL        =  3
+enum GLOBAL_SKILL {
+	GLOBAL_SKILL_INVALID  = -1,
+	GLOBAL_SKILL_ATTACK   =  0,
+	GLOBAL_SKILL_DEFEND   =  1,
+	GLOBAL_SKILL_SUPPORT  =  2,
+	GLOBAL_SKILL_TOTAL    =  3
 };
 
-/** \name Skill Types
-*** \brief Constants used to identify the type of a skills
-**/
-//@{
-const uint8 GLOBAL_SKILL_NONE      = 0x00;
-const uint8 GLOBAL_SKILL_ATTACK    = 0x01;
-const uint8 GLOBAL_SKILL_DEFEND    = 0x02;
-const uint8 GLOBAL_SKILL_SUPPORT   = 0x04;
-//@}
+
+/** ****************************************************************************
+*** \brief Represents an elemental effect on an actor or other object
+***
+*** Elemental effects are special types of attack and defense bonuses. They do
+*** not apply on individual attack points, but rather on the whole of a
+*** character or enemy. There are really two types of elemental effects: physical
+*** and metaphysical (the same as the two types of attacks). The difference
+*** between physical and metaphysical attacks is the relationship of elemental
+*** strengths and weaknesses. For example, equpping an armor with the metaphysical
+*** "fire" elemental makes the bearer weak against water, but strong against earth.
+*** On the contrary, an armor with the phyiscal "piercing" elemental makes the bearer
+*** strong against piercing attacks.
+*** ***************************************************************************/
+class GlobalElementalEffect {
+public:
+	GlobalElementalEffect() :
+		_type(GLOBAL_ELEMENTAL_INVALID), _intensity(GLOBAL_INTENSITY_NEUTRAL) {}
+
+	~GlobalElementalEffect()
+		{}
+
+	/** \brief Class Member Access Functions
+	*** \note The "Set" functions may also change the _icon_image member of this class
+	**/
+	//@{
+	GLOBAL_ELEMENTAL GetType() const
+		{ return _type; }
+
+	GLOBAL_INTENSITY GetIntensity() const
+		{ return _intensity; }
+
+	void SetIntensity(GLOBAL_INTENSITY intensity)
+		{ _intensity = intensity; }
+	//@}
+
+	/** \brief Increments the elemental effect's intensity
+	*** \param amount The number of levels to increase the intensity by (default = 1)
+	**/
+	void IncrementIntensity(uint8 amount = 1);
+	
+	/** \brief Decrements the elemental effect's intensity
+	*** \param amount The number of levels to decrease the intensity by (default = 1)
+	**/
+	void DecrementIntensity(uint8 amount = 1);
+
+private:
+	/** \brief The type (identifier) of elemental that the object represents
+	*** Refer to the Elemental Effect Types for a list of the valid types and values that
+	*** this member may be.
+	**/
+	GLOBAL_ELEMENTAL _type;
+
+	/** \brief The intensity of the elemental effect has
+	*** Note that this member only includes positive values since it is an unsigned integer. This is
+	*** done for simplicity. Whether the elemental effect is a defensive boost or an offensive boost
+	*** is not determined by this class, but rather the context in which the class object is used.
+	**/
+	GLOBAL_INTENSITY _intensity;
+}; // class GlobalElementalEffect
+
+
 
 /** ****************************************************************************
 *** \brief Represents a status effect on an actor or other object
@@ -111,28 +167,25 @@ const uint8 GLOBAL_SKILL_SUPPORT   = 0x04;
 *** ***************************************************************************/
 class GlobalStatusEffect {
 public:
-	/** \brief No-arg constructor sets all class members to invalid/uninitialized states
-	*** Usually you do not want to create an object of this class using its no-arg destructor,
-	*** however it is here just in case.
-	**/
-	GlobalStatusEffect();
-	GlobalStatusEffect(uint8 type, GLOBAL_INTENSITY intensity_level = GLOBAL_INTENSITY_NEUTRAL);
-	~GlobalStatusEffect();
+	GlobalStatusEffect(GLOBAL_STATUS type, GLOBAL_INTENSITY intensity = GLOBAL_INTENSITY_NEUTRAL) :
+		_type(type), _intensity(intensity) {}
 
-	/** \brief Class Member Access Functions
-	*** \note The "Set" functions may also change the _icon_image member of this class
-	**/
+	~GlobalStatusEffect()
+		{}
+
+	// TODO: Return a pointer from image stored in GameGlobal
+	// hoa_video::StillImage* GetIconImage();
+
+	//! \brief Class Member Access Functions
 	//@{
-	uint8 GetType() const
+	GLOBAL_STATUS GetType() const
 		{ return _type; }
-	uint8 GetIntensityLevel() const
-		{ return _intensity_level; }
-	//! \note This function may return NULL if the _type member is not properly initialized
-	const hoa_video::StillImage* GetIconImage() const
-		{ return _icon_image; }
 
-	void SetType(uint8 type);
-	void SetIntensityLevel(GLOBAL_INTENSITY level);
+	GLOBAL_INTENSITY GetIntensity() const
+		{ return _intensity; }
+
+	void SetIntensity(GLOBAL_INTENSITY intensity)
+		{ _intensity = intensity; }
 	//@}
 
 	/** \brief Increments the status effect intensity by a positive amount
@@ -159,128 +212,19 @@ public:
 	**/
 	bool DecrementIntensity(uint8 amount);
 
-	/** \brief Checks that the argument is a valid status type
-	*** \return True if the type is valid, false if it is not recognized or is equal to GLOBAL_STATUS_NONE
-	**/
-	static bool CheckValidType(uint8 type);
-
 private:
 	/** \brief The type (identifier) of status that the object represents
 	*** Refer to the Status Effect Types for a list of the valid types and values that
 	*** this member may be.
 	**/
-	uint8 _type;
+	GLOBAL_STATUS _type;
 
-	/** \brief The intensity level of the effect
+	/** \brief The level of intensity of the status effect
 	*** There are four levels of intensity, as indicated by the Status Effect Intensities constants.
 	*** This member should only ever equal one of those values
 	**/
-	GLOBAL_INTENSITY _intensity_level;
-
-	/** \brief A pointer to an icon image that represents the status effect
-	*** The _icon_image is not a single image file, but rather a conglomeration of different images.
-	*** This member is automatically updated whenever the type or intensity of the status effect changes.
-	*** This image is a visual depiction of both the type and intensity of the status effect. The intensity
-	*** is represented by a background color, and the type is represented by an image. If the _intensity member
-	*** is invalid, then no background color is drawn. If the type member is invalid, then the image remains NULL. 
-	***
-	*** \note Each icon is 25x25 pixels in dimension.
-	**/
-	hoa_video::StillImage *_icon_image;
-
-	/** \brief Creates an icon image to reflect the current type and intensity
-	*** This function is called whenever it is determined that the _type or _intensity member has been
-	*** changed.
-	**/
-	void _CreateIconImage();
+	GLOBAL_INTENSITY _intensity;
 }; // class GlobalStatusEffect
-
-
-
-/** ****************************************************************************
-*** \brief Represents an elemental effect on an actor or other object
-***
-*** Elemental effects are special types of attack and defense bonuses. They do
-*** not apply on individual attack points, but rather on the whole of a
-*** character or enemy. There are really two types of elemental effects: physical
-*** and metaphysical (the same as the two types of attacks). The difference
-*** between physical and metaphysical attacks is the relationship of elemental
-*** strengths and weaknesses. For example, equpping an armor with the metaphysical
-*** "fire" elemental makes the bearer weak against water, but strong against earth.
-*** On the contrary, an armor with the phyiscal "piercing" elemental makes the bearer
-*** strong against piercing attacks.
-*** ***************************************************************************/
-class GlobalElementalEffect {
-public:
-	/** \brief No-arg constructor sets all class members to invalid/uninitialized states
-	*** Usually you do not want to create an object of this class using its no-arg destructor,
-	*** however it is here just in case.
-	**/
-	GlobalElementalEffect();
-	GlobalElementalEffect(GLOBAL_ELEMENTAL type, uint32 value = 0);
-	~GlobalElementalEffect();
-
-	/** \brief Class Member Access Functions
-	*** \note The "Set" functions may also change the _icon_image member of this class
-	**/
-	//@{
-	uint8 GetType() const
-		{ return _type; }
-	uint32 GetStrength() const
-		{ return _strength; }
-	//! \note This function may return NULL if the _type member is not properly initialized
-	const hoa_video::StillImage* GetIconImage() const
-		{ return _icon_image; }
-
-	void SetType(uint8 type);
-	void SetStrength(uint32 strength)
-		{ _strength = strength; }
-	//@}
-
-	/** \brief Increments the elemental effect's strength
-	*** \param amount The number to increase the _strength member by
-	**/
-	void IncrementStrength(uint32 amount);
-	
-	/** \brief Decrements the elemental effect's strength
-	*** \param amount The number to decrease the _strength member by
-	**/
-	void DecrementStrength(uint32 amount);
-
-	/** \brief Checks that the argument is a valid elemental type
-	*** \return True if the type is valid, false if it is not recognized or is equal to GLOBAL_ELEMENTAL_NONE
-	**/
-	static bool CheckValidType(GLOBAL_ELEMENTAL type);
-
-private:
-	/** \brief The type (identifier) of elemental that the object represents
-	*** Refer to the Elemental Effect Types for a list of the valid types and values that
-	*** this member may be.
-	**/
-	GLOBAL_ELEMENTAL _type;
-
-	/** \brief The amount of strength that the elemental effect has
-	*** Note that this member only includes positive values since it is an unsigned integer. This is
-	*** done for simplicity. Whether the elemental effect is a defensive boost or an offensive boost
-	*** is not determined by this class, but rather the context in which the class object is used.
-	**/
-	uint32 _strength;
-
-	/** \brief A pointer to an icon image that represents the elemental effect
-	*** This member is a pointer to the image of the elemental that is stored in the GameGlobal singleton class.
-	*** The StillImage object that is pointed to by this member is never created nor destroyed by this class.
-	***
-	*** \note Each icon is 25x25 pixels in dimension.
-	**/
-	hoa_video::StillImage *_icon_image;
-
-	/** \brief Sets the image that corresponds to the _type member
-	*** This function sets up the _icon_image member to reflect what the type of the elemental
-	*** effect is.
-	**/
-	void _SetIconImage();
-}; // class GlobalElementalEffect
-
 
 
 /** ****************************************************************************
@@ -300,12 +244,8 @@ private:
 *** ***************************************************************************/
 class GlobalSkill {
 public:
-	/** \brief No-arg constructor sets all class members to invalid/uninitialized states
-	*** Usually you do not want to create an object of this class using its no-arg destructor,
-	*** however it is here just in case.
-	**/
-	GlobalSkill();
-	GlobalSkill(std::string script);
+	GlobalSkill(uint32 id);
+
 	~GlobalSkill();
 
 	/** \name Class member access functions
@@ -313,53 +253,71 @@ public:
 	*** by the Lua script.
 	**/
 	//@{
-	hoa_utils::ustring GetSkillName() const
-		{ return _skill_name; }
-	uint8 GetSkillType() const
-		{ return _skill_type; }
-	uint32 GetSkillPointsRequired() const
-		{ return _skill_points_required; }
+	hoa_utils::ustring GetName() const
+		{ return _name; }
+
+	uint8 GetType() const
+		{ return _type; }
+
+	uint32 GetSPRequired() const
+		{ return _sp_required; }
+
 	uint32 GetWarmupTime() const
 		{ return _warmup_time; }
+
 	uint32 GetCooldownTime() const
 		{ return _cooldown_time; }
+
 	uint32 GetLevelRequired() const
 		{ return _level_required; }
-	uint32 GetNumberTargets() const
-		{ return _number_targets; }
+
+	GLOBAL_TARGET GetTargetType() const
+		{ return _target_type; }
+		
 // 	std::vector<GlobalElementalEffect*>& GetElementalEffects() const
 // 		{ return _elemental_effects; }
+
 // 	std::vector<std::pair<float, GlobalStatusEffect*> >& GetStatusEffects() const
 // 		{ return _status_effects; }
 	//@}
 
 private:
 	//! \brief The name of the skill as it will be displayed on the screen.
-	hoa_utils::ustring _skill_name;
+	hoa_utils::ustring _name;
+
+	//! \brief A short description of the skill
+	hoa_utils::ustring _description;
+
+	//! \brief The unique identifier number of the skill.
+	uint32 _id;
+
 	/** \brief The type identifier for the skill
 	*** Refer to the Skill Types constants defined in this file.
 	**/
-	uint8 _skill_type;
+	GLOBAL_SKILL _type;
+
+	//! \brief The type of target that the skill is executed upon.
+	GLOBAL_TARGET _target_type;
+
 	/** \brief The amount of skill points (SP) that the skill requires to be used
 	*** Zero is a valid value for this member and simply means that no skill points are required
 	*** to use the skill. These are called "innate skills".
 	**/
-	uint8 _sp_usage;
-	/** \brief Don't know for sure. My best guess would be the amount of skill points lost 
-	 */
-	uint32 _skill_points_required;
+	uint32 _sp_required;
+
 	/** \brief The amount of time that must expire before a skill can be used from when it is selected
 	*** When a character or enemy is determined to use a skill, this member tells how many milliseconds must
 	*** pass before the skill can be used (in otherwords, before it can be placed in the action queue in a battle).
 	*** It is acceptable for this member to be zero.
 	**/
-
 	uint32 _warmup_time;
+
 	/** \brief The amount of time that must expire after a skill can be used before the actor can regain their stamina
 	*** After a character or enemy uses a skill, this member tells how many milliseconds must pass before
 	*** the invoker can recover and begin re-filling their stamina bar. It is acceptable for this member to be zero.
 	**/
 	uint32 _cooldown_time;
+
 	/** \brief The experience level required to use the skill
 	*** If the actor wishing to use the skill does not have the minimum experience level required, then the
 	*** existance of the skill may not be acknowledged at all depending upon the game code context which uses
@@ -367,12 +325,6 @@ private:
 	*** Zero is a valid member for this class as well and simply indicates that no specific experience level is required.
 	**/
 	uint32 _level_required;
-	/** \brief The number of targets that the skill will effect when it is used
-	*** A target could be either an attack point (for a sword strike) or an entire actor (for a heal spell).
-	*** The number of targets does <b>not</b> include the invoker if the skill does nothing more than it would normally
-	*** be expected to do (reduce the actor's current number of skill points, etc.).
-	**/
-	uint32 _number_targets;
 
 	/** \brief A vector containing all elemental effects that are defined by the skill
 	*** This vector contains only the elementals that have non-zero strength (in other words, it does not
@@ -389,8 +341,6 @@ private:
 	**/
 	std::vector<std::pair<float, GlobalStatusEffect*> > _status_effects;
 
-	//! \brief The name of the skill as it is used to reference its information in a Lua script
-	std::string _script_name;
 	// TODO: Add a pointer to the skill's execution script function
 	// ScriptFunction _function;
 }; // class GlobalSkill

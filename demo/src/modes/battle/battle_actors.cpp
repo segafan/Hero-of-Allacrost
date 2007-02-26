@@ -44,15 +44,15 @@ namespace private_battle {
 // BattleCharacterActor class
 // *****************************************************************************
 BattleCharacterActor::BattleCharacterActor(GlobalCharacter * character, float XLocation, float YLocation) :
-GlobalCharacter(character->GetName(), character->GetFilename(), character->GetID()),
-global_character_(character),
-_x_location(XLocation),
-_y_location(YLocation),
-_x_origin(_x_location),
-_y_origin(_y_location),
-_total_time_damaged(0),
-_damage_dealt(0),
-_is_queued_to_perform(false)
+	GlobalCharacter(character->GetID()),
+	global_character_(character),
+	_x_location(XLocation),
+	_y_location(YLocation),
+	_x_origin(_x_location),
+	_y_origin(_y_location),
+	_total_time_damaged(0),
+	_damage_dealt(0),
+	_is_queued_to_perform(false)
 {
 	//FIX ME
 	_time_meter_portrait.SetFilename("img/menus/stamina_icon.png");
@@ -61,7 +61,7 @@ _is_queued_to_perform(false)
 
 	//Load time portrait selector
 	_time_portrait_selected.SetDimensions(45,45);
-	_time_portrait_selected.SetFilename("img/menus/stamina_icon_selected.png");
+	_time_portrait_selected.SetFilename("img/menus/stamina_icon.png");
 	VideoManager->LoadImage(_time_portrait_selected);
 	
 	//_time_portrait_location = 128;
@@ -348,15 +348,15 @@ void BattleCharacterActor::TakeDamage(uint32 damage)
 ////////////////////////////////////////////////////////////////////////////////
 // EnemyActor class
 ////////////////////////////////////////////////////////////////////////////////
-BattleEnemyActor::BattleEnemyActor(const std::string & filename, float XLocation, float YLocation) :
-GlobalEnemy(filename),
-_x_location(XLocation),
-_y_location(YLocation),
-_x_origin(_x_location),
-_y_origin(_y_location),
-_total_time_damaged(0),
-_damage_dealt(0),
-_is_queued_to_perform(false)
+BattleEnemyActor::BattleEnemyActor(uint32 id, float XLocation, float YLocation) :
+	GlobalEnemy(id),
+	_x_location(XLocation),
+	_y_location(YLocation),
+	_x_origin(_x_location),
+	_y_origin(_y_location),
+	_total_time_damaged(0),
+	_damage_dealt(0),
+	_is_queued_to_perform(false)
 {
 	//FIX ME
 	_time_meter_portrait.SetFilename("img/menus/stamina_icon.png");
@@ -365,7 +365,7 @@ _is_queued_to_perform(false)
 
 	//Load time portrait selector
 	_time_portrait_selected.SetDimensions(45,45);
-	_time_portrait_selected.SetFilename("img/menus/stamina_icon_selected.png");
+	_time_portrait_selected.SetFilename("img/menus/stamina_icon.png");
 	VideoManager->LoadImage(_time_portrait_selected);
 
 	//GetWaitTime()->SetDuration(2000);

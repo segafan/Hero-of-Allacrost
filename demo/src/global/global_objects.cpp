@@ -33,15 +33,16 @@ namespace hoa_global {
 // ***** GlobalItem Class
 // ****************************************************************************
 
-bool GlobalItem::Load(uint32 id) {
-	if (id < 1 || id > 9999) {
+void GlobalItem::_Load() {
+	if (_id == 0 || _id > 10000) {
+		_type = GLOBAL_OBJECT_INVALID;
 		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL ERROR: GlobalItem::Load has an invalid value for its id: " << id << endl;
-		return false;
+			cerr << "GLOBAL ERROR: GlobalItem::_Load has an invalid id value: " << _id << endl;
+		return;
 	}
 
 	// Load the item data from the script
-	GlobalManager->_items_script.ReadOpenTable(id);
+	GlobalManager->_items_script.ReadOpenTable(_id);
 	_name = MakeUnicodeString(GlobalManager->_items_script.ReadString("name"));
 	_description = MakeUnicodeString(GlobalManager->_items_script.ReadString("description"));
 	_icon_image.SetFilename(GlobalManager->_items_script.ReadString("icon"));
@@ -51,13 +52,12 @@ bool GlobalItem::Load(uint32 id) {
 	GlobalManager->_items_script.ReadCloseTable();
 
 	if (GlobalManager->_items_script.GetErrorCode() != SCRIPT_NO_ERRORS) {
-		return false;
+		return;
 	}
 	if (_icon_image.Load() == false) {
-		return false;
+		return;
 	}
-	return true;
-} // bool GlobalItem::Load(uint32 id)
+} // void GlobalItem::_Load()
 
 
 
@@ -76,15 +76,16 @@ void GlobalItem::Use(void* target) {
 // ***** GlobalWeapon Class
 // ****************************************************************************
 
-bool GlobalWeapon::Load(uint32 id) {
-	if (id < 10000 || id > 19999) {
+void GlobalWeapon::_Load() {
+	if (_id < 10001 || _id > 20000) {
+		_type = GLOBAL_OBJECT_INVALID;
 		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL ERROR: GlobalWeapon::Load has an invalid value for its id: " << id << endl;
-		return false;
+			cerr << "GLOBAL ERROR: GlobalWeapon::_Load has an invalid id value: " << _id << endl;
+		return;
 	}
 
 	// Load the weapon data from the script
-	GlobalManager->_weapons_script.ReadOpenTable(id);
+	GlobalManager->_weapons_script.ReadOpenTable(_id);
 	
 	_name = MakeUnicodeString(GlobalManager->_weapons_script.ReadString("name"));
 	_description = MakeUnicodeString(GlobalManager->_weapons_script.ReadString("description"));
@@ -96,45 +97,46 @@ bool GlobalWeapon::Load(uint32 id) {
 	GlobalManager->_weapons_script.ReadCloseTable();
 
 	if (GlobalManager->_weapons_script.GetErrorCode() != SCRIPT_NO_ERRORS) {
-		return false;
+		return;
 	}
 	if (_icon_image.Load() == false) {
-		return false;
+		return;
 	}
-	return true;
-} // bool GlobalWeapon::Load(uint32 id)
+} // void GlobalWeapon::_Load()
 
 // ****************************************************************************
 // ***** GlobalArmor Class
 // ****************************************************************************
 
-bool GlobalArmor::Load(uint32 id) {
-	if (id < 20000 || id > 29999) {
+void GlobalArmor::_Load() {
+	if (_id < 20001 || _id > 60000) {
+		_type = GLOBAL_OBJECT_INVALID;
 		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL ERROR: GlobalArmor::Load has an invalid value for its id: " << id << endl;
-		return false;
+			cerr << "GLOBAL ERROR: GlobalArmor::_Load has an invalid id value: " << _id << endl;
+		return;
 	}
 
 	// Set the _type member according to the id value
-	if (id < 22000) {
+	if (_id <= 30000) {
 		_type = GLOBAL_OBJECT_HEAD_ARMOR;
 	}
-	else if (id < 24000) {
+	else if (_id <= 40000) {
 		_type = GLOBAL_OBJECT_TORSO_ARMOR;
 	}
-	else if (id < 26000) {
+	else if (_id <= 50000) {
 		_type = GLOBAL_OBJECT_ARM_ARMOR;
 	}
-	else if (id < 28000) {
+	else if (_id <= 60000) {
 		_type = GLOBAL_OBJECT_LEG_ARMOR;
 	}
 	else {
+		_type = GLOBAL_OBJECT_INVALID;
 		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL ERROR: GlobalArmor::Load has an unknown id range: " << id << endl;
-		return false;
+			cerr << "GLOBAL ERROR: GlobalArmor::_Load has an unknown id range: " << _id << endl;
+		return;
 	}
 
-	GlobalManager->_armor_script.ReadOpenTable(id);
+	GlobalManager->_armor_script.ReadOpenTable(_id);
 	
 	_name = MakeUnicodeString(GlobalManager->_armor_script.ReadString("name"));
 	_description = MakeUnicodeString(GlobalManager->_armor_script.ReadString("description"));
@@ -146,12 +148,12 @@ bool GlobalArmor::Load(uint32 id) {
 	GlobalManager->_armor_script.ReadCloseTable();
 
 	if (GlobalManager->_armor_script.GetErrorCode() != SCRIPT_NO_ERRORS) {
-		return false;
+		return;
 	}
 	if (_icon_image.Load() == false) {
-		return false;
+		return;
 	}
-	return true;
-} // bool GlobalArmor::Load(uint32 id)
+	return;
+} // void GlobalArmor::_Load()
 
 } // namespace hoa_global

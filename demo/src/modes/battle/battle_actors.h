@@ -287,7 +287,7 @@ private:
 *** ***************************************************************************/
 class BattleEnemyActor : public hoa_global::GlobalEnemy, public IBattleActor {
 public:
-	BattleEnemyActor(const std::string & filename, float XLocation, float YLocation);
+	BattleEnemyActor(uint32 id, float XLocation, float YLocation);
 
 	virtual ~BattleEnemyActor();
 

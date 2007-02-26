@@ -10,7 +10,7 @@
 -- and keep some space between groups. This way, we won't get a garbled mess of
 -- weapons.
 --
--- Note (2): Valid ids for items are 10000-19999. Do not break this limit, because
+-- Note (2): Valid ids for items are 10001-20000. Do not break this limit, because
 -- other value ranges correspond to other types of objects (items, armor, etc.)
 ------------------------------------------------------------------------------]]
 
@@ -19,10 +19,10 @@ weapons = {}
 
 
 -- -----------------------------------------------------------------------------
--- IDs 10001-10199 are reserved for swords
+-- IDs 10001-10500 are reserved for swords
 -- -----------------------------------------------------------------------------
 
-weapons[10000] = {
+weapons[10001] = {
 	name = "Karlate Sword",
 	description = "Standard karlate issued equipment",
 	icon = "img/icons/weapons/karlate_sword.png",

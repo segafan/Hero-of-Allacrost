@@ -9,7 +9,7 @@
 -- consider giving it some space from the other items. This way, we won't
 -- get a jumbled mess of different ids.
 --
--- Note (2): Valid ids for items are 1-9999. Do not exceed this limit, because
+-- Note (2): Valid ids for items are 1-10000. Do not exceed this limit, because
 -- higher id values correspond to other types of objects (weapons, armor, etc.)
 --
 -- Note (3): Items can have three different types of attack targets: an attack
@@ -23,7 +23,7 @@ items = {}
 
 
 -- -----------------------------------------------------------------------------
--- IDs 1-200 are reserved for healing potions
+-- IDs 1-1000 are reserved for healing potions
 -- -----------------------------------------------------------------------------
 
 items[1] = {
@@ -39,13 +39,13 @@ items[1] = {
 }
 
 -- -----------------------------------------------------------------------------
--- IDs 201-400 are reserved for status potions
+-- IDs 1001-2000 are reserved for status potions
 -- -----------------------------------------------------------------------------
 
--- items[201] = {}
+-- items[1001] = {}
 
 -- -----------------------------------------------------------------------------
--- IDs 401-600 are reserved for elemental potions
+-- IDs 2001-3000 are reserved for elemental potions
 -- -----------------------------------------------------------------------------
 
--- items[401] = {}
+-- items[2001] = {}
