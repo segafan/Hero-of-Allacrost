@@ -7,10 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4941A4E90AC1D80B00D65B8E /* dat in Resources */ = {isa = PBXBuildFile; fileRef = 4941A4D70AC1D80800D65B8E /* dat */; };
-		4941A62D0AC1D83600D65B8E /* img in Resources */ = {isa = PBXBuildFile; fileRef = 4941A4EB0AC1D83500D65B8E /* img */; };
-		4941A6340AC1D84600D65B8E /* mus in Resources */ = {isa = PBXBuildFile; fileRef = 4941A62E0AC1D84600D65B8E /* mus */; };
-		4941A6450AC1D85800D65B8E /* snd in Resources */ = {isa = PBXBuildFile; fileRef = 4941A6350AC1D85800D65B8E /* snd */; };
 		4941A6F10AC1D86400D65B8E /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A68B0AC1D86400D65B8E /* main.cpp */; };
 		4941A6F20AC1D86400D65B8E /* main_options.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A68C0AC1D86400D65B8E /* main_options.cpp */; };
 		4941A6F40AC1D86400D65B8E /* battle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6900AC1D86400D65B8E /* battle.cpp */; };
@@ -70,6 +66,10 @@
 		49BDC4520AF5412600940A6C /* socket.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 49BDC4500AF5412600940A6C /* socket.h */; };
 		49BDC4530AF5412600940A6C /* socket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49BDC4510AF5412600940A6C /* socket.cpp */; };
 		49DEC4270AD18E9800DC8362 /* Allacrost-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 49DEC4260AD18E9800DC8362 /* Allacrost-Info.plist */; };
+		49E90F9F0B935D91006BF734 /* dat in Resources */ = {isa = PBXBuildFile; fileRef = 49E90F9B0B935D91006BF734 /* dat */; };
+		49E90FA00B935D91006BF734 /* mus in Resources */ = {isa = PBXBuildFile; fileRef = 49E90F9C0B935D91006BF734 /* mus */; };
+		49E90FA10B935D91006BF734 /* snd in Resources */ = {isa = PBXBuildFile; fileRef = 49E90F9D0B935D91006BF734 /* snd */; };
+		49E912910B9363AA006BF734 /* img in Resources */ = {isa = PBXBuildFile; fileRef = 49E911C30B9363A9006BF734 /* img */; };
 		D404C6EA0B02FD3E00827A19 /* editor.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D404C6E90B02FD3E00827A19 /* editor.moc.cpp */; };
 		D404C6EC0B02FD6D00827A19 /* grid.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D404C6EB0B02FD6D00827A19 /* grid.moc.cpp */; };
 		D4D02B720B0656E500772C78 /* SDLMain.m in Sources */ = {isa = PBXBuildFile; fileRef = 4941A7630AC1DCA500D65B8E /* SDLMain.m */; };
@@ -102,11 +102,7 @@
 		D4D1BF450B02B6510052BF1E /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4941A7130AC1D89300D65B8E /* OpenGL.framework */; };
 		D4D1BF650B02BB9F0052BF1E /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4941A7190AC1D8B300D65B8E /* SDL.framework */; };
 		D4D1BF6B0B02BC010052BF1E /* SDL_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4941A7180AC1D8B300D65B8E /* SDL_ttf.framework */; };
-		D4D6DB2C0B127DD3002F33F2 /* dat in Resources */ = {isa = PBXBuildFile; fileRef = 4941A4D70AC1D80800D65B8E /* dat */; };
-		D4D6DB2D0B127DD3002F33F2 /* img in Resources */ = {isa = PBXBuildFile; fileRef = 4941A4EB0AC1D83500D65B8E /* img */; };
 		D4D6DB2E0B127DD3002F33F2 /* mac_logo.icns in Resources */ = {isa = PBXBuildFile; fileRef = 4941A7510AC1D9A200D65B8E /* mac_logo.icns */; };
-		D4D6DB2F0B127DD3002F33F2 /* mus in Resources */ = {isa = PBXBuildFile; fileRef = 4941A62E0AC1D84600D65B8E /* mus */; };
-		D4D6DB300B127DD3002F33F2 /* snd in Resources */ = {isa = PBXBuildFile; fileRef = 4941A6350AC1D85800D65B8E /* snd */; };
 		D4F71AF60B06BAE900361DA9 /* Qt3Support.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4F71AF50B06BAE900361DA9 /* Qt3Support.framework */; };
 		D4F71C210B06BAFB00361DA9 /* QtCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4F71C200B06BAFB00361DA9 /* QtCore.framework */; };
 		D4F71D530B06BB0800361DA9 /* QtGui.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4F71D520B06BB0800361DA9 /* QtGui.framework */; };
@@ -157,10 +153,6 @@
 
 /* Begin PBXFileReference section */
 		4941A4B00AC1D77500D65B8E /* Allacrost.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Allacrost.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		4941A4D70AC1D80800D65B8E /* dat */ = {isa = PBXFileReference; lastKnownFileType = folder; path = dat; sourceTree = "<group>"; };
-		4941A4EB0AC1D83500D65B8E /* img */ = {isa = PBXFileReference; lastKnownFileType = folder; path = img; sourceTree = "<group>"; };
-		4941A62E0AC1D84600D65B8E /* mus */ = {isa = PBXFileReference; lastKnownFileType = folder; path = mus; sourceTree = "<group>"; };
-		4941A6350AC1D85800D65B8E /* snd */ = {isa = PBXFileReference; lastKnownFileType = folder; path = snd; sourceTree = "<group>"; };
 		4941A6470AC1D86300D65B8E /* defs.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = defs.h; sourceTree = "<group>"; };
 		4941A68B0AC1D86400D65B8E /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		4941A68C0AC1D86400D65B8E /* main_options.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = main_options.cpp; sourceTree = "<group>"; };
@@ -266,9 +258,13 @@
 		49BDC4500AF5412600940A6C /* socket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = socket.h; sourceTree = "<group>"; };
 		49BDC4510AF5412600940A6C /* socket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = socket.cpp; sourceTree = "<group>"; };
 		49DEC4260AD18E9800DC8362 /* Allacrost-Info.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xml; path = "Allacrost-Info.plist"; sourceTree = "<group>"; };
+		49E90F9B0B935D91006BF734 /* dat */ = {isa = PBXFileReference; lastKnownFileType = folder; path = dat; sourceTree = "<group>"; };
+		49E90F9C0B935D91006BF734 /* mus */ = {isa = PBXFileReference; lastKnownFileType = folder; path = mus; sourceTree = "<group>"; };
+		49E90F9D0B935D91006BF734 /* snd */ = {isa = PBXFileReference; lastKnownFileType = folder; path = snd; sourceTree = "<group>"; };
+		49E911C30B9363A9006BF734 /* img */ = {isa = PBXFileReference; lastKnownFileType = folder; path = img; sourceTree = "<group>"; };
 		D404C6E90B02FD3E00827A19 /* editor.moc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = editor.moc.cpp; path = src/editor/editor.moc.cpp; sourceTree = "<group>"; };
 		D404C6EB0B02FD6D00827A19 /* grid.moc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = grid.moc.cpp; path = src/editor/grid.moc.cpp; sourceTree = "<group>"; };
-		D4D1BA490B02B1DB0052BF1E /* Editor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Editor.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D4D1BA490B02B1DB0052BF1E /* Editor.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Editor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4D1BA4B0B02B1DB0052BF1E /* Editor-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Editor-Info.plist"; sourceTree = "<group>"; };
 		D4D1BA650B02B27F0052BF1E /* editor.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = editor.cpp; sourceTree = "<group>"; };
 		D4D1BA660B02B27F0052BF1E /* editor.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = editor.h; sourceTree = "<group>"; };
@@ -360,11 +356,11 @@
 		4941A4BD0AC1D7BA00D65B8E /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				49E911C30B9363A9006BF734 /* img */,
+				49E90F9B0B935D91006BF734 /* dat */,
+				49E90F9C0B935D91006BF734 /* mus */,
+				49E90F9D0B935D91006BF734 /* snd */,
 				4941A7510AC1D9A200D65B8E /* mac_logo.icns */,
-				4941A6350AC1D85800D65B8E /* snd */,
-				4941A62E0AC1D84600D65B8E /* mus */,
-				4941A4EB0AC1D83500D65B8E /* img */,
-				4941A4D70AC1D80800D65B8E /* dat */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -648,12 +644,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4941A4E90AC1D80B00D65B8E /* dat in Resources */,
-				4941A62D0AC1D83600D65B8E /* img in Resources */,
-				4941A6340AC1D84600D65B8E /* mus in Resources */,
-				4941A6450AC1D85800D65B8E /* snd in Resources */,
 				4941A7520AC1D9A200D65B8E /* mac_logo.icns in Resources */,
 				49DEC4270AD18E9800DC8362 /* Allacrost-Info.plist in Resources */,
+				49E90F9F0B935D91006BF734 /* dat in Resources */,
+				49E90FA00B935D91006BF734 /* mus in Resources */,
+				49E90FA10B935D91006BF734 /* snd in Resources */,
+				49E912910B9363AA006BF734 /* img in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -662,11 +658,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D4D1BA8B0B02B4400052BF1E /* Editor-Info.plist in Resources */,
-				D4D6DB2C0B127DD3002F33F2 /* dat in Resources */,
-				D4D6DB2D0B127DD3002F33F2 /* img in Resources */,
 				D4D6DB2E0B127DD3002F33F2 /* mac_logo.icns in Resources */,
-				D4D6DB2F0B127DD3002F33F2 /* mus in Resources */,
-				D4D6DB300B127DD3002F33F2 /* snd in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -798,7 +790,7 @@
 		4941A4B50AC1D77900D65B8E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = i386;
+				ARCHS = $NATIVE_ARCH;
 				COPY_PHASE_STRIP = NO;
 				GCC_DEBUGGING_SYMBOLS = full;
 				GCC_DYNAMIC_NO_PIC = NO;
