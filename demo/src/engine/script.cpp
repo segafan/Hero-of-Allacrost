@@ -317,15 +317,15 @@ uint32 ScriptDescriptor::ReadGetTableSize() {
 
 
 object ScriptDescriptor::ReadFunctionPointer(string key) {
-	object o;
 	if (_CheckFileAccess(SCRIPT_READ) == false)
-		return o;
+		return luabind::object();
 
-	// Global value
+	// Key is a global value if true
 	if (_open_tables.size() == 0) {
 		lua_getglobal(_lstack, key.c_str());
-		o(from_stack(_lstack, STACK_TOP));
 
+		luabind::object o(from_stack(_lstack, STACK_TOP));
+		
 		if (!o) {
 			if (SCRIPT_DEBUG)
 				cerr << "SCRIPT DESCRIPTOR: Unable to access global " << key << endl;
@@ -347,8 +347,7 @@ object ScriptDescriptor::ReadFunctionPointer(string key) {
 
 	// There is an open table, get the key from the table
 	else {
-		// TODO: for some reason the following line causes a seg fault
-		o(from_stack(_lstack, STACK_TOP));
+		luabind::object o(from_stack(_lstack, STACK_TOP));
 		if (type(o) != LUA_TTABLE) {
 			// Table not on top of stack
 			if (SCRIPT_DEBUG)
@@ -371,8 +370,27 @@ object ScriptDescriptor::ReadFunctionPointer(string key) {
 
 
 object ScriptDescriptor::ReadFunctionPointer(int32 key) {
-	object o;
-	// TODO
+	if (_CheckFileAccess(SCRIPT_READ) == false)
+		return luabind::object();
+
+	// Key is always a table element
+	luabind::object o(from_stack(_lstack, STACK_TOP));
+		if (type(o) != LUA_TTABLE) {
+			// Table not on top of stack
+			if (SCRIPT_DEBUG)
+				cerr << "SCRIPT DESCRIPTOR: Top of stack is not a table." << endl;
+			_error_code |= SCRIPT_BAD_GLOBAL;
+			return o;
+		}
+		if (type(o[key]) == LUA_TFUNCTION) {
+			lua_pop(_lstack, 1);
+		}
+		else {
+			if (SCRIPT_DEBUG)
+				cerr << "SCRIPT DESCRIPTOR: Unexpected type for retrieved value " << key << endl;
+			_error_code |= SCRIPT_BAD_TYPE;
+		}
+		return o[key];
 
 	return o;
 } // object ScriptDescriptor::ReadFunctionPointer(int32 key)

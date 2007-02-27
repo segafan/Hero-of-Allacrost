@@ -195,9 +195,7 @@ void BootMode::Reset() {
 	VideoManager->SetTextColor(Color::white);
 
 	// Reset the game universe
-	GameGlobal::SingletonDestroy();
-	GlobalManager = GameGlobal::SingletonCreate();
-	GlobalManager->SingletonInitialize();
+	GlobalManager->ClearAllData();
 
 	// Decide which music track to play
 	if (_logo_animating)

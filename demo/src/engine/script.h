@@ -50,7 +50,7 @@ extern "C" {
 *** functions, etc. This member is typically used outside of this engine as a reference to make
 *** Lua function calls.
 **/
-#define ScriptObject luabind::object;
+#define ScriptObject luabind::object
 
 //! All calls to the scripting engine are wrapped in this namespace.
 namespace hoa_script {
@@ -528,7 +528,8 @@ template <class T> T ScriptDescriptor::_Read(int32 key, T default_value) {
 
 	if (_open_tables.size() == 0) {
 		// There needs to be a table
-		if (SCRIPT_DEBUG) std::cerr << "SCRIPTDESCRIPTOR: No open tables to read from." << std::endl;
+		if (SCRIPT_DEBUG)
+			std::cerr << "SCRIPT ERROR: _Read() No open tables to read from." << std::endl;
 		_error_code |= SCRIPT_OPEN_TABLE_FAILURE;
 		return default_value;
 	}
@@ -536,7 +537,7 @@ template <class T> T ScriptDescriptor::_Read(int32 key, T default_value) {
 	luabind::object o(luabind::from_stack(_lstack, private_script::STACK_TOP));
 	if (luabind::type(o) != LUA_TTABLE) {
 		// table not on top of stack
-		if (SCRIPT_DEBUG) std::cerr << "SCRIPTDESCRIPTOR: Top of stack is not a table." << std::endl;
+		if (SCRIPT_DEBUG) std::cerr << "SCRIPT ERROR: _Read() Top of stack is not a table." << std::endl;
 		_error_code |= SCRIPT_BAD_GLOBAL;
 		return default_value;
 	}
@@ -545,7 +546,7 @@ template <class T> T ScriptDescriptor::_Read(int32 key, T default_value) {
 		return luabind::object_cast<T>(o[key]);
 	}
 	catch (...) {
-		if (SCRIPT_DEBUG) std::cerr << "SCRIPTDESCRIPTOR: Unable to cast value to correct type." << std::endl;
+		if (SCRIPT_DEBUG) std::cerr << "SCRIPT ERROR: _Read() Unable to cast value to correct type." << std::endl;
 		_error_code |= SCRIPT_INVALID_TABLE_KEY;
 	}
 
@@ -564,7 +565,7 @@ template <class T> T ScriptDescriptor::_Read(const char *key, T default_value) {
 		luabind::object o(luabind::from_stack(_lstack, private_script::STACK_TOP));
 
 		if (!o) {
-			if (SCRIPT_DEBUG) std::cerr << "SCRIPTDESCRIPTOR: Unable to access global " << key << std::endl;
+			if (SCRIPT_DEBUG) std::cerr << "SCRIPT ERROR: _Read() Unable to access global " << key << std::endl;
 			_error_code |= SCRIPT_BAD_GLOBAL;
 			return default_value;
 		}
@@ -575,7 +576,7 @@ template <class T> T ScriptDescriptor::_Read(const char *key, T default_value) {
 			return ret_val;
 		}
 		catch (...) {
-			if (SCRIPT_DEBUG) std::cerr << "SCRIPTDESCRIPTOR: Unable to cast value to correct type." << std::endl;
+			if (SCRIPT_DEBUG) std::cerr << "SCRIPT ERROR: _Read() Unable to cast value to correct type." << std::endl;
 			_error_code |= SCRIPT_BAD_GLOBAL;
 		}
 	}
@@ -584,7 +585,7 @@ template <class T> T ScriptDescriptor::_Read(const char *key, T default_value) {
 		luabind::object o(luabind::from_stack(_lstack, private_script::STACK_TOP));
 		if (luabind::type(o) != LUA_TTABLE) {
 			// table not on top of stack
-			if (SCRIPT_DEBUG) std::cerr << "SCRIPTDESCRIPTOR: Top of stack is not a table." << std::endl;
+			if (SCRIPT_DEBUG) std::cerr << "SCRIPT ERROR: _Read() Top of stack is not a table." << std::endl;
 			_error_code |= SCRIPT_BAD_GLOBAL;
 			return default_value;
 		}
@@ -593,7 +594,7 @@ template <class T> T ScriptDescriptor::_Read(const char *key, T default_value) {
 			return luabind::object_cast<T>(o[key]);
 		}
 		catch (...) {
-			if (SCRIPT_DEBUG) std::cerr << "SCRIPTDESCRIPTOR: Unable to cast value to correct type." << std::endl;
+			if (SCRIPT_DEBUG) std::cerr << "SCRIPT ERROR: _Read() Unable to cast value to correct type." << std::endl;
 			_error_code |= SCRIPT_INVALID_TABLE_KEY;
 		}
 	}
@@ -605,7 +606,7 @@ template <class T> T ScriptDescriptor::_Read(const char *key, T default_value) {
 template <class T> void ScriptDescriptor::_ReadVector(int32 key, std::vector<T> &vect) {
 	// Check that there is at least one open table, required for integer keys
 	if (_open_tables.size() == 0) {
-		if (SCRIPT_DEBUG) std::cerr << "SCRIPTDESCRIPTOR: Need at least one table open to use a numerical key." << std::endl;
+		if (SCRIPT_DEBUG) std::cerr << "SCRIPT ERROR: _ReadVector() Need at least one table open to use a numerical key." << std::endl;
 		_error_code |= SCRIPT_BAD_GLOBAL;
 		return;
 	}
@@ -625,7 +626,7 @@ template <class T, class U> void ScriptDescriptor::_ReadVector(T key, std::vecto
 	luabind::object o(luabind::from_stack(_lstack, private_script::STACK_TOP));
 	if (luabind::type(o) != LUA_TTABLE) {
 		if (SCRIPT_DEBUG)
-			std::cerr << "SCRIPTDESCRIPTOR: No table on top of stack, unable to continue." << std::endl;
+			std::cerr << "SCRIPT ERROR: _ReadVector() No table on top of stack, unable to continue." << std::endl;
 		_error_code = SCRIPT_INVALID_TABLE_KEY;
 		return;
 	}
@@ -636,7 +637,7 @@ template <class T, class U> void ScriptDescriptor::_ReadVector(T key, std::vecto
 		}
 		catch (...) {
 			if (SCRIPT_DEBUG)
-				std::cerr << "SCRIPTDESCRIPTOR: Unable to cast value to correct type." << std::endl;
+				std::cerr << "SCRIPT ERROR: _ReadVector() Unable to cast value to correct type." << std::endl;
 			_error_code = SCRIPT_INVALID_TABLE_KEY;
 		}
 	}
