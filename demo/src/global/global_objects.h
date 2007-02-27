@@ -46,6 +46,7 @@ enum GLOBAL_OBJECT {
 	GLOBAL_OBJECT_TOTAL       =  8
 };
 
+
 /** \name GlobalItem Usage Cases
 *** \brief Enum values used for identification of different game object types
 **/
@@ -179,7 +180,7 @@ public:
 	*** \note This will reduce the count member by zero. If the count member is already zero,
 	*** this function will return without doing anything.
 	**/
-	void Use(void* target);
+	void Use(GlobalTarget* target);
 
 	//! \name Class Member Access Functions
 	//@{
@@ -203,7 +204,7 @@ private:
 	GLOBAL_TARGET _target_type;
 
 	//! \brief A reference to the script function that performs the items action.
-	luabind::object _function;
+	ScriptObject _function;
 
 	GlobalItem(const GlobalItem&);
 	GlobalItem& operator=(const GlobalItem&);

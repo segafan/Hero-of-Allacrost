@@ -74,6 +74,6 @@ armor[50001] = {
 	icon = "img/icons/armor/karlate_greaves.png",
 	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS,
 	physical_defense = 3,
-	metaphyscial_defense = 0,
+	metaphysical_defense = 0,
 	slots = 0
 }

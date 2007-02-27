@@ -126,21 +126,20 @@ int32 main(int32 argc, char *argv[]) {
 		return 1;
 	}
 
-	// Create singleton class managers
+	// Create and initialize singleton class managers
 	AudioManager = GameAudio::SingletonCreate();
 	InputManager = GameInput::SingletonCreate();
 	VideoManager = GameVideo::SingletonCreate();
 	ScriptManager = GameScript::SingletonCreate();
 	SystemManager = GameSystem::SingletonCreate();
-
-	// NOTE: The GlobalManager will not be created until the user actually starts a game instance
 	ModeManager = GameModeManager::SingletonCreate();
+	GlobalManager = GameGlobal::SingletonCreate();
 
 	if (VideoManager->SingletonInitialize() == false) {
 		cerr << "ERROR: unable to initialize VideoManager" << endl;
 		return 1;
 	}
-	
+
 	VideoManager->SetMenuSkin("img/menus/black_sleet", "img/menus/black_sleet_texture.png", Color(0.0f, 0.0f, 0.0f, 0.0f));
 	if (!VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "default", 18)) {
 		return 1;
@@ -197,6 +196,10 @@ int32 main(int32 argc, char *argv[]) {
 	}
 	if (InputManager->SingletonInitialize() == false) {
 		cerr << "ERROR: unable to initialize InputManager" << endl;
+		return 1;
+	}
+	if (GlobalManager->SingletonInitialize() == false) {
+		cerr << "ERROR: unable to initialize GlobalManager" << endl;
 		return 1;
 	}
 

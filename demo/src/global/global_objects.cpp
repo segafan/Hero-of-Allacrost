@@ -41,6 +41,7 @@ void GlobalItem::_Load() {
 		return;
 	}
 
+
 	// Load the item data from the script
 	GlobalManager->_items_script.ReadOpenTable(_id);
 	_name = MakeUnicodeString(GlobalManager->_items_script.ReadString("name"));
@@ -48,7 +49,7 @@ void GlobalItem::_Load() {
 	_icon_image.SetFilename(GlobalManager->_items_script.ReadString("icon"));
 	_usage = static_cast<GLOBAL_ITEM_USE>(GlobalManager->_items_script.ReadInt("usage"));
 	_target_type = static_cast<GLOBAL_TARGET>(GlobalManager->_items_script.ReadInt("target_type"));
-	// _function = GlobalManager->_items_script.ReadFunctionPointer("use_function");
+	_function = GlobalManager->_items_script.ReadFunctionPointer("use_function");
 	GlobalManager->_items_script.ReadCloseTable();
 
 	if (GlobalManager->_items_script.GetErrorCode() != SCRIPT_NO_ERRORS) {
@@ -61,7 +62,7 @@ void GlobalItem::_Load() {
 
 
 
-void GlobalItem::Use(void* target) {
+void GlobalItem::Use(GlobalTarget* target) {
 	if (_count == 0) {
 		if (GLOBAL_DEBUG)
 			cerr << "GLOBAL ERROR: tried to use item " << MakeStandardString(_name) << " which had a count of zero" << endl;
