@@ -66,9 +66,9 @@ enemies[1] = {
 
 enemies[2] = {
 	name = "Spider",
-	img_filename = "img/sprites/battle/enemies/spider.png",
-	img_width = 64,
-	img_height = 64,
+	sprite_filename = "img/sprites/battle/enemies/spider.png",
+	sprite_width = 64,
+	sprite_height = 64,
 
 	base_stats = {
 		hit_points = 10,
@@ -119,9 +119,9 @@ enemies[2] = {
 
 enemies[3] = {
 	name = "Snake",
-	img_filename = "img/sprites/battle/enemies/snake.png",
-	img_width = 128,
-	img_height = 64,
+	sprite_filename = "img/sprites/battle/enemies/snake.png",
+	sprite_width = 128,
+	sprite_height = 64,
 
 	base_stats = {
 		hit_points = 10,
@@ -180,9 +180,9 @@ enemies[3] = {
 
 enemies[4] = {
 	name = "Skeleton",
-	img_filename = "img/sprites/battle/enemies/skeleton.png",
-	img_width = 64,
-	img_height = 128,
+	sprite_filename = "img/sprites/battle/enemies/skeleton.png",
+	sprite_width = 64,
+	sprite_height = 128,
 
 	
 	base_stats = {
