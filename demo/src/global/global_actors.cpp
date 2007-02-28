@@ -160,8 +160,6 @@ GlobalCharacter::GlobalCharacter(uint32 id) {
 		_armor_equipped.push_back(NULL);
 	}
 
-	char_script.ReadCloseTable();
-
 	// (6): Create the character's initial skill set
 	vector<int32> skill_ids;
 	char_script.ReadIntVector("initial_skills", skill_ids);
@@ -169,7 +167,7 @@ GlobalCharacter::GlobalCharacter(uint32 id) {
 	for (uint32 i = 0; i < skill_ids.size(); i++) {
 		_skills.insert(make_pair(skill_ids[i], new GlobalSkill(skill_ids[i])));
 	}
-	
+
 	char_script.ReadCloseTable();
 	char_script.CloseFile();
 
