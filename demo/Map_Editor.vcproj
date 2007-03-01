@@ -37,7 +37,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)\src&quot;;&quot;$(ProjectDir)\src\engine\video&quot;;&quot;$(ProjectDir)\src\editor&quot;;&quot;$(ProjectDir)\src\engine\audio&quot;;&quot;$(ProjectDir)\src\modes&quot;;&quot;$(ProjectDir)\src\engine&quot;;&quot;$(ProjectDir)\src\modes\battle&quot;;&quot;$(ProjectDir)\src\modes\boot&quot;;&quot;$(ProjectDir)\src\modes\map&quot;;&quot;$(ProjectDir)\src\modes\menu&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)\src&quot;;&quot;$(ProjectDir)\src\engine\video&quot;;&quot;$(ProjectDir)\src\editor&quot;;&quot;$(ProjectDir)\src\engine\audio&quot;;&quot;$(ProjectDir)\src\modes&quot;;&quot;$(ProjectDir)\src\engine&quot;;&quot;$(ProjectDir)\src\modes\battle&quot;;&quot;$(ProjectDir)\src\modes\boot&quot;;&quot;$(ProjectDir)\src\modes\map&quot;;&quot;$(ProjectDir)\src\modes\menu&quot;;&quot;$(ProjectDir)\src\global&quot;"
 				PreprocessorDefinitions="QT3_SUPPORT;QT_CLEAN_NAMESPACE;QT_NO_DEBUG;QT_GUI_LIB;QT_CORE_LIB;QT_SHARED"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -58,7 +58,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="QtGui4.lib QtCore4.lib QtOpenGL4.lib Qt3Support4.lib SDL.lib SDL_Net.lib SDL_TTF.lib SDLMain.lib LuaBind_debug.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib"
+				AdditionalDependencies="QtGui4.lib QtCore4.lib QtOpenGL4.lib Qt3Support4.lib SDL.lib SDL_Net.lib SDL_TTF.lib SDLMain.lib LuaBind_debug.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib SDL_mixer.lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				LinkTimeCodeGeneration="1"
@@ -117,7 +117,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="0"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)\src&quot;;&quot;$(ProjectDir)\src\engine\video&quot;;&quot;$(ProjectDir)\src\editor&quot;;&quot;$(ProjectDir)\src\engine\audio&quot;;&quot;$(ProjectDir)\src\modes&quot;;&quot;$(ProjectDir)\src\engine&quot;;&quot;$(ProjectDir)\src\modes\battle&quot;;&quot;$(ProjectDir)\src\modes\boot&quot;;&quot;$(ProjectDir)\src\modes\map&quot;;&quot;$(ProjectDir)\src\modes\menu&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)\src&quot;;&quot;$(ProjectDir)\src\engine\video&quot;;&quot;$(ProjectDir)\src\editor&quot;;&quot;$(ProjectDir)\src\engine\audio&quot;;&quot;$(ProjectDir)\src\modes&quot;;&quot;$(ProjectDir)\src\engine&quot;;&quot;$(ProjectDir)\src\modes\battle&quot;;&quot;$(ProjectDir)\src\modes\boot&quot;;&quot;$(ProjectDir)\src\modes\map&quot;;&quot;$(ProjectDir)\src\modes\menu&quot;;&quot;$(ProjectDir)\src\global&quot;"
 				PreprocessorDefinitions="QT3_SUPPORT;QT_CLEAN_NAMESPACE;QT_NO_DEBUG;QT_GUI_LIB;QT_CORE_LIB;QT_SHARED"
 				MinimalRebuild="true"
 				RuntimeLibrary="2"
@@ -137,7 +137,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="QtGui4.lib QtCore4.lib QtOpenGL4.lib Qt3Support4.lib SDL.lib SDL_Net.lib SDL_TTF.lib SDLMain.lib LuaBind.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib"
+				AdditionalDependencies="QtGui4.lib QtCore4.lib QtOpenGL4.lib Qt3Support4.lib SDL.lib SDL_Net.lib SDL_TTF.lib SDLMain.lib LuaBind.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib SDL_mixer.lib"
 				IgnoreAllDefaultLibraries="false"
 				IgnoreDefaultLibraryNames=""
 				SubSystem="2"
@@ -181,6 +181,38 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\src\engine\audio\audio.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\audio\audio_music.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\audio\audio_sound.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\battle\battle.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\battle\battle_actors.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\boot\boot.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\boot\boot_credits.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\boot\boot_menu.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\engine\video\draw.cpp"
 				>
 			</File>
@@ -205,6 +237,22 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\global\global.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\global\global_actors.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\global\global_objects.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\global\global_skills.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\editor\grid.cpp"
 				>
 			</File>
@@ -221,11 +269,43 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\engine\input.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\engine\video\interpolator.cpp"
 				>
 			</File>
 			<File
+				RelativePath=".\src\modes\map\map.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\map\map_actions.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\map\map_dialogue.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\map\map_objects.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\menu\menu.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\menu\menu_views.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\engine\video\menu_window.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\mode_manager.cpp"
 				>
 			</File>
 			<File
@@ -245,6 +325,18 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\modes\pause.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\quit.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\scene.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\engine\script.cpp"
 				>
 			</File>
@@ -254,6 +346,10 @@
 			</File>
 			<File
 				RelativePath=".\src\engine\socket.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\system.cpp"
 				>
 			</File>
 			<File
@@ -291,6 +387,26 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\src\modes\battle\battle.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\battle\battle_actors.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\boot\boot.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\boot\boot_credits.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\boot\boot_menu.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\engine\video\color.h"
 				>
 			</File>
@@ -311,6 +427,18 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\global\global_actors.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\global\global_objects.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\global\global_skills.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\editor\grid.h"
 				>
 			</File>
@@ -324,6 +452,22 @@
 			</File>
 			<File
 				RelativePath=".\src\engine\video\interpolator.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\map\map.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\map\map_actions.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\map\map_dialogue.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\map\map_objects.h"
 				>
 			</File>
 			<File
@@ -356,6 +500,18 @@
 			</File>
 			<File
 				RelativePath=".\src\engine\video\particle_system.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\pause.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\quit.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\scene.h"
 				>
 			</File>
 			<File
