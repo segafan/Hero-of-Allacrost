@@ -171,6 +171,51 @@ GlobalCharacter::GlobalCharacter(uint32 id) {
 	char_script.ReadCloseTable();
 	char_script.CloseFile();
 
+	// TEMP TEMP TEMP: Load the character's idle animation frame by frame
+	vector<StillImage> idle_frames;
+	AnimatedImage idle;
+	StillImage imd;
+	imd.SetDimensions(64, 128);
+	imd.SetFilename("img/sprites/battle/characters/" + _filename + "_idle_fr0.png");
+	idle_frames.push_back(imd);
+	imd.SetFilename("img/sprites/battle/characters/" + _filename + "_idle_fr1.png");
+	idle_frames.push_back(imd);
+	imd.SetFilename("img/sprites/battle/characters/" + _filename + "_idle_fr2.png");
+	idle_frames.push_back(imd);
+	imd.SetFilename("img/sprites/battle/characters/" + _filename + "_idle_fr3.png");
+	idle_frames.push_back(imd);
+	imd.SetFilename("img/sprites/battle/characters/" + _filename + "_idle_fr4.png");
+	idle_frames.push_back(imd);
+	imd.SetFilename("img/sprites/battle/characters/" + _filename + "_idle_fr5.png");
+	idle_frames.push_back(imd);
+
+	for (uint32 i = 0; i < idle_frames.size(); i++) {
+		if (!VideoManager->LoadImage(idle_frames[i])) cerr << "Failed to load battle sprite." << endl;
+
+	}
+
+	for (uint32 i = 0; i < idle_frames.size(); i++) { idle.AddFrame(idle_frames[i], 10); }
+	idle.SetFrameIndex(0);
+	_battle_animation["idle"] = idle;
+
+	// TEMP TEMP TEMP: Load the character's battle portrait
+	imd.SetDimensions(100, 100);
+	imd.SetFilename("img/portraits/battle/" + _filename + ".png");
+	_battle_portraits.push_back(imd);
+	imd.SetFilename("img/portraits/battle/" + _filename + "_hp75.png");
+	_battle_portraits.push_back(imd);
+	imd.SetFilename("img/portraits/battle/" + _filename + "_hp50.png");
+	_battle_portraits.push_back(imd);
+	imd.SetFilename("img/portraits/battle/" + _filename + "_hp25.png");
+	_battle_portraits.push_back(imd);
+	imd.SetFilename("img/portraits/battle/" + _filename + "_hp00.png");
+	_battle_portraits.push_back(imd);
+
+	for (uint32 i = 0; i < _battle_portraits.size(); i++) {
+		if (VideoManager->LoadImage(_battle_portraits[i]) == false)
+			exit(1);
+	}
+
 	// TEMP: Add new skills
 	// AddAttackSkill(new GlobalSkill()); // removed text "sword_slash" because that constructor isn't implemented yet -MF
 } // GlobalCharacter::GlobalCharacter(uint32 id)
@@ -205,7 +250,14 @@ GlobalEnemy::GlobalEnemy(uint32 id) {
 	string sprite_filename = enemy_data.ReadString("sprite_filename");
 	_sprite_width = enemy_data.ReadInt("sprite_width");
 	_sprite_height = enemy_data.ReadInt("sprite_height");
-	// Attempt to load the multiimage, which should contain one row and four columns of images
+
+	// Make four dummy images for LoadMultiImage(). TODO: Can't we do these in LoadMultiImage() instead :(
+	StillImage foo;
+	_sprite_frames.push_back(foo);
+	_sprite_frames.push_back(foo);
+	_sprite_frames.push_back(foo);
+	_sprite_frames.push_back(foo);
+	// Attempt to load the MultiImage, which should contain one row and four columns of images
 	if (VideoManager->LoadMultiImage(_sprite_frames, sprite_filename, 1, 4) == false) {
 		cerr << "GLOBAL ERROR: failed to load sprite frames for enemy: " << sprite_filename << endl;
 		return;
