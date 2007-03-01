@@ -43,7 +43,7 @@
 namespace hoa_editor
 {
 
-	//! Different layers
+//! Different layers
 enum LAYER_TYPE
 {
 	INVALID_LAYER = -1,
@@ -89,8 +89,8 @@ class Grid: public QGLWidget
 
 		QStringList file_name_list;         // list of tile file names
 		QStringList tileset_list;           // list of tileset names
-		std::vector<int32> tiles_walkable;  // vector of walkability of tiles
-		std::vector<int32> indiv_walkable;  // vector of walkability of individual tiles
+		std::vector<uint32> tiles_walkable; // vector of walkability of tiles
+		std::vector<uint32> indiv_walkable; // vector of walkability of individual tiles
 
 	protected:
 		void initializeGL();                // sets up the rendering context

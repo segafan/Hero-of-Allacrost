@@ -587,7 +587,7 @@ void Editor::_OpenTileDatabase()
 			QMessageBox::warning(this, "Tile Database", "Tile database does not exist. Creating one now...");
 			_stat_bar->message("Please wait...");
 			_tile_db = new TileDatabase();
-			_tile_db->Update("img/tiles");
+			_tile_db->Update("img/tilesets");
 			_tile_db->Save("dat/tilesets/tiles_database.lua");
 			_stat_bar->message("Database successfully created!", 5000);
 		} // tile database has not yet been setup
@@ -733,7 +733,7 @@ QString MusicDialog::GetSelectedFile()
 EditorScrollView::EditorScrollView(QWidget* parent, const QString& name, int width,
 	int height, TileDatabase* db) : Q3ScrollView(parent, (const char*) name, Qt::WNoAutoErase|Qt::WStaticContents)
 {
-	_db=db;
+	_db = db;
 
 	// Set default editing modes.
 	_tile_mode  = PAINT_TILE;
@@ -749,11 +749,11 @@ EditorScrollView::EditorScrollView(QWidget* parent, const QString& name, int wid
 	Q3VButtonGroup* checkboxes = new Q3VButtonGroup("Walkability", _context_menu,
 		"checkboxes");
 	_allwalk_checkbox = new QCheckBox("All", checkboxes, "allwalk_checkbox");
-	for (uint32 i = 0; i < 8; i++)
-		_walk_checkbox[i] = new QCheckBox(QString("Level %1").arg(i+1), checkboxes,
-			QString("walk_checkbox[%1]").arg(i));
-	connect(_allwalk_checkbox, SIGNAL(toggled(bool)), this,
-		SLOT(_ToggleWalkCheckboxes(bool)));
+	_walk_checkbox[0] = new QCheckBox(QString("NW corner"), checkboxes, QString("walk_checkbox[0]"));
+	_walk_checkbox[1] = new QCheckBox(QString("NE corner"), checkboxes, QString("walk_checkbox[1]"));
+	_walk_checkbox[2] = new QCheckBox(QString("SW corner"), checkboxes, QString("walk_checkbox[2]"));
+	_walk_checkbox[3] = new QCheckBox(QString("SE corner"), checkboxes, QString("walk_checkbox[3]"));
+	connect(_allwalk_checkbox, SIGNAL(toggled(bool)), this, SLOT(_ToggleWalkCheckboxes(bool)));
 	connect(_context_menu, SIGNAL(aboutToShow()), this, SLOT(_ContextMenuSetup()));
 	connect(_context_menu, SIGNAL(aboutToHide()), this, SLOT(_ContextMenuEvaluate()));
 	_context_menu->insertItem("Walkability", checkboxes, NULL);
@@ -949,10 +949,10 @@ void EditorScrollView::_ContextMenuSetup()
 	unsigned int walkable = 0;
 	
 	// Individual walkability supersedes everything else
-	if (_map->indiv_walkable[_tile_index] != -1)
+	if (_map->indiv_walkable[_tile_index] != 0)
 		walkable = _map->indiv_walkable[_tile_index];
 	// Look up walkability property from the map
-	else if (_map->tiles_walkable[_tile_index] != -1)
+	else if (_map->tiles_walkable[_tile_index] != 0)
 		walkable = _map->tiles_walkable[_tile_index];
 	// Look up walkability property in global tiles database
 	else
@@ -964,7 +964,7 @@ void EditorScrollView::_ContextMenuSetup()
 
 	// Set checkboxes
 	_allwalk_checkbox->setChecked(true);
-	for (uint8 i = 0; i < 8; i++)
+	for (uint8 i = 0; i < 3; i++)
 		if (walkable & (1 << i))
 			_walk_checkbox[i]->setChecked(true);
 		else
@@ -977,7 +977,7 @@ void EditorScrollView::_ContextMenuSetup()
 void EditorScrollView::_ContextMenuEvaluate()
 {
 	_map->indiv_walkable[_tile_index] = 0;
-	for (uint8 i = 0; i < 8; i++)
+	for (uint8 i = 0; i < 3; i++)
 		if (_walk_checkbox[i]->isChecked())
 			_map->indiv_walkable[_tile_index] |= (1 << i);
 } // _ContextMenuEvaluate()
@@ -985,10 +985,10 @@ void EditorScrollView::_ContextMenuEvaluate()
 void EditorScrollView::_ToggleWalkCheckboxes(bool on)
 {
 	if (on)
-		for (uint8 i = 0; i < 8; i++)
+		for (uint8 i = 0; i < 3; i++)
 			_walk_checkbox[i]->setChecked(true);
 	else
-		for (uint8 i = 0; i < 8; i++)
+		for (uint8 i = 0; i < 3; i++)
 			_walk_checkbox[i]->setChecked(false);
 } // _ToggleWalkCheckboxes(...)
 

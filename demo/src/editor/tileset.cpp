@@ -17,6 +17,7 @@
 #include "tileset.h"
 
 using namespace std;
+using namespace hoa_video;
 using namespace hoa_script;
 using namespace hoa_editor;
 
@@ -154,6 +155,11 @@ void TileDatabase::Update(const QString& tile_dir_name)
 		// if it does not exist in the database yet, add it
 		if (_tiles.find(tile_file) == _tiles.end())
 		{
+			vector<StillImage> tile_vec;
+			if (!VideoManager->LoadMultiImage(tile_vec, tile_file.toStdString(), 16, 16))
+				qDebug("Failed to load multi-image.");
+			else
+				qDebug("Hooray! Seems to have worked...");
 			DbTile new_tile(tile_file, 255);
 			_tiles.insert(std::pair<QString, DbTile> (tile_file, new_tile));
 			_global_set.AddTile(tile_file);
