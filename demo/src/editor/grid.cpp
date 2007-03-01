@@ -57,6 +57,9 @@ Grid::Grid(QWidget* parent, const QString& name, int width, int height)
 		_lower_layer.push_back(-1);
 		_middle_layer.push_back(-1);
 		_upper_layer.push_back(-1);
+	} // -1 is used for no tiles
+	for (int i = 0; i < _width * _height * 4; i++)
+	{
 		tiles_walkable.push_back(-1);
 		indiv_walkable.push_back(-1);
 	} // -1 is used for no tiles
@@ -214,17 +217,33 @@ void Grid::LoadMap()
 	read_data.ReadCloseTable();
 	
 	read_data.ReadOpenTable("tile_walkable");
-	for (int32 i = 0; i < _height; i++)
+	uint32 walk_west;
+	vector<uint32> walk_temp;
+	vector<uint32>::iterator wit;
+	for (int32 i = 0; i < _height * 2; i++)
 	{
 		read_data.ReadIntVector(i, vect);
+		wit = walk_temp.begin();
 		for (vector<int32>::iterator it = vect.begin(); it != vect.end(); it++)
-			tiles_walkable.push_back(*it);
+		{
+			walk_west = *it;
+			it++;
+			if (i % 2 == 0)
+				walk_temp.push_back(walk_west & *it);
+			else
+			{
+				tiles_walkable.push_back(*wit & walk_west & *it);
+				wit++;
+			} // remainder means entire tile has been read
+		} // iterate through the row
 		vect.clear();
+		if (i % 2 != 0)
+			walk_temp.clear();
 	} // iterate through the rows of the walkability table
 	read_data.ReadCloseTable();
 	
 	// Initialize individual tile walkability.
-	for (int i = 0; i < _width * _height; i++)
+	for (int i = 0; i < _width * _height * 4; i++)
 		indiv_walkable.push_back(-1);
 
 	// Load music
@@ -385,7 +404,7 @@ void Grid::SaveMap()
 		write_data.WriteEndTable();
 		write_data.WriteInsertNewLine();
 
-		write_data.WriteComment("Walkability status of tiles for 8 height levels. Non-zero indicates walkable. Valid range: [0-255]");
+		write_data.WriteComment("Walkability status of tiles for 32 contexts. Non-zero indicates walkable. Valid range: [0:2^32-1]");
 		write_data.WriteBeginTable("tile_walkable");
 		ScriptDescriptor read_data;
 		if (!read_data.OpenFile("dat/tilesets/tiles_database.lua", SCRIPT_READ))
@@ -393,18 +412,40 @@ void Grid::SaveMap()
 				QString("ERROR: could not open dat/tilesets/tiles_database.lua for reading!"));
 		else
 		{
-			for (int row = 0; row < _height; row++)
+			for (int row = 0; row < _height * 2; row++)
 			{
 				for (int col = 0; col < _width; col++)
 				{
 					// Individual tile property supersedes anything else.
-					if (indiv_walkable[row * _width + col] != -1)
-						layer_row.push_back(indiv_walkable[row * _width + col]);
-					else if (tiles_walkable[row * _width + col] != -1)
-						layer_row.push_back(tiles_walkable[row * _width + col]);
+					if (indiv_walkable[row / 2 * _width + col] != 0)
+					{
+						if (row % 2 == 0)
+						{
+							layer_row.push_back(indiv_walkable[row / 2 * _width + col] & 1);  // gets NW corner
+							layer_row.push_back(indiv_walkable[row / 2 * _width + col] & 2);  // gets NE corner
+						} // no remainder means top half of the tile
+						else
+						{
+							layer_row.push_back(indiv_walkable[row / 2 * _width + col] & 4);  // gets SW corner
+							layer_row.push_back(indiv_walkable[row / 2 * _width + col] & 8);  // gets SE corner
+						} // remainder means bottom half of the tile
+					} // this tile is walkable
+					else if (tiles_walkable[row * _width + col] != 0)
+					{
+						if (row % 2 == 0)
+						{
+							layer_row.push_back(tiles_walkable[row / 2 * _width + col] & 1);  // gets NW corner
+							layer_row.push_back(tiles_walkable[row / 2 * _width + col] & 2);  // gets NE corner
+						} // no remainder means top half of the tile
+						else
+						{
+							layer_row.push_back(tiles_walkable[row / 2 * _width + col] & 4);  // gets SW corner
+							layer_row.push_back(tiles_walkable[row / 2 * _width + col] & 8);  // gets SE corner
+						} // remainder means bottom half of the tile
+					} // this tile is walkable
 					else
 					{
-						QString temp = file_name_list[_lower_layer[row * _width + col]];
+						QString temp = file_name_list[_lower_layer[row / 2 * _width + col]];
 						temp.remove(".png").remove("img/tiles/");
 						read_data.ReadOpenTable("tile_filenames");
 						uint32 table_size = read_data.ReadGetTableSize();
@@ -420,7 +461,17 @@ void Grid::SaveMap()
 						if (filename == temp)
 						{
 							read_data.ReadOpenTable("tile_properties");
-							layer_row.push_back(read_data.ReadInt(index));
+							uint32 walk_prop = read_data.ReadInt(index);
+							if (row % 2 == 0)
+							{
+								layer_row.push_back(walk_prop & 1);  // gets NW corner
+								layer_row.push_back(walk_prop & 2);  // gets NE corner
+							} // no remainder means top half of the tile
+							else
+							{
+								layer_row.push_back(walk_prop & 4);  // gets SW corner
+								layer_row.push_back(walk_prop & 8);  // gets SE corner
+							} // remainder means bottom half of the tile
 							read_data.ReadCloseTable();
 						} // tile exists in the database
 					} // falls back to global property in tile database
