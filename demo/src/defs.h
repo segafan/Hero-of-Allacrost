@@ -114,13 +114,12 @@ namespace hoa_video {
 	}
 }
 
-// Data declarations, see script.h/cpp
+// Script declarations, see script.h/cpp
 namespace hoa_script {
 	extern bool SCRIPT_DEBUG;
 	class GameScript;
 
-	class ReadScriptDescriptor;
-	class WriteScriptDescriptor;
+	class ScriptDescriptor;
 }
 
 // Mode manager declarations, see mode_manager.h/cpp
@@ -143,7 +142,7 @@ namespace hoa_system {
 	class GameSystem;
 }
 
-// Global declarations, see src/global/*
+// Global declarations, see src/global/
 namespace hoa_global {
 	extern bool GLOBAL_DEBUG;
 	class GameGlobal;
@@ -152,16 +151,18 @@ namespace hoa_global {
 	class GlobalItem;
 	class GlobalWeapon;
 	class GlobalArmor;
+	class GlobalShard;
+	class GlobalKeyItem;
 
 	class GlobalStatusEffect;
 	class GlobalElementalEffect;
 	class GlobalSkill;
 
-	class GlobalAttackPoint;
+	class GlobalTarget;
 	class GlobalAttackPoint;
 	class GlobalActor;
-	class GlobalEnemy;
 	class GlobalCharacter;
+	class GlobalEnemy;
 	class GlobalParty;
 }
 

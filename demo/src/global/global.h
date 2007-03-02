@@ -163,11 +163,11 @@ public:
 	std::vector<GlobalArmor*>*  GetInventoryLegArmor()
 		{ return &_inventory_leg_armor; }
 
-// 	std::vector<GlobalPeriapt*>* GetInventoryPeriapts()
-// 		{ return &_inventory_periapts; }
-// 
-// 	std::vector<GlobalKeyItem*>* GetInventoryKeyItems()
-// 		{ return &_inventory_key_items; }
+	std::vector<GlobalShard*>* GetInventoryShards()
+		{ return &_inventory_shards; }
+
+	std::vector<GlobalKeyItem*>* GetInventoryKeyItems()
+		{ return &_inventory_key_items; }
 	//@}
 
 	//! \brief Returns a pointer to the active party
@@ -204,8 +204,8 @@ private:
 	std::vector<GlobalArmor*>   _inventory_torso_armor;
 	std::vector<GlobalArmor*>   _inventory_arm_armor;
 	std::vector<GlobalArmor*>   _inventory_leg_armor;
-	// std::vector<GlobalPeriapt> _inventory_periapts;
-	// std::vector<GlobalKeyItem> _inventory_key_items;
+	std::vector<GlobalShard*>   _inventory_shards;
+	std::vector<GlobalKeyItem*> _inventory_key_items;
 	//@}
 
 	/** \brief The active party of characters

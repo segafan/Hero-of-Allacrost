@@ -256,8 +256,8 @@ void GameGlobal::ClearAllData() {
 	_inventory_torso_armor.clear();
 	_inventory_arm_armor.clear();
 	_inventory_leg_armor.clear();
-// 	_inventory_shards.clear();
-// 	_inventory_key_items.clear();
+	_inventory_shards.clear();
+	_inventory_key_items.clear();
 
 	// Delete all characters
 	for (map<uint32, GlobalCharacter*>::iterator i = _characters.begin(); i != _characters.end(); i++) {
@@ -300,14 +300,13 @@ GlobalCharacter* GameGlobal::GetCharacter(uint32 id) {
 // ****************************************************************************
 
 void GameGlobal::AddToInventory(uint32 obj_id, uint32 obj_count) {
-	// If the object is already in the inventory, increment the count of the object 
+	// If the object is already in the inventory, increment the count of the object
 	if (_inventory.find(obj_id) != _inventory.end()) {
 		_inventory[obj_id]->IncrementCount(obj_count);
 		return;
 	}
 
 	// Otherwise create a new object instance and add it to the inventory
-	// Use the id value to figure out what type of object it is
 	if (obj_id == 0) {
 		cerr << "GLOBAL ERROR: Attempted to add invalid object to inventory with id: " << obj_id << endl;
 	} else if (obj_id < 10000) { // Item
@@ -363,23 +362,71 @@ void GameGlobal::RemoveFromInventory(uint32 obj_id) {
 	if (obj_id == 0) {
 		cerr << "GLOBAL WARNING: attempted to remove invalid object to inventory with id: " << obj_id << endl;
 	} else if (obj_id < 10000) { // Item
-		// TODO
+		for (vector<GlobalItem*>::iterator i = _inventory_items.begin(); i != _inventory_items.end(); i++) {
+			if ((*i)->GetID() == obj_id) {
+				_inventory_items.erase(i);
+				return;
+			}
+		}
+		cerr << "GLOBAL WARNING: object to remove was not found in _inventory_items vector" << endl;
 	} else if (obj_id < 20000) { // Weapon
-		// TODO
+		for (vector<GlobalWeapon*>::iterator i = _inventory_weapons.begin(); i != _inventory_weapons.end(); i++) {
+			if ((*i)->GetID() == obj_id) {
+				_inventory_weapons.erase(i);
+				return;
+			}
+		}
+		cerr << "GLOBAL WARNING: object to remove was not found in _inventory_weapons vector" << endl;
 	} else if (obj_id < 30000) { // Head Armor
-		// TODO
+		for (vector<GlobalArmor*>::iterator i = _inventory_head_armor.begin(); i != _inventory_head_armor.end(); i++) {
+			if ((*i)->GetID() == obj_id) {
+				_inventory_head_armor.erase(i);
+				return;
+			}
+		}
+		cerr << "GLOBAL WARNING: object to remove was not found in _inventory_head_armor vector" << endl;
 	} else if (obj_id < 40000) { // Torso Armor
-		// TODO
+		for (vector<GlobalArmor*>::iterator i = _inventory_torso_armor.begin(); i != _inventory_torso_armor.end(); i++) {
+			if ((*i)->GetID() == obj_id) {
+				_inventory_torso_armor.erase(i);
+				return;
+			}
+		}
+		cerr << "GLOBAL WARNING: object to remove was not found in _inventory_torso_armor vector" << endl;
 	} else if (obj_id < 50000) { // Arm Armor
-		// TODO
+		for (vector<GlobalArmor*>::iterator i = _inventory_arm_armor.begin(); i != _inventory_arm_armor.end(); i++) {
+			if ((*i)->GetID() == obj_id) {
+				_inventory_arm_armor.erase(i);
+				return;
+			}
+		}
+		cerr << "GLOBAL WARNING: object to remove was not found in _inventory_arm_armor vector" << endl;
 	} else if (obj_id < 60000) { // Leg Armor
-		// TODO
+		for (vector<GlobalArmor*>::iterator i = _inventory_leg_armor.begin(); i != _inventory_leg_armor.end(); i++) {
+			if ((*i)->GetID() == obj_id) {
+				_inventory_leg_armor.erase(i);
+				return;
+			}
+		}
+		cerr << "GLOBAL WARNING: object to remove was not found in _inventory_leg_armor vector" << endl;
 	} else if (obj_id < 70000) { // Shard
-		// TODO
+		for (vector<GlobalShard*>::iterator i = _inventory_shards.begin(); i != _inventory_shards.end(); i++) {
+			if ((*i)->GetID() == obj_id) {
+				_inventory_shards.erase(i);
+				return;
+			}
+		}
+		cerr << "GLOBAL WARNING: object to remove was not found in _inventory_shards vector" << endl;
 	} else if (obj_id < 80000) { // Key Item
-		// TODO
+		for (vector<GlobalKeyItem*>::iterator i = _inventory_key_items.begin(); i != _inventory_key_items.end(); i++) {
+			if ((*i)->GetID() == obj_id) {
+				_inventory_key_items.erase(i);
+				break;
+			}
+		}
+		cerr << "GLOBAL WARNING: object to remove was not found in _inventory_key_items vector" << endl;
 	} else {
-		cerr << "GLOBAL WARNING: attempted to remove invalid object to inventory with id: " << obj_id << endl;
+		cerr << "GLOBAL WARNING: attempted to remove invalid object from inventory with id: " << obj_id << endl;
 	}
 } // void GameGlobal::RemoveFromInventory(uint32 obj_id)
 
