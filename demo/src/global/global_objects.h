@@ -258,8 +258,9 @@ private:
 *** Not all pieces of armor can be equipped by all characters. Even though there's
 *** only one armor class, there are actually four types of armor: head, torso, arm,
 *** and leg. The GlobalObject#_type member is used to identify what armor category
-*** an instance of this class belongs to. All armor have the same members/properties, so it doesn't make any sense to make four
-*** identical classes different only in name for the four armor types.
+*** an instance of this class belongs to. All armor have the same members/properties,
+*** so it doesn't make any sense to make four identical classes different only in
+*** name for the four armor types.
 *** ***************************************************************************/
 class GlobalArmor : public GlobalObject {
 public:
@@ -290,8 +291,27 @@ private:
 }; // class GlobalArmor : public GlobalObject
 
 
+/** ****************************************************************************
+*** \brief Represents a shard item
+***
+*** Shards are small items that can be combined with weapons and armor to 
+*** enhance their properties.
+*** ***************************************************************************/
+class GlobalShard : public GlobalObject {
+	// TODO
+};
 
-// TODO: write two more clases: GlobalShard and GlobalKeyItem
+
+/** ****************************************************************************
+*** \brief Represents key items found in the game
+***
+*** Key items are items which can not be used by the player. They simply sit
+*** idly in the inventory.
+*** ***************************************************************************/
+class GlobalKeyItem : public GlobalObject {
+	// TODO
+};
+
 
 } // namespace hoa_global
 
