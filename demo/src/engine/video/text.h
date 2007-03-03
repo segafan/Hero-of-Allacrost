@@ -67,6 +67,8 @@ public:
 	float max_y;
 	//! \brief The amount of space between glyphs.
 	int32 advance;
+	//! \brief The top y value of the glyph.
+	int top_y;
 }; // class FontGlyph
 
 
@@ -94,6 +96,85 @@ public:
 	//! \brief A pointer to a cache which holds all of the glyphs used in this font.
 	std::map<uint16, FontGlyph*>* glyph_cache;
 }; // class FontProperties
+
+/** ****************************************************************************
+*** \brief A structure holding a single rendered line.
+*** ***************************************************************************/
+class RenderedLine {
+private:
+        //! \brief Disabled copy constructor
+        RenderedLine(const RenderedLine &other);
+        //! \brief Disabled assignment operator
+        RenderedLine &operator=(const RenderedLine &other);
+public:
+	//! \brief Num textures constant enum
+	enum
+	{
+		MAIN_TEXTURE   = 0,
+		SHADOW_TEXTURE = 1,
+		NUM_TEXTURES   = 2,
+	};
+	//! \brief The height of the line
+	int32 height;
+	//! \brief V texture coordinate of the line.
+	float v;
+	//! \brief The width of the line
+	int32 width;
+	//! \brief U texture coordinate of the line.
+	float u;
+	//! \brief The GL texture
+	GLuint texture[NUM_TEXTURES];
+	//! \brief The X offset to draw on
+	int32 x_offset;
+	//! \brief The Y offset to draw on
+	int32 y_offset;
+	//! \brief Create a RenderedLine
+	RenderedLine(GLuint *tex, 
+		     int32 lineWidth,  int32 texWidth,
+		     int32 lineHeight, int32 texHeight, 
+		     int32 xOffset,    int32 yOffset);
+	//! \brief Deletes textures
+	~RenderedLine();
+}; // class RenderedLine
+
+
+/** ****************************************************************************
+*** \brief A structure which a rendered string
+*** ***************************************************************************/
+class RenderedString {
+private:
+	//! \brief The total width of this text block.
+	int32 _width;
+	//! \brief SDL_ttf's recommended amount of spacing between lines.
+	int32 _line_skip;
+	//! \brief X offset of the shadow texture
+	int32 _shadow_xoff;
+	//! \brief Y offset of the shadow texture
+	int32 _shadow_yoff;
+public:
+	//! \brief Vector of line textures
+	std::vector<RenderedLine*> lines;
+	//! \brief Constructs empty string.
+	RenderedString(int32 line_skip, int32 shadowX = 0, int32 shadowY = 0);
+	//! \brief Deletes textures
+	~RenderedString();
+	//! \brief Draw the string
+	bool Draw() const;
+	//! \brief Add a line to the string
+	bool Add(RenderedLine *line);
+	//! \brief Get the current line skip
+	int32 GetLineSkip() const { return _line_skip; };
+	//! \brief Get the line width
+	int32 GetWidth() const { return _width; };
+	//! \brief Get the shadow X offset
+	int32 GetShadowX() const { return _shadow_xoff; };
+	//! \brief Get the shadow X offset
+	int32 GetShadowY() const { return _shadow_yoff; };
+	//! \brief Set the shadow X offset
+	void SetShadowX(int32 xoff) { _shadow_xoff = xoff; };
+	//! \brief Set the shadow X offset
+	void SetShadowY(int32 yoff) { _shadow_yoff = yoff; };
+}; // class RenderedString
 
 }  // namespace hoa_video
 

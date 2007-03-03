@@ -21,6 +21,7 @@
 
 #include <string>
 #include "video.h"
+#include "text.h"
 
 
 //! All calls to boot mode are wrapped in this namespace.
@@ -67,6 +68,9 @@ private:
 
 	//! Text to be displayed
 	const std::string _credits_text;
+
+        //! Rendered text string
+        hoa_video::RenderedString *_credits_rendered;
 };
 
 
