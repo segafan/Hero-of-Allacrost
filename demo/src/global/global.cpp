@@ -279,6 +279,8 @@ void GameGlobal::AddCharacter(uint32 id) {
 
 	GlobalCharacter *ch = new GlobalCharacter(id);
 	_characters.insert(make_pair(id, ch));
+	_character_order.push_back(ch);
+	_active_party.AddActor(ch);
 }
 
 

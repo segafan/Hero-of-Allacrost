@@ -1056,6 +1056,7 @@ StatusWindow::StatusWindow() : _char_select_active(false)
 // 	_menu_sounds["potion"] = potion;
 // 	_menu_sounds["cancel"] = cancel;
 	
+	_current_char = GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS);
 } // StatusWindow::StatusWindow()
 
 
@@ -1198,7 +1199,9 @@ void StatusWindow::Draw()
 
 	//Draw character full body portrait
 	VideoManager->Move(735, 145);
-	VideoManager->DrawImage(_full_portraits[_char_select.GetSelection()]);
+
+//	FIX ME: This line causes a crash!
+//	VideoManager->DrawImage(_full_portraits[_char_select.GetSelection()]);
 
 	_char_select.Draw();
 
