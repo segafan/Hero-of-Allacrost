@@ -142,6 +142,9 @@ public:
 	***/
 	GlobalCharacter* GetCharacter(uint32 id);
 
+	std::vector<GlobalCharacter*>* GetCharacterOrder()
+		{ return &_character_order; };
+
 	const uint32 GetFunds() const
 		{ return _funds; }
 
@@ -184,6 +187,12 @@ private:
 	*** The map key is the character's unique ID number.
 	**/
 	std::map<uint32, GlobalCharacter*> _characters;
+
+	/** \brief A vector whose purpose is to determine the ORDER of characters
+	*** The first four characters in this vector go to the active party; the rest are in reserve.
+	**/
+	std::vector<GlobalCharacter*> _character_order;
+
 
 	/** \brief Retains a list of all of the objects currently stored in the player's inventory
 	*** This map is used to quickly check if an item is in the inventory or not. The key to the map is the object's
