@@ -109,49 +109,211 @@ Color GameVideo::GetTextColor () const
 	return _currentTextColor;
 }
 
+//-----------------------------------------------------------------------------
+// _GenTexLine: renders a text line to a texture
+//-----------------------------------------------------------------------------
+RenderedLine *GameVideo::_GenTexLine(uint16 *line, FontProperties *fp)
+{
+	if (!fp)
+		return NULL;
+
+	// Array is { texid, shadowTexid }
+	GLuint texid[2] = { 0, 0 };
+
+	if (!*line)
+		return new RenderedLine(texid, 0, 0, 0, 0, 0, 0);
+	
+	static const SDL_Color color = { 0xFF, 0xFF, 0xFF, 0xFF };
+
+	TTF_Font * font = fp->ttf_font;
+
+	SDL_Surface *initial      = NULL;
+	SDL_Surface *intermediary = NULL;
+	// If we are shadowing, use an array
+	// to store shadow colored versions
+	// of text pixels.
+	uint8       *shadowPixels = NULL;
+	int32 lineW,    lineH;
+	int32 textureW, textureH;
+
+	// Number of textures we're rendering
+	uint8 numTextures = 0;
+
+	// Minimum Y value of the line
+	int32 minY = 0;
+	// Calculated line width
+	int32 calcLineWidth = 0;
+
+	Color shadowColor;
+
+	uint16 *charPtr;
+
+	#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+		static const int rmask = 0xff000000;
+		static const int gmask = 0x00ff0000;
+		static const int bmask = 0x0000ff00;
+		static const int amask = 0x000000ff;
+	#else
+		static const int rmask = 0x000000ff;
+		static const int gmask = 0x0000ff00;
+		static const int bmask = 0x00ff0000;
+		static const int amask = 0xff000000;
+	#endif	
+
+	if (TTF_SizeUNICODE(font, line, &lineW, &lineH) == -1)
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: TTF_SizeUNICODE() returned NULL in _GenTexLine()!" << endl;
+		return NULL;
+	}
+
+	for (charPtr = line; *charPtr; ++charPtr)
+	{
+		FontGlyph * glyphinfo = (*fp->glyph_cache)[*charPtr];
+		int curMinY = glyphinfo->top_y;
+		if (curMinY < minY)
+			minY = curMinY;
+		calcLineWidth += glyphinfo->advance;
+	}
+
+	lineH -= minY;
+	// TTF_SizeUNICODE underestimates line width as a 
+	// result of its micro positioning
+	if (calcLineWidth > lineW)
+		lineW = calcLineWidth;
+
+	textureW = RoundUpPow2(lineW + 1);
+	textureH = RoundUpPow2(lineH + 1);
+
+	intermediary = SDL_CreateRGBSurface(0, textureW, textureH, 32, 
+			rmask, gmask, bmask, amask);
+
+	if(!intermediary)
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: SDL_CreateRGBSurface() returned NULL in _GenTexLine()!" << endl;
+		return NULL;
+	}
+
+	SDL_Rect surfTarget;
+	int xpos = 0;
+	int ypos = -minY;
+	for (charPtr = line; *charPtr; ++charPtr)
+	{
+		FontGlyph * glyphinfo = (*fp->glyph_cache)[*charPtr];
+
+		initial = TTF_RenderGlyph_Blended(font, *charPtr, color);
+
+		if(!initial)
+		{
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: TTF_RenderGlyph_Blended() returned NULL in _GenTexLine()!" << endl;
+			return NULL;
+		}
+
+		surfTarget.x = xpos + glyphinfo->min_x;
+		surfTarget.y = ypos + glyphinfo->top_y;
+
+		if(SDL_BlitSurface(initial, NULL, intermediary, &surfTarget) < 0)
+		{
+			SDL_FreeSurface(initial);
+			SDL_FreeSurface(intermediary);
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: SDL_BlitSurface() failed in _GenTexLine()! (" << SDL_GetError() << ")" << endl;
+			return NULL;
+		}
+		SDL_FreeSurface(initial);
+		xpos += glyphinfo->advance;
+	}
+
+	if (_textShadow)
+	{
+		shadowPixels = new uint8[intermediary->w * intermediary->h * 4];
+		shadowColor  = _GetTextShadowColor(fp);
+	}
+
+	SDL_LockSurface(intermediary);
+	for(int j = 0; j < intermediary->w * intermediary->h ; ++ j)
+	{
+		if (_textShadow)
+		{
+			shadowPixels[j*4+3] = ((uint8*)intermediary->pixels)[j*4+2];
+			shadowPixels[j*4+0] = (uint8) (shadowColor[0] * 0xFF);
+			shadowPixels[j*4+1] = (uint8) (shadowColor[1] * 0xFF);
+			shadowPixels[j*4+2] = (uint8) (shadowColor[2] * 0xFF);
+		}
+		((uint8*)intermediary->pixels)[j*4+3] = ((uint8*)intermediary->pixels)[j*4+2];
+		((uint8*)intermediary->pixels)[j*4+0] = (uint8) (_currentTextColor[0] * 0xFF);
+		((uint8*)intermediary->pixels)[j*4+1] = (uint8) (_currentTextColor[1] * 0xFF);
+		((uint8*)intermediary->pixels)[j*4+2] = (uint8) (_currentTextColor[2] * 0xFF);
+	}
+
+	numTextures = _textShadow ? 2 : 1;
+
+	glGenTextures(numTextures, texid);
+
+	uint8 *texturePointers[2] =
+	{ 
+		(uint8 *)intermediary->pixels, 
+		shadowPixels 
+	};
+
+	for (int j = 0; j < numTextures; ++j)
+	{
+		_BindTexture(texid[j]);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);	
+
+		glTexImage2D(GL_TEXTURE_2D, 0, 4, textureW, textureH, 0, GL_RGBA, 
+			     GL_UNSIGNED_BYTE, texturePointers[j] );
+
+		GLenum err;
+		if((err = glGetError()) != 0)
+		{
+		        if(VIDEO_DEBUG)
+		   	     cerr << "VIDEO ERROR: _GenTexLine: glError found after glTexImage2D (" << gluErrorString(err) << ")" << endl;
+
+			SDL_FreeSurface(intermediary);
+
+			if (shadowPixels)
+				delete shadowPixels;
+
+		        return NULL;
+		}
+
+	}
+
+	SDL_UnlockSurface(intermediary);
+	SDL_FreeSurface(intermediary);
+
+	if (shadowPixels)
+		delete shadowPixels;
+
+	return new RenderedLine(texid, lineW, textureW, lineH, textureH, 0, minY);
+}
 
 //-----------------------------------------------------------------------------
-// _DrawTextHelper: since there are two DrawText functions (one for unicode and
-//                 one for non-unicode), this private function is used to
-//                 do all the work so that code doesn't have to be duplicated.
-//                 Either text or uText is valid string and the other is NULL.
+// _CacheGlyphs: renders unicode characters to the internal glyph cache
 //-----------------------------------------------------------------------------
 
-bool GameVideo::_DrawTextHelper
-( 
-	const uint16 *uText
+bool GameVideo::_CacheGlyphs
+(
+	const uint16 *uText,
+	FontProperties *fp 
 )
 {
+	if (!fp)
+		return false;
 
-	if(_font_map.empty())
-		return false;
-		
-	// empty string, do nothing
-	if(*uText == 0)
-		return true;
-		
-	SDL_Color color;
-	
-	if(_font_map.find(_current_font) == _font_map.end())
-		return false;
-	
-	FontProperties * fp = _font_map[_current_font];
+	static const SDL_Color color = { 0xFF, 0xFF, 0xFF, 0xFF };
+
 	TTF_Font * font = fp->ttf_font;
 	
-	color.r = 255;
-	color.g = 255;
-	color.b = 255;
-	
-	
-	glBlendFunc(GL_ONE, GL_ONE);
-	glEnable(GL_BLEND);
-
 	SDL_Surface *initial = NULL;
 	SDL_Surface *intermediary = NULL;
 	int32 w,h;
 	GLuint texture;
-
-	CoordSys &cs = _coord_sys;
 
 	// Figure out which glyphs are not already cached
 	std::vector<uint16> newglyphs;
@@ -172,7 +334,7 @@ bool GameVideo::_DrawTextHelper
 		if(!initial)
 		{
 			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: TTF_RenderUNICODE_Blended() returned NULL in _DrawTextHelper()!" << endl;
+				cerr << "VIDEO ERROR: TTF_RenderUNICODE_Blended() returned NULL in CacheGlyphs()!" << endl;
 			return false;
 		}
 
@@ -200,33 +362,40 @@ bool GameVideo::_DrawTextHelper
 
 		if(!intermediary)
 		{
+			SDL_FreeSurface(initial);
+			SDL_FreeSurface(intermediary);
 			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: SDL_CreateRGBSurface() returned NULL in _DrawTextHelper()!" << endl;
+				cerr << "VIDEO ERROR: SDL_CreateRGBSurface() returned NULL in CacheGlyphs()!" << endl;
 			return false;
 		}
 
 
 		if(SDL_BlitSurface(initial, 0, intermediary, 0) < 0)
 		{
+			SDL_FreeSurface(initial);
+			SDL_FreeSurface(intermediary);
 			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: SDL_BlitSurface() failed in _DrawTextHelper()!" << endl;
+				cerr << "VIDEO ERROR: SDL_BlitSurface() failed in CacheGlyphs()!" << endl;
 			return false;
 		}
-
 
 		glGenTextures(1, &texture);
 		if(glGetError())
 		{
+			SDL_FreeSurface(initial);
+			SDL_FreeSurface(intermediary);
 			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: glGetError() true after glGenTextures() in _DrawTextHelper!" << endl;
+				cerr << "VIDEO ERROR: glGetError() true after glGenTextures() in CacheGlyphs()!" << endl;
 			return false;
 		}
 		
 		_BindTexture(texture);
 		if(glGetError())
 		{
+			SDL_FreeSurface(initial);
+			SDL_FreeSurface(intermediary);
 			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: glGetError() true after glBindTexture() in _DrawTextHelper!" << endl;
+				cerr << "VIDEO ERROR: glGetError() true after glBindTexture() in CacheGlyphs()!" << endl;
 			return false;
 		}
 
@@ -250,8 +419,10 @@ bool GameVideo::_DrawTextHelper
 
 		if(glGetError())
 		{
+			SDL_FreeSurface(initial);
+			SDL_FreeSurface(intermediary);
 			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: glGetError() true after glTexImage2D() in _DrawTextHelper!" << endl;
+				cerr << "VIDEO ERROR: glGetError() true after glTexImage2D() in CacheGlyphs()!" << endl;
 			return false;
 		}
 
@@ -261,8 +432,10 @@ bool GameVideo::_DrawTextHelper
 
 		if(TTF_GlyphMetrics(font, newglyphs[glyphindex], &minx, &maxx, &miny, &maxy, &advance))
 		{
+			SDL_FreeSurface(initial);
+			SDL_FreeSurface(intermediary);
 			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: glGetError() true after glTexImage2D() in _DrawTextHelper!" << endl;
+				cerr << "VIDEO ERROR: glGetError() true after glTexImage2D() in CacheGlyphs()!" << endl;
 			return false;
 		}
 
@@ -270,6 +443,7 @@ bool GameVideo::_DrawTextHelper
 		glyph->texture = texture;
 		glyph->min_x = minx;
 		glyph->min_y = miny;
+		glyph->top_y = fp->ascent - maxy;
 		glyph->width = initial->w + 1;
 		glyph->height = initial->h + 1;
 		glyph->max_x = (float)(((double)initial->w + 1) / ((double)w));
@@ -280,10 +454,42 @@ bool GameVideo::_DrawTextHelper
 
 		SDL_FreeSurface(initial);
 		SDL_FreeSurface(intermediary);
-
-
 	}
+	return true;
+} // GameVideo::CacheGlyphs()
+
+//-----------------------------------------------------------------------------
+// _DrawTextHelper: since there are two DrawText functions (one for unicode and
+//                 one for non-unicode), this private function is used to
+//                 do all the work so that code doesn't have to be duplicated.
+//                 Either text or uText is valid string and the other is NULL.
+//-----------------------------------------------------------------------------
+
+bool GameVideo::_DrawTextHelper
+( 
+	const uint16 *uText
+)
+{
+
+	if(_font_map.empty())
+		return false;
+		
+	// empty string, do nothing
+	if(*uText == 0)
+		return true;
+		
+	if(_font_map.find(_current_font) == _font_map.end())
+		return false;
 	
+	FontProperties * fp = _font_map[_current_font];
+	
+	glBlendFunc(GL_ONE, GL_ONE);
+	glEnable(GL_BLEND);
+
+	CoordSys &cs = _coord_sys;
+
+	_CacheGlyphs(uText, fp);
+
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glEnable(GL_TEXTURE_2D);
@@ -514,6 +720,96 @@ bool GameVideo::DrawText(const ustring &txt)
 	return true;
 }
 
+//-----------------------------------------------------------------------------
+// RenderText: Renders the given unicode string.
+//-----------------------------------------------------------------------------
+RenderedString *GameVideo::RenderText(const ustring &txt)
+{
+	if(txt.empty())
+	{
+		// Previously, if an empty string was passed, it was considered an error
+		// However, it happens often enough in practice that now we just return true
+		// without doing anything.
+		
+		return NULL;
+	}
+
+	if(_font_map.find(_current_font) == _font_map.end())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "GameVideo::DrawText() failed because font passed was either not loaded or improperly loaded!\n" <<
+				"  *fontname: " << _current_font << endl;
+		return NULL;
+	}
+
+	FontProperties * fp = _font_map[_current_font];
+	TTF_Font * font = fp->ttf_font;
+	
+	if(!font)
+	{
+		return NULL;
+	}
+
+	uint16 newline('\n');
+	int32 lineSkip = fp->line_skip;
+	std::vector<uint16 *> lineArray;
+
+	_CacheGlyphs(txt.c_str(), fp);
+
+	const uint16 *charIter;
+	// Set lineStart value to one additional to total height of line
+	// a reasonable maximum value.
+	uint16 *reformattedText = new uint16[txt.size() + 1];
+	uint16 *reformIter = reformattedText;
+	uint16 *lastLine = reformattedText;
+	for (charIter = txt.c_str(); *charIter; ++charIter)
+	{
+		if (*charIter == newline)
+		{
+			*reformIter++ = '\0';
+			lineArray.push_back(lastLine);
+			lastLine = reformIter;
+		}
+		else
+		{
+			*reformIter++ = *charIter;
+		}
+	}
+	lineArray.push_back(lastLine);
+	*reformIter = '\0';
+
+	std::vector<uint16 *>::iterator lineIter;
+
+
+	Color oldColor = _currentTextColor;
+	int32 shadowOffsetX = 0;
+	int32 shadowOffsetY = 0;
+	// if text shadows are enabled, draw the shadow
+	if(_textShadow && fp->shadow_style != VIDEO_TEXT_SHADOW_NONE)
+	{
+		shadowOffsetX = static_cast<int32>(_coord_sys.GetHorizontalDirection()) * fp->shadow_x;
+		shadowOffsetY = static_cast<int32>(_coord_sys.GetVerticalDirection()) * fp->shadow_y;
+	}
+
+	RenderedString *rendStr = new RenderedString(lineSkip, shadowOffsetX, shadowOffsetY);
+
+	for (lineIter = lineArray.begin(); lineIter != lineArray.end(); ++lineIter)
+	{
+		RenderedLine *line = NULL;
+		if ((line = _GenTexLine(*lineIter, fp)) == NULL)
+		{
+			if(VIDEO_DEBUG)
+				cerr << "Failed to generate line texture for " << MakeStandardString(ustring(*lineIter)) << "." << endl;
+			delete rendStr;
+			return NULL;
+		}
+		rendStr->Add(line);
+	}
+	delete[] reformattedText;
+		
+	return rendStr;
+}
+
 
 //-----------------------------------------------------------------------------
 // CalculateTextWidth: return the width of the given text using the given font
@@ -639,6 +935,194 @@ bool GameVideo::SetFontShadowStyle(const std::string &fontName, TEXT_SHADOW_STYL
 	return true;
 }
 
+//-----------------------------------------------------------------------------
+// _GetTextShadowColor: gets the current text shadow color
+//-----------------------------------------------------------------------------
+Color GameVideo::_GetTextShadowColor(FontProperties *fp)
+{
+	Color shadowColor;
+	if(_textShadow && fp->shadow_style != VIDEO_TEXT_SHADOW_NONE)
+	{
+		switch(fp->shadow_style)
+		{
+			case VIDEO_TEXT_SHADOW_DARK:
+				shadowColor = Color::black;
+				shadowColor[3] = _currentTextColor[3] * 0.5f;
+				break;
+			case VIDEO_TEXT_SHADOW_LIGHT:
+				shadowColor = Color::white;
+				shadowColor[3] = _currentTextColor[3] * 0.5f;
+				break;
+			case VIDEO_TEXT_SHADOW_BLACK:
+				shadowColor = Color::black;
+				shadowColor[3] = _currentTextColor[3];
+				break;
+			case VIDEO_TEXT_SHADOW_COLOR:
+				shadowColor = _currentTextColor;
+				shadowColor[3] = _currentTextColor[3] * 0.5f;
+				break;
+			case VIDEO_TEXT_SHADOW_INVCOLOR:
+				shadowColor = Color(1.0f - _currentTextColor[0], 1.0f - _currentTextColor[1], 1.0f - _currentTextColor[2], _currentTextColor[3] * 0.5f);
+				break;
+			default:
+			{
+				if(VIDEO_DEBUG)
+					cerr << "VIDEO ERROR: Unknown text shadow style (" << fp->shadow_style << ") -  GameVideo::_GetTextShadowColor()" << endl;
+				break;
+			}
+		}
+	}
+	return shadowColor;
+}
 
+//-----------------------------------------------------------------------------
+// ~RenderedLine: deletes the line
+//-----------------------------------------------------------------------------
+
+RenderedLine::~RenderedLine()
+{
+}
+
+//-----------------------------------------------------------------------------
+// RenderedLine: constructs a new rendered line
+//-----------------------------------------------------------------------------
+
+RenderedLine::RenderedLine(GLuint *tex, int32 lineWidth, int32 texWidth, int32 lineHeight, int32 texHeight, int32 xOffset, int32 yOffset)
+	: height(lineHeight), width(lineWidth),
+	  x_offset(xOffset),  y_offset(yOffset)
+{
+	u = ((float)lineWidth  + 1.0f) / (float)texWidth;
+	v = ((float)lineHeight + 1.0f) / (float)texHeight;
+	if (tex)
+		memcpy(texture, tex, sizeof(GLuint) * NUM_TEXTURES);
+	else
+		memset(texture, 0,   sizeof(GLuint) * NUM_TEXTURES);
+}
+
+//-----------------------------------------------------------------------------
+// RenderedString::Draw: draws a rendered string
+//-----------------------------------------------------------------------------
+bool RenderedString::Draw() const
+{
+	return GameVideo::SingletonCreate()->Draw(*this);
+}
+
+
+//-----------------------------------------------------------------------------
+// RenderedLine::Draw: draws a rendered lineline
+//-----------------------------------------------------------------------------
+bool GameVideo::Draw(const RenderedLine &line, int32 texIndex)
+{
+	if (texIndex >= RenderedLine::NUM_TEXTURES
+	||  texIndex < 0)
+		return false;
+
+	// Empty strings are 0 texture ids
+	if (!line.texture[texIndex])
+		return false;
+
+	if (!_BindTexture(line.texture[texIndex]))
+	{
+		if ( VIDEO_DEBUG )
+		{
+			cerr << "Failed to bind texture for line draw." << endl;
+		}
+		return false;
+	}
+
+	float halfW = line.width  * 0.5f;
+	float halfH = line.height * 0.5f;
+
+	glBegin(GL_QUADS);
+
+	glTexCoord2f(0.0f, line.v); 
+	glVertex2f(- halfW, - halfH);
+
+	glTexCoord2f(line.u, line.v); 
+	glVertex2f(+ halfW, - halfH);
+
+	glTexCoord2f(line.u, 0.0f); 
+	glVertex2f(+ halfW, + halfH);
+
+	glTexCoord2f(0.0f, 0.0f); 
+	glVertex2f(- halfW, + halfH);
+
+	glEnd();
+
+	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// RenderedString::Add: adds a line to a rendered string
+//-----------------------------------------------------------------------------
+bool RenderedString::Add(RenderedLine *str)
+{
+	lines.push_back(str);
+	if (str->width > _width)
+		_width = str->width;
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+// RenderedString: constructs a new empty rendered string
+//-----------------------------------------------------------------------------
+RenderedString::RenderedString(int32 line_skip, int32 shadowX, int32 shadowY)
+	: _width(0), _line_skip(line_skip),
+	  _shadow_xoff(shadowX), _shadow_yoff(shadowY)
+	{}
+
+//-----------------------------------------------------------------------------
+// ~RenderedString: deletes all contained lines
+//-----------------------------------------------------------------------------
+RenderedString::~RenderedString()
+{
+	GameVideo *video = GameVideo::SingletonCreate();
+	std::vector<RenderedLine *>::iterator line;
+	for (line = lines.begin(); line != lines.end(); ++line)
+	{
+		video->_DeleteTexture((*line)->texture[RenderedLine::MAIN_TEXTURE]);
+		video->_DeleteTexture((*line)->texture[RenderedLine::SHADOW_TEXTURE]);
+		delete *line;
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Draw: draws a rendered string
+//-----------------------------------------------------------------------------
+bool GameVideo::Draw(const RenderedString &string)
+{
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glEnable(GL_TEXTURE_2D);
+	glDisable(GL_FOG);
+
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0.1f);
+
+	float xoff = ((_xalign) * string.GetWidth()) * .5f * -_coord_sys.GetHorizontalDirection();
+
+	std::vector<RenderedLine*>::const_iterator it;
+
+	glPushMatrix();
+	MoveRelative(xoff, 0.0f);
+	for (it = string.lines.begin(); it != string.lines.end(); ++it)
+	{
+		const RenderedLine &line = *(*it);
+		if (line.texture[RenderedLine::SHADOW_TEXTURE])
+		{
+			glPushMatrix();
+			MoveRelative(string.GetShadowX(), string.GetShadowY());
+			Draw(line, RenderedLine::SHADOW_TEXTURE);
+			glPopMatrix();
+		}
+		Draw(line, RenderedLine::MAIN_TEXTURE);
+		MoveRelative(0.0f, -_coord_sys.GetVerticalDirection() * string.GetLineSkip());
+	}
+	glPopMatrix();
+	return true;
+}
 
 }  // namespace hoa_video
+

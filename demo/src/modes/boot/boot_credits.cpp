@@ -109,7 +109,8 @@ _credits_text(
 			  "Adam Lindquist (Zorbfish) ~ Scripting engine\n\n"
 			  "(Melchior)\n\n"
 			  "(Egan1)"
-			  )
+			  ),
+_credits_rendered(NULL)
 {
 	// Init the background window
 	_window.Create(1024.0f, 600.0f);
@@ -137,7 +138,8 @@ void CreditsScreen::Draw()
 	VideoManager->Move(512.0f, 450 + _text_offset_y);
 	VideoManager->SetScissorRect(_window.GetScissorRect());
 	VideoManager->EnableScissoring(true);
-	VideoManager->DrawText(MakeUnicodeString(_credits_text));
+	if (_credits_rendered)
+		_credits_rendered->Draw();
 	VideoManager->EnableScissoring(false);
 }
 
@@ -162,6 +164,15 @@ void CreditsScreen::Show()
 	_visible = true;
 	_text_offset_y = 0.0f; // Reset the text offset
 	VideoManager->SetFont("default"); // Reset font
+        if (!_credits_rendered)
+	{
+		_credits_rendered = VideoManager->RenderText(MakeUnicodeString(_credits_text));
+		if (!_credits_rendered)
+		{
+			cerr << "Failed to render credits string.\n" << endl;
+			exit(1);
+		}
+	}
 }
 
 
@@ -171,6 +182,11 @@ void CreditsScreen::Hide()
 	_window.Hide();
 	_visible = false;
 	VideoManager->SetTextColor(Color::white); // Reset text color
+	if (_credits_rendered)
+	{
+		delete _credits_rendered;
+		_credits_rendered = NULL;
+	}
 }
 
 

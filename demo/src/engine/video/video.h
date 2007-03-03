@@ -189,6 +189,7 @@ class GameVideo {
 	friend class private_video::VariableTexMemMgr;
 	friend class private_video::TexSheet;
 	friend class private_video::ParticleSystem;
+	friend class RenderedString;
 
 public:
 	SINGLETON_METHODS(GameVideo);
@@ -1028,6 +1029,22 @@ public:
 	*/
 	StillImage *GetDefaultCursor();
 
+	/** \brief Draws a rendered string object
+	 * \param string The rendered string
+	 */
+	bool Draw(const RenderedString &string);
+
+	/** \brief Draws a rendered line object
+	 * \param line The rendered line
+	 * \param texIndex Whether main or shadow texture
+	 */
+	bool Draw(const RenderedLine &line, int32 texIndex);
+
+	/** \brief Renders the given string to a drawable object
+	 * \param txt The string to render
+	 */
+	RenderedString *RenderText(const hoa_utils::ustring &txt);
+
 private:
 	SINGLETON_DECLARE(GameVideo);
 
@@ -1336,6 +1353,29 @@ private:
 	 * \return success/failure
 	 */
 	bool _DrawTextHelper(const uint16 *const uText);
+
+	/** \brief caches glyph info and textures for rendering
+	 *
+	 *  \param uText  Pointer to a unicode string holding the glyphs to cache
+	 *  \param fp     Pointer to the internal FontProperties class representing the font
+	 * \return success/failure
+	 */
+	bool _CacheGlyphs(const uint16 *uText, FontProperties *fp);
+
+	/** \brief generates a texture for a given line
+	 *
+	 *  \param uText  Pointer to a unicode string holding the text to render
+	 *  \param fp     Pointer to the internal FontProperties class representing the font
+	 * \return the line or NULL on failure
+	 */
+	RenderedLine *_GenTexLine(uint16 *line, FontProperties *fp);
+
+	/** \brief retrieves the shadow color based on the current color and shadow style
+	 *
+	 *  \param fp     Pointer to the internal FontProperties class representing the font
+	 * \return the shadow color
+	 */
+	Color _GetTextShadowColor(FontProperties *fp);
 
 	/** \brief inserts an image into a texture sheet
 	 *
