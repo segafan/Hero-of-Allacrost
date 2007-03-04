@@ -63,7 +63,7 @@ BattleCharacterActor::BattleCharacterActor(GlobalCharacter * character, float XL
 	_time_portrait_selected.SetDimensions(45,45);
 	_time_portrait_selected.SetFilename("img/menus/stamina_icon.png");
 	VideoManager->LoadImage(_time_portrait_selected);
-	
+
 	//_time_portrait_location = 128;
 	//FIX ME Use char stats to determine wait time
 	//FIX ME #2 Do not initialize here.  Have BattleMode loop through all actors
@@ -144,7 +144,7 @@ void BattleCharacterActor::Update() {
 // Draws the character's current sprite animation frame
 void BattleCharacterActor::DrawSprite() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-	
+
 	if (GetActor()->IsAlive()) {
 		// Draw the actor selector image if this character is currently selected
 		if (this == current_battle->_selected_character && current_battle->_cursor_state != CURSOR_IDLE) {
@@ -154,7 +154,7 @@ void BattleCharacterActor::DrawSprite() {
 		// Draw the character sprite
 		VideoManager->Move(_x_location, _y_location);
 		GetActor()->RetrieveBattleAnimation("idle")->Draw();
-		
+
 
 		// TEMP: determine if character sprite needs red damage numbers drawn next to it
 		if (_total_time_damaged > 0) {
@@ -169,7 +169,7 @@ void BattleCharacterActor::DrawSprite() {
 				_total_time_damaged = 0;
 			}
 				//current_battle->SetPerformingScript (false);
-			//}	
+			//}
 		}
 	}
 	else {
@@ -232,7 +232,7 @@ void BattleCharacterActor::DrawTimePortrait(bool is_selected) {
 void BattleCharacterActor::DrawStatus() {
 	// Used to determine where to draw the character's status
 	float y_offset = 0.0f;
-	
+
 	// Determine what vertical order the character is in and set the y_offset accordingly
 	if (current_battle->_character_actors[0] == this) {
 		y_offset = 0.0f;
@@ -280,18 +280,6 @@ void BattleCharacterActor::DrawStatus() {
 		VideoManager->Move(412, 90 + y_offset);
 	}
 
-	VideoManager->SetDrawFlags(VIDEO_BLEND_ADD, 0);
-	VideoManager->DrawImage(_status_bar_cover_image);
-
-	// ST, yellow bar
-	VideoManager->SetDrawFlags(VIDEO_NO_BLEND, 0);
-//	bar_size = static_cast<float>(84*GetActor()->GetSkillPoints())/static_cast<float>(GetActor()->GetMaxSkillPoints());
-	VideoManager->Move(512, 90 + y_offset);
-	VideoManager->DrawRectangle(83,6,Color(0.643f,0.624f,0.0f,1.0f));	// Draw color bar (if needed)
-	VideoManager->Move(512, 90 + y_offset);
-	VideoManager->DrawRectangle(83.0f-bar_size,6,Color::black);	// Draw black bar (if needed)
-
-	VideoManager->Move(512, 90 + y_offset);
 	VideoManager->SetDrawFlags(VIDEO_BLEND_ADD, 0);
 	VideoManager->DrawImage(_status_bar_cover_image);
 
@@ -419,7 +407,7 @@ void BattleEnemyActor::Update() {
 		else
 			_time_portrait_location += SystemManager->GetUpdateTime() * (405.f / _wait_time.GetDuration());//.081f;
 	}
-	
+
 	/*static uint32 next_attack = 0;
 	static uint32 last_attack = 0;
 
@@ -464,7 +452,7 @@ void BattleEnemyActor::Update() {
 // Draws the damage-blended enemy sprite
 void BattleEnemyActor::DrawSprite() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-	
+
 	// Draw the sprite's final damage frame in grayscale and return
 	if (!IsAlive()) {
 		VideoManager->Move(_x_location, _y_location);
@@ -527,11 +515,11 @@ void BattleEnemyActor::DrawSprite() {
 		VideoManager->Move(GetXLocation() + 25.0f, GetYLocation() + ( _total_time_damaged / 35.0f ) + 80.0f);
 		VideoManager->DrawText(NumberToString(_damage_dealt));
 		VideoManager->SetFont( "battle" );
-		
+
 		if (_total_time_damaged > 3000) {
 			_total_time_damaged = 0;
 			//current_battle->SetPerformingScript(false);
-		}	
+		}
 	}
 }
 

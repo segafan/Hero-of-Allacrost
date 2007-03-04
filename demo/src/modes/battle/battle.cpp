@@ -80,7 +80,7 @@ void ScriptEvent::Update()
 	//_warm_up_time -= SystemManager->GetUpdateTime();
 	//FIX ME use char stats
 	float offset = SystemManager->GetUpdateTime() * (107.f / _warm_up_time.GetDuration());
-	_source->SetTimePortraitLocation(_source->GetTimePortraitLocation() + offset); 
+	_source->SetTimePortraitLocation(_source->GetTimePortraitLocation() + offset);
 	//TODO Any warm up animations
 }
 
@@ -733,7 +733,7 @@ void BattleMode::_UpdateAttackPointSelection() {
 	if (InputManager->ConfirmPress()) {
 		_selected_actor_arguments.push_back(GetEnemyActorAt(_argument_actor_index));
 		if (_selected_actor_arguments.size() == _necessary_selections) {
-			
+
 			//AddScriptEventToQueue(ScriptEvent(_selected_character, _selected_actor_arguments, "sword_swipe", 2000));
 			AddScriptEventToQueue(new ScriptEvent(GetPlayerCharacterAt(_actor_index), _selected_actor_arguments, "sword_swipe", 1000));
 			_selected_character->SetQueuedToPerform(true);
@@ -838,19 +838,18 @@ void BattleMode::_DrawSprites() {
 
 
 void BattleMode::_DrawTimeMeter() {
-
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM);
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 	VideoManager->Move(1010, 128);
 	VideoManager->DrawImage(_universal_time_meter);
 	// Draw all character portraits
-	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 	//BattleEnemyActor * e = GetEnemyActorAt(_argument_actor_index);
 
 	//FIX ME Below is the logic that should be used...requires change to UpdateTargetSelection code
 	for (uint32 i = 0; i < _character_actors.size(); i++)
 	{
 		bool selected = false;
-		
+
 		if (CURSOR_SELECT_TARGET || CURSOR_SELECT_ATTACK_POINT)
 		{
 			for (uint8 j = 0; j < _selected_actor_arguments.size(); j++)
@@ -947,10 +946,10 @@ void BattleMode::_DrawActionTypeWindow() {
 	_action_type_window.Draw();
 
 	VideoManager->Move(30.0f, 525.0f);
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 	VideoManager->DrawImage(_action_type_icons[_action_type_menu_cursor_location]);
 	VideoManager->MoveRelative(55.0f, -20.0f);
-	VideoManager->SetDrawFlags(VIDEO_Y_CENTER);
+	VideoManager->SetDrawFlags(VIDEO_Y_CENTER, 0);
 
 	switch (_action_type_menu_cursor_location)
 	{
