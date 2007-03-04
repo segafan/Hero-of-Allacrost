@@ -189,6 +189,7 @@ class GameVideo {
 	friend class private_video::VariableTexMemMgr;
 	friend class private_video::TexSheet;
 	friend class private_video::ParticleSystem;
+	friend class StillImage;
 	friend class RenderedString;
 
 public:
@@ -1390,21 +1391,21 @@ private:
 	 *  \param id  image descriptor to load. Can specify filename, color, width, height, and static as its parameters
 	 * \return success/failure
 	 */
-	bool _LoadImage(StillImage &id, bool grayscale = false);
+	bool _LoadImage(StillImage &id);
 
 	/** \brief loads an animated image. Assumes that you have called AddFrame for all the frames.
 	 *
 	 *  \param id  image descriptor to load
 	 * \return success/failure
 	 */
-	bool _LoadImage(AnimatedImage &id, bool grayscale = false);
+	bool _LoadImage(AnimatedImage &id);
 
 	/** \brief does the actual work of loading an image
 	 *
 	 *  \param id  StillImage of the image to load. May specify a filename, color, width, height, and static
 	 * \return success/failure
 	 */
-	bool _LoadImageHelper(StillImage &id, bool grayscale = false);
+	bool _LoadImageHelper(StillImage &id);
 
 
 	/**
@@ -1478,6 +1479,13 @@ private:
 	 * \param dst ImageLoadInfo struct where the RGB buffer will be stored
 	 */
 	void _RGBAToRGB (const private_video::ImageLoadInfo& src, private_video::ImageLoadInfo &dst) const;
+
+
+	//! \brief Pass a texture (video memory) to a system memory buffer
+	void _GetBufferFromTexture (hoa_video::private_video::ImageLoadInfo& buffer, hoa_video::private_video::TexSheet* texture) const;
+
+	//! \brief Pass an image (video memory) to a system memory buffer
+	void _GetBufferFromImage (hoa_video::private_video::ImageLoadInfo& buffer, hoa_video::private_video::Image* img) const;
 
 	/** \brief removes a texture sheet from our vector of sheets and deletes it
 	 *

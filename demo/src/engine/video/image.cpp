@@ -27,8 +27,9 @@ namespace private_video {
 // ********************************** Image ************************************
 // *****************************************************************************
 
-Image::Image(const std::string &fname, int32 w, int32 h, bool grayscale_) :
+Image::Image(const std::string &fname, const std::string &tags_, int32 w, int32 h, bool grayscale_) :
 	filename(fname),
+	tags(tags_),
 	width(w),
 	height(h),
 	grayscale(grayscale_)
@@ -45,10 +46,11 @@ Image::Image(const std::string &fname, int32 w, int32 h, bool grayscale_) :
 
 
 
-Image::Image(TexSheet *sheet, const std::string &fname, int32 x_, int32 y_, float u1_, float v1_,
+Image::Image(TexSheet *sheet, const std::string &tags_, const std::string &fname, int32 x_, int32 y_, float u1_, float v1_,
 	float u2_, float v2_, int32 w, int32 h, bool grayscale_) :
 	texture_sheet(sheet),
 	filename(fname),
+	tags(tags_),
 	x(x_),
 	y(y_),
 	u1(u1_),
@@ -191,15 +193,104 @@ void StillImage::Clear() {
 
 
 void StillImage::EnableGrayScale() {
+	// If the image is already in grayscale mode, go back
+	if (_grayscale)
+		return;
+	
+	// Mark as grayscale
 	this->_grayscale = true;
-	this->Load();
+
+	// If the image is not yet loaded, go back (it will be made grayscale when loading)
+	if (_elements.size() == 0)
+		return;
+
+	hoa_video::GameVideo* video = GameVideo::SingletonGetReference();
+
+	// Turn gray all the ImageElement components
+	for (uint32 i=0; i<_elements.size(); i++)
+	{
+		Image *img = _elements[i].image;	// Color image
+
+		if (img == NULL)
+		{
+			cerr << "VIDEO ERROR: Attemp to turn to grayscale mode a NULL Image" << endl;
+			continue;
+		}
+
+		// Check first if there is a grayscale version already in the map
+		if (video->_images.find(img->filename + img->tags + "<G>") != video->_images.end())
+		{
+			_elements[i].image = video->_images[img->filename + img->tags + "<G>"];
+			++(_elements[i].image->ref_count);
+			continue;
+		}
+
+		// If we arrive here, it means we have to convert to grayscale the image
+		hoa_video::private_video::ImageLoadInfo buffer;
+		video->_GetBufferFromImage (buffer, img);
+
+		video->_ConvertImageToGrayscale (buffer, buffer);
+		
+		Image* new_image_gray = new Image(img->filename, img->tags+"<G>", buffer.width, buffer.height, true);
+
+		TexSheet *sheet = video->_InsertImageInTexSheet(new_image_gray, buffer, _is_static);
+
+		if(!sheet)
+		{
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO_DEBUG: GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
+
+			delete new_image_gray;
+
+			if (buffer.pixels)
+				delete (buffer.pixels);
+
+			return;
+		}
+
+		new_image_gray->ref_count = 1;
+		video->_images[new_image_gray->filename + new_image_gray->tags] = new_image_gray;
+		_elements[i].image = new_image_gray;
+	}
 }
 
 
 
 void StillImage::DisableGrayScale() {
+	// If the image is already in color mode, go back
+	if (!_grayscale)
+		return;
+	
+	// Mark as not grayscale
 	this->_grayscale = false;
-	this->Load();
+
+	// If the image is not yet loaded, go back
+	if (_elements.size() == 0)
+		return;
+
+	hoa_video::GameVideo* video = GameVideo::SingletonGetReference();
+
+	// Turn to color all the ImageElement components
+	for (uint32 i=0; i<_elements.size(); i++)
+	{
+		Image *img = _elements[i].image;	// Color image
+
+		if (img == NULL)
+		{
+			cerr << "VIDEO ERROR: Attemp to turn to color mode a NULL Image" << endl;
+			continue;
+		}
+
+		// Check for the color mode version of the image, already in the map
+		if (video->_images.find(img->filename + img->tags.substr(0,img->tags.length()-3)) == video->_images.end())
+		{
+			cerr << "VIDEO ERROR: Color image not found in the map, while gray one was in it" << endl;
+			continue;
+		}
+
+		_elements[i].image = video->_images[img->filename + img->tags.substr(0,img->tags.length()-3)];
+		--(img->ref_count);
+	}
 }
 
 //------------------------------------------------------------------------------

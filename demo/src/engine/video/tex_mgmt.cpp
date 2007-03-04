@@ -15,6 +15,8 @@
 #include <math.h>
 #include "gui.h"
 
+#include <fstream>
+
 using namespace std;
 using namespace hoa_video::private_video;
 using namespace hoa_video;
@@ -107,24 +109,28 @@ bool GameVideo::LoadImage(ImageDescriptor &id)
 {
 	if(id._animated)
 	{
+		return _LoadImage(dynamic_cast<AnimatedImage &>(id));
+
 		if (id.IsGrayScale())
-			return _LoadImage(dynamic_cast<AnimatedImage &>(id), true);
-		else
-			return _LoadImage(dynamic_cast<AnimatedImage &>(id));
+		{
+			dynamic_cast<AnimatedImage &>(id).EnableGrayScale();
+		}
 	}
 	else
 	{
+		return _LoadImage(dynamic_cast<StillImage &>(id));
+
 		if (id.IsGrayScale())
-			return _LoadImage(dynamic_cast<StillImage &>(id), true);
-		else
-			return _LoadImage(dynamic_cast<StillImage &>(id));
+		{
+			dynamic_cast<StillImage &>(id).EnableGrayScale();
+		}
 	}
 }
 
 //-----------------------------------------------------------------------------
 // _LoadImage: helper function to load an animated image
 //-----------------------------------------------------------------------------
-bool GameVideo::_LoadImage(AnimatedImage &id, bool grayscale)
+bool GameVideo::_LoadImage(AnimatedImage &id)
 {
 	uint32 numFrames = static_cast<uint32>(id._frames.size());
 
@@ -141,7 +147,7 @@ bool GameVideo::_LoadImage(AnimatedImage &id, bool grayscale)
 
 		if(needToLoad)
 		{
-			success &= _LoadImage(id._frames[frame]._image, grayscale);
+			success &= _LoadImage(id._frames[frame]._image);
 		}
 	}
 
@@ -156,12 +162,14 @@ bool GameVideo::_LoadImage(AnimatedImage &id, bool grayscale)
 //             to remain in memory for the entire game, so place it in a
 //             special texture sheet reserved for things that don't change often.
 //-----------------------------------------------------------------------------
-bool GameVideo::_LoadImage(StillImage &id, bool grayscale)
+bool GameVideo::_LoadImage(StillImage &id)
 {
+	// Delete everything previously stored in here
+	id._elements.clear();
+
 	// 1. special case: if filename is empty, load a colored quad
 	if(id._filename.empty())
 	{
-		id._elements.clear();
 		ImageElement quad(NULL, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, id._width, id._height, id._color);
 		id._elements.push_back(quad);
 		return true;
@@ -169,12 +177,9 @@ bool GameVideo::_LoadImage(StillImage &id, bool grayscale)
 
 	// 2. check if an image with the same filename has already been loaded
 	//    If so, point to that
-	if(_images.find(id._filename + (grayscale ? string("_grayscale") : string(""))) != _images.end())
+	if(_images.find(id._filename) != _images.end())
 	{
-		id._elements.clear();
-
-		// Get the image
-		Image *img = _images[id._filename + (grayscale ? string("_grayscale") : string(""))];
+		Image *img = _images[id._filename];		// Get the image from the map
 
 		if(!img)
 		{
@@ -191,18 +196,8 @@ bool GameVideo::_LoadImage(StillImage &id, bool grayscale)
 				return false;
 		}
 
-		++(img->ref_count);
+		++(img->ref_count);		// Increment the reference counter of the Image
 	
-		// If the image is grayscale, increment also the counter for the color image
-		if (grayscale)
-		{
-			map<string, Image*>::iterator it = _images.find(id._filename);
-			if (it != _images.end())
-			{
-				++(it->second->ref_count);
-			}
-		}
-
 		if(id._width == 0.0f)
 			id._width = (float) img->width;
 		if(id._height == 0.0f)
@@ -215,7 +210,7 @@ bool GameVideo::_LoadImage(StillImage &id, bool grayscale)
 	}
 
 	// 3. Load the image right away
-	bool success = _LoadImageHelper(id, grayscale);
+	bool success = _LoadImageHelper(id);
 
 	if(!success)
 	{
@@ -237,8 +232,7 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 		return false;
 	}
 
-	std::string image_name;
-	std::string image_name_color;
+	std::string tags;
 	std::string s;
 	uint32 current_image;
 	uint32 x, y;
@@ -250,22 +244,25 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 	{
 		for (y=0; y<cols && !need_load; y++)
 		{
-			image_name = filename;
+			tags = "";
 			IntegerToString(s,x);
-			image_name += "_X" + s;
+			tags += "<X" + s + "_";
+			IntegerToString(s,rows);
+			tags += s + ">";
 			IntegerToString(s,y);
-			image_name += "_Y" + s;
-			image_name += (images[x*cols+y]._grayscale ? string("_grayscale") : string(""));
+			tags += "<Y" + s + "_";
+			IntegerToString(s,cols);
+			tags += s + ">";
 
 			// If this image doesn't exist, don't do anything else
-			if(_images.find(image_name) == _images.end())
+			if(_images.find(filename+tags) == _images.end())
 			{
 				need_load = true;
 			}
 		}
 	}
 
-	// If not all the images are loaded, then load the image
+	// If not all the images are loaded, then load the big image from disk
 	private_video::ImageLoadInfo loadInfo;
 	if (need_load)
 	{
@@ -273,33 +270,35 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 			return false;
 	}
 
+	// One by one, get the subimages
 	for (x=0; x<rows; x++)
 	{
 		for (y=0; y<cols; y++)
 		{
-			current_image = x*cols + y;
-			image_name = filename;
 			IntegerToString(s,x);
-			image_name += "_X" + s;
+			tags = "<X" + s + "_";
+			IntegerToString(s,rows);
+			tags += s + ">";
 			IntegerToString(s,y);
-			image_name += "_Y" + s;
-			bool grayscale = images[x*cols+y]._grayscale;
-			image_name_color = image_name;
-			image_name += (grayscale ? string("_grayscale") : string(""));
+			tags += "<Y" + s + "_";
+			IntegerToString(s,cols);
+			tags += s + ">";
+
+			current_image = x*cols + y;
 
 			// If the image exists, take the information from it
-			if(_images.find(image_name) != _images.end())
+			if(_images.find(filename+tags) != _images.end())
 			{
 				images.at(current_image)._elements.clear();
 
-				Image *img = _images[image_name];
+				Image *img = _images[filename+tags];
 
 				if(!img)
 				{
 					if(VIDEO_DEBUG)
 						cerr << "VIDEO ERROR: got a NULL Image from images map in LoadImage()" << endl;
 
-					free(loadInfo.pixels);
+					delete[] loadInfo.pixels;
 					return false;
 				}
 
@@ -310,38 +309,17 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 					if(!img->texture_sheet->RestoreImage(img))
 					{
 						if (loadInfo.pixels)
-							free(loadInfo.pixels);
+							delete[] loadInfo.pixels;
 						return false;
 					}
 				}
 
 				++(img->ref_count);
 
-				// If the image is in grayscale mode, also increment the counter for the color one
-				if (grayscale)
-				{
-					Image *img = _images[image_name_color];
-
-					// If the image doesn't exist, we had a problem with the ref-counter system
-					if (!img)
-					{
-						cerr << "VIDEO ERROR: grayscale image exists but not color one" << endl;
-
-						if (loadInfo.pixels)
-							free(loadInfo.pixels);
-						return false;
-					}
-
-					++(img->ref_count);
-				}
-
 				if (images.at(current_image)._height == 0.0f)
 					images.at(current_image)._height = (float)((x == rows-1 && loadInfo.height%rows) ? loadInfo.height-(x*loadInfo.height/rows) : loadInfo.height/rows);
 				if (images.at(current_image)._width == 0.0f)
 					images.at(current_image)._width = (float)((y == cols-1 && loadInfo.width%cols) ? loadInfo.width-(y*loadInfo.width/cols) : loadInfo.width/cols);
-				
-	//			images.at(current_image)._width = (float) img->width;
-	//			images.at(current_image)._height = (float) img->height;
 
 				ImageElement element(img, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f,
 					images.at(current_image)._width, images.at(current_image)._height, images.at(current_image)._color);
@@ -349,7 +327,7 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 			}
 			else	// If the image is not present, take the piece from the loaded image
 			{
-				images.at(current_image)._filename = image_name;
+				images.at(current_image)._filename = filename;
 				images.at(current_image)._animated = false;
 
 				if (images.at(current_image)._height == 0.0f)
@@ -366,10 +344,8 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 					memcpy ((uint8*)info.pixels+4*info.width*i, (uint8*)loadInfo.pixels+(((x*loadInfo.height/rows)+i)*loadInfo.width+y*loadInfo.width/cols)*4, 4*info.width);
 				}
 
-				// First, place a color copy of the image
-
-				//create an Image structure and store it our std::map of images
-				Image *newImage = new Image(image_name_color, info.width, info.height, false);
+				// Create an Image structure and store it our std::map of images
+				Image *newImage = new Image(filename, tags, info.width, info.height, false);
 
 				// try to insert the image in a texture sheet
 				TexSheet *sheet = _InsertImageInTexSheet(newImage, info, images.at(current_image)._is_static);
@@ -383,60 +359,36 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 					cerr << "VIDEO_DEBUG: GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
 
 					if (loadInfo.pixels)
-						free(loadInfo.pixels);
+						delete[] loadInfo.pixels;
 					return false;
 				}
 
 				newImage->ref_count = 1;
 
 				// store the image in our std::map
-				_images[image_name_color] = newImage;
+				_images[filename + tags] = newImage;
 
-				// If grayscale, make a grayscale version of the image
-				if (grayscale)
-				{
-					// Obtain a grayscale buffer
-					_ConvertImageToGrayscale (info, info);
+				if (images.at(current_image)._height == 0.0f)
+					images.at(current_image)._height = (float)((x == rows-1 && loadInfo.height%rows) ? loadInfo.height-(x*loadInfo.height/rows) : loadInfo.height/rows);
+				if (images.at(current_image)._width == 0.0f)
+					images.at(current_image)._width = (float)((y == cols-1 && loadInfo.width%cols) ? loadInfo.width-(y*loadInfo.width/cols) : loadInfo.width/cols);
 
-					//create an Image structure and store it our std::map of images
-					Image *new_image_gray = new Image(image_name, info.width, info.height, true);
+				// store the new image element
+				ImageElement element(newImage, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f, images.at(current_image)._width, images.at(current_image)._height, images.at(current_image)._color);
+				images.at(current_image)._elements.push_back(element);
+			}
 
-					// try to insert the image in a texture sheet
-					TexSheet *sheet_gray = _InsertImageInTexSheet(new_image_gray, info, images.at(current_image)._is_static);
-
-					if(!sheet_gray)
-					{
-						if(VIDEO_DEBUG)
-						cerr << "VIDEO_DEBUG: GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
-
-						free(loadInfo.pixels);
-						return false;
-					}
-
-					new_image_gray->ref_count = 1;
-
-					// store the image in our std::map
-					_images[image_name] = new_image_gray;
-
-					// store the new image element
-					ImageElement element(new_image_gray, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f,
-						images.at(current_image)._width, images.at(current_image)._height, images.at(current_image)._color);
-					images.at(current_image)._elements.push_back(element);
-				}
-				else
-				{
-					// store the new image element
-					ImageElement element(newImage, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f,
-						images.at(current_image)._width, images.at(current_image)._height, images.at(current_image)._color);
-					images.at(current_image)._elements.push_back(element);
-				}
+			// If the image is in grayscale, convert it
+			if (images.at(current_image)._grayscale)
+			{
+				images.at(current_image).EnableGrayScale();
 			}
 		}
 	}
 
 	// Free loaded image, in case we used it
 	if (loadInfo.pixels)
-		free (loadInfo.pixels);
+		delete[] loadInfo.pixels;
 
 	return true;
 }
@@ -472,7 +424,7 @@ bool GameVideo::LoadAnimatedImage(AnimatedImage &id, const std::string &filename
 // _LoadImageHelper: private function which does the dirty work of actually
 //                     loading an image.
 //-----------------------------------------------------------------------------
-bool GameVideo::_LoadImageHelper(StillImage &id, bool grayscale)
+bool GameVideo::_LoadImageHelper(StillImage &id)
 {
 	bool isStatic = id._is_static;
 
@@ -488,7 +440,7 @@ bool GameVideo::_LoadImageHelper(StillImage &id, bool grayscale)
 	}
 
 	// create an Image structure and store it our std::map of images (for the color copy, always present)
-	Image *newImage = new Image(id._filename, load_info.width, load_info.height, false);
+	Image *newImage = new Image(id._filename, "", load_info.width, load_info.height, false);
 
 	// try to insert the image in a texture sheet
 	TexSheet *sheet = _InsertImageInTexSheet(newImage, load_info, isStatic);
@@ -502,7 +454,7 @@ bool GameVideo::_LoadImageHelper(StillImage &id, bool grayscale)
 			cerr << "VIDEO_DEBUG: GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
 
 		delete newImage;
-		free(load_info.pixels);
+		delete[] load_info.pixels;
 		return false;
 	}
 
@@ -518,51 +470,12 @@ bool GameVideo::_LoadImageHelper(StillImage &id, bool grayscale)
 	if(id._height == 0.0f)
 		id._height = (float) load_info.height;
 
-	// If the image is grayscale, also add to the map a copy of the grayscale one
-	if (grayscale)
-	{
-		Image *new_image_gray (0);
-		_ConvertImageToGrayscale(load_info,load_info);
-	
-		new_image_gray = new Image(id._filename+"_grayscale", load_info.width, load_info.height, true);
-
-		TexSheet *sheet = _InsertImageInTexSheet(new_image_gray, load_info, isStatic);
-
-		if(!sheet)
-		{
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO_DEBUG: GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
-
-			delete newImage;
-			delete new_image_gray;
-
-			if (load_info.pixels)
-				free(load_info.pixels);
-
-			return false;
-		}
-
-		new_image_gray->ref_count = 1;
-		_images[id._filename+"_grayscale"] = new_image_gray;
-
-		// Store the image element
-		ImageElement element(new_image_gray, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f, id._width, id._height, id._color);
-		id._elements.push_back(element);
-	}
-	else	// If is color, store the image element
-	{
-		ImageElement element(newImage, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f, id._width, id._height, id._color);
-		id._elements.push_back(element);
-	}
-
-	newImage->ref_count = 1;
-
-	// store the image in our std::map
-	_images[id._filename] = newImage;
+	ImageElement element(newImage, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f, id._width, id._height, id._color);
+	id._elements.push_back(element);
 
 	// finally, delete the buffer used to hold the pixel data
 	if (load_info.pixels)
-		free(load_info.pixels);
+		delete[] load_info.pixels;
 
 	return true;
 }
@@ -640,7 +553,7 @@ bool GameVideo::_LoadRawImagePng(const std::string &filename, hoa_video::private
 
 	loadInfo.width = info_ptr->width;
 	loadInfo.height = info_ptr->height;
-	loadInfo.pixels = malloc(info_ptr->width * info_ptr->height * 4);
+	loadInfo.pixels = new uint8 [info_ptr->width * info_ptr->height * 4];
 
 	unsigned int bpp = info_ptr->channels;
 
@@ -717,7 +630,7 @@ bool GameVideo::_LoadRawImageJpeg(const std::string &filename, hoa_video::privat
 
 	loadInfo.width = cinfo.output_width;
 	loadInfo.height = cinfo.output_height;
-	loadInfo.pixels = malloc(cinfo.output_width * cinfo.output_height * 4);
+	loadInfo.pixels = new uint8 [cinfo.output_width * cinfo.output_height * 4];
 
 	unsigned int bpp = cinfo.output_components;
 
@@ -1044,43 +957,75 @@ bool GameVideo::SaveImage (const std::string &file_name, const StillImage &image
 		return false;
 	}
 
-	hoa_video::private_video::ImageLoadInfo texture;
+	hoa_video::private_video::ImageLoadInfo buffer;
 	hoa_video::private_video::Image* img = const_cast<Image*>(image._elements[0].image);
 
-	// Get the texture as a buffer
-	texture.height = img->texture_sheet->height;
-	texture.width = img->texture_sheet->width;
-	texture.pixels = new uint8 [texture.height * texture.width * 4];
-	GameVideo *videoManager = GameVideo::SingletonGetReference();
-	videoManager->_BindTexture(img->texture_sheet->texID);
-	glGetTexImage (GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.pixels);
-
-	// Get the part of the texture we are interested in, by copying the rows
-	hoa_video::private_video::ImageLoadInfo info;
-	info.width = img->width;
-	info.height = img->height;
-	info.pixels = new uint8 [img->width * img->height * 4];
-	uint32 dst_bytes = info.width * 4;
-	uint32 src_bytes = texture.width * 4;
-	uint32 src_offset = img->x * texture.width * 4 + img->y * 4;
-	for (int32 i=0; i<info.height; i++)
-	{
-		memcpy ((uint8*)info.pixels+i*dst_bytes, (uint8*)texture.pixels+i*src_bytes+src_offset, dst_bytes);
-	}
+	_GetBufferFromImage (buffer, img);
 
 	if (type == JPEG)
 	{
-		_RGBAToRGB (info, info);
-		_SaveJpeg (file_name, info);
+		_RGBAToRGB (buffer, buffer);
+		_SaveJpeg (file_name, buffer);
 	}
 	else
 	{
-		_SavePng (file_name, info);
+		_SavePng (file_name, buffer);
 	}
 
 	return true;
 }
 
+
+//----------------------------------------------------------------------------
+// Pass a texture to a given buffer
+//----------------------------------------------------------------------------
+void GameVideo::_GetBufferFromTexture (hoa_video::private_video::ImageLoadInfo& buffer,
+									   hoa_video::private_video::TexSheet* texture) const
+{
+	if (buffer.pixels)
+		delete[] buffer.pixels;
+	buffer.pixels = NULL;
+
+	// Get the texture as a buffer
+	buffer.height = texture->height;
+	buffer.width = texture->width;
+	buffer.pixels = new uint8 [buffer.height * buffer.width * 4];
+	VideoManager->_BindTexture(texture->texID);
+	glGetTexImage (GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer.pixels);
+}
+
+
+//----------------------------------------------------------------------------
+// Pass an Image to a given buffer
+//----------------------------------------------------------------------------
+void GameVideo::_GetBufferFromImage (hoa_video::private_video::ImageLoadInfo& buffer,
+									 hoa_video::private_video::Image* img) const
+{
+	// Get the texture as a buffer
+	_GetBufferFromTexture (buffer, img->texture_sheet);
+
+	// In case the image is smaller than the texture (it is just contained there), then copy the image rectangle
+	if (buffer.height > img->height || buffer.width > img->width)
+	{
+		hoa_video::private_video::ImageLoadInfo info;
+		info.width = img->width;
+		info.height = img->height;
+		info.pixels = new uint8 [img->width * img->height * 4];
+		uint32 dst_bytes = info.width * 4;
+		uint32 src_bytes = buffer.width * 4;
+		uint32 src_offset = img->y * buffer.width * 4 + img->x * 4;
+		for (int32 i=0; i<info.height; i++)
+		{
+			memcpy ((uint8*)info.pixels+i*dst_bytes, (uint8*)buffer.pixels+i*src_bytes+src_offset, dst_bytes);
+		}
+
+		delete buffer.pixels;
+
+		buffer.pixels = info.pixels;
+		buffer.height = info.height;
+		buffer.width = info.width;
+	}
+}
 
 //-----------------------------------------------------------------------------
 // TilesToObject: given a vector of tiles, and a 2D vector of indices into
@@ -1394,7 +1339,7 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 	int32 w = sheet->width;
 	int32 h = sheet->height;
 
-	Image img(sheet, string(), 0, 0, 0.0f, 0.0f, 1.0f, 1.0f, w, h, false);
+	Image img(sheet, string(), "<T>", 0, 0, 0.0f, 0.0f, 1.0f, 1.0f, w, h, false);
 
 
 	_PushContext();
