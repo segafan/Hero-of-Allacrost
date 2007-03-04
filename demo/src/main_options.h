@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,7 +29,7 @@ namespace hoa_main {
 **/
 bool ParseProgramOptions(int32 &return_code, int32 argc, char **argv);
 
-//! Prints out the program usage for running the program.
+//! \brief Prints out the program usage for running the program.
 void PrintUsage();
 
 /** \brief Enables debugging print statements in various parts of the game engine.
@@ -48,9 +48,18 @@ bool PrintSystemInformation();
 **/
 bool CheckFiles();
 
-/** \brief Resets the game settings (audio levels, key mappings, etc.) to their default values.
+/** \brief Resets the game settings (audio volume, key mappings, etc.) to their default values.
 *** \return False if the settings could not be restored, or if another problem occured.
 **/
 bool ResetSettings();
+
+/** \brief Executes a specific piece of code that is intended to test some piece of functionality
+*** \param test_code An unsigned integer, provided by the user, which indicates which test code to run
+***
+*** The purpose of this function is primarily intended for debugging engine components without requiring
+*** the programmer to alter main.cpp. Useful tests can be kept around permanently, so that if a particular
+*** implementation of an engine component changes, it is easy to re-test that the correct behavior occurs.
+**/
+void DEBUG_TestCode(uint32 test_code);
 
 } // namespace hoa_main

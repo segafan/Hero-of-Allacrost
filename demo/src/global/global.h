@@ -74,6 +74,9 @@ public:
 
 	/** \brief Adds a new character to the party.
 	*** \param id The ID number of the character to add to the party.
+	***
+	*** If the number of characters is less than four when this function is called, the
+	*** new character will automatically be added to the active party.
 	**/
 	void AddCharacter(uint32 id);
 
@@ -136,6 +139,9 @@ public:
 	void SetFunds(uint32 amount)
 		{ _funds = amount; }
 
+	const uint32 GetFunds() const
+		{ return _funds; }
+
 	/** \brief Returns a pointer to a character currently in the party.
 	*** \param id The ID number of the character to retrieve.
 	*** \return A pointer to the character, or NULL if the character was not found.
@@ -145,8 +151,8 @@ public:
 	std::vector<GlobalCharacter*>* GetCharacterOrder()
 		{ return &_character_order; };
 
-	const uint32 GetFunds() const
-		{ return _funds; }
+	GlobalParty* GetActiveParty()
+		{ return &_active_party; }
 
 	std::vector<GlobalItem*>* GetInventoryItems()
 		{ return &_inventory_items; }
@@ -173,12 +179,9 @@ public:
 		{ return &_inventory_key_items; }
 	//@}
 
-	//! \brief Returns a pointer to the active party
-	GlobalParty* GetActiveParty()
-		{ return &_active_party; }
-
 private:
 	SINGLETON_DECLARE(GameGlobal);
+
 	//! \brief The amount of financial resources the party currently has.
 	uint32 _funds;
 
@@ -189,10 +192,15 @@ private:
 	std::map<uint32, GlobalCharacter*> _characters;
 
 	/** \brief A vector whose purpose is to determine the ORDER of characters
-	*** The first four characters in this vector go to the active party; the rest are in reserve.
+	*** The first four characters in this vector are in the active party; the rest are in reserve.
 	**/
 	std::vector<GlobalCharacter*> _character_order;
 
+	/** \brief The active party of characters
+	*** The active party contains the group of characters that will fight when a battle begins.
+	*** This party can be up to four characters, and should always contain at least one character.
+	**/
+	GlobalParty _active_party;
 
 	/** \brief Retains a list of all of the objects currently stored in the player's inventory
 	*** This map is used to quickly check if an item is in the inventory or not. The key to the map is the object's
@@ -216,12 +224,6 @@ private:
 	std::vector<GlobalShard*>   _inventory_shards;
 	std::vector<GlobalKeyItem*> _inventory_key_items;
 	//@}
-
-	/** \brief The active party of characters
-	*** The active party contains the group of characters that will fight when a battle begins. This party can be up to
-	*** four characters, and should always contain at least one character.
-	**/
-	GlobalParty _active_party;
 
 	//! \brief Script files that hold data for various global objects
 	//@{

@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -33,7 +33,7 @@ bool ParseProgramOptions(int32 &return_code, int32 argc, char **argv) {
 	// Convert the argument list to a vector of strings for convenience
 	vector<string> options(argv, argv + argc);
 	return_code = 0;
-	
+
 	for (uint32 i = 1; i < options.size(); i++) {
 		if (options[i] == "-c" || options[i] == "--check") {
 			if (CheckFiles() == true) {
@@ -81,7 +81,21 @@ bool ParseProgramOptions(int32 &return_code, int32 argc, char **argv) {
 			return_code = 0;
 			return false;
 		}
-		else if (options[i] == "-V" || options[i] == "--version") {
+		else if (options[i] == "-t" || options[i] == "--test") {
+			if ((i + 1) >= options.size()) {
+				cerr << "Option " << options[i] << " requires an argument." << endl;
+				PrintUsage();
+				return_code = 1;
+				return false;
+			}
+			// TODO: convert options[i+1] from a string to a number and call test code
+// 			if (DEBUG_TestCode(options[i + 1]) == false) {
+// 				return_code = 1;
+// 				return false;
+// 			}
+			i++;
+		}
+		else if (options[i] == "-v" || options[i] == "--version") {
 			if (IsLatestVersion())
 				cout << "This is the latest version of Allacrost" << endl;
 			else
@@ -95,9 +109,11 @@ bool ParseProgramOptions(int32 &return_code, int32 argc, char **argv) {
 			return false;
 		}
 	}
-	
+
 	return true;
 } // bool ParseProgramOptions(int32_t &return_code, int32_t argc, char **argv)
+
+
 
 // Prints out the usage options (arguments) for running the program (work in progress)
 void PrintUsage() {
@@ -111,7 +127,8 @@ void PrintUsage() {
 	cout << "  --help/-h         :: prints this help menu" << endl;
 	cout << "  --info/-i         :: prints information about the user's system" << endl;
 	cout << "  --reset/-r        :: resets game configuration to use default settings" << endl;
-	cout << "  --check-ver/-V    :: checks for newer versions of Allacrost online" << endl;
+	cout << "  --test/-t <arg>   :: executes requested testing code and then exits" << endl;
+	cout << "  --version/-v      :: checks for newer versions of Allacrost online" << endl;
 }
 
 
@@ -121,10 +138,10 @@ bool EnableDebugging(string vars) {
 		cerr << "ERROR: debug specifier string is empty" << endl;
 		return false;
 	}
-	
+
 	// A vector of all the debug arguments
 	vector<string> args;
-	
+
 	// Find the first non-whitespace character
 	uint32 sbegin = 0;
 	while (vars[sbegin] == ' ' || vars[sbegin] == '\t') {
@@ -134,7 +151,7 @@ bool EnableDebugging(string vars) {
 			return false;
 		}
 	}
-	
+
 	// Parse the vars string on white-space characters and fill the args vector
 	// TODO: this loop needs to be made more robust to errors
 	for (uint32 i = sbegin; i < vars.size(); i++) {
@@ -144,14 +161,14 @@ bool EnableDebugging(string vars) {
 		}
 	}
 	args.push_back(vars.substr(sbegin, vars.size() - sbegin));
-	
+
 	// Enable all specified debug variables
 	for (uint32 i = 0; i < args.size(); i++) {
 		if (args[i] == "all") {
 			// This causes every call to SDL_SetError to also print an error message on stderr.
 			// NOTE: commented out because apparently SDL_putenv is not yet an available function on some systems
 			// SDL_putenv("SDL_DEBUG=1");
-			
+
 			hoa_audio::AUDIO_DEBUG                  = true;
 			hoa_battle::BATTLE_DEBUG                = true;
 			hoa_boot::BOOT_DEBUG                    = true;
@@ -218,7 +235,7 @@ bool EnableDebugging(string vars) {
 			return false;
 		}
 	} // for (uint32 i = 0; i < args.size(); i++)
-	
+
 	return true;
 } // bool EnableDebugging(string vars)
 
@@ -345,5 +362,24 @@ bool CheckFiles() {
 	cout << "This option is not yet implemented." << endl;
 	return false;
 } // bool CheckFiles()
+
+
+
+void DEBUG_TestCode(uint32 code) {
+	// Default test message
+	if (code == 0) {
+		cout << "0: This is not a real test code id, it just prints this message" << endl;
+	}
+
+	// NOTE: All code cases require a comment describing what the test involves
+// 	else if (code == 1) {
+// 		do_something
+// 	}
+
+
+	else {
+		cerr << "MAIN ERROR: no definition for test code id number: " << code << endl;
+	}
+} // void DEBUG_TestCode(uint32 code)
 
 } // namespace hoa_main
