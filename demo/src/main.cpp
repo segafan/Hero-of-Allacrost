@@ -84,7 +84,126 @@ void QuitAllacrost() {
 	GameScript::SingletonDestroy();
 	GameSystem::SingletonDestroy();
 	GameVideo::SingletonDestroy();
-}
+} // void QuitAllacrost()
+
+
+/** \brief Initializes all engine components and makes other preparations for the game to start
+*** \return True if the game engine was initialized successfully, false if an unrecoverable error occured
+***
+**/
+bool InitializeEngine() {
+	// Initialize SDL. The video, audio, and joystick subsystems are initialized elsewhere.
+	if (SDL_Init(SDL_INIT_TIMER) != 0) {
+		cerr << "MAIN ERROR: Unable to initialize SDL: " << SDL_GetError() << endl;
+		return false;
+	}
+
+	// Create and initialize singleton class managers
+	AudioManager = GameAudio::SingletonCreate();
+	InputManager = GameInput::SingletonCreate();
+	VideoManager = GameVideo::SingletonCreate();
+	ScriptManager = GameScript::SingletonCreate();
+	SystemManager = GameSystem::SingletonCreate();
+	ModeManager = GameModeManager::SingletonCreate();
+	GlobalManager = GameGlobal::SingletonCreate();
+
+	if (VideoManager->SingletonInitialize() == false) {
+		cerr << "ERROR: unable to initialize VideoManager" << endl;
+		return false;
+	}
+
+	VideoManager->SetMenuSkin("img/menus/black_sleet", "img/menus/black_sleet_texture.png", Color(0.0f, 0.0f, 0.0f, 0.0f));
+	if (!VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "default", 18)) {
+		return false;
+	}
+
+	VideoManager->SetFontShadowXOffset("default", 1);
+	VideoManager->SetFontShadowYOffset("default", -2);
+	VideoManager->SetFontShadowStyle("default", VIDEO_TEXT_SHADOW_BLACK);
+
+	VideoManager->SetFontShadowXOffset("default", 1);
+	VideoManager->SetFontShadowYOffset("default", -2);
+	VideoManager->SetFontShadowStyle("default", VIDEO_TEXT_SHADOW_BLACK);
+
+	if (!VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "map", 24)) {
+		return false;
+	}
+
+	VideoManager->SetFontShadowXOffset("map", 0);
+	VideoManager->SetFontShadowYOffset("map", 0);
+	VideoManager->SetFontShadowStyle("map", VIDEO_TEXT_SHADOW_BLACK);
+
+	if (!VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "battle", 20)) {
+		return false;
+	}
+
+	VideoManager->SetFontShadowXOffset("battle", 1);
+	VideoManager->SetFontShadowYOffset("battle", -2);
+	VideoManager->SetFontShadowStyle("battle", VIDEO_TEXT_SHADOW_BLACK);
+
+	// Font used to show damage received / given in battle mode
+	if (!VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "battle_dmg", 24)) {
+		return false;
+	}
+
+	VideoManager->SetFontShadowXOffset("battle_dmg", 1);
+	VideoManager->SetFontShadowYOffset("battle_dmg", -2);
+	VideoManager->SetFontShadowStyle("battle_dmg", VIDEO_TEXT_SHADOW_BLACK);
+
+	if (AudioManager->SingletonInitialize() == false) {
+		cerr << "ERROR: unable to initialize AudioManager" << endl;
+		return false;
+	}
+	if (ScriptManager->SingletonInitialize() == false) {
+		cerr << "ERROR: unable to initialize ScriptManager" << endl;
+		return false;
+	}
+	if (ModeManager->SingletonInitialize() == false) {
+		cerr << "ERROR: unable to initialize ModeManager" << endl;
+		return false;
+	}
+	if (SystemManager->SingletonInitialize() == false) {
+		cerr << "ERROR: unable to initialize SystemManager" << endl;
+		return false;
+	}
+	if (InputManager->SingletonInitialize() == false) {
+		cerr << "ERROR: unable to initialize InputManager" << endl;
+		return false;
+	}
+	if (GlobalManager->SingletonInitialize() == false) {
+		cerr << "ERROR: unable to initialize GlobalManager" << endl;
+		return false;
+	}
+
+	// Set the window title and icon name
+	SDL_WM_SetCaption("Hero of Allacrost", "Hero of Allacrost");
+
+	// Set the window icon
+	#ifdef _WIN32
+		SDL_WM_SetIcon(SDL_LoadBMP("img/logos/program_icon.bmp"), NULL);
+	#else
+		// Later, add an icon here for non-Windows systems (which support more than 32x32 .bmp files)
+		SDL_WM_SetIcon(SDL_LoadBMP("img/logos/program_icon.bmp"), NULL);
+	#endif
+
+	// Hide the mouse cursor since we don't use or acknowledge mouse input from the user
+	SDL_ShowCursor(SDL_DISABLE);
+
+	// Enabled for multilingual keyboard support
+	SDL_EnableUNICODE(1);
+
+	// Ignore the events that we don't care about so they never appear in the event queue
+	SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
+	SDL_EventState(SDL_MOUSEBUTTONDOWN, SDL_IGNORE);
+	SDL_EventState(SDL_MOUSEBUTTONUP, SDL_IGNORE);
+	SDL_EventState(SDL_SYSWMEVENT, SDL_IGNORE);
+	SDL_EventState(SDL_VIDEOEXPOSE, SDL_IGNORE);
+	SDL_EventState(SDL_USEREVENT, SDL_IGNORE);
+
+	SystemManager->InitializeTimers();
+
+	return true;
+} // bool InitializeEngine()
 
 
 
@@ -120,115 +239,10 @@ int32 main(int32 argc, char *argv[]) {
 		return return_code;
 	}
 
-	// Initialize SDL. The video, audio, and joystick subsystems are initialized elsewhere.
-	if (SDL_Init(SDL_INIT_TIMER) != 0) {
-		cerr << "MAIN ERROR: Unable to initialize SDL: " << SDL_GetError() << endl;
+	if (InitializeEngine() == false) {
+		cerr << "ERROR: failed to initialize game engine, exiting..." << endl;
 		return 1;
 	}
-
-	// Create and initialize singleton class managers
-	AudioManager = GameAudio::SingletonCreate();
-	InputManager = GameInput::SingletonCreate();
-	VideoManager = GameVideo::SingletonCreate();
-	ScriptManager = GameScript::SingletonCreate();
-	SystemManager = GameSystem::SingletonCreate();
-	ModeManager = GameModeManager::SingletonCreate();
-	GlobalManager = GameGlobal::SingletonCreate();
-
-	if (VideoManager->SingletonInitialize() == false) {
-		cerr << "ERROR: unable to initialize VideoManager" << endl;
-		return 1;
-	}
-
-	VideoManager->SetMenuSkin("img/menus/black_sleet", "img/menus/black_sleet_texture.png", Color(0.0f, 0.0f, 0.0f, 0.0f));
-	if (!VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "default", 18)) {
-		return 1;
-	}
-
-	VideoManager->SetFontShadowXOffset("default", 1);
-	VideoManager->SetFontShadowYOffset("default", -2);
-	VideoManager->SetFontShadowStyle("default", VIDEO_TEXT_SHADOW_BLACK);
-
-	VideoManager->SetFontShadowXOffset("default", 1);
-	VideoManager->SetFontShadowYOffset("default", -2);
-	VideoManager->SetFontShadowStyle("default", VIDEO_TEXT_SHADOW_BLACK);
-
-	if (!VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "map", 24)) {
-		return 1;
-	}
-
-	VideoManager->SetFontShadowXOffset("map", 0);
-	VideoManager->SetFontShadowYOffset("map", 0);
-	VideoManager->SetFontShadowStyle("map", VIDEO_TEXT_SHADOW_BLACK);
-
-	if (!VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "battle", 20)) {
-		return 1;
-	}
-
-	VideoManager->SetFontShadowXOffset("battle", 1);
-	VideoManager->SetFontShadowYOffset("battle", -2);
-	VideoManager->SetFontShadowStyle("battle", VIDEO_TEXT_SHADOW_BLACK);
-
-	// Font used to show damage received / given in battle mode
-	if (!VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "battle_dmg", 24)) {
-		return 1;
-	}
-
-	VideoManager->SetFontShadowXOffset("battle_dmg", 1);
-	VideoManager->SetFontShadowYOffset("battle_dmg", -2);
-	VideoManager->SetFontShadowStyle("battle_dmg", VIDEO_TEXT_SHADOW_BLACK);
-
-	if (AudioManager->SingletonInitialize() == false) {
-		cerr << "ERROR: unable to initialize AudioManager" << endl;
-		return 1;
-	}
-	if (ScriptManager->SingletonInitialize() == false) {
-		cerr << "ERROR: unable to initialize ScriptManager" << endl;
-		return 1;
-	}
-	if (ModeManager->SingletonInitialize() == false) {
-		cerr << "ERROR: unable to initialize ModeManager" << endl;
-		return 1;
-	}
-	if (SystemManager->SingletonInitialize() == false) {
-		cerr << "ERROR: unable to initialize SystemManager" << endl;
-		return 1;
-	}
-	if (InputManager->SingletonInitialize() == false) {
-		cerr << "ERROR: unable to initialize InputManager" << endl;
-		return 1;
-	}
-	if (GlobalManager->SingletonInitialize() == false) {
-		cerr << "ERROR: unable to initialize GlobalManager" << endl;
-		return 1;
-	}
-
-	// Set the window title and icon name
-	SDL_WM_SetCaption("Hero of Allacrost", "Hero of Allacrost");
-
-	// Set the window icon
-	#ifdef _WIN32
-		SDL_WM_SetIcon(SDL_LoadBMP("img/logos/program_icon.bmp"), NULL);
-	#else
-		// Later, add an icon here for non-Windows systems (which support more than 32x32 .bmp files)
-		SDL_WM_SetIcon(SDL_LoadBMP("img/logos/program_icon.bmp"), NULL);
-	#endif
-
-	// Hide the mouse cursor since we don't use or acknowledge mouse input from the user
-	SDL_ShowCursor(SDL_DISABLE);
-
-	// Enabled for multilingual keyboard support
-	SDL_EnableUNICODE(1);
-
-	// Ignore the events that we don't care about so they never appear in the event queue
-	SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
-	SDL_EventState(SDL_MOUSEBUTTONDOWN, SDL_IGNORE);
-	SDL_EventState(SDL_MOUSEBUTTONUP, SDL_IGNORE);
-	SDL_EventState(SDL_SYSWMEVENT, SDL_IGNORE);
-	SDL_EventState(SDL_VIDEOEXPOSE, SDL_IGNORE);
-	SDL_EventState(SDL_USEREVENT, SDL_IGNORE);
-
-	SystemManager->InitializeTimers();
 
 	// This is the main loop for the game. The loop iterates once for every frame drawn to the screen.
 	while (SystemManager->NotDone()) {

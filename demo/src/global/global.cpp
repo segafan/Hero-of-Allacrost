@@ -279,17 +279,47 @@ void GameGlobal::AddCharacter(uint32 id) {
 
 	GlobalCharacter *ch = new GlobalCharacter(id);
 	_characters.insert(make_pair(id, ch));
+
+	// Add the new character to the active party if the active party contains less than four characters
+	if (_character_order.size() < 4)
+		_active_party.AddActor(ch);
+
 	_character_order.push_back(ch);
-	_active_party.AddActor(ch);
-}
+} // void GameGlobal::AddCharacter(uint32 id)
+
+
+
+void GameGlobal::RemoveCharacter(uint32 id) {
+	map<uint32, GlobalCharacter*>::iterator ch = _characters.find(id);
+
+	if (ch == _characters.end()) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: attempted to remove a character that did not exist" << endl;
+		return;
+	}
+
+	delete(ch->second);
+	_characters.erase(ch);
+
+	for (vector<GlobalCharacter*>::iterator i = _character_order.begin(); i != _character_order.end(); i++) {
+		if ((*i)->GetID() == id) {
+			_character_order.erase(i);
+
+			// Reform the active party, in case the removed character was a member of it
+			_active_party.RemoveAllActors();
+			for (uint32 j = 0; j < 4 || j >= _character_order.size(); j++) {
+				_active_party.AddActor(_character_order[j]);
+			}
+		}
+	}
+} // void GameGlobal::RemoveCharacter(uint32 id)
 
 
 
 GlobalCharacter* GameGlobal::GetCharacter(uint32 id) {
-	for (uint32 i = 0; i < _characters.size(); i++) {
-		if (_characters[i] != 0 && _characters[i]->GetID() == id) {
-			return _characters[i];
-		}
+	map<uint32, GlobalCharacter*>::iterator ch = _characters.find(id);
+	if (ch != _characters.end()) {
+		return (ch->second);
 	}
 
 	if (GLOBAL_DEBUG)
