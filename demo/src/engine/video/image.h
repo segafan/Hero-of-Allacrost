@@ -95,6 +95,18 @@ public:
 	**/
 	std::string filename;
 
+	//! \brief String holding the tags defining the properties of the image
+	/*!
+		The tags need to be present always in the same order, since they will be used as
+		a key in a map. When adding new flags, remember to add the documentation in here.
+		These are the current flags, presented in the appearance order:
+		<T> For temporary images
+		<Xrow_ROWS>	For multiimages
+		<Ycol_COLS> For multiimages
+		<G> Grayscale images
+	*/
+	std::string tags;
+
 	//! \brief The coordiates of where the image is located in the texture sheet
 	int32 x, y;
 
@@ -119,10 +131,10 @@ public:
 	/** \brief Constructor defaults image as the first one in a texture sheet.
 	*** \note The actual sheet where the image is located will be determined later.
 	**/
-	Image(const std::string &fname, int32 w, int32 h, bool grayscale_);
+	Image(const std::string &fname, const std::string &tags_, int32 w, int32 h, bool grayscale_);
 
-	///! \brief Constructor where image coordinates are specified, along with texture coords and the texture sheet.
-	Image(TexSheet *sheet, const std::string &fname, int32 x_, int32 y_, float u1_, float v1_,
+	//! \brief Constructor where image coordinates are specified, along with texture coords and the texture sheet.
+	Image(TexSheet *sheet, const std::string &fname, const std::string &tags_, int32 x_, int32 y_, float u1_, float v1_,
 		float u2_, float v2_, int32 w, int32 h, bool grayscale_);
 
 	Image & operator=(Image &rhs)
