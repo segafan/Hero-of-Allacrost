@@ -20,6 +20,7 @@
 #include "map_actions.h"
 #include "audio.h"
 #include "video.h"
+#include "system.h"
 
 using namespace std;
 using namespace hoa_utils;
@@ -631,6 +632,121 @@ bool MapSprite::LoadState() {
 
 	return true;
 }
+
+void MonsterSprite::Draw()
+{
+	if( _state != DEAD ) {
+		if (MapObject::DrawHelper() == true) {
+			VideoManager->DrawImage(animations[current_animation],_color);
+		}
+	}
+}
+
+// Load in the appropriate images and other data for the sprite
+bool MonsterSprite::Load() {
+	AnimatedImage img;
+	uint32 frame_speed = static_cast<uint32>(movement_speed / 10.0f);
+
+	// Broken multi-image loading code
+	vector<StillImage> frames (24);
+	for (uint8 i=0; i<24; i++)
+		frames[i].SetDimensions(img_half_width * 2, img_height);
+
+	if (VideoManager->LoadMultiImage(frames, "img/sprites/map/scorpion_walk.png", 4, 6) == false) {
+		return false;
+	}
+	else {
+		cout << "MAP: Loaded MulitImage successfully!" << endl;
+	}
+
+	img.Clear();
+	img.AddFrame(frames[0], frame_speed);
+	animations.push_back(img);
+
+	img.Clear();
+	img.AddFrame(frames[6], frame_speed);
+	animations.push_back(img);
+
+	img.Clear();
+	img.AddFrame(frames[12], frame_speed);
+	animations.push_back(img);
+
+	img.Clear();
+	img.AddFrame(frames[18], frame_speed);
+	animations.push_back(img);
+
+	img.Clear();
+	img.AddFrame(frames[1], frame_speed);
+	img.AddFrame(frames[2], frame_speed);
+	img.AddFrame(frames[3], frame_speed);
+	img.AddFrame(frames[4], frame_speed);
+	img.AddFrame(frames[5], frame_speed);
+	animations.push_back(img);
+
+	img.Clear();
+	img.AddFrame(frames[7], frame_speed);
+	img.AddFrame(frames[8], frame_speed);
+	img.AddFrame(frames[9], frame_speed);
+	img.AddFrame(frames[10], frame_speed);
+	img.AddFrame(frames[11], frame_speed);
+	animations.push_back(img);
+
+	img.Clear();
+	img.AddFrame(frames[13], frame_speed);
+	img.AddFrame(frames[14], frame_speed);
+	img.AddFrame(frames[15], frame_speed);
+	img.AddFrame(frames[16], frame_speed);
+	img.AddFrame(frames[17], frame_speed);
+	animations.push_back(img);
+
+	img.Clear();
+	img.AddFrame(frames[19], frame_speed);
+	img.AddFrame(frames[20], frame_speed);
+	img.AddFrame(frames[21], frame_speed);
+	img.AddFrame(frames[22], frame_speed);
+	img.AddFrame(frames[23], frame_speed);
+	animations.push_back(img);
+
+	for (uint32 i = 0; i < animations.size(); i++) {
+// 		animations[i].SetDimensions(img_half_width * 2, img_height);
+		if (animations[i].Load() == false) {
+			cerr << "MAP ERROR: failed to load sprite animation" << endl;
+			return false;
+		}
+	}
+
+	
+	return true;
+} // bool MonsterSprite::Load()
+
+void MonsterSprite::Update()
+	{
+		switch( _state )
+		{
+		case SPAWNING:
+			_time_elapsed += hoa_system::SystemManager->GetUpdateTime();
+			if( _color.GetAlpha() < 1.0f ) {
+				_color.SetAlpha( ( _time_elapsed / 5000.0f ) * 1.0f );
+			}
+			else
+			{
+				_time_elapsed = 0;
+				_state = HOSTILE;
+			}
+			break;
+		case HOSTILE:
+			_time_elapsed += hoa_system::SystemManager->GetUpdateTime();			
+			if( _time_elapsed >= 2500 )
+			{
+				direction = 1 << (rand()%12);
+				_time_elapsed = 0;
+			}
+			MapSprite::Update();
+			break;
+		}
+	}
+
+
 
 } // namespace private_map
 

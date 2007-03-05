@@ -345,7 +345,7 @@ bool GameVideo::MakeScreenshot()
 	glGetIntegerv(GL_VIEWPORT, viewportDims);
 
 	// Buffer to store the image before it is flipped
-	void * buffer = new uint8 [viewportDims[2] * viewportDims[3] * 3];
+	void * buffer = malloc(viewportDims[2] * viewportDims[3] * 3);
 
 	// Read pixel data
 	glReadPixels(0, 0, viewportDims[2], viewportDims[3], GL_RGB, GL_UNSIGNED_BYTE, buffer);
@@ -355,7 +355,7 @@ bool GameVideo::MakeScreenshot()
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO_DEBUG: glReadPixels() returned an error inside GameVideo::CaptureScreen!" << endl;
 
-		delete[] buffer;
+		free(buffer);
 		return false;
 	}
 
@@ -370,7 +370,7 @@ bool GameVideo::MakeScreenshot()
 	if((outfile = fopen("screenshot.jpg", "wb")) == NULL)
 	{
 		cerr << "Could not open screenshot.jpg for writing!" << endl;
-		delete[] buffer;
+		free(buffer);
 		return false;
 	}
 
@@ -385,7 +385,7 @@ bool GameVideo::MakeScreenshot()
 	jpeg_set_quality(&cinfo, 70, TRUE);
 	jpeg_start_compress(&cinfo, TRUE);
 
-	JSAMPLE ** row_pointers = new JSAMPLE* [viewportDims[3]];
+	JSAMPLE ** row_pointers = (JSAMPLE **)malloc(sizeof(JSAMPLE *) * viewportDims[3]);
 
 	for(int32 line = 0; line < viewportDims[3]; line++)
 	{
@@ -398,8 +398,8 @@ bool GameVideo::MakeScreenshot()
 
 	jpeg_destroy_compress(&cinfo);
 
-	delete[] buffer;
-	delete[] row_pointers;
+	free(buffer);
+	free(row_pointers);
 
 	return true;
 }
@@ -513,17 +513,13 @@ void GameVideo::SetCoordSys
 
 void GameVideo::SetDrawFlags(int32 firstflag, ...)
 {
-	int32 n;
-	int32 flag;
+	int32 flag = firstflag;
 	va_list args;
 
 	va_start(args, firstflag);
-	for (n=0;;n++)
+	while( flag != 0 )
 	{
-		flag = (n==0) ? firstflag : va_arg(args, int32);
 		switch (flag) {
-		case 0: goto done;
-
 		case VIDEO_X_LEFT: _xalign=-1; break;
 		case VIDEO_X_CENTER: _xalign=0; break;
 		case VIDEO_X_RIGHT: _xalign=1; break;
@@ -547,8 +543,8 @@ void GameVideo::SetDrawFlags(int32 firstflag, ...)
 				cerr << "Unknown flag " << flag << " passed to SetDrawFlags()\n";
 			break;
 		}
+		flag = va_arg(args, int32);
 	}
-done:
 	va_end(args);
 }
 
@@ -1317,10 +1313,10 @@ bool GameVideo::CaptureScreen(StillImage &id)
 	ImageLoadInfo loadInfo;
 	loadInfo.width = viewportDims[2];
 	loadInfo.height = viewportDims[3];
-	loadInfo.pixels = new uint8 [viewportDims[2] * viewportDims[3] * 4];
+	loadInfo.pixels = malloc(viewportDims[2] * viewportDims[3] * 4);
 
 	// Buffer to store the image before it is flipped
-	void * buffer = new uint8 [viewportDims[2] * viewportDims[3] * 4];
+	void * buffer = malloc(viewportDims[2] * viewportDims[3] * 4);
 
 	// Read pixel data
 	glReadPixels(0, 0, viewportDims[2], viewportDims[3], GL_RGBA, GL_UNSIGNED_BYTE, buffer);
@@ -1330,8 +1326,8 @@ bool GameVideo::CaptureScreen(StillImage &id)
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO_DEBUG: glReadPixels() returned an error inside GameVideo::CaptureScreen!" << endl;
 
-		delete[] buffer;
-		delete[] loadInfo.pixels;
+		free(buffer);
+		free(loadInfo.pixels);
 		return false;
 	}
 
@@ -1345,10 +1341,11 @@ bool GameVideo::CaptureScreen(StillImage &id)
 	}
 
 	// Free the buffer
-	delete[] buffer;
+	free(buffer);
 
+	//TEMP TAGS
 	// create an Image structure and store it our std::map of images
-	Image *newImage = new Image(id._filename, "<T>", loadInfo.width, loadInfo.height, false);
+	Image *newImage = new Image(id._filename, "", loadInfo.width, loadInfo.height, false);
 
 	// try to insert the image in a texture sheet
 	TexSheet *sheet = _InsertImageInTexSheet(newImage, loadInfo, true);
@@ -1361,7 +1358,7 @@ bool GameVideo::CaptureScreen(StillImage &id)
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO_DEBUG: GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
 
-		delete[] loadInfo.pixels;
+		free(loadInfo.pixels);
 		return false;
 	}
 
@@ -1379,7 +1376,7 @@ bool GameVideo::CaptureScreen(StillImage &id)
 	id._elements.push_back(element);
 
 	// finally, delete the buffer used to hold the pixel data
-	delete[] loadInfo.pixels;
+	free(loadInfo.pixels);
 
 	return true;
 }

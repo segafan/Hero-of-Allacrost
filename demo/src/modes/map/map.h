@@ -74,6 +74,45 @@ const uint8 DIALOGUE     = 0x02;
 const uint8 OBSERVATION  = 0x04;
 //@}
 
+/** \name Map Context Constants
+*** \brief Constants used to name the possible contexts on a map
+**/
+enum
+{
+	MAP_CONTEXT_1 = 0x00000001,
+	MAP_CONTEXT_2 = 0x00000002,
+	MAP_CONTEXT_3 = 0x00000004,
+	MAP_CONTEXT_4 = 0x00000008,
+	MAP_CONTEXT_5 = 0x00000010,
+	MAP_CONTEXT_6 = 0x00000020,
+	MAP_CONTEXT_7 = 0x00000040,
+	MAP_CONTEXT_8 = 0x00000080,
+	MAP_CONTEXT_9 = 0x00000100,
+	MAP_CONTEXT_10 = 0x00000200,
+	MAP_CONTEXT_11 = 0x00000400,
+	MAP_CONTEXT_12 = 0x00000800,
+	MAP_CONTEXT_13 = 0x00001000,
+	MAP_CONTEXT_14 = 0x00002000,
+	MAP_CONTEXT_15 = 0x00004000,
+	MAP_CONTEXT_16 = 0x00008000,
+	MAP_CONTEXT_17 = 0x00010000,
+	MAP_CONTEXT_18 = 0x00020000,
+	MAP_CONTEXT_19 = 0x00040000,
+	MAP_CONTEXT_20 = 0x00080000,
+	MAP_CONTEXT_21 = 0x00100000,
+	MAP_CONTEXT_22 = 0x00200000,
+	MAP_CONTEXT_23 = 0x00400000,
+	MAP_CONTEXT_24 = 0x00800000,
+	MAP_CONTEXT_25 = 0x01000000,
+	MAP_CONTEXT_26 = 0x02000000,
+	MAP_CONTEXT_27 = 0x04000000,
+	MAP_CONTEXT_28 = 0x08000000,
+	MAP_CONTEXT_29 = 0x10000000,
+	MAP_CONTEXT_30 = 0x20000000,
+	MAP_CONTEXT_31 = 0x40000000,
+	MAP_CONTEXT_32 = 0x80000000,
+};
+
 
 /** ****************************************************************************
 *** \brief Retains information about how the next map frame should be drawn.
@@ -200,7 +239,6 @@ public:
 		{ lower_layer = lower; middle_layer = middle; upper_layer = upper; }
 }; // class MapTile
 
-
 /** ****************************************************************************
 *** \brief Handles the game execution while the player is exploring maps.
 ***
@@ -312,11 +350,11 @@ private:
 
 	/** \brief A 2D vector indicating which spots on the map sprites may walk on.
 	*** This vector is kept seperate from the vector of tiles because each tile
-	*** has 4 walkable booleans associated with it. Note that sprite objects may
+	*** has 4 walkable uint32 bitflags associated with it. Note that sprite objects may
 	*** come in various sizes, so not all sprites may fit through a narrow
 	*** passage way.
 	**/
-	std::vector<std::vector<bool> > _map_grid;
+	std::vector<std::vector<uint32> > _map_grid;
 
 	/** \brief A map containing pointers to all of the sprites on a map.
 	*** This map does not include a pointer to the MapMode#_camera nor MapMode#_virtual_focus
@@ -387,6 +425,7 @@ private:
 	//! \brief This keeps a pointer to the active dialogue.
 	private_map::MapDialogue* _current_dialogue;
 
+	std::vector< private_map::MonsterZone* > _monster_zones; 
 
 	// -------------------- Battle Data Retained by the Map
 

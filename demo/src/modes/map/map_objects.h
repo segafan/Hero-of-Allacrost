@@ -94,12 +94,13 @@ const uint32 ANIM_WALKING_EAST   = 7;
 //@}
 
 /** \name Map Sprite Type Constants
-*** These constants are used to identify the type of object of a map sprite
+*** These constants are used to identify the type a map sprite
 **/
 //@{
 const uint8 PHYSICAL_TYPE = 0;
 const uint8 VIRTUAL_TYPE = 1;
 const uint8 SPRITE_TYPE = 2;
+const uint8 MONSTER_TYPE = 3;
 //@}
 
 /** ****************************************************************************
@@ -140,7 +141,7 @@ public:
 	*** example of where this is useful is a bridge, which shouldn't simply disappear because the
 	*** player walks inside a nearby home.
 	**/
-	int8 context;
+	uint32 context;
 
 	/** \brief Coordinates for the object's origin/position.
 	*** The origin of every map object is the bottom center point of the object. These
@@ -264,7 +265,7 @@ public:
 	void SetObjectID(int16 id)
 		{ object_id = id; }
 
-	void SetContext(int8 ctxt)
+	void SetContext(uint32 ctxt)
 		{ context = ctxt; }
 
 	void SetXPosition(uint16 x, float offset)
@@ -300,7 +301,7 @@ public:
 	int16 GetObjectID() const
 		{ return object_id; }
 
-	int8 GetContext() const
+	uint32 GetContext() const
 		{ return context; }
 
 	void GetXPosition(uint16 &x, float &offset) const
@@ -635,13 +636,13 @@ public:
 	/** \brief Fills up the animations vector and loads the sprite image frames.
 	*** \return False if there was a problem loading the sprite.
 	**/
-	bool Load();
+	virtual bool Load();
 
 	//! \brief Updates the sprite's position and state.
-	void Update();
+	virtual void Update();
 
 	//! \brief Draws the sprite frame in the appropriate position on the screen, if it is visible.
-	void Draw();
+	virtual void Draw();
 
 	/** \name Lua Access Functions
 	*** These functions are specifically written for Lua binding, to enable Lua to access the
@@ -678,6 +679,64 @@ public:
 	virtual bool LoadState();
 
 }; // class MapSprite : public VirtualSprite
+
+
+/** ****************************************************************************
+*** \brief A mobile map object with which the player can get in a fight with.
+***
+*** Monster sprites are attached to a MonsterZone, where they will respawn when
+*** dead. A monster sprite can be in one of 3 states: SPAWNING, HOSTILE or DEAD.
+*** In spawning state, the monster becomes gradually visible, is immobile and
+*** cannot be attacked. In hostile state, the monsters roams the map and will
+*** attack if touched by the player. In dead state, the monsters is invisible 
+*** and waits for the MonsterZone to reset it in an other position, back in 
+*** spawning state.
+*** ***************************************************************************/
+class MonsterSprite : public MapSprite
+{
+private:
+	enum State
+	{
+		SPAWNING,
+		HOSTILE,
+		DEAD
+	};
+public:
+	MonsterSprite()
+		: _color( 1.0f,1.0f,1.0f,0.0f )
+	{
+		MapObject::_object_type = MONSTER_TYPE;
+		moving = true;
+		_time_elapsed = 0;
+		_state = SPAWNING;
+	}
+
+	virtual bool Load();
+
+	//! \brief Updates the sprite's position and state.
+	virtual void Update();
+
+	//! \brief Draws the sprite frame in the appropriate position on the screen, if it is visible.
+	virtual void Draw();
+
+	void SetZone( MonsterZone* zone )
+		{ _zone = zone; }
+
+	void StateDead()
+		{ updatable = false; _state = DEAD; }
+	
+	void StateSpawning()
+		{ updatable = true; _state = SPAWNING; } 
+	
+	void StateHostile()
+		{ updatable = true; _state = HOSTILE; }
+
+private:
+	MonsterZone* _zone;
+	hoa_video::Color _color;
+	uint32 _time_elapsed; 
+	State _state; 
+};
 
 } // namespace private_map
 
