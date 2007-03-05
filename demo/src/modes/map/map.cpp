@@ -343,17 +343,17 @@ bool MapMode::Load(string filename) {
 	}
 
 	for (uint16 r = 0; r < _num_grid_rows; r++) {
-		_map_grid.push_back(vector<bool>(_num_grid_cols, false));
+		_map_grid.push_back(vector<uint32>(_num_grid_cols, 0));
 	}
 
 	// Uncomment this loop to test out tile-collision detection
- 	//for (uint16 r = 0; r < _num_grid_rows; r++) {
- 	//	for (uint16 c = 0; c < _num_grid_cols; c++) {
- 	//		if ((r + c) % 70 == 0) {
- 	//			_map_grid[r][c] = true;
- 	//		}
- 	//	}
- 	//}
+ 	for (uint16 r = 0; r < _num_grid_rows; r++) {
+ 		for (uint16 c = 0; c < _num_grid_cols; c++) {
+ 			if ((r + c) % 70 == 0) {
+				_map_grid[r][c] = MAP_CONTEXT_1;
+ 			}
+ 		}
+ 	}
 
 	// TODO: Need a "ReadCallFunction" for scripting engine to replace raw luabind call
 	// _map_script.ReadCallFunction("Load", "");
@@ -452,6 +452,22 @@ bool MapMode::Load(string filename) {
 // 		return false;
 // 	_ground_objects.push_back(DialogueSprite);
 // 	_all_objects[ 1 ] = DialogueSprite;
+
+	//TEMP
+	MonsterSprite* Monster = new MonsterSprite();
+	Monster->name = MakeUnicodeString("Monster");
+	Monster->SetObjectID(999);
+	Monster->SetContext(1);
+	Monster->SetXPosition(50, 0.5f);
+	Monster->SetYPosition(45, 0.5f);
+	Monster->SetCollHalfWidth(1.0f);
+	Monster->SetCollHeight(2.0f);
+	Monster->img_half_width = 1.0f;
+	Monster->img_height = 4.0f;
+	Monster->movement_speed = VERY_SLOW_SPEED*2;
+	Monster->SetDirection(EAST);
+
+	_AddGroundObject(Monster);
 
 	for (uint32 i = 0; i < _ground_objects.size(); i++) {
 		if (_ground_objects[i]->Load() == false) {
@@ -792,7 +808,9 @@ MapObject* MapMode::_FindNearestObject(const VirtualSprite* sprite) {
 		MapObject* obj = i->second;
 		if( obj == sprite ) //A sprite can't target itself
 			continue;
-		if (obj->context != sprite->context) // Objects in different contexts can not interact with one another
+		
+		// Objects in different contexts can not interact with one another
+		if (obj->context & sprite->context == 0) // Since objects can span multiple context, we check that no contexts are equal
 			continue;
 
 		// Compute the full position coordinates for the object under study
@@ -883,7 +901,7 @@ bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 		// the map grid tile indeces referenced in this loop are all valid entries.
 		for (uint32 r = static_cast<uint32>(cr_top); r <= static_cast<uint32>(y_location); r++) {
 			for (uint32 c = static_cast<uint32>(cr_left); c <= static_cast<uint32>(cr_right); c++) {
-				if (_map_grid[r][c] == true) { // Then this overlapping tile is unwalkable
+				if (_map_grid[r][c] & sprite->context > 0) { // Then this overlapping tile is unwalkable
 					return true;
 				}
 			}
@@ -900,25 +918,36 @@ bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 		// Only verify this object if it is not the same object as the sprite
 		if ((*objects)[i]->object_id != sprite->object_id
 			&& !(*objects)[i]->no_collision
-			&& (*objects)[i]->context == sprite->context )
+			&& (*objects)[i]->context & sprite->context > 0 )
 		{
-			// Only verify this object if it has no_collision set to false
-			if ( !(*objects)[i]->no_collision ) {
-				// Compute the full position coordinates of the other object
-				float other_x_location = (*objects)[i]->ComputeXLocation();
-				float other_y_location = (*objects)[i]->ComputeYLocation();;
+			// Compute the full position coordinates of the other object
+			float other_x_location = (*objects)[i]->ComputeXLocation();
+			float other_y_location = (*objects)[i]->ComputeYLocation();;
 
-				// Verify that the bounding boxes overlap on the horizontal axis
-				if (!(other_x_location - (*objects)[i]->coll_half_width > cr_right
-					|| other_x_location + (*objects)[i]->coll_half_width < cr_left)) {
-					// Verify that the bounding boxes overlap on the vertical axis
-					if (!(other_y_location - (*objects)[i]->coll_height > y_location
-						|| other_y_location < cr_top )) {
+			// Verify that the bounding boxes overlap on the horizontal axis
+			if (!(other_x_location - (*objects)[i]->coll_half_width > cr_right
+				|| other_x_location + (*objects)[i]->coll_half_width < cr_left)) {
+				// Verify that the bounding boxes overlap on the vertical axis
+				if (!(other_y_location - (*objects)[i]->coll_height > y_location
+					|| other_y_location < cr_top )) {
 						// Boxes overlap on both axis, there is a colision
+						if( sprite->GetType() == MONSTER_TYPE && (*objects)[i] == _camera ) {
+							reinterpret_cast<MonsterSprite*>(sprite)->StateDead();
+							BattleMode *BM = new BattleMode();
+							ModeManager->Push(BM);
+							return false;
+						}
+
+						if( (*objects)[i]->GetType() == MONSTER_TYPE &&  sprite == _camera ) {
+							reinterpret_cast<MonsterSprite*>((*objects)[i])->StateDead();
+							BattleMode *BM = new BattleMode();
+							ModeManager->Push(BM);
+							return false;
+						}
 						return true;
-					}
 				}
 			}
+		
 		}
 	}
 
@@ -968,7 +997,7 @@ void MapMode::_FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path
 	}
 	for (int16 r = dest.row - y_span; r < dest.row; r++) {
 		for (int16 c = dest.col - x_span; c < dest.col + x_span; c++) {
-			if (_map_grid[r][c] == true) {
+			if (_map_grid[r][c] & sprite->context > 0) {
 				if (MAP_DEBUG)
 					cerr << "MAP ERROR: sprite can not move to destination node on path because one or more grid tiles are unwalkable" << endl;
 				return;
@@ -1012,7 +1041,7 @@ void MapMode::_FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path
 			bool continue_loop = true;
 			for (int16 r = nodes[i].row - y_span; r < nodes[i].row && continue_loop; r++) {
 				for (int16 c = nodes[i].col - x_span; c < nodes[i].col + x_span; c++) {
-					if (_map_grid[r][c] == true) {
+					if (_map_grid[r][c] & sprite->context > 0) {
 						continue_loop = false;
 						break;
 					}
