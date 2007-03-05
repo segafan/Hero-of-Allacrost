@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		493D9E450B9C9FFD00DF1F52 /* map_zones.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 493D9E440B9C9FFD00DF1F52 /* map_zones.h */; };
 		4941A6F10AC1D86400D65B8E /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A68B0AC1D86400D65B8E /* main.cpp */; };
 		4941A6F20AC1D86400D65B8E /* main_options.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A68C0AC1D86400D65B8E /* main_options.cpp */; };
 		4941A6F40AC1D86400D65B8E /* battle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6900AC1D86400D65B8E /* battle.cpp */; };
@@ -128,6 +129,7 @@
 				4941A7450AC1D8BA00D65B8E /* SDL_ttf.framework in Copy Frameworks */,
 				4941A7460AC1D8BA00D65B8E /* SDL.framework in Copy Frameworks */,
 				49BDC4520AF5412600940A6C /* socket.h in Copy Frameworks */,
+				493D9E450B9C9FFD00DF1F52 /* map_zones.h in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -152,6 +154,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		493D9E440B9C9FFD00DF1F52 /* map_zones.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = map_zones.h; sourceTree = "<group>"; };
 		4941A4B00AC1D77500D65B8E /* Allacrost.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Allacrost.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4941A6470AC1D86300D65B8E /* defs.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = defs.h; sourceTree = "<group>"; };
 		4941A68B0AC1D86400D65B8E /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
@@ -264,7 +267,7 @@
 		49E911C30B9363A9006BF734 /* img */ = {isa = PBXFileReference; lastKnownFileType = folder; path = img; sourceTree = "<group>"; };
 		D404C6E90B02FD3E00827A19 /* editor.moc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = editor.moc.cpp; path = src/editor/editor.moc.cpp; sourceTree = "<group>"; };
 		D404C6EB0B02FD6D00827A19 /* grid.moc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = grid.moc.cpp; path = src/editor/grid.moc.cpp; sourceTree = "<group>"; };
-		D4D1BA490B02B1DB0052BF1E /* Editor.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Editor.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D4D1BA490B02B1DB0052BF1E /* Editor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Editor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4D1BA4B0B02B1DB0052BF1E /* Editor-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Editor-Info.plist"; sourceTree = "<group>"; };
 		D4D1BA650B02B27F0052BF1E /* editor.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = editor.cpp; sourceTree = "<group>"; };
 		D4D1BA660B02B27F0052BF1E /* editor.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = editor.h; sourceTree = "<group>"; };
@@ -426,6 +429,7 @@
 		4941A69B0AC1D86400D65B8E /* map */ = {
 			isa = PBXGroup;
 			children = (
+				493D9E440B9C9FFD00DF1F52 /* map_zones.h */,
 				4941A69C0AC1D86400D65B8E /* map.cpp */,
 				4941A69D0AC1D86400D65B8E /* map.h */,
 				4941A69E0AC1D86400D65B8E /* map_actions.cpp */,

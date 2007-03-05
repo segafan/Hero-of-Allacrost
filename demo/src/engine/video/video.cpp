@@ -573,6 +573,10 @@ bool GameVideo::ApplySettings()
 		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
 		SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+		
+		// set up multisampling
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 2);
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
 		if (!SDL_SetVideoMode(_temp_width, _temp_height, 0, flags)) {
 		// RGB values of 1 for each and 8 for depth seemed to be sufficient.
@@ -582,6 +586,10 @@ bool GameVideo::ApplySettings()
 			SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
 			SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
 			SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0);
+			
+			// kill multisampling
+			SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
+			SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
 
 			if (!SDL_SetVideoMode(_temp_width, _temp_height, 0, flags)) {
 				if (VIDEO_DEBUG) {
