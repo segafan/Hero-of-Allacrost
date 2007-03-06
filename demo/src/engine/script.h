@@ -52,12 +52,15 @@ extern "C" {
 **/
 #define ScriptObject luabind::object
 
-//! All calls to the scripting engine are wrapped in this namespace.
+//! \brief A macro for making Lua function calls
+#define ScriptCallFunction luabind::call_function
+
+//! \brief All calls to the scripting engine are wrapped in this namespace.
 namespace hoa_script {
 
-//! The singleton pointer responsible for the interaction between the C++ engine and Lua scripts.
+//! \brief The singleton pointer responsible for the interaction between the C++ engine and Lua scripts.
 extern GameScript *ScriptManager;
-//! Determines whether the code in the hoa_script namespace should print debug statements or not.
+//! \brief Determines whether the code in the hoa_script namespace should print debug statements or not.
 extern bool SCRIPT_DEBUG;
 
 /** \name Script Error Codes
