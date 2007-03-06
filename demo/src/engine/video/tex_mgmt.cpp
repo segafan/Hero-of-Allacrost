@@ -109,7 +109,10 @@ bool GameVideo::LoadImage(ImageDescriptor &id)
 {
 	if(id._animated)
 	{
-		return _LoadImage(dynamic_cast<AnimatedImage &>(id));
+		if (!_LoadImage(dynamic_cast<AnimatedImage &>(id)))
+		{
+			return false;
+		}
 
 		if (id.IsGrayScale())
 		{
@@ -118,13 +121,18 @@ bool GameVideo::LoadImage(ImageDescriptor &id)
 	}
 	else
 	{
-		return _LoadImage(dynamic_cast<StillImage &>(id));
+		if (!_LoadImage(dynamic_cast<StillImage &>(id)))
+		{
+			return false;
+		}
 
 		if (id.IsGrayScale())
 		{
 			dynamic_cast<StillImage &>(id).EnableGrayScale();
 		}
 	}
+
+	return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -226,9 +234,15 @@ bool GameVideo::_LoadImage(StillImage &id)
 
 bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::string &filename, const uint32 rows, const uint32 cols)
 {
-	if (filename.empty() || images.size()!=rows*cols)
+	if (images.size()!=rows*cols)
 	{
-		cerr << "Unexpected error loading multi image" << endl;
+		cerr << "VIDEO ERROR: vector of StillImages not holding rows*cols images, when loading multi image" << endl;
+		return false;
+	}
+
+	if (filename.empty())
+	{
+		cerr << "Video Error: empty filename when loading multi image" << endl;
 		return false;
 	}
 
@@ -298,7 +312,7 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 					if(VIDEO_DEBUG)
 						cerr << "VIDEO ERROR: got a NULL Image from images map in LoadImage()" << endl;
 
-					delete[] loadInfo.pixels;
+					free (loadInfo.pixels);
 					return false;
 				}
 
@@ -309,7 +323,7 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 					if(!img->texture_sheet->RestoreImage(img))
 					{
 						if (loadInfo.pixels)
-							delete[] loadInfo.pixels;
+							free (loadInfo.pixels);
 						return false;
 					}
 				}
@@ -359,7 +373,7 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 					cerr << "VIDEO_DEBUG: GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
 
 					if (loadInfo.pixels)
-						delete[] loadInfo.pixels;
+						free (loadInfo.pixels);
 					return false;
 				}
 
@@ -388,7 +402,7 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 
 	// Free loaded image, in case we used it
 	if (loadInfo.pixels)
-		delete[] loadInfo.pixels;
+		free (loadInfo.pixels);
 
 	return true;
 }
@@ -454,7 +468,7 @@ bool GameVideo::_LoadImageHelper(StillImage &id)
 			cerr << "VIDEO_DEBUG: GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
 
 		delete newImage;
-		delete[] load_info.pixels;
+		free (load_info.pixels);
 		return false;
 	}
 
@@ -475,7 +489,7 @@ bool GameVideo::_LoadImageHelper(StillImage &id)
 
 	// finally, delete the buffer used to hold the pixel data
 	if (load_info.pixels)
-		delete[] load_info.pixels;
+		free (load_info.pixels);
 
 	return true;
 }
@@ -553,7 +567,7 @@ bool GameVideo::_LoadRawImagePng(const std::string &filename, hoa_video::private
 
 	loadInfo.width = info_ptr->width;
 	loadInfo.height = info_ptr->height;
-	loadInfo.pixels = new uint8 [info_ptr->width * info_ptr->height * 4];
+	loadInfo.pixels = malloc (info_ptr->width * info_ptr->height * 4);
 
 	unsigned int bpp = info_ptr->channels;
 
@@ -630,7 +644,7 @@ bool GameVideo::_LoadRawImageJpeg(const std::string &filename, hoa_video::privat
 
 	loadInfo.width = cinfo.output_width;
 	loadInfo.height = cinfo.output_height;
-	loadInfo.pixels = new uint8 [cinfo.output_width * cinfo.output_height * 4];
+	loadInfo.pixels = malloc (cinfo.output_width * cinfo.output_height * 4);
 
 	unsigned int bpp = cinfo.output_components;
 
@@ -841,7 +855,7 @@ bool GameVideo::SaveImage (const std::string &file_name, const std::vector<Still
 	hoa_video::private_video::ImageLoadInfo info;
 	info.height = rows*height;
 	info.width = columns*width;
-	info.pixels = new uint8 [info.width * info.height * 4];
+	info.pixels = malloc (info.width * info.height * 4);
 
 	GameVideo *videoManager = GameVideo::SingletonGetReference();
 	hoa_video::private_video::Image* img;
@@ -854,7 +868,7 @@ bool GameVideo::SaveImage (const std::string &file_name, const std::vector<Still
 	ID = img->texture_sheet->texID;
 	texture.width = img->texture_sheet->width;
 	texture.height = img->texture_sheet->height;
-	texture.pixels = new uint8 [texture.width * texture.height * 4];
+	texture.pixels = malloc (texture.width * texture.height * 4);
 	videoManager->_BindTexture(ID);
 	glGetTexImage (GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.pixels);
 
@@ -873,10 +887,10 @@ bool GameVideo::SaveImage (const std::string &file_name, const std::vector<Still
 				// If the new texture is bigger, reallocate memory
 				if (texture.height * texture.width < img->texture_sheet->height * img->texture_sheet->width * 4)
 				{
-					delete[] texture.pixels;
+					free (texture.pixels);
 					texture.width = img->texture_sheet->width;
 					texture.height = img->texture_sheet->height;
-					texture.pixels = new uint8 [texture.width * texture.height * 4];
+					texture.pixels = malloc (texture.width * texture.height * 4);
 				}
 				glGetTexImage (GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.pixels);
 			}
@@ -906,6 +920,12 @@ bool GameVideo::SaveImage (const std::string &file_name, const std::vector<Still
 	{
 		_SavePng (file_name, info);
 	}
+
+	if (info.pixels)
+		free (info.pixels);
+
+	if (texture.pixels)
+		free (texture.pixels);
 
 	return true;
 }
@@ -983,13 +1003,13 @@ void GameVideo::_GetBufferFromTexture (hoa_video::private_video::ImageLoadInfo& 
 									   hoa_video::private_video::TexSheet* texture) const
 {
 	if (buffer.pixels)
-		delete[] buffer.pixels;
+		free (buffer.pixels);
 	buffer.pixels = NULL;
 
 	// Get the texture as a buffer
 	buffer.height = texture->height;
 	buffer.width = texture->width;
-	buffer.pixels = new uint8 [buffer.height * buffer.width * 4];
+	buffer.pixels = malloc (buffer.height * buffer.width * 4);
 	VideoManager->_BindTexture(texture->texID);
 	glGetTexImage (GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer.pixels);
 }
@@ -1010,7 +1030,7 @@ void GameVideo::_GetBufferFromImage (hoa_video::private_video::ImageLoadInfo& bu
 		hoa_video::private_video::ImageLoadInfo info;
 		info.width = img->width;
 		info.height = img->height;
-		info.pixels = new uint8 [img->width * img->height * 4];
+		info.pixels = malloc (img->width * img->height * 4);
 		uint32 dst_bytes = info.width * 4;
 		uint32 src_bytes = buffer.width * 4;
 		uint32 src_offset = img->y * buffer.width * 4 + img->x * 4;
@@ -1019,7 +1039,8 @@ void GameVideo::_GetBufferFromImage (hoa_video::private_video::ImageLoadInfo& bu
 			memcpy ((uint8*)info.pixels+i*dst_bytes, (uint8*)buffer.pixels+i*src_bytes+src_offset, dst_bytes);
 		}
 
-		delete buffer.pixels;
+		if (buffer.pixels)
+			free (buffer.pixels);
 
 		buffer.pixels = info.pixels;
 		buffer.height = info.height;
@@ -2532,6 +2553,9 @@ bool GameVideo::_ReloadImagesToSheet(TexSheet *sheet)
 					cerr << "VIDEO ERROR: sheet->CopyRect() failed in _ReloadImagesToSheet()!" << endl;
 				success = false;
 			}
+
+			if (loadInfo.pixels)
+				free (loadInfo.pixels);
 		}
 		++iImage;
 	}
