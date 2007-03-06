@@ -20,9 +20,6 @@
 #include <stdarg.h>
 #include "script.h"
 
-#include "global.h"
-#include "map.h"
-
 using namespace std;
 using namespace hoa_utils;
 using namespace hoa_script::private_script;
@@ -325,7 +322,7 @@ object ScriptDescriptor::ReadFunctionPointer(string key) {
 		lua_getglobal(_lstack, key.c_str());
 
 		luabind::object o(from_stack(_lstack, STACK_TOP));
-		
+
 		if (!o) {
 			if (SCRIPT_DEBUG)
 				cerr << "SCRIPT DESCRIPTOR: Unable to access global " << key << endl;
@@ -938,17 +935,6 @@ GameScript::~GameScript() {
 
 
 bool GameScript::SingletonInitialize() {
-// 	// Call all binding functions to make classes, functions, etc. available to Lua
-// 	hoa_video::GameVideo::BindToLua();
-// 	hoa_audio::GameAudio::BindToLua();
-// 	hoa_mode_manager::GameModeManager::BindToLua();
-// 	hoa_system::GameSystem::BindToLua();
-// 	hoa_input::GameInput::BindToLua();
-	hoa_global::GameGlobal::BindToLua();
-//
-// 	hoa_battle::BattleMode::BindToLua();
-	hoa_map::MapMode::BindToLua();
-
 	// TODO: Open the user setting's file and apply those settings
 	return true;
 }

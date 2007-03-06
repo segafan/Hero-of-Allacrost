@@ -33,15 +33,19 @@
 
 #include "utils.h"
 #include "defs.h"
+
+#include "main_options.h"
+
 #include "audio.h"
 #include "video.h"
-#include "script.h"
-#include "mode_manager.h"
 #include "input.h"
+#include "script.h"
 #include "system.h"
 #include "global.h"
+#include "mode_manager.h"
+
 #include "boot.h"
-#include "main_options.h"
+#include "map.h"
 
 using namespace std;
 using namespace hoa_utils;
@@ -158,6 +162,18 @@ bool InitializeEngine() {
 		cerr << "ERROR: unable to initialize ScriptManager" << endl;
 		return false;
 	}
+
+	// Call all binding functions to make classes, functions, etc. available to Lua
+// 	hoa_video::GameVideo::BindToLua();
+// 	hoa_audio::GameAudio::BindToLua();
+// 	hoa_mode_manager::GameModeManager::BindToLua();
+// 	hoa_system::GameSystem::BindToLua();
+// 	hoa_input::GameInput::BindToLua();
+	hoa_global::GameGlobal::BindToLua();
+
+// 	hoa_battle::BattleMode::BindToLua();
+	hoa_map::MapMode::BindToLua();
+
 	if (ModeManager->SingletonInitialize() == false) {
 		cerr << "ERROR: unable to initialize ModeManager" << endl;
 		return false;
