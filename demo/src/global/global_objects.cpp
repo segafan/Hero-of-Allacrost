@@ -69,7 +69,7 @@ void GlobalItem::Use(GlobalTarget* target) {
 		return;
 	}
 
-	luabind::call_function<void>(_function);
+	ScriptCallFunction<void>(_function);
 	_count--;
 }
 
@@ -87,14 +87,14 @@ void GlobalWeapon::_Load() {
 
 	// Load the weapon data from the script
 	GlobalManager->_weapons_script.ReadOpenTable(_id);
-	
+
 	_name = MakeUnicodeString(GlobalManager->_weapons_script.ReadString("name"));
 	_description = MakeUnicodeString(GlobalManager->_weapons_script.ReadString("description"));
 	_icon_image.SetFilename(GlobalManager->_weapons_script.ReadString("icon"));
 	_usable_by = static_cast<uint32>(GlobalManager->_weapons_script.ReadInt("usable_by"));
 	_physical_attack = GlobalManager->_weapons_script.ReadInt("physical_attack");
 	_metaphysical_attack = GlobalManager->_weapons_script.ReadInt("metaphysical_attack");
-	
+
 	GlobalManager->_weapons_script.ReadCloseTable();
 
 	if (GlobalManager->_weapons_script.GetErrorCode() != SCRIPT_NO_ERRORS) {
@@ -138,14 +138,14 @@ void GlobalArmor::_Load() {
 	}
 
 	GlobalManager->_armor_script.ReadOpenTable(_id);
-	
+
 	_name = MakeUnicodeString(GlobalManager->_armor_script.ReadString("name"));
 	_description = MakeUnicodeString(GlobalManager->_armor_script.ReadString("description"));
 	_icon_image.SetFilename(GlobalManager->_armor_script.ReadString("icon"));
 	_usable_by = static_cast<uint32>(GlobalManager->_armor_script.ReadInt("usable_by"));
 	_physical_defense = GlobalManager->_armor_script.ReadInt("physical_defense");
 	_metaphysical_defense = GlobalManager->_armor_script.ReadInt("metaphysical_defense");
-	
+
 	GlobalManager->_armor_script.ReadCloseTable();
 
 	if (GlobalManager->_armor_script.GetErrorCode() != SCRIPT_NO_ERRORS) {

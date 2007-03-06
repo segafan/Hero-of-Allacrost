@@ -355,9 +355,7 @@ bool MapMode::Load(string filename) {
  		}
  	}
 
-	// TODO: Need a "ReadCallFunction" for scripting engine to replace raw luabind call
-	// _map_script.ReadCallFunction("Load", "");
-	luabind::call_function<void>(_map_script.GetLuaState(), "Load", this);
+	ScriptCallFunction<void>(_map_script.GetLuaState(), "Load", this);
 
 	_current_dialogue = NULL;
 
@@ -808,7 +806,7 @@ MapObject* MapMode::_FindNearestObject(const VirtualSprite* sprite) {
 		MapObject* obj = i->second;
 		if( obj == sprite ) //A sprite can't target itself
 			continue;
-		
+
 		// Objects in different contexts can not interact with one another
 		if (obj->context & sprite->context == 0) // Since objects can span multiple context, we check that no contexts are equal
 			continue;
@@ -947,7 +945,7 @@ bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 						return true;
 				}
 			}
-		
+
 		}
 	}
 
