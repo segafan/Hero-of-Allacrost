@@ -1334,8 +1334,12 @@ bool GameVideo::CaptureScreen(StillImage &id)
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO_DEBUG: glReadPixels() returned an error inside GameVideo::CaptureScreen!" << endl;
 
-		free(buffer);
-		free(loadInfo.pixels);
+		if (buffer)
+			free(buffer);
+
+		if (loadInfo.pixels)
+			free(loadInfo.pixels);
+
 		return false;
 	}
 
@@ -1349,7 +1353,8 @@ bool GameVideo::CaptureScreen(StillImage &id)
 	}
 
 	// Free the buffer
-	free(buffer);
+	if (buffer)
+		free(buffer);
 
 	//TEMP TAGS
 	// create an Image structure and store it our std::map of images
@@ -1366,7 +1371,9 @@ bool GameVideo::CaptureScreen(StillImage &id)
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO_DEBUG: GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
 
-		free(loadInfo.pixels);
+		if (loadInfo.pixels)
+			free(loadInfo.pixels);
+
 		return false;
 	}
 
@@ -1384,7 +1391,8 @@ bool GameVideo::CaptureScreen(StillImage &id)
 	id._elements.push_back(element);
 
 	// finally, delete the buffer used to hold the pixel data
-	free(loadInfo.pixels);
+	if (loadInfo.pixels)
+		free(loadInfo.pixels);
 
 	return true;
 }
