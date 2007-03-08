@@ -17,6 +17,7 @@
 #include "map.h"
 #include "map_objects.h"
 #include "map_dialogue.h"
+#include "map_zones.h"
 #include "audio.h"
 #include "video.h"
 #include "global.h"
@@ -59,6 +60,8 @@ MapMode::MapMode() {
 
 	_map_state = EXPLORE;
 
+	_lastID = 1000;
+
 	_virtual_focus = new VirtualSprite();
 	_virtual_focus->SetXPosition(0, 0.0f);
 	_virtual_focus->SetYPosition(0, 0.0f);
@@ -89,9 +92,8 @@ MapMode::~MapMode() {
 	}
 
 	// Delete all of the map objects
-	for (uint32 i = 0; i < _ground_objects.size(); i++) {
-		if (_ground_objects[i] != NULL)
-			delete(_ground_objects[i]);
+	for (uint32 i = 0; i < _ground_objects.size(); i++) 
+		delete(_ground_objects[i]);
 	}
 
 	for (uint32 i = 0; i < _pass_objects.size(); i++) {
@@ -141,9 +143,11 @@ void MapMode::BindToLua() {
 			.def("_AddGroundObject", &MapMode::_AddGroundObject, adopt(_2))
 			.def("_AddPassObject", &MapMode::_AddPassObject, adopt(_2))
 			.def("_AddSkyObject", &MapMode::_AddSkyObject, adopt(_2))
+			.def("_AddZone", &MapMode::_AddZone, adopt(_2))
 			.def("_SetCameraFocus", &MapMode::_SetCameraFocus)
 			.def("_SetMapState", &MapMode::_SetMapState)
 			.def("_GetMapState", &MapMode::_GetMapState)
+			.def("_GetGeneratedObjectID", &MapMode::_GetGeneratedObjectID)
 
 			// Namespace constants
 			.enum_("constants") [
@@ -177,6 +181,12 @@ void MapMode::BindToLua() {
 				value("ANIM_WALKING_NORTH", ANIM_WALKING_NORTH),
 				value("ANIM_WALKING_WEST", ANIM_WALKING_WEST),
 				value("ANIM_WALKING_EAST", ANIM_WALKING_EAST),
+				//Sprite speeds
+				value("VERY_SLOW_SPEED", VERY_SLOW_SPEED),
+				value("SLOW_SPEED", SLOW_SPEED),
+				value("NORMAL_SPEED", NORMAL_SPEED),
+				value("FAST_SPEED", FAST_SPEED),
+				value("VERY_FAST_SPEED", VERY_FAST_SPEED),
 				// Map dialogue constants
 				value("DIALOGUE_INFINITE", DIALOGUE_INFINITE)
 			]
@@ -243,6 +253,54 @@ void MapMode::BindToLua() {
 			.def("SetCurrentAnimation", &MapSprite::SetCurrentAnimation)
 			.def("GetWalkSound", &MapSprite::GetWalkSound)
 			.def("GetCurrentAnimation", &MapSprite::GetCurrentAnimation)
+	];
+
+	module(ScriptManager->GetGlobalState(), "hoa_map")
+	[
+		class_<MonsterSprite, MapSprite>("MonsterSprite")
+			.def(constructor<std::string>())
+			.def("SetZone", &MonsterSprite::SetZone)
+			.def("Reset", &MonsterSprite::Reset)
+			.def("SetAggroRange", &MonsterSprite::SetAggroRange)
+			.def("GetAggroRange", &MonsterSprite::GetAggroRange)
+			.def("SetTimeToChange", &MonsterSprite::SetTimeToChange)
+			.def("GetTimeToChange", &MonsterSprite::GetTimeToChange)
+			.def("SetTimeToSpawn", &MonsterSprite::SetTimeToSpawn)
+			.def("GetTimeToSpawn", &MonsterSprite::GetTimeToSpawn)
+			.def("ChangeStateDead", &MonsterSprite::ChangeStateDead)
+			.def("ChangeStateSpawning", &MonsterSprite::ChangeStateSpawning)
+			.def("ChangeStateHostile", &MonsterSprite::ChangeStateHostile)
+			.def("IsDead", &MonsterSprite::IsDead)
+			.def("IsSpawning", &MonsterSprite::IsSpawning)
+			.def("IsHostile", &MonsterSprite::IsHostile)
+	];
+
+	module(ScriptManager->GetGlobalState(), "hoa_map")
+	[
+		class_<ZoneSection>("ZoneSection")
+			.def(constructor<uint16,uint16,uint16,uint16>())
+			.def_readwrite("start_row", &ZoneSection::start_row)
+			.def_readwrite("end_row", &ZoneSection::end_row)
+			.def_readwrite("start_col", &ZoneSection::start_col)
+			.def_readwrite("end_col", &ZoneSection::end_col)
+	];
+
+	module(ScriptManager->GetGlobalState(), "hoa_map")
+	[
+		class_<MapZone>("MapZone")
+			.def("AddSection", &MapZone::AddSection, adopt(_2))
+			.scope
+			[
+				def("IsInsideZone", &MapZone::IsInsideZone)
+			]
+	];
+
+	module(ScriptManager->GetGlobalState(), "hoa_map")
+	[
+		class_<MonsterZone, MapZone>("MonsterZone")
+			.def(constructor<MapMode*, uint8, uint32, bool>())
+			.def("AddMonster", &MonsterZone::AddMonster, adopt(_2))
+			.def("IsRestraining", &MonsterZone::IsRestraining)
 	];
 
 	module(ScriptManager->GetGlobalState(), "hoa_map")
@@ -347,47 +405,20 @@ bool MapMode::Load(string filename) {
 	}
 
 	// Uncomment this loop to test out tile-collision detection
- 	for (uint16 r = 0; r < _num_grid_rows; r++) {
- 		for (uint16 c = 0; c < _num_grid_cols; c++) {
- 			if ((r + c) % 70 == 0) {
-				_map_grid[r][c] = MAP_CONTEXT_1;
- 			}
- 		}
- 	}
+ 	//for (uint16 r = 0; r < _num_grid_rows; r++) {
+ 	//	for (uint16 c = 0; c < _num_grid_cols; c++) {
+ 	//		if ((r + c) % 70 == 0) {
+		//		_map_grid[r][c] = MAP_CONTEXT_1;
+ 	//		}
+ 	//	}
+ 	//}
 
 	ScriptCallFunction<void>(_map_script.GetLuaState(), "Load", this);
 
 	_current_dialogue = NULL;
 
-
-
-	// Load player sprite and rest of map objects
-// 	MapSprite *sp;
-// 	sp = new MapSprite();
-// 	sp->name = MakeUnicodeString("Claudius");
-// 	sp->SetObjectID(0);
-// 	sp->SetContext(1);
-// 	sp->SetXPosition(55, 0.5f);
-// 	sp->SetYPosition(55, 0.5f);
-// 	sp->SetCollHalfWidth(1.0f);
-// 	sp->SetCollHeight(2.0f);
-// 	sp->img_half_width = 1.0f;
-// 	sp->img_height = 4.0f;
-// 	sp->movement_speed = NORMAL_SPEED;
-// 	sp->direction = SOUTH;
-// 	sp->SetFacePortrait( "img/portraits/map/claudius.png" );
-// 	if (sp->Load() == false)
-// 		return false;
-// 	_all_objects[ 0 ] = sp;
-// 	_camera = sp;
-// 	_ground_objects.push_back(sp);
-
-	_camera = reinterpret_cast< VirtualSprite* >( _all_objects[ 1000 ] );
-
-
 	MapSprite *DialogueSprite;
 	MapDialogue *Dialogue = new MapDialogue( false );
-
 
 	// Load player sprite and rest of map objects
 	DialogueSprite = new MapSprite();
@@ -422,50 +453,10 @@ bool MapMode::Load(string filename) {
 	Dialogue->AddText( 1, MakeUnicodeString( "This is a test" ), 5000 );
 	Dialogue->AddTextActions( 1000, MakeUnicodeString( "Oh really?!" ), testvec );
 
-	//ActionPathMove *new_act;
-	/*new_act = new ActionPathMove(DialogueSprite);
-	new_act->destination.row = 45;
-	new_act->destination.col = 50;
-	DialogueSprite->actions.push_back(new_act);
-	new_act = new ActionPathMove(DialogueSprite);
-	new_act->destination.row = 50;
-	new_act->destination.col = 45;
-	DialogueSprite->actions.push_back(new_act);
-
-	new_act = new ActionPathMove(DialogueSprite);
-	new_act->destination.row = 47;
-	new_act->destination.col = 22;
-	DialogueSprite->actions.push_back(new_act);
-	new_act = new ActionPathMove(DialogueSprite);
-	new_act->destination.row = 8;
-	new_act->destination.col = 8;
-	DialogueSprite->actions.push_back(new_act);*/
-	//DialogueSprite->current_action = 0;
-
 	DialogueSprite->AddDialogue( Dialogue );
 	DialogueSprite->SetDialogue( 0 );
 	DialogueSprite->SetFacePortrait( "img/portraits/map/laila.png" );
 	_AddGroundObject(DialogueSprite);
-// 	if (DialogueSprite->Load() == false)
-// 		return false;
-// 	_ground_objects.push_back(DialogueSprite);
-// 	_all_objects[ 1 ] = DialogueSprite;
-
-	//TEMP
-	MonsterSprite* Monster = new MonsterSprite();
-	Monster->name = MakeUnicodeString("Monster");
-	Monster->SetObjectID(999);
-	Monster->SetContext(1);
-	Monster->SetXPosition(50, 0.5f);
-	Monster->SetYPosition(45, 0.5f);
-	Monster->SetCollHalfWidth(1.0f);
-	Monster->SetCollHeight(2.0f);
-	Monster->img_half_width = 1.0f;
-	Monster->img_height = 4.0f;
-	Monster->movement_speed = VERY_SLOW_SPEED*2;
-	Monster->SetDirection(EAST);
-
-	_AddGroundObject(Monster);
 
 	for (uint32 i = 0; i < _ground_objects.size(); i++) {
 		if (_ground_objects[i]->Load() == false) {
@@ -525,6 +516,11 @@ void MapMode::Update() {
 	// TODO
 
 	// ---------- (3) Update all objects on the map
+
+
+	for( uint32 i = 0; i < _zones.size(); i++ ) {
+		_zones[i]->Update();
+	}
 
 	for (uint32 i = 0; i < _ground_objects.size(); i++) {
 		_ground_objects[i]->Update();
@@ -929,18 +925,20 @@ bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 				if (!(other_y_location - (*objects)[i]->coll_height > y_location
 					|| other_y_location < cr_top )) {
 						// Boxes overlap on both axis, there is a colision
-						if( sprite->GetType() == MONSTER_TYPE && (*objects)[i] == _camera ) {
-							reinterpret_cast<MonsterSprite*>(sprite)->StateDead();
-							BattleMode *BM = new BattleMode();
-							ModeManager->Push(BM);
-							return false;
+						if( sprite->GetType() == MONSTER_TYPE && (*objects)[i] == _camera 
+							&& reinterpret_cast<MonsterSprite*>(sprite)->IsHostile() ) {
+								reinterpret_cast<MonsterSprite*>(sprite)->ChangeStateDead();
+								//BattleMode *BM = new BattleMode();
+								//ModeManager->Push(BM);
+								return false;
 						}
 
-						if( (*objects)[i]->GetType() == MONSTER_TYPE &&  sprite == _camera ) {
-							reinterpret_cast<MonsterSprite*>((*objects)[i])->StateDead();
-							BattleMode *BM = new BattleMode();
-							ModeManager->Push(BM);
-							return false;
+						if( (*objects)[i]->GetType() == MONSTER_TYPE &&  sprite == _camera
+							&& reinterpret_cast<MonsterSprite*>((*objects)[i])->IsHostile() ) {
+								reinterpret_cast<MonsterSprite*>((*objects)[i])->ChangeStateDead();
+								//BattleMode *BM = new BattleMode();
+								//ModeManager->Push(BM);
+								return false;
 						}
 						return true;
 				}
@@ -1311,6 +1309,10 @@ void MapMode::Draw() {
 	}
 } // void MapMode::_Draw()
 
+uint16 MapMode::_GetGeneratedObjectID() {
+	return ++_lastID;
+}
+
 // ****************************************************************************
 // ************************* LUA BINDING FUNCTIONS ****************************
 // ****************************************************************************
@@ -1332,6 +1334,10 @@ void MapMode::_AddPassObject(private_map::MapObject *obj) {
 void MapMode::_AddSkyObject(private_map::MapObject *obj) {
 	_sky_objects.push_back(obj);
 	_all_objects.insert(make_pair(obj->object_id, obj));
+}
+
+void MapMode::_AddZone(private_map::MapZone *zone) {
+	_zones.push_back(zone);
 }
 
 } // namespace hoa_map

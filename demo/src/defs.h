@@ -203,6 +203,10 @@ namespace hoa_map {
 		class MapFrame;
 		class PathNode;
 
+		class ZoneSection;
+		class MapZone;
+		class MonsterZone;
+
 		class MapObject;
 		class PhysicalObject;
 		class VirtualSprite;
@@ -216,9 +220,7 @@ namespace hoa_map {
 		class ActionAnimate;
 		class ActionScriptFunction;
 
-		class ZoneSection;
-		class MapZone;
-		class MonsterZone;
+		
 	}
 }
 
