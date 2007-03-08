@@ -92,7 +92,7 @@ MapMode::~MapMode() {
 	}
 
 	// Delete all of the map objects
-	for (uint32 i = 0; i < _ground_objects.size(); i++) 
+	for (uint32 i = 0; i < _ground_objects.size(); i++) { 
 		delete(_ground_objects[i]);
 	}
 
