@@ -103,6 +103,8 @@ modes_SOURCES = \
 	$(MODES_DIR)/boot/boot_credits.h \
 	$(MODES_DIR)/map/map.cpp \
 	$(MODES_DIR)/map/map.h \
+	$(MODES_DIR)/map/map_zones.cpp \
+	$(MODES_DIR)/map/map_zones.h \
 	$(MODES_DIR)/map/map_actions.cpp \
 	$(MODES_DIR)/map/map_actions.h \
 	$(MODES_DIR)/map/map_dialogue.cpp \
