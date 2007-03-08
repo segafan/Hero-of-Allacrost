@@ -19,6 +19,7 @@
 #include "utils.h"
 #include "defs.h"
 
+
 namespace hoa_map {
 
 namespace private_map {
@@ -28,13 +29,13 @@ namespace private_map {
 ***
 *** The area is represented by the top-left corner as the start and the bottom
 *** right corner as the end of the area. Both are represented in the row / column
-*** format ( big tiles, not collision cells )
+*** format ( small tiles, collision cells )
 ***
 *** \note ZoneSection should not be used by itself, attach it to a MapZone.
 *** ***************************************************************************/
 class ZoneSection {
 public:
-	ZoneSection( uint16 s_row = 0, uint16 s_col = 0, uint16 e_row = 0, uint16 e_col = 0 )
+	ZoneSection( uint16 s_col, uint16 s_row, uint16 e_col, uint16 e_row )
 		: start_row( s_row ), start_col( s_col ), end_row( e_row ), end_col( e_col ) {}
 
 	uint16 start_row, start_col;
@@ -51,28 +52,19 @@ public:
 *** ***************************************************************************/
 class MapZone {
 public:
-	void AddSection( const ZoneSection & section )
-		{ _sections.push_back( section ); }
+	MapZone(){};
+	virtual ~MapZone(){};
+	void AddSection( ZoneSection * section );
 
-	static bool IsInsideZone( const uint16 pos_x, const uint16 pos_y, const MapZone & zone )
-	{
-		
-		for( std::vector< ZoneSection >::iterator i = zone._sections.begin();
-			 i != zone._sections.end(); ++i )
-		{
-			if( pos_x >= i->start_col && pos_x <= i->end_col
-				&& pos_y >= i->start_row && pos_y <= i->end_row )
-			{
-				return true;
-			}
-		}
-		return false;
-	}
+	static bool IsInsideZone( uint16 pos_x, uint16 pos_y, const MapZone * zone );
 
 	virtual void Update() = 0;
 
 protected:
+	void _RandomPosition( uint16 & x, uint16 & y );
+
 	std::vector< ZoneSection > _sections;
+	MapMode* _map;
 };
 
 /** ****************************************************************************
@@ -84,28 +76,25 @@ protected:
 *** ***************************************************************************/
 class MonsterZone : public MapZone {
 public:
-	MonsterZone( uint8 max_monsters, uint32 regen_time, bool constrained = true )
-		: _regen_time( regen_time ), _max_monsters( max_monsters ), _time_left( 0 ),
-		_active_monsters( 0 ), _constrained( constrained ) { }
-	
-	void Update() {
-		if( _active_monsters < _max_monsters ) {
-			_time_left -= time_elapsed;
-			if( _time_left <= 0 ) {
-				//Make monster active
-				++_active_monsters;
-				_time_left = _regen_time;
-			}
-		}	
-	}
+	MonsterZone( MapMode* map, uint8 max_monsters, uint32 regen_time, bool restrained );
+	virtual ~MonsterZone(){};
+
+	void Update();
+
+	void AddMonster( MonsterSprite* m );
+
+	void MonsterDead();
+
+	bool IsRestraining() const
+		{ return _restrained; }
 
 private:
 	uint32 _regen_time;
-	int32 _time_left;
+	uint32 _time_elapsed;
 	uint8 _max_monsters;
 	uint8 _active_monsters;
 
-	bool _constrained;
+	bool _restrained;
 
 	std::vector< MonsterSprite* > _monsters;
 };

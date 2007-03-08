@@ -21,6 +21,7 @@
 #include "video.h"
 #include "map_actions.h"
 #include "map_dialogue.h"
+#include "map_zones.h"
 
 namespace hoa_map {
 
@@ -206,6 +207,8 @@ public:
 	**/
 	bool draw_on_second_pass;
 
+	std::string filename;
+
 	// ---------- Methods
 
 	MapObject();
@@ -262,7 +265,7 @@ public:
 	*** members of this class.
 	**/
 	//@{
-	void SetObjectID(int16 id)
+	void SetObjectID(int16 id = 0)
 		{ object_id = id; }
 
 	void SetContext(uint32 ctxt)
@@ -682,7 +685,7 @@ public:
 
 
 /** ****************************************************************************
-*** \brief A mobile map object with which the player can get in a fight with.
+*** \brief A mobile map object with which the player can get in a fight.
 ***
 *** Monster sprites are attached to a MonsterZone, where they will respawn when
 *** dead. A monster sprite can be in one of 3 states: SPAWNING, HOSTILE or DEAD.
@@ -702,13 +705,17 @@ private:
 		DEAD
 	};
 public:
-	MonsterSprite()
-		: _color( 1.0f,1.0f,1.0f,0.0f )
+	MonsterSprite( std::string file )
+		: _color( 1.0f,1.0f,1.0f,0.0f ),
+		 _aggro_range(8.0f),
+		 _time_dir_change(2500),
+		 _time_to_spawn(3500),
+		 _zone(0)
 	{
+		filename = file;
 		MapObject::_object_type = MONSTER_TYPE;
 		moving = true;
-		_time_elapsed = 0;
-		_state = SPAWNING;
+		Reset();
 	}
 
 	virtual bool Load();
@@ -722,20 +729,59 @@ public:
 	void SetZone( MonsterZone* zone )
 		{ _zone = zone; }
 
-	void StateDead()
-		{ updatable = false; _state = DEAD; }
+	void Reset() {
+		updatable = false; 
+		no_collision = true;
+		_state = DEAD; 
+		_time_elapsed = 0; 
+		_color.SetAlpha( 0.0f );
+	}
+
+	void SetAggroRange( float range )
+		{ _aggro_range = range; }
+
+	float GetAggroRange()
+		{ return _aggro_range; }
+
+	void SetTimeToChange( uint32 time )
+		{ _time_dir_change = time; }
+
+	uint32 GetTimeToChange()
+		{ return _time_dir_change; }
+
+	void SetTimeToSpawn( uint32 time )
+		{ _time_to_spawn = time; }
+
+	uint32 GetTimeToSpawn()
+		{ return _time_to_spawn; }
+
+	void ChangeStateDead()
+		{ Reset(); _zone->MonsterDead(); }
 	
-	void StateSpawning()
-		{ updatable = true; _state = SPAWNING; } 
+	void ChangeStateSpawning()
+		{ updatable = true; _state = SPAWNING; no_collision = false; } 
 	
-	void StateHostile()
-		{ updatable = true; _state = HOSTILE; }
+	void ChangeStateHostile()
+		{ updatable = true; _state = HOSTILE;}
+
+	bool IsDead()
+		{ return _state == DEAD; }
+	
+	bool IsSpawning()
+		{ return _state == SPAWNING; }
+	
+	bool IsHostile()
+		{ return _state == HOSTILE; }
 
 private:
-	MonsterZone* _zone;
+	private_map::MonsterZone* _zone;
 	hoa_video::Color _color;
 	uint32 _time_elapsed; 
 	State _state; 
+	
+	float _aggro_range;
+	uint32 _time_dir_change;
+	uint32 _time_to_spawn;
 };
 
 } // namespace private_map

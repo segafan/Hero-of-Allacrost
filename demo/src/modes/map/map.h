@@ -270,9 +270,11 @@ class MapMode : public hoa_mode_manager::GameMode {
 	friend class private_map::PhysicalObject;
 	friend class private_map::VirtualSprite;
 	friend class private_map::MapSprite;
+	friend class private_map::MonsterSprite;
 	friend class private_map::MapDialogue;
 	friend class private_map::SpriteAction;
 	friend class private_map::ActionPathMove;
+	friend class private_map::MonsterZone;
 public:
 	MapMode();
 
@@ -363,6 +365,10 @@ private:
 	**/
 	std::map<uint16, private_map::MapObject*> _all_objects;
 
+	/** \brief Keeps the last generated objectID
+	**/
+	uint16 _lastID;
+
 	/** \brief A container for all of the map objects located on the ground layer.
 	*** The ground object layer is where most objects and sprites exist in Allacrost.
 	**/
@@ -425,7 +431,7 @@ private:
 	//! \brief This keeps a pointer to the active dialogue.
 	private_map::MapDialogue* _current_dialogue;
 
-	std::vector< private_map::MonsterZone* > _monster_zones; 
+	std::vector< private_map::MapZone* > _zones; 
 
 	// -------------------- Battle Data Retained by the Map
 
@@ -502,6 +508,10 @@ private:
 	void _AddPassObject(private_map::MapObject *obj);
 
 	void _AddSkyObject(private_map::MapObject *obj);
+
+	void _AddZone(private_map::MapZone *zone);
+
+	uint16 _GetGeneratedObjectID();
 
 	void _SetMapState(uint8 state)
 		{ _map_state = state; }

@@ -228,4 +228,17 @@ function Load(m)
 	sprite:SetDirection(2);
 	sprite:SetFacePortrait("img/portraits/map/claudius.png");
 	map:_AddGroundObject(sprite);
+	
+	--Create a Monster Zone ( attached to current map, 5 monsters max, 5000 ms between respawns, monsters restricted to area )
+	local mzone = hoa_map.MonsterZone( map, 5, 5000, true );
+	--Add a section to the zone that goes from (60, 45) to (80,60) (in positions - or divided tiles)
+	mzone:AddSection( hoa_map.ZoneSection( 60, 45, 80, 60 ) );
+	--Create a sprite representation of a monster attached to this zone
+	local monster = hoa_map.MonsterSprite( "dat/maps/sprites/scorpion.lua" );
+	monster:SetZone( mzone );
+	
+	--Add the monster to the zone (it also gets added to the ground objects)
+	mzone:AddMonster( monster );
+	--Add the zone to the map
+	map:_AddZone( mzone );
 end -- function Load()

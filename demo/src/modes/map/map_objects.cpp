@@ -21,11 +21,13 @@
 #include "audio.h"
 #include "video.h"
 #include "system.h"
+#include "script.h"
 
 using namespace std;
 using namespace hoa_utils;
 using namespace hoa_audio;
 using namespace hoa_video;
+using namespace hoa_script;
 
 namespace hoa_map {
 
@@ -633,6 +635,10 @@ bool MapSprite::LoadState() {
 	return true;
 }
 
+// *****************************************************************************
+// ********************** MonsterSprite Class Functions ************************
+// *****************************************************************************
+
 void MonsterSprite::Draw()
 {
 	if( _state != DEAD ) {
@@ -644,107 +650,173 @@ void MonsterSprite::Draw()
 
 // Load in the appropriate images and other data for the sprite
 bool MonsterSprite::Load() {
-	AnimatedImage img;
-	uint32 frame_speed = static_cast<uint32>(movement_speed / 10.0f);
+	ScriptDescriptor sprite_script;
+	bool success = sprite_script.OpenFile(filename, SCRIPT_READ);
 
+ 	ScriptCallFunction<void>(sprite_script.GetLuaState(), "Load", this);
+
+	string sprite_sheet = sprite_script.ReadString("sprite_sheet");
+	uint32 multi_img_rows = sprite_script.ReadInt("sprite_sheet_rows");
+	uint32 multi_img_cols = sprite_script.ReadInt("sprite_sheet_cols");
+	
+	uint32 frame_speed = sprite_script.ReadInt("frame_speed");
+	//uint32 frame_speed = static_cast<uint32>(movement_speed / 10.0f);
+
+	AnimatedImage img;
 	// Broken multi-image loading code
-	vector<StillImage> frames (24);
-	for (uint8 i=0; i<24; i++)
+	vector<StillImage> frames (multi_img_rows * multi_img_cols);
+	for (uint32 i = 0; i < ( multi_img_rows * multi_img_cols ); ++i)
 		frames[i].SetDimensions(img_half_width * 2, img_height);
 
-	if (VideoManager->LoadMultiImage(frames, "img/sprites/map/scorpion_walk.png", 4, 6) == false) {
+	if (VideoManager->LoadMultiImage(frames, sprite_sheet, multi_img_rows, multi_img_cols) == false) {
 		return false;
 	}
 	else {
 		cout << "MAP: Loaded MulitImage successfully!" << endl;
 	}
 
-	img.Clear();
-	img.AddFrame(frames[0], frame_speed);
+	vector<int32> frames_vector;
+	//Load Standing South
+	sprite_script.ReadIntVector("standing_south_frames", frames_vector );
+	for( size_t i = 0; i < frames_vector.size(); ++i ) {
+		img.AddFrame( frames[ frames_vector[ i ] ], frame_speed);
+	}
 	animations.push_back(img);
 
+	//Load Standing North
 	img.Clear();
-	img.AddFrame(frames[6], frame_speed);
+	frames_vector.clear();
+	sprite_script.ReadIntVector("standing_north_frames", frames_vector );
+	for( size_t i = 0; i < frames_vector.size(); ++i ) {
+		img.AddFrame( frames[ frames_vector[ i ] ], frame_speed);
+	}
 	animations.push_back(img);
 
+	//Load Standing West
 	img.Clear();
-	img.AddFrame(frames[12], frame_speed);
+	frames_vector.clear();
+	sprite_script.ReadIntVector("standing_west_frames", frames_vector );
+	for( size_t i = 0; i < frames_vector.size(); ++i ) {
+		img.AddFrame( frames[ frames_vector[ i ] ], frame_speed);
+	}
 	animations.push_back(img);
 
+	//Load Standing East
 	img.Clear();
-	img.AddFrame(frames[18], frame_speed);
+	frames_vector.clear();
+	sprite_script.ReadIntVector("standing_east_frames", frames_vector );
+	for( size_t i = 0; i < frames_vector.size(); ++i ) {
+		img.AddFrame( frames[ frames_vector[ i ] ], frame_speed);
+	}
 	animations.push_back(img);
 
+	//Load Walking South
 	img.Clear();
-	img.AddFrame(frames[1], frame_speed);
-	img.AddFrame(frames[2], frame_speed);
-	img.AddFrame(frames[3], frame_speed);
-	img.AddFrame(frames[4], frame_speed);
-	img.AddFrame(frames[5], frame_speed);
+	frames_vector.clear();
+	sprite_script.ReadIntVector("walking_south_frames", frames_vector );
+	for( size_t i = 0; i < frames_vector.size(); ++i ) {
+		img.AddFrame( frames[ frames_vector[ i ] ], frame_speed);
+	}
 	animations.push_back(img);
 
+	//Load Walking North
 	img.Clear();
-	img.AddFrame(frames[7], frame_speed);
-	img.AddFrame(frames[8], frame_speed);
-	img.AddFrame(frames[9], frame_speed);
-	img.AddFrame(frames[10], frame_speed);
-	img.AddFrame(frames[11], frame_speed);
+	frames_vector.clear();
+	sprite_script.ReadIntVector("walking_north_frames", frames_vector );
+	for( size_t i = 0; i < frames_vector.size(); ++i ) {
+		img.AddFrame( frames[ frames_vector[ i ] ], frame_speed);
+	}
 	animations.push_back(img);
 
+	//Load Walking West
 	img.Clear();
-	img.AddFrame(frames[13], frame_speed);
-	img.AddFrame(frames[14], frame_speed);
-	img.AddFrame(frames[15], frame_speed);
-	img.AddFrame(frames[16], frame_speed);
-	img.AddFrame(frames[17], frame_speed);
+	frames_vector.clear();
+	sprite_script.ReadIntVector("walking_west_frames", frames_vector );
+	for( size_t i = 0; i < frames_vector.size(); ++i ) {
+		img.AddFrame( frames[ frames_vector[ i ] ], frame_speed);
+	}
 	animations.push_back(img);
 
+	//Load Walking East
 	img.Clear();
-	img.AddFrame(frames[19], frame_speed);
-	img.AddFrame(frames[20], frame_speed);
-	img.AddFrame(frames[21], frame_speed);
-	img.AddFrame(frames[22], frame_speed);
-	img.AddFrame(frames[23], frame_speed);
+	frames_vector.clear();
+	sprite_script.ReadIntVector("walking_east_frames", frames_vector );
+	for( size_t i = 0; i < frames_vector.size(); ++i ) {
+		img.AddFrame( frames[ frames_vector[ i ] ], frame_speed);
+	}
 	animations.push_back(img);
 
 	for (uint32 i = 0; i < animations.size(); i++) {
-// 		animations[i].SetDimensions(img_half_width * 2, img_height);
 		if (animations[i].Load() == false) {
 			cerr << "MAP ERROR: failed to load sprite animation" << endl;
 			return false;
 		}
 	}
 
-	
 	return true;
 } // bool MonsterSprite::Load()
 
 void MonsterSprite::Update()
+{
+	switch( _state )
 	{
-		switch( _state )
-		{
-		case SPAWNING:
-			_time_elapsed += hoa_system::SystemManager->GetUpdateTime();
-			if( _color.GetAlpha() < 1.0f ) {
-				_color.SetAlpha( ( _time_elapsed / 5000.0f ) * 1.0f );
-			}
-			else
-			{
-				_time_elapsed = 0;
-				_state = HOSTILE;
-			}
-			break;
-		case HOSTILE:
-			_time_elapsed += hoa_system::SystemManager->GetUpdateTime();			
-			if( _time_elapsed >= 2500 )
-			{
-				direction = 1 << (rand()%12);
-				_time_elapsed = 0;
-			}
-			MapSprite::Update();
-			break;
+	case SPAWNING:
+		_time_elapsed += hoa_system::SystemManager->GetUpdateTime();
+		if( _color.GetAlpha() < 1.0f ) {
+			_color.SetAlpha( ( _time_elapsed / static_cast<float>(GetTimeToSpawn()) ) * 1.0f );
 		}
+		else
+		{
+			ChangeStateHostile();
+		}
+		break;
+	case HOSTILE:
+		_time_elapsed += hoa_system::SystemManager->GetUpdateTime();
+
+		float xdelta = ComputeXLocation() - hoa_map::MapMode::_current_map->_camera->ComputeXLocation();
+		float ydelta = ComputeYLocation() - hoa_map::MapMode::_current_map->_camera->ComputeYLocation();
+
+		if( !MapZone::IsInsideZone( x_position, y_position, _zone ) && _zone->IsRestraining() ) { 
+			SetDirection( CalculateOppositeDirection( GetDirection() ) );
+		}
+		else {
+			if( abs(xdelta) <= _aggro_range && abs(ydelta) <= _aggro_range && MapZone::IsInsideZone( hoa_map::MapMode::_current_map->_camera->x_position, hoa_map::MapMode::_current_map->_camera->y_position, _zone ) )
+			{
+				if( xdelta > -0.5 && xdelta < 0.5 && ydelta < 0 )
+					SetDirection( SOUTH );
+				else
+					if( xdelta > -0.5 && xdelta < 0.5 && ydelta > 0 )
+						SetDirection( NORTH );
+					else
+						if( ydelta > -0.5 && ydelta < 0.5 && xdelta > 0 )
+							SetDirection( WEST );
+						else
+							if( ydelta > -0.5 && ydelta < 0.5 && xdelta < 0 )
+								SetDirection( EAST );
+							else
+								if( xdelta < 0 && ydelta < 0 )
+									SetDirection( SOUTHEAST );
+								else
+									if( xdelta < 0 && ydelta > 0 )
+										SetDirection( NORTHEAST );
+									else
+										if( xdelta > 0 && ydelta < 0 )
+											SetDirection( SOUTHWEST );
+										else
+											SetDirection( NORTHWEST );
+			}
+			else {
+				if( _time_elapsed >= GetTimeToChange() ) {
+					SetDirection( 1 << hoa_utils::RandomBoundedInteger(0,11) );
+					_time_elapsed = 0;
+				}
+			}
+		}
+		
+		MapSprite::Update();
+		break;
 	}
+} // void MonsterSprite::Update()
 
 
 
