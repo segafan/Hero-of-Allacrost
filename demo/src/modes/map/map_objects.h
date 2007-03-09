@@ -691,12 +691,11 @@ public:
 *** dead. A monster sprite can be in one of 3 states: SPAWNING, HOSTILE or DEAD.
 *** In spawning state, the monster becomes gradually visible, is immobile and
 *** cannot be attacked. In hostile state, the monsters roams the map and will
-*** attack if touched by the player. In dead state, the monsters is invisible 
-*** and waits for the MonsterZone to reset it in an other position, back in 
+*** attack if touched by the player. In dead state, the monsters is invisible
+*** and waits for the MonsterZone to reset it in an other position, back in
 *** spawning state.
 *** ***************************************************************************/
-class MonsterSprite : public MapSprite
-{
+class MonsterSprite : public MapSprite {
 private:
 	enum State
 	{
@@ -704,13 +703,14 @@ private:
 		HOSTILE,
 		DEAD
 	};
+
 public:
-	MonsterSprite( std::string file )
-		: _color( 1.0f,1.0f,1.0f,0.0f ),
-		 _aggro_range(8.0f),
-		 _time_dir_change(2500),
-		 _time_to_spawn(3500),
-		 _zone(0)
+	MonsterSprite( std::string file ) :
+		_zone(NULL),
+		_color(1.0f, 1.0f, 1.0f, 0.0f),
+		_aggro_range(8.0f),
+		_time_dir_change(2500),
+		_time_to_spawn(3500)
 	{
 		filename = file;
 		MapObject::_object_type = MONSTER_TYPE;
@@ -730,10 +730,10 @@ public:
 		{ _zone = zone; }
 
 	void Reset() {
-		updatable = false; 
+		updatable = false;
 		no_collision = true;
-		_state = DEAD; 
-		_time_elapsed = 0; 
+		_state = DEAD;
+		_time_elapsed = 0;
 		_color.SetAlpha( 0.0f );
 	}
 
@@ -757,28 +757,28 @@ public:
 
 	void ChangeStateDead()
 		{ Reset(); _zone->MonsterDead(); }
-	
+
 	void ChangeStateSpawning()
-		{ updatable = true; _state = SPAWNING; no_collision = false; } 
-	
+		{ updatable = true; _state = SPAWNING; no_collision = false; }
+
 	void ChangeStateHostile()
 		{ updatable = true; _state = HOSTILE;}
 
 	bool IsDead()
 		{ return _state == DEAD; }
-	
+
 	bool IsSpawning()
 		{ return _state == SPAWNING; }
-	
+
 	bool IsHostile()
 		{ return _state == HOSTILE; }
 
 private:
 	private_map::MonsterZone* _zone;
 	hoa_video::Color _color;
-	uint32 _time_elapsed; 
-	State _state; 
-	
+	uint32 _time_elapsed;
+	State _state;
+
 	float _aggro_range;
 	uint32 _time_dir_change;
 	uint32 _time_to_spawn;

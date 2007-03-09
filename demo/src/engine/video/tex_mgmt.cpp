@@ -205,7 +205,7 @@ bool GameVideo::_LoadImage(StillImage &id)
 		}
 
 		++(img->ref_count);		// Increment the reference counter of the Image
-	
+
 		if(id._width == 0.0f)
 			id._width = (float) img->width;
 		if(id._height == 0.0f)
@@ -763,7 +763,7 @@ bool GameVideo::_SaveJpeg (const std::string& file_name, hoa_video::private_vide
 
 	jpeg_start_compress (&cinfo, TRUE);
 
-	JSAMPROW row_pointer;				// pointer to a single row 
+	JSAMPROW row_pointer;				// pointer to a single row
 	int row_stride = info.width * 3;	// physical row width in buffer
 
 	// Note that the lines have to be stored from top to bottom
@@ -821,7 +821,7 @@ bool GameVideo::SaveImage (const std::string &file_name, const std::vector<Still
 		return false;
 	}
 
-	// Check if the number of images is compatible with the number of rows and columns 
+	// Check if the number of images is compatible with the number of rows and columns
 	if (image.size() != rows*columns)
 	{
 		cerr << "Game Video: Can't store " << image.size() << " in " << rows << " rows and " << columns << " columns" << endl;
@@ -839,9 +839,9 @@ bool GameVideo::SaveImage (const std::string &file_name, const std::vector<Still
 	}
 
 	// Check all the images are of the same size
-	uint32 width = image[0]->_elements[0].image->width;
-	uint32 height = image[0]->_elements[0].image->height;
-	for (uint32 i=0 ; i<image.size(); i++)
+	int32 width = image[0]->_elements[0].image->width;
+	int32 height = image[0]->_elements[0].image->height;
+	for (uint32 i = 0; i < image.size(); i++)
 	{
 		if (!image[i]->_elements[0].image || image[i]->_elements[0].image->width != width ||
 			image[i]->_elements[0].image->height != height)
@@ -901,7 +901,7 @@ bool GameVideo::SaveImage (const std::string &file_name, const std::vector<Still
 			uint32 dst_bytes = width*columns*4;
 			uint32 src_bytes = texture.width * 4;
 			uint32 src_offset = img->x * texture.width * 4 + img->y * 4;
-			for (uint32 j=0; j<height; j++)
+			for (int32 j = 0; j < height; j++)
 			{
 				memcpy ((uint8*)info.pixels+j*dst_bytes+dst_offset, (uint8*)texture.pixels+j*src_bytes+src_offset, copy_bytes);
 			}

@@ -47,7 +47,7 @@ bool MapZone::IsInsideZone( uint16 pos_x, uint16 pos_y, const MapZone * zone ) {
 void MapZone::_RandomPosition( uint16 & x, uint16 & y ) {
 	//Select a ZoneSection randomly
 	uint16 i = RandomBoundedInteger( 0, _sections.size() - 1 );
-	
+
 	//Select a position inside that section
 	x = RandomBoundedInteger(_sections[i].start_col, _sections[i].end_col);
 	y = RandomBoundedInteger(_sections[i].start_row, _sections[i].end_row);
@@ -57,11 +57,17 @@ void MapZone::_RandomPosition( uint16 & x, uint16 & y ) {
 // *********************** MonsterZone Class Functions *************************
 // *****************************************************************************
 
-MonsterZone::MonsterZone( MapMode* map, uint8 max_monsters, uint32 regen_time, bool restrained )
-	: _regen_time( regen_time ), _max_monsters( max_monsters ), _time_elapsed( 0 ),
-	_active_monsters( 0 ), _restrained( restrained ) {
-		_map = map;
+MonsterZone::MonsterZone(MapMode* map, uint8 max_monsters, uint32 regen_time, bool restrained) :
+	_regen_time(regen_time),
+	_time_elapsed(0),
+	_max_monsters(max_monsters),
+	_active_monsters(0),
+	_restrained(restrained)
+{
+	_map = map;
 }
+
+
 
 void MonsterZone::Update() {
 	if( _active_monsters < _max_monsters ) {
@@ -103,17 +109,22 @@ void MonsterZone::Update() {
 			//Reset timer
 			_time_elapsed = 0;
 		}
-	}	
+	}
 } // void MonsterZone::Update()
+
+
 
 void MonsterZone::AddMonster( MonsterSprite* m ) {
 	_monsters.push_back( m );
 	_map->_AddGroundObject( m );
 }
 
-void MonsterZone::MonsterDead() { 
-	--_active_monsters; 
+
+
+void MonsterZone::MonsterDead() {
+	--_active_monsters;
 }
 
-} // namespace private_map 
+} // namespace private_map
+
 } // namespace hoa_map

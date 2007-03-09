@@ -92,7 +92,7 @@ MapMode::~MapMode() {
 	}
 
 	// Delete all of the map objects
-	for (uint32 i = 0; i < _ground_objects.size(); i++) { 
+	for (uint32 i = 0; i < _ground_objects.size(); i++) {
 		delete(_ground_objects[i]);
 	}
 
@@ -182,11 +182,11 @@ void MapMode::BindToLua() {
 				value("ANIM_WALKING_WEST", ANIM_WALKING_WEST),
 				value("ANIM_WALKING_EAST", ANIM_WALKING_EAST),
 				//Sprite speeds
-				value("VERY_SLOW_SPEED", VERY_SLOW_SPEED),
-				value("SLOW_SPEED", SLOW_SPEED),
-				value("NORMAL_SPEED", NORMAL_SPEED),
-				value("FAST_SPEED", FAST_SPEED),
-				value("VERY_FAST_SPEED", VERY_FAST_SPEED),
+				value("VERY_SLOW_SPEED", static_cast<uint32>(VERY_SLOW_SPEED)),
+				value("SLOW_SPEED", static_cast<uint32>(SLOW_SPEED)),
+				value("NORMAL_SPEED", static_cast<uint32>(NORMAL_SPEED)),
+				value("FAST_SPEED", static_cast<uint32>(FAST_SPEED)),
+				value("VERY_FAST_SPEED", static_cast<uint32>(VERY_FAST_SPEED)),
 				// Map dialogue constants
 				value("DIALOGUE_INFINITE", DIALOGUE_INFINITE)
 			]
@@ -925,7 +925,7 @@ bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 				if (!(other_y_location - (*objects)[i]->coll_height > y_location
 					|| other_y_location < cr_top )) {
 						// Boxes overlap on both axis, there is a colision
-						if( sprite->GetType() == MONSTER_TYPE && (*objects)[i] == _camera 
+						if( sprite->GetType() == MONSTER_TYPE && (*objects)[i] == _camera
 							&& reinterpret_cast<MonsterSprite*>(sprite)->IsHostile() ) {
 								reinterpret_cast<MonsterSprite*>(sprite)->ChangeStateDead();
 								//BattleMode *BM = new BattleMode();
