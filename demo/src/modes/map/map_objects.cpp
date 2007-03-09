@@ -651,14 +651,16 @@ void MonsterSprite::Draw()
 // Load in the appropriate images and other data for the sprite
 bool MonsterSprite::Load() {
 	ScriptDescriptor sprite_script;
-	bool success = sprite_script.OpenFile(filename, SCRIPT_READ);
+	if (sprite_script.OpenFile(filename, SCRIPT_READ) == false) {
+		return false;
+	}
 
- 	ScriptCallFunction<void>(sprite_script.GetLuaState(), "Load", this);
+	ScriptCallFunction<void>(sprite_script.GetLuaState(), "Load", this);
 
 	string sprite_sheet = sprite_script.ReadString("sprite_sheet");
 	uint32 multi_img_rows = sprite_script.ReadInt("sprite_sheet_rows");
 	uint32 multi_img_cols = sprite_script.ReadInt("sprite_sheet_cols");
-	
+
 	uint32 frame_speed = sprite_script.ReadInt("frame_speed");
 	//uint32 frame_speed = static_cast<uint32>(movement_speed / 10.0f);
 
@@ -756,8 +758,10 @@ bool MonsterSprite::Load() {
 	return true;
 } // bool MonsterSprite::Load()
 
-void MonsterSprite::Update()
-{
+
+
+void MonsterSprite::Update() {
+	float xdelta, ydelta;
 	switch( _state )
 	{
 	case SPAWNING:
@@ -770,13 +774,14 @@ void MonsterSprite::Update()
 			ChangeStateHostile();
 		}
 		break;
+
 	case HOSTILE:
 		_time_elapsed += hoa_system::SystemManager->GetUpdateTime();
 
-		float xdelta = ComputeXLocation() - hoa_map::MapMode::_current_map->_camera->ComputeXLocation();
-		float ydelta = ComputeYLocation() - hoa_map::MapMode::_current_map->_camera->ComputeYLocation();
+		xdelta = ComputeXLocation() - hoa_map::MapMode::_current_map->_camera->ComputeXLocation();
+		ydelta = ComputeYLocation() - hoa_map::MapMode::_current_map->_camera->ComputeYLocation();
 
-		if( !MapZone::IsInsideZone( x_position, y_position, _zone ) && _zone->IsRestraining() ) { 
+		if( !MapZone::IsInsideZone( x_position, y_position, _zone ) && _zone->IsRestraining() ) {
 			SetDirection( CalculateOppositeDirection( GetDirection() ) );
 		}
 		else {
@@ -812,8 +817,11 @@ void MonsterSprite::Update()
 				}
 			}
 		}
-		
+
 		MapSprite::Update();
+		break;
+
+	default:
 		break;
 	}
 } // void MonsterSprite::Update()

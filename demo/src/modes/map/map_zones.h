@@ -76,12 +76,14 @@ protected:
 *** ***************************************************************************/
 class MonsterZone : public MapZone {
 public:
-	MonsterZone( MapMode* map, uint8 max_monsters, uint32 regen_time, bool restrained );
-	virtual ~MonsterZone(){};
+	MonsterZone(MapMode* map, uint8 max_monsters, uint32 regen_time, bool restrained);
+
+	virtual ~MonsterZone()
+		{}
 
 	void Update();
 
-	void AddMonster( MonsterSprite* m );
+	void AddMonster(MonsterSprite* m);
 
 	void MonsterDead();
 
@@ -96,11 +98,11 @@ private:
 
 	bool _restrained;
 
-	std::vector< MonsterSprite* > _monsters;
+	std::vector<MonsterSprite*> _monsters;
 };
 
-}
+} // namespace private_map
 
-}
+} // namespace hoa_map
 
-#endif
+#endif // __MAP_ZONES_HEADER__

@@ -42,9 +42,9 @@ namespace private_map {
 // *********************** MapDialogue Class Functions ************************
 // ****************************************************************************
 
-MapDialogue::MapDialogue( const bool save_state ) : 
-	_current_line(0),
+MapDialogue::MapDialogue( const bool save_state ) :
 	_seen(0),
+	_current_line(0),
 	_blocked(false)
 {
 	if (MAP_DEBUG)
@@ -55,7 +55,7 @@ MapDialogue::MapDialogue( const bool save_state ) :
 MapDialogue::~MapDialogue() {
 	if (MAP_DEBUG)
 		cout << "MAP: MapDialogue destructor invoked" << endl;
-	
+
 	for( uint32 i = 0; i < _actions.size(); ++i )
 	{
 		for( uint32 j = 0; j < _actions[i].size(); ++j )
