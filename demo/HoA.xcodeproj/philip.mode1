@@ -263,7 +263,6 @@
 								<string>4941A68E0AC1D86400D65B8E</string>
 								<string>4941A69B0AC1D86400D65B8E</string>
 								<string>4941A4BD0AC1D7BA00D65B8E</string>
-								<string>4941A4D70AC1D80800D65B8E</string>
 								<string>1C37FBAC04509CD000000102</string>
 								<string>1C37FAAC04509CD000000102</string>
 								<string>1C37FABC05509CD000000102</string>
@@ -271,15 +270,11 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>10</integer>
-									<integer>6</integer>
-									<integer>5</integer>
-									<integer>2</integer>
-									<integer>0</integer>
+									<integer>65</integer>
 								</array>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateVisibleRectKey</key>
-							<string>{{0, 88}, {186, 338}}</string>
+							<string>{{0, 0}, {186, 338}}</string>
 						</dict>
 						<key>PBXTopSmartGroupGIDs</key>
 						<array/>
@@ -379,9 +374,9 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>D4DA427D0B96B26D00A24628</string>
+				<string>D4F84F0D0BA34F3F00AD643A</string>
 				<string>1CE0B1FE06471DED0097A5F4</string>
-				<string>D4DA427E0B96B26D00A24628</string>
+				<string>D4F84F0E0BA34F3F00AD643A</string>
 				<string>1CE0B20306471E060097A5F4</string>
 				<string>1CE0B20506471E060097A5F4</string>
 			</array>
@@ -494,7 +489,7 @@
 	<key>PerspectivesBarVisible</key>
 	<false/>
 	<key>PinnedNavigatorIdentifier</key>
-	<string>D4DA42960B96C19B00A24628</string>
+	<string>D415C1100B98214D005C0ACA</string>
 	<key>ShelfIsVisible</key>
 	<false/>
 	<key>SourceDescription</key>
@@ -517,12 +512,6 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
-		<string>D4DA429D0B96C63700A24628</string>
-		<string>D4DA429E0B96C63700A24628</string>
-		<string>D4F7165E0B06B36400361DA9</string>
-		<string>1CD10A99069EF8BA00B06720</string>
-		<string>D4DA42910B96C14600A24628</string>
-		<string>1C0AD2B3069F1EA900FABCE6</string>
 		<string>D43083E80AF9860800A5173A</string>
 		<string>/Users/philip/allacrost/demo/HoA.xcodeproj</string>
 	</array>
@@ -543,14 +532,12 @@
 					<key>Dock</key>
 					<array>
 						<dict>
-							<key>BecomeActive</key>
-							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXProjectModuleGUID</key>
 								<string>1CD0528F0623707200166675</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>grid.cpp</string>
+								<string></string>
 								<key>StatusBarVisibility</key>
 								<true/>
 							</dict>
@@ -606,7 +593,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>D43083E80AF9860800A5173A</string>
-				<string>D4DA42860B96BFD200A24628</string>
+				<string>D4F84F0F0BA34F3F00AD643A</string>
 				<string>1CD0528F0623707200166675</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 			</array>
