@@ -1,11 +1,11 @@
 // !$*UTF8*$!
 {
 	4941A4A10AC1D76400D65B8E /* Project object */ = {
-		activeBuildConfigurationName = Debug;
-		activeExecutable = D4D1BA4A0B02B1DB0052BF1E /* Editor */;
-		activeTarget = D4D1BA480B02B1DB0052BF1E /* Editor */;
+		activeBuildConfigurationName = Release;
+		activeExecutable = D43080DE0AF982F800A5173A /* Allacrost */;
+		activeTarget = 4941A4AF0AC1D77500D65B8E /* Allacrost */;
 		addToTargets = (
-			D4D1BA480B02B1DB0052BF1E /* Editor */,
+			4941A4AF0AC1D77500D65B8E /* Allacrost */,
 		);
 		breakpoints = (
 		);
@@ -150,8 +150,8 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 194425440;
-			PBXWorkspaceStateSaveDate = 194425440;
+			PBXPerProjectTemplateStateSaveDate = 195251984;
+			PBXWorkspaceStateSaveDate = 195251984;
 		};
 		sourceControlManager = D43082570AF9831800A5173A /* Source Control */;
 		userBuildSettings = {
@@ -177,6 +177,13 @@
 			sepNavSelRange = "{3996, 0}";
 			sepNavVisRect = "{{0, 1329}, {638, 219}}";
 			sepNavWindowFrame = "{{107, 131}, {750, 558}}";
+		};
+	};
+	4941A6900AC1D86400D65B8E /* battle.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1239, 18270}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRect = "{{0, 0}, {1239, 404}}";
 		};
 	};
 	4941A6950AC1D86400D65B8E /* boot.cpp */ = {
@@ -448,7 +455,7 @@
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {711, 4186}}";
 			sepNavSelRange = "{4750, 0}";
-			sepNavVisRect = "{{0, 2343}, {711, 429}}";
+			sepNavVisRect = "{{0, 1993}, {711, 429}}";
 			sepNavWindowFrame = "{{186, 110}, {750, 558}}";
 		};
 	};

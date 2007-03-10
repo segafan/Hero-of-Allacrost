@@ -104,6 +104,7 @@
 		D4D1BF650B02BB9F0052BF1E /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4941A7190AC1D8B300D65B8E /* SDL.framework */; };
 		D4D1BF6B0B02BC010052BF1E /* SDL_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4941A7180AC1D8B300D65B8E /* SDL_ttf.framework */; };
 		D4D6DB2E0B127DD3002F33F2 /* mac_logo.icns in Resources */ = {isa = PBXBuildFile; fileRef = 4941A7510AC1D9A200D65B8E /* mac_logo.icns */; };
+		D4DAC8A90BA13F55009FA7BE /* map_zones.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4DAC8A80BA13F55009FA7BE /* map_zones.cpp */; };
 		D4F71AF60B06BAE900361DA9 /* Qt3Support.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4F71AF50B06BAE900361DA9 /* Qt3Support.framework */; };
 		D4F71C210B06BAFB00361DA9 /* QtCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4F71C200B06BAFB00361DA9 /* QtCore.framework */; };
 		D4F71D530B06BB0800361DA9 /* QtGui.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4F71D520B06BB0800361DA9 /* QtGui.framework */; };
@@ -278,6 +279,7 @@
 		D4D1BA6B0B02B27F0052BF1E /* tile.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = tile.h; sourceTree = "<group>"; };
 		D4D1BA6C0B02B27F0052BF1E /* tileset.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = tileset.cpp; sourceTree = "<group>"; };
 		D4D1BA6D0B02B27F0052BF1E /* tileset.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = tileset.h; sourceTree = "<group>"; };
+		D4DAC8A80BA13F55009FA7BE /* map_zones.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = map_zones.cpp; sourceTree = "<group>"; };
 		D4F71AF50B06BAE900361DA9 /* Qt3Support.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Qt3Support.framework; path = "/usr/local/Trolltech/Qt-4.2.0/lib/Qt3Support.framework"; sourceTree = "<absolute>"; };
 		D4F71C200B06BAFB00361DA9 /* QtCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QtCore.framework; path = "/usr/local/Trolltech/Qt-4.2.0/lib/QtCore.framework"; sourceTree = "<absolute>"; };
 		D4F71D520B06BB0800361DA9 /* QtGui.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QtGui.framework; path = "/usr/local/Trolltech/Qt-4.2.0/lib/QtGui.framework"; sourceTree = "<absolute>"; };
@@ -429,6 +431,7 @@
 		4941A69B0AC1D86400D65B8E /* map */ = {
 			isa = PBXGroup;
 			children = (
+				D4DAC8A80BA13F55009FA7BE /* map_zones.cpp */,
 				493D9E440B9C9FFD00DF1F52 /* map_zones.h */,
 				4941A69C0AC1D86400D65B8E /* map.cpp */,
 				4941A69D0AC1D86400D65B8E /* map.h */,
@@ -737,6 +740,7 @@
 				4996296F0AF50B1F00B6A328 /* global_objects.cpp in Sources */,
 				499629710AF50B1F00B6A328 /* global_actors.cpp in Sources */,
 				49BDC4530AF5412600940A6C /* socket.cpp in Sources */,
+				D4DAC8A90BA13F55009FA7BE /* map_zones.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -787,6 +791,10 @@
 		4941A4A40AC1D76400D65B8E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
 				COPY_PHASE_STRIP = YES;
 			};
 			name = Release;
@@ -836,6 +844,7 @@
 		4941A4B60AC1D77900D65B8E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = i386;
 				COPY_PHASE_STRIP = YES;
 				DEAD_CODE_STRIPPING = YES;
 				GCC_AUTO_VECTORIZATION = YES;
