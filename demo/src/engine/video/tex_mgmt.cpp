@@ -2532,32 +2532,112 @@ bool GameVideo::_ReloadImagesToSheet(TexSheet *sheet)
 	map<string, Image *>::iterator iImage     = _images.begin();
 	map<string, Image *>::iterator iImageEnd  = _images.end();
 
+	struct MultiImageInfo
+	{
+		ImageLoadInfo multi_image;
+		ImageLoadInfo image;
+	};
+	std::map <string, MultiImageInfo> multi_image_info;
+
 	bool success = true;
 	while(iImage != iImageEnd)
 	{
 		Image *i = iImage->second;
+
+		// Check if the current image belongs to this sheet
 		if(i->texture_sheet == sheet)
 		{
 			ImageLoadInfo loadInfo;
 
-			if(!_LoadRawImage(i->filename, loadInfo))
-			{
-				if(VIDEO_DEBUG)
-					cerr << "VIDEO ERROR: _LoadRawImage() failed in _ReloadImagesToSheet()!" << endl;
-				success = false;
-			}
+			bool bMultiImage = ( i->tags.find("<X",0) != i->filename.npos);
 
-			if(!sheet->CopyRect(i->x, i->y, loadInfo))
+			if (bMultiImage)	// Check if this is a multiimage and load as it
 			{
-				if(VIDEO_DEBUG)
-					cerr << "VIDEO ERROR: sheet->CopyRect() failed in _ReloadImagesToSheet()!" << endl;
-				success = false;
-			}
+				ImageLoadInfo pImage;
 
-			if (loadInfo.pixels)
-				free (loadInfo.pixels);
+				if (multi_image_info.find(i->filename) == multi_image_info.end())
+				{
+					// Load the image
+					if(!_LoadRawImage(i->filename, loadInfo))
+					{
+						if(VIDEO_DEBUG)
+							cerr << "VIDEO ERROR: _LoadRawImage() failed in _ReloadImagesToSheet()!" << endl;
+						success = false;
+					}
+
+					// Copy the part of the image in a buffer
+					pImage.height = i->height;
+					pImage.width = i->width;
+					pImage.pixels = malloc(pImage.height * pImage.width * 4);
+
+					MultiImageInfo info;
+					info.multi_image = loadInfo;
+					info.image = pImage;
+					multi_image_info[i->filename] = info;
+				}
+				else
+				{
+					loadInfo = multi_image_info[i->filename].multi_image;
+					pImage = multi_image_info[i->filename].image;
+				}
+
+				if (!pImage.pixels)
+				{
+					if (VIDEO_DEBUG)
+						cerr << "VIDEO ERROR: run out of memory in _ReloadImageToSheet()" << endl;
+					success = false;
+				}
+
+				uint16 pos0, pos1;
+				pos0 = i->tags.find("<X", 0);
+				pos1 = i->tags.find('_', pos0);
+				uint32 x = atoi( i->tags.substr(pos0+2, pos1).c_str() );
+				uint32 rows = loadInfo.height / pImage.height;
+				pos0 = i->tags.find("<Y", 0);
+				pos1 = i->tags.find('_', pos0);
+				uint32 y = atoi( i->tags.substr(pos0+2, pos1).c_str() );
+				uint32 cols = loadInfo.width / pImage.width;
+
+				for (int row=0; row<pImage.height; row++)
+				{
+					memcpy ((uint8*)pImage.pixels+4*pImage.width*row, (uint8*)loadInfo.pixels+(((x*loadInfo.height/rows)+row)*loadInfo.width+y*loadInfo.width/cols)*4, 4*pImage.width);
+				}
+
+				// Copy in the texture the image
+				if(!sheet->CopyRect(i->x, i->y, pImage))
+				{
+					if(VIDEO_DEBUG)
+						cerr << "VIDEO ERROR: sheet->CopyRect() failed in _ReloadImagesToSheet()!" << endl;
+					success = false;
+				}
+			}
+			else		// Load this way if it as a normal image (one image in one file)
+			{
+				if(!_LoadRawImage(i->filename, loadInfo))
+				{
+					if(VIDEO_DEBUG)
+						cerr << "VIDEO ERROR: _LoadRawImage() failed in _ReloadImagesToSheet()!" << endl;
+					success = false;
+				}
+
+				if(!sheet->CopyRect(i->x, i->y, loadInfo))
+				{
+					if(VIDEO_DEBUG)
+						cerr << "VIDEO ERROR: sheet->CopyRect() failed in _ReloadImagesToSheet()!" << endl;
+					success = false;
+				}
+
+				if (loadInfo.pixels)
+					free (loadInfo.pixels);
+			}
 		}
 		++iImage;
+	}
+
+	for (map<string,MultiImageInfo>::iterator it=multi_image_info.begin(); it!=multi_image_info.end(); ++it)
+	{
+		free ((*it).second.multi_image.pixels);
+		free ((*it).second.image.pixels);
 	}
 
 	return success;
@@ -2576,7 +2656,7 @@ bool GameVideo::_SaveTempTextures()
 		Image *image = iImage->second;
 
 		// it's a temporary texture!!
-		if(image->filename.find("TEMP_") != string::npos)
+		if(image->tags.find("<T>") != string::npos)
 		{
 			image->texture_sheet->SaveImage(image);
 		}
