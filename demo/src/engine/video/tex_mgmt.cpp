@@ -2603,6 +2603,10 @@ bool GameVideo::_ReloadImagesToSheet(TexSheet *sheet)
 					memcpy ((uint8*)pImage.pixels+4*pImage.width*row, (uint8*)loadInfo.pixels+(((x*loadInfo.height/rows)+row)*loadInfo.width+y*loadInfo.width/cols)*4, 4*pImage.width);
 				}
 
+				// Convert to grayscale if needed
+				if (i->tags.find("<G>",0) != i->filename.npos)
+					_ConvertImageToGrayscale(pImage, pImage);
+
 				// Copy in the texture the image
 				if(!sheet->CopyRect(i->x, i->y, pImage))
 				{
@@ -2620,6 +2624,10 @@ bool GameVideo::_ReloadImagesToSheet(TexSheet *sheet)
 					success = false;
 				}
 
+				// Convert to grayscale if needed
+				if (i->tags.find("<G>",0) != i->filename.npos)
+					_ConvertImageToGrayscale(loadInfo, loadInfo);
+
 				if(!sheet->CopyRect(i->x, i->y, loadInfo))
 				{
 					if(VIDEO_DEBUG)
@@ -2631,6 +2639,7 @@ bool GameVideo::_ReloadImagesToSheet(TexSheet *sheet)
 					free (loadInfo.pixels);
 			}
 		}
+
 		++iImage;
 	}
 
