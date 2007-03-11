@@ -394,147 +394,64 @@ MapSprite::~MapSprite() {
 
 
 // Load in the appropriate images and other data for the sprite
-bool MapSprite::Load() {
-	AnimatedImage img;
+bool MapSprite::LoadStandardAnimations(std::string filename) {
+
+	// The speed to display each frame in the walking animation
 	uint32 frame_speed = static_cast<uint32>(movement_speed / 10.0f);
 
-	// Broken multi-image loading code
-	vector<StillImage> frames (24);
-	for (uint8 i=0; i<24; i++)
+	// Prepare the four standing and four walking animations
+	for (uint8 i = 0; i < 8; i++)
+		animations.push_back(AnimatedImage());
+
+	// Load the multi-image, containing 24 frames total
+	vector<StillImage> frames(24);
+	for (uint8 i = 0; i < 24; i++)
 		frames[i].SetDimensions(img_half_width * 2, img_height);
 
-	if (VideoManager->LoadMultiImage(frames, "img/sprites/map/claudius_walk.png", 4, 6) == false) {
+	if (VideoManager->LoadMultiImage(frames, filename, 4, 6) == false) {
 		return false;
 	}
-	else {
-		cout << "MAP: Loaded MulitImage successfully!" << endl;
-	}
 
-	img.Clear();
-	img.AddFrame(frames[0], frame_speed);
-	animations.push_back(img);
+	// Add standing frames to animations
+	animations[0].AddFrame(frames[0], frame_speed);
+	animations[1].AddFrame(frames[6], frame_speed);
+	animations[2].AddFrame(frames[12], frame_speed);
+	animations[3].AddFrame(frames[18], frame_speed);
 
-	img.Clear();
-	img.AddFrame(frames[6], frame_speed);
-	animations.push_back(img);
+	// Add walking frames to animations
+	animations[4].AddFrame(frames[1], frame_speed);
+	animations[4].AddFrame(frames[2], frame_speed);
+	animations[4].AddFrame(frames[3], frame_speed);
+	animations[4].AddFrame(frames[4], frame_speed);
+	animations[4].AddFrame(frames[5], frame_speed);
 
-	img.Clear();
-	img.AddFrame(frames[12], frame_speed);
-	animations.push_back(img);
+	animations[5].AddFrame(frames[7], frame_speed);
+	animations[5].AddFrame(frames[8], frame_speed);
+	animations[5].AddFrame(frames[9], frame_speed);
+	animations[5].AddFrame(frames[10], frame_speed);
+	animations[5].AddFrame(frames[11], frame_speed);
 
-	img.Clear();
-	img.AddFrame(frames[18], frame_speed);
-	animations.push_back(img);
+	animations[6].AddFrame(frames[13], frame_speed);
+	animations[6].AddFrame(frames[14], frame_speed);
+	animations[6].AddFrame(frames[15], frame_speed);
+	animations[6].AddFrame(frames[16], frame_speed);
+	animations[6].AddFrame(frames[17], frame_speed);
 
-	img.Clear();
-	img.AddFrame(frames[1], frame_speed);
-	img.AddFrame(frames[2], frame_speed);
-	img.AddFrame(frames[3], frame_speed);
-	img.AddFrame(frames[4], frame_speed);
-	img.AddFrame(frames[5], frame_speed);
-	animations.push_back(img);
-
-	img.Clear();
-	img.AddFrame(frames[7], frame_speed);
-	img.AddFrame(frames[8], frame_speed);
-	img.AddFrame(frames[9], frame_speed);
-	img.AddFrame(frames[10], frame_speed);
-	img.AddFrame(frames[11], frame_speed);
-	animations.push_back(img);
-
-	img.Clear();
-	img.AddFrame(frames[13], frame_speed);
-	img.AddFrame(frames[14], frame_speed);
-	img.AddFrame(frames[15], frame_speed);
-	img.AddFrame(frames[16], frame_speed);
-	img.AddFrame(frames[17], frame_speed);
-	animations.push_back(img);
-
-	img.Clear();
-	img.AddFrame(frames[19], frame_speed);
-	img.AddFrame(frames[20], frame_speed);
-	img.AddFrame(frames[21], frame_speed);
-	img.AddFrame(frames[22], frame_speed);
-	img.AddFrame(frames[23], frame_speed);
-	animations.push_back(img);
+	animations[7].AddFrame(frames[19], frame_speed);
+	animations[7].AddFrame(frames[20], frame_speed);
+	animations[7].AddFrame(frames[21], frame_speed);
+	animations[7].AddFrame(frames[22], frame_speed);
+	animations[7].AddFrame(frames[23], frame_speed);
 
 	for (uint32 i = 0; i < animations.size(); i++) {
-// 		animations[i].SetDimensions(img_half_width * 2, img_height);
 		if (animations[i].Load() == false) {
 			cerr << "MAP ERROR: failed to load sprite animation" << endl;
 			return false;
 		}
 	}
 
-	// TEMP
-// 	img.Clear();
-// 	img.AddFrame(string("img/sprites/map/claudius_d0.png"), frame_speed);
-// 	img.SetDimensions(img_half_width * 2, img_height);
-// 	animations.push_back(img);
-//
-// 	img.Clear();
-// 	img.AddFrame(string("img/sprites/map/claudius_u0.png"), frame_speed);
-// 	img.SetDimensions(img_half_width * 2, img_height);
-// 	animations.push_back(img);
-//
-// 	img.Clear();
-// 	img.AddFrame(string("img/sprites/map/claudius_l0.png"), frame_speed);
-// 	img.SetDimensions(img_half_width * 2, img_height);
-// 	animations.push_back(img);
-//
-// 	img.Clear();
-// 	img.AddFrame(string("img/sprites/map/claudius_r0.png"), frame_speed);
-// 	img.SetDimensions(img_half_width * 2, img_height);
-// 	animations.push_back(img);
-//
-// 	img.Clear();
-// 	img.AddFrame(string("img/sprites/map/claudius_d1.png"), frame_speed);
-// 	img.AddFrame(string("img/sprites/map/claudius_d2.png"), frame_speed);
-// 	img.AddFrame(string("img/sprites/map/claudius_d3.png"), frame_speed);
-// 	img.AddFrame(string("img/sprites/map/claudius_d1.png"), frame_speed);
-// 	img.AddFrame(string("img/sprites/map/claudius_d4.png"), frame_speed);
-// 	img.AddFrame(string("img/sprites/map/claudius_d5.png"), frame_speed);
-// 	img.SetDimensions(img_half_width * 2, img_height);
-// 	animations.push_back(img);
-//
-// 	img.Clear();
-// 	img.AddFrame(string("img/sprites/map/claudius_u1.png"), frame_speed);
-// 	img.AddFrame(string("img/sprites/map/claudius_u2.png"), frame_speed);
-// 	img.AddFrame(string("img/sprites/map/claudius_u3.png"), frame_speed);
-// 	img.AddFrame(string("img/sprites/map/claudius_u1.png"), frame_speed);
-// 	img.AddFrame(string("img/sprites/map/claudius_u4.png"), frame_speed);
-// 	img.AddFrame(string("img/sprites/map/claudius_u5.png"), frame_speed);
-// 	img.SetDimensions(img_half_width * 2, img_height);
-// 	animations.push_back(img);
-//
-// 	img.Clear();
-// 	img.AddFrame(string("img/sprites/map/claudius_l1.png"), frame_speed);
-// 	img.AddFrame(string("img/sprites/map/claudius_l2.png"), frame_speed);
-// 	img.AddFrame(string("img/sprites/map/claudius_l3.png"), frame_speed);
-// 	img.AddFrame(string("img/sprites/map/claudius_l1.png"), frame_speed);
-// 	img.AddFrame(string("img/sprites/map/claudius_l4.png"), frame_speed);
-// 	img.AddFrame(string("img/sprites/map/claudius_l5.png"), frame_speed);
-// 	img.SetDimensions(img_half_width * 2, img_height);
-// 	animations.push_back(img);
-//
-// 	img.Clear();
-// 	img.AddFrame(string("img/sprites/map/claudius_r1.png"), frame_speed);
-// 	img.AddFrame(string("img/sprites/map/claudius_r2.png"), frame_speed);
-// 	img.AddFrame(string("img/sprites/map/claudius_r3.png"), frame_speed);
-// 	img.AddFrame(string("img/sprites/map/claudius_r1.png"), frame_speed);
-// 	img.AddFrame(string("img/sprites/map/claudius_r4.png"), frame_speed);
-// 	img.AddFrame(string("img/sprites/map/claudius_r5.png"), frame_speed);
-// 	img.SetDimensions(img_half_width * 2, img_height);
-// 	animations.push_back(img);
-//
-// 	for (uint32 i = 0; i < animations.size(); i++) {
-// 		if (animations[i].Load() == false) {
-// 			cerr << "MAP ERROR: failed to load sprite animation" << endl;
-// 			return false;
-// 		}
-// 	}
 	return true;
-} // bool MapSprite::Load()
+} // bool MapSprite::LoadStandardAnimations(std::string filename)
 
 
 // Updates the state of the sprite

@@ -29,43 +29,56 @@ namespace private_map {
 ***
 *** The area is represented by the top-left corner as the start and the bottom
 *** right corner as the end of the area. Both are represented in the row / column
-*** format ( small tiles, collision cells )
+*** format (small tiles, collision cells).
 ***
-*** \note ZoneSection should not be used by itself, attach it to a MapZone.
+*** \note ZoneSection should not be used by itself. Attach it to a MapZone.
 *** ***************************************************************************/
 class ZoneSection {
 public:
-	ZoneSection( uint16 s_col, uint16 s_row, uint16 e_col, uint16 e_row )
-		: start_row( s_row ), start_col( s_col ), end_row( e_row ), end_col( e_col ) {}
+	ZoneSection( uint16 s_col, uint16 s_row, uint16 e_col, uint16 e_row ) :
+		start_row(s_row),
+		start_col(s_col),
+		end_row(e_row),
+		end_col(e_col)
+		{}
 
+	//! \brief Coordinates of the top-left tile corner of this zone.
 	uint16 start_row, start_col;
+	//! \brief Coordinates of the bottom-right tile corner of this zone.
 	uint16 end_row, end_col;
-};
+}; // class ZoneSection
+
 
 /** ***************************************************************************
 *** \brief Abstract class that represents a special zone on a map.
 ***
-*** The area is made up of many ZoneSection, so it can be more than rectangular.
+*** The area is made up of many ZoneSection instances, so it can be any shape.
 *** This class can be derived to create poisonous zones, etc.
 ***
-*** \note ZoneSections in the MapZone can overlap without creating problems.
+*** \note ZoneSections in the MapZone may overlap without any problem.
 *** ***************************************************************************/
 class MapZone {
 public:
-	MapZone(){};
-	virtual ~MapZone(){};
-	void AddSection( ZoneSection * section );
+	MapZone()
+		{}
 
-	static bool IsInsideZone( uint16 pos_x, uint16 pos_y, const MapZone * zone );
+	virtual ~MapZone()
+		{}
+
+	void AddSection(ZoneSection * section);
+
+	static bool IsInsideZone(uint16 pos_x, uint16 pos_y, const MapZone *zone);
 
 	virtual void Update() = 0;
 
 protected:
-	void _RandomPosition( uint16 & x, uint16 & y );
+	std::vector<ZoneSection> _sections;
 
-	std::vector< ZoneSection > _sections;
 	MapMode* _map;
-};
+
+	void _RandomPosition(uint16& x, uint16& y);
+}; // class MapZone
+
 
 /** ****************************************************************************
 *** \brief Class that represents an area where monsters spawn and roam in.

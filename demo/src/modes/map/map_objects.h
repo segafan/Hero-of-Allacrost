@@ -216,11 +216,6 @@ public:
 	virtual ~MapObject()
 		{}
 
-	/** \brief Loads any data that the object requires.
-	*** \return False if there was a failure in loading any of the data.
-	**/
-	virtual bool Load() = 0;
-
 	/** \brief Updates the state of an object.
 	*** Many map objects may not actually have a use for this function. For example, animated objects like a
 	*** tree automatically have their frames updated by the video engine, so there is no need to
@@ -341,23 +336,20 @@ public:
 	{ return _object_type; }
 	//@}
 
-
-
 protected:
 	//! \brief This holds the the type of sprite this is.
 	uint8 _object_type;
 
 }; // class MapObject
 
+
 /** \brief This is a predicate used to sort MapObjects in correct draw order
-*** \note A simple < operator cannot be used with the sorting algorithm because it is sorting pointers.
 *** \return True if the MapObject pointed by a should be drawn behind MapObject pointed by b
+*** \note A simple '<' operator cannot be used with the sorting algorithm because it is sorting pointers.
 **/
-struct MapObject_Ptr_Less
-{
-	const bool operator()( const MapObject * a, const MapObject * b )
-	{
-		return ( a->y_position + a->y_offset ) < ( b->y_position + b->y_offset );
+struct MapObject_Ptr_Less {
+	const bool operator()(const MapObject * a, const MapObject * b) {
+		return (a->y_position + a->y_offset) < (b->y_position + b->y_offset);
 	}
 };
 
@@ -389,12 +381,6 @@ public:
 	PhysicalObject();
 
 	~PhysicalObject();
-
-	/** \brief Loads the objects animation images
-	*** \return False if the images failed to load.
-	**/
-	bool Load()
-		{ return true; }
 
 	//! \brief Updates the object's animation frames if it is animated.
 	void Update();
@@ -493,7 +479,7 @@ public:
 	//@}
 
 	//! \brief This vector contains all the dialogues of the sprite
-	std::vector< MapDialogue* > dialogues;
+	std::vector<MapDialogue*> dialogues;
 
 	/** \brief An index to the dialogues vector, representing the current sprite dialogue to
 	*** display when talked to by the player. A negative value indicates that the sprite has no dialogue.
@@ -502,16 +488,10 @@ public:
 	**/
 	int16 current_dialogue;
 
-	// -------------------- Publice methods
+	// -------------------- Public methods
 	VirtualSprite();
 
 	~VirtualSprite();
-
-	/** \brief Loads the sprite's face portrait image, if it has one
-	*** \return False if the image failed to load.
-	**/
-	virtual bool Load()
-		{ return true; }
 
 	//! \brief Updates the virtual object's position if it is moving, otherwise does nothing.
 	virtual void Update();
@@ -542,7 +522,6 @@ public:
 		{ return movement_speed; }
 
 	void SetFacePortrait(std::string pn);
-
 	//@}
 
 	/** \brief This method will save the state of a sprite.
@@ -600,7 +579,6 @@ public:
 *** ***************************************************************************/
 class MapSprite : public VirtualSprite {
 public:
-
 	//! \brief Holds the previous value of VirtualSprite#moving from the last call to MapSprite#Update().
 	bool was_moving;
 
@@ -636,10 +614,11 @@ public:
 
 	~MapSprite();
 
-	/** \brief Fills up the animations vector and loads the sprite image frames.
+	/** \brief Loads the image containing the standard animations for the sprite
+	*** \param filename The name of the image file holding the standard walking animations
 	*** \return False if there was a problem loading the sprite.
 	**/
-	virtual bool Load();
+	bool LoadStandardAnimations(std::string filename);
 
 	//! \brief Updates the sprite's position and state.
 	virtual void Update();
@@ -718,7 +697,7 @@ public:
 		Reset();
 	}
 
-	virtual bool Load();
+	bool Load();
 
 	//! \brief Updates the sprite's position and state.
 	virtual void Update();
