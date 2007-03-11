@@ -159,7 +159,7 @@ void MapMode::BindToLua() {
 				value("PHYSICAL_TYPE", PHYSICAL_TYPE),
 				value("VIRTUAL_TYPE", VIRTUAL_TYPE),
 				value("SPRITE_TYPE", SPRITE_TYPE),
-				// Object directions
+				// Sprite directions
 				value("NORTH", NORTH),
 				value("SOUTH", SOUTH),
 				value("EAST", WEST),
@@ -172,7 +172,7 @@ void MapMode::BindToLua() {
 				value("SW_WEST", SW_WEST),
 				value("SE_SOUTH", SE_SOUTH),
 				value("SE_EAST", SE_EAST),
-				// Object animations
+				// Sprite animations
 				value("ANIM_STANDING_SOUTH", ANIM_STANDING_SOUTH),
 				value("ANIM_STANDING_NORTH", ANIM_STANDING_NORTH),
 				value("ANIM_STANDING_WEST", ANIM_STANDING_WEST),
@@ -181,13 +181,13 @@ void MapMode::BindToLua() {
 				value("ANIM_WALKING_NORTH", ANIM_WALKING_NORTH),
 				value("ANIM_WALKING_WEST", ANIM_WALKING_WEST),
 				value("ANIM_WALKING_EAST", ANIM_WALKING_EAST),
-				//Sprite speeds
+				// Sprite speeds
 				value("VERY_SLOW_SPEED", static_cast<uint32>(VERY_SLOW_SPEED)),
 				value("SLOW_SPEED", static_cast<uint32>(SLOW_SPEED)),
 				value("NORMAL_SPEED", static_cast<uint32>(NORMAL_SPEED)),
 				value("FAST_SPEED", static_cast<uint32>(FAST_SPEED)),
 				value("VERY_FAST_SPEED", static_cast<uint32>(VERY_FAST_SPEED)),
-				// Map dialogue constants
+				// Map dialogues
 				value("DIALOGUE_INFINITE", DIALOGUE_INFINITE)
 			]
 	];
@@ -253,6 +253,7 @@ void MapMode::BindToLua() {
 			.def("SetCurrentAnimation", &MapSprite::SetCurrentAnimation)
 			.def("GetWalkSound", &MapSprite::GetWalkSound)
 			.def("GetCurrentAnimation", &MapSprite::GetCurrentAnimation)
+			.def("LoadStandardAnimations", &MapSprite::LoadStandardAnimations)
 	];
 
 	module(ScriptManager->GetGlobalState(), "hoa_map")
@@ -417,52 +418,53 @@ bool MapMode::Load(string filename) {
 
 	_current_dialogue = NULL;
 
-	MapSprite *DialogueSprite;
-	MapDialogue *Dialogue = new MapDialogue( false );
+// 	MapSprite *DialogueSprite;
+// 	MapDialogue *Dialogue = new MapDialogue( false );
+//
+// 	// Load player sprite and rest of map objects
+// 	DialogueSprite = new MapSprite();
+// 	DialogueSprite->name = MakeUnicodeString("NPC");
+// 	DialogueSprite->SetObjectID(1);
+// 	DialogueSprite->SetContext(1);
+// 	DialogueSprite->SetXPosition(45, 0.5f);
+// 	DialogueSprite->SetYPosition(45, 0.5f);
+// 	DialogueSprite->SetCollHalfWidth(1.0f);
+// 	DialogueSprite->SetCollHeight(2.0f);
+// 	DialogueSprite->img_half_width = 1.0f;
+// 	DialogueSprite->img_height = 4.0f;
+// 	DialogueSprite->movement_speed = NORMAL_SPEED;
+// 	DialogueSprite->LoadStandardAnimations("img/sprites/map/laila_walk.png");
+// 	DialogueSprite->SetFacePortrait( "img/portraits/map/laila.png" );
+// 	DialogueSprite->SetDirection(EAST);
+//
+// 	ActionPathMove *new_act = new ActionPathMove(DialogueSprite);
+// 	new_act->SetForced(true);
+// 	new_act->destination.row = 35;
+// 	new_act->destination.col = 45;
+//
+// 	std::vector<SpriteAction *> testvec;
+// 	testvec.push_back(new_act);
+//
+// 	new_act = new ActionPathMove(DialogueSprite);
+// 	new_act->SetForced(true);
+// 	new_act->destination.row = 35;
+// 	new_act->destination.col = 40;
+// 	testvec.push_back( new_act );
+//
+//
+//
+// 	Dialogue->AddText( 1, MakeUnicodeString( "This is a test" ), 5000 );
+// 	Dialogue->AddTextActions( 1000, MakeUnicodeString( "Oh really?!" ), testvec );
+//
+// 	DialogueSprite->AddDialogue( Dialogue );
+// 	DialogueSprite->SetDialogue( 0 );
+// 	_AddGroundObject(DialogueSprite);
 
-	// Load player sprite and rest of map objects
-	DialogueSprite = new MapSprite();
-	DialogueSprite->name = MakeUnicodeString("NPC");
-	DialogueSprite->SetObjectID(1);
-	DialogueSprite->SetContext(1);
-	DialogueSprite->SetXPosition(45, 0.5f);
-	DialogueSprite->SetYPosition(45, 0.5f);
-	DialogueSprite->SetCollHalfWidth(1.0f);
-	DialogueSprite->SetCollHeight(2.0f);
-	DialogueSprite->img_half_width = 1.0f;
-	DialogueSprite->img_height = 4.0f;
-	DialogueSprite->movement_speed = NORMAL_SPEED;
-	DialogueSprite->SetDirection(EAST);
-
-	ActionPathMove *new_act = new ActionPathMove(DialogueSprite);
-	new_act->SetForced(true);
-	new_act->destination.row = 35;
-	new_act->destination.col = 45;
-
-	std::vector<SpriteAction *> testvec;
-	testvec.push_back(new_act);
-
-	new_act = new ActionPathMove(DialogueSprite);
-	new_act->SetForced(true);
-	new_act->destination.row = 35;
-	new_act->destination.col = 40;
-	testvec.push_back( new_act );
-
-
-
-	Dialogue->AddText( 1, MakeUnicodeString( "This is a test" ), 5000 );
-	Dialogue->AddTextActions( 1000, MakeUnicodeString( "Oh really?!" ), testvec );
-
-	DialogueSprite->AddDialogue( Dialogue );
-	DialogueSprite->SetDialogue( 0 );
-	DialogueSprite->SetFacePortrait( "img/portraits/map/laila.png" );
-	_AddGroundObject(DialogueSprite);
-
-	for (uint32 i = 0; i < _ground_objects.size(); i++) {
-		if (_ground_objects[i]->Load() == false) {
-			cerr << "MAP ERROR: failed to load ground object" << endl;
-		}
-	}
+// 	for (uint32 i = 0; i < _ground_objects.size(); i++) {
+// 		if (_ground_objects[i]->Load() == false) {
+// 			cerr << "MAP ERROR: failed to load ground object" << endl;
+// 		}
+// 	}
 
 	// ---------- (1) Setup GUI items (in a 1024x768 coordinate system)
 	VideoManager->PushState();
@@ -534,7 +536,6 @@ void MapMode::Update() {
 
 	// ---------- (4) Sort the objects so they are in the correct draw order ********
  	std::sort( _ground_objects.begin(), _ground_objects.end(), MapObject_Ptr_Less() );
-
 } // void MapMode::Update()
 
 
@@ -1196,6 +1197,7 @@ void MapMode::_CalculateDrawInfo() {
 		_draw_info.num_draw_rows--;
 	}
 
+	// Comment this out to print out debugging info about each map frame that is drawn
 // 	printf("--- MAP DRAW INFO ---\n");
 // 	printf("Starting row, col: [%d, %d]\n", _draw_info.starting_row, _draw_info.starting_col);
 // 	printf("# draw rows, cols: [%d, %d]\n", _draw_info.num_draw_rows, _draw_info.num_draw_cols);

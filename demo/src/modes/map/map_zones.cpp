@@ -117,6 +117,7 @@ void MonsterZone::Update() {
 void MonsterZone::AddMonster( MonsterSprite* m ) {
 	_monsters.push_back( m );
 	_map->_AddGroundObject( m );
+	m->Load();
 }
 
 

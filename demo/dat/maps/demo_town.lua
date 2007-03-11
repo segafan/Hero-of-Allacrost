@@ -25,7 +25,7 @@ tileset_filenames = {}
 tileset_filenames[1] = "img/tiles/temp.png"
 
 
--- The map grid to indicate walkability. The size of the grid is 4x the size of the map tiles array
+-- The map grid to indicate walkability. The size of the grid is 4x the size of the tile layer tables
 map_grid = {}
 map_grid[0] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 map_grid[1] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
@@ -207,6 +207,7 @@ function Load(m)
 	sprite:SetImgHeight(4.0);
 	sprite:SetMovementSpeed(200.0);
 	sprite:SetDirection(8);
+	sprite:LoadStandardAnimations("img/sprites/map/claudius_walk.png");
 	sprite:SetFacePortrait("img/portraits/map/claudius.png");
 	map:_AddGroundObject(sprite);
 
@@ -215,7 +216,7 @@ function Load(m)
 
 	-- Create a NPC sprite
 	sprite = hoa_map.MapSprite();
-	sprite:SetName("NPC");
+	sprite:SetName("Laila");
 	sprite:SetObjectID(2);
 	sprite:SetContext(1);
 	sprite:SetXPosition(17, 0.5);
@@ -226,19 +227,127 @@ function Load(m)
 	sprite:SetImgHeight(4.0);
 	sprite:SetMovementSpeed(200.0);
 	sprite:SetDirection(2);
-	sprite:SetFacePortrait("img/portraits/map/claudius.png");
+	sprite:LoadStandardAnimations("img/sprites/map/laila_walk.png");
+	sprite:SetFacePortrait("img/portraits/map/laila.png");
 	map:_AddGroundObject(sprite);
-	
-	--Create a Monster Zone ( attached to current map, 5 monsters max, 5000 ms between respawns, monsters restricted to area )
+
+	sprite = hoa_map.MapSprite();
+	sprite:SetName("Marcus");
+	sprite:SetObjectID(3);
+	sprite:SetContext(1);
+	sprite:SetXPosition(27, 0.5);
+	sprite:SetYPosition(27, 0.5);
+	sprite:SetCollHalfWidth(1.0);
+	sprite:SetCollHeight(2.0);
+	sprite:SetImgHalfWidth(1.0);
+	sprite:SetImgHeight(4.0);
+	sprite:SetMovementSpeed(200.0);
+	sprite:SetDirection(2);
+	sprite:LoadStandardAnimations("img/sprites/map/marcus_walk.png");
+	sprite:SetFacePortrait("img/portraits/map/marcus.png");
+	map:_AddGroundObject(sprite);
+
+	sprite = hoa_map.MapSprite();
+	sprite:SetName("Vanica");
+	sprite:SetObjectID(4);
+	sprite:SetContext(1);
+	sprite:SetXPosition(25, 0.5);
+	sprite:SetYPosition(25, 0.5);
+	sprite:SetCollHalfWidth(1.0);
+	sprite:SetCollHeight(2.0);
+	sprite:SetImgHalfWidth(1.0);
+	sprite:SetImgHeight(4.0);
+	sprite:SetMovementSpeed(200.0);
+	sprite:SetDirection(2);
+	sprite:LoadStandardAnimations("img/sprites/map/vanica_walk.png");
+	sprite:SetFacePortrait("img/portraits/map/vanica.png");
+	map:_AddGroundObject(sprite);
+
+	sprite = hoa_map.MapSprite();
+	sprite:SetName("Seasoned Karlate");
+	sprite:SetObjectID(5);
+	sprite:SetContext(1);
+	sprite:SetXPosition(40, 0.5);
+	sprite:SetYPosition(40, 0.5);
+	sprite:SetCollHalfWidth(1.0);
+	sprite:SetCollHeight(2.0);
+	sprite:SetImgHalfWidth(1.0);
+	sprite:SetImgHeight(4.0);
+	sprite:SetMovementSpeed(200.0);
+	sprite:SetDirection(2);
+	sprite:LoadStandardAnimations("img/sprites/map/soldier_npc01_walk.png");
+	map:_AddGroundObject(sprite);
+
+	sprite = hoa_map.MapSprite();
+	sprite:SetName("Speedracer?");
+	sprite:SetObjectID(6);
+	sprite:SetContext(1);
+	sprite:SetXPosition(30, 0.5);
+	sprite:SetYPosition(25, 0.5);
+	sprite:SetCollHalfWidth(1.0);
+	sprite:SetCollHeight(2.0);
+	sprite:SetImgHalfWidth(1.0);
+	sprite:SetImgHeight(4.0);
+	sprite:SetMovementSpeed(200.0);
+	sprite:SetDirection(2);
+	sprite:LoadStandardAnimations("img/sprites/map/man_npc01_walk.png");
+	map:_AddGroundObject(sprite);
+
+	sprite = hoa_map.MapSprite();
+	sprite:SetName("Needs to Shave");
+	sprite:SetObjectID(7);
+	sprite:SetContext(1);
+	sprite:SetXPosition(10, 0.5);
+	sprite:SetYPosition(33, 0.5);
+	sprite:SetCollHalfWidth(1.0);
+	sprite:SetCollHeight(2.0);
+	sprite:SetImgHalfWidth(1.0);
+	sprite:SetImgHeight(4.0);
+	sprite:SetMovementSpeed(200.0);
+	sprite:SetDirection(2);
+	sprite:LoadStandardAnimations("img/sprites/map/man_npc02_walk.png");
+	map:_AddGroundObject(sprite);
+
+	sprite = hoa_map.MapSprite();
+	sprite:SetName("Little Brat");
+	sprite:SetObjectID(8);
+	sprite:SetContext(1);
+	sprite:SetXPosition(42, 0.5);
+	sprite:SetYPosition(11, 0.5);
+	sprite:SetCollHalfWidth(1.0);
+	sprite:SetCollHeight(2.0);
+	sprite:SetImgHalfWidth(1.0);
+	sprite:SetImgHeight(4.0);
+	sprite:SetMovementSpeed(200.0);
+	sprite:SetDirection(2);
+	sprite:LoadStandardAnimations("img/sprites/map/child_npc01_walk.png");
+	map:_AddGroundObject(sprite);
+
+	sprite = hoa_map.MapSprite();
+	sprite:SetName("Drunk Prostitute");
+	sprite:SetObjectID(2);
+	sprite:SetContext(1);
+	sprite:SetXPosition(15, 0.5);
+	sprite:SetYPosition(25, 0.5);
+	sprite:SetCollHalfWidth(1.0);
+	sprite:SetCollHeight(2.0);
+	sprite:SetImgHalfWidth(1.0);
+	sprite:SetImgHeight(4.0);
+	sprite:SetMovementSpeed(200.0);
+	sprite:SetDirection(2);
+	sprite:LoadStandardAnimations("img/sprites/map/woman_npc01_walk.png");
+	map:_AddGroundObject(sprite);
+
+	-- Create a Monster Zone ( attached to current map, 5 monsters max, 5000 ms between respawns, monsters restricted to area )
 	local mzone = hoa_map.MonsterZone( map, 5, 5000, true );
-	--Add a section to the zone that goes from (60, 45) to (80,60) (in positions - or divided tiles)
+	-- Add a section to the zone that goes from (60, 45) to (80,60) (in positions - or divided tiles)
 	mzone:AddSection( hoa_map.ZoneSection( 60, 45, 80, 60 ) );
-	--Create a sprite representation of a monster attached to this zone
+	-- Create a sprite representation of a monster attached to this zone
 	local monster = hoa_map.MonsterSprite( "dat/maps/sprites/scorpion.lua" );
 	monster:SetZone( mzone );
 	
-	--Add the monster to the zone (it also gets added to the ground objects)
+	-- Add the monster to the zone (it also gets added to the ground objects)
 	mzone:AddMonster( monster );
-	--Add the zone to the map
+	-- Add the zone to the map
 	map:_AddZone( mzone );
 end -- function Load()
