@@ -559,7 +559,10 @@ bool GameVideo::ApplySettings()
 	// Used by the game Hero of Allacrost, an SDL application
 	if (_target == VIDEO_TARGET_SDL_WINDOW) {
 		// Losing GL context, so unload images first
-		UnloadTextures();
+		if  (!UnloadTextures())
+		{
+			cerr << "VIDEO: Failed to delete OpenGL textures during a context change" << endl;
+		}
 
 		int32 flags = SDL_OPENGL;
 
