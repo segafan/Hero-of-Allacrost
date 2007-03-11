@@ -320,12 +320,12 @@ function Load(m)
 	sprite:SetImgHeight(4.0);
 	sprite:SetMovementSpeed(200.0);
 	sprite:SetDirection(2);
-	sprite:LoadStandardAnimations("img/sprites/map/child_npc01_walk.png");
+	sprite:LoadStandardAnimations("img/sprites/map/boy_npc01_walk.png");
 	map:_AddGroundObject(sprite);
 
 	sprite = hoa_map.MapSprite();
 	sprite:SetName("Drunk Prostitute");
-	sprite:SetObjectID(2);
+	sprite:SetObjectID(9);
 	sprite:SetContext(1);
 	sprite:SetXPosition(15, 0.5);
 	sprite:SetYPosition(25, 0.5);
@@ -346,7 +346,8 @@ function Load(m)
 	local monster = hoa_map.MonsterSprite( "dat/maps/sprites/scorpion.lua" );
 	monster:SetZone( mzone );
 	
-	-- Add the monster to the zone (it also gets added to the ground objects)
+	--Add the monster to the zone (it also gets added to the ground objects) 
+	--note that you can add more types of monsters, the zone will generate random monster based on every monster added to the zone
 	mzone:AddMonster( monster );
 	-- Add the zone to the map
 	map:_AddZone( mzone );
