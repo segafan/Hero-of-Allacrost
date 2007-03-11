@@ -293,6 +293,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\modes\map\map_zones.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\modes\menu\menu.cpp"
 				>
 			</File>
@@ -468,6 +472,10 @@
 			</File>
 			<File
 				RelativePath=".\src\modes\map\map_objects.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\map\map_zones.h"
 				>
 			</File>
 			<File
