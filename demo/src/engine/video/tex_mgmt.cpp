@@ -2304,28 +2304,6 @@ bool GameVideo::ReloadTextures()
 	if(_usesLights)
 		_lightOverlay = _CreateBlankGLTexture(1024, 1024);
 
-	// Clear all font caches
-	map<string, FontProperties *>::iterator iFontProp    = _font_map.begin();
-	map<string, FontProperties *>::iterator iFontPropEnd = _font_map.end();
-
-	while(iFontProp != _font_map.end())
-	{
-		FontProperties *fp = iFontProp->second;
-
-		if(fp->glyph_cache)
-		{
-			for(std::map<uint16, FontGlyph *>::iterator glyphitr = fp->glyph_cache->begin(); glyphitr != fp->glyph_cache->end(); glyphitr++)
-			{
-				_DeleteTexture((*glyphitr).second->texture);
-				delete (*glyphitr).second;
-			}
-
-			fp->glyph_cache->clear();
-		}
-
-		++iFontProp;
-	}
-
 	return success;
 }
 
@@ -2375,6 +2353,28 @@ bool GameVideo::UnloadTextures()
 	{
 		_DeleteTexture(_lightOverlay);
 		_lightOverlay = 0xFFFFFFFF;
+	}
+
+	// Clear all font caches
+	map<string, FontProperties *>::iterator iFontProp    = _font_map.begin();
+	map<string, FontProperties *>::iterator iFontPropEnd = _font_map.end();
+
+	while(iFontProp != _font_map.end())
+	{
+		FontProperties *fp = iFontProp->second;
+
+		if(fp->glyph_cache)
+		{
+			for(std::map<uint16, FontGlyph *>::iterator glyphitr = fp->glyph_cache->begin(); glyphitr != fp->glyph_cache->end(); glyphitr++)
+			{
+				_DeleteTexture((*glyphitr).second->texture);
+				delete (*glyphitr).second;
+			}
+
+			fp->glyph_cache->clear();
+		}
+
+		++iFontProp;
 	}
 
 	return success;
