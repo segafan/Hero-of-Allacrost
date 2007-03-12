@@ -1450,7 +1450,7 @@ void GameVideo::ToggleFPS()
 string GameVideo::_CreateTempFilename(const string &extension)
 {
 	// figure out the temp filename to return
-	string filename = "/tmp/allacrost_TEMP_";
+	string filename = "/tmp/allacrost";
 	filename += _nextTempFile;
 	filename += extension;
 
