@@ -2521,6 +2521,13 @@ bool TexSheet::Reload()
 	return true;
 }
 
+
+//! \note Temporary: place this in an appropriate place in the private_video namespace
+struct MultiImageInfo {
+		ImageLoadInfo multi_image;
+		ImageLoadInfo image;
+};
+
 //-----------------------------------------------------------------------------
 // _ReloadImagesToSheet: helper function of the GameVideo class to
 //                      TexSheet::Reload() to do the dirty work of reloading
@@ -2532,11 +2539,6 @@ bool GameVideo::_ReloadImagesToSheet(TexSheet *sheet)
 	map<string, Image *>::iterator iImage     = _images.begin();
 	map<string, Image *>::iterator iImageEnd  = _images.end();
 
-	struct MultiImageInfo
-	{
-		ImageLoadInfo multi_image;
-		ImageLoadInfo image;
-	};
 	std::map <string, MultiImageInfo> multi_image_info;
 
 	bool success = true;
