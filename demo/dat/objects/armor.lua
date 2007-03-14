@@ -30,6 +30,7 @@ armor[20001] = {
 	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS,
 	physical_defense = 6,
 	metaphysical_defense = 2,
+	standard_price = 80,
 	slots = 0
 }
 
@@ -45,6 +46,7 @@ armor[30001] = {
 	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS,
 	physical_defense = 8,
 	metaphysical_defense = 0,
+	standard_price = 170,
 	slots = 0
 }
 
@@ -60,6 +62,7 @@ armor[40001] = {
 	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS,
 	physical_defense = 2,
 	metaphysical_defense = 0,
+	standard_price = 40,
 	slots = 0
 }
 
@@ -75,5 +78,6 @@ armor[50001] = {
 	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS,
 	physical_defense = 3,
 	metaphysical_defense = 0,
+	standard_price = 25,
 	slots = 0
 }

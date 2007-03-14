@@ -113,6 +113,9 @@ public:
 
 	uint32 GetCount() const
 		{ return _count; }
+
+	uint32 GetPrice() const
+		{ return _price; }
 	//@}
 
 protected:
@@ -134,6 +137,9 @@ protected:
 
 	//! \brief How many items are represented within this class object instance
 	uint32 _count;
+
+	//! \brief The listed price of the object in the game's markets
+	uint32 _price;
 
 	/** \brief A bit-mask that determines which characters can use the said object.
 	*** See the "Game Character Types" constants in global_characters.h for more information
@@ -170,7 +176,7 @@ class GlobalItem : public GlobalObject {
 public:
 	GlobalItem(uint32 id, uint32 count = 1)
 		{ _id = id; _type = GLOBAL_OBJECT_ITEM; _count = count; _Load(); }
-	
+
 	~GlobalItem()
 		{}
 
@@ -294,7 +300,7 @@ private:
 /** ****************************************************************************
 *** \brief Represents a shard item
 ***
-*** Shards are small items that can be combined with weapons and armor to 
+*** Shards are small items that can be combined with weapons and armor to
 *** enhance their properties.
 *** ***************************************************************************/
 class GlobalShard : public GlobalObject {
