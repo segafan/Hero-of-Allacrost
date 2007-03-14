@@ -31,6 +31,7 @@ items[1] = {
 	icon = "img/icons/items/health_potion.png",
 	usage = hoa_global.GameGlobal.GLOBAL_ITEM_USE_ALL,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ACTOR,
+	standard_price = 60,
 
 	use_function = function()
 		print("Used a healing potion!")

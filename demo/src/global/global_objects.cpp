@@ -49,6 +49,7 @@ void GlobalItem::_Load() {
 	_icon_image.SetFilename(GlobalManager->_items_script.ReadString("icon"));
 	_usage = static_cast<GLOBAL_ITEM_USE>(GlobalManager->_items_script.ReadInt("usage"));
 	_target_type = static_cast<GLOBAL_TARGET>(GlobalManager->_items_script.ReadInt("target_type"));
+	_price = GlobalManager->_items_script.ReadInt("standard_price");
 	_function = GlobalManager->_items_script.ReadFunctionPointer("use_function");
 	GlobalManager->_items_script.ReadCloseTable();
 
@@ -94,6 +95,7 @@ void GlobalWeapon::_Load() {
 	_usable_by = static_cast<uint32>(GlobalManager->_weapons_script.ReadInt("usable_by"));
 	_physical_attack = GlobalManager->_weapons_script.ReadInt("physical_attack");
 	_metaphysical_attack = GlobalManager->_weapons_script.ReadInt("metaphysical_attack");
+	_price = GlobalManager->_items_script.ReadInt("standard_price");
 
 	GlobalManager->_weapons_script.ReadCloseTable();
 
@@ -145,6 +147,7 @@ void GlobalArmor::_Load() {
 	_usable_by = static_cast<uint32>(GlobalManager->_armor_script.ReadInt("usable_by"));
 	_physical_defense = GlobalManager->_armor_script.ReadInt("physical_defense");
 	_metaphysical_defense = GlobalManager->_armor_script.ReadInt("metaphysical_defense");
+	_price = GlobalManager->_items_script.ReadInt("standard_price");
 
 	GlobalManager->_armor_script.ReadCloseTable();
 

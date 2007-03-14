@@ -220,7 +220,7 @@ namespace hoa_map {
 		class ActionAnimate;
 		class ActionScriptFunction;
 
-		
+
 	}
 }
 
@@ -246,6 +246,12 @@ namespace hoa_quit {
 namespace hoa_scene {
 	extern bool SCENE_DEBUG;
 	class SceneMode;
+}
+
+// Shop mode declarations, see shop./cpp
+namespace hoa_shop {
+	extern bool SHOP_DEBUG;
+	class ShopMode;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

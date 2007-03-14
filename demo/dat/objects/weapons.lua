@@ -29,5 +29,6 @@ weapons[10001] = {
 	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS,
 	physical_attack = 12,
 	metaphysical_attack = 0,
+	standard_price = 2,
 	slots = 0
 }
