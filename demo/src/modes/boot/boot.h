@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -64,7 +64,7 @@ private:
 
 	//! Credits screen window
 	CreditsScreen _credits_screen;
-	
+
 	//! A pointer to the currently visible menu
 	BootMenu * _current_menu;
 
@@ -94,40 +94,40 @@ private:
 
 	//! Has the user modified game settings?
 	bool _has_modified_settings;
-	
+
 	//! If this isn't the latest version, what is?
 	std::string _latest_version_number;
 
-	
+
 	/*!
 	 *  \brief Animates the game logo when this class is first initialized.
 	 *
 	 *  The logo animation sequences:
 	 *  1) When game first starts up, screen is totally black
      *
-	 *  2) Logo gradually fades in from the background to appear on 
+	 *  2) Logo gradually fades in from the background to appear on
 	 *     the center of the screen, with the sword placed horizontally
 	 *	   as if it is "sheathed" inside the word Allacros
      *
      *  3) After logo fade in is complete, the sword slides out (unsheathes)
 	 *     and moves to the right
 	 *
-     *  4) After sword is completely removed, it moves upwards and makes 
-	 *     full 360 degree swings a few times (as if an invisible person was 
+     *  4) After sword is completely removed, it moves upwards and makes
+	 *     full 360 degree swings a few times (as if an invisible person was
 	 *	   swinging/twirling it) with powerful "woosh" sounds cutting the air.
      *
      *  5) Sword slows down, then comes crashing into the logo (in its
 	 *     default vertical position) with a loud ka-ching
-	 *  
-	 *  6) A brilliant flash of white light eminates from the sword along 
+	 *
+	 *  6) A brilliant flash of white light eminates from the sword along
 	 *     with the ka-ching sound, quickly whiting out the entire screen
      *
-	 *  7) The light fades away, revealing the desert background image 
-	 *	   (instead of a blank screen) and the logo is now at the top 
+	 *  7) The light fades away, revealing the desert background image
+	 *	   (instead of a blank screen) and the logo is now at the top
 	 *	   center of the screen.
      *
-     *  8) Finally, the copyright text at the very bottom of the 
-	 *     screen appears, along with the boot menu (New Game, etc.) 
+     *  8) Finally, the copyright text at the very bottom of the
+	 *     screen appears, along with the boot menu (New Game, etc.)
 	 */
 	void _AnimateLogo();
 
@@ -137,10 +137,10 @@ private:
 	//! Stops playback of the opening animation
 	void _EndOpeningAnimation();
 
-	//! Waits infinitely for a key press 
+	//! Waits infinitely for a key press
 	SDLKey _WaitKeyPress();
 
-	//! Waits infinitely for a joystick press 
+	//! Waits infinitely for a joystick press
 	uint8 _WaitJoyPress();
 
 	/**
@@ -163,7 +163,7 @@ private:
 	/**
 	*** \brief Redefines a joystick button to be mapped to another command. Waits for press using _WaitJoyPress()
 	**/
-	//@{	
+	//@{
 	void _RedefineConfirmJoy();
 	void _RedefineCancelJoy();
 	void _RedefineMenuJoy();
@@ -201,6 +201,8 @@ private:
 	void _OnBattleDebug();
 	//! Menu debug confirmed
 	void _OnMenuDebug();
+	//! Shop debug confirmed
+	void _OnShopDebug();
 
 	// Options' handlers
 	//! 'Video' confirmed
@@ -278,7 +280,7 @@ public:
 	void Update();
 	//! Wrapper function that calls different draw functions depending on the menu state.
 	void Draw();
-	
+
 };
 
 } // namespace hoa_boot

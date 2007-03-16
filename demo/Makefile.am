@@ -12,7 +12,8 @@ INCLUDES = \
 	-I$(top_srcdir)/src/modes/battle \
 	-I$(top_srcdir)/src/modes/boot \
 	-I$(top_srcdir)/src/modes/map \
-	-I$(top_srcdir)/src/modes/menu
+	-I$(top_srcdir)/src/modes/menu \
+	-I$(top_srcdir)/src/modes/shop
 
 VIDEO_DIR = src/engine/video
 video_SOURCES = \
@@ -120,7 +121,11 @@ modes_SOURCES = \
 	$(MODES_DIR)/quit.cpp \
 	$(MODES_DIR)/quit.h \
 	$(MODES_DIR)/scene.cpp \
-	$(MODES_DIR)/scene.h
+	$(MODES_DIR)/scene.h \
+	$(MODES_DIR)/shop/shop.h \
+	$(MODES_DIR)/shop/shop.cpp \
+	$(MODES_DIR)/shop/shop_windows.h \
+	$(MODES_DIR)/shop/shop_windows.cpp
 	
 if COND_EDITOR
 EDITOR_DIR = src/editor

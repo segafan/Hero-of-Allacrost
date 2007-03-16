@@ -41,7 +41,6 @@ void GlobalItem::_Load() {
 		return;
 	}
 
-
 	// Load the item data from the script
 	GlobalManager->_items_script.ReadOpenTable(_id);
 	_name = MakeUnicodeString(GlobalManager->_items_script.ReadString("name"));
@@ -88,15 +87,13 @@ void GlobalWeapon::_Load() {
 
 	// Load the weapon data from the script
 	GlobalManager->_weapons_script.ReadOpenTable(_id);
-
 	_name = MakeUnicodeString(GlobalManager->_weapons_script.ReadString("name"));
 	_description = MakeUnicodeString(GlobalManager->_weapons_script.ReadString("description"));
 	_icon_image.SetFilename(GlobalManager->_weapons_script.ReadString("icon"));
 	_usable_by = static_cast<uint32>(GlobalManager->_weapons_script.ReadInt("usable_by"));
 	_physical_attack = GlobalManager->_weapons_script.ReadInt("physical_attack");
 	_metaphysical_attack = GlobalManager->_weapons_script.ReadInt("metaphysical_attack");
-	_price = GlobalManager->_items_script.ReadInt("standard_price");
-
+	_price = GlobalManager->_weapons_script.ReadInt("standard_price");
 	GlobalManager->_weapons_script.ReadCloseTable();
 
 	if (GlobalManager->_weapons_script.GetErrorCode() != SCRIPT_NO_ERRORS) {
@@ -140,15 +137,13 @@ void GlobalArmor::_Load() {
 	}
 
 	GlobalManager->_armor_script.ReadOpenTable(_id);
-
 	_name = MakeUnicodeString(GlobalManager->_armor_script.ReadString("name"));
 	_description = MakeUnicodeString(GlobalManager->_armor_script.ReadString("description"));
 	_icon_image.SetFilename(GlobalManager->_armor_script.ReadString("icon"));
 	_usable_by = static_cast<uint32>(GlobalManager->_armor_script.ReadInt("usable_by"));
 	_physical_defense = GlobalManager->_armor_script.ReadInt("physical_defense");
 	_metaphysical_defense = GlobalManager->_armor_script.ReadInt("metaphysical_defense");
-	_price = GlobalManager->_items_script.ReadInt("standard_price");
-
+	_price = GlobalManager->_armor_script.ReadInt("standard_price");
 	GlobalManager->_armor_script.ReadCloseTable();
 
 	if (GlobalManager->_armor_script.GetErrorCode() != SCRIPT_NO_ERRORS) {
