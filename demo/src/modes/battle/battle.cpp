@@ -830,9 +830,21 @@ void BattleMode::_DrawSprites() {
 		_character_actors[i]->DrawSprite();
 	}
 
-	// Draw all enemy sprites
-	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
-		_enemy_actors[i]->DrawSprite();
+	// Ascending Y sorting functor. We want to compare the actual objects, NOT pointers!
+	struct AscendingYSort
+	{
+		bool operator()(BattleEnemyActor*& a1, BattleEnemyActor*& a2)
+		{
+			return ((*a1) < (*a2));
+		}
+	};
+
+	// Sort and draw the enemies
+	std::deque<private_battle::BattleEnemyActor*> sorted_enemy_actors = _enemy_actors;
+	std::sort(sorted_enemy_actors.begin(), sorted_enemy_actors.end(), AscendingYSort());
+	
+	for (uint32 i = 0; i < sorted_enemy_actors.size(); i++) {
+		sorted_enemy_actors[i]->DrawSprite();		
 	}
 } // void BattleMode::_DrawSprites()
 
