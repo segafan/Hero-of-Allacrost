@@ -30,6 +30,7 @@
 #include "map.h"
 #include "battle.h" // tmp
 #include "menu.h" // even more tmp
+#include "shop.h" // tmp
 
 using namespace std;
 using namespace hoa_boot::private_boot;
@@ -484,7 +485,7 @@ void BootMode::_SetupMainMenu() {
 
 	_main_menu.AddOption(MakeUnicodeString("Battle"), &BootMode::_OnBattleDebug);
 	_main_menu.AddOption(MakeUnicodeString("Menu"), &BootMode::_OnMenuDebug);
-
+	_main_menu.AddOption(MakeUnicodeString("Shop"), &BootMode::_OnShopDebug);
 
 	_main_menu.EnableOption(1, false); // gray out "load game" for now.
 }
@@ -632,6 +633,12 @@ void BootMode::_OnMenuDebug() {
 	GlobalManager->AddCharacter(GLOBAL_CHARACTER_CLAUDIUS);
 	hoa_menu::MenuMode *MM = new hoa_menu::MenuMode();
 	ModeManager->Push(MM);
+}
+
+// Shop debug confirmed
+void BootMode::_OnShopDebug() {
+	hoa_shop::ShopMode *SM = new hoa_shop::ShopMode();
+	ModeManager->Push(SM);
 }
 
 

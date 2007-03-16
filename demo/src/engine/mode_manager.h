@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -49,7 +49,7 @@ const uint8 MODE_MANAGER_WORLD_MODE  = 9;
 ***
 *** The GameMode class is the starting base for developing a new mode of operation
 *** for the game. The GameModeManager class handles all of the GameMode class
-*** objects. One should learn to understand the interaction between these two 
+*** objects. One should learn to understand the interaction between these two
 *** classes.
 ***
 *** \note THIS IS VERY IMPORTANT. Never, under any circumstances should
@@ -60,11 +60,11 @@ const uint8 MODE_MANAGER_WORLD_MODE  = 9;
 *** **************************************************************************/
 class GameMode {
 	friend class GameModeManager;
-	
+
 protected:
 	//! Indicates what 'mode' this object is in (what type of inherited class).
 	uint8 mode_type;
-	
+
 private:
 	//! Copy constructor is private, because making a copy of a game mode object is a \b bad idea.
 	GameMode(const GameMode& other);
@@ -77,7 +77,7 @@ public:
 	GameMode(uint8 mt);
 	//! Destructor is virutal, since the inherited class holds all the important data.
 	virtual ~GameMode();
-	
+
 	//! Updates the state of the game mode.
 	virtual void Update() = 0;
 	//! Draws the next screen frame for the game mode.
@@ -96,8 +96,8 @@ public:
 ***
 *** The GameModeManager class keeps a stack of GameMode objects, where the object
 *** on the top of the stack is the active GameMode (there can only be one active
-*** game mode at any time). The Update() and Draw() functions for this class are 
-*** wrapper calls to the GameMode functions of the same name, and act on the 
+*** game mode at any time). The Update() and Draw() functions for this class are
+*** wrapper calls to the GameMode functions of the same name, and act on the
 *** active game mode.
 ***
 *** When a condition is encountered in which a game mode wishes to destroy itself
@@ -130,10 +130,10 @@ private:
 	bool _state_change;
 	//! The number of game modes to pop from the back of the stack on the next call to GameModeManager#Update().
 	uint32 _pop_count;
-	
+
 public:
 	SINGLETON_METHODS(GameModeManager);
-	
+
 	//! \brief Increments by one the number of game modes to pop off the stack
 	void Pop();
 	/** \brief Removes all game modes from the stack on the next call to GameModeManager#Update().
