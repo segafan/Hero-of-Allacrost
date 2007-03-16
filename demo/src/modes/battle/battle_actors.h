@@ -345,25 +345,28 @@ public:
 	{ _y_origin = y_origin; }
 	//@}
 
-	// Gets a pointer to the GlobalActor
+	//! Gets a pointer to the GlobalActor
 	virtual hoa_global::GlobalActor * GetActor()
 	{ return this; }
 
-	// \brief Sets the location of the time meter portrait
-	// \param new_val new value for the location
+	//! \brief Sets the location of the time meter portrait
+	//! \param new_val new value for the location
 	virtual void SetTimePortraitLocation(float new_val) { _time_portrait_location = new_val; }
 
-	// \brief Gets the location of the time meter portrait
-	// \return The location of the time portrait
+	//! \brief Gets the location of the time meter portrait
+	//! \return The location of the time portrait
 	virtual float GetTimePortraitLocation() { return _time_portrait_location; }
 
-	// \brief Gets the wait time
-	// \return the wait time
+	//! \brief Gets the wait time
+	//! \return the wait time
 	virtual hoa_system::Timer* GetWaitTime() { return &_wait_time; }
 
-	// \brief Resets the wait time and time meter portrait
+	//! \brief Resets the wait time and time meter portrait
 	void ResetWaitTime();
 	//inline void SetWaitTime(uint32 wait_time) { _wait_time = wait_time; }
+
+	//! \brief Compares the Y-coordinates of the actors, used for sorting the actors up-down when drawing
+	bool operator<(const BattleEnemyActor & other) const;
 
 private:
 	//! Enemy's X-coordinate on the screen

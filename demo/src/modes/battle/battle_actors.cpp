@@ -320,7 +320,7 @@ void BattleCharacterActor::TakeDamage(uint32 damage)
 {
 	_total_time_damaged = 1;
 	_damage_dealt = damage;
-	VideoManager->ShakeScreen(2.0f, 0.75f); // TODO: remove this line! Only for testing =)
+
 	if (damage >= GetActor()->GetHitPoints()) // Was it a killing blow?
 	{
 		GetActor()->SetHitPoints(0);
@@ -376,6 +376,15 @@ void BattleEnemyActor::ResetWaitTime()
 	//Sets time meter portrait position
 
 	_time_portrait_location = 128.f;
+}
+
+// Compares the Y-coordinates of the actors, used for sorting the actors up-down when drawing
+bool BattleEnemyActor::operator<(const BattleEnemyActor & other) const
+{
+	if ((_y_location - GetHeight()) > (other._y_location - other.GetHeight()))
+		return true;
+	else
+		return false;
 }
 
 // Updates the action status of the enemy

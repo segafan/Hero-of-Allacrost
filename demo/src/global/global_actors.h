@@ -648,6 +648,10 @@ public:
 	std::vector<hoa_video::StillImage>* GetSpriteFrames()
 		{ return &_sprite_frames; }
 
+	//! \brief Returns the height of the enemy
+	int GetHeight() const
+	{ return static_cast<int>(_sprite_frames[0].GetHeight()); }
+
 	/** \brief Simulates the growth of the enemy from the base experience level.
 	*** \param level The experience level to set the enemey to
 	***
