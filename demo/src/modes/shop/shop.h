@@ -45,7 +45,8 @@ enum SHOP_STATE {
 	SHOP_STATE_INVALID  = -1,
 	SHOP_STATE_ACTION   =  0,
 	SHOP_STATE_LIST     =  1,
-	SHOP_STATE_TOTAL    =  2
+	SHOP_STATE_CONFIRM  =  2,
+	SHOP_STATE_TOTAL    =  3
 };
 
 } // namespace private_shop
@@ -53,10 +54,17 @@ enum SHOP_STATE {
 /** ****************************************************************************
 *** \brief Handles the game execution while the player is shopping.
 ***
-*** ShopMode allows the player to purchase items, weapons, and armor. It does
-*** not support the purchase of shards or key items, however.
+*** ShopMode allows the player to purchase items, weapons, armor, and other
+*** objects. ShopMode consists of a captured screenshot which forms the
+*** background image, upon which a series of menu windows are drawn. The
+*** background image is of size 1024x768, and a 800x600 arrangement of windows
+*** is drawn ontop of the middle of that image.
+***
 *** ***************************************************************************/
 class ShopMode : public hoa_mode_manager::GameMode {
+	friend class private_shop::ShopActionWindow;
+	friend class private_shop::ObjectListWindow;
+	friend class private_shop::ObjectInfoWindow;
 public:
 	ShopMode();
 
@@ -74,17 +82,13 @@ public:
 	//! \brief Handles the drawing of everything on the shop menu and makes sub-draw function calls as appropriate.
 	void Draw();
 
-	/** \brief Adds a new object to the inventory
+	/** \brief Adds a new object for the shop to sell
 	*** \param object_id The id number of the object to add
 	***
 	*** You should only specify id numbers that correspond to items, weapons, or armor
 	*** The newly added object won't be seen in the shop menu until the Reset() function is called.
 	**/
 	void AddObject(uint32 object_id);
-
-	void SetState(private_shop::SHOP_STATE state)
-		{ _shop_state = state; }
-
 private:
 	//! \brief Keeps track of what windows are open to determine how to handle user input
 	private_shop::SHOP_STATE _shop_state;
@@ -118,7 +122,8 @@ private:
 	//@{
 	//! \brief The top window containing the shop actions (buy, sell, etc).
 	private_shop::ShopActionWindow _action_window;
-// 	private_shop::ObjectListWindow _list_window;
+	private_shop::ObjectListWindow _list_window;
+	private_shop::ObjectInfoWindow _info_window;
 	//@}
 }; // class ShopMode : public hoa_mode_manager::GameMode
 

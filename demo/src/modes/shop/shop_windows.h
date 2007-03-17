@@ -32,7 +32,8 @@ namespace private_shop {
 /** ****************************************************************************
 *** \brief Represents the top window in shop mode which contains the main shop actions
 ***
-*** This includes "buy", "sell", etc.
+*** Shop actions include "buy", "sell", etc. This window also contains financial
+*** information about the party and the current purchases.
 *** ***************************************************************************/
 class ShopActionWindow : public hoa_video::MenuWindow {
 public:
@@ -40,17 +41,19 @@ public:
 
 	~ShopActionWindow();
 
+	//! \brief Handles user input and updates the state of the window
+	void Update();
+
+	//! \brief Draws the window to the screen
+	void Draw();
+
 	/** \brief The list of options for what the player may do in shop mode
 	*** Each option includes the name of the object and its price.
 	**/
 	hoa_video::OptionBox options;
 
-	//! \brief Handles user input and updates the state of the window
-	void Update();
-
-	//! \brief Draws the window to the screen
-	void Draw()
-		{ hoa_video::MenuWindow::Draw(); }
+	//! \brief Prints financial information in the bottom of the window
+	hoa_video::TextBox text;
 }; // class ShopActionWindow : public hoa_video::MenuWindow
 
 
@@ -59,69 +62,61 @@ public:
 ***
 ***
 *** ***************************************************************************/
-// class ObjectListWindow : public hoa_video::MenuWindow {
-// public:
-// 	ObjectListWindow()
-// 		{}
-//
-// 	ObjectListWindow()
-// 		{}
-//
-// 	/** \brief Contains the list of objects for sale
-// 	*** Each option includes the name of the object and its price.
-// 	**/
-// 	hoa_video::OptionBox object_list;
-//
-// 	//! \brief Removes all entries in the option box
-// 	void Clear()
-// 		{ object_list.clear(); }
-//
-// 	//! \brief Processes user input and updates the cursor
-// 	void Update();
-//
-// 	//! \brief Draws the object list window and options to the screen
-// 	void Draw();
-//
-// 	/** \brief Adds a new entry to the option box
-// 	*** \param name The name of the object for this entry
-// 	*** \param price The price of the object in this entry
-// 	**/
-// 	void AddEntry(hoa_utils::ustring name, uint32 price);
-// }; // class ObjectListWindow : public hoa_video::MenuWindow
+class ObjectListWindow : public hoa_video::MenuWindow {
+public:
+	ObjectListWindow();
+
+	~ObjectListWindow();
+
+	//! \brief Removes all object entries from the list
+	void Clear();
+
+	/** \brief Adds a new entry to the option box
+	*** \param name The name of the object for this entry
+	*** \param price The price of the object in this entry
+	**/
+	void AddEntry(hoa_utils::ustring name, uint32 price);
+
+	//! \brief Reconstructs the option box from the entries that have been added
+	void ConstructList();
+
+	//! \brief Processes user input and updates the cursor
+	void Update();
+
+	//! \brief Draws the object list window and options to the screen
+	void Draw();
+
+	//! \brief Contains the text that forms each option in the list
+	std::vector<hoa_utils::ustring> option_text;
+
+	/** \brief Contains the list of objects for sale
+	*** Each option includes the name of the object and its price.
+	**/
+	hoa_video::OptionBox object_list;
+}; // class ObjectListWindow : public hoa_video::MenuWindow
 
 
 /** ****************************************************************************
-*** \brief
+*** \brief Displays detailed information about a selected object
 ***
 ***
 *** ***************************************************************************/
-// class ObjectPropertiesWindow : public hoa_video::MenuWindow {
-// public:
-// 	ObjectPropertiesWindow()
-// 		{}
-//
-// 	~ObjectPropertiesWindow()
-// 		{}
-//
-// 	/** \brief Sets the object which the window displays the description of
-// 	*** \param obj A pointer to the object which the window will describe, or NULL to clear the window.
-// 	***
-// 	*** This is not sets the _object member of this class, but changes the entire rendering settings
-// 	*** of the window.
-// 	**/
-// 	void SetObject(GlobalObject* obj);
-//
-// 	//! \brief Draws the window and the object properties contained within
-// 	void Draw();
-//
-// private:
-// 	/** \brief A pointer to the object whose properties are to be described
-// 	*** If this member is set to NULL, then the window will be blank. The pointer
-// 	*** should point to an object contained within a ShopMode class, not to an
-// 	*** object in the player's inventory or anywhere else.
-// 	**/
-// 	GlobalObject* _object;
-// }; // class ObjectPropertiesWindow : public hoa_video::MenuWindow
+class ObjectInfoWindow : public hoa_video::MenuWindow {
+public:
+	ObjectInfoWindow();
+
+	~ObjectInfoWindow();
+
+	//! \brief Draws the window and the object properties contained within
+	void Draw();
+
+	/** \brief A pointer to the object whose properties are to be described
+	*** If this member is set to NULL, then the window will be blank. The pointer
+	*** should point to an object contained within a ShopMode class, not to an
+	*** object in the player's inventory or anywhere else.
+	**/
+	hoa_global::GlobalObject* object;
+}; // class ObjectInfoWindow : public hoa_video::MenuWindow
 
 } // namespace private_shop
 
