@@ -67,6 +67,12 @@ ShopMode::~ShopMode() {
 		cout << "SHOP: ShopMode destructor invoked" << endl;
 
 	VideoManager->DeleteImage(_saved_screen);
+
+	for (uint32 i = 0; i < _all_objects.size(); i++) {
+		delete(_all_objects[i]);
+	}
+	_all_objects.clear();
+
 	private_shop::current_shop = NULL;
 }
 
@@ -85,6 +91,11 @@ void ShopMode::Reset() {
 	_all_objects.push_back(new GlobalArmor(30001));
 	_all_objects.push_back(new GlobalArmor(40001));
 	_all_objects.push_back(new GlobalArmor(50001));
+
+	for (uint32 i = 0; i < _all_objects.size(); i++) {
+		_list_window.AddEntry(_all_objects[i]->GetName(), _all_objects[i]->GetPrice());
+	}
+	_list_window.ConstructList();
 }
 
 
@@ -95,6 +106,7 @@ void ShopMode::Update() {
 			_action_window.Update();
 			break;
 		case SHOP_STATE_LIST:
+			_list_window.Update();
 			break;
 		default:
 			if (SHOP_DEBUG)
@@ -111,6 +123,8 @@ void ShopMode::Draw() {
 	VideoManager->DrawImage(_saved_screen);
 
 	_action_window.Draw();
+	_list_window.Draw();
+	_info_window.Draw();
 }
 
 

@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -54,7 +54,7 @@ MenuMode::MenuMode()
 	if (!VideoManager->CaptureScreen(_saved_screen)) {
 		cerr << "MENU: ERROR: Couldn't save the screen!" << endl;
 	}
-	
+
 	// Init the location picture
 	//_location_picture.SetFilename("img/menus/locations/desert_cave.png");
 	//_location_picture.SetDimensions(500, 125);
@@ -64,7 +64,7 @@ MenuMode::MenuMode()
 	// FIXME: remove this eventually
 	GlobalManager->SetFunds(4236);
 	_current_window = WIN_INVENTORY;
-		
+
 	GlobalParty & characters = *GlobalManager->GetActiveParty();
 
 	// Setup character windows based on active party size
@@ -89,7 +89,7 @@ MenuMode::MenuMode()
 	_bottom_window.SetPosition(static_cast<float>(start_x),static_cast<float>(start_y) + 442);
 
 	// Width of each character window is 360 px.
-	// Each char window will have an additional 16 px for the left border 
+	// Each char window will have an additional 16 px for the left border
 	// The 4th (last) char window will have another 16 px for the right border
 	// Height of the char window is 98 px.
 	// The bottom window in the main view is 192 px high, and the full width which will be 216 * 4 + 16
@@ -138,21 +138,21 @@ MenuMode::MenuMode()
 		VIDEO_MENU_EDGE_ALL);
 	_formation_window.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y) + 10);
 
-	
+
 	// Set the menu to show the main options
 	_current_menu_showing = SHOW_MAIN;
 	_current_menu = &_main_options;
-	
+
 	// Load sounds
 	SoundDescriptor confirm;
 	SoundDescriptor bump;
 	SoundDescriptor potion;
 	SoundDescriptor cancel;
-	if (confirm.LoadSound("snd/obtain.wav") == false) 
+	if (confirm.LoadSound("snd/obtain.wav") == false)
 	{
 		cerr << "MINICHARWINDOW::UPDATE - Unable to load confirm sound effect!" << endl;
 	}
-	if (bump.LoadSound("snd/bump.wav") == false) 
+	if (bump.LoadSound("snd/bump.wav") == false)
 	{
 		cerr << "MINICHARWINDOW::UPDATE - Unable to load bump sound effect!" << endl;
 	}
@@ -174,13 +174,13 @@ MenuMode::MenuMode()
 // Release and destroy everything
 MenuMode::~MenuMode() {
 	if (MENU_DEBUG) cout << "MENU: MenuMode destructor invoked." << endl;
-	
+
 	// Remove saved images
 	VideoManager->DeleteImage(_saved_screen);
-	
+
 	// Unload location picture
 	//VideoManager->DeleteImage(_location_picture);
-	
+
 	// Destroy all menu windows
 	_bottom_window.Destroy();
 	_character_window0.Destroy();
@@ -199,7 +199,7 @@ MenuMode::~MenuMode() {
 	_menu_sounds["bump"].FreeSound();
 	_menu_sounds["potion"].FreeSound();
 	_menu_sounds["cancel"].FreeSound();
-	
+
 } // MenuMode::~MenuMode()
 
 
@@ -225,7 +225,7 @@ void MenuMode::Reset() {
 	_skills_window.Show();
 	_equip_window.Show();
 	_formation_window.Show();
-	
+
 	// Setup OptionBoxes
 	this->_SetupMainOptionBox();
 	this->_SetupInventoryOptionBox();
@@ -234,7 +234,7 @@ void MenuMode::Reset() {
 	this->_SetupOptionsOptionBox();
 	this->_SetupSaveOptionBox();
 	this->_SetupEquipOptionBox();
-	
+
 } // void MenuMode::Reset()
 
 
@@ -259,7 +259,7 @@ void MenuMode::_SetupMainOptionBox()
 	// Setup the main options box
 	this->_SetupOptionBoxCommonSettings(&_main_options);
 	_main_options.SetSize(MAIN_SIZE, 1);
-	
+
 	// Generate the strings
 	vector<ustring> options;
 	options.push_back(MakeUnicodeString("Inventory"));
@@ -268,7 +268,7 @@ void MenuMode::_SetupMainOptionBox()
 	options.push_back(MakeUnicodeString("Status"));
 	options.push_back(MakeUnicodeString("Formation"));
 	options.push_back(MakeUnicodeString("Exit"));
-	
+
 	// Add strings and set default selection.
 	_main_options.SetOptions(options);
 	_main_options.SetSelection(MAIN_INVENTORY);
@@ -286,13 +286,13 @@ void MenuMode::_SetupInventoryOptionBox()
 	// Setup the option box
 	this->_SetupOptionBoxCommonSettings(&_menu_inventory);
 	_menu_inventory.SetSize(INV_SIZE, 1);
-	
+
 	// Generate the strings
 	vector<ustring> options;
 	options.push_back(MakeUnicodeString("Use"));
 	options.push_back(MakeUnicodeString("Sort"));
 	options.push_back(MakeUnicodeString("Cancel"));
-	
+
 	// Add strings and set default selection.
 	_menu_inventory.SetOptions(options);
 	_menu_inventory.SetSelection(INV_USE);
@@ -304,12 +304,12 @@ void MenuMode::_SetupSkillsOptionBox()
 	// Setup the option box
 	this->_SetupOptionBoxCommonSettings(&_menu_skills);
 	_menu_skills.SetSize(SKILLS_SIZE, 1);
-	
+
 	// Generate the strings
 	vector<ustring> options;
 	options.push_back(MakeUnicodeString("Use"));
 	options.push_back(MakeUnicodeString("Cancel"));
-	
+
 	// Add strings and set default selection.
 	_menu_skills.SetOptions(options);
 	_menu_skills.SetSelection(SKILLS_USE);
@@ -323,17 +323,17 @@ void MenuMode::_SetupEquipOptionBox()
 	this->_SetupOptionBoxCommonSettings(&_menu_equip);
 	_menu_equip.SetCellSize(150.0f, 50.0f);
 	_menu_equip.SetSize(EQUIP_SIZE, 1);
-	
+
 	// Generate the strings
 	vector<ustring> options;
 	options.push_back(MakeUnicodeString("Equip"));
 	options.push_back(MakeUnicodeString("Remove"));
 	options.push_back(MakeUnicodeString("Cancel"));
-	
+
 	// Add strings and set default selection.
 	_menu_equip.SetOptions(options);
 	_menu_equip.SetSelection(EQUIP_EQUIP);
-	
+
 	// Disable unused options
 	_menu_equip.EnableOption(EQUIP_REMOVE, false);
 }
@@ -343,12 +343,12 @@ void MenuMode::_SetupStatusOptionBox()
 	// Setup the status option box
 	this->_SetupOptionBoxCommonSettings(&_menu_status);
 	_menu_status.SetSize(STATUS_SIZE, 1);
-	
+
 	// Generate the strings
 	vector<ustring> options;
 	options.push_back(MakeUnicodeString("View"));
 	options.push_back(MakeUnicodeString("Cancel"));
-	
+
 	// Add strings and set default selection.
 	_menu_status.SetOptions(options);
 	_menu_status.SetSelection(STATUS_VIEW);
@@ -361,13 +361,13 @@ void MenuMode::_SetupOptionsOptionBox()
 	// Setup the options option box
 	this->_SetupOptionBoxCommonSettings(&_menu_options);
 	_menu_options.SetSize(OPTIONS_SIZE, 1);
-	
+
 	// Generate the strings
 	vector<ustring> options;
 	options.push_back(MakeUnicodeString("Edit"));
 	options.push_back(MakeUnicodeString("Save"));
 	options.push_back(MakeUnicodeString("Cancel"));
-	
+
 	// Add strings and set default selection.
 	_menu_options.SetOptions(options);
 	_menu_options.SetSelection(OPTIONS_EDIT);
@@ -380,12 +380,12 @@ void MenuMode::_SetupSaveOptionBox()
 	// setup the save options box
 	this->_SetupOptionBoxCommonSettings(&_menu_save);
 	_menu_save.SetSize(SAVE_SIZE, 1);
-	
+
 	// Generate the strings
 	vector<ustring> options;
 	options.push_back(MakeUnicodeString("Save"));
 	options.push_back(MakeUnicodeString("Cancel"));
-	
+
 	// Add strings and set default selection.
 	_menu_save.SetOptions(options);
 	_menu_save.SetSelection(SAVE_SAVE);
@@ -395,8 +395,8 @@ void MenuMode::_SetupSaveOptionBox()
 // MenuMode class -- Update Code
 ////////////////////////////////////////////////////////////////////////////////
 
-void MenuMode::Update() 
-{	
+void MenuMode::Update()
+{
 	// See if inventory window is active
 	//FIX ME: Use a var to track active window and switch?
 
@@ -421,8 +421,8 @@ void MenuMode::Update()
 		return;
 	}
 
-		
-	if (InputManager->CancelPress()) 
+
+	if (InputManager->CancelPress())
 	{
 		// Play sound.
 		_menu_sounds["cancel"].PlaySound();
@@ -453,10 +453,10 @@ void MenuMode::Update()
 		// Play Sound
 		_current_menu->HandleRightKey();
 	}
-	
+
 	// Get the latest event from the current menu
 	int32 event = _current_menu->GetEvent();
-	
+
 	// If confirm was pressed
 	if (event == VIDEO_OPTION_CONFIRM)
 	{
@@ -520,11 +520,11 @@ void MenuMode::Draw() {
 
 	// Set the text colour to white
 	VideoManager->SetTextColor(Color(1.0f, 1.0f, 1.0f, 1.0f));
-	
+
 	//FIX ME:  Test
 	_DrawBottomMenu();
 	_main_options_window.Draw();
-		
+
 	// Detects which option is highlighted in main menu choices and sets that to the current window
 	// to draw
 	if (_current_menu_showing == SHOW_MAIN) {
@@ -538,7 +538,7 @@ void MenuMode::Draw() {
 	switch (drawwindow)
 	{
 		case SHOW_MAIN: break;
-		
+
 		case SHOW_INVENTORY:
 		{
 			_inventory_window.Draw();
@@ -583,7 +583,7 @@ void MenuMode::Draw() {
 	_character_window1.Draw();
 	_character_window2.Draw();
 	_character_window3.Draw();
-	
+
 	// Draw currently active options box
 	_current_menu->Draw();
 } // void MenuMode::Draw()
@@ -630,10 +630,10 @@ void MenuMode::_DrawBottomMenu() {
 			VideoManager->MoveRelative(260, 30);
 			VideoManager->DrawImage(i);
 	}
-	
+
 
 	// Display Location
-	
+
 	if (!VideoManager->DrawText(MakeUnicodeString("Desert Cave")))
 		cerr << "MENU: ERROR > Couldn't draw location!" << endl;
 
@@ -650,19 +650,19 @@ void MenuMode::_DrawBottomMenu() {
 	std::string time = std::string("Time: ") + os_time.str();
 	if (!VideoManager->DrawText(MakeUnicodeString(time)))
 		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
-	
+
 	// Get the money of the party
 	std::ostringstream os_money;
 	os_money << GlobalManager->GetMoney();
-	std::string money = std::string("Dorrun: ") + os_money.str();
+	std::string money = std::string("Drunes: ") + os_money.str();
 	VideoManager->MoveRelative(0, 30);
 	if (!VideoManager->DrawText(MakeUnicodeString(money)))
 		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
-	
+
 	//VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, 0);
-		
+
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
-		
+
 	VideoManager->Move(390, 685);
 	VideoManager->DrawImage(_location_picture);*/
 } // void MenuMode::_DrawBottomMenu()
@@ -672,7 +672,7 @@ void MenuMode::_DrawBottomMenu() {
 //FIX ME:  Adjust for new layout
 void MenuMode::_HandleMainMenu()
 {
-	
+
 	// Change the based on which option was selected.
 	switch (_main_options.GetSelection())
 	{
