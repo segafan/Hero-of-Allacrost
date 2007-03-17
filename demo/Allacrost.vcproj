@@ -39,7 +39,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)\src&quot;;&quot;$(ProjectDir)\src\engine\video&quot;;&quot;$(ProjectDir)\src\editor&quot;;&quot;$(ProjectDir)\src\engine\audio&quot;;&quot;$(ProjectDir)\src\modes&quot;;&quot;$(ProjectDir)\src\engine&quot;;&quot;$(ProjectDir)\src\modes\battle&quot;;&quot;$(ProjectDir)\src\modes\boot&quot;;&quot;$(ProjectDir)\src\modes\map&quot;;&quot;$(ProjectDir)\src\modes\menu&quot;;&quot;$(ProjectDir)\src\global&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)\src&quot;;&quot;$(ProjectDir)\src\engine\video&quot;;&quot;$(ProjectDir)\src\editor&quot;;&quot;$(ProjectDir)\src\engine\audio&quot;;&quot;$(ProjectDir)\src\modes&quot;;&quot;$(ProjectDir)\src\engine&quot;;&quot;$(ProjectDir)\src\modes\battle&quot;;&quot;$(ProjectDir)\src\modes\boot&quot;;&quot;$(ProjectDir)\src\modes\map&quot;;&quot;$(ProjectDir)\src\modes\menu&quot;;&quot;$(ProjectDir)\src\modes\shop&quot;;&quot;$(ProjectDir)\src\global&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -122,7 +122,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="0"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)\src&quot;;&quot;$(ProjectDir)\src\engine\video&quot;;&quot;$(ProjectDir)\src\editor&quot;;&quot;$(ProjectDir)\src\engine\audio&quot;;&quot;$(ProjectDir)\src\modes&quot;;&quot;$(ProjectDir)\src\engine&quot;;&quot;$(ProjectDir)\src\modes\battle&quot;;&quot;$(ProjectDir)\src\modes\boot&quot;;&quot;$(ProjectDir)\src\modes\map&quot;;&quot;$(ProjectDir)\src\modes\menu&quot;;&quot;$(ProjectDir)\src\global&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)\src&quot;;&quot;$(ProjectDir)\src\engine\video&quot;;&quot;$(ProjectDir)\src\editor&quot;;&quot;$(ProjectDir)\src\engine\audio&quot;;&quot;$(ProjectDir)\src\modes&quot;;&quot;$(ProjectDir)\src\engine&quot;;&quot;$(ProjectDir)\src\modes\battle&quot;;&quot;$(ProjectDir)\src\modes\boot&quot;;&quot;$(ProjectDir)\src\modes\map&quot;;&quot;$(ProjectDir)\src\modes\menu&quot;;&quot;$(ProjectDir)\src\modes\shop&quot;;&quot;$(ProjectDir)\src\global&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;"
 				MinimalRebuild="true"
 				ExceptionHandling="1"
@@ -381,6 +381,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\modes\shop\shop.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\shop\shop_windows.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\engine\socket.h"
 				>
 			</File>
@@ -586,6 +594,14 @@
 			</File>
 			<File
 				RelativePath=".\src\engine\video\shake.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\shop\shop.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\shop\shop_windows.cpp"
 				>
 			</File>
 			<File
