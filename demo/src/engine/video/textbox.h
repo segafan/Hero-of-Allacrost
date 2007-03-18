@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2006 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -132,7 +132,7 @@ public:
 
 	/** \brief A non-unicode version of SetDisplayText().
 	*** \param text The text to be set in the box (a standard non-unicode string).
-	*** See the unicode version of ShowText for more details.
+	*** See the unicode version of SetDisplayText for more details.
 	**/
 	void SetDisplayText(const std::string &text);
 
@@ -157,11 +157,11 @@ public:
 	**/
 	std::string GetFont() const
 		{ return _font; }
-	
+
 	//! \brief Return the current text display mode that is set for this textbox.
 	TEXT_DISPLAY_MODE GetDisplayMode() const
 		{ return _mode; }
-	
+
 	//! \brief Return the current text display speed, in characters per second.
 	float GetDisplaySpeed() const
 		{ return _display_speed; }
@@ -199,28 +199,28 @@ private:
 
 	//! \brief Alignment flags for the textbox.
 	int32 _text_xalign, _text_yalign;
-	
+
 	//! \brief Hold the number of characters in the entire text.
 	uint32 _num_chars;
 
-	//! \brief True if the text being drawn by ShowText() is done (in the case of gradual rendering).
+	//! \brief True if the text being drawn by SetDisplayText() is done (in the case of gradual rendering).
 	bool _finished;
-	
-	//! \brief The number of milliseconds that have passed since ShowText() was called.
+
+	//! \brief The number of milliseconds that have passed since SetDisplayText() was called.
 	uint32 _current_time;
-	
+
 	//! \brief The number of milliseconds remaining until the gradual text display will be complete.
 	uint32 _end_time;
 
 	//! \brief The font name to use for this textbox.
 	std::string _font;
-	
+
 	//! \brief A pointer to the structure containing properties of the current font such as its height, etc.
 	FontProperties* _font_properties;
 
 	//! \brief The display mode for the text (one character at a time, fading in, instant, etc.).
 	TEXT_DISPLAY_MODE _mode;
-	
+
 	//! \brief An array of wide strings, one for each line of text.
 	std::vector<hoa_utils::ustring> _text;
 

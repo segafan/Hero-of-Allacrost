@@ -24,11 +24,11 @@ weapons = {}
 
 weapons[10001] = {
 	name = "Karlate Sword",
-	description = "Standard karlate issued equipment",
+	description = "Standard Karlate issued equipment. A light weight iron sword suitable for most skirmishes.",
 	icon = "img/icons/weapons/karlate_sword.png",
 	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS,
 	physical_attack = 12,
 	metaphysical_attack = 0,
-	standard_price = 2,
+	standard_price = 120,
 	slots = 0
 }

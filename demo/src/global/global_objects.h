@@ -116,6 +116,9 @@ public:
 
 	uint32 GetPrice() const
 		{ return _price; }
+
+	const hoa_video::StillImage& GetIconImage() const
+		{ return _icon_image; }
 	//@}
 
 protected:
@@ -236,11 +239,17 @@ public:
 	~GlobalWeapon()
 		{}
 
+	uint32 GetPhysicalAttack() const
+		{ return _physical_attack; }
+
+	uint32 GetMetaphysicalAttack() const
+		{ return _metaphysical_attack; }
+
 private:
-	//! The amount of physical damage that the weapon causes
+	//! \brief The amount of physical damage that the weapon causes
 	uint32 _physical_attack;
 
-	//! The amount of metaphysical damage that the weapon causes
+	//! \brief The amount of metaphysical damage that the weapon causes
 	uint32 _metaphysical_attack;
 
 	std::map<GLOBAL_ELEMENTAL, uint32> _elemental_bonuses;
@@ -276,11 +285,17 @@ public:
 	~GlobalArmor()
 		{}
 
+	uint32 GetPhysicalDefense() const
+		{ return _physical_defense; }
+
+	uint32 GetMetaphysicalDefense() const
+		{ return _metaphysical_defense; }
+
 private:
-	//! The amount of physical defense that the armor allows
+	//! \brief The amount of physical defense that the armor allows
 	uint32 _physical_defense;
 
-	//! The amount of metaphysical defense that the armor allows
+	//! \brief The amount of metaphysical defense that the armor allows
 	uint32 _metaphysical_defense;
 
 	// TODO: Add elemental bonuses

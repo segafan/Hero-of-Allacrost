@@ -181,6 +181,7 @@ bool EnableDebugging(string vars) {
 			hoa_menu::MENU_DEBUG                    = true;
 			hoa_pause::PAUSE_DEBUG                  = true;
 			hoa_quit::QUIT_DEBUG                    = true;
+			hoa_shop::SHOP_DEBUG                    = true;
 			hoa_scene::SCENE_DEBUG                  = true;
 			hoa_utils::UTILS_DEBUG                  = true;
 			hoa_video::VIDEO_DEBUG                  = true;
@@ -223,6 +224,9 @@ bool EnableDebugging(string vars) {
 		}
 		else if (args[i] == "scene") {
 			hoa_scene::SCENE_DEBUG = true;
+		}
+		else if (args[i] == "shop") {
+			hoa_shop::SHOP_DEBUG = true;
 		}
 		else if (args[i] == "utils") {
 			hoa_utils::UTILS_DEBUG = true;
