@@ -77,6 +77,9 @@ enum CURSOR_STATE {
 	CURSOR_SELECT_ATTACK_POINT = 4
 };
 
+//! When a battle first starts, this is the wait time for the slowest actor
+const uint32 MAX_INIT_WAIT_TIME = 8000;
+
 /** ****************************************************************************
 *** \brief Representation of a single, scripted action to be executed in battle
 ***
@@ -392,6 +395,9 @@ private:
 	hoa_video::StillImage _swap_card;
 	//@}
 
+	//! Used for scaling actor wait times
+	uint32 _min_agility;
+
 	//! \name Actor Action Processing
 	//@{
 	//! A FIFO queue of actor actions to perform
@@ -408,6 +414,11 @@ private:
 
 	void _CreateCharacterActors();
 	void _CreateEnemyActors();
+
+	/*
+	 * \brief Initializes battle actors
+	 */
+	void _InitBattleActors();
 
 	//! Shutdown the battle mode
 	void _ShutDown();
