@@ -61,14 +61,14 @@ BattleCharacterActor::BattleCharacterActor(GlobalCharacter * character, float XL
 
 	//Load time portrait selector
 	_time_portrait_selected.SetDimensions(45,45);
-	_time_portrait_selected.SetFilename("img/menus/stamina_icon.png");
+	_time_portrait_selected.SetFilename("img/menus/stamina_icon_selected.png");
 	VideoManager->LoadImage(_time_portrait_selected);
 
 	//_time_portrait_location = 128;
 	//FIX ME Use char stats to determine wait time
 	//FIX ME #2 Do not initialize here.  Have BattleMode loop through all actors
 	// and scale wait time based on slowest actor
-	_wait_time.SetDuration(5000);
+	//_wait_time.SetDuration(5000);
 	//ResetWaitTime();
 	//_wait_time.Play();
 	//_action_state = ACTION_IDLE;
@@ -101,8 +101,8 @@ void BattleCharacterActor::ResetWaitTime()
 }
 
 // Updates the state of the character. Must be called every frame!
-void BattleCharacterActor::Update() {
-
+void BattleCharacterActor::Update()
+{	
 	if (GetActor()->IsAlive() == false)
 	{
 		current_battle->RemoveScriptedEventsForActor(this);
@@ -110,34 +110,8 @@ void BattleCharacterActor::Update() {
 
 	GetActor()->RetrieveBattleAnimation("idle")->Update();
 
-	//FIX ME have to use char stats
 	if (!_wait_time.HasExpired() && GetActor()->IsAlive() && !IsQueuedToPerform())
-		_time_portrait_location += SystemManager->GetUpdateTime() * .081f;
-
-	/*if (_wait_time)
-		_wait_time -= SystemManager->GetUpdateTime();
-
-	if (_wait_time < 0)
-		_wait_time = 0;*/
-
-	//if (_wait_time <= 0)
-	//{
-	//	_wait_time//FIX ME set as active character for menu
-	//}
-		/*switch(_action_state)
-		{
-		case ACTION_IDLE:
-			//We have to sit until he makes a move w/ the menu
-			_wait_time = 0;
-			break;
-		case ACTION_WARM_UP:
-			break;
-		case ACTION_COOL_DOWN:
-			break;
-		default: //I screwed up somewheres
-			cerr << "Invalid value for _action_state in BattleCharacterActor\n";
-			break;
-		}*/
+		_time_portrait_location += SystemManager->GetUpdateTime() * (405.0f / _wait_time.GetDuration());	
 }
 
 

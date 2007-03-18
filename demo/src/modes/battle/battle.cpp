@@ -128,6 +128,7 @@ BattleMode::BattleMode() :
 	_action_menu_window(NULL),
 	_action_list_menu(NULL),
 	_current_number_swaps(0),
+	_min_agility(9999),
 	_swap_countdown_timer(300000) // 5 minutes
 {
 	std::vector <hoa_video::StillImage> attack_point_indicator;
@@ -361,6 +362,8 @@ void BattleMode::_TEMP_LoadTestData() {
 	// Construct all battle actors
 	_CreateCharacterActors();
 	_CreateEnemyActors();
+
+	_InitBattleActors();
 }
 
 
@@ -377,7 +380,7 @@ void BattleMode::_CreateCharacterActors() {
 		_character_actors.push_back(claudius);
 		_selected_character = claudius;
 		_actor_index = GetIndexOfCharacter(claudius);
-		claudius->ResetWaitTime();
+		//claudius->ResetWaitTime();
 	}
 } // void BattleMode::_CreateCharacterActors()
 
@@ -393,8 +396,8 @@ void BattleMode::_CreateEnemyActors() {
 			BattleEnemyActor * green_slime = new BattleEnemyActor(1, static_cast<float> (RandomBoundedInteger(400, 600)), static_cast<float> (RandomBoundedInteger(200, 400)));
 			green_slime->SetName(MakeUnicodeString("Green Slime"));
 			green_slime->LevelSimulator(2);
-			green_slime->GetWaitTime()->SetDuration(10000);
-			green_slime->ResetWaitTime();
+			//green_slime->GetWaitTime()->SetDuration(10000);
+			//green_slime->ResetWaitTime();
 			_enemy_actors.push_back(green_slime);
 		}
 
@@ -404,8 +407,8 @@ void BattleMode::_CreateEnemyActors() {
 			BattleEnemyActor * spider = new BattleEnemyActor(2, static_cast<float> (RandomBoundedInteger(400, 600)), static_cast<float> (RandomBoundedInteger(200, 400)));
 			spider->SetName(MakeUnicodeString("Spider"));
 			spider->LevelSimulator(2);
-			spider->GetWaitTime()->SetDuration(9000);
-			spider->ResetWaitTime();
+			//spider->GetWaitTime()->SetDuration(9000);
+			//spider->ResetWaitTime();
 			_enemy_actors.push_back(spider);
 		}
 
@@ -415,8 +418,8 @@ void BattleMode::_CreateEnemyActors() {
 			BattleEnemyActor * snake = new BattleEnemyActor(3, static_cast<float> (RandomBoundedInteger(400, 600)), static_cast<float> (RandomBoundedInteger(200, 400)));
 			snake->SetName(MakeUnicodeString("Snake"));
 			snake->LevelSimulator(2);
-			snake->GetWaitTime()->SetDuration(8000);
-			snake->ResetWaitTime();
+			//snake->GetWaitTime()->SetDuration(8000);
+			//snake->ResetWaitTime();
 			_enemy_actors.push_back(snake);
 		}
 
@@ -426,14 +429,55 @@ void BattleMode::_CreateEnemyActors() {
 			BattleEnemyActor * skeleton = new BattleEnemyActor(4, static_cast<float> (RandomBoundedInteger(400, 600)), static_cast<float> (RandomBoundedInteger(200, 400)));
 			skeleton->SetName(MakeUnicodeString("Skeleton"));
 			skeleton->LevelSimulator(2);
-			skeleton->GetWaitTime()->SetDuration(7000);
-			skeleton->ResetWaitTime();
+			//skeleton->GetWaitTime()->SetDuration(7000);
+			//skeleton->ResetWaitTime();
 			_enemy_actors.push_back(skeleton);
 		}
 	}
 }
 
+void BattleMode::_InitBattleActors()
+{
+	//Loop through and find the actor with the lowest agility
+	for (uint8 i = 0; i < _enemy_actors.size(); ++i)
+	{
+		if ( _enemy_actors[i]->GetAgility() < _min_agility )
+			_min_agility = _enemy_actors[i]->GetAgility();
+	}
 
+	for (uint8 i = 0; i < _character_actors.size(); ++i)
+	{
+		if ( _character_actors[i]->GetAgility() < _min_agility )
+			_min_agility = _character_actors[i]->GetAgility();
+	}
+
+	//Now adjust starting wait times based on agility proportions
+	//If current actor's agility is twice the lowest agility, then
+	//they will have a wait time that is half of the slowest actor
+	float proportion;
+
+	for (uint8 i = 0; i < _enemy_actors.size(); ++i)
+	{
+		proportion = static_cast<float>(_min_agility) / static_cast<float>(_enemy_actors[i]->GetAgility());
+		_enemy_actors[i]->GetWaitTime()->SetDuration(static_cast<uint32>(MAX_INIT_WAIT_TIME * proportion));
+
+		//Start the timer.  We can do this here because the calculations will be done so quickly
+		//that the other chars wont fall far behind.
+		_enemy_actors[i]->ResetWaitTime();
+	}
+
+	for (uint8 i = 0; i < _character_actors.size(); ++i)
+	{
+		proportion = static_cast<float>(_min_agility) / static_cast<float>(_character_actors[i]->GetAgility());
+		_character_actors[i]->GetWaitTime()->SetDuration(static_cast<uint32>(MAX_INIT_WAIT_TIME * proportion));
+
+		//Start the timer.  We can do this here because the calculations will be done so quickly
+		//that the other chars wont fall far behind.
+		_character_actors[i]->ResetWaitTime();
+	}
+
+	SystemManager->UpdateTimers();
+}
 
 void BattleMode::_ShutDown() {
 	if (BATTLE_DEBUG) cout << "BATTLE: ShutDown() called!" << endl;
