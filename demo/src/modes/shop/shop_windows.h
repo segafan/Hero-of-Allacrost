@@ -53,7 +53,7 @@ public:
 	hoa_video::OptionBox options;
 
 	//! \brief Prints financial information in the bottom of the window
-	hoa_video::TextBox text;
+	hoa_video::TextBox text_box;
 }; // class ShopActionWindow : public hoa_video::MenuWindow
 
 
@@ -67,6 +67,8 @@ public:
 	ObjectListWindow();
 
 	~ObjectListWindow();
+
+	// -------------------- Class Methods
 
 	//! \brief Removes all object entries from the list
 	void Clear();
@@ -85,6 +87,11 @@ public:
 
 	//! \brief Draws the object list window and options to the screen
 	void Draw();
+
+	// -------------------- Class Members
+
+	//! \brief When set to true, the OptionBox will not be drawn for this window
+	bool hide_options;
 
 	//! \brief Contains the text that forms each option in the list
 	std::vector<hoa_utils::ustring> option_text;
@@ -110,12 +117,24 @@ public:
 	//! \brief Draws the window and the object properties contained within
 	void Draw();
 
+	/** \brief Sets the object that this window will display the properties of
+	*** \param obj A pointer to the object to represent. NULL indicates no object.
+	**/
+	void SetObject(hoa_global::GlobalObject* obj);
+
+	//! \brief A text box that holds the description text of the object
+	hoa_video::TextBox description;
+
+	//! \brief A text box that displays the object's properties, such as attack or defense ratings
+	hoa_video::TextBox properties;
+
+private:
 	/** \brief A pointer to the object whose properties are to be described
 	*** If this member is set to NULL, then the window will be blank. The pointer
 	*** should point to an object contained within a ShopMode class, not to an
 	*** object in the player's inventory or anywhere else.
 	**/
-	hoa_global::GlobalObject* object;
+	hoa_global::GlobalObject* _object;
 }; // class ObjectInfoWindow : public hoa_video::MenuWindow
 
 } // namespace private_shop

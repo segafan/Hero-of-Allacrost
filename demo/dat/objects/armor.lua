@@ -25,7 +25,7 @@ armor = {}
 
 armor[20001] = {
 	name = "Karlate Helmet",
-	description = "Standard Karlate issued equipment",
+	description = "Standard Karlate issued equipment. Battle worn but still reliable head protection.",
 	icon = "img/icons/armor/karlate_helmet.png",
 	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS,
 	physical_defense = 6,
@@ -41,11 +41,11 @@ armor[20001] = {
 
 armor[30001] = {
 	name = "Karlate Breastplate",
-	description = "Standard Karlate issued equipment",
+	description = "Standard Karlate issued equipment. Effectively protects the torso from most types of attack.",
 	icon = "img/icons/armor/karlate_breastplate.png",
 	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS,
 	physical_defense = 8,
-	metaphysical_defense = 0,
+	metaphysical_defense = 2,
 	standard_price = 170,
 	slots = 0
 }
@@ -57,7 +57,7 @@ armor[30001] = {
 
 armor[40001] = {
 	name = "Karlate Shield",
-	description = "Standard Karlate issued equipment",
+	description = "Standard Karlate issued equipment. Strong wooden oak protects from all but the heaviest of assaults.",
 	icon = "img/icons/armor/karlate_shield.png",
 	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS,
 	physical_defense = 2,
@@ -73,7 +73,7 @@ armor[40001] = {
 
 armor[50001] = {
 	name = "Karlate Greaves",
-	description = "Standard Karlate issued equipment",
+	description = "Standard Karlate issued equipment. Light metal alloy protects the legs while minimizing the negative impact on movement.",
 	icon = "img/icons/armor/karlate_greaves.png",
 	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS,
 	physical_defense = 3,

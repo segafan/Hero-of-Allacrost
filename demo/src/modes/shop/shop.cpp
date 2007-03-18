@@ -55,9 +55,12 @@ ShopMode::ShopMode() {
 
 	mode_type = MODE_MANAGER_SHOP_MODE;
 	private_shop::current_shop = this;
+	_shop_state = SHOP_STATE_ACTION;
 
-	if (VideoManager->CaptureScreen(_saved_screen) == false)
-		if (SHOP_DEBUG) cerr << "SHOP ERROR: Failed to capture saved screen" << endl;
+	if (VideoManager->CaptureScreen(_saved_screen) == false) {
+		if (SHOP_DEBUG)
+			cerr << "SHOP ERROR: Failed to capture saved screen" << endl;
+	}
 }
 
 
@@ -85,6 +88,8 @@ void ShopMode::Reset() {
     	cerr << "SHOP ERROR: failed to set font" << endl;
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 
+	// Everything is temporary code from here to the end of this function
+	GlobalManager->AddFunds(5000);
 	_all_objects.push_back(new GlobalItem(1));
 	_all_objects.push_back(new GlobalWeapon(10001));
 	_all_objects.push_back(new GlobalArmor(20001));
@@ -96,6 +101,17 @@ void ShopMode::Reset() {
 		_list_window.AddEntry(_all_objects[i]->GetName(), _all_objects[i]->GetPrice());
 	}
 	_list_window.ConstructList();
+
+	SoundDescriptor snd;
+	_shop_sounds["confirm"] = SoundDescriptor();
+	_shop_sounds["cancel"] = SoundDescriptor();
+	_shop_sounds["coins"] = SoundDescriptor();
+	_shop_sounds["bump"] = SoundDescriptor();
+
+	_shop_sounds["confirm"].LoadSound("snd/confirm.wav");
+	_shop_sounds["cancel"].LoadSound("snd/cancel.wav");
+	_shop_sounds["coins"].LoadSound("snd/coins.wav");
+	_shop_sounds["bump"].LoadSound("snd/bump.wav");
 }
 
 
@@ -107,6 +123,9 @@ void ShopMode::Update() {
 			break;
 		case SHOP_STATE_LIST:
 			_list_window.Update();
+			break;
+		case SHOP_STATE_CONFIRM:
+			// TODO
 			break;
 		default:
 			if (SHOP_DEBUG)
@@ -123,9 +142,10 @@ void ShopMode::Draw() {
 	VideoManager->DrawImage(_saved_screen);
 
 	_action_window.Draw();
-	_list_window.Draw();
 	_info_window.Draw();
+	_list_window.Draw();
 }
+
 
 
 void ShopMode::AddObject(uint32 object_id) {

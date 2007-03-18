@@ -309,7 +309,7 @@ void TextBox::SetDisplayText(const hoa_utils::ustring &text)
 	if(text.empty())
 	{
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: empty string passed to TextBox::SetDisplayText()!" << endl;
+			cerr << "VIDEO WARNING: empty string passed to TextBox::SetDisplayText()!" << endl;
 		return;
 	}
 
