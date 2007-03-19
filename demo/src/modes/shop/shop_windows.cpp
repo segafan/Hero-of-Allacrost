@@ -263,8 +263,8 @@ ObjectInfoWindow::~ObjectInfoWindow() {
 void ObjectInfoWindow::SetObject(GlobalObject* obj) {
 	_object = obj;
 	if (obj == NULL) {
-		description.Clear();
-		properties.Clear();
+		description.ClearText();
+		properties.ClearText();
 		return;
 	}
 
@@ -292,7 +292,7 @@ void ObjectInfoWindow::SetObject(GlobalObject* obj) {
 			);
 			break;
 		default:
-			properties.Clear();
+			properties.ClearText();
 			break;
 	}
 }

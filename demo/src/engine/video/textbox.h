@@ -26,6 +26,13 @@
 
 namespace hoa_video {
 
+namespace private_video {
+
+//! \brief The unicode version of the newline character, used for string parsing
+const uint16 NEWLINE_CHARACTER = static_cast<uint16>('\n');
+
+} // namespace private_video
+
 /** ****************************************************************************
 *** \brief These text display modes control how the text is rendered.
 *** - VIDEO_TEXT_INSTANT: render the text instantly
@@ -42,8 +49,7 @@ enum TEXT_DISPLAY_MODE {
 	VIDEO_TEXT_FADELINE   = 2,
 	VIDEO_TEXT_FADECHAR   = 3,
 	VIDEO_TEXT_REVEAL     = 4,
-	VIDEO_TEXT_FADEREVEAL = 5,
-	VIDEO_TEXT_TOTAL      = 6
+	VIDEO_TEXT_TOTAL      = 5
 };
 
 
@@ -63,10 +69,11 @@ enum TEXT_DISPLAY_MODE {
 class TextBox : public private_video::GUIControl {
 public:
 	TextBox();
+
 	~TextBox();
 
-	//! \brief Clears the textbox of all of its data.
-	void Clear();
+	//! \brief Removes all text from the text box
+	void ClearText();
 
 	/** \brief Updates the amount of text that has been rendered.
 	*** \param frame_time The amount of milliseconds that have transpired since the last frame.
@@ -84,7 +91,7 @@ public:
 	*** This is useful if a player gets impatient while text is scrolling to the screen.
 	**/
 	void ForceFinish()
-		{ if (_text.empty()) return; _finished = true; }
+		{ if (_text.empty() == true) return; _finished = true; }
 
 	/** \brief Sets the width and height of the text box. Returns false and prints an error message
 	*** \param w The width to set for the text box (for a 1024x768 coordinate system).
@@ -128,13 +135,13 @@ public:
 	*** new lines where appropriate. If the text is so big that it can't fit even with word
 	*** wrapping, an error is printed to the console if debugging is enabled.
 	**/
-	void SetDisplayText(const hoa_utils::ustring &text);
+	void SetDisplayText(const hoa_utils::ustring& text);
 
 	/** \brief A non-unicode version of SetDisplayText().
 	*** \param text The text to be set in the box (a standard non-unicode string).
 	*** See the unicode version of SetDisplayText for more details.
 	**/
-	void SetDisplayText(const std::string &text);
+	void SetDisplayText(const std::string& text);
 
 	/** \brief Obtains the width and height of the text box.
 	*** \param w A reference to the variable in which to store the width.
@@ -142,14 +149,14 @@ public:
 	*** If the dimensions are invalid because SetDimensions has not yet been called, neither
 	*** w nor h will be modified.
 	**/
-	void GetDimensions(float &w, float &h)
+	void GetDimensions(float& w, float& h)
 		{ w = _width; h = _height; }
 
 	/** \brief Retrieve the current x and y alignments for the text
 	*** \param xalign The member to hold the x alignment (e.g. VIDEO_X_LEFT).
 	*** \param yalign The member to hold the y alignment (e.g. VIDEO_Y_TOP).
 	**/
-	void GetTextAlignment(int32 &xalign, int32 &yalign)
+	void GetTextAlignment(int32& xalign, int32& yalign)
 		{ xalign = _text_xalign; yalign = _text_yalign; }
 
 	/** \brief Gets the font label for this textbox.
@@ -183,12 +190,12 @@ public:
 
 	/** \brief Checks all class members to see if all members have been set to valid values.
 	*** \param errors A reference to a string to be filled if any errors are found.
-	*** \return True if object is initialized, orfalse if it is not.
-	*** This is used internally to make sure we have a valid object before doing any
-	*** complicated operations. If it detects any problems, it generates a list of errors
+	*** \return True if object is initialized, or false if it is not.
+	*** This is used to make sure that the text box's settings are valid before doing any
+	*** drawing or update operations. If it detects any problems, it generates a string of errors
 	*** and returns it by reference so they can be displayed.
 	**/
-	bool IsInitialized(std::string &errors);
+	bool IsInitialized(std::string& errors);
 
 private:
 	//! \brief The dimensions of the text box, in pixels.
@@ -225,7 +232,8 @@ private:
 	std::vector<hoa_utils::ustring> _text;
 
 	/** \brief Returns the height of the text when it's rendered with the current font
-	*** \return height of text rendered in current font
+	*** \return The height of text rendered in current font
+	*** \note This is a low-level function so it doesn't check if the current font is valid or not
 	**/
 	int32 _CalculateTextHeight();
 
@@ -240,7 +248,7 @@ private:
 	/** \brief Adds a new line of text to the _text vector.
 	*** \param line The unicode text string to add as a new line
 	*** If the line is too long to fit in the width of the textbox, it will automatically
-	*** be split into multiple lines (i.e. word wrapping).
+	*** be split into multiple lines through word wrapping.
 	**/
 	void _AddLine(const hoa_utils::ustring &line);
 
