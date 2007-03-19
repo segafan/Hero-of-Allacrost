@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4931EC2B0BAF28BA00013185 /* dat in Resources */ = {isa = PBXBuildFile; fileRef = 4931EB160BAF28B700013185 /* dat */; };
+		4931EC2C0BAF28BA00013185 /* img in Resources */ = {isa = PBXBuildFile; fileRef = 4931EB320BAF28B800013185 /* img */; };
+		4931EC2D0BAF28BA00013185 /* mus in Resources */ = {isa = PBXBuildFile; fileRef = 4931EC140BAF28B900013185 /* mus */; };
+		4931EC2E0BAF28BA00013185 /* snd in Resources */ = {isa = PBXBuildFile; fileRef = 4931EC1A0BAF28B900013185 /* snd */; };
 		4941A6F10AC1D86400D65B8E /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A68B0AC1D86400D65B8E /* main.cpp */; };
 		4941A6F20AC1D86400D65B8E /* main_options.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A68C0AC1D86400D65B8E /* main_options.cpp */; };
 		4941A6F40AC1D86400D65B8E /* battle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6900AC1D86400D65B8E /* battle.cpp */; };
@@ -66,10 +70,6 @@
 		49BDC4520AF5412600940A6C /* socket.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 49BDC4500AF5412600940A6C /* socket.h */; };
 		49BDC4530AF5412600940A6C /* socket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49BDC4510AF5412600940A6C /* socket.cpp */; };
 		49DEC4270AD18E9800DC8362 /* Allacrost-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 49DEC4260AD18E9800DC8362 /* Allacrost-Info.plist */; };
-		49E90F9F0B935D91006BF734 /* dat in Resources */ = {isa = PBXBuildFile; fileRef = 49E90F9B0B935D91006BF734 /* dat */; };
-		49E90FA00B935D91006BF734 /* mus in Resources */ = {isa = PBXBuildFile; fileRef = 49E90F9C0B935D91006BF734 /* mus */; };
-		49E90FA10B935D91006BF734 /* snd in Resources */ = {isa = PBXBuildFile; fileRef = 49E90F9D0B935D91006BF734 /* snd */; };
-		49E912910B9363AA006BF734 /* img in Resources */ = {isa = PBXBuildFile; fileRef = 49E911C30B9363A9006BF734 /* img */; };
 		D404C6EA0B02FD3E00827A19 /* editor.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D404C6E90B02FD3E00827A19 /* editor.moc.cpp */; };
 		D404C6EC0B02FD6D00827A19 /* grid.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D404C6EB0B02FD6D00827A19 /* grid.moc.cpp */; };
 		D407F7ED0BADECF300848C43 /* shop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D407F7E90BADECF300848C43 /* shop.cpp */; };
@@ -155,6 +155,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4931EB160BAF28B700013185 /* dat */ = {isa = PBXFileReference; lastKnownFileType = folder; path = dat; sourceTree = "<group>"; };
+		4931EB320BAF28B800013185 /* img */ = {isa = PBXFileReference; lastKnownFileType = folder; path = img; sourceTree = "<group>"; };
+		4931EC140BAF28B900013185 /* mus */ = {isa = PBXFileReference; lastKnownFileType = folder; path = mus; sourceTree = "<group>"; };
+		4931EC1A0BAF28B900013185 /* snd */ = {isa = PBXFileReference; lastKnownFileType = folder; path = snd; sourceTree = "<group>"; };
 		493D9E440B9C9FFD00DF1F52 /* map_zones.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = map_zones.h; sourceTree = "<group>"; };
 		4941A4B00AC1D77500D65B8E /* Allacrost.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Allacrost.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4941A6470AC1D86300D65B8E /* defs.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = defs.h; sourceTree = "<group>"; };
@@ -262,10 +266,6 @@
 		49BDC4500AF5412600940A6C /* socket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = socket.h; sourceTree = "<group>"; };
 		49BDC4510AF5412600940A6C /* socket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = socket.cpp; sourceTree = "<group>"; };
 		49DEC4260AD18E9800DC8362 /* Allacrost-Info.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xml; path = "Allacrost-Info.plist"; sourceTree = "<group>"; };
-		49E90F9B0B935D91006BF734 /* dat */ = {isa = PBXFileReference; lastKnownFileType = folder; path = dat; sourceTree = "<group>"; };
-		49E90F9C0B935D91006BF734 /* mus */ = {isa = PBXFileReference; lastKnownFileType = folder; path = mus; sourceTree = "<group>"; };
-		49E90F9D0B935D91006BF734 /* snd */ = {isa = PBXFileReference; lastKnownFileType = folder; path = snd; sourceTree = "<group>"; };
-		49E911C30B9363A9006BF734 /* img */ = {isa = PBXFileReference; lastKnownFileType = folder; path = img; sourceTree = "<group>"; };
 		D404C6E90B02FD3E00827A19 /* editor.moc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = editor.moc.cpp; path = src/editor/editor.moc.cpp; sourceTree = "<group>"; };
 		D404C6EB0B02FD6D00827A19 /* grid.moc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = grid.moc.cpp; path = src/editor/grid.moc.cpp; sourceTree = "<group>"; };
 		D407F7E90BADECF300848C43 /* shop.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = shop.cpp; sourceTree = "<group>"; };
@@ -365,10 +365,10 @@
 		4941A4BD0AC1D7BA00D65B8E /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				49E911C30B9363A9006BF734 /* img */,
-				49E90F9B0B935D91006BF734 /* dat */,
-				49E90F9C0B935D91006BF734 /* mus */,
-				49E90F9D0B935D91006BF734 /* snd */,
+				4931EB160BAF28B700013185 /* dat */,
+				4931EB320BAF28B800013185 /* img */,
+				4931EC140BAF28B900013185 /* mus */,
+				4931EC1A0BAF28B900013185 /* snd */,
 				4941A7510AC1D9A200D65B8E /* mac_logo.icns */,
 			);
 			name = Resources;
@@ -669,10 +669,10 @@
 			files = (
 				4941A7520AC1D9A200D65B8E /* mac_logo.icns in Resources */,
 				49DEC4270AD18E9800DC8362 /* Allacrost-Info.plist in Resources */,
-				49E90F9F0B935D91006BF734 /* dat in Resources */,
-				49E90FA00B935D91006BF734 /* mus in Resources */,
-				49E90FA10B935D91006BF734 /* snd in Resources */,
-				49E912910B9363AA006BF734 /* img in Resources */,
+				4931EC2B0BAF28BA00013185 /* dat in Resources */,
+				4931EC2C0BAF28BA00013185 /* img in Resources */,
+				4931EC2D0BAF28BA00013185 /* mus in Resources */,
+				4931EC2E0BAF28BA00013185 /* snd in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
