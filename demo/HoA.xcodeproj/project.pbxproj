@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		493D9E450B9C9FFD00DF1F52 /* map_zones.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 493D9E440B9C9FFD00DF1F52 /* map_zones.h */; };
 		4941A6F10AC1D86400D65B8E /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A68B0AC1D86400D65B8E /* main.cpp */; };
 		4941A6F20AC1D86400D65B8E /* main_options.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A68C0AC1D86400D65B8E /* main_options.cpp */; };
 		4941A6F40AC1D86400D65B8E /* battle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6900AC1D86400D65B8E /* battle.cpp */; };
@@ -73,6 +72,8 @@
 		49E912910B9363AA006BF734 /* img in Resources */ = {isa = PBXBuildFile; fileRef = 49E911C30B9363A9006BF734 /* img */; };
 		D404C6EA0B02FD3E00827A19 /* editor.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D404C6E90B02FD3E00827A19 /* editor.moc.cpp */; };
 		D404C6EC0B02FD6D00827A19 /* grid.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D404C6EB0B02FD6D00827A19 /* grid.moc.cpp */; };
+		D407F7ED0BADECF300848C43 /* shop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D407F7E90BADECF300848C43 /* shop.cpp */; };
+		D407F7EF0BADECF300848C43 /* shop_windows.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D407F7EB0BADECF300848C43 /* shop_windows.cpp */; };
 		D4D02B720B0656E500772C78 /* SDLMain.m in Sources */ = {isa = PBXBuildFile; fileRef = 4941A7630AC1DCA500D65B8E /* SDLMain.m */; };
 		D4D1BA6E0B02B27F0052BF1E /* editor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1BA650B02B27F0052BF1E /* editor.cpp */; };
 		D4D1BA6F0B02B27F0052BF1E /* editor_main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1BA670B02B27F0052BF1E /* editor_main.cpp */; };
@@ -130,7 +131,6 @@
 				4941A7450AC1D8BA00D65B8E /* SDL_ttf.framework in Copy Frameworks */,
 				4941A7460AC1D8BA00D65B8E /* SDL.framework in Copy Frameworks */,
 				49BDC4520AF5412600940A6C /* socket.h in Copy Frameworks */,
-				493D9E450B9C9FFD00DF1F52 /* map_zones.h in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -268,6 +268,10 @@
 		49E911C30B9363A9006BF734 /* img */ = {isa = PBXFileReference; lastKnownFileType = folder; path = img; sourceTree = "<group>"; };
 		D404C6E90B02FD3E00827A19 /* editor.moc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = editor.moc.cpp; path = src/editor/editor.moc.cpp; sourceTree = "<group>"; };
 		D404C6EB0B02FD6D00827A19 /* grid.moc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = grid.moc.cpp; path = src/editor/grid.moc.cpp; sourceTree = "<group>"; };
+		D407F7E90BADECF300848C43 /* shop.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = shop.cpp; sourceTree = "<group>"; };
+		D407F7EA0BADECF300848C43 /* shop.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = shop.h; sourceTree = "<group>"; };
+		D407F7EB0BADECF300848C43 /* shop_windows.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = shop_windows.cpp; sourceTree = "<group>"; };
+		D407F7EC0BADECF300848C43 /* shop_windows.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = shop_windows.h; sourceTree = "<group>"; };
 		D4D1BA490B02B1DB0052BF1E /* Editor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Editor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4D1BA4B0B02B1DB0052BF1E /* Editor-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Editor-Info.plist"; sourceTree = "<group>"; };
 		D4D1BA650B02B27F0052BF1E /* editor.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = editor.cpp; sourceTree = "<group>"; };
@@ -390,6 +394,7 @@
 		4941A68E0AC1D86400D65B8E /* modes */ = {
 			isa = PBXGroup;
 			children = (
+				D407F7E80BADECF300848C43 /* shop */,
 				4941A68F0AC1D86400D65B8E /* battle */,
 				4941A6940AC1D86400D65B8E /* boot */,
 				4941A69B0AC1D86400D65B8E /* map */,
@@ -573,6 +578,17 @@
 			name = "Temporary Source Files";
 			sourceTree = "<group>";
 		};
+		D407F7E80BADECF300848C43 /* shop */ = {
+			isa = PBXGroup;
+			children = (
+				D407F7E90BADECF300848C43 /* shop.cpp */,
+				D407F7EA0BADECF300848C43 /* shop.h */,
+				D407F7EB0BADECF300848C43 /* shop_windows.cpp */,
+				D407F7EC0BADECF300848C43 /* shop_windows.h */,
+			);
+			path = shop;
+			sourceTree = "<group>";
+		};
 		D4D1BA640B02B27F0052BF1E /* editor */ = {
 			isa = PBXGroup;
 			children = (
@@ -741,6 +757,8 @@
 				499629710AF50B1F00B6A328 /* global_actors.cpp in Sources */,
 				49BDC4530AF5412600940A6C /* socket.cpp in Sources */,
 				D4DAC8A90BA13F55009FA7BE /* map_zones.cpp in Sources */,
+				D407F7ED0BADECF300848C43 /* shop.cpp in Sources */,
+				D407F7EF0BADECF300848C43 /* shop_windows.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
