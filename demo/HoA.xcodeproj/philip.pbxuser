@@ -150,8 +150,8 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 195251984;
-			PBXWorkspaceStateSaveDate = 195251984;
+			PBXPerProjectTemplateStateSaveDate = 195948380;
+			PBXWorkspaceStateSaveDate = 195948380;
 		};
 		sourceControlManager = D43082570AF9831800A5173A /* Source Control */;
 		userBuildSettings = {
@@ -314,6 +314,8 @@
 		executableUserSymbolLevel = 0;
 		libgmallocEnabled = 0;
 		name = Allacrost;
+		savedGlobals = {
+		};
 		sourceDirectories = (
 		);
 	};
