@@ -55,7 +55,7 @@ BattleCharacterActor::BattleCharacterActor(GlobalCharacter * character, float XL
 	_is_queued_to_perform(false)
 {
 	//FIX ME
-	_time_meter_portrait.SetFilename("img/menus/stamina_icon.png");
+	_time_meter_portrait.SetFilename("img/icons/actors/characters/" + GetFilename() + ".png");
 	_time_meter_portrait.SetDimensions(45,45);
 	VideoManager->LoadImage(_time_meter_portrait);
 
@@ -321,7 +321,8 @@ BattleEnemyActor::BattleEnemyActor(uint32 id, float XLocation, float YLocation) 
 	_is_queued_to_perform(false)
 {
 	//FIX ME
-	_time_meter_portrait.SetFilename("img/menus/stamina_icon.png");
+	_time_meter_portrait.SetFilename("img/icons/actors/enemies/" + GetFilename() + ".png");
+	//_time_meter_portrait.SetFilename("img/menus/stamina_icon.png");
 	_time_meter_portrait.SetDimensions(45,45);
 	VideoManager->LoadImage(_time_meter_portrait);
 

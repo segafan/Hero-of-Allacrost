@@ -336,6 +336,9 @@ protected:
 	//! \brief The name of the actor as it will be displayed upon the screen.
 	hoa_utils::ustring _name;
 
+	//! \brief The filename that the actor's images use (no extension)
+	//hoa_utils::ustring _filename;
+
 	//! \name Base Actor Statistics
 	//@{
 	//! \brief The current experience level of the actor.
@@ -548,6 +551,7 @@ public:
 		{ return &_battle_portraits; }
 
 protected:
+
 	//! \brief The name used to retrieve the characters's data and other information from various sources
 	std::string _filename;
 
@@ -642,6 +646,9 @@ public:
 	//@{
 	uint32 GetExperiencePoints() const
 		{ return _experience_points; }
+
+	std::string GetFilename() const
+		{ return _filename; }
 	//@}
 
 	//! \brief Returns the enemy's sprite frames
