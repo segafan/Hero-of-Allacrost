@@ -13,6 +13,7 @@ enemies = {}
 
 enemies[1] = {
 	name = "Green Slime",
+	filename = "green_slime",
 	sprite_filename = "img/sprites/battle/enemies/green_slime.png",
 	sprite_width = 64,
 	sprite_height = 64,
@@ -66,6 +67,7 @@ enemies[1] = {
 
 enemies[2] = {
 	name = "Spider",
+	filename = "spider",
 	sprite_filename = "img/sprites/battle/enemies/spider.png",
 	sprite_width = 64,
 	sprite_height = 64,
@@ -119,6 +121,7 @@ enemies[2] = {
 
 enemies[3] = {
 	name = "Snake",
+	filename = "snake",
 	sprite_filename = "img/sprites/battle/enemies/snake.png",
 	sprite_width = 128,
 	sprite_height = 64,
@@ -180,6 +183,7 @@ enemies[3] = {
 
 enemies[4] = {
 	name = "Skeleton",
+	filename = "skeleton",
 	sprite_filename = "img/sprites/battle/enemies/skeleton.png",
 	sprite_width = 64,
 	sprite_height = 128,

@@ -250,6 +250,7 @@ GlobalEnemy::GlobalEnemy(uint32 id) {
 	string sprite_filename = enemy_data.ReadString("sprite_filename");
 	_sprite_width = enemy_data.ReadInt("sprite_width");
 	_sprite_height = enemy_data.ReadInt("sprite_height");
+	_filename = enemy_data.ReadString("filename");
 
 	// Make four dummy images for LoadMultiImage(). TODO: Can't we do these in LoadMultiImage() instead :(
 	StillImage foo;

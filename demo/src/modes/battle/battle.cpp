@@ -155,7 +155,7 @@ BattleMode::BattleMode() :
 	//Load the universal time meter image
 	_universal_time_meter.SetDimensions(10, 512);
 	_universal_time_meter.SetFilename("img/menus/stamina_bar.png");
-	if (VideoManager->LoadImage(_universal_time_meter))
+	if (!VideoManager->LoadImage(_universal_time_meter))
 		cerr << "BATTLE ERROR: Failed to load time meter." << endl;
 
 	//Load in action type icons, FIXME add more later
