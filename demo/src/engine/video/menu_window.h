@@ -24,14 +24,15 @@
 
 namespace hoa_video {
 
-//! \brief How many milliseconds it takes for a menu to scroll in or out of view.
+//! \brief How many milliseconds it takes for a window to scroll in or out of view.
 const int32 VIDEO_MENU_SCROLL_TIME = 200;
 
+
 /** \name Menu Edge Bitflags
-*** \brief These flags control the presence/absence of each edge of the menu.
+*** \brief These flags control the presence/absence of each edge of the menu window.
 *** For example, if you want to show a menu with its left edge hidden, then you would pass in all
-*** the flags except VIDEO_MENU_EDGE_LEFT to the Create() function, or alternatively you could
-*** pass the complement of that bit flag (~VIDEO_MENU_EDGE_LEFT)
+*** the flags except VIDEO_MENU_EDGE_LEFT to the MenuWindow#Create() function, or alternatively
+*** you could pass the complement of that bit flag (~VIDEO_MENU_EDGE_LEFT).
 **/
 //@{
 const int32 VIDEO_MENU_EDGE_LEFT   = 0x1;
@@ -42,29 +43,27 @@ const int32 VIDEO_MENU_EDGE_ALL    = 0xF;
 //@}
 
 
-/** ****************************************************************************
-*** \brief These menu display modes control how the menu appears or disappears.
+/** \brief Menu display modes control how the menu window appears or disappears.
 *** The specific display modes include:
 *** - VIDEO_MENU_INSTANT: appears/disappears instantly
 *** - VIDEO_MENU_EXPAND_FROM_CENTER: starts as a thin horizontal line at center and expands out
-*** *****************************************************************************/
-enum MenuDisplayMode {
-	VIDEO_MENU_INVALID = -1,
-	VIDEO_MENU_INSTANT = 0,
-	VIDEO_MENU_EXPAND_FROM_CENTER = 1,
-	VIDEO_MENU_TOTAL = 2
+**/
+enum VIDEO_MENU_DISPLAY_MODE {
+	VIDEO_MENU_INVALID            = -1,
+	VIDEO_MENU_INSTANT            =  0,
+	VIDEO_MENU_EXPAND_FROM_CENTER =  1,
+	VIDEO_MENU_TOTAL              =  2
 };
 
 
-/** ****************************************************************************
-*** \brief These enums are used to tell the visiblity state of a menu window.
+/** \brief These enums are used to tell the visiblity state of a menu window.
 *** The possible states and their meaning include:
 *** - VIDEO_MENU_STATE_SHOWN: the menu is fully shown
 *** - VIDEO_MENU_STATE_SHOWING: the menu is still in the process of scrolling on to the screen
-*** - VIDEO_MENU_STATE_HIDING: the menu is scrolling out of view, but not completely hidden yet
+*** - VIDEO_MENU_STATE_HIDING: the menu is scrolling out of view, but is not completely hidden yet
 *** - VIDEO_MENU_STATE_HIDDEN: the menu is fully hidden
-*** ***************************************************************************/
-enum MenuState {
+**/
+enum VIDEO_MENU_STATE {
 	VIDEO_MENU_STATE_INVALID = -1,
 	VIDEO_MENU_STATE_SHOWN   = 0,
 	VIDEO_MENU_STATE_SHOWING = 1,
@@ -79,8 +78,7 @@ enum MenuState {
 ***
 *** A menu window is simply a rectangle drawn on the screen that has a border
 *** image and a background. Menu windows exist to provide a base upon which to
-*** draw text and images that are not a part of the map environment, such as
-*** an inventory screen.
+*** draw text and images that are not a part of the regular game environment.
 ***
 *** \todo Allow the user to specify an arbitrary amount of time for showing/
 *** hiding the menu window.
@@ -160,15 +158,15 @@ public:
 
 	//! \name Class Member Access Functions
 	//@{
-	void SetDisplayMode(MenuDisplayMode mode);
+	void SetDisplayMode(VIDEO_MENU_DISPLAY_MODE mode);
 
 	void GetDimensions(float &w, float &h) const
 		{ w = _width; h = _height; }
 
-	MenuDisplayMode GetDisplayMode() const
+	VIDEO_MENU_DISPLAY_MODE GetDisplayMode() const
 		{ return _display_mode; }
 
-	MenuState GetState() const
+	VIDEO_MENU_STATE GetState() const
 		{ return _window_state; }
 
 	ScreenRect GetScissorRect() const
@@ -199,7 +197,7 @@ private:
 	int32 _edge_shared_flags;
 
 	//! \brief The state of the menu window (hidden, shown, hiding, showing).
-	MenuState _window_state;
+	VIDEO_MENU_STATE _window_state;
 
 	//! \brief The number of milliseconds that have passed since the menu was shown.
 	int32 _current_time;
@@ -208,7 +206,7 @@ private:
 	StillImage _menu_image;
 
 	//! \brief The window's display mode (instant, expand from center, etc).
-	MenuDisplayMode _display_mode;
+	VIDEO_MENU_DISPLAY_MODE _display_mode;
 
 	//! \brief Set to true if scissoring needs to be used on the window.
 	bool _is_scissored;

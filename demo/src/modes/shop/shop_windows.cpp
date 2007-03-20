@@ -295,7 +295,7 @@ void ObjectInfoWindow::SetObject(GlobalObject* obj) {
 			properties.ClearText();
 			break;
 	}
-}
+} // void ObjectInfoWindow::SetObject(GlobalObject* obj)
 
 
 
