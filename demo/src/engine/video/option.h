@@ -7,14 +7,14 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-/*!****************************************************************************
- * \file    option.h
- * \author  Raj Sharma, roos@allacrost.org
- * \brief   Header file for OptionBox class
- *
- * The OptionBox class is a GUI control which allows you to create several
- * choices, which the player can select from by using the arrow keys
- *****************************************************************************/
+/** ****************************************************************************
+*** \file    option.h
+*** \author  Raj Sharma, roos@allacrost.org
+*** \brief   Header file for OptionBox GUI control and supporting classes
+***
+*** OptionBox is a type of GUI control that allows you to create several
+*** option choices, which the player can select from by using the arrow keys.
+*** ***************************************************************************/
 
 #ifndef __OPTION_HEADER__
 #define __OPTION_HEADER__
@@ -23,597 +23,328 @@
 #include "utils.h"
 #include "gui.h"
 
-//! All calls to the video engine are wrapped in this namespace.
-namespace hoa_video
-{
+//! \brief All calls to the video engine are wrapped in this namespace.
+namespace hoa_video {
 
-
-//! how often the menu cursor blinks (assuming it's in blinking state), in milliseconds
+//! \brief The number of milliseconds that the menu cursor blinks when in the blinking state
 const int32 VIDEO_CURSOR_BLINK_RATE = 40;
 
-//! how many milliseconds it takes to scroll when the cursor goes past the end of an option box
+//! \brief The number of milliseconds it takes to scroll when the cursor goes past the end of an option box
 const int32 VIDEO_OPTION_SCROLL_TIME = 100;
 
 
-/*!****************************************************************************
- *  \brief These are the types of events that an option box can generate
- *   VIDEO_OPTION_SELECTION_CHANGE: the selection changed
- *   VIDEO_OPTION_CONFIRM:          the player confirmed an option
- *   VIDEO_OPTION_CANCEL:           the player pressed the cancel key
- *   VIDEO_OPTION_SWITCH:           two elements were just switched
- *   VIDEO_OPTION_BOUNDS_UP:        player tried to go past top of option box
- *   VIDEO_OPTION_BOUNDS_DOWN:      player tried to go past bottom of option box
- *   VIDEO_OPTION_BOUNDS_LEFT:      player tried to go past left of option box
- *   VIDEO_OPTION_BOUNDS_RIGHT:     player tried to go past right of option box
- *****************************************************************************/
-
-enum OptionBoxEvent
-{
-	VIDEO_OPTION_INVALID = -1,
-
-	VIDEO_OPTION_NO_EVENT = 0,
-
-	VIDEO_OPTION_SELECTION_CHANGE = 0,
-	VIDEO_OPTION_CONFIRM          = 1,
-	VIDEO_OPTION_CANCEL           = 2,
-	VIDEO_OPTION_SWITCH           = 3,
-	VIDEO_OPTION_BOUNDS_UP        = 4,
-	VIDEO_OPTION_BOUNDS_DOWN      = 5,
-	VIDEO_OPTION_BOUNDS_LEFT      = 6,
-	VIDEO_OPTION_BOUNDS_RIGHT     = 7,
-
-	VIDEO_OPTION_TOTAL = 8
+//! \brief These are the types of events that an option box can generate
+enum OptionBoxEvent {
+	VIDEO_OPTION_INVALID          = -1,
+	//! The selected option changed
+	VIDEO_OPTION_SELECTION_CHANGE =  0,
+	//! The player confirmed a selection
+	VIDEO_OPTION_CONFIRM          =  1,
+	//! The player pressed the cancel key
+	VIDEO_OPTION_CANCEL           =  2,
+	//! Two options were switched by the player
+	VIDEO_OPTION_SWITCH           =  3,
+	//! The player tried to exceed the top most option
+	VIDEO_OPTION_BOUNDS_UP        =  4,
+	//! The player tried to exceed the bottom most option
+	VIDEO_OPTION_BOUNDS_DOWN      =  5,
+	//! The player tried to exceed the left most option
+	VIDEO_OPTION_BOUNDS_LEFT      =  6,
+	//! The player tried to exceed the right most option
+	VIDEO_OPTION_BOUNDS_RIGHT     =  7,
+	VIDEO_OPTION_TOTAL            =  8
 };
 
 
-/*!****************************************************************************
- *  \brief When you create an option, it's more than just text- it can contain
- *         alignment tags, position tags, or even images. These are called
- *         "option elements":
- *   VIDEO_OPTION_ELEMENT_LEFT_ALIGN: left align tag
- *   VIDEO_OPTION_ELEMENT_CENTER_ALIGN: center align tag
- *   VIDEO_OPTION_ELEMENT_RIGHT_ALIGN: right align tag
- *   VIDEO_OPTION_ELEMENT_POSITION: position tag
- *   VIDEO_OPTION_ELEMENT_IMAGE: image
- *   VIDEO_OPTION_ELEMENT_TEXT: text
- *****************************************************************************/
-
-enum OptionElementType
-{
-	VIDEO_OPTION_ELEMENT_INVALID = -1,
-
-	VIDEO_OPTION_ELEMENT_LEFT_ALIGN   = 0,
-	VIDEO_OPTION_ELEMENT_CENTER_ALIGN = 1,
-	VIDEO_OPTION_ELEMENT_RIGHT_ALIGN  = 2,
-
-	VIDEO_OPTION_ELEMENT_POSITION = 3,
-	VIDEO_OPTION_ELEMENT_IMAGE    = 4,
-	VIDEO_OPTION_ELEMENT_TEXT     = 5,
-
-	VIDEO_OPTION_ELEMENT_TOTAL = 6
+//! \brief Type identifiers for options, whether the option is text, an image, or an align flag
+enum OptionElementType {
+	VIDEO_OPTION_ELEMENT_INVALID      = -1,
+	//! Identifies mark-up for left alignment
+	VIDEO_OPTION_ELEMENT_LEFT_ALIGN   =  0,
+	//! Identifies mark-up for center alignment
+	VIDEO_OPTION_ELEMENT_CENTER_ALIGN =  1,
+	//! Identifies mark-up for right alignment
+	VIDEO_OPTION_ELEMENT_RIGHT_ALIGN  =  2,
+	//! Identifies the position tag
+	VIDEO_OPTION_ELEMENT_POSITION     =  3,
+	//! Represents option images
+	VIDEO_OPTION_ELEMENT_IMAGE        =  4,
+	//! Represents option text
+	VIDEO_OPTION_ELEMENT_TEXT         =  5,
+	VIDEO_OPTION_ELEMENT_TOTAL        =  6
 };
 
 
-/*!****************************************************************************
- *  \brief The visual state of the menu cursor
- *   VIDEO_CURSOR_STATE_HIDDEN: causes cursor to not be displayed
- *   VIDEO_CURSOR_STATE_VISIBLE: causes cursor to be displayed
- *   VIDEO_CURSOR_STATE_BLINKING: causes cursor to continually blink
- *****************************************************************************/
-
-enum CursorState
-{
-	VIDEO_CURSOR_STATE_INVALID = -1,
-
-	VIDEO_CURSOR_STATE_HIDDEN   = 0,
-	VIDEO_CURSOR_STATE_VISIBLE  = 1,
-	VIDEO_CURSOR_STATE_BLINKING = 2,
-
-	VIDEO_CURSOR_STATE_TOTAL = 3
+//! \brief For representing the visual state of the menu cursor
+enum CursorState {
+	VIDEO_CURSOR_STATE_INVALID  = -1,
+	//! Hides the cursor so it is not drawn on the screen
+	VIDEO_CURSOR_STATE_HIDDEN   =  0,
+	//! Shows the cursor next to the selected option
+	VIDEO_CURSOR_STATE_VISIBLE  =  1,
+	//! Causes the cursor to continually blink
+	VIDEO_CURSOR_STATE_BLINKING =  2,
+	VIDEO_CURSOR_STATE_TOTAL    =  3
 };
 
 
-/*!****************************************************************************
- *  \brief Modes to control how the cursor wraps around when the player goes
- *         too far to one side of an option box
- *   VIDEO_WRAP_MODE_NONE:     if cursor goes off the right edge, it stays
- *                             where it is
- *   VIDEO_WRAP_MODE_STRAIGHT: if the cursor goes off the right edge, it appears
- *                             on the left side, on the same row
- *   VIDEO_WRAP_MODE_SHIFTED:  if the cursor goes off the right edge, it appears
- *                             on the left side, but one row down
- *****************************************************************************/
-
-enum WrapMode
-{
-	VIDEO_WRAP_MODE_INVALID = -1,
-
-	VIDEO_WRAP_MODE_NONE     = 0,
-	VIDEO_WRAP_MODE_STRAIGHT = 1,
-	VIDEO_WRAP_MODE_SHIFTED  = 2,
-
-	VIDEO_WRAP_MODE_TOTAL = 3
+//! \brief Modes to control how the cursor wraps around when the cursor exceeds the list boundary
+enum WrapMode {
+	VIDEO_WRAP_MODE_INVALID  = -1,
+	//! Cursor retains its position on the list boundary
+	VIDEO_WRAP_MODE_NONE     =  0,
+	//! Cursor wraps around left to right, top to bottom, when exceeding the boundary
+	VIDEO_WRAP_MODE_STRAIGHT =  1,
+	//! Similar to straight, but the cursor will move one row or column when it exceeds a column or row boundary
+	VIDEO_WRAP_MODE_SHIFTED  =  2,
+	VIDEO_WRAP_MODE_TOTAL    =  3
 };
 
 
-/*!****************************************************************************
- *  \brief These select modes control how confirming works when you choose options
- *   VIDEO_SELECT_SINGLE: just confirm on an item once
- *   VIDEO_SELECT_DOUBLE: confirm once to highlight an item, then again to actually
- *                        confirm. If you press confirm on one item and then again
- *                        on a *different* item, then the two items get switched
- *****************************************************************************/
-
+//! \brief These select modes control how confirming works when you choose options
 enum SelectMode
 {
 	VIDEO_SELECT_INVALID = -1,
-
-	VIDEO_SELECT_SINGLE = 0,
-	VIDEO_SELECT_DOUBLE = 1,
-
-	VIDEO_SELECT_TOTAL = 2
+	//! Options only require a single confirmation
+	VIDEO_SELECT_SINGLE  =  0,
+	//! The first confirmation highlights the item, and the second confirms it.
+	//! \note If you press confirm on one item and confirm again on a different item, the two items get switched.
+	VIDEO_SELECT_DOUBLE  =  1,
+	VIDEO_SELECT_TOTAL   =  2
 };
 
+namespace private_video {
 
-/*!****************************************************************************
- *  \brief with an option, you can have text, images, alignment tags, or
- *         position tags. An OptionElement encapsulates each of these things
- *****************************************************************************/
-
-class OptionElement
-{
+/** ****************************************************************************
+*** \brief A class which encapsulates the various contents of an option.
+***
+*** Contents can include text, images, mark-up tags, etc.
+*** ***************************************************************************/
+class OptionElement {
 public:
-
-	//! type of option element
+	//! \brief A type indentifier for determining what this option represents
 	OptionElementType type;
 
-	//! value, like an offset for a position tag, etc.
+	//! \brief A simple integer value used for various purposes such as offsets
 	int32 value;
 };
 
 
-/*!****************************************************************************
- *  \brief holds the bounds for a particular "cell" in an option box. This is
- *         used for calculations when drawing an option box
- *****************************************************************************/
-
-class OptionCellBounds
-{
+/** ****************************************************************************
+*** \brief Holds the bound coordinates for a particular "cell" in an option box.
+***
+*** This is used for calculations when drawing an option box
+*** ***************************************************************************/
+class OptionCellBounds {
 public:
 
-	//! y coordinate of top of cell
-	float cellYTop;
+	//! \brief The y coordinate for the top, bottom, and center of the cell
+	float y_top, y_center, y_bottom;
 
-	//! y coordinate of center of cell
-	float cellYCenter;
-
-	//! y coordinate of bottom of cell
-	float cellYBottom;
-
-	//! x coordinate of left of cell
-	float cellXLeft;
-
-	//! x coordinate of center of cell
-	float cellXCenter;
-
-	//! x coordinate of right of cell
-	float cellXRight;
+	//! \brief The x coordinate for the left, right, and center of the cell
+	float x_left, x_center, x_right;
 };
 
 
-/*!****************************************************************************
- *  \brief represents one particular option in a list. For example
- *         in a shop, one option might be "Mythril knife", and it contains
- *         an icon of a knife, the text, "Mythril knife", and then a
- *         right alignment flag, and at the end, "500 Gil"
- *****************************************************************************/
-
-class Option
-{
+/** ****************************************************************************
+*** \brief Represents one particular option in a list and all its elements
+***
+*** For example in a shop menu, one option might be "Mythril Knife" and contain
+*** an icon of a knife, the text, "Mythril Knife", a right alignment flag, and
+*** finally the text "500 drunes".
+*** ***************************************************************************/
+class Option {
 public:
+	//! \brief The elements that this option is composed of
+	std::vector<OptionElement> elements;
 
-	//! vector of option elements
-	std::vector<OptionElement>      elements;
-
-	//! vector of text
+	//! \brief Contains all pieces of text for this option
 	std::vector<hoa_utils::ustring> text;
 
-	//! vector of images
-	std::vector<StillImage>    images;
+	//! \brief Contains all images used for this option
+	//! \todo Allow for animated images as well
+	std::vector<StillImage> images;
 
-	//! flag to specify whether this option is disabled or not
+	//! \brief A flag to specify whether this option is disabled or not
 	bool disabled;
 };
 
+} // namespace private_video
 
-/*!****************************************************************************
- *  \brief The OptionBox control is used for basically showing several choices
- *         that the player can choose by moving the cursor to the choice they
- *         want and pressing the confirm key.
- *****************************************************************************/
-
-class OptionBox : public private_video::GUIControl
-{
+/** ****************************************************************************
+*** \brief Represents rows and columns of options that the player may select
+***
+*** The OptionBox control is used for presenting the player with several choices,
+*** of actions to take, wares to buy, etc. The class handles cursor movement
+*** ***************************************************************************/
+class OptionBox : public private_video::GUIControl {
 public:
-
-	/*!
-	 *  \brief Constructor
-	 */
 	OptionBox();
 
-	/*!
-	 *  \brief Destructor
-	 */
 	~OptionBox();
 
-	/*!
-	 *  \brief updates the option box control
-	 *  \param frameTime number of milliseconds elapsed this frame
-	 * \return success/failure
-	 */
+	/** \brief Updates the state of the option box
+	*** \param frame_time The number of milliseconds elapsed this frame
+	**/
+	void Update(uint32 frame_time);
 
-	void Update(uint32 frameTime);
-
-
-	/*!
-	 *  \brief draws the control
-	 * \return success/failure
-	 */
-
+	//! \brief Draws each enabled option to the screen
 	void Draw();
 
 
-	/*!
-	 *  \brief sets the font for this control
-	 *  \param fontName label to a valid, already-loaded font
-	 * \return success/failure
-	 */
-
-	bool SetFont(const std::string &fontName);
-
-
-	/*!
-	 *  \brief handles left key press
-	 */
-
-	void HandleLeftKey();
-
-
-	/*!
-	 *  \brief handles up key press
-	 */
-
-	void HandleUpKey();
-
-
-	/*!
-	 *  \brief handles down key press
-	 */
-
-	void HandleDownKey();
-
-
-	/*!
-	 *  \brief handles right key press
-	 */
-
-	void HandleRightKey();
-
-
-	/*!
-	 *  \brief handles confirm key press
-	 */
-
-	void HandleConfirmKey();
-
-
-	/*!
-	 *  \brief handles cancel key press
-	 */
-
-	void HandleCancelKey();
-
-
-	/*!
-	 *  \brief sets the cell width and height
-	 * \param hSpacing horizontal spacing between cells
-	 * \param vSpacing vertical spacing between cells
-	 */
-
-	void SetCellSize(float hSpacing, float vSpacing);
-
-
-	/*!
-	 *  \brief sets the size of the box in terms of number of columns and rows
-	 * \param columns number of columns in the options box
-	 * \param rows number of rows in the options box
-	 */
-
-	void SetSize(int32 columns, int32 rows);
-
-
-	/*!
-	 *  \brief sets the alignment of the option text
-	 * \param xalign left/right alignment of text in the cell
-	 * \param yalign top/bottom alignment of text in the cell
-	 */
-
-	void SetOptionAlignment(int32 xalign, int32 yalign);
-
-
-	/*!
-	 *  \brief sets the selection mode (single or double confirm mode)
-	 * \param mode the select mode
-	 */
-
-	void SetSelectMode(SelectMode mode);
-
-
-	/*!
-	 *  \brief enables/disables switching, where player can confirm on one item, then
-	 *         confirm on another item to switch them
-	 * \param enable true for enabling switching, false for no
-	 */
-
+	/** \brief Enables or disables the ability to switch the location of two options
+	*** \param enable True enables switching, false disables it
+	*** \todo What is the default for switching?
+	**/
 	void EnableSwitching(bool enable);
 
+	//! \brief Processes the input commands for moving the cursor, selecting options, etcetra
+	//@{
+	void HandleUpKey();
+	void HandleDownKey();
+	void HandleLeftKey();
+	void HandleRightKey();
+	void HandleConfirmKey();
+	void HandleCancelKey();
+	//@}
 
-	/*!
-	 *  \brief sets the behavior to use for vertical wrapping
-	 * \param mode the wrap mode
-	 */
-
-	void SetVerticalWrapMode(WrapMode mode);
-
-
-	/*!
-	 *  \brief sets the behavior to use for horizontal wrapping
-	 * \param mode the wrap mode
-	 */
-
-	void SetHorizontalWrapMode(WrapMode mode);
-
-
-	/*!
-	 *  \brief sets the cursor state to be visible, hidden, or blinking
-	 * \param state the cursor state
-	 * \return success/failure
-	 */
-
-	bool SetCursorState(CursorState state);
-
-
-	/*!
-	 *  \brief sets the cursor offset relative to the text positions
-	 * \param x left/right offset
-	 * \param y top/bottom offset
-	 * \return success/failure
-	 */
-
-	bool SetCursorOffset(float x, float y);
-
-
-	/*!
-	 *  \brief sets the current selection (0 to _numOptions-1)
-	 * \param index the desired selection
-	 * \return success/failure...could fail if SetOptions() was not called
-	 */
-
-	bool SetSelection(int32 index);
-
-
-	/*!
-	 *  \brief sets the options to display in this option box
-	 *
-	 *  \param formatText a vector of unicode strings which contain the text
-	 *         for each item, along with any formatting tags
-	 *
-	 *         For example: "<img/weapons/mythril.png>Mythril knife<r>500 Gil"
-	 * \return success/failure
-	 */
-
-	bool SetOptions(const std::vector<hoa_utils::ustring> &formatText);
-
-
-	/*!
-	 *  \brief changes the text of a particular option
-	 *
-	 *  \param index which option to change
-	 *  \param text the text to change the option to
-	 *
-	 *  \return returns false on failure, for example if the index passed in is
-	 *          invalid or if SetOptions() has never been called to initially
-	 *          populate the options box
-	 */
-
-	bool SetOptionText(int32 index, const hoa_utils::ustring &text);
-
-	/*!
-	 *  \brief Adds a new option to the OptionBox
-	 *
-	 *  \param text for the new option
-	 *
-	 *  \return returns false on failure (if the given text is illegal)
-	 */
+	/** \brief Adds a new option to the OptionBox
+	*** \param text for the new option
+	*** \return returns false on failure (if the given text is illegal)
+	**/
 	bool AddOption(const hoa_utils::ustring &text);
 
-
-	/*!
-	 *  \brief enables/disables the option with the given index
-	 * \param index the option to enable/disable
-	 * \param enable true to enable, false to disable.  Options are enabled by default.
-	 */
-
+	/** \brief enables/disables the option with the given index
+	*** \param index the option to enable/disable
+	*** \param enable true to enable, false to disable.  Options are enabled by default.
+	**/
 	bool EnableOption(int32 index, bool enable);
 
+	//! \name Member Access Functions
+	//@{
+	/** \brief Sets the font that the option box will use for text
+	***  \param font_name A label to a valid, already-loaded font
+	**/
+	void SetFont(const std::string &font_name);
 
-	/*!
-	 *  \brief sorts the option list alphabetically
-	 * \return success/failure
-	 */
+	/** \brief Sets the width and height of all option cells
+	*** \param horz_spacing The amount of horizontal space allocated for each cell
+	*** \param vert_spacing The amount of vertical space allocated for each cell
+	**/
+	void SetCellSize(float horz_spacing, float vert_spacing);
 
-	bool Sort();
+	/** \brief Sets the size of the option box in terms of number of columns and rows
+	*** \param columns The number of columns to allocate for the option box
+	*** \param rows The number of rows to allocate for the option box
+	**/
+	void SetSize(int32 columns, int32 rows);
 
+	/** \brief sets the alignment of the option text
+	*** \param xalign left/right alignment of text in the cell
+	*** \param yalign top/bottom alignment of text in the cell
+	**/
+	void SetOptionAlignment(int32 xalign, int32 yalign);
 
-	/*!
-	 *  \brief returns true if the option box is in the middle of scrolling
-	 * \return true if scrolling option box, false if not
-	 */
+	/** \brief Sets the option selection mode (single or double confirm)
+	*** \param mode The selection mode to set
+	**/
+	void SetSelectMode(SelectMode mode);
 
+	/** \brief Sets the behavior for vertical wrapping of the cursor
+	*** \param mode The vertical wrap behavior to set
+	**/
+	void SetVerticalWrapMode(WrapMode mode);
+
+	/** \brief Sets the behavior for horizontal wrapping of the cursor
+	*** \param mode The horizontal wrap behavior to set
+	**/
+	void SetHorizontalWrapMode(WrapMode mode);
+
+	/** \brief Sets the state of the cursor icon
+	*** \param state The cursor state to set
+	**/
+	void SetCursorState(CursorState state);
+
+	/** \brief Sets the cursor offset relative to the text position
+	*** \param x Horizontal offset (sign determines direction)
+	*** \param y Vertical offset (sign dteremines direction)
+	*** \return success/failure
+	**/
+	void SetCursorOffset(float x, float y);
+
+	/** \brief Sets the currently selected option (0 to # of options - 1)
+	*** \param index The desired selection index in the list of options
+	**/
+	void SetSelection(int32 index);
+
+	/** \brief Sets the options to display in this option box
+	*** \param format_text A vector of unicode strings which contain the text for each item, along with any formatting tags
+	*** \return success/failure
+	***
+	*** For example: "<img/weapons/mythril.png>Mythril knife<r>500 drunes"
+	**/
+	bool SetOptions(const std::vector<hoa_utils::ustring>& format_text);
+
+	/** \brief Changes the value of a particular option
+	*** \param index The index of the option to change
+	*** \param text The text to change the option to
+	*** \return False on failure
+	**/
+	bool SetOptionText(int32 index, const hoa_utils::ustring &text);
+
+	/** \brief Checks if the option box is in the process of scrolling
+	*** \return True if the option box is scrolling, false if it is not
+	**/
 	bool IsScrolling() const;
 
-
-	/*!
-	 *  \brief returns true if the given option is enabled
-	 *  \param index of the option to check
-	 * \return true if option is enabled, false if it's not
-	 */
+	/** \brief returns true if the given option is enabled
+	*** \param index of the option to check
+	*** \return true if option is enabled, false if it's not
+	**/
 	bool IsEnabled(int32 index) const;
 
-
-	/*!
-	 *  \brief returns an integer which contains the code of an event that occurred, or
+	/** \brief returns an integer which contains the code of an event that occurred, or
 	 *         zero if no event occurred. This should be called every frame to see if
 	 *         anything new happened, like the player confirming or canceling, etc. Do
 	 *         not call it more than once per frame though, because it clears the event
 	 *         flag.
 	 * \return int representing an option box event (i.e. cancel, confirm, left, right, etc.)
 	 */
-
 	int32 GetEvent();
 
-
-	/*!
-	 *  \brief returns the index of the currently selected option
-	 * \return the current selection
-	 */
-
+	/** \brief Returns the index of the currently selected option
+	*** \return The current selection index
+	**/
 	int32 GetSelection() const;
 
-
-	/*!
-	 *  \brief if double-confirm mode is enabled and one item has been confirmed but
-	 *         we're waiting for the player to confirm the other, then GetSwitchSelection()
-	 *         returns the index of the already-confirmed item
-	 * \return index of already confirmed option
-	 */
-
+	/** \brief Returns the index of the previously confirmed option when switching two options
+	*** \return The index of the previously confirmed option
+	**/
 	int32 GetSwitchSelection() const;
 
-
-	/*!
-	 *  \brief returns the number of rows
-	 * \return number of rows in option box
-	 */
-
+	/** \brief returns the number of rows
+	*** \return number of rows in option box
+	**/
 	int32 GetNumRows() const;
 
-
-	/*!
-	 *  \brief returns the number of columns
-	 * \return number of columns in option box
-	 */
-
+	/** \brief returns the number of columns
+	*** \return number of columns in option box
+	**/
 	int32 GetNumColumns() const;
 
-
-	/*!
-	 *  \brief returns the number of options that were set using SetOptions()
-	 * \return number of options in option box
-	 */
-
+	/** \brief Retreives the number of options in the option box
+	*** \return The number of options contained by the option box
+	**/
 	int32 GetNumOptions() const;
+	//@}
 
-
-	/*!
-	 *  \brief used mostly internally to determine if the option box is initialized.
-	 *         If not, then "errors" is filled with a list of reasons why it is not
-	 *         initialized.
-	 * \param errors string to hold any error info produced by this function
-	 * \return true if initialized, false if not
-	 */
-
-	bool IsInitialized(std::string &errors);
+	/** \brief Used to determine whether the option box is initialized and ready for use
+	*** \param errors Used to report the list of reasons why the option box is not initialized
+	*** \return True if the option box is initialized, false if it is not
+	**/
+	bool IsInitialized(std::string& errors);
 
 private:
-
-	/*!
-	 *  \brief given an alignment and the bounds of an option cell, it sets up the correct
-	 *         flags to render into that cell, and returns the x and y values where the
-	 *         text should be rendered.
-	 * \param xalign left/right alignement of text in option box
-	 * \param yalign top/bottom alignement of text in option box
-	 * \param bounds bounds of the option box, used in conjunction with xalign and yalign
-	 *	      to determine x and y coordinates for the cursor
-	 * \param x x position of the cursor
-	 * \param y y position of the cursor
-	 */
-
-	void _SetupAlignment(int32 xalign, int32 yalign, const OptionCellBounds &bounds, float &x, float &y);
-
-
-	/*!
-	 *  \brief clears the list of options
-	 */
-
-	void _ClearOptions();
-
-
-	/*!
-	 *  \brief helper function to parse text for an option box, and fill an Option structure
-	 * \param formatString the formatted string, using the XML structure described by SetOptions()
-	 * \param option which option the string corresponds to
-	 * \return success/failure
-	 */
-
-	bool _ParseOption(const hoa_utils::ustring &formatString, Option &option);
-
-
-	/*!
-	 *  \brief switches the option items specified by _selection and _switchSelection
-	 */
-
-	void _SwitchItems();
-
-
-	/*!
-	 *  \brief increments or decrements the current selection by offset
-	 * \param offset amount to move in specified direction
-	 * \param horizontal true if moving horizontally, false if moving vertically
-	 *  \return false if the selection does not change
-	 */
-
-	bool _ChangeSelection(int32 offset, bool horizontal);
-
-
-	/*!
-	 *  \brief plays the confirm sound
-	 */
-
-	void _PlayConfirmSound();
-
-
-	/*!
-	 *  \brief returns the height of the text when it's rendered with the current font
-	 */
-
-	void _PlayNoConfirmSound();
-
-
-	/*!
-	 *  \brief plays the select sound
-	 */
-
-	void _PlaySelectSound();
-
-
-	/*!
-	 *  \brief plays the switch sound
-	 */
-
-	void _PlaySwitchSound();
-
-
 	//! after every change to any of the settings, check if the textbox is in a valid state and update this bool
 	bool   _initialized;
 
@@ -693,7 +424,7 @@ private:
 	int32 _firstSelection;
 
 	//! vector containing each option
-	std::vector <Option> _options;
+	std::vector<private_video::Option> _options;
 
 	//! how many options there are in this box
 	int32 _numOptions;
@@ -704,10 +435,39 @@ private:
 	//! structure containing properties of the current font like height, etc.
 	FontProperties _fontProperties;
 
-}; // class OptionBox : public private_video::GUIControl
+	/** \brief given an alignment and the bounds of an option cell, it sets up the correct
+	 *         flags to render into that cell, and returns the x and y values where the
+	 *         text should be rendered.
+	 * \param xalign left/right alignement of text in option box
+	 * \param yalign top/bottom alignement of text in option box
+	 * \param bounds bounds of the option box, used in conjunction with xalign and yalign
+	 *	      to determine x and y coordinates for the cursor
+	 * \param x x position of the cursor
+	 * \param y y position of the cursor
+	**/
+	void _SetupAlignment(int32 xalign, int32 yalign, const private_video::OptionCellBounds &bounds, float &x, float &y);
 
+	//! \brief Removes all options from the optionbox
+	void _ClearOptions();
+
+	/** \brief helper function to parse text for an option box, and fill an Option structure
+	 * \param formatString the formatted string, using the XML structure described by SetOptions()
+	 * \param option which option the string corresponds to
+	 * \return success/failure
+	**/
+	bool _ParseOption(const hoa_utils::ustring &formatString, private_video::Option &option);
+
+	//! \brief Switches the option items specified by _selection and _switchSelection
+	void _SwitchItems();
+
+	/** \brief increments or decrements the current selection by offset
+	*** \param offset amount to move in specified direction
+	*** \param horizontal true if moving horizontally, false if moving vertically
+	*** \return false if the selection does not change
+	**/
+	bool _ChangeSelection(int32 offset, bool horizontal);
+}; // class OptionBox : public private_video::GUIControl
 
 } // namespace hoa_video
 
-
-#endif  // !__OPTION_HEADER__
+#endif  // __OPTION_HEADER__

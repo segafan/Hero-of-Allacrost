@@ -7,19 +7,19 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <sstream>
+
 #include "utils.h"
 #include "option.h"
 #include "video.h"
-#include <sstream>
 
 using namespace std;
+
+using namespace hoa_utils;
 using namespace hoa_video;
 using namespace hoa_video::private_video;
-using namespace hoa_utils;
 
-
-namespace hoa_video
-{
+namespace hoa_video {
 
 
 //-----------------------------------------------------------------------------
@@ -62,7 +62,7 @@ OptionBox::OptionBox()
 //          font label is passed in.
 //-----------------------------------------------------------------------------
 
-bool OptionBox::SetFont(const std::string &fontName)
+void OptionBox::SetFont(const std::string &fontName)
 {
 	// try to get pointer to video manager
 	GameVideo *videoManager = GameVideo::SingletonGetReference();
@@ -70,7 +70,7 @@ bool OptionBox::SetFont(const std::string &fontName)
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: OptionBox::SetFont() failed, couldn't get pointer to GameVideo!" << endl;
-		return false;
+		return;
 	}
 
 	// try to get properties about the current font. Note we don't bother calling IsValidFont() to see
@@ -79,13 +79,11 @@ bool OptionBox::SetFont(const std::string &fontName)
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: OptionBox::SetFont() failed because GameVideo::GetFontProperties() returned false for the font:\n" << fontName << endl;
-		return false;
+		return;
 	}
 
 	_font = fontName;
 	_initialized = IsInitialized(_initialization_errors);
-
-	return true;
 }
 
 
@@ -227,7 +225,6 @@ bool OptionBox::_ChangeSelection(int32 offset, bool horizontal)
 		_scrolling = true;
 	}
 
-	_PlaySelectSound();
 	_event = VIDEO_OPTION_SELECTION_CHANGE;
 
 	return true;
@@ -283,17 +280,15 @@ void OptionBox::HandleRightKey()
 // SetCursorState: sets the cursor to shown, hidden, or blinking
 //-----------------------------------------------------------------------------
 
-bool OptionBox::SetCursorState(CursorState state)
-{
+void OptionBox::SetCursorState(CursorState state) {
 	if(state <= VIDEO_CURSOR_STATE_INVALID || state >= VIDEO_CURSOR_STATE_TOTAL)
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: Invalid cursor state passed to OptionBox::SetCursorState (" << state << ")" << endl;
-		return false;
+		return;
 	}
 
 	_cursorState = state;
-	return true;
 }
 
 
@@ -302,12 +297,11 @@ bool OptionBox::SetCursorState(CursorState state)
 //                  little to the left of each text item
 //-----------------------------------------------------------------------------
 
-bool OptionBox::SetCursorOffset(float x, float y)
+void OptionBox::SetCursorOffset(float x, float y)
 {
 	_cursorX = x;
 	_cursorY = y;
 
-	return true;
 }
 
 
@@ -333,7 +327,6 @@ void OptionBox::HandleCancelKey()
 		_event = VIDEO_OPTION_CANCEL;
 	}
 
-	_PlaySelectSound();  // for now, cancel sounds the same as a selection
 }
 
 
@@ -363,7 +356,6 @@ void OptionBox::HandleConfirmKey()
 
 			// send a switch event
 			_event = VIDEO_OPTION_SWITCH;
-			_PlaySwitchSound();
 		}
 	}
 
@@ -380,12 +372,10 @@ void OptionBox::HandleConfirmKey()
 		if(_options[_selection].disabled)
 		{
 			// play an annoying beep to tell player they clicked on a disabled option
-			_PlayNoConfirmSound();
 			return;
 		}
 
 		_event = VIDEO_OPTION_CONFIRM;
-		_PlayConfirmSound();
 
 		// get out of switch mode
 		_firstSelection = -1;
@@ -503,13 +493,13 @@ void OptionBox::SetHorizontalWrapMode(WrapMode mode)
 //               no element "0" yet.
 //-----------------------------------------------------------------------------
 
-bool OptionBox::SetSelection(int32 index)
+void OptionBox::SetSelection(int32 index)
 {
 	if(index < -1 || index >= _numOptions)
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: OptionBox::SetSelection() was passed invalid index (" << index << ")" << endl;
-		return false;
+		return;
 	}
 	_selection = index;
 
@@ -527,8 +517,6 @@ bool OptionBox::SetSelection(int32 index)
 			_scrollOffset = totalNumRows - _numRows;
 		}
 	}
-
-	return true;
 }
 
 
@@ -649,22 +637,6 @@ bool OptionBox::EnableOption(int32 index, bool enable)
 	return true;
 }
 
-
-//-----------------------------------------------------------------------------
-// Sort: sorts the list of options by the first word in the option text which
-//       is not interrupted by a tag. For example, if the format string for
-//       an option is "<20>Phoenix down<r>500 gold", then "Phoenix down" is the
-//       string to sort by.
-//-----------------------------------------------------------------------------
-
-bool OptionBox::Sort()
-{
-	// STUB: I have not implemented this yet because apparently sorting
-	//       unicode strings is extremely complicated. For example, in Portuguese
-	//       maybe they use a similar alphabet, but the letters are in a different
-	//       order :uhoh:
-	return true;
-}
 
 
 //-----------------------------------------------------------------------------
@@ -808,34 +780,6 @@ bool OptionBox::IsEnabled(int32 index) const
 }
 
 
-//-----------------------------------------------------------------------------
-// _PlayConfirmSound: sound when user confirms an option
-//-----------------------------------------------------------------------------
-
-void OptionBox::_PlayConfirmSound()
-{
-}
-
-//-----------------------------------------------------------------------------
-// _PlayNoConfirmSound: sound when user tries to confirm on a disabled option
-//-----------------------------------------------------------------------------
-void OptionBox::_PlayNoConfirmSound()
-{
-}
-
-//-----------------------------------------------------------------------------
-// _PlaySelectSound: sound when selection changes
-//-----------------------------------------------------------------------------
-void OptionBox::_PlaySelectSound()
-{
-}
-
-//-----------------------------------------------------------------------------
-// _PlaySwitchSound: sound when two options are switched
-//-----------------------------------------------------------------------------
-void OptionBox::_PlaySwitchSound()
-{
-}
 
 //-----------------------------------------------------------------------------
 // _ParseOption: helper function to SetOptions. Reads in option format string,
@@ -1117,9 +1061,9 @@ void OptionBox::Draw()
 
 	OptionCellBounds bounds;
 
-	bounds.cellYTop    = top + cellOffset;
-	bounds.cellYCenter = bounds.cellYTop - 0.5f * _vSpacing * cs.GetVerticalDirection();
-	bounds.cellYBottom = bounds.cellYCenter * 2.0f - bounds.cellYTop;
+	bounds.y_top    = top + cellOffset;
+	bounds.y_center = bounds.y_top - 0.5f * _vSpacing * cs.GetVerticalDirection();
+	bounds.y_bottom = bounds.y_center * 2.0f - bounds.y_top;
 
 	float yoff = -_vSpacing * cs.GetVerticalDirection();
 	float xoff = _hSpacing * cs.GetHorizontalDirection();
@@ -1129,9 +1073,9 @@ void OptionBox::Draw()
 	// go through all the "cells" and draw them
 	for(int32 row = rowMin; row < rowMax; ++row)
 	{
-		bounds.cellXLeft   = left;
-		bounds.cellXCenter = bounds.cellXLeft + 0.5f * _hSpacing * cs.GetHorizontalDirection();
-		bounds.cellXRight  = bounds.cellXCenter * 2.0f - bounds.cellXLeft;
+		bounds.x_left   = left;
+		bounds.x_center = bounds.x_left + 0.5f * _hSpacing * cs.GetHorizontalDirection();
+		bounds.x_right  = bounds.x_center * 2.0f - bounds.x_left;
 
 		for(int32 col = 0; col < _numColumns; ++col)
 		{
@@ -1194,7 +1138,7 @@ void OptionBox::Draw()
 							else
 								video->DrawImage(op.images[imageIndex], Color::white);
 
-							float edge = x - bounds.cellXLeft;
+							float edge = x - bounds.x_left;
 							float width = op.images[imageIndex].GetWidth();
 							if(xalign == VIDEO_X_CENTER)
 								edge -= width * 0.5f * cs.GetHorizontalDirection();
@@ -1210,7 +1154,7 @@ void OptionBox::Draw()
 
 					case VIDEO_OPTION_ELEMENT_POSITION:
 					{
-						x = bounds.cellXLeft + op.elements[opElem].value * cs.GetHorizontalDirection();
+						x = bounds.x_left + op.elements[opElem].value * cs.GetHorizontalDirection();
 						video->Move(x, y);
 						break;
 					}
@@ -1223,7 +1167,7 @@ void OptionBox::Draw()
 						{
 							const ustring &text = op.text[textIndex];
 							float width = static_cast<float>(video->CalculateTextWidth(_font, text));
-							float edge = x - bounds.cellXLeft;
+							float edge = x - bounds.x_left;
 
 							if(xalign == VIDEO_X_CENTER)
 								edge -= width * 0.5f * cs.GetHorizontalDirection();
@@ -1283,17 +1227,17 @@ void OptionBox::Draw()
 					video->DrawImage(*defaultCursor, Color::white);
 			}
 
-			bounds.cellXLeft   += xoff;
-			bounds.cellXCenter += xoff;
-			bounds.cellXRight  += xoff;
+			bounds.x_left   += xoff;
+			bounds.x_center += xoff;
+			bounds.x_right  += xoff;
 		}
 
 		if(finished)
 			break;
 
-		bounds.cellYTop    += yoff;
-		bounds.cellYCenter += yoff;
-		bounds.cellYBottom += yoff;
+		bounds.y_top    += yoff;
+		bounds.y_center += yoff;
+		bounds.y_bottom += yoff;
 	}
 
 	video->_PopContext();
@@ -1313,26 +1257,26 @@ void OptionBox::_SetupAlignment(int32 xalign, int32 yalign, const OptionCellBoun
 	switch(xalign)
 	{
 		case VIDEO_X_LEFT:
-			x = bounds.cellXLeft;
+			x = bounds.x_left;
 			break;
 		case VIDEO_X_CENTER:
-			x = bounds.cellXCenter;
+			x = bounds.x_center;
 			break;
 		default:
-			x = bounds.cellXRight;
+			x = bounds.x_right;
 			break;
 	};
 
 	switch(yalign)
 	{
 		case VIDEO_Y_TOP:
-			y = bounds.cellYTop;
+			y = bounds.y_top;
 			break;
 		case VIDEO_Y_CENTER:
-			y = bounds.cellYCenter;
+			y = bounds.y_center;
 			break;
 		default:
-			y = bounds.cellYBottom;
+			y = bounds.y_bottom;
 			break;
 	};
 
