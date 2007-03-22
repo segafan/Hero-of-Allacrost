@@ -43,7 +43,6 @@ const uint16 NEWLINE_CHARACTER = static_cast<uint16>('\n');
 *** - VIDEO_TEXT_FADEREVEAL: like REVEAL, except as text gets revealed it fades in
 *** ***************************************************************************/
 enum TEXT_DISPLAY_MODE {
-	VIDEO_TEXT_INVALID    = -1,
 	VIDEO_TEXT_INSTANT    = 0,
 	VIDEO_TEXT_CHAR       = 1,
 	VIDEO_TEXT_FADELINE   = 2,
@@ -69,6 +68,8 @@ enum TEXT_DISPLAY_MODE {
 class TextBox : public private_video::GUIControl {
 public:
 	TextBox();
+	
+	TextBox(float x, float y, float width, float height, const TEXT_DISPLAY_MODE &mode = VIDEO_TEXT_INSTANT);
 
 	~TextBox();
 
@@ -197,6 +198,11 @@ public:
 	**/
 	bool IsInitialized(std::string& errors);
 
+
+	//! \brief Sets the display text color of this text box
+	void SetTextColor(Color &color)
+		{ _text_color = color; }
+
 private:
 	//! \brief The dimensions of the text box, in pixels.
 	float _width, _height;
@@ -231,6 +237,12 @@ private:
 	//! \brief An array of wide strings, one for each line of text.
 	std::vector<hoa_utils::ustring> _text;
 
+	//! \brief The unedited text for reformatting
+	hoa_utils::ustring _text_save;
+	
+	//! \brief A set text color to display
+	Color _text_color;
+
 	/** \brief Returns the height of the text when it's rendered with the current font
 	*** \return The height of text rendered in current font
 	*** \note This is a low-level function so it doesn't check if the current font is valid or not
@@ -258,6 +270,11 @@ private:
 	*** \param scissor_rect The scissor rectangle used for this textbox.
 	**/
 	void _DrawTextLines(float text_x, float text_y, ScreenRect scissor_rect);
+
+	/** \brief Reformats text for size/font.
+	**/
+	void _ReformatText();
+
 }; // class TextBox : public GUIControl
 
 } // namespace hoa_video
