@@ -21,18 +21,36 @@ using namespace hoa_video::private_video;
 
 namespace hoa_video {
 
-TextBox::TextBox() {
-	_finished = false;
-	_current_time = 0;
-	_mode = VIDEO_TEXT_INVALID;
-	_display_speed = 0.0f;
-	_num_chars = 0;
-	_initialized = IsInitialized(_initialization_errors);
-	_width = _height = 0.0f;
-	_text_xalign = VIDEO_X_LEFT;
-	_text_yalign = VIDEO_Y_BOTTOM;
+TextBox::TextBox() 
+: _width(0.0f),
+  _height(0.0f),
+  _display_speed(0.0f),
+  _text_xalign(VIDEO_X_LEFT),
+  _text_yalign(VIDEO_Y_BOTTOM),
+  _num_chars(0),
+  _finished(false),
+  _current_time(0),
+  _mode(VIDEO_TEXT_INSTANT),
+  _text_color(Color::white)
+{
+	_initialized = false;
 }
 
+TextBox::TextBox(float x, float y, float width, float height, const TEXT_DISPLAY_MODE &mode)
+: _width(width),
+  _height(height),
+  _display_speed(0.0f),
+  _text_xalign(VIDEO_X_LEFT),
+  _text_yalign(VIDEO_Y_BOTTOM),
+  _num_chars(0),
+  _finished(false),
+  _current_time(0),
+  _mode(mode),
+  _text_color(Color::white)
+{
+	SetPosition(x, y);
+	_initialized = false;
+}
 
 
 TextBox::~TextBox() {
@@ -103,6 +121,7 @@ void TextBox::Draw() {
 
 	ScreenRect rect(x, y, w, h);
 
+	/* XXX: Disabled buggy
 	if (_owner) {
 		rect.Intersect(_owner->GetScissorRect());
 	}
@@ -111,6 +130,7 @@ void TextBox::Draw() {
 	if (VideoManager->IsScissoringEnabled()) {
 		VideoManager->SetScissorRect(rect);
 	}
+	*/
 
 	// Holds the height of the text to be drawn
 	float text_height = static_cast<float>(_CalculateTextHeight());
@@ -142,7 +162,10 @@ void TextBox::Draw() {
 	// Set the draw cursor, draw flags, and draw the text
 	VideoManager->Move(0.0f, text_ypos);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
+	Color oldColor = VideoManager->GetTextColor();
+	VideoManager->SetTextColor(_text_color);
 	_DrawTextLines(text_xpos, text_ypos, rect);
+	VideoManager->SetTextColor(oldColor);
 
 	VideoManager->_PopContext();
 } // void TextBox::Draw()
@@ -164,8 +187,7 @@ void TextBox::SetDimensions(float w, float h) {
 
 	_width = w;
 	_height = h;
-
-	_initialized = IsInitialized(_initialization_errors);
+	_ReformatText();
 }
 
 
@@ -174,8 +196,6 @@ void TextBox::SetDimensions(float w, float h) {
 void TextBox::SetTextAlignment(int32 xalign, int32 yalign) {
 	_text_xalign = xalign;
 	_text_yalign = yalign;
-
-	_initialized = IsInitialized(_initialization_errors);
 }
 
 
@@ -189,19 +209,19 @@ void TextBox::SetFont(const string& font_name) {
 	}
 
 	_font = font_name;
-	_initialized = IsInitialized(_initialization_errors);
+	_ReformatText();
+	_initialized = true;
 }
 
 
 
 void TextBox::SetDisplayMode(const TEXT_DISPLAY_MODE &mode) {
-	if (mode <= VIDEO_TEXT_INVALID || mode >= VIDEO_TEXT_TOTAL) {
+	if (mode < VIDEO_TEXT_INSTANT || mode >= VIDEO_TEXT_TOTAL) {
 		cerr << "VIDEO WARNING: TextBox::SetDisplayMode() failed because of an invalid mode argument: " << mode << endl;
 		return;
 	}
 
 	_mode = mode;
-	_initialized = IsInitialized(_initialization_errors);
 }
 
 
@@ -214,63 +234,30 @@ void TextBox::SetDisplaySpeed(float display_speed) {
 	}
 
 	_display_speed = display_speed;
-	_initialized = IsInitialized(_initialization_errors);
 }
 
 
 
 void TextBox::SetDisplayText(const ustring& text) {
-	if (text.empty()) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO WARNING: empty string passed to TextBox::SetDisplayText()!" << endl;
-		return;
-	}
-
 	if (_initialized == false) {
 		if (VIDEO_DEBUG)
 			cerr << "VIDEO WARNING: TextBox::SetDisplayText() failed because the textbox was not initialized:\n" << _initialization_errors << endl;
 		return;
 	}
 
-	// (1): Go through the text ustring and determine where the newline characters can be found, examining one line at a time and adding it to the _text vector.
-	size_t newline_pos;
-	ustring temp_str = text;
-
-	_text.clear();
-	_num_chars = 0;
-
-	while (true) {
-		newline_pos = temp_str.find(NEWLINE_CHARACTER);
-
-		// If the end of the string has been reached, add the new line and exit
-		if (newline_pos == ustring::npos) {
-			_AddLine(temp_str);
-			break;
-		}
-		// Otherwise, add the new line segment and proceed to find the next
-		else {
-			_AddLine(temp_str.substr(0, newline_pos));
-			temp_str = temp_str.substr(newline_pos + 1, temp_str.length() - newline_pos);
-		}
-	}
-
-	// (2): Calculate the height of the text and check it against the height of the textbox.
-	int32 text_height = _CalculateTextHeight();
-
-	if (text_height > _height) {
-		if (VIDEO_DEBUG) {
-			cerr << "VIDEO WARNING: In TextBox::SetDisplayText() tried to display text of height (";
-			cerr << text_height << ") in a window of lower height (" << _height << ")" << endl;
-		}
-	}
+	_text_save = text;
+	_ReformatText();
 
 	// Reset the timer since new text has been set
 	_current_time = 0;
 
 	// (3): Determine how much time the text will take to display depending on the display mode, speed, and size of the text
+	_finished = false;
 	switch(_mode) {
 		case VIDEO_TEXT_INSTANT:
 			_end_time = 0;
+			// (4): Set finished to true only if the display mode is VIDEO_TEXT_INSTANT
+			_finished = true;
 			break;
 
 		case VIDEO_TEXT_CHAR:     // All three of these modes display one character at a time
@@ -293,14 +280,52 @@ void TextBox::SetDisplayText(const ustring& text) {
 			break;
 	};
 
-	// (4): Set finished to true only if the display mode is VIDEO_TEXT_INSTANT
-	if (_mode == VIDEO_TEXT_INSTANT)
-		_finished = true;
-	else
-		_finished = false;
 } // void TextBox::SetDisplayText(const ustring& text)
 
 
+void TextBox::_ReformatText() {
+	// (1): Go through the text ustring and determine where the newline characters can be found, examining one line at a time and adding it to the _text vector.
+	size_t newline_pos;
+	ustring temp_str = _text_save;
+	_text.clear();
+	_num_chars = 0;
+
+
+	// If font not set, return (leave _text vector empty)
+	if (!_font_properties) {
+		if (VIDEO_DEBUG) {
+			cerr << "VIDEO WARNING: TextBox::_ReformatText() with invalid font." << endl;
+		}
+		return;
+	}
+
+	while (true) {
+		newline_pos = temp_str.find(NEWLINE_CHARACTER);
+
+		// If the end of the string has been reached, add the new line and exit
+		if (newline_pos == ustring::npos) {
+			_AddLine(temp_str);
+			break;
+		}
+		// Otherwise, add the new line segment and proceed to find the next
+		else {
+			_AddLine(temp_str.substr(0, newline_pos));
+			temp_str = temp_str.substr(newline_pos + 1, temp_str.length() - newline_pos);
+		}
+	}
+
+	// (2): Calculate the height of the text and check it against the height of the textbox.
+	int32 text_height = _CalculateTextHeight();
+
+	if (text_height > _height) {
+		if (VIDEO_DEBUG) {
+			cerr << "VIDEO WARNING: In TextBox::_ReformatText() tried to display text of height (";
+			cerr << text_height << ") in a window of lower height (" << _height << ")" << endl;
+		}
+	}
+
+
+} // void TextBox::_ReformatText()
 
 void TextBox::SetDisplayText(const string &text) {
 	ustring wstr = MakeUnicodeString(text);
@@ -313,34 +338,12 @@ bool TextBox::IsInitialized(string& errors) {
 	errors.clear();
 	ostringstream stream;
 
-	// Check width
-	if (_width <= 0.0f || _width > 1024.0f)
-		stream << "* Invalid width (" << _width << ")" << endl;
-
-	// Check height
-	if (_height <= 0.0f || _height > 768.0f)
-		stream << "* Invalid height (" << _height << ")" << endl;
-
-	// Check alignment flags
-	if (_text_xalign < VIDEO_X_LEFT || _text_xalign > VIDEO_X_RIGHT)
-		stream << "* Invalid x alignment (" << _text_xalign << ")" << endl;
-
-	if (_text_yalign < VIDEO_Y_TOP || _text_yalign > VIDEO_Y_BOTTOM)
-		stream << "* Invalid y alignment (" << _text_yalign << ")" << endl;
 
 	// Check font
 	if (_font.empty())
 		stream << "* Invalid font: no font has been set" << endl;
 	else if (VideoManager->IsValidFont(_font) == false)
 		stream << "* Invalid font: " << _font << endl;
-
-	// Check display speed
-	if (_display_speed <= 0.0f)
-		stream << "* Invalid display speed (" << _display_speed << ")" << endl;
-
-	// Check display mode
-	if (_mode <= VIDEO_TEXT_INVALID || _mode >= VIDEO_TEXT_TOTAL)
-		stream << "* Invalid display mode (" << _mode << ")" << endl;
 
 	errors = stream.str();
 
