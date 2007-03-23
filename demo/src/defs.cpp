@@ -354,22 +354,22 @@ void BindEngineToLua() {
 
 	module(ScriptManager->GetGlobalState(), "hoa_map")
 	[
-		class_<MonsterSprite, MapSprite>("MonsterSprite")
+		class_<EnemySprite, MapSprite>("EnemySprite")
 			.def(constructor<std::string>())
-			.def("SetZone", &MonsterSprite::SetZone)
-			.def("Reset", &MonsterSprite::Reset)
-			.def("SetAggroRange", &MonsterSprite::SetAggroRange)
-			.def("GetAggroRange", &MonsterSprite::GetAggroRange)
-			.def("SetTimeToChange", &MonsterSprite::SetTimeToChange)
-			.def("GetTimeToChange", &MonsterSprite::GetTimeToChange)
-			.def("SetTimeToSpawn", &MonsterSprite::SetTimeToSpawn)
-			.def("GetTimeToSpawn", &MonsterSprite::GetTimeToSpawn)
-			.def("ChangeStateDead", &MonsterSprite::ChangeStateDead)
-			.def("ChangeStateSpawning", &MonsterSprite::ChangeStateSpawning)
-			.def("ChangeStateHostile", &MonsterSprite::ChangeStateHostile)
-			.def("IsDead", &MonsterSprite::IsDead)
-			.def("IsSpawning", &MonsterSprite::IsSpawning)
-			.def("IsHostile", &MonsterSprite::IsHostile)
+			.def("SetZone", &EnemySprite::SetZone)
+			.def("Reset", &EnemySprite::Reset)
+			.def("SetAggroRange", &EnemySprite::SetAggroRange)
+			.def("GetAggroRange", &EnemySprite::GetAggroRange)
+			.def("SetTimeToChange", &EnemySprite::SetTimeToChange)
+			.def("GetTimeToChange", &EnemySprite::GetTimeToChange)
+			.def("SetTimeToSpawn", &EnemySprite::SetTimeToSpawn)
+			.def("GetTimeToSpawn", &EnemySprite::GetTimeToSpawn)
+			.def("ChangeStateDead", &EnemySprite::ChangeStateDead)
+			.def("ChangeStateSpawning", &EnemySprite::ChangeStateSpawning)
+			.def("ChangeStateHostile", &EnemySprite::ChangeStateHostile)
+			.def("IsDead", &EnemySprite::IsDead)
+			.def("IsSpawning", &EnemySprite::IsSpawning)
+			.def("IsHostile", &EnemySprite::IsHostile)
 	];
 
 	module(ScriptManager->GetGlobalState(), "hoa_map")
@@ -394,10 +394,10 @@ void BindEngineToLua() {
 
 	module(ScriptManager->GetGlobalState(), "hoa_map")
 	[
-		class_<MonsterZone, MapZone>("MonsterZone")
+		class_<EnemyZone, MapZone>("EnemyZone")
 			.def(constructor<MapMode*, uint8, uint32, bool>())
-			.def("AddMonster", &MonsterZone::AddMonster, adopt(_2))
-			.def("IsRestraining", &MonsterZone::IsRestraining)
+			.def("AddEnemy", &EnemyZone::AddEnemy, adopt(_2))
+			.def("IsRestraining", &EnemyZone::IsRestraining)
 	];
 
 	module(ScriptManager->GetGlobalState(), "hoa_map")

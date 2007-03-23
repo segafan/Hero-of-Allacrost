@@ -553,10 +553,10 @@ bool MapSprite::LoadState() {
 }
 
 // *****************************************************************************
-// ********************** MonsterSprite Class Functions ************************
+// ********************** EnemySprite Class Functions ************************
 // *****************************************************************************
 
-void MonsterSprite::Draw()
+void EnemySprite::Draw()
 {
 	if( _state != DEAD ) {
 		if (MapObject::DrawHelper() == true) {
@@ -566,7 +566,7 @@ void MonsterSprite::Draw()
 }
 
 // Load in the appropriate images and other data for the sprite
-bool MonsterSprite::Load() {
+bool EnemySprite::Load() {
 	ScriptDescriptor sprite_script;
 	if (sprite_script.OpenFile(filename, SCRIPT_READ) == false) {
 		return false;
@@ -673,11 +673,11 @@ bool MonsterSprite::Load() {
 	}
 
 	return true;
-} // bool MonsterSprite::Load()
+} // bool EnemySprite::Load()
 
 
 
-void MonsterSprite::Update() {
+void EnemySprite::Update() {
 	float xdelta, ydelta;
 	switch( _state )
 	{
@@ -741,7 +741,7 @@ void MonsterSprite::Update() {
 	default:
 		break;
 	}
-} // void MonsterSprite::Update()
+} // void EnemySprite::Update()
 
 
 
