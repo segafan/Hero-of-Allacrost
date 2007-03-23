@@ -213,6 +213,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\defs.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\engine\video\draw.cpp"
 				>
 			</File>
