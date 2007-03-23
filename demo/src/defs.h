@@ -12,24 +12,35 @@
 *** \author  Tyler Olsen, roots@allacrost.org
 *** \brief   Header file for forward declarations of classes and debug variables.
 ***
-*** The primary purpose of this file is to forward declare classes and variables
-*** in such a way that we avoid recursive inclusion problems. It defines every
-*** class (that is not in a private_* namespace) across the entire source tree.
-*** If you add a new class or namespace, don't forget to add its declaration to
-*** this file!
+*** This file serves two purposes. The first purpose of this file is to forward
+*** declare classes and shared variables in order to avoid problems with
+*** recursive. The second purpose of this file is to declare the function that
+*** contains all of the Allacrost Lua binding code. This makes the C++ engine
+*** code available for use in Lua scripts.
 ***
 *** \note Pretty much every header file in the source tree will need to include
-*** this file, with a few exceptions (utils.h is one).
-***
-*** \note This file should not be included in any source files.
+*** this file, with a few exceptions (utils.h is one). The only source file 
+*** that should need to include this file is defs.cpp
 ***
 *** \note The commenting for all namespaces, variables, and classes declared in
 *** this file can be found in the respective header files for where these
-*** structures reside in.
+*** structures reside in. There are no doxygen comments for the classes and
+*** namespaces found here.
 *** **************************************************************************/
 
 #ifndef __DEFS_HEADER__
 #define __DEFS_HEADER__
+
+//! \brief Namespace which contains the single Lua binding function
+namespace hoa_defs {
+
+/** \brief Contains the binding code which makes the C++ engine available to Lua
+*** This method should <b>only be called once</b>. It must be called after the
+*** ScriptEngine is initialized, otherwise the application will crash.
+**/
+void BindEngineToLua();
+
+} // namespace hoa_defs
 
 ////////////////////////////////////////////////////////////////////////////////
 // Game Engine Declarations

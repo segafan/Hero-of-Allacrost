@@ -61,7 +61,7 @@ ShopActionWindow::ShopActionWindow() {
 	vector<ustring> text;
 	text.push_back(MakeUnicodeString("Buy"));
 	text.push_back(MakeUnicodeString("Sell"));
-	text.push_back(MakeUnicodeString("Exit"));
+	text.push_back(MakeUnicodeString("Leave"));
 	options.SetOptions(text);
 	options.SetSelection(0);
 
@@ -244,7 +244,7 @@ ObjectInfoWindow::ObjectInfoWindow() {
 
 	// (4) Initialize the properties text box in the upper right section of the window
 	properties.SetOwner(this);
-	properties.SetPosition(275.0f, 160.0f);
+	properties.SetPosition(50.0f, 150.0f);
 	properties.SetDimensions(300.0f, 80.0f);
 	properties.SetDisplaySpeed(30);
 	properties.SetFont("default");

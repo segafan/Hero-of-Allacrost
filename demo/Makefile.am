@@ -166,6 +166,7 @@ allacrost_SOURCES = \
 	src/main.cpp \
 	src/main_options.cpp \
 	src/main_options.h \
+	src/defs.cpp \
 	src/defs.h \
 	src/utils.cpp \
 	src/utils.h \

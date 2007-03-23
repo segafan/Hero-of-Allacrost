@@ -28,11 +28,11 @@
 
 #include "defs.h"
 #include "utils.h"
+
 #include "mode_manager.h"
 #include "script.h"
 #include "video.h"
 #include "gui.h"
-
 
 //! All calls to map mode are wrapped in this namespace.
 namespace hoa_map {
@@ -275,15 +275,12 @@ class MapMode : public hoa_mode_manager::GameMode {
 	friend class private_map::SpriteAction;
 	friend class private_map::ActionPathMove;
 	friend class private_map::MonsterZone;
+
+	friend void hoa_defs::BindEngineToLua();
 public:
 	MapMode();
 
 	~MapMode();
-
-	/** \brief Makes all relevant map classes and methods available to Lua.
-	*** This function only needs to be called once when the game begins.
-	**/
-	static void BindToLua();
 
 	/** \brief Loads all map data as specified in the Lua file that defines the map.
 	*** \param filename The name of the map script file to load.

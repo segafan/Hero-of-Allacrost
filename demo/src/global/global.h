@@ -60,11 +60,6 @@ class GameGlobal {
 public:
 	SINGLETON_METHODS(GameGlobal);
 
-	/** \brief Makes all relevant global classes and methods available to Lua.
-	*** This function only needs to be called once when the application starts.
-	**/
-	static void BindToLua();
-
 	/** \brief Deletes all data stored within the GameGlobal class object
 	*** This function is meant to be called when the user quits the current game instance
 	*** and returns to the boot screen. It will delete all characters, inventory, and other
