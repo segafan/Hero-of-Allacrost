@@ -726,17 +726,17 @@ bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 				if (!(other_y_location - (*objects)[i]->coll_height > y_location
 					|| other_y_location < cr_top )) {
 						// Boxes overlap on both axis, there is a colision
-						if( sprite->GetType() == MONSTER_TYPE && (*objects)[i] == _camera
-							&& reinterpret_cast<MonsterSprite*>(sprite)->IsHostile() ) {
-								reinterpret_cast<MonsterSprite*>(sprite)->ChangeStateDead();
+						if( sprite->GetType() == ENEMY_TYPE && (*objects)[i] == _camera
+							&& reinterpret_cast<EnemySprite*>(sprite)->IsHostile() ) {
+								reinterpret_cast<EnemySprite*>(sprite)->ChangeStateDead();
 								//BattleMode *BM = new BattleMode();
 								//ModeManager->Push(BM);
 								return false;
 						}
 
-						if( (*objects)[i]->GetType() == MONSTER_TYPE &&  sprite == _camera
-							&& reinterpret_cast<MonsterSprite*>((*objects)[i])->IsHostile() ) {
-								reinterpret_cast<MonsterSprite*>((*objects)[i])->ChangeStateDead();
+						if( (*objects)[i]->GetType() == ENEMY_TYPE &&  sprite == _camera
+							&& reinterpret_cast<EnemySprite*>((*objects)[i])->IsHostile() ) {
+								reinterpret_cast<EnemySprite*>((*objects)[i])->ChangeStateDead();
 								//BattleMode *BM = new BattleMode();
 								//ModeManager->Push(BM);
 								return false;

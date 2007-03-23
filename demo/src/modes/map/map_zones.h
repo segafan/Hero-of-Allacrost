@@ -87,18 +87,18 @@ protected:
 *** time. The monsters can be constrained in the zone area or be free to roam
 *** the whole map after spawning.
 *** ***************************************************************************/
-class MonsterZone : public MapZone {
+class EnemyZone : public MapZone {
 public:
-	MonsterZone(MapMode* map, uint8 max_monsters, uint32 regen_time, bool restrained);
+	EnemyZone(MapMode* map, uint8 max_enemies, uint32 regen_time, bool restrained);
 
-	virtual ~MonsterZone()
+	virtual ~EnemyZone()
 		{}
 
 	void Update();
 
-	void AddMonster(MonsterSprite* m);
+	void AddEnemy(EnemySprite* m);
 
-	void MonsterDead();
+	void EnemyDead();
 
 	bool IsRestraining() const
 		{ return _restrained; }
@@ -106,12 +106,12 @@ public:
 private:
 	uint32 _regen_time;
 	uint32 _time_elapsed;
-	uint8 _max_monsters;
-	uint8 _active_monsters;
+	uint8 _max_enemies;
+	uint8 _active_enemies;
 
 	bool _restrained;
 
-	std::vector<MonsterSprite*> _monsters;
+	std::vector<EnemySprite*> _enemies;
 };
 
 } // namespace private_map

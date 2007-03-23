@@ -217,13 +217,13 @@ namespace hoa_map {
 
 		class ZoneSection;
 		class MapZone;
-		class MonsterZone;
+		class EnemyZone;
 
 		class MapObject;
 		class PhysicalObject;
 		class VirtualSprite;
 		class MapSprite;
-		class MonsterSprite;
+		class EnemySprite;
 
 		class MapDialogue;
 

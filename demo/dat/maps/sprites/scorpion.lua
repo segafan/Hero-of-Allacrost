@@ -1,12 +1,12 @@
-function Load(monster)
-	monster:SetName("Scorpion");
-	monster:SetObjectID( map:_GetGeneratedObjectID() );
-	monster:SetContext(1);
-	monster:SetCollHalfWidth(1.0);
-	monster:SetCollHeight(2.0);
-	monster:SetImgHalfWidth(1.0);
-	monster:SetImgHeight(4.0);
-	monster:SetMovementSpeed(hoa_map.MapMode.VERY_SLOW_SPEED*1.5);
+function Load(enemy)
+	enemy:SetName("Scorpion");
+	enemy:SetObjectID( map:_GetGeneratedObjectID() );
+	enemy:SetContext(1);
+	enemy:SetCollHalfWidth(1.0);
+	enemy:SetCollHeight(2.0);
+	enemy:SetImgHalfWidth(1.0);
+	enemy:SetImgHeight(4.0);
+	enemy:SetMovementSpeed(hoa_map.MapMode.VERY_SLOW_SPEED*1.5);
 end 
 
 sprite_sheet = "img/sprites/map/scorpion_walk.png";

@@ -101,7 +101,7 @@ const uint32 ANIM_WALKING_EAST   = 7;
 const uint8 PHYSICAL_TYPE = 0;
 const uint8 VIRTUAL_TYPE = 1;
 const uint8 SPRITE_TYPE = 2;
-const uint8 MONSTER_TYPE = 3;
+const uint8 ENEMY_TYPE = 3;
 //@}
 
 /** ****************************************************************************
@@ -666,15 +666,15 @@ public:
 /** ****************************************************************************
 *** \brief A mobile map object with which the player can get in a fight.
 ***
-*** Monster sprites are attached to a MonsterZone, where they will respawn when
+*** Monster sprites are attached to a EnemyZone, where they will respawn when
 *** dead. A monster sprite can be in one of 3 states: SPAWNING, HOSTILE or DEAD.
 *** In spawning state, the monster becomes gradually visible, is immobile and
 *** cannot be attacked. In hostile state, the monsters roams the map and will
 *** attack if touched by the player. In dead state, the monsters is invisible
-*** and waits for the MonsterZone to reset it in an other position, back in
+*** and waits for the EnemyZone to reset it in an other position, back in
 *** spawning state.
 *** ***************************************************************************/
-class MonsterSprite : public MapSprite {
+class EnemySprite : public MapSprite {
 private:
 	enum State
 	{
@@ -684,7 +684,7 @@ private:
 	};
 
 public:
-	MonsterSprite( std::string file ) :
+	EnemySprite( std::string file ) :
 		_zone(NULL),
 		_color(1.0f, 1.0f, 1.0f, 0.0f),
 		_aggro_range(8.0f),
@@ -692,7 +692,7 @@ public:
 		_time_to_spawn(3500)
 	{
 		filename = file;
-		MapObject::_object_type = MONSTER_TYPE;
+		MapObject::_object_type = ENEMY_TYPE;
 		moving = true;
 		Reset();
 	}
@@ -705,7 +705,7 @@ public:
 	//! \brief Draws the sprite frame in the appropriate position on the screen, if it is visible.
 	virtual void Draw();
 
-	void SetZone( MonsterZone* zone )
+	void SetZone( EnemyZone* zone )
 		{ _zone = zone; }
 
 	void Reset() {
@@ -735,7 +735,7 @@ public:
 		{ return _time_to_spawn; }
 
 	void ChangeStateDead()
-		{ Reset(); _zone->MonsterDead(); }
+		{ Reset(); _zone->EnemyDead(); }
 
 	void ChangeStateSpawning()
 		{ updatable = true; _state = SPAWNING; no_collision = false; }
@@ -753,7 +753,7 @@ public:
 		{ return _state == HOSTILE; }
 
 private:
-	private_map::MonsterZone* _zone;
+	private_map::EnemyZone* _zone;
 	hoa_video::Color _color;
 	uint32 _time_elapsed;
 	State _state;

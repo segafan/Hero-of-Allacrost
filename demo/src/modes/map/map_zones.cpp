@@ -54,14 +54,14 @@ void MapZone::_RandomPosition( uint16 & x, uint16 & y ) {
 }
 
 // *****************************************************************************
-// *********************** MonsterZone Class Functions *************************
+// *********************** EnemyZone Class Functions *************************
 // *****************************************************************************
 
-MonsterZone::MonsterZone(MapMode* map, uint8 max_monsters, uint32 regen_time, bool restrained) :
+EnemyZone::EnemyZone(MapMode* map, uint8 max_enemies, uint32 regen_time, bool restrained) :
 	_regen_time(regen_time),
 	_time_elapsed(0),
-	_max_monsters(max_monsters),
-	_active_monsters(0),
+	_max_enemies(max_enemies),
+	_active_enemies(0),
 	_restrained(restrained)
 {
 	_map = map;
@@ -69,40 +69,40 @@ MonsterZone::MonsterZone(MapMode* map, uint8 max_monsters, uint32 regen_time, bo
 
 
 
-void MonsterZone::Update() {
-	if( _active_monsters < _max_monsters ) {
-		//Add / Spawn monsters if the maximum number is not reached
+void EnemyZone::Update() {
+	if( _active_enemies < _max_enemies ) {
+		//Add / Spawn enemies if the maximum number is not reached
 		_time_elapsed += hoa_system::SystemManager->GetUpdateTime();
 		if( _time_elapsed >= ( _regen_time + rand()%(_regen_time/4) ) ) {
 			//If the regen time is reached ( + up to 1/4 of the regen time )
 			//Spawn a new monster
-			if( _monsters.size() < _max_monsters ) {
-				//There are not enough MonsterSprite to show on the map
+			if( _enemies.size() < _max_enemies ) {
+				//There are not enough EnemySprite to show on the map
 				//Create a copy from a randomly selected sprite
-				if( _monsters.size() > 0 ) {
-					MonsterSprite* tempMonster = new MonsterSprite( *_monsters[ rand()%_monsters.size() ] );
+				if( _enemies.size() > 0 ) {
+					EnemySprite* tempMonster = new EnemySprite( *_enemies[ rand()%_enemies.size() ] );
 					tempMonster->SetObjectID( _map->_GetGeneratedObjectID() );
 					tempMonster->Reset();
 					_map->_AddGroundObject( tempMonster );
-					_monsters.push_back( tempMonster );
+					_enemies.push_back( tempMonster );
 				}
 			}
 			//Select a DEAD monster to spawn
-			for( uint32 i = 0; i < _monsters.size(); i++ ) {
-				if( !_monsters[i]->updatable ) {
-					++_active_monsters;
+			for( uint32 i = 0; i < _enemies.size(); i++ ) {
+				if( !_enemies[i]->updatable ) {
+					++_active_enemies;
 
 					//Select a random position inside the zone where there is no collision
 					uint16 x, y;
 					do {
 						_RandomPosition( x, y );
 
-						_monsters[i]->SetXPosition( x, 0.5f );
-						_monsters[i]->SetYPosition( y, 0.5f );
-					}while( _map->_DetectCollision( _monsters[i] ) );
+						_enemies[i]->SetXPosition( x, 0.5f );
+						_enemies[i]->SetYPosition( y, 0.5f );
+					}while( _map->_DetectCollision( _enemies[i] ) );
 
 					//Spawn the monster at that location
-					_monsters[i]->ChangeStateSpawning();
+					_enemies[i]->ChangeStateSpawning();
 					break;
 				}
 			}
@@ -110,20 +110,20 @@ void MonsterZone::Update() {
 			_time_elapsed = 0;
 		}
 	}
-} // void MonsterZone::Update()
+} // void EnemyZone::Update()
 
 
 
-void MonsterZone::AddMonster( MonsterSprite* m ) {
-	_monsters.push_back( m );
+void EnemyZone::AddEnemy( EnemySprite* m ) {
+	_enemies.push_back( m );
 	_map->_AddGroundObject( m );
 	m->Load();
 }
 
 
 
-void MonsterZone::MonsterDead() {
-	--_active_monsters;
+void EnemyZone::EnemyDead() {
+	--_active_enemies;
 }
 
 } // namespace private_map
