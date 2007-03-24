@@ -328,16 +328,14 @@ object ScriptDescriptor::ReadFunctionPointer(string key) {
 			if (SCRIPT_DEBUG)
 				cerr << "SCRIPT DESCRIPTOR: Unable to access global " << key << endl;
 			_error_code |= SCRIPT_BAD_GLOBAL;
-			return o;
+			return luabind::object();
 		}
 
-		if (type(o) == LUA_TFUNCTION) {
-			lua_pop(_lstack, 1);
-		}
-		else {
+		if (type(o) != LUA_TFUNCTION) {
 			if (SCRIPT_DEBUG)
 				cerr << "SCRIPT DESCRIPTOR: Unexpected type for retrieved value " << key << endl;
 			_error_code |= SCRIPT_BAD_TYPE;
+			return luabind::object();
 		}
 
 		return o;
@@ -351,16 +349,16 @@ object ScriptDescriptor::ReadFunctionPointer(string key) {
 			if (SCRIPT_DEBUG)
 				cerr << "SCRIPT DESCRIPTOR: Top of stack is not a table." << endl;
 			_error_code |= SCRIPT_BAD_GLOBAL;
-			return o;
+			return luabind::object();
 		}
-		if (type(o[key]) == LUA_TFUNCTION) {
-			lua_pop(_lstack, 1);
-		}
-		else {
+	
+		if (type(o[key]) != LUA_TFUNCTION) {
 			if (SCRIPT_DEBUG)
 				cerr << "SCRIPT DESCRIPTOR: Unexpected type for retrieved value " << key << endl;
 			_error_code |= SCRIPT_BAD_TYPE;
+			return luabind::object();
 		}
+		
 		return o[key];
 	}
 } // object ScriptDescriptor::ReadFunctionPointer(string key)
@@ -373,24 +371,22 @@ object ScriptDescriptor::ReadFunctionPointer(int32 key) {
 
 	// Key is always a table element
 	luabind::object o(from_stack(_lstack, STACK_TOP));
-		if (type(o) != LUA_TTABLE) {
-			// Table not on top of stack
-			if (SCRIPT_DEBUG)
-				cerr << "SCRIPT DESCRIPTOR: Top of stack is not a table." << endl;
-			_error_code |= SCRIPT_BAD_GLOBAL;
-			return o;
-		}
-		if (type(o[key]) == LUA_TFUNCTION) {
-			lua_pop(_lstack, 1);
-		}
-		else {
-			if (SCRIPT_DEBUG)
-				cerr << "SCRIPT DESCRIPTOR: Unexpected type for retrieved value " << key << endl;
-			_error_code |= SCRIPT_BAD_TYPE;
-		}
-		return o[key];
+	if (type(o) != LUA_TTABLE) {
+		// Table not on top of stack
+		if (SCRIPT_DEBUG)
+			cerr << "SCRIPT DESCRIPTOR: Top of stack is not a table." << endl;
+		_error_code |= SCRIPT_BAD_GLOBAL;
+		return o;
+	}
 
-	return o;
+	if (type(o[key]) != LUA_TFUNCTION) {
+		if (SCRIPT_DEBUG)
+			cerr << "SCRIPT DESCRIPTOR: Unexpected type for retrieved value " << key << endl;
+		_error_code |= SCRIPT_BAD_TYPE;
+		return o;
+	}
+
+	return o[key];
 } // object ScriptDescriptor::ReadFunctionPointer(int32 key)
 
 // ***************************** Write Functions *******************************

@@ -90,8 +90,7 @@ void ShopMode::Reset() {
 	VideoManager->SetTextColor(Color::white);
 
 	// Everything is temporary code from here to the end of this function
-	//! \bug This line causes the game to exit if shop mode is entered a second time...
-	_all_objects.push_back(new GlobalItem(1)); 
+	_all_objects.push_back(new GlobalItem(1));
 	_all_objects.push_back(new GlobalWeapon(10001));
 	_all_objects.push_back(new GlobalArmor(20001));
 	_all_objects.push_back(new GlobalArmor(30001));
