@@ -87,15 +87,19 @@ void ShopMode::Reset() {
 	if (VideoManager->SetFont("default") == false)
     	cerr << "SHOP ERROR: failed to set font" << endl;
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
+	VideoManager->SetTextColor(Color::white);
 
 	// Everything is temporary code from here to the end of this function
-	GlobalManager->AddFunds(5000);
-	_all_objects.push_back(new GlobalItem(1));
+	//! \bug This line causes the game to exit if shop mode is entered a second time...
+	_all_objects.push_back(new GlobalItem(1)); 
 	_all_objects.push_back(new GlobalWeapon(10001));
 	_all_objects.push_back(new GlobalArmor(20001));
 	_all_objects.push_back(new GlobalArmor(30001));
 	_all_objects.push_back(new GlobalArmor(40001));
 	_all_objects.push_back(new GlobalArmor(50001));
+
+	GlobalManager->SetFunds(5000);
+	_action_window.UpdateFinanceText();
 
 	for (uint32 i = 0; i < _all_objects.size(); i++) {
 		_list_window.AddEntry(_all_objects[i]->GetName(), _all_objects[i]->GetPrice());
