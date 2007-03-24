@@ -23,6 +23,7 @@
 #include "defs.h"
 
 #include "script.h"
+#include "mode_manager.h"
 
 #include "global.h"
 #include "global_objects.h"
@@ -34,38 +35,53 @@
 #include "map_dialogue.h"
 #include "map_objects.h"
 #include "map_zones.h"
+#include "shop.h"
 
 using namespace luabind;
-using namespace hoa_script;
 
 namespace hoa_defs {
 
 void BindEngineToLua() {
 	// ---------- (1) Bind Engine Components
 
-	// Video Engine Bindings
+	// ----- Video Engine Bindings
 	// TODO
 
-	// Audio Engine Bindings
+	// ----- Audio Engine Bindings
 	// TODO
 
-	// Input Engine Bindings
+	// ----- Input Engine Bindings
 	// TODO
 
-	// System Engine Bindings
+	// ----- System Engine Bindings
 	// TODO
 
-	// Script Engine Bindings
+	// ----- Script Engine Bindings
 	// TODO
 	
-	// Mode Manager Engine Bindings
-	// TODO
+	// ----- Mode Manager Engine Bindings
+	{
+	using namespace hoa_mode_manager;
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_mode_manager")
+	[
+		class_<GameMode>("GameMode")
+	];
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_mode_manager")
+	[
+		class_<GameModeManager>("GameModeManager")
+			.def("Push", &GameModeManager::Push, adopt(_2))
+			.def("Pop", &GameModeManager::Pop)
+	];
+
+	} // End using mode manager namespaces
 
 	// ---------- (2) Bind Global Components
 	{
 	using namespace hoa_global;
 
-	module(ScriptManager->GetGlobalState(), "hoa_global")
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
 	[
 		class_<GameGlobal>("GameGlobal")
 			.def("AddCharacter", &GameGlobal::AddCharacter)
@@ -115,12 +131,12 @@ void BindEngineToLua() {
 			]
 	];
 
-	module(ScriptManager->GetGlobalState(), "hoa_global")
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
 	[
 		class_<GlobalAttackPoint>("GlobalAttackPoint")
 	];
 
-	module(ScriptManager->GetGlobalState(), "hoa_global")
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
 	[
 		class_<GlobalActor>("GlobalActor")
 			.def("GetName", &GlobalActor::GetName)
@@ -162,22 +178,22 @@ void BindEngineToLua() {
 // 			.def("EquipArmor", &GlobalActor::EquipArmor)
 	];
 
-	module(ScriptManager->GetGlobalState(), "hoa_global")
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
 	[
 		class_<GlobalEnemy, GlobalActor>("GlobalEnemy")
 	];
 
-	module(ScriptManager->GetGlobalState(), "hoa_global")
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
 	[
 		class_<GlobalCharacter, GlobalActor>("GlobalCharacter")
 	];
 
-	module(ScriptManager->GetGlobalState(), "hoa_global")
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
 	[
 		class_<GlobalParty>("GlobalParty")
 	];
 
-	module(ScriptManager->GetGlobalState(), "hoa_global")
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
 	[
 		class_<GlobalObject>("GlobalObject")
 			.def("GetID", &GlobalObject::GetID)
@@ -189,35 +205,35 @@ void BindEngineToLua() {
 			.def("DecrementCount", &GlobalObject::DecrementCount)
 	];
 
-	module(ScriptManager->GetGlobalState(), "hoa_global")
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
 	[
 		class_<GlobalItem, GlobalObject>("GlobalItem")
 // 			.def(constructor<>(uint32, uint32))
 	];
 
-	module(ScriptManager->GetGlobalState(), "hoa_global")
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
 	[
 		class_<GlobalWeapon, GlobalObject>("GlobalWeapon")
 // 			.def(constructor<>(uint32, uint32))
 	];
 
-	module(ScriptManager->GetGlobalState(), "hoa_global")
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
 	[
 		class_<GlobalArmor, GlobalObject>("GlobalArmor")
 // 			.def(constructor<>(uint32, uint32))
 	];
 
-	module(ScriptManager->GetGlobalState(), "hoa_global")
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
 	[
 		class_<GlobalStatusEffect>("GlobalStatusEffect")
 	];
 
-	module(ScriptManager->GetGlobalState(), "hoa_global")
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
 	[
 		class_<GlobalElementalEffect>("GlobalElementalEffect")
 	];
 
-	module(ScriptManager->GetGlobalState(), "hoa_global")
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
 	[
 		class_<GlobalSkill>("GlobalSkill")
 	];
@@ -226,14 +242,14 @@ void BindEngineToLua() {
 
 	// ---------- (3) Bind Game Mode Components
 
-	// Map Mode Bindings
+	// ----- Map Mode Bindings
 	{
 	using namespace hoa_map;
 	using namespace hoa_map::private_map;
 
-	module(ScriptManager->GetGlobalState(), "hoa_map")
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
-		class_<MapMode>("MapMode")
+		class_<MapMode, hoa_mode_manager::GameMode>("MapMode")
 			.def(constructor<>())
 			.def("Load", &MapMode::Load)
 			.def("_AddGroundObject", &MapMode::_AddGroundObject, adopt(_2))
@@ -288,7 +304,7 @@ void BindEngineToLua() {
 			]
 	];
 
-	module(ScriptManager->GetGlobalState(), "hoa_map")
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<MapObject>("MapObject")
 			.def("SetObjectID", &MapObject::SetObjectID)
@@ -317,7 +333,7 @@ void BindEngineToLua() {
 			.def("IsDrawOnSecondPass", &MapObject::IsDrawOnSecondPass)
 	];
 
-	module(ScriptManager->GetGlobalState(), "hoa_map")
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<PhysicalObject, MapObject>("PhysicalObject")
 			.def(constructor<>())
@@ -327,7 +343,7 @@ void BindEngineToLua() {
 			.def("GetCurrentAnimation", &PhysicalObject::GetCurrentAnimation)
 	];
 
-	module(ScriptManager->GetGlobalState(), "hoa_map")
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<VirtualSprite, MapObject>("VirtualSprite")
 			.def(constructor<>())
@@ -340,7 +356,7 @@ void BindEngineToLua() {
 			.def("AddDialogue", &VirtualSprite::AddDialogue, adopt(_2))
 	];
 
-	module(ScriptManager->GetGlobalState(), "hoa_map")
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<MapSprite, VirtualSprite>("MapSprite")
 			.def(constructor<>())
@@ -352,7 +368,7 @@ void BindEngineToLua() {
 			.def("LoadStandardAnimations", &MapSprite::LoadStandardAnimations)
 	];
 
-	module(ScriptManager->GetGlobalState(), "hoa_map")
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<EnemySprite, MapSprite>("EnemySprite")
 			.def(constructor<std::string>())
@@ -372,7 +388,7 @@ void BindEngineToLua() {
 			.def("IsHostile", &EnemySprite::IsHostile)
 	];
 
-	module(ScriptManager->GetGlobalState(), "hoa_map")
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<ZoneSection>("ZoneSection")
 			.def(constructor<uint16,uint16,uint16,uint16>())
@@ -382,7 +398,7 @@ void BindEngineToLua() {
 			.def_readwrite("end_col", &ZoneSection::end_col)
 	];
 
-	module(ScriptManager->GetGlobalState(), "hoa_map")
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<MapZone>("MapZone")
 			.def("AddSection", &MapZone::AddSection, adopt(_2))
@@ -392,7 +408,7 @@ void BindEngineToLua() {
 			]
 	];
 
-	module(ScriptManager->GetGlobalState(), "hoa_map")
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<EnemyZone, MapZone>("EnemyZone")
 			.def(constructor<MapMode*, uint8, uint32, bool>())
@@ -400,32 +416,45 @@ void BindEngineToLua() {
 			.def("IsRestraining", &EnemyZone::IsRestraining)
 	];
 
-	module(ScriptManager->GetGlobalState(), "hoa_map")
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<MapDialogue>("MapDialogue")
 			.def(constructor<>())
 			.def("AddText", &MapDialogue::AddText)
 	];
 
-	module(ScriptManager->GetGlobalState(), "hoa_map")
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<SpriteAction>("SpriteAction")
 			.def("Load", &SpriteAction::Load)
 			.def("Execute", &SpriteAction::Execute)
 	];
 
-// 	module(ScriptManager->GetGlobalState(), "hoa_map")
+// 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 // 	[
 // 		class_<ActionPathMove, SpriteAction>("ActionPathMove")
 // 			.def(constructor<>())
 // 	];
 
-// 	module(ScriptManager->GetGlobalState(), "hoa_map")
+// 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 // 	[
 // 		class_<ActionAnimate, SpriteAction>("ActionAnimate")
 // 			.def(constructor<>())
 // 	];
 	} // End using map mode namespaces
+
+	// ----- Shop Mode bindings
+	{
+	using namespace hoa_shop;
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_shop")
+	[
+		class_<ShopMode, hoa_mode_manager::GameMode>("ShopMode")
+			.def(constructor<>())
+			.def("AddObject", &ShopMode::AddObject)
+	];
+
+	} // End using shop mode namespaces
 
 } // void BindEngineToLua()
 

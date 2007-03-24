@@ -72,9 +72,8 @@ ShopActionWindow::ShopActionWindow() {
 	text_box.SetDisplaySpeed(30);
 	text_box.SetFont("default");
 	text_box.SetDisplayMode(VIDEO_TEXT_INSTANT);
-	text_box.SetTextAlignment(VIDEO_X_CENTER, VIDEO_Y_TOP);
-// 	text_box.SetDisplayText(MakeUnicodeString(NumberToString(GlobalManager->GetFunds())));
-	text_box.SetDisplayText("For great justice!");
+	text_box.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	UpdateFinanceText();
 } // ShopActionWindow::ShopActionWindow()
 
 
@@ -122,6 +121,14 @@ void ShopActionWindow::Update() {
 	else if (InputManager->DownPress()) {
 		options.HandleDownKey();
 	}
+}
+
+
+
+void ShopActionWindow::UpdateFinanceText() {
+	text_box.SetDisplayText(MakeUnicodeString(
+		"Drunes: " + NumberToString(GlobalManager->GetFunds())
+	));
 }
 
 

@@ -44,6 +44,9 @@ public:
 	//! \brief Handles user input and updates the state of the window
 	void Update();
 
+	//! \brief Updates the text box that displays the financial information about the transaction
+	void UpdateFinanceText();
+
 	//! \brief Draws the window to the screen
 	void Draw();
 
