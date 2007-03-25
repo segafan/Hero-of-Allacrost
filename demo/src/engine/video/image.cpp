@@ -148,13 +148,24 @@ _loaded (false)
 }
 
 
-bool ImageDescriptor::Load() {
+bool ImageDescriptor::Load()
+{
 	return VideoManager->LoadImage(*this);
 }
 
 
-void ImageDescriptor::Draw() {
+void ImageDescriptor::Draw()
+{
 	VideoManager->DrawImage(*this);
+}
+
+
+bool ImageDescriptor::Save(const std::string filename) const
+{
+	if (_animated)
+		return VideoManager->SaveImage(filename, dynamic_cast<const AnimatedImage &>(*this));
+	else
+		return VideoManager->SaveImage(filename, dynamic_cast<const StillImage &>(*this));
 }
 
 

@@ -273,6 +273,14 @@ public:
 	//! \brief Draws the image to the display buffer.
 	void Draw();
 
+	//! \brief Saves the image to a file
+	/*!
+		The image can be saved as PNG or JPG. Choosing will be done by checking the
+		filename, that must include the extension (.jpg, .jpeg or .png)
+		\param filename Name of the file to be stored.
+	*/
+	bool Save(const std::string filename) const;
+
 protected:
 	/** \brief The width and height of the image, in pixels.
 	*** If this represents a compound StillImage is a compound, (i.e. it contains multiple images)

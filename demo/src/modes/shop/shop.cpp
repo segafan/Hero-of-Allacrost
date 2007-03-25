@@ -141,8 +141,17 @@ void ShopMode::Update() {
 
 
 void ShopMode::Draw() {
-	VideoManager->Move(0, 0);
+	// Draw the background image
+	// For that, set the system coordinates to the size of the window (same with the saved-screen)
+	int32 width = VideoManager->GetWidth();
+	int32 height = VideoManager->GetHeight();
+	VideoManager->SetCoordSys (0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height));
+
+	VideoManager->Move(0,0);
 	VideoManager->DrawImage(_saved_screen);
+	
+	// Restore the Coordinate system (that one will be shop mode coodinate system?)
+	VideoManager->SetCoordSys (0.0f, 1024.0f, 0.0f, 768.0f);
 
 	_action_window.Draw();
 	_info_window.Draw();
