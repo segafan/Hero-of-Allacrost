@@ -610,7 +610,7 @@ public:
 	 *	This function loads an image and cut it in pieces, loading each of
 	 *	that on separate StillImage objects.
 	 *  \param images  Vector of StillImages where the cut images will be loaded.
-	 *	\param filename Name of the file to be opened to read.
+	 *	\param filename Name of the file.
 	 *	\param rows Number of rows of sub-images in the MultiImage.
 	 *	\param cols Number of columns of sub-images in the MultiImage.
 	 *	\return success/failure
@@ -620,8 +620,8 @@ public:
 	/** \brief Loads a MultiImage in an AnimatedImage as frames.
 	 *	This function loads an image and cut it in pieces, loading each of
 	 *	that on frames of an AnimatedImage.
-	 *  \param image  AnimatedImage where the cut images will be loaded.
-	 *	\param filename Name of the file to be opened to read.
+	 *  \param image AnimatedImage where the cut images will be loaded.
+	 *	\param filename Name of the file.
 	 *	\param rows Number of rows of sub-images in the MultiImage.
 	 *	\param rows Number of columns of sub-images in the MultiImage.
 	 *	\return success/failure
@@ -632,21 +632,29 @@ public:
 	/*	This function stores a vector of images as a single image. This is useful for creating multiimage 
 	 *	images. The image can be stored in JPEG or PNG, which is decided by the filename.
 	 *  \param image Vector of images to save
-	 *	\param filename Name of the file to be opened to read.
+	 *	\param filename Name of the file.
 	 *	\param rows Number of rows of sub-images in the MultiImage.
 	 *	\param cols Number of columns of sub-images in the MultiImage.
 	 *	\return success/failure
 	 */
 	bool SaveImage (const std::string &file_name, const std::vector<StillImage*> &image, const uint32 rows, const uint32 columns) const;
 
-	//! \brief Saves and image into a file.
-	/*	This function stores a vector of images as a single image. This is useful for creating multiimage 
-	 *	images. The image can be stored in JPEG or PNG, which is decided by the filename.
-	 *  \param image Image to store.
-	 *	\param filename Name of the file to be opened to read.
+	//! \brief Saves a StillImage into a file.
+	/*	The image can be stored in JPEG or PNG, which is decided by the filename.
+	 *  \param image StillImage to store.
+	 *	\param filename Name of the file.
 	 *	\return success/failure
 	 */
 	bool SaveImage (const std::string &file_name, const StillImage &image) const;
+
+	//! \brief Saves an AnimatedImage into a file.
+	/*	The image can be stored in JPEG or PNG, which is decided by the filename.
+	 *  It will be stored as a multiimage, with each frame aligned in one row and as many columns as frames.
+	 *  \param image AnimatedImage to store.
+	 *	\param filename Name of the file.
+	 *	\return success/failure
+	 */
+	bool SaveImage (const std::string &file_name, const AnimatedImage &image) const;
 
 	/** \brief captures the contents of the screen and saves it to an image
 	 *         descriptor

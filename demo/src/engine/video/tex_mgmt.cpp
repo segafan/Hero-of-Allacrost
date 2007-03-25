@@ -701,12 +701,14 @@ bool GameVideo::_SavePng (const std::string& file_name, hoa_video::private_video
 
 	if(!info_ptr)
 	{
+		png_destroy_write_struct(&png_ptr, NULL);
 		fclose(fp);
 		return false;
 	}
 
 	if(setjmp(png_jmpbuf(png_ptr)))
 	{
+		png_destroy_write_struct(&png_ptr, &info_ptr);
 		fclose(fp);
 		return false;
 	}
@@ -725,6 +727,10 @@ bool GameVideo::_SavePng (const std::string& file_name, hoa_video::private_video
 	png_set_rows(png_ptr, info_ptr, row_pointers);
 
 	png_write_png (png_ptr, info_ptr, PNG_TRANSFORM_IDENTITY, NULL);
+
+	png_write_image(png_ptr, row_pointers);
+
+	png_write_end(png_ptr, info_ptr);
 
 	png_destroy_write_struct (&png_ptr, &info_ptr);
 
@@ -857,7 +863,6 @@ bool GameVideo::SaveImage (const std::string &file_name, const std::vector<Still
 	info.width = columns*width;
 	info.pixels = malloc (info.width * info.height * 4);
 
-	GameVideo *videoManager = GameVideo::SingletonGetReference();
 	hoa_video::private_video::Image* img;
 	GLuint ID;
 	hoa_video::private_video::ImageLoadInfo texture;
@@ -869,7 +874,7 @@ bool GameVideo::SaveImage (const std::string &file_name, const std::vector<Still
 	texture.width = img->texture_sheet->width;
 	texture.height = img->texture_sheet->height;
 	texture.pixels = malloc (texture.width * texture.height * 4);
-	videoManager->_BindTexture(ID);
+	VideoManager->_BindTexture(ID);
 	glGetTexImage (GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.pixels);
 
 	uint32 i=0;
@@ -881,7 +886,7 @@ bool GameVideo::SaveImage (const std::string &file_name, const std::vector<Still
 			if (ID != img->texture_sheet->texID)
 			{
 				// Get new texture ID
-				videoManager->_BindTexture(img->texture_sheet->texID);
+				VideoManager->_BindTexture(img->texture_sheet->texID);
 				ID = img->texture_sheet->texID;
 
 				// If the new texture is bigger, reallocate memory
@@ -900,7 +905,7 @@ bool GameVideo::SaveImage (const std::string &file_name, const std::vector<Still
 			uint32 dst_offset = x*height*width*columns*4 + y*width*4;
 			uint32 dst_bytes = width*columns*4;
 			uint32 src_bytes = texture.width * 4;
-			uint32 src_offset = img->x * texture.width * 4 + img->y * 4;
+			uint32 src_offset = img->y * texture.width * 4 + img->x * 4;
 			for (int32 j = 0; j < height; j++)
 			{
 				memcpy ((uint8*)info.pixels+j*dst_bytes+dst_offset, (uint8*)texture.pixels+j*src_bytes+src_offset, copy_bytes);
@@ -930,6 +935,23 @@ bool GameVideo::SaveImage (const std::string &file_name, const std::vector<Still
 	return true;
 }
 
+
+//-----------------------------------------------------------------------------
+// SaveImage: Saves an AnimatedImage as a multiimage
+//-----------------------------------------------------------------------------
+bool GameVideo::SaveImage (const std::string &file_name, const AnimatedImage &image) const
+{
+	int32 frame_count = dynamic_cast<const AnimatedImage &>(image).GetNumFrames();
+	std::vector <StillImage*> frames;
+	frames.reserve (frame_count);
+
+	for (int32 frame=0; frame<frame_count; frame++)
+	{
+		frames.push_back(dynamic_cast<const AnimatedImage &>(image).GetFrame(frame));
+	}
+
+	return SaveImage (file_name, frames, 1, frame_count);
+}
 
 
 //-----------------------------------------------------------------------------

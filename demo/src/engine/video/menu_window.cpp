@@ -97,7 +97,8 @@ void MenuWindow::Update(uint32 frame_time) {
 	}
 
 	if (_window_state == VIDEO_MENU_STATE_HIDDEN || _window_state == VIDEO_MENU_STATE_SHOWN) {
-		if (_is_scissored == true) {
+//		if (_is_scissored == true)
+		{
 			float x_buffer = (_width - _inner_width) / 2;
 			float y_buffer = (_height - _inner_height) / 2;
 
