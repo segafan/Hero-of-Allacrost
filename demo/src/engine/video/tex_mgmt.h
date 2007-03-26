@@ -150,20 +150,17 @@ public:
 	bool AddImage
 	(
 		Image *img,
-		ImageLoadInfo & loadInfo
+		ImageLoadInfo & load_info
 	);
 	
-	//FIXME Unused
-	bool SaveImage(Image *img);
-	
 	/*!******************************************************************
-	*  \brief copies an image into a sub-rectangle of the texture
+	*  \brief Copies an image into a sub-rectangle of the texture
 	* \param x x coordinate of rectangle to copy image to
 	* \param y y coordinate of rectangle to copy image to
 	* \param loadInfo the image loading info
 	* \return success/failure
 	*********************************************************************/
-	bool CopyRect(int32 x, int32 y, private_video::ImageLoadInfo & loadInfo);
+	bool CopyRect(int32 x, int32 y, private_video::ImageLoadInfo & load_info);
 	
 	/*!******************************************************************
 	*  \brief removes an image completely
@@ -198,25 +195,25 @@ public:
 	*********************************************************************/
 	bool Reload();
 
-	//! width of the texsheet
+	//! \brief Width of the texsheet
 	int32 width;
 	
-	//! height of the texsheet
+	//! \brief Height of the texsheet
 	int32 height;
 
-	//! if true, images in this sheet that are unlikely to change
-	bool isStatic;
+	//! \brief If true, images in this sheet that are unlikely to change
+	bool is_static;
 	
-	//! does it hold 32x32, 32x64, 64x64, or any kind
+	//! \brief Does it hold 32x32, 32x64, 64x64, or any kind
 	TexSheetType type;
 
-	//! manages which areas of the texture are free
-	TexMemMgr *texMemManager;
+	//! \brief Manages which areas of the texture are free
+	TexMemMgr *tex_mem_manager;
 
-	//! number OpenGL uses to refer to this texture
-	GLuint texID;
+	//! \brief Number OpenGL uses to refer to this texture
+	GLuint tex_ID;
 	
-	//! if texsheet is loaded
+	//! \brief If texsheet is loaded
 	bool loaded;		
 };
 
@@ -232,17 +229,17 @@ class FixedImageNode
 {
 public:
 
-	//! the image that belongs to the block
+	//! \brief the image that belongs to the block
 	Image          *image;
 	
-	//! the next node in the list
+	//! \brief The next node in the list
 	FixedImageNode *next;
 	
-	//! the previous node in the list
+	//! \brief The previous node in the list
 	FixedImageNode *prev;
 	
-	//! the block index
-	int32 blockIndex;
+	//! \brief The block index
+	int32 block_index;
 };
 
 
@@ -310,12 +307,12 @@ private:
 	//! NOTE: the sheet dimensions are not in pixels, but images.
 	//!       So, a 512x512 sheet holding 32x32 images would be 16x16
 	
-	int32 _sheetWidth;
-	int32 _sheetHeight;
-	int32 _imageWidth;
-	int32 _imageHeight;
+	int32 _sheet_width;
+	int32 _sheet_height;
+	int32 _image_width;
+	int32 _image_height;
 	
-	TexSheet *_texSheet;
+	TexSheet *_tex_sheet;
 	
 	//! The open list keeps track of which blocks of memory are
 	//! open. Note that we track blocks with BOTH an array and a list.
@@ -328,8 +325,8 @@ private:
 	//! time they're freed to the time they're removed, in case they
 	//! are loaded again in the near future
 	
-	FixedImageNode *_openListHead;
-	FixedImageNode *_openListTail;
+	FixedImageNode *_open_list_head;
+	FixedImageNode *_open_list_tail;
 	
 	//! this is our actual array of blocks which is indexed like a 2D
 	//! array. For example, blocks[x+y*width]->image would tell us
@@ -353,10 +350,10 @@ public:
 		free  = true;
 	}
 
-	//! the image
+	//! \brief Pointer to the image
 	Image *image;
 	
-	//! is the image freed?
+	//! \brief Is the image freed?
 	bool   free;
 };
 
@@ -421,24 +418,24 @@ private:
 	bool SetBlockProperties
 	(
 		Image *img, 
-		bool changeFree, 
-		bool changeImage, 
+		bool change_free, 
+		bool change_image, 
 		bool free, 
-		Image *newImage
+		Image *new_image
 	);
 
-	//! the texhseet it's using
-	TexSheet *_texSheet;
+	//! \brief The texhseet it's using
+	TexSheet *_tex_sheet;
 	
-	//! it's list of blocks
+	//! \brief It's list of blocks
 	VariableImageNode *_blocks;
 	
 	//! Sheet's dimensions
 	//! NOTE: these aren't in pixels, but in "blocks" of 16x16. So,
 	//!       a 512x512 sheet would be 32x32 in blocks
 	
-	int32 _sheetWidth;
-	int32 _sheetHeight;
+	int32 _sheet_width;
+	int32 _sheet_height;
 };
 
 }  // namespace private_video

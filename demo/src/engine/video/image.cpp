@@ -209,13 +209,11 @@ void StillImage::EnableGrayScale() {
 		return;
 	
 	// Mark as grayscale
-	this->_grayscale = true;
+	_grayscale = true;
 
 	// If the image is not yet loaded, go back (it will be made grayscale when loading)
 	if (_elements.size() == 0)
 		return;
-
-	hoa_video::GameVideo* video = GameVideo::SingletonGetReference();
 
 	// Turn gray all the ImageElement components
 	for (uint32 i=0; i<_elements.size(); i++)
@@ -229,22 +227,22 @@ void StillImage::EnableGrayScale() {
 		}
 
 		// Check first if there is a grayscale version already in the map
-		if (video->_images.find(img->filename + img->tags + "<G>") != video->_images.end())
+		if (VideoManager->_images.find(img->filename + img->tags + "<G>") != VideoManager->_images.end())
 		{
-			_elements[i].image = video->_images[img->filename + img->tags + "<G>"];
+			_elements[i].image = VideoManager->_images[img->filename + img->tags + "<G>"];
 			++(_elements[i].image->ref_count);
 			continue;
 		}
 
 		// If we arrive here, it means we have to convert to grayscale the image
 		hoa_video::private_video::ImageLoadInfo buffer;
-		video->_GetBufferFromImage (buffer, img);
+		VideoManager->_GetBufferFromImage (buffer, img);
 
-		video->_ConvertImageToGrayscale (buffer, buffer);
+		VideoManager->_ConvertImageToGrayscale (buffer, buffer);
 		
 		Image* new_image_gray = new Image(img->filename, img->tags+"<G>", buffer.width, buffer.height, true);
 
-		TexSheet *sheet = video->_InsertImageInTexSheet(new_image_gray, buffer, _is_static);
+		TexSheet *sheet = VideoManager->_InsertImageInTexSheet(new_image_gray, buffer, _is_static);
 
 		if(!sheet)
 		{
@@ -260,7 +258,7 @@ void StillImage::EnableGrayScale() {
 		}
 
 		new_image_gray->ref_count = 1;
-		video->_images[new_image_gray->filename + new_image_gray->tags] = new_image_gray;
+		VideoManager->_images[new_image_gray->filename + new_image_gray->tags] = new_image_gray;
 		_elements[i].image = new_image_gray;
 	}
 }
@@ -273,13 +271,11 @@ void StillImage::DisableGrayScale() {
 		return;
 	
 	// Mark as not grayscale
-	this->_grayscale = false;
+	_grayscale = false;
 
 	// If the image is not yet loaded, go back
 	if (_elements.size() == 0)
 		return;
-
-	hoa_video::GameVideo* video = GameVideo::SingletonGetReference();
 
 	// Turn to color all the ImageElement components
 	for (uint32 i=0; i<_elements.size(); i++)
@@ -293,13 +289,13 @@ void StillImage::DisableGrayScale() {
 		}
 
 		// Check for the color mode version of the image, already in the map
-		if (video->_images.find(img->filename + img->tags.substr(0,img->tags.length()-3)) == video->_images.end())
+		if (VideoManager->_images.find(img->filename + img->tags.substr(0,img->tags.length()-3)) == VideoManager->_images.end())
 		{
 			cerr << "VIDEO ERROR: Color image not found in the map, while gray one was in it" << endl;
 			continue;
 		}
 
-		_elements[i].image = video->_images[img->filename + img->tags.substr(0,img->tags.length()-3)];
+		_elements[i].image = VideoManager->_images[img->filename + img->tags.substr(0,img->tags.length()-3)];
 		--(img->ref_count);
 	}
 }
@@ -316,6 +312,7 @@ void StillImage::DisableGrayScale() {
 //------------------------------------------------------------------------------
 bool StillImage::AddImage(const StillImage &id, float x_offset, float y_offset, float u1, float v1, float u2, float v2)
 {
+	// Negative offsets not allowed
 	if (x_offset < 0.0f || y_offset < 0.0f) {
 		if (VIDEO_DEBUG) 
 			cerr << "VIDEO ERROR: passed negative offsets to StillImage::AddImage()" << endl;
@@ -425,8 +422,8 @@ void AnimatedImage::Update() {
 	_frame_counter += frame_change;
 
 	// If the frame time has expired, update the frame index and counter.
-	while (_frame_counter >= _frames[_frame_index]._frame_time) {
-		frame_change = _frame_counter - _frames[_frame_index]._frame_time;
+	while (_frame_counter >= _frames[_frame_index].frame_time) {
+		frame_change = _frame_counter - _frames[_frame_index].frame_time;
 		_frame_index++;
 		if (_frame_index >= _frames.size()) {
 				// Check if the animation has looping enabled and if so, increment the loop counter
@@ -452,8 +449,8 @@ bool AnimatedImage::AddFrame(const std::string &frame, uint32 frame_time) {
 	img.SetStatic(_is_static);
 	
 	AnimationFrame new_frame;
-	new_frame._frame_time = frame_time;
-	new_frame._image = img;
+	new_frame.frame_time = frame_time;
+	new_frame.image = img;
 	_frames.push_back(new_frame);
 
 	return true;
@@ -463,15 +460,15 @@ bool AnimatedImage::AddFrame(const std::string &frame, uint32 frame_time) {
 
 bool AnimatedImage::AddFrame(const StillImage &frame, uint32 frame_time) {
 	AnimationFrame new_frame;
-	new_frame._image = frame;
-	new_frame._frame_time = frame_time;
+	new_frame.image = frame;
+	new_frame.frame_time = frame_time;
 
 	// Check if the static image argument has been loaded yet.
 	// If it has, then we have to increment the reference count
-	uint32 num_elements = new_frame._image._elements.size();
+	uint32 num_elements = new_frame.image._elements.size();
 	if (num_elements) {
 		for (uint32 i = 0; i < num_elements; i++) {
-			++(new_frame._image._elements[i].image->ref_count);
+			++(new_frame.image._elements[i].image->ref_count);
 		}
 	}
 	

@@ -116,9 +116,9 @@ GameVideo::GameVideo()
 	_yalign = -1;
 	_xflip = 0;
 	_yflip = 0;
-	_currentDebugTexSheet = -1;
+	_current_debug_TexSheet = -1;
 	_usesLights = false;
-	_lightOverlay = 0xFFFFFFFF;
+	_light_overlay = 0xFFFFFFFF;
 	_gui = NULL;
 	_lastTexID = 0xFFFFFFFF;
 	_numTexSwitches = 0;
@@ -389,7 +389,7 @@ bool GameVideo::MakeScreenshot()
 
 	for(int32 line = 0; line < viewportDims[3]; line++)
 	{
-		row_pointers[line] = ((unsigned char *)buffer) + ((viewportDims[3] - line - 1) * viewportDims[2] * 3);
+		row_pointers[line] = ((uint8*)buffer) + ((viewportDims[3] - line - 1) * viewportDims[2] * 3);
 	}
 
 	jpeg_write_scanlines(&cinfo, row_pointers, viewportDims[3]);
@@ -452,8 +452,8 @@ GameVideo::~GameVideo()
 	TTF_Quit();
 
 	// delete texture sheets
-	vector<TexSheet *>::iterator iSheet      = _texSheets.begin();
-	vector<TexSheet *>::iterator iSheetEnd   = _texSheets.end();
+	vector<TexSheet *>::iterator iSheet      = _tex_sheets.begin();
+	vector<TexSheet *>::iterator iSheetEnd   = _tex_sheets.end();
 
 	while(iSheet != iSheetEnd)
 	{
@@ -1231,7 +1231,7 @@ void GameVideo::SetTransform(float m[16])
 //-----------------------------------------------------------------------------
 bool GameVideo::EnablePointLights()
 {
-	_lightOverlay = _CreateBlankGLTexture(1024, 1024);
+	_light_overlay = _CreateBlankGLTexture(1024, 1024);
 
 	_usesLights = true;
 
@@ -1243,12 +1243,12 @@ bool GameVideo::EnablePointLights()
 //-----------------------------------------------------------------------------
 void GameVideo::DisablePointLights()
 {
-	if(_lightOverlay != 0xFFFFFFFF)
+	if(_light_overlay != 0xFFFFFFFF)
 	{
-		_DeleteTexture(_lightOverlay);
+		_DeleteTexture(_light_overlay);
 	}
 
-	_lightOverlay = 0xFFFFFFFF;
+	_light_overlay = 0xFFFFFFFF;
 
 	_usesLights = false;
 }
@@ -1261,10 +1261,10 @@ void GameVideo::DisablePointLights()
 //-----------------------------------------------------------------------------
 bool GameVideo::ApplyLightingOverlay()
 {
-	if(_lightOverlay != 0xFFFFFFFF)
+	if(_light_overlay != 0xFFFFFFFF)
 	{
 		// Copy light overlay to opengl texture
-		_BindTexture(_lightOverlay);
+		_BindTexture(_light_overlay);
 		glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, 1024, 1024, 0);
 
 		CoordSys tempCoordSys = _coord_sys;
@@ -1279,7 +1279,7 @@ bool GameVideo::ApplyLightingOverlay()
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_DST_COLOR, GL_ZERO);
 
-		_BindTexture(_lightOverlay);
+		_BindTexture(_light_overlay);
 		glBegin(GL_QUADS);
 		glTexCoord2f(0.0f, 0.0f);
 		glVertex2f(xlo, ylo); //bl
@@ -1349,8 +1349,8 @@ bool GameVideo::CaptureScreen(StillImage &id)
 	// Flip the image
 	for(int32 line = 0; line < viewportDims[3]; line++)
 	{
-		unsigned char * srcline = ((unsigned char *)buffer) + (line * viewportDims[2] * 4);
-		unsigned char * destline = ((unsigned char *)loadInfo.pixels) + ((viewportDims[3] - line - 1) * viewportDims[2] * 4);
+		uint8* srcline = ((uint8*)buffer) + (line * viewportDims[2] * 4);
+		uint8* destline = ((uint8*)loadInfo.pixels) + ((viewportDims[3] - line - 1) * viewportDims[2] * 4);
 
 		memcpy(destline, srcline, viewportDims[2] * 4);
 	}
@@ -1459,7 +1459,7 @@ string GameVideo::_CreateTempFilename(const string &extension)
 	//       a valid name
 
 
-	for(int digit = 7; digit >= 0; --digit)
+	for(int32 digit = 7; digit >= 0; --digit)
 	{
 		++_nextTempFile[digit];
 
@@ -1515,7 +1515,7 @@ void GameVideo::_PushContext()
 	c.font      = _current_font;
 	c.text_color = _currentTextColor;
 
-	_contextStack.push(c);
+	_context_stack.push(c);
 }
 
 
@@ -1527,7 +1527,7 @@ void GameVideo::_PushContext()
 void GameVideo::_PopContext()
 {
 	// restore context information and pop it from stack
-	private_video::Context c = _contextStack.top();
+	private_video::Context c = _context_stack.top();
 	SetCoordSys(c.coordinate_system);
 	_blend  = c.blend;
 	_xalign = c.x_align;
@@ -1541,7 +1541,7 @@ void GameVideo::_PopContext()
 	_viewport = c.viewport;
 	_scissorRect = c.scissor_rectangle;
 	_scissorEnabled = c.scissoring_enabled;
-	_contextStack.pop();
+	_context_stack.pop();
 
 	// restore modelview transformation
 	glMatrixMode(GL_MODELVIEW);

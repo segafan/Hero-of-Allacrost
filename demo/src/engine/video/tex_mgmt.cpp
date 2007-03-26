@@ -62,14 +62,14 @@ void GameVideo::_ConvertImageToGrayscale(const ImageLoadInfo& src, ImageLoadInfo
 		return;
 
 	// Convert the pixels to grayscale while copying
-	unsigned char* src_pix = static_cast<unsigned char*>(src.pixels);
-	unsigned char* src_end = static_cast<unsigned char*>(src.pixels) + (src.width * src.height * 4);
-	unsigned char* dst_pix = static_cast<unsigned char*>(dst.pixels);
-	unsigned char value;
+	uint8* src_pix = static_cast<uint8*>(src.pixels);
+	uint8* src_end = static_cast<uint8*>(src.pixels) + (src.width * src.height * 4);
+	uint8* dst_pix = static_cast<uint8*>(dst.pixels);
+	uint8 value;
 
 	for (; src_pix<src_end; src_pix+=4,dst_pix+=4)
 	{
-		value = static_cast<unsigned char>((30 * *(src_pix) + 59 * *(src_pix+1) + 11 * *(src_pix+2))*0.01f);	// Get grayscale value
+		value = static_cast<uint8>((30 * *(src_pix) + 59 * *(src_pix+1) + 11 * *(src_pix+2))*0.01f);	// Get grayscale value
 		*dst_pix = *(dst_pix+1) = *(dst_pix+2) = value;		// Assign it
 		*(dst_pix+3) = *(src_pix+3);					// Assign alpha value
 	}
@@ -84,8 +84,8 @@ void GameVideo::_RGBAToRGB (const private_video::ImageLoadInfo& src, private_vid
 	if (!dst.width || !dst.height)	// Return if there are no pixels in the image
 		return;
 
-	unsigned char* pSrc = static_cast<unsigned char*>(src.pixels);
-	unsigned char* pDst = static_cast<unsigned char*>(dst.pixels);
+	uint8* pSrc = static_cast<uint8*>(src.pixels);
+	uint8* pDst = static_cast<uint8*>(dst.pixels);
 
 	int32 iSrc;
 	int32 iDst;
@@ -140,22 +140,22 @@ bool GameVideo::LoadImage(ImageDescriptor &id)
 //-----------------------------------------------------------------------------
 bool GameVideo::_LoadImage(AnimatedImage &id)
 {
-	uint32 numFrames = static_cast<uint32>(id._frames.size());
+	uint32 num_frames = static_cast<uint32>(id._frames.size());
 
 	bool success = true;
 
 	// go through all the frames and load anything that hasn't already been loaded
-	for(uint32 frame = 0; frame < numFrames; ++frame)
+	for(uint32 frame = 0; frame < num_frames; ++frame)
 	{
 		// if the API user passes only filenames to AddFrame(), then we need to load
 		// the images, but if a static image is passed directly, then we can skip
 		// loading
 
-		bool needToLoad = id._frames[frame]._image._elements.empty();
+		bool need_to_load = id._frames[frame].image._elements.empty();
 
-		if(needToLoad)
+		if(need_to_load)
 		{
-			success &= _LoadImage(id._frames[frame]._image);
+			success &= _LoadImage(id._frames[frame].image);
 		}
 	}
 
@@ -277,10 +277,10 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 	}
 
 	// If not all the images are loaded, then load the big image from disk
-	private_video::ImageLoadInfo loadInfo;
+	private_video::ImageLoadInfo load_info;
 	if (need_load)
 	{
-		if(!_LoadRawImage(filename, loadInfo))
+		if(!_LoadRawImage(filename, load_info))
 			return false;
 	}
 
@@ -312,7 +312,7 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 					if(VIDEO_DEBUG)
 						cerr << "VIDEO ERROR: got a NULL Image from images map in LoadImage()" << endl;
 
-					free (loadInfo.pixels);
+					free (load_info.pixels);
 					return false;
 				}
 
@@ -322,8 +322,8 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 					// not removed, so restore it
 					if(!img->texture_sheet->RestoreImage(img))
 					{
-						if (loadInfo.pixels)
-							free (loadInfo.pixels);
+						if (load_info.pixels)
+							free (load_info.pixels);
 						return false;
 					}
 				}
@@ -331,9 +331,9 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 				++(img->ref_count);
 
 				if (images.at(current_image)._height == 0.0f)
-					images.at(current_image)._height = (float)((x == rows-1 && loadInfo.height%rows) ? loadInfo.height-(x*loadInfo.height/rows) : loadInfo.height/rows);
+					images.at(current_image)._height = (float)((x == rows-1 && load_info.height%rows) ? load_info.height-(x*load_info.height/rows) : load_info.height/rows);
 				if (images.at(current_image)._width == 0.0f)
-					images.at(current_image)._width = (float)((y == cols-1 && loadInfo.width%cols) ? loadInfo.width-(y*loadInfo.width/cols) : loadInfo.width/cols);
+					images.at(current_image)._width = (float)((y == cols-1 && load_info.width%cols) ? load_info.width-(y*load_info.width/cols) : load_info.width/cols);
 
 				ImageElement element(img, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f,
 					images.at(current_image)._width, images.at(current_image)._height, images.at(current_image)._color);
@@ -345,24 +345,24 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 				images.at(current_image)._animated = false;
 
 				if (images.at(current_image)._height == 0.0f)
-					images.at(current_image)._height = (float)((x == rows-1 && loadInfo.height%rows) ? loadInfo.height-(x*loadInfo.height/rows) : loadInfo.height/rows);
+					images.at(current_image)._height = (float)((x == rows-1 && load_info.height%rows) ? load_info.height-(x*load_info.height/rows) : load_info.height/rows);
 				if (images.at(current_image)._width == 0.0f)
-					images.at(current_image)._width = (float)((y == cols-1 && loadInfo.width%cols) ? loadInfo.width-(y*loadInfo.width/cols) : loadInfo.width/cols);
+					images.at(current_image)._width = (float)((y == cols-1 && load_info.width%cols) ? load_info.width-(y*load_info.width/cols) : load_info.width/cols);
 
 				private_video::ImageLoadInfo info;
-				info.width = ((y == cols-1 && loadInfo.width%cols) ? loadInfo.width-(y*loadInfo.width/cols) : loadInfo.width/cols);
-				info.height = ((x == rows-1 && loadInfo.height%rows) ? loadInfo.height-(x*loadInfo.height/rows) : loadInfo.height/rows);
+				info.width = ((y == cols-1 && load_info.width%cols) ? load_info.width-(y*load_info.width/cols) : load_info.width/cols);
+				info.height = ((x == rows-1 && load_info.height%rows) ? load_info.height-(x*load_info.height/rows) : load_info.height/rows);
 				info.pixels = new uint8 [info.width*info.height*4];
-				for (int i=0; i<info.height; i++)
+				for (int32 i=0; i<info.height; i++)
 				{
-					memcpy ((uint8*)info.pixels+4*info.width*i, (uint8*)loadInfo.pixels+(((x*loadInfo.height/rows)+i)*loadInfo.width+y*loadInfo.width/cols)*4, 4*info.width);
+					memcpy ((uint8*)info.pixels+4*info.width*i, (uint8*)load_info.pixels+(((x*load_info.height/rows)+i)*load_info.width+y*load_info.width/cols)*4, 4*info.width);
 				}
 
 				// Create an Image structure and store it our std::map of images
-				Image *newImage = new Image(filename, tags, info.width, info.height, false);
+				Image *new_image = new Image(filename, tags, info.width, info.height, false);
 
 				// try to insert the image in a texture sheet
-				TexSheet *sheet = _InsertImageInTexSheet(newImage, info, images.at(current_image)._is_static);
+				TexSheet *sheet = _InsertImageInTexSheet(new_image, info, images.at(current_image)._is_static);
 
 				if(!sheet)
 				{
@@ -372,23 +372,23 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 					if(VIDEO_DEBUG)
 					cerr << "VIDEO_DEBUG: GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
 
-					if (loadInfo.pixels)
-						free (loadInfo.pixels);
+					if (load_info.pixels)
+						free (load_info.pixels);
 					return false;
 				}
 
-				newImage->ref_count = 1;
+				new_image->ref_count = 1;
 
 				// store the image in our std::map
-				_images[filename + tags] = newImage;
+				_images[filename + tags] = new_image;
 
 				if (images.at(current_image)._height == 0.0f)
-					images.at(current_image)._height = (float)((x == rows-1 && loadInfo.height%rows) ? loadInfo.height-(x*loadInfo.height/rows) : loadInfo.height/rows);
+					images.at(current_image)._height = (float)((x == rows-1 && load_info.height%rows) ? load_info.height-(x*load_info.height/rows) : load_info.height/rows);
 				if (images.at(current_image)._width == 0.0f)
-					images.at(current_image)._width = (float)((y == cols-1 && loadInfo.width%cols) ? loadInfo.width-(y*loadInfo.width/cols) : loadInfo.width/cols);
+					images.at(current_image)._width = (float)((y == cols-1 && load_info.width%cols) ? load_info.width-(y*load_info.width/cols) : load_info.width/cols);
 
 				// store the new image element
-				ImageElement element(newImage, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f, images.at(current_image)._width, images.at(current_image)._height, images.at(current_image)._color);
+				ImageElement element(new_image, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f, images.at(current_image)._width, images.at(current_image)._height, images.at(current_image)._color);
 				images.at(current_image)._elements.push_back(element);
 			}
 
@@ -401,8 +401,8 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 	}
 
 	// Free loaded image, in case we used it
-	if (loadInfo.pixels)
-		free (loadInfo.pixels);
+	if (load_info.pixels)
+		free (load_info.pixels);
 
 	return true;
 }
@@ -440,7 +440,7 @@ bool GameVideo::LoadAnimatedImage(AnimatedImage &id, const std::string &filename
 //-----------------------------------------------------------------------------
 bool GameVideo::_LoadImageHelper(StillImage &id)
 {
-	bool isStatic = id._is_static;
+	bool is_static = id._is_static;
 
 	id._elements.clear();
 
@@ -454,10 +454,10 @@ bool GameVideo::_LoadImageHelper(StillImage &id)
 	}
 
 	// create an Image structure and store it our std::map of images (for the color copy, always present)
-	Image *newImage = new Image(id._filename, "", load_info.width, load_info.height, false);
+	Image *new_image = new Image(id._filename, "", load_info.width, load_info.height, false);
 
 	// try to insert the image in a texture sheet
-	TexSheet *sheet = _InsertImageInTexSheet(newImage, load_info, isStatic);
+	TexSheet *sheet = _InsertImageInTexSheet(new_image, load_info, is_static);
 
 	if(!sheet)
 	{
@@ -467,15 +467,15 @@ bool GameVideo::_LoadImageHelper(StillImage &id)
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO_DEBUG: GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
 
-		delete newImage;
+		delete new_image;
 		free (load_info.pixels);
 		return false;
 	}
 
-	newImage->ref_count = 1;
+	new_image->ref_count = 1;
 
 	// store the image in our std::map
-	_images[id._filename] = newImage;
+	_images[id._filename] = new_image;
 
 	// if width or height are zero, that means to use the dimensions of image
 	if(id._width == 0.0f)
@@ -484,7 +484,7 @@ bool GameVideo::_LoadImageHelper(StillImage &id)
 	if(id._height == 0.0f)
 		id._height = (float) load_info.height;
 
-	ImageElement element(newImage, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f, id._width, id._height, id._color);
+	ImageElement element(new_image, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f, id._width, id._height, id._color);
 	id._elements.push_back(element);
 
 	// finally, delete the buffer used to hold the pixel data
@@ -498,7 +498,7 @@ bool GameVideo::_LoadImageHelper(StillImage &id)
 //-----------------------------------------------------------------------------
 // _LoadRawImage: Determines which image loader to call
 //-----------------------------------------------------------------------------
-bool GameVideo::_LoadRawImage(const std::string & filename, private_video::ImageLoadInfo & loadInfo)
+bool GameVideo::_LoadRawImage(const std::string & filename, private_video::ImageLoadInfo & load_info)
 {
 	// Isolate the extension
 	size_t extpos = filename.rfind('.');
@@ -509,9 +509,9 @@ bool GameVideo::_LoadRawImage(const std::string & filename, private_video::Image
 	std::string extension = std::string(filename, extpos, filename.length() - extpos);
 
 	if(extension == ".jpeg" || extension == ".jpg")
-		return _LoadRawImageJpeg(filename, loadInfo);
+		return _LoadRawImageJpeg(filename, load_info);
 	if(extension == ".png")
-		return _LoadRawImagePng(filename, loadInfo) ;
+		return _LoadRawImagePng(filename, load_info) ;
 
 	return false;
 }
@@ -520,24 +520,23 @@ bool GameVideo::_LoadRawImage(const std::string & filename, private_video::Image
 // _LoadRawImagePng: Loads a PNG image to RGBA format
 //-----------------------------------------------------------------------------
 
-bool GameVideo::_LoadRawImagePng(const std::string &filename, hoa_video::private_video::ImageLoadInfo &loadInfo)
+bool GameVideo::_LoadRawImagePng(const std::string &filename, hoa_video::private_video::ImageLoadInfo &load_info)
 {
 	FILE * fp = fopen(filename.c_str(), "rb");
 
 	if(fp == NULL)
 		return false;
 
-	unsigned char testbuffer[8];
+	uint8 test_buffer[8];
 
-	fread(testbuffer, 1, 8, fp);
-	if(png_sig_cmp(testbuffer, 0, 8))
+	fread(test_buffer, 1, 8, fp);
+	if(png_sig_cmp(test_buffer, 0, 8))
 	{
 		fclose(fp);
 		return false;
 	}
 
-	png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,
-		(png_voidp)NULL, NULL, NULL);
+	png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, (png_voidp)NULL, NULL, NULL);
 
 	if(!png_ptr)
 	{
@@ -549,12 +548,14 @@ bool GameVideo::_LoadRawImagePng(const std::string &filename, hoa_video::private
 
 	if(!info_ptr)
 	{
+		png_destroy_read_struct(&png_ptr, NULL, (png_infopp)NULL);
 		fclose(fp);
 		return false;
 	}
 
 	if(setjmp(png_jmpbuf(png_ptr)))
 	{
+		png_destroy_read_struct(&png_ptr, NULL, (png_infopp)NULL);
 		fclose(fp);
 		return false;
 	}
@@ -563,50 +564,49 @@ bool GameVideo::_LoadRawImagePng(const std::string &filename, hoa_video::private
 	png_set_sig_bytes(png_ptr, 8);
 	png_read_png(png_ptr, info_ptr, PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_PACKING | PNG_TRANSFORM_EXPAND, NULL);
 
-	unsigned char * * row_pointers = png_get_rows(png_ptr, info_ptr);
+	uint8** row_pointers = png_get_rows(png_ptr, info_ptr);
 
-	loadInfo.width = info_ptr->width;
-	loadInfo.height = info_ptr->height;
-	loadInfo.pixels = malloc (info_ptr->width * info_ptr->height * 4);
+	load_info.width = info_ptr->width;
+	load_info.height = info_ptr->height;
+	load_info.pixels = malloc (info_ptr->width * info_ptr->height * 4);
 
-	unsigned int bpp = info_ptr->channels;
+	uint32 bpp = info_ptr->channels;
 
-	for(unsigned int y = 0; y < info_ptr->height; y++)
+	for(uint32 y = 0; y < info_ptr->height; y++)
 	{
-		for(unsigned int x = 0; x < info_ptr->width; x++)
+		for(uint32 x = 0; x < info_ptr->width; x++)
 		{
-			unsigned char * imgpixel = row_pointers[y] + (x * bpp);
-			unsigned char * dstpixel = ((unsigned char *)loadInfo.pixels) + ((y * info_ptr->width) + x) * 4;
+			uint8* img_pixel = row_pointers[y] + (x * bpp);
+			uint8* dst_pixel = ((uint8 *)load_info.pixels) + ((y * info_ptr->width) + x) * 4;
 
 			if(bpp == 4)
 			{
-				dstpixel[0] = imgpixel[0];
-				dstpixel[1] = imgpixel[1];
-				dstpixel[2] = imgpixel[2];
-				dstpixel[3] = imgpixel[3];
+				dst_pixel[0] = img_pixel[0];
+				dst_pixel[1] = img_pixel[1];
+				dst_pixel[2] = img_pixel[2];
+				dst_pixel[3] = img_pixel[3];
 			}
 			else if(bpp == 3)
 			{
-				dstpixel[0] = imgpixel[0];
-				dstpixel[1] = imgpixel[1];
-				dstpixel[2] = imgpixel[2];
-				dstpixel[3] = 0xFF;
+				dst_pixel[0] = img_pixel[0];
+				dst_pixel[1] = img_pixel[1];
+				dst_pixel[2] = img_pixel[2];
+				dst_pixel[3] = 0xFF;
 			}
 			else if(bpp == 1)
 			{
-				png_color c = info_ptr->palette[imgpixel[0]];
+				png_color c = info_ptr->palette[img_pixel[0]];
 
-				dstpixel[0] = c.red;
-				dstpixel[1] = c.green;
-				dstpixel[2] = c.blue;
-				dstpixel[3] = 0xFF;
+				dst_pixel[0] = c.red;
+				dst_pixel[1] = c.green;
+				dst_pixel[2] = c.blue;
+				dst_pixel[3] = 0xFF;
 			}
 		}
 	}
 
 
-	png_destroy_read_struct(&png_ptr, &info_ptr,
-		(png_infopp)NULL);
+	png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
 
 	fclose(fp);
 
@@ -617,10 +617,10 @@ bool GameVideo::_LoadRawImagePng(const std::string &filename, hoa_video::private
 // _LoadRawImageJpeg: Loads a Jpeg image to RGBA format
 //-----------------------------------------------------------------------------
 
-bool GameVideo::_LoadRawImageJpeg(const std::string &filename, hoa_video::private_video::ImageLoadInfo &loadInfo)
+bool GameVideo::_LoadRawImageJpeg(const std::string &filename, hoa_video::private_video::ImageLoadInfo &load_info)
 {
 	FILE * infile;
-	unsigned char ** buffer;
+	uint8** buffer;
 
 	if((infile = fopen(filename.c_str(), "rb")) == NULL)
 		return false;
@@ -642,29 +642,29 @@ bool GameVideo::_LoadRawImageJpeg(const std::string &filename, hoa_video::privat
 		((j_common_ptr) &cinfo, JPOOL_IMAGE, row_stride, 1);
 
 
-	loadInfo.width = cinfo.output_width;
-	loadInfo.height = cinfo.output_height;
-	loadInfo.pixels = malloc (cinfo.output_width * cinfo.output_height * 4);
+	load_info.width = cinfo.output_width;
+	load_info.height = cinfo.output_height;
+	load_info.pixels = malloc (cinfo.output_width * cinfo.output_height * 4);
 
-	unsigned int bpp = cinfo.output_components;
+	uint32 bpp = cinfo.output_components;
 
-	for(unsigned int y = 0; y < cinfo.output_height; y++)
+	for(uint32 y = 0; y < cinfo.output_height; y++)
 	{
 		jpeg_read_scanlines(&cinfo, buffer, 1);
 
-		for(unsigned int x = 0; x < cinfo.output_width; x++)
+		for(uint32 x = 0; x < cinfo.output_width; x++)
 		{
-			unsigned char * imgpixel = buffer[0] + (x * bpp);
-			unsigned char * dstpixel = ((unsigned char *)loadInfo.pixels) + ((y * cinfo.output_width) + x) * 4;
+			uint8* img_pixel = buffer[0] + (x * bpp);
+			uint8* dst_pixel = ((uint8 *)load_info.pixels) + ((y * cinfo.output_width) + x) * 4;
 
-			dstpixel[0] = imgpixel[0];
-			dstpixel[1] = imgpixel[1];
-			dstpixel[2] = imgpixel[2];
+			dst_pixel[0] = img_pixel[0];
+			dst_pixel[1] = img_pixel[1];
+			dst_pixel[2] = img_pixel[2];
 
 			if(bpp == 4)
-				dstpixel[3] = imgpixel[3];
+				dst_pixel[3] = img_pixel[3];
 			else
-				dstpixel[3] = 0xFF;
+				dst_pixel[3] = 0xFF;
 		}
 	}
 
@@ -770,12 +770,12 @@ bool GameVideo::_SaveJpeg (const std::string& file_name, hoa_video::private_vide
 	jpeg_start_compress (&cinfo, TRUE);
 
 	JSAMPROW row_pointer;				// pointer to a single row
-	int row_stride = info.width * 3;	// physical row width in buffer
+	uint32 row_stride = info.width * 3;	// physical row width in buffer
 
 	// Note that the lines have to be stored from top to bottom
 	while (cinfo.next_scanline < cinfo.image_height)
 	{
-		row_pointer = (unsigned char*)info.pixels + cinfo.next_scanline * row_stride;
+		row_pointer = (uint8*)info.pixels + cinfo.next_scanline * row_stride;
 	    jpeg_write_scanlines(&cinfo, &row_pointer, 1);
 	}
 
@@ -870,7 +870,7 @@ bool GameVideo::SaveImage (const std::string &file_name, const std::vector<Still
 	// Do that for the first image (on later ones, maybe we don't need to get again
 	// the texture, since it might be the same)
 	img = const_cast<Image*>(image[0]->_elements[0].image);
-	ID = img->texture_sheet->texID;
+	ID = img->texture_sheet->tex_ID;
 	texture.width = img->texture_sheet->width;
 	texture.height = img->texture_sheet->height;
 	texture.pixels = malloc (texture.width * texture.height * 4);
@@ -883,11 +883,11 @@ bool GameVideo::SaveImage (const std::string &file_name, const std::vector<Still
 		for (uint32 y=0; y<columns; y++)
 		{
 			img = const_cast<Image*>(image[i]->_elements[0].image);
-			if (ID != img->texture_sheet->texID)
+			if (ID != img->texture_sheet->tex_ID)
 			{
 				// Get new texture ID
-				VideoManager->_BindTexture(img->texture_sheet->texID);
-				ID = img->texture_sheet->texID;
+				VideoManager->_BindTexture(img->texture_sheet->tex_ID);
+				ID = img->texture_sheet->tex_ID;
 
 				// If the new texture is bigger, reallocate memory
 				if (texture.height * texture.width < img->texture_sheet->height * img->texture_sheet->width * 4)
@@ -1032,7 +1032,7 @@ void GameVideo::_GetBufferFromTexture (hoa_video::private_video::ImageLoadInfo& 
 	buffer.height = texture->height;
 	buffer.width = texture->width;
 	buffer.pixels = malloc (buffer.height * buffer.width * 4);
-	VideoManager->_BindTexture(texture->texID);
+	VideoManager->_BindTexture(texture->tex_ID);
 	glGetTexImage (GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer.pixels);
 }
 
@@ -1097,11 +1097,11 @@ StillImage GameVideo::TilesToObject
 	w = (int32) indices[0].size();         // how many tiles wide and high
 	h = (int32) indices.size();
 
-	float tileWidth  = tiles[0]._width;   // width and height of each tile
-	float tileHeight = tiles[0]._height;
+	float tile_width  = tiles[0]._width;   // width and height of each tile
+	float tile_height = tiles[0]._height;
 
-	id._width  = (float) w * tileWidth;   // total width/height of compound
-	id._height = (float) h * tileHeight;
+	id._width  = (float) w * tile_width;   // total width/height of compound
+	id._height = (float) h * tile_height;
 
 	id._is_static = tiles[0]._is_static;
 
@@ -1111,10 +1111,10 @@ StillImage GameVideo::TilesToObject
 		{
 			// add each tile at the correct offset
 
-			float xOffset = x * tileWidth;
-			float yOffset = y * tileHeight;
+			float x_offset = x * tile_width;
+			float y_offset = y * tile_height;
 
-			if(!id.AddImage(tiles[indices[y][x]], xOffset, yOffset))
+			if(!id.AddImage(tiles[indices[y][x]], x_offset, y_offset))
 			{
 				if(VIDEO_DEBUG)
 				{
@@ -1137,16 +1137,16 @@ StillImage GameVideo::TilesToObject
 //                        Returns NULL on failure, which should only happen if
 //                        we run out of memory or bad argument is passed.
 //-----------------------------------------------------------------------------
-TexSheet *GameVideo::_InsertImageInTexSheet(Image *image, private_video::ImageLoadInfo & loadInfo, bool isStatic)
+TexSheet *GameVideo::_InsertImageInTexSheet(Image *image, private_video::ImageLoadInfo & load_info, bool is_static)
 {
 	// if it's a large image size (>512x512) then we already know it's not going
 	// to fit in any of our existing texture sheets, so create a new one for it
 
-	if(loadInfo.width > 512 || loadInfo.height > 512)
+	if(load_info.width > 512 || load_info.height > 512)
 	{
-		int32 roundW = RoundUpPow2(loadInfo.width);
-		int32 roundH = RoundUpPow2(loadInfo.height);
-		TexSheet *sheet = _CreateTexSheet(roundW, roundH, VIDEO_TEXSHEET_ANY, false);
+		int32 round_width = RoundUpPow2(load_info.width);
+		int32 round_height = RoundUpPow2(load_info.height);
+		TexSheet *sheet = _CreateTexSheet(round_width, round_height, VIDEO_TEXSHEET_ANY, false);
 
 		// ran out of memory!
 		if(!sheet)
@@ -1156,7 +1156,7 @@ TexSheet *GameVideo::_InsertImageInTexSheet(Image *image, private_video::ImageLo
 			return NULL;
 		}
 
-		if(sheet->AddImage(image, loadInfo))
+		if(sheet->AddImage(image, load_info))
 			return sheet;
 		else
 		{
@@ -1171,11 +1171,11 @@ TexSheet *GameVideo::_InsertImageInTexSheet(Image *image, private_video::ImageLo
 
 	TexSheetType type;
 
-	if(loadInfo.width == 32 && loadInfo.height == 32)
+	if(load_info.width == 32 && load_info.height == 32)
 		type = VIDEO_TEXSHEET_32x32;
-	else if(loadInfo.width == 32 && loadInfo.height == 64)
+	else if(load_info.width == 32 && load_info.height == 64)
 		type = VIDEO_TEXSHEET_32x64;
-	else if(loadInfo.width == 64 && loadInfo.height == 64)
+	else if(load_info.width == 64 && load_info.height == 64)
 		type = VIDEO_TEXSHEET_64x64;
 	else
 		type = VIDEO_TEXSHEET_ANY;
@@ -1183,11 +1183,11 @@ TexSheet *GameVideo::_InsertImageInTexSheet(Image *image, private_video::ImageLo
 	// loop through existing texture sheets and see if the image will fit in
 	// any of the ones which match the type we're looking for
 
-	size_t numTexSheets = _texSheets.size();
+	size_t num_tex_sheets = _tex_sheets.size();
 
-	for(uint32 iSheet = 0; iSheet < numTexSheets; ++iSheet)
+	for(uint32 iSheet = 0; iSheet < num_tex_sheets; ++iSheet)
 	{
-		TexSheet *sheet = _texSheets[iSheet];
+		TexSheet *sheet = _tex_sheets[iSheet];
 		if(!sheet)
 		{
 			if(VIDEO_DEBUG)
@@ -1195,9 +1195,9 @@ TexSheet *GameVideo::_InsertImageInTexSheet(Image *image, private_video::ImageLo
 			return NULL;
 		}
 
-		if(sheet->type == type && sheet->isStatic == isStatic)
+		if(sheet->type == type && sheet->is_static == is_static)
 		{
-			if(sheet->AddImage(image, loadInfo))
+			if(sheet->AddImage(image, load_info))
 			{
 				// added to a sheet successfully
 				return sheet;
@@ -1207,7 +1207,7 @@ TexSheet *GameVideo::_InsertImageInTexSheet(Image *image, private_video::ImageLo
 
 	// if it doesn't fit in any of them, create a new 512x512 and stuff it in
 
-	TexSheet *sheet = _CreateTexSheet(512, 512, type, isStatic);
+	TexSheet *sheet = _CreateTexSheet(512, 512, type, is_static);
 	if(!sheet)
 	{
 		// failed to create texture, ran out of memory probably
@@ -1222,7 +1222,7 @@ TexSheet *GameVideo::_InsertImageInTexSheet(Image *image, private_video::ImageLo
 
 	// now that we have a fresh texture sheet, AddImage() should work without
 	// any problem
-	if(sheet->AddImage(image, loadInfo))
+	if(sheet->AddImage(image, load_info))
 	{
 		return sheet;
 	}
@@ -1244,7 +1244,7 @@ TexSheet *GameVideo::_CreateTexSheet
 	int32 width,
 	int32 height,
 	TexSheetType type,
-	bool isStatic
+	bool is_static
 )
 {
 	// validate the parameters
@@ -1265,12 +1265,12 @@ TexSheet *GameVideo::_CreateTexSheet
 		return NULL;
 	}
 
-	GLuint texID = _CreateBlankGLTexture(width, height);
+	GLuint tex_ID = _CreateBlankGLTexture(width, height);
 
 	// now that we have our texture loaded, simply create a new TexSheet
 
- 	TexSheet *sheet = new TexSheet(width, height, texID, type, isStatic);
-	_texSheets.push_back(sheet);
+ 	TexSheet *sheet = new TexSheet(width, height, tex_ID, type, is_static);
+	_tex_sheets.push_back(sheet);
 
 	return sheet;
 }
@@ -1280,23 +1280,23 @@ TexSheet *GameVideo::_CreateTexSheet
 // TexSheet constructor
 //-----------------------------------------------------------------------------
 
-TexSheet::TexSheet(int32 w, int32 h, GLuint texID_, TexSheetType type_, bool isStatic_)
+TexSheet::TexSheet(int32 w, int32 h, GLuint tex_ID_, TexSheetType type_, bool is_static_)
 {
 	width = w;
 	height = h;
-	texID = texID_;
+	tex_ID = tex_ID_;
 	type = type_;
-	isStatic = isStatic_;
+	is_static = is_static_;
 	loaded = true;
 
 	if(type == VIDEO_TEXSHEET_32x32)
-		texMemManager = new FixedTexMemMgr(this, 32, 32);
+		tex_mem_manager = new FixedTexMemMgr(this, 32, 32);
 	else if(type == VIDEO_TEXSHEET_32x64)
-		texMemManager = new FixedTexMemMgr(this, 32, 64);
+		tex_mem_manager = new FixedTexMemMgr(this, 32, 64);
 	else if(type == VIDEO_TEXSHEET_64x64)
-		texMemManager = new FixedTexMemMgr(this, 64, 64);
+		tex_mem_manager = new FixedTexMemMgr(this, 64, 64);
 	else
-		texMemManager = new VariableTexMemMgr(this);
+		tex_mem_manager = new VariableTexMemMgr(this);
 }
 
 
@@ -1307,11 +1307,9 @@ TexSheet::TexSheet(int32 w, int32 h, GLuint texID_, TexSheetType type_, bool isS
 TexSheet::~TexSheet()
 {
 	// delete texture memory manager
-	delete texMemManager;
+	delete tex_mem_manager;
 
-	hoa_video::GameVideo *videoManager = hoa_video::GameVideo::SingletonGetReference();
-
-	if(!videoManager)
+	if(!VideoManager)
 	{
 		if(VIDEO_DEBUG)
 		{
@@ -1320,7 +1318,7 @@ TexSheet::~TexSheet()
 	}
 
 	// unload actual texture from memory
-	videoManager->_DeleteTexture(texID);
+	VideoManager->_DeleteTexture(tex_ID);
 }
 
 
@@ -1330,10 +1328,10 @@ TexSheet::~TexSheet()
 
 VariableTexMemMgr::VariableTexMemMgr(TexSheet *sheet)
 {
-	_texSheet    = sheet;
-	_sheetWidth  = sheet->width / 16;
-	_sheetHeight = sheet->height / 16;
-	_blocks      = new VariableImageNode[_sheetWidth*_sheetHeight];
+	_tex_sheet    = sheet;
+	_sheet_width  = sheet->width / 16;
+	_sheet_height = sheet->height / 16;
+	_blocks      = new VariableImageNode[_sheet_width*_sheet_height];
 }
 
 
@@ -1350,29 +1348,29 @@ VariableTexMemMgr::~VariableTexMemMgr()
 bool GameVideo::_DEBUG_ShowTexSheet()
 {
 	// value of zero means to disable display
-	if(_currentDebugTexSheet == -1)
+	if(_current_debug_TexSheet == -1)
 	{
 		return true;
 	}
 
 	// check if there aren't any texture sheets! (should never happen)
-	if(_texSheets.empty())
+	if(_tex_sheets.empty())
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO_WARNING: Called DEBUG_ShowTexture(), but there were no texture sheets" << endl;
 		return false;
 	}
 
-	int32 numSheets = (int32) _texSheets.size();
+	int32 num_sheets = (int32) _tex_sheets.size();
 
 	// we may go out of bounds say, if we were viewing a texture sheet and then it got
 	// deleted or something. To recover, just set it to the last texture sheet
-	if(_currentDebugTexSheet >= numSheets)
+	if(_current_debug_TexSheet >= num_sheets)
 	{
-		_currentDebugTexSheet = numSheets - 1;
+		_current_debug_TexSheet = num_sheets - 1;
 	}
 
-	TexSheet *sheet = _texSheets[_currentDebugTexSheet];
+	TexSheet *sheet = _tex_sheets[_current_debug_TexSheet];
 
 	if(!sheet)
 	{
@@ -1424,7 +1422,7 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 		return false;
 	}
 
-	sprintf(buf, "  Sheet #: %d", _currentDebugTexSheet);
+	sprintf(buf, "  Sheet #: %d", _current_debug_TexSheet);
 	MoveRelative(0, -20);
 	if(!DrawText(buf))
 	{
@@ -1456,7 +1454,7 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 		return false;
 	}
 
-	sprintf(buf, "  Static:  %d", sheet->isStatic);
+	sprintf(buf, "  Static:  %d", sheet->is_static);
 	MoveRelative(0, -20);
 	if(!DrawText(buf))
 	{
@@ -1464,7 +1462,7 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 		return false;
 	}
 
-	sprintf(buf, "  TexID:   %d", sheet->texID);
+	sprintf(buf, "  TexID:   %d", sheet->tex_ID);
 	MoveRelative(0, -20);
 	if(!DrawText(buf))
 	{
@@ -1528,13 +1526,13 @@ bool GameVideo::_DeleteImage(Image *const img)
 
 bool GameVideo::_RemoveSheet(TexSheet *sheet)
 {
-	if(_texSheets.empty())
+	if(_tex_sheets.empty())
 	{
 		return false;
 	}
 
-	vector<TexSheet*>::iterator iSheet = _texSheets.begin();
-	vector<TexSheet*>::iterator iEnd   = _texSheets.end();
+	vector<TexSheet*>::iterator iSheet = _tex_sheets.begin();
+	vector<TexSheet*>::iterator iEnd   = _tex_sheets.end();
 
 	// search std::vector for pointer matching sheet and remove it
 	while(iSheet != iEnd)
@@ -1542,7 +1540,7 @@ bool GameVideo::_RemoveSheet(TexSheet *sheet)
 		if(*iSheet == sheet)
 		{
 			delete sheet;
-			_texSheets.erase(iSheet);
+			_tex_sheets.erase(iSheet);
 			return true;
 		}
 		++iSheet;
@@ -1558,28 +1556,28 @@ bool GameVideo::_RemoveSheet(TexSheet *sheet)
 // NOTE: assumes that the image we're adding is still "bound" in DevIL
 //-----------------------------------------------------------------------------
 
-bool TexSheet::AddImage(Image *img, ImageLoadInfo & loadInfo)
+bool TexSheet::AddImage(Image *img, ImageLoadInfo & load_info)
 {
 	// try inserting into the texture memory manager
-	bool couldInsert = texMemManager->Insert(img);
-	if(!couldInsert)
+	bool could_insert = tex_mem_manager->Insert(img);
+	if(!could_insert)
 		return false;
 
 	// now img contains the x, y, width, and height of the subrectangle
 	// inside the texture sheet, so go ahead and copy that area
 
-	TexSheet *texSheet = img->texture_sheet;
-	if(!texSheet)
+	TexSheet *tex_sheet = img->texture_sheet;
+	if(!tex_sheet)
 	{
 		// technically this should never happen since Insert() returned true
 		if(VIDEO_DEBUG)
 		{
-			cerr << "VIDEO ERROR: texSheet was NULL after texMemManager->Insert() returned true" << endl;
+			cerr << "VIDEO ERROR: texSheet was NULL after tex_mem_manager->Insert() returned true" << endl;
 		}
 		return false;
 	}
 
-	if(!CopyRect(img->x, img->y, loadInfo))
+	if(!CopyRect(img->x, img->y, load_info))
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: CopyRect() failed in TexSheet::AddImage()!" << endl;
@@ -1594,12 +1592,11 @@ bool TexSheet::AddImage(Image *img, ImageLoadInfo & loadInfo)
 // CopyRect: copies an image into a sub-rectangle of the texture
 //-----------------------------------------------------------------------------
 
-bool TexSheet::CopyRect(int32 x, int32 y, private_video::ImageLoadInfo & loadInfo)
+bool TexSheet::CopyRect(int32 x, int32 y, private_video::ImageLoadInfo & load_info)
 {
 	int32 error;
 
-	hoa_video::GameVideo *videoManager = hoa_video::GameVideo::SingletonGetReference();
-	videoManager->_BindTexture(texID);
+	VideoManager->_BindTexture(tex_ID);
 
 	error = glGetError();
 	if(error)
@@ -1617,11 +1614,11 @@ bool TexSheet::CopyRect(int32 x, int32 y, private_video::ImageLoadInfo & loadInf
 		0,                // level
 		x,                // x offset within tex sheet
 		y,                // y offset within tex sheet
-		loadInfo.width,   // width in pixels of image
-		loadInfo.height,  // height in pixels of image
+		load_info.width,   // width in pixels of image
+		load_info.height,  // height in pixels of image
 		GL_RGBA,		  // format
 		GL_UNSIGNED_BYTE, // type
-		loadInfo.pixels   // pixels of the sub image
+		load_info.pixels   // pixels of the sub image
 	);
 
 	error = glGetError();
@@ -1645,7 +1642,7 @@ bool TexSheet::CopyRect(int32 x, int32 y, private_video::ImageLoadInfo & loadInf
 
 bool TexSheet::RemoveImage(Image *img)
 {
-	return texMemManager->Remove(img);
+	return tex_mem_manager->Remove(img);
 }
 
 
@@ -1658,7 +1655,7 @@ bool TexSheet::RemoveImage(Image *img)
 
 bool TexSheet::FreeImage(Image *img)
 {
-	return texMemManager->Free(img);
+	return tex_mem_manager->Free(img);
 }
 
 //-----------------------------------------------------------------------------
@@ -1669,7 +1666,7 @@ bool TexSheet::FreeImage(Image *img)
 
 bool TexSheet::RestoreImage(Image *img)
 {
-	return texMemManager->Restore(img);
+	return tex_mem_manager->Restore(img);
 }
 
 
@@ -1697,12 +1694,12 @@ bool GameVideo::DeleteImage(ImageDescriptor &id)
 
 bool GameVideo::_DeleteImage(AnimatedImage &id)
 {
-	int32 numFrames = id.GetNumFrames();
+	int32 num_frames = id.GetNumFrames();
 	bool success = true;
 
-	for(int j = 0; j < numFrames; ++j)
+	for(int32 j = 0; j < num_frames; ++j)
 	{
-		success &= _DeleteImage(id._frames[j]._image);
+		success &= _DeleteImage(id._frames[j].image);
 	}
 
 	return success;
@@ -1818,39 +1815,39 @@ bool GameVideo::_RemoveImage(Image *img)
 
 FixedTexMemMgr::FixedTexMemMgr
 (
-	TexSheet *texSheet,
-	int32 imgW,
-	int32 imgH
+	TexSheet *tex_sheet,
+	int32 img_width,
+	int32 img_height
 )
 {
-	_texSheet = texSheet;
+	_tex_sheet = tex_sheet;
 
 	// set all the dimensions
-	_sheetWidth  = texSheet->width  / imgW;
-	_sheetHeight = texSheet->height / imgH;
-	_imageWidth  = imgW;
-	_imageHeight = imgH;
+	_sheet_width  = tex_sheet->width  / img_width;
+	_sheet_height = tex_sheet->height / img_height;
+	_image_width  = img_width;
+	_image_height = img_height;
 
 	// allocate the blocks array
-	int32 numBlocks = _sheetWidth * _sheetHeight;
-	_blocks = new FixedImageNode[numBlocks];
+	int32 num_blocks = _sheet_width * _sheet_height;
+	_blocks = new FixedImageNode[num_blocks];
 
 	// initialize linked list of open blocks... which, at this point is
 	// all the blocks!
-	_openListHead = &_blocks[0];
-	_openListTail = &_blocks[numBlocks-1];
+	_open_list_head = &_blocks[0];
+	_open_list_tail = &_blocks[num_blocks-1];
 
 	// now initialize all the blocks to proper values
-	for(int32 i = 0; i < numBlocks - 1; ++i)
+	for(int32 i = 0; i < num_blocks - 1; ++i)
 	{
 		_blocks[i].next  = &_blocks[i+1];
 		_blocks[i].image = NULL;
-		_blocks[i].blockIndex = i;
+		_blocks[i].block_index = i;
 	}
 
-	_blocks[numBlocks-1].next  = NULL;
-	_blocks[numBlocks-1].image = NULL;
-	_blocks[numBlocks-1].blockIndex = numBlocks - 1;
+	_blocks[num_blocks-1].next  = NULL;
+	_blocks[num_blocks-1].image = NULL;
+	_blocks[num_blocks-1].block_index = num_blocks - 1;
 }
 
 
@@ -1878,7 +1875,7 @@ bool VariableTexMemMgr::Insert  (Image *img)
 	// it is always safe to remove the texture sheet from memory when the
 	// background is unreferenced. That way backgrounds don't stick around in memory.
 
-	if(_sheetWidth > 32 || _sheetHeight > 32)  // 32 blocks = 512 pixels
+	if(_sheet_width > 32 || _sheet_height > 32)  // 32 blocks = 512 pixels
 	{
 		if(!_blocks[0].free)  // quick way to test if texsheet's occupied
 			return false;
@@ -1890,7 +1887,7 @@ bool VariableTexMemMgr::Insert  (Image *img)
 	int32 w = (img->width  + 15) / 16;   // width and height in blocks
 	int32 h = (img->height + 15) / 16;
 
-	int32 blockX=-1, blockY=-1;
+	int32 block_x=-1, block_y=-1;
 
 
 	// this is a 100% brute force way to allocate a block, just a bunch
@@ -1899,61 +1896,59 @@ bool VariableTexMemMgr::Insert  (Image *img)
 	// about fitting images with pixel perfect resolution.
 	// Later, if this turns out to be a bottleneck, we can rewrite this
 	// algorithm to something more intelligent ^_^
-	for(int32 y = 0; y < _sheetHeight - h + 1; ++y)
+	for(int32 y = 0; y < _sheet_height - h + 1; ++y)
 	{
-		for(int32 x = 0; x < _sheetWidth - w + 1; ++x)
+		for(int32 x = 0; x < _sheet_width - w + 1; ++x)
 		{
-			int32 furthestBlocker = -1;
+			int32 furthest_blocker = -1;
 
 			for(int32 dy = 0; dy < h; ++dy)
 			{
 				for(int32 dx = 0; dx < w; ++dx)
 				{
-					if(!_blocks[(x+dx)+((y+dy)*_sheetWidth)].free)
+					if(!_blocks[(x+dx)+((y+dy)*_sheet_width)].free)
 					{
-						furthestBlocker = x+dx;
-						goto endneighborsearch;
+						furthest_blocker = x+dx;
+						goto endneighborsearch_GOTO;
 					}
 				}
 			}
 
-			endneighborsearch:
+			endneighborsearch_GOTO:
 
-			if(furthestBlocker == -1)
+			if(furthest_blocker == -1)
 			{
-				blockX = x;
-				blockY = y;
-				goto endsearch;
+				block_x = x;
+				block_y = y;
+				goto endsearch_GOTO;
 			}
 		}
 	}
 
-	endsearch:
+	endsearch_GOTO:
 
-	if(blockX == -1 || blockY == -1)
+	if(block_x == -1 || block_y == -1)
 		return false;
 
 	// check if there's already an image allocated at this block.
 	// If so, we have to notify GameVideo that we're ejecting
 	// this image out of memory to make place for the new one
 
-	hoa_video::GameVideo *VideoManager = hoa_video::GameVideo::SingletonGetReference();
-
 	// update blocks
-	std::set<hoa_video::private_video::Image *> removeimages;
+	std::set<hoa_video::private_video::Image *> remove_images;
 
-	for(int32 y = blockY; y < blockY + h; ++y)
+	for(int32 y = block_y; y < block_y + h; ++y)
 	{
-		for(int32 x = blockX; x < blockX + w; ++x)
+		for(int32 x = block_x; x < block_x + w; ++x)
 		{
-			int32 index = x + (y * _sheetWidth);
+			int32 index = x + (y * _sheet_width);
 			// check if there's already an image at the point we're
 			// trying to load at. If so, we need to tell GameVideo
 			// to update its internal vector
 
 			if(_blocks[index].image)
 			{
-				removeimages.insert(_blocks[index].image);
+				remove_images.insert(_blocks[index].image);
 			}
 
 			_blocks[index].free  = false;
@@ -1962,7 +1957,7 @@ bool VariableTexMemMgr::Insert  (Image *img)
 		}
 	}
 
-	for(std::set<hoa_video::private_video::Image *>::iterator itr = removeimages.begin(); itr != removeimages.end(); itr++)
+	for(std::set<hoa_video::private_video::Image *>::iterator itr = remove_images.begin(); itr != remove_images.end(); itr++)
 	{
 		Remove(*itr);
 		VideoManager->_RemoveImage(*itr);
@@ -1972,20 +1967,20 @@ bool VariableTexMemMgr::Insert  (Image *img)
 	// calculate the actual pixel coordinates given this node's
 	// block index
 
-	img->x = blockX * 16;
-	img->y = blockY * 16;
+	img->x = block_x * 16;
+	img->y = block_y * 16;
 
 	// calculate the u,v coordinates
 
-	float sheetW = (float) _texSheet->width;
-	float sheetH = (float) _texSheet->height;
+	float sheet_width = (float) _tex_sheet->width;
+	float sheet_height = (float) _tex_sheet->height;
 
-	img->u1 = float(img->x + 0.5f)               / sheetW;
-	img->u2 = float(img->x + img->width - 0.5f)  / sheetW;
-	img->v1 = float(img->y + 0.5f)               / sheetH;
-	img->v2 = float(img->y + img->height - 0.5f) / sheetH;
+	img->u1 = float(img->x + 0.5f)               / sheet_width;
+	img->u2 = float(img->x + img->width - 0.5f)  / sheet_width;
+	img->v1 = float(img->y + 0.5f)               / sheet_height;
+	img->v2 = float(img->y + img->height - 0.5f) / sheet_height;
 
-	img->texture_sheet = _texSheet;
+	img->texture_sheet = _tex_sheet;
 	return true;
 }
 
@@ -2013,28 +2008,28 @@ bool VariableTexMemMgr::Remove(Image *img)
 bool VariableTexMemMgr::SetBlockProperties
 (
 	Image *img,
-	bool changeFree,
-	bool changeImage,
+	bool change_free,
+	bool change_image,
 	bool free,
-	Image *newImage
+	Image *new_image
 )
 {
-	int32 blockX = img->x / 16;          // upper-left corner in blocks
-	int32 blockY = img->y / 16;
+	int32 block_x = img->x / 16;          // upper-left corner in blocks
+	int32 block_y = img->y / 16;
 
 	int32 w = (img->width  + 15) / 16;   // width and height in blocks
 	int32 h = (img->height + 15) / 16;
 
-	for(int32 y = blockY; y < blockY + h; ++y)
+	for(int32 y = block_y; y < block_y + h; ++y)
 	{
-		for(int32 x = blockX; x < blockX + w; ++x)
+		for(int32 x = block_x; x < block_x + w; ++x)
 		{
-			if(_blocks[x+y*_sheetWidth].image == img)
+			if(_blocks[x+y*_sheet_width].image == img)
 			{
-				if(changeFree)
-					_blocks[x+y*_sheetWidth].free  = free;
-				if(changeImage)
-					_blocks[x+y*_sheetWidth].image = newImage;
+				if(change_free)
+					_blocks[x+y*_sheet_width].free  = free;
+				if(change_image)
+					_blocks[x+y*_sheet_width].image = new_image;
 			}
 		}
 	}
@@ -2073,24 +2068,24 @@ bool FixedTexMemMgr::Insert(Image *img)
 {
 	// whoa, nothing on the open list! (no blocks left) return false :(
 
-	if(_openListHead == NULL)
+	if(_open_list_head == NULL)
 		return false;
 
 	// otherwise, get and remove the head of the open list
 
-	FixedImageNode *node = _openListHead;
-	_openListHead = _openListHead->next;
+	FixedImageNode *node = _open_list_head;
+	_open_list_head = _open_list_head->next;
 
-	if(_openListHead == NULL)
+	if(_open_list_head == NULL)
 	{
 		// this must mean we just removed the last open block, so
 		// set the tail to NULL as well
-		_openListTail = NULL;
+		_open_list_tail = NULL;
 	}
 	else
 	{
 		// since this is the new head, it's prev pointer should be NULL
-		_openListHead->prev = NULL;
+		_open_list_head->prev = NULL;
 	}
 
 	node->next = NULL;
@@ -2101,7 +2096,6 @@ bool FixedTexMemMgr::Insert(Image *img)
 
 	if(node->image)
 	{
-		hoa_video::GameVideo *VideoManager = hoa_video::GameVideo::SingletonGetReference();
 		VideoManager->_RemoveImage(node->image);
 		node->image = NULL;
 	}
@@ -2109,20 +2103,20 @@ bool FixedTexMemMgr::Insert(Image *img)
 	// calculate the actual pixel coordinates given this node's
 	// block index
 
-	img->x = _imageWidth  * (node->blockIndex % _sheetWidth);
-	img->y = _imageHeight * (node->blockIndex / _sheetWidth);
+	img->x = _image_width  * (node->block_index % _sheet_width);
+	img->y = _image_height * (node->block_index / _sheet_width);
 
 	// calculate the u,v coordinates
 
-	float sheetW = (float) _texSheet->width;
-	float sheetH = (float) _texSheet->height;
+	float sheet_width = (float) _tex_sheet->width;
+	float sheet_height = (float) _tex_sheet->height;
 
-	img->u1 = float(img->x + 0.5f)               / sheetW;
-	img->u2 = float(img->x + img->width - 0.5f)  / sheetW;
-	img->v1 = float(img->y + 0.5f)               / sheetH;
-	img->v2 = float(img->y + img->height - 0.5f) / sheetH;
+	img->u1 = float(img->x + 0.5f)               / sheet_width;
+	img->u2 = float(img->x + img->width - 0.5f)  / sheet_width;
+	img->v1 = float(img->y + 0.5f)               / sheet_height;
+	img->v2 = float(img->y + img->height - 0.5f) / sheet_height;
 
-	img->texture_sheet = _texSheet;
+	img->texture_sheet = _tex_sheet;
 
 	return true;
 }
@@ -2132,11 +2126,11 @@ bool FixedTexMemMgr::Insert(Image *img)
 //-----------------------------------------------------------------------------
 int32 FixedTexMemMgr::_CalculateBlockIndex(Image *img)
 {
-	int32 blockX = img->x / _imageWidth;
-	int32 blockY = img->y / _imageHeight;
+	int32 block_x = img->x / _image_width;
+	int32 block_y = img->y / _image_height;
 
-	int32 blockIndex = blockX + _sheetWidth * blockY;
-	return blockIndex;
+	int32 block_index = block_x + _sheet_width * block_y;
+	return block_index;
 }
 
 //-----------------------------------------------------------------------------
@@ -2148,10 +2142,10 @@ int32 FixedTexMemMgr::_CalculateBlockIndex(Image *img)
 bool FixedTexMemMgr::Remove(Image *img)
 {
 	// translate x,y coordinates into a block index
-	int32 blockIndex = _CalculateBlockIndex(img);
+	int32 block_index = _CalculateBlockIndex(img);
 
 	// check to make sure the block is actually owned by this image
-	if(_blocks[blockIndex].image != img)
+	if(_blocks[block_index].image != img)
 	{
 		// error, the block that the image thinks it owns is actually not
 		// owned by that image
@@ -2162,10 +2156,10 @@ bool FixedTexMemMgr::Remove(Image *img)
 	}
 
 	// set the image to NULL to indicate that this block is completely free
-	_blocks[blockIndex].image = NULL;
+	_blocks[block_index].image = NULL;
 
 	// remove block from the open list
-	_DeleteNode(blockIndex);
+	_DeleteNode(block_index);
 
 	return true;
 }
@@ -2173,15 +2167,15 @@ bool FixedTexMemMgr::Remove(Image *img)
 //-----------------------------------------------------------------------------
 // DeleteNode: deletes a node from the open list with the given block index
 //-----------------------------------------------------------------------------
-void FixedTexMemMgr::_DeleteNode(int32 blockIndex)
+void FixedTexMemMgr::_DeleteNode(int32 block_index)
 {
-	if(blockIndex < 0)
+	if(block_index < 0)
 		return;
 
-	if(blockIndex >= _sheetWidth * _sheetHeight)
+	if(block_index >= _sheet_width * _sheet_height)
 		return;
 
-	FixedImageNode *node = &_blocks[blockIndex];
+	FixedImageNode *node = &_blocks[block_index];
 
 	if(node->prev && node->next)
 	{
@@ -2192,19 +2186,19 @@ void FixedTexMemMgr::_DeleteNode(int32 blockIndex)
 	{
 		// node is tail of the list
 		node->prev->next = NULL;
-		_openListTail = node->prev;
+		_open_list_tail = node->prev;
 	}
 	else if(node->next)
 	{
 		// node is head of the list
-		_openListHead = node->next;
+		_open_list_head = node->next;
 		node->next->prev = NULL;
 	}
 	else
 	{
 		// node is the only element in the list
-		_openListHead = NULL;
-		_openListTail = NULL;
+		_open_list_head = NULL;
+		_open_list_tail = NULL;
 	}
 
 	// just for good measure, clear out this node's pointers
@@ -2221,22 +2215,22 @@ void FixedTexMemMgr::_DeleteNode(int32 blockIndex)
 //-----------------------------------------------------------------------------
 bool FixedTexMemMgr::Free(Image *img)
 {
-	int32 blockIndex = _CalculateBlockIndex(img);
+	int32 block_index = _CalculateBlockIndex(img);
 
-	FixedImageNode *node = &_blocks[blockIndex];
+	FixedImageNode *node = &_blocks[block_index];
 
-	if(_openListTail != NULL)
+	if(_open_list_tail != NULL)
 	{
 		// simply append to end of list
-		_openListTail->next = node;
-		node->prev = _openListTail;
+		_open_list_tail->next = node;
+		node->prev = _open_list_tail;
 		node->next = NULL;
-		_openListTail = node;
+		_open_list_tail = node;
 	}
 	else
 	{
 		// special case: empty list
-		_openListHead = _openListTail = node;
+		_open_list_head = _open_list_tail = node;
 		node->next = node->prev = NULL;
 	}
 
@@ -2249,8 +2243,8 @@ bool FixedTexMemMgr::Free(Image *img)
 //-----------------------------------------------------------------------------
 bool FixedTexMemMgr::Restore(Image *img)
 {
-	int32 blockIndex = _CalculateBlockIndex(img);
-	_DeleteNode(blockIndex);
+	int32 block_index = _CalculateBlockIndex(img);
+	_DeleteNode(block_index);
 	return true;
 }
 
@@ -2260,11 +2254,11 @@ bool FixedTexMemMgr::Restore(Image *img)
 //-----------------------------------------------------------------------------
 void GameVideo::DEBUG_NextTexSheet()
 {
-	++_currentDebugTexSheet;
+	++_current_debug_TexSheet;
 
-	if(_currentDebugTexSheet >= (int32) _texSheets.size())
+	if(_current_debug_TexSheet >= (int32) _tex_sheets.size())
 	{
-		_currentDebugTexSheet = -1;   // disable display
+		_current_debug_TexSheet = -1;   // disable display
 	}
 }
 
@@ -2274,11 +2268,11 @@ void GameVideo::DEBUG_NextTexSheet()
 //-----------------------------------------------------------------------------
 void GameVideo::DEBUG_PrevTexSheet()
 {
-	--_currentDebugTexSheet;
+	--_current_debug_TexSheet;
 
-	if(_currentDebugTexSheet < -1)
+	if(_current_debug_TexSheet < -1)
 	{
-		_currentDebugTexSheet = (int32) _texSheets.size() - 1;
+		_current_debug_TexSheet = (int32) _tex_sheets.size() - 1;
 	}
 }
 
@@ -2292,8 +2286,8 @@ bool GameVideo::ReloadTextures()
 {
 	// reload texture sheets
 
-	vector<TexSheet *>::iterator iSheet    = _texSheets.begin();
-	vector<TexSheet *>::iterator iSheetEnd = _texSheets.end();
+	vector<TexSheet *>::iterator iSheet    = _tex_sheets.begin();
+	vector<TexSheet *>::iterator iSheetEnd = _tex_sheets.end();
 
 	bool success = true;
 
@@ -2317,14 +2311,13 @@ bool GameVideo::ReloadTextures()
 			success = false;
 		}
 
-
 		++iSheet;
 	}
 
 	_DeleteTempTextures();
 
 	if(_usesLights)
-		_lightOverlay = _CreateBlankGLTexture(1024, 1024);
+		_light_overlay = _CreateBlankGLTexture(1024, 1024);
 
 	return success;
 }
@@ -2342,8 +2335,8 @@ bool GameVideo::UnloadTextures()
 	_SaveTempTextures();
 
 	// unload texture sheets
-	vector<TexSheet *>::iterator iSheet    = _texSheets.begin();
-	vector<TexSheet *>::iterator iSheetEnd = _texSheets.end();
+	vector<TexSheet *>::iterator iSheet    = _tex_sheets.begin();
+	vector<TexSheet *>::iterator iSheetEnd = _tex_sheets.end();
 
 	bool success = true;
 
@@ -2367,14 +2360,13 @@ bool GameVideo::UnloadTextures()
 			success = false;
 		}
 
-
 		++iSheet;
 	}
 
-	if(_lightOverlay != 0xFFFFFFFF)
+	if(_light_overlay != 0xFFFFFFFF)
 	{
-		_DeleteTexture(_lightOverlay);
-		_lightOverlay = 0xFFFFFFFF;
+		_DeleteTexture(_light_overlay);
+		_light_overlay = 0xFFFFFFFF;
 	}
 
 	// Clear all font caches
@@ -2407,11 +2399,11 @@ bool GameVideo::UnloadTextures()
 //                if we deleted the last texture we bound using _BindTexture(),
 //                then set the last tex ID to 0xffffffff
 //-----------------------------------------------------------------------------
-bool GameVideo::_DeleteTexture(GLuint texID)
+bool GameVideo::_DeleteTexture(GLuint tex_ID)
 {
-	glDeleteTextures(1, &texID);
+	glDeleteTextures(1, &tex_ID);
 
-	if(_lastTexID == texID)
+	if(_lastTexID == tex_ID)
 		_lastTexID = 0xFFFFFFFF;
 
 	if(glGetError())
@@ -2436,8 +2428,7 @@ bool TexSheet::Unload()
 	}
 
 	// delete the texture
-	hoa_video::GameVideo *videoManager = hoa_video::GameVideo::SingletonGetReference();
-	if(!videoManager->_DeleteTexture(texID))
+	if(!VideoManager->_DeleteTexture(tex_ID))
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: _DeleteTexture() failed in TexSheet::Unload()!" << endl;
@@ -2460,14 +2451,14 @@ GLuint GameVideo::_CreateBlankGLTexture(int32 width, int32 height)
 
 	int32 error;
 
-	GLuint texID;
+	GLuint tex_ID;
 
-	glGenTextures(1, &texID);
+	glGenTextures(1, &tex_ID);
 	error = glGetError();
 
 	if(!error)   // if there's no error so far, attempt to bind texture
 	{
-		_BindTexture(texID);
+		_BindTexture(tex_ID);
 		error = glGetError();
 
 		// if the binding was successful, initialize the texture with glTexImage2D()
@@ -2480,7 +2471,7 @@ GLuint GameVideo::_CreateBlankGLTexture(int32 width, int32 height)
 
 	if(error != 0)   // if there's an error, delete the texture and return error code
 	{
-		_DeleteTexture(texID);
+		_DeleteTexture(tex_ID);
 
 		if(VIDEO_DEBUG)
 		{
@@ -2498,7 +2489,7 @@ GLuint GameVideo::_CreateBlankGLTexture(int32 width, int32 height)
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
 
-	return texID;
+	return tex_ID;
 }
 
 //-----------------------------------------------------------------------------
@@ -2517,8 +2508,7 @@ bool TexSheet::Reload()
 	}
 
 	// create new OpenGL texture
-	hoa_video::GameVideo *videoManager = hoa_video::GameVideo::SingletonGetReference();
-	GLuint tID = videoManager->_CreateBlankGLTexture(width, height);
+	GLuint tID = VideoManager->_CreateBlankGLTexture(width, height);
 
 	if(tID == 0xFFFFFFFF)
 	{
@@ -2527,12 +2517,12 @@ bool TexSheet::Reload()
 		return false;
 	}
 
-	texID = tID;
+	tex_ID = tID;
 
 	// now the hard part: go through all the images that belong to this texture
 	// and reload them again. (GameVideo's function, _ReloadImagesToSheet does this)
 
-	if(!videoManager->_ReloadImagesToSheet(this))
+	if(!VideoManager->_ReloadImagesToSheet(this))
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: CopyImagesToSheet() failed in TexSheet::Reload()!" << endl;
@@ -2543,12 +2533,6 @@ bool TexSheet::Reload()
 	return true;
 }
 
-
-//! \note Temporary: place this in an appropriate place in the private_video namespace
-struct MultiImageInfo {
-		ImageLoadInfo multi_image;
-		ImageLoadInfo image;
-};
 
 //-----------------------------------------------------------------------------
 // _ReloadImagesToSheet: helper function of the GameVideo class to
@@ -2561,6 +2545,12 @@ bool GameVideo::_ReloadImagesToSheet(TexSheet *sheet)
 	map<string, Image *>::iterator iImage     = _images.begin();
 	map<string, Image *>::iterator iImageEnd  = _images.end();
 
+	//! \brief Temporal struct for holding a multiimage information
+	struct MultiImageInfo {
+		ImageLoadInfo multi_image;	//!< \brief Whole pixels of an image holding subimages
+		ImageLoadInfo image;		//!< \brief Buffer that can hold a subimage of this multiimage
+	};
+
 	std::map <string, MultiImageInfo> multi_image_info;
 
 	bool success = true;
@@ -2571,18 +2561,18 @@ bool GameVideo::_ReloadImagesToSheet(TexSheet *sheet)
 		// Check if the current image belongs to this sheet
 		if(i->texture_sheet == sheet)
 		{
-			ImageLoadInfo loadInfo;
+			ImageLoadInfo load_info;
 
-			bool bMultiImage = ( i->tags.find("<X",0) != i->filename.npos);
+			bool is_multi_image = ( i->tags.find("<X",0) != i->filename.npos);
 
-			if (bMultiImage)	// Check if this is a multiimage and load as it
+			if (is_multi_image)	// Check if this is a multiimage and load as it
 			{
-				ImageLoadInfo pImage;
+				ImageLoadInfo image;
 
 				if (multi_image_info.find(i->filename) == multi_image_info.end())
 				{
 					// Load the image
-					if(!_LoadRawImage(i->filename, loadInfo))
+					if(!_LoadRawImage(i->filename, load_info))
 					{
 						if(VIDEO_DEBUG)
 							cerr << "VIDEO ERROR: _LoadRawImage() failed in _ReloadImagesToSheet()!" << endl;
@@ -2590,22 +2580,22 @@ bool GameVideo::_ReloadImagesToSheet(TexSheet *sheet)
 					}
 
 					// Copy the part of the image in a buffer
-					pImage.height = i->height;
-					pImage.width = i->width;
-					pImage.pixels = malloc(pImage.height * pImage.width * 4);
+					image.height = i->height;
+					image.width = i->width;
+					image.pixels = malloc(image.height * image.width * 4);
 
 					MultiImageInfo info;
-					info.multi_image = loadInfo;
-					info.image = pImage;
+					info.multi_image = load_info;
+					info.image = image;
 					multi_image_info[i->filename] = info;
 				}
 				else
 				{
-					loadInfo = multi_image_info[i->filename].multi_image;
-					pImage = multi_image_info[i->filename].image;
+					load_info = multi_image_info[i->filename].multi_image;
+					image = multi_image_info[i->filename].image;
 				}
 
-				if (!pImage.pixels)
+				if (!image.pixels)
 				{
 					if (VIDEO_DEBUG)
 						cerr << "VIDEO ERROR: run out of memory in _ReloadImageToSheet()" << endl;
@@ -2616,23 +2606,23 @@ bool GameVideo::_ReloadImagesToSheet(TexSheet *sheet)
 				pos0 = i->tags.find("<X", 0);
 				pos1 = i->tags.find('_', pos0);
 				uint32 x = atoi( i->tags.substr(pos0+2, pos1).c_str() );
-				uint32 rows = loadInfo.height / pImage.height;
+				uint32 rows = load_info.height / image.height;
 				pos0 = i->tags.find("<Y", 0);
 				pos1 = i->tags.find('_', pos0);
 				uint32 y = atoi( i->tags.substr(pos0+2, pos1).c_str() );
-				uint32 cols = loadInfo.width / pImage.width;
+				uint32 cols = load_info.width / image.width;
 
-				for (int row=0; row<pImage.height; row++)
+				for (int32 row=0; row<image.height; row++)
 				{
-					memcpy ((uint8*)pImage.pixels+4*pImage.width*row, (uint8*)loadInfo.pixels+(((x*loadInfo.height/rows)+row)*loadInfo.width+y*loadInfo.width/cols)*4, 4*pImage.width);
+					memcpy ((uint8*)image.pixels+4*image.width*row, (uint8*)load_info.pixels+(((x*load_info.height/rows)+row)*load_info.width+y*load_info.width/cols)*4, 4*image.width);
 				}
 
 				// Convert to grayscale if needed
 				if (i->tags.find("<G>",0) != i->filename.npos)
-					_ConvertImageToGrayscale(pImage, pImage);
+					_ConvertImageToGrayscale(image, image);
 
 				// Copy in the texture the image
-				if(!sheet->CopyRect(i->x, i->y, pImage))
+				if(!sheet->CopyRect(i->x, i->y, image))
 				{
 					if(VIDEO_DEBUG)
 						cerr << "VIDEO ERROR: sheet->CopyRect() failed in _ReloadImagesToSheet()!" << endl;
@@ -2641,7 +2631,7 @@ bool GameVideo::_ReloadImagesToSheet(TexSheet *sheet)
 			}
 			else		// Load this way if it as a normal image (one image in one file)
 			{
-				if(!_LoadRawImage(i->filename, loadInfo))
+				if(!_LoadRawImage(i->filename, load_info))
 				{
 					if(VIDEO_DEBUG)
 						cerr << "VIDEO ERROR: _LoadRawImage() failed in _ReloadImagesToSheet()!" << endl;
@@ -2650,17 +2640,17 @@ bool GameVideo::_ReloadImagesToSheet(TexSheet *sheet)
 
 				// Convert to grayscale if needed
 				if (i->tags.find("<G>",0) != i->filename.npos)
-					_ConvertImageToGrayscale(loadInfo, loadInfo);
+					_ConvertImageToGrayscale(load_info, load_info);
 
-				if(!sheet->CopyRect(i->x, i->y, loadInfo))
+				if(!sheet->CopyRect(i->x, i->y, load_info))
 				{
 					if(VIDEO_DEBUG)
 						cerr << "VIDEO ERROR: sheet->CopyRect() failed in _ReloadImagesToSheet()!" << endl;
 					success = false;
 				}
 
-				if (loadInfo.pixels)
-					free (loadInfo.pixels);
+				if (load_info.pixels)
+					free (load_info.pixels);
 			}
 		}
 
@@ -2691,7 +2681,7 @@ bool GameVideo::_SaveTempTextures()
 		// it's a temporary texture!!
 		if(image->tags.find("<T>") != string::npos)
 		{
-			image->texture_sheet->SaveImage(image);
+	//		image->texture_sheet->SaveImage(image);
 		}
 
 		++iImage;
@@ -2707,18 +2697,6 @@ bool GameVideo::_DeleteTempTextures()
 	return CleanDirectory("temp");
 }
 
-//-----------------------------------------------------------------------------
-// FIXME: Unused?  Wrong definition? SaveImage: saves the image to the given filename
-//-----------------------------------------------------------------------------
-bool TexSheet::SaveImage(Image *img)
-{
-	// uint8 *pixels = new uint8[width*height*4];
-	GameVideo *videoManager = GameVideo::SingletonGetReference();
-	videoManager->_BindTexture(texID);
-	//glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-
-	return false;
-}
 
 
 }  // namespace hoa_video
