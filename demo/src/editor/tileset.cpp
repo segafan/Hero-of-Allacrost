@@ -21,9 +21,9 @@ using namespace hoa_video;
 using namespace hoa_script;
 using namespace hoa_editor;
 
-TilesetTable::TilesetTable(QWidget* parent, const QString& name, TileDatabase* db)
+TilesetTable::TilesetTable(QWidget* parent, const QString& name)
 	: Q3Table(parent, (const char*) name)
-{
+{	
 	// Set some table properties.
 	setReadOnly(true);
 	setShowGrid(false);
@@ -32,47 +32,52 @@ TilesetTable::TilesetTable(QWidget* parent, const QString& name, TileDatabase* d
 	setLeftMargin(0);
 	
 	// Create filename from name.
-	std::list<DbTile> tiles;
-	if (name == "Global")
-		tiles = db->GetGlobalSet().GetTiles();
-	else
-	{
-		TileSet tset(db, name);
-		tiles = tset.GetTiles();
-	}
+	QString filename;
+	filename = name;
+	filename.append(".png").prepend("img/tilesets/");
 
 	// Set up the table.
-	int num_columns = visibleWidth() / TILE_WIDTH - 1;
-	setNumCols(num_columns);
-	setNumRows(static_cast<int> (ceil(
-			static_cast<double> (tiles.size()) / static_cast<double> (num_columns))));
+	//int num_columns = visibleWidth() / TILE_WIDTH - 1;
+	//setNumCols(num_columns);
+	setNumCols(16);
+	setNumRows(16);
+	//setNumRows(static_cast<int> (ceil(
+	//		static_cast<double> (tiles.size()) / static_cast<double> (num_columns))));
 	for (int i = 0; i < numRows(); i++)
 		setRowHeight(i, TILE_HEIGHT);
 	for (int i = 0; i < numCols(); i++)
 		setColumnWidth(i, TILE_WIDTH);
 
 	// Read in tiles and create table items.
-	int row = 0;
-	int col = 0;
-	for (std::list<DbTile>::const_iterator it=tiles.begin(); it!=tiles.end(); it++)
+	QRect rectangle;
+	QDir dir = QDir::current();
+	for (int row = 0; row < 16; row++)
 	{
-		QString tile_path = QString("img/tiles/"+(*it).file_name);
-		QPixmap tile_pixmap = QPixmap(tile_path);
-		setPixmap(row, col, tile_pixmap);
-		setText(row, col, tile_path);
-
-		col++;
-		if (col == numCols())
+		for (int col = 0; col < 16; col++)
 		{
-			col = 0;
-			row++;
-		} // end of the column has been reached
-	}	
-} // Tileset constructor
+			QImageReader reader(filename, "png");
+			rectangle.setRect(col * TILE_WIDTH, row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+			reader.setClipRect(rectangle);
+			QImage tile_img = reader.read();
+			if (!tile_img.isNull())
+			{
+				// FIXME: conversion from image to pixmap isn't working, so save the tile and then read it for now
+				//tile_pixmap.fromImage(tile_img);
+				if (!tile_img.save(QString("tile%1.png").arg(col + row * 16)))
+					qDebug("Saving error during tileset table creation");
+				QPixmap tile_pixmap(QString("tile%1.png").arg(col + row * 16));
+				setPixmap(row, col, tile_pixmap);
+				dir.remove(QString("tile%1.png").arg(col + row * 16));
+			} // image of the tile must not be null
+			else
+				qDebug(QString("%1").arg(reader.error()));
+		} // iterate through the columns of the tileset
+	} // iterate through the rows of the tileset
+} // TilesetTable constructor
 
 TilesetTable::~TilesetTable()
 {
-} // Tileset destructor
+} // TilesetTable destructor
 
 
 
@@ -156,10 +161,10 @@ void TileDatabase::Update(const QString& tile_dir_name)
 		if (_tiles.find(tile_file) == _tiles.end())
 		{
 			vector<StillImage> tile_vec;
-			if (!VideoManager->LoadMultiImage(tile_vec, tile_file.toStdString(), 16, 16))
-				qDebug("Failed to load multi-image.");
-			else
-				qDebug("Hooray! Seems to have worked...");
+//			if (!VideoManager->LoadMultiImage(tile_vec, tile_file.toStdString(), 16, 16))
+//				qDebug("Failed to load multi-image.");
+//			else
+//				qDebug("Hooray! Seems to have worked...");
 			DbTile new_tile(tile_file, 255);
 			_tiles.insert(std::pair<QString, DbTile> (tile_file, new_tile));
 			_global_set.AddTile(tile_file);

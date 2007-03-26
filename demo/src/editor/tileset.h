@@ -26,6 +26,8 @@
 #include <QMessageBox>
 #include <Q3Table>
 #include <QDir>
+#include <QImageReader>
+#include <QRect>
 
 //! All calls to the editor are wrapped in this namespace.
 namespace hoa_editor
@@ -43,7 +45,7 @@ class TilesetTable : public Q3Table
 {
 	public:
 		//! TilesetTable constructor. Name needs to be the name, not the filename.
-		TilesetTable(QWidget* parent, const QString& name, TileDatabase* db);    // constructor
+		TilesetTable(QWidget* parent, const QString& name);    // constructor
 		~TilesetTable();                                       // destructor
 
 		// TODO: implement some sort of dynamic table resizing on window resize

@@ -160,8 +160,6 @@ void Editor::_FileNew()
 {
 	if (_EraseOK())
 	{
-		_OpenTileDatabase();
-		
 		NewMapDialog* new_map = new NewMapDialog(this, "new_map");
 
 		if (new_map->exec() == QDialog::Accepted)
@@ -182,7 +180,7 @@ void Editor::_FileNew()
 			{
 				if (tiles->isOn())
 				{
-					_ed_tabs->addTab(new TilesetTable(_ed_widget, tiles->text(), _tile_db), tiles->text());
+					_ed_tabs->addTab(new TilesetTable(_ed_widget, tiles->text()), tiles->text());
 					_ed_scrollview->_map->tileset_list.push_back(tiles->text());
 				} // tileset must be selected
 				tiles = static_cast<Q3CheckListItem*> (tiles->nextSibling());
@@ -208,8 +206,6 @@ void Editor::_FileOpen()
 {
 	if (_EraseOK())
 	{
-		_OpenTileDatabase();
-		
 		// file to open
 		QString file_name = Q3FileDialog::getOpenFileName(
 			"dat/maps", "Maps (*.lua)", this, "file open",
@@ -235,7 +231,7 @@ void Editor::_FileOpen()
 
 			for (QStringList::ConstIterator it = _ed_scrollview->_map->tileset_list.begin();
 				it != _ed_scrollview->_map->tileset_list.end(); it++)
-				_ed_tabs->addTab(new TilesetTable(_ed_widget, *it, _tile_db), *it);
+				_ed_tabs->addTab(new TilesetTable(_ed_widget, *it), *it);
 			_ed_tabs->show();
 
 			_ed_scrollview->resize(_ed_scrollview->_map->GetWidth(),
@@ -323,7 +319,7 @@ void Editor::_FileResize()
 		{
 			if (tiles->isOn())
 			{
-				_ed_tabs->addTab(new TilesetTable(_ed_widget, tiles->text(), _tile_db), tiles->text());
+				_ed_tabs->addTab(new TilesetTable(_ed_widget, tiles->text()), tiles->text());
 				_ed_scrollview->_map->tileset_list.push_back(tiles->text());
 			} // tileset must be selected
 			tiles = static_cast<Q3CheckListItem*> (tiles->nextSibling());
@@ -624,17 +620,16 @@ NewMapDialog::NewMapDialog(QWidget* parent, const QString& name)
 	connect(_ok_pbut,     SIGNAL(released()), this, SLOT(accept()));
 	connect(_cancel_pbut, SIGNAL(released()), this, SLOT(reject()));
 
-	QDir tileset_dir("dat/tilesets");
+	QDir tileset_dir("img/tilesets");
 	_tileset_lview->addColumn("Tilesets");
-	Q3CheckListItem* global = new Q3CheckListItem(_tileset_lview, "Global", Q3CheckListItem::CheckBox);
-	global->setOn(true);
+//	Q3CheckListItem* global = new Q3CheckListItem(_tileset_lview, "Global", Q3CheckListItem::CheckBox);
+//	global->setOn(true);
 	for (uint32 i = 0; i < tileset_dir.count(); i++)
 	{
-		if (tileset_dir[i].contains("tileset") != 0)
-		{
-			(void) new Q3CheckListItem(_tileset_lview, tileset_dir[i].remove("tileset_").remove(".lua"),
-				Q3CheckListItem::CheckBox);
-		}
+//		if (tileset_dir[i].contains("tileset") != 0)
+//		{
+			(void) new Q3CheckListItem(_tileset_lview, tileset_dir[i].remove(".png"), Q3CheckListItem::CheckBox);
+//		}
 	} // looks for tileset files in the tileset directory
 	
 	_dia_layout->addWidget(_height_label, 0, 0);
@@ -818,7 +813,7 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 
 		case MOVE_TILE: // start moving a tile
 		{
-			_move_source_index=_tile_index;
+			_move_source_index = _tile_index;
 			break;
 		} // edit mode MOVE_TILE
 
