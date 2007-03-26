@@ -773,111 +773,123 @@ void InventoryWindow::_TEMP_ApplyItem() {
 // Updates the item list
 void InventoryWindow::_UpdateItemText()
 {
-// 	// Get the inventory items
-// 	map<uint32, GlobalObject*> inv = GlobalManager->GetInventory();
-//
-// 	// For item names
-// 	vector<ustring> inv_names;
-// 	// For iterating through items
-// 	map<uint32,GlobalObject*>::iterator i;
-// 	// Temp var to hold the current object
-// 	GlobalObject* obj;
-// 	// If the object is an item, cast and store here to check usage
-// 	GlobalItem* item;
-// 	// Temp var to hold option
-// 	string text;
-// 	// Determines the number of selections (see the for loops)
-// 	uint16 count = 0;
-//
-// 	//FIX ME - When video engine is fixed, take out MakeStandardString
-// 	switch (_item_categories.GetSelection()) {
-//
-// 		//Index all items
-// 		case ITEM_ALL:
-// 			for (i = inv.begin(), count = 0; i != inv.end(); i++, count++) {
-// 				obj = i->second;
-// 				if (obj->GetType() == GLOBAL_OBJECT_ITEM) {
-// 					item = (GlobalItem*)obj;
-// 					// NOTE: item->GetIconPath is defunct
-// 					text = "TEMP:insert icon" + MakeStandardString(item->GetName()) +
-// 						"<R><350>" + NumberToString(item->GetCount()) + "   ";
-// 					inv_names.push_back(MakeUnicodeString(text));
-// 					if (item->GetUsage() != GLOBAL_ITEM_USE_MENU) {
-// 						_inventory_items.EnableOption(count,false);
-// 					}
-// 				}
-// 			}
-// 			break;
-//
-// 		//Index menu items only
-// 		case ITEM_FIELD:
-// 			for (i = inv.begin(), count = 0; i != inv.end(); i++) {
-// 				obj = i->second;
-// 				if (obj->GetType() == GLOBAL_OBJECT_ITEM) {
-// 					item = (GlobalItem*)obj;
-// 					if (item->GetUsage() == GLOBAL_ITEM_USE_MENU) {
-// 						// NOTE: item->GetIconPath is defunct
-// 						text = "TEMP:insert icon" + MakeStandardString(item->GetName()) +
-// 							"<R><350>" + NumberToString(item->GetCount()) + "   ";
-// 						inv_names.push_back(MakeUnicodeString(text));
-// 						count++;
-// 					}
-// 				}
-// 			}
-// 			break;
-//
-// 		//Index battle items only
-// 		case ITEM_BATTLE:
-// 			for (i = inv.begin(), count = 0; i != inv.end(); i++) {
-// 				obj = i->second;
-// 				if (obj->GetType() == GLOBAL_OBJECT_ITEM) {
-// 					item = (GlobalItem*)obj;
-// 					if (item->GetUsage() == GLOBAL_ITEM_USE_BATTLE) {
-// 						// NOTE: item->GetIconPath is defunct
-// 						text = "TEMP:insert icon" + MakeStandardString(item->GetName()) +
-// 							"<R><350>" + NumberToString(item->GetCount()) + "   ";
-// 						inv_names.push_back(MakeUnicodeString(text));
-// 						_inventory_items.EnableOption(count,false);
-// 						count++;
-// 					}
-// 				}
-// 			}
-// 			break;
-//
-// 		//Index equipment only
-// 		case ITEM_EQUIPMENT:
-// 			for (i = inv.begin(), count = 0; i != inv.end(); i++) {
-// 				obj = i->second;
-// 				if (obj->GetType() >= GLOBAL_OBJECT_WEAPON &&
-// 					obj->GetType() <= GLOBAL_OBJECT_LEG_ARMOR) {
-// 						/*if (item->GetType() & GLOBAL_WEAPON) {
-// 							item = (GlobalWeapon*)obj;
-// 						}
-// 						else {
-// 							item = (GlobalArmor*)obj;
-// 						}*/
-// 						// NOTE: item->GetIconPath is defunct
-// 						text = "TEMP:insert icon" + MakeStandardString(obj->GetName()) +
-// 							"<R><350>" + NumberToString(obj->GetCount()) + "   ";
-// 						inv_names.push_back(MakeUnicodeString(text));
-// 						_inventory_items.EnableOption(count,false);
-// 						count++;
-// 				}
-// 			}
-// 			break;
-//
-// 		case ITEM_KEY:
-// 			break;
-// 	}
-//
-// 	_inventory_items.SetSize(1,count);
-// 	_inventory_items.SetOptions(inv_names);
-//
-// 	// Make sure we have at least one item before setting selection
-// 	if (inv.size() > 0) {
-// 		_inventory_items.SetSelection(0);
-// 	}
-//
+	// Get the inventory items
+	std::vector<GlobalItem*>* invItems = GlobalManager->GetInventoryItems();
+	std::vector<GlobalWeapon*>* invWeapons = GlobalManager->GetInventoryWeapons();
+	std::vector<GlobalArmor*>* invTorsoArmor = GlobalManager->GetInventoryTorsoArmor();
+	std::vector<GlobalArmor*>* invHeadArmor = GlobalManager->GetInventoryHeadArmor();
+	std::vector<GlobalArmor*>* invArmArmor = GlobalManager->GetInventoryArmArmor();
+	std::vector<GlobalArmor*>* invLegArmor = GlobalManager->GetInventoryLegArmor();
+	std::vector<GlobalKeyItem*>* invKeyItems = GlobalManager->GetInventoryKeyItems();
+
+
+	// For item names
+	std::vector<ustring> inv_names;
+	// For iterating through items
+	std::vector<GlobalItem*>::iterator i;
+	std::vector<GlobalWeapon*>::iterator i_weapon;
+	std::vector<GlobalArmor*>::iterator i_armor;
+	std::vector<GlobalKeyItem*>::iterator i_key;
+
+	// temporary object storage variables
+	GlobalItem* item;
+	GlobalWeapon* weapon;
+	GlobalArmor* armor;
+	GlobalKeyItem* key_item;
+
+	// Temp var to hold option
+	string text;
+	// Determines the number of selections (see the for loops)
+	uint16 count = 0;
+
+	//FIX ME - When video engine is fixed, take out MakeStandardString
+	switch (_item_categories.GetSelection()) {
+
+		//Index all items
+		case ITEM_ALL:
+			for (i = invItems->begin(), count = 0; i != invItems->end(); i++) {
+				item = *i;
+				text = "<" + item->GetIconImage().GetFilename() + "><32>" + MakeStandardString(item->GetName()) + "<R><350>" + NumberToString(item->GetCount()) + "   ";
+				inv_names.push_back(MakeUnicodeString(text));
+				count++;
+			}
+			break;
+
+		//Index menu items only
+		case ITEM_FIELD:
+			for (i = invItems->begin(), count = 0; i != invItems->end(); i++) {
+				item = *i;
+//				if (item->GetUsage() == GLOBAL_ITEM_USE_MENU) {
+					text = "<" + item->GetIconImage().GetFilename() + "><32>" + MakeStandardString(item->GetName()) + "<R><350>" + NumberToString(item->GetCount()) + "   ";
+					inv_names.push_back(MakeUnicodeString(text));
+					count++;
+//				}
+			}
+			break;
+
+		//Index battle items only
+		case ITEM_BATTLE:
+			for (i = invItems->begin(), count = 0; i != invItems->end(); i++) {
+				item = *i;
+//				if (item->GetUsage() == GLOBAL_ITEM_USE_BATTLE) {
+					text = "<" + item->GetIconImage().GetFilename() + "><32>" + MakeStandardString(item->GetName()) + "<R><350>" + NumberToString(item->GetCount()) + "   ";
+					inv_names.push_back(MakeUnicodeString(text));
+					count++;
+//				}
+			}
+			break;
+
+		//Index equipment only
+		case ITEM_EQUIPMENT:
+/*			for (i_weapon = invWeapons->begin(), count = 0; i_weapon != invWeapons->end(); i++) {
+				weapon = *i_weapon;
+				// NOTE: item->GetIconPath is defunct
+				text = "TEMP:insert icon" + MakeStandardString(weapon->GetName()) +
+					"<R><350>" + NumberToString(weapon->GetCount()) + "   ";
+				inv_names.push_back(MakeUnicodeString(text));
+				count++;
+			}
+
+			for (i_armor = invHeadArmor->begin(), count = 0; i_armor != invHeadArmor->end(); i++) {
+				armor = *i_armor;
+				// NOTE: item->GetIconPath is defunct
+				text = "TEMP:insert icon" + MakeStandardString(armor->GetName()) +
+					"<R><350>" + NumberToString(armor->GetCount()) + "   ";
+				inv_names.push_back(MakeUnicodeString(text));
+				count++;
+			}
+
+			for (i_armor = invTorsoArmor->begin(), count = 0; i_armor != invTorsoArmor->end(); i++) {
+				armor = *i_armor;
+				// NOTE: item->GetIconPath is defunct
+				text = "TEMP:insert icon" + MakeStandardString(armor->GetName()) +
+					"<R><350>" + NumberToString(armor->GetCount()) + "   ";
+				inv_names.push_back(MakeUnicodeString(text));
+				count++;
+			}
+*/
+			break;
+
+		case ITEM_KEY:
+			for (i_key = invKeyItems->begin(), count = 0; i_key != invKeyItems->end(); i_key++) {
+				key_item = *i_key;
+				// NOTE: item->GetIconPath is defunct
+				text = "TEMP:insert icon" + MakeStandardString(key_item->GetName()) +
+					"<R><350>" + NumberToString(key_item->GetCount()) + "   ";
+				inv_names.push_back(MakeUnicodeString(text));
+				count++;
+			}
+			break;
+	}
+
+	_inventory_items.SetSize(1,count);
+	_inventory_items.SetOptions(inv_names);
+
+	// Make sure we have at least one item before setting selection
+	if (invItems->size() > 0) {
+		_inventory_items.SetSelection(0);
+	}
+
 } // void InventoryWindow::UpdateItemText()
 
 
