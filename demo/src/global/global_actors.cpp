@@ -226,6 +226,7 @@ GlobalCharacter::GlobalCharacter(uint32 id) {
 
 GlobalEnemy::GlobalEnemy(uint32 id) {
 	_id = id;
+	_experience_level = 0;
 
 	// (1): Use the id member to determine the name of the data file that the enemy is defined in
 	string file_ext;
@@ -240,6 +241,7 @@ GlobalEnemy::GlobalEnemy(uint32 id) {
 	ScriptDescriptor enemy_data;
 	if (enemy_data.OpenFile(filename.c_str(), SCRIPT_READ) == false) {
 		cerr << "GLOBAL ERROR: failed to load enemy data file: " << _filename << endl;
+		_id = 0;
 		return;
 	}
 	enemy_data.ReadOpenTable("enemies");
@@ -261,6 +263,7 @@ GlobalEnemy::GlobalEnemy(uint32 id) {
 	// Attempt to load the MultiImage, which should contain one row and four columns of images
 	if (VideoManager->LoadMultiImage(_sprite_frames, sprite_filename, 1, 4) == false) {
 		cerr << "GLOBAL ERROR: failed to load sprite frames for enemy: " << sprite_filename << endl;
+		_id = 0;
 		return;
 	}
 

@@ -43,11 +43,11 @@ namespace private_battle {
 // *****************************************************************************
 // BattleCharacterActor class
 // *****************************************************************************
-BattleCharacterActor::BattleCharacterActor(GlobalCharacter * character, float XLocation, float YLocation) :
+BattleCharacterActor::BattleCharacterActor(GlobalCharacter * character, float x_location, float y_location) :
 	GlobalCharacter(character->GetID()),
 	global_character_(character),
-	_x_location(XLocation),
-	_y_location(YLocation),
+	_x_location(x_location),
+	_y_location(y_location),
 	_x_origin(_x_location),
 	_y_origin(_y_location),
 	_total_time_damaged(0),
@@ -310,10 +310,10 @@ void BattleCharacterActor::TakeDamage(uint32 damage)
 ////////////////////////////////////////////////////////////////////////////////
 // EnemyActor class
 ////////////////////////////////////////////////////////////////////////////////
-BattleEnemyActor::BattleEnemyActor(uint32 id, float XLocation, float YLocation) :
-	GlobalEnemy(id),
-	_x_location(XLocation),
-	_y_location(YLocation),
+BattleEnemyActor::BattleEnemyActor(GlobalEnemy enemy, float x_location, float y_location) :
+	GlobalEnemy(enemy),
+	_x_location(x_location),
+	_y_location(y_location),
 	_x_origin(_x_location),
 	_y_origin(_y_location),
 	_total_time_damaged(0),

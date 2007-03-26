@@ -478,11 +478,10 @@ void BootMode::_SetupMainMenu() {
 
 	// Add all the needed menu options to the main menu
 	_main_menu.AddOption(MakeUnicodeString("New Game"), &BootMode::_OnNewGame);
-	_main_menu.AddOption(MakeUnicodeString("Load Game")/*, &BootMode::_OnLoadGame*/); // Battle mode removed! "Take that visage!"
+	_main_menu.AddOption(MakeUnicodeString("Load Game"));
 	_main_menu.AddOption(MakeUnicodeString("Options"), &BootMode::_OnOptions);
 	_main_menu.AddOption(MakeUnicodeString("Credits"), &BootMode::_OnCredits);
 	_main_menu.AddOption(MakeUnicodeString("Quit"), &BootMode::_OnQuit);
-
 	_main_menu.AddOption(MakeUnicodeString("Battle"), &BootMode::_OnBattleDebug);
 	_main_menu.AddOption(MakeUnicodeString("Menu"), &BootMode::_OnMenuDebug);
 	_main_menu.AddOption(MakeUnicodeString("Shop"), &BootMode::_OnShopDebug);
@@ -624,6 +623,10 @@ void BootMode::_OnBattleDebug() {
 	ModeManager->Pop();
 	GlobalManager->AddCharacter(GLOBAL_CHARACTER_CLAUDIUS);
 	BattleMode *BM = new BattleMode();
+	BM->AddEnemy(1);
+	BM->AddEnemy(2);
+	BM->AddEnemy(3);
+	BM->AddEnemy(4);
 	ModeManager->Push(BM);
 }
 

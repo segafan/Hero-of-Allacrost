@@ -80,6 +80,14 @@ enum CURSOR_STATE {
 //! When a battle first starts, this is the wait time for the slowest actor
 const uint32 MAX_INIT_WAIT_TIME = 8000;
 
+/** \brief Finds the average experience level of all members in the party
+*** \return A floating point value representing the average level|
+***
+*** This calculation includes both characters in the active party and those in
+*** the reservers.
+**/
+float ComputeAveragePartyLevel();
+
 /** ****************************************************************************
 *** \brief Representation of a single, scripted action to be executed in battle
 ***
@@ -133,7 +141,12 @@ private:
 /** ****************************************************************************
 *** \brief Manages all objects, events, and scenes that occur in a battle
 ***
-***
+*** To create a battle, first you must create an instance of this class. Next,
+*** the battle must be populated with enemies by using the AddEnemy() methods
+*** prescribed below. You must then call the InitializeEnemies() method so that
+*** the added enemies are ready for the battle to come. This should all be done
+*** prior the Reset() method being called. If you fail to add any enemies,
+*** an error will occur and the battle will self-terminate itself.
 *** ***************************************************************************/
 class BattleMode : public hoa_mode_manager::GameMode {
 	friend class private_battle::BattleActor;
@@ -143,6 +156,7 @@ class BattleMode : public hoa_mode_manager::GameMode {
 
 public:
 	BattleMode();
+
 	~BattleMode();
 
 	/**
@@ -151,11 +165,38 @@ public:
 	//@{
 	//! Resets appropriate class members. Called whenever BattleMode is made the active game mode.
 	void Reset();
+	
 	//! This method calls different update functions depending on the battle state.
 	void Update();
+
 	//! This method calls different draw functions depending on the battle state.
 	void Draw();
 	//@}
+
+	/** \brief Adds a new active enemy to the battle field
+	*** \param new_enemy A copy of the GlobalEnemy object to add to the battle
+	*** This method uses the GlobalEnemy copy constructor to create a copy of the enemy. The GlobalEnemy
+	*** passed as an argument should be in its default loaded state (that is, it should have an experience
+	*** level equal to zero).
+	**/
+	void AddEnemy(hoa_global::GlobalEnemy new_enemy);
+
+	/** \brief Adds a new active enemy to the battle field
+	*** \param new_enemy_id The id number of the new enemy to add to the battle
+	*** This method works precisely the same was as the method which takes a GlobalEnemy argument,
+	*** only this version will construct the global enemy just using its id (meaning that it has
+	*** to open up the Lua file which defines the enemy). If the GlobalEnemy has already been
+	*** defined somewhere else, it is better to pass it in to the alternative definition of this
+	*** function.
+	**/
+	void AddEnemy(uint32 new_enemy_id)
+		{ AddEnemy(hoa_global::GlobalEnemy(new_enemy_id)); }
+
+	/** \brief Prepares all added enemies for the battle to come
+	*** Any enemies added after this call is made will <b>not</b> be present in the battle, at least
+	*** until this method is called once more.
+	**/
+	void InitializeEnemies();
 
 	//! Are we performing an action
 	bool _IsPerformingScript() const
@@ -177,7 +218,7 @@ public:
 		{ return _character_actors; }
 
 	//! Returns all targeted actors
-	//inline std::deque<private_battle::IBattleActor*> GetSelectedActors() const
+	//std::deque<private_battle::IBattleActor*> GetSelectedActors() const
 	//	{ return _selected_actor_arguments; }
 
 	//! Is the battle over?
@@ -196,10 +237,14 @@ public:
 
 	uint32 GetNumberOfCharacters() const
 		{ return _character_actors.size(); }
+
 	uint32 GetNumberOfEnemies() const
 		{ return _enemy_actors.size(); }
+
 	int32 GetIndexOfFirstAliveEnemy() const;
+
 	int32 GetIndexOfLastAliveEnemy() const;
+
 	int32 GetIndexOfFirstIdleCharacter() const;
 
 	//! Returns the player actor at the deque location 'index'
@@ -222,6 +267,9 @@ public:
 	inline private_battle::ScriptEvent* GetActiveScript() { return _active_se; }
 
 private:
+	//! When set to true, all preparations have been made and the battle is ready to begin
+	bool _initialized;
+
 	//! Set to true whenever an actor (player or enemy) is performing an action
 	bool _performing_script;
 
@@ -247,6 +295,7 @@ private:
 	//@{
 	//! The full-screen, static background image to be used for the battle
 	hoa_video::StillImage _battle_background;
+
 	//! Container for images (both still and animated) that are to be drawn in the background
 	std::vector<hoa_video::ImageDescriptor*> _background_images;
 	//@}
@@ -266,6 +315,7 @@ private:
 	*** the battle from the beginning. This data will be used to restore BattleMode::_enemy_actors.
 	**/
 	std::deque<hoa_global::GlobalEnemy> _original_enemies;
+
 	/** \brief Contains the original set of characters and their status
 	*** This data is retained in the case that the player loses the battle and chooses to re-try
 	*** the battle from the beginning. This data will be used to restore BattleMode::_character_actors.
@@ -279,6 +329,7 @@ private:
 	*** that have zero hit points.
 	**/
 	std::deque<private_battle::BattleCharacterActor*> _character_actors;
+
 	/** \brief Enemies that are presently fighting in the battle
 	*** There is a theoretical limit on how many enemies may fight in one battle, but that is dependent upon
 	*** the sprite size of all active enemies and this limit will be detected by the BattleMode class.
@@ -415,10 +466,8 @@ private:
 	void _CreateCharacterActors();
 	void _CreateEnemyActors();
 
-	/*
-	 * \brief Initializes battle actors
-	 */
-	void _InitBattleActors();
+	//! Initializes all data necessary for the battle to begin
+	void _Initialize();
 
 	//! Shutdown the battle mode
 	void _ShutDown();
@@ -441,12 +490,16 @@ private:
 	//@{
 	//! Updates which character the player has chosen to select
 	void _UpdateCharacterSelection();
+
 	//! Processes user input when the player's cursor is on the action type menu
 	void _UpdateActionTypeMenu();
+
 	//! Processes user input when the player's cursor is on the action list menu
 	void _UpdateActionListMenu();
+
 	//! Processes user input when the player's cursor is selecting a target for an action
 	void _UpdateTargetSelection();
+
 	//! Processes user input when the player's cursor is selecting an attack point for an action
 	void _UpdateAttackPointSelection();
 	//@}
@@ -460,31 +513,37 @@ private:
 	*** (battle sprites, menus, etc.). 
 	**/
 	void _DrawBackgroundVisuals();
+
 	/** \brief Draws all character and enemy sprites as well as any sprite visuals
 	*** In addition to the sprites themselves, this function draws special effects and indicators for the sprites.
 	*** For example, the actor selector image and any visible action effects like magic.
 	**/
 	void _DrawSprites();
+
 	/** \brief Draws the universal time meter and the portraits attached to it
 	*** Portraits are retrieved from the battle actors.
 	**/
 	void _DrawTimeMeter();
+
 	/** \brief Draws the bottom menu visuals and information
 	*** The bottom menu contains a wide array of information, including swap cards, character portraits, character names,
 	*** and both character and enemy status. This menu is perpetually drawn on the battle screen.
 	**/
 	void _DrawBottomMenu();
+
 	/** \brief Draws the left menu for action types and action lists
 	*** The action type and action list menus are only drawn when a character is able to take an action in battle. Either
 	*** the action type or the action list menu is drawn at any given time (they do not exist simulatenously).
 	**/
 	void _DrawActionMenu();
+
 	/** \brief Draws the upper menu for dialogues that occur in-battle
 	*** This menu is only drawn when a dialogue takes place in battle. In-battle dialogues are a rare-occurence, so this
 	*** menu is not drawn very often.
 	*** \TODO Dialogues are currently not supported in battles. The feature will be added sometime in the future.
 	**/
 	void _DrawDialogueMenu();
+
 	/** \brief Draws the small window above the action list
 	*** This window is for indicatinig what your current action is, in case you forgot what you chose
 	**/
