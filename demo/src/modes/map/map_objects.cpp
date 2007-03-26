@@ -590,9 +590,6 @@ bool EnemySprite::Load() {
 	if (VideoManager->LoadMultiImage(frames, sprite_sheet, multi_img_rows, multi_img_cols) == false) {
 		return false;
 	}
-	else {
-		cout << "MAP: Loaded MulitImage successfully!" << endl;
-	}
 
 	vector<int32> frames_vector;
 	//Load Standing South

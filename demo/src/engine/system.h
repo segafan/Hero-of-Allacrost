@@ -60,10 +60,16 @@ public:
 
 	/** \brief Initializes the timers used in the game.
 	***
-	*** This function should only be called \b once in main.cpp, just before the main game loop begins.
+	*** This function should only be called <b>once</b> in main.cpp, just before the main game loop begins.
 	**/
 	void InitializeTimers();
-	//! Updates the game time variables.
+
+	/** \brief Updates the game timer variables.
+	*** 
+	*** This function should only be called <b>once</b> for each cycle through the main game loop. Since
+	*** it is called inside the loop in main.cpp, you should have no reason to call this function anywhere
+	*** else.
+	**/
 	void UpdateTimers();
 
 	/** \brief Retrieves the amount of time that the game should be updated by for time-based movement.

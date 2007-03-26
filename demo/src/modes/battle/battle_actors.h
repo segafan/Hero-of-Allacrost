@@ -150,7 +150,7 @@ public:
 *** ***************************************************************************/
 class BattleCharacterActor : public hoa_global::GlobalCharacter, public IBattleActor {
 public:
-	BattleCharacterActor(hoa_global::GlobalCharacter * character, float XLocation, float YLocation);
+	BattleCharacterActor(hoa_global::GlobalCharacter * character, float x_location, float y_location);
 
 	virtual ~BattleCharacterActor();
 
@@ -175,7 +175,7 @@ public:
 
 	//! Is the character queued to attack?
 	bool IsQueuedToPerform() const
-	{ return _is_queued_to_perform; }
+		{ return _is_queued_to_perform; }
 
 	// Sets queued to perform
 	void SetQueuedToPerform(bool QueuedToPerform)
@@ -184,33 +184,33 @@ public:
 	//! \name Getters and setters for the current and the original coordinates
 	//@{
 	float GetXLocation() const
-	{ return _x_location; }
+		{ return _x_location; }
 
 	float GetYLocation() const
-	{ return _y_location; }
+		{ return _y_location; }
 
 	float GetXOrigin() const
-	{ return _x_origin; }
+		{ return _x_origin; }
 
 	float GetYOrigin() const
-	{ return _y_origin; }
+		{ return _y_origin; }
 
 	void SetXLocation(float x_location)
-	{ _x_location = x_location; }
+		{ _x_location = x_location; }
 
 	void SetYLocation(float y_location)
-	{ _y_location = y_location; }
+		{ _y_location = y_location; }
 
 	void SetXOrigin(float x_origin)
-	{ _x_origin = x_origin; }
+		{ _x_origin = x_origin; }
 
 	void SetYOrigin(float y_origin)
-	{ _y_origin = y_origin; }
+		{ _y_origin = y_origin; }
 	//@}
 
 	// Gets a pointer to the GlobalActor
 	virtual hoa_global::GlobalCharacter * GetActor()
-	{ return global_character_; }
+		{ return global_character_; }
 
 	// \brief Sets the location of the time meter portrait
 	// \param new_val new value for the location
@@ -287,7 +287,7 @@ private:
 *** ***************************************************************************/
 class BattleEnemyActor : public hoa_global::GlobalEnemy, public IBattleActor {
 public:
-	BattleEnemyActor(uint32 id, float XLocation, float YLocation);
+	BattleEnemyActor(GlobalEnemy enemy, float x_location, float y_location);
 
 	virtual ~BattleEnemyActor();
 
@@ -312,42 +312,42 @@ public:
 
 	//! Is the enemy queued to attack?
 	bool IsQueuedToPerform() const
-	{ return _is_queued_to_perform; }
+		{ return _is_queued_to_perform; }
 
 	// Sets queued to perform
 	void SetQueuedToPerform(bool QueuedToPerform)
-	{ _is_queued_to_perform = QueuedToPerform; }
+		{ _is_queued_to_perform = QueuedToPerform; }
 
 	//! \name Getters and setters for the current and the original coordinates
 	//@{
 	float GetXLocation() const
-	{ return _x_location; }
+		{ return _x_location; }
 
 	float GetYLocation() const
-	{ return _y_location; }
+		{ return _y_location; }
 
 	float GetXOrigin() const
-	{ return _x_origin; }
+		{ return _x_origin; }
 
 	float GetYOrigin() const
-	{ return _y_origin; }
+		{ return _y_origin; }
 
 	void SetXLocation(float x_location)
-	{ _x_location = x_location; }
+		{ _x_location = x_location; }
 
 	void SetYLocation(float y_location)
-	{ _y_location = y_location; }
+		{ _y_location = y_location; }
 
 	void SetXOrigin(float x_origin)
-	{ _x_origin = x_origin; }
+		{ _x_origin = x_origin; }
 
 	void SetYOrigin(float y_origin)
-	{ _y_origin = y_origin; }
+		{ _y_origin = y_origin; }
 	//@}
 
 	//! Gets a pointer to the GlobalActor
-	virtual hoa_global::GlobalActor * GetActor()
-	{ return this; }
+	virtual hoa_global::GlobalActor* GetActor()
+		{ return this; }
 
 	//! \brief Sets the location of the time meter portrait
 	//! \param new_val new value for the location

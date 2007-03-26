@@ -209,6 +209,9 @@ public:
 
 	//! \name Class member access functions
 	//@{
+	uint32 GetID() const
+		{ return _id; }
+
 	hoa_utils::ustring GetName() const
 		{ return _name; }
 
@@ -504,9 +507,6 @@ public:
 	std::string GetFilename() const
 		{ return _filename; }
 
-	uint32 GetID() const
-		{ return _id; }
-
 	uint32 GetExperienceForNextLevel() const
 		{ return _experience_next_level; }
 
@@ -554,11 +554,6 @@ protected:
 
 	//! \brief The name used to retrieve the characters's data and other information from various sources
 	std::string _filename;
-
-	/** \brief An identification number for the character
-	*** Refer to the Game Character Type constants at the top of this file
-	**/
-	uint32 _id;
 
 	/** \brief The skills that the character may use
 	*** Skills are broken up into three types: attack, defense, and support. There is really no distinguishment
@@ -675,12 +670,6 @@ public:
 protected:
 	//! \brief The name used to retrieve the enemy's data and other information
 	std::string _filename;
-
-	/** \brief A unique identification number for the enemy type
-	*** This only identifies the type of enemy. It will not distinguish between two enemies of the same type
-	*** (e.g., two spiders). It is used to find the enemy's data in a script file.
-	**/
-	uint32 _enemy_id;
 
 	//! \brief The number of experience points that the party is given when the enemy is defeated
 	uint32 _experience_points;

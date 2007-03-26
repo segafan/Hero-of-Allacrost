@@ -115,6 +115,7 @@ void ScriptEvent::RunScript() {
 ////////////////////////////////////////////////////////////////////////////////
 
 BattleMode::BattleMode() :
+	_initialized(false),
 	_performing_script(false),
 	_active_se(NULL),
 	_battle_over(false),
@@ -128,9 +129,12 @@ BattleMode::BattleMode() :
 	_action_menu_window(NULL),
 	_action_list_menu(NULL),
 	_current_number_swaps(0),
-	_min_agility(9999),
-	_swap_countdown_timer(300000) // 5 minutes
+	_swap_countdown_timer(300000), // 5 minutes
+	_min_agility(9999)
 {
+	if (BATTLE_DEBUG)
+		cout << "BATTLE: BattleMode constructor invoked" << endl;
+
 	std::vector <hoa_video::StillImage> attack_point_indicator;
 	StillImage frame;
 	frame.SetDimensions(16, 16);
@@ -235,9 +239,6 @@ BattleMode::BattleMode() :
  	_battle_lose_menu.SetSelection(0); // This line may be causing a seg-fault!
 
 	_TEMP_LoadTestData();
-
-	_actor_index = GetIndexOfFirstIdleCharacter();
-	// TODO: From the average level of the party, level up all enemies passed in
 } // BattleMode::BattleMode()
 
 
@@ -302,13 +303,48 @@ BattleMode::~BattleMode() {
 
 void BattleMode::Reset() {
 	current_battle = this;
+
 	VideoManager->SetCoordSys(0.0f, static_cast<float>(SCREEN_LENGTH * TILE_SIZE),
 		0.0f, static_cast<float>(SCREEN_HEIGHT * TILE_SIZE));
 	VideoManager->SetFont("battle");
+
 	if (_battle_music[0].IsPlaying() == false) {
 		_battle_music[0].PlayMusic();
 	}
+
+	if (_initialized == false) {
+		_Initialize();
+	}
 }
+
+
+void BattleMode::AddEnemy(GlobalEnemy new_enemy) {
+	// (1): Don't add the enemy if it has an invalid ID or an experience level that is not zero
+	if (new_enemy.GetID() < 1) {
+		if (BATTLE_DEBUG) {
+			cerr << "BATTLE WARNING: attempted to add a new enemy with an invalid id (0)."
+				<< "The enemy was not added to the battle." << endl;
+		}
+		return;
+	}
+	if (new_enemy.GetExperienceLevel() != 0) {
+		if (BATTLE_DEBUG) {
+			cerr << "BATTLE WARNING: attempted to add a new enemy that had already been initialized to experience level "
+				<< new_enemy.GetExperienceLevel() << ". The enemy was not added to the battle." << endl;
+		}
+	}
+
+	// (2): Level the enemy up to be within a reasonable range of the party's strength
+	new_enemy.LevelSimulator(2); // TODO: use guassian random variable and average party xp level to set
+
+	// (3): Hold a copy of this enemy in case the battle needs to be restarted
+	_original_enemies.push_back(new_enemy);
+
+	// (4): Construct the enemy battle actor to be placed on the battle field
+	BattleEnemyActor* enemy_actor= new BattleEnemyActor(new_enemy, static_cast<float>(RandomBoundedInteger(400, 600)), static_cast<float>(RandomBoundedInteger(200, 400)));
+	_enemy_actors.push_back(enemy_actor);
+}
+
 
 
 void BattleMode::_TEMP_LoadTestData() {
@@ -358,87 +394,36 @@ void BattleMode::_TEMP_LoadTestData() {
 	_battle_sounds[2].LoadSound("snd/skeleton_attack.wav");
 	_battle_sounds[3].LoadSound("snd/sword_swipe.wav");
 	_battle_sounds[4].LoadSound("snd/snake_attack.wav");
-
-	// Construct all battle actors
-	_CreateCharacterActors();
-	_CreateEnemyActors();
-
-	_InitBattleActors();
 }
 
 
 
-void BattleMode::_CreateCharacterActors() {
-	_character_actors.clear();
 
-	if (GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS) == NULL) {
-		cerr << "BATTLE ERROR: could not retrieve Claudius character" << endl;
-		_ShutDown();
-	}
-	else {
-		BattleCharacterActor * claudius = new BattleCharacterActor(GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS), 256, 320);
-		_character_actors.push_back(claudius);
-		_selected_character = claudius;
-		_actor_index = GetIndexOfCharacter(claudius);
-		//claudius->ResetWaitTime();
-	}
-} // void BattleMode::_CreateCharacterActors()
-
-
-
-void BattleMode::_CreateEnemyActors() {
-
-	while (_enemy_actors.empty())
-	{
-		// Create the Green Slime EnemyActor
-		if (Probability(50))
-		{
-			BattleEnemyActor * green_slime = new BattleEnemyActor(1, static_cast<float> (RandomBoundedInteger(400, 600)), static_cast<float> (RandomBoundedInteger(200, 400)));
-			green_slime->SetName(MakeUnicodeString("Green Slime"));
-			green_slime->LevelSimulator(2);
-			//green_slime->GetWaitTime()->SetDuration(10000);
-			//green_slime->ResetWaitTime();
-			_enemy_actors.push_back(green_slime);
-		}
-
-		// Create the Spider EnemyActor
-		if (Probability(50))
-		{
-			BattleEnemyActor * spider = new BattleEnemyActor(2, static_cast<float> (RandomBoundedInteger(400, 600)), static_cast<float> (RandomBoundedInteger(200, 400)));
-			spider->SetName(MakeUnicodeString("Spider"));
-			spider->LevelSimulator(2);
-			//spider->GetWaitTime()->SetDuration(9000);
-			//spider->ResetWaitTime();
-			_enemy_actors.push_back(spider);
-		}
-
-		// Create the Snake EnemyActor
-		if (Probability(50))
-		{
-			BattleEnemyActor * snake = new BattleEnemyActor(3, static_cast<float> (RandomBoundedInteger(400, 600)), static_cast<float> (RandomBoundedInteger(200, 400)));
-			snake->SetName(MakeUnicodeString("Snake"));
-			snake->LevelSimulator(2);
-			//snake->GetWaitTime()->SetDuration(8000);
-			//snake->ResetWaitTime();
-			_enemy_actors.push_back(snake);
-		}
-
-		// Create the Skeleton EnemyActor
-		if (Probability(50))
-		{
-			BattleEnemyActor * skeleton = new BattleEnemyActor(4, static_cast<float> (RandomBoundedInteger(400, 600)), static_cast<float> (RandomBoundedInteger(200, 400)));
-			skeleton->SetName(MakeUnicodeString("Skeleton"));
-			skeleton->LevelSimulator(2);
-			//skeleton->GetWaitTime()->SetDuration(7000);
-			//skeleton->ResetWaitTime();
-			_enemy_actors.push_back(skeleton);
-		}
-	}
-}
-
-void BattleMode::_InitBattleActors()
+void BattleMode::_Initialize()
 {
-	//Loop through and find the actor with the lowest agility
+	// (1): Construct all character battle actors from the active party
+	GlobalParty* active_party = GlobalManager->GetActiveParty();
+	if (active_party->GetPartySize() == 0) {
+		if (BATTLE_DEBUG) 
+			cerr << "BATTLE ERROR: In BattleMode::_Initialize(), the size of the active party was zero" << endl;
+		ModeManager->Pop(); // Self-destruct the battle mode
+		return;
+	}
+	// TODO: implement this later
+	for (uint32 i = 0; i < active_party->GetPartySize(); i++) {
+		GlobalCharacter* new_character = dynamic_cast<GlobalCharacter*>(active_party->GetActor(i));
+		BattleCharacterActor* new_actor = new BattleCharacterActor(new_character, 256, 320);
+		_character_actors.push_back(new_actor);
+		_selected_character = new_actor;
+	}
+	// TEMP: just add Claudius to the battle
+// 	BattleCharacterActor * claudius = new BattleCharacterActor(GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS), 256, 320);
+// 	_character_actors.push_back(claudius);
+// 	_selected_character = claudius;
+
+	_actor_index = GetIndexOfFirstIdleCharacter();
+
+	// (2) Loop through and find the actor with the lowest agility
 	for (uint8 i = 0; i < _enemy_actors.size(); ++i)
 	{
 		if ( _enemy_actors[i]->GetAgility() < _min_agility )
@@ -476,8 +461,13 @@ void BattleMode::_InitBattleActors()
 		_character_actors[i]->ResetWaitTime();
 	}
 
+	// TODO: needs a comment on why this is done here
 	SystemManager->UpdateTimers();
-}
+
+	_initialized = true;
+} // void BattleMode::_Initialize()
+
+
 
 void BattleMode::_ShutDown() {
 	if (BATTLE_DEBUG) cout << "BATTLE: ShutDown() called!" << endl;

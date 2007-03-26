@@ -157,6 +157,12 @@ bool MapMode::Load(string filename) {
 	vector<string> music_filenames;
 	_map_script.ReadStringVector("music_filenames", music_filenames);
 
+	vector<int32> enemy_ids;
+	_map_script.ReadIntVector("enemy_ids", enemy_ids);
+	for (uint32 i = 0; i < enemy_ids.size(); i++) {
+		_enemies.push_back(GlobalEnemy(enemy_ids[i]));
+	}
+
 	// ---------- (2) Load in the map tileset images
 // 	_map_script.ReadOpenTable("tileset_filenames");
 // 	vector<bool> grid_row;
