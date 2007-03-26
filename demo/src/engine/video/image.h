@@ -20,10 +20,12 @@
 *** container filled with both still and animated images.
 ***
 *** - <b>StillImage</b> is a single non-animated image. This is what the user 
-*** will utilize most of the time.
+*** will utilize most of the time. It has a vector of ImageElement objects, and
+***	usually will have just one. Having more is for generating compound images.
 ***
 *** - <b>AnimatedImage</b> is an animated image that contains multiple frames
 *** (which are AnimationFrame objects) and timing information for each frame.
+***	Each of this frames is an AnimationFrame.
 ***
 *** The internal classes used only by the video engine are:
 ***
@@ -59,17 +61,18 @@ namespace private_video {
 /** ****************************************************************************
 *** \brief A container to store information about an image being loaded.
 *** This class is used to pass information between image loader code and
-*** OpenGL texture creation.
+*** OpenGL texture creation. It can also be used sometimes as a temporary
+***	holder for pixel data.
 *** ***************************************************************************/
 class ImageLoadInfo {
 public:
-	//! \brief The width of the image (in pixels?)
+	//! \brief The width of the image (in pixels)
 	int32 width;
 
-	//! \brief The height of the image (in pixels?)
+	//! \brief The height of the image (in pixels)
 	int32 height;
 
-	//! \todo Needs a comment
+	//! \todo Buffer of data, usually of size width*height*4 (RGBA, 8 bits per component)
 	void* pixels;
 
 	//! Constructor for intializing the class data members
@@ -84,6 +87,8 @@ public:
 
 /** ****************************************************************************
 *** \brief Represents a single image that is loaded and stored in a texture sheet.
+*** All the existing images will be stored in a map at the video engine. That way
+*** they can be shared among objects.
 *** ***************************************************************************/
 class Image {
 public:
@@ -91,33 +96,36 @@ public:
 	TexSheet* texture_sheet;
 
 	/** \brief The filename for the image.
-	*** This is stored for every image in case it needs to be reloaded.
+	*** This is stored for every image in case it needs to be reloaded. This may happen
+	*** when a context change happens, such a switch from/to fullscreen mode or a
+	*** resolution change.
 	**/
 	std::string filename;
 
 	//! \brief String holding the tags defining the properties of the image
 	/*!
 		The tags need to be present always in the same order, since they will be used as
-		a key in a map. When adding new flags, remember to add the documentation in here.
-		These are the current flags, presented in the appearance order:
-		<T> For temporary images
-		<Xrow_ROWS>	For multiimages
-		<Ycol_COLS> For multiimages
-		<G> Grayscale images
+		a key in the video engine's map. When adding new flags, remember to add the documentation in here.
+		These are the currently supported flags, presented in the appearance order:
+		\<T>			For temporary images
+		\<Xrow_ROWS>	For multiimages
+		\<Ycol_COLS>	For multiimages
+		\<G>			Grayscale images
+		Note that \<T> and the multiimages tags can't appear together.
 	*/
 	std::string tags;
 
-	//! \brief The coordiates of where the image is located in the texture sheet
+	//! \brief The coordiates of where the image is located in the texture sheet (in pixels)
 	int32 x, y;
 
 	/** \brief The actual uv coordinates.
 	*** This is a little redundant, but saves effort on floating point calcuations.
 	*** u1 and v1 are the upper-left UV coordinates, while u2 and v2 correspond to
-	*** the lower-right.
+	*** the lower-right. They are expressed in the [0.0,1.0] range.
 	**/
 	float u1, v1, u2, v2;
 
-	//! \brief The image's width and height, in pixels
+	//! \brief The image's width and height, in coordinate system units
 	int32 width, height;
 
 	//! \brief Determines whether this image is in grayscale mode or not
@@ -131,11 +139,11 @@ public:
 	/** \brief Constructor defaults image as the first one in a texture sheet.
 	*** \note The actual sheet where the image is located will be determined later.
 	**/
-	Image(const std::string &fname, const std::string &tags_, int32 w, int32 h, bool grayscale_);
+	Image(const std::string &fname, const std::string &tags_, int32 width, int32 height, bool grayscale_);
 
 	//! \brief Constructor where image coordinates are specified, along with texture coords and the texture sheet.
 	Image(TexSheet *sheet, const std::string &fname, const std::string &tags_, int32 x_, int32 y_, float u1_, float v1_,
-		float u2_, float v2_, int32 w, int32 h, bool grayscale_);
+		float u2_, float v2_, int32 wifth, int32 height, bool grayscale_);
 
 	Image & operator=(Image &rhs)
 		{ return *this; }
@@ -163,10 +171,10 @@ public:
 	**/
 	float u1, v1, u2, v2;
 
-	//! \brief The width of the image in the stack.
+	//! \brief The width of the image in the stack, in coordinate system units.
 	float width;
 
-	//! \brief The height of the image in the stack.
+	//! \brief The height of the image in the stack, in coordinate system units.
 	float height;
 
 	//! \brief The colors of the four image vertices.
@@ -195,6 +203,8 @@ public:
 
 } // namespace private_video
 
+
+
 /** ****************************************************************************
 *** \brief The abstract base class for StillImage and AnimatedImage.
 *** ***************************************************************************/
@@ -204,7 +214,7 @@ public:
 	ImageDescriptor();
 
 	virtual ~ImageDescriptor()
-		{}
+	{}
 
 	//! \brief Clears all data retained by the object (color, width, height, etc.)
 	virtual void Clear() = 0;
@@ -216,17 +226,17 @@ public:
 	**/
 	virtual void SetStatic(bool is_static) = 0;
 
-	/** \brief Sets the image's width.
+	/** \brief Sets the image's width, expressed as coordinate system units.
 	*** \param width The desired width of the image.
 	**/
 	virtual void SetWidth(float width) = 0;
 
-	/** \brief Sets the image's height.
+	/** \brief Sets the image's height, expressed as coordinate system units.
 	*** \param height The desired height of the image.
 	**/
 	virtual void SetHeight(float height) = 0;
 
-	/** \brief Sets the image's dimensions.
+	/** \brief Sets the image's dimensions, expressed as coordinate system units.
 	*** \param width desired width of the image
 	*** \param height desired height of the image
 	**/
@@ -282,11 +292,9 @@ public:
 	bool Save(const std::string filename) const;
 
 protected:
-	/** \brief The width and height of the image, in pixels.
+	/** \brief The width and height of the image, in coordinate system units.
 	*** If this represents a compound StillImage is a compound, (i.e. it contains multiple images)
 	*** then the width and height refer to the entire compound
-	*** \todo If these dimensions are in pixels, why are these floats? Are we sure its not in the
-	*** dimensions relative to the coordinate system being used?
 	**/
 	float _width, _height;
 
@@ -337,7 +345,7 @@ public:
 	/** \brief AddImage allows the user to create compound images.
 	*** \param id The image to add to the compound image.
 	*** \param x_offset The x offset of the compound image.
-	*** \param yOffset The y offset of the compound image.
+	*** \param y_offset The y offset of the compound image.
 	*** \param u1 The upper-left u coordinate for the image. The default is 0.0f.
 	*** \param v1 The upper-left v coordinate for the image. The default is 0.0f.
 	*** \param u2 The lower-right u coordinate for the image. The default is 1.0f.
@@ -352,27 +360,40 @@ public:
 	
 	//! \name Class Member Set Functions
 	//@{
-	//! \brief Sets the filename of the image
+	/** \brief Sets the filename of the image
+	***	\param filename Name of the fle to load
+	**/
 	void SetFilename(const std::string &filename)
 		{ _filename = filename; }
 
-	//! \brief Sets width of the image
+	/** \brief Sets width of the image
+	***	\param width Width of the image
+	**/
 	void SetWidth(float width)
 		{ _width = width; }
 
-	//! \brief Sets height of the image
+	/** \brief Sets height of the image
+	***	\param height Height of the image
+	**/
 	void SetHeight(float height)
 		{ _height = height; }
 
-	//! \brief Sets the dimensions (width + height) of the image.
+	/** \brief Sets the dimensions (width, height) of the image.
+	***	\param width Width of the image
+	***	\param height Height of the image
+	**/
 	void SetDimensions(float width, float height)
 		{ _width  = width; _height = height; }
 
-	//! \brief Sets image to static/animated
+	/** \brief Sets image to static/animated
+	***	\param is_static Flag indicating wether the image should be made static or not
+	**/
 	void SetStatic(bool is_static)
 		{ _is_static = is_static; }
 
-	//! \brief Sets the color for the image (for all four verteces).
+	/** \brief Sets the color for the image (for all four verteces).
+	***	\param color Colors for the 4 vertex of the image
+	**/
 	void SetColor(const Color &color)
 		{ _color[0] = _color[1] = _color[2] = _color[3] = color; }
 
@@ -411,7 +432,8 @@ public:
 
 private:
 	/** \brief The name of the image file from which this image was created
-	*** \todo What happens to this member if this is a compound image???
+	*** This is used for loading an image (SetFilename(), Load()), so after loading, it has no
+	***	purpose. If we have a compound image, these will be an empty string.
 	**/
 	std::string _filename;
 
@@ -431,10 +453,10 @@ namespace private_video {
 class AnimationFrame {
 public:
 	//! \brief The time to display this frame image, in milliseconds.
-	uint32 _frame_time;
+	uint32 frame_time;
 
 	//! \brief The StillImage used for this frame in the animation.
-	StillImage _image;
+	StillImage image;
 }; // class AnimationFrame
 
 } // namespace private_video
@@ -498,16 +520,25 @@ public:
 
 	//! \name Class Member Set Functions
 	//@{
-	//! \brief Sets all animation frames to be a certain width.
+	/** \brief Sets all animation frames to be a certain width.
+	***	\param width Width of the images
+	**/
 	void SetWidth(float width);
 
-	//! \brief Sets all animation frames to be a certain height
+	/*! \brief Sets all animation frames to be a certain height
+	***	\param height Height of the images
+	**/
 	void SetHeight(float height);
 
-	//! \brief Sets all animation frames to be a certain width and height.
+	/** \brief Sets all animation frames to be a certain width and height.
+	***	\param width Width of the images
+	***	\param height Height of the images
+	**/
 	void SetDimensions(float width, float height);
 
-	//! \brief sets All frames to be of a certain color (all vertices are set to the same color)
+	/** \brief sets All frames to be of a certain color (all vertices are set to the same color)
+	***	\param color Color of the 4 vertices
+	**/
 	void SetColor(const Color &color);
 
 	/** \brief sets all frames to have the specified vertex colors
@@ -519,6 +550,7 @@ public:
 	void SetVertexColors(const Color &tl, const Color &tr, const Color &bl, const Color &br);
 
 	/** \brief Sets the static member for all animation frame images.
+	***	\param is_static Flag indicating wether the image will be static or not.
 	*** \note If the frames are already loaded, it doesn't bother to try to unload them
 	*** and then reload them again statically.
 	**/
@@ -526,28 +558,35 @@ public:
 		{ _is_static = is_static; }
 
 	/** \brief Sets the current frame index of the animation.
-	*** \param frame_index The index of the frame to access
+	*** \param index The index of the frame to access
 	*** \note Passing in an invalid value for the index will not change the current frame
 	**/
 	void SetFrameIndex(uint32 index)
 		{ if (index > _frames.size()) return; _frame_index = index; _frame_counter = 0; }
 
-	//! \brief Returns the number of milliseconds that the current frame has been shown for.
+	/** \brief Sets the number of milliseconds that the current frame has been shown for.
+	***	\param time Time of the frame counter
+	**/
 	void SetTimeProgress(uint32 time)
 		{ _frame_counter = time; }
 
 	/** \brief Set the number of loops for the animation.
 	*** A value less than zero indicates to loop forever. Zero indicates do not loop: just run the
 	*** animation from beginning to end and stop.
+	***	\param loops Number of loops for the animation
 	**/
 	void SetNumberLoops(int32 loops)
 		{ _number_loops = loops; }
 
-	//! \brief Set the current number of loops that the animation has completed.
+	/** \brief Set the current number of loops that the animation has completed.
+	***	\param loops Current loop count
+	**/
 	void SetLoopCounter(int32 loops)
 		{ _loop_counter = loops; }
 
-	//! \brief Effectively stops the animation in its track if this member is set to true.
+	/** \brief Effectively stops the animation in its track if this member is set to true.
+	***	\param loops Flag  for stoping the looping procecss
+	**/
 	void SetLoopsFinished(bool loops)
 		{ _loops_finished = loops; }
 	//@}
@@ -557,12 +596,12 @@ public:
 	//! \brief Returns the width of the 1st frame of animation.
 	//! \note Function will return 0.0f if there are no animation frames.
 	float GetWidth() const
-		{ if (_frames.size() == 0) return 0.0f; else return _frames[0]._image.GetWidth(); }
+		{ if (_frames.size() == 0) return 0.0f; else return _frames[0].image.GetWidth(); }
 
 	//! \brief Returns the height of the 1st frame of animation.
 	//! \note Function will return 0.0f if there are no animation frames.
 	float GetHeight() const
-		{ if (_frames.size() == 0) return 0.0f; else return _frames[0]._image.GetHeight(); }
+		{ if (_frames.size() == 0) return 0.0f; else return _frames[0].image.GetHeight(); }
 
 	//! \brief Returns the number of frames in this animation
 	uint32 GetNumFrames() const
@@ -581,7 +620,7 @@ public:
 	*** what you are doing.
 	**/
 	StillImage *GetFrame(uint32 index) const
-		{ if (index >= _frames.size()) return NULL; else return const_cast<StillImage*>(&(_frames[index]._image)); }
+		{ if (index >= _frames.size()) return NULL; else return const_cast<StillImage*>(&(_frames[index].image)); }
 
 	//! \brief Returns the number of milliseconds that the current frame has been shown for.
 	uint32 GetTimeProgress() const
@@ -591,8 +630,9 @@ public:
 	*** \return A float from 0.0f to 1.0f, indicate how much of its allotted time this frame has spent.
 	**/
 	float GetPercentProgress() const
-		{ return static_cast<float>(_frame_counter) / _frames[_frame_index]._frame_time; }
+		{ return static_cast<float>(_frame_counter) / _frames[_frame_index].frame_time; }
 
+	//! \brief Returns true if the loops have finished, false otherwise
 	bool IsLoopsFinished() const
 		{ return _loops_finished; }
 	//@}

@@ -186,7 +186,7 @@ bool GameVideo::_DrawElement(const ImageElement &element) {
 
 		// set up blending parameters
 		glEnable(GL_TEXTURE_2D);
-		_BindTexture(img->texture_sheet->texID);
+		_BindTexture(img->texture_sheet->tex_ID);
 
 		glBegin(GL_QUADS);
 
@@ -339,7 +339,7 @@ bool GameVideo::_DrawElement
 
 		// set up texture parameters
 		glEnable(GL_TEXTURE_2D);
-		_BindTexture(img->texture_sheet->texID);
+		_BindTexture(img->texture_sheet->tex_ID);
 
 		glBegin(GL_QUADS);
 		if(element.one_color)

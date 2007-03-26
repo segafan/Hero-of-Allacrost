@@ -1113,7 +1113,7 @@ private:
 	bool   _fpsDisplay;
 
 	//! current debug texture sheet
-	int32  _currentDebugTexSheet;
+	int32  _current_debug_TexSheet;
 
 	//! keep track of number of texture switches per frame
 	int32  _numTexSwitches;
@@ -1125,7 +1125,7 @@ private:
 	bool   _usesLights;
 
 	//! lighting overlay texture
-	GLuint _lightOverlay;
+	GLuint _light_overlay;
 
 	//! offsets to shake the screen by (if any)
 	float  _shakeX, _shakeY;
@@ -1207,7 +1207,7 @@ private:
 	std::map    <std::string, private_video::Image*>   _images;
 
 	//! vector containing all texture sheets currently being managed by the video engine
-	std::vector <private_video::TexSheet *>     _texSheets;
+	std::vector <private_video::TexSheet *>     _tex_sheets;
 
 	//! STL map containing properties for each font (includeing TTF_Font *)
 	std::map    <std::string, FontProperties *> _font_map;
@@ -1216,7 +1216,7 @@ private:
 	std::map <std::string, ParticleEffectDef *> _particle_effect_defs;
 
 	//! stack containing context, i.e. draw flags plus coord sys. Context is pushed and popped by any GameVideo functions that clobber these settings
-	std::stack  <private_video::Context>      _contextStack;
+	std::stack  <private_video::Context>      _context_stack;
 
 	//-- Private methods ------------------------------------------------------
 
