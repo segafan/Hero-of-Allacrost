@@ -250,7 +250,7 @@ void BindEngineToLua() {
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<MapMode, hoa_mode_manager::GameMode>("MapMode")
-			.def(constructor<>())
+			.def(constructor<const std::string&>())
 			.def("Load", &MapMode::Load)
 			.def("_AddGroundObject", &MapMode::_AddGroundObject, adopt(_2))
 			.def("_AddPassObject", &MapMode::_AddPassObject, adopt(_2))

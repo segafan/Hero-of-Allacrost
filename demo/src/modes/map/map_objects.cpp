@@ -126,12 +126,12 @@ VirtualSprite::VirtualSprite() :
 	MapObject::_object_type = VIRTUAL_TYPE;
 }
 
-VirtualSprite::~VirtualSprite()
-{
-	if( face_portrait )
-	{
+
+
+VirtualSprite::~VirtualSprite() {
+	if (face_portrait != NULL) {
 		VideoManager->DeleteImage(*face_portrait);
-		face_portrait = 0;
+		face_portrait = NULL;
 	}
 
 	for (uint32 i = 0; i < actions.size(); i++) {
@@ -139,33 +139,36 @@ VirtualSprite::~VirtualSprite()
 	}
 	actions.clear();
 
-	for( uint32 i = 0; i < dialogues.size(); ++i )
-	{
+	for(uint32 i = 0; i < dialogues.size(); ++i) {
 		delete dialogues[i];
 	}
+	dialogues.clear();
 }
 
-uint16 VirtualSprite::CalculateOppositeDirection( const uint16 direction )
-{
+
+
+uint16 VirtualSprite::CalculateOppositeDirection(const uint16 direction) {
 	switch( direction )
 	{
-	case NORTH:		return SOUTH;
-	case SOUTH:		return NORTH;
-	case WEST:		return EAST;
-	case EAST:		return WEST;
-	case NW_NORTH:	return SE_SOUTH;
-	case NW_WEST:	return SE_EAST;
-	case NE_NORTH:	return SW_SOUTH;
-	case NE_EAST:	return SW_WEST;
-	case SW_SOUTH:	return NE_NORTH;
-	case SW_WEST:	return NE_EAST;
-	case SE_SOUTH:	return NW_NORTH;
-	case SE_EAST:	return NW_WEST;
+	case NORTH:     return SOUTH;
+	case SOUTH:     return NORTH;
+	case WEST:      return EAST;
+	case EAST:      return WEST;
+	case NW_NORTH:  return SE_SOUTH;
+	case NW_WEST:   return SE_EAST;
+	case NE_NORTH:  return SW_SOUTH;
+	case NE_EAST:   return SW_WEST;
+	case SW_SOUTH:  return NE_NORTH;
+	case SW_WEST:   return NE_EAST;
+	case SE_SOUTH:  return NW_NORTH;
+	case SE_EAST:   return NW_WEST;
 	default:
-		cerr << "MAP_OBJ ERROR: CalcOppDir: received invalid direction" << endl;
+		cerr << "MAP ERROR: VirtualSprite::CalculateOppositeDirection received invalid direction" << endl;
 		return SOUTH;
 	}
 }
+
+
 
 void VirtualSprite::Update() {
 	if (!updatable) {
@@ -192,8 +195,7 @@ void VirtualSprite::Update() {
 
 		float distance_moved = static_cast<float>(MapMode::_current_map->_time_elapsed) / movement_speed;
 
-		// Move the sprite the appropriate distance in the appropriate direction
-		// Y movements
+		// Move the sprite the appropriate distance in the appropriate Y direction
 		switch (direction) {
 			case NORTH:
 				y_offset -= distance_moved; break;
@@ -258,7 +260,7 @@ void VirtualSprite::Update() {
 		} // switch (direction)
 
 		// Determine if the sprite may move to this new X position
-		if ( MapMode::_current_map->_DetectCollision(this) )
+		if (MapMode::_current_map->_DetectCollision(this))
 			x_offset = tmp_x;
 
 		// Roll-over X position offsets if necessary
@@ -327,8 +329,7 @@ void VirtualSprite::SetFacePortrait(std::string pn) {
 
 
 
-void VirtualSprite::SaveState()
-{
+void VirtualSprite::SaveState() {
 	_saved = true;
 
 	_saved_direction = direction;
@@ -340,9 +341,8 @@ void VirtualSprite::SaveState()
 
 
 
-bool VirtualSprite::LoadState()
-{
-	if( !_saved )
+bool VirtualSprite::LoadState() {
+	if(_saved == false)
 		return false;
 
 	 direction = _saved_direction;
@@ -579,11 +579,9 @@ bool EnemySprite::Load() {
 	uint32 multi_img_cols = sprite_script.ReadInt("sprite_sheet_cols");
 
 	uint32 frame_speed = sprite_script.ReadInt("frame_speed");
-	//uint32 frame_speed = static_cast<uint32>(movement_speed / 10.0f);
 
 	AnimatedImage img;
-	// Broken multi-image loading code
-	vector<StillImage> frames (multi_img_rows * multi_img_cols);
+	vector<StillImage> frames(multi_img_rows * multi_img_cols);
 	for (uint32 i = 0; i < ( multi_img_rows * multi_img_cols ); ++i)
 		frames[i].SetDimensions(img_half_width * 2, img_height);
 
@@ -608,7 +606,7 @@ bool EnemySprite::Load() {
 	}
 	animations.push_back(img);
 
-	//Load Standing West
+	// Load Standing West
 	img.Clear();
 	frames_vector.clear();
 	sprite_script.ReadIntVector("standing_west_frames", frames_vector );
@@ -617,7 +615,7 @@ bool EnemySprite::Load() {
 	}
 	animations.push_back(img);
 
-	//Load Standing East
+	// Load Standing East
 	img.Clear();
 	frames_vector.clear();
 	sprite_script.ReadIntVector("standing_east_frames", frames_vector );
@@ -626,7 +624,7 @@ bool EnemySprite::Load() {
 	}
 	animations.push_back(img);
 
-	//Load Walking South
+	// Load Walking South
 	img.Clear();
 	frames_vector.clear();
 	sprite_script.ReadIntVector("walking_south_frames", frames_vector );
@@ -635,7 +633,7 @@ bool EnemySprite::Load() {
 	}
 	animations.push_back(img);
 
-	//Load Walking North
+	// Load Walking North
 	img.Clear();
 	frames_vector.clear();
 	sprite_script.ReadIntVector("walking_north_frames", frames_vector );
@@ -644,7 +642,7 @@ bool EnemySprite::Load() {
 	}
 	animations.push_back(img);
 
-	//Load Walking West
+	// Load Walking West
 	img.Clear();
 	frames_vector.clear();
 	sprite_script.ReadIntVector("walking_west_frames", frames_vector );
@@ -653,7 +651,7 @@ bool EnemySprite::Load() {
 	}
 	animations.push_back(img);
 
-	//Load Walking East
+	// Load Walking East
 	img.Clear();
 	frames_vector.clear();
 	sprite_script.ReadIntVector("walking_east_frames", frames_vector );

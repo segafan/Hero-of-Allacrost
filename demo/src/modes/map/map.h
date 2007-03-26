@@ -79,15 +79,15 @@ const uint8 OBSERVATION  = 0x04;
 **/
 enum
 {
-	MAP_CONTEXT_1 = 0x00000001,
-	MAP_CONTEXT_2 = 0x00000002,
-	MAP_CONTEXT_3 = 0x00000004,
-	MAP_CONTEXT_4 = 0x00000008,
-	MAP_CONTEXT_5 = 0x00000010,
-	MAP_CONTEXT_6 = 0x00000020,
-	MAP_CONTEXT_7 = 0x00000040,
-	MAP_CONTEXT_8 = 0x00000080,
-	MAP_CONTEXT_9 = 0x00000100,
+	MAP_CONTEXT_1  = 0x00000001,
+	MAP_CONTEXT_2  = 0x00000002,
+	MAP_CONTEXT_3  = 0x00000004,
+	MAP_CONTEXT_4  = 0x00000008,
+	MAP_CONTEXT_5  = 0x00000010,
+	MAP_CONTEXT_6  = 0x00000020,
+	MAP_CONTEXT_7  = 0x00000040,
+	MAP_CONTEXT_8  = 0x00000080,
+	MAP_CONTEXT_9  = 0x00000100,
 	MAP_CONTEXT_10 = 0x00000200,
 	MAP_CONTEXT_11 = 0x00000400,
 	MAP_CONTEXT_12 = 0x00000800,
@@ -167,8 +167,10 @@ public:
 	//@{
 	//! \brief The total score for this node (f = g + h).
 	int16 f_score;
+
 	//! \brief The score for this node relative to the source.
 	int16 g_score;
+
 	//! \brief The Manhattan distance from this node to the destination.
 	int16 h_score;
 	//@}
@@ -190,10 +192,9 @@ public:
 	bool operator!=(const PathNode& that) const
 		{ return ((this->row != that.row) || (this->col != that.col)); }
 
-	//! \brief Overloaded comparison operator only used for pathFinding. It compares the two f_scores.
+	//! \brief Overloaded comparison operator only used for path finding. It compares the two f_scores.
 	bool operator<(const PathNode& that) const
 		{ return this->f_score > that.f_score; }
-
 }; // class PathNode
 
 } // namespace private_map
@@ -278,7 +279,7 @@ class MapMode : public hoa_mode_manager::GameMode {
 
 	friend void hoa_defs::BindEngineToLua();
 public:
-	MapMode();
+	MapMode(std::string filename);
 
 	~MapMode();
 
@@ -428,7 +429,8 @@ private:
 	//! \brief This keeps a pointer to the active dialogue.
 	private_map::MapDialogue* _current_dialogue;
 
-	std::vector< private_map::MapZone* > _zones; 
+	//! \brief Container for map zones, used for various purposes such as spawning of enemies
+	std::vector<private_map::MapZone*> _zones;
 
 	// -------------------- Battle Data Retained by the Map
 

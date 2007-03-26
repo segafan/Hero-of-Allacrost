@@ -892,7 +892,7 @@ void BootMode::Update() {
 		// When the screen is finished fading to black, create a new map mode and fade back in
 		if (!VideoManager->IsFading()) {
 			ModeManager->Pop();
-			MapMode *MM = new MapMode();
+			MapMode *MM = new MapMode("dat/maps/demo_town.lua");
 			ModeManager->Push(MM);
 			VideoManager->FadeScreen(Color::clear, 1.0f);
 		}

@@ -21,7 +21,6 @@
 #include "video.h"
 #include "global.h"
 #include "script.h"
-//#include "battle.h"
 #include "menu.h"
 
 using namespace std;

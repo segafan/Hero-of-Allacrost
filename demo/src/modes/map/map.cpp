@@ -53,8 +53,11 @@ MapMode *MapMode::_current_map = NULL;
 // ***************************** GENERAL FUNCTIONS ****************************
 // ****************************************************************************
 
-MapMode::MapMode() {
-	if (MAP_DEBUG) cout << "MAP: MapMode constructor invoked" << endl;
+MapMode::MapMode(string filename) :
+	_map_filename(filename)
+{
+	if (MAP_DEBUG)
+		cout << "MAP: MapMode constructor invoked" << endl;
 
 	mode_type = MODE_MANAGER_MAP_MODE;
 
@@ -134,15 +137,11 @@ void MapMode::Reset() {
 
 // Loads the map from a Lua file.
 bool MapMode::Load(string filename) {
-	// TEMP: All of this is temporary, and will be replaced later
-
 	// ---------- (1) Open map script file and begin loading data
-	_map_filename = "dat/maps/demo_town.lua";
 	if (_map_script.OpenFile(_map_filename, SCRIPT_READ) == false) {
 		cerr << "MAP ERROR: unable to open map script file " << _map_filename << endl;
 	}
 
-// 	_encounters = _map_script.ReadBool("encounters");
 // 	_num_tile_rows = _map_script.ReadInt("num_tile_rows");
 // 	_num_tile_cols = _map_script.ReadInt("num_tile_cols");
 	_num_tile_rows = 50;
