@@ -165,7 +165,6 @@ private:
 
 	//! \brief Contains weither or not to reset the map sprites status
 	bool _save_state;
-
 }; // class MapDialogue
 
 } // namespace private_map

@@ -251,6 +251,7 @@ public:
 	//@{
 	float ComputeXLocation() const
 		{ return (static_cast<float>(x_position) + x_offset); }
+
 	float ComputeYLocation() const
 		{ return (static_cast<float>(y_position) + y_offset); }
 	//@}
@@ -459,7 +460,7 @@ public:
 	**/
 	int8 current_action;
 
-	//TODO: change how forced action work
+	// TODO: change how forced action work
 	int8 forced_action;
 
 	//! \brief A container for all of the actions this sprite performs.
@@ -489,6 +490,7 @@ public:
 	int16 current_dialogue;
 
 	// -------------------- Public methods
+
 	VirtualSprite();
 
 	~VirtualSprite();
@@ -607,7 +609,6 @@ public:
 	uint8 _saved_current_animation;
 	//@}
 
-
 	// -------------------------------- Methods --------------------------------
 
 	MapSprite();
@@ -659,20 +660,23 @@ public:
 	*** \return false if there was no saved state, true otherwise.
 	**/
 	virtual bool LoadState();
-
 }; // class MapSprite : public VirtualSprite
 
 
 /** ****************************************************************************
-*** \brief A mobile map object with which the player can get in a fight.
+*** \brief A mobile map object that induces a battle to occur if the player touches it
 ***
-*** Monster sprites are attached to a EnemyZone, where they will respawn when
-*** dead. A monster sprite can be in one of 3 states: SPAWNING, HOSTILE or DEAD.
-*** In spawning state, the monster becomes gradually visible, is immobile and
-*** cannot be attacked. In hostile state, the monsters roams the map and will
-*** attack if touched by the player. In dead state, the monsters is invisible
-*** and waits for the EnemyZone to reset it in an other position, back in
-*** spawning state.
+*** There are really two types of enemy sprites. The first type behave just like
+*** map sprites and can have scripted movement sequences. The second type belong
+*** to EnemyZones, where they fade into existence and pursue after the player's
+*** sprite should the player enter the zone.
+***
+*** An enemy sprite in a zone can be in one of 3 states: SPAWNING, HOSTILE or DEAD.
+*** In the spawning state, the enemy becomes gradually visible, is immobile, and
+*** cannot be touched or attacked. In the hostile state, the enemies roams the map
+*** and will cause a battle if touched by the player. In the dead state, the enemy
+*** is invisible and waits for the EnemyZone to reset it in another position, so
+*** that it may spawn once more.
 *** ***************************************************************************/
 class EnemySprite : public MapSprite {
 private:
@@ -684,7 +688,7 @@ private:
 	};
 
 public:
-	EnemySprite( std::string file ) :
+	EnemySprite(std::string file) :
 		_zone(NULL),
 		_color(1.0f, 1.0f, 1.0f, 0.0f),
 		_aggro_range(8.0f),
@@ -753,6 +757,7 @@ public:
 		{ return _state == HOSTILE; }
 
 private:
+	//! \brief The zone that the enemy sprite belongs to
 	private_map::EnemyZone* _zone;
 	hoa_video::Color _color;
 	uint32 _time_elapsed;
