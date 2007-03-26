@@ -106,6 +106,7 @@
 		D4D1BF6B0B02BC010052BF1E /* SDL_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4941A7180AC1D8B300D65B8E /* SDL_ttf.framework */; };
 		D4D6DB2E0B127DD3002F33F2 /* mac_logo.icns in Resources */ = {isa = PBXBuildFile; fileRef = 4941A7510AC1D9A200D65B8E /* mac_logo.icns */; };
 		D4DAC8A90BA13F55009FA7BE /* map_zones.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4DAC8A80BA13F55009FA7BE /* map_zones.cpp */; };
+		D4E561270BB71B53002FB758 /* defs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4E561260BB71B53002FB758 /* defs.cpp */; };
 		D4F71AF60B06BAE900361DA9 /* Qt3Support.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4F71AF50B06BAE900361DA9 /* Qt3Support.framework */; };
 		D4F71C210B06BAFB00361DA9 /* QtCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4F71C200B06BAFB00361DA9 /* QtCore.framework */; };
 		D4F71D530B06BB0800361DA9 /* QtGui.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4F71D520B06BB0800361DA9 /* QtGui.framework */; };
@@ -272,6 +273,8 @@
 		D407F7EA0BADECF300848C43 /* shop.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = shop.h; sourceTree = "<group>"; };
 		D407F7EB0BADECF300848C43 /* shop_windows.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = shop_windows.cpp; sourceTree = "<group>"; };
 		D407F7EC0BADECF300848C43 /* shop_windows.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = shop_windows.h; sourceTree = "<group>"; };
+		D4C6A2B50BAE645400B86F6B /* .desert_cave.lua.swp */ = {isa = PBXFileReference; lastKnownFileType = file; path = .desert_cave.lua.swp; sourceTree = "<group>"; };
+		D4C6A2B60BAE645400B86F6B /* desert_cave.lua */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = desert_cave.lua; sourceTree = "<group>"; };
 		D4D1BA490B02B1DB0052BF1E /* Editor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Editor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4D1BA4B0B02B1DB0052BF1E /* Editor-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Editor-Info.plist"; sourceTree = "<group>"; };
 		D4D1BA650B02B27F0052BF1E /* editor.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = editor.cpp; sourceTree = "<group>"; };
@@ -284,6 +287,7 @@
 		D4D1BA6C0B02B27F0052BF1E /* tileset.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = tileset.cpp; sourceTree = "<group>"; };
 		D4D1BA6D0B02B27F0052BF1E /* tileset.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = tileset.h; sourceTree = "<group>"; };
 		D4DAC8A80BA13F55009FA7BE /* map_zones.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = map_zones.cpp; sourceTree = "<group>"; };
+		D4E561260BB71B53002FB758 /* defs.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = defs.cpp; sourceTree = "<group>"; };
 		D4F71AF50B06BAE900361DA9 /* Qt3Support.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Qt3Support.framework; path = "/usr/local/Trolltech/Qt-4.2.0/lib/Qt3Support.framework"; sourceTree = "<absolute>"; };
 		D4F71C200B06BAFB00361DA9 /* QtCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QtCore.framework; path = "/usr/local/Trolltech/Qt-4.2.0/lib/QtCore.framework"; sourceTree = "<absolute>"; };
 		D4F71D520B06BB0800361DA9 /* QtGui.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QtGui.framework; path = "/usr/local/Trolltech/Qt-4.2.0/lib/QtGui.framework"; sourceTree = "<absolute>"; };
@@ -325,6 +329,7 @@
 		4941A49F0AC1D76400D65B8E = {
 			isa = PBXGroup;
 			children = (
+				D4C6A2B40BAE645400B86F6B /* tilesets */,
 				D404C6E80B02FCEC00827A19 /* Temporary Source Files */,
 				4941A4BC0AC1D7B300D65B8E /* Source Files */,
 				4941A4BD0AC1D7BA00D65B8E /* Resources */,
@@ -377,6 +382,7 @@
 		4941A6460AC1D86300D65B8E /* src */ = {
 			isa = PBXGroup;
 			children = (
+				D4E561260BB71B53002FB758 /* defs.cpp */,
 				D4D1BA640B02B27F0052BF1E /* editor */,
 				4999AC1A0AF407BD004DD3A3 /* engine */,
 				4941A6470AC1D86300D65B8E /* defs.h */,
@@ -589,6 +595,16 @@
 			path = shop;
 			sourceTree = "<group>";
 		};
+		D4C6A2B40BAE645400B86F6B /* tilesets */ = {
+			isa = PBXGroup;
+			children = (
+				D4C6A2B50BAE645400B86F6B /* .desert_cave.lua.swp */,
+				D4C6A2B60BAE645400B86F6B /* desert_cave.lua */,
+			);
+			name = tilesets;
+			path = dat/tilesets;
+			sourceTree = "<group>";
+		};
 		D4D1BA640B02B27F0052BF1E /* editor */ = {
 			isa = PBXGroup;
 			children = (
@@ -759,6 +775,7 @@
 				D4DAC8A90BA13F55009FA7BE /* map_zones.cpp in Sources */,
 				D407F7ED0BADECF300848C43 /* shop.cpp in Sources */,
 				D407F7EF0BADECF300848C43 /* shop_windows.cpp in Sources */,
+				D4E561270BB71B53002FB758 /* defs.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
