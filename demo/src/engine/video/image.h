@@ -201,6 +201,18 @@ public:
 }; // class ImageElement
 
 
+//! \brief Temporal struct for holding a multiimage information
+/*!
+	\note This struct is just used in GameVideo::_ReloadImagesToSheet. However,
+	placing the declaration of the struct at local scope produced compilation
+	errors on Linux. Therefore we will keep it in here.
+*/
+struct MultiImageInfo {
+	ImageLoadInfo multi_image;	//!< \brief Whole pixels of an image holding subimages
+	ImageLoadInfo image;		//!< \brief Buffer that can hold a subimage of this multiimage
+};
+
+
 } // namespace private_video
 
 

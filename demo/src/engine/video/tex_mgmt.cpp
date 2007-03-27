@@ -2533,14 +2533,6 @@ bool TexSheet::Reload()
 	return true;
 }
 
-// NOTE: If you define this inside GameVideo::_ReloadImagesToSheet, compilation fails on Linux.
-// This should be placed in the private_video namespace somewhere, or removed altogether.
-//! \brief Temporal struct for holding a multiimage information
-struct MultiImageInfo {
-	ImageLoadInfo multi_image;	//!< \brief Whole pixels of an image holding subimages
-	ImageLoadInfo image;		//!< \brief Buffer that can hold a subimage of this multiimage
-};
-
 
 //-----------------------------------------------------------------------------
 // _ReloadImagesToSheet: helper function of the GameVideo class to
@@ -2553,8 +2545,7 @@ bool GameVideo::_ReloadImagesToSheet(TexSheet *sheet)
 	map<string, Image *>::iterator iImage     = _images.begin();
 	map<string, Image *>::iterator iImageEnd  = _images.end();
 
-
-	std::map <string, MultiImageInfo> multi_image_info;
+	std::map <string, private_video::MultiImageInfo> multi_image_info;
 
 	bool success = true;
 	while(iImage != iImageEnd)
