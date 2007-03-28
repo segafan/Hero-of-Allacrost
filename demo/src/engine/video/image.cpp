@@ -222,7 +222,8 @@ void StillImage::EnableGrayScale() {
 
 		if (img == NULL)
 		{
-			cerr << "VIDEO ERROR: Attemp to turn to grayscale mode a NULL Image" << endl;
+			if (VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: Attemp to turn to grayscale mode a NULL Image" << endl;
 			continue;
 		}
 
@@ -284,14 +285,16 @@ void StillImage::DisableGrayScale() {
 
 		if (img == NULL)
 		{
-			cerr << "VIDEO ERROR: Attemp to turn to color mode a NULL Image" << endl;
+			if (VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: Attemp to turn to color mode a NULL Image" << endl;
 			continue;
 		}
 
 		// Check for the color mode version of the image, already in the map
 		if (VideoManager->_images.find(img->filename + img->tags.substr(0,img->tags.length()-3)) == VideoManager->_images.end())
 		{
-			cerr << "VIDEO ERROR: Color image not found in the map, while gray one was in it" << endl;
+			if (VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: Color image not found in the map, while gray one was in it" << endl;
 			continue;
 		}
 
