@@ -171,6 +171,11 @@ enum VIDEO_STENCIL_OP {
 	VIDEO_STENCIL_OP_TOTAL = 4
 };
 
+//! \brief Standard natural resolution sizes for allacrost images.
+enum {
+	VIDEO_STANDARD_RES_WIDTH  = 1024,
+	VIDEO_STANDARD_RES_HEIGHT = 768
+};
 
 /** ****************************************************************************
 *** \brief Manages all the video operations and serves as the API to the video engine.
@@ -1547,6 +1552,9 @@ private:
 	 *  \param frameTime  elapsed time for the current rendering frame
 	 */
 	void  _UpdateShake(int32 frameTime);
+
+	//! Whether textures should be smoothed for non natural resolution.
+	bool _ShouldSmooth();
 
 	/**
 	 *  \brief function solely for debugging, which shows number of texture switches made during a frame,

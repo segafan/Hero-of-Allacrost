@@ -1764,6 +1764,16 @@ int32 GameVideo::_ScreenCoordY(float y)
 
 
 //-----------------------------------------------------------------------------
+// _ShouldSmooth: call to check if textures should be smoothed to display
+//                nicely on non-natural (non 1024x768) resolutions
+//-----------------------------------------------------------------------------
+bool GameVideo::_ShouldSmooth() {
+	return ( _width  != VIDEO_STANDARD_RES_WIDTH ||
+		 _height != VIDEO_STANDARD_RES_HEIGHT);
+}
+
+
+//-----------------------------------------------------------------------------
 // MakeLightning: creates a lightning effect
 //-----------------------------------------------------------------------------
 
