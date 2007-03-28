@@ -137,7 +137,7 @@ public:
 
 	//! \brief Adds new image to the tex sheet
 	/*! \param img The image to add
-		\param loadInfo The image loading info
+		\param load_info The image loading info
 		\return Success/failure
 	*/
 	bool AddImage
@@ -149,7 +149,7 @@ public:
 	//! \brief Copies an image into a sub-rectangle of the texture
 	/*!	\param x X coordinate of rectangle to copy image to
 		\param y Y coordinate of rectangle to copy image to
-		\param loadInfo The image loading info
+		\param load_info The image loading info
 		\return Success/failure
 	*/
 	bool CopyRect(int32 x, int32 y, private_video::ImageLoadInfo & load_info);
@@ -387,10 +387,10 @@ private:
 	//! \brief Goes through all the blocks associated with img, and updates their "free" and "image" properties.
 	/*!	This actually will happen when changeFree and changeImage are true, respectively
 		\param img the image to use for the block
-		\param changeFree the block's free status has changed
-		\param changeImage the block's image has changed
+		\param change_free the block's free status has changed
+		\param change_image the block's image has changed
 		\param free the block's free status
-		\param newImage the new image to use if changeImage is true
+		\param new_image the new image to use if changeImage is true
 	*/
 	bool SetBlockProperties
 	(
