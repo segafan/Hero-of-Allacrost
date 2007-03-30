@@ -30,6 +30,10 @@
 #include "global_actors.h"
 #include "global_skills.h"
 
+/*#include "battle_actors.h"
+#include "battle.h"
+#include "system.h"*/
+
 #include "map.h"
 #include "map_actions.h"
 #include "map_dialogue.h"
@@ -110,10 +114,16 @@ void BindEngineToLua() {
 				value("GLOBAL_OBJECT_JEWEL", GLOBAL_OBJECT_JEWEL),
 				value("GLOBAL_OBJECT_KEY_ITEM", GLOBAL_OBJECT_KEY_ITEM),
 				// Item usage constants
-				value("GLOBAL_ITEM_USE_MENU", GLOBAL_ITEM_USE_INVALID),
+				value("GLOBAL_ITEM_USE_INVALID", GLOBAL_ITEM_USE_INVALID),
 				value("GLOBAL_ITEM_USE_MENU", GLOBAL_ITEM_USE_MENU),
 				value("GLOBAL_ITEM_USE_BATTLE", GLOBAL_ITEM_USE_BATTLE),
 				value("GLOBAL_ITEM_USE_ALL", GLOBAL_ITEM_USE_ALL),
+				// Item and skill alignment constants
+				value("GLOBAL_ALIGNMENT_INVALID", GLOBAL_ALIGNMENT_INVALID),
+				value("GLOBAL_ALIGNMENT_GOOD", GLOBAL_ALIGNMENT_GOOD),
+				value("GLOBAL_ALIGNMENT_BAD", GLOBAL_ALIGNMENT_BAD),
+				value("GLOBAL_ALIGNMENT_NEUTRAL", GLOBAL_ALIGNMENT_NEUTRAL),
+				value("GLOBAL_ALIGNMENT_TOTAL", GLOBAL_ALIGNMENT_TOTAL),
 				// Elemental type constants
 				value("GLOBAL_ELEMENTAL_FIRE", GLOBAL_ELEMENTAL_FIRE),
 				value("GLOBAL_ELEMENTAL_WATER", GLOBAL_ELEMENTAL_WATER),
@@ -443,6 +453,39 @@ void BindEngineToLua() {
 // 	];
 	} // End using map mode namespaces
 
+	// ----- Battle Mode bindings
+
+	/*{
+		using namespace hoa_system;
+		using namespace hoa_battle;
+		using namespace hoa_battle::private_battle;
+
+		module(hoa_script::ScriptManager->GetGlobalState(), "hoa_battle")
+		[
+			class_<BattleActor>("BattleActor")
+				.def(constructor<>())
+				.def("SetHitPoints", &BattleActor::SetHitPoints)
+				.def("SetMaxHitPoints", &BattleActor::SetMaxHitPoints)
+				.def("SetSkillPoints", &BattleActor::SetSkillPoints)
+				.def("SetMaxSkillPoints", &BattleActor::SetMaxSkillPoints)
+				.def("SetStrength", &BattleActor::SetStrength)
+				.def("SetVigor", &BattleActor::SetVigor)
+				.def("SetFortitude", &BattleActor::SetFortitude)
+				.def("SetResistance", &BattleActor::SetResistance)
+				.def("SetAgility", &BattleActor::SetAgility)
+				.def("SetEvade", &BattleActor::SetEvade)
+				.def("GetHitPoints", &BattleActor::GetHitPoints)
+				.def("GetMaxHitPoints", &BattleActor::GetMaxHitPoints)
+				.def("GetSkillPoints", &BattleActor::GetSkillPoints)
+				.def("GetMaxSkillPoints", &BattleActor::GetMaxSkillPoints)
+				.def("GetStrength", &BattleActor::GetStrength)
+				.def("GetVigor", &BattleActor::GetVigor)
+				.def("GetFortitude", &BattleActor::GetFortitude)
+				.def("GetResistance", &BattleActor::GetResistance)
+				.def("GetAgility", &BattleActor::GetAgility)
+				.def("GetEvade", &BattleActor::GetEvade)
+		];
+	}*/
 	// ----- Shop Mode bindings
 	{
 	using namespace hoa_shop;

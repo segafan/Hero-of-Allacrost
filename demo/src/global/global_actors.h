@@ -510,8 +510,8 @@ public:
 	uint32 GetExperienceForNextLevel() const
 		{ return _experience_next_level; }
 
-	GlobalWeapon* GetWeapon() const
-		{ return _weapon_equipped; }
+	/*GlobalWeapon* GetWeapon() const
+		{ return _weapon_equipped; }*/
 
 	GlobalArmor* GetEquippedHeadArmor()
 		{ return _armor_equipped[0]; }

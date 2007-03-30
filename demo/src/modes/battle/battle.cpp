@@ -58,7 +58,7 @@ BattleMode * current_battle = NULL;
 ////////////////////////////////////////////////////////////////////////////////
 
 //ScriptEvent::ScriptEvent(hoa_global::GlobalActor * source, std::deque<IBattleActor*> targets, const std::string & script_name) :
-ScriptEvent::ScriptEvent(IBattleActor* source, std::deque<IBattleActor*> targets, const std::string & script_name, uint32 warm_up_time) :
+ScriptEvent::ScriptEvent(BattleActor* source, std::deque<BattleActor*> targets, const std::string & script_name, uint32 warm_up_time) :
 	_script_name(script_name),
 	_source(source),
 	_targets(targets)
@@ -68,6 +68,17 @@ ScriptEvent::ScriptEvent(IBattleActor* source, std::deque<IBattleActor*> targets
 	_warm_up_time.Play();
 }
 
+//Constructor for a script event that uses an item
+ScriptEvent::ScriptEvent(BattleActor* source, BattleActor* target, GlobalItem* item, uint32 warm_up_time) :
+	_item(item),
+	_skill(NULL),
+	_target(target),
+	_source(source)
+{
+	_warm_up_time.SetDuration(warm_up_time);
+	_warm_up_time.Reset();
+	_warm_up_time.Play();
+}
 
 
 ScriptEvent::~ScriptEvent()
@@ -78,33 +89,87 @@ ScriptEvent::~ScriptEvent()
 void ScriptEvent::Update()
 {
 	//_warm_up_time -= SystemManager->GetUpdateTime();
-	//FIX ME use char stats
 	float offset = SystemManager->GetUpdateTime() * (107.f / _warm_up_time.GetDuration());
+	
 	_source->SetTimePortraitLocation(_source->GetTimePortraitLocation() + offset);
 	//TODO Any warm up animations
 }
 
 void ScriptEvent::RunScript() {
-	// TEMP: do basic damage to the actors
-	for (uint8 i = 0; i < _targets.size(); i++) {
+	//If _item is non-NULL, then we're using an item
+	if (_item)
+	{
+		if (_item->GetTargetType() == GLOBAL_TARGET_PARTY)
+		{
+			if (static_cast<BattleEnemyActor*>(_target))
+			{
+				//Loop through enemies and apply the item
+				for (uint32 i = 0; i < current_battle->GetNumberOfEnemies(); ++i)
+				{
+					_item->Use(current_battle->GetEnemyActorAt(i), _source);
+				}
+				
+				//_item->DecrementCount(1);
 
-		IBattleActor * actor = _targets[i];
-		actor->TakeDamage(GaussianRandomValue(12, 2.0f));
+				if (_item->GetCount() == 0)
+				{
+					GlobalManager->RemoveFromInventory(_item->GetID());
+				}
+				//FIX ME Reconstruct action list somehow (do via ran_script)
 
-		// TODO: Do this better way!
-		if (MakeStandardString(this->GetSource()->GetActor()->GetName()) == "Spider")
-			current_battle->_battle_sounds[0].PlaySound();
-		else if (MakeStandardString(this->GetSource()->GetActor()->GetName()) == "Green Slime")
-			current_battle->_battle_sounds[1].PlaySound();
-		else if (MakeStandardString(this->GetSource()->GetActor()->GetName()) == "Skeleton")
-			current_battle->_battle_sounds[2].PlaySound();
-		else if (MakeStandardString(this->GetSource()->GetActor()->GetName()) == "Claudius")
-			current_battle->_battle_sounds[3].PlaySound();
-		else if (MakeStandardString(this->GetSource()->GetActor()->GetName()) == "Snake")
-			current_battle->_battle_sounds[4].PlaySound();
+			}
+			else
+			{
+				//Loop through all party members and apply
+				for (uint32 i = 0; i < current_battle->GetNumberOfCharacters(); ++i)
+				{
+					_item->Use(current_battle->GetPlayerCharacterAt(i), _source);
+				}
+
+				//_item->DecrementCount(1);
+
+				if (_item->GetCount() == 0)
+				{
+					GlobalManager->RemoveFromInventory(_item->GetID());
+				}
+				//FIX ME Reconstruct action list somehow (do via ran_script)
+			}
+		}
+		else
+		{
+			_item->Use(_target, _source);
+			//_item->DecrementCount(1);
+
+			if (_item->GetCount() == 0)
+			{
+				GlobalManager->RemoveFromInventory(_item->GetID());
+			}
+			//FIX ME Reconstruct action list somehow (do via ran_script)
+		}
 	}
-	// TODO: get script from global script repository and run, passing in list of arguments and host actor
+	// TEMP: do basic damage to the actors
+	else
+	{
+		//Skill code here
+		/*for (uint8 i = 0; i < _targets.size(); i++) {
 
+			IBattleActor * actor = _targets[i];
+			actor->TakeDamage(GaussianRandomValue(12, 2.0f));
+
+			// TODO: Do this better way!
+			if (MakeStandardString(this->GetSource()->GetActor()->GetName()) == "Spider")
+				current_battle->_battle_sounds[0].PlaySound();
+			else if (MakeStandardString(this->GetSource()->GetActor()->GetName()) == "Green Slime")
+				current_battle->_battle_sounds[1].PlaySound();
+			else if (MakeStandardString(this->GetSource()->GetActor()->GetName()) == "Skeleton")
+				current_battle->_battle_sounds[2].PlaySound();
+			else if (MakeStandardString(this->GetSource()->GetActor()->GetName()) == "Claudius")
+				current_battle->_battle_sounds[3].PlaySound();
+			else if (MakeStandardString(this->GetSource()->GetActor()->GetName()) == "Snake")
+				current_battle->_battle_sounds[4].PlaySound();
+		}*/
+		// TODO: get script from global script repository and run, passing in list of arguments and host actor
+	}
 }
 
 } // namespace private battle
@@ -130,7 +195,9 @@ BattleMode::BattleMode() :
 	_action_list_menu(NULL),
 	_current_number_swaps(0),
 	_swap_countdown_timer(300000), // 5 minutes
-	_min_agility(9999)
+	_min_agility(9999),
+	_selected_option_index(0),
+	_item_list(NULL)
 {
 	if (BATTLE_DEBUG)
 		cout << "BATTLE: BattleMode constructor invoked" << endl;
@@ -194,7 +261,7 @@ BattleMode::BattleMode() :
 	_action_type_menu.EnableOption(1, false); // Disable defend & support
 	_action_type_menu.EnableOption(2, false);
 	// TEMP: inventory not ready yet from GlobalManager
-// 	if (GlobalManager->GetInventory().empty())
+	if (GlobalManager->GetInventoryItems()->empty())
 		_action_type_menu.EnableOption(3, false);
 
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
@@ -266,6 +333,7 @@ BattleMode::~BattleMode() {
 	}
 	_enemy_actors.clear();
 
+	//FIX ME If item scripts are still there, add the item back to the inventory
 	for (std::list<ScriptEvent*>::iterator i = _script_queue.begin(); i != _script_queue.end(); ++i) {
 		delete *i;
 	}
@@ -342,6 +410,7 @@ void BattleMode::AddEnemy(GlobalEnemy new_enemy) {
 
 	// (4): Construct the enemy battle actor to be placed on the battle field
 	BattleEnemyActor* enemy_actor= new BattleEnemyActor(new_enemy, static_cast<float>(RandomBoundedInteger(400, 600)), static_cast<float>(RandomBoundedInteger(200, 400)));
+	enemy_actor->InitBattleActorStats(&new_enemy);
 	_enemy_actors.push_back(enemy_actor);
 }
 
@@ -396,9 +465,6 @@ void BattleMode::_TEMP_LoadTestData() {
 	_battle_sounds[4].LoadSound("snd/snake_attack.wav");
 }
 
-
-
-
 void BattleMode::_Initialize()
 {
 	// (1): Construct all character battle actors from the active party
@@ -413,6 +479,7 @@ void BattleMode::_Initialize()
 	for (uint32 i = 0; i < active_party->GetPartySize(); i++) {
 		GlobalCharacter* new_character = dynamic_cast<GlobalCharacter*>(active_party->GetActor(i));
 		BattleCharacterActor* new_actor = new BattleCharacterActor(new_character, 256, 320);
+		new_actor->InitBattleActorStats(new_character);
 		_character_actors.push_back(new_actor);
 		_selected_character = new_actor;
 	}
@@ -461,8 +528,33 @@ void BattleMode::_Initialize()
 		_character_actors[i]->ResetWaitTime();
 	}
 
-	// TODO: needs a comment on why this is done here
+	// Andy: Once every game loop, the SystemManager's timers are updated
+	// However, in between calls, battle mode is constructed. As part
+	// of battle mode's construction, each actor is given a wait timer
+	// that is triggered on initialization. But the moving of the stamina
+	// portrait uses the update time from SystemManager.  Therefore, the
+	// amount of time since SystemManager last updated is greater than
+	// the amount of time that has expired on the actors' wait timers
+	// during the first orund of battle mode.  This gives the portrait an
+	// extra boost, so once the wait time expires for an actor, his portrait
+	// is past the designated stopping point
+
+	// <--      time       -->
+	// A----------X-----------B
+	// If the SystemManager has its timers updated at A and B, and battle mode is
+	// constructed and initialized at X, you can see the amount of time between
+	// X and B (how much time passed on the wait timers in round 1) is significantly
+	// smaller than the time between A and B.  Hence the extra boost to the stamina
+	// portrait's location
+
+	//FIX ME This will not work in the future (i.e. paralysis)...realized this
+	//after writing all the above crap
 	SystemManager->UpdateTimers();
+
+	//TEMP: For testing battle item usage only!  Pull once usage is proven!
+	// Adds a health potion to your inventory
+	GlobalManager->AddToInventory(1);
+	_action_type_menu.EnableOption(3,true);
 
 	_initialized = true;
 } // void BattleMode::_Initialize()
@@ -519,10 +611,11 @@ void BattleMode::Update() {
 	//if (!_IsPerformingScript() && _script_queue.size() > 0) {
 		std::list<private_battle::ScriptEvent*>::iterator it;
 		bool ran_script = false;
+		ScriptEvent* se;
 		//for (uint8 i = 0; i < _script_queue.size(); i++)
 		for (it = _script_queue.begin(); it != _script_queue.end(); it++)
 		{
-			ScriptEvent* se = (*it);//_script_queue.front();
+			se = (*it);//_script_queue.front();
 			se->Update();
 			//(*it).Update();
 			//se._warm_up_time -= SystemManager->GetUpdateTime();
@@ -538,7 +631,14 @@ void BattleMode::Update() {
 
 		//Do this out here so iterator doesnt get screwed up mid-loop
 		if (ran_script)
+		{
+			//If we used an item, immediately reconstruct the action list
+			//This way if an item is used
+			if (se->GetItem())
+				_ConstructActionListMenu();
+
 			SetPerformingScript(false,NULL);
+		}
 	}
 
 	// Update various menus and other GUI graphics as appropriate
@@ -580,7 +680,7 @@ void BattleMode::_UpdateCharacterSelection() {
 	// to process user input on the same loop.  This is because the input is from the previous
 	// loop and isn't valid for the menu.
 
-	if (_actor_index == -1) {
+	if (_actor_index == INVALID_BATTLE_ACTOR_INDEX) {
 		_actor_index = GetIndexOfFirstIdleCharacter();
 		return;
 	}
@@ -600,7 +700,7 @@ void BattleMode::_UpdateCharacterSelection() {
 
 		while (working_index < GetNumberOfCharacters()) {
 			bca = GetPlayerCharacterAt(working_index + 1);
-			if (bca->GetActor()->IsAlive() && bca->GetWaitTime()->HasExpired() && !bca->IsQueuedToPerform())
+			if (bca->IsAlive() && bca->GetWaitTime()->HasExpired() && !bca->IsQueuedToPerform())
 			{
 				_actor_index = working_index + 1;
 				break;
@@ -622,7 +722,7 @@ void BattleMode::_UpdateCharacterSelection() {
 
 		while (working_index > 0) {
 			bca = GetPlayerCharacterAt(working_index + 1);
-			if (bca->GetActor()->IsAlive() && bca->GetWaitTime()->HasExpired() && !bca->IsQueuedToPerform())
+			if (bca->IsAlive() && bca->GetWaitTime()->HasExpired() && !bca->IsQueuedToPerform())
 			{
 				_actor_index = working_index - 1;
 				break;
@@ -683,7 +783,6 @@ void BattleMode::_UpdateActionTypeMenu() {
 
 
 
-
 void BattleMode::_UpdateActionListMenu() {
 	if (InputManager->DownPress()) {
 		_action_list_menu->HandleDownKey();
@@ -695,15 +794,43 @@ void BattleMode::_UpdateActionListMenu() {
 		// If attacking, select target
 		// TEMP: only allows to select one target
 		if (_action_type_menu_cursor_location == ACTION_TYPE_ATTACK) {
+			//FIX ME: _necessary_selections is a useless field.  This will always
+			//be 1.  If an attack targets all bad guys, then all will be selected at
+			//once, not in sequence.
 			_necessary_selections = 1;
 			_argument_actor_index = GetIndexOfFirstAliveEnemy();
 			_selected_enemy = GetEnemyActorAt(_argument_actor_index);
 			_cursor_state = CURSOR_SELECT_TARGET;
 		}
 		else if (_action_type_menu_cursor_location == ACTION_TYPE_ITEM) {
-			//_PopulateItemList();, ignore anything not useable in battle
 			//Set cursor to first index
 			//
+			//_necessary_selections = 1;
+			//_argument_actor_index = GetIndexOfFirstAliveEnemy();
+			//_selected_enemy = GetEnemyActorAt(_argument_actor_index);
+			_cursor_state = CURSOR_SELECT_TARGET;
+			_selected_option_index = _action_list_menu->GetSelection();
+			_argument_actor_index = 0;
+
+			GlobalItem* selected_item = _item_list[_selected_option_index];
+
+			//FIX ME: Need some way of creating multiple cursors in the event of
+			//a party item, also need cursor memory
+			switch (selected_item->GetTargetAlignment())
+			{
+				case GLOBAL_ALIGNMENT_GOOD:
+				case GLOBAL_ALIGNMENT_NEUTRAL:
+					//_selected_character = GetPlayerCharacterAt(0);
+					//_selected_enemy = NULL;
+					_selected_target = GetPlayerCharacterAt(0);
+					break;
+				case GLOBAL_ALIGNMENT_BAD:
+					//_selected_character = NULL;
+					_selected_target = GetEnemyActorAt(GetIndexOfFirstAliveEnemy());
+					break;
+				default:
+					break;
+			}
 		}
 		// TODO: retrieve the selected skill, place the cursor on either characters or enemies,
 		// depending on whom that skill should target by default
@@ -716,45 +843,233 @@ void BattleMode::_UpdateActionListMenu() {
 
 
 void BattleMode::_UpdateTargetSelection() {
-	if (InputManager->DownPress() || InputManager->LeftPress()) {
-		// Select the character "to the top"
-		int32 working_index = _argument_actor_index;
-		while (true) {
-			if (working_index > 0)
-				--working_index;
-			else
-				working_index = GetIndexOfLastAliveEnemy();
+	switch (_action_type_menu_cursor_location)
+	{
+	case ACTION_TYPE_ATTACK:
+		if (InputManager->DownPress() || InputManager->LeftPress()) {
+			// Select the character "to the top"
+			uint32 working_index = _argument_actor_index;
+			while (true) {
+				if (working_index > 0)
+					--working_index;
+				else
+					working_index = GetIndexOfLastAliveEnemy();
 
-			if (GetEnemyActorAt((working_index))->IsAlive()) {
-				_argument_actor_index = working_index;
-				_selected_enemy = GetEnemyActorAt(_argument_actor_index);
-				break;
+				if (GetEnemyActorAt((working_index))->IsAlive()) {
+					_argument_actor_index = working_index;
+					_selected_enemy = GetEnemyActorAt(_argument_actor_index);
+					break;
+				}
 			}
 		}
-	}
-	else if (InputManager->UpPress() || InputManager->RightPress()) {
-		// Select the character "to the bottom"
-		uint32 working_index = _argument_actor_index;
-		while (true) {
-			if (working_index < GetNumberOfEnemies() - 1)
-				working_index++;
-			else
-				working_index = GetIndexOfFirstAliveEnemy();
+		else if (InputManager->UpPress() || InputManager->RightPress()) {
+			// Select the character "to the bottom"
+			uint32 working_index = _argument_actor_index;
+			while (true) {
+				if (working_index < GetNumberOfEnemies() - 1)
+					working_index++;
+				else
+					working_index = GetIndexOfFirstAliveEnemy();
 
-			if (GetEnemyActorAt((working_index))->IsAlive()) {
-				_argument_actor_index = working_index;
-				_selected_enemy = GetEnemyActorAt(_argument_actor_index);
-				break;
+				if (GetEnemyActorAt((working_index))->IsAlive()) {
+					_argument_actor_index = working_index;
+					_selected_enemy = GetEnemyActorAt(_argument_actor_index);
+					break;
+				}
 			}
 		}
-	}
-	else if (InputManager->ConfirmPress()) {
-		_cursor_state = CURSOR_SELECT_ATTACK_POINT;
-		// TODO: Implement cursor memory for attack points here
-		_attack_point_selected = 0;
-	}
-	else if (InputManager->CancelPress()) {
-		_cursor_state = CURSOR_SELECT_ACTION_LIST;
+		else if (InputManager->ConfirmPress()) {
+			_cursor_state = CURSOR_SELECT_ATTACK_POINT;
+			// TODO: Implement cursor memory for attack points here
+			_attack_point_selected = 0;
+		}
+		else if (InputManager->CancelPress()) {
+			_cursor_state = CURSOR_SELECT_ACTION_LIST;
+		}
+		break;
+
+	case ACTION_TYPE_ITEM:
+		
+		//FIX ME: Check for enemy or friendly item type
+		if (InputManager->DownPress() || InputManager->LeftPress()) {
+			GlobalItem* item = _item_list.at(_selected_option_index);
+
+			if (item->GetTargetType() != GLOBAL_TARGET_PARTY)
+			{
+				switch (item->GetTargetAlignment())
+				{
+					case GLOBAL_ALIGNMENT_GOOD:
+						if (_argument_actor_index)
+						{
+							--_argument_actor_index;
+						}
+						else
+						{
+							_argument_actor_index = GlobalManager->GetActiveParty()->GetPartySize();
+						}
+
+						_selected_target = GetPlayerCharacterAt(_argument_actor_index);
+						break;
+
+					case GLOBAL_ALIGNMENT_BAD:
+						_argument_actor_index = GetIndexOfNextAliveEnemy(false);
+						_selected_target = GetEnemyActorAt(_argument_actor_index);
+						break;
+
+					case GLOBAL_ALIGNMENT_NEUTRAL:
+						if (InputManager->DownPress())
+						{
+							if (static_cast<BattleCharacterActor*>(_selected_target))
+							{
+								if (_argument_actor_index)
+								{
+									--_argument_actor_index;
+								}
+								else
+								{
+									_argument_actor_index = GlobalManager->GetActiveParty()->GetPartySize();
+								}
+
+								_selected_target = GetPlayerCharacterAt(_argument_actor_index);
+							}
+							else
+							{
+								_argument_actor_index = GetIndexOfNextAliveEnemy(false);
+								_selected_target = GetEnemyActorAt(_argument_actor_index);
+							}
+						}
+						break;
+
+					default:
+						break;
+				}
+
+			}
+			//Switch to target party if targeting bad guys
+			if (InputManager->LeftPress() &&
+				item->GetTargetAlignment() == GLOBAL_ALIGNMENT_NEUTRAL &&
+				static_cast<BattleEnemyActor*>(_selected_target))
+			{
+				_argument_actor_index = 0;
+				_selected_target = GetPlayerCharacterAt(0);
+			}
+		}
+		else if (InputManager->UpPress() || InputManager->RightPress()) {
+			GlobalItem* item = _item_list.at(_selected_option_index);
+
+			if (item->GetTargetType() != GLOBAL_TARGET_PARTY)
+			{
+				switch (item->GetTargetAlignment())
+				{
+					case GLOBAL_ALIGNMENT_GOOD:
+						if (_argument_actor_index < (GlobalManager->GetActiveParty()->GetPartySize() - 1))
+						{
+							++_argument_actor_index;
+						}
+						else
+						{
+							_argument_actor_index = 0;
+						}
+
+						_selected_target = GetPlayerCharacterAt(_argument_actor_index);
+						break;
+
+					case GLOBAL_ALIGNMENT_BAD:
+						_argument_actor_index = GetIndexOfNextAliveEnemy(true);
+						_selected_target = GetEnemyActorAt(_argument_actor_index);
+						break;
+
+					case GLOBAL_ALIGNMENT_NEUTRAL:
+						if (InputManager->UpPress())
+						{
+							if (static_cast<BattleCharacterActor*>(_selected_target))
+							{
+								if (_argument_actor_index < GlobalManager->GetActiveParty()->GetPartySize() - 1)
+								{
+									++_argument_actor_index;
+								}
+								else
+								{
+									_argument_actor_index = 0;
+								}
+
+								_selected_target = GetPlayerCharacterAt(_argument_actor_index);
+							}
+							else
+							{
+								_argument_actor_index = GetIndexOfNextAliveEnemy(true);
+								_selected_target = GetEnemyActorAt(_argument_actor_index);
+							}
+						}
+						break;
+
+					default:
+						break;
+				}
+
+			}
+			//Switch to target party if targeting bad guys
+			if (InputManager->RightPress() &&
+				item->GetTargetAlignment() == GLOBAL_ALIGNMENT_NEUTRAL &&
+				static_cast<BattleCharacterActor*>(_selected_target))
+			{
+				_argument_actor_index = 0;
+				//_selected_character = NULL;
+				_selected_target = GetEnemyActorAt(GetIndexOfFirstAliveEnemy());
+			}
+			/*if (item->GetTargetType() != GLOBAL_TARGET_PARTY)
+			{
+				if (_argument_actor_index < (GlobalManager->GetActiveParty()->GetPartySize() - 1))
+				{
+					++_argument_actor_index;
+				}
+				else
+				{
+					_argument_actor_index = 0;
+				}
+
+				_selected_character = GetPlayerCharacterAt(_argument_actor_index);
+			}
+			//Set _select_character to NULL
+			//It's an easy-to-check indicator that this item targets everyone
+			else
+			{
+				_argument_actor_index = 0;
+				_select_character = NULL;
+			}*/
+		}
+		else if (InputManager->ConfirmPress()) {
+			GlobalItem* item = _item_list.at(_selected_option_index);
+			//FIX ME Don't know if this is the best approach
+			//We decrement the count now so that if the next char wants to use
+			//items, they know how many are left
+			//If curr char uses item, then dec stays, and if count == 0 then it's
+			//removed from inventory...if item is not used (i.e. battle over), it's
+			//inc'd back
+			item->DecrementCount(1);
+
+			ScriptEvent *se = new ScriptEvent(_selected_character, _selected_target, item);
+			AddScriptEventToQueue(se);
+
+			//Refresh item list
+			_ConstructActionListMenu();
+			//_cursor_state = CURSOR_SELECT_ATTACK_POINT;
+			// TODO: Implement cursor memory for attack points here
+			//_attack_point_selected = 0;
+			//USE ITEM
+			//DEC COUNT
+			//REFRESH ITEM LIST
+		}
+		else if (InputManager->CancelPress()) {
+			_cursor_state = CURSOR_SELECT_ACTION_LIST;
+			//Nullify just in case
+			//_selected_character = NULL;
+			_selected_target = NULL;
+		}
+		break;
+
+	default:
+		break;
 	}
 } // void BattleMode::_UpdateTargetSelection()
 
@@ -762,7 +1077,7 @@ void BattleMode::_UpdateTargetSelection() {
 
 void BattleMode::_UpdateAttackPointSelection() {
 	BattleEnemyActor * e = GetEnemyActorAt(_argument_actor_index);
-	vector<GlobalAttackPoint*>global_attack_points = e->GetAttackPoints();
+	vector<GlobalAttackPoint*>global_attack_points = e->GetActor()->GetAttackPoints();
 
 	if (InputManager->ConfirmPress()) {
 		_selected_actor_arguments.push_back(GetEnemyActorAt(_argument_actor_index));
@@ -1137,28 +1452,39 @@ void BattleMode::_ConstructActionListMenu() {
 	}
 
 	else if (_action_type_menu_cursor_location == ACTION_TYPE_ITEM) {
+		vector<GlobalItem*>* inv = GlobalManager->GetInventoryItems();
+		_item_list.clear();
 		// TEMP: GlobalManager inventory is not ready yet
 // 		Inventory inv = GlobalManager->GetInventory();
-// 		if (inv.empty()) {
-// 			_cursor_state = CURSOR_SELECT_ACTION_TYPE;
+ 		if (inv->empty()) {
+ 			_cursor_state = CURSOR_SELECT_ACTION_TYPE;
 			return;
-// 		}
+ 		}
 
 		// Calculate the number of rows, this is dividing by 6, and if there is a remainder > 0, add one more row for the remainder
-// 		_action_list_menu->SetSize(6, inv.size() / 6 + ((inv.size() % 6) > 0 ? 1 : 0));
+ 		_action_list_menu->SetSize(1, inv->size() / 6 + ((inv->size() % 6) > 0 ? 1 : 0));
 		vector<ustring> inv_names;
 
 		// Get the name of each item in the inventory
 		// TEMP: commented this out until inventory management in GameGlobal is finished
-// 		for (Inventory::iterator it = inv.begin(); it != inv.end(); ++it) {
-// 			GlobalObject * item = it->second;
+ 		for (uint32 i = 0; i < inv->size(); ++i) {
+ 			GlobalItem *item = inv->at(i);
 // 			// NOTE: item->GetIconPath is defunct. Option box will be able to take image arguments in the future
-// 			string inv_item_str = string("<") + "TEMP:ITEM" + string("><42>") + MakeStandardString(item->GetName()) + string(" ") + NumberToString(item->GetCount());
-// 			inv_names.push_back(MakeUnicodeString(inv_item_str));
-// 		}
+			//We check for GetCount() because if a character is warming up with a use-item script,
+			//we temporarily dec the count.  If he uses the item, we leave it dec'd.  If he doesn't,
+			//then we inc the count back in.  So at this point in the code, you could potentially have
+			//items still part of the inventory, but temporarily unavailable for selection until we
+			//see how the previous char's use-item script pans out.
+			if (item->GetUsage() >= GLOBAL_ITEM_USE_BATTLE && item->GetCount())
+			{
+ 				string inv_item_str = MakeStandardString(inv->at(i)->GetName()) + string("<32>") + NumberToString(inv->at(i)->GetCount());
+ 				inv_names.push_back(MakeUnicodeString(inv_item_str));
+				_item_list.push_back(item);
+			}
+ 		}
 
 		_action_list_menu->SetOptions(inv_names);
-		_action_list_menu->SetSize(1, inv_names.size());
+		//_action_list_menu->SetSize(1, inv_names.size());
 		_action_list_menu->SetSelection(0);
 	}
 
@@ -1184,7 +1510,7 @@ void BattleMode::SetPerformingScript(bool is_performing, ScriptEvent* se)
 		// _script_queue.front().GetSource() is always either BattleEnemyActor or BattleCharacterActor
 		//IBattleActor * source = dynamic_cast<IBattleActor*>(_script_queue.front().GetSource());
 		//IBattleActor* source = _script_queue.front().GetSource();
-		IBattleActor* source = (*_active_se).GetSource();
+		BattleActor* source = (*_active_se).GetSource();
 		if (source) {
 			source->SetQueuedToPerform(false);
 			//ScriptEvent t = *_active_se;
@@ -1230,8 +1556,8 @@ void BattleMode::SetPerformingScript(bool is_performing, ScriptEvent* se)
 
 
 
-//void BattleMode::RemoveScriptedEventsForActor(hoa_global::GlobalActor * actor) {
-void BattleMode::RemoveScriptedEventsForActor(IBattleActor * actor) {
+void BattleMode::RemoveScriptedEventsForActor(BattleActor * actor) {
+//void BattleMode::RemoveScriptedEventsForActor(IBattleActor * actor) {
 	std::list<private_battle::ScriptEvent*>::iterator it = _script_queue.begin();
 
 	while (it != _script_queue.end()) {
@@ -1293,7 +1619,7 @@ void BattleMode::SwapCharacters(BattleCharacterActor * ActorToRemove, BattleChar
 
 
 
-int32 BattleMode::GetIndexOfFirstAliveEnemy() const {
+uint32 BattleMode::GetIndexOfFirstAliveEnemy() const {
 
 	std::deque<private_battle::BattleEnemyActor*>::const_iterator it = _enemy_actors.begin();
 	for (uint32 i = 0; it != _enemy_actors.end(); i++, it++) {
@@ -1302,11 +1628,12 @@ int32 BattleMode::GetIndexOfFirstAliveEnemy() const {
 		}
 	}
 
-	return -1;
+	//Should not be reached
+	return INVALID_BATTLE_ACTOR_INDEX;
 }
 
 
-int32 BattleMode::GetIndexOfLastAliveEnemy() const {
+uint32 BattleMode::GetIndexOfLastAliveEnemy() const {
 
 	std::deque<private_battle::BattleEnemyActor*>::const_iterator it = _enemy_actors.end()-1;
 	for (int32 i = _enemy_actors.size()-1; i >= 0; i--, it--) {
@@ -1315,12 +1642,13 @@ int32 BattleMode::GetIndexOfLastAliveEnemy() const {
 		}
 	}
 
-	return -1;
+	//Should not be reached
+	return INVALID_BATTLE_ACTOR_INDEX;
 }
 
 
 
-int32 BattleMode::GetIndexOfFirstIdleCharacter() const {
+uint32 BattleMode::GetIndexOfFirstIdleCharacter() const {
 
 	BattleCharacterActor *bca;
 	deque<BattleCharacterActor*>::const_iterator it = _character_actors.begin();
@@ -1333,18 +1661,66 @@ int32 BattleMode::GetIndexOfFirstIdleCharacter() const {
 		}
 	}
 
-	return -1;
+	return INVALID_BATTLE_ACTOR_INDEX;
 }
 
 
-int32 BattleMode::GetIndexOfCharacter(BattleCharacterActor * const Actor) const {
+uint32 BattleMode::GetIndexOfCharacter(BattleCharacterActor * const Actor) const {
 
 	deque<BattleCharacterActor*>::const_iterator it = _character_actors.begin();
 	for (int32 i = 0; it != _character_actors.end(); i++, it++) {
 		if (*it == Actor)
 			return i;
 	}
-	return -1;
+
+	//Should not be reached
+	return INVALID_BATTLE_ACTOR_INDEX;
+}
+
+uint32 BattleMode::GetIndexOfNextAliveEnemy(bool move_upward) const
+{
+	//BattleCharacterActor *bca;
+
+	if (move_upward)
+	{
+		for (uint32 i = _argument_actor_index; i < _enemy_actors.size(); ++i)
+		{
+			if (_enemy_actors[i]->GetActor()->IsAlive())
+			{
+				return i;
+			}
+		}
+		for (uint32 i = 0; i <= _argument_actor_index; ++i)
+		{
+			if (_enemy_actors[i]->GetActor()->IsAlive())
+			{
+				return i;
+			}
+		}
+		
+		//Should never be reached
+		return INVALID_BATTLE_ACTOR_INDEX;
+	}
+	else
+	{
+		for (uint32 i = _argument_actor_index; i >= 0; --i)
+		{
+			if (_enemy_actors[i]->GetActor()->IsAlive())
+			{
+				return i;
+			}
+		}
+		for (uint32 i = _enemy_actors.size() - 1; i >= _argument_actor_index; --i)
+		{
+			if (_enemy_actors[i]->GetActor()->IsAlive())
+			{
+				return i;
+			}
+		}
+		
+		//Should never be reached
+		return INVALID_BATTLE_ACTOR_INDEX;
+	}
 }
 
 } // namespace hoa_battle
