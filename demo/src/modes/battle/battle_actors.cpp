@@ -41,28 +41,112 @@ namespace hoa_battle {
 namespace private_battle {
 
 // *****************************************************************************
-// BattleCharacterActor class
+// BattleActor class
 // *****************************************************************************
-BattleCharacterActor::BattleCharacterActor(GlobalCharacter * character, float x_location, float y_location) :
-	GlobalCharacter(character->GetID()),
-	global_character_(character),
-	_x_location(x_location),
-	_y_location(y_location),
-	_x_origin(_x_location),
-	_y_origin(_y_location),
-	_total_time_damaged(0),
+
+BattleActor::BattleActor() : _total_time_damaged(0),
 	_damage_dealt(0),
 	_is_queued_to_perform(false)
 {
-	//FIX ME
-	_time_meter_portrait.SetFilename("img/icons/actors/characters/" + GetFilename() + ".png");
-	_time_meter_portrait.SetDimensions(45,45);
-	VideoManager->LoadImage(_time_meter_portrait);
-
 	//Load time portrait selector
 	_time_portrait_selected.SetDimensions(45,45);
 	_time_portrait_selected.SetFilename("img/menus/stamina_icon_selected.png");
 	VideoManager->LoadImage(_time_portrait_selected);
+}
+
+BattleActor::~BattleActor()
+{
+	VideoManager->DeleteImage(_time_portrait_selected);
+}
+
+//Copies stats from the GlobalActor handle that is passed in
+void BattleActor::InitBattleActorStats(hoa_global::GlobalActor* actor)
+{
+	SetMaxHitPoints(actor->GetMaxHitPoints());
+	SetMaxSkillPoints(actor->GetMaxSkillPoints());
+	SetHitPoints(actor->GetHitPoints());
+	SetSkillPoints(actor->GetSkillPoints());
+	SetStrength(actor->GetStrength());
+	SetVigor(actor->GetVigor());
+	SetFortitude(actor->GetFortitude());
+	SetResistance(actor->GetResistance());
+	SetAgility(actor->GetAgility());
+	SetEvade(actor->GetEvade());
+}
+
+// Draws the character's portrait on the time meter
+void BattleActor::DrawTimePortrait(bool is_selected) {
+	if (IsAlive()) {
+		VideoManager->Move(995, _time_portrait_location);
+
+		VideoManager->DrawImage(_time_meter_portrait);
+
+		if (is_selected)
+			VideoManager->DrawImage(_time_portrait_selected);
+	}
+}
+
+//Reset actor wait time
+void BattleActor::ResetWaitTime()
+{
+	_wait_time.Reset();
+	_wait_time.Play();
+
+	//Sets time meter portrait position
+	_time_portrait_location = 128.f;
+}
+
+//Updates the actor...called every frame
+void BattleActor::Update()
+{	
+	if (!_wait_time.HasExpired() && IsAlive() && !IsQueuedToPerform())
+		_time_portrait_location += SystemManager->GetUpdateTime() * (405.0f / _wait_time.GetDuration());
+}
+
+// Gives a specific amount of damage for the actor
+void BattleActor::TakeDamage(uint32 damage)
+{
+	_total_time_damaged = 1;
+	_damage_dealt = damage;
+
+	if (damage >= GetHitPoints()) // Was it a killing blow?
+	{
+		SetHitPoints(0);
+		current_battle->RemoveScriptedEventsForActor(this);
+	}
+	else {
+		SetHitPoints(GetHitPoints() - damage);
+	}
+}
+
+// *****************************************************************************
+// BattleCharacterActor class
+// *****************************************************************************
+BattleCharacterActor::BattleCharacterActor(GlobalCharacter * character, float x_location, float y_location) :
+	BattleActor(),
+	_global_character(character)
+	/*_x_location(x_location),
+	_y_location(y_location),
+	_x_origin(_x_location),
+	_y_origin(_y_location)*/
+	//_total_time_damaged(0),
+	//_damage_dealt(0),
+	//_is_queued_to_perform(false)
+{
+	//Cannot initalize protected members in init list for some reason
+	_x_location = x_location;
+	_y_location = y_location;
+	_x_origin = _x_location;
+	_y_origin = _y_location;
+	//FIX ME
+	_time_meter_portrait.SetFilename("img/icons/actors/characters/" + character->GetFilename() + ".png");
+	_time_meter_portrait.SetDimensions(45,45);
+	VideoManager->LoadImage(_time_meter_portrait);
+
+	//Load time portrait selector
+	/*_time_portrait_selected.SetDimensions(45,45);
+	_time_portrait_selected.SetFilename("img/menus/stamina_icon_selected.png");
+	VideoManager->LoadImage(_time_portrait_selected);*/
 
 	//_time_portrait_location = 128;
 	//FIX ME Use char stats to determine wait time
@@ -85,33 +169,34 @@ BattleCharacterActor::BattleCharacterActor(GlobalCharacter * character, float x_
 BattleCharacterActor::~BattleCharacterActor() {
 	//FIX ME
 	VideoManager->DeleteImage(_time_meter_portrait);
-	VideoManager->DeleteImage(_time_portrait_selected);
+	//VideoManager->DeleteImage(_time_portrait_selected);
 	VideoManager->DeleteImage(_status_bar_cover_image);
 	VideoManager->DeleteImage(_status_menu_image);
 }
 
 
-void BattleCharacterActor::ResetWaitTime()
+/*void BattleCharacterActor::ResetWaitTime()
 {
 	_wait_time.Reset();// = 5000;
 	_wait_time.Play();
 
 	//Sets time meter portrait position
 	_time_portrait_location = 128.f;
-}
+}*/
 
 // Updates the state of the character. Must be called every frame!
 void BattleCharacterActor::Update()
 {	
-	if (GetActor()->IsAlive() == false)
+	/*if (GetActor()->IsAlive() == false)
 	{
 		current_battle->RemoveScriptedEventsForActor(this);
-	}
+	}*/
+	BattleActor::Update();
 
 	GetActor()->RetrieveBattleAnimation("idle")->Update();
 
-	if (!_wait_time.HasExpired() && GetActor()->IsAlive() && !IsQueuedToPerform())
-		_time_portrait_location += SystemManager->GetUpdateTime() * (405.0f / _wait_time.GetDuration());	
+	//if (!_wait_time.HasExpired() && GetActor()->IsAlive() && !IsQueuedToPerform())
+	//	_time_portrait_location += SystemManager->GetUpdateTime() * (405.0f / _wait_time.GetDuration());	
 }
 
 
@@ -119,7 +204,7 @@ void BattleCharacterActor::Update()
 void BattleCharacterActor::DrawSprite() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 
-	if (GetActor()->IsAlive()) {
+	if (IsAlive()) {
 		// Draw the actor selector image if this character is currently selected
 		if (this == current_battle->_selected_character && current_battle->_cursor_state != CURSOR_IDLE) {
 			VideoManager->Move(_x_location - 20.0f, _y_location - 20.0f);
@@ -158,7 +243,7 @@ void BattleCharacterActor::DrawPortrait() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 	VideoManager->Move(48, 9);
 
-	float hp_percent =  static_cast<float>(GetActor()->GetHitPoints()) / static_cast<float>(GetActor()->GetMaxHitPoints());
+	float hp_percent =  static_cast<float>(GetHitPoints()) / static_cast<float>(GetMaxHitPoints());
 
 	if (GetActor()->GetHitPoints() == 0) {
 	  VideoManager->DrawImage(portrait_frames[4]);
@@ -191,7 +276,7 @@ void BattleCharacterActor::DrawPortrait() {
 
 
 // Draws the character's portrait on the time meter
-void BattleCharacterActor::DrawTimePortrait(bool is_selected) {
+/*void BattleCharacterActor::DrawTimePortrait(bool is_selected) {
 
 	if (GetActor()->IsAlive()) {
 		VideoManager->Move(995, _time_portrait_location);
@@ -201,7 +286,7 @@ void BattleCharacterActor::DrawTimePortrait(bool is_selected) {
 		if (is_selected)
 			VideoManager->DrawImage(_time_portrait_selected);
 	}
-}
+}*/
 // Draws the character's status information
 void BattleCharacterActor::DrawStatus() {
 	// Used to determine where to draw the character's status
@@ -223,13 +308,14 @@ void BattleCharacterActor::DrawStatus() {
 
 	// HP, green bar
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_NO_BLEND, 0);
-	bar_size = static_cast<float>(83*GetActor()->GetHitPoints())/static_cast<float>(GetActor()->GetMaxHitPoints());
+	bar_size = static_cast<float>(83*GetHitPoints())/static_cast<float>(GetMaxHitPoints());
 	VideoManager->Move(312, 90 + y_offset);
-	if (GetActor()->GetHitPoints() > 0)		// Draw color bar (if needed)
+
+	if (GetHitPoints() > 0)		// Draw color bar (if needed)
 	{
 		VideoManager->DrawRectangle(bar_size,6,Color(0.133f,0.455f,0.133f,1.0f));
 	}
-	if (GetActor()->GetHitPoints() != GetActor()->GetMaxHitPoints())	// Draw black bar (if needed)
+	if (GetHitPoints() != GetMaxHitPoints())	// Draw black bar (if needed)
 	{
 		VideoManager->MoveRelative(bar_size, 0.0f);
 		VideoManager->DrawRectangle(83.0f-bar_size,6,Color::black);
@@ -241,13 +327,14 @@ void BattleCharacterActor::DrawStatus() {
 
 	// SP, blue bar
 	VideoManager->SetDrawFlags(VIDEO_NO_BLEND, 0);
-	bar_size = static_cast<float>(84*GetActor()->GetSkillPoints())/static_cast<float>(GetActor()->GetMaxSkillPoints());
+	bar_size = static_cast<float>(84*GetSkillPoints())/static_cast<float>(GetMaxSkillPoints());
 	VideoManager->Move(412, 90 + y_offset);
-	if (GetActor()->GetSkillPoints() > 0)	// Draw color bar (if needed)
+
+	if (GetSkillPoints() > 0)	// Draw color bar (if needed)
 	{
 		VideoManager->DrawRectangle(bar_size,6,Color(0.129f,0.263f,0.451f,1.0f));
 	}
-	if (GetActor()->GetHitPoints() != GetActor()->GetMaxHitPoints())	// Draw black bar (if needed)
+	if (GetHitPoints() != GetMaxHitPoints())	// Draw black bar (if needed)
 	{
 		VideoManager->MoveRelative(bar_size,0.0f);
 		VideoManager->DrawRectangle(83.0f-bar_size,6,Color::black);
@@ -273,11 +360,11 @@ void BattleCharacterActor::DrawStatus() {
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 
 	VideoManager->Move(355.0f, 90.0f + y_offset);
-	VideoManager->DrawText(NumberToString(GetActor()->GetHitPoints()));
+	VideoManager->DrawText(NumberToString(GetHitPoints()));
 
 	// Draw the character's current skill points on top of the middle of the SP bar
 	VideoManager->MoveRelative(100, 0);
-	VideoManager->DrawText(NumberToString(GetActor()->GetSkillPoints()));
+	VideoManager->DrawText(NumberToString(GetSkillPoints()));
 
 	// Draw all of the character's current status afflictions
 	// TODO: waiting for ActorEffects class to be implemented
@@ -290,7 +377,7 @@ void BattleCharacterActor::DrawStatus() {
 
 
 // Gives a specific amount of damage for the character
-void BattleCharacterActor::TakeDamage(uint32 damage)
+/*void BattleCharacterActor::TakeDamage(uint32 damage)
 {
 	_total_time_damaged = 1;
 	_damage_dealt = damage;
@@ -303,7 +390,7 @@ void BattleCharacterActor::TakeDamage(uint32 damage)
 	else {
 		GetActor()->SetHitPoints(GetActor()->GetHitPoints() - damage);
 	}
-}
+}*/
 
 
 
@@ -311,25 +398,32 @@ void BattleCharacterActor::TakeDamage(uint32 damage)
 // EnemyActor class
 ////////////////////////////////////////////////////////////////////////////////
 BattleEnemyActor::BattleEnemyActor(GlobalEnemy enemy, float x_location, float y_location) :
-	GlobalEnemy(enemy),
-	_x_location(x_location),
+	BattleActor(),
+	_global_enemy(enemy.GetID())
+	/*_x_location(x_location),
 	_y_location(y_location),
 	_x_origin(_x_location),
-	_y_origin(_y_location),
-	_total_time_damaged(0),
+	_y_origin(_y_location)*/
+	/*_total_time_damaged(0),
 	_damage_dealt(0),
-	_is_queued_to_perform(false)
+	_is_queued_to_perform(false)*/
 {
+	//Cannot initalize protected members in init list for some reason
+	_x_location = x_location;
+	_y_location = y_location;
+	_x_origin = _x_location;
+	_y_origin = _y_location;
+
 	//FIX ME
-	_time_meter_portrait.SetFilename("img/icons/actors/enemies/" + GetFilename() + ".png");
+	_time_meter_portrait.SetFilename("img/icons/actors/enemies/" + _global_enemy.GetFilename() + ".png");
 	//_time_meter_portrait.SetFilename("img/menus/stamina_icon.png");
 	_time_meter_portrait.SetDimensions(45,45);
 	VideoManager->LoadImage(_time_meter_portrait);
 
 	//Load time portrait selector
-	_time_portrait_selected.SetDimensions(45,45);
+	/*_time_portrait_selected.SetDimensions(45,45);
 	_time_portrait_selected.SetFilename("img/menus/stamina_icon.png");
-	VideoManager->LoadImage(_time_portrait_selected);
+	VideoManager->LoadImage(_time_portrait_selected);*/
 
 	//GetWaitTime()->SetDuration(2000);
 	//ResetWaitTime();
@@ -340,26 +434,27 @@ BattleEnemyActor::BattleEnemyActor(GlobalEnemy enemy, float x_location, float y_
 BattleEnemyActor::~BattleEnemyActor() {
 	// FIX ME
 	VideoManager->DeleteImage(_time_meter_portrait);
-	VideoManager->DeleteImage(_time_portrait_selected);
+	//VideoManager->DeleteImage(_time_portrait_selected);
 }
 
 
-void BattleEnemyActor::ResetWaitTime()
+/*void BattleEnemyActor::ResetWaitTime()
 {
 	_wait_time.Reset();
 	_wait_time.Play();
 	//Sets time meter portrait position
 
 	_time_portrait_location = 128.f;
-}
+}*/
 
 // Compares the Y-coordinates of the actors, used for sorting the actors up-down when drawing
 bool BattleEnemyActor::operator<(const BattleEnemyActor & other) const
 {
-	if ((_y_location - GetHeight()) > (other._y_location - other.GetHeight()))
+	//if ((_y_location - (GetActor()->GetHeight())) > (other.GetYLocation() - (other.GetActor()->GetHeight())))
+	if (_y_location > other.GetYLocation())
 		return true;
-	else
-		return false;
+	
+	return false;
 }
 
 // Updates the action status of the enemy
@@ -367,62 +462,34 @@ void BattleEnemyActor::Update() {
 
 	//if (_wait_time)
 	//	_wait_time -= SystemManager->GetUpdateTime();
+	BattleActor::Update();
 
-	if (GetActor()->IsAlive() && !IsQueuedToPerform())
+	if (IsAlive() && !IsQueuedToPerform() && GetWaitTime()->HasExpired())
 	{
-		if (_wait_time.HasExpired())
-		{
+		//if (_wait_time.HasExpired())
+		//{
 			//_wait_time = 0;
 			//FIX ME Needs real AI decisions
 			//we can perform another attack
-			std::deque<IBattleActor*> final_targets;
+			std::deque<BattleActor*> final_targets;
 			std::deque<BattleCharacterActor*> targets = current_battle->GetCharacters();
 
 			for (uint8 i = 0; i < targets.size(); i++) {
-				final_targets.push_back(dynamic_cast<IBattleActor*>(targets[i]));
+				final_targets.push_back(dynamic_cast<BattleActor*>(targets[i]));
 			}
 
 			// okay, we can perform another attack.  set us up as queued to perform.
 			SetQueuedToPerform(true);
 			current_battle->AddScriptEventToQueue(new ScriptEvent(this, final_targets, "sword_swipe", 3000));
 			SetXLocation(GetXOrigin()); // Always attack from the starting location
-		}
+		//}
 		//FIX ME have to use char stats
-		else
-			_time_portrait_location += SystemManager->GetUpdateTime() * (405.f / _wait_time.GetDuration());//.081f;
+		/*else
+			_time_portrait_location += SystemManager->GetUpdateTime() * (405.f / _wait_time.GetDuration());//.081f;*/
 	}
-
-	/*static uint32 next_attack = 0;
-	static uint32 last_attack = 0;
-
-	// make sure the enemy isn't queued to perform.  set the next attack time
-	if (next_attack == 0 && !IsQueuedToPerform()) {
-		next_attack = RandomBoundedInteger(5000, 30000);
-		last_attack = 0;
-		SetXLocation(GetXOrigin()); // Always attack from the starting location
-	}
-
-	last_attack += SystemManager->GetUpdateTime();
-
-	if ( last_attack > next_attack && !IsQueuedToPerform() && IsAlive()) {
-		//we can perform another attack
-		std::deque<IBattleActor*> final_targets;
-		std::deque<BattleCharacterActor*> targets = current_battle->GetCharacters();
-
-		for (uint8 i = 0; i < targets.size(); i++) {
-			final_targets.push_back(dynamic_cast<IBattleActor*>(targets[i]));
-		}
-
-		// okay, we can perform another attack.  set us up as queued to perform.
-		SetQueuedToPerform(true);
-		current_battle->AddScriptEventToQueue(ScriptEvent(this, final_targets, "sword_swipe", 2000));
-		SetXLocation(GetXOrigin()); // Always attack from the starting location
-
-		last_attack = 0;
-		next_attack = 0;
-	}*/
 
 	// If we're attacking, update the offset a little
+	// FIX ME Let the script event handle this
 	if (IsAttacking()) {
 		if ((_x_origin - _x_location) < 50)
 			_x_location -= 0.8f * static_cast<float>(SystemManager->GetUpdateTime());
@@ -440,7 +507,7 @@ void BattleEnemyActor::DrawSprite() {
 	// Draw the sprite's final damage frame in grayscale and return
 	if (!IsAlive()) {
 		VideoManager->Move(_x_location, _y_location);
-		std::vector<StillImage> & sprite_frames = *GetSpriteFrames();
+		std::vector<StillImage> & sprite_frames = *(GetActor()->GetSpriteFrames());
 		sprite_frames[3].EnableGrayScale();
 		VideoManager->DrawImage(sprite_frames[3]);
 		sprite_frames[3].DisableGrayScale();
@@ -453,7 +520,7 @@ void BattleEnemyActor::DrawSprite() {
 		}
 
 		// Draw the enemy's damage-blended sprite frames
-		std::vector<StillImage> & sprite_frames = *GetSpriteFrames();
+		std::vector<StillImage> & sprite_frames = *(GetActor()->GetSpriteFrames());
 		VideoManager->Move(_x_location, _y_location);
 		float hp_percent = static_cast<float>(GetHitPoints()) / static_cast<float>(GetMaxHitPoints());
 
@@ -478,9 +545,10 @@ void BattleEnemyActor::DrawSprite() {
 		}
 
 		// Draw the attack point indicator if necessary
-		if (this == current_battle->_selected_enemy && current_battle->_cursor_state == CURSOR_SELECT_ATTACK_POINT) {
+		if (this == current_battle->_selected_target && current_battle->_cursor_state == CURSOR_SELECT_ATTACK_POINT) {
 			VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
-			std::vector<GlobalAttackPoint*> attack_points = GetAttackPoints();
+			std::vector<GlobalAttackPoint*> attack_points = GetActor()->GetAttackPoints();
+
 			VideoManager->Move(GetXLocation() + attack_points[current_battle->_attack_point_selected]->GetXPosition(),
 				GetYLocation() + attack_points[current_battle->_attack_point_selected]->GetYPosition());
 			VideoManager->DrawImage(current_battle->_attack_point_indicator);
@@ -508,7 +576,7 @@ void BattleEnemyActor::DrawSprite() {
 }
 
 // Draws the enemy's time meter portrait
-void BattleEnemyActor::DrawTimePortrait(bool is_selected)
+/*void BattleEnemyActor::DrawTimePortrait(bool is_selected)
 {
 	if (GetActor()->IsAlive()) {
 		VideoManager->Move(995, _time_portrait_location);
@@ -518,7 +586,7 @@ void BattleEnemyActor::DrawTimePortrait(bool is_selected)
 		if (is_selected)
 			VideoManager->DrawImage(_time_portrait_selected);
 	}
-}
+}*/
 
 // Draws the enemy's status information
 void BattleEnemyActor::DrawStatus() {
@@ -526,11 +594,11 @@ void BattleEnemyActor::DrawStatus() {
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 	VideoManager->SetTextColor(Color::white);
 	VideoManager->Move(920, 84);
-	VideoManager->DrawText(GetName());
+	VideoManager->DrawText(GetActor()->GetName());
 
 	// Draw the name of the enemy's currently selected attack point
 	if (current_battle->_cursor_state == CURSOR_SELECT_ATTACK_POINT) {
-		std::vector<GlobalAttackPoint*> attack_points = GetAttackPoints();
+		std::vector<GlobalAttackPoint*> attack_points = GetActor()->GetAttackPoints();
 		VideoManager->MoveRelative(0, -25);
 		ustring attack_point = MakeUnicodeString("(") + attack_points[current_battle->_attack_point_selected]->GetName() + MakeUnicodeString(")");
 		VideoManager->DrawText(attack_point);
@@ -547,7 +615,7 @@ void BattleEnemyActor::DrawStatus() {
 
 
 // Gives a specific amount of damage for the enemy
-void BattleEnemyActor::TakeDamage(uint32 damage)
+/*void BattleEnemyActor::TakeDamage(uint32 damage)
 {
 	_total_time_damaged = 1;
 	_damage_dealt = damage;
@@ -559,7 +627,7 @@ void BattleEnemyActor::TakeDamage(uint32 damage)
 	else {
 		SetHitPoints(GetHitPoints() - damage);
 	}
-}
+}*/
 
 
 // Is the monster attacking right now
@@ -570,7 +638,7 @@ bool BattleEnemyActor::IsAttacking() const
 		//GlobalActor * first_attacker = (current_battle->_script_queue.front()).GetSource();
 		if (current_battle->GetActiveScript())
 		{
-			IBattleActor * first_attacker = current_battle->GetActiveScript()->GetSource();
+			BattleActor *first_attacker = current_battle->GetActiveScript()->GetSource();
 			if (IsQueuedToPerform() && (this == first_attacker))
 				return true;
 		}

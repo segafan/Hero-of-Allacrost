@@ -58,6 +58,17 @@ enum GLOBAL_ITEM_USE {
 	GLOBAL_ITEM_USE_TOTAL   =  3
 };
 
+/** \name GlobalItem and GlobalSkill Alignment values
+*** \brief Enum values used for telling us whether they target friends, foes, or both
+**/
+enum GLOBAL_ALIGNMENT {
+	GLOBAL_ALIGNMENT_INVALID = -1,
+	GLOBAL_ALIGNMENT_GOOD    =  0,
+	GLOBAL_ALIGNMENT_BAD	 =  1,
+	GLOBAL_ALIGNMENT_NEUTRAL =  2,
+	GLOBAL_ALIGNMENT_TOTAL   =  3
+};
+
 
 
 /** ****************************************************************************
@@ -183,13 +194,27 @@ public:
 	~GlobalItem()
 		{}
 
+	//Andy: We need to different versions of Use, one for Menu Mode and one for Battle Mode.
+	//This is because IBattleActor is a standalone interface that does not inherit from
+	//anything, so we cannot have one definition handle both modes.
+
 	/** \brief Calls the script function which performs the item's use
 	*** \param target A void pointer to the target, which should be either a pointer to a
 	*** GlobalAttackPoint, GlobalActor, or GlobalParty class object
 	*** \note This will reduce the count member by zero. If the count member is already zero,
 	*** this function will return without doing anything.
+	*** \note This version is only for BATTLE MODE.
 	**/
-	void Use(GlobalTarget* target);
+	void Use(hoa_battle::private_battle::BattleActor* target, hoa_battle::private_battle::BattleActor* instigator);
+
+	/** \brief Calls the script function which performs the item's use
+	*** \param target A void pointer to the target, which should be either a pointer to a
+	*** GlobalAttackPoint, GlobalActor, or GlobalParty class object
+	*** \note This will reduce the count member by zero. If the count member is already zero,
+	*** this function will return without doing anything.
+	*** \note This version is only for MENU MODE.
+	**/
+	//void Use(GlobalCharacter* target, GlobalCharacter* instigator = NULL);
 
 	//! \name Class Member Access Functions
 	//@{
@@ -198,6 +223,9 @@ public:
 
 	GLOBAL_TARGET GetTargetType() const
 		{ return _target_type; }
+
+	GLOBAL_ALIGNMENT GetTargetAlignment() const
+		{ return _target_alignment; }
 	//@}
 
 private:
@@ -211,6 +239,11 @@ private:
 	*** Target types include attack points, actors, and parties. This enum  type is defined in global_skills.h
 	**/
 	GLOBAL_TARGET _target_type;
+
+	/** \brief Whose side the item is on.
+	*** Can either target friendlies, enemies, or both
+	**/
+	GLOBAL_ALIGNMENT _target_alignment;
 
 	//! \brief A reference to the script function that performs the items action.
 	ScriptObject _function;

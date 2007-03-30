@@ -77,8 +77,15 @@ enum CURSOR_STATE {
 	CURSOR_SELECT_ATTACK_POINT = 4
 };
 
+//! Returned as an index when looking for a character or enemy and they do not exist
+const uint32 INVALID_BATTLE_ACTOR_INDEX = 999;
+
 //! When a battle first starts, this is the wait time for the slowest actor
 const uint32 MAX_INIT_WAIT_TIME = 8000;
+
+//! Warm up time for using items (try to keep short, should be constant regardless
+// of item used
+const uint32 ITEM_WARM_UP_TIME = 500;
 
 /** \brief Finds the average experience level of all members in the party
 *** \return A floating point value representing the average level|
@@ -95,7 +102,8 @@ float ComputeAveragePartyLevel();
 *** ***************************************************************************/
 class ScriptEvent {
 public:
-	ScriptEvent(IBattleActor* source, std::deque<IBattleActor*> targets, const std::string & script_name, uint32 warm_up_time);
+	ScriptEvent(BattleActor* source, std::deque<BattleActor*> targets, const std::string & script_name, uint32 warm_up_time);
+	ScriptEvent(BattleActor* source, BattleActor* target, hoa_global::GlobalItem* item, uint32 warm_up_time = ITEM_WARM_UP_TIME);
 
 	~ScriptEvent();
 
@@ -104,13 +112,26 @@ public:
 
 	//! \name Class member access functions
 	//@{
-	//hoa_global::GlobalActor * GetSource()
-	//	{ return _source; }
+	BattleActor * GetSource()
+		{ return _source; }
+
+	inline hoa_system::Timer GetWarmUpTime() const
+		{ return _warm_up_time; }
+
+	inline BattleActor* GetTarget()
+		{ return _target; }
+
+	inline hoa_global::GlobalItem* GetItem()
+		{ return _item; }
+
+	inline hoa_global::GlobalSkill* GetSkill()
+		{ return _skill; }
+
 	//@}
 
 	//! \name Class member access functions
 	//@{
-	hoa_battle::private_battle::IBattleActor * GetSource() { return _source; }
+	//hoa_global::GlobalActor * GetSource() { return _source; }
 	//@}
 
 	//! \brief Updates the script
@@ -118,7 +139,7 @@ public:
 
 	// \brief Returns the amount of time left in warm up
 	// \return warm up time left
-	inline hoa_system::Timer GetWarmUpTime() const { return _warm_up_time; }
+	//inline hoa_system::Timer GetWarmUpTime() const { return _warm_up_time; }
 
 	//! \brief Gets the BattleActor hosting this script
 	//inline IBattleActor* GetActor() { return _actor_source; }
@@ -127,10 +148,16 @@ private:
 	//! The name of the executing script
 	std::string _script_name;
 	//! The actor whom is initiating this script
-	IBattleActor* _source;
+	BattleActor* _source;
+	//! Pointer to the skill attached to this script (for skill events only)
+	hoa_global::GlobalSkill* _skill;
+	//! Pointer to the item attached to this script (for item events only)
+	hoa_global::GlobalItem* _item;
 	//hoa_global::GlobalActor * _source;
 	//! The targets of the script
-	std::deque<IBattleActor *> _targets;
+	BattleActor* _target;
+	//! The targets of the script FIX ME
+	std::deque<BattleActor *> _targets;
 	//! The amount of time to wait to execute the script
 	hoa_system::Timer _warm_up_time;
 	//! If the script is ready to run or not
@@ -210,7 +237,7 @@ public:
 		{ _script_queue.push_back(event); }
 
 	//! Remove all scripted events for an actor
-	void RemoveScriptedEventsForActor(hoa_battle::private_battle::IBattleActor * actor);
+	void RemoveScriptedEventsForActor(hoa_battle::private_battle::BattleActor * actor);
 	//void RemoveScriptedEventsForActor(hoa_global::GlobalActor * actor);
 
 	//! Returns all player actors
@@ -241,11 +268,14 @@ public:
 	uint32 GetNumberOfEnemies() const
 		{ return _enemy_actors.size(); }
 
-	int32 GetIndexOfFirstAliveEnemy() const;
+	uint32 GetIndexOfFirstAliveEnemy() const;
 
-	int32 GetIndexOfLastAliveEnemy() const;
+	uint32 GetIndexOfLastAliveEnemy() const;
 
-	int32 GetIndexOfFirstIdleCharacter() const;
+	uint32 GetIndexOfFirstIdleCharacter() const;
+
+	//! Useful for item and skill targeting
+	uint32 GetIndexOfNextAliveEnemy(bool move_upward) const;
 
 	//! Returns the player actor at the deque location 'index'
 	private_battle::BattleCharacterActor * GetPlayerCharacterAt(uint32 index) const
@@ -256,7 +286,7 @@ public:
 		{ return _enemy_actors.at(index); }
 
 	//! Returns the index of a player character
-	int32 GetIndexOfCharacter(private_battle::BattleCharacterActor * const Actor) const;
+	uint32 GetIndexOfCharacter(private_battle::BattleCharacterActor * const Actor) const;
 
 	//! \brief Swap a character from _player_actors to _player_actors_in_battle
 	// This may become more complicated if it is done in a wierd graphical manner
@@ -351,7 +381,11 @@ private:
 	//! The current/last EnemyActor that is/was selected by the player
 	private_battle::BattleEnemyActor * _selected_enemy;
 
+	//! The current target for the player's selection
+	private_battle::BattleActor *_selected_target;
+
 	//! The number of selections that must be made for an action
+	// FIX ME: Obsolete
 	uint32 _necessary_selections;
 	//! The current attack point we are pointing to
 	uint32 _attack_point_selected;
@@ -365,9 +399,9 @@ private:
 	//! Character index of the currently selected actor
 	int32 _actor_index;
 	//! Argument selector
-	int32 _argument_actor_index;
+	uint32 _argument_actor_index;
 	//! The actors we have selected as arguments
-	std::deque<private_battle::IBattleActor*> _selected_actor_arguments;
+	std::deque<private_battle::BattleActor*> _selected_actor_arguments;
 	//@}
 
 	//! \name Battle GUI Objects and Images
@@ -448,6 +482,14 @@ private:
 
 	//! Used for scaling actor wait times
 	uint32 _min_agility;
+
+	/* \brief A 1 to 1 mapping of the names we put in our item list.
+	** \note Gives us a quick handle to directly manipulate and/or pass the item to Lua
+	*/
+	std::vector<hoa_global::GlobalItem*> _item_list;
+
+	//! Holds the selected index from the action list
+	int32 _selected_option_index;
 
 	//! \name Actor Action Processing
 	//@{

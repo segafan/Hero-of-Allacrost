@@ -152,6 +152,7 @@ namespace hoa_input {
 namespace hoa_system {
 	extern bool SYSTEM_DEBUG;
 	class GameSystem;
+	//class Timer;
 }
 
 // Global declarations, see src/global/
@@ -182,6 +183,7 @@ namespace hoa_global {
 // Game Mode Declarations
 ////////////////////////////////////////////////////////////////////////////////
 
+
 // Battle mode declarations, see battle.h/cpp
 namespace hoa_battle {
 	extern bool BATTLE_DEBUG;
@@ -189,13 +191,13 @@ namespace hoa_battle {
 
 	namespace private_battle {
 		class ActorEffect;
-		class IBattleActor;
 		class BattleActor;
 		class BattleCharacterActor;
 		class BattleEnemyActor;
 		class ScriptEvent;
 	}
 }
+
 
 // Boot mode declarations, see boot.h/cpp
 namespace hoa_boot {

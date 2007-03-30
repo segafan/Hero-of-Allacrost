@@ -273,6 +273,9 @@ public:
 
 	GLOBAL_TARGET GetTargetType() const
 		{ return _target_type; }
+
+	/*GLOBAL_ALIGNMENT GetTargetAlignment() const
+		{ return _target_alignment; }*/
 		
 // 	std::vector<GlobalElementalEffect*>& GetElementalEffects() const
 // 		{ return _elemental_effects; }
@@ -298,6 +301,11 @@ private:
 
 	//! \brief The type of target that the skill is executed upon.
 	GLOBAL_TARGET _target_type;
+
+	/** \brief Whose side the skill is on.
+	*** Can either target friendlies, enemies, or both
+	**/
+	//GLOBAL_ALIGNMENT _target_alignment;
 
 	/** \brief The amount of skill points (SP) that the skill requires to be used
 	*** Zero is a valid value for this member and simply means that no skill points are required

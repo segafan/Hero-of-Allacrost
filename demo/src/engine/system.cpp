@@ -162,4 +162,4 @@ bool Timer::HasExpired()
 	return false;
 }
 
-} // namespace hoa_settings
+} // namespace hoa_system
