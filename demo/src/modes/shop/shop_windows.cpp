@@ -92,7 +92,7 @@ void ShopActionWindow::Update() {
 		options.HandleConfirmKey();
 		options.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 		if (options.GetSelection() == 0) { // Buy
-			current_shop->_shop_state = SHOP_STATE_LIST;
+			current_shop->_state = SHOP_STATE_LIST;
 			current_shop->_list_window.hide_options = false;
 			current_shop->_info_window.SetObject(current_shop->_all_objects[0]);
 			current_shop->_shop_sounds["confirm"].PlaySound();
@@ -197,11 +197,13 @@ void ObjectListWindow::Update() {
 
 	if (InputManager->ConfirmPress()) {
 		object_list.HandleConfirmKey();
-		current_shop->_shop_sounds["coins"].PlaySound();
+		current_shop->_confirm_window.SetObject(current_shop->_all_objects[object_list.GetSelection()]);
+		current_shop->_state = SHOP_STATE_CONFIRM;
+		current_shop->_shop_sounds["confirm"].PlaySound();
 	}
 	else if (InputManager->CancelPress()) {
 		hide_options = true;
-		current_shop->_shop_state = SHOP_STATE_ACTION;
+		current_shop->_state = SHOP_STATE_ACTION;
 		current_shop->_action_window.options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 		current_shop->_info_window.SetObject(NULL);
 		current_shop->_shop_sounds["cancel"].PlaySound();
@@ -321,6 +323,107 @@ void ObjectInfoWindow::Draw() {
 	// Draw the object's description and stats text boxes
 	description.Draw();
 	properties.Draw();
+}
+
+// *****************************************************************************
+// ****************************** ConfirmWindow ********************************
+// *****************************************************************************
+
+ConfirmWindow::ConfirmWindow() {
+	// (1) Create the confirmation window in the center of the screen
+	MenuWindow::Create(400, 200);
+	MenuWindow::SetPosition(512, 384);
+	MenuWindow::SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	MenuWindow::SetDisplayMode(VIDEO_MENU_INSTANT);
+
+	// (2) Initialize the option list
+	options.SetOwner(this);
+	options.SetPosition(100.0f, 100.0f);
+	options.SetSize(2, 1); // Two columns, one row
+	options.SetCellSize(150.0f, 50.0f);
+	options.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	options.SetFont("default");
+	options.SetSelectMode(VIDEO_SELECT_SINGLE);
+	options.SetCursorOffset(-50.0f, 20.0f);
+	options.SetVerticalWrapMode(VIDEO_WRAP_MODE_NONE);
+
+	vector<ustring> text;
+	text.push_back(MakeUnicodeString("Confirm"));
+	text.push_back(MakeUnicodeString("Cancel"));
+	options.SetOptions(text);
+	options.SetSelection(0);
+
+	_object = NULL;
+}
+
+
+
+ConfirmWindow::~ConfirmWindow() {
+	MenuWindow::Destroy();
+}
+
+
+
+void ConfirmWindow::Update() {
+	options.GetEvent();
+
+	if (InputManager->LeftPress()) {
+		options.HandleLeftKey();
+	}
+	else if (InputManager->RightPress()) {
+		options.HandleRightKey();
+	}
+
+	if (InputManager->CancelPress()) {
+		current_shop->_shop_sounds["cancel"].PlaySound();
+		SetObject(NULL);
+		options.SetSelection(0);
+		current_shop->_state = SHOP_STATE_LIST;
+	}
+	else if (InputManager->ConfirmPress()) {
+		if (options.GetSelection() == 0) { // Confirm purchase
+			// Add to global inventory
+			GlobalManager->AddToInventory(_object->GetID());
+			GlobalManager->SubtractFunds(_object->GetPrice());
+			current_shop->_shop_sounds["coins"].PlaySound();
+			current_shop->_action_window.UpdateFinanceText();
+			current_shop->_state = SHOP_STATE_LIST;
+		}
+		else {
+			current_shop->_shop_sounds["cancel"].PlaySound();
+		}
+
+		// Return to previous window
+		options.SetSelection(0);
+		SetObject(NULL);
+		current_shop->_state = SHOP_STATE_LIST;
+	}
+}
+
+
+
+void ConfirmWindow::Draw() {
+	if (_object == NULL)
+		return;
+
+	MenuWindow::Draw();
+	options.Draw();
+	VideoManager->PushState();
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
+	VideoManager->Move(512, 450);
+	VideoManager->DrawText("Make this purchase?");
+	VideoManager->PopState();
+}
+
+
+
+void ConfirmWindow::SetObject(GlobalObject* obj) {
+	_object = obj;
+
+	if (_object == NULL)
+		MenuWindow::Hide();
+	else
+		MenuWindow::Show();
 }
 
 

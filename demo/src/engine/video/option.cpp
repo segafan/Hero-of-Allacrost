@@ -984,10 +984,7 @@ void OptionBox::_ClearOptions()
 void OptionBox::Draw()
 {
 	// fail if option box isn't initialized properly
-	if(!_initialized)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "OptionBox::Draw() failed because the option box was not initialized:" << endl << _initialization_errors << endl;
+	if (!_initialized) {
 		return;
 	}
 
