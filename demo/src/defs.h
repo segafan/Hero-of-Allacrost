@@ -152,7 +152,7 @@ namespace hoa_input {
 namespace hoa_system {
 	extern bool SYSTEM_DEBUG;
 	class GameSystem;
-	//class Timer;
+	class Timer;
 }
 
 // Global declarations, see src/global/
