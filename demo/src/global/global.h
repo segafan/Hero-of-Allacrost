@@ -149,6 +149,9 @@ public:
 	GlobalParty* GetActiveParty()
 		{ return &_active_party; }
 
+	std::map<uint32, GlobalObject*>* GetInventory()
+		{ return &_inventory; }
+
 	std::vector<GlobalItem*>* GetInventoryItems()
 		{ return &_inventory_items; }
 

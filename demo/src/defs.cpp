@@ -22,6 +22,7 @@
 #include "utils.h"
 #include "defs.h"
 
+#include "system.h"
 #include "script.h"
 #include "mode_manager.h"
 
@@ -30,10 +31,8 @@
 #include "global_actors.h"
 #include "global_skills.h"
 
-/*#include "battle_actors.h"
 #include "battle.h"
-#include "system.h"*/
-
+#include "battle_actors.h"
 #include "map.h"
 #include "map_actions.h"
 #include "map_dialogue.h"
@@ -454,38 +453,36 @@ void BindEngineToLua() {
 	} // End using map mode namespaces
 
 	// ----- Battle Mode bindings
+	{
+	using namespace hoa_battle;
+	using namespace hoa_battle::private_battle;
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_battle")
+	[
+		class_<BattleActor>("BattleActor")
+			.def(constructor<>())
+			.def("SetHitPoints", &BattleActor::SetHitPoints)
+			.def("SetMaxHitPoints", &BattleActor::SetMaxHitPoints)
+			.def("SetSkillPoints", &BattleActor::SetSkillPoints)
+			.def("SetMaxSkillPoints", &BattleActor::SetMaxSkillPoints)
+			.def("SetStrength", &BattleActor::SetStrength)
+			.def("SetVigor", &BattleActor::SetVigor)
+			.def("SetFortitude", &BattleActor::SetFortitude)
+			.def("SetResistance", &BattleActor::SetResistance)
+			.def("SetAgility", &BattleActor::SetAgility)
+			.def("SetEvade", &BattleActor::SetEvade)
+			.def("GetHitPoints", &BattleActor::GetHitPoints)
+			.def("GetMaxHitPoints", &BattleActor::GetMaxHitPoints)
+			.def("GetSkillPoints", &BattleActor::GetSkillPoints)
+			.def("GetMaxSkillPoints", &BattleActor::GetMaxSkillPoints)
+			.def("GetStrength", &BattleActor::GetStrength)
+			.def("GetVigor", &BattleActor::GetVigor)
+			.def("GetFortitude", &BattleActor::GetFortitude)
+			.def("GetResistance", &BattleActor::GetResistance)
+			.def("GetAgility", &BattleActor::GetAgility)
+			.def("GetEvade", &BattleActor::GetEvade)
+	];
+	} // End using battle mode namespaces
 
-	/*{
-		using namespace hoa_system;
-		using namespace hoa_battle;
-		using namespace hoa_battle::private_battle;
-
-		module(hoa_script::ScriptManager->GetGlobalState(), "hoa_battle")
-		[
-			class_<BattleActor>("BattleActor")
-				.def(constructor<>())
-				.def("SetHitPoints", &BattleActor::SetHitPoints)
-				.def("SetMaxHitPoints", &BattleActor::SetMaxHitPoints)
-				.def("SetSkillPoints", &BattleActor::SetSkillPoints)
-				.def("SetMaxSkillPoints", &BattleActor::SetMaxSkillPoints)
-				.def("SetStrength", &BattleActor::SetStrength)
-				.def("SetVigor", &BattleActor::SetVigor)
-				.def("SetFortitude", &BattleActor::SetFortitude)
-				.def("SetResistance", &BattleActor::SetResistance)
-				.def("SetAgility", &BattleActor::SetAgility)
-				.def("SetEvade", &BattleActor::SetEvade)
-				.def("GetHitPoints", &BattleActor::GetHitPoints)
-				.def("GetMaxHitPoints", &BattleActor::GetMaxHitPoints)
-				.def("GetSkillPoints", &BattleActor::GetSkillPoints)
-				.def("GetMaxSkillPoints", &BattleActor::GetMaxSkillPoints)
-				.def("GetStrength", &BattleActor::GetStrength)
-				.def("GetVigor", &BattleActor::GetVigor)
-				.def("GetFortitude", &BattleActor::GetFortitude)
-				.def("GetResistance", &BattleActor::GetResistance)
-				.def("GetAgility", &BattleActor::GetAgility)
-				.def("GetEvade", &BattleActor::GetEvade)
-		];
-	}*/
 	// ----- Shop Mode bindings
 	{
 	using namespace hoa_shop;
