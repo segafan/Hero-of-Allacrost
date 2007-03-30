@@ -358,7 +358,7 @@ public:
 	VariableTexMemMgr(TexSheet *sheet);
 	~VariableTexMemMgr();
 
-	/*! \brief Inserts a new block into the texture
+	//! \brief Inserts a new block into the texture
 	/*!	\param img the image to insert
 		\return success/failure
 	*/

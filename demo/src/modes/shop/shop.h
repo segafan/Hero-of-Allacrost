@@ -65,6 +65,7 @@ class ShopMode : public hoa_mode_manager::GameMode {
 	friend class private_shop::ShopActionWindow;
 	friend class private_shop::ObjectListWindow;
 	friend class private_shop::ObjectInfoWindow;
+	friend class private_shop::ConfirmWindow;
 public:
 	ShopMode();
 
@@ -89,20 +90,22 @@ public:
 	*** The newly added object won't be seen in the shop menu until the Reset() function is called.
 	**/
 	void AddObject(uint32 object_id);
+
 private:
 	//! \brief Keeps track of what windows are open to determine how to handle user input
-	private_shop::SHOP_STATE _shop_state;
-
-	//! \brief An image of the last frame shown on the screen before ShopMode was created.
-	hoa_video::StillImage _saved_screen;
-
+	private_shop::SHOP_STATE _state;
 
 	//! \brief The total cost of all marked purchases.
 	int32 _purchases_cost;
+
 	//! \brief The total revenue that will be earned from all marked sales.
 	int32 _sales_revenue;
+
 	//! \brief The quantity of the player's drunes, minus purchase cost, plus sales revenue.
 	int32 _total_remaining;
+
+	//! \brief An image of the last frame shown on the screen before ShopMode was created.
+	hoa_video::StillImage _saved_screen;
 
 	/** \brief Contains the ids of all objects which are sold in the shop
 	*** The map key is the object id and the value is not used for anything.
@@ -122,8 +125,15 @@ private:
 	//@{
 	//! \brief The top window containing the shop actions (buy, sell, etc).
 	private_shop::ShopActionWindow _action_window;
+
+	//! \brief The window containing the list of wares for sale
 	private_shop::ObjectListWindow _list_window;
+
+	//! \brief The window that provides a detailed description of the selected object in the list window
 	private_shop::ObjectInfoWindow _info_window;
+
+	//! \brief A window to confirm the purchase or sale of an object
+	private_shop::ConfirmWindow _confirm_window;
 	//@}
 }; // class ShopMode : public hoa_mode_manager::GameMode
 

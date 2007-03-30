@@ -55,7 +55,7 @@ ShopMode::ShopMode() {
 
 	mode_type = MODE_MANAGER_SHOP_MODE;
 	private_shop::current_shop = this;
-	_shop_state = SHOP_STATE_ACTION;
+	_state = SHOP_STATE_ACTION;
 
 	if (VideoManager->CaptureScreen(_saved_screen) == false) {
 		if (SHOP_DEBUG)
@@ -120,7 +120,7 @@ void ShopMode::Reset() {
 
 
 void ShopMode::Update() {
-	switch (_shop_state) {
+	switch (_state) {
 		case SHOP_STATE_ACTION:
 			_action_window.Update();
 			break;
@@ -128,12 +128,12 @@ void ShopMode::Update() {
 			_list_window.Update();
 			break;
 		case SHOP_STATE_CONFIRM:
-			// TODO
+			_confirm_window.Update();
 			break;
 		default:
 			if (SHOP_DEBUG)
-				cerr << "SHOP WARNING: invalid shop state: " << _shop_state << ", reseting to initial state" << endl;
-			_shop_state = SHOP_STATE_ACTION;
+				cerr << "SHOP WARNING: invalid shop state: " << _state << ", reseting to initial state" << endl;
+			_state = SHOP_STATE_ACTION;
 			return;
 	} // switch (shop_state)
 } // void ShopMode::Update()
@@ -156,6 +156,7 @@ void ShopMode::Draw() {
 	_action_window.Draw();
 	_info_window.Draw();
 	_list_window.Draw();
+	_confirm_window.Draw();
 }
 
 

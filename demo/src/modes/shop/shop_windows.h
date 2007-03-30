@@ -140,6 +140,43 @@ private:
 	hoa_global::GlobalObject* _object;
 }; // class ObjectInfoWindow : public hoa_video::MenuWindow
 
+
+
+/** ****************************************************************************
+*** \brief Displays the object's icon, name, and a sale confirmation message
+***
+*** This window is temporary and will likely be later removed when the
+*** shopping cart functionality is made available.
+*** ***************************************************************************/
+class ConfirmWindow : public hoa_video::MenuWindow {
+public:
+	ConfirmWindow();
+
+	~ConfirmWindow();
+
+	//! \brief Updates the option box
+	void Update();
+
+	//! \brief Draws the window and the object properties contained within
+	void Draw();
+
+	/** \brief Sets the object that this window will display the properties of
+	*** \param obj A pointer to the object to represent. NULL indicates no object.
+	**/
+	void SetObject(hoa_global::GlobalObject* obj);
+
+	//! \brief Options for the user to confirm or reject the sale
+	hoa_video::OptionBox options;
+
+private:
+	/** \brief A pointer to the object whose properties are to be described
+	*** If this member is set to NULL, then the window will be blank. The pointer
+	*** should point to an object contained within a ShopMode class, not to an
+	*** object in the player's inventory or anywhere else.
+	**/
+	hoa_global::GlobalObject* _object;
+}; // class ObjectInfoWindow : public hoa_video::MenuWindow
+
 } // namespace private_shop
 
 } // namespace hoa_shop
