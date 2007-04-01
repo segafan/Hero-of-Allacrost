@@ -222,7 +222,13 @@ public:
 		{ return _Read<int32>(key.c_str(), 0); }
 
 	int32 ReadInt(const int32 key)
-		{ return _Read<int32>(key, 0); }
+		{ return _Read<uint32>(key, 0); }
+
+	uint32 ReadUInt(std::string key)
+		{ return _Read<int32>(key.c_str(), 0); }
+
+	uint32 ReadUInt(const int32 key)
+		{ return _Read<uint32>(key, 0); }
 
 	float ReadFloat(std::string key)
 		{ return _Read<float>(key.c_str(), 0.0f); }
@@ -267,6 +273,12 @@ public:
 
 	void ReadIntVector(const int32 key, std::vector<int32> &vect)
 		{ _ReadVector<int32>(key, vect); }
+
+	void ReadUIntVector(std::string key, std::vector<uint32> &vect)
+		{ _ReadVector<std::string, uint32>(key, vect); }
+
+	void ReadUIntVector(const int32 key, std::vector<uint32> &vect)
+		{ _ReadVector<uint32>(key, vect); }
 
 	void ReadFloatVector(std::string key, std::vector<float> &vect)
 		{ _ReadVector<std::string, float>(key, vect); }

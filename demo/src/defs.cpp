@@ -47,21 +47,33 @@ namespace hoa_defs {
 void BindEngineToLua() {
 	// ---------- (1) Bind Engine Components
 
+
+
 	// ----- Video Engine Bindings
 	// TODO
+
+
 
 	// ----- Audio Engine Bindings
 	// TODO
 
+
+
 	// ----- Input Engine Bindings
 	// TODO
+
+
 
 	// ----- System Engine Bindings
 	// TODO
 
+
+
 	// ----- Script Engine Bindings
 	// TODO
-	
+
+
+
 	// ----- Mode Manager Engine Bindings
 	{
 	using namespace hoa_mode_manager;
@@ -79,6 +91,8 @@ void BindEngineToLua() {
 	];
 
 	} // End using mode manager namespaces
+
+
 
 	// ---------- (2) Bind Global Components
 	{
@@ -249,7 +263,11 @@ void BindEngineToLua() {
 
 	} // End using global namespaces
 
+
+
 	// ---------- (3) Bind Game Mode Components
+
+
 
 	// ----- Map Mode Bindings
 	{
@@ -260,7 +278,6 @@ void BindEngineToLua() {
 	[
 		class_<MapMode, hoa_mode_manager::GameMode>("MapMode")
 			.def(constructor<const std::string&>())
-			.def("Load", &MapMode::Load)
 			.def("_AddGroundObject", &MapMode::_AddGroundObject, adopt(_2))
 			.def("_AddPassObject", &MapMode::_AddPassObject, adopt(_2))
 			.def("_AddSkyObject", &MapMode::_AddSkyObject, adopt(_2))
@@ -452,6 +469,8 @@ void BindEngineToLua() {
 // 	];
 	} // End using map mode namespaces
 
+
+
 	// ----- Battle Mode bindings
 	{
 	using namespace hoa_battle;
@@ -482,6 +501,8 @@ void BindEngineToLua() {
 			.def("GetEvade", &BattleActor::GetEvade)
 	];
 	} // End using battle mode namespaces
+
+
 
 	// ----- Shop Mode bindings
 	{
