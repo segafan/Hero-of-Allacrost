@@ -127,16 +127,21 @@ void BindEngineToLua() {
 				value("GLOBAL_OBJECT_JEWEL", GLOBAL_OBJECT_JEWEL),
 				value("GLOBAL_OBJECT_KEY_ITEM", GLOBAL_OBJECT_KEY_ITEM),
 				// Item usage constants
-				value("GLOBAL_ITEM_USE_INVALID", GLOBAL_ITEM_USE_INVALID),
-				value("GLOBAL_ITEM_USE_MENU", GLOBAL_ITEM_USE_MENU),
-				value("GLOBAL_ITEM_USE_BATTLE", GLOBAL_ITEM_USE_BATTLE),
-				value("GLOBAL_ITEM_USE_ALL", GLOBAL_ITEM_USE_ALL),
+				value("GLOBAL_USE_INVALID", GLOBAL_USE_INVALID),
+				value("GLOBAL_USE_MENU", GLOBAL_USE_MENU),
+				value("GLOBAL_USE_BATTLE", GLOBAL_USE_BATTLE),
+				value("GLOBAL_USE_ALL", GLOBAL_USE_ALL),
 				// Item and skill alignment constants
 				value("GLOBAL_ALIGNMENT_INVALID", GLOBAL_ALIGNMENT_INVALID),
 				value("GLOBAL_ALIGNMENT_GOOD", GLOBAL_ALIGNMENT_GOOD),
 				value("GLOBAL_ALIGNMENT_BAD", GLOBAL_ALIGNMENT_BAD),
 				value("GLOBAL_ALIGNMENT_NEUTRAL", GLOBAL_ALIGNMENT_NEUTRAL),
 				value("GLOBAL_ALIGNMENT_TOTAL", GLOBAL_ALIGNMENT_TOTAL),
+				// Global skill types
+				value("GLOBAL_SKILL_INVALID", GLOBAL_SKILL_INVALID),
+				value("GLOBAL_SKILL_ATTACK", GLOBAL_SKILL_ATTACK),
+				value("GLOBAL_SKILL_DEFEND", GLOBAL_SKILL_DEFEND),
+				value("GLOBAL_SKILL_INVALID", GLOBAL_SKILL_INVALID),
 				// Elemental type constants
 				value("GLOBAL_ELEMENTAL_FIRE", GLOBAL_ELEMENTAL_FIRE),
 				value("GLOBAL_ELEMENTAL_WATER", GLOBAL_ELEMENTAL_WATER),
@@ -499,6 +504,7 @@ void BindEngineToLua() {
 			.def("GetResistance", &BattleActor::GetResistance)
 			.def("GetAgility", &BattleActor::GetAgility)
 			.def("GetEvade", &BattleActor::GetEvade)
+			.def("TakeDamage", &BattleActor::TakeDamage)
 	];
 	} // End using battle mode namespaces
 

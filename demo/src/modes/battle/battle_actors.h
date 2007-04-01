@@ -153,6 +153,9 @@ public:
 	//! Updates the state of the character. Must be called every frame!
 	virtual void Update();
 
+	// \brief Draws the status of the actor
+	virtual void DrawStatus() { }
+
 	//! Draws the actor's current sprite animation frame
 	//virtual void DrawSprite();
 
@@ -163,6 +166,10 @@ public:
 	// \brief Tells us if the actor is alive
 	// \return true if alive
 	bool IsAlive() { return (_hp > 0); }
+
+	// \brief Tells us if this actor is an enemy
+	// \return true if it is an enemy
+	virtual bool IsEnemy() { return true; }
 
 	// \brief Copies stats from the passed in GlobalActor to member variables
 	// \param The actor to copy
@@ -336,12 +343,16 @@ public:
 	//! Draws the character's damage-blended face portrait
 	void DrawPortrait();
 
+	// \brief Tells us if this actor is an enemy
+	// \return true if it is an enemy
+	virtual bool IsEnemy() { return false; }
+
 	// \brief Draws the character's portrait for the time meter
 	// \param is_selected If the enemy is selected for an action, highlight it
 	//void DrawTimePortrait(bool is_selected);
 
 	//! Draws the character's status information
-	void DrawStatus();
+	virtual void DrawStatus();
 
 	//! Gives a specific amount of damage for the character
 	//void TakeDamage(uint32 damage);
@@ -475,7 +486,7 @@ public:
 	//void DrawTimePortrait(bool is_selected);
 
 	//! Draws the enemy's status information
-	void DrawStatus();
+	virtual void DrawStatus();
 
 	//! Gives a specific amount of damage for the enemy
 	//void TakeDamage(uint32 damage);

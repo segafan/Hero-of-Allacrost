@@ -248,6 +248,20 @@ public:
 
 	~GlobalSkill();
 
+	/** \brief Calls the script function which performs the skill's use
+	*** \param target A pointer to the target of this skill
+	*** \param instigator A pointer to the instigator of this skill
+	*** \note This version is only for BATTLE MODE.
+	**/
+	void Use(hoa_battle::private_battle::BattleActor* target, hoa_battle::private_battle::BattleActor* instigator);
+
+	/** \brief Calls the script function which performs the skill's use
+	*** \param target A pointer to the target of this skill
+	*** \param instigator A pointer to the instigator of this skill
+	*** \note This version is only for MENU MODE.
+	**/
+	void Use(hoa_global::GlobalCharacter* target, hoa_global::GlobalCharacter* instigator);
+
 	/** \name Class member access functions
 	*** \note No set functiosn are defined because the class members should only be defined
 	*** by the Lua script.
@@ -274,8 +288,8 @@ public:
 	GLOBAL_TARGET GetTargetType() const
 		{ return _target_type; }
 
-	/*GLOBAL_ALIGNMENT GetTargetAlignment() const
-		{ return _target_alignment; }*/
+	GLOBAL_ALIGNMENT GetTargetAlignment() const
+		{ return _target_alignment; }
 		
 // 	std::vector<GlobalElementalEffect*>& GetElementalEffects() const
 // 		{ return _elemental_effects; }
@@ -305,7 +319,12 @@ private:
 	/** \brief Whose side the skill is on.
 	*** Can either target friendlies, enemies, or both
 	**/
-	//GLOBAL_ALIGNMENT _target_alignment;
+	GLOBAL_ALIGNMENT _target_alignment;
+
+	/** \brief Where the skill can be used
+	*** Can either target friendlies, enemies, or both
+	**/
+	GLOBAL_USE _usage;
 
 	/** \brief The amount of skill points (SP) that the skill requires to be used
 	*** Zero is a valid value for this member and simply means that no skill points are required
@@ -349,8 +368,12 @@ private:
 	**/
 	std::vector<std::pair<float, GlobalStatusEffect*> > _status_effects;
 
-	// TODO: Add a pointer to the skill's execution script function
-	// ScriptFunction _function;
+	//! Handle to the skill's Lua use function
+	ScriptObject _use_function;
+
+	//! \brief Loads the skill's data from a file and sets the members of the class
+	void _Load();
+
 }; // class GlobalSkill
 
 } // namespace hoa_global

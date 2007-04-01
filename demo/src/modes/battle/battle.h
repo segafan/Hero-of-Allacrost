@@ -33,6 +33,7 @@
 #include "global.h"
 #include "global_actors.h"
 #include "mode_manager.h"
+#include "system.h"
 
 namespace hoa_battle {
 
@@ -85,7 +86,7 @@ const uint32 MAX_INIT_WAIT_TIME = 8000;
 
 //! Warm up time for using items (try to keep short, should be constant regardless
 // of item used
-const uint32 ITEM_WARM_UP_TIME = 500;
+const uint32 ITEM_WARM_UP_TIME = 1000;
 
 /** \brief Finds the average experience level of all members in the party
 *** \return A floating point value representing the average level|
@@ -104,6 +105,7 @@ class ScriptEvent {
 public:
 	ScriptEvent(BattleActor* source, std::deque<BattleActor*> targets, const std::string & script_name, uint32 warm_up_time);
 	ScriptEvent(BattleActor* source, BattleActor* target, hoa_global::GlobalItem* item, uint32 warm_up_time = ITEM_WARM_UP_TIME);
+	ScriptEvent(BattleActor* source, BattleActor* target, hoa_global::GlobalSkill* skill);
 
 	~ScriptEvent();
 
@@ -379,14 +381,13 @@ private:
 	//! The current CharacterActor that is selected by the player
 	private_battle::BattleCharacterActor * _selected_character;
 	//! The current/last EnemyActor that is/was selected by the player
-	private_battle::BattleEnemyActor * _selected_enemy;
-
+	//private_battle::BattleEnemyActor * _selected_enemy;
 	//! The current target for the player's selection
 	private_battle::BattleActor *_selected_target;
 
 	//! The number of selections that must be made for an action
 	// FIX ME: Obsolete
-	uint32 _necessary_selections;
+	//uint32 _necessary_selections;
 	//! The current attack point we are pointing to
 	uint32 _attack_point_selected;
 	//! The number of items in this menu
@@ -397,11 +398,13 @@ private:
 	uint32 _action_type_menu_cursor_location;
 
 	//! Character index of the currently selected actor
+	//FIX ME Don't think this is needed anymore, have a handle
+	//to the char via _selected_character
 	int32 _actor_index;
 	//! Argument selector
 	uint32 _argument_actor_index;
-	//! The actors we have selected as arguments
-	std::deque<private_battle::BattleActor*> _selected_actor_arguments;
+	//! The actors we have selected as arguments OBSOLETE
+	//std::deque<private_battle::BattleActor*> _selected_actor_arguments;
 	//@}
 
 	//! \name Battle GUI Objects and Images
@@ -483,10 +486,15 @@ private:
 	//! Used for scaling actor wait times
 	uint32 _min_agility;
 
-	/* \brief A 1 to 1 mapping of the names we put in our item list.
+	/* \brief A 1 to 1 mapping of the names we put in our item action list.
 	** \note Gives us a quick handle to directly manipulate and/or pass the item to Lua
 	*/
 	std::vector<hoa_global::GlobalItem*> _item_list;
+
+	/* \brief A 1 to 1 mapping of the names we put in our skill action list.
+	** \note Gives us a quick handle to directly manipulate and/or pass the skill to Lua
+	*/
+	std::vector<hoa_global::GlobalSkill*> _skill_list;
 
 	//! Holds the selected index from the action list
 	int32 _selected_option_index;

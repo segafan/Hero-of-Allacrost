@@ -52,6 +52,7 @@ GameGlobal::~GameGlobal() {
 	_items_script.CloseFile();
 	_weapons_script.CloseFile();
 	_armor_script.CloseFile();
+	_attack_skills_script.CloseFile();
 }
 
 
@@ -75,6 +76,12 @@ bool GameGlobal::SingletonInitialize() {
 		return false;
 	}
 	_armor_script.ReadOpenTable("armor");
+
+	if (_attack_skills_script.OpenFile("dat/skills/attack.lua", SCRIPT_READ) == false) {
+		cerr << "GLOBAL ERROR: could not open script: dat/skills/attack.lua" << endl;
+		return false;
+	}
+	_attack_skills_script.ReadOpenTable("skills");
 
 	return true;
 }

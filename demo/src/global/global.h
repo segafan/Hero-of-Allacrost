@@ -54,6 +54,7 @@ extern bool GLOBAL_DEBUG;
 *** ***************************************************************************/
 class GameGlobal {
 	friend class GlobalItem;
+	friend class GlobalSkill;
 	friend class GlobalWeapon;
 	friend class GlobalArmor;
 
@@ -228,6 +229,7 @@ private:
 	hoa_script::ScriptDescriptor _items_script;
 	hoa_script::ScriptDescriptor _weapons_script;
 	hoa_script::ScriptDescriptor _armor_script;
+	hoa_script::ScriptDescriptor _attack_skills_script;
 	//@}
 }; // class GameGlobal
 

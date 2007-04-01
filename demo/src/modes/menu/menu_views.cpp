@@ -299,7 +299,7 @@ void MiniCharacterSelectWindow::Update()
 		_menu_sounds["potion"].PlaySound();
 
 		// increase hp FIXME
-		if (selected->GetUsage() == GLOBAL_ITEM_USE_MENU)
+		if (selected->GetUsage() == GLOBAL_USE_MENU)
 		{
 			uint32 new_hp = ch->GetHitPoints();
 			//new_hp += selected->GetRecoveryAmount();
@@ -724,7 +724,7 @@ void InventoryWindow::_TEMP_ApplyItem() {
 	_menu_sounds["potion"].PlaySound();
 
 	// increase hp
-	if (selected->GetUsage() == GLOBAL_ITEM_USE_MENU)
+	if (selected->GetUsage() == GLOBAL_USE_MENU)
 	{
 		uint32 new_hp = ch->GetHitPoints();
 		new_hp += 180;//selected->->GetRecoveryAmount();
@@ -819,7 +819,7 @@ void InventoryWindow::_UpdateItemText()
 		case ITEM_FIELD:
 			for (i = invItems->begin(), count = 0; i != invItems->end(); i++) {
 				item = *i;
-//				if (item->GetUsage() == GLOBAL_ITEM_USE_MENU) {
+//				if (item->GetUsage() == GLOBAL_USE_MENU) {
 					text = "<" + item->GetIconImage().GetFilename() + "><32>" + MakeStandardString(item->GetName()) + "<R><350>" + NumberToString(item->GetCount()) + "   ";
 					inv_names.push_back(MakeUnicodeString(text));
 					count++;
@@ -831,7 +831,7 @@ void InventoryWindow::_UpdateItemText()
 		case ITEM_BATTLE:
 			for (i = invItems->begin(), count = 0; i != invItems->end(); i++) {
 				item = *i;
-//				if (item->GetUsage() == GLOBAL_ITEM_USE_BATTLE) {
+//				if (item->GetUsage() == GLOBAL_USE_BATTLE) {
 					text = "<" + item->GetIconImage().GetFilename() + "><32>" + MakeStandardString(item->GetName()) + "<R><350>" + NumberToString(item->GetCount()) + "   ";
 					inv_names.push_back(MakeUnicodeString(text));
 					count++;

@@ -38,6 +38,28 @@ enum GLOBAL_TARGET {
 	GLOBAL_TARGET_TOTAL        =  3
 };
 
+/** \name GlobalItem and GlobalSkill Alignment values
+*** \brief Enum values used for telling us whether they target friends, foes, or both
+**/
+enum GLOBAL_ALIGNMENT {
+	GLOBAL_ALIGNMENT_INVALID = -1,
+	GLOBAL_ALIGNMENT_GOOD    =  0,
+	GLOBAL_ALIGNMENT_BAD	 =  1,
+	GLOBAL_ALIGNMENT_NEUTRAL =  2,
+	GLOBAL_ALIGNMENT_TOTAL   =  3
+};
+
+/** \name GlobalItem and GlobalSkill Usage Cases
+*** \brief Enum values used for identification of different game object types
+**/
+enum GLOBAL_USE {
+	GLOBAL_USE_INVALID = -1,
+	GLOBAL_USE_MENU    =  0,
+	GLOBAL_USE_BATTLE  =  1,
+	GLOBAL_USE_ALL     =  2,
+	GLOBAL_USE_TOTAL   =  3
+};
+
 /** \name Game Character IDs
 *** \brief Integers that are used for identification of characters
 *** These series of constants are used as bit-masks for determining things such as if the character
@@ -200,6 +222,7 @@ public:
 	***
 	*** This function is implemented primarily because GlobalActor requires at
 	*** least one purely virtual function to be an abstract class.
+	*** FIX ME Obsolete.  Moved to BattleActor and now called IsEnemy().
 	**/
 	virtual bool IsCharacter() = 0;
 
