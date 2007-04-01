@@ -3,8 +3,8 @@
 --  audio volume, language, key mappings, etc. See src/engine.h for details.
 --]]
 
-video_defaults = {screen_resx = 1024, screen_resy = 768, full_screen = true};
-video_settings = {screen_resx = 1024, screen_resy = 768, full_screen = true};
+video_defaults = {screen_resx = 1024, screen_resy = 768, full_screen = false};
+video_settings = {screen_resx = 1024, screen_resy = 768, full_screen = false};
 
 audio_defaults = {music_vol = 1.0, sound_vol = 1.0};
 audio_settings = {music_vol = 1.0, sound_vol = 1.0};
