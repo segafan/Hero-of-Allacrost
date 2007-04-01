@@ -2534,7 +2534,7 @@ bool GameVideo::ReloadTextures()
 
 	_DeleteTempTextures();
 
-	if(_usesLights)
+	if(_uses_lights)
 		_light_overlay = _CreateBlankGLTexture(1024, 1024);
 
 	return success;
@@ -2629,8 +2629,8 @@ bool GameVideo::_DeleteTexture(GLuint tex_ID)
 {
 	glDeleteTextures(1, &tex_ID);
 
-	if(_lastTexID == tex_ID)
-		_lastTexID = 0xFFFFFFFF;
+	if(_last_tex_ID == tex_ID)
+		_last_tex_ID = 0xFFFFFFFF;
 
 	if(glGetError())
 		return false;

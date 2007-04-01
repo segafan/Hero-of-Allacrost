@@ -48,22 +48,22 @@ public:
 	//@}
 
 	Color()
-		{ colors_[0] = 0.0f; colors_[1] = 0.0f; colors_[2] = 0.0f; colors_[3] = 1.0f; }
+		{ _colors[0] = 0.0f; _colors[1] = 0.0f; _colors[2] = 0.0f; _colors[3] = 1.0f; }
 
 	Color(float r, float g, float b, float a)
-		{ colors_[0] = r; colors_[1] = g; colors_[2] = b; colors_[3] = a; }
+		{ _colors[0] = r; _colors[1] = g; _colors[2] = b; _colors[3] = a; }
 
 	//! \brief Overloaded Operators
 	//@{
 	bool operator == (const Color &c) const
-		{ return colors_[0] == c.colors_[0] && colors_[1] == c.colors_[1] && colors_[2] == c.colors_[2] && colors_[3] == c.colors_[3]; }
+		{ return _colors[0] == c._colors[0] && _colors[1] == c._colors[1] && _colors[2] == c._colors[2] && _colors[3] == c._colors[3]; }
 
 	bool operator != (const Color &c) const
-		{ return colors_[0] != c.colors_[0] || colors_[1] != c.colors_[1] || colors_[2] != c.colors_[2] || colors_[3] != c.colors_[3]; }
+		{ return _colors[0] != c._colors[0] || _colors[1] != c._colors[1] || _colors[2] != c._colors[2] || _colors[3] != c._colors[3]; }
 
 	Color operator + (const Color &c) const
 		{
-			Color col = Color(colors_[0] + c.colors_[0], colors_[1] + c.colors_[1], colors_[2] + c.colors_[2], colors_[3] + c.colors_[3]);
+			Color col = Color(_colors[0] + c._colors[0], _colors[1] + c._colors[1], _colors[2] + c._colors[2], _colors[3] + c._colors[3]);
 			if (col[0] > 1.0f) col[0] = 1.0f; else if (col[0] < 0.0f) col[0] = 0.0f;
 			if (col[1] > 1.0f) col[1] = 1.0f; else if (col[1] < 0.0f) col[1] = 0.0f;
 			if (col[2] > 1.0f) col[2] = 1.0f; else if (col[2] < 0.0f) col[2] = 0.0f;
@@ -72,55 +72,55 @@ public:
 		}
 
 	Color operator *= (const Color &c)
-		{ return Color(colors_[0] * c.colors_[0], colors_[1] * c.colors_[1], colors_[2] * c.colors_[2], colors_[3] * c.colors_[3]); }
+		{ return Color(_colors[0] * c._colors[0], _colors[1] * c._colors[1], _colors[2] * c._colors[2], _colors[3] * c._colors[3]); }
 
 	Color operator * (const Color &c) const
-		{ return Color(colors_[0] * c.colors_[0], colors_[1] * c.colors_[1], colors_[2] * c.colors_[2], colors_[3] * c.colors_[3]); }
+		{ return Color(_colors[0] * c._colors[0], _colors[1] * c._colors[1], _colors[2] * c._colors[2], _colors[3] * c._colors[3]); }
 
 	Color operator * (float f) const
-		{ return Color(colors_[0] * f, colors_[1] * f, colors_[2] * f, colors_[3]); }
+		{ return Color(_colors[0] * f, _colors[1] * f, _colors[2] * f, _colors[3]); }
 
 	/** \note No checking of array bounds are done here for efficiency reasons. If safety is a concern, use the
 	*** class member access functions instead.
 	**/
 	float &operator[](int32 i)
-		{ return colors_[i]; }
+		{ return _colors[i]; }
 
 	/** \note No checking of array bounds are done here for efficiency reasons. If safety is a concern, use the
 	*** class member access functions instead.
 	**/
 	const float &operator[](int32 i) const
-		{ return colors_[i]; }
+		{ return _colors[i]; }
 	//@}
 
 	//! \brief Class member access functions
 	//@{
 	const float* GetColors() const
-		{ return colors_; }
+		{ return _colors; }
 
 	float GetRed() const
-		{ return colors_[0]; }
+		{ return _colors[0]; }
 
 	float GetGreen() const
-		{ return colors_[1]; }
+		{ return _colors[1]; }
 
 	float GetBlue() const
-		{ return colors_[2]; }
+		{ return _colors[2]; }
 
 	float GetAlpha() const
-		{ return colors_[3]; }
+		{ return _colors[3]; }
 
 	void SetRed(float r)
-		{ colors_[0] = r; if (colors_[0] > 1.0f) colors_[0] = 1.0f; else if (colors_[0] < 0.0f) colors_[0] = 0.0f; }
+		{ _colors[0] = r; if (_colors[0] > 1.0f) _colors[0] = 1.0f; else if (_colors[0] < 0.0f) _colors[0] = 0.0f; }
 
 	void SetGreen(float g)
-		{ colors_[1] = g; if (colors_[1] > 1.0f) colors_[1] = 1.0f; else if (colors_[1] < 0.0f) colors_[1] = 0.0f; }
+		{ _colors[1] = g; if (_colors[1] > 1.0f) _colors[1] = 1.0f; else if (_colors[1] < 0.0f) _colors[1] = 0.0f; }
 
 	void SetBlue(float b)
-		{ colors_[2] = b; if (colors_[2] > 1.0f) colors_[2] = 1.0f; else if (colors_[2] < 0.0f) colors_[2] = 0.0f; }
+		{ _colors[2] = b; if (_colors[2] > 1.0f) _colors[2] = 1.0f; else if (_colors[2] < 0.0f) _colors[2] = 0.0f; }
 
 	void SetAlpha(float a)
-		{ colors_[3] = a; if (colors_[3] > 1.0f) colors_[3] = 1.0f; else if (colors_[3] < 0.0f) colors_[3] = 0.0f; }
+		{ _colors[3] = a; if (_colors[3] > 1.0f) _colors[3] = 1.0f; else if (_colors[3] < 0.0f) _colors[3] = 0.0f; }
 	//@}
 
 private:
@@ -128,7 +128,7 @@ private:
 	*** These values range from 0.0 to 1.0. The indeces of the array represent:
 	*** red, green, blue, and alpha in that order.
 	**/
-	float colors_[4];
+	float _colors[4];
 }; // class Color
 
 }  // namespace hoa_video

@@ -31,8 +31,8 @@ bool GameVideo::_DrawStillImage(const StillImage &id)
 	// will take care of the modulation. If not, (i.e. no overlay is being used)
 	// then pass the light color so the vertex colors can do the modulation
 	
-	if(!_usesLights && (_lightColor != Color::white))
-		return _DrawStillImage(id, _lightColor);
+	if(!_uses_lights && (_light_color != Color::white))
+		return _DrawStillImage(id, _light_color);
 	else
 		return _DrawStillImage(id, Color::white);
 }
@@ -50,61 +50,61 @@ bool GameVideo::_DrawStillImage(const StillImage &id, const Color &color)
 		return true;
 	}
 
-	size_t numElements = id._elements.size();
+	size_t num_elements = id._elements.size();
 	
 	float modulation = _fader.GetFadeModulation();
-	Color fadeColor(modulation, modulation, modulation, 1.0f);
+	Color fade_color(modulation, modulation, modulation, 1.0f);
 
-	float shakeX = _shakeX * (_coord_sys.GetRight() - _coord_sys.GetLeft()) / 1024.0f;
-	float shakeY = _shakeY * (_coord_sys.GetTop()   - _coord_sys.GetBottom()) / 768.0f;
+	float x_shake = _x_shake * (_coord_sys.GetRight() - _coord_sys.GetLeft()) / 1024.0f;
+	float y_shake = _y_shake * (_coord_sys.GetTop()   - _coord_sys.GetBottom()) / 768.0f;
 
-	float xAlignOffset = ((_xalign+1) * id._width)  * 0.5f * -_coord_sys.GetHorizontalDirection();
-	float yAlignOffset = ((_yalign+1) * id._height) * 0.5f * -_coord_sys.GetVerticalDirection();
+	float x_align_offset = ((_x_align+1) * id._width)  * 0.5f * -_coord_sys.GetHorizontalDirection();
+	float y_align_offset = ((_y_align+1) * id._height) * 0.5f * -_coord_sys.GetVerticalDirection();
 
 	glPushMatrix();
-	MoveRelative(xAlignOffset, yAlignOffset);	
+	MoveRelative(x_align_offset, y_align_offset);	
 
-	bool skipModulation = (color == Color::white && modulation == 1.0f);
+	bool skip_modulation = (color == Color::white && modulation == 1.0f);
 	
 	
-	for(uint32 iElement = 0; iElement < numElements; ++iElement)
+	for(uint32 iElement = 0; iElement < num_elements; ++iElement)
 	{		
 		glPushMatrix();
 		
-		float xoff = (float)id._elements[iElement].x_offset;
-		float yoff = (float)id._elements[iElement].y_offset;
+		float x_off = (float)id._elements[iElement].x_offset;
+		float y_off = (float)id._elements[iElement].y_offset;
 
-		if(_xflip)
+		if(_x_flip)
 		{
-			xoff = id._width - xoff - id._elements[iElement].width;
+			x_off = id._width - x_off - id._elements[iElement].width;
 		}
 		
-		if(_yflip)
+		if(_y_flip)
 		{
-			yoff = id._height - yoff - id._elements[iElement].height;
+			y_off = id._height - y_off - id._elements[iElement].height;
 		}
 
-		xoff += shakeX;
-		yoff += shakeY;
+		x_off += x_shake;
+		y_off += y_shake;
 
-		MoveRelative(xoff * _coord_sys.GetHorizontalDirection(), yoff * _coord_sys.GetVerticalDirection());
+		MoveRelative(x_off * _coord_sys.GetHorizontalDirection(), y_off * _coord_sys.GetVerticalDirection());
 		
-		float xscale = id._elements[iElement].width;
-		float yscale = id._elements[iElement].height;
+		float x_scale = id._elements[iElement].width;
+		float y_scale = id._elements[iElement].height;
 		
 		if(_coord_sys.GetHorizontalDirection() < 0.0f)
-			xscale = -xscale;
+			x_scale = -x_scale;
 		if(_coord_sys.GetVerticalDirection() < 0.0f)
-			yscale = -yscale;
+			y_scale = -y_scale;
 		
-		glScalef(xscale, yscale, 1.0f);
+		glScalef(x_scale, y_scale, 1.0f);
 
 		bool success;
 		
-		if(skipModulation)
+		if(skip_modulation)
 			success = _DrawElement(id._elements[iElement]);
 		else
-			success = _DrawElement(id._elements[iElement], color * fadeColor);
+			success = _DrawElement(id._elements[iElement], color * fade_color);
 		
 		if(!success)
 		{
@@ -169,7 +169,7 @@ bool GameVideo::_DrawElement(const ImageElement &element) {
 		t1 = img->v1 + element.v2 * (img->v2 - img->v1);
 
 		// swap x texture coordinates for x flipping
-		if (_xflip) 
+		if (_x_flip) 
 		{ 
 			float temp = s0;
 			s0 = s1;
@@ -177,7 +177,7 @@ bool GameVideo::_DrawElement(const ImageElement &element) {
 		} 
 
 		// swap y texture coordinates for y flipping
-		if (_yflip) 
+		if (_y_flip) 
 		{ 
 			float temp = t0;
 			t0 = t1;
@@ -279,7 +279,7 @@ bool GameVideo::_DrawElement(const ImageElement &element) {
 bool GameVideo::_DrawElement
 (
 	const ImageElement &element,
-	const Color &modulateColor
+	const Color &modulate_color
 )
 {	
 	Image *img = element.image;
@@ -322,7 +322,7 @@ bool GameVideo::_DrawElement
 		t1 = img->v1 + element.v2 * (img->v2 - img->v1);
 
 		// swap x texture coordinates for x flipping
-		if (_xflip) 
+		if (_x_flip) 
 		{ 
 			float temp = s0;
 			s0 = s1;
@@ -330,7 +330,7 @@ bool GameVideo::_DrawElement
 		} 
 
 		// swap y texture coordinates for y flipping
-		if (_yflip) 
+		if (_y_flip) 
 		{ 
 			float temp = t0;
 			t0 = t1;
@@ -344,7 +344,7 @@ bool GameVideo::_DrawElement
 		glBegin(GL_QUADS);
 		if(element.one_color)
 		{
-			Color color = element.color[0] * modulateColor;
+			Color color = element.color[0] * modulate_color;
 			glColor4fv((GLfloat *)&color);
 			glTexCoord2f(s0, t1);
 			glVertex2f(xlo, ylo); //bl
@@ -358,10 +358,10 @@ bool GameVideo::_DrawElement
 		else
 		{
 			Color color[4];
-			color[0] = modulateColor * element.color[0];
-			color[1] = modulateColor * element.color[1];
-			color[2] = modulateColor * element.color[2];
-			color[3] = modulateColor * element.color[3];
+			color[0] = modulate_color * element.color[0];
+			color[1] = modulate_color * element.color[1];
+			color[2] = modulate_color * element.color[2];
+			color[3] = modulate_color * element.color[3];
 			
 			glColor4fv((GLfloat *)&color[0]);
 			glTexCoord2f(s0, t1);
@@ -382,7 +382,7 @@ bool GameVideo::_DrawElement
 		glBegin(GL_QUADS);
 		if(element.one_color)
 		{
-			Color color = element.color[0] * modulateColor;			
+			Color color = element.color[0] * modulate_color;			
 			glColor4fv((GLfloat *)&color);
 			glVertex2f(xlo, ylo); //bl
 			glVertex2f(xhi, ylo); //br
@@ -392,10 +392,10 @@ bool GameVideo::_DrawElement
 		else
 		{
 			Color color[4];
-			color[0] = modulateColor * element.color[0];
-			color[1] = modulateColor * element.color[1];
-			color[2] = modulateColor * element.color[2];
-			color[3] = modulateColor * element.color[3];
+			color[0] = modulate_color * element.color[0];
+			color[1] = modulate_color * element.color[1];
+			color[2] = modulate_color * element.color[2];
+			color[3] = modulate_color * element.color[3];
 
 			glColor4fv((GLfloat *)&color[0]);
 			glVertex2f(xlo, ylo); //bl
@@ -455,7 +455,7 @@ bool GameVideo::DrawHalo(const StillImage &id, float x, float y, const Color &co
 //-----------------------------------------------------------------------------
 bool GameVideo::DrawLight(const StillImage &id, float x, float y, const Color &color)
 {
-	if(!_usesLights)
+	if(!_uses_lights)
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: called DrawLight() even though real lighting was not enabled!" << endl;

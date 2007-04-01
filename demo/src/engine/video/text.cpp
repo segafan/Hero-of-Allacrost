@@ -106,7 +106,7 @@ std::string GameVideo::GetFont() const
 
 Color GameVideo::GetTextColor () const
 {
-	return _currentTextColor;
+	return _current_text_color;
 }
 
 //-----------------------------------------------------------------------------
@@ -226,7 +226,7 @@ RenderedLine *GameVideo::_GenTexLine(uint16 *line, FontProperties *fp)
 		xpos += glyphinfo->advance;
 	}
 
-	if (_textShadow)
+	if (_text_shadow)
 	{
 		shadowPixels = new uint8[intermediary->w * intermediary->h * 4];
 		shadowColor  = _GetTextShadowColor(fp);
@@ -235,7 +235,7 @@ RenderedLine *GameVideo::_GenTexLine(uint16 *line, FontProperties *fp)
 	SDL_LockSurface(intermediary);
 	for(int j = 0; j < intermediary->w * intermediary->h ; ++ j)
 	{
-		if (_textShadow)
+		if (_text_shadow)
 		{
 			shadowPixels[j*4+3] = ((uint8*)intermediary->pixels)[j*4+2];
 			shadowPixels[j*4+0] = (uint8) (shadowColor[0] * 0xFF);
@@ -243,12 +243,12 @@ RenderedLine *GameVideo::_GenTexLine(uint16 *line, FontProperties *fp)
 			shadowPixels[j*4+2] = (uint8) (shadowColor[2] * 0xFF);
 		}
 		((uint8*)intermediary->pixels)[j*4+3] = ((uint8*)intermediary->pixels)[j*4+2];
-		((uint8*)intermediary->pixels)[j*4+0] = (uint8) (_currentTextColor[0] * 0xFF);
-		((uint8*)intermediary->pixels)[j*4+1] = (uint8) (_currentTextColor[1] * 0xFF);
-		((uint8*)intermediary->pixels)[j*4+2] = (uint8) (_currentTextColor[2] * 0xFF);
+		((uint8*)intermediary->pixels)[j*4+0] = (uint8) (_current_text_color[0] * 0xFF);
+		((uint8*)intermediary->pixels)[j*4+1] = (uint8) (_current_text_color[1] * 0xFF);
+		((uint8*)intermediary->pixels)[j*4+2] = (uint8) (_current_text_color[2] * 0xFF);
 	}
 
-	numTextures = _textShadow ? 2 : 1;
+	numTextures = _text_shadow ? 2 : 1;
 
 	glGenTextures(numTextures, texid);
 
@@ -509,13 +509,13 @@ bool GameVideo::_DrawTextHelper
 		return false;
 	}
 
-	float xoff = ((_xalign+1) * fontwidth) * .5f * -cs.GetHorizontalDirection();
-	float yoff = ((_yalign+1) * fontheight) * .5f * -cs.GetVerticalDirection();
+	float xoff = ((_x_align+1) * fontwidth) * .5f * -cs.GetHorizontalDirection();
+	float yoff = ((_y_align+1) * fontheight) * .5f * -cs.GetVerticalDirection();
 
 	MoveRelative(xoff, yoff);
 
 	float modulation = _fader.GetFadeModulation();
-	Color textColor = _currentTextColor * modulation;
+	Color textColor = _current_text_color * modulation;
 
 	int xpos = 0;
 
@@ -571,7 +571,7 @@ bool GameVideo::_DrawTextHelper
 
 	glPopMatrix();
 	
-	if(_fogIntensity > 0.0f)
+	if(_fog_intensity > 0.0f)
 		glEnable(GL_FOG);
 
 	glDisable(GL_ALPHA_TEST);
@@ -649,10 +649,10 @@ bool GameVideo::DrawText(const ustring &txt)
 
 			glPushMatrix();
 			
-			Color oldTextColor = _currentTextColor;
+			Color oldTextColor = _current_text_color;
 
 			// if text shadows are enabled, draw the shadow
-			if(_textShadow && fp->shadow_style != VIDEO_TEXT_SHADOW_NONE)
+			if(_text_shadow && fp->shadow_style != VIDEO_TEXT_SHADOW_NONE)
 			{
 				Color textColor;
 				
@@ -781,11 +781,11 @@ RenderedString *GameVideo::RenderText(const ustring &txt)
 	std::vector<uint16 *>::iterator lineIter;
 
 
-	Color oldColor = _currentTextColor;
+	Color oldColor = _current_text_color;
 	int32 shadowOffsetX = 0;
 	int32 shadowOffsetY = 0;
 	// if text shadows are enabled, draw the shadow
-	if(_textShadow && fp->shadow_style != VIDEO_TEXT_SHADOW_NONE)
+	if(_text_shadow && fp->shadow_style != VIDEO_TEXT_SHADOW_NONE)
 	{
 		shadowOffsetX = static_cast<int32>(_coord_sys.GetHorizontalDirection()) * fp->shadow_x;
 		shadowOffsetY = static_cast<int32>(_coord_sys.GetVerticalDirection()) * fp->shadow_y;
@@ -851,7 +851,7 @@ int32 GameVideo::CalculateTextWidth(const std::string &fontName, const std::stri
 
 void GameVideo::EnableTextShadow(bool enable)
 {
-	_textShadow = enable;
+	_text_shadow = enable;
 }
 
 
@@ -941,28 +941,28 @@ bool GameVideo::SetFontShadowStyle(const std::string &fontName, TEXT_SHADOW_STYL
 Color GameVideo::_GetTextShadowColor(FontProperties *fp)
 {
 	Color shadowColor;
-	if(_textShadow && fp->shadow_style != VIDEO_TEXT_SHADOW_NONE)
+	if(_text_shadow && fp->shadow_style != VIDEO_TEXT_SHADOW_NONE)
 	{
 		switch(fp->shadow_style)
 		{
 			case VIDEO_TEXT_SHADOW_DARK:
 				shadowColor = Color::black;
-				shadowColor[3] = _currentTextColor[3] * 0.5f;
+				shadowColor[3] = _current_text_color[3] * 0.5f;
 				break;
 			case VIDEO_TEXT_SHADOW_LIGHT:
 				shadowColor = Color::white;
-				shadowColor[3] = _currentTextColor[3] * 0.5f;
+				shadowColor[3] = _current_text_color[3] * 0.5f;
 				break;
 			case VIDEO_TEXT_SHADOW_BLACK:
 				shadowColor = Color::black;
-				shadowColor[3] = _currentTextColor[3];
+				shadowColor[3] = _current_text_color[3];
 				break;
 			case VIDEO_TEXT_SHADOW_COLOR:
-				shadowColor = _currentTextColor;
-				shadowColor[3] = _currentTextColor[3] * 0.5f;
+				shadowColor = _current_text_color;
+				shadowColor[3] = _current_text_color[3] * 0.5f;
 				break;
 			case VIDEO_TEXT_SHADOW_INVCOLOR:
-				shadowColor = Color(1.0f - _currentTextColor[0], 1.0f - _currentTextColor[1], 1.0f - _currentTextColor[2], _currentTextColor[3] * 0.5f);
+				shadowColor = Color(1.0f - _current_text_color[0], 1.0f - _current_text_color[1], 1.0f - _current_text_color[2], _current_text_color[3] * 0.5f);
 				break;
 			default:
 			{
@@ -1101,7 +1101,7 @@ bool GameVideo::Draw(const RenderedString &string)
 	glEnable(GL_ALPHA_TEST);
 	glAlphaFunc(GL_GREATER, 0.1f);
 
-	float xoff = ((_xalign) * string.GetWidth()) * .5f * -_coord_sys.GetHorizontalDirection();
+	float xoff = ((_x_align) * string.GetWidth()) * .5f * -_coord_sys.GetHorizontalDirection();
 
 	std::vector<RenderedLine*>::const_iterator it;
 
