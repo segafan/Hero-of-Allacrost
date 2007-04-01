@@ -214,6 +214,10 @@ void BattleCharacterActor::DrawSprite() {
 		VideoManager->Move(_x_location, _y_location);
 		GetActor()->RetrieveBattleAnimation("idle")->Draw();
 
+		if (this == current_battle->_selected_target) {
+			VideoManager->Move(_x_location - 20.0f, _y_location - 20.0f);
+			VideoManager->DrawImage(current_battle->_actor_selection_image);
+		}
 
 		// TEMP: determine if character sprite needs red damage numbers drawn next to it
 		if (_total_time_damaged > 0) {
@@ -448,11 +452,11 @@ BattleEnemyActor::~BattleEnemyActor() {
 }*/
 
 // Compares the Y-coordinates of the actors, used for sorting the actors up-down when drawing
+// BROKEN!!! My bad -CD
 bool BattleEnemyActor::operator<(const BattleEnemyActor & other) const
 {
-	//if ((_y_location - (GetActor()->GetHeight())) > (other.GetYLocation() - (other.GetActor()->GetHeight())))
-	if (_y_location > other.GetYLocation())
-		return true;
+	//if ((_y_location - ((*GetActor()).GetHeight())) > (other.GetYLocation() - (*(other.GetActor()).GetHeight())))
+	//	return true;
 	
 	return false;
 }
@@ -514,7 +518,7 @@ void BattleEnemyActor::DrawSprite() {
 	}
 	else {
 		// Draw the actor selector image over the currently selected enemy
-		if (this == current_battle->_selected_enemy) {
+		if (this == current_battle->_selected_target) {
 			VideoManager->Move(_x_location - 20.0f, _y_location - 20.0f);
 			VideoManager->DrawImage(current_battle->_actor_selection_image);
 		}

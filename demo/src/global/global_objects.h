@@ -47,30 +47,6 @@ enum GLOBAL_OBJECT {
 };
 
 
-/** \name GlobalItem Usage Cases
-*** \brief Enum values used for identification of different game object types
-**/
-enum GLOBAL_ITEM_USE {
-	GLOBAL_ITEM_USE_INVALID = -1,
-	GLOBAL_ITEM_USE_MENU    =  0,
-	GLOBAL_ITEM_USE_BATTLE  =  1,
-	GLOBAL_ITEM_USE_ALL     =  2,
-	GLOBAL_ITEM_USE_TOTAL   =  3
-};
-
-/** \name GlobalItem and GlobalSkill Alignment values
-*** \brief Enum values used for telling us whether they target friends, foes, or both
-**/
-enum GLOBAL_ALIGNMENT {
-	GLOBAL_ALIGNMENT_INVALID = -1,
-	GLOBAL_ALIGNMENT_GOOD    =  0,
-	GLOBAL_ALIGNMENT_BAD	 =  1,
-	GLOBAL_ALIGNMENT_NEUTRAL =  2,
-	GLOBAL_ALIGNMENT_TOTAL   =  3
-};
-
-
-
 /** ****************************************************************************
 *** \brief An abstract parent class for representing a game object
 ***
@@ -199,26 +175,22 @@ public:
 	//anything, so we cannot have one definition handle both modes.
 
 	/** \brief Calls the script function which performs the item's use
-	*** \param target A void pointer to the target, which should be either a pointer to a
-	*** GlobalAttackPoint, GlobalActor, or GlobalParty class object
-	*** \note This will reduce the count member by zero. If the count member is already zero,
-	*** this function will return without doing anything.
+	*** \param target A pointer to the target of this skill
+	*** \param instigator A pointer to the instigator of this skill
 	*** \note This version is only for BATTLE MODE.
 	**/
 	void Use(hoa_battle::private_battle::BattleActor* target, hoa_battle::private_battle::BattleActor* instigator);
 
 	/** \brief Calls the script function which performs the item's use
-	*** \param target A void pointer to the target, which should be either a pointer to a
-	*** GlobalAttackPoint, GlobalActor, or GlobalParty class object
-	*** \note This will reduce the count member by zero. If the count member is already zero,
-	*** this function will return without doing anything.
+	*** \param target A pointer to the target of this skill
+	*** \param instigator A pointer to the instigator of this skill
 	*** \note This version is only for MENU MODE.
 	**/
-	//void Use(GlobalCharacter* target, GlobalCharacter* instigator = NULL);
+	void Use(GlobalCharacter* target, GlobalCharacter* instigator = NULL);
 
 	//! \name Class Member Access Functions
 	//@{
-	GLOBAL_ITEM_USE GetUsage() const
+	GLOBAL_USE GetUsage() const
 		{ return _usage; }
 
 	GLOBAL_TARGET GetTargetType() const
@@ -233,7 +205,7 @@ private:
 	*** Items may only be used in either menu mode or battle mode. If an item is to be used in another game mode,
 	*** then it must rely on either the menu or battle use values.
 	**/
-	GLOBAL_ITEM_USE _usage;
+	GLOBAL_USE _usage;
 
 	/** \brief The type of target for the item.
 	*** Target types include attack points, actors, and parties. This enum  type is defined in global_skills.h
@@ -246,7 +218,7 @@ private:
 	GLOBAL_ALIGNMENT _target_alignment;
 
 	//! \brief A reference to the script function that performs the items action.
-	ScriptObject _function;
+	ScriptObject _use_function;
 
 	GlobalItem(const GlobalItem&);
 	GlobalItem& operator=(const GlobalItem&);

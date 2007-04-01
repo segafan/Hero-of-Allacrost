@@ -18,6 +18,7 @@
 #include "utils.h"
 #include "video.h"
 #include "script.h"
+#include "battle_actors.h"
 
 #include "global.h"
 
@@ -105,13 +106,73 @@ GlobalSkill::GlobalSkill(uint32 id) : _id(id) {
 	// TODO: Use the id to look up the approrpriate script and load the skill data
 
 	// TEMP: Only one type of skill is defined: Sword Slash
-	_name = MakeUnicodeString("Sword Slash");
+	/*_name = MakeUnicodeString("Sword Slash");
 	_type = GLOBAL_SKILL_ATTACK;
 	_target_type = GLOBAL_TARGET_ATTACK_POINT;
 	_sp_required = 0;
 	_warmup_time = 0;
 	_cooldown_time = 0;
-	_level_required = 1;
+	_level_required = 1;*/
+	_Load();
+}
+
+void GlobalSkill::_Load()
+{
+	if (_id == 0 || _id > 9999) {
+		_type = GLOBAL_SKILL_INVALID;
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL ERROR: GlobalItem::_Load has an invalid id value: " << _id << endl;
+		return;
+	}
+
+	// Load the item data from the script
+	GlobalManager->_attack_skills_script.ReadOpenTable(_id);
+	_name = MakeUnicodeString(GlobalManager->_attack_skills_script.ReadString("name"));
+	_description = MakeUnicodeString(GlobalManager->_attack_skills_script.ReadString("description"));
+	_usage = static_cast<GLOBAL_USE>(GlobalManager->_attack_skills_script.ReadInt("usage"));
+	_target_type = static_cast<GLOBAL_TARGET>(GlobalManager->_attack_skills_script.ReadInt("target_type"));
+	_target_alignment = static_cast<GLOBAL_ALIGNMENT>(GlobalManager->_attack_skills_script.ReadInt("target_alignment"));
+	_sp_required = GlobalManager->_attack_skills_script.ReadInt("sp_usage");
+	_use_function = GlobalManager->_attack_skills_script.ReadFunctionPointer("use_function");
+	_warmup_time = GlobalManager->_attack_skills_script.ReadInt("warmup_time");
+	_cooldown_time = GlobalManager->_attack_skills_script.ReadInt("cooldown_time");
+	_type = static_cast<GLOBAL_SKILL>(GlobalManager->_attack_skills_script.ReadInt("skill_type"));
+	_level_required = GlobalManager->_attack_skills_script.ReadInt("level_required");
+
+	GlobalManager->_attack_skills_script.ReadCloseTable();
+
+	if (GlobalManager->_attack_skills_script.GetErrorCode() != SCRIPT_NO_ERRORS) {
+		cerr << "GLOBAL ERROR: GlobalItem::_Load errored in parsing table with code: " << GlobalManager->_attack_skills_script.GetErrorCode() << endl;
+	}
+}
+
+
+//This version is only for BATTLE MODE
+void GlobalSkill::Use(hoa_battle::private_battle::BattleActor* target, hoa_battle::private_battle::BattleActor* instigator) {
+	//FIX ME Do a nifty text message in game
+	//This check is if in case a player is warming up
+	//and some of his SP gets syphoned
+	if (GetSPRequired() > instigator->GetSkillPoints())
+	{
+		cerr << "GLOBAL ERROR: tried to use item " << MakeStandardString(_name) << " which had a count of zero" << endl;
+		return;
+	}
+
+	ScriptCallFunction<void>(_use_function, target, instigator);
+}
+
+//This version is only for BATTLE MODE
+void GlobalSkill::Use(GlobalCharacter* target, GlobalCharacter* instigator) {
+	//FIX ME Do a nifty text message in game
+	//This check is if in case a player is warming up
+	//and some of his SP gets syphoned
+	if (GetSPRequired() > instigator->GetSkillPoints())
+	{
+		cerr << "GLOBAL ERROR: tried to use item " << MakeStandardString(_name) << " which had a count of zero" << endl;
+		return;
+	}
+
+	ScriptCallFunction<void>(_use_function, target, instigator);
 }
 
 

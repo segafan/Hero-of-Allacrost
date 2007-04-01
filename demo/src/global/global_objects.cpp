@@ -18,6 +18,7 @@
 #include "utils.h"
 #include "video.h"
 #include "script.h"
+#include "battle_actors.h"
 
 #include "global.h"
 
@@ -46,11 +47,11 @@ void GlobalItem::_Load() {
 	_name = MakeUnicodeString(GlobalManager->_items_script.ReadString("name"));
 	_description = MakeUnicodeString(GlobalManager->_items_script.ReadString("description"));
 	_icon_image.SetFilename(GlobalManager->_items_script.ReadString("icon"));
-	_usage = static_cast<GLOBAL_ITEM_USE>(GlobalManager->_items_script.ReadInt("usage"));
+	_usage = static_cast<GLOBAL_USE>(GlobalManager->_items_script.ReadInt("usage"));
 	_target_type = static_cast<GLOBAL_TARGET>(GlobalManager->_items_script.ReadInt("target_type"));
 	_target_alignment = static_cast<GLOBAL_ALIGNMENT>(GlobalManager->_items_script.ReadInt("target_alignment"));
 	_price = GlobalManager->_items_script.ReadInt("standard_price");
-	_function = GlobalManager->_items_script.ReadFunctionPointer("use_function");
+	_use_function = GlobalManager->_items_script.ReadFunctionPointer("use_function");
 
 	GlobalManager->_items_script.ReadCloseTable();
 
@@ -63,31 +64,21 @@ void GlobalItem::_Load() {
 } // void GlobalItem::_Load()
 
 
-//This version is only for MENU MODE (eventually)
+//This version is only for BATTLE MODE
 void GlobalItem::Use(hoa_battle::private_battle::BattleActor* target, hoa_battle::private_battle::BattleActor* instigator) {
-	if (_count == 0) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL ERROR: tried to use item " << MakeStandardString(_name) << " which had a count of zero" << endl;
-		return;
-	}
-
-	//bool success = ScriptCallFunction<bool>(_function(target, instigator));
-
-	//if (success)
-	//	--_count;
+	ScriptCallFunction<void>(_use_function, target, instigator);
 }
 
-//This version is only for BATTTLE MODE
-/*void GlobalItem::Use(GlobalCharacter* target, GlobalCharacter* instigator = NULL) {
+//This version is only for MENU MODE
+void GlobalItem::Use(GlobalCharacter* target, GlobalCharacter* instigator) {
 	if (_count == 0) {
 		if (GLOBAL_DEBUG)
 			cerr << "GLOBAL ERROR: tried to use item " << MakeStandardString(_name) << " which had a count of zero" << endl;
 		return;
 	}
-
-	ScriptCallFunction<void>(_function);
+	ScriptCallFunction<void>(_use_function, target, instigator);
 	_count--;
-}*/
+}
 
 // ****************************************************************************
 // ***** GlobalWeapon Class

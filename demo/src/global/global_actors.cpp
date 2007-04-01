@@ -164,8 +164,26 @@ GlobalCharacter::GlobalCharacter(uint32 id) {
 	vector<int32> skill_ids;
 	char_script.ReadIntVector("initial_skills", skill_ids);
 
+	GlobalSkill *skill = NULL;
+
 	for (uint32 i = 0; i < skill_ids.size(); i++) {
-		_skills.insert(make_pair(skill_ids[i], new GlobalSkill(skill_ids[i])));
+		skill = new GlobalSkill(skill_ids[i]);
+		_skills.insert(make_pair(skill_ids[i], skill));
+
+		switch (skill->GetType())
+		{
+			case GLOBAL_SKILL_ATTACK:
+				_attack_skills.push_back(skill);
+				break;
+			case GLOBAL_SKILL_DEFEND:
+				_defense_skills.push_back(skill);
+				break;
+			case GLOBAL_SKILL_SUPPORT:
+				_support_skills.push_back(skill);
+				break;
+			default:
+				break;
+		}
 	}
 
 	char_script.ReadCloseTable();
