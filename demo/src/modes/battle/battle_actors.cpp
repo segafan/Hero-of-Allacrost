@@ -524,7 +524,7 @@ void BattleEnemyActor::DrawSprite() {
 		}
 
 		// Draw the enemy's damage-blended sprite frames
-		std::vector<StillImage> & sprite_frames = *(GetActor()->GetSpriteFrames());
+		std::vector<StillImage>& sprite_frames = *(GetActor()->GetSpriteFrames());
 		VideoManager->Move(_x_location, _y_location);
 		float hp_percent = static_cast<float>(GetHitPoints()) / static_cast<float>(GetMaxHitPoints());
 

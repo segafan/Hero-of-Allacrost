@@ -230,6 +230,8 @@ private:
 	hoa_script::ScriptDescriptor _weapons_script;
 	hoa_script::ScriptDescriptor _armor_script;
 	hoa_script::ScriptDescriptor _attack_skills_script;
+	hoa_script::ScriptDescriptor _defend_skills_script;
+	hoa_script::ScriptDescriptor _support_skills_script;
 	//@}
 }; // class GameGlobal
 
