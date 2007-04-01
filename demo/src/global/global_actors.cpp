@@ -273,11 +273,7 @@ GlobalEnemy::GlobalEnemy(uint32 id) {
 	_filename = enemy_data.ReadString("filename");
 
 	// Make four dummy images for LoadMultiImage(). TODO: Can't we do these in LoadMultiImage() instead :(
-	StillImage foo;
-	_sprite_frames.push_back(foo);
-	_sprite_frames.push_back(foo);
-	_sprite_frames.push_back(foo);
-	_sprite_frames.push_back(foo);
+	_sprite_frames.assign(4, StillImage());
 	// Attempt to load the MultiImage, which should contain one row and four columns of images
 	if (VideoManager->LoadMultiImage(_sprite_frames, sprite_filename, 1, 4) == false) {
 		cerr << "GLOBAL ERROR: failed to load sprite frames for enemy: " << sprite_filename << endl;

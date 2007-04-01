@@ -116,9 +116,23 @@ GlobalSkill::GlobalSkill(uint32 id) : _id(id) {
 	_Load();
 }
 
-void GlobalSkill::_Load()
-{
-	if (_id == 0 || _id > 9999) {
+void GlobalSkill::_Load() {
+	// A pointer to the skill script which will be used to load this skill
+	ScriptDescriptor *skill_script = NULL;
+
+	if (_id >= 1 && _id <= 10000) {
+		_type = GLOBAL_SKILL_ATTACK;
+		skill_script = &(GlobalManager->_attack_skills_script);
+	}
+	else if (_id >= 10001 && _id <= 20000) {
+		_type = GLOBAL_SKILL_DEFEND;
+		skill_script = &(GlobalManager->_defend_skills_script);
+	}
+	else if (_id >= 20001 && _id <= 30001) {
+		_type = GLOBAL_SKILL_SUPPORT;
+		skill_script = &(GlobalManager->_support_skills_script);
+	}
+	else {
 		_type = GLOBAL_SKILL_INVALID;
 		if (GLOBAL_DEBUG)
 			cerr << "GLOBAL ERROR: GlobalItem::_Load has an invalid id value: " << _id << endl;
@@ -126,23 +140,23 @@ void GlobalSkill::_Load()
 	}
 
 	// Load the item data from the script
-	GlobalManager->_attack_skills_script.ReadOpenTable(_id);
-	_name = MakeUnicodeString(GlobalManager->_attack_skills_script.ReadString("name"));
-	_description = MakeUnicodeString(GlobalManager->_attack_skills_script.ReadString("description"));
-	_usage = static_cast<GLOBAL_USE>(GlobalManager->_attack_skills_script.ReadInt("usage"));
-	_target_type = static_cast<GLOBAL_TARGET>(GlobalManager->_attack_skills_script.ReadInt("target_type"));
-	_target_alignment = static_cast<GLOBAL_ALIGNMENT>(GlobalManager->_attack_skills_script.ReadInt("target_alignment"));
-	_sp_required = GlobalManager->_attack_skills_script.ReadInt("sp_usage");
-	_use_function = GlobalManager->_attack_skills_script.ReadFunctionPointer("use_function");
-	_warmup_time = GlobalManager->_attack_skills_script.ReadInt("warmup_time");
-	_cooldown_time = GlobalManager->_attack_skills_script.ReadInt("cooldown_time");
-	_type = static_cast<GLOBAL_SKILL>(GlobalManager->_attack_skills_script.ReadInt("skill_type"));
-	_level_required = GlobalManager->_attack_skills_script.ReadInt("level_required");
+	skill_script->ReadOpenTable(_id);
 
-	GlobalManager->_attack_skills_script.ReadCloseTable();
+	_name = MakeUnicodeString(skill_script->ReadString("name"));
+	_description = MakeUnicodeString(skill_script->ReadString("description"));
+	_target_type = static_cast<GLOBAL_TARGET>(skill_script->ReadInt("target_type"));
+	_sp_required = skill_script->ReadInt("sp_required");
+	_warmup_time = skill_script->ReadInt("warmup_time");
+	_cooldown_time = skill_script->ReadInt("cooldown_time");
+	_level_required = skill_script->ReadInt("level_required");
+	_usage = static_cast<GLOBAL_USE>(skill_script->ReadInt("usage"));
+	_target_alignment = static_cast<GLOBAL_ALIGNMENT>(skill_script->ReadInt("target_alignment"));
+	_use_function = skill_script->ReadFunctionPointer("use_function");
 
-	if (GlobalManager->_attack_skills_script.GetErrorCode() != SCRIPT_NO_ERRORS) {
-		cerr << "GLOBAL ERROR: GlobalItem::_Load errored in parsing table with code: " << GlobalManager->_attack_skills_script.GetErrorCode() << endl;
+	skill_script->ReadCloseTable();
+
+	if (skill_script->GetErrorCode() != SCRIPT_NO_ERRORS) {
+		cerr << "GLOBAL ERROR: GlobalItem::_Load errored in parsing table with code: " << skill_script->GetErrorCode() << endl;
 	}
 }
 

@@ -11,19 +11,18 @@ skills = {}
 
 
 -- -----------------------------------------------------------------------------
--- IDs 1-9999 are reserved for attack skills
+-- IDs 1-10000 are reserved for attack skills
 -- -----------------------------------------------------------------------------
 
 skills[1] = {
 	name = "Slicing Rain",
 	description = "A simple but effective vertical sword slash.",
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
-	sp_usage = 0,
+	sp_required = 0,
 	warmup_time = 2000,
 	cooldown_time = 0,
 	level_required = 1,
 	usage = hoa_global.GameGlobal.GLOBAL_USE_BATTLE,
-	skilltype = hoa_global.GameGlobal.GLOBAL_SKILL_ATTACK,
 	target_alignment = hoa_global.GameGlobal.GLOBAL_ALIGNMENT_NEUTRAL,
 
 	use_function = function(target,instigator)
