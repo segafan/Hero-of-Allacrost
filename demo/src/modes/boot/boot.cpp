@@ -571,7 +571,6 @@ void BootMode::_SetupResolutionMenu() {
 	_resolution_menu.AddOption(MakeUnicodeString("640 x 480"), &BootMode::_OnResolution640x480);
 	_resolution_menu.AddOption(MakeUnicodeString("800 x 600"), &BootMode::_OnResolution800x600);
 	_resolution_menu.AddOption(MakeUnicodeString("1024 x 768"), &BootMode::_OnResolution1024x768);
-	_resolution_menu.AddOption(MakeUnicodeString("1280 x 1024"), &BootMode::_OnResolution1280x1024);
 	_resolution_menu.SetParent(&_video_options_menu);
 	_resolution_menu.SetWindowed(true);
 }
@@ -740,11 +739,6 @@ void BootMode::_OnResolution800x600() {
 void BootMode::_OnResolution1024x768() {
 	_SetResolution(1024, 768);
 }
-
-void BootMode::_OnResolution1280x1024() {
-	_SetResolution(1280, 1024);
-}
-
 
 // Brightness increment. Actually the correct term is "gamma correction" but I think it's easier for the user to think of it just as brightness!
 void BootMode::_OnBrightnessLeft() {

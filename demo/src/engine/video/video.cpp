@@ -22,6 +22,7 @@
 #include "video.h"
 #include "context.h"
 #include "gui.h"
+#include "script.h"
 
 using namespace std;
 using namespace hoa_video::private_video;
@@ -183,12 +184,29 @@ bool GameVideo::SingletonInitialize()
 	const SDL_VideoInfo* video_info (0);
 	video_info = SDL_GetVideoInfo ();
 
+	hoa_script::ScriptDescriptor settings_lua;
+	static const char *settings_filename = "dat/config/settings.lua";
+
+	if (!settings_lua.OpenFile(settings_filename, hoa_script::SCRIPT_READ))
+	{
+		fprintf(stderr, "Failed to load file '%s'.\n", settings_filename);
+		exit(1);
+	}
+
+	settings_lua.ReadOpenTable("video_settings");
+	int  settings_width      = settings_lua.ReadInt("screen_resx");
+	int  settings_height     = settings_lua.ReadInt("screen_resy");
+	bool settings_fullscreen = settings_lua.ReadBool("full_screen");
+	settings_lua.ReadCloseTable();
+
+	settings_lua.CloseFile();
+
 	if (video_info)
 	{
 		// Set the resolution to be the highest possible (lower than the user one)
-		if (video_info->current_w > 1280 && video_info->current_h > 1024)
+		if (video_info->current_w > settings_width && video_info->current_h > settings_height)
 		{
-			SetResolution (1280, 1024);
+			SetResolution (settings_width, settings_height);
 		}
 		else if (video_info->current_w > 1024 && video_info->current_h > 768)
 		{
@@ -206,10 +224,10 @@ bool GameVideo::SingletonInitialize()
 	else
 	{
 		// Default resoltion if we could not retrieve the resolution of the user
-		SetResolution(1024, 768);
+		SetResolution(settings_width, settings_height);
 	}
 
-	SetFullscreen(false);
+	SetFullscreen(settings_fullscreen);
 
 	if(!ApplySettings())
 	{
