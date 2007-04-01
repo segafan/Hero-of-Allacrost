@@ -16,16 +16,20 @@ skills = {}
 
 skills[1] = {
 	name = "Slicing Rain",
-	description = "A simple but effective vertical sword slash",
+	description = "A simple but effective vertical sword slash.",
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
 	sp_usage = 0,
-	warmup_time = 0,
+	warmup_time = 2000,
 	cooldown_time = 0,
-	level_required = 1
-	usage = hoa_global.GameGlobal.GLOBAL_ITEM_USE_ALL,
+	level_required = 1,
+	usage = hoa_global.GameGlobal.GLOBAL_USE_BATTLE,
+	skilltype = hoa_global.GameGlobal.GLOBAL_SKILL_ATTACK,
+	target_alignment = hoa_global.GameGlobal.GLOBAL_ALIGNMENT_NEUTRAL,
 
-
-	ExecuteFunction = function()
-		print("Executed Slicing Rain!")
+	use_function = function(target,instigator)
+		t = target
+		i = instigator
+		t:TakeDamage(32)
+		--print("Executed Slicing Rain!")
 	end
 }

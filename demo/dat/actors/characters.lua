@@ -64,7 +64,7 @@ characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS] = {
 	initial_arm_armor = 40001,
 	initial_leg_armor = 50001,
 
-	initial_skills = {}
+	initial_skills = { 1 }
 }
 
 
