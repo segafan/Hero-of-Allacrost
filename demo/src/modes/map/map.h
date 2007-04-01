@@ -61,6 +61,9 @@ const uint16 HALF_TILE_COLS = 16;
 const uint16 HALF_TILE_ROWS = 12;
 //@}
 
+//! \brief The number of tiles that are found in a tileset image (512x512 pixel image containing 32x32 pixel tiles)
+const uint32 TILES_PER_TILESET = 256;
+
 /** \name Map State Constants
 *** \brief Constants used for describing the current state of operation during map mode.
 *** These constants are largely used to determine what
@@ -283,15 +286,6 @@ public:
 
 	~MapMode();
 
-	/** \brief Loads all map data as specified in the Lua file that defines the map.
-	*** \param filename The name of the map script file to load.
-	*** \return True if the map loaded successfully, false otherwise.
-	*** \note If no argument is given for the filename, the function will attempt to use the
-	*** MapMode::_map_filename member. If that name is not valid, the function will report an
-	*** error.
-	**/
-	bool Load(std::string filename = "");
-
 	//! \brief Resets appropriate class members. Called whenever the MapMode object is made the active game mode.
 	void Reset();
 
@@ -408,6 +402,15 @@ private:
 	//! \brief Contains the images for all map tiles, both still and animate.
 	std::vector<hoa_video::ImageDescriptor*> _tile_images;
 
+	/** \brief Contains all of the animated tile images used on the map.
+	*** The purpose of this vector is to easily update all tile animations without stepping through the
+	*** _tile_images vector, which contains both still and animated images.
+	***
+	*** \note The elements in this vector point to the same AnimatedImages that are pointed to by _tile_images. Therefore,
+	*** this vector should <b>not</b> have delete invoked on its elements, since delete is already invoked on _tile_images.
+	**/
+	std::vector<hoa_video::AnimatedImage*> _animated_tile_images;
+
 	//! \brief The music that the map will need to make use of.
 	std::vector<hoa_audio::MusicDescriptor> _music;
 
@@ -440,6 +443,12 @@ private:
 	*** and then passed to battle mode to use.
 	**/
 	std::vector<hoa_global::GlobalEnemy> _enemies;
+
+	//! \brief Loads all map data as specified in the Lua file that defines the map.
+	void _Load();
+
+	//! \brief A helper function to MapMode::_Load, handles all operations on loading tilesets and tile images
+	void _LoadTiles();
 
 	// -------------------- Update Methods
 
