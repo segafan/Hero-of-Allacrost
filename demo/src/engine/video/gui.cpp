@@ -66,16 +66,16 @@ void GUIElement::CalculateAlignedRect(float &left, float &right, float &bottom, 
 	if (VideoManager->_coord_sys.GetHorizontalDirection() < 0.0f)
 		right = -right;
 
-	float xoff, yoff;
+	float x_off, y_off;
 
-	xoff = _x_position + ((VideoManager->_xalign + 1) * width)  * 0.5f * -VideoManager->_coord_sys.GetHorizontalDirection();
-	yoff = _y_position + ((VideoManager->_yalign + 1) * height) * 0.5f * -VideoManager->_coord_sys.GetVerticalDirection();
+	x_off = _x_position + ((VideoManager->_x_align + 1) * width)  * 0.5f * -VideoManager->_coord_sys.GetHorizontalDirection();
+	y_off = _y_position + ((VideoManager->_y_align + 1) * height) * 0.5f * -VideoManager->_coord_sys.GetVerticalDirection();
 
-	left   += xoff;
-	right  += xoff;
+	left   += x_off;
+	right  += x_off;
 
-	top    += yoff;
-	bottom += yoff;
+	top    += y_off;
+	bottom += y_off;
 } // void GUIElement::CalculateAlignedRect(float &left, float &right, float &bottom, float &top)
 
 // *****************************************************************************

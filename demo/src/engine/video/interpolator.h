@@ -93,10 +93,10 @@ public:
 	
 	/*!***************************************************************************
 	*  \brief Increments time by frameTime and updates the interpolation
-	* \param frameTime amount to update the time value by
+	* \param frame_time amount to update the time value by
 	* \return success/failure
 	*****************************************************************************/
-	bool  Update(int32 frameTime);
+	bool  Update(int32 frame_time);
 	
 	/*!***************************************************************************
 	*  \brief Is interpolation finished?
@@ -140,16 +140,16 @@ private:
 	float _a, _b;
 	
 	//! The current time in the interpolation
-	int32   _currentTime;
+	int32   _current_time;
 	
 	//! The end of the interpolation
-	int32   _endTime;
+	int32   _end_time;
 	
 	//! If the interpolation is finished
 	bool  _finished;
 	
 	//! The current interpolated value
-	float _currentValue;
+	float _current_value;
 	
 }; // class Interpolator
 

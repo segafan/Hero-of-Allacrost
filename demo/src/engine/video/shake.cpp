@@ -29,7 +29,7 @@ const int32 VIDEO_TIME_BETWEEN_SHAKE_UPDATES = 50;
 //              pass in VIDEO_FALLOFF_NONE and 0.0f for falloffTime
 //-----------------------------------------------------------------------------
 
-bool GameVideo::ShakeScreen(float force, float falloffTime, ShakeFalloff falloffMethod)
+bool GameVideo::ShakeScreen(float force, float falloff_time, ShakeFalloff falloff_method)
 {
 	// check inputs
 	if(force < 0.0f)
@@ -39,21 +39,21 @@ bool GameVideo::ShakeScreen(float force, float falloffTime, ShakeFalloff falloff
 		return false;
 	}
 
-	if(falloffTime < 0.0f)
+	if(falloff_time < 0.0f)
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: passed negative falloff time to ShakeScreen()!" << endl;
 		return false;
 	}
 
-	if(falloffMethod <= VIDEO_FALLOFF_INVALID || falloffMethod >= VIDEO_FALLOFF_TOTAL)
+	if(falloff_method <= VIDEO_FALLOFF_INVALID || falloff_method >= VIDEO_FALLOFF_TOTAL)
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: passed invalid shake method to ShakeScreen()!" << endl;
 		return false;
 	}
 	
-	if(falloffTime == 0.0f && falloffMethod != VIDEO_FALLOFF_NONE)
+	if(falloff_time == 0.0f && falloff_method != VIDEO_FALLOFF_NONE)
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: ShakeScreen() called with 0.0f (infinite), but falloff method was not VIDEO_FALLOFF_NONE!" << endl;
@@ -62,15 +62,15 @@ bool GameVideo::ShakeScreen(float force, float falloffTime, ShakeFalloff falloff
 		
 	// create the shake force structure
 	
-	int32 milliseconds = int32(falloffTime * 1000);
+	int32 milliseconds = int32(falloff_time * 1000);
 	ShakeForce s;
-	s.currentTime  = 0;
-	s.endTime      = milliseconds;
-	s.initialForce = force;
+	s.current_time  = 0;
+	s.end_time      = milliseconds;
+	s.initial_force = force;
 	
 	
 	// set up the interpolation
-	switch(falloffMethod)
+	switch(falloff_method)
 	{
 		case VIDEO_FALLOFF_NONE:
 			s.interpolator.SetMethod(VIDEO_INTERPOLATE_SRCA);
@@ -106,7 +106,7 @@ bool GameVideo::ShakeScreen(float force, float falloffTime, ShakeFalloff falloff
 	};
 	
 	// add the shake force to GameVideo's list
-	_shakeForces.push_front(s);
+	_shake_forces.push_front(s);
 	
 	return true;
 }
@@ -118,8 +118,8 @@ bool GameVideo::ShakeScreen(float force, float falloffTime, ShakeFalloff falloff
 
 bool GameVideo::StopShaking()
 {
-	_shakeForces.clear();
-	_shakeX = _shakeY = 0.0f;
+	_shake_forces.clear();
+	_x_shake = _y_shake = 0.0f;
 	return true;
 }
 
@@ -130,7 +130,7 @@ bool GameVideo::StopShaking()
 
 bool GameVideo::IsShaking()
 {
-	return !_shakeForces.empty();
+	return !_shake_forces.empty();
 }
 
 
@@ -145,10 +145,10 @@ bool GameVideo::IsShaking()
 
 float GameVideo::_RoundForce(float force)
 {
-	int32 fractionPct = int32(force * 100) - (int32(force) * 100);
+	int32 fraction_pct = int32(force * 100) - (int32(force) * 100);
 	
 	int32 r = rand()%100;
-	if(fractionPct > r)
+	if(fraction_pct > r)
 		force = ceilf(force);
 	else
 		force = floorf(force);
@@ -162,56 +162,56 @@ float GameVideo::_RoundForce(float force)
 //              and update the shake x,y offsets
 //-----------------------------------------------------------------------------
 
-void GameVideo::_UpdateShake(int32 frameTime)
+void GameVideo::_UpdateShake(int32 frame_time)
 {
-	if(_shakeForces.empty())
+	if(_shake_forces.empty())
 	{
-		_shakeX = _shakeY = 0;
+		_x_shake = _y_shake = 0;
 		return;
 	}
 
 	// first, update all the shake effects and calculate the net force, i.e.
 	// the sum of the forces of all the shakes
 	
-	float netForce = 0.0f;
+	float net_force = 0.0f;
 	
-	list<ShakeForce>::iterator iShake = _shakeForces.begin();
-	list<ShakeForce>::iterator iEnd   = _shakeForces.end();
+	list<ShakeForce>::iterator iShake = _shake_forces.begin();
+	list<ShakeForce>::iterator iEnd   = _shake_forces.end();
 	
 	while(iShake != iEnd)
 	{
 		ShakeForce &s = *iShake;
-		s.currentTime += frameTime;
+		s.current_time += frame_time;
 
-		if(s.endTime != 0 && s.currentTime >= s.endTime)
+		if(s.end_time != 0 && s.current_time >= s.end_time)
 		{
-			iShake = _shakeForces.erase(iShake);
+			iShake = _shake_forces.erase(iShake);
 		}
 		else
 		{
-			s.interpolator.Update(frameTime);
-			netForce += s.interpolator.GetValue();
+			s.interpolator.Update(frame_time);
+			net_force += s.interpolator.GetValue();
 			++iShake;	
 		}
 	}	
 
 	// cap the max update frequency
 	
-	static int32 timeTilNextUpdate = 0;		
-	timeTilNextUpdate -= frameTime;
+	static int32 time_til_next_update = 0;		
+	time_til_next_update -= frame_time;
 	
-	if(timeTilNextUpdate > 0)
+	if(time_til_next_update > 0)
 		return;
 	
-	timeTilNextUpdate = VIDEO_TIME_BETWEEN_SHAKE_UPDATES;
+	time_til_next_update = VIDEO_TIME_BETWEEN_SHAKE_UPDATES;
 
 
 	// now that we have our force (finally), calculate the proper shake offsets
 	// note that this doesn't produce a radially symmetric distribution of offsets
 	// but I think it's not noticeable so... :)
 	
-	_shakeX = _RoundForce(RandomFloat(-netForce, netForce));
-	_shakeY = _RoundForce(RandomFloat(-netForce, netForce));	
+	_x_shake = _RoundForce(RandomFloat(-net_force, net_force));
+	_y_shake = _RoundForce(RandomFloat(-net_force, net_force));	
 }
 
 

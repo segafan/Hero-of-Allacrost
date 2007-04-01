@@ -69,16 +69,16 @@ class ShakeForce
 public:
 
 	//! initial force of the shake
-	float initialForce;
+	float initial_force;
 	
 	//! used to interpolate the shake
 	Interpolator interpolator;
 	
 	//! milliseconds that passed since this shake started
-	int32   currentTime;
+	int32   current_time;
 	
 	//! milliseconds that this shake was set to last for
-	int32   endTime;
+	int32   end_time;
 };
 
 

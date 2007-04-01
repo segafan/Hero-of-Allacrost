@@ -117,20 +117,30 @@ const int32 VIDEO_ANIMATION_FRAME_PERIOD = 10;
 enum VIDEO_DRAW_FLAGS {
 	VIDEO_DRAW_FLAGS_INVALID = -1,
 
+	//@{
 	//! X alignment flags
 	VIDEO_X_LEFT = 1, VIDEO_X_CENTER = 2, VIDEO_X_RIGHT = 3,
+	//@}
 
+	//@{
 	//! Y alignment flags
 	VIDEO_Y_TOP = 4, VIDEO_Y_CENTER = 5, VIDEO_Y_BOTTOM = 6,
+	//@}
 
+	//@{
 	//! X flip flags
 	VIDEO_X_FLIP = 7, VIDEO_X_NOFLIP = 8,
+	//@}
 
+	//@{
 	//! Y flip flags
 	VIDEO_Y_FLIP = 9, VIDEO_Y_NOFLIP = 10,
+	//@}
 
+	//@{
 	//! Texture blending flags
 	VIDEO_NO_BLEND = 11, VIDEO_BLEND = 12, VIDEO_BLEND_ADD = 13,
+	//@}
 
 	VIDEO_DRAW_FLAGS_TOTAL = 14
 };
@@ -218,7 +228,7 @@ public:
 	bool Clear(const Color &c);
 
 	/** \brief call at end of every frame
-	*** \param frame_ime The number of milliseconds that have passed since the last frame.
+	*** \param frame_time The number of milliseconds that have passed since the last frame.
 	*** \return success/failure
 	**/
 	bool Display(int32 frame_time);
@@ -310,9 +320,9 @@ public:
 	void SetCoordSys(float left, float right, float bottom, float top);
 
 	/** \brief sets the coordinate system. Default is (0,1024,0,768)
-	 *  \param coordSys the coordinate system you want to set to
+	 *  \param coordinate_system the coordinate system you want to set to
 	 */
-	void SetCoordSys(const CoordSys &coordSys);
+	void SetCoordSys(const CoordSys &coordinate_system);
 
 	/** \brief enables scissoring, where you can specify a rectangle of the screen
 	 *         which is affected by rendering operations. MAKE SURE to disable
@@ -327,7 +337,7 @@ public:
 	 * \return true if enabled, false if not
 	 */
 	bool IsScissoringEnabled()
-		{ return _scissorEnabled; }
+		{ return _scissor_enabled; }
 
 	/** \brief sets the rectangle to use for scissorring, where you can specify an
 	 *         area of the screen for draw operations to affect. Note, the coordinates
@@ -352,7 +362,7 @@ public:
 	 * \return the scissor rectangle
 	 */
 	ScreenRect GetScissorRect()
-		{ return _scissorRect; }
+		{ return _scissor_rect; }
 
 	/** \brief converts coordinates given relative to the current coord sys into
 	 *         "screen coordinates", which are in pixel units with (0,0) as the
@@ -418,18 +428,18 @@ public:
 	/** \brief after you call this, subsequent calls to DrawImage() result in
 	 *         a scaled image
 	 *
-	 *  \param xScale pass 1.0 for normal horizontal scaling, 2.0 for double
+	 *  \param x pass 1.0 for normal horizontal scaling, 2.0 for double
 	 *                  scaling, etc.
-	 *  \param yScale same, except vertical scaling
+	 *  \param y same, except vertical scaling
 	 *
 	 *  \note This function should NOT be used unless you understand how transformation
 	 *        matrices work in OpenGL.
 	 */
 
-	void Scale(float xScale, float yScale);
+	void Scale(float x, float y);
 
 	/** \brief sets OpenGL transform to contents of 4x4 matrix (16 values)
-	 *  \param array of 16 float values forming a 4x4 transformation matrix
+	 *  \param m of 16 float values forming a 4x4 transformation matrix
 	 */
 	void SetTransform(float m[16]);
 
@@ -451,29 +461,29 @@ public:
 		{ return (_font_map.find(name) != _font_map.end()); }
 
 	/** \brief Get the font properties for a previously loaded font
-	*** \param fontName  The referred name of the loaded font (e.g. "courier24").
+	*** \param font_name  The referred name of the loaded font (e.g. "courier24").
 	*** \return A pointer to the FontProperties object with the requested data, or NULL if an error occurred.
 	**/
-	FontProperties* GetFontProperties(const std::string &fontName);
+	FontProperties* GetFontProperties(const std::string &font_name);
 
 	/** \brief calculates the width of the given text if it were rendered with the given font
 	 *         If an invalid font name is passed, returns -1
 	 *
-	 *  \param fontName  the font to use
+	 *  \param font_name  the font to use
 	 *  \param text      the text string in unicode
 	 * \return width of the given text
 	 */
-	int32 CalculateTextWidth(const std::string &fontName, const hoa_utils::ustring &text);
+	int32 CalculateTextWidth(const std::string &font_name, const hoa_utils::ustring &text);
 
 
 	/** \brief calculates the width of the given text if it were rendered with the given font
 	 *         If an invalid font name is passed, returns -1
 	 *
-	 *  \param fontName  the font to use
+	 *  \param font_name  the font to use
 	 *  \param text      the text string in multi-byte character format
 	 * \return width of the given text
 	 */
-	int32 CalculateTextWidth(const std::string &fontName, const std::string  &text);
+	int32 CalculateTextWidth(const std::string &font_name, const std::string  &text);
 
 	/** \brief sets current font
 	 *  \param name  name of the font to set to
@@ -491,37 +501,37 @@ public:
 	 * \return success/failure
 	 */
 	void SetTextColor(const Color &color)
-		{ _currentTextColor = color; }
+		{ _current_text_color = color; }
 
 	/** \brief sets the shadow offset to use for a given font. By default, all font shadows
 	 *         are slightly to the right and to the bottom of the text, by an offset of
 	 *         fontHeight / 8. That doesn't always look good though, so use this function
 	 *         to adjust it if you want.
 	 *
-	 *  \param fontName  label of the font you want to set the shadow offset for
+	 *  \param font_name  label of the font you want to set the shadow offset for
 	 *  \param x         x offset in pixels (based on 1024x768)
 	 * \return success/failure
 	 */
-	bool SetFontShadowXOffset(const std::string &fontName, int32 x);
+	bool SetFontShadowXOffset(const std::string &font_name, int32 x);
 
 	/** \brief sets the shadow offset to use for a given font. By default, all font shadows
 	 *         are slightly to the right and to the bottom of the text, by an offset of
 	 *         fontHeight / 8. That doesn't always look good though, so use this function
 	 *         to adjust it if you want.
 	 *
-	 *  \param fontName  label of the font you want to set the shadow offset for
+	 *  \param font_name  label of the font you want to set the shadow offset for
 	 *  \param y         y offset in pixels (based on 1024x768)
 	 * \return success/failure
 	 */
-	bool SetFontShadowYOffset(const std::string &fontName, int32 y);
+	bool SetFontShadowYOffset(const std::string &font_name, int32 y);
 
 	/** \brief sets the shadow style to use for the given font
 	 *
-	 *  \param fontName  label of the font you want to set the shadow style for
+	 *  \param font_name  label of the font you want to set the shadow style for
 	 *  \param style     the shadow style you want (e.g. VIDEO_TEXT_SHADOW_BLACK)
 	 * \return success/failure
 	 */
-	bool SetFontShadowStyle(const std::string &fontName, TEXT_SHADOW_STYLE style);
+	bool SetFontShadowStyle(const std::string &font_name, TEXT_SHADOW_STYLE style);
 
 	/** \brief get name of current font
 	 * \return string containing the name of the font
@@ -554,7 +564,7 @@ public:
 	//-- Particle effects -----------------------------------------------------------
 
 	/** \brief add a particle effect at the given point x and y
-	 *  \param filename - file containing the particle effect definition
+	 *  \param particle_effect_filename - file containing the particle effect definition
 	 *  \param x - X coordinate of the effect
 	 *  \param y - Y coordinate of the effect
 	 *  \param reload - reload the effect from file if it already exists
@@ -564,7 +574,7 @@ public:
 	 *         effect and want to see how it looks. When we actually release the game,
 	 *         reload should be false since it adds some cost to the loading
 	 */
-	ParticleEffectID AddParticleEffect(const std::string &particleEffectFilename, float x, float y, bool reload=false);
+	ParticleEffectID AddParticleEffect(const std::string &particle_effect_filename, float x, float y, bool reload=false);
 
 	/** \brief draws all active particle effects
 	 * \return success/failure
@@ -626,18 +636,18 @@ public:
 	 *	This function loads an image and cut it in pieces, loading each of
 	 *	that on frames of an AnimatedImage.
 	 *  \param image AnimatedImage where the cut images will be loaded.
-	 *	\param filename Name of the file.
+	 *	\param file_name Name of the file.
 	 *	\param rows Number of rows of sub-images in the MultiImage.
-	 *	\param rows Number of columns of sub-images in the MultiImage.
+	 *	\param cols Number of columns of sub-images in the MultiImage.
 	 *	\return success/failure
 	 */
-	bool LoadAnimatedImage(AnimatedImage &image, const std::string &filename, const uint32 rows, const uint32 cols);
+	bool LoadAnimatedImage(AnimatedImage &image, const std::string &file_name, const uint32 rows, const uint32 cols);
 
 	//! \brief Saves a vector of images in a single file.
 	/*	This function stores a vector of images as a single image. This is useful for creating multiimage 
 	 *	images. The image can be stored in JPEG or PNG, which is decided by the filename.
 	 *  \param image Vector of images to save
-	 *	\param filename Name of the file.
+	 *	\param file_name Name of the file.
 	 *	\param rows Number of rows of sub-images in the MultiImage.
 	 *	\param cols Number of columns of sub-images in the MultiImage.
 	 *	\return success/failure
@@ -647,7 +657,7 @@ public:
 	//! \brief Saves a StillImage into a file.
 	/*	The image can be stored in JPEG or PNG, which is decided by the filename.
 	 *  \param image StillImage to store.
-	 *	\param filename Name of the file.
+	 *	\param file_name Name of the file.
 	 *	\return success/failure
 	 */
 	bool SaveImage (const std::string &file_name, const StillImage &image) const;
@@ -656,7 +666,7 @@ public:
 	/*	The image can be stored in JPEG or PNG, which is decided by the filename.
 	 *  It will be stored as a multiimage, with each frame aligned in one row and as many columns as frames.
 	 *  \param image AnimatedImage to store.
-	 *	\param filename Name of the file.
+	 *	\param file_name Name of the file.
 	 *	\return success/failure
 	 */
 	bool SaveImage (const std::string &file_name, const AnimatedImage &image) const;
@@ -692,10 +702,10 @@ public:
 	 *         in as many parameters as you want, as long as the last
 	 *         parameter is a zero.
 	 *         e.g. SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, 0);
-	 * \param firstflag the first of many draw flags
+	 * \param first_flag the first of many draw flags
 	 * \param .. specify as many draw flags as you want.  Terminate with a 0.
 	 */
-	void SetDrawFlags(int32 firstflag, ...);
+	void SetDrawFlags(int32 first_flag, ...);
 
 	/** \brief draws an image which is modulated by the scene's light color
 	 *
@@ -707,6 +717,7 @@ public:
 	/** \brief draws an image which is modulated by a custom color
 	 *
 	 *  \param id  image descriptor to draw (either StillImage or AnimatedImage)
+	 *  \param color Color used for modulating the image
 	 * \return success/failure
 	 */
 	bool DrawImage(const ImageDescriptor &id, const Color &color);
@@ -737,7 +748,7 @@ public:
 	/** \brief sets the current menu skin (borders+fill color). Assumes all four
 	 *         vertices of menu interior are same color
 	 *
-	 *  \param imgBaseName  name of images which form the border
+	 *  \param img_base_name  name of images which form the border
 	 *                      For example if you pass in "/img/menus/chrome", then it will load:
 	 *                          /img/menus/chrome_tl.png
 	 *                          /img/menus/chrome_t.png
@@ -753,16 +764,16 @@ public:
 	 *                          /img/menus/chrome_tri_b.png
 	 *                          /img/menus/chrome_quad.png
 	 *
-	 *  \param fillColor    color for inner area of menu. can be transparent
+	 *  \param fill_color    color for inner area of menu. can be transparent
 	 * \return success/failure
 	 */
-	bool SetMenuSkin(const std::string &imgBaseName, const Color  &fillColor);
+	bool SetMenuSkin(const std::string &img_base_name, const Color  &fill_color);
 
 	/** \brief sets the current menu skin (borders+fill color). This version of
 	 *         SetMenuSkin() allows the 4 vertices of the interior of the menu
 	 *         to have different colors so you can have gradients.
 	 *
-	 *  \param imgBaseName  name of images which form the border
+	 *  \param img_base_name  name of images which form the border
 	 *                      For example if you pass in "/img/menus/chrome", then it will load:
 	 *                          /img/menus/chrome_tl.png
 	 *                          /img/menus/chrome_t.png
@@ -778,18 +789,18 @@ public:
 	 *                          /img/menus/chrome_tri_b.png
 	 *                          /img/menus/chrome_quad.png
 	 *
-	 *  \param fillColor_TL  color for upper left  vertex of interior
-	 *  \param fillColor_TR  color for upper right vertex of interior
-	 *  \param fillColor_BL  color for lower left  vertex of interior
-	 *  \param fillColor_BR  color for lower right vertex of interior
+	 *  \param fill_color_TL  color for upper left  vertex of interior
+	 *  \param fill_color_TR  color for upper right vertex of interior
+	 *  \param fill_color_BL  color for lower left  vertex of interior
+	 *  \param fill_color_BR  color for lower right vertex of interior
 	 * \return success/failure
 	 */
-	bool SetMenuSkin(const std::string &imgBaseName, const Color  &fillColor_TL, const Color  &fillColor_TR,
-		const Color  &fillColor_BL, const Color  &fillColor_BR);
+	bool SetMenuSkin(const std::string &img_base_name, const Color  &fill_color_TL, const Color  &fill_color_TR,
+		const Color  &fill_color_BL, const Color  &fill_color_BR);
 
 	/** \brief sets the current menu skin (borders+background image).
 	 *
-	 *  \param imgBaseName  name of images which form the border
+	 *  \param img_base_name  name of images which form the border
 	 *                      For example if you pass in "/img/menus/chrome", then it will load:
 	 *                          /img/menus/chrome_tl.png
 	 *                          /img/menus/chrome_t.png
@@ -805,20 +816,20 @@ public:
 	 *                          /img/menus/chrome_tri_b.png
 	 *                          /img/menus/chrome_quad.png
 	 *
-	 *  \param backgroundImage image filename for the background of the menu window
+	 *  \param background_image image filename for the background of the menu window
 	 *
-	 *  \param fillColor_TL  color for upper left  vertex of interior
-	 *  \param fillColor_TR  color for upper right vertex of interior
-	 *  \param fillColor_BL  color for lower left  vertex of interior
-	 *  \param fillColor_BR  color for lower right vertex of interior
+	 *  \param fill_color_TL  color for upper left  vertex of interior
+	 *  \param fill_color_TR  color for upper right vertex of interior
+	 *  \param fill_color_BL  color for lower left  vertex of interior
+	 *  \param fill_color_BR  color for lower right vertex of interior
 	 * \return success/failure
 	 */
-	bool SetMenuSkin(const std::string &imgBaseName, const std::string &backgroundImage,
-		const Color  &fillColor_TL, const Color  &fillColor_TR, const Color  &fillColor_BL, const Color  &fillColor_BR);
+	bool SetMenuSkin(const std::string &img_base_name, const std::string &background_image,
+		const Color  &fill_color_TL, const Color  &fill_color_TR, const Color  &fill_color_BL, const Color  &fill_color_BR);
 
 	/** \brief sets the current menu skin (borders+background image).
 	 *
-	 *  \param imgBaseName  name of images which form the border
+	 *  \param img_base_name  name of images which form the border
 	 *                      For example if you pass in "/img/menus/chrome", then it will load:
 	 *                          /img/menus/chrome_tl.png
 	 *                          /img/menus/chrome_t.png
@@ -834,12 +845,12 @@ public:
 	 *                          /img/menus/chrome_tri_b.png
 	 *                          /img/menus/chrome_quad.png
 	 *
-	 *  \param backgroundImage image filename for the background of the menu window
+	 *  \param background_image image filename for the background of the menu window
 	 *
-	 *  \param fillColor       color for for interior of window
+	 *  \param fill_color       color for for interior of window
 	 * \return success/failure
 	 */
-	bool SetMenuSkin(const std::string &imgBaseName, const std::string &backgroundImage, const Color &fillColor);
+	bool SetMenuSkin(const std::string &img_base_name, const std::string &background_image, const Color &fill_color);
 
 	//-- Lighting and fog -----------------------------------------------------
 
@@ -922,11 +933,11 @@ public:
 	bool DrawFullscreenOverlay(const Color &color);
 
 	/** \brief call to create lightning effect
-	 *  \param litFile a .lit file which contains lightning intensities stored
+	 *  \param lit_file a .lit file which contains lightning intensities stored
 	 *                 as bytes (0-255).
 	 * \return success/failure
 	 */
-	bool MakeLightning(const std::string &litFile);
+	bool MakeLightning(const std::string &lit_file);
 
 	/** \brief call this every frame to draw any lightning effects. You should make
 	 *         sure to place this call in an appropriate spot. In particular, you should
@@ -954,13 +965,13 @@ public:
 	/** \brief shakes the screen
 	 *
 	 *  \param force        Initial force of the shake
-	 *  \param falloffTime  How long the shake should last for. Pass 0.0f for
+	 *  \param falloff_time  How long the shake should last for. Pass 0.0f for
 	 *                      a shake that doesn't end until you stop it manually
 	 *  \param falloff      Specifies the method of falloff. The default is
 	 *                      VIDEO_FALLOFF_NONE.
 	 * \return success/failure
 	 */
-	bool ShakeScreen(float force, float falloffTime, ShakeFalloff falloff = VIDEO_FALLOFF_NONE);
+	bool ShakeScreen(float force, float falloff_time, ShakeFalloff falloff = VIDEO_FALLOFF_NONE);
 
 	/**  \brief stops all shake effects
 	 * \return success/failure
@@ -989,7 +1000,7 @@ public:
 	 *         current FPS on the screen.
 	 * \return success/failure
 	 */
-	bool DrawFPS(int32 frameTime);
+	bool DrawFPS(int32 frame_time);
 
 	/** \brief toggles the FPS display (on by default)
 	 */
@@ -1005,11 +1016,11 @@ public:
 	 *         from the current coord sys
 	 * \param x x coordinate to start grid at
 	 * \param y y coordinate to start grid at
-	 * \param xstep width of grid squares
-	 * \param ystep height of grid squares
+	 * \param x_step width of grid squares
+	 * \param y_step height of grid squares
 	 * \param c color of the grid
 	 */
-	void DrawGrid(float x, float y, float xstep, float ystep, const Color &c);
+	void DrawGrid(float x, float y, float x_step, float y_step, const Color &c);
 
 	/** \brief Draws a solid rectangle of a given color.
 	 * Draws a solid rectangle of a given color. For that, the lower-left corner
@@ -1034,9 +1045,9 @@ public:
 	bool ToggleAdvancedDisplay();
 
 	/** \brief sets the default cursor to the image in the given filename
-	* \param cursorImageFilename file containing the cursor image
+	* \param cursor_image_filename file containing the cursor image
 	*/
-	bool SetDefaultCursor(const std::string &cursorImageFilename);
+	bool SetDefaultCursor(const std::string &cursor_image_filename);
 
 	/** \brief returns the cursor image
 	* \return the cursor image
@@ -1050,9 +1061,9 @@ public:
 
 	/** \brief Draws a rendered line object
 	 * \param line The rendered line
-	 * \param texIndex Whether main or shadow texture
+	 * \param tex_index Whether main or shadow texture
 	 */
-	bool Draw(const RenderedLine &line, int32 texIndex);
+	bool Draw(const RenderedLine &line, int32 tex_index);
 
 	/** \brief Renders the given string to a drawable object
 	 * \param txt The string to render
@@ -1082,19 +1093,19 @@ private:
 	int8 _blend;
 
 	//! x align flag which tells if images should be left, center, or right aligned
-	int8 _xalign;
+	int8 _x_align;
 
 	//! y align flag which tells if images should be top, center, or bottom aligned
-	int8 _yalign;
+	int8 _y_align;
 
 	//! x flip flag. true if images should be flipped horizontally
-	int8 _xflip;
+	int8 _x_flip;
 
 	//! y flip flag. true if images should be flipped vertically
-	int8 _yflip;
+	int8 _y_flip;
 
 	//! eight character name for temp files that increments every time you create a new one so they are always unique
-	char _nextTempFile[9];
+	char _next_temp_file[9];
 
 	//! current coordinate system
 	CoordSys    _coord_sys;
@@ -1103,43 +1114,46 @@ private:
 	ScreenRect _viewport;
 
 	//! current scissor rectangle
-	ScreenRect _scissorRect;
+	ScreenRect _scissor_rect;
 
 	//! is scissoring enabled or not
-	bool _scissorEnabled;
+	bool _scissor_enabled;
 
 	//! fader class which implements screen fading
 	private_video::ScreenFader _fader;
 
 	//! advanced display flag. If true, info about the video engine is shown on screen
-	bool   _advancedDisplay;
+	bool   _advanced_display;
 
 	//! fps display flag. If true, FPS is displayed
-	bool   _fpsDisplay;
+	bool   _fps_display;
 
 	//! current debug texture sheet
 	int32  _current_debug_TexSheet;
 
 	//! keep track of number of texture switches per frame
-	int32  _numTexSwitches;
+	int32  _num_tex_switches;
 
 	//! keep track of number of draw calls per frame
-	int32  _numDrawCalls;
+	int32  _num_draw_calls;
 
 	//! true if real lights are enabled
-	bool   _usesLights;
+	bool   _uses_lights;
 
 	//! lighting overlay texture
 	GLuint _light_overlay;
 
-	//! offsets to shake the screen by (if any)
-	float  _shakeX, _shakeY;
+	//! X offset to shake the screen by (if any)
+	float  _x_shake;
+	
+	//! Y offset to shake the screen by (if any)
+	float _y_shake;
 
 	//! Current gamma value
 	float _gamma_value;
 
 	//! current shake forces affecting screen
-	std::list<private_video::ShakeForce> _shakeForces;
+	std::list<private_video::ShakeForce> _shake_forces;
 
     //! true if game is currently running fullscreen
 	bool _fullscreen;
@@ -1164,43 +1178,43 @@ private:
 	int32  _temp_height;
 
 	//! ID of the last texture that was bound. Used to eliminate redundant binding of textures
-	GLuint _lastTexID;
+	GLuint _last_tex_ID;
 
 	//! current font name
 	std::string _current_font;
 
 	//! current text color
-	Color       _currentTextColor;
+	Color       _current_text_color;
 
 	//! image which is to be used as the cursor
-	StillImage _defaultMenuCursor;
+	StillImage _default_menu_cursor;
 
 	//! Image used for rendering rectangles
 	StillImage _rectangle_image;
 
 	//! if true, text shadow effect is enabled
-	bool _textShadow;
+	bool _text_shadow;
 
 	//! current fog color (set by SetFog())
-	Color _fogColor;
+	Color _fog_color;
 
 	//! current fog intensity (set by SetFog())
-	float _fogIntensity;
+	float _fog_intensity;
 
 	//! current scene lighting color (essentially just modulates vertex colors of all the images)
-	Color _lightColor;
+	Color _light_color;
 
 	//! true if a lightning effect is active
-	bool  _lightningActive;
+	bool  _lightning_active;
 
 	//! current time of lightning effect (time since it started)
-	int32 _lightningCurTime;
+	int32 _lightning_current_time;
 
 	//! how many milliseconds to do the lightning effect for
-	int32 _lightningEndTime;
+	int32 _lightning_end_time;
 
 	//! intensity data for lightning effect
-	std::vector <float> _lightningData;
+	std::vector <float> _lightning_data;
 
 	//! counter to keep track of milliseconds since game started for animations
 	int32 _animation_counter;
@@ -1227,10 +1241,10 @@ private:
 
 	/** \brief wraps a call to glBindTexture(), except it adds checking to eliminate redundant texture binding. Redundancy checks are already implemented by most drivers, but this is a double check "just in case"
 	 *
-	 *  \param texID   integer handle to the OpenGL texture
+	 *  \param tex_ID   integer handle to the OpenGL texture
 	 * \return success/failure
 	 */
-	bool _BindTexture(GLuint texID);
+	bool _BindTexture(GLuint tex_ID);
 
 	/** \brief converts VIDEO_DRAW_LEFT or VIDEO_DRAW_RIGHT flags to a numerical offset
 	* \param xalign the draw flag
@@ -1258,17 +1272,17 @@ private:
 	 *
 	 *  \param width  Width of menu, based on pixels in 1024x768 resolution
 	 *  \param height Height of menu, based on pixels in 1024x768 resolution.
-	 *  \param innerWidth return value for the width of the inside of the menu
-	 *  \param innerHeight return value for the height of the inside of the menu
-	 *  \param edgeVisibleFlags bit flags to tell which edges are visible
-	 *  \param edgeSharedFlags  bit flags to tell which edges are shared with other menus
+	 *  \param inner_width return value for the width of the inside of the menu
+	 *  \param inner_height return value for the height of the inside of the menu
+	 *  \param edge_visible_flags bit flags to tell which edges are visible
+	 *  \param edge_shared_flags  bit flags to tell which edges are shared with other menus
 	 *
 	 *  \note  this is only meant to be used by the Menu class, not by users of
 	 *         the video engine.
 	 * \return success/failure
 	 */
-	bool _CreateMenu(StillImage &menu, float width, float height, float & innerWidth, float & innerHeight,
-		int32 edgeVisibleFlags, int32 edgeSharedFlags);
+	bool _CreateMenu(StillImage &menu, float width, float height, float & inner_width, float & inner_height,
+		int32 edge_visible_flags, int32 edge_shared_flags);
 
 	/** \brief returns a filename like TEMP_abcd1234.ext, and each time you call it, it increments the
 	 *         alphanumeric part of the filename. This way, during any particular run
@@ -1288,17 +1302,17 @@ private:
 	 *  \param width    width of the sheet
 	 *  \param height   height of the sheet
 	 *  \param type     specifies what type of images this texture sheet manages (e.g. 32x32 images, 64x64 images, any type, etc)
-	 *  \param isStatic if true, this texture sheet is meant to manage images which are not expected to be loaded and unloaded very often
+	 *  \param is_static if true, this texture sheet is meant to manage images which are not expected to be loaded and unloaded very often
 	 * \return the newly created texsheet
 	 */
-	private_video::TexSheet *_CreateTexSheet(int32 width, int32 height, private_video::TexSheetType type, bool isStatic);
+	private_video::TexSheet *_CreateTexSheet(int32 width, int32 height, private_video::TexSheetType type, bool is_static);
 
 	/** \brief wraps a call to glDeleteTextures(), except it adds some checking related to eliminating redundant texture binding.
 	 *
-	 *  \param texID   integer handle to the OpenGL texture
+	 *  \param tex_ID   integer handle to the OpenGL texture
 	 * \return success/failure
 	 */
-	bool _DeleteTexture(GLuint texID);
+	bool _DeleteTexture(GLuint tex_ID);
 
 	/** \brief decreases the reference count of an image
 	 *
@@ -1330,10 +1344,10 @@ private:
 	/** \brief draws an image element, i.e. one image within an image descriptor which may contain multiple images
 	 *
 	 *  \param element        pointer to the image element to draw
-	 *  \param modulateColor  combination of color for this image, and our current fade color
+	 *  \param modulate_color  combination of color for this image, and our current fade color
 	 * \return success/failure
 	 */
-	bool _DrawElement(const private_video::ImageElement &element, const Color &modulateColor);
+	bool _DrawElement(const private_video::ImageElement &element, const Color &modulate_color);
 
 	/** \brief draws an image element, i.e. one image within an image descriptor which may contain multiple images
 	 *
@@ -1378,7 +1392,7 @@ private:
 
 	/** \brief generates a texture for a given line
 	 *
-	 *  \param uText  Pointer to a unicode string holding the text to render
+	 *  \param line  Pointer to a unicode string holding the text to render
 	 *  \param fp     Pointer to the internal FontProperties class representing the font
 	 * \return the line or NULL on failure
 	 */
@@ -1393,11 +1407,12 @@ private:
 
 	/** \brief inserts an image into a texture sheet
 	 *
-	 *  \param image       pointer to the image to insert
-	 *  \param loadInfo	   attributes of the image to be inserted
+	 *  \param image     pointer to the image to insert
+	 *  \param load_info attributes of the image to be inserted
+	 *  \param is_static Wether an image is static or not  
 	 * \return a new texsheet with the image in it
 	 */
-	private_video::TexSheet *_InsertImageInTexSheet(private_video::Image *image, private_video::ImageLoadInfo & loadInfo, bool isStatic);
+	private_video::TexSheet *_InsertImageInTexSheet(private_video::Image *image, private_video::ImageLoadInfo & load_info, bool is_static);
 
 	/** \brief loads an image
 	 *
@@ -1427,27 +1442,27 @@ private:
 
 	/** \brief Load raw image data from a file
 	 *
-	 *  \param filename   Filename of image to load
-	 *  \param loadInfo   Returns with the image file attributes and pixels
+	 *  \param file_name   Filename of image to load
+	 *  \param load_info   Returns with the image file attributes and pixels
 	 * \return success/failure
 	 */
-	bool _LoadRawImage(const std::string & filename, private_video::ImageLoadInfo & loadInfo);
+	bool _LoadRawImage(const std::string & file_name, private_video::ImageLoadInfo & load_info);
 
 	/** \brief Load raw image data from a JPG file
 	 *
-	 *  \param filename   Filename of image to load
-	 *  \param loadInfo   Returns with the image file attributes and pixels
+	 *  \param file_name   Filename of image to load
+	 *  \param load_info   Returns with the image file attributes and pixels
 	 * \return success/failure
 	 */
-	bool _LoadRawImageJpeg(const std::string & filename, private_video::ImageLoadInfo & loadInfo);
+	bool _LoadRawImageJpeg(const std::string & file_name, private_video::ImageLoadInfo & load_info);
 
 	/** \brief Load raw image data from a PNG file
 	 *
-	 *  \param filename   Filename of image to load
-	 *  \param loadInfo   Returns with the image file attributes and pixels
+	 *  \param file_name   Filename of image to load
+	 *  \param load_info   Returns with the image file attributes and pixels
 	 * \return success/failure
 	 */
-	bool _LoadRawImagePng(const std::string & filename, private_video::ImageLoadInfo & loadInfo);
+	bool _LoadRawImagePng(const std::string & file_name, private_video::ImageLoadInfo & load_info);
 
 	/*! \brief Saves Raw data in a Png file
 	 *	\param file_name Name of the file, without the extension
@@ -1465,18 +1480,18 @@ private:
 
 	/** \brief loop through all currently loaded images and if they belong to the given tex sheet, reload them into it
 	 *
-	 *  \param texSheet   pointer to the tex sheet whose images we want to load
+	 *  \param tex_sheet   pointer to the tex sheet whose images we want to load
 	 * \return success/failure
 	 */
-	bool _ReloadImagesToSheet(private_video::TexSheet *texSheet);
+	bool _ReloadImagesToSheet(private_video::TexSheet *tex_sheet);
 
 	/** \brief removes the image from the STL map with the same pointer as the one passed in. Returns false on failure
 	 *
-	 *  \param imageToRemove   pointer to the image we want to remove
+	 *  \param image_to_remove   pointer to the image we want to remove
 	 * \return success/failure
 	 */
 
-	bool _RemoveImage(private_video::Image *imageToRemove);
+	bool _RemoveImage(private_video::Image *image_to_remove);
 
 	/** \brief Converts a color image to a grayscale one;
 	 * Converts a colored image in a grayscale one. Actually, it converts not an image, but
@@ -1495,17 +1510,25 @@ private:
 
 
 	//! \brief Pass a texture (video memory) to a system memory buffer
+	/*!
+	 *  \param buffer Buffer where the pixels of the texture will be stored
+	 *  \param texture TexSheet to be copied
+	*/
 	void _GetBufferFromTexture (hoa_video::private_video::ImageLoadInfo& buffer, hoa_video::private_video::TexSheet* texture) const;
 
 	//! \brief Pass an image (video memory) to a system memory buffer
+	/*!
+	 *  \param buffer Buffer where the pixels of the image will be stored
+	 *  \param img Image to be copied
+	*/
 	void _GetBufferFromImage (hoa_video::private_video::ImageLoadInfo& buffer, hoa_video::private_video::Image* img) const;
 
 	/** \brief removes a texture sheet from our vector of sheets and deletes it
 	 *
-	 *  \param sheetToRemove  pointer to the sheet we want to remove
+	 *  \param sheet_to_remove  pointer to the sheet we want to remove
 	 * \return success/failure
 	 */
-	bool _RemoveSheet(private_video::TexSheet *sheetToRemove);
+	bool _RemoveSheet(private_video::TexSheet *sheet_to_remove);
 
 	/**
 	 *  \brief rounds a force value to the nearest integer. Rounding is based on probability. For example the number 2.85 has an 85% chance of rounding to 3 and a 15% chance of rounding to 2
@@ -1549,9 +1572,9 @@ private:
 	/**
 	 *  \brief updates the shaking effect
 	 *
-	 *  \param frameTime  elapsed time for the current rendering frame
+	 *  \param frame_time  elapsed time for the current rendering frame
 	 */
-	void  _UpdateShake(int32 frameTime);
+	void  _UpdateShake(int32 frame_time);
 
 	//! Whether textures should be smoothed for non natural resolution.
 	bool _ShouldSmooth();

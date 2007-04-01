@@ -35,10 +35,10 @@ const float VIDEO_FAST_TRANSFORM_POWER = 0.3f;
 Interpolator::Interpolator()
 {
 	_method = VIDEO_INTERPOLATE_LINEAR;
-	_currentTime = _endTime = 0;
+	_current_time = _end_time = 0;
 	_a = _b  = 0.0f;
 	_finished  = true;    // no interpolation in progress
-	_currentValue = 0.0f;
+	_current_value = 0.0f;
 }
 
 
@@ -71,8 +71,8 @@ bool Interpolator::Start(float a, float b, int32 milliseconds)
 	_a = a;
 	_b = b;
 
-	_currentTime = 0;
-	_endTime     = milliseconds;
+	_current_time = 0;
+	_end_time     = milliseconds;
 	_finished    = false;
 
 	Update(0);  // do initial update so we have a valid value for GetValue()
@@ -117,7 +117,7 @@ bool Interpolator::SetMethod(InterpolationMethod method)
 
 float Interpolator::GetValue()
 {
-	return _currentValue;
+	return _current_value;
 }
 
 
@@ -128,9 +128,9 @@ float Interpolator::GetValue()
 //         This function will return false if the method is invalid.
 //-----------------------------------------------------------------------------
 
-bool Interpolator::Update(int32 frameTime)
+bool Interpolator::Update(int32 frame_time)
 {
-	if(frameTime < 0)
+	if(frame_time < 0)
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: called Interpolator::Update() with negative frameTime!" << endl;
@@ -145,24 +145,24 @@ bool Interpolator::Update(int32 frameTime)
 	}
 
 	// update current time
-	_currentTime += frameTime;
+	_current_time += frame_time;
 
-	if(_currentTime > _endTime)
+	if(_current_time > _end_time)
 	{
-		_currentTime = _endTime;
+		_current_time = _end_time;
 		_finished    = true;
 	}
 
 	// calculate a value from 0.0f to 1.0f of how far we are in the interpolation
 	float t;
 
-	if(_endTime == 0)
+	if(_end_time == 0)
 	{
 		t = 1.0f;
 	}
 	else
 	{
-		t = (float)_currentTime / (float)_endTime;
+		t = (float)_current_time / (float)_end_time;
 	}
 
 	if(t > 1.0f)
@@ -202,7 +202,7 @@ bool Interpolator::Update(int32 frameTime)
 		}
 	};
 
-	_currentValue = Lerp(t, _a, _b);
+	_current_value = Lerp(t, _a, _b);
 
 	return true;
 }

@@ -113,35 +113,35 @@ GameVideo::GameVideo()
 	_temp_height = 0;
 	_temp_fullscreen = false;
 	_blend = 0;
-	_xalign = -1;
-	_yalign = -1;
-	_xflip = 0;
-	_yflip = 0;
+	_x_align = -1;
+	_y_align = -1;
+	_x_flip = 0;
+	_y_flip = 0;
 	_current_debug_TexSheet = -1;
-	_usesLights = false;
+	_uses_lights = false;
 	_light_overlay = 0xFFFFFFFF;
 	_gui = NULL;
-	_lastTexID = 0xFFFFFFFF;
-	_numTexSwitches = 0;
-	_advancedDisplay = false;
-	_fpsDisplay = false;
-	_shakeX = 0;
-	_shakeY = 0;
+	_last_tex_ID = 0xFFFFFFFF;
+	_num_tex_switches = 0;
+	_advanced_display = false;
+	_fps_display = false;
+	_x_shake = 0;
+	_y_shake = 0;
 	_gamma_value = 1.0f;
-	_fogColor = Color(1.0f, 1.0f, 1.0f, 1.0f);
-	_fogIntensity = 0.0f;
-	_lightColor = Color(1.0f, 1.0f, 1.0f, 1.0f);
-	_currentTextColor = Color(1.0f, 1.0f, 1.0f, 1.0f);
-	_textShadow = false;
+	_fog_color = Color(1.0f, 1.0f, 1.0f, 1.0f);
+	_fog_intensity = 0.0f;
+	_light_color = Color(1.0f, 1.0f, 1.0f, 1.0f);
+	_current_text_color = Color(1.0f, 1.0f, 1.0f, 1.0f);
+	_text_shadow = false;
 	_coord_sys = CoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
-	_scissorEnabled = false;
+	_scissor_enabled = false;
 	_viewport = ScreenRect(0, 0, 100, 100);
-	_scissorRect = ScreenRect(0, 0, 1024, 768);
+	_scissor_rect = ScreenRect(0, 0, 1024, 768);
 	_animation_counter = 0;
 	_current_frame_diff = 0;
-	_lightningActive = false;
-	_lightningCurTime = 0;
-	_lightningEndTime = 0;
+	_lightning_active = false;
+	_lightning_current_time = 0;
+	_lightning_end_time = 0;
 	_target = VIDEO_TARGET_SDL_WINDOW;
 	_x = 0;
 	_y = 0;
@@ -149,7 +149,7 @@ GameVideo::GameVideo()
 	if (VIDEO_DEBUG)
 		cout << "VIDEO: GameVideo constructor invoked\n";
 
-	strcpy(_nextTempFile, "00000000");
+	strcpy(_next_temp_file, "00000000");
 }
 
 
@@ -194,8 +194,8 @@ bool GameVideo::SingletonInitialize()
 	}
 
 	settings_lua.ReadOpenTable("video_settings");
-	int  settings_width      = settings_lua.ReadInt("screen_resx");
-	int  settings_height     = settings_lua.ReadInt("screen_resy");
+	int32  settings_width      = settings_lua.ReadInt("screen_resx");
+	int32  settings_height     = settings_lua.ReadInt("screen_resy");
 	bool settings_fullscreen = settings_lua.ReadBool("full_screen");
 	settings_lua.ReadCloseTable();
 
@@ -355,69 +355,44 @@ bool GameVideo::SingletonInitialize()
 
 bool GameVideo::MakeScreenshot()
 {
+	private_video::ImageLoadInfo buffer;
+
 	if(VIDEO_DEBUG)
 		cout << "VIDEO: Entering MakeScreenshot()" << endl;
 
 	// Retrieve width/height of the viewport
-	GLint viewportDims[4];
-	glGetIntegerv(GL_VIEWPORT, viewportDims);
+	GLint viewport_dimensions[4];
+	glGetIntegerv(GL_VIEWPORT, viewport_dimensions);
 
 	// Buffer to store the image before it is flipped
-	void * buffer = malloc(viewportDims[2] * viewportDims[3] * 3);
+	buffer.width = viewport_dimensions[2];
+	buffer.height = viewport_dimensions[3];
+	buffer.pixels = malloc(buffer.width * buffer.height * 3);
 
 	// Read pixel data
-	glReadPixels(0, 0, viewportDims[2], viewportDims[3], GL_RGB, GL_UNSIGNED_BYTE, buffer);
+	glReadPixels(0, 0, buffer.width, buffer.height, GL_RGB, GL_UNSIGNED_BYTE, buffer.pixels);
 
 	if(glGetError())
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO_DEBUG: glReadPixels() returned an error inside GameVideo::CaptureScreen!" << endl;
 
-		free(buffer);
+		free(buffer.pixels);
 		return false;
 	}
 
-
-	struct jpeg_compress_struct cinfo;
-	struct jpeg_error_mgr jerr;
-
-	cinfo.err = jpeg_std_error(&jerr);
-	jpeg_create_compress(&cinfo);
-
-	FILE * outfile;
-	if((outfile = fopen("screenshot.jpg", "wb")) == NULL)
+	// Flip vertically the image
+	void* buffer_temp = malloc(buffer.width * buffer.height * 3);
+	for (int32 i=0; i<buffer.height; ++i)
 	{
-		cerr << "Could not open screenshot.jpg for writing!" << endl;
-		free(buffer);
-		return false;
+		memcpy ((uint8*)buffer_temp+i*buffer.width*3, (uint8*)buffer.pixels+(buffer.height-i-1)*buffer.width*3, buffer.width*3);
 	}
+	free (buffer.pixels);
+	buffer.pixels = buffer_temp;
 
-	jpeg_stdio_dest(&cinfo, outfile);
+	_SaveJpeg("screenshot.jpg", buffer);
 
-	cinfo.image_width = viewportDims[2];
-	cinfo.image_height = viewportDims[3];
-	cinfo.input_components = 3;
-	cinfo.in_color_space = JCS_RGB;
-
-	jpeg_set_defaults(&cinfo);
-	jpeg_set_quality(&cinfo, 70, TRUE);
-	jpeg_start_compress(&cinfo, TRUE);
-
-	JSAMPLE ** row_pointers = (JSAMPLE **)malloc(sizeof(JSAMPLE *) * viewportDims[3]);
-
-	for(int32 line = 0; line < viewportDims[3]; line++)
-	{
-		row_pointers[line] = ((uint8*)buffer) + ((viewportDims[3] - line - 1) * viewportDims[2] * 3);
-	}
-
-	jpeg_write_scanlines(&cinfo, row_pointers, viewportDims[3]);
-	jpeg_finish_compress(&cinfo);
-	fclose(outfile);
-
-	jpeg_destroy_compress(&cinfo);
-
-	free(buffer);
-	free(row_pointers);
+	free(buffer.pixels);
 
 	return true;
 }
@@ -495,9 +470,9 @@ GameVideo::~GameVideo()
 // SetCoordSys: sets the current coordinate system
 //-----------------------------------------------------------------------------
 
-void GameVideo::SetCoordSys(const CoordSys &coordSys)
+void GameVideo::SetCoordSys(const CoordSys &coordinate_system)
 {
-	_coord_sys = coordSys;
+	_coord_sys = coordinate_system;
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -529,28 +504,28 @@ void GameVideo::SetCoordSys
 // SetDrawFlags: used for controlling various flags like blending, flipping, etc.
 //-----------------------------------------------------------------------------
 
-void GameVideo::SetDrawFlags(int32 firstflag, ...)
+void GameVideo::SetDrawFlags(int32 first_flag, ...)
 {
-	int32 flag = firstflag;
+	int32 flag = first_flag;
 	va_list args;
 
-	va_start(args, firstflag);
+	va_start(args, first_flag);
 	while( flag != 0 )
 	{
 		switch (flag) {
-		case VIDEO_X_LEFT: _xalign=-1; break;
-		case VIDEO_X_CENTER: _xalign=0; break;
-		case VIDEO_X_RIGHT: _xalign=1; break;
+		case VIDEO_X_LEFT: _x_align=-1; break;
+		case VIDEO_X_CENTER: _x_align=0; break;
+		case VIDEO_X_RIGHT: _x_align=1; break;
 
-		case VIDEO_Y_TOP: _yalign=1; break;
-		case VIDEO_Y_CENTER: _yalign=0; break;
-		case VIDEO_Y_BOTTOM: _yalign=-1; break;
+		case VIDEO_Y_TOP: _y_align=1; break;
+		case VIDEO_Y_CENTER: _y_align=0; break;
+		case VIDEO_Y_BOTTOM: _y_align=-1; break;
 
-		case VIDEO_X_NOFLIP: _xflip=0; break;
-		case VIDEO_X_FLIP: _xflip=1; break;
+		case VIDEO_X_NOFLIP: _x_flip=0; break;
+		case VIDEO_X_FLIP: _x_flip=1; break;
 
-		case VIDEO_Y_NOFLIP: _yflip=0; break;
-		case VIDEO_Y_FLIP: _yflip=1; break;
+		case VIDEO_Y_NOFLIP: _y_flip=0; break;
+		case VIDEO_Y_FLIP: _y_flip=1; break;
 
 		case VIDEO_NO_BLEND: _blend=0; break;
 		case VIDEO_BLEND: _blend=1; break;
@@ -633,7 +608,7 @@ bool GameVideo::ApplySettings()
 
 		ReloadTextures();
 
-		EnableFog(_fogColor, _fogIntensity);
+		EnableFog(_fog_color, _fog_intensity);
 
 		return true;
 	} // if (_target == VIDEO_TARGET_SDL_WINDOW)
@@ -685,8 +660,8 @@ void GameVideo::SetViewport(float left, float right, float bottom, float top)
 
 bool GameVideo::Clear()
 {
-	if(_usesLights)
-		return Clear(_lightColor);
+	if(_uses_lights)
+		return Clear(_light_color);
 	else
 		return Clear(Color::black);
 }
@@ -704,7 +679,7 @@ bool GameVideo::Clear(const Color &c)
 	glClearColor(c[0], c[1], c[2], c[3]);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	_numTexSwitches = 0;
+	_num_tex_switches = 0;
 
 	if(glGetError())
 		return false;
@@ -719,9 +694,9 @@ bool GameVideo::Clear(const Color &c)
 //-----------------------------------------------------------------------------
 /*bool GameVideo::AccumulateLights()
 {
-	if(_lightOverlay != 0xFFFFFFFF)
+	if(_light_overlay != 0xFFFFFFFF)
 	{
-		_BindTexture(_lightOverlay);
+		_BindTexture(_light_overlay);
 		glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, 1024, 1024, 0);
 	}
 
@@ -734,47 +709,47 @@ bool GameVideo::Clear(const Color &c)
 //          screen
 //-----------------------------------------------------------------------------
 
-bool GameVideo::Display(int32 frameTime)
+bool GameVideo::Display(int32 frame_time)
 {
 	// update particle effects
-	_particle_manager.Update(frameTime);
+	_particle_manager.Update(frame_time);
 
 	// update shaking effect
 	_PushContext();
 	SetCoordSys(0, 1024, 0, 768);
-	_UpdateShake(frameTime);
+	_UpdateShake(frame_time);
 
 	// update lightning timer
-	_lightningCurTime += frameTime;
+	_lightning_current_time += frame_time;
 
-	if(_lightningCurTime > _lightningEndTime)
-		_lightningActive = false;
+	if(_lightning_current_time > _lightning_end_time)
+		_lightning_active = false;
 
 	// show an overlay over the screen if we're fading
 	if(_fader.ShouldUseFadeOverlay())
 	{
 		Color c = _fader.GetFadeOverlayColor();
-		StillImage fadeOverlay;
-		fadeOverlay.SetDimensions(1024.0f, 768.0f);
-		fadeOverlay.SetColor(c);
-		LoadImage(fadeOverlay);
+		StillImage fade_overlay;
+		fade_overlay.SetDimensions(1024.0f, 768.0f);
+		fade_overlay.SetColor(c);
+		LoadImage(fade_overlay);
 		SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 		PushState();
 		Move(0, 0);
-		DrawImage(fadeOverlay);
+		DrawImage(fade_overlay);
 		PopState();
-		DeleteImage(fadeOverlay);
+		DeleteImage(fade_overlay);
 	}
 
 	// this must be called before DrawFPS and all, because we only
 	// want to count texture switches related to the game itself, not the
 	// ones used to draw debug text and things like that.
 
-	if(_advancedDisplay)
+	if(_advanced_display)
 		_DEBUG_ShowAdvancedStats();
 
-	if(_fpsDisplay)
-		DrawFPS(frameTime);
+	if(_fps_display)
+		DrawFPS(frame_time);
 
 	if(!_DEBUG_ShowTexSheet())
 	{
@@ -783,12 +758,12 @@ bool GameVideo::Display(int32 frameTime)
 			// keep track of whether we've already shown this error.
 			// If we've shown it once, stop showing it so we don't clog up
 			// the debug output with the same message 1000 times
-			static bool hasFailed = false;
+			static bool has_failed = false;
 
-			if(!hasFailed)
+			if(!has_failed)
 			{
 				cerr << "VIDEO ERROR: _DEBUG_ShowTexSheet() failed\n";
-				hasFailed = true;
+				has_failed = true;
 			}
 		}
 	}
@@ -797,15 +772,15 @@ bool GameVideo::Display(int32 frameTime)
 
 	SDL_GL_SwapBuffers();
 
-	_fader.Update(frameTime);
+	_fader.Update(frame_time);
 
 	// update animation timers
 
-	int32 oldFrameIndex = _animation_counter / VIDEO_ANIMATION_FRAME_PERIOD;
-	_animation_counter += frameTime;
-	int32 currentFrameIndex = _animation_counter / VIDEO_ANIMATION_FRAME_PERIOD;
+	int32 old_frame_index = _animation_counter / VIDEO_ANIMATION_FRAME_PERIOD;
+	_animation_counter += frame_time;
+	int32 current_frame_index = _animation_counter / VIDEO_ANIMATION_FRAME_PERIOD;
 
-	_current_frame_diff = currentFrameIndex - oldFrameIndex;
+	_current_frame_diff = current_frame_index - old_frame_index;
 
 	return true;
 }
@@ -875,7 +850,7 @@ bool GameVideo::_DEBUG_ShowAdvancedStats()
 {
 	// display to screen
 	char text[50];
-	sprintf(text, "Switches: %d\nParticles: %d", _numTexSwitches, _particle_manager.GetNumParticles());
+	sprintf(text, "Switches: %d\nParticles: %d", _num_tex_switches, _particle_manager.GetNumParticles());
 
 	if( !SetFont("debug_font"))
 		return false;
@@ -896,9 +871,9 @@ bool GameVideo::_DEBUG_ShowAdvancedStats()
 void GameVideo::Move(float tx, float ty)
 {
 #ifndef NDEBUG
-	GLint matrixMode;
-	glGetIntegerv(GL_MATRIX_MODE, &matrixMode);
-	assert(matrixMode == GL_MODELVIEW);
+	GLint matrix_mode;
+	glGetIntegerv(GL_MATRIX_MODE, &matrix_mode);
+	assert(matrix_mode == GL_MODELVIEW);
 #endif
 	glLoadIdentity();
 	glTranslatef(tx, ty, 0);
@@ -912,9 +887,9 @@ void GameVideo::Move(float tx, float ty)
 void GameVideo::MoveRelative(float tx, float ty)
 {
 #ifndef NDEBUG
-	GLint matrixMode;
-	glGetIntegerv(GL_MATRIX_MODE, &matrixMode);
-	assert(matrixMode == GL_MODELVIEW);
+	GLint matrix_mode;
+	glGetIntegerv(GL_MATRIX_MODE, &matrix_mode);
+	assert(matrix_mode == GL_MODELVIEW);
 #endif
 	glTranslatef(tx, ty, 0);
 	_x += tx;
@@ -935,14 +910,14 @@ void GameVideo::GetDrawPosition(float &x, float &y)
 //         about this CARFULLY before you call it
 //-----------------------------------------------------------------------------
 
-void GameVideo::Rotate(float acAngle)
+void GameVideo::Rotate(float ac_angle)
 {
 #ifndef NDEBUG
-	GLint matrixMode;
-	glGetIntegerv(GL_MATRIX_MODE, &matrixMode);
-	assert(matrixMode == GL_MODELVIEW);
+	GLint matrix_mode;
+	glGetIntegerv(GL_MATRIX_MODE, &matrix_mode);
+	assert(matrix_mode == GL_MODELVIEW);
 #endif
-	glRotatef(acAngle, 0, 0, 1);
+	glRotatef(ac_angle, 0, 0, 1);
 }
 
 
@@ -950,15 +925,15 @@ void GameVideo::Rotate(float acAngle)
 // Scale: scales the coordinate axes by xScale and yScale respectively
 //-----------------------------------------------------------------------------
 
-void GameVideo::Scale(float xScale, float yScale)
+void GameVideo::Scale(float x, float y)
 {
 #ifndef NDEBUG
-	GLint matrixMode;
-	glGetIntegerv(GL_MATRIX_MODE, &matrixMode);
-	assert(matrixMode == GL_MODELVIEW);
+	GLint matrix_mode;
+	glGetIntegerv(GL_MATRIX_MODE, &matrix_mode);
+	assert(matrix_mode == GL_MODELVIEW);
 #endif
 
-	glScalef(xScale, yScale, 1.0f);
+	glScalef(x, y, 1.0f);
 }
 
 
@@ -991,11 +966,11 @@ void GameVideo::PopState()
 
 bool GameVideo::SetMenuSkin
 (
-	const std::string &imgBaseName,
-	const Color  &fillColor
+	const std::string &img_base_name,
+	const Color  &fill_color
 )
 {
-	return SetMenuSkin(imgBaseName, fillColor, fillColor, fillColor, fillColor);
+	return SetMenuSkin(img_base_name, fill_color, fill_color, fill_color, fill_color);
 }
 
 
@@ -1008,33 +983,33 @@ bool GameVideo::SetMenuSkin
 
 bool GameVideo::SetMenuSkin
 (
-	const std::string &imgBaseName,
-	const Color  &fillColor_TL,
-	const Color  &fillColor_TR,
-	const Color  &fillColor_BL,
-	const Color  &fillColor_BR
+	const std::string &img_base_name,
+	const Color  &fill_color_TL,
+	const Color  &fill_color_TR,
+	const Color  &fill_color_BL,
+	const Color  &fill_color_BR
 )
 {
 	return _gui->SetMenuSkin
 	(
-		imgBaseName + "_tl.png",
-		imgBaseName + "_t.png",
-		imgBaseName + "_tr.png",
-		imgBaseName + "_l.png",
-		imgBaseName + "_r.png",
-		imgBaseName + "_bl.png",
-		imgBaseName + "_b.png",
-		imgBaseName + "_br.png",
-		imgBaseName + "_tri_t.png",
-		imgBaseName + "_tri_l.png",
-		imgBaseName + "_tri_r.png",
-		imgBaseName + "_tri_b.png",
-		imgBaseName + "_quad.png",
+		img_base_name + "_tl.png",
+		img_base_name + "_t.png",
+		img_base_name + "_tr.png",
+		img_base_name + "_l.png",
+		img_base_name + "_r.png",
+		img_base_name + "_bl.png",
+		img_base_name + "_b.png",
+		img_base_name + "_br.png",
+		img_base_name + "_tri_t.png",
+		img_base_name + "_tri_l.png",
+		img_base_name + "_tri_r.png",
+		img_base_name + "_tri_b.png",
+		img_base_name + "_quad.png",
 
-		fillColor_TL,
-		fillColor_TR,
-		fillColor_BL,
-		fillColor_BR,
+		fill_color_TL,
+		fill_color_TR,
+		fill_color_BL,
+		fill_color_BR,
 
 		""     // no background image
 	);
@@ -1048,34 +1023,34 @@ bool GameVideo::SetMenuSkin
 
 bool GameVideo::SetMenuSkin
 (
-	const std::string &imgBaseName,
-	const std::string &backgroundImage,
-	const Color  &fillColor_TL,
-	const Color  &fillColor_TR,
-	const Color  &fillColor_BL,
-	const Color  &fillColor_BR
+	const std::string &img_base_name,
+	const std::string &background_image,
+	const Color  &fill_color_TL,
+	const Color  &fill_color_TR,
+	const Color  &fill_color_BL,
+	const Color  &fill_color_BR
 )
 {
 	return _gui->SetMenuSkin
 	(
-		imgBaseName + "_tl.png",
-		imgBaseName + "_t.png",
-		imgBaseName + "_tr.png",
-		imgBaseName + "_l.png",
-		imgBaseName + "_r.png",
-		imgBaseName + "_bl.png",
-		imgBaseName + "_b.png",
-		imgBaseName + "_br.png",
-		imgBaseName + "_tri_t.png",
-		imgBaseName + "_tri_l.png",
-		imgBaseName + "_tri_r.png",
-		imgBaseName + "_tri_b.png",
-		imgBaseName + "_quad.png",
-		fillColor_TL,
-		fillColor_TR,
-		fillColor_BL,
-		fillColor_BR,
-		backgroundImage
+		img_base_name + "_tl.png",
+		img_base_name + "_t.png",
+		img_base_name + "_tr.png",
+		img_base_name + "_l.png",
+		img_base_name + "_r.png",
+		img_base_name + "_bl.png",
+		img_base_name + "_b.png",
+		img_base_name + "_br.png",
+		img_base_name + "_tri_t.png",
+		img_base_name + "_tri_l.png",
+		img_base_name + "_tri_r.png",
+		img_base_name + "_tri_b.png",
+		img_base_name + "_quad.png",
+		fill_color_TL,
+		fill_color_TR,
+		fill_color_BL,
+		fill_color_BR,
+		background_image
 	);
 }
 
@@ -1087,12 +1062,12 @@ bool GameVideo::SetMenuSkin
 
 bool GameVideo::SetMenuSkin
 (
-	const std::string &imgBaseName,
-	const std::string &backgroundImage,
-	const Color  &fillColor
+	const std::string &img_base_name,
+	const std::string &background_image,
+	const Color  &fill_color
 )
 {
-	return SetMenuSkin(imgBaseName, backgroundImage, fillColor, fillColor, fillColor, fillColor);
+	return SetMenuSkin(img_base_name, background_image, fill_color, fill_color, fill_color, fill_color);
 }
 
 
@@ -1101,13 +1076,13 @@ bool GameVideo::SetMenuSkin
 //              discard the call if we try to bind the same texture twice
 //-----------------------------------------------------------------------------
 
-bool GameVideo::_BindTexture(GLuint texID)
+bool GameVideo::_BindTexture(GLuint tex_ID)
 {
-	if(texID != _lastTexID)
+	if(tex_ID != _last_tex_ID)
 	{
-		_lastTexID = texID;
-		glBindTexture(GL_TEXTURE_2D, texID);
-		++_numTexSwitches;
+		_last_tex_ID = tex_ID;
+		glBindTexture(GL_TEXTURE_2D, tex_ID);
+		++_num_tex_switches;
 	}
 
 	if(glGetError())
@@ -1125,7 +1100,7 @@ bool GameVideo::_BindTexture(GLuint texID)
 
 bool GameVideo::ToggleAdvancedDisplay()
 {
-	_advancedDisplay = !_advancedDisplay;
+	_advanced_display = !_advanced_display;
 	return true;
 }
 
@@ -1134,9 +1109,9 @@ bool GameVideo::ToggleAdvancedDisplay()
 //-----------------------------------------------------------------------------
 // _CreateMenu: creates menu image descriptor
 //-----------------------------------------------------------------------------
-bool GameVideo::_CreateMenu(StillImage &menu, float width, float height, float & innerWidth, float & innerHeight, int32 edgeVisibleFlags, int32 edgeSharedFlags)
+bool GameVideo::_CreateMenu(StillImage &menu, float width, float height, float & inner_width, float & inner_height, int32 edge_visible_flags, int32 edge_shared_flags)
 {
-	return _gui->CreateMenu(menu, width, height, innerWidth, innerHeight, edgeVisibleFlags, edgeSharedFlags);
+	return _gui->CreateMenu(menu, width, height, inner_width, inner_height, edge_visible_flags, edge_shared_flags);
 }
 
 
@@ -1147,13 +1122,13 @@ bool GameVideo::_CreateMenu(StillImage &menu, float width, float height, float &
 //-----------------------------------------------------------------------------
 bool GameVideo::EnableSceneLighting(const Color &color)
 {
-	_lightColor = color;
+	_light_color = color;
 
 	if(color[3] != 1.0f)
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: color passed to EnableSceneLighting() had alpha other than 1.0f!" << endl;
-		_lightColor[3] = 1.0f;
+		_light_color[3] = 1.0f;
 	}
 
 	return true;
@@ -1164,7 +1139,7 @@ bool GameVideo::EnableSceneLighting(const Color &color)
 //-----------------------------------------------------------------------------
 void GameVideo::DisableSceneLighting()
 {
-	_lightColor = Color::white;
+	_light_color = Color::white;
 }
 
 //-----------------------------------------------------------------------------
@@ -1173,7 +1148,7 @@ void GameVideo::DisableSceneLighting()
 
 Color &GameVideo::GetSceneLightingColor()
 {
-	return _lightColor;
+	return _light_color;
 }
 
 
@@ -1202,8 +1177,8 @@ bool GameVideo::EnableFog(const Color &color, float intensity)
 	}
 
 	// set the parameters
-	_fogColor = color;
-	_fogIntensity = intensity;
+	_fog_color = color;
+	_fog_intensity = intensity;
 
 	// apply the new settings with OpenGL
 	if(intensity == 0.0f)
@@ -1229,7 +1204,7 @@ bool GameVideo::EnableFog(const Color &color, float intensity)
 void GameVideo::DisableFog()
 {
 	glDisable(GL_FOG);
-	_fogIntensity = 0.0f;
+	_fog_intensity = 0.0f;
 }
 
 
@@ -1251,7 +1226,7 @@ bool GameVideo::EnablePointLights()
 {
 	_light_overlay = _CreateBlankGLTexture(1024, 1024);
 
-	_usesLights = true;
+	_uses_lights = true;
 
 	return true;
 }
@@ -1268,7 +1243,7 @@ void GameVideo::DisablePointLights()
 
 	_light_overlay = 0xFFFFFFFF;
 
-	_usesLights = false;
+	_uses_lights = false;
 }
 
 
@@ -1285,7 +1260,7 @@ bool GameVideo::ApplyLightingOverlay()
 		_BindTexture(_light_overlay);
 		glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, 1024, 1024, 0);
 
-		CoordSys tempCoordSys = _coord_sys;
+		CoordSys temp_CoordSys = _coord_sys;
 
 		SetCoordSys(0.0f, 1.0f, 0.0f, 1.0f);
 		float xlo = 0.0f, ylo = 0.0f, xhi = 1.0f, yhi = 1.0f;
@@ -1308,7 +1283,7 @@ bool GameVideo::ApplyLightingOverlay()
 		glTexCoord2f(0.0f, my);
 		glVertex2f(xlo, yhi);//tl
 		glEnd();
-		SetCoordSys(tempCoordSys.GetLeft(), tempCoordSys.GetRight(), tempCoordSys.GetBottom(), tempCoordSys.GetTop());
+		SetCoordSys(temp_CoordSys.GetLeft(), temp_CoordSys.GetRight(), temp_CoordSys.GetBottom(), temp_CoordSys.GetTop());
 	}
 
 	return true;
@@ -1335,20 +1310,20 @@ bool GameVideo::CaptureScreen(StillImage &id)
 		cout << "VIDEO: Entering CaptureScreen()" << endl;
 
 	// Retrieve width/height of the viewport
-	GLint viewportDims[4];
-	glGetIntegerv(GL_VIEWPORT, viewportDims);
+	GLint viewport_dimensions[4];
+	glGetIntegerv(GL_VIEWPORT, viewport_dimensions);
 
 	// Set up the loadInfo struct
-	ImageLoadInfo loadInfo;
-	loadInfo.width = viewportDims[2];
-	loadInfo.height = viewportDims[3];
-	loadInfo.pixels = malloc(viewportDims[2] * viewportDims[3] * 4);
+	ImageLoadInfo load_info;
+	load_info.width = viewport_dimensions[2];
+	load_info.height = viewport_dimensions[3];
+	load_info.pixels = malloc(viewport_dimensions[2] * viewport_dimensions[3] * 4);
 
 	// Buffer to store the image before it is flipped
-	void * buffer = malloc(viewportDims[2] * viewportDims[3] * 4);
+	void * buffer = malloc(viewport_dimensions[2] * viewport_dimensions[3] * 4);
 
 	// Read pixel data
-	glReadPixels(0, 0, viewportDims[2], viewportDims[3], GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+	glReadPixels(0, 0, viewport_dimensions[2], viewport_dimensions[3], GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 
 	if(glGetError())
 	{
@@ -1358,19 +1333,19 @@ bool GameVideo::CaptureScreen(StillImage &id)
 		if (buffer)
 			free(buffer);
 
-		if (loadInfo.pixels)
-			free(loadInfo.pixels);
+		if (load_info.pixels)
+			free(load_info.pixels);
 
 		return false;
 	}
 
 	// Flip the image
-	for(int32 line = 0; line < viewportDims[3]; line++)
+	for(int32 line = 0; line < viewport_dimensions[3]; line++)
 	{
-		uint8* srcline = ((uint8*)buffer) + (line * viewportDims[2] * 4);
-		uint8* destline = ((uint8*)loadInfo.pixels) + ((viewportDims[3] - line - 1) * viewportDims[2] * 4);
+		uint8* srcline = ((uint8*)buffer) + (line * viewport_dimensions[2] * 4);
+		uint8* destline = ((uint8*)load_info.pixels) + ((viewport_dimensions[3] - line - 1) * viewport_dimensions[2] * 4);
 
-		memcpy(destline, srcline, viewportDims[2] * 4);
+		memcpy(destline, srcline, viewport_dimensions[2] * 4);
 	}
 
 	// Free the buffer
@@ -1379,10 +1354,10 @@ bool GameVideo::CaptureScreen(StillImage &id)
 
 	//TEMP TAGS
 	// create an Image structure and store it our std::map of images
-	Image *newImage = new Image(id._filename, "", loadInfo.width, loadInfo.height, false);
+	Image *new_image = new Image(id._filename, "", load_info.width, load_info.height, false);
 
 	// try to insert the image in a texture sheet
-	TexSheet *sheet = _InsertImageInTexSheet(newImage, loadInfo, true);
+	TexSheet *sheet = _InsertImageInTexSheet(new_image, load_info, true);
 
 	if(!sheet)
 	{
@@ -1392,28 +1367,28 @@ bool GameVideo::CaptureScreen(StillImage &id)
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO_DEBUG: GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
 
-		if (loadInfo.pixels)
-			free(loadInfo.pixels);
+		if (load_info.pixels)
+			free(load_info.pixels);
 
 		return false;
 	}
 
-	newImage->ref_count = 1;
+	new_image->ref_count = 1;
 
 	// if width or height are zero, that means to use the dimensions of image
 	if(id._width == 0.0f)
-		id._width = (float) loadInfo.width;
+		id._width = (float)load_info.width;
 
 	if(id._height == 0.0f)
-		id._height = (float) loadInfo.height;
+		id._height = (float)load_info.height;
 
 	// store the new image element
-	ImageElement  element(newImage, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f, id._width, id._height, id._color);
+	ImageElement  element(new_image, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f, id._width, id._height, id._color);
 	id._elements.push_back(element);
 
 	// finally, delete the buffer used to hold the pixel data
-	if (loadInfo.pixels)
-		free(loadInfo.pixels);
+	if (load_info.pixels)
+		free(load_info.pixels);
 
 	return true;
 }
@@ -1457,7 +1432,7 @@ float GameVideo::GetGamma()
 
 void GameVideo::ToggleFPS()
 {
-	_fpsDisplay = !_fpsDisplay;
+	_fps_display = !_fps_display;
 }
 
 
@@ -1465,12 +1440,12 @@ void GameVideo::ToggleFPS()
 // _CreateTempFilename
 //-----------------------------------------------------------------------------
 
-string GameVideo::_CreateTempFilename(const string &extension)
+std::string GameVideo::_CreateTempFilename(const std::string &extension)
 {
 	// figure out the temp filename to return
-	string filename = "/tmp/allacrost";
-	filename += _nextTempFile;
-	filename += extension;
+	string file_name = "/tmp/allacrost";
+	file_name += _next_temp_file;
+	file_name += extension;
 
 	// increment the 8-character temp name
 	// Note: assume that the temp name is currently set to
@@ -1479,30 +1454,30 @@ string GameVideo::_CreateTempFilename(const string &extension)
 
 	for(int32 digit = 7; digit >= 0; --digit)
 	{
-		++_nextTempFile[digit];
+		++_next_temp_file[digit];
 
-		if(_nextTempFile[digit] > 'z')
+		if(_next_temp_file[digit] > 'z')
 		{
 			if(digit==0)
 			{
 				if(VIDEO_DEBUG)
 					cerr << "VIDEO ERROR: _nextTempFile went past 'zzzzzzzz'" << endl;
-				return filename;
+				return file_name;
 			}
 
-			_nextTempFile[digit] = '0';
+			_next_temp_file[digit] = '0';
 		}
 		else
 		{
-			if(_nextTempFile[digit] > '9' && _nextTempFile[digit] < 'a')
-				_nextTempFile[digit] = 'a';
+			if(_next_temp_file[digit] > '9' && _next_temp_file[digit] < 'a')
+				_next_temp_file[digit] = 'a';
 
 			// if the digit did not overflow, then we don't need to carry over
 			break;
 		}
 	}
 
-	return filename;
+	return file_name;
 }
 
 
@@ -1521,17 +1496,17 @@ void GameVideo::_PushContext()
 	private_video::Context c;
 	c.coordinate_system = _coord_sys;
 	c.blend    = _blend;
-	c.x_align   = _xalign;
-	c.y_align   = _yalign;
-	c.x_flip    = _xflip;
-	c.y_flip    = _yflip;
+	c.x_align   = _x_align;
+	c.y_align   = _y_align;
+	c.x_flip    = _x_flip;
+	c.y_flip    = _y_flip;
 
 	c.viewport = _viewport;
-	c.scissor_rectangle = _scissorRect;
-	c.scissoring_enabled = _scissorEnabled;
+	c.scissor_rectangle = _scissor_rect;
+	c.scissoring_enabled = _scissor_enabled;
 
 	c.font      = _current_font;
-	c.text_color = _currentTextColor;
+	c.text_color = _current_text_color;
 
 	_context_stack.push(c);
 }
@@ -1548,17 +1523,17 @@ void GameVideo::_PopContext()
 	private_video::Context c = _context_stack.top();
 	SetCoordSys(c.coordinate_system);
 	_blend  = c.blend;
-	_xalign = c.x_align;
-	_yalign = c.y_align;
-	_xflip  = c.x_flip;
-	_yflip  = c.y_flip;
+	_x_align = c.x_align;
+	_y_align = c.y_align;
+	_x_flip  = c.x_flip;
+	_y_flip  = c.y_flip;
 
 	_current_font      = c.font;
-	_currentTextColor = c.text_color;
+	_current_text_color = c.text_color;
 
 	_viewport = c.viewport;
-	_scissorRect = c.scissor_rectangle;
-	_scissorEnabled = c.scissoring_enabled;
+	_scissor_rect = c.scissor_rectangle;
+	_scissor_enabled = c.scissoring_enabled;
 	_context_stack.pop();
 
 	// restore modelview transformation
@@ -1567,10 +1542,10 @@ void GameVideo::_PopContext()
 
 	glViewport(_viewport.left, _viewport.top, _viewport.width, _viewport.height);
 
-	if(_scissorEnabled)
+	if(_scissor_enabled)
 	{
 		glEnable(GL_SCISSOR_TEST);
-		glScissor(_scissorRect.left, _scissorRect.top, _scissorRect.width, _scissorRect.height);
+		glScissor(_scissor_rect.left, _scissor_rect.top, _scissor_rect.width, _scissor_rect.height);
 	}
 	else
 	{
@@ -1583,13 +1558,13 @@ void GameVideo::_PopContext()
 // _ConvertYAlign: convert a value like VIDEO_Y_BOTTOM to an offset like -1
 //-----------------------------------------------------------------------------
 
-int32 GameVideo::_ConvertYAlign(int32 yalign)
+int32 GameVideo::_ConvertYAlign(int32 y_align)
 {
-	switch(yalign)
+	switch(y_align)
 	{
 		case VIDEO_Y_BOTTOM:
 			return -1;
-		case VIDEO_X_CENTER:
+		case VIDEO_Y_CENTER:
 			return 0;
 		default:
 			return 1;
@@ -1601,9 +1576,9 @@ int32 GameVideo::_ConvertYAlign(int32 yalign)
 // _ConvertXAlign: convert a value like VIDEO_X_LEFT to an offset like -1
 //-----------------------------------------------------------------------------
 
-int32 GameVideo::_ConvertXAlign(int32 xalign)
+int32 GameVideo::_ConvertXAlign(int32 x_align)
 {
-	switch(xalign)
+	switch(x_align)
 	{
 		case VIDEO_X_LEFT:
 			return -1;
@@ -1617,10 +1592,10 @@ int32 GameVideo::_ConvertXAlign(int32 xalign)
 //-----------------------------------------------------------------------------
 // SetDefaultCursor: sets the default menu cursor, returns false if it fails
 //-----------------------------------------------------------------------------
-bool GameVideo::SetDefaultCursor(const std::string &cursorImageFilename)
+bool GameVideo::SetDefaultCursor(const std::string &cursor_image_filename)
 {
-	_defaultMenuCursor.SetFilename(cursorImageFilename);
-	return LoadImage(_defaultMenuCursor);
+	_default_menu_cursor.SetFilename(cursor_image_filename);
+	return LoadImage(_default_menu_cursor);
 }
 
 
@@ -1629,8 +1604,8 @@ bool GameVideo::SetDefaultCursor(const std::string &cursorImageFilename)
 //-----------------------------------------------------------------------------
 StillImage *GameVideo::GetDefaultCursor()
 {
-	if(_defaultMenuCursor.GetWidth() != 0.0f)  // cheap test if image is valid
-		return &_defaultMenuCursor;
+	if(_default_menu_cursor.GetWidth() != 0.0f)  // cheap test if image is valid
+		return &_default_menu_cursor;
 	else
 		return NULL;
 }
@@ -1683,7 +1658,7 @@ void ScreenRect::Intersect(const ScreenRect &rect)
 //-----------------------------------------------------------------------------
 void GameVideo::EnableScissoring(bool enable)
 {
-	_scissorEnabled = enable;
+	_scissor_enabled = enable;
 
 	if(enable)
 		glEnable(GL_SCISSOR_TEST);
@@ -1698,8 +1673,8 @@ void GameVideo::EnableScissoring(bool enable)
 //-----------------------------------------------------------------------------
 void GameVideo::SetScissorRect(float left, float right, float bottom, float top)
 {
-	_scissorRect = CalculateScreenRect(left, right, bottom, top);
-	glScissor(_scissorRect.left, _scissorRect.top, _scissorRect.width, _scissorRect.height);
+	_scissor_rect = CalculateScreenRect(left, right, bottom, top);
+	glScissor(_scissor_rect.left, _scissor_rect.top, _scissor_rect.width, _scissor_rect.height);
 }
 
 
@@ -1708,7 +1683,7 @@ void GameVideo::SetScissorRect(float left, float right, float bottom, float top)
 //-----------------------------------------------------------------------------
 void GameVideo::SetScissorRect(const ScreenRect &rect)
 {
-	_scissorRect = rect;
+	_scissor_rect = rect;
 	glScissor(rect.left, rect.top, rect.width, rect.height);
 }
 
@@ -1795,14 +1770,14 @@ bool GameVideo::_ShouldSmooth() {
 // MakeLightning: creates a lightning effect
 //-----------------------------------------------------------------------------
 
-bool GameVideo::MakeLightning(const std::string &litFile)
+bool GameVideo::MakeLightning(const std::string &lit_file)
 {
-	FILE *fp = fopen(litFile.c_str(), "rb");
+	FILE *fp = fopen(lit_file.c_str(), "rb");
 	if(!fp)
 		return false;
 
-	int32 dataSize;
-	if(!fread(&dataSize, 4, 1, fp))
+	int32 data_size;
+	if(!fread(&data_size, 4, 1, fp))
 	{
 		fclose(fp);
 		return false;
@@ -1818,9 +1793,9 @@ bool GameVideo::MakeLightning(const std::string &litFile)
 		           ((dataSize & 0x000000FF) << 24);
 	#endif
 
-	uint8 *data = new uint8[dataSize];
+	uint8 *data = new uint8[data_size];
 
-	if(!fread(data, dataSize, 1, fp))
+	if(!fread(data, data_size, 1, fp))
 	{
 		delete [] data;
 		fclose(fp);
@@ -1829,19 +1804,19 @@ bool GameVideo::MakeLightning(const std::string &litFile)
 
 	fclose(fp);
 
-	_lightningData.clear();
+	_lightning_data.clear();
 
-	for(int32 j = 0; j < dataSize; ++j)
+	for(int32 j = 0; j < data_size; ++j)
 	{
 		float f = float(data[j]) / 255.0f;
-		_lightningData.push_back(f);
+		_lightning_data.push_back(f);
 	}
 
 	delete [] data;
 
-	_lightningActive = true;
-	_lightningCurTime = 0;
-	_lightningEndTime = dataSize * 1000 / 100;
+	_lightning_active = true;
+	_lightning_current_time = 0;
+	_lightning_end_time = data_size * 1000 / 100;
 
 	return true;
 }
@@ -1853,20 +1828,20 @@ bool GameVideo::MakeLightning(const std::string &litFile)
 
 bool GameVideo::DrawLightning()
 {
-	if(!_lightningActive)
+	if(!_lightning_active)
 		return true;
 
 	// convert milliseconds elapsed into data points elapsed
 
-	float t = _lightningCurTime * 100.0f / 1000.0f;
+	float t = _lightning_current_time * 100.0f / 1000.0f;
 
-	int32 roundedT = static_cast<int32>(t);
-	t -= roundedT;
+	int32 rounded_t = static_cast<int32>(t);
+	t -= rounded_t;
 
 	// get 2 separate data points and blend together (linear interpolation)
 
-	float data1 = _lightningData[roundedT];
-	float data2 = _lightningData[roundedT+1];
+	float data1 = _lightning_data[rounded_t];
+	float data2 = _lightning_data[rounded_t+1];
 
 	float intensity = data1 * (1-t) + data2 * t;
 
@@ -1922,7 +1897,7 @@ bool GameVideo::SetTarget(VIDEO_TARGET target)
 //           vertical grid spacing of xstep and ystep, with a color 'c'
 //-----------------------------------------------------------------------------
 
-void GameVideo::DrawGrid(float x, float y, float xstep, float ystep, const Color &c)
+void GameVideo::DrawGrid(float x, float y, float x_step, float y_step, const Color &c)
 {
 	PushState();
 
@@ -1930,16 +1905,16 @@ void GameVideo::DrawGrid(float x, float y, float xstep, float ystep, const Color
 	glBegin(GL_LINES);
 	glColor4fv(&c[0]);
 
-	float xMax = _coord_sys.GetRight();
-	float yMax = _coord_sys.GetBottom();
+	float x_Max = _coord_sys.GetRight();
+	float y_Max = _coord_sys.GetBottom();
 
-	for(; x <= xMax; x += xstep)
+	for(; x <= x_Max; x += x_step)
 	{
 		glVertex2f(x, _coord_sys.GetBottom());
 		glVertex2f(x, _coord_sys.GetTop());
 	}
 
-	for(; y <= yMax; y += ystep)
+	for(; y <= y_Max; y += y_step)
 	{
 		glVertex2f(_coord_sys.GetLeft(), y);
 		glVertex2f(_coord_sys.GetRight(), y);
