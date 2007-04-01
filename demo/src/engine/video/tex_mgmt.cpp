@@ -365,10 +365,10 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 
 				++(img->ref_count);
 
-				if (images.at(current_image)._height == 0.0f)
-					images.at(current_image)._height = (float)((x == rows-1 && load_info.height%rows) ? load_info.height-(x*load_info.height/rows) : load_info.height/rows);
-				if (images.at(current_image)._width == 0.0f)
-					images.at(current_image)._width = (float)((y == cols-1 && load_info.width%cols) ? load_info.width-(y*load_info.width/cols) : load_info.width/cols);
+				if (images.at(current_image)._width == 0)
+					images.at(current_image)._width = (float)img->width;
+				if (images.at(current_image)._height == 0)
+					images.at(current_image)._height = (float)img->height;
 
 				ImageElement element(img, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f,
 					images.at(current_image)._width, images.at(current_image)._height, images.at(current_image)._color);
@@ -416,11 +416,6 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 
 				// store the image in our std::map
 				_images[filename + tags] = new_image;
-
-				if (images.at(current_image)._height == 0.0f)
-					images.at(current_image)._height = (float)((x == rows-1 && load_info.height%rows) ? load_info.height-(x*load_info.height/rows) : load_info.height/rows);
-				if (images.at(current_image)._width == 0.0f)
-					images.at(current_image)._width = (float)((y == cols-1 && load_info.width%cols) ? load_info.width-(y*load_info.width/cols) : load_info.width/cols);
 
 				// store the new image element
 				ImageElement element(new_image, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f, images.at(current_image)._width, images.at(current_image)._height, images.at(current_image)._color);
