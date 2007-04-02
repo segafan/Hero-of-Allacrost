@@ -22,9 +22,12 @@
 #include "utils.h"
 #include "defs.h"
 
-#include "system.h"
-#include "script.h"
+#include "audio.h"
+#include "input.h"
 #include "mode_manager.h"
+#include "script.h"
+#include "system.h"
+#include "video.h"
 
 #include "global.h"
 #include "global_objects.h"
@@ -49,28 +52,29 @@ void BindEngineToLua() {
 
 
 
-	// ----- Video Engine Bindings
-	// TODO
-
-
-
 	// ----- Audio Engine Bindings
-	// TODO
+	{
+	using namespace hoa_audio;
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_audio")
+	[
+		class_<GameAudio>("GameAudio")
+	];
+
+	} // End using audio namespaces
 
 
 
 	// ----- Input Engine Bindings
-	// TODO
+	{
+	using namespace hoa_input;
 
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_input")
+	[
+		class_<GameInput>("GameInput")
+	];
 
-
-	// ----- System Engine Bindings
-	// TODO
-
-
-
-	// ----- Script Engine Bindings
-	// TODO
+	} // End using input namespaces
 
 
 
@@ -91,6 +95,46 @@ void BindEngineToLua() {
 	];
 
 	} // End using mode manager namespaces
+
+
+
+	// ----- Script Engine Bindings
+	{
+	using namespace hoa_script;
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_script")
+	[
+		class_<GameScript>("GameScript")
+	];
+
+	} // End using script namespaces
+
+
+
+	// ----- System Engine Bindings
+	{
+	using namespace hoa_system;
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_system")
+	[
+		class_<GameSystem>("GameSystem")
+	];
+
+	} // End using system namespaces
+
+
+
+	// ----- Video Engine Bindings
+	{
+	using namespace hoa_video;
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_video")
+	[
+		class_<GameVideo>("GameVideo")
+	];
+
+	} // End using video namespaces
+
 
 
 
@@ -522,6 +566,17 @@ void BindEngineToLua() {
 	];
 
 	} // End using shop mode namespaces
+
+
+
+	// ---------- (4) Bind engine class objects
+	luabind::object global_table = luabind::globals(hoa_script::ScriptManager->GetGlobalState());
+	global_table["AudioManager"]     = hoa_audio::AudioManager;
+	global_table["InputManager"]     = hoa_input::InputManager;
+	global_table["GameModeManager"]  = hoa_mode_manager::ModeManager;
+	global_table["ScriptManager"]    = hoa_script::ScriptManager;
+	global_table["SystemManager"]    = hoa_system::SystemManager;
+	global_table["VideoManager"]     = hoa_video::VideoManager;
 
 } // void BindEngineToLua()
 
