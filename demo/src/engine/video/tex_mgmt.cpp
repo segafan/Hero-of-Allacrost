@@ -8,6 +8,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "utils.h"
+#include "tex_mgmt.h"
 #include <cassert>
 #include <cstdarg>
 #include <set>
@@ -21,7 +22,7 @@ namespace hoa_video
 {
 
 
-using namespace private_video;
+using namespace hoa_video::private_video;
 using namespace std;
 using namespace hoa_utils;
 
