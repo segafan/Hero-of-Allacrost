@@ -54,9 +54,15 @@ namespace private_system {
 ***
 *** \note 1) This class is a singleton.
 *** ***************************************************************************/
-class GameSystem {
+class GameSystem : public hoa_utils::Singleton<GameSystem> {
+	friend class hoa_utils::Singleton<GameSystem>;
+
 public:
-	SINGLETON_METHODS(GameSystem);
+//	SINGLETON_METHODS(GameSystem);
+
+	~GameSystem ();
+
+	bool SingletonInitialize ();
 
 	/** \brief Initializes the timers used in the game.
 	***
@@ -131,7 +137,10 @@ public:
 		{ _not_done = false; }
 
 private:
-	SINGLETON_DECLARE(GameSystem);
+//	SINGLETON_DECLARE(GameSystem);
+
+	GameSystem ();
+
 	//! The last time that the UpdateTimers function was called, in milliseconds.
 	uint32 _last_update;
 	//! The number of milliseconds that have transpired on the last timer update.

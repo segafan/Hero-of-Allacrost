@@ -30,11 +30,15 @@ using namespace hoa_quit;
 using namespace hoa_pause;
 using namespace hoa_input::private_input;
 
+
+hoa_input::GameInput* hoa_utils::Singleton<hoa_input::GameInput>::_ref = 0;
+
+
 namespace hoa_input {
 
 GameInput *InputManager = NULL;
 bool INPUT_DEBUG = false;
-SINGLETON_INITIALIZE(GameInput);
+//SINGLETON_INITIALIZE(GameInput);
 
 
 // Initializes class members

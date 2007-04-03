@@ -116,9 +116,14 @@ public:
 *** a stack is used. The second reason is "just in case" we need to access a stack
 *** element that is not on the top of the stack.
 *** **************************************************************************/
-class GameModeManager {
+class GameModeManager : public hoa_utils::Singleton<GameModeManager> {
+	friend class hoa_utils::Singleton<GameModeManager>;
+
 private:
-	SINGLETON_DECLARE(GameModeManager);
+	//SINGLETON_DECLARE(GameModeManager);
+
+	GameModeManager ();
+
 
 	/** \brief A stack containing all the live game modes.
 	*** \note The back/last element of the vector is the top of the stack.
@@ -132,7 +137,11 @@ private:
 	uint32 _pop_count;
 
 public:
-	SINGLETON_METHODS(GameModeManager);
+//	SINGLETON_METHODS(GameModeManager);
+
+	~GameModeManager ();
+
+	bool SingletonInitialize ();
 
 	//! \brief Increments by one the number of game modes to pop off the stack
 	void Pop();

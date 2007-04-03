@@ -22,11 +22,17 @@ using namespace std;
 using namespace hoa_utils;
 using namespace hoa_system;
 
+
+template <>
+hoa_audio::GameAudio* Singleton<hoa_audio::GameAudio>::_ref = 0;
+
+
 namespace hoa_audio {
 
 GameAudio *AudioManager = NULL;
 bool AUDIO_DEBUG = false;
-SINGLETON_INITIALIZE(GameAudio);
+//SINGLETON_INITIALIZE(GameAudio);
+
 
 namespace private_audio {
 

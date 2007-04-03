@@ -23,11 +23,15 @@ using namespace hoa_script;
 using namespace hoa_audio;
 using namespace hoa_system::private_system;
 
+
+hoa_system::GameSystem* hoa_utils::Singleton<hoa_system::GameSystem>::_ref = 0;
+
+
 namespace hoa_system {
 
 GameSystem *SystemManager = NULL;
 bool SYSTEM_DEBUG = false;
-SINGLETON_INITIALIZE(GameSystem);
+//SINGLETON_INITIALIZE(GameSystem);
 
 
 // The constructor initalize all the data fields inside the GameSystem class

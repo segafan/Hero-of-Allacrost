@@ -19,11 +19,15 @@
 using namespace std;
 using namespace hoa_boot;
 
+
+hoa_mode_manager::GameModeManager* hoa_utils::Singleton<hoa_mode_manager::GameModeManager>::_ref = 0;
+
+
 namespace hoa_mode_manager {
 
 GameModeManager *ModeManager = NULL;
 bool MODE_MANAGER_DEBUG = false;
-SINGLETON_INITIALIZE(GameModeManager);
+//SINGLETON_INITIALIZE(GameModeManager);
 
 // ****************************************************************************
 // ***** GameMode class

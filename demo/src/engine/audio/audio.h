@@ -117,14 +117,20 @@ const int32 BUFFER_SIZE = 1024;
  * data. Audio data is only freed once there are no more references to the
  * data.
  *****************************************************************************/
-class GameAudio {
+class GameAudio : public hoa_utils::Singleton<GameAudio>
+{
+	friend class hoa_utils::Singleton<GameAudio>;
 	friend class private_audio::SoundData;
 	friend class SoundDescriptor;
 	friend class private_audio::MusicData;
 	friend class MusicDescriptor;
 
 public:
-	SINGLETON_METHODS(GameAudio);
+	//SINGLETON_METHODS(GameAudio);
+
+	~GameAudio ();
+
+	bool SingletonInitialize ();
 
 	/*! \brief Returns a set of error codes and also clears the error code to a no-error state.
 	 *
@@ -215,7 +221,9 @@ public:
 	void DEBUG_PrintInfo();
 
 private:
-	SINGLETON_DECLARE(GameAudio)
+	//SINGLETON_DECLARE(GameAudio)
+	
+	GameAudio ();
 
 	//! The volume level for music playback. Valid range is between 0.0f and 1.0f
 	float _music_volume;

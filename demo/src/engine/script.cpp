@@ -26,11 +26,15 @@ using namespace hoa_utils;
 using namespace hoa_script::private_script;
 using namespace luabind;
 
+
+hoa_script::GameScript* Singleton<hoa_script::GameScript>::_ref = 0;
+
+
 namespace hoa_script {
 
 GameScript *ScriptManager = NULL;
 bool SCRIPT_DEBUG = false;
-SINGLETON_INITIALIZE(GameScript);
+//SINGLETON_INITIALIZE(GameScript);
 
 
 // *****************************************************************************
