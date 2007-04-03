@@ -79,16 +79,20 @@ class Grid: public QGLWidget
 
 		std::vector<int32>& GetLayer(LAYER_TYPE layer);
 
-		//! Sets background music
+		//! Sets background music.
 		void SetMusic(const QString& music_file);
-		//! Gets background music
+		//! Gets background music.
 		const QString& GetMusic() const;
 
-		void LoadMap();                     // loads a map from a config file
-		void SaveMap();                     // saves the map to a config file
+		//! Loads a map from a config file.
+		void LoadMap();
+		//! Saves the map to a config file.
+		void SaveMap();
 
-		QStringList file_name_list;         // list of tile file names
-		QStringList tileset_list;           // list of tileset names
+		//! List of the tileset names being used.
+		QStringList tileset_names;
+		//! A vector containing each tileset's list of tiles loaded via LoadMultiImage. 
+		std::vector<std::vector<hoa_video::StillImage> > tileset_tiles;
 		std::vector<uint32> tiles_walkable; // vector of walkability of tiles
 		std::vector<uint32> indiv_walkable; // vector of walkability of individual tiles
 

@@ -18,14 +18,14 @@
 #include <fstream>
 
 
+using namespace hoa_video::private_video;
+
+
 namespace hoa_video
 {
 
-
-using namespace hoa_video::private_video;
 using namespace std;
 using namespace hoa_utils;
-
 
 
 

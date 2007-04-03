@@ -176,12 +176,16 @@ void Editor::_FileNew()
 			_ed_tabs->setTabPosition(QTabWidget::South);
 
 			Q3CheckListItem* tiles = static_cast<Q3CheckListItem*> (new_map->GetTilesetListView()->firstChild());
+			vector<StillImage> temp(256);
 			while (tiles)
 			{
 				if (tiles->isOn())
 				{
-					_ed_tabs->addTab(new TilesetTable(_ed_widget, tiles->text()), tiles->text());
-					_ed_scrollview->_map->tileset_list.push_back(tiles->text());
+					TilesetTable* table = new TilesetTable(_ed_widget, tiles->text());
+					_ed_tabs->addTab(table, tiles->text());
+					_ed_scrollview->_map->tileset_names.append(tiles->text());
+					temp = table->tiles;
+					_ed_scrollview->_map->tileset_tiles.push_back(temp);
 				} // tileset must be selected
 				tiles = static_cast<Q3CheckListItem*> (tiles->nextSibling());
 			} // iterate through all possible tilesets
@@ -229,8 +233,8 @@ void Editor::_FileOpen()
 			_ed_scrollview->_map->SetFileName(file_name);
 			_ed_scrollview->_map->LoadMap();
 
-			for (QStringList::ConstIterator it = _ed_scrollview->_map->tileset_list.begin();
-				it != _ed_scrollview->_map->tileset_list.end(); it++)
+			for (QStringList::ConstIterator it = _ed_scrollview->_map->tileset_names.begin();
+				it != _ed_scrollview->_map->tileset_names.end(); it++)
 				_ed_tabs->addTab(new TilesetTable(_ed_widget, *it), *it);
 			_ed_tabs->show();
 
@@ -314,13 +318,13 @@ void Editor::_FileResize()
 		_ed_tabs->setTabPosition(QTabWidget::South);
 
 		Q3CheckListItem* tiles = static_cast<Q3CheckListItem*> (resize->GetTilesetListView()->firstChild());
-		_ed_scrollview->_map->tileset_list.clear();
+		_ed_scrollview->_map->tileset_names.clear();
 		while (tiles)
 		{
 			if (tiles->isOn())
 			{
 				_ed_tabs->addTab(new TilesetTable(_ed_widget, tiles->text()), tiles->text());
-				_ed_scrollview->_map->tileset_list.push_back(tiles->text());
+				_ed_scrollview->_map->tileset_names.push_back(tiles->text());
 			} // tileset must be selected
 			tiles = static_cast<Q3CheckListItem*> (tiles->nextSibling());
 		} // iterate through all possible tilesets
@@ -329,7 +333,7 @@ void Editor::_FileResize()
 		_ed_tabs->show();
 	} // only if the user pressed OK
 	else
-		_stat_bar->message("Map not resized!",5000);
+		_stat_bar->message("Map not resized!", 5000);
 
 	delete resize;
 } // _FileResize()
@@ -384,23 +388,21 @@ void Editor::_ViewToggleUL()
 void Editor::_TileLayerFill()
 {
 	// get reference to current tileset
-	//Editor* editor = static_cast<Editor*> (topLevelWidget());
-	Q3Table* table = static_cast<Q3Table*> (this->_ed_tabs->currentPage());
+	TilesetTable* table = static_cast<TilesetTable*> (this->_ed_tabs->currentPage());
 
 	// put selected tile from tileset into tile array at correct position
-	QString name = table->text(table->currentRow(), table->currentColumn());
-	int file_index = _ed_scrollview->_map->file_name_list.findIndex(name);
-	if (file_index == -1)
+	int tileset_index = table->currentRow() * 16 + table->currentColumn();
+	int multiplier = _ed_scrollview->_map->tileset_names.findIndex(table->tileset_name);
+	if (multiplier == -1)
 	{
-		_ed_scrollview->_map->file_name_list.append(name);
-		file_index = _ed_scrollview->_map->file_name_list.findIndex(name);
-	} // add tile filename to the list in use
+		_ed_scrollview->_map->tileset_names.append(table->tileset_name);
+		multiplier = _ed_scrollview->_map->tileset_names.findIndex(table->tileset_name);
+	} // calculate index of current tileset
 
 	vector<int32>::iterator it;    // used to iterate over an entire layer
-	vector<int32>& CurrentLayer=_ed_scrollview->GetCurrentLayer();
-	for (it = CurrentLayer.begin();
-					it != CurrentLayer.end(); it++)
-				*it = file_index;
+	vector<int32>& CurrentLayer = _ed_scrollview->GetCurrentLayer();
+	for (it = CurrentLayer.begin(); it != CurrentLayer.end(); it++)
+		*it = tileset_index + multiplier * 256;
 } // _TileLayerFill()
 
 void Editor::_TileLayerClear()
@@ -795,18 +797,18 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 			{
 				// get reference to current tileset
 				Editor* editor = static_cast<Editor*> (topLevelWidget());
-				Q3Table* table = static_cast<Q3Table*> (editor->_ed_tabs->currentPage());
+				TilesetTable* table = static_cast<TilesetTable*> (editor->_ed_tabs->currentPage());
 
 				// put selected tile from tileset into tile array at correct position
-				QString name = table->text(table->currentRow(), table->currentColumn());
-				int file_index = _map->file_name_list.findIndex(name);
-				if (file_index == -1)
+				int tileset_index = table->currentRow() * 16 + table->currentColumn();
+				int multiplier = _map->tileset_names.findIndex(table->tileset_name);
+				if (multiplier == -1)
 				{
-					_map->file_name_list.append(name);
-					file_index = _map->file_name_list.findIndex(name);
-				} // add tile filename to the list in use
-
-				GetCurrentLayer()[_tile_index] = file_index;
+					_map->tileset_names.append(table->tileset_name);
+					multiplier = _map->tileset_names.findIndex(table->tileset_name);
+				} // calculate index of current tileset
+				
+				GetCurrentLayer()[_tile_index] = tileset_index + multiplier * 256;
 			} // left mouse button was pressed
 			break;
 		} // edit mode PAINT_TILE
@@ -826,7 +828,8 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 				// delete the tile
 				GetCurrentLayer()[_tile_index] = -1;
 
-				_RemoveIfUnused(file_index);
+				// No longer needed
+				//_RemoveIfUnused(file_index);
 			} // left mouse button was pressed
 			break;
 		} // edit mode DELETE_TILE
@@ -859,18 +862,18 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 				{
 					// get reference to current tileset
 					Editor* editor = static_cast<Editor*> (topLevelWidget());
-					Q3Table* table = static_cast<Q3Table*> (editor->_ed_tabs->currentPage());
+					TilesetTable* table = static_cast<TilesetTable*> (editor->_ed_tabs->currentPage());
 
 					// put selected tile from tileset into tile array at correct position
-					QString name = table->text(table->currentRow(), table->currentColumn());
-					int file_index = _map->file_name_list.findIndex(name);
-					if (file_index == -1)
+					int tileset_index = table->currentRow() * 16 + table->currentColumn();
+					int multiplier = _map->tileset_names.findIndex(table->tileset_name);
+					if (multiplier == -1)
 					{
-						_map->file_name_list.append(name);
-						file_index = _map->file_name_list.findIndex(name);
-					} // add tile filename to the list in use
+						_map->tileset_names.append(table->tileset_name);
+						multiplier = _map->tileset_names.findIndex(table->tileset_name);
+					} // calculate index of current tileset
 
-					GetCurrentLayer()[_tile_index] = file_index;
+					GetCurrentLayer()[_tile_index] = tileset_index + multiplier * 256;
 				} // left mouse button was pressed
 				break;
 			} // edit mode PAINT_TILE
@@ -889,7 +892,7 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 					// delete the tile
 					GetCurrentLayer()[_tile_index] = -1;
 
-					_RemoveIfUnused(file_index);
+					//_RemoveIfUnused(file_index);
 				} // left mouse button was pressed
 				break;
 			} // edit mode DELETE_TILE
@@ -912,7 +915,7 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 
 	if (_tile_mode == MOVE_TILE)
 	{
-		std::vector<int32>& layer=GetCurrentLayer();
+		std::vector<int32>& layer = GetCurrentLayer();
 		layer[_tile_index] = layer[_move_source_index];
 		layer[_move_source_index] = -1;
 	} // finish moving a tile
@@ -952,9 +955,10 @@ void EditorScrollView::_ContextMenuSetup()
 	// Look up walkability property in global tiles database
 	else
 	{
-		QString tile_name = _map->file_name_list[
-			_map->GetLayer(LOWER_LAYER)[_tile_index]];
-		walkable = _db->GetGlobalSet().GetTile(tile_name).walkability;
+	// FIXME
+//		QString tile_name = _map->file_name_list[
+//			_map->GetLayer(LOWER_LAYER)[_tile_index]];
+//		walkable = _db->GetGlobalSet().GetTile(tile_name).walkability;
 	}
 
 	// Set checkboxes
@@ -995,19 +999,19 @@ void EditorScrollView::_RemoveIfUnused(int file_index)
 {
 	// find other instances of the tile 
 	bool found = false;
-	for (LAYER_TYPE layer = LOWER_LAYER;layer <= UPPER_LAYER && !found; layer++)
+	for (LAYER_TYPE layer = LOWER_LAYER; layer <= UPPER_LAYER && !found; layer++)
 	{
 		vector<int32>::iterator it;
-		vector<int32>& CurrentLayer = _map->GetLayer(layer);
+		vector<int32>& current_layer = _map->GetLayer(layer);
 		// Loop until we either find something or we are at the end of the vector
-		for (it = CurrentLayer.begin(); it != CurrentLayer.end() && *it != file_index; it++);
-		if (it != CurrentLayer.end())
-			found = true;
+		for (it = current_layer.begin(); it != current_layer.end() && *it != file_index; it++);
+			if (it != current_layer.end())
+				found = true;
 	}
 
 	// If tile was not found, remove it from the list
-	if (!found)
-		_map->file_name_list.removeAt(file_index);
+	//if (!found)
+		//_map->file_name_list.removeAt(file_index);
 } // _RemoveIfUnused(...)
 
 
