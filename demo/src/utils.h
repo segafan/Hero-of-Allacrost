@@ -313,7 +313,7 @@ std::string MakeStandardString(const hoa_utils::ustring& text);
 *** ***************************************************************************/
 //@{
 //! Place this macro in the private sector of the class definition
-#define SINGLETON_DECLARE(class_name) \
+/*#define SINGLETON_DECLARE(class_name) \
 	static class_name *_ref; \
 	class_name(const class_name&); \
 	class_name& operator=(const class_name&);
@@ -343,6 +343,53 @@ std::string MakeStandardString(const hoa_utils::ustring& text);
 #define SINGLETON_INITIALIZE(class_name) \
 	class_name* class_name::_ref = NULL;
 //@}
+*/
+
+template <typename T>
+class Singleton
+{
+protected:
+	static T* _ref;
+
+public:
+	static T* SingletonCreate ()
+	{
+//		assert (_ref == NULL);
+
+		if (_ref == NULL)
+			_ref = new T();
+
+		return _ref;
+	}
+
+	static void SingletonDestroy()
+	{
+//		assert (_ref != NULL);
+
+		if (_ref != NULL)
+			delete _ref;
+
+		_ref = NULL;
+	}
+
+	static bool SingletonInitialize () {}
+
+	static T* SingletonGetReference()
+	{
+		return _ref;
+	}
+
+protected:
+   Singleton() {}
+   virtual ~Singleton() {}
+  
+private:
+	Singleton (const Singleton &s);
+	Singleton &operator = (const Singleton &s);
+};
+
+
+
 
 
 /** \brief A template function that returns the number of elements in an array

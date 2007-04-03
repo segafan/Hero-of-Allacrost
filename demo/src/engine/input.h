@@ -194,9 +194,14 @@ public:
 *** \note In the end, all you really need to know about this class are the
 *** member access functions in the public section of this class (its not that hard).
 *** **************************************************************************/
-class GameInput {
+class GameInput : public hoa_utils::Singleton<GameInput> {
+	friend class hoa_utils::Singleton<GameInput>;
+
 private:
-	SINGLETON_DECLARE(GameInput);
+	//SINGLETON_DECLARE(GameInput);
+
+	GameInput ();
+
 	
 	//! Holds the current user-defined key settings
 	private_input::KeyState _key;
@@ -287,7 +292,11 @@ private:
 	**/
 	void _SetNewJoyButton(uint8 & old_button, uint8 new_button);
 public:
-	SINGLETON_METHODS(GameInput);
+//	SINGLETON_METHODS(GameInput);
+
+	~GameInput ();
+
+	bool SingletonInitialize ();
 
 	/** \brief Loads the default key settings from the lua file and sets them back
 	*** \return Returns false if the settings file couldn't be read

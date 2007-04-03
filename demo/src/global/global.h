@@ -52,14 +52,20 @@ extern bool GLOBAL_DEBUG;
 *** manager class. There can only be one game instance that the player is playing
 *** at any given time.
 *** ***************************************************************************/
-class GameGlobal {
+class GameGlobal : public hoa_utils::Singleton<GameGlobal>
+{
+	friend class hoa_utils::Singleton<GameGlobal>;
 	friend class GlobalItem;
 	friend class GlobalSkill;
 	friend class GlobalWeapon;
 	friend class GlobalArmor;
 
 public:
-	SINGLETON_METHODS(GameGlobal);
+//	SINGLETON_METHODS(GameGlobal);
+	
+	~GameGlobal ();
+
+	bool SingletonInitialize ();
 
 	/** \brief Deletes all data stored within the GameGlobal class object
 	*** This function is meant to be called when the user quits the current game instance
@@ -179,7 +185,9 @@ public:
 	//@}
 
 private:
-	SINGLETON_DECLARE(GameGlobal);
+//	SINGLETON_DECLARE(GameGlobal);
+
+	GameGlobal ();
 
 	//! \brief The amount of financial resources the party currently has.
 	uint32 _funds;

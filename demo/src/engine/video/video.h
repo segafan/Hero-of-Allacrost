@@ -194,7 +194,8 @@ enum {
 *** large, the implementation of many of the methods for this class are split up
 *** into multiple .cpp source files in the video code directory.
 *** *****************************************************************************/
-class GameVideo {
+class GameVideo : public hoa_utils::Singleton<GameVideo> {
+	friend class hoa_utils::Singleton<GameVideo>;
 	friend class TextBox;
 	friend class OptionBox;
 	friend class MenuWindow;
@@ -208,7 +209,11 @@ class GameVideo {
 	friend class RenderedString;
 
 public:
-	SINGLETON_METHODS(GameVideo);
+	//SINGLETON_METHODS(GameVideo);
+	
+	~GameVideo ();
+
+	bool SingletonInitialize ();
 
 
 	//-- General --------------------------------------------------------------
@@ -1071,7 +1076,9 @@ public:
 	RenderedString *RenderText(const hoa_utils::ustring &txt);
 
 private:
-	SINGLETON_DECLARE(GameVideo);
+//	SINGLETON_DECLARE(GameVideo);
+
+	GameVideo ();
 
 	//-- Private variables ----------------------------------------------------
 

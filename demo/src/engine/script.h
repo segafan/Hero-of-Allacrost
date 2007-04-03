@@ -501,11 +501,16 @@ private:
 ***
 *** \note This class is a singleton
 *** ***************************************************************************/
-class GameScript {
+class GameScript : public hoa_utils::Singleton<GameScript> {
+	friend class hoa_utils::Singleton<GameScript>;
 	friend class ScriptDescriptor;
 
 public:
-	SINGLETON_METHODS(GameScript);
+//	SINGLETON_METHODS(GameScript);
+
+	~GameScript ();
+
+	bool SingletonInitialize ();
 
 	//! \brief Returns a pointer to the global lua state
 	lua_State *GetGlobalState()
@@ -518,7 +523,9 @@ public:
 	bool IsFileOpen(std::string& filename);
 
 private:
-	SINGLETON_DECLARE(GameScript);
+//	SINGLETON_DECLARE(GameScript);
+
+	GameScript ();
 
 	//! \brief Maintains a list of all data files that are currently open.
 	std::map<std::string, ScriptDescriptor*> _open_files;
