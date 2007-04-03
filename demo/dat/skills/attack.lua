@@ -25,10 +25,8 @@ skills[1] = {
 	usage = hoa_global.GameGlobal.GLOBAL_USE_BATTLE,
 	target_alignment = hoa_global.GameGlobal.GLOBAL_ALIGNMENT_NEUTRAL,
 
-	use_function = function(target,instigator)
-		t = target
-		i = instigator
-		t:TakeDamage(32)
-		--print("Executed Slicing Rain!")
+	BattleExecute = function(target, instigator)
+		target:TakeDamage(32);
+		AudioManager:PlaySound("snd/sword_swipe.wav");
 	end
 }

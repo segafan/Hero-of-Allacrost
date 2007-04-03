@@ -20,7 +20,7 @@ characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS] = {
 	vigor = 4,
 	fortitude = 14,
 	protection = 6,
-	agility = 21,
+	agility = 35,
 	evade = 4.0,
 
 	attack_points = {

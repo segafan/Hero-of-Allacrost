@@ -248,19 +248,17 @@ public:
 
 	~GlobalSkill();
 
-	/** \brief Calls the script function which performs the skill's use
-	*** \param target A pointer to the target of this skill
-	*** \param instigator A pointer to the instigator of this skill
-	*** \note This version is only for BATTLE MODE.
+	/** \brief Calls the script function which executes the skill for battles
+	*** \param target A pointer to the target of the skill
+	*** \param instigator A pointer to the instigator whom is executing the skill
 	**/
-	void Use(hoa_battle::private_battle::BattleActor* target, hoa_battle::private_battle::BattleActor* instigator);
+	void BattleExecute(hoa_battle::private_battle::BattleActor* target, hoa_battle::private_battle::BattleActor* instigator);
 
-	/** \brief Calls the script function which performs the skill's use
-	*** \param target A pointer to the target of this skill
-	*** \param instigator A pointer to the instigator of this skill
-	*** \note This version is only for MENU MODE.
+	/** \brief Calls the script function which executes the skill for menus
+	*** \param target A pointer to the target of the skill
+	*** \param instigator A pointer to the instigator whom is executing the skill
 	**/
-	void Use(hoa_global::GlobalCharacter* target, hoa_global::GlobalCharacter* instigator);
+	void MenuExecute(hoa_global::GlobalCharacter* target, hoa_global::GlobalCharacter* instigator);
 
 	/** \name Class member access functions
 	*** \note No set functiosn are defined because the class members should only be defined
@@ -368,8 +366,8 @@ private:
 	**/
 	std::vector<std::pair<float, GlobalStatusEffect*> > _status_effects;
 
-	//! Handle to the skill's Lua use function
-	ScriptObject _use_function;
+	//! \brief A pointer to the skill's execution function for battles
+	ScriptObject _battle_execute_function;
 
 	//! \brief Loads the skill's data from a file and sets the members of the class
 	void _Load();

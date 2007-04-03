@@ -151,7 +151,8 @@ void GlobalSkill::_Load() {
 	_level_required = skill_script->ReadInt("level_required");
 	_usage = static_cast<GLOBAL_USE>(skill_script->ReadInt("usage"));
 	_target_alignment = static_cast<GLOBAL_ALIGNMENT>(skill_script->ReadInt("target_alignment"));
-	_use_function = skill_script->ReadFunctionPointer("use_function");
+	_battle_execute_function = skill_script->ReadFunctionPointer("BattleExecute");
+//  	_menu_execute_function = skill_script->ReadFunctionPointer("MenuExecute");
 
 	skill_script->ReadCloseTable();
 
@@ -161,8 +162,8 @@ void GlobalSkill::_Load() {
 }
 
 
-//This version is only for BATTLE MODE
-void GlobalSkill::Use(hoa_battle::private_battle::BattleActor* target, hoa_battle::private_battle::BattleActor* instigator) {
+
+void GlobalSkill::BattleExecute(hoa_battle::private_battle::BattleActor* target, hoa_battle::private_battle::BattleActor* instigator) {
 	//FIX ME Do a nifty text message in game
 	//This check is if in case a player is warming up
 	//and some of his SP gets syphoned
@@ -172,11 +173,12 @@ void GlobalSkill::Use(hoa_battle::private_battle::BattleActor* target, hoa_battl
 		return;
 	}
 
-	ScriptCallFunction<void>(_use_function, target, instigator);
+	ScriptCallFunction<void>(_battle_execute_function, target, instigator);
 }
 
-//This version is only for BATTLE MODE
-void GlobalSkill::Use(GlobalCharacter* target, GlobalCharacter* instigator) {
+
+
+void GlobalSkill::MenuExecute(GlobalCharacter* target, GlobalCharacter* instigator) {
 	//FIX ME Do a nifty text message in game
 	//This check is if in case a player is warming up
 	//and some of his SP gets syphoned
@@ -186,7 +188,7 @@ void GlobalSkill::Use(GlobalCharacter* target, GlobalCharacter* instigator) {
 		return;
 	}
 
-	ScriptCallFunction<void>(_use_function, target, instigator);
+// 	ScriptCallFunction<void>(_menu_execute_function, target, instigator);
 }
 
 

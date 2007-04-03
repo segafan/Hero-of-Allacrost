@@ -51,7 +51,8 @@ void GlobalItem::_Load() {
 	_target_type = static_cast<GLOBAL_TARGET>(GlobalManager->_items_script.ReadInt("target_type"));
 	_target_alignment = static_cast<GLOBAL_ALIGNMENT>(GlobalManager->_items_script.ReadInt("target_alignment"));
 	_price = GlobalManager->_items_script.ReadInt("standard_price");
-	_use_function = GlobalManager->_items_script.ReadFunctionPointer("use_function");
+	_battle_use_function = GlobalManager->_items_script.ReadFunctionPointer("BattleUse");
+	// 	_menu_use_function = GlobalManager->_items_script.ReadFunctionPointer("MenuUse");
 
 	GlobalManager->_items_script.ReadCloseTable();
 
@@ -64,19 +65,19 @@ void GlobalItem::_Load() {
 } // void GlobalItem::_Load()
 
 
-//This version is only for BATTLE MODE
-void GlobalItem::Use(hoa_battle::private_battle::BattleActor* target, hoa_battle::private_battle::BattleActor* instigator) {
-	ScriptCallFunction<void>(_use_function, target, instigator);
+
+void GlobalItem::BattleUse(hoa_battle::private_battle::BattleActor* target, hoa_battle::private_battle::BattleActor* instigator) {
+	ScriptCallFunction<void>(_battle_use_function, target, instigator);
 }
 
-//This version is only for MENU MODE
-void GlobalItem::Use(GlobalCharacter* target, GlobalCharacter* instigator) {
+
+void GlobalItem::MenuUse(GlobalCharacter* target) {
 	if (_count == 0) {
 		if (GLOBAL_DEBUG)
 			cerr << "GLOBAL ERROR: tried to use item " << MakeStandardString(_name) << " which had a count of zero" << endl;
 		return;
 	}
-	ScriptCallFunction<void>(_use_function, target, instigator);
+// 	ScriptCallFunction<void>(_menu_use_function, target, instigator);
 	_count--;
 }
 

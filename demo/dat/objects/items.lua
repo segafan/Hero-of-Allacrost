@@ -34,10 +34,14 @@ items[1] = {
 	target_alignment = hoa_global.GameGlobal.GLOBAL_ALIGNMENT_GOOD,
 	standard_price = 60,
 
-	use_function = function(target,instigator)
-		t = target
-		t:SetHitPoints(t:GetHitPoints() + 100)
-		--print("Used a healing potion!")
+	BattleUse = function(target, instigator)
+		target:SetHitPoints(target:GetHitPoints() + 100);
+		AudioManager:PlaySound("snd/potion_drink.wav");
+	end,
+
+	MenuUse = function(target)
+		target:SetHitPoints(target:GetHitPoints() + 100);
+		AudioManager:PlaySound("snd/potion_drink.wav");
 	end
 }
 

@@ -16,10 +16,11 @@
 #include "audio.h"
 #include "audio_sound.h"
 #include "audio_music.h"
+#include "system.h"
 
 using namespace std;
 using namespace hoa_utils;
-using namespace hoa_script;
+using namespace hoa_system;
 
 namespace hoa_audio {
 
@@ -82,6 +83,44 @@ bool GameAudio::SingletonInitialize() {
 	
 	Mix_AllocateChannels(SOUND_CHANNELS);
 	return true;
+}
+
+
+
+void GameAudio::Update() {
+	// The countdown timer to examine the list of temporary seconds, initialized to 5 seconds
+	static int32 examine_time = 5000;
+
+	examine_time -= SystemManager->GetUpdateTime();
+	if (examine_time < 0) { // 5 seconds have expired, reset timer and examine list for temporary sounds that are stopped
+		examine_time = 5000;
+
+		for (list<SoundDescriptor*>::iterator i = _temp_sounds.begin(); i != _temp_sounds.end(); i++) {
+			if ((*i)->GetSoundState() == AUDIO_STATE_STOPPED) {
+				delete(*i);
+
+				// The iterator i will become invalid after calling erase on it, so this circumvents that problem
+				list<SoundDescriptor*>::iterator temp = i;
+				i++;
+				_temp_sounds.erase(temp);
+			}
+		}
+	}
+}
+
+
+
+void GameAudio::PlaySound(string filename) {
+	SoundDescriptor* new_sound = new SoundDescriptor();
+
+	if (new_sound->LoadSound(filename) == false) {
+		if (AUDIO_DEBUG)
+			cerr << "AUDIO ERROR: GameAudio::PlaySound() failed because the sound file could not be loaded" << endl;
+		delete(new_sound);
+	}
+
+	new_sound->PlaySound();
+	_temp_sounds.push_front(new_sound);
 }
 
 

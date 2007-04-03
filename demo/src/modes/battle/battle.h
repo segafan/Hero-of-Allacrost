@@ -149,17 +149,24 @@ public:
 private:
 	//! The name of the executing script
 	std::string _script_name;
+
 	//! The actor whom is initiating this script
 	BattleActor* _source;
+
 	//! Pointer to the skill attached to this script (for skill events only)
 	hoa_global::GlobalSkill* _skill;
+
 	//! Pointer to the item attached to this script (for item events only)
 	hoa_global::GlobalItem* _item;
+
 	//hoa_global::GlobalActor * _source;
+
 	//! The targets of the script
 	BattleActor* _target;
+
 	//! The targets of the script FIX ME
 	std::deque<BattleActor *> _targets;
+
 	//! The amount of time to wait to execute the script
 	hoa_system::Timer _warm_up_time;
 	//! If the script is ready to run or not

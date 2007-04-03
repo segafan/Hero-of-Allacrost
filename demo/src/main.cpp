@@ -260,7 +260,7 @@ int32 main(int32 argc, char *argv[]) {
 		InputManager->EventHandler();
 
 		// 3) Update any streaming audio sources
-		// AudioManager->Update();
+		AudioManager->Update();
 
 		// 4) Update timers for correct time-based movement operation
 		SystemManager->UpdateTimers();

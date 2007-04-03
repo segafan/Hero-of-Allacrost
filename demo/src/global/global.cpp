@@ -60,25 +60,21 @@ GameGlobal::~GameGlobal() {
 bool GameGlobal::SingletonInitialize() {
 	// Open up the persistent script files
 	if (_items_script.OpenFile("dat/objects/items.lua", SCRIPT_READ) == false) {
-		cerr << "GLOBAL ERROR: could not open script: dat/items.lua" << endl;
 		return false;
 	}
 	_items_script.ReadOpenTable("items");
 
 	if (_weapons_script.OpenFile("dat/objects/weapons.lua", SCRIPT_READ) == false) {
-		cerr << "GLOBAL ERROR: could not open script: dat/weapons.lua" << endl;
 		return false;
 	}
 	_weapons_script.ReadOpenTable("weapons");
 
 	if (_armor_script.OpenFile("dat/objects/armor.lua", SCRIPT_READ) == false) {
-		cerr << "GLOBAL ERROR: could not open script: dat/armor.lua" << endl;
 		return false;
 	}
 	_armor_script.ReadOpenTable("armor");
 
 	if (_attack_skills_script.OpenFile("dat/skills/attack.lua", SCRIPT_READ) == false) {
-		cerr << "GLOBAL ERROR: could not open script: dat/skills/attack.lua" << endl;
 		return false;
 	}
 	_attack_skills_script.ReadOpenTable("skills");

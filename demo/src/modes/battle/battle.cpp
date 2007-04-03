@@ -61,9 +61,9 @@ BattleMode * current_battle = NULL;
 ScriptEvent::ScriptEvent(BattleActor* source, std::deque<BattleActor*> targets, const std::string & script_name, uint32 warm_up_time) :
 	_script_name(script_name),
 	_source(source),
-	_targets(targets),
+	_skill(NULL),
 	_item(NULL),
-	_skill(NULL)
+	_targets(targets)
 {
 	_warm_up_time.SetDuration(warm_up_time);
 	_warm_up_time.Reset();
@@ -72,10 +72,10 @@ ScriptEvent::ScriptEvent(BattleActor* source, std::deque<BattleActor*> targets, 
 
 //Constructor for a script event that uses an item
 ScriptEvent::ScriptEvent(BattleActor* source, BattleActor* target, GlobalSkill* skill) :
-	_item(NULL),
+	_source(source),
 	_skill(skill),
-	_target(target),
-	_source(source)
+	_item(NULL),
+	_target(target)
 {
 	_warm_up_time.SetDuration(skill->GetWarmupTime());
 	_warm_up_time.Reset();
@@ -84,10 +84,11 @@ ScriptEvent::ScriptEvent(BattleActor* source, BattleActor* target, GlobalSkill* 
 
 //Constructor for a script event that uses an item
 ScriptEvent::ScriptEvent(BattleActor* source, BattleActor* target, GlobalItem* item, uint32 warm_up_time) :
-	_item(item),
+	_source(source),
 	_skill(NULL),
-	_target(target),
-	_source(source)
+	_item(item),
+	_target(target)
+
 {
 	_warm_up_time.SetDuration(warm_up_time);
 	_warm_up_time.Reset();
@@ -120,7 +121,7 @@ void ScriptEvent::RunScript() {
 				//Loop through enemies and apply the item
 				for (uint32 i = 0; i < current_battle->GetNumberOfEnemies(); ++i)
 				{
-					_item->Use(current_battle->GetEnemyActorAt(i), _source);
+					_item->BattleUse(current_battle->GetEnemyActorAt(i), _source);
 				}
 				
 				//_item->DecrementCount(1);
@@ -135,7 +136,7 @@ void ScriptEvent::RunScript() {
 				//Loop through all party members and apply
 				for (uint32 i = 0; i < current_battle->GetNumberOfCharacters(); ++i)
 				{
-					_item->Use(current_battle->GetPlayerCharacterAt(i), _source);
+					_item->BattleUse(current_battle->GetPlayerCharacterAt(i), _source);
 				}
 
 				//_item->DecrementCount(1);
@@ -148,7 +149,7 @@ void ScriptEvent::RunScript() {
 		}
 		else
 		{
-			_item->Use(_target, _source);
+			_item->BattleUse(_target, _source);
 			//_item->DecrementCount(1);
 
 			/*if (_item->GetCount() == 0)
@@ -173,7 +174,7 @@ void ScriptEvent::RunScript() {
 				//Loop through enemies and apply the item
 				for (uint32 i = 0; i < current_battle->GetNumberOfEnemies(); ++i)
 				{
-					_skill->Use(current_battle->GetEnemyActorAt(i), _source);
+					_skill->BattleExecute(current_battle->GetEnemyActorAt(i), _source);
 				}
 			}
 			else
@@ -181,13 +182,13 @@ void ScriptEvent::RunScript() {
 				//Loop through all party members and apply
 				for (uint32 i = 0; i < current_battle->GetNumberOfCharacters(); ++i)
 				{
-					_skill->Use(current_battle->GetPlayerCharacterAt(i), _source);
+					_skill->BattleExecute(current_battle->GetPlayerCharacterAt(i), _source);
 				}
 			}
 		}
 		else
 		{
-			_skill->Use(_target, _source);
+			_skill->BattleExecute(_target, _source);
 		}
 
 		_source->SetSkillPoints(_source->GetSkillPoints() - _skill->GetSPRequired());
@@ -242,8 +243,8 @@ BattleMode::BattleMode() :
 	_current_number_swaps(0),
 	_swap_countdown_timer(300000), // 5 minutes
 	_min_agility(9999),
-	_selected_option_index(0),
-	_item_list(NULL)
+	_item_list(NULL),
+	_selected_option_index(0)
 {
 	if (BATTLE_DEBUG)
 		cout << "BATTLE: BattleMode constructor invoked" << endl;
