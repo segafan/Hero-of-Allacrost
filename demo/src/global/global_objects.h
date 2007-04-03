@@ -174,19 +174,16 @@ public:
 	//This is because IBattleActor is a standalone interface that does not inherit from
 	//anything, so we cannot have one definition handle both modes.
 
-	/** \brief Calls the script function which performs the item's use
-	*** \param target A pointer to the target of this skill
-	*** \param instigator A pointer to the instigator of this skill
-	*** \note This version is only for BATTLE MODE.
+	/** \brief Calls the script function which performs the item's use for battle mode
+	*** \param target A pointer to the target of the item
+	*** \param instigator A pointer to the instigator that is using the item
 	**/
-	void Use(hoa_battle::private_battle::BattleActor* target, hoa_battle::private_battle::BattleActor* instigator);
+	void BattleUse(hoa_battle::private_battle::BattleActor* target, hoa_battle::private_battle::BattleActor* instigator);
 
-	/** \brief Calls the script function which performs the item's use
-	*** \param target A pointer to the target of this skill
-	*** \param instigator A pointer to the instigator of this skill
-	*** \note This version is only for MENU MODE.
+	/** \brief Calls the script function which performs the item's use for menu mode
+	*** \param target A pointer to the target of the item
 	**/
-	void Use(GlobalCharacter* target, GlobalCharacter* instigator = NULL);
+	void MenuUse(GlobalCharacter* target);
 
 	//! \name Class Member Access Functions
 	//@{
@@ -217,8 +214,11 @@ private:
 	**/
 	GLOBAL_ALIGNMENT _target_alignment;
 
-	//! \brief A reference to the script function that performs the items action.
-	ScriptObject _use_function;
+	//! \brief A reference to the script function that performs the item's effect while in battle.
+	ScriptObject _battle_use_function;
+
+	//! \brief A reference to the script function that performs the item's effect while in a menu
+	ScriptObject _menu_use_function;
 
 	GlobalItem(const GlobalItem&);
 	GlobalItem& operator=(const GlobalItem&);

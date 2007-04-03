@@ -59,6 +59,7 @@ void BindEngineToLua() {
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_audio")
 	[
 		class_<GameAudio>("GameAudio")
+			.def("PlaySound", &GameAudio::PlaySound)
 	];
 
 	} // End using audio namespaces

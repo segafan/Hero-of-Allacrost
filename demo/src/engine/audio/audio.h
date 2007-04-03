@@ -135,6 +135,12 @@ public:
 	uint32 CheckErrors()
 		{ uint32 return_code; return_code = _audio_errors; _audio_errors = AUDIO_ERROR_NONE; return return_code; }
 
+	/*! \brief Periodically removes any temporarily loaded sounds that have finished playing
+	 *
+	 *  This method is called once every frame, but it only actually checks for finished sounds once every 5 seconds.
+	 */
+	void Update();
+
 	/*! \name Volume Member Access Functions
 	 *  \brief Used for reading and modifying the volume of music/sound in the game.
 	 *
@@ -156,6 +162,14 @@ public:
 	void SetMusicVolume(float vol);
 	void SetSoundVolume(float vol);
 	//@}
+
+	/*! \brief Plays a sound once
+	 *  \param filename The name of the sound file to play
+	 *  
+	 *  This method of playback is useful because it doesn't require any SoundDescriptor objects to be managed by the user.
+	 *  This is ideal for the case of scripts which wish to play a sound only once.
+	 */
+	void PlaySound(std::string filename);
 
 	/*! \name Global Audio Manipulation Functions
 	 *  \brief Performs specified operation on all active sounds and music.
@@ -238,6 +252,12 @@ private:
 	private_audio::SoundData* _AcquireSoundData(std::string filename);
 	private_audio::MusicData* _AcquireMusicData(std::string filename);
 	//@}
+
+	/** \brief Holds sounds which are temporarily loaded and played
+	*** This vector holds any sounds loaded via a call to AudioManager#PlaySound. It will play the sound once to completion.
+	*** The AudioManager#Update call periodically reviews this list and removes any sounds which have finished playing.
+	**/
+	std::list<SoundDescriptor*> _temp_sounds;
 
 }; // class GameAudio
 
