@@ -162,29 +162,23 @@ void Grid::LoadMap()
 	if (!read_data.OpenFile(_file_name.toStdString(), SCRIPT_READ))
 		QMessageBox::warning(this, "Loading File...", QString("ERROR: could not open %1 for reading!").arg(_file_name));
 
-	file_name_list.clear();
+	tileset_names.clear();
+	tileset_tiles.clear();
 	_lower_layer.clear();
 	_middle_layer.clear();
 	_upper_layer.clear();
-
-	_random_encounters=read_data.ReadBool("random_encounters");
-	_encounter_rate=read_data.ReadInt("encounter_rate");
 	
-	_height = read_data.ReadInt("row_count");
-	_width  = read_data.ReadInt("col_count");
+	_height = read_data.ReadInt("num_tile_rows");
+	_width  = read_data.ReadInt("num_tile_cols");
 	resize(_width * TILE_WIDTH, _height * TILE_HEIGHT);
 
-	read_data.ReadOpenTable("tileset_names");
+	read_data.ReadOpenTable("tileset_filenames");
 	uint32 table_size = read_data.ReadGetTableSize();
 	for (uint32 i = 1; i <= table_size; i++)
-		tileset_list.append(QString::fromStdString(read_data.ReadString(i)));
+		tileset_names.append(QString::fromStdString(read_data.ReadString(i)));
 	read_data.ReadCloseTable();
 
-	read_data.ReadOpenTable("tile_filenames");
-	table_size = read_data.ReadGetTableSize();
-	for (uint32 i = 1; i <= table_size; i++)
-		file_name_list.append(QString::fromStdString(read_data.ReadString(i)).prepend("img/tiles/").append(".png"));
-	read_data.ReadCloseTable();
+// FIXME: need to load the tileset images using LoadMultiImages
 
 	read_data.ReadOpenTable("lower_layer");
 	for (int32 i = 0; i < _height; i++)
@@ -216,7 +210,7 @@ void Grid::LoadMap()
 	} // iterate through the rows of the lower layer
 	read_data.ReadCloseTable();
 	
-	read_data.ReadOpenTable("tile_walkable");
+	read_data.ReadOpenTable("map_grid");
 	uint32 walk_west;
 	vector<uint32> walk_temp;
 	vector<uint32>::iterator wit;
@@ -282,60 +276,27 @@ void Grid::SaveMap()
 		write_data.WriteComment(_file_name);
 		write_data.WriteInsertNewLine();
 
-		write_data.WriteComment("Whether or not we have random encounters, and if so the rate of encounter");
-		write_data.WriteBool("random_encounters", _random_encounters);
-		write_data.WriteInt("encounter_rate", _encounter_rate);
+		write_data.WriteComment("The number of rows and columns of tiles that compose the map");
+		write_data.WriteInt("num_tile_cols", _width);
+		write_data.WriteInt("num_tile_rows", _height);
 		write_data.WriteInsertNewLine();
-
+	
 		write_data.WriteComment("The music files used as background music on this map.");
 		write_data.WriteBeginTable("music_filenames");
-		if(_music_file!="None")
+		if(_music_file != "None")
 			write_data.WriteString(1,_music_file);
 		write_data.WriteEndTable();
 		write_data.WriteInsertNewLine();
 
-		write_data.WriteComment("The number of rows and columns of tiles that compose the map");
-		write_data.WriteInt("row_count", _height);
-		write_data.WriteInt("col_count", _width);
-		write_data.WriteInsertNewLine();
-
 		write_data.WriteComment("The names of the tilesets used, with the path and file extension omitted (note that the indeces begin with 1, not 0)");
-		write_data.WriteBeginTable("tileset_names");
+		write_data.WriteBeginTable("tileset_filenames");
 		i = 0;
-		for (QStringList::Iterator qit = tileset_list.begin();
-		     qit != tileset_list.end(); ++qit)
+		for (QStringList::Iterator qit = tileset_names.begin();
+		     qit != tileset_names.end(); ++qit)
 		{
 			i++;
 			write_data.WriteString(i, (*qit).ascii());
 		} // iterate through tileset_list writing each element
-		write_data.WriteEndTable();
-		write_data.WriteInsertNewLine();
-
-		write_data.WriteComment("The names of the tile image files used, with the path and file extension omitted (note that the indeces begin with 1, not 0)");
-		write_data.WriteBeginTable("tile_filenames");
-		i = 0;
-		for (QStringList::Iterator qit = file_name_list.begin();
-		     qit != file_name_list.end(); ++qit)
-		{
-			i++;
-			QString temp = *qit;
-			temp.remove(".png").remove("img/tiles/");
-			write_data.WriteString(i, temp.ascii());
-		} // iterate through file_name_list writing each element
-		write_data.WriteEndTable();
-		write_data.WriteInsertNewLine();
-
-		// FIXME: hard-coded for now
-		write_data.WriteComment("This structure forms still or animate tile images. In this case, all of our tiles are stills, but note that each element must still be a table.");
-		write_data.WriteBeginTable("tile_mappings");
-		vector<int32> vect_single;
-		for (j = 0; j < i; j++)
-		{
-			vect_single.push_back(j);
-			sprintf(buffer, "%d", j);
-			write_data.WriteIntVector(buffer, vect_single);
-			vect_single.clear();
-		}
 		write_data.WriteEndTable();
 		write_data.WriteInsertNewLine();
 
@@ -393,17 +354,6 @@ void Grid::SaveMap()
 		// Create vector of 0s.
 		vector<int32> vect_0s(_width, 0);
 
-		// FIXME: hard-coded for now
-		write_data.WriteComment("Tile properties, not including walkability status. Valid range: [0-255]");
-		write_data.WriteBeginTable("tile_properties");
-		for (i = 0; i < _height; i++)
-		{
-			sprintf(buffer, "%d", i);
-			write_data.WriteIntVector(buffer, vect_0s);
-		}
-		write_data.WriteEndTable();
-		write_data.WriteInsertNewLine();
-
 		write_data.WriteComment("Walkability status of tiles for 32 contexts. Non-zero indicates walkable. Valid range: [0:2^32-1]");
 		write_data.WriteBeginTable("tile_walkable");
 		ScriptDescriptor read_data;
@@ -445,7 +395,7 @@ void Grid::SaveMap()
 					} // this tile is walkable
 					else
 					{
-						QString temp = file_name_list[_lower_layer[row / 2 * _width + col]];
+						QString temp;// = file_name_list[_lower_layer[row / 2 * _width + col]];
 						temp.remove(".png").remove("img/tiles/");
 						read_data.ReadOpenTable("tile_filenames");
 						uint32 table_size = read_data.ReadGetTableSize();
@@ -485,20 +435,6 @@ void Grid::SaveMap()
 		write_data.WriteEndTable();
 		write_data.WriteInsertNewLine();
 
-		// Create vector of -1s.
-		vector<int32> vect(_width, -1);
-
-		// FIXME: hard-coded for now
-		write_data.WriteComment("Events associated with each tile. -1 indicates no event.");
-		write_data.WriteBeginTable("tile_events");
-		for (i = 0; i < _height; i++)
-		{
-			sprintf(buffer, "%d", i);
-			write_data.WriteIntVector(buffer, vect);
-		}
-		write_data.WriteEndTable();
-
-		write_data.WriteInsertNewLine();
 		write_data.CloseFile();
 	
 		_changed = false;
@@ -520,14 +456,14 @@ void Grid::paintGL()
 {
 	int32 col;                       // tile array loop index
 	vector<int32>::iterator it;      // used to iterate through tile arrays
-	hoa_video::StillImage tile;      // tile to draw to screen
+	int tileset_index;               // index into the tileset_names vector
+	int tile_index;                  // ranges from 0-255
 
 	// Setup drawing parameters
 	VideoManager->SetCoordSys(0.0f, VideoManager->GetWidth() / TILE_WIDTH,
 		VideoManager->GetHeight() / TILE_HEIGHT, 0.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
 	VideoManager->Clear(Color::white);
-	tile.SetDimensions(1.0f, 1.0f);  // all tiles are same size (for now)
 
 	// Draw lower layer
 	if (_ll_on)
@@ -538,9 +474,25 @@ void Grid::paintGL()
 		{
 			if (*it != -1)
 			{
-				tile.SetFilename(file_name_list[*it].toStdString());
-				VideoManager->LoadImage(tile);
-				VideoManager->DrawImage(tile);
+				tileset_index = *it / 256;
+				if (tileset_index == 0)
+					tile_index = *it;
+				else  // Don't divide by 0
+					tile_index = *it / (tileset_index * 256);
+				/*qDebug(QString("*it=%1").arg(*it));
+				qDebug(QString("tileset_index=%1").arg(tileset_index));
+				qDebug(QString("tile_index=%1").arg(tile_index));
+				qDebug(QString("tileset_tiles[0].size() = %1").arg(tileset_tiles[0].size()));
+				StillImage tile;
+				tile.SetDimensions(1.0f, 1.0f);
+				tile.SetFilename("img/tiles/ll_water.png");
+	
+				if (!VideoManager->LoadImage(tile))
+					qDebug("Error loading the tile!");
+				qDebug(QString("Width = %1").arg(tileset_tiles[tileset_index][tile_index].GetWidth()));
+				qDebug(QString("Height = %1").arg(tile.GetHeight()));*/
+				if (!VideoManager->DrawImage(/*tile))*/tileset_tiles[tileset_index][tile_index]))
+					qDebug("Error drawing the tile!");
 			} // a tile exists to draw
 			col = ++col % _width;
 			if (col == 0)
@@ -559,9 +511,12 @@ void Grid::paintGL()
 		{
 			if (*it != -1)
 			{
-				tile.SetFilename(file_name_list[*it].toStdString());
-				VideoManager->LoadImage(tile);
-				VideoManager->DrawImage(tile);
+				tileset_index = *it / 256;
+				if (tileset_index == 0)
+					tile_index = *it;
+				else  // Don't divide by 0
+					tile_index = *it / (tileset_index * 256);
+				VideoManager->DrawImage(tileset_tiles[tileset_index][tile_index]);
 			} // a tile exists to draw
 			col = ++col % _width;
 			if (col == 0)
@@ -580,9 +535,12 @@ void Grid::paintGL()
 		{
 			if (*it != -1)
 			{
-				tile.SetFilename(file_name_list[*it].toStdString());
-				VideoManager->LoadImage(tile);
-				VideoManager->DrawImage(tile);
+				tileset_index = *it / 256;
+				if (tileset_index == 0)
+					tile_index = *it;
+				else  // Don't divide by 0
+					tile_index = *it / (tileset_index * 256);
+				VideoManager->DrawImage(tileset_tiles[tileset_index][tile_index]);
 			} // a tile exists to draw
 			col = ++col % _width;
 			if (col == 0)

@@ -48,6 +48,10 @@ class TilesetTable : public Q3Table
 		TilesetTable(QWidget* parent, const QString& name);    // constructor
 		~TilesetTable();                                       // destructor
 
+		//! The name of the tileset this table is representing.
+		QString tileset_name;
+		//! Contains the StillImage tiles of the tileset, used in grid.cpp
+		std::vector<hoa_video::StillImage> tiles;
 		// TODO: implement some sort of dynamic table resizing on window resize
 }; // class Tileset
 

@@ -45,22 +45,6 @@
 		4999AC510AF407BE004DD3A3 /* audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC1D0AF407BD004DD3A3 /* audio.cpp */; };
 		4999AC520AF407BE004DD3A3 /* audio_music.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC1E0AF407BD004DD3A3 /* audio_music.cpp */; };
 		4999AC550AF407BE004DD3A3 /* audio_sound.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC210AF407BD004DD3A3 /* audio_sound.cpp */; };
-		4999AC560AF407BE004DD3A3 /* video.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC230AF407BD004DD3A3 /* video.cpp */; };
-		4999AC570AF407BE004DD3A3 /* fade.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC240AF407BD004DD3A3 /* fade.cpp */; };
-		4999AC5D0AF407BE004DD3A3 /* particle_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC2A0AF407BD004DD3A3 /* particle_system.cpp */; };
-		4999AC5F0AF407BE004DD3A3 /* option.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC2C0AF407BD004DD3A3 /* option.cpp */; };
-		4999AC610AF407BE004DD3A3 /* interpolator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC2E0AF407BD004DD3A3 /* interpolator.cpp */; };
-		4999AC620AF407BE004DD3A3 /* tex_mgmt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC2F0AF407BD004DD3A3 /* tex_mgmt.cpp */; };
-		4999AC640AF407BE004DD3A3 /* gui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC310AF407BD004DD3A3 /* gui.cpp */; };
-		4999AC670AF407BE004DD3A3 /* shake.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC340AF407BE004DD3A3 /* shake.cpp */; };
-		4999AC690AF407BE004DD3A3 /* menu_window.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC360AF407BE004DD3A3 /* menu_window.cpp */; };
-		4999AC6A0AF407BE004DD3A3 /* particle_manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC370AF407BE004DD3A3 /* particle_manager.cpp */; };
-		4999AC700AF407BE004DD3A3 /* particle_effect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC3D0AF407BE004DD3A3 /* particle_effect.cpp */; };
-		4999AC710AF407BE004DD3A3 /* effects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC3E0AF407BE004DD3A3 /* effects.cpp */; };
-		4999AC720AF407BE004DD3A3 /* image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC3F0AF407BE004DD3A3 /* image.cpp */; };
-		4999AC740AF407BE004DD3A3 /* text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC410AF407BE004DD3A3 /* text.cpp */; };
-		4999AC790AF407BE004DD3A3 /* draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC460AF407BE004DD3A3 /* draw.cpp */; };
-		4999AC7A0AF407BE004DD3A3 /* textbox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC470AF407BE004DD3A3 /* textbox.cpp */; };
 		4999AC7B0AF407BE004DD3A3 /* input.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC480AF407BE004DD3A3 /* input.cpp */; };
 		4999AC7C0AF407BE004DD3A3 /* script.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC490AF407BE004DD3A3 /* script.cpp */; };
 		4999AC7D0AF407BE004DD3A3 /* mode_manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC4A0AF407BE004DD3A3 /* mode_manager.cpp */; };
@@ -75,6 +59,36 @@
 		D407F7ED0BADECF300848C43 /* shop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D407F7E90BADECF300848C43 /* shop.cpp */; };
 		D407F7EF0BADECF300848C43 /* shop_windows.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D407F7EB0BADECF300848C43 /* shop_windows.cpp */; };
 		D4D02B720B0656E500772C78 /* SDLMain.m in Sources */ = {isa = PBXBuildFile; fileRef = 4941A7630AC1DCA500D65B8E /* SDLMain.m */; };
+		D4D1664D0BC0D91400190FC0 /* draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166280BC0D91300190FC0 /* draw.cpp */; };
+		D4D1664E0BC0D91400190FC0 /* effects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166290BC0D91300190FC0 /* effects.cpp */; };
+		D4D1664F0BC0D91400190FC0 /* fade.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1662A0BC0D91300190FC0 /* fade.cpp */; };
+		D4D166510BC0D91400190FC0 /* gui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1662C0BC0D91300190FC0 /* gui.cpp */; };
+		D4D166530BC0D91400190FC0 /* image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1662E0BC0D91300190FC0 /* image.cpp */; };
+		D4D166550BC0D91400190FC0 /* interpolator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166300BC0D91300190FC0 /* interpolator.cpp */; };
+		D4D166570BC0D91400190FC0 /* menu_window.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166320BC0D91300190FC0 /* menu_window.cpp */; };
+		D4D166590BC0D91400190FC0 /* option.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166340BC0D91300190FC0 /* option.cpp */; };
+		D4D1665C0BC0D91400190FC0 /* particle_effect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166370BC0D91300190FC0 /* particle_effect.cpp */; };
+		D4D166600BC0D91400190FC0 /* particle_manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1663B0BC0D91300190FC0 /* particle_manager.cpp */; };
+		D4D166620BC0D91400190FC0 /* particle_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1663D0BC0D91300190FC0 /* particle_system.cpp */; };
+		D4D166650BC0D91400190FC0 /* shake.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166400BC0D91300190FC0 /* shake.cpp */; };
+		D4D166690BC0D91400190FC0 /* text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166440BC0D91400190FC0 /* text.cpp */; };
+		D4D1666B0BC0D91400190FC0 /* textbox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166460BC0D91400190FC0 /* textbox.cpp */; };
+		D4D1666D0BC0D91400190FC0 /* video.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166480BC0D91400190FC0 /* video.cpp */; };
+		D4D166720BC0D91400190FC0 /* draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166280BC0D91300190FC0 /* draw.cpp */; };
+		D4D166730BC0D91400190FC0 /* effects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166290BC0D91300190FC0 /* effects.cpp */; };
+		D4D166740BC0D91400190FC0 /* fade.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1662A0BC0D91300190FC0 /* fade.cpp */; };
+		D4D166760BC0D91400190FC0 /* gui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1662C0BC0D91300190FC0 /* gui.cpp */; };
+		D4D166780BC0D91400190FC0 /* image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1662E0BC0D91300190FC0 /* image.cpp */; };
+		D4D1667A0BC0D91400190FC0 /* interpolator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166300BC0D91300190FC0 /* interpolator.cpp */; };
+		D4D1667C0BC0D91400190FC0 /* menu_window.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166320BC0D91300190FC0 /* menu_window.cpp */; };
+		D4D1667E0BC0D91400190FC0 /* option.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166340BC0D91300190FC0 /* option.cpp */; };
+		D4D166810BC0D91400190FC0 /* particle_effect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166370BC0D91300190FC0 /* particle_effect.cpp */; };
+		D4D166850BC0D91400190FC0 /* particle_manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1663B0BC0D91300190FC0 /* particle_manager.cpp */; };
+		D4D166870BC0D91400190FC0 /* particle_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1663D0BC0D91300190FC0 /* particle_system.cpp */; };
+		D4D1668A0BC0D91400190FC0 /* shake.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166400BC0D91300190FC0 /* shake.cpp */; };
+		D4D1668E0BC0D91400190FC0 /* text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166440BC0D91400190FC0 /* text.cpp */; };
+		D4D166900BC0D91400190FC0 /* textbox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166460BC0D91400190FC0 /* textbox.cpp */; };
+		D4D166920BC0D91400190FC0 /* video.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166480BC0D91400190FC0 /* video.cpp */; };
 		D4D1BA6E0B02B27F0052BF1E /* editor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1BA650B02B27F0052BF1E /* editor.cpp */; };
 		D4D1BA6F0B02B27F0052BF1E /* editor_main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1BA670B02B27F0052BF1E /* editor_main.cpp */; };
 		D4D1BA700B02B27F0052BF1E /* grid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1BA680B02B27F0052BF1E /* grid.cpp */; };
@@ -83,22 +97,6 @@
 		D4D1BA730B02B3240052BF1E /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6AF0AC1D86400D65B8E /* utils.cpp */; };
 		D4D1BA740B02B3560052BF1E /* socket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49BDC4510AF5412600940A6C /* socket.cpp */; };
 		D4D1BA750B02B3610052BF1E /* script.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC490AF407BE004DD3A3 /* script.cpp */; };
-		D4D1BA7B0B02B3AF0052BF1E /* video.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC230AF407BD004DD3A3 /* video.cpp */; };
-		D4D1BA7C0B02B3BA0052BF1E /* textbox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC470AF407BE004DD3A3 /* textbox.cpp */; };
-		D4D1BA7D0B02B3C20052BF1E /* text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC410AF407BE004DD3A3 /* text.cpp */; };
-		D4D1BA7E0B02B3C90052BF1E /* tex_mgmt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC2F0AF407BD004DD3A3 /* tex_mgmt.cpp */; };
-		D4D1BA7F0B02B3D20052BF1E /* shake.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC340AF407BE004DD3A3 /* shake.cpp */; };
-		D4D1BA800B02B3DE0052BF1E /* particle_system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC2A0AF407BD004DD3A3 /* particle_system.cpp */; };
-		D4D1BA810B02B3E70052BF1E /* particle_manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC370AF407BE004DD3A3 /* particle_manager.cpp */; };
-		D4D1BA820B02B3EF0052BF1E /* particle_effect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC3D0AF407BE004DD3A3 /* particle_effect.cpp */; };
-		D4D1BA830B02B3FA0052BF1E /* option.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC2C0AF407BD004DD3A3 /* option.cpp */; };
-		D4D1BA840B02B4000052BF1E /* menu_window.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC360AF407BE004DD3A3 /* menu_window.cpp */; };
-		D4D1BA850B02B4040052BF1E /* interpolator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC2E0AF407BD004DD3A3 /* interpolator.cpp */; };
-		D4D1BA860B02B4070052BF1E /* image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC3F0AF407BE004DD3A3 /* image.cpp */; };
-		D4D1BA870B02B40A0052BF1E /* gui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC310AF407BD004DD3A3 /* gui.cpp */; };
-		D4D1BA880B02B40D0052BF1E /* fade.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC240AF407BD004DD3A3 /* fade.cpp */; };
-		D4D1BA890B02B4110052BF1E /* effects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC3E0AF407BE004DD3A3 /* effects.cpp */; };
-		D4D1BA8A0B02B4140052BF1E /* draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC460AF407BE004DD3A3 /* draw.cpp */; };
 		D4D1BA8B0B02B4400052BF1E /* Editor-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D4D1BA4B0B02B1DB0052BF1E /* Editor-Info.plist */; };
 		D4D1BF180B02B5F30052BF1E /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4941A7670AC1DCDF00D65B8E /* Cocoa.framework */; };
 		D4D1BF450B02B6510052BF1E /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4941A7130AC1D89300D65B8E /* OpenGL.framework */; };
@@ -106,6 +104,8 @@
 		D4D1BF6B0B02BC010052BF1E /* SDL_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4941A7180AC1D8B300D65B8E /* SDL_ttf.framework */; };
 		D4D6DB2E0B127DD3002F33F2 /* mac_logo.icns in Resources */ = {isa = PBXBuildFile; fileRef = 4941A7510AC1D9A200D65B8E /* mac_logo.icns */; };
 		D4DAC8A90BA13F55009FA7BE /* map_zones.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4DAC8A80BA13F55009FA7BE /* map_zones.cpp */; };
+		D4DBE6D90BC1E91A00E85DCB /* tex_mgmt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4DBE6D80BC1E91A00E85DCB /* tex_mgmt.cpp */; };
+		D4DBE6DA0BC1E91A00E85DCB /* tex_mgmt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4DBE6D80BC1E91A00E85DCB /* tex_mgmt.cpp */; };
 		D4E561270BB71B53002FB758 /* defs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4E561260BB71B53002FB758 /* defs.cpp */; };
 		D4F71AF60B06BAE900361DA9 /* Qt3Support.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4F71AF50B06BAE900361DA9 /* Qt3Support.framework */; };
 		D4F71C210B06BAFB00361DA9 /* QtCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4F71C200B06BAFB00361DA9 /* QtCore.framework */; };
@@ -218,43 +218,6 @@
 		4999AC1F0AF407BD004DD3A3 /* audio.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = audio.h; sourceTree = "<group>"; };
 		4999AC200AF407BD004DD3A3 /* audio_music.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = audio_music.h; sourceTree = "<group>"; };
 		4999AC210AF407BD004DD3A3 /* audio_sound.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = audio_sound.cpp; sourceTree = "<group>"; };
-		4999AC230AF407BD004DD3A3 /* video.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = video.cpp; sourceTree = "<group>"; };
-		4999AC240AF407BD004DD3A3 /* fade.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = fade.cpp; sourceTree = "<group>"; };
-		4999AC250AF407BD004DD3A3 /* shake.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = shake.h; sourceTree = "<group>"; };
-		4999AC260AF407BD004DD3A3 /* particle_emitter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = particle_emitter.h; sourceTree = "<group>"; };
-		4999AC270AF407BD004DD3A3 /* menu_window.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = menu_window.h; sourceTree = "<group>"; };
-		4999AC280AF407BD004DD3A3 /* screen_rect.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = screen_rect.h; sourceTree = "<group>"; };
-		4999AC290AF407BD004DD3A3 /* particle_manager.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = particle_manager.h; sourceTree = "<group>"; };
-		4999AC2A0AF407BD004DD3A3 /* particle_system.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = particle_system.cpp; sourceTree = "<group>"; };
-		4999AC2B0AF407BD004DD3A3 /* particle.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = particle.h; sourceTree = "<group>"; };
-		4999AC2C0AF407BD004DD3A3 /* option.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = option.cpp; sourceTree = "<group>"; };
-		4999AC2D0AF407BD004DD3A3 /* coord_sys.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = coord_sys.h; sourceTree = "<group>"; };
-		4999AC2E0AF407BD004DD3A3 /* interpolator.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = interpolator.cpp; sourceTree = "<group>"; };
-		4999AC2F0AF407BD004DD3A3 /* tex_mgmt.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = tex_mgmt.cpp; sourceTree = "<group>"; };
-		4999AC300AF407BD004DD3A3 /* particle_effect.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = particle_effect.h; sourceTree = "<group>"; };
-		4999AC310AF407BD004DD3A3 /* gui.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = gui.cpp; sourceTree = "<group>"; };
-		4999AC320AF407BD004DD3A3 /* image.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = image.h; sourceTree = "<group>"; };
-		4999AC330AF407BD004DD3A3 /* text.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = text.h; sourceTree = "<group>"; };
-		4999AC340AF407BE004DD3A3 /* shake.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = shake.cpp; sourceTree = "<group>"; };
-		4999AC350AF407BE004DD3A3 /* particle_keyframe.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = particle_keyframe.h; sourceTree = "<group>"; };
-		4999AC360AF407BE004DD3A3 /* menu_window.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = menu_window.cpp; sourceTree = "<group>"; };
-		4999AC370AF407BE004DD3A3 /* particle_manager.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = particle_manager.cpp; sourceTree = "<group>"; };
-		4999AC380AF407BE004DD3A3 /* textbox.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = textbox.h; sourceTree = "<group>"; };
-		4999AC390AF407BE004DD3A3 /* fade.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = fade.h; sourceTree = "<group>"; };
-		4999AC3A0AF407BE004DD3A3 /* video.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = video.h; sourceTree = "<group>"; };
-		4999AC3B0AF407BE004DD3A3 /* particle_system.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = particle_system.h; sourceTree = "<group>"; };
-		4999AC3C0AF407BE004DD3A3 /* option.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = option.h; sourceTree = "<group>"; };
-		4999AC3D0AF407BE004DD3A3 /* particle_effect.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = particle_effect.cpp; sourceTree = "<group>"; };
-		4999AC3E0AF407BE004DD3A3 /* effects.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = effects.cpp; sourceTree = "<group>"; };
-		4999AC3F0AF407BE004DD3A3 /* image.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = image.cpp; sourceTree = "<group>"; };
-		4999AC400AF407BE004DD3A3 /* color.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = color.h; sourceTree = "<group>"; };
-		4999AC410AF407BE004DD3A3 /* text.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = text.cpp; sourceTree = "<group>"; };
-		4999AC420AF407BE004DD3A3 /* interpolator.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = interpolator.h; sourceTree = "<group>"; };
-		4999AC430AF407BE004DD3A3 /* tex_mgmt.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = tex_mgmt.h; sourceTree = "<group>"; };
-		4999AC440AF407BE004DD3A3 /* context.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = context.h; sourceTree = "<group>"; };
-		4999AC450AF407BE004DD3A3 /* gui.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = gui.h; sourceTree = "<group>"; };
-		4999AC460AF407BE004DD3A3 /* draw.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = draw.cpp; sourceTree = "<group>"; };
-		4999AC470AF407BE004DD3A3 /* textbox.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = textbox.cpp; sourceTree = "<group>"; };
 		4999AC480AF407BE004DD3A3 /* input.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = input.cpp; sourceTree = "<group>"; };
 		4999AC490AF407BE004DD3A3 /* script.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = script.cpp; sourceTree = "<group>"; };
 		4999AC4A0AF407BE004DD3A3 /* mode_manager.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = mode_manager.cpp; sourceTree = "<group>"; };
@@ -273,8 +236,42 @@
 		D407F7EA0BADECF300848C43 /* shop.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = shop.h; sourceTree = "<group>"; };
 		D407F7EB0BADECF300848C43 /* shop_windows.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = shop_windows.cpp; sourceTree = "<group>"; };
 		D407F7EC0BADECF300848C43 /* shop_windows.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = shop_windows.h; sourceTree = "<group>"; };
-		D4C6A2B50BAE645400B86F6B /* .desert_cave.lua.swp */ = {isa = PBXFileReference; lastKnownFileType = file; path = .desert_cave.lua.swp; sourceTree = "<group>"; };
-		D4C6A2B60BAE645400B86F6B /* desert_cave.lua */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = desert_cave.lua; sourceTree = "<group>"; };
+		D4D166250BC0D91300190FC0 /* color.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = color.h; sourceTree = "<group>"; };
+		D4D166260BC0D91300190FC0 /* context.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = context.h; sourceTree = "<group>"; };
+		D4D166270BC0D91300190FC0 /* coord_sys.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = coord_sys.h; sourceTree = "<group>"; };
+		D4D166280BC0D91300190FC0 /* draw.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = draw.cpp; sourceTree = "<group>"; };
+		D4D166290BC0D91300190FC0 /* effects.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = effects.cpp; sourceTree = "<group>"; };
+		D4D1662A0BC0D91300190FC0 /* fade.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = fade.cpp; sourceTree = "<group>"; };
+		D4D1662B0BC0D91300190FC0 /* fade.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = fade.h; sourceTree = "<group>"; };
+		D4D1662C0BC0D91300190FC0 /* gui.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = gui.cpp; sourceTree = "<group>"; };
+		D4D1662D0BC0D91300190FC0 /* gui.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = gui.h; sourceTree = "<group>"; };
+		D4D1662E0BC0D91300190FC0 /* image.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = image.cpp; sourceTree = "<group>"; };
+		D4D1662F0BC0D91300190FC0 /* image.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = image.h; sourceTree = "<group>"; };
+		D4D166300BC0D91300190FC0 /* interpolator.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = interpolator.cpp; sourceTree = "<group>"; };
+		D4D166310BC0D91300190FC0 /* interpolator.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = interpolator.h; sourceTree = "<group>"; };
+		D4D166320BC0D91300190FC0 /* menu_window.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = menu_window.cpp; sourceTree = "<group>"; };
+		D4D166330BC0D91300190FC0 /* menu_window.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = menu_window.h; sourceTree = "<group>"; };
+		D4D166340BC0D91300190FC0 /* option.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = option.cpp; sourceTree = "<group>"; };
+		D4D166350BC0D91300190FC0 /* option.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = option.h; sourceTree = "<group>"; };
+		D4D166360BC0D91300190FC0 /* particle.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = particle.h; sourceTree = "<group>"; };
+		D4D166370BC0D91300190FC0 /* particle_effect.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = particle_effect.cpp; sourceTree = "<group>"; };
+		D4D166380BC0D91300190FC0 /* particle_effect.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = particle_effect.h; sourceTree = "<group>"; };
+		D4D166390BC0D91300190FC0 /* particle_emitter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = particle_emitter.h; sourceTree = "<group>"; };
+		D4D1663A0BC0D91300190FC0 /* particle_keyframe.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = particle_keyframe.h; sourceTree = "<group>"; };
+		D4D1663B0BC0D91300190FC0 /* particle_manager.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = particle_manager.cpp; sourceTree = "<group>"; };
+		D4D1663C0BC0D91300190FC0 /* particle_manager.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = particle_manager.h; sourceTree = "<group>"; };
+		D4D1663D0BC0D91300190FC0 /* particle_system.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = particle_system.cpp; sourceTree = "<group>"; };
+		D4D1663E0BC0D91300190FC0 /* particle_system.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = particle_system.h; sourceTree = "<group>"; };
+		D4D1663F0BC0D91300190FC0 /* screen_rect.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = screen_rect.h; sourceTree = "<group>"; };
+		D4D166400BC0D91300190FC0 /* shake.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = shake.cpp; sourceTree = "<group>"; };
+		D4D166410BC0D91300190FC0 /* shake.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = shake.h; sourceTree = "<group>"; };
+		D4D166430BC0D91400190FC0 /* tex_mgmt.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = tex_mgmt.h; sourceTree = "<group>"; };
+		D4D166440BC0D91400190FC0 /* text.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = text.cpp; sourceTree = "<group>"; };
+		D4D166450BC0D91400190FC0 /* text.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = text.h; sourceTree = "<group>"; };
+		D4D166460BC0D91400190FC0 /* textbox.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = textbox.cpp; sourceTree = "<group>"; };
+		D4D166470BC0D91400190FC0 /* textbox.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = textbox.h; sourceTree = "<group>"; };
+		D4D166480BC0D91400190FC0 /* video.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = video.cpp; sourceTree = "<group>"; };
+		D4D166490BC0D91400190FC0 /* video.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = video.h; sourceTree = "<group>"; };
 		D4D1BA490B02B1DB0052BF1E /* Editor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Editor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4D1BA4B0B02B1DB0052BF1E /* Editor-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Editor-Info.plist"; sourceTree = "<group>"; };
 		D4D1BA650B02B27F0052BF1E /* editor.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = editor.cpp; sourceTree = "<group>"; };
@@ -287,6 +284,7 @@
 		D4D1BA6C0B02B27F0052BF1E /* tileset.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = tileset.cpp; sourceTree = "<group>"; };
 		D4D1BA6D0B02B27F0052BF1E /* tileset.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = tileset.h; sourceTree = "<group>"; };
 		D4DAC8A80BA13F55009FA7BE /* map_zones.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = map_zones.cpp; sourceTree = "<group>"; };
+		D4DBE6D80BC1E91A00E85DCB /* tex_mgmt.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = tex_mgmt.cpp; sourceTree = "<group>"; };
 		D4E561260BB71B53002FB758 /* defs.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = defs.cpp; sourceTree = "<group>"; };
 		D4F71AF50B06BAE900361DA9 /* Qt3Support.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Qt3Support.framework; path = "/usr/local/Trolltech/Qt-4.2.0/lib/Qt3Support.framework"; sourceTree = "<absolute>"; };
 		D4F71C200B06BAFB00361DA9 /* QtCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QtCore.framework; path = "/usr/local/Trolltech/Qt-4.2.0/lib/QtCore.framework"; sourceTree = "<absolute>"; };
@@ -329,7 +327,6 @@
 		4941A49F0AC1D76400D65B8E = {
 			isa = PBXGroup;
 			children = (
-				D4C6A2B40BAE645400B86F6B /* tilesets */,
 				D404C6E80B02FCEC00827A19 /* Temporary Source Files */,
 				4941A4BC0AC1D7B300D65B8E /* Source Files */,
 				4941A4BD0AC1D7BA00D65B8E /* Resources */,
@@ -502,8 +499,8 @@
 		4999AC1A0AF407BD004DD3A3 /* engine */ = {
 			isa = PBXGroup;
 			children = (
+				D4D166240BC0D91300190FC0 /* video */,
 				4999AC1B0AF407BD004DD3A3 /* audio */,
-				4999AC220AF407BD004DD3A3 /* video */,
 				4999AC480AF407BE004DD3A3 /* input.cpp */,
 				4999AC490AF407BE004DD3A3 /* script.cpp */,
 				4999AC4A0AF407BE004DD3A3 /* mode_manager.cpp */,
@@ -531,50 +528,6 @@
 			path = audio;
 			sourceTree = "<group>";
 		};
-		4999AC220AF407BD004DD3A3 /* video */ = {
-			isa = PBXGroup;
-			children = (
-				4999AC230AF407BD004DD3A3 /* video.cpp */,
-				4999AC240AF407BD004DD3A3 /* fade.cpp */,
-				4999AC250AF407BD004DD3A3 /* shake.h */,
-				4999AC260AF407BD004DD3A3 /* particle_emitter.h */,
-				4999AC270AF407BD004DD3A3 /* menu_window.h */,
-				4999AC280AF407BD004DD3A3 /* screen_rect.h */,
-				4999AC290AF407BD004DD3A3 /* particle_manager.h */,
-				4999AC2A0AF407BD004DD3A3 /* particle_system.cpp */,
-				4999AC2B0AF407BD004DD3A3 /* particle.h */,
-				4999AC2C0AF407BD004DD3A3 /* option.cpp */,
-				4999AC2D0AF407BD004DD3A3 /* coord_sys.h */,
-				4999AC2E0AF407BD004DD3A3 /* interpolator.cpp */,
-				4999AC2F0AF407BD004DD3A3 /* tex_mgmt.cpp */,
-				4999AC300AF407BD004DD3A3 /* particle_effect.h */,
-				4999AC310AF407BD004DD3A3 /* gui.cpp */,
-				4999AC320AF407BD004DD3A3 /* image.h */,
-				4999AC330AF407BD004DD3A3 /* text.h */,
-				4999AC340AF407BE004DD3A3 /* shake.cpp */,
-				4999AC350AF407BE004DD3A3 /* particle_keyframe.h */,
-				4999AC360AF407BE004DD3A3 /* menu_window.cpp */,
-				4999AC370AF407BE004DD3A3 /* particle_manager.cpp */,
-				4999AC380AF407BE004DD3A3 /* textbox.h */,
-				4999AC390AF407BE004DD3A3 /* fade.h */,
-				4999AC3A0AF407BE004DD3A3 /* video.h */,
-				4999AC3B0AF407BE004DD3A3 /* particle_system.h */,
-				4999AC3C0AF407BE004DD3A3 /* option.h */,
-				4999AC3D0AF407BE004DD3A3 /* particle_effect.cpp */,
-				4999AC3E0AF407BE004DD3A3 /* effects.cpp */,
-				4999AC3F0AF407BE004DD3A3 /* image.cpp */,
-				4999AC400AF407BE004DD3A3 /* color.h */,
-				4999AC410AF407BE004DD3A3 /* text.cpp */,
-				4999AC420AF407BE004DD3A3 /* interpolator.h */,
-				4999AC430AF407BE004DD3A3 /* tex_mgmt.h */,
-				4999AC440AF407BE004DD3A3 /* context.h */,
-				4999AC450AF407BE004DD3A3 /* gui.h */,
-				4999AC460AF407BE004DD3A3 /* draw.cpp */,
-				4999AC470AF407BE004DD3A3 /* textbox.cpp */,
-			);
-			path = video;
-			sourceTree = "<group>";
-		};
 		D404C6E80B02FCEC00827A19 /* Temporary Source Files */ = {
 			isa = PBXGroup;
 			children = (
@@ -595,14 +548,48 @@
 			path = shop;
 			sourceTree = "<group>";
 		};
-		D4C6A2B40BAE645400B86F6B /* tilesets */ = {
+		D4D166240BC0D91300190FC0 /* video */ = {
 			isa = PBXGroup;
 			children = (
-				D4C6A2B50BAE645400B86F6B /* .desert_cave.lua.swp */,
-				D4C6A2B60BAE645400B86F6B /* desert_cave.lua */,
+				D4DBE6D80BC1E91A00E85DCB /* tex_mgmt.cpp */,
+				D4D166250BC0D91300190FC0 /* color.h */,
+				D4D166260BC0D91300190FC0 /* context.h */,
+				D4D166270BC0D91300190FC0 /* coord_sys.h */,
+				D4D166280BC0D91300190FC0 /* draw.cpp */,
+				D4D166290BC0D91300190FC0 /* effects.cpp */,
+				D4D1662A0BC0D91300190FC0 /* fade.cpp */,
+				D4D1662B0BC0D91300190FC0 /* fade.h */,
+				D4D1662C0BC0D91300190FC0 /* gui.cpp */,
+				D4D1662D0BC0D91300190FC0 /* gui.h */,
+				D4D1662E0BC0D91300190FC0 /* image.cpp */,
+				D4D1662F0BC0D91300190FC0 /* image.h */,
+				D4D166300BC0D91300190FC0 /* interpolator.cpp */,
+				D4D166310BC0D91300190FC0 /* interpolator.h */,
+				D4D166320BC0D91300190FC0 /* menu_window.cpp */,
+				D4D166330BC0D91300190FC0 /* menu_window.h */,
+				D4D166340BC0D91300190FC0 /* option.cpp */,
+				D4D166350BC0D91300190FC0 /* option.h */,
+				D4D166360BC0D91300190FC0 /* particle.h */,
+				D4D166370BC0D91300190FC0 /* particle_effect.cpp */,
+				D4D166380BC0D91300190FC0 /* particle_effect.h */,
+				D4D166390BC0D91300190FC0 /* particle_emitter.h */,
+				D4D1663A0BC0D91300190FC0 /* particle_keyframe.h */,
+				D4D1663B0BC0D91300190FC0 /* particle_manager.cpp */,
+				D4D1663C0BC0D91300190FC0 /* particle_manager.h */,
+				D4D1663D0BC0D91300190FC0 /* particle_system.cpp */,
+				D4D1663E0BC0D91300190FC0 /* particle_system.h */,
+				D4D1663F0BC0D91300190FC0 /* screen_rect.h */,
+				D4D166400BC0D91300190FC0 /* shake.cpp */,
+				D4D166410BC0D91300190FC0 /* shake.h */,
+				D4D166430BC0D91400190FC0 /* tex_mgmt.h */,
+				D4D166440BC0D91400190FC0 /* text.cpp */,
+				D4D166450BC0D91400190FC0 /* text.h */,
+				D4D166460BC0D91400190FC0 /* textbox.cpp */,
+				D4D166470BC0D91400190FC0 /* textbox.h */,
+				D4D166480BC0D91400190FC0 /* video.cpp */,
+				D4D166490BC0D91400190FC0 /* video.h */,
 			);
-			name = tilesets;
-			path = dat/tilesets;
+			path = video;
 			sourceTree = "<group>";
 		};
 		D4D1BA640B02B27F0052BF1E /* editor */ = {
@@ -747,22 +734,6 @@
 				4999AC510AF407BE004DD3A3 /* audio.cpp in Sources */,
 				4999AC520AF407BE004DD3A3 /* audio_music.cpp in Sources */,
 				4999AC550AF407BE004DD3A3 /* audio_sound.cpp in Sources */,
-				4999AC560AF407BE004DD3A3 /* video.cpp in Sources */,
-				4999AC570AF407BE004DD3A3 /* fade.cpp in Sources */,
-				4999AC5D0AF407BE004DD3A3 /* particle_system.cpp in Sources */,
-				4999AC5F0AF407BE004DD3A3 /* option.cpp in Sources */,
-				4999AC610AF407BE004DD3A3 /* interpolator.cpp in Sources */,
-				4999AC620AF407BE004DD3A3 /* tex_mgmt.cpp in Sources */,
-				4999AC640AF407BE004DD3A3 /* gui.cpp in Sources */,
-				4999AC670AF407BE004DD3A3 /* shake.cpp in Sources */,
-				4999AC690AF407BE004DD3A3 /* menu_window.cpp in Sources */,
-				4999AC6A0AF407BE004DD3A3 /* particle_manager.cpp in Sources */,
-				4999AC700AF407BE004DD3A3 /* particle_effect.cpp in Sources */,
-				4999AC710AF407BE004DD3A3 /* effects.cpp in Sources */,
-				4999AC720AF407BE004DD3A3 /* image.cpp in Sources */,
-				4999AC740AF407BE004DD3A3 /* text.cpp in Sources */,
-				4999AC790AF407BE004DD3A3 /* draw.cpp in Sources */,
-				4999AC7A0AF407BE004DD3A3 /* textbox.cpp in Sources */,
 				4999AC7B0AF407BE004DD3A3 /* input.cpp in Sources */,
 				4999AC7C0AF407BE004DD3A3 /* script.cpp in Sources */,
 				4999AC7D0AF407BE004DD3A3 /* mode_manager.cpp in Sources */,
@@ -776,6 +747,22 @@
 				D407F7ED0BADECF300848C43 /* shop.cpp in Sources */,
 				D407F7EF0BADECF300848C43 /* shop_windows.cpp in Sources */,
 				D4E561270BB71B53002FB758 /* defs.cpp in Sources */,
+				D4D1664D0BC0D91400190FC0 /* draw.cpp in Sources */,
+				D4D1664E0BC0D91400190FC0 /* effects.cpp in Sources */,
+				D4D1664F0BC0D91400190FC0 /* fade.cpp in Sources */,
+				D4D166510BC0D91400190FC0 /* gui.cpp in Sources */,
+				D4D166530BC0D91400190FC0 /* image.cpp in Sources */,
+				D4D166550BC0D91400190FC0 /* interpolator.cpp in Sources */,
+				D4D166570BC0D91400190FC0 /* menu_window.cpp in Sources */,
+				D4D166590BC0D91400190FC0 /* option.cpp in Sources */,
+				D4D1665C0BC0D91400190FC0 /* particle_effect.cpp in Sources */,
+				D4D166600BC0D91400190FC0 /* particle_manager.cpp in Sources */,
+				D4D166620BC0D91400190FC0 /* particle_system.cpp in Sources */,
+				D4D166650BC0D91400190FC0 /* shake.cpp in Sources */,
+				D4D166690BC0D91400190FC0 /* text.cpp in Sources */,
+				D4D1666B0BC0D91400190FC0 /* textbox.cpp in Sources */,
+				D4D1666D0BC0D91400190FC0 /* video.cpp in Sources */,
+				D4DBE6D90BC1E91A00E85DCB /* tex_mgmt.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -784,32 +771,32 @@
 			buildActionMask = 2147483647;
 			files = (
 				D4D02B720B0656E500772C78 /* SDLMain.m in Sources */,
-				D4D1BA8A0B02B4140052BF1E /* draw.cpp in Sources */,
 				D4D1BA6E0B02B27F0052BF1E /* editor.cpp in Sources */,
 				D4D1BA6F0B02B27F0052BF1E /* editor_main.cpp in Sources */,
-				D4D1BA890B02B4110052BF1E /* effects.cpp in Sources */,
-				D4D1BA880B02B40D0052BF1E /* fade.cpp in Sources */,
 				D4D1BA700B02B27F0052BF1E /* grid.cpp in Sources */,
-				D4D1BA870B02B40A0052BF1E /* gui.cpp in Sources */,
-				D4D1BA860B02B4070052BF1E /* image.cpp in Sources */,
-				D4D1BA850B02B4040052BF1E /* interpolator.cpp in Sources */,
-				D4D1BA840B02B4000052BF1E /* menu_window.cpp in Sources */,
-				D4D1BA830B02B3FA0052BF1E /* option.cpp in Sources */,
-				D4D1BA820B02B3EF0052BF1E /* particle_effect.cpp in Sources */,
-				D4D1BA810B02B3E70052BF1E /* particle_manager.cpp in Sources */,
-				D4D1BA800B02B3DE0052BF1E /* particle_system.cpp in Sources */,
 				D4D1BA750B02B3610052BF1E /* script.cpp in Sources */,
-				D4D1BA7F0B02B3D20052BF1E /* shake.cpp in Sources */,
 				D4D1BA740B02B3560052BF1E /* socket.cpp in Sources */,
-				D4D1BA7E0B02B3C90052BF1E /* tex_mgmt.cpp in Sources */,
-				D4D1BA7D0B02B3C20052BF1E /* text.cpp in Sources */,
-				D4D1BA7C0B02B3BA0052BF1E /* textbox.cpp in Sources */,
 				D4D1BA710B02B27F0052BF1E /* tile.cpp in Sources */,
 				D4D1BA720B02B27F0052BF1E /* tileset.cpp in Sources */,
-				D4D1BA7B0B02B3AF0052BF1E /* video.cpp in Sources */,
 				D4D1BA730B02B3240052BF1E /* utils.cpp in Sources */,
 				D404C6EA0B02FD3E00827A19 /* editor.moc.cpp in Sources */,
 				D404C6EC0B02FD6D00827A19 /* grid.moc.cpp in Sources */,
+				D4D166720BC0D91400190FC0 /* draw.cpp in Sources */,
+				D4D166730BC0D91400190FC0 /* effects.cpp in Sources */,
+				D4D166740BC0D91400190FC0 /* fade.cpp in Sources */,
+				D4D166760BC0D91400190FC0 /* gui.cpp in Sources */,
+				D4D166780BC0D91400190FC0 /* image.cpp in Sources */,
+				D4D1667A0BC0D91400190FC0 /* interpolator.cpp in Sources */,
+				D4D1667C0BC0D91400190FC0 /* menu_window.cpp in Sources */,
+				D4D1667E0BC0D91400190FC0 /* option.cpp in Sources */,
+				D4D166810BC0D91400190FC0 /* particle_effect.cpp in Sources */,
+				D4D166850BC0D91400190FC0 /* particle_manager.cpp in Sources */,
+				D4D166870BC0D91400190FC0 /* particle_system.cpp in Sources */,
+				D4D1668A0BC0D91400190FC0 /* shake.cpp in Sources */,
+				D4D1668E0BC0D91400190FC0 /* text.cpp in Sources */,
+				D4D166900BC0D91400190FC0 /* textbox.cpp in Sources */,
+				D4D166920BC0D91400190FC0 /* video.cpp in Sources */,
+				D4DBE6DA0BC1E91A00E85DCB /* tex_mgmt.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

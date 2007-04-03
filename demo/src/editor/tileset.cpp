@@ -32,9 +32,16 @@ TilesetTable::TilesetTable(QWidget* parent, const QString& name)
 	setLeftMargin(0);
 	
 	// Create filename from name.
+	tileset_name = name;
 	QString filename;
 	filename = name;
 	filename.append(".png").prepend("img/tilesets/");
+	tiles.resize(256);
+	for (int i = 0; i < 256; i++)
+		tiles[i].SetDimensions(1.0f, 1.0f);
+	
+	if(!VideoManager->LoadMultiImage(tiles, filename.toStdString(), 16, 16))
+		qDebug("LoadMultiImage failed to load tileset " + filename);
 
 	// Set up the table.
 	//int num_columns = visibleWidth() / TILE_WIDTH - 1;
