@@ -23,7 +23,7 @@
 namespace hoa_mode_manager {
 
 //! The singleton pointer responsible for maintaining and updating the game mode state.
-extern GameModeManager *ModeManager;
+extern GameModeManager* ModeManager;
 
 //! Determines whether the code in the hoa_mode_manager namespace should print debug statements or not.
 extern bool MODE_MANAGER_DEBUG;
@@ -91,6 +91,7 @@ public:
 	virtual void Reset() = 0;
 }; // class GameMode
 
+
 /** ***************************************************************************
 *** \brief Manages and maintains all of the living game mode objects.
 ***
@@ -120,31 +121,30 @@ class GameModeManager : public hoa_utils::Singleton<GameModeManager> {
 	friend class hoa_utils::Singleton<GameModeManager>;
 
 private:
-	//SINGLETON_DECLARE(GameModeManager);
-
-	GameModeManager ();
-
+	GameModeManager();
 
 	/** \brief A stack containing all the live game modes.
 	*** \note The back/last element of the vector is the top of the stack.
 	**/
 	std::vector<GameMode*> _game_stack;
+
 	//! A vector of game modes to push to the stack on the next call to GameModeManager#Update().
 	std::vector<GameMode*> _push_stack;
+
 	//! True if a state change occured and we need to change the active game mode.
 	bool _state_change;
+
 	//! The number of game modes to pop from the back of the stack on the next call to GameModeManager#Update().
 	uint32 _pop_count;
 
 public:
-//	SINGLETON_METHODS(GameModeManager);
-
-	~GameModeManager ();
+	~GameModeManager();
 
 	bool SingletonInitialize ();
 
 	//! \brief Increments by one the number of game modes to pop off the stack
 	void Pop();
+
 	/** \brief Removes all game modes from the stack on the next call to GameModeManager#Update().
 	***
 	*** This function sets the GameModeManager#pop_count member to the size of GameModeManager#game_stack.
@@ -154,16 +154,19 @@ public:
 	*** \note Typically this function is only used when the game exits, or when a programmer is smoking crack.
 	**/
 	void PopAll();
+
 	/** \brief Pushes a new GameMode object on top of the stack.
 	*** \param gm The new GameMode object that will go to the top of the stack.
 	*** \note This should be obvious, but once you push a new object on the stack
 	*** top, it will automatically become the new active game state.
 	**/
 	void Push(GameMode* gm);
+
 	/**  \brief  Gets the type of the currently active game mode.
 	***  \return The value of the mode_type member of the GameMode object on the top of the stack.
 	**/
 	uint8 GetGameType();
+
 	/** \brief Gets a pointer to the top game stack object.
 	*** \return A pointer to the GameMode object on the top of the stack.
 	**/
@@ -171,8 +174,10 @@ public:
 
 	//! \brief Checks if the game stack needs modes pushed or popped, then calls Update on the active game mode.
 	void Update();
+
 	//! \brief Calls the Draw() function on the active game mode.
 	void Draw();
+
 	//! \brief Prints the contents of the game_stack member to standard output.
 	void DEBUG_PrintStack();
 }; // class GameModeManager

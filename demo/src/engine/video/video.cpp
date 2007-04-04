@@ -25,20 +25,20 @@
 #include "script.h"
 
 using namespace std;
-using namespace hoa_video::private_video;
+
 using namespace hoa_utils;
+using namespace hoa_video::private_video;
 
 
-hoa_video::GameVideo* hoa_utils::Singleton<hoa_video::GameVideo>::_ref = NULL;
+
+
 
 
 namespace hoa_video {
 
-GameVideo *VideoManager = NULL;
+template<> GameVideo* Singleton<GameVideo>::_singleton_reference = NULL;
+GameVideo* VideoManager = NULL;
 bool VIDEO_DEBUG = false;
-
-//SINGLETON_INITIALIZE(GameVideo);
-
 
 //-----------------------------------------------------------------------------
 // Static variables

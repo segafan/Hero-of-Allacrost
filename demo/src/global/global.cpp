@@ -21,17 +21,17 @@
 #include "video.h"
 
 using namespace std;
+
 using namespace hoa_utils;
 using namespace hoa_script;
 using namespace hoa_video;
 
 
-hoa_global::GameGlobal* Singleton<hoa_global::GameGlobal>::_ref = 0;
-
 
 namespace hoa_global {
 
-GameGlobal *GlobalManager = NULL;
+template<> GameGlobal* Singleton<GameGlobal>::_singleton_reference = 0;
+GameGlobal* GlobalManager = NULL;
 bool GLOBAL_DEBUG = false;
 //SINGLETON_INITIALIZE(GameGlobal);
 

@@ -59,7 +59,8 @@ extern "C" {
 namespace hoa_script {
 
 //! \brief The singleton pointer responsible for the interaction between the C++ engine and Lua scripts.
-extern GameScript *ScriptManager;
+extern GameScript* ScriptManager;
+
 //! \brief Determines whether the code in the hoa_script namespace should print debug statements or not.
 extern bool SCRIPT_DEBUG;
 
@@ -506,9 +507,7 @@ class GameScript : public hoa_utils::Singleton<GameScript> {
 	friend class ScriptDescriptor;
 
 public:
-//	SINGLETON_METHODS(GameScript);
-
-	~GameScript ();
+	~GameScript();
 
 	bool SingletonInitialize ();
 
@@ -523,9 +522,7 @@ public:
 	bool IsFileOpen(std::string& filename);
 
 private:
-//	SINGLETON_DECLARE(GameScript);
-
-	GameScript ();
+	GameScript();
 
 	//! \brief Maintains a list of all data files that are currently open.
 	std::map<std::string, ScriptDescriptor*> _open_files;

@@ -46,7 +46,7 @@
 namespace hoa_audio {
 
 //! The singleton pointer responsible for all audio operations.
-extern GameAudio *AudioManager;
+extern GameAudio* AudioManager;
 //! Determines whether the code in the hoa_audio namespace should print debug statements or not.
 extern bool AUDIO_DEBUG;
 
@@ -126,9 +126,7 @@ class GameAudio : public hoa_utils::Singleton<GameAudio>
 	friend class MusicDescriptor;
 
 public:
-	//SINGLETON_METHODS(GameAudio);
-
-	~GameAudio ();
+	~GameAudio();
 
 	bool SingletonInitialize ();
 
@@ -221,9 +219,7 @@ public:
 	void DEBUG_PrintInfo();
 
 private:
-	//SINGLETON_DECLARE(GameAudio)
-	
-	GameAudio ();
+	GameAudio();
 
 	//! The volume level for music playback. Valid range is between 0.0f and 1.0f
 	float _music_volume;

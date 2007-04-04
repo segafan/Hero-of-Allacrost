@@ -76,7 +76,7 @@ extern "C" {
 namespace hoa_video {
 
 //! \brief The singleton pointer for the engine, responsible for all video operations.
-extern GameVideo *VideoManager;
+extern GameVideo* VideoManager;
 
 //! \brief Determines whether the code in the hoa_video namespace should print
 extern bool VIDEO_DEBUG;
@@ -209,9 +209,7 @@ class GameVideo : public hoa_utils::Singleton<GameVideo> {
 	friend class RenderedString;
 
 public:
-	//SINGLETON_METHODS(GameVideo);
-	
-	~GameVideo ();
+	~GameVideo();
 
 	bool SingletonInitialize ();
 
@@ -1076,9 +1074,7 @@ public:
 	RenderedString *RenderText(const hoa_utils::ustring &txt);
 
 private:
-//	SINGLETON_DECLARE(GameVideo);
-
-	GameVideo ();
+	GameVideo();
 
 	//-- Private variables ----------------------------------------------------
 

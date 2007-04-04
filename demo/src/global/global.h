@@ -35,7 +35,7 @@
 namespace hoa_global {
 
 //! \brief The singleton pointer responsible for the management of global game data.
-extern GameGlobal *GlobalManager;
+extern GameGlobal* GlobalManager;
 
 //! \brief  Determines whether the code in the hoa_global namespace should print debug statements or not.
 extern bool GLOBAL_DEBUG;
@@ -52,8 +52,7 @@ extern bool GLOBAL_DEBUG;
 *** manager class. There can only be one game instance that the player is playing
 *** at any given time.
 *** ***************************************************************************/
-class GameGlobal : public hoa_utils::Singleton<GameGlobal>
-{
+class GameGlobal : public hoa_utils::Singleton<GameGlobal> {
 	friend class hoa_utils::Singleton<GameGlobal>;
 	friend class GlobalItem;
 	friend class GlobalSkill;
@@ -61,11 +60,9 @@ class GameGlobal : public hoa_utils::Singleton<GameGlobal>
 	friend class GlobalArmor;
 
 public:
-//	SINGLETON_METHODS(GameGlobal);
-	
-	~GameGlobal ();
+	~GameGlobal();
 
-	bool SingletonInitialize ();
+	bool SingletonInitialize();
 
 	/** \brief Deletes all data stored within the GameGlobal class object
 	*** This function is meant to be called when the user quits the current game instance
@@ -185,9 +182,7 @@ public:
 	//@}
 
 private:
-//	SINGLETON_DECLARE(GameGlobal);
-
-	GameGlobal ();
+	GameGlobal();
 
 	//! \brief The amount of financial resources the party currently has.
 	uint32 _funds;
