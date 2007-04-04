@@ -43,7 +43,7 @@
 namespace hoa_input {
 
 //! The singleton pointer responsible for handling and updating user input.
-extern GameInput *InputManager;
+extern GameInput* InputManager;
 
 //! Determines whether the code in the hoa_input namespace should print debug statements or not.
 extern bool INPUT_DEBUG;
@@ -198,13 +198,11 @@ class GameInput : public hoa_utils::Singleton<GameInput> {
 	friend class hoa_utils::Singleton<GameInput>;
 
 private:
-	//SINGLETON_DECLARE(GameInput);
+	GameInput();
 
-	GameInput ();
-
-	
 	//! Holds the current user-defined key settings
 	private_input::KeyState _key;
+
 	//! Holds the current user-defined joystick settings
 	private_input::JoystickState _joystick;
 
@@ -292,9 +290,7 @@ private:
 	**/
 	void _SetNewJoyButton(uint8 & old_button, uint8 new_button);
 public:
-//	SINGLETON_METHODS(GameInput);
-
-	~GameInput ();
+	~GameInput();
 
 	bool SingletonInitialize ();
 

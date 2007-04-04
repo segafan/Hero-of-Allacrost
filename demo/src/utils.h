@@ -215,6 +215,94 @@ private:
 }; // class ustring
 
 
+/** ****************************************************************************
+*** \brief Used for transforming a standard class into a singleton class
+***
+*** This is a templated abstract class which classes may derive from to become
+*** singleton classes. To create a new singleton type class, follow the steps below.
+*** It is assumed that the desired class is called "ClassName".
+***
+*** -# In the header file, define the class as follows: class ClassName : public hoa_utils::Singleton<ClassName>
+*** -# Make hoa_utils::Singleton<ClassName> a friend of ClassName in the header file
+*** -# Put the ClassName() constructor in the private section of the class, and the destructor in the public section
+*** -# Define the following function in the public section of the class and implement it: bool SingletonInitialize()
+*** -# In the source file, set the static template member like so: template<> ClassName* Singleton<ClassName>::_singleton_reference = NULL
+***
+*** With this done, your new class should be ready to go. To create and use a singleton class, do the following:
+***
+*** -# Call ClassName* SingletonCreate() to get a pointer to the new singleton class instance
+*** -# After the singleton object has been created, next call bool SingletonInitialize() to initialize the class
+*** -# If you ever need to retreive a pointer for a singleton you've created, just call the static method const ClassName* SingletonGetReference()
+*** -# Call SingletonDestroy to destroy the class and its underlying singleton. You can then create and initialize the singleton once more if you'd like.
+***
+*** \note The creation steps listed above are the only way to properly construct a singleton class object. Don't try to circumvent it, and never attempt to
+*** modify the protected static member Singleton::_singleton_reference directly, except as instructed above.
+***
+*** \note Sometimes singleton classes need to refer to each other to initialize themselves, particularly with game engine components. That is the purpose
+*** of the SingletonInitialize() method, so that all the singleton objects can be created and then reference each other when this method is invoked. It
+*** can be viewed as a helper function to the class constructor.
+***
+*** \note For engine singleton classes, SingletonCreate(), SingletonDestroy(), and SingletonInitialize()
+*** should only be called in main.cpp before the main game loop. There may be qualified exceptions to this
+*** practice, however.
+***
+*** \note Most of our singleton classes also define a pointer to their singleton object inside the
+*** source file of the class. For example, the GameAudio singleton contains the AudioManager class object
+*** name inside the hoa_audio namespace. Therefore you do not need to call the SingletonGetReference()
+*** function when this object is made available.
+*** ***************************************************************************/
+template<typename T> class Singleton {
+protected:
+	//! \brief A reference to the singleton class instance itself
+	static T* _singleton_reference;
+
+	Singleton()
+		{}
+
+	virtual ~Singleton()
+		{}
+
+public:
+	//! \brief Creates and returns an instance of the singleton class
+	static T* SingletonCreate() {
+		if (_singleton_reference == NULL) {
+			_singleton_reference = new T();
+		}
+		else {
+			if (UTILS_DEBUG)
+				std::cerr << "UTILS WARNING: Singleton::SingletonCreate() was invoked when the class object was already instantiated" << std::endl;
+		}
+		return _singleton_reference;
+	}
+
+	//! \brief Destroys the singleton class instance
+	static void SingletonDestroy() {
+		if (_singleton_reference != NULL) {
+			delete _singleton_reference;
+		}
+		else {
+			if (UTILS_DEBUG)
+				std::cerr << "UTILS WARNING: Singleton::SingletonDestroy() was invoked when the class object was not instantiated" << std::endl;
+		}
+		_singleton_reference = NULL;
+	}
+
+	//! \brief Returns a pointer to the singleton class instance (or NULL if the class is not instantiated)
+	static const T* SingletonGetReference()
+		{ return _singleton_reference; }
+
+	/** \brief A method for the inheriting class to implement, which initializes the class
+	*** \return True if initialization was successful, false if it was not
+	**/
+	virtual bool SingletonInitialize() = 0;
+
+private:
+	Singleton(const Singleton &s);
+	Singleton& operator=(const Singleton &s);
+}; // template<typename T> class Singleton
+
+
+
 //! \name String Utility Functions
 //@{
 /** \brief Converts an integer type into a standard string
@@ -259,137 +347,6 @@ hoa_utils::ustring MakeUnicodeString(const std::string& text);
 **/
 std::string MakeStandardString(const hoa_utils::ustring& text);
 //@}
-
-/** ****************************************************************************
-*** \name Singleton class creation macros
-*** \brief Used for transforming a standard class into a singleton class
-***
-*** To create a singleton class using these macros, perform the following steps.
-***
-*** 0) The header file of the class must #include "utils.h" and specify the scope hoa_utils::
-*** 1) Place SINGLETON_DECLARE(class_name) in the private section of the class
-*** 2) Place SINGLETON_METHODS(class_name) in the public section of the class
-*** 3) Place SINGLETON_INITIALIZE(class_name) at the top of the source file of the class.
-*** 4) Define the constructor and destructor for the class.
-*** 5) Also define the public function bool SingletonInitialize() (from the SINGLETON_METHODS macro).
-***
-*** After performing these steps, your class with have 4 static functions publicly avaiable:
-*** - CLASS* SingletonCreate()         creates a new singleton (if one did not already exist)
-***                                    and returns a pointer to the class object
-***
-*** - bool SingletonInitialize()       initializes the members and data for the created singleton object
-***                                    (will return false if the initialization code failed)
-***
-*** - void SingletonDestroy()          destroys the singleton class (as long as one currently exists)
-***
-*** - CLASS* SingletonGetReference()   returns a pointer to the singleton class object
-***
-*** \note Do not use any other method of creating a singleton class in the code.
-*** These macros are the one and only way you are allowed to create singleton classes.
-***
-*** \note The constructor and destructor for a class <b>must</b> be defined. Failure to implement
-*** them yields a compilation error that will look similar to the following.
-*** `In function `SINGLETON::SingletonCreate()': undefined reference to `SINGLETON::SINGLETON[in-charge]()`
-***
-*** \note The constructor and destructor are defined in the public section of the class because the Luabind
-*** library requires this in order to bind the class. You should <b>not</b>, however, create or delete instances
-*** of this class by use of the constructor or destructor. The copy constructor, copy assignment operator,
-*** new/new[], and delete/delete[] operators are  all declared in the private section of the class.
-*** Use the SingletonCreate(), SingletonDestroy(), and SingletonGetReference() methods instead.
-***
-*** \note Usually, you shouldn't need to do much of anything in the class constructor. This is because the
-*** public SingletonInitialize() function should handle the true initialization of the class. This function
-*** is necessary because some singleton classes rely on the existance of one another to intialize themselves.
-*** Thus, most singleton classes are first created with SingletonCreate(), and then only initialized once all
-*** other singletons objects exist.
-***
-*** \note For most singleton classes, SingletonCreate() and SingletonDestroy() should only be called in
-*** main.cpp. There may be qualified exceptions to this practice, however.
-***
-*** \note Most, if not all, singleton classes also define a pointer to their singleton object inside the
-*** source file of the class. For example, the GameAudio singleton contains the AudioManager class object
-*** name inside the hoa_audio namespace. Thus, it is actually very rare that you would ever have to invoke
-*** the SingletonCreate(), SingletonDestroy(), SingletonGetReference(), or SingletonInitialize() functions.
-*** ***************************************************************************/
-//@{
-//! Place this macro in the private sector of the class definition
-/*#define SINGLETON_DECLARE(class_name) \
-	static class_name *_ref; \
-	class_name(const class_name&); \
-	class_name& operator=(const class_name&);
-
-//! Place this macro in the public sector of the class definition
-#define SINGLETON_METHODS(class_name) \
-	class_name(); \
-	~class_name(); \
-	static class_name* SingletonCreate() { \
-			if (_ref == NULL) { \
-				_ref = new class_name(); \
-			} \
-			return _ref; \
-	} \
-	static void SingletonDestroy() { \
-			if (_ref != NULL) { \
-				delete _ref; \
-				_ref = NULL; \
-			} \
-	} \
-	static class_name* SingletonGetReference() { \
-			return _ref; \
-	} \
-	bool SingletonInitialize();
-
-//! Place this macro in the source file of the class
-#define SINGLETON_INITIALIZE(class_name) \
-	class_name* class_name::_ref = NULL;
-//@}
-*/
-
-template <typename T>
-class Singleton
-{
-protected:
-	static T* _ref;
-
-public:
-	static T* SingletonCreate ()
-	{
-//		assert (_ref == NULL);
-
-		if (_ref == NULL)
-			_ref = new T();
-
-		return _ref;
-	}
-
-	static void SingletonDestroy()
-	{
-//		assert (_ref != NULL);
-
-		if (_ref != NULL)
-			delete _ref;
-
-		_ref = NULL;
-	}
-
-	static bool SingletonInitialize () {}
-
-	static T* SingletonGetReference()
-	{
-		return _ref;
-	}
-
-protected:
-   Singleton() {}
-   virtual ~Singleton() {}
-  
-private:
-	Singleton (const Singleton &s);
-	Singleton &operator = (const Singleton &s);
-};
-
-
-
 
 
 /** \brief A template function that returns the number of elements in an array

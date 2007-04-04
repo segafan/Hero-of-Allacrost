@@ -64,18 +64,9 @@ OptionBox::OptionBox()
 
 void OptionBox::SetFont(const std::string &fontName)
 {
-	// try to get pointer to video manager
-	GameVideo *videoManager = GameVideo::SingletonGetReference();
-	if(!videoManager)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: OptionBox::SetFont() failed, couldn't get pointer to GameVideo!" << endl;
-		return;
-	}
-
 	// try to get properties about the current font. Note we don't bother calling IsValidFont() to see
 	// if this font has been loaded since GetFontProperties() implements that check
-	if(videoManager->GetFontProperties(fontName) == NULL)
+	if(VideoManager->GetFontProperties(fontName) == NULL)
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: OptionBox::SetFont() failed because GameVideo::GetFontProperties() returned false for the font:\n" << fontName << endl;
@@ -881,9 +872,8 @@ bool OptionBox::_ParseOption(const hoa_utils::ustring &formatString, Option &op)
 
 						StillImage imd;
 						imd.SetFilename(tagText);
-						GameVideo *videoManager = GameVideo::SingletonGetReference();
 
-						if(videoManager->LoadImage(imd))
+						if(VideoManager->LoadImage(imd))
 						{
 							opElem.type  = VIDEO_OPTION_ELEMENT_IMAGE;
 							opElem.value = static_cast<int32> (op.images.size());
@@ -961,12 +951,11 @@ void OptionBox::_ClearOptions()
 	// firstly, go through each option and unreference any images it is
 	// holding on to
 
-	GameVideo *videoManager = GameVideo::SingletonGetReference();
 	for(int32 j = 0; j < static_cast<int32>(_options.size()); ++j)
 	{
 		for(int32 i = 0; i < static_cast<int32>(_options[j].images.size()); ++i)
 		{
-			videoManager->DeleteImage(_options[j].images[i]);
+			VideoManager->DeleteImage(_options[j].images[i]);
 		}
 	}
 
@@ -988,9 +977,8 @@ void OptionBox::Draw()
 		return;
 	}
 
-	GameVideo *video = GameVideo::SingletonGetReference();
-	video->_PushContext();
-	video->SetDrawFlags(_xalign, _yalign, VIDEO_BLEND, 0);
+	VideoManager->_PushContext();
+	VideoManager->SetDrawFlags(_xalign, _yalign, VIDEO_BLEND, 0);
 
 	// calculate width and height of option box
 
@@ -1013,22 +1001,22 @@ void OptionBox::Draw()
 
 	ScreenRect rect(x, y, w, h);
 
-	int32 cursorMargin = static_cast<int32>(video->GetDefaultCursor()->GetWidth() + 1 - this->_cursorX);
+	int32 cursorMargin = static_cast<int32>(VideoManager->GetDefaultCursor()->GetWidth() + 1 - this->_cursorX);
 	rect.left -= cursorMargin;
 	rect.width += cursorMargin;
 
 	if(_owner)
 		rect.Intersect(_owner->GetScissorRect());
-	rect.Intersect(video->GetScissorRect());
-	video->EnableScissoring(_owner && video->IsScissoringEnabled());
-	if(video->IsScissoringEnabled())
-		video->SetScissorRect(rect);
+	rect.Intersect(VideoManager->GetScissorRect());
+	VideoManager->EnableScissoring(_owner && VideoManager->IsScissoringEnabled());
+	if(VideoManager->IsScissoringEnabled())
+		VideoManager->SetScissorRect(rect);
 
-	CoordSys &cs = video->_coord_sys;
+	CoordSys &cs = VideoManager->_coord_sys;
 
-	video->SetFont(_font);
+	VideoManager->SetFont(_font);
 
-	video->SetDrawFlags(_option_xalign, _option_yalign, VIDEO_X_NOFLIP, VIDEO_Y_NOFLIP, VIDEO_BLEND, 0);
+	VideoManager->SetDrawFlags(_option_xalign, _option_yalign, VIDEO_X_NOFLIP, VIDEO_Y_NOFLIP, VIDEO_BLEND, 0);
 
 
 	int32 rowMin, rowMax;
@@ -1095,9 +1083,9 @@ void OptionBox::Draw()
 			Option &op = _options.at(index);
 
 			if(op.disabled)
-				video->SetTextColor(Color::gray);
+				VideoManager->SetTextColor(Color::gray);
 			else
-				video->SetTextColor(Color::white);
+				VideoManager->SetTextColor(Color::white);
 
 			for(int32 opElem = 0; opElem < (int32) op.elements.size(); ++opElem)
 			{
@@ -1131,9 +1119,9 @@ void OptionBox::Draw()
 						if(imageIndex >= 0 && imageIndex < (int32)op.images.size())
 						{
 							if(op.disabled)
-								video->DrawImage(op.images[imageIndex], Color::gray);
+								VideoManager->DrawImage(op.images[imageIndex], Color::gray);
 							else
-								video->DrawImage(op.images[imageIndex], Color::white);
+								VideoManager->DrawImage(op.images[imageIndex], Color::white);
 
 							float edge = x - bounds.x_left;
 							float width = op.images[imageIndex].GetWidth();
@@ -1152,7 +1140,7 @@ void OptionBox::Draw()
 					case VIDEO_OPTION_ELEMENT_POSITION:
 					{
 						x = bounds.x_left + op.elements[opElem].value * cs.GetHorizontalDirection();
-						video->Move(x, y);
+						VideoManager->Move(x, y);
 						break;
 					}
 
@@ -1163,7 +1151,7 @@ void OptionBox::Draw()
 						if(textIndex >= 0 && textIndex < (int32)op.text.size())
 						{
 							const ustring &text = op.text[textIndex];
-							float width = static_cast<float>(video->CalculateTextWidth(_font, text));
+							float width = static_cast<float>(VideoManager->CalculateTextWidth(_font, text));
 							float edge = x - bounds.x_left;
 
 							if(xalign == VIDEO_X_CENTER)
@@ -1174,7 +1162,7 @@ void OptionBox::Draw()
 							if(edge < leftEdge)
 								leftEdge = edge;
 
-							video->DrawText(text);
+							VideoManager->DrawText(text);
 						}
 
 						break;
@@ -1204,24 +1192,24 @@ void OptionBox::Draw()
 			if(index == _firstSelection && !_blink && _cursorState != VIDEO_CURSOR_STATE_HIDDEN)
 			{
 				_SetupAlignment(VIDEO_X_LEFT, _option_yalign, bounds, x, y);
-				video->SetDrawFlags(VIDEO_BLEND, 0);
-				video->MoveRelative(_cursorX + leftEdge + _switchCursorX, cursorOffset + _cursorY + _switchCursorY);
-				StillImage *defaultCursor = video->GetDefaultCursor();
+				VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+				VideoManager->MoveRelative(_cursorX + leftEdge + _switchCursorX, cursorOffset + _cursorY + _switchCursorY);
+				StillImage *defaultCursor = VideoManager->GetDefaultCursor();
 
 				if(defaultCursor)
-					video->DrawImage(*defaultCursor, Color::white);
+					VideoManager->DrawImage(*defaultCursor, Color::white);
 			}
 
 			// if this is the index where we are supposed to show the cursor, show it
 			if(index == _selection && !(_blink && _cursorState == VIDEO_CURSOR_STATE_BLINKING) && _cursorState != VIDEO_CURSOR_STATE_HIDDEN)
 			{
 				_SetupAlignment(VIDEO_X_LEFT, _option_yalign, bounds, x, y);
-				video->SetDrawFlags(VIDEO_BLEND, 0);
-				video->MoveRelative(_cursorX + leftEdge, cursorOffset + _cursorY);
-				StillImage *defaultCursor = video->GetDefaultCursor();
+				VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+				VideoManager->MoveRelative(_cursorX + leftEdge, cursorOffset + _cursorY);
+				StillImage *defaultCursor = VideoManager->GetDefaultCursor();
 
 				if(defaultCursor)
-					video->DrawImage(*defaultCursor, Color::white);
+					VideoManager->DrawImage(*defaultCursor, Color::white);
 			}
 
 			bounds.x_left   += xoff;
@@ -1237,7 +1225,7 @@ void OptionBox::Draw()
 		bounds.y_bottom += yoff;
 	}
 
-	video->_PopContext();
+	VideoManager->_PopContext();
 }
 
 
@@ -1246,10 +1234,8 @@ void OptionBox::Draw()
 //                  option cell
 //-----------------------------------------------------------------------------
 
-void OptionBox::_SetupAlignment(int32 xalign, int32 yalign, const OptionCellBounds &bounds, float &x, float &y)
-{
-	GameVideo *video = GameVideo::SingletonGetReference();
-	video->SetDrawFlags(xalign, yalign, 0);
+void OptionBox::_SetupAlignment(int32 xalign, int32 yalign, const OptionCellBounds &bounds, float &x, float &y) {
+	VideoManager->SetDrawFlags(xalign, yalign, 0);
 
 	switch(xalign)
 	{
@@ -1277,7 +1263,7 @@ void OptionBox::_SetupAlignment(int32 xalign, int32 yalign, const OptionCellBoun
 			break;
 	};
 
-	video->Move(x, y);
+	VideoManager->Move(x, y);
 }
 
 

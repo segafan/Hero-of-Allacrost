@@ -32,7 +32,7 @@
 namespace hoa_system {
 
 //! The singleton pointer responsible for managing the system during game operation.
-extern GameSystem *SystemManager;
+extern GameSystem* SystemManager;
 
 //! Determines whether the code in the hoa_system namespace should print debug statements or not.
 extern bool SYSTEM_DEBUG;
@@ -58,11 +58,9 @@ class GameSystem : public hoa_utils::Singleton<GameSystem> {
 	friend class hoa_utils::Singleton<GameSystem>;
 
 public:
-//	SINGLETON_METHODS(GameSystem);
+	~GameSystem();
 
-	~GameSystem ();
-
-	bool SingletonInitialize ();
+	bool SingletonInitialize();
 
 	/** \brief Initializes the timers used in the game.
 	***
@@ -137,9 +135,7 @@ public:
 		{ _not_done = false; }
 
 private:
-//	SINGLETON_DECLARE(GameSystem);
-
-	GameSystem ();
+	GameSystem();
 
 	//! The last time that the UpdateTimers function was called, in milliseconds.
 	uint32 _last_update;

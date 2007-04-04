@@ -19,19 +19,17 @@
 #include "system.h"
 
 using namespace std;
+
 using namespace hoa_utils;
 using namespace hoa_system;
 
 
-template <>
-hoa_audio::GameAudio* Singleton<hoa_audio::GameAudio>::_ref = 0;
-
 
 namespace hoa_audio {
 
-GameAudio *AudioManager = NULL;
+template<> GameAudio* Singleton<GameAudio>::_singleton_reference = 0;
+GameAudio* AudioManager = NULL;
 bool AUDIO_DEBUG = false;
-//SINGLETON_INITIALIZE(GameAudio);
 
 
 namespace private_audio {
