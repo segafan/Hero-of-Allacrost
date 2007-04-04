@@ -24,10 +24,10 @@ using namespace hoa_utils;
 using namespace hoa_system;
 
 
+template<> hoa_audio::GameAudio* Singleton<hoa_audio::GameAudio>::_singleton_reference = 0;
 
 namespace hoa_audio {
 
-template<> GameAudio* Singleton<GameAudio>::_singleton_reference = 0;
 GameAudio* AudioManager = NULL;
 bool AUDIO_DEBUG = false;
 

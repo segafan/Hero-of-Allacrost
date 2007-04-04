@@ -33,10 +33,10 @@ using namespace hoa_pause;
 using namespace hoa_input::private_input;
 
 
+template<> hoa_input::GameInput* Singleton<hoa_input::GameInput>::_singleton_reference = NULL;
 
 namespace hoa_input {
 
-template<> GameInput* Singleton<GameInput>::_singleton_reference = NULL;
 GameInput* InputManager = NULL;
 bool INPUT_DEBUG = false;
 

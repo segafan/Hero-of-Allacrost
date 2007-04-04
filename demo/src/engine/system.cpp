@@ -26,10 +26,10 @@ using namespace hoa_audio;
 using namespace hoa_system::private_system;
 
 
+template<> hoa_system::GameSystem* Singleton<hoa_system::GameSystem>::_singleton_reference = NULL;
 
 namespace hoa_system {
 
-template<> GameSystem* Singleton<GameSystem>::_singleton_reference = NULL;
 GameSystem* SystemManager = NULL;
 bool SYSTEM_DEBUG = false;
 
