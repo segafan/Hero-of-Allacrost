@@ -33,10 +33,10 @@ using namespace hoa_video::private_video;
 
 
 
+template<> hoa_video::GameVideo* Singleton<hoa_video::GameVideo>::_singleton_reference = NULL;
 
 namespace hoa_video {
 
-template<> GameVideo* Singleton<GameVideo>::_singleton_reference = NULL;
 GameVideo* VideoManager = NULL;
 bool VIDEO_DEBUG = false;
 

@@ -27,10 +27,10 @@ using namespace hoa_script;
 using namespace hoa_video;
 
 
+template<> hoa_global::GameGlobal* Singleton<hoa_global::GameGlobal>::_singleton_reference = 0;
 
 namespace hoa_global {
 
-template<> GameGlobal* Singleton<GameGlobal>::_singleton_reference = 0;
 GameGlobal* GlobalManager = NULL;
 bool GLOBAL_DEBUG = false;
 //SINGLETON_INITIALIZE(GameGlobal);

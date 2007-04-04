@@ -22,10 +22,10 @@ using namespace hoa_utils;
 using namespace hoa_boot;
 
 
+template<> hoa_mode_manager::GameModeManager* Singleton<hoa_mode_manager::GameModeManager>::_singleton_reference = NULL;
 
 namespace hoa_mode_manager {
 
-template<> GameModeManager* Singleton<GameModeManager>::_singleton_reference = NULL;
 GameModeManager* ModeManager = NULL;
 bool MODE_MANAGER_DEBUG = false;
 

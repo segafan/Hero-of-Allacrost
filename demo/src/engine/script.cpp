@@ -29,10 +29,10 @@ using namespace hoa_script::private_script;
 
 
 
+template<> hoa_script::GameScript* Singleton<hoa_script::GameScript>::_singleton_reference = NULL;
 
 namespace hoa_script {
 
-template<> GameScript* Singleton<GameScript>::_singleton_reference = NULL;
 GameScript* ScriptManager = NULL;
 bool SCRIPT_DEBUG = false;
 
