@@ -17,6 +17,8 @@
 #include "system.h"
 #include "map_objects.h"
 
+extern bool MAP_DEBUG;
+
 using namespace hoa_utils;
 
 namespace hoa_map {
@@ -67,8 +69,6 @@ EnemyZone::EnemyZone(MapMode* map, uint8 max_enemies, uint32 regen_time, bool re
 	_map = map;
 }
 
-
-
 void EnemyZone::Update() {
 	if( _active_enemies < _max_enemies ) {
 		//Add / Spawn enemies if the maximum number is not reached
@@ -90,19 +90,34 @@ void EnemyZone::Update() {
 			//Select a DEAD monster to spawn
 			for( uint32 i = 0; i < _enemies.size(); i++ ) {
 				if( !_enemies[i]->updatable ) {
-					++_active_enemies;
 
 					//Select a random position inside the zone where there is no collision
 					uint16 x, y;
+					//TEMP: magic constant
+					int retries = 5; //Number of retries (if the is no place, it won't freeze the game)
+					bool collision;
 					do {
 						_RandomPosition( x, y );
+						//if(MAP_DEBUG)
+						//	printf( "RandomPosition: %i, %i : Retry #: %i\n", x, y, retries );
 
 						_enemies[i]->SetXPosition( x, 0.5f );
 						_enemies[i]->SetYPosition( y, 0.5f );
-					}while( _map->_DetectCollision( _enemies[i] ) );
+						_enemies[i]->no_collision = false;
+
+						collision = _map->_DetectCollision( _enemies[i] );
+					}while( collision && --retries != 0 );
+					
+					//If the max retries reached, reset collision on enemy and retry later
+					if( retries == 0 && collision )
+					{
+						_enemies[i]->no_collision = true;
+						break;
+					}
 
 					//Spawn the monster at that location
 					_enemies[i]->ChangeStateSpawning();
+					++_active_enemies;
 					break;
 				}
 			}
