@@ -108,6 +108,8 @@ void GameGlobal::ClearAllData() {
 		delete i->second;
 	}
 	_characters.clear();
+	_character_order.clear();
+	_active_party.RemoveAllActors();
 } // void GameGlobal::ClearAllData()
 
 // ****************************************************************************
