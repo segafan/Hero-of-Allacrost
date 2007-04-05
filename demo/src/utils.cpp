@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2007 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -59,7 +59,7 @@ bool IsPowerOfTwo(uint32 x) {
 
 bool IsOddNumber(uint32 x) {
 	#if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
-		return (x & 0x10000000);
+		return (x & 0x80000000);
 	#else // SDL_BYTEORDER == SDL_LITTLE_ENDIAN
 		return (x & 0x00000001);
 	#endif
@@ -87,17 +87,17 @@ ustring::ustring() {
 
 ustring::ustring(const uint16 *s) {
 	_str.clear();
-	
+
 	if (!s) {
 		_str.push_back(0);
 		return;
 	}
-	
+
 	while (*s != 0) {
 		_str.push_back(*s);
 		++s;
 	}
-	
+
 	_str.push_back(0);
 }
 
@@ -106,17 +106,17 @@ ustring::ustring(const uint16 *s) {
 ustring ustring::substr(size_t pos, size_t n) const
 {
 	size_t len = length();
-	
+
 	if (pos >= len)
 		throw std::out_of_range("pos passed to substr() was too large");
-		
+
 	ustring s;
 	while (n > 0 && pos < len) {
 		s += _str[pos];
 		++pos;
 		--n;
 	}
-	
+
 	return s;
 }
 
@@ -127,19 +127,19 @@ ustring & ustring::operator + (const ustring& s)
 	// nothing to do for empty string
 	if (s.empty())
 		return *this;
-	
+
 	// add first character of string into the null character spot
 	_str[length()] = s[0];
-	
-	// add rest of characters afterward		
+
+	// add rest of characters afterward
 	size_t len = s.length();
 	for (size_t j = 1; j < len; ++j) {
 		_str.push_back(s[j]);
 	}
-	
+
 	// Finish off with a null character
 	_str.push_back(0);
-	
+
 	return *this;
 }
 
@@ -148,7 +148,7 @@ ustring & ustring::operator + (const ustring& s)
 ustring & ustring::operator += (uint16 c) {
 	_str[length()] = c;
 	_str.push_back(0);
-	
+
 	return *this;
 }
 
@@ -158,28 +158,28 @@ ustring & ustring::operator += (const ustring &s) {
 	// nothing to do for empty string
 	if (s.empty())
 		return *this;
-	
+
 	// add first character of string into the null character spot
 	_str[length()] = s[0];
-	
-	// add rest of characters afterward		
+
+	// add rest of characters afterward
 	size_t len = s.length();
 	for (size_t j = 1; j < len; ++j) {
 		_str.push_back(s[j]);
 	}
-	
+
 	// Finish off with a null character
 	_str.push_back(0);
-	
+
 	return *this;
 }
 
 
 // Will assign the current string to this string
 ustring & ustring::operator = (const ustring &s) {
-	clear();	
+	clear();
 	operator += (s);
-	
+
 	return *this;
 } // ustring & ustring::operator = (const ustring &s)
 
@@ -187,12 +187,12 @@ ustring & ustring::operator = (const ustring &s) {
 // Finds a character within a string, starting at pos. If nothing is found, npos is returned
 size_t ustring::find(uint16 c, size_t pos) const {
 	size_t len = length();
-	
+
 	for (size_t j = pos; j < len; ++j) {
 		if (_str[j] == c)
 			return j;
 	}
-	
+
 	return npos;
 } // size_t ustring::find(uint16 c, size_t pos) const
 
@@ -202,7 +202,7 @@ size_t ustring::find(const ustring &s, size_t pos) const {
 	size_t len = length();
 	size_t total_chars = s.length();
 	size_t chars_found = 0;
-	
+
 	for (size_t j = pos; j < len; ++j) {
 		if (_str[j] == s[chars_found]) {
 			++chars_found;
@@ -214,7 +214,7 @@ size_t ustring::find(const ustring &s, size_t pos) const {
 			chars_found = 0;
 		}
 	}
-	
+
 	return npos;
 } // size_t ustring::find(const ustring &s, size_t pos) const
 
@@ -226,10 +226,10 @@ size_t ustring::find(const ustring &s, size_t pos) const {
 bool IsStringNumeric(const string& text) {
 	if (text.empty())
 		return false;
-				
+
 	// Keep track of whether decimal point is allowed. It is allowed to be present in the text zero or one times only.
 	bool decimal_allowed = true;
-	
+
 	size_t len = text.length();
 
 	// Check each character of the string one at a time
@@ -247,7 +247,7 @@ bool IsStringNumeric(const string& text) {
 			}
 		}
 	}
-	
+
 	return true;
 } // bool IsStringNumeric(const string& text)
 
@@ -257,14 +257,14 @@ ustring MakeUnicodeString(const string& text) {
 	int32 length = static_cast<int32>(text.length());
 	uint16 *ubuff = new uint16[length+1];
 	ubuff[length] = static_cast<uint16>('\0');
-	
+
 	for (int32 c = 0; c < length; ++c) {
 		ubuff[c] = static_cast<uint16>(text[c]);
 	}
-	
+
 	ustring new_ustr(ubuff);
 	delete[] ubuff;
-	
+
 	return new_ustr;
 } // ustring MakeUnicodeString(const string& text)
 
@@ -272,22 +272,22 @@ ustring MakeUnicodeString(const string& text) {
 // Creates a normal string from a ustring
 string MakeStandardString(const ustring& text) {
 	int32 length = static_cast<int32>(text.length());
-	
+
 	unsigned char *strbuff = new unsigned char[length+1];
 	strbuff[length] = '\0';
-	
+
 	for (int32 c = 0; c < length; ++c) {
 		uint16 curr_char = text[c];
-		
+
 		if(curr_char > 0xff)
 			strbuff[c] = '?';
 		else
 			strbuff[c] = static_cast<unsigned char>(curr_char);
 	}
-	
+
 	string new_str(reinterpret_cast<char*>(strbuff));
 	delete [] strbuff;
-	
+
 	return new_str;
 } // string MakeStandardString(const ustring& text)
 
@@ -384,12 +384,12 @@ bool MakeDirectory(const std::string& dir_name) {
 	#else
 		int32 success = mkdir(dir_name.c_str(), S_IRWXG | S_IRWXO | S_IRWXU);
 	#endif
-	
+
 	if (success == -1) {
 		cerr << "UTILS ERROR: could not create directory: " << dir_name.c_str() << endl;
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -399,7 +399,7 @@ bool CleanDirectory(const std::string& dir_name) {
 	// Don't do anything if the directory doesn't exist
 	struct stat buf;
 	int32 i = stat(dir_name.c_str(), &buf);
-	if (i != 0)	
+	if (i != 0)
 		return true;
 
 	#ifdef _WIN32
@@ -408,15 +408,15 @@ bool CleanDirectory(const std::string& dir_name) {
 		// Get the current directory that the Allacrost application resides in
 		char app_path[1024];
 		GetCurrentDirectoryA(1024, app_path);
-		
+
 		int32 app_path_len = static_cast<int32>(strlen(app_path));
 		if (app_path_len <= 0)
-			return false;	
+			return false;
 		if(app_path[app_path_len-1] == '\\')    // Remove the ending slash if one is there
 			app_path[app_path_len-1] = '\0';
-			
+
 		string full_path = app_path;
-		
+
 		if (dir_name[0] == '/' || dir_name[0] == '\\') {
 			full_path += dir_name;
 		}
@@ -424,13 +424,13 @@ bool CleanDirectory(const std::string& dir_name) {
 			full_path += "/";
 			full_path += dir_name;
 		}
-		
+
 		char file_found[1024];
 		WIN32_FIND_DATAA info;
 		HANDLE hp;
 		sprintf(file_found, "%s\\*.*", full_path.c_str());
 		hp = FindFirstFileA(file_found, &info);
-		
+
 		if (hp != INVALID_HANDLE_VALUE) {
 			// Remove each file from the full_path directory
 			do {
@@ -442,10 +442,10 @@ bool CleanDirectory(const std::string& dir_name) {
 
 	#else
 		//--- NOT WINDOWS ----------------------------------------------------------
-	
+
 	DIR *parent_dir;
 	struct dirent *dir_file;
-	
+
 	parent_dir = opendir(dir_name.c_str());   // open the directory we want to clean
 	if (!parent_dir) {
 		cerr << "UTILS ERROR: failed to clean directory: " << dir_name << endl;
@@ -461,11 +461,11 @@ bool CleanDirectory(const std::string& dir_name) {
 		string file_name = base_dir + dir_file->d_name;
 		remove(file_name.c_str());
 	}
-	
+
 	closedir(parent_dir);
-	
+
 	#endif
-	
+
 	return true;
 }
 
@@ -481,15 +481,15 @@ bool RemoveDirectory(const std::string& dir_name)
 
 	// Remove any files that still reside in the directory
 	CleanDirectory(dir_name);
- 
+
 	// Finally, remove the folder itself with rmdir()
 	int32 success = rmdir(dir_name.c_str());
-	
+
 	if (success == -1) {
 		cerr << "UTILS ERROR: could not delete directory: " << dir_name << endl;
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -521,11 +521,11 @@ bool IsLatestVersion ()
 	conn.IsQueued ( 300 );
 	conn.ScanLine ( "%d.%d.%d", &rversionmajor, &rversionminor, &rpatch );
 	conn.Disconnect();
-	
+
 	char vstring[255];
 	sprintf ( vstring, "%d.%d.%d", rversionmajor, rversionminor, rpatch );
 	temp_version_str = vstring;
-	
+
 	if (rversionmajor > ALLACROST_MAJOR_VERSION)
 		return false;
 	else if (rversionmajor == ALLACROST_MAJOR_VERSION)

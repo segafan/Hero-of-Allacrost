@@ -226,7 +226,7 @@ void MapMode::_Load() {
 	_dialogue_textbox.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	VideoManager->PopState();
 
-	// ---------- (6) Call the map script's load function, which will 
+	// ---------- (6) Call the map script's load function, which will
 	ScriptCallFunction<void>(_map_script.GetLuaState(), "Load", this);
 } // void MapMode::_Load()
 
@@ -312,7 +312,7 @@ void MapMode::_LoadTiles() {
 	_map_script.ReadCloseTable();
 
 	// ---------- (4) Determine which tiles in each tileset are referenced in this map
-	
+
 	// Set size to be equal to the total number of tiles and initialize all entries to -1 (unreferenced)
 	tile_references.assign(tileset_filenames.size() * TILES_PER_TILESET, -1);
 
@@ -354,7 +354,7 @@ void MapMode::_LoadTiles() {
 	}
 
 	// ---------- (5) Parse all of the tileset definition files and create any animated tile images that are used
-	
+
 	ScriptDescriptor tileset_script; // Used to access the tileset definition file
 	vector<uint32> animation_info;   // Temporarily retains the animation data (tile frame indeces and display times)
 
@@ -365,34 +365,34 @@ void MapMode::_LoadTiles() {
 // 				<< tileset_script.GetFilename() << endl;
 // 			return;
 // 		}
-// 
+//
 // 		tileset_script.ReadOpenTable("animated_tiles");
 // 		for (uint32 j = 0; j < tileset_script.ReadGetTableSize(); j++) {
 // 			animation_info.clear();
 // 			tileset_script.ReadUIntVector(j, animation_info);
-// 
+//
 // 			// The index of the first frame in the animation. (i * TILES_PER_TILESET) factors in which tileset the frame comes from
 // 			uint32 first_frame_index = animation_info[0] + (i * TILES_PER_TILESET);
-// 
+//
 // 			// Check if this animation is referenced in the map by looking at the first tile frame index. If it is not, continue on to the next animation
 // 			if (tile_references[first_frame_index] == -1) {
 // 				continue;
 // 			}
-// 
+//
 // 			AnimatedImage new_animation;
 // 			new_animation.SetDimensions(2.0f, 2.0f);
-// 
+//
 // 			// Each pair of entries in the animation info indicate the tile frame index (k) and the time (k+1)
 // 			for (uint32 k = 0; k < animation_info.size(); k += 2) {
 // 				new_animation.AddFrame(tileset_images[i][animation_info[k]], animation_info[k+1]);
 // 			}
-// 
+//
 // 			tile_animations.insert(make_pair(first_frame_index, new_animation));
 // 		}
 // 	} // for (uint32 i = 0; i < tileset_filenames.size(); i++)
 
 	// ---------- (6) Add all referenced tiles to the _tile_images vector, in the proper order
-	
+
 	for (uint32 i = 0; i < tileset_images.size(); i++) {
 		for (uint32 j = 0; j < TILES_PER_TILESET; j++) {
 			uint32 reference = (i * TILES_PER_TILESET) + j;
@@ -1059,13 +1059,13 @@ void MapMode::_CalculateDrawInfo() {
 
 	// Determine the draw coordinates of the top left corner using the camera's current position
 	_draw_info.tile_x_start = 1.0f - _camera->x_offset;
-	//if (IsOddNumber(_camera->x_position))
-	if( _camera->x_position % 2 )
+	if (IsOddNumber(_camera->x_position))
+// 	if( _camera->x_position % 2 )
 		_draw_info.tile_x_start -= 1.0f;
 
 	_draw_info.tile_y_start = 2.0f - _camera->y_offset;
-	//if (IsOddNumber(_camera->y_position))
-	if( _camera->y_position % 2 )
+	if (IsOddNumber(_camera->y_position))
+// 	if( _camera->y_position % 2 )
 		_draw_info.tile_y_start -= 1.0f;
 
 	// By default the map draws 32 + 1 columns and 24 + 1 rows of tiles, the maximum that can fit on the screen.
