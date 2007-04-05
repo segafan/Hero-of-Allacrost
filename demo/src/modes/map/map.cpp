@@ -1060,12 +1060,10 @@ void MapMode::_CalculateDrawInfo() {
 	// Determine the draw coordinates of the top left corner using the camera's current position
 	_draw_info.tile_x_start = 1.0f - _camera->x_offset;
 	if (IsOddNumber(_camera->x_position))
-// 	if( _camera->x_position % 2 )
 		_draw_info.tile_x_start -= 1.0f;
 
 	_draw_info.tile_y_start = 2.0f - _camera->y_offset;
 	if (IsOddNumber(_camera->y_position))
-// 	if( _camera->y_position % 2 )
 		_draw_info.tile_y_start -= 1.0f;
 
 	// By default the map draws 32 + 1 columns and 24 + 1 rows of tiles, the maximum that can fit on the screen.

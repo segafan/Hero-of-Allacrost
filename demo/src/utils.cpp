@@ -58,11 +58,8 @@ bool IsPowerOfTwo(uint32 x) {
 
 
 bool IsOddNumber(uint32 x) {
-	#if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
-		return (x & 0x80000000);
-	#else // SDL_BYTEORDER == SDL_LITTLE_ENDIAN
-		return (x & 0x00000001);
-	#endif
+	// NOTE: this happens to work for both little and big endian systems
+	return (x & 0x00000001);
 }
 
 
