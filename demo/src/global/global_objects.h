@@ -185,6 +185,14 @@ public:
 	**/
 	void MenuUse(GlobalCharacter* target);
 
+	//! \brief Returns true if the item can be used in battle mode
+	bool IsUsableInBattle()
+		{ return ((_usage == GLOBAL_USE_BATTLE) || (_usage == GLOBAL_USE_ALL)); }
+
+	//! \brief Returns true if the item can be used in menu mode
+	bool IsUsableInMenu()
+		{ return ((_usage == GLOBAL_USE_MENU) || (_usage == GLOBAL_USE_ALL)); }
+
 	//! \name Class Member Access Functions
 	//@{
 	GLOBAL_USE GetUsage() const

@@ -56,20 +56,20 @@ CharacterWindow::CharacterWindow()
 CharacterWindow::~CharacterWindow()
 {
 	// Delete the character's portrait
-	VideoManager->DeleteImage(this->_portrait);
+	VideoManager->DeleteImage(_portrait);
 }
 
 
 
 void CharacterWindow::SetCharacter(GlobalCharacter *character)
 {
-	this->_char_id = character->GetID();
+	_char_id = character->GetID();
 
 	// TODO: Load the portrait
-	this->_portrait.SetFilename("img/portraits/map/" + character->GetFilename() + ".png");
-	this->_portrait.SetStatic(true);
-	this->_portrait.SetDimensions(100, 100);
-	VideoManager->LoadImage(this->_portrait);
+	_portrait.SetFilename("img/portraits/map/" + character->GetFilename() + ".png");
+	_portrait.SetStatic(true);
+	_portrait.SetDimensions(100, 100);
+	VideoManager->LoadImage(_portrait);
 } // void CharacterWindow::SetCharacter(GlobalCharacter *character)
 
 
@@ -89,8 +89,8 @@ void CharacterWindow::Draw()
 
 	// Get the window metrics
 	float x, y, w, h;
-	this->GetPosition(x,y);
-	this->GetDimensions(w,h);
+	GetPosition(x,y);
+	GetDimensions(w,h);
 /*<<<<<<< .mine
 =======
 
@@ -157,32 +157,6 @@ MiniCharacterSelectWindow::MiniCharacterSelectWindow() : _char_window_active(fal
 {
 	MenuWindow::Create(300, 472);
 	MenuWindow::SetPosition(724, 150);
-
-	// Load sounds
-	SoundDescriptor confirm;
-	SoundDescriptor bump;
-	SoundDescriptor potion;
-	SoundDescriptor cancel;
-	if (confirm.LoadSound("snd/obtain.wav") == false)
-	{
-		cerr << "MINICHARWINDOW::UPDATE - Unable to load confirm sound effect!" << endl;
-	}
-	if (bump.LoadSound("snd/bump.wav") == false)
-	{
-		cerr << "MINICHARWINDOW::UPDATE - Unable to load bump sound effect!" << endl;
-	}
-	if (potion.LoadSound("snd/potion_drink.wav") == false)
-	{
-		cerr << "MINICHARWINDOW::UPDATE - Unable to load potion drink sound effect!" << endl;
-	}
-	if (cancel.LoadSound("snd/cancel.wav") == false)
-	{
-		cerr << "MINICHARWINDOW::UPDATE - Unable to load cancel sound effect!" << endl;
-	}
-	_menu_sounds["confirm"] = confirm;
-	_menu_sounds["bump"] = bump;
-	_menu_sounds["potion"] = potion;
-	_menu_sounds["cancel"] = cancel;
 }
 
 //--------------------------------------------------------
@@ -190,11 +164,7 @@ MiniCharacterSelectWindow::MiniCharacterSelectWindow() : _char_window_active(fal
 //--------------------------------------------------------
 MiniCharacterSelectWindow::~MiniCharacterSelectWindow()
 {
-	// Clear sounds
-	_menu_sounds["confirm"].FreeSound();
-	_menu_sounds["bump"].FreeSound();
-	_menu_sounds["potion"].FreeSound();
-	_menu_sounds["cancel"].FreeSound();
+
 }
 
 //------------------------------------------------------
@@ -283,7 +253,7 @@ void MiniCharacterSelectWindow::Update()
 		if (selected->GetCount() == 0)
 		{
 			// no more items to use
-			_menu_sounds["bump"].PlaySound();
+			MenuMode::_instance->_menu_sounds["bump"].PlaySound();
 			return;
 		}
 
@@ -291,12 +261,12 @@ void MiniCharacterSelectWindow::Update()
 		if (ch->GetHitPoints() == ch->GetMaxHitPoints())
 		{
 			// don't use item we're full
-			_menu_sounds["bump"].PlaySound();
+			MenuMode::_instance->_menu_sounds["bump"].PlaySound();
 			return;
 		}
 
 		// Play Sound
-		_menu_sounds["potion"].PlaySound();
+// 		_menu_sounds["potion"].PlaySound();
 
 		// increase hp FIXME
 		if (selected->GetUsage() == GLOBAL_USE_MENU)
@@ -324,8 +294,8 @@ void MiniCharacterSelectWindow::Update()
 		}
 		else {
 			GlobalManager->RemoveFromInventory(selected->GetID());
-			this->Activate(false);
-			this->Hide();
+			Activate(false);
+			Hide();
 		}
 	}
 	else if (InputManager->LeftPress())
@@ -363,32 +333,6 @@ InventoryWindow::InventoryWindow() : _active_box(ITEM_ACTIVE_NONE)
 	_InitInventoryItems();
 	_InitCharSelect();
 
-	// Load sounds
-	SoundDescriptor confirm;
-	SoundDescriptor bump;
-	SoundDescriptor potion;
-	SoundDescriptor cancel;
-	if (confirm.LoadSound("snd/obtain.wav") == false)
-	{
-		cerr << "INVENTORYWINDOW::UPDATE - Unable to load confirm sound effect!" << endl;
-	}
-	if (bump.LoadSound("snd/bump.wav") == false)
-	{
-		cerr << "INVENTORYWINDOW::UPDATE - Unable to load bump sound effect!" << endl;
-	}
-	if (potion.LoadSound("snd/potion_drink.wav") == false)
-	{
-		cerr << "INVENTORYWINDOW::UPDATE - Unable to load potion drink sound effect!" << endl;
-	}
-	if (cancel.LoadSound("snd/cancel.wav") == false)
-	{
-		cerr << "INVENTORYWINDOW::UPDATE - Unable to load cancel sound effect!" << endl;
-	}
-	_menu_sounds["confirm"] = confirm;
-	_menu_sounds["bump"] = bump;
-	_menu_sounds["potion"] = potion;
-	_menu_sounds["cancel"] = cancel;
-
 	//Load char portraits for bottom menu
 	StillImage i;
 
@@ -398,23 +342,17 @@ InventoryWindow::InventoryWindow() : _active_box(ITEM_ACTIVE_NONE)
 	_portraits.push_back(i);
 	VideoManager->LoadImage(_portraits[0]);
 
-	_location_picture.SetFilename("img/menus/locations/desert_cave.png");
-	_location_picture.SetDimensions(500.0f, 125.0f);
-	VideoManager->LoadImage(_location_picture);
+	_location_graphic.SetFilename("img/menus/locations/desert_cave.png");
+	_location_graphic.SetDimensions(500.0f, 125.0f);
+	VideoManager->LoadImage(_location_graphic);
 
 }// void InventoryWindow::InventoryWindow
 
 InventoryWindow::~InventoryWindow()
 {
-	// Clear sounds
-	_menu_sounds["confirm"].FreeSound();
-	_menu_sounds["bump"].FreeSound();
-	_menu_sounds["potion"].FreeSound();
-	_menu_sounds["cancel"].FreeSound();
-
 	// Delete portraits
 	VideoManager->DeleteImage(_portraits[0]);
-	VideoManager->DeleteImage(_location_picture);
+	VideoManager->DeleteImage(_location_graphic);
 }
 
 //Initializes the list of items
@@ -572,12 +510,12 @@ void InventoryWindow::Update() {
 						_item_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 						_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 						_active_box = ITEM_ACTIVE_LIST;
-						_menu_sounds["confirm"].PlaySound();
+						MenuMode::_instance->_menu_sounds["confirm"].PlaySound();
 					}
 				}
 				// Deactivate inventory
 				else if (event == VIDEO_OPTION_CANCEL) {
-					_menu_sounds["cancel"].PlaySound();
+					MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
 					_item_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 					Activate(false);
 				}
@@ -591,12 +529,12 @@ void InventoryWindow::Update() {
 					_active_box = ITEM_ACTIVE_CHAR;
 					_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
 					_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-					_menu_sounds["confirm"].PlaySound();
+					MenuMode::_instance->_menu_sounds["confirm"].PlaySound();
 				}
 				// Return to category selection
 				else if (event == VIDEO_OPTION_CANCEL) {
 					_active_box = ITEM_ACTIVE_CATEGORY;
-					_menu_sounds["cancel"].PlaySound();
+					MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
 					_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 					_item_categories.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 				}
@@ -620,7 +558,7 @@ void InventoryWindow::Update() {
 					_active_box = ITEM_ACTIVE_LIST;
 					_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 					_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-					_menu_sounds["cancel"].PlaySound();
+					MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
 				}
 			}
 			break;
@@ -708,7 +646,7 @@ void InventoryWindow::_TEMP_ApplyItem() {
 	if (selected->GetCount() == 0)
 	{
 		// no more items to use
-		_menu_sounds["bump"].PlaySound();
+		MenuMode::_instance->_menu_sounds["bump"].PlaySound();
 		return;
 	}
 
@@ -716,12 +654,12 @@ void InventoryWindow::_TEMP_ApplyItem() {
 	if (ch->GetHitPoints() == ch->GetMaxHitPoints())
 	{
 		// don't use item we're full
-		_menu_sounds["bump"].PlaySound();
+		MenuMode::_instance->_menu_sounds["bump"].PlaySound();
 		return;
 	}
 
 	// Play Sound
-	_menu_sounds["potion"].PlaySound();
+// 	_menu_sounds["potion"].PlaySound();
 
 	// increase hp
 	if (selected->GetUsage() == GLOBAL_USE_MENU)
@@ -765,8 +703,8 @@ void InventoryWindow::_TEMP_ApplyItem() {
 			_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 			_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 		}
-		//this->Activate(false);
-		//this->Hide();
+		//Activate(false);
+		//Hide();
 	}
 }
 
@@ -909,9 +847,6 @@ void InventoryWindow::Draw()
 	// Draw item list
 	_inventory_items.Draw();
 
-	// Draw bottom menu contents
-	_DrawBottomMenu();
-
 	return;
 /*<<<<<<< .mine
 =======
@@ -921,96 +856,6 @@ void InventoryWindow::Draw()
 
 } // bool InventoryWindow::Draw()
 
-// Draw contents of bottom menu based on what option box is active
-void InventoryWindow::_DrawBottomMenu() {
-/*
-	GlobalCharacter* _current_char;
-	GlobalItem* _current_item;
-	// FIXME dont use these
-	ostringstream agl, iteminfo;
-
-	switch (_active_box) {
-		case ITEM_ACTIVE_CHAR:
-			_current_char = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActor(_char_select.GetSelection()));
-			VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
-			VideoManager->Move(115, 670);
-
-			VideoManager->DrawImage(_portraits[0]);
-			VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
-			VideoManager->Move(277,559);
-
-			//VideoManager->MoveRelative(0, 25);
-			VideoManager->DrawText(MakeUnicodeString("Strength: 106"));
-
-			VideoManager->MoveRelative(0, 20);
-			VideoManager->DrawText(MakeUnicodeString("Vigor: 72"));
-
-			VideoManager->MoveRelative(0, 20);
-			VideoManager->DrawText(MakeUnicodeString("Fortitude: 106"));
-
-			VideoManager->MoveRelative(0, 20);
-			VideoManager->DrawText(MakeUnicodeString("Resistance: 48"));
-
-			VideoManager->MoveRelative(0, 20);
-			//ostringstream agl;
-			//agl.flush();
-			agl << "Agility: " << _current_char->GetAgility();
-			VideoManager->DrawText(MakeUnicodeString(agl.str()));
-
-			VideoManager->MoveRelative(0, 20);
-			VideoManager->DrawText(MakeUnicodeString("Evade: 3%"));
-
-		case ITEM_ACTIVE_LIST:
-			_current_item = (*GlobalManager->GetInventory())[_inventory_items.GetSelection()]);
-			VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
-			VideoManager->Move(670,577);
-
-			VideoManager->DrawText(_current_item->GetName());
-			VideoManager->MoveRelative(0, 50);
-			//stat.flush();
-			iteminfo << "HP + 180";// << _current_item->GetRecoveryAmount();
-			VideoManager->DrawText(MakeUnicodeString(iteminfo.str()));
-			break;
-
-		default:
-			VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
-			VideoManager->Move(150, 577);
-
-			//FIX ME: Make dynamic
-			//Display Location
-
-			if (!VideoManager->DrawText(MakeUnicodeString("Desert Cave")))
-				cerr << "MENU: ERROR > Couldn't draw location!" << endl;
-
-			// Draw Played Time
-			VideoManager->MoveRelative(-40, 60);
-			std::ostringstream os_time;
-
-			uint8 hours = SystemManager->GetPlayHours();
-			uint8 minutes = SystemManager->GetPlayMinutes();
-			uint8 seconds = SystemManager->GetPlaySeconds();
-			os_time << (hours < 10 ? "0" : "") << (uint32)hours << ":";
-			os_time << (minutes < 10 ? "0" : "") << (uint32)minutes << ":";
-			os_time << (seconds < 10 ? "0" : "") << (uint32)seconds;
-
-			std::string time = std::string("Time: ") + os_time.str();
-			if (!VideoManager->DrawText(MakeUnicodeString(time)))
-				cerr << "MENU: ERROR > Couldn't draw text!" << endl;
-
-			// Get the money of the party
-			std::ostringstream os_money;
-			os_money << GlobalManager->GetFunds();
-			std::string money = std::string("Drunes: ") + os_money.str();
-			VideoManager->MoveRelative(0, 30);
-			if (!VideoManager->DrawText(MakeUnicodeString(money)))
-				cerr << "MENU: ERROR > Couldn't draw text!" << endl;
-
-			VideoManager->Move(390, 685);
-			VideoManager->DrawImage(_location_picture);
-
-			break;
-	}*/
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 // StatusWindow Class
@@ -1034,10 +879,10 @@ StatusWindow::StatusWindow() : _char_select_active(false)
 // 	}
 //
 // 	// FIXME Init the location picture
-// 	_location_picture.SetFilename("img/menus/locations/desert_cave.png");
-// 	_location_picture.SetDimensions(500, 125);
-// 	_location_picture.SetStatic(true);
-// 	VideoManager->LoadImage(_location_picture);
+// 	_location_graphic.SetFilename("img/menus/locations/desert_cave.png");
+// 	_location_graphic.SetDimensions(500, 125);
+// 	_location_graphic.SetStatic(true);
+// 	VideoManager->LoadImage(_location_graphic);
 //
 // 	//Init char select option box
 // 	_InitCharSelect();
@@ -1081,7 +926,7 @@ StatusWindow::~StatusWindow()
 // 		VideoManager->DeleteImage(_full_portraits[i]);
 // 	}
 //
-// 	VideoManager->DeleteImage(_location_picture);
+// 	VideoManager->DeleteImage(_location_graphic);
 //
 // 	// Clear sounds
 // 	_menu_sounds["confirm"].FreeSound();
@@ -1125,8 +970,7 @@ void StatusWindow::_InitCharSelect() {
 }
 
 // Updates the status window
-void StatusWindow::Update()
-{
+void StatusWindow::Update() {
 	//FIX ME: Handle StatusWindow OptionBox
 
 	// check input values
@@ -1145,14 +989,14 @@ void StatusWindow::Update()
 
 	if (_char_select.GetEvent() == VIDEO_OPTION_CANCEL) {
 		Activate(false);
-		_menu_sounds["cancel"].PlaySound();
+		MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
 	}
 
 } // void StatusWindow::Update()
 
+
 // Draws the status window
-void StatusWindow::Draw()
-{
+void StatusWindow::Draw() {
 	MenuWindow::Draw();
 
 	// Set drawing system
@@ -1216,94 +1060,23 @@ void StatusWindow::Draw()
 //	VideoManager->DrawImage(_full_portraits[_char_select.GetSelection()]);
 
 	_char_select.Draw();
-
-	_DrawBottomMenu();
 } // void StatusWindow::Draw()
-
-// Draws the bottom menu for the status window
-void StatusWindow::_DrawBottomMenu() {
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
-	VideoManager->Move(150, 577);
-
-	//FIX ME: Make dynamic
-	//Display Location
-
-	if (!VideoManager->DrawText(MakeUnicodeString("Desert Cave")))
-		cerr << "MENU: ERROR > Couldn't draw location!" << endl;
-
-	// Draw Played Time
-	VideoManager->MoveRelative(-40, 60);
-	std::ostringstream os_time;
-
-	uint8 hours = SystemManager->GetPlayHours();
-	uint8 minutes = SystemManager->GetPlayMinutes();
-	uint8 seconds = SystemManager->GetPlaySeconds();
-	os_time << (hours < 10 ? "0" : "") << (uint32)hours << ":";
-	os_time << (minutes < 10 ? "0" : "") << (uint32)minutes << ":";
-	os_time << (seconds < 10 ? "0" : "") << (uint32)seconds;
-
-	std::string time = std::string("Time: ") + os_time.str();
-	if (!VideoManager->DrawText(MakeUnicodeString(time)))
-		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
-
-	// Get the money of the party
-	std::ostringstream os_money;
-	os_money << GlobalManager->GetFunds();
-	std::string money = std::string("Drunes: ") + os_money.str();
-	VideoManager->MoveRelative(0, 30);
-	if (!VideoManager->DrawText(MakeUnicodeString(money)))
-		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
-
-	//VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, 0);
-
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
-
-	VideoManager->Move(390, 685);
-	VideoManager->DrawImage(_location_picture);
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 // SkillsWindow Class
 ////////////////////////////////////////////////////////////////////////////////
 
-SkillsWindow::SkillsWindow()  : _active_box(SKILL_ACTIVE_NONE)
-{
+SkillsWindow::SkillsWindow() : _active_box(SKILL_ACTIVE_NONE) {
 	// Init option boxes
 	_InitCharSelect();
 	_InitSkillsList();
 	_InitSkillsCategories();
+} // SkillsWindow::SkillsWindow()
 
-	// Load sounds
-	SoundDescriptor confirm;
-	SoundDescriptor cancel;
 
-	if (confirm.LoadSound("snd/obtain.wav") == false)
-	{
-		cerr << "SKILLSWINDOW::UPDATE - Unable to load confirm sound effect!" << endl;
-	}
 
-	if (cancel.LoadSound("snd/cancel.wav") == false)
-	{
-		cerr << "SKILLSWINDOW::UPDATE - Unable to load cancel sound effect!" << endl;
-	}
-
-	_menu_sounds["confirm"] = confirm;
-	_menu_sounds["cancel"] = cancel;
-
-}// SkillsWindow::SkillsWindow()
-
-SkillsWindow::~SkillsWindow()
-{
-	// Clear sounds
-	_menu_sounds["confirm"].FreeSound();
-	_menu_sounds["cancel"].FreeSound();
-
-}// SkillsWindow::~SkillsWindow()
-
-// Actiavte/deactivate window
 void SkillsWindow::Activate(bool new_status) {
-
-	//Activate window and first option box...or deactivate both
+	// Activate window and first option box...or deactivate both
 	if (new_status) {
 		_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 		_active_box = SKILL_ACTIVE_CHAR;
@@ -1314,27 +1087,25 @@ void SkillsWindow::Activate(bool new_status) {
 	}
 }
 
-// Initalize skill list
+
+
 void SkillsWindow::_InitSkillsList() {
 	// Set up the inventory option box
 	_skills_list.SetCellSize(180.0f, 30.0f);
-
 	_skills_list.SetPosition(500.0f, 170.0f);
 	_skills_list.SetFont("default");
-
 	_skills_list.SetCursorOffset(-52.0f, -20.0f);
 	_skills_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
 	_skills_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_skills_list.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-	// Update the skills list
+
 	_UpdateSkillList();
 	_skills_list.SetSelection(0);
-	// Initially hide the cursor
 	_skills_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-
 }
 
-// Initialize character select
+
+
 void SkillsWindow::_InitCharSelect() {
 // 	//character selection set up
 // 	vector<ustring> options;
@@ -1358,38 +1129,35 @@ void SkillsWindow::_InitCharSelect() {
 // 	_char_select.SetOptions(options);
 // 	_char_select.SetSelection(0);
 // 	_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-
 }
 
-// Initialize skill categories
+
+
 void SkillsWindow::_InitSkillsCategories() {
-	//Set params
 	_skills_categories.SetCellSize(105.0f,30.0f);
 	_skills_categories.SetPosition(510.0f, 120.0f);
 	_skills_categories.SetFont("default");
 	_skills_categories.SetSize(SKILL_CATEGORY_SIZE,1);
-
 	_skills_categories.SetCursorOffset(-52.0f, -20.0f);
 	_skills_categories.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
 	_skills_categories.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_skills_categories.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 
-	//Create options
+	// Create options
 	vector<ustring> options;
 	options.push_back(MakeUnicodeString("All"));
 	options.push_back(MakeUnicodeString("Field"));
 	options.push_back(MakeUnicodeString("Battle"));
 
-	//Set options and default selection
+	// Set options and default selection
 	_skills_categories.SetOptions(options);
 	_skills_categories.SetSelection(SKILL_ALL);
 	_skills_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-
-
 } // void SkillsWindow::InitSkillsCategories()
 
-void SkillsWindow::Update() {
 
+
+void SkillsWindow::Update() {
 	//FIXME: Need support for skills
 	return;
 
@@ -1439,73 +1207,65 @@ void SkillsWindow::Update() {
 
 	switch (_active_box) {
 		case SKILL_ACTIVE_CHAR_APPLY:
-			//Handle skill application
-			{
-				if (event == VIDEO_OPTION_CONFIRM) {
-					//TODO Use Skill
-					_menu_sounds["confirm"].PlaySound();
-				}
-				else if (event == VIDEO_OPTION_CANCEL) {
-					_active_box = SKILL_ACTIVE_LIST;
-					_skills_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-					_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-					_menu_sounds["cancel"].PlaySound();
-				}
+			// Handle skill application
+			if (event == VIDEO_OPTION_CONFIRM) {
+				//TODO Use Skill
+				MenuMode::_instance->_menu_sounds["confirm"].PlaySound();
+			}
+			else if (event == VIDEO_OPTION_CANCEL) {
+				_active_box = SKILL_ACTIVE_LIST;
+				_skills_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+				_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+				MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
 			}
 			break;
 
 		case SKILL_ACTIVE_CHAR:
-			//Choose character for skillset
-			{
-				if (event == VIDEO_OPTION_CONFIRM) {
-					_active_box = SKILL_ACTIVE_CATEGORY;
-					_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-					_skills_categories.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-					_char_skillset = _char_select.GetSelection();
-					_menu_sounds["confirm"].PlaySound();
-				}
-				else if (event == VIDEO_OPTION_CANCEL) {
-					Activate(false);
-					_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-					_menu_sounds["cancel"].PlaySound();
-				}
+			// Choose character for skillset
+			if (event == VIDEO_OPTION_CONFIRM) {
+				_active_box = SKILL_ACTIVE_CATEGORY;
+				_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+				_skills_categories.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+				_char_skillset = _char_select.GetSelection();
+				MenuMode::_instance->_menu_sounds["confirm"].PlaySound();
+			}
+			else if (event == VIDEO_OPTION_CANCEL) {
+				Activate(false);
+				_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+				MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
 			}
 			break;
 
 		case SKILL_ACTIVE_LIST:
-			//Choose skill
-			{
-				if (event == VIDEO_OPTION_CONFIRM) {
-					_active_box = SKILL_ACTIVE_CHAR_APPLY;
-					_skills_list.SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
-					_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-					_menu_sounds["confirm"].PlaySound();
-				}
-				else if (event == VIDEO_OPTION_CANCEL) {
-					_active_box = SKILL_ACTIVE_CATEGORY;
-					_menu_sounds["cancel"].PlaySound();
-					_skills_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-					_skills_categories.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-				}
+			// Choose skill
+			if (event == VIDEO_OPTION_CONFIRM) {
+				_active_box = SKILL_ACTIVE_CHAR_APPLY;
+				_skills_list.SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
+				_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+				MenuMode::_instance->_menu_sounds["confirm"].PlaySound();
+			}
+			else if (event == VIDEO_OPTION_CANCEL) {
+				_active_box = SKILL_ACTIVE_CATEGORY;
+				MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
+				_skills_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+				_skills_categories.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 			}
 			break;
 
 		case SKILL_ACTIVE_CATEGORY:
-			//Choose skill type
-			{
-				if (event == VIDEO_OPTION_CONFIRM) {
-					_active_box = SKILL_ACTIVE_LIST;
-					_skills_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-					_skills_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-					_menu_sounds["confirm"].PlaySound();
-				}
-				else if (event == VIDEO_OPTION_CANCEL) {
-					_active_box = SKILL_ACTIVE_CHAR;
-					_menu_sounds["cancel"].PlaySound();
-					_skills_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-					_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-					_char_select.SetSelection(_char_skillset);
-				}
+			// Choose skill type
+			if (event == VIDEO_OPTION_CONFIRM) {
+				_active_box = SKILL_ACTIVE_LIST;
+				_skills_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+				_skills_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+				MenuMode::_instance->_menu_sounds["confirm"].PlaySound();
+			}
+			else if (event == VIDEO_OPTION_CANCEL) {
+				_active_box = SKILL_ACTIVE_CHAR;
+				MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
+				_skills_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+				_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+				_char_select.SetSelection(_char_skillset);
 			}
 			break;
 	}
@@ -1513,7 +1273,8 @@ void SkillsWindow::Update() {
 	_UpdateSkillList();
 } // void SkillsWindow::Update()
 
-// Update skill list
+
+
 void SkillsWindow::_UpdateSkillList() {
 	//uint32 partysize = GlobalManager->GetParty().size();
 
@@ -1550,15 +1311,10 @@ void SkillsWindow::_UpdateSkillList() {
 	_skills_list.SetSize(1,12);
 
 	_skills_list.SetOptions(options);
-
 }
 
-/*<<<<<<< .mine
-// Draw the skill window
-bool SkillsWindow::Draw() {
-	if (MenuWindow::Draw() == false)
-		return false;
-=======*/
+
+
 void SkillsWindow::Draw() {
 	MenuWindow::Draw();
 
@@ -1566,72 +1322,17 @@ void SkillsWindow::Draw() {
 	_char_select.Draw();
 	_skills_categories.Draw();
 	_skills_list.Draw();
-
 }
-
-// Draw the bottom menu for the skill window
-void SkillsWindow::_DrawBottomMenu() {
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
-	VideoManager->Move(150, 577);
-
-	//FIX ME: Make dynamic
-	//Display Location
-
-	if (!VideoManager->DrawText(MakeUnicodeString("Desert Cave")))
-		cerr << "MENU: ERROR > Couldn't draw location!" << endl;
-
-	// Draw Played Time
-	VideoManager->MoveRelative(-40, 60);
-	std::ostringstream os_time;
-
-	uint8 hours = SystemManager->GetPlayHours();
-	uint8 minutes = SystemManager->GetPlayMinutes();
-	uint8 seconds = SystemManager->GetPlaySeconds();
-	os_time << (hours < 10 ? "0" : "") << (uint32)hours << ":";
-	os_time << (minutes < 10 ? "0" : "") << (uint32)minutes << ":";
-	os_time << (seconds < 10 ? "0" : "") << (uint32)seconds;
-
-	std::string time = std::string("Time: ") + os_time.str();
-	if (!VideoManager->DrawText(MakeUnicodeString(time)))
-		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
-
-	// Get the money of the party
-	std::ostringstream os_money;
-	os_money << GlobalManager->GetFunds();
-	std::string money = std::string("Drunes: ") + os_money.str();
-	VideoManager->MoveRelative(0, 30);
-	if (!VideoManager->DrawText(MakeUnicodeString(money)))
-		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
-
-} // void SkillsWindow::DrawBottomMenu()
 
 ////////////////////////////////////////////////////////////////////////////////
 // EquipWindow Class
 ////////////////////////////////////////////////////////////////////////////////
 
-EquipWindow::EquipWindow() : _active_box(EQUIP_ACTIVE_NONE)
-{
+EquipWindow::EquipWindow() : _active_box(EQUIP_ACTIVE_NONE) {
 	// Initialize option boxes
 	_InitCharSelect();
 	_InitEquipmentSelect();
 	_InitEquipmentList();
-
-	// Load sounds
-	SoundDescriptor confirm;
-	SoundDescriptor cancel;
-
-	if (confirm.LoadSound("snd/obtain.wav") == false)
-	{
-		cerr << "SKILLSWINDOW::UPDATE - Unable to load confirm sound effect!" << endl;
-	}
-
-	if (cancel.LoadSound("snd/cancel.wav") == false)
-	{
-		cerr << "SKILLSWINDOW::UPDATE - Unable to load cancel sound effect!" << endl;
-	}
-
-	_menu_sounds["confirm"] = confirm;
-	_menu_sounds["cancel"] = cancel;
 
 	StillImage i;
 
@@ -1656,21 +1357,18 @@ EquipWindow::EquipWindow() : _active_box(EQUIP_ACTIVE_NONE)
 		VideoManager->LoadImage(_equip_images[i]);
 	}
 
-}// EquipWindow::EquipWindow()
+}
 
-EquipWindow::~EquipWindow()
-{
-	// Clear sounds
-	_menu_sounds["confirm"].FreeSound();
-	_menu_sounds["cancel"].FreeSound();
 
+
+EquipWindow::~EquipWindow() {
 	for (uint32 i = 0; i < EQUIP_CATEGORY_SIZE; i++) {
 		VideoManager->DeleteImage(_equip_images[i]);
 	}
+}
 
-}// EquipWindow::~EquipWindow()
 
-// Activate/deactivate window
+
 void EquipWindow::Activate(bool new_status) {
 
 	//Activate window and first option box...or deactivate both
@@ -1684,7 +1382,8 @@ void EquipWindow::Activate(bool new_status) {
 	}
 }
 
-// Initialize equipment list (list of items to replace with)
+
+
 void EquipWindow::_InitEquipmentList() {
 	// Set up the inventory option box
 	_equip_list.SetCellSize(180.0f, 30.0f);
@@ -1701,10 +1400,10 @@ void EquipWindow::_InitEquipmentList() {
 	_equip_list.SetSelection(0);
 	// Initially hide the cursor
 	_equip_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-
 }
 
-// Initialize character select
+
+
 void EquipWindow::_InitCharSelect() {
 // 	//character selection set up
 // 	vector<ustring> options;
@@ -1732,7 +1431,8 @@ void EquipWindow::_InitCharSelect() {
 //
 } // void EquipWindow::InitCharSelect()
 
-// Initialize equipment select (use to choose which piece to replace)
+
+
 void EquipWindow::_InitEquipmentSelect() {
 	//Set params
 	_equip_select.SetCellSize(105.0f,70.0f);
@@ -1754,7 +1454,8 @@ void EquipWindow::_InitEquipmentSelect() {
 
 } // void EquipWindow::_InitEquipmentSelect()
 
-// Updates the equipment window
+
+
 void EquipWindow::Update() {
 
 	// Points to the active option box
@@ -1809,11 +1510,11 @@ void EquipWindow::Update() {
 					_active_box = EQUIP_ACTIVE_SELECT;
 					_char_select.SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
 					_equip_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-					_menu_sounds["confirm"].PlaySound();
+					MenuMode::_instance->_menu_sounds["confirm"].PlaySound();
 				}
 				else if (event == VIDEO_OPTION_CANCEL) {
 					Activate(false);
-					_menu_sounds["cancel"].PlaySound();
+					MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
 				}
 			}
 			break;
@@ -1825,13 +1526,13 @@ void EquipWindow::Update() {
 					_active_box = EQUIP_ACTIVE_LIST;
 					_equip_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 					_equip_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-					_menu_sounds["confirm"].PlaySound();
+					MenuMode::_instance->_menu_sounds["confirm"].PlaySound();
 				}
 				else if (event == VIDEO_OPTION_CANCEL) {
 					_active_box = EQUIP_ACTIVE_CHAR;
 					_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 					_equip_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-					_menu_sounds["cancel"].PlaySound();
+					MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
 				}
 			}
 			break;
@@ -1844,11 +1545,11 @@ void EquipWindow::Update() {
 					_active_box = EQUIP_ACTIVE_SELECT;
 					_equip_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 					_equip_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-					_menu_sounds["confirm"].PlaySound();
+					MenuMode::_instance->_menu_sounds["confirm"].PlaySound();
 				}
 				else if (event == VIDEO_OPTION_CANCEL) {
 					_active_box = EQUIP_ACTIVE_SELECT;
-					_menu_sounds["cancel"].PlaySound();
+					MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
 					_equip_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 					_equip_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 				}
@@ -1860,7 +1561,7 @@ void EquipWindow::Update() {
 } // void EquipWindow::Update()
 
 
-// Updates list of available replacements
+
 void EquipWindow::_UpdateEquipList() {
 // 	// FIXME: warning, unused variable
 // 	//hoa_global::GlobalCharacter* ch = GlobalManager->GetCharacter(_char_select.GetSelection());
@@ -1973,16 +1674,10 @@ void EquipWindow::_UpdateEquipList() {
 
 } // void EquipWindow::UpdateEquipList()
 
-/*<<<<<<< .mine
 
-// Draws the equipment window
-bool EquipWindow::Draw() {
-	if (MenuWindow::Draw() == false)
-		return false;
-=======*/
+
 void EquipWindow::Draw() {
 	MenuWindow::Draw();
-
 
 	//Draw option boxes
 	_char_select.Draw();
