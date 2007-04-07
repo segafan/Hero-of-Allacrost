@@ -484,7 +484,7 @@ void MapMode::_HandleInputExplore() {
 
 	// Go to menu mode if the user requested it
 	if (InputManager->MenuPress()) {
-		MenuMode *MM = new MenuMode();
+		MenuMode *MM = new MenuMode("Desert Cave", "img/menus/locations/desert_cave.png");
 		ModeManager->Push(MM);
 		return;
 	}

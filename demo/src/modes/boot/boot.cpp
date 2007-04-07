@@ -633,7 +633,7 @@ void BootMode::_OnBattleDebug() {
 void BootMode::_OnMenuDebug() {
 	ModeManager->Pop();
 	GlobalManager->AddCharacter(GLOBAL_CHARACTER_CLAUDIUS);
-	hoa_menu::MenuMode *MM = new hoa_menu::MenuMode();
+	hoa_menu::MenuMode *MM = new hoa_menu::MenuMode("The Boot Screen", "img/menus/locations/desert_cave.png");
 	ModeManager->Push(MM);
 }
 

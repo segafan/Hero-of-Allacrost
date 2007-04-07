@@ -43,27 +43,33 @@ namespace hoa_menu {
 
 bool MENU_DEBUG = false;
 
+MenuMode* MenuMode::_instance = NULL;
+
 ////////////////////////////////////////////////////////////////////////////////
 // MenuMode class -- Initialization and Destruction Code
 ////////////////////////////////////////////////////////////////////////////////
-MenuMode::MenuMode()
-{
-	if (MENU_DEBUG) cout << "MENU: MenuMode constructor invoked." << endl;
 
-	// Save the currently drawn screen
-	if (!VideoManager->CaptureScreen(_saved_screen)) {
-		cerr << "MENU: ERROR: Couldn't save the screen!" << endl;
+MenuMode::MenuMode(string locale_name, string locale_image) {
+	if (MENU_DEBUG)
+		cout << "MENU: MenuMode constructor invoked." << endl;
+
+	_locale_name = MakeUnicodeString(locale_name);
+
+	// Initialize the location graphic
+	_locale_graphic.SetFilename(locale_image);
+	_locale_graphic.SetDimensions(500, 125);
+	_locale_graphic.SetStatic(true);
+	if (VideoManager->LoadImage(_locale_graphic) == false) {
+		cerr << "MENU ERROR: failed to load locale graphic in MenuMode constructor: " << locale_image << endl;
+		exit(1);
 	}
 
-	// Init the location picture
-	//_location_picture.SetFilename("img/menus/locations/desert_cave.png");
-	//_location_picture.SetDimensions(500, 125);
-	//_location_picture.SetStatic(true);
-	//VideoManager->LoadImage(_location_picture);
+	if (VideoManager->CaptureScreen(_saved_screen) == false) {
+		if (MENU_DEBUG)
+			cerr << "MENU WARNING: Couldn't save the screen!" << endl;
+	}
 
-	// FIXME: remove this eventually
-	GlobalManager->SetFunds(4236);
-	_current_window = WIN_INVENTORY;
+	_current_window = WINDOW_INVENTORY;
 
 	GlobalParty & characters = *GlobalManager->GetActiveParty();
 
@@ -74,7 +80,8 @@ MenuMode::MenuMode()
 		case 2: _character_window1.SetCharacter(dynamic_cast<GlobalCharacter*>(characters.GetActor(1)));
 		case 1: _character_window0.SetCharacter(dynamic_cast<GlobalCharacter*>(characters.GetActor(0)));
 			break;
-		default: cerr << "MENU ERROR: no characters in party!" << endl;
+		default:
+			cerr << "MENU ERROR: no characters in party!" << endl;
 			exit(1);
 	}
 
@@ -82,104 +89,82 @@ MenuMode::MenuMode()
 	uint32 start_x = (1024 - 800) / 2 - 40;
 	uint32 start_y = (768 - 600) / 2 + 15;
 	uint32 win_width = 208;
-//	uint32 win_height = 600 - 192;
 
 	//The bottom window for the menu
 	_bottom_window.Create(static_cast<float>(win_width * 4 + 16), 140 + 16, VIDEO_MENU_EDGE_ALL);
-	_bottom_window.SetPosition(static_cast<float>(start_x),static_cast<float>(start_y) + 442);
+	_bottom_window.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y + 442));
 
 	// Width of each character window is 360 px.
 	// Each char window will have an additional 16 px for the left border
 	// The 4th (last) char window will have another 16 px for the right border
 	// Height of the char window is 98 px.
 	// The bottom window in the main view is 192 px high, and the full width which will be 216 * 4 + 16
-	_character_window0.Create(360, 98,~VIDEO_MENU_EDGE_BOTTOM,
-		VIDEO_MENU_EDGE_BOTTOM);
-	_character_window0.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y) + 10);
+	_character_window0.Create(360, 98, ~VIDEO_MENU_EDGE_BOTTOM, VIDEO_MENU_EDGE_BOTTOM);
+	_character_window0.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y + 10));
 
-	_character_window1.Create(360, 98,~VIDEO_MENU_EDGE_BOTTOM,
-		VIDEO_MENU_EDGE_BOTTOM | VIDEO_MENU_EDGE_TOP);
-	_character_window1.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y) + 118);
+	_character_window1.Create(360, 98, ~VIDEO_MENU_EDGE_BOTTOM, VIDEO_MENU_EDGE_BOTTOM | VIDEO_MENU_EDGE_TOP);
+	_character_window1.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y + 118));
 
-	_character_window2.Create(360, 98,~VIDEO_MENU_EDGE_BOTTOM,
-		VIDEO_MENU_EDGE_BOTTOM | VIDEO_MENU_EDGE_TOP);
-	_character_window2.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y) + 226);
+	_character_window2.Create(360, 98, ~VIDEO_MENU_EDGE_BOTTOM, VIDEO_MENU_EDGE_BOTTOM | VIDEO_MENU_EDGE_TOP);
+	_character_window2.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y + 226));
 
-	_character_window3.Create(360, 98,~VIDEO_MENU_EDGE_BOTTOM,
-		VIDEO_MENU_EDGE_TOP | VIDEO_MENU_EDGE_BOTTOM);
-	_character_window3.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y) + 334);
+	_character_window3.Create(360, 98, ~VIDEO_MENU_EDGE_BOTTOM, VIDEO_MENU_EDGE_TOP | VIDEO_MENU_EDGE_BOTTOM);
+	_character_window3.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y + 334));
 
-	_main_options_window.Create(static_cast<float>(win_width * 4 + 16), 60,
-		~VIDEO_MENU_EDGE_BOTTOM, VIDEO_MENU_EDGE_BOTTOM);
-	_main_options_window.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y) - 50);
+	_main_options_window.Create(static_cast<float>(win_width * 4 + 16), 60, ~VIDEO_MENU_EDGE_BOTTOM, VIDEO_MENU_EDGE_BOTTOM);
+	_main_options_window.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y - 50));
 
 	// Set up the status window
-	_status_window.Create(static_cast<float>(win_width * 4 + 16), 448,
-		VIDEO_MENU_EDGE_ALL);
-	_status_window.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y) + 10);
+	_status_window.Create(static_cast<float>(win_width * 4 + 16), 448, VIDEO_MENU_EDGE_ALL);
+	_status_window.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y + 10));
 
 	//Set up the skills window
-	_skills_window.Create(static_cast<float>(win_width * 4 + 16), 448,
-		VIDEO_MENU_EDGE_ALL);
-	_skills_window.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y) + 10);
+	_skills_window.Create(static_cast<float>(win_width * 4 + 16), 448, VIDEO_MENU_EDGE_ALL);
+	_skills_window.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y + 10));
 
 	//Set up the equipment window
-	_equip_window.Create(static_cast<float>(win_width * 4 + 16), 448,
-		VIDEO_MENU_EDGE_ALL);
-	_equip_window.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y) + 10);
+	_equip_window.Create(static_cast<float>(win_width * 4 + 16), 448, VIDEO_MENU_EDGE_ALL);
+	_equip_window.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y + 10));
 
 	// Set up the inventory window
-	_inventory_window.Create(static_cast<float>(win_width * 4 + 16), 448,
-		VIDEO_MENU_EDGE_ALL);
-	_inventory_window.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y) + 10);
+	_inventory_window.Create(static_cast<float>(win_width * 4 + 16), 448, VIDEO_MENU_EDGE_ALL);
+	_inventory_window.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y + 10));
 
-	//FIXME: Set up the formation window
-	_formation_window.Create(static_cast<float>(win_width * 4 + 16), 448,
-		VIDEO_MENU_EDGE_ALL);
-	_formation_window.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y) + 10);
+// 	// TODO: Set up the formation window
+	_formation_window.Create(static_cast<float>(win_width * 4 + 16), 448, VIDEO_MENU_EDGE_ALL);
+	_formation_window.SetPosition(static_cast<float>(start_x), static_cast<float>(start_y + 10));
 
 
 	// Set the menu to show the main options
 	_current_menu_showing = SHOW_MAIN;
 	_current_menu = &_main_options;
 
-	// Load sounds
-	SoundDescriptor confirm;
-	SoundDescriptor bump;
-	SoundDescriptor potion;
-	SoundDescriptor cancel;
-	if (confirm.LoadSound("snd/obtain.wav") == false)
-	{
-		cerr << "MINICHARWINDOW::UPDATE - Unable to load confirm sound effect!" << endl;
-	}
-	if (bump.LoadSound("snd/bump.wav") == false)
-	{
-		cerr << "MINICHARWINDOW::UPDATE - Unable to load bump sound effect!" << endl;
-	}
-	if (potion.LoadSound("snd/potion_drink.wav") == false)
-	{
-		cerr << "MINICHARWINDOW::UPDATE - Unable to load potion drink sound effect!" << endl;
-	}
-	if (cancel.LoadSound("snd/cancel.wav") == false)
-	{
-		cerr << "MINICHARWINDOW::UPDATE - Unable to load cancel sound effect!" << endl;
-	}
-	_menu_sounds["confirm"] = confirm;
-	_menu_sounds["bump"] = bump;
-	_menu_sounds["potion"] = potion;
-	_menu_sounds["cancel"] = cancel;
+	// Load menu sounds
+	_menu_sounds["confirm"] = SoundDescriptor();
+	_menu_sounds["confirm"].LoadSound("snd/confirm.wav");
+	_menu_sounds["cancel"] = SoundDescriptor();
+	_menu_sounds["cancel"].LoadSound("snd/cancel.wav");
+	_menu_sounds["bump"] = SoundDescriptor();
+	_menu_sounds["bump"].LoadSound("snd/bump.wav");
 
+	if (_instance != NULL) {
+		if (MENU_DEBUG)
+			cerr << "MENU WARNING: attempting to create a new instance of MenuMode when one already seems to exist" << endl;
+	}
+	_instance = this;
 } // MenuMode::MenuMode()
 
-// Release and destroy everything
+
+
 MenuMode::~MenuMode() {
-	if (MENU_DEBUG) cout << "MENU: MenuMode destructor invoked." << endl;
+	if (MENU_DEBUG)
+		cout << "MENU: MenuMode destructor invoked." << endl;
 
 	// Remove saved images
 	VideoManager->DeleteImage(_saved_screen);
 
 	// Unload location picture
-	//VideoManager->DeleteImage(_location_picture);
+	VideoManager->DeleteImage(_locale_graphic);
 
 	// Destroy all menu windows
 	_bottom_window.Destroy();
@@ -194,12 +179,12 @@ MenuMode::~MenuMode() {
 	_equip_window.Destroy();
 	_formation_window.Destroy();
 
-	// Clear sounds
+	// Free sounds
 	_menu_sounds["confirm"].FreeSound();
 	_menu_sounds["bump"].FreeSound();
-	_menu_sounds["potion"].FreeSound();
 	_menu_sounds["cancel"].FreeSound();
 
+	_instance = NULL;
 } // MenuMode::~MenuMode()
 
 
@@ -227,20 +212,19 @@ void MenuMode::Reset() {
 	_formation_window.Show();
 
 	// Setup OptionBoxes
-	this->_SetupMainOptionBox();
-	this->_SetupInventoryOptionBox();
-	this->_SetupSkillsOptionBox();
-	this->_SetupStatusOptionBox();
-	this->_SetupOptionsOptionBox();
-	this->_SetupSaveOptionBox();
-	this->_SetupEquipOptionBox();
+	_SetupMainOptionBox();
+	_SetupInventoryOptionBox();
+	_SetupSkillsOptionBox();
+	_SetupStatusOptionBox();
+	_SetupOptionsOptionBox();
+	_SetupSaveOptionBox();
+	_SetupEquipOptionBox();
 
 } // void MenuMode::Reset()
 
 
 
-void MenuMode::_SetupOptionBoxCommonSettings(OptionBox *ob)
-{
+void MenuMode::_SetupOptionBoxCommonSettings(OptionBox *ob) {
 	// Set all the default options
 	ob->SetFont("default");
 	ob->SetCellSize(115.0f, 50.0f);
@@ -254,10 +238,9 @@ void MenuMode::_SetupOptionBoxCommonSettings(OptionBox *ob)
 
 
 
-void MenuMode::_SetupMainOptionBox()
-{
+void MenuMode::_SetupMainOptionBox() {
 	// Setup the main options box
-	this->_SetupOptionBoxCommonSettings(&_main_options);
+	_SetupOptionBoxCommonSettings(&_main_options);
 	_main_options.SetSize(MAIN_SIZE, 1);
 
 	// Generate the strings
@@ -281,10 +264,9 @@ void MenuMode::_SetupMainOptionBox()
 
 
 
-void MenuMode::_SetupInventoryOptionBox()
-{
+void MenuMode::_SetupInventoryOptionBox() {
 	// Setup the option box
-	this->_SetupOptionBoxCommonSettings(&_menu_inventory);
+	_SetupOptionBoxCommonSettings(&_menu_inventory);
 	_menu_inventory.SetSize(INV_SIZE, 1);
 
 	// Generate the strings
@@ -299,10 +281,10 @@ void MenuMode::_SetupInventoryOptionBox()
 }
 
 
-void MenuMode::_SetupSkillsOptionBox()
-{
+
+void MenuMode::_SetupSkillsOptionBox() {
 	// Setup the option box
-	this->_SetupOptionBoxCommonSettings(&_menu_skills);
+	_SetupOptionBoxCommonSettings(&_menu_skills);
 	_menu_skills.SetSize(SKILLS_SIZE, 1);
 
 	// Generate the strings
@@ -317,10 +299,9 @@ void MenuMode::_SetupSkillsOptionBox()
 
 
 
-void MenuMode::_SetupEquipOptionBox()
-{
+void MenuMode::_SetupEquipOptionBox() {
 	// Setup the status option box
-	this->_SetupOptionBoxCommonSettings(&_menu_equip);
+	_SetupOptionBoxCommonSettings(&_menu_equip);
 	_menu_equip.SetCellSize(150.0f, 50.0f);
 	_menu_equip.SetSize(EQUIP_SIZE, 1);
 
@@ -338,10 +319,11 @@ void MenuMode::_SetupEquipOptionBox()
 	_menu_equip.EnableOption(EQUIP_REMOVE, false);
 }
 
-void MenuMode::_SetupStatusOptionBox()
-{
+
+
+void MenuMode::_SetupStatusOptionBox() {
 	// Setup the status option box
-	this->_SetupOptionBoxCommonSettings(&_menu_status);
+	_SetupOptionBoxCommonSettings(&_menu_status);
 	_menu_status.SetSize(STATUS_SIZE, 1);
 
 	// Generate the strings
@@ -356,10 +338,9 @@ void MenuMode::_SetupStatusOptionBox()
 
 
 
-void MenuMode::_SetupOptionsOptionBox()
-{
+void MenuMode::_SetupOptionsOptionBox() {
 	// Setup the options option box
-	this->_SetupOptionBoxCommonSettings(&_menu_options);
+	_SetupOptionBoxCommonSettings(&_menu_options);
 	_menu_options.SetSize(OPTIONS_SIZE, 1);
 
 	// Generate the strings
@@ -375,10 +356,9 @@ void MenuMode::_SetupOptionsOptionBox()
 
 
 
-void MenuMode::_SetupSaveOptionBox()
-{
+void MenuMode::_SetupSaveOptionBox() {
 	// setup the save options box
-	this->_SetupOptionBoxCommonSettings(&_menu_save);
+	_SetupOptionBoxCommonSettings(&_menu_save);
 	_menu_save.SetSize(SAVE_SIZE, 1);
 
 	// Generate the strings
@@ -395,8 +375,7 @@ void MenuMode::_SetupSaveOptionBox()
 // MenuMode class -- Update Code
 ////////////////////////////////////////////////////////////////////////////////
 
-void MenuMode::Update()
-{
+void MenuMode::Update() {
 	// See if inventory window is active
 	//FIX ME: Use a var to track active window and switch?
 
@@ -421,35 +400,29 @@ void MenuMode::Update()
 		return;
 	}
 
-
-	if (InputManager->CancelPress())
-	{
+	if (InputManager->CancelPress()) {
 		// Play sound.
 		_menu_sounds["cancel"].PlaySound();
 		// If in main menu, return to previous Mode, else return to main menu.
 		if (_current_menu_showing == SHOW_MAIN)
 			ModeManager->Pop();
-		else
-		{
+		else {
 			_current_menu_showing = SHOW_MAIN;
 			_current_menu = &_main_options;
 		}
 	}
-	else if (InputManager->ConfirmPress())
-	{
+	else if (InputManager->ConfirmPress()) {
 		// Play Sound
 		if (_current_menu->IsEnabled(_current_menu->GetSelection()))
 			_menu_sounds["confirm"].PlaySound();
 
 		_current_menu->HandleConfirmKey();
 	}
-	else if (InputManager->LeftPress())
-	{
+	else if (InputManager->LeftPress()) {
 		// Play Sound
 		_current_menu->HandleLeftKey();
 	}
-	else if (InputManager->RightPress())
-	{
+	else if (InputManager->RightPress()) {
 		// Play Sound
 		_current_menu->HandleRightKey();
 	}
@@ -458,32 +431,37 @@ void MenuMode::Update()
 	int32 event = _current_menu->GetEvent();
 
 	// If confirm was pressed
-	if (event == VIDEO_OPTION_CONFIRM)
-	{
+	if (event == VIDEO_OPTION_CONFIRM) {
 		// Handle options for the current menu
-		switch (_current_menu_showing)
-		{
+		switch (_current_menu_showing) {
 			case SHOW_MAIN:
-				this->_HandleMainMenu();
+				_HandleMainMenu();
 				break;
+
 			case SHOW_INVENTORY:
-				this->_HandleInventoryMenu();
+				_HandleInventoryMenu();
 				break;
+
 			case SHOW_SKILLS:
-				this->_HandleSkillsMenu();
+				_HandleSkillsMenu();
 				break;
+
 			case SHOW_STATUS:
-				this->_HandleStatusMenu();
+				_HandleStatusMenu();
 				break;
+
 			case SHOW_EQUIP:
-				this->_HandleEquipMenu();
+				_HandleEquipMenu();
 				break;
+
 			/*case SHOW_OPTIONS:
-				this->_HandleOptionsMenu();
+				_HandleOptionsMenu();
 				break;
+
 			case SHOW_SAVE:
-				this->_HandleSaveMenu();
+				_HandleSaveMenu();
 				break;*/
+
 			default:
 				cerr << "MENU: ERROR: Invalid menu showing!" << endl;
 				break;
@@ -511,7 +489,7 @@ void MenuMode::Draw() {
 	VideoManager->SetCoordSys (0.0f, 1024.0f, 768.0f, 0.0f);
 
 
-	uint32 drawwindow;
+	uint32 draw_window;
 
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
 
@@ -528,54 +506,46 @@ void MenuMode::Draw() {
 	// Detects which option is highlighted in main menu choices and sets that to the current window
 	// to draw
 	if (_current_menu_showing == SHOW_MAIN) {
-		drawwindow = _current_menu->GetSelection() + 1;
+		draw_window = _current_menu->GetSelection() + 1;
 	}
 	else {
-		drawwindow = _current_menu_showing;
+		draw_window = _current_menu_showing;
 	}
 
 	// Draw the chosen window
-	switch (drawwindow)
-	{
-		case SHOW_MAIN: break;
+	switch (draw_window) {
+		case SHOW_MAIN:
+			break;
 
 		case SHOW_INVENTORY:
-		{
 			_inventory_window.Draw();
 			break;
-		}
+
 		case SHOW_STATUS:
-		{
 			_status_window.Draw();
 			break;
-		}
+
 		case SHOW_SKILLS:
-		{
 			_skills_window.Draw();
 			break;
-		}
+
 		case SHOW_EQUIP:
-		{
 			_equip_window.Draw();
 			break;
-		}
+
 		/*case SHOW_OPTIONS:
-		{
-			//this->_HandleOptionsMenu();
-			break;
-		}*/
-		//FIXME
+			//_HandleOptionsMenu();
+			break;*/
+
+		// FIXME
 		case SHOW_FORMATION:
 		case SHOW_EXIT:
-		{
 			_formation_window.Draw();
 			break;
-		}
+
 		/*case SHOW_SAVE:
-		{
-			//this->_HandleSaveMenu();
-			break;
-		}*/
+			//_HandleSaveMenu();
+			break;*/
 	}
 
 	// Draw character windows
@@ -593,11 +563,10 @@ void MenuMode::Draw() {
 void MenuMode::_DrawBottomMenu() {
 	_bottom_window.Draw();
 
-	/*VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 	VideoManager->Move(150, 577);
 
-	if (_current_menu_showing == SHOW_INVENTORY || _current_menu_showing == SHOW_EQUIP
-		|| _current_menu_showing == SHOW_SKILLS) {
+	if (_current_menu_showing == SHOW_INVENTORY || _current_menu_showing == SHOW_EQUIP || _current_menu_showing == SHOW_SKILLS) {
 			VideoManager->DrawText(MakeUnicodeString("STR: 105 (+1)"));
 
 			VideoManager->MoveRelative(0, 20);
@@ -633,9 +602,7 @@ void MenuMode::_DrawBottomMenu() {
 
 
 	// Display Location
-
-	if (!VideoManager->DrawText(MakeUnicodeString("Desert Cave")))
-		cerr << "MENU: ERROR > Couldn't draw location!" << endl;
+	VideoManager->DrawText(_locale_name);
 
 	// Draw Played Time
 	VideoManager->MoveRelative(-40, 60);
@@ -648,110 +615,94 @@ void MenuMode::_DrawBottomMenu() {
 	os_time << (seconds < 10 ? "0" : "") << (uint32)seconds;
 
 	std::string time = std::string("Time: ") + os_time.str();
-	if (!VideoManager->DrawText(MakeUnicodeString(time)))
-		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
+	VideoManager->DrawText(MakeUnicodeString(time));
 
-	// Get the money of the party
-	std::ostringstream os_money;
-	os_money << GlobalManager->GetMoney();
-	std::string money = std::string("Drunes: ") + os_money.str();
+	// Display the current funds that the party has
+	string money = string("Drunes: " + NumberToString(GlobalManager->GetFunds()));
 	VideoManager->MoveRelative(0, 30);
-	if (!VideoManager->DrawText(MakeUnicodeString(money)))
-		cerr << "MENU: ERROR > Couldn't draw text!" << endl;
+	VideoManager->DrawText(MakeUnicodeString(money));
 
-	//VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, 0);
+	VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, 0);
 
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 
 	VideoManager->Move(390, 685);
-	VideoManager->DrawImage(_location_picture);*/
+	VideoManager->DrawImage(_locale_graphic);
 } // void MenuMode::_DrawBottomMenu()
 
 
 
 //FIX ME:  Adjust for new layout
-void MenuMode::_HandleMainMenu()
-{
-
-	// Change the based on which option was selected.
-	switch (_main_options.GetSelection())
-	{
+void MenuMode::_HandleMainMenu() {
+	switch (_main_options.GetSelection()) {
 		case MAIN_INVENTORY:
-		{
 			_current_menu_showing = SHOW_INVENTORY;
 			_current_menu = &_menu_inventory;
 			break;
-		}
+
 		case MAIN_SKILLS:
-		{
 			_current_menu_showing = SHOW_SKILLS;
 			_current_menu = &_menu_skills;
 			break;
-		}
+
 		/*case MAIN_OPTIONS:
-		{
 			_current_menu_showing = SHOW_OPTIONS;
 			_current_menu = &_menu_options;
-			break;
-		}*/
+			break;*/
+
 		/*case MAIN_FORMATION:
-		{
 			_current_menu_showing = SHOW_FORMATION;
 			_current_menu = &_menu_formation;
-			break;
-		}*/
+			break;*/
+
 		case MAIN_STATUS:
-		{
 			_current_menu_showing = SHOW_STATUS;
 			_current_menu = &_menu_status;
 			break;
-		}
+
 		case MAIN_EQUIP:
-		{
 			_current_menu_showing = SHOW_EQUIP;
 			_current_menu = &_menu_equip;
 			break;
-		}
+
 		/*case MAIN_SAVE:
-		{
 			_current_menu_showing = SHOW_SAVE;
 			_current_menu = &_menu_save;
-			break;
-		}*/
+			break;*/
+
 		case MAIN_EXIT:
-		{
 			ModeManager->Pop();
 			break;
-		}
+
 		default:
-		{
-			cerr << "MENU: ERROR: Invalid option in MenuMode::HandleMainMenu()!" << endl;
+			cerr << "MENU ERROR: Invalid option in MenuMode::_HandleMainMenu()" << endl;
 			break;
-		}
 	}
 } // void MenuMode::_HandleMainMenu()
 
-// Handles the status menu
+
+
 void MenuMode::_HandleStatusMenu() {
 	switch (_menu_status.GetSelection()) {
 		case STATUS_VIEW:
 			_status_window.Activate(true);
 			break;
+
 		case STATUS_CANCEL:
 			_current_menu_showing = SHOW_MAIN;
 			_current_menu = &_main_options;
 			break;
+
 		default:
-			cerr << "MENU: ERROR: Invalid option in MenuMode::HandleStatusMenu()!" << endl;
+			cerr << "MENU ERROR: Invalid option in MenuMode::_HandleStatusMenu()" << endl;
 			break;
 	}
 }
 
-// Handles the inventory menu
-void MenuMode::_HandleInventoryMenu()
-{
-	switch (_menu_inventory.GetSelection())
-	{
+
+
+void MenuMode::_HandleInventoryMenu() {
+	switch (_menu_inventory.GetSelection()) {
 		case INV_USE:
 			// FIXME: Reenable
 			// Make sure we have some items in the inventory.
@@ -760,112 +711,109 @@ void MenuMode::_HandleInventoryMenu()
 			_inventory_window.Activate(true);
 			_current_menu->SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
 			break;
+
 		case INV_SORT:
 			// TODO: Handle the sort inventory comand
 			cout << "MENU: Inventory sort command!" << endl;
 			break;
+
 		case INV_CANCEL:
-		{
 			_current_menu_showing = SHOW_MAIN;
 			_current_menu = &_main_options;
 			break;
-		}
+
 		default:
-			cerr << "MENU: ERROR: Invalid option in MenuMode::HandleInventoryMenu()!" << endl;
+			cerr << "MENU ERROR: Invalid option in MenuMode::_HandleInventoryMenu()" << endl;
 			break;
 	}
 }
 
-// Handles the skills menu
-void MenuMode::_HandleSkillsMenu()
-{
-	switch (_menu_skills.GetSelection())
-	{
+
+
+void MenuMode::_HandleSkillsMenu() {
+	switch (_menu_skills.GetSelection()) {
 		case SKILLS_CANCEL:
-		{
 			_current_menu_showing = SHOW_MAIN;
 			_current_menu = &_main_options;
 			break;
-		}
+
 		case SKILLS_USE:
-		{
 			_skills_window.Activate(true);
 			_current_menu->SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
 			break;
-		}
+
 		default:
-			cerr << "MENU: ERROR: Invalid option in MenuMode::HandleSkillsMenu()!" << endl;
+			cerr << "MENU ERROR: Invalid option in MenuMode::_HandleSkillsMenu()" << endl;
 			break;
 	}
 }
 
-// Handles the equipment menu
-void MenuMode::_HandleEquipMenu()
-{
-	switch (_menu_equip.GetSelection())
-	{
+
+
+void MenuMode::_HandleEquipMenu() {
+	switch (_menu_equip.GetSelection()) {
 		case EQUIP_EQUIP:
 			_equip_window.Activate(true);
 			_current_menu->SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
 			break;
+
 		case EQUIP_REMOVE:
 			// TODO: Handle the remove command
 			cout << "MENU: Remove command!" << endl;
 			break;
+
 		case EQUIP_CANCEL:
-		{
 			_current_menu_showing = SHOW_MAIN;
 			_current_menu = &_main_options;
 			break;
-		}
+
 		default:
-			cerr << "MENU: ERROR: Invalid option in MenuMode::HandleEquipMenu()!" << endl;
+			cerr << "MENU ERROR: Invalid option in MenuMode::_HandleEquipMenu()" << endl;
 			break;
 	}
 }
 
-// Handles the options menu
-void MenuMode::_HandleOptionsMenu()
-{
-	switch (_menu_options.GetSelection())
-	{
+
+
+void MenuMode::_HandleOptionsMenu() {
+	switch (_menu_options.GetSelection()) {
 		case OPTIONS_EDIT:
 			// TODO: Handle the Options - Edit command
 			cout << "MENU: Options - Edit command!" << endl;
 			break;
+
 		case OPTIONS_SAVE:
 			// TODO: Handle the Options - Save command
 			cout << "MENU: Options - Save command!" << endl;
 			break;
+
 		case OPTIONS_CANCEL:
-		{
 			_current_menu_showing = SHOW_MAIN;
 			_current_menu = &_main_options;
 			break;
-		}
+
 		default:
-			cerr << "MENU: ERROR: Invalid option in MenuMode::HandleOptionsMenu()!" << endl;
+			cerr << "MENU ERROR: Invalid option in MenuMode::_HandleOptionsMenu()" << endl;
 			break;
 	}
 }
 
-// Handles the save menu
-void MenuMode::_HandleSaveMenu()
-{
-	switch (_menu_save.GetSelection())
-	{
+
+
+void MenuMode::_HandleSaveMenu() {
+	switch (_menu_save.GetSelection()) {
 		case SAVE_SAVE:
 			// TODO: Handle Save - Save command
 			cout << "MENU: Save - Save command!" << endl;
 			break;
+
 		case SAVE_CANCEL:
-		{
 			_current_menu_showing = SHOW_MAIN;
 			_current_menu = &_main_options;
 			break;
-		}
+
 		default:
-			cerr << "MENU: ERROR: Invalid option in MenuMode::HandleSaveMenu()!" << endl;
+			cerr << "MENU ERROR: Invalid option in MenuMode::_HandleSaveMenu()" << endl;
 	}
 }
 
