@@ -1004,7 +1004,7 @@ RenderedLine::RenderedLine(GLuint *tex, int32 lineWidth, int32 texWidth, int32 l
 //-----------------------------------------------------------------------------
 bool RenderedString::Draw() const
 {
-	return GameVideo::SingletonCreate()->Draw(*this);
+	return VideoManager->Draw(*this);
 }
 
 
@@ -1077,12 +1077,11 @@ RenderedString::RenderedString(int32 line_skip, int32 shadowX, int32 shadowY)
 //-----------------------------------------------------------------------------
 RenderedString::~RenderedString()
 {
-	GameVideo *video = GameVideo::SingletonCreate();
 	std::vector<RenderedLine *>::iterator line;
 	for (line = lines.begin(); line != lines.end(); ++line)
 	{
-		video->_DeleteTexture((*line)->texture[RenderedLine::MAIN_TEXTURE]);
-		video->_DeleteTexture((*line)->texture[RenderedLine::SHADOW_TEXTURE]);
+		VideoManager->_DeleteTexture((*line)->texture[RenderedLine::MAIN_TEXTURE]);
+		VideoManager->_DeleteTexture((*line)->texture[RenderedLine::SHADOW_TEXTURE]);
 		delete *line;
 	}
 }

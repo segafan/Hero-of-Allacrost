@@ -7,45 +7,44 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-/*!****************************************************************************
- * \file    boot_credits.h
- * \author  Viljami Korhonen, mindflayer@allacrost.org
- * \brief   Header file for the Credits screen
- *
- * This file includes a simple version of the credits screen class
- * used in the boot mode. 
- *****************************************************************************/
- 
+/** ****************************************************************************
+*** \file    boot_credits.h
+*** \author  Viljami Korhonen, mindflayer@allacrost.org
+*** \brief   Header file for the Credits screen
+***
+*** This file defines the credits screen class that is used by boot mode.
+*** ***************************************************************************/
+
 #ifndef __BOOT_CREDITS__
 #define __BOOT_CREDITS__
 
 #include <string>
+
 #include "video.h"
-#include "text.h"
 
 
-//! All calls to boot mode are wrapped in this namespace.
+
 namespace hoa_boot {
 
+// TODO: this should all be defined in the private_boot namespace
 
-/*!****************************************************************************
- *  \brief The CreditsScreen-class provides everything that's needed for simple
- * Credits-screen effects. Used only in the boot mode.
- *****************************************************************************/
+/** ****************************************************************************
+*** \brief Provides for everything that is needed for displaying the game credits.
+***
+*** This class is used only in boot mode.
+*** *****************************************************************************/
 class CreditsScreen
 {
 public:
-	//! Constructor
 	CreditsScreen();
 
-	//! Destructor
 	~CreditsScreen();
 
 	//! Draws the credits window on the screen if it is set visible
 	void Draw();
 
 	//! Updates the credits window
-	void UpdateWindow(int32 frameTime);
+	void UpdateWindow(int32 frame_time);
 
 	//! Shows the credits window
 	void Show();
@@ -67,16 +66,12 @@ private:
 	float _text_offset_y;
 
 	//! Text to be displayed
-	const std::string _credits_text;
+	std::string _credits_text;
 
-        //! Rendered text string
-        hoa_video::RenderedString *_credits_rendered;
+	//! Rendered text string
+	hoa_video::RenderedString* _credits_rendered;
 };
 
+} // namespace hoa_boot
 
-} // end hoa_boot
-
-
-#endif
-
-
+#endif // __BOOT_CREDITS__
