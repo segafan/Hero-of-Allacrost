@@ -169,7 +169,6 @@ void Editor::_FileNew()
 			_ed_tabs->setTabPosition(QTabWidget::South);
 
 			Q3CheckListItem* tiles = static_cast<Q3CheckListItem*> (new_map->GetTilesetListView()->firstChild());
-			vector<StillImage> temp(256);
 			while (tiles)
 			{
 				if (tiles->isOn())
@@ -177,8 +176,7 @@ void Editor::_FileNew()
 					TilesetTable* table = new TilesetTable(_ed_widget, tiles->text());
 					_ed_tabs->addTab(table, tiles->text());
 					_ed_scrollview->_map->tileset_names.append(tiles->text());
-					temp = table->tiles;
-					_ed_scrollview->_map->tileset_tiles.push_back(temp);
+					_ed_scrollview->_map->tilesets.push_back(table);
 				} // tileset must be selected
 				tiles = static_cast<Q3CheckListItem*> (tiles->nextSibling());
 			} // iterate through all possible tilesets

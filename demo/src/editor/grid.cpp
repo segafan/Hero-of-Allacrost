@@ -163,7 +163,7 @@ void Grid::LoadMap()
 		QMessageBox::warning(this, "Loading File...", QString("ERROR: could not open %1 for reading!").arg(_file_name));
 
 	tileset_names.clear();
-	tileset_tiles.clear();
+	tilesets.clear();
 	_lower_layer.clear();
 	_middle_layer.clear();
 	_upper_layer.clear();
@@ -491,8 +491,8 @@ void Grid::paintGL()
 					qDebug("Error loading the tile!");
 				qDebug(QString("Width = %1").arg(tileset_tiles[tileset_index][tile_index].GetWidth()));
 				qDebug(QString("Height = %1").arg(tile.GetHeight()));*/
-				if (!VideoManager->DrawImage(/*tile))*/tileset_tiles[tileset_index][tile_index]))
-					qDebug("Error drawing the tile!");
+
+				VideoManager->DrawImage(tilesets[tileset_index]->tiles[tile_index]);
 			} // a tile exists to draw
 			col = ++col % _width;
 			if (col == 0)
@@ -516,7 +516,7 @@ void Grid::paintGL()
 					tile_index = *it;
 				else  // Don't divide by 0
 					tile_index = *it / (tileset_index * 256);
-				VideoManager->DrawImage(tileset_tiles[tileset_index][tile_index]);
+				VideoManager->DrawImage(tilesets[tileset_index]->tiles[tile_index]);
 			} // a tile exists to draw
 			col = ++col % _width;
 			if (col == 0)
@@ -540,7 +540,7 @@ void Grid::paintGL()
 					tile_index = *it;
 				else  // Don't divide by 0
 					tile_index = *it / (tileset_index * 256);
-				VideoManager->DrawImage(tileset_tiles[tileset_index][tile_index]);
+				VideoManager->DrawImage(tilesets[tileset_index]->tiles[tile_index]);
 			} // a tile exists to draw
 			col = ++col % _width;
 			if (col == 0)
