@@ -23,6 +23,7 @@
 #include "video.h"
 
 #include "tile.h"
+#include "tileset.h"
 
 #include <QCheckBox>
 #include <QColor>
@@ -91,8 +92,8 @@ class Grid: public QGLWidget
 
 		//! List of the tileset names being used.
 		QStringList tileset_names;
-		//! A vector containing each tileset's list of tiles loaded via LoadMultiImage. 
-		std::vector<std::vector<hoa_video::StillImage> > tileset_tiles;
+		//! A vector which contains a pointer to each tileset and the tiles it has loaded via LoadMultiImage
+		std::vector<TilesetTable*> tilesets;
 		std::vector<uint32> tiles_walkable; // vector of walkability of tiles
 		std::vector<uint32> indiv_walkable; // vector of walkability of individual tiles
 
