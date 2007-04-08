@@ -7,122 +7,56 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-/*!****************************************************************************
- * \file    boot_credits.cpp
- * \author  Viljami Korhonen, mindflayer@allacrost.org
- * \brief   Source file for the Credits screen
- *****************************************************************************/
+/** ****************************************************************************
+*** \file    boot_credits.cpp
+*** \author  Viljami Korhonen, mindflayer@allacrost.org
+*** \brief   Source file for the credits screen
+*** ***************************************************************************/
 
 #include "video.h"
+#include "script.h"
+
 #include "boot_credits.h"
 
 using namespace std;
-using namespace hoa_video;
+
 using namespace hoa_utils;
+using namespace hoa_video;
+using namespace hoa_script;
+
+
 
 namespace hoa_boot {
 
-
 CreditsScreen::CreditsScreen() :
-_visible(false),
-_text_offset_y(0.0f),
-_credits_text(
-			  "Hero of Allacrost Development Team\n"
-			  "\n\n\n\n"
-			  "Founder and Lead Designer\n\n"
-			  "Tyler Olsen (Roots)\n"
-			  "\n\n\n"
-			  "Deputy Lead\n\n"
-			  "Philip Vorsilak (gorzuate)\n"
-			  "\n\n\n"
-			  "Team Manager\n\n"
-			  "Emre Motan (emrebfg)\n"
-			  "\n\n\n"
-			  "Programming Team\n\n"
-			  "Corey Hoffstein (visage) ~ Programming lead, battle mode engine\n\n"
-			  "Tyler Olsen (Roots) ~ Game engine, audio engine, map mode engine\n\n"
-			  "Raj Sharma (roos) ~ Video engine\n\n"
-			  "Philip Vorsilak (gorzuate) ~ Level editor\n\n"
-			  "Viljami Korhonen (MindFlayer) ~ Boot mode engine\n\n"
-			  "Daniel Steuernol (Steu) ~ Menu mode engine\n"
-			  "\n\n\n"
-			  "Artwork Team\n\n"
-			  "Joe Raucci (Sylon) ~ Battle sprites, map sprites, GUI artwork\n\n"
-			  "Brett Steele (Safir~Kreuz) ~ Map sprites, battle sprites, character portraits\n\n"
-			  "Richard Kettering (Jetryl) ~ Map tiles, map sprites, inventory icons, location graphics\n\n"
-			  "Josiah Tobin (Josiah Tobin) ~ Map tiles\n\n"
-			  "Matthew James (nunvuru) ~ Website graphics, GUI artwork, Allacrost logos\n\n"
-			  "Victoria Smith (alenacat) ~ Map sprites, map tiles\n\n"
-			  "Jerimiah Short (BigPapaN0z) ~ Map tiles\n\n"
-			  "Max Humber (zomby138) ~ Conceptual Art, Computer Graphics\n\n"
-			  "\n\n\n"
-			  "Music and Sound Team\n\n"
-			  "Ryan Reilly (Rain) ~ Music and sound lead, soundtrack composer\n\n"
-			  "Joe Rouse (Loodwig) ~ Soundtrack composer\n\n"
-			  "Zhe Zhou (shizeet) ~ Sound mixer\n\n"
-			  "Jamie Bremaneson (Jam) ~ Sound composer\n\n"
-			  "\n\n\n"
-			  "Online Services\n\n"
-			  "Matthew James (nunvuru) ~ Website design\n\n"
-			  "Emre Motan (emrebfg) ~ Website content, forum administration\n\n"
-			  "Daniel Steuernol (Steu) ~ Wiki support\n"
-			  "\n\n\n"
-			  "Story\n\n"
-			  "Tyler Olsen (Roots) ~ Author\n\n"
-			  "Tim Hargreaves (Balthazar) ~ Editor\n"
-			  "\n\n\n"
-			  "Packaging\n\n"
-			  "Philip Vorsilak (gorzuate) ~ Source distribution\n\n"
-			  "Viljami Korhonen (MindFlayer) ~ Windows distribution\n\n"
-			  "Alistair Lynn (prophile) ~ OS X distribution\n\n"
-			  "(ettin) ~ Debian distribution\n\n"
-			  "\n\n\n"
-			  "Additional Programming\n\n"
-			  "Nick Weihs (nickw) ~ Video engine\n\n"
-			  "Vladimir Mitrovic (snipe714) ~ Scripting engine\n\n"
-			  "Farooq Mela (CamelJockey) ~ Video engine\n\n"
-			  "Kevin Martin (kev82) ~ Video engine, game engine\n\n"
-
-			  "\n\n\n"
-			  "Additional Artwork\n\n"
-			  "Tyler Stroud (gloomcover) ~ Map tiles\n\n"
-			  "Jason Frailey (Valdroni) ~ Concept art, map sprites\n\n"
-			  "Nathan Christie (Adarias) ~ Concept art, map sprites, map tiles\n\n"
-			  "(fmunoz) ~ Inventory icons\n\n"
-			  "(Jarks) ~ Map tiles, inventory icons\n\n"
-			  "(wayfarer) ~ Concept art, map sprites\n\n"
-			  "Chris Luspo (Venndetta1) ~ Concept art\n\n"
-			  "Jon Williams (Jonatron) ~ Map sprites\n\n"
-			  "\n\n\n"
-			  "Additional Music and Sound\n\n"
-			  "Matt Dexter (Star Pilot) ~ Soundtrack composer\n\n"
-			  "Jean Malary (hamiko) ~ Sound mixer\n"
-			  "\n\n\n"
-			  "Additional Internet Services\n\n"
-			  "Tim Hargreaves (Balthazar) ~ previous website, forum administration\n\n"
-			  "Felix Kastner (Biohazard) ~ previous website\n"
-			  "\n\n\n"
-			  "Additional Translation\n\n"
-			  "Mikko Hanninen (Burnsaber) ~ Finnish prologue\n"
-			  "\n\n\n"
-			  "Extra Thanks\n\n"
-			  "Adam Lindquist (Zorbfish) ~ Scripting engine\n\n"
-			  "(Melchior)\n\n"
-			  "(Egan1)"
-			  ),
-_credits_rendered(NULL)
+	_visible(false),
+	_text_offset_y(0.0f),
+	_credits_rendered(NULL)
 {
 	// Init the background window
 	_window.Create(1024.0f, 600.0f);
 	_window.SetPosition(0.0f, 630.0f);
 	_window.SetDisplayMode(VIDEO_MENU_EXPAND_FROM_CENTER);
 	_window.Hide();
+
+	// Load the credits from the Lua file
+	ScriptDescriptor credits_file;
+	if (credits_file.OpenFile("dat/credits.lua", SCRIPT_READ) == false) {
+		cerr << "BOOT ERROR: failed to open the credits file" << endl;
+		exit(1);
+	}
+	_credits_text = credits_file.ReadString("credits_text");
+	credits_file.CloseFile();
 }
 
 
 CreditsScreen::~CreditsScreen()
 {
 	_window.Destroy();
+	if (_credits_rendered != NULL) {
+		delete(_credits_rendered);
+		_credits_rendered = NULL;
+	}
 }
 
 
@@ -164,12 +98,11 @@ void CreditsScreen::Show()
 	_visible = true;
 	_text_offset_y = 0.0f; // Reset the text offset
 	VideoManager->SetFont("default"); // Reset font
-        if (!_credits_rendered)
-	{
+
+	if (!_credits_rendered) {
 		_credits_rendered = VideoManager->RenderText(MakeUnicodeString(_credits_text));
-		if (!_credits_rendered)
-		{
-			cerr << "Failed to render credits string.\n" << endl;
+		if (!_credits_rendered) {
+			cerr << "BOOT ERROR: failed to render the credits string.\n" << endl;
 			exit(1);
 		}
 	}
@@ -182,9 +115,8 @@ void CreditsScreen::Hide()
 	_window.Hide();
 	_visible = false;
 	VideoManager->SetTextColor(Color::white); // Reset text color
-	if (_credits_rendered)
-	{
-		delete _credits_rendered;
+	if (_credits_rendered) {
+		delete(_credits_rendered);
 		_credits_rendered = NULL;
 	}
 }
