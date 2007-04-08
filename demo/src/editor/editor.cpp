@@ -23,9 +23,6 @@ using namespace std;
 
 Editor::Editor() : Q3MainWindow(0, 0, Qt::WDestructiveClose)
 {
-	// initialize database
-	_tile_db = NULL;
-
 	// create the statusbar
 	_stat_bar = new QStatusBar(this);
 	
@@ -64,8 +61,6 @@ Editor::Editor() : Q3MainWindow(0, 0, Qt::WDestructiveClose)
 	_layer_ids.insert(std::pair<LAYER_TYPE,int>(MIDDLE_LAYER,edit_ml_id));
 	int edit_ul_id = _tiles_menu->insertItem("Edit &upper layer", this, SLOT(_TileEditUL()));
 	_layer_ids.insert(std::pair<LAYER_TYPE,int>(UPPER_LAYER,edit_ul_id));
-	_tiles_menu->insertSeparator();
-	_tiles_menu->insertItem("&Manage database...", this, SLOT(_TileDatabase()), Qt::CTRL+Qt::Key_D);
 	
 	// map menu creation
 	_map_menu = new Q3PopupMenu(this);
@@ -113,8 +108,6 @@ Editor::~Editor()
 	delete _ed_layout;
 	delete _ed_widget;
 
-	if(_tile_db != NULL)
-		delete _tile_db;
 } // Editor destructor
 
 
@@ -167,7 +160,7 @@ void Editor::_FileNew()
 			if (_ed_scrollview != NULL)
 				delete _ed_scrollview;
 			_ed_scrollview = new EditorScrollView(_ed_widget, "map",
-				new_map->GetWidth(), new_map->GetHeight(), _tile_db);
+				new_map->GetWidth(), new_map->GetHeight());
 			_ed_scrollview->resize(new_map->GetWidth() * TILE_WIDTH, new_map->GetHeight() * TILE_HEIGHT);
 
 			if (_ed_tabs != NULL)
@@ -219,7 +212,7 @@ void Editor::_FileOpen()
 		{
 			if (_ed_scrollview != NULL)
 				delete _ed_scrollview;
-			_ed_scrollview = new EditorScrollView(_ed_widget, "map", 0, 0, _tile_db);
+			_ed_scrollview = new EditorScrollView(_ed_widget, "map", 0, 0);
 
 			if (_ed_tabs != NULL)
 				delete _ed_tabs;
@@ -476,14 +469,6 @@ void Editor::_TileEditUL()
 		_SetEditLayer(UPPER_LAYER);
 } // _TileEditUL()
 
-void Editor::_TileDatabase()
-{
-	_OpenTileDatabase();
-	DatabaseDialog* tile_db = new DatabaseDialog(this, "tile_db_dialog", _tile_db);
-	tile_db->exec();
-	delete tile_db;
-} // _TileDatabase()
-
 void Editor::_MapSelectMusic()
 {
 	if(_ed_scrollview == NULL)
@@ -550,47 +535,6 @@ bool Editor::_EraseOK()
     return true;
 } // _EraseOK()
 
-void Editor::_OpenTileDatabase()
-{
-	if (_tile_db == NULL)
-	{
-		QDir database_dir("./dat");    // tiles database directory
-		if (!database_dir.exists("tilesets"))
-		{
-			QString database_name = QDir::convertSeparators("dat/tilesets");
-			QString message("Tile database directory ");
-			message.append(database_name);
-			message.append(" does not exist.\nCreate ");
-			message.append(database_name);
-			message.append(" directory?\n");
-			message.append("(Warning: editor will not function without this directory!)");
-			int answer = QMessageBox::warning(this, "Tile Database", QString(message), "&Yes", "&No", QString::null, 0, 1);
-
-			if (answer == 0)
-			{
-				if (!database_dir.mkdir("tilesets"))
-				{
-					QMessageBox::warning(this, "Tile Database", "Unable to create tile database directory! Exiting...");
-					_FileQuit();
-				} // only if mkdir was unsuccessful
-			} // user pressed yes
-			else
-				_FileQuit();
-		} // make sure tile database directory exists
-
-		if (QFile::exists("dat/tilesets/tiles_database.lua"))
-			_tile_db = new TileDatabase("dat/tilesets/tiles_database.lua");
-		else 
-		{
-			QMessageBox::warning(this, "Tile Database", "Tile database does not exist. Creating one now...");
-			_stat_bar->message("Please wait...");
-			_tile_db = new TileDatabase();
-			_tile_db->Update("img/tilesets");
-			_tile_db->Save("dat/tilesets/tiles_database.lua");
-			_stat_bar->message("Database successfully created!", 5000);
-		} // tile database has not yet been setup
-	} // only create a database if one hasn't been setup yet
-} // _OpenTileDatabase()
 
 /************************
   NewMapDialog class functions follow
@@ -727,11 +671,9 @@ QString MusicDialog::GetSelectedFile()
   EditorScrollView class functions follow
 ************************/
 
-EditorScrollView::EditorScrollView(QWidget* parent, const QString& name, int width,
-	int height, TileDatabase* db) : Q3ScrollView(parent, (const char*) name, Qt::WNoAutoErase|Qt::WStaticContents)
+EditorScrollView::EditorScrollView(QWidget* parent, const QString& name, int width, int height)
+	: Q3ScrollView(parent, (const char*) name, Qt::WNoAutoErase|Qt::WStaticContents)
 {
-	_db = db;
-
 	// Set default editing modes.
 	_tile_mode  = PAINT_TILE;
 	_layer_edit = LOWER_LAYER;
@@ -1014,353 +956,3 @@ void EditorScrollView::_RemoveIfUnused(int file_index)
 		//_map->file_name_list.removeAt(file_index);
 } // _RemoveIfUnused(...)
 
-
-/************************
-  DatabaseDialog class functions follow
-************************/
-
-DatabaseDialog::DatabaseDialog(QWidget* parent, const QString& name, TileDatabase* db)
-	: Q3TabDialog(parent, (const char*) name)
-{
-	_db = db;
-	_selected_set = NULL;
-	_set_modified = false;
-
-	setCaption("Tile Database...");
-	resize(600, 500);
-
-	QDir tileset_dir("dat/tilesets");    // tileset directory
-
-	// ***************************************************
-	// The following creates the Tilesets tab of the Tile Database manager dialog.
-	// ***************************************************
-
-	// Create a widget to put inside a tab of the dialog.
-	QWidget* tilesets_widget = new QWidget(this);
-
-	// Create a QLabel for a read-only QComboBox (drop-down list) and add all existing tilesets,
-	// and connect it to a slot.
-	QLabel* tilesets_label = new QLabel("Tileset to modify:", tilesets_widget, "tilesets_label");
-	tilesets_label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
-	_tilesets_cbox = new QComboBox(tilesets_widget);
-	_tilesets_cbox->setEditable(false);
-	_tilesets_cbox->addItem("Select Tileset...");
-	_tilesets_cbox->addItem("New Tileset");
-	for (uint32 i = 0; i < tileset_dir.count(); i++)
-	{
-		if (tileset_dir[i].contains("tileset") != 0)
-			_tilesets_cbox->addItem(tileset_dir[i].remove("tileset_").remove(".lua"));
-	} // looks for tileset files in the tileset directory
-	connect(_tilesets_cbox, SIGNAL(activated(const QString&)), this, SLOT(_TilesetsTabPopulateTileset(const QString&)));
-
-	// Create a QLineEdit and a QLabel for it.
-	_tileset_ledit = new QLineEdit(tilesets_widget);
-	_tileset_ledit->setEnabled(false);
-	QLabel* tileset_label = new QLabel("Tileset Name:", tilesets_widget, "tileset_label");
-	tileset_label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
-
-	// Create QIconViews and set up their properties appropriately.
-	_all_tiles   = new Q3IconView(tilesets_widget, "all_tiles_iview");
-	_mod_tileset = new Q3IconView(tilesets_widget, "new_tileset_iview");
-	_all_tiles->setItemTextPos(Q3IconView::Right);
-	_mod_tileset->setItemTextPos(Q3IconView::Right);
-	_all_tiles->setSelectionMode(Q3IconView::Single);
-	_mod_tileset->setSelectionMode(Q3IconView::Single);
-	_all_tiles->setWordWrapIconText(false);
-	_mod_tileset->setWordWrapIconText(false);
-	_all_tiles->setItemsMovable(false);
-	_mod_tileset->setItemsMovable(false);
-	_mod_tileset->setSorting(true);
-	_all_tiles->setGridX(300);
-	_mod_tileset->setGridX(300);
-	_mod_tileset->setAcceptDrops(true);
-	_mod_tileset->setEnabled(false);
-	_all_tiles->setEnabled(false);
-
-	// Populate the QIconView for the global tileset.
-	std::list<DbTile> global_set_files = _db->GetGlobalSet().GetTiles();
-	for(std::list<DbTile>::const_iterator it = global_set_files.begin(); it != global_set_files.end(); it++)
-		(void) new Q3IconViewItem(_all_tiles, (*it).file_name, QPixmap("img/tiles/" + (*it).file_name));
-
-	// Create QPushButtons and connect them to their appropriate slots.
-	QPushButton* add_tile_pbut = new QPushButton("Add Tile", tilesets_widget);
-	QPushButton* del_tile_pbut = new QPushButton("Remove Tile", tilesets_widget);
-	connect(add_tile_pbut, SIGNAL(clicked()), this, SLOT(_AddTile()));
-	connect(del_tile_pbut, SIGNAL(clicked()), this, SLOT(_DelTile()));
-
-	// Create a QGridLayout and add all the created widgets to it.
-	Q3GridLayout* tilesets_tab = new Q3GridLayout(tilesets_widget, 4, 2, 5);
-	tilesets_tab->addWidget(tilesets_label, 0, 0);
-	tilesets_tab->addWidget(_tilesets_cbox, 0, 1);
-	tilesets_tab->addWidget(tileset_label,  1, 0);
-	tilesets_tab->addWidget(_tileset_ledit, 1, 1);
-	tilesets_tab->addWidget(_all_tiles,     2, 0);
-	tilesets_tab->addWidget(_mod_tileset,   2, 1);
-	tilesets_tab->addWidget(add_tile_pbut,  3, 0);
-	tilesets_tab->addWidget(del_tile_pbut,  3, 1);
-
-	// Insert the tab into the dialog window.
-	addTab(tilesets_widget, "Tilesets");
-
-	// ***************************************************
-	// End of Tilesets tab creation.
-	// ***************************************************
-		
-	// ***************************************************
-	// The following creates the Properties tab of the Tile Database manager dialog.
-	// ***************************************************
-
-	// Create a widget to put inside a tab of the dialog.
-	QWidget* properties_widget = new QWidget(this);
-
-	// Create a QLabel for a read-only QComboBox (drop-down list) and add all existing tilesets, and connect it to a slot.
-	_proptsets_cbox = new QComboBox(properties_widget);
-	_proptsets_cbox->setEditable(false);
-	_proptsets_cbox->addItem("Select Tileset...");
-	for (uint32 i = 0; i < tileset_dir.count(); i++)
-	{
-		if (tileset_dir[i].contains("tileset") != 0)
-			_proptsets_cbox->insertItem(tileset_dir[i].remove("tileset_").remove(".lua"));
-	} // looks for tileset files in the tileset directory
-	connect(_proptsets_cbox, SIGNAL(activated(const QString&)), this, SLOT(_PropertiesTabPopulateTileset(const QString&)));
-
-	// Create QIconView and set up its properties appropriately.
-	_prop_tileset = new Q3IconView(properties_widget, "prop_tileset_iview");
-	_prop_tileset->setItemTextPos(Q3IconView::Right);
-	_prop_tileset->setSelectionMode(Q3IconView::Single);
-	_prop_tileset->setWordWrapIconText(false);
-	_prop_tileset->setItemsMovable(false);
-	_prop_tileset->setSorting(true);
-	_prop_tileset->setGridX(300);
-	connect(_prop_tileset, SIGNAL(currentChanged(Q3IconViewItem *)), this, SLOT(_ProcessWalkability(Q3IconViewItem *)));
-	_tile_index = 0;    // no changes made yet
-
-	// Create the walkability checkboxes and add them to a QVButtonGroup.
-	Q3VButtonGroup* checkboxes = new Q3VButtonGroup("Walkability", properties_widget, "checkboxes");
-	_allwalk_checkbox = new QCheckBox("All", checkboxes, "allwalk_checkbox");
-	for (uint32 i = 0; i < 8; i++)
-		_walk_checkbox[i] = new QCheckBox(QString("Level %1").arg(i+1), checkboxes, QString("walk_checkbox[%1]").arg(i));
-	connect(_allwalk_checkbox, SIGNAL(toggled(bool)), this, SLOT(_ToggleWalkCheckboxes(bool)));
-
-	// Create the animation stuff. FIXME
-	QLabel* anim_label = new QLabel("Placeholder for animation settings", properties_widget, "anim_label");
-
-	// Create a QGridLayout and add all the created widgets to it.
-	Q3GridLayout* properties_tab = new Q3GridLayout(properties_widget, 2, 3, 5);
-	properties_tab->addWidget(_proptsets_cbox, 0, 0);
-	properties_tab->addWidget(_prop_tileset,   1, 0);
-	properties_tab->addWidget(checkboxes,      1, 1);
-	properties_tab->addWidget(anim_label,      1, 2);
-
-	// Insert the tab into the dialog window.
-	addTab(properties_widget, "Properties");
-		
-	// ***************************************************
-	// End of Properties tab creation.
-	// ***************************************************
-
-	// Create a Cancel button and connect the OK button to a useful slot.
-	setCancelButton();
-	connect(this, SIGNAL(applyButtonPressed()), this, SLOT(_UpdateData()));
-} // DatabaseDialog constructor
-
-DatabaseDialog::~DatabaseDialog()
-{
-	delete _tilesets_cbox;
-	delete _tileset_ledit;
-	delete _all_tiles;
-	delete _mod_tileset;
-	delete _proptsets_cbox;
-	delete _prop_tileset;
-	delete _allwalk_checkbox;
-	for (uint32 i = 0; i < 8; i++)
-		delete _walk_checkbox[i];
-	if(_selected_set != NULL) 	 
-		delete _selected_set;
-} // DatabaseDialog destructor
-
-
-
-// ********** Private slots **********
-
-void DatabaseDialog::_CreateTileSet()
-{
-	if(_selected_set == NULL)
-	{
-		if (_tileset_ledit->text().isEmpty() || _tileset_ledit->text().isNull())
-		{
-			QMessageBox::warning(this, "Error", "You must enter a name for this new tileset!");
-			return;
-		} // must have a name for this tileset
-		
-		TileSet* new_set = new TileSet(_db);
-		new_set->SetName(_tileset_ledit->text());
-		_SwitchTileset(new_set);
-
-		_tilesets_cbox->setCurrentText(_tileset_ledit->text());
-		_tileset_ledit->setEnabled(false);
-	}
-} // _CreateTileSet()
-
-void DatabaseDialog::_UpdateData()
-{
-	// Save current tileset if necessary.
-	if (_set_modified && !_tileset_ledit->text().isNull() && _tileset_ledit->text() != "" && _selected_set != NULL)
-	{
-		_selected_set->SetName(_tileset_ledit->text());
-		_selected_set->Save();
-		_set_modified = false;
-	} // only if the QLineEdit is not empty
-	
-	// User might change some properties then immediately click Ok.
-	_ProcessWalkability(_prop_tileset->currentItem());
-	
-	// Save tile db.
-	_db->Save("dat/tilesets/tiles_database.lua");
-	
-	// ***************************************************
-	// End of saving data related to the Properties tab.
-	// ***************************************************
-} // _UpdateData()
-
-void DatabaseDialog::_AddTile()
-{
-	_CreateTileSet();
-
-	Q3IconViewItem* current_item = _all_tiles->currentItem();
-	// If no item is selected, show a warning.
-	if (current_item == 0)
-		QMessageBox::warning(this, "Error", "No tile selected!");
-	else if (_mod_tileset->findItem(current_item->text(), Q3IconView::ExactMatch) == 0)
-	{
-		(void) new Q3IconViewItem(_mod_tileset, _all_tiles->currentItem()->text(), *_all_tiles->currentItem()->pixmap());
-		_selected_set->AddTile(_all_tiles->currentItem()->text());
-		_set_modified = true;
-	} // Only add new tile if it doesn't already exist in the new tileset.
-} // _AddTile()
-
-void DatabaseDialog::_DelTile()
-{
-	if (_mod_tileset->currentItem() != 0)
-	{
-		_selected_set->RemoveTile(_mod_tileset->currentItem()->text());
-		delete _mod_tileset->currentItem();
-		_set_modified = true;
-	} // only delete if there's something to delete
-} // _DelTile()
-
-void DatabaseDialog::_TilesetsTabPopulateTileset(const QString& name)
-{
-	if (name != "New Tileset" && name != "Select Tileset...")
-	{
-		// Fill in the QLineEdit.
-		_tileset_ledit->setText(name);
-
-		// Do the populating.
-		_PopulateTilesetHelper(_mod_tileset, name);
-
-		_tileset_ledit->setEnabled(false);
-		_mod_tileset->setEnabled(true);
-		_all_tiles->setEnabled(true);
-	} // no populating necessary otherwise
-	else
-	{
-		_selected_set = NULL;
-		_tileset_ledit->setText("");
-		qDebug("blooie");
-		if (name == "New Tileset")
-		{
-			qDebug("poop");
-			_tileset_ledit->setEnabled(true);
-			_mod_tileset->setEnabled(true);
-			_all_tiles->setEnabled(true);
-		}
-		else
-		{
-			qDebug("hi");
-			_tileset_ledit->setEnabled(false);
-			_mod_tileset->setEnabled(false);
-			_all_tiles->setEnabled(false);
-		}
-	}
-} // _TilesetsTabPopulateTileset(...)
-
-void DatabaseDialog::_PropertiesTabPopulateTileset(const QString& name)
-{
-	if (name != "Select Tileset...")
-		_PopulateTilesetHelper(_prop_tileset, name);
-} // _PropertiesTabPopulateTileset(...)
-
-void DatabaseDialog::_ProcessWalkability(Q3IconViewItem* item)
-{
-	if (item != NULL)
-	{
-		if (_selected_item != "")
-		{
-			DbTile& tile = _selected_set->GetTile(_selected_item);
-
-			int old_walk = tile.walkability;
-			// Record the new walkability options.
-			tile.walkability = 0;
-			for (uint8 i = 0; i < 8; i++)
-				if (_walk_checkbox[i]->isChecked())
-					tile.walkability |= (1 << i);
-			if(tile.walkability != old_walk)
-				_set_modified = true;
-		} // must have made some changes in order to record them
-		
-		DbTile& new_tile = _selected_set->GetTile(item->text());
-		_allwalk_checkbox->setChecked(true);
-		for (uint8 i = 0; i < 8; i++)
-			if (new_tile.walkability & (1 << i))
-				_walk_checkbox[i]->setChecked(true);
-			else
-			{
-				_allwalk_checkbox->setChecked(false);
-				_walk_checkbox[i]->setChecked(false);
-			}
-	} // nothing to do otherwise
-} // _ProcessWalkability(...)
-
-void DatabaseDialog::_ToggleWalkCheckboxes(bool on)
-{
-	if (on)
-		for (uint8 i = 0; i < 8; i++)
-			_walk_checkbox[i]->setChecked(true);
-	else
-		for (uint8 i = 0; i < 8; i++)
-			_walk_checkbox[i]->setChecked(false);
-} // _ToggleWalkCheckboxes(...)
-
-
-
-// ********** Private functions **********
-
-void DatabaseDialog::_PopulateTilesetHelper(Q3IconView *tileset, const QString& name)
-{
-	if (tileset != NULL)
-	{
-		tileset->clear();
-		_SwitchTileset(new TileSet(_db, name));
-
-		std::list<DbTile> tiles = _selected_set->GetTiles();
-		for(std::list<DbTile>::const_iterator it = tiles.begin(); it != tiles.end(); it++)
-			(void) new Q3IconViewItem(tileset, (*it).file_name, QPixmap("img/tiles/" + (*it).file_name));
-	} // no populating necessary otherwise
-} // _PopulateTilesetHelper()
-
-void DatabaseDialog::_SwitchTileset(TileSet* new_set)
-{
-	// If the tileset has been modified, ask if it should be saved.
-	if(_set_modified && _selected_set != NULL)
-	{
-		int ret = QMessageBox::question(this, "Tileset has been changed",
-			"Do you want to save your changes?", QMessageBox::Yes, QMessageBox::No);
-		if (ret == QMessageBox::Yes)
-			_selected_set->Save();
-		delete _selected_set;
-	} // must not be NULL
-
-	_selected_set = new_set;
-	_set_modified = false;
-} // _SwitchTileset(...)

@@ -118,7 +118,6 @@ class Editor: public Q3MainWindow
 		void _TileEditLL();
 		void _TileEditML();
 		void _TileEditUL();
-		void _TileDatabase();
 		//@}
 
 		//! \name Map Menu Item Slots
@@ -138,8 +137,6 @@ class Editor: public Q3MainWindow
 	private:
 		//! Saves the map if it is unsaved.
 		bool _EraseOK();
-		//! Sets up the tile database.
-		void _OpenTileDatabase();
 		//! Sets current edit mode
 		void _SetEditMode(TILE_MODE_TYPE new_mode);
 		//! Sets currently edited layer
@@ -188,9 +185,6 @@ class Editor: public Q3MainWindow
 		std::map<LAYER_TYPE, int> _layer_ids;
 		//! Mode items in Tile menu
 		std::map<TILE_MODE_TYPE, int> _mode_ids;
-
-		//! Tile database
-		TileDatabase* _tile_db;
 }; // class Editor
 
 class NewMapDialog: public QDialog
@@ -255,9 +249,8 @@ class EditorScrollView: public Q3ScrollView
 	Q_OBJECT 
 	
 	public:
-		EditorScrollView(QWidget* parent, const QString& name, int width,
-			int height, TileDatabase* db);                     // constructor
-		~EditorScrollView();                 // destructor
+		EditorScrollView(QWidget* parent, const QString& name, int width, int height);
+		~EditorScrollView();
 
 		//! Resizes the map.
 		//! \param width Width of the map.
@@ -317,77 +310,7 @@ class EditorScrollView: public Q3ScrollView
 
 		//! Stores source index of moved tiles
 		int _move_source_index;
-
-		TileDatabase* _db;
 }; // class EditorScrollView
-
-class DatabaseDialog: public Q3TabDialog
-{
-	//! Macro needed to use Qt's slots and signals.
-	Q_OBJECT 
-
-	public:
-		DatabaseDialog(QWidget* parent, const QString& name, TileDatabase* db);    // constructor
-		~DatabaseDialog();                                       // destructor
-
-	private slots:
-		//! Writes out/updates all modifications to the tile database.
-		void _UpdateData();
-		//! Adds a tile to a tileset.
-		void _AddTile();
-		//! Deletes a tile from a tileset.
-		void _DelTile();
-		//! Draws the tileset specified onto the window in the Tilesets tab.
-		//! \note Also modifies the QLineEdit in the Tilesets tab.
-		//! \param name Name of the tileset to draw.
-		void _TilesetsTabPopulateTileset(const QString& name);
-		//! Draws the tileset specified onto the window in the Properties tab.
-		//! \param name Name of the tileset to draw.
-		void _PropertiesTabPopulateTileset(const QString& name);
-		//! Reads and saves the walkable checkboxes according to the current
-		//! selection of the QIconView tileset in the Properties tab.
-		//! \param item Selected item in the tileset to check walkability.
-		void _ProcessWalkability(Q3IconViewItem *item);
-		//! Uses a single checkbox to toggle the remaining walkable checkboxes.
-		//! \param on True if the single checkbox is on, False otherwise.
-		void _ToggleWalkCheckboxes(bool on);
-		void _CreateTileSet();
-
-	private:
-		//! Populates the tileset specified by one of the 2 PopulateTileset slots.
-		//! \param tileset Pointer to the tileset to draw.
-		//! \param name Name of the tileset to draw.
-		void _PopulateTilesetHelper(Q3IconView *tileset, const QString& name);
-		void _SwitchTileset(TileSet* new_set);
-		
-		//! Lists all available tiles to create new tileset in the Tilesets tab.
-		Q3IconView* _all_tiles; 
-		//! Lists tiles added to new/modified tileset in the Tilesets tab.
-		Q3IconView* _mod_tileset; 
-		//! Previously selected tile in the tileset of the Properties tab.
-		Q3IconViewItem* _prev_ivitem; 
-		//! Lists tiles in selected tileset in the Properties tab.
-		Q3IconView* _prop_tileset; 
-		//! Stores index into _tile_properties of previously selected tile in
-		//! tileset in the Properties tab.
-		uint32 _tile_index;
-		//! Editable name of the tileset in the Tilesets tab.
-		QLineEdit* _tileset_ledit; 
-		//! A checkbox capable of toggling all the other walkable checkboxes of the
-		//! Properties tab.
-		QCheckBox* _allwalk_checkbox;
-		//! Array of walkability checkboxes of selected tile in the tileset of the
-		//! Properties tab.
-		QCheckBox* _walk_checkbox[8];
-		QComboBox* _proptsets_cbox;
-		QComboBox* _tilesets_cbox;
-
-		TileDatabase* _db;
-		TileSet* _selected_set;
-		QString _selected_item;
-		//! True if the current tileset has been modified, false otherwise.
-		bool _set_modified;
-}; // class DatabaseDialog
 
 } // namespace hoa_editor
 
