@@ -33,9 +33,7 @@ TilesetTable::TilesetTable(QWidget* parent, const QString& name)
 	
 	// Create filename from name.
 	tileset_name = name;
-	QString filename;
-	filename = name;
-	filename.append(".png").prepend("img/tilesets/");
+	QString filename = QString("img/tilesets/" + name + ".png");
 	tiles.resize(256);
 	for (int i = 0; i < 256; i++)
 		tiles[i].SetDimensions(1.0f, 1.0f);

@@ -20,6 +20,7 @@
 #include "tileset.h"
 
 #include <QApplication>
+#include <QCheckBox>
 #include <QComboBox>
 #include <QDialog>
 #include <Q3FileDialog>
@@ -45,6 +46,7 @@
 #include <Q3GridLayout>
 #include <QMouseEvent>
 #include <Q3VBoxLayout>
+#include <Q3VButtonGroup>
 
 #include <map>
 

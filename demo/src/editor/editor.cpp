@@ -191,7 +191,7 @@ void Editor::_FileNew()
 			_SetEditMode(PAINT_TILE);
 		} // only if the user pressed OK
 		else
-			_stat_bar->message("No map created!",5000);
+			_stat_bar->message("No map created!", 5000);
 
 		delete new_map;
 	} // make sure an unsaved map is not lost
@@ -226,7 +226,11 @@ void Editor::_FileOpen()
 
 			for (QStringList::ConstIterator it = _ed_scrollview->_map->tileset_names.begin();
 				it != _ed_scrollview->_map->tileset_names.end(); it++)
-				_ed_tabs->addTab(new TilesetTable(_ed_widget, *it), *it);
+			{
+				TilesetTable* table = new TilesetTable(_ed_widget, *it);
+				_ed_tabs->addTab(table, *it);
+				_ed_scrollview->_map->tilesets.push_back(table);
+			} // iterate through all tilesets in the map
 			_ed_tabs->show();
 
 			_ed_scrollview->resize(_ed_scrollview->_map->GetWidth(),
