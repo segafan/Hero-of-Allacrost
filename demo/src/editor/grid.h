@@ -25,26 +25,14 @@
 #include "tile.h"
 #include "tileset.h"
 
-#include <QCheckBox>
-#include <QColor>
-#include <QCursor>
-#include <Q3DragObject>
-#include <QFile>
 #include <QGLWidget>
-#include <QLayout>
-#include <QMessageBox>
-#include <QPen>
-#include <Q3PopupMenu>
-#include <QRadioButton>
 #include <QStringList>
-#include <Q3VButtonGroup>
-#include <QMatrix>
 
 //! All calls to the editor are wrapped in this namespace.
 namespace hoa_editor
 {
 
-//! Different layers
+//! Different tile layers in the map.
 enum LAYER_TYPE
 {
 	INVALID_LAYER = -1,
@@ -65,8 +53,10 @@ class Grid: public QGLWidget
 			int width = 0, int height = 0); // constructor
 		~Grid();                            // destructor
 
+		//! Returns the map's modified status.
 		bool GetChanged() const { return _changed; }
-		void SetChanged(bool value);        // sets the map's modified status
+		//! Sets the map's modified status;
+		void SetChanged(bool value);
 		QString GetFileName() const { return _file_name; }
 		void    SetFileName(QString filename); // sets the map's file name
 		int  GetHeight() const { return _height; }
@@ -80,115 +70,83 @@ class Grid: public QGLWidget
 
 		std::vector<int32>& GetLayer(LAYER_TYPE layer);
 
-		//! Sets background music.
+		/*!
+		 *  \brief Sets the map's background music. Currently the map can only support one music file.
+		 *  \param music_file The file name of the music file that will be used.
+		 */
 		void SetMusic(const QString& music_file);
-		//! Gets background music.
+
+		/*!
+		 *  \brief Gets the map's background music file name.
+		 *  \return A QString of the music's file name.
+		 */
 		const QString& GetMusic() const;
 
-		//! Loads a map from a config file.
+		/*!
+		 *  \brief Loads a map from a config (lua) file when the user selects Open Map... from the File menu.
+		 */
 		void LoadMap();
-		//! Saves the map to a config file.
+
+		/*!
+		 *  \brief Saves the map to a config (lua) file when the user selects Save, Save as..., or Quit
+		 *         from the File menu.
+		 */
 		void SaveMap();
 
 		//! List of the tileset names being used.
 		QStringList tileset_names;
-		//! A vector which contains a pointer to each tileset and the tiles it has loaded via LoadMultiImage
+		//! A vector which contains a pointer to each tileset and the tiles it has loaded via LoadMultiImage.
 		std::vector<TilesetTable*> tilesets;
-		std::vector<uint32> tiles_walkable; // vector of walkability of tiles
-		std::vector<uint32> indiv_walkable; // vector of walkability of individual tiles
+		//! A vector of the default walkability of tiles, specified in their tileset config file.
+		std::vector<uint32> tiles_walkable;
+		//! A vector of the walkability of tiles modified on the map, which overrides their default walkability.
+		std::vector<uint32> indiv_walkable;
 
 	protected:
-		void initializeGL();                // sets up the rendering context
-		void paintGL();                     // paints the entire map
-		void resizeGL(int w, int h);        // resizes the widget
+		/*!
+		 *  \brief Sets up the rendering context of the OpenGL portion of the editor.
+		 */
+		void initializeGL();
 
-		// I think these are protected
-		// Low-level drag and drop
-/*		void dragEnterEvent(QDragEnterEvent *evt);
-		void dropEvent(QDropEvent *evt);
-		//void mousePressEvent(QMouseEvent *);
-		//void mouseMoveEvent(QMouseEvent *);
-		
-		void contentsMousePressEvent(QMouseEvent *evt);
-		void contentsMouseMoveEvent(QMouseEvent *evt);
-		void contentsMouseReleaseEvent(QMouseEvent *evt);
-		void contentsMouseDoubleClickEvent(QMouseEvent *evt);
-		void contentsContextMenuEvent(QContextMenuEvent *);
-*/		
-	private slots:
-		// the following slots are used to gray out items in the menu
-/*		void _EditMenuSetup();
-		void _ViewMenuSetup();
-		void _ViewMenuEvaluate();
-		void _TileMenuSetup();
-		void _TileMenuEvaluate();
-		
-		// the following slots are used in the edit menu
-		void _EditUndo();		// undoes last action
-		void _EditRedo();		// redoes last action
-		void _EditClear();		// clears all items on the map
-//		void _EditMode();		// sets the editing mode
-		
-		// the following slots are used in the view menu
-		void _ViewToggleGrid();	// toggles the map's grid on or off
+		/*!
+		 *  \brief Paints the entire map with the Allacrost video engine.
+		 */
+		void paintGL();
 
-		// the following slots are used in the tile menu
-//		void _TileFlipHorizontal(); <-- Told I don't need this capability
-//		void _TileFlipVertical();
-//		void _TileRotateClockwise();
-//		void _TileRotateCounterClockwise();
-		void _TileMode();		// sets the status of the tile
-*/
+		/*!
+		 *  \brief Performs a resize operation of the OpenGL widget when appropriate.
+		 */
+		void resizeGL(int w, int h);
+
 	private:
-/*		void _GetMapData();		// gets map height and width & loads into DOM
-//		void _PaintMap();		// paints the map to the screen
-		void _CreateMenus();	// creates the various context menus
-		
-		QPoint _menu_position;	// position at which theMenu was executed
-		QPopupMenu* _the_menu;	// menu pops up on right click
-		QPopupMenu* _edit_menu;	// internal to theMenu
-		QPopupMenu* _view_menu;	// internal to theMenu
-		QPopupMenu* _tile_menu;	// internal to theMenu
+		//! The map's file name.
+		QString _file_name;
+		//! The height of the map in tiles.
+		int _height;
+		//! The width of the map in tiles.
+		int _width;
 
-		QRadioButton* _view_none;
-		QRadioButton* _view_treasure;
-		QRadioButton* _view_event;
-		QRadioButton* _view_occupied;
-		QRadioButton* _view_no_walk;
+		//! When TRUE the map has been modified.
+		bool _changed;
+		//! When TRUE the grid between tiles is displayed.
+		bool _grid_on;
+		//! When TRUE the lower layer of tiles is displayed.
+		bool _ll_on;
+		//! When TRUE the middle layer of tiles is displayed.
+		bool _ml_on;
+		//! When TRUE the upper layer of tiles is displayed.
+		bool _ul_on;
 
-		QVButtonGroup* _properties;			// tile status button group
-		QCheckBox* _tile_treasure;
-		QCheckBox* _tile_event;
-		QCheckBox* _tile_occupied;
-		
-		QCanvasItem* _moving;	// set if an object is currently being moved
-		QPoint _moving_start;	// moving object's starting point
+		//! A vector of tiles in the lower layer.
+		std::vector<int32> _lower_layer;
+		//! A vector of tiles in the middle layer.
+		std::vector<int32> _middle_layer;
+		//! A vector of tiles in the upper layer.
+		std::vector<int32> _upper_layer;
 
-*/		QString _file_name;		// map's file name
-/*		int _view_property;		// hex. bit mask of which property being viewed
-		int _tile_properties;	// hex. bit mask of a tile's properties
-*/		int _height;			// height of map in tiles
-		int _width;				// width of map in tiles
-		hoa_video::StillImage _tile;
-		bool _changed;			// TRUE = map modified, FALSE otherwise
-		//bool _dragging;		// TRUE = something being dragged, else FALSE
-		bool _grid_on;			// TRUE = grid is displayed, else FALSE
-		bool _ll_on;            // TRUE = lower layer is displayer, else FALSE
-		bool _ml_on;            // TRUE = middle layer is displayer, else FALSE
-		bool _ul_on;            // TRUE = upper layer is displayer, else FALSE
-
-		std::vector<int32> _lower_layer;     // vector of tiles in the lower layer
-		std::vector<int32> _middle_layer;    // vector of tiles in the middle layer
-		std::vector<int32> _upper_layer;     // vector of tiles in the upper layer
-
-		//! Stores background music
+		//! Stores the background music file.
 		QString _music_file;
-		bool _random_encounters;
-		int _encounter_rate;
-
-/*		//bool _drag_on;		// TRUE = dragging is enabled, else painting
-		bool _walk_on;			// TRUE = walkable is set, else not-walkable
-*/}; // class Grid
+}; // class Grid
 
 } // namespace hoa_editor
 

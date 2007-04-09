@@ -58,6 +58,10 @@
 		D404C6EC0B02FD6D00827A19 /* grid.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D404C6EB0B02FD6D00827A19 /* grid.moc.cpp */; };
 		D407F7ED0BADECF300848C43 /* shop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D407F7E90BADECF300848C43 /* shop.cpp */; };
 		D407F7EF0BADECF300848C43 /* shop_windows.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D407F7EB0BADECF300848C43 /* shop_windows.cpp */; };
+		D4CE3FB60BC9A11500CA3D30 /* dat in Resources */ = {isa = PBXBuildFile; fileRef = 4931EB160BAF28B700013185 /* dat */; };
+		D4CE3FB70BC9A11900CA3D30 /* img in Resources */ = {isa = PBXBuildFile; fileRef = 4931EB320BAF28B800013185 /* img */; };
+		D4CE3FB80BC9A11D00CA3D30 /* mus in Resources */ = {isa = PBXBuildFile; fileRef = 4931EC140BAF28B900013185 /* mus */; };
+		D4CE3FB90BC9A12100CA3D30 /* snd in Resources */ = {isa = PBXBuildFile; fileRef = 4931EC1A0BAF28B900013185 /* snd */; };
 		D4D02B720B0656E500772C78 /* SDLMain.m in Sources */ = {isa = PBXBuildFile; fileRef = 4941A7630AC1DCA500D65B8E /* SDLMain.m */; };
 		D4D1664D0BC0D91400190FC0 /* draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166280BC0D91300190FC0 /* draw.cpp */; };
 		D4D1664E0BC0D91400190FC0 /* effects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D166290BC0D91300190FC0 /* effects.cpp */; };
@@ -683,6 +687,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D4CE3FB90BC9A12100CA3D30 /* snd in Resources */,
+				D4CE3FB80BC9A11D00CA3D30 /* mus in Resources */,
+				D4CE3FB70BC9A11900CA3D30 /* img in Resources */,
+				D4CE3FB60BC9A11500CA3D30 /* dat in Resources */,
 				D4D1BA8B0B02B4400052BF1E /* Editor-Info.plist in Resources */,
 				D4D6DB2E0B127DD3002F33F2 /* mac_logo.icns in Resources */,
 			);
