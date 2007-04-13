@@ -1791,10 +1791,10 @@ bool GameVideo::MakeLightning(const std::string &lit_file)
 	// Check if this processor uses big endian, and reorder bytes if so.
 
 	#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-		dataSize = ((dataSize & 0xFF000000) >> 24) |
-		           ((dataSize & 0x00FF0000) >> 8) |
-		           ((dataSize & 0x0000FF00) << 8) |
-		           ((dataSize & 0x000000FF) << 24);
+		data_size = ((data_size & 0xFF000000) >> 24) |
+		           ((data_size & 0x00FF0000) >> 8) |
+		           ((data_size & 0x0000FF00) << 8) |
+		           ((data_size & 0x000000FF) << 24);
 	#endif
 
 	uint8 *data = new uint8[data_size];
