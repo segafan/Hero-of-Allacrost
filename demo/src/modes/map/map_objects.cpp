@@ -422,24 +422,28 @@ bool MapSprite::LoadStandardAnimations(std::string filename) {
 	animations[4].AddFrame(frames[1], frame_speed);
 	animations[4].AddFrame(frames[2], frame_speed);
 	animations[4].AddFrame(frames[3], frame_speed);
+	animations[4].AddFrame(frames[1], frame_speed);
 	animations[4].AddFrame(frames[4], frame_speed);
 	animations[4].AddFrame(frames[5], frame_speed);
 
 	animations[5].AddFrame(frames[7], frame_speed);
 	animations[5].AddFrame(frames[8], frame_speed);
 	animations[5].AddFrame(frames[9], frame_speed);
+	animations[5].AddFrame(frames[7], frame_speed);
 	animations[5].AddFrame(frames[10], frame_speed);
 	animations[5].AddFrame(frames[11], frame_speed);
 
 	animations[6].AddFrame(frames[13], frame_speed);
 	animations[6].AddFrame(frames[14], frame_speed);
 	animations[6].AddFrame(frames[15], frame_speed);
+	animations[6].AddFrame(frames[13], frame_speed);
 	animations[6].AddFrame(frames[16], frame_speed);
 	animations[6].AddFrame(frames[17], frame_speed);
 
 	animations[7].AddFrame(frames[19], frame_speed);
 	animations[7].AddFrame(frames[20], frame_speed);
 	animations[7].AddFrame(frames[21], frame_speed);
+	animations[7].AddFrame(frames[19], frame_speed);
 	animations[7].AddFrame(frames[22], frame_speed);
 	animations[7].AddFrame(frames[23], frame_speed);
 
