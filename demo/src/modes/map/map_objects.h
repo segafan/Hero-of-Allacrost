@@ -680,8 +680,7 @@ public:
 *** ***************************************************************************/
 class EnemySprite : public MapSprite {
 private:
-	enum State
-	{
+	enum STATE {
 		SPAWNING,
 		HOSTILE,
 		DEAD
@@ -761,7 +760,7 @@ private:
 	private_map::EnemyZone* _zone;
 	hoa_video::Color _color;
 	uint32 _time_elapsed;
-	State _state;
+	STATE _state;
 
 	float _aggro_range;
 	uint32 _time_dir_change;

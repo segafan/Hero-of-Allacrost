@@ -697,11 +697,11 @@ void EnemySprite::Update() {
 		xdelta = ComputeXLocation() - hoa_map::MapMode::_current_map->_camera->ComputeXLocation();
 		ydelta = ComputeYLocation() - hoa_map::MapMode::_current_map->_camera->ComputeYLocation();
 
-		if( !MapZone::IsInsideZone( x_position, y_position, _zone ) && _zone->IsRestraining() ) {
+		if(_zone->IsInsideZone(x_position, y_position) == false && _zone->IsRestraining() ) {
 			SetDirection( CalculateOppositeDirection( GetDirection() ) );
 		}
 		else {
-			if( abs(xdelta) <= _aggro_range && abs(ydelta) <= _aggro_range && MapZone::IsInsideZone( hoa_map::MapMode::_current_map->_camera->x_position, hoa_map::MapMode::_current_map->_camera->y_position, _zone ) )
+			if( abs(xdelta) <= _aggro_range && abs(ydelta) <= _aggro_range && _zone->IsInsideZone( hoa_map::MapMode::_current_map->_camera->x_position, hoa_map::MapMode::_current_map->_camera->y_position) )
 			{
 				if( xdelta > -0.5 && xdelta < 0.5 && ydelta < 0 )
 					SetDirection( SOUTH );
