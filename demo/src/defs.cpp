@@ -467,7 +467,7 @@ void BindEngineToLua() {
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<ZoneSection>("ZoneSection")
-			.def(constructor<uint16,uint16,uint16,uint16>())
+			.def(constructor<uint16, uint16, uint16, uint16>())
 			.def_readwrite("start_row", &ZoneSection::start_row)
 			.def_readwrite("end_row", &ZoneSection::end_row)
 			.def_readwrite("start_col", &ZoneSection::start_col)
@@ -478,16 +478,13 @@ void BindEngineToLua() {
 	[
 		class_<MapZone>("MapZone")
 			.def("AddSection", &MapZone::AddSection, adopt(_2))
-			.scope
-			[
-				def("IsInsideZone", &MapZone::IsInsideZone)
-			]
+			.def("IsInsideZone", &MapZone::IsInsideZone)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<EnemyZone, MapZone>("EnemyZone")
-			.def(constructor<MapMode*, uint8, uint32, bool>())
+			.def(constructor<uint32, bool>())
 			.def("AddEnemy", &EnemyZone::AddEnemy, adopt(_2))
 			.def("IsRestraining", &EnemyZone::IsRestraining)
 	];

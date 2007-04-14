@@ -19,6 +19,8 @@
 
 extern bool MAP_DEBUG;
 
+using namespace std;
+
 using namespace hoa_utils;
 
 namespace hoa_map {
@@ -29,16 +31,18 @@ namespace private_map {
 // ************************* MapZone Class Functions ***************************
 // *****************************************************************************
 
-void MapZone::AddSection( ZoneSection * section )
-	{ _sections.push_back( *section ); delete section; }
+void MapZone::AddSection(ZoneSection* section) {
+	_sections.push_back(*section);
+	delete section;
+}
 
-bool MapZone::IsInsideZone( uint16 pos_x, uint16 pos_y, const MapZone * zone ) {
-	//Verify each section of the zone to make sure the position is in bounds.
-	for( std::vector< ZoneSection >::const_iterator i = zone->_sections.begin();
-		 i != zone->_sections.end(); ++i )
-	{
-		if( pos_x >= i->start_col && pos_x <= i->end_col
-			&& pos_y >= i->start_row && pos_y <= i->end_row )
+
+
+bool MapZone::IsInsideZone(uint16 pos_x, uint16 pos_y) {
+	// Verify each section of the zone to make sure the position is in bounds.
+	for (std::vector<ZoneSection>::const_iterator i = _sections.begin(); i != _sections.end(); ++i) {
+		if (pos_x >= i->start_col && pos_x <= i->end_col &&
+			pos_y >= i->start_row && pos_y <= i->end_row )
 		{
 			return true;
 		}
@@ -46,11 +50,13 @@ bool MapZone::IsInsideZone( uint16 pos_x, uint16 pos_y, const MapZone * zone ) {
 	return false;
 }
 
-void MapZone::_RandomPosition( uint16 & x, uint16 & y ) {
-	//Select a ZoneSection randomly
-	uint16 i = RandomBoundedInteger( 0, _sections.size() - 1 );
 
-	//Select a position inside that section
+
+void MapZone::_RandomPosition(uint16& x, uint16& y) {
+	// Select a ZoneSection randomly
+	uint16 i = RandomBoundedInteger(0, _sections.size() - 1);
+
+	// Select a position inside that section
 	x = RandomBoundedInteger(_sections[i].start_col, _sections[i].end_col);
 	y = RandomBoundedInteger(_sections[i].start_row, _sections[i].end_row);
 }
@@ -59,80 +65,38 @@ void MapZone::_RandomPosition( uint16 & x, uint16 & y ) {
 // *********************** EnemyZone Class Functions *************************
 // *****************************************************************************
 
-EnemyZone::EnemyZone(MapMode* map, uint8 max_enemies, uint32 regen_time, bool restrained) :
+EnemyZone::EnemyZone(uint32 regen_time, bool restrained) :
 	_regen_time(regen_time),
-	_time_elapsed(0),
-	_max_enemies(max_enemies),
+	_spawn_timer(0),
 	_active_enemies(0),
 	_restrained(restrained)
-{
-	_map = map;
-}
+{}
 
-void EnemyZone::Update() {
-	if( _active_enemies < _max_enemies ) {
-		//Add / Spawn enemies if the maximum number is not reached
-		_time_elapsed += hoa_system::SystemManager->GetUpdateTime();
-		if( _time_elapsed >= ( _regen_time + rand()%(_regen_time/4) ) ) {
-			//If the regen time is reached ( + up to 1/4 of the regen time )
-			//Spawn a new monster
-			if( _enemies.size() < _max_enemies ) {
-				//There are not enough EnemySprite to show on the map
-				//Create a copy from a randomly selected sprite
-				if( _enemies.size() > 0 ) {
-					EnemySprite* tempMonster = new EnemySprite( *_enemies[ rand()%_enemies.size() ] );
-					tempMonster->SetObjectID( _map->_GetGeneratedObjectID() );
-					tempMonster->Reset();
-					_map->_AddGroundObject( tempMonster );
-					_enemies.push_back( tempMonster );
-				}
-			}
-			//Select a DEAD monster to spawn
-			for( uint32 i = 0; i < _enemies.size(); i++ ) {
-				if( !_enemies[i]->updatable ) {
 
-					//Select a random position inside the zone where there is no collision
-					uint16 x, y;
-					//TEMP: magic constant
-					int retries = 5; //Number of retries (if the is no place, it won't freeze the game)
-					bool collision;
-					do {
-						_RandomPosition( x, y );
-						//if(MAP_DEBUG)
-						//	printf( "RandomPosition: %i, %i : Retry #: %i\n", x, y, retries );
 
-						_enemies[i]->SetXPosition( x, 0.5f );
-						_enemies[i]->SetYPosition( y, 0.5f );
-						_enemies[i]->no_collision = false;
-
-						collision = _map->_DetectCollision( _enemies[i] );
-					}while( collision && --retries != 0 );
-					
-					//If the max retries reached, reset collision on enemy and retry later
-					if( retries == 0 && collision )
-					{
-						_enemies[i]->no_collision = true;
-						break;
-					}
-
-					//Spawn the monster at that location
-					_enemies[i]->ChangeStateSpawning();
-					++_active_enemies;
-					break;
-				}
-			}
-			//Reset timer
-			_time_elapsed = 0;
-		}
+void EnemyZone::AddEnemy(EnemySprite* enemy, MapMode* map, uint8 count) {
+	if (count == 0) {
+		// NOTE: The EnemySprite pointer passed in is not deleted in this case
+		if (MAP_DEBUG)
+			cerr << "MAP WARNING: EnemyZone::AddEnemy called with a zero count for the enemy" << endl;
+		return;
 	}
-} // void EnemyZone::Update()
 
+	// Load the first enemy
+	enemy->Load();
+	map->_AddGroundObject(enemy);
+	_enemies.push_back(enemy);
 
-
-void EnemyZone::AddEnemy( EnemySprite* m ) {
-	_enemies.push_back( m );
-	_map->_AddGroundObject( m );
-	m->Load();
+	// Create any additional copies of the enemy and add them as well
+	uint8 remaining = count - 1;
+	while (remaining > 0) {
+		EnemySprite* copy = new EnemySprite(*enemy);
+		copy->SetObjectID(map->_GetGeneratedObjectID() );
+		copy->Reset();
+		map->_AddGroundObject(copy);
+		_enemies.push_back(copy);
+		remaining--;
+	}
 }
 
 
@@ -140,6 +104,57 @@ void EnemyZone::AddEnemy( EnemySprite* m ) {
 void EnemyZone::EnemyDead() {
 	--_active_enemies;
 }
+
+
+
+void EnemyZone::Update() {
+	// Spawn new enemies only if there is at least one enemy that is not active
+	if (_active_enemies == _enemies.size()) {
+		return;
+	}
+
+	// Return if the regenenration time has not been reached, return
+	_spawn_timer += hoa_system::SystemManager->GetUpdateTime();
+	if (_spawn_timer < _regen_time) {
+		return;
+	}
+
+	// Otherwise, select a DEAD enemy to spawn
+	uint32 index = 0;
+	for (uint32 i = 0; i < _enemies.size(); i++) {
+		if (_enemies[i]->IsDead() == true) {
+			index = i;
+			break;
+		}
+	}
+
+	// Used to retain random position coordinates in the zone
+	uint16 x, y;
+	// Number of times to try to place the enemy in the zone (arbitrarly set to 5 tries)
+	int8 retries = 5;
+	// Holds the result of a collision detection check
+	bool collision;
+
+	// Select a random position inside the zone to place the spawning enemy, and make sure that there is no collision
+	_enemies[index]->no_collision = false;
+	do {
+		_RandomPosition(x, y);
+		_enemies[index]->SetXPosition(x, 0.0f);
+		_enemies[index]->SetYPosition(y, 0.0f);
+		collision = MapMode::_current_map->_DetectCollision(_enemies[index]);
+	} while (collision && --retries > 0);
+
+	// If there is still a collision, reset the collision info on the enemy and retry on the next frame update
+	if (collision) {
+		_enemies[index]->no_collision = true;
+		return;
+	}
+
+	// Otherwise, spawn the enemy and reset the spawn timer
+	_spawn_timer = 0;
+	_enemies[index]->ChangeStateSpawning();
+	_active_enemies++;
+} // void EnemyZone::Update()
 
 } // namespace private_map
 

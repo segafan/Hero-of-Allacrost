@@ -338,17 +338,16 @@ function Load(m)
 	sprite:LoadStandardAnimations("img/sprites/map/woman_npc01_walk.png");
 	map:_AddGroundObject(sprite);
 
-	-- Create a Monster Zone ( attached to current map, 5 monsters max, 5000 ms between respawns, monsters restricted to area )
-	local ezone = hoa_map.EnemyZone(map, 5, 5000, true);
-	-- Add a section to the zone that goes from (60, 45) to (80,60) (in positions - or divided tiles)
-	ezone:AddSection( hoa_map.ZoneSection( 20, 11, 50, 40 ) );
+	-- Create an EnemyZone (5000 ms between respawns, monsters restricted to zone area)
+	local ezone = hoa_map.EnemyZone(5000, true);
+	-- Add a section to the zone that goes from (20, 10) to (50, 40) in map grid coordinates
+	ezone:AddSection(hoa_map.ZoneSection(20, 10, 50, 40));
 	-- Create a sprite representation of a monster attached to this zone
 	local enemy = hoa_map.EnemySprite("dat/maps/sprites/scorpion.lua");
 	enemy:SetZone(ezone);
 	
-	--Add the monster to the zone (it also gets added to the ground objects) 
-	--note that you can add more types of monsters, the zone will generate random monster based on every monster added to the zone
-	ezone:AddEnemy(enemy);
-	-- Add the zone to the map
+	-- Add the enemy to the zone five times (it also gets added to the ground objects) 
+	ezone:AddEnemy(enemy, map, 5);
+	-- Finally, add the zone to the map
 	map:_AddZone(ezone);
 end -- function Load()
