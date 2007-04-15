@@ -560,14 +560,51 @@ bool MapSprite::LoadState() {
 // ********************** EnemySprite Class Functions ************************
 // *****************************************************************************
 
-void EnemySprite::Draw()
+EnemySprite::EnemySprite() :
+	_zone(NULL),
+	_color(1.0f, 1.0f, 1.0f, 0.0f),
+	_aggro_range(8.0f),
+	_time_dir_change(2500),
+	_time_to_spawn(3500)
 {
-	if( _state != DEAD ) {
-		if (MapObject::DrawHelper() == true) {
+	filename = "";
+	MapObject::_object_type = ENEMY_TYPE;
+	moving = true;
+	Reset();
+}
+
+
+
+EnemySprite::EnemySprite(std::string file) :
+	_zone(NULL),
+	_color(1.0f, 1.0f, 1.0f, 0.0f),
+	_aggro_range(8.0f),
+	_time_dir_change(2500),
+	_time_to_spawn(3500)
+{
+	filename = file;
+	MapObject::_object_type = ENEMY_TYPE;
+	moving = true;
+	Reset();
+}
+
+
+
+void EnemySprite::Reset() {
+	updatable = false;
+	no_collision = true;
+	_state = DEAD;
+	_time_elapsed = 0;
+	_color.SetAlpha(0.0f);
+}
+
+
+void EnemySprite::Draw() {
+	if (_state != DEAD && MapObject::DrawHelper() == true) {
 			VideoManager->DrawImage(animations[current_animation],_color);
-		}
 	}
 }
+
 
 // Load in the appropriate images and other data for the sprite
 bool EnemySprite::Load() {
@@ -577,172 +614,77 @@ bool EnemySprite::Load() {
 	}
 
 	ScriptCallFunction<void>(sprite_script.GetLuaState(), "Load", this);
-
 	string sprite_sheet = sprite_script.ReadString("sprite_sheet");
-	uint32 multi_img_rows = sprite_script.ReadInt("sprite_sheet_rows");
-	uint32 multi_img_cols = sprite_script.ReadInt("sprite_sheet_cols");
-
-	uint32 frame_speed = sprite_script.ReadInt("frame_speed");
-
-	AnimatedImage img;
-	vector<StillImage> frames(multi_img_rows * multi_img_cols);
-	for (uint32 i = 0; i < ( multi_img_rows * multi_img_cols ); ++i)
-		frames[i].SetDimensions(img_half_width * 2, img_height);
-
-	if (VideoManager->LoadMultiImage(frames, sprite_sheet, multi_img_rows, multi_img_cols) == false) {
-		return false;
-	}
-
-	vector<int32> frames_vector;
-	//Load Standing South
-	sprite_script.ReadIntVector("standing_south_frames", frames_vector );
-	for( size_t i = 0; i < frames_vector.size(); ++i ) {
-		img.AddFrame( frames[ frames_vector[ i ] ], frame_speed);
-	}
-	animations.push_back(img);
-
-	//Load Standing North
-	img.Clear();
-	frames_vector.clear();
-	sprite_script.ReadIntVector("standing_north_frames", frames_vector );
-	for( size_t i = 0; i < frames_vector.size(); ++i ) {
-		img.AddFrame( frames[ frames_vector[ i ] ], frame_speed);
-	}
-	animations.push_back(img);
-
-	// Load Standing West
-	img.Clear();
-	frames_vector.clear();
-	sprite_script.ReadIntVector("standing_west_frames", frames_vector );
-	for( size_t i = 0; i < frames_vector.size(); ++i ) {
-		img.AddFrame( frames[ frames_vector[ i ] ], frame_speed);
-	}
-	animations.push_back(img);
-
-	// Load Standing East
-	img.Clear();
-	frames_vector.clear();
-	sprite_script.ReadIntVector("standing_east_frames", frames_vector );
-	for( size_t i = 0; i < frames_vector.size(); ++i ) {
-		img.AddFrame( frames[ frames_vector[ i ] ], frame_speed);
-	}
-	animations.push_back(img);
-
-	// Load Walking South
-	img.Clear();
-	frames_vector.clear();
-	sprite_script.ReadIntVector("walking_south_frames", frames_vector );
-	for( size_t i = 0; i < frames_vector.size(); ++i ) {
-		img.AddFrame( frames[ frames_vector[ i ] ], frame_speed);
-	}
-	animations.push_back(img);
-
-	// Load Walking North
-	img.Clear();
-	frames_vector.clear();
-	sprite_script.ReadIntVector("walking_north_frames", frames_vector );
-	for( size_t i = 0; i < frames_vector.size(); ++i ) {
-		img.AddFrame( frames[ frames_vector[ i ] ], frame_speed);
-	}
-	animations.push_back(img);
-
-	// Load Walking West
-	img.Clear();
-	frames_vector.clear();
-	sprite_script.ReadIntVector("walking_west_frames", frames_vector );
-	for( size_t i = 0; i < frames_vector.size(); ++i ) {
-		img.AddFrame( frames[ frames_vector[ i ] ], frame_speed);
-	}
-	animations.push_back(img);
-
-	// Load Walking East
-	img.Clear();
-	frames_vector.clear();
-	sprite_script.ReadIntVector("walking_east_frames", frames_vector );
-	for( size_t i = 0; i < frames_vector.size(); ++i ) {
-		img.AddFrame( frames[ frames_vector[ i ] ], frame_speed);
-	}
-	animations.push_back(img);
-
-	for (uint32 i = 0; i < animations.size(); i++) {
-		if (animations[i].Load() == false) {
-			cerr << "MAP ERROR: failed to load sprite animation" << endl;
-			return false;
-		}
-	}
-
-	return true;
+	return MapSprite::LoadStandardAnimations(sprite_sheet);
 } // bool EnemySprite::Load()
 
 
 
 void EnemySprite::Update() {
-	float xdelta, ydelta;
-	switch( _state )
-	{
-	case SPAWNING:
-		_time_elapsed += hoa_system::SystemManager->GetUpdateTime();
-		if( _color.GetAlpha() < 1.0f ) {
-			_color.SetAlpha( ( _time_elapsed / static_cast<float>(GetTimeToSpawn()) ) * 1.0f );
-		}
-		else
-		{
-			ChangeStateHostile();
-		}
-		break;
-
-	case HOSTILE:
-		_time_elapsed += hoa_system::SystemManager->GetUpdateTime();
-
-		xdelta = ComputeXLocation() - hoa_map::MapMode::_current_map->_camera->ComputeXLocation();
-		ydelta = ComputeYLocation() - hoa_map::MapMode::_current_map->_camera->ComputeYLocation();
-
-		if(_zone->IsInsideZone(x_position, y_position) == false && _zone->IsRestraining() ) {
-			SetDirection( CalculateOppositeDirection( GetDirection() ) );
-		}
-		else {
-			if( abs(xdelta) <= _aggro_range && abs(ydelta) <= _aggro_range && _zone->IsInsideZone( hoa_map::MapMode::_current_map->_camera->x_position, hoa_map::MapMode::_current_map->_camera->y_position) )
-			{
-				if( xdelta > -0.5 && xdelta < 0.5 && ydelta < 0 )
-					SetDirection( SOUTH );
-				else
-					if( xdelta > -0.5 && xdelta < 0.5 && ydelta > 0 )
-						SetDirection( NORTH );
-					else
-						if( ydelta > -0.5 && ydelta < 0.5 && xdelta > 0 )
-							SetDirection( WEST );
-						else
-							if( ydelta > -0.5 && ydelta < 0.5 && xdelta < 0 )
-								SetDirection( EAST );
-							else
-								if( xdelta < 0 && ydelta < 0 )
-									SetDirection( SOUTHEAST );
-								else
-									if( xdelta < 0 && ydelta > 0 )
-										SetDirection( NORTHEAST );
-									else
-										if( xdelta > 0 && ydelta < 0 )
-											SetDirection( SOUTHWEST );
-										else
-											SetDirection( NORTHWEST );
+	switch (_state) {
+		// Gradually increase the alpha while the sprite is fading in during spawning
+		case SPAWNING:
+			_time_elapsed += hoa_system::SystemManager->GetUpdateTime();
+			if (_color.GetAlpha() < 1.0f) {
+				_color.SetAlpha((_time_elapsed / static_cast<float>(_time_to_spawn)) * 1.0f);
 			}
 			else {
-				if( _time_elapsed >= GetTimeToChange() ) {
-					SetDirection( 1 << hoa_utils::RandomBoundedInteger(0,11) );
+				ChangeStateHostile();
+			}
+			break;
+
+		// Set the sprite's direction so that it seeks to collide with the map camera's position
+		case HOSTILE:
+			// Holds the x and y deltas between the sprite and map camera coordinate pairs
+			float xdelta, ydelta;
+			_time_elapsed += hoa_system::SystemManager->GetUpdateTime();
+
+			xdelta = ComputeXLocation() - MapMode::_current_map->_camera->ComputeXLocation();
+			ydelta = ComputeYLocation() - MapMode::_current_map->_camera->ComputeYLocation();
+
+			// If the sprite has moved outside of its zone and it should not, reverse the sprite's direction
+			if (_zone->IsInsideZone(x_position, y_position) == false && _zone->IsRestraining()) {
+					SetDirection(CalculateOppositeDirection(GetDirection()));
+			}
+			// Otherwise, determine the direction that the sprite should move if the camera is within the sprite's aggression range
+			else if (abs(xdelta) <= _aggro_range && abs(ydelta) <= _aggro_range &&
+				_zone->IsInsideZone(hoa_map::MapMode::_current_map->_camera->x_position, hoa_map::MapMode::_current_map->_camera->y_position))
+				{
+					if (xdelta > -0.5 && xdelta < 0.5 && ydelta < 0)
+						SetDirection(SOUTH);
+					else if (xdelta > -0.5 && xdelta < 0.5 && ydelta > 0)
+						SetDirection(NORTH);
+					else if (ydelta > -0.5 && ydelta < 0.5 && xdelta > 0)
+						SetDirection(WEST);
+					else if (ydelta > -0.5 && ydelta < 0.5 && xdelta < 0)
+						SetDirection(EAST);
+					else if (xdelta < 0 && ydelta < 0)
+						SetDirection(SOUTHEAST);
+					else if (xdelta < 0 && ydelta > 0)
+						SetDirection(NORTHEAST);
+					else if (xdelta > 0 && ydelta < 0)
+						SetDirection(SOUTHWEST);
+					else
+						SetDirection(NORTHWEST);
+			}
+			// If the sprite is not within the aggression range, pick a random direction to move
+			else {
+				if (_time_elapsed >= GetTimeToChange()) {
+					// TODO: needs comment
+					SetDirection(1 << hoa_utils::RandomBoundedInteger(0,11));
 					_time_elapsed = 0;
 				}
 			}
-		}
 
-		MapSprite::Update();
-		break;
+			MapSprite::Update();
+			break;
 
-	default:
-		break;
+		// Do nothing if the sprite is in the DEAD state, or any other state
+		case DEAD:
+		default:
+			break;
 	}
 } // void EnemySprite::Update()
-
-
 
 } // namespace private_map
 

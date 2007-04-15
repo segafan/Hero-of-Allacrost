@@ -82,8 +82,8 @@ void EnemyZone::AddEnemy(EnemySprite* enemy, MapMode* map, uint8 count) {
 		return;
 	}
 
-	// Load the first enemy
-	enemy->Load();
+	// Prepare the first enemy
+	enemy->SetZone(this);
 	map->_AddGroundObject(enemy);
 	_enemies.push_back(enemy);
 

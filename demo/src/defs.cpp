@@ -447,6 +447,7 @@ void BindEngineToLua() {
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<EnemySprite, MapSprite>("EnemySprite")
+			.def(constructor<>())
 			.def(constructor<std::string>())
 			.def("SetZone", &EnemySprite::SetZone)
 			.def("Reset", &EnemySprite::Reset)
