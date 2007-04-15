@@ -99,14 +99,16 @@ void GameAudio::Update() {
 	if (examine_time < 0) { // 5 seconds have expired, reset timer and examine list for temporary sounds that are stopped
 		examine_time = 5000;
 
-		for (list<SoundDescriptor*>::iterator i = _temp_sounds.begin(); i != _temp_sounds.end(); i++) {
+		// NOTE: Everytime a sound is deleted, we have to traverse back to the list begin.
+		// Probably an alternative container would suit _temp_sounds better (std::deque anyone?)
+		for (list<SoundDescriptor*>::iterator i = _temp_sounds.begin(); i != _temp_sounds.end();) {
 			if ((*i)->GetSoundState() == AUDIO_STATE_STOPPED) {
 				delete(*i);
-
-				// The iterator i will become invalid after calling erase on it, so this circumvents that problem
-				list<SoundDescriptor*>::iterator temp = i;
+				_temp_sounds.erase(i);
+				i = _temp_sounds.begin();
+			}
+			else {
 				i++;
-				_temp_sounds.erase(temp);
 			}
 		}
 	}
