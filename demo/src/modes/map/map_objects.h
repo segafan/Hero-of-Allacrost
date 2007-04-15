@@ -334,7 +334,7 @@ public:
 		{ return draw_on_second_pass; }
 
 	uint8 GetType() const
-	{ return _object_type; }
+		{ return _object_type; }
 	//@}
 
 protected:
@@ -680,6 +680,7 @@ public:
 *** ***************************************************************************/
 class EnemySprite : public MapSprite {
 private:
+	//! \brief The states that the enemy sprite may be in
 	enum STATE {
 		SPAWNING,
 		HOSTILE,
@@ -687,19 +688,13 @@ private:
 	};
 
 public:
-	EnemySprite(std::string file) :
-		_zone(NULL),
-		_color(1.0f, 1.0f, 1.0f, 0.0f),
-		_aggro_range(8.0f),
-		_time_dir_change(2500),
-		_time_to_spawn(3500)
-	{
-		filename = file;
-		MapObject::_object_type = ENEMY_TYPE;
-		moving = true;
-		Reset();
-	}
+	//! \brief The default constructor which typically requires that the user make several additional calls to setup the sprite properties
+	EnemySprite();
+	
+	//! \brief A constructor for when the enemy sprite is stored in the definition of a single file
+	EnemySprite(std::string file);
 
+	//! \brief Loads the enemy's data from a file and returns true if it was successful
 	bool Load();
 
 	//! \brief Updates the sprite's position and state.
@@ -708,34 +703,40 @@ public:
 	//! \brief Draws the sprite frame in the appropriate position on the screen, if it is visible.
 	virtual void Draw();
 
+	//! \brief Resets various members of the class so that the enemy is dead, invisible, and does not produce a collision
+	void Reset();
+
+	//! \name Class Member Access Functions
+	//@{
+	float GetAggroRange() const
+		{ return _aggro_range; }
+
+	uint32 GetTimeToChange() const
+		{ return _time_dir_change; }
+
+	uint32 GetTimeToSpawn() const
+		{ return _time_to_spawn; }
+
+	bool IsDead() const
+		{ return _state == DEAD; }
+
+	bool IsSpawning() const
+		{ return _state == SPAWNING; }
+
+	bool IsHostile() const
+		{ return _state == HOSTILE; }
+
 	void SetZone( EnemyZone* zone )
 		{ _zone = zone; }
-
-	void Reset() {
-		updatable = false;
-		no_collision = true;
-		_state = DEAD;
-		_time_elapsed = 0;
-		_color.SetAlpha( 0.0f );
-	}
 
 	void SetAggroRange( float range )
 		{ _aggro_range = range; }
 
-	float GetAggroRange()
-		{ return _aggro_range; }
-
 	void SetTimeToChange( uint32 time )
 		{ _time_dir_change = time; }
 
-	uint32 GetTimeToChange()
-		{ return _time_dir_change; }
-
 	void SetTimeToSpawn( uint32 time )
 		{ _time_to_spawn = time; }
-
-	uint32 GetTimeToSpawn()
-		{ return _time_to_spawn; }
 
 	void ChangeStateDead()
 		{ Reset(); _zone->EnemyDead(); }
@@ -745,25 +746,28 @@ public:
 
 	void ChangeStateHostile()
 		{ updatable = true; _state = HOSTILE;}
-
-	bool IsDead()
-		{ return _state == DEAD; }
-
-	bool IsSpawning()
-		{ return _state == SPAWNING; }
-
-	bool IsHostile()
-		{ return _state == HOSTILE; }
+	//@}
 
 private:
 	//! \brief The zone that the enemy sprite belongs to
 	private_map::EnemyZone* _zone;
+
+	//! \brief Used to gradually fade in the sprite as it is spawning by adjusting the alpha channel
 	hoa_video::Color _color;
+
+	//! \brief A timer used for spawning
 	uint32 _time_elapsed;
+
+	//! \brief The state that the enemy sprite is in
 	STATE _state;
 
+	//! \brief A value which determines how close the player needs to be for the enemy to aggressively seek to confront it
 	float _aggro_range;
+
+	//! \brief ???
 	uint32 _time_dir_change;
+
+	//! \brief ???
 	uint32 _time_to_spawn;
 };
 

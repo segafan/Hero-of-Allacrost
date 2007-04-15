@@ -343,11 +343,40 @@ function Load(m)
 	-- Add a section to the zone that goes from (20, 10) to (50, 40) in map grid coordinates
 	ezone:AddSection(hoa_map.ZoneSection(20, 10, 50, 40));
 	-- Create a sprite representation of a monster attached to this zone
-	local enemy = hoa_map.EnemySprite("dat/maps/sprites/scorpion.lua");
-	enemy:SetZone(ezone);
-	
-	-- Add the enemy to the zone five times (it also gets added to the ground objects) 
-	ezone:AddEnemy(enemy, map, 5);
+	local enemy = hoa_map.EnemySprite();
+	enemy:SetObjectID(map:_GetGeneratedObjectID());
+	enemy:SetContext(1);
+	enemy:SetCollHalfWidth(1.0);
+	enemy:SetCollHeight(2.0);
+	enemy:SetImgHalfWidth(1.0);
+	enemy:SetImgHeight(4.0);
+	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
+	enemy:LoadStandardAnimations("img/sprites/map/scorpion_walk.png");
+	-- Add the enemy to the zone two times (it also gets added to the ground objects) 
+	ezone:AddEnemy(enemy, map, 2);
+
+	enemy = hoa_map.EnemySprite();
+	enemy:SetObjectID(map:_GetGeneratedObjectID());
+	enemy:SetContext(1);
+	enemy:SetCollHalfWidth(1.0);
+	enemy:SetCollHeight(2.0);
+	enemy:SetImgHalfWidth(1.0);
+	enemy:SetImgHeight(4.0);
+	enemy:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
+	enemy:LoadStandardAnimations("img/sprites/map/snake_walk.png");
+	ezone:AddEnemy(enemy, map, 2);
+
+	enemy = hoa_map.EnemySprite();
+	enemy:SetObjectID(map:_GetGeneratedObjectID());
+	enemy:SetContext(1);
+	enemy:SetCollHalfWidth(1.0);
+	enemy:SetCollHeight(2.0);
+	enemy:SetImgHalfWidth(1.0);
+	enemy:SetImgHeight(4.0);
+	enemy:SetMovementSpeed(hoa_map.MapMode.VERY_SLOW_SPEED);
+	enemy:LoadStandardAnimations("img/sprites/map/slime_walk.png");
+	ezone:AddEnemy(enemy, map, 2);
+
 	-- Finally, add the zone to the map
 	map:_AddZone(ezone);
 end -- function Load()
