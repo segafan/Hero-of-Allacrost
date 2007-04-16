@@ -689,7 +689,7 @@ EditorScrollView::EditorScrollView(QWidget* parent, const QString& name, int wid
 	// Create the walkability checkboxes and add them to a QVButtonGroup.
 	Q3VButtonGroup* checkboxes = new Q3VButtonGroup("Walkability", _context_menu,
 		"checkboxes");
-	_allwalk_checkbox = new QCheckBox("All", checkboxes, "allwalk_checkbox");
+	_allwalk_checkbox = new QCheckBox(QString("All")      , checkboxes, QString("allwalk_checkbox"));
 	_walk_checkbox[0] = new QCheckBox(QString("NW corner"), checkboxes, QString("walk_checkbox[0]"));
 	_walk_checkbox[1] = new QCheckBox(QString("NE corner"), checkboxes, QString("walk_checkbox[1]"));
 	_walk_checkbox[2] = new QCheckBox(QString("SW corner"), checkboxes, QString("walk_checkbox[2]"));
@@ -704,7 +704,7 @@ EditorScrollView::~EditorScrollView()
 {
 	delete _map;
 	delete _allwalk_checkbox;
-	for (int i = 0; i < 8; i++)
+	for (int i = 0; i < ED_WALK_CHECKBOXES; i++)
 		delete _walk_checkbox[i];
 	delete _context_menu;
 } // EditorScrollView destructor
