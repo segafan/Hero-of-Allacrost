@@ -302,6 +302,12 @@ private:
 	**/
 	static MapMode *_current_map;
 
+	/** \brief A reference to the instance of MapMode which most recently had its constructor called
+	*** This is not the same as _current_map, and this pointer should only be used in conjunction with
+	*** loading code. The pointer is only updated when the MapMode constructor is called.
+	**/
+	static MapMode *_loading_map;
+
 	//! \brief The name of the script file that contains the map.
 	std::string _map_filename;
 

@@ -18,16 +18,20 @@
 #include "map_objects.h"
 #include "map_dialogue.h"
 #include "map_actions.h"
+
 #include "audio.h"
 #include "video.h"
-#include "system.h"
 #include "script.h"
+#include "system.h"
+#include "global.h"
 
 using namespace std;
 using namespace hoa_utils;
 using namespace hoa_audio;
 using namespace hoa_video;
 using namespace hoa_script;
+using namespace hoa_system;
+using namespace hoa_global;
 
 namespace hoa_map {
 
@@ -460,7 +464,7 @@ bool MapSprite::LoadStandardAnimations(std::string filename) {
 
 // Updates the state of the sprite
 void MapSprite::Update() {
-	if ( !updatable )
+	if (!updatable)
 		return;
 
 	// Set the sprite's animation to the standing still position if movement has just stopped
@@ -546,7 +550,7 @@ void MapSprite::SaveState() {
 
 
 bool MapSprite::LoadState() {
-	if( !VirtualSprite::LoadState() )
+	if (!VirtualSprite::LoadState())
 		return false;
 
 	was_moving = _saved_was_moving;
@@ -589,6 +593,19 @@ EnemySprite::EnemySprite(std::string file) :
 }
 
 
+// Load in the appropriate images and other data for the sprite from a Lua file
+bool EnemySprite::Load() {
+	ScriptDescriptor sprite_script;
+	if (sprite_script.OpenFile(filename, SCRIPT_READ) == false) {
+		return false;
+	}
+
+	ScriptCallFunction<void>(sprite_script.GetLuaState(), "Load", this);
+	string sprite_sheet = sprite_script.ReadString("sprite_sheet");
+	return MapSprite::LoadStandardAnimations(sprite_sheet);
+}
+
+
 
 void EnemySprite::Reset() {
 	updatable = false;
@@ -599,24 +616,44 @@ void EnemySprite::Reset() {
 }
 
 
-void EnemySprite::Draw() {
-	if (_state != DEAD && MapObject::DrawHelper() == true) {
-			VideoManager->DrawImage(animations[current_animation],_color);
+
+void EnemySprite::AddEnemy(uint32 enemy_id) {
+	if (_enemy_parties.empty()) {
+		if (MAP_DEBUG) {
+			cerr << "MAP WARNING: In EnemySprite::AddEnemy, can not add new enemy when no parties have been declared" << endl;
+		}
+		return;
+	}
+
+	_enemy_parties.back().push_back(enemy_id);
+
+	// Make sure that the GlobalEnemy has already been created for this enemy_id
+	if (MAP_DEBUG) {
+		bool found = false;
+		for (uint32 i = 0; i < MapMode::_loading_map->_enemies.size(); i++) {
+			if (MapMode::_loading_map->_enemies[i].GetID() == enemy_id) {
+				found = true;
+				break;
+			}
+		}
+
+		if (found == false) {
+			cerr << "MAP WARNING: In EnemySprite::AddEnemy, enemy to add has id " << enemy_id
+				<< ", which does not exist in MapMode::_enemies" << endl;
+		}
 	}
 }
 
 
-// Load in the appropriate images and other data for the sprite
-bool EnemySprite::Load() {
-	ScriptDescriptor sprite_script;
-	if (sprite_script.OpenFile(filename, SCRIPT_READ) == false) {
-		return false;
+
+const std::vector<uint32>& EnemySprite::RetrieveRandomParty() {
+	if (_enemy_parties.empty()) {
+		cerr << "MAP ERROR: Called EnemySprite::RetreiveRandomParty when no enemy parties existed!" << endl;
+		exit(1);
 	}
 
-	ScriptCallFunction<void>(sprite_script.GetLuaState(), "Load", this);
-	string sprite_sheet = sprite_script.ReadString("sprite_sheet");
-	return MapSprite::LoadStandardAnimations(sprite_sheet);
-} // bool EnemySprite::Load()
+	return _enemy_parties[rand() % _enemy_parties.size()];
+}
 
 
 
@@ -624,7 +661,7 @@ void EnemySprite::Update() {
 	switch (_state) {
 		// Gradually increase the alpha while the sprite is fading in during spawning
 		case SPAWNING:
-			_time_elapsed += hoa_system::SystemManager->GetUpdateTime();
+			_time_elapsed += SystemManager->GetUpdateTime();
 			if (_color.GetAlpha() < 1.0f) {
 				_color.SetAlpha((_time_elapsed / static_cast<float>(_time_to_spawn)) * 1.0f);
 			}
@@ -637,7 +674,7 @@ void EnemySprite::Update() {
 		case HOSTILE:
 			// Holds the x and y deltas between the sprite and map camera coordinate pairs
 			float xdelta, ydelta;
-			_time_elapsed += hoa_system::SystemManager->GetUpdateTime();
+			_time_elapsed += SystemManager->GetUpdateTime();
 
 			xdelta = ComputeXLocation() - MapMode::_current_map->_camera->ComputeXLocation();
 			ydelta = ComputeYLocation() - MapMode::_current_map->_camera->ComputeYLocation();
@@ -685,6 +722,14 @@ void EnemySprite::Update() {
 			break;
 	}
 } // void EnemySprite::Update()
+
+
+
+void EnemySprite::Draw() {
+	if (_state != DEAD && MapObject::DrawHelper() == true) {
+			VideoManager->DrawImage(animations[current_animation],_color);
+	}
+}
 
 } // namespace private_map
 
