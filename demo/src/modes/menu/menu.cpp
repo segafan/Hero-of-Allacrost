@@ -277,7 +277,7 @@ void MenuMode::_SetupInventoryOptionBox() {
 
 	// Add strings and set default selection.
 	_menu_inventory.SetOptions(options);
-	_menu_inventory.SetSelection(INV_USE);
+	_menu_inventory.SetSelection(INV_USE);	
 }
 
 
@@ -567,67 +567,75 @@ void MenuMode::_DrawBottomMenu() {
 	VideoManager->Move(150, 577);
 
 	if (_current_menu_showing == SHOW_INVENTORY || _current_menu_showing == SHOW_EQUIP || _current_menu_showing == SHOW_SKILLS) {
-			VideoManager->DrawText(MakeUnicodeString("STR: 105 (+1)"));
+		GlobalCharacter* character = GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS);
+		string text = "STR: " +  NumberToString(character->GetStrength());
+		VideoManager->DrawText(MakeUnicodeString(text));
 
-			VideoManager->MoveRelative(0, 20);
-			VideoManager->DrawText(MakeUnicodeString("VGR: 72 (+0)"));
+		text = "VIG: " +  NumberToString(character->GetVigor());
+		VideoManager->MoveRelative(0, 20);
+		VideoManager->DrawText(MakeUnicodeString(text));
 
-			VideoManager->MoveRelative(0, 20);
-			VideoManager->DrawText(MakeUnicodeString("FRT: 106 (-2)"));
+		text = "FRT: " +  NumberToString(character->GetFortitude());
+		VideoManager->MoveRelative(0, 20);
+		VideoManager->DrawText(MakeUnicodeString(text));
 
-			VideoManager->MoveRelative(0, 20);
-			VideoManager->DrawText(MakeUnicodeString("RES: 48 (+0)"));
+		text = "RES: " +  NumberToString(character->GetResistance());
+		VideoManager->MoveRelative(0, 20);
+		VideoManager->DrawText(MakeUnicodeString(text));
 
-			VideoManager->MoveRelative(0, 20);
-			VideoManager->DrawText(MakeUnicodeString("AGI: 25 (+0)"));
+		text = "AGI: " +  NumberToString(character->GetAgility());
+		VideoManager->MoveRelative(0, 20);
+		VideoManager->DrawText(MakeUnicodeString(text));
 
-			VideoManager->MoveRelative(0, 20);
-			VideoManager->DrawText(MakeUnicodeString("EVD: 3% (+1)"));
+		text = "EVD: " +  NumberToString(character->GetEvade()) + "%";
+		VideoManager->MoveRelative(0, 20);
+		VideoManager->DrawText(MakeUnicodeString(text));
 
-			VideoManager->SetDrawFlags(VIDEO_X_CENTER,VIDEO_Y_BOTTOM,0);
+		VideoManager->SetDrawFlags(VIDEO_X_CENTER,VIDEO_Y_BOTTOM,0);
 
-			VideoManager->MoveRelative(370, -80);
-			VideoManager->DrawText(MakeUnicodeString("Health Potion"));
+		text = "Health Potion";
+		VideoManager->MoveRelative(370, -80);
+		VideoManager->DrawText(MakeUnicodeString(text));
 
-			VideoManager->MoveRelative(0, 60);
-			VideoManager->DrawText(MakeUnicodeString("HP +30.  Single Ally"));
+		VideoManager->MoveRelative(0, 60);
+		VideoManager->DrawText(MakeUnicodeString("HP +30.  Single Ally"));
 
-			VideoManager->SetDrawFlags(VIDEO_X_LEFT,VIDEO_Y_BOTTOM,0);
-			StillImage i;
-			i.SetFilename("img/icons/items/health_potion_large.png");
-			VideoManager->LoadImage(i);
-			VideoManager->MoveRelative(260, 30);
-			VideoManager->DrawImage(i);
+		VideoManager->SetDrawFlags(VIDEO_X_LEFT,VIDEO_Y_BOTTOM,0);
+		StillImage i;
+		i.SetFilename("img/icons/items/health_potion_large.png");
+		VideoManager->LoadImage(i);
+		VideoManager->MoveRelative(260, 30);
+		VideoManager->DrawImage(i);
 	}
+	else {
+		// Display Location
+		VideoManager->DrawText(_locale_name);
 
+		// Draw Played Time
+		VideoManager->MoveRelative(-40, 60);
+		std::ostringstream os_time;
+		uint8 hours = SystemManager->GetPlayHours();
+		uint8 minutes = SystemManager->GetPlayMinutes();
+		uint8 seconds = SystemManager->GetPlaySeconds();
+		os_time << (hours < 10 ? "0" : "") << (uint32)hours << ":";
+		os_time << (minutes < 10 ? "0" : "") << (uint32)minutes << ":";
+		os_time << (seconds < 10 ? "0" : "") << (uint32)seconds;
 
-	// Display Location
-	VideoManager->DrawText(_locale_name);
-
-	// Draw Played Time
-	VideoManager->MoveRelative(-40, 60);
-	std::ostringstream os_time;
-	uint8 hours = SystemManager->GetPlayHours();
-	uint8 minutes = SystemManager->GetPlayMinutes();
-	uint8 seconds = SystemManager->GetPlaySeconds();
-	os_time << (hours < 10 ? "0" : "") << (uint32)hours << ":";
-	os_time << (minutes < 10 ? "0" : "") << (uint32)minutes << ":";
-	os_time << (seconds < 10 ? "0" : "") << (uint32)seconds;
-
-	std::string time = std::string("Time: ") + os_time.str();
-	VideoManager->DrawText(MakeUnicodeString(time));
+		std::string time = std::string("Time: ") + os_time.str();
+		VideoManager->DrawText(MakeUnicodeString(time));
 
 	// Display the current funds that the party has
-	string money = string("Drunes: " + NumberToString(GlobalManager->GetFunds()));
-	VideoManager->MoveRelative(0, 30);
-	VideoManager->DrawText(MakeUnicodeString(money));
+		string money = string("Drunes: " + NumberToString(GlobalManager->GetFunds()));
+		VideoManager->MoveRelative(0, 30);
+		VideoManager->DrawText(MakeUnicodeString(money));
 
-	VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, 0);
+		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, 0);
 
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
+		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 
-	VideoManager->Move(390, 685);
-	VideoManager->DrawImage(_locale_graphic);
+		VideoManager->Move(390, 685);
+		VideoManager->DrawImage(_locale_graphic);
+	}
 } // void MenuMode::_DrawBottomMenu()
 
 
@@ -702,12 +710,12 @@ void MenuMode::_HandleStatusMenu() {
 
 
 void MenuMode::_HandleInventoryMenu() {
-	switch (_menu_inventory.GetSelection()) {
+/*	switch (_menu_inventory.GetSelection()) {
 		case INV_USE:
 			// FIXME: Reenable
 			// Make sure we have some items in the inventory.
-			//if (GlobalManager->GetInventory().size() == 0)
-			//	return;
+			if (GlobalManager->GetInventory().size() == 0)
+				return;
 			_inventory_window.Activate(true);
 			_current_menu->SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
 			break;
@@ -725,7 +733,7 @@ void MenuMode::_HandleInventoryMenu() {
 		default:
 			cerr << "MENU ERROR: Invalid option in MenuMode::_HandleInventoryMenu()" << endl;
 			break;
-	}
+	}*/
 }
 
 

@@ -712,36 +712,47 @@ void InventoryWindow::_TEMP_ApplyItem() {
 void InventoryWindow::_UpdateItemText()
 {
 	// Get the inventory items
-	std::vector<GlobalItem*>* invItems = GlobalManager->GetInventoryItems();
+	std::map<uint32, GlobalObject*>* inv = GlobalManager->GetInventory();
+/*	std::vector<GlobalItem*>* invItems = GlobalManager->GetInventoryItems();
 	std::vector<GlobalWeapon*>* invWeapons = GlobalManager->GetInventoryWeapons();
 	std::vector<GlobalArmor*>* invTorsoArmor = GlobalManager->GetInventoryTorsoArmor();
 	std::vector<GlobalArmor*>* invHeadArmor = GlobalManager->GetInventoryHeadArmor();
 	std::vector<GlobalArmor*>* invArmArmor = GlobalManager->GetInventoryArmArmor();
 	std::vector<GlobalArmor*>* invLegArmor = GlobalManager->GetInventoryLegArmor();
 	std::vector<GlobalKeyItem*>* invKeyItems = GlobalManager->GetInventoryKeyItems();
-
+*/
 
 	// For item names
 	std::vector<ustring> inv_names;
 	// For iterating through items
-	std::vector<GlobalItem*>::iterator i;
+	std::map<uint32, GlobalObject*>::iterator i;
+/*	std::vector<GlobalItem*>::iterator i;
 	std::vector<GlobalWeapon*>::iterator i_weapon;
 	std::vector<GlobalArmor*>::iterator i_armor;
-	std::vector<GlobalKeyItem*>::iterator i_key;
+	std::vector<GlobalKeyItem*>::iterator i_key;*/
 
 	// temporary object storage variables
-	GlobalItem* item;
+	GlobalObject* obj;
+/*	GlobalItem* item;
 	GlobalWeapon* weapon;
 	GlobalArmor* armor;
 	GlobalKeyItem* key_item;
-
+*/
 	// Temp var to hold option
 	string text;
 	// Determines the number of selections (see the for loops)
 	uint16 count = 0;
 
+	for (i = inv->begin(), count = 0; i != inv->end(); i++) {
+		obj = i->second;
+		text = "<" + obj->GetIconImage().GetFilename() + "><32>" + MakeStandardString(obj->GetName()) + "<R><350>" + NumberToString(obj->GetCount()) + "   ";
+		inv_names.push_back(MakeUnicodeString(text));
+		count++;
+	}
+
+
 	//FIX ME - When video engine is fixed, take out MakeStandardString
-	switch (_item_categories.GetSelection()) {
+/*	switch (_item_categories.GetSelection()) {
 
 		//Index all items
 		case ITEM_ALL:
@@ -779,7 +790,7 @@ void InventoryWindow::_UpdateItemText()
 
 		//Index equipment only
 		case ITEM_EQUIPMENT:
-/*			for (i_weapon = invWeapons->begin(), count = 0; i_weapon != invWeapons->end(); i++) {
+			for (i_weapon = invWeapons->begin(), count = 0; i_weapon != invWeapons->end(); i++) {
 				weapon = *i_weapon;
 				// NOTE: item->GetIconPath is defunct
 				text = "TEMP:insert icon" + MakeStandardString(weapon->GetName()) +
@@ -805,7 +816,7 @@ void InventoryWindow::_UpdateItemText()
 				inv_names.push_back(MakeUnicodeString(text));
 				count++;
 			}
-*/
+
 			break;
 
 		case ITEM_KEY:
@@ -827,7 +838,7 @@ void InventoryWindow::_UpdateItemText()
 	if (invItems->size() > 0) {
 		_inventory_items.SetSelection(0);
 	}
-
+*/
 } // void InventoryWindow::UpdateItemText()
 
 
