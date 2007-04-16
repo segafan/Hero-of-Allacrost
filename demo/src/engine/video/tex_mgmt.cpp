@@ -621,7 +621,7 @@ bool GameVideo::_LoadRawImagePng(const std::string &filename, hoa_video::private
 	uint8* img_pixel;
 	uint8* dst_pixel;
 
-	if (bpp == 1)
+	if (info_ptr->color_type == PNG_COLOR_TYPE_PALETTE)
 	{
 		png_color c;
 		for(uint32 y = 0; y < info_ptr->height; y++)
@@ -635,6 +635,21 @@ bool GameVideo::_LoadRawImagePng(const std::string &filename, hoa_video::private
 				dst_pixel[0] = c.red;
 				dst_pixel[1] = c.green;
 				dst_pixel[2] = c.blue;
+				dst_pixel[3] = 0xFF;
+			}
+		}
+	}
+	else if (bpp == 1)
+	{
+		for(uint32 y = 0; y < info_ptr->height; y++)
+		{
+			for(uint32 x = 0; x < info_ptr->width; x++)
+			{
+				img_pixel = row_pointers[y] + (x * bpp);
+				dst_pixel = ((uint8 *)load_info.pixels) + ((y * info_ptr->width) + x) * 4;
+				dst_pixel[0] = img_pixel[0];
+				dst_pixel[1] = img_pixel[0];
+				dst_pixel[2] = img_pixel[0];
 				dst_pixel[3] = 0xFF;
 			}
 		}
