@@ -697,14 +697,35 @@ public:
 	//! \brief Loads the enemy's data from a file and returns true if it was successful
 	bool Load();
 
+	//! \brief Resets various members of the class so that the enemy is dead, invisible, and does not produce a collision
+	void Reset();
+
 	//! \brief Updates the sprite's position and state.
 	virtual void Update();
 
 	//! \brief Draws the sprite frame in the appropriate position on the screen, if it is visible.
 	virtual void Draw();
 
-	//! \brief Resets various members of the class so that the enemy is dead, invisible, and does not produce a collision
-	void Reset();
+	// TODO: eventually I would like the ability for Lua to pass in a table of ints to the AddEnemyParty function, but because I'm not quite
+	// sure how to do that yet, I'm writing several smaller functions so we can just get this demo released.
+
+	// void AddEnemyParty(std::vector<uint32>& party);
+
+	/** \brief Adds a new empty vector to the _enemy_parties member
+	*** \note Make sure to populate this vector by adding at least one enemy!
+	**/
+	void NewEnemyParty()
+		{ _enemy_parties.push_back(std::vector<uint32>()); }
+
+	/** \brief Adds an enemy with the specified ID to the last party in _enemy_parties
+	*** \param enemy_id The ID of the enemy to add
+	*** \note MapMode should have already loaded a GlobalEnemy with this ID and retained it within the MapMode#_enemies member.
+	*** If this is not the case, this function will print a warning message.
+	**/
+	void AddEnemy(uint32 enemy_id);
+
+	//! \brief Returns a reference to a random party of enemies
+	const std::vector<uint32>& RetrieveRandomParty();
 
 	//! \name Class Member Access Functions
 	//@{
@@ -726,16 +747,16 @@ public:
 	bool IsHostile() const
 		{ return _state == HOSTILE; }
 
-	void SetZone( EnemyZone* zone )
+	void SetZone(EnemyZone* zone)
 		{ _zone = zone; }
 
-	void SetAggroRange( float range )
+	void SetAggroRange(float range)
 		{ _aggro_range = range; }
 
-	void SetTimeToChange( uint32 time )
+	void SetTimeToChange(uint32 time)
 		{ _time_dir_change = time; }
 
-	void SetTimeToSpawn( uint32 time )
+	void SetTimeToSpawn(uint32 time)
 		{ _time_to_spawn = time; }
 
 	void ChangeStateDead()
@@ -769,6 +790,11 @@ private:
 
 	//! \brief ???
 	uint32 _time_to_spawn;
+
+	/** \brief Contains the possible groups of enemies that may appear in a battle should the player encounter this enemy sprite
+	*** The numbers contained within this member are ID numbers for the enemy. If the
+	**/
+	std::vector<std::vector<uint32> > _enemy_parties;
 };
 
 } // namespace private_map

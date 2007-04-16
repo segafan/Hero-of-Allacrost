@@ -44,8 +44,9 @@ using namespace hoa_menu;
 namespace hoa_map {
 
 bool MAP_DEBUG = true;
-// Initialize static class variable
+// Initialize static class variables
 MapMode *MapMode::_current_map = NULL;
+MapMode *MapMode::_loading_map = NULL;
 
 // ****************************************************************************
 // ************************** MapMode Class Functions *************************
@@ -58,6 +59,7 @@ MapMode::MapMode(string filename) :
 {
 	if (MAP_DEBUG)
 		cout << "MAP: MapMode constructor invoked" << endl;
+	_loading_map = this;
 
 	mode_type = MODE_MANAGER_MAP_MODE;
 	_map_state = EXPLORE;
@@ -850,25 +852,37 @@ bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 			if (!(other_x_location - (*objects)[i]->coll_half_width > cr_right
 				|| other_x_location + (*objects)[i]->coll_half_width < cr_left)) {
 				// Verify that the bounding boxes overlap on the vertical axis
-				if (!(other_y_location - (*objects)[i]->coll_height > y_location
-					|| other_y_location < cr_top )) {
-						// Boxes overlap on both axis, there is a colision
-						if( sprite->GetType() == ENEMY_TYPE && (*objects)[i] == _camera
-							&& reinterpret_cast<EnemySprite*>(sprite)->IsHostile() ) {
-								reinterpret_cast<EnemySprite*>(sprite)->ChangeStateDead();
-								//BattleMode *BM = new BattleMode();
-								//ModeManager->Push(BM);
-								return false;
+				if (!(other_y_location - (*objects)[i]->coll_height > y_location || other_y_location < cr_top )) {
+					// Boxes overlap on both axis, there is a colision
+					if (sprite->GetType() == ENEMY_TYPE && (*objects)[i] == _camera) {
+						EnemySprite *enemy = reinterpret_cast<EnemySprite*>(sprite);
+						if (enemy->IsHostile()) {
+							enemy->ChangeStateDead();
+							BattleMode *BM = new BattleMode();
+							ModeManager->Push(BM);
+							const vector<uint32>& enemy_party = enemy->RetrieveRandomParty();
+							for (uint32 i = 0; i < enemy_party.size(); i++) {
+								BM->AddEnemy(enemy_party[i]);
+							}
+							return false;
 						}
+					}
 
-						if( (*objects)[i]->GetType() == ENEMY_TYPE && sprite == _camera
-							&& reinterpret_cast<EnemySprite*>((*objects)[i])->IsHostile() ) {
-								reinterpret_cast<EnemySprite*>((*objects)[i])->ChangeStateDead();
-								//BattleMode *BM = new BattleMode();
-								//ModeManager->Push(BM);
-								return false;
+					if ((*objects)[i]->GetType() == ENEMY_TYPE && sprite == _camera) {
+						EnemySprite *enemy = reinterpret_cast<EnemySprite*>((*objects)[i]);
+						if (enemy->IsHostile()) {
+							enemy->ChangeStateDead();
+							BattleMode *BM = new BattleMode();
+							ModeManager->Push(BM);
+							const vector<uint32>& enemy_party = enemy->RetrieveRandomParty();
+							for (uint32 i = 0; i < enemy_party.size(); i++) {
+								BM->AddEnemy(enemy_party[i]);
+							}
+							return false;
 						}
-						return true;
+					}
+
+					return true;
 				}
 			}
 

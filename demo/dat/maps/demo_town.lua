@@ -352,6 +352,9 @@ function Load(m)
 	enemy:SetImgHeight(4.0);
 	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
 	enemy:LoadStandardAnimations("img/sprites/map/scorpion_walk.png");
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(2);
+	enemy:AddEnemy(2);
 	-- Add the enemy to the zone two times (it also gets added to the ground objects) 
 	ezone:AddEnemy(enemy, map, 2);
 
@@ -364,6 +367,14 @@ function Load(m)
 	enemy:SetImgHeight(4.0);
 	enemy:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
 	enemy:LoadStandardAnimations("img/sprites/map/snake_walk.png");
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(4);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(3);
 	ezone:AddEnemy(enemy, map, 2);
 
 	enemy = hoa_map.EnemySprite();
@@ -375,6 +386,14 @@ function Load(m)
 	enemy:SetImgHeight(4.0);
 	enemy:SetMovementSpeed(hoa_map.MapMode.VERY_SLOW_SPEED);
 	enemy:LoadStandardAnimations("img/sprites/map/slime_walk.png");
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(1);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
 	ezone:AddEnemy(enemy, map, 2);
 
 	-- Finally, add the zone to the map
