@@ -257,7 +257,7 @@ void Grid::LoadMap()
 	_ml_on = true;          // middle layer default to off
 	_ul_on = true;          // upper layer default to off
 	_changed = false;       // map has not been changed yet
-	updateGL();
+//	updateGL();
 } // LoadMap()
 
 void Grid::SaveMap()
@@ -494,6 +494,7 @@ void Grid::paintGL()
 
 				//VideoManager->DrawRectangle(1.0f, 1.0f, Color::red);
 				//VideoManager->DrawImage(tilesets[tileset_index]->tiles[tile_index], Color::green);
+				VideoManager->DrawImage(tilesets[tileset_index]->tiles[tile_index]);
 			} // a tile exists to draw
 			col = ++col % _width;
 			if (col == 0)

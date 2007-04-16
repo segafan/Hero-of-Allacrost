@@ -307,8 +307,13 @@ class EditorScrollView: public Q3ScrollView
 		//! A checkbox capable of toggling all the other walkable checkboxes in the
 		//! context menu.
 		QCheckBox *_allwalk_checkbox;
+		//! Number of walkability checkboxes
+		enum {
+			ED_WALK_CHECKBOXES = 4,
+		};
 		//! Array of walkability checkboxes in the context menu.
-		QCheckBox *_walk_checkbox[4];
+		QCheckBox *_walk_checkbox[ED_WALK_CHECKBOXES];
+
 
 		//! Stores source index of moved tiles
 		int _move_source_index;
