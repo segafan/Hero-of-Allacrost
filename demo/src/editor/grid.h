@@ -22,7 +22,6 @@
 #include "script.h"
 #include "video.h"
 
-#include "tile.h"
 #include "tileset.h"
 
 #include <QGLWidget>
@@ -97,8 +96,6 @@ class Grid: public QGLWidget
 		QStringList tileset_names;
 		//! A vector which contains a pointer to each tileset and the tiles it has loaded via LoadMultiImage.
 		std::vector<TilesetTable*> tilesets;
-		//! A vector of the default walkability of tiles, specified in their tileset config file.
-		std::vector<uint32> tiles_walkable;
 		//! A vector of the walkability of tiles modified on the map, which overrides their default walkability.
 		std::vector<uint32> indiv_walkable;
 

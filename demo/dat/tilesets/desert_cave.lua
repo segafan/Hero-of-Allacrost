@@ -167,10 +167,10 @@ walkability[15][0] = { 1, 1, 1, 1}
 walkability[15][1] = { 1, 1, 1, 1}
 walkability[15][2] = { 1, 1, 1, 1}
 
--- The animated tiles table has one row per animated tile, with each entry in a row indicating which tile in the tileset is the next part of the animation.
+-- The animated tiles table has one row per animated tile, with each entry in a row indicating which tile in the tileset is the next part of the animation, followed by the time in ms that the tile will be displayed for.
 animated_tiles = {}
-animated_tiles[0] = { 144, 145, 146, 147, 148, 149, 150, 151 }
-animated_tiles[1] = { 152, 153, 154, 155, 156, 157, 158, 159 }
-animated_tiles[2] = { 160, 161, 162, 163, 164, 165, 166, 167 }
-animated_tiles[3] = { 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 200, 201, 202 }
-animated_tiles[4] = { 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 216, 217, 218 }
+animated_tiles[0] = { 144, 25, 145, 25, 146, 25, 147, 25, 148, 25, 149, 25, 150, 25, 151, 25 }
+animated_tiles[1] = { 152, 25, 153, 25, 154, 25, 155, 25, 156, 25, 157, 25, 158, 25, 159, 25 }
+animated_tiles[2] = { 160, 25, 161, 25, 162, 25, 163, 25, 164, 25, 165, 25, 166, 25, 167, 25 }
+animated_tiles[3] = { 168, 25, 169, 25, 170, 25, 171, 25, 172, 25, 173, 25, 174, 25, 175, 25, 176, 25, 177, 25, 178, 25, 179, 25, 180, 25, 181, 25, 182, 25, 183, 25, 200, 25, 201, 202, 25 }
+animated_tiles[4] = { 184, 25, 185, 25, 186, 25, 187, 25, 188, 25, 189, 25, 190, 25, 191, 25, 192, 25, 193, 25, 194, 25, 195, 25, 196, 25, 197, 25, 198, 25, 199, 25, 216, 25, 217, 25, 218, 25 }

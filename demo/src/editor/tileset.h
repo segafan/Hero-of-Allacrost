@@ -21,7 +21,6 @@
 #include "defs.h"
 #include "script.h"
 #include "video.h"
-#include "tile.h"
 
 #include <QMessageBox>
 #include <Q3Table>
@@ -32,6 +31,10 @@
 //! All calls to the editor are wrapped in this namespace.
 namespace hoa_editor
 {
+
+//! Width and height of a tile in pixels.
+const int TILE_WIDTH  = 32;
+const int TILE_HEIGHT = 32;
 
 /** ****************************************************************************
 *** \brief Manages individual tiles in a table with drag and drop capability.

@@ -274,46 +274,29 @@ class EditorScrollView: public Q3ScrollView
 		void contentsMousePressEvent(QMouseEvent *evt);
 		void contentsMouseMoveEvent(QMouseEvent *evt);
 		void contentsMouseReleaseEvent(QMouseEvent *evt);
-		void contentsContextMenuEvent(QContextMenuEvent *evt);
+//		void contentsContextMenuEvent(QContextMenuEvent *evt);
 		//@}
 
 	private slots:
-		//! \name Context Menu Slots
+/*		//! \name Context Menu Slots
 		//! \brief These slots are used to correctly setup and process the context
 		//!        menu, which pops up on right-clicks of the mouse on the map.
 		//{@
 		void _ContextMenuSetup();
 		void _ContextMenuEvaluate();
 		//@}
-		
-		//! Uses a single checkbox to toggle the remaining walkable checkboxes.
-		//! \param on True if the single checkbox is on, False otherwise.
-		void _ToggleWalkCheckboxes(bool on);
-
+*/
 	private:
-		//! Removes current tile if it is no longer used
-		void _RemoveIfUnused(int file_index);
-
 		//! Current working map.
 		Grid *_map;
 		//! Current tile edit mode being used.
-		TILE_MODE_TYPE  _tile_mode;
+		TILE_MODE_TYPE _tile_mode;
 		//! Current layer being edited.
 		LAYER_TYPE _layer_edit;
 		//! Mouse is at this tile index on the map.
 		int _tile_index;
 		//! Menu used on right-clicks of the mouse on the map.
-		Q3PopupMenu *_context_menu;
-		//! A checkbox capable of toggling all the other walkable checkboxes in the
-		//! context menu.
-		QCheckBox *_allwalk_checkbox;
-		//! Number of walkability checkboxes
-		enum {
-			ED_WALK_CHECKBOXES = 4,
-		};
-		//! Array of walkability checkboxes in the context menu.
-		QCheckBox *_walk_checkbox[ED_WALK_CHECKBOXES];
-
+		//Q3PopupMenu *_context_menu;
 
 		//! Stores source index of moved tiles
 		int _move_source_index;

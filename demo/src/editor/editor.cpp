@@ -538,6 +538,7 @@ bool Editor::_EraseOK()
 } // _EraseOK()
 
 
+
 /************************
   NewMapDialog class functions follow
 ************************/
@@ -570,15 +571,8 @@ NewMapDialog::NewMapDialog(QWidget* parent, const QString& name)
 
 	QDir tileset_dir("img/tilesets");
 	_tileset_lview->addColumn("Tilesets");
-//	Q3CheckListItem* global = new Q3CheckListItem(_tileset_lview, "Global", Q3CheckListItem::CheckBox);
-//	global->setOn(true);
-	for (uint32 i = 0; i < tileset_dir.count(); i++)
-	{
-//		if (tileset_dir[i].contains("tileset") != 0)
-//		{
-			(void) new Q3CheckListItem(_tileset_lview, tileset_dir[i].remove(".png"), Q3CheckListItem::CheckBox);
-//		}
-	} // looks for tileset files in the tileset directory
+	for (uint32 i = 0; i < tileset_dir.count(); i++)  // looks for tileset files in the tileset directory
+		(void) new Q3CheckListItem(_tileset_lview, tileset_dir[i].remove(".png"), Q3CheckListItem::CheckBox);
 	
 	_dia_layout->addWidget(_height_label, 0, 0);
 	_dia_layout->addWidget(_height_sbox, 1, 0);
@@ -599,6 +593,8 @@ NewMapDialog::~NewMapDialog()
 	delete _ok_pbut;
 	delete _dia_layout;
 } // NewMapDialog destructor
+
+
 
 /************************
   MusicDialog class functions follow
@@ -621,10 +617,10 @@ MusicDialog::MusicDialog(QWidget* parent, const QString& name, const QString& se
 	connect(_ok_pbut,     SIGNAL(released()), this, SLOT(accept()));
 	connect(_cancel_pbut, SIGNAL(released()), this, SLOT(reject()));
 
-	_dia_layout->addWidget(_select_label,0,0);
-	_dia_layout->addWidget(_music_list,1,0);
-	_dia_layout->addWidget(_ok_pbut,2,0);
-	_dia_layout->addWidget(_cancel_pbut,2,1);
+	_dia_layout->addWidget(_select_label, 0, 0);
+	_dia_layout->addWidget(_music_list, 1, 0);
+	_dia_layout->addWidget(_ok_pbut, 2, 0);
+	_dia_layout->addWidget(_cancel_pbut, 2, 1);
 
 	_PopulateMusicList(selected_music);
 } // MusicDialog::MusicDialog
@@ -648,17 +644,17 @@ void MusicDialog::_PopulateMusicList(const QString& selected_str)
 	{
 		if (music_dir[i].contains(".ogg"))
 		{
-			QString file_name=music_dir[i];
-			Q3ListViewItem* Item=new Q3ListViewItem(_music_list, file_name);
+			QString file_name = music_dir[i];
+			Q3ListViewItem* Item = new Q3ListViewItem(_music_list, file_name);
 			if (selected_str.endsWith(file_name) && !selected_str.isEmpty())
 				_music_list->setSelected(Item, true);
-		} // if .ogg
-	} // for i
+		} // only look for .ogg files
+	} // iterate through all files in the music directory
 
 	// Add "None" option
-	Q3ListViewItem* NoneItem = new Q3ListViewItem(_music_list, "None");
+	Q3ListViewItem* none_item = new Q3ListViewItem(_music_list, "None");
 	if (selected_str.isEmpty() || selected_str == "None")
-		_music_list->setSelected(NoneItem, true);
+		_music_list->setSelected(none_item, true);
 } // MusicDialog::_PopulateMusicList
 
 QString MusicDialog::GetSelectedFile()
@@ -668,6 +664,8 @@ QString MusicDialog::GetSelectedFile()
 
 	return QString("mus/" + _music_list->currentItem()->text(0));
 } // MusicDialog::GetSelectedFile
+
+
 
 /************************
   EditorScrollView class functions follow
@@ -685,28 +683,17 @@ EditorScrollView::EditorScrollView(QWidget* parent, const QString& name, int wid
 	addChild(_map);
 
 	// Context menu creation.
-	_context_menu = new Q3PopupMenu(this);
-	// Create the walkability checkboxes and add them to a QVButtonGroup.
-	Q3VButtonGroup* checkboxes = new Q3VButtonGroup("Walkability", _context_menu,
-		"checkboxes");
-	_allwalk_checkbox = new QCheckBox(QString("All")      , checkboxes, QString("allwalk_checkbox"));
-	_walk_checkbox[0] = new QCheckBox(QString("NW corner"), checkboxes, QString("walk_checkbox[0]"));
-	_walk_checkbox[1] = new QCheckBox(QString("NE corner"), checkboxes, QString("walk_checkbox[1]"));
-	_walk_checkbox[2] = new QCheckBox(QString("SW corner"), checkboxes, QString("walk_checkbox[2]"));
-	_walk_checkbox[3] = new QCheckBox(QString("SE corner"), checkboxes, QString("walk_checkbox[3]"));
-	connect(_allwalk_checkbox, SIGNAL(toggled(bool)), this, SLOT(_ToggleWalkCheckboxes(bool)));
-	connect(_context_menu, SIGNAL(aboutToShow()), this, SLOT(_ContextMenuSetup()));
-	connect(_context_menu, SIGNAL(aboutToHide()), this, SLOT(_ContextMenuEvaluate()));
-	_context_menu->insertItem("Walkability", checkboxes, NULL);
+	//_context_menu = new Q3PopupMenu(this);
+
+	//connect(_context_menu, SIGNAL(aboutToShow()), this, SLOT(_ContextMenuSetup()));
+	//connect(_context_menu, SIGNAL(aboutToHide()), this, SLOT(_ContextMenuEvaluate()));
+	//_context_menu->insertItem("Unwalkability", checkboxes, NULL);
 } // EditorScrollView constructor
 
 EditorScrollView::~EditorScrollView()
 {
 	delete _map;
-	delete _allwalk_checkbox;
-	for (int i = 0; i < ED_WALK_CHECKBOXES; i++)
-		delete _walk_checkbox[i];
-	delete _context_menu;
+	//delete _context_menu;
 } // EditorScrollView destructor
 
 void EditorScrollView::Resize(int width, int height)
@@ -871,6 +858,7 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 	_map->updateGL();
 } // contentsMouseReleaseEvent(...)
 
+/*
 void EditorScrollView::contentsContextMenuEvent(QContextMenuEvent *evt)
 {
 	// Don't popup a menu outside the map.
@@ -881,80 +869,17 @@ void EditorScrollView::contentsContextMenuEvent(QContextMenuEvent *evt)
 	_tile_index = evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH;
 	_context_menu->exec(QCursor::pos());
 } // contentsContextMenuEvent(...)
-
+*/
 
 
 // ********** Private slots **********
-
+/*
 void EditorScrollView::_ContextMenuSetup()
 {
-	unsigned int walkable = 0;
-	
-	// Individual walkability supersedes everything else
-	if (_map->indiv_walkable[_tile_index] != 0)
-		walkable = _map->indiv_walkable[_tile_index];
-	// Look up walkability property from the map
-	else if (_map->tiles_walkable[_tile_index] != 0)
-		walkable = _map->tiles_walkable[_tile_index];
-	// Look up walkability property in global tiles database
-	else
-	{
-	// FIXME
-//		QString tile_name = _map->file_name_list[
-//			_map->GetLayer(LOWER_LAYER)[_tile_index]];
-//		walkable = _db->GetGlobalSet().GetTile(tile_name).walkability;
-	}
-
-	// Set checkboxes
-	_allwalk_checkbox->setChecked(true);
-	for (uint8 i = 0; i < 3; i++)
-		if (walkable & (1 << i))
-			_walk_checkbox[i]->setChecked(true);
-		else
-		{
-			_allwalk_checkbox->setChecked(false);
-			_walk_checkbox[i]->setChecked(false);
-		}
+// used for a right-click menu on the tiles
 } // _ContextMenuSetup()
 
 void EditorScrollView::_ContextMenuEvaluate()
 {
-	_map->indiv_walkable[_tile_index] = 0;
-	for (uint8 i = 0; i < 3; i++)
-		if (_walk_checkbox[i]->isChecked())
-			_map->indiv_walkable[_tile_index] |= (1 << i);
 } // _ContextMenuEvaluate()
-
-void EditorScrollView::_ToggleWalkCheckboxes(bool on)
-{
-	if (on)
-		for (uint8 i = 0; i < 3; i++)
-			_walk_checkbox[i]->setChecked(true);
-	else
-		for (uint8 i = 0; i < 3; i++)
-			_walk_checkbox[i]->setChecked(false);
-} // _ToggleWalkCheckboxes(...)
-
-
-
-// ********** Private Functions **********
-
-void EditorScrollView::_RemoveIfUnused(int file_index) 
-{
-	// find other instances of the tile 
-	bool found = false;
-	for (LAYER_TYPE layer = LOWER_LAYER; layer <= UPPER_LAYER && !found; layer++)
-	{
-		vector<int32>::iterator it;
-		vector<int32>& current_layer = _map->GetLayer(layer);
-		// Loop until we either find something or we are at the end of the vector
-		for (it = current_layer.begin(); it != current_layer.end() && *it != file_index; it++);
-			if (it != current_layer.end())
-				found = true;
-	}
-
-	// If tile was not found, remove it from the list
-	//if (!found)
-		//_map->file_name_list.removeAt(file_index);
-} // _RemoveIfUnused(...)
-
+*/
