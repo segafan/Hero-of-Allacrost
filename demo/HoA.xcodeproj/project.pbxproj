@@ -96,7 +96,6 @@
 		D4D1BA6E0B02B27F0052BF1E /* editor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1BA650B02B27F0052BF1E /* editor.cpp */; };
 		D4D1BA6F0B02B27F0052BF1E /* editor_main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1BA670B02B27F0052BF1E /* editor_main.cpp */; };
 		D4D1BA700B02B27F0052BF1E /* grid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1BA680B02B27F0052BF1E /* grid.cpp */; };
-		D4D1BA710B02B27F0052BF1E /* tile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1BA6A0B02B27F0052BF1E /* tile.cpp */; };
 		D4D1BA720B02B27F0052BF1E /* tileset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4D1BA6C0B02B27F0052BF1E /* tileset.cpp */; };
 		D4D1BA730B02B3240052BF1E /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4941A6AF0AC1D86400D65B8E /* utils.cpp */; };
 		D4D1BA740B02B3560052BF1E /* socket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49BDC4510AF5412600940A6C /* socket.cpp */; };
@@ -283,8 +282,6 @@
 		D4D1BA670B02B27F0052BF1E /* editor_main.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = editor_main.cpp; sourceTree = "<group>"; };
 		D4D1BA680B02B27F0052BF1E /* grid.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = grid.cpp; sourceTree = "<group>"; };
 		D4D1BA690B02B27F0052BF1E /* grid.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = grid.h; sourceTree = "<group>"; };
-		D4D1BA6A0B02B27F0052BF1E /* tile.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = tile.cpp; sourceTree = "<group>"; };
-		D4D1BA6B0B02B27F0052BF1E /* tile.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = tile.h; sourceTree = "<group>"; };
 		D4D1BA6C0B02B27F0052BF1E /* tileset.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = tileset.cpp; sourceTree = "<group>"; };
 		D4D1BA6D0B02B27F0052BF1E /* tileset.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = tileset.h; sourceTree = "<group>"; };
 		D4DAC8A80BA13F55009FA7BE /* map_zones.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = map_zones.cpp; sourceTree = "<group>"; };
@@ -604,8 +601,6 @@
 				D4D1BA670B02B27F0052BF1E /* editor_main.cpp */,
 				D4D1BA680B02B27F0052BF1E /* grid.cpp */,
 				D4D1BA690B02B27F0052BF1E /* grid.h */,
-				D4D1BA6A0B02B27F0052BF1E /* tile.cpp */,
-				D4D1BA6B0B02B27F0052BF1E /* tile.h */,
 				D4D1BA6C0B02B27F0052BF1E /* tileset.cpp */,
 				D4D1BA6D0B02B27F0052BF1E /* tileset.h */,
 			);
@@ -784,7 +779,6 @@
 				D4D1BA700B02B27F0052BF1E /* grid.cpp in Sources */,
 				D4D1BA750B02B3610052BF1E /* script.cpp in Sources */,
 				D4D1BA740B02B3560052BF1E /* socket.cpp in Sources */,
-				D4D1BA710B02B27F0052BF1E /* tile.cpp in Sources */,
 				D4D1BA720B02B27F0052BF1E /* tileset.cpp in Sources */,
 				D4D1BA730B02B3240052BF1E /* utils.cpp in Sources */,
 				D404C6EA0B02FD3E00827A19 /* editor.moc.cpp in Sources */,
