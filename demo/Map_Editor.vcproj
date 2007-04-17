@@ -21,6 +21,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="moc &quot;$(ProjectDir)\src\editor\editor.h&quot; &gt; &quot;$(ProjectDir)\src\editor\editor_moc.cpp&quot;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
