@@ -23,7 +23,7 @@ music_filenames[1] = "mus/Seeking_New_Worlds.ogg"
 tileset_filenames = {}
 tileset_filenames[1] = "desert_cave"
 
-enemy_ids = {1, 2, 3, 4}
+enemy_ids = {1, 2, 3, 4, 5}
 
 -- The map grid to indicate walkability. The size of the grid is 4x the size of the tile layer tables
 map_grid = {}
