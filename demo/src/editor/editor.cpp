@@ -159,14 +159,16 @@ void Editor::_FileNew()
 		{
 			if (_ed_scrollview != NULL)
 				delete _ed_scrollview;
-			_ed_scrollview = new EditorScrollView(_ed_widget, "map",
-				new_map->GetWidth(), new_map->GetHeight());
-			_ed_scrollview->resize(new_map->GetWidth() * TILE_WIDTH, new_map->GetHeight() * TILE_HEIGHT);
+			_ed_scrollview = new EditorScrollView(_ed_widget, "map", new_map->GetWidth(), new_map->GetHeight());
 
 			if (_ed_tabs != NULL)
 				delete _ed_tabs;
 			_ed_tabs = new QTabWidget(_ed_widget);
 			_ed_tabs->setTabPosition(QTabWidget::South);
+
+			_ed_layout->addWidget(_ed_scrollview);
+			_ed_layout->addWidget(_ed_tabs);
+			_ed_scrollview->show();
 
 			Q3CheckListItem* tiles = static_cast<Q3CheckListItem*> (new_map->GetTilesetListView()->firstChild());
 			while (tiles)
@@ -181,11 +183,19 @@ void Editor::_FileNew()
 				tiles = static_cast<Q3CheckListItem*> (tiles->nextSibling());
 			} // iterate through all possible tilesets
 	
-			_ed_layout->addWidget(_ed_scrollview);
-			_ed_layout->addWidget(_ed_tabs);
-			_ed_scrollview->show();
 			_ed_tabs->show();
 
+			_ed_scrollview->resize(new_map->GetWidth() * TILE_WIDTH, new_map->GetHeight() * TILE_HEIGHT);
+
+			_grid_on = false;
+			_ll_on   = false;
+			_ml_on   = false;
+			_ul_on   = false;
+			_ViewToggleGrid();
+			_ViewToggleLL();
+			_ViewToggleML();
+			_ViewToggleUL();
+			
 			// Set default edit mode
 			_SetEditLayer(LOWER_LAYER);
 			_SetEditMode(PAINT_TILE);
@@ -231,24 +241,25 @@ void Editor::_FileOpen()
 				_ed_tabs->addTab(table, *it);
 				_ed_scrollview->_map->tilesets.push_back(table);
 			} // iterate through all tilesets in the map
+
 			_ed_tabs->show();
 
-			_ed_scrollview->resize(_ed_scrollview->_map->GetWidth(),
-				_ed_scrollview->_map->GetHeight());
+			_ed_scrollview->resize(_ed_scrollview->_map->GetWidth(), _ed_scrollview->_map->GetHeight());
+
 			_grid_on = false;
-			_ll_on = false;
-			_ml_on = false;
-			_ul_on = false;
+			_ll_on   = false;
+			_ml_on   = false;
+			_ul_on   = false;
 			_ViewToggleGrid();
 			_ViewToggleLL();
 			_ViewToggleML();
 			_ViewToggleUL();
-			_stat_bar->message(QString("Opened \'%1\'").
-				arg(_ed_scrollview->_map->GetFileName()), 5000);
 
 			// Set default edit mode
 			_SetEditLayer(LOWER_LAYER);
 			_SetEditMode(PAINT_TILE);
+
+			_stat_bar->message(QString("Opened \'%1\'").arg(_ed_scrollview->_map->GetFileName()), 5000);
 		} // file must exist in order to open it
 	} // make sure an unsaved map is not lost
 } // _FileOpen()
@@ -318,8 +329,10 @@ void Editor::_FileResize()
 		{
 			if (tiles->isOn())
 			{
-				_ed_tabs->addTab(new TilesetTable(_ed_widget, tiles->text()), tiles->text());
-				_ed_scrollview->_map->tileset_names.push_back(tiles->text());
+				TilesetTable* table = new TilesetTable(_ed_widget, tiles->text());
+				_ed_tabs->addTab(table, tiles->text());
+				_ed_scrollview->_map->tileset_names.append(tiles->text());
+				_ed_scrollview->_map->tilesets.push_back(table);
 			} // tileset must be selected
 			tiles = static_cast<Q3CheckListItem*> (tiles->nextSibling());
 		} // iterate through all possible tilesets
@@ -398,20 +411,25 @@ void Editor::_TileLayerFill()
 	vector<int32>& CurrentLayer = _ed_scrollview->GetCurrentLayer();
 	for (it = CurrentLayer.begin(); it != CurrentLayer.end(); it++)
 		*it = tileset_index + multiplier * 256;
+
+	// Draw the changes
+	_ed_scrollview->_map->updateGL();
 } // _TileLayerFill()
 
 void Editor::_TileLayerClear()
 {
 	vector<int32>::iterator it;    // used to iterate over an entire layer
-	vector<int32>& CurrentLayer=_ed_scrollview->GetCurrentLayer();
-	for (it = CurrentLayer.begin();
-					it != CurrentLayer.end(); it++)
-				*it = -1;
+	vector<int32>& CurrentLayer = _ed_scrollview->GetCurrentLayer();
+	for (it = CurrentLayer.begin(); it != CurrentLayer.end(); it++)
+		*it = -1;
+
+	// Draw the changes
+	_ed_scrollview->_map->updateGL();
 } // _TileLayerClear()
 
 void Editor::_SetEditMode(TILE_MODE_TYPE new_mode)
 {
-	if(_ed_scrollview==NULL)
+	if(_ed_scrollview == NULL)
 		return;
 
 	// Unset old check
