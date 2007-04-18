@@ -173,7 +173,8 @@ void Grid::LoadMap()
 		tileset_names.append(QString::fromStdString(read_data.ReadString(i)));
 	read_data.ReadCloseTable();
 
-// FIXME: need to load the tileset images using LoadMultiImages
+	// Loading the tileset images using LoadMultiImage is done in editor.cpp in FileOpen via
+	// creation of the TilesetTable(s)
 
 	read_data.ReadOpenTable("lower_layer");
 	for (int32 i = 0; i < _height; i++)
@@ -205,6 +206,15 @@ void Grid::LoadMap()
 	} // iterate through the rows of the lower layer
 	read_data.ReadCloseTable();
 	
+	// The map_grid is 4x as big as the map: 2x in the width and 2x in the height. Starting
+	// with row 0 (and doing the same thing for every row that is a multiple of 2), we take the first 2 entries,
+	// bit-wise AND them, and put them into a temporary vector called walk_temp. We keep doing this for every 2
+	// entries until the row is exhausted. walk_temp should now be the same length or size as the width of the map.
+	//
+	// Now we go on to the next row (and we do the same thing here for every other row, or rows that are not
+	// multiples of 2. We do the same thing that we did for the multiples-of-2 rows, except now we bit-wise AND the
+	// 2 entries with their corresponding entry in the walk_temp vector. We have now reconstructed the walkability
+	// for each tile.
 	read_data.ReadOpenTable("map_grid");
 	uint32 walk_west;
 	vector<uint32> walk_temp;
@@ -230,10 +240,6 @@ void Grid::LoadMap()
 			walk_temp.clear();
 	} // iterate through the rows of the walkability table
 	read_data.ReadCloseTable();
-	
-	// Initialize individual tile walkability.
-	for (int i = 0; i < _width * _height * 4; i++)
-		indiv_walkable.push_back(-1);
 
 	// Load music
 	read_data.ReadOpenTable("music_filenames");
@@ -248,11 +254,10 @@ void Grid::LoadMap()
 	}
 
 	_grid_on = true;        // grid lines default to on
-	_ll_on = true;          // lower layer default to on
-	_ml_on = true;          // middle layer default to off
-	_ul_on = true;          // upper layer default to off
+	_ll_on   = true;        // lower layer default to on
+	_ml_on   = true;        // middle layer default to off
+	_ul_on   = true;        // upper layer default to off
 	_changed = false;       // map has not been changed yet
-//	updateGL();
 } // LoadMap()
 
 void Grid::SaveMap()
@@ -458,20 +463,6 @@ void Grid::paintGL()
 					tile_index = *it;
 				else  // Don't divide by 0
 					tile_index = *it / (tileset_index * 256);
-				/*qDebug(QString("*it=%1").arg(*it));
-				qDebug(QString("tileset_index=%1").arg(tileset_index));
-				qDebug(QString("tile_index=%1").arg(tile_index));
-				//qDebug(QString("tileset_tiles[0].size() = %1").arg(tileset_tiles[0].size()));
-				StillImage tile;
-				tile.SetDimensions(1.0f, 1.0f);
-				tile.SetFilename("img/tiles/ll_water.png");
-	
-				if (!VideoManager->LoadImage(tile))
-					qDebug("Error loading the tile!");
-				//qDebug(QString("Width = %1").arg(tileset_tiles[tileset_index][tile_index].GetWidth()));
-				qDebug(QString("Height = %1").arg(tile.GetHeight()));*/
-
-				//VideoManager->DrawRectangle(1.0f, 1.0f, Color::red);
 				VideoManager->DrawImage(tilesets[tileset_index]->tiles[tile_index]);
 			} // a tile exists to draw
 			col = ++col % _width;
@@ -497,8 +488,6 @@ void Grid::paintGL()
 				else  // Don't divide by 0
 					tile_index = *it / (tileset_index * 256);
 				VideoManager->DrawImage(tilesets[tileset_index]->tiles[tile_index]);
-				/*VideoManager->DEBUG_NextTexSheet();
-				VideoManager->_DEBUG_ShowTexSheet();*/
 			} // a tile exists to draw
 			col = ++col % _width;
 			if (col == 0)
