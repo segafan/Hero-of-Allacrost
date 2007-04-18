@@ -243,3 +243,65 @@ enemies[4] = {
 	skills = {}
 }
 
+
+enemies[5] = {
+	name = "Scorpion",
+	filename = "scorpion",
+	sprite_filename = "img/sprites/battle/enemies/scorpion.png",
+	sprite_width = 64,
+	sprite_height = 64,
+
+	
+	base_stats = {
+		hit_points = 10,
+		skill_points = 10,
+		experience_points = 5,
+		strength = 10,
+		vigor = 0,
+		fortitude = 8,
+		protection = 4,
+		agility = 10,
+		evade = 2.0
+	},
+
+	growth_stats = {
+		hit_points = 10.0,
+		skill_points = 10.0,
+		experience_points = 5.0,
+		strength = 10.0,
+		vigor = 0.0,
+		fortitude = 8.0,
+		protection = 4.0,
+		agility = 10.0,
+		evade = 2.0
+	},
+
+	attack_points = {
+		[1] = {
+			name = "Head",
+			x_position = 26,
+			y_position = 23,
+			fortitude_bonus = 0.0,
+			protection_bonus = 0.0,
+			evade_bonus = 0.0
+		},
+		[2] = {
+			name = "Chest",
+			x_position = 39,
+			y_position = 26,
+			fortitude_bonus = 0.0,
+			protection_bonus = 0.0,
+			evade_bonus = 0.0
+		},
+		[3] = {
+			name = "Legs",
+			x_position = 48,
+			y_position = 14,
+			fortitude_bonus = 0.0,
+			protection_bonus = 0.0,
+			evade_bonus = 0.0
+		}
+	},
+
+	skills = {}
+}

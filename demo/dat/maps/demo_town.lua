@@ -353,7 +353,7 @@ function Load(m)
 	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
 	enemy:LoadStandardAnimations("img/sprites/map/scorpion_walk.png");
 	enemy:NewEnemyParty();
-	enemy:AddEnemy(2);
+	enemy:AddEnemy(5);
 	enemy:AddEnemy(2);
 	-- Add the enemy to the zone two times (it also gets added to the ground objects) 
 	ezone:AddEnemy(enemy, map, 2);
