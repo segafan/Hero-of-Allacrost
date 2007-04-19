@@ -5,7 +5,6 @@
 		activeExecutable = D4D1BA4A0B02B1DB0052BF1E /* Editor */;
 		activeTarget = D4D1BA480B02B1DB0052BF1E /* Editor */;
 		addToTargets = (
-			4941A4AF0AC1D77500D65B8E /* Allacrost */,
 			D4D1BA480B02B1DB0052BF1E /* Editor */,
 		);
 		breakpoints = (
@@ -151,8 +150,8 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 198647175;
-			PBXWorkspaceStateSaveDate = 198647175;
+			PBXPerProjectTemplateStateSaveDate = 198648282;
+			PBXWorkspaceStateSaveDate = 198648282;
 		};
 		sourceControlManager = D43082570AF9831800A5173A /* Source Control */;
 		userBuildSettings = {
