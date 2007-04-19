@@ -916,8 +916,9 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = NO;
 				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
+					/Library/Frameworks,
+					"$(inherited)",
 				);
 				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"/usr/local/Trolltech/Qt-4.2.0/lib\"";
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -971,8 +972,9 @@
 				COPY_PHASE_STRIP = YES;
 				DEAD_CODE_STRIPPING = NO;
 				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
+					/Library/Frameworks,
+					"$(inherited)",
 				);
 				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"/usr/local/Trolltech/Qt-4.2.0/lib\"";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
@@ -1012,7 +1014,7 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Editor;
-				USER_HEADER_SEARCH_PATHS = "/Library/Frameworks/SDL.framework/Headers /usr/local/Trolltech/Qt-4.2.0/lib/Qt3Support.framework/Headers /usr/local/Trolltech/Qt-4.2.0/lib/QtCore.framework/Headers /usr/local/Trolltech/Qt-4.2.0/lib/QtGui.framework/Headers /usr/local/Trolltech/Qt-4.2.0/lib/QtOpenGL.framework/Headers";
+				USER_HEADER_SEARCH_PATHS = "/Library/Frameworks/SDL.framework/Headers /Library/Frameworks/Qt3Support.framework/Headers /Library/Frameworks/QtCore.framework/Headers /Library/Frameworks/QtGui.framework/Headers /Library/Frameworks/QtOpenGL.framework/Headers";
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
 			};

@@ -268,7 +268,7 @@
 								</array>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateVisibleRectKey</key>
-							<string>{{0, 308}, {186, 338}}</string>
+							<string>{{0, 250}, {186, 338}}</string>
 						</dict>
 						<key>PBXTopSmartGroupGIDs</key>
 						<array/>
@@ -368,9 +368,9 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>D45109A90BD714B200D211E7</string>
+				<string>D4335CCD0BD71D03002276D5</string>
 				<string>1CE0B1FE06471DED0097A5F4</string>
-				<string>D45109AA0BD714B200D211E7</string>
+				<string>D4335CCE0BD71D03002276D5</string>
 				<string>1CE0B20306471E060097A5F4</string>
 				<string>1CE0B20506471E060097A5F4</string>
 			</array>
@@ -547,10 +547,12 @@
 							<string>0pt</string>
 						</dict>
 						<dict>
+							<key>BecomeActive</key>
+							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXBuildLogShowsTranscriptDefaultKey</key>
-								<string>{{0, 79}, {1280, 593}}</string>
+								<string>{{0, 5}, {1280, 667}}</string>
 								<key>PBXProjectModuleGUID</key>
 								<string>XCMainBuildResultsModuleGUID</string>
 								<key>PBXProjectModuleLabel</key>
@@ -588,7 +590,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>D43083E80AF9860800A5173A</string>
-				<string>D45109B20BD7173100D211E7</string>
+				<string>D4335CC90BD71C8C002276D5</string>
 				<string>1CD0528F0623707200166675</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 			</array>
@@ -950,9 +952,9 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>1C0AD2B3069F1EA900FABCE6</string>
-				<string>D45109AB0BD714B200D211E7</string>
+				<string>D4335CCA0BD71C8C002276D5</string>
 				<string>1CD0528B0623707200166675</string>
-				<string>D45109AC0BD714B200D211E7</string>
+				<string>D4335CCB0BD71C8C002276D5</string>
 			</array>
 			<key>ToolbarConfiguration</key>
 			<string>xcode.toolbar.config.run</string>
