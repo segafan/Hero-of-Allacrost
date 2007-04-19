@@ -959,7 +959,7 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Editor;
-				USER_HEADER_SEARCH_PATHS = "/Library/Frameworks/SDL.framework/Headers /usr/local/Trolltech/Qt-4.2.0/lib/Qt3Support.framework/Headers /usr/local/Trolltech/Qt-4.2.0/lib/QtCore.framework/Headers /usr/local/Trolltech/Qt-4.2.0/lib/QtGui.framework/Headers /usr/local/Trolltech/Qt-4.2.0/lib/QtOpenGL.framework/Headers";
+				USER_HEADER_SEARCH_PATHS = "/Library/Frameworks/SDL.framework/Headers /Library/Frameworks/Qt3Support.framework/Headers /Library/Frameworks/QtCore.framework/Headers /Library/Frameworks/QtGui.framework/Headers /Library/Frameworks/QtOpenGL.framework/Headers";
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
 			};
