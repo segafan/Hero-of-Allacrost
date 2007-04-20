@@ -243,7 +243,6 @@ BattleMode::BattleMode() :
 	_current_number_swaps(0),
 	_swap_countdown_timer(300000), // 5 minutes
 	_min_agility(9999),
-	_item_list(NULL),
 	_selected_option_index(0)
 {
 	if (BATTLE_DEBUG)
@@ -735,7 +734,7 @@ void BattleMode::_UpdateCharacterSelection() {
 	// to process user input on the same loop.  This is because the input is from the previous
 	// loop and isn't valid for the menu.
 
-	if (_actor_index == INVALID_BATTLE_ACTOR_INDEX) {
+	if (_actor_index == static_cast<int32>(INVALID_BATTLE_ACTOR_INDEX)) {
 		_actor_index = GetIndexOfFirstIdleCharacter();
 		return;
 	}
@@ -1354,21 +1353,13 @@ void BattleMode::_DrawBackgroundVisuals() {
 
 bool _TEMPIsA1Smaller(BattleEnemyActor* a1, BattleEnemyActor* a2)
 {
-	if ((a1->GetYLocation() - (a1->GetActor()->GetHeight())) > (a2->GetYLocation() - (a2->GetActor()->GetHeight())))
+	if (a1->GetYLocation() - a1->GetActor()->GetHeight() < a2->GetYLocation() - a2->GetActor()->GetHeight())
 		return true;
 
 	return false;
 }
 
-void BattleMode::_DrawSprites() {
-	// TODO: Draw sprites in order based on their x and y coordinates on the screen (bottom to top, then left to right)
-
-	// Draw all character sprites
-	for (uint32 i = 0; i < _character_actors.size(); i++) {
-		_character_actors[i]->DrawSprite();
-	}
-
-	// Ascending Y sorting functor. We want to compare the actual objects, NOT pointers!
+// Ascending Y sorting functor. We want to compare the actual objects, NOT pointers!
 	struct AscendingYSort
 	{
 		bool operator()(BattleEnemyActor* a1, BattleEnemyActor* a2)
@@ -1378,9 +1369,19 @@ void BattleMode::_DrawSprites() {
 		}
 	};
 
+void BattleMode::_DrawSprites() {
+	// TODO: Draw sprites in order based on their x and y coordinates on the screen (bottom to top, then left to right)
+
+	// Draw all character sprites
+	for (uint32 i = 0; i < _character_actors.size(); i++) {
+		_character_actors[i]->DrawSprite();
+	}
+
+	
+
 	// Sort and draw the enemies
 	std::deque<private_battle::BattleEnemyActor*> sorted_enemy_actors = _enemy_actors;
-// 	std::sort(sorted_enemy_actors.begin(), sorted_enemy_actors.end(), AscendingYSort());
+ 	std::sort(sorted_enemy_actors.begin(), sorted_enemy_actors.end(), AscendingYSort());
 
 	for (uint32 i = 0; i < sorted_enemy_actors.size(); i++) {
 		sorted_enemy_actors[i]->DrawSprite();
@@ -1927,7 +1928,7 @@ uint32 BattleMode::GetIndexOfNextAliveEnemy(bool move_upward) const
 
 	if (move_upward)
 	{
-		for (uint32 i = _argument_actor_index; i < _enemy_actors.size(); ++i)
+		for (uint32 i = _argument_actor_index + 1; i < _enemy_actors.size(); ++i)
 		{
 			if (_enemy_actors[i]->GetActor()->IsAlive())
 			{
@@ -1947,14 +1948,14 @@ uint32 BattleMode::GetIndexOfNextAliveEnemy(bool move_upward) const
 	}
 	else
 	{
-		for (uint32 i = _argument_actor_index; i >= 0; --i)
+		for (int32 i = static_cast<int32>(_argument_actor_index) - 1; i >= 0; --i)
 		{
 			if (_enemy_actors[i]->GetActor()->IsAlive())
 			{
 				return i;
 			}
 		}
-		for (uint32 i = _enemy_actors.size() - 1; i >= _argument_actor_index; --i)
+		for (int32 i = static_cast<int32>(_enemy_actors.size()) - 1; i >= _argument_actor_index; --i)
 		{
 			if (_enemy_actors[i]->GetActor()->IsAlive())
 			{
