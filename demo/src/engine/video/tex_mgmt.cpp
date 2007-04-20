@@ -461,6 +461,13 @@ bool GameVideo::LoadAnimatedImage(AnimatedImage &id, const std::string &filename
 	// Load the frames via LoadMultiImage
 	success = LoadMultiImage(v, filename, rows, cols);
 
+	// Put the loaded frame images back into the AnimatedImage
+	if (success == true) {
+		for (uint32 i = 0; i < v.size(); i++) {
+			id._frames[i].image = v[i];
+		}
+	}
+
 	return success;
 }
 

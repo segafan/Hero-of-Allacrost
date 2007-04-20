@@ -189,50 +189,26 @@ GlobalCharacter::GlobalCharacter(uint32 id) {
 	char_script.ReadCloseTable();
 	char_script.CloseFile();
 
-	// TEMP TEMP TEMP: Load the character's idle animation frame by frame
-	vector<StillImage> idle_frames;
+	// TEMP TEMP TEMP: Load the character's idle animation
 	AnimatedImage idle;
-	StillImage imd;
-	imd.SetDimensions(64, 128);
-	imd.SetFilename("img/sprites/battle/characters/" + _filename + "_idle_fr0.png");
-	idle_frames.push_back(imd);
-	imd.SetFilename("img/sprites/battle/characters/" + _filename + "_idle_fr1.png");
-	idle_frames.push_back(imd);
-	imd.SetFilename("img/sprites/battle/characters/" + _filename + "_idle_fr2.png");
-	idle_frames.push_back(imd);
-	imd.SetFilename("img/sprites/battle/characters/" + _filename + "_idle_fr3.png");
-	idle_frames.push_back(imd);
-	imd.SetFilename("img/sprites/battle/characters/" + _filename + "_idle_fr4.png");
-	idle_frames.push_back(imd);
-	imd.SetFilename("img/sprites/battle/characters/" + _filename + "_idle_fr5.png");
-	idle_frames.push_back(imd);
-
-	for (uint32 i = 0; i < idle_frames.size(); i++) {
-		if (!VideoManager->LoadImage(idle_frames[i])) cerr << "Failed to load battle sprite." << endl;
-
+	StillImage img;
+	img.SetDimensions(64, 128);
+	for (uint32 i = 0; i < 6; i ++) {
+		idle.AddFrame(img, 10);
 	}
-
-	for (uint32 i = 0; i < idle_frames.size(); i++) { idle.AddFrame(idle_frames[i], 10); }
+	if (VideoManager->LoadAnimatedImage(idle, "img/sprites/battle/characters/" + _filename + "_idle.png", 1, 6) == false) {
+		exit(1);
+	}
 	idle.SetFrameIndex(0);
 	_battle_animation["idle"] = idle;
 
-	// TEMP TEMP TEMP: Load the character's battle portrait
-	imd.SetDimensions(100, 100);
-	imd.SetFilename("img/portraits/battle/" + _filename + ".png");
-	_battle_portraits.push_back(imd);
-	imd.SetFilename("img/portraits/battle/" + _filename + "_hp75.png");
-	_battle_portraits.push_back(imd);
-	imd.SetFilename("img/portraits/battle/" + _filename + "_hp50.png");
-	_battle_portraits.push_back(imd);
-	imd.SetFilename("img/portraits/battle/" + _filename + "_hp25.png");
-	_battle_portraits.push_back(imd);
-	imd.SetFilename("img/portraits/battle/" + _filename + "_hp00.png");
-	_battle_portraits.push_back(imd);
-
+	// Load the character's battle portraits from a multi image
+	_battle_portraits.assign(5, StillImage());
 	for (uint32 i = 0; i < _battle_portraits.size(); i++) {
-		if (VideoManager->LoadImage(_battle_portraits[i]) == false)
-			exit(1);
+		_battle_portraits[i].SetDimensions(100, 100);
 	}
+	if (VideoManager->LoadMultiImage(_battle_portraits, "img/portraits/battle/" + _filename + "_damage.png", 1, 5) == false)
+		exit(1);
 
 	// TEMP: Add new skills
 	// AddAttackSkill(new GlobalSkill()); // removed text "sword_slash" because that constructor isn't implemented yet -MF
