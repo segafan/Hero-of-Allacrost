@@ -37,26 +37,20 @@ void IntegerToString(std::string &s, const int32 num)
 {
 	static char digits[10] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
-	if (num == 0)
-	{
-		s = "0";
-		return;
-	}
-
 	s.clear ();
 	uint32 value = abs(num);
 
 	// Get every digit, by dividing by 10
-	while (value > 0)
+	do
 	{
-		s = s + digits[value%10];
+		s = digits[value%10] + s;
 		value /= 10;
-	}
+	} while (value > 0);
 
 	// If the number is negative prepend '-'
 	if (num < 0)
 	{
-		s = s + "-";
+		s = "-" + s;
 	}
 }
 
