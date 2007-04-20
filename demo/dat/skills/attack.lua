@@ -30,3 +30,21 @@ skills[1] = {
 		AudioManager:PlaySound("snd/sword_swipe.wav");
 	end
 }
+
+-- Another attack skill with a slightly faster warmup but less damage
+skills[2] = {
+	name = "Super Nyrkkii!",
+	description = "Even Mike Tyson would be afraid of a punch this powerful!",
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	sp_required = 0,
+	warmup_time = 1200,
+	cooldown_time = 0,
+	level_required = 1,
+	usage = hoa_global.GameGlobal.GLOBAL_USE_BATTLE,
+	target_alignment = hoa_global.GameGlobal.GLOBAL_ALIGNMENT_BAD,
+
+	BattleExecute = function(target, instigator)
+		target:TakeDamage(15);
+		AudioManager:PlaySound("snd/sword_swipe.wav");
+	end
+}
