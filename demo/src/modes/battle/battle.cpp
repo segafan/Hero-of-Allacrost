@@ -1623,13 +1623,13 @@ void BattleMode::_ConstructActionListMenu() {
 	}
 
 	_action_list_menu = new OptionBox();
-	_action_list_menu->SetPosition(5.0f, 445.0f);
+	_action_list_menu->SetPosition(5.0f, 455.0f);
 	_action_list_menu->SetFont("battle");
-	_action_list_menu->SetAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	_action_list_menu->SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_action_list_menu->SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_action_list_menu->SetSelectMode(VIDEO_SELECT_SINGLE);
 	_action_list_menu->SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-	_action_list_menu->SetCellSize(200.0f, 60.0f);
+	_action_list_menu->SetCellSize(200.0f, 35.0f);
 	_action_list_menu->SetCursorOffset(-20.0f, 25.0f);
 
 	if (_action_type_menu_cursor_location == ACTION_TYPE_ATTACK) {
