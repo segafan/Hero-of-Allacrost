@@ -262,167 +262,175 @@ void Grid::LoadMap()
 
 void Grid::SaveMap()
 {
-	char buffer[2]; // used for converting an int to a string with sprintf
+	char buffer[5]; // used for converting an int to a string with sprintf
 	int i;      // Lua table index / Loop counter variable
-	int j;      // Loop counter variable FIXME: temporary!
 	vector<int32>::iterator it;  // used to iterate through the layers
 	vector<int32> layer_row;     // one row of a layer
 	ScriptDescriptor write_data;
 	
-	if (!write_data.OpenFile(_file_name.toStdString(), SCRIPT_WRITE))
+	if (write_data.OpenFile(_file_name.toStdString(), SCRIPT_WRITE) == false) {
 		QMessageBox::warning(this, "Saving File...", QString("ERROR: could not open %1 for writing!").arg(_file_name));
-	else
+		return;
+	}
+
+	write_data.WriteComment(_file_name);
+	write_data.WriteInsertNewLine();
+
+	write_data.WriteComment("A reference to the C++ MapMode object that was created with this file");
+	write_data.WriteLine("map = {}\n");
+
+	write_data.WriteComment("The number of rows and columns of tiles that compose the map");
+	write_data.WriteInt("num_tile_cols", _width);
+	write_data.WriteInt("num_tile_rows", _height);
+	write_data.WriteInsertNewLine();
+
+	write_data.WriteComment("The sound files used on this map.");
+	write_data.WriteBeginTable("sound_filenames");
+	// TEMP: currently sound_filenames table is not populated with sounds
+	write_data.WriteEndTable();
+	write_data.WriteInsertNewLine();
+
+	write_data.WriteComment("The music files used as background music on this map.");
+	write_data.WriteBeginTable("music_filenames");
+	if (_music_file != "None")
+		write_data.WriteString(1, _music_file);
+	write_data.WriteEndTable();
+	write_data.WriteInsertNewLine();
+
+	write_data.WriteComment("The names of the tilesets used, with the path and file extension omitted");
+	write_data.WriteBeginTable("tileset_filenames");
+	i = 0;
+	for (QStringList::Iterator qit = tileset_names.begin(); qit != tileset_names.end(); ++qit)
 	{
-		write_data.WriteComment(_file_name);
-		write_data.WriteInsertNewLine();
+		i++;
+		write_data.WriteString(i, (*qit).ascii());
+	} // iterate through tileset_list writing each element
+	write_data.WriteEndTable();
+	write_data.WriteInsertNewLine();
 
-		write_data.WriteComment("The number of rows and columns of tiles that compose the map");
-		write_data.WriteInt("num_tile_cols", _width);
-		write_data.WriteInt("num_tile_rows", _height);
-		write_data.WriteInsertNewLine();
-	
-		write_data.WriteComment("The music files used as background music on this map.");
-		write_data.WriteBeginTable("music_filenames");
-		if(_music_file != "None")
-			write_data.WriteString(1,_music_file);
-		write_data.WriteEndTable();
-		write_data.WriteInsertNewLine();
+	// Create vector of 0s.
+	vector<int32> vect_0s(_width, 0);
 
-		write_data.WriteComment("The names of the tilesets used, with the path and file extension omitted (note that the indeces begin with 1, not 0)");
-		write_data.WriteBeginTable("tileset_filenames");
-		i = 0;
-		for (QStringList::Iterator qit = tileset_names.begin();
-		     qit != tileset_names.end(); ++qit)
+	write_data.WriteComment("The map grid to indicate walkability. The size of the grid is 4x the size of the tile layer tables");
+	write_data.WriteComment("Walkability status of tiles for 32 contexts. Non-zero indicates walkable. Valid range: [0:2^32-1]");
+	write_data.WriteBeginTable("map_grid");
+	for (int row = 0; row < _height * 2; row++)
+	{
+		for (int col = 0; col < _width * 2; col++)
 		{
-			i++;
-			write_data.WriteString(i, (*qit).ascii());
-		} // iterate through tileset_list writing each element
-		write_data.WriteEndTable();
-		write_data.WriteInsertNewLine();
-
-		write_data.WriteComment("The lower tile layer. The numbers are indeces to the tile_mappings table.");
-		write_data.WriteBeginTable("lower_layer");
-		it = _lower_layer.begin();
-		for (int row = 0; row < _height; row++)
-		{
-			for (int col = 0; col < _width; col++)
+			// Individual tile property supersedes anything else.
+			if (indiv_walkable[row / 2 * _width + col] != -1)
 			{
-				layer_row.push_back(*it);
-				it++;
-			} // iterate through the columns of the lower layer
-			sprintf(buffer, "%d", row);
-			write_data.WriteIntVector(buffer, layer_row);
-			layer_row.clear();
-		} // iterate through the rows of the lower layer
-		write_data.WriteEndTable();
-		write_data.WriteInsertNewLine();
-
-		write_data.WriteComment("The middle tile layer. The numbers are indeces to the tile_mappings table.");
-		write_data.WriteBeginTable("middle_layer");
-		it = _middle_layer.begin();
-		for (int row = 0; row < _height; row++)
-		{
-			for (int col = 0; col < _width; col++)
-			{
-				layer_row.push_back(*it);
-				it++;
-			} // iterate through the columns of the middle layer
-			sprintf(buffer, "%d", row);
-			write_data.WriteIntVector(buffer, layer_row);
-			layer_row.clear();
-		} // iterate through the rows of the middle layer
-		write_data.WriteEndTable();
-		write_data.WriteInsertNewLine();
-
-		write_data.WriteComment("The upper tile layer. The numbers are indeces to the tile_mappings table.");
-		write_data.WriteBeginTable("upper_layer");
-		it = _upper_layer.begin();
-		for (int row = 0; row < _height; row++)
-		{
-			for (int col = 0; col < _width; col++)
-			{
-				layer_row.push_back(*it);
-				it++;
-			} // iterate through the columns of the upper layer
-			sprintf(buffer, "%d", row);
-			write_data.WriteIntVector(buffer, layer_row);
-			layer_row.clear();
-		} // iterate through the rows of the upper layer
-		write_data.WriteEndTable();
-		write_data.WriteInsertNewLine();
-
-		// Create vector of 0s.
-		vector<int32> vect_0s(_width, 0);
-
-		write_data.WriteComment("Walkability status of tiles for 32 contexts. Non-zero indicates walkable. Valid range: [0:2^32-1]");
-		write_data.WriteBeginTable("tile_walkable");
-		for (int row = 0; row < _height * 2; row++)
-		{
-			for (int col = 0; col < _width; col++)
-			{
-				// Individual tile property supersedes anything else.
-				if (indiv_walkable[row / 2 * _width + col] != -1)
+				if (row % 2 == 0)
 				{
+					layer_row.push_back(indiv_walkable[row / 2 * _width + col] & 1);  // gets NW corner
+					layer_row.push_back((indiv_walkable[row / 2 * _width + col] >> 1) & 1);  // gets NE corner
+				} // no remainder means top half of the tile
+				else
+				{
+					layer_row.push_back((indiv_walkable[row / 2 * _width + col] >> 2) & 1);  // gets SW corner
+					layer_row.push_back((indiv_walkable[row / 2 * _width + col] >> 3) & 1);  // gets SE corner
+				} // remainder means bottom half of the tile
+			} // this tile has been modified from it's default
+			else
+			{
+				/*ScriptDescriptor read_data;
+				if (!read_data.OpenFile("dat/tilesets/tiles_database.lua", SCRIPT_READ))
+					QMessageBox::warning(this, "Tiles Database",
+						QString("ERROR: could not open dat/tilesets/tiles_database.lua for reading!"));
+				QString temp;// = file_name_list[_lower_layer[row / 2 * _width + col]];
+				temp.remove(".png").remove("img/tiles/");
+				read_data.ReadOpenTable("tile_filenames");
+				uint32 table_size = read_data.ReadGetTableSize();
+				uint32 index = 0;
+				QString filename = "";
+				while (filename != temp && index < table_size)
+				{
+					index++;
+					filename = QString::fromStdString(read_data.ReadString(index));
+				} // find index of current tile in the database
+				read_data.ReadCloseTable();
+				read_data.CloseFile();
+
+				if (filename == temp)
+				{
+					read_data.ReadOpenTable("tile_properties");
+					uint32 walk_prop = read_data.ReadInt(index);
 					if (row % 2 == 0)
 					{
-						layer_row.push_back(indiv_walkable[row / 2 * _width + col] & 1);  // gets NW corner
-						layer_row.push_back((indiv_walkable[row / 2 * _width + col] >> 1) & 1);  // gets NE corner
+						layer_row.push_back(walk_prop & 1);  // gets NW corner
+						layer_row.push_back(walk_prop & 2);  // gets NE corner
 					} // no remainder means top half of the tile
 					else
 					{
-						layer_row.push_back((indiv_walkable[row / 2 * _width + col] >> 2) & 1);  // gets SW corner
-						layer_row.push_back((indiv_walkable[row / 2 * _width + col] >> 3) & 1);  // gets SE corner
+						layer_row.push_back(walk_prop & 4);  // gets SW corner
+						layer_row.push_back(walk_prop & 8);  // gets SE corner
 					} // remainder means bottom half of the tile
-				} // this tile has been modified from it's default
-				else
-				{
-					/*ScriptDescriptor read_data;
-					if (!read_data.OpenFile("dat/tilesets/tiles_database.lua", SCRIPT_READ))
-						QMessageBox::warning(this, "Tiles Database",
-							QString("ERROR: could not open dat/tilesets/tiles_database.lua for reading!"));
-					QString temp;// = file_name_list[_lower_layer[row / 2 * _width + col]];
-					temp.remove(".png").remove("img/tiles/");
-					read_data.ReadOpenTable("tile_filenames");
-					uint32 table_size = read_data.ReadGetTableSize();
-					uint32 index = 0;
-					QString filename = "";
-					while (filename != temp && index < table_size)
-					{
-						index++;
-						filename = QString::fromStdString(read_data.ReadString(index));
-					} // find index of current tile in the database
 					read_data.ReadCloseTable();
-					read_data.CloseFile();
-					
-					if (filename == temp)
-					{
-						read_data.ReadOpenTable("tile_properties");
-						uint32 walk_prop = read_data.ReadInt(index);
-						if (row % 2 == 0)
-						{
-							layer_row.push_back(walk_prop & 1);  // gets NW corner
-							layer_row.push_back(walk_prop & 2);  // gets NE corner
-						} // no remainder means top half of the tile
-						else
-						{
-							layer_row.push_back(walk_prop & 4);  // gets SW corner
-							layer_row.push_back(walk_prop & 8);  // gets SE corner
-						} // remainder means bottom half of the tile
-						read_data.ReadCloseTable();
-					} // tile exists in the database*/
-				} // falls back to global property in tile database
-			} // iterate through the columns of the lower layer
-			sprintf(buffer, "%d", row);
-			write_data.WriteIntVector(buffer, layer_row);
-			layer_row.clear();
-		} // iterate through the rows of the lower layer
-		write_data.WriteEndTable();
-		write_data.WriteInsertNewLine();
+				} // tile exists in the database*/
+			} // falls back to global property in tile database
+		} // iterate through the columns of the lower layer
+		sprintf(buffer, "%d", row);
+		write_data.WriteIntVector(buffer, layer_row);
+		layer_row.clear();
+	} // iterate through the rows of the lower layer
+	write_data.WriteEndTable();
+	write_data.WriteInsertNewLine();
 
-		write_data.CloseFile();
-	
-		_changed = false;
-	} // successfully opened file for writing
+	write_data.WriteComment("The lower tile layer. The numbers are indeces to the tile_mappings table.");
+	write_data.WriteBeginTable("lower_layer");
+	it = _lower_layer.begin();
+	for (int row = 0; row < _height; row++)
+	{
+		for (int col = 0; col < _width; col++)
+		{
+			layer_row.push_back(*it);
+			it++;
+		} // iterate through the columns of the lower layer
+		sprintf(buffer, "%d", row);
+		write_data.WriteIntVector(buffer, layer_row);
+		layer_row.clear();
+	} // iterate through the rows of the lower layer
+	write_data.WriteEndTable();
+	write_data.WriteInsertNewLine();
+
+	write_data.WriteComment("The middle tile layer. The numbers are indeces to the tile_mappings table.");
+	write_data.WriteBeginTable("middle_layer");
+	it = _middle_layer.begin();
+	for (int row = 0; row < _height; row++)
+	{
+		for (int col = 0; col < _width; col++)
+		{
+			layer_row.push_back(*it);
+			it++;
+		} // iterate through the columns of the middle layer
+		sprintf(buffer, "%d", row);
+		write_data.WriteIntVector(buffer, layer_row);
+		layer_row.clear();
+	} // iterate through the rows of the middle layer
+	write_data.WriteEndTable();
+	write_data.WriteInsertNewLine();
+
+	write_data.WriteComment("The upper tile layer. The numbers are indeces to the tile_mappings table.");
+	write_data.WriteBeginTable("upper_layer");
+	it = _upper_layer.begin();
+	for (int row = 0; row < _height; row++)
+	{
+		for (int col = 0; col < _width; col++)
+		{
+			layer_row.push_back(*it);
+			it++;
+		} // iterate through the columns of the upper layer
+		sprintf(buffer, "%d", row);
+		write_data.WriteIntVector(buffer, layer_row);
+		layer_row.clear();
+	} // iterate through the rows of the upper layer
+	write_data.WriteEndTable();
+	write_data.WriteInsertNewLine();
+
+	write_data.CloseFile();
+
+	_changed = false;
 } // SaveMap()
 
 

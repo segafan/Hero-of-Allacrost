@@ -3,7 +3,7 @@
 --
 -- Description: This file contains the definitions of multiple foes that the
 -- player encounters in battle. This file contains those enemies who have ids
--- from 1-99.
+-- from 1-100.
 ------------------------------------------------------------------------------]]
 
 -- All enemy definitions are stored in this table
