@@ -136,7 +136,6 @@ std::vector<int32>& Grid::GetLayer(LAYER_TYPE layer)
 		default:
 			return _lower_layer;
 	} // switch on the current layer
-	//return _lower_layer;
 } // GetLayer(...)
 
 void Grid::SetMusic(const QString& music_file) 
@@ -263,7 +262,7 @@ void Grid::LoadMap()
 void Grid::SaveMap()
 {
 	char buffer[5]; // used for converting an int to a string with sprintf
-	int i;      // Lua table index / Loop counter variable
+	int i;          // Lua table index / Loop counter variable
 	vector<int32>::iterator it;  // used to iterate through the layers
 	vector<int32> layer_row;     // one row of a layer
 	ScriptDescriptor write_data;
@@ -312,7 +311,7 @@ void Grid::SaveMap()
 	vector<int32> vect_0s(_width, 0);
 
 	write_data.WriteComment("The map grid to indicate walkability. The size of the grid is 4x the size of the tile layer tables");
-	write_data.WriteComment("Walkability status of tiles for 32 contexts. Non-zero indicates walkable. Valid range: [0:2^32-1]");
+	write_data.WriteComment("Walkability status of tiles for 32 contexts. Zero indicates walkable. Valid range: [0:2^32-1]");
 	write_data.WriteBeginTable("map_grid");
 	for (int row = 0; row < _height * 2; row++)
 	{
@@ -470,7 +469,7 @@ void Grid::paintGL()
 				if (tileset_index == 0)
 					tile_index = *it;
 				else  // Don't divide by 0
-					tile_index = *it / (tileset_index * 256);
+					tile_index = *it % (tileset_index * 256);
 				VideoManager->DrawImage(tilesets[tileset_index]->tiles[tile_index]);
 			} // a tile exists to draw
 			col = ++col % _width;
@@ -494,7 +493,7 @@ void Grid::paintGL()
 				if (tileset_index == 0)
 					tile_index = *it;
 				else  // Don't divide by 0
-					tile_index = *it / (tileset_index * 256);
+					tile_index = *it % (tileset_index * 256);
 				VideoManager->DrawImage(tilesets[tileset_index]->tiles[tile_index]);
 			} // a tile exists to draw
 			col = ++col % _width;
@@ -518,7 +517,7 @@ void Grid::paintGL()
 				if (tileset_index == 0)
 					tile_index = *it;
 				else  // Don't divide by 0
-					tile_index = *it / (tileset_index * 256);
+					tile_index = *it % (tileset_index * 256);
 				VideoManager->DrawImage(tilesets[tileset_index]->tiles[tile_index]);
 			} // a tile exists to draw
 			col = ++col % _width;
