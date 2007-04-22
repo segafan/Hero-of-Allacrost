@@ -603,6 +603,15 @@ public:
 
 	//-- Images / Animation ---------------------------------------------------------
 
+	/*! \brief Get information of an image file
+	 *	\param file_name Name of the file, without the extension
+	 *	\param rows Rows of the image
+	 *	\param cols Columns of the image
+	 *	\param bpp Bits per pixel of the image
+	 *	\return True if the process was carried out with no problem, false otherwise
+	 */
+	bool GetImageInfo (const std::string& file_name, uint32 &rows, uint32& cols, uint32& bpp);
+
 	/** \brief loads an image (static or animated image). Assumes that you have already called
 	 *         all the appropriate functions to initialize the image. In the case of a static image,
 	 *         this means setting its filename, and possibly other properties like width, height, and
@@ -626,14 +635,25 @@ public:
 
 	/** \brief Loads a MultiImage in a vector of StillImages.
 	 *	This function loads an image and cut it in pieces, loading each of
-	 *	that on separate StillImage objects.
+	 *	that on separate StillImage objects. It uses the number of stored elements as input parameters.
 	 *  \param images  Vector of StillImages where the cut images will be loaded.
 	 *	\param filename Name of the file.
 	 *	\param rows Number of rows of sub-images in the MultiImage.
 	 *	\param cols Number of columns of sub-images in the MultiImage.
 	 *	\return success/failure
 	 */
-	bool LoadMultiImage(std::vector<StillImage> &images, const std::string &filename, const uint32 rows, const uint32 cols);
+	bool LoadMultiImageFromNumberElements(std::vector<StillImage> &images, const std::string &filename, const uint32 rows, const uint32 cols);
+
+	/** \brief Loads a MultiImage in a vector of StillImages.
+	 *	This function loads an image and cut it in pieces, loading each of
+	 *	that on separate StillImage objects. It uses the size of the stored elements as input parameters.
+	 *  \param images  Vector of StillImages where the cut images will be loaded.
+	 *	\param filename Name of the file.
+	 *	\param width Width of a stored element.
+	 *	\param height Height of a stored element.
+	 *	\return success/failure
+	 */
+	bool LoadMultiImageFromElementsSize(std::vector<StillImage> &images, const std::string &filename, const uint32 width, const uint32 height);
 
 	/** \brief Loads a MultiImage in an AnimatedImage as frames.
 	 *	This function loads an image and cut it in pieces, loading each of
@@ -644,7 +664,18 @@ public:
 	 *	\param cols Number of columns of sub-images in the MultiImage.
 	 *	\return success/failure
 	 */
-	bool LoadAnimatedImage(AnimatedImage &image, const std::string &file_name, const uint32 rows, const uint32 cols);
+	bool LoadAnimatedImageFromNumberElements(AnimatedImage &image, const std::string &file_name, const uint32 rows, const uint32 cols);
+
+	/** \brief Loads a MultiImage in an AnimatedImage as frames.
+	 *	This function loads an image and cut it in pieces, loading each of
+	 *	that on frames of an AnimatedImage.
+	 *  \param image AnimatedImage where the cut images will be loaded.
+	 *	\param file_name Name of the file.
+	 *	\param rows Number of rows of sub-images in the MultiImage.
+	 *	\param cols Number of columns of sub-images in the MultiImage.
+	 *	\return success/failure
+	 */
+	bool LoadAnimatedImageFromElementsSize(AnimatedImage &image, const std::string &file_name, const uint32 rows, const uint32 cols);
 
 	//! \brief Saves a vector of images in a single file.
 	/*	This function stores a vector of images as a single image. This is useful for creating multiimage 
@@ -1439,9 +1470,13 @@ private:
 	bool _LoadImageHelper(StillImage &id);
 
 
-	/**
-	**/
-	bool _LoadMultiImage (private_video::MultiImage &id);
+	/** \brief Loads an image file in several StillImages
+	 *  \param images Vector of StillImages to be loaded
+	 *  \param file_name Name of the image file to read
+	 *  \param rows Number of rows of StillImages
+	 *  \param cols Number of columns of StillImages
+	 */
+	bool _LoadMultiImage (std::vector <StillImage>& images, const std::string &file_name, const uint32& rows, const uint32& cols);
 
 	/** \brief Load raw image data from a file
 	 *
@@ -1480,6 +1515,24 @@ private:
 	 *	\return True if the process was carried out with no problem, false otherwise
 	 */
 	bool _SaveJpeg (const std::string& file_name, hoa_video::private_video::ImageLoadInfo &info) const;
+
+	/*! \brief Get information of a Png file
+	 *	\param file_name Name of the file, without the extension
+	 *	\param rows Rows of the image
+	 *	\param cols Columns of the image
+	 *	\param bpp Bits per pixel of the image
+	 *	\return True if the process was carried out with no problem, false otherwise
+	 */
+	bool _GetImageInfoPng (const std::string& file_name, uint32 &rows, uint32& cols, uint32& bpp);
+
+	/*! \brief Get information of a Jpeg file
+	 *	\param file_name Name of the file, without the extension
+	 *	\param rows Rows of the image
+	 *	\param cols Columns of the image
+	 *	\param bpp Bits per pixel of the image
+	 *	\return True if the process was carried out with no problem, false otherwise
+	 */
+	bool _GetImageInfoJpeg (const std::string& file_name, uint32 &rows, uint32& cols, uint32& bpp);
 
 	/** \brief loop through all currently loaded images and if they belong to the given tex sheet, reload them into it
 	 *

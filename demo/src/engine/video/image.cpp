@@ -185,7 +185,7 @@ void ImageDescriptor::_Clear()
 // ******************************** StillImage *********************************
 // *****************************************************************************
 
-StillImage::StillImage(bool grayscale) {
+StillImage::StillImage(const bool grayscale) {
 	Clear();
 	_animated = false;
 	_grayscale = grayscale;
@@ -201,6 +201,40 @@ void StillImage::Clear() {
 	SetColor(Color::white);
 }
 
+
+void StillImage::SetWidth (const float width)
+{
+	_width = width;
+
+	for (std::vector <private_video::ImageElement>::iterator it=_elements.begin(); it<_elements.end(); ++it)
+	{
+		it->width = width;
+	}
+}
+
+
+void StillImage::SetHeight (const float height)
+{
+	_height = height;
+
+	for (std::vector <private_video::ImageElement>::iterator it=_elements.begin(); it<_elements.end(); ++it)
+	{
+		it->height = height;
+	}
+}
+
+
+void StillImage::SetDimensions (const float width, const float height)
+{
+	_width = width;
+	_height = height;
+
+	for (std::vector <private_video::ImageElement>::iterator it=_elements.begin(); it<_elements.end(); ++it)
+	{
+		it->width = width;
+		it->height = height;
+	}
+}
 
 
 void StillImage::EnableGrayScale() {
@@ -366,7 +400,7 @@ bool StillImage::AddImage(const StillImage &id, float x_offset, float y_offset, 
 // ******************************* AnimatedImage *******************************
 // *****************************************************************************
 
-AnimatedImage::AnimatedImage(bool grayscale) {
+AnimatedImage::AnimatedImage(const bool grayscale) {
 	Clear();
 	_animated = true;
 	_grayscale = grayscale;
@@ -481,7 +515,7 @@ bool AnimatedImage::AddFrame(const StillImage &frame, uint32 frame_time) {
 
 
 
-void AnimatedImage::SetWidth(float width) {
+void AnimatedImage::SetWidth(const float width) {
 	_width = width;
 
 	// Update the width of each frame image
@@ -494,7 +528,7 @@ void AnimatedImage::SetWidth(float width) {
 
 
 
-void AnimatedImage::SetHeight(float height) {
+void AnimatedImage::SetHeight(const float height) {
 	_height = height;
 
 	// Update the height of each frame image
@@ -507,7 +541,7 @@ void AnimatedImage::SetHeight(float height) {
 
 
 
-void AnimatedImage::SetDimensions(float width, float height) {
+void AnimatedImage::SetDimensions(const float width, const float height) {
 	_width = width;
 	_height = height;
 

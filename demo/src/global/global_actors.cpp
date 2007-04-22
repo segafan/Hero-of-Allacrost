@@ -196,7 +196,7 @@ GlobalCharacter::GlobalCharacter(uint32 id) {
 	for (uint32 i = 0; i < 6; i ++) {
 		idle.AddFrame(img, 10);
 	}
-	if (VideoManager->LoadAnimatedImage(idle, "img/sprites/battle/characters/" + _filename + "_idle.png", 1, 6) == false) {
+	if (VideoManager->LoadAnimatedImageFromNumberElements(idle, "img/sprites/battle/characters/" + _filename + "_idle.png", 1, 6) == false) {
 		exit(1);
 	}
 	idle.SetFrameIndex(0);
@@ -207,7 +207,7 @@ GlobalCharacter::GlobalCharacter(uint32 id) {
 	for (uint32 i = 0; i < _battle_portraits.size(); i++) {
 		_battle_portraits[i].SetDimensions(100, 100);
 	}
-	if (VideoManager->LoadMultiImage(_battle_portraits, "img/portraits/battle/" + _filename + "_damage.png", 1, 5) == false)
+	if (VideoManager->LoadMultiImageFromNumberElements(_battle_portraits, "img/portraits/battle/" + _filename + "_damage.png", 1, 5) == false)
 		exit(1);
 
 	// TEMP: Add new skills
@@ -251,7 +251,7 @@ GlobalEnemy::GlobalEnemy(uint32 id) {
 	// Make four dummy images for LoadMultiImage(). TODO: Can't we do these in LoadMultiImage() instead :(
 	_sprite_frames.assign(4, StillImage());
 	// Attempt to load the MultiImage, which should contain one row and four columns of images
-	if (VideoManager->LoadMultiImage(_sprite_frames, sprite_filename, 1, 4) == false) {
+	if (VideoManager->LoadMultiImageFromNumberElements(_sprite_frames, sprite_filename, 1, 4) == false) {
 		cerr << "GLOBAL ERROR: failed to load sprite frames for enemy: " << sprite_filename << endl;
 		_id = 0;
 		return;

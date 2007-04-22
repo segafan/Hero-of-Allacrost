@@ -266,7 +266,7 @@ void MapMode::_LoadTiles() {
 			tileset_images[i][j].SetDimensions(2.0f, 2.0f);
 		}
 
-		if (VideoManager->LoadMultiImage(tileset_images[i], image_filename, 16, 16) == false) {
+		if (VideoManager->LoadMultiImageFromNumberElements(tileset_images[i], image_filename, 16, 16) == false) {
 			cerr << "MAP ERROR: MapMode::_LoadTiles() failed to load tileset image:" << image_filename << endl;
 			return;
 		}

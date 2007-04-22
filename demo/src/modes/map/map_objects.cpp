@@ -412,7 +412,7 @@ bool MapSprite::LoadStandardAnimations(std::string filename) {
 	for (uint8 i = 0; i < 24; i++)
 		frames[i].SetDimensions(img_half_width * 2, img_height);
 
-	if (VideoManager->LoadMultiImage(frames, filename, 4, 6) == false) {
+	if (VideoManager->LoadMultiImageFromNumberElements(frames, filename, 4, 6) == false) {
 		return false;
 	}
 
