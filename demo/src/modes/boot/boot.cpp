@@ -622,10 +622,12 @@ void BootMode::_OnBattleDebug() {
 	ModeManager->Pop();
 	GlobalManager->AddCharacter(GLOBAL_CHARACTER_CLAUDIUS);
 	BattleMode *BM = new BattleMode();
-	BM->AddEnemy(1);
-	BM->AddEnemy(2);
-	BM->AddEnemy(3);
-	BM->AddEnemy(4);
+	BM->AddEnemy(101);
+	BM->AddEnemy(102);
+	BM->AddEnemy(103);
+	BM->AddEnemy(104);
+	BM->AddEnemy(105);
+	BM->AddEnemy(106);
 	ModeManager->Push(BM);
 }
 
