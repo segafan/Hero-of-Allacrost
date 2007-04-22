@@ -226,8 +226,10 @@ GlobalEnemy::GlobalEnemy(uint32 id) {
 	string file_ext;
 	if (_id < 1) {
 		cerr << "GLOBAL ERROR: invalid id for loading enemy data: " << _id << endl;
-	} else if (_id < 100) {
+	} else if (_id < 101) {
 		file_ext = "01";
+	} else if (_id < 201) {
+		file_ext = "02";
 	}
 	string filename = "dat/actors/enemies_set_" + file_ext + ".lua";
 
