@@ -39,7 +39,7 @@ TilesetTable::TilesetTable(QWidget* parent, const QString& name)
 		tiles[i].SetDimensions(1.0f, 1.0f);
 
 	// NOTE: the following line currently causes a seg fault when the editor exits!
-	if (VideoManager->LoadMultiImage(tiles, filename.toStdString(), 16, 16) == false)
+	if (VideoManager->LoadMultiImageFromNumberElements(tiles, filename.toStdString(), 16, 16) == false)
 		qDebug("LoadMultiImage failed to load tileset " + filename);
 // 	else
 // 		qDebug("LoadMultiImage successful! " + filename);

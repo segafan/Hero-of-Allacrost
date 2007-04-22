@@ -108,6 +108,123 @@ void GameVideo::_RGBAToRGB (const private_video::ImageLoadInfo& src, private_vid
 }
 
 
+//-----------------------------------------------------------------------------
+// GetImageInfo: Gets cols, rows and bpp from an image file
+//-----------------------------------------------------------------------------
+bool GameVideo::GetImageInfo (const std::string& file_name, uint32 &rows, uint32& cols, uint32& bpp)
+{
+	// Isolate the extension
+	size_t extpos = file_name.rfind('.');
+
+	if(extpos == string::npos)
+	{
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: image file extension not specified when calling to GetImageInfo" << endl;
+		return false;
+	}
+
+	std::string extension = std::string(file_name, extpos, file_name.length() - extpos);
+
+	if(extension == ".jpeg" || extension == ".jpg")
+		return _GetImageInfoJpeg(file_name, rows, cols, bpp);
+	if(extension == ".png")
+		return _GetImageInfoPng(file_name, rows, cols, bpp);
+
+	if (VIDEO_DEBUG)
+		cerr << "VIDEO ERROR: image file extension not recognized when calling to GetImageInfo" << endl;
+
+	return false;
+}
+
+
+//-----------------------------------------------------------------------------
+// GetImageInfoPng: Gets cols, rows and bpp from a PNG image file
+//-----------------------------------------------------------------------------
+bool GameVideo::_GetImageInfoPng (const std::string& file_name, uint32 &rows, uint32& cols, uint32& bpp)
+{
+	FILE * fp = fopen(file_name.c_str(), "rb");
+
+	if(fp == NULL)
+		return false;
+
+	uint8 test_buffer[8];
+
+	fread(test_buffer, 1, 8, fp);
+	if(png_sig_cmp(test_buffer, 0, 8))
+	{
+		fclose(fp);
+		return false;
+	}
+
+	png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, (png_voidp)NULL, NULL, NULL);
+
+	if(!png_ptr)
+	{
+		fclose(fp);
+		return false;
+	}
+
+	png_infop info_ptr = png_create_info_struct(png_ptr);
+
+	if(!info_ptr)
+	{
+		png_destroy_read_struct(&png_ptr, NULL, (png_infopp)NULL);
+		fclose(fp);
+		return false;
+	}
+
+	if(setjmp(png_jmpbuf(png_ptr)))
+	{
+		png_destroy_read_struct(&png_ptr, NULL, (png_infopp)NULL);
+		fclose(fp);
+		return false;
+	}
+
+	png_init_io(png_ptr, fp);
+	png_set_sig_bytes(png_ptr, 8);
+
+	png_read_png(png_ptr, info_ptr, PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_PACKING | PNG_TRANSFORM_EXPAND, NULL);
+
+	cols = info_ptr->width;
+	rows = info_ptr->height;
+	bpp = info_ptr->channels * 8;
+
+	png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
+	fclose (fp);
+
+	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// GetImageInfoJpeg: Gets cols, rows and bpp from a JPEG image file
+//-----------------------------------------------------------------------------
+bool GameVideo::_GetImageInfoJpeg (const std::string& file_name, uint32 &rows, uint32& cols, uint32& bpp)
+{
+	FILE * infile;
+
+	if((infile = fopen(file_name.c_str(), "rb")) == NULL)
+		return false;
+
+	jpeg_decompress_struct cinfo;
+	jpeg_error_mgr jerr;
+
+	cinfo.err = jpeg_std_error(&jerr);
+	jpeg_create_decompress(&cinfo);
+
+	jpeg_stdio_src(&cinfo, infile);
+	jpeg_read_header(&cinfo, TRUE);
+
+	cols = cinfo.output_width;
+	rows = cinfo.output_height;
+	bpp = cinfo.output_components;
+
+	jpeg_destroy_decompress(&cinfo);
+
+	fclose(infile);
+
+	return true;
+}
 
 
 //-----------------------------------------------------------------------------
@@ -256,25 +373,93 @@ bool GameVideo::_LoadImage(StillImage &id)
 
 
 //-----------------------------------------------------------------------------
-// LoadMultiImage: Opens an image file and breaks it in many StillImages
+// LoadMultiImageFromNumberElements: Opens an image file and breaks it in many StillImages
 //-----------------------------------------------------------------------------
 
-bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::string &filename, const uint32 rows, const uint32 cols)
+bool GameVideo::LoadMultiImageFromNumberElements(std::vector<StillImage> &images, const std::string &file_name, const uint32 rows, const uint32 cols)
 {
-	if (images.size()!=rows*cols)
+	// Get the size of the image
+	uint32 image_rows, image_cols, bpp;
+	GetImageInfo(file_name, image_rows, image_cols, bpp);
+
+	// If all the images are not the same size, then there is an error
+	if ((image_rows % rows) || (image_cols % cols))
 	{
 		if (VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: vector of StillImages not holding rows*cols images, when loading multi image" << endl;
+			cerr << "VIDEO ERROR: loading multi image, the size of the image (file) is not multiple of the size of the images (StillImage)" << endl;
 		return false;
 	}
 
-	if (filename.empty())
+	// If the images vector has not the same size of the required elements, redimension the vector
+	if (images.size()!= rows*cols)
+	{
+		images.resize(rows*cols);
+	}
+
+	// If the width and height was not specified (0.0f), then assume the size of the image element
+	float width ((float)image_cols / (float)cols);
+	float height ((float)image_rows / (float)rows);
+	for (std::vector<StillImage>::iterator it=images.begin(); it<images.end(); ++it)
+	{
+		if (it->_height == 0.0f)
+			it->_height = height;
+		if (it->_width == 0.0f)
+			it->_width = width;
+	}
+
+	// Load the images
+	return _LoadMultiImage (images, file_name, rows, cols);
+}
+
+
+
+//-----------------------------------------------------------------------------
+// LoadMultiImageFromElementsSize: Opens an image file and breaks it in many frames of an AnimateImage
+//-----------------------------------------------------------------------------
+bool GameVideo::LoadMultiImageFromElementsSize(std::vector<StillImage> &images, const std::string &file_name, const uint32 width, const uint32 height)
+{
+	// Get the size of the image
+	uint32 image_rows, image_cols, bpp;
+	GetImageInfo(file_name, image_rows, image_cols, bpp);
+
+	// If all the images are not the same size, then there is an error
+	if ((image_rows % height) || (image_cols % width))
 	{
 		if (VIDEO_DEBUG)
-			cerr << "Video Error: empty filename when loading multi image" << endl;
+			cerr << "VIDEO ERROR: loading multi image, the size of the image (file) is not multiple of the size of the images (StillImage)" << endl;
 		return false;
 	}
 
+	uint32 rows (image_rows / height);
+	uint32 cols (image_cols / width);
+
+	// If the images vector has not the same size of the required elements, redimension the vector
+	// Using this multi image loader probably means tat the images vector is empty
+	if (images.size() != rows*cols)
+	{
+		images.resize(rows*cols);
+	}
+
+	// If the width and height was not specified (0.0f), then assume the size of the image element
+	for (std::vector<StillImage>::iterator it=images.begin(); it<images.end(); ++it)
+	{
+		if (it->_height == 0.0f)
+			it->_height = (float)height;
+		if (it->_width == 0.0f)
+			it->_width = (float)width;
+	}
+
+	// Load the images
+	return _LoadMultiImage (images, file_name, rows, cols);
+}
+
+
+//-----------------------------------------------------------------------------
+// _LoadMultiImage: Breaks an image in several StillImages
+//-----------------------------------------------------------------------------
+bool GameVideo::_LoadMultiImage (std::vector <StillImage>& images, const std::string &file_name, const uint32& rows,
+								 const uint32& cols)
+{
 	std::string tags;
 	std::string s;
 	uint32 current_image;
@@ -299,7 +484,7 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 
 			// If this image doesn't exist, don't do anything else.
 			// We will have to load the image file
-			if(_images.find(filename+tags) == _images.end())
+			if(_images.find(file_name+tags) == _images.end())
 			{
 				need_load = true;
 			}
@@ -307,11 +492,15 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 	}
 
 	// If not all the images are loaded, then load the big image from disk
-	private_video::ImageLoadInfo load_info;
+	private_video::MultiImageInfo info;
 	if (need_load)
 	{
-		if(!_LoadRawImage(filename, load_info))
+		if(!_LoadRawImage(file_name, info.multi_image))
 			return false;
+
+		info.image.width = info.multi_image.width / cols;
+		info.image.height = info.multi_image.height / rows;
+		info.image.pixels = new uint8 [info.image.width*info.image.height*4];
 	}
 
 	// One by one, get the subimages
@@ -331,18 +520,21 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 			current_image = x*cols + y;
 
 			// If the image exists, take the information from it
-			if(_images.find(filename+tags) != _images.end())
+			if(_images.find(file_name+tags) != _images.end())
 			{
 				images.at(current_image)._elements.clear();
 
-				Image *img = _images[filename+tags];
+				Image *img = _images[file_name+tags];
 
 				if (!img)
 				{
 					if(VIDEO_DEBUG)
 						cerr << "VIDEO ERROR: got a NULL Image from images map in LoadImage()" << endl;
 
-					free (load_info.pixels);
+					if (info.multi_image.pixels)
+						free (info.multi_image.pixels);
+					if (info.image.pixels)
+						free (info.image.pixels);
 					return false;
 				}
 
@@ -352,18 +544,15 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 					// not removed, so restore it
 					if (!img->texture_sheet->RestoreImage(img))
 					{
-						if (load_info.pixels)
-							free (load_info.pixels);
+						if (info.multi_image.pixels)
+							free (info.multi_image.pixels);
+						if (info.image.pixels)
+							free (info.image.pixels);
 						return false;
 					}
 				}
 
 				++(img->ref_count);
-
-				if (images.at(current_image)._width == 0)
-					images.at(current_image)._width = (float)img->width;
-				if (images.at(current_image)._height == 0)
-					images.at(current_image)._height = (float)img->height;
 
 				ImageElement element(img, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f,
 					images.at(current_image)._width, images.at(current_image)._height, images.at(current_image)._color);
@@ -371,28 +560,19 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 			}
 			else	// If the image is not present, take the piece from the loaded image
 			{
-				images.at(current_image)._filename = filename;
+				images.at(current_image)._filename = file_name;
 				images.at(current_image)._animated = false;
 
-				if (images.at(current_image)._height == 0.0f)
-					images.at(current_image)._height = (float)((x == rows-1 && load_info.height%rows) ? load_info.height-(x*load_info.height/rows) : load_info.height/rows);
-				if (images.at(current_image)._width == 0.0f)
-					images.at(current_image)._width = (float)((y == cols-1 && load_info.width%cols) ? load_info.width-(y*load_info.width/cols) : load_info.width/cols);
-
-				private_video::ImageLoadInfo info;
-				info.width = ((y == cols-1 && load_info.width%cols) ? load_info.width-(y*load_info.width/cols) : load_info.width/cols);
-				info.height = ((x == rows-1 && load_info.height%rows) ? load_info.height-(x*load_info.height/rows) : load_info.height/rows);
-				info.pixels = new uint8 [info.width*info.height*4];
-				for (int32 i=0; i<info.height; i++)
+				for (int32 i=0; i<info.image.height; i++)
 				{
-					memcpy ((uint8*)info.pixels+4*info.width*i, (uint8*)load_info.pixels+(((x*load_info.height/rows)+i)*load_info.width+y*load_info.width/cols)*4, 4*info.width);
+					memcpy ((uint8*)info.image.pixels+4*info.image.width*i, (uint8*)info.multi_image.pixels+(((x*info.multi_image.height/rows)+i)*info.multi_image.width+y*info.multi_image.width/cols)*4, 4*info.image.width);
 				}
 
 				// Create an Image structure and store it our std::map of images
-				Image *new_image = new Image(filename, tags, info.width, info.height, false);
+				Image *new_image = new Image(file_name, tags, info.image.width, info.image.height, false);
 
 				// Try to insert the image in a texture sheet
-				TexSheet *sheet = _InsertImageInTexSheet(new_image, info, images.at(current_image)._is_static);
+				TexSheet *sheet = _InsertImageInTexSheet(new_image, info.image, images.at(current_image)._is_static);
 
 				if (!sheet)
 				{
@@ -402,15 +582,17 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 					if(VIDEO_DEBUG)
 						cerr << "VIDEO_DEBUG: GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
 
-					if (load_info.pixels)
-						free (load_info.pixels);
+					if (info.multi_image.pixels)
+						free (info.multi_image.pixels);
+					if (info.image.pixels)
+						free (info.image.pixels);
 					return false;
 				}
 
 				new_image->ref_count = 1;
 
 				// store the image in our std::map
-				_images[filename + tags] = new_image;
+				_images[file_name + tags] = new_image;
 
 				// store the new image element
 				ImageElement element(new_image, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f, images.at(current_image)._width, images.at(current_image)._height, images.at(current_image)._color);
@@ -426,20 +608,20 @@ bool GameVideo::LoadMultiImage(std::vector<StillImage> &images, const std::strin
 	}
 
 	// Free loaded image, in case we used it
-	if (load_info.pixels)
-		free (load_info.pixels);
+	if (info.multi_image.pixels)
+		free (info.multi_image.pixels);
+	if (info.image.pixels)
+		free (info.image.pixels);
 
 	return true;
 }
 
 
-
-
 //-----------------------------------------------------------------------------
-// LoadMultiImage: Opens an image file and breaks it in many frames of an AnimateImage
+// LoadAnimatedImageFromNumberElements: Opens an image file and breaks it in many frames of an AnimateImage
 //-----------------------------------------------------------------------------
 
-bool GameVideo::LoadAnimatedImage(AnimatedImage &id, const std::string &filename, const uint32 rows, const uint32 cols)
+bool GameVideo::LoadAnimatedImageFromNumberElements(AnimatedImage &id, const std::string &filename, const uint32 rows, const uint32 cols)
 {
 	// If the number of frames and the number of sub-images doesn't match, return
 	if (id.GetNumFrames() != rows*cols)
@@ -449,8 +631,6 @@ bool GameVideo::LoadAnimatedImage(AnimatedImage &id, const std::string &filename
 		return false;
 	}
 
-	bool success = true;
-
 	// Get the vector of images
 	std::vector <StillImage> v;
 	for (uint32 frame=0; frame<id.GetNumFrames(); ++frame)
@@ -459,7 +639,7 @@ bool GameVideo::LoadAnimatedImage(AnimatedImage &id, const std::string &filename
 	}
 
 	// Load the frames via LoadMultiImage
-	success = LoadMultiImage(v, filename, rows, cols);
+	bool success = LoadMultiImageFromNumberElements(v, filename, rows, cols);
 
 	// Put the loaded frame images back into the AnimatedImage
 	if (success == true) {
@@ -472,6 +652,10 @@ bool GameVideo::LoadAnimatedImage(AnimatedImage &id, const std::string &filename
 }
 
 
+bool GameVideo::LoadAnimatedImageFromElementsSize(AnimatedImage &image, const std::string &file_name, const uint32 rows, const uint32 cols)
+{
+	return false;
+}
 
 
 //-----------------------------------------------------------------------------
@@ -555,7 +739,7 @@ bool GameVideo::_LoadRawImage(const std::string & filename, private_video::Image
 	if(extension == ".jpeg" || extension == ".jpg")
 		return _LoadRawImageJpeg(filename, load_info);
 	if(extension == ".png")
-		return _LoadRawImagePng(filename, load_info) ;
+		return _LoadRawImagePng(filename, load_info);
 
 	return false;
 }
