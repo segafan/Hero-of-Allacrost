@@ -454,7 +454,7 @@ void Grid::paintGL()
 	VideoManager->SetCoordSys(0.0f, VideoManager->GetWidth() / TILE_WIDTH,
 		VideoManager->GetHeight() / TILE_HEIGHT, 0.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
-	VideoManager->Clear(Color::white);
+	VideoManager->Clear(Color::black);
 
 	// Draw lower layer
 	if (_ll_on)
