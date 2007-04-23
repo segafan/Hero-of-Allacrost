@@ -1138,6 +1138,21 @@ void MapMode::_CalculateDrawInfo() {
 		_draw_info.num_draw_rows--;
 	}
 
+
+
+	// TRYING TO GET RID OF PROBLEMS OF DUPLICATED LINES IN MAP
+	// THIS CODE IS TEMPORAL AND NOT COMPLETELY WORKING
+	double y_resolution ((double)SCREEN_ROWS / 768.0);
+	double x_resolution ((double)SCREEN_COLS / 1024.0);
+
+	double d_temp = _draw_info.tile_x_start / x_resolution;
+	_draw_info.tile_x_start = x_resolution * ((int)floor(d_temp));
+	d_temp = _draw_info.tile_y_start / y_resolution;
+	_draw_info.tile_y_start = y_resolution * ((int)floor(d_temp));
+
+
+
+
 	// Comment this out to print out debugging info about each map frame that is drawn
 // 	printf("--- MAP DRAW INFO ---\n");
 // 	printf("Starting row, col: [%d, %d]\n", _draw_info.starting_row, _draw_info.starting_col);
