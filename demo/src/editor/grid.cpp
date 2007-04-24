@@ -56,8 +56,6 @@ Grid::Grid(QWidget* parent, const QString& name, int width, int height)
 		_upper_layer.push_back(-1);
 	} // -1 is used for no tiles
 	// -1 is used for no tiles
-	for (int i = 0; i < _width * _height * 4; i++)
-		indiv_walkable.push_back(-1);
 
 	// Create the video engine's singleton
 	VideoManager = GameVideo::SingletonCreate();
@@ -214,7 +212,7 @@ void Grid::LoadMap()
 	// multiples of 2. We do the same thing that we did for the multiples-of-2 rows, except now we bit-wise AND the
 	// 2 entries with their corresponding entry in the walk_temp vector. We have now reconstructed the walkability
 	// for each tile.
-	read_data.ReadOpenTable("map_grid");
+	/*read_data.ReadOpenTable("map_grid");
 	uint32 walk_west;
 	vector<uint32> walk_temp;
 	vector<uint32>::iterator wit;
@@ -238,7 +236,7 @@ void Grid::LoadMap()
 		if (i % 2 != 0)
 			walk_temp.clear();
 	} // iterate through the rows of the walkability table
-	read_data.ReadCloseTable();
+	read_data.ReadCloseTable();*/
 
 	// Load music
 	read_data.ReadOpenTable("music_filenames");
@@ -266,6 +264,8 @@ void Grid::SaveMap()
 	vector<int32>::iterator it;  // used to iterate through the layers
 	vector<int32> layer_row;     // one row of a layer
 	ScriptDescriptor write_data;
+	int tileset_index;
+	int tile_index;
 	
 	if (write_data.OpenFile(_file_name.toStdString(), SCRIPT_WRITE) == false) {
 		QMessageBox::warning(this, "Saving File...", QString("ERROR: could not open %1 for writing!").arg(_file_name));
@@ -313,66 +313,98 @@ void Grid::SaveMap()
 	write_data.WriteComment("The map grid to indicate walkability. The size of the grid is 4x the size of the tile layer tables");
 	write_data.WriteComment("Walkability status of tiles for 32 contexts. Zero indicates walkable. Valid range: [0:2^32-1]");
 	write_data.WriteBeginTable("map_grid");
-	for (int row = 0; row < _height * 2; row++)
+	vector<int32> ll_vect;
+	vector<int32> ml_vect;
+	vector<int32> ul_vect;
+	int row = 0;
+	bool twice = false;
+	while (row < _height)
 	{
-		for (int col = 0; col < _width * 2; col++)
+		for (int32 i = 0; i < _width; i++)
 		{
-			// Individual tile property supersedes anything else.
-			if (indiv_walkable[row / 2 * _width + col] != -1)
+			// Get walkability for lower layer tile.
+			tileset_index = _lower_layer[i] / 256;
+			if (tileset_index == 0)
+				tile_index = _lower_layer[i];
+			else  // Don't divide by 0
+				tile_index = _lower_layer[i] % (tileset_index * 256);
+			//qDebug(QString("tileset_index = %1").arg(tileset_index));
+			//qDebug(QString("tile_index = %1").arg(tile_index));
+			if (tile_index = -1)
 			{
-				if (row % 2 == 0)
-				{
-					layer_row.push_back(indiv_walkable[row / 2 * _width + col] & 1);  // gets NW corner
-					layer_row.push_back((indiv_walkable[row / 2 * _width + col] >> 1) & 1);  // gets NE corner
-				} // no remainder means top half of the tile
-				else
-				{
-					layer_row.push_back((indiv_walkable[row / 2 * _width + col] >> 2) & 1);  // gets SW corner
-					layer_row.push_back((indiv_walkable[row / 2 * _width + col] >> 3) & 1);  // gets SE corner
-				} // remainder means bottom half of the tile
-			} // this tile has been modified from it's default
+				ll_vect.push_back(0);
+				ll_vect.push_back(0);
+				ll_vect.push_back(0);
+				ll_vect.push_back(0);
+			}
+			else
+				ll_vect = tilesets[tileset_index]->walkability[tile_index];
+
+			// Get walkability for middle layer tile.
+			tileset_index = _middle_layer[i] / 256;
+			if (tileset_index == 0)
+				tile_index = _middle_layer[i];
+			else  // Don't divide by 0
+				tile_index = _middle_layer[i] % (tileset_index * 256);
+			if (tile_index = -1)
+			{
+				ml_vect.push_back(0);
+				ml_vect.push_back(0);
+				ml_vect.push_back(0);
+				ml_vect.push_back(0);
+			}
+			else
+				ml_vect = tilesets[tileset_index]->walkability[tile_index];
+
+			// Get walkability for upper layer tile.
+			tileset_index = _upper_layer[i] / 256;
+			if (tileset_index == 0)
+				tile_index = _upper_layer[i];
+			else  // Don't divide by 0
+				tile_index = _upper_layer[i] % (tileset_index * 256);
+			if (tile_index = -1)
+			{
+				ul_vect.push_back(0);
+				ul_vect.push_back(0);
+				ul_vect.push_back(0);
+				ul_vect.push_back(0);
+			}
+			else
+				ul_vect = tilesets[tileset_index]->walkability[tile_index];
+
+			if (twice)
+			{
+				layer_row.push_back(ll_vect[2] | ml_vect[2] | ul_vect[2]);  // SW corner
+				layer_row.push_back(ll_vect[3] | ml_vect[3] | ul_vect[3]);  // SE corner
+			}
 			else
 			{
-				/*ScriptDescriptor read_data;
-				if (!read_data.OpenFile("dat/tilesets/tiles_database.lua", SCRIPT_READ))
-					QMessageBox::warning(this, "Tiles Database",
-						QString("ERROR: could not open dat/tilesets/tiles_database.lua for reading!"));
-				QString temp;// = file_name_list[_lower_layer[row / 2 * _width + col]];
-				temp.remove(".png").remove("img/tiles/");
-				read_data.ReadOpenTable("tile_filenames");
-				uint32 table_size = read_data.ReadGetTableSize();
-				uint32 index = 0;
-				QString filename = "";
-				while (filename != temp && index < table_size)
-				{
-					index++;
-					filename = QString::fromStdString(read_data.ReadString(index));
-				} // find index of current tile in the database
-				read_data.ReadCloseTable();
-				read_data.CloseFile();
+				//qDebug(QString("ll_vect = %1 %2 %3 %4").arg(ll_vect[0]).arg(ll_vect[1]).arg(ll_vect[2]).arg(ll_vect[3]));
+				//qDebug(QString("ml_vect = %1 %2 %3 %4").arg(ml_vect[0]).arg(ml_vect[1]).arg(ml_vect[2]).arg(ml_vect[3]));
+				//qDebug(QString("ul_vect = %1 %2 %3 %4").arg(ul_vect[0]).arg(ul_vect[1]).arg(ul_vect[2]).arg(ul_vect[3]));
+				layer_row.push_back(ll_vect[0] | ml_vect[0] | ul_vect[0]);  // NW corner
+				layer_row.push_back(ll_vect[1] | ml_vect[1] | ul_vect[1]);  // NE corner
+			}
+			
+			ll_vect.clear();
+			ml_vect.clear();
+			ul_vect.clear();
+		} // iterate through the columns of the layers
 
-				if (filename == temp)
-				{
-					read_data.ReadOpenTable("tile_properties");
-					uint32 walk_prop = read_data.ReadInt(index);
-					if (row % 2 == 0)
-					{
-						layer_row.push_back(walk_prop & 1);  // gets NW corner
-						layer_row.push_back(walk_prop & 2);  // gets NE corner
-					} // no remainder means top half of the tile
-					else
-					{
-						layer_row.push_back(walk_prop & 4);  // gets SW corner
-						layer_row.push_back(walk_prop & 8);  // gets SE corner
-					} // remainder means bottom half of the tile
-					read_data.ReadCloseTable();
-				} // tile exists in the database*/
-			} // falls back to global property in tile database
-		} // iterate through the columns of the lower layer
-		sprintf(buffer, "%d", row);
+		if (twice)
+			sprintf(buffer, "%d", row*2+1);
+		else
+			sprintf(buffer, "%d", row*2);
 		write_data.WriteIntVector(buffer, layer_row);
 		layer_row.clear();
-	} // iterate through the rows of the lower layer
+		if (twice)
+		{
+			twice = false;
+			row++;
+		}
+		else
+			twice = true;
+	} // iterate through the rows of the layers
 	write_data.WriteEndTable();
 	write_data.WriteInsertNewLine();
 

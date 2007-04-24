@@ -5,7 +5,7 @@
 		activeExecutable = D4D1BA4A0B02B1DB0052BF1E /* Editor */;
 		activeTarget = D4D1BA480B02B1DB0052BF1E /* Editor */;
 		addToTargets = (
-			D4D1BA480B02B1DB0052BF1E /* Editor */,
+			4941A4AF0AC1D77500D65B8E /* Allacrost */,
 		);
 		breakpoints = (
 		);
@@ -150,15 +150,8 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 198906908;
-			PBXWorkspaceStateSaveDate = 198906908;
-		};
-		perUserProjectItems = {
-			D406239F0BDB0BD000126198 = D406239F0BDB0BD000126198 /* PBXBookmark */;
-			D40623A90BDB13F200126198 = D40623A90BDB13F200126198 /* PBXTextBookmark */;
-			D40623AC0BDB13F200126198 = D40623AC0BDB13F200126198 /* PBXTextBookmark */;
-			D40623AD0BDB13F200126198 = D40623AD0BDB13F200126198 /* PBXTextBookmark */;
-			D4E814640BDB1421003AE5D2 /* PBXTextBookmark */ = D4E814640BDB1421003AE5D2 /* PBXTextBookmark */;
+			PBXPerProjectTemplateStateSaveDate = 199083606;
+			PBXWorkspaceStateSaveDate = 199083606;
 		};
 		sourceControlManager = D43082570AF9831800A5173A /* Source Control */;
 		userBuildSettings = {
@@ -234,17 +227,17 @@
 	};
 	4999AC490AF407BE004DD3A3 /* script.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {711, 13510}}";
+			sepNavIntBoundsRect = "{{0, 0}, {711, 13566}}";
 			sepNavSelRange = "{24320, 0}";
-			sepNavVisRect = "{{0, 12789}, {711, 429}}";
+			sepNavVisRect = "{{0, 3085}, {711, 429}}";
 			sepNavWindowFrame = "{{186, 110}, {750, 558}}";
 		};
 	};
 	4999AC4B0AF407BE004DD3A3 /* script.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {770, 8274}}";
+			sepNavIntBoundsRect = "{{0, 0}, {830, 9632}}";
 			sepNavSelRange = "{13882, 0}";
-			sepNavVisRect = "{{0, 4368}, {711, 429}}";
+			sepNavVisRect = "{{0, 845}, {711, 429}}";
 			sepNavWindowFrame = "{{222, 96}, {750, 558}}";
 		};
 	};
@@ -269,37 +262,6 @@
 			sepNavVisRect = "{{0, 0}, {711, 429}}";
 			sepNavWindowFrame = "{{61, 173}, {750, 558}}";
 		};
-	};
-	D406239F0BDB0BD000126198 /* PBXBookmark */ = {
-		isa = PBXBookmark;
-		fRef = D4D1BA650B02B27F0052BF1E /* editor.cpp */;
-	};
-	D40623A90BDB13F200126198 /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = D4D1BA650B02B27F0052BF1E /* editor.cpp */;
-		name = "editor.cpp: 724";
-		rLen = 0;
-		rLoc = 22493;
-		rType = 0;
-		vrLen = 876;
-		vrLoc = 20070;
-	};
-	D40623AC0BDB13F200126198 /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = D4D1BA660B02B27F0052BF1E /* editor.h */;
-		rLen = 0;
-		rLoc = 2147483647;
-		rType = 0;
-	};
-	D40623AD0BDB13F200126198 /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = D4D1BA660B02B27F0052BF1E /* editor.h */;
-		name = "editor.h: 277";
-		rLen = 0;
-		rLoc = 8028;
-		rType = 0;
-		vrLen = 765;
-		vrLoc = 8092;
 	};
 	D43080DE0AF982F800A5173A /* Allacrost */ = {
 		isa = PBXExecutable;
@@ -446,17 +408,17 @@
 	};
 	D4D1BA650B02B27F0052BF1E /* editor.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {950, 12656}}";
-			sepNavSelRange = "{22493, 0}";
-			sepNavVisRect = "{{0, 8951}, {711, 429}}";
-			sepNavWindowFrame = "{{3, 22}, {750, 558}}";
+			sepNavIntBoundsRect = "{{0, 0}, {950, 12712}}";
+			sepNavSelRange = "{25946, 0}";
+			sepNavVisRect = "{{0, 11219}, {711, 429}}";
+			sepNavWindowFrame = "{{7, 94}, {750, 558}}";
 		};
 	};
 	D4D1BA660B02B27F0052BF1E /* editor.h */ = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {711, 4326}}";
 			sepNavSelRange = "{8028, 0}";
-			sepNavVisRect = "{{0, 3721}, {711, 429}}";
+			sepNavVisRect = "{{0, 3294}, {711, 429}}";
 			sepNavWindowFrame = "{{50, 220}, {750, 558}}";
 		};
 	};
@@ -470,34 +432,34 @@
 	};
 	D4D1BA680B02B27F0052BF1E /* grid.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {800, 7658}}";
-			sepNavSelRange = "{17209, 0}";
-			sepNavVisRect = "{{0, 7033}, {711, 429}}";
-			sepNavWindowFrame = "{{10, 220}, {750, 558}}";
+			sepNavIntBoundsRect = "{{0, 0}, {800, 8022}}";
+			sepNavSelRange = "{11749, 0}";
+			sepNavVisRect = "{{0, 4249}, {711, 429}}";
+			sepNavWindowFrame = "{{14, 220}, {750, 558}}";
 		};
 	};
 	D4D1BA690B02B27F0052BF1E /* grid.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {711, 2128}}";
-			sepNavSelRange = "{1340, 0}";
-			sepNavVisRect = "{{0, 648}, {711, 429}}";
+			sepNavIntBoundsRect = "{{0, 0}, {711, 2016}}";
+			sepNavSelRange = "{3339, 0}";
+			sepNavVisRect = "{{0, 1169}, {711, 429}}";
 			sepNavWindowFrame = "{{13, 127}, {750, 558}}";
 		};
 	};
 	D4D1BA6C0B02B27F0052BF1E /* tileset.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {711, 1246}}";
-			sepNavSelRange = "{2038, 32}";
-			sepNavVisRect = "{{0, 549}, {711, 429}}";
+			sepNavIntBoundsRect = "{{0, 0}, {764, 1526}}";
+			sepNavSelRange = "{3619, 0}";
+			sepNavVisRect = "{{0, 1097}, {711, 429}}";
 			sepNavWindowFrame = "{{528, 6}, {750, 558}}";
 		};
 	};
 	D4D1BA6D0B02B27F0052BF1E /* tileset.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {711, 882}}";
-			sepNavSelRange = "{1284, 0}";
-			sepNavVisRect = "{{0, 340}, {711, 429}}";
-			sepNavWindowFrame = "{{38, 194}, {750, 558}}";
+			sepNavIntBoundsRect = "{{0, 0}, {711, 924}}";
+			sepNavSelRange = "{2053, 0}";
+			sepNavVisRect = "{{0, 472}, {711, 429}}";
+			sepNavWindowFrame = "{{488, 19}, {750, 558}}";
 		};
 	};
 	D4DBE6D80BC1E91A00E85DCB /* tex_mgmt.cpp */ = {
@@ -507,15 +469,5 @@
 			sepNavVisRect = "{{0, 22053}, {711, 429}}";
 			sepNavWindowFrame = "{{15, 215}, {750, 558}}";
 		};
-	};
-	D4E814640BDB1421003AE5D2 /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = D4D1BA650B02B27F0052BF1E /* editor.cpp */;
-		name = "editor.cpp: 724";
-		rLen = 0;
-		rLoc = 22493;
-		rType = 0;
-		vrLen = 875;
-		vrLoc = 20070;
 	};
 }
