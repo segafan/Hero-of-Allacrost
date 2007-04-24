@@ -361,38 +361,38 @@ void MapMode::_LoadTiles() {
 	ScriptDescriptor tileset_script; // Used to access the tileset definition file
 	vector<uint32> animation_info;   // Temporarily retains the animation data (tile frame indeces and display times)
 
-	// TODO: waiting for editor support (particularly tileset definition files) before this code may be used
-// 	for (uint32 i = 0; i < tileset_filenames.size(); i++) {
-// 		if (tileset_script.OpenFile("dat/tilesets/" + tileset_filenames[i] + ".lua", SCRIPT_READ) == false) {
-// 			cerr << "MAP ERROR: In MapMode::_LoadTiles(), the map failed to load because it could not open a tileset definition file: "
-// 				<< tileset_script.GetFilename() << endl;
-// 			return;
-// 		}
-//
-// 		tileset_script.ReadOpenTable("animated_tiles");
-// 		for (uint32 j = 0; j < tileset_script.ReadGetTableSize(); j++) {
-// 			animation_info.clear();
-// 			tileset_script.ReadUIntVector(j, animation_info);
-//
-// 			// The index of the first frame in the animation. (i * TILES_PER_TILESET) factors in which tileset the frame comes from
-// 			uint32 first_frame_index = animation_info[0] + (i * TILES_PER_TILESET);
-//
-// 			// Check if this animation is referenced in the map by looking at the first tile frame index. If it is not, continue on to the next animation
-// 			if (tile_references[first_frame_index] == -1) {
-// 				continue;
-// 			}
-//
-// 			AnimatedImage new_animation;
-// 			new_animation.SetDimensions(2.0f, 2.0f);
-//
-// 			// Each pair of entries in the animation info indicate the tile frame index (k) and the time (k+1)
-// 			for (uint32 k = 0; k < animation_info.size(); k += 2) {
-// 				new_animation.AddFrame(tileset_images[i][animation_info[k]], animation_info[k+1]);
-// 			}
-//
-// 			tile_animations.insert(make_pair(first_frame_index, new_animation));
-// 		}
-// 	} // for (uint32 i = 0; i < tileset_filenames.size(); i++)
+	for (uint32 i = 0; i < tileset_filenames.size(); i++) {
+		if (tileset_script.OpenFile("dat/tilesets/" + tileset_filenames[i] + ".lua", SCRIPT_READ) == false) {
+			cerr << "MAP ERROR: In MapMode::_LoadTiles(), the map failed to load because it could not open a tileset definition file: "
+				<< tileset_script.GetFilename() << endl;
+			return;
+		}
+
+		tileset_script.ReadOpenTable("animated_tiles");
+		for (uint32 j = 1; j <= tileset_script.ReadGetTableSize(); j++) {
+			animation_info.clear();
+			tileset_script.ReadUIntVector(j, animation_info);
+
+			// The index of the first frame in the animation. (i * TILES_PER_TILESET) factors in which tileset the frame comes from
+			uint32 first_frame_index = animation_info[0] + (i * TILES_PER_TILESET);
+
+			// Check if this animation is referenced in the map by looking at the first tile frame index. If it is not, continue on to the next animation
+			if (tile_references[first_frame_index] == -1) {
+				continue;
+			}
+
+			AnimatedImage new_animation;
+			new_animation.SetDimensions(2.0f, 2.0f);
+
+			// Each pair of entries in the animation info indicate the tile frame index (k) and the time (k+1)
+			for (uint32 k = 0; k < animation_info.size(); k += 2) {
+				new_animation.AddFrame(tileset_images[i][animation_info[k]], animation_info[k+1]);
+			}
+
+			tile_animations.insert(make_pair(first_frame_index, new_animation));
+		}
+		tileset_script.CloseFile();
+	} // for (uint32 i = 0; i < tileset_filenames.size(); i++)
 
 	// ---------- (6) Add all referenced tiles to the _tile_images vector, in the proper order
 

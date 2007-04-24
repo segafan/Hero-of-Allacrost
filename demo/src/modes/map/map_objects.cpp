@@ -368,9 +368,6 @@ MapSprite::MapSprite() :
 	walk_sound(-1),
 	current_animation(ANIM_STANDING_SOUTH)
 {
-	if (MAP_DEBUG)
-		cout << "MAP: MapSprite constructor invoked" << endl;
-
 	MapObject::_object_type = SPRITE_TYPE;
 	VirtualSprite::face_portrait = 0;
 }
@@ -378,9 +375,6 @@ MapSprite::MapSprite() :
 
 // Free all allocated images and other data
 MapSprite::~MapSprite() {
-	if (MAP_DEBUG)
-		cout << "MAP: MapSprite destructor invoked" << endl;
-
 	for (uint32 i = 0; i < animations.size(); i++) {
 		VideoManager->DeleteImage(animations[i]);
 	}
