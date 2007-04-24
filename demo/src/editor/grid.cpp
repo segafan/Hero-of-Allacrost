@@ -330,7 +330,7 @@ void Grid::SaveMap()
 				tile_index = _lower_layer[i] % (tileset_index * 256);
 			//qDebug(QString("tileset_index = %1").arg(tileset_index));
 			//qDebug(QString("tile_index = %1").arg(tile_index));
-			if (tile_index = -1)
+			if (tile_index == -1)
 			{
 				ll_vect.push_back(0);
 				ll_vect.push_back(0);
@@ -346,7 +346,7 @@ void Grid::SaveMap()
 				tile_index = _middle_layer[i];
 			else  // Don't divide by 0
 				tile_index = _middle_layer[i] % (tileset_index * 256);
-			if (tile_index = -1)
+			if (tile_index == -1)
 			{
 				ml_vect.push_back(0);
 				ml_vect.push_back(0);
@@ -362,7 +362,7 @@ void Grid::SaveMap()
 				tile_index = _upper_layer[i];
 			else  // Don't divide by 0
 				tile_index = _upper_layer[i] % (tileset_index * 256);
-			if (tile_index = -1)
+			if (tile_index == -1)
 			{
 				ul_vect.push_back(0);
 				ul_vect.push_back(0);
