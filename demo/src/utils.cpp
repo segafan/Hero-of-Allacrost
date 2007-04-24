@@ -29,6 +29,7 @@ using namespace std;
 
 #include "socket.h"
 
+
 using namespace hoa_socket;
 
 namespace hoa_utils {
@@ -67,6 +68,14 @@ bool IsOddNumber(uint32 x) {
 bool IsFloatInRange(float value, float lower, float upper) {
 	return (value >= lower && value <= upper);
 }
+
+
+float FloorToFloatMultiple (const float value, const float multiple)
+{
+	return multiple * floor(value / multiple);
+}
+
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ///// ustring Class

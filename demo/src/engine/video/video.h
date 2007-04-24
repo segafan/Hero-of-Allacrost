@@ -267,17 +267,33 @@ public:
 	/** \brief returns width, (whatever was set with SetResolution)
 	 * \return width of the screen
 	 */
-	int32 GetWidth() { return _width; }
+	int32 GetWidth() const { return _width; }
 
 	/** \brief returns height, (whatever was set with SetResolution)
 	 * \return height of the screen
 	 */
-	int32 GetHeight() { return _height; }
+	int32 GetHeight() const { return _height; }
+
+	/** \brief return a reference to the coordinates system
+	 *  \return Reference to the coordinates system
+	 */
+	const CoordSys& GetCoordSys() const { return _coord_sys; }
 
 	/** \brief returns true if game is in fullscreen mode
 	 * \return true if in fullscreen mode, false if in windowed mode
 	 */
 	bool IsFullscreen();
+
+	/** \brief Return the pixel size expressed coordinate system units
+	 *  \return Pixel size expressed in cordinate system units
+	 *  \param x Horizontal resolution
+	 *  \param x Vertical resolution
+	 */
+	void GetPixelSize(double &x, double &y)
+	{
+		x = (_coord_sys.GetRight() - _coord_sys.GetLeft()) / _width;
+		y = (_coord_sys.GetTop() - _coord_sys.GetBottom()) / _height;
+	}
 
 	/** \brief sets the game to fullscreen or windowed depending on whether
 	 *         true or false is passed

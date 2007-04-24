@@ -62,6 +62,7 @@
 #include <map>
 #include <stack>
 #include <stdexcept>
+#include <sstream>
 
 #ifdef _WIN32
 	// Even though Allacrost is platform independent, OpenGL on Windows requires windows.h to be included
@@ -137,6 +138,30 @@ bool IsOddNumber(uint32 x);
 *** the bound arguments.
 **/
 bool IsFloatInRange(float value, float lower, float upper);
+
+
+//! \brief Rounds down a float to a multiple of another float
+/*!
+ *  \return Rounded float
+ *  \param value Number to be rounded
+ *  \param multiple Multiple to be considered when rounding
+ */
+float FloorToFloatMultiple (const float value, const float multiple);
+
+
+//!	\brief Converts data to string
+/*! Thi function convers ata to string, if it has the sstring::operator<< implementated
+ *  \param s String to be filled
+ *  \param data Data to convert to string
+ */
+template<class T>
+void DataToString(std::string &s, const T &data)
+{
+	std::ostringstream stream;
+	stream << data;
+	s = stream.str();
+}
+
 
 /** ****************************************************************************
 *** \brief Implements unicode strings with uint16 as the character type
