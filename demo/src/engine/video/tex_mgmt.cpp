@@ -29,33 +29,6 @@ using namespace hoa_utils;
 
 
 
-//-----------------------------------------------------------------------------
-//!	\brief Converts an integer to string
-//-----------------------------------------------------------------------------
-
-void IntegerToString(std::string &s, const int32 num)
-{
-	static char digits[10] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-
-	s.clear ();
-	uint32 value = abs(num);
-
-	// Get every digit, by dividing by 10
-	do
-	{
-		s = digits[value%10] + s;
-		value /= 10;
-	} while (value > 0);
-
-	// If the number is negative prepend '-'
-	if (num < 0)
-	{
-		s = "-" + s;
-	}
-}
-
-
-
 
 //-----------------------------------------------------------------------------
 // ConvertImageToGrayscale: Converts an image from color to gray mode
@@ -473,13 +446,13 @@ bool GameVideo::_LoadMultiImage (std::vector <StillImage>& images, const std::st
 		for (y=0; y<cols && !need_load; y++)
 		{
 			tags = "";
-			IntegerToString(s,x);
+			DataToString(s,x);
 			tags += "<X" + s + "_";
-			IntegerToString(s,rows);
+			DataToString(s,rows);
 			tags += s + ">";
-			IntegerToString(s,y);
+			DataToString(s,y);
 			tags += "<Y" + s + "_";
-			IntegerToString(s,cols);
+			DataToString(s,cols);
 			tags += s + ">";
 
 			// If this image doesn't exist, don't do anything else.
@@ -508,13 +481,13 @@ bool GameVideo::_LoadMultiImage (std::vector <StillImage>& images, const std::st
 	{
 		for (y=0; y<cols; y++)
 		{
-			IntegerToString(s,x);
+			DataToString(s,x);
 			tags = "<X" + s + "_";
-			IntegerToString(s,rows);
+			DataToString(s,rows);
 			tags += s + ">";
-			IntegerToString(s,y);
+			DataToString(s,y);
 			tags += "<Y" + s + "_";
-			IntegerToString(s,cols);
+			DataToString(s,cols);
 			tags += s + ">";
 
 			current_image = x*cols + y;

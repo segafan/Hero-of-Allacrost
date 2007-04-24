@@ -1066,6 +1066,17 @@ void MapMode::_FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path
 
 // Determines things like our starting tiles
 void MapMode::_CalculateDrawInfo() {
+	// TRYING TO GET RID OF PROBLEMS OF DUPLICATED LINES IN MAP
+	// THIS CODE IS TEMPORAL AND NOT COMPLETELY WORKING
+	static float x (_draw_info.tile_x_start);
+	static float y (_draw_info.tile_y_start);
+
+	_draw_info.tile_x_start = x;
+	_draw_info.tile_y_start = y;
+
+
+
+
 	// ---------- (1) Set the default starting draw positions for the tiles (top left tile)
 
 	// The camera's position is in terms of the 16x16 grid, which needs to be converted into 32x32 coordinates.
@@ -1143,13 +1154,22 @@ void MapMode::_CalculateDrawInfo() {
 
 	// TRYING TO GET RID OF PROBLEMS OF DUPLICATED LINES IN MAP
 	// THIS CODE IS TEMPORAL AND NOT COMPLETELY WORKING
-	double y_resolution ((double)SCREEN_ROWS / 768.0);
-	double x_resolution ((double)SCREEN_COLS / 1024.0);
+	double y_resolution;
+	double x_resolution;
 
-	double d_temp = _draw_info.tile_x_start / x_resolution;
-	_draw_info.tile_x_start = x_resolution * ((int)floor(d_temp));
-	d_temp = _draw_info.tile_y_start / y_resolution;
-	_draw_info.tile_y_start = y_resolution * ((int)floor(d_temp));
+	float x2 (_draw_info.tile_x_start);
+	float y2 (_draw_info.tile_y_start);
+
+	VideoManager->GetPixelSize(x_resolution, y_resolution);
+
+	_draw_info.tile_x_start = FloorToFloatMultiple (_draw_info.tile_x_start, x_resolution);
+	_draw_info.tile_y_start = FloorToFloatMultiple (_draw_info.tile_y_start, y_resolution);
+
+	if (x2 - _draw_info.tile_x_start > x_resolution*0.5f)
+		_draw_info.tile_x_start += x_resolution;
+	if (y2 - _draw_info.tile_y_start > y_resolution*0.5f)
+		_draw_info.tile_y_start += y_resolution;
+
 
 
 
