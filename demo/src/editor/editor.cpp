@@ -175,10 +175,10 @@ void Editor::_FileNew()
 			{
 				if (tiles->isOn())
 				{
-					TilesetTable* table = new TilesetTable(_ed_widget, tiles->text());
-					_ed_tabs->addTab(table, tiles->text());
-					_ed_scrollview->_map->tileset_names.append(tiles->text());
-					_ed_scrollview->_map->tilesets.push_back(table);
+					Tileset* a_tileset = new Tileset(_ed_widget, tiles->text());
+					_ed_tabs->addTab(a_tileset->table, tiles->text());
+					//_ed_scrollview->_map->tileset_names.append(tiles->text());
+					_ed_scrollview->_map->tilesets.push_back(a_tileset);
 				} // tileset must be selected
 				tiles = static_cast<Q3CheckListItem*> (tiles->nextSibling());
 			} // iterate through all possible tilesets
@@ -237,9 +237,9 @@ void Editor::_FileOpen()
 			for (QStringList::ConstIterator it = _ed_scrollview->_map->tileset_names.begin();
 				it != _ed_scrollview->_map->tileset_names.end(); it++)
 			{
-				TilesetTable* table = new TilesetTable(_ed_widget, *it);
-				_ed_tabs->addTab(table, *it);
-				_ed_scrollview->_map->tilesets.push_back(table);
+				Tileset* a_tileset = new Tileset(_ed_widget, *it);
+				_ed_tabs->addTab(a_tileset->table, *it);
+				_ed_scrollview->_map->tilesets.push_back(a_tileset);
 			} // iterate through all tilesets in the map
 
 			_ed_tabs->show();
@@ -329,10 +329,10 @@ void Editor::_FileResize()
 		{
 			if (tiles->isOn())
 			{
-				TilesetTable* table = new TilesetTable(_ed_widget, tiles->text());
-				_ed_tabs->addTab(table, tiles->text());
-				_ed_scrollview->_map->tileset_names.append(tiles->text());
-				_ed_scrollview->_map->tilesets.push_back(table);
+				Tileset* a_tileset = new Tileset(_ed_widget, tiles->text());
+				_ed_tabs->addTab(a_tileset->table, tiles->text());
+				//_ed_scrollview->_map->tileset_names.append(tiles->text());
+				_ed_scrollview->_map->tilesets.push_back(a_tileset);
 			} // tileset must be selected
 			tiles = static_cast<Q3CheckListItem*> (tiles->nextSibling());
 		} // iterate through all possible tilesets
@@ -396,15 +396,15 @@ void Editor::_ViewToggleUL()
 void Editor::_TileLayerFill()
 {
 	// get reference to current tileset
-	TilesetTable* table = static_cast<TilesetTable*> (this->_ed_tabs->currentPage());
+	Q3Table* table = static_cast<Q3Table*> (_ed_tabs->currentPage());
 
 	// put selected tile from tileset into tile array at correct position
 	int tileset_index = table->currentRow() * 16 + table->currentColumn();
-	int multiplier = _ed_scrollview->_map->tileset_names.findIndex(table->tileset_name);
+	int multiplier = _ed_scrollview->_map->tileset_names.findIndex(_ed_tabs->tabText(_ed_tabs->currentIndex()));
 	if (multiplier == -1)
 	{
-		_ed_scrollview->_map->tileset_names.append(table->tileset_name);
-		multiplier = _ed_scrollview->_map->tileset_names.findIndex(table->tileset_name);
+		_ed_scrollview->_map->tileset_names.append(_ed_tabs->tabText(_ed_tabs->currentIndex()));
+		multiplier = _ed_scrollview->_map->tileset_names.findIndex(_ed_tabs->tabText(_ed_tabs->currentIndex()));
 	} // calculate index of current tileset
 
 	vector<int32>::iterator it;    // used to iterate over an entire layer
@@ -746,18 +746,20 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 			{
 				// get reference to current tileset
 				Editor* editor = static_cast<Editor*> (topLevelWidget());
-				TilesetTable* table = static_cast<TilesetTable*> (editor->_ed_tabs->currentPage());
+				Q3Table* table = static_cast<Q3Table*> (editor->_ed_tabs->currentPage());
+				QString tileset_name = editor->_ed_tabs->tabText(editor->_ed_tabs->currentIndex());
 
 				// put selected tile from tileset into tile array at correct position
 				int tileset_index = table->currentRow() * 16 + table->currentColumn();
-				int multiplier = _map->tileset_names.findIndex(table->tileset_name);
+				int multiplier = _map->tileset_names.findIndex(tileset_name);
 				if (multiplier == -1)
 				{
-					_map->tileset_names.append(table->tileset_name);
-					multiplier = _map->tileset_names.findIndex(table->tileset_name);
+					_map->tileset_names.append(tileset_name);
+					multiplier = _map->tileset_names.findIndex(tileset_name);
 				} // calculate index of current tileset
 				
-				GetCurrentLayer()[_tile_index] = tileset_index + multiplier * 256;
+				if (_map->tilesets[multiplier]->walkability[tileset_index][0] != -1)
+					GetCurrentLayer()[_tile_index] = tileset_index + multiplier * 256;
 			} // left mouse button was pressed
 			break;
 		} // edit mode PAINT_TILE
@@ -811,18 +813,20 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 				{
 					// get reference to current tileset
 					Editor* editor = static_cast<Editor*> (topLevelWidget());
-					TilesetTable* table = static_cast<TilesetTable*> (editor->_ed_tabs->currentPage());
+					Q3Table* table = static_cast<Q3Table*> (editor->_ed_tabs->currentPage());
+					QString tileset_name = editor->_ed_tabs->tabText(editor->_ed_tabs->currentIndex());
 
 					// put selected tile from tileset into tile array at correct position
 					int tileset_index = table->currentRow() * 16 + table->currentColumn();
-					int multiplier = _map->tileset_names.findIndex(table->tileset_name);
+					int multiplier = _map->tileset_names.findIndex(tileset_name);
 					if (multiplier == -1)
 					{
-						_map->tileset_names.append(table->tileset_name);
-						multiplier = _map->tileset_names.findIndex(table->tileset_name);
+						_map->tileset_names.append(tileset_name);
+						multiplier = _map->tileset_names.findIndex(tileset_name);
 					} // calculate index of current tileset
 
-					GetCurrentLayer()[_tile_index] = tileset_index + multiplier * 256;
+					if (_map->tilesets[multiplier]->walkability[tileset_index][0] != -1)
+						GetCurrentLayer()[_tile_index] = tileset_index + multiplier * 256;
 				} // left mouse button was pressed
 				break;
 			} // edit mode PAINT_TILE

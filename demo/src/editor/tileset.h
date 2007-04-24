@@ -37,23 +37,26 @@ const int TILE_WIDTH  = 32;
 const int TILE_HEIGHT = 32;
 
 /** ****************************************************************************
-*** \brief Manages individual tiles in a table with drag and drop capability.
-*** \note Inherits from the QTable class.
+*** \brief Manages individual tiles in a tileset and everything related with
+***        them, such as walkability, animations, and so on.
 *** ***************************************************************************/
-class TilesetTable : public Q3Table
+class Tileset
 {
-public:
-	//! TilesetTable constructor. Name needs to be the name, not the filename.
-	TilesetTable(QWidget* parent, const QString& name);
+	public:
+		//! Tileset constructor. Name needs to be the name of the tileset, not the filename.
+		Tileset(QWidget* parent, const QString& name);
+		//! Tileset destructor.
+		~Tileset();
 
-	~TilesetTable();
-
-	//! The name of the tileset this table is representing.
-	QString tileset_name;
-
-	//! Contains the StillImage tiles of the tileset, used in grid.cpp
-	std::vector<hoa_video::StillImage> tiles;
-	// TODO: implement some sort of dynamic table resizing on window resize
+		//! The name of the tileset this table is representing.
+		QString tileset_name;
+		//! Contains the StillImage tiles of the tileset, used in grid.cpp.
+		std::vector<hoa_video::StillImage> tiles;
+		//! Contains walkability information for each tile.
+		std::map<int, std::vector<int32> > walkability;
+		//! Reference to the table implementation of this tileset in the bottom of the editor.
+		Q3Table* table;
+		// TODO: implement some sort of dynamic table resizing on window resize
 }; // class Tileset
 
 } // namespace hoa_editor

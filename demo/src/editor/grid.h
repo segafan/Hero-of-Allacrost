@@ -95,9 +95,7 @@ class Grid: public QGLWidget
 		//! List of the tileset names being used.
 		QStringList tileset_names;
 		//! A vector which contains a pointer to each tileset and the tiles it has loaded via LoadMultiImage.
-		std::vector<TilesetTable*> tilesets;
-		//! A vector of the walkability of tiles modified on the map, which overrides their default walkability.
-		std::vector<uint32> indiv_walkable;
+		std::vector<Tileset*> tilesets;
 
 	protected:
 		//! \brief Sets up the rendering context of the OpenGL portion of the editor.
