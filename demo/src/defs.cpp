@@ -328,6 +328,7 @@ void BindEngineToLua() {
 	[
 		class_<MapMode, hoa_mode_manager::GameMode>("MapMode")
 			.def(constructor<const std::string&>())
+			.def_readwrite("_camera", &MapMode::_camera)
 			.def("_AddGroundObject", &MapMode::_AddGroundObject, adopt(_2))
 			.def("_AddPassObject", &MapMode::_AddPassObject, adopt(_2))
 			.def("_AddSkyObject", &MapMode::_AddSkyObject, adopt(_2))
@@ -407,6 +408,9 @@ void BindEngineToLua() {
 			.def("IsVisible", &MapObject::IsVisible)
 			.def("IsNoCollision", &MapObject::IsNoCollision)
 			.def("IsDrawOnSecondPass", &MapObject::IsDrawOnSecondPass)
+			// TEMP: because GetXPosition and GetYPostiion seem to give a runtime error in Lua
+			.def_readonly("x_position", &MapObject::x_position)
+			.def_readonly("y_position", &MapObject::y_position)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
@@ -480,6 +484,7 @@ void BindEngineToLua() {
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<MapZone>("MapZone")
+			.def(constructor<>())
 			.def("AddSection", &MapZone::AddSection, adopt(_2))
 			.def("IsInsideZone", &MapZone::IsInsideZone)
 	];
@@ -574,7 +579,7 @@ void BindEngineToLua() {
 	luabind::object global_table = luabind::globals(hoa_script::ScriptManager->GetGlobalState());
 	global_table["AudioManager"]     = hoa_audio::AudioManager;
 	global_table["InputManager"]     = hoa_input::InputManager;
-	global_table["GameModeManager"]  = hoa_mode_manager::ModeManager;
+	global_table["ModeManager"]      = hoa_mode_manager::ModeManager;
 	global_table["ScriptManager"]    = hoa_script::ScriptManager;
 	global_table["SystemManager"]    = hoa_system::SystemManager;
 	global_table["VideoManager"]     = hoa_video::VideoManager;

@@ -20,6 +20,8 @@ tileset_filenames[1] = "mountain_landscape"
 tileset_filenames[2] = "mountain_house_exterior"
 tileset_filenames[3] = "mountain_house_exterior2"
 
+enemy_ids = {}
+
 -- The map grid to indicate walkability. The size of the grid is 4x the size of the tile layer tables
 -- Walkability status of tiles for 32 contexts. Zero indicates walkable. Valid range: [0:2^32-1]
 map_grid = {}
@@ -237,390 +239,167 @@ upper_layer[39] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
 
 
 function Load(m)
-
 	-- First, record the current map in the "map" variable that is global to this script
-
 	map = m;
 
-
-
 	-- Create the player's sprite
-
 	local sprite = hoa_map.MapSprite();
-
 	sprite:SetName("Claudius");
-
 	sprite:SetObjectID(1000);
-
 	sprite:SetContext(1);
-
-	sprite:SetXPosition(55, 0.5);
-
-	sprite:SetYPosition(55, 0.5);
-
+	sprite:SetXPosition(110, 0.5);
+	sprite:SetYPosition(22, 0.5);
 	sprite:SetCollHalfWidth(1.0);
-
 	sprite:SetCollHeight(2.0);
-
 	sprite:SetImgHalfWidth(1.0);
-
 	sprite:SetImgHeight(4.0);
-
 	sprite:SetMovementSpeed(200.0);
-
 	sprite:SetDirection(8);
-
 	sprite:LoadStandardAnimations("img/sprites/map/claudius_walk.png");
-
 	sprite:SetFacePortrait("img/portraits/map/claudius.png");
-
 	map:_AddGroundObject(sprite);
-
-
 
 	-- Set the camera to focus on the player's sprite
-
 	map:_SetCameraFocus(sprite);
 
-
-
 	-- Create a NPC sprite
-
 	sprite = hoa_map.MapSprite();
-
 	sprite:SetName("Laila");
-
 	sprite:SetObjectID(2);
-
 	sprite:SetContext(1);
-
 	sprite:SetXPosition(17, 0.5);
-
 	sprite:SetYPosition(17, 0.5);
-
 	sprite:SetCollHalfWidth(1.0);
-
 	sprite:SetCollHeight(2.0);
-
 	sprite:SetImgHalfWidth(1.0);
-
 	sprite:SetImgHeight(4.0);
-
 	sprite:SetMovementSpeed(200.0);
-
 	sprite:SetDirection(2);
-
 	sprite:LoadStandardAnimations("img/sprites/map/laila_walk.png");
-
 	sprite:SetFacePortrait("img/portraits/map/laila.png");
-
 	map:_AddGroundObject(sprite);
 
-
-
 	sprite = hoa_map.MapSprite();
-
 	sprite:SetName("Marcus");
-
 	sprite:SetObjectID(3);
-
 	sprite:SetContext(1);
-
 	sprite:SetXPosition(27, 0.5);
-
 	sprite:SetYPosition(27, 0.5);
-
 	sprite:SetCollHalfWidth(1.0);
-
 	sprite:SetCollHeight(2.0);
-
 	sprite:SetImgHalfWidth(1.0);
-
 	sprite:SetImgHeight(4.0);
-
 	sprite:SetMovementSpeed(200.0);
-
 	sprite:SetDirection(2);
-
 	sprite:LoadStandardAnimations("img/sprites/map/marcus_walk.png");
-
 	sprite:SetFacePortrait("img/portraits/map/marcus.png");
-
 	map:_AddGroundObject(sprite);
 
-
-
 	sprite = hoa_map.MapSprite();
-
 	sprite:SetName("Vanica");
-
 	sprite:SetObjectID(4);
-
 	sprite:SetContext(1);
-
 	sprite:SetXPosition(25, 0.5);
-
 	sprite:SetYPosition(25, 0.5);
-
 	sprite:SetCollHalfWidth(1.0);
-
 	sprite:SetCollHeight(2.0);
-
 	sprite:SetImgHalfWidth(1.0);
-
 	sprite:SetImgHeight(4.0);
-
 	sprite:SetMovementSpeed(200.0);
-
 	sprite:SetDirection(2);
-
 	sprite:LoadStandardAnimations("img/sprites/map/vanica_walk.png");
-
 	sprite:SetFacePortrait("img/portraits/map/vanica.png");
-
 	map:_AddGroundObject(sprite);
 
-
-
 	sprite = hoa_map.MapSprite();
-
 	sprite:SetName("Seasoned Karlate");
-
 	sprite:SetObjectID(5);
-
 	sprite:SetContext(1);
-
 	sprite:SetXPosition(10, 0.5);
-
 	sprite:SetYPosition(12, 0.5);
-
 	sprite:SetCollHalfWidth(1.0);
-
 	sprite:SetCollHeight(2.0);
-
 	sprite:SetImgHalfWidth(1.0);
-
 	sprite:SetImgHeight(4.0);
-
 	sprite:SetMovementSpeed(200.0);
-
 	sprite:SetDirection(2);
-
 	sprite:LoadStandardAnimations("img/sprites/map/soldier_npc01_walk.png");
-
 	map:_AddGroundObject(sprite);
 
-
-
 	sprite = hoa_map.MapSprite();
-
 	sprite:SetName("Speedracer?");
-
 	sprite:SetObjectID(6);
-
 	sprite:SetContext(1);
-
 	sprite:SetXPosition(30, 0.5);
-
 	sprite:SetYPosition(25, 0.5);
-
 	sprite:SetCollHalfWidth(1.0);
-
 	sprite:SetCollHeight(2.0);
-
 	sprite:SetImgHalfWidth(1.0);
-
 	sprite:SetImgHeight(4.0);
-
 	sprite:SetMovementSpeed(200.0);
-
 	sprite:SetDirection(2);
-
 	sprite:LoadStandardAnimations("img/sprites/map/man_npc01_walk.png");
-
 	map:_AddGroundObject(sprite);
 
-
-
 	sprite = hoa_map.MapSprite();
-
 	sprite:SetName("Needs to Shave");
-
 	sprite:SetObjectID(7);
-
 	sprite:SetContext(1);
-
 	sprite:SetXPosition(10, 0.5);
-
 	sprite:SetYPosition(13, 0.5);
-
 	sprite:SetCollHalfWidth(1.0);
-
 	sprite:SetCollHeight(2.0);
-
 	sprite:SetImgHalfWidth(1.0);
-
 	sprite:SetImgHeight(4.0);
-
 	sprite:SetMovementSpeed(200.0);
-
 	sprite:SetDirection(2);
-
 	sprite:LoadStandardAnimations("img/sprites/map/man_npc02_walk.png");
-
 	map:_AddGroundObject(sprite);
 
-
-
 	sprite = hoa_map.MapSprite();
-
 	sprite:SetName("Little Brat");
-
 	sprite:SetObjectID(8);
-
 	sprite:SetContext(1);
-
 	sprite:SetXPosition(32, 0.5);
-
 	sprite:SetYPosition(11, 0.5);
-
 	sprite:SetCollHalfWidth(1.0);
-
 	sprite:SetCollHeight(2.0);
-
 	sprite:SetImgHalfWidth(1.0);
-
 	sprite:SetImgHeight(4.0);
-
 	sprite:SetMovementSpeed(200.0);
-
 	sprite:SetDirection(2);
-
 	sprite:LoadStandardAnimations("img/sprites/map/boy_npc01_walk.png");
-
 	map:_AddGroundObject(sprite);
-
-
 
 	sprite = hoa_map.MapSprite();
-
 	sprite:SetName("Drunk Prostitute");
-
 	sprite:SetObjectID(9);
-
 	sprite:SetContext(1);
-
 	sprite:SetXPosition(15, 0.5);
-
 	sprite:SetYPosition(25, 0.5);
-
 	sprite:SetCollHalfWidth(1.0);
-
 	sprite:SetCollHeight(2.0);
-
 	sprite:SetImgHalfWidth(1.0);
-
 	sprite:SetImgHeight(4.0);
-
 	sprite:SetMovementSpeed(200.0);
-
 	sprite:SetDirection(2);
-
 	sprite:LoadStandardAnimations("img/sprites/map/woman_npc01_walk.png");
-
 	map:_AddGroundObject(sprite);
 
-
-
-	-- Create an EnemyZone (5000 ms between respawns, monsters restricted to zone area)
-
-	local ezone = hoa_map.EnemyZone(5000, true);
+	-- Create a zone for exiting the map, to be used as a trigger
+	exit_zone = hoa_map.MapZone();
 
 	-- Add a section to the zone that goes from (20, 10) to (50, 40) in map grid coordinates
-
-	ezone:AddSection(hoa_map.ZoneSection(20, 10, 50, 40));
-
-	-- Create a sprite representation of a monster attached to this zone
-
-	local enemy = hoa_map.EnemySprite();
-	enemy:SetObjectID(map:_GetGeneratedObjectID());
-
-	enemy:SetContext(1);
-
-	enemy:SetCollHalfWidth(1.0);
-
-	enemy:SetCollHeight(2.0);
-
-	enemy:SetImgHalfWidth(1.0);
-
-	enemy:SetImgHeight(4.0);
-
-	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
-	enemy:LoadStandardAnimations("img/sprites/map/scorpion_walk.png");
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(5);
-	enemy:AddEnemy(2);
-
-	-- Add the enemy to the zone two times (it also gets added to the ground objects) 
-
-	ezone:AddEnemy(enemy, map, 2);
-
-
-	enemy = hoa_map.EnemySprite();
-	enemy:SetObjectID(map:_GetGeneratedObjectID());
-
-	enemy:SetContext(1);
-
-	enemy:SetCollHalfWidth(1.0);
-
-	enemy:SetCollHeight(2.0);
-
-	enemy:SetImgHalfWidth(1.0);
-
-	enemy:SetImgHeight(4.0);
-
-	enemy:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
-	enemy:LoadStandardAnimations("img/sprites/map/snake_walk.png");
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(3);
-	enemy:AddEnemy(3);
-	enemy:AddEnemy(4);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(3);
-	enemy:AddEnemy(3);
-	enemy:AddEnemy(3);
-
-	ezone:AddEnemy(enemy, map, 2);
-
-	enemy = hoa_map.EnemySprite();
-	enemy:SetObjectID(map:_GetGeneratedObjectID());
-
-	enemy:SetContext(1);
-
-	enemy:SetCollHalfWidth(1.0);
-
-	enemy:SetCollHeight(2.0);
-
-	enemy:SetImgHalfWidth(1.0);
-
-	enemy:SetImgHeight(4.0);
-
-	enemy:SetMovementSpeed(hoa_map.MapMode.VERY_SLOW_SPEED);
-	enemy:LoadStandardAnimations("img/sprites/map/slime_walk.png");
-
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(1);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(1);
-	ezone:AddEnemy(enemy, map, 2);
-
-
-	-- Finally, add the zone to the map
-
-	map:_AddZone(ezone);
-
+	exit_zone:AddSection(hoa_map.ZoneSection(118, 30, 119, 40));
+	map:_AddZone(exit_zone);
 end -- function Load()
+
+
+function Update()
+	-- Check if the map camera is in the exit zone
+	if (exit_zone:IsInsideZone(map._camera.x_position, map._camera.y_position) == true) then
+		ModeManager:Pop();
+		local cave_map = hoa_map.MapMode("dat/maps/demo_cave.lua");
+		ModeManager:Push(cave_map);
+	end
+end

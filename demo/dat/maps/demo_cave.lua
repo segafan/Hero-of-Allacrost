@@ -12,7 +12,7 @@ sound_filenames = {}
 
 -- The music files used as background music on this map.
 music_filenames = {}
-music_filenames[1] = ""
+music_filenames[1] = "mus/Allacrost_Opening_Theme.ogg"
 
 -- The names of the tilesets used, with the path and file extension omitted
 tileset_filenames = {}
@@ -20,6 +20,8 @@ tileset_filenames[1] = "desert_cave_ground"
 tileset_filenames[2] = "desert_cave_walls"
 tileset_filenames[3] = "desert_cave_walls2"
 tileset_filenames[4] = "desert_cave_water"
+
+enemy_ids = { 1, 2, 3, 4, 5 }
 
 -- The map grid to indicate walkability. The size of the grid is 4x the size of the tile layer tables
 -- Walkability status of tiles for 32 contexts. Zero indicates walkable. Valid range: [0:2^32-1]
@@ -334,3 +336,106 @@ upper_layer[57] = { 568, 569, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
 upper_layer[58] = { 270, 271, -1, -1, -1, -1, -1, -1, -1, 334, -1, 396, 397, 398, -1, -1, -1, -1, -1, -1, -1, 302, 303, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }
 upper_layer[59] = { -1, 287, 382, 380, 381, 382, 383, 348, 349, 350, 383, 412, 413, 414, 415, 382, 383, 348, 349, 380, 381, 318, 319, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }
 
+
+function Load(m)
+	-- First, record the current map in the "map" variable that is global to this script
+	map = m;
+
+	-- Create the player's sprite
+	local sprite = hoa_map.MapSprite();
+	sprite:SetName("Claudius");
+	sprite:SetObjectID(1000);
+	sprite:SetContext(1);
+	sprite:SetXPosition(4, 0.0);
+	sprite:SetYPosition(118, 0.0);
+	sprite:SetCollHalfWidth(1.0);
+	sprite:SetCollHeight(2.0);
+	sprite:SetImgHalfWidth(1.0);
+	sprite:SetImgHeight(4.0);
+	sprite:SetMovementSpeed(200.0);
+	sprite:SetDirection(8);
+	sprite:LoadStandardAnimations("img/sprites/map/claudius_walk.png");
+	sprite:SetFacePortrait("img/portraits/map/claudius.png");
+	map:_AddGroundObject(sprite);
+	-- Set the camera to focus on the player's sprite
+	map:_SetCameraFocus(sprite);
+
+	-- Create an EnemyZone (5000 ms between respawns, monsters restricted to zone area)
+	local ezone = hoa_map.EnemyZone(5000, true);
+	-- Add a section to the zone that goes from (101, 10) to (117, 40) in map grid coordinates
+	ezone:AddSection(hoa_map.ZoneSection(10, 101, 40, 117));
+
+	-- Create a sprite representation of a monster attached to this zone
+	local enemy = hoa_map.EnemySprite();
+	enemy:SetObjectID(map:_GetGeneratedObjectID());
+	enemy:SetContext(1);
+	enemy:SetCollHalfWidth(1.0);
+	enemy:SetCollHeight(2.0);
+	enemy:SetImgHalfWidth(1.0);
+	enemy:SetImgHeight(4.0);
+	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
+	enemy:LoadStandardAnimations("img/sprites/map/scorpion_walk.png");
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(2);
+	-- Add the enemy to the zone two times (it also gets added to the ground objects) 
+	ezone:AddEnemy(enemy, map, 2);
+
+	enemy = hoa_map.EnemySprite();
+	enemy:SetObjectID(map:_GetGeneratedObjectID());
+	enemy:SetContext(1);
+	enemy:SetCollHalfWidth(1.0);
+	enemy:SetCollHeight(2.0);
+	enemy:SetImgHalfWidth(1.0);
+	enemy:SetImgHeight(4.0);
+	enemy:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
+	enemy:LoadStandardAnimations("img/sprites/map/snake_walk.png");
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(4);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(3);
+	ezone:AddEnemy(enemy, map, 2);
+
+	enemy = hoa_map.EnemySprite();
+	enemy:SetObjectID(map:_GetGeneratedObjectID());
+	enemy:SetContext(1);
+	enemy:SetCollHalfWidth(1.0);
+	enemy:SetCollHeight(2.0);
+	enemy:SetImgHalfWidth(1.0);
+	enemy:SetImgHeight(4.0);
+	enemy:SetMovementSpeed(hoa_map.MapMode.VERY_SLOW_SPEED);
+	enemy:LoadStandardAnimations("img/sprites/map/slime_walk.png");
+
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(1);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	ezone:AddEnemy(enemy, map, 2);
+
+	-- Finally, add the zone to the map
+	map:_AddZone(ezone);
+
+	-- Create a zone for exiting the map, to be used as a trigger
+	exit_zone = hoa_map.MapZone();
+	-- Add a section to the zone that goes from (20, 10) to (50, 40) in map grid coordinates
+	exit_zone:AddSection(hoa_map.ZoneSection(2, 114, 2, 116));
+	map:_AddZone(exit_zone);
+end
+
+
+function Update()
+	-- Check if the map camera is in the exit zone
+	if (exit_zone:IsInsideZone(map._camera.x_position, map._camera.y_position) == true) then
+		ModeManager:Pop();
+		local cave_map = hoa_map.MapMode("dat/maps/demo_town.lua");
+		ModeManager:Push(cave_map);
+	end
+end

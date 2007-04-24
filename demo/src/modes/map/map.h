@@ -345,6 +345,21 @@ private:
 	**/
 	hoa_script::ScriptDescriptor _map_script;
 
+	/** \brief A script function which assists with the MapMode#Update method
+	*** The most common operation that this script function performs is to check trigger conditions that
+	*** cause map events to occur. 
+	**/
+	ScriptObject _update_function;
+	
+	/** \brief Script functions which assists with the MapMode#Draw method
+	*** These two script functions allow arbitrary changes to the graphical appearance on the screen.
+	**/
+	// TODO
+	//@{
+// 	hoa_script::ScriptObject _pre_draw_function;
+// 	hoa_script::ScriptObject _post_draw_function;
+	//@}
+
 	//! \brief A 2D vector that contains all of the map's tile objects.
 	std::vector<std::vector<MapTile> > _tile_grid;
 
