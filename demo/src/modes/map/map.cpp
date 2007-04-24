@@ -230,6 +230,7 @@ void MapMode::_Load() {
 
 	// ---------- (6) Call the map script's load function, which will
 	ScriptCallFunction<void>(_map_script.GetLuaState(), "Load", this);
+	_update_function = _map_script.ReadFunctionPointer("Update");
 } // void MapMode::_Load()
 
 
@@ -427,8 +428,10 @@ void MapMode::_LoadTiles() {
 void MapMode::Update() {
 	_time_elapsed = SystemManager->GetUpdateTime();
 
-	// ---------- (1) Process user input
+	// ---------- (1) Call the map's update script function
+	ScriptCallFunction<void>(_update_function);
 
+	// ---------- (2) Process user input
 	switch (_map_state) {
 		case EXPLORE:
 			_HandleInputExplore();
@@ -441,14 +444,12 @@ void MapMode::Update() {
 			break;
 	}
 
-	// ---------- (2) Update all animated tile images
-
+	// ---------- (3) Update all animated tile images
 	for (uint32 i = 0; i < _animated_tile_images.size(); i++) {
 		_animated_tile_images[i]->Update();
 	}
 
-	// ---------- (3) Update all objects on the map
-
+	// ---------- (4) Update all objects on the map
 	for( uint32 i = 0; i < _zones.size(); i++ ) {
 		_zones[i]->Update();
 	}
@@ -463,7 +464,7 @@ void MapMode::Update() {
 		_sky_objects[i]->Update();
 	}
 
-	// ---------- (4) Sort the objects so they are in the correct draw order ********
+	// ---------- (5) Sort the objects so they are in the correct draw order ********
  	std::sort( _ground_objects.begin(), _ground_objects.end(), MapObject_Ptr_Less() );
 } // void MapMode::Update()
 

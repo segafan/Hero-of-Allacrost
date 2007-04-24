@@ -48,7 +48,7 @@ public:
 
 
 /** ***************************************************************************
-*** \brief Abstract class that represents a special zone on a map.
+*** \brief A class that represents a special zone on a map.
 ***
 *** The area is made up of many ZoneSection instances, so it can be any shape.
 *** This class can be derived to create enemy zones, poisonous zones, etc.
@@ -73,7 +73,8 @@ public:
 	bool IsInsideZone(uint16 pos_x, uint16 pos_y);
 
 	//! \brief Updates the state of the zone and the state of any objects in the zone
-	virtual void Update() = 0;
+	virtual void Update()
+		{}
 
 protected:
 	//! \brief The rectangular sections which compose the map zone
