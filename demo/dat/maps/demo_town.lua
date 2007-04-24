@@ -388,7 +388,6 @@ function Load(m)
 
 	-- Create a zone for exiting the map, to be used as a trigger
 	exit_zone = hoa_map.MapZone();
-
 	-- Add a section to the zone that goes from (20, 10) to (50, 40) in map grid coordinates
 	exit_zone:AddSection(hoa_map.ZoneSection(118, 30, 119, 40));
 	map:_AddZone(exit_zone);
