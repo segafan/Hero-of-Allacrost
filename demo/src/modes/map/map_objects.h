@@ -791,6 +791,9 @@ private:
 	//! \brief ???
 	uint32 _time_to_spawn;
 
+	//! \brief Indicates if the enemy is outside of its zone. If it is, it won't change direction until it gets back in.
+	bool _out_of_zone;
+
 	/** \brief Contains the possible groups of enemies that may appear in a battle should the player encounter this enemy sprite
 	*** The numbers contained within this member are ID numbers for the enemy. If the
 	**/
