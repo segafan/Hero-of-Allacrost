@@ -607,6 +607,7 @@ void EnemySprite::Reset() {
 	_state = DEAD;
 	_time_elapsed = 0;
 	_color.SetAlpha(0.0f);
+	_out_of_zone = false;
 }
 
 
@@ -674,11 +675,20 @@ void EnemySprite::Update() {
 			ydelta = ComputeYLocation() - MapMode::_current_map->_camera->ComputeYLocation();
 
 			// If the sprite has moved outside of its zone and it should not, reverse the sprite's direction
-			if (_zone->IsInsideZone(x_position, y_position) == false && _zone->IsRestraining()) {
+			if (_zone->IsInsideZone(x_position, y_position) == false && _zone->IsRestraining() ) {
+				//Make sure it wasn't already out (stuck on boundaries fix) 	
+				if( !_out_of_zone )
+				{
 					SetDirection(CalculateOppositeDirection(GetDirection()));
+					//The sprite is now finding its way back into the zone 
+					_out_of_zone = true;
+				}					
 			}
 			// Otherwise, determine the direction that the sprite should move if the camera is within the sprite's aggression range
-			else if (abs(xdelta) <= _aggro_range && abs(ydelta) <= _aggro_range &&
+			else {
+				_out_of_zone = false;
+
+				if (abs(xdelta) <= _aggro_range && abs(ydelta) <= _aggro_range &&
 				_zone->IsInsideZone(hoa_map::MapMode::_current_map->_camera->x_position, hoa_map::MapMode::_current_map->_camera->y_position))
 				{
 					if (xdelta > -0.5 && xdelta < 0.5 && ydelta < 0)
@@ -697,13 +707,14 @@ void EnemySprite::Update() {
 						SetDirection(SOUTHWEST);
 					else
 						SetDirection(NORTHWEST);
-			}
-			// If the sprite is not within the aggression range, pick a random direction to move
-			else {
-				if (_time_elapsed >= GetTimeToChange()) {
-					// TODO: needs comment
-					SetDirection(1 << hoa_utils::RandomBoundedInteger(0,11));
-					_time_elapsed = 0;
+				}
+				// If the sprite is not within the aggression range, pick a random direction to move
+				else {
+					if (_time_elapsed >= GetTimeToChange()) {
+						// TODO: needs comment
+						SetDirection(1 << hoa_utils::RandomBoundedInteger(0,11));
+						_time_elapsed = 0;
+					}
 				}
 			}
 
