@@ -320,7 +320,7 @@ void Grid::SaveMap()
 	bool twice = false;
 	while (row < _height)
 	{
-		for (int32 i = 0; i < _width; i++)
+		for (int32 i = row * _width; i < row * _width + _width; i++)
 		{
 			// Get walkability for lower layer tile.
 			tileset_index = _lower_layer[i] / 256;
@@ -328,8 +328,6 @@ void Grid::SaveMap()
 				tile_index = _lower_layer[i];
 			else  // Don't divide by 0
 				tile_index = _lower_layer[i] % (tileset_index * 256);
-			//qDebug(QString("tileset_index = %1").arg(tileset_index));
-			//qDebug(QString("tile_index = %1").arg(tile_index));
 			if (tile_index == -1)
 			{
 				ll_vect.push_back(0);
@@ -379,9 +377,6 @@ void Grid::SaveMap()
 			}
 			else
 			{
-				//qDebug(QString("ll_vect = %1 %2 %3 %4").arg(ll_vect[0]).arg(ll_vect[1]).arg(ll_vect[2]).arg(ll_vect[3]));
-				//qDebug(QString("ml_vect = %1 %2 %3 %4").arg(ml_vect[0]).arg(ml_vect[1]).arg(ml_vect[2]).arg(ml_vect[3]));
-				//qDebug(QString("ul_vect = %1 %2 %3 %4").arg(ul_vect[0]).arg(ul_vect[1]).arg(ul_vect[2]).arg(ul_vect[3]));
 				layer_row.push_back(ll_vect[0] | ml_vect[0] | ul_vect[0]);  // NW corner
 				layer_row.push_back(ll_vect[1] | ml_vect[1] | ul_vect[1]);  // NE corner
 			}
