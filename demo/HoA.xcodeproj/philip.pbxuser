@@ -2,8 +2,8 @@
 {
 	4941A4A10AC1D76400D65B8E /* Project object */ = {
 		activeBuildConfigurationName = Debug;
-		activeExecutable = D4D1BA4A0B02B1DB0052BF1E /* Editor */;
-		activeTarget = D4D1BA480B02B1DB0052BF1E /* Editor */;
+		activeExecutable = D43080DE0AF982F800A5173A /* Allacrost */;
+		activeTarget = 4941A4AF0AC1D77500D65B8E /* Allacrost */;
 		addToTargets = (
 			4941A4AF0AC1D77500D65B8E /* Allacrost */,
 		);
@@ -150,8 +150,12 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 199083606;
-			PBXWorkspaceStateSaveDate = 199083606;
+			PBXPerProjectTemplateStateSaveDate = 199170761;
+			PBXWorkspaceStateSaveDate = 199170761;
+		};
+		perUserProjectItems = {
+			D4F342FE0BDF22FA00176ED1 /* PBXBookmark */ = D4F342FE0BDF22FA00176ED1 /* PBXBookmark */;
+			D4F3432B0BDF3F6D00176ED1 /* PBXTextBookmark */ = D4F3432B0BDF3F6D00176ED1 /* PBXTextBookmark */;
 		};
 		sourceControlManager = D43082570AF9831800A5173A /* Source Control */;
 		userBuildSettings = {
@@ -432,10 +436,10 @@
 	};
 	D4D1BA680B02B27F0052BF1E /* grid.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {800, 8022}}";
-			sepNavSelRange = "{11749, 0}";
-			sepNavVisRect = "{{0, 4249}, {711, 429}}";
-			sepNavWindowFrame = "{{14, 220}, {750, 558}}";
+			sepNavIntBoundsRect = "{{0, 0}, {800, 7952}}";
+			sepNavSelRange = "{11788, 0}";
+			sepNavVisRect = "{{0, 5359}, {711, 429}}";
+			sepNavWindowFrame = "{{451, 63}, {750, 558}}";
 		};
 	};
 	D4D1BA690B02B27F0052BF1E /* grid.h */ = {
@@ -469,5 +473,19 @@
 			sepNavVisRect = "{{0, 22053}, {711, 429}}";
 			sepNavWindowFrame = "{{15, 215}, {750, 558}}";
 		};
+	};
+	D4F342FE0BDF22FA00176ED1 /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = D4D1BA680B02B27F0052BF1E /* grid.cpp */;
+	};
+	D4F3432B0BDF3F6D00176ED1 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = D4D1BA680B02B27F0052BF1E /* grid.cpp */;
+		name = "grid.cpp: 392";
+		rLen = 0;
+		rLoc = 11788;
+		rType = 0;
+		vrLen = 755;
+		vrLoc = 11587;
 	};
 }
