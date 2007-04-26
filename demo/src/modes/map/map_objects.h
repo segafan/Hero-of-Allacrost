@@ -35,10 +35,10 @@ namespace private_map {
 *** the distance of one map grid (16 pixels).
 **/
 //@{
-const float VERY_SLOW_SPEED = 300.0f;
-const float SLOW_SPEED      = 250.0f;
-const float NORMAL_SPEED    = 200.0f;
-const float FAST_SPEED      = 150.0f;
+const float VERY_SLOW_SPEED = 200.0f;
+const float SLOW_SPEED      = 175.0f;
+const float NORMAL_SPEED    = 150.0f;
+const float FAST_SPEED      = 125.0f;
 const float VERY_FAST_SPEED = 100.0f;
 //@}
 
