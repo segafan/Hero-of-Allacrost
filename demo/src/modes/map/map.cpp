@@ -1161,6 +1161,8 @@ void MapMode::_CalculateDrawInfo() {
 	float y2 (_draw_info.tile_y_start);
 
 	VideoManager->GetPixelSize(x_resolution, y_resolution);
+	x_resolution = abs(x_resolution);
+	y_resolution = abs(y_resolution);
 
 	_draw_info.tile_x_start = FloorToFloatMultiple (_draw_info.tile_x_start, x_resolution);
 	_draw_info.tile_y_start = FloorToFloatMultiple (_draw_info.tile_y_start, y_resolution);
