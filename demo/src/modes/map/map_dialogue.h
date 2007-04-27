@@ -82,9 +82,13 @@ public:
 	*** reset the speakers to the state at which they were before the dialogue.
 	*** This parameter is set to true ( reset ) by default.
 	**/
-	MapDialogue(const bool save_state = true);
+	MapDialogue(bool save_state = true);
 
 	~MapDialogue();
+
+	//! \brief This resets the counter that keeps track of how many times the dialogue has been seen.
+	void ClearSeenDialogue()
+		{ _seen = 0; }
 
 	//! \brief Indicates if this dialogue has been seen by the player.
 	bool IsSeenDialogue() const
@@ -94,75 +98,23 @@ public:
 	void SetSeenDialogue()
 		{ _seen++; }
 
-	//! \brief This resets the counter that keeps track of how many times the dialogue has been seen.
-
-	void ClearSeenDialogue()
-		{ _seen = 0; }
-
 	//! \brief This returns the number of times that this dialogue has been seen by the player.
 	int32 GetSeenCount() const
 		{ return _seen; }
 
-	/** \brief This method adds a new line of text and actions to the dialogue.
-	*** \param speaker_id The object ID of the speaker of the line of text ( must be a VirtualSprite )
-	*** \param text The text to show on the screen
-	*** \param actions A vector of SpriteActions to execute during this line of the dialogue.
-	*** \param time The maximum time in milliseconds to show the line of dialogue. DIALOGUE_INFINITE (-1)
-	*** means that it won't disappear unless the user gives an input.
-	*** \note The actions received will be executed in order during the dialogue. If
-	*** it is required to have multiple actors move at the same time, each action
-	*** should have their force attribute set to false. If it is required to force
-	*** the actions to finish before continuing the dialogue, the last action can have its
-	*** force attribute set to true, but has to finish after the other actions.
-	**/
-	void AddTextActions(uint32 speaker_id, hoa_utils::ustring text, std::vector<SpriteAction*>& actions, int32 time = DIALOGUE_INFINITE);
-
-	/** \brief This method adds a new line of text and action to the dialogue.
-	*** \param speaker_id The object ID of the speaker of the line of text ( must be a VirtualSprite )
-	*** \param text The text to show on the screen
-	*** \param time The maximum time in milliseconds to show the line of dialogue. DIALOGUE_INFINITE (-1)
-	*** means that it won't disappear unless the user gives an input.
-	*** \param action A pointer to a SpriteAction that should be executed during this line of the dialogue.
-	**/
-	void AddText(const uint32 speaker_id, const hoa_utils::ustring text, const int32 time = DIALOGUE_INFINITE, SpriteAction* action = NULL);
-
-	/** \brief This method will update the current line of the dialogue.
-	*** \return False if the dialogue is finished, true otherwise.
-	**/
-	bool ReadNextLine();
-
-	//! \brief Returns the object ID of speaker of the current line of dialogue.
-	uint32 GetSpeaker() const
-		{ return _speakers[_current_line]; }
-
-	//! \brief Returns the unicode string of the current line of dialogue.
-	hoa_utils::ustring GetLine() const
-		{ return _text[_current_line]; }
-
-	//! \brief Returns the vector of SpriteAction* of the current line of dialogue.
-	std::vector<SpriteAction*> & GetActions()
-		{ return _actions[_current_line]; }
-
 	//! \brief Returns the maximum time in milliseconds that the current line of dialogue should be displayed.
-	int32 LineTime() const
+	int32 GetLineTime() const
 		{ return _time[_current_line]; }
 
-	/** \brief This method returns if a dialogue is blocked or not.
-	*** A blocked dialogue cannot be skipped by the user. Each line
-	*** of the dialogue will have to last the time specified.
-	*** \return true if blocked, false otherwise.
-	**/
+	//! \brief Returns a bool that indicates whether a dialogue is blocked (ignores user input)
 	bool IsBlocked() const
 		{ return _blocked; }
 
 	//! \brief This method controls if the dialogue should ignore user input (true) or not (false).
-	void SetBlock( const bool b )
+	void SetBlock(bool b)
 		{ _blocked = b; }
 
-	/** \brief This method returns if a dialogue should load the saved state
-	*** of the dialogue speakers at the end of the dialogue.
-	*** \return true if it will load the saved state, false otherwise.
-	**/
+	//! \brief Returns true if a dialogue should load the saved state of the dialogue speakers at the end of the dialogue.
 	bool IsSaving() const
 		{ return _save_state; }
 
@@ -170,31 +122,58 @@ public:
 	uint32 GetNumLines() const
 		{ return _speakers.size(); }
 
-	//These are unsafe and might change in the future
+	//! \brief Returns the object ID of the speaker of the current line of dialogue.
+	uint32 GetCurrentSpeaker() const
+		{ return _speakers[_current_line]; }
 
-	//! \brief returns the objec id of the speaker of a line.
-	uint32 GetSpeaker(uint32 line) const
-		{ return _speakers[line]; }
+	//! \brief Returns a reference to the unicode text string of the current line of dialogue.
+	hoa_utils::ustring GetCurrentLine() const
+		{ return _text[_current_line]; }
 
-	//! \brief returns the text of a line.
-	hoa_utils::ustring GetLine(uint32 line) const
-		{ return _text[line]; }
+	//! \brief Returns a pointer to the ScriptObject that will be invoked after the current line of dialogue completes
+	ScriptObject* GetCurrentAction()
+		{ return _actions[_current_line]; }
 
-	//! \brief returns the actions of a line.
-	std::vector<SpriteAction*> & GetActions(uint32 line)
-		{ return _actions[line]; }
+	//! \brief Returns the object id of the speaker of a line.
+	uint32 GetLineSpeaker(uint32 line) const
+		{ if (line > _speakers.size()) return -1; else return _speakers[line]; }
+
+	//! \brief Returns the text of a specific line.
+	hoa_utils::ustring GetLineText(uint32 line) const
+		{ if (line > _text.size()) return hoa_utils::ustring(); else return _text[line]; }
+
+	//! \brief Returns the actions of a specific line.
+	ScriptObject* GetLineAction(uint32 line)
+		{ if (line > _actions.size()) return NULL; else return _actions[line]; }
+
+	/** \brief This method adds a new line of text and optionally an action to the dialogue.
+	*** \param text The text to show on the screen
+	*** \param speaker_id The object ID of the speaker of this line of text (the ID should correspond to a VirtualSprite or dervied class)
+	*** \param time The maximum time in milliseconds to show the line of dialogue. DIALOGUE_INFINITE (-1)
+	*** means that it won't disappear unless the user gives an input.
+	*** \param action An integer key to the map_functions table in the map file that contains the script function to execute when this line
+	*** completes. A value less than zero indicates that no action is to occur.
+	*** 
+	*** \todo text should eventually take a ustring instead of a std::string, but we need better support for ustring in scripts to do that
+	**/
+	void AddText(std::string text, uint32 speaker_id, int32 time = DIALOGUE_INFINITE, int32 action = -1);
+
+	/** \brief This method will update the current line of the dialogue.
+	*** \return False if the dialogue is finished, true otherwise.
+	**/
+	bool ReadNextLine();
 
 private:
 	//! \brief The text of the conversation, split up into multiple lines.
 	std::vector<hoa_utils::ustring> _text;
 
-	//! \brief A list of object ID numbers for who speaks what lines.
+	//! \brief A list of object ID numbers that declare who speaks which lines.
 	std::vector<uint32> _speakers;
 
-	//! \brief A list of events that may occur after each line.
-	std::vector< std::vector<SpriteAction*> > _actions;
+	//! \brief A list of optional events that may occur after each line.
+	std::vector<ScriptObject*> _actions;
 
-	//! \brief The maximum time of each line in the dialogue
+	//! \brief The maximum time of each line in the dialogue.
 	std::vector<int32> _time;
 
 	//! \brief This counts the number of time a player has seen this dialogue.
@@ -203,10 +182,10 @@ private:
 	//! \brief An index to the current line to read.
 	uint32 _current_line;
 
-	//! \brief Contains the blocked status of the dialogue.
+	//! \brief When this member is set to true, dialogues will ignore user input and instead execute independently.
 	bool _blocked;
 
-	//! \brief Contains weither or not to reset the map sprites status
+	//! \brief Declares whether or not to reset the status of map sprites after the dialogue completes.
 	bool _save_state;
 }; // class MapDialogue
 
