@@ -32,3 +32,14 @@ weapons[10001] = {
 	standard_price = 120,
 	slots = 0
 }
+
+weapons[10002] = {
+	name = "Iron Sword",
+	description = "A sturdy but somewhat dull sword forged from a single block of solid iron.",
+	icon = "img/icons/weapons/iron_sword.png",
+	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS,
+	physical_attack = 16,
+	metaphysical_attack = 0,
+	standard_price = 250,
+	slots = 0
+}
