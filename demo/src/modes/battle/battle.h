@@ -228,6 +228,11 @@ public:
 	void AddEnemy(uint32 new_enemy_id)
 		{ AddEnemy(hoa_global::GlobalEnemy(new_enemy_id)); }
 
+	// NOTE: this is temporary because of a signature matching problem with the seperate AddEnemy definitions above
+	// This method is being bound to Lua until the problem is resolved, at which point this method should be removed
+	void TEMP_AddEnemy(uint32 new_enemy_id)
+		{ AddEnemy(hoa_global::GlobalEnemy(new_enemy_id)); }
+
 	/** \brief Prepares all added enemies for the battle to come
 	*** Any enemies added after this call is made will <b>not</b> be present in the battle, at least
 	*** until this method is called once more.

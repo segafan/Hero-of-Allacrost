@@ -118,7 +118,11 @@ void DialogueManager::Update() {
 	// If the line has been finished, process the post-line action if it exists and move on to the next line
 	if (finish_line == true) {
 		if (_current_dialogue->GetCurrentAction() != NULL) {
-			ScriptCallFunction<void>(*(_current_dialogue->GetCurrentAction()));
+			try {
+				ScriptCallFunction<void>(*(_current_dialogue->GetCurrentAction()));
+			} catch (luabind::error& e) {
+				ScriptManager->HandleLuaError(e);
+			}
 		}
 	
 		// Move to the next line of dialogue
