@@ -92,12 +92,16 @@ void ShopMode::Reset() {
 	// Everything is temporary code from here to the end of this function
 	_all_objects.push_back(new GlobalItem(1));
 	_all_objects.push_back(new GlobalWeapon(10001));
-	_all_objects.push_back(new GlobalArmor(20001));
-	_all_objects.push_back(new GlobalArmor(30001));
-	_all_objects.push_back(new GlobalArmor(40001));
+	_all_objects.push_back(new GlobalWeapon(10002));
+// 	_all_objects.push_back(new GlobalArmor(20001));
+	_all_objects.push_back(new GlobalArmor(20002));
+// 	_all_objects.push_back(new GlobalArmor(30001));
+	_all_objects.push_back(new GlobalArmor(30002));
+// 	_all_objects.push_back(new GlobalArmor(40001));
+	_all_objects.push_back(new GlobalArmor(40002));
 	_all_objects.push_back(new GlobalArmor(50001));
 
-	GlobalManager->SetFunds(5000);
+	GlobalManager->SetFunds(500);
 	_action_window.UpdateFinanceText();
 
 	for (uint32 i = 0; i < _all_objects.size(); i++) {

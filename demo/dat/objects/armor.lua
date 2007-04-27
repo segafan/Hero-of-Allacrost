@@ -34,6 +34,17 @@ armor[20001] = {
 	slots = 0
 }
 
+armor[20002] = {
+	name = "Cobalt Helm",
+	description = "A small helmet composed of a secret colbalt based alloy.",
+	icon = "img/icons/armor/cobalt_helm.png",
+	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS,
+	physical_defense = 8,
+	metaphysical_defense = 4,
+	standard_price = 140,
+	slots = 0
+}
+
 
 -- -----------------------------------------------------------------------------
 -- IDs 30001-40000 are reserved for torso armor
@@ -50,6 +61,17 @@ armor[30001] = {
 	slots = 0
 }
 
+armor[30002] = {
+	name = "Leather Chain Mail",
+	description = "A light chain mail woven into a tough, leather cuirass.",
+	icon = "img/icons/armor/leather_chain_mail.png",
+	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS,
+	physical_defense = 14,
+	metaphysical_defense = 3,
+	standard_price = 320,
+	slots = 0
+}
+
 
 -- -----------------------------------------------------------------------------
 -- IDs 40001-50000 are reserved for arm armor
@@ -62,7 +84,18 @@ armor[40001] = {
 	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS,
 	physical_defense = 2,
 	metaphysical_defense = 0,
-	standard_price = 40,
+	standard_price = 90,
+	slots = 0
+}
+
+armor[40002] = {
+	name = "Phoenix Shield",
+	description = "A tall steel shield with a mighty phoenix embroidered on the front.",
+	icon = "img/icons/armor/phoenix_shield.png",
+	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS,
+	physical_defense = 6,
+	metaphysical_defense = 6,
+	standard_price = 150,
 	slots = 0
 }
 
@@ -78,6 +111,6 @@ armor[50001] = {
 	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS,
 	physical_defense = 3,
 	metaphysical_defense = 0,
-	standard_price = 25,
+	standard_price = 120,
 	slots = 0
 }
