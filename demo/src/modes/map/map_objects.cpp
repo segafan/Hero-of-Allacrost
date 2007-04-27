@@ -117,6 +117,8 @@ void PhysicalObject::Draw() {
 // ********************* VirtualSprite Class Functions ************************
 // ****************************************************************************
 
+AnimatedImage VirtualSprite::_dialogue_icon;
+
 VirtualSprite::VirtualSprite() :
 	direction(SOUTH),
 	movement_speed(NORMAL_SPEED),
@@ -125,8 +127,11 @@ VirtualSprite::VirtualSprite() :
 	face_portrait( NULL ),
 	current_action(-1),
 	forced_action(-1),
-	_saved(false)
+	_saved(false),
+	_current_dialogue(0),
+	_show_dialogue_icon(true)
 {
+	static int diag_icon_fake = _LoadDialogueIcon();
 	MapObject::_object_type = VIRTUAL_TYPE;
 }
 
@@ -149,7 +154,20 @@ VirtualSprite::~VirtualSprite() {
 	dialogues.clear();
 }
 
+int VirtualSprite::_LoadDialogueIcon()
+{
+	std::vector<StillImage> frames;
+	VideoManager->LoadMultiImageFromElementsSize( frames, "img\\misc\\dialogue_icon.png", 32, 32 );
+	
+	for( size_t i = 0; i < frames.size(); ++i ) {
+		//Frame speed arbitrary set to 100 ms each frame
+		_dialogue_icon.AddFrame( frames[i], 100 );
+	}
 
+	_dialogue_icon.SetDimensions( 2, 2 );
+	_dialogue_icon.Load();
+	return 0;
+}
 
 uint16 VirtualSprite::CalculateOppositeDirection(const uint16 direction) {
 	switch( direction )
@@ -175,6 +193,7 @@ uint16 VirtualSprite::CalculateOppositeDirection(const uint16 direction) {
 
 
 void VirtualSprite::Update() {
+	_dialogue_icon.Update();
 	if (!updatable) {
 		return;
 	}
@@ -278,6 +297,15 @@ void VirtualSprite::Update() {
 		}
 	} // if (moving)
 } // void VirtualSprite::Update()
+
+void VirtualSprite::Draw() {
+	if( HasDialogue() ) {
+		if( IsShowingDialogueIcon() && MapMode::_IsShowingDialogueIcons() ) {
+			VideoManager->MoveRelative( 0, -GetImgHeight() );
+			VideoManager->DrawImage( _dialogue_icon );
+		}
+	}
+}
 
 
 
@@ -527,8 +555,10 @@ void MapSprite::Update() {
 
 // Draw the appropriate sprite frame at the correct position on the screen
 void MapSprite::Draw() {
-	if (MapObject::DrawHelper() == true)
+	if (MapObject::DrawHelper() == true) {
 		VideoManager->DrawImage(animations[current_animation]);
+		VirtualSprite::Draw();
+	}
 }
 
 
@@ -570,8 +600,6 @@ EnemySprite::EnemySprite() :
 	moving = true;
 	Reset();
 }
-
-
 
 EnemySprite::EnemySprite(std::string file) :
 	_zone(NULL),
@@ -688,8 +716,9 @@ void EnemySprite::Update() {
 			else {
 				_out_of_zone = false;
 
-				if (abs(xdelta) <= _aggro_range && abs(ydelta) <= _aggro_range &&
-				_zone->IsInsideZone(hoa_map::MapMode::_current_map->_camera->x_position, hoa_map::MapMode::_current_map->_camera->y_position))
+				//Enemies will only aggro if the camera is inside the zone, or the zone is non-restrictive
+				if ( abs(xdelta) <= _aggro_range && abs(ydelta) <= _aggro_range 
+					 && ( !_zone->IsRestraining() || _zone->IsInsideZone( MapMode::_current_map->_camera->ComputeXLocation(), MapMode::_current_map->_camera->ComputeYLocation() ) )  )
 				{
 					if (xdelta > -0.5 && xdelta < 0.5 && ydelta < 0)
 						SetDirection(SOUTH);

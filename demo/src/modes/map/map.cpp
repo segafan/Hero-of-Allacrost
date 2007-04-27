@@ -47,6 +47,7 @@ bool MAP_DEBUG = true;
 // Initialize static class variables
 MapMode *MapMode::_current_map = NULL;
 MapMode *MapMode::_loading_map = NULL;
+bool MapMode::_show_dialogue_icons = true;
 
 // ****************************************************************************
 // ************************** MapMode Class Functions *************************

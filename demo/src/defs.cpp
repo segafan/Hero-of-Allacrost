@@ -342,6 +342,12 @@ void BindEngineToLua() {
 			.def("_GetMapState", &MapMode::_GetMapState)
 			.def("_GetGeneratedObjectID", &MapMode::_GetGeneratedObjectID)
 
+			.scope
+			[
+				def("_ShowDialogueIcons", &MapMode::_ShowDialogueIcons),
+				def("_IsShowingDialogueIcons", &MapMode::_IsShowingDialogueIcons)
+			]
+			
 			// Namespace constants
 			.enum_("constants") [
 				// Map states
@@ -438,6 +444,8 @@ void BindEngineToLua() {
 			.def("GetMovementSpeed", &VirtualSprite::GetMovementSpeed)
 			.def("AddAction", &VirtualSprite::AddAction, adopt(_2))
 			.def("AddDialogue", &VirtualSprite::AddDialogue, adopt(_2))
+			.def("ShowDialogueIcon", &VirtualSprite::ShowDialogueIcon)
+			.def("IsShowingDialogueIcon", &VirtualSprite::IsShowingDialogueIcon)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
