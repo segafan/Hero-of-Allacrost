@@ -416,13 +416,7 @@ map_functions = {}
 -- Creates a new shop mode instance
 map_functions[0] = function()
 	print("I'm a script function");
---	local battle = hoa_battle.BattleMode();
---	battle:AddEnemy(1);
---	battle:AddEnemy(2);
---	ModeManager:Push(battle);
---	local cave_map = hoa_map.MapMode("dat/maps/demo_cave.lua");
---	ModeManager:Push(cave_map);
 	local shop = hoa_shop.ShopMode();
-	ModeManager:Push(shop_mode);
+	ModeManager:Push(shop);
 end
 
