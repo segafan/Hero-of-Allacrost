@@ -309,6 +309,9 @@ private:
 	**/
 	static MapMode *_loading_map;
 
+	//! \brief Indicates if dialogue icons should be drawn or not.
+	static bool _show_dialogue_icons;
+
 	//! \brief The name of the script file that contains the map.
 	std::string _map_filename;
 
@@ -545,6 +548,12 @@ private:
 
 	private_map::VirtualSprite* _GetCameraFocus() const
 		{ return _camera; }
+
+	static void _ShowDialogueIcons( bool state )
+		{ _show_dialogue_icons = state; }
+
+	static bool _IsShowingDialogueIcons()
+		{ return _show_dialogue_icons; }
 	//@}
 }; // class MapMode
 

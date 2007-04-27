@@ -92,6 +92,8 @@ void EnemyZone::AddEnemy(EnemySprite* enemy, MapMode* map, uint8 count) {
 	while (remaining > 0) {
 		EnemySprite* copy = new EnemySprite(*enemy);
 		copy->SetObjectID(map->_GetGeneratedObjectID() );
+		//Add a 10% random margin of error to make enemies look less sync'ed
+		copy->SetTimeToChange( copy->GetTimeToChange() * ( 1 + RandomFloat()*10 ) );
 		copy->Reset();
 		map->_AddGroundObject(copy);
 		_enemies.push_back(copy);

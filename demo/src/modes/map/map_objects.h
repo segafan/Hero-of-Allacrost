@@ -487,7 +487,13 @@ public:
 	*** \note If the sprite has no entries in its dialogues vector, this member should remain negative,
 	*** otherwise a segmentation fault will occur.
 	**/
-	int16 current_dialogue;
+	int16 _current_dialogue;
+
+	//! \brief Indicates if the icon indicating that there is a dialogue available should be drawn or not.
+	bool _show_dialogue_icon;
+
+	//! \brief This static animation is used to indicate which sprite has a dialogue
+	static hoa_video::AnimatedImage _dialogue_icon;
 
 	// -------------------- Public methods
 
@@ -498,9 +504,8 @@ public:
 	//! \brief Updates the virtual object's position if it is moving, otherwise does nothing.
 	virtual void Update();
 
-	//! \brief Does nothing since a virtual object has nothing to draw.
-	virtual void Draw()
-		{ return; }
+	//! \brief Draws a dialogue icon over the virtual sprite if it has to.
+	virtual void Draw();
 
 	/** \name Lua Access Functions
 	*** These functions are specifically written for Lua binding, to enable Lua to access the
@@ -552,16 +557,22 @@ public:
 		{ return dialogues.size() > 0; }
 
 	MapDialogue* GetCurrentDialogue() const
-		{ return dialogues[current_dialogue]; }
+		{ return dialogues[_current_dialogue]; }
 
 	void SetDialogue(const int16 dialogue)
-		{ if (static_cast<uint16>(dialogue) >= dialogues.size()) return; else current_dialogue = dialogue; }
+		{ if (static_cast<uint16>(dialogue) >= dialogues.size()) return; else _current_dialogue = dialogue; }
 
 	void NextDialogue()
-		{ current_dialogue++; if (static_cast<uint16>(current_dialogue) >= dialogues.size()) current_dialogue = 0; }
+		{ _current_dialogue++; if (static_cast<uint16>(_current_dialogue) >= dialogues.size()) _current_dialogue = 0; }
 
 	int16 GetNumDialogues() const
 		{ return dialogues.size(); }
+
+	void ShowDialogueIcon( bool state )
+		{ _show_dialogue_icon = state; }
+
+	bool IsShowingDialogueIcon() const
+		{ return _show_dialogue_icon; }
 	//@}
 
 	/** \brief This static class function returns the opposite direction of the
@@ -569,6 +580,14 @@ public:
 	*** \note This is mostly used as an helper function to make sprites face each other.
 	**/
 	static uint16 CalculateOppositeDirection( const uint16 direction );
+
+private:
+	/** \brief This static class function loads and set up the image used to indicate that
+	*** a sprite has a dialogue.
+	*** \note It is only called once by initialising a static int in the constructor.
+	**/
+	static int _LoadDialogueIcon();
+
 }; // class VirtualMapObject : public MapObject
 
 
