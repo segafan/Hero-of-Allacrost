@@ -63,7 +63,6 @@ MapMode::MapMode(string filename) :
 
 	mode_type = MODE_MANAGER_MAP_MODE;
 	_map_state = EXPLORE;
-	_current_dialogue = NULL;
 	_lastID = 1000;
 
 	_virtual_focus = new VirtualSprite();
@@ -72,6 +71,8 @@ MapMode::MapMode(string filename) :
 	_virtual_focus->movement_speed = NORMAL_SPEED;
 	_virtual_focus->SetNoCollision(true);
 	_virtual_focus->SetVisible(false);
+
+	_dialogue_manager = new DialogueManager();
 
 	// TODO: Load the map data in a seperate thread
 	_Load();
@@ -108,11 +109,9 @@ MapMode::~MapMode() {
 	}
 	delete(_virtual_focus);
 
-	_map_script.CloseFile();
+	delete(_dialogue_manager);
 
-	// Free up the dialogue window
-	VideoManager->DeleteImage(_dialogue_box);
-	_dialogue_window.Destroy();
+	_map_script.CloseFile();
 }
 
 
@@ -205,30 +204,7 @@ void MapMode::_Load() {
 		_enemies.push_back(GlobalEnemy(enemy_ids[i]));
 	}
 
-	// ---------- (5) Setup GUI items (in a 1024x768 coordinate system)
-	VideoManager->PushState();
-	VideoManager->SetCoordSys(0, 1024, 768, 0);
-	_dialogue_window.Create(1024.0f, 256.0f);
-	_dialogue_window.SetPosition(0.0f, 512.0f);
-	_dialogue_window.SetDisplayMode(VIDEO_MENU_EXPAND_FROM_CENTER);
-
-	_dialogue_box.SetFilename("img/menus/dialogue_box.png");
-	if (_dialogue_box.Load() == false)
-		cerr << "MAP ERROR: failed to load image: " << _dialogue_box.GetFilename() << endl;
-
-	_dialogue_nameplate.SetFilename("img/menus/dialogue_nameplate.png");
-	if (_dialogue_nameplate.Load() == false)
-		cerr << "MAP ERROR: failed to load image: " << _dialogue_nameplate.GetFilename() << endl;
-
-	_dialogue_textbox.SetDisplaySpeed(30);
-	_dialogue_textbox.SetPosition(300.0f, 768.0f - 180.0f);
-	_dialogue_textbox.SetDimensions(1024.0f - 300.0f - 60.0f, 180.0f - 70.0f);
-	_dialogue_textbox.SetFont("default");
-	_dialogue_textbox.SetDisplayMode(VIDEO_TEXT_FADECHAR);
-	_dialogue_textbox.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
-	VideoManager->PopState();
-
-	// ---------- (6) Call the map script's load function, which will
+	// ---------- (5) Call the map script's load function, which will
 	ScriptCallFunction<void>(_map_script.GetLuaState(), "Load", this);
 	_update_function = _map_script.ReadFunctionPointer("Update");
 } // void MapMode::_Load()
@@ -437,7 +413,7 @@ void MapMode::Update() {
 			_HandleInputExplore();
 			break;
 		case DIALOGUE:
-			_HandleInputDialogue();
+			_dialogue_manager->Update();
 			break;
 		default:
 			_HandleInputExplore();
@@ -492,11 +468,6 @@ void MapMode::_HandleInputExplore() {
 		return;
 	}
 
-	// TEMPORARY: disable random encounters
-// 	if (InputManager->SwapPress()) {
-// 		_random_encounters = !_random_encounters;
-// 	}
-
 	// Toggle running versus walking
 // 	if (InputManager->CancelPress()) {
 // 		if (speed_double) {
@@ -510,7 +481,7 @@ void MapMode::_HandleInputExplore() {
 // 	}
 
 	if (InputManager->ConfirmPress()) {
-		MapObject * obj = _FindNearestObject(_camera);
+		MapObject* obj = _FindNearestObject(_camera);
 		if (obj && (obj->GetType() == VIRTUAL_TYPE || obj->GetType() == SPRITE_TYPE)) {
 			VirtualSprite *sp = reinterpret_cast<VirtualSprite*>(obj);
 
@@ -520,9 +491,8 @@ void MapMode::_HandleInputExplore() {
 				_camera->moving = false;
 
 				sp->moving = false;
-				sp->SetDirection( VirtualSprite::CalculateOppositeDirection( _camera->GetDirection() ) );
-				_current_dialogue = sp->GetCurrentDialogue();
-				_dialogue_textbox.SetDisplayText( _current_dialogue->GetLine() );
+				sp->SetDirection(VirtualSprite::CalculateOppositeDirection(_camera->GetDirection()));
+				_dialogue_manager->SetCurrentDialogue(sp->GetCurrentDialogue());
 				_map_state = DIALOGUE;
 				return;
 			}
@@ -571,120 +541,6 @@ void MapMode::_HandleInputExplore() {
 		}
 	} // if (_camera->moving == true)
 } // void MapMode::_HandleInputExplore()
-
-
-// Updates the game status when MapMode is in the 'dialogue' state
-void MapMode::_HandleInputDialogue() {
-	static int32 timeleft = 0; //Time left to the curent line
-	static MapDialogue* last_dialogue = 0; //Used to detect if the dialogue changed
-	if( _current_dialogue )
-	{
-		if( _current_dialogue != last_dialogue )
-		{
-			timeleft = _current_dialogue->LineTime();
-			last_dialogue = _current_dialogue;
-		}
-
-		_dialogue_textbox.Update(_time_elapsed);
-		//Only update if it has some time left
-		if( timeleft > 0 ) {
-			timeleft -= _time_elapsed;
-			//If it get below 0, clip it to 0 as -1 means infinite
-			if( timeleft < 0 )
-				timeleft = 0;
-		}
-
-		// Get the actions
-		std::vector<SpriteAction*> * actions = &_current_dialogue->GetActions();
-		for( std::vector<SpriteAction*>::iterator i = actions->begin();
-			 i != actions->end(); ++i )
-		{
-			// Note order is important here, check if the pointer is valid
-			// then check if the action is not finished
-			if( (*i) && !(*i)->IsFinished() )
-			{
-				//Unfinished, then execute the action.
-				(*i)->Execute();
-				//If the action is forced, return now to ignore user input.
-				if( (*i)->IsForced() )
-					return;
-			}
-		}
-
-		// If the dialogue is blocked, ignore user input
-		if( _current_dialogue->IsBlocked() ) {
-			if( timeleft <= 0 ) {
-				if( _current_dialogue->ReadNextLine() ) {
-					// There is no time elft, change line
-					timeleft = _current_dialogue->LineTime();
-					_dialogue_textbox.SetDisplayText(_current_dialogue->GetLine());
-				}
-				else {
-					// The dialogue is over
-					_map_state = EXPLORE;
-
-					// Restore the status of the map sprites if the dialogue should reset them.
-					if( _current_dialogue->IsSaving() ) {
- 						for (uint32 i = 0; i < _current_dialogue->GetNumLines(); i++) {
-							static_cast< VirtualSprite* >( _all_objects[ _current_dialogue->GetSpeaker( i ) ] )->LoadState();
- 						}
-					}
- 					_current_dialogue = NULL;
-					last_dialogue = NULL;
-				}
-			}
-		} // if( _current_dialogue->IsBlocked() )
-		else {
-			if( timeleft != 0 ) {
- 				if (InputManager->ConfirmPress()) {
-					// The line isn't finished, but user sent an input
- 					if (!_dialogue_textbox.IsFinished()) {
-						// Force the text to show completly
- 						_dialogue_textbox.ForceFinish();
- 					}
- 					else {
-						// IF the text is already show, change line
- 						if ( _current_dialogue->ReadNextLine() ) {
- 							timeleft = _current_dialogue->LineTime();
-							_dialogue_textbox.SetDisplayText(_current_dialogue->GetLine());
- 						}
- 						else {
-							// The is no more line, the dialogue is over
- 							_map_state = EXPLORE;
- 							// Restore the status of the map sprites
-							if( _current_dialogue->IsSaving() ) {
- 								for (uint32 i = 0; i < _current_dialogue->GetNumLines(); i++) {
-									static_cast< VirtualSprite* >( _all_objects[ _current_dialogue->GetSpeaker( i ) ] )->LoadState();
- 								}
-							}
- 							_current_dialogue = NULL;
-							last_dialogue = NULL;
- 						}
- 					}
- 				}
-			} // if( timeleft != 0 )
-			else {
-				// There is no more time left, too bad we change line
-				if ( _current_dialogue->ReadNextLine() ) {
-					timeleft = _current_dialogue->LineTime();
-					_dialogue_textbox.SetDisplayText(_current_dialogue->GetLine());
-				}
-				else {
-					// No more line, the dialogue is over
-					_map_state = EXPLORE;
-					if( _current_dialogue->IsSaving() ) {
-						// Restore the status of the map sprites
-						for (uint32 i = 0; i < _current_dialogue->GetNumLines(); i++) {
-							static_cast< VirtualSprite* >( _all_objects[ _current_dialogue->GetSpeaker( i ) ] )->LoadState();
-						}
-					}
-					_current_dialogue = NULL;
-					last_dialogue = NULL;
-				}
-			} // if( timeleft == 0 )
-		} // if( !_current_dialogue->IsBlocked() )
-	} // if( _current_dialogue )
-} // void MapMode::_HandleInputDialogue()
 
 
 
@@ -763,7 +619,6 @@ MapObject* MapMode::_FindNearestObject(const VirtualSprite* sprite) {
 	}
 
 	// ---------- (3): Figure out which of the valid objects is the closest to the sprite
-
 	// NOTE: For simplicity, we simply find which object has the location coordinates which are
 	// closest to the sprite's coordinates using the Manhattan distance.
 
@@ -1266,28 +1121,9 @@ void MapMode::Draw() {
 	// ---------- (8) Call Lua to determine if any lighting, etc. needs to be done after drawing
 	// TODO
 
-	// ---------- (9) Draw the dialogue menu and text if necessary
+	// ---------- (9) Draw the dialogue display if a dialogue is active
 	if (_map_state == DIALOGUE) {
-		VideoManager->PushState();
-		VideoManager->SetCoordSys(0.0f, 1024.0f, 768.0f, 0.0f);
-		VideoManager->SetDrawFlags( VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0 );
-		VideoManager->Move(0.0f, 768.0f);
-		_dialogue_box.Draw();
-		VideoManager->MoveRelative(47.0f, -42.0f);
-		_dialogue_nameplate.Draw();
-
-		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, 0);
-		VideoManager->SetTextColor(Color(Color::black));
-		VideoManager->SetFont("map");
-		VideoManager->MoveRelative(120.0f, -10.0f);
-		VideoManager->DrawText( reinterpret_cast< VirtualSprite* >( _all_objects[ _current_dialogue->GetSpeaker() ] )->name );
-		if ( reinterpret_cast< VirtualSprite* >( _all_objects[ _current_dialogue->GetSpeaker() ] )->face_portrait != NULL) {
-			VideoManager->MoveRelative(0.0f, -26.0f);
-			reinterpret_cast< VirtualSprite* >( _all_objects[ _current_dialogue->GetSpeaker() ] )->face_portrait->Draw();
-		}
-		//_dialogue_window.Show();
-		_dialogue_textbox.Draw();
-		VideoManager->PopState();
+		_dialogue_manager->Draw();
 	}
 } // void MapMode::_Draw()
 

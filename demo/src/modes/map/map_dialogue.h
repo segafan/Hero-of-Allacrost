@@ -27,6 +27,51 @@ namespace private_map {
 //! \brief This constant is used to indicate that a line of dialogue can stay an infinite time on the screen.
 const int32 DIALOGUE_INFINITE = -1;
 
+
+/** ****************************************************************************
+*** \brief A display for managing and displaying dialogue on maps
+*** 
+*** The MapMode class creates an instance of this class to handle all dialogue
+*** processing. This includes the visual display of dialogue as well as handling
+*** user input and processing of any scripted sequences that should appear with
+*** the dialogue.
+*** ***************************************************************************/
+class DialogueManager : public hoa_video::MenuWindow {
+public:
+	DialogueManager();
+
+	~DialogueManager();
+
+	//! \brief Updates the state of the conversation
+	void Update();
+
+	//! \brief Draws the dialogue window, text, portraits, and other related visuals to the screen
+	void Draw();
+
+	void SetCurrentDialogue(MapDialogue* dialogue)
+		{ _current_dialogue = dialogue; }
+
+	void ClearDialogue()
+		{ _current_dialogue = NULL; }
+
+	MapDialogue* GetCurrentDialogue() const
+		{ return _current_dialogue; }
+
+private:
+	//! \brief A pointer to the current piece of dialogue that is active
+	MapDialogue* _current_dialogue;
+
+	//! \brief A background image used in map dialogue
+	hoa_video::StillImage _background_image;
+
+	//! \brief The nameplate image used along with the dialogue box image.
+	hoa_video::StillImage _nameplate_image;
+
+	//! \brief The textbox used for rendering the dialogue text
+	hoa_video::TextBox _display_textbox;
+}; // class DialogueManager : public hoa_video::MenuWindow
+
+
 /** ****************************************************************************
 *** \brief Retains and manages dialogues between characters on a map.
 *** ***************************************************************************/
@@ -70,8 +115,7 @@ public:
 	*** the actions to finish before continuing the dialogue, the last action can have its
 	*** force attribute set to true, but has to finish after the other actions.
 	**/
-	void AddTextActions(const uint32 speaker_id, const hoa_utils::ustring text,
-		const std::vector<SpriteAction*> & actions, const int32 time = DIALOGUE_INFINITE);
+	void AddTextActions(uint32 speaker_id, hoa_utils::ustring text, std::vector<SpriteAction*>& actions, int32 time = DIALOGUE_INFINITE);
 
 	/** \brief This method adds a new line of text and action to the dialogue.
 	*** \param speaker_id The object ID of the speaker of the line of text ( must be a VirtualSprite )
@@ -80,11 +124,10 @@ public:
 	*** means that it won't disappear unless the user gives an input.
 	*** \param action A pointer to a SpriteAction that should be executed during this line of the dialogue.
 	**/
-	void AddText(const uint32 speaker_id, const hoa_utils::ustring text,
-		const int32 time = DIALOGUE_INFINITE, SpriteAction* action = NULL);
+	void AddText(const uint32 speaker_id, const hoa_utils::ustring text, const int32 time = DIALOGUE_INFINITE, SpriteAction* action = NULL);
 
 	/** \brief This method will update the current line of the dialogue.
-	*** \return false if the dialogue is over, true otherwise.
+	*** \return False if the dialogue is finished, true otherwise.
 	**/
 	bool ReadNextLine();
 

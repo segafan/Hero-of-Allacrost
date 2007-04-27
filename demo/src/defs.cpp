@@ -17,6 +17,10 @@
 *** available in Lua. All binding code is contained within this single file
 *** because the binding code greatly increases the compilation time, but this
 *** effect is mitigated if it is contained within a single file.
+***
+*** \note To most C++ programmers, the syntax of the binding code found in this
+*** file may be very unfamiliar and obtuse. Refer to the Luabind documentation
+*** as necessary to gain an understanding of this code style.
 *** **************************************************************************/
 
 #include "utils.h"
