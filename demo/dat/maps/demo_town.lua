@@ -415,7 +415,6 @@ map_functions = {}
 
 -- Creates a new shop mode instance
 map_functions[0] = function()
-	print("I'm a script function");
 	local shop = hoa_shop.ShopMode();
 	ModeManager:Push(shop);
 end
