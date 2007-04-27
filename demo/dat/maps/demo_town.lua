@@ -239,8 +239,11 @@ function Load(m)
 	-- First, record the current map in the "map" variable that is global to this script
 	map = m;
 
+	local sprite;
+	local dialogue;
+
 	-- Create the player's sprite
-	local sprite = hoa_map.MapSprite();
+	sprite = hoa_map.MapSprite();
 	sprite:SetName("Claudius");
 	sprite:SetObjectID(1000);
 	sprite:SetContext(1);
@@ -264,8 +267,8 @@ function Load(m)
 	sprite:SetName("Laila");
 	sprite:SetObjectID(2);
 	sprite:SetContext(1);
-	sprite:SetXPosition(37, 0.5);
-	sprite:SetYPosition(27, 0.5);
+	sprite:SetXPosition(92, 0.5);
+	sprite:SetYPosition(33, 0.5);
 	sprite:SetCollHalfWidth(1.0);
 	sprite:SetCollHeight(2.0);
 	sprite:SetImgHalfWidth(1.0);
@@ -274,6 +277,13 @@ function Load(m)
 	sprite:SetDirection(2);
 	sprite:LoadStandardAnimations("img/sprites/map/laila_walk.png");
 	sprite:SetFacePortrait("img/portraits/map/laila.png");
+	dialogue = hoa_map.MapDialogue();
+	dialogue:AddText("Hello, world!", 2, -1, -1);
+	dialogue:AddText("Hello, baby!", 1000, -1, -1);
+	sprite:AddDialogue(dialogue);
+	dialogue = hoa_map.MapDialogue();
+	dialogue:AddText("I have wonderful merchandise for sale.", 2, -1, 0);
+	sprite:AddDialogue(dialogue);
 	map:_AddGroundObject(sprite);
 
 	sprite = hoa_map.MapSprite();
@@ -399,3 +409,16 @@ function Update()
 		ModeManager:Push(cave_map);
 	end
 end
+
+
+map_functions = {}
+
+-- Creates a new shop mode instance
+map_functions[0] = function()
+	print("I'm a script function");
+	local cave_map = hoa_map.MapMode("dat/maps/demo_cave.lua");
+	ModeManager:Push(cave_map);
+--	local shop = hoa_shop.ShopMode();
+--	ModeManager:Push(shop_mode);
+end
+

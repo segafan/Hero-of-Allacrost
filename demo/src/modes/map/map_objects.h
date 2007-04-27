@@ -555,7 +555,10 @@ public:
 		{ return dialogues[current_dialogue]; }
 
 	void SetDialogue(const int16 dialogue)
-		{ current_dialogue = dialogue; }
+		{ if (static_cast<uint16>(dialogue) >= dialogues.size()) return; else current_dialogue = dialogue; }
+
+	void NextDialogue()
+		{ current_dialogue++; if (static_cast<uint16>(current_dialogue) >= dialogues.size()) current_dialogue = 0; }
 
 	int16 GetNumDialogues() const
 		{ return dialogues.size(); }
