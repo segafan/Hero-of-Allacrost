@@ -536,6 +536,15 @@ void BindEngineToLua() {
 	using namespace hoa_battle::private_battle;
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_battle")
 	[
+		class_<BattleMode, hoa_mode_manager::GameMode>("BattleMode")
+			.def(constructor<>())
+			// TODO: use signature matching for the AddEnemy method here: (void(*)(uint32)) 
+			// Still trying to get this signature matching code to compile though...
+			.def("AddEnemy", &BattleMode::TEMP_AddEnemy)
+	];
+	
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_battle")
+	[
 		class_<BattleActor>("BattleActor")
 			.def(constructor<>())
 			.def("SetHitPoints", &BattleActor::SetHitPoints)

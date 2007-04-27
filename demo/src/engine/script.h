@@ -521,6 +521,11 @@ public:
 	**/
 	bool IsFileOpen(std::string& filename);
 
+	/** \brief Handles run-time errors generated in Lua
+	*** \param error A reference to the luabind::error instance that was thrown
+	**/
+	void HandleLuaError(luabind::error& err);
+
 private:
 	GameScript();
 
@@ -536,6 +541,7 @@ private:
 	//! \brief Removes an open file from the list of open files
 	void _RemoveOpenFile(ScriptDescriptor* sd);
 }; // class GameScript
+
 
 // *****************************************************************************
 // ************** ScriptDescriptor Template Function Definitions ***************

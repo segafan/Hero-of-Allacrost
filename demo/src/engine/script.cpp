@@ -941,6 +941,15 @@ bool GameScript::SingletonInitialize() {
 
 
 
+void GameScript::HandleLuaError(luabind::error& err) {
+	lua_State *state = err.state();
+	cerr << "SCRIPT ERROR: a run-time Lua error has occured with the following error message:\n  " << endl;
+	cerr << lua_tostring(state, lua_gettop(state)) << endl;
+	lua_pop(state, 1);
+}
+
+
+
 void GameScript::_AddOpenFile(ScriptDescriptor* sd) {
 	// NOTE: Function assumes that the file is not already open
 	_open_files.insert(make_pair(sd->_filename, sd));
