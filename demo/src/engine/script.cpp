@@ -950,6 +950,13 @@ void GameScript::HandleLuaError(luabind::error& err) {
 
 
 
+void GameScript::HandleCastError(luabind::cast_failed& err) {
+	cerr << "SCRIPT ERROR: the return value of a Lua function call could not be successfully converted "
+		<< "to the specified C++ type: " << err.what() << endl;
+}
+
+
+
 void GameScript::_AddOpenFile(ScriptDescriptor* sd) {
 	// NOTE: Function assumes that the file is not already open
 	_open_files.insert(make_pair(sd->_filename, sd));
