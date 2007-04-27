@@ -155,6 +155,10 @@ namespace hoa_system {
 	class Timer;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// Global Code Declarations
+////////////////////////////////////////////////////////////////////////////////
+
 // Global declarations, see src/global/
 namespace hoa_global {
 	extern bool GLOBAL_DEBUG;
@@ -227,14 +231,13 @@ namespace hoa_map {
 		class MapSprite;
 		class EnemySprite;
 
+		class DialogueManager;
 		class MapDialogue;
 
 		class SpriteAction;
 		class ActionPathMove;
 		class ActionAnimate;
 		class ActionScriptFunction;
-
-
 	}
 }
 
@@ -269,7 +272,7 @@ namespace hoa_shop {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Other Declarations
+// Miscellaneous Declarations
 ////////////////////////////////////////////////////////////////////////////////
 
 // Utils declarations, see utils.h/cpp

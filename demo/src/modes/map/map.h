@@ -275,6 +275,7 @@ class MapMode : public hoa_mode_manager::GameMode {
 	friend class private_map::VirtualSprite;
 	friend class private_map::MapSprite;
 	friend class private_map::EnemySprite;
+	friend class private_map::DialogueManager;
 	friend class private_map::MapDialogue;
 	friend class private_map::SpriteAction;
 	friend class private_map::ActionPathMove;
@@ -438,20 +439,8 @@ private:
 	//! \brief The sounds that the map needs available to it.
 	std::vector<hoa_audio::SoundDescriptor> _sounds;
 
-	//! \brief The dialogue box image used in maps.
-	hoa_video::StillImage _dialogue_box;
-
-	//! \brief The dialogue nameplate image used along with the dialogue box image.
-	hoa_video::StillImage _dialogue_nameplate;
-
-	//! \brief The window for character dialogues.
-	hoa_video::MenuWindow _dialogue_window;
-
-	//! \brief The textbox for character dialogues.
-	hoa_video::TextBox _dialogue_textbox;
-
 	//! \brief This keeps a pointer to the active dialogue.
-	private_map::MapDialogue* _current_dialogue;
+	private_map::DialogueManager* _dialogue_manager;
 
 	//! \brief Container for map zones, used for various purposes such as spawning of enemies
 	std::vector<private_map::MapZone*> _zones;
