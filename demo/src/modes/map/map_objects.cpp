@@ -157,7 +157,7 @@ VirtualSprite::~VirtualSprite() {
 int VirtualSprite::_LoadDialogueIcon()
 {
 	std::vector<StillImage> frames;
-	VideoManager->LoadMultiImageFromElementsSize( frames, "img\\misc\\dialogue_icon.png", 32, 32 );
+	VideoManager->LoadMultiImageFromElementsSize( frames, "img/misc/dialogue_icon.png", 32, 32 );
 	
 	for( size_t i = 0; i < frames.size(); ++i ) {
 		//Frame speed arbitrary set to 100 ms each frame
