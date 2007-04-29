@@ -250,6 +250,9 @@ public:
 	uint32 GetMaxSkillPoints() const
 		{ return _max_skill_points; }
 
+	std::map<uint32, GlobalSkill*> GetSkills() const
+		{ return _skills; }
+
 	uint32 GetExperienceLevel() const
 		{ return _experience_level; }
 

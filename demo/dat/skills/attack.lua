@@ -48,3 +48,76 @@ skills[2] = {
 		AudioManager:PlaySound("snd/sword_swipe.wav");
 	end
 }
+
+
+-- Enemy attack skills
+skills[100] = {
+	name = "Snake bite",
+	description = "A really painful, venomous snake bite",
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	sp_required = 0,
+	warmup_time = 900,
+	cooldown_time = 0,
+	level_required = 1,
+	usage = hoa_global.GameGlobal.GLOBAL_USE_BATTLE,
+	target_alignment = hoa_global.GameGlobal.GLOBAL_ALIGNMENT_BAD,
+
+	BattleExecute = function(target, instigator)
+		target:TakeDamage(14);
+		AudioManager:PlaySound("snd/snake_attack.wav");
+	end
+}
+
+skills[101] = {
+	name = "Spider sting",
+	description = "Do spiders have stings? Better than having a 'bite' everywhere!",
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	sp_required = 0,
+	warmup_time = 1400,
+	cooldown_time = 0,
+	level_required = 1,
+	usage = hoa_global.GameGlobal.GLOBAL_USE_BATTLE,
+	target_alignment = hoa_global.GameGlobal.GLOBAL_ALIGNMENT_BAD,
+
+	BattleExecute = function(target, instigator)
+		target:TakeDamage(13);
+		AudioManager:PlaySound("snd/spider_attack.wav");
+	end
+}
+
+skills[102] = {
+	name = "Slime Attack",
+	description = "Green, wobbly attack made of sheer terror",
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	sp_required = 0,
+	warmup_time = 1100,
+	cooldown_time = 0,
+	level_required = 1,
+	usage = hoa_global.GameGlobal.GLOBAL_USE_BATTLE,
+	target_alignment = hoa_global.GameGlobal.GLOBAL_ALIGNMENT_BAD,
+
+	BattleExecute = function(target, instigator)
+		target:TakeDamage(10);
+		AudioManager:PlaySound("snd/slime_attack.wav");
+	end
+}
+
+
+skills[103] = {
+	name = "Skeleton Sword Attack",
+	description = "Mighty Skeleton King's Sword Thrust. Don't get on way!",
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	sp_required = 0,
+	warmup_time = 1400,
+	cooldown_time = 0,
+	level_required = 1,
+	usage = hoa_global.GameGlobal.GLOBAL_USE_BATTLE,
+	target_alignment = hoa_global.GameGlobal.GLOBAL_ALIGNMENT_BAD,
+
+	BattleExecute = function(target, instigator)
+		target:TakeDamage(20);
+		AudioManager:PlaySound("snd/skeleton_attack.wav");
+	end
+}
+
+

@@ -82,7 +82,7 @@ ScriptEvent::ScriptEvent(BattleActor* source, BattleActor* target, GlobalSkill* 
 	_warm_up_time.Play();
 }
 
-//Constructor for a script event that uses an item
+// Constructor for a script event that uses an item
 ScriptEvent::ScriptEvent(BattleActor* source, BattleActor* target, GlobalItem* item, uint32 warm_up_time) :
 	_source(source),
 	_skill(NULL),
@@ -91,6 +91,20 @@ ScriptEvent::ScriptEvent(BattleActor* source, BattleActor* target, GlobalItem* i
 
 {
 	_warm_up_time.SetDuration(warm_up_time);
+	_warm_up_time.Reset();
+	_warm_up_time.Play();
+}
+
+
+// Constructor with multiple targets and a skill
+ScriptEvent::ScriptEvent(BattleActor* source, std::deque<BattleActor*> targets, hoa_global::GlobalSkill* skill) :
+	_source(source),
+	_skill(skill),
+	_item(NULL),
+	_targets(targets),
+	_target(NULL)
+{
+	_warm_up_time.SetDuration(skill->GetWarmupTime());
 	_warm_up_time.Reset();
 	_warm_up_time.Play();
 }
@@ -188,13 +202,20 @@ void ScriptEvent::RunScript() {
 		}
 		else
 		{
-			_skill->BattleExecute(_target, _source);
+			if (_target)
+			{
+				_skill->BattleExecute(_target, _source);
+			}
+			else
+			{
+				_skill->BattleExecute(current_battle->GetPlayerCharacterAt(0), _source);
+			}
 		}
 
 		_source->SetSkillPoints(_source->GetSkillPoints() - _skill->GetSPRequired());
 		
 		//TEMP
-		current_battle->_battle_sounds[4].PlaySound();
+		//current_battle->_battle_sounds[4].PlaySound();
 	}
 	else
 	{
@@ -213,8 +234,8 @@ void ScriptEvent::RunScript() {
 				current_battle->_battle_sounds[2].PlaySound();
 			else if (MakeStandardString(this->GetSource()->GetActor()->GetName()) == "Claudius")
 				current_battle->_battle_sounds[3].PlaySound();
-			else if (MakeStandardString(this->GetSource()->GetActor()->GetName()) == "Snake")*/
-			current_battle->_battle_sounds[4].PlaySound();
+			else if (MakeStandardString(this->GetSource()->GetActor()->GetName()) == "Snake")
+			current_battle->_battle_sounds[4].PlaySound();*/
 		}
 		// TODO: get script from global script repository and run, passing in list of arguments and host actor
 	}

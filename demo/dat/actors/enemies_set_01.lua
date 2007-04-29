@@ -61,7 +61,7 @@ enemies[1] = {
 		}
 	},
 
-	skills = {}
+	skills = { 102 }
 }
 
 
@@ -115,7 +115,7 @@ enemies[2] = {
 		}
 	},
 
-	skills = {}
+	skills = { 101 }
 }
 
 
@@ -177,7 +177,7 @@ enemies[3] = {
 		}
 	},
 
-	skills = {}
+	skills = { 100 }
 }
 
 
@@ -240,7 +240,7 @@ enemies[4] = {
 		}
 	},
 
-	skills = {}
+	skills = { 103 }
 }
 
 
@@ -303,5 +303,5 @@ enemies[5] = {
 		}
 	},
 
-	skills = {}
+	skills = { 101 }
 }
