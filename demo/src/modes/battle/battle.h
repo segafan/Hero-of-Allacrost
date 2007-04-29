@@ -122,6 +122,7 @@ public:
 	ScriptEvent(BattleActor* source, std::deque<BattleActor*> targets, const std::string & script_name, uint32 warm_up_time);
 	ScriptEvent(BattleActor* source, BattleActor* target, hoa_global::GlobalItem* item, uint32 warm_up_time = ITEM_WARM_UP_TIME);
 	ScriptEvent(BattleActor* source, BattleActor* target, hoa_global::GlobalSkill* skill);
+	ScriptEvent(BattleActor* source, std::deque<BattleActor*> targets, hoa_global::GlobalSkill* skill);
 
 	~ScriptEvent();
 

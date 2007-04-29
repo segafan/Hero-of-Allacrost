@@ -484,7 +484,11 @@ void BattleEnemyActor::Update() {
 
 			// okay, we can perform another attack.  set us up as queued to perform.
 			SetQueuedToPerform(true);
-			current_battle->AddScriptEventToQueue(new ScriptEvent(this, final_targets, "sword_swipe", 3000));
+			GlobalSkill* skill = (GetActor()->GetSkills().begin()->second);
+			ScriptEvent *se = new ScriptEvent(this, final_targets, skill);
+			current_battle->AddScriptEventToQueue(se);
+
+			//current_battle->AddScriptEventToQueue(new ScriptEvent(this, final_targets, "sword_swipe", 3000));
 			SetXLocation(GetXOrigin()); // Always attack from the starting location
 		//}
 		//FIX ME have to use char stats
