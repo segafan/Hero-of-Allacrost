@@ -21,7 +21,7 @@ tileset_filenames[2] = "desert_cave_walls"
 tileset_filenames[3] = "desert_cave_walls2"
 tileset_filenames[4] = "desert_cave_water"
 
-enemy_ids = { 1, 2, 3, 4, 5 }
+enemy_ids = { 1, 2, 3, 4, 5, 101, 102, 103, 104, 105, 106 }
 
 -- The map grid to indicate walkability. The size of the grid is 4x the size of the tile layer tables
 -- Walkability status of tiles for 32 contexts. Zero indicates walkable. Valid range: [0:2^32-1]
@@ -352,13 +352,48 @@ function Load(m)
 	sprite:SetCollHeight(1.9);
 	sprite:SetImgHalfWidth(1.0);
 	sprite:SetImgHeight(4.0);
-	sprite:SetMovementSpeed(200.0);
-	sprite:SetDirection(8);
+	sprite:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
+	sprite:SetDirection(hoa_map.MapMode.EAST);
 	sprite:LoadStandardAnimations("img/sprites/map/claudius_walk.png");
 	sprite:SetFacePortrait("img/portraits/map/claudius.png");
 	map:_AddGroundObject(sprite);
 	-- Set the camera to focus on the player's sprite
 	map:_SetCameraFocus(sprite);
+
+	sprite = hoa_map.MapSprite();
+	sprite:SetName("Jonas");
+	sprite:SetObjectID(1);
+	sprite:SetContext(1);
+	sprite:SetXPosition(73, 0.0);
+	sprite:SetYPosition(32, 0.0);
+	sprite:SetCollHalfWidth(0.95);
+	sprite:SetCollHeight(1.9);
+	sprite:SetImgHalfWidth(1.0);
+	sprite:SetImgHeight(4.0);
+	sprite:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
+	sprite:SetDirection(hoa_map.MapMode.SOUTH);
+	sprite:LoadStandardAnimations("img/sprites/map/soldier_npc01_walk.png");
+	dialogue = hoa_map.MapDialogue();
+	dialogue:AddText("Claudius, what are you doing here?", 1, -1, -1);
+	dialogue:AddText("I came down here for training.", 1000, -1, -1);
+	dialogue:AddText("Well, good job getting this far all by yourself. This is a pretty dangerous place for someone as inexperienced as yourself.", 1, -1, -1);
+	dialogue:AddText("Yes well, I have to train hard if I want to be able to spar with you evenly one day, Jonas. By the way, what were you doing?", 1000, -1, -1);
+	dialogue:AddText("Ahh. Well the cave goes deeper than this, but it appears a collapse here has blocked the way. I was trying to find an alternative passage, but it appears that the inner chambers are now completely inaccessible.", 1, -1, -1);
+	dialogue:AddText("In any case, this is as far as you can go in this demo, so thanks for.....", 1, -1, 0); -- Creepy sound plays here
+	dialogue:AddText("What was that noise? Hey, look out!", 1, -1, 1); -- Boss battle occurs
+	sprite:AddDialogue(dialogue);
+	dialogue = hoa_map.MapDialogue();
+	dialogue:AddText("Phew, that was a shock. I've never seen such foes wandering in this cave. Nice job taking care of them Claudius, I can definitely tell that your swordsmanship has improved.", 1, -1, -1);
+	dialogue:AddText("Thank you. By the way...why didn't you assist me in battle?", 1000, -1, -1);
+	dialogue:AddText("Ah, err...well you see, you'll never reach your full potential if you always have your seniors stepping in for you.", 1, -1, -1);
+	dialogue:AddText("I see.", 1000, -1, -1);
+	dialogue:AddText("And besides, I don't even have my own battle sprite graphics yet! The development team needs more artists to help move the game along!", 1, -1, -1);
+	dialogue:AddText(".....", 1000, -1, -1);
+	sprite:AddDialogue(dialogue);
+	dialogue = hoa_map.MapDialogue();
+	dialogue:AddText("Well now, this really is the end of our demo. Thanks for playing.", 1, -1, -1);
+	sprite:AddDialogue(dialogue);
+	map:_AddGroundObject(sprite);
 
 	-- Create an EnemyZone (5000 ms between respawns, monsters restricted to zone area)
 	local ezone = hoa_map.EnemyZone(5000, true);
@@ -438,4 +473,22 @@ function Update()
 		local cave_map = hoa_map.MapMode("dat/maps/demo_town.lua");
 		ModeManager:Push(cave_map);
 	end
+end
+
+
+map_functions = {}
+
+-- Plays a sneaky/odd sound
+map_functions[0] = function()
+	AudioManager:PlaySound("snd/coins.wav");
+end
+
+-- Throws player into a boss battle
+map_functions[1] = function()
+	local battle = hoa_battle.BattleMode();
+	battle:AddEnemy(103);
+	battle:AddEnemy(104);
+	battle:AddEnemy(105);
+	battle:AddEnemy(106);
+	ModeManager:Push(battle);
 end

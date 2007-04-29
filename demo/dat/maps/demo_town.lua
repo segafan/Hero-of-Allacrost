@@ -319,21 +319,6 @@ function Load(m)
 	map:_AddGroundObject(sprite);
 
 	sprite = hoa_map.MapSprite();
-	sprite:SetName("Seasoned Karlate");
-	sprite:SetObjectID(5);
-	sprite:SetContext(1);
-	sprite:SetXPosition(40, 0.5);
-	sprite:SetYPosition(32, 0.5);
-	sprite:SetCollHalfWidth(1.0);
-	sprite:SetCollHeight(2.0);
-	sprite:SetImgHalfWidth(1.0);
-	sprite:SetImgHeight(4.0);
-	sprite:SetMovementSpeed(200.0);
-	sprite:SetDirection(2);
-	sprite:LoadStandardAnimations("img/sprites/map/soldier_npc01_walk.png");
-	map:_AddGroundObject(sprite);
-
-	sprite = hoa_map.MapSprite();
 	sprite:SetName("Speedracer?");
 	sprite:SetObjectID(6);
 	sprite:SetContext(1);
