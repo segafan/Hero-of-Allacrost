@@ -66,6 +66,124 @@ enemies[101] = {
 
 
 enemies[102] = {
+	name = "Aerocephal",
+	filename = "aerocephal",
+	sprite_filename = "img/sprites/battle/enemies/aerocephal.png",
+	sprite_width = 192,
+	sprite_height = 192,
+
+	
+	base_stats = {
+		hit_points = 10,
+		skill_points = 10,
+		experience_points = 5,
+		strength = 10,
+		vigor = 0,
+		fortitude = 8,
+		protection = 4,
+		agility = 10,
+		evade = 2.0
+	},
+
+	growth_stats = {
+		hit_points = 10.0,
+		skill_points = 10.0,
+		experience_points = 5.0,
+		strength = 10.0,
+		vigor = 0.0,
+		fortitude = 8.0,
+		protection = 4.0,
+		agility = 10.0,
+		evade = 2.0
+	},
+
+	attack_points = {
+		[1] = {
+			name = "Forehead",
+			x_position = 90,
+			y_position = 127,
+			fortitude_bonus = 0.0,
+			protection_bonus = 0.0,
+			evade_bonus = 0.0
+		},
+		[2] = {
+			name = "Orifice",
+			x_position = 95,
+			y_position = 77,
+			fortitude_bonus = 0.0,
+			protection_bonus = 0.0,
+			evade_bonus = 0.0
+		},
+	},
+
+	skills = {}
+}
+
+
+enemies[103] = {
+	name = "Arcana Drake",
+	filename = "arcana_drake",
+	sprite_filename = "img/sprites/battle/enemies/arcana_drake.png",
+	sprite_width = 192,
+	sprite_height = 256,
+
+	
+	base_stats = {
+		hit_points = 10,
+		skill_points = 10,
+		experience_points = 5,
+		strength = 10,
+		vigor = 0,
+		fortitude = 8,
+		protection = 4,
+		agility = 10,
+		evade = 2.0
+	},
+
+	growth_stats = {
+		hit_points = 10.0,
+		skill_points = 10.0,
+		experience_points = 5.0,
+		strength = 10.0,
+		vigor = 0.0,
+		fortitude = 8.0,
+		protection = 4.0,
+		agility = 10.0,
+		evade = 2.0
+	},
+
+	attack_points = {
+		[1] = {
+			name = "Head",
+			x_position = 26,
+			y_position = 23,
+			fortitude_bonus = 0.0,
+			protection_bonus = 0.0,
+			evade_bonus = 0.0
+		},
+		[2] = {
+			name = "Body",
+			x_position = 95,
+			y_position = 111,
+			fortitude_bonus = 0.0,
+			protection_bonus = 0.0,
+			evade_bonus = 0.0
+		},
+		[3] = {
+			name = "Tail",
+			x_position = 22,
+			y_position = 146,
+			fortitude_bonus = 0.0,
+			protection_bonus = 0.0,
+			evade_bonus = 0.0
+		}
+	},
+
+	skills = {}
+}
+
+
+enemies[104] = {
 	name = "Nagaruda",
 	filename = "nagaruda",
 	sprite_filename = "img/sprites/battle/enemies/nagaruda.png",
@@ -127,7 +245,7 @@ enemies[102] = {
 }
 
 
-enemies[103] = {
+enemies[105] = {
 	name = "Deceleon",
 	filename = "deceleon",
 	sprite_filename = "img/sprites/battle/enemies/deceleon.png",
@@ -187,124 +305,6 @@ enemies[103] = {
 			name = "Legs",
 			x_position = 150,
 			y_position = 105,
-			fortitude_bonus = 0.0,
-			protection_bonus = 0.0,
-			evade_bonus = 0.0
-		}
-	},
-
-	skills = {}
-}
-
-
-enemies[104] = {
-	name = "Aerocephal",
-	filename = "aerocephal",
-	sprite_filename = "img/sprites/battle/enemies/aerocephal.png",
-	sprite_width = 192,
-	sprite_height = 192,
-
-	
-	base_stats = {
-		hit_points = 10,
-		skill_points = 10,
-		experience_points = 5,
-		strength = 10,
-		vigor = 0,
-		fortitude = 8,
-		protection = 4,
-		agility = 10,
-		evade = 2.0
-	},
-
-	growth_stats = {
-		hit_points = 10.0,
-		skill_points = 10.0,
-		experience_points = 5.0,
-		strength = 10.0,
-		vigor = 0.0,
-		fortitude = 8.0,
-		protection = 4.0,
-		agility = 10.0,
-		evade = 2.0
-	},
-
-	attack_points = {
-		[1] = {
-			name = "Forehead",
-			x_position = 90,
-			y_position = 127,
-			fortitude_bonus = 0.0,
-			protection_bonus = 0.0,
-			evade_bonus = 0.0
-		},
-		[2] = {
-			name = "Orifice",
-			x_position = 95,
-			y_position = 77,
-			fortitude_bonus = 0.0,
-			protection_bonus = 0.0,
-			evade_bonus = 0.0
-		},
-	},
-
-	skills = {}
-}
-
-
-enemies[105] = {
-	name = "Arcana Drake",
-	filename = "arcana_drake",
-	sprite_filename = "img/sprites/battle/enemies/arcana_drake.png",
-	sprite_width = 192,
-	sprite_height = 256,
-
-	
-	base_stats = {
-		hit_points = 10,
-		skill_points = 10,
-		experience_points = 5,
-		strength = 10,
-		vigor = 0,
-		fortitude = 8,
-		protection = 4,
-		agility = 10,
-		evade = 2.0
-	},
-
-	growth_stats = {
-		hit_points = 10.0,
-		skill_points = 10.0,
-		experience_points = 5.0,
-		strength = 10.0,
-		vigor = 0.0,
-		fortitude = 8.0,
-		protection = 4.0,
-		agility = 10.0,
-		evade = 2.0
-	},
-
-	attack_points = {
-		[1] = {
-			name = "Head",
-			x_position = 26,
-			y_position = 23,
-			fortitude_bonus = 0.0,
-			protection_bonus = 0.0,
-			evade_bonus = 0.0
-		},
-		[2] = {
-			name = "Body",
-			x_position = 95,
-			y_position = 111,
-			fortitude_bonus = 0.0,
-			protection_bonus = 0.0,
-			evade_bonus = 0.0
-		},
-		[3] = {
-			name = "Tail",
-			x_position = 22,
-			y_position = 146,
 			fortitude_bonus = 0.0,
 			protection_bonus = 0.0,
 			evade_bonus = 0.0
