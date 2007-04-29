@@ -3037,7 +3037,13 @@ bool GameVideo::_ReloadImagesToSheet(TexSheet *sheet)
 			}
 			else		// Load this way if it as a normal image (one image in one file)
 			{
-				if(!_LoadRawImage(i->filename, load_info))
+				std::string fname = i->filename;
+				if (i->tags.find("<T>",0) != i->tags.npos)
+				{
+					fname = "img\\temp\\" + fname + ".png";
+				}
+
+				if(!_LoadRawImage(fname, load_info))
 				{
 					if(VIDEO_DEBUG)
 						cerr << "VIDEO ERROR: _LoadRawImage() failed in _ReloadImagesToSheet()!" << endl;
@@ -3091,7 +3097,10 @@ bool GameVideo::_SaveTempTextures()
 		// It's a temporary texture!!
 		if(image->tags.find("<T>") != string::npos)
 		{
-	//		image->texture_sheet->SaveImage(image);
+			hoa_video::private_video::ImageLoadInfo buffer;
+
+			_GetBufferFromImage (buffer, image);
+			_SavePng ("img\\temp\\"+image->filename+".png", buffer);
 		}
 
 		++iImage;
@@ -3108,7 +3117,7 @@ bool GameVideo::_SaveTempTextures()
 
 bool GameVideo::_DeleteTempTextures()
 {
-	return CleanDirectory("temp");
+	return CleanDirectory("img\\temp");
 }
 
 

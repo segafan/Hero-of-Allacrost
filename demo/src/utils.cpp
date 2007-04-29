@@ -427,7 +427,7 @@ bool CleanDirectory(const std::string& dir_name) {
 			full_path += dir_name;
 		}
 		else {
-			full_path += "/";
+			full_path += "\\";
 			full_path += dir_name;
 		}
 
