@@ -158,7 +158,7 @@ void Timer::Reset()
 	_expiration_time = -1;
 }
 
-bool Timer::HasExpired()
+bool Timer::HasExpired() const
 {
 	if ( _expiration_time >= 0 && ( SDL_GetTicks() > _expiration_time ) )
 		return true;

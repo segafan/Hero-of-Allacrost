@@ -494,6 +494,9 @@ public:
 	//! Is the monster attacking right now
 	bool IsAttacking() const;
 
+	// \brief Resets the attack timer for the animation
+	void ResetAttackTimer();
+
 	//! Is the enemy queued to attack?
 	/*bool IsQueuedToPerform() const
 		{ return _is_queued_to_perform; }
@@ -558,6 +561,9 @@ public:
 private:
 	//! Handle to the GlobalEnemy Entity
 	hoa_global::GlobalEnemy _global_enemy;
+
+	//! Timer for the attack animation
+	hoa_system::Timer _attack_animation_timer;
 
 	//! Enemy's X-coordinate on the screen
 	/*float _x_location;

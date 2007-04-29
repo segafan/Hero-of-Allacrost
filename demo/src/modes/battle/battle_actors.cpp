@@ -424,6 +424,11 @@ BattleEnemyActor::BattleEnemyActor(GlobalEnemy enemy, float x_location, float y_
 	_time_meter_portrait.SetDimensions(45,45);
 	VideoManager->LoadImage(_time_meter_portrait);
 
+	// Reset attack timer,
+	_attack_animation_timer.SetDuration(0);
+	_attack_animation_timer.Reset();
+	_attack_animation_timer.Play();
+
 	//Load time portrait selector
 	/*_time_portrait_selected.SetDimensions(45,45);
 	_time_portrait_selected.SetFilename("img/menus/stamina_icon.png");
@@ -641,18 +646,15 @@ void BattleEnemyActor::DrawStatus() {
 // Is the monster attacking right now
 bool BattleEnemyActor::IsAttacking() const
 {
-	if (current_battle && !current_battle->_script_queue.empty())
-	{
-		//GlobalActor * first_attacker = (current_battle->_script_queue.front()).GetSource();
-		if (current_battle->GetActiveScript())
-		{
-			BattleActor *first_attacker = current_battle->GetActiveScript()->GetSource();
-			if (IsQueuedToPerform() && (this == first_attacker))
-				return true;
-		}
-	}
+	return !_attack_animation_timer.HasExpired();
+}
 
-	return false;
+
+void BattleEnemyActor::ResetAttackTimer()
+{
+	_attack_animation_timer.SetDuration(1000);
+	_attack_animation_timer.Reset();
+	_attack_animation_timer.Play();
 }
 
 
