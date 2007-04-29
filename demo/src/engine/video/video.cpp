@@ -1358,7 +1358,9 @@ bool GameVideo::CaptureScreen(StillImage &id)
 
 	//TEMP TAGS
 	// create an Image structure and store it our std::map of images
-	Image *new_image = new Image(id._filename, "", load_info.width, load_info.height, false);
+	if (id._filename == "")
+		id._filename = "captured_screen";
+	Image *new_image = new Image(id._filename, "<T>", load_info.width, load_info.height, false);
 
 	// try to insert the image in a texture sheet
 	TexSheet *sheet = _InsertImageInTexSheet(new_image, load_info, true);
@@ -1389,6 +1391,10 @@ bool GameVideo::CaptureScreen(StillImage &id)
 	// store the new image element
 	ImageElement  element(new_image, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f, id._width, id._height, id._color);
 	id._elements.push_back(element);
+
+	// Store the image in our std::map
+	_images[id._filename] = new_image;
+
 
 	// finally, delete the buffer used to hold the pixel data
 	if (load_info.pixels)

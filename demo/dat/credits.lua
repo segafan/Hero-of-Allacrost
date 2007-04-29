@@ -79,9 +79,9 @@ credits_text =
 	"\n\n\n" ..
 
 	"Additional Artwork\n\n" ..
-	"John W. Bjerk (eleazar) ~ map tiles" .. 
-	"Mark Goodenough (RangerM) ~ map sprites, map tiles" ..
-	"Richard Marks (DeveloperX) ~ map tiles" ..
+	"John W. Bjerk (eleazar) ~ map tiles\n\n" .. 
+	"Mark Goodenough (RangerM) ~ map sprites, map tiles\n\n" ..
+	"Richard Marks (DeveloperX) ~ map tiles\n\n" ..
 	"Victoria Smith (alenacat) ~ map sprites, map tiles\n\n" ..
 	"Jerimiah Short (BigPapaN0z) ~ map tiles\n\n" ..
 	"Tyler Stroud (gloomcover) ~ map tiles\n\n" ..

@@ -964,6 +964,8 @@ void MapMode::_CalculateDrawInfo() {
 	_draw_info.left_edge   = camera_x - HALF_SCREEN_COLS;
 	_draw_info.right_edge  = camera_x + HALF_SCREEN_COLS;
 
+
+
 	// ---------- (3) Check for special conditions that modify the drawing state
 
 	// Usually the map centers on the camera's position, but when the camera becomes close to
@@ -1030,6 +1032,21 @@ void MapMode::_CalculateDrawInfo() {
 		_draw_info.tile_y_start += y_resolution;
 
 
+
+
+
+
+
+	_draw_info.left_edge = FloorToFloatMultiple (_draw_info.left_edge, x_resolution);
+	_draw_info.top_edge = FloorToFloatMultiple (_draw_info.top_edge, y_resolution);
+
+	if (camera_x - HALF_SCREEN_COLS - _draw_info.left_edge > x_resolution*0.5f)
+		_draw_info.left_edge += x_resolution;
+	if (camera_y - HALF_SCREEN_ROWS - _draw_info.top_edge > y_resolution*0.5f)
+		_draw_info.top_edge += y_resolution;
+
+	_draw_info.bottom_edge = _draw_info.top_edge + 2*SCREEN_COLS;
+	_draw_info.bottom_edge = _draw_info.top_edge + 2*SCREEN_ROWS;
 
 
 
