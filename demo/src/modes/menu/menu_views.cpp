@@ -745,7 +745,7 @@ void InventoryWindow::_UpdateItemText()
 
 	for (i = inv->begin(), count = 0; i != inv->end(); i++) {
 		obj = i->second;
-		text = "<" + obj->GetIconImage().GetFilename() + "><32>" + MakeStandardString(obj->GetName()) + "<R><350>" + NumberToString(obj->GetCount()) + "   ";
+		text = "<" + obj->GetIconImage().GetFilename() + "><32>     " + MakeStandardString(obj->GetName()) + "<R><350>" + NumberToString(obj->GetCount()) + "   ";
 		inv_names.push_back(MakeUnicodeString(text));
 		count++;
 	}
@@ -830,15 +830,15 @@ void InventoryWindow::_UpdateItemText()
 			}
 			break;
 	}
-
+*/
 	_inventory_items.SetSize(1,count);
 	_inventory_items.SetOptions(inv_names);
 
 	// Make sure we have at least one item before setting selection
-	if (invItems->size() > 0) {
+	if (inv->size() > 0) {
 		_inventory_items.SetSelection(0);
 	}
-*/
+
 } // void InventoryWindow::UpdateItemText()
 
 
@@ -874,21 +874,21 @@ void InventoryWindow::Draw()
 
 StatusWindow::StatusWindow() : _char_select_active(false)
 {
-// 	// Get party size for iteration
-// 	uint32 partysize = GlobalManager->GetActiveParty()->GetCharacters().size();
-// 	StillImage portrait;
-//
-// 	// Set up the full body portrait
-// 	for (uint32 i = 0; i < partysize; i++) {
-// 		_current_char = GlobalManager->GetActiveParty()->GetCharacters()[i];
-// 		string full_path = string("img/portraits/menu/") + _current_char->GetFilename() + string("_large.png");
-// 		portrait.SetFilename(full_path);
-// 		portrait.SetStatic(true);
-// 		portrait.SetDimensions(150, 350);
-// 		VideoManager->LoadImage(portrait);
-// 		_full_portraits.push_back(portrait);
-// 	}
-//
+	// Get party size for iteration
+	uint32 partysize = GlobalManager->GetActiveParty()->GetPartySize();
+	StillImage portrait;
+
+	// Set up the full body portrait
+	for (uint32 i = 0; i < partysize; i++) {
+		// FIXME: Make applicable for other characters
+		string full_path = string("img/portraits/menu/claudius_large.png");
+		portrait.SetFilename(full_path);
+		portrait.SetStatic(true);
+		portrait.SetDimensions(150, 350);
+		VideoManager->LoadImage(portrait);
+		_full_portraits.push_back(portrait);
+	}
+
 // 	// FIXME Init the location picture
 // 	_location_graphic.SetFilename("img/menus/locations/desert_cave.png");
 // 	_location_graphic.SetDimensions(500, 125);
@@ -931,11 +931,11 @@ StatusWindow::StatusWindow() : _char_select_active(false)
 
 StatusWindow::~StatusWindow()
 {
-// 	uint32 partysize = GlobalManager->GetActiveParty()->GetCharacters().size();
-//
-// 	for (uint32 i = 0; i < partysize; i++) {
-// 		VideoManager->DeleteImage(_full_portraits[i]);
-// 	}
+	uint32 partysize = GlobalManager->GetActiveParty()->GetPartySize();
+
+	for (uint32 i = 0; i < partysize; i++) {
+		VideoManager->DeleteImage(_full_portraits[i]);
+	}
 //
 // 	VideoManager->DeleteImage(_location_graphic);
 //
@@ -957,27 +957,27 @@ void StatusWindow::Activate(bool new_value) {
 }
 
 void StatusWindow::_InitCharSelect() {
-// 	//character selection set up
-// 	vector<ustring> options;
-// 	uint32 size = GlobalManager->GetActiveParty()->GetCharacters().size();
-//
-// 	_char_select.SetCursorOffset(-50.0f, -6.0f);
-// 	_char_select.SetFont("default");
-// 	_char_select.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
-// 	_char_select.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-// 	_char_select.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-// 	_char_select.SetSize(1, ((size >= 4) ? 4 : size));
-// 	_char_select.SetCellSize(360, 108);
-// 	_char_select.SetPosition(72.0f, 109.0f);
-//
-// 	// Use blank string so cursor can point somewhere
-// 	for (uint32 i = 0; i < size; i++) {
-// 		options.push_back(MakeUnicodeString(" "));
-// 	}
-//
-// 	_char_select.SetOptions(options);
-// 	_char_select.SetSelection(0);
-// 	_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+	//character selection set up
+	vector<ustring> options;
+	uint32 size = GlobalManager->GetActiveParty()->GetPartySize();
+
+	_char_select.SetCursorOffset(-50.0f, -6.0f);
+	_char_select.SetFont("default");
+	_char_select.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
+	_char_select.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_char_select.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	_char_select.SetSize(1, ((size >= 4) ? 4 : size));
+	_char_select.SetCellSize(360, 108);
+	_char_select.SetPosition(72.0f, 109.0f);
+
+	// Use blank string so cursor can point somewhere
+	for (uint32 i = 0; i < size; i++) {
+		options.push_back(MakeUnicodeString(" "));
+	}
+
+	_char_select.SetOptions(options);
+	_char_select.SetSelection(0);
+	_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 }
 
 // Updates the status window
@@ -991,7 +991,7 @@ void StatusWindow::Update() {
 	}
 	else if (InputManager->DownPress())
 	{
-		_char_select.HandleUpKey();
+		_char_select.HandleDownKey();
 	}
 	else if (InputManager->CancelPress())
 	{
@@ -1045,16 +1045,24 @@ void StatusWindow::Draw() {
 	VideoManager->DrawText(MakeUnicodeString(next.str()));
 
 	VideoManager->MoveRelative(0, 25);
-	VideoManager->DrawText(MakeUnicodeString("Strength: 106"));
+	ostringstream ostr;
+	ostr << "Strength: " << _current_char->GetStrength();
+	VideoManager->DrawText(MakeUnicodeString(ostr.str()));
 
 	VideoManager->MoveRelative(0, 25);
-	VideoManager->DrawText(MakeUnicodeString("Vigor: 72"));
+	ostringstream ovig;
+	ovig << "Vigor: " << _current_char->GetVigor();
+	VideoManager->DrawText(MakeUnicodeString(ovig.str()));
 
 	VideoManager->MoveRelative(0, 25);
-	VideoManager->DrawText(MakeUnicodeString("Fortitude: 106"));
+	ostringstream ofort;
+	ofort << "XP to Next: " << _current_char->GetFortitude();
+	VideoManager->DrawText(MakeUnicodeString(ofort.str()));
 
 	VideoManager->MoveRelative(0, 25);
-	VideoManager->DrawText(MakeUnicodeString("Resistance: 48"));
+	ostringstream ores;
+	ores << "Resistance: " << _current_char->GetResistance();
+	VideoManager->DrawText(MakeUnicodeString(ores.str()));
 
 	VideoManager->MoveRelative(0, 25);
 	ostringstream agl;
@@ -1062,13 +1070,16 @@ void StatusWindow::Draw() {
 	VideoManager->DrawText(MakeUnicodeString(agl.str()));
 
 	VideoManager->MoveRelative(0, 25);
-	VideoManager->DrawText(MakeUnicodeString("Evade: 3%"));
+	ostringstream oeva;
+	oeva << "Evade: " << _current_char->GetEvade() << "%";
+	VideoManager->DrawText(MakeUnicodeString(oeva.str()));
 
 	//Draw character full body portrait
 	VideoManager->Move(735, 145);
 
 //	FIX ME: This line causes a crash!
-//	VideoManager->DrawImage(_full_portraits[_char_select.GetSelection()]);
+//	_char_select.GetSelection() returns -1
+	VideoManager->DrawImage(_full_portraits[0]);
 
 	_char_select.Draw();
 } // void StatusWindow::Draw()
@@ -1118,28 +1129,28 @@ void SkillsWindow::_InitSkillsList() {
 
 
 void SkillsWindow::_InitCharSelect() {
-// 	//character selection set up
-// 	vector<ustring> options;
-// 	uint32 size = GlobalManager->GetActiveParty()->GetCharacters().size();
-//
-// 	_char_select.SetCursorOffset(-50.0f, -6.0f);
-// 	_char_select.SetFont("default");
-// 	_char_select.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
-// 	_char_select.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-// 	_char_select.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-// 	_char_select.SetSize(1, ((size >= 4) ? 4 : size));
-// 	_char_select.SetCellSize(360, 108);
-// 	_char_select.SetPosition(72.0f, 109.0f);
-//
-// 	//Use blank strings....won't be seen anyway
-// 	for (uint32 i = 0; i < size; i++) {
-// 		options.push_back(MakeUnicodeString(" "));
-// 	}
-//
-// 	//Set options, selection and cursor state
-// 	_char_select.SetOptions(options);
-// 	_char_select.SetSelection(0);
-// 	_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+	//character selection set up
+	vector<ustring> options;
+	uint32 size = GlobalManager->GetActiveParty()->GetPartySize();
+
+	_char_select.SetCursorOffset(-50.0f, -6.0f);
+	_char_select.SetFont("default");
+	_char_select.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
+	_char_select.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_char_select.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	_char_select.SetSize(1, ((size >= 4) ? 4 : size));
+	_char_select.SetCellSize(360, 108);
+	_char_select.SetPosition(72.0f, 109.0f);
+
+	//Use blank strings....won't be seen anyway
+	for (uint32 i = 0; i < size; i++) {
+		options.push_back(MakeUnicodeString(" "));
+	}
+
+	//Set options, selection and cursor state
+	_char_select.SetOptions(options);
+	_char_select.SetSelection(0);
+	_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 }
 
 
