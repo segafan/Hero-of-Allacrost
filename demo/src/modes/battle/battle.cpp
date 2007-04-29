@@ -239,6 +239,14 @@ void ScriptEvent::RunScript() {
 		}
 		// TODO: get script from global script repository and run, passing in list of arguments and host actor
 	}
+
+	if (_source)
+	{
+		if (_source->IsEnemy())
+		{
+			dynamic_cast<BattleEnemyActor*>(_source)->ResetAttackTimer();
+		}
+	}
 }
 
 } // namespace private battle

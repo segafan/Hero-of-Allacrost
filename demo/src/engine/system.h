@@ -209,7 +209,7 @@ public:
 	 * \brief Returns the duration of the timer
 	 * \return the duration of the timer
 	**/
-	inline uint32 GetDuration() { return _duration; }
+	inline uint32 GetDuration() const { return _duration; }
 
 	/**
 	 * \brief Sets the duration of the timer
@@ -221,13 +221,13 @@ public:
 	 * \brief Returns the amount of time left on the timer
 	 * \return the time left on the timer
 	**/
-	inline uint32 GetTimeLeft() { return _expiration_time - SDL_GetTicks(); }
+	inline uint32 GetTimeLeft() const { return _expiration_time - SDL_GetTicks(); }
 
 	/**
 	 * \brief Resets the timer
 	 * \return True if time is up.
 	**/
-	bool HasExpired();
+	bool HasExpired() const;
 
 private:
 
