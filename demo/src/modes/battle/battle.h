@@ -55,6 +55,22 @@ const uint32 SCREEN_LENGTH = 16;
 const uint32 SCREEN_HEIGHT = 12; 
 //@}
 
+/** \brief Possible monster locations in monster creation order. 
+//  \note This is probably only a temporary fix until we get the monster sorting to work correctly
+**/
+const float MONSTER_LOCATIONS[][2] =
+{
+	515.0f, 768.0f - 360.0f, // 768 - because of reverse Y-coordinate system 
+	494.0f, 768.0f - 450.0f,
+	510.0f, 768.0f - 550.0f,
+	580.0f, 768.0f - 630.0f,
+	675.0f, 768.0f - 390.0f,
+	655.0f, 768.0f - 494.0f,
+	793.0f, 768.0f - 505.0f,
+	730.0f, 768.0f - 600.0f
+};
+
+
 /** \name Action Type Constants
 *** \brief Identifications for the types of actions a player's characters may perform
 **/
@@ -516,6 +532,9 @@ private:
 	//! A FIFO queue of actor actions to perform
 	std::list<private_battle::ScriptEvent*> _script_queue;
 	//@}
+
+	//! An Index to the (x,y) location of the next created monster (MONSTER_LOCATIONS array)
+	int32 _next_monster_location_index;
 
 	////////////////////////////// PRIVATE METHODS ///////////////////////////////
 

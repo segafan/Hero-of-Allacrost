@@ -243,7 +243,8 @@ BattleMode::BattleMode() :
 	_current_number_swaps(0),
 	_swap_countdown_timer(300000), // 5 minutes
 	_min_agility(9999),
-	_selected_option_index(0)
+	_selected_option_index(0),
+	_next_monster_location_index(0)
 {
 	if (BATTLE_DEBUG)
 		cout << "BATTLE: BattleMode constructor invoked" << endl;
@@ -426,8 +427,7 @@ BattleMode::~BattleMode() {
 void BattleMode::Reset() {
 	current_battle = this;
 
-	VideoManager->SetCoordSys(0.0f, static_cast<float>(SCREEN_LENGTH * TILE_SIZE),
-		0.0f, static_cast<float>(SCREEN_HEIGHT * TILE_SIZE));
+	VideoManager->SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
 	VideoManager->SetFont("battle");
 
 	if (_battle_music[0].IsPlaying() == false) {
@@ -463,7 +463,11 @@ void BattleMode::AddEnemy(GlobalEnemy new_enemy) {
 	_original_enemies.push_back(new_enemy);
 
 	// (4): Construct the enemy battle actor to be placed on the battle field
-	BattleEnemyActor* enemy_actor= new BattleEnemyActor(new_enemy, static_cast<float>(RandomBoundedInteger(400, 600)), static_cast<float>(RandomBoundedInteger(200, 400)));
+	float x = MONSTER_LOCATIONS[_next_monster_location_index][0];
+	float y = MONSTER_LOCATIONS[_next_monster_location_index][1];
+	_next_monster_location_index++;
+	_next_monster_location_index = _next_monster_location_index % (sizeof(MONSTER_LOCATIONS)/2);
+	BattleEnemyActor* enemy_actor= new BattleEnemyActor(new_enemy, x, y);
 	enemy_actor->InitBattleActorStats(&new_enemy);
 	_enemy_actors.push_back(enemy_actor);
 }
@@ -1380,12 +1384,14 @@ void BattleMode::_DrawSprites() {
 	
 
 	// Sort and draw the enemies
-	std::deque<private_battle::BattleEnemyActor*> sorted_enemy_actors = _enemy_actors;
- 	std::sort(sorted_enemy_actors.begin(), sorted_enemy_actors.end(), AscendingYSort());
+	//std::deque<private_battle::BattleEnemyActor*> sorted_enemy_actors = _enemy_actors;
+ 	//std::sort(sorted_enemy_actors.begin(), sorted_enemy_actors.end(), AscendingYSort());
 
-	for (uint32 i = 0; i < sorted_enemy_actors.size(); i++) {
-		sorted_enemy_actors[i]->DrawSprite();
+	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
+		_enemy_actors[i]->DrawSprite();
 	}
+
+
 } // void BattleMode::_DrawSprites()
 
 
@@ -1955,7 +1961,7 @@ uint32 BattleMode::GetIndexOfNextAliveEnemy(bool move_upward) const
 				return i;
 			}
 		}
-		for (int32 i = static_cast<int32>(_enemy_actors.size()) - 1; i >= _argument_actor_index; --i)
+		for (int32 i = static_cast<int32>(_enemy_actors.size()) - 1; i >= static_cast<int32>(_argument_actor_index); --i)
 		{
 			if (_enemy_actors[i]->GetActor()->IsAlive())
 			{
