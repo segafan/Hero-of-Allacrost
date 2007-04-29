@@ -60,14 +60,14 @@ const uint32 SCREEN_HEIGHT = 12;
 **/
 const float MONSTER_LOCATIONS[][2] =
 {
-	515.0f, 768.0f - 360.0f, // 768 - because of reverse Y-coordinate system 
-	494.0f, 768.0f - 450.0f,
-	510.0f, 768.0f - 550.0f,
-	580.0f, 768.0f - 630.0f,
-	675.0f, 768.0f - 390.0f,
-	655.0f, 768.0f - 494.0f,
-	793.0f, 768.0f - 505.0f,
-	730.0f, 768.0f - 600.0f
+	{ 515.0f, 768.0f - 360.0f}, // 768 - because of reverse Y-coordinate system 
+	{ 494.0f, 768.0f - 450.0f},
+	{ 510.0f, 768.0f - 550.0f},
+	{ 580.0f, 768.0f - 630.0f},
+	{ 675.0f, 768.0f - 390.0f},
+	{ 655.0f, 768.0f - 494.0f},
+	{ 793.0f, 768.0f - 505.0f},
+	{ 730.0f, 768.0f - 600.0f}
 };
 
 
