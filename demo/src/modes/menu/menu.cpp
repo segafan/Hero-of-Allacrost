@@ -41,7 +41,7 @@ using namespace hoa_menu::private_menu;
 
 namespace hoa_menu {
 
-bool MENU_DEBUG = false;
+bool MENU_DEBUG = true;
 
 MenuMode* MenuMode::_instance = NULL;
 
@@ -257,8 +257,8 @@ void MenuMode::_SetupMainOptionBox() {
 	_main_options.SetSelection(MAIN_INVENTORY);
 
 	// Disable unused options
-	_main_options.EnableOption(1, false);
-	_main_options.EnableOption(2, false);
+//	_main_options.EnableOption(1, false);
+//	_main_options.EnableOption(2, false);
 	_main_options.EnableOption(4, false);
 }
 
@@ -316,7 +316,7 @@ void MenuMode::_SetupEquipOptionBox() {
 	_menu_equip.SetSelection(EQUIP_EQUIP);
 
 	// Disable unused options
-	_menu_equip.EnableOption(EQUIP_REMOVE, false);
+//	_menu_equip.EnableOption(EQUIP_REMOVE, false);
 }
 
 
