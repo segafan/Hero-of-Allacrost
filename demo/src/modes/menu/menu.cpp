@@ -257,7 +257,7 @@ void MenuMode::_SetupMainOptionBox() {
 	_main_options.SetSelection(MAIN_INVENTORY);
 
 	// Disable unused options
-//	_main_options.EnableOption(1, false);
+	_main_options.EnableOption(1, false);
 //	_main_options.EnableOption(2, false);
 	_main_options.EnableOption(4, false);
 }
@@ -710,11 +710,9 @@ void MenuMode::_HandleStatusMenu() {
 
 
 void MenuMode::_HandleInventoryMenu() {
-/*	switch (_menu_inventory.GetSelection()) {
+	switch (_menu_inventory.GetSelection()) {
 		case INV_USE:
-			// FIXME: Reenable
-			// Make sure we have some items in the inventory.
-			if (GlobalManager->GetInventory().size() == 0)
+			if (GlobalManager->GetInventory()->size() == 0)
 				return;
 			_inventory_window.Activate(true);
 			_current_menu->SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
@@ -733,7 +731,7 @@ void MenuMode::_HandleInventoryMenu() {
 		default:
 			cerr << "MENU ERROR: Invalid option in MenuMode::_HandleInventoryMenu()" << endl;
 			break;
-	}*/
+	}
 }
 
 
