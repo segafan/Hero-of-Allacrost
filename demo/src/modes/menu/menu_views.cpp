@@ -1587,8 +1587,6 @@ void EquipWindow::_UpdateEquipList() {
 		uint32 gearsize;
 		vector<hoa_global::GlobalWeapon*> weapons;
 		vector<hoa_global::GlobalArmor*> armor;
-		map<uint32, hoa_global::GlobalObject*>* inv = GlobalManager->GetInventory();
-		map<uint32, hoa_global::GlobalObject*>::iterator iter;
 
 		switch (_equip_select.GetSelection()) {
 			case EQUIP_WEAPON:
@@ -1602,64 +1600,40 @@ void EquipWindow::_UpdateEquipList() {
 				break;
 
 			case EQUIP_HEADGEAR:
-				for (iter = inv->begin(); iter != inv->end(); iter++) {
-					if (iter->second->GetType() == GLOBAL_OBJECT_HEAD_ARMOR) { // && usable by cur char
-						armor.push_back(static_cast<GlobalArmor*>(iter->second));
-					}
-				}
-
-				gearsize = armor.size();
+				gearsize = GlobalManager->GetInventoryHeadArmor()->size();
 
 				for (uint32 j = 0; j < gearsize; j++) {
-					options.push_back(armor[j]->GetName());
+					options.push_back(GlobalManager->GetInventoryHeadArmor()->at(j)->GetName());
 				}
 
 				_equip_list.SetOptions(options);
 				break;
 
 			case EQUIP_BODYARMOR:
-				for (iter = inv->begin(); iter != inv->end(); iter++) {
-					if (iter->second->GetType() == GLOBAL_OBJECT_TORSO_ARMOR) { // && usable by cur char
-						armor.push_back(static_cast<GlobalArmor*>(iter->second));
-					}
-				}
-
-				gearsize = armor.size();
+				gearsize = GlobalManager->GetInventoryTorsoArmor()->size();
 
 				for (uint32 j = 0; j < gearsize; j++) {
-					options.push_back(armor[j]->GetName());
+					options.push_back(GlobalManager->GetInventoryTorsoArmor()->at(j)->GetName());
 				}
 
 				_equip_list.SetOptions(options);
 				break;
 
 			case EQUIP_OFFHAND:
-				for (iter = inv->begin(); iter != inv->end(); iter++) {
-					if (iter->second->GetType() == GLOBAL_OBJECT_ARM_ARMOR) { // && usable by cur char
-						armor.push_back(static_cast<GlobalArmor*>(iter->second));
-					}
-				}
-
-				gearsize = armor.size();
+				gearsize = GlobalManager->GetInventoryArmArmor()->size();
 
 				for (uint32 j = 0; j < gearsize; j++) {
-					options.push_back(armor[j]->GetName());
+					options.push_back(GlobalManager->GetInventoryArmArmor()->at(j)->GetName());
 				}
 
 				_equip_list.SetOptions(options);
 				break;
 
 			case EQUIP_LEGGINGS:
-				for (iter = inv->begin(); iter != inv->end(); iter++) {
-					if (iter->second->GetType() == GLOBAL_OBJECT_LEG_ARMOR) { // && usable by cur char
-						armor.push_back(static_cast<GlobalArmor*>(iter->second));
-					}
-				}
-
-				gearsize = armor.size();
+				gearsize = GlobalManager->GetInventoryLegArmor()->size();
 
 				for (uint32 j = 0; j < gearsize; j++) {
-					options.push_back(armor[j]->GetName());
+					options.push_back(GlobalManager->GetInventoryLegArmor()->at(j)->GetName());
 				}
 
 				_equip_list.SetOptions(options);
