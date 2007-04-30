@@ -358,7 +358,7 @@ InventoryWindow::~InventoryWindow()
 //Initializes the list of items
 void InventoryWindow::_InitInventoryItems() {
 	// Set up the inventory option box
-	_inventory_items.SetCellSize(180.0f, 30.0f);
+	_inventory_items.SetCellSize(180.0f, 60.0f);
 
 	_inventory_items.SetPosition(500.0f, 170.0f);
 	_inventory_items.SetFont("default");
@@ -833,12 +833,6 @@ void InventoryWindow::_UpdateItemText()
 */
 	_inventory_items.SetSize(1,count);
 	_inventory_items.SetOptions(inv_names);
-
-	// Make sure we have at least one item before setting selection
-	if (inv->size() > 0) {
-		_inventory_items.SetSelection(0);
-	}
-
 } // void InventoryWindow::UpdateItemText()
 
 
@@ -896,7 +890,7 @@ StatusWindow::StatusWindow() : _char_select_active(false)
 // 	VideoManager->LoadImage(_location_graphic);
 //
 // 	//Init char select option box
-// 	_InitCharSelect();
+	_InitCharSelect();
 //
 // 	// Load sounds
 // 	SoundDescriptor confirm;
@@ -1418,7 +1412,7 @@ void EquipWindow::_InitEquipmentList() {
 	_equip_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_equip_list.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	// Update the equipment list
-	//UpdateEquipList();
+//	UpdateEquipList();
 	_equip_list.SetSelection(0);
 	// Initially hide the cursor
 	_equip_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
@@ -1427,30 +1421,30 @@ void EquipWindow::_InitEquipmentList() {
 
 
 void EquipWindow::_InitCharSelect() {
-// 	//character selection set up
-// 	vector<ustring> options;
-// 	uint32 size = GlobalManager->GetActiveParty()->GetCharacters().size();
-//
-// 	_char_select.SetCursorOffset(-50.0f, -6.0f);
-// 	_char_select.SetFont("default");
-// 	_char_select.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
-// 	_char_select.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-// 	_char_select.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-// 	_char_select.SetSize(1, ((size >= 4) ? 4 : size));
-// 	//_char_select.SetSize(1, 4);
-// 	_char_select.SetCellSize(360, 108);
-// 	_char_select.SetPosition(72.0f, 109.0f);
-//
-// 	//Use blank strings....won't be seen anyway
-// 	for (uint32 i = 0; i < size; i++) {
-// 		options.push_back(MakeUnicodeString(" "));
-// 	}
-//
-// 	//Set options, selection and cursor state
-// 	_char_select.SetOptions(options);
-// 	_char_select.SetSelection(0);
-// 	_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-//
+	//character selection set up
+	vector<ustring> options;
+	uint32 size = GlobalManager->GetActiveParty()->GetPartySize();
+
+	_char_select.SetCursorOffset(-50.0f, -6.0f);
+	_char_select.SetFont("default");
+	_char_select.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
+	_char_select.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_char_select.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	_char_select.SetSize(1, ((size >= 4) ? 4 : size));
+	//_char_select.SetSize(1, 4);
+	_char_select.SetCellSize(360, 108);
+	_char_select.SetPosition(72.0f, 109.0f);
+
+	//Use blank strings....won't be seen anyway
+	for (uint32 i = 0; i < size; i++) {
+		options.push_back(MakeUnicodeString(" "));
+	}
+
+	//Set options, selection and cursor state
+	_char_select.SetOptions(options);
+	_char_select.SetSelection(0);
+	_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+
 } // void EquipWindow::InitCharSelect()
 
 
@@ -1579,120 +1573,109 @@ void EquipWindow::Update() {
 			break;
 	}
 
-	//UpdateEquipList();
+	_UpdateEquipList();
 } // void EquipWindow::Update()
 
 
 
 void EquipWindow::_UpdateEquipList() {
-// 	// FIXME: warning, unused variable
-// 	//hoa_global::GlobalCharacter* ch = GlobalManager->GetCharacter(_char_select.GetSelection());
-// 	std::vector<ustring> options;
-//
-// 	if (_active_box == EQUIP_ACTIVE_LIST) {
-// 		uint32 gearsize;
-// 		vector<hoa_global::GlobalWeapon*> weapons;
-// 		vector<hoa_global::GlobalArmor*> armor;
-// 		map<uint32, hoa_global::GlobalObject*> inv = GlobalManager->GetInventory();
-// 		uint32 invsize = inv.size();
-//
-// 		switch (_equip_select.GetSelection()) {
-// 			case EQUIP_WEAPON:
-// 				for (uint32 i = 0; i < invsize; i++) {
-// 					if (inv[i]->GetType() == GLOBAL_OBJECT_WEAPON) { // && usable by cur char
-// 						weapons.push_back(static_cast<GlobalWeapon*>(inv[i]));
-// 					}
-// 				}
-//
-// 				gearsize = weapons.size();
-//
-// 				for (uint32 j = 0; j < gearsize; j++) {
-// 					options.push_back(weapons[j]->GetName());
-// 				}
-//
-// 				_equip_list.SetOptions(options);
-// 				break;
-//
-// 			case EQUIP_HEADGEAR:
-// 				for (uint32 i = 0; i < invsize; i++) {
-// 					if (inv[i]->GetType() == GLOBAL_OBJECT_HEAD_ARMOR) { // && usable by cur char
-// 						armor.push_back(static_cast<GlobalArmor*>(inv[i]));
-// 					}
-// 				}
-//
-// 				gearsize = armor.size();
-//
-// 				for (uint32 j = 0; j < gearsize; j++) {
-// 					options.push_back(armor[j]->GetName());
-// 				}
-//
-// 				_equip_list.SetOptions(options);
-// 				break;
-//
-// 			case EQUIP_BODYARMOR:
-// 				for (uint32 i = 0; i < invsize; i++) {
-// 					if (inv[i]->GetType() == GLOBAL_OBJECT_TORSO_ARMOR) { // && usable by cur char
-// 						armor.push_back(static_cast<GlobalArmor*>(inv[i]));
-// 					}
-// 				}
-//
-// 				gearsize = armor.size();
-//
-// 				for (uint32 j = 0; j < gearsize; j++) {
-// 					options.push_back(armor[j]->GetName());
-// 				}
-//
-// 				_equip_list.SetOptions(options);
-// 				break;
-//
-// 			case EQUIP_OFFHAND:
-// 				for (uint32 i = 0; i < invsize; i++) {
-// 					if (inv[i]->GetType() == GLOBAL_OBJECT_ARM_ARMOR) { // && usable by cur char
-// 						armor.push_back(static_cast<GlobalArmor*>(inv[i]));
-// 					}
-// 				}
-//
-// 				gearsize = armor.size();
-//
-// 				for (uint32 j = 0; j < gearsize; j++) {
-// 					options.push_back(armor[j]->GetName());
-// 				}
-//
-// 				_equip_list.SetOptions(options);
-// 				break;
-//
-// 			case EQUIP_LEGGINGS:
-// 				for (uint32 i = 0; i < invsize; i++) {
-// 					if (inv[i]->GetType() == GLOBAL_OBJECT_LEG_ARMOR) { // && usable by cur char
-// 						armor.push_back(static_cast<GlobalArmor*>(inv[i]));
-// 					}
-// 				}
-//
-// 				gearsize = armor.size();
-//
-// 				for (uint32 j = 0; j < gearsize; j++) {
-// 					options.push_back(armor[j]->GetName());
-// 				}
-//
-// 				_equip_list.SetOptions(options);
-// 				break;
-// 		}
-// 	}
-//
-// 	else {
-// 		/*options.push_back(MakeUnicodeString(ch->GetWeapon()->GetName()));
-// 		options.push_back(MakeUnicodeString(ch->GetHeadArmor()->GetName()));
-// 		options.push_back(MakeUnicodeString(ch->GetBodyArmor()->GetName()));
-// 		options.push_back(MakeUnicodeString(ch->GetArmsArmor()->GetName()));
-// 		options.push_back(MakeUnicodeString(ch->GetLegArmor()->GetName()));*/
-// 		options.push_back(MakeUnicodeString("Karlate Sword"));
-// 		options.push_back(MakeUnicodeString("Karlate Helmet"));
-// 		options.push_back(MakeUnicodeString("Karlate Breastplate"));
-// 		options.push_back(MakeUnicodeString("Karlate Shield"));
-// 		options.push_back(MakeUnicodeString("Karlate Greaves"));
-//
-// 		_equip_select.SetOptions(options);
-// 	}
+	// FIXME: warning, unused variable
+	hoa_global::GlobalCharacter* ch = GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS); //_char_select.GetSelection());
+	std::vector<ustring> options;
+
+	if (_active_box == EQUIP_ACTIVE_LIST) {
+		uint32 gearsize;
+		vector<hoa_global::GlobalWeapon*> weapons;
+		vector<hoa_global::GlobalArmor*> armor;
+		map<uint32, hoa_global::GlobalObject*>* inv = GlobalManager->GetInventory();
+		map<uint32, hoa_global::GlobalObject*>::iterator iter;
+
+		switch (_equip_select.GetSelection()) {
+			case EQUIP_WEAPON:
+				gearsize = GlobalManager->GetInventoryWeapons()->size();
+
+				for (uint32 j = 0; j < gearsize; j++) {
+					options.push_back(GlobalManager->GetInventoryWeapons()->at(j)->GetName());
+				}
+
+				_equip_list.SetOptions(options);
+				break;
+
+			case EQUIP_HEADGEAR:
+				for (iter = inv->begin(); iter != inv->end(); iter++) {
+					if (iter->second->GetType() == GLOBAL_OBJECT_HEAD_ARMOR) { // && usable by cur char
+						armor.push_back(static_cast<GlobalArmor*>(iter->second));
+					}
+				}
+
+				gearsize = armor.size();
+
+				for (uint32 j = 0; j < gearsize; j++) {
+					options.push_back(armor[j]->GetName());
+				}
+
+				_equip_list.SetOptions(options);
+				break;
+
+			case EQUIP_BODYARMOR:
+				for (iter = inv->begin(); iter != inv->end(); iter++) {
+					if (iter->second->GetType() == GLOBAL_OBJECT_TORSO_ARMOR) { // && usable by cur char
+						armor.push_back(static_cast<GlobalArmor*>(iter->second));
+					}
+				}
+
+				gearsize = armor.size();
+
+				for (uint32 j = 0; j < gearsize; j++) {
+					options.push_back(armor[j]->GetName());
+				}
+
+				_equip_list.SetOptions(options);
+				break;
+
+			case EQUIP_OFFHAND:
+				for (iter = inv->begin(); iter != inv->end(); iter++) {
+					if (iter->second->GetType() == GLOBAL_OBJECT_ARM_ARMOR) { // && usable by cur char
+						armor.push_back(static_cast<GlobalArmor*>(iter->second));
+					}
+				}
+
+				gearsize = armor.size();
+
+				for (uint32 j = 0; j < gearsize; j++) {
+					options.push_back(armor[j]->GetName());
+				}
+
+				_equip_list.SetOptions(options);
+				break;
+
+			case EQUIP_LEGGINGS:
+				for (iter = inv->begin(); iter != inv->end(); iter++) {
+					if (iter->second->GetType() == GLOBAL_OBJECT_LEG_ARMOR) { // && usable by cur char
+						armor.push_back(static_cast<GlobalArmor*>(iter->second));
+					}
+				}
+
+				gearsize = armor.size();
+
+				for (uint32 j = 0; j < gearsize; j++) {
+					options.push_back(armor[j]->GetName());
+				}
+
+				_equip_list.SetOptions(options);
+				break;
+		}
+	}
+
+	else {
+		options.push_back(MakeUnicodeString(MakeStandardString(ch->GetWeaponEquipped()->GetName())));
+		options.push_back(MakeUnicodeString(MakeStandardString(ch->GetEquippedHeadArmor()->GetName())));
+		options.push_back(MakeUnicodeString(MakeStandardString(ch->GetEquippedTorsoArmor()->GetName())));
+		options.push_back(MakeUnicodeString(MakeStandardString(ch->GetEquippedArmsArmor()->GetName())));
+		options.push_back(MakeUnicodeString(MakeStandardString(ch->GetEquippedLegArmor()->GetName())));
+
+		_equip_select.SetOptions(options);
+	}
 
 } // void EquipWindow::UpdateEquipList()
 
