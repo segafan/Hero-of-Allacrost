@@ -69,9 +69,14 @@ void BattleActor::InitBattleActorStats(hoa_global::GlobalActor* actor)
 	SetStrength(actor->GetStrength());
 	SetVigor(actor->GetVigor());
 	SetFortitude(actor->GetFortitude());
-	SetResistance(actor->GetResistance());
+	SetProtection(actor->GetProtection());
 	SetAgility(actor->GetAgility());
 	SetEvade(actor->GetEvade());
+
+	CalcPhysicalAttack();
+	CalcMetaPhysicalAttack();
+	CalcPhysicalDefense();
+	CalcMetaPhysicalDefense();
 }
 
 // Draws the character's portrait on the time meter
@@ -96,11 +101,17 @@ void BattleActor::ResetWaitTime()
 	_time_portrait_location = 128.f;
 }
 
-//Updates the actor...called every frame
-void BattleActor::Update()
-{	
-	if (!_wait_time.HasExpired() && IsAlive() && !IsQueuedToPerform())
-		_time_portrait_location += SystemManager->GetUpdateTime() * (405.0f / _wait_time.GetDuration());
+
+//For when he dies
+void BattleActor::OnDeath()
+{
+	GetWaitTime()->Reset();
+}
+
+//For when he is given new life! LIFE!
+void BattleActor::OnLife()
+{
+	GetWaitTime()->Play();
 }
 
 // Gives a specific amount of damage for the actor
@@ -112,6 +123,7 @@ void BattleActor::TakeDamage(uint32 damage)
 	if (damage >= GetHitPoints()) // Was it a killing blow?
 	{
 		SetHitPoints(0);
+		OnDeath();
 		current_battle->RemoveScriptedEventsForActor(this);
 	}
 	else {
@@ -191,7 +203,8 @@ void BattleCharacterActor::Update()
 	{
 		current_battle->RemoveScriptedEventsForActor(this);
 	}*/
-	BattleActor::Update();
+	if (!_wait_time.HasExpired() && IsAlive() && !IsQueuedToPerform() && _wait_time.IsPlaying())
+		_time_portrait_location += SystemManager->GetUpdateTime() * (405.0f / _wait_time.GetDuration());
 
 	GetActor()->RetrieveBattleAnimation("idle")->Update();
 
@@ -199,6 +212,48 @@ void BattleCharacterActor::Update()
 	//	_time_portrait_location += SystemManager->GetUpdateTime() * (405.0f / _wait_time.GetDuration());	
 }
 
+//Calculates the actor's base physical attack damage
+void BattleCharacterActor::CalcPhysicalAttack()
+{
+	_physical_attack = _strength;
+
+	if (GetActor()->GetWeaponEquipped())
+		_physical_attack += GetActor()->GetWeaponEquipped()->GetPhysicalAttack();
+}
+
+//Calculates the actor's base metaphysical attack damage
+void BattleCharacterActor::CalcMetaPhysicalAttack()
+{
+	_metaphysical_attack = _vigor;
+
+	if (GetActor()->GetWeaponEquipped())
+		_metaphysical_attack += GetActor()->GetWeaponEquipped()->GetMetaphysicalAttack();
+}
+
+//Calculates the actor's base physical defense
+void BattleCharacterActor::CalcPhysicalDefense()
+{
+	_physical_defense = _fortitude;
+	std::vector<GlobalArmor*> armor = GetActor()->GetArmorEquipped();
+
+	for (uint32 i = 0; i < armor.size(); ++i)
+	{
+		_physical_defense += armor[i]->GetPhysicalDefense();
+	}
+}
+
+//Calculates the actor's base metaphysical defense
+void BattleCharacterActor::CalcMetaPhysicalDefense()
+{
+	_metaphysical_defense = _protection;
+
+	std::vector<GlobalArmor*> armor = GetActor()->GetArmorEquipped();
+
+	for (uint32 i = 0; i < armor.size(); ++i)
+	{
+		_metaphysical_defense += armor[i]->GetMetaphysicalDefense();
+	}
+}
 
 // Draws the character's current sprite animation frame
 void BattleCharacterActor::DrawSprite() {
@@ -396,7 +451,12 @@ void BattleCharacterActor::DrawStatus() {
 	}
 }*/
 
-
+//For now, only update HP and SP
+void BattleCharacterActor::UpdateGlobalActorStats()
+{
+	GetActor()->SetHitPoints(GetHitPoints());
+	GetActor()->SetSkillPoints(GetSkillPoints());
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // EnemyActor class
@@ -446,6 +506,35 @@ BattleEnemyActor::~BattleEnemyActor() {
 	//VideoManager->DeleteImage(_time_portrait_selected);
 }
 
+//Calculates the actor's base physical attack damage
+void BattleEnemyActor::CalcPhysicalAttack()
+{
+	_physical_attack = _strength;
+
+	if (GetActor()->GetWeaponEquipped())
+		_physical_attack += GetActor()->GetWeaponEquipped()->GetPhysicalAttack();
+}
+
+//Calculates the actor's base metaphysical attack damage
+void BattleEnemyActor::CalcMetaPhysicalAttack()
+{
+	_metaphysical_attack = _vigor;
+
+	if (GetActor()->GetWeaponEquipped())
+		_metaphysical_attack += GetActor()->GetWeaponEquipped()->GetMetaphysicalAttack();
+}
+
+//Calculates the actor's base physical defense
+void BattleEnemyActor::CalcPhysicalDefense()
+{
+	_physical_defense = _fortitude;
+}
+
+//Calculates the actor's base metaphysical defense
+void BattleEnemyActor::CalcMetaPhysicalDefense()
+{
+	_metaphysical_defense = _protection;
+}
 
 /*void BattleEnemyActor::ResetWaitTime()
 {
@@ -471,7 +560,8 @@ void BattleEnemyActor::Update() {
 
 	//if (_wait_time)
 	//	_wait_time -= SystemManager->GetUpdateTime();
-	BattleActor::Update();
+	if (!_wait_time.HasExpired() && IsAlive() && !IsQueuedToPerform() && _wait_time.IsPlaying())
+		_time_portrait_location += SystemManager->GetUpdateTime() * (405.0f / _wait_time.GetDuration());
 
 	if (IsAlive() && !IsQueuedToPerform() && GetWaitTime()->HasExpired())
 	{

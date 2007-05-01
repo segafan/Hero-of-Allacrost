@@ -265,7 +265,7 @@ public:
 	uint32 GetFortitude() const
 		{ return _fortitude; }
 
-	uint32 GetResistance() const
+	uint32 GetProtection() const
 		{ return _protection; }
 
 	uint32 GetAgility() const

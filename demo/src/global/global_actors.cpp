@@ -222,6 +222,9 @@ GlobalEnemy::GlobalEnemy(uint32 id) {
 	_id = id;
 	_experience_level = 0;
 
+	_armor_equipped.clear();
+	_weapon_equipped = NULL;
+
 	// (1): Use the id member to determine the name of the data file that the enemy is defined in
 	string file_ext;
 	if (_id < 1) {

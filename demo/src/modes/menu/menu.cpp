@@ -579,7 +579,7 @@ void MenuMode::_DrawBottomMenu() {
 		VideoManager->MoveRelative(0, 20);
 		VideoManager->DrawText(MakeUnicodeString(text));
 
-		text = "RES: " +  NumberToString(character->GetResistance());
+		text = "PRO: " +  NumberToString(character->GetProtection());
 		VideoManager->MoveRelative(0, 20);
 		VideoManager->DrawText(MakeUnicodeString(text));
 

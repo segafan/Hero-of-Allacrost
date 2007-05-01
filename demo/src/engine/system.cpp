@@ -140,26 +140,34 @@ Timer::Timer( uint32 duration )
 	_duration = duration;
 	_time_left = duration;
 	_expiration_time = -1;
+	_is_playing = false;
 }
 
 void Timer::Play()
 {
 	_expiration_time = SDL_GetTicks() + _time_left;
+	_is_playing = true;
 }
 
 void Timer::Pause()
 {
 	_time_left = _expiration_time - SDL_GetTicks();
+	_is_playing = false;
 }
 
 void Timer::Reset()
 {
 	_time_left = _duration;
 	_expiration_time = -1;
+	_is_playing = false;
 }
 
 bool Timer::HasExpired() const
 {
+	//Time not up if it's paused
+	if (!_is_playing)
+		return false;
+
 	if ( _expiration_time >= 0 && ( SDL_GetTicks() > _expiration_time ) )
 		return true;
 

@@ -1055,7 +1055,7 @@ void StatusWindow::Draw() {
 
 	VideoManager->MoveRelative(0, 25);
 	ostringstream ores;
-	ores << "Resistance: " << _current_char->GetResistance();
+	ores << "Protection: " << _current_char->GetProtection();
 	VideoManager->DrawText(MakeUnicodeString(ores.str()));
 
 	VideoManager->MoveRelative(0, 25);

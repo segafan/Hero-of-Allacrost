@@ -181,7 +181,7 @@ public:
 	/**
 	 * \brief Only used by classes that have a timer as a member variable
 	**/
-	Timer() {}
+	Timer() : _duration(0), _time_left(0), _is_playing(false), _expiration_time(0) {}
 
 	/**
 	 * \brief Destructor
@@ -225,9 +225,15 @@ public:
 
 	/**
 	 * \brief Resets the timer
-	 * \return True if time is up.
+	 * \return true if time is up.
 	**/
 	bool HasExpired() const;
+
+	/**
+	 * \brief True if the timer is running
+	 * \return true if the timer is playing
+	**/
+	bool IsPlaying() const { return _is_playing; }
 
 private:
 
@@ -235,6 +241,9 @@ private:
 	 * \brief Privatized so it's not used
 	**/
 	//Timer(const hoa_system::Timer &T);
+
+	//! True if the timer is active
+	bool _is_playing;
 
 	//! The duration of the timer (in milliseconds)
 	uint32 _duration;

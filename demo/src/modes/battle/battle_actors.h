@@ -150,8 +150,23 @@ public:
 	// \return the wait time
 	hoa_system::Timer* GetWaitTime() { return &_wait_time; }
 
-	//! Updates the state of the character. Must be called every frame!
-	virtual void Update();
+	// \brief Called when the actor dies
+	virtual void OnDeath();
+
+	// \brief Called when the actor is revived
+	virtual void OnLife();
+
+	// \brief Calculates the actor's base physical attack damage
+	virtual void CalcPhysicalAttack() { }
+
+	// \brief Calculates the actor's base metaphysical attack damage
+	virtual void CalcMetaPhysicalAttack() { }
+
+	// \brief Calculates the actor's base physical defense
+	virtual void CalcPhysicalDefense() { }
+
+	// \brief Calculates the actor's base metaphysical defense
+	virtual void CalcMetaPhysicalDefense() { }
 
 	// \brief Draws the status of the actor
 	virtual void DrawStatus() { }
@@ -204,6 +219,21 @@ public:
 
 	//! \name Getters for the actor's stats
 	//@{
+	uint32 GetPhysicalAttack() const
+		{ return _physical_attack; }
+
+	uint32 GetMetaPhysicalAttack() const
+		{ return _metaphysical_attack; }
+
+	uint32 GetPhysicalDefense() const
+		{ return _physical_defense; }
+
+	uint32 GetMetaPhysicalDefense() const
+		{ return _metaphysical_defense; }
+	//@}
+
+	//! \name Getters for the actor's stats
+	//@{
 	uint32 GetHitPoints() const
 		{ return _hp; }
 
@@ -225,8 +255,8 @@ public:
 	uint32 GetFortitude() const
 		{ return _fortitude; }
 
-	uint32 GetResistance() const
-		{ return _resistance; }
+	uint32 GetProtection() const
+		{ return _protection; }
 
 	uint32 GetAgility() const
 		{ return _agility; }
@@ -258,8 +288,8 @@ public:
 	void SetFortitude(uint32 fortitude)
 		{ _fortitude = fortitude; }
 
-	void SetResistance(uint32 resistance)
-		{ _resistance = resistance; }
+	void SetProtection(uint32 protection)
+		{ _protection = protection; }
 
 	void SetAgility(uint32 agility)
 		{ _agility = agility; }
@@ -270,6 +300,9 @@ public:
 	//@}
 
 protected:
+	//! The last time the actor was updated
+	uint32 _last_update_time;
+
 	//! Character's X-coordinate on the screen
 	float _x_location;
 
@@ -291,9 +324,17 @@ protected:
 	uint32 _strength;
 	uint32 _vigor;
 	uint32 _fortitude;
-	uint32 _resistance;
+	uint32 _protection;
 	uint32 _agility;
 	float _evade;
+	//@}
+
+	//! \name Actor's attack and defense stats.  Derived from base stats, equipment, and effects
+	//@{
+	uint32 _physical_attack;
+	uint32 _metaphysical_attack;
+	uint32 _physical_defense;
+	uint32 _metaphysical_defense;
 	//@}
 
 	//! Variable for tracking time (ms) on how long to show the damage text
@@ -335,7 +376,7 @@ public:
 	virtual ~BattleCharacterActor();
 
 	//! Updates the state of the character. Must be called every frame!
-	virtual void Update();
+	void Update();
 
 	//! Draws the character's current sprite animation frame
 	void DrawSprite();
@@ -353,6 +394,18 @@ public:
 
 	//! Draws the character's status information
 	virtual void DrawStatus();
+
+	// \brief Calculates the actor's base physical attack damage
+	virtual void CalcPhysicalAttack();
+
+	// \brief Calculates the actor's base metaphysical attack damage
+	virtual void CalcMetaPhysicalAttack();
+
+	// \brief Calculates the actor's base physical defense
+	virtual void CalcPhysicalDefense();
+
+	// \brief Calculates the actor's base metaphysical defense
+	virtual void CalcMetaPhysicalDefense();
 
 	//! Gives a specific amount of damage for the character
 	//void TakeDamage(uint32 damage);
@@ -395,6 +448,10 @@ public:
 	// Gets a pointer to the GlobalActor
 	hoa_global::GlobalCharacter * GetActor()
 		{ return _global_character; }
+
+	// \brief Used to permanently change actor stats.
+	// \note In most cases this is current HP and SP
+	virtual void UpdateGlobalActorStats();
 
 	// \brief Sets the location of the time meter portrait
 	// \param new_val new value for the location
@@ -476,7 +533,7 @@ public:
 	virtual ~BattleEnemyActor();
 
 	//! Updates the action status of the enemy
-	virtual void Update();
+	void Update();
 
 	//! Draws the damage-blended enemy sprite
 	void DrawSprite();
@@ -496,6 +553,18 @@ public:
 
 	// \brief Resets the attack timer for the animation
 	void ResetAttackTimer();
+
+	// \brief Calculates the actor's base physical attack damage
+	virtual void CalcPhysicalAttack();
+
+	// \brief Calculates the actor's base metaphysical attack damage
+	virtual void CalcMetaPhysicalAttack();
+
+	// \brief Calculates the actor's base physical defense
+	virtual void CalcPhysicalDefense();
+
+	// \brief Calculates the actor's base metaphysical defense
+	virtual void CalcMetaPhysicalDefense();
 
 	//! Is the enemy queued to attack?
 	/*bool IsQueuedToPerform() const
