@@ -563,6 +563,7 @@ void BattleMode::_Initialize()
 		return;
 	}
 	// TODO: implement this later
+	// COMMENT: Implement what later?
 	for (uint32 i = 0; i < active_party->GetPartySize(); i++) {
 		GlobalCharacter* new_character = dynamic_cast<GlobalCharacter*>(active_party->GetActor(i));
 		BattleCharacterActor* new_actor = new BattleCharacterActor(new_character, 256, 320);
@@ -640,8 +641,8 @@ void BattleMode::_Initialize()
 
 	//TEMP: For testing battle item usage only!  Pull once usage is proven!
 	// Adds a health potion to your inventory
-	GlobalManager->AddToInventory(1);
-	_action_type_menu.EnableOption(3,true);
+	//GlobalManager->AddToInventory(1);
+	//_action_type_menu.EnableOption(3,true);
 
 	_initialized = true;
 } // void BattleMode::_Initialize()
@@ -652,6 +653,11 @@ void BattleMode::_ShutDown() {
 	if (BATTLE_DEBUG) cout << "BATTLE: ShutDown() called!" << endl;
 
 	_battle_music[0].StopMusic();
+
+	for (uint32 i = 0; i < _character_actors.size(); ++i)
+	{
+		_character_actors[i]->UpdateGlobalActorStats();
+	}
 
 	// This call will clear the input state
 	InputManager->EventHandler();
@@ -706,7 +712,7 @@ void BattleMode::Update() {
 			se->Update();
 			//(*it).Update();
 			//se._warm_up_time -= SystemManager->GetUpdateTime();
-			if (se->GetWarmUpTime().HasExpired() && !_IsPerformingScript())
+			if (se->GetWarmUpTime()->HasExpired() && !_IsPerformingScript())
 			{
 				SetPerformingScript(true,se);
 				se->RunScript();
@@ -771,6 +777,11 @@ void BattleMode::_UpdateCharacterSelection() {
 		_actor_index = GetIndexOfFirstIdleCharacter();
 		return;
 	}
+
+	//We have a charcter selected....halt everything
+	if (!ACTIVE_BATTLE_MODE)
+		FreezeTimers();
+
 	// Return if the player does not have more than one character so select
 	if (_NumberOfCharactersAlive() == 1) {
 		_cursor_state = CURSOR_SELECT_ACTION_TYPE;
@@ -1090,6 +1101,10 @@ void BattleMode::_UpdateTargetSelection() {
 				_actor_index = GetIndexOfFirstIdleCharacter();
 				_cursor_state = CURSOR_IDLE;
 				_action_menu_window->Hide();
+
+				//Resume battle
+				if (!ACTIVE_BATTLE_MODE)
+					UnFreezeTimers();
 			}
 		}
 		else if (InputManager->CancelPress()) {
@@ -1265,6 +1280,10 @@ void BattleMode::_UpdateTargetSelection() {
 			_cursor_state = CURSOR_IDLE;
 			_action_menu_window->Hide();
 
+			//Resume battle
+			if (!ACTIVE_BATTLE_MODE)
+				UnFreezeTimers();
+
 			//If we've got anotRefresh item list
 			//if (_actor_index != INVALID_BATTLE_ACTOR_INDEX)
 			//	_ConstructActionListMenu();
@@ -1306,6 +1325,10 @@ void BattleMode::_UpdateAttackPointSelection() {
 		_actor_index = GetIndexOfFirstIdleCharacter();
 		_cursor_state = CURSOR_IDLE;
 		_action_menu_window->Hide();
+
+		//Resume battle
+		if (!ACTIVE_BATTLE_MODE)
+			UnFreezeTimers();
 		/*}
 		else {
 			_cursor_state = CURSOR_SELECT_TARGET;
@@ -1850,6 +1873,62 @@ void BattleMode::RemoveScriptedEventsForActor(BattleActor * actor) {
 	}
 }
 
+void BattleMode::FreezeTimers()
+{
+	std::list<private_battle::ScriptEvent*>::iterator it = _script_queue.begin();
+	//Pause scripts
+	while (it != _script_queue.end())
+	{
+		if ((*it)->GetWarmUpTime()->IsPlaying())
+			(*it)->GetWarmUpTime()->Pause();
+
+		++it;
+	}
+
+	//Pause characters
+	for (uint32 i = 0; i < _character_actors.size(); ++i)
+	{
+		if (_character_actors.at(i)->GetWaitTime()->IsPlaying())
+			_character_actors.at(i)->GetWaitTime()->Pause();
+	}
+
+	//Pause enemies
+	for (uint32 i = 0; i < _enemy_actors.size(); ++i)
+	{
+		if (_enemy_actors.at(i)->GetWaitTime()->IsPlaying())
+			_enemy_actors.at(i)->GetWaitTime()->Pause();
+	}
+}
+
+
+void BattleMode::UnFreezeTimers()
+{
+	//FIX ME Do not unpause timers for paralyzed actors
+	//Unpause scripts
+	std::list<private_battle::ScriptEvent*>::iterator it = _script_queue.begin();
+	//Pause scripts
+	while (it != _script_queue.end())
+	{
+		if (!(*it)->GetWarmUpTime()->IsPlaying())
+			(*it)->GetWarmUpTime()->Play();
+
+		++it;
+	}
+
+	//Unpause characters
+	for (uint32 i = 0; i < _character_actors.size(); ++i)
+	{
+		if (!_character_actors.at(i)->GetWaitTime()->IsPlaying())
+			_character_actors.at(i)->GetWaitTime()->Play();
+	}
+
+	//Unpause enemies
+	for (uint32 i = 0; i < _enemy_actors.size(); ++i)
+	{
+		if (!_enemy_actors.at(i)->GetWaitTime()->IsPlaying())
+			_enemy_actors.at(i)->GetWaitTime()->Play();
+	}
+}
 
 // Handle player victory
 void BattleMode::PlayerVictory() {

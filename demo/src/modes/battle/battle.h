@@ -104,6 +104,10 @@ const uint32 MAX_INIT_WAIT_TIME = 8000;
 // of item used
 const uint32 ITEM_WARM_UP_TIME = 1000;
 
+//! True if we are using active battle mode (i.e. timers do not pause when player is making choices
+//FIX ME should be handled via the options menu
+const bool ACTIVE_BATTLE_MODE = false;
+
 /** \brief Finds the average experience level of all members in the party
 *** \return A floating point value representing the average level|
 ***
@@ -134,8 +138,8 @@ public:
 	BattleActor * GetSource()
 		{ return _source; }
 
-	inline hoa_system::Timer GetWarmUpTime() const
-		{ return _warm_up_time; }
+	inline hoa_system::Timer* GetWarmUpTime()
+		{ return &_warm_up_time; }
 
 	inline BattleActor* GetTarget()
 		{ return _target; }
@@ -278,6 +282,16 @@ public:
 	//! Returns all targeted actors
 	//std::deque<private_battle::IBattleActor*> GetSelectedActors() const
 	//	{ return _selected_actor_arguments; }
+
+	/*
+	* \brief Freezes all timers in battle mode.  Used when game is paused or using wait battle mode.
+	*/
+	void FreezeTimers();
+
+	/*
+	* \brief Unfreezes all timers in battle mode.  Used when game is unpaused or using wait battle mode.
+	*/
+	void UnFreezeTimers();
 
 	//! Is the battle over?
 	bool IsBattleOver() const

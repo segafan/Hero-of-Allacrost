@@ -26,7 +26,8 @@ skills[1] = {
 	target_alignment = hoa_global.GameGlobal.GLOBAL_ALIGNMENT_NEUTRAL,
 
 	BattleExecute = function(target, instigator)
-		target:TakeDamage(32);
+		target:TakeDamage(instigator:GetPhysicalAttack() + 32 - target:GetPhysicalDefense());
+		--target:TakeDamage(32);
 		AudioManager:PlaySound("snd/sword_swipe.wav");
 	end
 }
