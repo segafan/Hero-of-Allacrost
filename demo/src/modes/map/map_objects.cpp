@@ -154,6 +154,8 @@ VirtualSprite::~VirtualSprite() {
 	dialogues.clear();
 }
 
+
+
 int VirtualSprite::_LoadDialogueIcon()
 {
 	std::vector<StillImage> frames;
@@ -169,9 +171,10 @@ int VirtualSprite::_LoadDialogueIcon()
 	return 0;
 }
 
+
+
 uint16 VirtualSprite::CalculateOppositeDirection(const uint16 direction) {
-	switch( direction )
-	{
+	switch (direction) {
 	case NORTH:     return SOUTH;
 	case SOUTH:     return NORTH;
 	case WEST:      return EAST;
@@ -185,7 +188,8 @@ uint16 VirtualSprite::CalculateOppositeDirection(const uint16 direction) {
 	case SE_SOUTH:  return NW_NORTH;
 	case SE_EAST:   return NW_WEST;
 	default:
-		cerr << "MAP ERROR: VirtualSprite::CalculateOppositeDirection received invalid direction" << endl;
+		if (MAP_DEBUG)
+			cerr << "MAP WARNING: VirtualSprite::CalculateOppositeDirection received invalid direction" << endl;
 		return SOUTH;
 	}
 }
@@ -199,7 +203,7 @@ void VirtualSprite::Update() {
 	}
 
 	// If the sprite was not forced to do a certain action
-	if (forced_action < 0 ) {
+	if (forced_action < 0) {
 		// Execute the sprite's action and if it is finished, update the action counter
 		if (current_action >= 0) {
 			actions[current_action]->Execute();
@@ -244,7 +248,7 @@ void VirtualSprite::Update() {
 		} // switch (direction)
 
 		// Determine if the sprite may move to this new Y position
-		if ( MapMode::_current_map->_DetectCollision(this) )
+		if (MapMode::_current_map->_DetectCollision(this))
 			y_offset = tmp_y;
 
 		// Roll-over Y position offsets if necessary
@@ -298,11 +302,13 @@ void VirtualSprite::Update() {
 	} // if (moving)
 } // void VirtualSprite::Update()
 
+
+
 void VirtualSprite::Draw() {
-	if( HasDialogue() ) {
-		if( IsShowingDialogueIcon() && MapMode::_IsShowingDialogueIcons() ) {
-			VideoManager->MoveRelative( 0, -GetImgHeight() );
-			VideoManager->DrawImage( _dialogue_icon );
+	if (HasDialogue()) {
+		if (IsShowingDialogueIcon() && MapMode::_IsShowingDialogueIcons()) {
+			VideoManager->MoveRelative(0, -GetImgHeight());
+			VideoManager->DrawImage(_dialogue_icon);
 		}
 	}
 }
@@ -374,7 +380,7 @@ void VirtualSprite::SaveState() {
 
 
 bool VirtualSprite::LoadState() {
-	if(_saved == false)
+	if (_saved == false)
 		return false;
 
 	 direction = _saved_direction;
