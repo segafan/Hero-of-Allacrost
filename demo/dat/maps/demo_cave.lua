@@ -398,7 +398,7 @@ function Load(m)
 	-- Create an EnemyZone (5000 ms between respawns, monsters restricted to zone area)
 	local ezone = hoa_map.EnemyZone(5000, true);
 	-- Add a section to the zone that goes from (101, 10) to (117, 40) in map grid coordinates
-	ezone:AddSection(hoa_map.ZoneSection(10, 101, 40, 117));
+	ezone:AddSection(hoa_map.ZoneSection(34, 88, 46, 96));
 
 	-- Create a sprite representation of a monster attached to this zone
 	local enemy = hoa_map.EnemySprite();
@@ -414,7 +414,50 @@ function Load(m)
 	enemy:AddEnemy(5);
 	enemy:AddEnemy(2);
 	-- Add the enemy to the zone two times (it also gets added to the ground objects) 
-	ezone:AddEnemy(enemy, map, 2);
+	ezone:AddEnemy(enemy, map, 1);
+
+	-- Finally, add the zone to the map
+	map:_AddZone(ezone);
+
+
+	local ezone = hoa_map.EnemyZone(5000, true);
+	ezone:AddSection(hoa_map.ZoneSection(60, 76, 70, 96));
+
+	local enemy = hoa_map.EnemySprite();
+	enemy:SetObjectID(map:_GetGeneratedObjectID());
+	enemy:SetContext(1);
+	enemy:SetCollHalfWidth(1.0);
+	enemy:SetCollHeight(2.0);
+	enemy:SetImgHalfWidth(1.0);
+	enemy:SetImgHeight(4.0);
+	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
+	enemy:LoadStandardAnimations("img/sprites/map/scorpion_walk.png");
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(2);
+	ezone:AddEnemy(enemy, map, 1);
+
+	enemy = hoa_map.EnemySprite();
+	enemy:SetObjectID(map:_GetGeneratedObjectID());
+	enemy:SetContext(1);
+	enemy:SetCollHalfWidth(1.0);
+	enemy:SetCollHeight(2.0);
+	enemy:SetImgHalfWidth(1.0);
+	enemy:SetImgHeight(4.0);
+	enemy:SetMovementSpeed(hoa_map.MapMode.VERY_SLOW_SPEED);
+	enemy:LoadStandardAnimations("img/sprites/map/slime_walk.png");
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
+	ezone:AddEnemy(enemy, map, 1);
+
+	map:_AddZone(ezone);
+
+
+	-- Create an EnemyZone (5000 ms between respawns, monsters restricted to zone area)
+	local ezone = hoa_map.EnemyZone(5000, true);
+	-- Add a section to the zone that goes from (101, 10) to (117, 40) in map grid coordinates
+	ezone:AddSection(hoa_map.ZoneSection(20, 62, 32, 72));
 
 	enemy = hoa_map.EnemySprite();
 	enemy:SetObjectID(map:_GetGeneratedObjectID());
@@ -433,28 +476,7 @@ function Load(m)
 	enemy:AddEnemy(3);
 	enemy:AddEnemy(3);
 	enemy:AddEnemy(3);
-	ezone:AddEnemy(enemy, map, 2);
-
-	enemy = hoa_map.EnemySprite();
-	enemy:SetObjectID(map:_GetGeneratedObjectID());
-	enemy:SetContext(1);
-	enemy:SetCollHalfWidth(1.0);
-	enemy:SetCollHeight(2.0);
-	enemy:SetImgHalfWidth(1.0);
-	enemy:SetImgHeight(4.0);
-	enemy:SetMovementSpeed(hoa_map.MapMode.VERY_SLOW_SPEED);
-	enemy:LoadStandardAnimations("img/sprites/map/slime_walk.png");
-
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(1);
-	enemy:NewEnemyParty();
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(1);
-	enemy:AddEnemy(1);
-	ezone:AddEnemy(enemy, map, 2);
-
+	ezone:AddEnemy(enemy, map, 1);
 	-- Finally, add the zone to the map
 	map:_AddZone(ezone);
 

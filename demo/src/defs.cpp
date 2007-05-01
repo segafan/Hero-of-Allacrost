@@ -446,6 +446,7 @@ void BindEngineToLua() {
 			.def("AddDialogue", &VirtualSprite::AddDialogue, adopt(_2))
 			.def("ShowDialogueIcon", &VirtualSprite::ShowDialogueIcon)
 			.def("IsShowingDialogueIcon", &VirtualSprite::IsShowingDialogueIcon)
+			.def_readwrite("current_action", &VirtualSprite::current_action)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
@@ -523,20 +524,20 @@ void BindEngineToLua() {
 			.def("Execute", &SpriteAction::Execute)
 	];
 
-// 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
-// 	[
-// 		class_<ActionPathMove, SpriteAction>("ActionPathMove")
-// 			.def(constructor<>())
-// 	];
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
+	[
+		class_<ActionPathMove, SpriteAction>("ActionPathMove")
+			.def(constructor<VirtualSprite*>())
+			.def("SetDestination", &ActionPathMove::SetDestination)
 
-// 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
-// 	[
-// 		class_<ActionAnimate, SpriteAction>("ActionAnimate")
-// 			.def(constructor<>())
-// 	];
+	];
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
+	[
+		class_<ActionAnimate, SpriteAction>("ActionAnimate")
+			.def(constructor<VirtualSprite*>())
+	];
 	} // End using map mode namespaces
-
-
 
 	// ----- Battle Mode bindings
 	{

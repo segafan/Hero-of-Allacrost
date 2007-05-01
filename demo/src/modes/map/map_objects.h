@@ -554,7 +554,7 @@ public:
 		{ dialogues.push_back(md); }
 
 	bool HasDialogue() const
-		{ return dialogues.size() > 0; }
+		{ return (dialogues.size() > 0); }
 
 	MapDialogue* GetCurrentDialogue() const
 		{ return dialogues[_current_dialogue]; }
@@ -568,18 +568,17 @@ public:
 	int16 GetNumDialogues() const
 		{ return dialogues.size(); }
 
-	void ShowDialogueIcon( bool state )
+	void ShowDialogueIcon(bool state)
 		{ _show_dialogue_icon = state; }
 
 	bool IsShowingDialogueIcon() const
 		{ return _show_dialogue_icon; }
 	//@}
 
-	/** \brief This static class function returns the opposite direction of the
-	*** direction given in parameter.
+	/** \brief This static class function returns the opposite direction of the direction given in parameter.
 	*** \note This is mostly used as an helper function to make sprites face each other.
 	**/
-	static uint16 CalculateOppositeDirection( const uint16 direction );
+	static uint16 CalculateOppositeDirection(const uint16 direction);
 
 private:
 	/** \brief This static class function loads and set up the image used to indicate that

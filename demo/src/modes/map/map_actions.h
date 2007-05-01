@@ -112,8 +112,8 @@ public:
 	//! \brief An index to the path vector containing the node that the sprite is currently on.
 	uint32 current_node;
 
-	ActionPathMove() :
-		SpriteAction(NULL), current_node(0) {}
+// 	ActionPathMove() :
+// 		SpriteAction(NULL), current_node(0) {}
 
 	ActionPathMove(VirtualSprite* sprite) :
 		SpriteAction(sprite), current_node(0) {}
