@@ -448,7 +448,7 @@ void InventoryWindow::Activate(bool new_status)
 void InventoryWindow::Update() {
 
 	//bool cancel = false;
-	if (_inventory_items.GetNumOptions() == 0)
+	if ( GlobalManager->GetInventory()->size() == 0 )
 	{
 		// no more items in inventory, exit inventory window
 		Activate(false);
@@ -457,6 +457,8 @@ void InventoryWindow::Update() {
 
 	// Points to the active option box
 	OptionBox *active_option = NULL;
+
+	_inventory_items.Update( SystemManager->GetUpdateTime() ); //For scrolling
 
 	switch (_active_box) {
 		case ITEM_ACTIVE_CATEGORY:
@@ -713,125 +715,124 @@ void InventoryWindow::_UpdateItemText()
 {
 	// Get the inventory items
 	std::map<uint32, GlobalObject*>* inv = GlobalManager->GetInventory();
-/*	std::vector<GlobalItem*>* invItems = GlobalManager->GetInventoryItems();
+	std::vector<GlobalItem*>* invItems = GlobalManager->GetInventoryItems();
 	std::vector<GlobalWeapon*>* invWeapons = GlobalManager->GetInventoryWeapons();
 	std::vector<GlobalArmor*>* invTorsoArmor = GlobalManager->GetInventoryTorsoArmor();
 	std::vector<GlobalArmor*>* invHeadArmor = GlobalManager->GetInventoryHeadArmor();
 	std::vector<GlobalArmor*>* invArmArmor = GlobalManager->GetInventoryArmArmor();
 	std::vector<GlobalArmor*>* invLegArmor = GlobalManager->GetInventoryLegArmor();
 	std::vector<GlobalKeyItem*>* invKeyItems = GlobalManager->GetInventoryKeyItems();
-*/
+
 
 	// For item names
 	std::vector<ustring> inv_names;
 	// For iterating through items
 	std::map<uint32, GlobalObject*>::iterator i;
-/*	std::vector<GlobalItem*>::iterator i;
+	std::vector<GlobalItem*>::iterator i_item;
 	std::vector<GlobalWeapon*>::iterator i_weapon;
 	std::vector<GlobalArmor*>::iterator i_armor;
-	std::vector<GlobalKeyItem*>::iterator i_key;*/
+	std::vector<GlobalKeyItem*>::iterator i_key;
 
 	// temporary object storage variables
 	GlobalObject* obj;
-/*	GlobalItem* item;
+	GlobalItem* item;
 	GlobalWeapon* weapon;
 	GlobalArmor* armor;
 	GlobalKeyItem* key_item;
-*/
+
+	_item_objects.clear();
+
 	// Temp var to hold option
 	string text;
-	// Determines the number of selections (see the for loops)
-	uint16 count = 0;
-
-	for (i = inv->begin(), count = 0; i != inv->end(); i++) {
-		obj = i->second;
-		text = "<" + obj->GetIconImage().GetFilename() + "><32>     " + MakeStandardString(obj->GetName()) + "<R><350>" + NumberToString(obj->GetCount()) + "   ";
-		inv_names.push_back(MakeUnicodeString(text));
-		count++;
-	}
-
 
 	//FIX ME - When video engine is fixed, take out MakeStandardString
-/*	switch (_item_categories.GetSelection()) {
+	switch (_item_categories.GetSelection()) {
 
 		//Index all items
 		case ITEM_ALL:
-			for (i = invItems->begin(), count = 0; i != invItems->end(); i++) {
-				item = *i;
-				text = "<" + item->GetIconImage().GetFilename() + "><32>" + MakeStandardString(item->GetName()) + "<R><350>" + NumberToString(item->GetCount()) + "   ";
+			for (i = inv->begin(); i != inv->end(); i++) {
+				obj = i->second;
+				text = "<" + obj->GetIconImage().GetFilename() + "><32>     " + MakeStandardString(obj->GetName()) + "<R><350>" + NumberToString(obj->GetCount()) + "   ";
 				inv_names.push_back(MakeUnicodeString(text));
-				count++;
+				_item_objects.push_back( obj );
 			}
 			break;
 
+
 		//Index menu items only
 		case ITEM_FIELD:
-			for (i = invItems->begin(), count = 0; i != invItems->end(); i++) {
-				item = *i;
-//				if (item->GetUsage() == GLOBAL_USE_MENU) {
-					text = "<" + item->GetIconImage().GetFilename() + "><32>" + MakeStandardString(item->GetName()) + "<R><350>" + NumberToString(item->GetCount()) + "   ";
+			for (i_item = invItems->begin(); i_item != invItems->end(); i_item++) {
+				item = *i_item;
+				if( item->GetUsage() == GLOBAL_USE_MENU || item->GetUsage() == GLOBAL_USE_ALL  ) {
+					text = "<" + item->GetIconImage().GetFilename() + "><32>     " + MakeStandardString(item->GetName()) + "<R><350>" + NumberToString(item->GetCount()) + "   ";
 					inv_names.push_back(MakeUnicodeString(text));
-					count++;
-//				}
+					_item_objects.push_back( item );
+				}
 			}
 			break;
 
 		//Index battle items only
 		case ITEM_BATTLE:
-			for (i = invItems->begin(), count = 0; i != invItems->end(); i++) {
-				item = *i;
-//				if (item->GetUsage() == GLOBAL_USE_BATTLE) {
-					text = "<" + item->GetIconImage().GetFilename() + "><32>" + MakeStandardString(item->GetName()) + "<R><350>" + NumberToString(item->GetCount()) + "   ";
+			for (i_item = invItems->begin(); i_item != invItems->end(); i_item++) {
+				item = *i_item;
+				if( item->GetUsage() == GLOBAL_USE_BATTLE ) {
+					text = "<" + item->GetIconImage().GetFilename() + "><32>     " + MakeStandardString(item->GetName()) + "<R><350>" + NumberToString(item->GetCount()) + "   ";
 					inv_names.push_back(MakeUnicodeString(text));
-					count++;
-//				}
+					_item_objects.push_back( item );
+				}
 			}
 			break;
 
 		//Index equipment only
 		case ITEM_EQUIPMENT:
-			for (i_weapon = invWeapons->begin(), count = 0; i_weapon != invWeapons->end(); i++) {
+			for (i_weapon = invWeapons->begin(); i_weapon != invWeapons->end(); i_weapon++) {
 				weapon = *i_weapon;
-				// NOTE: item->GetIconPath is defunct
-				text = "TEMP:insert icon" + MakeStandardString(weapon->GetName()) +
-					"<R><350>" + NumberToString(weapon->GetCount()) + "   ";
+				text = "<" + weapon->GetIconImage().GetFilename() + "><32>     " + MakeStandardString(weapon->GetName()) + "<R><350>" + NumberToString(weapon->GetCount()) + "   ";
 				inv_names.push_back(MakeUnicodeString(text));
-				count++;
+				_item_objects.push_back( weapon );
 			}
 
-			for (i_armor = invHeadArmor->begin(), count = 0; i_armor != invHeadArmor->end(); i++) {
+			for (i_armor = invHeadArmor->begin(); i_armor != invHeadArmor->end(); i_armor++) {
 				armor = *i_armor;
-				// NOTE: item->GetIconPath is defunct
-				text = "TEMP:insert icon" + MakeStandardString(armor->GetName()) +
-					"<R><350>" + NumberToString(armor->GetCount()) + "   ";
+				text = "<" + armor->GetIconImage().GetFilename() + "><32>     " + MakeStandardString(armor->GetName()) + "<R><350>" + NumberToString(armor->GetCount()) + "   ";
 				inv_names.push_back(MakeUnicodeString(text));
-				count++;
+				_item_objects.push_back( armor );
 			}
 
-			for (i_armor = invTorsoArmor->begin(), count = 0; i_armor != invTorsoArmor->end(); i++) {
+			for (i_armor = invTorsoArmor->begin(); i_armor != invTorsoArmor->end(); i_armor++) {
 				armor = *i_armor;
-				// NOTE: item->GetIconPath is defunct
-				text = "TEMP:insert icon" + MakeStandardString(armor->GetName()) +
-					"<R><350>" + NumberToString(armor->GetCount()) + "   ";
+				text = "<" + armor->GetIconImage().GetFilename() + "><32>     " + MakeStandardString(armor->GetName()) + "<R><350>" + NumberToString(armor->GetCount()) + "   ";
 				inv_names.push_back(MakeUnicodeString(text));
-				count++;
+				_item_objects.push_back( armor );
+			}
+
+			for (i_armor = invArmArmor->begin(); i_armor != invArmArmor->end(); i_armor++) {
+				armor = *i_armor;
+				text = "<" + armor->GetIconImage().GetFilename() + "><32>     " + MakeStandardString(armor->GetName()) + "<R><350>" + NumberToString(armor->GetCount()) + "   ";
+				inv_names.push_back(MakeUnicodeString(text));
+				_item_objects.push_back( armor );
+			}
+
+			for (i_armor = invLegArmor->begin(); i_armor != invLegArmor->end(); i_armor++) {
+				armor = *i_armor;
+				text = "<" + armor->GetIconImage().GetFilename() + "><32>     " + MakeStandardString(armor->GetName()) + "<R><350>" + NumberToString(armor->GetCount()) + "   ";
+				inv_names.push_back(MakeUnicodeString(text));
+				_item_objects.push_back( armor );
 			}
 
 			break;
 
 		case ITEM_KEY:
-			for (i_key = invKeyItems->begin(), count = 0; i_key != invKeyItems->end(); i_key++) {
+			for (i_key = invKeyItems->begin(); i_key != invKeyItems->end(); i_key++) {
 				key_item = *i_key;
-				// NOTE: item->GetIconPath is defunct
-				text = "TEMP:insert icon" + MakeStandardString(key_item->GetName()) +
-					"<R><350>" + NumberToString(key_item->GetCount()) + "   ";
+				text = "<" + key_item->GetIconImage().GetFilename() + "><32>     " + MakeStandardString(key_item->GetName()) + "<R><350>" + NumberToString(key_item->GetCount()) + "   ";
 				inv_names.push_back(MakeUnicodeString(text));
-				count++;
+				_item_objects.push_back( key_item );
 			}
 			break;
 	}
-*/
-	_inventory_items.SetSize(1,count);
+
+	_inventory_items.SetSize(1,6);
 	_inventory_items.SetOptions(inv_names);
 } // void InventoryWindow::UpdateItemText()
 
