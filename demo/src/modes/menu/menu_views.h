@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2007 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -110,7 +110,7 @@ private:
 
 public:
 	CharacterWindow();
-	
+
 	~CharacterWindow();
 
 	/** \brief Set the character for this window
@@ -191,7 +191,7 @@ public:
 	*** \param new_status Activates the inventory window when true, de-activates it when false
 	**/
 	void Activate(bool new_status);
-	
+
 	/** \brief Indicates whether the inventory window is in the active context
 	*** \return True if the inventory window is in the active context
 	**/
@@ -200,7 +200,7 @@ public:
 
 	//! If the inventory window is ready to cancel out, or cancel out a sub-window
 	//bool CanCancel();
-	
+
 	/*!
 	* \brief Updates the inventory window.  Handles key presses, switches window context, etc.
 	*/
@@ -230,6 +230,9 @@ private:
 
 	//! OptionBox to choose item category
 	hoa_video::OptionBox _item_categories;
+
+	//! Vector of GlobalObjects that corresponds to _inventory_items
+	std::vector< hoa_global::GlobalObject* > _item_objects;
 
 	/*!
 	* \brief Updates the item text in the inventory items
@@ -277,7 +280,7 @@ private:
 
 	//! if the window is active or not
 	bool _char_select_active;
-	
+
 	//! character selection option box
 	hoa_video::OptionBox _char_select;
 
@@ -290,7 +293,7 @@ public:
 
 	StatusWindow();
 	~StatusWindow();
-	
+
 	/*!
 	* \brief render this window to the screen
 	* \return success/failure
@@ -307,13 +310,13 @@ public:
 	* \return true if the window is active, false if it's not
 	*/
 	inline bool IsActive() { return _char_select_active; }
-	
+
 	/*!
 	* \brief Active this window
 	* \param new_value true to activate window, false to deactivate window
 	*/
 	void Activate(bool new_value);
-		
+
 }; // class StatusWindow : public hoa_video::MenuWindow
 
 
@@ -434,16 +437,16 @@ private:
 
 	//! Character selector
 	hoa_video::OptionBox _char_select;
-	
+
 	//! Equipment selector
 	hoa_video::OptionBox _equip_select;
-	
+
 	//! Replacement selector
 	hoa_video::OptionBox _equip_list;
 
 	//! Flag to specify the active option box
 	uint32 _active_box;
-	
+
 	//! equipment images
 	std::vector<hoa_video::StillImage> _equip_images;
 
@@ -451,12 +454,12 @@ private:
 	* \brief Set up char selector
 	*/
 	void _InitCharSelect();
-	
+
 	/*!
 	* \brief Set up equipment selector
 	*/
 	void _InitEquipmentSelect();
-	
+
 	/*!
 	* \brief Set up replacement selector
 	*/

@@ -69,7 +69,7 @@ public:
 	void InitializeTimers();
 
 	/** \brief Updates the game timer variables.
-	*** 
+	***
 	*** This function should only be called <b>once</b> for each cycle through the main game loop. Since
 	*** it is called inside the loop in main.cpp, you should have no reason to call this function anywhere
 	*** else.
@@ -181,7 +181,7 @@ public:
 	/**
 	 * \brief Only used by classes that have a timer as a member variable
 	**/
-	Timer() : _duration(0), _time_left(0), _is_playing(false), _expiration_time(0) {}
+	Timer() : _is_playing(false), _duration(0), _time_left(0), _expiration_time(0) {}
 
 	/**
 	 * \brief Destructor
