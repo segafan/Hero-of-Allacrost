@@ -155,6 +155,18 @@ VirtualSprite::~VirtualSprite() {
 }
 
 
+void VirtualSprite::UpdateSeenDialogue() {
+	// Check all dialogues for any which have not yet been read
+	for (uint32 i = 0; i < dialogues.size(); i++) {
+		if (dialogues[i]->HasAlreadySeen() == false) {
+			seen_all_dialogue = false;
+			return;
+		}
+	}
+
+	seen_all_dialogue = true;
+}
+
 
 int VirtualSprite::_LoadDialogueIcon()
 {
@@ -306,7 +318,7 @@ void VirtualSprite::Update() {
 
 void VirtualSprite::Draw() {
 	if (HasDialogue()) {
-		if (IsShowingDialogueIcon() && MapMode::_IsShowingDialogueIcons()) {
+		if (IsShowingDialogueIcon() && MapMode::_IsShowingDialogueIcons() && seen_all_dialogue == false) {
 			VideoManager->MoveRelative(0, -GetImgHeight());
 			VideoManager->DrawImage(_dialogue_icon);
 		}
