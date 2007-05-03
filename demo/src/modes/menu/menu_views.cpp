@@ -1293,7 +1293,7 @@ void SkillsWindow::Update() {
 
 
 void SkillsWindow::_UpdateSkillList() {
-	//uint32 partysize = GlobalManager->GetParty().size();
+	//uint32 partysize = GlobalManager->GetActiveParty().GetPartySize();
 
 	//hoa_global::GlobalCharacter* ch = GlobalManager->GetCharacter(_char_select.GetSelection());
 	std::vector<ustring> options;
