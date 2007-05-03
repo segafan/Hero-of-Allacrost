@@ -238,8 +238,6 @@ void GameGlobal::RemoveFromInventory(uint32 obj_id) {
 		cerr << "GLOBAL WARNING: attempted to remove invalid object to inventory with id: " << obj_id << endl;
 	} else if (obj_id < 10000) { // Item
 		for (vector<GlobalItem*>::iterator i = _inventory_items.begin(); i != _inventory_items.end(); i++) {
-			cout << "obj_id == " << obj_id << endl;
-			cout << "GetID() == " << (*i)->GetID() << endl;
 			if ((*i)->GetID() == obj_id) {
 				_inventory_items.erase(i);
 				delete _inventory[obj_id];

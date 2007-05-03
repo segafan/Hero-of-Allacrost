@@ -77,6 +77,13 @@ void GlobalItem::MenuUse(GlobalCharacter* target) {
 			cerr << "GLOBAL ERROR: tried to use item " << MakeStandardString(_name) << " which had a count of zero" << endl;
 		return;
 	}
+	else if (_id == 1) {
+		target->SetHitPoints(target->GetHitPoints() + 30);
+	}
+	else {
+		cerr << "Can't use this item!" << endl;
+		return;
+	}
 // 	ScriptCallFunction<void>(_menu_use_function, target, instigator);
 	_count--;
 }
