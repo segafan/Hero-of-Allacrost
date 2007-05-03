@@ -279,6 +279,7 @@ namespace hoa_shop {
 namespace hoa_utils {
 	extern bool UTILS_DEBUG;
 	class ustring;
+	extern float RandomFloat();
 }
 
 #endif /* #ifndef __DEFS_HEADER__ */

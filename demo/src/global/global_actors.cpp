@@ -42,8 +42,8 @@ bool GlobalAttackPoint::LoadData(ScriptDescriptor& script) {
 	_name = MakeUnicodeString(script.ReadString("name"));
 	_x_position = script.ReadInt("x_position");
 	_y_position = script.ReadInt("y_position");
-	_fortitude_bonus = script.ReadFloat("fortitude_bonus");
-	_protection_bonus = script.ReadFloat("protection_bonus");
+	_fortitude_bonus = script.ReadInt("fortitude_bonus");
+	_protection_bonus = script.ReadInt("protection_bonus");
 	_evade_bonus = script.ReadFloat("evade_bonus");
 
 	// TODO: Check if any script read errors occurred

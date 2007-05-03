@@ -317,11 +317,17 @@ void BindEngineToLua() {
 
 	} // End using global namespaces
 
+	// ---------- (3) Bind Util Functions
+	{
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_utils")
+	[
+		def("RandomFloat", &hoa_utils::RandomFloat)
+	];
+	}
 
 
-	// ---------- (3) Bind Game Mode Components
-
-
+	// ---------- (4) Bind Game Mode Components
+	
 
 	// ----- Map Mode Bindings
 	{
@@ -580,6 +586,7 @@ void BindEngineToLua() {
 			.def("GetMetaPhysicalAttack", &BattleActor::GetMetaPhysicalAttack)
 			.def("GetPhysicalDefense", &BattleActor::GetPhysicalDefense)
 			.def("GetMetaPhysicalDefense", &BattleActor::GetMetaPhysicalDefense)
+			.def("GetCombatEvade", &BattleActor::GetCombatEvade)
 			.def("TakeDamage", &BattleActor::TakeDamage)
 			.def("OnDeath", &BattleActor::OnDeath)
 			.def("OnLife", &BattleActor::OnLife)

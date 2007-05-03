@@ -123,10 +123,10 @@ float ComputeAveragePartyLevel();
 *** ***************************************************************************/
 class ScriptEvent {
 public:
-	ScriptEvent(BattleActor* source, std::deque<BattleActor*> targets, const std::string & script_name, uint32 warm_up_time);
-	ScriptEvent(BattleActor* source, BattleActor* target, hoa_global::GlobalItem* item, uint32 warm_up_time = ITEM_WARM_UP_TIME);
-	ScriptEvent(BattleActor* source, BattleActor* target, hoa_global::GlobalSkill* skill);
-	ScriptEvent(BattleActor* source, std::deque<BattleActor*> targets, hoa_global::GlobalSkill* skill);
+	//ScriptEvent(BattleActor* source, std::deque<BattleActor*> targets, const std::string & script_name, uint32 warm_up_time);
+	ScriptEvent(BattleActor* source, BattleActor* target, hoa_global::GlobalItem* item, hoa_global::GlobalAttackPoint* attack_point = NULL, uint32 warm_up_time = ITEM_WARM_UP_TIME);
+	ScriptEvent(BattleActor* source, BattleActor* target, hoa_global::GlobalSkill* skill, hoa_global::GlobalAttackPoint* attack_point = NULL);
+	//ScriptEvent(BattleActor* source, std::deque<BattleActor*> targets, hoa_global::GlobalSkill* skill);
 
 	~ScriptEvent();
 
@@ -180,13 +180,16 @@ private:
 	//! Pointer to the item attached to this script (for item events only)
 	hoa_global::GlobalItem* _item;
 
+	//! The selected attack point (if applicable)
+	hoa_global::GlobalAttackPoint* _attack_point;
+
 	//hoa_global::GlobalActor * _source;
 
 	//! The targets of the script
 	BattleActor* _target;
 
 	//! The targets of the script FIX ME
-	std::deque<BattleActor *> _targets;
+	//std::deque<BattleActor *> _targets;
 
 	//! The amount of time to wait to execute the script
 	hoa_system::Timer _warm_up_time;
