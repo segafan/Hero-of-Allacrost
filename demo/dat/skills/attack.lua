@@ -26,7 +26,10 @@ skills[1] = {
 	target_alignment = hoa_global.GameGlobal.GLOBAL_ALIGNMENT_NEUTRAL,
 
 	BattleExecute = function(target, instigator)
-		target:TakeDamage(instigator:GetPhysicalAttack() + 32 - target:GetPhysicalDefense());
+		--If the random float is bigger, then we landed the hit
+		if ((hoa_utils.RandomFloat() * 100) > target:GetCombatEvade()) then
+			target:TakeDamage(instigator:GetPhysicalAttack() + 32 - target:GetPhysicalDefense());
+		end
 		--target:TakeDamage(32);
 		AudioManager:PlaySound("snd/sword_swipe.wav");
 	end
@@ -45,7 +48,11 @@ skills[2] = {
 	target_alignment = hoa_global.GameGlobal.GLOBAL_ALIGNMENT_BAD,
 
 	BattleExecute = function(target, instigator)
-		target:TakeDamage(15);
+		--If the random float is bigger, then we landed the hit
+		if ((hoa_utils.RandomFloat() * 100) > target:GetCombatEvade()) then
+			target:TakeDamage(instigator:GetPhysicalAttack() + 45 - target:GetPhysicalDefense());
+		end
+		--target:TakeDamage(15);
 		AudioManager:PlaySound("snd/sword_swipe.wav");
 	end
 }
@@ -64,7 +71,11 @@ skills[100] = {
 	target_alignment = hoa_global.GameGlobal.GLOBAL_ALIGNMENT_BAD,
 
 	BattleExecute = function(target, instigator)
-		target:TakeDamage(14);
+		--If the random float is bigger, then we landed the hit
+		if ((hoa_utils.RandomFloat() * 100) > target:GetCombatEvade()) then
+			target:TakeDamage(instigator:GetPhysicalAttack() + 14 - target:GetPhysicalDefense());
+		end
+		--target:TakeDamage(14);
 		AudioManager:PlaySound("snd/snake_attack.wav");
 	end
 }
@@ -81,7 +92,11 @@ skills[101] = {
 	target_alignment = hoa_global.GameGlobal.GLOBAL_ALIGNMENT_BAD,
 
 	BattleExecute = function(target, instigator)
-		target:TakeDamage(13);
+		--If the random float is bigger, then we landed the hit
+		if ((hoa_utils.RandomFloat() * 100) > target:GetCombatEvade()) then
+			target:TakeDamage(instigator:GetPhysicalAttack() + 13 - target:GetPhysicalDefense());
+		end
+		--target:TakeDamage(13);
 		AudioManager:PlaySound("snd/spider_attack.wav");
 	end
 }
@@ -98,7 +113,11 @@ skills[102] = {
 	target_alignment = hoa_global.GameGlobal.GLOBAL_ALIGNMENT_BAD,
 
 	BattleExecute = function(target, instigator)
-		target:TakeDamage(10);
+		--If the random float is bigger, then we landed the hit
+		if ((hoa_utils.RandomFloat() * 100) > target:GetCombatEvade()) then
+			target:TakeDamage(instigator:GetPhysicalAttack() + 10 - target:GetPhysicalDefense());
+		end
+		--target:TakeDamage(10);
 		AudioManager:PlaySound("snd/slime_attack.wav");
 	end
 }
@@ -106,7 +125,7 @@ skills[102] = {
 
 skills[103] = {
 	name = "Skeleton Sword Attack",
-	description = "Mighty Skeleton King's Sword Thrust. Don't get on way!",
+	description = "Mighty Skeleton King's Sword Thrust. Don't get in way!",
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
 	sp_required = 0,
 	warmup_time = 1400,
@@ -116,7 +135,11 @@ skills[103] = {
 	target_alignment = hoa_global.GameGlobal.GLOBAL_ALIGNMENT_BAD,
 
 	BattleExecute = function(target, instigator)
-		target:TakeDamage(20);
+		--If the random float is bigger, then we landed the hit
+		if ((hoa_utils.RandomFloat() * 100) > target:GetCombatEvade()) then
+			target:TakeDamage(instigator:GetPhysicalAttack() + 20 - target:GetPhysicalDefense());
+		end
+		--target:TakeDamage(20);
 		AudioManager:PlaySound("snd/skeleton_attack.wav");
 	end
 }

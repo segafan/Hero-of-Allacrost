@@ -148,10 +148,10 @@ public:
 	uint16 GetYPosition() const
 		{ return _y_position; }
 
-	float GetFortitudeBonus() const
+	uint32 GetFortitudeBonus() const
 		{ return _fortitude_bonus; }
 
-	float GetProtectionBonus() const
+	uint32 GetProtectionBonus() const
 		{ return _protection_bonus; }
 
 	float GetEvadeBonus() const
@@ -180,8 +180,8 @@ private:
 	*** setting the fortitude bonus to 25.0f increases the actor's fortitude on this attack point by 25%.
 	**/
 	//@{
-	float _fortitude_bonus;
-	float _protection_bonus;
+	uint32 _fortitude_bonus;
+	uint32 _protection_bonus;
 	float _evade_bonus;
 	//@}
 

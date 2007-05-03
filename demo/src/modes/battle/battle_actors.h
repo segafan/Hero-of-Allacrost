@@ -122,7 +122,7 @@ public:
 	/*! Gives a specific amount of damage for the object
 	** \note Must be defined in subclasses
 	*/
-	virtual void TakeDamage(uint32 damage);
+	virtual void TakeDamage(int32 damage);
 
 	//! Sets queued to perform
 	void SetQueuedToPerform(bool QueuedToPerform)
@@ -156,17 +156,20 @@ public:
 	// \brief Called when the actor is revived
 	virtual void OnLife();
 
-	// \brief Calculates the actor's base physical attack damage
+	// \brief Calculates the actor's physical attack damage
 	virtual void CalcPhysicalAttack() { }
 
-	// \brief Calculates the actor's base metaphysical attack damage
+	// \brief Calculates the actor's metaphysical attack damage
 	virtual void CalcMetaPhysicalAttack() { }
 
-	// \brief Calculates the actor's base physical defense
-	virtual void CalcPhysicalDefense() { }
+	// \brief Calculates the actor's physical defense
+	virtual void CalcPhysicalDefense(hoa_global::GlobalAttackPoint* attack_point = NULL) { }
 
-	// \brief Calculates the actor's base metaphysical defense
-	virtual void CalcMetaPhysicalDefense() { }
+	// \brief Calculates the actor's metaphysical defense
+	virtual void CalcMetaPhysicalDefense(hoa_global::GlobalAttackPoint* attack_point = NULL) { }
+
+	// \brief Calculates the actor's evade
+	virtual void CalcEvade(hoa_global::GlobalAttackPoint* attack_point = NULL) { }
 
 	// \brief Draws the status of the actor
 	virtual void DrawStatus() { }
@@ -217,7 +220,7 @@ public:
 		{ _y_origin = y_origin; }
 	//@}
 
-	//! \name Getters for the actor's stats
+	//! \name Getters for the actor's combat stats
 	//@{
 	uint32 GetPhysicalAttack() const
 		{ return _physical_attack; }
@@ -230,6 +233,9 @@ public:
 
 	uint32 GetMetaPhysicalDefense() const
 		{ return _metaphysical_defense; }
+
+	float GetCombatEvade() const
+		{ return _combat_evade; }
 	//@}
 
 	//! \name Getters for the actor's stats
@@ -299,6 +305,12 @@ public:
 
 	//@}
 
+	// \brief Resets the attack timer for the animation
+	void TEMP_ResetAttackTimer();
+
+	//! Is the monster attacking right now
+	bool TEMP_IsAttacking() const;
+
 protected:
 	//! The last time the actor was updated
 	uint32 _last_update_time;
@@ -335,6 +347,7 @@ protected:
 	uint32 _metaphysical_attack;
 	uint32 _physical_defense;
 	uint32 _metaphysical_defense;
+	float _combat_evade;
 	//@}
 
 	//! Variable for tracking time (ms) on how long to show the damage text
@@ -360,6 +373,9 @@ protected:
 	//! Amount of time character spends in the idle phase
 	//FIX ME for now, will also be used for cool down times?
 	hoa_system::Timer _wait_time;
+
+	//! Timer for the attack animation
+	hoa_system::Timer _TEMP_attack_animation_timer;
 
 	//! Recalculates wait time if agility has changed	
 	void _RecalculateWaitTime();
@@ -395,17 +411,20 @@ public:
 	//! Draws the character's status information
 	virtual void DrawStatus();
 
-	// \brief Calculates the actor's base physical attack damage
+	// \brief Calculates the actor's physical attack damage
 	virtual void CalcPhysicalAttack();
 
-	// \brief Calculates the actor's base metaphysical attack damage
+	// \brief Calculates the actor's metaphysical attack damage
 	virtual void CalcMetaPhysicalAttack();
 
-	// \brief Calculates the actor's base physical defense
-	virtual void CalcPhysicalDefense();
+	// \brief Calculates the actor's physical defense
+	virtual void CalcPhysicalDefense(hoa_global::GlobalAttackPoint* attack_point = NULL);
 
-	// \brief Calculates the actor's base metaphysical defense
-	virtual void CalcMetaPhysicalDefense();
+	// \brief Calculates the actor's metaphysical defense
+	virtual void CalcMetaPhysicalDefense(hoa_global::GlobalAttackPoint* attack_point = NULL);
+
+	// \brief Calculates the actor's evade
+	virtual void CalcEvade(hoa_global::GlobalAttackPoint* attack_point = NULL);
 
 	//! Gives a specific amount of damage for the character
 	//void TakeDamage(uint32 damage);
@@ -548,23 +567,20 @@ public:
 	//! Gives a specific amount of damage for the enemy
 	//void TakeDamage(uint32 damage);
 
-	//! Is the monster attacking right now
-	bool IsAttacking() const;
-
-	// \brief Resets the attack timer for the animation
-	void ResetAttackTimer();
-
-	// \brief Calculates the actor's base physical attack damage
+	// \brief Calculates the actor's physical attack damage
 	virtual void CalcPhysicalAttack();
 
-	// \brief Calculates the actor's base metaphysical attack damage
+	// \brief Calculates the actor's metaphysical attack damage
 	virtual void CalcMetaPhysicalAttack();
 
-	// \brief Calculates the actor's base physical defense
-	virtual void CalcPhysicalDefense();
+	// \brief Calculates the actor's physical defense
+	virtual void CalcPhysicalDefense(hoa_global::GlobalAttackPoint* attack_point = NULL);
 
-	// \brief Calculates the actor's base metaphysical defense
-	virtual void CalcMetaPhysicalDefense();
+	// \brief Calculates the actor's metaphysical defense
+	virtual void CalcMetaPhysicalDefense(hoa_global::GlobalAttackPoint* attack_point = NULL);
+
+	// \brief Calculates the actor's evade
+	virtual void CalcEvade(hoa_global::GlobalAttackPoint* attack_point = NULL);
 
 	//! Is the enemy queued to attack?
 	/*bool IsQueuedToPerform() const
@@ -630,9 +646,6 @@ public:
 private:
 	//! Handle to the GlobalEnemy Entity
 	hoa_global::GlobalEnemy _global_enemy;
-
-	//! Timer for the attack animation
-	hoa_system::Timer _attack_animation_timer;
 
 	//! Enemy's X-coordinate on the screen
 	/*float _x_location;

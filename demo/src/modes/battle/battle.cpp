@@ -58,7 +58,7 @@ BattleMode * current_battle = NULL;
 ////////////////////////////////////////////////////////////////////////////////
 
 //ScriptEvent::ScriptEvent(hoa_global::GlobalActor * source, std::deque<IBattleActor*> targets, const std::string & script_name) :
-ScriptEvent::ScriptEvent(BattleActor* source, std::deque<BattleActor*> targets, const std::string & script_name, uint32 warm_up_time) :
+/*ScriptEvent::ScriptEvent(BattleActor* source, std::deque<BattleActor*> targets, const std::string & script_name, uint32 warm_up_time) :
 	_script_name(script_name),
 	_source(source),
 	_skill(NULL),
@@ -68,13 +68,14 @@ ScriptEvent::ScriptEvent(BattleActor* source, std::deque<BattleActor*> targets, 
 	_warm_up_time.SetDuration(warm_up_time);
 	_warm_up_time.Reset();
 	_warm_up_time.Play();
-}
+}*/
 
 //Constructor for a script event that uses an item
-ScriptEvent::ScriptEvent(BattleActor* source, BattleActor* target, GlobalSkill* skill) :
+ScriptEvent::ScriptEvent(BattleActor* source, BattleActor* target, GlobalSkill* skill, GlobalAttackPoint* attack_point) :
 	_source(source),
 	_skill(skill),
 	_item(NULL),
+	_attack_point(attack_point),
 	_target(target)
 {
 	_warm_up_time.SetDuration(skill->GetWarmupTime());
@@ -83,10 +84,11 @@ ScriptEvent::ScriptEvent(BattleActor* source, BattleActor* target, GlobalSkill* 
 }
 
 // Constructor for a script event that uses an item
-ScriptEvent::ScriptEvent(BattleActor* source, BattleActor* target, GlobalItem* item, uint32 warm_up_time) :
+ScriptEvent::ScriptEvent(BattleActor* source, BattleActor* target, GlobalItem* item, GlobalAttackPoint* attack_point, uint32 warm_up_time) :
 	_source(source),
 	_skill(NULL),
 	_item(item),
+	_attack_point(attack_point),
 	_target(target)
 
 {
@@ -97,7 +99,7 @@ ScriptEvent::ScriptEvent(BattleActor* source, BattleActor* target, GlobalItem* i
 
 
 // Constructor with multiple targets and a skill
-ScriptEvent::ScriptEvent(BattleActor* source, std::deque<BattleActor*> targets, hoa_global::GlobalSkill* skill) :
+/*ScriptEvent::ScriptEvent(BattleActor* source, std::deque<BattleActor*> targets, hoa_global::GlobalSkill* skill) :
 	_source(source),
 	_skill(skill),
 	_item(NULL),
@@ -107,7 +109,7 @@ ScriptEvent::ScriptEvent(BattleActor* source, std::deque<BattleActor*> targets, 
 	_warm_up_time.SetDuration(skill->GetWarmupTime());
 	_warm_up_time.Reset();
 	_warm_up_time.Play();
-}
+}*/
 
 
 ScriptEvent::~ScriptEvent()
@@ -118,9 +120,12 @@ ScriptEvent::~ScriptEvent()
 void ScriptEvent::Update()
 {
 	//_warm_up_time -= SystemManager->GetUpdateTime();
-	float offset = SystemManager->GetUpdateTime() * (107.f / _warm_up_time.GetDuration());
+	if (_warm_up_time.IsPlaying())
+	{
+		float offset = SystemManager->GetUpdateTime() * (107.f / _warm_up_time.GetDuration());
 	
-	_source->SetTimePortraitLocation(_source->GetTimePortraitLocation() + offset);
+		_source->SetTimePortraitLocation(_source->GetTimePortraitLocation() + offset);
+	}
 	//TODO Any warm up animations
 }
 
@@ -132,10 +137,19 @@ void ScriptEvent::RunScript() {
 		{
 			if (_target->IsEnemy())
 			{
+				BattleEnemyActor* bea;
 				//Loop through enemies and apply the item
 				for (uint32 i = 0; i < current_battle->GetNumberOfEnemies(); ++i)
 				{
-					_item->BattleUse(current_battle->GetEnemyActorAt(i), _source);
+					bea = current_battle->GetEnemyActorAt(i);
+					if (bea->IsAlive())
+					{
+						bea->CalcEvade(_attack_point);
+						bea->CalcMetaPhysicalDefense(_attack_point);
+						bea->CalcPhysicalDefense(_attack_point);
+					}
+
+					_item->BattleUse(bea, _source);
 				}
 				
 				//_item->DecrementCount(1);
@@ -147,10 +161,19 @@ void ScriptEvent::RunScript() {
 			}
 			else
 			{
+				BattleCharacterActor* bca;
 				//Loop through all party members and apply
 				for (uint32 i = 0; i < current_battle->GetNumberOfCharacters(); ++i)
 				{
-					_item->BattleUse(current_battle->GetPlayerCharacterAt(i), _source);
+					bca = current_battle->GetPlayerCharacterAt(i);
+					if (bca->IsAlive())
+					{
+						bca->CalcEvade(_attack_point);
+						bca->CalcMetaPhysicalDefense(_attack_point);
+						bca->CalcPhysicalDefense(_attack_point);
+					}
+
+					_item->BattleUse(bca, _source);
 				}
 
 				//_item->DecrementCount(1);
@@ -163,6 +186,10 @@ void ScriptEvent::RunScript() {
 		}
 		else
 		{
+			_target->CalcEvade(_attack_point);
+			_target->CalcMetaPhysicalDefense(_attack_point);
+			_target->CalcPhysicalDefense(_attack_point);
+
 			_item->BattleUse(_target, _source);
 			//_item->DecrementCount(1);
 
@@ -181,35 +208,63 @@ void ScriptEvent::RunScript() {
 	// TEMP: do basic damage to the actors
 	else if (_skill)
 	{
+		_source->CalcMetaPhysicalAttack();
+		_source->CalcPhysicalAttack();
+
 		if (_skill->GetTargetType() == GLOBAL_TARGET_PARTY)
 		{
 			if (_target->IsEnemy())
 			{
+				BattleEnemyActor* bea;
 				//Loop through enemies and apply the item
 				for (uint32 i = 0; i < current_battle->GetNumberOfEnemies(); ++i)
 				{
-					_skill->BattleExecute(current_battle->GetEnemyActorAt(i), _source);
+					bea = current_battle->GetEnemyActorAt(i);
+					if (bea->IsAlive())
+					{
+						bea->CalcEvade(_attack_point);
+						bea->CalcMetaPhysicalDefense(_attack_point);
+						bea->CalcPhysicalDefense(_attack_point);
+					}
+
+					_skill->BattleExecute(bea, _source);
 				}
 			}
 			else
 			{
+				BattleCharacterActor* bca;
 				//Loop through all party members and apply
 				for (uint32 i = 0; i < current_battle->GetNumberOfCharacters(); ++i)
 				{
-					_skill->BattleExecute(current_battle->GetPlayerCharacterAt(i), _source);
+					bca = current_battle->GetPlayerCharacterAt(i);
+					if (bca->IsAlive())
+					{
+						bca->CalcEvade(_attack_point);
+						bca->CalcMetaPhysicalDefense(_attack_point);
+						bca->CalcPhysicalDefense(_attack_point);
+					}
+
+					_skill->BattleExecute(bca, _source);
 				}
 			}
 		}
 		else
 		{
-			if (_target)
+			//if (_target)
+			//{
+			if (_target->IsAlive())
 			{
-				_skill->BattleExecute(_target, _source);
+				_target->CalcEvade(_attack_point);
+				_target->CalcMetaPhysicalDefense(_attack_point);
+				_target->CalcPhysicalDefense(_attack_point);
 			}
+
+			_skill->BattleExecute(_target, _source);
+			/*}
 			else
 			{
 				_skill->BattleExecute(current_battle->GetPlayerCharacterAt(0), _source);
-			}
+			}*/
 		}
 
 		_source->SetSkillPoints(_source->GetSkillPoints() - _skill->GetSPRequired());
@@ -217,7 +272,8 @@ void ScriptEvent::RunScript() {
 		//TEMP
 		//current_battle->_battle_sounds[4].PlaySound();
 	}
-	else
+	//OBSOLETE
+	/*else
 	{
 		//Skill code here
 		for (uint8 i = 0; i < _targets.size(); i++) {
@@ -235,17 +291,19 @@ void ScriptEvent::RunScript() {
 			else if (MakeStandardString(this->GetSource()->GetActor()->GetName()) == "Claudius")
 				current_battle->_battle_sounds[3].PlaySound();
 			else if (MakeStandardString(this->GetSource()->GetActor()->GetName()) == "Snake")
-			current_battle->_battle_sounds[4].PlaySound();*/
+			current_battle->_battle_sounds[4].PlaySound();
 		}
 		// TODO: get script from global script repository and run, passing in list of arguments and host actor
-	}
+	}*/
 
+	//FIXE ME Temp code!!!
 	if (_source)
 	{
-		if (_source->IsEnemy())
-		{
-			dynamic_cast<BattleEnemyActor*>(_source)->ResetAttackTimer();
-		}
+		_source->TEMP_ResetAttackTimer();
+		//if (_source->IsEnemy())
+		//{
+		//	dynamic_cast<BattleEnemyActor*>(_source)->ResetAttackTimer();
+		//}
 	}
 }
 
@@ -1316,7 +1374,9 @@ void BattleMode::_UpdateAttackPointSelection() {
 		//if (_selected_actor_arguments.size() == _necessary_selections) {
 
 		//AddScriptEventToQueue(ScriptEvent(_selected_character, _selected_actor_arguments, "sword_swipe", 2000));
-		ScriptEvent *se = new ScriptEvent(_selected_character, _selected_target, _skill_list.at(_selected_option_index));
+		//FIX ME Point-specific items later on?
+		ScriptEvent *se = new ScriptEvent(_selected_character, _selected_target,
+			_skill_list.at(_selected_option_index), global_attack_points[_attack_point_selected]);
 		AddScriptEventToQueue(se);//(GetPlayerCharacterAt(_actor_index), _selected_actor_arguments, "sword_swipe", 1000));
 		_selected_character->SetQueuedToPerform(true);
 		//_selected_actor_arguments.clear();

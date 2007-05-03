@@ -52,6 +52,11 @@ BattleActor::BattleActor() : _total_time_damaged(0),
 	_time_portrait_selected.SetDimensions(45,45);
 	_time_portrait_selected.SetFilename("img/menus/stamina_icon_selected.png");
 	VideoManager->LoadImage(_time_portrait_selected);
+
+	// Reset attack timer, TEMP CODE!!!!
+	_TEMP_attack_animation_timer.SetDuration(0);
+	_TEMP_attack_animation_timer.Reset();
+	_TEMP_attack_animation_timer.Play();
 }
 
 BattleActor::~BattleActor()
@@ -115,12 +120,21 @@ void BattleActor::OnLife()
 }
 
 // Gives a specific amount of damage for the actor
-void BattleActor::TakeDamage(uint32 damage)
+// Switched from uint to int to allow for nullified attacks
+//(i.e. attacks where damage dealt is < defense)
+void BattleActor::TakeDamage(int32 damage)
 {
 	_total_time_damaged = 1;
+
+	if (damage <= 0)
+	{
+		_damage_dealt = 0;
+		return;
+	}
+
 	_damage_dealt = damage;
 
-	if (damage >= GetHitPoints()) // Was it a killing blow?
+	if (static_cast<uint32>(damage) >= GetHitPoints()) // Was it a killing blow?
 	{
 		SetHitPoints(0);
 		OnDeath();
@@ -129,6 +143,19 @@ void BattleActor::TakeDamage(uint32 damage)
 	else {
 		SetHitPoints(GetHitPoints() - damage);
 	}
+}
+
+void BattleActor::TEMP_ResetAttackTimer()
+{
+	_TEMP_attack_animation_timer.SetDuration(1000);
+	_TEMP_attack_animation_timer.Reset();
+	_TEMP_attack_animation_timer.Play();
+}
+
+// Is the actor attacking right now
+bool BattleActor::TEMP_IsAttacking() const
+{
+	return !_TEMP_attack_animation_timer.HasExpired();
 }
 
 // *****************************************************************************
@@ -208,6 +235,13 @@ void BattleCharacterActor::Update()
 
 	GetActor()->RetrieveBattleAnimation("idle")->Update();
 
+	if (TEMP_IsAttacking()) {
+		if ((_x_location - _x_origin) < 50)
+			_x_location += 0.8f * static_cast<float>(SystemManager->GetUpdateTime());
+	}
+	else
+		SetXLocation(GetXOrigin()); // Restore original place
+
 	//if (!_wait_time.HasExpired() && GetActor()->IsAlive() && !IsQueuedToPerform())
 	//	_time_portrait_location += SystemManager->GetUpdateTime() * (405.0f / _wait_time.GetDuration());	
 }
@@ -231,7 +265,7 @@ void BattleCharacterActor::CalcMetaPhysicalAttack()
 }
 
 //Calculates the actor's base physical defense
-void BattleCharacterActor::CalcPhysicalDefense()
+void BattleCharacterActor::CalcPhysicalDefense(hoa_global::GlobalAttackPoint* attack_point)
 {
 	_physical_defense = _fortitude;
 	std::vector<GlobalArmor*> armor = GetActor()->GetArmorEquipped();
@@ -240,10 +274,15 @@ void BattleCharacterActor::CalcPhysicalDefense()
 	{
 		_physical_defense += armor[i]->GetPhysicalDefense();
 	}
+
+	if (attack_point)
+	{
+		_physical_defense += attack_point->GetFortitudeBonus();
+	}
 }
 
 //Calculates the actor's base metaphysical defense
-void BattleCharacterActor::CalcMetaPhysicalDefense()
+void BattleCharacterActor::CalcMetaPhysicalDefense(hoa_global::GlobalAttackPoint* attack_point)
 {
 	_metaphysical_defense = _protection;
 
@@ -252,6 +291,28 @@ void BattleCharacterActor::CalcMetaPhysicalDefense()
 	for (uint32 i = 0; i < armor.size(); ++i)
 	{
 		_metaphysical_defense += armor[i]->GetMetaphysicalDefense();
+	}
+
+	if (attack_point)
+	{
+		_metaphysical_defense += attack_point->GetProtectionBonus();
+	}
+}
+
+//Calculates the actor's evade
+void BattleCharacterActor::CalcEvade(hoa_global::GlobalAttackPoint* attack_point)
+{
+	_combat_evade = _evade;
+
+	//std::vector<GlobalArmor*> armor = GetActor()->GetArmorEquipped();
+
+	/*for (uint32 i = 0; i < armor.size(); ++i)
+	{
+		_metaphysical_defense += armor[i]->GetMetaphysicalDefense();
+	}*/
+	if (attack_point)
+	{
+		_combat_evade += attack_point->GetEvadeBonus();
 	}
 }
 
@@ -484,11 +545,6 @@ BattleEnemyActor::BattleEnemyActor(GlobalEnemy enemy, float x_location, float y_
 	_time_meter_portrait.SetDimensions(45,45);
 	VideoManager->LoadImage(_time_meter_portrait);
 
-	// Reset attack timer,
-	_attack_animation_timer.SetDuration(0);
-	_attack_animation_timer.Reset();
-	_attack_animation_timer.Play();
-
 	//Load time portrait selector
 	/*_time_portrait_selected.SetDimensions(45,45);
 	_time_portrait_selected.SetFilename("img/menus/stamina_icon.png");
@@ -525,15 +581,42 @@ void BattleEnemyActor::CalcMetaPhysicalAttack()
 }
 
 //Calculates the actor's base physical defense
-void BattleEnemyActor::CalcPhysicalDefense()
+void BattleEnemyActor::CalcPhysicalDefense(GlobalAttackPoint* attack_point)
 {
 	_physical_defense = _fortitude;
+
+	if (attack_point)
+	{
+		_physical_defense += attack_point->GetFortitudeBonus();
+	}
 }
 
 //Calculates the actor's base metaphysical defense
-void BattleEnemyActor::CalcMetaPhysicalDefense()
+void BattleEnemyActor::CalcMetaPhysicalDefense(GlobalAttackPoint* attack_point)
 {
 	_metaphysical_defense = _protection;
+
+	if (attack_point)
+	{
+		_metaphysical_defense += attack_point->GetProtectionBonus();
+	}
+}
+
+//Calculates the actor's base evade
+void BattleEnemyActor::CalcEvade(hoa_global::GlobalAttackPoint* attack_point)
+{
+	_combat_evade = _evade;
+
+	//std::vector<GlobalArmor*> armor = GetActor()->GetArmorEquipped();
+
+	/*for (uint32 i = 0; i < armor.size(); ++i)
+	{
+		_metaphysical_defense += armor[i]->GetMetaphysicalDefense();
+	}*/
+	if (attack_point)
+	{
+		_combat_evade += attack_point->GetEvadeBonus();
+	}
 }
 
 /*void BattleEnemyActor::ResetWaitTime()
@@ -570,17 +653,24 @@ void BattleEnemyActor::Update() {
 			//_wait_time = 0;
 			//FIX ME Needs real AI decisions
 			//we can perform another attack
-			std::deque<BattleActor*> final_targets;
+			//MF: Bad bad bad.  We do not build a queue of targets.  Not anymore.
+			//All we do is have a handle to either 1 enemy or char to see which
+			//side we're attacking.  If it's a party skill, then the script just
+			//loops over them.  Besides, we don't want to send dequeues to the
+			//Lua stack.
+
+			/*std::deque<BattleActor*> final_targets;
 			std::deque<BattleCharacterActor*> targets = current_battle->GetCharacters();
 
 			for (uint8 i = 0; i < targets.size(); i++) {
 				final_targets.push_back(dynamic_cast<BattleActor*>(targets[i]));
-			}
+			}*/
 
 			// okay, we can perform another attack.  set us up as queued to perform.
 			SetQueuedToPerform(true);
 			GlobalSkill* skill = (GetActor()->GetSkills().begin()->second);
-			ScriptEvent *se = new ScriptEvent(this, final_targets, skill);
+			//FIX ME Until we have AI, pick Claudius
+			ScriptEvent *se = new ScriptEvent(this, current_battle->GetPlayerCharacterAt(0), skill);
 			current_battle->AddScriptEventToQueue(se);
 
 			//current_battle->AddScriptEventToQueue(new ScriptEvent(this, final_targets, "sword_swipe", 3000));
@@ -593,7 +683,7 @@ void BattleEnemyActor::Update() {
 
 	// If we're attacking, update the offset a little
 	// FIX ME Let the script event handle this
-	if (IsAttacking()) {
+	if (TEMP_IsAttacking()) {
 		if ((_x_origin - _x_location) < 50)
 			_x_location -= 0.8f * static_cast<float>(SystemManager->GetUpdateTime());
 	}
@@ -731,21 +821,6 @@ void BattleEnemyActor::DrawStatus() {
 		SetHitPoints(GetHitPoints() - damage);
 	}
 }*/
-
-
-// Is the monster attacking right now
-bool BattleEnemyActor::IsAttacking() const
-{
-	return !_attack_animation_timer.HasExpired();
-}
-
-
-void BattleEnemyActor::ResetAttackTimer()
-{
-	_attack_animation_timer.SetDuration(1000);
-	_attack_animation_timer.Reset();
-	_attack_animation_timer.Play();
-}
 
 
 } // namespace private_battle

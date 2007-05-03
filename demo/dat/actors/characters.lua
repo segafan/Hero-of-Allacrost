@@ -36,24 +36,24 @@ characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS] = {
 			name = "Torso",
 			x_position = 37,
 			y_position = 34,
-			fortitude_bonus = 40.0,
-			protection_bonus = 10.0,
+			fortitude_bonus = 40,
+			protection_bonus = 10,
 			evade_bonus = 0.0
 		},
 		[3] = {
 			name = "Arms",
 			x_position = 31,
 			y_position = 54,
-			fortitude_bonus = 10.0,
-			protection_bonus = 0.0,
+			fortitude_bonus = 10,
+			protection_bonus = 0,
 			evade_bonus = 10.0
 		},
 		[4] = {
 			name = "Legs",
 			x_position = 37,
 			y_position = 34,
-			fortitude_bonus = 20.0,
-			protection_bonus = 20.0,
+			fortitude_bonus = 20,
+			protection_bonus = 20,
 			evade_bonus = 5.0
 		}
 	},
