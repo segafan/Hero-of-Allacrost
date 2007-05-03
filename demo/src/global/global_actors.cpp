@@ -71,6 +71,43 @@ void GlobalActor::_CalculateEvadeRatings() {
 	// TODO
 }
 
+
+
+void GlobalActor::EquipWeapon(GlobalWeapon* weapon) {
+	delete _weapon_equipped;
+	_weapon_equipped = new GlobalWeapon(weapon->GetID());
+}
+
+
+
+void GlobalActor::EquipArmor(GlobalArmor* armor) {
+	switch (armor->GetType()) {
+		case GLOBAL_OBJECT_HEAD_ARMOR:
+		delete _armor_equipped[0];
+		_armor_equipped[0] = new GlobalArmor(armor->GetID());
+		break;
+
+		case GLOBAL_OBJECT_TORSO_ARMOR:
+		delete _armor_equipped[1];
+		_armor_equipped[1] = new GlobalArmor(armor->GetID());
+		break;
+
+		case GLOBAL_OBJECT_ARM_ARMOR:
+		delete _armor_equipped[2];
+		_armor_equipped[2] = new GlobalArmor(armor->GetID());
+		break;
+
+		case GLOBAL_OBJECT_LEG_ARMOR:
+		delete _armor_equipped[3];
+		_armor_equipped[3] = new GlobalArmor(armor->GetID());
+		break;
+
+		default:
+		cerr << "ERROR: Trying to equip an armor that isn't an armor!" << endl;
+		break;
+	}
+}
+
 // ****************************************************************************
 // ***** GlobalCharacter
 // ****************************************************************************
