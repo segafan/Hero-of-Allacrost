@@ -74,77 +74,37 @@ private:
 
 /** ****************************************************************************
 *** \brief Retains and manages dialogues between characters on a map.
+*** 
+*** Dialogues consist of multiple lines. Each line of a dialogue contains the 
+*** following information:
+***
+*** -# The text of the line
+*** -# An object ID that indicates who is currently speaking the line
+*** -# A value that indicates the maximum time that the line should be displayed
+*** -# A pointer to a script function to execute after the line is finished
+***
+*** Both the time value and the script function pointer are optional and do not
+*** need to be set for every line of dialogue. Dialogues may also be "blocked",
+*** which means that they ignore the user's input while the dialogue is executing.
+***
+*** When a dialogue is finished, usually the state of all speaker sprites (status 
+*** such as the direction they were facing prior to the dialogue) is restored so
+*** that they can continue. Also for dialogues which are "owned" by a sprite (where
+*** owned simply means that the dialogue instance is retained in the VirtualSprite#_dialogues
+*** container), the sprite is informed that the dialogue has finished so that the
+*** sprite may re-check whether or not all dialogues that it contains have been
+*** seen by the player.
 *** ***************************************************************************/
 class MapDialogue {
 public:
 	/** \brief This is the default contructor.
 	*** It can take a bool parameter to indicate weither or not the dialogue should
 	*** reset the speakers to the state at which they were before the dialogue.
-	*** This parameter is set to true ( reset ) by default.
+	*** This parameter is set to true (reset) by default.
 	**/
 	MapDialogue(bool save_state = true);
 
 	~MapDialogue();
-
-	//! \brief This resets the counter that keeps track of how many times the dialogue has been seen.
-	void ClearSeenDialogue()
-		{ _seen = 0; }
-
-	//! \brief Indicates if this dialogue has been seen by the player.
-	bool IsSeenDialogue() const
-		{ return _seen == 0 ? false : true; }
-
-	//! \brief This increments the counter that keeps track of how many times the dialogue has been seen.
-	void SetSeenDialogue()
-		{ _seen++; }
-
-	//! \brief This returns the number of times that this dialogue has been seen by the player.
-	int32 GetSeenCount() const
-		{ return _seen; }
-
-	//! \brief Returns the maximum time in milliseconds that the current line of dialogue should be displayed.
-	int32 GetLineTime() const
-		{ return _time[_current_line]; }
-
-	//! \brief Returns a bool that indicates whether a dialogue is blocked (ignores user input)
-	bool IsBlocked() const
-		{ return _blocked; }
-
-	//! \brief This method controls if the dialogue should ignore user input (true) or not (false).
-	void SetBlock(bool b)
-		{ _blocked = b; }
-
-	//! \brief Returns true if a dialogue should load the saved state of the dialogue speakers at the end of the dialogue.
-	bool IsSaving() const
-		{ return _save_state; }
-
-	//! \brief This returns the number of line of the dialogue.
-	uint32 GetNumLines() const
-		{ return _speakers.size(); }
-
-	//! \brief Returns the object ID of the speaker of the current line of dialogue.
-	uint32 GetCurrentSpeaker() const
-		{ return _speakers[_current_line]; }
-
-	//! \brief Returns a reference to the unicode text string of the current line of dialogue.
-	hoa_utils::ustring GetCurrentLine() const
-		{ return _text[_current_line]; }
-
-	//! \brief Returns a pointer to the ScriptObject that will be invoked after the current line of dialogue completes
-	ScriptObject* GetCurrentAction()
-		{ return _actions[_current_line]; }
-
-	//! \brief Returns the object id of the speaker of a line.
-	uint32 GetLineSpeaker(uint32 line) const
-		{ if (line > _speakers.size()) return -1; else return _speakers[line]; }
-
-	//! \brief Returns the text of a specific line.
-	hoa_utils::ustring GetLineText(uint32 line) const
-		{ if (line > _text.size()) return hoa_utils::ustring(); else return _text[line]; }
-
-	//! \brief Returns the actions of a specific line.
-	ScriptObject* GetLineAction(uint32 line)
-		{ if (line > _actions.size()) return NULL; else return _actions[line]; }
 
 	/** \brief This method adds a new line of text and optionally an action to the dialogue.
 	*** \param text The text to show on the screen
@@ -163,19 +123,81 @@ public:
 	**/
 	bool ReadNextLine();
 
+	//! \name Class Member Access Functions
+	//@{
+	//! \brief This resets the counter that keeps track of how many times the dialogue has been seen.
+	void ResetTimesSeen()
+		{ _seen = 0; }
+
+	//! \brief Indicates if this dialogue has already been seen by the player.
+	bool HasAlreadySeen() const
+		{ return (_seen == 0) ? false : true; }
+
+	//! \brief This increments the counter that keeps track of how many times the dialogue has been seen by the player
+	void IncrementTimesSeen()
+		{ _seen++; }
+
+	//! \brief This method controls if the dialogue should ignore user input (true) or not (false).
+	void SetBlock(bool b)
+		{ _blocked = b; }
+
+	void SetOwner(VirtualSprite* sprite)
+		{ _owner = sprite; }
+
+	//! \brief This returns the number of times that this dialogue has been seen by the player.
+	int32 GetTimesSeen() const
+		{ return _seen; }
+
+	//! \brief Returns a bool that indicates whether a dialogue is blocked (ignores user input)
+	bool IsBlocked() const
+		{ return _blocked; }
+
+	//! \brief Returns true if a dialogue should load the saved state of the dialogue speakers at the end of the dialogue.
+	bool IsSaving() const
+		{ return _save_state; }
+
+	VirtualSprite* GetOwner() const
+		{ return _owner; }
+
+	//! \brief This returns the number of line of the dialogue.
+	uint32 GetNumLines() const
+		{ return _speakers.size(); }
+
+	//! \brief Returns a reference to the unicode text string of the current line of dialogue.
+	hoa_utils::ustring GetCurrentText() const
+		{ return _text[_current_line]; }
+
+	//! \brief Returns the object ID of the speaker of the current line of dialogue.
+	uint32 GetCurrentSpeaker() const
+		{ return _speakers[_current_line]; }
+
+	//! \brief Returns the display time of the current line of dialogue.
+	int32 GetCurrentTime() const
+		{ return _time[_current_line]; }
+
+	//! \brief Returns a pointer to the ScriptObject that will be invoked after the current line of dialogue completes
+	ScriptObject* GetCurrentAction()
+		{ return _actions[_current_line]; }
+
+	//! \brief Returns the text of a specific line.
+	hoa_utils::ustring GetLineText(uint32 line) const
+		{ if (line > _text.size()) return hoa_utils::ustring(); else return _text[line]; }
+
+	//! \brief Returns the object id of the speaker of a line.
+	uint32 GetLineSpeaker(uint32 line) const
+		{ if (line > _speakers.size()) return 0; else return _speakers[line]; }
+
+	//! \brief Returns the maximum time in milliseconds that the current line of dialogue should be displayed.
+	int32 GetLineTime(uint32 line) const
+		{ if (line > _time.size()) return -1; else return _time[line]; }
+
+	//! \brief Returns the actions of a specific line.
+	ScriptObject* GetLineAction(uint32 line)
+		{ if (line > _actions.size()) return NULL; else return _actions[line]; }
+	//@}
+
+
 private:
-	//! \brief The text of the conversation, split up into multiple lines.
-	std::vector<hoa_utils::ustring> _text;
-
-	//! \brief A list of object ID numbers that declare who speaks which lines.
-	std::vector<uint32> _speakers;
-
-	//! \brief A list of optional events that may occur after each line.
-	std::vector<ScriptObject*> _actions;
-
-	//! \brief The maximum time of each line in the dialogue.
-	std::vector<int32> _time;
-
 	//! \brief This counts the number of time a player has seen this dialogue.
 	uint32 _seen;
 
@@ -187,6 +209,21 @@ private:
 
 	//! \brief Declares whether or not to reset the status of map sprites after the dialogue completes.
 	bool _save_state;
+
+	//! \brief The sprite, if any, which "owns" this dialogue (ie the dialogue can only be initiated by talking to the owner)
+	VirtualSprite* _owner;
+
+	//! \brief The text of the conversation, split up into multiple lines.
+	std::vector<hoa_utils::ustring> _text;
+
+	//! \brief A list of object ID numbers that declare who speaks which lines.
+	std::vector<uint32> _speakers;
+
+	//! \brief The maximum display time of each line in the dialogue. A time less than zero indicates infinite time.
+	std::vector<int32> _time;
+
+	//! \brief A list of optional events that may occur after each line.
+	std::vector<ScriptObject*> _actions;
 }; // class MapDialogue
 
 } // namespace private_map

@@ -84,8 +84,8 @@ void DialogueManager::Update() {
 		return;
 
 	if (_current_dialogue != last_dialogue) {
-		time_remaining = _current_dialogue->GetLineTime();
-		_display_textbox.SetDisplayText(_current_dialogue->GetCurrentLine());
+		time_remaining = _current_dialogue->GetCurrentTime();
+		_display_textbox.SetDisplayText(_current_dialogue->GetCurrentText());
 		last_dialogue = _current_dialogue;
 	}
 
@@ -127,8 +127,8 @@ void DialogueManager::Update() {
 	
 		// Move to the next line of dialogue
 		if (_current_dialogue->ReadNextLine() == true) {
-			time_remaining = _current_dialogue->GetLineTime();
-			_display_textbox.SetDisplayText(_current_dialogue->GetCurrentLine());
+			time_remaining = _current_dialogue->GetCurrentTime();
+			_display_textbox.SetDisplayText(_current_dialogue->GetCurrentText());
 		}
 
 		// This dialogue is finished, restore game state as necessary
@@ -199,11 +199,16 @@ MapDialogue::~MapDialogue() {
 
 
 bool MapDialogue::ReadNextLine() {
+	// Determine if the dialogue is finished
 	if (++_current_line >= _text.size()) {
 		_current_line = 0;
-		SetSeenDialogue();
+		IncrementTimesSeen();
+		if (_owner != NULL) {
+			_owner->UpdateSeenDialogue();
+		}
 		return false;
 	}
+	// Return true if the dialogue has additional lines to read
 	return true;
 }
 

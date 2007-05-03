@@ -453,6 +453,9 @@ public:
 	//! \brief A pointer to the face portrait of the sprite, as seen in dialogues and menus.
 	hoa_video::StillImage* face_portrait;
 
+	//! \brief Set to false if the sprite contains dialogue that has not been seen by the player
+	bool seen_all_dialogue;
+
 	/** \brief An index to the actions vector, representing the current sprite action being performed.
 	*** A negative value indicates that the sprite is taking no action. If the sprite has no entries
 	*** in its actions vector, this member should remain negative, otherwise a segmentation fault
@@ -542,6 +545,8 @@ public:
 	**/
 	virtual bool LoadState();
 
+	//! \brief Examines all dialogue owned by the sprite and sets the appropriate value of VirtualSprite#seen_all_dialogue
+	void UpdateSeenDialogue();
 
 	/** \name Dialogue control methods
 	*** These methods are used to add and control which dialogue should the sprite speak.
@@ -551,7 +556,7 @@ public:
 		{ act->SetSprite(this); actions.push_back(act); }
 
 	void AddDialogue(MapDialogue* md)
-		{ dialogues.push_back(md); }
+		{ dialogues.push_back(md); md->SetOwner(this); if (md->HasAlreadySeen() == false) seen_all_dialogue = false; }
 
 	bool HasDialogue() const
 		{ return (dialogues.size() > 0); }
