@@ -347,7 +347,7 @@ public:
 	*** This function will also automatically re-calculate all attack ratings, elemental, and status bonuses.
 	*** NULL will be returned if no weapon is already equipped.
 	**/
-// 	void EquipWeapon(GlobalWeapon* weapon);
+	void EquipWeapon(GlobalWeapon* weapon);
 
 	/** \brief Equips a new armor on the actor
 	*** \param armor The piece of armor to equip
@@ -356,7 +356,7 @@ public:
 	*** If the attack point index is invalid, the function will return the armor argument. NULL will be returned
 	*** if no armor is already equipped on the attack point.
 	**/
-// 	void EquipArmor(GlobalArmor* armor);
+	void EquipArmor(GlobalArmor* armor);
 
 protected:
 	//! \brief An identification number to represent the actor.

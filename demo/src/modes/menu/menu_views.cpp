@@ -1354,19 +1354,20 @@ EquipWindow::EquipWindow() : _active_box(EQUIP_ACTIVE_NONE) {
 	StillImage i;
 
 	// FIXME: Use as permanent pictures
-	i.SetFilename("img/icons/weapons/karlate_sword.png");
+	// obj->GetIconImage().GetFilename()
+	i.SetFilename(GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS)->GetWeaponEquipped()->GetIconImage().GetFilename());
 	_equip_images.push_back(i);
 
-	i.SetFilename("img/icons/armor/karlate_helmet.png");
+	i.SetFilename(GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS)->GetEquippedHeadArmor()->GetIconImage().GetFilename());
 	_equip_images.push_back(i);
 
-	i.SetFilename("img/icons/armor/karlate_breastplate.png");
+	i.SetFilename(GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS)->GetEquippedTorsoArmor()->GetIconImage().GetFilename());
 	_equip_images.push_back(i);
 
-	i.SetFilename("img/icons/armor/karlate_shield.png");
+	i.SetFilename(GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS)->GetEquippedArmsArmor()->GetIconImage().GetFilename());
 	_equip_images.push_back(i);
 
-	i.SetFilename("img/icons/armor/karlate_greaves.png");
+	i.SetFilename(GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS)->GetEquippedLegArmor()->GetIconImage().GetFilename());
 	_equip_images.push_back(i);
 
 	for (uint32 i = 0; i < EQUIP_CATEGORY_SIZE; i++) {
@@ -1413,7 +1414,7 @@ void EquipWindow::_InitEquipmentList() {
 	_equip_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_equip_list.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	// Update the equipment list
-//	UpdateEquipList();
+	_UpdateEquipList();
 	_equip_list.SetSelection(0);
 	// Initially hide the cursor
 	_equip_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
@@ -1542,6 +1543,7 @@ void EquipWindow::Update() {
 				if (event == VIDEO_OPTION_CONFIRM) {
 					_active_box = EQUIP_ACTIVE_LIST;
 					_equip_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+					_equip_list.SetSelection(0);
 					_equip_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 					MenuMode::_instance->_menu_sounds["confirm"].PlaySound();
 				}
@@ -1558,7 +1560,32 @@ void EquipWindow::Update() {
 		case EQUIP_ACTIVE_LIST:
 			{
 				if (event == VIDEO_OPTION_CONFIRM) {
-					//TODO Change Equipment, handle removal
+					hoa_global::GlobalCharacter* ch = GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS); 
+					if (_equip_select.GetSelection() == EQUIP_WEAPON) {
+						GlobalManager->AddToInventory(ch->GetWeaponEquipped()->GetID());
+						ch->EquipWeapon(GlobalManager->GetInventoryWeapons()->at(_equip_list.GetSelection()));
+						GlobalManager->DecrementObjectCount(ch->GetWeaponEquipped()->GetID(), 1);
+					}
+					else if (_equip_select.GetSelection() == EQUIP_HEADGEAR) {
+						GlobalManager->AddToInventory(ch->GetEquippedHeadArmor()->GetID());ch->EquipArmor(GlobalManager->GetInventoryHeadArmor()->at(_equip_list.GetSelection()));
+						GlobalManager->DecrementObjectCount(ch->GetEquippedHeadArmor()->GetID(), 1);
+					}
+					else if (_equip_select.GetSelection() == EQUIP_BODYARMOR) {
+						GlobalManager->AddToInventory(ch->GetEquippedTorsoArmor()->GetID());ch->EquipArmor(GlobalManager->GetInventoryTorsoArmor()->at(_equip_list.GetSelection()));
+						GlobalManager->DecrementObjectCount(ch->GetEquippedTorsoArmor()->GetID(), 1);
+					}
+					else if (_equip_select.GetSelection() == EQUIP_OFFHAND) {
+						GlobalManager->AddToInventory(ch->GetEquippedArmsArmor()->GetID());ch->EquipArmor(GlobalManager->GetInventoryArmArmor()->at(_equip_list.GetSelection()));
+						GlobalManager->DecrementObjectCount(ch->GetEquippedArmsArmor()->GetID(), 1);
+					}
+					else if (_equip_select.GetSelection() == EQUIP_LEGGINGS) {
+						GlobalManager->AddToInventory(ch->GetEquippedLegArmor()->GetID());ch->EquipArmor(GlobalManager->GetInventoryLegArmor()->at(_equip_list.GetSelection()));
+						GlobalManager->DecrementObjectCount(ch->GetEquippedLegArmor()->GetID(), 1);
+					}
+					else {
+						cerr << "This shouldn't happen!" << endl;
+					}
+
 					_active_box = EQUIP_ACTIVE_SELECT;
 					_equip_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 					_equip_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
@@ -1580,12 +1607,11 @@ void EquipWindow::Update() {
 
 
 void EquipWindow::_UpdateEquipList() {
-	// FIXME: warning, unused variable
 	hoa_global::GlobalCharacter* ch = GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS); //_char_select.GetSelection());
 	std::vector<ustring> options;
 
 	if (_active_box == EQUIP_ACTIVE_LIST) {
-		uint32 gearsize;
+		uint32 gearsize = 0;
 		vector<hoa_global::GlobalWeapon*> weapons;
 		vector<hoa_global::GlobalArmor*> armor;
 
@@ -1597,7 +1623,6 @@ void EquipWindow::_UpdateEquipList() {
 					options.push_back(GlobalManager->GetInventoryWeapons()->at(j)->GetName());
 				}
 
-				_equip_list.SetOptions(options);
 				break;
 
 			case EQUIP_HEADGEAR:
@@ -1607,7 +1632,6 @@ void EquipWindow::_UpdateEquipList() {
 					options.push_back(GlobalManager->GetInventoryHeadArmor()->at(j)->GetName());
 				}
 
-				_equip_list.SetOptions(options);
 				break;
 
 			case EQUIP_BODYARMOR:
@@ -1617,7 +1641,6 @@ void EquipWindow::_UpdateEquipList() {
 					options.push_back(GlobalManager->GetInventoryTorsoArmor()->at(j)->GetName());
 				}
 
-				_equip_list.SetOptions(options);
 				break;
 
 			case EQUIP_OFFHAND:
@@ -1627,7 +1650,6 @@ void EquipWindow::_UpdateEquipList() {
 					options.push_back(GlobalManager->GetInventoryArmArmor()->at(j)->GetName());
 				}
 
-				_equip_list.SetOptions(options);
 				break;
 
 			case EQUIP_LEGGINGS:
@@ -1637,10 +1659,11 @@ void EquipWindow::_UpdateEquipList() {
 					options.push_back(GlobalManager->GetInventoryLegArmor()->at(j)->GetName());
 				}
 
-				_equip_list.SetOptions(options);
 				break;
-		}
-	}
+		} // switch
+		_equip_list.SetSize(1, gearsize);
+		_equip_list.SetOptions(options);
+	} // if EQUIP_ACTIVE_LIST
 
 	else {
 		options.push_back(MakeUnicodeString(MakeStandardString(ch->GetWeaponEquipped()->GetName())));
