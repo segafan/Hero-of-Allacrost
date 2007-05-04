@@ -20,6 +20,7 @@
 #include "system.h"
 #include "quit.h"
 #include "pause.h"
+#include "battle.h"
 
 using namespace std;
 
@@ -32,6 +33,8 @@ using namespace hoa_quit;
 using namespace hoa_pause;
 using namespace hoa_input::private_input;
 
+using namespace hoa_battle;
+using namespace hoa_battle::private_battle;
 
 template<> hoa_input::GameInput* Singleton<hoa_input::GameInput>::_singleton_reference = NULL;
 
@@ -40,6 +43,8 @@ namespace hoa_input {
 GameInput* InputManager = NULL;
 bool INPUT_DEBUG = false;
 
+//To determine if we are in battle mode when pausing
+bool in_battle_mode = false;
 
 // Initializes class members
 GameInput::GameInput() {
@@ -239,10 +244,22 @@ void GameInput::TogglePause(){
 	// If the current game mode is PauseMode, unpause the game
 	if (ModeManager->GetGameType() == MODE_MANAGER_PAUSE_MODE) {
 		ModeManager->Pop();
+
+		if (in_battle_mode)
+		{
+			current_battle->UnFreezeTimers();
+			in_battle_mode = false;
+		}
 	}
 	// Otherwise, make PauseMode the active game mode
 	else {
 		PauseMode *PM = new PauseMode();
+
+		if (ModeManager->GetGameType() == MODE_MANAGER_BATTLE_MODE)
+		{
+			current_battle->FreezeTimers();
+			in_battle_mode = true;
+		}
 		ModeManager->Push(PM);
 	}
 }
@@ -685,10 +702,19 @@ void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 			// If the current game mode is PauseMode, unpause the game
 			else if (ModeManager->GetGameType() == MODE_MANAGER_PAUSE_MODE) {
 				ModeManager->Pop();
+				if (ModeManager->GetGameType() == MODE_MANAGER_BATTLE_MODE)
+				{
+					current_battle->UnFreezeTimers();
+				}
 			}
 			// Otherwise, make PauseMode the active game mode
 			else {
 				PauseMode *PM = new PauseMode();
+
+				if (ModeManager->GetGameType() == MODE_MANAGER_BATTLE_MODE)
+				{
+					current_battle->FreezeTimers();
+				}
 				ModeManager->Push(PM);
 			}
 			return;

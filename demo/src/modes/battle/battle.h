@@ -360,6 +360,15 @@ private:
 	//! Set to true if it was player who won the battle.
 	bool _victorious_battle;
 
+	//! XP gained from battle
+	uint32 _victory_xp;
+
+	//! Money gained from battle
+	uint32 _victory_money;
+
+	//! Items gained from battle
+	std::vector<uint32> _victory_items;
+
 	/** \brief Container for all music to be played during the battle
 	*** The first element in this vector is the primary battle track. For most battles, only a primary track
 	*** is required. However, some battles may require additional tracks to toggle between.
@@ -570,6 +579,9 @@ private:
 
 	//! Shutdown the battle mode
 	void _ShutDown();
+
+	//! Tally rewards (XP, money, items)
+	void _TallyRewards();
 
 	//! \brief Returns the number of enemies that are still alive in the battle
 	const uint32 _NumberEnemiesAlive() const;

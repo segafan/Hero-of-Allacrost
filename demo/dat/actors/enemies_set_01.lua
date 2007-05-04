@@ -29,7 +29,14 @@ enemies[1] = {
 		agility = 10,
 		evade = 2.0
 	},
-
+	
+	--Add in a stealable item when we get that far
+	rewards = {
+		item_dropped = 1, --Healing potion
+		chance_to_drop = 20.0,
+		money = 10
+	},
+	
 	growth_stats = {
 		hit_points = 10.0,
 		skill_points = 10.0,
@@ -84,6 +91,13 @@ enemies[2] = {
 		evade = 2.0
 	},
 
+	--Add in a stealable item when we get that far
+	rewards = {
+		item_dropped = 1, --Healing potion
+		chance_to_drop = 20.0,
+		money = 10
+	},
+	
 	growth_stats = {
 		hit_points = 10.0,
 		skill_points = 10.0,
@@ -138,6 +152,13 @@ enemies[3] = {
 		evade = 2.0
 	},
 
+	--Add in a stealable item when we get that far
+	rewards = {
+		item_dropped = 1, --Healing potion
+		chance_to_drop = 20.0,
+		money = 10
+	},
+	
 	growth_stats = {
 		hit_points = 10.0,
 		skill_points = 10.0,
@@ -201,6 +222,13 @@ enemies[4] = {
 		evade = 2.0
 	},
 
+	--Add in a stealable item when we get that far
+	rewards = {
+		item_dropped = 1, --Healing potion
+		chance_to_drop = 20.0,
+		money = 10
+	},
+	
 	growth_stats = {
 		hit_points = 10.0,
 		skill_points = 10.0,
@@ -262,6 +290,13 @@ enemies[5] = {
 		protection = 4,
 		agility = 10,
 		evade = 2.0
+	},
+
+	--Add in a stealable item when we get that far
+	rewards = {
+		item_dropped = 1, --Healing potion
+		chance_to_drop = 20.0,
+		money = 10
 	},
 
 	growth_stats = {

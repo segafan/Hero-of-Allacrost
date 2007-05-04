@@ -148,6 +148,9 @@ GlobalCharacter::GlobalCharacter(uint32 id) {
 	_agility = char_script.ReadInt("agility");
 	_evade = char_script.ReadFloat("evade");
 
+	//FIX ME Temp
+	_experience_next_level = 1;
+
 	// (4): Setup the character's attack points
 	char_script.ReadOpenTable("attack_points");
 	for (uint32 i = 0; i < 4; i++) {
@@ -251,6 +254,42 @@ GlobalCharacter::GlobalCharacter(uint32 id) {
 	// AddAttackSkill(new GlobalSkill()); // removed text "sword_slash" because that constructor isn't implemented yet -MF
 } // GlobalCharacter::GlobalCharacter(uint32 id)
 
+bool GlobalCharacter::AddXP(uint32 xp)
+{
+	int32 temp_xp = static_cast<int32>(_experience_next_level - xp);
+	//
+
+	if (temp_xp <= 0)
+	{
+		//FIX ME
+		//SetExperienceNextLevel(GetXPForNextLevel() + _experience_next_level);
+		SetExperienceNextLevel(11000 + temp_xp);
+		AddExperienceLevel();
+
+		return true;
+	}
+
+	_experience_next_level = static_cast<uint32>(xp);
+
+	return false;
+}
+
+void GlobalCharacter::AddExperienceLevel(uint32 lvl)
+{
+	_experience_level += lvl;
+
+	//FIX ME How in the hell do we determine how the character grows?
+	//Why do only enemies have growth stats
+	_strength += static_cast<uint32>(RandomBoundedInteger(1, 10));
+	_vigor += static_cast<uint32>(RandomBoundedInteger(1, 10));
+	_fortitude += static_cast<uint32>(RandomBoundedInteger(1, 10));
+	_protection += static_cast<uint32>(RandomBoundedInteger(1, 10));
+	_agility += static_cast<uint32>(RandomBoundedInteger(1, 10));
+
+	_max_hit_points += static_cast<uint32>(RandomBoundedInteger(1, 10));
+	_max_skill_points += static_cast<uint32>(RandomBoundedInteger(1, 10));
+}
+
 // ****************************************************************************
 // ***** GlobalEnemy
 // ****************************************************************************
@@ -314,7 +353,14 @@ GlobalEnemy::GlobalEnemy(uint32 id) {
 	_evade = enemy_data.ReadFloat("evade");
 	enemy_data.ReadCloseTable();
 
-	// (5): Load the growth statistics
+	// (5): Load the rewards
+	enemy_data.ReadOpenTable("rewards");
+	_item_dropped = enemy_data.ReadInt("item_dropped");
+	_chance_to_drop = enemy_data.ReadFloat("chance_to_drop");
+	_money = enemy_data.ReadInt("money");
+	enemy_data.ReadCloseTable();
+
+	// (6): Load the growth statistics
 	enemy_data.ReadOpenTable("growth_stats");
 	_growth_hit_points = enemy_data.ReadFloat("hit_points");
 	_growth_skill_points = enemy_data.ReadFloat("skill_points");
@@ -327,7 +373,7 @@ GlobalEnemy::GlobalEnemy(uint32 id) {
 	_growth_evade = enemy_data.ReadFloat("evade");
 	enemy_data.ReadCloseTable();
 
-	// (6): Create and initialize the attack points for the enemy
+	// (7): Create and initialize the attack points for the enemy
 	enemy_data.ReadOpenTable("attack_points");
 	uint32 ap_size = enemy_data.ReadGetTableSize();
 	for (uint32 i = 1; i <= ap_size; i++) {
@@ -340,7 +386,7 @@ GlobalEnemy::GlobalEnemy(uint32 id) {
 	}
 	enemy_data.ReadCloseTable();
 
-	// (7): Add the set of skills to the enemy
+	// (8): Add the set of skills to the enemy
 	vector<int32> skill_ids;
 	enemy_data.ReadIntVector("skills", skill_ids);
 	for (uint32 i = 0; i < skill_ids.size(); i++) {
