@@ -486,6 +486,7 @@ BattleMode::~BattleMode() {
 
 	_item_list.clear();
 	_skill_list.clear();
+	_victory_items.clear();
 
 	// Remove all of the battle images that were loaded
 	VideoManager->DeleteImage(_battle_background);
@@ -734,6 +735,8 @@ void BattleMode::_TallyRewards()
 {
 	GlobalEnemy *gbe;
 
+	std::map<string, uint32>::iterator it;
+	std::map<uint32, GlobalObject*>::iterator it2;
 	//Tally up the xp, money, and get the list of items
 	for (uint32 i = 0; i < GetNumberOfEnemies(); ++i)
 	{
@@ -743,10 +746,21 @@ void BattleMode::_TallyRewards()
 
 		if (RandomFloat() * 100 <= gbe->GetChanceToDrop())
 		{
-			_victory_items.push_back(gbe->GetItemDropped());
 			//Added here so that we can display the list on victory
 			//FIX ME later
 			GlobalManager->AddToInventory(gbe->GetItemDropped());
+
+			it2 = GlobalManager->GetInventory()->find(gbe->GetItemDropped());
+			it = _victory_items.find(MakeStandardString(it2->second->GetName()));
+
+			if (it != _victory_items.end())
+			{
+				++it->second;
+			}
+			else
+			{
+				_victory_items.insert(make_pair(MakeStandardString(it2->second->GetName()), 1));
+			}
 		}
 	}
 
@@ -1502,12 +1516,14 @@ void BattleMode::Draw() {
 			if (_victory_items.size() > 0)
 			{
 				text += MakeUnicodeString("Items: ");
-				std::map<uint32, GlobalObject*>::iterator it;
+				std::map<string, uint32>::iterator it;
 				//FIX ME:  Find a neat way to list what was added
-				for (uint32 i = 0; i < _victory_items.size(); ++i)
+				for (it = _victory_items.begin(); it != _victory_items.end(); ++it)
 				{
-					it = GlobalManager->GetInventory()->find(_victory_items[i]);
-					text += it->second->GetName() + MakeUnicodeString("\n\n");
+					text += MakeUnicodeString(it->first);
+					text += MakeUnicodeString(" x" + NumberToString(it->second) + "\n\n");
+					//it = GlobalManager->GetInventory()->find(_victory_items[i]);
+					//text += it->second->GetName() + MakeUnicodeString("\n\n");
 				}
 			}
 			VideoManager->DrawText(text);

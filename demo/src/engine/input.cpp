@@ -702,9 +702,10 @@ void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 			// If the current game mode is PauseMode, unpause the game
 			else if (ModeManager->GetGameType() == MODE_MANAGER_PAUSE_MODE) {
 				ModeManager->Pop();
-				if (ModeManager->GetGameType() == MODE_MANAGER_BATTLE_MODE)
+				if (in_battle_mode)
 				{
 					current_battle->UnFreezeTimers();
+					in_battle_mode = false;
 				}
 			}
 			// Otherwise, make PauseMode the active game mode
@@ -714,6 +715,7 @@ void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 				if (ModeManager->GetGameType() == MODE_MANAGER_BATTLE_MODE)
 				{
 					current_battle->FreezeTimers();
+					in_battle_mode = true;
 				}
 				ModeManager->Push(PM);
 			}

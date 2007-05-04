@@ -367,7 +367,7 @@ private:
 	uint32 _victory_money;
 
 	//! Items gained from battle
-	std::vector<uint32> _victory_items;
+	std::map<std::string, uint32> _victory_items;
 
 	/** \brief Container for all music to be played during the battle
 	*** The first element in this vector is the primary battle track. For most battles, only a primary track
