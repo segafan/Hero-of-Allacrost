@@ -564,8 +564,18 @@ public:
 		{ _experience_next_level = xp_next; }
 	//@}
 
-	void AddExperienceLevel(uint32 lvl = 1)
-		{ _experience_level += lvl; }
+	/*
+	* \brief Adds the given number of levels to the character
+	* \param the number of levels to increase the character by
+	*/
+	void AddExperienceLevel(uint32 lvl = 1);
+
+	/*
+	* \brief Adds experience to the character
+	* \param xp the amount of experience to add
+	* \return true if he leveled up, flase if he did not
+	*/
+	bool AddXP(uint32 xp);
 
 	void AddBattleAnimation(const std::string & name, hoa_video::AnimatedImage anim)
 		{ _battle_animation[name] = anim; }
@@ -668,6 +678,15 @@ public:
 	uint32 GetExperiencePoints() const
 		{ return _experience_points; }
 
+	uint32 GetMoney() const
+		{ return _money; }
+
+	uint32 GetItemDropped() const
+		{ return _item_dropped; }
+
+	float GetChanceToDrop() const
+		{ return _chance_to_drop; }
+
 	std::string GetFilename() const
 		{ return _filename; }
 	//@}
@@ -699,6 +718,15 @@ protected:
 
 	//! \brief The number of experience points that the party is given when the enemy is defeated
 	uint32 _experience_points;
+
+	//! \brief The item the enemy drops when defeated
+	uint32 _item_dropped;
+
+	//! \brief Amount of money the enemy drops
+	uint32 _money;
+
+	//! \brief The chance an enemy has to drop an item
+	float _chance_to_drop;
 
 	/** \name Growth Statistics
 	*** \brief The average increase for statistics between experience levels is stored by these members

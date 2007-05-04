@@ -331,10 +331,14 @@ BattleMode::BattleMode() :
 	_swap_countdown_timer(300000), // 5 minutes
 	_min_agility(9999),
 	_selected_option_index(0),
-	_next_monster_location_index(0)
+	_next_monster_location_index(0),
+	_victory_xp(0),
+	_victory_money(0)
 {
 	if (BATTLE_DEBUG)
 		cout << "BATTLE: BattleMode constructor invoked" << endl;
+
+	mode_type = MODE_MANAGER_BATTLE_MODE;
 
 	std::vector <hoa_video::StillImage> attack_point_indicator;
 	StillImage frame;
@@ -362,6 +366,8 @@ BattleMode::BattleMode() :
 	_universal_time_meter.SetFilename("img/menus/stamina_bar.png");
 	if (!VideoManager->LoadImage(_universal_time_meter))
 		cerr << "BATTLE ERROR: Failed to load time meter." << endl;
+
+	_victory_items.clear();
 
 	//Load in action type icons, FIXME add more later
 	frame.SetDimensions(45, 45);
@@ -724,6 +730,38 @@ void BattleMode::_ShutDown() {
 	ModeManager->Pop();
 }
 
+void BattleMode::_TallyRewards()
+{
+	GlobalEnemy *gbe;
+
+	//Tally up the xp, money, and get the list of items
+	for (uint32 i = 0; i < GetNumberOfEnemies(); ++i)
+	{
+		gbe = GetEnemyActorAt(i)->GetActor();
+		_victory_xp += gbe->GetExperiencePoints();
+		_victory_money += gbe->GetMoney();
+
+		if (RandomFloat() * 100 <= gbe->GetChanceToDrop())
+		{
+			_victory_items.push_back(gbe->GetItemDropped());
+			//Added here so that we can display the list on victory
+			//FIX ME later
+			GlobalManager->AddToInventory(gbe->GetItemDropped());
+		}
+	}
+
+	uint32 num_alive = 0;
+
+	for (uint32 i = 0; i < GetNumberOfCharacters(); ++i)
+	{
+		if (GetPlayerCharacterAt(i)->IsAlive())
+			++num_alive;
+	}
+
+	//Divvy the XP between surviving party members
+	_victory_xp /= num_alive;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // BattleMode class -- Update Code
 ////////////////////////////////////////////////////////////////////////////////
@@ -732,12 +770,23 @@ void BattleMode::Update() {
 	_battle_over = (_NumberEnemiesAlive() == 0) || (_NumberOfCharactersAlive() == 0);
 
 	if (_battle_over) {
-		_victorious_battle = (_NumberEnemiesAlive() == 0);
-		if (_victorious_battle) {
-			if (InputManager->ConfirmPress()) {
+		if (_victorious_battle)
+		{
+			if (InputManager->ConfirmPress())
+			{
 				PlayerVictory();
 			}
 		}
+		//If this is the first time we found out we've won, tally up the rewards
+		else if ((_victorious_battle = (_NumberEnemiesAlive() == 0)) == true)
+		{
+			_TallyRewards();
+		}
+		/*if (_victorious_battle) {
+			if (InputManager->ConfirmPress()) {
+				PlayerVictory();
+			}
+		}*/
 		else {
 			_battle_lose_menu.Update(SystemManager->GetUpdateTime()); // Update lose menu
 			if (InputManager->ConfirmRelease()) {
@@ -1444,7 +1493,25 @@ void BattleMode::Draw() {
 			VideoManager->Move(520.0f, 384.0f);
 			VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 			VideoManager->SetTextColor(Color::white);
-			VideoManager->DrawText("Your party is victorious!\n\nExp: +50\n\nLoot : 1 HP Potion");
+			//std::ostringstream victory_text;
+			//victory_text << "Your party is victorious!\n\n" << "XP: " << 
+			ustring text = MakeUnicodeString("Your party is victorious!\n\n");
+			text += MakeUnicodeString("XP: ") + MakeUnicodeString(NumberToString(_victory_xp)) + MakeUnicodeString("\n\n");
+			text += MakeUnicodeString("Money: ") + MakeUnicodeString(NumberToString(_victory_money)) + MakeUnicodeString("\n\n");
+
+			if (_victory_items.size() > 0)
+			{
+				text += MakeUnicodeString("Items: ");
+				std::map<uint32, GlobalObject*>::iterator it;
+				//FIX ME:  Find a neat way to list what was added
+				for (uint32 i = 0; i < _victory_items.size(); ++i)
+				{
+					it = GlobalManager->GetInventory()->find(_victory_items[i]);
+					text += it->second->GetName() + MakeUnicodeString("\n\n");
+				}
+			}
+			VideoManager->DrawText(text);
+			//VideoManager->DrawText("Your party is victorious!\n\nExp: +50\n\nLoot : 1 HP Potion");
 		}
 		// Show the lose screen
 		else {
@@ -1992,15 +2059,28 @@ void BattleMode::UnFreezeTimers()
 
 // Handle player victory
 void BattleMode::PlayerVictory() {
+	static bool added_rewards = false;
+
 	if (BATTLE_DEBUG) cout << "BATTLE: Player has won a battle!" << endl;
+	
+	if (!added_rewards)
+	{
+		// Give player some loot
+		// TODO: Fix this with proper ID's!
+		//GlobalManager->AddToInventory(1); // adds one healing potion
 
-	// Give player some loot
-	// TODO: Fix this with proper ID's!
-	GlobalManager->AddToInventory(1); // adds one healing potion
-
-	// Give some experience for each character in the party
-	for (uint32 i = 0; i < _character_actors.size(); ++i) {
-		_character_actors.at(i)->GetActor()->AddExperienceLevel(1); // TODO: Add only experience, NOT exp LEVEL!
+		GlobalManager->AddFunds(_victory_money);
+		// Give some experience for each character in the party
+		for (uint32 i = 0; i < _character_actors.size(); ++i) {
+			//_character_actors.at(i)->GetActor()->AddExperienceLevel(1); // TODO: Add only experience, NOT exp LEVEL!
+			_character_actors.at(i)->GetActor()->AddXP(_victory_xp);
+		}
+		added_rewards = true;
+		_victory_xp = 0;
+		_victory_money = 0;
+		
+		AudioManager->PlaySound("snd/confirm.wav");
+		return;
 	}
 
 	VideoManager->DisableFog();
