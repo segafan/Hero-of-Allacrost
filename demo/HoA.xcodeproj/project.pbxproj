@@ -110,6 +110,7 @@
 		D4DBE6D90BC1E91A00E85DCB /* tex_mgmt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4DBE6D80BC1E91A00E85DCB /* tex_mgmt.cpp */; };
 		D4DBE6DA0BC1E91A00E85DCB /* tex_mgmt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4DBE6D80BC1E91A00E85DCB /* tex_mgmt.cpp */; };
 		D4E561270BB71B53002FB758 /* defs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4E561260BB71B53002FB758 /* defs.cpp */; };
+		D4EE2D640BE85F5B00B7112A /* boot_welcome.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4EE2D630BE85F5B00B7112A /* boot_welcome.cpp */; };
 		D4F68AA00BD72266009F6973 /* Qt3Support.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4F68A9F0BD72266009F6973 /* Qt3Support.framework */; };
 		D4F68AA40BD72276009F6973 /* QtCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4F68AA30BD72276009F6973 /* QtCore.framework */; };
 		D4F68AA80BD72280009F6973 /* QtGui.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4F68AA70BD7227F009F6973 /* QtGui.framework */; };
@@ -156,7 +157,7 @@
 		4931EC140BAF28B900013185 /* mus */ = {isa = PBXFileReference; lastKnownFileType = folder; path = mus; sourceTree = "<group>"; };
 		4931EC1A0BAF28B900013185 /* snd */ = {isa = PBXFileReference; lastKnownFileType = folder; path = snd; sourceTree = "<group>"; };
 		493D9E440B9C9FFD00DF1F52 /* map_zones.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = map_zones.h; sourceTree = "<group>"; };
-		4941A4B00AC1D77500D65B8E /* Allacrost.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Allacrost.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4941A4B00AC1D77500D65B8E /* Allacrost.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Allacrost.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4941A6470AC1D86300D65B8E /* defs.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = defs.h; sourceTree = "<group>"; };
 		4941A68B0AC1D86400D65B8E /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		4941A68C0AC1D86400D65B8E /* main_options.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = main_options.cpp; sourceTree = "<group>"; };
@@ -279,6 +280,8 @@
 		D4DAC8A80BA13F55009FA7BE /* map_zones.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = map_zones.cpp; sourceTree = "<group>"; };
 		D4DBE6D80BC1E91A00E85DCB /* tex_mgmt.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = tex_mgmt.cpp; sourceTree = "<group>"; };
 		D4E561260BB71B53002FB758 /* defs.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = defs.cpp; sourceTree = "<group>"; };
+		D4EE2D630BE85F5B00B7112A /* boot_welcome.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = boot_welcome.cpp; sourceTree = "<group>"; };
+		D4EE2D650BE85F6700B7112A /* boot_welcome.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = boot_welcome.h; sourceTree = "<group>"; };
 		D4F68A9F0BD72266009F6973 /* Qt3Support.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Qt3Support.framework; path = /Library/Frameworks/Qt3Support.framework; sourceTree = "<absolute>"; };
 		D4F68AA30BD72276009F6973 /* QtCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QtCore.framework; path = /Library/Frameworks/QtCore.framework; sourceTree = "<absolute>"; };
 		D4F68AA70BD7227F009F6973 /* QtGui.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QtGui.framework; path = /Library/Frameworks/QtGui.framework; sourceTree = "<absolute>"; };
@@ -419,6 +422,8 @@
 		4941A6940AC1D86400D65B8E /* boot */ = {
 			isa = PBXGroup;
 			children = (
+				D4EE2D650BE85F6700B7112A /* boot_welcome.h */,
+				D4EE2D630BE85F5B00B7112A /* boot_welcome.cpp */,
 				4941A6950AC1D86400D65B8E /* boot.cpp */,
 				4941A6960AC1D86400D65B8E /* boot.h */,
 				4941A6970AC1D86400D65B8E /* boot_credits.cpp */,
@@ -758,6 +763,7 @@
 				D4D1666B0BC0D91400190FC0 /* textbox.cpp in Sources */,
 				D4D1666D0BC0D91400190FC0 /* video.cpp in Sources */,
 				D4DBE6D90BC1E91A00E85DCB /* tex_mgmt.cpp in Sources */,
+				D4EE2D640BE85F5B00B7112A /* boot_welcome.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -860,7 +866,10 @@
 		4941A4B60AC1D77900D65B8E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = i386;
+				ARCHS = (
+					i386,
+					ppc,
+				);
 				COPY_PHASE_STRIP = YES;
 				DEAD_CODE_STRIPPING = YES;
 				GCC_AUTO_VECTORIZATION = YES;
