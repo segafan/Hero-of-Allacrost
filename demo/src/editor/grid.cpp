@@ -151,7 +151,7 @@ void Grid::LoadMap()
 	ScriptDescriptor read_data;
 	vector<int32> vect;             // used to read in vectors from the file
 
-	if (!read_data.OpenFile(_file_name.toStdString(), SCRIPT_READ))
+	if (!read_data.OpenFile(std::string(_file_name.toAscii()), SCRIPT_READ))
 		QMessageBox::warning(this, "Loading File...", QString("ERROR: could not open %1 for reading!").arg(_file_name));
 
 	tileset_names.clear();
@@ -167,7 +167,7 @@ void Grid::LoadMap()
 	read_data.ReadOpenTable("tileset_filenames");
 	uint32 table_size = read_data.ReadGetTableSize();
 	for (uint32 i = 1; i <= table_size; i++)
-		tileset_names.append(QString::fromStdString(read_data.ReadString(i)));
+		tileset_names.append(QString(read_data.ReadString(i).c_str()));
 	read_data.ReadCloseTable();
 
 	// Loading the tileset images using LoadMultiImage is done in editor.cpp in FileOpen via
@@ -246,7 +246,7 @@ void Grid::LoadMap()
 		if (size == 0)
 			_music_file = "None";
 		else
-			_music_file = QString::fromStdString(read_data.ReadString(1));
+			_music_file = QString(read_data.ReadString(1).c_str());
 		read_data.ReadCloseTable();
 	}
 
@@ -267,7 +267,7 @@ void Grid::SaveMap()
 	int tileset_index;
 	int tile_index;
 	
-	if (write_data.OpenFile(_file_name.toStdString(), SCRIPT_WRITE) == false) {
+	if (write_data.OpenFile(std::string(_file_name.toAscii()), SCRIPT_WRITE) == false) {
 		QMessageBox::warning(this, "Saving File...", QString("ERROR: could not open %1 for writing!").arg(_file_name));
 		return;
 	}
