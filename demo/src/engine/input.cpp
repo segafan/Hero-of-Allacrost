@@ -46,6 +46,20 @@ bool INPUT_DEBUG = false;
 //To determine if we are in battle mode when pausing
 bool in_battle_mode = false;
 
+void TEMP_HandlePause()
+{
+	if (ModeManager->GetGameType() == MODE_MANAGER_BATTLE_MODE)
+	{
+		current_battle->FreezeTimers();
+		in_battle_mode = true;
+	}
+	else if (in_battle_mode)
+	{
+		current_battle->UnFreezeTimers();
+		in_battle_mode = false;
+	}
+}
+
 // Initializes class members
 GameInput::GameInput() {
 	if (INPUT_DEBUG) cout << "INPUT: GameInput constructor invoked" << endl;
@@ -244,22 +258,13 @@ void GameInput::TogglePause(){
 	// If the current game mode is PauseMode, unpause the game
 	if (ModeManager->GetGameType() == MODE_MANAGER_PAUSE_MODE) {
 		ModeManager->Pop();
-
-		if (in_battle_mode)
-		{
-			current_battle->UnFreezeTimers();
-			in_battle_mode = false;
-		}
+		TEMP_HandlePause();
 	}
 	// Otherwise, make PauseMode the active game mode
 	else {
 		PauseMode *PM = new PauseMode();
 
-		if (ModeManager->GetGameType() == MODE_MANAGER_BATTLE_MODE)
-		{
-			current_battle->FreezeTimers();
-			in_battle_mode = true;
-		}
+		TEMP_HandlePause();
 		ModeManager->Push(PM);
 	}
 }
@@ -306,6 +311,7 @@ void GameInput::EventHandler() {
 			// Otherwise, we push QuitMode onto the stack
 			else {
 				QuitMode *QM = new QuitMode();
+				TEMP_HandlePause();
 				ModeManager->Push(QM);
 			}
 			return;
@@ -473,6 +479,7 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 				// Otherwise, enter QuitMode
 				else {
 					QuitMode *QM = new QuitMode();
+					TEMP_HandlePause();
 					ModeManager->Push(QM);
 				}
 			}
@@ -504,10 +511,12 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 				// Cancel QuitMode if it is the active game mode
 				if(ModeManager->GetGameType() == MODE_MANAGER_QUIT_MODE) {
 					ModeManager->Pop();
+					TEMP_HandlePause();
 				}
 				// Otherwise, enter QuitMode
 				else {
 					QuitMode *QM = new QuitMode();
+					TEMP_HandlePause();
 					ModeManager->Push(QM);
 				}
 			}
@@ -702,21 +711,13 @@ void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 			// If the current game mode is PauseMode, unpause the game
 			else if (ModeManager->GetGameType() == MODE_MANAGER_PAUSE_MODE) {
 				ModeManager->Pop();
-				if (in_battle_mode)
-				{
-					current_battle->UnFreezeTimers();
-					in_battle_mode = false;
-				}
+				TEMP_HandlePause();
 			}
 			// Otherwise, make PauseMode the active game mode
 			else {
 				PauseMode *PM = new PauseMode();
 
-				if (ModeManager->GetGameType() == MODE_MANAGER_BATTLE_MODE)
-				{
-					current_battle->FreezeTimers();
-					in_battle_mode = true;
-				}
+				TEMP_HandlePause();
 				ModeManager->Push(PM);
 			}
 			return;
@@ -730,6 +731,7 @@ void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 			// Otherwise, enter QuitMode
 			else {
 				QuitMode *QM = new QuitMode();
+				TEMP_HandlePause();
 				ModeManager->Push(QM);
 			}
 			return;

@@ -48,6 +48,11 @@ extern GameInput* InputManager;
 //! Determines whether the code in the hoa_input namespace should print debug statements or not.
 extern bool INPUT_DEBUG;
 
+/* \brief Handles pausing/unpausing for battle mode (special case)
+* \note Placed here so it's visible from QuitMode as well
+*/
+void TEMP_HandlePause();
+
 
 //! An internal namespace to be used only within the input code.
 namespace private_input {

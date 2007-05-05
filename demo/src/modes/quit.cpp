@@ -235,7 +235,7 @@ void QuitMode::_Cancel() {
 // 			break;
 // 		// Don't need to do anything for case SETTINGS_SAME_VOLUME
 // 	}
-
+	TEMP_HandlePause();
 	ModeManager->Pop();
 }
 
