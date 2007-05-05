@@ -24,9 +24,9 @@
 
 #include <QMessageBox>
 #include <Q3Table>
-#include <QDir>
 #include <QImageReader>
 #include <QRect>
+#include <QVariant>
 
 //! All calls to the editor are wrapped in this namespace.
 namespace hoa_editor

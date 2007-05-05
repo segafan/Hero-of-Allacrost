@@ -50,7 +50,6 @@ Tileset::Tileset(QWidget* parent, const QString& name)
 
 	// Read in tiles and create table items.
 	QRect rectangle;
-	QDir dir = QDir::current();
 	for (int row = 0; row < 16; row++)
 	{
 		for (int col = 0; col < 16; col++)
@@ -59,15 +58,11 @@ Tileset::Tileset(QWidget* parent, const QString& name)
 			rectangle.setRect(col * TILE_WIDTH, row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
 			reader.setClipRect(rectangle);
 			QImage tile_img = reader.read();
+			QVariant variant = tile_img;
 			if (!tile_img.isNull())
 			{
-				// FIXME: conversion from image to pixmap isn't working, so save the tile and then read it for now
-				//tile_pixmap.fromImage(tile_img);
-				if (!tile_img.save(QString("tile%1.png").arg(col + row * 16)))
-					qDebug("Saving error during tileset table creation");
-				QPixmap tile_pixmap(QString("tile%1.png").arg(col + row * 16));
+				QPixmap tile_pixmap = variant.value<QPixmap>();
 				table->setPixmap(row, col, tile_pixmap);
-				dir.remove(QString("tile%1.png").arg(col + row * 16));
 			} // image of the tile must not be null
 			else
 				qDebug(QString("%1").arg(reader.error()));
