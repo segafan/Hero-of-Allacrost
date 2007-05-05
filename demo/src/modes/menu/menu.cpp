@@ -566,8 +566,37 @@ void MenuMode::_DrawBottomMenu() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 	VideoManager->Move(150, 577);
 
-	if (_current_menu_showing == SHOW_INVENTORY || _current_menu_showing == SHOW_EQUIP || _current_menu_showing == SHOW_SKILLS) {
-		GlobalCharacter* character = GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS);
+	if (_current_menu_showing == SHOW_INVENTORY) {
+		GlobalActor* actor = GlobalManager->GetActiveParty()->GetActor(0);
+		GlobalCharacter* character = (GlobalCharacter*)(actor);
+		string text = "STR: " +  NumberToString(character->GetStrength());
+		VideoManager->DrawText(MakeUnicodeString(text));
+
+		text = "VIG: " +  NumberToString(character->GetVigor());
+		VideoManager->MoveRelative(0, 20);
+		VideoManager->DrawText(MakeUnicodeString(text));
+
+		text = "FRT: " +  NumberToString(character->GetFortitude());
+		VideoManager->MoveRelative(0, 20);
+		VideoManager->DrawText(MakeUnicodeString(text));
+
+		text = "PRO: " +  NumberToString(character->GetProtection());
+		VideoManager->MoveRelative(0, 20);
+		VideoManager->DrawText(MakeUnicodeString(text));
+
+		text = "AGI: " +  NumberToString(character->GetAgility());
+		VideoManager->MoveRelative(0, 20);
+		VideoManager->DrawText(MakeUnicodeString(text));
+
+		text = "EVD: " +  NumberToString(character->GetEvade()) + "%";
+		VideoManager->MoveRelative(0, 20);
+		VideoManager->DrawText(MakeUnicodeString(text));
+
+		VideoManager->SetDrawFlags(VIDEO_X_CENTER,VIDEO_Y_BOTTOM,0);
+	}
+	else if (_current_menu_showing == SHOW_EQUIP || _current_menu_showing == SHOW_SKILLS) {
+		GlobalActor* actor = GlobalManager->GetActiveParty()->GetActor(0);
+		GlobalCharacter* character = (GlobalCharacter*)(actor);
 		string text = "STR: " +  NumberToString(character->GetStrength());
 		VideoManager->DrawText(MakeUnicodeString(text));
 

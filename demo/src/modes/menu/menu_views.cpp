@@ -842,7 +842,35 @@ void InventoryWindow::Draw()
 {
 	MenuWindow::Draw();
 
+	// This is part of the bottom menu, but there's really no way to run it from menu.cpp...
+	if (_active_box != ITEM_ACTIVE_NONE) {
+		GlobalObject* obj = NULL;
+		std::map<uint32, GlobalObject*>::iterator iter = GlobalManager->GetInventory()->begin();
+
+		for (int32 ctr = 0; ctr < _inventory_items.GetSelection(); ctr++, iter++) {
+		}
+		obj = iter->second;
+
+		VideoManager->Move(150, 577);
+
+		string text = MakeStandardString(obj->GetName());
+		VideoManager->MoveRelative(370, 0);
+		VideoManager->DrawText(MakeUnicodeString(text));
+
+		text = MakeStandardString(obj->GetDescription());
+		VideoManager->MoveRelative(0, 60);
+		VideoManager->DrawText(MakeUnicodeString(text));
+
+		VideoManager->SetDrawFlags(VIDEO_X_LEFT,VIDEO_Y_BOTTOM,0);
+		StillImage i;
+		i.SetFilename("img/icons/items/health_potion_large.png");
+		VideoManager->LoadImage(i);
+		VideoManager->MoveRelative(260, 30);
+		VideoManager->DrawImage(i);
+	} // if
+
 	// Update the item text in case the number of items changed.
+	_UpdateItemText();
 
 	// Draw char select option box
 	_char_select.Draw();
