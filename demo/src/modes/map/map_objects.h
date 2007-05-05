@@ -104,6 +104,9 @@ const uint8 SPRITE_TYPE = 2;
 const uint8 ENEMY_TYPE = 3;
 //@}
 
+//! \brief An animated icon used to indicate which sprites have unseen dialogue
+extern hoa_video::AnimatedImage new_dialogue_icon;
+
 /** ****************************************************************************
 *** \brief Abstract class that represents objects on a map
 ***
@@ -495,9 +498,6 @@ public:
 	//! \brief Indicates if the icon indicating that there is a dialogue available should be drawn or not.
 	bool _show_dialogue_icon;
 
-	//! \brief This static animation is used to indicate which sprite has a dialogue
-	static hoa_video::AnimatedImage _dialogue_icon;
-
 	// -------------------- Public methods
 
 	VirtualSprite();
@@ -584,14 +584,6 @@ public:
 	*** \note This is mostly used as an helper function to make sprites face each other.
 	**/
 	static uint16 CalculateOppositeDirection(const uint16 direction);
-
-private:
-	/** \brief This static class function loads and set up the image used to indicate that
-	*** a sprite has a dialogue.
-	*** \note It is only called once by initialising a static int in the constructor.
-	**/
-	static int _LoadDialogueIcon();
-
 }; // class VirtualMapObject : public MapObject
 
 

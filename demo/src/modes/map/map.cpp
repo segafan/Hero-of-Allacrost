@@ -77,6 +77,19 @@ MapMode::MapMode(string filename) :
 
 	// TODO: Load the map data in a seperate thread
 	_Load();
+
+	// TEMP: Load dialogue icon
+	if (private_map::new_dialogue_icon.GetNumFrames() == 0) {
+		std::vector<StillImage> frames;
+		VideoManager->LoadMultiImageFromElementsSize(frames, "img/misc/dialogue_icon.png", 32, 32);
+	
+		for( size_t i = 0; i < frames.size(); ++i ) {
+			private_map::new_dialogue_icon.AddFrame(frames[i], 100);
+		}
+
+		private_map::new_dialogue_icon.SetDimensions(2, 2);
+		private_map::new_dialogue_icon.Load();
+	}
 }
 
 
@@ -122,7 +135,7 @@ void MapMode::Reset() {
 	VideoManager->SetCoordSys(0.0f, SCREEN_COLS, SCREEN_ROWS, 0.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, 0);
 
-	if (!VideoManager->SetFont("default"))
+	if (!VideoManager->SetFont("map"))
     	cerr << "MAP ERROR: Failed to set the map font" << endl;
 
 	// Let all map objects know that this is the current map
