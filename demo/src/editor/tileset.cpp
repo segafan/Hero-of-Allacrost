@@ -33,7 +33,7 @@ Tileset::Tileset(QWidget* parent, const QString& name)
 	for (int i = 0; i < 256; i++)
 		tiles[i].SetDimensions(1.0f, 1.0f);
 	// NOTE: the following line currently causes a seg fault when the editor exits!
-	if (VideoManager->LoadMultiImageFromNumberElements(tiles, img_filename.toStdString(), 16, 16) == false)
+	if (VideoManager->LoadMultiImageFromNumberElements(tiles, std::string(img_filename.toAscii()), 16, 16) == false)
 		qDebug("LoadMultiImage failed to load tileset " + img_filename);
 
 	// Set up the table.
@@ -74,7 +74,7 @@ Tileset::Tileset(QWidget* parent, const QString& name)
 	ScriptDescriptor read_data;
 	vector<int32> vect;           // used to read in vectors from the data file
 	
-	if (!read_data.OpenFile(dat_filename.toStdString(), SCRIPT_READ))
+	if (!read_data.OpenFile(std::string(dat_filename.toAscii()), SCRIPT_READ))
 		QMessageBox::warning(parent, "Loading File...", QString("ERROR: could not open %1 for reading!").arg(dat_filename));
 
 	read_data.ReadOpenTable("walkability");

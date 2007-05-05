@@ -4,6 +4,7 @@
 	Version="8,00"
 	Name="Map Editor"
 	ProjectGUID="{A93BAE19-0D23-4237-83B6-01CAB0358D37}"
+	RootNamespace="Map Editor"
 	>
 	<Platforms>
 		<Platform
@@ -379,10 +380,6 @@
 			</File>
 			<File
 				RelativePath=".\src\engine\video\textbox.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\editor\tile.cpp"
 				>
 			</File>
 			<File
