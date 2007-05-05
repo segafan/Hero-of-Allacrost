@@ -61,7 +61,8 @@ DialogueManager::DialogueManager() {
 	_display_textbox.SetDisplaySpeed(30);
 	_display_textbox.SetPosition(300.0f, 768.0f - 180.0f);
 	_display_textbox.SetDimensions(1024.0f - 300.0f - 60.0f, 180.0f - 70.0f);
-	_display_textbox.SetFont("default");
+	_display_textbox.SetFont("map");
+	_display_textbox.SetTextColor(Color::black);
 	_display_textbox.SetDisplayMode(VIDEO_TEXT_FADECHAR);
 	_display_textbox.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 
@@ -160,8 +161,8 @@ void DialogueManager::Draw() {
 	_nameplate_image.Draw();
 
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, 0);
-	VideoManager->SetTextColor(Color(Color::black));
 	VideoManager->SetFont("map");
+	VideoManager->SetTextColor(Color(Color::black));
 	VideoManager->MoveRelative(120.0f, -10.0f);
 	VirtualSprite* speaker = reinterpret_cast<VirtualSprite*>(MapMode::_current_map->_all_objects[_current_dialogue->GetCurrentSpeaker()]);
 	VideoManager->DrawText(speaker->name);

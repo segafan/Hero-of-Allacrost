@@ -278,8 +278,13 @@ function Load(m)
 	sprite:LoadStandardAnimations("img/sprites/map/laila_walk.png");
 	sprite:SetFacePortrait("img/portraits/map/laila.png");
 	dialogue = hoa_map.MapDialogue();
-	dialogue:AddText("Hello, world!", 2, -1, -1);
-	dialogue:AddText("Hello, baby!", 1000, -1, -1);
+	dialogue:AddText("Laila, what's wrong? You have a worried look on your face.", 1000, -1, -1);
+	dialogue:AddText("You're going into that cave again, aren't you?", 2, -1, -1);
+	dialogue:AddText("Well.....yes I intend to...", 1000, -1, -1);
+	dialogue:AddText("Its dangerous in there! Why do you always do these types of reckless things?!", 2, -1, -1);
+	dialogue:AddText("Laila, if I want to be capable on the battlefiled I have to fight some real battles. Not doing this type of training is what would truly be reckless. You understand that, don't you? I know that you're worried about me and I appreciate it, but you need to stop doing this.", 1000, -1, -1);
+	dialogue:AddText(".....Alright, I'm sorry. Just be careful in there, okay? Turn back if things are looking risky and stock up on healing potions.", 2, -1, -1);
+	dialogue:AddText("Will do. Thanks.", 1000, -1, -1);
 	sprite:AddDialogue(dialogue);
 	map:_AddGroundObject(sprite);
 
@@ -297,13 +302,19 @@ function Load(m)
 	sprite:SetDirection(2);
 	sprite:LoadStandardAnimations("img/sprites/map/marcus_walk.png");
 	sprite:SetFacePortrait("img/portraits/map/marcus.png");
+	dialogue = hoa_map.MapDialogue();
+	dialogue:AddText("Hey there son, how's the training going?", 3, -1, -1);
+	dialogue:AddText("Pretty well. The enemies I fight in the cave aren't too tough.", 1000, -1, -1);
+	dialogue:AddText("Good to hear. Don't let your guard down though. The deeper you go into that cave, the more likely it is that you'll face stronger opponents.", 3, -1, -1);
+	sprite:AddDialogue(dialogue);
 	action = hoa_map.ActionPathMove(sprite);
 	action:SetDestination(50, 35);
 	sprite:AddAction(action);
 	action = hoa_map.ActionPathMove(sprite);
 	action:SetDestination(40, 35);
 	sprite:AddAction(action);
-	sprite.current_action = 0;	
+	sprite.current_action = 0;
+
 	map:_AddGroundObject(sprite);
 
 	sprite = hoa_map.MapSprite();
@@ -321,7 +332,12 @@ function Load(m)
 	sprite:LoadStandardAnimations("img/sprites/map/vanica_walk.png");
 	sprite:SetFacePortrait("img/portraits/map/vanica.png");
 	dialogue = hoa_map.MapDialogue();
-	dialogue:AddText("I'm the mother.", 4, -1, -1);
+	dialogue:AddText("Oh, Claudius? What seems to be the matter?", 4, -1, -1);
+	dialogue:AddText("I keep seeing these weird little icons above people's heads. What do they mean?", 1000, -1, -1);
+	dialogue:AddText("Oh, that. That icon is a new dialogue indicator. Any person that has something new to say that you haven't already heard will have that icon above their head. Once you've heard everything that they've had to say, the icon will disappear.", 4, -1, -1);
+	sprite:AddDialogue(dialogue);
+	dialogue = hoa_map.MapDialogue();
+	dialogue:AddText("And remember that a person may have more than one dialogue, so if the icon doesn't disappear after speaking to a person, speak to them once more.", 4, -1, -1);
 	sprite:AddDialogue(dialogue);
 	action = hoa_map.ActionPathMove(sprite);
 	action:SetDestination(38, 38);
@@ -333,7 +349,7 @@ function Load(m)
 	map:_AddGroundObject(sprite);
 
 	sprite = hoa_map.MapSprite();
-	sprite:SetName("Speedracer?");
+	sprite:SetName("Laine");
 	sprite:SetObjectID(6);
 	sprite:SetContext(1);
 	sprite:SetXPosition(72, 0.5);
@@ -345,6 +361,10 @@ function Load(m)
 	sprite:SetMovementSpeed(200.0);
 	sprite:SetDirection(2);
 	sprite:LoadStandardAnimations("img/sprites/map/man_npc01_walk.png");
+	dialogue = hoa_map.MapDialogue();
+	dialogue:AddText("Hello, would you happen to know why it seems impossible to enter any of these houses?", 1000, -1, -1);
+	dialogue:AddText("Ah, well the game designers are still working on decorating the interiors, so they had to lock the doors to make sure that no one soiled the place before they were finished. Hopefully they'll be ready for us by the time the next demo rolls around.", 6, -1, -1);
+	sprite:AddDialogue(dialogue);
 	action = hoa_map.ActionPathMove(sprite);
 	action:SetDestination(72, 35);
 	sprite:AddAction(action);
@@ -362,7 +382,7 @@ function Load(m)
 	map:_AddGroundObject(sprite);
 
 	sprite = hoa_map.MapSprite();
-	sprite:SetName("Needs to Shave");
+	sprite:SetName("Alexander");
 	sprite:SetObjectID(7);
 	sprite:SetContext(1);
 	sprite:SetXPosition(52, 0.5);
@@ -374,6 +394,9 @@ function Load(m)
 	sprite:SetMovementSpeed(200.0);
 	sprite:SetDirection(2);
 	sprite:LoadStandardAnimations("img/sprites/map/man_npc02_walk.png");
+	dialogue = hoa_map.MapDialogue();
+	dialogue:AddText("Choose your target wisely in battle. Its best to single out and take down one foe at a time. And don't be afraid to use a healing potion in battle if you're approaching your limit, but at the same time don't be wasteful with them.", 7, -1, -1);
+	sprite:AddDialogue(dialogue);
 	action = hoa_map.ActionPathMove(sprite);
 	action:SetDestination(52, 45);
 	sprite:AddAction(action);
@@ -384,7 +407,7 @@ function Load(m)
 	map:_AddGroundObject(sprite);
 
 	sprite = hoa_map.MapSprite();
-	sprite:SetName("Little Brat");
+	sprite:SetName("Torl");
 	sprite:SetObjectID(8);
 	sprite:SetContext(1);
 	sprite:SetXPosition(32, 0.5);
@@ -396,6 +419,9 @@ function Load(m)
 	sprite:SetMovementSpeed(200.0);
 	sprite:SetDirection(2);
 	sprite:LoadStandardAnimations("img/sprites/map/boy_npc01_walk.png");
+	dialogue = hoa_map.MapDialogue();
+	dialogue:AddText("This village is boring! There's no one I can play with here!", 8, -1, -1);
+	sprite:AddDialogue(dialogue);
 	action = hoa_map.ActionPathMove(sprite);
 	action:SetDestination(62, 28);
 	sprite:AddAction(action);
@@ -419,7 +445,7 @@ function Load(m)
 	sprite:SetDirection(2);
 	sprite:LoadStandardAnimations("img/sprites/map/woman_npc01_walk.png");
 	dialogue = hoa_map.MapDialogue();
-	dialogue:AddText("I have wonderful merchandise for sale.", 9, -1, 0);
+	dialogue:AddText("I have merchandise for sale at affordable prices. Take a look.", 9, -1, 0);
 	sprite:AddDialogue(dialogue);
 	map:_AddGroundObject(sprite);
 

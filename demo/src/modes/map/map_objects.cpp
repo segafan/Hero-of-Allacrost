@@ -37,6 +37,9 @@ namespace hoa_map {
 
 namespace private_map {
 
+// Initialized in MapMode constructor
+hoa_video::AnimatedImage new_dialogue_icon;
+
 // *****************************************************************************
 // ************************ MapObject Class Functions **************************
 // *****************************************************************************
@@ -117,8 +120,6 @@ void PhysicalObject::Draw() {
 // ********************* VirtualSprite Class Functions ************************
 // ****************************************************************************
 
-AnimatedImage VirtualSprite::_dialogue_icon;
-
 VirtualSprite::VirtualSprite() :
 	direction(SOUTH),
 	movement_speed(NORMAL_SPEED),
@@ -131,7 +132,6 @@ VirtualSprite::VirtualSprite() :
 	_current_dialogue(0),
 	_show_dialogue_icon(true)
 {
-	static int diag_icon_fake = _LoadDialogueIcon();
 	MapObject::_object_type = VIRTUAL_TYPE;
 }
 
@@ -168,22 +168,6 @@ void VirtualSprite::UpdateSeenDialogue() {
 }
 
 
-int VirtualSprite::_LoadDialogueIcon()
-{
-	std::vector<StillImage> frames;
-	VideoManager->LoadMultiImageFromElementsSize( frames, "img/misc/dialogue_icon.png", 32, 32 );
-	
-	for( size_t i = 0; i < frames.size(); ++i ) {
-		//Frame speed arbitrary set to 100 ms each frame
-		_dialogue_icon.AddFrame( frames[i], 100 );
-	}
-
-	_dialogue_icon.SetDimensions( 2, 2 );
-	_dialogue_icon.Load();
-	return 0;
-}
-
-
 
 uint16 VirtualSprite::CalculateOppositeDirection(const uint16 direction) {
 	switch (direction) {
@@ -209,7 +193,7 @@ uint16 VirtualSprite::CalculateOppositeDirection(const uint16 direction) {
 
 
 void VirtualSprite::Update() {
-	_dialogue_icon.Update();
+	new_dialogue_icon.Update();
 	if (!updatable) {
 		return;
 	}
@@ -320,7 +304,7 @@ void VirtualSprite::Draw() {
 	if (HasDialogue()) {
 		if (IsShowingDialogueIcon() && MapMode::_IsShowingDialogueIcons() && seen_all_dialogue == false) {
 			VideoManager->MoveRelative(0, -GetImgHeight());
-			VideoManager->DrawImage(_dialogue_icon);
+			VideoManager->DrawImage(new_dialogue_icon);
 		}
 	}
 }
@@ -387,6 +371,8 @@ void VirtualSprite::SaveState() {
 	_saved_moving = moving;
 	_saved_name = name;
 	_saved_current_action = current_action;
+	// TEMP
+	updatable = false;
 }
 
 
@@ -400,6 +386,9 @@ bool VirtualSprite::LoadState() {
 	 moving = _saved_moving;
 	 name = _saved_name;
 	 current_action = _saved_current_action;
+
+	// TEMP
+	updatable = true;
 
 	 return true;
 }
