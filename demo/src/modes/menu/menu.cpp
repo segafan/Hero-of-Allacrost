@@ -277,7 +277,7 @@ void MenuMode::_SetupInventoryOptionBox() {
 
 	// Add strings and set default selection.
 	_menu_inventory.SetOptions(options);
-	_menu_inventory.SetSelection(INV_USE);	
+	_menu_inventory.SetSelection(INV_USE);
 }
 
 
@@ -499,9 +499,8 @@ void MenuMode::Draw() {
 	// Set the text colour to white
 	VideoManager->SetTextColor(Color(1.0f, 1.0f, 1.0f, 1.0f));
 
-	//FIX ME:  Test
-	_DrawBottomMenu();
 	_main_options_window.Draw();
+	_DrawBottomMenu();
 
 	// Detects which option is highlighted in main menu choices and sets that to the current window
 	// to draw
@@ -548,6 +547,9 @@ void MenuMode::Draw() {
 			break;*/
 	}
 
+	//FIX ME:  Test
+
+
 	// Draw character windows
 	_character_window0.Draw();
 	_character_window1.Draw();
@@ -566,33 +568,9 @@ void MenuMode::_DrawBottomMenu() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 	VideoManager->Move(150, 577);
 
-	if (_current_menu_showing == SHOW_INVENTORY) {
-		GlobalActor* actor = GlobalManager->GetActiveParty()->GetActor(0);
-		GlobalCharacter* character = (GlobalCharacter*)(actor);
-		string text = "STR: " +  NumberToString(character->GetStrength());
-		VideoManager->DrawText(MakeUnicodeString(text));
-
-		text = "VIG: " +  NumberToString(character->GetVigor());
-		VideoManager->MoveRelative(0, 20);
-		VideoManager->DrawText(MakeUnicodeString(text));
-
-		text = "FRT: " +  NumberToString(character->GetFortitude());
-		VideoManager->MoveRelative(0, 20);
-		VideoManager->DrawText(MakeUnicodeString(text));
-
-		text = "PRO: " +  NumberToString(character->GetProtection());
-		VideoManager->MoveRelative(0, 20);
-		VideoManager->DrawText(MakeUnicodeString(text));
-
-		text = "AGI: " +  NumberToString(character->GetAgility());
-		VideoManager->MoveRelative(0, 20);
-		VideoManager->DrawText(MakeUnicodeString(text));
-
-		text = "EVD: " +  NumberToString(character->GetEvade()) + "%";
-		VideoManager->MoveRelative(0, 20);
-		VideoManager->DrawText(MakeUnicodeString(text));
-
-		VideoManager->SetDrawFlags(VIDEO_X_CENTER,VIDEO_Y_BOTTOM,0);
+	if (_current_menu_showing == SHOW_INVENTORY )
+	{
+		//Just do nothing and let the inventory drawing do the job
 	}
 	else if (_current_menu_showing == SHOW_EQUIP || _current_menu_showing == SHOW_SKILLS) {
 		GlobalActor* actor = GlobalManager->GetActiveParty()->GetActor(0);
@@ -621,20 +599,6 @@ void MenuMode::_DrawBottomMenu() {
 		VideoManager->DrawText(MakeUnicodeString(text));
 
 		VideoManager->SetDrawFlags(VIDEO_X_CENTER,VIDEO_Y_BOTTOM,0);
-
-		text = "Health Potion";
-		VideoManager->MoveRelative(370, -80);
-		VideoManager->DrawText(MakeUnicodeString(text));
-
-		VideoManager->MoveRelative(0, 60);
-		VideoManager->DrawText(MakeUnicodeString("HP +30.  Single Ally"));
-
-		VideoManager->SetDrawFlags(VIDEO_X_LEFT,VIDEO_Y_BOTTOM,0);
-		StillImage i;
-		i.SetFilename("img/icons/items/health_potion_large.png");
-		VideoManager->LoadImage(i);
-		VideoManager->MoveRelative(260, 30);
-		VideoManager->DrawImage(i);
 	}
 	else {
 		// Display Location
