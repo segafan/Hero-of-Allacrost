@@ -346,6 +346,15 @@ InventoryWindow::InventoryWindow() : _active_box(ITEM_ACTIVE_NONE)
 	_location_graphic.SetDimensions(500.0f, 125.0f);
 	VideoManager->LoadImage(_location_graphic);
 
+	//Initializes the description textbox for the bottom window
+	_description.SetOwner(this);
+	_description.SetPosition(30.0f, 525.0f);
+	_description.SetDimensions(800.0f, 80.0f);
+	_description.SetDisplaySpeed(30);
+	_description.SetFont("default");
+	_description.SetDisplayMode(VIDEO_TEXT_INSTANT);
+	_description.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+
 }// void InventoryWindow::InventoryWindow
 
 InventoryWindow::~InventoryWindow()
@@ -358,7 +367,7 @@ InventoryWindow::~InventoryWindow()
 //Initializes the list of items
 void InventoryWindow::_InitInventoryItems() {
 	// Set up the inventory option box
-	_inventory_items.SetCellSize(180.0f, 60.0f);
+	_inventory_items.SetCellSize(400.0f, 60.0f);
 
 	_inventory_items.SetPosition(500.0f, 170.0f);
 	_inventory_items.SetFont("default");
@@ -366,10 +375,11 @@ void InventoryWindow::_InitInventoryItems() {
 	_inventory_items.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
 	_inventory_items.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_inventory_items.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	_inventory_items.TEMP_OverideScissorring(true);
 
 	// Update the item text
 	_UpdateItemText();
-	_inventory_items.SetSelection(0);
+	_inventory_items.SetSelection(0);		VideoManager->MoveRelative(-65, 20);
 	// Initially hide the cursor
 	_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 }
@@ -511,6 +521,7 @@ void InventoryWindow::Update() {
 					if (_inventory_items.GetNumOptions() > 0) {
 						_item_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 						_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+						_description.SetDisplayText( _item_objects[ 0 ]->GetDescription() );
 						_active_box = ITEM_ACTIVE_LIST;
 						MenuMode::_instance->_menu_sounds["confirm"].PlaySound();
 					}
@@ -539,6 +550,10 @@ void InventoryWindow::Update() {
 					MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
 					_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 					_item_categories.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+				}
+				else if ( event == VIDEO_OPTION_BOUNDS_UP || VIDEO_OPTION_BOUNDS_DOWN )
+				{
+					_description.SetDisplayText( _item_objects[ _inventory_items.GetSelection() ]->GetDescription() );
 				}
 			}
 			break;
@@ -843,30 +858,19 @@ void InventoryWindow::Draw()
 	MenuWindow::Draw();
 
 	// This is part of the bottom menu, but there's really no way to run it from menu.cpp...
-	if (_active_box != ITEM_ACTIVE_NONE) {
+	if (_active_box == ITEM_ACTIVE_LIST) {
 		GlobalObject* obj = NULL;
-		std::map<uint32, GlobalObject*>::iterator iter = GlobalManager->GetInventory()->begin();
 
-		for (int32 ctr = 0; ctr < _inventory_items.GetSelection(); ctr++, iter++) {
-		}
-		obj = iter->second;
+		obj = _item_objects[ _inventory_items.GetSelection() ];
 
-		VideoManager->Move(150, 577);
+		VideoManager->SetDrawFlags(VIDEO_X_LEFT,VIDEO_Y_CENTER,0);
 
-		string text = MakeStandardString(obj->GetName());
-		VideoManager->MoveRelative(370, 0);
-		VideoManager->DrawText(MakeUnicodeString(text));
-
-		text = MakeStandardString(obj->GetDescription());
-		VideoManager->MoveRelative(0, 60);
-		VideoManager->DrawText(MakeUnicodeString(text));
-
+		VideoManager->Move(100, 600);
+		VideoManager->DrawImage(obj->GetIconImage() );
+		VideoManager->MoveRelative(65, 0);
+		VideoManager->DrawText(obj->GetName());
 		VideoManager->SetDrawFlags(VIDEO_X_LEFT,VIDEO_Y_BOTTOM,0);
-		StillImage i;
-		i.SetFilename("img/icons/items/health_potion_large.png");
-		VideoManager->LoadImage(i);
-		VideoManager->MoveRelative(260, 30);
-		VideoManager->DrawImage(i);
+		_description.Draw();
 	} // if
 
 	// Update the item text in case the number of items changed.
@@ -1588,7 +1592,7 @@ void EquipWindow::Update() {
 		case EQUIP_ACTIVE_LIST:
 			{
 				if (event == VIDEO_OPTION_CONFIRM) {
-					hoa_global::GlobalCharacter* ch = GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS); 
+					hoa_global::GlobalCharacter* ch = GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS);
 					if (_equip_select.GetSelection() == EQUIP_WEAPON) {
 						GlobalManager->AddToInventory(ch->GetWeaponEquipped()->GetID());
 						ch->EquipWeapon(GlobalManager->GetInventoryWeapons()->at(_equip_list.GetSelection()));

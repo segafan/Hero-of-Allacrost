@@ -54,6 +54,7 @@ OptionBox::OptionBox()
 	_hSpacing = _vSpacing = 0.0f;
 	_numRows = _numColumns = 0;
 	_initialized = IsInitialized(_initialization_errors);
+	_TEMP_overide_scissorring = false;
 }
 
 
@@ -335,7 +336,7 @@ void OptionBox::HandleConfirmKey()
 	if(_selection < 0 || _selection >= _numOptions)
 		return;
 
-	// case 1: switching 2 different elements
+	// case 1: switc_TEMPhing 2 different elements
 	if(_firstSelection >= 0 && _selection != _firstSelection)
 	{
 		if(_switching)
@@ -457,6 +458,14 @@ void OptionBox::EnableSwitching(bool enable)
 	_switching = enable;
 }
 
+//-----------------------------------------------------------------------------
+// OverideScisorring: scissoring to the optionbox's size
+//-----------------------------------------------------------------------------
+
+void OptionBox::TEMP_OverideScissorring( bool enable )
+{
+	_TEMP_overide_scissorring = enable;
+}
 
 //-----------------------------------------------------------------------------
 // SetVerticalWrapMode: controls how the cursor wraps when it goes beyond the
@@ -1005,12 +1014,30 @@ void OptionBox::Draw()
 	rect.left -= cursorMargin;
 	rect.width += cursorMargin;
 
-	if(_owner)
-		rect.Intersect(_owner->GetScissorRect());
-	rect.Intersect(VideoManager->GetScissorRect());
-	VideoManager->EnableScissoring(_owner && VideoManager->IsScissoringEnabled());
-	if(VideoManager->IsScissoringEnabled())
+
+	//TEMP: Code to make the inventory look good for now until scissoring can be fixed correctly
+	//Used to set the scissoring back to what it was before
+	bool scissoring_rollback = VideoManager->IsScissoringEnabled();
+	if( _TEMP_overide_scissorring ) {
+		std::cout << rect.left << std::endl;
+		std::cout << "Top: " << rect.top << std::endl;
+		std::cout << rect.width << std::endl;
+		std::cout << "Height: " << rect.height << std::endl;
+		rect.top += 71;
+		rect.height += 10;
+		std::cout << "Top: " << rect.top << std::endl;
+		rect.Intersect(VideoManager->GetScissorRect());
+		VideoManager->EnableScissoring(true);
 		VideoManager->SetScissorRect(rect);
+	}
+	else {
+		if(_owner && VideoManager->IsScissoringEnabled() ) {
+			rect.Intersect(_owner->GetScissorRect());
+			rect.Intersect(VideoManager->GetScissorRect());
+			VideoManager->EnableScissoring(true);
+			VideoManager->SetScissorRect(rect);
+		}
+	}
 
 	CoordSys &cs = VideoManager->_coord_sys;
 
@@ -1103,7 +1130,8 @@ void OptionBox::Draw()
 						xalign = VIDEO_X_CENTER;
 						_SetupAlignment(xalign, _option_yalign, bounds, x, y);
 						break;
-					}
+						std::cout << rect.left << std::endl;
+						std::cout << rect.top << std::endl;				}
 
 					case VIDEO_OPTION_ELEMENT_RIGHT_ALIGN:
 					{
@@ -1225,6 +1253,7 @@ void OptionBox::Draw()
 		bounds.y_bottom += yoff;
 	}
 
+	VideoManager->EnableScissoring( scissoring_rollback );
 	VideoManager->_PopContext();
 }
 

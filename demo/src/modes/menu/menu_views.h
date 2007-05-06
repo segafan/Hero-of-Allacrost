@@ -231,6 +231,9 @@ private:
 	//! OptionBox to choose item category
 	hoa_video::OptionBox _item_categories;
 
+	//! TextBox that holds the selected object's description
+	hoa_video::TextBox _description;
+
 	//! Vector of GlobalObjects that corresponds to _inventory_items
 	std::vector< hoa_global::GlobalObject* > _item_objects;
 

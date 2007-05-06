@@ -344,6 +344,11 @@ public:
 	**/
 	bool IsInitialized(std::string& errors);
 
+	/** \brief Used to enable scissoring to the size of the option box instead of the owner's
+	*** \param enable true to enable, false to disable
+	**/
+	void TEMP_OverideScissorring( bool enable );
+
 private:
 	//! after every change to any of the settings, check if the textbox is in a valid state and update this bool
 	bool   _initialized;
@@ -434,6 +439,9 @@ private:
 
 	//! structure containing properties of the current font like height, etc.
 	FontProperties _fontProperties;
+
+	//! true if scissoring is enabled and using another rectangle then the owner's
+	bool _TEMP_overide_scissorring;
 
 	/** \brief given an alignment and the bounds of an option cell, it sets up the correct
 	 *         flags to render into that cell, and returns the x and y values where the
