@@ -500,9 +500,9 @@ end
 
 map_functions = {}
 
--- Plays a sneaky/odd sound
+-- Plays a ground-rumbling sound
 map_functions[0] = function()
-	AudioManager:PlaySound("snd/coins.wav");
+	AudioManager:PlaySound("snd/rumble.wav");
 end
 
 -- Throws player into a boss battle
