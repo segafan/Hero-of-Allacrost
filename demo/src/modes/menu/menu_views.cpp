@@ -562,12 +562,15 @@ void InventoryWindow::Update() {
 			{
 				// Use the item on the chosen character
 				if (event == VIDEO_OPTION_CONFIRM) {
-					//FIXME Use Item
-					/*GlobalItem *item = (GlobalItem*)(GlobalManager->GetInventory()[item_selected]);
-					if ((item->GetUseCase() & GLOBAL_HP_RECOVERY_ITEM) || (item->GetUseCase() & GLOBAL_SP_RECOVERY_ITEM))
-					{*/
-						_TEMP_ApplyItem();
-					//}
+					GlobalObject* obj = _item_objects[ _inventory_items.GetSelection() ];
+					GlobalCharacter *ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActor(_char_select.GetSelection()));
+					if (obj->GetType() == GLOBAL_OBJECT_ITEM) {
+						GlobalItem *item = (GlobalItem*)obj;
+						item->MenuUse(ch);
+						if (item->GetCount() <= 0) {
+							GlobalManager->RemoveFromInventory(item->GetID());
+						} // if
+					} // if
 					//_menu_sounds["confirm"].PlaySound();
 				}
 				// Return to item selection
@@ -859,9 +862,7 @@ void InventoryWindow::Draw()
 
 	// This is part of the bottom menu, but there's really no way to run it from menu.cpp...
 	if (_active_box == ITEM_ACTIVE_LIST) {
-		GlobalObject* obj = NULL;
-
-		obj = _item_objects[ _inventory_items.GetSelection() ];
+		GlobalObject* obj = _item_objects[ _inventory_items.GetSelection() ];
 
 		VideoManager->SetDrawFlags(VIDEO_X_LEFT,VIDEO_Y_CENTER,0);
 
@@ -1384,22 +1385,22 @@ EquipWindow::EquipWindow() : _active_box(EQUIP_ACTIVE_NONE) {
 	_InitEquipmentList();
 
 	StillImage i;
+	GlobalActor* actor = GlobalManager->GetActiveParty()->GetActor(_char_select.GetSelection());
+	GlobalCharacter* ch = (GlobalCharacter*)(actor);
 
-	// FIXME: Use as permanent pictures
-	// obj->GetIconImage().GetFilename()
-	i.SetFilename(GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS)->GetWeaponEquipped()->GetIconImage().GetFilename());
+	i.SetFilename(ch->GetWeaponEquipped()->GetIconImage().GetFilename());
 	_equip_images.push_back(i);
 
-	i.SetFilename(GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS)->GetEquippedHeadArmor()->GetIconImage().GetFilename());
+	i.SetFilename(ch->GetEquippedHeadArmor()->GetIconImage().GetFilename());
 	_equip_images.push_back(i);
 
-	i.SetFilename(GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS)->GetEquippedTorsoArmor()->GetIconImage().GetFilename());
+	i.SetFilename(ch->GetEquippedTorsoArmor()->GetIconImage().GetFilename());
 	_equip_images.push_back(i);
 
-	i.SetFilename(GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS)->GetEquippedArmsArmor()->GetIconImage().GetFilename());
+	i.SetFilename(ch->GetEquippedArmsArmor()->GetIconImage().GetFilename());
 	_equip_images.push_back(i);
 
-	i.SetFilename(GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS)->GetEquippedLegArmor()->GetIconImage().GetFilename());
+	i.SetFilename(ch->GetEquippedLegArmor()->GetIconImage().GetFilename());
 	_equip_images.push_back(i);
 
 	for (uint32 i = 0; i < EQUIP_CATEGORY_SIZE; i++) {
@@ -1592,7 +1593,9 @@ void EquipWindow::Update() {
 		case EQUIP_ACTIVE_LIST:
 			{
 				if (event == VIDEO_OPTION_CONFIRM) {
-					hoa_global::GlobalCharacter* ch = GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS);
+					GlobalActor* actor = GlobalManager->GetActiveParty()->GetActor(_char_select.GetSelection());
+					GlobalCharacter* ch = (GlobalCharacter*)(actor);
+
 					if (_equip_select.GetSelection() == EQUIP_WEAPON) {
 						GlobalManager->AddToInventory(ch->GetWeaponEquipped()->GetID());
 						ch->EquipWeapon(GlobalManager->GetInventoryWeapons()->at(_equip_list.GetSelection()));
@@ -1639,7 +1642,8 @@ void EquipWindow::Update() {
 
 
 void EquipWindow::_UpdateEquipList() {
-	hoa_global::GlobalCharacter* ch = GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS); //_char_select.GetSelection());
+	GlobalActor* actor = GlobalManager->GetActiveParty()->GetActor(_char_select.GetSelection());
+	GlobalCharacter* ch = (GlobalCharacter*)(actor);
 	std::vector<ustring> options;
 
 	if (_active_box == EQUIP_ACTIVE_LIST) {
@@ -1698,11 +1702,11 @@ void EquipWindow::_UpdateEquipList() {
 	} // if EQUIP_ACTIVE_LIST
 
 	else {
-		options.push_back(MakeUnicodeString(MakeStandardString(ch->GetWeaponEquipped()->GetName())));
-		options.push_back(MakeUnicodeString(MakeStandardString(ch->GetEquippedHeadArmor()->GetName())));
-		options.push_back(MakeUnicodeString(MakeStandardString(ch->GetEquippedTorsoArmor()->GetName())));
-		options.push_back(MakeUnicodeString(MakeStandardString(ch->GetEquippedArmsArmor()->GetName())));
-		options.push_back(MakeUnicodeString(MakeStandardString(ch->GetEquippedLegArmor()->GetName())));
+		options.push_back(ch->GetWeaponEquipped()->GetName());
+		options.push_back(ch->GetEquippedHeadArmor()->GetName());
+		options.push_back(ch->GetEquippedTorsoArmor()->GetName());
+		options.push_back(ch->GetEquippedArmsArmor()->GetName());
+		options.push_back(ch->GetEquippedLegArmor()->GetName());
 
 		_equip_select.SetOptions(options);
 	}
@@ -1741,10 +1745,7 @@ void EquipWindow::Draw() {
 	}
 	else {
 		_equip_select.Draw();
-
-		// FIX ME: warning: unused variable
-		//hoa_global::GlobalCharacter *ch = GlobalManager->GetParty()[_char_select.GetSelection()];
-
+		
 		//FIX ME: Use XML tags for formatting option boxes
 		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 		VideoManager->Move(450.0f, 170.0f);

@@ -78,14 +78,20 @@ void GlobalItem::MenuUse(GlobalCharacter* target) {
 		return;
 	}
 	else if (_id == 1) {
+		// check character hp
+		if (target->GetHitPoints() == target->GetMaxHitPoints()) {
+			// don't use item we're full
+			// can't play "bump" sound from here... perhaps this function should return bool?
+			return;
+		}
 		target->SetHitPoints(target->GetHitPoints() + 30);
+		DecrementCount(1);
 	}
 	else {
 		cerr << "Can't use this item!" << endl;
 		return;
 	}
 // 	ScriptCallFunction<void>(_menu_use_function, target, instigator);
-	_count--;
 }
 
 // ****************************************************************************
