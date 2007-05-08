@@ -382,11 +382,16 @@ void ConfirmWindow::Update() {
 	}
 	else if (InputManager->ConfirmPress()) {
 		if (options.GetSelection() == 0) { // Confirm purchase
-			// Add to global inventory
-			GlobalManager->AddToInventory(_object->GetID());
-			GlobalManager->SubtractFunds(_object->GetPrice());
-			current_shop->_shop_sounds["coins"].PlaySound();
-			current_shop->_action_window.UpdateFinanceText();
+			if (GlobalManager->GetFunds() >= _object->GetPrice()) {
+				// Add to global inventory
+				GlobalManager->AddToInventory(_object->GetID());
+				GlobalManager->SubtractFunds(_object->GetPrice());
+				current_shop->_shop_sounds["coins"].PlaySound();
+				current_shop->_action_window.UpdateFinanceText();
+			}
+			else {
+				current_shop->_shop_sounds["bump"].PlaySound();
+			}
 			current_shop->_state = SHOP_STATE_LIST;
 		}
 		else {

@@ -584,6 +584,7 @@ void BootMode::_OnNewGame() {
 	_SaveSettingsFile();
 
 	GlobalManager->AddCharacter(GLOBAL_CHARACTER_CLAUDIUS);
+	GlobalManager->SetFunds(500);
 
 	_fade_out = true;
 	VideoManager->FadeScreen(Color::black, 1.0f);

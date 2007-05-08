@@ -1019,13 +1019,13 @@ void OptionBox::Draw()
 	//Used to set the scissoring back to what it was before
 	bool scissoring_rollback = VideoManager->IsScissoringEnabled();
 	if( _TEMP_overide_scissorring ) {
-		std::cout << rect.left << std::endl;
-		std::cout << "Top: " << rect.top << std::endl;
-		std::cout << rect.width << std::endl;
-		std::cout << "Height: " << rect.height << std::endl;
+//		std::cout << rect.left << std::endl;
+//		std::cout << "Top: " << rect.top << std::endl;
+//		std::cout << rect.width << std::endl;
+//		std::cout << "Height: " << rect.height << std::endl;
 		rect.top += 71;
 		rect.height += 10;
-		std::cout << "Top: " << rect.top << std::endl;
+//		std::cout << "Top: " << rect.top << std::endl;
 		rect.Intersect(VideoManager->GetScissorRect());
 		VideoManager->EnableScissoring(true);
 		VideoManager->SetScissorRect(rect);
