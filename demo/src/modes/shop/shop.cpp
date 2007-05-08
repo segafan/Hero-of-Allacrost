@@ -41,7 +41,7 @@ using namespace hoa_shop::private_shop;
 
 namespace hoa_shop {
 
-bool SHOP_DEBUG = false;
+bool SHOP_DEBUG = true;
 
 namespace private_shop {
 
@@ -101,7 +101,7 @@ void ShopMode::Reset() {
 	_all_objects.push_back(new GlobalArmor(40002));
 	_all_objects.push_back(new GlobalArmor(50001));
 
-	GlobalManager->SetFunds(500);
+//	GlobalManager->SetFunds(500);
 	_action_window.UpdateFinanceText();
 
 	for (uint32 i = 0; i < _all_objects.size(); i++) {
