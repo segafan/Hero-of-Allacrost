@@ -18,6 +18,7 @@
 
 #include <iostream>
 #include <stdarg.h>
+#include <boost/lexical_cast.hpp>
 
 #include "script.h"
 
@@ -58,7 +59,7 @@ bool ScriptDescriptor::_CheckFileAccess(SCRIPT_ACCESS_MODE mode) {
 
 
 
-bool ScriptDescriptor::OpenFile(std::string file_name, SCRIPT_ACCESS_MODE mode) {
+bool ScriptDescriptor::OpenFile(const std::string& file_name, SCRIPT_ACCESS_MODE mode) {
 	if (ScriptManager->IsFileOpen(file_name) == true) {
 		if (SCRIPT_DEBUG)
 			cerr << "SCRIPT ERROR: Attempted to open file that is already opened: " << _filename << endl;
@@ -197,7 +198,7 @@ void ScriptDescriptor::DEBUG_ShowGlobals() {
 
 // ****************************** Read Functions *******************************
 
-void ScriptDescriptor::ReadOpenTable(std::string key) {
+void ScriptDescriptor::ReadOpenTable(const std::string& key) {
 	if (_CheckFileAccess(SCRIPT_READ) == false)
 		return;
 
@@ -263,7 +264,7 @@ void ScriptDescriptor::ReadCloseTable() {
 
 
 
-uint32 ScriptDescriptor::ReadGetTableSize(std::string key) {
+uint32 ScriptDescriptor::ReadGetTableSize(const std::string& key) {
 	if (_CheckFileAccess(SCRIPT_READ) == false)
 		return 0;
 
@@ -317,7 +318,7 @@ uint32 ScriptDescriptor::ReadGetTableSize() {
 
 
 
-object ScriptDescriptor::ReadFunctionPointer(string key) {
+object ScriptDescriptor::ReadFunctionPointer(const std::string& key) {
 	if (_CheckFileAccess(SCRIPT_READ) == false)
 		return luabind::object();
 
@@ -419,16 +420,8 @@ void ScriptDescriptor::WriteInsertNewLine() {
 
 
 
-void ScriptDescriptor::WriteComment(const char* comment) {
-	if (_CheckFileAccess(SCRIPT_WRITE) != true)
-		return;
 
-	_outfile << "-- " << comment << endl;
-}
-
-
-
-void ScriptDescriptor::WriteComment(std::string& comment) {
+void ScriptDescriptor::WriteComment(const std::string& comment) {
 	if (_CheckFileAccess(SCRIPT_WRITE) != true)
 		return;
 
@@ -455,16 +448,8 @@ void ScriptDescriptor::WriteEndCommentBlock() {
 
 
 
-void ScriptDescriptor::WriteLine(const char* comment) {
-	if (_CheckFileAccess(SCRIPT_WRITE) != true)
-		return;
 
-	_outfile << comment << endl;
-}
-
-
-
-void ScriptDescriptor::WriteLine(std::string& comment) {
+void ScriptDescriptor::WriteLine(const std::string& comment) {
 	if (_CheckFileAccess(SCRIPT_WRITE) != true)
 		return;
 
@@ -473,7 +458,7 @@ void ScriptDescriptor::WriteLine(std::string& comment) {
 
 
 // This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
-void ScriptDescriptor::WriteBool(const char *key, bool value) {
+void ScriptDescriptor::WriteBool(const std::string &key, bool value) {
 	if (_CheckFileAccess(SCRIPT_WRITE) != true)
 		return;
 
@@ -504,9 +489,6 @@ void ScriptDescriptor::WriteBool(const char *key, bool value) {
 
 // This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
 void ScriptDescriptor::WriteBool(const int32 key, bool value) {
-	if (_CheckFileAccess(SCRIPT_WRITE) != true)
-		return;
-
 	if (_open_tables.empty()) {
 		_error_code |= SCRIPT_BAD_GLOBAL;
 		if (SCRIPT_DEBUG)
@@ -514,24 +496,13 @@ void ScriptDescriptor::WriteBool(const int32 key, bool value) {
 		return;
 	}
 
-	_WriteTablePath();
-	_outfile << '[' << key << ']' << " = ";
-	if (value)
-		_outfile << "true" << endl;
-	else
-		_outfile << "false" << endl;
+	WriteBool(boost::lexical_cast<std::string>(key), value);
 }
 
-
-
-void ScriptDescriptor::WriteBool(string &key, bool value)
-{
-	this->WriteBool(key.c_str(), value);
-}
 
 
 // This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
-void ScriptDescriptor::WriteInt(const char *key, int32 value) {
+void ScriptDescriptor::WriteInt(const std::string &key, int32 value) {
 	if (_CheckFileAccess(SCRIPT_WRITE) != true)
 		return;
 
@@ -547,9 +518,6 @@ void ScriptDescriptor::WriteInt(const char *key, int32 value) {
 
 // This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
 void ScriptDescriptor::WriteInt(const int32 key, int32 value) {
-	if (_CheckFileAccess(SCRIPT_WRITE) != true)
-		return;
-
 	if (_open_tables.empty()) {
 		_error_code |= SCRIPT_BAD_GLOBAL;
 		if (SCRIPT_DEBUG)
@@ -557,20 +525,13 @@ void ScriptDescriptor::WriteInt(const int32 key, int32 value) {
 		return;
 	}
 
-	_WriteTablePath();
-	_outfile << '[' << key << ']' << " = " << value << endl;
+	WriteInt(boost::lexical_cast<std::string>(key), value);
 }
 
-
-
-void ScriptDescriptor::WriteInt(string &key, int32 value)
-{
-	this->WriteInt(key.c_str(), value);
-}
 
 
 // This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
-void ScriptDescriptor::WriteFloat(const char *key, float value) {
+void ScriptDescriptor::WriteFloat(const std::string &key, float value) {
 	if (_CheckFileAccess(SCRIPT_WRITE) != true)
 		return;
 
@@ -587,9 +548,6 @@ void ScriptDescriptor::WriteFloat(const char *key, float value) {
 
 // This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
 void ScriptDescriptor::WriteFloat(const int32 key, float value) {
-	if (_CheckFileAccess(SCRIPT_WRITE) != true)
-		return;
-
 	if (_open_tables.empty()) {
 		_error_code |= SCRIPT_BAD_GLOBAL;
 		if (SCRIPT_DEBUG)
@@ -597,20 +555,13 @@ void ScriptDescriptor::WriteFloat(const int32 key, float value) {
 		return;
 	}
 
-	_WriteTablePath();
-	_outfile << '[' << key << ']' << " = " << value << endl;
+	WriteFloat(boost::lexical_cast<std::string>(key),value);
 }
 
-
-
-void ScriptDescriptor::WriteFloat(string &key, float value)
-{
-	this->WriteFloat(key.c_str(), value);
-}
 
 // This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
 // TODO: Check for bad strings (ie, if it contains puncutation charcters like , or ])
-void ScriptDescriptor::WriteString(const char *key, const char* value) {
+void ScriptDescriptor::WriteString(const std::string &key, const std::string &value) {
 	if (_CheckFileAccess(SCRIPT_WRITE) != true)
 		return;
 
@@ -626,25 +577,7 @@ void ScriptDescriptor::WriteString(const char *key, const char* value) {
 
 // This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
 // TODO: Check for bad strings (ie, if it contains puncutation charcters like , or ])
-void ScriptDescriptor::WriteString(const char *key, std::string& value) {
-	if (_CheckFileAccess(SCRIPT_WRITE) != true)
-		return;
-
-	if (_open_tables.size() == 0) {
-		_outfile << key << " = \"" << value << "\"" << endl;
-	}
-	else {
-		_WriteTablePath();
-		_outfile << '[' << key << ']' << " = \"" << value << "\"" << endl;
-	}
-}
-
-// This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
-// TODO: Check for bad strings (ie, if it contains puncutation charcters like , or ])
-void ScriptDescriptor::WriteString(const int32 key, const char* value) {
-	if (_CheckFileAccess(SCRIPT_WRITE) != true)
-		return;
-
+void ScriptDescriptor::WriteString(const int32 key, const std::string& value) {
 	if (_open_tables.empty()) {
 		_error_code |= SCRIPT_BAD_GLOBAL;
 		if (SCRIPT_DEBUG)
@@ -652,44 +585,12 @@ void ScriptDescriptor::WriteString(const int32 key, const char* value) {
 		return;
 	}
 
-	_WriteTablePath();
-	_outfile << '[' << key << ']' << " = \"" << value << "\"" << endl;
-}
-
-// This will become a key of the most recently opened table. If no tables are opened, it becomes a global.
-// TODO: Check for bad strings (ie, if it contains puncutation charcters like , or ])
-void ScriptDescriptor::WriteString(const int32 key, std::string& value) {
-	if (_CheckFileAccess(SCRIPT_WRITE) != true)
-		return;
-
-	if (_open_tables.empty()) {
-		_error_code |= SCRIPT_BAD_GLOBAL;
-		if (SCRIPT_DEBUG)
-			cerr << "SCRIPT ERROR: Attempt to write a numerical value as a global key" << endl;
-		return;
-	}
-
-	_WriteTablePath();
-	_outfile << '[' << key << ']' << " = \"" << value << "\"" << endl;
+	WriteString(boost::lexical_cast<std::string>(key), value);
 }
 
 
 
-void ScriptDescriptor::WriteString(string &key, const char *value)
-{
-	this->WriteString(key.c_str(), value);
-}
-
-
-
-void ScriptDescriptor::WriteString(string &key, string &value)
-{
-	this->WriteString(key.c_str(), value);
-}
-
-
-
-void ScriptDescriptor::WriteBoolVector(const char *key, std::vector<bool> &vect) {
+void ScriptDescriptor::WriteBoolVector(const std::string &key, std::vector<bool> &vect) {
 	if (_CheckFileAccess(SCRIPT_WRITE) != true)
 		return;
 
@@ -721,9 +622,13 @@ void ScriptDescriptor::WriteBoolVector(const char *key, std::vector<bool> &vect)
 	_outfile << " }" << endl;
 }
 
+void ScriptDescriptor::WriteBoolVector(const int32 key, std::vector<bool> &vect) {
+	WriteBoolVector(boost::lexical_cast<std::string>(key),vect);
+}
 
 
-void ScriptDescriptor::WriteIntVector(const char *key, std::vector<int32> &vect) {
+
+void ScriptDescriptor::WriteIntVector(const std::string &key, std::vector<int32> &vect) {
 	if (_CheckFileAccess(SCRIPT_WRITE) != true)
 		return;
 
@@ -749,9 +654,13 @@ void ScriptDescriptor::WriteIntVector(const char *key, std::vector<int32> &vect)
 	_outfile << " }" << endl;
 }
 
+void ScriptDescriptor::WriteIntVector(const int32 key, std::vector<int> &vect) {
+	WriteIntVector(boost::lexical_cast<std::string>(key),vect);
+}
 
 
-void ScriptDescriptor::WriteFloatVector(const char *key, std::vector<float> &vect) {
+
+void ScriptDescriptor::WriteFloatVector(const std::string &key, std::vector<float> &vect) {
 	if (_CheckFileAccess(SCRIPT_WRITE) != true)
 		return;
 
@@ -778,9 +687,13 @@ void ScriptDescriptor::WriteFloatVector(const char *key, std::vector<float> &vec
 	_outfile << " }" << endl;
 }
 
+void ScriptDescriptor::WriteFloatVector(const int32 key, std::vector<float> &vect) {
+	WriteFloatVector(boost::lexical_cast<std::string>(key),vect);
+}
+
 
 // TODO: Check for bad strings (ie, if it contains puncutation charcters like , or ])
-void ScriptDescriptor::WriteStringVector(const char *key, std::vector<std::string> &vect) {
+void ScriptDescriptor::WriteStringVector(const std::string &key, std::vector<std::string> &vect) {
 	if (_CheckFileAccess(SCRIPT_WRITE) != true)
 		return;
 
@@ -806,9 +719,13 @@ void ScriptDescriptor::WriteStringVector(const char *key, std::vector<std::strin
 	_outfile << " }" << endl;
 }
 
+void ScriptDescriptor::WriteStringVector(const int32 key, std::vector<std::string> &vect) {
+	WriteStringVector(boost::lexical_cast<std::string>(key),vect);
+}
+
 
 // Writes the new table name to the file and manages the state of the context
-void ScriptDescriptor::WriteBeginTable(const char *key) {
+void ScriptDescriptor::WriteBeginTable(const std::string &key) {
 	if (_CheckFileAccess(SCRIPT_WRITE) != true)
 		return;
 
@@ -885,7 +802,7 @@ void ScriptDescriptor::SaveStack(const std::string &filename) {
 
 
 
-void ScriptDescriptor::_SaveStackProcessTable(ScriptDescriptor &sd, string &name, luabind::object table) {
+void ScriptDescriptor::_SaveStackProcessTable(ScriptDescriptor &sd, const string &name, luabind::object table) {
 	sd.WriteBeginTable(name.c_str());
 	for (luabind::iterator it(table), end; it != end; ++it) {
 		switch(luabind::type(*it)) {
@@ -971,7 +888,7 @@ void GameScript::_RemoveOpenFile(ScriptDescriptor* sd) {
 
 
 
-bool GameScript::IsFileOpen(std::string& filename) {
+bool GameScript::IsFileOpen(const std::string& filename) {
 	// TEMP: Remove this later
 	return false;
 

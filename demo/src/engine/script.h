@@ -122,7 +122,7 @@ class ScriptDescriptor {
 	friend class GameScript;
 private:
 	//! Functions to print out a table during stack output.
-	void _SaveStackProcessTable(ScriptDescriptor &sd, std::string &name, luabind::object table);
+	void _SaveStackProcessTable(ScriptDescriptor &sd, const std::string &name, luabind::object table);
 public:
 	ScriptDescriptor ()
 		{ _filename = ""; _access_mode = SCRIPT_CLOSED; _error_code = 0; _lstack = NULL; }
@@ -139,7 +139,7 @@ public:
 	bool IsFileOpen()
 		{ return (_access_mode != SCRIPT_CLOSED); }
 
-	std::string GetFilename()
+	const std::string& GetFilename()
 		{ return _filename; }
 
 	SCRIPT_ACCESS_MODE GetAccessMode()
@@ -162,7 +162,7 @@ public:
 	*** \note This is the only function that uses explicit error checking. In other words,
 	*** an error in this function call will not change the return value of the GetError() function.
 	**/
-	bool OpenFile(std::string file_name, SCRIPT_ACCESS_MODE mode);
+	bool OpenFile(const std::string& file_name, SCRIPT_ACCESS_MODE mode);
 
 	/** \brief Opens the file identified by the _filename class member
 	*** \param mode The mode with which to access the file with (read, write)
@@ -213,37 +213,37 @@ public:
 	*** These functions call the template _Read() functions with a default return value.
 	**/
 	//@{
-	bool ReadBool(std::string key)
+	bool ReadBool(const std::string& key)
 		{ return _Read<bool>(key.c_str(), false); }
 
 	bool ReadBool(const int32 key)
 		{ return _Read<bool>(key, false); }
 
-	int32 ReadInt(std::string key)
+	int32 ReadInt(const std::string& key)
 		{ return _Read<int32>(key.c_str(), 0); }
 
 	int32 ReadInt(const int32 key)
 		{ return _Read<uint32>(key, 0); }
 
-	uint32 ReadUInt(std::string key)
+	uint32 ReadUInt(const std::string& key)
 		{ return _Read<int32>(key.c_str(), 0); }
 
 	uint32 ReadUInt(const int32 key)
 		{ return _Read<uint32>(key, 0); }
 
-	float ReadFloat(std::string key)
+	float ReadFloat(const std::string& key)
 		{ return _Read<float>(key.c_str(), 0.0f); }
 
 	float ReadFloat(const int32 key)
 		{ return _Read<float>(key, 0.0f); }
 
-	std::string ReadString(std::string key)
+	std::string ReadString(const std::string& key)
 		{ return _Read<std::string>(key.c_str(), ""); }
 
 	std::string ReadString(const int32 key)
 		{ return _Read<std::string>(key, ""); }
 
-	hoa_utils::ustring ReadUString(std::string key)
+	hoa_utils::ustring ReadUString(const std::string& key)
 		{ return _Read<hoa_utils::ustring>(key.c_str(), hoa_utils::MakeUnicodeString("")); }
 
 	hoa_utils::ustring ReadUString(const int32 key)
@@ -263,37 +263,37 @@ public:
 	*** They can not be used to access tables in the global space.
 	**/
 	//@{
-	void ReadBoolVector(std::string key, std::vector<bool> &vect)
+	void ReadBoolVector(const std::string& key, std::vector<bool> &vect)
 		{ _ReadVector<std::string, bool>(key, vect); }
 
 	void ReadBoolVector(const int32 key, std::vector<bool> &vect)
 		{ _ReadVector<bool>(key, vect); }
 
-	void ReadIntVector(std::string key, std::vector<int32> &vect)
+	void ReadIntVector(const std::string& key, std::vector<int32> &vect)
 		{ _ReadVector<std::string, int32>(key, vect); }
 
 	void ReadIntVector(const int32 key, std::vector<int32> &vect)
 		{ _ReadVector<int32>(key, vect); }
 
-	void ReadUIntVector(std::string key, std::vector<uint32> &vect)
+	void ReadUIntVector(const std::string& key, std::vector<uint32> &vect)
 		{ _ReadVector<std::string, uint32>(key, vect); }
 
 	void ReadUIntVector(const int32 key, std::vector<uint32> &vect)
 		{ _ReadVector<uint32>(key, vect); }
 
-	void ReadFloatVector(std::string key, std::vector<float> &vect)
+	void ReadFloatVector(const std::string& key, std::vector<float> &vect)
 		{ _ReadVector<std::string, float>(key, vect); }
 
 	void ReadFloatVector(const int32 key, std::vector<float> &vect)
 		{ _ReadVector<float>(key, vect); }
 
-	void ReadStringVector(std::string key, std::vector<std::string> &vect)
+	void ReadStringVector(const std::string& key, std::vector<std::string> &vect)
 		{ _ReadVector<std::string, std::string>(key, vect); }
 
 	void ReadStringVector(const int32 key, std::vector<std::string> &vect)
 		{ _ReadVector<std::string>(key, vect); }
 
-	void ReadUStringVector(std::string key, std::vector<hoa_utils::ustring> &vect)
+	void ReadUStringVector(const std::string& key, std::vector<hoa_utils::ustring> &vect)
 		{ _ReadVector<std::string, hoa_utils::ustring>(key, vect); }
 
 	void ReadUStringVector(const int32 key, std::vector<hoa_utils::ustring> &vect)
@@ -314,13 +314,13 @@ public:
 	*** table that is defined in the file's global space.
 	**/
 	//@{
-	void ReadOpenTable(std::string key);
+	void ReadOpenTable(const std::string& key);
 
 	void ReadOpenTable(const int32 key);
 
 	void ReadCloseTable();
 
-	uint32 ReadGetTableSize(std::string key);
+	uint32 ReadGetTableSize(const std::string& key);
 
 	uint32 ReadGetTableSize(const int32 key);
 
@@ -335,7 +335,7 @@ public:
 	*** serves as a function pointer.
 	**/
 	//@{
-	luabind::object ReadFunctionPointer(std::string key);
+	luabind::object ReadFunctionPointer(const std::string& key);
 
 	//! \note The calling function may <b>not</b> be contained within the global space for an integer key.
 	luabind::object ReadFunctionPointer(int32 key);
@@ -355,8 +355,7 @@ public:
 	void WriteInsertNewLine();
 
 	//! Writes a string of text and prepends it with a comment. Equivalent to `// comment` in C++.
-	void WriteComment(const char* comment);
-	void WriteComment(std::string& comment);
+	void WriteComment(const std::string& comment);
 
 	//! After this function is invoked, every single function call will be a comment. Equivalent to `/*` in C++.
 	void WriteBeginCommentBlock();
@@ -368,8 +367,7 @@ public:
 	 *  \note Typically, unless you \c really know what you are doing, you should only call this between
 	 *  the beginning and end of a comment block.
 	 */
-	void WriteLine(const char* comment);
-	void WriteLine(std::string& comment);
+	void WriteLine(const std::string& comment);
 	//@}
 
 	/** \name Lua Variable Write Functions
@@ -380,21 +378,14 @@ public:
 	*** in the Lua file. Otherwise, they become keys of the most recently opened table.
 	**/
 	//@{
-	void WriteBool(const char *key, bool value);
 	void WriteBool(const int32 key, bool value);
-	void WriteBool(std::string &key, bool value);
-	void WriteInt(const char *key, int32 value);
+	void WriteBool(const std::string &key, bool value);
 	void WriteInt(const int32 key, int32 value);
-	void WriteInt(std::string &key, int32 value);
-	void WriteFloat(const char *key, float value);
+	void WriteInt(const std::string &key, int32 value);
 	void WriteFloat(const int32 key, float value);
-	void WriteFloat(std::string &key, float value);
-	void WriteString(const char *key, const char* value);
-	void WriteString(const char *key, std::string& value);
-	void WriteString(const int32 key, const char* value);
-	void WriteString(const int32 key, std::string& value);
-	void WriteString(std::string &key, const char *value);
-	void WriteString(std::string &key, std::string &value);
+	void WriteFloat(const std::string &key, float value);
+	void WriteString(const std::string &key, const std::string& value);
+	void WriteString(const int32 key, const std::string& value);
 	//@}
 
 	/** \name Lua Vector Write Functions
@@ -403,10 +394,14 @@ public:
 	*** \param &vect A reference to the vector of elements to write.
 	**/
 	//@{
-	void WriteBoolVector(const char *key, std::vector<bool> &vect);
-	void WriteIntVector(const char *key, std::vector<int32> &vect);
-	void WriteFloatVector(const char *key, std::vector<float> &vect);
-	void WriteStringVector(const char *key, std::vector<std::string> &vect);
+	void WriteBoolVector(const std::string &key, std::vector<bool> &vect);
+	void WriteBoolVector(const int32 key, std::vector<bool> &vect);
+	void WriteIntVector(const std::string &key, std::vector<int32> &vect);
+	void WriteIntVector(const int32 key, std::vector<int32> &vect);
+	void WriteFloatVector(const std::string &key, std::vector<float> &vect);
+	void WriteFloatVector(const int32 key, std::vector<float> &vect);
+	void WriteStringVector(const std::string &key, std::vector<std::string> &vect);
+	void WriteStringVector(const int32 key, std::vector<std::string> &vect);
 	//@}
 
 	/** \name Lua Table Write Functions
@@ -417,7 +412,7 @@ public:
 	*** write tables open.
 	**/
 	//@{
-	void WriteBeginTable(const char *key);
+	void WriteBeginTable(const std::string &key);
 	void WriteBeginTable(int key);
 	void WriteEndTable();
 	//@}
@@ -475,7 +470,7 @@ private:
 	**/
 	//@{
 	template <class T> T _Read(int32 key, T default_value);
-	template <class T> T _Read(const char *key, T default_value);
+	template <class T> T _Read(const std::string &key, T default_value);
 	//@}
 
 	/** \name Vector Read Access Templates
@@ -519,7 +514,7 @@ public:
 	*** \param filename The name of the file to check.
 	*** \return True if the filename is registered to a ScriptDescriptor object who has the file opened.
 	**/
-	bool IsFileOpen(std::string& filename);
+	bool IsFileOpen(const std::string& filename);
 
 	/** \brief Handles run-time errors generated in Lua
 	*** \param err A reference to the luabind::error instance that was thrown
@@ -595,13 +590,13 @@ template <class T> T ScriptDescriptor::_Read(int32 key, T default_value) {
 
 
 
-template <class T> T ScriptDescriptor::_Read(const char *key, T default_value) {
+template <class T> T ScriptDescriptor::_Read(const std::string &key, T default_value) {
 	if (_CheckFileAccess(SCRIPT_READ) == false)
 		return false;
 
 	// Global value
 	if (_open_tables.size() == 0) {
-		lua_getglobal(_lstack, key);
+		lua_getglobal(_lstack, key.c_str());
 		luabind::object o(luabind::from_stack(_lstack, private_script::STACK_TOP));
 
 		if (!o) {
