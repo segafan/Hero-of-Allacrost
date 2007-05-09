@@ -13,6 +13,8 @@ audio_settings = {music_vol = 1.0, sound_vol = 1.0};
 language_defaults = 0;
 language_settings = 0;
 
+-- First time the game is run, show welcome message if 1
+welcome = 1;
 
 --[[ DEFAULT KEY SETTINGS --
 -- 
