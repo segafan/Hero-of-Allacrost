@@ -225,6 +225,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\modes\boot\boot_welcome.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\engine\video\color.h"
 				>
 			</File>
@@ -470,6 +474,10 @@
 			</File>
 			<File
 				RelativePath=".\src\modes\boot\boot_menu.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\boot\boot_welcome.cpp"
 				>
 			</File>
 			<File

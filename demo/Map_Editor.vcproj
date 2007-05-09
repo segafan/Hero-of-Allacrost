@@ -215,6 +215,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\modes\boot\boot_welcome.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\defs.cpp"
 				>
 			</File>
@@ -418,6 +422,10 @@
 			</File>
 			<File
 				RelativePath=".\src\modes\boot\boot_menu.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\boot\boot_welcome.h"
 				>
 			</File>
 			<File
