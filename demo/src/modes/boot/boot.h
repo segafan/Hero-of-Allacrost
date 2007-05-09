@@ -27,6 +27,7 @@
 #include "video.h"
 #include "boot_menu.h"
 #include "boot_credits.h"
+#include "boot_welcome.h"
 
 //! All calls to boot mode are wrapped in this namespace.
 namespace hoa_boot {
@@ -64,6 +65,9 @@ private:
 
 	//! Credits screen window
 	CreditsScreen _credits_screen;
+
+	//! Welcome screen window
+	WelcomeScreen _welcome_screen;
 
 	//! A pointer to the currently visible menu
 	BootMenu * _current_menu;

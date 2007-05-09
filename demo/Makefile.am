@@ -102,6 +102,8 @@ modes_SOURCES = \
 	$(MODES_DIR)/boot/boot_menu.h \
 	$(MODES_DIR)/boot/boot_credits.cpp \
 	$(MODES_DIR)/boot/boot_credits.h \
+	$(MODES_DIR)/boot/boot_welcome.cpp \
+	$(MODES_DIR)/boot/boot_welcome.h \
 	$(MODES_DIR)/map/map.cpp \
 	$(MODES_DIR)/map/map.h \
 	$(MODES_DIR)/map/map_zones.cpp \

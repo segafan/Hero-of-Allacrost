@@ -31,6 +31,7 @@
 #include "battle.h" // tmp
 #include "menu.h" // even more tmp
 #include "shop.h" // tmp
+#include <fstream> // more more tmp
 
 using namespace std;
 using namespace hoa_boot::private_boot;
@@ -52,6 +53,7 @@ bool BOOT_DEBUG = false;
 
 // Initialize static members here
 bool BootMode::_logo_animating = true;
+uint32 welcome = 0;
 
 
 // ****************************************************************************
@@ -351,13 +353,25 @@ void BootMode::_DrawBackgroundItems() {
 // Stops playback of the opening animation
 void BootMode::_EndOpeningAnimation() {
 	VideoManager->DisableFog(); // Turn off the fog
-	_logo_animating = false;
 
 	// Stop playing SFX and start playing the main theme
 	_boot_music.at(1).SetFadeOutTime(1000);
 	_boot_music.at(1).StopMusic();
 	_boot_music.at(0).SetFadeInTime(5000);
 	_boot_music.at(0).PlayMusic();
+	
+	// Load the settings file for reading in the welcome variable
+	ScriptDescriptor settings_lua;
+	if (!settings_lua.OpenFile("dat/config/settings.lua", SCRIPT_READ)) {
+		cout << "BOOT ERROR: failed to load the settings file!" << endl;
+	}
+	welcome = settings_lua.ReadInt("welcome");
+	settings_lua.CloseFile();
+	if (welcome) {
+		_welcome_screen.Show();
+	}
+
+	_logo_animating = false;
 }
 
 
@@ -914,6 +928,32 @@ void BootMode::Update() {
 	// Update the credits window (because it may be hiding/showing!)
 	_credits_screen.UpdateWindow(time_elapsed);
 
+	//CD: Handle key press here, just like any other time
+	if (_welcome_screen.IsVisible())
+	{
+		if (InputManager->AnyKeyPress())
+		{
+			_boot_sounds.at(0).PlaySound();
+			welcome = 0;
+			_welcome_screen.Hide();
+
+			// Read in the settings file for writing back the welcome variable
+			string line = "";
+			fstream settings_file("dat/config/settings.lua");
+			if (settings_file.is_open()) {
+				while (!settings_file.eof() && line != "welcome = 1;")
+					getline(settings_file, line);
+				settings_file.seekp(-3, ios::cur);
+				settings_file.put('0');
+				settings_file.close();
+			}
+			else
+				cout << "BOOT ERROR: failed to load the settings file!" << endl;
+		}
+
+		return;
+	}
+
 	// A confirm-key was pressed -> handle it (but ONLY if the credits screen isn't visible)
 	if (InputManager->ConfirmPress() && !_credits_screen.IsVisible())
 	{
@@ -997,9 +1037,11 @@ void BootMode::Draw() {
 
 	_DrawBackgroundItems();
 
-	// Decide whether to draw the credits window or the main menu
+	// Decide whether to draw the credits window, welcome window or the main menu
 	if (_credits_screen.IsVisible())
 		_credits_screen.Draw();
+	else if (_welcome_screen.IsVisible())
+		_welcome_screen.Draw();
 	else
 		_current_menu->Draw();
 
