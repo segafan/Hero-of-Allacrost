@@ -272,7 +272,7 @@ void Grid::SaveMap()
 		return;
 	}
 
-	write_data.WriteComment(_file_name);
+	write_data.WriteComment(std::string(_file_name.toAscii()));
 	write_data.WriteInsertNewLine();
 
 	write_data.WriteComment("A reference to the C++ MapMode object that was created with this file");
@@ -292,7 +292,7 @@ void Grid::SaveMap()
 	write_data.WriteComment("The music files used as background music on this map.");
 	write_data.WriteBeginTable("music_filenames");
 	if (_music_file != "None")
-		write_data.WriteString(1, _music_file);
+		write_data.WriteString(1, std::string(_music_file.toAscii()));
 	write_data.WriteEndTable();
 	write_data.WriteInsertNewLine();
 

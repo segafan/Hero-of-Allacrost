@@ -95,9 +95,70 @@ Tileset::Tileset(QWidget* parent, const QString& name)
 		} // make sure a row exists
 	} // iterate through all rows of the walkability table
 	read_data.ReadCloseTable();
+
+	//Read animated tiles
+	uint32 animated_table_size = read_data.ReadGetTableSize("animated_tiles");
+	read_data.ReadOpenTable("animated_tiles");
+	for (uint32 i=1; i<=animated_table_size; i++) 
+	{
+		_animated_tiles.push_back(std::vector<AnimatedTileData>());
+		std::vector<AnimatedTileData>& tiles=_animated_tiles.back();
+		// Tile count is table size / 2 (tile id + time)
+		uint32 tile_count=read_data.ReadGetTableSize(i) / 2;
+		read_data.ReadOpenTable(i);
+		for(uint32 index=1; index<=tile_count; index++) 
+		{
+			tiles.push_back(AnimatedTileData());
+			AnimatedTileData& tile_data=tiles.back();
+			tile_data.tile_id=read_data.ReadUInt(index*2-1);
+			tile_data.time=read_data.ReadUInt(index*2);
+		}
+		read_data.ReadCloseTable();
+	}
+	read_data.ReadCloseTable();
 } // Tileset constructor
 
 Tileset::~Tileset()
 {
 	delete table;
 } // TilesetTable destructor
+
+void Tileset::Save() {
+	std::string dat_filename = "dat/tilesets/" + std::string(tileset_name.toAscii()) + ".lua";
+	std::string img_filename = "img/tilesets/" + std::string(tileset_name.toAscii()) + ".png";
+	ScriptDescriptor write_data;
+
+	// Write global infos
+	write_data.WriteInsertNewLine();
+	write_data.OpenFile(dat_filename,SCRIPT_WRITE);
+	write_data.WriteString("file_name",dat_filename);
+	write_data.WriteString("image",dat_filename);
+	write_data.WriteInt("num_tile_cols",table->numCols());
+	write_data.WriteInt("num_tile_rows",table->numRows());
+	write_data.WriteInsertNewLine();
+
+	// Write walkability data
+	write_data.WriteBeginTable("walkability");
+	for(int row=0;row<table->numRows();row++) {
+		write_data.WriteBeginTable(row);
+		for(int col=0;col<table->numCols();col++) {
+			write_data.WriteIntVector(col,this->walkability[row*16+col]);
+		}
+		write_data.WriteEndTable();
+	}
+	write_data.WriteEndTable();
+
+	// Write animated tiles
+	write_data.WriteBeginTable("animated_tiles");
+	for(int i=0;i<_animated_tiles.size();i++) {
+		std::vector<int32> data;
+		for(int c=0;c<_animated_tiles[i].size();c++) {
+			data.push_back(_animated_tiles[i][c].tile_id);
+			data.push_back(_animated_tiles[i][c].time);
+		}
+		write_data.WriteIntVector(i+1,data);
+	}
+	write_data.WriteEndTable();
+
+	write_data.CloseFile();
+}
