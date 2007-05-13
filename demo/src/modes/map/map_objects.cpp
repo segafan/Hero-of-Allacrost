@@ -493,8 +493,8 @@ bool MapSprite::LoadStandardAnimations(std::string filename) {
 
 // Updates the state of the sprite
 void MapSprite::Update() {
-	if (!updatable)
-		return;
+// 	if (!updatable)
+// 		return;
 
 	// Set the sprite's animation to the standing still position if movement has just stopped
 	if (!moving) {
