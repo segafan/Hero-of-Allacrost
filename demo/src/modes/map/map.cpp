@@ -505,7 +505,9 @@ void MapMode::_HandleInputExplore() {
 				_camera->moving = false;
 
 				sp->moving = false;
+				cout << "direction before: " << sp->direction << endl;
 				sp->SetDirection(VirtualSprite::CalculateOppositeDirection(_camera->GetDirection()));
+				cout << "direction after: " << sp->direction << endl;
 				_dialogue_manager->SetCurrentDialogue(sp->GetCurrentDialogue());
 				sp->NextDialogue();
 				_map_state = DIALOGUE;
@@ -944,9 +946,6 @@ void MapMode::_CalculateDrawInfo() {
 	_draw_info.tile_x_start = x;
 	_draw_info.tile_y_start = y;
 
-
-
-
 	// ---------- (1) Set the default starting draw positions for the tiles (top left tile)
 
 	// The camera's position is in terms of the 16x16 grid, which needs to be converted into 32x32 coordinates.
@@ -1022,8 +1021,6 @@ void MapMode::_CalculateDrawInfo() {
 		_draw_info.num_draw_rows--;
 	}
 
-
-
 	// TRYING TO GET RID OF PROBLEMS OF DUPLICATED LINES IN MAP
 	// THIS CODE IS TEMPORAL AND NOT COMPLETELY WORKING
 	double y_resolution;
@@ -1044,12 +1041,6 @@ void MapMode::_CalculateDrawInfo() {
 	if (y2 - _draw_info.tile_y_start > y_resolution*0.5f)
 		_draw_info.tile_y_start += y_resolution;
 
-
-
-
-
-
-
 	_draw_info.left_edge = FloorToFloatMultiple (_draw_info.left_edge, x_resolution);
 	_draw_info.top_edge = FloorToFloatMultiple (_draw_info.top_edge, y_resolution);
 
@@ -1060,8 +1051,6 @@ void MapMode::_CalculateDrawInfo() {
 
 	_draw_info.bottom_edge = _draw_info.top_edge + 2*SCREEN_COLS;
 	_draw_info.bottom_edge = _draw_info.top_edge + 2*SCREEN_ROWS;
-
-
 
 	// Comment this out to print out debugging info about each map frame that is drawn
 // 	printf("--- MAP DRAW INFO ---\n");

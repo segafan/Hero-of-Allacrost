@@ -50,9 +50,9 @@ Left Select         'w'                     Select multiple targets or page scro
 Right Select        'e'                     Select multiple targets or page scroll down                          \n\
 Pause               'spacebar'            Pause/unpause the game                                                   \n\
 Quit                'ESC'                 Quit the game                                                            \n\
-Fullscreen          'Ctrl+f'              Toggles between full-screen mode and windowed mode              \n\
+Fullscreen          'Ctrl+f'              Toggles between full screen mode and windowed mode              \n\
 Quit                'Ctrl+q'              Quit the game                                                           \n\
-FPS Display         'Ctrl+r'       Toggles display of the frames per second in the upper-right hand corner\n\
+FPS Display         'Ctrl+r'       Toggles display of the frames per second in the upper right hand corner\n\
 Screenshot         'Ctrl+s'              Takes a screenshot and saves it to 'screenshot.jpg'                    ")
 
 {
