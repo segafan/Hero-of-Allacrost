@@ -395,8 +395,8 @@ function Load(m)
 	sprite:AddDialogue(dialogue);
 	map:_AddGroundObject(sprite);
 
-	-- Create an EnemyZone (5000 ms between respawns, monsters restricted to zone area)
-	local ezone = hoa_map.EnemyZone(5000, true);
+	-- Create an EnemyZone (2000 ms between respawns, monsters restricted to zone area)
+	local ezone = hoa_map.EnemyZone(2000, true);
 	-- Add a section to the zone that goes from (101, 10) to (117, 40) in map grid coordinates
 	ezone:AddSection(hoa_map.ZoneSection(34, 88, 46, 96));
 
@@ -413,14 +413,17 @@ function Load(m)
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(5);
 	enemy:AddEnemy(2);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(5);
 	-- Add the enemy to the zone two times (it also gets added to the ground objects) 
-	ezone:AddEnemy(enemy, map, 1);
+	ezone:AddEnemy(enemy, map, 2);
 
 	-- Finally, add the zone to the map
 	map:_AddZone(ezone);
 
 
-	local ezone = hoa_map.EnemyZone(5000, true);
+	local ezone = hoa_map.EnemyZone(2000, true);
 	ezone:AddSection(hoa_map.ZoneSection(60, 76, 70, 96));
 
 	local enemy = hoa_map.EnemySprite();
@@ -449,17 +452,17 @@ function Load(m)
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(1);
 	enemy:AddEnemy(1);
+	enemy:AddEnemy(1);
 	ezone:AddEnemy(enemy, map, 1);
 
 	map:_AddZone(ezone);
 
 
-	-- Create an EnemyZone (5000 ms between respawns, monsters restricted to zone area)
-	local ezone = hoa_map.EnemyZone(5000, true);
-	-- Add a section to the zone that goes from (101, 10) to (117, 40) in map grid coordinates
+	-- Create an EnemyZone (2000 ms between respawns, monsters restricted to zone area)
+	local ezone = hoa_map.EnemyZone(2000, true);
 	ezone:AddSection(hoa_map.ZoneSection(20, 62, 32, 72));
 
-	enemy = hoa_map.EnemySprite();
+	local enemy = hoa_map.EnemySprite();
 	enemy:SetObjectID(map:_GetGeneratedObjectID());
 	enemy:SetContext(1);
 	enemy:SetCollHalfWidth(1.0);
@@ -475,6 +478,115 @@ function Load(m)
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(3);
 	enemy:AddEnemy(3);
+	enemy:AddEnemy(3);
+	ezone:AddEnemy(enemy, map, 1);
+
+	enemy = hoa_map.EnemySprite();
+	enemy:SetObjectID(map:_GetGeneratedObjectID());
+	enemy:SetContext(1);
+	enemy:SetCollHalfWidth(1.0);
+	enemy:SetCollHeight(2.0);
+	enemy:SetImgHalfWidth(1.0);
+	enemy:SetImgHeight(4.0);
+	enemy:SetMovementSpeed(hoa_map.MapMode.VERY_SLOW_SPEED);
+	enemy:LoadStandardAnimations("img/sprites/map/slime_walk.png");
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(2);
+	enemy:AddEnemy(4);
+	enemy:AddEnemy(1);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(4);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(3);
+	ezone:AddEnemy(enemy, map, 1);
+	-- Finally, add the zone to the map
+	map:_AddZone(ezone);
+
+
+	-- Create an EnemyZone (2000 ms between respawns, monsters restricted to zone area)
+	local ezone = hoa_map.EnemyZone(2000, true);
+	ezone:AddSection(hoa_map.ZoneSection(8, 26, 21, 35));
+
+	local enemy = hoa_map.EnemySprite();
+	enemy:SetObjectID(map:_GetGeneratedObjectID());
+	enemy:SetContext(1);
+	enemy:SetCollHalfWidth(1.0);
+	enemy:SetCollHeight(2.0);
+	enemy:SetImgHalfWidth(1.0);
+	enemy:SetImgHeight(4.0);
+	enemy:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
+	enemy:LoadStandardAnimations("img/sprites/map/scorpion_walk.png");
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(4);
+	enemy:AddEnemy(4);
+	enemy:AddEnemy(2);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(2);
+	enemy:AddEnemy(4);
+	enemy:AddEnemy(4);
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(5);
+	ezone:AddEnemy(enemy, map, 1);
+
+	enemy = hoa_map.EnemySprite();
+	enemy:SetObjectID(map:_GetGeneratedObjectID());
+	enemy:SetContext(1);
+	enemy:SetCollHalfWidth(1.0);
+	enemy:SetCollHeight(2.0);
+	enemy:SetImgHalfWidth(1.0);
+	enemy:SetImgHeight(4.0);
+	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
+	enemy:LoadStandardAnimations("img/sprites/map/snake_walk.png");
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(4);
+	enemy:AddEnemy(2);
+	enemy:AddEnemy(2);
+	enemy:AddEnemy(4);
+	enemy:AddEnemy(3);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(3);
+	enemy:AddEnemy(4);
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(4);
+	enemy:AddEnemy(4);
+	enemy:AddEnemy(4);
+	ezone:AddEnemy(enemy, map, 1);
+	-- Finally, add the zone to the map
+	map:_AddZone(ezone);
+
+
+	-- Create an EnemyZone (2000 ms between respawns, monsters restricted to zone area)
+	local ezone = hoa_map.EnemyZone(2000, true);
+	ezone:AddSection(hoa_map.ZoneSection(44, 6, 51, 13));
+
+	local enemy = hoa_map.EnemySprite();
+	enemy:SetObjectID(map:_GetGeneratedObjectID());
+	enemy:SetContext(1);
+	enemy:SetCollHalfWidth(1.0);
+	enemy:SetCollHeight(2.0);
+	enemy:SetImgHalfWidth(1.0);
+	enemy:SetImgHeight(4.0);
+	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
+	enemy:LoadStandardAnimations("img/sprites/map/scorpion_walk.png");
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(4);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(4);
+	enemy:AddEnemy(4);
+	enemy:AddEnemy(2);
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(1);
+	enemy:AddEnemy(2);
+	enemy:AddEnemy(4);
+	enemy:AddEnemy(5);
+	enemy:AddEnemy(5);
 	enemy:AddEnemy(3);
 	ezone:AddEnemy(enemy, map, 1);
 	-- Finally, add the zone to the map
