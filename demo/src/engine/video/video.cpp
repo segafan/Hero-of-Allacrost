@@ -17,6 +17,7 @@
 #include <cassert>
 #include <cstdarg>
 #include <math.h>
+#include <vector>
 
 #include "utils.h"
 #include "video.h"
@@ -577,10 +578,14 @@ bool GameVideo::ApplySettings()
 		// set up multisampling
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 2);
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
+		
+		// set up vsync
+		SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, 1);
 
 		if (!SDL_SetVideoMode(_temp_width, _temp_height, 0, flags)) {
 		// RGB values of 1 for each and 8 for depth seemed to be sufficient.
 		// 565 and 16 here because it works with them on this computer.
+		// NOTE from prophile: this ought to be changed to 5558
 			SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
 			SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 6);
 			SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
@@ -590,6 +595,9 @@ bool GameVideo::ApplySettings()
 			// kill multisampling
 			SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
 			SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
+			
+			// cancel vsync
+			SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, 0);
 
 			if (!SDL_SetVideoMode(_temp_width, _temp_height, 0, flags)) {
 				if (VIDEO_DEBUG) {
@@ -1277,7 +1285,22 @@ bool GameVideo::ApplyLightingOverlay()
 		glBlendFunc(GL_DST_COLOR, GL_ZERO);
 
 		_BindTexture(_light_overlay);
-		glBegin(GL_QUADS);
+		
+		GLfloat vertices[8] = { xlo, ylo, xhi, ylo, xhi, yhi, xlo, yhi };
+		GLfloat tex_coords[8] = { 0.0f, 0.0f, mx, 0.0f, mx, my, 0.0f, my };
+		
+		glEnableClientState ( GL_VERTEX_ARRAY );
+		glEnableClientState ( GL_TEXTURE_COORD_ARRAY );
+		
+		glVertexPointer ( 2, GL_FLOAT, 0, vertices );
+		glTexCoordPointer ( 2, GL_FLOAT, 0, tex_coords );
+		
+		glDrawArrays ( GL_QUADS, 0, 4 );
+		
+		glDisableClientState ( GL_TEXTURE_COORD_ARRAY );
+		glDisableClientState ( GL_VERTEX_ARRAY );
+		
+		/*glBegin(GL_QUADS);
 		glTexCoord2f(0.0f, 0.0f);
 		glVertex2f(xlo, ylo); //bl
 		glTexCoord2f(mx, 0.0f);
@@ -1286,7 +1309,7 @@ bool GameVideo::ApplyLightingOverlay()
 		glVertex2f(xhi, yhi);//tr
 		glTexCoord2f(0.0f, my);
 		glVertex2f(xlo, yhi);//tl
-		glEnd();
+		glEnd();*/
 		SetCoordSys(temp_CoordSys.GetLeft(), temp_CoordSys.GetRight(), temp_CoordSys.GetBottom(), temp_CoordSys.GetTop());
 	}
 
@@ -1912,11 +1935,35 @@ void GameVideo::DrawGrid(float x, float y, float x_step, float y_step, const Col
 	PushState();
 
 	Move(0, 0);
-	glBegin(GL_LINES);
-	glColor4fv(&c[0]);
-
+	
 	float x_Max = _coord_sys.GetRight();
 	float y_Max = _coord_sys.GetBottom();
+	
+	std::vector<GLfloat> vertices;
+	int numvertices;
+	for (; x <= x_Max; x += x_step)
+	{
+		vertices.push_back(x);
+		vertices.push_back(_coord_sys.GetBottom());
+		vertices.push_back(x);
+		vertices.push_back(_coord_sys.GetTop());
+		numvertices += 2;
+	}
+	for (; y < y_Max; y += y_step)
+	{
+		vertices.push_back(_coord_sys.GetLeft());
+		vertices.push_back(y);
+		vertices.push_back(_coord_sys.GetRight());
+		vertices.push_back(y);
+		numvertices += 2;
+	}
+	glColor4fv(&c[0]);
+	glEnableClientState ( GL_VERTEX_ARRAY );
+	glVertexPointer ( 2, GL_FLOAT, 0, &(vertices[0]) );
+	glDrawArrays ( GL_LINES, 0, numvertices );
+	glDisableClientState ( GL_VERTEX_ARRAY );
+	/*glBegin(GL_LINES);
+	glColor4fv(&c[0]);
 
 	for(; x <= x_Max; x += x_step)
 	{
@@ -1930,7 +1977,7 @@ void GameVideo::DrawGrid(float x, float y, float x_step, float y_step, const Col
 		glVertex2f(_coord_sys.GetRight(), y);
 	}
 
-	glEnd();
+	glEnd();*/
 	PopState();
 }
 
