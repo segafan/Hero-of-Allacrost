@@ -87,6 +87,11 @@ bool GameVideo::_DrawStillImage(const StillImage &id, const Color &color)
 		x_off += x_shake;
 		y_off += y_shake;
 
+//		float x__ = 0.5f * abs(_coord_sys.GetRight()-_coord_sys.GetLeft()) / (float)_width;
+//		float y__ = 0.5f * abs(_coord_sys.GetTop()-_coord_sys.GetBottom()) / (float)_height;
+
+//		MoveRelative(x__ + x_off * _coord_sys.GetHorizontalDirection(), y__ + y_off * _coord_sys.GetVerticalDirection());
+
 		MoveRelative(x_off * _coord_sys.GetHorizontalDirection(), y_off * _coord_sys.GetVerticalDirection());
 		
 		float x_scale = id._elements[iElement].width;
