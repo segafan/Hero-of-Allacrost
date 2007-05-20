@@ -41,6 +41,9 @@ using namespace hoa_script;
 using namespace hoa_battle;
 using namespace hoa_menu;
 
+
+
+
 namespace hoa_map {
 
 bool MAP_DEBUG = true;
@@ -936,15 +939,25 @@ void MapMode::_FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path
 // **************************** DRAW FUNCTIONS ********************************
 // ****************************************************************************
 
+#define __MAP_CHANGE_1__
+#define __MAP_CHANGE_2__
+
+
 // Determines things like our starting tiles
 void MapMode::_CalculateDrawInfo() {
 	// TRYING TO GET RID OF PROBLEMS OF DUPLICATED LINES IN MAP
 	// THIS CODE IS TEMPORAL AND NOT COMPLETELY WORKING
+
+#ifdef __MAP_CHANGE_1__
 	static float x (_draw_info.tile_x_start);
 	static float y (_draw_info.tile_y_start);
 
-	_draw_info.tile_x_start = x;
-	_draw_info.tile_y_start = y;
+//	if (VideoManager->GetWidth() == 1024 && VideoManager->GetHeight() == 768)
+	{
+		_draw_info.tile_x_start = x;
+		_draw_info.tile_y_start = y;
+	}
+#endif
 
 	// ---------- (1) Set the default starting draw positions for the tiles (top left tile)
 
@@ -1023,34 +1036,46 @@ void MapMode::_CalculateDrawInfo() {
 
 	// TRYING TO GET RID OF PROBLEMS OF DUPLICATED LINES IN MAP
 	// THIS CODE IS TEMPORAL AND NOT COMPLETELY WORKING
+#ifdef __MAP_CHANGE_1__
 	double y_resolution;
 	double x_resolution;
 
 	float x2 (_draw_info.tile_x_start);
 	float y2 (_draw_info.tile_y_start);
 
-	VideoManager->GetPixelSize(x_resolution, y_resolution);
-	x_resolution = abs(x_resolution);
-	y_resolution = abs(y_resolution);
+//	if (VideoManager->GetWidth() == 1024 && VideoManager->GetHeight() == 768)
+	{
+		VideoManager->GetPixelSize(x_resolution, y_resolution);
+		x_resolution = abs(x_resolution);
+		y_resolution = abs(y_resolution);
 
-	_draw_info.tile_x_start = FloorToFloatMultiple (_draw_info.tile_x_start, x_resolution);
-	_draw_info.tile_y_start = FloorToFloatMultiple (_draw_info.tile_y_start, y_resolution);
+		_draw_info.tile_x_start = FloorToFloatMultiple (_draw_info.tile_x_start, x_resolution);
+		_draw_info.tile_y_start = FloorToFloatMultiple (_draw_info.tile_y_start, y_resolution);
 
-	if (x2 - _draw_info.tile_x_start > x_resolution*0.5f)
-		_draw_info.tile_x_start += x_resolution;
-	if (y2 - _draw_info.tile_y_start > y_resolution*0.5f)
-		_draw_info.tile_y_start += y_resolution;
+		if (x2 - _draw_info.tile_x_start > x_resolution*0.5f)
+			_draw_info.tile_x_start += x_resolution;
+		if (y2 - _draw_info.tile_y_start > y_resolution*0.5f)
+			_draw_info.tile_y_start += y_resolution;
+	}
+#endif
 
-	_draw_info.left_edge = FloorToFloatMultiple (_draw_info.left_edge, x_resolution);
-	_draw_info.top_edge = FloorToFloatMultiple (_draw_info.top_edge, y_resolution);
+#if defined(__MAP_CHANGE_1__) && defined(__MAP_CHANGE_2__)
+//	if (VideoManager->GetWidth() == 1024 && VideoManager->GetHeight() == 768)
+	{
+		_draw_info.left_edge = FloorToFloatMultiple (_draw_info.left_edge, x_resolution);
+		_draw_info.top_edge = FloorToFloatMultiple (_draw_info.top_edge, y_resolution);
 
-	if (camera_x - HALF_SCREEN_COLS - _draw_info.left_edge > x_resolution*0.5f)
-		_draw_info.left_edge += x_resolution;
-	if (camera_y - HALF_SCREEN_ROWS - _draw_info.top_edge > y_resolution*0.5f)
-		_draw_info.top_edge += y_resolution;
+		if (camera_x - HALF_SCREEN_COLS - _draw_info.left_edge > x_resolution*0.5f)
+			_draw_info.left_edge += x_resolution;
+		if (camera_y - HALF_SCREEN_ROWS - _draw_info.top_edge > y_resolution*0.5f)
+			_draw_info.top_edge += y_resolution;
 
-	_draw_info.bottom_edge = _draw_info.top_edge + 2*SCREEN_COLS;
-	_draw_info.bottom_edge = _draw_info.top_edge + 2*SCREEN_ROWS;
+		_draw_info.right_edge = _draw_info.left_edge + 2*SCREEN_COLS;
+		_draw_info.bottom_edge = _draw_info.top_edge + 2*SCREEN_ROWS;
+	}
+#endif
+
+
 
 	// Comment this out to print out debugging info about each map frame that is drawn
 // 	printf("--- MAP DRAW INFO ---\n");
