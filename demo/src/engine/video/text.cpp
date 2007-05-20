@@ -518,6 +518,15 @@ bool GameVideo::_DrawTextHelper
 	Color textColor = _current_text_color * modulation;
 
 	int xpos = 0;
+	
+	GLfloat tex_coords[8];
+	GLint vertices[8];
+	
+	glEnableClientState ( GL_VERTEX_ARRAY );
+	glEnableClientState ( GL_TEXTURE_COORD_ARRAY );
+	
+	glVertexPointer ( 2, GL_INT, 0, vertices );
+	glTexCoordPointer ( 2, GL_FLOAT, 0, tex_coords );
 
 	for(const uint16 * glyph = uText; *glyph != 0; glyph++)
 	{
@@ -548,7 +557,26 @@ bool GameVideo::_DrawTextHelper
 			return false;
 		}
 		
-		glBegin(GL_QUADS);
+		vertices[0] = minx;
+		vertices[1] = miny;
+		vertices[2] = minx + xhi;
+		vertices[3] = miny;
+		vertices[4] = minx + xhi;
+		vertices[5] = miny + yhi;
+		vertices[6] = minx;
+		vertices[7] = miny + yhi;
+		tex_coords[0] = 0.0f;
+		tex_coords[1] = ty;
+		tex_coords[2] = tx;
+		tex_coords[3] = ty;
+		tex_coords[4] = tx;
+		tex_coords[5] = 0.0f;
+		tex_coords[6] = 0.0f;
+		tex_coords[7] = 0.0f;
+		
+		glColor4fv((GLfloat*)&textColor);
+		glDrawArrays(GL_QUADS, 0, 4);
+		/*glBegin(GL_QUADS);
 		glColor4fv((GLfloat *)&textColor);
 
 		glTexCoord2f(0.0, ty); 
@@ -563,11 +591,13 @@ bool GameVideo::_DrawTextHelper
 		glTexCoord2f(0.0, 0.0); 
 		glVertex2i(minx, miny + yhi);
 
-		glEnd();
+		glEnd();*/
 
 		xpos += glyphinfo->advance;
 	}
 
+	glDisableClientState ( GL_VERTEX_ARRAY );
+	glDisableClientState ( GL_TEXTURE_COORD_ARRAY );
 
 	glPopMatrix();
 	
@@ -576,7 +606,7 @@ bool GameVideo::_DrawTextHelper
 
 	glDisable(GL_ALPHA_TEST);
 
-	glFinish();
+	//glFinish();
 
 	return true;
 }
