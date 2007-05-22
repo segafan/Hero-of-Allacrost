@@ -746,15 +746,18 @@ void BootMode::_SetResolution(int32 width, int32 height) {
 }
 
 void BootMode::_OnResolution640x480() {
-	_SetResolution(640, 480);
+	if (VideoManager->GetWidth() != 640 && VideoManager->GetHeight() != 480)
+		_SetResolution(640, 480);
 }
 
 void BootMode::_OnResolution800x600() {
-	_SetResolution(800, 600);
+	if (VideoManager->GetWidth() != 800 && VideoManager->GetHeight() != 600)
+		_SetResolution(800, 600);
 }
 
 void BootMode::_OnResolution1024x768() {
-	_SetResolution(1024, 768);
+	if (VideoManager->GetWidth() != 1024 && VideoManager->GetHeight() != 768)
+		_SetResolution(1024, 768);
 }
 
 // Brightness increment. Actually the correct term is "gamma correction" but I think it's easier for the user to think of it just as brightness!
