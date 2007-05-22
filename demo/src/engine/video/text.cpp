@@ -335,6 +335,8 @@ bool GameVideo::_CacheGlyphs
 		{
 			if(VIDEO_DEBUG)
 				cerr << "VIDEO ERROR: TTF_RenderUNICODE_Blended() returned NULL in CacheGlyphs()!" << endl;
+			// TEMP
+			cerr << "VIEO ERROR (Probably a problem from SDL_ttf): " << TTF_GetError() << endl;
 			return false;
 		}
 
