@@ -230,7 +230,11 @@ int32 main(int32 argc, char *argv[]) {
 		path.append ("/Resources/");
 		chdir(path.c_str());
 	#elif __linux__
-		chdir(DATADIR);
+		// Look for data files in DATADIR only if they are not available in the
+		// current directory.
+		cout << DATADIR << endl;
+		if (ifstream("dat/config/settings.lua") == NULL)
+			chdir(DATADIR);
 	#endif
 
 	// Initialize the random number generator (note: 'unsigned int' is a required usage in this case)
