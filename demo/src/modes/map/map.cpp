@@ -508,9 +508,7 @@ void MapMode::_HandleInputExplore() {
 				_camera->moving = false;
 
 				sp->moving = false;
-				cout << "direction before: " << sp->direction << endl;
 				sp->SetDirection(VirtualSprite::CalculateOppositeDirection(_camera->GetDirection()));
-				cout << "direction after: " << sp->direction << endl;
 				_dialogue_manager->SetCurrentDialogue(sp->GetCurrentDialogue());
 				sp->NextDialogue();
 				_map_state = DIALOGUE;

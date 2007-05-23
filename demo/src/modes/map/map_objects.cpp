@@ -767,8 +767,16 @@ void EnemySprite::Update() {
 
 
 void EnemySprite::Draw() {
+	// If the enemy is not registered in a EnemyZone, draw it like a normal map sprite
+	if (_zone == NULL) {
+		MapSprite::Draw();
+		return;
+	}
+
+	// Otherwise, only draw it if it is not in the DEAD state
 	if (_state != DEAD && MapObject::DrawHelper() == true) {
-			VideoManager->DrawImage(animations[current_animation],_color);
+		VideoManager->DrawImage(animations[current_animation], _color);
+		return;
 	}
 }
 
