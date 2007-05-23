@@ -151,7 +151,6 @@ void DialogueManager::Update() {
 
 
 void DialogueManager::Draw() {
-// 	cout << "DB" << endl;
 	VideoManager->PushState();
 	VideoManager->SetCoordSys(0.0f, 1024.0f, 768.0f, 0.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
@@ -172,7 +171,6 @@ void DialogueManager::Draw() {
 	}
 	_display_textbox.Draw();
 	VideoManager->PopState();
-// 	cout << "DE" << endl;
 } // void DialogueManager::Draw()
 
 // ****************************************************************************
