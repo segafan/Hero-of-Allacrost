@@ -232,7 +232,6 @@ int32 main(int32 argc, char *argv[]) {
 	#elif __linux__
 		// Look for data files in DATADIR only if they are not available in the
 		// current directory.
-		cout << DATADIR << endl;
 		if (ifstream("dat/config/settings.lua") == NULL)
 			chdir(DATADIR);
 	#endif
