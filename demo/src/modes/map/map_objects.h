@@ -777,14 +777,17 @@ public:
 	void SetTimeToSpawn(uint32 time)
 		{ _time_to_spawn = time; }
 
-	void ChangeStateDead()
-		{ Reset(); _zone->EnemyDead(); }
+	void ChangeStateDead() { 
+		Reset(); 
+		if( _zone ) 
+			_zone->EnemyDead(); 
+	}
 
 	void ChangeStateSpawning()
 		{ updatable = true; _state = SPAWNING; no_collision = false; }
 
 	void ChangeStateHostile()
-		{ updatable = true; _state = HOSTILE;}
+		{ updatable = true; _state = HOSTILE; no_collision = false; _color.SetAlpha(1.0); }
 	//@}
 
 private:
