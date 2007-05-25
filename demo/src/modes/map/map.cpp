@@ -503,7 +503,6 @@ void MapMode::_HandleInputExplore() {
 			VirtualSprite *sp = reinterpret_cast<VirtualSprite*>(obj);
 
 			if (sp->HasDialogue()) {
-				_camera->SaveState();
 				sp->SaveState();
 				_camera->moving = false;
 
