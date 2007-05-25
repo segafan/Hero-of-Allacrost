@@ -307,6 +307,7 @@ bool GameVideo::_CacheGlyphs
 		return false;
 
 	static const SDL_Color color = { 0xFF, 0xFF, 0xFF, 0xFF };
+	static const uint16 fallbackglyph = '?'; // fall back to this glyph if one does not exist
 
 	TTF_Font * font = fp->ttf_font;
 	
@@ -334,10 +335,17 @@ bool GameVideo::_CacheGlyphs
 		if(!initial)
 		{
 			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: TTF_RenderUNICODE_Blended() returned NULL in CacheGlyphs()!" << endl;
+				cerr << "VIDEO ERROR: TTF_RenderUNICODE_Blended() returned NULL in CacheGlyphs(), resorting to fallback" << endl;
+			initial = TTF_RenderGlyph_Blended(font, fallbackglyph, color);
+			if (!fallbackglyph)
+			{
+				if (VIDEO_DEBUG)
+					cerr << "VIDEO ERROR: TTF_RenderUNICODE_Blended() could not render fallback glyph, aborting!" << endl;
+				return false;
+			}
 			// TEMP
-			cerr << "VIEO ERROR (Probably a problem from SDL_ttf): " << TTF_GetError() << endl;
-			return false;
+			//cerr << "VIDEO ERROR (Probably a problem from SDL_ttf): " << TTF_GetError() << endl;
+			//return false;
 		}
 
 		w = RoundUpPow2(initial->w + 1);
