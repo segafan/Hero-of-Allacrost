@@ -90,16 +90,26 @@ void ShopActionWindow::Update() {
 
 	if (InputManager->ConfirmPress()) {
 		options.HandleConfirmKey();
-		options.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 		if (options.GetSelection() == 0) { // Buy
+			options.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 			current_shop->_state = SHOP_STATE_LIST;
 			current_shop->_list_window.hide_options = false;
 			current_shop->_info_window.SetObject(current_shop->_all_objects[0]);
 			current_shop->_shop_sounds["confirm"].PlaySound();
 		}
 		else if (options.GetSelection() == 1) { // Sell
-			options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-			current_shop->_shop_sounds["bump"].PlaySound();
+			if (GlobalManager->GetInventory()->empty() == false) {
+				current_shop->_sell_window.UpdateSellList();
+				current_shop->_sell_window.object_list.SetSelection(0);
+				current_shop->_state = SHOP_STATE_SELL;
+				current_shop->_sell_window.hide_options = false;
+				current_shop->_info_window.SetObject(current_shop->_sell_window.current_inv[0]);
+				options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+				current_shop->_shop_sounds["confirm"].PlaySound();
+			}
+			else {
+				current_shop->_shop_sounds["cancel"].PlaySound();
+			}
 		}
 		else if (options.GetSelection() == 2) { // Exit
 			ModeManager->Pop();
@@ -221,6 +231,103 @@ void ObjectListWindow::Update() {
 
 
 void ObjectListWindow::Draw() {
+	MenuWindow::Draw();
+
+	if (hide_options == false && option_text.empty() == false)
+		object_list.Draw();
+}
+
+// *****************************************************************************
+// *************************** ObjectSellListWindow ****************************
+// *****************************************************************************
+
+ObjectSellListWindow::ObjectSellListWindow() {
+	MenuWindow::Create(600, 400, VIDEO_MENU_EDGE_ALL, VIDEO_MENU_EDGE_LEFT | VIDEO_MENU_EDGE_BOTTOM);
+	MenuWindow::SetPosition(312, 684);
+	MenuWindow::SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	MenuWindow::SetDisplayMode(VIDEO_MENU_INSTANT);
+	MenuWindow::Show();
+
+	object_list.SetOwner(this);
+	object_list.SetCellSize(500.0f, 50.0f);
+	object_list.SetPosition(50.0f, 400.0f);
+	object_list.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	object_list.SetFont("default");
+	object_list.SetSelectMode(VIDEO_SELECT_SINGLE);
+	object_list.SetCursorOffset(-50.0f, 20.0f);
+	object_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_NONE);
+
+	hide_options = true;
+}
+
+
+
+ObjectSellListWindow::~ObjectSellListWindow() {
+	MenuWindow::Destroy();
+}
+
+
+
+void ObjectSellListWindow::Clear() {
+	option_text.clear();
+	current_inv.clear();
+	object_list.SetOptions(option_text);
+}
+
+
+
+void ObjectSellListWindow::AddEntry(hoa_utils::ustring name, uint32 count, uint32 price) {
+	option_text.push_back(name + MakeUnicodeString(" x") + MakeUnicodeString(NumberToString(count)) + MakeUnicodeString("<R>") + MakeUnicodeString(NumberToString(price)));
+}
+
+
+
+void ObjectSellListWindow::Update() {
+	MenuWindow::Update(SystemManager->GetUpdateTime());
+	object_list.GetEvent(); // clear any events, since they prevent cursor movement
+
+	if (InputManager->ConfirmPress()) {
+		object_list.HandleConfirmKey();
+		current_shop->_confirm_sell_window.SetObject(current_inv[object_list.GetSelection()]);
+		object_list.SetSelection(0);
+		current_shop->_state = SHOP_STATE_CONFIRM_SELL;
+		current_shop->_shop_sounds["confirm"].PlaySound();
+	}
+	else if (InputManager->CancelPress()) {
+		hide_options = true;
+		current_shop->_state = SHOP_STATE_ACTION;
+		current_shop->_action_window.options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+		current_shop->_info_window.SetObject(NULL);
+		current_shop->_shop_sounds["cancel"].PlaySound();
+	}
+	else if (InputManager->UpPress()) {
+		object_list.HandleUpKey();
+		current_shop->_info_window.SetObject(current_inv[object_list.GetSelection()]);
+	}
+	else if (InputManager->DownPress()) {
+		object_list.HandleDownKey();
+		current_shop->_info_window.SetObject(current_inv[object_list.GetSelection()]);
+	}
+}
+
+
+
+void ObjectSellListWindow::UpdateSellList() {
+	Clear();
+	std::map<uint32, GlobalObject*>* inv = GlobalManager->GetInventory();
+	std::map<uint32, GlobalObject*>::iterator iter;
+
+	for (iter = inv->begin(); iter != inv->end(); iter++) {
+		current_inv.push_back(iter->second);
+		AddEntry(iter->second->GetName(), iter->second->GetCount(), iter->second->GetPrice());
+	}
+	object_list.SetSize(1, option_text.size());
+	object_list.SetOptions(option_text);
+}
+
+
+
+void ObjectSellListWindow::Draw() {
 	MenuWindow::Draw();
 
 	if (hide_options == false && option_text.empty() == false)
@@ -431,6 +538,112 @@ void ConfirmWindow::SetObject(GlobalObject* obj) {
 		MenuWindow::Show();
 }
 
+// *****************************************************************************
+// **************************** SellConfirmWindow ******************************
+// *****************************************************************************
+
+SellConfirmWindow::SellConfirmWindow() {
+	// (1) Create the confirmation window in the center of the screen
+	MenuWindow::Create(400, 200);
+	MenuWindow::SetPosition(512, 384);
+	MenuWindow::SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	MenuWindow::SetDisplayMode(VIDEO_MENU_INSTANT);
+
+	// (2) Initialize the option list
+	options.SetOwner(this);
+	options.SetPosition(100.0f, 100.0f);
+	options.SetSize(2, 1); // Two columns, one row
+	options.SetCellSize(150.0f, 50.0f);
+	options.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	options.SetFont("default");
+	options.SetSelectMode(VIDEO_SELECT_SINGLE);
+	options.SetCursorOffset(-50.0f, 20.0f);
+	options.SetVerticalWrapMode(VIDEO_WRAP_MODE_NONE);
+
+	vector<ustring> text;
+	text.push_back(MakeUnicodeString("Confirm"));
+	text.push_back(MakeUnicodeString("Cancel"));
+	options.SetOptions(text);
+	options.SetSelection(0);
+
+	_object = NULL;
+}
+
+
+
+SellConfirmWindow::~SellConfirmWindow() {
+	MenuWindow::Destroy();
+}
+
+
+
+void SellConfirmWindow::Update() {
+	options.GetEvent();
+
+	if (InputManager->LeftPress()) {
+		options.HandleLeftKey();
+	}
+	else if (InputManager->RightPress()) {
+		options.HandleRightKey();
+	}
+
+	if (InputManager->CancelPress()) {
+		current_shop->_shop_sounds["cancel"].PlaySound();
+		SetObject(NULL);
+		options.SetSelection(0);
+		current_shop->_state = SHOP_STATE_SELL;
+	}
+	else if (InputManager->ConfirmPress()) {
+		if (options.GetSelection() == 0) { // Confirm sale
+			GlobalManager->AddFunds(_object->GetPrice());
+			GlobalManager->DecrementObjectCount(_object->GetID(), 1);
+			current_shop->_shop_sounds["coins"].PlaySound();
+			current_shop->_action_window.UpdateFinanceText();
+			current_shop->_sell_window.UpdateSellList();
+			current_shop->_sell_window.object_list.SetSelection(0);
+			if (GlobalManager->GetInventory()->empty() == true) {
+				current_shop->_state = SHOP_STATE_ACTION;
+			}
+			else {
+				current_shop->_state = SHOP_STATE_SELL;
+			}
+		}
+		else {
+			current_shop->_shop_sounds["cancel"].PlaySound();
+			current_shop->_state = SHOP_STATE_SELL;
+		}
+
+		// Return to previous window
+		options.SetSelection(0);
+		SetObject(NULL);
+	}
+}
+
+
+
+void SellConfirmWindow::Draw() {
+	if (_object == NULL)
+		return;
+
+	MenuWindow::Draw();
+	options.Draw();
+	VideoManager->PushState();
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
+	VideoManager->Move(512, 450);
+	VideoManager->DrawText("Sell this item?");
+	VideoManager->PopState();
+}
+
+
+
+void SellConfirmWindow::SetObject(GlobalObject* obj) {
+	_object = obj;
+
+	if (_object == NULL)
+		MenuWindow::Hide();
+	else
+		MenuWindow::Show();
+}
 
 } // namespace private_shop
 

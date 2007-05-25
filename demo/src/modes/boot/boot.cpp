@@ -656,6 +656,7 @@ void BootMode::_OnMenuDebug() {
 
 // Shop debug confirmed
 void BootMode::_OnShopDebug() {
+	GlobalManager->AddFunds(500);
 	hoa_shop::ShopMode *SM = new hoa_shop::ShopMode();
 	ModeManager->Push(SM);
 }

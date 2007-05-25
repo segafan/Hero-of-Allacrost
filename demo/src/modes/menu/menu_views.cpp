@@ -333,15 +333,19 @@ InventoryWindow::InventoryWindow() : _active_box(ITEM_ACTIVE_NONE)
 	_InitInventoryItems();
 	_InitCharSelect();
 
+/*	None of this is useful... do we need any of it anymore?
 	//Load char portraits for bottom menu
 	StillImage i;
 
 	//FIX ME: Make dynamic based on char names
 	i.SetFilename("img/portraits/battle/claudius.png");
+
 	i.SetDimensions(100.0f, 100.0f);
 	_portraits.push_back(i);
+	cout << "Warning Here?" << endl;
 	VideoManager->LoadImage(_portraits[0]);
-
+	cout << "Warning Here?" << endl;
+*/
 	_location_graphic.SetFilename("img/menus/locations/desert_cave.png");
 	_location_graphic.SetDimensions(500.0f, 125.0f);
 	VideoManager->LoadImage(_location_graphic);
@@ -360,7 +364,7 @@ InventoryWindow::InventoryWindow() : _active_box(ITEM_ACTIVE_NONE)
 InventoryWindow::~InventoryWindow()
 {
 	// Delete portraits
-	VideoManager->DeleteImage(_portraits[0]);
+//	VideoManager->DeleteImage(_portraits[0]);
 	VideoManager->DeleteImage(_location_graphic);
 }
 

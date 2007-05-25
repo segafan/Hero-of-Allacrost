@@ -107,6 +107,56 @@ public:
 
 
 /** ****************************************************************************
+*** \brief A window containing a list of current inventory and selling price
+***
+***
+*** ***************************************************************************/
+class ObjectSellListWindow : public hoa_video::MenuWindow {
+public:
+	ObjectSellListWindow();
+
+	~ObjectSellListWindow();
+
+	// -------------------- Class Methods
+
+	//! \brief Removes all object entries from the list
+	void Clear();
+
+	/** \brief Adds a new entry to the option box
+	*** \param name The name of the object for this entry
+	*** \param count The number of objects in the current inventory
+	*** \param price The price of the object in this entry
+	**/
+	void AddEntry(hoa_utils::ustring name, uint32 count, uint32 price);
+
+	//! \brief Processes user input and updates the cursor
+	void Update();
+
+	//! \brief Refreshes list of sellable items
+	void UpdateSellList();
+
+	//! \brief Draws the object list window and options to the screen
+	void Draw();
+
+	// -------------------- Class Members
+
+	//! \brief When set to true, the OptionBox will not be drawn for this window
+	bool hide_options;
+
+	//! \brief Contains the text that forms each option in the list
+	std::vector<hoa_utils::ustring> option_text;
+
+	/** \brief Contains the list of objects for sale
+	*** Each option includes the name of the object and its price.
+	**/
+	hoa_video::OptionBox object_list;
+
+	//! \brief Contains a vector of inventory objects
+	std::vector<hoa_global::GlobalObject*> current_inv;
+}; // class ObjectSellListWindow : public hoa_video::MenuWindow
+
+
+/** ****************************************************************************
 *** \brief Displays detailed information about a selected object
 ***
 ***
@@ -175,7 +225,44 @@ private:
 	*** object in the player's inventory or anywhere else.
 	**/
 	hoa_global::GlobalObject* _object;
-}; // class ObjectInfoWindow : public hoa_video::MenuWindow
+}; // class ConfirmWindow : public hoa_video::MenuWindow
+
+
+
+/** ****************************************************************************
+*** \brief Displays the object's icon, name, and a sale confirmation message
+***
+*** This window is temporary and will likely be later removed when the
+*** shopping cart functionality is made available.
+*** ***************************************************************************/
+class SellConfirmWindow : public hoa_video::MenuWindow {
+public:
+	SellConfirmWindow();
+
+	~SellConfirmWindow();
+
+	//! \brief Updates the option box
+	void Update();
+
+	//! \brief Draws the window and the object properties contained within
+	void Draw();
+
+	/** \brief Sets the object that this window will display the properties of
+	*** \param obj A pointer to the object to represent. NULL indicates no object.
+	**/
+	void SetObject(hoa_global::GlobalObject* obj);
+
+	//! \brief Options for the user to confirm or reject the sale
+	hoa_video::OptionBox options;
+
+private:
+	/** \brief A pointer to the object whose properties are to be described
+	*** If this member is set to NULL, then the window will be blank. The pointer
+	*** should point to an object contained within a ShopMode class, not to an
+	*** object in the player's inventory or anywhere else.
+	**/
+	hoa_global::GlobalObject* _object;
+}; // class SellConfirmWindow : public hoa_video::MenuWindow
 
 } // namespace private_shop
 
