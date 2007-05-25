@@ -15,6 +15,9 @@ AC_PROG_CC
 AC_PROG_INSTALL
 CXXFLAGS="-Wall"
 
+datadir=${datadir}/${PACKAGE}-${VERSION}
+AC_SUBST(datadir)
+
 dnl Check for compiler optimization option.
 AC_MSG_CHECKING(whether to enable -O3 compiler optimization)
 optimize_default="yes"

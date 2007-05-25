@@ -42,11 +42,13 @@ extern ShopMode* current_shop;
 
 //! \brief Used to indicate what window has control of user input
 enum SHOP_STATE {
-	SHOP_STATE_INVALID  = -1,
-	SHOP_STATE_ACTION   =  0,
-	SHOP_STATE_LIST     =  1,
-	SHOP_STATE_CONFIRM  =  2,
-	SHOP_STATE_TOTAL    =  3
+	SHOP_STATE_INVALID       = -1,
+	SHOP_STATE_ACTION        =  0,
+	SHOP_STATE_LIST          =  1,
+	SHOP_STATE_SELL          =  2,
+	SHOP_STATE_CONFIRM       =  3,
+	SHOP_STATE_CONFIRM_SELL  =  4,
+	SHOP_STATE_TOTAL         =  5,
 };
 
 } // namespace private_shop
@@ -64,8 +66,10 @@ enum SHOP_STATE {
 class ShopMode : public hoa_mode_manager::GameMode {
 	friend class private_shop::ShopActionWindow;
 	friend class private_shop::ObjectListWindow;
+	friend class private_shop::ObjectSellListWindow;
 	friend class private_shop::ObjectInfoWindow;
 	friend class private_shop::ConfirmWindow;
+	friend class private_shop::SellConfirmWindow;
 public:
 	ShopMode();
 
@@ -129,11 +133,18 @@ private:
 	//! \brief The window containing the list of wares for sale
 	private_shop::ObjectListWindow _list_window;
 
+	//! \brief The window containing the list of wares for sale
+	private_shop::ObjectSellListWindow _sell_window;
+
 	//! \brief The window that provides a detailed description of the selected object in the list window
 	private_shop::ObjectInfoWindow _info_window;
 
-	//! \brief A window to confirm the purchase or sale of an object
+	//! \brief A window to confirm the purchase of an object
 	private_shop::ConfirmWindow _confirm_window;
+
+	//! \brief A window to confirm the sale of an object
+	private_shop::SellConfirmWindow _confirm_sell_window;
+	
 	//@}
 }; // class ShopMode : public hoa_mode_manager::GameMode
 

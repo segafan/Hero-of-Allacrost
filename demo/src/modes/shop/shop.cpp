@@ -109,6 +109,9 @@ void ShopMode::Reset() {
 	}
 	_list_window.ConstructList();
 
+	_sell_window.UpdateSellList();
+	_sell_window.object_list.SetSelection(0);
+
 	SoundDescriptor snd;
 	_shop_sounds["confirm"] = SoundDescriptor();
 	_shop_sounds["cancel"] = SoundDescriptor();
@@ -131,8 +134,14 @@ void ShopMode::Update() {
 		case SHOP_STATE_LIST:
 			_list_window.Update();
 			break;
+		case SHOP_STATE_SELL:
+			_sell_window.Update();
+			break;
 		case SHOP_STATE_CONFIRM:
 			_confirm_window.Update();
+			break;
+		case SHOP_STATE_CONFIRM_SELL:
+			_confirm_sell_window.Update();
 			break;
 		default:
 			if (SHOP_DEBUG)
@@ -159,8 +168,20 @@ void ShopMode::Draw() {
 
 	_action_window.Draw();
 	_info_window.Draw();
-	_list_window.Draw();
-	_confirm_window.Draw();
+	if (_state == SHOP_STATE_SELL) {
+		_sell_window.Draw();
+	}
+	else if (_state == SHOP_STATE_CONFIRM_SELL) {
+		_sell_window.Draw();
+		_confirm_sell_window.Draw();
+	}
+	else if (_state == SHOP_STATE_CONFIRM) {
+		_list_window.Draw();
+		_confirm_window.Draw();
+	}
+	else {
+		_list_window.Draw();
+	}
 }
 
 
