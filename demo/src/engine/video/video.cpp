@@ -1940,7 +1940,7 @@ void GameVideo::DrawGrid(float x, float y, float x_step, float y_step, const Col
 	float y_Max = _coord_sys.GetBottom();
 	
 	std::vector<GLfloat> vertices;
-	int numvertices;
+	int numvertices = 0;
 	for (; x <= x_Max; x += x_step)
 	{
 		vertices.push_back(x);
