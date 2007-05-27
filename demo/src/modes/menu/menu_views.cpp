@@ -1706,6 +1706,32 @@ void EquipWindow::_UpdateEquipList() {
 	} // if EQUIP_ACTIVE_LIST
 
 	else {
+		// First, update the IMAGES of the equipped items
+		_equip_images.clear();
+		StillImage i;
+
+		i.SetFilename(ch->GetWeaponEquipped()->GetIconImage().GetFilename());
+		_equip_images.push_back(i);
+
+		i.SetFilename(ch->GetEquippedHeadArmor()->GetIconImage().GetFilename());
+		_equip_images.push_back(i);
+
+		i.SetFilename(ch->GetEquippedTorsoArmor()->GetIconImage().GetFilename());
+		_equip_images.push_back(i);
+
+		i.SetFilename(ch->GetEquippedArmsArmor()->GetIconImage().GetFilename());
+		_equip_images.push_back(i);
+
+		i.SetFilename(ch->GetEquippedLegArmor()->GetIconImage().GetFilename());
+		_equip_images.push_back(i);
+
+		for (uint32 i = 0; i < EQUIP_CATEGORY_SIZE; i++) {
+			_equip_images[i].SetDimensions(60, 60);
+			VideoManager->LoadImage(_equip_images[i]);
+		}
+
+		// Now, update the NAMES of the equipped items
+
 		options.push_back(ch->GetWeaponEquipped()->GetName());
 		options.push_back(ch->GetEquippedHeadArmor()->GetName());
 		options.push_back(ch->GetEquippedTorsoArmor()->GetName());
