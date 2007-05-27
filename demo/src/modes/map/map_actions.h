@@ -45,9 +45,6 @@ public:
 	virtual ~SpriteAction()
 		{}
 
-	//! \brief Loads the data for this action from the map's data file.
-	virtual void Load() = 0;
-
 	//! \brief Executes the sprite's action.
 	virtual void Execute() = 0;
 
@@ -61,8 +58,8 @@ public:
 	*** \return True if the action is finished, false if it is not.
 	*** \note This is not a normal class member act
 	**/
-	const bool IsFinishedReset()
-		{ if (!_finished) return false; _finished = false; return true; }
+	bool IsFinishedReset()
+		{ if (!_finished) return false; else _finished = false; return true; }
 
 	/** \brief This method returns if this action is forced (true) or not (false).
 	*** A forced action will have to finish in order to let a dialogue continue to its next line.
@@ -86,7 +83,7 @@ protected:
 	//! \brief Set to true when the action has finished its execution.
 	bool _finished;
 
-	//! \brief This contains if the action should be forced to finish or not duri9ng a dialogue.
+	//! \brief This contains if the action should be forced to finish or not during a dialogue.
 	bool _forced;
 }; // class SpriteAction
 
@@ -103,6 +100,8 @@ protected:
 *** *****************************************************************************/
 class ActionPathMove : public SpriteAction {
 public:
+	// ----- Members -----
+
 	//! \brief The destination tile of this path movement
 	PathNode destination;
 
@@ -112,8 +111,7 @@ public:
 	//! \brief An index to the path vector containing the node that the sprite is currently on.
 	uint32 current_node;
 
-// 	ActionPathMove() :
-// 		SpriteAction(NULL), current_node(0) {}
+	// ----- Methods ----
 
 	ActionPathMove(VirtualSprite* sprite) :
 		SpriteAction(sprite), current_node(0) {}
@@ -121,12 +119,56 @@ public:
 	~ActionPathMove()
 		{}
 
-	void Load();
-
 	void Execute();
 
 	void SetDestination(int16 x, int16 y)
 		{ destination.col = x; destination.row = y; }
+}; // class ActionPathMove : public SpriteAction
+
+
+/** ****************************************************************************
+*** \brief Action for declaring random movement of sprites
+***
+*** This class has several parameters that can be set to define the random movement.
+*** These parameters include, for example, the amount of time to move randomly before
+*** proceeding to the sprite's next action, any temporary changes in movement speed
+*** during the random movement, whether the sprite's position should be confined
+*** to a specific map zone, etc.
+*** *****************************************************************************/
+class ActionRandomMove : public SpriteAction {
+public:
+	// ----- Members -----
+	/** \brief The amount of time to perform random movement before ending this action
+	*** Set this member to hoa_system::INFINITE_TIME in order to continue the random movement
+	*** forever. The default value of this member will be set to 10 seconds if it is not specified.
+	**/
+	uint32 total_movement_time;
+
+	//! \brief A timer which keeps track of how long the sprite has moved about randomly
+	uint32 movement_timer;
+
+	/** \brief The amount of time (in milliseconds) that the sprite should continue moving in one direction
+	*** The default value for this timer is two seconds (2000ms).
+	**/
+	uint32 total_direction_time;
+
+	//! \brief A timer which keeps track of how long the sprite has been moving around since the last change in direction.
+	uint32 direction_timer;
+
+	/** \brief A pointer to the map zone, if any, that the sprite should constrain their random movement to.
+	*** TODO: has not yet been implemented
+	**/
+	MapZone* zone;
+
+	// ----- Methods -----
+
+	ActionRandomMove(VirtualSprite* sprite) :
+		SpriteAction(sprite), total_movement_time(10000), total_direction_time(2000) {}
+
+	~ActionRandomMove()
+		{}
+
+	void Execute();
 }; // class ActionPathMove : public SpriteAction
 
 
@@ -168,8 +210,6 @@ public:
 
 	~ActionAnimate()
 		{}
-
-	void Load();
 
 	void Execute();
 }; // class ActionAnimate : public SpriteAction
