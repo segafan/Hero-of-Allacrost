@@ -584,6 +584,11 @@ public:
 	*** \note This is mostly used as an helper function to make sprites face each other.
 	**/
 	static uint16 CalculateOppositeDirection(const uint16 direction);
+
+	/** \brief Sets the sprite's direction to a random value
+	*** This function is used mostly for the ActionRandomMove class.
+	**/
+	void SetRandomDirection();
 }; // class VirtualMapObject : public MapObject
 
 

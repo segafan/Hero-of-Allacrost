@@ -31,6 +31,13 @@
 //! All calls to the system engine are wrapped in this namespace.
 namespace hoa_system {
 
+/** \brief A constant that represents the "infinite" number of milliseconds
+*** \note This value is technically not infinite, but it is the maximum value of a 32-bit
+*** unsigned integer (2^32 - 1). This value will only be reached after ~49.7 consecutive
+*** days of the game running, which shouldn't happen.
+**/
+const uint32 INFINITE_TIME = 4294967295UL;
+
 //! The singleton pointer responsible for managing the system during game operation.
 extern GameSystem* SystemManager;
 
@@ -86,7 +93,7 @@ public:
 	*** that we have to worry about it.
 	**/
 
-	const uint32 GetUpdateTime() const
+	uint32 GetUpdateTime() const
 		{ return _update_time; }
 
 	/** \brief Sets the play-time of a game instance
@@ -103,18 +110,18 @@ public:
 	*** \return The number of hours, minutes, or seconds of play time.
 	**/
 	//@{
-	const uint8 GetPlayHours() const
+	uint8 GetPlayHours() const
 		{ return _hours_played; }
-	const uint8 GetPlayMinutes() const
+	uint8 GetPlayMinutes() const
 		{ return _minutes_played; }
-	const uint8 GetPlaySeconds() const
+	uint8 GetPlaySeconds() const
 		{ return _seconds_played; }
 	//@}
 
 	/** \brief  Used to determine what language the game is running in.
 	*** \return The language that the game is running in.
 	**/
-	const std::string GetLanguage() const
+	std::string GetLanguage() const
 		{ return _language; }
 
 	/** \brief Sets the language that the game should use.
@@ -125,7 +132,7 @@ public:
 	/** \brief  Determines whether the user is done with the game.
 	*** \return False if the user would like to exit the game.
 	**/
-	const bool NotDone() const
+	bool NotDone() const
 		{ return _not_done; }
 
 	/** \brief The function to call to initialize the exit process of the game.
@@ -137,9 +144,9 @@ public:
 private:
 	GameSystem();
 
-	//! The last time that the UpdateTimers function was called, in milliseconds.
+	//! \brief The last time that the UpdateTimers function was called, in milliseconds.
 	uint32 _last_update;
-	//! The number of milliseconds that have transpired on the last timer update.
+	//! \brief The number of milliseconds that have transpired on the last timer update.
 	uint32 _update_time;
 
 	/** \name  Play time variables

@@ -393,6 +393,40 @@ bool VirtualSprite::LoadState() {
 	 return true;
 }
 
+
+
+void VirtualSprite::SetRandomDirection() {
+	switch (RandomBoundedInteger(1, 8)) {
+		case 1:
+			SetDirection(NORTH);
+			break;
+		case 2:
+			SetDirection(SOUTH);
+			break;
+		case 3:
+			SetDirection(EAST);
+			break;
+		case 4:
+			SetDirection(WEST);
+			break;
+		case 5:
+			SetDirection(NORTHEAST);
+			break;
+		case 6:
+			SetDirection(NORTHWEST);
+			break;
+		case 7:
+			SetDirection(SOUTHEAST);
+			break;
+		case 8:
+			SetDirection(SOUTHWEST);
+			break;
+		default:
+			if (MAP_DEBUG)
+				cerr << "MAP WARNING: In VirtualSprite::SetRandomDirection(), invalid direction was picked" << endl;
+	}
+}
+
 // ****************************************************************************
 // ************************ MapSprite Class Functions *************************
 // ****************************************************************************
@@ -717,11 +751,11 @@ void EnemySprite::Update() {
 
 			// If the sprite has moved outside of its zone and it should not, reverse the sprite's direction
 			if (_zone->IsInsideZone(x_position, y_position) == false && _zone->IsRestraining() ) {
-				//Make sure it wasn't already out (stuck on boundaries fix) 	
+				// Make sure it wasn't already out (stuck on boundaries fix) 	
 				if( !_out_of_zone )
 				{
 					SetDirection(CalculateOppositeDirection(GetDirection()));
-					//The sprite is now finding its way back into the zone 
+					// The sprite is now finding its way back into the zone 
 					_out_of_zone = true;
 				}					
 			}
@@ -729,9 +763,9 @@ void EnemySprite::Update() {
 			else {
 				_out_of_zone = false;
 
-				//Enemies will only aggro if the camera is inside the zone, or the zone is non-restrictive
+				// Enemies will only aggro if the camera is inside the zone, or the zone is non-restrictive
 				if ( abs(xdelta) <= _aggro_range && abs(ydelta) <= _aggro_range 
-					 && ( !_zone->IsRestraining() || _zone->IsInsideZone( MapMode::_current_map->_camera->ComputeXLocation(), MapMode::_current_map->_camera->ComputeYLocation() ) )  )
+					 && (!_zone->IsRestraining() || _zone->IsInsideZone(MapMode::_current_map->_camera->x_position, MapMode::_current_map->_camera->y_position)))
 				{
 					if (xdelta > -0.5 && xdelta < 0.5 && ydelta < 0)
 						SetDirection(SOUTH);

@@ -526,7 +526,6 @@ void BindEngineToLua() {
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
 		class_<SpriteAction>("SpriteAction")
-			.def("Load", &SpriteAction::Load)
 			.def("Execute", &SpriteAction::Execute)
 	];
 
@@ -535,7 +534,14 @@ void BindEngineToLua() {
 		class_<ActionPathMove, SpriteAction>("ActionPathMove")
 			.def(constructor<VirtualSprite*>())
 			.def("SetDestination", &ActionPathMove::SetDestination)
+	];
 
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
+	[
+		class_<ActionRandomMove, SpriteAction>("ActionRandomMove")
+			.def(constructor<VirtualSprite*>())
+			.def_readwrite("total_movement_time", &ActionRandomMove::total_movement_time)
+			.def_readwrite("total_direction_time", &ActionRandomMove::total_direction_time)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")

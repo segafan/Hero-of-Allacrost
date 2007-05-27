@@ -62,7 +62,7 @@ bool ScriptDescriptor::_CheckFileAccess(SCRIPT_ACCESS_MODE mode) {
 bool ScriptDescriptor::OpenFile(const std::string& file_name, SCRIPT_ACCESS_MODE mode) {
 	if (ScriptManager->IsFileOpen(file_name) == true) {
 		if (SCRIPT_DEBUG)
-			cerr << "SCRIPT ERROR: Attempted to open file that is already opened: " << _filename << endl;
+			cerr << "SCRIPT ERROR: Attempted to open file that is already opened: " << file_name << endl;
 		return false;
 	}
 
@@ -889,9 +889,6 @@ void GameScript::_RemoveOpenFile(ScriptDescriptor* sd) {
 
 
 bool GameScript::IsFileOpen(const std::string& filename) {
-	// TEMP: Remove this later
-	return false;
-
 	if (_open_files.find(filename) != _open_files.end()) {
 		return true;
 	}

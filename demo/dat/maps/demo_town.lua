@@ -422,11 +422,12 @@ function Load(m)
 	dialogue = hoa_map.MapDialogue();
 	dialogue:AddText("This village is boring! There's no one I can play with here!", 8, -1, -1);
 	sprite:AddDialogue(dialogue);
-	action = hoa_map.ActionPathMove(sprite);
-	action:SetDestination(62, 28);
-	sprite:AddAction(action);
-	action = hoa_map.ActionPathMove(sprite);
-	action:SetDestination(32, 28);
+--	action = hoa_map.ActionPathMove(sprite);
+--	action:SetDestination(62, 28);
+--	sprite:AddAction(action);
+--	action = hoa_map.ActionPathMove(sprite);
+--	action:SetDestination(32, 28);
+	action = hoa_map.ActionRandomMove(sprite);
 	sprite:AddAction(action);
 	sprite.current_action = 0;
 	map:_AddGroundObject(sprite);

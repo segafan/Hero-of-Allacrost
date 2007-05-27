@@ -13,15 +13,18 @@
 *** \brief   Source file for map mode actions.
 *** ***************************************************************************/
 
-#include "utils.h"
 #include <iostream>
+#include "utils.h"
+
 #include "map.h"
 #include "map_actions.h"
 #include "map_objects.h"
 #include "map_dialogue.h"
+#include "system.h"
 
 using namespace std;
 using namespace hoa_utils;
+using namespace hoa_system;
 
 namespace hoa_map {
 
@@ -30,12 +33,6 @@ namespace private_map {
 // *****************************************************************************
 // **************************** ActionPathMove *********************************
 // *****************************************************************************
-
-void ActionPathMove::Load() {
-	MapMode::_current_map->_FindPath(_sprite, path, destination);
-}
-
-
 
 void ActionPathMove::Execute() {
 	// TODO: Check if we already have a previously computed path and if it is still valid, use it.
@@ -84,13 +81,30 @@ void ActionPathMove::Execute() {
 } // void ActionPathMove::Execute()
 
 // *****************************************************************************
-// ************************** ActionAnimate *******************************
+// **************************** ActionRandomMove *******************************
 // *****************************************************************************
 
-void ActionAnimate::Load() {
-	// TODO
-} // void ActionAnimate::Load(uint32 table_key)
+void ActionRandomMove::Execute() {
+	_sprite->moving = true;
+	direction_timer += SystemManager->GetUpdateTime();
+	movement_timer += SystemManager->GetUpdateTime();
 
+	// Check if we should change the sprite's direction
+	if (direction_timer >= total_direction_time) {
+		direction_timer -= total_direction_time;
+		_sprite->SetRandomDirection();
+	}
+
+	if (movement_timer >= total_movement_time) {
+		movement_timer = 0;
+		_finished = true;
+		_sprite->moving = false;
+	}
+}
+
+// *****************************************************************************
+// ***************************** ActionAnimate *********************************
+// *****************************************************************************
 
 void ActionAnimate::Execute() {
 	// TODO
