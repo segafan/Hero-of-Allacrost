@@ -597,7 +597,8 @@ void SellConfirmWindow::Update() {
 	}
 	else if (InputManager->ConfirmPress()) {
 		if (options.GetSelection() == 0) { // Confirm sale
-			GlobalManager->AddFunds(GlobalManager->GetInventory()->at(_object_id)->GetPrice());
+			std::map<uint32, GlobalObject*>::iterator iter = GlobalManager->GetInventory()->find(_object_id);
+			GlobalManager->AddFunds(iter->second->GetPrice());
 			GlobalManager->DecrementObjectCount(_object_id, 1);
 			current_shop->_shop_sounds["coins"].PlaySound();
 			current_shop->_action_window.UpdateFinanceText();
