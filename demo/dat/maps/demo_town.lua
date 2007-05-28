@@ -16,7 +16,7 @@ sound_filenames = {}
 
 -- The music files used as background music on this map.
 music_filenames = {}
-music_filenames[1] = "mus/Seeking_New_Worlds.ogg"
+music_filenames[1] = "mus/Town_Folk.ogg"
 
 -- The names of the tilesets used, with the path and file extension omitted
 tileset_filenames = {}
