@@ -158,6 +158,12 @@ void MapMode::_Load() {
 		return;
 	}
 
+	_map_name = MakeUnicodeString(_map_script.ReadString("map_name"));
+	_location_graphic.SetFilename("img/menus/locations/" + _map_script.ReadString("location_filename"));
+	if (_location_graphic.Load() == false) {
+		cerr << "MAP ERROR: failed to load location graphic image: " << _location_graphic.GetFilename() << endl;
+	}
+
 	_num_tile_rows = _map_script.ReadInt("num_tile_rows");
 	_num_tile_cols = _map_script.ReadInt("num_tile_cols");
 	_num_grid_rows = _num_tile_rows * 2;
@@ -480,7 +486,7 @@ void MapMode::_HandleInputExplore() {
 
 	// Go to menu mode if the user requested it
 	if (InputManager->MenuPress()) {
-		MenuMode *MM = new MenuMode("Desert Cave", "img/menus/locations/desert_cave.png");
+		MenuMode *MM = new MenuMode(_map_name, _location_graphic.GetFilename());
 		ModeManager->Push(MM);
 		return;
 	}

@@ -160,7 +160,7 @@ public:
 	/** \param location_name The name of the current map that will be displayed on the menu screen.
 	*** \param locale_image The filename for the location image that is displayed in the menus.
 	**/
-	MenuMode(std::string locale_name, std::string locale_image);
+	MenuMode(hoa_utils::ustring locale_name, std::string locale_image);
 
 	~MenuMode();
 

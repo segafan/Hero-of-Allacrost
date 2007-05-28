@@ -60,14 +60,14 @@ const uint32 SCREEN_HEIGHT = 12;
 **/
 const float MONSTER_LOCATIONS[][2] =
 {
-	{ 515.0f, 768.0f - 360.0f}, // 768 - because of reverse Y-coordinate system 
-	{ 494.0f, 768.0f - 450.0f},
-	{ 510.0f, 768.0f - 550.0f},
-	{ 580.0f, 768.0f - 630.0f},
-	{ 675.0f, 768.0f - 390.0f},
-	{ 655.0f, 768.0f - 494.0f},
-	{ 793.0f, 768.0f - 505.0f},
-	{ 730.0f, 768.0f - 600.0f}
+	{ 515.0f, 768.0f - 360.0f }, // 768 - because of reverse Y-coordinate system 
+	{ 494.0f, 768.0f - 450.0f },
+	{ 510.0f, 768.0f - 550.0f },
+	{ 580.0f, 768.0f - 630.0f },
+	{ 675.0f, 768.0f - 390.0f },
+	{ 655.0f, 768.0f - 494.0f },
+	{ 793.0f, 768.0f - 505.0f },
+	{ 730.0f, 768.0f - 600.0f }
 };
 
 
@@ -251,6 +251,14 @@ public:
 	**/
 	void AddEnemy(uint32 new_enemy_id)
 		{ AddEnemy(hoa_global::GlobalEnemy(new_enemy_id)); }
+
+	/** \brief Adds a piece of music to the battle soundtrack
+	*** \param music_filename The full filename of the music to play
+	*** Note that the first piece of music added is the one that will be played upon entering battle. All subsequent pieces
+	*** of music added must be explicitly triggered to play by certain scripted conditions in battle. If no music is added
+	*** for a battle, a default battle theme will be played.
+	**/
+	void AddMusic(std::string music_filename);
 
 	// NOTE: this is temporary because of a signature matching problem with the seperate AddEnemy definitions above
 	// This method is being bound to Lua until the problem is resolved, at which point this method should be removed

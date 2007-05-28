@@ -49,11 +49,11 @@ MenuMode* MenuMode::_instance = NULL;
 // MenuMode class -- Initialization and Destruction Code
 ////////////////////////////////////////////////////////////////////////////////
 
-MenuMode::MenuMode(string locale_name, string locale_image) {
+MenuMode::MenuMode(ustring locale_name, string locale_image) {
 	if (MENU_DEBUG)
 		cout << "MENU: MenuMode constructor invoked." << endl;
 
-	_locale_name = MakeUnicodeString(locale_name);
+	_locale_name = locale_name;
 
 	// Initialize the location graphic
 	_locale_graphic.SetFilename(locale_image);
