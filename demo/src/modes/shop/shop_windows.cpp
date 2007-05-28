@@ -418,8 +418,9 @@ void ObjectInfoWindow::SetObject(GlobalObject* obj) {
 void ObjectInfoWindow::Draw() {
 	MenuWindow::Draw();
 
-	if (_object == NULL)
+	if (_object == NULL) {
 		return;
+	}
 
 	// Draw the object's icon and name
 	VideoManager->Move(350, 200);
@@ -566,7 +567,7 @@ SellConfirmWindow::SellConfirmWindow() {
 	options.SetOptions(text);
 	options.SetSelection(0);
 
-	_object = NULL;
+	_object_id = 0;
 }
 
 
@@ -590,13 +591,14 @@ void SellConfirmWindow::Update() {
 	if (InputManager->CancelPress()) {
 		current_shop->_shop_sounds["cancel"].PlaySound();
 		SetObject(NULL);
+		current_shop->_info_window.SetObject(NULL);
 		options.SetSelection(0);
 		current_shop->_state = SHOP_STATE_SELL;
 	}
 	else if (InputManager->ConfirmPress()) {
 		if (options.GetSelection() == 0) { // Confirm sale
-			GlobalManager->AddFunds(_object->GetPrice());
-			GlobalManager->DecrementObjectCount(_object->GetID(), 1);
+			GlobalManager->AddFunds(GlobalManager->GetInventory()->at(_object_id)->GetPrice());
+			GlobalManager->DecrementObjectCount(_object_id, 1);
 			current_shop->_shop_sounds["coins"].PlaySound();
 			current_shop->_action_window.UpdateFinanceText();
 			current_shop->_sell_window.UpdateSellList();
@@ -616,13 +618,14 @@ void SellConfirmWindow::Update() {
 		// Return to previous window
 		options.SetSelection(0);
 		SetObject(NULL);
+		current_shop->_info_window.SetObject(NULL);
 	}
 }
 
 
 
 void SellConfirmWindow::Draw() {
-	if (_object == NULL)
+	if (_object_id == 0)
 		return;
 
 	MenuWindow::Draw();
@@ -637,12 +640,15 @@ void SellConfirmWindow::Draw() {
 
 
 void SellConfirmWindow::SetObject(GlobalObject* obj) {
-	_object = obj;
-
-	if (_object == NULL)
+	
+	if (obj == NULL) {
+		_object_id = 0;
 		MenuWindow::Hide();
-	else
+	}
+	else {
+		_object_id = obj->GetID();
 		MenuWindow::Show();
+	}
 }
 
 } // namespace private_shop

@@ -256,12 +256,7 @@ public:
 	hoa_video::OptionBox options;
 
 private:
-	/** \brief A pointer to the object whose properties are to be described
-	*** If this member is set to NULL, then the window will be blank. The pointer
-	*** should point to an object contained within a ShopMode class, not to an
-	*** object in the player's inventory or anywhere else.
-	**/
-	hoa_global::GlobalObject* _object;
+	uint32 _object_id;
 }; // class SellConfirmWindow : public hoa_video::MenuWindow
 
 } // namespace private_shop

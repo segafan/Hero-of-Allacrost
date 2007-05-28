@@ -1109,8 +1109,6 @@ void StatusWindow::Draw() {
 	//Draw character full body portrait
 	VideoManager->Move(735, 145);
 
-//	FIX ME: This line causes a crash!
-//	_char_select.GetSelection() returns -1
 	VideoManager->DrawImage(_full_portraits[0]);
 
 	_char_select.Draw();
