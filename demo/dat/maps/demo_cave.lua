@@ -16,7 +16,7 @@ sound_filenames = {}
 
 -- The music files used as background music on this map.
 music_filenames = {}
-music_filenames[1] = "mus/Allacrost_Opening_Theme.ogg"
+music_filenames[1] = "mus/Where_Serpents_Sleep.ogg"
 
 -- The names of the tilesets used, with the path and file extension omitted
 tileset_filenames = {}
