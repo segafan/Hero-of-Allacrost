@@ -318,6 +318,9 @@ private:
 	//! \brief The name of the map, as it will be read by the player in the game.
 	hoa_utils::ustring _map_name;
 
+	//! \brief Holds an image that represents an outline of the location, used primarily in MenuMode
+	hoa_video::StillImage _location_graphic;
+
 	//! \brief Indicates the current state that the map is in, such as when a dialogue is taking place.
 	uint8 _map_state;
 

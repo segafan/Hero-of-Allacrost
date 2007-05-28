@@ -524,7 +524,19 @@ void BattleMode::Reset() {
 	VideoManager->SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
 	VideoManager->SetFont("battle");
 
-	if (_battle_music[0].IsPlaying() == false) {
+
+	// Load the default battle music track if no other music has been added
+	if (_battle_music.empty()) {
+		MusicDescriptor MD;
+		if (MD.LoadMusic("mus/Confrontation.ogg") == false) {
+			cerr << "BATTLE ERROR: failed to load default battle theme track: " << MD.GetFilename() << endl;
+		}
+		else {
+			_battle_music.push_back(MD);
+		}
+	}
+
+	if (_battle_music.empty() == false && _battle_music[0].IsPlaying() == false) {
 		_battle_music[0].PlayMusic();
 	}
 
@@ -568,6 +580,18 @@ void BattleMode::AddEnemy(GlobalEnemy new_enemy) {
 
 
 
+void BattleMode::AddMusic(string music_filename) {
+	MusicDescriptor MD;
+	if (MD.LoadMusic(music_filename) == false) {
+		cerr << "BATTLE ERROR: BattleMode::AddMusic failed to load this music file: " << music_filename << endl;
+	}
+	else {
+		_battle_music.push_back(MD);
+	}
+}
+
+
+
 void BattleMode::_TEMP_LoadTestData() {
 	// Load all background images
 	_battle_background.SetFilename("img/backdrops/battle/desert_cave.png");
@@ -597,11 +621,6 @@ void BattleMode::_TEMP_LoadTestData() {
 		cerr << "BATTLE ERROR: Failed to load swap card: " << endl;
 		_ShutDown();
 	}
-
-	// Load the battle music track
-	MusicDescriptor MD;
-	MD.LoadMusic("mus/Confrontation.ogg");
-	_battle_music.push_back(MD);
 
 	// Load the battle sfx
 	SoundDescriptor SD;

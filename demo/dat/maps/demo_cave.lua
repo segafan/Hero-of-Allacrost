@@ -3,6 +3,10 @@
 -- A reference to the C++ MapMode object that was created with this file
 map = {}
 
+-- The map name and location graphic
+map_name = "Cave"
+location_filename = "desert_cave.png"
+
 -- The number of rows and columns of tiles that compose the map
 num_tile_cols = 40
 num_tile_rows = 60
@@ -620,23 +624,23 @@ end
 -- Throws player into a boss battle
 map_functions[1] = function()
 	local enemy = hoa_map.EnemySprite();
-   enemy:SetObjectID(map:_GetGeneratedObjectID());
-   enemy:SetContext(1);
-   enemy:SetXPosition(71, 0.0);
-   enemy:SetYPosition(28, 0.0);
-   enemy:SetCollHalfWidth(1.0);
-   enemy:SetCollHeight(2.0);
-   enemy:SetImgHalfWidth(2.0);
-   enemy:SetImgHeight(4.0);
-   enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
-   enemy:LoadStandardAnimations("img/sprites/map/gigas_walk.png");
-   enemy:NewEnemyParty();
-   enemy:AddEnemy(103);
-   enemy:AddEnemy(104);
-   action = hoa_map.ActionPathMove(enemy);
-   action:SetDestination(72, 32);
-   enemy:AddAction(action);
-   enemy.current_action = 0;
-   enemy:ChangeStateHostile();
-   map:_AddGroundObject(enemy); 
+	enemy:SetObjectID(map:_GetGeneratedObjectID());
+	enemy:SetContext(1);
+	enemy:SetXPosition(71, 0.0);
+	enemy:SetYPosition(28, 0.0);
+	enemy:SetCollHalfWidth(1.0);
+	enemy:SetCollHeight(2.0);
+	enemy:SetImgHalfWidth(2.0);
+	enemy:SetImgHeight(4.0);
+	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
+	enemy:LoadStandardAnimations("img/sprites/map/gigas_walk.png");
+	enemy:NewEnemyParty();
+	enemy:AddEnemy(103);
+	enemy:AddEnemy(104);
+	action = hoa_map.ActionPathMove(enemy);
+	action:SetDestination(72, 32);
+	enemy:AddAction(action);
+	enemy.current_action = 0;
+	enemy:ChangeStateHostile();
+	map:_AddGroundObject(enemy); 
 end
