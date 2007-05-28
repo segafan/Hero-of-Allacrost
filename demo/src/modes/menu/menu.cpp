@@ -572,32 +572,104 @@ void MenuMode::_DrawBottomMenu() {
 	{
 		//Just do nothing and let the inventory drawing do the job
 	}
-	else if (_current_menu_showing == SHOW_EQUIP || _current_menu_showing == SHOW_SKILLS) {
+	else if (_current_menu_showing == SHOW_EQUIP) {
 		GlobalActor* actor = GlobalManager->GetActiveParty()->GetActor(0);
-		GlobalCharacter* character = (GlobalCharacter*)(actor);
-		string text = "STR: " +  NumberToString(character->GetStrength());
+		GlobalCharacter* ch = (GlobalCharacter*)(actor);
+		string text = "STR: " +  NumberToString(ch->GetStrength());
 		VideoManager->DrawText(MakeUnicodeString(text));
 
-		text = "VIG: " +  NumberToString(character->GetVigor());
+		text = "VIG: " +  NumberToString(ch->GetVigor());
 		VideoManager->MoveRelative(0, 20);
 		VideoManager->DrawText(MakeUnicodeString(text));
 
-		text = "FRT: " +  NumberToString(character->GetFortitude());
+		text = "FRT: " +  NumberToString(ch->GetFortitude());
 		VideoManager->MoveRelative(0, 20);
 		VideoManager->DrawText(MakeUnicodeString(text));
 
-		text = "PRO: " +  NumberToString(character->GetProtection());
+		text = "PRO: " +  NumberToString(ch->GetProtection());
 		VideoManager->MoveRelative(0, 20);
 		VideoManager->DrawText(MakeUnicodeString(text));
 
-		text = "AGI: " +  NumberToString(character->GetAgility());
+		text = "AGI: " +  NumberToString(ch->GetAgility());
 		VideoManager->MoveRelative(0, 20);
 		VideoManager->DrawText(MakeUnicodeString(text));
 
-		text = "EVD: " +  NumberToString(character->GetEvade()) + "%";
+		text = "EVD: " +  NumberToString(ch->GetEvade()) + "%";
 		VideoManager->MoveRelative(0, 20);
 		VideoManager->DrawText(MakeUnicodeString(text));
 
+		VideoManager->Move(310, 577);
+
+		text = "Current Equipment:";
+		VideoManager->DrawText(MakeUnicodeString(text));
+
+		text = "Weapon";
+		VideoManager->MoveRelative(0, 20);
+		VideoManager->DrawText(MakeUnicodeString(text));
+
+		text = "Head";
+		VideoManager->MoveRelative(0, 20);
+		VideoManager->DrawText(MakeUnicodeString(text));
+
+		text = "Torso";
+		VideoManager->MoveRelative(0, 20);
+		VideoManager->DrawText(MakeUnicodeString(text));
+
+		text = "Off";
+		VideoManager->MoveRelative(0, 20);
+		VideoManager->DrawText(MakeUnicodeString(text));
+
+		text = "Legs";
+		VideoManager->MoveRelative(0, 20);
+		VideoManager->DrawText(MakeUnicodeString(text));
+
+		VideoManager->Move(400, 577);
+
+		// Skip a line
+
+		text = "PHYS ATK: " + NumberToString(ch->GetWeaponEquipped()->GetPhysicalAttack());
+		VideoManager->MoveRelative(0, 20);
+		VideoManager->DrawText(MakeUnicodeString(text));
+
+		text = "PHYS DEF: " + NumberToString(ch->GetEquippedHeadArmor()->GetPhysicalDefense());
+		VideoManager->MoveRelative(0, 20);
+		VideoManager->DrawText(MakeUnicodeString(text));
+
+		text = "PHYS DEF: " +  NumberToString(ch->GetEquippedTorsoArmor()->GetPhysicalDefense());
+		VideoManager->MoveRelative(0, 20);
+		VideoManager->DrawText(MakeUnicodeString(text));
+
+		text = "PHYS DEF: " +  NumberToString(ch->GetEquippedArmsArmor()->GetPhysicalDefense());
+		VideoManager->MoveRelative(0, 20);
+		VideoManager->DrawText(MakeUnicodeString(text));
+
+		text = "PHYS DEF: " +  NumberToString(ch->GetEquippedLegArmor()->GetPhysicalDefense());
+		VideoManager->MoveRelative(0, 20);
+		VideoManager->DrawText(MakeUnicodeString(text));
+
+		VideoManager->Move(550, 577);
+
+		// Skip a line
+
+		text = "META ATK: " + NumberToString(ch->GetWeaponEquipped()->GetMetaphysicalAttack());
+		VideoManager->MoveRelative(0, 20);
+		VideoManager->DrawText(MakeUnicodeString(text));
+
+		text = "META DEF: " + NumberToString(ch->GetEquippedHeadArmor()->GetMetaphysicalDefense());
+		VideoManager->MoveRelative(0, 20);
+		VideoManager->DrawText(MakeUnicodeString(text));
+
+		text = "META DEF: " +  NumberToString(ch->GetEquippedTorsoArmor()->GetMetaphysicalDefense());
+		VideoManager->MoveRelative(0, 20);
+		VideoManager->DrawText(MakeUnicodeString(text));
+
+		text = "META DEF: " +  NumberToString(ch->GetEquippedArmsArmor()->GetMetaphysicalDefense());
+		VideoManager->MoveRelative(0, 20);
+		VideoManager->DrawText(MakeUnicodeString(text));
+
+		text = "META DEF: " +  NumberToString(ch->GetEquippedLegArmor()->GetMetaphysicalDefense());
+		VideoManager->MoveRelative(0, 20);
+		VideoManager->DrawText(MakeUnicodeString(text));
 		VideoManager->SetDrawFlags(VIDEO_X_CENTER,VIDEO_Y_BOTTOM,0);
 	}
 	else {
