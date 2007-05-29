@@ -14,14 +14,28 @@ characters = {}
 characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS] = {
 	name = "Claudius",
 	filename = "claudius",
-	max_hit_points = 120,
-	max_skill_points = 15,
-	strength = 12,
-	vigor = 4,
-	fortitude = 14,
-	protection = 6,
-	agility = 35,
-	evade = 4.0,
+
+	base_stats = {
+		max_hit_points = 120,
+		max_skill_points = 15,
+		strength = 12,
+		vigor = 4,
+		fortitude = 14,
+		protection = 6,
+		agility = 35,
+		evade = 4.0
+	},
+
+	growth_stats = {
+		hit_points = 10.0,
+		skill_points = 5.0,
+		strength = 10.0,
+		vigor = 1.0,
+		fortitude = 8.0,
+		protection = 1.0,
+		agility = 10.0,
+		evade = 2.0
+	},
 
 	attack_points = {
 		[1] = {
