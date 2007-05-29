@@ -410,6 +410,27 @@ protected:
 	//! \brief The sum of the character's vigor and their weapon's metaphysical attack
 	uint32 _metaphysical_attack_rating;
 
+
+	/** \name Growth Statistics
+	*** \brief The average increase for statistics between experience levels is stored by these members
+	***
+	*** Note that even though the normal statistics members are integers, these are floating point values. This
+	*** is so because it allows us a finer granularity of control over how much a particular statistic grows
+	*** with time.
+	**/
+	//@{
+	float _growth_hit_points;
+	float _growth_skill_points;
+	float _growth_experience_points;
+	float _growth_strength;
+	float _growth_vigor;
+	float _growth_fortitude;
+	float _growth_protection;
+	float _growth_agility;
+	float _growth_evade;
+	//@}
+
+
 	/** \brief Defense and evade rating totals for all attack points
 	*** \note The size of these vectors will always be equal to the number of attack points on the actor.
 	***

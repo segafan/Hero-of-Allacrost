@@ -136,6 +136,8 @@ GlobalCharacter::GlobalCharacter(uint32 id) {
 	// (3): Read the character's basic stats
 	_name = MakeUnicodeString(char_script.ReadString("name"));
 	_filename = char_script.ReadString("filename");
+
+	char_script.ReadOpenTable("base_stats");
 	_max_hit_points = char_script.ReadInt("max_hit_points");
 	_hit_points = _max_hit_points;
 	_max_skill_points = char_script.ReadInt("max_skill_points");
@@ -147,6 +149,22 @@ GlobalCharacter::GlobalCharacter(uint32 id) {
 	_protection = char_script.ReadInt("protection");
 	_agility = char_script.ReadInt("agility");
 	_evade = char_script.ReadFloat("evade");
+	char_script.ReadCloseTable();
+
+	// (3.5): Read the character's growth stats
+	char_script.ReadOpenTable("growth_stats");
+	_growth_hit_points = char_script.ReadFloat("hit_points");
+	_growth_skill_points = char_script.ReadFloat("skill_points");
+	_growth_experience_points = char_script.ReadFloat("experience_points");
+	_growth_strength = char_script.ReadFloat("strength");
+	_growth_vigor = char_script.ReadFloat("vigor");
+	_growth_fortitude = char_script.ReadFloat("fortitude");
+	_growth_protection = char_script.ReadFloat("protection");
+	_growth_agility = char_script.ReadFloat("agility");
+	_growth_evade = char_script.ReadFloat("evade");
+	char_script.ReadCloseTable();
+
+
 
 	//FIX ME Temp
 	_experience_next_level = 1;
@@ -264,7 +282,7 @@ bool GlobalCharacter::AddXP(uint32 xp)
 		//FIX ME
 		//SetExperienceNextLevel(GetXPForNextLevel() + _experience_next_level);
 		SetExperienceNextLevel(11000 + temp_xp);
-		AddExperienceLevel();
+		AddExperienceLevel(1);
 
 		return true;
 	}
@@ -278,16 +296,17 @@ void GlobalCharacter::AddExperienceLevel(uint32 lvl)
 {
 	_experience_level += lvl;
 
-	//FIX ME How in the hell do we determine how the character grows?
-	//Why do only enemies have growth stats
-	_strength += static_cast<uint32>(RandomBoundedInteger(1, 10));
-	_vigor += static_cast<uint32>(RandomBoundedInteger(1, 10));
-	_fortitude += static_cast<uint32>(RandomBoundedInteger(1, 10));
-	_protection += static_cast<uint32>(RandomBoundedInteger(1, 10));
-	_agility += static_cast<uint32>(RandomBoundedInteger(1, 10));
+	// Adds the growth stats, plus a small random value, to the character's stats on levelling.
 
-	_max_hit_points += static_cast<uint32>(RandomBoundedInteger(1, 10));
-	_max_skill_points += static_cast<uint32>(RandomBoundedInteger(1, 10));
+	_strength += static_cast<uint32>(_growth_strength + RandomBoundedInteger(1, 3));
+	_vigor += static_cast<uint32>(_growth_vigor + RandomBoundedInteger(1, 3));
+	_fortitude += static_cast<uint32>(_growth_fortitude + RandomBoundedInteger(1, 3));
+	_protection += static_cast<uint32>(_growth_protection + RandomBoundedInteger(1, 2));
+	_agility += static_cast<uint32>(_growth_agility + RandomBoundedInteger(1, 3));
+
+	_max_hit_points += static_cast<uint32>(_growth_hit_points + RandomBoundedInteger(1, 3));
+	_max_skill_points += static_cast<uint32>(_growth_skill_points + RandomBoundedInteger(1, 3));
+	_evade += static_cast<uint32>(_growth_evade + RandomBoundedInteger(1, 3));
 }
 
 // ****************************************************************************
