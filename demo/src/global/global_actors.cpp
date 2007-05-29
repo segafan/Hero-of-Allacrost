@@ -167,7 +167,7 @@ GlobalCharacter::GlobalCharacter(uint32 id) {
 
 
 	//FIX ME Temp
-	_experience_next_level = 1;
+	_experience_next_level = 40;
 
 	// (4): Setup the character's attack points
 	char_script.ReadOpenTable("attack_points");
@@ -281,13 +281,14 @@ bool GlobalCharacter::AddXP(uint32 xp)
 	{
 		//FIX ME
 		//SetExperienceNextLevel(GetXPForNextLevel() + _experience_next_level);
-		SetExperienceNextLevel(11000 + temp_xp);
+		SetExperienceNextLevel(50 + temp_xp);
 		AddExperienceLevel(1);
 
 		return true;
 	}
-
-	_experience_next_level = static_cast<uint32>(xp);
+	else {
+		SetExperienceNextLevel(temp_xp);
+	}
 
 	return false;
 }

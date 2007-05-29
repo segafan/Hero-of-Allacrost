@@ -367,7 +367,8 @@ private:
 
 	//! Set to true if it was player who won the battle.
 	bool _victorious_battle;
-
+	bool _first_time_at_victory_screen;
+	
 	//! XP gained from battle
 	uint32 _victory_xp;
 
