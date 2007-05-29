@@ -320,6 +320,7 @@ BattleMode::BattleMode() :
 	_active_se(NULL),
 	_battle_over(false),
 	_victorious_battle(false),
+	_first_time_at_victory_screen(true),
 	_selected_character(NULL),
 	_selected_target(NULL),
 	_attack_point_selected(0),
@@ -801,26 +802,56 @@ void BattleMode::_TallyRewards()
 
 void BattleMode::Update() {
 	_battle_over = (_NumberEnemiesAlive() == 0) || (_NumberOfCharactersAlive() == 0);
-
+	static bool displayed_stats;
+	static bool begun_countdown;
+	
+	if ( _NumberEnemiesAlive() == 0 ) {
+		_victorious_battle = true;
+	}
+	
 	if (_battle_over) {
-		if (_victorious_battle)
-		{
-			if (InputManager->ConfirmPress())
+		if (_victorious_battle) {
+			if ( _first_time_at_victory_screen) {
+				displayed_stats = false;
+				begun_countdown = false;
+				_first_time_at_victory_screen = false;
+				_TallyRewards();	//calculate the player's new stats
+				PlayerVictory();	//actually write them into the player's data
+			}
+			else
 			{
-				PlayerVictory();
+				if (begun_countdown && (displayed_stats == false)) {
+				// if we've started the countdown, but haven't finished it.
+				// roll it, and don't look for input on each screen update.
+				// reduce each number by 1, per each screen redraw.
+							if (_victory_xp != 0) {
+							_victory_xp--;
+							}
+							
+							if ( _victory_money != 0) {
+								_victory_money--;
+							}
+							
+							if ( (_victory_xp == 0) && (_victory_money == 0) ) {
+								displayed_stats = true;
+							}
+				}
+				else { //if the countdown is not started, or completely finished, then don't roll the numbers.
+				// and do look for input
+					if (InputManager->ConfirmPress()) {
+						AudioManager->PlaySound("snd/confirm.wav");
+						if ( displayed_stats == false) {  //if the countdown is not started
+							begun_countdown = true;
+						}
+						else { // if the countdown is totally finished
+							VideoManager->DisableFog();
+							_ShutDown();
+						}
+					}
+				}
 			}
 		}
-		//If this is the first time we found out we've won, tally up the rewards
-		else if ((_victorious_battle = (_NumberEnemiesAlive() == 0)) == true)
-		{
-			_TallyRewards();
-		}
-		/*if (_victorious_battle) {
-			if (InputManager->ConfirmPress()) {
-				PlayerVictory();
-			}
-		}*/
-		else {
+		else {  // if it's a losing battle
 			_battle_lose_menu.Update(SystemManager->GetUpdateTime()); // Update lose menu
 			if (InputManager->ConfirmRelease()) {
 				// _battle_lose_menu.HandleConfirmKey(); // This needs to be handled when there's more than 1 option
@@ -2094,32 +2125,13 @@ void BattleMode::UnFreezeTimers()
 
 // Handle player victory
 void BattleMode::PlayerVictory() {
-	static bool added_rewards = false;
-
 	if (BATTLE_DEBUG) cout << "BATTLE: Player has won a battle!" << endl;
-	
-	if (!added_rewards)
-	{
-		// Give player some loot
-		// TODO: Fix this with proper ID's!
-		//GlobalManager->AddToInventory(1); // adds one healing potion
 
-		GlobalManager->AddFunds(_victory_money);
-		// Give some experience for each character in the party
-		for (uint32 i = 0; i < _character_actors.size(); ++i) {
-			//_character_actors.at(i)->GetActor()->AddExperienceLevel(1); // TODO: Add only experience, NOT exp LEVEL!
-			_character_actors.at(i)->GetActor()->AddXP(_victory_xp);
-		}
-		added_rewards = true;
-		_victory_xp = 0;
-		_victory_money = 0;
-		
-		AudioManager->PlaySound("snd/confirm.wav");
-		return;
+	GlobalManager->AddFunds(_victory_money);
+	// Give some experience for each character in the party
+	for (uint32 i = 0; i < _character_actors.size(); ++i) {
+		_character_actors.at(i)->GetActor()->AddXP(_victory_xp);
 	}
-
-	VideoManager->DisableFog();
-	_ShutDown();
 }
 
 
