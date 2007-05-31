@@ -60,14 +60,14 @@ const uint32 MAIN_SIZE           = 6;
 //@{
 const uint32 INV_USE    = 0;
 const uint32 INV_SORT   = 1;
-const uint32 INV_CANCEL = 2;
+const uint32 INV_BACK   = 2;
 const uint32 INV_SIZE   = 3;
 //@}
 
 //! \name Skills Menu Options Constants
 //@{
-const uint32 SKILLS_USE		= 0;
-const uint32 SKILLS_CANCEL  = 1;
+const uint32 SKILLS_USE     = 0;
+const uint32 SKILLS_BACK    = 1;
 const uint32 SKILLS_SIZE    = 2;
 //@}
 
@@ -75,21 +75,21 @@ const uint32 SKILLS_SIZE    = 2;
 //@{
 const uint32 EQUIP_EQUIP   = 0;
 const uint32 EQUIP_REMOVE  = 1;
-const uint32 EQUIP_CANCEL  = 2;
+const uint32 EQUIP_BACK    = 2;
 const uint32 EQUIP_SIZE    = 3;
 //@}
 
 //! \name Status Menu Options Constants
 //@{
 const uint32 STATUS_VIEW    = 0;
-const uint32 STATUS_CANCEL  = 1;
+const uint32 STATUS_BACK    = 1;
 const uint32 STATUS_SIZE    = 2;
 //@}
 
 //! \name Formation Menu Options Constants
 //@{
 const uint32 FORMATION_SWITCH  = 0;
-const uint32 FORMATION_CANCEL  = 1;
+const uint32 FORMATION_BACK    = 1;
 const uint32 FORMATION_SIZE    = 2;
 //@}
 
@@ -97,14 +97,14 @@ const uint32 FORMATION_SIZE    = 2;
 //@{
 const uint32 OPTIONS_EDIT    = 0;
 const uint32 OPTIONS_SAVE    = 1;
-const uint32 OPTIONS_CANCEL  = 2;
+const uint32 OPTIONS_BACK    = 2;
 const uint32 OPTIONS_SIZE    = 3;
 //@}
 
 //! \name Save Menu Options Constants
 //@{
 const uint32 SAVE_SAVE    = 0;
-const uint32 SAVE_CANCEL  = 1;
+const uint32 SAVE_BACK    = 1;
 const uint32 SAVE_SIZE    = 2;
 //@}
 
