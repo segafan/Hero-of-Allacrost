@@ -192,7 +192,7 @@ void MiniCharacterSelectWindow::Draw()
 		portrait.SetDimensions(32, 64);
 		portrait.SetStatic(true);
 		VideoManager->LoadImage(portrait);
-		VideoManager->MoveRelative(0.0f, (float)(i * 116));
+		VideoManager->MoveRelative(0.0f, static_cast<float>(i * 116));
 		VideoManager->DrawImage(portrait);
 		VideoManager->DeleteImage(portrait);
 

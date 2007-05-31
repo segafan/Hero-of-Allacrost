@@ -273,7 +273,7 @@ void MenuMode::_SetupInventoryOptionBox() {
 	vector<ustring> options;
 	options.push_back(MakeUnicodeString("Use"));
 	options.push_back(MakeUnicodeString("Sort"));
-	options.push_back(MakeUnicodeString("Cancel"));
+	options.push_back(MakeUnicodeString("Back"));
 
 	// Add strings and set default selection.
 	_menu_inventory.SetOptions(options);
@@ -290,7 +290,7 @@ void MenuMode::_SetupSkillsOptionBox() {
 	// Generate the strings
 	vector<ustring> options;
 	options.push_back(MakeUnicodeString("Use"));
-	options.push_back(MakeUnicodeString("Cancel"));
+	options.push_back(MakeUnicodeString("Back"));
 
 	// Add strings and set default selection.
 	_menu_skills.SetOptions(options);
@@ -309,7 +309,7 @@ void MenuMode::_SetupEquipOptionBox() {
 	vector<ustring> options;
 	options.push_back(MakeUnicodeString("Equip"));
 	options.push_back(MakeUnicodeString("Remove"));
-	options.push_back(MakeUnicodeString("Cancel"));
+	options.push_back(MakeUnicodeString("Back"));
 
 	// Add strings and set default selection.
 	_menu_equip.SetOptions(options);
@@ -329,7 +329,7 @@ void MenuMode::_SetupStatusOptionBox() {
 	// Generate the strings
 	vector<ustring> options;
 	options.push_back(MakeUnicodeString("View"));
-	options.push_back(MakeUnicodeString("Cancel"));
+	options.push_back(MakeUnicodeString("Back"));
 
 	// Add strings and set default selection.
 	_menu_status.SetOptions(options);
@@ -347,7 +347,7 @@ void MenuMode::_SetupOptionsOptionBox() {
 	vector<ustring> options;
 	options.push_back(MakeUnicodeString("Edit"));
 	options.push_back(MakeUnicodeString("Save"));
-	options.push_back(MakeUnicodeString("Cancel"));
+	options.push_back(MakeUnicodeString("Back"));
 
 	// Add strings and set default selection.
 	_menu_options.SetOptions(options);
@@ -364,7 +364,7 @@ void MenuMode::_SetupSaveOptionBox() {
 	// Generate the strings
 	vector<ustring> options;
 	options.push_back(MakeUnicodeString("Save"));
-	options.push_back(MakeUnicodeString("Cancel"));
+	options.push_back(MakeUnicodeString("Back"));
 
 	// Add strings and set default selection.
 	_menu_save.SetOptions(options);
@@ -615,7 +615,7 @@ void MenuMode::_DrawBottomMenu() {
 		VideoManager->MoveRelative(0, 20);
 		VideoManager->DrawText(MakeUnicodeString(text));
 
-		text = "Off";
+		text = "Arm";
 		VideoManager->MoveRelative(0, 20);
 		VideoManager->DrawText(MakeUnicodeString(text));
 
@@ -682,22 +682,20 @@ void MenuMode::_DrawBottomMenu() {
 		uint8 hours = SystemManager->GetPlayHours();
 		uint8 minutes = SystemManager->GetPlayMinutes();
 		uint8 seconds = SystemManager->GetPlaySeconds();
-		os_time << (hours < 10 ? "0" : "") << (uint32)hours << ":";
-		os_time << (minutes < 10 ? "0" : "") << (uint32)minutes << ":";
-		os_time << (seconds < 10 ? "0" : "") << (uint32)seconds;
+		os_time << (hours < 10 ? "0" : "") << static_cast<uint32>(hours) << ":";
+		os_time << (minutes < 10 ? "0" : "") << static_cast<uint32>(minutes) << ":";
+		os_time << (seconds < 10 ? "0" : "") << static_cast<uint32>(seconds);
 
 		std::string time = std::string("Time: ") + os_time.str();
 		VideoManager->DrawText(MakeUnicodeString(time));
 
-	// Display the current funds that the party has
+		// Display the current funds that the party has
 		string money = string("Drunes: " + NumberToString(GlobalManager->GetFunds()));
 		VideoManager->MoveRelative(0, 30);
 		VideoManager->DrawText(MakeUnicodeString(money));
 
 		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, 0);
-
 		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
-
 		VideoManager->Move(390, 685);
 		VideoManager->DrawImage(_locale_graphic);
 	}
@@ -761,7 +759,7 @@ void MenuMode::_HandleStatusMenu() {
 			_status_window.Activate(true);
 			break;
 
-		case STATUS_CANCEL:
+		case STATUS_BACK:
 			_current_menu_showing = SHOW_MAIN;
 			_current_menu = &_main_options;
 			break;
@@ -788,7 +786,7 @@ void MenuMode::_HandleInventoryMenu() {
 			cout << "MENU: Inventory sort command!" << endl;
 			break;
 
-		case INV_CANCEL:
+		case INV_BACK:
 			_current_menu_showing = SHOW_MAIN;
 			_current_menu = &_main_options;
 			break;
@@ -803,7 +801,7 @@ void MenuMode::_HandleInventoryMenu() {
 
 void MenuMode::_HandleSkillsMenu() {
 	switch (_menu_skills.GetSelection()) {
-		case SKILLS_CANCEL:
+		case SKILLS_BACK:
 			_current_menu_showing = SHOW_MAIN;
 			_current_menu = &_main_options;
 			break;
@@ -833,7 +831,7 @@ void MenuMode::_HandleEquipMenu() {
 			cout << "MENU: Remove command!" << endl;
 			break;
 
-		case EQUIP_CANCEL:
+		case EQUIP_BACK:
 			_current_menu_showing = SHOW_MAIN;
 			_current_menu = &_main_options;
 			break;
@@ -858,7 +856,7 @@ void MenuMode::_HandleOptionsMenu() {
 			cout << "MENU: Options - Save command!" << endl;
 			break;
 
-		case OPTIONS_CANCEL:
+		case OPTIONS_BACK:
 			_current_menu_showing = SHOW_MAIN;
 			_current_menu = &_main_options;
 			break;
@@ -878,7 +876,7 @@ void MenuMode::_HandleSaveMenu() {
 			cout << "MENU: Save - Save command!" << endl;
 			break;
 
-		case SAVE_CANCEL:
+		case SAVE_BACK:
 			_current_menu_showing = SHOW_MAIN;
 			_current_menu = &_main_options;
 			break;

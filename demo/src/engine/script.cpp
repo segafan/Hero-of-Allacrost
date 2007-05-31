@@ -72,7 +72,7 @@ bool ScriptDescriptor::OpenFile(const std::string& file_name, SCRIPT_ACCESS_MODE
 		_lstack = lua_newthread(ScriptManager->GetGlobalState());
 
 		// Attempt to load the Lua file.
-		if (lua_dofile(_lstack, file_name.c_str())) {
+		if (lua_dofile(_lstack, file_name.c_str()) != 0) {
 			cerr << "SCRIPT ERROR: Could not load file " << file_name << " for reading. " << endl;
 			_filename = "";
 			_access_mode = SCRIPT_CLOSED;
