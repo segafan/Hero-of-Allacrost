@@ -454,6 +454,48 @@ function Load(m)
 	sprite:AddDialogue(dialogue);
 	map:_AddGroundObject(sprite);
 
+	sprite = hoa_map.MapSprite();
+	sprite:SetName("Livia");
+	sprite:SetObjectID(10);
+	sprite:SetContext(1);
+	sprite:SetXPosition(32, 0.5);
+	sprite:SetYPosition(29, 0.5);
+	sprite:SetCollHalfWidth(0.95);
+	sprite:SetCollHeight(1.9);
+	sprite:SetImgHalfWidth(1.0);
+	sprite:SetImgHeight(4.0);
+	sprite:SetMovementSpeed(hoa_map.MapMode.NORMAL_SPEED);
+	sprite:SetDirection(2);
+	sprite:LoadStandardAnimations("img/sprites/map/girl_npc02_walk.png");
+	dialogue = hoa_map.MapDialogue();
+	dialogue:AddText("I'm looking for my brother Torl.  I sure hope he doesn't get into any trouble.", 10, -1, -1);
+	sprite:AddDialogue(dialogue);
+	action = hoa_map.ActionRandomMove(sprite);
+	sprite:AddAction(action);
+	sprite.current_action = 0;
+	map:_AddGroundObject(sprite);
+
+	sprite = hoa_map.MapSprite();
+	sprite:SetName("Octavia");
+	sprite:SetObjectID(11);
+	sprite:SetContext(1);
+	sprite:SetXPosition(9, 0.5);
+	sprite:SetYPosition(35, 0.5);
+	sprite:SetCollHalfWidth(1.0);
+	sprite:SetCollHeight(2.0);
+	sprite:SetImgHalfWidth(1.0);
+	sprite:SetImgHeight(4.0);
+	sprite:SetMovementSpeed(150.0);
+	sprite:SetDirection(2);
+	sprite:LoadStandardAnimations("img/sprites/map/woman_npc02_walk.png");
+	dialogue = hoa_map.MapDialogue();
+	dialogue:AddText("So much work to do!", 11, -1, -1);
+	sprite:AddDialogue(dialogue);
+	action = hoa_map.ActionRandomMove(sprite);
+	sprite:AddAction(action);
+	sprite.current_action = 0;
+	map:_AddGroundObject(sprite);
+
 	-- Create a zone for exiting the map, to be used as a trigger
 	exit_zone = hoa_map.MapZone();
 	-- Add a section to the zone that goes from (20, 10) to (50, 40) in map grid coordinates
