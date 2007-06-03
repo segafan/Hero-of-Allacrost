@@ -573,7 +573,13 @@ void BattleMode::AddEnemy(GlobalEnemy new_enemy) {
 	float x = MONSTER_LOCATIONS[_next_monster_location_index][0];
 	float y = MONSTER_LOCATIONS[_next_monster_location_index][1];
 	_next_monster_location_index++;
-	_next_monster_location_index = _next_monster_location_index % (sizeof(MONSTER_LOCATIONS)/2);
+
+	// TEMP
+	// The next line modulus have been changed. Howeever, a better solution is to provide a std::vector
+	// instead of an array for MONSTER_LOCATIONS, init in the constructor, and make modulus with  the vector length
+	// _next_monster_location_index = _next_monster_location_index % (sizeof(MONSTER_LOCATIONS)/2); <-- Before
+	_next_monster_location_index = _next_monster_location_index % 8;  // <-- Now
+
 	BattleEnemyActor* enemy_actor= new BattleEnemyActor(new_enemy, x, y);
 	enemy_actor->InitBattleActorStats(&new_enemy);
 	_enemy_actors.push_back(enemy_actor);

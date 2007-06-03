@@ -413,6 +413,8 @@ GlobalEnemy::GlobalEnemy(uint32 id) {
 		// TODO: Use the skill ids to load all of the GlobalSkills for the enemy
 		_skills.insert(make_pair(skill_ids[i], new GlobalSkill(static_cast<uint32>(skill_ids[i]))));
 	}
+
+	enemy_data.CloseFile();
 } // GlobalEnemy::~GlobalEnemy()
 
 
