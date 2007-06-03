@@ -69,6 +69,10 @@ bool ScriptDescriptor::OpenFile(const std::string& file_name, SCRIPT_ACCESS_MODE
 	// Case for opening with read permissions
 	if (mode == SCRIPT_READ) {
 		// Needs a comment: what does this do exactly?
+
+		// Increases the stack size for 1 element. That is needed because the new thread will be pushed in the
+		// stack and we have to be sure there is enough space
+		lua_checkstack (ScriptManager->GetGlobalState(),1);
 		_lstack = lua_newthread(ScriptManager->GetGlobalState());
 
 		// Attempt to load the Lua file.
