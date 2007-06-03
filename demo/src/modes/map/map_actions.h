@@ -163,7 +163,7 @@ public:
 	// ----- Methods -----
 
 	ActionRandomMove(VirtualSprite* sprite) :
-		SpriteAction(sprite), total_movement_time(10000), total_direction_time(2000) {}
+		SpriteAction(sprite), total_movement_time(10000), movement_timer(0), total_direction_time(2000), direction_timer(0) {}
 
 	~ActionRandomMove()
 		{}
