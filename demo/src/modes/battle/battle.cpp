@@ -528,6 +528,9 @@ void BattleMode::Reset() {
 
 	// Load the default battle music track if no other music has been added
 	if (_battle_music.empty()) {
+
+		if (BATTLE_DEBUG) cerr << "BATTLE DEBUG: No music defined. Attempting to load the default theme" << endl;
+
 		MusicDescriptor MD;
 		if (MD.LoadMusic("mus/Confrontation.ogg") == false) {
 			cerr << "BATTLE ERROR: failed to load default battle theme track: " << MD.GetFilename() << endl;
@@ -588,7 +591,15 @@ void BattleMode::AddEnemy(GlobalEnemy new_enemy) {
 
 
 void BattleMode::AddMusic(string music_filename) {
+	
+	if (music_filename == "")
+	{
+		if (BATTLE_DEBUG) cerr << "BATTLE DEBUG: Passed in an empty music filename." << endl;
+		return;
+	}
+
 	MusicDescriptor MD;
+
 	if (MD.LoadMusic(music_filename) == false) {
 		cerr << "BATTLE ERROR: BattleMode::AddMusic failed to load this music file: " << music_filename << endl;
 	}

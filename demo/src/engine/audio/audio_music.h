@@ -69,7 +69,7 @@ public:
 
 	//! Returns a const reference to the filename of the buffer that the source points to.
 	const std::string &GetFilename()
-		{ if (_data != NULL) return _data->filename; }
+	{ if (_data != NULL) return _data->filename; throw std::runtime_error("MusicDescriptor: Can't get the filename reference!"); }
 	/** \brief Loads the music file from memory.
 	*** \param fname The name of the file to load, without path information or file extension attached.
 	**/

@@ -634,7 +634,8 @@ EnemySprite::EnemySprite() :
 	_color(1.0f, 1.0f, 1.0f, 0.0f),
 	_aggro_range(8.0f),
 	_time_dir_change(2500),
-	_time_to_spawn(3500)
+	_time_to_spawn(3500),
+	_music_theme("")
 {
 	filename = "";
 	MapObject::_object_type = ENEMY_TYPE;
