@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2007 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -49,7 +49,7 @@ public:
 	Mix_Music *music;
 	//! Is this piece of music currently playing
 	bool playing;
-	
+
 	//! Returns true if all OpenAL buffers are valid.
 	bool IsValid();
 	//! Removes a single reference to this buffer. If the reference count becomes zero, the buffer is destroyed.
@@ -69,7 +69,8 @@ public:
 
 	//! Returns a const reference to the filename of the buffer that the source points to.
 	const std::string &GetFilename()
-	{ if (_data != NULL) return _data->filename; throw std::runtime_error("MusicDescriptor: Can't get the filename reference!"); }
+		{ if (_data != NULL) return _data->filename; throw std::runtime_error("MusicDescriptor: Can't get the filename reference!"); }
+
 	/** \brief Loads the music file from memory.
 	*** \param fname The name of the file to load, without path information or file extension attached.
 	**/
