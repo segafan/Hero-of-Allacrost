@@ -107,7 +107,29 @@ void ActionRandomMove::Execute() {
 // *****************************************************************************
 
 void ActionAnimate::Execute() {
-	// TODO
+	timer += SystemManager->GetUpdateTime();
+
+	if (timer > display_times[current_frame]) {
+		timer = 0;
+		current_frame++;
+
+		// If we've finished displaying the final frame...
+		if (current_frame >= frames.size()) {
+			current_frame = 0;
+
+			// If this animation is not infinitely looped, increment the loop counter
+			if (loops >= 0) {
+				loop_count++;
+				if (loop_count > loops) {
+					_finished = true;
+					loop_count = 0;
+					return;
+				 }
+			}
+		}
+
+		dynamic_cast<MapSprite*>(_sprite)->SetCurrentAnimation(frames[current_frame]);
+	}
 
 } // void ActionAnimate::Execute()
 

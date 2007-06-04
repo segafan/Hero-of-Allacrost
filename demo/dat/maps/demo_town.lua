@@ -290,6 +290,14 @@ function Load(m)
 	dialogue:AddText(".....Alright, I'm sorry. Just be careful in there, okay? Turn back if things are looking risky and stock up on healing potions.", 2, -1, -1);
 	dialogue:AddText("Will do. Thanks.", 1000, -1, -1);
 	sprite:AddDialogue(dialogue);
+	action = hoa_map.ActionAnimate(sprite);
+	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_SOUTH, 250);
+	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_WEST, 250);
+	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_NORTH, 250);
+	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_EAST, 250);
+	action:SetLoops(-1);
+	sprite:AddAction(action);
+	sprite.current_action = 0;
 	map:_AddGroundObject(sprite);
 
 	sprite = hoa_map.MapSprite();
