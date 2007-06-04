@@ -85,7 +85,7 @@ MapMode::MapMode(string filename) :
 	if (private_map::new_dialogue_icon.GetNumFrames() == 0) {
 		std::vector<StillImage> frames;
 		VideoManager->LoadMultiImageFromElementsSize(frames, "img/misc/dialogue_icon.png", 32, 32);
-	
+
 		for( size_t i = 0; i < frames.size(); ++i ) {
 			private_map::new_dialogue_icon.AddFrame(frames[i], 100);
 		}
@@ -145,8 +145,12 @@ void MapMode::Reset() {
 	MapMode::_current_map = this;
 
 	// TEMP: This will need to be scripted later
-	if (_music.size() > 0 && _music[0].GetMusicState() != AUDIO_STATE_PLAYING) {
+	if (_music.size() > 0 && _music[0].IsPlaying() == false) {
+		cout << "DEBUG: music not already playing, playing now..." << endl;
 		_music[0].PlayMusic();
+	}
+	else {
+		cout << "DEBUG: music already playing..." << endl;
 	}
 }
 

@@ -2,7 +2,7 @@
 //            Copyright (C) 2004-2007 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
@@ -45,7 +45,7 @@ MusicData::~MusicData() {
 	if (reference_count > 0) {
 		if (AUDIO_DEBUG) cerr << "AUDIO WARNING: freeing music data with a non-zero reference count" << endl;
 	}
-	
+
 	Mix_FreeMusic(music);
 	music = NULL;
 }
@@ -120,7 +120,7 @@ bool MusicDescriptor::LoadMusic(const std::string & fname) {
 		_data->RemoveReference();
 		_data = NULL;
 	}
-	
+
 	_data = AudioManager->_AcquireMusicData(fname);
 	if (_data == NULL) {
 		return false;
@@ -139,8 +139,6 @@ void MusicDescriptor::FreeMusic() {
 
 
 void MusicDescriptor::PlayMusic() {
-	
-
 	if (_data == NULL) {
 		return;
 	}
@@ -226,7 +224,7 @@ uint8 MusicDescriptor::GetMusicState() {
 		default: // MIX_NO_FADING
 			break;
 	}
-	
+
 	if (Mix_PlayingMusic() != 0) {
 		return AUDIO_STATE_PLAYING;
 	}
@@ -244,8 +242,7 @@ bool MusicDescriptor::IsPlaying()
 	if (_data != NULL) {
 		return _data->playing;
 	}
-	else
-	{
+	else {
 		return false;
 	}
 }
