@@ -185,6 +185,10 @@ public:
 *** \note These actions can not be used with VirtualSprite objects, since this
 *** class explicitly needs animation images to work and virtual sprites have no
 *** sprite images to work with.
+***
+*** \note You MUST add at least one frame to the object if you are intending to use it.
+*** Calling the Execute() function when the object contains no frame entries will cause
+*** a segmentation fault.
 *** ***************************************************************************/
 class ActionAnimate : public SpriteAction {
 public:
@@ -193,9 +197,21 @@ public:
 	**/
 	std::vector<uint16> frames;
 
-	std::vector<uint32> timers;
+	/** \brief Indicates how long to display each frame
+	*** The size of this vector should be equal to the size of the frames vector
+	**/
+	std::vector<uint32> display_times;
 
-	/** \brief The number of times to loop the animation before finishing.
+	//! \brief Indicates the current frame
+	uint32 current_frame;
+
+	//! \brief Used to count down the display time of the current frame
+	uint32 timer;
+
+	//! \brief A counter for the number of loops
+	int8 loop_count;
+
+	/** \brief The number of times to loop the series of frames before finishing.
 	*** A value less than zero indicates to loop forever. Be careful with this,
 	*** because that means that the action would never arrive at the "finished"
 	*** state.
@@ -206,12 +222,18 @@ public:
 	int8 loops;
 
 	ActionAnimate(VirtualSprite* sprite) :
-		SpriteAction(sprite) {}
+		SpriteAction(sprite), current_frame(0), timer(0), loops(0) {}
 
 	~ActionAnimate()
 		{}
 
 	void Execute();
+
+	void AddFrame(uint16 frame, uint32 time)
+		{ frames.push_back(frame); display_times.push_back(time); }
+
+	void SetLoops(int8 count)
+		{ loops = count; }
 }; // class ActionAnimate : public SpriteAction
 
 

@@ -539,20 +539,22 @@ void MapSprite::Update() {
 		}
 
 		// Determine the correct standing frame to display
-		if (direction & FACING_NORTH) {
-			current_animation = ANIM_STANDING_NORTH;
-		}
-		else if (direction & FACING_SOUTH) {
-			current_animation = ANIM_STANDING_SOUTH;
-		}
-		else if (direction & FACING_WEST) {
-			current_animation = ANIM_STANDING_WEST;
-		}
-		else if (direction & FACING_EAST) {
-			current_animation = ANIM_STANDING_EAST;
-		}
-		else {
-			cerr << "MAP ERROR: could not find proper standing animation to draw" << endl;
+		if (actions.empty()) {
+			if (direction & FACING_NORTH) {
+				current_animation = ANIM_STANDING_NORTH;
+			}
+			else if (direction & FACING_SOUTH) {
+				current_animation = ANIM_STANDING_SOUTH;
+			}
+			else if (direction & FACING_WEST) {
+				current_animation = ANIM_STANDING_WEST;
+			}
+			else if (direction & FACING_EAST) {
+				current_animation = ANIM_STANDING_EAST;
+			}
+			else {
+				cerr << "MAP ERROR: could not find proper standing animation to draw" << endl;
+			}
 		}
 	} // if (!moving)
 
@@ -752,20 +754,20 @@ void EnemySprite::Update() {
 
 			// If the sprite has moved outside of its zone and it should not, reverse the sprite's direction
 			if (_zone->IsInsideZone(x_position, y_position) == false && _zone->IsRestraining() ) {
-				// Make sure it wasn't already out (stuck on boundaries fix) 	
+				// Make sure it wasn't already out (stuck on boundaries fix)
 				if( !_out_of_zone )
 				{
 					SetDirection(CalculateOppositeDirection(GetDirection()));
-					// The sprite is now finding its way back into the zone 
+					// The sprite is now finding its way back into the zone
 					_out_of_zone = true;
-				}					
+				}
 			}
 			// Otherwise, determine the direction that the sprite should move if the camera is within the sprite's aggression range
 			else {
 				_out_of_zone = false;
 
 				// Enemies will only aggro if the camera is inside the zone, or the zone is non-restrictive
-				if ( abs(xdelta) <= _aggro_range && abs(ydelta) <= _aggro_range 
+				if ( abs(xdelta) <= _aggro_range && abs(ydelta) <= _aggro_range
 					 && (!_zone->IsRestraining() || _zone->IsInsideZone(MapMode::_current_map->_camera->x_position, MapMode::_current_map->_camera->y_position)))
 				{
 					if (xdelta > -0.5 && xdelta < 0.5 && ydelta < 0)
