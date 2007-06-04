@@ -146,11 +146,7 @@ void MapMode::Reset() {
 
 	// TEMP: This will need to be scripted later
 	if (_music.size() > 0 && _music[0].IsPlaying() == false) {
-		cout << "DEBUG: music not already playing, playing now..." << endl;
 		_music[0].PlayMusic();
-	}
-	else {
-		cout << "DEBUG: music already playing..." << endl;
 	}
 }
 
