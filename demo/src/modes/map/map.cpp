@@ -738,6 +738,7 @@ bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 						if (enemy->IsHostile()) {
 							enemy->ChangeStateDead();
 							BattleMode *BM = new BattleMode();
+							BM->AddMusic(enemy->GetBattleMusicTheme());
 							ModeManager->Push(BM);
 							const vector<uint32>& enemy_party = enemy->RetrieveRandomParty();
 							for (uint32 i = 0; i < enemy_party.size(); i++) {
@@ -752,6 +753,7 @@ bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 						if (enemy->IsHostile()) {
 							enemy->ChangeStateDead();
 							BattleMode *BM = new BattleMode();
+							BM->AddMusic(enemy->GetBattleMusicTheme());
 							ModeManager->Push(BM);
 							const vector<uint32>& enemy_party = enemy->RetrieveRandomParty();
 							for (uint32 i = 0; i < enemy_party.size(); i++) {

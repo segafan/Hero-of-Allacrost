@@ -761,6 +761,9 @@ public:
 	uint32 GetTimeToSpawn() const
 		{ return _time_to_spawn; }
 
+	std::string GetBattleMusicTheme() const
+		{ return _music_theme; }
+
 	bool IsDead() const
 		{ return _state == DEAD; }
 
@@ -781,6 +784,9 @@ public:
 
 	void SetTimeToSpawn(uint32 time)
 		{ _time_to_spawn = time; }
+
+	void SetBattleMusicTheme(const std::string & music_theme)
+		{ _music_theme = music_theme; }
 
 	void ChangeStateDead() { 
 		Reset(); 
@@ -819,6 +825,9 @@ private:
 
 	//! \brief Indicates if the enemy is outside of its zone. If it is, it won't change direction until it gets back in.
 	bool _out_of_zone;
+
+	//! \brief The default battle music theme for the monster
+	std::string _music_theme;
 
 	/** \brief Contains the possible groups of enemies that may appear in a battle should the player encounter this enemy sprite
 	*** The numbers contained within this member are ID numbers for the enemy. If the
