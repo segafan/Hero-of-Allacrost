@@ -642,6 +642,6 @@ map_functions[1] = function()
 	enemy:AddAction(action);
 	enemy.current_action = 0;
 	enemy:ChangeStateHostile();
-	enemy:SetBattleMusicTheme("mus/Seeking_New_Worlds.ogg"); -- TODO: Change this to battle mode theme
+	enemy:SetBattleMusicTheme("mus/The_Creature_Awakens.ogg");
 	map:_AddGroundObject(enemy); 
 end

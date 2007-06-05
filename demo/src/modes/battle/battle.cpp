@@ -825,10 +825,12 @@ void BattleMode::Update() {
 	if ( _NumberEnemiesAlive() == 0 ) {
 		_victorious_battle = true;
 	}
-	
+
 	if (_battle_over) {
 		if (_victorious_battle) {
 			if ( _first_time_at_victory_screen) {
+				AddMusic("mus/Allacrost_Fanfare.ogg");
+				_battle_music.back().PlayMusic();
 				displayed_stats = false;
 				begun_countdown = false;
 				_first_time_at_victory_screen = false;
@@ -1569,6 +1571,7 @@ void BattleMode::Draw() {
 
 	if (_battle_over) {
 		VideoManager->DisableSceneLighting();
+
 		// Draw a victory screen along with the loot. TODO: Maybe do this in a separate function
 		if (_victorious_battle) {
 			VideoManager->Move(520.0f, 384.0f);
@@ -1578,7 +1581,7 @@ void BattleMode::Draw() {
 			//victory_text << "Your party is victorious!\n\n" << "XP: " << 
 			ustring text = MakeUnicodeString("Your party is victorious!\n\n");
 			text += MakeUnicodeString("XP: ") + MakeUnicodeString(NumberToString(_victory_xp)) + MakeUnicodeString("\n\n");
-			text += MakeUnicodeString("Money: ") + MakeUnicodeString(NumberToString(_victory_money)) + MakeUnicodeString("\n\n");
+			text += MakeUnicodeString("Drunes: ") + MakeUnicodeString(NumberToString(_victory_money)) + MakeUnicodeString("\n\n");
 
 			if (_victory_items.size() > 0)
 			{
