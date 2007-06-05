@@ -1503,14 +1503,11 @@ void EquipWindow::_InitEquipmentSelect() {
 	_equip_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 	_UpdateEquipList();
 	_equip_select.SetSelection(EQUIP_WEAPON);
-
-
 } // void EquipWindow::_InitEquipmentSelect()
 
 
 
 void EquipWindow::Update() {
-
 	// Points to the active option box
 	OptionBox *active_option = NULL;
 
@@ -1577,10 +1574,17 @@ void EquipWindow::Update() {
 			{
 				if (event == VIDEO_OPTION_CONFIRM) {
 					_active_box = EQUIP_ACTIVE_LIST;
-					_equip_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-					_equip_list.SetSelection(0);
-					_equip_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-					MenuMode::_instance->_menu_sounds["confirm"].PlaySound();
+					_UpdateEquipList();
+					if (_equip_list.GetNumOptions() > 0) {
+						_equip_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+						_equip_list.SetSelection(0);
+						_equip_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+						MenuMode::_instance->_menu_sounds["confirm"].PlaySound();
+					}
+					else {
+						_active_box = EQUIP_ACTIVE_SELECT;
+						MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
+					}
 				}
 				else if (event == VIDEO_OPTION_CANCEL) {
 					_active_box = EQUIP_ACTIVE_CHAR;
@@ -1637,7 +1641,6 @@ void EquipWindow::Update() {
 			}
 			break;
 	}
-
 	_UpdateEquipList();
 } // void EquipWindow::Update()
 
