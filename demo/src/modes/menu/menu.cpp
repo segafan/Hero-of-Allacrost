@@ -41,7 +41,7 @@ using namespace hoa_menu::private_menu;
 
 namespace hoa_menu {
 
-bool MENU_DEBUG = true;
+bool MENU_DEBUG = false;
 
 MenuMode* MenuMode::_instance = NULL;
 

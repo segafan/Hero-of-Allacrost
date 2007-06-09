@@ -282,7 +282,7 @@ void ScriptEvent::RunScript() {
 			actor->TakeDamage(GaussianRandomValue(12, 2.0f));
 
 			// TODO: Do this better way!
-			/*if (MakeStandardString(this->GetSource()->GetActor()->GetName()) == "Spider")
+			if (MakeStandardString(this->GetSource()->GetActor()->GetName()) == "Spider")
 				current_battle->_battle_sounds[0].PlaySound();
 			else if (MakeStandardString(this->GetSource()->GetActor()->GetName()) == "Green Slime")
 				current_battle->_battle_sounds[1].PlaySound();
@@ -321,6 +321,8 @@ BattleMode::BattleMode() :
 	_battle_over(false),
 	_victorious_battle(false),
 	_first_time_at_victory_screen(true),
+	_victory_xp(0),
+	_victory_money(0),
 	_selected_character(NULL),
 	_selected_target(NULL),
 	_attack_point_selected(0),
@@ -332,9 +334,7 @@ BattleMode::BattleMode() :
 	_swap_countdown_timer(300000), // 5 minutes
 	_min_agility(9999),
 	_selected_option_index(0),
-	_next_monster_location_index(0),
-	_victory_xp(0),
-	_victory_money(0)
+	_next_monster_location_index(0)
 {
 	if (BATTLE_DEBUG)
 		cout << "BATTLE: BattleMode constructor invoked" << endl;

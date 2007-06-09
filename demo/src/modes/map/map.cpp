@@ -46,7 +46,7 @@ using namespace hoa_menu;
 
 namespace hoa_map {
 
-bool MAP_DEBUG = true;
+bool MAP_DEBUG = false;
 // Initialize static class variables
 MapMode *MapMode::_current_map = NULL;
 MapMode *MapMode::_loading_map = NULL;

@@ -383,7 +383,8 @@ void InventoryWindow::_InitInventoryItems() {
 
 	// Update the item text
 	_UpdateItemText();
-	_inventory_items.SetSelection(0);		VideoManager->MoveRelative(-65, 20);
+	_inventory_items.SetSelection(0);
+	VideoManager->MoveRelative(-65, 20);
 	// Initially hide the cursor
 	_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 }
