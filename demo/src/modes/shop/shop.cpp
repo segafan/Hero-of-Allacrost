@@ -41,7 +41,7 @@ using namespace hoa_shop::private_shop;
 
 namespace hoa_shop {
 
-bool SHOP_DEBUG = true;
+bool SHOP_DEBUG = false;
 
 namespace private_shop {
 

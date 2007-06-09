@@ -60,11 +60,11 @@ private:
 	//! Is the window visible or not
 	bool _visible;
 
-	//! Text to be displayed
-	std::string _welcome_text;
-
 	//! Rendered text string
 	hoa_video::RenderedString* _welcome_rendered;
+
+	//! Text to be displayed
+	std::string _welcome_text;
 };
 
 } // namespace hoa_boot
