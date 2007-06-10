@@ -30,29 +30,27 @@ skills[1] = {
 		if ((hoa_utils.RandomFloat() * 100) > target:GetCombatEvade()) then
 			target:TakeDamage(instigator:GetPhysicalAttack() + 32 - target:GetPhysicalDefense());
 		end
-		--target:TakeDamage(32);
 		AudioManager:PlaySound("snd/sword_swipe.wav");
 	end
 }
 
--- Another attack skill with a slightly faster warmup but less damage
+-- Another attack skill with faster warm-up and increased damage
 skills[2] = {
-	name = "Super Nyrkkii!",
-	description = "Even Mike Tyson would be afraid of a punch this powerful!",
+	name = "Forward Thrust",
+	description = "A quick and daring thrust into an opponent's flesh.",
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
-	sp_required = 0,
+	sp_required = 2,
 	warmup_time = 1200,
 	cooldown_time = 0,
-	level_required = 1,
+	level_required = 3,
 	usage = hoa_global.GameGlobal.GLOBAL_USE_BATTLE,
-	target_alignment = hoa_global.GameGlobal.GLOBAL_ALIGNMENT_BAD,
+	target_alignment = hoa_global.GameGlobal.GLOBAL_ALIGNMENT_NEUTRAL,
 
 	BattleExecute = function(target, instigator)
 		--If the random float is bigger, then we landed the hit
 		if ((hoa_utils.RandomFloat() * 100) > target:GetCombatEvade()) then
 			target:TakeDamage(instigator:GetPhysicalAttack() + 45 - target:GetPhysicalDefense());
 		end
-		--target:TakeDamage(15);
 		AudioManager:PlaySound("snd/sword_swipe.wav");
 	end
 }
