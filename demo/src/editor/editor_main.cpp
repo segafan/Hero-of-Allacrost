@@ -28,7 +28,10 @@ int main(int argc, char **argv)
 {
 #ifndef _WIN32
 #ifndef __MACH__
-	chdir(DATADIR);
+	// Look for data files in DATADIR only if they are not available in the
+	// current directory.
+	if (ifstream("./dat/config/settings.lua") == NULL)
+		chdir(DATADIR);
 #endif
 #endif
 
