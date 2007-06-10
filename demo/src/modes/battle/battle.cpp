@@ -841,12 +841,7 @@ void BattleMode::Update() {
 				_TallyRewards();	//calculate the player's new stats
 				PlayerVictory();	//actually write them into the player's data
 			}
-			else {
-				if (_first_visit_to_end_screen) {
-					AddMusic("mus/Allacrost_Intermission.ogg");
-					_battle_music.back().PlayMusic();
-					_first_visit_to_end_screen = false;
-				}
+			else {				
 				if (begun_countdown && (displayed_stats == false)) {
 					// if we've started the countdown, but haven't finished it.
 					// roll it, and don't look for input on each screen update.
@@ -884,6 +879,12 @@ void BattleMode::Update() {
 			}
 		}
 		else {  // if it's a losing battle
+			if (_first_visit_to_end_screen) {
+					AddMusic("mus/Allacrost_Intermission.ogg");
+					_battle_music.back().PlayMusic();
+					_first_visit_to_end_screen = false;
+				}
+
 			_battle_lose_menu.Update(SystemManager->GetUpdateTime()); // Update lose menu
 			if (InputManager->ConfirmRelease()) {
 				// _battle_lose_menu.HandleConfirmKey(); // This needs to be handled when there's more than 1 option
