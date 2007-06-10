@@ -251,8 +251,8 @@ function Load(m)
 	sprite:SetName("Claudius");
 	sprite:SetObjectID(1000);
 	sprite:SetContext(1);
-	sprite:SetXPosition(90, 0.5);
-	sprite:SetYPosition(29, 0.5);
+	sprite:SetXPosition(100, 0.5);
+	sprite:SetYPosition(36, 0.5);
 	sprite:SetCollHalfWidth(0.95);
 	sprite:SetCollHeight(1.9);
 	sprite:SetImgHalfWidth(1.0);
@@ -284,12 +284,13 @@ function Load(m)
 
 	dialogue = hoa_map.MapDialogue();
 	dialogue:AddText("Laila, what's wrong? You have a worried look on your face.", 1000, -1, -1);
-	dialogue:AddText("You're going into that cave again, aren't you?", 2, -1, -1);
+	dialogue:AddText("You're going into the cave again, aren't you?", 2, -1, -1);
 	dialogue:AddText("Well.....yes I intend to...", 1000, -1, -1);
 	dialogue:AddText("Its dangerous in there! Why do you always do these types of reckless things?!", 2, -1, -1);
-	dialogue:AddText("Laila, if I want to be capable on the battlefiled I have to fight some real battles. Not doing this type of training is what would truly be reckless. You understand that, don't you? I know that you're worried about me and I appreciate it, but you need to stop doing this.", 1000, -1, -1);
-	dialogue:AddText(".....Alright, I'm sorry. Just be careful in there, okay? Turn back if things are looking risky and stock up on healing potions.", 2, -1, -1);
-	dialogue:AddText("Will do. Thanks.", 1000, -1, -1);
+	dialogue:AddText("Laila, if I want to be capable on the battlefiled I have to fight some real battles. Not doing this type of training is what would truly be reckless. You understand that, don't you?", 1000, -1, -1);
+	dialogue:AddText("I know that you're worried about me and I appreciate it, but you need to stop doing this.", 1000, -1, -1);
+	dialogue:AddText(".....Alright, I'm sorry. Just be careful in there, okay? Turn back if things are looking risky and make sure to stock up on healing potions.", 2, -1, -1);
+	dialogue:AddText("Will do. Thanks Laila.", 1000, -1, -1);
 	sprite:AddDialogue(dialogue);
 
 	action = hoa_map.ActionAnimate(sprite);
@@ -338,7 +339,7 @@ function Load(m)
 
 	dialogue = hoa_map.MapDialogue();
 	dialogue:AddText("Hey there son, how's the training going?", 3, -1, -1);
-	dialogue:AddText("Pretty well. The enemies I fight in the cave aren't too tough.", 1000, -1, -1);
+	dialogue:AddText("Pretty well. The enemies I am fighting in the cave aren't too tough.", 1000, -1, -1);
 	dialogue:AddText("Good to hear. Don't let your guard down though. The deeper you go into that cave, the more likely it is that you'll face stronger opponents.", 3, -1, -1);
 	sprite:AddDialogue(dialogue);
 
@@ -371,8 +372,8 @@ function Load(m)
 
 	dialogue = hoa_map.MapDialogue();
 	dialogue:AddText("Oh, Claudius? What seems to be the matter?", 4, -1, -1);
-	dialogue:AddText("I keep seeing these weird little icons above people's heads. What do they mean?", 1000, -1, -1);
-	dialogue:AddText("Oh, that. That icon is a new dialogue indicator. Any person that has something new to say that you haven't already heard will have that icon above their head. Once you've heard everything that they've had to say, the icon will disappear.", 4, -1, -1);
+	dialogue:AddText("There are odd little icons above people's heads. What do they mean?", 1000, -1, -1);
+	dialogue:AddText("Oh, that. That is a new dialogue indicator. Any person that has something new to say that you haven't already heard will have that icon above their head. Once you've heard everything that they've had to say, the icon will disappear.", 4, -1, -1);
 	sprite:AddDialogue(dialogue);
 
 	dialogue = hoa_map.MapDialogue();
@@ -446,7 +447,7 @@ function Load(m)
 	sprite:LoadStandardAnimations("img/sprites/map/man_npc02_walk.png");
 
 	dialogue = hoa_map.MapDialogue();
-	dialogue:AddText("Choose your target wisely in battle. Its best to single out and take down one foe at a time. And don't be afraid to use a healing potion in battle if you're approaching your limit, but at the same time don't be wasteful with them.", 7, -1, -1);
+	dialogue:AddText("Choose your target wisely in battle. Its best to single out and take down one foe at a time. And don't be afraid to use a healing potion or two in battle if you're feeling weak.", 7, -1, -1);
 	sprite:AddDialogue(dialogue);
 
 	action = hoa_map.ActionPathMove(sprite);
@@ -530,7 +531,7 @@ function Load(m)
 	sprite:LoadStandardAnimations("img/sprites/map/girl_npc02_walk.png");
 
 	dialogue = hoa_map.MapDialogue();
-	dialogue:AddText("I'm looking for my brother Torl.  I sure hope he doesn't get into any trouble.", 10, -1, -1);
+	dialogue:AddText("I'm looking for my brother Torl. I sure hope he doesn't get into any trouble.", 10, -1, -1);
 	sprite:AddDialogue(dialogue);
 
 	action = hoa_map.ActionRandomMove(sprite);

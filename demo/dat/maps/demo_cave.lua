@@ -70,11 +70,11 @@ map_grid[36] = { 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 map_grid[37] = { 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0 }
 map_grid[38] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1 }
 map_grid[39] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1 }
-map_grid[40] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0 }
-map_grid[41] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0 }
-map_grid[42] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0 }
-map_grid[43] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0 }
-map_grid[44] = { 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1 }
+map_grid[40] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0 }
+map_grid[41] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0 }
+map_grid[42] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0 }
+map_grid[43] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0 }
+map_grid[44] = { 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1 }
 map_grid[45] = { 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1 }
 map_grid[46] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }
 map_grid[47] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1 }
@@ -236,9 +236,9 @@ middle_layer[16] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 336, 337, 426, 
 middle_layer[17] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 352, 353, 442, 443, 354, 355, -1, -1, 64, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 145, -1 }
 middle_layer[18] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 368, 369, 314, 315, 370, 371, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 145, 70 }
 middle_layer[19] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 68, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 145, 86 }
-middle_layer[20] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 336, 337, 278, 279, 276, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 145, -1 }
-middle_layer[21] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 352, 353, 294, 295, 292, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 82, -1, -1, 104, 104, 64 }
-middle_layer[22] = { 328, 329, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 368, 369, 310, 311, 308, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 119, 120, 102 }
+middle_layer[20] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 336, 337, 278, 279, 276, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 86, -1, -1, -1, 145, -1 }
+middle_layer[21] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 352, 353, 294, 295, 292, -1, -1, -1, -1, -1, -1, -1, -1, -1, 85, 82, -1, -1, 104, 104, 64 }
+middle_layer[22] = { 328, 329, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 368, 369, 310, 311, 308, -1, -1, -1, -1, -1, -1, -1, -1, -1, 80, -1, -1, -1, 119, 120, 102 }
 middle_layer[23] = { 344, 345, 319, 319, 319, 319, 319, 319, 319, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 81, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 80, 135, 151, 119 }
 middle_layer[24] = { 360, 361, 260, 261, 319, 319, 319, 319, 319, 377, 338, 339, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 135, 151 }
 middle_layer[25] = { 376, 377, 276, 277, 319, 319, 319, 319, 319, 393, 354, 355, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 320, 321, 260, -1, 306, 269, -1, -1, -1, -1, -1, -1, -1, -1, 29, 30, 135 }
@@ -298,7 +298,7 @@ upper_layer[15] = { -1, -1, 422, 423, -1, -1, -1, -1, -1, -1, -1, -1, -1, 266, 2
 upper_layer[16] = { -1, -1, 438, 439, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 432, 433, -1, -1, -1, -1, -1, 418, 419, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }
 upper_layer[17] = { -1, -1, 270, 271, -1, -1, -1, -1, 258, 259, -1, -1, -1, -1, -1, -1, -1, -1, -1, 288, 289, -1, -1, -1, -1, -1, 434, 435, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }
 upper_layer[18] = { -1, -1, 286, 287, 380, 381, 348, 349, 274, 275, -1, -1, -1, -1, -1, -1, -1, -1, -1, 304, 305, -1, -1, -1, -1, -1, 386, 387, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }
-upper_layer[19] = { -1, -1, -1, -1, -1, -1, -1, -1, 270, 271, 258, 259, -1, -1, -1, -1, -1, -1, -1, 320, 321, 262, 263, 260, 261, -1, 402, 403, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }
+upper_layer[19] = { -1, -1, -1, -1, -1, -1, -1, -1, 270, 271, 258, 259, -1, -1, -1, -1, -1, -1, -1, 320, 321, 262, 263, 260, 261, -1, 402, 403, -1, -1, -1, -1, -1, -1, 70, -1, -1, -1, -1, -1 }
 upper_layer[20] = { -1, -1, -1, -1, -1, -1, -1, -1, 286, 287, 274, 275, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 277, -1, 418, 419, -1, -1, -1, -1, -1, -1, -1, -1, -1, 130, -1, -1 }
 upper_layer[21] = { -1, -1, -1, -1, -1, -1, -1, 319, 319, 329, 290, 291, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 293, -1, -1, 270, 271, -1, -1, -1, -1, 396, 397, 258, 259, -1, -1, -1 }
 upper_layer[22] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, 319, 306, 307, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 309, -1, 111, 286, 287, 380, 381, 382, 383, 412, 413, 274, 275, -1, -1, -1 }
@@ -341,6 +341,7 @@ upper_layer[58] = { 586, 571, -1, -1, -1, -1, -1, -1, -1, 334, -1, 396, 397, 398
 upper_layer[59] = { 287, 351, 382, 380, 381, 382, 383, 348, 349, 350, 383, 412, 413, 414, 415, 382, 383, 318, 319, 319, 418, 318, 319, -1, -1, -1, -1, -1, -1, 286, 287, 318, 319, -1, -1, -1, -1, -1, -1, -1 }
 
 
+
 function Load(m)
 	-- First, record the current map in the "map" variable that is global to this script
 	map = m;
@@ -368,8 +369,8 @@ function Load(m)
 	sprite:SetName("Jonas");
 	sprite:SetObjectID(1);
 	sprite:SetContext(1);
-	sprite:SetXPosition(73, 0.0);
-	sprite:SetYPosition(32, 0.0);
+	sprite:SetXPosition(74, 0.0);
+	sprite:SetYPosition(40, 0.0);
 	sprite:SetCollHalfWidth(0.95);
 	sprite:SetCollHeight(1.9);
 	sprite:SetImgHalfWidth(1.0);
@@ -379,24 +380,35 @@ function Load(m)
 	sprite:LoadStandardAnimations("img/sprites/map/soldier_npc01_walk.png");
 	dialogue = hoa_map.MapDialogue();
 	dialogue:AddText("Claudius, what are you doing here?", 1, -1, -1);
-	dialogue:AddText("I came down here for training.", 1000, -1, -1);
+	dialogue:AddText("I came in this cave for training.", 1000, -1, -1);
 	dialogue:AddText("Well, good job getting this far all by yourself. This is a pretty dangerous place for someone as inexperienced as yourself.", 1, -1, -1);
 	dialogue:AddText("Yes well, I have to train hard if I want to be able to spar with you evenly one day, Jonas. By the way, what were you doing?", 1000, -1, -1);
-	dialogue:AddText("Ahh. Well the cave goes deeper than this, but it appears a collapse here has blocked the way. I was trying to find an alternative passage, but it appears that the inner chambers are now completely inaccessible.", 1, -1, -1);
+	dialogue:AddText("The cave goes deeper than this, but it appears a collapse here has blocked the way. I was trying to find an alternative passage, but it appears that the inner chambers are now completely inaccessible.", 1, -1, -1);
 	dialogue:AddText("In any case, this is as far as you can go in this demo, so thanks for.....", 1, -1, 0); -- Creepy sound plays here
-	dialogue:AddText("What was that noise? Hey, look out!", 1, -1, 1); -- Boss battle occurs
+	dialogue:AddText("Wait, what was that noise? Hey, look out!", 1, -1, 1); -- Boss battle occurs
 	sprite:AddDialogue(dialogue);
+
 	dialogue = hoa_map.MapDialogue();
 	dialogue:AddText("Phew, that was a shock. I've never seen such foes wandering in this cave. Nice job taking care of them Claudius, I can definitely tell that your swordsmanship has improved.", 1, -1, -1);
-	dialogue:AddText("Thank you. By the way...why didn't you assist me in battle?", 1000, -1, -1);
+	dialogue:AddText("Thank you. By the way...why didn't you fight with me in that battle?", 1000, -1, -1);
 	dialogue:AddText("Ah, err...well you see, you'll never reach your full potential if you always have your seniors stepping in for you.", 1, -1, -1);
 	dialogue:AddText("I see.", 1000, -1, -1);
 	dialogue:AddText("And besides, I don't even have my own battle sprite graphics yet! The development team needs more artists to help move the game along!", 1, -1, -1);
 	dialogue:AddText(".....", 1000, -1, -1);
+
 	sprite:AddDialogue(dialogue);
 	dialogue = hoa_map.MapDialogue();
-	dialogue:AddText("Well now, this really is the end of our demo. Thanks for playing.", 1, -1, -1);
+	dialogue:AddText("Well, this truly is the end of the demo. Thanks for playing.", 1, -1, -1);
 	sprite:AddDialogue(dialogue);
+
+	action = hoa_map.ActionAnimate(sprite);
+	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_SOUTH, 1000);
+	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_WEST, 1500);
+	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_SOUTH, 1000);
+	action:AddFrame(hoa_map.MapMode.ANIM_STANDING_EAST, 1500);
+	action:SetLoops(-1);
+	sprite:AddAction(action);
+	sprite.current_action = 0;
 	map:_AddGroundObject(sprite);
 
 	-- Create an EnemyZone (2000 ms between respawns, monsters restricted to zone area)
@@ -638,7 +650,7 @@ map_functions[1] = function()
 	enemy:AddEnemy(103);
 	enemy:AddEnemy(104);
 	action = hoa_map.ActionPathMove(enemy);
-	action:SetDestination(72, 32);
+	action:SetDestination(74, 40);
 	enemy:AddAction(action);
 	enemy.current_action = 0;
 	enemy:ChangeStateHostile();
