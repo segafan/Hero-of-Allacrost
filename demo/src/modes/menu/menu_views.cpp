@@ -1317,8 +1317,6 @@ void SkillsWindow::Update() {
 			if (event == VIDEO_OPTION_CONFIRM) {
 				_skills_list.SetSelection(0);
 				if (_skills_list.GetNumOptions() > 0) {
-					GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActor(_char_select.GetSelection()));
-					_description.SetDisplayText( ch->GetAttackSkills()[ _skills_list.GetSelection()]->GetDescription() );
 					_active_box = SKILL_ACTIVE_LIST;
 					_skills_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 					_skills_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
@@ -1339,6 +1337,16 @@ void SkillsWindow::Update() {
 	}
 
 	_UpdateSkillList();
+
+	if (_skills_list.GetNumOptions() > 0 &&
+	    _skills_list.GetSelection() >= 0 &&
+	    _skills_list.GetNumOptions() > _skills_list.GetSelection()) {
+		GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActor(_char_select.GetSelection()));
+		std::vector<hoa_global::GlobalSkill*> skills = ch->GetAttackSkills();
+		cout << _skills_list.GetSelection() << endl;
+		GlobalSkill* skill = skills[_skills_list.GetSelection()];
+		_description.SetDisplayText( skill->GetDescription() );
+	}
 } // void SkillsWindow::Update()
 
 
@@ -1389,7 +1397,6 @@ void SkillsWindow::Draw() {
 		VideoManager->Move(100, 600);
 		VideoManager->MoveRelative(65, 0);
 		VideoManager->DrawText(skill->GetName());
-//		VideoManager->DrawText(skill->GetDescription());
 		VideoManager->SetDrawFlags(VIDEO_X_LEFT,VIDEO_Y_BOTTOM,0);
 		_description.Draw();
 	} // if
