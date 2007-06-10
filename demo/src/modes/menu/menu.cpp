@@ -257,8 +257,6 @@ void MenuMode::_SetupMainOptionBox() {
 	_main_options.SetSelection(MAIN_INVENTORY);
 
 	// Disable unused options
-	_main_options.EnableOption(1, false);
-//	_main_options.EnableOption(2, false);
 	_main_options.EnableOption(4, false);
 }
 
