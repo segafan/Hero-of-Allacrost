@@ -375,7 +375,10 @@ private:
 	//! The skills list option box
 	hoa_video::OptionBox _skills_list;
 
-	//! Track whihc character's skillset was chosen
+	//! TextBox that holds the selected skill's description
+	hoa_video::TextBox _description;
+
+	//! Track which character's skillset was chosen
 	int32 _char_skillset;
 
 	/*!

@@ -572,6 +572,7 @@ void InventoryWindow::Update() {
 					if (obj->GetType() == GLOBAL_OBJECT_ITEM) {
 						GlobalItem *item = (GlobalItem*)obj;
 						item->MenuUse(ch);
+						item->DecrementCount(1);
 						if (item->GetCount() <= 0) {
 							GlobalManager->RemoveFromInventory(item->GetID());
 						} // if
@@ -1124,6 +1125,14 @@ SkillsWindow::SkillsWindow() : _active_box(SKILL_ACTIVE_NONE) {
 	_InitCharSelect();
 	_InitSkillsList();
 	_InitSkillsCategories();
+
+	_description.SetOwner(this);
+	_description.SetPosition(30.0f, 525.0f);
+	_description.SetDimensions(800.0f, 80.0f);
+	_description.SetDisplaySpeed(30);
+	_description.SetFont("default");
+	_description.SetDisplayMode(VIDEO_TEXT_INSTANT);
+	_description.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 } // SkillsWindow::SkillsWindow()
 
 
@@ -1306,9 +1315,10 @@ void SkillsWindow::Update() {
 		case SKILL_ACTIVE_CATEGORY:
 			// Choose skill type
 			if (event == VIDEO_OPTION_CONFIRM) {
-				_UpdateSkillList();
+				_skills_list.SetSelection(0);
 				if (_skills_list.GetNumOptions() > 0) {
-					_skills_list.SetSelection(0);
+					GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActor(_char_select.GetSelection()));
+					_description.SetDisplayText( ch->GetAttackSkills()[ _skills_list.GetSelection()]->GetDescription() );
 					_active_box = SKILL_ACTIVE_LIST;
 					_skills_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 					_skills_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
@@ -1334,8 +1344,6 @@ void SkillsWindow::Update() {
 
 
 void SkillsWindow::_UpdateSkillList() {
-//	uint32 partysize = GlobalManager->GetActiveParty()->GetPartySize();
-
 	GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActor(_char_select.GetSelection()));
 	std::vector<ustring> options;
 
@@ -1368,6 +1376,23 @@ void SkillsWindow::_UpdateSkillList() {
 
 void SkillsWindow::Draw() {
 	MenuWindow::Draw();
+	
+	// This is part of the bottom menu.
+	if (_active_box == SKILL_ACTIVE_LIST) {
+		GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActor(_char_select.GetSelection()));
+		std::vector<ustring> options;
+		std::vector<hoa_global::GlobalSkill*> skills = ch->GetAttackSkills();
+		GlobalSkill* skill = skills[ _skills_list.GetSelection() ];
+
+		VideoManager->SetDrawFlags(VIDEO_X_LEFT,VIDEO_Y_CENTER,0);
+
+		VideoManager->Move(100, 600);
+		VideoManager->MoveRelative(65, 0);
+		VideoManager->DrawText(skill->GetName());
+//		VideoManager->DrawText(skill->GetDescription());
+		VideoManager->SetDrawFlags(VIDEO_X_LEFT,VIDEO_Y_BOTTOM,0);
+		_description.Draw();
+	} // if
 
 	//Draw option boxes
 	_char_select.Draw();

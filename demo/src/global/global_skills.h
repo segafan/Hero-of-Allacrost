@@ -268,6 +268,9 @@ public:
 	hoa_utils::ustring GetName() const
 		{ return _name; }
 
+	hoa_utils::ustring GetDescription() const
+		{ return _description; }
+
 	uint8 GetType() const
 		{ return _type; }
 
