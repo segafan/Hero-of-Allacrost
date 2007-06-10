@@ -319,7 +319,7 @@ void ObjectSellListWindow::UpdateSellList() {
 
 	for (iter = inv->begin(); iter != inv->end(); iter++) {
 		current_inv.push_back(iter->second);
-		AddEntry(iter->second->GetName(), iter->second->GetCount(), iter->second->GetPrice());
+		AddEntry(iter->second->GetName(), iter->second->GetCount(), iter->second->GetPrice() / 2);
 	}
 	object_list.SetSize(1, option_text.size());
 	object_list.SetOptions(option_text);
@@ -598,7 +598,7 @@ void SellConfirmWindow::Update() {
 	else if (InputManager->ConfirmPress()) {
 		if (options.GetSelection() == 0) { // Confirm sale
 			std::map<uint32, GlobalObject*>::iterator iter = GlobalManager->GetInventory()->find(_object_id);
-			GlobalManager->AddFunds(iter->second->GetPrice());
+			GlobalManager->AddFunds(iter->second->GetPrice() / 2);
 			GlobalManager->DecrementObjectCount(_object_id, 1);
 			current_shop->_shop_sounds["coins"].PlaySound();
 			current_shop->_action_window.UpdateFinanceText();

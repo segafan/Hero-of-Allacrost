@@ -367,13 +367,22 @@ private:
 
 	//! Set to true if it was player who won the battle.
 	bool _victorious_battle;
-	bool _first_time_at_victory_screen;
+	bool _first_visit_to_end_screen;
 	
 	//! XP gained from battle
 	uint32 _victory_xp;
 
+	//! SP gained from battle
+	uint32 _victory_sp;
+
 	//! Money gained from battle
 	uint32 _victory_money;
+
+	//! Set to true if character gained an experience level
+	bool _victory_level;
+
+	//! Set to true if character earned a new skill this experience level
+	bool _victory_skill;
 
 	//! Items gained from battle
 	std::map<std::string, uint32> _victory_items;

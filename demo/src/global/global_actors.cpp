@@ -293,6 +293,24 @@ bool GlobalCharacter::AddXP(uint32 xp)
 	return false;
 }
 
+void GlobalCharacter::AddSkill(uint32 skill_id) {
+	GlobalSkill* skill = new GlobalSkill(skill_id);
+
+	switch (skill->GetType()) {
+		case GLOBAL_SKILL_ATTACK:
+			_attack_skills.push_back(skill);
+			break;
+		case GLOBAL_SKILL_DEFEND:
+			_defense_skills.push_back(skill);
+			break;
+		case GLOBAL_SKILL_SUPPORT:
+			_support_skills.push_back(skill);
+			break;
+		default:
+			break;
+	}
+}
+
 void GlobalCharacter::AddExperienceLevel(uint32 lvl)
 {
 	_experience_level += lvl;

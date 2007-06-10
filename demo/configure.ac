@@ -2,7 +2,7 @@ dnl                                               -*- Autoconf -*-
 dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(Hero of Allacrost - Demo, 0.1.0, gorzuate@allacrost.org, allacrost)
+AC_INIT(Hero of Allacrost - Demo, 0.2.0, roots@allacrost.org, allacrost)
 AC_CONFIG_HEADERS(config.h)
 AC_CONFIG_SRCDIR([src/main.cpp])
 AC_CANONICAL_TARGET

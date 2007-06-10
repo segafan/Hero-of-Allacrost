@@ -320,9 +320,12 @@ BattleMode::BattleMode() :
 	_active_se(NULL),
 	_battle_over(false),
 	_victorious_battle(false),
-	_first_time_at_victory_screen(true),
+	_first_visit_to_end_screen(true),
 	_victory_xp(0),
+	_victory_sp(0),
 	_victory_money(0),
+	_victory_level(false),
+	_victory_skill(false),
 	_selected_character(NULL),
 	_selected_target(NULL),
 	_attack_point_selected(0),
@@ -540,8 +543,8 @@ void BattleMode::Reset() {
 		}
 	}
 
-	if (_battle_music.empty() == false && _battle_music[0].IsPlaying() == false) {
-		_battle_music[0].PlayMusic();
+	if (_battle_music.empty() == false && _battle_music.back().IsPlaying() == false) {
+		_battle_music.back().PlayMusic();
 	}
 
 	if (_initialized == false) {
@@ -775,6 +778,7 @@ void BattleMode::_TallyRewards()
 	std::map<string, uint32>::iterator it;
 	std::map<uint32, GlobalObject*>::iterator it2;
 	//Tally up the xp, money, and get the list of items
+	_victory_sp = GetNumberOfEnemies();
 	for (uint32 i = 0; i < GetNumberOfEnemies(); ++i)
 	{
 		gbe = GetEnemyActorAt(i)->GetActor();
@@ -828,28 +832,37 @@ void BattleMode::Update() {
 
 	if (_battle_over) {
 		if (_victorious_battle) {
-			if ( _first_time_at_victory_screen) {
+			if (_first_visit_to_end_screen) {
 				AddMusic("mus/Allacrost_Fanfare.ogg");
 				_battle_music.back().PlayMusic();
 				displayed_stats = false;
 				begun_countdown = false;
-				_first_time_at_victory_screen = false;
+				_first_visit_to_end_screen = false;
 				_TallyRewards();	//calculate the player's new stats
 				PlayerVictory();	//actually write them into the player's data
 			}
-			else
-			{
+			else {
+				if (_first_visit_to_end_screen) {
+					AddMusic("mus/Allacrost_Intermission.ogg");
+					_battle_music.back().PlayMusic();
+					_first_visit_to_end_screen = false;
+				}
 				if (begun_countdown && (displayed_stats == false)) {
-				// if we've started the countdown, but haven't finished it.
-				// roll it, and don't look for input on each screen update.
-				// reduce each number by 1, per each screen redraw.
+					// if we've started the countdown, but haven't finished it.
+					// roll it, and don't look for input on each screen update.
+					// reduce each number by 1, per each screen redraw.
 							if (_victory_xp != 0) {
-							_victory_xp--;
+								_victory_xp--;
+							}
+
+							if (_victory_sp != 0) {
+								_victory_sp--;
 							}
 							
 							if ( _victory_money != 0) {
 								_victory_money--;
 							}
+
 							
 							if ( (_victory_xp == 0) && (_victory_money == 0) ) {
 								displayed_stats = true;
@@ -1580,8 +1593,15 @@ void BattleMode::Draw() {
 			//std::ostringstream victory_text;
 			//victory_text << "Your party is victorious!\n\n" << "XP: " << 
 			ustring text = MakeUnicodeString("Your party is victorious!\n\n");
-			text += MakeUnicodeString("XP: ") + MakeUnicodeString(NumberToString(_victory_xp)) + MakeUnicodeString("\n\n");
-			text += MakeUnicodeString("Drunes: ") + MakeUnicodeString(NumberToString(_victory_money)) + MakeUnicodeString("\n\n");
+			text += MakeUnicodeString("XP: ") + MakeUnicodeString(NumberToString(_victory_xp) + "\n\n");
+			text += MakeUnicodeString("SP: ") + MakeUnicodeString(NumberToString(_victory_sp) + "\n\n");
+			text += MakeUnicodeString("Drunes: ") + MakeUnicodeString(NumberToString(_victory_money) + "\n\n");
+			if (_victory_level) {
+				text += MakeUnicodeString("Experience Level Gained\n\n");
+			}
+			if (_victory_skill) {
+				text += MakeUnicodeString("New Skill Learned\n\n");
+			}
 
 			if (_victory_items.size() > 0)
 			{
@@ -2145,19 +2165,25 @@ void BattleMode::UnFreezeTimers()
 
 // Handle player victory
 void BattleMode::PlayerVictory() {
-	if (BATTLE_DEBUG) cout << "BATTLE: Player has won a battle!" << endl;
-
 	GlobalManager->AddFunds(_victory_money);
 	// Give some experience for each character in the party
 	for (uint32 i = 0; i < _character_actors.size(); ++i) {
-		_character_actors.at(i)->GetActor()->AddXP(_victory_xp);
+		GlobalCharacter* character = _character_actors.at(i)->GetActor();
+		if (character->GetExperienceForNextLevel() < _victory_xp) {
+			_victory_level = true;
+// 			AudioManager->PlaySound("snd/level_up.wav");
+			if (character->GetExperienceLevel() == 1) // Character is upgrading to level 2
+				_victory_skill = true;
+				character->AddSkill(2);
+		}
+		character->AddXP(_victory_xp);
+		character->AddSkillPoints(_victory_sp);
 	}
 }
 
 
 // Handle player defeat
 void BattleMode::PlayerDefeat() {
-	if (BATTLE_DEBUG) cout << "Player was defeated in a battle!" << endl;
 	_ShutDown();
 	ModeManager->PopAll();
 	BootMode *BM = new BootMode();

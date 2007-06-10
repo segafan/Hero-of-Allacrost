@@ -304,8 +304,14 @@ public:
 	void SetHitPoints(uint32 hp)
 		{ if (hp > _max_hit_points) _hit_points = _max_hit_points; else _hit_points = hp; }
 
+	void AddHitPoints(uint32 hp)
+		{ _hit_points += hp; if (_hit_points > _max_hit_points) _hit_points = _max_hit_points; }
+
 	void SetSkillPoints(uint32 sp)
 		{ if (sp > _max_skill_points) _skill_points = _max_skill_points; else _skill_points = sp; }
+
+	void AddSkillPoints(uint32 sp)
+		{ _skill_points += sp; if (_skill_points > _max_skill_points) _skill_points = _max_skill_points; }
 
 	void SetMaxHitPoints(uint32 hp)
 		{ _max_hit_points = hp; }
@@ -597,6 +603,8 @@ public:
 	* \return true if he leveled up, flase if he did not
 	*/
 	bool AddXP(uint32 xp);
+
+	void AddSkill(uint32 skill_id);
 
 	void AddBattleAnimation(const std::string & name, hoa_video::AnimatedImage anim)
 		{ _battle_animation[name] = anim; }
