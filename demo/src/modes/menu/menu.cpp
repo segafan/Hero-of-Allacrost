@@ -568,7 +568,11 @@ void MenuMode::_DrawBottomMenu() {
 
 	if (_current_menu_showing == SHOW_INVENTORY )
 	{
-		//Just do nothing and let the inventory drawing do the job
+		// Just do nothing and let the inventory drawing do the job
+	}
+	else if (_current_menu_showing == SHOW_SKILLS )
+	{
+		// For now, let SkillsWindow do the job.
 	}
 	else if (_current_menu_showing == SHOW_EQUIP) {
 		GlobalActor* actor = GlobalManager->GetActiveParty()->GetActor(0);
