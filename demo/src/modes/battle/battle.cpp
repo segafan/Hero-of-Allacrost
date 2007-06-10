@@ -2178,7 +2178,7 @@ void BattleMode::PlayerVictory() {
 				character->AddSkill(2);
 		}
 		character->AddXP(_victory_xp);
-		character->AddSkillPoints(_victory_sp);
+		_character_actors.at(i)->SetSkillPoints(_character_actors.at(i)->GetSkillPoints() + _victory_sp);
 	}
 }
 
