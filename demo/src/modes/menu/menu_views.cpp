@@ -1211,9 +1211,6 @@ void SkillsWindow::_InitSkillsCategories() {
 
 
 void SkillsWindow::Update() {
-	//FIXME: Need support for skills
-	return;
-
 	OptionBox *active_option = NULL;
 
 	//choose correct menu
@@ -1292,10 +1289,11 @@ void SkillsWindow::Update() {
 		case SKILL_ACTIVE_LIST:
 			// Choose skill
 			if (event == VIDEO_OPTION_CONFIRM) {
-				_active_box = SKILL_ACTIVE_CHAR_APPLY;
+/*				_active_box = SKILL_ACTIVE_CHAR_APPLY;
 				_skills_list.SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
 				_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-				MenuMode::_instance->_menu_sounds["confirm"].PlaySound();
+				MenuMode::_instance->_menu_sounds["confirm"].PlaySound();*/
+				MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
 			}
 			else if (event == VIDEO_OPTION_CANCEL) {
 				_active_box = SKILL_ACTIVE_CATEGORY;
@@ -1308,10 +1306,17 @@ void SkillsWindow::Update() {
 		case SKILL_ACTIVE_CATEGORY:
 			// Choose skill type
 			if (event == VIDEO_OPTION_CONFIRM) {
-				_active_box = SKILL_ACTIVE_LIST;
-				_skills_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-				_skills_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-				MenuMode::_instance->_menu_sounds["confirm"].PlaySound();
+				_UpdateSkillList();
+				if (_skills_list.GetNumOptions() > 0) {
+					_skills_list.SetSelection(0);
+					_active_box = SKILL_ACTIVE_LIST;
+					_skills_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+					_skills_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+					MenuMode::_instance->_menu_sounds["confirm"].PlaySound();
+				}
+				else {
+					MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
+				}
 			}
 			else if (event == VIDEO_OPTION_CANCEL) {
 				_active_box = SKILL_ACTIVE_CHAR;
@@ -1329,39 +1334,32 @@ void SkillsWindow::Update() {
 
 
 void SkillsWindow::_UpdateSkillList() {
-	//uint32 partysize = GlobalManager->GetActiveParty().GetPartySize();
+//	uint32 partysize = GlobalManager->GetActiveParty()->GetPartySize();
 
-	//hoa_global::GlobalCharacter* ch = GlobalManager->GetCharacter(_char_select.GetSelection());
+	GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActor(_char_select.GetSelection()));
 	std::vector<ustring> options;
 
 	//FIX ME Need new categories
-	/*std::vector<hoa_global::GlobalSkill*> skills = ch->GetAttackSkills();
+	std::vector<hoa_global::GlobalSkill*> skills = ch->GetAttackSkills();
 	uint32 skillsize = skills.size();
 
-
-
-	_skills_list.SetSize(1,skillsize);
-
-
-	for (uint32 i = 0; i < skillsize; i++) {
-		os.clear();
-		os << skills[i]->GetName() << "              " << skills[i]->GetSPUsage() << "SP";
-		options.push_back(MakeUnicodeString(os.str()));
-	}*/
-
-	//FIX ME: Test code
-	/*for (uint32 i = 0; i < 12; i++) {
-		options.push_back(MakeUnicodeString("Sword Strike                       30 SP"));
-	}
-*/
-	/*GlobalCharacterParty* party = GlobalManager->GetActiveParty();
-	GlobalCharacter* ch = party->GetCharacters()[_char_select.GetSelection()];
+	string tempstr = "";
 
 	switch (_skills_categories.GetSelection()) {
 		case SKILL_ALL:
-			{*/
+		case SKILL_BATTLE:
+			_skills_list.SetSize(1,skillsize);
 
-	_skills_list.SetSize(1,12);
+			for (uint32 i = 0; i < skillsize; i++) {
+				tempstr = MakeStandardString(skills[i]->GetName()) + "		" + NumberToString(skills[i]->GetSPRequired()) + " SP";
+				options.push_back(MakeUnicodeString(tempstr));
+			}
+		break;
+
+		case SKILL_FIELD:
+		default:
+			_skills_list.SetSize(1,0);
+	}
 
 	_skills_list.SetOptions(options);
 }
