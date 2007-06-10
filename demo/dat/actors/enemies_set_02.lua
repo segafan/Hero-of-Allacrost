@@ -29,13 +29,6 @@ enemies[101] = {
 		agility = 8,
 		evade = 1.0
 	},
-
-	--Add in a stealable item when we get that far
-	rewards = {
-		item_dropped = 10002, --Iron sword
-		chance_to_drop = 5.0,
-		money = 100
-	},
 	
 	growth_stats = {
 		hit_points = 10.0,
@@ -47,6 +40,12 @@ enemies[101] = {
 		protection = 4.0,
 		agility = 10.0,
 		evade = 2.0
+	},
+
+	rewards = {
+		item_dropped = 10002, --Iron sword
+		chance_to_drop = 5.0,
+		money = 100
 	},
 
 	attack_points = {
@@ -91,13 +90,6 @@ enemies[102] = {
 		agility = 10,
 		evade = 2.0
 	},
-
-	--Add in a stealable item when we get that far
-	rewards = {
-		item_dropped = 10001, --Karlate sword
-		chance_to_drop = 10.0,
-		money = 100
-	},
 	
 	growth_stats = {
 		hit_points = 10.0,
@@ -109,6 +101,12 @@ enemies[102] = {
 		protection = 4.0,
 		agility = 10.0,
 		evade = 2.0
+	},
+
+	rewards = {
+		item_dropped = 10001, --Karlate sword
+		chance_to_drop = 10.0,
+		money = 100
 	},
 
 	attack_points = {
@@ -153,13 +151,6 @@ enemies[103] = {
 		agility = 10,
 		evade = 2.0
 	},
-
-	--Add in a stealable item when we get that far
-	rewards = {
-		item_dropped = 20002, --Cobalt Helm
-		chance_to_drop = 5.0,
-		money = 100
-	},
 	
 	growth_stats = {
 		hit_points = 10.0,
@@ -171,6 +162,12 @@ enemies[103] = {
 		protection = 4.0,
 		agility = 10.0,
 		evade = 2.0
+	},
+
+	rewards = {
+		item_dropped = 20002, --Cobalt Helm
+		chance_to_drop = 5.0,
+		money = 100
 	},
 
 	attack_points = {
@@ -222,13 +219,6 @@ enemies[104] = {
 		agility = 10,
 		evade = 2.0
 	},
-
-	--Add in a stealable item when we get that far
-	rewards = {
-		item_dropped = 40001, --Karlate shield
-		chance_to_drop = 15.0,
-		money = 100
-	},
 	
 	growth_stats = {
 		hit_points = 10.0,
@@ -240,6 +230,12 @@ enemies[104] = {
 		protection = 4.0,
 		agility = 10.0,
 		evade = 2.0
+	},
+
+	rewards = {
+		item_dropped = 40001, -- Karlate shield
+		chance_to_drop = 15.0,
+		money = 100
 	},
 
 	attack_points = {
@@ -291,13 +287,6 @@ enemies[105] = {
 		agility = 10,
 		evade = 2.0
 	},
-
-	--Add in a stealable item when we get that far
-	rewards = {
-		item_dropped = 10001, --Karlate sword
-		chance_to_drop = 5.0,
-		money = 100
-	},
 	
 	growth_stats = {
 		hit_points = 10.0,
@@ -309,6 +298,12 @@ enemies[105] = {
 		protection = 4.0,
 		agility = 10.0,
 		evade = 2.0
+	},
+
+	rewards = {
+		item_dropped = 10001, -- Karlate sword
+		chance_to_drop = 5.0,
+		money = 100
 	},
 
 	attack_points = {
@@ -346,7 +341,7 @@ enemies[105] = {
 		}
 	},
 
-	skills = { 1 }
+	skills = { 1, 2 }
 }
 
 
@@ -369,13 +364,6 @@ enemies[106] = {
 		agility = 10,
 		evade = 2.0
 	},
-
-	--Add in a stealable item when we get that far
-	rewards = {
-		item_dropped = 30001, --Karlate breastplate
-		chance_to_drop = 15.0,
-		money = 100
-	},
 	
 	growth_stats = {
 		hit_points = 10.0,
@@ -387,6 +375,12 @@ enemies[106] = {
 		protection = 4.0,
 		agility = 10.0,
 		evade = 2.0
+	},
+
+	rewards = {
+		item_dropped = 30001, -- Karlate breastplate
+		chance_to_drop = 15.0,
+		money = 100
 	},
 
 	attack_points = {
@@ -416,5 +410,6 @@ enemies[106] = {
 		}
 	},
 
-	skills = { 1 }
+	skills = { 1, 2 }
+
 }

@@ -2173,9 +2173,10 @@ void BattleMode::PlayerVictory() {
 		if (character->GetExperienceForNextLevel() < _victory_xp) {
 			_victory_level = true;
 // 			AudioManager->PlaySound("snd/level_up.wav");
-			if (character->GetExperienceLevel() == 1) // Character is upgrading to level 2
+			if (character->GetExperienceLevel() == 1) { // Character is upgrading to level 2
 				_victory_skill = true;
 				character->AddSkill(2);
+			}
 		}
 		character->AddXP(_victory_xp);
 		_character_actors.at(i)->SetSkillPoints(_character_actors.at(i)->GetSkillPoints() + _victory_sp);

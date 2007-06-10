@@ -562,13 +562,13 @@ function Load(m)
 	enemy:AddEnemy(4);
 	enemy:AddEnemy(2);
 	enemy:AddEnemy(2);
-	enemy:AddEnemy(4);
+	enemy:AddEnemy(101);
 	enemy:AddEnemy(3);
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(3);
 	enemy:AddEnemy(4);
 	enemy:AddEnemy(5);
-	enemy:AddEnemy(4);
+	enemy:AddEnemy(102);
 	enemy:AddEnemy(4);
 	enemy:AddEnemy(4);
 	ezone:AddEnemy(enemy, map, 1);
@@ -594,7 +594,7 @@ function Load(m)
 	enemy:AddEnemy(4);
 	enemy:AddEnemy(1);
 	enemy:AddEnemy(4);
-	enemy:AddEnemy(4);
+	enemy:AddEnemy(101);
 	enemy:AddEnemy(2);
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(5);
@@ -602,7 +602,7 @@ function Load(m)
 	enemy:AddEnemy(2);
 	enemy:AddEnemy(4);
 	enemy:AddEnemy(5);
-	enemy:AddEnemy(5);
+	enemy:AddEnemy(102);
 	enemy:AddEnemy(3);
 	ezone:AddEnemy(enemy, map, 1);
 	-- Finally, add the zone to the map
@@ -649,6 +649,8 @@ map_functions[1] = function()
 	enemy:NewEnemyParty();
 	enemy:AddEnemy(103);
 	enemy:AddEnemy(104);
+	enemy:AddEnemy(105);
+	enemy:AddEnemy(106);
 	action = hoa_map.ActionPathMove(enemy);
 	action:SetDestination(74, 40);
 	enemy:AddAction(action);

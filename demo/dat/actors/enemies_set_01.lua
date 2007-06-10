@@ -33,19 +33,19 @@ enemies[1] = {
 	--Add in a stealable item when we get that far
 	rewards = {
 		item_dropped = 1, --Healing potion
-		chance_to_drop = 20.0,
+		chance_to_drop = 10.0,
 		money = 10
 	},
 	
 	growth_stats = {
 		hit_points = 10.0,
-		skill_points = 10.0,
+		skill_points = 1.0,
 		experience_points = 5.0,
-		strength = 10.0,
+		strength = 7.0,
 		vigor = 0.0,
-		fortitude = 8.0,
+		fortitude = 12.0,
 		protection = 4.0,
-		agility = 10.0,
+		agility = 5.0,
 		evade = 2.0
 	},
 
@@ -80,34 +80,33 @@ enemies[2] = {
 	sprite_height = 64,
 
 	base_stats = {
-		hit_points = 10,
+		hit_points = 15,
 		skill_points = 10,
-		experience_points = 5,
-		strength = 10,
+		experience_points = 6,
+		strength = 12,
 		vigor = 0,
 		fortitude = 8,
 		protection = 4,
 		agility = 10,
 		evade = 2.0
 	},
-
-	--Add in a stealable item when we get that far
-	rewards = {
-		item_dropped = 1, --Healing potion
-		chance_to_drop = 20.0,
-		money = 10
-	},
 	
 	growth_stats = {
 		hit_points = 10.0,
 		skill_points = 10.0,
 		experience_points = 5.0,
-		strength = 10.0,
+		strength = 8.0,
 		vigor = 0.0,
 		fortitude = 8.0,
 		protection = 4.0,
 		agility = 10.0,
 		evade = 2.0
+	},
+
+	rewards = {
+		item_dropped = 1, -- Healing potion
+		chance_to_drop = 10.0,
+		money = 10
 	},
 
 	attack_points = {
@@ -141,9 +140,9 @@ enemies[3] = {
 	sprite_height = 64,
 
 	base_stats = {
-		hit_points = 10,
+		hit_points = 15,
 		skill_points = 10,
-		experience_points = 5,
+		experience_points = 7,
 		strength = 10,
 		vigor = 0,
 		fortitude = 8,
@@ -151,24 +150,23 @@ enemies[3] = {
 		agility = 10,
 		evade = 2.0
 	},
-
-	--Add in a stealable item when we get that far
-	rewards = {
-		item_dropped = 1, --Healing potion
-		chance_to_drop = 20.0,
-		money = 10
-	},
 	
 	growth_stats = {
 		hit_points = 10.0,
 		skill_points = 10.0,
 		experience_points = 5.0,
-		strength = 10.0,
+		strength = 14.0,
 		vigor = 0.0,
 		fortitude = 8.0,
 		protection = 4.0,
 		agility = 10.0,
 		evade = 2.0
+	},
+
+	rewards = {
+		item_dropped = 1, -- Healing potion
+		chance_to_drop = 10.0,
+		money = 10
 	},
 
 	attack_points = {
@@ -211,34 +209,33 @@ enemies[4] = {
 
 	
 	base_stats = {
-		hit_points = 10,
+		hit_points = 20,
 		skill_points = 10,
 		experience_points = 5,
-		strength = 10,
+		strength = 15,
 		vigor = 0,
 		fortitude = 8,
 		protection = 4,
 		agility = 10,
 		evade = 2.0
 	},
-
-	--Add in a stealable item when we get that far
-	rewards = {
-		item_dropped = 1, --Healing potion
-		chance_to_drop = 20.0,
-		money = 10
-	},
 	
 	growth_stats = {
-		hit_points = 10.0,
+		hit_points = 13.0,
 		skill_points = 10.0,
 		experience_points = 5.0,
-		strength = 10.0,
+		strength = 15.0,
 		vigor = 0.0,
 		fortitude = 8.0,
 		protection = 4.0,
 		agility = 10.0,
 		evade = 2.0
+	},
+
+	rewards = {
+		item_dropped = 1, -- Healing potion
+		chance_to_drop = 15.0,
+		money = 10
 	},
 
 	attack_points = {
@@ -281,10 +278,10 @@ enemies[5] = {
 
 	
 	base_stats = {
-		hit_points = 10,
+		hit_points = 12,
 		skill_points = 10,
-		experience_points = 5,
-		strength = 10,
+		experience_points = 8,
+		strength = 12,
 		vigor = 0,
 		fortitude = 8,
 		protection = 4,
@@ -292,23 +289,22 @@ enemies[5] = {
 		evade = 2.0
 	},
 
-	--Add in a stealable item when we get that far
-	rewards = {
-		item_dropped = 1, --Healing potion
-		chance_to_drop = 20.0,
-		money = 10
-	},
-
 	growth_stats = {
-		hit_points = 10.0,
+		hit_points = 11.0,
 		skill_points = 10.0,
 		experience_points = 5.0,
-		strength = 10.0,
+		strength = 9.0,
 		vigor = 0.0,
 		fortitude = 8.0,
 		protection = 4.0,
 		agility = 10.0,
 		evade = 2.0
+	},
+
+	rewards = {
+		item_dropped = 1, -- Healing potion
+		chance_to_drop = 15.0,
+		money = 10
 	},
 
 	attack_points = {

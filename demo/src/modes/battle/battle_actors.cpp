@@ -128,7 +128,7 @@ void BattleActor::TakeDamage(int32 damage)
 
 	if (damage <= 0)
 	{
-		_damage_dealt = 0;
+		_damage_dealt = RandomBoundedInteger(1, 4);
 		return;
 	}
 
