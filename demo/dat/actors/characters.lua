@@ -23,7 +23,8 @@ characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS] = {
 		fortitude = 14,
 		protection = 6,
 		agility = 35,
-		evade = 4.0
+		evade = 4.0,
+		experience_points = 50
 	},
 
 	growth_stats = {
@@ -80,5 +81,16 @@ characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS] = {
 
 	initial_skills = { 1 }
 }
+
+
+
+function XPToNextLevel ( current_level )
+	
+	newExperiencePoints = (50 * current_level)  -- it's assumed that the C++ gives the level we're being promoted to, rather than the one we're being promoted from, in the "add experience" function.
+	
+	return newExperiencePoints
+end
+
+
 
 

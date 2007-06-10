@@ -149,6 +149,7 @@ GlobalCharacter::GlobalCharacter(uint32 id) {
 	_protection = char_script.ReadInt("protection");
 	_agility = char_script.ReadInt("agility");
 	_evade = char_script.ReadFloat("evade");
+	_experience_next_level = char_script.ReadInt("experience_points");
 	char_script.ReadCloseTable();
 
 	// (3.5): Read the character's growth stats
@@ -163,11 +164,6 @@ GlobalCharacter::GlobalCharacter(uint32 id) {
 	_growth_agility = char_script.ReadFloat("agility");
 	_growth_evade = char_script.ReadFloat("evade");
 	char_script.ReadCloseTable();
-
-
-
-	//FIX ME Temp
-	_experience_next_level = 40;
 
 	// (4): Setup the character's attack points
 	char_script.ReadOpenTable("attack_points");
@@ -275,21 +271,28 @@ GlobalCharacter::GlobalCharacter(uint32 id) {
 bool GlobalCharacter::AddXP(uint32 xp)
 {
 	int32 temp_xp = static_cast<int32>(_experience_next_level - xp);
-	//
+	int32 xp_to_next_level = 0;
+
+	// (1): Attempt to open the characters script file
+	ScriptDescriptor char_script;
+	char_script.OpenFile("dat/actors/characters.lua", SCRIPT_READ);
+	//FIXME - no error checking code here!
 
 	if (temp_xp <= 0)
 	{
-		//FIX ME
-		//SetExperienceNextLevel(GetXPForNextLevel() + _experience_next_level);
-		SetExperienceNextLevel(50 + temp_xp);
-		AddExperienceLevel(1);
+		//next lines are essentially SetExperienceNextLevel(GetXPForNextLevel() + _experience_next_level);
+		xp_to_next_level = ScriptCallFunction<int32>(char_script.GetLuaState(), "XPToNextLevel", (_experience_level + 1)); //add one to calculate based on the level we're going to; simplifies the lua function a bit.
+		SetExperienceNextLevel(xp_to_next_level + temp_xp);  //if we're here, temp_xp will be negative
+		
+		AddExperienceLevel(1);  //FIXME - if the character gets enough XP to gain multiple levels, they shouldn't only get one
 
+		char_script.CloseFile();
 		return true;
 	}
 	else {
 		SetExperienceNextLevel(temp_xp);
 	}
-
+	char_script.CloseFile();
 	return false;
 }
 
