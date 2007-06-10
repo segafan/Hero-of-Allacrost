@@ -52,7 +52,7 @@ void GlobalItem::_Load() {
 	_target_alignment = static_cast<GLOBAL_ALIGNMENT>(GlobalManager->_items_script.ReadInt("target_alignment"));
 	_price = GlobalManager->_items_script.ReadInt("standard_price");
 	_battle_use_function = GlobalManager->_items_script.ReadFunctionPointer("BattleUse");
-	// 	_menu_use_function = GlobalManager->_items_script.ReadFunctionPointer("MenuUse");
+	_menu_use_function = GlobalManager->_items_script.ReadFunctionPointer("MenuUse");
 
 	GlobalManager->_items_script.ReadCloseTable();
 
@@ -72,26 +72,7 @@ void GlobalItem::BattleUse(hoa_battle::private_battle::BattleActor* target, hoa_
 
 
 void GlobalItem::MenuUse(GlobalCharacter* target) {
-	if (_count == 0) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL ERROR: tried to use item " << MakeStandardString(_name) << " which had a count of zero" << endl;
-		return;
-	}
-	else if (_id == 1) {
-		// check character hp
-		if (target->GetHitPoints() == target->GetMaxHitPoints()) {
-			// don't use item we're full
-			// can't play "bump" sound from here... perhaps this function should return bool?
-			return;
-		}
-		target->SetHitPoints(target->GetHitPoints() + 30);
-		DecrementCount(1);
-	}
-	else {
-		cerr << "Can't use this item!" << endl;
-		return;
-	}
-// 	ScriptCallFunction<void>(_menu_use_function, target, instigator);
+	ScriptCallFunction<void>(_menu_use_function, target);
 }
 
 // ****************************************************************************
