@@ -14,7 +14,7 @@ language_defaults = 0;
 language_settings = 0;
 
 -- First time the game is run, show welcome message if 1
-welcome = 0;
+welcome = 1;
 
 --[[ DEFAULT KEY SETTINGS --
 -- 
