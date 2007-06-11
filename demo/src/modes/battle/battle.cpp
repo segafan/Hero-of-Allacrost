@@ -570,7 +570,7 @@ void BattleMode::AddEnemy(GlobalEnemy new_enemy) {
 	}
 
 	// (2): Level the enemy up to be within a reasonable range of the party's strength
-	new_enemy.LevelSimulator(2); // TODO: use guassian random variable and average party xp level to set
+	new_enemy.LevelSimulator(GlobalManager->AveragePartyLevel());
 
 	// (3): Hold a copy of this enemy in case the battle needs to be restarted
 	_original_enemies.push_back(new_enemy);

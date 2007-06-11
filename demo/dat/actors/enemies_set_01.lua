@@ -106,7 +106,7 @@ enemies[2] = {
 	rewards = {
 		item_dropped = 1, -- Healing potion
 		chance_to_drop = 10.0,
-		money = 10
+		money = 12
 	},
 
 	attack_points = {
@@ -166,7 +166,7 @@ enemies[3] = {
 	rewards = {
 		item_dropped = 1, -- Healing potion
 		chance_to_drop = 10.0,
-		money = 10
+		money = 14
 	},
 
 	attack_points = {
@@ -235,7 +235,7 @@ enemies[4] = {
 	rewards = {
 		item_dropped = 1, -- Healing potion
 		chance_to_drop = 15.0,
-		money = 10
+		money = 18
 	},
 
 	attack_points = {
@@ -304,7 +304,7 @@ enemies[5] = {
 	rewards = {
 		item_dropped = 1, -- Healing potion
 		chance_to_drop = 15.0,
-		money = 10
+		money = 12
 	},
 
 	attack_points = {

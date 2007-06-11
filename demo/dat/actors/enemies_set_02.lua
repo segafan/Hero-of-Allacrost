@@ -45,7 +45,7 @@ enemies[101] = {
 	rewards = {
 		item_dropped = 10002, -- Iron sword
 		chance_to_drop = 5.0,
-		money = 100
+		money = 55
 	},
 
 	attack_points = {
@@ -106,7 +106,7 @@ enemies[102] = {
 	rewards = {
 		item_dropped = 10001, -- Karlate sword
 		chance_to_drop = 10.0,
-		money = 100
+		money = 60
 	},
 
 	attack_points = {
@@ -167,7 +167,7 @@ enemies[103] = {
 	rewards = {
 		item_dropped = 20002, --Cobalt Helm
 		chance_to_drop = 5.0,
-		money = 100
+		money = 80
 	},
 
 	attack_points = {
@@ -235,7 +235,7 @@ enemies[104] = {
 	rewards = {
 		item_dropped = 40001, -- Karlate shield
 		chance_to_drop = 15.0,
-		money = 100
+		money = 70
 	},
 
 	attack_points = {
@@ -303,7 +303,7 @@ enemies[105] = {
 	rewards = {
 		item_dropped = 10001, -- Karlate sword
 		chance_to_drop = 5.0,
-		money = 100
+		money = 85
 	},
 
 	attack_points = {

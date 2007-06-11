@@ -132,17 +132,17 @@ void BattleActor::TakeDamage(int32 damage)
 	}
 	else
 	{
-		_damage_dealt = damage + RandomBoundedInteger(0, 4);
+		_damage_dealt = damage + static_cast<uint32>(RandomBoundedInteger(0, 4));
 	}
 
-	if (static_cast<uint32>(damage) >= GetHitPoints()) // Was it a killing blow?
+	if (static_cast<uint32>(_damage_dealt) >= GetHitPoints()) // Was it a killing blow?
 	{
 		SetHitPoints(0);
 		OnDeath();
 		current_battle->RemoveScriptedEventsForActor(this);
 	}
 	else {
-		SetHitPoints(GetHitPoints() - damage);
+		SetHitPoints(GetHitPoints() - _damage_dealt);
 	}
 }
 

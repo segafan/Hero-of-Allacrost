@@ -125,6 +125,12 @@ public:
 	**/
 	void DecrementObjectCount(uint32 obj_id, uint32 obj_count);
 
+	/** \brief Calculates the average experience level of members in the active party
+	*** \return The average (integer) experience level of all members in the active party
+	*** This is used primarily for determining the level of growth for enemies in battle.
+	**/
+	uint32 AveragePartyLevel();
+
 	//! \note The overflow condition is not checked here: we just assume it will never occur
 	void AddFunds(uint32 amount)
 		{ _funds += amount; }
