@@ -498,6 +498,9 @@ public:
 	//! \brief Indicates if the icon indicating that there is a dialogue available should be drawn or not.
 	bool _show_dialogue_icon;
 
+	//! \brief Used to fade the dialogue icon according to distance 
+	hoa_video::Color _dialogue_icon_color;
+
 	// -------------------- Public methods
 
 	VirtualSprite();

@@ -513,6 +513,7 @@ void MapMode::_HandleInputExplore() {
 				_camera->moving = false;
 
 				sp->moving = false;
+				sp->current_action = -1;
 				sp->SetDirection(VirtualSprite::CalculateOppositeDirection(_camera->GetDirection()));
 				_dialogue_manager->SetCurrentDialogue(sp->GetCurrentDialogue());
 				sp->NextDialogue();

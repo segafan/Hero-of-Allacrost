@@ -130,7 +130,8 @@ VirtualSprite::VirtualSprite() :
 	forced_action(-1),
 	_saved(false),
 	_current_dialogue(0),
-	_show_dialogue_icon(true)
+	_show_dialogue_icon(true),
+	_dialogue_icon_color( 1.0f, 1.0f, 1.0f, 0.0f )
 {
 	MapObject::_object_type = VIRTUAL_TYPE;
 }
@@ -193,6 +194,13 @@ uint16 VirtualSprite::CalculateOppositeDirection(const uint16 direction) {
 
 
 void VirtualSprite::Update() {
+	//Update the alpha of the dialogue icon according to it's distance from the player to make it fade away
+	const float DIALOGUE_ICON_VISIBLE_RANGE = 30.0f;
+	float icon_alpha = 1.0f - ( abs( ComputeXLocation() - MapMode::_current_map->_camera->ComputeXLocation() ) + abs( ComputeYLocation() - MapMode::_current_map->_camera->ComputeYLocation() ) ) / DIALOGUE_ICON_VISIBLE_RANGE;
+	if( icon_alpha < 0 )
+		icon_alpha = 0;
+	_dialogue_icon_color.SetAlpha( icon_alpha );
+
 	new_dialogue_icon.Update();
 	if (!updatable) {
 		return;
@@ -304,7 +312,7 @@ void VirtualSprite::Draw() {
 	if (HasDialogue()) {
 		if (IsShowingDialogueIcon() && MapMode::_IsShowingDialogueIcons() && seen_all_dialogue == false) {
 			VideoManager->MoveRelative(0, -GetImgHeight());
-			VideoManager->DrawImage(new_dialogue_icon);
+			VideoManager->DrawImage(new_dialogue_icon, _dialogue_icon_color);
 		}
 	}
 }
@@ -372,7 +380,7 @@ void VirtualSprite::SaveState() {
 	_saved_name = name;
 	_saved_current_action = current_action;
 	// TEMP
-	updatable = false;
+	//updatable = false;
 }
 
 
@@ -388,7 +396,7 @@ bool VirtualSprite::LoadState() {
 	 current_action = _saved_current_action;
 
 	// TEMP
-	updatable = true;
+	//updatable = true;
 
 	 return true;
 }
@@ -539,7 +547,7 @@ void MapSprite::Update() {
 		}
 
 		// Determine the correct standing frame to display
-		if (actions.empty()) {
+		if (current_action == -1) {
 			if (direction & FACING_NORTH) {
 				current_animation = ANIM_STANDING_NORTH;
 			}
@@ -725,8 +733,7 @@ const std::vector<uint32>& EnemySprite::RetrieveRandomParty() {
 
 
 void EnemySprite::Update() {
-	// If the enemy is not registered in a EnemyZone, consider it a normal MapSprite
-	if (_zone == NULL) {
+	if( current_action != -1 ) {
 		MapSprite::Update();
 		return;
 	}
@@ -753,7 +760,7 @@ void EnemySprite::Update() {
 			ydelta = ComputeYLocation() - MapMode::_current_map->_camera->ComputeYLocation();
 
 			// If the sprite has moved outside of its zone and it should not, reverse the sprite's direction
-			if (_zone->IsInsideZone(x_position, y_position) == false && _zone->IsRestraining() ) {
+			if ( _zone != NULL && _zone->IsInsideZone(x_position, y_position) == false && _zone->IsRestraining() ) {
 				// Make sure it wasn't already out (stuck on boundaries fix)
 				if( !_out_of_zone )
 				{
@@ -767,8 +774,9 @@ void EnemySprite::Update() {
 				_out_of_zone = false;
 
 				// Enemies will only aggro if the camera is inside the zone, or the zone is non-restrictive
-				if ( abs(xdelta) <= _aggro_range && abs(ydelta) <= _aggro_range
-					 && (!_zone->IsRestraining() || _zone->IsInsideZone(MapMode::_current_map->_camera->x_position, MapMode::_current_map->_camera->y_position)))
+				// The order of comparaisons here is important, the NULL check MUST come before the rest or a null pointer exception could happen if no zone is registered
+				if ( _zone == NULL || ( abs(xdelta) <= _aggro_range && abs(ydelta) <= _aggro_range 
+					 && (!_zone->IsRestraining() || _zone->IsInsideZone(MapMode::_current_map->_camera->x_position, MapMode::_current_map->_camera->y_position)) ) )
 				{
 					if (xdelta > -0.5 && xdelta < 0.5 && ydelta < 0)
 						SetDirection(SOUTH);
