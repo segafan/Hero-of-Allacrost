@@ -19,22 +19,15 @@ enemies[1] = {
 	sprite_height = 64,
 
 	base_stats = {
-		hit_points = 10,
+		hit_points = 22,
 		skill_points = 10,
 		experience_points = 5,
-		strength = 10,
+		strength = 15,
 		vigor = 0,
-		fortitude = 8,
+		fortitude = 10,
 		protection = 4,
-		agility = 10,
+		agility = 12,
 		evade = 2.0
-	},
-	
-	--Add in a stealable item when we get that far
-	rewards = {
-		item_dropped = 1, --Healing potion
-		chance_to_drop = 10.0,
-		money = 10
 	},
 	
 	growth_stats = {
@@ -47,6 +40,12 @@ enemies[1] = {
 		protection = 4.0,
 		agility = 5.0,
 		evade = 2.0
+	},
+
+	rewards = {
+		item_dropped = 1, -- Healing potion
+		chance_to_drop = 10.0,
+		money = 10
 	},
 
 	attack_points = {
@@ -80,14 +79,14 @@ enemies[2] = {
 	sprite_height = 64,
 
 	base_stats = {
-		hit_points = 15,
+		hit_points = 25,
 		skill_points = 10,
 		experience_points = 6,
-		strength = 12,
+		strength = 17,
 		vigor = 0,
-		fortitude = 8,
+		fortitude = 11,
 		protection = 4,
-		agility = 10,
+		agility = 18,
 		evade = 2.0
 	},
 	
@@ -140,7 +139,7 @@ enemies[3] = {
 	sprite_height = 64,
 
 	base_stats = {
-		hit_points = 15,
+		hit_points = 28,
 		skill_points = 10,
 		experience_points = 7,
 		strength = 14,
@@ -209,14 +208,14 @@ enemies[4] = {
 
 	
 	base_stats = {
-		hit_points = 20,
+		hit_points = 24,
 		skill_points = 10,
 		experience_points = 5,
 		strength = 15,
 		vigor = 0,
-		fortitude = 12,
+		fortitude = 14,
 		protection = 4,
-		agility = 10,
+		agility = 13,
 		evade = 2.0
 	},
 	
@@ -278,14 +277,14 @@ enemies[5] = {
 
 	
 	base_stats = {
-		hit_points = 12,
+		hit_points = 22,
 		skill_points = 10,
 		experience_points = 8,
-		strength = 12,
+		strength = 18,
 		vigor = 0,
-		fortitude = 8,
+		fortitude = 12,
 		protection = 4,
-		agility = 10,
+		agility = 14,
 		evade = 2.0
 	},
 
