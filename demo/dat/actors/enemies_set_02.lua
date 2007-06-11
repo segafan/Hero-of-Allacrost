@@ -43,7 +43,7 @@ enemies[101] = {
 	},
 
 	rewards = {
-		item_dropped = 10002, --Iron sword
+		item_dropped = 10002, -- Iron sword
 		chance_to_drop = 5.0,
 		money = 100
 	},
@@ -80,15 +80,15 @@ enemies[102] = {
 
 	
 	base_stats = {
-		hit_points = 10,
+		hit_points = 50,
 		skill_points = 10,
-		experience_points = 5,
+		experience_points = 20,
 		strength = 10,
 		vigor = 0,
-		fortitude = 8,
+		fortitude = 7,
 		protection = 4,
-		agility = 10,
-		evade = 2.0
+		agility = 20,
+		evade = 10.0
 	},
 	
 	growth_stats = {
@@ -97,14 +97,14 @@ enemies[102] = {
 		experience_points = 5.0,
 		strength = 10.0,
 		vigor = 0.0,
-		fortitude = 8.0,
+		fortitude = 3.0,
 		protection = 4.0,
 		agility = 10.0,
-		evade = 2.0
+		evade = 2.5
 	},
 
 	rewards = {
-		item_dropped = 10001, --Karlate sword
+		item_dropped = 10001, -- Karlate sword
 		chance_to_drop = 10.0,
 		money = 100
 	},
@@ -141,26 +141,26 @@ enemies[103] = {
 
 	
 	base_stats = {
-		hit_points = 10,
+		hit_points = 55,
 		skill_points = 10,
-		experience_points = 5,
-		strength = 10,
+		experience_points = 20,
+		strength = 15,
 		vigor = 0,
 		fortitude = 8,
-		protection = 4,
+		protection = 5,
 		agility = 10,
 		evade = 2.0
 	},
 	
 	growth_stats = {
-		hit_points = 10.0,
+		hit_points = 15.0,
 		skill_points = 10.0,
 		experience_points = 5.0,
-		strength = 10.0,
+		strength = 15.0,
 		vigor = 0.0,
 		fortitude = 8.0,
-		protection = 4.0,
-		agility = 10.0,
+		protection = 3.0,
+		agility = 6.0,
 		evade = 2.0
 	},
 
@@ -211,12 +211,12 @@ enemies[104] = {
 	base_stats = {
 		hit_points = 10,
 		skill_points = 10,
-		experience_points = 5,
+		experience_points = 30,
 		strength = 10,
 		vigor = 0,
 		fortitude = 8,
 		protection = 4,
-		agility = 10,
+		agility = 12,
 		evade = 2.0
 	},
 	
@@ -228,7 +228,7 @@ enemies[104] = {
 		vigor = 0.0,
 		fortitude = 8.0,
 		protection = 4.0,
-		agility = 10.0,
+		agility = 8.0,
 		evade = 2.0
 	},
 
@@ -277,27 +277,27 @@ enemies[105] = {
 	sprite_height = 256,
 
 	base_stats = {
-		hit_points = 10,
+		hit_points = 80,
 		skill_points = 10,
-		experience_points = 5,
-		strength = 10,
+		experience_points = 25,
+		strength = 15,
 		vigor = 0,
-		fortitude = 8,
+		fortitude = 20,
 		protection = 4,
-		agility = 10,
-		evade = 2.0
+		agility = 4,
+		evade = 1.0
 	},
 	
 	growth_stats = {
 		hit_points = 10.0,
 		skill_points = 10.0,
 		experience_points = 5.0,
-		strength = 10.0,
+		strength = 7.0,
 		vigor = 0.0,
-		fortitude = 8.0,
+		fortitude = 5.0,
 		protection = 4.0,
-		agility = 10.0,
-		evade = 2.0
+		agility = 4.0,
+		evade = 1.5
 	},
 
 	rewards = {
@@ -354,26 +354,26 @@ enemies[106] = {
 
 	
 	base_stats = {
-		hit_points = 10,
+		hit_points = 100,
 		skill_points = 10,
-		experience_points = 5,
-		strength = 10,
+		experience_points = 40,
+		strength = 22,
 		vigor = 0,
 		fortitude = 8,
 		protection = 4,
-		agility = 10,
+		agility = 18,
 		evade = 2.0
 	},
 	
 	growth_stats = {
-		hit_points = 10.0,
+		hit_points = 15.0,
 		skill_points = 10.0,
 		experience_points = 5.0,
-		strength = 10.0,
+		strength = 9.0,
 		vigor = 0.0,
 		fortitude = 8.0,
 		protection = 4.0,
-		agility = 10.0,
+		agility = 7.5,
 		evade = 2.0
 	},
 
