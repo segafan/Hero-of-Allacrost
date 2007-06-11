@@ -28,12 +28,12 @@ characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS] = {
 	},
 
 	growth_stats = {
-		hit_points = 10.0,
+		hit_points = 14.0,
 		skill_points = 4.0,
 		strength = 8.0,
 		vigor = 1.0,
-		fortitude = 6.0,
-		protection = 1.0,
+		fortitude = 8.0,
+		protection = 3.0,
 		agility = 5.0,
 		evade = 2.0
 	},
