@@ -99,7 +99,7 @@ enemies[102] = {
 		vigor = 0.0,
 		fortitude = 3.0,
 		protection = 4.0,
-		agility = 10.0,
+		agility = 7.5,
 		evade = 2.5
 	},
 
@@ -209,7 +209,7 @@ enemies[104] = {
 	sprite_height = 256,
 
 	base_stats = {
-		hit_points = 10,
+		hit_points = 45,
 		skill_points = 10,
 		experience_points = 30,
 		strength = 10,
@@ -224,9 +224,9 @@ enemies[104] = {
 		hit_points = 10.0,
 		skill_points = 10.0,
 		experience_points = 5.0,
-		strength = 10.0,
+		strength = 6.0,
 		vigor = 0.0,
-		fortitude = 8.0,
+		fortitude = 5.0,
 		protection = 4.0,
 		agility = 8.0,
 		evade = 2.0
