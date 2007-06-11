@@ -20,21 +20,22 @@ credits_text =
 	"\n\n\n" ..
 
 	"Programming Team\n\n" ..
-	"Daniel Steuernol (Steu) ~ programming lead, scripting engine\n\n" ..
-	"Tyler Olsen (Roots) ~ game engine, map code, various code\n\n" ..
-	"Corey Hoffstein (visage) ~ programming lead, battle code\n\n" ..
-	"Philip Vorsilak (gorzuate) ~ game editor\n\n" ..
-	"Viljami Korhonen (MindFlayer) ~ boot code, battle code\n\n" ..
+
+	"Tyler Olsen (Roots) ~ programming lead, game engine, map code\n\n" ..
 	"Moises Ferrer Serra (byaku) ~ video engine, audio engine\n\n" ..
+	"Philip Vorsilak (gorzuate) ~ game editor\n\n" ..
+	"Andy Gardner (ChopperDave) ~ battle code, menu code\n\n" ..
+	"Viljami Korhonen (MindFlayer) ~ boot code, battle code\n\n" ..
 	"Guillaume Anctil (Drakkoon) ~ map code\n\n" ..
+	"Daniel Steuernol (Steu) ~ scripting engine\n\n" ..
 	"Lindsay Roberts (Linds) ~ video engine\n\n" ..
-        "Heikki Naski (raging_hog) ~ Content Management System\n\n" ..
+	"Jacob Rudolph (rujasu) ~ menu code\n\n" ..
 	"\n\n\n" ..
 
 	"Artwork Team\n\n" ..
 	"Richard Kettering (Jetryl) ~ map tiles, map sprites, inventory icons, location graphics\n\n" ..
-	"Joe Raucci (Sylon) ~ battle sprites, map sprites, GUI artwork\n\n" ..
 	"Brett Steele (Safir~Kreuz) ~ map sprites, battle sprites, character portraits\n\n" ..
+	"Joe Raucci (Sylon) ~ battle sprites, map sprites, GUI artwork\n\n" ..
 	"Josiah Tobin (Josiah Tobin) ~ map tiles\n\n" ..
 	"Matthew James (nunvuru) ~ website graphics, GUI artwork, game logos\n\n" ..
 	"Max Humber (zomby138) ~ concept art, computer graphics\n\n" ..
@@ -50,8 +51,9 @@ credits_text =
 	"\n\n\n" ..
 
 	"Map Designers\n\n" ..
-	"Richard Kettering (Jetryl) ~ map tiles, map sprites, inventory icons, location graphics\n\n" ..
+	"Richard Kettering (Jetryl)\n\n" ..
 	"Tyler Olsen (Roots)\n\n" ..
+	"\n\n\n" ..
 
 	"Team Manager\n\n" ..
 	"Emre Motan (emrebfg)\n\n" ..
@@ -61,6 +63,7 @@ credits_text =
 	"Matthew James (nunvuru) ~ website design\n\n" ..
 	"Emre Motan (emrebfg) ~ website content, forum administration\n\n" ..
 	"Daniel Steuernol (Steu) ~ wiki support\n\n" ..
+        "Heikki Naski (raging_hog) ~ Content Management System\n\n" ..
 	"\n\n\n" ..
 
 	"Story\n\n" ..
@@ -69,7 +72,7 @@ credits_text =
 	"\n\n\n" ..
 
 	"Packaging\n\n" ..
-	"Philip Vorsilak (gorzuate) ~ source distribution\n\n" ..
+	"Philip Vorsilak (gorzuate) ~ Source distribution\n\n" ..
 	"Viljami Korhonen (MindFlayer) ~ Windows distribution\n\n" ..
 	"Alistair Lynn (prophile) ~ OS X distribution\n\n" ..
 	"(ettin) ~ Debian distribution\n\n" ..
@@ -77,7 +80,7 @@ credits_text =
 	"\n\n\n" ..
 
 	"Additional Programming\n\n" ..
-	"Jacob Rudolph (rujasu) ~ menu code\n\n" ..
+	"Corey Hoffstein (visage) ~ battle code\n\n" ..
 	"Raj Sharma (roos) ~ video engine\n\n" ..
 	"Aaron Smith (Etherstar) ~ audio engine\n\n" ..
 	"Nick Weihs (nickw) ~ video engine\n\n" ..
@@ -119,10 +122,10 @@ credits_text =
 	"\n\n\n" ..
 
         "Special Thanks\n\n" ..
-        "Danc ~ mountain town tileset\n\n" ..
-        "The Battle for Wesnoth\n\n" ..
+        "(Danc)\n\n" ..
+        "The Battle for Wesnoth Development Team\n\n" ..
         "The Mana World Game Development Team\n\n" ..
-        "\n\n\n" ,,
+        "\n\n\n" ..
 
 	"Extra Thanks\n\n" ..
 	"Adam Lindquist (Zorbfish)\n\n" ..
