@@ -1,6 +1,6 @@
 <<<< Hero of Allacrost readme and info >>>>
 
-Copyright (C) 2004, 2005 by The Allacrost Project
+Copyright (C) 2004 - 2007 by The Allacrost Project
 All Rights Reserved
 
 This code is licensed under the GNU GPL. It is free software and you may
@@ -10,7 +10,7 @@ See http://www.gnu.org/copyleft/gpl.html for details.
 Hero of Allacrost (http://www.allacrost.org/) is a single player, 2D sprite-based role playing game. In HoA, you play Claudius, a young knight who has been given the mission to search for a legendary hero destined to save the world from destruction. Along the journey you will join forces with other characters, explore towns and dungeons, and do battle with a wide-range of foes.
 
 Install procedure:
-Once you've unpacked the tarball or checked it out of Subversion, just run 'autoreconf && ./configure && make && make install' from the top-level directory at the prompt.
+Once you've unpacked the tarball or checked it out of Subversion, just run 'autoreconf -i && ./configure && make && make install' from the top-level directory at the prompt.
 
 Directories included are:
 dat/ img/ mus/ snd/ src/
@@ -22,5 +22,6 @@ libjpeg
 libpng
 SDL
 SDL_mixer
-Lua 5.0+
+Lua 5.0+ (NOT Lua 5.1+)
+Luabind
 Qt 4+ (optional for use of the map editor)
