@@ -128,11 +128,12 @@ void BattleActor::TakeDamage(int32 damage)
 
 	if (damage <= 0)
 	{
-		_damage_dealt = RandomBoundedInteger(1, 4);
-		return;
+		_damage_dealt = RandomBoundedInteger(1, 5);
 	}
-
-	_damage_dealt = damage;
+	else
+	{
+		_damage_dealt = damage + RandomBoundedInteger(0, 4);
+	}
 
 	if (static_cast<uint32>(damage) >= GetHitPoints()) // Was it a killing blow?
 	{
