@@ -146,7 +146,7 @@ enemies[3] = {
 		vigor = 0,
 		fortitude = 9,
 		protection = 4,
-		agility = 10,
+		agility = 15,
 		evade = 2.0
 	},
 	
@@ -154,9 +154,9 @@ enemies[3] = {
 		hit_points = 10.0,
 		skill_points = 10.0,
 		experience_points = 5.0,
-		strength = 14.0,
+		strength = 6.0,
 		vigor = 0.0,
-		fortitude = 9.0,
+		fortitude = 5.0,
 		protection = 4.0,
 		agility = 10.0,
 		evade = 2.0
@@ -220,10 +220,10 @@ enemies[4] = {
 	},
 	
 	growth_stats = {
-		hit_points = 13.0,
+		hit_points = 9.0,
 		skill_points = 10.0,
 		experience_points = 5.0,
-		strength = 15.0,
+		strength = 8.0,
 		vigor = 0.0,
 		fortitude = 8.0,
 		protection = 4.0,
@@ -289,12 +289,12 @@ enemies[5] = {
 	},
 
 	growth_stats = {
-		hit_points = 11.0,
+		hit_points = 6.0,
 		skill_points = 10.0,
 		experience_points = 5.0,
-		strength = 9.0,
+		strength = 6.0,
 		vigor = 0.0,
-		fortitude = 8.0,
+		fortitude = 7.0,
 		protection = 4.0,
 		agility = 10.0,
 		evade = 2.0
