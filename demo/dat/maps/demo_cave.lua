@@ -570,7 +570,6 @@ function Load(m)
 	enemy:AddEnemy(5);
 	enemy:AddEnemy(102);
 	enemy:AddEnemy(4);
-	enemy:AddEnemy(4);
 	ezone:AddEnemy(enemy, map, 1);
 	-- Finally, add the zone to the map
 	map:_AddZone(ezone);
@@ -590,7 +589,6 @@ function Load(m)
 	enemy:SetMovementSpeed(hoa_map.MapMode.SLOW_SPEED);
 	enemy:LoadStandardAnimations("img/sprites/map/scorpion_walk.png");
 	enemy:NewEnemyParty();
-	enemy:AddEnemy(5);
 	enemy:AddEnemy(4);
 	enemy:AddEnemy(1);
 	enemy:AddEnemy(4);
@@ -601,7 +599,6 @@ function Load(m)
 	enemy:AddEnemy(1);
 	enemy:AddEnemy(2);
 	enemy:AddEnemy(4);
-	enemy:AddEnemy(5);
 	enemy:AddEnemy(102);
 	enemy:AddEnemy(3);
 	ezone:AddEnemy(enemy, map, 1);
