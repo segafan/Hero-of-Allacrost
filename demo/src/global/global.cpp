@@ -354,4 +354,16 @@ void GameGlobal::DecrementObjectCount(uint32 obj_id, uint32 count) {
 	}
 } // void GameGlobal::DecrementObjectCount(uint32 obj_id, uint32 count)
 
+
+
+uint32 GameGlobal::AveragePartyLevel() {
+	uint32 xp_level_sum = 0;
+	for (uint32 i = 0; i < _active_party.GetPartySize(); i++) {
+		GlobalActor* actor = _active_party.GetActor(i);
+		xp_level_sum += actor->GetExperienceLevel();
+	}
+	xp_level_sum /= _active_party.GetPartySize();
+	return xp_level_sum;
+} // uint32 GameGlobal::AveragePartyLevel()
+
 } // namespace hoa_global
