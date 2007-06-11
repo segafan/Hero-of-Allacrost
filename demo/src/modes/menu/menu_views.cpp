@@ -1343,7 +1343,6 @@ void SkillsWindow::Update() {
 	    _skills_list.GetNumOptions() > _skills_list.GetSelection()) {
 		GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActor(_char_select.GetSelection()));
 		std::vector<hoa_global::GlobalSkill*> skills = ch->GetAttackSkills();
-		cout << _skills_list.GetSelection() << endl;
 		GlobalSkill* skill = skills[_skills_list.GetSelection()];
 		_description.SetDisplayText( skill->GetDescription() );
 	}
