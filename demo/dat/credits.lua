@@ -19,10 +19,6 @@ credits_text =
 	"Philip Vorsilak (gorzuate)\n\n" ..
 	"\n\n\n" ..
 
-	"Team Manager\n\n" ..
-	"Emre Motan (emrebfg)\n\n" ..
-	"\n\n\n" ..
-
 	"Programming Team\n\n" ..
 	"Daniel Steuernol (Steu) ~ programming lead, scripting engine\n\n" ..
 	"Tyler Olsen (Roots) ~ game engine, map code, various code\n\n" ..
@@ -32,6 +28,7 @@ credits_text =
 	"Moises Ferrer Serra (byaku) ~ video engine, audio engine\n\n" ..
 	"Guillaume Anctil (Drakkoon) ~ map code\n\n" ..
 	"Lindsay Roberts (Linds) ~ video engine\n\n" ..
+        "Heikki Naski (raging_hog) ~ Content Management System\n\n" ..
 	"\n\n\n" ..
 
 	"Artwork Team\n\n" ..
@@ -41,6 +38,8 @@ credits_text =
 	"Josiah Tobin (Josiah Tobin) ~ map tiles\n\n" ..
 	"Matthew James (nunvuru) ~ website graphics, GUI artwork, game logos\n\n" ..
 	"Max Humber (zomby138) ~ concept art, computer graphics\n\n" ..
+        "Herbert Glaser (hollowgrind) ~ map sprites\n\n" ..
+        "Adam Black (indigoshift) ~ concept art\n\n" ..
 	"\n\n\n" ..
 
 	"Music and Sound Team\n\n" ..
@@ -48,6 +47,14 @@ credits_text =
 	"Joe Rouse (Loodwig) ~ soundtrack composer\n\n" ..
 	"Zhe Zhou (shizeet) ~ sound composer\n\n" ..
 	"Jamie Bremaneson (Jam) ~ sound composer\n\n" ..
+	"\n\n\n" ..
+
+	"Map Designers\n\n" ..
+	"Richard Kettering (Jetryl) ~ map tiles, map sprites, inventory icons, location graphics\n\n" ..
+	"Tyler Olsen (Roots)\n\n" ..
+
+	"Team Manager\n\n" ..
+	"Emre Motan (emrebfg)\n\n" ..
 	"\n\n\n" ..
 
 	"Online Services\n\n" ..
@@ -66,6 +73,7 @@ credits_text =
 	"Viljami Korhonen (MindFlayer) ~ Windows distribution\n\n" ..
 	"Alistair Lynn (prophile) ~ OS X distribution\n\n" ..
 	"(ettin) ~ Debian distribution\n\n" ..
+        "Dmitry Marakasov (AMDmi3) ~ FreeBSD distribution\n\n" ..
 	"\n\n\n" ..
 
 	"Additional Programming\n\n" ..
@@ -109,6 +117,12 @@ credits_text =
 	"Additional Translation\n\n" ..
 	"Mikko Hanninen (Burnsaber) ~ Finnish prologue\n\n" ..
 	"\n\n\n" ..
+
+        "Special Thanks\n\n" ..
+        "Danc ~ mountain town tileset\n\n" ..
+        "The Battle for Wesnoth\n\n" ..
+        "The Mana World Game Development Team\n\n" ..
+        "\n\n\n" ,,
 
 	"Extra Thanks\n\n" ..
 	"Adam Lindquist (Zorbfish)\n\n" ..
