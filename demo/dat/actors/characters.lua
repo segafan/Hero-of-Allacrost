@@ -73,8 +73,81 @@ characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS] = {
 		}
 	},
 
-	initial_weapon = 10001,
+	initial_weapon = 10002,
 	initial_head_armor = 20001,
+	initial_torso_armor = 30001,
+	initial_arm_armor = 40001,
+	initial_leg_armor = 50001,
+
+	initial_skills = { 1 }
+}
+
+
+
+characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA] = {
+	name = "Laila",
+	filename = "laila",
+
+	base_stats = {
+		max_hit_points = 123,
+		max_skill_points = 25,
+		strength = 11,
+		vigor = 4,
+		fortitude = 14,
+		protection = 6,
+		agility = 32,
+		evade = 4.0,
+		experience_points = 50
+	},
+
+	growth_stats = {
+		hit_points = 14.0,
+		skill_points = 4.0,
+		strength = 8.0,
+		vigor = 1.0,
+		fortitude = 8.0,
+		protection = 3.0,
+		agility = 5.0,
+		evade = 2.0
+	},
+
+	attack_points = {
+		[1] = {
+			name = "Head",
+			x_position = 31,
+			y_position = 54,
+			fortitude_bonus = 0.0,
+			protection_bonus = 20.0,
+			evade_bonus = 25.0
+		},
+		[2] = {
+			name = "Torso",
+			x_position = 37,
+			y_position = 34,
+			fortitude_bonus = 40,
+			protection_bonus = 10,
+			evade_bonus = 0.0
+		},
+		[3] = {
+			name = "Arms",
+			x_position = 31,
+			y_position = 54,
+			fortitude_bonus = 10,
+			protection_bonus = 0,
+			evade_bonus = 10.0
+		},
+		[4] = {
+			name = "Legs",
+			x_position = 37,
+			y_position = 34,
+			fortitude_bonus = 20,
+			protection_bonus = 20,
+			evade_bonus = 5.0
+		}
+	},
+
+	initial_weapon = 10001,
+	initial_head_armor = 20002,
 	initial_torso_armor = 30001,
 	initial_arm_armor = 40001,
 	initial_leg_armor = 50001,

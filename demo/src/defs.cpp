@@ -165,6 +165,7 @@ void BindEngineToLua() {
 			.enum_("constants") [
 				// Character type constants
 				value("GLOBAL_CHARACTER_CLAUDIUS", GLOBAL_CHARACTER_CLAUDIUS),
+				value("GLOBAL_CHARACTER_LAILA", GLOBAL_CHARACTER_LAILA),
 				// Object type constants
 				value("GLOBAL_OBJECT_INVALID", GLOBAL_OBJECT_INVALID),
 				value("GLOBAL_OBJECT_ITEM", GLOBAL_OBJECT_ITEM),
