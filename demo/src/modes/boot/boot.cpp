@@ -598,6 +598,8 @@ void BootMode::_OnNewGame() {
 	_SaveSettingsFile();
 
 	GlobalManager->AddCharacter(GLOBAL_CHARACTER_CLAUDIUS);
+	GlobalManager->AddCharacter(GLOBAL_CHARACTER_LAILA);
+
 	GlobalManager->SetFunds(250);
 
 	_fade_out = true;

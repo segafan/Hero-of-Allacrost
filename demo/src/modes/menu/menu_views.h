@@ -133,7 +133,7 @@ public:
 *** selecting an item in the inventory, that needs a character to work
 *** on.
 *** ***************************************************************************/
-class MiniCharacterSelectWindow : public hoa_video::MenuWindow {
+/*class MiniCharacterSelectWindow : public hoa_video::MenuWindow {
 public:
 	MiniCharacterSelectWindow();
 
@@ -173,7 +173,7 @@ private:
 	//! \brief Hide copy constructor.
 	MiniCharacterSelectWindow(MiniCharacterSelectWindow &other);
 }; // class MiniCharacterSelectWindow : public hoa_video::MenuWindow
-
+*/
 
 
 /** ****************************************************************************
@@ -256,9 +256,6 @@ private:
 	* \brief Initializes item category select option box
 	*/
 	void _InitCategory();
-
-	//! FIX ME
-	void _TEMP_ApplyItem();
 
 }; // class InventoryWindow : public hoa_video::MenuWindow
 

@@ -149,7 +149,7 @@ const uint32 WINDOW_FORMATION      = 5;
 *** ***************************************************************************/
 class MenuMode : public hoa_mode_manager::GameMode {
 	friend class private_menu::CharacterWindow;
-	friend class private_menu::MiniCharacterSelectWindow;
+//	friend class private_menu::MiniCharacterSelectWindow;
 	friend class private_menu::InventoryWindow;
 	friend class private_menu::StatusWindow;
 	friend class private_menu::SkillsWindow;

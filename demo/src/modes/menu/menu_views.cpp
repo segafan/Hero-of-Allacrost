@@ -65,7 +65,6 @@ void CharacterWindow::SetCharacter(GlobalCharacter *character)
 {
 	_char_id = character->GetID();
 
-	// TODO: Load the portrait
 	_portrait.SetFilename("img/portraits/map/" + character->GetFilename() + ".png");
 	_portrait.SetStatic(true);
 	_portrait.SetDimensions(100, 100);
@@ -91,14 +90,6 @@ void CharacterWindow::Draw()
 	float x, y, w, h;
 	GetPosition(x,y);
 	GetDimensions(w,h);
-/*<<<<<<< .mine
-=======
-
-	// check to see if this window is an actual character
-	if (_char_id == hoa_global::GLOBAL_CHARACTER_INVALID)
-		// no more to do here
-		return;
->>>>>>> .r528*/
 
 	GlobalCharacter *character = GlobalManager->GetCharacter(_char_id);
 
@@ -146,181 +137,6 @@ void CharacterWindow::Draw()
 	return;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// MiniCharacterSelectWindow Class
-////////////////////////////////////////////////////////////////////////////////
-
-//--------------------------------------------------------
-// MiniCharacterSelectwindow::MiniCharacterSelectWindow()
-//--------------------------------------------------------
-MiniCharacterSelectWindow::MiniCharacterSelectWindow() : _char_window_active(false), _current_char_selected(0)
-{
-	MenuWindow::Create(300, 472);
-	MenuWindow::SetPosition(724, 150);
-}
-
-//--------------------------------------------------------
-// MiniCharacterSelectwindow::~MiniCharacterSelectWindow()
-//--------------------------------------------------------
-MiniCharacterSelectWindow::~MiniCharacterSelectWindow()
-{
-
-}
-
-//------------------------------------------------------
-// MiniCharacterSelectWindow::Draw()
-//------------------------------------------------------
-void MiniCharacterSelectWindow::Draw()
-{
-	MenuWindow::Draw();
-
-	if (!_char_window_active)
-		return;
-
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
-
-	// Draw Portraits of the party
-	for (uint32 i = 0; i < GlobalManager->GetActiveParty()->GetPartySize(); ++i)
-	{
-		VideoManager->Move(765, 180);
-
-		GlobalCharacter *current = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActor(i));
-		// Get the portrait from the character eventually
-		StillImage portrait;
-		// TODO: This needs optimization, move the LoadImage - DeleteImage calls into constructor/destructor
-		portrait.SetFilename(string("img/sprites/map/") + string(current->GetFilename()) + string("_d0.png"));
-		portrait.SetDimensions(32, 64);
-		portrait.SetStatic(true);
-		VideoManager->LoadImage(portrait);
-		VideoManager->MoveRelative(0.0f, static_cast<float>(i * 116));
-		VideoManager->DrawImage(portrait);
-		VideoManager->DeleteImage(portrait);
-
-		// Draw Text
-		// draw name
-		VideoManager->MoveRelative(65, -10);
-		if (!VideoManager->DrawText(current->GetName()))
-			cerr << "MINICHARACTERWINDOW: Unable to draw character's name" << endl;
-
-		// Draw health
-		VideoManager->MoveRelative(0, 30);
-		ostringstream os_health;
-		os_health << current->GetHitPoints() << " / " << current->GetMaxHitPoints();
-		std::string health = std::string("Health: ") + os_health.str();
-		if (!VideoManager->DrawText(MakeUnicodeString(health)))
-			cerr << "MINICHARACTERWINDOW: ERROR > Couldn't draw health!" << endl;
-
-		// Draw skill points
-		VideoManager->MoveRelative(0, 30);
-		ostringstream os_skill;
-		os_skill << current->GetSkillPoints() << " / " << current->GetMaxSkillPoints();
-		std::string skill = std::string("Skill: ") + os_skill.str();
-		if (!VideoManager->DrawText(MakeUnicodeString(skill)))
-			cerr << "CHARACTERWINDOW: ERROR > Couldn't draw skill!" << endl;
-
-		// This is the char the cursor is currently on, draw it
-		if (i == _current_char_selected)
-		{
-			VideoManager->Move(730.0f, (float)(207 + (i * 116)));
-			VideoManager->DrawImage(*(VideoManager->GetDefaultCursor()));
-		}
-	}
-
-	return;
-}
-
-//------------------------------------------------------
-// MiniCharacterSelectWindow::Active(bool)
-//------------------------------------------------------
-void MiniCharacterSelectWindow::Activate(bool new_status)
-{
-	// Set new status
-	_char_window_active = new_status;
-}
-
-//------------------------------------------------------
-// MiniCharacterSelectWindow::Update()
-//------------------------------------------------------
-void MiniCharacterSelectWindow::Update()
-{
-	// Check input values
-	if (InputManager->ConfirmPress())
-	{
-		// Use the passed in item, to update values
-		GlobalItem *selected = (*GlobalManager->GetInventoryItems())[_selected_item_index];
-		GlobalCharacter *ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActor(_current_char_selected));
-
-		if (selected->GetCount() == 0)
-		{
-			// no more items to use
-			MenuMode::_instance->_menu_sounds["bump"].PlaySound();
-			return;
-		}
-
-		// check character hp
-		if (ch->GetHitPoints() == ch->GetMaxHitPoints())
-		{
-			// don't use item we're full
-			MenuMode::_instance->_menu_sounds["bump"].PlaySound();
-			return;
-		}
-
-		// Play Sound
-// 		_menu_sounds["potion"].PlaySound();
-
-		// increase hp FIXME
-		if (selected->GetUsage() == GLOBAL_USE_MENU)
-		{
-			uint32 new_hp = ch->GetHitPoints();
-			//new_hp += selected->GetRecoveryAmount();
-			if (new_hp > ch->GetMaxHitPoints())
-				new_hp = ch->GetMaxHitPoints();
-			ch->SetHitPoints(new_hp);
-		}
-
-		// increase sp
-		/*if ((selected->GetUsage() & GLOBAL_SP_RECOVERY_ITEM) == GLOBAL_SP_RECOVERY_ITEM)
-		{
-			uint32 new_sp = ch->GetSP();
-			new_sp += selected->GetRecoveryAmount();
-			if (new_sp > ch->GetMaxSP())
-				new_sp = ch->GetMaxSP();
-			ch->SetSP(new_sp);
-		}*/
-
-		// decrease item count
-		if (selected->GetCount() > 1) {
-			selected->DecrementCount(1);
-		}
-		else {
-			GlobalManager->RemoveFromInventory(selected->GetID());
-			Activate(false);
-			Hide();
-		}
-	}
-	else if (InputManager->LeftPress())
-	{
-
-	}
-	else if (InputManager->RightPress())
-	{
-
-	}
-	else if (InputManager->UpPress())
-	{
-		if (_current_char_selected > 0)
-			_current_char_selected--;
-		else
-			_current_char_selected = GlobalManager->GetActiveParty()->GetPartySize() - 1;
-	}
-	else if (InputManager->DownPress())
-	{
-		if (_current_char_selected < GlobalManager->GetActiveParty()->GetPartySize() - 1)
-			_current_char_selected++;
-		else
-			_current_char_selected = 0;
-	}
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 // InventoryWindow Class
@@ -332,23 +148,6 @@ InventoryWindow::InventoryWindow() : _active_box(ITEM_ACTIVE_NONE)
 	_InitCategory();
 	_InitInventoryItems();
 	_InitCharSelect();
-
-/*	None of this is useful... do we need any of it anymore?
-	//Load char portraits for bottom menu
-	StillImage i;
-
-	//FIX ME: Make dynamic based on char names
-	i.SetFilename("img/portraits/battle/claudius.png");
-
-	i.SetDimensions(100.0f, 100.0f);
-	_portraits.push_back(i);
-	cout << "Warning Here?" << endl;
-	VideoManager->LoadImage(_portraits[0]);
-	cout << "Warning Here?" << endl;
-*/
-	_location_graphic.SetFilename("img/menus/locations/desert_cave.png");
-	_location_graphic.SetDimensions(500.0f, 125.0f);
-	VideoManager->LoadImage(_location_graphic);
 
 	//Initializes the description textbox for the bottom window
 	_description.SetOwner(this);
@@ -363,9 +162,6 @@ InventoryWindow::InventoryWindow() : _active_box(ITEM_ACTIVE_NONE)
 
 InventoryWindow::~InventoryWindow()
 {
-	// Delete portraits
-//	VideoManager->DeleteImage(_portraits[0]);
-	VideoManager->DeleteImage(_location_graphic);
 }
 
 //Initializes the list of items
@@ -440,7 +236,7 @@ void InventoryWindow::_InitCategory() {
 	_item_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 
 	//FIXME: Reenable later
-	_item_categories.EnableOption(ITEM_KEY,false);
+//	_item_categories.EnableOption(ITEM_KEY,false);
 }
 
 // Activates/deactivates inventory window
@@ -524,6 +320,7 @@ void InventoryWindow::Update() {
 				// Activate the item list for this category
 				if (event == VIDEO_OPTION_CONFIRM) {
 					if (_inventory_items.GetNumOptions() > 0) {
+						_inventory_items.SetSelection(0);
 						_item_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 						_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 						_description.SetDisplayText( _item_objects[ 0 ]->GetDescription() );
@@ -590,149 +387,9 @@ void InventoryWindow::Update() {
 			break;
 	}
 
-//<<<<<<< .mine
 	// Update the item list
 	_UpdateItemText();
-//=======
-		/*if (event == VIDEO_OPTION_CONFIRM) {
-			//TODO Use Item
-			GlobalItem *item = (GlobalItem*)(GlobalManager->GetInventory()[item_selected]);
-			if ((item->GetUseCase() & GLOBAL_HP_RECOVERY_ITEM) || (item->GetUseCase() & GLOBAL_SP_RECOVERY_ITEM))
-			{
-				ApplyItem();
-			//}
-			//_menu_sounds["confirm"].PlaySound();
-		}
-		else if (event == VIDEO_OPTION_CANCEL) {
-			//_char_select_active = false;
-			//_inventory_active = true;
-			_active_box = ITEM_LIST_ACTIVE;
-			_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-			_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-			_menu_sounds["cancel"].PlaySound();
-			//cancel = false;
-		}
-	}
-	// Activate the character select window upon a confirm event on the option box
-	else if (_inventory_active)
-	{
-
-		if (event == VIDEO_OPTION_CONFIRM) {
-			//int item_selected = _inventory_items.GetSelection();
-			_char_select_active = true;
-			_inventory_active = false;
-			_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
-			_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-			_menu_sounds["confirm"].PlaySound();
-			//GlobalItem *item = (GlobalItem*)(GlobalManager->GetInventory()[item_selected]);
-			//if ((item->GetUseCase() & GLOBAL_HP_RECOVERY_ITEM) || (item->GetUseCase() & GLOBAL_SP_RECOVERY_ITEM))
-			//{
-
-				// Activate the character select window
-				//_char_window.Show();
-				//_char_window.Activate(true);
-				//_char_window.SetSelectedIndex(item_selected);
-		}
-		else if (event == VIDEO_OPTION_CANCEL) {
-			_inventory_active = false;
-			_menu_sounds["cancel"].PlaySound();
-			//Activate(false);
-			//cancel = false;
-			_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-			_item_categories.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-			_item_categories_active = true;
-		}
-	}
-	else if (_item_categories_active) {
-		if (event == VIDEO_OPTION_CONFIRM) {
-			_item_categories_active = false;
-			_item_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-			_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-			_inventory_active = true;
-			_menu_sounds["confirm"].PlaySound();
-		}
-		else if (event == VIDEO_OPTION_CANCEL) {
-			_menu_sounds["cancel"].PlaySound();
-			_item_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-			Activate(false);
-		}
-	}*/
-	/*UpdateItemText();
->>>>>>> .r528*/
-
 } // void InventoryWindow::Update()
-
-// FIXME Temp function
-void InventoryWindow::_TEMP_ApplyItem() {
-
-	// Use the passed in item to update values
-	GlobalItem *selected = (*GlobalManager->GetInventoryItems())[_inventory_items.GetSelection()];
-	GlobalCharacter *ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActor(_char_select.GetSelection()));
-
-	if (selected->GetCount() == 0)
-	{
-		// no more items to use
-		MenuMode::_instance->_menu_sounds["bump"].PlaySound();
-		return;
-	}
-
-	// check character hp
-	if (ch->GetHitPoints() == ch->GetMaxHitPoints())
-	{
-		// don't use item we're full
-		MenuMode::_instance->_menu_sounds["bump"].PlaySound();
-		return;
-	}
-
-	// Play Sound
-// 	_menu_sounds["potion"].PlaySound();
-
-	// increase hp
-	if (selected->GetUsage() == GLOBAL_USE_MENU)
-	{
-		uint32 new_hp = ch->GetHitPoints();
-		new_hp += 180;//selected->->GetRecoveryAmount();
-		if (new_hp > ch->GetMaxHitPoints())
-			new_hp = ch->GetMaxHitPoints();
-		ch->SetHitPoints(new_hp);
-	}
-
-	// increase sp
-	/*if ((selected->GetUseCase() & GLOBAL_SP_RECOVERY_ITEM) == GLOBAL_SP_RECOVERY_ITEM)
-	{
-		uint32 new_sp = ch->GetSP();
-		new_sp += selected->GetRecoveryAmount();
-		if (new_sp > ch->GetMaxSP())
-			new_sp = ch->GetMaxSP();
-		ch->SetSP(new_sp);
-	}*/
-
-	// decrease item count
-	if (selected->GetCount() > 1) {
-		selected->DecrementCount(1);
-	}
-	else {
-		//GlobalManager->RemoveItemFromInventory(HP_POTION);
-		GlobalManager->RemoveFromInventory(selected->GetID());
-		//_char_select_active = false;
-		if (GlobalManager->GetInventoryItems()->size() > 0) {
-			//_inventory_active = true;
-			_active_box = ITEM_ACTIVE_LIST;
-			_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-			_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-		}
-		else {
-			//_char_select_active = false;
-			//_inventory_active = false;
-			//_item_categories_active = false;
-			_active_box = ITEM_ACTIVE_NONE;
-			_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-			_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-		}
-		//Activate(false);
-		//Hide();
-	}
-}
 
 // Updates the item list
 void InventoryWindow::_UpdateItemText()
@@ -741,10 +398,7 @@ void InventoryWindow::_UpdateItemText()
 	std::map<uint32, GlobalObject*>* inv = GlobalManager->GetInventory();
 	std::vector<GlobalItem*>* invItems = GlobalManager->GetInventoryItems();
 	std::vector<GlobalWeapon*>* invWeapons = GlobalManager->GetInventoryWeapons();
-	std::vector<GlobalArmor*>* invTorsoArmor = GlobalManager->GetInventoryTorsoArmor();
-	std::vector<GlobalArmor*>* invHeadArmor = GlobalManager->GetInventoryHeadArmor();
-	std::vector<GlobalArmor*>* invArmArmor = GlobalManager->GetInventoryArmArmor();
-	std::vector<GlobalArmor*>* invLegArmor = GlobalManager->GetInventoryLegArmor();
+	std::vector<GlobalArmor*>* invArmor;
 	std::vector<GlobalKeyItem*>* invKeyItems = GlobalManager->GetInventoryKeyItems();
 
 
@@ -816,28 +470,32 @@ void InventoryWindow::_UpdateItemText()
 				_item_objects.push_back( weapon );
 			}
 
-			for (i_armor = invHeadArmor->begin(); i_armor != invHeadArmor->end(); i_armor++) {
+			invArmor = GlobalManager->GetInventoryHeadArmor();
+			for (i_armor = invArmor->begin(); i_armor != invArmor->end(); i_armor++) {
 				armor = *i_armor;
 				text = "<" + armor->GetIconImage().GetFilename() + "><32>     " + MakeStandardString(armor->GetName()) + "<R><350>" + NumberToString(armor->GetCount()) + "   ";
 				inv_names.push_back(MakeUnicodeString(text));
 				_item_objects.push_back( armor );
 			}
 
-			for (i_armor = invTorsoArmor->begin(); i_armor != invTorsoArmor->end(); i_armor++) {
+			invArmor = GlobalManager->GetInventoryTorsoArmor();
+			for (i_armor = invArmor->begin(); i_armor != invArmor->end(); i_armor++) {
 				armor = *i_armor;
 				text = "<" + armor->GetIconImage().GetFilename() + "><32>     " + MakeStandardString(armor->GetName()) + "<R><350>" + NumberToString(armor->GetCount()) + "   ";
 				inv_names.push_back(MakeUnicodeString(text));
 				_item_objects.push_back( armor );
 			}
 
-			for (i_armor = invArmArmor->begin(); i_armor != invArmArmor->end(); i_armor++) {
+			invArmor = GlobalManager->GetInventoryArmArmor();
+			for (i_armor = invArmor->begin(); i_armor != invArmor->end(); i_armor++) {
 				armor = *i_armor;
 				text = "<" + armor->GetIconImage().GetFilename() + "><32>     " + MakeStandardString(armor->GetName()) + "<R><350>" + NumberToString(armor->GetCount()) + "   ";
 				inv_names.push_back(MakeUnicodeString(text));
 				_item_objects.push_back( armor );
 			}
 
-			for (i_armor = invLegArmor->begin(); i_armor != invLegArmor->end(); i_armor++) {
+			invArmor = GlobalManager->GetInventoryLegArmor();
+			for (i_armor = invArmor->begin(); i_armor != invArmor->end(); i_armor++) {
 				armor = *i_armor;
 				text = "<" + armor->GetIconImage().GetFilename() + "><32>     " + MakeStandardString(armor->GetName()) + "<R><350>" + NumberToString(armor->GetCount()) + "   ";
 				inv_names.push_back(MakeUnicodeString(text));
@@ -893,12 +551,6 @@ void InventoryWindow::Draw()
 	_inventory_items.Draw();
 
 	return;
-/*<<<<<<< .mine
-=======
-	// Draw the char window
-	// _char_window.Draw();
->>>>>>> .r528*/
-
 } // bool InventoryWindow::Draw()
 
 
@@ -906,78 +558,38 @@ void InventoryWindow::Draw()
 // StatusWindow Class
 ////////////////////////////////////////////////////////////////////////////////
 
-StatusWindow::StatusWindow() : _char_select_active(false)
-{
+StatusWindow::StatusWindow() : _char_select_active(false) {
 	// Get party size for iteration
 	uint32 partysize = GlobalManager->GetActiveParty()->GetPartySize();
 	StillImage portrait;
 
+	GlobalCharacter* ch;
+
 	// Set up the full body portrait
 	for (uint32 i = 0; i < partysize; i++) {
-		// FIXME: Make applicable for other characters
-		string full_path = string("img/portraits/menu/claudius_large.png");
-		portrait.SetFilename(full_path);
+		ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActor(i));
+		portrait.SetFilename("img/portraits/menu/" + ch->GetFilename() + "_large.png");
 		portrait.SetStatic(true);
 		portrait.SetDimensions(150, 350);
 		VideoManager->LoadImage(portrait);
 		_full_portraits.push_back(portrait);
+//		cout << "Pushing " << ch->GetFilename() << "onto stack." << endl;
 	}
 
-// 	// FIXME Init the location picture
-// 	_location_graphic.SetFilename("img/menus/locations/desert_cave.png");
-// 	_location_graphic.SetDimensions(500, 125);
-// 	_location_graphic.SetStatic(true);
-// 	VideoManager->LoadImage(_location_graphic);
-//
 // 	//Init char select option box
 	_InitCharSelect();
-//
-// 	// Load sounds
-// 	SoundDescriptor confirm;
-// 	SoundDescriptor bump;
-// 	SoundDescriptor potion;
-// 	SoundDescriptor cancel;
-// 	if (confirm.LoadSound("snd/obtain.wav") == false)
-// 	{
-// 		cerr << "INVENTORYWINDOW::UPDATE - Unable to load confirm sound effect!" << endl;
-// 	}
-// 	if (bump.LoadSound("snd/bump.wav") == false)
-// 	{
-// 		cerr << "INVENTORYWINDOW::UPDATE - Unable to load bump sound effect!" << endl;
-// 	}
-// 	if (potion.LoadSound("snd/potion_drink.wav") == false)
-// 	{
-// 		cerr << "INVENTORYWINDOW::UPDATE - Unable to load potion drink sound effect!" << endl;
-// 	}
-// 	if (cancel.LoadSound("snd/cancel.wav") == false)
-// 	{
-// 		cerr << "INVENTORYWINDOW::UPDATE - Unable to load cancel sound effect!" << endl;
-// 	}
-// 	_menu_sounds["confirm"] = confirm;
-// 	_menu_sounds["bump"] = bump;
-// 	_menu_sounds["potion"] = potion;
-// 	_menu_sounds["cancel"] = cancel;
 
-	_current_char = GlobalManager->GetCharacter(GLOBAL_CHARACTER_CLAUDIUS);
+	_current_char =  dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActor(_char_select.GetSelection()));
 } // StatusWindow::StatusWindow()
 
 
 
-StatusWindow::~StatusWindow()
-{
+StatusWindow::~StatusWindow() {
 	uint32 partysize = GlobalManager->GetActiveParty()->GetPartySize();
 
 	for (uint32 i = 0; i < partysize; i++) {
 		VideoManager->DeleteImage(_full_portraits[i]);
 	}
-//
-// 	VideoManager->DeleteImage(_location_graphic);
-//
-// 	// Clear sounds
-// 	_menu_sounds["confirm"].FreeSound();
-// 	_menu_sounds["bump"].FreeSound();
-// 	_menu_sounds["potion"].FreeSound();
-// 	_menu_sounds["cancel"].FreeSound();
 }
 
 // Activate/deactivate window
@@ -1016,7 +628,7 @@ void StatusWindow::_InitCharSelect() {
 
 // Updates the status window
 void StatusWindow::Update() {
-	//FIX ME: Handle StatusWindow OptionBox
+	_current_char =  dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActor(_char_select.GetSelection()));
 
 	// check input values
 	if (InputManager->UpPress())
@@ -1037,6 +649,7 @@ void StatusWindow::Update() {
 		MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
 	}
 
+	_current_char =  dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActor(_char_select.GetSelection()));
 } // void StatusWindow::Update()
 
 
@@ -1111,7 +724,7 @@ void StatusWindow::Draw() {
 	//Draw character full body portrait
 	VideoManager->Move(735, 145);
 
-	VideoManager->DrawImage(_full_portraits[0]);
+	VideoManager->DrawImage(_full_portraits[_char_select.GetSelection()]);
 
 	_char_select.Draw();
 } // void StatusWindow::Draw()
@@ -1133,6 +746,7 @@ SkillsWindow::SkillsWindow() : _active_box(SKILL_ACTIVE_NONE) {
 	_description.SetFont("default");
 	_description.SetDisplayMode(VIDEO_TEXT_INSTANT);
 	_description.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
+
 } // SkillsWindow::SkillsWindow()
 
 
@@ -1357,7 +971,7 @@ void SkillsWindow::_UpdateSkillList() {
 	//FIX ME Need new categories
 	std::vector<hoa_global::GlobalSkill*> skills = ch->GetAttackSkills();
 	uint32 skillsize = skills.size();
-
+	
 	string tempstr = "";
 
 	switch (_skills_categories.GetSelection()) {
@@ -1375,7 +989,7 @@ void SkillsWindow::_UpdateSkillList() {
 		default:
 			_skills_list.SetSize(1,0);
 	}
-
+	
 	_skills_list.SetOptions(options);
 }
 
