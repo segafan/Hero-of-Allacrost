@@ -65,7 +65,12 @@ bool GameVideo::_DrawStillImage(const StillImage &id, const Color &color)
 	MoveRelative(x_align_offset, y_align_offset);	
 
 	bool skip_modulation = (color == Color::white && modulation == 1.0f);
+
+	// If we're modulating, calculate modulation color now
+	if (!skip_modulation)
+		fade_color = color * fade_color;
 	
+	Color color_modulated[4];
 	
 	for(uint32 iElement = 0; iElement < num_elements; ++iElement)
 	{		
@@ -107,9 +112,15 @@ bool GameVideo::_DrawStillImage(const StillImage &id, const Color &color)
 		bool success;
 		
 		if(skip_modulation)
-			success = _DrawElement(id._elements[iElement]);
+			success = _DrawElement(id._elements[iElement], id._elements[iElement].color);
 		else
-			success = _DrawElement(id._elements[iElement], color * fade_color);
+		{
+			color_modulated[0] = id._elements[iElement].color[0] * fade_color;
+			color_modulated[1] = id._elements[iElement].color[1] * fade_color;
+			color_modulated[2] = id._elements[iElement].color[2] * fade_color;
+			color_modulated[3] = id._elements[iElement].color[3] * fade_color;
+			success = _DrawElement(id._elements[iElement], color_modulated);
+		}
 		
 		if(!success)
 		{
@@ -131,18 +142,26 @@ bool GameVideo::_DrawStillImage(const StillImage &id, const Color &color)
 // _DrawElement: draws an image element. This is only used privately.
 //-----------------------------------------------------------------------------
 
-bool GameVideo::_DrawElement(const ImageElement &element) {
+bool GameVideo::_DrawElement(const ImageElement &element, const Color *color_array) {
 	Image *img = element.image;
 	
-	// set vertex coordinates
-	float xlo,xhi,ylo,yhi;
-	xlo = 0.0f;
-	xhi = 1.0f;
-	ylo = 0.0f;
-	yhi = 1.0f;
+	// Set vertex coordinates
+	static const float xlo = 0.0f;
+	static const float xhi = 1.0f;
+	static const float ylo = 0.0f;
+	static const float yhi = 1.0f;
 
+	// Array of the four vertexes defined on
+	// the 2D plane for glDrawArrays().
+	static const float vert_coords[] = 
+	{ 
+		xlo, ylo,
+		xhi, ylo,
+		xhi, yhi,
+		xlo, yhi,
+	};
 
-	// set blending parameters
+	// Set blending parameters
 	if(_blend)
 	{
 		glEnable(GL_BLEND);
@@ -161,9 +180,14 @@ bool GameVideo::_DrawElement(const ImageElement &element) {
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
 
-	// make calls to OpenGL to render this image
+	// Constant function local values for array rendering
+	static const int num_vertexes      = 4;
+	static const int coords_per_vertex = 2;
+
 		
-	if(img)
+	// If we have an image, setup texture coordinates
+	// and the texture coordinate array for glDrawArrays().
+	if (img)
 	{
 		// set texture coordinates	
 		float s0,s1,t0,t1;
@@ -172,6 +196,7 @@ bool GameVideo::_DrawElement(const ImageElement &element) {
 		s1 = img->u1 + element.u2 * (img->u2 - img->u1);
 		t0 = img->v1 + element.v1 * (img->v2 - img->v1);
 		t1 = img->v1 + element.v2 * (img->v2 - img->v1);
+
 
 		// swap x texture coordinates for x flipping
 		if (_x_flip) 
@@ -189,77 +214,71 @@ bool GameVideo::_DrawElement(const ImageElement &element) {
 			t1 = temp;
 		}
 
-		// set up blending parameters
+		// Place texture coordinates in a 4x2 array
+		// mirroring the structure of the vertex
+		// array for use in glDrawArrays().
+		float tex_coords[] = { 
+			s0, t1,
+			s1, t1,
+			s1, t0,
+			s0, t0,
+		};
+
+		// Enable texturing and bind texture
 		glEnable(GL_TEXTURE_2D);
 		_BindTexture(img->texture_sheet->tex_ID);
 
-		glBegin(GL_QUADS);
+		// Enable texture coordinate array
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
+		// Setup texture coordinate array
+		glTexCoordPointer(coords_per_vertex, GL_FLOAT, 0, tex_coords);
 		if (element.one_color)
 		{
-			glColor4fv((GLfloat *)&element.color[0]);
-
-			//glColor3f(s0, t1, 0);
-			glTexCoord2f(s0, t1);
-			glVertex2f(xlo, ylo); //bl
-
-			//glColor3f(s1, t1, 0);
-			glTexCoord2f(s1, t1);
-			glVertex2f(xhi, ylo); //br
-
-			//glColor3f(s1, t0, 0);
-			glTexCoord2f(s1, t0);
-			glVertex2f(xhi, yhi); //tr
-
-			//glColor3f(s0, t0, 0);
-			glTexCoord2f(s0, t0);
-			glVertex2f(xlo, yhi); //tl
+			glColor4fv((GLfloat *)&color_array[0]);
 		}
 		else
 		{
-			glColor4fv((GLfloat *)&element.color[0]);
-			glTexCoord2f(s0, t1);
-			glVertex2f(xlo, ylo); //bl
-			glColor4fv((GLfloat *)&element.color[1]);
-			glTexCoord2f(s1, t1);
-			glVertex2f(xhi, ylo); //br
-			glColor4fv((GLfloat *)&element.color[2]);
-			glTexCoord2f(s1, t0);
-			glVertex2f(xhi, yhi); //tr
-			glColor4fv((GLfloat *)&element.color[3]);
-			glTexCoord2f(s0, t0);
-			glVertex2f(xlo, yhi); //tl			
-		}		
+			glEnableClientState(GL_COLOR_ARRAY);
+			glColorPointer(4, GL_FLOAT, 0, (GLfloat *)color_array);
+		}
+		// Always use a vertex array
+		glEnableClientState(GL_VERTEX_ARRAY);
+
+		// Setup the vertex array pointer
+		glVertexPointer(coords_per_vertex, GL_FLOAT, 0, vert_coords);
+
+		// Draw the object using the array pointers we've just setup
+		glDrawArrays(GL_QUADS, 0, num_vertexes);
 	}
 	else
 	{
-		glBegin(GL_QUADS);
+		// Use a single call to glColor for one_color
+		// images, or a setup a gl color array for multiple.
 		if (element.one_color)
 		{
-			glColor4fv((GLfloat *)&element.color[0]);
-			glVertex2f(xlo, ylo); //bl
-			glVertex2f(xhi, ylo); //br
-			glVertex2f(xhi, yhi); //tr
-			glVertex2f(xlo, yhi); //tl			
+			glColor4fv((GLfloat *)&color_array[0]);
+			glDisableClientState(GL_COLOR_ARRAY);
 		}
 		else
 		{
-			glColor4fv((GLfloat *)&element.color[0]);
-			glVertex2f(xlo, ylo); //bl
-			glColor4fv((GLfloat *)&element.color[1]);
-			glVertex2f(xhi, ylo); //br
-			glColor4fv((GLfloat *)&element.color[2]);
-			glVertex2f(xhi, yhi); //tr
-			glColor4fv((GLfloat *)&element.color[3]);
-			glVertex2f(xlo, yhi); //tl			
+			glEnableClientState(GL_COLOR_ARRAY);
+			//glColorPointer(4, GL_FLOAT, 0, (GLfloat *)element.color);
+			glColorPointer(4, GL_FLOAT, 0, (GLfloat *)color_array);
 		}
+		// Always use a vertex array
+		glEnableClientState(GL_VERTEX_ARRAY);
+
+		// Setup the vertex array pointer
+		glVertexPointer(coords_per_vertex, GL_FLOAT, 0, vert_coords);
+
+		// Disable the texture array as we're not texturing
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+		// Draw the object using the array pointers we've just setup
+		glDrawArrays(GL_QUADS, 0, num_vertexes);
 	}
 
-	glEnd();
-
-
-	// clean up
-	glDisable(GL_TEXTURE_2D);
 	if (_blend)
 		glDisable(GL_BLEND);
 	
@@ -273,161 +292,6 @@ bool GameVideo::_DrawElement(const ImageElement &element) {
 	return true;
 }
 
-
-//-----------------------------------------------------------------------------
-// _DrawElement: draws an image element. This is only used privately.
-//
-// Note: this version includes modulation set by the image descriptor and
-//       screen fader
-//-----------------------------------------------------------------------------
-
-bool GameVideo::_DrawElement
-(
-	const ImageElement &element,
-	const Color &modulate_color
-)
-{	
-	Image *img = element.image;
-
-	// set vertex coordinates
-	float xlo,xhi,ylo,yhi;
-	xlo = 0.0f;
-	xhi = 1.0f;
-	ylo = 0.0f;
-	yhi = 1.0f;
-	
-	// set blending
-	if(_blend)
-	{
-		glEnable(GL_BLEND);
-		if (_blend == 1)
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		else
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE); // additive
-	}
-	else
-	{
-		// if blending isn't in the draw flags, don't use blending UNLESS
-		// the given image element has translucent vertex colors
-		if(!element.blend)
-			glDisable(GL_BLEND);
-		else
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	}
-
-	// make calls to OpenGL to render this image
-	
-	if(img)
-	{
-		// set texture coordinates	
-		float s0,s1,t0,t1;
-		s0 = img->u1 + element.u1 * (img->u2 - img->u1);
-		s1 = img->u1 + element.u2 * (img->u2 - img->u1);
-		t0 = img->v1 + element.v1 * (img->v2 - img->v1);
-		t1 = img->v1 + element.v2 * (img->v2 - img->v1);
-
-		// swap x texture coordinates for x flipping
-		if (_x_flip) 
-		{ 
-			float temp = s0;
-			s0 = s1;
-			s1 = temp;
-		} 
-
-		// swap y texture coordinates for y flipping
-		if (_y_flip) 
-		{ 
-			float temp = t0;
-			t0 = t1;
-			t1 = temp;
-		} 
-
-		// set up texture parameters
-		glEnable(GL_TEXTURE_2D);
-		_BindTexture(img->texture_sheet->tex_ID);
-
-		glBegin(GL_QUADS);
-		if(element.one_color)
-		{
-			Color color = element.color[0] * modulate_color;
-			glColor4fv((GLfloat *)&color);
-			glTexCoord2f(s0, t1);
-			glVertex2f(xlo, ylo); //bl
-			glTexCoord2f(s1, t1);
-			glVertex2f(xhi, ylo); //br
-			glTexCoord2f(s1, t0);
-			glVertex2f(xhi, yhi); //tr
-			glTexCoord2f(s0, t0);
-			glVertex2f(xlo, yhi); //tl
-		}
-		else
-		{
-			Color color[4];
-			color[0] = modulate_color * element.color[0];
-			color[1] = modulate_color * element.color[1];
-			color[2] = modulate_color * element.color[2];
-			color[3] = modulate_color * element.color[3];
-			
-			glColor4fv((GLfloat *)&color[0]);
-			glTexCoord2f(s0, t1);
-			glVertex2f(xlo, ylo); //bl
-			glColor4fv((GLfloat *)&color[1]);
-			glTexCoord2f(s1, t1);
-			glVertex2f(xhi, ylo); //br
-			glColor4fv((GLfloat *)&color[2]);
-			glTexCoord2f(s1, t0);
-			glVertex2f(xhi, yhi); //tr
-			glColor4fv((GLfloat *)&color[3]);
-			glTexCoord2f(s0, t0);
-			glVertex2f(xlo, yhi); //tl			
-		}		
-	}
-	else
-	{
-		glBegin(GL_QUADS);
-		if(element.one_color)
-		{
-			Color color = element.color[0] * modulate_color;			
-			glColor4fv((GLfloat *)&color);
-			glVertex2f(xlo, ylo); //bl
-			glVertex2f(xhi, ylo); //br
-			glVertex2f(xhi, yhi); //tr
-			glVertex2f(xlo, yhi); //tl			
-		}
-		else
-		{
-			Color color[4];
-			color[0] = modulate_color * element.color[0];
-			color[1] = modulate_color * element.color[1];
-			color[2] = modulate_color * element.color[2];
-			color[3] = modulate_color * element.color[3];
-
-			glColor4fv((GLfloat *)&color[0]);
-			glVertex2f(xlo, ylo); //bl
-			glColor4fv((GLfloat *)&color[1]);
-			glVertex2f(xhi, ylo); //br
-			glColor4fv((GLfloat *)&color[2]);
-			glVertex2f(xhi, yhi); //tr
-			glColor4fv((GLfloat *)&color[3]);
-			glVertex2f(xlo, yhi); //tl			
-		}
-	}
-
-	glEnd();
-
-	glDisable(GL_TEXTURE_2D);
-	if (_blend)
-		glDisable(GL_BLEND);
-		
-	if(glGetError())
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: glGetError() returned true in _DrawElement()!" << endl;
-		return false;
-	}		
-		
-	return true;
-}
 
 
 //-----------------------------------------------------------------------------

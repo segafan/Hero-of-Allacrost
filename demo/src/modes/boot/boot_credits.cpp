@@ -73,7 +73,15 @@ void CreditsScreen::Draw()
 	VideoManager->SetScissorRect(_window.GetScissorRect());
 	VideoManager->EnableScissoring(true);
 	if (_credits_rendered)
+	{
+		// Fade in the text by setting new color with alpha value below 1.0f
+		float color_alpha = _text_offset_y * 0.025f;
+		if (color_alpha > 1.0f)
+			color_alpha = 1.0f;
+		GLfloat modulation[] = {1.0f, 1.0f, 1.0f, color_alpha};
+		glColor4fv(modulation);
 		_credits_rendered->Draw();
+	}
 	VideoManager->EnableScissoring(false);
 }
 
@@ -82,12 +90,8 @@ void CreditsScreen::Draw()
 void CreditsScreen::UpdateWindow(int32 frameTime)
 {
 	_window.Update(frameTime);
-	float color_alpha = _text_offset_y * 0.025f;
 	float delta = static_cast<float>(frameTime) * 0.02f;
 	_text_offset_y += delta; // Update text offset
-
-	// Fade in the text by setting new text color with alpha value below 1.0f
-	VideoManager->SetTextColor(Color(1.0f, 1.0f, 1.0f, (color_alpha > 1.0f) ? 1.0f : color_alpha));
 }
 
 
@@ -98,6 +102,7 @@ void CreditsScreen::Show()
 	_visible = true;
 	_text_offset_y = 0.0f; // Reset the text offset
 	VideoManager->SetFont("default"); // Reset font
+	VideoManager->SetTextColor(Color::white); // Reset text color
 
 	if (!_credits_rendered) {
 		_credits_rendered = VideoManager->RenderText(MakeUnicodeString(_credits_text));
@@ -114,7 +119,7 @@ void CreditsScreen::Hide()
 {
 	_window.Hide();
 	_visible = false;
-	VideoManager->SetTextColor(Color::white); // Reset text color
+	glColor4fv(&Color::white[0]);
 	if (_credits_rendered) {
 		delete(_credits_rendered);
 		_credits_rendered = NULL;

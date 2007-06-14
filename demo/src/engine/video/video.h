@@ -1393,22 +1393,16 @@ private:
 
 	/** \brief draws an image element, i.e. one image within an image descriptor which may contain multiple images
 	 *
-	 *  \param element        pointer to the image element to draw
-	 *  \param modulate_color  combination of color for this image, and our current fade color
-	 * \return success/failure
-	 */
-	bool _DrawElement(const private_video::ImageElement &element, const Color &modulate_color);
-
-	/** \brief draws an image element, i.e. one image within an image descriptor which may contain multiple images
-	 *
-	 *  \note  this version of the function accepts no color, so for cases where no fade is going on
-	 *         and we don't want to modulate the image's color (which is the case indeed 99% of the time),
-	 *         we can skip all the nasty modulation math for a bit of extra efficiency
+	 *  \note  this function takes an array of vertex colors. in cases where
+	 *         modulation is required, copy the element.color array and modulate
+	 *         it, else just pass element.color as this argument.
 	 *
 	 *  \param element        pointer to the image element to draw
+	 *  \param color_array    pointer to an 4 element array of vertex colors,
+	 *                        modulated if necessary
 	 * \return success/failure
 	 */
-	bool _DrawElement(const private_video::ImageElement &element);
+	bool _DrawElement(const private_video::ImageElement &element, const Color *color_array);
 
 	/** \brief helper function to DrawImage() to do the actual work of doing an image
 	 *
