@@ -1332,7 +1332,6 @@ bool GameVideo::ApplyLightingOverlay()
 
 bool GameVideo::CaptureScreen(StillImage &id)
 {
-
 	if(VIDEO_DEBUG)
 		cout << "VIDEO: Entering CaptureScreen()" << endl;
 
@@ -1340,65 +1339,42 @@ bool GameVideo::CaptureScreen(StillImage &id)
 	GLint viewport_dimensions[4];
 	glGetIntegerv(GL_VIEWPORT, viewport_dimensions);
 
-	// Set up the loadInfo struct
-	ImageLoadInfo load_info;
-	load_info.width = viewport_dimensions[2];
-	load_info.height = viewport_dimensions[3];
-	load_info.pixels = malloc(viewport_dimensions[2] * viewport_dimensions[3] * 4);
-
-	// Buffer to store the image before it is flipped
-	void * buffer = malloc(viewport_dimensions[2] * viewport_dimensions[3] * 4);
-
-	// Read pixel data
-	glReadPixels(0, 0, viewport_dimensions[2], viewport_dimensions[3], GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-
-	if(glGetError())
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO_DEBUG: glReadPixels() returned an error inside GameVideo::CaptureScreen!" << endl;
-
-		if (buffer)
-			free(buffer);
-
-		if (load_info.pixels)
-			free(load_info.pixels);
-
-		return false;
-	}
-
-	// Flip the image
-	for(int32 line = 0; line < viewport_dimensions[3]; line++)
-	{
-		uint8* srcline = ((uint8*)buffer) + (line * viewport_dimensions[2] * 4);
-		uint8* destline = ((uint8*)load_info.pixels) + ((viewport_dimensions[3] - line - 1) * viewport_dimensions[2] * 4);
-
-		memcpy(destline, srcline, viewport_dimensions[2] * 4);
-	}
-
-	// Free the buffer
-	if (buffer)
-		free(buffer);
+	// Set up the screen rectangle to copy
+	int32 width  = viewport_dimensions[2];
+	int32 height = viewport_dimensions[3];
+	ScreenRect    screen_rect(0, height, width, height);
 
 	//TEMP TAGS
 	// create an Image structure and store it our std::map of images
 	if (id._filename == "")
 		id._filename = "captured_screen";
-	Image *new_image = new Image(id._filename, "<T>", load_info.width, load_info.height, false);
+	Image *new_image = new Image(id._filename, "<T>", width, height, false);
 
-	// try to insert the image in a texture sheet
-	TexSheet *sheet = _InsertImageInTexSheet(new_image, load_info, true);
+	// Try to create a texture sheet of screen size (rounded up)
+	TexSheet *sheet = _CreateTexSheet(RoundUpPow2(width), RoundUpPow2(height), VIDEO_TEXSHEET_ANY, false);
 
 	if(!sheet)
 	{
-		// this should never happen, unless we run out of memory or there
-		// is a bug in the _InsertImageInTexSheet() function
-
-		if(VIDEO_DEBUG)
+		// This should never happen, unless we run out of memory or the
+		// size of the screen texture is larger than the max available
+		if (VIDEO_DEBUG)
 			cerr << "VIDEO_DEBUG: GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
 
-		if (load_info.pixels)
-			free(load_info.pixels);
+		return false;
+	}
+	if (!sheet->tex_mem_manager->Insert(new_image))
+	{
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO_DEBUG: TexMemMgr->Insert(image) returned NULL in " << __FUNCTION__ << endl;
+		_RemoveSheet(sheet);
+		return false;
+	}
 
+	if (!sheet->CopyScreenRect(0, 0, screen_rect))
+	{
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO_DEBUG: TexSheet->CopyScreenRect() failed in " << __FUNCTION__ << endl;
+		_RemoveSheet(sheet);
 		return false;
 	}
 
@@ -1406,22 +1382,17 @@ bool GameVideo::CaptureScreen(StillImage &id)
 
 	// if width or height are zero, that means to use the dimensions of image
 	if(id._width == 0.0f)
-		id._width = (float)load_info.width;
+		id._width  = (float)width;
 
 	if(id._height == 0.0f)
-		id._height = (float)load_info.height;
+		id._height = (float)height;
 
-	// store the new image element
-	ImageElement  element(new_image, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f, id._width, id._height, id._color);
+	// Store the new image element (flipped y)
+	ImageElement element(new_image, 0, 0, 0.0f, 1.0f, 1.0f, 0.0f, id._width, id._height, id._color);
 	id._elements.push_back(element);
 
 	// Store the image in our std::map
 	_images[id._filename] = new_image;
-
-
-	// finally, delete the buffer used to hold the pixel data
-	if (load_info.pixels)
-		free(load_info.pixels);
 
 	return true;
 }

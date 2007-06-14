@@ -153,6 +153,14 @@ public:
 		\return Success/failure
 	*/
 	bool CopyRect(int32 x, int32 y, private_video::ImageLoadInfo & load_info);
+
+	//! \brief Copies an portion of the screen into a sub-rectangle of the texture
+	/*!	\param x X coordinate of rectangle to copy screen to
+		\param y Y coordinate of rectangle to copy screen to
+		\param screen_rect The portion of the screen
+		\return Success/failure
+	*/
+	bool CopyScreenRect(int32 x, int32 y, const ScreenRect &screen_rect);
 	
 	//! \brief Removes an image completely
 	/*!	\param img The image to remove
