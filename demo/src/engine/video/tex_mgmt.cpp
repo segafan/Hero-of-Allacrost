@@ -1921,12 +1921,9 @@ bool TexSheet::AddImage(Image *img, ImageLoadInfo & load_info)
 
 bool TexSheet::CopyRect(int32 x, int32 y, private_video::ImageLoadInfo & load_info)
 {
-	int32 error;
+	GLenum error;
 
-	VideoManager->_BindTexture(tex_ID);
-
-	error = glGetError();
-	if(error)
+	if (!VideoManager->_BindTexture(tex_ID))
 	{
 		if(VIDEO_DEBUG)
 		{
@@ -1938,12 +1935,12 @@ bool TexSheet::CopyRect(int32 x, int32 y, private_video::ImageLoadInfo & load_in
 	glTexSubImage2D
 	(
 		GL_TEXTURE_2D,		// target
-		0,					// level
-		x,					// x offset within tex sheet
-		y,					// y offset within tex sheet
+		0,			// level
+		x,			// x offset within tex sheet
+		y,			// y offset within tex sheet
 		load_info.width,	// width in pixels of image
 		load_info.height,	// height in pixels of image
-		GL_RGBA,			// format
+		GL_RGBA,		// format
 		GL_UNSIGNED_BYTE,	// type
 		load_info.pixels	// pixels of the sub image
 	);
@@ -1961,6 +1958,43 @@ bool TexSheet::CopyRect(int32 x, int32 y, private_video::ImageLoadInfo & load_in
 	return true;
 }
 
+bool TexSheet::CopyScreenRect(int32 x, int32 y, const ScreenRect &screen_rect)
+{
+	GLenum error;
+
+	if (!VideoManager->_BindTexture(tex_ID))
+	{
+		if(VIDEO_DEBUG)
+		{
+			cerr << "VIDEO ERROR: could not bind texture in TexSheet::CopyScreenRect()!" << endl;
+		}
+		return false;
+	}
+
+	glCopyTexSubImage2D
+	(
+		GL_TEXTURE_2D,		// target
+		0,			// level
+		x,			// x offset within tex sheet
+		y,			// y offset within tex sheet
+		screen_rect.left,	// left starting pixel of the screen to copy
+		screen_rect.top - screen_rect.height,	// bottom starting pixel of the screen to copy
+		screen_rect.width,	// width in pixels of image
+		screen_rect.height	// height in pixels of image
+	);
+
+	error = glGetError();
+	if(error)
+	{
+		if(VIDEO_DEBUG)
+		{
+			cerr << "VIDEO ERROR: glTexSubImage2D() failed in TexSheet::CopyScreenRect()!" << endl;
+		}
+		return false;
+	}
+
+	return true;
+}
 
 
 
