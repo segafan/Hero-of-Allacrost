@@ -972,116 +972,49 @@ void GameVideo::PopState()
 
 
 //-----------------------------------------------------------------------------
-// SetMenuSkin: sets the menu skin to use the menu border images starting with
-//              imageBaseName, and with an interior of fill color
+// Menu Methods
 //-----------------------------------------------------------------------------
 
-bool GameVideo::SetMenuSkin
-(
-	const std::string &img_base_name,
-	const Color  &fill_color
-)
+bool GameVideo::LoadMenuSkin(std::string skin_name, std::string border_image, std::string background_image, bool make_default)
 {
-	return SetMenuSkin(img_base_name, fill_color, fill_color, fill_color, fill_color);
+	return _gui->LoadMenuSkin(skin_name, border_image, background_image,
+		Color::clear, Color::clear, Color::clear, Color::clear, make_default);
 }
 
 
-//-----------------------------------------------------------------------------
-// SetMenuSkin: sets the menu skin to use the menu border images starting with
-//              imageBaseName, and with an interior whose 4 vertices' colors
-//              are given by fillColor_TL, fillColor_TR, fillColor_BL and
-//              fillColor_BR
-//-----------------------------------------------------------------------------
 
-bool GameVideo::SetMenuSkin
-(
-	const std::string &img_base_name,
-	const Color  &fill_color_TL,
-	const Color  &fill_color_TR,
-	const Color  &fill_color_BL,
-	const Color  &fill_color_BR
-)
+bool GameVideo::LoadMenuSkin(std::string skin_name, std::string border_image, Color background_color, bool make_default)
 {
-	return _gui->SetMenuSkin
-	(
-		img_base_name + "_tl.png",
-		img_base_name + "_t.png",
-		img_base_name + "_tr.png",
-		img_base_name + "_l.png",
-		img_base_name + "_r.png",
-		img_base_name + "_bl.png",
-		img_base_name + "_b.png",
-		img_base_name + "_br.png",
-		img_base_name + "_tri_t.png",
-		img_base_name + "_tri_l.png",
-		img_base_name + "_tri_r.png",
-		img_base_name + "_tri_b.png",
-		img_base_name + "_quad.png",
-
-		fill_color_TL,
-		fill_color_TR,
-		fill_color_BL,
-		fill_color_BR,
-
-		""     // no background image
-	);
+	return _gui->LoadMenuSkin(skin_name, border_image, "",
+		background_color, background_color, background_color, background_color, make_default);
 }
 
 
-//-----------------------------------------------------------------------------
-// SetMenuSkin: sets the menu skin to use the menu border images starting with
-//              imageBaseName, and with a background image
-//-----------------------------------------------------------------------------
 
-bool GameVideo::SetMenuSkin
-(
-	const std::string &img_base_name,
-	const std::string &background_image,
-	const Color  &fill_color_TL,
-	const Color  &fill_color_TR,
-	const Color  &fill_color_BL,
-	const Color  &fill_color_BR
-)
+bool GameVideo::LoadMenuSkin(std::string skin_name, std::string border_image, Color top_left, Color top_right,
+	Color bottom_left, Color bottom_right, bool make_default)
 {
-	return _gui->SetMenuSkin
-	(
-		img_base_name + "_tl.png",
-		img_base_name + "_t.png",
-		img_base_name + "_tr.png",
-		img_base_name + "_l.png",
-		img_base_name + "_r.png",
-		img_base_name + "_bl.png",
-		img_base_name + "_b.png",
-		img_base_name + "_br.png",
-		img_base_name + "_tri_t.png",
-		img_base_name + "_tri_l.png",
-		img_base_name + "_tri_r.png",
-		img_base_name + "_tri_b.png",
-		img_base_name + "_quad.png",
-		fill_color_TL,
-		fill_color_TR,
-		fill_color_BL,
-		fill_color_BR,
-		background_image
-	);
+	return _gui->LoadMenuSkin(skin_name, border_image, "",
+		top_left, top_right, bottom_left, bottom_right, make_default);
 }
 
 
-//-----------------------------------------------------------------------------
-// SetMenuSkin: sets the menu skin to use the menu border images starting with
-//              imageBaseName, a background image, and with an interior of fill color
-//-----------------------------------------------------------------------------
 
-bool GameVideo::SetMenuSkin
-(
-	const std::string &img_base_name,
-	const std::string &background_image,
-	const Color  &fill_color
-)
+bool GameVideo::LoadMenuSkin(std::string skin_name, std::string border_image, std::string background_image,
+	Color background_color, bool make_default)
 {
-	return SetMenuSkin(img_base_name, background_image, fill_color, fill_color, fill_color, fill_color);
+	return _gui->LoadMenuSkin(skin_name, border_image, background_image,
+		background_color, background_color, background_color, background_color, make_default);
 }
 
+
+
+bool GameVideo::LoadMenuSkin(std::string skin_name, std::string border_image, std::string background_image,
+	Color top_left, Color top_right, Color bottom_left, Color bottom_right, bool make_default)
+{
+	return _gui->LoadMenuSkin(skin_name, border_image, background_image,
+		top_left, top_right, bottom_left, bottom_right, make_default);
+}
 
 //-----------------------------------------------------------------------------
 // _BindTexture: wraps call to glBindTexture(), plus some extra checking to

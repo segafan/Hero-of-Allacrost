@@ -169,50 +169,6 @@ protected:
 
 
 /** ****************************************************************************
-*** \brief Holds information about a menu skin (borders + interior).
-***
-*** There is only one active menu skin at any given time. In other words, there
-*** can not have a GUI obje
-***
-*** \note You don't need to worry about this class and you should never create
-*** any instance of it. It is only to exist as a member of the GUI class
-***
-*** \todo Add support for menu skin backgrounds to be tiled images versus
-*** stretched images.
-***
-*** \todo Add support to allow menu skin backgrounds to be colors instead of
-*** images.
-***
-*** \todo Enable menu skin images to be loaded as MultiImage image files.
-*** ***************************************************************************/
-class MenuSkin {
-public:
-	//! \brief The background image of the menu skin.
-	StillImage background;
-
-	/** \brief A 2d array that holds the border images for the menu skin
-	*** The entries in this array represent the following parts:
-	*** - skin[0][0]: upper left corner
-	*** - skin[0][1]: top side
-	*** - skin[0][2]: upper right corner
-	*** - skin[1][0]: left side
-	*** - skin[1][1]: center (no image, just colors)
-	*** - skin[1][2]: right side
-	*** - skin[2][0]: bottom left corner
-	*** - skin[2][1]: bottom side
-	*** - skin[2][2]: bottom right corner
-	**/
-	StillImage skin[3][3];
-
-	/** \brief Border-connecting images, used when two or more MenuWindows are side by side.
-	***  There are four tri-connectors and one quad-connector. tri_t would be an image for
-	***  a 3-way connector on the top of a MenuWindow.
-	**/
-	StillImage tri_t, tri_l, tri_r, tri_b, quad;
-}; // class MenuSkin
-
-
-/** ****************************************************************************
 *** \brief A helper class to the video engine to manage all of the GUI functionality.
 ***
 *** There is exactly one instance of this class, which is both created and destroyed
@@ -222,8 +178,17 @@ public:
 *** ***************************************************************************/
 class GUI {
 public:
-	//! \brief The current menu skin that all GUI objects will use.
-	MenuSkin current_skin;
+	/** \brief A map containing all of the menu skins which have been loaded
+	*** The string argument is the reference name of the menu, which is defined
+	*** by the user when they load a new skin. 
+	***
+	**/
+	std::map<std::string, MenuSkin> menu_skins;
+
+	/** \brief A pointer to the default menu skin that GUI objects will use if a skin is not explicitly declared
+	*** 
+	**/
+	MenuSkin* default_skin;
 
 	//! \brief Keeps track of the sum of FPS values over the last VIDEO_FPS_SAMPLES frames.
 	//! This is used to simplify the calculation of average frames per second.
@@ -251,33 +216,54 @@ public:
 	**/
 	void DrawFPS(int32 frame_time);
 
-	/** \brief Sets the current menu skin for GUI objects to use
-	*** \param &img_file_* image filenames for the skin
-	*** \param &fill_color_* color to fill the menu with. You can make it transparent by setting alpha
-	*** \param &background_image background image of the menu
-	*** \return True if successful, false otherwise.
+	/** \brief Prepares a new menu skin for use in game
+	*** \param skin_name The name that will be used to refer to the skin after it is successfully loaded
+	*** \param border_image The filename for the multi-image that contains the menu's border images
+	*** \param background_image The filename for the skin's background image (optional)
+	*** \param top_left Sets the background color for the top left portion of the skin
+	*** \param top_right Sets the background color for the top right portion of the skin
+	*** \param bottom_left Sets the background color for the bottom left portion of the skin
+	*** \param bottom_right Sets the background color for the bottom right portion of the skin
+	*** \param make_default If this skin should be the default menu skin to be used, set this argument to true
+	*** \return True if the skin was loaded successfully, or false in case of an error
+	*** 
+	*** A few notes about this function:
+	*** - Only the first two arguments are required; the rest are optional
+	*** - If you want a consistent background color for the menu, you should set all four color arguments to the same value
+	*** - If you set a background image, the background colors will not be visible unless the background image has some transparency
+	*** - If no other menu skins are loaded when this function is called, the default skin will automatically be set to this skin,
+	***   regardless of the value of the make_default parameter.
 	**/
-	bool SetMenuSkin
-	(
-		const std::string &img_file_TL,
-		const std::string &img_file_T,
-		const std::string &img_file_TR,
-		const std::string &img_file_L,
-		const std::string &img_file_R,
-		const std::string &img_file_BL, // image filenames for the borders
-		const std::string &img_file_B,
-		const std::string &img_file_BR,
-		const std::string &img_file_tri_T,
-		const std::string &img_file_tri_L,
-		const std::string &img_file_tri_R,
-		const std::string &img_file_tri_B,
-		const std::string &img_file_quad,
-		const Color &fill_color_TL, // color to fill the menu with. You can
-		const Color &fill_color_TR, // make it transparent by setting alpha
-		const Color &fill_color_BL,
-		const Color &fill_color_BR,
-		const std::string &background_image
-	);
+	bool LoadMenuSkin(std::string skin_name, std::string border_image, std::string background_image = "",
+		Color top_left = Color::clear, Color top_right = Color::clear, Color bottom_left = Color::clear,
+		Color bottom_right = Color::clear, bool make_default = false);
+
+	/** \brief Sets the default menu skin to use from the set of pre-loaded skins
+	*** \param skin_name The name of the already loaded menu skin that should be made the default skin
+	***
+	*** If the skin_name does not refer to a valid skin, a warning message will be printed and no change
+	*** will occur.
+	*** \note This method will <b>not</b> change the skins of any active menu windows.
+	**/
+	void SetDefaultMenuSkin(std::string skin_name);
+
+	/** \brief Deletes a menu skin that has been loaded
+	*** \param skin_name The name of the loaded menu skin that should be removed
+	***
+	*** This function could fail on one of two circumstances. First, if there is no MenuSkin loaded for
+	*** the key skin_name, the function will do nothing. Second, if any MenuWindow objects are still
+	*** referencing the skin that is trying to be deleted, the function will print a warning message
+	*** and not delete the skin. Therefore, <b>before you call this function, you must delete any and all
+	*** MenuWindow objects which make use of this skin, or change the skin used by those objects</b>.
+	**/
+	void DeleteMenuSkin(std::string skin_name);
+
+	/** \brief Determines if a specific menu skin is loaded and available for use
+	*** \param skin_name The name of the menu skin to check
+	*** \return True if the menu skin exists, false if it does not
+	**/
+	bool IsMenuSkinAvailable(std::string skin_name)
+		{ if (menu_skins.find(skin_name) != menu_skins.end()) return true; else return false; }
 
 	/** \brief Creates a new image for a menu of a given width and height.
 	*** \param id A reference to the StillImage object to contain the menu image

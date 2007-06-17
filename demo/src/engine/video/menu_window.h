@@ -73,6 +73,63 @@ enum VIDEO_MENU_STATE {
 };
 
 
+namespace private_video {
+
+/** ****************************************************************************
+*** \brief A container class for a menu skin, consisting of border images and an interior
+***
+*** The GUI class manages all MenuSkins which have been loaded by the user. Multiple
+*** menu
+***
+*** \note The contructor and destructor of this class do nothing. The creation and destruction
+*** of the images contained by this class is done from the GUI class.
+***
+*** \todo Add support for menu skin backgrounds to be tiled images versus
+*** stretched images.
+***
+*** \todo Add support to allow menu skin backgrounds to be colors instead of
+*** images.
+*** ***************************************************************************/
+class MenuSkin {
+public:
+	/** \brief A 2d array that holds the border images for the menu skin
+	*** The entries in this array represent the following parts:
+	*** - borders[0][0]: upper left corner
+	*** - borders[0][1]: top side
+	*** - borders[0][2]: upper right corner
+	*** - borders[1][0]: left side
+	*** - borders[1][1]: center (this is not an actual image, but rather contains the background colors for the four corners)
+	*** - borders[1][2]: right side
+	*** - borders[2][0]: bottom left corner
+	*** - borders[2][1]: bottom side
+	*** - borders[2][2]: bottom right corner
+	**/
+	StillImage borders[3][3];
+
+	/** \brief Border-connecting images, used when two or more MenuWindows are side by side.
+	***  There are four tri-connectors and one quad-connector. tri_t would be an image for
+	***  a 3-way connector on the top of a MenuWindow.
+	***  - connectors[0]: top tri-connector
+	***  - connectors[1]: bottom tri-connector
+	***  - connectors[2]: left tri-connector
+	***  - connectors[3]: right tri-connector
+	***  - connectors[4]: quad connector
+	**/
+	StillImage connectors[5];
+
+	//! \brief The (optional) background image of the menu skin that fills the inside of the MenuWindow
+	StillImage background;
+
+	MenuSkin()
+		{}
+
+	~MenuSkin()
+		{}
+}; // class MenuSkin
+
+} // namespace private_video
+
+
 /** ****************************************************************************
 *** \brief Represents GUI menu windows and handles their operation
 ***
@@ -177,9 +234,13 @@ private:
 	//! \brief The id of the next menu instance to assign. New IDs are assigned to each menu when it is created.
 	static int32 _current_menu_id;
 
-	//! \brief Retains a registered map of menu window objects.
-	//! \note This is in case the menus need to be updated if the menu skin changes.
+	/** \brief Retains a registered map of menu window objects.
+	*** \note This is in case the menus need to be updated if the menu skin changes.
+	**/
 	static std::map<int32, MenuWindow*> _menu_map;
+
+	//! \brief A pointer to the menu skin that the menu window currently uses
+	private_video::MenuSkin* _skin;
 
 	//! \brief The current id of this object.
 	int32 _id;
@@ -218,7 +279,7 @@ private:
 	*** \return Success or failure.
 	**/
 	bool _RecreateImage();
-}; //class MenuWindow : public GUIElement
+}; // class MenuWindow : public GUIElement
 
 } // namespace hoa_video
 

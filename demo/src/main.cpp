@@ -116,8 +116,11 @@ bool InitializeEngine() {
 		return false;
 	}
 
-	VideoManager->SetMenuSkin("img/menus/black_sleet", "img/menus/black_sleet_texture.png", Color(0.0f, 0.0f, 0.0f, 0.0f));
-	if (!VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "default", 18)) {
+	if (VideoManager->LoadMenuSkin("black_sleet", "img/menus/black_sleet_skin.png", "img/menus/black_sleet_texture.png") == false) {
+		return false;
+	}
+
+	if (VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "default", 18) == false) {
 		return false;
 	}
 
