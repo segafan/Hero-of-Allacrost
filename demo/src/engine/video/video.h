@@ -795,112 +795,46 @@ public:
 
 	//-- Menus -----------------------------------------------------------------
 
-	/** \brief sets the current menu skin (borders+fill color). Assumes all four
-	 *         vertices of menu interior are same color
-	 *
-	 *  \param img_base_name  name of images which form the border
-	 *                      For example if you pass in "/img/menus/chrome", then it will load:
-	 *                          /img/menus/chrome_tl.png
-	 *                          /img/menus/chrome_t.png
-	 *                          /img/menus/chrome_tr.png
-	 *                          /img/menus/chrome_l.png
-	 *                          /img/menus/chrome_r.png
-	 *                          /img/menus/chrome_bl.png
-	 *                          /img/menus/chrome_b.png
-	 *                          /img/menus/chrome_br.png
-	 *                          /img/menus/chrome_tri_t.png
-	 *                          /img/menus/chrome_tri_l.png
-	 *                          /img/menus/chrome_tri_r.png
-	 *                          /img/menus/chrome_tri_b.png
-	 *                          /img/menus/chrome_quad.png
-	 *
-	 *  \param fill_color    color for inner area of menu. can be transparent
-	 * \return success/failure
-	 */
-	bool SetMenuSkin(const std::string &img_base_name, const Color  &fill_color);
+	/** \name Methods for loading of menu skins
+	***
+	*** These methods all attempt to load a menu skin. The differences between these implementations are
+	*** whether the skin includes a background image, single background color, multiple background colors,
+	*** or some combination thereof.
+	***
+	*** \param skin_name The name that will be used to refer to the skin after it is successfully loaded
+	*** \param border_image The filename for the multi-image that contains the menu's border images
+	*** \param background_image The filename for the skin's background image (optional)
+	*** \param top_left Sets the background color for the top left portion of the skin
+	*** \param top_right Sets the background color for the top right portion of the skin
+	*** \param bottom_left Sets the background color for the bottom left portion of the skin
+	*** \param bottom_right Sets the background color for the bottom right portion of the skin
+	*** \param make_default If this skin should be the default menu skin to be used, set this argument to true
+	*** \return True if the skin was loaded successfully, or false in case of an error
+	***
+	*** A few notes about this function:
+	*** - If you set a background image, any background colors will not be visible unless the background image has some transparency
+	*** - If no other menu skins are loaded when this function is called, the default skin will automatically be set to this skin,
+	***   regardless of the value of the make_default parameter.
+	**/
+	//@{
+	//! \brief A background image with no background colors
+	bool LoadMenuSkin(std::string skin_name, std::string border_image, std::string background_image, bool make_default = false);
 
-	/** \brief sets the current menu skin (borders+fill color). This version of
-	 *         SetMenuSkin() allows the 4 vertices of the interior of the menu
-	 *         to have different colors so you can have gradients.
-	 *
-	 *  \param img_base_name  name of images which form the border
-	 *                      For example if you pass in "/img/menus/chrome", then it will load:
-	 *                          /img/menus/chrome_tl.png
-	 *                          /img/menus/chrome_t.png
-	 *                          /img/menus/chrome_tr.png
-	 *                          /img/menus/chrome_l.png
-	 *                          /img/menus/chrome_r.png
-	 *                          /img/menus/chrome_bl.png
-	 *                          /img/menus/chrome_b.png
-	 *                          /img/menus/chrome_br.png
-	 *                          /img/menus/chrome_tri_t.png
-	 *                          /img/menus/chrome_tri_l.png
-	 *                          /img/menus/chrome_tri_r.png
-	 *                          /img/menus/chrome_tri_b.png
-	 *                          /img/menus/chrome_quad.png
-	 *
-	 *  \param fill_color_TL  color for upper left  vertex of interior
-	 *  \param fill_color_TR  color for upper right vertex of interior
-	 *  \param fill_color_BL  color for lower left  vertex of interior
-	 *  \param fill_color_BR  color for lower right vertex of interior
-	 * \return success/failure
-	 */
-	bool SetMenuSkin(const std::string &img_base_name, const Color  &fill_color_TL, const Color  &fill_color_TR,
-		const Color  &fill_color_BL, const Color  &fill_color_BR);
+	//! \brief No background image with a single background color
+	bool LoadMenuSkin(std::string skin_name, std::string border_image, Color background_color, bool make_default = false);
 
-	/** \brief sets the current menu skin (borders+background image).
-	 *
-	 *  \param img_base_name  name of images which form the border
-	 *                      For example if you pass in "/img/menus/chrome", then it will load:
-	 *                          /img/menus/chrome_tl.png
-	 *                          /img/menus/chrome_t.png
-	 *                          /img/menus/chrome_tr.png
-	 *                          /img/menus/chrome_l.png
-	 *                          /img/menus/chrome_r.png
-	 *                          /img/menus/chrome_bl.png
-	 *                          /img/menus/chrome_b.png
-	 *                          /img/menus/chrome_br.png
-	 *                          /img/menus/chrome_tri_t.png
-	 *                          /img/menus/chrome_tri_l.png
-	 *                          /img/menus/chrome_tri_r.png
-	 *                          /img/menus/chrome_tri_b.png
-	 *                          /img/menus/chrome_quad.png
-	 *
-	 *  \param background_image image filename for the background of the menu window
-	 *
-	 *  \param fill_color_TL  color for upper left  vertex of interior
-	 *  \param fill_color_TR  color for upper right vertex of interior
-	 *  \param fill_color_BL  color for lower left  vertex of interior
-	 *  \param fill_color_BR  color for lower right vertex of interior
-	 * \return success/failure
-	 */
-	bool SetMenuSkin(const std::string &img_base_name, const std::string &background_image,
-		const Color  &fill_color_TL, const Color  &fill_color_TR, const Color  &fill_color_BL, const Color  &fill_color_BR);
+	//! \brief No background image with multiple background colors
+	bool LoadMenuSkin(std::string skin_name, std::string border_image, Color top_left, Color top_right,
+		Color bottom_left, Color bottom_right, bool make_default = false);
 
-	/** \brief sets the current menu skin (borders+background image).
-	 *
-	 *  \param img_base_name  name of images which form the border
-	 *                      For example if you pass in "/img/menus/chrome", then it will load:
-	 *                          /img/menus/chrome_tl.png
-	 *                          /img/menus/chrome_t.png
-	 *                          /img/menus/chrome_tr.png
-	 *                          /img/menus/chrome_l.png
-	 *                          /img/menus/chrome_r.png
-	 *                          /img/menus/chrome_bl.png
-	 *                          /img/menus/chrome_b.png
-	 *                          /img/menus/chrome_br.png
-	 *                          /img/menus/chrome_tri_t.png
-	 *                          /img/menus/chrome_tri_l.png
-	 *                          /img/menus/chrome_tri_r.png
-	 *                          /img/menus/chrome_tri_b.png
-	 *                          /img/menus/chrome_quad.png
-	 *
-	 *  \param background_image image filename for the background of the menu window
-	 *
-	 *  \param fill_color       color for for interior of window
-	 * \return success/failure
-	 */
-	bool SetMenuSkin(const std::string &img_base_name, const std::string &background_image, const Color &fill_color);
+	//! \brief A background image with a single background color
+	bool LoadMenuSkin(std::string skin_name, std::string border_image, std::string background_image,
+		Color background_color, bool make_default = false);
+
+	//! \brief A background image with multiple background colors
+	bool LoadMenuSkin(std::string skin_name, std::string border_image, std::string background_image,
+		Color top_left, Color top_right, Color bottom_left, Color bottom_right, bool make_default = false);
+	//@}
 
 	//-- Lighting and fog -----------------------------------------------------
 
