@@ -375,7 +375,7 @@ public:
 	 *         dimensions
 	 * \param rect rectangle to set the scissor rectangle to
 	 */
-	void SetScissorRect (const ScreenRect &rect);
+	void SetScissorRect(const ScreenRect &rect);
 
 	/** \brief returns scissor rect
 	 * \return the scissor rectangle
