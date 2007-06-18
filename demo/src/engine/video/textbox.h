@@ -31,6 +31,9 @@ namespace private_video {
 //! \brief The unicode version of the newline character, used for string parsing
 const uint16 NEWLINE_CHARACTER = static_cast<uint16>('\n');
 
+//! \brief Assume this many characters per line of text when calculating display speed for textboxes
+const uint32 CHARS_PER_LINE = 30;
+
 } // namespace private_video
 
 /** ****************************************************************************

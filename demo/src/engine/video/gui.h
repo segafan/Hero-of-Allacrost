@@ -28,17 +28,17 @@ namespace hoa_video {
 
 namespace private_video {
 
-//! Take several samples of the FPS across frames and then average to get a steady FPS display
-const int32 VIDEO_FPS_SAMPLES = 350;
+//! \brief The number of FPS samples to retain across frames
+const uint32 FPS_SAMPLES = 250;
 
-//! Maximum milliseconds that the current frame time and our averaged frame time must vary before we freak out and start catching up
-const int32 VIDEO_MAX_FTIME_DIFF = 4;
+//! \brief Maximum milliseconds that the current frame time and our averaged frame time must vary before we begin trying to catch up
+const uint32 MAX_FTIME_DIFF = 5;
 
-//! If we need to play catchup with the FPS, how many samples to take
-const int32 VIDEO_FPS_CATCHUP = 20;
+//! \brief The number of samples to take if we need to play catchup with the current FPS
+const uint32 FPS_CATCHUP = 20;
 
-//! Assume this many characters per line of text when calculating display speed for textboxes
-const int32 VIDEO_CHARS_PER_LINE = 30;
+//! \brief The singleton pointer for the GUI manager
+extern GUISupervisor* GUIManager;
 
 /** ****************************************************************************
 *** \brief An abstract base class for all GUI elements (windows + controls).
@@ -176,45 +176,12 @@ protected:
 *** class which manages the GUI system. It also happens to handle the drawing of
 *** the average frames per second (FPS) on the screen.
 *** ***************************************************************************/
-class GUI {
+class GUISupervisor : public hoa_utils::Singleton<GUISupervisor> {
+	friend class hoa_utils::Singleton<GUISupervisor>;
 public:
-	/** \brief A map containing all of the menu skins which have been loaded
-	*** The string argument is the reference name of the menu, which is defined
-	*** by the user when they load a new skin. 
-	***
-	**/
-	std::map<std::string, MenuSkin> menu_skins;
-
-	/** \brief A pointer to the default menu skin that GUI objects will use if a skin is not explicitly declared
-	*** 
-	**/
-	MenuSkin* default_skin;
-
-	//! \brief Keeps track of the sum of FPS values over the last VIDEO_FPS_SAMPLES frames.
-	//! This is used to simplify the calculation of average frames per second.
-	int32 total_fps;
-
-	//! \brief A circular array of FPS samples used for calculating averaged FPS
-	int32 fps_samples[VIDEO_FPS_SAMPLES];
-
-	//! \brief An index variable to keep track of the start of the circular fps_samples array.
-	int32 cur_sample;
-
-	/** \brief The number of FPS samples currently recorded.
-	*** This value should always be VIDEO_FPS_SAMPLES, unless the game has just started, in which
-	*** case it could be anywhere from 0 to VIDEO_FPS_SAMPLES depending on how many frames have
-	*** been displayed.
-	**/
-	int32 num_samples;
-
-	GUI();
-
-	~GUI();
-
-	/** \brief Updates the FPS counter and draws it on the screen
-	*** \param frame_time The number of milliseconds it took for the last frame.
-	**/
-	void DrawFPS(int32 frame_time);
+	GUISupervisor();
+	~GUISupervisor();
+	bool SingletonInitialize();
 
 	/** \brief Prepares a new menu skin for use in game
 	*** \param skin_name The name that will be used to refer to the skin after it is successfully loaded
@@ -238,15 +205,6 @@ public:
 		Color top_left = Color::clear, Color top_right = Color::clear, Color bottom_left = Color::clear,
 		Color bottom_right = Color::clear, bool make_default = false);
 
-	/** \brief Sets the default menu skin to use from the set of pre-loaded skins
-	*** \param skin_name The name of the already loaded menu skin that should be made the default skin
-	***
-	*** If the skin_name does not refer to a valid skin, a warning message will be printed and no change
-	*** will occur.
-	*** \note This method will <b>not</b> change the skins of any active menu windows.
-	**/
-	void SetDefaultMenuSkin(std::string skin_name);
-
 	/** \brief Deletes a menu skin that has been loaded
 	*** \param skin_name The name of the loaded menu skin that should be removed
 	***
@@ -256,47 +214,98 @@ public:
 	*** and not delete the skin. Therefore, <b>before you call this function, you must delete any and all
 	*** MenuWindow objects which make use of this skin, or change the skin used by those objects</b>.
 	**/
-	void DeleteMenuSkin(std::string skin_name);
+	void DeleteMenuSkin(std::string& skin_name);
 
-	/** \brief Determines if a specific menu skin is loaded and available for use
-	*** \param skin_name The name of the menu skin to check
-	*** \return True if the menu skin exists, false if it does not
-	**/
-	bool IsMenuSkinAvailable(std::string skin_name)
-		{ if (menu_skins.find(skin_name) != menu_skins.end()) return true; else return false; }
+	//! \brief Returns a pointer to the default menu skin
+	MenuSkin* GetDefaultMenuSkin() const
+		{ return _default_skin; }
 
-	/** \brief Creates a new image for a menu of a given width and height.
-	*** \param id A reference to the StillImage object to contain the menu image
-	*** \param width  desired width of menu, based on pixels in 1024x768 resolution
-	*** \param height desired height of menu, based on pixels in 1024x768 resolution
-	*** \param inner_width return value for the width of the inside of the menu
-	*** \param inner_height return value for the height of the inside of the menu
-	*** \param edge_visible_flags Specifies all the edges of the menu that should be drawn.
-	*** In most cases, this should just be the default of VIDEO_MENU_EDGE_ALL. However, for
-	*** example, you can make the left edge disappear by using ~VIDEO_MENU_EDGE_LEFT, or
-	*** alternatively bitwise OR-ing all the other edge flags together (right, top, and bottom).
-	*** \param edge_shared_flags Tells which sides of the menu window are shared with other menus.
-	*** The rule of thumb is that when you want 2 menus to share a border, then you should hide one
-	*** of the menu's border with the visible flags, and specify the other menu's border as shared,
-	*** so it becomes the common one they both use.
-	*** \return True if the menu image was successfully created, false otherwise.
-	*** \note The width and height must be aligned to the border image sizes. So for example if the
-	*** border artwork is all 8x8 images and you try to create a menu that is 117x69, it will get
-	*** rounded to 120x72.
+	/** \brief Returns a pointer to the MenuSkin of a corresponding skin name
+	*** \param skin_name The name of the menu skin to grab
+	*** \return A pointer to the MenuSkin, or NULL if the skin name was not found
 	**/
-	bool CreateMenu(StillImage &id, float width, float height, float &inner_height, float &inner_width,
-		int32 edge_visible_flags, int32 edge_shared_flags);
+	MenuSkin* GetMenuSkin(std::string& skin_name)
+		{ if (_menu_skins.find(skin_name) == _menu_skins.end()) return NULL; else return &(_menu_skins[skin_name]); }
+
+	/** \brief Sets the default menu skin to use from the set of pre-loaded skins
+	*** \param skin_name The name of the already loaded menu skin that should be made the default skin
+	***
+	*** If the skin_name does not refer to a valid skin, a warning message will be printed and no change
+	*** will occur.
+	*** \note This method will <b>not</b> change the skins of any active menu windows.
+	**/
+	void SetDefaultMenuSkin(std::string& skin_name);
+
+	/** \brief Returns the next available MenuWindow ID for a MenuWindow to use
+	*** \return The ID number for the MenuWindow to use
+	*** This method should only need to be called from the MenuWindow constructor.
+	**/
+	uint32 GetNextMenuWindowID()
+		{ _next_window_id++; return (_next_window_id - 1); }
+
+	/** \brief Adds a newly created MenuWindow into the map of existing windows
+	*** \param new_window A pointer to the newly created MenuWindow
+	*** Don't call this method anywhere else but from MenuWindow::Create(), or you may cause problems.
+	**/
+	void AddMenuWindow(MenuWindow* new_window);
+
+	/** \brief Removes an existing MenuWindow from the map of existing windows
+	*** \param old_window A pointer to the MenuWindow to be removed
+	*** Don't call this method anywhere else but from MenuWindow::Destroy(), or you may cause problems.
+	**/
+	void RemoveMenuWindow(MenuWindow* old_window);
+
+	/** \brief Updates the FPS counter and draws it on the screen
+	*** \param frame_time The number of milliseconds it took for the last frame.
+	***
+	*** Calculates and draws the FPS based on the time the frame took.
+	*** To make the FPS appear more "steady", the FPS that's displayed on the
+	*** screen is actually the average over the last several frames.
+	**/
+	void DrawFPS(uint32 frame_time);
 
 private:
-	/** \brief Checks a menu skin to make sure its border image sizes are consistent.
-	*** \param skin A reference to the menu skin to check.
-	*** \return True if skin is consistent, false otherwise.
+	/** \brief A map containing all of the menu skins which have been loaded
+	*** The string argument is the reference name of the menu, which is defined
+	*** by the user when they load a new skin. 
 	***
-	*** This function performs some simple checks to make sure that all of the images
-	*** that compose a menu skin are of a consistent size.
 	**/
-	bool _CheckSkinConsistency(const MenuSkin &skin);
-}; // class GUI
+	std::map<std::string, MenuSkin> _menu_skins;
+
+	/** \brief A map containing all of the actively created MenuWindow objects
+	*** The integer key is the MenuWindow's ID number. This primary purpose of this map is to coordinate menu windows
+	*** with menu skins. A menu skin can not be deleted when a menu window is still using that skin, and menu windows
+	*** must be re-drawn when the properties of a menu skin that it uses changes.
+	**/
+	std::map<uint32, MenuWindow*> _menu_windows;
+
+	/** \brief A pointer to the default menu skin that GUI objects will use if a skin is not explicitly declared
+	*** If no menu skins exist, this member will be NULL. It will never be NULL as long as one menu skin is loaded.
+	*** If the default menu skin is deleted by the user, an alternative default skin will automatically be set.
+	**/
+	MenuSkin* _default_skin;
+
+	//! \brief The next ID to assign to a MenuWindow when one is created
+	uint32 _next_window_id;
+
+	//! \brief A circular array of FPS samples used for calculating average FPS
+	uint32 _fps_samples[FPS_SAMPLES];
+
+	/** \brief Keeps track of the sum of FPS values over the last VIDEO_FPS_SAMPLES frames
+	*** This is used to simplify the calculation of average frames per second.
+	**/
+	uint32 _fps_sum;
+
+	//! \brief An index variable to keep track of the start of the circular fps_samples array.
+	uint32 _current_sample;
+
+	/** \brief The number of FPS samples currently recorded.
+	*** This value should always be VIDEO_FPS_SAMPLES, unless the game has just started, in which
+	*** case it could be anywhere from 0 to VIDEO_FPS_SAMPLES depending on how many frames have
+	*** been displayed.
+	**/
+	uint32 _number_samples;
+}; // class GUISupervisor
 
 } // namespace private_video
 

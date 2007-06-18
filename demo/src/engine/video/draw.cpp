@@ -339,13 +339,12 @@ bool GameVideo::DrawLight(const StillImage &id, float x, float y, const Color &c
 // DrawFPS: draws current frames per second
 //-----------------------------------------------------------------------------
 
-bool GameVideo::DrawFPS(int32 frameTime)
+void GameVideo::DrawFPS(uint32 frame_time)
 {
 	_PushContext();
-	_gui->DrawFPS(frameTime);
+	GUIManager->DrawFPS(frame_time);
 	_PopContext();
-	
-	return true;
+
 }
 
 

@@ -200,7 +200,7 @@ class GameVideo : public hoa_utils::Singleton<GameVideo> {
 	friend class OptionBox;
 	friend class MenuWindow;
 	friend class private_video::GUIElement;
-	friend class private_video::GUI;
+	friend class private_video::GUISupervisor;
 	friend class private_video::FixedTexMemMgr;
 	friend class private_video::VariableTexMemMgr;
 	friend class private_video::TexSheet;
@@ -211,7 +211,7 @@ class GameVideo : public hoa_utils::Singleton<GameVideo> {
 public:
 	~GameVideo();
 
-	bool SingletonInitialize ();
+	bool SingletonInitialize();
 
 
 	//-- General --------------------------------------------------------------
@@ -836,6 +836,31 @@ public:
 		Color top_left, Color top_right, Color bottom_left, Color bottom_right, bool make_default = false);
 	//@}
 
+	//! \brief Returns true if there is a menu skin avialable corresponding to the argument name
+	bool IsMenuSkinAvailable(std::string& skin_name) const
+		{ if (private_video::GUIManager->GetMenuSkin(skin_name) == NULL) return false; else return true; }
+
+	/** \brief Sets the default menu skin to use
+	*** \param skin_name The name of the already loaded menu skin that should be made the default skin
+	***
+	*** If the skin_name does not refer to a valid skin, a warning message will be printed and no change
+	*** will occur.
+	*** \note This method will <b>not</b> change the skins of any existing menu windows.
+	**/
+	void SetDefaultMenuSkin(std::string& skin_name)
+		{ private_video::GUIManager->SetDefaultMenuSkin(skin_name); }
+
+	/** \brief Deletes a menu skin that has been loaded
+	*** \param skin_name The name of the loaded menu skin that should be removed
+	***
+	*** Before you call this function, you must delete any and all MenuWindow objects which make use of this skin,
+	*** or change the skin used by those objects. Failing to do so will result in a warning message being printed
+	*** and the skin will not be deleted. The function will also print a warning message and exit if it could not
+	*** find a skin referred to by the argument name.
+	**/
+	void DeleteMenuSkin(std::string& skin_name)
+		{ private_video::GUIManager->DeleteMenuSkin(skin_name); }
+
 	//-- Lighting and fog -----------------------------------------------------
 
 	/** \brief turn on the ligt color for the scene
@@ -980,11 +1005,10 @@ public:
 	 */
 	float GetGamma();
 
-	/** \brief updates the FPS counter with the given frame time and draws the
-	 *         current FPS on the screen.
-	 * \return success/failure
-	 */
-	bool DrawFPS(int32 frame_time);
+	/** \brief Updates the FPS counter and draws the current average FPS to the screen
+	*** The number of milliseconds that have expired since the last frame was drawn
+	**/
+	void DrawFPS(uint32 frame_time);
 
 	/** \brief toggles the FPS display (on by default)
 	 */
@@ -1058,12 +1082,6 @@ private:
 	GameVideo();
 
 	//-- Private variables ----------------------------------------------------
-
-	// for now the game gui class is a member of video so that
-	// externally people only have to deal with GameVideo.
-
-	//! pointer to GUI class which implements all GUI functionality
-	private_video::GUI *_gui;
 
 	//! particle manager, does dirty work of managing particle effects
 	private_video::ParticleManager _particle_manager;
@@ -1249,24 +1267,6 @@ private:
 	 * \return OpenGL ID for this texture or 0xffffffff for failure.
 	 */
 	GLuint _CreateBlankGLTexture(int32 width, int32 height);
-
-	/** \brief creates an StillImage of a menu which is the given size
-	 *
-	 *  \param menu   Reference to menu to create
-	 *
-	 *  \param width  Width of menu, based on pixels in 1024x768 resolution
-	 *  \param height Height of menu, based on pixels in 1024x768 resolution.
-	 *  \param inner_width return value for the width of the inside of the menu
-	 *  \param inner_height return value for the height of the inside of the menu
-	 *  \param edge_visible_flags bit flags to tell which edges are visible
-	 *  \param edge_shared_flags  bit flags to tell which edges are shared with other menus
-	 *
-	 *  \note  this is only meant to be used by the Menu class, not by users of
-	 *         the video engine.
-	 * \return success/failure
-	 */
-	bool _CreateMenu(StillImage &menu, float width, float height, float & inner_width, float & inner_height,
-		int32 edge_visible_flags, int32 edge_shared_flags);
 
 	/** \brief returns a filename like TEMP_abcd1234.ext, and each time you call it, it increments the
 	 *         alphanumeric part of the filename. This way, during any particular run
