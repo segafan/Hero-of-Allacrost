@@ -125,7 +125,6 @@ GameVideo::GameVideo()
 	_current_debug_TexSheet = -1;
 	_uses_lights = false;
 	_light_overlay = 0xFFFFFFFF;
-	_gui = NULL;
 	_last_tex_ID = 0xFFFFFFFF;
 	_num_tex_switches = 0;
 	_advanced_display = false;
@@ -292,8 +291,9 @@ bool GameVideo::SingletonInitialize()
 		return false;
 	}
 
-	// create the GUI
-	_gui = new private_video::GUI;
+	// Create and initialize the GUI sub-system
+	GUIManager = GUISupervisor::SingletonCreate();
+	GUIManager->SingletonInitialize();
 
 	// make a temp directory and make sure it doesn't contain any files
 	// (in case the game crashed during a previous run, leaving stuff behind)
@@ -416,7 +416,7 @@ GameVideo::~GameVideo()
 	_particle_manager.Destroy();
 
 	// delete GUI
-	delete _gui;
+	GUIManager->SingletonDestroy();
 
 	// delete font properties
 
@@ -977,7 +977,7 @@ void GameVideo::PopState()
 
 bool GameVideo::LoadMenuSkin(std::string skin_name, std::string border_image, std::string background_image, bool make_default)
 {
-	return _gui->LoadMenuSkin(skin_name, border_image, background_image,
+	return GUIManager->LoadMenuSkin(skin_name, border_image, background_image,
 		Color::clear, Color::clear, Color::clear, Color::clear, make_default);
 }
 
@@ -985,7 +985,7 @@ bool GameVideo::LoadMenuSkin(std::string skin_name, std::string border_image, st
 
 bool GameVideo::LoadMenuSkin(std::string skin_name, std::string border_image, Color background_color, bool make_default)
 {
-	return _gui->LoadMenuSkin(skin_name, border_image, "",
+	return GUIManager->LoadMenuSkin(skin_name, border_image, "",
 		background_color, background_color, background_color, background_color, make_default);
 }
 
@@ -994,7 +994,7 @@ bool GameVideo::LoadMenuSkin(std::string skin_name, std::string border_image, Co
 bool GameVideo::LoadMenuSkin(std::string skin_name, std::string border_image, Color top_left, Color top_right,
 	Color bottom_left, Color bottom_right, bool make_default)
 {
-	return _gui->LoadMenuSkin(skin_name, border_image, "",
+	return GUIManager->LoadMenuSkin(skin_name, border_image, "",
 		top_left, top_right, bottom_left, bottom_right, make_default);
 }
 
@@ -1003,7 +1003,7 @@ bool GameVideo::LoadMenuSkin(std::string skin_name, std::string border_image, Co
 bool GameVideo::LoadMenuSkin(std::string skin_name, std::string border_image, std::string background_image,
 	Color background_color, bool make_default)
 {
-	return _gui->LoadMenuSkin(skin_name, border_image, background_image,
+	return GUIManager->LoadMenuSkin(skin_name, border_image, background_image,
 		background_color, background_color, background_color, background_color, make_default);
 }
 
@@ -1012,7 +1012,7 @@ bool GameVideo::LoadMenuSkin(std::string skin_name, std::string border_image, st
 bool GameVideo::LoadMenuSkin(std::string skin_name, std::string border_image, std::string background_image,
 	Color top_left, Color top_right, Color bottom_left, Color bottom_right, bool make_default)
 {
-	return _gui->LoadMenuSkin(skin_name, border_image, background_image,
+	return GUIManager->LoadMenuSkin(skin_name, border_image, background_image,
 		top_left, top_right, bottom_left, bottom_right, make_default);
 }
 
@@ -1049,15 +1049,6 @@ bool GameVideo::ToggleAdvancedDisplay()
 	return true;
 }
 
-
-
-//-----------------------------------------------------------------------------
-// _CreateMenu: creates menu image descriptor
-//-----------------------------------------------------------------------------
-bool GameVideo::_CreateMenu(StillImage &menu, float width, float height, float & inner_width, float & inner_height, int32 edge_visible_flags, int32 edge_shared_flags)
-{
-	return _gui->CreateMenu(menu, width, height, inner_width, inner_height, edge_visible_flags, edge_shared_flags);
-}
 
 
 //-----------------------------------------------------------------------------

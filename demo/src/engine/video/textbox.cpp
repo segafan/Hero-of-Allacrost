@@ -269,8 +269,8 @@ void TextBox::SetDisplayText(const ustring& text) {
 			break;
 
 		case VIDEO_TEXT_FADELINE:   // Displays one line at a time
-			// Instead of _num_chars in the other calculation, we use number of lines times VIDEO_CHARS_PER_LINE
-			_end_time = static_cast<int32>(1000.0f * (_text.size() * VIDEO_CHARS_PER_LINE) / _display_speed);
+			// Instead of _num_chars in the other calculation, we use number of lines times CHARS_PER_LINE
+			_end_time = static_cast<int32>(1000.0f * (_text.size() * CHARS_PER_LINE) / _display_speed);
 			break;
 
 		default:

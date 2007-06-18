@@ -104,10 +104,10 @@ namespace hoa_video {
 		class MultiImage;
 		class AnimationFrame;
 
+		class GUISupervisor;
 		class GUIElement;
 		class GUIControl;
 		class MenuSkin;
-		class GUI;
 
 		class Option;
 		class OptionElement;

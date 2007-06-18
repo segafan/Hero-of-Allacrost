@@ -78,8 +78,9 @@ namespace private_video {
 /** ****************************************************************************
 *** \brief A container class for a menu skin, consisting of border images and an interior
 ***
-*** The GUI class manages all MenuSkins which have been loaded by the user. Multiple
-*** menu
+*** The GUISupervisor class manages all MenuSkins which have been loaded by the user.
+*** Multiple menu skins may co-exist at one time and be drawn to the screen. The MenuWindow
+*** class makes extensive use of MenuSkins.
 ***
 *** \note The contructor and destructor of this class do nothing. The creation and destruction
 *** of the images contained by this class is done from the GUI class.
@@ -141,7 +142,7 @@ public:
 *** hiding the menu window.
 *** ***************************************************************************/
 class MenuWindow : public private_video::GUIElement {
-	friend class private_video::GUI;
+	friend class private_video::GUISupervisor;
 public:
 	MenuWindow();
 
@@ -149,6 +150,7 @@ public:
 		{}
 
 	/** \brief Sets the width and height of the menu.
+	*** \param skin_name The name of the menu skin with which to construct this menu window.
 	*** \param w The window width in pixels, which must be within the range of [0.0f, 1024.f].
 	*** \param h The window height in pixels, which must be within the range of [0.0f, 768.f].
 	*** \param visible_flags A combination of bit flags, VIDEO_MENU_EDGE_LEFT, etc. that indicate
@@ -158,6 +160,9 @@ public:
 	*** \return False and print an error message on failure. Otherwise return true upon success.
 	*** \note This function <b>must</b> be called before you attempt to draw the window.
 	**/
+	bool Create(std::string skin_name, float w, float h, int32 visible_flags = VIDEO_MENU_EDGE_ALL, int32 shared_flags = 0);
+	
+	//! \note This version of the create function does not take a skin_name argument. It uses the default menu skin.
 	bool Create(float w, float h, int32 visible_flags = VIDEO_MENU_EDGE_ALL, int32 shared_flags = 0);
 
 	/** \brief You <b>must</b> call this method when you are finished using a menu.
@@ -213,6 +218,13 @@ public:
 	**/
 	void ChangeEdgeSharedFlags(int32 flags);
 
+	/** \brief Changes which menu skin is used by the window after it has been created
+	*** \param skin_name The name to which the skin is referred by
+	*** \note If the skin_name is invalid, a warning mesage will be printed and no change
+	*** will take place. This call is somewhat expensive since it has to recreate the menu window image.
+	**/
+	void ChangeMenuSkin(std::string& skin_name);
+
 	//! \name Class Member Access Functions
 	//@{
 	void SetDisplayMode(VIDEO_MENU_DISPLAY_MODE mode);
@@ -231,17 +243,6 @@ public:
 	//@}
 
 private:
-	//! \brief The id of the next menu instance to assign. New IDs are assigned to each menu when it is created.
-	static int32 _current_menu_id;
-
-	/** \brief Retains a registered map of menu window objects.
-	*** \note This is in case the menus need to be updated if the menu skin changes.
-	**/
-	static std::map<int32, MenuWindow*> _menu_map;
-
-	//! \brief A pointer to the menu skin that the menu window currently uses
-	private_video::MenuSkin* _skin;
-
 	//! \brief The current id of this object.
 	int32 _id;
 
@@ -257,11 +258,14 @@ private:
 	//! \brief Flags used to tell which edges are shared with other windows.
 	int32 _edge_shared_flags;
 
+	//! \brief A pointer to the menu skin that the menu window currently uses
+	private_video::MenuSkin* _skin;
+
 	//! \brief The state of the menu window (hidden, shown, hiding, showing).
 	VIDEO_MENU_STATE _window_state;
 
 	//! \brief The number of milliseconds that have passed since the menu was shown.
-	int32 _current_time;
+	int32 _display_timer;
 
 	//! \brief The image that creates the window
 	StillImage _menu_image;
@@ -276,7 +280,12 @@ private:
 	ScreenRect _scissor_rect;
 
 	/** \brief Used to create the menu window's image when the visible properties of the window change.
-	*** \return Success or failure.
+	*** \return True if the menu image was successfully created, false otherwise.
+	***
+	*** \note This function may not create a window that is exactly the width and height requested.
+	*** It will automatically adjust the dimneions to minimalize warping. So for example, if the
+	*** border artwork is all 8x8 pixel images and you try to create a menu that is 117x69, it will get
+	*** rounded up to 120x72.
 	**/
 	bool _RecreateImage();
 }; // class MenuWindow : public GUIElement
