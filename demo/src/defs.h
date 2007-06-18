@@ -93,6 +93,7 @@ namespace hoa_video {
 	namespace private_video {
 		class Context;
 
+
 		class TexSheet;
 		class TexMemMgr;
 		class FixedTexMemMgr;

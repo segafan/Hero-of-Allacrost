@@ -10,7 +10,7 @@
 /** ****************************************************************************
 *** \file    coord_sys.h
 *** \author  Raj Sharma, roos@allacrost.org
-*** \brief   Header file for CoordSys class.
+*** \brief   Header file for the CoordSys class.
 *** ***************************************************************************/
 
 #ifndef __COORD_SYS_HEADER__
@@ -75,6 +75,6 @@ private:
 	float _left, _right, _bottom, _top;
 }; // class CoordSys
 
-}  // namespace hoa_video
+} // namespace hoa_video
 
-#endif   // __COORD_SYS_HEADER__
+#endif // __COORD_SYS_HEADER__

@@ -1557,29 +1557,7 @@ void GameVideo::PopMatrix()
 	glPopMatrix();
 }
 
-//-----------------------------------------------------------------------------
-// Intersect: intersects this rect with another, and stores the resulting
-//            rectangle. If the two rectangles don't intersect, then all
-//            member variables are zero
-//-----------------------------------------------------------------------------
-void ScreenRect::Intersect(const ScreenRect &rect)
-{
-	left   = max(left,   rect.left);
-	top    = max(top,    rect.top);
 
-	int32 right  = min(left + width - 1,  rect.left + rect.width - 1);
-	int32 bottom = min(top + height - 1, rect.top + rect.height - 1);
-
-	if(left > right || top > bottom)
-	{
-		left = right = width = height = 0;
-	}
-	else
-	{
-		width  = right - left + 1;
-		height = bottom - top + 1;
-	}
-}
 
 //-----------------------------------------------------------------------------
 // EnableScissoring: enable/disable scissoring
