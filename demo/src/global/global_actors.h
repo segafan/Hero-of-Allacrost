@@ -578,14 +578,14 @@ public:
 	GlobalArmor* GetEquippedLegArmor()
 		{ return _armor_equipped[3]; }
 
-	std::vector<GlobalSkill*> GetAttackSkills() const
-		{ return _attack_skills; }
+	std::vector<GlobalSkill*>* GetAttackSkills()
+		{ return &_attack_skills; }
 
-	std::vector<GlobalSkill*> GetDefenseSkills() const
-		{ return _defense_skills; }
+	std::vector<GlobalSkill*>* GetDefenseSkills()
+		{ return &_defense_skills; }
 
-	std::vector<GlobalSkill*> GetSupportSkills() const
-		{ return _support_skills; }
+	std::vector<GlobalSkill*>* GetSupportSkills()
+		{ return &_support_skills; }
 
 	void SetExperienceNextLevel(uint32 xp_next)
 		{ _experience_next_level = xp_next; }
@@ -609,7 +609,7 @@ public:
 	void AddBattleAnimation(const std::string & name, hoa_video::AnimatedImage anim)
 		{ _battle_animation[name] = anim; }
 
-	hoa_video::AnimatedImage * RetrieveBattleAnimation(const std::string & name)
+	hoa_video::AnimatedImage* RetrieveBattleAnimation(const std::string & name)
 		{ return &_battle_animation[name]; }
 
 	std::vector<hoa_video::StillImage>* GetBattlePortraits()

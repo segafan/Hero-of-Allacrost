@@ -168,16 +168,16 @@ public:
 	std::vector<GlobalWeapon*>* GetInventoryWeapons()
 		{ return &_inventory_weapons; }
 
-	std::vector<GlobalArmor*>*  GetInventoryHeadArmor()
+	std::vector<GlobalArmor*>* GetInventoryHeadArmor()
 		{ return &_inventory_head_armor; }
 
-	std::vector<GlobalArmor*>*  GetInventoryTorsoArmor()
+	std::vector<GlobalArmor*>* GetInventoryTorsoArmor()
 		{ return &_inventory_torso_armor; }
 
-	std::vector<GlobalArmor*>*  GetInventoryArmArmor()
+	std::vector<GlobalArmor*>* GetInventoryArmArmor()
 		{ return &_inventory_arm_armor; }
 
-	std::vector<GlobalArmor*>*  GetInventoryLegArmor()
+	std::vector<GlobalArmor*>* GetInventoryLegArmor()
 		{ return &_inventory_leg_armor; }
 
 	std::vector<GlobalShard*>* GetInventoryShards()
