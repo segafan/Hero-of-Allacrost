@@ -21,6 +21,7 @@
 ***   - Mac OS X   #ifdef __MACH__
 ***   - OpenDarwin #ifdef __MACH__
 ***   - Linux      #ifdef __linux__
+***   - FreeBSD    #ifdef __FreeBSD__
 ***   - Solaris    #ifdef SOLARIS
 ***   - BeOS       #ifdef __BEOS__
 ***
