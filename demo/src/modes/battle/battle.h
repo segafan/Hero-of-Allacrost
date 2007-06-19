@@ -35,6 +35,8 @@
 #include "mode_manager.h"
 #include "system.h"
 
+#include "battle_windows.h"
+
 namespace hoa_battle {
 
 extern bool BATTLE_DEBUG;
@@ -88,10 +90,9 @@ const uint32 ACTION_TYPE_ITEM      = 3;
 **/
 enum CURSOR_STATE {
 	CURSOR_IDLE = 0,
-	CURSOR_SELECT_ACTION_TYPE = 1,
-	CURSOR_SELECT_ACTION_LIST = 2,
-	CURSOR_SELECT_TARGET = 3,
-	CURSOR_SELECT_ATTACK_POINT = 4
+	CURSOR_SELECT_ATTACK_POINT = 1,
+	CURSOR_SELECT_TARGET = 2,
+	CURSOR_SELECT_PARTY = 3
 };
 
 //! Returned as an index when looking for a character or enemy and they do not exist
@@ -213,7 +214,8 @@ class BattleMode : public hoa_mode_manager::GameMode {
 	friend class private_battle::BattleCharacterActor;
 	friend class private_battle::BattleEnemyActor;
 	friend class private_battle::ScriptEvent;
-
+	friend class private_battle::ActionWindow;
+	friend class private_battle::FinishWindow;
 public:
 	BattleMode();
 
@@ -265,57 +267,42 @@ public:
 	void TEMP_AddEnemy(uint32 new_enemy_id)
 		{ AddEnemy(hoa_global::GlobalEnemy(new_enemy_id)); }
 
-	/** \brief Prepares all added enemies for the battle to come
-	*** Any enemies added after this call is made will <b>not</b> be present in the battle, at least
-	*** until this method is called once more.
-	**/
-	void InitializeEnemies();
-
-	//! Are we performing an action
+	//! \brief Returns true if an actor is performing an action
 	bool _IsPerformingScript() const
 		{ return _performing_script; }
 
-	//! Sets whether an action is being performed or not, and what that action is
+	//! \brief Sets whether an action is being performed or not, and what that action is
 	void SetPerformingScript(bool is_performing, private_battle::ScriptEvent* se);
 
-	//! Added a scripted event to the queue
+	//! \brief Added a scripted event to the queue
 	void AddScriptEventToQueue(private_battle::ScriptEvent* event)
 		{ _script_queue.push_back(event); }
 
-	//! Remove all scripted events for an actor
+	//! \brief Remove all scripted events for an actor
 	void RemoveScriptedEventsForActor(hoa_battle::private_battle::BattleActor * actor);
-	//void RemoveScriptedEventsForActor(hoa_global::GlobalActor * actor);
 
-	//! Returns all player actors
+	//! \brief Returns all player actors
 	std::deque<private_battle::BattleCharacterActor*> GetCharacters() const
 		{ return _character_actors; }
 
-	//! Returns all targeted actors
-	//std::deque<private_battle::IBattleActor*> GetSelectedActors() const
-	//	{ return _selected_actor_arguments; }
-
-	/*
-	* \brief Freezes all timers in battle mode.  Used when game is paused or using wait battle mode.
-	*/
+	//! \brief Freezes all timers in battle mode. Used when game is paused or using wait battle mode.
 	void FreezeTimers();
 
-	/*
-	* \brief Unfreezes all timers in battle mode.  Used when game is unpaused or using wait battle mode.
-	*/
+	//! \brief Unfreezes all timers in battle mode.  Used when game is unpaused or using wait battle mode.
 	void UnFreezeTimers();
 
-	//! Is the battle over?
+	//! \brief Is the battle over?
 	bool IsBattleOver() const
 		{ return _battle_over; }
 
-	//! Was the battle victorious?
+	//! \brief Was the battle victorious?
 	bool IsVictorious() const
 		{ return _victorious_battle; }
 
-	//! Handle player victory
+	//! \brief Handle player victory
 	void PlayerVictory();
 	
-	//! Handle player defeat
+	//! \brief Handle player defeat
 	void PlayerDefeat();
 
 	uint32 GetNumberOfCharacters() const
@@ -350,7 +337,8 @@ public:
 
 	// \brief Gets the active ScriptEvent
 	// \param se the ScriptEvent to designate as active
-	inline private_battle::ScriptEvent* GetActiveScript() { return _active_se; }
+	inline private_battle::ScriptEvent* GetActiveScript()
+		{ return _active_se; }
 
 private:
 	//! When set to true, all preparations have been made and the battle is ready to begin
@@ -405,16 +393,8 @@ private:
 	std::vector<hoa_video::ImageDescriptor*> _background_images;
 	//@}
 
-	//! \name Battle Actors Data
+	//! \name Battle Actor Containers
 	//@{
-	/** \brief A map containing pointers to all actors both on and off the battle field
-	*** The actor objects are indexed by their unique ID numbers. This structure is used primarily
-	*** for two things. First, it serves as a convenient index to look up and retrieve an actor
-	*** object when only an ID number is known. Second, it is used to prevent memory leaks by
-	*** ensuring that all BattleActor objects are deleted when the battle ends.
-	**/
-	std::map<uint8, private_battle::BattleActor*> _battle_actors;
-
 	/** \brief Contains the original set of enemies and their status
 	*** This data is retained in the case that the player loses the battle and chooses to re-try
 	*** the battle from the beginning. This data will be used to restore BattleMode::_enemy_actors.
@@ -426,6 +406,14 @@ private:
 	*** the battle from the beginning. This data will be used to restore BattleMode::_character_actors.
 	**/
 	std::deque<hoa_global::GlobalCharacter> _original_characters;
+
+	/** \brief A map containing pointers to all actors both on and off the battle field
+	*** The actor objects are indexed by their unique ID numbers. This structure is used primarily
+	*** for two things. First, it serves as a convenient index to look up and retrieve an actor
+	*** object when only an ID number is known. Second, it is used to prevent memory leaks by
+	*** ensuring that all BattleActor objects are deleted when the battle ends.
+	**/
+	std::map<uint8, private_battle::BattleActor*> _battle_actors;
 
 	/** \brief Characters that are presently fighting in the battle
 	*** No more than four characters may be fighting at any given time, thus this structure will never
@@ -449,105 +437,80 @@ private:
 	std::deque<private_battle::BattleCharacterActor*> _reserve_characters;
 	//@}
 
-	//! \name Player Selection Data
+	//! \name Selection Data
 	//@{
-	//! The current CharacterActor that is selected by the player
-	private_battle::BattleCharacterActor * _selected_character;
-	//! The current/last EnemyActor that is/was selected by the player
-	//private_battle::BattleEnemyActor * _selected_enemy;
-	//! The current target for the player's selection
-	private_battle::BattleActor *_selected_target;
-
-	//! The number of selections that must be made for an action
-	// FIX ME: Obsolete
-	//uint32 _necessary_selections;
-	//! The current attack point we are pointing to
-	uint32 _attack_point_selected;
-	//! The number of items in this menu
-	uint32 _number_menu_items;
-	//! The state of the menu cursor
+	//! \brief The state of the battle's selection cursor
 	private_battle::CURSOR_STATE _cursor_state;
-	//! The cursor location in the _action_type_menu.  For pure hackery reasons only
-	uint32 _action_type_menu_cursor_location;
 
-	//! Character index of the currently selected actor
-	//FIX ME Don't think this is needed anymore, have a handle
-	//to the char via _selected_character
+	/** \brief Character index of the currently selected actor
+	*** \note This needs to be made defunct. Occurences of it in battle.cpp should
+	*** be replaced with the index of the _selected_character member
+	**/
 	int32 _actor_index;
-	//! Argument selector
+
+	//! \brief The current character that is selected by the player
+	private_battle::BattleCharacterActor* _selected_character;
+
+	/** \brief The current target for the player's selection
+	*** This may point to either a character or enemy actor.
+	**/
+	private_battle::BattleActor* _selected_target;
+
+	/** \brief The index of the attack point on the selected target that is selected
+	*** If the target type of the skill or item is not an attack point target, then
+	*** the value of this member is meaningless.
+	**/
+	uint32 _selected_attack_point;
+
+	//! \brief Argument selector
 	uint32 _argument_actor_index;
-	//! The actors we have selected as arguments OBSOLETE
-	//std::deque<private_battle::BattleActor*> _selected_actor_arguments;
 	//@}
 
-	//! \name Battle GUI Objects and Images
+	//! \name Battle GUI Windows
 	//@{
-	//! The static image that is drawn for the bottom menu
+	/** \brief Window which displays various information and options related to selecting actions for characters
+	*** Located at the bottom right hand corner of the screen, this window is only visible when the player is
+	*** actively selecting an action for a character.
+	**/
+	private_battle::ActionWindow* _action_window;
+
+	/** \brief Window which presents information and options after a battle is concluded
+	*** Located at the center of the screen, this window only appears after one party in the battle has defeated
+	*** the other.
+	**/
+	private_battle::FinishWindow* _finish_window;
+	//@}
+
+	//! \name Battle GUI Images
+	//@{
+	//! \brief The static image that is drawn for the bottom menus
 	hoa_video::StillImage _bottom_menu_image;
-	/** \brief The menu window used for action types and action lists
-	*** This menu window is always located on the left side of the screen.
-	**/
-	hoa_video::MenuWindow* _action_menu_window;
-	/** \brief The menu window used to list your currently selected action
-	*** It's placed at the top of the left menu, reserving the bottom for
-	*** the action list
-	**/
-	hoa_video::MenuWindow _action_type_window;
-	/** \brief The option menu that lists the types of actions that a character may take in battle
-	*** Typically this list includes "attack", "defend", "support", and "item". More types may appear
-	*** under special circumstances and conditions.
-	**/
-	hoa_video::OptionBox _action_type_menu;
-	/** \brief The option menu that lists the actions that a character may take in battle
-	*** 
-	**/
-	hoa_video::OptionBox* _action_list_menu;
-	/** \brief The options that a player may choose to take if they lose the battle
-	*** The list of options include: re-try battle, quit to main menu, or quit game.
-	**/
-	hoa_video::OptionBox _battle_lose_menu;
+
 	/** \brief An image that indicates that a particular actor has been selected
 	*** This image best suites character sprites and enemy sprites of similar size. It does not work
 	*** well with larger or smaller sprites.
 	**/
 	hoa_video::StillImage _actor_selection_image;
+
 	/** \brief An image that points out the location of specific attack points on an actor
 	*** This image may be used for both character and enemy actors. It is used to indicate an actively selected
 	*** attack point, <b>not</b> just any attack points present.
 	**/
 	hoa_video::AnimatedImage _attack_point_indicator;
-	/** \brief The icons used for representing each of the possible action types in battle
-	*** This vector is used solely for the purpose of drawing the chosen action above the
-	*** action list in battle.  For example, if they choose attack, then the attack icon along
-	*** with the word 'Attack' will appear at the top of the window, followed by the action list
-	**/
-	std::vector<hoa_video::StillImage> _action_type_icons;
+
 	/** \brief The universal stamina bar that all battle actors proceed along
 	*** All battle actors have a portrait that moves along this meter to signify their
 	*** turn in the rotation.  The meter and corresponding portraits must be drawn after the
 	*** character sprites.
 	**/
 	hoa_video::StillImage _universal_time_meter;
-	//@}
-
-	//! \name Character Swap Card Data
-	//@{
-	/** \brief The number of character swaps that the player may currently perform
-	*** The maximum number of swaps ever allowed is four, thus the value of this class member will always have the range [0, 4].
-	*** This member is also used to determine how many swap cards to draw on the battle screen.
-	**/
-	uint8 _current_number_swaps;
-	/** \brief A running counter to determine when a player may be given another swap card
-	*** The units of this timer are milliseconds. The timer is initially set to around 5 minutes.
-	*** Once the timer reaches below zero, it is reset and BattleMode::_num_swap_cards is incremented by one.
-	**/
-	int32 _swap_countdown_timer;
 
 	/** \brief Image that indicates when a player may perform character swapping
 	*** This image is drawn in the lower left corner of the screen. When no swaps are available to the player,
 	*** the image is drawn in gray-scale.
 	**/
 	hoa_video::StillImage _swap_icon;
+
 	/** \brief Used for visual display of how many swaps a character may perform
 	*** This image is drawn in the lower left corner of the screen, just above the swap indicator. This image 
 	*** may be drawn on the screen up to four times (in a card-stack fashion), one for each swap that is
@@ -556,21 +519,24 @@ private:
 	hoa_video::StillImage _swap_card;
 	//@}
 
+	//! \name Character Swap Card Data
+	//@{
+	/** \brief The number of character swaps that the player may currently perform
+	*** The maximum number of swaps ever allowed is four, thus the value of this class member will always have the range [0, 4].
+	*** This member is also used to determine how many swap cards to draw on the battle screen.
+	**/
+
+	uint8 _current_number_swaps;
+
+	/** \brief A running counter to determine when a player may be given another swap card
+	*** The units of this timer are milliseconds. The timer is initially set to around 5 minutes.
+	*** Once the timer reaches below zero, it is reset and BattleMode::_num_swap_cards is incremented by one.
+	**/
+	int32 _swap_countdown_timer;
+	//@}
+
 	//! Used for scaling actor wait times
 	uint32 _min_agility;
-
-	/* \brief A 1 to 1 mapping of the names we put in our item action list.
-	** \note Gives us a quick handle to directly manipulate and/or pass the item to Lua
-	*/
-	std::vector<hoa_global::GlobalItem*> _item_list;
-
-	/* \brief A 1 to 1 mapping of the names we put in our skill action list.
-	** \note Gives us a quick handle to directly manipulate and/or pass the skill to Lua
-	*/
-	std::vector<hoa_global::GlobalSkill*> _skill_list;
-
-	//! Holds the selected index from the action list
-	int32 _selected_option_index;
 
 	//! \name Actor Action Processing
 	//@{
@@ -590,6 +556,7 @@ private:
 	void _TEMP_LoadTestData();
 
 	void _CreateCharacterActors();
+
 	void _CreateEnemyActors();
 
 	//! Initializes all data necessary for the battle to begin
@@ -602,11 +569,12 @@ private:
 	void _TallyRewards();
 
 	//! \brief Returns the number of enemies that are still alive in the battle
-	const uint32 _NumberEnemiesAlive() const;
+	uint32 _NumberEnemiesAlive() const;
+
 	/** \brief Returns the number of characters that are still alive in the battle
 	*** \note This function only counts the characters on the screen, not characters in the party reserves
 	**/
-	const uint32 _NumberOfCharactersAlive() const;
+	uint32 _NumberCharactersAlive() const;
 
 	/** \brief Creates the action list menu depending upon which action type the player has chosen
 	***
@@ -619,12 +587,6 @@ private:
 	//@{
 	//! Updates which character the player has chosen to select
 	void _UpdateCharacterSelection();
-
-	//! Processes user input when the player's cursor is on the action type menu
-	void _UpdateActionTypeMenu();
-
-	//! Processes user input when the player's cursor is on the action list menu
-	void _UpdateActionListMenu();
 
 	//! Processes user input when the player's cursor is selecting a target for an action
 	void _UpdateTargetSelection();
@@ -643,6 +605,12 @@ private:
 	**/
 	void _DrawBackgroundVisuals();
 
+	/** \brief Draws the bottom menu visuals and information
+	*** The bottom menu contains a wide array of information, including swap cards, character portraits, character names,
+	*** and both character and enemy status. This menu is perpetually drawn on the battle screen.
+	**/
+	void _DrawBottomMenu();
+
 	/** \brief Draws all character and enemy sprites as well as any sprite visuals
 	*** In addition to the sprites themselves, this function draws special effects and indicators for the sprites.
 	*** For example, the actor selector image and any visible action effects like magic.
@@ -653,30 +621,6 @@ private:
 	*** Portraits are retrieved from the battle actors.
 	**/
 	void _DrawTimeMeter();
-
-	/** \brief Draws the bottom menu visuals and information
-	*** The bottom menu contains a wide array of information, including swap cards, character portraits, character names,
-	*** and both character and enemy status. This menu is perpetually drawn on the battle screen.
-	**/
-	void _DrawBottomMenu();
-
-	/** \brief Draws the left menu for action types and action lists
-	*** The action type and action list menus are only drawn when a character is able to take an action in battle. Either
-	*** the action type or the action list menu is drawn at any given time (they do not exist simulatenously).
-	**/
-	void _DrawActionMenu();
-
-	/** \brief Draws the upper menu for dialogues that occur in-battle
-	*** This menu is only drawn when a dialogue takes place in battle. In-battle dialogues are a rare-occurence, so this
-	*** menu is not drawn very often.
-	*** \TODO Dialogues are currently not supported in battles. The feature will be added sometime in the future.
-	**/
-	void _DrawDialogueMenu();
-
-	/** \brief Draws the small window above the action list
-	*** This window is for indicatinig what your current action is, in case you forgot what you chose
-	**/
-	void _DrawActionTypeWindow();
 	//@}
 }; // class BattleMode : public hoa_mode_manager::GameMode
 

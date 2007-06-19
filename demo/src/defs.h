@@ -195,11 +195,15 @@ namespace hoa_battle {
 	class BattleMode;
 
 	namespace private_battle {
-		class ActorEffect;
 		class BattleActor;
 		class BattleCharacterActor;
 		class BattleEnemyActor;
+
+		class ActorEffect;
 		class ScriptEvent;
+
+		class ActionWindow;
+		class FinishWindow;
 	}
 }
 

@@ -956,8 +956,8 @@ void SkillsWindow::Update() {
 	    _skills_list.GetSelection() >= 0 &&
 	    _skills_list.GetNumOptions() > _skills_list.GetSelection()) {
 		GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActor(_char_select.GetSelection()));
-		std::vector<hoa_global::GlobalSkill*> skills = ch->GetAttackSkills();
-		GlobalSkill* skill = skills[_skills_list.GetSelection()];
+		std::vector<hoa_global::GlobalSkill*>* skills = ch->GetAttackSkills();
+		GlobalSkill* skill = skills->at(_skills_list.GetSelection());
 		_description.SetDisplayText( skill->GetDescription() );
 	}
 } // void SkillsWindow::Update()
@@ -969,8 +969,8 @@ void SkillsWindow::_UpdateSkillList() {
 	std::vector<ustring> options;
 
 	//FIX ME Need new categories
-	std::vector<hoa_global::GlobalSkill*> skills = ch->GetAttackSkills();
-	uint32 skillsize = skills.size();
+	std::vector<hoa_global::GlobalSkill*>* skills = ch->GetAttackSkills();
+	uint32 skillsize = skills->size();
 	
 	string tempstr = "";
 
@@ -980,7 +980,7 @@ void SkillsWindow::_UpdateSkillList() {
 			_skills_list.SetSize(1,skillsize);
 
 			for (uint32 i = 0; i < skillsize; i++) {
-				tempstr = MakeStandardString(skills[i]->GetName()) + "		" + NumberToString(skills[i]->GetSPRequired()) + " SP";
+				tempstr = MakeStandardString(skills->at(i)->GetName()) + "		" + NumberToString(skills->at(i)->GetSPRequired()) + " SP";
 				options.push_back(MakeUnicodeString(tempstr));
 			}
 		break;
@@ -1002,8 +1002,8 @@ void SkillsWindow::Draw() {
 	if (_active_box == SKILL_ACTIVE_LIST) {
 		GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActor(_char_select.GetSelection()));
 		std::vector<ustring> options;
-		std::vector<hoa_global::GlobalSkill*> skills = ch->GetAttackSkills();
-		GlobalSkill* skill = skills[ _skills_list.GetSelection() ];
+		std::vector<hoa_global::GlobalSkill*>* skills = ch->GetAttackSkills();
+		GlobalSkill* skill = skills->at(_skills_list.GetSelection());
 
 		VideoManager->SetDrawFlags(VIDEO_X_LEFT,VIDEO_Y_CENTER,0);
 

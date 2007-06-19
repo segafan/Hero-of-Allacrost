@@ -21,6 +21,7 @@
 #include "utils.h"
 #include "audio.h"
 #include "video.h"
+#include "input.h"
 #include "system.h"
 #include "global.h"
 #include "script.h"
@@ -30,6 +31,7 @@
 using namespace hoa_utils;
 using namespace hoa_audio;
 using namespace hoa_video;
+using namespace hoa_input;
 using namespace hoa_system;
 using namespace hoa_global;
 using namespace hoa_script;
@@ -424,47 +426,6 @@ void BattleCharacterActor::DrawStatus() {
 		y_offset = -75.0f;
 	}
 
-	// Shrinking bars (HP, SP) TODO: STAMINA
-	float bar_size;
-
-	// HP, green bar
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_NO_BLEND, 0);
-	bar_size = static_cast<float>(83*GetHitPoints())/static_cast<float>(GetMaxHitPoints());
-	VideoManager->Move(312, 90 + y_offset);
-
-	if (GetHitPoints() > 0)		// Draw color bar (if needed)
-	{
-		VideoManager->DrawRectangle(bar_size,6,Color(0.133f,0.455f,0.133f,1.0f));
-	}
-	if (GetHitPoints() != GetMaxHitPoints())	// Draw black bar (if needed)
-	{
-		VideoManager->MoveRelative(bar_size, 0.0f);
-		VideoManager->DrawRectangle(83.0f-bar_size,6,Color::black);
-		VideoManager->Move(312, 90 + y_offset);
-	}
-
-	VideoManager->SetDrawFlags(VIDEO_BLEND_ADD, 0);
-	VideoManager->DrawImage(_status_bar_cover_image);
-
-	// SP, blue bar
-	VideoManager->SetDrawFlags(VIDEO_NO_BLEND, 0);
-	bar_size = static_cast<float>(84*GetSkillPoints())/static_cast<float>(GetMaxSkillPoints());
-	VideoManager->Move(412, 90 + y_offset);
-
-	if (GetSkillPoints() > 0)	// Draw color bar (if needed)
-	{
-		VideoManager->DrawRectangle(bar_size,6,Color(0.129f,0.263f,0.451f,1.0f));
-	}
-	if (GetHitPoints() != GetMaxHitPoints())	// Draw black bar (if needed)
-	{
-		VideoManager->MoveRelative(bar_size,0.0f);
-		VideoManager->DrawRectangle(83.0f-bar_size,6,Color::black);
-		VideoManager->Move(412, 90 + y_offset);
-	}
-
-	VideoManager->SetDrawFlags(VIDEO_BLEND_ADD, 0);
-	VideoManager->DrawImage(_status_bar_cover_image);
-
 	// Draw the background of the menu
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 	VideoManager->Move(149, 84.0f + y_offset);
@@ -477,23 +438,69 @@ void BattleCharacterActor::DrawStatus() {
 	VideoManager->Move(225.0f, 90.0f + y_offset);
  	VideoManager->DrawText(GetActor()->GetName());
 
-	// Draw the character's current health on top of the middle of the HP bar
-	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+	// If the swap key is being held down, draw status icons instead of HP and SP bars
+	if (InputManager->SwapState()) {
+		// TODO: draw status icons and information
 
-	VideoManager->Move(355.0f, 90.0f + y_offset);
-	VideoManager->DrawText(NumberToString(GetHitPoints()));
+		// Draw all of the character's current status afflictions
+		// VideoManager->MoveRel(152, 4);
+		// for (uint8 i = 0; i < _effects.size(); i++) {
+		// 	VideoManager->DrawImage(_effects[i].image);
+		// 	VideoManager->MoveRel(25, 0);
+		// }
+	}
+	else {
+		// Shrinking bars (HP, SP)
+		float bar_size;
 
-	// Draw the character's current skill points on top of the middle of the SP bar
-	VideoManager->MoveRelative(100, 0);
-	VideoManager->DrawText(NumberToString(GetSkillPoints()));
+		// HP, green bar
+		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_NO_BLEND, 0);
+		bar_size = static_cast<float>(83*GetHitPoints())/static_cast<float>(GetMaxHitPoints());
+		VideoManager->Move(312, 90 + y_offset);
 
-	// Draw all of the character's current status afflictions
-	// TODO: waiting for ActorEffects class to be implemented
-	// VideoManager->MoveRel(152, 4);
-	// for (uint8 i = 0; i < _effects.size(); i++) {
-	// 	VideoManager->DrawImage(_effects[i].image);
-	// 	VideoManager->MoveRel(25, 0);
-	// }
+		if (GetHitPoints() > 0)		// Draw color bar (if needed)
+		{
+			VideoManager->DrawRectangle(bar_size,6,Color(0.133f,0.455f,0.133f,1.0f));
+		}
+		if (GetHitPoints() != GetMaxHitPoints())	// Draw black bar (if needed)
+		{
+			VideoManager->MoveRelative(bar_size, 0.0f);
+			VideoManager->DrawRectangle(83.0f-bar_size,6,Color::black);
+			VideoManager->Move(312, 90 + y_offset);
+		}
+
+		VideoManager->SetDrawFlags(VIDEO_BLEND_ADD, 0);
+		VideoManager->DrawImage(_status_bar_cover_image);
+
+		// SP, blue bar
+		VideoManager->SetDrawFlags(VIDEO_NO_BLEND, 0);
+		bar_size = static_cast<float>(84*GetSkillPoints())/static_cast<float>(GetMaxSkillPoints());
+		VideoManager->Move(412, 90 + y_offset);
+
+		if (GetSkillPoints() > 0)	// Draw color bar (if needed)
+		{
+			VideoManager->DrawRectangle(bar_size,6,Color(0.129f,0.263f,0.451f,1.0f));
+		}
+		if (GetHitPoints() != GetMaxHitPoints())	// Draw black bar (if needed)
+		{
+			VideoManager->MoveRelative(bar_size,0.0f);
+			VideoManager->DrawRectangle(83.0f-bar_size,6,Color::black);
+			VideoManager->Move(412, 90 + y_offset);
+		}
+
+		VideoManager->SetDrawFlags(VIDEO_BLEND_ADD, 0);
+		VideoManager->DrawImage(_status_bar_cover_image);
+
+		// Draw the character's current health on top of the middle of the HP bar
+		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+
+		VideoManager->Move(355.0f, 90.0f + y_offset);
+		VideoManager->DrawText(NumberToString(GetHitPoints()));
+
+		// Draw the character's current skill points on top of the middle of the SP bar
+		VideoManager->MoveRelative(100, 0);
+		VideoManager->DrawText(NumberToString(GetSkillPoints()));
+	}
 }
 
 
@@ -743,8 +750,8 @@ void BattleEnemyActor::DrawSprite() {
 			VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 			std::vector<GlobalAttackPoint*> attack_points = GetActor()->GetAttackPoints();
 
-			VideoManager->Move(GetXLocation() + attack_points[current_battle->_attack_point_selected]->GetXPosition(),
-				GetYLocation() + attack_points[current_battle->_attack_point_selected]->GetYPosition());
+			VideoManager->Move(GetXLocation() + attack_points[current_battle->_selected_attack_point]->GetXPosition(),
+				GetYLocation() + attack_points[current_battle->_selected_attack_point]->GetYPosition());
 			VideoManager->DrawImage(current_battle->_attack_point_indicator);
 
 			// Reset default X and Y draw orientation
@@ -794,7 +801,7 @@ void BattleEnemyActor::DrawStatus() {
 	if (current_battle->_cursor_state == CURSOR_SELECT_ATTACK_POINT) {
 		std::vector<GlobalAttackPoint*> attack_points = GetActor()->GetAttackPoints();
 		VideoManager->MoveRelative(0, -25);
-		ustring attack_point = MakeUnicodeString("(") + attack_points[current_battle->_attack_point_selected]->GetName() + MakeUnicodeString(")");
+		ustring attack_point = MakeUnicodeString("(") + attack_points[current_battle->_selected_attack_point]->GetName() + MakeUnicodeString(")");
 		VideoManager->DrawText(attack_point);
 	}
 
