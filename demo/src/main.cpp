@@ -232,7 +232,7 @@ int32 main(int32 argc, char *argv[]) {
 		// Now the program should be in app/Contents
 		path.append ("/Resources/");
 		chdir(path.c_str());
-	#elif __linux__
+	#elif defined(__linux__) || defined(__FreeBSD__)
 		// Look for data files in DATADIR only if they are not available in the
 		// current directory.
 		if (ifstream("dat/config/settings.lua") == NULL)
