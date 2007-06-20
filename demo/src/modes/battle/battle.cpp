@@ -26,7 +26,6 @@
 #include "system.h"
 #include "global.h"
 #include "script.h"
-
 #include "battle.h"
 #include "battle_actors.h"
 #include "boot.h"
@@ -268,33 +267,7 @@ void ScriptEvent::RunScript() {
 		}
 
 		_source->SetSkillPoints(_source->GetSkillPoints() - _skill->GetSPRequired());
-		
-		//TEMP
-		//current_battle->_battle_sounds[4].PlaySound();
 	}
-	//OBSOLETE
-	/*else
-	{
-		//Skill code here
-		for (uint8 i = 0; i < _targets.size(); i++) {
-
-			BattleActor * actor = _targets[i];
-			actor->TakeDamage(GaussianRandomValue(12, 2.0f));
-
-			// TODO: Do this better way!
-			if (MakeStandardString(this->GetSource()->GetActor()->GetName()) == "Spider")
-				current_battle->_battle_sounds[0].PlaySound();
-			else if (MakeStandardString(this->GetSource()->GetActor()->GetName()) == "Green Slime")
-				current_battle->_battle_sounds[1].PlaySound();
-			else if (MakeStandardString(this->GetSource()->GetActor()->GetName()) == "Skeleton")
-				current_battle->_battle_sounds[2].PlaySound();
-			else if (MakeStandardString(this->GetSource()->GetActor()->GetName()) == "Claudius")
-				current_battle->_battle_sounds[3].PlaySound();
-			else if (MakeStandardString(this->GetSource()->GetActor()->GetName()) == "Snake")
-			current_battle->_battle_sounds[4].PlaySound();
-		}
-		// TODO: get script from global script repository and run, passing in list of arguments and host actor
-	}*/
 
 	//FIXE ME Temp code!!!
 	if (_source)
@@ -391,9 +364,6 @@ BattleMode::~BattleMode() {
 	for (uint32 i = 0; i < _battle_music.size(); i++)
 		_battle_music.at(i).FreeMusic();
 
-	for (uint32 i = 0; i < _battle_sounds.size(); i++)
-		_battle_sounds.at(i).FreeSound();
-
 	// Delete all character and enemy actors
 	for (deque<BattleCharacterActor*>::iterator i = _character_actors.begin(); i != _character_actors.end(); i++) {
 		delete *i;
@@ -438,7 +408,6 @@ void BattleMode::Reset() {
 
 	VideoManager->SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
 	VideoManager->SetFont("battle");
-
 
 	// Load the default battle music track if no other music has been added
 	if (_battle_music.empty()) {
@@ -494,7 +463,7 @@ void BattleMode::AddEnemy(GlobalEnemy new_enemy) {
 
 	// TEMP
 	// The next line modulus have been changed. Howeever, a better solution is to provide a std::vector
-	// instead of an array for MONSTER_LOCATIONS, init in the constructor, and make modulus with  the vector length
+	// instead of an array for MONSTER_LOCATIONS, init in the constructor, and make modulus with the vector length
 	// _next_monster_location_index = _next_monster_location_index % (sizeof(MONSTER_LOCATIONS)/2); <-- Before
 	_next_monster_location_index = _next_monster_location_index % 8;  // <-- Now
 
@@ -552,19 +521,6 @@ void BattleMode::_TEMP_LoadTestData() {
 		cerr << "BATTLE ERROR: Failed to load swap card: " << endl;
 		_ShutDown();
 	}
-
-	// Load the battle sfx
-	SoundDescriptor SD;
-	_battle_sounds.push_back(SD);
-	_battle_sounds.push_back(SD);
-	_battle_sounds.push_back(SD);
-	_battle_sounds.push_back(SD);
-	_battle_sounds.push_back(SD);
-	_battle_sounds[0].LoadSound("snd/spider_attack.wav");
-	_battle_sounds[1].LoadSound("snd/slime_attack.wav");
-	_battle_sounds[2].LoadSound("snd/skeleton_attack.wav");
-	_battle_sounds[3].LoadSound("snd/sword_swipe.wav");
-	_battle_sounds[4].LoadSound("snd/snake_attack.wav");
 }
 
 
