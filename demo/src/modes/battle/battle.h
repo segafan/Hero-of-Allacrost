@@ -90,9 +90,10 @@ const uint32 ACTION_TYPE_ITEM      = 3;
 **/
 enum CURSOR_STATE {
 	CURSOR_IDLE = 0,
-	CURSOR_SELECT_ATTACK_POINT = 1,
-	CURSOR_SELECT_TARGET = 2,
-	CURSOR_SELECT_PARTY = 3
+	CURSOR_WAIT = 1,
+	CURSOR_SELECT_ATTACK_POINT = 2,
+	CURSOR_SELECT_TARGET = 3,
+	CURSOR_SELECT_PARTY = 4
 };
 
 //! Returned as an index when looking for a character or enemy and they do not exist
@@ -442,11 +443,17 @@ private:
 	//! \brief The state of the battle's selection cursor
 	private_battle::CURSOR_STATE _cursor_state;
 
+	// NOTE: Are _actor_index and _argument_actor_index really necessary in addition to _selected_character
+	// and _selected target? They essentially represent the same thing...
+
 	/** \brief Character index of the currently selected actor
 	*** \note This needs to be made defunct. Occurences of it in battle.cpp should
 	*** be replaced with the index of the _selected_character member
 	**/
 	int32 _actor_index;
+
+	//! \brief Argument selector
+	uint32 _argument_actor_index;
 
 	//! \brief The current character that is selected by the player
 	private_battle::BattleCharacterActor* _selected_character;
@@ -461,9 +468,6 @@ private:
 	*** the value of this member is meaningless.
 	**/
 	uint32 _selected_attack_point;
-
-	//! \brief Argument selector
-	uint32 _argument_actor_index;
 	//@}
 
 	//! \name Battle GUI Windows
@@ -575,11 +579,6 @@ private:
 	*** \note This function only counts the characters on the screen, not characters in the party reserves
 	**/
 	uint32 _NumberCharactersAlive() const;
-
-	/** \brief Creates the action list menu depending upon which action type the player has chosen
-	***
-	**/
-	void _ConstructActionListMenu();
 
 	/** \name Update helper functions
 	*** \brief Functions which update the state of various battle components
