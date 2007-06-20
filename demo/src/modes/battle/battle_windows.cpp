@@ -48,7 +48,7 @@ ActionWindow::ActionWindow() {
 	}
 	MenuWindow::SetPosition(512.0f, 128.0f);
 	MenuWindow::SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
-	Reset();
+
 
 	// NOTE: may need to set the dimensions of these images to 45, 45
 	_action_category_icons.resize(4);
@@ -98,6 +98,7 @@ ActionWindow::ActionWindow() {
 	// Setup options for VIEW_TARGET_SELECTION
 
 	// Setup options for VIEW_ACTION_INFORMATION
+	Reset();
 } // ActionWindow::ActionWindow()
 
 
@@ -151,7 +152,7 @@ void ActionWindow::Reset() {
 	_action_target_type = GLOBAL_TARGET_INVALID;
 	_action_alignment_type = GLOBAL_ALIGNMENT_INVALID;
 	_item_list.clear();
-	_skill_list->clear();
+	_skill_list = NULL;
 }
 
 // ----- UPDATE METHODS
