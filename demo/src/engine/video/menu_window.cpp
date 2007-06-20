@@ -357,19 +357,19 @@ bool MenuWindow::_RecreateImage() {
 	float left_height = _skin->borders[1][0].GetHeight();
 
 	// Calculate how many times the top/bottom images have to be tiled in order to make up the width of the window
-	float inner_width = _width - horizontal_border_size;
-	float inner_height = _height - vertical_border_size;
+	_inner_width = _width - horizontal_border_size;
+	_inner_height = _height - vertical_border_size;
 
-	if (inner_width < 0.0f) {
+	if (_inner_width < 0.0f) {
 		if (VIDEO_DEBUG) {
-			cerr << "VIDEO ERROR: In MenuWindow::_RecreateImage(), inner_width was negative" << endl;
+			cerr << "VIDEO ERROR: In MenuWindow::_RecreateImage(), _inner_width was negative" << endl;
 		}
 		return false;
 	}
 
-	if (inner_height < 0.0f) {
+	if (_inner_height < 0.0f) {
 		if (VIDEO_DEBUG) {
-			cerr << "VIDEO ERROR: In MenuWindow::_RecreateImage(), inner_height was negative" << endl;
+			cerr << "VIDEO ERROR: In MenuWindow::_RecreateImage(), _inner_height was negative" << endl;
 		}
 		return false;
 	}
@@ -378,8 +378,8 @@ bool MenuWindow::_RecreateImage() {
 	bool background_loaded = _skin->background.GetWidth();
 
 	// Find how many times we have to tile the border images to fit the dimensions given
-	float num_x_tiles = inner_width  / top_width;
-	float num_y_tiles = inner_height / left_height;
+	float num_x_tiles = _inner_width  / top_width;
+	float num_y_tiles = _inner_height / left_height;
 
 	int32 inum_x_tiles = static_cast<int32>(num_x_tiles);
 	int32 inum_y_tiles = static_cast<int32>(num_y_tiles);
@@ -393,14 +393,14 @@ bool MenuWindow::_RecreateImage() {
 	if (dnum_x_tiles > 0.001f) {
 		float width_adjust = (1.0f - dnum_x_tiles) * top_width;
 		_width += width_adjust;
-		inner_width += width_adjust;
+		_inner_width += width_adjust;
 		++inum_x_tiles;
 	}
 
 	if (dnum_y_tiles > 0.001f) {
 		float height_adjust = (1.0f - dnum_y_tiles) * top_width;
 		_height += height_adjust;
-		inner_height += height_adjust;
+		_inner_height += height_adjust;
 		++inum_y_tiles;
 	}
 
@@ -428,8 +428,8 @@ bool MenuWindow::_RecreateImage() {
 		float min_x = 0;
 		float min_y = 0;
 
-		float max_x = inner_width + horizontal_border_size;
-		float max_y = inner_height + vertical_border_size;
+		float max_x = _inner_width + horizontal_border_size;
+		float max_y = _inner_height + vertical_border_size;
 
 		if (_edge_visible_flags & VIDEO_MENU_EDGE_TOP)
 			max_y -= (top_border_size / 2);
@@ -456,7 +456,7 @@ bool MenuWindow::_RecreateImage() {
 	else {
 		// Otherwise re-create the overlay at the correct width and height
 		VideoManager->DeleteImage(_skin->borders[1][1]);
-		_skin->borders[1][1].SetDimensions(inner_width, inner_height);
+		_skin->borders[1][1].SetDimensions(_inner_width, _inner_height);
 		_skin->borders[1][1].SetVertexColors(c[0], c[1], c[2], c[3]);
 		VideoManager->LoadImage(_skin->borders[1][1]);
 
