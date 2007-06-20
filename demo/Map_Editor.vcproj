@@ -203,6 +203,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\modes\battle\battle_windows.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\modes\boot\boot.cpp"
 				>
 			</File>
@@ -410,6 +414,10 @@
 			</File>
 			<File
 				RelativePath=".\src\modes\battle\battle_actors.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\battle\battle_windows.h"
 				>
 			</File>
 			<File
