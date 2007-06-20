@@ -473,7 +473,7 @@ bool GameVideo::_LoadMultiImage (std::vector <StillImage>& images, const std::st
 
 		info.image.width = info.multi_image.width / cols;
 		info.image.height = info.multi_image.height / rows;
-		info.image.pixels = new uint8 [info.image.width*info.image.height*4];
+		info.image.pixels = (uint8 *) malloc(info.image.width*info.image.height*4);
 	}
 
 	// One by one, get the subimages

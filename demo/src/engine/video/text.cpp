@@ -316,21 +316,16 @@ bool GameVideo::_CacheGlyphs
 	int32 w,h;
 	GLuint texture;
 
-	// Figure out which glyphs are not already cached
-	std::vector<uint16> newglyphs;
-	for(const uint16 * glyph = uText; *glyph != 0; glyph++)
+	for(const uint16 * character_ptr = uText; *character_ptr != 0; ++character_ptr)
 	{
-		if(fp->glyph_cache->find(*glyph) != fp->glyph_cache->end())
+		// Reference for legibility
+		const uint16 &character = *character_ptr;
+
+		// Check if glyph already cached
+		if(fp->glyph_cache->find(character) != fp->glyph_cache->end())
 			continue;
 
-		newglyphs.push_back(*glyph);
-	}
-	
-
-	for(size_t glyphindex = 0; glyphindex < newglyphs.size(); glyphindex++)
-	{
-		
-		initial = TTF_RenderGlyph_Blended(font, newglyphs[glyphindex], color);
+		initial = TTF_RenderGlyph_Blended(font, character, color);
 		
 		if(!initial)
 		{
@@ -440,7 +435,7 @@ bool GameVideo::_CacheGlyphs
 		int miny, maxy;
 		int advance;
 
-		if(TTF_GlyphMetrics(font, newglyphs[glyphindex], &minx, &maxx, &miny, &maxy, &advance))
+		if(TTF_GlyphMetrics(font, character, &minx, &maxx, &miny, &maxy, &advance))
 		{
 			SDL_FreeSurface(initial);
 			SDL_FreeSurface(intermediary);
@@ -460,7 +455,7 @@ bool GameVideo::_CacheGlyphs
 		glyph->max_y = (float)(((double)initial->h + 1) / ((double)h));
 		glyph->advance = advance;
 
-		fp->glyph_cache->insert(std::pair<uint16, FontGlyph *>(newglyphs[glyphindex], glyph));
+		fp->glyph_cache->insert(std::pair<uint16, FontGlyph *>(character, glyph));
 
 		SDL_FreeSurface(initial);
 		SDL_FreeSurface(intermediary);
