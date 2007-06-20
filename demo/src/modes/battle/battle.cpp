@@ -293,7 +293,6 @@ BattleMode::BattleMode() :
 	_active_se(NULL),
 	_battle_over(false),
 	_victorious_battle(false),
-	_first_visit_to_end_screen(true),
 	_victory_xp(0),
 	_victory_sp(0),
 	_victory_money(0),
@@ -545,7 +544,7 @@ void BattleMode::_Initialize()
 		_selected_character = new_actor;
 	}
 
-	_actor_index = GetIndexOfFirstIdleCharacter();
+	_selected_character_index = GetIndexOfFirstIdleCharacter();
 
 	// (2) Loop through and find the actor with the lowest agility
 	for (uint8 i = 0; i < _enemy_actors.size(); i++) {
@@ -617,12 +616,9 @@ void BattleMode::_Initialize()
 
 
 void BattleMode::_ShutDown() {
-	if (BATTLE_DEBUG) cout << "BATTLE: ShutDown() called!" << endl;
-
 	_battle_music[0].StopMusic();
 
-	for (uint32 i = 0; i < _character_actors.size(); ++i)
-	{
+	for (uint32 i = 0; i < _character_actors.size(); ++i) {
 		_character_actors[i]->UpdateGlobalActorStats();
 	}
 
@@ -686,77 +682,29 @@ void BattleMode::_TallyRewards() {
 
 void BattleMode::Update() {
 	_battle_over = (_NumberEnemiesAlive() == 0) || (_NumberCharactersAlive() == 0);
-	static bool displayed_stats;
-	static bool begun_countdown;
-	
-	if ( _NumberEnemiesAlive() == 0 ) {
-		_victorious_battle = true;
-	}
+	_victorious_battle = (_NumberEnemiesAlive() == 0);
 
+	// ----- (1): If the battle is over, only execute this small block of update code
 	if (_battle_over) {
-		if (_victorious_battle) {
-			if (_first_visit_to_end_screen) {
-				AddMusic("mus/Allacrost_Fanfare.ogg");
-				_battle_music.back().PlayMusic();
-				displayed_stats = false;
-				begun_countdown = false;
-				_first_visit_to_end_screen = false;
-				_TallyRewards();	//calculate the player's new stats
-				PlayerVictory();	//actually write them into the player's data
-			}
-			else {				
-				if (begun_countdown && (displayed_stats == false)) {
-					// if we've started the countdown, but haven't finished it.
-					// roll it, and don't look for input on each screen update.
-					// reduce each number by 1, per each screen redraw.
-							if (_victory_xp != 0) {
-								_victory_xp--;
-							}
+		if (_finish_window->GetState() == FINISH_INVALID) { // Indicates that the battle has just now finished
+			_action_window->Reset();
+			_finish_window->Initialize(_victorious_battle);
 
-							if (_victory_sp != 0) {
-								_victory_sp--;
-							}
-							
-							if ( _victory_money != 0) {
-								_victory_money--;
-							}
-
-							
-							if ( (_victory_xp == 0) && (_victory_money == 0) ) {
-								displayed_stats = true;
-							}
-				}
-				else { //if the countdown is not started, or completely finished, then don't roll the numbers.
-				// and do look for input
-					if (InputManager->ConfirmPress()) {
-						AudioManager->PlaySound("snd/confirm.wav");
-						if ( displayed_stats == false) {  //if the countdown is not started
-							begun_countdown = true;
-						}
-						else { // if the countdown is totally finished
-							VideoManager->DisableFog();
-							_ShutDown();
-						}
-					}
-				}
+			if (_victorious_battle) {
+				_TallyRewards();
+				PlayerVictory();
 			}
 		}
-		else {  // if it's a losing battle
-			if (_first_visit_to_end_screen) {
-					AddMusic("mus/Allacrost_Intermission.ogg");
-					_battle_music.back().PlayMusic();
-					_first_visit_to_end_screen = false;
-				}
 
-			if (InputManager->ConfirmRelease()) {
-				PlayerDefeat();
-			}
-		}
-		// Do not update other battle components when the battle has already ended
+		// The FinishWindow::Update() function handles all update code when a battle is over.
+		// The call to shut down battle mode is also made from within this call.
+		_finish_window->Update();
+
+		// Do not update other battle code if the battle has already ended
 		return;
-	}
+	} // if (_battle_over)
 
-	// Update all battle actors
+	// ----- (2): Update the state of all battle actors
 	for (uint8 i = 0; i < _character_actors.size(); i++) {
 		_character_actors[i]->Update();
 	}
@@ -764,7 +712,7 @@ void BattleMode::Update() {
 		_enemy_actors[i]->Update();
 	}
 
-	// Run any scripts that are sitting in the queue
+	// ----- (3): Execute any scripts that are sitting in the queue
 	if (_script_queue.size()) {
 	//if (!_IsPerformingScript() && _script_queue.size() > 0) {
 		std::list<private_battle::ScriptEvent*>::iterator it;
@@ -796,28 +744,25 @@ void BattleMode::Update() {
 
 			SetPerformingScript(false,NULL);
 		}
-	}
+	} // if (_script_queue.size())
 
-	// Update various menus and other GUI graphics as appropriate
+	// ----- (4): Update various menus and other GUI graphics as appropriate
 	if (_cursor_state == CURSOR_SELECT_ATTACK_POINT) {
 		_attack_point_indicator.Update();
 	}
 
-	// Process user input depending upon which state the menu cursor is in
+	// ----- (5): Process user input depending upon which state the menu cursor is in
 	switch (_cursor_state) {
 		case CURSOR_IDLE:
 			_UpdateCharacterSelection();
 			break;
 		case CURSOR_WAIT:
-			_action_window->Update();
 			break;
 		case CURSOR_SELECT_TARGET:
 			_UpdateTargetSelection();
-			_action_window->Update();
 			break;
 		case CURSOR_SELECT_ATTACK_POINT:
 			_UpdateAttackPointSelection();
-			_action_window->Update();
 			break;
 		// TODO: What should be done for these two options?
 		case CURSOR_SELECT_PARTY:
@@ -825,6 +770,7 @@ void BattleMode::Update() {
 			break;
 	} // switch (_cursor_state)
 
+	// ----- (6): Update the action window if the player is making an action or target selection
 	if (_action_window->GetState() != VIEW_INVALID)
 		_action_window->Update();
 } // void BattleMode::Update()
@@ -833,8 +779,8 @@ void BattleMode::Update() {
 
 void BattleMode::_UpdateCharacterSelection() {
 	// First check if there are any characters in the idle state. If there aren't, there's nothing left to do
-	_actor_index = GetIndexOfFirstIdleCharacter();
-	if (_actor_index == static_cast<int32>(INVALID_BATTLE_ACTOR_INDEX)) {
+	_selected_character_index = GetIndexOfFirstIdleCharacter();
+	if (_selected_character_index == static_cast<int32>(INVALID_BATTLE_ACTOR_INDEX)) {
 		return;
 	}
 
@@ -846,7 +792,7 @@ void BattleMode::_UpdateCharacterSelection() {
 	// If there is only one character alive, then we are sure that he/she is the character to select
 	if (_NumberCharactersAlive() == 1) {
 		_cursor_state = CURSOR_WAIT;
-		_selected_character = GetPlayerCharacterAt(_actor_index);
+		_selected_character = GetPlayerCharacterAt(_selected_character_index);
 		_action_window->Initialize(_selected_character);
 		return;
 	}
@@ -860,13 +806,13 @@ void BattleMode::_UpdateCharacterSelection() {
 	if (InputManager->UpPress() || InputManager->RightPress()) {
 		// Select the next character above the currently selected one
 		// If no such character exists, the selected character will remain selected
-		uint32 working_index = _actor_index;
+		uint32 working_index = _selected_character_index;
 		BattleCharacterActor *bca;
 
 		while (working_index < GetNumberOfCharacters()) {
 			bca = GetPlayerCharacterAt(working_index + 1);
 			if (bca->IsAlive() && bca->GetWaitTime()->HasExpired() && !bca->IsQueuedToPerform()) {
-				_actor_index = working_index + 1;
+				_selected_character_index = working_index + 1;
 				break;
 			}
 
@@ -876,14 +822,14 @@ void BattleMode::_UpdateCharacterSelection() {
 	else if (InputManager->DownPress() || InputManager->LeftPress()) {
 		// Select the next character below the currently selected one.
 		// If no such character exists, the selected character will remain selected
-		uint32 working_index = _actor_index;
+		uint32 working_index = _selected_character_index;
 		BattleCharacterActor *bca;
 
 		while (working_index > 0) {
 			bca = GetPlayerCharacterAt(working_index + 1);
 			if (bca->IsAlive() && bca->GetWaitTime()->HasExpired() && !bca->IsQueuedToPerform())
 			{
-				_actor_index = working_index - 1;
+				_selected_character_index = working_index - 1;
 				break;
 			}
 			--working_index;
@@ -891,7 +837,7 @@ void BattleMode::_UpdateCharacterSelection() {
 	}
 	else if (InputManager->ConfirmPress()) {
 		_cursor_state = CURSOR_WAIT;
-		_selected_character = GetPlayerCharacterAt(_actor_index);
+		_selected_character = GetPlayerCharacterAt(_selected_character_index);
 		_action_window->Initialize(_selected_character);
 	}
 } // void BattleMode::_UpdateCharacterSelection()
@@ -903,24 +849,24 @@ void BattleMode::_UpdateTargetSelection() {
 		if (_action_window->GetActionTargetType() != GLOBAL_TARGET_PARTY) {
 			switch (_action_window->GetActionAlignmentType()) {
 				case GLOBAL_ALIGNMENT_BAD:
-					_argument_actor_index = GetIndexOfNextAliveEnemy(false);
-					_selected_target = GetEnemyActorAt(_argument_actor_index);
+					_selected_target_index = GetIndexOfNextAliveEnemy(false);
+					_selected_target = GetEnemyActorAt(_selected_target_index);
 					break;
 
 				case GLOBAL_ALIGNMENT_NEUTRAL:
 					if (InputManager->DownPress()) {
 						if (_selected_target->IsEnemy() == false) {
-							if (_argument_actor_index) {
-								--_argument_actor_index;
+							if (_selected_target_index) {
+								--_selected_target_index;
 							}
 							else {
-								_argument_actor_index = GlobalManager->GetActiveParty()->GetPartySize() - 1;
+								_selected_target_index = GlobalManager->GetActiveParty()->GetPartySize() - 1;
 							}
-							_selected_target = GetPlayerCharacterAt(_argument_actor_index);
+							_selected_target = GetPlayerCharacterAt(_selected_target_index);
 						}
 						else {
-							_argument_actor_index = GetIndexOfNextAliveEnemy(false);
-							_selected_target = GetEnemyActorAt(_argument_actor_index);
+							_selected_target_index = GetIndexOfNextAliveEnemy(false);
+							_selected_target = GetEnemyActorAt(_selected_target_index);
 						}
 					}
 					break;
@@ -939,7 +885,7 @@ void BattleMode::_UpdateTargetSelection() {
 			{
 				if (_character_actors[i]->IsAlive())
 				{
-					_argument_actor_index = i;
+					_selected_target_index = i;
 					_selected_target = GetPlayerCharacterAt(i);
 					break;
 				}
@@ -951,25 +897,25 @@ void BattleMode::_UpdateTargetSelection() {
 		if (_action_window->GetActionTargetType() != GLOBAL_TARGET_PARTY) {
 			switch (_action_window->GetActionAlignmentType()) {
 				case GLOBAL_ALIGNMENT_BAD:
-					_argument_actor_index = GetIndexOfNextAliveEnemy(true);
-					_selected_target = GetEnemyActorAt(_argument_actor_index);
+					_selected_target_index = GetIndexOfNextAliveEnemy(true);
+					_selected_target = GetEnemyActorAt(_selected_target_index);
 					break;
 
 				case GLOBAL_ALIGNMENT_NEUTRAL:
 					if (InputManager->UpPress()) {
 						if (_selected_target->IsEnemy() == false) {
-							if (_argument_actor_index < GlobalManager->GetActiveParty()->GetPartySize() - 1) {
-								++_argument_actor_index;
+							if (_selected_target_index < GlobalManager->GetActiveParty()->GetPartySize() - 1) {
+								++_selected_target_index;
 							}
 							else {
-								_argument_actor_index = 0;
+								_selected_target_index = 0;
 							}
 
-							_selected_target = GetPlayerCharacterAt(_argument_actor_index);
+							_selected_target = GetPlayerCharacterAt(_selected_target_index);
 						}
 						else {
-							_argument_actor_index = GetIndexOfNextAliveEnemy(true);
-							_selected_target = GetEnemyActorAt(_argument_actor_index);
+							_selected_target_index = GetIndexOfNextAliveEnemy(true);
+							_selected_target = GetEnemyActorAt(_selected_target_index);
 						}
 					}
 					break;
@@ -983,8 +929,8 @@ void BattleMode::_UpdateTargetSelection() {
 		if (InputManager->RightPress() && _selected_target->IsEnemy() == false &&
 			_action_window->GetActionAlignmentType() == GLOBAL_ALIGNMENT_NEUTRAL)
 		{
-			_argument_actor_index = GetIndexOfFirstAliveEnemy();
-			_selected_target = GetEnemyActorAt(_argument_actor_index);
+			_selected_target_index = GetIndexOfFirstAliveEnemy();
+			_selected_target = GetEnemyActorAt(_selected_target_index);
 		}
 	} // else if (InputManager->UpPress() || InputManager->RightPress())
 
@@ -1013,7 +959,7 @@ void BattleMode::_UpdateTargetSelection() {
 			AddScriptEventToQueue(new_event);
 			_selected_character->SetQueuedToPerform(true);
 			_selected_target = NULL;
-			_actor_index = GetIndexOfFirstIdleCharacter();
+			_selected_character_index = GetIndexOfFirstIdleCharacter();
 			_cursor_state = CURSOR_IDLE;
 
 			// Resume battle timers if the battle is executing in wait mode
@@ -1031,7 +977,7 @@ void BattleMode::_UpdateTargetSelection() {
 
 
 void BattleMode::_UpdateAttackPointSelection() {
-	BattleEnemyActor* e = GetEnemyActorAt(_argument_actor_index);
+	BattleEnemyActor* e = GetEnemyActorAt(_selected_target_index);
 	vector<GlobalAttackPoint*>global_attack_points = e->GetActor()->GetAttackPoints();
 
 	if (InputManager->ConfirmPress()) {
@@ -1053,7 +999,7 @@ void BattleMode::_UpdateAttackPointSelection() {
 		AddScriptEventToQueue(new_event);
 		_selected_character->SetQueuedToPerform(true);
 		_selected_target = NULL;
-		_actor_index = GetIndexOfFirstIdleCharacter();
+		_selected_character_index = GetIndexOfFirstIdleCharacter();
 		_cursor_state = CURSOR_IDLE;
 		_action_window->Reset();
 
@@ -1110,50 +1056,8 @@ void BattleMode::Draw() {
 	}
 
 	if (_battle_over) {
-		// TODO: replace all of this with a call to _finish_window.Draw()
-		VideoManager->DisableSceneLighting();
-
-		// Draw a victory screen along with the loot. TODO: Maybe do this in a separate function
-		if (_victorious_battle) {
-			VideoManager->Move(520.0f, 384.0f);
-			VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
-			VideoManager->SetTextColor(Color::white);
-			//std::ostringstream victory_text;
-			//victory_text << "Your party is victorious!\n\n" << "XP: " << 
-			ustring text = MakeUnicodeString("Your party is victorious!\n\n");
-			text += MakeUnicodeString("XP: ") + MakeUnicodeString(NumberToString(_victory_xp) + "\n\n");
-			text += MakeUnicodeString("SP: ") + MakeUnicodeString(NumberToString(_victory_sp) + "\n\n");
-			text += MakeUnicodeString("Drunes: ") + MakeUnicodeString(NumberToString(_victory_money) + "\n\n");
-			if (_victory_level) {
-				text += MakeUnicodeString("Experience Level Gained\n\n");
-			}
-			if (_victory_skill) {
-				text += MakeUnicodeString("New Skill Learned\n\n");
-			}
-
-			if (_victory_items.size() > 0)
-			{
-				text += MakeUnicodeString("Items: ");
-				std::map<string, uint32>::iterator it;
-				//FIX ME:  Find a neat way to list what was added
-				for (it = _victory_items.begin(); it != _victory_items.end(); ++it)
-				{
-					text += MakeUnicodeString(it->first);
-					text += MakeUnicodeString(" x" + NumberToString(it->second) + "\n\n");
-					//it = GlobalManager->GetInventory()->find(_victory_items[i]);
-					//text += it->second->GetName() + MakeUnicodeString("\n\n");
-				}
-			}
-			VideoManager->DrawText(text);
-			//VideoManager->DrawText("Your party is victorious!\n\nExp: +50\n\nLoot : 1 HP Potion");
-		}
-		// Show the lose screen
-		else {
-				VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
-				VideoManager->Move(520.0f, 430.0f);
-				VideoManager->DrawText("Your party has been defeated!");
-		}
-	} // endif (_battle_over)
+		_finish_window->Draw();
+	}
 } // void BattleMode::Draw()
 
 
@@ -1220,7 +1124,7 @@ void BattleMode::_DrawTimeMeter() {
 	VideoManager->DrawImage(_universal_time_meter);
 	// Draw all character portraits
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
-	//BattleEnemyActor * e = GetEnemyActorAt(_argument_actor_index);
+	//BattleEnemyActor * e = GetEnemyActorAt(_selected_target_index);
 
 	GLOBAL_TARGET target_type = GLOBAL_TARGET_INVALID;
 	bool selected;// = false;
@@ -1578,14 +1482,14 @@ uint32 BattleMode::GetIndexOfNextAliveEnemy(bool move_upward) const {
 
 	if (move_upward)
 	{
-		for (uint32 i = _argument_actor_index + 1; i < _enemy_actors.size(); ++i)
+		for (uint32 i = _selected_target_index + 1; i < _enemy_actors.size(); ++i)
 		{
 			if (_enemy_actors[i]->GetActor()->IsAlive())
 			{
 				return i;
 			}
 		}
-		for (uint32 i = 0; i <= _argument_actor_index; ++i)
+		for (uint32 i = 0; i <= _selected_target_index; ++i)
 		{
 			if (_enemy_actors[i]->GetActor()->IsAlive())
 			{
@@ -1598,14 +1502,14 @@ uint32 BattleMode::GetIndexOfNextAliveEnemy(bool move_upward) const {
 	}
 	else
 	{
-		for (int32 i = static_cast<int32>(_argument_actor_index) - 1; i >= 0; --i)
+		for (int32 i = static_cast<int32>(_selected_target_index) - 1; i >= 0; --i)
 		{
 			if (_enemy_actors[i]->GetActor()->IsAlive())
 			{
 				return i;
 			}
 		}
-		for (int32 i = static_cast<int32>(_enemy_actors.size()) - 1; i >= static_cast<int32>(_argument_actor_index); --i)
+		for (int32 i = static_cast<int32>(_enemy_actors.size()) - 1; i >= static_cast<int32>(_selected_target_index); --i)
 		{
 			if (_enemy_actors[i]->GetActor()->IsAlive())
 			{

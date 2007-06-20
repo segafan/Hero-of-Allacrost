@@ -16,6 +16,7 @@
 #include "utils.h"
 #include "defs.h"
 
+#include "audio.h"
 #include "video.h"
 #include "input.h"
 #include "system.h"
@@ -28,6 +29,7 @@ using namespace std;
 
 using namespace hoa_utils;
 
+using namespace hoa_audio;
 using namespace hoa_video;
 using namespace hoa_input;
 using namespace hoa_system;
@@ -226,8 +228,8 @@ void ActionWindow::_UpdateActionSelection() {
 			_action_target_type = _skill_list->at(_selected_action)->GetTargetType();
 			_action_alignment_type = _skill_list->at(_selected_action)->GetTargetAlignment();
 			current_battle->_cursor_state = CURSOR_SELECT_TARGET;
-			current_battle->_argument_actor_index = current_battle->GetIndexOfFirstAliveEnemy();
-			current_battle->_selected_target = current_battle->GetEnemyActorAt(current_battle->_argument_actor_index);
+			current_battle->_selected_target_index = current_battle->GetIndexOfFirstAliveEnemy();
+			current_battle->_selected_target = current_battle->GetEnemyActorAt(current_battle->_selected_target_index);
 		}
 
 		else if (_selected_action_category == ACTION_TYPE_ITEM) {
@@ -236,7 +238,7 @@ void ActionWindow::_UpdateActionSelection() {
 
 			// TEMP: Need to re-examine this later... make sure both helpful and hurtful items register properly
 			current_battle->_cursor_state = CURSOR_SELECT_TARGET;
-			current_battle->_argument_actor_index = 0;
+			current_battle->_selected_target_index = 0;
 
 			// TODO: Use target type to select actor or party, and use cursor memory
 			switch (_action_alignment_type) {
@@ -391,15 +393,44 @@ void ActionWindow::_DrawTargetSelection() {
 
 
 void ActionWindow::_DrawActionInformation() {
-	// TODO: display detailed information about the skill or text selected
-
-	// TEMP: simply indicates whether the list item selected is a skill or an item
+	// TODO: load action/item info into rendered text objects instead of rendering the textevery frame
 	VideoManager->Move(650.0f, 100.0f);
 	if (_selected_action_category == ACTION_TYPE_ITEM) {
-		VideoManager->DrawText(MakeUnicodeString("This is an item."));
+		VideoManager->SetTextColor(Color(1.0f, 1.0f, 0.0f, 0.8f)); // 80% translucent yellow text
+		VideoManager->DrawText(MakeUnicodeString("Item"));
+
+		VideoManager->SetTextColor(Color::white);
+		VideoManager->MoveRelative(0.0f, -25.0f);
+		// TODO: add item icon and description
+		VideoManager->DrawText(
+			MakeUnicodeString("Name: ") + GetSelectedItem()->GetName() +
+			MakeUnicodeString("\nCurrent Quantity: " + NumberToString(GetSelectedItem()->GetCount())) +
+			MakeUnicodeString("\nTarget Type: TODO") +
+			MakeUnicodeString("\nAlignment Type: TODO")
+		);
 	}
+
 	else {
-		VideoManager->DrawText(MakeUnicodeString("This is a skill."));
+		VideoManager->SetTextColor(Color(1.0f, 1.0f, 0.0f, 0.8f)); // 80% translucent yellow text
+		if (_selected_action_category == ACTION_TYPE_ATTACK) {
+			VideoManager->DrawText(MakeUnicodeString("Attack Skill"));
+		}
+		else if (_selected_action_category == ACTION_TYPE_DEFEND) {
+			VideoManager->DrawText(MakeUnicodeString("Defend Skill"));
+		}
+		else if (_selected_action_category == ACTION_TYPE_SUPPORT) {
+			VideoManager->DrawText(MakeUnicodeString("Support Skill"));
+		}
+
+		VideoManager->SetTextColor(Color::white);
+		VideoManager->MoveRelative(0.0f, -25.0f);
+		// TODO: add warm-up and cool-down times (in seconds), and description
+		VideoManager->DrawText(
+			MakeUnicodeString("Name: ") + GetSelectedSkill()->GetName() +
+			MakeUnicodeString("\nSP Required: " + NumberToString(GetSelectedSkill()->GetSPRequired())) +
+			MakeUnicodeString("\nTarget Type: TODO") +
+			MakeUnicodeString("\nAlignment Type: TODO")
+		);
 	}
 }
 
@@ -506,6 +537,26 @@ FinishWindow::FinishWindow() {
 	MenuWindow::SetPosition(512.0f, 384.0f);
 	MenuWindow::SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	MenuWindow::Hide();
+
+	_state = FINISH_INVALID;
+
+	vector<ustring> lose_text;
+	lose_text.push_back(MakeUnicodeString("Retry  <R>the battle"));
+	lose_text.push_back(MakeUnicodeString("Load   <R>from last save point"));
+	lose_text.push_back(MakeUnicodeString("Return <R>to main menu"));
+	lose_text.push_back(MakeUnicodeString("Exit   <R>the game"));
+	_lose_options.SetOptions(lose_text);
+	_lose_options.SetCellSize(128.0f, 50.0f);
+	_lose_options.SetPosition(530.0f, 380.0f);
+	_lose_options.SetSize(1, 4);
+	_lose_options.SetFont("battle");
+	_lose_options.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_lose_options.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	_lose_options.SetSelectMode(VIDEO_SELECT_SINGLE);
+	_lose_options.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_lose_options.SetCursorOffset(-60.0f, 25.0f);
+	_lose_options.SetSelection(0);
+	_lose_options.SetOwner(this);
 }
 
 
@@ -520,39 +571,75 @@ void FinishWindow::Initialize(bool victory) {
 	MenuWindow::Show();
 
 	if (victory) {
-
+		_state = FINISH_ANNOUNCE_WIN;
+		current_battle->AddMusic("mus/Allacrost_Fanfare.ogg");
+		current_battle->_battle_music.back().PlayMusic();
 	}
 	else {
-		_lose_options.SetCellSize(128.0f, 50.0f);
-		_lose_options.SetPosition(530.0f, 380.0f);
-		_lose_options.SetSize(1, 4);
-		_lose_options.SetFont("battle");
-		_lose_options.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-		_lose_options.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-		_lose_options.SetSelectMode(VIDEO_SELECT_SINGLE);
-		_lose_options.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
-		_lose_options.SetCursorOffset(-60.0f, 25.0f);
-
-		vector<ustring> lose_text;
-		lose_text.push_back(MakeUnicodeString("Retry  <R>the battle"));
-		lose_text.push_back(MakeUnicodeString("Load   <R>from last save point"));
-		lose_text.push_back(MakeUnicodeString("Return <R>to main menu"));
-		lose_text.push_back(MakeUnicodeString("Exit   <R>the game"));
-		_lose_options.SetOptions(lose_text);
-		_lose_options.SetSelection(0);
+		_state = FINISH_ANNOUNCE_LOSE;
+		current_battle->AddMusic("mus/Allacrost_Intermission.ogg");
+		current_battle->_battle_music.back().PlayMusic();
 	}
 }
 
 
 
 void FinishWindow::Update() {
-	// TODO
+	// TODO: This is temporary... need to properly allow player
+
+	if (_state == FINISH_ANNOUNCE_WIN) {
+		if (InputManager->ConfirmPress()) {
+			AudioManager->PlaySound("snd/confirm.wav");
+			current_battle->_ShutDown();
+		}
+	}
+
+	else if (_state == FINISH_ANNOUNCE_LOSE) {
+		if (InputManager->ConfirmPress()) {
+			current_battle->PlayerDefeat();
+		}
+	}
 }
 
 
 
 void FinishWindow::Draw() {
-	// TODO
+	VideoManager->DisableSceneLighting();
+	MenuWindow::Draw();
+
+	// TODO: This all needs to be re-written so that it is formatted nicely and fits on the menu window
+	if (_state == FINISH_ANNOUNCE_WIN) {
+		VideoManager->Move(520.0f, 384.0f);
+		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
+		VideoManager->SetTextColor(Color::white);
+
+		ustring text = MakeUnicodeString("Your party is victorious!\n\n");
+		text += MakeUnicodeString("XP: ") + MakeUnicodeString(NumberToString(current_battle->_victory_xp) + "\n\n");
+		text += MakeUnicodeString("SP: ") + MakeUnicodeString(NumberToString(current_battle->_victory_sp) + "\n\n");
+		text += MakeUnicodeString("Drunes: ") + MakeUnicodeString(NumberToString(current_battle->_victory_money) + "\n\n");
+		if (current_battle->_victory_level) {
+			text += MakeUnicodeString("Experience Level Gained\n\n");
+		}
+		if (current_battle->_victory_skill) {
+			text += MakeUnicodeString("New Skill Learned\n\n");
+		}
+
+		if (current_battle->_victory_items.size() > 0) {
+			text += MakeUnicodeString("Items: ");
+			std::map<string, uint32>::iterator it;
+			for (it = current_battle->_victory_items.begin(); it != current_battle->_victory_items.end(); ++it) {
+				text += MakeUnicodeString(it->first);
+				text += MakeUnicodeString(" x" + NumberToString(it->second) + "\n\n");
+			}
+		}
+		VideoManager->DrawText(text);
+	}
+
+	else if (_state == FINISH_ANNOUNCE_LOSE) {
+		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
+		VideoManager->Move(520.0f, 430.0f);
+		VideoManager->DrawText("Your party has been defeated!");
+	}
 }
 
 } // namespace private_battle
