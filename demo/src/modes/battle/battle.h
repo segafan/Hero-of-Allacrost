@@ -382,9 +382,6 @@ private:
 	**/
 	std::vector<hoa_audio::MusicDescriptor> _battle_music;
 
-	//! Container for various sounds that need to be played during the battle
-	std::vector<hoa_audio::SoundDescriptor> _battle_sounds;
-
 	//! \name Battle Background Data
 	//@{
 	//! The full-screen, static background image to be used for the battle
