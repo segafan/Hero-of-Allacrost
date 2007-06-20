@@ -87,6 +87,12 @@ const uint32 ACTION_TYPE_ITEM      = 3;
 *** These constants are used throughout the battle code for various purposes, including determining what 
 *** user input commands should do, which components of the battle scene should be updated, and what 
 *** objects in the battle scene should be drawn.
+*** 
+*** - IDLE: no characters are ready to take an action
+*** - WAIT: the player is selecting an action for a character, but is not ready to select a target yet
+*** - SELECT_TARGET:
+*** 
+*** \todo Don't think select_attack_point or select_party will be necessary with the new control scheme
 **/
 enum CURSOR_STATE {
 	CURSOR_IDLE = 0,
@@ -209,6 +215,9 @@ private:
 *** the added enemies are ready for the battle to come. This should all be done
 *** prior the Reset() method being called. If you fail to add any enemies,
 *** an error will occur and the battle will self-terminate itself.
+*** 
+*** \todo Add a RestartBattle() function that re-initializes all battle data and
+*** begins the battle over from the start.
 *** ***************************************************************************/
 class BattleMode : public hoa_mode_manager::GameMode {
 	friend class private_battle::BattleActor;
@@ -268,6 +277,8 @@ public:
 	void TEMP_AddEnemy(uint32 new_enemy_id)
 		{ AddEnemy(hoa_global::GlobalEnemy(new_enemy_id)); }
 
+	// TODO: Some of the public methods below should probably not be public...
+
 	//! \brief Returns true if an actor is performing an action
 	bool _IsPerformingScript() const
 		{ return _performing_script; }
@@ -318,18 +329,18 @@ public:
 
 	uint32 GetIndexOfFirstIdleCharacter() const;
 
-	//! Useful for item and skill targeting
+	//! \brief Useful for item and skill targeting
 	uint32 GetIndexOfNextAliveEnemy(bool move_upward) const;
 
-	//! Returns the player actor at the deque location 'index'
+	//! \brief Returns the player actor at the deque location 'index'
 	private_battle::BattleCharacterActor * GetPlayerCharacterAt(uint32 index) const
 		{ return _character_actors.at(index); }
 
-	//! Returns the enemy actor at the deque location 'index'
+	//! \brief Returns the enemy actor at the deque location 'index'
 	private_battle::BattleEnemyActor * GetEnemyActorAt(uint32 index) const
 		{ return _enemy_actors.at(index); }
 
-	//! Returns the index of a player character
+	//! \brief Returns the index of a player character
 	uint32 GetIndexOfCharacter(private_battle::BattleCharacterActor * const Actor) const;
 
 	//! \brief Swap a character from _player_actors to _player_actors_in_battle
@@ -342,38 +353,37 @@ public:
 		{ return _active_se; }
 
 private:
-	//! When set to true, all preparations have been made and the battle is ready to begin
+	//! \brief When set to true, all preparations have been made and the battle is ready to begin
 	bool _initialized;
 
-	//! Set to true whenever an actor (player or enemy) is performing an action
+	//! \brief Set to true whenever an actor (player or enemy) is performing an action
 	bool _performing_script;
 
-	//! The script currently being performed
+	//! \brief The script currently being performed
 	private_battle::ScriptEvent* _active_se;
 
-	//! Set to true when either side of the battle is dead
+	//! \brief Set to true when either side of the battle is dead
 	bool _battle_over;
 
-	//! Set to true if it was player who won the battle.
+	//! \brief Set to true if it was player who won the battle.
 	bool _victorious_battle;
-	bool _first_visit_to_end_screen;
 	
-	//! XP gained from battle
+	//! \brief XP gained from battle
 	uint32 _victory_xp;
 
-	//! SP gained from battle
+	//! \brief SP gained from battle
 	uint32 _victory_sp;
 
-	//! Money gained from battle
+	//! \brief Money gained from battle
 	uint32 _victory_money;
 
-	//! Set to true if character gained an experience level
+	//! \brief Set to true if character gained an experience level
 	bool _victory_level;
 
-	//! Set to true if character earned a new skill this experience level
+	//! \brief Set to true if character earned a new skill this experience level
 	bool _victory_skill;
 
-	//! Items gained from battle
+	//! \brief Items gained from battle
 	std::map<std::string, uint32> _victory_items;
 
 	/** \brief Container for all music to be played during the battle
@@ -384,10 +394,10 @@ private:
 
 	//! \name Battle Background Data
 	//@{
-	//! The full-screen, static background image to be used for the battle
+	//! \brief The full-screen, static background image to be used for the battle
 	hoa_video::StillImage _battle_background;
 
-	//! Container for images (both still and animated) that are to be drawn in the background
+	//! \brief Container for images (both still and animated) that are to be drawn in the background
 	std::vector<hoa_video::ImageDescriptor*> _background_images;
 	//@}
 
@@ -440,17 +450,17 @@ private:
 	//! \brief The state of the battle's selection cursor
 	private_battle::CURSOR_STATE _cursor_state;
 
-	// NOTE: Are _actor_index and _argument_actor_index really necessary in addition to _selected_character
+	// NOTE: Are _selected_character_index and _selected_target_index really necessary in addition to _selected_character
 	// and _selected target? They essentially represent the same thing...
 
 	/** \brief Character index of the currently selected actor
 	*** \note This needs to be made defunct. Occurences of it in battle.cpp should
 	*** be replaced with the index of the _selected_character member
 	**/
-	int32 _actor_index;
+	int32 _selected_character_index;
 
 	//! \brief Argument selector
-	uint32 _argument_actor_index;
+	uint32 _selected_target_index;
 
 	//! \brief The current character that is selected by the player
 	private_battle::BattleCharacterActor* _selected_character;
@@ -536,16 +546,16 @@ private:
 	int32 _swap_countdown_timer;
 	//@}
 
-	//! Used for scaling actor wait times
+	//! \brief Used for scaling actor wait times
 	uint32 _min_agility;
 
 	//! \name Actor Action Processing
 	//@{
-	//! A FIFO queue of actor actions to perform
+	//! \brief A FIFO queue of actor actions to perform
 	std::list<private_battle::ScriptEvent*> _script_queue;
 	//@}
 
-	//! An Index to the (x,y) location of the next created monster (MONSTER_LOCATIONS array)
+	//! \brief An Index to the (x,y) location of the next created monster (MONSTER_LOCATIONS array)
 	int32 _next_monster_location_index;
 
 	////////////////////////////// PRIVATE METHODS ///////////////////////////////
@@ -560,13 +570,13 @@ private:
 
 	void _CreateEnemyActors();
 
-	//! Initializes all data necessary for the battle to begin
+	//! \brief Initializes all data necessary for the battle to begin
 	void _Initialize();
 
-	//! Shutdown the battle mode
+	//! \brief Shutdown the battle mode
 	void _ShutDown();
 
-	//! Tally rewards (XP, money, items)
+	//! \brief Tally rewards (XP, money, items)
 	void _TallyRewards();
 
 	//! \brief Returns the number of enemies that are still alive in the battle
@@ -581,13 +591,13 @@ private:
 	*** \brief Functions which update the state of various battle components
 	**/
 	//@{
-	//! Updates which character the player has chosen to select
+	//! \brief Updates which character the player has chosen to select
 	void _UpdateCharacterSelection();
 
-	//! Processes user input when the player's cursor is selecting a target for an action
+	//! \brief Processes user input when the player's cursor is selecting a target for an action
 	void _UpdateTargetSelection();
 
-	//! Processes user input when the player's cursor is selecting an attack point for an action
+	//! \brief Processes user input when the player's cursor is selecting an attack point for an action
 	void _UpdateAttackPointSelection();
 	//@}
 

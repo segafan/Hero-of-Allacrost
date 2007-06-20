@@ -49,6 +49,18 @@ enum ACTION_WINDOW_VIEWS {
 	VIEW_TOTAL = 4
 };
 
+/** \brief Enums for the various states that the FinishWindow class may be in
+*** See the descriptions of the various views for the ActionWindow class to
+*** understand what these constants represent
+***
+**/
+enum FINISH_WINDOW_VIEWS {
+	FINISH_INVALID = -1,
+	FINISH_ANNOUNCE_WIN = 0,
+	FINISH_ANNOUNCE_LOSE = 1,
+	FINISH_TOTAL = 2
+};
+
 /** ****************************************************************************
 *** \brief Represents the battle window where the player selects actions to execute.
 ***
@@ -224,9 +236,24 @@ private:
 /** ****************************************************************************
 *** \brief The window displayed once a battle has either been won or lost
 ***
-*** This window is located in the center of the screen and only appears when a victor
-*** has been decided in the battle. The contents of this window differ depending on
-*** whether the battle was victorious or a loss.
+*** This window is located in the center right portion of the screen and only appears
+*** when a victor has been decided in the battle. The contents of this window differ
+*** depending on whether the battle was victorious or a loss. If the player won
+*** the battle, they will have their victory spoils written to the screen along
+*** with any character growth information (e.g. experience level up). If the player
+*** lost the battle, they will be presented with a number of options. The player
+*** may choose to:
+***
+*** - Retry the battle from the beginning
+*** - Load the game from the last save point
+*** - Return to the game's main menu
+*** - Exit the game
+***
+*** \todo Add feature where spoils (XP, drunes, etc) are quickly counted down as
+*** they go into the party's posession.
+***
+*** \todo If the battle is victorious, allow the player to go to menu mode before
+*** returning from the finished battle.
 *** ***************************************************************************/
 class FinishWindow : public hoa_video::MenuWindow {
 	friend class BattleMode;
@@ -246,7 +273,13 @@ public:
 	//! \brief Draws the window and its contents
 	void Draw();
 
+	FINISH_WINDOW_VIEWS GetState() const
+		{ return _state; }
+
 private:
+	//! \brief The state that the window is in, which determines its contents
+	FINISH_WINDOW_VIEWS _state;
+
 	//! \brief Text that displays "VICTORY" or "DEFEAT" depending upon the battle's outcome
 // 	hoa_video::RenderedText* _finish_status;
 
