@@ -72,7 +72,7 @@ ActionWindow::ActionWindow() {
 	category_options.push_back(MakeUnicodeString("<img/icons/battle/item.png><60>Item"));
 
 	_action_category_list.SetOptions(category_options);
-	_action_category_list.SetPosition(30.0f, 542.0f);
+	_action_category_list.SetPosition(50.0f, 100.0f);
 	_action_category_list.SetCursorOffset(-20.0f, 25.0f);
 	_action_category_list.SetCellSize(100.0f, 80.0f);
 	_action_category_list.SetSize(4, 1);
@@ -82,9 +82,10 @@ ActionWindow::ActionWindow() {
 	_action_category_list.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_action_category_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
  	_action_category_list.SetSelection(0);
+ 	_action_category_list.SetOwner(this);
 
  	// Setup options for VIEW_ACTION_SELECTION
-	_action_selection_list.SetPosition(5.0f, 455.0f);
+	_action_selection_list.SetPosition(128.0f, 128.0f);
 	_action_selection_list.SetCursorOffset(-20.0f, 25.0f);
 	_action_selection_list.SetCellSize(200.0f, 35.0f);
 	_action_selection_list.SetFont("battle");
@@ -92,6 +93,7 @@ ActionWindow::ActionWindow() {
 	_action_selection_list.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_action_selection_list.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_action_selection_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+ 	_action_selection_list.SetOwner(this);
 
 	// TODO: add rendered text generation methods for skill and item list headers
 
@@ -107,11 +109,7 @@ ActionWindow::~ActionWindow() {
 	MenuWindow::Destroy();
 
 	for (uint32 i = 0; i < _action_category_icons.size(); i++) {
-		if (VideoManager->DeleteImage(_action_category_icons[i]) == false) {
-			cerr << "BATTLE ERROR: In ActionWindow constructor, failed to load action category icon: "
-				<< _action_category_icons[i].GetFilename() << endl;
-			return;
-		}
+		VideoManager->DeleteImage(_action_category_icons[i]);
 	}
 }
 
@@ -121,14 +119,17 @@ void ActionWindow::Initialize(BattleCharacterActor* character) {
 	_character = character;
 	if (character == NULL) {
 		if (BATTLE_DEBUG)
-			cerr << "BATTLE WARNING: In ActionWindow::Reset(), a NULL character pointer was passed" << endl;
+			cerr << "BATTLE WARNING: In ActionWindow::Initialize(), a NULL character pointer was passed" << endl;
 		_state = VIEW_INVALID;
 		return;
 	}
 
-	// Disable options which have no skills, or where the inventory is empty
+	MenuWindow::Show();
+	_state = VIEW_ACTION_CATEGORY;
+
+	// Disable action categories which have no skills, or where the inventory is empty
 	if (_character->GetActor()->GetAttackSkills()->empty())
-		_action_category_list.EnableOption(1, false);
+		_action_category_list.EnableOption(0, false);
 	if (_character->GetActor()->GetDefenseSkills()->empty())
 		_action_category_list.EnableOption(1, false);
 	if (_character->GetActor()->GetSupportSkills()->empty())
@@ -136,7 +137,6 @@ void ActionWindow::Initialize(BattleCharacterActor* character) {
 	// TEMP: inventory not ready yet from GlobalManager
 	if (GlobalManager->GetInventoryItems()->empty())
 		_action_category_list.EnableOption(3, false);
-
 
 	// TODO: clear _action_selection_list of all options
 } // void ActionWindow::Initialize(BattleCharacterActor* character)
@@ -261,7 +261,7 @@ void ActionWindow::_UpdateActionSelection() {
 	}
 	else if (InputManager->MenuPress()) {
 		_selected_action = _action_selection_list.GetSelection();
-		_state = VIEW_TARGET_SELECTION;
+		_state = VIEW_ACTION_INFORMATION;
 	}
 	else if (InputManager->CancelPress()) {
 		_state = VIEW_ACTION_CATEGORY;
@@ -329,10 +329,10 @@ void ActionWindow::_DrawActionCategory() {
 
 void ActionWindow::_DrawActionSelection() {
 	// Draw the selected action category and name
-	VideoManager->Move(30.0f, 525.0f);
+	VideoManager->Move(530.0f, 100.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 	VideoManager->DrawImage(_action_category_icons[_selected_action_category]);
-	VideoManager->MoveRelative(55.0f, -20.0f);
+	VideoManager->MoveRelative(0.0f, -20.0f);
 	VideoManager->SetDrawFlags(VIDEO_Y_CENTER, 0);
 
 	switch (_selected_action_category) {
@@ -358,11 +358,12 @@ void ActionWindow::_DrawActionSelection() {
 	// Draw the action list header text
 	VideoManager->SetFont("battle");
 	VideoManager->SetTextColor(Color(1.0f, 1.0f, 0.0f, 0.8f)); // 80% translucent yellow text
+	VideoManager->Move(650.0f, 125.0f);
 	if (_selected_action_category != ACTION_TYPE_ITEM) {
-		VideoManager->DrawText(MakeUnicodeString("Skill         SP"));
+		VideoManager->DrawText(MakeUnicodeString("Skill                 SP"));
 	}
 	else {
-		VideoManager->DrawText(MakeUnicodeString("Item          QTY"));
+		VideoManager->DrawText(MakeUnicodeString("Item                 QTY"));
 	}
 
 	// Draw the list of actions
@@ -372,10 +373,10 @@ void ActionWindow::_DrawActionSelection() {
 
 
 void ActionWindow::_DrawTargetSelection() {
-	// TODO: Draw 
+	// TODO: Draw information specific to target (friend vs foe, attack point versus party, etc.)
 
 	// if (current_battle->_selected_target->IsEnemy())
-
+	VideoManager->Move(650.0f, 100.0f);
 	if (_action_target_type == GLOBAL_TARGET_ATTACK_POINT) {
 		VideoManager->DrawText(MakeUnicodeString("Attack Point Targeted."));
 	}
@@ -393,6 +394,7 @@ void ActionWindow::_DrawActionInformation() {
 	// TODO: display detailed information about the skill or text selected
 
 	// TEMP: simply indicates whether the list item selected is a skill or an item
+	VideoManager->Move(650.0f, 100.0f);
 	if (_selected_action_category == ACTION_TYPE_ITEM) {
 		VideoManager->DrawText(MakeUnicodeString("This is an item."));
 	}

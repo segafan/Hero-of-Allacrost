@@ -837,7 +837,6 @@ void BattleMode::Update() {
 			//If we used an item, immediately reconstruct the action list
 			//This way if an item is used
 			//if (se->GetItem())
-			//	_ConstructActionListMenu();
 
 			SetPerformingScript(false,NULL);
 		}
@@ -853,11 +852,16 @@ void BattleMode::Update() {
 		case CURSOR_IDLE:
 			_UpdateCharacterSelection();
 			break;
+		case CURSOR_WAIT:
+			_action_window->Update();
+			break;
 		case CURSOR_SELECT_TARGET:
 			_UpdateTargetSelection();
+			_action_window->Update();
 			break;
 		case CURSOR_SELECT_ATTACK_POINT:
 			_UpdateAttackPointSelection();
+			_action_window->Update();
 			break;
 		// TODO: What should be done for these two options?
 		case CURSOR_SELECT_PARTY:
@@ -872,25 +876,29 @@ void BattleMode::Update() {
 
 
 void BattleMode::_UpdateCharacterSelection() {
-	// NOTE: Comment needed here, when would this situation occur and why do we need to return?
-	// ANDY: This is the first time that character selection comes into focus, so we don't want
-	// to process user input on the same loop.  This is because the input is from the previous
-	// loop and isn't valid for the menu.
+	// First check if there are any characters in the idle state. If there aren't, there's nothing left to do
+	_actor_index = GetIndexOfFirstIdleCharacter();
 	if (_actor_index == static_cast<int32>(INVALID_BATTLE_ACTOR_INDEX)) {
-		_actor_index = GetIndexOfFirstIdleCharacter();
 		return;
 	}
 
-	// When have a charcter selected....halt everything in wait mode
+	// TODO: Only freeze timers this when we've gone from having no idle characters to having at least one idle character
+	// If the battle is running in wait mode, freeze all timers while the player selects an action
 	if (ACTIVE_BATTLE_MODE == false)
 		FreezeTimers();
 
-	// Return if the player does not have more than one character so select
+	// If there is only one character alive, then we are sure that he/she is the character to select
 	if (_NumberCharactersAlive() == 1) {
-		_cursor_state = CURSOR_IDLE;
+		_cursor_state = CURSOR_WAIT;
+		_selected_character = GetPlayerCharacterAt(_actor_index);
 		_action_window->Initialize(_selected_character);
 		return;
 	}
+
+	// TODO: the code below doesn't work very well in practice (fight a battle with two characters and see what I mean)
+	// it needs to be cleaned
+
+	// Otherwise there are multiple characters, of which more than one may be idle
 
 	// Handle user input commands: up, down, left, right, confirm
 	if (InputManager->UpPress() || InputManager->RightPress()) {
@@ -901,8 +909,7 @@ void BattleMode::_UpdateCharacterSelection() {
 
 		while (working_index < GetNumberOfCharacters()) {
 			bca = GetPlayerCharacterAt(working_index + 1);
-			if (bca->IsAlive() && bca->GetWaitTime()->HasExpired() && !bca->IsQueuedToPerform())
-			{
+			if (bca->IsAlive() && bca->GetWaitTime()->HasExpired() && !bca->IsQueuedToPerform()) {
 				_actor_index = working_index + 1;
 				break;
 			}
@@ -927,8 +934,8 @@ void BattleMode::_UpdateCharacterSelection() {
 		}
 	}
 	else if (InputManager->ConfirmPress()) {
+		_cursor_state = CURSOR_WAIT;
 		_selected_character = GetPlayerCharacterAt(_actor_index);
-		_cursor_state = CURSOR_IDLE;
 		_action_window->Initialize(_selected_character);
 	}
 } // void BattleMode::_UpdateCharacterSelection()
@@ -1142,8 +1149,9 @@ void BattleMode::Draw() {
 	_DrawSprites();
 	_DrawTimeMeter();
 
-	if (_action_window->GetState() != VIEW_INVALID)
+	if (_action_window->GetState() != VIEW_INVALID) {
 		_action_window->Draw();
+	}
 
 	if (_battle_over) {
 		// TODO: replace all of this with a call to _finish_window.Draw()
