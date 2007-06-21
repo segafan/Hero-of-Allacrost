@@ -14,15 +14,19 @@
 *** ***************************************************************************/
 
 #include <iostream>
+
 #include "utils.h"
+
+#include "system.h"
 
 #include "map.h"
 #include "map_actions.h"
-#include "map_objects.h"
 #include "map_dialogue.h"
-#include "system.h"
+#include "map_objects.h"
+#include "map_sprites.h"
 
 using namespace std;
+
 using namespace hoa_utils;
 using namespace hoa_system;
 

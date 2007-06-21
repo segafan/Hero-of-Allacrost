@@ -44,6 +44,7 @@
 #include "map_actions.h"
 #include "map_dialogue.h"
 #include "map_objects.h"
+#include "map_sprites.h"
 #include "map_zones.h"
 #include "shop.h"
 
