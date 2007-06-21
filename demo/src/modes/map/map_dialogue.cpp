@@ -14,15 +14,18 @@
 *** ***************************************************************************/
 
 #include "utils.h"
-#include "map.h"
-#include "map_objects.h"
-#include "map_dialogue.h"
+
 #include "audio.h"
 #include "video.h"
 #include "input.h"
 #include "script.h"
 #include "global.h"
 #include "menu.h"
+
+#include "map_dialogue.h"
+#include "map.h"
+#include "map_objects.h"
+#include "map_sprites.h"
 
 using namespace std;
 using namespace hoa_utils;
@@ -33,7 +36,6 @@ using namespace hoa_script;
 using namespace hoa_system;
 using namespace hoa_global;
 using namespace hoa_menu;
-using namespace luabind;
 
 namespace hoa_map {
 

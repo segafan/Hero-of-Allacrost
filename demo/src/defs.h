@@ -232,6 +232,7 @@ namespace hoa_map {
 
 		class MapObject;
 		class PhysicalObject;
+
 		class VirtualSprite;
 		class MapSprite;
 		class EnemySprite;

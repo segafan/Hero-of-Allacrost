@@ -13,9 +13,11 @@
 *** \brief   Source file for map mode zones.
 *** ***************************************************************************/
 
-#include "map_zones.h"
 #include "system.h"
+
+#include "map_zones.h"
 #include "map_objects.h"
+#include "map_sprites.h"
 
 extern bool MAP_DEBUG;
 
