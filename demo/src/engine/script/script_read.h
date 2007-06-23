@@ -338,6 +338,8 @@ protected:
 	//@{
 	template <class T> void _ReadDataVector(const std::string& key, std::vector<T>& vect);
 	template <class T> void _ReadDataVector(int32 key, std::vector<T>& vect);
+	//! \brief This template method is a helper function for the other two
+	template <class T> void _ReadDataVectorHelper(std::vector<T>& vect);
 	//@}
 }; // class ReadScriptDescriptor
 
@@ -418,23 +420,7 @@ template <class T> T ReadScriptDescriptor::_ReadData(int32 key, T default_value)
 template <class T> void ReadScriptDescriptor::_ReadDataVector(const std::string& key, std::vector<T>& vect) {
 	// Open the table and grab if off the stack
 	OpenTable(key);
-	luabind::object o(luabind::from_stack(_lstack, private_script::STACK_TOP));
-
-	if (luabind::type(o) != LUA_TTABLE) {
-		_error_messages << "* _ReadDataVector() failed because it did not successfully open the table: " << key << std::endl;
-		return;
-	}
-	
-	// Iterate through all the items of the table and place it in the vector
-	for (luabind::iterator it(o), end; it != end; it++) {
-		try {
-			vect.push_back(luabind::object_cast<T>((*it)));
-		}
-		catch (...) {
-			_error_messages << "* _ReadDataVector() failed due to a type case failure when reading the table: " << key << std::endl;
-		}
-	}
-
+	_ReadDataVectorHelper(vect);
 	CloseTable();
 } // template <class T> void ReadScriptDescriptor::_ReadDataVector(std::string key, std::vector<T> &vect)
 
@@ -447,9 +433,32 @@ template <class T> void ReadScriptDescriptor::_ReadDataVector(int32 key, std::ve
 		return;
 	}
 
-	// Now that the open table condition has been checked, call the other template function
-	_ReadDataVector<T>(hoa_utils::NumberToString(key), vect);
+	// Open the table and grab if off the stack
+	OpenTable(key);
+	_ReadDataVectorHelper(vect);
+	CloseTable();
 } // template <class T> void ReadScriptDescriptor::_ReadDataVector(int32 key, std::vector<T> &vect)
+
+
+
+template <class T> void ReadScriptDescriptor::_ReadDataVectorHelper(std::vector<T>& vect) {
+	luabind::object o(luabind::from_stack(_lstack, private_script::STACK_TOP));
+
+	if (luabind::type(o) != LUA_TTABLE) {
+		_error_messages << "* _ReadDataVectorHelper() failed because the top of the stack was not a table" << std::endl;
+		return;
+	}
+	
+	// Iterate through all the items of the table and place it in the vector
+	for (luabind::iterator it(o), end; it != end; it++) {
+		try {
+			vect.push_back(luabind::object_cast<T>((*it)));
+		}
+		catch (...) {
+			_error_messages << "* _ReadDataVectorHelper() failed due to a type cast failure when reading the table" << std::endl;
+		}
+	}
+} // template <class T> void ReadScriptDescriptor::_ReadDataVectorHelper(std::vector<T>& vect)
 
 } // namespace hoa_script
 
