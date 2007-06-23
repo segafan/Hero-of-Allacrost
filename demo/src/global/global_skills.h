@@ -24,9 +24,6 @@
 #include "defs.h"
 #include "utils.h"
 
-#include "global_actors.h"
-#include "global_objects.h"
-
 namespace hoa_global {
 
 /** \name Elemental Effect Types
@@ -258,7 +255,7 @@ public:
 	*** \param target A pointer to the target of the skill
 	*** \param instigator A pointer to the instigator whom is executing the skill
 	**/
-	void MenuExecute(hoa_global::GlobalCharacter* target, hoa_global::GlobalCharacter* instigator);
+	void MenuExecute(GlobalCharacter* target, GlobalCharacter* instigator);
 
 	/** \name Class member access functions
 	*** \note No set functiosn are defined because the class members should only be defined

@@ -13,7 +13,7 @@
  * \brief   Header file for editor's grid, used for the OpenGL map portion
  *          where tiles are painted, edited, etc.
  *****************************************************************************/
-			   
+
 #ifndef __GRID_HEADER__
 #define __GRID_HEADER__
 

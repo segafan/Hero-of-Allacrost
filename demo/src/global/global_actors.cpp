@@ -34,7 +34,7 @@ namespace hoa_global {
 // ***** GlobalAttackPoint
 // ****************************************************************************
 
-bool GlobalAttackPoint::LoadData(ScriptDescriptor& script) {
+bool GlobalAttackPoint::LoadData(ReadScriptDescriptor& script) {
 	if (script.GetAccessMode() != SCRIPT_READ) {
 		return false;
 	}
@@ -122,22 +122,22 @@ GlobalCharacter::GlobalCharacter(uint32 id) {
 	_id = id;
 
 	// (1): Attempt to open the characters script file
-	ScriptDescriptor char_script;
-	if (char_script.OpenFile("dat/actors/characters.lua", SCRIPT_READ) == false) {
+	ReadScriptDescriptor char_script;
+	if (char_script.OpenFile("dat/actors/characters.lua") == false) {
 		if (GLOBAL_DEBUG)
 			cerr << "GLOBAL ERROR: could not create new character" << endl;
 		return;
 	}
 
 	// (2): Open up the table containing the character's data
-	char_script.ReadOpenTable("characters");
-	char_script.ReadOpenTable(_id);
+	char_script.OpenTable("characters");
+	char_script.OpenTable(_id);
 
 	// (3): Read the character's basic stats
 	_name = MakeUnicodeString(char_script.ReadString("name"));
 	_filename = char_script.ReadString("filename");
 
-	char_script.ReadOpenTable("base_stats");
+	char_script.OpenTable("base_stats");
 	_max_hit_points = char_script.ReadInt("max_hit_points");
 	_hit_points = _max_hit_points;
 	_max_skill_points = char_script.ReadInt("max_skill_points");
@@ -150,10 +150,10 @@ GlobalCharacter::GlobalCharacter(uint32 id) {
 	_agility = char_script.ReadInt("agility");
 	_evade = char_script.ReadFloat("evade");
 	_experience_next_level = char_script.ReadInt("experience_points");
-	char_script.ReadCloseTable();
+	char_script.CloseTable();
 
 	// (3.5): Read the character's growth stats
-	char_script.ReadOpenTable("growth_stats");
+	char_script.OpenTable("growth_stats");
 	_growth_hit_points = char_script.ReadFloat("hit_points");
 	_growth_skill_points = char_script.ReadFloat("skill_points");
 	_growth_experience_points = char_script.ReadFloat("experience_points");
@@ -163,17 +163,17 @@ GlobalCharacter::GlobalCharacter(uint32 id) {
 	_growth_protection = char_script.ReadFloat("protection");
 	_growth_agility = char_script.ReadFloat("agility");
 	_growth_evade = char_script.ReadFloat("evade");
-	char_script.ReadCloseTable();
+	char_script.CloseTable();
 
 	// (4): Setup the character's attack points
-	char_script.ReadOpenTable("attack_points");
+	char_script.OpenTable("attack_points");
 	for (uint32 i = 0; i < 4; i++) {
 		_attack_points.push_back(new GlobalAttackPoint());
-		char_script.ReadOpenTable(i+1);
+		char_script.OpenTable(i+1);
 		_attack_points[i]->LoadData(char_script);
-		char_script.ReadCloseTable();
+		char_script.CloseTable();
 	}
-	char_script.ReadCloseTable();
+	char_script.CloseTable();
 
 	// (5): Create the character's initial equipment
 	uint32 equipment_id;
@@ -240,7 +240,7 @@ GlobalCharacter::GlobalCharacter(uint32 id) {
 		}
 	}
 
-	char_script.ReadCloseTable();
+	char_script.CloseTable();
 	char_script.CloseFile();
 
 	// TEMP TEMP TEMP: Load the character's idle animation
@@ -274,12 +274,11 @@ bool GlobalCharacter::AddXP(uint32 xp)
 	int32 xp_to_next_level = 0;
 
 	// (1): Attempt to open the characters script file
-	ScriptDescriptor char_script;
-	char_script.OpenFile("dat/actors/characters.lua", SCRIPT_READ);
+	ReadScriptDescriptor char_script;
+	char_script.OpenFile("dat/actors/characters.lua");
 	//FIXME - no error checking code here!
 
-	if (temp_xp <= 0)
-	{
+	if (temp_xp <= 0) {
 		//next lines are essentially SetExperienceNextLevel(GetXPForNextLevel() + _experience_next_level);
 		xp_to_next_level = ScriptCallFunction<int32>(char_script.GetLuaState(), "XPToNextLevel", (_experience_level + 1)); //add one to calculate based on the level we're going to; simplifies the lua function a bit.
 		SetExperienceNextLevel(xp_to_next_level + temp_xp);  //if we're here, temp_xp will be negative
@@ -354,14 +353,14 @@ GlobalEnemy::GlobalEnemy(uint32 id) {
 	string filename = "dat/actors/enemies_set_" + file_ext + ".lua";
 
 	// (2): Open the script file and table that store the enemy data
-	ScriptDescriptor enemy_data;
-	if (enemy_data.OpenFile(filename.c_str(), SCRIPT_READ) == false) {
+	ReadScriptDescriptor enemy_data;
+	if (enemy_data.OpenFile(filename.c_str()) == false) {
 		cerr << "GLOBAL ERROR: failed to load enemy data file: " << _filename << endl;
 		_id = 0;
 		return;
 	}
-	enemy_data.ReadOpenTable("enemies");
-	enemy_data.ReadOpenTable(_id);
+	enemy_data.OpenTable("enemies");
+	enemy_data.OpenTable(_id);
 
 	// (3): Load the enemy's name and sprite data
 	_name = MakeUnicodeString(enemy_data.ReadString("name"));
@@ -380,7 +379,7 @@ GlobalEnemy::GlobalEnemy(uint32 id) {
 	}
 
 	// (4): Load the base statistics
-	enemy_data.ReadOpenTable("base_stats");
+	enemy_data.OpenTable("base_stats");
 	_max_hit_points = enemy_data.ReadInt("hit_points");
 	_hit_points = _max_hit_points;
 	_max_skill_points = enemy_data.ReadInt("skill_points");
@@ -392,17 +391,17 @@ GlobalEnemy::GlobalEnemy(uint32 id) {
 	_protection = enemy_data.ReadInt("protection");
 	_agility = enemy_data.ReadInt("agility");
 	_evade = enemy_data.ReadFloat("evade");
-	enemy_data.ReadCloseTable();
+	enemy_data.CloseTable();
 
 	// (5): Load the rewards
-	enemy_data.ReadOpenTable("rewards");
+	enemy_data.OpenTable("rewards");
 	_item_dropped = enemy_data.ReadInt("item_dropped");
 	_chance_to_drop = enemy_data.ReadFloat("chance_to_drop");
 	_money = enemy_data.ReadInt("money");
-	enemy_data.ReadCloseTable();
+	enemy_data.CloseTable();
 
 	// (6): Load the growth statistics
-	enemy_data.ReadOpenTable("growth_stats");
+	enemy_data.OpenTable("growth_stats");
 	_growth_hit_points = enemy_data.ReadFloat("hit_points");
 	_growth_skill_points = enemy_data.ReadFloat("skill_points");
 	_growth_experience_points = enemy_data.ReadFloat("experience_points");
@@ -412,20 +411,20 @@ GlobalEnemy::GlobalEnemy(uint32 id) {
 	_growth_protection = enemy_data.ReadFloat("protection");
 	_growth_agility = enemy_data.ReadFloat("agility");
 	_growth_evade = enemy_data.ReadFloat("evade");
-	enemy_data.ReadCloseTable();
+	enemy_data.CloseTable();
 
 	// (7): Create and initialize the attack points for the enemy
-	enemy_data.ReadOpenTable("attack_points");
-	uint32 ap_size = enemy_data.ReadGetTableSize();
+	enemy_data.OpenTable("attack_points");
+	uint32 ap_size = enemy_data.GetTableSize();
 	for (uint32 i = 1; i <= ap_size; i++) {
 		_attack_points.push_back(new GlobalAttackPoint());
-		enemy_data.ReadOpenTable(i);
+		enemy_data.OpenTable(i);
 		if (_attack_points.back()->LoadData(enemy_data) == false) {
 			cerr << "GLOBAL ERROR: GlobalEnemy constructor was unable to load data for an attack point" << endl;
 		}
-		enemy_data.ReadCloseTable();
+		enemy_data.CloseTable();
 	}
-	enemy_data.ReadCloseTable();
+	enemy_data.CloseTable();
 
 	// (8): Add the set of skills to the enemy
 	vector<int32> skill_ids;

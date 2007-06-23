@@ -188,20 +188,20 @@ bool GameVideo::SingletonInitialize()
 	const SDL_VideoInfo* video_info (0);
 	video_info = SDL_GetVideoInfo ();
 
-	hoa_script::ScriptDescriptor settings_lua;
+	hoa_script::ReadScriptDescriptor settings_lua;
 	static const char *settings_filename = "dat/config/settings.lua";
 
-	if (!settings_lua.OpenFile(settings_filename, hoa_script::SCRIPT_READ))
+	if (!settings_lua.OpenFile(settings_filename))
 	{
 		fprintf(stderr, "Failed to load file '%s'.\n", settings_filename);
 		exit(1);
 	}
 
-	settings_lua.ReadOpenTable("video_settings");
+	settings_lua.OpenTable("video_settings");
 	int32  settings_width      = settings_lua.ReadInt("screen_resx");
 	int32  settings_height     = settings_lua.ReadInt("screen_resy");
 	bool settings_fullscreen = settings_lua.ReadBool("full_screen");
-	settings_lua.ReadCloseTable();
+	settings_lua.CloseTable();
 
 	settings_lua.CloseFile();
 

@@ -7,24 +7,27 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-/*!****************************************************************************
- * \file    boot.h
- * \author  Viljami Korhonen, mindflayer@allacrost.org
- * \brief   Header file for boot mode interface.
- *
- * This code handles the game event processing and frame drawing when the user
- * is in boot mode (the boot screen and menus).
- *****************************************************************************/
+/** ****************************************************************************
+*** \file    boot.h
+*** \author  Viljami Korhonen, mindflayer@allacrost.org
+*** \brief   Header file for boot mode interface.
+***
+*** This code handles the game event processing and frame drawing when the user
+*** is in boot mode (the boot screen and menus).
+*** ***************************************************************************/
 
 #ifndef __BOOT_HEADER__
 #define __BOOT_HEADER__
 
-#include "utils.h"
 #include <string>
 #include <vector>
+
+#include "utils.h"
 #include "defs.h"
-#include "mode_manager.h"
+
 #include "video.h"
+#include "mode_manager.h"
+
 #include "boot_menu.h"
 #include "boot_credits.h"
 #include "boot_welcome.h"

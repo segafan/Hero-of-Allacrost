@@ -24,8 +24,6 @@ using namespace hoa_utils;
 using namespace hoa_video;
 using namespace hoa_script;
 
-
-
 namespace hoa_boot {
 
 CreditsScreen::CreditsScreen() :
@@ -40,8 +38,8 @@ CreditsScreen::CreditsScreen() :
 	_window.Hide();
 
 	// Load the credits from the Lua file
-	ScriptDescriptor credits_file;
-	if (credits_file.OpenFile("dat/credits.lua", SCRIPT_READ) == false) {
+	ReadScriptDescriptor credits_file;
+	if (credits_file.OpenFile("dat/credits.lua") == false) {
 		cerr << "BOOT ERROR: failed to open the credits file" << endl;
 		exit(1);
 	}

@@ -135,7 +135,7 @@ public:
 	*** table containing the attack point when it finishes loading the data, so the calling routine
 	*** must remember to close the table after this call is made.
 	**/
-	bool LoadData(hoa_script::ScriptDescriptor& script);
+	bool LoadData(hoa_script::ReadScriptDescriptor& script);
 
 	//! \name Class Member Access Functions
 	//@{

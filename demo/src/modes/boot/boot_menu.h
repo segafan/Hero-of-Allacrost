@@ -18,16 +18,17 @@
  * However, no inheritance was used as I found it to be more of a nuisance
  * than benefit in here!
  *****************************************************************************/
- 
+
 #ifndef __BOOT_MENU__
 #define __BOOT_MENU__
 
-#include "utils.h"
 #include <string>
 #include <vector>
-#include "video.h"
+
+#include "utils.h"
 #include "defs.h"
 
+#include "video.h"
 
 //! All calls to boot mode are wrapped in this namespace.
 namespace hoa_boot {

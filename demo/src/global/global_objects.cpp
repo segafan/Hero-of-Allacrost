@@ -43,7 +43,7 @@ void GlobalItem::_Load() {
 	}
 
 	// Load the item data from the script
-	GlobalManager->_items_script.ReadOpenTable(_id);
+	GlobalManager->_items_script.OpenTable(_id);
 	_name = MakeUnicodeString(GlobalManager->_items_script.ReadString("name"));
 	_description = MakeUnicodeString(GlobalManager->_items_script.ReadString("description"));
 	_icon_image.SetFilename(GlobalManager->_items_script.ReadString("icon"));
@@ -54,9 +54,10 @@ void GlobalItem::_Load() {
 	_battle_use_function = GlobalManager->_items_script.ReadFunctionPointer("BattleUse");
 	_menu_use_function = GlobalManager->_items_script.ReadFunctionPointer("MenuUse");
 
-	GlobalManager->_items_script.ReadCloseTable();
+	GlobalManager->_items_script.CloseTable();
 
-	if (GlobalManager->_items_script.GetErrorCode() != SCRIPT_NO_ERRORS) {
+	if (GlobalManager->_items_script.IsErrorDetected()) {
+		cerr << GlobalManager->_items_script.GetErrorMessages() << endl;
 		return;
 	}
 	if (_icon_image.Load() == false) {
@@ -88,7 +89,7 @@ void GlobalWeapon::_Load() {
 	}
 
 	// Load the weapon data from the script
-	GlobalManager->_weapons_script.ReadOpenTable(_id);
+	GlobalManager->_weapons_script.OpenTable(_id);
 	_name = MakeUnicodeString(GlobalManager->_weapons_script.ReadString("name"));
 	_description = MakeUnicodeString(GlobalManager->_weapons_script.ReadString("description"));
 	_icon_image.SetFilename(GlobalManager->_weapons_script.ReadString("icon"));
@@ -96,9 +97,10 @@ void GlobalWeapon::_Load() {
 	_physical_attack = GlobalManager->_weapons_script.ReadInt("physical_attack");
 	_metaphysical_attack = GlobalManager->_weapons_script.ReadInt("metaphysical_attack");
 	_price = GlobalManager->_weapons_script.ReadInt("standard_price");
-	GlobalManager->_weapons_script.ReadCloseTable();
+	GlobalManager->_weapons_script.CloseTable();
 
-	if (GlobalManager->_weapons_script.GetErrorCode() != SCRIPT_NO_ERRORS) {
+	if (GlobalManager->_weapons_script.IsErrorDetected()) {
+		cerr << GlobalManager->_weapons_script.GetErrorMessages() << endl;
 		return;
 	}
 	if (_icon_image.Load() == false) {
@@ -138,7 +140,7 @@ void GlobalArmor::_Load() {
 		return;
 	}
 
-	GlobalManager->_armor_script.ReadOpenTable(_id);
+	GlobalManager->_armor_script.OpenTable(_id);
 	_name = MakeUnicodeString(GlobalManager->_armor_script.ReadString("name"));
 	_description = MakeUnicodeString(GlobalManager->_armor_script.ReadString("description"));
 	_icon_image.SetFilename(GlobalManager->_armor_script.ReadString("icon"));
@@ -146,9 +148,10 @@ void GlobalArmor::_Load() {
 	_physical_defense = GlobalManager->_armor_script.ReadInt("physical_defense");
 	_metaphysical_defense = GlobalManager->_armor_script.ReadInt("metaphysical_defense");
 	_price = GlobalManager->_armor_script.ReadInt("standard_price");
-	GlobalManager->_armor_script.ReadCloseTable();
+	GlobalManager->_armor_script.CloseTable();
 
-	if (GlobalManager->_armor_script.GetErrorCode() != SCRIPT_NO_ERRORS) {
+	if (GlobalManager->_armor_script.IsErrorDetected()) {
+		cerr << GlobalManager->_armor_script.GetErrorMessages() << endl;
 		return;
 	}
 	if (_icon_image.Load() == false) {

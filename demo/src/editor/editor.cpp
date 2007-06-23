@@ -774,7 +774,8 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 		{
 			if (evt->button() == Qt::LeftButton)
 			{
-				int file_index = GetCurrentLayer()[_tile_index];
+				// NOTE: Is file_index going to be used?? If not, no reason for this call
+				//int file_index = GetCurrentLayer()[_tile_index];
 
 				// delete the tile
 				GetCurrentLayer()[_tile_index] = -1;
@@ -840,7 +841,8 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 			{
 				if (evt->state() == Qt::LeftButton)
 				{
-					int file_index = GetCurrentLayer()[_tile_index];
+					// NOTE: file_index is not being used here...
+					//int file_index = GetCurrentLayer()[_tile_index];
 
 					// delete the tile
 					GetCurrentLayer()[_tile_index] = -1;

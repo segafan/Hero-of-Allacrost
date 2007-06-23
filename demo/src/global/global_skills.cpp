@@ -118,7 +118,7 @@ GlobalSkill::GlobalSkill(uint32 id) : _id(id) {
 
 void GlobalSkill::_Load() {
 	// A pointer to the skill script which will be used to load this skill
-	ScriptDescriptor *skill_script = NULL;
+	ReadScriptDescriptor *skill_script = NULL;
 
 	if (_id >= 1 && _id <= 10000) {
 		_type = GLOBAL_SKILL_ATTACK;
@@ -140,7 +140,7 @@ void GlobalSkill::_Load() {
 	}
 
 	// Load the item data from the script
-	skill_script->ReadOpenTable(_id);
+	skill_script->OpenTable(_id);
 
 	_name = MakeUnicodeString(skill_script->ReadString("name"));
 	_description = MakeUnicodeString(skill_script->ReadString("description"));
@@ -154,10 +154,11 @@ void GlobalSkill::_Load() {
 	_battle_execute_function = skill_script->ReadFunctionPointer("BattleExecute");
 //  	_menu_execute_function = skill_script->ReadFunctionPointer("MenuExecute");
 
-	skill_script->ReadCloseTable();
+	skill_script->CloseTable();
 
-	if (skill_script->GetErrorCode() != SCRIPT_NO_ERRORS) {
-		cerr << "GLOBAL ERROR: GlobalItem::_Load errored in parsing table with code: " << skill_script->GetErrorCode() << endl;
+	if (skill_script->IsErrorDetected()) {
+		cerr << "GLOBAL ERROR: GlobalItem::_Load experienced errors when reading Lua data: " << endl;
+		cerr << skill_script->GetErrorMessages() << endl;
 	}
 }
 

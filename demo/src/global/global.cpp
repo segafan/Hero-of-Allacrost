@@ -63,25 +63,25 @@ GameGlobal::~GameGlobal() {
 
 bool GameGlobal::SingletonInitialize() {
 	// Open up the persistent script files
-	if (_items_script.OpenFile("dat/objects/items.lua", SCRIPT_READ) == false) {
+	if (_items_script.OpenFile("dat/objects/items.lua") == false) {
 		return false;
 	}
-	_items_script.ReadOpenTable("items");
+	_items_script.OpenTable("items");
 
-	if (_weapons_script.OpenFile("dat/objects/weapons.lua", SCRIPT_READ) == false) {
+	if (_weapons_script.OpenFile("dat/objects/weapons.lua") == false) {
 		return false;
 	}
-	_weapons_script.ReadOpenTable("weapons");
+	_weapons_script.OpenTable("weapons");
 
-	if (_armor_script.OpenFile("dat/objects/armor.lua", SCRIPT_READ) == false) {
+	if (_armor_script.OpenFile("dat/objects/armor.lua") == false) {
 		return false;
 	}
-	_armor_script.ReadOpenTable("armor");
+	_armor_script.OpenTable("armor");
 
-	if (_attack_skills_script.OpenFile("dat/skills/attack.lua", SCRIPT_READ) == false) {
+	if (_attack_skills_script.OpenFile("dat/skills/attack.lua") == false) {
 		return false;
 	}
-	_attack_skills_script.ReadOpenTable("skills");
+	_attack_skills_script.OpenTable("skills");
 
 	return true;
 }

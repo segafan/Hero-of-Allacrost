@@ -70,8 +70,8 @@ BootMode::BootMode() :
 	if (BOOT_DEBUG) cout << "BOOT: BootMode constructor invoked." << endl;
 	mode_type = MODE_MANAGER_BOOT_MODE;
 
-	ScriptDescriptor read_data;
-	if (!read_data.OpenFile("dat/config/boot.lua", SCRIPT_READ)) {
+	ReadScriptDescriptor read_data;
+	if (!read_data.OpenFile("dat/config/boot.lua")) {
 		cout << "BOOT ERROR: failed to load data file" << endl;
 	}
 
@@ -116,9 +116,12 @@ BootMode::BootMode() :
 	vector<string> new_sound_files;
 	read_data.ReadStringVector("sound_files", new_sound_files);
 
-	if (read_data.GetError() != SCRIPT_NO_ERRORS) {
-		cout << "BOOT ERROR: some error occured during reading of boot data file" << endl;
+	if (read_data.IsErrorDetected()) {
+		cerr << "BOOT ERROR: some error occured during reading of boot data file" << endl;
+		cerr << read_data.GetErrorMessages() << endl;
 	}
+
+	read_data.CloseFile();
 
 	// Load all music files used in boot mode
 	_boot_music.resize(new_music_files.size(), MusicDescriptor());
@@ -361,8 +364,8 @@ void BootMode::_EndOpeningAnimation() {
 	_boot_music.at(0).PlayMusic();
 	
 	// Load the settings file for reading in the welcome variable
-	ScriptDescriptor settings_lua;
-	if (!settings_lua.OpenFile("dat/config/settings.lua", SCRIPT_READ)) {
+	ReadScriptDescriptor settings_lua;
+	if (!settings_lua.OpenFile("dat/config/settings.lua")) {
 		cout << "BOOT ERROR: failed to load the settings file!" << endl;
 	}
 	welcome = settings_lua.ReadInt("welcome");
@@ -855,44 +858,44 @@ void BootMode::_SaveSettingsFile() {
 		return;
 
 	// Load the settings file for reading in the original data
-	ScriptDescriptor settings_lua;
-	if (!settings_lua.OpenFile("dat/config/settings.lua", SCRIPT_READ)) {
+	ModifyScriptDescriptor settings_lua;
+	if (!settings_lua.OpenFile("dat/config/settings.lua")) {
 		cout << "BOOT ERROR: failed to load the settings file!" << endl;
 	}
 
 	// Write the current settings into the .lua file
 	// video
-	settings_lua.ChangeSetting<int32>("video_settings.screen_resx", VideoManager->GetWidth());
-	settings_lua.ChangeSetting<int32>("video_settings.screen_resy", VideoManager->GetHeight());
-	settings_lua.ChangeSetting<std::string>("video_settings.full_screen", VideoManager->IsFullscreen() ? "true" : "false");
-	settings_lua.ChangeSetting<float>("video_settings.brightness", VideoManager->GetGamma());
+	settings_lua.ModifyData<int32>("video_settings.screen_resx", VideoManager->GetWidth());
+	settings_lua.ModifyData<int32>("video_settings.screen_resy", VideoManager->GetHeight());
+	settings_lua.ModifyData<std::string>("video_settings.full_screen", VideoManager->IsFullscreen() ? "true" : "false");
+	settings_lua.ModifyData<float>("video_settings.brightness", VideoManager->GetGamma());
 
 	// audio
-	settings_lua.ChangeSetting<float>("audio_settings.music_vol", AudioManager->GetMusicVolume());
-	settings_lua.ChangeSetting<float>("audio_settings.sound_vol", AudioManager->GetSoundVolume());
+	settings_lua.ModifyData<float>("audio_settings.music_vol", AudioManager->GetMusicVolume());
+	settings_lua.ModifyData<float>("audio_settings.sound_vol", AudioManager->GetSoundVolume());
 
 	// input
-	settings_lua.ChangeSetting<int32>("key_settings.up", InputManager->GetUpKey());
-	settings_lua.ChangeSetting<int32>("key_settings.down", InputManager->GetDownKey());
-	settings_lua.ChangeSetting<int32>("key_settings.left", InputManager->GetLeftKey());
-	settings_lua.ChangeSetting<int32>("key_settings.right", InputManager->GetRightKey());
-	settings_lua.ChangeSetting<int32>("key_settings.confirm", InputManager->GetConfirmKey());
-	settings_lua.ChangeSetting<int32>("key_settings.cancel", InputManager->GetCancelKey());
-	settings_lua.ChangeSetting<int32>("key_settings.menu", InputManager->GetMenuKey());
-	settings_lua.ChangeSetting<int32>("key_settings.swap", InputManager->GetSwapKey());
-	settings_lua.ChangeSetting<int32>("key_settings.left_select", InputManager->GetLeftSelectKey());
-	settings_lua.ChangeSetting<int32>("key_settings.right_select", InputManager->GetRightSelectKey());
-	settings_lua.ChangeSetting<int32>("key_settings.pause", InputManager->GetPauseKey());
-	settings_lua.ChangeSetting<int32>("joystick_settings.confirm", InputManager->GetConfirmJoy());
-	settings_lua.ChangeSetting<int32>("joystick_settings.cancel", InputManager->GetCancelJoy());
-	settings_lua.ChangeSetting<int32>("joystick_settings.menu", InputManager->GetMenuJoy());
-	settings_lua.ChangeSetting<int32>("joystick_settings.swap", InputManager->GetSwapJoy());
-	settings_lua.ChangeSetting<int32>("joystick_settings.left_select", InputManager->GetLeftSelectJoy());
-	settings_lua.ChangeSetting<int32>("joystick_settings.right_select", InputManager->GetRightSelectJoy());
-	settings_lua.ChangeSetting<int32>("joystick_settings.pause", InputManager->GetPauseJoy());
+	settings_lua.ModifyData<int32>("key_settings.up", InputManager->GetUpKey());
+	settings_lua.ModifyData<int32>("key_settings.down", InputManager->GetDownKey());
+	settings_lua.ModifyData<int32>("key_settings.left", InputManager->GetLeftKey());
+	settings_lua.ModifyData<int32>("key_settings.right", InputManager->GetRightKey());
+	settings_lua.ModifyData<int32>("key_settings.confirm", InputManager->GetConfirmKey());
+	settings_lua.ModifyData<int32>("key_settings.cancel", InputManager->GetCancelKey());
+	settings_lua.ModifyData<int32>("key_settings.menu", InputManager->GetMenuKey());
+	settings_lua.ModifyData<int32>("key_settings.swap", InputManager->GetSwapKey());
+	settings_lua.ModifyData<int32>("key_settings.left_select", InputManager->GetLeftSelectKey());
+	settings_lua.ModifyData<int32>("key_settings.right_select", InputManager->GetRightSelectKey());
+	settings_lua.ModifyData<int32>("key_settings.pause", InputManager->GetPauseKey());
+	settings_lua.ModifyData<int32>("joystick_settings.confirm", InputManager->GetConfirmJoy());
+	settings_lua.ModifyData<int32>("joystick_settings.cancel", InputManager->GetCancelJoy());
+	settings_lua.ModifyData<int32>("joystick_settings.menu", InputManager->GetMenuJoy());
+	settings_lua.ModifyData<int32>("joystick_settings.swap", InputManager->GetSwapJoy());
+	settings_lua.ModifyData<int32>("joystick_settings.left_select", InputManager->GetLeftSelectJoy());
+	settings_lua.ModifyData<int32>("joystick_settings.right_select", InputManager->GetRightSelectJoy());
+	settings_lua.ModifyData<int32>("joystick_settings.pause", InputManager->GetPauseJoy());
 
 	// and save it!
-	settings_lua.SaveStack("dat/config/new_settings.lua");
+	settings_lua.CommitChanges();
 }
 
 

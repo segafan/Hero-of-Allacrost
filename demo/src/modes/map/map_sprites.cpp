@@ -594,8 +594,8 @@ EnemySprite::EnemySprite(std::string file) :
 
 // Load in the appropriate images and other data for the sprite from a Lua file
 bool EnemySprite::Load() {
-	ScriptDescriptor sprite_script;
-	if (sprite_script.OpenFile(filename, SCRIPT_READ) == false) {
+	ReadScriptDescriptor sprite_script;
+	if (sprite_script.OpenFile(filename) == false) {
 		return false;
 	}
 

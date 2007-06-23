@@ -7,6 +7,7 @@ INCLUDES = \
 	-I$(top_srcdir)/src/engine \
 	-I$(top_srcdir)/src/engine/audio \
 	-I$(top_srcdir)/src/engine/video \
+	-I$(top_srcdir)/src/engine/script \
 	-I$(top_srcdir)/src/global \
 	-I$(top_srcdir)/src/modes \
 	-I$(top_srcdir)/src/modes/battle \
@@ -64,6 +65,17 @@ audio_SOURCES = \
 	$(AUDIO_DIR)/audio_music.cpp \
 	$(AUDIO_DIR)/audio_music.h 
 
+SCRIPT_DIR = src/engine/script
+script_SOURCES = \
+	$(SCRIPT_DIR)/script.cpp \
+	$(SCRIPT_DIR)/script.h \
+	$(SCRIPT_DIR)/script_read.cpp \
+	$(SCRIPT_DIR)/script_read.h \
+	$(SCRIPT_DIR)/script_write.cpp \
+	$(SCRIPT_DIR)/script_write.h \
+	$(SCRIPT_DIR)/script_modify.cpp \
+	$(SCRIPT_DIR)/script_modify.h
+
 ENGINE_DIR = src/engine
 engine_SOURCES = \
 	$(ENGINE_DIR)/system.cpp \
@@ -72,12 +84,11 @@ engine_SOURCES = \
 	$(ENGINE_DIR)/input.h \
 	$(ENGINE_DIR)/mode_manager.cpp \
 	$(ENGINE_DIR)/mode_manager.h \
-	$(ENGINE_DIR)/script.cpp \
-	$(ENGINE_DIR)/script.h \
 	$(ENGINE_DIR)/socket.cpp \
 	$(ENGINE_DIR)/socket.h \
 	$(audio_SOURCES) \
-	$(video_SOURCES)
+	$(video_SOURCES) \
+	$(script_SOURCES)
 
 GLOBAL_DIR = src/global
 global_SOURCES = \
@@ -151,8 +162,7 @@ allacrost_editor_SOURCES = \
 	$(EDITOR_DIR)/tileset.cpp \
 	$(EDITOR_DIR)/tileset.h \
 	$(video_SOURCES) \
-	$(ENGINE_DIR)/script.cpp \
-	$(ENGINE_DIR)/script.h \
+	$(script_SOURCES) \
 	$(ENGINE_DIR)/socket.cpp \
 	$(ENGINE_DIR)/socket.h \
 	src/defs.h \
