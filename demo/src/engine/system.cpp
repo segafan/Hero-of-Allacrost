@@ -15,8 +15,8 @@
 *** ***************************************************************************/
 
 #include "system.h"
-#include "script.h"
 #include "audio.h"
+#include "script.h"
 
 using namespace std;
 
@@ -56,24 +56,25 @@ bool GameSystem::SingletonInitialize() {
 // 	bindtextdomain(PACKAGE, DATADIR);
 // 	textdomain(PACKAGE);
 
-	ScriptDescriptor settings_data;
+	ReadScriptDescriptor settings_data;
 
-	if (!settings_data.OpenFile("dat/config/settings.lua", SCRIPT_READ)) {
-		cout << "SYSTEM ERROR: failed to load settings from data file" << endl;
+	if (settings_data.OpenFile("dat/config/settings.lua") == false) {
+		cerr << "SYSTEM ERROR: failed to load settings from data file" << endl;
 		return false;
 	}
 
-	settings_data.ReadOpenTable("video_settings");
+	settings_data.OpenTable("video_settings");
 // 	SetFullScreen(settings_data.ReadBool("full_screen"));
-	settings_data.ReadCloseTable();
+	settings_data.CloseTable();
 
-	settings_data.ReadOpenTable("audio_settings");
+	settings_data.OpenTable("audio_settings");
 	AudioManager->SetMusicVolume(settings_data.ReadFloat("music_vol"));
 	AudioManager->SetSoundVolume(settings_data.ReadFloat("sound_vol"));
-	settings_data.ReadCloseTable();
+	settings_data.CloseTable();
 
-	if (settings_data.GetError() != SCRIPT_NO_ERRORS) {
-		cout << "SETTINGS WARNING: some error occured during read operations from data file" << endl;
+	if (settings_data.IsErrorDetected()) {
+		cerr << "SETTINGS WARNING: some errors occured during read operations from data file:" << endl;
+		cerr << settings_data.GetErrorMessages() << endl;
 	}
 	settings_data.CloseFile();
 	return true;

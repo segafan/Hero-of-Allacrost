@@ -22,8 +22,6 @@
 
 #include "video.h"
 
-
-
 namespace hoa_boot {
 
 // TODO: this should all be defined in the private_boot namespace

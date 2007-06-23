@@ -13,7 +13,7 @@
  * \brief   Source file for editor's grid, used for the OpenGL map portion
  *          where tiles are painted, edited, etc.
  *****************************************************************************/
-			   
+
 #include <iostream>
 #include "grid.h"
 
@@ -148,10 +148,10 @@ const QString& Grid::GetMusic() const
 
 void Grid::LoadMap()
 {
-	ScriptDescriptor read_data;
+	ReadScriptDescriptor read_data;
 	vector<int32> vect;             // used to read in vectors from the file
 
-	if (!read_data.OpenFile(std::string(_file_name.toAscii()), SCRIPT_READ))
+	if (!read_data.OpenFile(std::string(_file_name.toAscii())))
 		QMessageBox::warning(this, "Loading File...", QString("ERROR: could not open %1 for reading!").arg(_file_name));
 
 	tileset_names.clear();
@@ -164,16 +164,16 @@ void Grid::LoadMap()
 	_width  = read_data.ReadInt("num_tile_cols");
 	resize(_width * TILE_WIDTH, _height * TILE_HEIGHT);
 
-	read_data.ReadOpenTable("tileset_filenames");
-	uint32 table_size = read_data.ReadGetTableSize();
+	read_data.OpenTable("tileset_filenames");
+	uint32 table_size = read_data.GetTableSize();
 	for (uint32 i = 1; i <= table_size; i++)
 		tileset_names.append(QString(read_data.ReadString(i).c_str()));
-	read_data.ReadCloseTable();
+	read_data.CloseTable();
 
 	// Loading the tileset images using LoadMultiImage is done in editor.cpp in FileOpen via
 	// creation of the TilesetTable(s)
 
-	read_data.ReadOpenTable("lower_layer");
+	read_data.OpenTable("lower_layer");
 	for (int32 i = 0; i < _height; i++)
 	{
 		read_data.ReadIntVector(i, vect);
@@ -181,9 +181,9 @@ void Grid::LoadMap()
 			_lower_layer.push_back(*it);
 		vect.clear();
 	} // iterate through the rows of the lower layer
-	read_data.ReadCloseTable();
+	read_data.CloseTable();
 
-	read_data.ReadOpenTable("middle_layer");
+	read_data.OpenTable("middle_layer");
 	for (int32 i = 0; i < _height; i++)
 	{
 		read_data.ReadIntVector(i, vect);
@@ -191,9 +191,9 @@ void Grid::LoadMap()
 			_middle_layer.push_back(*it);
 		vect.clear();
 	} // iterate through the rows of the lower layer
-	read_data.ReadCloseTable();
+	read_data.CloseTable();
 
-	read_data.ReadOpenTable("upper_layer");
+	read_data.OpenTable("upper_layer");
 	for (int32 i = 0; i < _height; i++)
 	{
 		read_data.ReadIntVector(i, vect);
@@ -201,7 +201,7 @@ void Grid::LoadMap()
 			_upper_layer.push_back(*it);
 		vect.clear();
 	} // iterate through the rows of the lower layer
-	read_data.ReadCloseTable();
+	read_data.CloseTable();
 	
 	// The map_grid is 4x as big as the map: 2x in the width and 2x in the height. Starting
 	// with row 0 (and doing the same thing for every row that is a multiple of 2), we take the first 2 entries,
@@ -239,15 +239,15 @@ void Grid::LoadMap()
 	read_data.ReadCloseTable();*/
 
 	// Load music
-	read_data.ReadOpenTable("music_filenames");
-	if (read_data.GetErrorCode() == SCRIPT_NO_ERRORS)
+	read_data.OpenTable("music_filenames");
+	if (read_data.IsErrorDetected() == false)
 	{
-		int size = read_data.ReadGetTableSize();
+		int size = read_data.GetTableSize();
 		if (size == 0)
 			_music_file = "None";
 		else
 			_music_file = QString(read_data.ReadString(1).c_str());
-		read_data.ReadCloseTable();
+		read_data.CloseTable();
 	}
 
 	_grid_on = true;        // grid lines default to on
@@ -263,17 +263,17 @@ void Grid::SaveMap()
 	int i;          // Lua table index / Loop counter variable
 	vector<int32>::iterator it;  // used to iterate through the layers
 	vector<int32> layer_row;     // one row of a layer
-	ScriptDescriptor write_data;
+	WriteScriptDescriptor write_data;
 	int tileset_index;
 	int tile_index;
 	
-	if (write_data.OpenFile(std::string(_file_name.toAscii()), SCRIPT_WRITE) == false) {
+	if (write_data.OpenFile(std::string(_file_name.toAscii())) == false) {
 		QMessageBox::warning(this, "Saving File...", QString("ERROR: could not open %1 for writing!").arg(_file_name));
 		return;
 	}
 
 	write_data.WriteComment(std::string(_file_name.toAscii()));
-	write_data.WriteInsertNewLine();
+	write_data.InsertNewLine();
 
 	write_data.WriteComment("A reference to the C++ MapMode object that was created with this file");
 	write_data.WriteLine("map = {}\n");
@@ -281,38 +281,38 @@ void Grid::SaveMap()
 	write_data.WriteComment("The number of rows and columns of tiles that compose the map");
 	write_data.WriteInt("num_tile_cols", _width);
 	write_data.WriteInt("num_tile_rows", _height);
-	write_data.WriteInsertNewLine();
+	write_data.InsertNewLine();
 
 	write_data.WriteComment("The sound files used on this map.");
-	write_data.WriteBeginTable("sound_filenames");
+	write_data.BeginTable("sound_filenames");
 	// TEMP: currently sound_filenames table is not populated with sounds
-	write_data.WriteEndTable();
-	write_data.WriteInsertNewLine();
+	write_data.EndTable();
+	write_data.InsertNewLine();
 
 	write_data.WriteComment("The music files used as background music on this map.");
-	write_data.WriteBeginTable("music_filenames");
+	write_data.BeginTable("music_filenames");
 	if (_music_file != "None")
 		write_data.WriteString(1, std::string(_music_file.toAscii()));
-	write_data.WriteEndTable();
-	write_data.WriteInsertNewLine();
+	write_data.EndTable();
+	write_data.InsertNewLine();
 
 	write_data.WriteComment("The names of the tilesets used, with the path and file extension omitted");
-	write_data.WriteBeginTable("tileset_filenames");
+	write_data.BeginTable("tileset_filenames");
 	i = 0;
 	for (QStringList::Iterator qit = tileset_names.begin(); qit != tileset_names.end(); ++qit)
 	{
 		i++;
 		write_data.WriteString(i, (*qit).ascii());
 	} // iterate through tileset_list writing each element
-	write_data.WriteEndTable();
-	write_data.WriteInsertNewLine();
+	write_data.EndTable();
+	write_data.InsertNewLine();
 
 	// Create vector of 0s.
 	vector<int32> vect_0s(_width, 0);
 
 	write_data.WriteComment("The map grid to indicate walkability. The size of the grid is 4x the size of the tile layer tables");
 	write_data.WriteComment("Walkability status of tiles for 32 contexts. Zero indicates walkable. Valid range: [0:2^32-1]");
-	write_data.WriteBeginTable("map_grid");
+	write_data.BeginTable("map_grid");
 	vector<int32> ll_vect;
 	vector<int32> ml_vect;
 	vector<int32> ul_vect;
@@ -400,11 +400,11 @@ void Grid::SaveMap()
 		else
 			twice = true;
 	} // iterate through the rows of the layers
-	write_data.WriteEndTable();
-	write_data.WriteInsertNewLine();
+	write_data.EndTable();
+	write_data.InsertNewLine();
 
 	write_data.WriteComment("The lower tile layer. The numbers are indeces to the tile_mappings table.");
-	write_data.WriteBeginTable("lower_layer");
+	write_data.BeginTable("lower_layer");
 	it = _lower_layer.begin();
 	for (int row = 0; row < _height; row++)
 	{
@@ -417,11 +417,11 @@ void Grid::SaveMap()
 		write_data.WriteIntVector(buffer, layer_row);
 		layer_row.clear();
 	} // iterate through the rows of the lower layer
-	write_data.WriteEndTable();
-	write_data.WriteInsertNewLine();
+	write_data.EndTable();
+	write_data.InsertNewLine();
 
 	write_data.WriteComment("The middle tile layer. The numbers are indeces to the tile_mappings table.");
-	write_data.WriteBeginTable("middle_layer");
+	write_data.BeginTable("middle_layer");
 	it = _middle_layer.begin();
 	for (int row = 0; row < _height; row++)
 	{
@@ -434,11 +434,11 @@ void Grid::SaveMap()
 		write_data.WriteIntVector(buffer, layer_row);
 		layer_row.clear();
 	} // iterate through the rows of the middle layer
-	write_data.WriteEndTable();
-	write_data.WriteInsertNewLine();
+	write_data.EndTable();
+	write_data.InsertNewLine();
 
 	write_data.WriteComment("The upper tile layer. The numbers are indeces to the tile_mappings table.");
-	write_data.WriteBeginTable("upper_layer");
+	write_data.BeginTable("upper_layer");
 	it = _upper_layer.begin();
 	for (int row = 0; row < _height; row++)
 	{
@@ -451,8 +451,8 @@ void Grid::SaveMap()
 		write_data.WriteIntVector(buffer, layer_row);
 		layer_row.clear();
 	} // iterate through the rows of the upper layer
-	write_data.WriteEndTable();
-	write_data.WriteInsertNewLine();
+	write_data.EndTable();
+	write_data.InsertNewLine();
 
 	write_data.CloseFile();
 

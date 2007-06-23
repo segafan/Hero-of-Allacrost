@@ -18,7 +18,6 @@
 using namespace std;
 using namespace hoa_video;
 
-
 namespace hoa_boot {
 
 // Static BootMenu members

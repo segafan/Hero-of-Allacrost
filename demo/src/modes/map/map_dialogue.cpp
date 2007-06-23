@@ -220,10 +220,10 @@ void MapDialogue::AddText(std::string text, uint32 speaker_id, int32 time, int32
 	_speakers.push_back(speaker_id);
 	_time.push_back(time);
 	if (action >= 0) {
-		MapMode::_loading_map->_map_script.ReadOpenTable("map_functions");
+		MapMode::_loading_map->_map_script.OpenTable("map_functions");
 		ScriptObject* new_action = new ScriptObject();
 		*new_action = MapMode::_loading_map->_map_script.ReadFunctionPointer(action);
-		MapMode::_loading_map->_map_script.ReadCloseTable();
+		MapMode::_loading_map->_map_script.CloseTable();
 		_actions.push_back(new_action);
 	}
 	else {

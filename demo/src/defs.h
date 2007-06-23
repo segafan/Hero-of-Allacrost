@@ -14,9 +14,9 @@
 ***
 *** This file serves two purposes. The first purpose of this file is to forward
 *** declare classes and shared variables in order to avoid problems with
-*** recursive. The second purpose of this file is to declare the function that
-*** contains all of the Allacrost Lua binding code. This makes the C++ engine
-*** code available for use in Lua scripts.
+*** recursive inclusion. The second purpose of this file is to declare 
+*** the function that contains all of the Allacrost Lua binding code. This makes 
+*** the C++ engine code available for use in Lua scripts.
 ***
 *** \note Pretty much every header file in the source tree will need to include
 *** this file, with a few exceptions (utils.h is one). The only source file 
@@ -26,21 +26,13 @@
 *** this file can be found in the respective header files for where these
 *** structures reside in. There are no doxygen comments for the classes and
 *** namespaces found here.
+***
+*** \note You should not need to use the hoa_defs namespace unless you are
+*** making the call to bind the engine to Lua.
 *** **************************************************************************/
 
 #ifndef __DEFS_HEADER__
 #define __DEFS_HEADER__
-
-//! \brief Namespace which contains the single Lua binding function
-namespace hoa_defs {
-
-/** \brief Contains the binding code which makes the C++ engine available to Lua
-*** This method should <b>only be called once</b>. It must be called after the
-*** ScriptEngine is initialized, otherwise the application will crash.
-**/
-void BindEngineToLua();
-
-} // namespace hoa_defs
 
 ////////////////////////////////////////////////////////////////////////////////
 // Game Engine Declarations
@@ -93,7 +85,6 @@ namespace hoa_video {
 	namespace private_video {
 		class Context;
 
-
 		class TexSheet;
 		class TexMemMgr;
 		class FixedTexMemMgr;
@@ -133,6 +124,9 @@ namespace hoa_script {
 	class GameScript;
 
 	class ScriptDescriptor;
+	class ReadScriptDescriptor;
+	class WriteScriptDescriptor;
+	class ModifyScriptDescriptor;
 }
 
 // Mode manager declarations, see mode_manager.h/cpp
@@ -288,4 +282,19 @@ namespace hoa_utils {
 	extern float RandomFloat();
 }
 
-#endif /* #ifndef __DEFS_HEADER__ */
+////////////////////////////////////////////////////////////////////////////////
+// Binding Declarations
+////////////////////////////////////////////////////////////////////////////////
+
+//! \brief Namespace which contains the single Lua binding function
+namespace hoa_defs {
+
+/** \brief Contains the binding code which makes the C++ engine available to Lua
+*** This method should <b>only be called once</b>. It must be called after the
+*** ScriptEngine is initialized, otherwise the application will crash.
+**/
+void BindEngineToLua();
+
+} // namespace hoa_defs
+
+#endif // __DEFS_HEADER__

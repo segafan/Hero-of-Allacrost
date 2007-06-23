@@ -13,7 +13,7 @@
  * \brief   Header file for editor's tileset, used for maintaining a visible
  *          "list" of tiles to select from for painting on a map.
  *****************************************************************************/
-			   
+
 #ifndef __TILESET_HEADER__
 #define __TILESET_HEADER__
 

@@ -42,9 +42,6 @@ using namespace hoa_script;
 using namespace hoa_battle;
 using namespace hoa_menu;
 
-
-
-
 namespace hoa_map {
 
 bool MAP_DEBUG = false;
@@ -155,7 +152,7 @@ void MapMode::Reset() {
 // Loads the map from a Lua file.
 void MapMode::_Load() {
 	// ---------- (1) Open map script file and read in basic map properties and tile definitions
-	if (_map_script.OpenFile(_map_filename, SCRIPT_READ) == false) {
+	if (_map_script.OpenFile(_map_filename) == false) {
 		return;
 	}
 
@@ -173,19 +170,19 @@ void MapMode::_Load() {
 	// Do some checking to make sure tables are of the proper size
 	// NOTE: we only check that the number of rows are correct, but not the number of columns
 	// NOTE: the "+ 1" is due to a bug in ReadGetTableSize that is not yet resolved
-	if (_map_script.ReadGetTableSize("map_grid") + 1 != _num_grid_rows) {
+	if (_map_script.GetTableSize("map_grid") + 1 != _num_grid_rows) {
 		cerr << "MAP ERROR: In MapMode::_Load(), the map_grid table had an incorrect number of rows" << endl;
 		return;
 	}
-	if (_map_script.ReadGetTableSize("lower_layer") + 1 != _num_tile_rows) {
+	if (_map_script.GetTableSize("lower_layer") + 1 != _num_tile_rows) {
 		cerr << "MAP ERROR: In MapMode::_Load(), the lower_layer table had an incorrect number of rows" << endl;
 		return;
 	}
-	if (_map_script.ReadGetTableSize("middle_layer") + 1 != _num_tile_rows) {
+	if (_map_script.GetTableSize("middle_layer") + 1 != _num_tile_rows) {
 		cerr << "MAP ERROR: In MapMode::_Load(), the middle_layer table had an incorrect number of rows" << endl;
 		return;
 	}
-	if (_map_script.ReadGetTableSize("upper_layer") + 1 != _num_tile_rows) {
+	if (_map_script.GetTableSize("upper_layer") + 1 != _num_tile_rows) {
 		cerr << "MAP ERROR: In MapMode::_Load(), the upper_layer table had an incorrect number of rows" << endl;
 		return;
 	}
@@ -247,12 +244,12 @@ void MapMode::_LoadTiles() {
 
 	// ---------- (1) Construct the map grid (contains map traveriblity information)
 
-	_map_script.ReadOpenTable("map_grid");
+	_map_script.OpenTable("map_grid");
 	for (uint16 r = 0; r < _num_grid_rows; r++) {
 		_map_grid.push_back(vector<uint32>());
 		_map_script.ReadUIntVector(r, _map_grid.back());
 	}
-	_map_script.ReadCloseTable();
+	_map_script.CloseTable();
 	// ---------- (2) Load in the map tileset images and initialize all map tiles
 
 	_map_script.ReadStringVector("tileset_filenames", tileset_filenames);
@@ -282,7 +279,7 @@ void MapMode::_LoadTiles() {
 	vector<int32> table_row; // Used to temporarily store a row of integer table data
 
 	// Read the lower_layer
-	_map_script.ReadOpenTable("lower_layer");
+	_map_script.OpenTable("lower_layer");
 	for (uint32 r = 0; r < _num_tile_rows; r++) {
 		table_row.clear();
 		_map_script.ReadIntVector(r, table_row);
@@ -290,10 +287,10 @@ void MapMode::_LoadTiles() {
 			_tile_grid[r][c].lower_layer = table_row[c];
 		}
 	}
-	_map_script.ReadCloseTable();
+	_map_script.CloseTable();
 
 	// Read the middle_layer
-	_map_script.ReadOpenTable("middle_layer");
+	_map_script.OpenTable("middle_layer");
 	for (uint32 r = 0; r < _num_tile_rows; r++) {
 		table_row.clear();
 		_map_script.ReadIntVector(r, table_row);
@@ -301,10 +298,10 @@ void MapMode::_LoadTiles() {
 			_tile_grid[r][c].middle_layer = table_row[c];
 		}
 	}
-	_map_script.ReadCloseTable();
+	_map_script.CloseTable();
 
 	// Read the upper_layer
-	_map_script.ReadOpenTable("upper_layer");
+	_map_script.OpenTable("upper_layer");
 	for (uint32 r = 0; r < _num_tile_rows; r++) {
 		table_row.clear();
 		_map_script.ReadIntVector(r, table_row);
@@ -312,7 +309,7 @@ void MapMode::_LoadTiles() {
 			_tile_grid[r][c].upper_layer = table_row[c];
 		}
 	}
-	_map_script.ReadCloseTable();
+	_map_script.CloseTable();
 
 	// ---------- (4) Determine which tiles in each tileset are referenced in this map
 
@@ -358,18 +355,18 @@ void MapMode::_LoadTiles() {
 
 	// ---------- (5) Parse all of the tileset definition files and create any animated tile images that are used
 
-	ScriptDescriptor tileset_script; // Used to access the tileset definition file
+	ReadScriptDescriptor tileset_script; // Used to access the tileset definition file
 	vector<uint32> animation_info;   // Temporarily retains the animation data (tile frame indeces and display times)
 
 	for (uint32 i = 0; i < tileset_filenames.size(); i++) {
-		if (tileset_script.OpenFile("dat/tilesets/" + tileset_filenames[i] + ".lua", SCRIPT_READ) == false) {
+		if (tileset_script.OpenFile("dat/tilesets/" + tileset_filenames[i] + ".lua") == false) {
 			cerr << "MAP ERROR: In MapMode::_LoadTiles(), the map failed to load because it could not open a tileset definition file: "
 				<< tileset_script.GetFilename() << endl;
 			return;
 		}
 
-		tileset_script.ReadOpenTable("animated_tiles");
-		for (uint32 j = 1; j <= tileset_script.ReadGetTableSize(); j++) {
+		tileset_script.OpenTable("animated_tiles");
+		for (uint32 j = 1; j <= tileset_script.GetTableSize(); j++) {
 			animation_info.clear();
 			tileset_script.ReadUIntVector(j, animation_info);
 
@@ -391,6 +388,7 @@ void MapMode::_LoadTiles() {
 
 			tile_animations.insert(make_pair(first_frame_index, new_animation));
 		}
+		tileset_script.CloseTable();
 		tileset_script.CloseFile();
 	} // for (uint32 i = 0; i < tileset_filenames.size(); i++)
 

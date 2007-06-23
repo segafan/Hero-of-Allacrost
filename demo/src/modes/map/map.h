@@ -350,7 +350,7 @@ private:
 	*** This class generally performs a large amount of communication with this script continuously.
 	*** The script remains open for as long as the MapMode object exists.
 	**/
-	hoa_script::ScriptDescriptor _map_script;
+	hoa_script::ReadScriptDescriptor _map_script;
 
 	/** \brief A script function which assists with the MapMode#Update method
 	*** The most common operation that this script function performs is to check trigger conditions that

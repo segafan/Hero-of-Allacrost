@@ -235,12 +235,12 @@ private:
 
 	//! \brief Script files that hold data for various global objects
 	//@{
-	hoa_script::ScriptDescriptor _items_script;
-	hoa_script::ScriptDescriptor _weapons_script;
-	hoa_script::ScriptDescriptor _armor_script;
-	hoa_script::ScriptDescriptor _attack_skills_script;
-	hoa_script::ScriptDescriptor _defend_skills_script;
-	hoa_script::ScriptDescriptor _support_skills_script;
+	hoa_script::ReadScriptDescriptor _items_script;
+	hoa_script::ReadScriptDescriptor _weapons_script;
+	hoa_script::ReadScriptDescriptor _armor_script;
+	hoa_script::ReadScriptDescriptor _attack_skills_script;
+	hoa_script::ReadScriptDescriptor _defend_skills_script;
+	hoa_script::ReadScriptDescriptor _support_skills_script;
 	//@}
 }; // class GameGlobal
 
