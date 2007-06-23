@@ -17,7 +17,6 @@
 
 #include <iostream>
 #include <stdarg.h>
-#include <boost/lexical_cast.hpp>
 
 #include "script.h"
 
