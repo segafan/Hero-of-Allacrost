@@ -39,7 +39,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)\src&quot;;&quot;$(ProjectDir)\src\engine\video&quot;;&quot;$(ProjectDir)\src\editor&quot;;&quot;$(ProjectDir)\src\engine\audio&quot;;&quot;$(ProjectDir)\src\modes&quot;;&quot;$(ProjectDir)\src\engine&quot;;&quot;$(ProjectDir)\src\modes\battle&quot;;&quot;$(ProjectDir)\src\modes\boot&quot;;&quot;$(ProjectDir)\src\modes\map&quot;;&quot;$(ProjectDir)\src\modes\menu&quot;;&quot;$(ProjectDir)\src\modes\shop&quot;;&quot;$(ProjectDir)\src\global&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)\src&quot;;&quot;$(ProjectDir)\src\engine\video&quot;;&quot;$(ProjectDir)\src\editor&quot;;&quot;$(ProjectDir)\src\engine\audio&quot;;&quot;$(ProjectDir)\src\modes&quot;;&quot;$(ProjectDir)\src\engine&quot;;&quot;$(ProjectDir)\src\modes\battle&quot;;&quot;$(ProjectDir)\src\modes\boot&quot;;&quot;$(ProjectDir)\src\modes\map&quot;;&quot;$(ProjectDir)\src\modes\menu&quot;;&quot;$(ProjectDir)\src\modes\shop&quot;;&quot;$(ProjectDir)\src\global&quot;;&quot;$(ProjectDir)\src\engine\script&quot;"
 				PreprocessorDefinitions="QT3_SUPPORT;QT_CLEAN_NAMESPACE;QT_NO_DEBUG;QT_GUI_LIB;QT_CORE_LIB;QT_SHARED"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -119,7 +119,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="0"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)\src&quot;;&quot;$(ProjectDir)\src\engine\video&quot;;&quot;$(ProjectDir)\src\editor&quot;;&quot;$(ProjectDir)\src\engine\audio&quot;;&quot;$(ProjectDir)\src\modes&quot;;&quot;$(ProjectDir)\src\engine&quot;;&quot;$(ProjectDir)\src\modes\battle&quot;;&quot;$(ProjectDir)\src\modes\boot&quot;;&quot;$(ProjectDir)\src\modes\map&quot;;&quot;$(ProjectDir)\src\modes\menu&quot;;&quot;$(ProjectDir)\src\modes\shop&quot;;&quot;$(ProjectDir)\src\global&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)\src&quot;;&quot;$(ProjectDir)\src\engine\video&quot;;&quot;$(ProjectDir)\src\editor&quot;;&quot;$(ProjectDir)\src\engine\audio&quot;;&quot;$(ProjectDir)\src\modes&quot;;&quot;$(ProjectDir)\src\engine&quot;;&quot;$(ProjectDir)\src\modes\battle&quot;;&quot;$(ProjectDir)\src\modes\boot&quot;;&quot;$(ProjectDir)\src\modes\map&quot;;&quot;$(ProjectDir)\src\modes\menu&quot;;&quot;$(ProjectDir)\src\modes\shop&quot;;&quot;$(ProjectDir)\src\global&quot;;&quot;$(ProjectDir)\src\engine\script&quot;"
 				PreprocessorDefinitions="QT3_SUPPORT;QT_CLEAN_NAMESPACE;QT_NO_DEBUG;QT_GUI_LIB;QT_CORE_LIB;QT_SHARED"
 				MinimalRebuild="true"
 				RuntimeLibrary="2"
@@ -307,6 +307,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\modes\map\map_sprites.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\modes\map\map_zones.cpp"
 				>
 			</File>
@@ -355,7 +359,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\engine\script.cpp"
+				RelativePath=".\src\engine\script\script.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\script\script_modify.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\script\script_read.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\script\script_write.cpp"
 				>
 			</File>
 			<File
@@ -501,6 +517,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\modes\map\map_sprites.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\modes\map\map_zones.h"
 				>
 			</File>
@@ -553,7 +573,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\engine\script.h"
+				RelativePath=".\src\engine\script\script.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\script\script_modify.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\script\script_read.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\script\script_write.h"
 				>
 			</File>
 			<File

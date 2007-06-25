@@ -39,7 +39,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)\src&quot;;&quot;$(ProjectDir)\src\engine\video&quot;;&quot;$(ProjectDir)\src\editor&quot;;&quot;$(ProjectDir)\src\engine\audio&quot;;&quot;$(ProjectDir)\src\modes&quot;;&quot;$(ProjectDir)\src\engine&quot;;&quot;$(ProjectDir)\src\modes\battle&quot;;&quot;$(ProjectDir)\src\modes\boot&quot;;&quot;$(ProjectDir)\src\modes\map&quot;;&quot;$(ProjectDir)\src\modes\menu&quot;;&quot;$(ProjectDir)\src\modes\shop&quot;;&quot;$(ProjectDir)\src\global&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)\src&quot;;&quot;$(ProjectDir)\src\engine\video&quot;;&quot;$(ProjectDir)\src\editor&quot;;&quot;$(ProjectDir)\src\engine\audio&quot;;&quot;$(ProjectDir)\src\modes&quot;;&quot;$(ProjectDir)\src\engine&quot;;&quot;$(ProjectDir)\src\modes\battle&quot;;&quot;$(ProjectDir)\src\modes\boot&quot;;&quot;$(ProjectDir)\src\modes\map&quot;;&quot;$(ProjectDir)\src\modes\menu&quot;;&quot;$(ProjectDir)\src\modes\shop&quot;;&quot;$(ProjectDir)\src\global&quot;;&quot;$(ProjectDir)\src\engine\script&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -122,7 +122,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="0"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)\src&quot;;&quot;$(ProjectDir)\src\engine\video&quot;;&quot;$(ProjectDir)\src\editor&quot;;&quot;$(ProjectDir)\src\engine\audio&quot;;&quot;$(ProjectDir)\src\modes&quot;;&quot;$(ProjectDir)\src\engine&quot;;&quot;$(ProjectDir)\src\modes\battle&quot;;&quot;$(ProjectDir)\src\modes\boot&quot;;&quot;$(ProjectDir)\src\modes\map&quot;;&quot;$(ProjectDir)\src\modes\menu&quot;;&quot;$(ProjectDir)\src\modes\shop&quot;;&quot;$(ProjectDir)\src\global&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)\src&quot;;&quot;$(ProjectDir)\src\engine\video&quot;;&quot;$(ProjectDir)\src\editor&quot;;&quot;$(ProjectDir)\src\engine\audio&quot;;&quot;$(ProjectDir)\src\modes&quot;;&quot;$(ProjectDir)\src\engine&quot;;&quot;$(ProjectDir)\src\modes\battle&quot;;&quot;$(ProjectDir)\src\modes\boot&quot;;&quot;$(ProjectDir)\src\modes\map&quot;;&quot;$(ProjectDir)\src\modes\menu&quot;;&quot;$(ProjectDir)\src\modes\shop&quot;;&quot;$(ProjectDir)\src\global&quot;;&quot;$(ProjectDir)\src\engine\script&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;"
 				MinimalRebuild="true"
 				ExceptionHandling="1"
@@ -317,6 +317,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\modes\map\map_sprites.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\modes\map\map_zones.h"
 				>
 			</File>
@@ -381,7 +385,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\engine\script.h"
+				RelativePath=".\src\engine\script\script.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\script\script_modify.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\script\script_read.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\script\script_write.h"
 				>
 			</File>
 			<File
@@ -561,6 +577,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\modes\map\map_sprites.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\modes\map\map_zones.cpp"
 				>
 			</File>
@@ -609,7 +629,37 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\engine\script.cpp"
+				RelativePath=".\src\engine\script\script.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\src\engine\script\script_modify.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\script\script_read.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\script\script_write.cpp"
 				>
 			</File>
 			<File
