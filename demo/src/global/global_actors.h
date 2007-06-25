@@ -726,7 +726,11 @@ public:
 
 	//! \brief Returns the height of the enemy
 	int GetHeight() const
-	{ return static_cast<int>(_sprite_frames[0].GetHeight()); }
+	{ return static_cast<int>(_sprite_height); }
+
+	//! \brief Returns the width of the enemy
+	int GetWidth() const
+	{ return static_cast<int>(_sprite_width); }
 
 	/** \brief Simulates the growth of the enemy from the base experience level.
 	*** \param level The experience level to set the enemey to
@@ -776,13 +780,7 @@ protected:
 	float _growth_evade;
 	//@}
 
-	/** \brief The dimensions of the enemy sprite
-	*** The units are in number of 64 pixels. For example, a width of 1 and a height of 2 is equal to a
-	*** sprite that is 64 pixels wide by 128 pixels tall. These units are for simplification, since there
-	*** exists a "virtual" grid in the battle scene, and all enemy sprite sizes must be in number of
-	*** battle grid units. These members help the battle code to determine how and where to place all of
-	*** the enemy battle sprites.
-	**/
+	/** \brief The dimensions of the enemy sprite in pixels **/
 	uint32 _sprite_width, _sprite_height;
 
 	/** \brief The battle sprite frames for the enemy

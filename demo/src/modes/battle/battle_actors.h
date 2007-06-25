@@ -179,11 +179,11 @@ public:
 
 	// \brief Draws the actor's portrait for the time meter
 	// \param is_selected If the actor is selected for an action, highlight it
-	void DrawTimePortrait(bool is_selected);
+	virtual void DrawTimePortrait(bool is_selected);
 
 	// \brief Tells us if the actor is alive
 	// \return true if alive
-	bool IsAlive() { return (_hp > 0); }
+	virtual bool IsAlive() { return (_hp > 0); }
 
 	// \brief Tells us if this actor is an enemy
 	// \return true if it is an enemy
@@ -620,9 +620,6 @@ public:
 	//! Gets a pointer to the GlobalActor
 	virtual hoa_global::GlobalEnemy* GetActor()
 		{ return &_global_enemy; }
-
-	//! TEMP
-	int _TEMP_GetHeight() { return GetActor()->GetHeight(); }
 
 	//! \brief Sets the location of the time meter portrait
 	//! \param new_val new value for the location

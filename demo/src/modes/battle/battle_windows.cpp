@@ -379,6 +379,7 @@ void ActionWindow::_DrawTargetSelection() {
 
 	// if (current_battle->_selected_target->IsEnemy())
 	VideoManager->Move(650.0f, 100.0f);
+	VideoManager->SetTextColor(Color(1.0f, 1.0f, 1.0f, 1.0f)); // white
 	if (_action_target_type == GLOBAL_TARGET_ATTACK_POINT) {
 		VideoManager->DrawText(MakeUnicodeString("Attack Point Targeted."));
 	}
