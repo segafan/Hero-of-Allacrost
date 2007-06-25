@@ -80,10 +80,13 @@ public:
 	*** \param name The name of the object for this entry
 	*** \param price The price of the object in this entry
 	**/
-	void AddEntry(hoa_utils::ustring name, uint32 price);
+	void AddEntry(hoa_utils::ustring name, uint32 price, uint32 quantity);
 
 	//! \brief Reconstructs the option box from the entries that have been added
 	void ConstructList();
+
+	//! \brief Refreshes the option box and all entries
+	void RefreshList();
 
 	//! \brief Processes user input and updates the cursor
 	void Update();
