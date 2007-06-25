@@ -573,7 +573,6 @@ StatusWindow::StatusWindow() : _char_select_active(false) {
 		portrait.SetDimensions(150, 350);
 		VideoManager->LoadImage(portrait);
 		_full_portraits.push_back(portrait);
-//		cout << "Pushing " << ch->GetFilename() << "onto stack." << endl;
 	}
 
 // 	//Init char select option box

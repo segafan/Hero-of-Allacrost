@@ -53,10 +53,13 @@ ShopMode::ShopMode() {
 	if (SHOP_DEBUG)
 		cout << "SHOP: ShopMode constructor invoked" << endl;
 
+	_purchases_cost = 0;
+	_sales_revenue = 0;
+
 	mode_type = MODE_MANAGER_SHOP_MODE;
 	private_shop::current_shop = this;
 	_state = SHOP_STATE_ACTION;
-
+	
 	if (VideoManager->CaptureScreen(_saved_screen) == false) {
 		if (SHOP_DEBUG)
 			cerr << "SHOP ERROR: Failed to capture saved screen" << endl;
@@ -90,24 +93,26 @@ void ShopMode::Reset() {
 	VideoManager->SetTextColor(Color::white);
 
 	// Everything is temporary code from here to the end of this function
+	_all_objects.clear();
+	_all_objects_quantities.clear();
 	_all_objects.push_back(new GlobalItem(1));
+	_all_objects_quantities.push_back(0);
 	_all_objects.push_back(new GlobalWeapon(10001));
+	_all_objects_quantities.push_back(0);
 	_all_objects.push_back(new GlobalWeapon(10002));
-// 	_all_objects.push_back(new GlobalArmor(20001));
+	_all_objects_quantities.push_back(0);
 	_all_objects.push_back(new GlobalArmor(20002));
-// 	_all_objects.push_back(new GlobalArmor(30001));
+	_all_objects_quantities.push_back(0);
 	_all_objects.push_back(new GlobalArmor(30002));
-// 	_all_objects.push_back(new GlobalArmor(40001));
+	_all_objects_quantities.push_back(0);
 	_all_objects.push_back(new GlobalArmor(40002));
+	_all_objects_quantities.push_back(0);
 	_all_objects.push_back(new GlobalArmor(50001));
+	_all_objects_quantities.push_back(0);
 
-//	GlobalManager->SetFunds(500);
 	_action_window.UpdateFinanceText();
 
-	for (uint32 i = 0; i < _all_objects.size(); i++) {
-		_list_window.AddEntry(_all_objects[i]->GetName(), _all_objects[i]->GetPrice());
-	}
-	_list_window.ConstructList();
+	_list_window.RefreshList();
 
 	_sell_window.UpdateSellList();
 	_sell_window.object_list.SetSelection(0);
@@ -200,6 +205,10 @@ void ShopMode::AddObject(uint32 object_id) {
 	}
 
 	_object_map.insert(make_pair(object_id, 0));
+}
+
+uint32 ShopMode::GetTotalRemaining() {
+	return GlobalManager->GetFunds() - _purchases_cost + _sales_revenue;
 }
 
 } // namespace hoa_shop

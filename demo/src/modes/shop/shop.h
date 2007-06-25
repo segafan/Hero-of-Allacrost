@@ -87,6 +87,10 @@ public:
 	//! \brief Handles the drawing of everything on the shop menu and makes sub-draw function calls as appropriate.
 	void Draw();
 
+	uint32 GetPurchaseCost() 	{return _purchases_cost;}
+	uint32 GetSalesRevenue() 	{return _sales_revenue;}
+	uint32 GetTotalRemaining();
+
 	/** \brief Adds a new object for the shop to sell
 	*** \param object_id The id number of the object to add
 	***
@@ -100,13 +104,10 @@ private:
 	private_shop::SHOP_STATE _state;
 
 	//! \brief The total cost of all marked purchases.
-	int32 _purchases_cost;
+	uint32 _purchases_cost;
 
 	//! \brief The total revenue that will be earned from all marked sales.
-	int32 _sales_revenue;
-
-	//! \brief The quantity of the player's drunes, minus purchase cost, plus sales revenue.
-	int32 _total_remaining;
+	uint32 _sales_revenue;
 
 	//! \brief An image of the last frame shown on the screen before ShopMode was created.
 	hoa_video::StillImage _saved_screen;
@@ -124,6 +125,10 @@ private:
 	*** type of object) at a later time.
 	**/
 	std::vector<hoa_global::GlobalObject*> _all_objects;
+
+	/** \brief Contains quantities corresponding to _all_objects
+	**/
+	std::vector<int> _all_objects_quantities;
 
 	//! \name Menu Windows in Shop Mode
 	//@{

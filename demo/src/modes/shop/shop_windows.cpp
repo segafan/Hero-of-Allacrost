@@ -50,7 +50,7 @@ ShopActionWindow::ShopActionWindow() {
 	// (2) Initialize the list of actions
 	options.SetOwner(this);
 	options.SetPosition(25.0f, 600.0f);
-	options.SetSize(1, 3); // One column, numerous rows
+	options.SetSize(1, 5); // One column, numerous rows
 	options.SetCellSize(150.0f, 50.0f);
 	options.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	options.SetFont("default");
@@ -61,6 +61,8 @@ ShopActionWindow::ShopActionWindow() {
 	vector<ustring> text;
 	text.push_back(MakeUnicodeString("Buy"));
 	text.push_back(MakeUnicodeString("Sell"));
+	text.push_back(MakeUnicodeString("Confirm"));
+	text.push_back(MakeUnicodeString("Menu"));
 	text.push_back(MakeUnicodeString("Leave"));
 	options.SetOptions(text);
 	options.SetSelection(0);
@@ -111,7 +113,16 @@ void ShopActionWindow::Update() {
 				current_shop->_shop_sounds["cancel"].PlaySound();
 			}
 		}
-		else if (options.GetSelection() == 2) { // Exit
+		else if (options.GetSelection() == 2) { // Complete Transactions
+//			current_shop->_state = SHOP_STATE_CONFIRM;
+		current_shop->_shop_sounds["cancel"].PlaySound();
+		}
+		else if (options.GetSelection() == 3) { // Menu
+			current_shop->_shop_sounds["confirm"].PlaySound();
+//			hoa_menu::MenuMode *MM = new hoa_menu::MenuMode(MakeUnicodeString("Village Shop"), "img/menus/locations/mountain_village.png");
+//			ModeManager->Push(MM);
+		}
+		else if (options.GetSelection() == 4) { // Exit
 			ModeManager->Pop();
 			current_shop->_shop_sounds["cancel"].PlaySound();
 		}
@@ -136,9 +147,14 @@ void ShopActionWindow::Update() {
 
 
 void ShopActionWindow::UpdateFinanceText() {
-	text_box.SetDisplayText(MakeUnicodeString(
-		"Drunes: " + NumberToString(GlobalManager->GetFunds())
-	));
+	if (current_shop != NULL) {
+		text_box.SetDisplayText(MakeUnicodeString(
+			  "Funds:  " + NumberToString(GlobalManager->GetFunds()) +
+			"\nCosts:  " + NumberToString(current_shop->GetPurchaseCost()) +
+			"\nProfit: " + NumberToString(current_shop->GetSalesRevenue()) +
+			"\nTotal:  " + NumberToString(current_shop->GetTotalRemaining())
+		));
+	} // if
 }
 
 
@@ -178,8 +194,6 @@ ObjectListWindow::~ObjectListWindow() {
 	MenuWindow::Destroy();
 }
 
-
-
 void ObjectListWindow::Clear() {
 	option_text.clear();
 	object_list.SetOptions(option_text);
@@ -187,8 +201,8 @@ void ObjectListWindow::Clear() {
 
 
 
-void ObjectListWindow::AddEntry(hoa_utils::ustring name, uint32 price) {
-	option_text.push_back(name + MakeUnicodeString("<R>") + MakeUnicodeString(NumberToString(price)));
+void ObjectListWindow::AddEntry(hoa_utils::ustring name, uint32 price, uint32 quantity) {
+	option_text.push_back(name + MakeUnicodeString("<R>") + MakeUnicodeString(NumberToString(price)) + MakeUnicodeString("   x") + MakeUnicodeString(NumberToString(quantity)));
 }
 
 
@@ -197,6 +211,18 @@ void ObjectListWindow::ConstructList() {
 	object_list.SetSize(1, option_text.size());
 	object_list.SetOptions(option_text);
 	object_list.SetSelection(0);
+}
+
+
+
+void ObjectListWindow::RefreshList() {
+	Clear();
+	for (uint32 i = 0; i < current_shop->_all_objects.size(); i++) {
+		current_shop->_list_window.AddEntry(current_shop->_all_objects[i]->GetName(),
+						    current_shop->_all_objects[i]->GetPrice(),
+						    current_shop->_all_objects_quantities[i]);
+	} // for
+	ConstructList();
 }
 
 
@@ -226,6 +252,24 @@ void ObjectListWindow::Update() {
 		object_list.HandleDownKey();
 		current_shop->_info_window.SetObject(current_shop->_all_objects[object_list.GetSelection()]);
 	}
+	else if (InputManager->LeftPress()) {
+		int x = object_list.GetSelection();
+		if (current_shop->_all_objects_quantities[x] > 0) {
+			current_shop->_all_objects_quantities[x]--;
+			current_shop->_purchases_cost -= current_shop->_all_objects[x]->GetPrice();
+			object_list.SetOptionText(x, current_shop->_all_objects[x]->GetName() + MakeUnicodeString("<R>") + MakeUnicodeString(NumberToString(current_shop->_all_objects[x]->GetPrice())) + MakeUnicodeString("   x") + MakeUnicodeString(NumberToString(current_shop->_all_objects_quantities[x])));
+			current_shop->_action_window.UpdateFinanceText();
+		} // if
+	} // if LeftPress()
+	else if (InputManager->RightPress()) {
+		int x = object_list.GetSelection();
+		if (current_shop->_all_objects[x]->GetPrice() <= current_shop->GetTotalRemaining()) {
+			current_shop->_all_objects_quantities[x]++;
+			current_shop->_purchases_cost += current_shop->_all_objects[x]->GetPrice();
+			object_list.SetOptionText(x, current_shop->_all_objects[x]->GetName() + MakeUnicodeString("<R>") + MakeUnicodeString(NumberToString(current_shop->_all_objects[x]->GetPrice())) + MakeUnicodeString("   x") + MakeUnicodeString(NumberToString(current_shop->_all_objects_quantities[x])));
+			current_shop->_action_window.UpdateFinanceText();
+		} // if
+	} // if RightPress()
 }
 
 
@@ -490,17 +534,20 @@ void ConfirmWindow::Update() {
 	}
 	else if (InputManager->ConfirmPress()) {
 		if (options.GetSelection() == 0) { // Confirm purchase
-			if (GlobalManager->GetFunds() >= _object->GetPrice()) {
-				// Add to global inventory
-				GlobalManager->AddToInventory(_object->GetID());
-				GlobalManager->SubtractFunds(_object->GetPrice());
-				current_shop->_shop_sounds["coins"].PlaySound();
-				current_shop->_action_window.UpdateFinanceText();
+			for (uint32 ctr = 0; ctr < current_shop->_all_objects.size(); ctr++) {
+				if (current_shop->_all_objects_quantities[ctr] > 0) {
+					GlobalManager->AddToInventory(current_shop->_all_objects[ctr]->GetID(), current_shop->_all_objects_quantities[ctr]);
+				}
+				current_shop->_all_objects_quantities[ctr] = 0;
 			}
-			else {
-				current_shop->_shop_sounds["bump"].PlaySound();
-			}
+
+			GlobalManager->SubtractFunds(current_shop->GetPurchaseCost());
+			current_shop->_purchases_cost = 0;
+			current_shop->_sales_revenue = 0;
+			current_shop->_shop_sounds["coins"].PlaySound();
 			current_shop->_state = SHOP_STATE_LIST;
+			current_shop->_action_window.UpdateFinanceText();
+			current_shop->_list_window.RefreshList();
 		}
 		else {
 			current_shop->_shop_sounds["cancel"].PlaySound();

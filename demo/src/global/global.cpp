@@ -189,32 +189,26 @@ void GameGlobal::AddToInventory(uint32 obj_id, uint32 obj_count) {
 		cerr << "GLOBAL ERROR: Attempted to add invalid object to inventory with id: " << obj_id << endl;
 	} else if (obj_id < 10000) { // Item
 		GlobalItem *new_obj = new GlobalItem(obj_id, obj_count);
-		new_obj->IncrementCount(obj_count - 1);
 		_inventory.insert(make_pair(obj_id, new_obj));
 		_inventory_items.push_back(new_obj);
 	} else if (obj_id < 20000) { // Weapon
 		GlobalWeapon *new_obj = new GlobalWeapon(obj_id, obj_count);
-		new_obj->IncrementCount(obj_count - 1);
 		_inventory.insert(make_pair(obj_id, new_obj));
 		_inventory_weapons.push_back(new_obj);
 	} else if (obj_id < 30000) { // Head Armor
 		GlobalArmor *new_obj = new GlobalArmor(obj_id, obj_count);
-		new_obj->IncrementCount(obj_count - 1);
 		_inventory.insert(make_pair(obj_id, new_obj));
 		_inventory_head_armor.push_back(new_obj);
 	} else if (obj_id < 40000) { // Torso Armor
 		GlobalArmor *new_obj = new GlobalArmor(obj_id, obj_count);
-		new_obj->IncrementCount(obj_count - 1);
 		_inventory.insert(make_pair(obj_id, new_obj));
 		_inventory_torso_armor.push_back(new_obj);
 	} else if (obj_id < 50000) { // Arm Armor
 		GlobalArmor *new_obj = new GlobalArmor(obj_id, obj_count);
-		new_obj->IncrementCount(obj_count - 1);
 		_inventory.insert(make_pair(obj_id, new_obj));
 		_inventory_arm_armor.push_back(new_obj);
 	} else if (obj_id < 60000) { // Leg Armor
 		GlobalArmor *new_obj = new GlobalArmor(obj_id, obj_count);
-		new_obj->IncrementCount(obj_count - 1);
 		_inventory.insert(make_pair(obj_id, new_obj));
 		_inventory_leg_armor.push_back(new_obj);
 	} else if (obj_id < 70000) { // Shard
