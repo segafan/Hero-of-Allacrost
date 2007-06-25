@@ -1484,14 +1484,14 @@ uint32 BattleMode::GetIndexOfNextAliveEnemy(bool move_upward) const {
 	{
 		for (uint32 i = _selected_target_index + 1; i < _enemy_actors.size(); ++i)
 		{
-			if (_enemy_actors[i]->GetActor()->IsAlive())
+			if (_enemy_actors[i]->IsAlive())
 			{
 				return i;
 			}
 		}
 		for (uint32 i = 0; i <= _selected_target_index; ++i)
 		{
-			if (_enemy_actors[i]->GetActor()->IsAlive())
+			if (_enemy_actors[i]->IsAlive())
 			{
 				return i;
 			}
@@ -1504,14 +1504,14 @@ uint32 BattleMode::GetIndexOfNextAliveEnemy(bool move_upward) const {
 	{
 		for (int32 i = static_cast<int32>(_selected_target_index) - 1; i >= 0; --i)
 		{
-			if (_enemy_actors[i]->GetActor()->IsAlive())
+			if (_enemy_actors[i]->IsAlive())
 			{
 				return i;
 			}
 		}
 		for (int32 i = static_cast<int32>(_enemy_actors.size()) - 1; i >= static_cast<int32>(_selected_target_index); --i)
 		{
-			if (_enemy_actors[i]->GetActor()->IsAlive())
+			if (_enemy_actors[i]->IsAlive())
 			{
 				return i;
 			}

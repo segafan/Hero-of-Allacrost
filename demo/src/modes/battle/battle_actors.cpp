@@ -705,10 +705,11 @@ void BattleEnemyActor::Update() {
 void BattleEnemyActor::DrawSprite() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 
+	std::vector<StillImage>& sprite_frames = *(GetActor()->GetSpriteFrames());
+
 	// Draw the sprite's final damage frame in grayscale and return
 	if (!IsAlive()) {
 		VideoManager->Move(_x_location, _y_location);
-		std::vector<StillImage> & sprite_frames = *(GetActor()->GetSpriteFrames());
 		sprite_frames[3].EnableGrayScale();
 		VideoManager->DrawImage(sprite_frames[3]);
 		sprite_frames[3].DisableGrayScale();
@@ -716,12 +717,13 @@ void BattleEnemyActor::DrawSprite() {
 	else {
 		// Draw the actor selector image over the currently selected enemy
 		if (this == current_battle->_selected_target) {
-			VideoManager->Move(_x_location - 20.0f, _y_location - 20.0f);
+			VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+			VideoManager->Move(_x_location + GetActor()->GetWidth() / 2, _y_location - 25);
 			VideoManager->DrawImage(current_battle->_actor_selection_image);
+			VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 		}
 
-		// Draw the enemy's damage-blended sprite frames
-		std::vector<StillImage>& sprite_frames = *(GetActor()->GetSpriteFrames());
+		// Draw the enemy's damage-blended sprite frames	
 		VideoManager->Move(_x_location, _y_location);
 		float hp_percent = static_cast<float>(GetHitPoints()) / static_cast<float>(GetMaxHitPoints());
 
