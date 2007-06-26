@@ -243,7 +243,7 @@ void InventoryWindow::_InitCategory() {
 void InventoryWindow::Activate(bool new_status)
 {
 	// Set new status
-	if (_inventory_items.GetNumOptions() > 0 && new_status) {
+	if (_inventory_items.GetNumberOptions() > 0 && new_status) {
 		_active_box = ITEM_ACTIVE_CATEGORY;
 		// Update cursor state
 		_item_categories.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
@@ -319,7 +319,7 @@ void InventoryWindow::Update() {
 			{
 				// Activate the item list for this category
 				if (event == VIDEO_OPTION_CONFIRM) {
-					if (_inventory_items.GetNumOptions() > 0) {
+					if (_inventory_items.GetNumberOptions() > 0) {
 						_inventory_items.SetSelection(0);
 						_item_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 						_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
@@ -387,6 +387,7 @@ void InventoryWindow::Update() {
 			break;
 	}
 
+	active_option->Update();
 	// Update the item list
 	_UpdateItemText();
 } // void InventoryWindow::Update()
@@ -649,6 +650,7 @@ void StatusWindow::Update() {
 	}
 
 	_current_char =  dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActor(_char_select.GetSelection()));
+	_char_select.Update();
 } // void StatusWindow::Update()
 
 
@@ -929,7 +931,7 @@ void SkillsWindow::Update() {
 			// Choose skill type
 			if (event == VIDEO_OPTION_CONFIRM) {
 				_skills_list.SetSelection(0);
-				if (_skills_list.GetNumOptions() > 0) {
+				if (_skills_list.GetNumberOptions() > 0) {
 					_active_box = SKILL_ACTIVE_LIST;
 					_skills_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 					_skills_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
@@ -949,11 +951,12 @@ void SkillsWindow::Update() {
 			break;
 	}
 
+	active_option->Update();
 	_UpdateSkillList();
 
-	if (_skills_list.GetNumOptions() > 0 &&
+	if (_skills_list.GetNumberOptions() > 0 &&
 	    _skills_list.GetSelection() >= 0 &&
-	    _skills_list.GetNumOptions() > _skills_list.GetSelection()) {
+	    _skills_list.GetNumberOptions() > _skills_list.GetSelection()) {
 		GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActor(_char_select.GetSelection()));
 		std::vector<hoa_global::GlobalSkill*>* skills = ch->GetAttackSkills();
 		GlobalSkill* skill = skills->at(_skills_list.GetSelection());
@@ -1218,7 +1221,7 @@ void EquipWindow::Update() {
 				if (event == VIDEO_OPTION_CONFIRM) {
 					_active_box = EQUIP_ACTIVE_LIST;
 					_UpdateEquipList();
-					if (_equip_list.GetNumOptions() > 0) {
+					if (_equip_list.GetNumberOptions() > 0) {
 						_equip_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 						_equip_list.SetSelection(0);
 						_equip_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
@@ -1284,6 +1287,7 @@ void EquipWindow::Update() {
 			}
 			break;
 	}
+	active_option->Update();
 	_UpdateEquipList();
 } // void EquipWindow::Update()
 

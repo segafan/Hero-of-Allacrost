@@ -465,6 +465,7 @@ void MenuMode::Update() {
 				break;
 		}
 	}
+	_current_menu->Update();
 } // void MenuMode::Update()
 
 ////////////////////////////////////////////////////////////////////////////////
