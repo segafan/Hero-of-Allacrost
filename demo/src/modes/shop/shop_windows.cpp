@@ -88,7 +88,7 @@ ShopActionWindow::~ShopActionWindow() {
 
 void ShopActionWindow::Update() {
 	MenuWindow::Update(SystemManager->GetUpdateTime());
-	options.GetEvent(); // clear any events, since they prevent cursor movement
+	options.Update(); // clear any events, since they prevent cursor movement
 
 	if (InputManager->ConfirmPress()) {
 		options.HandleConfirmKey();
@@ -229,7 +229,7 @@ void ObjectListWindow::RefreshList() {
 
 void ObjectListWindow::Update() {
 	MenuWindow::Update(SystemManager->GetUpdateTime());
-	object_list.GetEvent(); // clear any events, since they prevent cursor movement
+	object_list.Update(); // clear any events, since they prevent cursor movement
 
 	if (InputManager->ConfirmPress()) {
 		object_list.HandleConfirmKey();
@@ -328,7 +328,7 @@ void ObjectSellListWindow::AddEntry(hoa_utils::ustring name, uint32 count, uint3
 
 void ObjectSellListWindow::Update() {
 	MenuWindow::Update(SystemManager->GetUpdateTime());
-	object_list.GetEvent(); // clear any events, since they prevent cursor movement
+	object_list.Update(); // clear any events, since they prevent cursor movement
 
 	if (InputManager->ConfirmPress()) {
 		object_list.HandleConfirmKey();
@@ -517,7 +517,7 @@ ConfirmWindow::~ConfirmWindow() {
 
 
 void ConfirmWindow::Update() {
-	options.GetEvent();
+	options.Update();
 
 	if (InputManager->LeftPress()) {
 		options.HandleLeftKey();
@@ -626,7 +626,7 @@ SellConfirmWindow::~SellConfirmWindow() {
 
 
 void SellConfirmWindow::Update() {
-	options.GetEvent();
+	options.Update();
 
 	if (InputManager->LeftPress()) {
 		options.HandleLeftKey();

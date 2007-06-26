@@ -58,11 +58,11 @@ void BootMenu::AddOption(const hoa_utils::ustring & text, void (BootMode::*confi
 
 	// Set new size
 	if (!_is_windowed)
-		_current_menu.SetSize(_current_menu.GetNumOptions(), 1);
+		_current_menu.SetSize(_current_menu.GetNumberOptions(), 1);
 	else // windowed mode has vertical menus
-		_current_menu.SetSize(1, _current_menu.GetNumOptions());
+		_current_menu.SetSize(1, _current_menu.GetNumberOptions());
 
-	if (_current_menu.GetNumOptions() == 1)
+	if (_current_menu.GetNumberOptions() == 1)
 	{
 		_current_menu.SetSelection(0);
 	}
@@ -104,7 +104,7 @@ void BootMenu::SetWindowed(bool windowed)
 		_current_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
 		_current_menu.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 		_current_menu.SetCursorOffset(-50.0f, 28.0f);
-		_current_menu.SetSize(_current_menu.GetNumOptions(), 1);
+		_current_menu.SetSize(_current_menu.GetNumberOptions(), 1);
 	}
 	else // windowed
 	{
@@ -116,7 +116,7 @@ void BootMenu::SetWindowed(bool windowed)
 		_current_menu.SetSelectMode(VIDEO_SELECT_SINGLE);
 		_current_menu.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 		_current_menu.SetCursorOffset(-50.0f, 28.0f);
-		_current_menu.SetSize(1, _current_menu.GetNumOptions());
+		_current_menu.SetSize(1, _current_menu.GetNumberOptions());
 		_current_menu.SetOwner(_menu_window);
 	}
 }
@@ -142,6 +142,7 @@ void BootMenu::SetTextDensity(float density)
 // Updates menu events. Call this every frame just like you would do on OptionBox!
 int32 BootMenu::GetEvent()
 {
+	_current_menu.Update();
 	return _current_menu.GetEvent();
 }
 
