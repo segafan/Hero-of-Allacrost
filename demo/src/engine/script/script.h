@@ -138,23 +138,24 @@ public:
 	const SCRIPT_ACCESS_MODE GetAccessMode()
 		{ return _access_mode; }
 
-	/** \brief Used to check if any error occured in previous operations.
+	/** \brief Clears any error messages that have been logged
+	*** \note Be careful when calling this function. It won't do any harm, but if used incorrectly it will deny you
+	*** useful information when debugging your code or script.
+	**/
+	void ClearErrors()
+		{ _error_messages.clear(); }
+
+	/** \brief Returns a string containing all error messages
 	*** \return A string containing a list of error messages, or an empty string if no errors occured
 	*** \note Everytime this function is called, the error messages stored by the class are cleared.
 	***
-	*** It is good practice to call this function following chunks of read/write/modify function calls
-	*** to the children of this class in order to detect if anything went wrong. The bit-mask values returned by this function are all listed
-	*** in the constants called "Data Error Codes" at the top of this file. It is perfectly
-	*** acceptable (although maybe pedantic) to call this function after every member function
-	*** of this class is invoked.
-	***
-	*** It is up to the user of this API to figure out how to recover when they detect an error
-	*** condition. The only thing that the code in the script management classes do is to
-	*** prevent errors from causing segmentation faults.
-	***
+	*** You can use this method in place of IsErrorDetected() if you like by simply checking if the
+	*** return value is an empty string. It is highly recommended that you check for errors after
+	*** making a block of read/write/modify calls. You may choose to check errors after every call
+	*** if you like, but this practice is usually not recommended.
 	**/
 	std::string GetErrorMessages()
-		{ std::string errors = _error_messages.str(); _error_messages.clear(); return errors; }
+		{ std::string errors = _error_messages.str(); ClearErrors(); return errors; }
 
 	/** \note This returns a copy, not a reference, because we don't want it to be modified
 	*** outside of the class.

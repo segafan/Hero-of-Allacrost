@@ -112,8 +112,10 @@ public:
 	//@{
 	uint8 GetPlayHours() const
 		{ return _hours_played; }
+
 	uint8 GetPlayMinutes() const
 		{ return _minutes_played; }
+
 	uint8 GetPlaySeconds() const
 		{ return _seconds_played; }
 	//@}

@@ -151,7 +151,7 @@ void BindEngineToLua() {
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
 	[
 		class_<GameGlobal>("GameGlobal")
-			.def("AddCharacter", &GameGlobal::AddCharacter)
+			.def("AddCharacter", (void(GameGlobal::*)(uint32)) &GameGlobal::AddCharacter)
 			.def("GetCharacter", &GameGlobal::GetCharacter)
 			.def("GetFunds", &GameGlobal::GetFunds)
 			.def("SetFunds", &GameGlobal::SetFunds)
@@ -565,9 +565,7 @@ void BindEngineToLua() {
 	[
 		class_<BattleMode, hoa_mode_manager::GameMode>("BattleMode")
 			.def(constructor<>())
-			// TODO: use signature matching for the AddEnemy method here: (void(*)(uint32))
-			// Still trying to get this signature matching code to compile though...
-			.def("AddEnemy", &BattleMode::TEMP_AddEnemy)
+			.def("AddEnemy", (void(BattleMode::*)(uint32)) &BattleMode::AddEnemy)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_battle")

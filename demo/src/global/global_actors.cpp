@@ -35,7 +35,7 @@ namespace hoa_global {
 // ****************************************************************************
 
 bool GlobalAttackPoint::LoadData(ReadScriptDescriptor& script) {
-	if (script.GetAccessMode() != SCRIPT_READ) {
+	if (script.IsFileOpen() == false) {
 		return false;
 	}
 
@@ -83,28 +83,28 @@ void GlobalActor::EquipWeapon(GlobalWeapon* weapon) {
 void GlobalActor::EquipArmor(GlobalArmor* armor) {
 	switch (armor->GetType()) {
 		case GLOBAL_OBJECT_HEAD_ARMOR:
-		delete _armor_equipped[0];
-		_armor_equipped[0] = new GlobalArmor(armor->GetID());
-		break;
+			delete _armor_equipped[0];
+			_armor_equipped[0] = new GlobalArmor(armor->GetID());
+			break;
 
 		case GLOBAL_OBJECT_TORSO_ARMOR:
-		delete _armor_equipped[1];
-		_armor_equipped[1] = new GlobalArmor(armor->GetID());
-		break;
+			delete _armor_equipped[1];
+			_armor_equipped[1] = new GlobalArmor(armor->GetID());
+			break;
 
 		case GLOBAL_OBJECT_ARM_ARMOR:
-		delete _armor_equipped[2];
-		_armor_equipped[2] = new GlobalArmor(armor->GetID());
-		break;
+			delete _armor_equipped[2];
+			_armor_equipped[2] = new GlobalArmor(armor->GetID());
+			break;
 
 		case GLOBAL_OBJECT_LEG_ARMOR:
-		delete _armor_equipped[3];
-		_armor_equipped[3] = new GlobalArmor(armor->GetID());
-		break;
+			delete _armor_equipped[3];
+			_armor_equipped[3] = new GlobalArmor(armor->GetID());
+			break;
 
 		default:
-		cerr << "ERROR: Trying to equip an armor that isn't an armor!" << endl;
-		break;
+			cerr << "ERROR: Trying to equip an armor that isn't an armor!" << endl;
+			break;
 	}
 }
 
@@ -112,13 +112,7 @@ void GlobalActor::EquipArmor(GlobalArmor* armor) {
 // ***** GlobalCharacter
 // ****************************************************************************
 
-GlobalCharacter::~GlobalCharacter() {
-	// TODO: delete all dynamically allocated data
-
-}
-
-
-GlobalCharacter::GlobalCharacter(uint32 id) {
+GlobalCharacter::GlobalCharacter(uint32 id, bool initial) {
 	_id = id;
 
 	// (1): Attempt to open the characters script file
@@ -137,20 +131,22 @@ GlobalCharacter::GlobalCharacter(uint32 id) {
 	_name = MakeUnicodeString(char_script.ReadString("name"));
 	_filename = char_script.ReadString("filename");
 
-	char_script.OpenTable("base_stats");
-	_max_hit_points = char_script.ReadInt("max_hit_points");
-	_hit_points = _max_hit_points;
-	_max_skill_points = char_script.ReadInt("max_skill_points");
-	_skill_points = _max_skill_points;
-	_experience_level = 1;
-	_strength = char_script.ReadInt("strength");
-	_vigor = char_script.ReadInt("vigor");
-	_fortitude = char_script.ReadInt("fortitude");
-	_protection = char_script.ReadInt("protection");
-	_agility = char_script.ReadInt("agility");
-	_evade = char_script.ReadFloat("evade");
-	_experience_next_level = char_script.ReadInt("experience_points");
-	char_script.CloseTable();
+	if (initial) {
+		char_script.OpenTable("base_stats");
+		_max_hit_points = char_script.ReadInt("max_hit_points");
+		_hit_points = _max_hit_points;
+		_max_skill_points = char_script.ReadInt("max_skill_points");
+		_skill_points = _max_skill_points;
+		_experience_level = 1;
+		_strength = char_script.ReadInt("strength");
+		_vigor = char_script.ReadInt("vigor");
+		_fortitude = char_script.ReadInt("fortitude");
+		_protection = char_script.ReadInt("protection");
+		_agility = char_script.ReadInt("agility");
+		_evade = char_script.ReadFloat("evade");
+		_experience_next_level = char_script.ReadInt("experience_points");
+		char_script.CloseTable();
+	}
 
 	// (3.5): Read the character's growth stats
 	char_script.OpenTable("growth_stats");
@@ -176,67 +172,71 @@ GlobalCharacter::GlobalCharacter(uint32 id) {
 	char_script.CloseTable();
 
 	// (5): Create the character's initial equipment
-	uint32 equipment_id;
+	if (initial) {
+		uint32 equipment_id;
 
-	// If the equipment id is zero, that means that there is no initial equipment
-	equipment_id = char_script.ReadInt("initial_weapon");
-	if (equipment_id != 0) {
-		_weapon_equipped = new GlobalWeapon(equipment_id, 1);
-	} else {
-		_weapon_equipped = NULL;
-	}
+		// If the equipment id is zero, that means that there is no initial equipment
+		equipment_id = char_script.ReadInt("initial_weapon");
+		if (equipment_id != 0) {
+			_weapon_equipped = new GlobalWeapon(equipment_id, 1);
+		} else {
+			_weapon_equipped = NULL;
+		}
 
-	equipment_id = char_script.ReadInt("initial_head_armor");
-	if (equipment_id != 0) {
-		_armor_equipped.push_back(new GlobalArmor(equipment_id, 1));
-	} else {
-		_armor_equipped.push_back(NULL);
-	}
+		equipment_id = char_script.ReadInt("initial_head_armor");
+		if (equipment_id != 0) {
+			_armor_equipped.push_back(new GlobalArmor(equipment_id, 1));
+		} else {
+			_armor_equipped.push_back(NULL);
+		}
 
-	equipment_id = char_script.ReadInt("initial_torso_armor");
-	if (equipment_id != 0) {
-		_armor_equipped.push_back(new GlobalArmor(equipment_id, 1));
-	} else {
-		_armor_equipped.push_back(NULL);
-	}
+		equipment_id = char_script.ReadInt("initial_torso_armor");
+		if (equipment_id != 0) {
+			_armor_equipped.push_back(new GlobalArmor(equipment_id, 1));
+		} else {
+			_armor_equipped.push_back(NULL);
+		}
 
-	equipment_id = char_script.ReadInt("initial_arm_armor");
-	if (equipment_id != 0) {
-		_armor_equipped.push_back(new GlobalArmor(equipment_id, 1));
-	} else {
-		_armor_equipped.push_back(NULL);
-	}
+		equipment_id = char_script.ReadInt("initial_arm_armor");
+		if (equipment_id != 0) {
+			_armor_equipped.push_back(new GlobalArmor(equipment_id, 1));
+		} else {
+			_armor_equipped.push_back(NULL);
+		}
 
-	equipment_id = char_script.ReadInt("initial_leg_armor");
-	if (equipment_id != 0) {
-		_armor_equipped.push_back(new GlobalArmor(equipment_id, 1));
-	} else {
-		_armor_equipped.push_back(NULL);
+		equipment_id = char_script.ReadInt("initial_leg_armor");
+		if (equipment_id != 0) {
+			_armor_equipped.push_back(new GlobalArmor(equipment_id, 1));
+		} else {
+			_armor_equipped.push_back(NULL);
+		}
 	}
 
 	// (6): Create the character's initial skill set
-	vector<int32> skill_ids;
-	char_script.ReadIntVector("initial_skills", skill_ids);
+	if (initial) {
+		vector<int32> skill_ids;
+		char_script.ReadIntVector("initial_skills", skill_ids);
 
-	GlobalSkill *skill = NULL;
+		GlobalSkill *skill = NULL;
 
-	for (uint32 i = 0; i < skill_ids.size(); i++) {
-		skill = new GlobalSkill(skill_ids[i]);
-		_skills.insert(make_pair(skill_ids[i], skill));
+		for (uint32 i = 0; i < skill_ids.size(); i++) {
+			AddSkill(skill_ids[i]);
+			skill = new GlobalSkill(skill_ids[i]);
+			_skills.insert(make_pair(skill_ids[i], skill));
 
-		switch (skill->GetType())
-		{
-			case GLOBAL_SKILL_ATTACK:
-				_attack_skills.push_back(skill);
-				break;
-			case GLOBAL_SKILL_DEFEND:
-				_defense_skills.push_back(skill);
-				break;
-			case GLOBAL_SKILL_SUPPORT:
-				_support_skills.push_back(skill);
-				break;
-			default:
-				break;
+			switch (skill->GetType()) {
+				case GLOBAL_SKILL_ATTACK:
+					_attack_skills.push_back(skill);
+					break;
+				case GLOBAL_SKILL_DEFEND:
+					_defense_skills.push_back(skill);
+					break;
+				case GLOBAL_SKILL_SUPPORT:
+					_support_skills.push_back(skill);
+					break;
+				default:
+					break;
+			}
 		}
 	}
 
@@ -268,15 +268,25 @@ GlobalCharacter::GlobalCharacter(uint32 id) {
 	// AddAttackSkill(new GlobalSkill()); // removed text "sword_slash" because that constructor isn't implemented yet -MF
 } // GlobalCharacter::GlobalCharacter(uint32 id)
 
-bool GlobalCharacter::AddXP(uint32 xp)
-{
+
+
+GlobalCharacter::~GlobalCharacter() {
+	// TODO: delete all dynamically allocated data
+}
+
+
+
+bool GlobalCharacter::AddXP(uint32 xp) {
 	int32 temp_xp = static_cast<int32>(_experience_next_level - xp);
 	int32 xp_to_next_level = 0;
 
 	// (1): Attempt to open the characters script file
 	ReadScriptDescriptor char_script;
-	char_script.OpenFile("dat/actors/characters.lua");
-	//FIXME - no error checking code here!
+	if (char_script.OpenFile("dat/actors/characters.lua") == false) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL ERROR: GlobalCharacter::AddXP failed because the character's script file could not be opened!" << endl;
+		return false;
+	}
 
 	if (temp_xp <= 0) {
 		//next lines are essentially SetExperienceNextLevel(GetXPForNextLevel() + _experience_next_level);
@@ -295,9 +305,23 @@ bool GlobalCharacter::AddXP(uint32 xp)
 	return false;
 }
 
-void GlobalCharacter::AddSkill(uint32 skill_id) {
-	GlobalSkill* skill = new GlobalSkill(skill_id);
 
+
+void GlobalCharacter::AddSkill(uint32 skill_id) {
+	if (skill_id == 0) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: GlobalCharacter::AddSkill() failed because an invalid skill id was given to it (0)" << endl;
+		return;
+	}
+
+	GlobalSkill* skill = new GlobalSkill(skill_id);
+	if (skill->GetID() == 0) { // Indicates the skill failed to load
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: GlobalCharacter::AddSkill() failed because the skill failed to load" << endl;
+		return;
+	}
+
+	_skills.insert(make_pair(skill_id, skill));
 	switch (skill->GetType()) {
 		case GLOBAL_SKILL_ATTACK:
 			_attack_skills.push_back(skill);
@@ -313,8 +337,9 @@ void GlobalCharacter::AddSkill(uint32 skill_id) {
 	}
 }
 
-void GlobalCharacter::AddExperienceLevel(uint32 lvl)
-{
+
+
+void GlobalCharacter::AddExperienceLevel(uint32 lvl) {
 	_experience_level += lvl;
 
 	// Adds the growth stats, plus a small random value, to the character's stats on levelling.

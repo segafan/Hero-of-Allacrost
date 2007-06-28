@@ -36,11 +36,10 @@ namespace hoa_global {
 
 GameGlobal* GlobalManager = NULL;
 bool GLOBAL_DEBUG = false;
-//SINGLETON_INITIALIZE(GameGlobal);
 
-// ****************************************************************************
-// ***** GameGlobal class - Initialization and Destruction
-// ****************************************************************************
+// -----------------------------------------------------------------------------
+// GameGlobal class - Initialization and Destruction
+// -----------------------------------------------------------------------------
 
 GameGlobal::GameGlobal() {
 	if (GLOBAL_DEBUG)
@@ -115,9 +114,9 @@ void GameGlobal::ClearAllData() {
 	_active_party.RemoveAllActors();
 } // void GameGlobal::ClearAllData()
 
-// ****************************************************************************
-// ***** GameGlobal class - Character and Party Manipulations
-// ****************************************************************************
+// -----------------------------------------------------------------------------
+// GameGlobal class - Character and Party Manipulations
+// -----------------------------------------------------------------------------
 
 void GameGlobal::AddCharacter(uint32 id) {
 	if (_characters.find(id) != _characters.end()) {
@@ -135,6 +134,24 @@ void GameGlobal::AddCharacter(uint32 id) {
 
 	_character_order.push_back(ch);
 } // void GameGlobal::AddCharacter(uint32 id)
+
+
+
+void GameGlobal::AddCharacter(GlobalCharacter* ch) {
+	if (_characters.find(ch->GetID()) != _characters.end()) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: attempted to add a character that already existed" << endl;
+		return;
+	}
+
+	_characters.insert(make_pair(ch->GetID(), ch));
+
+	// Add the new character to the active party if the active party contains less than four characters
+	if (_character_order.size() < 4)
+		_active_party.AddActor(ch);
+
+	_character_order.push_back(ch);
+} // void GameGlobal::AddCharacter(GlobalCharacter* ch)
 
 
 
@@ -385,6 +402,17 @@ bool GameGlobal::SaveGame(string& filename) {
 	// ----- (3) Save character data
 	file.InsertNewLine();
 	file.WriteLine("characters = {");
+	// First save the order of the characters in the party
+	file.WriteLine("\t[\"order\"] = {");
+	for (uint32 i = 0; i < _character_order.size(); i++) {
+		if (i == 0)
+			file.WriteLine("\t\t" + NumberToString(_character_order[i]->GetID()), false);
+		else
+			file.WriteLine(", " + NumberToString(_character_order[i]->GetID()), false);
+	}
+	file.WriteLine("\n\t}");
+
+	// Now save each individual character's data
 	for (uint32 i = 0; i < _character_order.size(); i++) {
 		if ((i + 1) == _character_order.size())
 			_SaveCharacter(file, _character_order[i], true);
@@ -407,11 +435,61 @@ bool GameGlobal::SaveGame(string& filename) {
 
 
 bool GameGlobal::LoadGame(string& filename) {
+	ReadScriptDescriptor file;
+	if (file.OpenFile(filename) == false) {
+		return false;
+	}
+
+	// ----- (1) Load play data
+	_funds = file.ReadUInt("funds");
+	uint8 hours, minutes, seconds;
+	hours = file.ReadUInt("play_hours");
+	minutes = file.ReadUInt("play_minutes");
+	seconds = file.ReadUInt("play_seconds");
+	SystemManager->SetPlayTime(hours, minutes, seconds);
+
+	// ----- (2) Load inventory
+	_LoadInventory(file, "items");
+	_LoadInventory(file, "weapons");
+	_LoadInventory(file, "head_armor");
+	_LoadInventory(file, "torso_armor");
+	_LoadInventory(file, "arm_armor");
+	_LoadInventory(file, "leg_armor");
+	_LoadInventory(file, "shards");
+	_LoadInventory(file, "key_items");
+
+	// ----- (3) Load characters into the party in the correct order
+	file.OpenTable("characters");
+	vector<uint32> char_ids;
+	file.ReadUIntVector("order", char_ids);
+	for (uint32 i = 0; i < char_ids.size(); i++) {
+		_LoadCharacter(file, char_ids[i]);
+	}
+	file.CloseTable();
+
+	// ----- (4) Load event data
+	file.OpenTable("events");
+	// TODO: _LoadEvents(file);
+	file.CloseTable();
+
+	// ----- (5) Report any errors detected from the previous read operations
+	if (file.IsErrorDetected()) {
+		if (GLOBAL_DEBUG) {
+			cerr << "GLOBAL WARNING: GameGlobal::LoadGame ran into errors when reading the game file. They are as follows:" << endl;
+			cerr << file.GetErrorMessages() << endl;
+		}
+		else {
+			file.ClearErrors();
+		}
+	}
+	
 	// TODO
 	return true;
 } // bool GameGlobal::LoadGame(string& filename)
 
-
+// -----------------------------------------------------------------------------
+// GameGlobal class - Private Methods
+// -----------------------------------------------------------------------------
 
 void GameGlobal::_SaveInventory(WriteScriptDescriptor& file) {
 	if (file.IsFileOpen() == false) {
@@ -639,5 +717,117 @@ void GameGlobal::_SaveCharacter(WriteScriptDescriptor& file, GlobalCharacter* ch
 	else
 		file.WriteLine("\t},");
 } // void GameGlobal::_SaveCharacter(WriteScriptDescriptor& file, GlobalCharacter* character, bool last)
+
+
+
+void GameGlobal::_LoadInventory(hoa_script::ReadScriptDescriptor& file, std::string category_name) {
+	if (file.IsFileOpen() == false) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: GameGlobal::_LoadInventory() failed because the file passed to it was not open" << endl;
+		return;
+	}
+
+	// The inventory category is a table filled with several sub-tables. Each sub-table contains exactly two unsigned integers.
+	// The first is the object's ID, and the second is its count. Tables in Lua begin with index 1, not 0.
+	file.OpenTable(category_name);
+	for (uint32 i = 1; i <= file.GetTableSize(); i++) {
+		file.OpenTable(i);
+		AddToInventory(file.ReadUInt(1), file.ReadUInt(2));
+		file.CloseTable();
+	}
+	file.CloseTable();
+} // void GameGlobal::_LoadInventory(hoa_script::ReadScriptDescriptor& file, std::string category_name)
+
+
+
+void GameGlobal::_LoadCharacter(hoa_script::ReadScriptDescriptor& file, uint32 id) {
+	if (file.IsFileOpen() == false) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: GameGlobal::_LoadCharacter() failed because the file passed to it was not open" << endl;
+		return;
+	}
+
+	// ----- (1): Create a new GlobalCharacter object using the provided id
+	// This loads all of the character's "static" data, such as their name, etc.
+	GlobalCharacter* character = new GlobalCharacter(id);
+
+	// This function assumes that the characters table in the saved game file is already open.
+	// So all we need to open is the character's table
+	file.OpenTable(id);
+
+	// ----- (2): Read in all of the character's stats data
+	character->SetExperienceLevel(file.ReadUInt("experience_level"));
+	character->SetExperiencePoints(file.ReadUInt("experience_points"));
+	character->SetExperienceNextLevel(file.ReadUInt("experience_points_next"));
+
+	character->SetMaxHitPoints(file.ReadUInt("max_hit_poitns"));
+	character->SetHitPoints(file.ReadUInt("hit_points"));
+	character->SetMaxSkillPoints(file.ReadUInt("max_skill_points"));
+	character->SetSkillPoints(file.ReadUInt("skill_points"));
+
+	character->SetStrength(file.ReadUInt("strength"));
+	character->SetVigor(file.ReadUInt("vigor"));
+	character->SetFortitude(file.ReadUInt("fortitude"));
+	character->SetProtection(file.ReadUInt("protection"));
+	character->SetAgility(file.ReadUInt("agility"));
+	character->SetEvade(file.ReadUInt("evade"));
+
+	// ----- (3): Read the character's equipment and load it onto the character
+	file.OpenTable("equipment");
+	uint32 equip_id;
+
+	// Equip the objects on the character as long as valid equipment IDs were read
+	equip_id = file.ReadUInt("weapon");
+	if (equip_id != 0) {
+		character->EquipWeapon(new GlobalWeapon(equip_id));
+	}
+
+	equip_id = file.ReadUInt("head_armor");
+	if (equip_id != 0) {
+		character->EquipArmor(new GlobalArmor(equip_id));
+	}
+
+	equip_id = file.ReadUInt("torso_armor");
+	if (equip_id != 0) {
+		character->EquipArmor(new GlobalArmor(equip_id));
+	}
+
+	equip_id = file.ReadUInt("arm_armor");
+	if (equip_id != 0) {
+		character->EquipArmor(new GlobalArmor(equip_id));
+	}
+
+	equip_id = file.ReadUInt("leg_armor");
+	if (equip_id != 0) {
+		character->EquipArmor(new GlobalArmor(equip_id));
+	}
+
+	file.CloseTable();
+
+	// ----- (4): Read the character's skills and pass those onto the character object
+	vector<uint32> skill_ids;
+
+	skill_ids.clear();
+	file.ReadUIntVector("attack_skills", skill_ids);
+	for (uint32 i = 0; i < skill_ids.size(); i++) {
+		character->AddSkill(skill_ids[i]);
+	}
+
+	skill_ids.clear();
+	file.ReadUIntVector("defend_skills", skill_ids);
+	for (uint32 i = 0; i < skill_ids.size(); i++) {
+		character->AddSkill(skill_ids[i]);
+	}
+
+	skill_ids.clear();
+	file.ReadUIntVector("support_skills", skill_ids);
+	for (uint32 i = 0; i < skill_ids.size(); i++) {
+		character->AddSkill(skill_ids[i]);
+	}
+
+	file.CloseTable();
+
+	AddCharacter(character);
+} // void GameGlobal::_LoadCharacter(hoa_script::ReadScriptDescriptor& file, uint32 id);
 
 } // namespace hoa_global

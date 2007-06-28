@@ -304,6 +304,12 @@ public:
 // 	std::vector<std::pair<float, GlobalStatusEffect*> >& GetStatusDefenseBonuses()
 // 		{ return _status_defense_bonuses; }
 
+	void SetExperienceLevel(uint32 xp_level)
+		{ _experience_level = xp_level; }
+
+	void SetExperiencePoints(uint32 xp_points)
+		{ _experience_points = xp_points; }
+
 	void SetHitPoints(uint32 hp)
 		{ if (hp > _max_hit_points) _hit_points = _max_hit_points; else _hit_points = hp; }
 
@@ -321,9 +327,6 @@ public:
 
 	void SetMaxSkillPoints(uint32 sp)
 		{ _max_skill_points = sp; }
-
-	void SetExperienceLevel(uint32 xp_level)
-		{ _experience_level = xp_level; }
 
 	void SetStrength(uint32 st)
 		{ _strength = st; _CalculateAttackRatings(); }
@@ -553,7 +556,14 @@ protected:
 *** ***************************************************************************/
 class GlobalCharacter : public GlobalActor {
 public:
-	GlobalCharacter(uint32 id);
+	/** \brief Constructs a new character by accessing its
+	*** \param id The integer ID of the character to create
+	*** \param initial If true, the character's stats, equipment, and skills are set
+	*** to the character's initial values.
+	*** \note If initial is set to false, the character's stats, equipment, and skills
+	*** must be set by external code, otherwise they will remain 0/NULL/empty.
+	**/
+	GlobalCharacter(uint32 id, bool initial = true);
 
 	virtual ~GlobalCharacter();
 

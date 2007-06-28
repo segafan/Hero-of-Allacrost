@@ -127,11 +127,9 @@ bool ReadScriptDescriptor::_DoesDataExist(const string& key, int32 type) {
 			return false;
 		}
 
-		// TODO: write checking code for o[key] types (o[key] == luabind::adl::index_proxy<luabind::adl::object>)
-		// return _CheckDataType(type, o[key]);
+		luabind::object obj(o[key]);
+		return _CheckDataType(type, obj);
 	}
-
-	return false;
 }
 
 
@@ -150,9 +148,8 @@ bool ReadScriptDescriptor::_DoesDataExist(int32 key, int32 type) {
 		return false;
 	}
 
-	// TODO: write checking code for o[key] types (o[key] == luabind::adl::index_proxy<luabind::adl::object>)
-	// return _CheckDataType(type, o[key]);
-	return false;
+	luabind::object obj(o[key]);
+	return _CheckDataType(type, obj);
 }
 
 
@@ -230,13 +227,13 @@ object ReadScriptDescriptor::ReadFunctionPointer(const string& key) {
 		luabind::object o(from_stack(_lstack, STACK_TOP));
 
 		if (!o) {
-			_error_messages << "* _ReadFunctionPointer() failed because it was unable to access the function "
+			_error_messages << "* ReadFunctionPointer() failed because it was unable to access the function "
 				<< "for the global key: " << key << endl;
 			return luabind::object();
 		}
 
 		if (type(o) != LUA_TFUNCTION) {
-			_error_messages << "* _ReadFunctionPointer() failed because the data retrieved was not a function "
+			_error_messages << "* ReadFunctionPointer() failed because the data retrieved was not a function "
 				<< "for the global key: " << key << endl;
 			return luabind::object();
 		}
@@ -247,13 +244,13 @@ object ReadScriptDescriptor::ReadFunctionPointer(const string& key) {
 	else { // The function should be an element of the most recently opened table
 		luabind::object o(from_stack(_lstack, STACK_TOP));
 		if (type(o) != LUA_TTABLE) {
-			_error_messages << "* _ReadFunctionPointer() failed because the top of the stack was not a table "
+			_error_messages << "* ReadFunctionPointer() failed because the top of the stack was not a table "
 				<< "for the table element key: " << key << endl;
 			return luabind::object();
 		}
 	
 		if (type(o[key]) != LUA_TFUNCTION) {
-			_error_messages << "* _ReadFunctionPointer() failed because the data retrieved was not a function "
+			_error_messages << "* ReadFunctionPointer() failed because the data retrieved was not a function "
 				<< "for the table element key: " << key << endl;
 			return luabind::object();
 		}
