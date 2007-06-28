@@ -268,6 +268,9 @@ public:
 	hoa_utils::ustring GetDescription() const
 		{ return _description; }
 
+	uint32 GetID() const
+		{ return _id; }
+
 	uint8 GetType() const
 		{ return _type; }
 

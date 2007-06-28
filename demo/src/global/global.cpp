@@ -15,17 +15,20 @@
 
 #include <iostream>
 
-#include "global.h"
 #include "utils.h"
-#include "script.h"
+#include "global.h"
+
 #include "video.h"
+#include "script.h"
+#include "system.h"
 
 using namespace std;
 
 using namespace hoa_utils;
-using namespace hoa_script;
-using namespace hoa_video;
 
+using namespace hoa_video;
+using namespace hoa_script;
+using namespace hoa_system;
 
 template<> hoa_global::GameGlobal* Singleton<hoa_global::GameGlobal>::_singleton_reference = 0;
 
@@ -359,5 +362,282 @@ uint32 GameGlobal::AveragePartyLevel() {
 	xp_level_sum /= _active_party.GetPartySize();
 	return xp_level_sum;
 } // uint32 GameGlobal::AveragePartyLevel()
+
+
+
+bool GameGlobal::SaveGame(string& filename) {
+	WriteScriptDescriptor file;
+	if (file.OpenFile(filename) == false) {
+		return false;
+	}
+
+	// ----- (1) Save simple play data
+	file.InsertNewLine();
+	file.WriteUInt("funds", _funds);
+	file.WriteUInt("play_hours", SystemManager->GetPlayHours());
+	file.WriteUInt("play_minutes", SystemManager->GetPlayMinutes());
+	file.WriteUInt("play_seconds", SystemManager->GetPlaySeconds());
+
+	// ----- (2) Save inventory (object id + object count pairs)
+	// NOTE: This does not include saving weapons/armor that are equipped on the characters
+	_SaveInventory(file);
+
+	// ----- (3) Save character data
+	file.InsertNewLine();
+	file.WriteLine("characters = {");
+	for (uint32 i = 0; i < _character_order.size(); i++) {
+		if ((i + 1) == _character_order.size())
+			_SaveCharacter(file, _character_order[i], true);
+		else
+			_SaveCharacter(file, _character_order[i], false);
+	}
+	file.WriteLine("}");
+
+	// ----- (4) Save event data
+	file.InsertNewLine();
+	file.WriteLine("events = {");
+	// TODO _SaveEvents(file)
+	file.WriteLine("}");
+
+	file.InsertNewLine();
+	file.CloseFile();
+	return true;
+} // bool GameGlobal::SaveGame(string& filename)
+
+
+
+bool GameGlobal::LoadGame(string& filename) {
+	// TODO
+	return true;
+} // bool GameGlobal::LoadGame(string& filename)
+
+
+
+void GameGlobal::_SaveInventory(WriteScriptDescriptor& file) {
+	if (file.IsFileOpen() == false) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: GameGlobal::_SaveInventory() failed because the file passed to it was not open" << endl;
+		return;
+	}
+
+	file.InsertNewLine();
+	file.WriteLine("items = {");
+	for (uint32 i = 0; i < _inventory_items.size(); i++) {
+		if (i == 0)
+			file.WriteLine("\t", false);
+		else
+			file.WriteLine(", ", false);
+		file.WriteLine("{" + NumberToString(_inventory_items[i]->GetID()) + ", "
+			+ NumberToString(_inventory_items[i]->GetCount()) + "}", false);
+	}
+	file.InsertNewLine();
+	file.WriteLine("}");
+
+	file.InsertNewLine();
+	file.WriteLine("weapons = {");
+	for (uint32 i = 0; i < _inventory_weapons.size(); i++) {
+		if (i == 0)
+			file.WriteLine("\t", false);
+		else
+			file.WriteLine(", ", false);
+		file.WriteLine("{" + NumberToString(_inventory_weapons[i]->GetID()) + ", "
+			+ NumberToString(_inventory_weapons[i]->GetCount()) + "}", false);
+	}
+	file.InsertNewLine();
+	file.WriteLine("}");
+
+	file.InsertNewLine();
+	file.WriteLine("head_armor = {");
+	for (uint32 i = 0; i < _inventory_head_armor.size(); i++) {
+		if (i == 0)
+			file.WriteLine("\t", false);
+		else
+			file.WriteLine(", ", false);
+		file.WriteLine("{" + NumberToString(_inventory_head_armor[i]->GetID()) + ", "
+			+ NumberToString(_inventory_head_armor[i]->GetCount()) + "}", false);
+	}
+	file.InsertNewLine();
+	file.WriteLine("}");
+
+	file.InsertNewLine();
+	file.WriteLine("torso_armor = {");
+	for (uint32 i = 0; i < _inventory_torso_armor.size(); i++) {
+		if (i == 0)
+			file.WriteLine("\t", false);
+		else
+			file.WriteLine(", ", false);
+		file.WriteLine("{" + NumberToString(_inventory_torso_armor[i]->GetID()) + ", "
+			+ NumberToString(_inventory_torso_armor[i]->GetCount()) + "}", false);
+	}
+	file.InsertNewLine();
+	file.WriteLine("}");
+
+	file.InsertNewLine();
+	file.WriteLine("arm_armor = {");
+	for (uint32 i = 0; i < _inventory_arm_armor.size(); i++) {
+		if (i == 0)
+			file.WriteLine("\t", false);
+		else
+			file.WriteLine(", ", false);
+		file.WriteLine("{" + NumberToString(_inventory_arm_armor[i]->GetID()) + ", "
+			+ NumberToString(_inventory_arm_armor[i]->GetCount()) + "}", false);
+	}
+	file.InsertNewLine();
+	file.WriteLine("}");
+
+	file.InsertNewLine();
+	file.WriteLine("leg_armor = {");
+	for (uint32 i = 0; i < _inventory_leg_armor.size(); i++) {
+		if (i == 0)
+			file.WriteLine("\t", false);
+		else
+			file.WriteLine(", ", false);
+		file.WriteLine("{" + NumberToString(_inventory_leg_armor[i]->GetID()) + ", "
+			+ NumberToString(_inventory_leg_armor[i]->GetCount()) + "}", false);
+	}
+	file.InsertNewLine();
+	file.WriteLine("}");
+
+	file.InsertNewLine();
+	file.WriteLine("shards = {");
+	for (uint32 i = 0; i < _inventory_shards.size(); i++) {
+		if (i == 0)
+			file.WriteLine("\t", false);
+		else
+			file.WriteLine(", ", false);
+		file.WriteLine("{" + NumberToString(_inventory_shards[i]->GetID()) + ", "
+			+ NumberToString(_inventory_shards[i]->GetCount()) + "}", false);
+	}
+	file.InsertNewLine();
+	file.WriteLine("}");
+
+	file.InsertNewLine();
+	file.WriteLine("key_items = {");
+	for (uint32 i = 0; i < _inventory_key_items.size(); i++) {
+		if (i == 0)
+			file.WriteLine("\t", false);
+		else
+			file.WriteLine(", ", false);
+		file.WriteLine("{" + NumberToString(_inventory_key_items[i]->GetID()) + ", "
+			+ NumberToString(_inventory_key_items[i]->GetCount()) + "}", false);
+	}
+	file.InsertNewLine();
+	file.WriteLine("}");
+} // void GameGlobal::_SaveInventory(WriteScriptDescriptor& file)
+
+
+
+void GameGlobal::_SaveCharacter(WriteScriptDescriptor& file, GlobalCharacter* character, bool last) {
+	if (file.IsFileOpen() == false) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: GameGlobal::_SaveCharacter() failed because the file argument was not an open file" << endl;
+		return;
+	}
+	if (character == NULL) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: GameGlobal::_SaveCharacter() failed because the character argument was NULL" << endl;
+		return;
+	}
+
+	file.WriteLine("\t[" + NumberToString(character->GetID()) + "] = {");
+
+	// ----- (1): Write out the character's stats
+	file.WriteLine("\t\texperience_level = " + NumberToString(character->GetExperienceLevel()) + ",");
+	file.WriteLine("\t\texperience_points = " + NumberToString(character->GetExperiencePoints()) + ",");
+	file.WriteLine("\t\texperience_points_next = " + NumberToString(character->GetExperienceForNextLevel()) + ", ");
+
+	file.WriteLine("\t\tmax_hit_points = " + NumberToString(character->GetMaxHitPoints()) + ",");
+	file.WriteLine("\t\thit_points = " + NumberToString(character->GetHitPoints()) + ",");
+	file.WriteLine("\t\tmax_skill_points = " + NumberToString(character->GetMaxSkillPoints()) + ",");
+	file.WriteLine("\t\tskill_points = " + NumberToString(character->GetSkillPoints()) + ",");
+
+	file.WriteLine("\t\tstrength = " + NumberToString(character->GetStrength()) + ",");
+	file.WriteLine("\t\tvigor = " + NumberToString(character->GetVigor()) + ",");
+	file.WriteLine("\t\tfortitude = " + NumberToString(character->GetFortitude()) + ",");
+	file.WriteLine("\t\tprotection = " + NumberToString(character->GetProtection()) + ",");
+	file.WriteLine("\t\tagility = " + NumberToString(character->GetAgility()) + ",");
+	file.WriteLine("\t\tevade = " + NumberToString(character->GetEvade()) + ",");
+
+	// ----- (2): Write out the character's equipment
+	uint32 weapon_id = 0;
+	uint32 head_id = 0;
+	uint32 torso_id = 0;
+	uint32 arm_id = 0;
+	uint32 leg_id = 0;
+	GlobalObject *obj_tmp = NULL;
+
+	obj_tmp = character->GetWeaponEquipped();
+	if (obj_tmp != NULL)
+		weapon_id = obj_tmp->GetID();
+
+	obj_tmp = character->GetHeadArmorEquipped();
+	if (obj_tmp != NULL)
+		head_id = obj_tmp->GetID();
+
+	obj_tmp = character->GetTorsoArmorEquipped();
+	if (obj_tmp != NULL)
+		torso_id = obj_tmp->GetID();
+
+	obj_tmp = character->GetArmArmorEquipped();
+	if (obj_tmp != NULL)
+		arm_id = obj_tmp->GetID();
+
+	obj_tmp = character->GetLegArmorEquipped();
+	if (obj_tmp != NULL)
+		leg_id = obj_tmp->GetID();
+
+	file.InsertNewLine();
+	file.WriteLine("\t\tequipment = {");
+	file.WriteLine("\t\t\tweapon = " + NumberToString(weapon_id) + ",");
+	file.WriteLine("\t\t\thead_armor = " + NumberToString(head_id) + ",");
+	file.WriteLine("\t\t\ttorso_armor = " + NumberToString(torso_id) + ",");
+	file.WriteLine("\t\t\tarm_armor = " + NumberToString(arm_id) + ",");
+	file.WriteLine("\t\t\tleg_armor = " + NumberToString(leg_id));
+	file.WriteLine("\t\t},");
+
+	// ----- (3): Write out the character's skills
+	std::vector<GlobalSkill*>* skill_vector;
+
+	file.InsertNewLine();
+	file.WriteLine("\t\tattack_skills = {");
+	skill_vector = character->GetAttackSkills();
+	for (uint32 i = 0; i < skill_vector->size(); i++) {
+		if (i == 0)
+			file.WriteLine("\t\t\t", false);
+		else
+			file.WriteLine(", ", false);
+		file.WriteLine(NumberToString(skill_vector->at(i)->GetID()), false);
+	}
+	file.WriteLine("\n\t\t},");
+
+	file.InsertNewLine();
+	file.WriteLine("\t\tdefense_skills = {");
+	skill_vector = character->GetDefenseSkills();
+	for (uint32 i = 0; i < skill_vector->size(); i++) {
+		if (i == 0)
+			file.WriteLine("\t\t\t", false);
+		else
+			file.WriteLine(", ", false);
+		file.WriteLine(NumberToString(skill_vector->at(i)->GetID()), false);
+	}
+	file.WriteLine("\n\t\t},");
+
+	file.InsertNewLine();
+	file.WriteLine("\t\tsupport_skills = {");
+	skill_vector = character->GetSupportSkills();
+	for (uint32 i = 0; i < skill_vector->size(); i++) {
+		if (i == 0)
+			file.WriteLine("\t\t\t", false);
+		else
+			file.WriteLine(", ", false);
+		file.WriteLine(NumberToString(skill_vector->at(i)->GetID()), false);
+	}
+	file.WriteLine("\n\t\t}");
+
+	if (last)
+		file.WriteLine("\t}");
+	else
+		file.WriteLine("\t},");
+} // void GameGlobal::_SaveCharacter(WriteScriptDescriptor& file, GlobalCharacter* character, bool last)
 
 } // namespace hoa_global

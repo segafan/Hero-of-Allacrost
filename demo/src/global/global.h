@@ -139,6 +139,18 @@ public:
 	void SubtractFunds(uint32 amount)
 		{ if (_funds >= amount) _funds -= amount; }
 
+	/** \brief Saves all global data to a saved game file
+	*** \param filename The filename of the saved game file where to write the data to
+	*** \return True if the game was successfully saved, false if it was not
+	**/
+	bool SaveGame(std::string& filename);
+
+	/** \brief Loads all global data from a saved game file
+	*** \param filename The filename of the saved game file where to read the data from
+	*** \return True if the game was successfully loaded, false if it was not
+	**/
+	bool LoadGame(std::string& filename);
+
 	//! \name Class Member Access Functions
 	//@{
 	void SetFunds(uint32 amount)
@@ -242,6 +254,31 @@ private:
 	hoa_script::ReadScriptDescriptor _defend_skills_script;
 	hoa_script::ReadScriptDescriptor _support_skills_script;
 	//@}
+
+	// ----- Private methods
+
+	/** \brief A helper function to GameGlobal::SaveGame() that stores the contents of the inventory to the saved game file
+	*** \param file A reference to the open and valid file where to write the inventory list
+	*** Note that this method writes all eight categories of inventory objects. The function writes
+	*** each inventory object as a pair of numbers (i.e. "{#1, #2}"), where the first number is the
+	*** object ID and the second number is the object count.
+	**/
+	void _SaveInventory(hoa_script::WriteScriptDescriptor& file);
+
+	/** \brief A helper function to GameGlobal::SaveGame() that writes character data to the saved game file
+	*** \param file A reference to the open and valid file where to write the character data
+	*** \param objects A ponter to the character whose data should be saved
+	*** \param last Set to true if this is the final character that needs to be saved
+	*** This method will need to be called once for each character in the player's party
+	**/
+	void _SaveCharacter(hoa_script::WriteScriptDescriptor& file, GlobalCharacter* character, bool last);
+
+	/** \brief A helper function to GameGlobal::SaveGame() that writes event data to the saved game file
+	*** \param file A reference to the open and valid file where to write the event data
+	*** \param event A ponter to the event data to store
+	*** This method will need to be called once for each character in the player's party
+	**/
+// 	void _SaveEvents(hoa_script::WriteScriptDescriptor& file, GlobalEvent* event);
 }; // class GameGlobal
 
 } // namespace hoa_global

@@ -310,7 +310,7 @@ void InventoryWindow::Update() {
 	}
 
 	uint32 event = active_option->GetEvent();
-
+	active_option->Update();
 	// Handle confirm/cancel presses differently for each window
 	switch (_active_box) {
 		case ITEM_ACTIVE_NONE: break;
@@ -387,7 +387,6 @@ void InventoryWindow::Update() {
 			break;
 	}
 
-	active_option->Update();
 	// Update the item list
 	_UpdateItemText();
 } // void InventoryWindow::Update()
@@ -648,9 +647,9 @@ void StatusWindow::Update() {
 		Activate(false);
 		MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
 	}
-
-	_current_char =  dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActor(_char_select.GetSelection()));
 	_char_select.Update();
+	_current_char =  dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActor(_char_select.GetSelection()));
+
 } // void StatusWindow::Update()
 
 
@@ -878,7 +877,7 @@ void SkillsWindow::Update() {
 	}
 
 	uint32 event = active_option->GetEvent();
-
+	active_option->Update();
 	switch (_active_box) {
 		case SKILL_ACTIVE_CHAR_APPLY:
 			// Handle skill application
@@ -951,7 +950,6 @@ void SkillsWindow::Update() {
 			break;
 	}
 
-	active_option->Update();
 	_UpdateSkillList();
 
 	if (_skills_list.GetNumberOptions() > 0 &&
@@ -1039,16 +1037,16 @@ EquipWindow::EquipWindow() : _active_box(EQUIP_ACTIVE_NONE) {
 	i.SetFilename(ch->GetWeaponEquipped()->GetIconImage().GetFilename());
 	_equip_images.push_back(i);
 
-	i.SetFilename(ch->GetEquippedHeadArmor()->GetIconImage().GetFilename());
+	i.SetFilename(ch->GetHeadArmorEquipped()->GetIconImage().GetFilename());
 	_equip_images.push_back(i);
 
-	i.SetFilename(ch->GetEquippedTorsoArmor()->GetIconImage().GetFilename());
+	i.SetFilename(ch->GetTorsoArmorEquipped()->GetIconImage().GetFilename());
 	_equip_images.push_back(i);
 
-	i.SetFilename(ch->GetEquippedArmsArmor()->GetIconImage().GetFilename());
+	i.SetFilename(ch->GetArmArmorEquipped()->GetIconImage().GetFilename());
 	_equip_images.push_back(i);
 
-	i.SetFilename(ch->GetEquippedLegArmor()->GetIconImage().GetFilename());
+	i.SetFilename(ch->GetLegArmorEquipped()->GetIconImage().GetFilename());
 	_equip_images.push_back(i);
 
 	for (uint32 i = 0; i < EQUIP_CATEGORY_SIZE; i++) {
@@ -1197,7 +1195,7 @@ void EquipWindow::Update() {
 	}
 
 	uint32 event = active_option->GetEvent();
-
+	active_option->Update();
 	switch (_active_box) {
 		//Choose character
 		case EQUIP_ACTIVE_CHAR:
@@ -1254,20 +1252,20 @@ void EquipWindow::Update() {
 						GlobalManager->DecrementObjectCount(ch->GetWeaponEquipped()->GetID(), 1);
 					}
 					else if (_equip_select.GetSelection() == EQUIP_HEADGEAR) {
-						GlobalManager->AddToInventory(ch->GetEquippedHeadArmor()->GetID());ch->EquipArmor(GlobalManager->GetInventoryHeadArmor()->at(_equip_list.GetSelection()));
-						GlobalManager->DecrementObjectCount(ch->GetEquippedHeadArmor()->GetID(), 1);
+						GlobalManager->AddToInventory(ch->GetHeadArmorEquipped()->GetID());ch->EquipArmor(GlobalManager->GetInventoryHeadArmor()->at(_equip_list.GetSelection()));
+						GlobalManager->DecrementObjectCount(ch->GetHeadArmorEquipped()->GetID(), 1);
 					}
 					else if (_equip_select.GetSelection() == EQUIP_BODYARMOR) {
-						GlobalManager->AddToInventory(ch->GetEquippedTorsoArmor()->GetID());ch->EquipArmor(GlobalManager->GetInventoryTorsoArmor()->at(_equip_list.GetSelection()));
-						GlobalManager->DecrementObjectCount(ch->GetEquippedTorsoArmor()->GetID(), 1);
+						GlobalManager->AddToInventory(ch->GetTorsoArmorEquipped()->GetID());ch->EquipArmor(GlobalManager->GetInventoryTorsoArmor()->at(_equip_list.GetSelection()));
+						GlobalManager->DecrementObjectCount(ch->GetTorsoArmorEquipped()->GetID(), 1);
 					}
 					else if (_equip_select.GetSelection() == EQUIP_OFFHAND) {
-						GlobalManager->AddToInventory(ch->GetEquippedArmsArmor()->GetID());ch->EquipArmor(GlobalManager->GetInventoryArmArmor()->at(_equip_list.GetSelection()));
-						GlobalManager->DecrementObjectCount(ch->GetEquippedArmsArmor()->GetID(), 1);
+						GlobalManager->AddToInventory(ch->GetArmArmorEquipped()->GetID());ch->EquipArmor(GlobalManager->GetInventoryArmArmor()->at(_equip_list.GetSelection()));
+						GlobalManager->DecrementObjectCount(ch->GetArmArmorEquipped()->GetID(), 1);
 					}
 					else if (_equip_select.GetSelection() == EQUIP_LEGGINGS) {
-						GlobalManager->AddToInventory(ch->GetEquippedLegArmor()->GetID());ch->EquipArmor(GlobalManager->GetInventoryLegArmor()->at(_equip_list.GetSelection()));
-						GlobalManager->DecrementObjectCount(ch->GetEquippedLegArmor()->GetID(), 1);
+						GlobalManager->AddToInventory(ch->GetLegArmorEquipped()->GetID());ch->EquipArmor(GlobalManager->GetInventoryLegArmor()->at(_equip_list.GetSelection()));
+						GlobalManager->DecrementObjectCount(ch->GetLegArmorEquipped()->GetID(), 1);
 					}
 					else {
 						cerr << "This shouldn't happen!" << endl;
@@ -1287,7 +1285,7 @@ void EquipWindow::Update() {
 			}
 			break;
 	}
-	active_option->Update();
+
 	_UpdateEquipList();
 } // void EquipWindow::Update()
 
@@ -1361,16 +1359,16 @@ void EquipWindow::_UpdateEquipList() {
 		i.SetFilename(ch->GetWeaponEquipped()->GetIconImage().GetFilename());
 		_equip_images.push_back(i);
 
-		i.SetFilename(ch->GetEquippedHeadArmor()->GetIconImage().GetFilename());
+		i.SetFilename(ch->GetHeadArmorEquipped()->GetIconImage().GetFilename());
 		_equip_images.push_back(i);
 
-		i.SetFilename(ch->GetEquippedTorsoArmor()->GetIconImage().GetFilename());
+		i.SetFilename(ch->GetTorsoArmorEquipped()->GetIconImage().GetFilename());
 		_equip_images.push_back(i);
 
-		i.SetFilename(ch->GetEquippedArmsArmor()->GetIconImage().GetFilename());
+		i.SetFilename(ch->GetArmArmorEquipped()->GetIconImage().GetFilename());
 		_equip_images.push_back(i);
 
-		i.SetFilename(ch->GetEquippedLegArmor()->GetIconImage().GetFilename());
+		i.SetFilename(ch->GetLegArmorEquipped()->GetIconImage().GetFilename());
 		_equip_images.push_back(i);
 
 		for (uint32 i = 0; i < EQUIP_CATEGORY_SIZE; i++) {
@@ -1381,10 +1379,10 @@ void EquipWindow::_UpdateEquipList() {
 		// Now, update the NAMES of the equipped items
 
 		options.push_back(ch->GetWeaponEquipped()->GetName());
-		options.push_back(ch->GetEquippedHeadArmor()->GetName());
-		options.push_back(ch->GetEquippedTorsoArmor()->GetName());
-		options.push_back(ch->GetEquippedArmsArmor()->GetName());
-		options.push_back(ch->GetEquippedLegArmor()->GetName());
+		options.push_back(ch->GetHeadArmorEquipped()->GetName());
+		options.push_back(ch->GetTorsoArmorEquipped()->GetName());
+		options.push_back(ch->GetArmArmorEquipped()->GetName());
+		options.push_back(ch->GetLegArmorEquipped()->GetName());
 
 		_equip_select.SetOptions(options);
 	}
@@ -1449,6 +1447,10 @@ void EquipWindow::Draw() {
 
 
 FormationWindow::FormationWindow() {
+	// TEMP: This is just temp code for testing
+	string file_name = "dat/saved_game.lua";
+	GlobalManager->SaveGame(file_name);
+	cout << "Game saved!" << endl;
 }
 
 FormationWindow::~FormationWindow() {

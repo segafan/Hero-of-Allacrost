@@ -117,7 +117,7 @@ const uint32 SHOW_SKILLS        = 2;
 const uint32 SHOW_EQUIP         = 3;
 const uint32 SHOW_STATUS        = 4;
 //const uint32 SHOW_OPTIONS       = 5;
-//const uint32 SHOW_SAVE          = 6;
+const uint32 SHOW_SAVE          = 111;
 const uint32 SHOW_FORMATION     = 5;
 const uint32 SHOW_EXIT          = 6;
 //@}

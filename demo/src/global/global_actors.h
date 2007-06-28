@@ -256,6 +256,9 @@ public:
 	uint32 GetExperienceLevel() const
 		{ return _experience_level; }
 
+	uint32 GetExperiencePoints() const
+		{ return _experience_points; }
+
 	uint32 GetStrength() const
 		{ return _strength; }
 
@@ -378,6 +381,9 @@ protected:
 	//@{
 	//! \brief The current experience level of the actor.
 	uint32 _experience_level;
+
+	//! \brief The number of experience points the actor has earned.
+	uint32 _experience_points;
 
 	//! \brief The current number of hit points that the actor has.
 	uint32 _hit_points;
@@ -563,19 +569,16 @@ public:
 	uint32 GetExperienceForNextLevel() const
 		{ return _experience_next_level; }
 
-	/*GlobalWeapon* GetWeapon() const
-		{ return _weapon_equipped; }*/
-
-	GlobalArmor* GetEquippedHeadArmor()
+	GlobalArmor* GetHeadArmorEquipped()
 		{ return _armor_equipped[0]; }
 
-	GlobalArmor* GetEquippedTorsoArmor()
+	GlobalArmor* GetTorsoArmorEquipped()
 		{ return _armor_equipped[1]; }
 
-	GlobalArmor* GetEquippedArmsArmor()
+	GlobalArmor* GetArmArmorEquipped()
 		{ return _armor_equipped[2]; }
 
-	GlobalArmor* GetEquippedLegArmor()
+	GlobalArmor* GetLegArmorEquipped()
 		{ return _armor_equipped[3]; }
 
 	std::vector<GlobalSkill*>* GetAttackSkills()
@@ -704,9 +707,6 @@ public:
 
 	//! \name Class member access functions
 	//@{
-	uint32 GetExperiencePoints() const
-		{ return _experience_points; }
-
 	uint32 GetMoney() const
 		{ return _money; }
 
@@ -748,9 +748,6 @@ public:
 protected:
 	//! \brief The name used to retrieve the enemy's data and other information
 	std::string _filename;
-
-	//! \brief The number of experience points that the party is given when the enemy is defeated
-	uint32 _experience_points;
 
 	//! \brief The item the enemy drops when defeated
 	uint32 _item_dropped;

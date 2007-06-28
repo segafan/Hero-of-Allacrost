@@ -83,12 +83,14 @@ public:
 	//! \brief Ends a comment block.
 	void EndCommentBlock();
 
-	/** \brief Writes the plain string of text to the file with a newline appended automatically
+	/** \brief Writes an unaltered string to the file
+	*** \param comment The string of text to write to the file
+	*** \param new_line If true, automatically appends a new line (enabled by default)
 	*** \note Typically, you should <b>really</b> try to avoid using this function unless you know
 	*** what you are doing. It is, however, safe to use it between the beginning and end of a
 	*** comment block (just don't write the syntax that ends the block, which is `--]]`).
 	**/
-	void WriteLine(const std::string& comment);
+	void WriteLine(const std::string& comment, bool new_line = true);
 	//@}
 
 	/** \name Variable Write Functions
@@ -174,7 +176,7 @@ public:
 	**/
 	//@{
 	void BeginTable(const std::string &key);
-	void BeginTable(int key);
+	void BeginTable(int32 key);
 	void EndTable();
 	//@}
 

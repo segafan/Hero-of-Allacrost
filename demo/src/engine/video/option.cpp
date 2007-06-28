@@ -222,12 +222,10 @@ void OptionBox::Draw() {
 								VideoManager->DrawImage(op.images[image_index], Color::white);
 
 							float width = op.images[image_index].GetWidth();
-							float edge = 0.0f;
-							if (xalign == VIDEO_X_LEFT)
-								edge = x - bounds.x_left;
-							else if (xalign == VIDEO_X_CENTER)
+							float edge = x - bounds.x_left; // edge value for VIDEO_X_LEFT
+							if (xalign == VIDEO_X_CENTER)
 								edge -= width * 0.5f * cs.GetHorizontalDirection();
-							else // (xalign == VIDEO_X_RIGHT)
+							else if (xalign == VIDEO_X_RIGHT)
 								edge -= width * cs.GetHorizontalDirection();
 
 							if (edge < left_edge)
@@ -249,13 +247,11 @@ void OptionBox::Draw() {
 						if (text_index >= 0 && text_index < static_cast<int32>(op.text.size())) {
 							const ustring& text = op.text[text_index];
 							float width = static_cast<float>(VideoManager->CalculateTextWidth(_font, text));
-							float edge = 0.0f;
+							float edge = x - bounds.x_left; // edge value for VIDEO_X_LEFT
 
-							if (xalign == VIDEO_X_LEFT)
-								edge = x - bounds.x_left;
-							else if (xalign == VIDEO_X_CENTER)
+							if (xalign == VIDEO_X_CENTER)
 								edge -= width * 0.5f * cs.GetHorizontalDirection();
-							else // (xalign == VIDEO_X_RIGHT)
+							else if (xalign == VIDEO_X_RIGHT)
 								edge -= width * cs.GetHorizontalDirection();
 
 							if (edge < left_edge)
