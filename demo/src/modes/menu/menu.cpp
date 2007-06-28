@@ -454,11 +454,11 @@ void MenuMode::Update() {
 
 			/*case SHOW_OPTIONS:
 				_HandleOptionsMenu();
-				break;
+				break;*/
 
 			case SHOW_SAVE:
 				_HandleSaveMenu();
-				break;*/
+				break;
 
 			default:
 				cerr << "MENU: ERROR: Invalid menu showing!" << endl;
@@ -541,9 +541,9 @@ void MenuMode::Draw() {
 			_formation_window.Draw();
 			break;
 
-		/*case SHOW_SAVE:
-			//_HandleSaveMenu();
-			break;*/
+		case SHOW_SAVE:
+			_HandleSaveMenu();
+			break;
 	}
 
 	//FIX ME:  Test
@@ -634,19 +634,19 @@ void MenuMode::_DrawBottomMenu() {
 		VideoManager->MoveRelative(0, 20);
 		VideoManager->DrawText(MakeUnicodeString(text));
 
-		text = "PHYS DEF: " + NumberToString(ch->GetEquippedHeadArmor()->GetPhysicalDefense());
+		text = "PHYS DEF: " + NumberToString(ch->GetHeadArmorEquipped()->GetPhysicalDefense());
 		VideoManager->MoveRelative(0, 20);
 		VideoManager->DrawText(MakeUnicodeString(text));
 
-		text = "PHYS DEF: " +  NumberToString(ch->GetEquippedTorsoArmor()->GetPhysicalDefense());
+		text = "PHYS DEF: " +  NumberToString(ch->GetTorsoArmorEquipped()->GetPhysicalDefense());
 		VideoManager->MoveRelative(0, 20);
 		VideoManager->DrawText(MakeUnicodeString(text));
 
-		text = "PHYS DEF: " +  NumberToString(ch->GetEquippedArmsArmor()->GetPhysicalDefense());
+		text = "PHYS DEF: " +  NumberToString(ch->GetArmArmorEquipped()->GetPhysicalDefense());
 		VideoManager->MoveRelative(0, 20);
 		VideoManager->DrawText(MakeUnicodeString(text));
 
-		text = "PHYS DEF: " +  NumberToString(ch->GetEquippedLegArmor()->GetPhysicalDefense());
+		text = "PHYS DEF: " +  NumberToString(ch->GetLegArmorEquipped()->GetPhysicalDefense());
 		VideoManager->MoveRelative(0, 20);
 		VideoManager->DrawText(MakeUnicodeString(text));
 
@@ -658,19 +658,19 @@ void MenuMode::_DrawBottomMenu() {
 		VideoManager->MoveRelative(0, 20);
 		VideoManager->DrawText(MakeUnicodeString(text));
 
-		text = "META DEF: " + NumberToString(ch->GetEquippedHeadArmor()->GetMetaphysicalDefense());
+		text = "META DEF: " + NumberToString(ch->GetHeadArmorEquipped()->GetMetaphysicalDefense());
 		VideoManager->MoveRelative(0, 20);
 		VideoManager->DrawText(MakeUnicodeString(text));
 
-		text = "META DEF: " +  NumberToString(ch->GetEquippedTorsoArmor()->GetMetaphysicalDefense());
+		text = "META DEF: " +  NumberToString(ch->GetTorsoArmorEquipped()->GetMetaphysicalDefense());
 		VideoManager->MoveRelative(0, 20);
 		VideoManager->DrawText(MakeUnicodeString(text));
 
-		text = "META DEF: " +  NumberToString(ch->GetEquippedArmsArmor()->GetMetaphysicalDefense());
+		text = "META DEF: " +  NumberToString(ch->GetArmArmorEquipped()->GetMetaphysicalDefense());
 		VideoManager->MoveRelative(0, 20);
 		VideoManager->DrawText(MakeUnicodeString(text));
 
-		text = "META DEF: " +  NumberToString(ch->GetEquippedLegArmor()->GetMetaphysicalDefense());
+		text = "META DEF: " +  NumberToString(ch->GetLegArmorEquipped()->GetMetaphysicalDefense());
 		VideoManager->MoveRelative(0, 20);
 		VideoManager->DrawText(MakeUnicodeString(text));
 		VideoManager->SetDrawFlags(VIDEO_X_CENTER,VIDEO_Y_BOTTOM,0);
@@ -873,10 +873,13 @@ void MenuMode::_HandleOptionsMenu() {
 
 
 void MenuMode::_HandleSaveMenu() {
+	string file_name;
 	switch (_menu_save.GetSelection()) {
 		case SAVE_SAVE:
 			// TODO: Handle Save - Save command
 			cout << "MENU: Save - Save command!" << endl;
+			file_name = "dat/saved_game.lua";
+			GlobalManager->SaveGame(file_name);
 			break;
 
 		case SAVE_BACK:

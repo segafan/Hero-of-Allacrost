@@ -603,7 +603,7 @@ void BootMode::_OnNewGame() {
 
 	GlobalManager->AddCharacter(GLOBAL_CHARACTER_CLAUDIUS);
 	GlobalManager->AddCharacter(GLOBAL_CHARACTER_LAILA);
-
+	GlobalManager->AddToInventory(1, 2);
 	GlobalManager->SetFunds(250);
 
 	_fade_out = true;

@@ -156,8 +156,10 @@ void WriteScriptDescriptor::EndCommentBlock() {
 
 
 
-void WriteScriptDescriptor::WriteLine(const string& comment) {
-	_outfile << comment << endl;
+void WriteScriptDescriptor::WriteLine(const string& comment, bool new_line) {
+	_outfile << comment;
+	if (new_line)
+		_outfile << endl;
 }
 
 //-----------------------------------------------------------------------------
@@ -381,7 +383,7 @@ void WriteScriptDescriptor::BeginTable(const string &key) {
 
 
 
-void WriteScriptDescriptor::BeginTable(int key) {
+void WriteScriptDescriptor::BeginTable(int32 key) {
 	if (_open_tables.size() == 0)
 		_outfile << key << " = {}" << endl;
 	else {
@@ -389,7 +391,7 @@ void WriteScriptDescriptor::BeginTable(int key) {
 		_outfile << '[' << key << "] = {}" << endl;
 	}
 
-	_open_tables.push_back(NumberToString<int>(key));
+	_open_tables.push_back(NumberToString<int32>(key));
 }
 
 
