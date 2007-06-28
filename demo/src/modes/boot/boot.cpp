@@ -495,7 +495,7 @@ void BootMode::_SetupMainMenu() {
 
 	// Add all the needed menu options to the main menu
 	_main_menu.AddOption(MakeUnicodeString("New Game"), &BootMode::_OnNewGame);
-	_main_menu.AddOption(MakeUnicodeString("Load Game"));
+	_main_menu.AddOption(MakeUnicodeString("Load Game"), &BootMode::_OnLoadGame);
 	_main_menu.AddOption(MakeUnicodeString("Options"), &BootMode::_OnOptions);
 	_main_menu.AddOption(MakeUnicodeString("Credits"), &BootMode::_OnCredits);
 	_main_menu.AddOption(MakeUnicodeString("Quit"), &BootMode::_OnQuit);
@@ -503,8 +503,6 @@ void BootMode::_SetupMainMenu() {
 	_main_menu.AddOption(MakeUnicodeString("Battle"), &BootMode::_OnBattleDebug);
 	_main_menu.AddOption(MakeUnicodeString("Menu"), &BootMode::_OnMenuDebug);
 	_main_menu.AddOption(MakeUnicodeString("Shop"), &BootMode::_OnShopDebug);
-
-	_main_menu.EnableOption(1, false); // gray out "load game" for now.
 }
 
 
@@ -615,6 +613,14 @@ void BootMode::_OnNewGame() {
 
 // 'Load Game' confirmed. Not done yet, sorry mate.
 void BootMode::_OnLoadGame() {
+	if (BOOT_DEBUG)	cout << "BOOT: Loading game." << endl;
+
+	_SaveSettingsFile();
+
+	_fade_out = true;
+	VideoManager->FadeScreen(Color::black, 1.0f);
+	_boot_music.at(0).SetFadeOutTime(500); // Fade out the music
+	_boot_music.at(0).StopMusic();
 }
 
 
