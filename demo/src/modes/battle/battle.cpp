@@ -435,7 +435,7 @@ void BattleMode::Reset() {
 
 void BattleMode::AddEnemy(GlobalEnemy new_enemy) {
 	// (1): Don't add the enemy if it has an invalid ID or an experience level that is not zero
-	if (new_enemy.GetID() < 1) {
+	if (new_enemy.GetID() == 0) {
 		if (BATTLE_DEBUG) {
 			cerr << "BATTLE WARNING: attempted to add a new enemy with an invalid id (0). "
 				<< "The enemy was not added to the battle." << endl;

@@ -249,7 +249,7 @@ public:
 	*** \param new_enemy A copy of the GlobalEnemy object to add to the battle
 	*** This method uses the GlobalEnemy copy constructor to create a copy of the enemy. The GlobalEnemy
 	*** passed as an argument should be in its default loaded state (that is, it should have an experience
-	*** level equal to zero).
+	*** level equal to one).
 	**/
 	void AddEnemy(hoa_global::GlobalEnemy new_enemy);
 
@@ -271,11 +271,6 @@ public:
 	*** for a battle, a default battle theme will be played.
 	**/
 	void AddMusic(std::string music_filename);
-
-	// NOTE: this is temporary because of a signature matching problem with the seperate AddEnemy definitions above
-	// This method is being bound to Lua until the problem is resolved, at which point this method should be removed
-	void TEMP_AddEnemy(uint32 new_enemy_id)
-		{ AddEnemy(hoa_global::GlobalEnemy(new_enemy_id)); }
 
 	// TODO: Some of the public methods below should probably not be public...
 

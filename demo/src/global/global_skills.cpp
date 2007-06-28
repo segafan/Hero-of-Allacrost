@@ -135,11 +135,18 @@ void GlobalSkill::_Load() {
 	else {
 		_type = GLOBAL_SKILL_INVALID;
 		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL ERROR: GlobalItem::_Load has an invalid id value: " << _id << endl;
+			cerr << "GLOBAL ERROR: GlobalSkill::_Load failed because it had an invalid id value: " << _id << endl;
+		_id = 0;
 		return;
 	}
 
 	// Load the item data from the script
+	if (skill_script->DoesTableExist(_id) == false) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL ERROR: GlobalSkill::_Load failed because there was no skill defined for the id: " << _id << endl;
+		_id = 0;
+		return;
+	}
 	skill_script->OpenTable(_id);
 
 	_name = MakeUnicodeString(skill_script->ReadString("name"));

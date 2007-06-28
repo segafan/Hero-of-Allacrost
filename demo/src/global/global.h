@@ -71,13 +71,31 @@ public:
 	**/
 	void ClearAllData();
 
-	/** \brief Adds a new character to the party.
+	/** \brief Adds a new character to the party with its initial settings
 	*** \param id The ID number of the character to add to the party.
 	***
-	*** If the number of characters is less than four when this function is called, the
-	*** new character will automatically be added to the active party.
+	*** Only use this function for when you wish the character to be constructed using
+	*** its initial stats, equipment, and skills. Otherwise, you should construct the
+	*** GlobalCharacter externally and invoke the other AddCharacter function with a
+	*** pointer to it.
+	***
+	*** \note If the number of characters is less than four when this function is called,
+	*** the new character will automatically be added to the active party.
 	**/
 	void AddCharacter(uint32 id);
+
+	/** \brief Adds a new pre-initialized character to the party
+	*** \param ch A pointer to the initialized GlobalCharacter object to add
+	***
+	*** The GlobalCharacter argument must be created -and- properly initalized (stats
+	*** members all set, equipment added, skills added) prior to making this call.
+	*** Adding an uninitialized character will likely result in a segmentation fault
+	*** or other run-time error somewhere down the road.
+	***
+	*** \note If the number of characters is less than four when this function is called,
+	*** the new character will automatically be added to the active party.
+	**/
+	void AddCharacter(GlobalCharacter* ch);
 
 	/** \brief Removes a character from the party.
 	*** \param id The ID number of the character to remove from the party.
@@ -279,6 +297,18 @@ private:
 	*** This method will need to be called once for each character in the player's party
 	**/
 // 	void _SaveEvents(hoa_script::WriteScriptDescriptor& file, GlobalEvent* event);
+
+	/** \brief A helper function to GameGlobal::LoadGame() that restores the contents of the inventory from a saved game file
+	*** \param file A reference to the open and valid file from where to read the inventory list
+	*** \param category_name The name of the table in the file that should contain the inventory for a specific category
+	**/
+	void _LoadInventory(hoa_script::ReadScriptDescriptor& file, std::string category_name);
+
+	/** \brief A helper function to GameGlobal::LoadGame() that loads a saved game character and adds it to the party
+	*** \param file A reference to the open and valid file from where to read the character from
+	*** \param id The character's integer ID, used to find and restore the character data
+	**/
+	void _LoadCharacter(hoa_script::ReadScriptDescriptor& file, uint32 id);
 }; // class GameGlobal
 
 } // namespace hoa_global
