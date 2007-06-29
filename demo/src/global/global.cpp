@@ -410,7 +410,7 @@ bool GameGlobal::SaveGame(string& filename) {
 		else
 			file.WriteLine(", " + NumberToString(_character_order[i]->GetID()), false);
 	}
-	file.WriteLine("\n\t}");
+	file.WriteLine("\n\t},");
 
 	// Now save each individual character's data
 	for (uint32 i = 0; i < _character_order.size(); i++) {
@@ -434,7 +434,7 @@ bool GameGlobal::SaveGame(string& filename) {
 
 
 
-bool GameGlobal::LoadGame(string& filename) {
+bool GameGlobal::LoadGame(const string& filename) {
 	ReadScriptDescriptor file;
 	if (file.OpenFile(filename) == false) {
 		return false;
@@ -760,7 +760,7 @@ void GameGlobal::_LoadCharacter(hoa_script::ReadScriptDescriptor& file, uint32 i
 	character->SetExperiencePoints(file.ReadUInt("experience_points"));
 	character->SetExperienceNextLevel(file.ReadUInt("experience_points_next"));
 
-	character->SetMaxHitPoints(file.ReadUInt("max_hit_poitns"));
+	character->SetMaxHitPoints(file.ReadUInt("max_hit_points"));
 	character->SetHitPoints(file.ReadUInt("hit_points"));
 	character->SetMaxSkillPoints(file.ReadUInt("max_skill_points"));
 	character->SetSkillPoints(file.ReadUInt("skill_points"));
@@ -814,7 +814,7 @@ void GameGlobal::_LoadCharacter(hoa_script::ReadScriptDescriptor& file, uint32 i
 	}
 
 	skill_ids.clear();
-	file.ReadUIntVector("defend_skills", skill_ids);
+	file.ReadUIntVector("defense_skills", skill_ids);
 	for (uint32 i = 0; i < skill_ids.size(); i++) {
 		character->AddSkill(skill_ids[i]);
 	}

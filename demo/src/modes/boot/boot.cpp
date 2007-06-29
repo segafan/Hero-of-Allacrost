@@ -615,12 +615,18 @@ void BootMode::_OnNewGame() {
 void BootMode::_OnLoadGame() {
 	if (BOOT_DEBUG)	cout << "BOOT: Loading game." << endl;
 
-	_SaveSettingsFile();
-
-	_fade_out = true;
-	VideoManager->FadeScreen(Color::black, 1.0f);
-	_boot_music.at(0).SetFadeOutTime(500); // Fade out the music
-	_boot_music.at(0).StopMusic();
+	if (DoesFileExist("dat/saved_game.lua")) {
+		_SaveSettingsFile();
+		
+		GlobalManager->LoadGame("dat/saved_game.lua");
+		_fade_out = true;
+		VideoManager->FadeScreen(Color::black, 1.0f);
+		_boot_music.at(0).SetFadeOutTime(500); // Fade out the music
+		_boot_music.at(0).StopMusic();
+	}
+	else {
+		cout << "BOOT: No saved game file exists, can not load game" << endl;
+	}
 }
 
 

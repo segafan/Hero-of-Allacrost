@@ -24,12 +24,9 @@
 #endif
 
 #include <sys/stat.h>
-
-using namespace std;
-
 #include "socket.h"
 
-
+using namespace std;
 using namespace hoa_socket;
 
 namespace hoa_utils {
@@ -374,6 +371,16 @@ bool Probability(uint32 chance) {
 ////////////////////////////////////////////////////////////////////////////////
 ///// Directory manipulation functions
 ////////////////////////////////////////////////////////////////////////////////
+
+bool DoesFileExist(const std::string& file_name) {
+	struct stat buf;
+	if (stat(file_name.c_str(), &buf) == 0)
+		return true;
+	else
+		return false;
+}
+
+
 
 bool MakeDirectory(const std::string& dir_name) {
 	// Don't do anything if the directory already exists
