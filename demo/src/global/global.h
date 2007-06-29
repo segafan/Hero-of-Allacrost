@@ -167,7 +167,7 @@ public:
 	*** \param filename The filename of the saved game file where to read the data from
 	*** \return True if the game was successfully loaded, false if it was not
 	**/
-	bool LoadGame(std::string& filename);
+	bool LoadGame(const std::string& filename);
 
 	//! \name Class Member Access Functions
 	//@{

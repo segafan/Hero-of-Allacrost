@@ -468,6 +468,12 @@ void InsertionSort(std::vector<T>& swap_vec) {
 
 //! \name Directory and File Manipulation Functions
 //@{
+/** \brief Checks if a file exists on the system or not
+*** \param file_name The name of the file to check (e.g. "dat/saved_game.lua")
+*** \return True if the file was found, or false if it was not found.
+**/
+bool DoesFileExist(const std::string& file_name);
+
 /** \brief Removes all files present in a directory
 *** \param dir_name The name of the directory to clean (e.g. "img/screnshots")
 *** \return True upon success, false upon failure
@@ -479,7 +485,6 @@ bool CleanDirectory(const std::string& dir_name);
 *** \return True upon success, false upon failure
 **/
 bool MakeDirectory(const std::string& dir_name);
-
 
 /** \brief Deletes a directory, as well as any files the directory may contain
 *** \param dir_name The name of the directory to remove (e.g. "img/screnshots")
