@@ -75,7 +75,6 @@ void OptionBox::Update(uint32 frame_time) {
 void OptionBox::Draw() {
 	// Do nothing if the option box is not properly initialized
 	if (_initialized == false) {
-		cerr << "VIDEO WARNING: OptionBox::Draw() was invoked when the option box was not initialized" << endl;
 		return;
 	}
 
@@ -84,17 +83,17 @@ void OptionBox::Draw() {
 
 	// (1) Determine the edge dimensions of the option box
 	float left, right, bottom, top;
-	left   = 0.0f;
+	left = 0.0f;
+	right = _number_columns * _horizontal_spacing;
 	bottom = 0.0f;
-	right  = _number_columns * _horizontal_spacing;
-	top    = _number_rows * _vertical_spacing;
+	top = _number_rows * _vertical_spacing;
 
 	CalculateAlignedRect(left, right, bottom, top);
 
 	int32 x, y, w, h;
 
-	x = static_cast<int32>(left < right? left: right);
-	y = static_cast<int32>(top < bottom? top : bottom);
+	x = static_cast<int32>(left < right ? left : right);
+	y = static_cast<int32>(top < bottom ? top : bottom);
 	w = static_cast<int32>(right - left);
 	if (w < 0)
 		w = -w;
@@ -104,7 +103,7 @@ void OptionBox::Draw() {
 
 	ScreenRect rect(x, y, w, h);
 
-	int32 cursor_margin = static_cast<int32>(VideoManager->GetDefaultCursor()->GetWidth() + 1 -_cursor_xoffset);
+	int32 cursor_margin = static_cast<int32>(VideoManager->GetDefaultCursor()->GetWidth() + 1 - _cursor_xoffset);
 	rect.left -= cursor_margin;
 	rect.width += cursor_margin;
 
@@ -129,7 +128,6 @@ void OptionBox::Draw() {
 	}
 
 	CoordSys &cs = VideoManager->_coord_sys;
-
 	VideoManager->SetFont(_font);
 	VideoManager->SetDrawFlags(_option_xalign, _option_yalign, VIDEO_X_NOFLIP, VIDEO_Y_NOFLIP, VIDEO_BLEND, 0);
 
@@ -152,11 +150,10 @@ void OptionBox::Draw() {
 		cell_offset = cs.GetVerticalDirection() * ((_scroll_time / (VIDEO_OPTION_SCROLL_TIME))) * _vertical_spacing;
 	}
 
-
 	OptionCellBounds bounds;
 	bounds.y_top = top + cell_offset;
 	bounds.y_center = bounds.y_top - 0.5f * _vertical_spacing * cs.GetVerticalDirection();
-	bounds.y_bottom = bounds.y_center * 2.0f - bounds.y_top;
+	bounds.y_bottom = (bounds.y_center * 2.0f) - bounds.y_top;
 
 	float yoff = -_vertical_spacing * cs.GetVerticalDirection();
 	float xoff = _horizontal_spacing * cs.GetHorizontalDirection();
@@ -655,10 +652,10 @@ bool OptionBox::_ConstructOption(const ustring& format_string, Option& op) {
 				if (tmp[1] == CENTER_TAG1 || tmp[1] == CENTER_TAG2) {
 					new_element.type = VIDEO_OPTION_ELEMENT_CENTER_ALIGN;
 				}
-				else if (tmp[1] == RIGHT_TAG1 || tmp[1] == RIGHT_TAG1) {
+				else if (tmp[1] == RIGHT_TAG1 || tmp[1] == RIGHT_TAG2) {
 					new_element.type = VIDEO_OPTION_ELEMENT_RIGHT_ALIGN;
 				}
-				else if (tmp[1] == LEFT_TAG1 || tmp[1] == LEFT_TAG1) {
+				else if (tmp[1] == LEFT_TAG1 || tmp[1] == LEFT_TAG2) {
 					new_element.type = VIDEO_OPTION_ELEMENT_LEFT_ALIGN;
 				}
 			}
@@ -666,7 +663,6 @@ bool OptionBox::_ConstructOption(const ustring& format_string, Option& op) {
 				// Extract the tag string 
 				string tag_text = MakeStandardString(tmp.substr(1, end_position - 1));
 				
-
 				if (IsStringNumeric(tag_text)) { // Then this must be a positioning tag
 					new_element.type  = VIDEO_OPTION_ELEMENT_POSITION;
 					new_element.value = atoi(tag_text.c_str());
