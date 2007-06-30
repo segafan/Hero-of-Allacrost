@@ -40,6 +40,98 @@ extern GameGlobal* GlobalManager;
 //! \brief  Determines whether the code in the hoa_global namespace should print debug statements or not.
 extern bool GLOBAL_DEBUG;
 
+//! \brief A return value used for when a specified event name fails to be found
+const int32 GLOBAL_BAD_EVENT = -5555555;
+
+/** ****************************************************************************
+*** \brief A container that manages the occurences of several related game events
+***
+*** Events in Allacrost are nothing more than a string, integer pair. The string
+*** represents the name of the event while the integer takes on various meanings
+*** about the event. One example of an event could be if the player has already
+*** seen a certain piece of dialogue, and the integer would be set to zero or
+*** non-zero to emulate a boolean value. Another example could be whether the
+*** player previous chose option A, B, C, or D when presented with a list of
+*** possible actions to take, in which the integer value would represent the
+*** option taken.
+*** 
+*** Because we want to continually look-up whether or not an event has occured,
+*** it is not efficient to store all game events in a single container (the
+*** larger the number of events, the longer the event search time). Instead,
+*** this class collectively represents a group of related events. A typical
+*** event group could represent all of the events that occured on a particular
+*** map, for instance.
+***
+*** \note Only the GameGlobal class may construct objects of this class. There
+*** are methods in GameGlobal to create new objects of this class
+*** ***************************************************************************/
+class GlobalEventGroup {
+	friend class GameGlobal;
+
+public:
+	~GlobalEventGroup() {}
+
+	/** \brief Queries whether or not an event of a given name exists in the group
+	*** \param event_name The name of the event to check for
+	*** \return True if the event name was found in the group, false if it was not
+	**/
+	bool DoesEventExist(const std::string& event_name)
+		{ if (_events.find(event_name) != _events.end()) return true; else return false; }
+
+	/** \brief Adds a new event to the group
+	*** \param event_name The name of the event to add
+	*** \param event_value The value of the event to add (default value is zero)
+	*** \note If an event by the given name already exists, the function will abort
+	*** and not add the new event
+	**/
+	void AddNewEvent(const std::string& event_name, int32 event_value = 0);
+
+	/** \brief Retrieves the value of a specific event in the group
+	*** \param event_name The name of the event to retrieve
+	*** \return The value of the event, or GLOBAL_BAD_EVENT if the event corresponding to the name wasn't found
+	**/
+	int32 GetEvent(const std::string& event_name);
+
+	/** \brief Sets the value for an existing event
+	*** \param event_name The name of the event whose value should be changed
+	*** \param event_value The value to set for the event
+	*** \note If the event by the given name is not found, no change will be made
+	**/
+	void SetEvent(const std::string& event_name, int32 event_value);
+
+	//! \brief Returns the number of events currently stored within the group
+	uint32 GetNumberEvents() const
+		{ return _events.size(); }
+
+	//! \brief Returns a copy of the name of this group
+	std::string GetGroupName() const
+		{ return _group_name; }
+
+private:
+	//! \brief The name given to this group of events
+	std::string _group_name;
+
+	/** \brief The map container for all the events in the group
+	*** The string is the name of the event, which should be unique to the group. The integer 
+	*** value represents the event's status and can take on multiple meanings depending on the
+	*** event's context.
+	**/
+	std::map<std::string, int32> _events;
+
+	/** \brief The class constructor is private because groups may only be created by the GameGlobal class
+	*** \param group_name The name of the group to create (this can not be changed)
+	**/
+	GlobalEventGroup(const std::string& group_name) :
+		_group_name(group_name) {}
+
+	//! \note Copy constructor and assignment operator kept private to prevent external code creating their own GlobalEventGroup objects
+	//@{
+	GlobalEventGroup(const GlobalEventGroup& geg);
+	GlobalEventGroup& operator=(const GlobalEventGroup& geg);
+	//@}
+}; // class GlobalEventGroup
+
+
 /** ****************************************************************************
 *** \brief Retains all the state information about the player's active game
 ***
@@ -71,6 +163,8 @@ public:
 	**/
 	void ClearAllData();
 
+	//! \name Character Functions
+	//@{
 	/** \brief Adds a new character to the party with its initial settings
 	*** \param id The ID number of the character to add to the party.
 	***
@@ -102,6 +196,22 @@ public:
 	**/
 	void RemoveCharacter(uint32 id);
 
+	/** \brief Returns a pointer to a character currently in the party.
+	*** \param id The ID number of the character to retrieve.
+	*** \return A pointer to the character, or NULL if the character was not found.
+	***/
+	GlobalCharacter* GetCharacter(uint32 id);
+
+	/** \brief Checks whether or not a character is in the party
+	*** \param id The id of the character to check for
+	*** \return True if the character was found to be in the party, or false if they were not found.
+	**/
+	bool IsCharacterInParty(uint32 id)
+		{ if (_characters.find(id) != _characters.end()) return true; else return false; }
+	//@}
+
+	//! \name Inventory Methods
+	//@{
 	/** \brief Adds a new item to the inventory
 	*** \param obj_id The identifier value of the object to add
 	*** \param obj_count The number of instances of the object to add (default == 1)
@@ -143,11 +253,48 @@ public:
 	**/
 	void DecrementObjectCount(uint32 obj_id, uint32 obj_count);
 
-	/** \brief Calculates the average experience level of members in the active party
-	*** \return The average (integer) experience level of all members in the active party
-	*** This is used primarily for determining the level of growth for enemies in battle.
+	/** \brief Checks whether or a given object is currently stored in the inventory
+	*** \param id The id of the object (item, weapon, armor, etc.) to check for
+	*** \return True if the object was found in the inventor, or false if it was not found
 	**/
-	uint32 AveragePartyLevel();
+	bool IsObjectInInventory(uint32 id)
+		{ if (_inventory.find(id) != _inventory.end()) return true; else return false; }
+	//@}
+
+	//! \name Event Group Methods
+	//@{
+	/** \brief Queries whether or not an event group of a given name exists
+	*** \param group_name The name of the event group to check for
+	*** \return True if the event group name was found, false if it was not
+	**/
+	bool DoesEventGroupExist(const std::string& group_name)
+		{ if (_event_groups.find(group_name) != _event_groups.end()) return true; else return false; }
+
+	/** \brief Adds a new event group for the class to manage
+	*** \param group_name The name of the new event group to add
+	*** \note If an event group  by the given name already exists, the function will abort
+	*** and not add the new event group. Otherwise, this class will automatically construct
+	*** a new event group of the given name and place it in its map of event groups.
+	**/
+	void AddNewEventGroup(const std::string& group_name);
+
+	/** \brief Returns a pointer to an event group of the specified name
+	*** \param group_name The name of the event group to retreive
+	*** \return A pointer to the GlobalEventGroup that represents the event group, or NULL if no event group
+	*** of the specifed name was found
+	*** 
+	*** You can use this method to invoke the public methods of the GlobalEventGroup class. For example, if
+	*** we wanted to add a new event "cave_collapse" with a value of 1 to the group event "cave_map", we 
+	*** would do the following: GlobalManager->GetEventGroup("cave_map")->AddNewEvent("cave_collapse", 1);
+	*** Be careful, however, because since this function returns NULL if the event group was not found, the
+	*** example code above would produce a segmentation fault if no event group by the name "cave_map" existed.
+	**/
+	GlobalEventGroup* GetEventGroup(const std::string& group_name);
+
+	//! \brief Returns the number of event groups stored in the class
+	uint32 GetNumberEventGroups() const
+		{ return _event_groups.size(); }
+	//@}
 
 	//! \note The overflow condition is not checked here: we just assume it will never occur
 	void AddFunds(uint32 amount)
@@ -156,6 +303,18 @@ public:
 	//! \note The amount is only subtracted if the current funds is equal to or exceeds the amount to subtract
 	void SubtractFunds(uint32 amount)
 		{ if (_funds >= amount) _funds -= amount; }
+
+	/** \brief Calculates the average experience level of members in the active party
+	*** \return The average (integer) experience level of all members in the active party
+	*** This is used primarily for determining the level of growth for enemies in battle.
+	**/
+	uint32 AveragePartyLevel();
+
+	/** \brief Sets the name and graphic for the current location
+	*** \param location_name The ustring that contains the name of the current map
+	*** \param location_graphic_filename The filename of the graphic image that represents this location
+	**/
+	void SetLocation(hoa_utils::ustring& location_name, std::string location_graphic_filename);
 
 	/** \brief Saves all global data to a saved game file
 	*** \param filename The filename of the saved game file where to write the data to
@@ -176,12 +335,6 @@ public:
 
 	const uint32 GetFunds() const
 		{ return _funds; }
-
-	/** \brief Returns a pointer to a character currently in the party.
-	*** \param id The ID number of the character to retrieve.
-	*** \return A pointer to the character, or NULL if the character was not found.
-	***/
-	GlobalCharacter* GetCharacter(uint32 id);
 
 	std::vector<GlobalCharacter*>* GetCharacterOrder()
 		{ return &_character_order; };
@@ -223,6 +376,12 @@ private:
 	//! \brief The amount of financial resources the party currently has.
 	uint32 _funds;
 
+	//! \brief The name of the map that the current party is on
+	hoa_utils::ustring _location_name;
+
+	//! \brief The graphical image which represents the current location
+	hoa_video::StillImage _location_graphic;
+
 	/** \brief A map containing all characters that the player has discovered
 	*** This map contains all characters that the player has met with, regardless of whether or not they are in the active party.
 	*** The map key is the character's unique ID number.
@@ -263,7 +422,7 @@ private:
 	std::vector<GlobalKeyItem*> _inventory_key_items;
 	//@}
 
-	//! \brief Script files that hold data for various global objects
+	//! \brief Script files that retain data for various global constructs
 	//@{
 	hoa_script::ReadScriptDescriptor _items_script;
 	hoa_script::ReadScriptDescriptor _weapons_script;
@@ -272,6 +431,11 @@ private:
 	hoa_script::ReadScriptDescriptor _defend_skills_script;
 	hoa_script::ReadScriptDescriptor _support_skills_script;
 	//@}
+
+	/** \brief The container which stores all of the groups of events that have occured in the game
+	*** The name of the GlobalEventGroup serves as its key in this map data structure.
+	**/
+	std::map<std::string, GlobalEventGroup*> _event_groups;
 
 	// ----- Private methods
 
@@ -291,12 +455,12 @@ private:
 	**/
 	void _SaveCharacter(hoa_script::WriteScriptDescriptor& file, GlobalCharacter* character, bool last);
 
-	/** \brief A helper function to GameGlobal::SaveGame() that writes event data to the saved game file
+	/** \brief A helper function to GameGlobal::SaveGame() that writes a group of event data to the saved game file
 	*** \param file A reference to the open and valid file where to write the event data
-	*** \param event A ponter to the event data to store
-	*** This method will need to be called once for each character in the player's party
+	*** \param event_group A pointer to the group of events to store
+	*** This method will need to be called once for each GlobalEventGroup contained by this class.
 	**/
-// 	void _SaveEvents(hoa_script::WriteScriptDescriptor& file, GlobalEvent* event);
+	void _SaveEvents(hoa_script::WriteScriptDescriptor& file, GlobalEventGroup* event_group);
 
 	/** \brief A helper function to GameGlobal::LoadGame() that restores the contents of the inventory from a saved game file
 	*** \param file A reference to the open and valid file from where to read the inventory list
@@ -309,6 +473,12 @@ private:
 	*** \param id The character's integer ID, used to find and restore the character data
 	**/
 	void _LoadCharacter(hoa_script::ReadScriptDescriptor& file, uint32 id);
+
+	/** \brief A helper function to GameGlobal::LoadGame() that loads a group of game events from a saved game file
+	*** \param file A reference to the open and valid file from where to read the event data from
+	*** \param group_name The name of the event group to load
+	**/
+	void _LoadEvents(hoa_script::ReadScriptDescriptor& file, const std::string& group_name);
 }; // class GameGlobal
 
 } // namespace hoa_global
