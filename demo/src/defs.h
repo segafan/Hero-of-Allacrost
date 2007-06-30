@@ -158,6 +158,7 @@ namespace hoa_system {
 namespace hoa_global {
 	extern bool GLOBAL_DEBUG;
 	class GameGlobal;
+	class GlobalEventGroup;
 
 	class GlobalObject;
 	class GlobalItem;

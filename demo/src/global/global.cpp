@@ -38,6 +38,46 @@ GameGlobal* GlobalManager = NULL;
 bool GLOBAL_DEBUG = false;
 
 // -----------------------------------------------------------------------------
+// GlobalEventGroup class
+// -----------------------------------------------------------------------------
+
+void GlobalEventGroup::AddNewEvent(const std::string& event_name, int32 event_value) {
+	if (DoesEventExist(event_name) == true) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: GlobalEventGroup::AddNewEvent() could not add the event because an event "
+				<< "with the name \"" << event_name  << "\" already existed in event group: " << _group_name << endl;
+		return;
+	}
+	_events.insert(make_pair(event_name, event_value));
+}
+
+
+
+int32 GlobalEventGroup::GetEvent(const std::string& event_name) {
+	map<string, int32>::iterator event_iter = _events.find(event_name);
+	if (event_iter == _events.end()) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: GlobalEventGroup::GetEvent() could not retrieve the event value because "
+				<< "the event name \"" << event_name  << "\" did not exist in event group: " << _group_name << endl;
+		return GLOBAL_BAD_EVENT;
+	}
+	return event_iter->second;
+}
+
+
+
+void GlobalEventGroup::SetEvent(const std::string& event_name, int32 event_value) {
+	map<string, int32>::iterator event_iter = _events.find(event_name);
+	if (event_iter == _events.end()) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: GlobalEventGroup::SetEvent() could not set the event value because "
+				<< "the event name \"" << event_name  << "\" did not exist in event group: " << _group_name << endl;
+		return;
+	}
+	event_iter->second = event_value;
+}
+
+// -----------------------------------------------------------------------------
 // GameGlobal class - Initialization and Destruction
 // -----------------------------------------------------------------------------
 
@@ -112,10 +152,16 @@ void GameGlobal::ClearAllData() {
 	_characters.clear();
 	_character_order.clear();
 	_active_party.RemoveAllActors();
+
+	// Delete all event groups
+	for (map<string, GlobalEventGroup*>::iterator i = _event_groups.begin(); i != _event_groups.end(); i++) {
+		delete (i->second);
+	}
+	_event_groups.clear();
 } // void GameGlobal::ClearAllData()
 
 // -----------------------------------------------------------------------------
-// GameGlobal class - Character and Party Manipulations
+// GameGlobal class - Character Functions
 // -----------------------------------------------------------------------------
 
 void GameGlobal::AddCharacter(uint32 id) {
@@ -184,18 +230,19 @@ void GameGlobal::RemoveCharacter(uint32 id) {
 
 GlobalCharacter* GameGlobal::GetCharacter(uint32 id) {
 	map<uint32, GlobalCharacter*>::iterator ch = _characters.find(id);
-	if (ch != _characters.end()) {
-		return (ch->second);
+	if (ch == _characters.end()) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: No character matching id #" << id << " found in party" << endl;
+		return NULL;
 	}
 
-	if (GLOBAL_DEBUG)
-		cerr << "GLOBAL WARNING: No character matching id #" << id << " found in party" << endl;
-	return NULL;
+	return (ch->second);
+
 }
 
-// ****************************************************************************
-// ***** GameGlobal class - Inventory Manipulations
-// ****************************************************************************
+// -----------------------------------------------------------------------------
+// GameGlobal class - Inventory Functions
+// -----------------------------------------------------------------------------
 
 void GameGlobal::AddToInventory(uint32 obj_id, uint32 obj_count) {
 	// If the object is already in the inventory, increment the count of the object
@@ -368,7 +415,38 @@ void GameGlobal::DecrementObjectCount(uint32 obj_id, uint32 count) {
 	}
 } // void GameGlobal::DecrementObjectCount(uint32 obj_id, uint32 count)
 
+// -----------------------------------------------------------------------------
+// GameGlobal class - Event Group Functions
+// -----------------------------------------------------------------------------
 
+void GameGlobal::AddNewEventGroup(const std::string& group_name) {
+	if (DoesEventGroupExist(group_name) == true) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: GameGlobal::AddNewEventGroup() failed because there was already an event group "
+				<< "name that existed for the requested group name: " << group_name << endl;
+		return;
+	}
+
+	GlobalEventGroup* geg = new GlobalEventGroup(group_name);
+	_event_groups.insert(make_pair(group_name, geg));
+}
+
+
+
+GlobalEventGroup* GameGlobal::GetEventGroup(const std::string& group_name) {
+	map<string, GlobalEventGroup*>::iterator group_iter = _event_groups.find(group_name);
+	if (group_iter == _event_groups.end()) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: GameGlobal::GetEventGroup() could not retrieve the event group because "
+				<< "there was no group event corresponding to the group name: " << group_name << endl;
+		return NULL;
+	}
+	return (group_iter->second);
+}
+
+// -----------------------------------------------------------------------------
+// GameGlobal class - Other Functions
+// -----------------------------------------------------------------------------
 
 uint32 GameGlobal::AveragePartyLevel() {
 	uint32 xp_level_sum = 0;
@@ -423,8 +501,10 @@ bool GameGlobal::SaveGame(string& filename) {
 
 	// ----- (4) Save event data
 	file.InsertNewLine();
-	file.WriteLine("events = {");
-	// TODO _SaveEvents(file)
+	file.WriteLine("event_groups = {");
+	for (map<string, GlobalEventGroup*>::iterator i = _event_groups.begin(); i != _event_groups.end(); i++) {
+		_SaveEvents(file, i->second);
+	}
 	file.WriteLine("}");
 
 	file.InsertNewLine();
@@ -468,7 +548,7 @@ bool GameGlobal::LoadGame(const string& filename) {
 	file.CloseTable();
 
 	// ----- (4) Load event data
-	file.OpenTable("events");
+	file.OpenTable("event_groups");
 	// TODO: _LoadEvents(file);
 	file.CloseTable();
 
@@ -720,6 +800,12 @@ void GameGlobal::_SaveCharacter(WriteScriptDescriptor& file, GlobalCharacter* ch
 
 
 
+void GameGlobal::_SaveEvents(hoa_script::WriteScriptDescriptor& file, GlobalEventGroup* event_group) {
+	// TODO
+} // GameGlobal::_SaveEvents(hoa_script::WriteScriptDescriptor& file, GlobalEventGroup* event_group)
+
+
+
 void GameGlobal::_LoadInventory(hoa_script::ReadScriptDescriptor& file, std::string category_name) {
 	if (file.IsFileOpen() == false) {
 		if (GLOBAL_DEBUG)
@@ -829,5 +915,11 @@ void GameGlobal::_LoadCharacter(hoa_script::ReadScriptDescriptor& file, uint32 i
 
 	AddCharacter(character);
 } // void GameGlobal::_LoadCharacter(hoa_script::ReadScriptDescriptor& file, uint32 id);
+
+
+
+void GameGlobal::_LoadEvents(hoa_script::ReadScriptDescriptor& file, const std::string& group_name) {
+	// TODO
+} // void GameGlobal::_LoadEvents(hoa_script::ReadScriptDescriptor& file, const std::string& group_name)
 
 } // namespace hoa_global
