@@ -47,8 +47,7 @@ enum SHOP_STATE {
 	SHOP_STATE_LIST          =  1,
 	SHOP_STATE_SELL          =  2,
 	SHOP_STATE_CONFIRM       =  3,
-	SHOP_STATE_CONFIRM_SELL  =  4,
-	SHOP_STATE_TOTAL         =  5,
+	SHOP_STATE_TOTAL         =  4,
 };
 
 } // namespace private_shop
@@ -69,7 +68,6 @@ class ShopMode : public hoa_mode_manager::GameMode {
 	friend class private_shop::ObjectSellListWindow;
 	friend class private_shop::ObjectInfoWindow;
 	friend class private_shop::ConfirmWindow;
-	friend class private_shop::SellConfirmWindow;
 public:
 	ShopMode();
 
@@ -126,9 +124,19 @@ private:
 	**/
 	std::vector<hoa_global::GlobalObject*> _all_objects;
 
+	/** \brief Contains all of the items
+	*** \note This container is temporary, and will be replaced with multiple containers (for each
+	*** type of object) at a later time.
+	**/
+	std::vector<hoa_global::GlobalObject*> _current_inv;
+
 	/** \brief Contains quantities corresponding to _all_objects
 	**/
 	std::vector<int> _all_objects_quantities;
+
+	/** \brief Contains quantities corresponding to current inventory
+	**/
+	std::vector<int> _sell_objects_quantities;
 
 	//! \name Menu Windows in Shop Mode
 	//@{
@@ -147,9 +155,6 @@ private:
 	//! \brief A window to confirm the purchase of an object
 	private_shop::ConfirmWindow _confirm_window;
 
-	//! \brief A window to confirm the sale of an object
-	private_shop::SellConfirmWindow _confirm_sell_window;
-	
 	//@}
 }; // class ShopMode : public hoa_mode_manager::GameMode
 

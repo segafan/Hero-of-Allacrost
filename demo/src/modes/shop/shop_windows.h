@@ -130,7 +130,7 @@ public:
 	*** \param count The number of objects in the current inventory
 	*** \param price The price of the object in this entry
 	**/
-	void AddEntry(hoa_utils::ustring name, uint32 count, uint32 price);
+	void AddEntry(hoa_utils::ustring name, uint32 count, uint32 price, uint32 sell_count);
 
 	//! \brief Processes user input and updates the cursor
 	void Update();
@@ -153,9 +153,6 @@ public:
 	*** Each option includes the name of the object and its price.
 	**/
 	hoa_video::OptionBox object_list;
-
-	//! \brief Contains a vector of inventory objects
-	std::vector<hoa_global::GlobalObject*> current_inv;
 }; // class ObjectSellListWindow : public hoa_video::MenuWindow
 
 
@@ -198,8 +195,8 @@ private:
 /** ****************************************************************************
 *** \brief Displays the object's icon, name, and a sale confirmation message
 ***
-*** This window is temporary and will likely be later removed when the
-*** shopping cart functionality is made available.
+*** This window is currently being used for the shopping cart functionality.
+*** When confirmed, all buy/sell transactions are finalized.
 *** ***************************************************************************/
 class ConfirmWindow : public hoa_video::MenuWindow {
 public:
@@ -213,54 +210,9 @@ public:
 	//! \brief Draws the window and the object properties contained within
 	void Draw();
 
-	/** \brief Sets the object that this window will display the properties of
-	*** \param obj A pointer to the object to represent. NULL indicates no object.
-	**/
-	void SetObject(hoa_global::GlobalObject* obj);
-
 	//! \brief Options for the user to confirm or reject the sale
 	hoa_video::OptionBox options;
-
-private:
-	/** \brief A pointer to the object whose properties are to be described
-	*** If this member is set to NULL, then the window will be blank. The pointer
-	*** should point to an object contained within a ShopMode class, not to an
-	*** object in the player's inventory or anywhere else.
-	**/
-	hoa_global::GlobalObject* _object;
 }; // class ConfirmWindow : public hoa_video::MenuWindow
-
-
-
-/** ****************************************************************************
-*** \brief Displays the object's icon, name, and a sale confirmation message
-***
-*** This window is temporary and will likely be later removed when the
-*** shopping cart functionality is made available.
-*** ***************************************************************************/
-class SellConfirmWindow : public hoa_video::MenuWindow {
-public:
-	SellConfirmWindow();
-
-	~SellConfirmWindow();
-
-	//! \brief Updates the option box
-	void Update();
-
-	//! \brief Draws the window and the object properties contained within
-	void Draw();
-
-	/** \brief Sets the object that this window will display the properties of
-	*** \param obj A pointer to the object to represent. NULL indicates no object.
-	**/
-	void SetObject(hoa_global::GlobalObject* obj);
-
-	//! \brief Options for the user to confirm or reject the sale
-	hoa_video::OptionBox options;
-
-private:
-	uint32 _object_id;
-}; // class SellConfirmWindow : public hoa_video::MenuWindow
 
 } // namespace private_shop
 

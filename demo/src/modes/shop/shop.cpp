@@ -92,23 +92,29 @@ void ShopMode::Reset() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 	VideoManager->SetTextColor(Color::white);
 
-	// Everything is temporary code from here to the end of this function
+	// Temporary code
 	_all_objects.clear();
-	_all_objects_quantities.clear();
 	_all_objects.push_back(new GlobalItem(1));
-	_all_objects_quantities.push_back(0);
 	_all_objects.push_back(new GlobalWeapon(10001));
-	_all_objects_quantities.push_back(0);
 	_all_objects.push_back(new GlobalWeapon(10002));
-	_all_objects_quantities.push_back(0);
 	_all_objects.push_back(new GlobalArmor(20002));
-	_all_objects_quantities.push_back(0);
 	_all_objects.push_back(new GlobalArmor(30002));
-	_all_objects_quantities.push_back(0);
 	_all_objects.push_back(new GlobalArmor(40002));
-	_all_objects_quantities.push_back(0);
 	_all_objects.push_back(new GlobalArmor(50001));
-	_all_objects_quantities.push_back(0);
+	// End temp code
+
+	_all_objects_quantities.clear();
+	for (int ctr = 0; ctr < _all_objects.size(); ctr++) {
+		_all_objects_quantities.push_back(0);
+	}
+
+	std::map<uint32, GlobalObject*>* inv = GlobalManager->GetInventory();
+	std::map<uint32, GlobalObject*>::iterator iter;
+
+	_sell_objects_quantities.clear();
+	for (iter = inv->begin(); iter != inv->end(); iter++) {
+		_sell_objects_quantities.push_back(0);
+	}
 
 	_action_window.UpdateFinanceText();
 
@@ -145,9 +151,6 @@ void ShopMode::Update() {
 		case SHOP_STATE_CONFIRM:
 			_confirm_window.Update();
 			break;
-		case SHOP_STATE_CONFIRM_SELL:
-			_confirm_sell_window.Update();
-			break;
 		default:
 			if (SHOP_DEBUG)
 				cerr << "SHOP WARNING: invalid shop state: " << _state << ", reseting to initial state" << endl;
@@ -173,20 +176,9 @@ void ShopMode::Draw() {
 
 	_action_window.Draw();
 	_info_window.Draw();
-	if (_state == SHOP_STATE_SELL) {
-		_sell_window.Draw();
-	}
-	else if (_state == SHOP_STATE_CONFIRM_SELL) {
-		_sell_window.Draw();
-		_confirm_sell_window.Draw();
-	}
-	else if (_state == SHOP_STATE_CONFIRM) {
-		_list_window.Draw();
-		_confirm_window.Draw();
-	}
-	else {
-		_list_window.Draw();
-	}
+	_sell_window.Draw();
+	_list_window.Draw();
+	_confirm_window.Draw();
 }
 
 
