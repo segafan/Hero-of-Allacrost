@@ -58,13 +58,90 @@ public:
 	void CloseFile();
 	//@}
 
-	/** \brief This function updates the global table with the specified key, value pair.
-	*** \param key The key name of the variable to be change
-	*** \param variable The new value to set the key
-	*** \note If the key varname does not exist in the lua stack, it will be added as a new key
-	*** with the specified value.
+	/** \name Data Modifier Functions
+	*** \brief These functions allow the modification of primitive data types
+	*** \param key The string or integer key of the variable to change
+	*** \param value The value to change the variable to
+	*** \note If the key could not be found in the active scope, no change will
+	*** occur and an error message will be logged.
 	**/
-	template <class T> void ModifyData(const std::string& key, T variable);
+	//@{
+	void ModifyBool(const std::string& key, bool value)
+		{ _ModifyData(key, value); }
+
+	void ModifyBool(int32 key, bool value)
+		{ _ModifyData(key, value); }
+	
+	void ModifyInt(const std::string& key, int32 value)
+		{ _ModifyData(key, value); }
+	
+	void ModifyInt(int32 key, int32 value)
+		{ _ModifyData(key, value); }
+	
+	void ModifyUInt(const std::string& key, uint32 value)
+		{ _ModifyData(key, value); }
+
+	void ModifyUInt(int32 key, uint32 value)
+		{ _ModifyData(key, value); }
+
+	void ModifyFloat(const std::string& key, float value)
+		{ _ModifyData(key, value); }
+	
+	void ModifyFloat(int32 key, float value)
+		{ _ModifyData(key, value); }
+	
+	void ModifyString(const std::string& key, const std::string& value)
+		{ _ModifyData(key, value); }
+	
+	void ModifyString(int32 key, const std::string& value)
+		{ _ModifyData(key, value); }
+	//@}
+
+	/** \name Data Addition Functions
+	*** \brief These functions allow the addition of new key/value pairs
+	*** \param key The string or integer key of the variable to add
+	*** \param value The value to set the new variable to
+	*** \note If the key already exists in the active scope when these
+	*** methods are called, the value of that key will be overwritten
+	*** with the new value. There will be no indication that this type of
+	*** overwrite operation took place, so be cautious.
+	**/
+	//@{
+	void AddNewBool(const std::string& key, bool value)
+		{ _AddNewData(key, value); }
+
+	void AddNewBool(int32 key, bool value)
+		{ _AddNewData(key, value); }
+	
+	void AddNewInt(const std::string& key, int32 value)
+		{ _AddNewData(key, value); }
+	
+	void AddNewInt(int32 key, int32 value)
+		{ _AddNewData(key, value); }
+	
+	void AddNewUInt(const std::string& key, uint32 value)
+		{ _AddNewData(key, value); }
+
+	void AddNewUInt(int32 key, uint32 value)
+		{ _AddNewData(key, value); }
+
+	void AddNewFloat(const std::string& key, float value)
+		{ _AddNewData(key, value); }
+	
+	void AddNewFloat(int32 key, float value)
+		{ _AddNewData(key, value); }
+	
+	void AddNewString(const std::string& key, const std::string& value)
+		{ _AddNewData(key, value); }
+	
+	void AddNewString(int32 key, const std::string& value)
+		{ _AddNewData(key, value); }
+	//@}
+
+	// TODO: Add methods to allow the creation of new tables
+// 	void CreateNewTable(const std::string& key);
+// 	void CreateNewTable(uint32 key);
+// 	void EndNewTable();
 
 	//! \brief Commits all modified changes to the Lua file for permanent retention
 	void CommitChanges();
@@ -76,30 +153,145 @@ private:
 	***
 	**/
 	void _SaveStackProcessTable(WriteScriptDescriptor& sd, const std::string &name, luabind::object table);
+
+	/** \brief Template functions that update the key, value pair for the most recently opened table, or in the global scope
+	*** \param key The key name of the variable to be change
+	*** \param value The new value to set the key
+	**/
+	//@{
+	template <class T> void _ModifyData(const std::string& key, T value);
+	template <class T> void _ModifyData(int32 key, T value);
+	//@}
+
+	/** \brief Template functions which add a new key, value pair to the most recently opened scope
+	*** \param key The key name of the variable to add
+	*** \param value The value to set for the new variable
+	**/
+	//@{
+	template <class T> void _AddNewData(const std::string& key, T value);
+	template <class T> void _AddNewData(int32 key, T value);
+	//@}
 }; // class ModifyScriptDescriptor
 
 //-----------------------------------------------------------------------------
 // Template Function Definitions
 //-----------------------------------------------------------------------------
 
-template <class T> void ModifyScriptDescriptor::ModifyData(const std::string& key, T variable) {
-	if (_open_tables.empty() == false) // Get from the table of globals
-		std::cerr << "ModifyScriptDescriptor::ModifyData() does not support table elements yet!" << std::endl;
+template <class T> void ModifyScriptDescriptor::_ModifyData(const std::string& key, T value) {
+	// A pointer to the table where the object is contained
+	luabind::object* table = NULL;
 
-	luabind::object o(luabind::from_stack(_lstack, LUA_GLOBALSINDEX));
+	if (_open_tables.empty() == false) // Retrieve the globals table
+		table = new luabind::object(luabind::from_stack(_lstack, LUA_GLOBALSINDEX));
+	else // Retrieve the most recently opened table from the top of the stack
+		table = new luabind::object(luabind::from_stack(_lstack, private_script::STACK_TOP));
 
-	for (luabind::iterator it(o), end; it != end; ++it) {
-		// Check to see if global variable exists
-		if (luabind::object_cast<std::string>(it.key()) == key) {
-			// Change the global variable if it is found
-			*it = variable;
-			return;
+	if (luabind::type(*table) != LUA_TTABLE) {
+		_error_messages << "* _ModifyData() failed because it could not construct the table "
+			<< "where the data resided: " << key << std::endl;
+		delete(table);
+		return;
+	}
+
+	for (luabind::iterator i(*table); i != private_script::TABLE_END; ++i) {
+		// Check to see if global value exists
+		try {
+			if (luabind::object_cast<std::string>(i.key()) == key) {
+				*i = value;
+				delete(table);
+				return;
+			}
+		}
+		catch (...)  {
+			// A cast failure does not indicate an error, simply continue on with the next key
 		}
 	}
 
-	// If we arrive here, then varname does not exist in the globals so add it
-	luabind::settable(o, key, variable);
-} // template <class T> void ModifyScriptDescriptor::ChangeSetting(const std::string &varname, T variable)
+	// If the code reaches this far, then the variable could not be found
+	_error_messages << "* _ModifyData() failed because in the active scope, it did not find the "
+		<< "table key: " << key << std::endl;
+	delete(table);
+} // template <class T> void ModifyScriptDescriptor::_ModifyData(const std::string& key, T value) {
+
+
+
+template <class T> void ModifyScriptDescriptor::_ModifyData(int32 key, T value) {
+	if (_open_tables.empty() == false) {
+		_error_messages << "* _ModifyData() failed because there were no open tables when the "
+			<< "function was invoked for key: " << key << std::endl;
+		return;
+	}
+
+	luabind::object table(luabind::from_stack(_lstack, private_script::STACK_TOP));
+
+	if (luabind::type(table) != LUA_TTABLE) {
+		_error_messages << "* _ModifyData() failed because the top of the stack was not a table "
+			<< "when trying to modify the data named: " << key << std::endl;
+		return;
+	}
+
+	for (luabind::iterator i(table); i != private_script::TABLE_END; ++i) {
+		// Check to see if global value exists
+		try {
+			if (luabind::object_cast<int32>(i.key()) == key) {
+				*i = value;
+				delete(table);
+				return;
+			}
+		}
+		catch (...)  {
+			// A cast failure does not indicate an error, simply continue on with the next key
+		}
+	}
+
+	// If the code reaches this far, then the variable could not be found
+	_error_messages << "* _ModifyData() failed because in the active scope, it did not find the "
+		<< "table key: " << key << std::endl;
+	delete(table);
+} // template <class T> void ModifyScriptDescriptor::_ModifyData(int32 key, T value) {
+
+
+
+template <class T> void ModifyScriptDescriptor::_AddNewData(const std::string& key, T value) {
+	// A pointer to the table where the object is contained
+	luabind::object* table = NULL;
+
+	if (_open_tables.empty() == false) // Retrieve the globals table
+		table = new luabind::object(luabind::from_stack(_lstack, LUA_GLOBALSINDEX));
+	else // Retrieve the most recently opened table from the top of the stack
+		table = new luabind::object(luabind::from_stack(_lstack, private_script::STACK_TOP));
+
+	if (luabind::type(*table) != LUA_TTABLE) {
+		_error_messages << "* _AddNewData() failed because the top of the stack was not a table "
+			<< "when trying to add the new data: " << key << std::endl;
+		return;
+	}
+
+	// NOTE: If the key already exists in the table, its value will be overwritten here
+	luabind::settable(*table, key, value);
+} // template <class T> void ModifyScriptDescriptor::_AddNewData(const std::string& key, T value)
+
+
+
+template <class T> void ModifyScriptDescriptor::_AddNewData(int32 key, T value) {
+	if (_open_tables.empty() == false) {
+		_error_messages << "* _AddNewData() failed because there were no open tables when the "
+			<< "function was invoked for key: " << key << std::endl;
+		return;
+	}
+
+	// A pointer to the table where the object is contained
+	luabind::object table(luabind::from_stack(_lstack, private_script::STACK_TOP));
+
+	if (luabind::type(table) != LUA_TTABLE) {
+		_error_messages << "* _AddNewData() failed because the top of the stack was not a table "
+			<< "when trying to add the new data: " << key << std::endl;
+		return;
+	}
+
+	// NOTE: If the key already exists in the table, its value will be overwritten here
+	luabind::settable(table, key, value);
+} // template <class T> void ModifyScriptDescriptor::_AddNewData(int32 key, T value)
 
 } // namespace hoa_script
 
