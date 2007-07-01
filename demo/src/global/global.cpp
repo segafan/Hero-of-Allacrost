@@ -473,9 +473,17 @@ bool GameGlobal::SaveGame(string& filename) {
 	file.WriteUInt("play_minutes", SystemManager->GetPlayMinutes());
 	file.WriteUInt("play_seconds", SystemManager->GetPlaySeconds());
 
-	// ----- (2) Save inventory (object id + object count pairs)
-	// NOTE: This does not include saving weapons/armor that are equipped on the characters
-	_SaveInventory(file);
+	// ----- (2) Save the inventory (object id + object count pairs)
+	// NOTE: This does not save any weapons/armor that are equipped on the characters. That data
+	// is stored alongside the character data when it is saved
+	_SaveInventory(file, "items", _inventory_items);
+	_SaveInventory(file, "weapons", _inventory_weapons);
+	_SaveInventory(file, "head_armor", _inventory_head_armor);
+	_SaveInventory(file, "torso_armor", _inventory_torso_armor);
+	_SaveInventory(file, "arm_armor", _inventory_arm_armor);
+	_SaveInventory(file, "leg_armor", _inventory_leg_armor);
+	_SaveInventory(file, "shards", _inventory_shards);
+	_SaveInventory(file, "key_items", _inventory_key_items);
 
 	// ----- (3) Save character data
 	file.InsertNewLine();
@@ -548,8 +556,11 @@ bool GameGlobal::LoadGame(const string& filename) {
 	file.CloseTable();
 
 	// ----- (4) Load event data
+	vector<string> group_names;
 	file.OpenTable("event_groups");
-	// TODO: _LoadEvents(file);
+	file.ReadTableKeys(group_names);
+	for (uint32 i = 0; i < group_names.size(); i++)
+		_LoadEvents(file, group_names[i]);
 	file.CloseTable();
 
 	// ----- (5) Report any errors detected from the previous read operations
@@ -557,133 +568,18 @@ bool GameGlobal::LoadGame(const string& filename) {
 		if (GLOBAL_DEBUG) {
 			cerr << "GLOBAL WARNING: GameGlobal::LoadGame ran into errors when reading the game file. They are as follows:" << endl;
 			cerr << file.GetErrorMessages() << endl;
-		}
-		else {
 			file.ClearErrors();
 		}
 	}
+
+	file.CloseFile();
 	
-	// TODO
 	return true;
 } // bool GameGlobal::LoadGame(string& filename)
 
 // -----------------------------------------------------------------------------
 // GameGlobal class - Private Methods
 // -----------------------------------------------------------------------------
-
-void GameGlobal::_SaveInventory(WriteScriptDescriptor& file) {
-	if (file.IsFileOpen() == false) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GameGlobal::_SaveInventory() failed because the file passed to it was not open" << endl;
-		return;
-	}
-
-	file.InsertNewLine();
-	file.WriteLine("items = {");
-	for (uint32 i = 0; i < _inventory_items.size(); i++) {
-		if (i == 0)
-			file.WriteLine("\t", false);
-		else
-			file.WriteLine(", ", false);
-		file.WriteLine("{" + NumberToString(_inventory_items[i]->GetID()) + ", "
-			+ NumberToString(_inventory_items[i]->GetCount()) + "}", false);
-	}
-	file.InsertNewLine();
-	file.WriteLine("}");
-
-	file.InsertNewLine();
-	file.WriteLine("weapons = {");
-	for (uint32 i = 0; i < _inventory_weapons.size(); i++) {
-		if (i == 0)
-			file.WriteLine("\t", false);
-		else
-			file.WriteLine(", ", false);
-		file.WriteLine("{" + NumberToString(_inventory_weapons[i]->GetID()) + ", "
-			+ NumberToString(_inventory_weapons[i]->GetCount()) + "}", false);
-	}
-	file.InsertNewLine();
-	file.WriteLine("}");
-
-	file.InsertNewLine();
-	file.WriteLine("head_armor = {");
-	for (uint32 i = 0; i < _inventory_head_armor.size(); i++) {
-		if (i == 0)
-			file.WriteLine("\t", false);
-		else
-			file.WriteLine(", ", false);
-		file.WriteLine("{" + NumberToString(_inventory_head_armor[i]->GetID()) + ", "
-			+ NumberToString(_inventory_head_armor[i]->GetCount()) + "}", false);
-	}
-	file.InsertNewLine();
-	file.WriteLine("}");
-
-	file.InsertNewLine();
-	file.WriteLine("torso_armor = {");
-	for (uint32 i = 0; i < _inventory_torso_armor.size(); i++) {
-		if (i == 0)
-			file.WriteLine("\t", false);
-		else
-			file.WriteLine(", ", false);
-		file.WriteLine("{" + NumberToString(_inventory_torso_armor[i]->GetID()) + ", "
-			+ NumberToString(_inventory_torso_armor[i]->GetCount()) + "}", false);
-	}
-	file.InsertNewLine();
-	file.WriteLine("}");
-
-	file.InsertNewLine();
-	file.WriteLine("arm_armor = {");
-	for (uint32 i = 0; i < _inventory_arm_armor.size(); i++) {
-		if (i == 0)
-			file.WriteLine("\t", false);
-		else
-			file.WriteLine(", ", false);
-		file.WriteLine("{" + NumberToString(_inventory_arm_armor[i]->GetID()) + ", "
-			+ NumberToString(_inventory_arm_armor[i]->GetCount()) + "}", false);
-	}
-	file.InsertNewLine();
-	file.WriteLine("}");
-
-	file.InsertNewLine();
-	file.WriteLine("leg_armor = {");
-	for (uint32 i = 0; i < _inventory_leg_armor.size(); i++) {
-		if (i == 0)
-			file.WriteLine("\t", false);
-		else
-			file.WriteLine(", ", false);
-		file.WriteLine("{" + NumberToString(_inventory_leg_armor[i]->GetID()) + ", "
-			+ NumberToString(_inventory_leg_armor[i]->GetCount()) + "}", false);
-	}
-	file.InsertNewLine();
-	file.WriteLine("}");
-
-	file.InsertNewLine();
-	file.WriteLine("shards = {");
-	for (uint32 i = 0; i < _inventory_shards.size(); i++) {
-		if (i == 0)
-			file.WriteLine("\t", false);
-		else
-			file.WriteLine(", ", false);
-		file.WriteLine("{" + NumberToString(_inventory_shards[i]->GetID()) + ", "
-			+ NumberToString(_inventory_shards[i]->GetCount()) + "}", false);
-	}
-	file.InsertNewLine();
-	file.WriteLine("}");
-
-	file.InsertNewLine();
-	file.WriteLine("key_items = {");
-	for (uint32 i = 0; i < _inventory_key_items.size(); i++) {
-		if (i == 0)
-			file.WriteLine("\t", false);
-		else
-			file.WriteLine(", ", false);
-		file.WriteLine("{" + NumberToString(_inventory_key_items[i]->GetID()) + ", "
-			+ NumberToString(_inventory_key_items[i]->GetCount()) + "}", false);
-	}
-	file.InsertNewLine();
-	file.WriteLine("}");
-} // void GameGlobal::_SaveInventory(WriteScriptDescriptor& file)
-
-
 
 void GameGlobal::_SaveCharacter(WriteScriptDescriptor& file, GlobalCharacter* character, bool last) {
 	if (file.IsFileOpen() == false) {
@@ -801,7 +697,28 @@ void GameGlobal::_SaveCharacter(WriteScriptDescriptor& file, GlobalCharacter* ch
 
 
 void GameGlobal::_SaveEvents(hoa_script::WriteScriptDescriptor& file, GlobalEventGroup* event_group) {
-	// TODO
+	if (file.IsFileOpen() == false) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: GameGlobal::_SaveEvents() failed because the file passed to it was not open" << endl;
+		return;
+	}
+
+	if (event_group == NULL) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: GameGlobal::_SaveEvents() failed because the a NULL event group was passed to it" << endl;
+		return;
+	}
+
+	file.WriteLine("\t" + event_group->GetGroupName() + " = {");
+
+	for (map<string, int32>::iterator i = event_group->_events.begin(); i != event_group->_events.end(); i++) {
+		if (i == event_group->_events.begin())
+			file.WriteLine("\t\t", false);
+		else
+			file.WriteLine(", ", false);
+		file.WriteLine("[\"" + i->first + "\"] = " + NumberToString(i->second), false);
+	}
+	file.WriteLine("\t}");
 } // GameGlobal::_SaveEvents(hoa_script::WriteScriptDescriptor& file, GlobalEventGroup* event_group)
 
 
@@ -813,13 +730,13 @@ void GameGlobal::_LoadInventory(hoa_script::ReadScriptDescriptor& file, std::str
 		return;
 	}
 
-	// The inventory category is a table filled with several sub-tables. Each sub-table contains exactly two unsigned integers.
-	// The first is the object's ID, and the second is its count. Tables in Lua begin with index 1, not 0.
+	vector<uint32> object_ids;
+
+	// The table keys are the inventory object ID numbers. The value of each key is the count of that object
 	file.OpenTable(category_name);
-	for (uint32 i = 1; i <= file.GetTableSize(); i++) {
-		file.OpenTable(i);
-		AddToInventory(file.ReadUInt(1), file.ReadUInt(2));
-		file.CloseTable();
+	file.ReadTableKeys(object_ids);
+	for (uint32 i = 0; i < object_ids.size(); i++) {
+		AddToInventory(object_ids[i], file.ReadUInt(object_ids[i]));
 	}
 	file.CloseTable();
 } // void GameGlobal::_LoadInventory(hoa_script::ReadScriptDescriptor& file, std::string category_name)
@@ -919,7 +836,23 @@ void GameGlobal::_LoadCharacter(hoa_script::ReadScriptDescriptor& file, uint32 i
 
 
 void GameGlobal::_LoadEvents(hoa_script::ReadScriptDescriptor& file, const std::string& group_name) {
-	// TODO
+	if (file.IsFileOpen() == false) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: GameGlobal::_LoadEvents() failed because the file passed to it was not open" << endl;
+		return;
+	}
+
+	AddNewEventGroup(group_name);
+	GlobalEventGroup* new_group = GetEventGroup(group_name); // new_group is guaranteed not to be NULL
+
+	vector<string> event_names;
+
+	file.OpenTable(group_name);
+	file.ReadTableKeys(event_names);
+	for (uint32 i = 0; i < event_names.size(); i++) {
+		new_group->AddNewEvent(event_names[i], file.ReadInt(event_names[i]));
+	}
+	file.CloseTable();
 } // void GameGlobal::_LoadEvents(hoa_script::ReadScriptDescriptor& file, const std::string& group_name)
 
 } // namespace hoa_global

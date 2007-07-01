@@ -81,6 +81,9 @@ namespace private_script {
 //! \brief Used to reference to the top of a Lua stack.
 const int32 STACK_TOP = -1;
 
+//! \brief Used to represent the end of a Lua table that is being iterated
+const luabind::iterator TABLE_END;
+
 } // namespace private_script
 
 /** ****************************************************************************

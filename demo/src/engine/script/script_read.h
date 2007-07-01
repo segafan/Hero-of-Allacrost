@@ -255,31 +255,79 @@ public:
 	//@}
 
 	/** \name Table Operation Functions
-	*** \brief These functions perform various Lua table operations.
-	*** \param key The name of the table to operate on.
-	*** \return Zero if there are no table elements or there was an error.
-	***
 	*** After a table is opened, it becomes the active "space" that all of the data read
 	*** operations operate on. You must <b>always</b> remember to close a table once you are
 	*** finished reading data from it.
-	***
-	*** \note The version of ReadOpenTable that uses an integer key will only work when there is
-	*** at least one table already open. In other words, we can't use a number to address a
-	*** table that is defined in the file's global space.
 	**/
 	//@{
-	void OpenTable(const std::string& key);
-	
-	void OpenTable(int32 key);
-	
+	//! \param table_name The name of the table to open
+	void OpenTable(const std::string& table_name);
+
+	/** \param table_name The integer key of the table to open
+	*** \note This function will only work when there is at least one other table already open
+	**/
+	void OpenTable(int32 table_name);
+
+	//! \brief Closes the most recently opened table
 	void CloseTable();
-	
-	uint32 GetTableSize(const std::string& key);
 
-	uint32 GetTableSize(int32 key);
+	/** \brief Returns the number of elements stored in an un-opened table
+	*** \param table_name The name of the (un-open) table to get the size of
+	**/
+	uint32 GetTableSize(const std::string& table_name);
 
-	//! \note This will attempt to get the size of the most recently opened table.
+	/** \brief Returns the number of elements stored in an un-opened table
+	*** \param table_name The integer key of the (un-open) table to get the size of
+	*** \note This function will only work when there is at least one other table already open
+	**/
+	uint32 GetTableSize(int32 table_name);
+
+	//! \brief Returns the number of elements stored in the most recently opened table
 	uint32 GetTableSize();
+
+	/** \brief Fills a vector with all of the keys of a table
+	*** \param table_name The name of the table to open and retrieve the keys from
+	*** \param keys A reference to the vector where to store the table keys
+	***
+	*** The functions without a table_name argument will retrieve the keys for the
+	*** most recently opened table. The keys vector will cleared before the function
+	*** starts populating it with table keys, so make sure nothing important is contained
+	*** in the keys vector before calling this function. If the keys vector is empty
+	*** after the function was called, either an error occured or the table was empty.
+	***
+	*** \note These functions will only work successfully for tables that have the same
+	*** data type for all their keys (ie, all string keys or all integer keys). A table
+	*** with mixed key types (integers and strings for example) will not be processed
+	*** successfully by these functions.
+	**/
+	//@{
+	void ReadTableKeys(std::vector<std::string>& keys)
+		{ _ReadTableKeys(keys); }
+
+	void ReadTableKeys(std::vector<int32>& keys)
+		{ _ReadTableKeys(keys); }
+
+	void ReadTableKeys(std::vector<uint32>& keys)
+		{ _ReadTableKeys(keys); }
+
+	void ReadTableKeys(const std::string& table_name, std::vector<std::string>& keys)
+		{ OpenTable(table_name); _ReadTableKeys(keys); CloseTable(); }
+
+	void ReadTableKeys(const std::string& table_name, std::vector<int32>& keys)
+		{ OpenTable(table_name); _ReadTableKeys(keys); CloseTable(); }
+
+	void ReadTableKeys(const std::string& table_name, std::vector<uint32>& keys)
+		{ OpenTable(table_name); _ReadTableKeys(keys); CloseTable(); }
+
+	void ReadTableKeys(int32 table_name, std::vector<std::string>& keys)
+		{ OpenTable(table_name); _ReadTableKeys(keys); CloseTable(); }
+
+	void ReadTableKeys(int32 table_name, std::vector<int32>& keys)
+		{ OpenTable(table_name); _ReadTableKeys(keys); CloseTable(); }
+
+	void ReadTableKeys(int32 table_name, std::vector<uint32>& keys)
+		{ OpenTable(table_name); _ReadTableKeys(keys); CloseTable(); }
+	//@}
 	//@}
 
 	//! \brief Returns a pointer to the local lua state (use with caution)
@@ -332,7 +380,7 @@ protected:
 	/** \name Vector Read Templates
 	*** \brief These template functions are called by the public ReadTYPEVector functions of this class.
 	*** \param key The name or numeric identifier of the Lua variable to access.
-	*** \param vect A reference to the vector where the read variables should be store
+	*** \param vect A reference to the vector where the read variables should be stored
 	*** \note Integer keys are only valid for variables stored in a table, not for global variables.
 	**/
 	//@{
@@ -341,6 +389,14 @@ protected:
 	//! \brief This template method is a helper function for the other two
 	template <class T> void _ReadDataVectorHelper(std::vector<T>& vect);
 	//@}
+
+	/** \name Table Key Template
+	*** \brief This template function fills a vector with all of the keys contained by the table
+	*** \param vect A reference to the vector where the keys should be stored
+	*** \note This function will fail for any table that has multiple key types (ie, contains both
+	*** integer and string keys).
+	**/
+	template <class T> void _ReadTableKeys(std::vector<T>& keys);
 }; // class ReadScriptDescriptor
 
 //-----------------------------------------------------------------------------
@@ -450,7 +506,7 @@ template <class T> void ReadScriptDescriptor::_ReadDataVectorHelper(std::vector<
 	}
 	
 	// Iterate through all the items of the table and place it in the vector
-	for (luabind::iterator it(o), end; it != end; it++) {
+	for (luabind::iterator it(o); it != private_script::TABLE_END; it++) {
 		try {
 			vect.push_back(luabind::object_cast<T>((*it)));
 		}
@@ -459,6 +515,35 @@ template <class T> void ReadScriptDescriptor::_ReadDataVectorHelper(std::vector<
 		}
 	}
 } // template <class T> void ReadScriptDescriptor::_ReadDataVectorHelper(std::vector<T>& vect)
+
+
+
+template <class T> void ReadScriptDescriptor::_ReadTableKeys(std::vector<T>& keys) {
+	keys.clear();
+
+	if (_open_tables.size() == 0) {
+		_error_messages << "* _ReadTableKeys() failed because there were no open tables to get the keys of" << std::endl;
+		return;
+	}
+
+	luabind::object table(luabind::from_stack(_lstack, private_script::STACK_TOP));
+
+	if (luabind::type(table) != LUA_TTABLE) {
+		_error_messages << "* _ReadTableKeys() failed because the top of the stack was not a table" << std::endl;
+		return;
+	}
+
+	for (luabind::iterator i(table); i != private_script::TABLE_END; i++) {
+		try {
+			keys.push_back(luabind::object_cast<T>(i.key()));
+		}
+		catch (...) {
+			_error_messages << "* _ReadTableKeys() failed due to a type cast failure when retrieving a table key" << std::endl;
+			keys.clear();
+			return;
+		}
+	}
+} // template <class T> void ReadScriptDescriptor::ReadTableKeys(std::vector<T>& keys) {
 
 } // namespace hoa_script
 
