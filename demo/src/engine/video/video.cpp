@@ -613,6 +613,9 @@ bool GameVideo::ApplySettings()
 				return false;
 			}
 		}
+		
+		// turn off writing to the depth buffer
+		glDepthMask ( GL_FALSE );
 
 		_width      = _temp_width;
 		_height     = _temp_height;
