@@ -877,34 +877,34 @@ void BootMode::_SaveSettingsFile() {
 
 	// Write the current settings into the .lua file
 	// video
-	settings_lua.ModifyData<int32>("video_settings.screen_resx", VideoManager->GetWidth());
-	settings_lua.ModifyData<int32>("video_settings.screen_resy", VideoManager->GetHeight());
-	settings_lua.ModifyData<std::string>("video_settings.full_screen", VideoManager->IsFullscreen() ? "true" : "false");
-	settings_lua.ModifyData<float>("video_settings.brightness", VideoManager->GetGamma());
+	settings_lua.ModifyInt("video_settings.screen_resx", VideoManager->GetWidth());
+	settings_lua.ModifyInt("video_settings.screen_resy", VideoManager->GetHeight());
+	settings_lua.ModifyString("video_settings.full_screen", VideoManager->IsFullscreen() ? "true" : "false");
+	settings_lua.ModifyFloat("video_settings.brightness", VideoManager->GetGamma());
 
 	// audio
-	settings_lua.ModifyData<float>("audio_settings.music_vol", AudioManager->GetMusicVolume());
-	settings_lua.ModifyData<float>("audio_settings.sound_vol", AudioManager->GetSoundVolume());
+	settings_lua.ModifyFloat("audio_settings.music_vol", AudioManager->GetMusicVolume());
+	settings_lua.ModifyFloat("audio_settings.sound_vol", AudioManager->GetSoundVolume());
 
 	// input
-	settings_lua.ModifyData<int32>("key_settings.up", InputManager->GetUpKey());
-	settings_lua.ModifyData<int32>("key_settings.down", InputManager->GetDownKey());
-	settings_lua.ModifyData<int32>("key_settings.left", InputManager->GetLeftKey());
-	settings_lua.ModifyData<int32>("key_settings.right", InputManager->GetRightKey());
-	settings_lua.ModifyData<int32>("key_settings.confirm", InputManager->GetConfirmKey());
-	settings_lua.ModifyData<int32>("key_settings.cancel", InputManager->GetCancelKey());
-	settings_lua.ModifyData<int32>("key_settings.menu", InputManager->GetMenuKey());
-	settings_lua.ModifyData<int32>("key_settings.swap", InputManager->GetSwapKey());
-	settings_lua.ModifyData<int32>("key_settings.left_select", InputManager->GetLeftSelectKey());
-	settings_lua.ModifyData<int32>("key_settings.right_select", InputManager->GetRightSelectKey());
-	settings_lua.ModifyData<int32>("key_settings.pause", InputManager->GetPauseKey());
-	settings_lua.ModifyData<int32>("joystick_settings.confirm", InputManager->GetConfirmJoy());
-	settings_lua.ModifyData<int32>("joystick_settings.cancel", InputManager->GetCancelJoy());
-	settings_lua.ModifyData<int32>("joystick_settings.menu", InputManager->GetMenuJoy());
-	settings_lua.ModifyData<int32>("joystick_settings.swap", InputManager->GetSwapJoy());
-	settings_lua.ModifyData<int32>("joystick_settings.left_select", InputManager->GetLeftSelectJoy());
-	settings_lua.ModifyData<int32>("joystick_settings.right_select", InputManager->GetRightSelectJoy());
-	settings_lua.ModifyData<int32>("joystick_settings.pause", InputManager->GetPauseJoy());
+	settings_lua.ModifyInt("key_settings.up", InputManager->GetUpKey());
+	settings_lua.ModifyInt("key_settings.down", InputManager->GetDownKey());
+	settings_lua.ModifyInt("key_settings.left", InputManager->GetLeftKey());
+	settings_lua.ModifyInt("key_settings.right", InputManager->GetRightKey());
+	settings_lua.ModifyInt("key_settings.confirm", InputManager->GetConfirmKey());
+	settings_lua.ModifyInt("key_settings.cancel", InputManager->GetCancelKey());
+	settings_lua.ModifyInt("key_settings.menu", InputManager->GetMenuKey());
+	settings_lua.ModifyInt("key_settings.swap", InputManager->GetSwapKey());
+	settings_lua.ModifyInt("key_settings.left_select", InputManager->GetLeftSelectKey());
+	settings_lua.ModifyInt("key_settings.right_select", InputManager->GetRightSelectKey());
+	settings_lua.ModifyInt("key_settings.pause", InputManager->GetPauseKey());
+	settings_lua.ModifyInt("joystick_settings.confirm", InputManager->GetConfirmJoy());
+	settings_lua.ModifyInt("joystick_settings.cancel", InputManager->GetCancelJoy());
+	settings_lua.ModifyInt("joystick_settings.menu", InputManager->GetMenuJoy());
+	settings_lua.ModifyInt("joystick_settings.swap", InputManager->GetSwapJoy());
+	settings_lua.ModifyInt("joystick_settings.left_select", InputManager->GetLeftSelectJoy());
+	settings_lua.ModifyInt("joystick_settings.right_select", InputManager->GetRightSelectJoy());
+	settings_lua.ModifyInt("joystick_settings.pause", InputManager->GetPauseJoy());
 
 	// and save it!
 	settings_lua.CommitChanges();
