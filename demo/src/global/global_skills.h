@@ -372,6 +372,9 @@ private:
 	//! \brief A pointer to the skill's execution function for battles
 	ScriptObject _battle_execute_function;
 
+	//! \brief A pointer to the skill's execution function for menus
+	ScriptObject _menu_execute_function;
+
 	//! \brief Loads the skill's data from a file and sets the members of the class
 	void _Load();
 

@@ -283,48 +283,48 @@ object ReadScriptDescriptor::ReadFunctionPointer(int32 key) {
 // Table Operation Functions
 //-----------------------------------------------------------------------------
 
-void ReadScriptDescriptor::OpenTable(const string& key) {
+void ReadScriptDescriptor::OpenTable(const string& table_name) {
 	if (_open_tables.size() == 0) { // Fetch the table from the global space
-		lua_getglobal(_lstack, key.c_str());
+		lua_getglobal(_lstack, table_name.c_str());
 		if (!lua_istable(_lstack, STACK_TOP)) {
 			_error_messages << "* OpenTable() failed because the data retrieved was not a table "
-				<< "or did not exist for the global key " << key << endl;
+				<< "or did not exist for the global key " << table_name << endl;
 			return;
 		}
-		_open_tables.push_back(key);
+		_open_tables.push_back(table_name);
 	}
 
 	else { // The table to fetch is an element of another table
-		lua_pushstring(_lstack, key.c_str());
+		lua_pushstring(_lstack, table_name.c_str());
 		lua_gettable(_lstack, STACK_TOP - 1);
 		if (!lua_istable(_lstack, STACK_TOP)) {
 			_error_messages << "* OpenTable() failed because the data retrieved was not a table "
-				<< "or did not exist for the table element key " << key << endl;
+				<< "or did not exist for the table element key " << table_name << endl;
 			return;
 		}
-		_open_tables.push_back(key);
+		_open_tables.push_back(table_name);
 	}
 } // void ReadScriptDescriptor::OpenTable(string key)
 
 
 
-void ReadScriptDescriptor::OpenTable(int32 key) {
+void ReadScriptDescriptor::OpenTable(int32 table_name) {
 	// At least one table must be open to use a numerical key
 	if (_open_tables.size() == 0) {
 		_error_messages << "* OpenTable() failed because there were no tables open when trying "
-				<< "to open the with the element key " << key << endl;
+				<< "to open the with the element key " << table_name << endl;
 		return;
 	}
 
-	lua_pushnumber(_lstack, key);
+	lua_pushnumber(_lstack, table_name);
 	lua_gettable(_lstack, STACK_TOP - 1);
 	if (!lua_istable(_lstack, STACK_TOP)) {
 		_error_messages << "* OpenTable() failed because the data retrieved was not a table "
-				<< "or did not exist for the table element key " << key << endl;
+				<< "or did not exist for the table element key " << table_name << endl;
 		return;
 	}
 
-	_open_tables.push_back(NumberToString(key));
+	_open_tables.push_back(NumberToString(table_name));
 } // void ReadScriptDescriptor::OpenTable(int32 key)
 
 
@@ -341,22 +341,22 @@ void ReadScriptDescriptor::CloseTable() {
 
 
 
-uint32 ReadScriptDescriptor::GetTableSize(const string& key) {
+uint32 ReadScriptDescriptor::GetTableSize(const string& table_name) {
 	uint32 size = 0;
 
-	OpenTable(key);
-	size = static_cast<uint32>(luaL_getn(_lstack, STACK_TOP));
+	OpenTable(table_name);
+	size = GetTableSize();
 	CloseTable();
 	return size;
 }
 
 
 
-uint32 ReadScriptDescriptor::GetTableSize(int32 key) {
+uint32 ReadScriptDescriptor::GetTableSize(int32 table_name) {
 	uint32 size = 0;
 
-	OpenTable(key);
-	size = static_cast<uint32>(luaL_getn(_lstack, STACK_TOP));
+	OpenTable(table_name);
+	size = GetTableSize();
 	CloseTable();
 
 	return size;

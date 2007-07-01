@@ -439,13 +439,13 @@ private:
 
 	// ----- Private methods
 
-	/** \brief A helper function to GameGlobal::SaveGame() that stores the contents of the inventory to the saved game file
+	/** \brief A helper function to GameGlobal::SaveGame() that stores the contents of a type of inventory to the saved game file
 	*** \param file A reference to the open and valid file where to write the inventory list
-	*** Note that this method writes all eight categories of inventory objects. The function writes
-	*** each inventory object as a pair of numbers (i.e. "{#1, #2}"), where the first number is the
-	*** object ID and the second number is the object count.
+	*** \param name The name under which this set of inventory data should be categorized (ie "items", "weapons", etc)
+	*** \param inv A reference to the inventory vector to store
+	*** \note The class type T must be a derived class of GlobalObject
 	**/
-	void _SaveInventory(hoa_script::WriteScriptDescriptor& file);
+	template <class T> void _SaveInventory(hoa_script::WriteScriptDescriptor& file, std::string name, std::vector<T*>& inv);
 
 	/** \brief A helper function to GameGlobal::SaveGame() that writes character data to the saved game file
 	*** \param file A reference to the open and valid file where to write the character data
@@ -480,6 +480,31 @@ private:
 	**/
 	void _LoadEvents(hoa_script::ReadScriptDescriptor& file, const std::string& group_name);
 }; // class GameGlobal
+
+//-----------------------------------------------------------------------------
+// Template Function Definitions
+//-----------------------------------------------------------------------------
+
+template <class T> void GameGlobal::_SaveInventory(hoa_script::WriteScriptDescriptor& file, std::string name, std::vector<T*>& inv) {
+	if (file.IsFileOpen() == false) {
+		if (GLOBAL_DEBUG)
+			std::cerr << "GLOBAL WARNING: GameGlobal::_SaveInventory() failed because the file passed to it was not open" << std::endl;
+		return;
+	}
+
+	file.InsertNewLine();
+	file.WriteLine(name + " = {");
+	for (uint32 i = 0; i < inv.size(); i++) {
+		if (i == 0)
+			file.WriteLine("\t", false);
+		else
+			file.WriteLine(", ", false);
+		file.WriteLine("[" + NumberToString(inv[i]->GetID()) + "] = "
+			+ NumberToString(inv[i]->GetCount()), false);
+	}
+	file.InsertNewLine();
+	file.WriteLine("}");
+} // template <class T> void GameGlobal::_SaveInventory(hoa_script::WriteScriptDescriptor& file, std::string name, std::vector<T*>& inv)
 
 } // namespace hoa_global
 

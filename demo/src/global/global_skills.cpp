@@ -135,7 +135,7 @@ void GlobalSkill::_Load() {
 	else {
 		_type = GLOBAL_SKILL_INVALID;
 		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL ERROR: GlobalSkill::_Load failed because it had an invalid id value: " << _id << endl;
+			cerr << "GLOBAL ERROR: GlobalSkill::_Load() failed because it had an invalid id value: " << _id << endl;
 		_id = 0;
 		return;
 	}
@@ -143,7 +143,7 @@ void GlobalSkill::_Load() {
 	// Load the item data from the script
 	if (skill_script->DoesTableExist(_id) == false) {
 		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL ERROR: GlobalSkill::_Load failed because there was no skill defined for the id: " << _id << endl;
+			cerr << "GLOBAL ERROR: GlobalSkill::_Load() failed because there was no skill defined for the id: " << _id << endl;
 		_id = 0;
 		return;
 	}
@@ -158,27 +158,32 @@ void GlobalSkill::_Load() {
 	_level_required = skill_script->ReadInt("level_required");
 	_usage = static_cast<GLOBAL_USE>(skill_script->ReadInt("usage"));
 	_target_alignment = static_cast<GLOBAL_ALIGNMENT>(skill_script->ReadInt("target_alignment"));
-	_battle_execute_function = skill_script->ReadFunctionPointer("BattleExecute");
-//  	_menu_execute_function = skill_script->ReadFunctionPointer("MenuExecute");
+	if (skill_script->DoesFunctionExist("BattleExecute"))
+		_battle_execute_function = skill_script->ReadFunctionPointer("BattleExecute");
+	if (skill_script->DoesFunctionExist("MenuExecut"))
+ 		_menu_execute_function = skill_script->ReadFunctionPointer("MenuExecute");
 
 	skill_script->CloseTable();
 
 	if (skill_script->IsErrorDetected()) {
-		cerr << "GLOBAL ERROR: GlobalItem::_Load experienced errors when reading Lua data: " << endl;
+		cerr << "GLOBAL ERROR: GlobalSkill::_Load() experienced errors when reading Lua data: " << endl;
 		cerr << skill_script->GetErrorMessages() << endl;
 	}
-}
+} // void GlobalSkill::_Load()
 
 
 
 void GlobalSkill::BattleExecute(hoa_battle::private_battle::BattleActor* target, hoa_battle::private_battle::BattleActor* instigator) {
-	//FIX ME Do a nifty text message in game
-	//This check is if in case a player is warming up
-	//and some of his SP gets syphoned
-	if (GetSPRequired() > instigator->GetSkillPoints())
-	{
-		cerr << "GLOBAL ERROR: tried to use item " << MakeStandardString(_name) << " which had a count of zero" << endl;
+	if (_battle_execute_function.is_valid() == false) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL ERROR: GlobalSkill::BattleExecute() failed because the Lua function "
+				<< "pointer was invalid for skill: " << _id << endl;
 		return;
+	}
+
+	if (GetSPRequired() > instigator->GetSkillPoints()) {
+		cerr << "GLOBAL ERROR: GlobalSkill::BattleExecute() failed because there was an insufficient amount of "
+			<< "skill points to execute the skill" << endl;
 	}
 
 	ScriptCallFunction<void>(_battle_execute_function, target, instigator);
@@ -187,12 +192,16 @@ void GlobalSkill::BattleExecute(hoa_battle::private_battle::BattleActor* target,
 
 
 void GlobalSkill::MenuExecute(GlobalCharacter* target, GlobalCharacter* instigator) {
-	//FIX ME Do a nifty text message in game
-	//This check is if in case a player is warming up
-	//and some of his SP gets syphoned
-	if (GetSPRequired() > instigator->GetSkillPoints())
-	{
-		cerr << "GLOBAL ERROR: tried to use item " << MakeStandardString(_name) << " which had a count of zero" << endl;
+	if (_menu_execute_function.is_valid() == false) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL ERROR: GlobalSkill::MenuExecute() failed because the Lua function "
+				<< "pointer was invalid for skill: " << _id << endl;
+		return;
+	}
+
+	if (GetSPRequired() > instigator->GetSkillPoints()) {
+		cerr << "GLOBAL ERROR: GlobalSkill::MenuExecute() failed because there was an insufficient amount of "
+			<< "skill points to execute the skill" << endl;
 		return;
 	}
 
