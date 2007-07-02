@@ -14,11 +14,13 @@
 *** **************************************************************************/
 
 #include "mode_manager.h"
+#include "system.h"
 #include "boot.h"
 
 using namespace std;
 
 using namespace hoa_utils;
+using namespace hoa_system;
 using namespace hoa_boot;
 
 
@@ -148,7 +150,7 @@ GameMode* GameModeManager::GetTop() {
 void GameModeManager::Update() {
 	// If a Push() or Pop() function was called, we need to adjust the state of the game stack.
 	if (_state_change == true) {
-		// Pop however many game modes we need to from the stop of the stack
+		// Pop however many game modes we need to from the top of the stack
 		while (_pop_count != 0) {
 			if (_game_stack.empty()) {
 				if (MODE_MANAGER_DEBUG) {
@@ -178,6 +180,9 @@ void GameModeManager::Update() {
 
 		// Reset the state change variable
 		_state_change = false;
+
+		// Call the system manager and tell it that the active game mode changed so it can update timers accordingly
+		SystemManager->ExamineSystemTimers();
 	} // if (_state_change == true)
 
 	// Call the Update function on the top stack mode (the active game mode)

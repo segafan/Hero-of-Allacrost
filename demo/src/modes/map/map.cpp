@@ -76,8 +76,7 @@ MapMode::MapMode(string filename) :
 
 	_dialogue_manager = new DialogueManager();
 
-	_intro_timer.SetDuration(7000);
-	_intro_timer.Reset();
+	_intro_timer.Initialize(7000, 0, this);
 
 	// TODO: Load the map data in a seperate thread
 	_Load();
@@ -150,7 +149,7 @@ void MapMode::Reset() {
 		_music[0].PlayMusic();
 	}
 
-	_intro_timer.Play();
+	_intro_timer.Run();
 }
 
 
@@ -1182,14 +1181,14 @@ void MapMode::Draw() {
 		_dialogue_manager->Draw();
 	}
 
-	if (_intro_timer.HasExpired() == false) {
-		uint32 time = _intro_timer.GetTimeLeft();
+	if (_intro_timer.IsFinished() == false) {
+		uint32 time = _intro_timer.GetTimeExpired();
 		Color blend(1.0f, 1.0f, 1.0f, 1.0f);
-		if (time > 5000) { // Fade in
-			blend.SetAlpha(1.0f - (static_cast<float>(time - 5000) / 2000.0f));
+		if (time < 2000) { // Fade in
+			blend.SetAlpha((static_cast<float>(time) / 2000.0f));
 		}
-		else if (time < 2000) { // Fade out
-			blend.SetAlpha(static_cast<float>(time) / 2000.0f);
+		else if (time > 5000) { // Fade out
+			blend.SetAlpha(1.0f - static_cast<float>(time - 5000) / 2000.0f);
 		}
 		VideoManager->PushState();
 		VideoManager->SetCoordSys(0.0f, 1024.0f, 768.0f, 0.0f);

@@ -316,7 +316,7 @@ private:
 	*** and name at the top center of the screen. The graphic and text are faded in for the first
 	*** two seconds, drawn opaquely for the next three seconds, and faded out in the final two seconds.
 	**/
-	hoa_system::Timer _intro_timer;
+	hoa_system::SystemTimer _intro_timer;
 
 	//! \brief The name of the script file that contains the map.
 	std::string _map_filename;

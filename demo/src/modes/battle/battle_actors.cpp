@@ -56,9 +56,8 @@ BattleActor::BattleActor() : _total_time_damaged(0),
 	VideoManager->LoadImage(_time_portrait_selected);
 
 	// Reset attack timer, TEMP CODE!!!!
-	_TEMP_attack_animation_timer.SetDuration(0);
-	_TEMP_attack_animation_timer.Reset();
-	_TEMP_attack_animation_timer.Play();
+	_TEMP_attack_animation_timer.Initialize(0);
+	_TEMP_attack_animation_timer.Run();
 }
 
 BattleActor::~BattleActor()
@@ -102,7 +101,7 @@ void BattleActor::DrawTimePortrait(bool is_selected) {
 void BattleActor::ResetWaitTime()
 {
 	_wait_time.Reset();
-	_wait_time.Play();
+	_wait_time.Run();
 
 	//Sets time meter portrait position
 	_time_portrait_location = 128.f;
@@ -118,7 +117,7 @@ void BattleActor::OnDeath()
 //For when he is given new life! LIFE!
 void BattleActor::OnLife()
 {
-	GetWaitTime()->Play();
+	GetWaitTime()->Run();
 }
 
 // Gives a specific amount of damage for the actor
@@ -150,15 +149,14 @@ void BattleActor::TakeDamage(int32 damage)
 
 void BattleActor::TEMP_ResetAttackTimer()
 {
-	_TEMP_attack_animation_timer.SetDuration(1000);
-	_TEMP_attack_animation_timer.Reset();
-	_TEMP_attack_animation_timer.Play();
+	_TEMP_attack_animation_timer.Initialize(1000);
+	_TEMP_attack_animation_timer.Run();
 }
 
 // Is the actor attacking right now
 bool BattleActor::TEMP_IsAttacking() const
 {
-	return !_TEMP_attack_animation_timer.HasExpired();
+	return !_TEMP_attack_animation_timer.IsFinished();
 }
 
 // *****************************************************************************
@@ -196,7 +194,7 @@ BattleCharacterActor::BattleCharacterActor(GlobalCharacter * character, float x_
 	// and scale wait time based on slowest actor
 	//_wait_time.SetDuration(5000);
 	//ResetWaitTime();
-	//_wait_time.Play();
+	//_wait_time.Initialize();
 	//_action_state = ACTION_IDLE;
 
 	// Load images for the down menu
@@ -220,7 +218,7 @@ BattleCharacterActor::~BattleCharacterActor() {
 /*void BattleCharacterActor::ResetWaitTime()
 {
 	_wait_time.Reset();// = 5000;
-	_wait_time.Play();
+	_wait_time.Initialize();
 
 	//Sets time meter portrait position
 	_time_portrait_location = 128.f;
@@ -233,7 +231,7 @@ void BattleCharacterActor::Update()
 	{
 		current_battle->RemoveScriptedEventsForActor(this);
 	}*/
-	if (!_wait_time.HasExpired() && IsAlive() && !IsQueuedToPerform() && _wait_time.IsPlaying())
+	if (!_wait_time.IsFinished() && IsAlive() && !IsQueuedToPerform() && _wait_time.IsRunning())
 		_time_portrait_location += SystemManager->GetUpdateTime() * (405.0f / _wait_time.GetDuration());
 
 	GetActor()->RetrieveBattleAnimation("idle")->Update();
@@ -245,7 +243,7 @@ void BattleCharacterActor::Update()
 	else
 		SetXLocation(GetXOrigin()); // Restore original place
 
-	//if (!_wait_time.HasExpired() && GetActor()->IsAlive() && !IsQueuedToPerform())
+	//if (!_wait_time.IsFinished() && GetActor()->IsAlive() && !IsQueuedToPerform())
 	//	_time_portrait_location += SystemManager->GetUpdateTime() * (405.0f / _wait_time.GetDuration());	
 }
 
@@ -630,7 +628,7 @@ void BattleEnemyActor::CalcEvade(hoa_global::GlobalAttackPoint* attack_point)
 /*void BattleEnemyActor::ResetWaitTime()
 {
 	_wait_time.Reset();
-	_wait_time.Play();
+	_wait_time.Initialize();
 	//Sets time meter portrait position
 
 	_time_portrait_location = 128.f;
@@ -651,12 +649,12 @@ void BattleEnemyActor::Update() {
 
 	//if (_wait_time)
 	//	_wait_time -= SystemManager->GetUpdateTime();
-	if (!_wait_time.HasExpired() && IsAlive() && !IsQueuedToPerform() && _wait_time.IsPlaying())
+	if (!_wait_time.IsFinished() && IsAlive() && !IsQueuedToPerform() && _wait_time.IsRunning())
 		_time_portrait_location += SystemManager->GetUpdateTime() * (405.0f / _wait_time.GetDuration());
 
-	if (IsAlive() && !IsQueuedToPerform() && GetWaitTime()->HasExpired())
+	if (IsAlive() && !IsQueuedToPerform() && GetWaitTime()->IsFinished())
 	{
-		//if (_wait_time.HasExpired())
+		//if (_wait_time.IsFinished())
 		//{
 			//_wait_time = 0;
 			//FIX ME Needs real AI decisions

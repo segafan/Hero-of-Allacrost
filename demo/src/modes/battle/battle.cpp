@@ -77,9 +77,8 @@ ScriptEvent::ScriptEvent(BattleActor* source, BattleActor* target, GlobalSkill* 
 	_attack_point(attack_point),
 	_target(target)
 {
-	_warm_up_time.SetDuration(skill->GetWarmupTime());
-	_warm_up_time.Reset();
-	_warm_up_time.Play();
+	_warm_up_time.Initialize(skill->GetWarmupTime());
+	_warm_up_time.Run();
 }
 
 // Constructor for a script event that uses an item
@@ -91,9 +90,8 @@ ScriptEvent::ScriptEvent(BattleActor* source, BattleActor* target, GlobalItem* i
 	_target(target)
 
 {
-	_warm_up_time.SetDuration(warm_up_time);
-	_warm_up_time.Reset();
-	_warm_up_time.Play();
+	_warm_up_time.Initialize(warm_up_time);
+	_warm_up_time.Run();
 }
 
 
@@ -105,9 +103,8 @@ ScriptEvent::ScriptEvent(BattleActor* source, BattleActor* target, GlobalItem* i
 	_targets(targets),
 	_target(NULL)
 {
-	_warm_up_time.SetDuration(skill->GetWarmupTime());
-	_warm_up_time.Reset();
-	_warm_up_time.Play();
+	_warm_up_time.Initialize(skill->GetWarmupTime());
+	_warm_up_time.Run();
 }*/
 
 
@@ -119,7 +116,7 @@ ScriptEvent::~ScriptEvent()
 void ScriptEvent::Update()
 {
 	//_warm_up_time -= SystemManager->GetUpdateTime();
-	if (_warm_up_time.IsPlaying())
+	if (_warm_up_time.IsRunning())
 	{
 		float offset = SystemManager->GetUpdateTime() * (107.f / _warm_up_time.GetDuration());
 	
@@ -725,7 +722,7 @@ void BattleMode::Update() {
 			se->Update();
 			//(*it).Update();
 			//se._warm_up_time -= SystemManager->GetUpdateTime();
-			if (se->GetWarmUpTime()->HasExpired() && !_IsPerformingScript())
+			if (se->GetWarmUpTime()->IsFinished() && !_IsPerformingScript())
 			{
 				SetPerformingScript(true,se);
 				se->RunScript();
@@ -811,7 +808,7 @@ void BattleMode::_UpdateCharacterSelection() {
 
 		while (working_index < GetNumberOfCharacters()) {
 			bca = GetPlayerCharacterAt(working_index + 1);
-			if (bca->IsAlive() && bca->GetWaitTime()->HasExpired() && !bca->IsQueuedToPerform()) {
+			if (bca->IsAlive() && bca->GetWaitTime()->IsFinished() && !bca->IsQueuedToPerform()) {
 				_selected_character_index = working_index + 1;
 				break;
 			}
@@ -827,7 +824,7 @@ void BattleMode::_UpdateCharacterSelection() {
 
 		while (working_index > 0) {
 			bca = GetPlayerCharacterAt(working_index + 1);
-			if (bca->IsAlive() && bca->GetWaitTime()->HasExpired() && !bca->IsQueuedToPerform())
+			if (bca->IsAlive() && bca->GetWaitTime()->IsFinished() && !bca->IsQueuedToPerform())
 			{
 				_selected_character_index = working_index - 1;
 				break;
@@ -1318,7 +1315,7 @@ void BattleMode::FreezeTimers()
 	//Pause scripts
 	while (it != _script_queue.end())
 	{
-		if ((*it)->GetWarmUpTime()->IsPlaying())
+		if ((*it)->GetWarmUpTime()->IsRunning())
 			(*it)->GetWarmUpTime()->Pause();
 
 		++it;
@@ -1327,14 +1324,14 @@ void BattleMode::FreezeTimers()
 	//Pause characters
 	for (uint32 i = 0; i < _character_actors.size(); ++i)
 	{
-		if (_character_actors.at(i)->GetWaitTime()->IsPlaying())
+		if (_character_actors.at(i)->GetWaitTime()->IsRunning())
 			_character_actors.at(i)->GetWaitTime()->Pause();
 	}
 
 	//Pause enemies
 	for (uint32 i = 0; i < _enemy_actors.size(); ++i)
 	{
-		if (_enemy_actors.at(i)->GetWaitTime()->IsPlaying())
+		if (_enemy_actors.at(i)->GetWaitTime()->IsRunning())
 			_enemy_actors.at(i)->GetWaitTime()->Pause();
 	}
 }
@@ -1348,8 +1345,8 @@ void BattleMode::UnFreezeTimers()
 	//Pause scripts
 	while (it != _script_queue.end())
 	{
-		if (!(*it)->GetWarmUpTime()->IsPlaying())
-			(*it)->GetWarmUpTime()->Play();
+		if ((*it)->GetWarmUpTime()->IsPaused())
+			(*it)->GetWarmUpTime()->Run();
 
 		++it;
 	}
@@ -1357,15 +1354,15 @@ void BattleMode::UnFreezeTimers()
 	//Unpause characters
 	for (uint32 i = 0; i < _character_actors.size(); ++i)
 	{
-		if (!_character_actors.at(i)->GetWaitTime()->IsPlaying())
-			_character_actors.at(i)->GetWaitTime()->Play();
+		if (_character_actors.at(i)->GetWaitTime()->IsPaused())
+			_character_actors.at(i)->GetWaitTime()->Run();
 	}
 
 	//Unpause enemies
 	for (uint32 i = 0; i < _enemy_actors.size(); ++i)
 	{
-		if (!_enemy_actors.at(i)->GetWaitTime()->IsPlaying())
-			_enemy_actors.at(i)->GetWaitTime()->Play();
+		if (_enemy_actors.at(i)->GetWaitTime()->IsPaused())
+			_enemy_actors.at(i)->GetWaitTime()->Run();
 	}
 }
 
@@ -1453,7 +1450,7 @@ uint32 BattleMode::GetIndexOfFirstIdleCharacter() const {
 
 	for (uint32 i = 0; it != _character_actors.end(); i++, it++) {
 		bca = (*it);
-		if (!bca->IsQueuedToPerform() && bca->GetActor()->IsAlive() && bca->GetWaitTime()->HasExpired())
+		if (!bca->IsQueuedToPerform() && bca->GetActor()->IsAlive() && bca->GetWaitTime()->IsFinished())
 		{
 			return i;
 		}
