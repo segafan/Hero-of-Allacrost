@@ -468,10 +468,12 @@ bool GameGlobal::SaveGame(string& filename) {
 
 	// ----- (1) Save simple play data
 	file.InsertNewLine();
-	file.WriteUInt("funds", _funds);
+	file.WriteString("location_name", MakeStandardString(_location_name));
+	file.WriteString("location_graphic", _location_graphic.GetFilename());
 	file.WriteUInt("play_hours", SystemManager->GetPlayHours());
 	file.WriteUInt("play_minutes", SystemManager->GetPlayMinutes());
 	file.WriteUInt("play_seconds", SystemManager->GetPlaySeconds());
+	file.WriteUInt("funds", _funds);
 
 	// ----- (2) Save the inventory (object id + object count pairs)
 	// NOTE: This does not save any weapons/armor that are equipped on the characters. That data
@@ -529,12 +531,19 @@ bool GameGlobal::LoadGame(const string& filename) {
 	}
 
 	// ----- (1) Load play data
-	_funds = file.ReadUInt("funds");
+	_location_name = MakeUnicodeString(file.ReadString("location_name"));
+	_location_graphic.SetFilename(file.ReadString("location_graphic"));
+	if (_location_graphic.Load() == false) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: GameGlobal::LoadGame() failed to load the location graphic: "
+				<< _location_graphic.GetFilename() << endl;
+	}
 	uint8 hours, minutes, seconds;
 	hours = file.ReadUInt("play_hours");
 	minutes = file.ReadUInt("play_minutes");
 	seconds = file.ReadUInt("play_seconds");
 	SystemManager->SetPlayTime(hours, minutes, seconds);
+	_funds = file.ReadUInt("funds");
 
 	// ----- (2) Load inventory
 	_LoadInventory(file, "items");

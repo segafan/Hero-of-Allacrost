@@ -76,6 +76,9 @@ MapMode::MapMode(string filename) :
 
 	_dialogue_manager = new DialogueManager();
 
+	_intro_timer.SetDuration(7000);
+	_intro_timer.Reset();
+
 	// TODO: Load the map data in a seperate thread
 	_Load();
 
@@ -146,6 +149,8 @@ void MapMode::Reset() {
 	if (_music.size() > 0 && _music[0].IsPlaying() == false) {
 		_music[0].PlayMusic();
 	}
+
+	_intro_timer.Play();
 }
 
 
@@ -1175,6 +1180,26 @@ void MapMode::Draw() {
 	// ---------- (9) Draw the dialogue display if a dialogue is active
 	if (_map_state == DIALOGUE) {
 		_dialogue_manager->Draw();
+	}
+
+	if (_intro_timer.HasExpired() == false) {
+		uint32 time = _intro_timer.GetTimeLeft();
+		Color blend(1.0f, 1.0f, 1.0f, 1.0f);
+		if (time > 5000) { // Fade in
+			blend.SetAlpha(1.0f - (static_cast<float>(time - 5000) / 2000.0f));
+		}
+		else if (time < 2000) { // Fade out
+			blend.SetAlpha(static_cast<float>(time) / 2000.0f);
+		}
+		VideoManager->PushState();
+		VideoManager->SetCoordSys(0.0f, 1024.0f, 768.0f, 0.0f);
+		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
+		VideoManager->Move(512.0f, 100.0f);
+		VideoManager->DrawImage(_location_graphic, blend);
+		VideoManager->MoveRelative(0.0f, -80.0f);
+		VideoManager->SetTextColor(blend);
+		VideoManager->DrawText(_map_name);
+		VideoManager->PopState();
 	}
 } // void MapMode::_Draw()
 

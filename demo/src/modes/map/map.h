@@ -78,19 +78,18 @@ const uint8 OBSERVATION  = 0x04;
 //@}
 
 /** \name Map Context Constants
-*** \brief Constants used to name the possible contexts on a map
+*** \brief Constants used to represent all 32 possible map contexts
 **/
-enum
-{
-	MAP_CONTEXT_1  = 0x00000001,
-	MAP_CONTEXT_2  = 0x00000002,
-	MAP_CONTEXT_3  = 0x00000004,
-	MAP_CONTEXT_4  = 0x00000008,
-	MAP_CONTEXT_5  = 0x00000010,
-	MAP_CONTEXT_6  = 0x00000020,
-	MAP_CONTEXT_7  = 0x00000040,
-	MAP_CONTEXT_8  = 0x00000080,
-	MAP_CONTEXT_9  = 0x00000100,
+enum MAP_CONTEXT {
+	MAP_CONTEXT_01 = 0x00000001,
+	MAP_CONTEXT_02 = 0x00000002,
+	MAP_CONTEXT_03 = 0x00000004,
+	MAP_CONTEXT_04 = 0x00000008,
+	MAP_CONTEXT_05 = 0x00000010,
+	MAP_CONTEXT_06 = 0x00000020,
+	MAP_CONTEXT_07 = 0x00000040,
+	MAP_CONTEXT_08 = 0x00000080,
+	MAP_CONTEXT_09 = 0x00000100,
 	MAP_CONTEXT_10 = 0x00000200,
 	MAP_CONTEXT_11 = 0x00000400,
 	MAP_CONTEXT_12 = 0x00000800,
@@ -113,7 +112,7 @@ enum
 	MAP_CONTEXT_29 = 0x10000000,
 	MAP_CONTEXT_30 = 0x20000000,
 	MAP_CONTEXT_31 = 0x40000000,
-	MAP_CONTEXT_32 = 0x80000000,
+	MAP_CONTEXT_32 = 0x80000000
 };
 
 
@@ -311,6 +310,13 @@ private:
 
 	//! \brief Indicates if dialogue icons should be drawn or not.
 	static bool _show_dialogue_icons;
+
+	/** \brief A timer used for when the player first enters the map
+	*** This timer is set to 7000 ms (7 seconds) and is used to display the map's location graphic
+	*** and name at the top center of the screen. The graphic and text are faded in for the first
+	*** two seconds, drawn opaquely for the next three seconds, and faded out in the final two seconds.
+	**/
+	hoa_system::Timer _intro_timer;
 
 	//! \brief The name of the script file that contains the map.
 	std::string _map_filename;
