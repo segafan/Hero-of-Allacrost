@@ -119,7 +119,7 @@ public:
 
 	//! \brief Resets the timer to its initial state
 	void Reset()
-		{ _state = SYSTEM_TIMER_INITIAL; _time_expired = 0; _times_completed = 0; }
+		{ if (_state != SYSTEM_TIMER_INVALID) { _state = SYSTEM_TIMER_INITIAL; _time_expired = 0; _times_completed = 0; } }
 
 	//! \brief Starts the timer from the initial state or resumes it if it is paused
 	void Run()
