@@ -146,7 +146,7 @@ public:
 	BattleActor * GetSource()
 		{ return _source; }
 
-	inline hoa_system::Timer* GetWarmUpTime()
+	inline hoa_system::SystemTimer* GetWarmUpTime()
 		{ return &_warm_up_time; }
 
 	inline BattleActor* GetTarget()
@@ -170,7 +170,7 @@ public:
 
 	// \brief Returns the amount of time left in warm up
 	// \return warm up time left
-	//inline hoa_system::Timer GetWarmUpTime() const { return _warm_up_time; }
+	//inline hoa_system::SystemTimer GetWarmUpTime() const { return _warm_up_time; }
 
 	//! \brief Gets the BattleActor hosting this script
 	//inline IBattleActor* GetActor() { return _actor_source; }
@@ -200,7 +200,7 @@ private:
 	//std::deque<BattleActor *> _targets;
 
 	//! The amount of time to wait to execute the script
-	hoa_system::Timer _warm_up_time;
+	hoa_system::SystemTimer _warm_up_time;
 	//! If the script is ready to run or not
 };
 

@@ -148,7 +148,7 @@ public:
 
 	// \brief Gets the wait time
 	// \return the wait time
-	hoa_system::Timer* GetWaitTime() { return &_wait_time; }
+	hoa_system::SystemTimer* GetWaitTime() { return &_wait_time; }
 
 	// \brief Called when the actor dies
 	virtual void OnDeath();
@@ -372,10 +372,10 @@ protected:
 
 	//! Amount of time character spends in the idle phase
 	//FIX ME for now, will also be used for cool down times?
-	hoa_system::Timer _wait_time;
+	hoa_system::SystemTimer _wait_time;
 
 	//! Timer for the attack animation
-	hoa_system::Timer _TEMP_attack_animation_timer;
+	hoa_system::SystemTimer _TEMP_attack_animation_timer;
 
 	//! Recalculates wait time if agility has changed	
 	void _RecalculateWaitTime();
@@ -482,7 +482,7 @@ public:
 
 	// \brief Gets the wait time
 	// \return the wait time
-	//virtual hoa_system::Timer* GetWaitTime() { return &_wait_time; }
+	//virtual hoa_system::SystemTimer* GetWaitTime() { return &_wait_time; }
 
 	// \brief Resets the wait time and time meter portrait
 	//void ResetWaitTime();
@@ -532,7 +532,7 @@ private:
 
 	//! Amount of time character spends in the idle phase
 	//FIX ME for now, will also be used for cool down times?
-	//hoa_system::Timer _wait_time;
+	//hoa_system::SystemTimer _wait_time;
 
 	//! Recalculates wait time if agility has changed	
 	//void _RecalculateWaitTime();
@@ -631,7 +631,7 @@ public:
 
 	//! \brief Gets the wait time
 	//! \return the wait time
-	virtual hoa_system::Timer* GetWaitTime() { return &_wait_time; }
+	virtual hoa_system::SystemTimer* GetWaitTime() { return &_wait_time; }
 
 	//! \brief Resets the wait time and time meter portrait
 	void ResetWaitTime();*/
@@ -678,7 +678,7 @@ private:
 
 	//! Amount of time enemy spends in the idle phase
 	//FIX ME for now, will also be used for cool down times?
-	hoa_system::Timer _wait_time;*/
+	hoa_system::SystemTimer _wait_time;*/
 
 	//! Which action state the char is in for the time meter.  TEMPORARY!!!
 	//uint8 _action_state;

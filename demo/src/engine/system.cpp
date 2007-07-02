@@ -21,10 +21,9 @@
 using namespace std;
 
 using namespace hoa_utils;
-using namespace hoa_script;
 using namespace hoa_audio;
-using namespace hoa_system::private_system;
-
+using namespace hoa_script;
+using namespace hoa_mode_manager;
 
 template<> hoa_system::GameSystem* Singleton<hoa_system::GameSystem>::_singleton_reference = NULL;
 
@@ -33,10 +32,124 @@ namespace hoa_system {
 GameSystem* SystemManager = NULL;
 bool SYSTEM_DEBUG = false;
 
+// -----------------------------------------------------------------------------
+// SystemTimer Class
+// -----------------------------------------------------------------------------
 
-// The constructor initalize all the data fields inside the GameSystem class
+SystemTimer::SystemTimer() :
+	_state(SYSTEM_TIMER_INVALID),
+	_duration(0),
+	_number_loops(0),
+	_mode_owner(NULL),
+	_time_expired(0),
+	_times_completed(0)
+{}
+
+
+
+SystemTimer::~SystemTimer() {
+	// If the timer is still in the invalid state, the SystemManager never received a reference to it.
+	if (_state == SYSTEM_TIMER_INVALID)
+		return;
+
+	// Remove the reference to this timer object from the SystemManager
+	SystemManager->_system_timers.erase(this);
+}
+
+
+
+void SystemTimer::Initialize(uint32 duration, int32 number_loops, hoa_mode_manager::GameMode* mode_owner) {
+	// If the state is invalid, this is the first time that this timer has been initialized and we need to pass it
+	// along to the SystemManager
+	if (_state == SYSTEM_TIMER_INVALID) {
+		SystemManager->_system_timers.insert(this);
+	}
+
+	_duration = duration;
+	_number_loops = number_loops;
+	_mode_owner = mode_owner;
+
+	_state = SYSTEM_TIMER_INITIAL;
+	_time_expired = 0;
+	_times_completed = 0;
+}
+
+
+
+void SystemTimer::SetDuration(uint32 duration) {
+	if (IsInitial()) {
+		_duration = duration;
+	}
+	else {
+		if (SYSTEM_DEBUG)
+			cerr << "SYSTEM WARNING: SystemTimer::SetDuration() was invoked when the timer was not in the "
+				<< "initial state. No operation was performed." << endl;
+		return;
+	}
+}
+
+
+
+void SystemTimer::SetNumberLoops(int32 number_loops) {
+	if (IsInitial()) {
+		_number_loops = number_loops;
+	}
+	else {
+		if (SYSTEM_DEBUG)
+			cerr << "SYSTEM WARNING: SystemTimer::SetNumberLoops() was invoked when the timer was not in the "
+				<< "initial state. No operation was performed." << endl;
+		return;
+	}
+}
+
+
+
+void SystemTimer::SetModeOwner(hoa_mode_manager::GameMode* mode_owner) {
+	if (IsInitial()) {
+		_mode_owner = mode_owner;
+	}
+	else {
+		if (SYSTEM_DEBUG)
+			cerr << "SYSTEM WARNING: SystemTimer::SetModeOwner() was invoked when the timer was not in the "
+				<< "initial state. No operation was performed." << endl;
+		return;
+	}
+}
+
+
+
+void SystemTimer::_UpdateTimer() {
+	if (IsRunning() == false)
+		return;
+
+	_time_expired += SystemManager->GetUpdateTime();
+
+	if (_time_expired >= _duration) {
+		_times_completed++;
+
+		// Checks if infinite looping is enabled
+		if (_number_loops < 0) { 
+			_time_expired -= _duration;
+		}
+		// Checks if the number of loops have expired
+		else if (_times_completed > static_cast<uint32>(_number_loops)) {
+			_time_expired = 0;
+			_state = SYSTEM_TIMER_FINISHED;
+		}
+		// Otherwise, there are still additional loops to complete
+		else {
+			_time_expired -= _duration;
+		}
+	}
+}
+
+// -----------------------------------------------------------------------------
+// GameSystem Class
+// -----------------------------------------------------------------------------
+
 GameSystem::GameSystem() {
-	if (SYSTEM_DEBUG) cout << "SETTINGS: GameSystem constructor invoked" << endl;
+	if (SYSTEM_DEBUG)
+		cout << "SETTINGS: GameSystem constructor invoked" << endl;
 
 	_not_done = true;
 	_language = "en"; // Default language is English
@@ -45,13 +158,14 @@ GameSystem::GameSystem() {
 
 
 GameSystem::~GameSystem() {
-	if (SYSTEM_DEBUG) cout << "SETTINGS: GameSystem destructor invoked" << endl;
+	if (SYSTEM_DEBUG)
+		cout << "SETTINGS: GameSystem destructor invoked" << endl;
 }
 
 
-// Makes a call to the data manager for retrieving configured settings
+
 bool GameSystem::SingletonInitialize() {
-	// Initialize the gettext library
+	// TODO: Initialize the gettext library
 // 	setlocale(LC_ALL, "");
 // 	bindtextdomain(PACKAGE, DATADIR);
 // 	textdomain(PACKAGE);
@@ -84,22 +198,25 @@ bool GameSystem::SingletonInitialize() {
 // Set up the timers before the main game loop begins
 void GameSystem::InitializeTimers() {
 	_last_update = SDL_GetTicks();
-	_update_time = 1; // Must be non-zero, otherwise bad things will happen...
+	_update_time = 1; // Set to non-zero, otherwise bad things may happen...
 	_hours_played = 0;
 	_minutes_played = 0;
 	_seconds_played = 0;
 	_milliseconds_played = 0;
+	_system_timers.clear();
 }
 
 
-// Returns the difference between the time now and last_update (in ms) and calculates frame rate
+
 void GameSystem::UpdateTimers() {
 	uint32 tmp;
 
+	// ----- (1): Update the simple game timer
 	tmp = _last_update;
 	_last_update = SDL_GetTicks();
 	_update_time = _last_update - tmp;
 
+	// ----- (2): Update the game play timer
 	_milliseconds_played += _update_time;
 	if (_milliseconds_played >= 1000) {
 		_seconds_played += _milliseconds_played / 1000;
@@ -112,6 +229,28 @@ void GameSystem::UpdateTimers() {
 				_minutes_played = _minutes_played % 60;
 			}
 		}
+	}
+
+	// ----- (3): Update all SystemTimer objects
+	for (set<SystemTimer*>::iterator i = _system_timers.begin(); i != _system_timers.end(); i++)
+		(*i)->_UpdateTimer();
+}
+
+
+
+void GameSystem::ExamineSystemTimers() {
+	GameMode* active_mode = ModeManager->GetTop();
+	GameMode* timer_mode = NULL;
+
+	for (set<SystemTimer*>::iterator i = _system_timers.begin(); i != _system_timers.end(); i++) {
+		timer_mode = (*i)->GetModeOwner();
+		if (timer_mode == NULL)
+			continue;
+		
+		if (timer_mode == active_mode)
+			(*i)->Run();
+		else
+			(*i)->Pause();
 	}
 }
 
@@ -131,48 +270,6 @@ void GameSystem::SetLanguage(std::string lang) {
 //
 // 	cerr << "SETTINGS ERROR: attempt to set unsupported language \"" << lang << "\" failed" << endl;
 	_language = lang;
-}
-
-/////////////////////////////
-// TIMER CLASS IMPLEMENTATION
-/////////////////////////////
-Timer::Timer( uint32 duration )
-{
-	_duration = duration;
-	_time_left = duration;
-	_expiration_time = -1;
-	_is_playing = false;
-}
-
-void Timer::Play()
-{
-	_expiration_time = SDL_GetTicks() + _time_left;
-	_is_playing = true;
-}
-
-void Timer::Pause()
-{
-	_time_left = _expiration_time - SDL_GetTicks();
-	_is_playing = false;
-}
-
-void Timer::Reset()
-{
-	_time_left = _duration;
-	_expiration_time = -1;
-	_is_playing = false;
-}
-
-bool Timer::HasExpired() const
-{
-	//Time not up if it's paused
-	if (!_is_playing)
-		return false;
-
-	if ( _expiration_time >= 0 && ( SDL_GetTicks() > _expiration_time ) )
-		return true;
-
-	return false;
 }
 
 } // namespace hoa_system
