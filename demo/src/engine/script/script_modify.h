@@ -143,16 +143,25 @@ public:
 // 	void CreateNewTable(uint32 key);
 // 	void EndNewTable();
 
-	//! \brief Commits all modified changes to the Lua file for permanent retention
-	void CommitChanges();
+	/** \brief Commits all modified changes to the Lua file for permanent retention
+	*** \param leave_closed If set to true this file will be left closed once the function finishes (re-opens fileby default)
+	***
+	*** This is a heavy-weight function because it has to write out the entire Lua state to a file,
+	*** regardless of whether one piece of data was modified or one hundred were. Therefore, you
+	*** should only call this function when all data modifications are done and you need to save the
+	*** result back to the hard-disk. Because the file referenced by this class is modified, the file
+	*** is closed and optionally re-opened before the function returns.
+	***
+	*** \todo Spawn off this function in a seperate thread?
+	**/
+	void CommitChanges(bool leave_closed = false);
 
 private:
-	/** \brief Functions to print out a table during stack output.
-	*** \todo Roots: I honestly have no idea what the purpose of this function is, since its not called
-	*** from anywhere
-	***
+	/** \brief A helper function to CommitChanges() that writes out the contents of a table to the file
+	*** \param file A reference to the open file to write the table to
+	*** \param table A reference to the valid luabind::object that contains the table's contents
 	**/
-	void _SaveStackProcessTable(WriteScriptDescriptor& sd, const std::string &name, luabind::object table);
+	void _CommitTable(WriteScriptDescriptor& file, const luabind::object& table);
 
 	/** \brief Template functions that update the key, value pair for the most recently opened table, or in the global scope
 	*** \param key The key name of the variable to be change

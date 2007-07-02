@@ -382,6 +382,12 @@ bool DoesFileExist(const std::string& file_name) {
 
 
 
+bool MoveFile(const std::string& source_name, const std::string& destination_name) {
+	return (rename(source_name.c_str(), destination_name.c_str()) == 0);
+}
+
+
+
 bool MakeDirectory(const std::string& dir_name) {
 	// Don't do anything if the directory already exists
 	struct stat buf;

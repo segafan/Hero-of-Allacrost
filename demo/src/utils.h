@@ -474,6 +474,18 @@ void InsertionSort(std::vector<T>& swap_vec) {
 **/
 bool DoesFileExist(const std::string& file_name);
 
+/** \brief Moves a file from one location to another
+*** \param source_name The name of the file that is to be moved
+*** \param destination_name The location name to where the file should be moved to
+*** \return True if the file was successfully moved, false if it was not
+***
+*** This function can also be used to rename files.
+*** \note If there exists a file with the same name + path as the destination_name,
+*** it will be overwritten without warning or indication. Be careful when using this
+*** function!
+**/
+bool MoveFile(const std::string& source_name, const std::string& destination_name);
+
 /** \brief Removes all files present in a directory
 *** \param dir_name The name of the directory to clean (e.g. "img/screnshots")
 *** \return True upon success, false upon failure
