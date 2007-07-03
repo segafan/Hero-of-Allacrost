@@ -53,17 +53,17 @@ enemies[101] = {
 			name = "Trunk",
 			x_position = 58,
 			y_position = 36,
-			fortitude_bonus = 10,
-			protection_bonus = 0,
-			evade_bonus = 0.0
+			fortitude_modifier = 10,
+			protection_modifier = 0,
+			evade_modifier = 0.0
 		},
 		[2] = {
 			name = "Branches",
 			x_position = 64,
 			y_position = 80,
-			fortitude_bonus = 0,
-			protection_bonus = 0,
-			evade_bonus = 1.0
+			fortitude_modifier = 0,
+			protection_modifier = 0,
+			evade_modifier = 1.0
 		}
 	},
 
@@ -114,17 +114,17 @@ enemies[102] = {
 			name = "Forehead",
 			x_position = 90,
 			y_position = 127,
-			fortitude_bonus = 0,
-			protection_bonus = 0,
-			evade_bonus = 0.0
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
 		},
 		[2] = {
 			name = "Orifice",
 			x_position = 95,
 			y_position = 77,
-			fortitude_bonus = 0,
-			protection_bonus = 0,
-			evade_bonus = 0.0
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
 		},
 	},
 
@@ -175,25 +175,25 @@ enemies[103] = {
 			name = "Head",
 			x_position = 26,
 			y_position = 23,
-			fortitude_bonus = 0,
-			protection_bonus = 0,
-			evade_bonus = 0.0
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
 		},
 		[2] = {
 			name = "Body",
 			x_position = 95,
 			y_position = 111,
-			fortitude_bonus = 0,
-			protection_bonus = 0,
-			evade_bonus = 0.0
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
 		},
 		[3] = {
 			name = "Tail",
 			x_position = 22,
 			y_position = 146,
-			fortitude_bonus = 0,
-			protection_bonus = 0,
-			evade_bonus = 0.0
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
 		}
 	},
 
@@ -243,25 +243,25 @@ enemies[104] = {
 			name = "Head",
 			x_position = 70,
 			y_position = 165,
-			fortitude_bonus = 0,
-			protection_bonus = 0,
-			evade_bonus = 0.0
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
 		},
 		[2] = {
 			name = "Abdomen",
 			x_position = 60,
 			y_position = 115,
-			fortitude_bonus = 0,
-			protection_bonus = 0,
-			evade_bonus = 0.0
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
 		},
 		[3] = {
 			name = "Tail",
 			x_position = 70,
 			y_position = 65,
-			fortitude_bonus = 0,
-			protection_bonus = 0,
-			evade_bonus = 0.0
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
 		}
 	},
 
@@ -311,33 +311,33 @@ enemies[105] = {
 			name = "Head",
 			x_position = 152,
 			y_position = 226,
-			fortitude_bonus = 0,
-			protection_bonus = 0,
-			evade_bonus = 0.0
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
 		},
 		[2] = {
 			name = "Chest",
 			x_position = 150,
 			y_position = 190,
-			fortitude_bonus = 0,
-			protection_bonus = 0,
-			evade_bonus = 0.0
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
 		},
 		[3] = {
 			name = "Arm",
 			x_position = 200,
 			y_position = 155,
-			fortitude_bonus = 0,
-			protection_bonus = 0,
-			evade_bonus = 0.0
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
 		},
 		[4] = {
 			name = "Legs",
 			x_position = 150,
 			y_position = 105,
-			fortitude_bonus = 0,
-			protection_bonus = 0,
-			evade_bonus = 0.0
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
 		}
 	},
 
@@ -388,25 +388,25 @@ enemies[106] = {
 			name = "Head",
 			x_position = 156,
 			y_position = 222,
-			fortitude_bonus = 0,
-			protection_bonus = 0,
-			evade_bonus = 0.0
+			fortitude_modifier = 0,
+			protection_modifier = 0,
+			evade_modifier = 0.0
 		},
 		[2] = {
 			name = "Chest",
 			x_position = 199,
 			y_position = 155,
-			fortitude_bonus = 0,
-			protection_bonus = 0,
-			evade_bonus = 0.0
+			fortitude_modifier = 0,
+			protection_modifier = 0,
+			evade_modifier = 0.0
 		},
 		[3] = {
 			name = "Arm",
 			x_position = 242,
 			y_position = 143,
-			fortitude_bonus = 0,
-			protection_bonus = 0,
-			evade_bonus = 0.0
+			fortitude_modifier = 0,
+			protection_modifier = 0,
+			evade_modifier = 0.0
 		}
 	},
 

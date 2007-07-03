@@ -278,7 +278,7 @@ void BattleCharacterActor::CalcPhysicalDefense(hoa_global::GlobalAttackPoint* at
 
 	if (attack_point)
 	{
-		_physical_defense += attack_point->GetFortitudeBonus();
+		_physical_defense += static_cast<uint32>(_physical_defense * attack_point->GetFortitudeModifier());
 	}
 }
 
@@ -296,7 +296,7 @@ void BattleCharacterActor::CalcMetaPhysicalDefense(hoa_global::GlobalAttackPoint
 
 	if (attack_point)
 	{
-		_metaphysical_defense += attack_point->GetProtectionBonus();
+		_metaphysical_defense += static_cast<uint32>(_metaphysical_defense * attack_point->GetProtectionModifier());
 	}
 }
 
@@ -313,7 +313,7 @@ void BattleCharacterActor::CalcEvade(hoa_global::GlobalAttackPoint* attack_point
 	}*/
 	if (attack_point)
 	{
-		_combat_evade += attack_point->GetEvadeBonus();
+		_combat_evade += static_cast<uint32>(_combat_evade * attack_point->GetEvadeModifier());
 	}
 }
 
@@ -593,7 +593,7 @@ void BattleEnemyActor::CalcPhysicalDefense(GlobalAttackPoint* attack_point)
 
 	if (attack_point)
 	{
-		_physical_defense += attack_point->GetFortitudeBonus();
+		_physical_defense += static_cast<uint32>(_physical_defense + attack_point->GetFortitudeModifier());
 	}
 }
 
@@ -604,7 +604,7 @@ void BattleEnemyActor::CalcMetaPhysicalDefense(GlobalAttackPoint* attack_point)
 
 	if (attack_point)
 	{
-		_metaphysical_defense += attack_point->GetProtectionBonus();
+		_metaphysical_defense += static_cast<uint32>(attack_point->GetProtectionModifier());
 	}
 }
 
@@ -621,7 +621,7 @@ void BattleEnemyActor::CalcEvade(hoa_global::GlobalAttackPoint* attack_point)
 	}*/
 	if (attack_point)
 	{
-		_combat_evade += attack_point->GetEvadeBonus();
+		_combat_evade += static_cast<uint32>(_combat_evade * attack_point->GetEvadeModifier());
 	}
 }
 
