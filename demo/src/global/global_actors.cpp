@@ -39,14 +39,31 @@ bool GlobalAttackPoint::LoadData(ReadScriptDescriptor& script) {
 		return false;
 	}
 
+	if (script.IsErrorDetected()) {
+		if (GLOBAL_DEBUG) {
+			cerr << "GLOBAL WARNING: GlobalAttackPoint::LoadData() found errors detected in the "
+				<< "script argument passed to it. They are as follows:" << endl;
+			cerr << script.GetErrorMessages() << endl;
+		}
+		script.ClearErrors();
+	}
+
 	_name = MakeUnicodeString(script.ReadString("name"));
 	_x_position = script.ReadInt("x_position");
 	_y_position = script.ReadInt("y_position");
-	_fortitude_bonus = script.ReadInt("fortitude_bonus");
-	_protection_bonus = script.ReadInt("protection_bonus");
-	_evade_bonus = script.ReadFloat("evade_bonus");
+	_fortitude_modifier = script.ReadFloat("fortitude_modifier");
+	_protection_modifier = script.ReadFloat("protection_modifier");
+	_evade_modifier = script.ReadFloat("evade_modifier");
 
-	// TODO: Check if any script read errors occurred
+	if (script.IsErrorDetected()) {
+		if (GLOBAL_DEBUG) {
+			cerr << "GLOBAL ERROR: GlobalAttackPoint::LoadData() failed due to script reading errors. "
+				<< "They are as follows:" << endl;
+			cerr << script.GetErrorMessages() << endl;
+		}
+		script.ClearErrors();
+		return false;
+	}
 
 	return true;
 }
@@ -144,15 +161,24 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) {
 		_protection = char_script.ReadInt("protection");
 		_agility = char_script.ReadInt("agility");
 		_evade = char_script.ReadFloat("evade");
-		_experience_next_level = char_script.ReadInt("experience_points");
+		_experience_next_level = char_script.ReadUInt("experience_points");
 		char_script.CloseTable();
+
+		if (char_script.IsErrorDetected()) {
+			if (GLOBAL_DEBUG) {
+				cerr << "GLOBAL WARNING: GlobalCharacter constructor had errors in reading the character's "
+					<< "base stats. They are as follows:" << endl;
+				cerr << char_script.GetErrorMessages() << endl;
+			}
+			char_script.ClearErrors();
+		}
 	}
 
 	// (3.5): Read the character's growth stats
 	char_script.OpenTable("growth_stats");
 	_growth_hit_points = char_script.ReadFloat("hit_points");
 	_growth_skill_points = char_script.ReadFloat("skill_points");
-	_growth_experience_points = char_script.ReadFloat("experience_points");
+// 	_growth_experience_points = char_script.ReadFloat("experience_points");
 	_growth_strength = char_script.ReadFloat("strength");
 	_growth_vigor = char_script.ReadFloat("vigor");
 	_growth_fortitude = char_script.ReadFloat("fortitude");

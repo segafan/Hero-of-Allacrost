@@ -43,33 +43,33 @@ characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS] = {
 			name = "Head",
 			x_position = 31,
 			y_position = 54,
-			fortitude_bonus = 0.0,
-			protection_bonus = 20.0,
-			evade_bonus = 25.0
+			fortitude_modifier = -0.20,
+			protection_modifier = 0.25,
+			evade_modifier = 0.50
 		},
 		[2] = {
 			name = "Torso",
 			x_position = 37,
 			y_position = 34,
-			fortitude_bonus = 40,
-			protection_bonus = 10,
-			evade_bonus = 0.0
+			fortitude_modifier = 0.40,
+			protection_modifier = 0.10,
+			evade_modifier = -0.20
 		},
 		[3] = {
 			name = "Arms",
 			x_position = 31,
 			y_position = 54,
-			fortitude_bonus = 10,
-			protection_bonus = 0,
-			evade_bonus = 10.0
+			fortitude_modifier = 0.10,
+			protection_modifier = 0.00,
+			evade_modifier = 0.10
 		},
 		[4] = {
 			name = "Legs",
 			x_position = 37,
 			y_position = 34,
-			fortitude_bonus = 20,
-			protection_bonus = 20,
-			evade_bonus = 5.0
+			fortitude_modifier = 0.20,
+			protection_modifier = 0.20,
+			evade_modifier = 0.05
 		}
 	},
 
@@ -116,33 +116,33 @@ characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA] = {
 			name = "Head",
 			x_position = 31,
 			y_position = 54,
-			fortitude_bonus = 0.0,
-			protection_bonus = 20.0,
-			evade_bonus = 25.0
+			fortitude_modifier = -0.20,
+			protection_modifier = 0.25,
+			evade_modifier = 0.50
 		},
 		[2] = {
 			name = "Torso",
 			x_position = 37,
 			y_position = 34,
-			fortitude_bonus = 40,
-			protection_bonus = 10,
-			evade_bonus = 0.0
+			fortitude_modifier = 0.40,
+			protection_modifier = 0.10,
+			evade_modifier = -0.20
 		},
 		[3] = {
 			name = "Arms",
 			x_position = 31,
 			y_position = 54,
-			fortitude_bonus = 10,
-			protection_bonus = 0,
-			evade_bonus = 10.0
+			fortitude_modifier = 0.10,
+			protection_modifier = 0.00,
+			evade_modifier = 0.10
 		},
 		[4] = {
 			name = "Legs",
 			x_position = 37,
 			y_position = 34,
-			fortitude_bonus = 20,
-			protection_bonus = 20,
-			evade_bonus = 5.0
+			fortitude_modifier = 0.20,
+			protection_modifier = 0.20,
+			evade_modifier = 0.05
 		}
 	},
 

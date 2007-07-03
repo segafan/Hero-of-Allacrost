@@ -53,17 +53,17 @@ enemies[1] = {
 			name = "Head",
 			x_position = 31,
 			y_position = 54,
-			fortitude_bonus = 0,
-			protection_bonus = 0,
-			evade_bonus = 0.0
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
 		},
 		[2] = {
 			name = "Body",
 			x_position = 37,
 			y_position = 34,
-			fortitude_bonus = 0,
-			protection_bonus = 0,
-			evade_bonus = 0.0
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
 		}
 	},
 
@@ -113,17 +113,17 @@ enemies[2] = {
 			name = "Head",
 			x_position = 17,
 			y_position = 33,
-			fortitude_bonus = 0,
-			protection_bonus = 0,
-			evade_bonus = 0.0
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
 		},
 		[2] = {
 			name = "Abdomen",
 			x_position = 48,
 			y_position = 57,
-			fortitude_bonus = 0,
-			protection_bonus = 0,
-			evade_bonus = 0.0
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
 		}
 	},
 
@@ -173,25 +173,25 @@ enemies[3] = {
 			name = "Head",
 			x_position = 24,
 			y_position = 60,
-			fortitude_bonus = 0,
-			protection_bonus = 0,
-			evade_bonus = 0.0
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
 		},
 		[2] = {
 			name = "Body",
 			x_position = 58,
 			y_position = 25,
-			fortitude_bonus = 0,
-			protection_bonus = 0,
-			evade_bonus = 0.0
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
 		},
 		[3] = {
 			name = "Tail",
 			x_position = 78,
 			y_position = 38,
-			fortitude_bonus = 0,
-			protection_bonus = 0,
-			evade_bonus = 0.0
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
 		}
 	},
 
@@ -242,25 +242,25 @@ enemies[4] = {
 			name = "Head",
 			x_position = 9,
 			y_position = 108,
-			fortitude_bonus = 0,
-			protection_bonus = 0,
-			evade_bonus = 0.0
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
 		},
 		[2] = {
 			name = "Chest",
 			x_position = 20,
 			y_position = 82,
-			fortitude_bonus = 0,
-			protection_bonus = 0,
-			evade_bonus = 0.0
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
 		},
 		[3] = {
 			name = "Legs",
 			x_position = 6,
 			y_position = 56,
-			fortitude_bonus = 0,
-			protection_bonus = 0,
-			evade_bonus = 0.0
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
 		}
 	},
 
@@ -311,25 +311,25 @@ enemies[5] = {
 			name = "Head",
 			x_position = 26,
 			y_position = 23,
-			fortitude_bonus = 0,
-			protection_bonus = 0,
-			evade_bonus = 0.0
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
 		},
 		[2] = {
 			name = "Chest",
 			x_position = 39,
 			y_position = 26,
-			fortitude_bonus = 0,
-			protection_bonus = 0,
-			evade_bonus = 0.0
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
 		},
 		[3] = {
 			name = "Legs",
 			x_position = 48,
 			y_position = 14,
-			fortitude_bonus = 0,
-			protection_bonus = 0,
-			evade_bonus = 0.0
+			fortitude_modifier = 0.0,
+			protection_modifier = 0.0,
+			evade_modifier = 0.0
 		}
 	},
 

@@ -148,14 +148,14 @@ public:
 	uint16 GetYPosition() const
 		{ return _y_position; }
 
-	uint32 GetFortitudeBonus() const
-		{ return _fortitude_bonus; }
+	float GetFortitudeModifier() const
+		{ return _fortitude_modifier; }
 
-	uint32 GetProtectionBonus() const
-		{ return _protection_bonus; }
+	float GetProtectionModifier() const
+		{ return _protection_modifier; }
 
-	float GetEvadeBonus() const
-		{ return _evade_bonus; }
+	float GetEvadeModifier() const
+		{ return _evade_modifier; }
 	//@}
 
 private:
@@ -172,17 +172,21 @@ private:
 	**/
 	uint16 _x_position, _y_position;
 
-	/** \brief The defense and evasion bonuses for this attack point
+	/** \brief The defense and evasion percentage modifiers for this attack point
 	***
-	*** These are called "bonuses" because they are added to the fortitude, protection, and evade ratings of the
-	*** actor which the attack point is a part of. These members may only be zero or positive -- never negative.
-	*** They are percentages which are applied to the actor's native defense and evasion ratings. For example, 
-	*** setting the fortitude bonus to 25.0f increases the actor's fortitude on this attack point by 25%.
+	*** These are called "modifiers" because they modify the value of fortitude, protection, and evade ratings of the
+	*** actor. They represent percentage change from the base stat. So for example, a fortitude modifer that is 0.25f
+	*** increases the fortitude of the attack point by 25%. If the base protection rating was 10 and the protection
+	*** modifier was -0.30f, the resulting protection for the attack point would be: 10 + (10 * -0.30f) = 7.
+	***
+	*** The lower bound for each modifier is -1.0f (-100%), which will result in a value of zero for that stat. No 
+	*** actor stats can be negative so even if the modifier drops below -1.0f, the resulting value will still be zero.
+	*** There is no theoretical upper bound, but it is usually advised to keep it under 1.0f (100%).
 	**/
 	//@{
-	uint32 _fortitude_bonus;
-	uint32 _protection_bonus;
-	float _evade_bonus;
+	float _fortitude_modifier;
+	float _protection_modifier;
+	float _evade_modifier;
 	//@}
 
 	/** \brief A vector containing all status effects that may be triggered by attacking the point
