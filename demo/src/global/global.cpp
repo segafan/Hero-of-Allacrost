@@ -34,6 +34,8 @@ template<> hoa_global::GameGlobal* Singleton<hoa_global::GameGlobal>::_singleton
 
 namespace hoa_global {
 
+using namespace private_global;
+
 GameGlobal* GlobalManager = NULL;
 bool GLOBAL_DEBUG = false;
 
@@ -95,9 +97,20 @@ GameGlobal::~GameGlobal() {
 	ClearAllData();
 
 	// Close all persistent script files
+	_items_script.CloseTable();
+	_weapons_script.CloseTable();
+	_head_armor_script.CloseTable();
+	_torso_armor_script.CloseTable();
+	_arm_armor_script.CloseTable();
+	_leg_armor_script.CloseTable();
+	_attack_skills_script.CloseTable();
+
 	_items_script.CloseFile();
 	_weapons_script.CloseFile();
-	_armor_script.CloseFile();
+	_head_armor_script.CloseFile();
+	_torso_armor_script.CloseFile();
+	_arm_armor_script.CloseFile();
+	_leg_armor_script.CloseFile();
 	_attack_skills_script.CloseFile();
 }
 
@@ -115,10 +128,25 @@ bool GameGlobal::SingletonInitialize() {
 	}
 	_weapons_script.OpenTable("weapons");
 
-	if (_armor_script.OpenFile("dat/objects/armor.lua") == false) {
+	if (_head_armor_script.OpenFile("dat/objects/head_armor.lua") == false) {
 		return false;
 	}
-	_armor_script.OpenTable("armor");
+	_head_armor_script.OpenTable("armor");
+
+	if (_torso_armor_script.OpenFile("dat/objects/torso_armor.lua") == false) {
+		return false;
+	}
+	_torso_armor_script.OpenTable("armor");
+
+	if (_arm_armor_script.OpenFile("dat/objects/arm_armor.lua") == false) {
+		return false;
+	}
+	_arm_armor_script.OpenTable("armor");
+
+	if (_leg_armor_script.OpenFile("dat/objects/leg_armor.lua") == false) {
+		return false;
+	}
+	_leg_armor_script.OpenTable("armor");
 
 	if (_attack_skills_script.OpenFile("dat/skills/attack.lua") == false) {
 		return false;
@@ -254,38 +282,103 @@ void GameGlobal::AddToInventory(uint32 obj_id, uint32 obj_count) {
 	// Otherwise create a new object instance and add it to the inventory
 	if (obj_id == 0) {
 		cerr << "GLOBAL ERROR: Attempted to add invalid object to inventory with id: " << obj_id << endl;
-	} else if (obj_id < 10000) { // Item
+	} else if (obj_id <= MAX_ITEM_ID) {
 		GlobalItem *new_obj = new GlobalItem(obj_id, obj_count);
 		_inventory.insert(make_pair(obj_id, new_obj));
 		_inventory_items.push_back(new_obj);
-	} else if (obj_id < 20000) { // Weapon
+	} else if (obj_id <= MAX_WEAPON_ID) {
 		GlobalWeapon *new_obj = new GlobalWeapon(obj_id, obj_count);
 		_inventory.insert(make_pair(obj_id, new_obj));
 		_inventory_weapons.push_back(new_obj);
-	} else if (obj_id < 30000) { // Head Armor
+	} else if (obj_id <= MAX_HEAD_ARMOR_ID) {
 		GlobalArmor *new_obj = new GlobalArmor(obj_id, obj_count);
 		_inventory.insert(make_pair(obj_id, new_obj));
 		_inventory_head_armor.push_back(new_obj);
-	} else if (obj_id < 40000) { // Torso Armor
+	} else if (obj_id <= MAX_TORSO_ARMOR_ID) {
 		GlobalArmor *new_obj = new GlobalArmor(obj_id, obj_count);
 		_inventory.insert(make_pair(obj_id, new_obj));
 		_inventory_torso_armor.push_back(new_obj);
-	} else if (obj_id < 50000) { // Arm Armor
+	} else if (obj_id <= MAX_ARM_ARMOR_ID) {
 		GlobalArmor *new_obj = new GlobalArmor(obj_id, obj_count);
 		_inventory.insert(make_pair(obj_id, new_obj));
 		_inventory_arm_armor.push_back(new_obj);
-	} else if (obj_id < 60000) { // Leg Armor
+	} else if (obj_id <= MAX_LEG_ARMOR_ID) {
 		GlobalArmor *new_obj = new GlobalArmor(obj_id, obj_count);
 		_inventory.insert(make_pair(obj_id, new_obj));
 		_inventory_leg_armor.push_back(new_obj);
-	} else if (obj_id < 70000) { // Shard
-		// TODO
-	} else if (obj_id < 80000) { // Key Item
-		// TODO
+	} else if (obj_id <= MAX_SHARD_ID) {
+// 		GlobalShard *new_obj = new GlobalShard(obj_id, obj_count);
+// 		_inventory.insert(make_pair(obj_id, new_obj));
+// 		_inventory_shards.push_back(new_obj);
+	} else if (obj_id <= MAX_KEY_ITEM_ID) {
+// 		GlobalKeyItem *new_obj = new GlobalKeyItem(obj_id, obj_count);
+// 		_inventory.insert(make_pair(obj_id, new_obj));
+// 		_inventory_key_items.push_back(new_obj);
 	} else {
 		cerr << "GLOBAL ERROR: Attempted to add invalid object to inventory with id: " << obj_id << endl;
 	}
 } // void GameGlobal::AddToInventory(uint32 obj_id)
+
+
+
+void GameGlobal::AddToInventory(GlobalObject* object) {
+	if (object == NULL) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: GameGlobal::AddToInventory() invoked with a NULL object pointer" << endl;
+		return;
+	}
+
+	uint32 obj_id = object->GetID();
+	uint32 obj_count = object->GetCount();
+
+	// If an instance of the same object is already inside the inventory, just increment the count and delete the object
+	if (_inventory.find(obj_id) != _inventory.end()) {
+		_inventory[obj_id]->IncrementCount(obj_count);
+		delete object;
+		return;
+	}
+
+	// Figure out which type of object this is, cast it to the correct type, and add it to the inventory
+	if (obj_id == 0) {
+		cerr << "GLOBAL ERROR: Attempted to add invalid object to inventory with id: " << obj_id << endl;
+		delete object;
+	} else if (obj_id <= MAX_ITEM_ID) {
+		GlobalItem *new_obj = dynamic_cast<GlobalItem*>(object);
+		_inventory.insert(make_pair(obj_id, new_obj));
+		_inventory_items.push_back(new_obj);
+	} else if (obj_id <= MAX_WEAPON_ID) {
+		GlobalWeapon *new_obj = dynamic_cast<GlobalWeapon*>(object);
+		_inventory.insert(make_pair(obj_id, new_obj));
+		_inventory_weapons.push_back(new_obj);
+	} else if (obj_id <= MAX_HEAD_ARMOR_ID) {
+		GlobalArmor *new_obj = dynamic_cast<GlobalArmor*>(object);
+		_inventory.insert(make_pair(obj_id, new_obj));
+		_inventory_head_armor.push_back(new_obj);
+	} else if (obj_id <= MAX_TORSO_ARMOR_ID) {
+		GlobalArmor *new_obj = dynamic_cast<GlobalArmor*>(object);
+		_inventory.insert(make_pair(obj_id, new_obj));
+		_inventory_torso_armor.push_back(new_obj);
+	} else if (obj_id <= MAX_ARM_ARMOR_ID) {
+		GlobalArmor *new_obj = dynamic_cast<GlobalArmor*>(object);
+		_inventory.insert(make_pair(obj_id, new_obj));
+		_inventory_arm_armor.push_back(new_obj);
+	} else if (obj_id <= MAX_LEG_ARMOR_ID) {
+		GlobalArmor *new_obj = dynamic_cast<GlobalArmor*>(object);
+		_inventory.insert(make_pair(obj_id, new_obj));
+		_inventory_leg_armor.push_back(new_obj);
+	} else if (obj_id <= MAX_SHARD_ID) {
+// 		GlobalShard *new_obj = dynamic_cast<GlobalShard*>(object);
+// 		_inventory.insert(make_pair(obj_id, new_obj));
+// 		_inventory_shards.push_back(new_obj);
+	} else if (obj_id <= MAX_KEY_ITEM_ID) {
+// 		GlobalKeyItem *new_obj = dynamic_cast<GlobalKeyItem*>(object);
+// 		_inventory.insert(make_pair(obj_id, new_obj));
+// 		_inventory_key_items.push_back(new_obj);
+	} else {
+		cerr << "GLOBAL ERROR: Attempted to add invalid object to inventory with id: " << obj_id << endl;
+		delete object;
+	}
+} // void GameGlobal::AddToInventory(GlobalObject* object)
 
 
 
@@ -297,90 +390,85 @@ void GameGlobal::RemoveFromInventory(uint32 obj_id) {
 	// Use the id value to figure out what type of object it is, and remove it from the object vector
 	if (obj_id == 0) {
 		cerr << "GLOBAL WARNING: attempted to remove invalid object to inventory with id: " << obj_id << endl;
-	} else if (obj_id < 10000) { // Item
-		for (vector<GlobalItem*>::iterator i = _inventory_items.begin(); i != _inventory_items.end(); i++) {
-			if ((*i)->GetID() == obj_id) {
-				_inventory_items.erase(i);
-				delete _inventory[obj_id];
-				_inventory.erase(obj_id);
-				return;
-			}
-		}
-		cerr << "GLOBAL WARNING: object to remove was not found in _inventory_items vector" << endl;
-	} else if (obj_id < 20000) { // Weapon
-		for (vector<GlobalWeapon*>::iterator i = _inventory_weapons.begin(); i != _inventory_weapons.end(); i++) {
-			if ((*i)->GetID() == obj_id) {
-				_inventory_weapons.erase(i);
-				delete _inventory[obj_id];
-				_inventory.erase(obj_id);
-				return;
-			}
-		}
-		cerr << "GLOBAL WARNING: object to remove was not found in _inventory_weapons vector" << endl;
-	} else if (obj_id < 30000) { // Head Armor
-		for (vector<GlobalArmor*>::iterator i = _inventory_head_armor.begin(); i != _inventory_head_armor.end(); i++) {
-			if ((*i)->GetID() == obj_id) {
-				_inventory_head_armor.erase(i);
-				delete _inventory[obj_id];
-				_inventory.erase(obj_id);
-				return;
-			}
-		}
-		cerr << "GLOBAL WARNING: object to remove was not found in _inventory_head_armor vector" << endl;
-	} else if (obj_id < 40000) { // Torso Armor
-		for (vector<GlobalArmor*>::iterator i = _inventory_torso_armor.begin(); i != _inventory_torso_armor.end(); i++) {
-			if ((*i)->GetID() == obj_id) {
-				_inventory_torso_armor.erase(i);
-				delete _inventory[obj_id];
-				_inventory.erase(obj_id);
-				return;
-			}
-		}
-		cerr << "GLOBAL WARNING: object to remove was not found in _inventory_torso_armor vector" << endl;
-	} else if (obj_id < 50000) { // Arm Armor
-		for (vector<GlobalArmor*>::iterator i = _inventory_arm_armor.begin(); i != _inventory_arm_armor.end(); i++) {
-			if ((*i)->GetID() == obj_id) {
-				_inventory_arm_armor.erase(i);
-				delete _inventory[obj_id];
-				_inventory.erase(obj_id);
-				return;
-			}
-		}
-		cerr << "GLOBAL WARNING: object to remove was not found in _inventory_arm_armor vector" << endl;
-	} else if (obj_id < 60000) { // Leg Armor
-		for (vector<GlobalArmor*>::iterator i = _inventory_leg_armor.begin(); i != _inventory_leg_armor.end(); i++) {
-			if ((*i)->GetID() == obj_id) {
-				_inventory_leg_armor.erase(i);
-				delete _inventory[obj_id];
-				_inventory.erase(obj_id);
-				return;
-			}
-		}
-		cerr << "GLOBAL WARNING: object to remove was not found in _inventory_leg_armor vector" << endl;
-	} else if (obj_id < 70000) { // Shard
-		for (vector<GlobalShard*>::iterator i = _inventory_shards.begin(); i != _inventory_shards.end(); i++) {
-			if ((*i)->GetID() == obj_id) {
-				_inventory_shards.erase(i);
-				delete _inventory[obj_id];
-				_inventory.erase(obj_id);
-				return;
-			}
-		}
-		cerr << "GLOBAL WARNING: object to remove was not found in _inventory_shards vector" << endl;
-	} else if (obj_id < 80000) { // Key Item
-		for (vector<GlobalKeyItem*>::iterator i = _inventory_key_items.begin(); i != _inventory_key_items.end(); i++) {
-			if ((*i)->GetID() == obj_id) {
-				_inventory_key_items.erase(i);
-				delete _inventory[obj_id];
-				_inventory.erase(obj_id);
-				return;
-			}
-		}
-		cerr << "GLOBAL WARNING: object to remove was not found in _inventory_key_items vector" << endl;
+	} else if (obj_id <= MAX_ITEM_ID) {
+		if (_RemoveFromInventory(obj_id, _inventory_items) == false && GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: object to remove was not found in _inventory_items vector" << endl;
+	} else if (obj_id <= MAX_WEAPON_ID) {
+		if (_RemoveFromInventory(obj_id, _inventory_weapons) == false && GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: object to remove was not found in _inventory_weapons vector" << endl;
+	} else if (obj_id <= MAX_HEAD_ARMOR_ID) {
+		if (_RemoveFromInventory(obj_id, _inventory_head_armor) == false && GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: object to remove was not found in _inventory_head_armor vector" << endl;
+	} else if (obj_id <= MAX_TORSO_ARMOR_ID) {
+		if (_RemoveFromInventory(obj_id, _inventory_torso_armor) == false && GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: object to remove was not found in _inventory_torso_armor vector" << endl;
+	} else if (obj_id <= MAX_ARM_ARMOR_ID) {
+		if (_RemoveFromInventory(obj_id, _inventory_arm_armor) == false && GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: object to remove was not found in _inventory_arm_armor vector" << endl;
+	} else if (obj_id <= MAX_LEG_ARMOR_ID) {
+		if (_RemoveFromInventory(obj_id, _inventory_leg_armor) == false && GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: object to remove was not found in _inventory_leg_armor vector" << endl;
+	} else if (obj_id <= MAX_SHARD_ID) {
+		if (_RemoveFromInventory(obj_id, _inventory_shards) == false && GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: object to remove was not found in _inventory_shards vector" << endl;
+	} else if (obj_id < MAX_KEY_ITEM_ID) {
+		if (_RemoveFromInventory(obj_id, _inventory_key_items) == false && GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: object to remove was not found in _inventory_key_items vector" << endl;
 	} else {
 		cerr << "GLOBAL WARNING: attempted to remove invalid object from inventory with id: " << obj_id << endl;
 	}
 } // void GameGlobal::RemoveFromInventory(uint32 obj_id)
+
+
+
+GlobalObject* GameGlobal::RetrieveFromInventory(uint32 obj_id, bool all_counts) {
+	if (_inventory.find(obj_id) == _inventory.end()) {
+		cerr << "GLOBAL WARNING: attempted to remove an object from inventory that didn't exist, with id: " << obj_id << endl;
+		return NULL;
+	}
+
+	GlobalObject* return_object = NULL;
+	// Use the id value to figure out what type of object it is, and remove it from the object vector
+	if (obj_id == 0) {
+		cerr << "GLOBAL WARNING: attempted to remove invalid object to inventory with id: " << obj_id << endl;
+	} else if (obj_id <= MAX_ITEM_ID) {
+		return_object = _RetrieveFromInventory(obj_id, _inventory_items, all_counts);
+		if (return_object == NULL && GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: object to remove was not found in _inventory_items vector" << endl;
+	} else if (obj_id <= MAX_WEAPON_ID) {
+		return_object = _RetrieveFromInventory(obj_id, _inventory_weapons, all_counts);
+		if (return_object == NULL && GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: object to remove was not found in _inventory_weapons vector" << endl;
+	} else if (obj_id <= MAX_HEAD_ARMOR_ID) {
+		return_object = _RetrieveFromInventory(obj_id, _inventory_head_armor, all_counts);
+		if (return_object == NULL && GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: object to remove was not found in _inventory_head_armor vector" << endl;
+	} else if (obj_id <= MAX_TORSO_ARMOR_ID) {
+		return_object = _RetrieveFromInventory(obj_id, _inventory_torso_armor, all_counts);
+		if (return_object == NULL && GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: object to remove was not found in _inventory_torso_armor vector" << endl;
+	} else if (obj_id <= MAX_ARM_ARMOR_ID) {
+		return_object = _RetrieveFromInventory(obj_id, _inventory_arm_armor, all_counts);
+		if (return_object == NULL && GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: object to remove was not found in _inventory_arm_armor vector" << endl;
+	} else if (obj_id <= MAX_LEG_ARMOR_ID) {
+		return_object = _RetrieveFromInventory(obj_id, _inventory_leg_armor, all_counts);
+		if (return_object == NULL && GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: object to remove was not found in _inventory_leg_armor vector" << endl;
+	} else if (obj_id <= MAX_SHARD_ID) {
+		return_object = _RetrieveFromInventory(obj_id, _inventory_shards, all_counts);
+		if (return_object == NULL && GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: object to remove was not found in _inventory_shards vector" << endl;
+	} else if (obj_id <= MAX_KEY_ITEM_ID) {
+		return_object = _RetrieveFromInventory(obj_id, _inventory_key_items, all_counts);
+		if (return_object == NULL && GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: object to remove was not found in _inventory_key_items vector" << endl;
+	} else {
+		cerr << "GLOBAL WARNING: attempted to remove invalid object from inventory with id: " << obj_id << endl;
+	}
+
+	return return_object;
+} // GlobalObject* GameGlobal::RetrieveFromInventory(uint32 obj_id, bool all_counts)
 
 
 
@@ -419,6 +507,20 @@ void GameGlobal::DecrementObjectCount(uint32 obj_id, uint32 count) {
 // GameGlobal class - Event Group Functions
 // -----------------------------------------------------------------------------
 
+bool GameGlobal::DoesEventExist(const string& group_name, const string& event_name) const {
+	map<string, GlobalEventGroup*>::const_iterator group_iter = _event_groups.find(group_name);
+	if (group_iter == _event_groups.end())
+		return false;
+
+	map<string, int32>::const_iterator event_iter = group_iter->second->_events.find(event_name);
+	if (event_iter == group_iter->second->_events.end())
+		return false;
+
+	return true;
+} // bool GameGlobal::DoesEventExist(const std::string& group_name, const std::string& event_name) const
+
+
+
 void GameGlobal::AddNewEventGroup(const std::string& group_name) {
 	if (DoesEventGroupExist(group_name) == true) {
 		if (GLOBAL_DEBUG)
@@ -433,8 +535,8 @@ void GameGlobal::AddNewEventGroup(const std::string& group_name) {
 
 
 
-GlobalEventGroup* GameGlobal::GetEventGroup(const std::string& group_name) {
-	map<string, GlobalEventGroup*>::iterator group_iter = _event_groups.find(group_name);
+GlobalEventGroup* GameGlobal::GetEventGroup(const std::string& group_name) const {
+	map<string, GlobalEventGroup*>::const_iterator group_iter = _event_groups.find(group_name);
 	if (group_iter == _event_groups.end()) {
 		if (GLOBAL_DEBUG)
 			cerr << "GLOBAL WARNING: GameGlobal::GetEventGroup() could not retrieve the event group because "
@@ -444,21 +546,44 @@ GlobalEventGroup* GameGlobal::GetEventGroup(const std::string& group_name) {
 	return (group_iter->second);
 }
 
+
+int32 GameGlobal::GetEventValue(const std::string& group_name, const std::string& event_name) const {
+	map<string, GlobalEventGroup*>::const_iterator group_iter = _event_groups.find(group_name);
+	if (group_iter == _event_groups.end())
+		return GLOBAL_BAD_EVENT;
+
+	map<string, int32>::const_iterator event_iter = group_iter->second->_events.find(event_name);
+	if (event_iter == group_iter->second->_events.end())
+		return GLOBAL_BAD_EVENT;
+
+	return event_iter->second;
+} // int32 GameGlobal::GetEventValue(const std::string& group_name, const std::string& event_name) const
+
+
+
+uint32 GameGlobal::GetNumberEvents(const string& group_name) const {
+	map<string, GlobalEventGroup*>::const_iterator group_iter = _event_groups.find(group_name);
+	if (group_iter == _event_groups.end())
+		return 0;
+
+	return group_iter->second->GetNumberEvents();
+}
+
 // -----------------------------------------------------------------------------
 // GameGlobal class - Other Functions
 // -----------------------------------------------------------------------------
 
-uint32 GameGlobal::AveragePartyLevel() {
-	uint32 xp_level_sum = 0;
-	for (uint32 i = 0; i < _active_party.GetPartySize(); i++) {
-		GlobalActor* actor = _active_party.GetActor(i);
-		xp_level_sum += actor->GetExperienceLevel();
+void GameGlobal::SetLocation(const hoa_utils::ustring& location_name, const std::string& location_graphic_filename) {
+	_location_name = location_name;
+
+	VideoManager->DeleteImage(_location_graphic);
+	_location_graphic.SetFilename(location_graphic_filename);
+	if (VideoManager->LoadImage(_location_graphic) == false) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: GameGlobal::SetLocation() failed to load location graphic"
+				<< location_graphic_filename << endl;
 	}
-	xp_level_sum /= _active_party.GetPartySize();
-	return xp_level_sum;
-} // uint32 GameGlobal::AveragePartyLevel()
-
-
+}
 
 bool GameGlobal::SaveGame(string& filename) {
 	WriteScriptDescriptor file;
@@ -473,7 +598,7 @@ bool GameGlobal::SaveGame(string& filename) {
 	file.WriteUInt("play_hours", SystemManager->GetPlayHours());
 	file.WriteUInt("play_minutes", SystemManager->GetPlayMinutes());
 	file.WriteUInt("play_seconds", SystemManager->GetPlaySeconds());
-	file.WriteUInt("funds", _funds);
+	file.WriteUInt("drunes", _drunes);
 
 	// ----- (2) Save the inventory (object id + object count pairs)
 	// NOTE: This does not save any weapons/armor that are equipped on the characters. That data
@@ -543,7 +668,7 @@ bool GameGlobal::LoadGame(const string& filename) {
 	minutes = file.ReadUInt("play_minutes");
 	seconds = file.ReadUInt("play_seconds");
 	SystemManager->SetPlayTime(hours, minutes, seconds);
-	_funds = file.ReadUInt("funds");
+	_drunes = file.ReadUInt("drunes");
 
 	// ----- (2) Load inventory
 	_LoadInventory(file, "items");
@@ -770,7 +895,7 @@ void GameGlobal::_LoadCharacter(hoa_script::ReadScriptDescriptor& file, uint32 i
 	// ----- (2): Read in all of the character's stats data
 	character->SetExperienceLevel(file.ReadUInt("experience_level"));
 	character->SetExperiencePoints(file.ReadUInt("experience_points"));
-	character->SetExperienceNextLevel(file.ReadUInt("experience_points_next"));
+// 	character->SetExperienceNextLevel(file.ReadUInt("experience_points_next"));
 
 	character->SetMaxHitPoints(file.ReadUInt("max_hit_points"));
 	character->SetHitPoints(file.ReadUInt("hit_points"));
@@ -796,22 +921,22 @@ void GameGlobal::_LoadCharacter(hoa_script::ReadScriptDescriptor& file, uint32 i
 
 	equip_id = file.ReadUInt("head_armor");
 	if (equip_id != 0) {
-		character->EquipArmor(new GlobalArmor(equip_id));
+		character->EquipHeadArmor(new GlobalArmor(equip_id));
 	}
 
 	equip_id = file.ReadUInt("torso_armor");
 	if (equip_id != 0) {
-		character->EquipArmor(new GlobalArmor(equip_id));
+		character->EquipTorsoArmor(new GlobalArmor(equip_id));
 	}
 
 	equip_id = file.ReadUInt("arm_armor");
 	if (equip_id != 0) {
-		character->EquipArmor(new GlobalArmor(equip_id));
+		character->EquipArmArmor(new GlobalArmor(equip_id));
 	}
 
 	equip_id = file.ReadUInt("leg_armor");
 	if (equip_id != 0) {
-		character->EquipArmor(new GlobalArmor(equip_id));
+		character->EquipLegArmor(new GlobalArmor(equip_id));
 	}
 
 	file.CloseTable();

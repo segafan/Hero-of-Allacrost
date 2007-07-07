@@ -26,9 +26,35 @@
 #include "script.h"
 
 #include "global_actors.h"
-#include "global_skills.h"
 
 namespace hoa_global {
+
+namespace private_global {
+
+/** \name Object ID Range Constants
+*** These constants set the maximum valid ID ranges for each object category.
+*** The full valid range for each object category ID is:
+*** - Items:            1-10000
+*** - Weapons:      10001-20000
+*** - Head Armor:   20001-30000
+*** - Torso Armor:  30001-40000
+*** - Arm Armor:    40001-50000
+*** - Leg Armor:    50001-60000
+*** - Shards:       60001-70000
+*** - Key Items:    70001-80000
+**/
+//@{
+const uint32 MAX_ITEM_ID         = 10000;
+const uint32 MAX_WEAPON_ID       = 20000;
+const uint32 MAX_HEAD_ARMOR_ID   = 30000;
+const uint32 MAX_TORSO_ARMOR_ID  = 40000;
+const uint32 MAX_ARM_ARMOR_ID    = 50000;
+const uint32 MAX_LEG_ARMOR_ID    = 60000;
+const uint32 MAX_SHARD_ID        = 70000;
+const uint32 MAX_KEY_ITEM_ID     = 80000;
+//@}
+
+} // namespace private_global
 
 /** \name GlobalObject Types
 *** \brief Used for identification of different game object types
@@ -41,10 +67,20 @@ enum GLOBAL_OBJECT {
 	GLOBAL_OBJECT_TORSO_ARMOR =  3,
 	GLOBAL_OBJECT_ARM_ARMOR   =  4,
 	GLOBAL_OBJECT_LEG_ARMOR   =  5,
-	GLOBAL_OBJECT_JEWEL       =  6,
+	GLOBAL_OBJECT_SHARD       =  6,
 	GLOBAL_OBJECT_KEY_ITEM    =  7,
 	GLOBAL_OBJECT_TOTAL       =  8
 };
+
+/** \brief Creates a new type of GlobalObject
+*** \param id The id value of the object to create
+*** \param count The count of the new object to create (default value == 1)
+*** \return A pointer to the newly created GlobalObject, or NULL if the object could not be created
+***
+*** This function actually does not create a GlobalObject (it can't, since its an abstract class),
+*** but rather creates one of the derived object class types depending on the value of the id argument.
+**/
+GlobalObject* GlobalCreateNewObject(uint32 id, uint32 count = 1);
 
 
 /** ****************************************************************************
@@ -61,24 +97,32 @@ enum GLOBAL_OBJECT {
 *** ***************************************************************************/
 class GlobalObject {
 public:
-	GlobalObject()
-		{ _id = 0; }
+	GlobalObject() :
+		_id(0), _count(0) {}
+
+	GlobalObject(uint32 id, uint32 count) :
+		_id(id), _count(count) {}
 
 	virtual ~GlobalObject()
 		{}
 
-	/** \brief Increments the number of objects represented by the specified amount
-	*** \param count The number of objects to add (a positive integer)
+	/** \brief Purely virtual function used to distinguish between object types
+	*** \return A value that represents the type of object
 	**/
-	void IncrementCount(uint32 count)
+	virtual GLOBAL_OBJECT GetObjectType() const = 0;
+
+	/** \brief Increments the number of objects represented by the specified amount
+	*** \param count The number of objects to add (default value == 1)
+	**/
+	void IncrementCount(uint32 count = 1)
 		{ _count += count; }
 
 	/** \brief Decrements the number of objects represented by the specified amount
-	*** \param count The number of objects to remove (a positive integer)
+	*** \param count The number of objects to remove (default value == 1)
 	*** \note When the count reaches zero, this class object will <b>not</b> self-destruct. It is the user's
 	*** responsiblity to check if the count becomes zero, and to destroy the object if it is appropriate to do so.
 	**/
-	void DecrementCount(uint32 count)
+	void DecrementCount(uint32 count = 1)
 		{ if (count > _count) _count = 0; else _count -= count; }
 
 	//! \name Class Member Access Functions
@@ -92,14 +136,11 @@ public:
 	hoa_utils::ustring GetDescription() const
 		{ return _description; }
 
-	GLOBAL_OBJECT GetType() const
-		{ return _type; }
-
-	uint32 GetUsableBy() const
-		{ return _usable_by; }
-
 	uint32 GetCount() const
 		{ return _count; }
+
+	void SetCount(uint32 count)
+		{ _count = count; }
 
 	uint32 GetPrice() const
 		{ return _price; }
@@ -110,47 +151,26 @@ public:
 
 protected:
 	/** \brief An identification number for each unique item
-	*** \note The ID number zero does not correspond to a valid item
+	*** \note An ID number of zero indicates an invalid object
 	**/
 	uint32 _id;
-
-	/** \brief A numerical value that defines what type of object this is.
-	*** See the GameObject Types constants for a list of the different object types.
-	**/
-	GLOBAL_OBJECT _type;
 
 	//! \brief The name of the object as it would be displayed on a screen
 	hoa_utils::ustring _name;
 
-	//! \brief A short description of the item to display to the player
+	//! \brief A short description of the item to display on the screen
 	hoa_utils::ustring _description;
 
-	//! \brief How many items are represented within this class object instance
+	//! \brief How many occurences of the object are represented by this class object instance
 	uint32 _count;
 
 	//! \brief The listed price of the object in the game's markets
 	uint32 _price;
 
-	/** \brief A bit-mask that determines which characters can use the said object.
-	*** See the "Game Character Types" constants in global_characters.h for more information
-	**/
-	uint32 _usable_by;
-
-	//! \brief An image icon of the object
+	//! \brief The image icon of the object
 	hoa_video::StillImage _icon_image;
-
-private:
-	GlobalObject(const GlobalObject&);
-	GlobalObject& operator=(const GlobalObject&);
-
-	/** \brief Loads the item's data from a file and sets the members of the class
-	***
-	*** This function is essentially an assitant to the class constructor. It is
-	*** required because GlobalObject requires at least one purely virtual function
-	*** to be an abstract class.
-	**/
-	virtual void _Load() = 0;
 }; // class GlobalObject
+
 
 /** ****************************************************************************
 *** \brief Represents items found and used throughout the game
@@ -161,18 +181,26 @@ private:
 *** used in only certain game modes (battles, menus, etc.). Most items
 *** can be used by any character, although some may only be used by certain
 *** characters.
+***
+*** \todo Item script functions should take abstract target type class pointers,
+*** not character or actor pointers.
 *** ***************************************************************************/
 class GlobalItem : public GlobalObject {
 public:
-	GlobalItem(uint32 id, uint32 count = 1)
-		{ _id = id; _type = GLOBAL_OBJECT_ITEM; _count = count; _Load(); }
+	GlobalItem(uint32 id, uint32 count = 1);
 
-	~GlobalItem()
-		{}
+	~GlobalItem();
 
-	//Andy: We need to different versions of Use, one for Menu Mode and one for Battle Mode.
-	//This is because IBattleActor is a standalone interface that does not inherit from
-	//anything, so we cannot have one definition handle both modes.
+	GLOBAL_OBJECT GetObjectType() const
+		{ return GLOBAL_OBJECT_ITEM; }
+
+	//! \brief Returns true if the item can be used in battle mode
+	bool IsUsableInBattle()
+		{ return ((_usage == GLOBAL_USE_BATTLE) || (_usage == GLOBAL_USE_ALL)); }
+
+	//! \brief Returns true if the item can be used in menu mode
+	bool IsUsableInMenu()
+		{ return ((_usage == GLOBAL_USE_MENU) || (_usage == GLOBAL_USE_ALL)); }
 
 	/** \brief Calls the script function which performs the item's use for battle mode
 	*** \param target A pointer to the target of the item
@@ -185,14 +213,6 @@ public:
 	**/
 	void MenuUse(GlobalCharacter* target);
 
-	//! \brief Returns true if the item can be used in battle mode
-	bool IsUsableInBattle()
-		{ return ((_usage == GLOBAL_USE_BATTLE) || (_usage == GLOBAL_USE_ALL)); }
-
-	//! \brief Returns true if the item can be used in menu mode
-	bool IsUsableInMenu()
-		{ return ((_usage == GLOBAL_USE_MENU) || (_usage == GLOBAL_USE_ALL)); }
-
 	//! \name Class Member Access Functions
 	//@{
 	GLOBAL_USE GetUsage() const
@@ -201,14 +221,14 @@ public:
 	GLOBAL_TARGET GetTargetType() const
 		{ return _target_type; }
 
-	GLOBAL_ALIGNMENT GetTargetAlignment() const
-		{ return _target_alignment; }
+	bool IsTargetAlly() const
+		{ return _target_ally; }
 	//@}
 
 private:
 	/** \brief Values to indicate where the item may be used
-	*** Items may only be used in either menu mode or battle mode. If an item is to be used in another game mode,
-	*** then it must rely on either the menu or battle use values.
+	*** Items may only be used in either menu mode or battle mode. If an item is to be used in
+	*** another game mode, then it choose to use either the menu or battle use functions.
 	**/
 	GLOBAL_USE _usage;
 
@@ -217,24 +237,15 @@ private:
 	**/
 	GLOBAL_TARGET _target_type;
 
-	/** \brief Whose side the item is on.
-	*** Can either target friendlies, enemies, or both
-	**/
-	GLOBAL_ALIGNMENT _target_alignment;
+	//! \brief If true the item should target allies, otherwise it should target enemies
+	bool _target_ally;
 
-	//! \brief A reference to the script function that performs the item's effect while in battle.
-	ScriptObject _battle_use_function;
+	//! \brief A pointer to the script function that performs the item's effect while in battle.
+	ScriptObject* _battle_use_function;
 
-	//! \brief A reference to the script function that performs the item's effect while in a menu
-	ScriptObject _menu_use_function;
-
-	GlobalItem(const GlobalItem&);
-	GlobalItem& operator=(const GlobalItem&);
-
-	//! \brief Loads the item's data from a file and sets the members of the class
-	void _Load();
+	//! \brief A pointer to the script function that performs the item's effect while in a menu
+	ScriptObject* _menu_use_function;
 }; // class GlobalItem : public GlobalObject
-
 
 
 /** ****************************************************************************
@@ -246,17 +257,22 @@ private:
 *** ***************************************************************************/
 class GlobalWeapon : public GlobalObject {
 public:
-	GlobalWeapon(uint32 id, uint32 count = 1)
-		{  _id = id; _type = GLOBAL_OBJECT_WEAPON; _count = count; _Load(); }
+	GlobalWeapon(uint32 id, uint32 count = 1);
 
 	~GlobalWeapon()
 		{}
+
+	GLOBAL_OBJECT GetObjectType() const
+		{ return GLOBAL_OBJECT_WEAPON; }
 
 	uint32 GetPhysicalAttack() const
 		{ return _physical_attack; }
 
 	uint32 GetMetaphysicalAttack() const
 		{ return _metaphysical_attack; }
+
+	uint32 GetUsableBy() const
+		{ return _usable_by; }
 
 private:
 	//! \brief The amount of physical damage that the weapon causes
@@ -265,38 +281,35 @@ private:
 	//! \brief The amount of metaphysical damage that the weapon causes
 	uint32 _metaphysical_attack;
 
-	std::map<GLOBAL_ELEMENTAL, uint32> _elemental_bonuses;
+	/** \brief A bit-mask that determines which characters can use or equip the object
+	*** See the Game Character ID constants in global_actors.h for more information
+	**/
+	uint32 _usable_by;
 
-	std::map<GLOBAL_STATUS, uint32> _status_bonuses;
-
-	// TODO std::vector<GlobalGem*> _sockets;
-
-	GlobalWeapon(const GlobalWeapon&);
-	GlobalWeapon& operator=(const GlobalWeapon&);
-
-	//! \brief Loads the weapons's data from a file and sets the members of the class
-	void _Load();
+	// TODO: Add elementals, status, and shard sockets to weapons
+	// std::map<GLOBAL_ELEMENTAL, uint32> _elemental_bonuses;
+	// std::map<GLOBAL_STATUS, uint32> _status_bonuses;
+	// std::vector<GlobalShard*> _sockets;
 }; // class GlobalWeapon : public GlobalObject
 
 
-
 /** ****************************************************************************
-*** \brief Represents the four types of armor found in the game
+*** \brief Represents all four types of armor found in the game
 ***
 *** Not all pieces of armor can be equipped by all characters. Even though there's
 *** only one armor class, there are actually four types of armor: head, torso, arm,
-*** and leg. The GlobalObject#_type member is used to identify what armor category
-*** an instance of this class belongs to. All armor have the same members/properties,
-*** so it doesn't make any sense to make four identical classes different only in
-*** name for the four armor types.
+*** and leg. The GetObjectType method is used to identify what armor category
+*** an instance of this class belongs to. All four types of armor have the same
+*** members/properties.
 *** ***************************************************************************/
 class GlobalArmor : public GlobalObject {
 public:
-	GlobalArmor(uint32 id, uint32 count = 1)
-		{  _id = id; _count = count; _Load(); }
+	GlobalArmor(uint32 id, uint32 count = 1);
 
 	~GlobalArmor()
 		{}
+
+	GLOBAL_OBJECT GetObjectType() const;
 
 	uint32 GetPhysicalDefense() const
 		{ return _physical_defense; }
@@ -304,24 +317,25 @@ public:
 	uint32 GetMetaphysicalDefense() const
 		{ return _metaphysical_defense; }
 
+	uint32 GetUsableBy() const
+		{ return _usable_by; }
+
 private:
-	//! \brief The amount of physical defense that the armor allows
+	//! \brief The amount of physical defense that the armor provides
 	uint32 _physical_defense;
 
-	//! \brief The amount of metaphysical defense that the armor allows
+	//! \brief The amount of metaphysical defense that the armor provides
 	uint32 _metaphysical_defense;
 
-	// TODO: Add elemental bonuses
-	// std::vector<GlobalElementalEffect*> _elemental_defenses;
+	/** \brief A bit-mask that determines which characters can use or equip the object
+	*** See the Game Character ID constants in global_actors.h for more information
+	**/
+	uint32 _usable_by;
 
-	// TODO: Add status effect bonuses
-	// std::vector<GlobalStatusEffect*> _status_defenses;
-
-	GlobalArmor(const GlobalArmor&);
-	GlobalArmor& operator=(const GlobalArmor&);
-
-	//! \brief Loads the armor's data from a file and sets the members of the class
-	void _Load();
+	// TODO: Add elementals, status, and shard sockets to armor
+	// std::map<GLOBAL_ELEMENTAL, uint32> _elemental_bonuses;
+	// std::map<GLOBAL_STATUS, uint32> _status_bonuses;
+	// std::vector<GlobalShard*> _sockets;
 }; // class GlobalArmor : public GlobalObject
 
 
@@ -330,10 +344,17 @@ private:
 ***
 *** Shards are small items that can be combined with weapons and armor to
 *** enhance their properties.
+***
+*** \todo This class is not yet implemented
 *** ***************************************************************************/
 class GlobalShard : public GlobalObject {
-	// TODO
-};
+public:
+	GlobalShard(uint32 id, uint32 count = 1) :
+		GlobalObject(id, count) {}
+
+	GLOBAL_OBJECT GetObjectType() const
+		{ return GLOBAL_OBJECT_SHARD; }
+}; // class GlobalShard : public GlobalObject
 
 
 /** ****************************************************************************
@@ -341,11 +362,17 @@ class GlobalShard : public GlobalObject {
 ***
 *** Key items are items which can not be used by the player. They simply sit
 *** idly in the inventory.
+***
+*** \todo This class is not yet implemented
 *** ***************************************************************************/
 class GlobalKeyItem : public GlobalObject {
-	// TODO
-};
+public:
+	GlobalKeyItem(uint32 id, uint32 count = 1) :
+		GlobalObject(id, count) {}
 
+	GLOBAL_OBJECT GetObjectType() const
+		{ return GLOBAL_OBJECT_KEY_ITEM; }
+}; // class GlobalKeyItem : public GlobalObject
 
 } // namespace hoa_global
 

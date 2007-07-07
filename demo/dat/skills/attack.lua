@@ -17,13 +17,11 @@ skills = {}
 skills[1] = {
 	name = "Slicing Rain",
 	description = "A simple but effective vertical sword slash.",
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
 	sp_required = 0,
 	warmup_time = 2000,
 	cooldown_time = 0,
-	level_required = 1,
-	usage = hoa_global.GameGlobal.GLOBAL_USE_BATTLE,
-	target_alignment = hoa_global.GameGlobal.GLOBAL_ALIGNMENT_NEUTRAL,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_ally = false,
 
 	BattleExecute = function(target, instigator)
 		--If the random float is bigger, then we landed the hit
@@ -38,13 +36,11 @@ skills[1] = {
 skills[2] = {
 	name = "Forward Thrust",
 	description = "A quick and daring thrust into an opponent's flesh.",
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
 	sp_required = 2,
 	warmup_time = 1200,
 	cooldown_time = 0,
-	level_required = 3,
-	usage = hoa_global.GameGlobal.GLOBAL_USE_BATTLE,
-	target_alignment = hoa_global.GameGlobal.GLOBAL_ALIGNMENT_NEUTRAL,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_ally = false,
 
 	BattleExecute = function(target, instigator)
 		--If the random float is bigger, then we landed the hit
@@ -59,14 +55,11 @@ skills[2] = {
 -- Enemy attack skills
 skills[100] = {
 	name = "Snake bite",
-	description = "A really painful, venomous snake bite",
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
 	sp_required = 0,
 	warmup_time = 900,
 	cooldown_time = 0,
-	level_required = 1,
-	usage = hoa_global.GameGlobal.GLOBAL_USE_BATTLE,
-	target_alignment = hoa_global.GameGlobal.GLOBAL_ALIGNMENT_BAD,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_ally = false,
 
 	BattleExecute = function(target, instigator)
 		--If the random float is bigger, then we landed the hit
@@ -80,14 +73,11 @@ skills[100] = {
 
 skills[101] = {
 	name = "Spider sting",
-	description = "Do spiders have stings? Better than having a 'bite' everywhere!",
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
 	sp_required = 0,
 	warmup_time = 1400,
 	cooldown_time = 0,
-	level_required = 1,
-	usage = hoa_global.GameGlobal.GLOBAL_USE_BATTLE,
-	target_alignment = hoa_global.GameGlobal.GLOBAL_ALIGNMENT_BAD,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_ally = false,
 
 	BattleExecute = function(target, instigator)
 		--If the random float is bigger, then we landed the hit
@@ -101,14 +91,11 @@ skills[101] = {
 
 skills[102] = {
 	name = "Slime Attack",
-	description = "Green, wobbly attack made of sheer terror",
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
 	sp_required = 0,
 	warmup_time = 1100,
 	cooldown_time = 0,
-	level_required = 1,
-	usage = hoa_global.GameGlobal.GLOBAL_USE_BATTLE,
-	target_alignment = hoa_global.GameGlobal.GLOBAL_ALIGNMENT_BAD,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_ally = false,
 
 	BattleExecute = function(target, instigator)
 		--If the random float is bigger, then we landed the hit
@@ -123,14 +110,11 @@ skills[102] = {
 
 skills[103] = {
 	name = "Skeleton Sword Attack",
-	description = "Mighty Skeleton King's Sword Thrust. Don't get in way!",
-	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
 	sp_required = 0,
 	warmup_time = 1400,
 	cooldown_time = 0,
-	level_required = 1,
-	usage = hoa_global.GameGlobal.GLOBAL_USE_BATTLE,
-	target_alignment = hoa_global.GameGlobal.GLOBAL_ALIGNMENT_BAD,
+	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ATTACK_POINT,
+	target_ally = false,
 
 	BattleExecute = function(target, instigator)
 		--If the random float is bigger, then we landed the hit

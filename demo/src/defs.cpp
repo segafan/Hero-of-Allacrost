@@ -153,20 +153,22 @@ void BindEngineToLua() {
 		class_<GameGlobal>("GameGlobal")
 			.def("AddCharacter", (void(GameGlobal::*)(uint32)) &GameGlobal::AddCharacter)
 			.def("GetCharacter", &GameGlobal::GetCharacter)
-			.def("GetFunds", &GameGlobal::GetFunds)
-			.def("SetFunds", &GameGlobal::SetFunds)
-			.def("AddFunds", &GameGlobal::AddFunds)
-			.def("SubtractFunds", &GameGlobal::SubtractFunds)
-			.def("AddToInventory", &GameGlobal::AddToInventory)
-			.def("RemoveFromInventory", &GameGlobal::RemoveFromInventory)
+			.def("GetDrunes", &GameGlobal::GetDrunes)
+			.def("SetDrunes", &GameGlobal::SetDrunes)
+			.def("AddDrunes", &GameGlobal::AddDrunes)
+			.def("SubtractDrunes", &GameGlobal::SubtractDrunes)
+			.def("AddToInventory", (void (GameGlobal::*)(uint32, uint32)) &GameGlobal::AddToInventory)
+			.def("RemoveFromInventory", (void (GameGlobal::*)(uint32)) &GameGlobal::RemoveFromInventory)
 			.def("IncrementObjectCount", &GameGlobal::IncrementObjectCount)
 			.def("DecrementObjectCount", &GameGlobal::DecrementObjectCount)
 
 			// Namespace constants
 			.enum_("constants") [
 				// Character type constants
+				value("GLOBAL_CHARACTER_INVALID", GLOBAL_CHARACTER_INVALID),
 				value("GLOBAL_CHARACTER_CLAUDIUS", GLOBAL_CHARACTER_CLAUDIUS),
 				value("GLOBAL_CHARACTER_LAILA", GLOBAL_CHARACTER_LAILA),
+				value("GLOBAL_CHARACTER_ALL", GLOBAL_CHARACTER_ALL),
 				// Object type constants
 				value("GLOBAL_OBJECT_INVALID", GLOBAL_OBJECT_INVALID),
 				value("GLOBAL_OBJECT_ITEM", GLOBAL_OBJECT_ITEM),
@@ -175,7 +177,7 @@ void BindEngineToLua() {
 				value("GLOBAL_OBJECT_TORSO_ARMOR", GLOBAL_OBJECT_TORSO_ARMOR),
 				value("GLOBAL_OBJECT_ARM_ARMOR", GLOBAL_OBJECT_ARM_ARMOR),
 				value("GLOBAL_OBJECT_LEG_ARMOR", GLOBAL_OBJECT_LEG_ARMOR),
-				value("GLOBAL_OBJECT_JEWEL", GLOBAL_OBJECT_JEWEL),
+				value("GLOBAL_OBJECT_SHARD", GLOBAL_OBJECT_SHARD),
 				value("GLOBAL_OBJECT_KEY_ITEM", GLOBAL_OBJECT_KEY_ITEM),
 				// Item usage constants
 				value("GLOBAL_USE_INVALID", GLOBAL_USE_INVALID),
@@ -183,11 +185,10 @@ void BindEngineToLua() {
 				value("GLOBAL_USE_BATTLE", GLOBAL_USE_BATTLE),
 				value("GLOBAL_USE_ALL", GLOBAL_USE_ALL),
 				// Item and skill alignment constants
-				value("GLOBAL_ALIGNMENT_INVALID", GLOBAL_ALIGNMENT_INVALID),
-				value("GLOBAL_ALIGNMENT_GOOD", GLOBAL_ALIGNMENT_GOOD),
-				value("GLOBAL_ALIGNMENT_BAD", GLOBAL_ALIGNMENT_BAD),
-				value("GLOBAL_ALIGNMENT_NEUTRAL", GLOBAL_ALIGNMENT_NEUTRAL),
-				value("GLOBAL_ALIGNMENT_TOTAL", GLOBAL_ALIGNMENT_TOTAL),
+				value("GLOBAL_POSITION_HEAD", GLOBAL_POSITION_HEAD),
+				value("GLOBAL_POSITION_TORSO", GLOBAL_POSITION_TORSO),
+				value("GLOBAL_POSITION_ARMS", GLOBAL_POSITION_ARMS),
+				value("GLOBAL_POSITION_LEGS", GLOBAL_POSITION_LEGS),
 				// Global skill types
 				value("GLOBAL_SKILL_INVALID", GLOBAL_SKILL_INVALID),
 				value("GLOBAL_SKILL_ATTACK", GLOBAL_SKILL_ATTACK),
@@ -213,12 +214,24 @@ void BindEngineToLua() {
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
 	[
 		class_<GlobalAttackPoint>("GlobalAttackPoint")
+			.def("GetName", &GlobalAttackPoint::GetName)
+			.def("GetXPosition", &GlobalAttackPoint::GetXPosition)
+			.def("GetYPosition", &GlobalAttackPoint::GetYPosition)
+			.def("GetFortitudeModifier", &GlobalAttackPoint::GetFortitudeModifier)
+			.def("GetProtectionModifier", &GlobalAttackPoint::GetProtectionModifier)
+			.def("GetEvadeModifier", &GlobalAttackPoint::GetEvadeModifier)
+			.def("GetActorOwner", &GlobalAttackPoint::GetActorOwner)
+			.def("GetTotalPhysicalDefense", &GlobalAttackPoint::GetTotalPhysicalDefense)
+			.def("GetTotalMetaphysicalDefense", &GlobalAttackPoint::GetTotalMetaphysicalDefense)
+			.def("GetTotalEvadeRating", &GlobalAttackPoint::GetTotalEvadeRating)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
 	[
 		class_<GlobalActor>("GlobalActor")
+			.def("GetID", &GlobalActor::GetID)
 			.def("GetName", &GlobalActor::GetName)
+			.def("GetFilename", &GlobalActor::GetFilename)
 			.def("GetHitPoints", &GlobalActor::GetHitPoints)
 			.def("GetMaxHitPoints", &GlobalActor::GetMaxHitPoints)
 			.def("GetSkillPoints", &GlobalActor::GetSkillPoints)
@@ -230,11 +243,11 @@ void BindEngineToLua() {
 			.def("GetProtection", &GlobalActor::GetProtection)
 			.def("GetAgility", &GlobalActor::GetAgility)
 			.def("GetEvade", &GlobalActor::GetEvade)
-			.def("GetPhysicalAttackRating", &GlobalActor::GetPhysicalAttackRating)
-			.def("GetMetaphysicalAttackRating", &GlobalActor::GetMetaphysicalAttackRating)
-			.def("GetWeaponEquipped", &GlobalActor::GetWeaponEquipped)
-			.def("GetArmorEquipped", &GlobalActor::GetArmorEquipped)
-			.def("GetAttackPoints", &GlobalActor::GetAttackPoints)
+			.def("GetTotalPhysicalAttack", &GlobalActor::GetTotalPhysicalAttack)
+			.def("GetTotalMetaphysicalAttack", &GlobalActor::GetTotalMetaphysicalAttack)
+// 			.def("GetWeaponEquipped", &GlobalActor::GetWeaponEquipped)
+// 			.def("GetArmorEquipped", (GlobalArmor* (GlobalActor::*)(uint32)) &GlobalActor::GetArmorEquipped)
+// 			.def("GetAttackPoints", &GlobalActor::GetAttackPoints)
 // 			.def("GetElementalAttackBonuses", &GlobalActor::GetElementalAttackBonuses)
 // 			.def("GetStatusAttackBonuses", &GlobalActor::GetStatusAttackBonuses)
 // 			.def("GetElementalDefenseBonuses", &GlobalActor::GetElementalDefenseBonuses)
@@ -259,12 +272,22 @@ void BindEngineToLua() {
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
 	[
-		class_<GlobalEnemy, GlobalActor>("GlobalEnemy")
+		class_<GlobalCharacterGrowth>("GlobalCharacterGrowth")
+			.def_readwrite("_hit_points_growth", &GlobalCharacterGrowth::_hit_points_growth)
+			.def_readwrite("_skill_points_growth", &GlobalCharacterGrowth::_skill_points_growth)
+			.def_readwrite("_strength_growth", &GlobalCharacterGrowth::_strength_growth)
+			.def_readwrite("_vigor_growth", &GlobalCharacterGrowth::_vigor_growth)
+			.def_readwrite("_fortitude_growth", &GlobalCharacterGrowth::_fortitude_growth)
+			.def_readwrite("_protection_growth", &GlobalCharacterGrowth::_protection_growth)
+			.def_readwrite("_agility_growth", &GlobalCharacterGrowth::_agility_growth)
+			.def_readwrite("_evade_growth", &GlobalCharacterGrowth::_evade_growth)
+			.def("_AddSkill", &GlobalCharacterGrowth::_AddSkill)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
 	[
 		class_<GlobalCharacter, GlobalActor>("GlobalCharacter")
+			.def("GetGrowth", &GlobalCharacter::GetGrowth)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
@@ -274,11 +297,15 @@ void BindEngineToLua() {
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
 	[
+		class_<GlobalEnemy, GlobalActor>("GlobalEnemy")
+	];
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
+	[
 		class_<GlobalObject>("GlobalObject")
 			.def("GetID", &GlobalObject::GetID)
 			.def("GetName", &GlobalObject::GetName)
-			.def("GetType", &GlobalObject::GetType)
-			.def("GetUsableBy", &GlobalObject::GetUsableBy)
+			.def("GetType", &GlobalObject::GetObjectType)
 			.def("GetCount", &GlobalObject::GetCount)
 			.def("IncrementCount", &GlobalObject::IncrementCount)
 			.def("DecrementCount", &GlobalObject::DecrementCount)
@@ -293,12 +320,14 @@ void BindEngineToLua() {
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
 	[
 		class_<GlobalWeapon, GlobalObject>("GlobalWeapon")
+			.def("GetUsableBy", &GlobalWeapon::GetUsableBy)
 // 			.def(constructor<>(uint32, uint32))
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_global")
 	[
 		class_<GlobalArmor, GlobalObject>("GlobalArmor")
+			.def("GetUsableBy", &GlobalArmor::GetUsableBy)
 // 			.def(constructor<>(uint32, uint32))
 	];
 

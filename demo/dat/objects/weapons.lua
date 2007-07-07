@@ -26,10 +26,10 @@ weapons[10001] = {
 	name = "Karlate Sword",
 	description = "Standard Karlate issued equipment. A light weight iron sword suitable for most skirmishes.",
 	icon = "img/icons/weapons/karlate_sword.png",
-	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS,
 	physical_attack = 12,
 	metaphysical_attack = 0,
 	standard_price = 120,
+	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS,
 	slots = 0
 }
 
@@ -37,9 +37,9 @@ weapons[10002] = {
 	name = "Iron Sword",
 	description = "A sturdy but somewhat dull sword forged from a single block of solid iron.",
 	icon = "img/icons/weapons/iron_sword.png",
-	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS,
 	physical_attack = 16,
 	metaphysical_attack = 0,
 	standard_price = 250,
+	usable_by = hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS,
 	slots = 0
 }

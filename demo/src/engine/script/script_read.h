@@ -102,10 +102,10 @@ public:
 	bool DoesVariableExist(int32 key)
 		{ return _DoesDataExist(key, LUA_TNIL); }
 
-	bool DoesBooleanExist(const std::string& key)
+	bool DoesBoolExist(const std::string& key)
 		{ return _DoesDataExist(key, LUA_TBOOLEAN); }
 
-	bool DoesBooleanExist(int32 key)
+	bool DoesBoolExist(int32 key)
 		{ return _DoesDataExist(key, LUA_TBOOLEAN); }
 
 	bool DoesIntExist(const std::string& key)
@@ -270,6 +270,9 @@ public:
 
 	//! \brief Closes the most recently opened table
 	void CloseTable();
+
+	//! \brief Closes any open tables and returns the user to the global scope
+	void CloseAllTables();
 
 	/** \brief Returns the number of elements stored in an un-opened table
 	*** \param table_name The name of the (un-open) table to get the size of

@@ -447,7 +447,7 @@ void BattleMode::AddEnemy(GlobalEnemy new_enemy) {
 	}
 
 	// (2): Level the enemy up to be within a reasonable range of the party's strength
-	new_enemy.LevelSimulator(GlobalManager->AveragePartyLevel());
+	new_enemy.Initialize(GlobalManager->AverageActivePartyExperienceLevel());
 
 	// (3): Hold a copy of this enemy in case the battle needs to be restarted
 	_original_enemies.push_back(new_enemy);
@@ -534,7 +534,7 @@ void BattleMode::_Initialize()
 	// TODO: implement this later
 	// COMMENT: Implement what later?
 	for (uint32 i = 0; i < active_party->GetPartySize(); i++) {
-		GlobalCharacter* new_character = dynamic_cast<GlobalCharacter*>(active_party->GetActor(i));
+		GlobalCharacter* new_character = dynamic_cast<GlobalCharacter*>(active_party->GetActorAtIndex(i));
 		BattleCharacterActor* new_actor = new BattleCharacterActor(new_character, 256, 320);
 		new_actor->InitBattleActorStats(new_character);
 		_character_actors.push_back(new_actor);
@@ -639,26 +639,27 @@ void BattleMode::_TallyRewards() {
 	{
 		gbe = GetEnemyActorAt(i)->GetActor();
 		_victory_xp += gbe->GetExperiencePoints();
-		_victory_money += gbe->GetMoney();
+		_victory_money += gbe->GetDrunesDropped();
 
-		if (RandomFloat() * 100 <= gbe->GetChanceToDrop())
-		{
-			//Added here so that we can display the list on victory
-			//FIX ME later
-			GlobalManager->AddToInventory(gbe->GetItemDropped());
-
-			it2 = GlobalManager->GetInventory()->find(gbe->GetItemDropped());
-			it = _victory_items.find(MakeStandardString(it2->second->GetName()));
-
-			if (it != _victory_items.end())
-			{
-				++it->second;
-			}
-			else
-			{
-				_victory_items.insert(make_pair(MakeStandardString(it2->second->GetName()), 1));
-			}
-		}
+	// Roots: this code is now defunct. Refer to the GlobalEnemy class to determine items dropped
+// 		if (RandomFloat() * 100 <= gbe->GetChanceToDrop())
+// 		{
+// 			//Added here so that we can display the list on victory
+// 			//FIX ME later
+// 			GlobalManager->AddToInventory(gbe->GetItemDropped());
+// 
+// 			it2 = GlobalManager->GetInventory()->find(gbe->GetItemDropped());
+// 			it = _victory_items.find(MakeStandardString(it2->second->GetName()));
+// 
+// 			if (it != _victory_items.end())
+// 			{
+// 				++it->second;
+// 			}
+// 			else
+// 			{
+// 				_victory_items.insert(make_pair(MakeStandardString(it2->second->GetName()), 1));
+// 			}
+// 		}
 	}
 
 	uint32 num_alive = 0;
@@ -844,91 +845,56 @@ void BattleMode::_UpdateCharacterSelection() {
 void BattleMode::_UpdateTargetSelection() {
 	if (InputManager->DownPress() || InputManager->LeftPress()) {
 		if (_action_window->GetActionTargetType() != GLOBAL_TARGET_PARTY) {
-			switch (_action_window->GetActionAlignmentType()) {
-				case GLOBAL_ALIGNMENT_BAD:
-					_selected_target_index = GetIndexOfNextAliveEnemy(false);
-					_selected_target = GetEnemyActorAt(_selected_target_index);
-					break;
-
-				case GLOBAL_ALIGNMENT_NEUTRAL:
-					if (InputManager->DownPress()) {
-						if (_selected_target->IsEnemy() == false) {
-							if (_selected_target_index) {
-								--_selected_target_index;
-							}
-							else {
-								_selected_target_index = GlobalManager->GetActiveParty()->GetPartySize() - 1;
-							}
-							_selected_target = GetPlayerCharacterAt(_selected_target_index);
+			if (_action_window->IsActionTargetAlly()) {
+				if (InputManager->DownPress()) {
+					if (_selected_target->IsEnemy() == false) {
+						if (_selected_target_index) {
+							--_selected_target_index;
 						}
 						else {
-							_selected_target_index = GetIndexOfNextAliveEnemy(false);
-							_selected_target = GetEnemyActorAt(_selected_target_index);
+							_selected_target_index = GlobalManager->GetActiveParty()->GetPartySize() - 1;
 						}
+						_selected_target = GetPlayerCharacterAt(_selected_target_index);
 					}
-					break;
-
-				default:
-					break;
-			}
-		}
-
-		// Switch to target the party if targeting bad guys
-		// Has to be at least one character alive for this to work, otherwise how the hell did we get to this point
-		if (InputManager->LeftPress() && _selected_target->IsEnemy()
-			&& _action_window->GetActionAlignmentType() == GLOBAL_ALIGNMENT_NEUTRAL)
-		{
-			for(uint8 i = 0; i < _character_actors.size(); ++i)
-			{
-				if (_character_actors[i]->IsAlive())
-				{
-					_selected_target_index = i;
-					_selected_target = GetPlayerCharacterAt(i);
-					break;
+					else {
+						_selected_target_index = GetIndexOfNextAliveEnemy(false);
+						_selected_target = GetEnemyActorAt(_selected_target_index);
+					}
 				}
+			} // if (_action_window->IsActionTargetAlly())
+			else {
+				_selected_target_index = GetIndexOfNextAliveEnemy(false);
+				_selected_target = GetEnemyActorAt(_selected_target_index);
 			}
 		}
 	} // if (InputManager->DownPress() || InputManager->LeftPress())
 
 	else if (InputManager->UpPress() || InputManager->RightPress()) {
 		if (_action_window->GetActionTargetType() != GLOBAL_TARGET_PARTY) {
-			switch (_action_window->GetActionAlignmentType()) {
-				case GLOBAL_ALIGNMENT_BAD:
-					_selected_target_index = GetIndexOfNextAliveEnemy(true);
-					_selected_target = GetEnemyActorAt(_selected_target_index);
-					break;
-
-				case GLOBAL_ALIGNMENT_NEUTRAL:
-					if (InputManager->UpPress()) {
-						if (_selected_target->IsEnemy() == false) {
-							if (_selected_target_index < GlobalManager->GetActiveParty()->GetPartySize() - 1) {
-								++_selected_target_index;
-							}
-							else {
-								_selected_target_index = 0;
-							}
-
-							_selected_target = GetPlayerCharacterAt(_selected_target_index);
+			if (_action_window->IsActionTargetAlly()) {
+				if (InputManager->UpPress()) {
+					if (_selected_target->IsEnemy() == false) {
+						if (_selected_target_index < GlobalManager->GetActiveParty()->GetPartySize() - 1) {
+							++_selected_target_index;
 						}
 						else {
-							_selected_target_index = GetIndexOfNextAliveEnemy(true);
-							_selected_target = GetEnemyActorAt(_selected_target_index);
+							_selected_target_index = 0;
 						}
-					}
-					break;
 
-				default:
-					break;
+						_selected_target = GetPlayerCharacterAt(_selected_target_index);
+					}
+					else {
+						_selected_target_index = GetIndexOfNextAliveEnemy(true);
+						_selected_target = GetEnemyActorAt(_selected_target_index);
+					}
+				}
+			} // if (_action_window->IsActionTargetAlly())
+			else {
+				_selected_target_index = GetIndexOfNextAliveEnemy(true);
+				_selected_target = GetEnemyActorAt(_selected_target_index);
 			}
 		}
 
-		// Switch to target party if targeting bad guys
-		if (InputManager->RightPress() && _selected_target->IsEnemy() == false &&
-			_action_window->GetActionAlignmentType() == GLOBAL_ALIGNMENT_NEUTRAL)
-		{
-			_selected_target_index = GetIndexOfFirstAliveEnemy();
-			_selected_target = GetEnemyActorAt(_selected_target_index);
-		}
 	} // else if (InputManager->UpPress() || InputManager->RightPress())
 
 	else if (InputManager->ConfirmPress()) {
@@ -975,13 +941,13 @@ void BattleMode::_UpdateTargetSelection() {
 
 void BattleMode::_UpdateAttackPointSelection() {
 	BattleEnemyActor* e = GetEnemyActorAt(_selected_target_index);
-	vector<GlobalAttackPoint*>global_attack_points = e->GetActor()->GetAttackPoints();
+	vector<GlobalAttackPoint*>* global_attack_points = e->GetActor()->GetAttackPoints();
 
 	if (InputManager->ConfirmPress()) {
 		ScriptEvent* new_event;
 		if (_action_window->GetActionCategory() != ACTION_TYPE_ITEM) {
 			new_event = new ScriptEvent(_selected_character, _selected_target, _action_window->GetSelectedSkill(),
-				global_attack_points[_selected_attack_point]);
+				global_attack_points->at(_selected_attack_point));
 		}
 		else {
 			GlobalItem* item = _action_window->GetSelectedItem();
@@ -991,7 +957,7 @@ void BattleMode::_UpdateAttackPointSelection() {
 			// If count == 0, then it's removed from inventory...if item is not used (i.e. battle ends before use),
 			// it is incremented back.
 			item->DecrementCount(1);
-			new_event = new ScriptEvent(_selected_character, _selected_target, item, global_attack_points[_selected_attack_point]);
+			new_event = new ScriptEvent(_selected_character, _selected_target, item, global_attack_points->at(_selected_attack_point));
 		}
 		AddScriptEventToQueue(new_event);
 		_selected_character->SetQueuedToPerform(true);
@@ -1006,10 +972,10 @@ void BattleMode::_UpdateAttackPointSelection() {
 	}
 
 	else if (InputManager->UpPress() || InputManager->RightPress()) {
-		if (_selected_attack_point < global_attack_points.size() - 1) {
+		if (_selected_attack_point < global_attack_points->size() - 1) {
 			_selected_attack_point++;
 		}
-		else if (_selected_attack_point == global_attack_points.size() - 1) {
+		else if (_selected_attack_point == global_attack_points->size() - 1) {
 			_selected_attack_point = 0;
 		}
 	}
@@ -1019,7 +985,7 @@ void BattleMode::_UpdateAttackPointSelection() {
 			_selected_attack_point--;
 		}
 		else if (_selected_attack_point == 0) {
-			_selected_attack_point = global_attack_points.size() - 1;
+			_selected_attack_point = global_attack_points->size() - 1;
 		}
 	}
 
@@ -1204,7 +1170,7 @@ void BattleMode::_DrawTimeMeter() {
 ////////////////////////////////////////////////////////////////////////////////
 
 bool _TEMPIsA1Smaller(BattleEnemyActor* a1, BattleEnemyActor* a2) {
-	if (a1->GetYLocation() - a1->GetActor()->GetHeight() < a2->GetYLocation() - a2->GetActor()->GetHeight())
+	if (a1->GetYLocation() - a1->GetActor()->GetSpriteHeight() < a2->GetYLocation() - a2->GetActor()->GetSpriteHeight())
 		return true;
 
 	return false;
@@ -1369,7 +1335,7 @@ void BattleMode::UnFreezeTimers()
 
 // Handle player victory
 void BattleMode::PlayerVictory() {
-	GlobalManager->AddFunds(_victory_money);
+	GlobalManager->AddDrunes(_victory_money);
 	// Give some experience for each character in the party
 	for (uint32 i = 0; i < _character_actors.size(); ++i) {
 		GlobalCharacter* character = _character_actors.at(i)->GetActor();
@@ -1381,7 +1347,8 @@ void BattleMode::PlayerVictory() {
 				character->AddSkill(2);
 			}
 		}
-		character->AddXP(_victory_xp);
+		// ROOTS: This function returns a bool indicating if there was any character growth... needs to be checked
+		character->AddExperiencePoints(_victory_xp);
 		_character_actors.at(i)->SetSkillPoints(_character_actors.at(i)->GetSkillPoints() + _victory_sp);
 	}
 }

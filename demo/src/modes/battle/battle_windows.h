@@ -134,8 +134,8 @@ public:
 	hoa_global::GLOBAL_TARGET GetActionTargetType() const
 		{ return _action_target_type; }
 
-	hoa_global::GLOBAL_ALIGNMENT GetActionAlignmentType() const
-		{ return _action_alignment_type; }
+	bool IsActionTargetAlly() const
+		{ return _action_target_ally; }
 
 	hoa_global::GlobalSkill* GetSelectedSkill() const
 		{ return _skill_list->at(_selected_action); }
@@ -161,8 +161,8 @@ private:
 	//! \brief The type of target for the currently selected action (attack point, actor, or party)
 	hoa_global::GLOBAL_TARGET _action_target_type;
 
-	//! \brief The type of alignment for the currently selected action (friend, foe, or neutral)
-	hoa_global::GLOBAL_ALIGNMENT _action_alignment_type;
+	//! \brief If true the action should target an ally, otherwise it should target an enemy
+	bool _action_target_ally;
 
 	/** \brief Contains the list of items that are available for use in battle
 	*** Each entry in here will correspond to each entry in the _action_selection_list when the

@@ -37,7 +37,7 @@ namespace hoa_global {
 //! \brief The singleton pointer responsible for the management of global game data.
 extern GameGlobal* GlobalManager;
 
-//! \brief  Determines whether the code in the hoa_global namespace should print debug statements or not.
+//! \brief Determines whether the code in the hoa_global namespace should print debug statements or not.
 extern bool GLOBAL_DEBUG;
 
 //! \brief A return value used for when a specified event name fails to be found
@@ -147,9 +147,9 @@ private:
 class GameGlobal : public hoa_utils::Singleton<GameGlobal> {
 	friend class hoa_utils::Singleton<GameGlobal>;
 	friend class GlobalItem;
-	friend class GlobalSkill;
 	friend class GlobalWeapon;
 	friend class GlobalArmor;
+	friend class GlobalSkill;
 
 public:
 	~GameGlobal();
@@ -212,7 +212,7 @@ public:
 
 	//! \name Inventory Methods
 	//@{
-	/** \brief Adds a new item to the inventory
+	/** \brief Adds a new object to the inventory
 	*** \param obj_id The identifier value of the object to add
 	*** \param obj_count The number of instances of the object to add (default == 1)
 	*** If the item already exists in the inventory, then instead the GlobalObject#_count member is used to
@@ -220,38 +220,62 @@ public:
 	**/
 	void AddToInventory(uint32 obj_id, uint32 obj_count = 1);
 
-	/** \brief Removes an item from the inventory
-	*** \param obj_id The identifier value of the item to remove
-	*** \note If the item is not in the inventory, the function will do nothing.
+	/** \brief Adds a new object to the inventory
+	*** \param object A pointer to the pre-created GlobalObject-type class to add
+	***
+	*** Once you call this function, GameGlobal assumes it is now responsible for memory management of this
+	*** object. Therefore, you should <b>never</b> attempt to reference the argument pointer after it is
+	*** passed to this function, because it may very well now point to an invalid location in memory. You
+	*** should also never use this function to pass a pointer to an object that was <b>not</b> created with
+	*** the new operator, because it is guaranteed that sooner or later GameGlobal will invoke delete on
+	*** this object.
+	**/
+	void AddToInventory(GlobalObject* object);
+
+	/** \brief Removes an object from the inventory
+	*** \param obj_id The identifier value of the object to remove
+	*** \note If the object is not in the inventory, the function will do nothing.
 	***
 	*** This function removes the item regardless of what the GlobalObject#_count member is set to.
-	*** If you want to remove only a certain number of instances of the item, use the function
+	*** If you want to remove only a certain number of instances of the object, use the function
 	*** GameGlobal#DecrementObjectCount.
 	**/
 	void RemoveFromInventory(uint32 obj_id);
 
+	/** \brief Retries a single copy of an object from the inventory
+	*** \param obj_id The identifier value of the item to remove
+	*** \param all_counts If set to true, all counts of the object will be removed from the inventory (default value == false)
+	*** \return A newly instantiated copy of the object, or NULL if the object was not found in the inventory
+	***
+	*** If all_counts is false, the returned object will have a count of one and the count of the object inside the inventory
+	*** will be decremented by one. If all_counts is ture, the returned object will have the same count as was previously in
+	*** the inventory, and the object will be removed from the inventory alltogether. Note that the pointer returned will need
+	*** to be deleted by the user code, unless the object is re-added to the inventory or equipped on a character.
+	**/
+	GlobalObject* RetrieveFromInventory(uint32 obj_id, bool all_counts = false);
+
 	/** \brief Increments the number (count) of an object in the inventory
 	*** \param item_id The integer identifier of the item that will have its count incremented
-	*** \param count The amount to increase the object's count by
+	*** \param count The amount to increase the object's count by (default value == 1)
 	***
 	*** If the item does not exist in the inventory, this function will do nothing. If the count parameter
-	*** is set to zero, no change will take place. Overflow conditions are not checked.
+	*** is set to zero, no change will take place.
 	***
 	*** \note The callee can not assume that the function call succeeded, but rather has to check this themselves.
 	**/
-	void IncrementObjectCount(uint32 obj_id, uint32 obj_count);
+	void IncrementObjectCount(uint32 obj_id, uint32 obj_count = 1);
 
 	/** \brief Decrements the number (count) of an object in the inventory
 	*** \param item_id The integer identifier of the item that will have its count decremented
-	*** \param count The amount to decrease the object's count by
+	*** \param count The amount to decrease the object's count by (default value == 1)
 	***
 	*** If the item does not exist in the inventory, this function will do nothing. If the count parameter
 	*** is set to zero, no change will take place. If the count parameter is greater than or equal to the
-	*** current count of the object, the object will be removed from the inventory.
+	*** current count of the object, the object will be completely removed from the inventory.
 	***
 	*** \note The callee can not assume that the function call succeeded, but rather has to check this themselves.
 	**/
-	void DecrementObjectCount(uint32 obj_id, uint32 obj_count);
+	void DecrementObjectCount(uint32 obj_id, uint32 obj_count = 1);
 
 	/** \brief Checks whether or a given object is currently stored in the inventory
 	*** \param id The id of the object (item, weapon, armor, etc.) to check for
@@ -267,8 +291,15 @@ public:
 	*** \param group_name The name of the event group to check for
 	*** \return True if the event group name was found, false if it was not
 	**/
-	bool DoesEventGroupExist(const std::string& group_name)
+	bool DoesEventGroupExist(const std::string& group_name) const
 		{ if (_event_groups.find(group_name) != _event_groups.end()) return true; else return false; }
+
+	/** \brief Determines if an event of a given name exists within a given group
+	*** \param group_name The name of the event group where the event to check is contained
+	*** \param event_name The name of the event to check for
+	*** \return True if the event was found, or false if the event name or group name was not found
+	**/
+	bool DoesEventExist(const std::string& group_name, const std::string& event_name) const;
 
 	/** \brief Adds a new event group for the class to manage
 	*** \param group_name The name of the new event group to add
@@ -289,32 +320,46 @@ public:
 	*** Be careful, however, because since this function returns NULL if the event group was not found, the
 	*** example code above would produce a segmentation fault if no event group by the name "cave_map" existed.
 	**/
-	GlobalEventGroup* GetEventGroup(const std::string& group_name);
+	GlobalEventGroup* GetEventGroup(const std::string& group_name) const;
+
+	/** \brief Returns the value of an event inside of a specified group
+	*** \param group_name The name of the event group where the event is contained
+	*** \param event_name The name of the event whose value should be retrieved
+	*** \return The value of the requested event, or GLOBAL_BAD_EVENT if the event was not found
+	**/
+	int32 GetEventValue(const std::string& group_name, const std::string& event_name) const;
 
 	//! \brief Returns the number of event groups stored in the class
 	uint32 GetNumberEventGroups() const
 		{ return _event_groups.size(); }
+
+	/** \brief Returns the number of events for a specified group name
+	*** \param group_name The name of the event group to retrieve the number of events for
+	*** \return The number of events in the group, or zero if no such group name existed
+	**/
+	uint32 GetNumberEvents(const std::string& group_name) const;
 	//@}
 
 	//! \note The overflow condition is not checked here: we just assume it will never occur
-	void AddFunds(uint32 amount)
-		{ _funds += amount; }
+	void AddDrunes(uint32 amount)
+		{ _drunes += amount; }
 
 	//! \note The amount is only subtracted if the current funds is equal to or exceeds the amount to subtract
-	void SubtractFunds(uint32 amount)
-		{ if (_funds >= amount) _funds -= amount; }
+	void SubtractDrunes(uint32 amount)
+		{ if (_drunes >= amount) _drunes -= amount; }
 
 	/** \brief Calculates the average experience level of members in the active party
 	*** \return The average (integer) experience level of all members in the active party
-	*** This is used primarily for determining the level of growth for enemies in battle.
+	*** This is used for determining the level of growth for enemies in battle.
 	**/
-	uint32 AveragePartyLevel();
+	uint32 AverageActivePartyExperienceLevel() const
+		{ return static_cast<uint32>(_active_party.AverageExperienceLevel()); }
 
 	/** \brief Sets the name and graphic for the current location
 	*** \param location_name The ustring that contains the name of the current map
 	*** \param location_graphic_filename The filename of the graphic image that represents this location
 	**/
-	void SetLocation(hoa_utils::ustring& location_name, std::string location_graphic_filename);
+	void SetLocation(const hoa_utils::ustring& location_name, const std::string& location_graphic_filename);
 
 	/** \brief Saves all global data to a saved game file
 	*** \param filename The filename of the saved game file where to write the data to
@@ -330,11 +375,17 @@ public:
 
 	//! \name Class Member Access Functions
 	//@{
-	void SetFunds(uint32 amount)
-		{ _funds = amount; }
+	void SetDrunes(uint32 amount)
+		{ _drunes = amount; }
 
-	const uint32 GetFunds() const
-		{ return _funds; }
+	uint32 GetDrunes() const
+		{ return _drunes; }
+
+	hoa_utils::ustring& GetLocationName()
+		{ return _location_name; }
+
+	hoa_video::StillImage& GetLocationGraphic()
+		{ return _location_graphic; }
 
 	std::vector<GlobalCharacter*>* GetCharacterOrder()
 		{ return &_character_order; };
@@ -373,8 +424,8 @@ public:
 private:
 	GameGlobal();
 
-	//! \brief The amount of financial resources the party currently has.
-	uint32 _funds;
+	//! \brief The amount of financial resources (drunes) that the party currently has
+	uint32 _drunes;
 
 	//! \brief The name of the map that the current party is on
 	hoa_utils::ustring _location_name;
@@ -388,7 +439,7 @@ private:
 	**/
 	std::map<uint32, GlobalCharacter*> _characters;
 
-	/** \brief A vector whose purpose is to determine the ORDER of characters
+	/** \brief A vector whose purpose is to maintain the order of characters
 	*** The first four characters in this vector are in the active party; the rest are in reserve.
 	**/
 	std::vector<GlobalCharacter*> _character_order;
@@ -426,7 +477,12 @@ private:
 	//@{
 	hoa_script::ReadScriptDescriptor _items_script;
 	hoa_script::ReadScriptDescriptor _weapons_script;
-	hoa_script::ReadScriptDescriptor _armor_script;
+	hoa_script::ReadScriptDescriptor _head_armor_script;
+	hoa_script::ReadScriptDescriptor _torso_armor_script;
+	hoa_script::ReadScriptDescriptor _arm_armor_script;
+	hoa_script::ReadScriptDescriptor _leg_armor_script;
+	// hoa_script::ReadScriptDescriptor _shard_script;
+	// hoa_script::ReadScriptDescriptor _key_items_script;
 	hoa_script::ReadScriptDescriptor _attack_skills_script;
 	hoa_script::ReadScriptDescriptor _defend_skills_script;
 	hoa_script::ReadScriptDescriptor _support_skills_script;
@@ -438,6 +494,21 @@ private:
 	std::map<std::string, GlobalEventGroup*> _event_groups;
 
 	// ----- Private methods
+
+	/** \brief A helper template function that finds and removes an object from the inventory
+	*** \param obj_id The ID of the object to remove from the inventory
+	*** \param inv The vector container of the appropriate inventory type
+	*** \return True if the object was successfully removed, or false if it was not
+	**/
+	template <class T> bool _RemoveFromInventory(uint32 obj_id, std::vector<T*>& inv);
+
+	/** \brief A helper template function that finds and returns a copy of an object from the inventory
+	*** \param obj_id The ID of the object to remove from the inventory
+	*** \param inv The vector container of the appropriate inventory type
+	*** \param all_counts If false the object's count is decremented by one from the inventory, otherwise all counts are removed completely
+	*** \return A pointer to the newly created copy of the object, or NULL if the object could not be found
+	**/
+	template <class T> T* _RetrieveFromInventory(uint32 obj_id, std::vector<T*>& inv, bool all_counts);
 
 	/** \brief A helper function to GameGlobal::SaveGame() that stores the contents of a type of inventory to the saved game file
 	*** \param file A reference to the open and valid file where to write the inventory list
@@ -479,11 +550,49 @@ private:
 	*** \param group_name The name of the event group to load
 	**/
 	void _LoadEvents(hoa_script::ReadScriptDescriptor& file, const std::string& group_name);
-}; // class GameGlobal
+}; // class GameGlobal : public hoa_utils::Singleton<GameGlobal>
 
 //-----------------------------------------------------------------------------
 // Template Function Definitions
 //-----------------------------------------------------------------------------
+
+template <class T> bool GameGlobal::_RemoveFromInventory(uint32 obj_id, std::vector<T*>& inv) {
+	for (typename std::vector<T*>::iterator i = inv.begin(); i != inv.end(); i++) {
+		if ((*i)->GetID() == obj_id) {
+			delete _inventory[obj_id];
+			_inventory.erase(obj_id);
+			inv.erase(i);
+			return true;
+		}
+	}
+
+	return false;
+} // template <class T> bool GameGlobal::_RemoveFromInventory(uint32 obj_id, std::vector<T*>& inv)
+
+
+
+template <class T> T* GameGlobal::_RetrieveFromInventory(uint32 obj_id, std::vector<T*>& inv, bool all_counts) {
+	for (typename std::vector<T*>::iterator i = inv.begin(); i != inv.end(); i++) {
+		if ((*i)->GetID() == obj_id) {
+			T* return_object;
+			if (all_counts == true || _inventory[obj_id]->GetCount() == 1) {
+				return_object = *i;
+				_inventory.erase(obj_id);
+				inv.erase(i);
+			}
+			else {
+				return_object = new T(**i);
+				return_object->SetCount(1);
+				_inventory[obj_id]->DecrementCount();
+			}
+			return return_object;
+		}
+	}
+
+	return NULL;
+} // template <class T> T* GameGlobal::_RetrieveFromInventory(uint32 obj_id, std::vector<T*>& inv, bool all_counts)
+
+
 
 template <class T> void GameGlobal::_SaveInventory(hoa_script::WriteScriptDescriptor& file, std::string name, std::vector<T*>& inv) {
 	if (file.IsFileOpen() == false) {

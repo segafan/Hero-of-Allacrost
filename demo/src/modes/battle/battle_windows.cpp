@@ -152,7 +152,7 @@ void ActionWindow::Reset() {
 	_selected_action_category = 0;
 	_selected_action = 0;
 	_action_target_type = GLOBAL_TARGET_INVALID;
-	_action_alignment_type = GLOBAL_ALIGNMENT_INVALID;
+	_action_target_ally = false;
 	_item_list.clear();
 	_skill_list = NULL;
 }
@@ -226,7 +226,7 @@ void ActionWindow::_UpdateActionSelection() {
 			_selected_action_category == ACTION_TYPE_SUPPORT)
 		{
 			_action_target_type = _skill_list->at(_selected_action)->GetTargetType();
-			_action_alignment_type = _skill_list->at(_selected_action)->GetTargetAlignment();
+			_action_target_ally = _skill_list->at(_selected_action)->IsTargetAlly();
 			current_battle->_cursor_state = CURSOR_SELECT_TARGET;
 			current_battle->_selected_target_index = current_battle->GetIndexOfFirstAliveEnemy();
 			current_battle->_selected_target = current_battle->GetEnemyActorAt(current_battle->_selected_target_index);
@@ -234,26 +234,17 @@ void ActionWindow::_UpdateActionSelection() {
 
 		else if (_selected_action_category == ACTION_TYPE_ITEM) {
 			_action_target_type = _item_list[_selected_action]->GetTargetType();
-			_action_alignment_type = _item_list[_selected_action]->GetTargetAlignment();
+			_action_target_ally = _item_list[_selected_action]->IsTargetAlly();
 
 			// TEMP: Need to re-examine this later... make sure both helpful and hurtful items register properly
 			current_battle->_cursor_state = CURSOR_SELECT_TARGET;
 			current_battle->_selected_target_index = 0;
 
 			// TODO: Use target type to select actor or party, and use cursor memory
-			switch (_action_alignment_type) {
-				case GLOBAL_ALIGNMENT_GOOD:
-				case GLOBAL_ALIGNMENT_NEUTRAL:
-					current_battle->_selected_target = current_battle->GetPlayerCharacterAt(0);
-					break;
-				case GLOBAL_ALIGNMENT_BAD:
-					current_battle->_selected_target = current_battle->GetEnemyActorAt(current_battle->GetIndexOfFirstAliveEnemy());
-					break;
-				default:
-					if (BATTLE_DEBUG)
-						cerr << "BATTLE WARNING: In ActionWindow::_UpdateActionSelection(), item's target alignment was invalid" << endl;
-					break;
-			}
+			if (_action_target_ally)
+				current_battle->_selected_target = current_battle->GetPlayerCharacterAt(0);
+			else
+				current_battle->_selected_target = current_battle->GetEnemyActorAt(current_battle->GetIndexOfFirstAliveEnemy());
 		}
 
 		else {
