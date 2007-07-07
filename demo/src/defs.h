@@ -118,7 +118,7 @@ namespace hoa_video {
 	}
 }
 
-// Script declarations, see script.h/cpp
+// Script declarations, see src/engine/script
 namespace hoa_script {
 	extern bool SCRIPT_DEBUG;
 	class GameScript;
@@ -175,6 +175,7 @@ namespace hoa_global {
 	class GlobalAttackPoint;
 	class GlobalActor;
 	class GlobalCharacter;
+	class GlobalCharacterGrowth;
 	class GlobalEnemy;
 	class GlobalParty;
 }

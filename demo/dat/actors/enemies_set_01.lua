@@ -9,16 +9,13 @@
 -- All enemy definitions are stored in this table
 enemies = {}
 
-
-
 enemies[1] = {
 	name = "Green Slime",
 	filename = "green_slime",
-	sprite_filename = "img/sprites/battle/enemies/green_slime.png",
 	sprite_width = 64,
 	sprite_height = 64,
 
-	base_stats = {
+	initial_stats = {
 		hit_points = 22,
 		skill_points = 10,
 		experience_points = 5,
@@ -27,7 +24,8 @@ enemies[1] = {
 		fortitude = 10,
 		protection = 4,
 		agility = 12,
-		evade = 2.0
+		evade = 2.0,
+		drunes = 10
 	},
 	
 	growth_stats = {
@@ -39,13 +37,8 @@ enemies[1] = {
 		fortitude = 12.0,
 		protection = 4.0,
 		agility = 5.0,
-		evade = 2.0
-	},
-
-	rewards = {
-		item_dropped = 1, -- Healing potion
-		chance_to_drop = 10.0,
-		money = 10
+		evade = 2.0,
+		drunes = 2.0
 	},
 
 	attack_points = {
@@ -67,18 +60,23 @@ enemies[1] = {
 		}
 	},
 
-	skills = { 102 }
+	skills = {
+		[102] = 1
+	},
+
+	drop_objects = {
+		{ 1, 0.10, 1 } -- Healing potion
+	}
 }
 
 
 enemies[2] = {
 	name = "Spider",
 	filename = "spider",
-	sprite_filename = "img/sprites/battle/enemies/spider.png",
 	sprite_width = 64,
 	sprite_height = 64,
 
-	base_stats = {
+	initial_stats = {
 		hit_points = 25,
 		skill_points = 10,
 		experience_points = 6,
@@ -87,7 +85,8 @@ enemies[2] = {
 		fortitude = 11,
 		protection = 4,
 		agility = 18,
-		evade = 2.0
+		evade = 2.0,
+		drunes = 12
 	},
 	
 	growth_stats = {
@@ -99,14 +98,10 @@ enemies[2] = {
 		fortitude = 8.0,
 		protection = 4.0,
 		agility = 10.0,
-		evade = 2.0
+		evade = 2.0,
+		drunes = 2.0
 	},
 
-	rewards = {
-		item_dropped = 1, -- Healing potion
-		chance_to_drop = 10.0,
-		money = 12
-	},
 
 	attack_points = {
 		[1] = {
@@ -127,18 +122,23 @@ enemies[2] = {
 		}
 	},
 
-	skills = { 101 }
+	skills = {
+		[101] = 1
+	},
+
+	drop_objects = {
+		{ 1, 0.10, 1 } -- Healing potion
+	}
 }
 
 
 enemies[3] = {
 	name = "Snake",
 	filename = "snake",
-	sprite_filename = "img/sprites/battle/enemies/snake.png",
 	sprite_width = 128,
 	sprite_height = 64,
 
-	base_stats = {
+	initial_stats = {
 		hit_points = 28,
 		skill_points = 10,
 		experience_points = 7,
@@ -147,7 +147,8 @@ enemies[3] = {
 		fortitude = 9,
 		protection = 4,
 		agility = 15,
-		evade = 2.0
+		evade = 2.0,
+		drunes = 14
 	},
 	
 	growth_stats = {
@@ -159,13 +160,8 @@ enemies[3] = {
 		fortitude = 5.0,
 		protection = 4.0,
 		agility = 10.0,
-		evade = 2.0
-	},
-
-	rewards = {
-		item_dropped = 1, -- Healing potion
-		chance_to_drop = 10.0,
-		money = 14
+		evade = 2.0,
+		drunes = 2.0
 	},
 
 	attack_points = {
@@ -195,19 +191,24 @@ enemies[3] = {
 		}
 	},
 
-	skills = { 100 }
+	skills = {
+		[100] = 1
+	},
+
+	drop_objects = {
+		{ 1, 0.10, 1 } -- Healing potion
+	}
 }
 
 
 enemies[4] = {
 	name = "Skeleton",
 	filename = "skeleton",
-	sprite_filename = "img/sprites/battle/enemies/skeleton.png",
 	sprite_width = 64,
 	sprite_height = 128,
 
 	
-	base_stats = {
+	initial_stats = {
 		hit_points = 24,
 		skill_points = 10,
 		experience_points = 5,
@@ -216,7 +217,8 @@ enemies[4] = {
 		fortitude = 14,
 		protection = 4,
 		agility = 13,
-		evade = 2.0
+		evade = 2.0,
+		drunes = 18
 	},
 	
 	growth_stats = {
@@ -228,13 +230,8 @@ enemies[4] = {
 		fortitude = 8.0,
 		protection = 4.0,
 		agility = 10.0,
-		evade = 2.0
-	},
-
-	rewards = {
-		item_dropped = 1, -- Healing potion
-		chance_to_drop = 15.0,
-		money = 18
+		evade = 2.0,
+		drunes = 2.0
 	},
 
 	attack_points = {
@@ -264,19 +261,24 @@ enemies[4] = {
 		}
 	},
 
-	skills = { 103 }
+	skills = {
+		[103] = 1
+	},
+
+	drop_objects = {
+		{ 1, 0.15, 1 } -- Healing potion
+	}
 }
 
 
 enemies[5] = {
 	name = "Scorpion",
 	filename = "scorpion",
-	sprite_filename = "img/sprites/battle/enemies/scorpion.png",
 	sprite_width = 64,
 	sprite_height = 64,
 
 	
-	base_stats = {
+	initial_stats = {
 		hit_points = 22,
 		skill_points = 10,
 		experience_points = 8,
@@ -285,7 +287,9 @@ enemies[5] = {
 		fortitude = 12,
 		protection = 4,
 		agility = 14,
-		evade = 2.0
+		evade = 2.0,
+		drunes = 12,
+		drunes = 2.0
 	},
 
 	growth_stats = {
@@ -300,11 +304,6 @@ enemies[5] = {
 		evade = 2.0
 	},
 
-	rewards = {
-		item_dropped = 1, -- Healing potion
-		chance_to_drop = 15.0,
-		money = 12
-	},
 
 	attack_points = {
 		[1] = {
@@ -333,5 +332,11 @@ enemies[5] = {
 		}
 	},
 
-	skills = { 101 }
+	skills = {
+		[101] = 1
+	},
+
+	drop_objects = {
+		{ 1, 0.15, 1 } -- Healing potion
+	}
 }

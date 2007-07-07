@@ -157,7 +157,7 @@ void ShopActionWindow::Update() {
 void ShopActionWindow::UpdateFinanceText() {
 	if (current_shop != NULL) {
 		text_box.SetDisplayText(MakeUnicodeString(
-			  "Funds:  " + NumberToString(GlobalManager->GetFunds()) +
+			  "Funds:  " + NumberToString(GlobalManager->GetDrunes()) +
 			"\nCosts:  " + NumberToString(current_shop->GetPurchaseCost()) +
 			"\nRefund: " + NumberToString(current_shop->GetSalesRevenue()) +
 			"\nTotal:  " + NumberToString(current_shop->GetTotalRemaining())
@@ -379,7 +379,7 @@ void ObjectSellListWindow::Update() {
 		} // if
 	} // if LeftPress()
 	else if (InputManager->RightPress()) {
-		int x = object_list.GetSelection();
+		uint32 x = object_list.GetSelection();
 		if (current_shop->_current_inv[x]->GetCount() > current_shop->_sell_objects_quantities[x]) {
 			current_shop->_sell_objects_quantities[x]++;
 			current_shop->_sales_revenue += (current_shop->_current_inv[x]->GetPrice() / 2);
@@ -472,7 +472,7 @@ void ObjectInfoWindow::SetObject(GlobalObject* obj) {
 	description.SetDisplayText(_object->GetDescription());
 
 	// Determine what properties to display depending on what type of object this is
-	switch (obj->GetType()) {
+	switch (obj->GetObjectType()) {
 		case GLOBAL_OBJECT_WEAPON:
 			GlobalWeapon *weapon;
 			weapon = dynamic_cast<GlobalWeapon*>(obj);
@@ -595,8 +595,8 @@ void ConfirmWindow::Update() {
 				current_shop->_sell_objects_quantities.push_back(0);
 			}
 
-			GlobalManager->SubtractFunds(current_shop->GetPurchaseCost());
-			GlobalManager->AddFunds(current_shop->GetSalesRevenue());
+			GlobalManager->SubtractDrunes(current_shop->GetPurchaseCost());
+			GlobalManager->AddDrunes(current_shop->GetSalesRevenue());
 			current_shop->_purchases_cost = 0;
 			current_shop->_sales_revenue = 0;
 			current_shop->_shop_sounds["coins"].PlaySound();

@@ -204,11 +204,6 @@ bool ReadScriptDescriptor::_CheckDataType(int32 type, luabind::object& obj_check
 				return false;
 			}
 		}
-		else {
-			_error_messages << "* _CheckDataType() failed because it was requested to check "
-				<< "against an unknown type: " << type << endl;
-			return false;
-		}
 	}
 
 	else {
@@ -337,6 +332,14 @@ void ReadScriptDescriptor::CloseTable() {
 
 	_open_tables.pop_back();
 	lua_pop(_lstack, 1);
+}
+
+
+
+void ReadScriptDescriptor::CloseAllTables() {
+	while (_open_tables.size() != 0) {
+		CloseTable();
+	}
 }
 
 

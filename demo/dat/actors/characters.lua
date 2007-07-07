@@ -9,13 +9,13 @@
 -- All character definitions are stored in this table
 characters = {}
 
-
-
 characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS] = {
 	name = "Claudius",
 	filename = "claudius",
 
-	base_stats = {
+	initial_stats = {
+		experience_level = 1,
+		experience_points = 50,
 		max_hit_points = 120,
 		max_skill_points = 15,
 		strength = 12,
@@ -24,22 +24,15 @@ characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS] = {
 		protection = 6,
 		agility = 30,
 		evade = 4.0,
-		experience_points = 50
-	},
-
-	growth_stats = {
-		hit_points = 14.0,
-		skill_points = 4.0,
-		strength = 8.0,
-		vigor = 1.0,
-		fortitude = 8.0,
-		protection = 3.0,
-		agility = 5.0,
-		evade = 2.0
+		weapon = 10002,
+		head_armor = 20001,
+		torso_armor = 30001,
+		arm_armor = 40001,
+		leg_armor = 50001
 	},
 
 	attack_points = {
-		[1] = {
+		[hoa_global.GameGlobal.GLOBAL_POSITION_HEAD] = {
 			name = "Head",
 			x_position = 31,
 			y_position = 54,
@@ -47,7 +40,7 @@ characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS] = {
 			protection_modifier = 0.25,
 			evade_modifier = 0.50
 		},
-		[2] = {
+		[hoa_global.GameGlobal.GLOBAL_POSITION_TORSO] = {
 			name = "Torso",
 			x_position = 37,
 			y_position = 34,
@@ -55,7 +48,7 @@ characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS] = {
 			protection_modifier = 0.10,
 			evade_modifier = -0.20
 		},
-		[3] = {
+		[hoa_global.GameGlobal.GLOBAL_POSITION_ARMS] = {
 			name = "Arms",
 			x_position = 31,
 			y_position = 54,
@@ -63,7 +56,7 @@ characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS] = {
 			protection_modifier = 0.00,
 			evade_modifier = 0.10
 		},
-		[4] = {
+		[hoa_global.GameGlobal.GLOBAL_POSITION_LEGS] = {
 			name = "Legs",
 			x_position = 37,
 			y_position = 34,
@@ -73,14 +66,31 @@ characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS] = {
 		}
 	},
 
-	initial_weapon = 10002,
-	initial_head_armor = 20001,
-	initial_torso_armor = 30001,
-	initial_arm_armor = 40001,
-	initial_leg_armor = 50001,
+	growth_stats = {
+		[1] = {
+			hit_points = 14.0,
+			skill_points = 4.0,
+			strength = 8.0,
+			vigor = 1.0,
+			fortitude = 8.0,
+			protection = 3.0,
+			agility = 5.0,
+			evade = 2.0
+		},
+		[4] = {
+			hit_points = 14.0,
+			skill_points = 4.0,
+			strength = 8.0,
+			vigor = 1.0,
+			fortitude = 8.0,
+			protection = 3.0,
+			agility = 5.0,
+			evade = 2.0
+		}
+	},
 
-	initial_skills = { 1 }
-}
+	skills = { [1] = 1, [2] = 2 }
+} -- characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_CLAUDIUS]
 
 
 
@@ -88,7 +98,9 @@ characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA] = {
 	name = "Laila",
 	filename = "laila",
 
-	base_stats = {
+	initial_stats = {
+		experience_level = 1,
+		experience_points = 30,
 		max_hit_points = 123,
 		max_skill_points = 25,
 		strength = 11,
@@ -97,22 +109,15 @@ characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA] = {
 		protection = 6,
 		agility = 32,
 		evade = 4.0,
-		experience_points = 50
-	},
-
-	growth_stats = {
-		hit_points = 14.0,
-		skill_points = 4.0,
-		strength = 8.0,
-		vigor = 1.0,
-		fortitude = 8.0,
-		protection = 3.0,
-		agility = 5.0,
-		evade = 2.0
+		weapon = 10002,
+		head_armor = 20001,
+		torso_armor = 30001,
+		arm_armor = 40001,
+		leg_armor = 50001
 	},
 
 	attack_points = {
-		[1] = {
+		[hoa_global.GameGlobal.GLOBAL_POSITION_HEAD] = {
 			name = "Head",
 			x_position = 31,
 			y_position = 54,
@@ -120,7 +125,7 @@ characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA] = {
 			protection_modifier = 0.25,
 			evade_modifier = 0.50
 		},
-		[2] = {
+		[hoa_global.GameGlobal.GLOBAL_POSITION_TORSO] = {
 			name = "Torso",
 			x_position = 37,
 			y_position = 34,
@@ -128,7 +133,7 @@ characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA] = {
 			protection_modifier = 0.10,
 			evade_modifier = -0.20
 		},
-		[3] = {
+		[hoa_global.GameGlobal.GLOBAL_POSITION_ARMS] = {
 			name = "Arms",
 			x_position = 31,
 			y_position = 54,
@@ -136,7 +141,7 @@ characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA] = {
 			protection_modifier = 0.00,
 			evade_modifier = 0.10
 		},
-		[4] = {
+		[hoa_global.GameGlobal.GLOBAL_POSITION_LEGS] = {
 			name = "Legs",
 			x_position = 37,
 			y_position = 34,
@@ -146,24 +151,88 @@ characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA] = {
 		}
 	},
 
-	initial_weapon = 10001,
-	initial_head_armor = 20002,
-	initial_torso_armor = 30001,
-	initial_arm_armor = 40001,
-	initial_leg_armor = 50001,
+	growth_stats = {
+		[1] = {
+			hit_points = 14.0,
+			skill_points = 4.0,
+			strength = 8.0,
+			vigor = 1.0,
+			fortitude = 8.0,
+			protection = 3.0,
+			agility = 5.0,
+			evade = 2.0
+		},
+		[4] = {
+			hit_points = 14.0,
+			skill_points = 4.0,
+			strength = 8.0,
+			vigor = 1.0,
+			fortitude = 8.0,
+			protection = 3.0,
+			agility = 5.0,
+			evade = 2.0
+		}
+	},
 
-	initial_skills = { 1 }
-}
+	skills = { [1] = 1, [2] = 2 }
+} -- characters[hoa_global.GameGlobal.GLOBAL_CHARACTER_LAILA]
 
 
+------------------------------------------------------------------------------[[
+-- \brief Called everytime a character reaches a new experience level. 
+-- \param character A pointer to the GlobalCharacter who has gained the new level
+-- 
+-- Before this function is called, the character should already have their 
+-- _experience_level member incremented. What this function does is determine
+-- the amount that each stat will grow by on the next level and if any new
+-- skills are learned on this level. 
+------------------------------------------------------------------------------]]
+function DetermineGrowth(character)
+	local new_level = character:GetExperienceLevel();        -- The value of the character's new XP level
+	local character_table = characters[character:GetID()];   -- Reference to the character's definition table
+	local growth_table = nil;                                -- Reference to the table containing the growth stats for this level
+	local new_skills = character_table["skills"][new_level]; -- Reference to the number or table of the new skills learned
+	local character_growth = character:GetGrowth();          -- Reference to the growth object contained within the character
 
-function XPToNextLevel ( current_level )
+	if (character_table == nil) then
+		print("LUA ERROR: characters.lua::GainExperienceLevel() failed because the character's ID was invalid");
+		return;
+	end
+
+	-- Find the appropriate index in the growth_stats table for determining how much the stats should grow by this level
+	local growth_index = new_level 
+	while (growth_index > 0) do
+		if (character_table["growth_stats"][growth_index] ~= nil) then
+			growth_table = character_table["growth_stats"][growth_index];
+			break;
+		end
+		growth_index = growth_index - 1;
+	end
 	
-	newExperiencePoints = (50 * current_level)  -- it's assumed that the C++ gives the level we're being promoted to, rather than the one we're being promoted from, in the "add experience" function.
+	if (growth_table == nil) then
+		print("LUA ERROR: characters.lua::GainExperienceLevel() failed because no growth stats were found");
+		return;
+	end
+
+	-- Calculate how much the character's stats are going to grow by the next level
+	character_growth._hit_points_growth = growth_table["hit_points"];
+	character_growth._skill_points_growth = growth_table["skill_points"];
+	character_growth._strength_growth = growth_table["strength"];
+	character_growth._vigor_growth = growth_table["vigor"];
+	character_growth._fortitude_growth = growth_table["fortitude"];
+	character_growth._protection_growth = growth_table["protection"];
+	character_growth._agility_growth = growth_table["agility"];
+	character_growth._evade_growth = growth_table["evade"];
 	
-	return newExperiencePoints
-end
-
-
-
-
+	-- Determine if the character learns any skills at this new level	
+	if (type(new_skills) == "number") then
+		character_growth:_AddSkill(new_skills);
+	elseif (type(new_skills) == "table") then
+		for i, skill in ipairs(new_skills) do
+			character_growth:_AddSkill(skill);
+		end
+	elseif (type(new_skills) ~= "nil") then
+		print("LUA ERROR: characters.lua::GainExperienceLevel() failed because of an unknown skill type");
+		return;
+	end
+end -- function DetermineGrowth(character)

@@ -75,10 +75,10 @@ MenuMode::MenuMode(ustring locale_name, string locale_image) {
 
 	// Setup character windows based on active party size
 	switch (characters.GetPartySize()) {
-		case 4: _character_window3.SetCharacter(dynamic_cast<GlobalCharacter*>(characters.GetActor(3)));
-		case 3: _character_window2.SetCharacter(dynamic_cast<GlobalCharacter*>(characters.GetActor(2)));
-		case 2: _character_window1.SetCharacter(dynamic_cast<GlobalCharacter*>(characters.GetActor(1)));
-		case 1: _character_window0.SetCharacter(dynamic_cast<GlobalCharacter*>(characters.GetActor(0)));
+		case 4: _character_window3.SetCharacter(dynamic_cast<GlobalCharacter*>(characters.GetActorAtIndex(3)));
+		case 3: _character_window2.SetCharacter(dynamic_cast<GlobalCharacter*>(characters.GetActorAtIndex(2)));
+		case 2: _character_window1.SetCharacter(dynamic_cast<GlobalCharacter*>(characters.GetActorAtIndex(1)));
+		case 1: _character_window0.SetCharacter(dynamic_cast<GlobalCharacter*>(characters.GetActorAtIndex(0)));
 			break;
 		default:
 			cerr << "MENU ERROR: no characters in party!" << endl;
@@ -576,7 +576,7 @@ void MenuMode::_DrawBottomMenu() {
 		// For now, let SkillsWindow do the job.
 	}
 	else if (_current_menu_showing == SHOW_EQUIP) {
-		GlobalActor* actor = GlobalManager->GetActiveParty()->GetActor(0);
+		GlobalActor* actor = GlobalManager->GetActiveParty()->GetActorAtIndex(0);
 		GlobalCharacter* ch = (GlobalCharacter*)(actor);
 		string text = "STR: " +  NumberToString(ch->GetStrength());
 		VideoManager->DrawText(MakeUnicodeString(text));
@@ -693,7 +693,7 @@ void MenuMode::_DrawBottomMenu() {
 		VideoManager->DrawText(MakeUnicodeString(time));
 
 		// Display the current funds that the party has
-		string money = string("Drunes: " + NumberToString(GlobalManager->GetFunds()));
+		string money = string("Drunes: " + NumberToString(GlobalManager->GetDrunes()));
 		VideoManager->MoveRelative(0, 30);
 		VideoManager->DrawText(MakeUnicodeString(money));
 

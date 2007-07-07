@@ -9,16 +9,13 @@
 -- All enemy definitions are stored in this table
 enemies = {}
 
-
-
 enemies[101] = {
 	name = "Daemarbora",
 	filename = "daemarbora",
-	sprite_filename = "img/sprites/battle/enemies/daemarbora.png",
 	sprite_width = 128,
 	sprite_height = 128,
 
-	base_stats = {
+	initial_stats = {
 		hit_points = 80,
 		skill_points = 20,
 		experience_points = 25,
@@ -27,7 +24,8 @@ enemies[101] = {
 		fortitude = 31,
 		protection = 13,
 		agility = 8,
-		evade = 1.0
+		evade = 1.0,
+		drunes = 55
 	},
 	
 	growth_stats = {
@@ -39,13 +37,8 @@ enemies[101] = {
 		fortitude = 6.0,
 		protection = 4.0,
 		agility = 10.0,
-		evade = 2.0
-	},
-
-	rewards = {
-		item_dropped = 10002, -- Iron sword
-		chance_to_drop = 5.0,
-		money = 55
+		evade = 2.0,
+		drunes = 5.0
 	},
 
 	attack_points = {
@@ -67,19 +60,24 @@ enemies[101] = {
 		}
 	},
 
-	skills = { 1 }
+	skills = {
+		[1] = 1
+	},
+
+	drop_objects = {
+		{ 10002, 0.05, 1 } -- Iron sword
+	}
 }
 
 
 enemies[102] = {
 	name = "Aerocephal",
 	filename = "aerocephal",
-	sprite_filename = "img/sprites/battle/enemies/aerocephal.png",
 	sprite_width = 192,
 	sprite_height = 192,
 
 	
-	base_stats = {
+	initial_stats = {
 		hit_points = 50,
 		skill_points = 10,
 		experience_points = 20,
@@ -88,7 +86,8 @@ enemies[102] = {
 		fortitude = 7,
 		protection = 4,
 		agility = 20,
-		evade = 10.0
+		evade = 10.0,
+		drunes = 60
 	},
 	
 	growth_stats = {
@@ -100,13 +99,8 @@ enemies[102] = {
 		fortitude = 3.0,
 		protection = 4.0,
 		agility = 7.5,
-		evade = 2.5
-	},
-
-	rewards = {
-		item_dropped = 10001, -- Karlate sword
-		chance_to_drop = 10.0,
-		money = 60
+		evade = 2.5,
+		drunes = 6.0
 	},
 
 	attack_points = {
@@ -128,19 +122,24 @@ enemies[102] = {
 		},
 	},
 
-	skills = { 1 }
+	skills = {
+		[1] = 1
+	},
+
+	drop_objects = {
+		{ 10001, 0.10, 1 } -- Karlate sword
+	}
 }
 
 
 enemies[103] = {
 	name = "Arcana Drake",
 	filename = "arcana_drake",
-	sprite_filename = "img/sprites/battle/enemies/arcana_drake.png",
 	sprite_width = 192,
 	sprite_height = 256,
 
 	
-	base_stats = {
+	initial_stats = {
 		hit_points = 55,
 		skill_points = 10,
 		experience_points = 20,
@@ -149,7 +148,8 @@ enemies[103] = {
 		fortitude = 8,
 		protection = 5,
 		agility = 10,
-		evade = 2.0
+		evade = 2.0,
+		drunes = 80
 	},
 	
 	growth_stats = {
@@ -161,13 +161,8 @@ enemies[103] = {
 		fortitude = 8.0,
 		protection = 3.0,
 		agility = 6.0,
-		evade = 2.0
-	},
-
-	rewards = {
-		item_dropped = 20002, --Cobalt Helm
-		chance_to_drop = 5.0,
-		money = 80
+		evade = 2.0,
+		drunes = 5.0
 	},
 
 	attack_points = {
@@ -197,18 +192,23 @@ enemies[103] = {
 		}
 	},
 
-	skills = { 1 }
+	skills = {
+		[1] = 1
+	},
+
+	drop_objects = {
+		{ 20002, 0.05, 1 } -- Cobalt Helm
+	}
 }
 
 
 enemies[104] = {
 	name = "Nagaruda",
 	filename = "nagaruda",
-	sprite_filename = "img/sprites/battle/enemies/nagaruda.png",
 	sprite_width = 192,
 	sprite_height = 256,
 
-	base_stats = {
+	initial_stats = {
 		hit_points = 45,
 		skill_points = 10,
 		experience_points = 30,
@@ -217,7 +217,8 @@ enemies[104] = {
 		fortitude = 8,
 		protection = 4,
 		agility = 12,
-		evade = 2.0
+		evade = 2.0,
+		drunes = 70
 	},
 	
 	growth_stats = {
@@ -229,13 +230,8 @@ enemies[104] = {
 		fortitude = 5.0,
 		protection = 4.0,
 		agility = 8.0,
-		evade = 2.0
-	},
-
-	rewards = {
-		item_dropped = 40001, -- Karlate shield
-		chance_to_drop = 15.0,
-		money = 70
+		evade = 2.0,
+		drunes = 7.0
 	},
 
 	attack_points = {
@@ -265,18 +261,23 @@ enemies[104] = {
 		}
 	},
 
-	skills = { 1 }
+	skills = {
+		[1] = 1
+	},
+
+	drop_objects = {
+		{ 40001, 0.15, 1 } -- Karlate shield
+	}
 }
 
 
 enemies[105] = {
 	name = "Deceleon",
 	filename = "deceleon",
-	sprite_filename = "img/sprites/battle/enemies/deceleon.png",
 	sprite_width = 256,
 	sprite_height = 256,
 
-	base_stats = {
+	initial_stats = {
 		hit_points = 80,
 		skill_points = 10,
 		experience_points = 25,
@@ -285,7 +286,8 @@ enemies[105] = {
 		fortitude = 20,
 		protection = 4,
 		agility = 4,
-		evade = 1.0
+		evade = 1.0,
+		drunes = 85
 	},
 	
 	growth_stats = {
@@ -297,13 +299,8 @@ enemies[105] = {
 		fortitude = 5.0,
 		protection = 4.0,
 		agility = 4.0,
-		evade = 1.5
-	},
-
-	rewards = {
-		item_dropped = 10001, -- Karlate sword
-		chance_to_drop = 5.0,
-		money = 85
+		evade = 1.5,
+		drunes = 2.0
 	},
 
 	attack_points = {
@@ -341,19 +338,24 @@ enemies[105] = {
 		}
 	},
 
-	skills = { 1, 2 }
+	skills = {
+		[1] = 1, [2] = 1
+	},
+
+	drop_objects = {
+		{ 10001, 0.05, 1 } -- Karlate sword
+	}
 }
 
 
 enemies[106] = {
 	name = "Aurum Drakueli",
 	filename = "aurum-drakueli",
-	sprite_filename = "img/sprites/battle/enemies/aurum-drakueli.png",
 	sprite_width = 320,
 	sprite_height = 256,
 
 	
-	base_stats = {
+	initial_stats = {
 		hit_points = 100,
 		skill_points = 10,
 		experience_points = 40,
@@ -362,7 +364,8 @@ enemies[106] = {
 		fortitude = 8,
 		protection = 4,
 		agility = 18,
-		evade = 2.0
+		evade = 2.0,
+		drunes = 100
 	},
 	
 	growth_stats = {
@@ -374,13 +377,8 @@ enemies[106] = {
 		fortitude = 8.0,
 		protection = 4.0,
 		agility = 7.5,
-		evade = 2.0
-	},
-
-	rewards = {
-		item_dropped = 30001, -- Karlate breastplate
-		chance_to_drop = 15.0,
-		money = 100
+		evade = 2.0,
+		drunes = 4.0
 	},
 
 	attack_points = {
@@ -410,6 +408,11 @@ enemies[106] = {
 		}
 	},
 
-	skills = { 1, 2 }
+	skills = {
+		[1] = 1, [2] = 1
+	},
 
+	drop_objects = {
+		{ 30001, 0.15, 1 } -- Karlate breastplate
+	}
 }

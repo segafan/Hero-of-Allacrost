@@ -104,7 +104,7 @@ void ShopMode::Reset() {
 	// End temp code
 
 	_all_objects_quantities.clear();
-	for (int ctr = 0; ctr < _all_objects.size(); ctr++) {
+	for (uint32 ctr = 0; ctr < _all_objects.size(); ctr++) {
 		_all_objects_quantities.push_back(0);
 	}
 
@@ -200,7 +200,7 @@ void ShopMode::AddObject(uint32 object_id) {
 }
 
 uint32 ShopMode::GetTotalRemaining() {
-	return GlobalManager->GetFunds() - _purchases_cost + _sales_revenue;
+	return GlobalManager->GetDrunes() - _purchases_cost + _sales_revenue;
 }
 
 } // namespace hoa_shop

@@ -24,7 +24,26 @@
 #include "defs.h"
 #include "utils.h"
 
+#include "global_actors.h"
+
 namespace hoa_global {
+
+namespace private_global {
+
+/** \name Skill ID Range Constants
+*** These constants set the maximum valid ID ranges for each skill category.
+*** The full valid range for each skill category ID is:
+*** - Attack:        1-10000
+*** - Defend:    10001-20000
+*** - Support:   20001-30000
+**/
+//@{
+const uint32 MAX_ATTACK_ID   = 10000;
+const uint32 MAX_DEFEND_ID   = 20000;
+const uint32 MAX_SUPPORT_ID  = 30000;
+//@}
+
+} // namespace private_global
 
 /** \name Elemental Effect Types
 *** \brief Constants used to identify the various elementals
@@ -229,25 +248,41 @@ private:
 ***
 *** Skills are one representation of actions that a character or enemy may take
 *** in battle. The actual execution of a skill is done by a Lua function, which
-*** this class makes reference to. Typically skills are not shared between
+*** this class manages pointers to. Typically skills are not shared between
 *** characters and enemies, primarily because characters are fully animated when
-*** executing actions, while enemies are not animated.
-*** 
+*** executing actions, while enemies are not animated. Skills can be used in
+*** contexts other than battles. For instance, using a healing skill on the
+*** party from the character management menu.
+***
 *** There are three types of skills: attack, defend, and support. The way that 
-*** this class is initialized is by defining the "script name" of the skill.
+*** this class is initialized is by defining the "script ID" of the skill.
 *** When this information is known, it seeks a Lua file that contains the
 *** data to set the members of this class as well as the script functions that
-*** actually describe how to execute the skill.
+*** actually perform the execution of the skill.
+***
+*** \todo Skill script functions should take abstract target type class pointer,
+*** arguments, not actor pointers.
 *** ***************************************************************************/
 class GlobalSkill {
 public:
+	//! \param id The identification number of the skill to construct
 	GlobalSkill(uint32 id);
 
 	~GlobalSkill();
 
+	//! \brief Returns true if the skill can be executed in battles
+	bool IsExecutableInBattle() const
+		{ return ((_usage == GLOBAL_USE_BATTLE) || (_usage == GLOBAL_USE_ALL)); }
+
+	//! \brief Returns true if the skill can be executed in menus
+	bool IsExecutableInMenu() const
+		{ return ((_usage == GLOBAL_USE_MENU) || (_usage == GLOBAL_USE_ALL)); }
+	//@
+
 	/** \brief Calls the script function which executes the skill for battles
 	*** \param target A pointer to the target of the skill
 	*** \param instigator A pointer to the instigator whom is executing the skill
+	*** 
 	**/
 	void BattleExecute(hoa_battle::private_battle::BattleActor* target, hoa_battle::private_battle::BattleActor* instigator);
 
@@ -283,14 +318,14 @@ public:
 	uint32 GetCooldownTime() const
 		{ return _cooldown_time; }
 
-	uint32 GetLevelRequired() const
-		{ return _level_required; }
+	GLOBAL_USE GetUsage() const
+		{ return _usage; }
 
 	GLOBAL_TARGET GetTargetType() const
 		{ return _target_type; }
 
-	GLOBAL_ALIGNMENT GetTargetAlignment() const
-		{ return _target_alignment; }
+	bool IsTargetAlly() const
+		{ return _target_ally; }
 		
 // 	std::vector<GlobalElementalEffect*>& GetElementalEffects() const
 // 		{ return _elemental_effects; }
@@ -314,19 +349,6 @@ private:
 	**/
 	GLOBAL_SKILL _type;
 
-	//! \brief The type of target that the skill is executed upon.
-	GLOBAL_TARGET _target_type;
-
-	/** \brief Whose side the skill is on.
-	*** Can either target friendlies, enemies, or both
-	**/
-	GLOBAL_ALIGNMENT _target_alignment;
-
-	/** \brief Where the skill can be used
-	*** Can either target friendlies, enemies, or both
-	**/
-	GLOBAL_USE _usage;
-
 	/** \brief The amount of skill points (SP) that the skill requires to be used
 	*** Zero is a valid value for this member and simply means that no skill points are required
 	*** to use the skill. These are called "innate skills".
@@ -346,20 +368,21 @@ private:
 	**/
 	uint32 _cooldown_time;
 
-	/** \brief The experience level required to use the skill
-	*** If the actor wishing to use the skill does not have the minimum experience level required, then the
-	*** existance of the skill may not be acknowledged at all depending upon the game code context which uses
-	*** it. For example, skills that can not yet be used would not be show in the list of skills to the player.
-	*** Zero is a valid member for this class as well and simply indicates that no specific experience level is required.
-	**/
-	uint32 _level_required;
+	//! \brief Indicates when the skill may be used (in battles, menus, etc.)
+	GLOBAL_USE _usage;
+
+	//! \brief The type of target that the skill is executed upon.
+	GLOBAL_TARGET _target_type;
+
+	//! \brief If set to true, the target should be an ally. If not, the target should be a foe.
+	bool _target_ally;
 
 	/** \brief A vector containing all elemental effects that are defined by the skill
 	*** This vector contains only the elementals that have non-zero strength (in other words, it does not
 	*** contain every single type of elemental regardless of whether it is actually used or not). Therefore,
 	*** it is very possible that this vector may be empty.
 	**/
-	std::vector<GlobalElementalEffect*> _elemental_effects;
+// 	std::vector<GlobalElementalEffect*> _elemental_effects;
 
 	/** \brief A vector containing all status effects and their likelihood of success that are defined by the skill
 	*** This vector contains only the status effects that have a non-zero chance of affecting their target. Therefore,
@@ -367,17 +390,13 @@ private:
 	*** to 1.0 that indicates the likelihood of success that the status effect has on a target. Note that this likelihood
 	*** does not take into account that the target may have a particular defense or immunity against the status effect.
 	**/
-	std::vector<std::pair<float, GlobalStatusEffect*> > _status_effects;
+// 	std::vector<std::pair<float, GlobalStatusEffect*> > _status_effects;
 
 	//! \brief A pointer to the skill's execution function for battles
-	ScriptObject _battle_execute_function;
+	ScriptObject* _battle_execute_function;
 
 	//! \brief A pointer to the skill's execution function for menus
-	ScriptObject _menu_execute_function;
-
-	//! \brief Loads the skill's data from a file and sets the members of the class
-	void _Load();
-
+	ScriptObject* _menu_execute_function;
 }; // class GlobalSkill
 
 } // namespace hoa_global

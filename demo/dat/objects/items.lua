@@ -29,9 +29,8 @@ items[1] = {
 	name = "Healing Potion",
 	description = "Restores a small amount of hit points to a target.",
 	icon = "img/icons/items/health_potion.png",
-	usage = hoa_global.GameGlobal.GLOBAL_USE_ALL,
 	target_type = hoa_global.GameGlobal.GLOBAL_TARGET_ACTOR,
-	target_alignment = hoa_global.GameGlobal.GLOBAL_ALIGNMENT_GOOD,
+	target_ally = true,
 	standard_price = 60,
 
 	BattleUse = function(target, instigator)

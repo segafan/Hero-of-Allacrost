@@ -602,7 +602,7 @@ void BootMode::_OnNewGame() {
 	GlobalManager->AddCharacter(GLOBAL_CHARACTER_CLAUDIUS);
 	GlobalManager->AddCharacter(GLOBAL_CHARACTER_LAILA);
 	GlobalManager->AddToInventory(1, 2);
-	GlobalManager->SetFunds(250);
+	GlobalManager->SetDrunes(250);
 
 	_fade_out = true;
 	VideoManager->FadeScreen(Color::black, 1.0f);
@@ -670,7 +670,7 @@ void BootMode::_OnMenuDebug() {
 
 // Shop debug confirmed
 void BootMode::_OnShopDebug() {
-	GlobalManager->AddFunds(500);
+	GlobalManager->AddDrunes(500);
 	hoa_shop::ShopMode *SM = new hoa_shop::ShopMode();
 	ModeManager->Push(SM);
 }

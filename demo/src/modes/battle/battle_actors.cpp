@@ -269,11 +269,11 @@ void BattleCharacterActor::CalcMetaPhysicalAttack()
 void BattleCharacterActor::CalcPhysicalDefense(hoa_global::GlobalAttackPoint* attack_point)
 {
 	_physical_defense = _fortitude;
-	std::vector<GlobalArmor*> armor = GetActor()->GetArmorEquipped();
+	std::vector<GlobalArmor*>* armor = GetActor()->GetArmorEquipped();
 
-	for (uint32 i = 0; i < armor.size(); ++i)
+	for (uint32 i = 0; i < armor->size(); ++i)
 	{
-		_physical_defense += armor[i]->GetPhysicalDefense();
+		_physical_defense += armor->at(i)->GetPhysicalDefense();
 	}
 
 	if (attack_point)
@@ -287,11 +287,11 @@ void BattleCharacterActor::CalcMetaPhysicalDefense(hoa_global::GlobalAttackPoint
 {
 	_metaphysical_defense = _protection;
 
-	std::vector<GlobalArmor*> armor = GetActor()->GetArmorEquipped();
+	std::vector<GlobalArmor*>* armor = GetActor()->GetArmorEquipped();
 
-	for (uint32 i = 0; i < armor.size(); ++i)
+	for (uint32 i = 0; i < armor->size(); ++i)
 	{
-		_metaphysical_defense += armor[i]->GetMetaphysicalDefense();
+		_metaphysical_defense += armor->at(i)->GetMetaphysicalDefense();
 	}
 
 	if (attack_point)
@@ -674,7 +674,7 @@ void BattleEnemyActor::Update() {
 
 			// okay, we can perform another attack.  set us up as queued to perform.
 			SetQueuedToPerform(true);
-			GlobalSkill* skill = (GetActor()->GetSkills().begin()->second);
+			GlobalSkill* skill = (GetActor()->GetSkills()->begin()->second);
 			//FIX ME Until we have AI, pick Claudius
 			ScriptEvent *se = new ScriptEvent(this, current_battle->GetPlayerCharacterAt(0), skill);
 			current_battle->AddScriptEventToQueue(se);
@@ -703,7 +703,7 @@ void BattleEnemyActor::Update() {
 void BattleEnemyActor::DrawSprite() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 
-	std::vector<StillImage>& sprite_frames = *(GetActor()->GetSpriteFrames());
+	std::vector<StillImage>& sprite_frames = *(GetActor()->GetBattleSpriteFrames());
 
 	// Draw the sprite's final damage frame in grayscale and return
 	if (!IsAlive()) {
@@ -716,7 +716,7 @@ void BattleEnemyActor::DrawSprite() {
 		// Draw the actor selector image over the currently selected enemy
 		if (this == current_battle->_selected_target) {
 			VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-			VideoManager->Move(_x_location + GetActor()->GetWidth() / 2, _y_location - 25);
+			VideoManager->Move(_x_location + GetActor()->GetSpriteWidth() / 2, _y_location - 25);
 			VideoManager->DrawImage(current_battle->_actor_selection_image);
 			VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 		}
@@ -748,7 +748,7 @@ void BattleEnemyActor::DrawSprite() {
 		// Draw the attack point indicator if necessary
 		if (this == current_battle->_selected_target && current_battle->_cursor_state == CURSOR_SELECT_ATTACK_POINT) {
 			VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
-			std::vector<GlobalAttackPoint*> attack_points = GetActor()->GetAttackPoints();
+			std::vector<GlobalAttackPoint*>& attack_points = *(GetActor()->GetAttackPoints());
 
 			VideoManager->Move(GetXLocation() + attack_points[current_battle->_selected_attack_point]->GetXPosition(),
 				GetYLocation() + attack_points[current_battle->_selected_attack_point]->GetYPosition());
@@ -799,7 +799,7 @@ void BattleEnemyActor::DrawStatus() {
 
 	// Draw the name of the enemy's currently selected attack point
 	if (current_battle->_cursor_state == CURSOR_SELECT_ATTACK_POINT) {
-		std::vector<GlobalAttackPoint*> attack_points = GetActor()->GetAttackPoints();
+		std::vector<GlobalAttackPoint*>& attack_points = *(GetActor()->GetAttackPoints());
 		VideoManager->MoveRelative(0, -25);
 		ustring attack_point = MakeUnicodeString("(") + attack_points[current_battle->_selected_attack_point]->GetName() + MakeUnicodeString(")");
 		VideoManager->DrawText(attack_point);
