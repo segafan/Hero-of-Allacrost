@@ -104,7 +104,9 @@ bool GlobalStatusEffect::DecrementIntensity(uint8 amount) {
 // -----------------------------------------------------------------------------
 
 GlobalSkill::GlobalSkill(uint32 id) :
-	_id(id)
+	_id(id),
+	_battle_execute_function(NULL),
+	_menu_execute_function(NULL)
 {
 	// A pointer to the skill script which will be used to load this skill
 	ReadScriptDescriptor *skill_script = NULL;
