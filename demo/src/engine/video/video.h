@@ -54,6 +54,8 @@ extern "C" {
 	#include <SDL/SDL_ttf.h>
 #endif
 
+#include <set>
+
 // Various other headers of the video engine
 #include "context.h"
 #include "color.h"
@@ -206,7 +208,8 @@ class GameVideo : public hoa_utils::Singleton<GameVideo> {
 	friend class private_video::TexSheet;
 	friend class private_video::ParticleSystem;
 	friend class StillImage;
-	friend class RenderedString;
+	friend class TImage;
+	friend class RenderedText;
 
 public:
 	~GameVideo();
@@ -1078,6 +1081,13 @@ public:
 	 */
 	RenderedString *RenderText(const hoa_utils::ustring &txt);
 
+	/** Renders a given unicode string and TextStyle to a pixel array
+	 * \param string The ustring to render
+	 * \param style  The text style to render
+	 * \param buffer The pixel array to render to
+	 */
+	bool _RenderText(hoa_utils::ustring &string, TextStyle &style, private_video::ImageLoadInfo &buffer);
+
 private:
 	GameVideo();
 
@@ -1227,6 +1237,9 @@ private:
 	//! STL map containing all the images currently being managed by the video engine
 	std::map    <std::string, private_video::Image*>   _images;
 
+	//! STL map containing all the text images currently being managed by the video engine
+	std::set    <hoa_video::TImage*>               _t_images;
+
 	//! vector containing all texture sheets currently being managed by the video engine
 	std::vector <private_video::TexSheet *>     _tex_sheets;
 
@@ -1303,7 +1316,7 @@ private:
 	 *  \param image  pointer to image
 	 * \return success/failure
 	 */
-	bool _DeleteImage(private_video::Image *const image);
+	bool _DeleteImage(private_video::BaseImage *const image);
 
 	/** \brief decreases ref count of an image
 	 *
@@ -1336,14 +1349,14 @@ private:
 	 *                        modulated if necessary
 	 * \return success/failure
 	 */
-	bool _DrawElement(const private_video::ImageElement &element, const Color *color_array);
+	bool _DrawElement(const private_video::BaseImageElement &element, const Color *color_array);
 
 	/** \brief helper function to DrawImage() to do the actual work of doing an image
 	 *
 	 *  \param img static image to draw
 	 * \return success/failure
 	 */
-	bool _DrawStillImage(const StillImage &img);
+	bool _DrawStillImage(const ImageListDescriptor &img);
 
 	/** \brief helper function to DrawImage() to do the actual work of drawing an image
 	 *
@@ -1351,7 +1364,7 @@ private:
 	 *  \param color color to modulate image by
 	 * \return success/failure
 	 */
-	bool _DrawStillImage(const StillImage &img, const Color &color);
+	bool _DrawStillImage(const ImageListDescriptor &img, const Color &color);
 
 	/** \brief does the actual work of drawing text
 	 *
@@ -1390,7 +1403,7 @@ private:
 	 *  \param is_static Wether an image is static or not  
 	 * \return a new texsheet with the image in it
 	 */
-	private_video::TexSheet *_InsertImageInTexSheet(private_video::Image *image, private_video::ImageLoadInfo & load_info, bool is_static);
+	private_video::TexSheet *_InsertImageInTexSheet(private_video::BaseImage *image, private_video::ImageLoadInfo & load_info, bool is_static);
 
 	/** \brief loads an image
 	 *
@@ -1413,6 +1426,37 @@ private:
 	 */
 	bool _LoadImageHelper(StillImage &id);
 
+	/** \brief Adds a TImage to the internal set
+	 *
+	 * \param timg The pointer to add
+	 *
+	 * \return True if successful, false if already present
+	 */
+	bool _AddTImage(TImage *timg);
+
+	/** \brief Gets a TImage from the internal set
+	 *
+	 * \param pntr The pointer in the set.
+	 *
+	 * \return The pointer itself if successful, or NULL
+	 */
+	TImage *_GetTImage(TImage *pntr);
+
+
+	/** \brief Decrements the reference count of a TImage
+	 *   and deletes from set if necessary.
+	 *
+	 *  \param img The pointer (and key of the set)
+	 */
+	bool _RemoveImage(TImage *img);
+
+
+	/** \brief Decrements the reference count of an Image
+	 *   of the base class and deletes from storage if necessary.
+	 *
+	 *  \param base_img The pointer (and key of the set/map)
+	 */
+	bool _RemoveImage(private_video::BaseImage *base_image);
 
 	/** \brief Loads an image file in several StillImages
 	 *  \param images Vector of StillImages to be loaded
@@ -1521,7 +1565,7 @@ private:
 	 *  \param buffer Buffer where the pixels of the image will be stored
 	 *  \param img Image to be copied
 	*/
-	void _GetBufferFromImage (hoa_video::private_video::ImageLoadInfo& buffer, hoa_video::private_video::Image* img) const;
+	void _GetBufferFromImage (hoa_video::private_video::ImageLoadInfo& buffer, hoa_video::private_video::BaseImage* img) const;
 
 	/** \brief removes a texture sheet from our vector of sheets and deletes it
 	 *

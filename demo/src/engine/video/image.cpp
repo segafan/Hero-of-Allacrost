@@ -29,11 +29,11 @@ namespace private_video {
 
 Image::Image(const std::string &fname, const std::string &tags_, int32 w, int32 h, bool grayscale_) :
 	filename(fname),
-	tags(tags_),
-	width(w),
-	height(h),
-	grayscale(grayscale_)
+	tags(tags_)
 {
+	width = w;
+	height = h;
+	grayscale = grayscale_;
 	texture_sheet = NULL;
 	x = 0;
 	y = 0;
@@ -42,27 +42,30 @@ Image::Image(const std::string &fname, const std::string &tags_, int32 w, int32 
 	u2 = 1.0f;
 	v2 = 1.0f;
 	ref_count = 0;
+	smooth = false;
 }
 
 
 
 Image::Image(TexSheet *sheet, const std::string &tags_, const std::string &fname, int32 x_, int32 y_, float u1_, float v1_,
-	float u2_, float v2_, int32 w, int32 h, bool grayscale_) :
-	texture_sheet(sheet),
-	filename(fname),
-	tags(tags_),
-	x(x_),
-	y(y_),
-	u1(u1_),
-	v1(v1_),
-	u2(u2_),
-	v2(v2_),
-	width(w),
-	height(h),
-	grayscale(grayscale_)
+	float u2_, float v2_, int32 w, int32 h, bool grayscale_) 
 {
+	texture_sheet = sheet;
+	filename = fname;
+	tags = tags_;
+	x = x_;
+	y = y_;
+	u1 = u1_;
+	v1 = v1_;
+	u2 = u2_;
+	v2 = v2_;
+	width = w;
+	height = h;
+	grayscale = grayscale_;
 	ref_count = 0;
+	smooth = false;
 }
+
 
 // *****************************************************************************
 // ****************************** ImageElement *********************************
@@ -70,16 +73,16 @@ Image::Image(TexSheet *sheet, const std::string &tags_, const std::string &fname
 
 ImageElement::ImageElement(Image *image_, float x_offset_, float y_offset_, float u1_, float v1_,
 	float u2_, float v2_, float width_, float height_) :
-	image(image_),
-	x_offset(x_offset_),
-	y_offset(y_offset_),
-	u1(u1_),
-	v1(v1_),
-	u2(u2_),
-	v2(v2_),
-	width(width_),
-	height(height_)
+	image(image_)
 {
+	x_offset = x_offset_;
+	y_offset = y_offset_;
+	u1 = u1_;
+	v1 = v1_;
+	u2 = u2_;
+	v2 = v2_;
+	width = width_;
+	height = height_;
 	white = true;
 	one_color = true;
 	blend = false;
@@ -90,16 +93,16 @@ ImageElement::ImageElement(Image *image_, float x_offset_, float y_offset_, floa
 
 ImageElement::ImageElement(Image *image_, float x_offset_, float y_offset_, float u1_, float v1_, 
 		float u2_, float v2_, float width_, float height_, Color color_[4]) :
-	image(image_),
-	x_offset(x_offset_),
-	y_offset(y_offset_),
-	u1(u1_),
-	v1(v1_),
-	u2(u2_),
-	v2(v2_),
-	width(width_),
-	height(height_)
+	image(image_)
 {
+	x_offset = x_offset_;
+	y_offset = y_offset_;
+	u1 = u1_;
+	v1 = v1_;
+	u2 = u2_;
+	v2 = v2_;
+	width = width_;
+	height = height_;
 	color[0] = color_[0];
 
 	// If all colors are the same, then mark it so we don't have to process all vertex colors
@@ -126,6 +129,15 @@ ImageElement::ImageElement(Image *image_, float x_offset_, float y_offset_, floa
 	}
 } // ImageElement::ImageElement()
 
+BaseImage *ImageElement::GetBaseImage()
+{
+	return image;
+}
+
+const BaseImage *ImageElement::GetBaseImage() const
+{
+	return image;
+}
 
 } // namespace private_video
 
@@ -395,6 +407,20 @@ bool StillImage::AddImage(const StillImage &id, float x_offset, float y_offset, 
 	
 	return true;	
 } // bool StillImage::AddImage()
+
+
+const BaseImageElement *StillImage::GetElement(uint32 index) const
+{
+	if (index >= GetNumElements())
+		return NULL;
+	return &_elements[index];
+}
+
+uint32 StillImage::GetNumElements() const
+{
+	return _elements.size();
+}
+
 
 // *****************************************************************************
 // ******************************* AnimatedImage *******************************

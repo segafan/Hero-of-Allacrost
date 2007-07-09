@@ -71,8 +71,14 @@ public:
 			return col;
 		}
 
-	Color operator *= (const Color &c)
-		{ return Color(_colors[0] * c._colors[0], _colors[1] * c._colors[1], _colors[2] * c._colors[2], _colors[3] * c._colors[3]); }
+	Color &operator *= (const Color &c)
+	{ 
+		_colors[0] *= c._colors[0];
+		_colors[1] *= c._colors[1];
+		_colors[2] *= c._colors[2];
+		_colors[3] *= c._colors[3];
+		return *this;
+	}
 
 	Color operator * (const Color &c) const
 		{ return Color(_colors[0] * c._colors[0], _colors[1] * c._colors[1], _colors[2] * c._colors[2], _colors[3] * c._colors[3]); }

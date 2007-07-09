@@ -110,190 +110,6 @@ Color GameVideo::GetTextColor () const
 }
 
 //-----------------------------------------------------------------------------
-// _GenTexLine: renders a text line to a texture
-//-----------------------------------------------------------------------------
-RenderedLine *GameVideo::_GenTexLine(uint16 *line, FontProperties *fp)
-{
-	if (!fp)
-		return NULL;
-
-	// Array is { texid, shadowTexid }
-	GLuint texid[2] = { 0, 0 };
-
-	if (!*line)
-		return new RenderedLine(texid, 0, 0, 0, 0, 0, 0);
-	
-	static const SDL_Color color = { 0xFF, 0xFF, 0xFF, 0xFF };
-
-	TTF_Font * font = fp->ttf_font;
-
-	SDL_Surface *initial      = NULL;
-	SDL_Surface *intermediary = NULL;
-	// If we are shadowing, use an array
-	// to store shadow colored versions
-	// of text pixels.
-	uint8       *shadowPixels = NULL;
-	int32 lineW,    lineH;
-	int32 textureW, textureH;
-
-	// Number of textures we're rendering
-	uint8 numTextures = 0;
-
-	// Minimum Y value of the line
-	int32 minY = 0;
-	// Calculated line width
-	int32 calcLineWidth = 0;
-
-	Color shadowColor;
-
-	uint16 *charPtr;
-
-	#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-		static const int rmask = 0xff000000;
-		static const int gmask = 0x00ff0000;
-		static const int bmask = 0x0000ff00;
-		static const int amask = 0x000000ff;
-	#else
-		static const int rmask = 0x000000ff;
-		static const int gmask = 0x0000ff00;
-		static const int bmask = 0x00ff0000;
-		static const int amask = 0xff000000;
-	#endif	
-
-	if (TTF_SizeUNICODE(font, line, &lineW, &lineH) == -1)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: TTF_SizeUNICODE() returned NULL in _GenTexLine()!" << endl;
-		return NULL;
-	}
-
-	for (charPtr = line; *charPtr; ++charPtr)
-	{
-		FontGlyph * glyphinfo = (*fp->glyph_cache)[*charPtr];
-		int curMinY = glyphinfo->top_y;
-		if (curMinY < minY)
-			minY = curMinY;
-		calcLineWidth += glyphinfo->advance;
-	}
-
-	lineH -= minY;
-	// TTF_SizeUNICODE underestimates line width as a 
-	// result of its micro positioning
-	if (calcLineWidth > lineW)
-		lineW = calcLineWidth;
-
-	textureW = RoundUpPow2(lineW + 1);
-	textureH = RoundUpPow2(lineH + 1);
-
-	intermediary = SDL_CreateRGBSurface(0, textureW, textureH, 32, 
-			rmask, gmask, bmask, amask);
-
-	if(!intermediary)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: SDL_CreateRGBSurface() returned NULL in _GenTexLine()!" << endl;
-		return NULL;
-	}
-
-	SDL_Rect surfTarget;
-	int xpos = 0;
-	int ypos = -minY;
-	for (charPtr = line; *charPtr; ++charPtr)
-	{
-		FontGlyph * glyphinfo = (*fp->glyph_cache)[*charPtr];
-
-		initial = TTF_RenderGlyph_Blended(font, *charPtr, color);
-
-		if(!initial)
-		{
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: TTF_RenderGlyph_Blended() returned NULL in _GenTexLine()!" << endl;
-			return NULL;
-		}
-
-		surfTarget.x = xpos + glyphinfo->min_x;
-		surfTarget.y = ypos + glyphinfo->top_y;
-
-		if(SDL_BlitSurface(initial, NULL, intermediary, &surfTarget) < 0)
-		{
-			SDL_FreeSurface(initial);
-			SDL_FreeSurface(intermediary);
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: SDL_BlitSurface() failed in _GenTexLine()! (" << SDL_GetError() << ")" << endl;
-			return NULL;
-		}
-		SDL_FreeSurface(initial);
-		xpos += glyphinfo->advance;
-	}
-
-	if (_text_shadow)
-	{
-		shadowPixels = new uint8[intermediary->w * intermediary->h * 4];
-		shadowColor  = _GetTextShadowColor(fp);
-	}
-
-	SDL_LockSurface(intermediary);
-	for(int j = 0; j < intermediary->w * intermediary->h ; ++ j)
-	{
-		if (_text_shadow)
-		{
-			shadowPixels[j*4+3] = ((uint8*)intermediary->pixels)[j*4+2];
-			shadowPixels[j*4+0] = (uint8) (shadowColor[0] * 0xFF);
-			shadowPixels[j*4+1] = (uint8) (shadowColor[1] * 0xFF);
-			shadowPixels[j*4+2] = (uint8) (shadowColor[2] * 0xFF);
-		}
-		((uint8*)intermediary->pixels)[j*4+3] = ((uint8*)intermediary->pixels)[j*4+2];
-		((uint8*)intermediary->pixels)[j*4+0] = (uint8) (_current_text_color[0] * 0xFF);
-		((uint8*)intermediary->pixels)[j*4+1] = (uint8) (_current_text_color[1] * 0xFF);
-		((uint8*)intermediary->pixels)[j*4+2] = (uint8) (_current_text_color[2] * 0xFF);
-	}
-
-	numTextures = _text_shadow ? 2 : 1;
-
-	glGenTextures(numTextures, texid);
-
-	uint8 *texturePointers[2] =
-	{ 
-		(uint8 *)intermediary->pixels, 
-		shadowPixels 
-	};
-
-	for (int j = 0; j < numTextures; ++j)
-	{
-		_BindTexture(texid[j]);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);	
-
-		glTexImage2D(GL_TEXTURE_2D, 0, 4, textureW, textureH, 0, GL_RGBA, 
-			     GL_UNSIGNED_BYTE, texturePointers[j] );
-
-		GLenum err;
-		if((err = glGetError()) != 0)
-		{
-		        if(VIDEO_DEBUG)
-		   	     cerr << "VIDEO ERROR: _GenTexLine: glError found after glTexImage2D (" << gluErrorString(err) << ")" << endl;
-
-			SDL_FreeSurface(intermediary);
-
-			if (shadowPixels)
-				delete shadowPixels;
-
-		        return NULL;
-		}
-
-	}
-
-	SDL_UnlockSurface(intermediary);
-	SDL_FreeSurface(intermediary);
-
-	if (shadowPixels)
-		delete shadowPixels;
-
-	return new RenderedLine(texid, lineW, textureW, lineH, textureH, 0, minY);
-}
-
-//-----------------------------------------------------------------------------
 // _CacheGlyphs: renders unicode characters to the internal glyph cache
 //-----------------------------------------------------------------------------
 
@@ -755,96 +571,156 @@ bool GameVideo::DrawText(const ustring &txt)
 	return true;
 }
 
+
 //-----------------------------------------------------------------------------
-// RenderText: Renders the given unicode string.
+// _RenderText: Renders a given unicode string and TextStyle to a pixel array
 //-----------------------------------------------------------------------------
-RenderedString *GameVideo::RenderText(const ustring &txt)
+
+bool GameVideo::_RenderText(hoa_utils::ustring &string, TextStyle &style, ImageLoadInfo &buffer)
 {
-	if(txt.empty())
+	FontProperties * fp = _font_map[style.font];
+	TTF_Font * font     = fp->ttf_font;
+
+	if (!font)
 	{
-		// Previously, if an empty string was passed, it was considered an error
-		// However, it happens often enough in practice that now we just return true
-		// without doing anything.
-		
-		return NULL;
+		if (VIDEO_DEBUG)
+			cerr << "GameVideo::_RenderText(): font '" << style.font << "' not valid." << endl;
+		return false;
 	}
 
-	if(_font_map.find(_current_font) == _font_map.end())
+	ImageLoadInfo load_info;
+
+	static const SDL_Color color = { 0xFF, 0xFF, 0xFF, 0xFF };
+
+	SDL_Surface *initial      = NULL;
+	SDL_Surface *intermediary = NULL;
+
+	int32 line_w, line_h;
+
+	// Minimum Y value of the line
+	int32 min_y = 0;
+	// Calculated line width
+	int32 calc_line_width = 0;
+	// Pixels left of '0' the first character extends, if any
+	int32 line_start_x = 0;
+
+	const uint16 *char_ptr;
+
+	#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+		static const int rmask = 0xff000000;
+		static const int gmask = 0x00ff0000;
+		static const int bmask = 0x0000ff00;
+		static const int amask = 0x000000ff;
+	#else
+		static const int rmask = 0x000000ff;
+		static const int gmask = 0x0000ff00;
+		static const int bmask = 0x00ff0000;
+		static const int amask = 0xff000000;
+	#endif	
+
+	if (TTF_SizeUNICODE(font, string.c_str(), &line_w, &line_h) == -1)
 	{
 		if(VIDEO_DEBUG)
-			cerr << "GameVideo::DrawText() failed because font passed was either not loaded or improperly loaded!\n" <<
-				"  *fontname: " << _current_font << endl;
-		return NULL;
+			cerr << "VIDEO ERROR: TTF_SizeUNICODE() returned NULL in _RenderText()!" << endl;
+		return false;
 	}
 
-	FontProperties * fp = _font_map[_current_font];
-	TTF_Font * font = fp->ttf_font;
-	
-	if(!font)
+	_CacheGlyphs(string.c_str(), fp);
+
+	for (char_ptr = string.c_str(); *char_ptr; ++char_ptr)
 	{
-		return NULL;
+		FontGlyph * glyphinfo = (*fp->glyph_cache)[*char_ptr];
+
+		if (glyphinfo->top_y < min_y)
+			min_y = glyphinfo->top_y;
+		calc_line_width += glyphinfo->advance;
 	}
 
-	uint16 newline('\n');
-	int32 lineSkip = fp->line_skip;
-	std::vector<uint16 *> lineArray;
+	// Minimum y off by one pixel in some cases.
+	min_y -= 1;
 
-	_CacheGlyphs(txt.c_str(), fp);
-
-	const uint16 *charIter;
-	// Set lineStart value to one additional to total height of line
-	// a reasonable maximum value.
-	uint16 *reformattedText = new uint16[txt.size() + 1];
-	uint16 *reformIter = reformattedText;
-	uint16 *lastLine = reformattedText;
-	for (charIter = txt.c_str(); *charIter; ++charIter)
+	// First character, check if it starts left of 0
+	char_ptr = string.c_str();
+	if (*char_ptr)
 	{
-		if (*charIter == newline)
-		{
-			*reformIter++ = '\0';
-			lineArray.push_back(lastLine);
-			lastLine = reformIter;
-		}
-		else
-		{
-			*reformIter++ = *charIter;
-		}
-	}
-	lineArray.push_back(lastLine);
-	*reformIter = '\0';
-
-	std::vector<uint16 *>::iterator lineIter;
-
-
-	Color oldColor = _current_text_color;
-	int32 shadowOffsetX = 0;
-	int32 shadowOffsetY = 0;
-	// if text shadows are enabled, draw the shadow
-	if(_text_shadow && fp->shadow_style != VIDEO_TEXT_SHADOW_NONE)
-	{
-		shadowOffsetX = static_cast<int32>(_coord_sys.GetHorizontalDirection()) * fp->shadow_x;
-		shadowOffsetY = static_cast<int32>(_coord_sys.GetVerticalDirection()) * fp->shadow_y;
+		FontGlyph * first_glyphinfo = (*fp->glyph_cache)[*char_ptr];
+		if (first_glyphinfo->min_x < 0)
+			line_start_x = first_glyphinfo->min_x;
 	}
 
-	RenderedString *rendStr = new RenderedString(lineSkip, shadowOffsetX, shadowOffsetY);
+	// TTF_SizeUNICODE underestimates line width as a 
+	// result of its micro positioning
+	if (calc_line_width > line_w)
+		line_w = calc_line_width;
 
-	for (lineIter = lineArray.begin(); lineIter != lineArray.end(); ++lineIter)
+	// Adjust line sizes by negative starting offsets if present
+	line_w -= line_start_x;
+	line_h -= min_y;
+
+	intermediary = SDL_CreateRGBSurface(0, line_w, line_h, 32, 
+			rmask, gmask, bmask, amask);
+
+	if (!intermediary)
 	{
-		RenderedLine *line = NULL;
-		if ((line = _GenTexLine(*lineIter, fp)) == NULL)
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: SDL_CreateRGBSurface() returned NULL in _RenderText()!" << endl;
+		return false;
+	}
+
+	SDL_Rect surf_target;
+	int32 xpos = -line_start_x;
+	int32 ypos = -min_y;
+	for (char_ptr = string.c_str(); *char_ptr; ++char_ptr)
+	{
+		FontGlyph * glyphinfo = (*fp->glyph_cache)[*char_ptr];
+
+		initial = TTF_RenderGlyph_Blended(font, *char_ptr, color);
+
+		if(!initial)
 		{
 			if(VIDEO_DEBUG)
-				cerr << "Failed to generate line texture for " << MakeStandardString(ustring(*lineIter)) << "." << endl;
-			delete rendStr;
-			return NULL;
+				cerr << "VIDEO ERROR: TTF_RenderGlyph_Blended() returned NULL in _RenderText()!" << endl;
+			return false;
 		}
-		rendStr->Add(line);
-	}
-	delete[] reformattedText;
-		
-	return rendStr;
-}
 
+		surf_target.x = xpos + glyphinfo->min_x;
+		surf_target.y = ypos + glyphinfo->top_y;
+
+		if (SDL_BlitSurface(initial, NULL, intermediary, &surf_target) < 0)
+		{
+			SDL_FreeSurface(initial);
+			SDL_FreeSurface(intermediary);
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: SDL_BlitSurface() failed in _RenderText()! (" << SDL_GetError() << ")" << endl;
+			return false;
+		}
+		SDL_FreeSurface(initial);
+		xpos += glyphinfo->advance;
+	}
+
+	SDL_LockSurface(intermediary);
+	for (int j = 0; j < intermediary->w * intermediary->h; ++ j)
+	{
+		((uint8*)intermediary->pixels)[j*4+3] = ((uint8*)intermediary->pixels)[j*4+2];
+		((uint8*)intermediary->pixels)[j*4+0] = (uint8) (style.color[0] * 0xFF);
+		((uint8*)intermediary->pixels)[j*4+1] = (uint8) (style.color[1] * 0xFF);
+		((uint8*)intermediary->pixels)[j*4+2] = (uint8) (style.color[2] * 0xFF);
+	}
+
+	load_info.width  = line_w;
+	load_info.height = line_h;
+	load_info.pixels = intermediary->pixels;
+
+	// Prevent SDL from deleting pixel array
+	intermediary->pixels = NULL;
+
+	buffer = load_info;
+
+	SDL_UnlockSurface(intermediary);
+	SDL_FreeSurface(intermediary);
+
+	return true;
+}
 
 //-----------------------------------------------------------------------------
 // CalculateTextWidth: return the width of the given text using the given font
@@ -973,6 +849,7 @@ bool GameVideo::SetFontShadowStyle(const std::string &fontName, TEXT_SHADOW_STYL
 //-----------------------------------------------------------------------------
 // _GetTextShadowColor: gets the current text shadow color
 //-----------------------------------------------------------------------------
+
 Color GameVideo::_GetTextShadowColor(FontProperties *fp)
 {
 	Color shadowColor;
@@ -1010,152 +887,521 @@ Color GameVideo::_GetTextShadowColor(FontProperties *fp)
 	return shadowColor;
 }
 
+
+// *****************************************************************************
+// ********************************* RenderedText *********************************
+// *****************************************************************************
+
 //-----------------------------------------------------------------------------
-// ~RenderedLine: deletes the line
+// RenderedText::DefaultConstructor: Constructs empty RenderedText
 //-----------------------------------------------------------------------------
 
-RenderedLine::~RenderedLine()
-{
+RenderedText::RenderedText()
+: _alignment (ALIGN_CENTER) {
+	Clear();
+	_animated = false;
+	_grayscale = false;
 }
 
 //-----------------------------------------------------------------------------
-// RenderedLine: constructs a new rendered line
+// RenderedText::ustring-Constructor: Constructs and renders RenderedText with String
 //-----------------------------------------------------------------------------
 
-RenderedLine::RenderedLine(GLuint *tex, int32 lineWidth, int32 texWidth, int32 lineHeight, int32 texHeight, int32 xOffset, int32 yOffset)
-	: height(lineHeight), width(lineWidth),
-	  x_offset(xOffset),  y_offset(yOffset)
-{
-	u = ((float)lineWidth  + 1.0f) / (float)texWidth;
-	v = ((float)lineHeight + 1.0f) / (float)texHeight;
-	if (tex)
-		memcpy(texture, tex, sizeof(GLuint) * NUM_TEXTURES);
-	else
-		memset(texture, 0,   sizeof(GLuint) * NUM_TEXTURES);
+RenderedText::RenderedText(const ustring &string, int8 alignment)
+: _alignment (ALIGN_CENTER) {
+	Clear();
+	_animated = false;
+	_grayscale = false;
+	_string = string;
+	SetAlignment(alignment);
+	_Regenerate();
 }
 
 //-----------------------------------------------------------------------------
-// RenderedString::Draw: draws a rendered string
+// RenderedText::sstring-Constructor: Constructs and renders RenderedText with String
 //-----------------------------------------------------------------------------
-bool RenderedString::Draw() const
-{
-	return VideoManager->Draw(*this);
+
+RenderedText::RenderedText(const std::string &string, int8 alignment)
+: _alignment (ALIGN_CENTER) {
+	Clear();
+	_animated = false;
+	_grayscale = false;
+	_string = MakeUnicodeString(string);
+	SetAlignment(alignment);
+	_Regenerate();
 }
 
+//-----------------------------------------------------------------------------
+// RenderedText::CopyConstructor: Copies state variables and increases ref counts.
+//-----------------------------------------------------------------------------
 
-//-----------------------------------------------------------------------------
-// RenderedLine::Draw: draws a rendered lineline
-//-----------------------------------------------------------------------------
-bool GameVideo::Draw(const RenderedLine &line, int32 texIndex)
+RenderedText::RenderedText(const RenderedText &other) 
 {
-	if (texIndex >= RenderedLine::NUM_TEXTURES
-	||  texIndex < 0)
-		return false;
+	// Chain to overriden copy constructor
+	*this = other;
+}
 
-	// Empty strings are 0 texture ids
-	if (!line.texture[texIndex])
-		return false;
+//-----------------------------------------------------------------------------
+// RenderedText::operator=: Copies state variables and increases ref counts.
+//-----------------------------------------------------------------------------
 
-	if (!_BindTexture(line.texture[texIndex]))
+void RenderedText::operator=(const RenderedText &other)
+{
+	// Copy values from other RenderedText manually
+	_string        = other._string;
+	_text_sections = other._text_sections;
+	_alignment     = other._alignment;
+	_width         = other._width;
+	_height        = other._height;
+
+	memcpy(_color, other._color, sizeof(_color));
+
+	// Increase ref count for all text sections
+	// as this RenderedText now also points to them
+	std::vector<TImageElement>::iterator it;
+	for (it = _text_sections.begin(); it != _text_sections.end(); ++it)
 	{
-		if ( VIDEO_DEBUG )
+		if (it->image)
+			it->image->Add();
+	}
+}
+
+//-----------------------------------------------------------------------------
+// ~RenderedText: Decrements ref counts on contained timages
+//-----------------------------------------------------------------------------
+
+RenderedText::~RenderedText()
+{
+	_ClearImages();
+}
+
+//-----------------------------------------------------------------------------
+// Clear: Decrements ref counts on contained timages, clears contained text
+//-----------------------------------------------------------------------------
+
+void RenderedText::Clear() {
+	_Clear();
+	_string.clear();
+	_ClearImages();
+
+	SetColor(Color::white);
+}
+
+//-----------------------------------------------------------------------------
+// GetElement: Gets the array referenced generic BaseImageElement for drawing
+//-----------------------------------------------------------------------------
+
+const private_video::BaseImageElement *RenderedText::GetElement(uint32 index) const
+{
+	if (index >= GetNumElements())
+		return NULL;
+	return &_text_sections[index];
+}
+
+//-----------------------------------------------------------------------------
+// GetNumElements: Gets the number of drawable elements contained
+//-----------------------------------------------------------------------------
+
+uint32 RenderedText::GetNumElements() const
+{
+	return _text_sections.size();
+}
+
+//-----------------------------------------------------------------------------
+// SetAlignment: Sets the horizontal text alignment of a RenderedText
+//-----------------------------------------------------------------------------
+
+bool RenderedText::SetAlignment(int8 alignment)
+{
+	switch (alignment)
+	{
+		case ALIGN_LEFT:
+		case ALIGN_CENTER:
+		case ALIGN_RIGHT:
+			if (_alignment != alignment)
+			{
+				_alignment = alignment;
+				_Realign();
+			}
+			return true;
+			break;
+		default:
+			if (VIDEO_DEBUG)
+				cerr << "VIDEO: " << __FUNCTION__ << ": alignment wasn't a valid constant." << endl;
+			return false;
+	}
+}
+
+//-----------------------------------------------------------------------------
+// SetText: Sets the contained text in a RenderedText and re-renders
+//-----------------------------------------------------------------------------
+
+void RenderedText::SetText(const ustring &string)
+{
+	_string = string;
+	_Regenerate();
+}
+
+//-----------------------------------------------------------------------------
+// SetText: std::string edition
+//-----------------------------------------------------------------------------
+
+void RenderedText::SetText(const std::string &string) {
+	SetText(MakeUnicodeString(string));
+}
+
+//-----------------------------------------------------------------------------
+// _ClearImages: Decrements reference counts on all contained timages
+//-----------------------------------------------------------------------------
+
+void RenderedText::_ClearImages()
+{
+	std::vector<TImageElement>::iterator it;
+	for (it = _text_sections.begin(); it != _text_sections.end(); ++it)
+	{
+		if (it->image)
+			VideoManager->_DeleteImage(it->image);
+	}
+	_text_sections.clear();
+	
+	_width  = 0;
+	_height = 0;
+}
+
+//-----------------------------------------------------------------------------
+// _Regenerate: (Re)Renders and aligns contained text
+//-----------------------------------------------------------------------------
+
+void RenderedText::_Regenerate() {
+	_ClearImages();
+
+	if(_string.empty())
+	{
+		return;
+	}
+
+	TextStyle style;
+	style.font          = VideoManager->GetFont();
+	style.shadow_enable = VideoManager->_text_shadow;
+	FontProperties *fp;
+	if (!VideoManager->IsValidFont(style.font)
+	|| ((fp = VideoManager->GetFontProperties(style.font)) == NULL))
+	{
+		if(VIDEO_DEBUG)
+			cerr << "RenderedText::_Regenerate(): Video engine contains invalid font." << endl;
+		return;
+	}
+
+	style.color = VideoManager->GetTextColor();
+
+	uint16 newline = '\n';
+	std::vector<uint16 *> line_array;
+
+	VideoManager->_CacheGlyphs(_string.c_str(), fp);
+
+	const uint16 *char_iter;
+	uint16 *reformatted_text = new uint16[_string.size() + 1];
+	uint16 *reform_iter = reformatted_text;
+	uint16 *last_line = reformatted_text;
+	for (char_iter = _string.c_str(); *char_iter; ++char_iter)
+	{
+		if (*char_iter == newline)
 		{
-			cerr << "Failed to bind texture for line draw." << endl;
+			*reform_iter++ = '\0';
+			line_array.push_back(last_line);
+			last_line = reform_iter;
 		}
+		else
+		{
+			*reform_iter++ = *char_iter;
+		}
+	}
+	line_array.push_back(last_line);
+	*reform_iter = '\0';
+
+	std::vector<uint16 *>::iterator line_iter;
+
+	Color old_color       = style.color;
+	int32 shadow_offset_x = 0;
+	int32 shadow_offset_y = 0;
+	Color shadow_color    = VideoManager->_GetTextShadowColor(fp);
+
+	float total_height = (line_array.size() - 1) * fp->line_skip;
+
+	for (line_iter = line_array.begin(); line_iter != line_array.end(); ++line_iter)
+	{
+		TImage *timage = new TImage(*line_iter, style);
+		if (!timage->Regenerate())
+		{
+			if (VIDEO_DEBUG)
+			{
+				cerr << "RenderedText::_Regenerate(): Failed to render TImage." << endl;
+			}
+		}
+
+		// Increment the reference count
+		timage->Add();
+		float y_offset = total_height + _height * -VideoManager->_coord_sys.GetVerticalDirection();
+		y_offset += (fp->line_skip - timage->height) * VideoManager->_coord_sys.GetVerticalDirection();
+		TImageElement element(timage, 0, y_offset, 0.0f, 0.0f, 1.0f, 1.0f, timage->width, timage->height, _color);
+
+		// if text shadows are enabled, add a shadow version
+		if (style.shadow_enable && timage->style.shadow_style != VIDEO_TEXT_SHADOW_NONE)
+		{
+			shadow_offset_x = static_cast<int32>(VideoManager->_coord_sys.GetHorizontalDirection()) * timage->style.shadow_offset_x;
+			shadow_offset_y = static_cast<int32>(VideoManager->_coord_sys.GetVerticalDirection())   * timage->style.shadow_offset_y;
+
+			TImageElement shadow_element = element;
+			shadow_element.x_offset += shadow_offset_x;
+			shadow_element.y_offset += shadow_offset_y;
+
+
+			// Line offsets must be set to be retained
+			// after lines are aligned
+			shadow_element.x_line_offset = shadow_offset_x;
+			shadow_element.y_line_offset = shadow_offset_y;
+
+			shadow_element.color[0] = shadow_color * _color[0];
+			shadow_element.color[1] = shadow_color * _color[1];
+			shadow_element.color[2] = shadow_color * _color[2];
+			shadow_element.color[3] = shadow_color * _color[3];
+
+			_text_sections.push_back(shadow_element);
+
+			// Increment reference count to reflect use in shadow texture
+			timage->Add();
+		}
+
+		// Add the timage to the video engine set
+		VideoManager->_AddTImage(timage);
+
+		// And to our internal vector
+		_text_sections.push_back(element);
+
+		// Set width to timage width, if wider
+		if (timage->width > _width)
+			_width = timage->width;
+
+		// Increase height by the font specified line height
+		_height += fp->line_skip;
+	}
+	delete[] reformatted_text;
+	_Realign();
+}
+
+//-----------------------------------------------------------------------------
+// _Realign: (Re)Aligns all text items to set alignment
+//-----------------------------------------------------------------------------
+
+void RenderedText::_Realign()
+{
+	std::vector<TImageElement>::iterator it;
+	for (it = _text_sections.begin(); it != _text_sections.end(); ++it)
+	{
+		it->x_offset = _alignment * VideoManager->_coord_sys.GetHorizontalDirection() * ( (_width - it->width) / 2.0f) + it->x_line_offset;
+	}
+}
+
+// *****************************************************************************
+// ********************************** TImage ***********************************
+// *****************************************************************************
+
+TImage::TImage(const hoa_utils::ustring &string_, const TextStyle &style_)
+:	string(string_),
+	style(style_)
+{
+	width = 0;
+	height = 0;
+	grayscale = false;
+	texture_sheet = NULL;
+	x = 0;
+	y = 0;
+	u1 = 0.0f;
+	v1 = 0.0f;
+	u2 = 1.0f;
+	v2 = 1.0f;
+	ref_count = 0;
+	// Use image smoothing
+	smooth = true;
+
+	LoadFontProperties();
+}
+
+
+
+TImage::TImage(TexSheet *sheet, const hoa_utils::ustring &string_, const TextStyle &style_, int32 x_, int32 y_, float u1_, float v1_,
+		float u2_, float v2_, int32 width, int32 height, bool grayscale_)
+:	string(string_),
+	style(style_)
+{
+	texture_sheet = sheet;
+	x = x_;
+	y = y_;
+	u1 = u1_;
+	v1 = v1_;
+	u2 = u2_;
+	v2 = v2_;
+	width = width;
+	height = height;
+	grayscale = grayscale_;
+	ref_count = 0;
+	// Use image smoothing
+	smooth = true;
+
+	LoadFontProperties();
+}
+
+
+bool TImage::LoadFontProperties()
+{
+	if (style.shadow_style == VIDEO_TEXT_SHADOW_INVALID)
+	{
+		FontProperties *fp = VideoManager->GetFontProperties(style.font);
+		if (!fp)
+		{
+			if (VIDEO_DEBUG)
+				cerr << "TImage::LoadFontProperties(): Invalid font '" << style.font << "'." << endl;
+			return false;
+		}
+		style.shadow_style    = fp->shadow_style;
+		style.shadow_offset_x = fp->shadow_x;
+		style.shadow_offset_y = fp->shadow_y;
+	}
+	return true;
+}
+
+bool TImage::Regenerate()
+{
+	if (texture_sheet)
+	{
+		VideoManager->_DeleteImage(this);
+		texture_sheet = NULL;
+	}
+
+	ImageLoadInfo buffer;
+
+	if (!VideoManager->_RenderText(string, style, buffer))
+		return false;
+	
+	width  = buffer.width;
+	height = buffer.height;
+
+	TexSheet *sheet = VideoManager->_InsertImageInTexSheet(this, buffer, true);
+	if(!sheet)
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO_DEBUG: TImage::Regenerate(): GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
+
+		free(buffer.pixels);
 		return false;
 	}
 
-	float halfW = line.width  * 0.5f;
-	float halfH = line.height * 0.5f;
+	texture_sheet = sheet;
 
-	glBegin(GL_QUADS);
-
-	glTexCoord2f(0.0f, line.v); 
-	glVertex2f(- halfW, - halfH);
-
-	glTexCoord2f(line.u, line.v); 
-	glVertex2f(+ halfW, - halfH);
-
-	glTexCoord2f(line.u, 0.0f); 
-	glVertex2f(+ halfW, + halfH);
-
-	glTexCoord2f(0.0f, 0.0f); 
-	glVertex2f(- halfW, + halfH);
-
-	glEnd();
-
+	free(buffer.pixels);
 	return true;
 }
 
-
-//-----------------------------------------------------------------------------
-// RenderedString::Add: adds a line to a rendered string
-//-----------------------------------------------------------------------------
-bool RenderedString::Add(RenderedLine *str)
+bool TImage::Reload()
 {
-	lines.push_back(str);
-	if (str->width > _width)
-		_width = str->width;
-	return true;
-}
+	// Check if indeed already loaded. If not - create texture sheet entry.
+	if (!texture_sheet)
+		return Regenerate();
 
-//-----------------------------------------------------------------------------
-// RenderedString: constructs a new empty rendered string
-//-----------------------------------------------------------------------------
-RenderedString::RenderedString(int32 line_skip, int32 shadowX, int32 shadowY)
-	: _width(0), _line_skip(line_skip),
-	  _shadow_xoff(shadowX), _shadow_yoff(shadowY)
-	{}
+	ImageLoadInfo buffer;
 
-//-----------------------------------------------------------------------------
-// ~RenderedString: deletes all contained lines
-//-----------------------------------------------------------------------------
-RenderedString::~RenderedString()
-{
-	std::vector<RenderedLine *>::iterator line;
-	for (line = lines.begin(); line != lines.end(); ++line)
+	if (!VideoManager->_RenderText(string, style, buffer))
+		return false;
+	
+	if (!texture_sheet->CopyRect(x, y, buffer))
 	{
-		VideoManager->_DeleteTexture((*line)->texture[RenderedLine::MAIN_TEXTURE]);
-		VideoManager->_DeleteTexture((*line)->texture[RenderedLine::SHADOW_TEXTURE]);
-		delete *line;
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: sheet->CopyRect() failed in TImage::Reload()!" << endl;
+		free(buffer.pixels);
+		return false;
 	}
+	return true;
 }
 
-//-----------------------------------------------------------------------------
-// Draw: draws a rendered string
-//-----------------------------------------------------------------------------
-bool GameVideo::Draw(const RenderedString &string)
+
+TImage *GameVideo::_GetTImage(TImage *pntr)
 {
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	if (_t_images.find(pntr) == _t_images.end())
+		return NULL;
+	return pntr;
+}
 
-	glEnable(GL_TEXTURE_2D);
-	glDisable(GL_FOG);
 
-	glEnable(GL_ALPHA_TEST);
-	glAlphaFunc(GL_GREATER, 0.1f);
+// *****************************************************************************
+// ****************************** TImageElement *********************************
+// *****************************************************************************
 
-	float xoff = ((_x_align) * string.GetWidth()) * .5f * -_coord_sys.GetHorizontalDirection();
+TImageElement::TImageElement(TImage *image_, float x_offset_, float y_offset_, float u1_, float v1_,
+	float u2_, float v2_, float width_, float height_) :
+	image(image_)
+{
+	x_offset = x_offset_;
+	y_offset = y_offset_;
+	u1 = u1_;
+	v1 = v1_;
+	u2 = u2_;
+	v2 = v2_;
+	width = width_;
+	height = height_;
+	white = true;
+	one_color = true;
+	blend = false;
+	color[0] = Color::white;
+}
 
-	std::vector<RenderedLine*>::const_iterator it;
 
-	glPushMatrix();
-	MoveRelative(xoff, 0.0f);
-	for (it = string.lines.begin(); it != string.lines.end(); ++it)
-	{
-		const RenderedLine &line = *(*it);
-		if (line.texture[RenderedLine::SHADOW_TEXTURE])
-		{
-			glPushMatrix();
-			MoveRelative(string.GetShadowX(), string.GetShadowY());
-			Draw(line, RenderedLine::SHADOW_TEXTURE);
-			glPopMatrix();
+
+TImageElement::TImageElement(TImage *image_, float x_offset_, float y_offset_, float u1_, float v1_, 
+		float u2_, float v2_, float width_, float height_, Color color_[4]) :
+	image(image_)
+{
+	x_offset = x_offset_;
+	y_offset = y_offset_;
+	u1 = u1_;
+	v1 = v1_;
+	u2 = u2_;
+	v2 = v2_;
+	width = width_;
+	height = height_;
+	color[0] = color_[0];
+
+	// If all colors are the same, then mark it so we don't have to process all vertex colors
+	if (color_[1] == color[0] && color_[2] == color[0] && color_[3] == color[0]) {
+		one_color = true;
+
+		// If all vertex colors are white, set a flag so they don't have to be processed at all
+		if (color[0] == Color::white) {
+			white = true;
+			blend = false;
 		}
-		Draw(line, RenderedLine::MAIN_TEXTURE);
-		MoveRelative(0.0f, -_coord_sys.GetVerticalDirection() * string.GetLineSkip());
+		// Set blend to true if alpha < 1.0f
+		else {
+			blend = (color[0][3] < 1.0f);
+		}
 	}
-	glPopMatrix();
-	return true;
+	else {
+		color[0] = color_[0];
+		color[1] = color_[1];
+		color[2] = color_[2];
+		color[3] = color_[3];
+		// Set blend to true if any of the four colors have an alpha value < 1.0f
+		blend = (color[0][3] < 1.0f || color[1][3] < 1.0f || color[2][3] < 1.0f || color[3][3] < 1.0f);
+	}
+} // TImageElement::TImageElement()
+
+BaseImage *TImageElement::GetBaseImage()
+{
+	return image;
+}
+
+const BaseImage *TImageElement::GetBaseImage() const
+{
+	return image;
 }
 
 }  // namespace hoa_video

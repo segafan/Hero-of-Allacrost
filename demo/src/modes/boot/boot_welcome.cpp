@@ -28,30 +28,27 @@ namespace hoa_boot {
 
 WelcomeScreen::WelcomeScreen() :
 	_visible(false),
-	_welcome_rendered(NULL),
-	_welcome_text(
-"If you have not read the MANUAL, the game controls follow:\n\
-		(press any key to continue)\n\
-\n\
-\n\
-\n\
-Command Name    Default Key Map    General Purpose                                                            \n\
-Up                  'up arrow'            Move sprite or cursor upwards                                        \n\
-Down               'down arrow'       Move sprite or cursor downwards                                      \n\
-Left                 'left arrow'         Move sprite or cursor to the left                                       \n\
-Right               'right arrow'        Move sprite or cursor to the right                                     \n\
-Confirm             'f'                     Confirm an action or menu command                                   \n\
-Cancel              'd'                     Cancel an action or menu command                                     \n\
-Menu                's'                     Display the main menu                                                    \n\
-Swap                'a'                     Swap the character being displayed                                     \n\
-Left Select         'w'                     Select multiple targets or page scroll up                             \n\
-Right Select        'e'                     Select multiple targets or page scroll down                          \n\
-Pause               'spacebar'            Pause/unpause the game                                                   \n\
-Quit                'ESC'                 Quit the game                                                            \n\
-Fullscreen          'Ctrl+f'              Toggles between full screen mode and windowed mode              \n\
-Quit                'Ctrl+q'              Quit the game                                                           \n\
-FPS Display         'Ctrl+r'       Toggles display of the frames per second in the upper right hand corner\n\
-Screenshot         'Ctrl+s'              Takes a screenshot and saves it to 'screenshot.jpg'                    ")
+	_welcome_text_header(
+        "If you have not read the MANUAL, the game controls follow:\n"
+                    "(press any key to continue)"),
+	_welcome_text_body(
+"Command Name    Default Key Map    General Purpose\n\n"
+"Up                  'up arrow'            Move sprite or cursor upwards\n\n"
+"Down               'down arrow'       Move sprite or cursor downwards\n\n"
+"Left                 'left arrow'         Move sprite or cursor to the left\n\n"
+"Right               'right arrow'        Move sprite or cursor to the right\n\n"
+"Confirm             'f'                     Confirm an action or menu command\n\n"
+"Cancel              'd'                     Cancel an action or menu command\n\n"
+"Menu                's'                     Display the main menu\n\n"
+"Swap                'a'                     Swap the character being displayed\n\n"
+"Left Select         'w'                     Select multiple targets or page scroll up\n\n"
+"Right Select        'e'                     Select multiple targets or page scroll down\n\n"
+"Pause               'spacebar'            Pause/unpause the game\n\n"
+"Quit                'ESC'                 Quit the game\n\n"
+"Fullscreen          'Ctrl+f'              Toggles between full screen mode and windowed mode\n\n"
+"Quit                'Ctrl+q'              Quit the game\n\n"
+"FPS Display         'Ctrl+r'       Toggles display of the frames per second in the upper right hand\n\n"
+"Screenshot         'Ctrl+s'              Takes a screenshot and saves it to 'screenshot.jpg'")
 
 {
 	// Init the background window
@@ -64,10 +61,6 @@ Screenshot         'Ctrl+s'              Takes a screenshot and saves it to 'scr
 WelcomeScreen::~WelcomeScreen()
 {
 	_window.Destroy();
-	if (_welcome_rendered != NULL) {
-		delete(_welcome_rendered);
-		_welcome_rendered = NULL;
-	}
 }
 
 
@@ -81,10 +74,12 @@ void WelcomeScreen::Draw()
 		return;
 
 	// Set clip region for the text and draw the visible part of it
-	VideoManager->Move(512.0f, 450.0f);
-	if (_welcome_rendered) {
-		_welcome_rendered->Draw();
-	}
+	VideoManager->SetDrawFlags(VIDEO_Y_TOP, 0);
+	VideoManager->Move(512.0f, 570.0f);
+	_welcome_header_rendered.Draw();
+	VideoManager->Move(512.0f, 504.0f);
+	_welcome_body_rendered.Draw();
+	VideoManager->SetDrawFlags(VIDEO_Y_CENTER, 0);
 }
 
 
@@ -95,13 +90,8 @@ void WelcomeScreen::Show()
 	_visible = true;
 	VideoManager->SetFont("default"); // Reset font
 
-	if (!_welcome_rendered) {
-		_welcome_rendered = VideoManager->RenderText(MakeUnicodeString(_welcome_text));
-		if (!_welcome_rendered) {
-			cerr << "BOOT ERROR: failed to render the welcome string.\n" << endl;
-			exit(1);
-		}
-	}
+	_welcome_header_rendered = RenderedText(_welcome_text_header);
+	_welcome_body_rendered   = RenderedText(_welcome_text_body, RenderedText::ALIGN_LEFT);
 }
 
 
@@ -111,10 +101,8 @@ void WelcomeScreen::Hide()
 	_window.Hide();
 	_visible = false;
 	VideoManager->SetTextColor(Color::white); // Reset text color
-	if (_welcome_rendered) {
-		delete(_welcome_rendered);
-		_welcome_rendered = NULL;
-	}
+	_welcome_header_rendered.Clear();
+	_welcome_body_rendered.Clear();
 }
 
 

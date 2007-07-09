@@ -62,6 +62,12 @@ public:
 
 	float GetTop() const
 		{ return _top; }
+
+	float GetWidth() const
+		{ return fabs(_left - _right); }
+
+	float GetHeight() const
+		{ return fabs(_top - _bottom); }
 	//@}
 
 private:

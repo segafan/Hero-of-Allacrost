@@ -21,6 +21,7 @@
 #include <string>
 
 #include "video.h"
+#include "text.h"
 
 namespace hoa_boot {
 
@@ -58,11 +59,17 @@ private:
 	//! Is the window visible or not
 	bool _visible;
 
-	//! Rendered text string
-	hoa_video::RenderedString* _welcome_rendered;
+	//! Rendered text header string
+	hoa_video::RenderedText _welcome_header_rendered;
 
-	//! Text to be displayed
-	std::string _welcome_text;
+	//! Rendered text body string
+	hoa_video::RenderedText _welcome_body_rendered;
+
+	//! Text header to be displayed
+	std::string _welcome_text_header;
+
+	//! Text body to be displayed
+	std::string _welcome_text_body;
 };
 
 } // namespace hoa_boot

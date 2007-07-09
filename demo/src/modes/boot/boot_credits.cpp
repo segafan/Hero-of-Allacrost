@@ -28,8 +28,7 @@ namespace hoa_boot {
 
 CreditsScreen::CreditsScreen() :
 	_visible(false),
-	_text_offset_y(0.0f),
-	_credits_rendered(NULL)
+	_text_offset_y(0.0f)
 {
 	// Init the background window
 	_window.Create(1024.0f, 600.0f);
@@ -43,7 +42,7 @@ CreditsScreen::CreditsScreen() :
 		cerr << "BOOT ERROR: failed to open the credits file" << endl;
 		exit(1);
 	}
-	_credits_text = credits_file.ReadString("credits_text");
+	_credits_text = MakeUnicodeString(credits_file.ReadString("credits_text"));
 	credits_file.CloseFile();
 }
 
@@ -51,10 +50,6 @@ CreditsScreen::CreditsScreen() :
 CreditsScreen::~CreditsScreen()
 {
 	_window.Destroy();
-	if (_credits_rendered != NULL) {
-		delete(_credits_rendered);
-		_credits_rendered = NULL;
-	}
 }
 
 
@@ -67,19 +62,20 @@ void CreditsScreen::Draw()
 		return;
 
 	// Set clip region for the text and draw the visible part of it
-	VideoManager->Move(512.0f, 450 + _text_offset_y);
+	VideoManager->Move(512.0f, 384.0f + _text_offset_y);
 	VideoManager->SetScissorRect(_window.GetScissorRect());
 	VideoManager->EnableScissoring(true);
-	if (_credits_rendered)
-	{
-		// Fade in the text by setting new color with alpha value below 1.0f
-		float color_alpha = _text_offset_y * 0.025f;
-		if (color_alpha > 1.0f)
-			color_alpha = 1.0f;
-		GLfloat modulation[] = {1.0f, 1.0f, 1.0f, color_alpha};
-		glColor4fv(modulation);
-		_credits_rendered->Draw();
-	}
+
+	// Fade in the text by setting new color with alpha value below 1.0f
+	float color_alpha = _text_offset_y * 0.025f;
+	if (color_alpha > 1.0f)
+		color_alpha = 1.0f;
+	Color modulated(1.0f, 1.0f, 1.0f, color_alpha);
+
+	VideoManager->SetDrawFlags(VIDEO_Y_TOP, 0);
+	VideoManager->DrawImage(_credits_rendered, modulated);
+	VideoManager->SetDrawFlags(VIDEO_Y_CENTER, 0);
+
 	VideoManager->EnableScissoring(false);
 }
 
@@ -101,14 +97,7 @@ void CreditsScreen::Show()
 	_text_offset_y = 0.0f; // Reset the text offset
 	VideoManager->SetFont("default"); // Reset font
 	VideoManager->SetTextColor(Color::white); // Reset text color
-
-	if (!_credits_rendered) {
-		_credits_rendered = VideoManager->RenderText(MakeUnicodeString(_credits_text));
-		if (!_credits_rendered) {
-			cerr << "BOOT ERROR: failed to render the credits string.\n" << endl;
-			exit(1);
-		}
-	}
+	_credits_rendered.SetText(_credits_text);
 }
 
 
@@ -117,11 +106,9 @@ void CreditsScreen::Hide()
 {
 	_window.Hide();
 	_visible = false;
-	glColor4fv(&Color::white[0]);
-	if (_credits_rendered) {
-		delete(_credits_rendered);
-		_credits_rendered = NULL;
-	}
+
+	// Explicit clear textures when leaving credits mode
+	_credits_rendered.Clear();
 }
 
 
