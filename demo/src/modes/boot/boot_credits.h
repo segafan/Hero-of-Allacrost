@@ -21,6 +21,7 @@
 #include <string>
 
 #include "video.h"
+#include "text.h"
 
 namespace hoa_boot {
 
@@ -64,10 +65,10 @@ private:
 	float _text_offset_y;
 
 	//! Text to be displayed
-	std::string _credits_text;
+	hoa_utils::ustring _credits_text;
 
 	//! Rendered text string
-	hoa_video::RenderedString* _credits_rendered;
+	hoa_video::RenderedText _credits_rendered;
 };
 
 } // namespace hoa_boot

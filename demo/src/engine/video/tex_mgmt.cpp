@@ -316,7 +316,7 @@ bool GameVideo::_LoadImage(StillImage &id)
 				return false;
 		}
 
-		++(img->ref_count);		// Increment the reference counter of the Image
+		img->Add();		// Increment the reference counter of the Image
 
 		if(id._width == 0.0f)
 			id._width = (float) img->width;
@@ -1346,7 +1346,7 @@ void GameVideo::_GetBufferFromTexture (hoa_video::private_video::ImageLoadInfo& 
 //----------------------------------------------------------------------------
 
 void GameVideo::_GetBufferFromImage (hoa_video::private_video::ImageLoadInfo& buffer,
-									 hoa_video::private_video::Image* img) const
+									 hoa_video::private_video::BaseImage* img) const
 {
 	// Get the texture as a buffer
 	_GetBufferFromTexture (buffer, img->texture_sheet);
@@ -1444,7 +1444,7 @@ StillImage GameVideo::TilesToObject (std::vector<StillImage> &tiles, std::vector
 //                        we run out of memory or bad argument is passed.
 //-----------------------------------------------------------------------------
 
-TexSheet *GameVideo::_InsertImageInTexSheet(Image *image, private_video::ImageLoadInfo & load_info, bool is_static)
+TexSheet *GameVideo::_InsertImageInTexSheet(BaseImage *image, private_video::ImageLoadInfo & load_info, bool is_static)
 {
 	// If it's a large image size (>512x512) then we already know it's not going
 	// to fit in any of our existing texture sheets, so create a new one for it
@@ -1599,6 +1599,9 @@ TexSheet::TexSheet(int32 w, int32 h, GLuint tex_ID_, TexSheetType type_, bool is
 	type = type_;
 	is_static = is_static_;
 	loaded = true;
+
+	if (VideoManager->_ShouldSmooth())
+		Smooth();
 
 	if(type == VIDEO_TEXSHEET_32x32)
 		tex_mem_manager = new FixedTexMemMgr(this, 32, 32);
@@ -1802,38 +1805,48 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 //               because we don't want huge textures sitting around in memory
 //-----------------------------------------------------------------------------
 
-bool GameVideo::_DeleteImage(Image *const img)
+bool GameVideo::_DeleteImage(BaseImage *const base_img)
 {
 	// If the image is grayscale, also perform a delete for the color image one
-	if (img->grayscale)
+	if (base_img->grayscale)
 	{
-		// The filename of the color image is the grayscale one but without "_grayscale" (10 characters) at the end
-		string filename (img->filename,0,img->filename.length()-10);
+		Image *img = dynamic_cast<Image *>(base_img);
+		if (img)
+		{
+			// The filename of the color image is the grayscale one but without "_grayscale" (10 characters) at the end
+			string filename (img->filename,0,img->filename.length()-10);
 
-		map<string,Image*>::iterator it = _images.find(filename);
-		if (it == _images.end())
+			map<string,Image*>::iterator it = _images.find(filename);
+			if (it == _images.end())
+			{
+				if (VIDEO_DEBUG)
+					cerr << "Attemp to delete a color copy didn't work" << endl;
+				return false;
+			}
+
+			_DeleteImage(it->second);
+		}
+		else
 		{
 			if (VIDEO_DEBUG)
-				cerr << "Attemp to delete a color copy didn't work" << endl;
+				cerr << "_DeleteImage(): Error: Grayscale BaseImage* was not of dynamic type Image*." << endl;
 			return false;
 		}
-
-		_DeleteImage(it->second);
 	}
 
-	if(img->width > 512 || img->height > 512)
+	if (base_img->Remove())
 	{
-		// Remove the image and texture sheet completely
-		_RemoveSheet(img->texture_sheet);
-		_RemoveImage(img);
-	}
-	else
-	{
-		// For smaller images, simply mark them as free in the memory manager
-		--(img->ref_count);
-		if(img->ref_count <= 0)
+		if(base_img->width > 512 || base_img->height > 512)
 		{
-			img->texture_sheet->FreeImage(img);
+			// Remove the image and texture sheet completely
+			_RemoveSheet(base_img->texture_sheet);
+			_RemoveImage(base_img);
+		}
+		else
+		{
+			// For smaller images, simply mark them as free 
+			// in the memory manager
+			base_img->texture_sheet->FreeImage(base_img);
 		}
 	}
 
@@ -1881,7 +1894,7 @@ bool GameVideo::_RemoveSheet(TexSheet *sheet)
 // NOTE: assumes that the image we're adding is still "bound" in DevIL
 //-----------------------------------------------------------------------------
 
-bool TexSheet::AddImage(Image *img, ImageLoadInfo & load_info)
+bool TexSheet::AddImage(BaseImage *img, ImageLoadInfo & load_info)
 {
 	// Try inserting into the texture memory manager
 	bool could_insert = tex_mem_manager->Insert(img);
@@ -2003,7 +2016,7 @@ bool TexSheet::CopyScreenRect(int32 x, int32 y, const ScreenRect &screen_rect)
 //              memory manager so that a new image can be loaded in its place
 //-----------------------------------------------------------------------------
 
-bool TexSheet::RemoveImage(Image *img)
+bool TexSheet::RemoveImage(BaseImage *img)
 {
 	return tex_mem_manager->Remove(img);
 }
@@ -2018,7 +2031,7 @@ bool TexSheet::RemoveImage(Image *img)
 //            we can simply Restore the image instead of reloading from disk.
 //-----------------------------------------------------------------------------
 
-bool TexSheet::FreeImage(Image *img)
+bool TexSheet::FreeImage(BaseImage *img)
 {
 	return tex_mem_manager->Free(img);
 }
@@ -2032,13 +2045,35 @@ bool TexSheet::FreeImage(Image *img)
 //               without reloading the image from disk.
 //-----------------------------------------------------------------------------
 
-bool TexSheet::RestoreImage(Image *img)
+bool TexSheet::RestoreImage(BaseImage *img)
 {
 	return tex_mem_manager->Restore(img);
 }
 
 
+//-----------------------------------------------------------------------------
+// Smooth: Sets filtering type of a texsheet if different from current.   
+//-----------------------------------------------------------------------------
 
+void TexSheet::Smooth(bool flag)
+{
+	// In case of global smoothing, do nothing here
+	if (VideoManager->_ShouldSmooth())
+	{
+		return;
+	}
+
+	// If setting has changed, set filtering
+	if (smoothed != flag)
+	{
+		smoothed = flag;
+		GLenum filtering_type = smoothed ? GL_LINEAR : GL_NEAREST;
+
+		VideoManager->_BindTexture(tex_ID);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering_type);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering_type);
+	}
+}
 
 //-----------------------------------------------------------------------------
 // DeleteImage: deletes an image descriptor (this is what the API user should call)
@@ -2147,11 +2182,32 @@ bool GameVideo::_DeleteImage(StillImage &id)
 	return true;
 }
 
+//-----------------------------------------------------------------------------
+// _RemoveImage(BaseImage*): removes the child image class from its specific storage method
+//-----------------------------------------------------------------------------
 
+bool GameVideo::_RemoveImage(BaseImage *base_image)
+{
+	Image  *img;
+	TImage *timage;
+
+	img = dynamic_cast<Image*>(base_image);
+	if (img)
+		return _RemoveImage(img);
+	
+	timage = dynamic_cast<TImage*>(base_image);
+	if (timage)
+		return _RemoveImage(timage);
+	
+	if (VIDEO_DEBUG)
+		cerr << "_RemoveImage(BaseImage*): Dynamic cast failed for all accepted types." << endl;
+
+	return false;
+}
 
 
 //-----------------------------------------------------------------------------
-// _RemoveImage: removes the image pointer from the std::map
+// _RemoveImage(Image*): removes the image pointer from the std::map
 //-----------------------------------------------------------------------------
 
 bool GameVideo::_RemoveImage(Image *img)
@@ -2184,6 +2240,32 @@ bool GameVideo::_RemoveImage(Image *img)
 	return false;
 }
 
+
+//-----------------------------------------------------------------------------
+// _RemoveImage: removes the timage pointer from the std::set
+//-----------------------------------------------------------------------------
+
+bool GameVideo::_RemoveImage(TImage *img)
+{
+	// Nothing to do if img is null
+	if(!img)
+		return true;
+
+	if(_t_images.empty())
+	{
+		return false;
+	}
+
+	if(_GetTImage(img))
+	{
+		_t_images.erase(img);
+		delete img;
+		return true;
+	}
+
+	// Couldn't find the image
+	return false;
+}
 
 
 
@@ -2247,7 +2329,7 @@ FixedTexMemMgr::~FixedTexMemMgr()
 //         left, return false
 //-----------------------------------------------------------------------------
 
-bool VariableTexMemMgr::Insert  (Image *img)
+bool VariableTexMemMgr::Insert  (BaseImage *img)
 {
 
 	// Don't allow insertions into a texture bigger than 512x512...
@@ -2315,7 +2397,7 @@ bool VariableTexMemMgr::Insert  (Image *img)
 	// this image out of memory to make place for the new one
 
 	// Update blocks
-	std::set<hoa_video::private_video::Image *> remove_images;
+	std::set<hoa_video::private_video::BaseImage *> remove_images;
 
 	for(int32 y = block_y; y < block_y + h; ++y)
 	{
@@ -2337,7 +2419,7 @@ bool VariableTexMemMgr::Insert  (Image *img)
 		}
 	}
 
-	for(std::set<hoa_video::private_video::Image *>::iterator itr = remove_images.begin(); itr != remove_images.end(); itr++)
+	for(std::set<hoa_video::private_video::BaseImage *>::iterator itr = remove_images.begin(); itr != remove_images.end(); itr++)
 	{
 		Remove(*itr);
 		VideoManager->_RemoveImage(*itr);
@@ -2375,7 +2457,7 @@ bool VariableTexMemMgr::Insert  (Image *img)
 //           3. set the "free" flag to true
 //-----------------------------------------------------------------------------
 
-bool VariableTexMemMgr::Remove(Image *img)
+bool VariableTexMemMgr::Remove(BaseImage *img)
 {
 	return SetBlockProperties(img, true, true, true, NULL);
 }
@@ -2391,11 +2473,11 @@ bool VariableTexMemMgr::Remove(Image *img)
 
 bool VariableTexMemMgr::SetBlockProperties
 (
-	Image *img,
+	BaseImage *img,
 	bool change_free,
 	bool change_image,
 	bool free,
-	Image *new_image
+	BaseImage *new_image
 )
 {
 	int32 block_x = img->x / 16;          // Upper-left corner in blocks
@@ -2429,7 +2511,7 @@ bool VariableTexMemMgr::SetBlockProperties
 //       NOTE: this assumes that the block isn't ALREADY free
 //-----------------------------------------------------------------------------
 
-bool VariableTexMemMgr::Free(Image *img)
+bool VariableTexMemMgr::Free(BaseImage *img)
 {
 	return SetBlockProperties(img, true, false, true, NULL);
 }
@@ -2441,7 +2523,7 @@ bool VariableTexMemMgr::Free(Image *img)
 // Restore: marks the blocks containing the image as non-free
 //-----------------------------------------------------------------------------
 
-bool VariableTexMemMgr::Restore(Image *img)
+bool VariableTexMemMgr::Restore(BaseImage *img)
 {
 	return SetBlockProperties(img, true, false, false, NULL);
 }
@@ -2454,7 +2536,7 @@ bool VariableTexMemMgr::Restore(Image *img)
 //         left, returns false.
 //-----------------------------------------------------------------------------
 
-bool FixedTexMemMgr::Insert(Image *img)
+bool FixedTexMemMgr::Insert(BaseImage *img)
 {
 	// Whoa, nothing on the open list! (no blocks left) return false :(
 
@@ -2518,7 +2600,7 @@ bool FixedTexMemMgr::Insert(Image *img)
 // CalculateBlockIndex: returns the block index used up by this image
 //-----------------------------------------------------------------------------
 
-int32 FixedTexMemMgr::_CalculateBlockIndex(Image *img)
+int32 FixedTexMemMgr::_CalculateBlockIndex(BaseImage *img)
 {
 	int32 block_x = img->x / _image_width;
 	int32 block_y = img->y / _image_height;
@@ -2537,7 +2619,7 @@ int32 FixedTexMemMgr::_CalculateBlockIndex(Image *img)
 //           2. remove it from the open list
 //-----------------------------------------------------------------------------
 
-bool FixedTexMemMgr::Remove(Image *img)
+bool FixedTexMemMgr::Remove(BaseImage *img)
 {
 	// Translate x,y coordinates into a block index
 	int32 block_index = _CalculateBlockIndex(img);
@@ -2619,7 +2701,7 @@ void FixedTexMemMgr::_DeleteNode(int32 block_index)
 //       NOTE: this assumes that the block isn't ALREADY free
 //-----------------------------------------------------------------------------
 
-bool FixedTexMemMgr::Free(Image *img)
+bool FixedTexMemMgr::Free(BaseImage *img)
 {
 	int32 block_index = _CalculateBlockIndex(img);
 
@@ -2651,7 +2733,7 @@ bool FixedTexMemMgr::Free(Image *img)
 //          mark it as "used" again
 //-----------------------------------------------------------------------------
 
-bool FixedTexMemMgr::Restore(Image *img)
+bool FixedTexMemMgr::Restore(BaseImage *img)
 {
 	int32 block_index = _CalculateBlockIndex(img);
 	_DeleteNode(block_index);
@@ -2910,13 +2992,12 @@ GLuint GameVideo::_CreateBlankGLTexture(int32 width, int32 height)
 	{
 		_DeleteTexture(tex_ID);
 
-		if(VIDEO_DEBUG)
-		{
-			cerr << "VIDEO ERROR: failed to create new texture in _CreateBlankGLTexture()." << endl;
-			cerr << "  OpenGL reported the following error:" << endl << "  ";
-			char *errString = (char*)gluErrorString(error);
-			cerr << errString << endl;
-		}
+		// This error is fatal, always show
+		cerr << "VIDEO ERROR: failed to create new " << width << " by " << height << " texture in _CreateBlankGLTexture()." << endl;
+		cerr << "  OpenGL reported the following error:" << endl << "  ";
+		char *errString = (char*)gluErrorString(error);
+		cerr << errString << endl;
+
 		return 0xffffffff;
 	}
 
@@ -2961,6 +3042,11 @@ bool TexSheet::Reload()
 	}
 
 	tex_ID = tID;
+
+	// Restore texture smoothing if applied.
+	bool was_smoothed = smoothed;
+	smoothed = false;
+	Smooth(was_smoothed);
 
 	// Now the hard part: go through all the images that belong to this texture
 	// and reload them again. (GameVideo's function, _ReloadImagesToSheet does this)
@@ -3109,6 +3195,15 @@ bool GameVideo::_ReloadImagesToSheet(TexSheet *sheet)
 		free ((*it).second.image.pixels);
 	}
 
+	// Regenerate all font textures
+	set<TImage*>::iterator t_begin = _t_images.begin();
+	set<TImage*>::iterator t_end   = _t_images.end();
+	for (;t_begin != t_end; ++t_begin)
+	{
+		if ((*t_begin)->texture_sheet == sheet)
+			(*t_begin)->Reload();
+	}
+
 	return success;
 }
 
@@ -3143,6 +3238,19 @@ bool GameVideo::_SaveTempTextures()
 }
 
 
+//-----------------------------------------------------------------------------
+// _AddTImage: add a TImage to the internal set
+//-----------------------------------------------------------------------------
+
+bool GameVideo::_AddTImage(TImage *timg)
+{
+	if (!_GetTImage(timg))
+	{
+		_t_images.insert(timg);
+		return true;
+	}
+	return false;
+}
 
 
 //-----------------------------------------------------------------------------

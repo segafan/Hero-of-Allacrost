@@ -97,25 +97,25 @@ public:
 	/*!	\param img the image to insert
 		\return Success/failure
 	*/
-	virtual bool Insert  (Image *img)=0;
+	virtual bool Insert  (BaseImage *img)=0;
 	
 	//! \brief Removes a block from the texture
 	/*!	\param img the image to remove
 		\return success/failure
 	*/
-	virtual bool Remove  (Image *img)=0;
+	virtual bool Remove  (BaseImage *img)=0;
 	
 	//! \brief Marks a block as free
 	/*!	\param img the image to free
 		\return Success/failure
 	*/
-	virtual bool Free    (Image *img)=0;
+	virtual bool Free    (BaseImage *img)=0;
 	
 	//! \brief Marks a block previously freed as used
 	/*!	\param img the image to restore
 		\return Success/failure
 	*/
-	virtual bool Restore (Image *img)=0;
+	virtual bool Restore (BaseImage *img)=0;
 };
 
 
@@ -142,7 +142,7 @@ public:
 	*/
 	bool AddImage
 	(
-		Image *img,
+		BaseImage *img,
 		ImageLoadInfo & load_info
 	);
 	
@@ -166,19 +166,19 @@ public:
 	/*!	\param img The image to remove
 		\return Success/failure
 	*/
-	bool RemoveImage (Image *img);
+	bool RemoveImage (BaseImage *img);
 	
 	//! \brief Marks the image as free
 	/*!	\param img The image to mark as free
 		\return Success/failure
 	*/
-	bool FreeImage   (Image *img);
+	bool FreeImage   (BaseImage *img);
 	
 	//! \brief Marks a previously freed image as "used"
 	/*!	\param img The image to mark as used
 		\return Success/failure
 	*/
-	bool RestoreImage (Image *img);
+	bool RestoreImage (BaseImage *img);
 	
 	//! \brief Unloads texture memory used by this sheet
 	/*!	\return Success/failure
@@ -189,6 +189,9 @@ public:
 	/*!	\return Success/failure
 	*/
 	bool Reload();
+
+	//! \brief Enable or disable smoothing (GL_LINEAR) on this texsheet
+	void Smooth(bool flag = true);
 
 	//! \brief Width of the texsheet
 	int32 width;
@@ -210,6 +213,9 @@ public:
 	
 	//! \brief Flag indicating if texsheet is loaded
 	bool loaded;		
+
+	//! \brief Whether this tex sheet is currently set GL_LINEAR
+	bool smoothed;
 };
 
 
@@ -224,7 +230,7 @@ class FixedImageNode
 public:
 
 	//! \brief The image that belongs to the block
-	Image          *image;
+	BaseImage          *image;
 	
 	//! \brief The next node in the list
 	FixedImageNode *next;
@@ -256,25 +262,25 @@ public:
 	/*!	\param img The image to insert
 		\return Success/failure
 	*/
-	bool Insert  (Image *img);
+	bool Insert  (BaseImage *img);
 	
 	//! \brief Removes a block from the texture
 	/*!	\param img The image to remove
 		\return Success/failure
 	*/
-	bool Remove  (Image *img);
+	bool Remove  (BaseImage *img);
 	
 	//! \brief Marks a block as free
 	/*!	\param img The image to free
 		\return Success/failure
 	*/
-	bool Free    (Image *img);
+	bool Free    (BaseImage *img);
 	
 	//! \brief Marks a block previously freed as used
 	/*!	\param img The image to restore
 		\return Success/failure
 	*/
-	bool Restore (Image *img);
+	bool Restore (BaseImage *img);
 
 private:
 
@@ -282,7 +288,7 @@ private:
 	/*!	\param img The image to look for
 		\return The block index for that image
 	*/
-	int32 _CalculateBlockIndex(Image *img);
+	int32 _CalculateBlockIndex(BaseImage *img);
 	
 	//! \brief Grabs the block index based off of the image
 	/*!	\param block_index The node in the list to delete
@@ -343,7 +349,7 @@ public:
 	}
 
 	//! \brief Pointer to the image
-	Image *image;
+	BaseImage *image;
 	
 	//! \brief Is the image freed?
 	bool   free;
@@ -370,25 +376,25 @@ public:
 	/*!	\param img the image to insert
 		\return success/failure
 	*/
-	bool Insert  (Image *img);
+	bool Insert  (BaseImage *img);
 	
 	//! \brief Removes a block from the texture
 	/*!	\param img the image to remove
 		\return success/failure
 	*/
-	bool Remove  (Image *img);
+	bool Remove  (BaseImage *img);
 	
 	//! \brief Marks a block as free
 	/*!	\param img the image to free
 		\return success/failure
 	*/
-	bool Free    (Image *img);
+	bool Free    (BaseImage *img);
 	
 	//! \brief Marks a block previously freed as used
 	/*!	\param img the image to restore
 		\return success/failure
 	*/
-	bool Restore (Image *img);
+	bool Restore (BaseImage *img);
 
 private:
 
@@ -402,11 +408,11 @@ private:
 	*/
 	bool SetBlockProperties
 	(
-		Image *img, 
+		BaseImage *img, 
 		bool change_free, 
 		bool change_image, 
 		bool free, 
-		Image *new_image
+		BaseImage *new_image
 	);
 
 	//! \brief The texhseet it's using

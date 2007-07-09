@@ -92,6 +92,7 @@ namespace hoa_video {
 
 		class ImageLoadInfo;
 		class Image;
+		class BaseImage;
 		class ImageElement;
 		class MultiImage;
 		class AnimationFrame;

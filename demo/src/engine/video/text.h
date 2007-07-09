@@ -176,6 +176,230 @@ public:
 	void SetShadowY(int32 yoff) { _shadow_yoff = yoff; };
 }; // class RenderedString
 
+/** ****************************************************************************
+*** \brief A class encompassing all options for a text style
+*** ***************************************************************************/
+class TextStyle {
+public:
+	//! \brief The string font name
+	std::string       font;
+	//! \brief Whether shadowing is enabled
+	bool              shadow_enable;
+	//! \brief The x offset of the shadow
+	int32	          shadow_offset_x;
+	//! \brief The y offset of the shadow
+	int32	          shadow_offset_y;
+	//! \brief The enum representing the shadow style
+	TEXT_SHADOW_STYLE shadow_style;
+	//! \brief The text color
+	Color		  color;
+
+	//! Default constructor sets shadow style to invalid
+	TextStyle()
+	: shadow_style(VIDEO_TEXT_SHADOW_INVALID)
+	{}
+};
+
+
+/** ****************************************************************************
+*** A text specific subclass of the BaseImage subclass, contains a
+*** string and style needed to render a piece of text.
+*** ***************************************************************************/
+class TImage : public private_video::BaseImage {
+public:
+	//! \brief The string represented
+	hoa_utils::ustring string;
+
+	//! \brief The font/color/etc.
+	TextStyle          style;
+
+	/** \brief Constructor defaults image as the first one in a texture sheet.
+	*** \note The actual sheet where the image is located will be determined later.
+	**/
+	TImage(const hoa_utils::ustring &string_, const TextStyle &style_);
+
+	//! \brief Constructor where image coordinates are specified, along with texture coords and the texture sheet.
+	TImage(private_video::TexSheet *sheet, const hoa_utils::ustring &string_, const TextStyle &style_, int32 x_, int32 y_, float u1_, float v1_,
+		float u2_, float v2_, int32 width, int32 height, bool grayscale_);
+
+	TImage & operator=(TImage &rhs)
+		{ return *this; }
+
+	//! Loads the properties of the internal font
+	bool LoadFontProperties();
+
+	//! Generate a text texture and add to a texture sheet
+	bool Regenerate();
+
+	//! Reload texture to an already assigned texture sheet
+	bool Reload();
+};
+
+/** ****************************************************************************
+*** \brief A text specific subclass of the BaseImageElement subclass.
+*** ***************************************************************************/
+class TImageElement : public private_video::BaseImageElement
+{
+public:
+	//! \brief The image that is being referenced by this object.
+	TImage* image;
+
+	//! \brief X offset from the line proper
+	float x_line_offset;
+	//! \brief Y offset from the line proper
+	float y_line_offset;
+
+
+
+	/** \brief Constructor specifying a specific image element.
+	*** Multiple elements can be stacked to form one compound image
+	**/
+	TImageElement(TImage *image_, float x_offset_, float y_offset_, float u1_, float v1_,
+		float u2_, float v2_, float width_, float height_, Color color_[4]);
+	
+	//! \brief Constructor defaulting the element to have white vertices and disabled blending.
+	TImageElement(TImage *image_, float x_offset_, float y_offset_, float u1_, float v1_,
+		float u2_, float v2_, float width_, float height_);
+
+	/** Helper function to get abstract drawable
+	 *  image type.
+	 */
+	virtual private_video::BaseImage *GetBaseImage();
+
+	/** Helper function to get abstract drawable
+	 *  image type (const version).
+	 */
+	virtual const private_video::BaseImage *GetBaseImage() const;
+};
+
+
+/** ****************************************************************************
+*** \brief Represents a rendered text string
+*** RenderedText is a compound image containing each line of a text string.
+*** ***************************************************************************/
+class RenderedText : public ImageListDescriptor {
+	friend class GameVideo;
+public:
+	enum align {
+		ALIGN_LEFT   = 0,
+		ALIGN_CENTER = 1,
+		ALIGN_RIGHT  = 2,
+	};
+
+	//! \brief Construct empty text object
+	RenderedText();
+
+	//! \brief Constructs rendered string of specified ustring
+	RenderedText(const hoa_utils::ustring &string, int8 alignment = ALIGN_CENTER);
+
+	//! \brief Constructs rendered string of specified std::string
+	RenderedText(const std::string        &string, int8 alignment = ALIGN_CENTER);
+
+	//! \brief Copy constructor increases contained reference counts
+	RenderedText(const RenderedText &other);
+
+	//! \brief Clone operator increases contained reference counts
+	void operator=(const RenderedText &other);
+
+	//! \brief Destructs RenderedText, lowering reference counts on all contained timages.
+	~RenderedText();
+
+	//! \brief Clears the image by resetting its properties
+	void Clear();
+
+	//! \name Class Member Set Functions
+	//@{
+	//! \brief Sets the text contained
+	void SetText(const hoa_utils::ustring &string);
+
+	//! \brief Sets the text (std::string version)
+	void SetText(const std::string &string);
+
+	/** \brief Sets horizontal text alignment
+	 *  \param alignment The alignment - ALIGN_CENTER,
+	 *         ALIGN_LEFT or ALIGN_RIGHT.
+	 */
+	bool SetAlignment(int8 alignment);
+
+	//! \brief Sets width of the image
+	void SetWidth(float width)
+		{ _width = width; }
+
+	//! \brief Sets height of the image
+	void SetHeight(float height)
+		{ _height = height; }
+
+	//! \brief Sets the dimensions (width + height) of the image.
+	void SetDimensions(float width, float height)
+		{ _width  = width; _height = height; }
+
+	//! \brief Sets image to static/animated
+	void SetStatic(bool is_static)
+		{ _is_static = is_static; }
+
+	//! \brief Sets the color for the image (for all four verteces).
+	void SetColor(const Color &color)
+		{ _color[0] = _color[1] = _color[2] = _color[3] = color; }
+
+	/** \brief Sets individual vertex colors in the image.
+	*** \param tl top left vertex color
+	*** \param tr top right vertex color
+	*** \param bl bottom left vertex color
+	*** \param br bottom right vertex color
+	**/
+	void SetVertexColors(const Color &tl, const Color &tr, const Color &bl, const Color &br)
+		{ _color[0] = tl; _color[1] = tr; _color[2] = bl; _color[3] = br; }
+	//@}
+
+	//! \name Class Member Get Functions
+	//@{
+	//! \brief Returns the filename of the image.
+	hoa_utils::ustring GetString() const
+		{ return _string; }
+
+	/** \brief Returns the color of a particular vertex
+	*** \param c The Color object to place the color in.
+	*** \param index The vertex index of the color to fetch
+	*** \note If an invalid index value is used, the function will return with no warning.
+	**/
+	void GetVertexColor(Color &c, uint8 index)
+		{ if (index > 3) return; else c = _color[index]; }
+
+	//@}
+
+	//! \brief Virtual method to retrieve a drawable base class element
+	virtual const private_video::BaseImageElement *GetElement(uint32 index) const;
+	//! \brief Virtual method to retrieve number of drawable base class elements
+	virtual uint32 GetNumElements() const;
+
+private:
+	/** \brief Clears all rendered text, decreasing ref count.
+	**/
+	void _ClearImages();
+
+	/** \brief Regenerates the string textures.
+	**/
+	void _Regenerate();
+
+	/** \brief Realigns text to a horizontal alignment
+	**/
+	void _Realign();
+	
+	/** \brief The string this was constructed from (for reloading)
+	**/
+	hoa_utils::ustring _string;
+
+	/** The TImage elements representing rendered text
+	**  portions, usually lines.
+	**/
+	std::vector<TImageElement> _text_sections;
+
+	//! \brief The horizontal text alignment
+	int8 _alignment;
+
+}; // class RenderedText : public ImageDescriptor
+
+
 }  // namespace hoa_video
 
 

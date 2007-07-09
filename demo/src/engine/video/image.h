@@ -85,35 +85,11 @@ public:
 }; // class ImageLoadInfo
 
 
-/** ****************************************************************************
-*** \brief Represents a single image that is loaded and stored in a texture sheet.
-*** All the existing images will be stored in a map at the video engine. That way
-*** they can be shared among objects.
-*** ***************************************************************************/
-class Image {
+class BaseImage {
 public:
+	friend class GameVideo;
 	//! \brief A pointer to the texture sheet where the image is contained.
 	TexSheet* texture_sheet;
-
-	/** \brief The filename for the image.
-	*** This is stored for every image in case it needs to be reloaded. This may happen
-	*** when a context change happens, such a switch from/to fullscreen mode or a
-	*** resolution change.
-	**/
-	std::string filename;
-
-	//! \brief String holding the tags defining the properties of the image
-	/*!
-		The tags need to be present always in the same order, since they will be used as
-		a key in the video engine's map. When adding new flags, remember to add the documentation in here.
-		These are the currently supported flags, presented in the appearance order:
-		\<T>			For temporary images
-		\<Xrow_ROWS>	For multiimages
-		\<Ycol_COLS>	For multiimages
-		\<G>			Grayscale images
-		Note that \<T> and the multiimages tags can't appear together.
-	*/
-	std::string tags;
 
 	//! \brief The coordiates of where the image is located in the texture sheet (in pixels)
 	int32 x, y;
@@ -136,6 +112,56 @@ public:
 	**/
 	int32 ref_count;
 
+	//! \brief Whether the image should be drawn smoothed (GL_LINEAR)
+	bool smooth;
+
+	//! \brief Virtual function decrements reference count,
+	//         returning true if deletion ref count reached.
+	virtual bool Remove()
+	{
+		--ref_count;
+		if (ref_count <= 0)
+			return true;
+		return false;
+	}
+	//! \brief Virtual function adds to reference count.
+	virtual void Add()
+	{
+		++ref_count;
+	}
+
+	//! \brief Default virtual constructor.
+	virtual ~BaseImage() {};
+};
+
+/** ****************************************************************************
+*** \brief Represents a single image that is loaded and stored in a texture sheet.
+*** All the existing images will be stored in a map at the video engine. That way
+*** they can be shared among objects.
+*** ***************************************************************************/
+class Image : public BaseImage {
+public:
+	/** \brief The filename for the image.
+	*** This is stored for every image in case it needs to be reloaded. This may happen
+	*** when a context change happens, such a switch from/to fullscreen mode or a
+	*** resolution change.
+	**/
+	std::string filename;
+
+	//! \brief String holding the tags defining the properties of the image
+	/*!
+		The tags need to be present always in the same order, since they will be used as
+		a key in the video engine's map. When adding new flags, remember to add the documentation in here.
+		These are the currently supported flags, presented in the appearance order:
+		\<T>			For temporary images
+		\<Xrow_ROWS>	For multiimages
+		\<Ycol_COLS>	For multiimages
+		\<G>			Grayscale images
+		Note that \<T> and the multiimages tags can't appear together.
+	*/
+	std::string tags;
+
+
 	/** \brief Constructor defaults image as the first one in a texture sheet.
 	*** \note The actual sheet where the image is located will be determined later.
 	**/
@@ -143,10 +169,13 @@ public:
 
 	//! \brief Constructor where image coordinates are specified, along with texture coords and the texture sheet.
 	Image(TexSheet *sheet, const std::string &fname, const std::string &tags_, int32 x_, int32 y_, float u1_, float v1_,
-		float u2_, float v2_, int32 wifth, int32 height, bool grayscale_);
+		float u2_, float v2_, int32 width, int32 height, bool grayscale_);
 
 	Image & operator=(Image &rhs)
 		{ return *this; }
+
+	//! \brief Default virtual constructor.
+	virtual ~Image() {};
 }; // class Image
 
 
@@ -154,12 +183,9 @@ public:
 *** \brief Represents a single image within an ImageDescriptor object.
 *** Compound images are formed of multiple ImageElements.
 *** ***************************************************************************/
-class ImageElement {
+class BaseImageElement {
 	friend class AnimatedImage;
 public:
-	//! \brief The image that is being referenced by this object.
-	Image* image;
-
 	//! \brief The x offset in the image stack.
 	float x_offset;
 
@@ -189,6 +215,21 @@ public:
 	//! \brief Set to true if the vertices are all white.
 	bool white;
 
+	virtual BaseImage *GetBaseImage() = 0;
+	virtual const BaseImage *GetBaseImage() const = 0;
+
+	virtual ~BaseImageElement() {};
+}; // class BaseImageElement
+
+
+class ImageElement : public BaseImageElement
+{
+public:
+	//! \brief The image that is being referenced by this object.
+	Image* image;
+
+
+
 	/** \brief Constructor specifying a specific image element.
 	*** Multiple elements can be stacked to form one compound image
 	**/
@@ -198,7 +239,11 @@ public:
 	//! \brief Constructor defaulting the element to have white vertices and disables blending.
 	ImageElement(Image *image_, float x_offset_, float y_offset_, float u1_, float v1_,
 		float u2_, float v2_, float width_, float height_);
-}; // class ImageElement
+
+	virtual BaseImage *GetBaseImage();
+	virtual const BaseImage *GetBaseImage() const;
+
+};
 
 
 //! \brief Temporal struct for holding a multiimage information
@@ -271,10 +316,13 @@ public:
 	//! \name Class Member Get Functions
 	//@{
 	//! \brief Returns the image width
-	virtual float GetWidth() const = 0;
+	virtual float GetWidth() const
+		{ return _width; }
+
 
 	//! \brief Returns image height
-	virtual float GetHeight() const = 0;
+	virtual float GetHeight() const
+		{ return _height; }
 
 	//! \brief Returns true if the image is grayscale.
 	bool IsGrayScale() const
@@ -330,6 +378,14 @@ protected:
 	void _Clear ();
 }; // class ImageDescriptor
 
+class ImageListDescriptor : public ImageDescriptor
+{
+public:
+	virtual const private_video::BaseImageElement *GetElement(uint32 index) const = 0;
+	virtual uint32 GetNumElements() const = 0;
+protected:
+};
+
 
 /** ****************************************************************************
 *** \brief Represents a single or compound still image
@@ -338,7 +394,7 @@ protected:
 *** large image (e.g. with TilesToObject() function). It's fine to think of
 *** compound images as just a single image.
 *** ***************************************************************************/
-class StillImage : public ImageDescriptor {
+class StillImage : public ImageListDescriptor {
 	friend class GameVideo;
 	friend class AnimatedImage;
 	friend class private_video::ParticleSystem;
@@ -422,14 +478,6 @@ public:
 	std::string GetFilename() const
 		{ return _filename; }
 
-	//! \brief Returns the width of the image.
-	float GetWidth() const
-		{ return _width; }
-
-	//! \brief Returns the height of the image.
-	float GetHeight() const
-		{ return _height; }
-
 	/** \brief Returns the color of a particular vertex
 	*** \param c The Color object to place the color in.
 	*** \param index The vertex index of the color to fetch
@@ -439,7 +487,9 @@ public:
 		{ if (index > 3) return; else c = _color[index]; }
 	//@}
 
-private:
+	virtual const private_video::BaseImageElement *GetElement(uint32 index) const;
+	virtual uint32 GetNumElements() const;
+protected:
 	/** \brief The name of the image file from which this image was created
 	*** This is used for loading an image (SetFilename(), Load()), so after loading, it has no
 	***	purpose. If we have a compound image, these will be an empty string.

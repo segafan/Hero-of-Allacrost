@@ -25,7 +25,7 @@ namespace hoa_video
 //                   color. Helper function to DrawImage()
 //-----------------------------------------------------------------------------
 
-bool GameVideo::_DrawStillImage(const StillImage &id)
+bool GameVideo::_DrawStillImage(const ImageListDescriptor &id)
 {
 	// if real lighting is enabled, draw images normally since the light overlay
 	// will take care of the modulation. If not, (i.e. no overlay is being used)
@@ -43,14 +43,14 @@ bool GameVideo::_DrawStillImage(const StillImage &id)
 //                   color passed in.
 //-----------------------------------------------------------------------------
 
-bool GameVideo::_DrawStillImage(const StillImage &id, const Color &color)
+bool GameVideo::_DrawStillImage(const ImageListDescriptor &id, const Color &color)
 {
 	// Don't do anything if this image is completely transparent (invisible)
 	if (color[3] == 0.0f) {
 		return true;
 	}
 
-	size_t num_elements = id._elements.size();
+	size_t num_elements = id.GetNumElements();
 	
 	float modulation = _fader.GetFadeModulation();
 	Color fade_color(modulation, modulation, modulation, 1.0f);
@@ -58,8 +58,8 @@ bool GameVideo::_DrawStillImage(const StillImage &id, const Color &color)
 	float x_shake = _x_shake * (_coord_sys.GetRight() - _coord_sys.GetLeft()) / 1024.0f;
 	float y_shake = _y_shake * (_coord_sys.GetTop()   - _coord_sys.GetBottom()) / 768.0f;
 
-	float x_align_offset = ((_x_align+1) * id._width)  * 0.5f * -_coord_sys.GetHorizontalDirection();
-	float y_align_offset = ((_y_align+1) * id._height) * 0.5f * -_coord_sys.GetVerticalDirection();
+	float x_align_offset = ((_x_align+1) * id.GetWidth())  * 0.5f * -_coord_sys.GetHorizontalDirection();
+	float y_align_offset = ((_y_align+1) * id.GetHeight()) * 0.5f * -_coord_sys.GetVerticalDirection();
 
 	glPushMatrix();
 	MoveRelative(x_align_offset, y_align_offset);	
@@ -74,19 +74,25 @@ bool GameVideo::_DrawStillImage(const StillImage &id, const Color &color)
 	
 	for(uint32 iElement = 0; iElement < num_elements; ++iElement)
 	{		
-		glPushMatrix();
+		if (!id.GetElement(iElement))
+		{
+			if (VIDEO_DEBUG)
+				cerr << "VIDEO: Error in " << __FUNCTION__ << ": id.GetElement(" << iElement << ") returned NULL." << endl;
+			continue;
+		}
 		
-		float x_off = (float)id._elements[iElement].x_offset;
-		float y_off = (float)id._elements[iElement].y_offset;
+		const BaseImageElement &element = *id.GetElement(iElement);
+		float x_off = (float)element.x_offset;
+		float y_off = (float)element.y_offset;
 
 		if(_x_flip)
 		{
-			x_off = id._width - x_off - id._elements[iElement].width;
+			x_off = id.GetWidth() - x_off - element.width;
 		}
 		
 		if(_y_flip)
 		{
-			y_off = id._height - y_off - id._elements[iElement].height;
+			y_off = id.GetHeight() - y_off - element.height;
 		}
 
 		x_off += x_shake;
@@ -97,10 +103,11 @@ bool GameVideo::_DrawStillImage(const StillImage &id, const Color &color)
 
 //		MoveRelative(x__ + x_off * _coord_sys.GetHorizontalDirection(), y__ + y_off * _coord_sys.GetVerticalDirection());
 
+		glPushMatrix();
 		MoveRelative(x_off * _coord_sys.GetHorizontalDirection(), y_off * _coord_sys.GetVerticalDirection());
 		
-		float x_scale = id._elements[iElement].width;
-		float y_scale = id._elements[iElement].height;
+		float x_scale = element.width;
+		float y_scale = element.height;
 		
 		if(_coord_sys.GetHorizontalDirection() < 0.0f)
 			x_scale = -x_scale;
@@ -112,14 +119,14 @@ bool GameVideo::_DrawStillImage(const StillImage &id, const Color &color)
 		bool success;
 		
 		if(skip_modulation)
-			success = _DrawElement(id._elements[iElement], id._elements[iElement].color);
+			success = _DrawElement(element, element.color);
 		else
 		{
-			color_modulated[0] = id._elements[iElement].color[0] * fade_color;
-			color_modulated[1] = id._elements[iElement].color[1] * fade_color;
-			color_modulated[2] = id._elements[iElement].color[2] * fade_color;
-			color_modulated[3] = id._elements[iElement].color[3] * fade_color;
-			success = _DrawElement(id._elements[iElement], color_modulated);
+			color_modulated[0] = element.color[0] * fade_color;
+			color_modulated[1] = element.color[1] * fade_color;
+			color_modulated[2] = element.color[2] * fade_color;
+			color_modulated[3] = element.color[3] * fade_color;
+			success = _DrawElement(element, color_modulated);
 		}
 		
 		if(!success)
@@ -127,6 +134,7 @@ bool GameVideo::_DrawStillImage(const StillImage &id, const Color &color)
 			if(VIDEO_DEBUG)
 				cerr << "VIDEO ERROR: _DrawElement() failed in DrawImage()!" << endl;
 			
+			glPopMatrix();
 			glPopMatrix();
 			return false;
 		}			
@@ -142,8 +150,8 @@ bool GameVideo::_DrawStillImage(const StillImage &id, const Color &color)
 // _DrawElement: draws an image element. This is only used privately.
 //-----------------------------------------------------------------------------
 
-bool GameVideo::_DrawElement(const ImageElement &element, const Color *color_array) {
-	Image *img = element.image;
+bool GameVideo::_DrawElement(const BaseImageElement &element, const Color *color_array) {
+	const BaseImage *img = element.GetBaseImage();
 	
 	// Set vertex coordinates
 	static const float xlo = 0.0f;
@@ -227,6 +235,8 @@ bool GameVideo::_DrawElement(const ImageElement &element, const Color *color_arr
 		// Enable texturing and bind texture
 		glEnable(GL_TEXTURE_2D);
 		_BindTexture(img->texture_sheet->tex_ID);
+		img->texture_sheet->Smooth(img->smooth);
+
 
 		// Enable texture coordinate array
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -263,7 +273,6 @@ bool GameVideo::_DrawElement(const ImageElement &element, const Color *color_arr
 		else
 		{
 			glEnableClientState(GL_COLOR_ARRAY);
-			//glColorPointer(4, GL_FLOAT, 0, (GLfloat *)element.color);
 			glColorPointer(4, GL_FLOAT, 0, (GLfloat *)color_array);
 		}
 		// Always use a vertex array
@@ -306,10 +315,10 @@ bool GameVideo::DrawHalo(const StillImage &id, float x, float y, const Color &co
 	PushMatrix();
 	Move(x, y);
 
-	char oldBlendMode = _blend;
+	char old_blend_mode = _blend;
 	_blend = VIDEO_BLEND_ADD;
 	DrawImage(id, color);
-	_blend = oldBlendMode;
+	_blend = old_blend_mode;
 	PopMatrix();
 	
 	return true;
@@ -359,7 +368,7 @@ bool GameVideo::DrawImage(const ImageDescriptor &id) {
 		return _DrawStillImage(*anim.GetFrame(anim.GetCurrentFrameIndex()));
 	}
 	else {
-		return _DrawStillImage(dynamic_cast<const StillImage &>(id));
+		return _DrawStillImage(dynamic_cast<const ImageListDescriptor &>(id));
 	}
 }
 
@@ -378,7 +387,7 @@ bool GameVideo::DrawImage(const ImageDescriptor &id, const Color &color)
 	}
 	else
 	{
-		return _DrawStillImage(dynamic_cast<const StillImage &>(id), color);
+		return _DrawStillImage(dynamic_cast<const ImageListDescriptor &>(id), color);
 	}
 }
 
