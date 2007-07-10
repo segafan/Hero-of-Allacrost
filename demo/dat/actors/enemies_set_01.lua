@@ -288,8 +288,7 @@ enemies[5] = {
 		protection = 4,
 		agility = 14,
 		evade = 2.0,
-		drunes = 12,
-		drunes = 2.0
+		drunes = 12
 	},
 
 	growth_stats = {
@@ -301,7 +300,8 @@ enemies[5] = {
 		fortitude = 7.0,
 		protection = 4.0,
 		agility = 10.0,
-		evade = 2.0
+		evade = 2.0,
+		drunes = 2.0
 	},
 
 

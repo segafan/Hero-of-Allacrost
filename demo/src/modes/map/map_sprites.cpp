@@ -631,7 +631,7 @@ void EnemySprite::AddEnemy(uint32 enemy_id) {
 	if (MAP_DEBUG) {
 		bool found = false;
 		for (uint32 i = 0; i < MapMode::_loading_map->_enemies.size(); i++) {
-			if (MapMode::_loading_map->_enemies[i].GetID() == enemy_id) {
+			if (MapMode::_loading_map->_enemies[i]->GetID() == enemy_id) {
 				found = true;
 				break;
 			}

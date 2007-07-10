@@ -460,11 +460,10 @@ private:
 	// -------------------- Battle Data Retained by the Map
 
 	/** \brief A container for the various foes which may appear on this map.
-	*** These enemies do not have their stats set, but rather are kept at their
-	*** base level stats. The stats are initialized just before a battle begins,
-	*** and then passed to battle mode to use.
+	*** These enemies are kept at their initial stats. They are passed to battle mode, where a copy of
+	*** each enemy is made and initialized there.
 	**/
-	std::vector<hoa_global::GlobalEnemy> _enemies;
+	std::vector<hoa_global::GlobalEnemy*> _enemies;
 
 	//! \brief Loads all map data as specified in the Lua file that defines the map.
 	void _Load();

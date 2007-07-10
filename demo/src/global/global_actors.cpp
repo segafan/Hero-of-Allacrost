@@ -838,7 +838,7 @@ bool GlobalCharacter::AddExperiencePoints(uint32 xp) {
 
 GlobalEnemy::GlobalEnemy(uint32 id) {
 	_id = id;
-	_experience_level = 1;
+	_experience_level = 0;
 	_weapon_equipped = NULL;
 	_armor_equipped.clear();
 
@@ -935,8 +935,10 @@ GlobalEnemy::GlobalEnemy(uint32 id) {
 					<< "skill set multiple times" << endl;
 		}
 	}
+	enemy_data.CloseTable();
 
-	// (8): Load the possible items that the enemy may drop
+
+	// (9): Load the possible items that the enemy may drop
 	enemy_data.OpenTable("drop_objects");
 	for (uint32 i = 1; i <= enemy_data.GetTableSize(); i++) {
 		enemy_data.OpenTable(i);

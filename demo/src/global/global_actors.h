@@ -623,7 +623,7 @@ protected:
 *** class exists is to provide an interface for external code to determine
 *** when character growth occurs, inform the player of the growth, and
 *** acknoleged the growth.
-*** 
+***
 *** The recommended proceedure for processing character growth is as follows:
 *** -# If the return value of GlobalCharacter::AddExperiencePoints is true, growth
 ***    has occured and should be processed.
@@ -634,7 +634,7 @@ protected:
 ***    report any non-zero values to the player. Then call AcknoledgeGrowth()
 *** -# Otherwise if the growth type is a new level, report growth plus any skills
 ***    learned and call AcknoledgeGrowth() (*see note)
-*** 
+***
 *** \note When an experience level is gained, after the call to AcknowledgeGrowth()
 *** there may be new growth available (because the character gained multiple 
 *** experience levels or met the requirements for additional gradual growth for
@@ -645,6 +645,7 @@ protected:
 *** \todo Add gradual stat growth feature
 *** ***************************************************************************/
 class GlobalCharacterGrowth {
+	friend class GameGlobal;
 	friend class GlobalCharacter;
 	friend void hoa_defs::BindEngineToLua();
 
