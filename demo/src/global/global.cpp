@@ -820,7 +820,111 @@ void GameGlobal::_SaveCharacter(WriteScriptDescriptor& file, GlobalCharacter* ch
 			file.WriteLine(", ", false);
 		file.WriteLine(NumberToString(skill_vector->at(i)->GetID()), false);
 	}
-	file.WriteLine("\n\t\t}");
+	file.WriteLine("\n\t\t},");
+
+	// ----- (4): Write out the character's growth data
+	GlobalCharacterGrowth* growth = character->GetGrowth();
+
+	if (growth->IsGrowthDetected()) {
+		if (GLOBAL_DEBUG)
+			cerr << "GLOBAL WARNING: GameGlobal::_SaveCharacter() discovered unacknowledged character growth" << endl;
+	}
+	
+	file.InsertNewLine();
+	file.WriteLine("\t\tgrowth = {");
+	file.WriteLine("\t\t\texperience_for_last_level = " + NumberToString(growth->_experience_for_last_level));
+	file.WriteLine("\t\t\texperience_for_next_level = " + NumberToString(growth->_experience_for_next_level));
+
+	file.WriteLine("\t\t\thit_points_growth = { ");
+	for (uint32 i = 0; i < growth->_hit_points_periodic_growth.size(); i++) {
+		if (i == 0)
+			file.WriteLine("\t\t\t\t", false);
+		else
+			file.WriteLine(", ", false);
+		file.WriteLine("[" + NumberToString(growth->_hit_points_periodic_growth[i].first) + "] = " + NumberToString(growth->_hit_points_periodic_growth[i].second), false);
+	}
+	file.WriteLine("\n\t\t\t}");
+
+	file.WriteLine("\t\t\tskill_points_growth = { ");
+	for (uint32 i = 0; i < growth->_skill_points_periodic_growth.size(); i++) {
+		if (i == 0)
+			file.WriteLine("\t\t\t\t", false);
+		else
+			file.WriteLine(", ", false);
+		file.WriteLine("[" + NumberToString(growth->_skill_points_periodic_growth[i].first) + "] = " + NumberToString(growth->_skill_points_periodic_growth[i].second), false);
+	}
+	file.WriteLine("\n\t\t\t}");
+
+	file.WriteLine("\t\t\tstrength_growth = { ");
+	for (uint32 i = 0; i < growth->_strength_periodic_growth.size(); i++) {
+		if (i == 0)
+			file.WriteLine("\t\t\t\t", false);
+		else
+			file.WriteLine(", ", false);
+		file.WriteLine("[" + NumberToString(growth->_strength_periodic_growth[i].first) + "] = " + NumberToString(growth->_strength_periodic_growth[i].second), false);
+	}
+	file.WriteLine("\n\t\t\t}");
+
+	file.WriteLine("\t\t\tvigor_growth = { ");
+	for (uint32 i = 0; i < growth->_vigor_periodic_growth.size(); i++) {
+		if (i == 0)
+			file.WriteLine("\t\t\t\t", false);
+		else
+			file.WriteLine(", ", false);
+		file.WriteLine("[" + NumberToString(growth->_vigor_periodic_growth[i].first) + "] = " + NumberToString(growth->_vigor_periodic_growth[i].second), false);
+	}
+	file.WriteLine("\n\t\t\t}");
+
+	file.WriteLine("\t\t\tfortitude_growth = { ");
+	for (uint32 i = 0; i < growth->_fortitude_periodic_growth.size(); i++) {
+		if (i == 0)
+			file.WriteLine("\t\t\t\t", false);
+		else
+			file.WriteLine(", ", false);
+		file.WriteLine("[" + NumberToString(growth->_fortitude_periodic_growth[i].first) + "] = " + NumberToString(growth->_fortitude_periodic_growth[i].second), false);
+	}
+	file.WriteLine("\n\t\t\t}");
+
+	file.WriteLine("\t\t\tprotection_growth = { ");
+	for (uint32 i = 0; i < growth->_protection_periodic_growth.size(); i++) {
+		if (i == 0)
+			file.WriteLine("\t\t\t\t", false);
+		else
+			file.WriteLine(", ", false);
+		file.WriteLine("[" + NumberToString(growth->_protection_periodic_growth[i].first) + "] = " + NumberToString(growth->_protection_periodic_growth[i].second), false);
+	}
+	file.WriteLine("\n\t\t\t}");
+
+	file.WriteLine("\t\t\tagility_growth = { ");
+	for (uint32 i = 0; i < growth->_agility_periodic_growth.size(); i++) {
+		if (i == 0)
+			file.WriteLine("\t\t\t\t", false);
+		else
+			file.WriteLine(", ", false);
+		file.WriteLine("[" + NumberToString(growth->_agility_periodic_growth[i].first) + "] = " + NumberToString(growth->_agility_periodic_growth[i].second), false);
+	}
+	file.WriteLine("\n\t\t\t}");
+
+	file.WriteLine("\t\t\tevade_growth = { ");
+	for (uint32 i = 0; i < growth->_evade_periodic_growth.size(); i++) {
+		if (i == 0)
+			file.WriteLine("\t\t\t\t", false);
+		else
+			file.WriteLine(", ", false);
+		file.WriteLine("[" + NumberToString(growth->_evade_periodic_growth[i].first) + "] = " + NumberToString(growth->_evade_periodic_growth[i].second), false);
+	}
+	file.WriteLine("\n\t\t\t}");
+
+	file.WriteLine("\t\t\tskills_learned = { ");
+	for (list<GlobalSkill*>::iterator i = growth->_skills_learned.begin(); i != growth->_skills_learned.end(); i++) {
+		if (i == growth->_skills_learned.begin())
+			file.WriteLine("\t\t\t\t", false);
+		else
+			file.WriteLine(", ", false);
+		file.WriteLine(NumberToString((*i)->GetID()), false);
+	}
+	file.WriteLine("\n\t\t\t}");
+	file.WriteLine("\t\t}");
 
 	if (last)
 		file.WriteLine("\t}");

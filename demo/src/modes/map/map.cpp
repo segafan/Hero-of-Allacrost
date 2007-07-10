@@ -108,6 +108,11 @@ MapMode::~MapMode() {
 		_sounds[i].FreeSound();
 	}
 
+	// Delete all enemy's created
+	for (uint32 i = 0; i < _enemies.size(); i++) {
+		delete(_enemies[i]);
+	}
+
 	// Delete all of the tile images
 	for (uint32 i = 0; i < _tile_images.size(); i++) {
 		delete(_tile_images[i]);
@@ -226,7 +231,7 @@ void MapMode::_Load() {
 	vector<int32> enemy_ids;
 	_map_script.ReadIntVector("enemy_ids", enemy_ids);
 	for (uint32 i = 0; i < enemy_ids.size(); i++) {
-		_enemies.push_back(GlobalEnemy(enemy_ids[i]));
+		_enemies.push_back(new GlobalEnemy(enemy_ids[i]));
 	}
 
 	// ---------- (5) Call the map script's load function, which will
