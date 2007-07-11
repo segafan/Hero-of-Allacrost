@@ -270,6 +270,10 @@ public:
 
 	~GlobalSkill();
 
+	GlobalSkill(const GlobalSkill& copy);
+
+	GlobalSkill& operator=(const GlobalSkill& copy);
+
 	//! \brief Returns true if the skill can be executed in battles
 	bool IsExecutableInBattle() const
 		{ return ((_usage == GLOBAL_USE_BATTLE) || (_usage == GLOBAL_USE_ALL)); }
