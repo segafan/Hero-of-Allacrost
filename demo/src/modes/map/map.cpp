@@ -57,16 +57,20 @@ bool MapMode::_show_dialogue_icons = true;
 // ****************************************************************************
 
 MapMode::MapMode(string filename) :
-	_map_filename(filename)
+	GameMode(),
+	_map_filename(filename),
+	_map_state(EXPLORE),
+	_lastID(1000),
+	_ignore_user_input(false),
+	_run_limited(true),
+	_run_disabled(false),
+	_run_stamina(10000)
 {
 	if (MAP_DEBUG)
 		cout << "MAP: MapMode constructor invoked" << endl;
 	_loading_map = this;
 
 	mode_type = MODE_MANAGER_MAP_MODE;
-	_map_state = EXPLORE;
-	_lastID = 1000;
-
 	_virtual_focus = new VirtualSprite();
 	_virtual_focus->SetXPosition(0, 0.0f);
 	_virtual_focus->SetYPosition(0, 0.0f);
@@ -234,9 +238,10 @@ void MapMode::_Load() {
 		_enemies.push_back(new GlobalEnemy(enemy_ids[i]));
 	}
 
-	// ---------- (5) Call the map script's load function, which will
+	// ---------- (5) Call the map script's load function
 	ScriptCallFunction<void>(_map_script.GetLuaState(), "Load", this);
 	_update_function = _map_script.ReadFunctionPointer("Update");
+	_draw_function = _map_script.ReadFunctionPointer("Draw");
 } // void MapMode::_Load()
 
 
@@ -434,6 +439,7 @@ void MapMode::_LoadTiles() {
 // Updates the game state when in map mode. Called from the main game loop.
 void MapMode::Update() {
 	_time_elapsed = SystemManager->GetUpdateTime();
+	_running = false;
 
 	// ---------- (1) Call the map's update script function
 	ScriptCallFunction<void>(_update_function);
@@ -499,17 +505,24 @@ void MapMode::_HandleInputExplore() {
 		return;
 	}
 
-	// Toggle running versus walking
-// 	if (InputManager->CancelPress()) {
-// 		if (speed_double) {
-// 			_focused_object->step_speed /= 2;
-// 			speed_double = false;
-// 		}
-// 		else {
-// 			_focused_object->step_speed *= 2;
-// 			speed_double = true;
-// 		}
-// 	}
+	// If the player is trying to run, update the stamina amount
+	if (InputManager->CancelState() == true && _run_disabled == false) {
+		if (_run_limited == false) {
+			_running = true;
+		}
+		else if (_run_stamina > _time_elapsed * 2) {
+			_run_stamina -= (_time_elapsed * 2);
+			_running = true;
+		}
+		else {
+			_run_stamina = 0;
+		}
+	}
+	else if (_run_stamina < 10000) {
+		_run_stamina += _time_elapsed;
+		if (_run_stamina > 10000)
+			_run_stamina = 10000;
+	}
 
 	if (InputManager->ConfirmPress()) {
 		MapObject* obj = _FindNearestObject(_camera);
@@ -1104,11 +1117,18 @@ void MapMode::_CalculateDrawInfo() {
 // Public draw function called by the main game loop
 void MapMode::Draw() {
 	_CalculateDrawInfo();
+	ScriptCallFunction<void>(_draw_function);
+	_DrawMapLayers();
+	_DrawGUI();
+	if (_map_state == DIALOGUE) {
+		_dialogue_manager->Draw();
+	}
+} // void MapMode::_Draw()
 
-	// ---------- (1) Call Lua to determine if any lighting, etc. needs to be done before drawing
-	// TODO
 
-	// ---------- (2) Draw the lower tile layer
+
+void MapMode::_DrawMapLayers() {
+	// ---------- (1) Draw the lower tile layer
 	VideoManager->SetDrawFlags(VIDEO_NO_BLEND, 0);
 	VideoManager->Move(_draw_info.tile_x_start, _draw_info.tile_y_start);
 	for (uint32 r = static_cast<uint32>(_draw_info.starting_row);
@@ -1137,7 +1157,7 @@ void MapMode::Draw() {
 			VideoManager->MoveRelative(2.0f, 0.0f);
 		}
 
-		VideoManager->MoveRelative(static_cast<float>(_draw_info.num_draw_cols * -2), 2.0f);
+		VideoManager->MoveRelative(-static_cast<float>(_draw_info.num_draw_cols * 2), 2.0f);
 	}
 
 	// ---------- (3) Draw the ground object layer (first pass)
@@ -1177,15 +1197,12 @@ void MapMode::Draw() {
 	for (uint32 i = 0; i < _sky_objects.size(); i++) {
 		_sky_objects[i]->Draw();
 	}
+} // void MapMode::_DrawMapLayers()
 
-	// ---------- (8) Call Lua to determine if any lighting, etc. needs to be done after drawing
-	// TODO
 
-	// ---------- (9) Draw the dialogue display if a dialogue is active
-	if (_map_state == DIALOGUE) {
-		_dialogue_manager->Draw();
-	}
 
+void MapMode::_DrawGUI() {
+	// ---------- (1) Draw the introductory location name and graphic if necessary
 	if (_intro_timer.IsFinished() == false) {
 		uint32 time = _intro_timer.GetTimeExpired();
 		Color blend(1.0f, 1.0f, 1.0f, 1.0f);
@@ -1205,13 +1222,21 @@ void MapMode::Draw() {
 		VideoManager->DrawText(_map_name);
 		VideoManager->PopState();
 	}
-} // void MapMode::_Draw()
 
+	// ---------- (2) Draw the run stamina bar in the lower right
+	float fill_size = static_cast<float>(_run_stamina) / 10000.0f;;
 
+	VideoManager->PushState();
+	VideoManager->SetCoordSys(0.0f, 1024.0f, 768.0f, 0.0f);
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_NO_BLEND, 0);
+	VideoManager->Move(800, 740);
 
-uint16 MapMode::_GetGeneratedObjectID() {
-	return ++_lastID;
-}
+	VideoManager->DrawRectangle(200, 10, Color::black);
+// 	VideoManager->MoveRelative(bar_size, 0.0f);
+	VideoManager->DrawRectangle(200 * fill_size, 10, Color(0.133f, 0.455f, 0.133f, 1.0f));
+	VideoManager->PopState();
+} // void MapMode::_DrawGUI()
+
 
 // ****************************************************************************
 // ************************* LUA BINDING FUNCTIONS ****************************

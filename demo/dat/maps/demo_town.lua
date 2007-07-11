@@ -580,6 +580,10 @@ function Update()
 end
 
 
+function Draw()
+end
+
+
 map_functions = {}
 
 -- Creates a new shop mode instance
