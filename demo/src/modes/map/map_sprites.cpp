@@ -150,6 +150,8 @@ void VirtualSprite::Update() {
 		float tmp_y = y_offset;
 
 		float distance_moved = static_cast<float>(MapMode::_current_map->_time_elapsed) / movement_speed;
+		if (MapMode::_current_map->_camera == this && MapMode::_current_map->_running == true)
+			distance_moved *= 2.0f;
 
 		// Move the sprite the appropriate distance in the appropriate Y direction
 		switch (direction) {
@@ -161,16 +163,16 @@ void VirtualSprite::Update() {
 			case EAST: break;
 			case NW_NORTH:
 			case NW_WEST:
-				y_offset -= distance_moved; break;
+				y_offset -= (distance_moved * 0.707f); break;
 			case SW_SOUTH:
 			case SW_WEST:
-				y_offset += distance_moved; break;
+				y_offset += (distance_moved * 0.707f); break;
 			case NE_NORTH:
 			case NE_EAST:
-				y_offset -= distance_moved; break;
+				y_offset -= (distance_moved * 0.707f); break;
 			case SE_SOUTH:
 			case SE_EAST:
-				y_offset += distance_moved; break;
+				y_offset += (distance_moved * 0.707f); break;
 			default:
 				cerr << "MAP ERROR: sprite trying to move in an invalid direction" << endl;
 				return;
@@ -195,21 +197,21 @@ void VirtualSprite::Update() {
 			case NORTH: break;
 			case SOUTH: break;
 			case WEST:
-				x_offset -= distance_moved; break;
+				x_offset -= (distance_moved * 0.707f); break;
 			case EAST:
-				x_offset += distance_moved; break;
+				x_offset += (distance_moved * 0.707f); break;
 			case NW_NORTH:
 			case NW_WEST:
-				x_offset -= distance_moved; break;
+				x_offset -= (distance_moved * 0.707f); break;
 			case SW_SOUTH:
 			case SW_WEST:
-				x_offset -= distance_moved; break;
+				x_offset -= (distance_moved * 0.707f); break;
 			case NE_NORTH:
 			case NE_EAST:
-				x_offset += distance_moved; break;
+				x_offset += (distance_moved * 0.707f); break;
 			case SE_SOUTH:
 			case SE_EAST:
-				x_offset += distance_moved; break;
+				x_offset += (distance_moved * 0.707f); break;
 			default:
 				cerr << "MAP ERROR: sprite trying to move in an invalid direction" << endl;
 				return;

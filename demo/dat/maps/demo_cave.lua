@@ -624,6 +624,11 @@ function Update()
 end
 
 
+
+function Draw()
+end
+
+
 map_functions = {}
 
 -- Plays a ground-rumbling sound

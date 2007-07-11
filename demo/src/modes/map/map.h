@@ -349,6 +349,27 @@ private:
 	**/
 	uint16 _num_grid_rows, _num_grid_cols;
 
+	//! \brief Holds the most recently generated object ID number
+	uint16 _lastID;
+
+	//! \brief While true, all user input commands to map mode are ignored
+	bool _ignore_user_input;
+
+	//! \brief If true, the player's sprite is running
+	bool _running;
+
+	//! \brief If true, the player's stamina will drain as they run. If false, stamina will not drain.
+	bool _run_limited;
+
+	//! \brief While true, the player is not allowed to run at all.
+	bool _run_disabled;
+
+	/** \brief The amount of stamina
+	*** This value ranges from 0 (empty) to 10000 (full). Stamina takes 10 seconds to completely fill from
+	*** the empty state and 5 seconds to empty from the full state.
+	**/
+	uint32 _run_stamina;
+
 	//! \brief Retains information needed to correctly draw the next map frame.
 	private_map::MapFrame _draw_info;
 
@@ -359,19 +380,17 @@ private:
 	hoa_script::ReadScriptDescriptor _map_script;
 
 	/** \brief A script function which assists with the MapMode#Update method
-	*** The most common operation that this script function performs is to check trigger conditions that
-	*** cause map events to occur. 
+	*** This function implements any custom update code that the specific map needs to be performed.
+	*** The most common operation that this script function performs is to check for trigger conditions
+	*** that cause map events to occur
 	**/
 	ScriptObject _update_function;
-	
-	/** \brief Script functions which assists with the MapMode#Draw method
-	*** These two script functions allow arbitrary changes to the graphical appearance on the screen.
+
+	/** \brief Script function which assists with the MapMode#Draw method
+	*** This function allows for drawing of custom map visuals. Usually this includes lighting or
+	*** other visual effects for the map environment.
 	**/
-	// TODO
-	//@{
-// 	hoa_script::ScriptObject _pre_draw_function;
-// 	hoa_script::ScriptObject _post_draw_function;
-	//@}
+	ScriptObject _draw_function;
 
 	//! \brief A 2D vector that contains all of the map's tile objects.
 	std::vector<std::vector<MapTile> > _tile_grid;
@@ -390,10 +409,6 @@ private:
 	*** 1000 and above are reserved for map sprites that correspond to the character's party.
 	**/
 	std::map<uint16, private_map::MapObject*> _all_objects;
-
-	/** \brief Keeps the last generated objectID
-	**/
-	uint16 _lastID;
 
 	/** \brief A container for all of the map objects located on the ground layer.
 	*** The ground object layer is where most objects and sprites exist in Allacrost.
@@ -525,6 +540,12 @@ private:
 	//! \brief Calculates information about how to draw the next map frame.
 	void _CalculateDrawInfo();
 
+	//! \brief Draws all visible map tiles and sprites to the screen
+	void _DrawMapLayers();
+
+	//! \brief Draws all GUI visuals, such as dialogue icons and the run meter
+	void _DrawGUI();
+
 	// -------------------- Lua Binding Functions
 	/** \name Lua Access Functions
 	*** These methods exist not to allow outside C++ classes to access map data, but instead to
@@ -540,7 +561,8 @@ private:
 
 	void _AddZone(private_map::MapZone *zone);
 
-	uint16 _GetGeneratedObjectID();
+	uint16 _GetGeneratedObjectID()
+		{ return ++_lastID; }
 
 	void _SetMapState(uint8 state)
 		{ _map_state = state; }
