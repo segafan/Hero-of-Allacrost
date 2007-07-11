@@ -191,6 +191,10 @@ public:
 
 	~GlobalItem();
 
+	GlobalItem(const GlobalItem& copy);
+
+	GlobalItem& operator=(const GlobalItem& copy);
+
 	GLOBAL_OBJECT GetObjectType() const
 		{ return GLOBAL_OBJECT_ITEM; }
 

@@ -208,6 +208,63 @@ GlobalSkill::~GlobalSkill() {
 
 
 
+GlobalSkill::GlobalSkill(const GlobalSkill& copy) {
+	_name = copy._name;
+	_description = copy._description;
+	_id = copy._id;
+	_type = copy._type;
+	_sp_required = copy._sp_required;
+	_warmup_time = copy._warmup_time;
+	_cooldown_time = copy._cooldown_time;
+	_usage = copy._usage;
+	_target_type = copy._target_type;
+	_target_ally = copy._target_ally;
+
+	// Make copies of valid ScriptObject function pointers
+	if (copy._battle_execute_function == NULL)
+		_battle_execute_function = NULL;
+	else
+		_battle_execute_function = new ScriptObject(*copy._battle_execute_function);
+
+	if (copy._menu_execute_function == NULL)
+		_menu_execute_function = NULL;
+	else
+		_menu_execute_function = new ScriptObject(*copy._menu_execute_function);
+} // GlobalSkill::GlobalSkill(const GlobalSkill& copy)
+
+
+
+GlobalSkill& GlobalSkill::operator=(const GlobalSkill& copy) {
+	if (this == &copy) // Handle self-assignment case
+		return *this;
+
+	_name = copy._name;
+	_description = copy._description;
+	_id = copy._id;
+	_type = copy._type;
+	_sp_required = copy._sp_required;
+	_warmup_time = copy._warmup_time;
+	_cooldown_time = copy._cooldown_time;
+	_usage = copy._usage;
+	_target_type = copy._target_type;
+	_target_ally = copy._target_ally;
+
+	// Make copies of valid ScriptObject function pointers
+	if (copy._battle_execute_function == NULL)
+		_battle_execute_function = NULL;
+	else
+		_battle_execute_function = new ScriptObject(*copy._battle_execute_function);
+
+	if (copy._menu_execute_function == NULL)
+		_menu_execute_function = NULL;
+	else
+		_menu_execute_function = new ScriptObject(*copy._menu_execute_function);
+
+	return *this;
+} // GlobalSkill& GlobalSkill::operator=(const GlobalSkill& copy)
+
+
+
 void GlobalSkill::BattleExecute(hoa_battle::private_battle::BattleActor* target, hoa_battle::private_battle::BattleActor* instigator) {
 	if (IsExecutableInBattle() == false) {
 		if (GLOBAL_DEBUG)

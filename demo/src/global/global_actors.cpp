@@ -86,6 +86,103 @@ GlobalActor::~GlobalActor() {
 
 
 
+GlobalActor::GlobalActor(const GlobalActor& copy) {
+	_id = copy._id;
+	_name = copy._name;
+	_filename = copy._filename;
+	_experience_level = copy._experience_level;
+	_experience_points = copy._experience_points;
+	_hit_points = copy._hit_points;
+	_max_hit_points = copy._max_hit_points;
+	_skill_points = copy._skill_points;
+	_max_skill_points = copy._max_skill_points;
+	_strength = copy._strength;
+	_vigor = copy._vigor;
+	_fortitude = copy._fortitude;
+	_protection = copy._protection;
+	_agility = copy._agility;
+	_evade = copy._evade;
+	_total_physical_attack = copy._total_physical_attack;
+	_total_metaphysical_attack = copy._total_metaphysical_attack;
+
+	// Copy all attack points
+	for (uint32 i = 0; i < copy._attack_points.size(); i++) {
+		_attack_points.push_back(new GlobalAttackPoint(*copy._attack_points[i]));
+		_attack_points[i]->_actor_owner = this;
+	}
+
+	// Copy all equipment that is not NULL
+	if (copy._weapon_equipped == NULL)
+		_weapon_equipped = NULL;
+	else
+		_weapon_equipped = new GlobalWeapon(*copy._weapon_equipped);
+
+	for (uint32 i = 0; i < _armor_equipped.size(); i++) {
+		if (_armor_equipped[i] == NULL)
+			_armor_equipped.push_back(NULL);
+		else
+			_armor_equipped.push_back(new GlobalArmor(*copy._armor_equipped[i]));
+	}
+
+	// Copy all skills
+	for (map<uint32, GlobalSkill*>::const_iterator i = copy._skills.begin(); i != copy._skills.end(); i++) {
+		_skills.insert(make_pair(i->first, new GlobalSkill(*(i->second))));
+	}
+} // GlobalActor::GlobalActor(const GlobalActor& copy)
+
+
+
+GlobalActor& GlobalActor::operator=(const GlobalActor& copy) {
+	cout << "GlobalActor assignment operator" << endl;
+	if (this == &copy) // Handle self-assignment case
+		return *this;
+
+	_id = copy._id;
+	_name = copy._name;
+	_filename = copy._filename;
+	_experience_level = copy._experience_level;
+	_experience_points = copy._experience_points;
+	_hit_points = copy._hit_points;
+	_max_hit_points = copy._max_hit_points;
+	_skill_points = copy._skill_points;
+	_max_skill_points = copy._max_skill_points;
+	_strength = copy._strength;
+	_vigor = copy._vigor;
+	_fortitude = copy._fortitude;
+	_protection = copy._protection;
+	_agility = copy._agility;
+	_evade = copy._evade;
+	_total_physical_attack = copy._total_physical_attack;
+	_total_metaphysical_attack = copy._total_metaphysical_attack;
+
+	// Copy all attack points
+	for (uint32 i = 0; i < copy._attack_points.size(); i++) {
+		_attack_points.push_back(new GlobalAttackPoint(*_attack_points[i]));
+		_attack_points[i]->_actor_owner = this;
+	}
+
+	// Copy all equipment that is not NULL
+	if (copy._weapon_equipped == NULL)
+		_weapon_equipped = NULL;
+	else
+		_weapon_equipped = new GlobalWeapon(*copy._weapon_equipped);
+
+	for (uint32 i = 0; i < _armor_equipped.size(); i++) {
+		if (_armor_equipped[i] == NULL)
+			_armor_equipped.push_back(NULL);
+		else
+			_armor_equipped.push_back(new GlobalArmor(*copy._armor_equipped[i]));
+	}
+
+	// Copy all skills
+	for (map<uint32, GlobalSkill*>::const_iterator i = copy._skills.begin(); i != copy._skills.end(); i++) {
+		_skills.insert(make_pair(i->first, new GlobalSkill(*(i->second))));
+	}
+	return *this;
+} // GlobalActor& GlobalActor::operator=(const GlobalActor& copy)
+
+
+
 uint32 GlobalActor::GetTotalPhysicalDefense(uint32 index) const {
 	if (index >= _attack_points.size()) {
 		if (GLOBAL_DEBUG)

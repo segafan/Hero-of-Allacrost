@@ -137,6 +137,61 @@ GlobalItem::~GlobalItem() {
 
 
 
+GlobalItem::GlobalItem(const GlobalItem& copy) {
+	_id = copy._id;
+	_name = copy._name;
+	_description = copy._description;
+	_count = copy._count;
+	_price = copy._price;
+	_icon_image = copy._icon_image;
+	_usage = copy._usage;
+	_target_type = copy._target_type;
+	_target_ally = copy._target_ally;
+
+	// Make copies of valid ScriptObject function pointers
+	if (copy._battle_use_function == NULL)
+		_battle_use_function = NULL;
+	else
+		_battle_use_function = new ScriptObject(*copy._battle_use_function);
+
+	if (copy._menu_use_function == NULL)
+		_menu_use_function = NULL;
+	else
+		_menu_use_function = new ScriptObject(*copy._menu_use_function);
+} // GlobalItem::GlobalItem(const GlobalItem& copy)
+
+
+
+GlobalItem& GlobalItem::operator=(const GlobalItem& copy) {
+	if (this == &copy) // Handle self-assignment case
+		return *this;
+
+	_id = copy._id;
+	_name = copy._name;
+	_description = copy._description;
+	_count = copy._count;
+	_price = copy._price;
+	_icon_image = copy._icon_image;
+	_usage = copy._usage;
+	_target_type = copy._target_type;
+	_target_ally = copy._target_ally;
+
+	// Make copies of valid ScriptObject function pointers
+	if (copy._battle_use_function == NULL)
+		_battle_use_function = NULL;
+	else
+		_battle_use_function = new ScriptObject(*copy._battle_use_function);
+
+	if (copy._menu_use_function == NULL)
+		_menu_use_function = NULL;
+	else
+		_menu_use_function = new ScriptObject(*copy._menu_use_function);
+
+	return *this;
+} // GlobalItem& GlobalItemoperator=(const GlobalItem& copy)
+
+
+
 void GlobalItem::BattleUse(hoa_battle::private_battle::BattleActor* target, hoa_battle::private_battle::BattleActor* instigator) {
 	if (IsUsableInBattle() == false) {
 		if (GLOBAL_DEBUG)

@@ -243,6 +243,10 @@ public:
 
 	virtual ~GlobalActor();
 
+	GlobalActor(const GlobalActor& copy);
+
+	GlobalActor& operator=(const GlobalActor& copy);
+
 	GLOBAL_TARGET GetTargetType()
 		{ return GLOBAL_TARGET_ACTOR; }
 
