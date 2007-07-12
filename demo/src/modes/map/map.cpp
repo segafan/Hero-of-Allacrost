@@ -61,8 +61,9 @@ MapMode::MapMode(string filename) :
 	_map_filename(filename),
 	_map_state(EXPLORE),
 	_lastID(1000),
-	_ignore_user_input(false),
-	_run_limited(true),
+	_ignore_input(false),
+	_running(false),
+	_run_forever(false),
 	_run_disabled(false),
 	_run_stamina(10000)
 {
@@ -445,16 +446,11 @@ void MapMode::Update() {
 	ScriptCallFunction<void>(_update_function);
 
 	// ---------- (2) Process user input
-	switch (_map_state) {
-		case EXPLORE:
-			_HandleInputExplore();
-			break;
-		case DIALOGUE:
+	if (_ignore_input == false) {
+		if (_map_state == DIALOGUE)
 			_dialogue_manager->Update();
-			break;
-		default:
+		else
 			_HandleInputExplore();
-			break;
 	}
 
 	// ---------- (3) Update all animated tile images
@@ -478,7 +474,7 @@ void MapMode::Update() {
 	}
 
 	// ---------- (5) Sort the objects so they are in the correct draw order ********
- 	std::sort( _ground_objects.begin(), _ground_objects.end(), MapObject_Ptr_Less() );
+	std::sort(_ground_objects.begin(), _ground_objects.end(), MapObject_Ptr_Less());
 } // void MapMode::Update()
 
 
@@ -507,7 +503,7 @@ void MapMode::_HandleInputExplore() {
 
 	// If the player is trying to run, update the stamina amount
 	if (InputManager->CancelState() == true && _run_disabled == false) {
-		if (_run_limited == false) {
+		if (_run_forever) {
 			_running = true;
 		}
 		else if (_run_stamina > _time_elapsed * 2) {
@@ -704,7 +700,6 @@ bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 	// The bottom of the sprite's collision rectangle is its y_location
 
 	// ---------- (1): Check if the sprite's position has gone out of bounds
-
 	if (cr_left < 0.0f || cr_top < 0.0f || cr_right >= static_cast<float>(_num_grid_cols) ||
 		y_location >= static_cast<float>(_num_grid_rows)) {
 		return true;
@@ -721,7 +716,6 @@ bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 	if (sprite->sky_object == false) { // Do tile collision detection for ground objects only
 
 		// ---------- (2): Determine if the sprite's collision rectangle overlaps any unwalkable tiles
-
 		// NOTE: Because the sprite's collision rectangle was determined to be within the map bounds,
 		// the map grid tile indeces referenced in this loop are all valid entries.
 		for (uint32 r = static_cast<uint32>(cr_top); r <= static_cast<uint32>(y_location); r++) {
@@ -738,7 +732,6 @@ bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 	}
 
 	// ---------- (3): Determine if two object's collision rectangles overlap
-
 	for (uint32 i = 0; i < objects->size(); i++) {
 		// Only verify this object if it is not the same object as the sprite
 		if ((*objects)[i]->object_id != sprite->object_id
@@ -784,11 +777,9 @@ bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 							return false;
 						}
 					}
-
 					return true;
 				}
 			}
-
 		}
 	}
 
@@ -1118,7 +1109,6 @@ void MapMode::_CalculateDrawInfo() {
 void MapMode::Draw() {
 	_CalculateDrawInfo();
 	ScriptCallFunction<void>(_draw_function);
-	_DrawMapLayers();
 	_DrawGUI();
 	if (_map_state == DIALOGUE) {
 		_dialogue_manager->Draw();
@@ -1224,15 +1214,15 @@ void MapMode::_DrawGUI() {
 	}
 
 	// ---------- (2) Draw the run stamina bar in the lower right
-	float fill_size = static_cast<float>(_run_stamina) / 10000.0f;;
+	float fill_size = static_cast<float>(_run_stamina) / 10000.0f;
 
 	VideoManager->PushState();
 	VideoManager->SetCoordSys(0.0f, 1024.0f, 768.0f, 0.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_NO_BLEND, 0);
 	VideoManager->Move(800, 740);
 
+	// TEMP: draw black background rectangle; to be replaced with an image
 	VideoManager->DrawRectangle(200, 10, Color::black);
-// 	VideoManager->MoveRelative(bar_size, 0.0f);
 	VideoManager->DrawRectangle(200 * fill_size, 10, Color(0.133f, 0.455f, 0.133f, 1.0f));
 	VideoManager->PopState();
 } // void MapMode::_DrawGUI()

@@ -150,85 +150,56 @@ void VirtualSprite::Update() {
 		float tmp_y = y_offset;
 
 		float distance_moved = static_cast<float>(MapMode::_current_map->_time_elapsed) / movement_speed;
+		// If this object is the map's focused and the player is running, increase the distance moved
 		if (MapMode::_current_map->_camera == this && MapMode::_current_map->_running == true)
 			distance_moved *= 2.0f;
+		// If the movement is diagonal, decrease the lateral movement distance by sin(45 degress)
+		if (direction & DIAGONAL_MOVEMENT)
+			distance_moved *= 0.707f;
 
 		// Move the sprite the appropriate distance in the appropriate Y direction
-		switch (direction) {
-			case NORTH:
-				y_offset -= distance_moved; break;
-			case SOUTH:
-				y_offset += distance_moved; break;
-			case WEST: break;
-			case EAST: break;
-			case NW_NORTH:
-			case NW_WEST:
-				y_offset -= (distance_moved * 0.707f); break;
-			case SW_SOUTH:
-			case SW_WEST:
-				y_offset += (distance_moved * 0.707f); break;
-			case NE_NORTH:
-			case NE_EAST:
-				y_offset -= (distance_moved * 0.707f); break;
-			case SE_SOUTH:
-			case SE_EAST:
-				y_offset += (distance_moved * 0.707f); break;
-			default:
-				cerr << "MAP ERROR: sprite trying to move in an invalid direction" << endl;
-				return;
-		} // switch (direction)
+		if (direction & (NORTH | NORTHWEST | NORTHEAST))
+			y_offset -= distance_moved;
+		else if (direction & (SOUTH | SOUTHWEST | SOUTHEAST))
+			y_offset += distance_moved;
 
 		// Determine if the sprite may move to this new Y position
-		if (MapMode::_current_map->_DetectCollision(this))
+		if (MapMode::_current_map->_DetectCollision(this)) {
 			y_offset = tmp_y;
-
-		// Roll-over Y position offsets if necessary
-		while (y_offset < 0.0f) {
-			y_position -= 1;
-			y_offset += 1.0f;
 		}
-		while (y_offset > 1.0f) {
-			y_position += 1;
-			y_offset -= 1.0f;
+		else {
+			// Roll-over Y position offsets if necessary
+			while (y_offset < 0.0f) {
+				y_position -= 1;
+				y_offset += 1.0f;
+			}
+			while (y_offset > 1.0f) {
+				y_position += 1;
+				y_offset -= 1.0f;
+			}
 		}
 
 		// Move the sprite the appropriate distance in the appropriate X direction
-		switch (direction) {
-			case NORTH: break;
-			case SOUTH: break;
-			case WEST:
-				x_offset -= (distance_moved * 0.707f); break;
-			case EAST:
-				x_offset += (distance_moved * 0.707f); break;
-			case NW_NORTH:
-			case NW_WEST:
-				x_offset -= (distance_moved * 0.707f); break;
-			case SW_SOUTH:
-			case SW_WEST:
-				x_offset -= (distance_moved * 0.707f); break;
-			case NE_NORTH:
-			case NE_EAST:
-				x_offset += (distance_moved * 0.707f); break;
-			case SE_SOUTH:
-			case SE_EAST:
-				x_offset += (distance_moved * 0.707f); break;
-			default:
-				cerr << "MAP ERROR: sprite trying to move in an invalid direction" << endl;
-				return;
-		} // switch (direction)
+		if (direction & (WEST | NORTHWEST | SOUTHWEST))
+			x_offset -= distance_moved;
+		else if (direction & (EAST | NORTHEAST | SOUTHEAST))
+			x_offset += distance_moved;
+
 
 		// Determine if the sprite may move to this new X position
-		if (MapMode::_current_map->_DetectCollision(this))
+		if (MapMode::_current_map->_DetectCollision(this)) {
 			x_offset = tmp_x;
-
-		// Roll-over X position offsets if necessary
-		while (x_offset < 0.0f) {
-			x_position -= 1;
-			x_offset += 1.0f;
 		}
-		while (x_offset > 1.0f) {
-			x_position += 1;
-			x_offset -= 1.0f;
+		else {
+			// Roll-over X position offsets if necessary
+			while (x_offset < 0.0f) {
+				x_position -= 1;
+				x_offset += 1.0f;
+			}
+			while (x_offset > 1.0f) {
+				x_position += 1;
+				x_offset -= 1.0f;
+			}
 		}
 	} // if (moving)
 } // void VirtualSprite::Update()

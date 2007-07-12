@@ -330,7 +330,7 @@ GlobalWeapon* GlobalActor::EquipWeapon(GlobalWeapon* weapon) {
 
 
 GlobalArmor* GlobalActor::EquipArmor(GlobalArmor* armor, uint32 index) {
-	if (index < _armor_equipped.size()) {
+	if (index >= _armor_equipped.size()) {
 		if (GLOBAL_DEBUG)
 			cerr << "GLOBAL ERROR: GlobalActor::EquipArmor() was given an invalid index: " << index
 				<< ", the armor was not equipped" << endl;

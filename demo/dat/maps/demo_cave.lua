@@ -626,6 +626,7 @@ end
 
 
 function Draw()
+	map:_DrawMapLayers();
 end
 
 
