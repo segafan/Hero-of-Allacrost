@@ -195,9 +195,15 @@ void ActionWindow::_UpdateActionCategory() {
 	}
 	
 	if (InputManager->ConfirmPress() ) {
-		_selected_action_category = static_cast<uint32>(_action_category_list.GetSelection());
-		_ConstructActionSelectionList();
-		_state = VIEW_ACTION_SELECTION;
+		_action_category_list.HandleConfirmKey();
+		if (_action_category_list.GetEvent() == VIDEO_OPTION_CONFIRM) {
+			_selected_action_category = static_cast<uint32>(_action_category_list.GetSelection());
+			_ConstructActionSelectionList();
+			_state = VIEW_ACTION_SELECTION;
+		}
+		else {
+			// Play a sound to indicate the selection was invalid
+		}
 	}
 	// TODO: implement cancel press ... what should it do?
 	// else if (InputManager->CancelPress()) { ... }

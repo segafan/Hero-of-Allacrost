@@ -33,7 +33,6 @@ const int32 VIDEO_CURSOR_BLINK_RATE = 40;
 //! \brief The number of milliseconds it takes to scroll when the cursor goes past the end of an option box
 const int32 VIDEO_OPTION_SCROLL_TIME = 100;
 
-
 //! \brief These are the types of events that an option box can generate
 enum OptionBoxEvent {
 	VIDEO_OPTION_INVALID          = -1,
@@ -103,8 +102,7 @@ enum WrapMode {
 
 
 //! \brief These select modes control how confirming works when you choose options
-enum SelectMode
-{
+enum SelectMode {
 	VIDEO_SELECT_INVALID = -1,
 	//! Options only require a single confirmation
 	VIDEO_SELECT_SINGLE  =  0,
@@ -273,6 +271,12 @@ public:
 	*** \param enable Set to true to enable, false to disable
 	**/
 	void EnableOption(int32 index, bool enable);
+
+	/** \brief Determines if an option is enabled or not
+	*** \param index The index of the option in the list to check
+	*** \return True if the option is enabled, false if it is not
+	**/
+	bool IsOptionEnabled(int32 index);
 
 	/** \brief Used to determine whether the option box is initialized and ready for use
 	*** \param error_messages Used to report the list of reasons why the option box is not initialized
