@@ -427,6 +427,19 @@ void OptionBox::EnableOption(int32 index, bool enable) {
 
 
 
+bool OptionBox::IsOptionEnabled(int32 index) {
+	if (index < 0 || index >= _number_options) {
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO WARNING: OptionBox::IsOptionEnabled() failed because an invalid "
+				<< "option index was specified: " << index << endl;
+		return false;
+	}
+
+	return (!_options[index].disabled);
+}
+
+
+
 bool OptionBox::IsInitialized(string& error_messages) {
 	ostringstream s;
 	error_messages.clear();
@@ -516,7 +529,7 @@ void OptionBox::HandleRightKey() {
 
 void OptionBox::HandleConfirmKey() {
 	// Ignore input while scrolling, or if an event has already been logged
-	if (_scrolling || _event)
+	if (_scrolling || _event || _options[_selection].disabled)
 		return;
 
 	// Abort if an invalid option is selected

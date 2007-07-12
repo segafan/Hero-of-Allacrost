@@ -404,10 +404,6 @@ public:
 	// \return true if it is an enemy
 	virtual bool IsEnemy() { return false; }
 
-	// \brief Draws the character's portrait for the time meter
-	// \param is_selected If the enemy is selected for an action, highlight it
-	//void DrawTimePortrait(bool is_selected);
-
 	//! Draws the character's status information
 	virtual void DrawStatus();
 
@@ -426,118 +422,24 @@ public:
 	// \brief Calculates the actor's evade
 	virtual void CalcEvade(hoa_global::GlobalAttackPoint* attack_point = NULL);
 
-	//! Gives a specific amount of damage for the character
-	//void TakeDamage(uint32 damage);
-
-	//! Is the character queued to attack?
-	//bool IsQueuedToPerform() const
-	//	{ return _is_queued_to_perform; }
-
-	// Sets queued to perform
-	//void SetQueuedToPerform(bool QueuedToPerform)
-	//{ _is_queued_to_perform = QueuedToPerform; }
-
-	//! \name Getters and setters for the current and the original coordinates
-	//@{
-	/*float GetXLocation() const
-		{ return _x_location; }
-
-	float GetYLocation() const
-		{ return _y_location; }
-
-	float GetXOrigin() const
-		{ return _x_origin; }
-
-	float GetYOrigin() const
-		{ return _y_origin; }
-
-	void SetXLocation(float x_location)
-		{ _x_location = x_location; }
-
-	void SetYLocation(float y_location)
-		{ _y_location = y_location; }
-
-	void SetXOrigin(float x_origin)
-		{ _x_origin = x_origin; }
-
-	void SetYOrigin(float y_origin)
-		{ _y_origin = y_origin; }*/
-	//@}
-
 	// Gets a pointer to the GlobalActor
 	hoa_global::GlobalCharacter * GetActor()
 		{ return _global_character; }
 
-	// \brief Used to permanently change actor stats.
-	// \note In most cases this is current HP and SP
+	//! \brief Used to permanently change actor stats.
+	//! \note In most cases this is current HP and SP
 	virtual void UpdateGlobalActorStats();
 
-	// \brief Sets the location of the time meter portrait
-	// \param new_val new value for the location
-	//virtual void SetTimePortraitLocation(float new_val) { _time_portrait_location = new_val; }
-
-	// \brief Gets the location of the time meter portrait
-	// \return The location of the time portrait
-	//virtual float GetTimePortraitLocation() { return _time_portrait_location; }
-
-	// \brief Gets the wait time
-	// \return the wait time
-	//virtual hoa_system::SystemTimer* GetWaitTime() { return &_wait_time; }
-
-	// \brief Resets the wait time and time meter portrait
-	//void ResetWaitTime();
-	
-		
 private:
 	//! A Pointer to the 'real' GlobalCharacter. TODO: This is very bad design and probably should be fixed...
-	hoa_global::GlobalCharacter * _global_character;
-
-	//! Character's X-coordinate on the screen
-	/*float _x_location;
-
-	//! Character's Y-coordinate on the screen
-	float _y_location;
-
-	//! Starting X coordinate of the character
-	float _x_origin;
-
-	//! Starting Y coordinate of the character
-	float _y_origin;
-
-	//! Variable for tracking time (ms) on how long to show the damage text
-	//FIX ME this has to go
-	uint32 _total_time_damaged;
-
-	//! How much damage was dealt on the last strike
-	//FIX ME this has to go unless we have good cause for it
-	uint32 _damage_dealt;
-
-	//! Is the character queued to attack?
-	bool _is_queued_to_perform;
-
-	//! Portrait for the time meter
-	hoa_video::StillImage _time_meter_portrait;
-
-	//! The image used to highlight time portraits for selected actors
-	hoa_video::StillImage _time_portrait_selected;*/
+	hoa_global::GlobalCharacter* _global_character;
 
 	//! Image of the cover of the bottom menu shrinking bar
 	hoa_video::StillImage _status_bar_cover_image;
 
 	//! Image of the menu status
 	hoa_video::StillImage _status_menu_image;
-
-	//! The y-value of it's location, since x is fixed
-	//float _time_portrait_location;
-
-	//! Amount of time character spends in the idle phase
-	//FIX ME for now, will also be used for cool down times?
-	//hoa_system::SystemTimer _wait_time;
-
-	//! Recalculates wait time if agility has changed	
-	//void _RecalculateWaitTime();
-
-}; // end BattleCharacterActor
+}; // class BattleCharacterActor
 
 
 /** ****************************************************************************
@@ -567,75 +469,24 @@ public:
 	//! Gives a specific amount of damage for the enemy
 	//void TakeDamage(uint32 damage);
 
-	// \brief Calculates the actor's physical attack damage
+	//! \brief Calculates the actor's physical attack damage
 	virtual void CalcPhysicalAttack();
 
-	// \brief Calculates the actor's metaphysical attack damage
+	//! \brief Calculates the actor's metaphysical attack damage
 	virtual void CalcMetaPhysicalAttack();
 
-	// \brief Calculates the actor's physical defense
+	//! \brief Calculates the actor's physical defense
 	virtual void CalcPhysicalDefense(hoa_global::GlobalAttackPoint* attack_point = NULL);
 
-	// \brief Calculates the actor's metaphysical defense
+	//! \brief Calculates the actor's metaphysical defense
 	virtual void CalcMetaPhysicalDefense(hoa_global::GlobalAttackPoint* attack_point = NULL);
 
-	// \brief Calculates the actor's evade
+	//! \brief Calculates the actor's evade
 	virtual void CalcEvade(hoa_global::GlobalAttackPoint* attack_point = NULL);
-
-	//! Is the enemy queued to attack?
-	/*bool IsQueuedToPerform() const
-		{ return _is_queued_to_perform; }
-
-	// Sets queued to perform
-	void SetQueuedToPerform(bool QueuedToPerform)
-		{ _is_queued_to_perform = QueuedToPerform; }
-
-	//! \name Getters and setters for the current and the original coordinates
-	//@{
-	float GetXLocation() const
-		{ return _x_location; }
-
-	float GetYLocation() const
-		{ return _y_location; }
-
-	float GetXOrigin() const
-		{ return _x_origin; }
-
-	float GetYOrigin() const
-		{ return _y_origin; }
-
-	void SetXLocation(float x_location)
-		{ _x_location = x_location; }
-
-	void SetYLocation(float y_location)
-		{ _y_location = y_location; }
-
-	void SetXOrigin(float x_origin)
-		{ _x_origin = x_origin; }
-
-	void SetYOrigin(float y_origin)
-		{ _y_origin = y_origin; }*/
-	//@}
 
 	//! Gets a pointer to the GlobalActor
 	virtual hoa_global::GlobalEnemy* GetActor()
 		{ return &_global_enemy; }
-
-	//! \brief Sets the location of the time meter portrait
-	//! \param new_val new value for the location
-	/*virtual void SetTimePortraitLocation(float new_val) { _time_portrait_location = new_val; }
-
-	//! \brief Gets the location of the time meter portrait
-	//! \return The location of the time portrait
-	virtual float GetTimePortraitLocation() { return _time_portrait_location; }
-
-	//! \brief Gets the wait time
-	//! \return the wait time
-	virtual hoa_system::SystemTimer* GetWaitTime() { return &_wait_time; }
-
-	//! \brief Resets the wait time and time meter portrait
-	void ResetWaitTime();*/
-	//inline void SetWaitTime(uint32 wait_time) { _wait_time = wait_time; }
 
 	//! \brief Compares the Y-coordinates of the actors, used for sorting the actors up-down when drawing
 	bool operator<(const BattleEnemyActor & other) const;
@@ -643,47 +494,7 @@ public:
 private:
 	//! Handle to the GlobalEnemy Entity
 	hoa_global::GlobalEnemy _global_enemy;
-
-	//! Enemy's X-coordinate on the screen
-	/*float _x_location;
-
-	//! Enemy's Y-coordinate on the screen
-	float _y_location;
-
-	//! Starting X coordinate of the enemy
-	float _x_origin;
-
-	//! Starting Y coordinate of the enemy
-	float _y_origin;
-
-	//! Variable for tracking time (ms) on how long to show the damage text
-	//FIX ME this has to go
-	uint32 _total_time_damaged;
-
-	//! How much damage was dealt on the last strike
-	//FIX ME this has to go unless we have good cause for it
-	uint32 _damage_dealt;
-
-	//! Is the enemy queued to attack?
-	bool _is_queued_to_perform;
-
-	//! Portrait for the time meter
-	hoa_video::StillImage _time_meter_portrait;
-
-	//! The image used to highlight time portraits for selected actors
-	hoa_video::StillImage _time_portrait_selected;
-
-	//! The y-value of it's location, since x is fixed
-	float _time_portrait_location;
-
-	//! Amount of time enemy spends in the idle phase
-	//FIX ME for now, will also be used for cool down times?
-	hoa_system::SystemTimer _wait_time;*/
-
-	//! Which action state the char is in for the time meter.  TEMPORARY!!!
-	//uint8 _action_state;
-
-}; // end BattleEnemyActor
+}; // class BattleEnemyActor
 
 } // namespace private_battle
 
