@@ -559,20 +559,18 @@ void BattleMode::_Initialize()
 	//they will have a wait time that is half of the slowest actor
 	float proportion;
 
-	for (uint8 i = 0; i < _enemy_actors.size(); ++i)
-	{
+	for (uint8 i = 0; i < _enemy_actors.size(); i++) {
 		proportion = static_cast<float>(_min_agility) / static_cast<float>(_enemy_actors[i]->GetAgility());
-		_enemy_actors[i]->GetWaitTime()->SetDuration(static_cast<uint32>(MAX_INIT_WAIT_TIME * proportion));
+		_enemy_actors[i]->GetWaitTime()->Initialize(static_cast<uint32>(MAX_INIT_WAIT_TIME * proportion));
 
 		//Start the timer.  We can do this here because the calculations will be done so quickly
 		//that the other chars wont fall far behind.
 		_enemy_actors[i]->ResetWaitTime();
 	}
 
-	for (uint8 i = 0; i < _character_actors.size(); ++i)
-	{
+	for (uint8 i = 0; i < _character_actors.size(); i++) {
 		proportion = static_cast<float>(_min_agility) / static_cast<float>(_character_actors[i]->GetAgility());
-		_character_actors[i]->GetWaitTime()->SetDuration(static_cast<uint32>(MAX_INIT_WAIT_TIME * proportion));
+		_character_actors[i]->GetWaitTime()->Initialize(static_cast<uint32>(MAX_INIT_WAIT_TIME * proportion));
 
 		//Start the timer.  We can do this here because the calculations will be done so quickly
 		//that the other chars wont fall far behind.
@@ -601,11 +599,6 @@ void BattleMode::_Initialize()
 	//FIX ME This will not work in the future (i.e. paralysis)...realized this
 	//after writing all the above crap
 	SystemManager->UpdateTimers();
-
-	//TEMP: For testing battle item usage only!  Pull once usage is proven!
-	// Adds a health potion to your inventory
-	//GlobalManager->AddToInventory(1);
-	//_action_type_menu.EnableOption(3,true);
 
 	_initialized = true;
 } // void BattleMode::_Initialize()
