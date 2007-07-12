@@ -127,56 +127,6 @@ public:
 
 
 /** ****************************************************************************
-*** \brief Represents a window used to select a character to perform an action on.
-***
-*** There should only ever be one of these active, usually used after
-*** selecting an item in the inventory, that needs a character to work
-*** on.
-*** ***************************************************************************/
-/*class MiniCharacterSelectWindow : public hoa_video::MenuWindow {
-public:
-	MiniCharacterSelectWindow();
-
-	~MiniCharacterSelectWindow();
-
-	//! needs comment
-	void Update();
-
-	//! \brief Render this window to the screen.
-	void Draw();
-
-	//! \brief change the active status of the window
-	void Activate(bool new_status);
-
-	bool IsActive()
-		{ return _char_window_active; }
-
-	//! \brief Selected Index accessor
-	//@{
-	void SetSelectedIndex(uint32 selected)
-		{ _selected_item_index = selected; }
-
-	uint32 GetSelectedIndex()
-		{ return _selected_item_index; }
-	//@}
-
-private:
-	//! \brief specifies if the char select window is active
-	bool _char_window_active;
-
-	//! \brief pointer to the current character that the cursor is pointing to.
-	uint32 _current_char_selected;
-
-	//! \brief the item that was selected in the inventory.
-	uint32 _selected_item_index;
-
-	//! \brief Hide copy constructor.
-	MiniCharacterSelectWindow(MiniCharacterSelectWindow &other);
-}; // class MiniCharacterSelectWindow : public hoa_video::MenuWindow
-*/
-
-
-/** ****************************************************************************
 *** \brief Represents the inventory window to browse the party's inventory
 ***
 *** This handles item use.  You can also view all items by category.
