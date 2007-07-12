@@ -353,13 +353,13 @@ private:
 	uint16 _lastID;
 
 	//! \brief While true, all user input commands to map mode are ignored
-	bool _ignore_user_input;
+	bool _ignore_input;
 
 	//! \brief If true, the player's sprite is running
 	bool _running;
 
-	//! \brief If true, the player's stamina will drain as they run. If false, stamina will not drain.
-	bool _run_limited;
+	//! \brief If true, the player's stamina will not drain as they run
+	bool _run_forever;
 
 	//! \brief While true, the player is not allowed to run at all.
 	bool _run_disabled;

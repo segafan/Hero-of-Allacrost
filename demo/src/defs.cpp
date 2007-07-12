@@ -370,6 +370,11 @@ void BindEngineToLua() {
 		class_<MapMode, hoa_mode_manager::GameMode>("MapMode")
 			.def(constructor<const std::string&>())
 			.def_readwrite("_camera", &MapMode::_camera)
+			.def_readwrite("_ignore_input", &MapMode::_ignore_input)
+			.def_readwrite("_running", &MapMode::_running)
+			.def_readwrite("_run_forever", &MapMode::_run_forever)
+			.def_readwrite("_run_disabled", &MapMode::_run_disabled)
+			.def_readwrite("_run_stamina", &MapMode::_run_stamina)
 			.def("_AddGroundObject", &MapMode::_AddGroundObject, adopt(_2))
 			.def("_AddPassObject", &MapMode::_AddPassObject, adopt(_2))
 			.def("_AddSkyObject", &MapMode::_AddSkyObject, adopt(_2))
@@ -378,6 +383,7 @@ void BindEngineToLua() {
 			.def("_SetMapState", &MapMode::_SetMapState)
 			.def("_GetMapState", &MapMode::_GetMapState)
 			.def("_GetGeneratedObjectID", &MapMode::_GetGeneratedObjectID)
+			.def("_DrawMapLayers", &MapMode::_DrawMapLayers)
 
 			.scope
 			[

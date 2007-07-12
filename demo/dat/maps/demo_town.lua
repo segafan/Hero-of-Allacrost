@@ -242,6 +242,7 @@ upper_layer[39] = { -1, -1, -1, -1, -1, -1, 40, 41, 20, 21, -1, -1, -1, -1, -1, 
 function Load(m)
 	-- First, record the current map in the "map" variable that is global to this script
 	map = m;
+	map._run_forever = true;
 
 	local sprite;
 	local dialogue;
@@ -581,6 +582,7 @@ end
 
 
 function Draw()
+	map:_DrawMapLayers();
 end
 
 
