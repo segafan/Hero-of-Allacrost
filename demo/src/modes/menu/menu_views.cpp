@@ -1031,8 +1031,7 @@ EquipWindow::EquipWindow() : _active_box(EQUIP_ACTIVE_NONE) {
 	_InitEquipmentList();
 
 	StillImage i;
-	GlobalActor* actor = GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection());
-	GlobalCharacter* ch = (GlobalCharacter*)(actor);
+	GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
 
 	i.SetFilename(ch->GetWeaponEquipped()->GetIconImage().GetFilename());
 	_equip_images.push_back(i);
@@ -1199,96 +1198,84 @@ void EquipWindow::Update() {
 	switch (_active_box) {
 		//Choose character
 		case EQUIP_ACTIVE_CHAR:
-			{
-				if (event == VIDEO_OPTION_CONFIRM) {
-					_active_box = EQUIP_ACTIVE_SELECT;
-					_char_select.SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
-					_equip_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-					MenuMode::_instance->_menu_sounds["confirm"].PlaySound();
-				}
-				else if (event == VIDEO_OPTION_CANCEL) {
-					Activate(false);
-					MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
-				}
+			if (event == VIDEO_OPTION_CONFIRM) {
+				_active_box = EQUIP_ACTIVE_SELECT;
+				_char_select.SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
+				_equip_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+				MenuMode::_instance->_menu_sounds["confirm"].PlaySound();
 			}
-			break;
+			else if (event == VIDEO_OPTION_CANCEL) {
+				Activate(false);
+				MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
+			}
+		break;
 
 		//Choose equipment to replace
 		case EQUIP_ACTIVE_SELECT:
-			{
-				if (event == VIDEO_OPTION_CONFIRM) {
-					_active_box = EQUIP_ACTIVE_LIST;
-					_UpdateEquipList();
-					if (_equip_list.GetNumberOptions() > 0) {
-						_equip_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-						_equip_list.SetSelection(0);
-						_equip_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-						MenuMode::_instance->_menu_sounds["confirm"].PlaySound();
-					}
-					else {
-						_active_box = EQUIP_ACTIVE_SELECT;
-						MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
-					}
-				}
-				else if (event == VIDEO_OPTION_CANCEL) {
-					_active_box = EQUIP_ACTIVE_CHAR;
-					_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+			if (event == VIDEO_OPTION_CONFIRM) {
+				_active_box = EQUIP_ACTIVE_LIST;
+				_UpdateEquipList();
+				if (_equip_list.GetNumberOptions() > 0) {
 					_equip_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+					_equip_list.SetSelection(0);
+					_equip_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+					MenuMode::_instance->_menu_sounds["confirm"].PlaySound();
+				}
+				else {
+					_active_box = EQUIP_ACTIVE_SELECT;
 					MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
 				}
 			}
-			break;
+			else if (event == VIDEO_OPTION_CANCEL) {
+				_active_box = EQUIP_ACTIVE_CHAR;
+				_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+				_equip_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+				MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
+			}
+		break;
 
 		//Choose replacement
 		case EQUIP_ACTIVE_LIST:
-			{
-				if (event == VIDEO_OPTION_CONFIRM) {
-// 					GlobalActor* actor = GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection());
-// 					GlobalCharacter* ch = (GlobalCharacter*)(actor);
+			if (event == VIDEO_OPTION_CONFIRM) {
+				GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
+				uint32 id_num;
 
-				// Roots: This code needs to be re-written to use the new inventory management scheme
-// 					if (_equip_select.GetSelection() == EQUIP_WEAPON) {
-// 						GlobalManager->AddToInventory(ch->GetWeaponEquipped()->GetID());
-// 						ch->EquipWeapon(GlobalManager->GetInventoryWeapons()->at(_equip_list.GetSelection()));
-// 						GlobalManager->DecrementObjectCount(ch->GetWeaponEquipped()->GetID(), 1);
-// 					}
-// 					else if (_equip_select.GetSelection() == EQUIP_HEADGEAR) {
-// 						GlobalManager->AddToInventory(ch->GetHeadArmorEquipped()->GetID());
-// 						ch->EquipArmor(GlobalManager->GetInventoryHeadArmor()->at(_equip_list.GetSelection()));
-// 						GlobalManager->DecrementObjectCount(ch->GetHeadArmorEquipped()->GetID(), 1);
-// 					}
-// 					else if (_equip_select.GetSelection() == EQUIP_BODYARMOR) {
-// 						GlobalManager->AddToInventory(ch->GetTorsoArmorEquipped()->GetID());
-// 						ch->EquipArmor(GlobalManager->GetInventoryTorsoArmor()->at(_equip_list.GetSelection()));
-// 						GlobalManager->DecrementObjectCount(ch->GetTorsoArmorEquipped()->GetID(), 1);
-// 					}
-// 					else if (_equip_select.GetSelection() == EQUIP_OFFHAND) {
-// 						GlobalManager->AddToInventory(ch->GetArmArmorEquipped()->GetID());
-// 						ch->EquipArmor(GlobalManager->GetInventoryArmArmor()->at(_equip_list.GetSelection()));
-// 						GlobalManager->DecrementObjectCount(ch->GetArmArmorEquipped()->GetID(), 1);
-// 					}
-// 					else if (_equip_select.GetSelection() == EQUIP_LEGGINGS) {
-// 						GlobalManager->AddToInventory(ch->GetLegArmorEquipped()->GetID());
-// 						ch->EquipArmor(GlobalManager->GetInventoryLegArmor()->at(_equip_list.GetSelection()));
-// 						GlobalManager->DecrementObjectCount(ch->GetLegArmorEquipped()->GetID(), 1);
-// 					}
-// 					else {
-// 						cerr << "This shouldn't happen!" << endl;
-// 					}
+				if (_equip_select.GetSelection() == EQUIP_WEAPON) {
+					id_num = GlobalManager->GetInventoryWeapons()->at(_equip_list.GetSelection())->GetID();
+					GlobalManager->AddToInventory(ch->EquipWeapon((GlobalWeapon*)GlobalManager->RetrieveFromInventory(id_num)));
+				}
+				else if (_equip_select.GetSelection() == EQUIP_HEADGEAR) {
+					id_num = GlobalManager->GetInventoryHeadArmor()->at(_equip_list.GetSelection())->GetID();
+					GlobalManager->AddToInventory(ch->EquipHeadArmor((GlobalArmor*)GlobalManager->RetrieveFromInventory(id_num)));
+				}
+				else if (_equip_select.GetSelection() == EQUIP_BODYARMOR) {
+					id_num = GlobalManager->GetInventoryTorsoArmor()->at(_equip_list.GetSelection())->GetID();
+					GlobalManager->AddToInventory(ch->EquipTorsoArmor((GlobalArmor*)GlobalManager->RetrieveFromInventory(id_num)));
+				}
+				else if (_equip_select.GetSelection() == EQUIP_OFFHAND) {
+					id_num = GlobalManager->GetInventoryArmArmor()->at(_equip_list.GetSelection())->GetID();
+					GlobalManager->AddToInventory(ch->EquipArmArmor((GlobalArmor*)GlobalManager->RetrieveFromInventory(id_num)));
+				}
+				else if (_equip_select.GetSelection() == EQUIP_LEGGINGS) {
+					id_num = GlobalManager->GetInventoryLegArmor()->at(_equip_list.GetSelection())->GetID();
+					GlobalManager->AddToInventory(ch->EquipLegArmor((GlobalArmor*)GlobalManager->RetrieveFromInventory(id_num)));
+				}
+				else {
+					cout << "MENU ERROR: _equip_select.GetSelection value is invalid: " << _equip_select.GetSelection() << endl;
+				}
 
-					_active_box = EQUIP_ACTIVE_SELECT;
-					_equip_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-					_equip_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-					MenuMode::_instance->_menu_sounds["confirm"].PlaySound();
-				}
-				else if (event == VIDEO_OPTION_CANCEL) {
-					_active_box = EQUIP_ACTIVE_SELECT;
-					MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
-					_equip_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-					_equip_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-				}
+				_active_box = EQUIP_ACTIVE_SELECT;
+				_equip_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+				_equip_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+				MenuMode::_instance->_menu_sounds["confirm"].PlaySound();
 			}
-			break;
+			else if (event == VIDEO_OPTION_CANCEL) {
+				_active_box = EQUIP_ACTIVE_SELECT;
+				MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
+				_equip_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+				_equip_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+			}
+		break;
 	}
 
 	_UpdateEquipList();
@@ -1297,8 +1284,7 @@ void EquipWindow::Update() {
 
 
 void EquipWindow::_UpdateEquipList() {
-	GlobalActor* actor = GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection());
-	GlobalCharacter* ch = (GlobalCharacter*)(actor);
+	GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
 	std::vector<ustring> options;
 
 	if (_active_box == EQUIP_ACTIVE_LIST) {
