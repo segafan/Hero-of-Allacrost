@@ -379,7 +379,7 @@ protected:
 
 	//! Recalculates wait time if agility has changed	
 	void _RecalculateWaitTime();
-};
+}; // class BattleActor
 
 
 /** ****************************************************************************
