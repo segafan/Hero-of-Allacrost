@@ -28,7 +28,6 @@
 #include "global_actors.h"
 #include "video.h"
 #include "audio.h"
-#include "battle.h"
 
 namespace hoa_battle {
 
@@ -54,13 +53,15 @@ class BattleActorEffect {
 public:
 	BattleActorEffect(private_battle::BattleActor* const host)
 		{}
+
 	virtual ~BattleActorEffect()
 		{}
 
-	//! Updates the effect's timer and other status
+	//! \brief Updates the effect's timer and other status
 	void Update()
 		{}
-	//! Removes the effect from its host
+
+	//! \brief Removes the effect from its host
 	void CureEffect() const
 		{}
 
@@ -68,30 +69,35 @@ public:
 	//@{
 	BattleActor* const GetHost() const
 		{ return _host; }
+
 	hoa_utils::ustring GetEffectName() const
 		{ return _effect_name; }
 
 	const int32 GetModifiedHealthPoints() const
 		{ return _health_points_modifier; }
+
 	const int32 GetModifiedSkillPoints() const
 		{ return _skill_points_modifier; }
+
 	const int32 GetModifiedStrength() const
 		{ return _strength_modifier; }
-	const int32 GetModifiedIntelligence() const
-		{ return _intelligence_modifier; }
+
 	const int32 GetModifiedAgility() const
 		{ return _agility_modifier; }
 	//@}
 
 private:
-	//! A pointer to the actor that the effect is afflicting
+	//! \brief A pointer to the actor that the effect is afflicting
 	private_battle::BattleActor* _host;
-	//! The name of the effect
+
+	//! \brief The name of the effect
 	hoa_utils::ustring _effect_name;
-	//! The number of milliseconds remaining until the effect is removed
+
+	//! \brief The number of milliseconds remaining until the effect is removed
 	uint32 _time_till_expiration;
-	// //! Enum value to determine how severe the effect is
-	// hoa_global::GLOBAL_AFFLICTION_SEVERITY _severity;
+
+	//! \brief Enum value to determine the strength of the effect
+	hoa_global::GLOBAL_INTENSITY _intensity;
 
 	/** \name Status modification members
 	*** \brief Members which modifies various properties of the host's status
@@ -100,97 +106,105 @@ private:
 	int32 _health_points_modifier;
 	int32 _skill_points_modifier;
 	int32 _strength_modifier;
-	int32 _intelligence_modifier;
 	int32 _agility_modifier;
 	//@}
 }; // class BattleActorEffect
 
 
 /** ****************************************************************************
-*** \brief This is an interface class for all the battle actors (eg. the player and the monsters)
+*** \brief An abstract class for representing a character or enemy actor
 ***
 *** \note This class is used because we no longer need try-catch blocks when converting
 *** pointers from GlobalActor to either BattleCharacterActor or BattleEnemyActor.
 *** Of course it helps to keep things a bit more generic and maintainable as well. ;)
 *** ***************************************************************************/
-class BattleActor
-{
+class BattleActor {
 public:
 	BattleActor();
+
 	virtual ~BattleActor();
 
-	/*! Gives a specific amount of damage for the object
-	** \note Must be defined in subclasses
+	/** Gives a specific amount of damage for the object
+	*** \note Must be defined in subclasses
 	*/
 	virtual void TakeDamage(int32 damage);
 
 	//! Sets queued to perform
-	void SetQueuedToPerform(bool QueuedToPerform)
-		{ _is_queued_to_perform = QueuedToPerform; }
+	void SetQueuedToPerform(bool queued)
+		{ _is_queued_to_perform = queued; }
 
 	//! Is the character queued to attack?
 	bool IsQueuedToPerform() const
 		{ return _is_queued_to_perform; }
 
 	//! Gets a pointer to the GlobalActor
-	//virtual hoa_global::GlobalActor * GetActor() = 0;
+	virtual hoa_global::GlobalActor* GetActor() = 0;
 
 	// \brief Resets the wait time and time meter portrait
 	void ResetWaitTime();
 
 	// \brief Sets the location of the time meter portrait
 	// \param new_val new value for the location
-	void SetTimePortraitLocation(float new_val) { _time_portrait_location = new_val; }
+	void SetTimePortraitLocation(float new_val)
+		{ _time_portrait_location = new_val; }
 
 	// \brief Gets the location of the time meter portrait
 	// \return The location of the time portrait
-	float GetTimePortraitLocation() { return _time_portrait_location; }
+	float GetTimePortraitLocation()
+		{ return _time_portrait_location; }
 
 	// \brief Gets the wait time
 	// \return the wait time
-	hoa_system::SystemTimer* GetWaitTime() { return &_wait_time; }
+	hoa_system::SystemTimer* GetWaitTime()
+		{ return &_wait_time; }
 
-	// \brief Called when the actor dies
+	//! \brief Called when the actor dies
 	virtual void OnDeath();
 
-	// \brief Called when the actor is revived
+	//! \brief Called when the actor is revived
 	virtual void OnLife();
 
-	// \brief Calculates the actor's physical attack damage
-	virtual void CalcPhysicalAttack() { }
+	//! \brief Calculates the actor's physical attack damage
+	virtual void CalcPhysicalAttack() = 0;
 
-	// \brief Calculates the actor's metaphysical attack damage
-	virtual void CalcMetaPhysicalAttack() { }
+	//! \brief Calculates the actor's metaphysical attack damage
+	virtual void CalcMetaPhysicalAttack() = 0;
 
-	// \brief Calculates the actor's physical defense
-	virtual void CalcPhysicalDefense(hoa_global::GlobalAttackPoint* attack_point = NULL) { }
+	//! \brief Calculates the actor's physical defense
+	virtual void CalcPhysicalDefense(hoa_global::GlobalAttackPoint* attack_point = NULL) = 0;
 
-	// \brief Calculates the actor's metaphysical defense
-	virtual void CalcMetaPhysicalDefense(hoa_global::GlobalAttackPoint* attack_point = NULL) { }
+	//! \brief Calculates the actor's metaphysical defense
+	virtual void CalcMetaPhysicalDefense(hoa_global::GlobalAttackPoint* attack_point = NULL) = 0;
 
-	// \brief Calculates the actor's evade
-	virtual void CalcEvade(hoa_global::GlobalAttackPoint* attack_point = NULL) { }
+	//! \brief Calculates the actor's evade
+	virtual void CalcEvade(hoa_global::GlobalAttackPoint* attack_point = NULL) = 0;
 
-	// \brief Draws the status of the actor
-	virtual void DrawStatus() { }
+	//! \brief Draws the status of the actor
+	virtual void DrawStatus() = 0;
 
-	//! Draws the actor's current sprite animation frame
-	//virtual void DrawSprite();
+	//! \brief Draws the actor's current sprite animation frame
+	virtual void DrawSprite() = 0;
 
-	// \brief Draws the actor's portrait for the time meter
-	// \param is_selected If the actor is selected for an action, highlight it
+	/** \brief Draws the actor's portrait for the time meter
+	*** \param is_selected If the actor is selected for an action, highlight it
+	**/
 	virtual void DrawTimePortrait(bool is_selected);
 
-	// \brief Tells us if the actor is alive
-	// \return true if alive
-	virtual bool IsAlive() { return (_hp > 0); }
+	/** \brief Tells us if the actor is alive
+	*** \return true if alive
+	**/
+	virtual bool IsAlive()
+		{ return (_hp > 0); }
 
-	// \brief Tells us if this actor is an enemy
-	// \return true if it is an enemy
-	virtual bool IsEnemy() { return true; }
+	/** \brief Tells us if this actor is an enemy
+	*** \return true if it is an enemy
+	**/
+	virtual bool IsEnemy()
+		{ return true; }
 
-	// \brief Copies stats from the passed in GlobalActor to member variables
-	// \param The actor to copy
+	/** \brief Copies stats from the passed in GlobalActor to member variables
+	*** \param The actor to copy
+	**/
 	void InitBattleActorStats(hoa_global::GlobalActor* actor);
 
 	//! \name Getters and setters for the current and the original coordinates

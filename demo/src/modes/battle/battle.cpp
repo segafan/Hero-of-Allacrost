@@ -667,6 +667,18 @@ void BattleMode::_TallyRewards() {
 	_victory_xp /= num_alive;
 }
 
+
+void BattleMode::_SetInitialTarget(hoa_global::GLOBAL_TARGET target_type, bool target_ally) {
+	if (target_ally) {
+		current_battle->_selected_target = current_battle->GetPlayerCharacterAt(0);
+		current_battle->_selected_target_index = 0;
+	}
+	else {
+		current_battle->_selected_target = current_battle->GetEnemyActorAt(current_battle->GetIndexOfFirstAliveEnemy());
+		current_battle->_selected_target_index = current_battle->GetIndexOfFirstAliveEnemy();
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // BattleMode class -- Update Code
 ////////////////////////////////////////////////////////////////////////////////

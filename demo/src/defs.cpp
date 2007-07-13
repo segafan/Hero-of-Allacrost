@@ -606,7 +606,6 @@ void BindEngineToLua() {
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_battle")
 	[
 		class_<BattleActor>("BattleActor")
-			.def(constructor<>())
 			.def("SetHitPoints", &BattleActor::SetHitPoints)
 			.def("SetMaxHitPoints", &BattleActor::SetMaxHitPoints)
 			.def("SetSkillPoints", &BattleActor::SetSkillPoints)
