@@ -582,6 +582,12 @@ private:
 	**/
 	uint32 _NumberCharactersAlive() const;
 
+	/** \brief Selects the initial target for an action to take effect on
+	*** \param target_type The type of target that the action takes effect on (attack point, actor, or party)
+	*** \param target_ally If true, the initial target is on the character party
+	**/
+	void _SetInitialTarget(hoa_global::GLOBAL_TARGET target_type, bool target_ally);
+
 	/** \name Update helper functions
 	*** \brief Functions which update the state of various battle components
 	**/

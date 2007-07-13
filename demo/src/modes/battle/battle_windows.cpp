@@ -202,7 +202,7 @@ void ActionWindow::_UpdateActionCategory() {
 			_state = VIEW_ACTION_SELECTION;
 		}
 		else {
-			// Play a sound to indicate the selection was invalid
+			// TODO: Play a sound to indicate the selection was invalid
 		}
 	}
 	// TODO: implement cancel press ... what should it do?
@@ -219,7 +219,6 @@ void ActionWindow::_UpdateActionSelection() {
 		_action_selection_list.HandleDownKey();
 	}
 
-	// TODO: I want to move most of this code to a new BattleMode function called "SetInitialTarget()" that figures out what the target
 	if (InputManager->ConfirmPress()) {
 		// TODO: make a call to battle mode so it can select the appropriate target
 		_selected_action = _action_selection_list.GetSelection();
@@ -234,23 +233,14 @@ void ActionWindow::_UpdateActionSelection() {
 			_action_target_type = _skill_list->at(_selected_action)->GetTargetType();
 			_action_target_ally = _skill_list->at(_selected_action)->IsTargetAlly();
 			current_battle->_cursor_state = CURSOR_SELECT_TARGET;
-			current_battle->_selected_target_index = current_battle->GetIndexOfFirstAliveEnemy();
-			current_battle->_selected_target = current_battle->GetEnemyActorAt(current_battle->_selected_target_index);
+			current_battle->_SetInitialTarget(_action_target_type, _action_target_ally);
 		}
 
 		else if (_selected_action_category == ACTION_TYPE_ITEM) {
 			_action_target_type = _item_list[_selected_action]->GetTargetType();
 			_action_target_ally = _item_list[_selected_action]->IsTargetAlly();
-
-			// TEMP: Need to re-examine this later... make sure both helpful and hurtful items register properly
 			current_battle->_cursor_state = CURSOR_SELECT_TARGET;
-			current_battle->_selected_target_index = 0;
-
-			// TODO: Use target type to select actor or party, and use cursor memory
-			if (_action_target_ally)
-				current_battle->_selected_target = current_battle->GetPlayerCharacterAt(0);
-			else
-				current_battle->_selected_target = current_battle->GetEnemyActorAt(current_battle->GetIndexOfFirstAliveEnemy());
+			current_battle->_SetInitialTarget(_action_target_type, _action_target_ally);
 		}
 
 		else {
