@@ -322,19 +322,19 @@ public:
 	bool SetAlignment(int8 alignment);
 
 	//! \brief Sets width of the image
-	void SetWidth(float width)
+	virtual void SetWidth(float width)
 		{ _width = width; }
 
 	//! \brief Sets height of the image
-	void SetHeight(float height)
+	virtual void SetHeight(float height)
 		{ _height = height; }
 
 	//! \brief Sets the dimensions (width + height) of the image.
-	void SetDimensions(float width, float height)
+	virtual void SetDimensions(float width, float height)
 		{ _width  = width; _height = height; }
 
 	//! \brief Sets image to static/animated
-	void SetStatic(bool is_static)
+	virtual void SetStatic(bool is_static)
 		{ _is_static = is_static; }
 
 	//! \brief Sets the color for the image (for all four verteces).
