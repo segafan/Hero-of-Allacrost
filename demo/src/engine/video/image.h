@@ -281,23 +281,23 @@ public:
 	/** \brief Makes the image static.
 	*** \param is_static Set to true to make the image static.
 	**/
-	virtual void SetStatic(const bool is_static) = 0;
+	virtual void SetStatic(bool is_static) = 0;
 
 	/** \brief Sets the image's width, expressed as coordinate system units.
 	*** \param width The desired width of the image.
 	**/
-	virtual void SetWidth(const float width) = 0;
+	virtual void SetWidth(float width) = 0;
 
 	/** \brief Sets the image's height, expressed as coordinate system units.
 	*** \param height The desired height of the image.
 	**/
-	virtual void SetHeight(const float height) = 0;
+	virtual void SetHeight(float height) = 0;
 
 	/** \brief Sets the image's dimensions, expressed as coordinate system units.
 	*** \param width desired width of the image
 	*** \param height desired height of the image
 	**/
-	virtual void SetDimensions(const float width, const float height) = 0;
+	virtual void SetDimensions(float width, float height) = 0;
 
 	/** \brief Sets the image's color.
 	*** \param color The desired color of the image.
@@ -437,23 +437,23 @@ public:
 	/** \brief Sets width of the image
 	***	\param width Width of the image
 	**/
-	void SetWidth(const float width);
+	void SetWidth(float width);
 
 	/** \brief Sets height of the image
 	***	\param height Height of the image
 	**/
-	void SetHeight(const float height);
+	void SetHeight(float height);
 
 	/** \brief Sets the dimensions (width, height) of the image.
 	***	\param width Width of the image
 	***	\param height Height of the image
 	**/
-	void SetDimensions(const float width, const float height);
+	void SetDimensions(float width, float height);
 
 	/** \brief Sets image to static/animated
 	***	\param is_static Flag indicating wether the image should be made static or not
 	**/
-	void SetStatic(const bool is_static)
+	void SetStatic(bool is_static)
 		{ _is_static = is_static; }
 
 	/** \brief Sets the color for the image (for all four verteces).
@@ -582,18 +582,18 @@ public:
 	/** \brief Sets all animation frames to be a certain width.
 	***	\param width Width of the images
 	**/
-	void SetWidth(const float width);
+	void SetWidth(float width);
 
 	/*! \brief Sets all animation frames to be a certain height
 	***	\param height Height of the images
 	**/
-	void SetHeight(const float height);
+	void SetHeight(float height);
 
 	/** \brief Sets all animation frames to be a certain width and height.
 	***	\param width Width of the images
 	***	\param height Height of the images
 	**/
-	void SetDimensions(const float width, const float height);
+	void SetDimensions(float width, float height);
 
 	/** \brief sets All frames to be of a certain color (all vertices are set to the same color)
 	***	\param color Color of the 4 vertices
@@ -613,7 +613,7 @@ public:
 	*** \note If the frames are already loaded, it doesn't bother to try to unload them
 	*** and then reload them again statically.
 	**/
-	void SetStatic(const bool is_static)
+	void SetStatic(bool is_static)
 		{ _is_static = is_static; }
 
 	/** \brief Sets the current frame index of the animation.

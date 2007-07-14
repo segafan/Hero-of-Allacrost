@@ -214,7 +214,7 @@ void StillImage::Clear() {
 }
 
 
-void StillImage::SetWidth (const float width)
+void StillImage::SetWidth (float width)
 {
 	_width = width;
 
@@ -225,7 +225,7 @@ void StillImage::SetWidth (const float width)
 }
 
 
-void StillImage::SetHeight (const float height)
+void StillImage::SetHeight (float height)
 {
 	_height = height;
 
@@ -236,7 +236,7 @@ void StillImage::SetHeight (const float height)
 }
 
 
-void StillImage::SetDimensions (const float width, const float height)
+void StillImage::SetDimensions (float width, float height)
 {
 	_width = width;
 	_height = height;
@@ -541,7 +541,7 @@ bool AnimatedImage::AddFrame(const StillImage &frame, uint32 frame_time) {
 
 
 
-void AnimatedImage::SetWidth(const float width) {
+void AnimatedImage::SetWidth(float width) {
 	_width = width;
 
 	// Update the width of each frame image
@@ -554,7 +554,7 @@ void AnimatedImage::SetWidth(const float width) {
 
 
 
-void AnimatedImage::SetHeight(const float height) {
+void AnimatedImage::SetHeight(float height) {
 	_height = height;
 
 	// Update the height of each frame image
@@ -567,7 +567,7 @@ void AnimatedImage::SetHeight(const float height) {
 
 
 
-void AnimatedImage::SetDimensions(const float width, const float height) {
+void AnimatedImage::SetDimensions(float width, float height) {
 	_width = width;
 	_height = height;
 
