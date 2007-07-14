@@ -109,7 +109,7 @@ public:
 	*** \param character A pointer to the character whom an action is being selected for
 	*** Calling this function will un-hide the menu window
 	**/
-	void Initialize(BattleCharacterActor* character);
+	void Initialize(BattleCharacter* character);
 
 	/** \brief Sets class members to initial state
 	*** This call also hides the window from the screen. You'll need to call the Initialize
@@ -148,7 +148,7 @@ private:
 	ACTION_WINDOW_VIEWS _state;
 
 	//! \brief A pointer to the character whom is currently selected for initiating an action
-	BattleCharacterActor* _character;
+	BattleCharacter* _character;
 
 	/** \brief The action category that the player selected when he/she was at that menu
 	*** The value of this member is often compared with the ACTION_TYPE constants at the top of battle.h
