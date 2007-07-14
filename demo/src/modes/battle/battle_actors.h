@@ -115,7 +115,7 @@ private:
 *** \brief An abstract class for representing a character or enemy actor
 ***
 *** \note This class is used because we no longer need try-catch blocks when converting
-*** pointers from GlobalActor to either BattleCharacterActor or BattleEnemyActor.
+*** pointers from GlobalActor to either BattleCharacter or BattleEnemy.
 *** Of course it helps to keep things a bit more generic and maintainable as well. ;)
 *** ***************************************************************************/
 class BattleActor {
@@ -197,10 +197,9 @@ public:
 		{ return (_hp > 0); }
 
 	/** \brief Tells us if this actor is an enemy
-	*** \return true if it is an enemy
+	*** \return True if it is an enemy
 	**/
-	virtual bool IsEnemy()
-		{ return true; }
+	virtual bool IsEnemy() = 0;
 
 	/** \brief Copies stats from the passed in GlobalActor to member variables
 	*** \param The actor to copy
@@ -399,11 +398,11 @@ protected:
 /** ****************************************************************************
 *** \brief Represents the player-controlled character in the battle
 *** ***************************************************************************/
-class BattleCharacterActor : public BattleActor {
+class BattleCharacter : public BattleActor {
 public:
-	BattleCharacterActor(hoa_global::GlobalCharacter * character, float x_location, float y_location);
+	BattleCharacter(hoa_global::GlobalCharacter * character, float x_location, float y_location);
 
-	virtual ~BattleCharacterActor();
+	~BattleCharacter();
 
 	//! Updates the state of the character. Must be called every frame!
 	void Update();
@@ -416,25 +415,25 @@ public:
 
 	// \brief Tells us if this actor is an enemy
 	// \return true if it is an enemy
-	virtual bool IsEnemy() { return false; }
+	bool IsEnemy() { return false; }
 
 	//! Draws the character's status information
-	virtual void DrawStatus();
+	void DrawStatus();
 
 	// \brief Calculates the actor's physical attack damage
-	virtual void CalcPhysicalAttack();
+	void CalcPhysicalAttack();
 
 	// \brief Calculates the actor's metaphysical attack damage
-	virtual void CalcMetaPhysicalAttack();
+	void CalcMetaPhysicalAttack();
 
 	// \brief Calculates the actor's physical defense
-	virtual void CalcPhysicalDefense(hoa_global::GlobalAttackPoint* attack_point = NULL);
+	void CalcPhysicalDefense(hoa_global::GlobalAttackPoint* attack_point = NULL);
 
 	// \brief Calculates the actor's metaphysical defense
-	virtual void CalcMetaPhysicalDefense(hoa_global::GlobalAttackPoint* attack_point = NULL);
+	void CalcMetaPhysicalDefense(hoa_global::GlobalAttackPoint* attack_point = NULL);
 
 	// \brief Calculates the actor's evade
-	virtual void CalcEvade(hoa_global::GlobalAttackPoint* attack_point = NULL);
+	void CalcEvade(hoa_global::GlobalAttackPoint* attack_point = NULL);
 
 	// Gets a pointer to the GlobalActor
 	hoa_global::GlobalCharacter * GetActor()
@@ -453,7 +452,7 @@ private:
 
 	//! Image of the menu status
 	hoa_video::StillImage _status_menu_image;
-}; // class BattleCharacterActor
+}; // class BattleCharacter
 
 
 /** ****************************************************************************
@@ -461,54 +460,50 @@ private:
 ***
 *** This class is a wrapper around a GlobalEnemy object.
 *** ***************************************************************************/
-class BattleEnemyActor : public BattleActor {
+class BattleEnemy : public BattleActor {
 public:
-	BattleEnemyActor(hoa_global::GlobalEnemy enemy, float x_location, float y_location);
+	BattleEnemy(hoa_global::GlobalEnemy enemy, float x_location, float y_location);
 
-	virtual ~BattleEnemyActor();
+	virtual ~BattleEnemy();
 
-	//! Updates the action status of the enemy
+	bool IsEnemy()
+		{ return true; }
+
+	//! \brief Updates the action status of the enemy
 	void Update();
 
-	//! Draws the damage-blended enemy sprite
+	//! \brief Draws the damage-blended enemy sprite on the battle field
 	void DrawSprite();
 
-	// \brief Draws the enemy's portrait for the time meter
-	// \param is_selected If the enemy is selected for an action, highlight it
-	//void DrawTimePortrait(bool is_selected);
-
-	//! Draws the enemy's status information
-	virtual void DrawStatus();
-
-	//! Gives a specific amount of damage for the enemy
-	//void TakeDamage(uint32 damage);
+	//! \brief Draws the enemy's status information in the action window box
+	void DrawStatus();
 
 	//! \brief Calculates the actor's physical attack damage
-	virtual void CalcPhysicalAttack();
+	void CalcPhysicalAttack();
 
 	//! \brief Calculates the actor's metaphysical attack damage
-	virtual void CalcMetaPhysicalAttack();
+	void CalcMetaPhysicalAttack();
 
 	//! \brief Calculates the actor's physical defense
-	virtual void CalcPhysicalDefense(hoa_global::GlobalAttackPoint* attack_point = NULL);
+	void CalcPhysicalDefense(hoa_global::GlobalAttackPoint* attack_point = NULL);
 
 	//! \brief Calculates the actor's metaphysical defense
-	virtual void CalcMetaPhysicalDefense(hoa_global::GlobalAttackPoint* attack_point = NULL);
+	void CalcMetaPhysicalDefense(hoa_global::GlobalAttackPoint* attack_point = NULL);
 
 	//! \brief Calculates the actor's evade
-	virtual void CalcEvade(hoa_global::GlobalAttackPoint* attack_point = NULL);
+	void CalcEvade(hoa_global::GlobalAttackPoint* attack_point = NULL);
 
 	//! Gets a pointer to the GlobalActor
-	virtual hoa_global::GlobalEnemy* GetActor()
+	hoa_global::GlobalEnemy* GetActor()
 		{ return &_global_enemy; }
 
 	//! \brief Compares the Y-coordinates of the actors, used for sorting the actors up-down when drawing
-	bool operator<(const BattleEnemyActor & other) const;
+	bool operator<(const BattleEnemy & other) const;
 
 private:
-	//! Handle to the GlobalEnemy Entity
+	//! \brief Handle to the GlobalEnemy Entity
 	hoa_global::GlobalEnemy _global_enemy;
-}; // class BattleEnemyActor
+}; // class BattleEnemy
 
 } // namespace private_battle
 

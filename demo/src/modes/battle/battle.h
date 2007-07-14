@@ -41,28 +41,28 @@ namespace hoa_battle {
 
 extern bool BATTLE_DEBUG;
 
-//! An internal namespace to be used only within the battle code. Don't use this namespace anywhere else!
+//! \brief An internal namespace to be used only within the battle code. Don't use this namespace anywhere else!
 namespace private_battle {
 
-//! A pointer to the BattleMode object that is managing the current battle that is taking place
+//! \brief A pointer to the BattleMode object that is managing the current battle that is taking place
 extern BattleMode* current_battle;
 
 //! \name Screen dimension constants
 //@{
-//! Battle scenes are visualized via an invisible grid of 64x64 tiles
+//! \brief Battle scenes are visualized via an invisible grid of 64x64 tiles
 const uint32 TILE_SIZE     = 64;
-//! The length of the screen in number of tiles (16 x 64 = 1024)
+//! \brief The length of the screen in number of tiles (16 x 64 = 1024)
 const uint32 SCREEN_LENGTH = 16;
-//! The height of the screen in number of tiles (12 x 64 = 768)
+//! \brief The height of the screen in number of tiles (12 x 64 = 768)
 const uint32 SCREEN_HEIGHT = 12; 
 //@}
 
 /** \brief Possible monster locations in monster creation order. 
-//  \note This is probably only a temporary fix until we get the monster sorting to work correctly
+*** \note This is a temporary hack until an enemy placement
+*** algorithm is properly working.
 **/
-const float MONSTER_LOCATIONS[][2] =
-{
-	{ 515.0f, 768.0f - 360.0f }, // 768 - because of reverse Y-coordinate system 
+const float MONSTER_LOCATIONS[][2] = {
+	{ 515.0f, 768.0f - 360.0f }, // 768.0f - because of reverse Y-coordinate system 
 	{ 494.0f, 768.0f - 450.0f },
 	{ 510.0f, 768.0f - 550.0f },
 	{ 580.0f, 768.0f - 630.0f },
@@ -125,84 +125,113 @@ const bool ACTIVE_BATTLE_MODE = false;
 float ComputeAveragePartyLevel();
 
 /** ****************************************************************************
-*** \brief Representation of a single, scripted action to be executed in battle
+*** \brief Representation of a single action to be executed in battle
 ***
-***
+*** This is an abstract base class for all action classes to inherit from.
+*** Actions are executed one at a time in a FIFO queue by BattleMode. Some
+*** actions may also be continuous, in that they apply an effect on the target
+*** for a limited period of time. For example, a skill which temporarily boosts
+*** the strength of its target.
 *** ***************************************************************************/
-class ScriptEvent {
+class BattleAction {
 public:
-	//ScriptEvent(BattleActor* source, std::deque<BattleActor*> targets, const std::string & script_name, uint32 warm_up_time);
-	ScriptEvent(BattleActor* source, BattleActor* target, hoa_global::GlobalItem* item, hoa_global::GlobalAttackPoint* attack_point = NULL, uint32 warm_up_time = ITEM_WARM_UP_TIME);
-	ScriptEvent(BattleActor* source, BattleActor* target, hoa_global::GlobalSkill* skill, hoa_global::GlobalAttackPoint* attack_point = NULL);
-	//ScriptEvent(BattleActor* source, std::deque<BattleActor*> targets, hoa_global::GlobalSkill* skill);
+	BattleAction(BattleActor* source, BattleActor* target, hoa_global::GlobalAttackPoint* attack_point);
 
-	~ScriptEvent();
-
-	//! Executes the script
-	void RunScript();
-
-	//! \name Class member access functions
-	//@{
-	BattleActor * GetSource()
-		{ return _source; }
-
-	inline hoa_system::SystemTimer* GetWarmUpTime()
-		{ return &_warm_up_time; }
-
-	inline BattleActor* GetTarget()
-		{ return _target; }
-
-	inline hoa_global::GlobalItem* GetItem()
-		{ return _item; }
-
-	inline hoa_global::GlobalSkill* GetSkill()
-		{ return _skill; }
-
-	//@}
-
-	//! \name Class member access functions
-	//@{
-	//hoa_global::GlobalActor * GetSource() { return _source; }
-	//@}
+	virtual ~BattleAction()
+		{}
 
 	//! \brief Updates the script
 	void Update();
 
-	// \brief Returns the amount of time left in warm up
-	// \return warm up time left
-	//inline hoa_system::SystemTimer GetWarmUpTime() const { return _warm_up_time; }
+	//! \brief Executes the script
+	virtual void RunScript() = 0;
 
-	//! \brief Gets the BattleActor hosting this script
-	//inline IBattleActor* GetActor() { return _actor_source; }
+	//! \brief Returns true if this action consumes an item
+	virtual bool IsItemAction() const = 0;
 
-private:
-	//! The name of the executing script
-	std::string _script_name;
+	//! \name Class member access functions
+	//@{
+	BattleActor* GetSource()
+		{ return _source; }
 
-	//! The actor whom is initiating this script
+	BattleActor* GetTarget()
+		{ return _target; }
+
+	hoa_system::SystemTimer* GetWarmUpTime()
+		{ return &_warm_up_time; }
+	//@}
+
+protected:
+	//! \brief The rendered text for the name of the action
+	hoa_video::RenderedText _script_name;
+
+	//! \brief The actor whom is initiating this action
 	BattleActor* _source;
 
-	//! Pointer to the skill attached to this script (for skill events only)
-	hoa_global::GlobalSkill* _skill;
-
-	//! Pointer to the item attached to this script (for item events only)
-	hoa_global::GlobalItem* _item;
-
-	//! The selected attack point (if applicable)
-	hoa_global::GlobalAttackPoint* _attack_point;
-
-	//hoa_global::GlobalActor * _source;
-
-	//! The targets of the script
+	//! \brief The targets of the script
+	//! \todo This should be changed to a GlobalTarget class pointer
 	BattleActor* _target;
 
-	//! The targets of the script FIX ME
-	//std::deque<BattleActor *> _targets;
+	//! \brief The selected attack point (if applicable)
+	//! \todo This should be removed when the _target member is changed
+	hoa_global::GlobalAttackPoint* _attack_point;
 
-	//! The amount of time to wait to execute the script
+	//! \brief The amount of time to wait to execute the script
 	hoa_system::SystemTimer _warm_up_time;
-	//! If the script is ready to run or not
-};
+}; // class BattleAction
+
+
+/** ****************************************************************************
+*** \brief A battle action which involves the exectuion of an actor's skill
+***
+*** This class invokes the execution of a GlobalSkill contained by the source
+*** actor. When the action is finished, any SP required to use the skill is
+*** subtracted from the source actor.
+*** ***************************************************************************/
+class SkillAction : public BattleAction {
+public:
+	SkillAction(BattleActor* source, BattleActor* target, hoa_global::GlobalSkill* skill, hoa_global::GlobalAttackPoint* attack_point = NULL);
+
+	void RunScript();
+
+	bool IsItemAction() const
+		{ return false; }
+
+	hoa_global::GlobalSkill* GetSkill()
+		{ return _skill; }
+
+private:
+	//! \brief Pointer to the skill attached to this script (for skill events only)
+	hoa_global::GlobalSkill* _skill;
+}; // class SkillAction : public BattleAction
+
+
+/** ****************************************************************************
+*** \brief A battle action which involves the use of an item
+***
+*** This class invokes the usage of a GlobalItem. The item's count is decremented
+*** as soon as the action goes into the FIFO queue. After the action is executed,
+*** the item is removed if its count has become zero. If the action is removed
+*** from the queue before it is executed (because the source actor perished, or
+*** the battle ended, or other circumstances), then the item's count is 
+*** incremented back to its original value since it was not used.
+*** ***************************************************************************/
+class ItemAction : public BattleAction {
+public:
+	ItemAction(BattleActor* source, BattleActor* target, hoa_global::GlobalItem* item, hoa_global::GlobalAttackPoint* attack_point = NULL);
+
+	void RunScript();
+
+	bool IsItemAction() const
+		{ return true; }
+
+	hoa_global::GlobalItem* GetItem()
+		{ return _item; }
+
+private:
+	//! \brief Pointer to the item attached to this script (for item events only)
+	hoa_global::GlobalItem* _item;
+}; // class SkillAction : public BattleAction
 
 } // namespace private_battle
 
@@ -221,9 +250,9 @@ private:
 *** ***************************************************************************/
 class BattleMode : public hoa_mode_manager::GameMode {
 	friend class private_battle::BattleActor;
-	friend class private_battle::BattleCharacterActor;
-	friend class private_battle::BattleEnemyActor;
-	friend class private_battle::ScriptEvent;
+	friend class private_battle::BattleCharacter;
+	friend class private_battle::BattleEnemy;
+	friend class private_battle::BattleAction;
 	friend class private_battle::ActionWindow;
 	friend class private_battle::FinishWindow;
 public:
@@ -235,13 +264,13 @@ public:
 	*** \brief Overloaded gamestate methods for the battle mode
 	**/
 	//@{
-	//! Resets appropriate class members. Called whenever BattleMode is made the active game mode.
+	//! \brief Resets appropriate class members. Called whenever BattleMode is made the active game mode.
 	void Reset();
 	
-	//! This method calls different update functions depending on the battle state.
+	//! \brief This method calls different update functions depending on the battle state.
 	void Update();
 
-	//! This method calls different draw functions depending on the battle state.
+	//! \brief This method calls different draw functions depending on the battle state.
 	void Draw();
 	//@}
 
@@ -270,26 +299,26 @@ public:
 	*** of music added must be explicitly triggered to play by certain scripted conditions in battle. If no music is added
 	*** for a battle, a default battle theme will be played.
 	**/
-	void AddMusic(std::string music_filename);
+	void AddMusic(const std::string& music_filename);
 
 	// TODO: Some of the public methods below should probably not be public...
 
 	//! \brief Returns true if an actor is performing an action
-	bool _IsPerformingScript() const
-		{ return _performing_script; }
+	bool _IsPerformingAction() const
+		{ return (_active_action != NULL); }
 
 	//! \brief Sets whether an action is being performed or not, and what that action is
-	void SetPerformingScript(bool is_performing, private_battle::ScriptEvent* se);
+	void SetPerformingAction(bool is_performing, private_battle::BattleAction* se);
 
 	//! \brief Added a scripted event to the queue
-	void AddScriptEventToQueue(private_battle::ScriptEvent* event)
-		{ _script_queue.push_back(event); }
+	void AddBattleActionToQueue(private_battle::BattleAction* event)
+		{ _action_queue.push_back(event); }
 
 	//! \brief Remove all scripted events for an actor
-	void RemoveScriptedEventsForActor(hoa_battle::private_battle::BattleActor * actor);
+	void RemoveActionsForActor(hoa_battle::private_battle::BattleActor* actor);
 
 	//! \brief Returns all player actors
-	std::deque<private_battle::BattleCharacterActor*> GetCharacters() const
+	std::deque<private_battle::BattleCharacter*> GetCharacters() const
 		{ return _character_actors; }
 
 	//! \brief Freezes all timers in battle mode. Used when game is paused or using wait battle mode.
@@ -328,36 +357,28 @@ public:
 	uint32 GetIndexOfNextAliveEnemy(bool move_upward) const;
 
 	//! \brief Returns the player actor at the deque location 'index'
-	private_battle::BattleCharacterActor * GetPlayerCharacterAt(uint32 index) const
+	private_battle::BattleCharacter * GetPlayerCharacterAt(uint32 index) const
 		{ return _character_actors.at(index); }
 
 	//! \brief Returns the enemy actor at the deque location 'index'
-	private_battle::BattleEnemyActor * GetEnemyActorAt(uint32 index) const
+	private_battle::BattleEnemy * GetEnemyActorAt(uint32 index) const
 		{ return _enemy_actors.at(index); }
 
 	//! \brief Returns the index of a player character
-	uint32 GetIndexOfCharacter(private_battle::BattleCharacterActor * const Actor) const;
+	uint32 GetIndexOfCharacter(private_battle::BattleCharacter * const Actor) const;
 
 	//! \brief Swap a character from _player_actors to _player_actors_in_battle
 	// This may become more complicated if it is done in a wierd graphical manner
-	void SwapCharacters(private_battle::BattleCharacterActor * ActorToRemove, private_battle::BattleCharacterActor * ActorToAdd);
+	void SwapCharacters(private_battle::BattleCharacter * ActorToRemove, private_battle::BattleCharacter * ActorToAdd);
 
-	// \brief Gets the active ScriptEvent
-	// \param se the ScriptEvent to designate as active
-	inline private_battle::ScriptEvent* GetActiveScript()
-		{ return _active_se; }
+	private_battle::BattleAction* GetActiveAction()
+		{ return _active_action; }
 
 private:
 	//! \brief When set to true, all preparations have been made and the battle is ready to begin
 	bool _initialized;
 
-	//! \brief Set to true whenever an actor (player or enemy) is performing an action
-	bool _performing_script;
-
-	//! \brief The script currently being performed
-	private_battle::ScriptEvent* _active_se;
-
-	//! \brief Set to true when either side of the battle is dead
+	//! \brief Set to true when either the character or enemy party has been defeated
 	bool _battle_over;
 
 	//! \brief Set to true if it was player who won the battle.
@@ -424,20 +445,20 @@ private:
 	*** that are in the party, but not actively fighting in the battle. This structure includes characters
 	*** that have zero hit points.
 	**/
-	std::deque<private_battle::BattleCharacterActor*> _character_actors;
+	std::deque<private_battle::BattleCharacter*> _character_actors;
 
 	/** \brief Enemies that are presently fighting in the battle
 	*** There is a theoretical limit on how many enemies may fight in one battle, but that is dependent upon
 	*** the sprite size of all active enemies and this limit will be detected by the BattleMode class.
 	*** This structure includes enemies that have zero hit points.
 	**/
-	std::deque<private_battle::BattleEnemyActor*> _enemy_actors;
+	std::deque<private_battle::BattleEnemy*> _enemy_actors;
 
 	/** \brief Characters that are in the party reserves
 	*** This structure contains characters which are in the current party, but are not fighting in the battle.
 	*** They may be swapped into the battle by the player.
 	**/
-	std::deque<private_battle::BattleCharacterActor*> _reserve_characters;
+	std::deque<private_battle::BattleCharacter*> _reserve_characters;
 	//@}
 
 	//! \name Selection Data
@@ -458,7 +479,7 @@ private:
 	uint32 _selected_target_index;
 
 	//! \brief The current character that is selected by the player
-	private_battle::BattleCharacterActor* _selected_character;
+	private_battle::BattleCharacter* _selected_character;
 
 	/** \brief The current target for the player's selection
 	*** This may point to either a character or enemy actor.
@@ -544,10 +565,16 @@ private:
 	//! \brief Used for scaling actor wait times
 	uint32 _min_agility;
 
-	//! \name Actor Action Processing
+	//! \name Action Processing
 	//@{
+	//! \brief The actor action currently being performed. Set to NULL if no action is being performed.
+	private_battle::BattleAction* _active_action;
+
 	//! \brief A FIFO queue of actor actions to perform
-	std::list<private_battle::ScriptEvent*> _script_queue;
+	std::list<private_battle::BattleAction*> _action_queue;
+
+	//! \brief Contains actions which are processed over a period of time
+	std::list<private_battle::BattleAction*> _action_residual;
 	//@}
 
 	//! \brief An Index to the (x,y) location of the next created monster (MONSTER_LOCATIONS array)

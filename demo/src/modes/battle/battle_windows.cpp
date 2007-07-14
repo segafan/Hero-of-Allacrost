@@ -117,7 +117,7 @@ ActionWindow::~ActionWindow() {
 
 
 
-void ActionWindow::Initialize(BattleCharacterActor* character) {
+void ActionWindow::Initialize(BattleCharacter* character) {
 	_character = character;
 	if (character == NULL) {
 		if (BATTLE_DEBUG)
@@ -141,7 +141,7 @@ void ActionWindow::Initialize(BattleCharacterActor* character) {
 		_action_category_list.EnableOption(3, false);
 
 	// TODO: clear _action_selection_list of all options
-} // void ActionWindow::Initialize(BattleCharacterActor* character)
+} // void ActionWindow::Initialize(BattleCharacter* character)
 
 
 

@@ -637,8 +637,6 @@ void BindEngineToLua() {
 	];
 	} // End using battle mode namespaces
 
-
-
 	// ----- Shop Mode bindings
 	{
 	using namespace hoa_shop;

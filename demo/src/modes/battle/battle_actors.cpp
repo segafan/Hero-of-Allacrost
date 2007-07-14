@@ -60,8 +60,9 @@ BattleActor::BattleActor() : _total_time_damaged(0),
 	_TEMP_attack_animation_timer.Run();
 }
 
-BattleActor::~BattleActor()
-{
+
+
+BattleActor::~BattleActor() {
 	VideoManager->DeleteImage(_time_portrait_selected);
 }
 
@@ -140,7 +141,7 @@ void BattleActor::TakeDamage(int32 damage)
 	{
 		SetHitPoints(0);
 		OnDeath();
-		current_battle->RemoveScriptedEventsForActor(this);
+		current_battle->RemoveActionsForActor(this);
 	}
 	else {
 		SetHitPoints(GetHitPoints() - _damage_dealt);
@@ -160,9 +161,10 @@ bool BattleActor::TEMP_IsAttacking() const
 }
 
 // *****************************************************************************
-// BattleCharacterActor class
+// BattleCharacter class
 // *****************************************************************************
-BattleCharacterActor::BattleCharacterActor(GlobalCharacter * character, float x_location, float y_location) :
+
+BattleCharacter::BattleCharacter(GlobalCharacter * character, float x_location, float y_location) :
 	BattleActor(),
 	_global_character(character)
 	/*_x_location(x_location),
@@ -206,7 +208,7 @@ BattleCharacterActor::BattleCharacterActor(GlobalCharacter * character, float x_
 }
 
 
-BattleCharacterActor::~BattleCharacterActor() {
+BattleCharacter::~BattleCharacter() {
 	//FIX ME
 	VideoManager->DeleteImage(_time_meter_portrait);
 	//VideoManager->DeleteImage(_time_portrait_selected);
@@ -215,7 +217,7 @@ BattleCharacterActor::~BattleCharacterActor() {
 }
 
 
-/*void BattleCharacterActor::ResetWaitTime()
+/*void BattleCharacter::ResetWaitTime()
 {
 	_wait_time.Reset();// = 5000;
 	_wait_time.Initialize();
@@ -224,9 +226,9 @@ BattleCharacterActor::~BattleCharacterActor() {
 	_time_portrait_location = 128.f;
 }*/
 
-// Updates the state of the character. Must be called every frame!
-void BattleCharacterActor::Update()
-{	
+
+
+void BattleCharacter::Update() {
 	/*if (GetActor()->IsAlive() == false)
 	{
 		current_battle->RemoveScriptedEventsForActor(this);
@@ -247,27 +249,27 @@ void BattleCharacterActor::Update()
 	//	_time_portrait_location += SystemManager->GetUpdateTime() * (405.0f / _wait_time.GetDuration());	
 }
 
-//Calculates the actor's base physical attack damage
-void BattleCharacterActor::CalcPhysicalAttack()
-{
+
+
+void BattleCharacter::CalcPhysicalAttack() {
 	_physical_attack = _strength;
 
 	if (GetActor()->GetWeaponEquipped())
 		_physical_attack += GetActor()->GetWeaponEquipped()->GetPhysicalAttack();
 }
 
-//Calculates the actor's base metaphysical attack damage
-void BattleCharacterActor::CalcMetaPhysicalAttack()
-{
+
+
+void BattleCharacter::CalcMetaPhysicalAttack() {
 	_metaphysical_attack = _vigor;
 
 	if (GetActor()->GetWeaponEquipped())
 		_metaphysical_attack += GetActor()->GetWeaponEquipped()->GetMetaphysicalAttack();
 }
 
-//Calculates the actor's base physical defense
-void BattleCharacterActor::CalcPhysicalDefense(hoa_global::GlobalAttackPoint* attack_point)
-{
+
+
+void BattleCharacter::CalcPhysicalDefense(hoa_global::GlobalAttackPoint* attack_point) {
 	_physical_defense = _fortitude;
 	std::vector<GlobalArmor*>* armor = GetActor()->GetArmorEquipped();
 
@@ -282,9 +284,8 @@ void BattleCharacterActor::CalcPhysicalDefense(hoa_global::GlobalAttackPoint* at
 	}
 }
 
-//Calculates the actor's base metaphysical defense
-void BattleCharacterActor::CalcMetaPhysicalDefense(hoa_global::GlobalAttackPoint* attack_point)
-{
+
+void BattleCharacter::CalcMetaPhysicalDefense(hoa_global::GlobalAttackPoint* attack_point) {
 	_metaphysical_defense = _protection;
 
 	std::vector<GlobalArmor*>* armor = GetActor()->GetArmorEquipped();
@@ -300,9 +301,9 @@ void BattleCharacterActor::CalcMetaPhysicalDefense(hoa_global::GlobalAttackPoint
 	}
 }
 
-//Calculates the actor's evade
-void BattleCharacterActor::CalcEvade(hoa_global::GlobalAttackPoint* attack_point)
-{
+
+
+void BattleCharacter::CalcEvade(hoa_global::GlobalAttackPoint* attack_point) {
 	_combat_evade = _evade;
 
 	//std::vector<GlobalArmor*> armor = GetActor()->GetArmorEquipped();
@@ -317,8 +318,9 @@ void BattleCharacterActor::CalcEvade(hoa_global::GlobalAttackPoint* attack_point
 	}
 }
 
-// Draws the character's current sprite animation frame
-void BattleCharacterActor::DrawSprite() {
+
+
+void BattleCharacter::DrawSprite() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 
 	if (IsAlive()) {
@@ -359,7 +361,7 @@ void BattleCharacterActor::DrawSprite() {
 
 
 // Draws the character's damage-blended face portrait
-void BattleCharacterActor::DrawPortrait() {
+void BattleCharacter::DrawPortrait() {
 	std::vector<StillImage> & portrait_frames = *(GetActor()->GetBattlePortraits());
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 	VideoManager->Move(48, 9);
@@ -397,7 +399,7 @@ void BattleCharacterActor::DrawPortrait() {
 
 
 // Draws the character's portrait on the time meter
-/*void BattleCharacterActor::DrawTimePortrait(bool is_selected) {
+/*void BattleCharacter::DrawTimePortrait(bool is_selected) {
 
 	if (GetActor()->IsAlive()) {
 		VideoManager->Move(995, _time_portrait_location);
@@ -409,7 +411,7 @@ void BattleCharacterActor::DrawPortrait() {
 	}
 }*/
 // Draws the character's status information
-void BattleCharacterActor::DrawStatus() {
+void BattleCharacter::DrawStatus() {
 	// Used to determine where to draw the character's status
 	float y_offset = 0.0f;
 
@@ -499,11 +501,11 @@ void BattleCharacterActor::DrawStatus() {
 		VideoManager->MoveRelative(100, 0);
 		VideoManager->DrawText(NumberToString(GetSkillPoints()));
 	}
-}
+} // void BattleCharacter::DrawStatus()
 
 
 // Gives a specific amount of damage for the character
-/*void BattleCharacterActor::TakeDamage(uint32 damage)
+/*void BattleCharacter::TakeDamage(uint32 damage)
 {
 	_total_time_damaged = 1;
 	_damage_dealt = damage;
@@ -519,16 +521,17 @@ void BattleCharacterActor::DrawStatus() {
 }*/
 
 //For now, only update HP and SP
-void BattleCharacterActor::UpdateGlobalActorStats()
+void BattleCharacter::UpdateGlobalActorStats()
 {
 	GetActor()->SetHitPoints(GetHitPoints());
 	GetActor()->SetSkillPoints(GetSkillPoints());
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// EnemyActor class
-////////////////////////////////////////////////////////////////////////////////
-BattleEnemyActor::BattleEnemyActor(GlobalEnemy enemy, float x_location, float y_location) :
+// /////////////////////////////////////////////////////////////////////////////
+// BattleEnemy class
+// /////////////////////////////////////////////////////////////////////////////
+
+BattleEnemy::BattleEnemy(GlobalEnemy enemy, float x_location, float y_location) :
 	BattleActor(),
 	_global_enemy(enemy.GetID())
 	/*_x_location(x_location),
@@ -562,14 +565,14 @@ BattleEnemyActor::BattleEnemyActor(GlobalEnemy enemy, float x_location, float y_
 
 
 
-BattleEnemyActor::~BattleEnemyActor() {
+BattleEnemy::~BattleEnemy() {
 	// FIX ME
 	VideoManager->DeleteImage(_time_meter_portrait);
 	//VideoManager->DeleteImage(_time_portrait_selected);
 }
 
 //Calculates the actor's base physical attack damage
-void BattleEnemyActor::CalcPhysicalAttack()
+void BattleEnemy::CalcPhysicalAttack()
 {
 	_physical_attack = _strength;
 
@@ -578,7 +581,7 @@ void BattleEnemyActor::CalcPhysicalAttack()
 }
 
 //Calculates the actor's base metaphysical attack damage
-void BattleEnemyActor::CalcMetaPhysicalAttack()
+void BattleEnemy::CalcMetaPhysicalAttack()
 {
 	_metaphysical_attack = _vigor;
 
@@ -587,7 +590,7 @@ void BattleEnemyActor::CalcMetaPhysicalAttack()
 }
 
 //Calculates the actor's base physical defense
-void BattleEnemyActor::CalcPhysicalDefense(GlobalAttackPoint* attack_point)
+void BattleEnemy::CalcPhysicalDefense(GlobalAttackPoint* attack_point)
 {
 	_physical_defense = _fortitude;
 
@@ -598,7 +601,7 @@ void BattleEnemyActor::CalcPhysicalDefense(GlobalAttackPoint* attack_point)
 }
 
 //Calculates the actor's base metaphysical defense
-void BattleEnemyActor::CalcMetaPhysicalDefense(GlobalAttackPoint* attack_point)
+void BattleEnemy::CalcMetaPhysicalDefense(GlobalAttackPoint* attack_point)
 {
 	_metaphysical_defense = _protection;
 
@@ -609,7 +612,7 @@ void BattleEnemyActor::CalcMetaPhysicalDefense(GlobalAttackPoint* attack_point)
 }
 
 //Calculates the actor's base evade
-void BattleEnemyActor::CalcEvade(hoa_global::GlobalAttackPoint* attack_point)
+void BattleEnemy::CalcEvade(hoa_global::GlobalAttackPoint* attack_point)
 {
 	_combat_evade = _evade;
 
@@ -625,7 +628,7 @@ void BattleEnemyActor::CalcEvade(hoa_global::GlobalAttackPoint* attack_point)
 	}
 }
 
-/*void BattleEnemyActor::ResetWaitTime()
+/*void BattleEnemy::ResetWaitTime()
 {
 	_wait_time.Reset();
 	_wait_time.Initialize();
@@ -636,7 +639,7 @@ void BattleEnemyActor::CalcEvade(hoa_global::GlobalAttackPoint* attack_point)
 
 // Compares the Y-coordinates of the actors, used for sorting the actors up-down when drawing
 // BROKEN!!! My bad -CD
-bool BattleEnemyActor::operator<(const BattleEnemyActor & other) const
+bool BattleEnemy::operator<(const BattleEnemy & other) const
 {
 	//if ((_y_location - ((*GetActor()).GetHeight())) > (other.GetYLocation() - (*(other.GetActor()).GetHeight())))
 	//	return true;
@@ -645,7 +648,7 @@ bool BattleEnemyActor::operator<(const BattleEnemyActor & other) const
 }
 
 // Updates the action status of the enemy
-void BattleEnemyActor::Update() {
+void BattleEnemy::Update() {
 
 	//if (_wait_time)
 	//	_wait_time -= SystemManager->GetUpdateTime();
@@ -666,7 +669,7 @@ void BattleEnemyActor::Update() {
 			//Lua stack.
 
 			/*std::deque<BattleActor*> final_targets;
-			std::deque<BattleCharacterActor*> targets = current_battle->GetCharacters();
+			std::deque<BattleCharacter*> targets = current_battle->GetCharacters();
 
 			for (uint8 i = 0; i < targets.size(); i++) {
 				final_targets.push_back(dynamic_cast<BattleActor*>(targets[i]));
@@ -676,10 +679,10 @@ void BattleEnemyActor::Update() {
 			SetQueuedToPerform(true);
 			GlobalSkill* skill = (GetActor()->GetSkills()->begin()->second);
 			//FIX ME Until we have AI, pick Claudius
-			ScriptEvent *se = new ScriptEvent(this, current_battle->GetPlayerCharacterAt(0), skill);
-			current_battle->AddScriptEventToQueue(se);
+			BattleAction *se = new SkillAction(this, current_battle->GetPlayerCharacterAt(0), skill);
+			current_battle->AddBattleActionToQueue(se);
 
-			//current_battle->AddScriptEventToQueue(new ScriptEvent(this, final_targets, "sword_swipe", 3000));
+			//current_battle->AddBattleActionToQueue(new BattleAction(this, final_targets, "sword_swipe", 3000));
 			SetXLocation(GetXOrigin()); // Always attack from the starting location
 		//}
 		//FIX ME have to use char stats
@@ -700,7 +703,7 @@ void BattleEnemyActor::Update() {
 
 
 // Draws the damage-blended enemy sprite
-void BattleEnemyActor::DrawSprite() {
+void BattleEnemy::DrawSprite() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 
 	std::vector<StillImage>& sprite_frames = *(GetActor()->GetBattleSpriteFrames());
@@ -777,7 +780,7 @@ void BattleEnemyActor::DrawSprite() {
 }
 
 // Draws the enemy's time meter portrait
-/*void BattleEnemyActor::DrawTimePortrait(bool is_selected)
+/*void BattleEnemy::DrawTimePortrait(bool is_selected)
 {
 	if (GetActor()->IsAlive()) {
 		VideoManager->Move(995, _time_portrait_location);
@@ -789,8 +792,9 @@ void BattleEnemyActor::DrawSprite() {
 	}
 }*/
 
-// Draws the enemy's status information
-void BattleEnemyActor::DrawStatus() {
+
+
+void BattleEnemy::DrawStatus() {
 	// Draw the enemy's name
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 	VideoManager->SetTextColor(Color::white);
@@ -816,7 +820,7 @@ void BattleEnemyActor::DrawStatus() {
 
 
 // Gives a specific amount of damage for the enemy
-/*void BattleEnemyActor::TakeDamage(uint32 damage)
+/*void BattleEnemy::TakeDamage(uint32 damage)
 {
 	_total_time_damaged = 1;
 	_damage_dealt = damage;

@@ -193,11 +193,13 @@ namespace hoa_battle {
 
 	namespace private_battle {
 		class BattleActor;
-		class BattleCharacterActor;
-		class BattleEnemyActor;
+		class BattleCharacter;
+		class BattleEnemy;
 
+		class BattleAction;
+		class SkillAction;
+		class ItemAction;
 		class ActorEffect;
-		class ScriptEvent;
 
 		class ActionWindow;
 		class FinishWindow;
