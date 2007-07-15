@@ -177,6 +177,9 @@ public:
 	
 	private_battle::ACTOR_STATE GetState() const
 		{ return _state; }
+
+	uint32 GetIndex() const
+		{ return _index; }
 	
 	float GetXOrigin() const
 		{ return _x_origin; }
@@ -198,6 +201,9 @@ public:
 
 	void SetState(private_battle::ACTOR_STATE state)
 		{ _state = state; }
+
+	void SetIndex(uint32 index)
+		{ _index = index; }
 
 	void SetXOrigin(float x_origin)
 		{ _x_origin = x_origin; }

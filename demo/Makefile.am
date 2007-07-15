@@ -105,6 +105,8 @@ MODES_DIR = src/modes
 modes_SOURCES = \
 	$(MODES_DIR)/battle/battle.cpp \
 	$(MODES_DIR)/battle/battle.h \
+	$(MODES_DIR)/battle/battle_actions.cpp \
+	$(MODES_DIR)/battle/battle_actions.h \
 	$(MODES_DIR)/battle/battle_actors.cpp \
 	$(MODES_DIR)/battle/battle_actors.h \
 	$(MODES_DIR)/battle/battle_windows.cpp \
