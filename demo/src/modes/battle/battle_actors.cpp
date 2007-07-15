@@ -28,6 +28,8 @@
 #include "battle.h"
 #include "battle_actors.h"
 
+using namespace std;
+
 using namespace hoa_utils;
 using namespace hoa_audio;
 using namespace hoa_video;
@@ -46,15 +48,16 @@ namespace private_battle {
 // BattleActor class
 // *****************************************************************************
 
-BattleActor::BattleActor() : _total_time_damaged(0),
-	_damage_dealt(0),
-	_is_queued_to_perform(false)
+BattleActor::BattleActor(GlobalActor* actor, float x_origin, float y_origin) :
+	_actor(actor),
+	_state(ACTOR_INVALID),
+	_x_origin(x_origin),
+	_y_origin(y_origin),
+	_x_location(x_origin),
+	_y_location(y_origin),
+	_total_time_damaged(0),
+	_damage_dealt(0)
 {
-	//Load time portrait selector
-	_time_portrait_selected.SetDimensions(45,45);
-	_time_portrait_selected.SetFilename("img/menus/stamina_icon_selected.png");
-	VideoManager->LoadImage(_time_portrait_selected);
-
 	// Reset attack timer, TEMP CODE!!!!
 	_TEMP_attack_animation_timer.Initialize(0);
 	_TEMP_attack_animation_timer.Run();
@@ -62,142 +65,64 @@ BattleActor::BattleActor() : _total_time_damaged(0),
 
 
 
-BattleActor::~BattleActor() {
-	VideoManager->DeleteImage(_time_portrait_selected);
-}
-
-//Copies stats from the GlobalActor handle that is passed in
-void BattleActor::InitBattleActorStats(hoa_global::GlobalActor* actor)
-{
-	SetMaxHitPoints(actor->GetMaxHitPoints());
-	SetMaxSkillPoints(actor->GetMaxSkillPoints());
-	SetHitPoints(actor->GetHitPoints());
-	SetSkillPoints(actor->GetSkillPoints());
-	SetStrength(actor->GetStrength());
-	SetVigor(actor->GetVigor());
-	SetFortitude(actor->GetFortitude());
-	SetProtection(actor->GetProtection());
-	SetAgility(actor->GetAgility());
-	SetEvade(actor->GetEvade());
-
-	CalcPhysicalAttack();
-	CalcMetaPhysicalAttack();
-	CalcPhysicalDefense();
-	CalcMetaPhysicalDefense();
-}
-
-// Draws the character's portrait on the time meter
-void BattleActor::DrawTimePortrait(bool is_selected) {
+void BattleActor::DrawStaminaIcon(bool is_selected) {
 	if (IsAlive()) {
-		VideoManager->Move(995, _time_portrait_location);
-
-		VideoManager->DrawImage(_time_meter_portrait);
-
+		VideoManager->Move(995, _stamina_icon_location);
+		VideoManager->DrawImage(_stamina_icon);
 		if (is_selected)
-			VideoManager->DrawImage(_time_portrait_selected);
+			VideoManager->DrawImage(current_battle->_stamina_icon_selected);
 	}
 }
 
-//Reset actor wait time
-void BattleActor::ResetWaitTime()
-{
+
+
+void BattleActor::ResetWaitTime() {
 	_wait_time.Reset();
 	_wait_time.Run();
-
-	//Sets time meter portrait position
-	_time_portrait_location = 128.f;
+	_stamina_icon_location = STAMINA_LOCATION_BOTTOM;
 }
 
 
-//For when he dies
-void BattleActor::OnDeath()
-{
-	GetWaitTime()->Reset();
-}
 
-//For when he is given new life! LIFE!
-void BattleActor::OnLife()
-{
-	GetWaitTime()->Run();
-}
-
-// Gives a specific amount of damage for the actor
-// Switched from uint to int to allow for nullified attacks
-//(i.e. attacks where damage dealt is < defense)
-void BattleActor::TakeDamage(int32 damage)
-{
+void BattleActor::TakeDamage(int32 damage) {
 	_total_time_damaged = 1;
 
-	if (damage <= 0)
-	{
+	if (damage <= 0) {
 		_damage_dealt = RandomBoundedInteger(1, 5);
 	}
-	else
-	{
+	else {
 		_damage_dealt = damage + static_cast<uint32>(RandomBoundedInteger(0, 4));
 	}
 
-	if (static_cast<uint32>(_damage_dealt) >= GetHitPoints()) // Was it a killing blow?
-	{
-		SetHitPoints(0);
-		OnDeath();
+	if (static_cast<uint32>(_damage_dealt) >= GetActor()->GetHitPoints()) { // Was it a killing blow?
+		GetActor()->SetHitPoints(0);
+		GetWaitTime()->Reset();
 		current_battle->RemoveActionsForActor(this);
+		_state = ACTOR_DEAD;
 	}
 	else {
-		SetHitPoints(GetHitPoints() - _damage_dealt);
+		GetActor()->SubtractHitPoints(_damage_dealt);
 	}
 }
 
-void BattleActor::TEMP_ResetAttackTimer()
-{
+
+
+void BattleActor::TEMP_ResetAttackTimer() {
 	_TEMP_attack_animation_timer.Initialize(1000);
 	_TEMP_attack_animation_timer.Run();
-}
-
-// Is the actor attacking right now
-bool BattleActor::TEMP_IsAttacking() const
-{
-	return !_TEMP_attack_animation_timer.IsFinished();
 }
 
 // *****************************************************************************
 // BattleCharacter class
 // *****************************************************************************
 
-BattleCharacter::BattleCharacter(GlobalCharacter * character, float x_location, float y_location) :
-	BattleActor(),
-	_global_character(character)
-	/*_x_location(x_location),
-	_y_location(y_location),
-	_x_origin(_x_location),
-	_y_origin(_y_location)*/
-	//_total_time_damaged(0),
-	//_damage_dealt(0),
-	//_is_queued_to_perform(false)
+BattleCharacter::BattleCharacter(GlobalCharacter* character, float x_origin, float y_origin) :
+	BattleActor(character, x_origin, y_origin)
 {
-	//Cannot initalize protected members in init list for some reason
-	_x_location = x_location;
-	_y_location = y_location;
-	_x_origin = _x_location;
-	_y_origin = _y_location;
-	//FIX ME
-	_time_meter_portrait.SetFilename("img/icons/actors/characters/" + character->GetFilename() + ".png");
-	_time_meter_portrait.SetDimensions(45,45);
-	VideoManager->LoadImage(_time_meter_portrait);
-
-	//Load time portrait selector
-	/*_time_portrait_selected.SetDimensions(45,45);
-	_time_portrait_selected.SetFilename("img/menus/stamina_icon_selected.png");
-	VideoManager->LoadImage(_time_portrait_selected);*/
-
-	//_time_portrait_location = 128;
-	//FIX ME Use char stats to determine wait time
-	//FIX ME #2 Do not initialize here.  Have BattleMode loop through all actors
-	// and scale wait time based on slowest actor
-	//_wait_time.SetDuration(5000);
-	//ResetWaitTime();
-	//_wait_time.Initialize();
-	//_action_state = ACTION_IDLE;
+	_stamina_icon.SetFilename("img/icons/actors/characters/" + character->GetFilename() + ".png");
+	_stamina_icon.SetDimensions(45,45);
+	if (VideoManager->LoadImage(_stamina_icon) == false)
+		cerr << "oh noes" << endl;
 
 	// Load images for the down menu
 	_status_bar_cover_image.SetFilename("img/menus/bar_cover.png");
@@ -205,117 +130,32 @@ BattleCharacter::BattleCharacter(GlobalCharacter * character, float x_location, 
 
 	_status_menu_image.SetFilename("img/menus/battle_character_menu.png");
 	VideoManager->LoadImage(_status_menu_image);
-}
+
+	_state = ACTOR_IDLE;
+} // BattleCharacter::BattleCharacter(GlobalCharacter* character, float x_origin, float y_origin)
+
 
 
 BattleCharacter::~BattleCharacter() {
-	//FIX ME
-	VideoManager->DeleteImage(_time_meter_portrait);
-	//VideoManager->DeleteImage(_time_portrait_selected);
+	VideoManager->DeleteImage(_stamina_icon);
 	VideoManager->DeleteImage(_status_bar_cover_image);
 	VideoManager->DeleteImage(_status_menu_image);
 }
 
 
-/*void BattleCharacter::ResetWaitTime()
-{
-	_wait_time.Reset();// = 5000;
-	_wait_time.Initialize();
-
-	//Sets time meter portrait position
-	_time_portrait_location = 128.f;
-}*/
-
-
 
 void BattleCharacter::Update() {
-	/*if (GetActor()->IsAlive() == false)
-	{
-		current_battle->RemoveScriptedEventsForActor(this);
-	}*/
-	if (!_wait_time.IsFinished() && IsAlive() && !IsQueuedToPerform() && _wait_time.IsRunning())
-		_time_portrait_location += SystemManager->GetUpdateTime() * (405.0f / _wait_time.GetDuration());
+	if (_state == ACTOR_IDLE)
+		_stamina_icon_location += SystemManager->GetUpdateTime() * (405.0f / _wait_time.GetDuration());
 
-	GetActor()->RetrieveBattleAnimation("idle")->Update();
-
-	if (TEMP_IsAttacking()) {
+	if (_state == ACTOR_ACTING) {
 		if ((_x_location - _x_origin) < 50)
 			_x_location += 0.8f * static_cast<float>(SystemManager->GetUpdateTime());
 	}
 	else
 		SetXLocation(GetXOrigin()); // Restore original place
 
-	//if (!_wait_time.IsFinished() && GetActor()->IsAlive() && !IsQueuedToPerform())
-	//	_time_portrait_location += SystemManager->GetUpdateTime() * (405.0f / _wait_time.GetDuration());	
-}
-
-
-
-void BattleCharacter::CalcPhysicalAttack() {
-	_physical_attack = _strength;
-
-	if (GetActor()->GetWeaponEquipped())
-		_physical_attack += GetActor()->GetWeaponEquipped()->GetPhysicalAttack();
-}
-
-
-
-void BattleCharacter::CalcMetaPhysicalAttack() {
-	_metaphysical_attack = _vigor;
-
-	if (GetActor()->GetWeaponEquipped())
-		_metaphysical_attack += GetActor()->GetWeaponEquipped()->GetMetaphysicalAttack();
-}
-
-
-
-void BattleCharacter::CalcPhysicalDefense(hoa_global::GlobalAttackPoint* attack_point) {
-	_physical_defense = _fortitude;
-	std::vector<GlobalArmor*>* armor = GetActor()->GetArmorEquipped();
-
-	for (uint32 i = 0; i < armor->size(); ++i)
-	{
-		_physical_defense += armor->at(i)->GetPhysicalDefense();
-	}
-
-	if (attack_point)
-	{
-		_physical_defense += static_cast<uint32>(_physical_defense * attack_point->GetFortitudeModifier());
-	}
-}
-
-
-void BattleCharacter::CalcMetaPhysicalDefense(hoa_global::GlobalAttackPoint* attack_point) {
-	_metaphysical_defense = _protection;
-
-	std::vector<GlobalArmor*>* armor = GetActor()->GetArmorEquipped();
-
-	for (uint32 i = 0; i < armor->size(); ++i)
-	{
-		_metaphysical_defense += armor->at(i)->GetMetaphysicalDefense();
-	}
-
-	if (attack_point)
-	{
-		_metaphysical_defense += static_cast<uint32>(_metaphysical_defense * attack_point->GetProtectionModifier());
-	}
-}
-
-
-
-void BattleCharacter::CalcEvade(hoa_global::GlobalAttackPoint* attack_point) {
-	_combat_evade = _evade;
-
-	//std::vector<GlobalArmor*> armor = GetActor()->GetArmorEquipped();
-
-	/*for (uint32 i = 0; i < armor.size(); ++i)
-	{
-		_metaphysical_defense += armor[i]->GetMetaphysicalDefense();
-	}*/
-	if (attack_point)
-	{
-		_combat_evade += static_cast<uint32>(_combat_evade * attack_point->GetEvadeModifier());
-	}
+	GetActor()->RetrieveBattleAnimation("idle")->Update();
 }
 
 
@@ -341,11 +181,11 @@ void BattleCharacter::DrawSprite() {
 		// TEMP: determine if character sprite needs red damage numbers drawn next to it
 		if (_total_time_damaged > 0) {
 			_total_time_damaged += SystemManager->GetUpdateTime();
-			VideoManager->SetFont( "battle_dmg" );
+			VideoManager->SetFont("battle_dmg");
 			VideoManager->SetTextColor(Color::red);
 			VideoManager->Move(GetXLocation() + 40.0f, GetYLocation() + ( _total_time_damaged / 35.0f ) + 100.0f);
 			VideoManager->DrawText(NumberToString(_damage_dealt));
-			VideoManager->SetFont( "battle" );
+			VideoManager->SetFont("battle");
 
 			if (_total_time_damaged > 3000) { // Show it for three seconds
 				_total_time_damaged = 0;
@@ -357,16 +197,16 @@ void BattleCharacter::DrawSprite() {
 	else {
 		// TODO: draw the "incapacitated" character here
 	}
-}
+} // void BattleCharacter::DrawSprite()
 
 
-// Draws the character's damage-blended face portrait
+
 void BattleCharacter::DrawPortrait() {
 	std::vector<StillImage> & portrait_frames = *(GetActor()->GetBattlePortraits());
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 	VideoManager->Move(48, 9);
 
-	float hp_percent =  static_cast<float>(GetHitPoints()) / static_cast<float>(GetMaxHitPoints());
+	float hp_percent =  static_cast<float>(GetActor()->GetHitPoints()) / static_cast<float>(GetActor()->GetMaxHitPoints());
 
 	if (GetActor()->GetHitPoints() == 0) {
 	  VideoManager->DrawImage(portrait_frames[4]);
@@ -398,19 +238,13 @@ void BattleCharacter::DrawPortrait() {
 }
 
 
-// Draws the character's portrait on the time meter
-/*void BattleCharacter::DrawTimePortrait(bool is_selected) {
 
-	if (GetActor()->IsAlive()) {
-		VideoManager->Move(995, _time_portrait_location);
+void BattleCharacter::DrawInformation() {
+	// TODO: Draw the character's statistics in the action window
+}
 
-		VideoManager->DrawImage(_time_meter_portrait);
 
-		if (is_selected)
-			VideoManager->DrawImage(_time_portrait_selected);
-	}
-}*/
-// Draws the character's status information
+
 void BattleCharacter::DrawStatus() {
 	// Used to determine where to draw the character's status
 	float y_offset = 0.0f;
@@ -438,53 +272,43 @@ void BattleCharacter::DrawStatus() {
 	VideoManager->Move(225.0f, 90.0f + y_offset);
  	VideoManager->DrawText(GetActor()->GetName());
 
-	// If the swap key is being held down, draw status icons instead of HP and SP bars
+	// If the swap key is being held down draw status icons
 	if (InputManager->SwapState()) {
-		// TODO: draw status icons and information
-
-		// Draw all of the character's current status afflictions
-		// VideoManager->MoveRel(152, 4);
-		// for (uint8 i = 0; i < _effects.size(); i++) {
-		// 	VideoManager->DrawImage(_effects[i].image);
-		// 	VideoManager->MoveRel(25, 0);
-		// }
+		// TODO: draw status icons and information for actor
 	}
+
+	// Otherwise, draw the HP and SP bars
 	else {
-		// Shrinking bars (HP, SP)
 		float bar_size;
 
-		// HP, green bar
+		// Draw HP bar in green
 		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_NO_BLEND, 0);
-		bar_size = static_cast<float>(83*GetHitPoints())/static_cast<float>(GetMaxHitPoints());
+		bar_size = static_cast<float>(83 * GetActor()->GetHitPoints()) / static_cast<float>(GetActor()->GetMaxHitPoints());
 		VideoManager->Move(312, 90 + y_offset);
 
-		if (GetHitPoints() > 0)		// Draw color bar (if needed)
-		{
-			VideoManager->DrawRectangle(bar_size,6,Color(0.133f,0.455f,0.133f,1.0f));
+		if (GetActor()->GetHitPoints() > 0) { // Draw color bar if needed
+			VideoManager->DrawRectangle(bar_size, 6, Color(0.133f, 0.455f, 0.133f, 1.0f));
 		}
-		if (GetHitPoints() != GetMaxHitPoints())	// Draw black bar (if needed)
-		{
+		if (GetActor()->GetHitPoints() != GetActor()->GetMaxHitPoints()) { // Draw black bar if needed
 			VideoManager->MoveRelative(bar_size, 0.0f);
-			VideoManager->DrawRectangle(83.0f-bar_size,6,Color::black);
+			VideoManager->DrawRectangle(83.0f - bar_size, 6, Color::black);
 			VideoManager->Move(312, 90 + y_offset);
 		}
 
 		VideoManager->SetDrawFlags(VIDEO_BLEND_ADD, 0);
 		VideoManager->DrawImage(_status_bar_cover_image);
 
-		// SP, blue bar
+		// Draw SP bar in blue
 		VideoManager->SetDrawFlags(VIDEO_NO_BLEND, 0);
-		bar_size = static_cast<float>(84*GetSkillPoints())/static_cast<float>(GetMaxSkillPoints());
+		bar_size = static_cast<float>(84 * GetActor()->GetSkillPoints()) / static_cast<float>(GetActor()->GetMaxSkillPoints());
 		VideoManager->Move(412, 90 + y_offset);
 
-		if (GetSkillPoints() > 0)	// Draw color bar (if needed)
-		{
-			VideoManager->DrawRectangle(bar_size,6,Color(0.129f,0.263f,0.451f,1.0f));
+		if (GetActor()->GetSkillPoints() > 0) { // Draw color bar if needed
+			VideoManager->DrawRectangle(bar_size,6,Color(0.129f, 0.263f, 0.451f, 1.0f));
 		}
-		if (GetHitPoints() != GetMaxHitPoints())	// Draw black bar (if needed)
-		{
+		if (GetActor()->GetHitPoints() != GetActor()->GetMaxHitPoints()) { // Draw black bar if needed
 			VideoManager->MoveRelative(bar_size,0.0f);
-			VideoManager->DrawRectangle(83.0f-bar_size,6,Color::black);
+			VideoManager->DrawRectangle(83.0f - bar_size, 6, Color::black);
 			VideoManager->Move(412, 90 + y_offset);
 		}
 
@@ -493,223 +317,81 @@ void BattleCharacter::DrawStatus() {
 
 		// Draw the character's current health on top of the middle of the HP bar
 		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-
 		VideoManager->Move(355.0f, 90.0f + y_offset);
-		VideoManager->DrawText(NumberToString(GetHitPoints()));
+		VideoManager->DrawText(NumberToString(GetActor()->GetHitPoints()));
 
 		// Draw the character's current skill points on top of the middle of the SP bar
 		VideoManager->MoveRelative(100, 0);
-		VideoManager->DrawText(NumberToString(GetSkillPoints()));
+		VideoManager->DrawText(NumberToString(GetActor()->GetSkillPoints()));
 	}
-} // void BattleCharacter::DrawStatus()
-
-
-// Gives a specific amount of damage for the character
-/*void BattleCharacter::TakeDamage(uint32 damage)
-{
-	_total_time_damaged = 1;
-	_damage_dealt = damage;
-
-	if (damage >= GetActor()->GetHitPoints()) // Was it a killing blow?
-	{
-		GetActor()->SetHitPoints(0);
-		current_battle->RemoveScriptedEventsForActor(this);
-	}
-	else {
-		GetActor()->SetHitPoints(GetActor()->GetHitPoints() - damage);
-	}
-}*/
-
-//For now, only update HP and SP
-void BattleCharacter::UpdateGlobalActorStats()
-{
-	GetActor()->SetHitPoints(GetHitPoints());
-	GetActor()->SetSkillPoints(GetSkillPoints());
-}
+} // void BattleCharacter::DrawInformation()
 
 // /////////////////////////////////////////////////////////////////////////////
 // BattleEnemy class
 // /////////////////////////////////////////////////////////////////////////////
 
-BattleEnemy::BattleEnemy(GlobalEnemy enemy, float x_location, float y_location) :
-	BattleActor(),
-	_global_enemy(enemy.GetID())
-	/*_x_location(x_location),
-	_y_location(y_location),
-	_x_origin(_x_location),
-	_y_origin(_y_location)*/
-	/*_total_time_damaged(0),
-	_damage_dealt(0),
-	_is_queued_to_perform(false)*/
+BattleEnemy::BattleEnemy(GlobalEnemy* enemy, float x_origin, float y_origin) :
+	BattleActor(enemy, x_origin, y_origin)
 {
-	//Cannot initalize protected members in init list for some reason
-	_x_location = x_location;
-	_y_location = y_location;
-	_x_origin = _x_location;
-	_y_origin = _y_location;
+	_stamina_icon.SetFilename("img/icons/actors/enemies/" + _actor->GetFilename() + ".png");
+	_stamina_icon.SetDimensions(45,45);
+	if (VideoManager->LoadImage(_stamina_icon) == false)
+		cerr << "oh noes" << endl;
 
-	//FIX ME
-	_time_meter_portrait.SetFilename("img/icons/actors/enemies/" + _global_enemy.GetFilename() + ".png");
-	//_time_meter_portrait.SetFilename("img/menus/stamina_icon.png");
-	_time_meter_portrait.SetDimensions(45,45);
-	VideoManager->LoadImage(_time_meter_portrait);
-
-	//Load time portrait selector
-	/*_time_portrait_selected.SetDimensions(45,45);
-	_time_portrait_selected.SetFilename("img/menus/stamina_icon.png");
-	VideoManager->LoadImage(_time_portrait_selected);*/
-
-	//GetWaitTime()->SetDuration(2000);
-	//ResetWaitTime();
+	_state = ACTOR_IDLE;
 }
 
 
 
 BattleEnemy::~BattleEnemy() {
-	// FIX ME
-	VideoManager->DeleteImage(_time_meter_portrait);
-	//VideoManager->DeleteImage(_time_portrait_selected);
+	VideoManager->DeleteImage(_stamina_icon);
+
+	delete _actor;
 }
 
-//Calculates the actor's base physical attack damage
-void BattleEnemy::CalcPhysicalAttack()
-{
-	_physical_attack = _strength;
 
-	if (GetActor()->GetWeaponEquipped())
-		_physical_attack += GetActor()->GetWeaponEquipped()->GetPhysicalAttack();
-}
-
-//Calculates the actor's base metaphysical attack damage
-void BattleEnemy::CalcMetaPhysicalAttack()
-{
-	_metaphysical_attack = _vigor;
-
-	if (GetActor()->GetWeaponEquipped())
-		_metaphysical_attack += GetActor()->GetWeaponEquipped()->GetMetaphysicalAttack();
-}
-
-//Calculates the actor's base physical defense
-void BattleEnemy::CalcPhysicalDefense(GlobalAttackPoint* attack_point)
-{
-	_physical_defense = _fortitude;
-
-	if (attack_point)
-	{
-		_physical_defense += static_cast<uint32>(_physical_defense + attack_point->GetFortitudeModifier());
-	}
-}
-
-//Calculates the actor's base metaphysical defense
-void BattleEnemy::CalcMetaPhysicalDefense(GlobalAttackPoint* attack_point)
-{
-	_metaphysical_defense = _protection;
-
-	if (attack_point)
-	{
-		_metaphysical_defense += static_cast<uint32>(attack_point->GetProtectionModifier());
-	}
-}
-
-//Calculates the actor's base evade
-void BattleEnemy::CalcEvade(hoa_global::GlobalAttackPoint* attack_point)
-{
-	_combat_evade = _evade;
-
-	//std::vector<GlobalArmor*> armor = GetActor()->GetArmorEquipped();
-
-	/*for (uint32 i = 0; i < armor.size(); ++i)
-	{
-		_metaphysical_defense += armor[i]->GetMetaphysicalDefense();
-	}*/
-	if (attack_point)
-	{
-		_combat_evade += static_cast<uint32>(_combat_evade * attack_point->GetEvadeModifier());
-	}
-}
-
-/*void BattleEnemy::ResetWaitTime()
-{
-	_wait_time.Reset();
-	_wait_time.Initialize();
-	//Sets time meter portrait position
-
-	_time_portrait_location = 128.f;
-}*/
 
 // Compares the Y-coordinates of the actors, used for sorting the actors up-down when drawing
-// BROKEN!!! My bad -CD
-bool BattleEnemy::operator<(const BattleEnemy & other) const
-{
+bool BattleEnemy::operator<(const BattleEnemy & other) const {
+	// NOTE: this code is currently not working correctly
 	//if ((_y_location - ((*GetActor()).GetHeight())) > (other.GetYLocation() - (*(other.GetActor()).GetHeight())))
 	//	return true;
-	
 	return false;
 }
 
-// Updates the action status of the enemy
+
+
 void BattleEnemy::Update() {
-
-	//if (_wait_time)
-	//	_wait_time -= SystemManager->GetUpdateTime();
-	if (!_wait_time.IsFinished() && IsAlive() && !IsQueuedToPerform() && _wait_time.IsRunning())
-		_time_portrait_location += SystemManager->GetUpdateTime() * (405.0f / _wait_time.GetDuration());
-
-	if (IsAlive() && !IsQueuedToPerform() && GetWaitTime()->IsFinished())
-	{
-		//if (_wait_time.IsFinished())
-		//{
-			//_wait_time = 0;
-			//FIX ME Needs real AI decisions
-			//we can perform another attack
-			//MF: Bad bad bad.  We do not build a queue of targets.  Not anymore.
-			//All we do is have a handle to either 1 enemy or char to see which
-			//side we're attacking.  If it's a party skill, then the script just
-			//loops over them.  Besides, we don't want to send dequeues to the
-			//Lua stack.
-
-			/*std::deque<BattleActor*> final_targets;
-			std::deque<BattleCharacter*> targets = current_battle->GetCharacters();
-
-			for (uint8 i = 0; i < targets.size(); i++) {
-				final_targets.push_back(dynamic_cast<BattleActor*>(targets[i]));
-			}*/
-
-			// okay, we can perform another attack.  set us up as queued to perform.
-			SetQueuedToPerform(true);
-			GlobalSkill* skill = (GetActor()->GetSkills()->begin()->second);
-			//FIX ME Until we have AI, pick Claudius
-			BattleAction *se = new SkillAction(this, current_battle->GetPlayerCharacterAt(0), skill);
-			current_battle->AddBattleActionToQueue(se);
-
-			//current_battle->AddBattleActionToQueue(new BattleAction(this, final_targets, "sword_swipe", 3000));
-			SetXLocation(GetXOrigin()); // Always attack from the starting location
-		//}
-		//FIX ME have to use char stats
-		/*else
-			_time_portrait_location += SystemManager->GetUpdateTime() * (405.f / _wait_time.GetDuration());//.081f;*/
+	if (_state == ACTOR_IDLE) {
+		if (_wait_time.IsFinished()) { // Indicates that the idle state is now finished
+			_stamina_icon_location = STAMINA_LOCATION_SELECT;
+			_state = ACTOR_WARM_UP;
+			_DecideAction();
+		}
+		else { // If still in IDLE state, update the stamina icon's location
+			_stamina_icon_location += SystemManager->GetUpdateTime() * (405.0f / _wait_time.GetDuration());
+		}
+		return;
 	}
 
-	// If we're attacking, update the offset a little
-	// FIX ME Let the script event handle this
-	if (TEMP_IsAttacking()) {
+	// TEMP: while the enemy is attacking, update their location to show a little jolting horizontal movement
+	if (_state == ACTOR_ACTING) {
 		if ((_x_origin - _x_location) < 50)
 			_x_location -= 0.8f * static_cast<float>(SystemManager->GetUpdateTime());
 	}
-	else
-		SetXLocation(GetXOrigin()); // Restore original place
-
+	else {
+		SetXLocation(GetXOrigin()); // Restore actor to original location
+	}
 }
 
 
-// Draws the damage-blended enemy sprite
+
 void BattleEnemy::DrawSprite() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-
 	std::vector<StillImage>& sprite_frames = *(GetActor()->GetBattleSpriteFrames());
 
 	// Draw the sprite's final damage frame in grayscale and return
-	if (!IsAlive()) {
+	if (_state == ACTOR_DEAD) {
 		VideoManager->Move(_x_location, _y_location);
 		sprite_frames[3].EnableGrayScale();
 		VideoManager->DrawImage(sprite_frames[3]);
@@ -726,7 +408,7 @@ void BattleEnemy::DrawSprite() {
 
 		// Draw the enemy's damage-blended sprite frames	
 		VideoManager->Move(_x_location, _y_location);
-		float hp_percent = static_cast<float>(GetHitPoints()) / static_cast<float>(GetMaxHitPoints());
+		float hp_percent = static_cast<float>(GetActor()->GetHitPoints()) / static_cast<float>(GetActor()->GetMaxHitPoints());
 
 		// Alpha will range from 1.0 to 0.0 in the following calculations
 		if (hp_percent < 0.33f) {
@@ -750,6 +432,7 @@ void BattleEnemy::DrawSprite() {
 
 		// Draw the attack point indicator if necessary
 		if (this == current_battle->_selected_target && current_battle->_cursor_state == CURSOR_SELECT_ATTACK_POINT) {
+			VideoManager->PushState();
 			VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 			std::vector<GlobalAttackPoint*>& attack_points = *(GetActor()->GetAttackPoints());
 
@@ -758,43 +441,29 @@ void BattleEnemy::DrawSprite() {
 			VideoManager->DrawImage(current_battle->_attack_point_indicator);
 
 			// Reset default X and Y draw orientation
-			VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
+			VideoManager->PopState();
 		}
 	}
 
-	// Determine if enemy needs to have red damage text drawn next to it
+	// TEMP: Determine if enemy needs to have red damage text drawn next to it
 	if (_total_time_damaged > 0) {
 		_total_time_damaged += SystemManager->GetUpdateTime();
 
-		VideoManager->SetFont( "battle_dmg" );
+		VideoManager->SetFont("battle_dmg");
 		VideoManager->SetTextColor(Color::red);
 		VideoManager->Move(GetXLocation() + 25.0f, GetYLocation() + ( _total_time_damaged / 35.0f ) + 80.0f);
 		VideoManager->DrawText(NumberToString(_damage_dealt));
-		VideoManager->SetFont( "battle" );
+		VideoManager->SetFont("battle");
 
 		if (_total_time_damaged > 3000) {
 			_total_time_damaged = 0;
-			//current_battle->SetPerformingScript(false);
 		}
 	}
-}
-
-// Draws the enemy's time meter portrait
-/*void BattleEnemy::DrawTimePortrait(bool is_selected)
-{
-	if (GetActor()->IsAlive()) {
-		VideoManager->Move(995, _time_portrait_location);
-
-		VideoManager->DrawImage(_time_meter_portrait);
-
-		if (is_selected)
-			VideoManager->DrawImage(_time_portrait_selected);
-	}
-}*/
+} // void BattleEnemy::DrawSprite()
 
 
 
-void BattleEnemy::DrawStatus() {
+void BattleEnemy::DrawInformation() {
 	// Draw the enemy's name
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 	VideoManager->SetTextColor(Color::white);
@@ -810,30 +479,17 @@ void BattleEnemy::DrawStatus() {
 	}
 
 	// TODO Draw the icons for any status afflictions that the enemy has
-	//VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-	//VideoManager->Move(818, 12);
-// 	for (uint8 i = 0; i < _effects; i++) {
-// 		VideoManager->DrawImage(_effects[i].image);
-// 		VideoManager->MoveRel(25, 0);
-// 	}
-}
+} // void BattleEnemy::DrawInformation()
 
 
-// Gives a specific amount of damage for the enemy
-/*void BattleEnemy::TakeDamage(uint32 damage)
-{
-	_total_time_damaged = 1;
-	_damage_dealt = damage;
-	if (damage >= GetHitPoints()) // Was it a killing blow?
-	{
-		SetHitPoints(0);
-		current_battle->RemoveScriptedEventsForActor(this);
-	}
-	else {
-		SetHitPoints(GetHitPoints() - damage);
-	}
-}*/
 
+void BattleEnemy::_DecideAction() {
+	// TEMP: this selects the first skill the enemy has and the first character as a target. Needs to be changed
+	GlobalSkill* skill = GetActor()->GetSkills()->begin()->second;
+	BattleAction* action = new SkillAction(this, current_battle->GetPlayerCharacterAt(0), skill);
+	current_battle->AddBattleActionToQueue(action);
+	SetXLocation(GetXOrigin()); // Always attack from the starting location
+} // void BattleEnemy::_DecideAction()
 
 } // namespace private_battle
 

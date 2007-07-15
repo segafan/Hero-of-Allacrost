@@ -71,7 +71,7 @@ BattleAction::BattleAction(BattleActor* source, BattleActor* target, GlobalAttac
 void BattleAction::Update() {
 	if (_warm_up_time.IsRunning()) {
 		float offset = SystemManager->GetUpdateTime() * (107.f / _warm_up_time.GetDuration());
-		_source->SetTimePortraitLocation(_source->GetTimePortraitLocation() + offset);
+		_source->SetStaminaIconLocation(_source->GetStaminaIconLocation() + offset);
 	}
 
 	// TODO: Any warm up animations
@@ -96,21 +96,12 @@ SkillAction::SkillAction(BattleActor* source, BattleActor* target, GlobalSkill* 
 
 
 void SkillAction::RunScript() {
-	_source->CalcMetaPhysicalAttack();
-	_source->CalcPhysicalAttack();
-
 	if (_skill->GetTargetType() == GLOBAL_TARGET_PARTY) {
 		if (_target->IsEnemy()) {
 			BattleEnemy* enemy;
 			//Loop through all enemies and apply the item
 			for (uint32 i = 0; i < current_battle->GetNumberOfEnemies(); i++) {
 				enemy = current_battle->GetEnemyActorAt(i);
-				if (enemy->IsAlive()) {
-					enemy->CalcEvade(_attack_point);
-					enemy->CalcMetaPhysicalDefense(_attack_point);
-					enemy->CalcPhysicalDefense(_attack_point);
-				}
-
 				_skill->BattleExecute(enemy, _source);
 			}
 		}
@@ -119,12 +110,6 @@ void SkillAction::RunScript() {
 			//Loop through all party members and apply
 			for (uint32 i = 0; i < current_battle->GetNumberOfCharacters(); i++) {
 				character = current_battle->GetPlayerCharacterAt(i);
-				if (character->IsAlive()) {
-					character->CalcEvade(_attack_point);
-					character->CalcMetaPhysicalDefense(_attack_point);
-					character->CalcPhysicalDefense(_attack_point);
-				}
-
 				_skill->BattleExecute(character, _source);
 			}
 		}
@@ -132,9 +117,6 @@ void SkillAction::RunScript() {
 
 	else {
 		if (_target->IsAlive()) {
-			_target->CalcEvade(_attack_point);
-			_target->CalcMetaPhysicalDefense(_attack_point);
-			_target->CalcPhysicalDefense(_attack_point);
 			_skill->BattleExecute(_target, _source);
 		}
 
@@ -144,7 +126,7 @@ void SkillAction::RunScript() {
 		}
 	}
 
-	_source->SetSkillPoints(_source->GetSkillPoints() - _skill->GetSPRequired());
+	_source->GetActor()->SubtractSkillPoints(_skill->GetSPRequired());
 
 	// FIX ME temporary code!!!
 	if (_source) {
@@ -178,12 +160,8 @@ void ItemAction::RunScript() {
 			for (uint32 i = 0; i < current_battle->GetNumberOfEnemies(); i++) {
 				enemy = current_battle->GetEnemyActorAt(i);
 				if (enemy->IsAlive()) {
-					enemy->CalcEvade(_attack_point);
-					enemy->CalcMetaPhysicalDefense(_attack_point);
-					enemy->CalcPhysicalDefense(_attack_point);
+					_item->BattleUse(enemy, _source);
 				}
-
-				_item->BattleUse(enemy, _source);
 			}
 		}
 	
@@ -192,22 +170,12 @@ void ItemAction::RunScript() {
 			//Loop through all party members and apply
 			for (uint32 i = 0; i < current_battle->GetNumberOfCharacters(); i++) {
 				character = current_battle->GetPlayerCharacterAt(i);
-				if (character->IsAlive()) {
-					character->CalcEvade(_attack_point);
-					character->CalcMetaPhysicalDefense(_attack_point);
-					character->CalcPhysicalDefense(_attack_point);
-				}
-
 				_item->BattleUse(character, _source);
 			}
 		}
 	} // if (_item->GetTargetType() == GLOBAL_TARGET_PARTY)
 
 	else {
-		_target->CalcEvade(_attack_point);
-		_target->CalcMetaPhysicalDefense(_attack_point);
-		_target->CalcPhysicalDefense(_attack_point);
-
 		_item->BattleUse(_target, _source);
 	}
 
@@ -224,7 +192,6 @@ void ItemAction::RunScript() {
 
 } // namespace private battle
 
-
 ////////////////////////////////////////////////////////////////////////////////
 // BattleMode class -- Initialization and Destruction Code
 ////////////////////////////////////////////////////////////////////////////////
@@ -233,11 +200,6 @@ BattleMode::BattleMode() :
 	_initialized(false),
 	_battle_over(false),
 	_victorious_battle(false),
-	_victory_xp(0),
-	_victory_sp(0),
-	_victory_money(0),
-	_victory_level(false),
-	_victory_skill(false),
 	_cursor_state(CURSOR_IDLE),
 	_selected_character(NULL),
 	_selected_target(NULL),
@@ -253,7 +215,7 @@ BattleMode::BattleMode() :
 
 	mode_type = MODE_MANAGER_BATTLE_MODE;
 
-	std::vector <hoa_video::StillImage> attack_point_indicator;
+	std::vector<hoa_video::StillImage> attack_point_indicator;
 	StillImage frame;
 	frame.SetDimensions(16, 16);
 	frame.SetFilename("img/icons/battle/ap_indicator_fr0.png");
@@ -265,6 +227,11 @@ BattleMode::BattleMode() :
 	frame.SetFilename("img/icons/battle/ap_indicator_fr3.png");
 	attack_point_indicator.push_back(frame);
 
+	_stamina_icon_selected.SetDimensions(45,45);
+	_stamina_icon_selected.SetFilename("img/menus/stamina_icon_selected.png");
+	if (VideoManager->LoadImage(_stamina_icon_selected) == false)
+		cerr << "BATTLE ERROR: Failed to load stamina icon selected image" << endl;
+
 	for (uint32 i = 0; i < attack_point_indicator.size(); i++) {
 		if (!VideoManager->LoadImage(attack_point_indicator[i]))
 			cerr << "BATTLE ERROR: Failed to load attack point indicator." << endl;
@@ -275,12 +242,10 @@ BattleMode::BattleMode() :
 	}
 
 	//Load the universal time meter image
-	_universal_time_meter.SetDimensions(10, 512);
-	_universal_time_meter.SetFilename("img/menus/stamina_bar.png");
-	if (!VideoManager->LoadImage(_universal_time_meter))
+	_stamina_meter.SetDimensions(10, 512);
+	_stamina_meter.SetFilename("img/menus/stamina_bar.png");
+	if (!VideoManager->LoadImage(_stamina_meter))
 		cerr << "BATTLE ERROR: Failed to load time meter." << endl;
-
-	_victory_items.clear();
 
 	_actor_selection_image.SetDimensions(109, 78);
 	_actor_selection_image.SetFilename("img/icons/battle/character_selector.png");
@@ -294,7 +259,6 @@ BattleMode::BattleMode() :
 } // BattleMode::BattleMode()
 
 
-
 BattleMode::~BattleMode() {
 	// Don't let current_battle keep pointing to this object instance any longer
 	if (current_battle == this) {
@@ -302,7 +266,7 @@ BattleMode::~BattleMode() {
 	}
 
 	for (uint32 i = 0; i < _battle_music.size(); i++)
-		_battle_music.at(i).FreeMusic();
+		_battle_music[i].FreeMusic();
 
 	// Delete all character and enemy actors
 	for (deque<BattleCharacter*>::iterator i = _character_actors.begin(); i != _character_actors.end(); i++) {
@@ -325,8 +289,6 @@ BattleMode::~BattleMode() {
 	}
 	_action_queue.clear();
 
-	_victory_items.clear();
-
 	// Remove all of the battle images that were loaded
 	VideoManager->DeleteImage(_battle_background);
 	VideoManager->DeleteImage(_bottom_menu_image);
@@ -334,7 +296,7 @@ BattleMode::~BattleMode() {
 	VideoManager->DeleteImage(_attack_point_indicator);
 	VideoManager->DeleteImage(_swap_icon);
 	VideoManager->DeleteImage(_swap_card);
-	VideoManager->DeleteImage(_universal_time_meter);
+	VideoManager->DeleteImage(_stamina_meter);
 
 	// Delete all GUI objects that are allocated
 	delete(_action_window);
@@ -374,27 +336,24 @@ void BattleMode::Reset() {
 
 
 
-void BattleMode::AddEnemy(GlobalEnemy new_enemy) {
+void BattleMode::AddEnemy(GlobalEnemy* new_enemy) {
 	// (1): Don't add the enemy if it has an invalid ID or an experience level that is not zero
-	if (new_enemy.GetID() == 0) {
+	if (new_enemy->GetID() == 0) {
 		if (BATTLE_DEBUG) {
 			cerr << "BATTLE WARNING: attempted to add a new enemy with an invalid id (0). "
 				<< "The enemy was not added to the battle." << endl;
 		}
 		return;
 	}
-	if (new_enemy.GetExperienceLevel() != 0) {
+	if (new_enemy->GetExperienceLevel() != 0) {
 		if (BATTLE_DEBUG) {
 			cerr << "BATTLE WARNING: attempted to add a new enemy that had already been initialized to experience level "
-				<< new_enemy.GetExperienceLevel() << ". The enemy was not added to the battle." << endl;
+				<< new_enemy->GetExperienceLevel() << ". The enemy was not added to the battle." << endl;
 		}
 	}
 
 	// (2): Level the enemy up to be within a reasonable range of the party's strength
-	new_enemy.Initialize(GlobalManager->AverageActivePartyExperienceLevel());
-
-	// (3): Hold a copy of this enemy in case the battle needs to be restarted
-	_original_enemies.push_back(new_enemy);
+	new_enemy->Initialize(GlobalManager->AverageActivePartyExperienceLevel());
 
 	// (4): Construct the enemy battle actor to be placed on the battle field
 	float x = MONSTER_LOCATIONS[_next_monster_location_index][0];
@@ -408,7 +367,6 @@ void BattleMode::AddEnemy(GlobalEnemy new_enemy) {
 	_next_monster_location_index = _next_monster_location_index % 8;  // <-- Now
 
 	BattleEnemy* enemy_actor= new BattleEnemy(new_enemy, x, y);
-	enemy_actor->InitBattleActorStats(&new_enemy);
 	_enemy_actors.push_back(enemy_actor);
 }
 
@@ -479,12 +437,10 @@ void BattleMode::_Initialize() {
 		ModeManager->Pop(); // Self-destruct the battle mode
 		return;
 	}
-	// TODO: implement this later
-	// COMMENT: Implement what later?
+
 	for (uint32 i = 0; i < active_party->GetPartySize(); i++) {
 		GlobalCharacter* new_character = dynamic_cast<GlobalCharacter*>(active_party->GetActorAtIndex(i));
 		BattleCharacter* new_actor = new BattleCharacter(new_character, 256, 320);
-		new_actor->InitBattleActorStats(new_character);
 		_character_actors.push_back(new_actor);
 		_selected_character = new_actor;
 	}
@@ -493,13 +449,13 @@ void BattleMode::_Initialize() {
 
 	// (2) Loop through and find the actor with the lowest agility
 	for (uint8 i = 0; i < _enemy_actors.size(); i++) {
-		if (_enemy_actors[i]->GetAgility() < _min_agility)
-			_min_agility = _enemy_actors[i]->GetAgility();
+		if (_enemy_actors[i]->GetActor()->GetAgility() < _min_agility)
+			_min_agility = _enemy_actors[i]->GetActor()->GetAgility();
 	}
 
 	for (uint8 i = 0; i < _character_actors.size(); i++) {
-		if (_character_actors[i]->GetAgility() < _min_agility)
-			_min_agility = _character_actors[i]->GetAgility();
+		if (_character_actors[i]->GetActor()->GetAgility() < _min_agility)
+			_min_agility = _character_actors[i]->GetActor()->GetAgility();
 	}
 
 	//Now adjust starting wait times based on agility proportions
@@ -508,7 +464,7 @@ void BattleMode::_Initialize() {
 	float proportion;
 
 	for (uint8 i = 0; i < _enemy_actors.size(); i++) {
-		proportion = static_cast<float>(_min_agility) / static_cast<float>(_enemy_actors[i]->GetAgility());
+		proportion = static_cast<float>(_min_agility) / static_cast<float>(_enemy_actors[i]->GetActor()->GetAgility());
 		_enemy_actors[i]->GetWaitTime()->Initialize(static_cast<uint32>(MAX_INIT_WAIT_TIME * proportion));
 
 		//Start the timer.  We can do this here because the calculations will be done so quickly
@@ -517,7 +473,7 @@ void BattleMode::_Initialize() {
 	}
 
 	for (uint8 i = 0; i < _character_actors.size(); i++) {
-		proportion = static_cast<float>(_min_agility) / static_cast<float>(_character_actors[i]->GetAgility());
+		proportion = static_cast<float>(_min_agility) / static_cast<float>(_character_actors[i]->GetActor()->GetAgility());
 		_character_actors[i]->GetWaitTime()->Initialize(static_cast<uint32>(MAX_INIT_WAIT_TIME * proportion));
 
 		//Start the timer.  We can do this here because the calculations will be done so quickly
@@ -556,10 +512,6 @@ void BattleMode::_Initialize() {
 void BattleMode::_ShutDown() {
 	_battle_music[0].StopMusic();
 
-	for (uint32 i = 0; i < _character_actors.size(); ++i) {
-		_character_actors[i]->UpdateGlobalActorStats();
-	}
-
 	// This call will clear the input state
 	InputManager->EventHandler();
 
@@ -567,53 +519,6 @@ void BattleMode::_ShutDown() {
 	ModeManager->Pop();
 }
 
-
-
-void BattleMode::_TallyRewards() {
-	GlobalEnemy *gbe;
-
-	std::map<string, uint32>::iterator it;
-	std::map<uint32, GlobalObject*>::iterator it2;
-	//Tally up the xp, money, and get the list of items
-	_victory_sp = GetNumberOfEnemies();
-	for (uint32 i = 0; i < GetNumberOfEnemies(); ++i)
-	{
-		gbe = GetEnemyActorAt(i)->GetActor();
-		_victory_xp += gbe->GetExperiencePoints();
-		_victory_money += gbe->GetDrunesDropped();
-
-	// Roots: this code is now defunct. Refer to the GlobalEnemy class to determine items dropped
-// 		if (RandomFloat() * 100 <= gbe->GetChanceToDrop())
-// 		{
-// 			//Added here so that we can display the list on victory
-// 			//FIX ME later
-// 			GlobalManager->AddToInventory(gbe->GetItemDropped());
-// 
-// 			it2 = GlobalManager->GetInventory()->find(gbe->GetItemDropped());
-// 			it = _victory_items.find(MakeStandardString(it2->second->GetName()));
-// 
-// 			if (it != _victory_items.end())
-// 			{
-// 				++it->second;
-// 			}
-// 			else
-// 			{
-// 				_victory_items.insert(make_pair(MakeStandardString(it2->second->GetName()), 1));
-// 			}
-// 		}
-	}
-
-	uint32 num_alive = 0;
-
-	for (uint32 i = 0; i < GetNumberOfCharacters(); ++i)
-	{
-		if (GetPlayerCharacterAt(i)->IsAlive())
-			++num_alive;
-	}
-
-	//Divvy the XP between surviving party members
-	_victory_xp /= num_alive;
-}
 
 
 void BattleMode::_SetInitialTarget(hoa_global::GLOBAL_TARGET target_type, bool target_ally) {
@@ -640,11 +545,6 @@ void BattleMode::Update() {
 		if (_finish_window->GetState() == FINISH_INVALID) { // Indicates that the battle has just now finished
 			_action_window->Reset();
 			_finish_window->Initialize(_victorious_battle);
-
-			if (_victorious_battle) {
-				_TallyRewards();
-				PlayerVictory();
-			}
 		}
 
 		// The FinishWindow::Update() function handles all update code when a battle is over.
@@ -761,7 +661,7 @@ void BattleMode::_UpdateCharacterSelection() {
 
 		while (working_index < GetNumberOfCharacters()) {
 			bca = GetPlayerCharacterAt(working_index + 1);
-			if (bca->IsAlive() && bca->GetWaitTime()->IsFinished() && !bca->IsQueuedToPerform()) {
+			if (bca->GetState() == ACTOR_IDLE && bca->GetWaitTime()->IsFinished()) {
 				_selected_character_index = working_index + 1;
 				break;
 			}
@@ -777,8 +677,7 @@ void BattleMode::_UpdateCharacterSelection() {
 
 		while (working_index > 0) {
 			bca = GetPlayerCharacterAt(working_index + 1);
-			if (bca->IsAlive() && bca->GetWaitTime()->IsFinished() && !bca->IsQueuedToPerform())
-			{
+			if (bca->GetState() == ACTOR_IDLE && bca->GetWaitTime()->IsFinished()) {
 				_selected_character_index = working_index - 1;
 				break;
 			}
@@ -872,7 +771,7 @@ void BattleMode::_UpdateTargetSelection() {
 				new_event = new ItemAction(_selected_character, _selected_target, item);
 			}
 			AddBattleActionToQueue(new_event);
-			_selected_character->SetQueuedToPerform(true);
+			_selected_character->SetState(ACTOR_WARM_UP);
 			_selected_target = NULL;
 			_selected_character_index = GetIndexOfFirstIdleCharacter();
 			_cursor_state = CURSOR_IDLE;
@@ -912,7 +811,7 @@ void BattleMode::_UpdateAttackPointSelection() {
 			new_event = new ItemAction(_selected_character, _selected_target, item, global_attack_points->at(_selected_attack_point));
 		}
 		AddBattleActionToQueue(new_event);
-		_selected_character->SetQueuedToPerform(true);
+		_selected_character->SetState(ACTOR_WARM_UP);
 		_selected_target = NULL;
 		_selected_character_index = GetIndexOfFirstIdleCharacter();
 		_cursor_state = CURSOR_IDLE;
@@ -947,7 +846,7 @@ void BattleMode::_UpdateAttackPointSelection() {
 } // void BattleMode::_UpdateAttackPointSelection()
 
 ////////////////////////////////////////////////////////////////////////////////
-// BattleMode class -- Draw Code
+// BattleMode class -- draw methods
 ////////////////////////////////////////////////////////////////////////////////
 
 void BattleMode::Draw() {
@@ -1036,7 +935,7 @@ void BattleMode::_DrawSprites() {
 void BattleMode::_DrawTimeMeter() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 	VideoManager->Move(1010, 128);
-	VideoManager->DrawImage(_universal_time_meter);
+	VideoManager->DrawImage(_stamina_meter);
 	// Draw all character portraits
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 	//BattleEnemy * e = GetEnemyActorAt(_selected_target_index);
@@ -1044,76 +943,59 @@ void BattleMode::_DrawTimeMeter() {
 	GLOBAL_TARGET target_type = GLOBAL_TARGET_INVALID;
 	bool selected;// = false;
 
-	if (_cursor_state == CURSOR_SELECT_TARGET || _cursor_state == CURSOR_SELECT_ATTACK_POINT)
-	{
-		if (_action_window->GetActionCategory() == ACTION_TYPE_ITEM)
-		{
+	if (_cursor_state == CURSOR_SELECT_TARGET || _cursor_state == CURSOR_SELECT_ATTACK_POINT) {
+		if (_action_window->GetActionCategory() == ACTION_TYPE_ITEM) {
 			target_type = _action_window->GetActionTargetType();
 		}
 		//FIX ME Work in option for flee
-		else
-		{
+		else {
 			//FIX ME
 // 			target_type = action_window->GetActionTargetType();
 		}
 	}
 
 	//FIX ME Below is the logic that should be used...requires change to UpdateTargetSelection code
-	for (uint32 i = 0; i < _character_actors.size(); i++)
-	{
+	for (uint32 i = 0; i < _character_actors.size(); i++) {
 		selected = false;
 
-		if (_cursor_state == CURSOR_SELECT_TARGET || _cursor_state == CURSOR_SELECT_ATTACK_POINT)
-		{
+		if (_cursor_state == CURSOR_SELECT_TARGET || _cursor_state == CURSOR_SELECT_ATTACK_POINT) {
 			//FIX ME Temp code.  Instead, check chosen item or skill's
 			//Target Type.  If PARTY and _selected_target is a BattleCharacter,
 			//loop through and highlight all characters
-			if (target_type == GLOBAL_TARGET_PARTY)
-			{
-				if (!_selected_target->IsEnemy())
-				{
+			if (target_type == GLOBAL_TARGET_PARTY) {
+				if (!_selected_target->IsEnemy()) {
 					selected = true;
 				}
 			}
-			else
-			{
-				if (!_selected_target->IsEnemy() && _selected_target == _character_actors[i])
-				{
+			else {
+				if (!_selected_target->IsEnemy() && _selected_target == _character_actors[i]) {
 					selected = true;
 				}
 			}
 		}
 
-		_character_actors[i]->DrawTimePortrait(selected);
+		_character_actors[i]->DrawStaminaIcon(selected);
 	}
 
 	// Draw all enemy sprites
 	// FIX ME use some logic for targeting highlight, loop on _selected_actor_arguments
-	for (uint32 i = 0; i < _enemy_actors.size(); i++)
-	{
+	for (uint32 i = 0; i < _enemy_actors.size(); i++) {
 		selected = false;
 
-		if (_cursor_state == CURSOR_SELECT_TARGET || _cursor_state == CURSOR_SELECT_ATTACK_POINT)
-		{
+		if (_cursor_state == CURSOR_SELECT_TARGET || _cursor_state == CURSOR_SELECT_ATTACK_POINT) {
 			//FIX ME Temp code.  Instead, check chosen item or skill's
 			//Target Type.  If PARTY and _selected_target is a BattleCharacter,
 			//loop through and highlight all characters
-			if (target_type == GLOBAL_TARGET_PARTY)
-			{
-				if (_selected_target->IsEnemy())
-				{
+			if (target_type == GLOBAL_TARGET_PARTY) {
+				if (_selected_target->IsEnemy()) {
 					selected = true;
 				}
 			}
-			else
-			{
-				if (_selected_target->IsEnemy() && _selected_target == _enemy_actors[i])
-				{
-					selected = true;
-				}
+			else if (_selected_target->IsEnemy() && _selected_target == _enemy_actors[i]) {
+				selected = true;
 			}
 		}
-		_enemy_actors[i]->DrawTimePortrait(selected);
+		_enemy_actors[i]->DrawStaminaIcon(selected);
 	}
 } // void BattleMode::_DrawTimeMeter()
 
@@ -1128,7 +1010,7 @@ bool _TEMPIsA1Smaller(BattleEnemy* a1, BattleEnemy* a2) {
 	return false;
 }
 
-// 
+
 // Ascending Y sorting functor. We want to compare the actual objects, NOT pointers!
 struct AscendingYSort {
 	bool operator()(BattleEnemy* a1, BattleEnemy* a2)
@@ -1175,7 +1057,7 @@ void BattleMode::SetPerformingAction(bool is_performing, BattleAction* se) {
 		//IBattleActor* source = _action_queue.front().GetSource();
 		BattleActor* source = (*_active_action).GetSource();
 		if (source) {
-			source->SetQueuedToPerform(false);
+			source->SetState(ACTOR_IDLE);
 
 			std::list<private_battle::BattleAction*>::iterator it = _action_queue.begin();
 			while (it != _action_queue.end()) {
@@ -1266,38 +1148,8 @@ void BattleMode::UnFreezeTimers() {
 }
 
 
-// Handle player victory
-void BattleMode::PlayerVictory() {
-	GlobalManager->AddDrunes(_victory_money);
-	// Give some experience for each character in the party
-	for (uint32 i = 0; i < _character_actors.size(); ++i) {
-		GlobalCharacter* character = _character_actors.at(i)->GetActor();
-		if (character->GetExperienceForNextLevel() < _victory_xp) {
-			_victory_level = true;
-// 			AudioManager->PlaySound("snd/level_up.wav");
-			if (character->GetExperienceLevel() == 1) { // Character is upgrading to level 2
-				_victory_skill = true;
-				character->AddSkill(2);
-			}
-		}
-		// ROOTS: This function returns a bool indicating if there was any character growth... needs to be checked
-		character->AddExperiencePoints(_victory_xp);
-		_character_actors.at(i)->SetSkillPoints(_character_actors.at(i)->GetSkillPoints() + _victory_sp);
-	}
-}
 
-
-// Handle player defeat
-void BattleMode::PlayerDefeat() {
-	_ShutDown();
-	ModeManager->PopAll();
-	BootMode *BM = new BootMode();
-	ModeManager->Push(BM);
-}
-
-
-
-void BattleMode::SwapCharacters(BattleCharacter * ActorToRemove, BattleCharacter * ActorToAdd) {
+void BattleMode::SwapCharacters(BattleCharacter* ActorToRemove, BattleCharacter * ActorToAdd) {
 	// Remove 'ActorToRemove'
 	for (std::deque < BattleCharacter * >::iterator it = _character_actors.begin(); it != _character_actors.end(); it++) {
 		if (*it == ActorToRemove) {
@@ -1325,9 +1177,10 @@ uint32 BattleMode::GetIndexOfFirstAliveEnemy() const {
 		}
 	}
 
-	//Should not be reached
+	// This should never be reached
 	return INVALID_BATTLE_ACTOR_INDEX;
 }
+
 
 
 uint32 BattleMode::GetIndexOfLastAliveEnemy() const {
@@ -1338,7 +1191,7 @@ uint32 BattleMode::GetIndexOfLastAliveEnemy() const {
 		}
 	}
 
-	//Should not be reached
+	// This should never be reached
 	return INVALID_BATTLE_ACTOR_INDEX;
 }
 
@@ -1350,72 +1203,61 @@ uint32 BattleMode::GetIndexOfFirstIdleCharacter() const {
 
 	for (uint32 i = 0; it != _character_actors.end(); i++, it++) {
 		character = (*it);
-		if (!character->IsQueuedToPerform() && character->GetActor()->IsAlive() && character->GetWaitTime()->IsFinished()) {
+		if (character->GetState() == ACTOR_IDLE) {
 			return i;
 		}
 	}
-
+	
 	return INVALID_BATTLE_ACTOR_INDEX;
 }
 
 
 
-uint32 BattleMode::GetIndexOfCharacter(BattleCharacter* const Actor) const {
+uint32 BattleMode::GetIndexOfCharacter(BattleCharacter* const actor) const {
 	deque<BattleCharacter*>::const_iterator it = _character_actors.begin();
 	for (int32 i = 0; it != _character_actors.end(); i++, it++) {
-		if (*it == Actor)
+		if (*it == actor)
 			return i;
 	}
 
-	//Should not be reached
+	// This should never be reached
 	return INVALID_BATTLE_ACTOR_INDEX;
 }
 
 
 
 uint32 BattleMode::GetIndexOfNextAliveEnemy(bool move_upward) const {
-	//BattleCharacter *bca;
-
-	if (move_upward)
-	{
-		for (uint32 i = _selected_target_index + 1; i < _enemy_actors.size(); ++i)
-		{
-			if (_enemy_actors[i]->IsAlive())
-			{
+	if (move_upward) {
+		for (uint32 i = _selected_target_index + 1; i < _enemy_actors.size(); i++) {
+			if (_enemy_actors[i]->IsAlive()) {
 				return i;
 			}
 		}
-		for (uint32 i = 0; i <= _selected_target_index; ++i)
-		{
+		for (uint32 i = 0; i <= _selected_target_index; ++i) {
+			if (_enemy_actors[i]->IsAlive()) {
+				return i;
+			}
+		}
+		
+		// This should never be reached
+		return INVALID_BATTLE_ACTOR_INDEX;
+	}
+	else {
+		for (int32 i = static_cast<int32>(_selected_target_index) - 1; i >= 0; i--) {
+			if (_enemy_actors[i]->IsAlive()) {
+				return i;
+			}
+		}
+		for (int32 i = static_cast<int32>(_enemy_actors.size()) - 1; i >= static_cast<int32>(_selected_target_index); i--) {
 			if (_enemy_actors[i]->IsAlive())
 			{
 				return i;
 			}
 		}
 		
-		//Should never be reached
+		// This should never be reached
 		return INVALID_BATTLE_ACTOR_INDEX;
 	}
-	else
-	{
-		for (int32 i = static_cast<int32>(_selected_target_index) - 1; i >= 0; --i)
-		{
-			if (_enemy_actors[i]->IsAlive())
-			{
-				return i;
-			}
-		}
-		for (int32 i = static_cast<int32>(_enemy_actors.size()) - 1; i >= static_cast<int32>(_selected_target_index); --i)
-		{
-			if (_enemy_actors[i]->IsAlive())
-			{
-				return i;
-			}
-		}
-		
-		//Should never be reached
-		return INVALID_BATTLE_ACTOR_INDEX;
-	}
-}
+} // uint32 BattleMode::GetIndexOfNextAliveEnemy(bool move_upward) const
 
 } // namespace hoa_battle

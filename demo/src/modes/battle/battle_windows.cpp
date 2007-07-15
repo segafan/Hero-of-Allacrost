@@ -460,7 +460,7 @@ void ActionWindow::_ConstructActionSelectionList() {
 
 		// Disable any options for which the character does not have a sufficient amount of SP to execute
 		for (uint32 i = 0; i < _skill_list->size(); i++) {
-			if (_skill_list->at(i)->GetSPRequired() > _character->GetSkillPoints())
+			if (_skill_list->at(i)->GetSPRequired() > _character->GetActor()->GetSkillPoints())
 				_action_selection_list.EnableOption(i, false);
 		}
 		return;
@@ -584,7 +584,7 @@ void FinishWindow::Update() {
 
 	else if (_state == FINISH_ANNOUNCE_LOSE) {
 		if (InputManager->ConfirmPress()) {
-			current_battle->PlayerDefeat();
+			
 		}
 	}
 }
@@ -602,24 +602,24 @@ void FinishWindow::Draw() {
 		VideoManager->SetTextColor(Color::white);
 
 		ustring text = MakeUnicodeString("Your party is victorious!\n\n");
-		text += MakeUnicodeString("XP: ") + MakeUnicodeString(NumberToString(current_battle->_victory_xp) + "\n\n");
-		text += MakeUnicodeString("SP: ") + MakeUnicodeString(NumberToString(current_battle->_victory_sp) + "\n\n");
-		text += MakeUnicodeString("Drunes: ") + MakeUnicodeString(NumberToString(current_battle->_victory_money) + "\n\n");
-		if (current_battle->_victory_level) {
-			text += MakeUnicodeString("Experience Level Gained\n\n");
-		}
-		if (current_battle->_victory_skill) {
-			text += MakeUnicodeString("New Skill Learned\n\n");
-		}
+// 		text += MakeUnicodeString("XP: ") + MakeUnicodeString(NumberToString(current_battle->_victory_xp) + "\n\n");
+// 		text += MakeUnicodeString("SP: ") + MakeUnicodeString(NumberToString(current_battle->_victory_sp) + "\n\n");
+// 		text += MakeUnicodeString("Drunes: ") + MakeUnicodeString(NumberToString(current_battle->_victory_money) + "\n\n");
+// 		if (current_battle->_victory_level) {
+// 			text += MakeUnicodeString("Experience Level Gained\n\n");
+// 		}
+// 		if (current_battle->_victory_skill) {
+// 			text += MakeUnicodeString("New Skill Learned\n\n");
+// 		}
 
-		if (current_battle->_victory_items.size() > 0) {
-			text += MakeUnicodeString("Items: ");
-			std::map<string, uint32>::iterator it;
-			for (it = current_battle->_victory_items.begin(); it != current_battle->_victory_items.end(); ++it) {
-				text += MakeUnicodeString(it->first);
-				text += MakeUnicodeString(" x" + NumberToString(it->second) + "\n\n");
-			}
-		}
+// 		if (current_battle->_victory_items.size() > 0) {
+// 			text += MakeUnicodeString("Items: ");
+// 			std::map<string, uint32>::iterator it;
+// 			for (it = current_battle->_victory_items.begin(); it != current_battle->_victory_items.end(); ++it) {
+// 				text += MakeUnicodeString(it->first);
+// 				text += MakeUnicodeString(" x" + NumberToString(it->second) + "\n\n");
+// 			}
+// 		}
 		VideoManager->DrawText(text);
 	}
 

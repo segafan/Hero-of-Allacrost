@@ -273,7 +273,7 @@ void GlobalSkill::BattleExecute(hoa_battle::private_battle::BattleActor* target,
 		return;
 	}
 
-	if (_sp_required > instigator->GetSkillPoints()) {
+	if (_sp_required > instigator->GetActor()->GetSkillPoints()) {
 		if (GLOBAL_DEBUG)
 			cerr << "GLOBAL WARNING: GlobalSkill::BattleExecute() failed because there was an insufficient amount of "
 				<< "skill points to execute the skill: " << _id << endl;
