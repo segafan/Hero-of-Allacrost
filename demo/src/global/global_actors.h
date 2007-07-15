@@ -419,7 +419,7 @@ public:
 		{ _hit_points += hp; if (_hit_points > _max_hit_points) _hit_points = _max_hit_points; }
 
 	//! \note If an overflow condition is detected, hit points will be set to zero
-	void SubHitPoints(uint32 hp)
+	void SubtractHitPoints(uint32 hp)
 		{ if (hp < _hit_points) _hit_points -= hp; else _hit_points = 0; }
 
 	//! \note The current hit points is also increased by the same amount as the max hit points
@@ -431,7 +431,7 @@ public:
 		{ _skill_points += sp; if (_skill_points > _max_skill_points) _skill_points = _max_skill_points; }
 
 	//! \note If an overflow condition is detected, skill points will be set to zero
-	void SubSkillPoints(uint32 sp)
+	void SubtractSkillPoints(uint32 sp)
 		{ if (sp < _skill_points) _skill_points -= sp; else _skill_points = 0; }
 
 	//! \note The current skill points is also increased by the same amount as the max skill points

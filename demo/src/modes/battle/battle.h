@@ -280,7 +280,7 @@ public:
 	*** passed as an argument should be in its default loaded state (that is, it should have an experience
 	*** level equal to one).
 	**/
-	void AddEnemy(hoa_global::GlobalEnemy new_enemy);
+	void AddEnemy(hoa_global::GlobalEnemy* new_enemy);
 
 	/** \brief Adds a new active enemy to the battle field
 	*** \param new_enemy_id The id number of the new enemy to add to the battle
@@ -291,7 +291,7 @@ public:
 	*** function.
 	**/
 	void AddEnemy(uint32 new_enemy_id)
-		{ AddEnemy(hoa_global::GlobalEnemy(new_enemy_id)); }
+		{ AddEnemy(new hoa_global::GlobalEnemy(new_enemy_id)); }
 
 	/** \brief Adds a piece of music to the battle soundtrack
 	*** \param music_filename The full filename of the music to play
@@ -335,12 +335,6 @@ public:
 	bool IsVictorious() const
 		{ return _victorious_battle; }
 
-	//! \brief Handle player victory
-	void PlayerVictory();
-	
-	//! \brief Handle player defeat
-	void PlayerDefeat();
-
 	uint32 GetNumberOfCharacters() const
 		{ return _character_actors.size(); }
 
@@ -364,8 +358,8 @@ public:
 	private_battle::BattleEnemy * GetEnemyActorAt(uint32 index) const
 		{ return _enemy_actors.at(index); }
 
-	//! \brief Returns the index of a player character
-	uint32 GetIndexOfCharacter(private_battle::BattleCharacter * const Actor) const;
+	//! \brief Returns the index of a certain character
+	uint32 GetIndexOfCharacter(private_battle::BattleCharacter* const actor) const;
 
 	//! \brief Swap a character from _player_actors to _player_actors_in_battle
 	// This may become more complicated if it is done in a wierd graphical manner
@@ -383,24 +377,6 @@ private:
 
 	//! \brief Set to true if it was player who won the battle.
 	bool _victorious_battle;
-	
-	//! \brief XP gained from battle
-	uint32 _victory_xp;
-
-	//! \brief SP gained from battle
-	uint32 _victory_sp;
-
-	//! \brief Money gained from battle
-	uint32 _victory_money;
-
-	//! \brief Set to true if character gained an experience level
-	bool _victory_level;
-
-	//! \brief Set to true if character earned a new skill this experience level
-	bool _victory_skill;
-
-	//! \brief Items gained from battle
-	std::map<std::string, uint32> _victory_items;
 
 	/** \brief Container for all music to be played during the battle
 	*** The first element in this vector is the primary battle track. For most battles, only a primary track
@@ -419,26 +395,6 @@ private:
 
 	//! \name Battle Actor Containers
 	//@{
-	/** \brief Contains the original set of enemies and their status
-	*** This data is retained in the case that the player loses the battle and chooses to re-try
-	*** the battle from the beginning. This data will be used to restore BattleMode::_enemy_actors.
-	**/
-	std::deque<hoa_global::GlobalEnemy> _original_enemies;
-
-	/** \brief Contains the original set of characters and their status
-	*** This data is retained in the case that the player loses the battle and chooses to re-try
-	*** the battle from the beginning. This data will be used to restore BattleMode::_character_actors.
-	**/
-	std::deque<hoa_global::GlobalCharacter> _original_characters;
-
-	/** \brief A map containing pointers to all actors both on and off the battle field
-	*** The actor objects are indexed by their unique ID numbers. This structure is used primarily
-	*** for two things. First, it serves as a convenient index to look up and retrieve an actor
-	*** object when only an ID number is known. Second, it is used to prevent memory leaks by
-	*** ensuring that all BattleActor objects are deleted when the battle ends.
-	**/
-	std::map<uint8, private_battle::BattleActor*> _battle_actors;
-
 	/** \brief Characters that are presently fighting in the battle
 	*** No more than four characters may be fighting at any given time, thus this structure will never
 	*** contain more than four CharacterActor objects. This structure does <b>not</b> include any characters
@@ -525,12 +481,15 @@ private:
 	**/
 	hoa_video::AnimatedImage _attack_point_indicator;
 
-	/** \brief The universal stamina bar that all battle actors proceed along
+	/** \brief The universal stamina bar that is used to represent the state of battle actors
 	*** All battle actors have a portrait that moves along this meter to signify their
 	*** turn in the rotation.  The meter and corresponding portraits must be drawn after the
 	*** character sprites.
 	**/
-	hoa_video::StillImage _universal_time_meter;
+	hoa_video::StillImage _stamina_meter;
+
+	//! \brief The image used to highlight stamina icons for selected actors
+	hoa_video::StillImage _stamina_icon_selected;
 
 	/** \brief Image that indicates when a player may perform character swapping
 	*** This image is drawn in the lower left corner of the screen. When no swaps are available to the player,
@@ -597,9 +556,6 @@ private:
 
 	//! \brief Shutdown the battle mode
 	void _ShutDown();
-
-	//! \brief Tally rewards (XP, money, items)
-	void _TallyRewards();
 
 	//! \brief Returns the number of enemies that are still alive in the battle
 	uint32 _NumberEnemiesAlive() const;
