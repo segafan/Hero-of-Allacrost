@@ -27,6 +27,7 @@
 #include "script.h"
 #include "battle.h"
 #include "battle_actors.h"
+#include "battle_actions.h"
 
 using namespace std;
 

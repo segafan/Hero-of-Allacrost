@@ -35,6 +35,8 @@
 #include "mode_manager.h"
 #include "system.h"
 
+#include "battle_actions.h"
+#include "battle_actors.h"
 #include "battle_windows.h"
 
 namespace hoa_battle {
@@ -124,115 +126,6 @@ const bool ACTIVE_BATTLE_MODE = false;
 **/
 float ComputeAveragePartyLevel();
 
-/** ****************************************************************************
-*** \brief Representation of a single action to be executed in battle
-***
-*** This is an abstract base class for all action classes to inherit from.
-*** Actions are executed one at a time in a FIFO queue by BattleMode. Some
-*** actions may also be continuous, in that they apply an effect on the target
-*** for a limited period of time. For example, a skill which temporarily boosts
-*** the strength of its target.
-*** ***************************************************************************/
-class BattleAction {
-public:
-	BattleAction(BattleActor* source, BattleActor* target, hoa_global::GlobalAttackPoint* attack_point);
-
-	virtual ~BattleAction()
-		{}
-
-	//! \brief Updates the script
-	void Update();
-
-	//! \brief Executes the script
-	virtual void RunScript() = 0;
-
-	//! \brief Returns true if this action consumes an item
-	virtual bool IsItemAction() const = 0;
-
-	//! \name Class member access functions
-	//@{
-	BattleActor* GetSource()
-		{ return _source; }
-
-	BattleActor* GetTarget()
-		{ return _target; }
-
-	hoa_system::SystemTimer* GetWarmUpTime()
-		{ return &_warm_up_time; }
-	//@}
-
-protected:
-	//! \brief The rendered text for the name of the action
-	hoa_video::RenderedText _script_name;
-
-	//! \brief The actor whom is initiating this action
-	BattleActor* _source;
-
-	//! \brief The targets of the script
-	//! \todo This should be changed to a GlobalTarget class pointer
-	BattleActor* _target;
-
-	//! \brief The selected attack point (if applicable)
-	//! \todo This should be removed when the _target member is changed
-	hoa_global::GlobalAttackPoint* _attack_point;
-
-	//! \brief The amount of time to wait to execute the script
-	hoa_system::SystemTimer _warm_up_time;
-}; // class BattleAction
-
-
-/** ****************************************************************************
-*** \brief A battle action which involves the exectuion of an actor's skill
-***
-*** This class invokes the execution of a GlobalSkill contained by the source
-*** actor. When the action is finished, any SP required to use the skill is
-*** subtracted from the source actor.
-*** ***************************************************************************/
-class SkillAction : public BattleAction {
-public:
-	SkillAction(BattleActor* source, BattleActor* target, hoa_global::GlobalSkill* skill, hoa_global::GlobalAttackPoint* attack_point = NULL);
-
-	void RunScript();
-
-	bool IsItemAction() const
-		{ return false; }
-
-	hoa_global::GlobalSkill* GetSkill()
-		{ return _skill; }
-
-private:
-	//! \brief Pointer to the skill attached to this script (for skill events only)
-	hoa_global::GlobalSkill* _skill;
-}; // class SkillAction : public BattleAction
-
-
-/** ****************************************************************************
-*** \brief A battle action which involves the use of an item
-***
-*** This class invokes the usage of a GlobalItem. The item's count is decremented
-*** as soon as the action goes into the FIFO queue. After the action is executed,
-*** the item is removed if its count has become zero. If the action is removed
-*** from the queue before it is executed (because the source actor perished, or
-*** the battle ended, or other circumstances), then the item's count is 
-*** incremented back to its original value since it was not used.
-*** ***************************************************************************/
-class ItemAction : public BattleAction {
-public:
-	ItemAction(BattleActor* source, BattleActor* target, hoa_global::GlobalItem* item, hoa_global::GlobalAttackPoint* attack_point = NULL);
-
-	void RunScript();
-
-	bool IsItemAction() const
-		{ return true; }
-
-	hoa_global::GlobalItem* GetItem()
-		{ return _item; }
-
-private:
-	//! \brief Pointer to the item attached to this script (for item events only)
-	hoa_global::GlobalItem* _item;
-}; // class SkillAction : public BattleAction
-
 } // namespace private_battle
 
 /** ****************************************************************************
@@ -244,9 +137,13 @@ private:
 *** the added enemies are ready for the battle to come. This should all be done
 *** prior the Reset() method being called. If you fail to add any enemies,
 *** an error will occur and the battle will self-terminate itself.
-*** 
+***
 *** \todo Add a RestartBattle() function that re-initializes all battle data and
 *** begins the battle over from the start.
+***
+*** \bug If timers are paused when then the game enters pause mod or quit mode, when
+*** it returns to battle mode the paused timers will incorrectly be resumed. Need
+*** to save/restore additional state information about timers on a pause event.
 *** ***************************************************************************/
 class BattleMode : public hoa_mode_manager::GameMode {
 	friend class private_battle::BattleActor;
@@ -255,14 +152,13 @@ class BattleMode : public hoa_mode_manager::GameMode {
 	friend class private_battle::BattleAction;
 	friend class private_battle::ActionWindow;
 	friend class private_battle::FinishWindow;
+
 public:
 	BattleMode();
 
 	~BattleMode();
 
-	/**
-	*** \brief Overloaded gamestate methods for the battle mode
-	**/
+	//! \name Inherited methods for the GameMode class
 	//@{
 	//! \brief Resets appropriate class members. Called whenever BattleMode is made the active game mode.
 	void Reset();
@@ -278,7 +174,7 @@ public:
 	*** \param new_enemy A copy of the GlobalEnemy object to add to the battle
 	*** This method uses the GlobalEnemy copy constructor to create a copy of the enemy. The GlobalEnemy
 	*** passed as an argument should be in its default loaded state (that is, it should have an experience
-	*** level equal to one).
+	*** level equal to zero).
 	**/
 	void AddEnemy(hoa_global::GlobalEnemy* new_enemy);
 
@@ -303,9 +199,6 @@ public:
 
 	// TODO: Some of the public methods below should probably not be public...
 
-	//! \brief Returns true if an actor is performing an action
-	bool _IsPerformingAction() const
-		{ return (_active_action != NULL); }
 
 	//! \brief Sets whether an action is being performed or not, and what that action is
 	void SetPerformingAction(bool is_performing, private_battle::BattleAction* se);
@@ -547,15 +440,21 @@ private:
 	**/
 	void _TEMP_LoadTestData();
 
-	void _CreateCharacterActors();
-
-	void _CreateEnemyActors();
-
 	//! \brief Initializes all data necessary for the battle to begin
 	void _Initialize();
 
 	//! \brief Shutdown the battle mode
 	void _ShutDown();
+
+	//! \brief Returns true if an actor is performing an action
+	bool _IsExecutingAction() const
+		{ return (_active_action != NULL); }
+
+	/** \brief Selects the initial target for an action to take effect on
+	*** \param target_type The type of target that the action takes effect on (attack point, actor, or party)
+	*** \param target_ally If true, the initial target is on the character party
+	**/
+	void _SetInitialTarget(hoa_global::GLOBAL_TARGET target_type, bool target_ally);
 
 	//! \brief Returns the number of enemies that are still alive in the battle
 	uint32 _NumberEnemiesAlive() const;
@@ -564,12 +463,6 @@ private:
 	*** \note This function only counts the characters on the screen, not characters in the party reserves
 	**/
 	uint32 _NumberCharactersAlive() const;
-
-	/** \brief Selects the initial target for an action to take effect on
-	*** \param target_type The type of target that the action takes effect on (attack point, actor, or party)
-	*** \param target_ally If true, the initial target is on the character party
-	**/
-	void _SetInitialTarget(hoa_global::GLOBAL_TARGET target_type, bool target_ally);
 
 	/** \name Update helper functions
 	*** \brief Functions which update the state of various battle components

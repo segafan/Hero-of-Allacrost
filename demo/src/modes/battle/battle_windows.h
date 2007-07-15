@@ -28,9 +28,6 @@
 #include "video.h"
 #include "global.h"
 
-
-#include "battle_actors.h"
-
 namespace hoa_battle {
 
 namespace private_battle {

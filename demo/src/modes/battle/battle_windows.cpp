@@ -24,6 +24,7 @@
 
 #include "battle.h"
 #include "battle_actors.h"
+#include "battle_windows.h"
 
 using namespace std;
 
