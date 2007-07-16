@@ -69,40 +69,50 @@ ActionWindow::ActionWindow() {
 
 	// Setup options for VIEW_ACTION_CATEGORY
 	vector<ustring> category_options;
-	category_options.push_back(MakeUnicodeString("<img/icons/battle/attack.png><60>Attack"));
-	category_options.push_back(MakeUnicodeString("<img/icons/battle/defend.png><60>Defend"));
-	category_options.push_back(MakeUnicodeString("<img/icons/battle/support.png><60>Support"));
-	category_options.push_back(MakeUnicodeString("<img/icons/battle/item.png><60>Item"));
+	category_options.push_back(MakeUnicodeString("<img/icons/battle/attack.png>\n\nAttack"));
+	category_options.push_back(MakeUnicodeString("<img/icons/battle/defend.png>\n\nDefend"));
+	category_options.push_back(MakeUnicodeString("<img/icons/battle/support.png>\n\nSupport"));
+	category_options.push_back(MakeUnicodeString("<img/icons/battle/item.png>\n\nItem"));
 
 	_action_category_list.SetOptions(category_options);
-	_action_category_list.SetPosition(50.0f, 100.0f);
+	_action_category_list.SetPosition(50.0f, 120.0f);
 	_action_category_list.SetCursorOffset(-20.0f, 25.0f);
-	_action_category_list.SetCellSize(100.0f, 80.0f);
+	_action_category_list.SetCellSize(100.0f, 100.0f);
 	_action_category_list.SetSize(4, 1);
 	_action_category_list.SetFont("battle");
 	_action_category_list.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_action_category_list.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_action_category_list.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_action_category_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
- 	_action_category_list.SetSelection(0);
- 	_action_category_list.SetOwner(this);
+	_action_category_list.SetSelection(0);
+	_action_category_list.SetOwner(this);
 
- 	// Setup options for VIEW_ACTION_SELECTION
-	_action_selection_list.SetPosition(128.0f, 128.0f);
-	_action_selection_list.SetCursorOffset(-20.0f, 25.0f);
-	_action_selection_list.SetCellSize(200.0f, 35.0f);
+	// Setup options for VIEW_ACTION_SELECTION
+	_action_selection_list.SetPosition(128.0f, 120.0f);
+	_action_selection_list.SetCursorOffset(-50.0f, 25.0f);
+	_action_selection_list.SetCellSize(300.0f, 35.0f);
 	_action_selection_list.SetFont("battle");
 	_action_selection_list.SetAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	_action_selection_list.SetOptionAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	_action_selection_list.SetSelectMode(VIDEO_SELECT_SINGLE);
 	_action_selection_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
- 	_action_selection_list.SetOwner(this);
-
-	// TODO: add rendered text generation methods for skill and item list headers
+	_action_selection_list.SetOwner(this);
 
 	// Setup options for VIEW_TARGET_SELECTION
 
 	// Setup options for VIEW_ACTION_INFORMATION
+
+	// Setup rendered text
+	_skill_selection_header.SetAlignment(RenderedText::ALIGN_LEFT);
+	_item_selection_header.SetAlignment(RenderedText::ALIGN_LEFT);
+	_action_information.SetAlignment(RenderedText::ALIGN_LEFT);
+	_target_information.SetAlignment(RenderedText::ALIGN_LEFT);
+	
+	VideoManager->SetFont("battle");
+	VideoManager->SetTextColor(Color(1.0f, 1.0f, 0.0f, 0.8f)); // 80% translucent yellow text
+	_skill_selection_header.SetText("Skill                          SP");
+	_item_selection_header.SetText("Item                          QTY");
+
 	Reset();
 } // ActionWindow::ActionWindow()
 
@@ -137,11 +147,10 @@ void ActionWindow::Initialize(BattleCharacter* character) {
 		_action_category_list.EnableOption(1, false);
 	if (_character->GetActor()->GetSupportSkills()->empty())
 		_action_category_list.EnableOption(2, false);
-	// TEMP: inventory not ready yet from GlobalManager
 	if (GlobalManager->GetInventoryItems()->empty())
 		_action_category_list.EnableOption(3, false);
 
-	// TODO: clear _action_selection_list of all options
+	_action_selection_list.ClearOptions();
 } // void ActionWindow::Initialize(BattleCharacter* character)
 
 
@@ -251,6 +260,7 @@ void ActionWindow::_UpdateActionSelection() {
 	}
 	else if (InputManager->MenuPress()) {
 		_selected_action = _action_selection_list.GetSelection();
+		_ConstructActionInformation();
 		_state = VIEW_ACTION_INFORMATION;
 	}
 	else if (InputManager->CancelPress()) {
@@ -263,21 +273,41 @@ void ActionWindow::_UpdateActionSelection() {
 
 
 void ActionWindow::_UpdateTargetSelection() {
-	if (InputManager->LeftPress() || InputManager->RightPress() || InputManager->UpPress() || InputManager->DownPress()) {
-		// TODO: check if selected target has changed and if so, update window content
-	}
-
-	// TODO: depends
-	else if (InputManager->CancelPress()) {
+	if (InputManager->CancelPress()) {
+		_target_information.Clear();
 		_state = VIEW_ACTION_SELECTION;
 	}
+	else if (InputManager->ConfirmPress()) {
+		Reset();
+		// TODO: call BattleMode method that confirms the selected character, target, and action for execution
+	}
 
-}
+	// If the target is a party type, then ignore arrow key presses since they are not processed
+	if (_action_target_type == GLOBAL_TARGET_PARTY) {
+		return;
+	}
+
+	if (InputManager->UpPress() || InputManager->DownPress()) {
+		BattleActor* previous_target = current_battle->_selected_target;
+		// TODO: call BattleMode method that updates the targeted actor
+		if (previous_target != current_battle->_selected_target) {
+			_ConstructTargetInformation();
+		}
+	}
+	else if (InputManager->LeftPress() || InputManager->RightPress()) {
+		uint32 previous_ap = current_battle->_selected_attack_point;
+		// TODO: call BattleMode method that updates the targeted attack point
+		if (previous_ap != current_battle->_selected_attack_point) {
+			_ConstructTargetInformation();
+		}
+	}
+} // void ActionWindow::_UpdateTargetSelection()
 
 
 
 void ActionWindow::_UpdateActionInformation() {
 	if (InputManager->MenuPress() || InputManager->CancelPress()) {
+		_action_information.Clear();
 		_state = VIEW_ACTION_SELECTION;
 	}
 }
@@ -319,10 +349,10 @@ void ActionWindow::_DrawActionCategory() {
 
 void ActionWindow::_DrawActionSelection() {
 	// Draw the selected action category and name
-	VideoManager->Move(530.0f, 100.0f);
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
+	VideoManager->Move(570.0f, 80.0f);
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 	VideoManager->DrawImage(_action_category_icons[_selected_action_category]);
-	VideoManager->MoveRelative(0.0f, -20.0f);
+	VideoManager->MoveRelative(0.0f, -40.0f);
 	VideoManager->SetDrawFlags(VIDEO_Y_CENTER, 0);
 
 	switch (_selected_action_category) {
@@ -346,81 +376,37 @@ void ActionWindow::_DrawActionSelection() {
 	}
 
 	// Draw the action list header text
-	VideoManager->SetFont("battle");
-	VideoManager->SetTextColor(Color(1.0f, 1.0f, 0.0f, 0.8f)); // 80% translucent yellow text
-	VideoManager->Move(650.0f, 125.0f);
+	VideoManager->Move(640.0f, 125.0f);
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, 0);
 	if (_selected_action_category != ACTION_TYPE_ITEM) {
-		VideoManager->DrawText(MakeUnicodeString("Skill                 SP"));
+		_skill_selection_header.Draw();
 	}
 	else {
-		VideoManager->DrawText(MakeUnicodeString("Item                 QTY"));
+		_item_selection_header.Draw();
 	}
 
 	// Draw the list of actions
 	_action_selection_list.Draw();
-}
+} // void ActionWindow::_DrawActionSelection()
 
 
 
 void ActionWindow::_DrawTargetSelection() {
-	// TODO: Draw information specific to target (friend vs foe, attack point versus party, etc.)
-
-	// if (current_battle->_selected_target->IsEnemy())
-	VideoManager->Move(650.0f, 100.0f);
-	VideoManager->SetTextColor(Color(1.0f, 1.0f, 1.0f, 1.0f)); // white
-	if (_action_target_type == GLOBAL_TARGET_ATTACK_POINT) {
-		VideoManager->DrawText(MakeUnicodeString("Attack Point Targeted."));
-	}
-	else if (_action_target_type == GLOBAL_TARGET_ACTOR) {
-		VideoManager->DrawText(MakeUnicodeString("Actor Targeted."));
-	}
-	else if (_action_target_type == GLOBAL_TARGET_PARTY) {
-		VideoManager->DrawText(MakeUnicodeString("Party Targeted."));
-	}
+	VideoManager->Move(640.0f, 125.0f);
+	VideoManager->SetTextColor(Color(1.0f, 1.0f, 0.0f, 0.8f)); // 80% translucent yellow text
+	VideoManager->DrawText(MakeUnicodeString("Target Information"));
+	VideoManager->MoveRelative(0.0f, -40.0f);
+	_target_information.Draw();
 }
 
 
 
 void ActionWindow::_DrawActionInformation() {
-	// TODO: load action/item info into rendered text objects instead of rendering the textevery frame
-	VideoManager->Move(650.0f, 100.0f);
-	if (_selected_action_category == ACTION_TYPE_ITEM) {
-		VideoManager->SetTextColor(Color(1.0f, 1.0f, 0.0f, 0.8f)); // 80% translucent yellow text
-		VideoManager->DrawText(MakeUnicodeString("Item"));
-
-		VideoManager->SetTextColor(Color::white);
-		VideoManager->MoveRelative(0.0f, -25.0f);
-		// TODO: add item icon and description
-		VideoManager->DrawText(
-			MakeUnicodeString("Name: ") + GetSelectedItem()->GetName() +
-			MakeUnicodeString("\nCurrent Quantity: " + NumberToString(GetSelectedItem()->GetCount())) +
-			MakeUnicodeString("\nTarget Type: TODO") +
-			MakeUnicodeString("\nAlignment Type: TODO")
-		);
-	}
-
-	else {
-		VideoManager->SetTextColor(Color(1.0f, 1.0f, 0.0f, 0.8f)); // 80% translucent yellow text
-		if (_selected_action_category == ACTION_TYPE_ATTACK) {
-			VideoManager->DrawText(MakeUnicodeString("Attack Skill"));
-		}
-		else if (_selected_action_category == ACTION_TYPE_DEFEND) {
-			VideoManager->DrawText(MakeUnicodeString("Defend Skill"));
-		}
-		else if (_selected_action_category == ACTION_TYPE_SUPPORT) {
-			VideoManager->DrawText(MakeUnicodeString("Support Skill"));
-		}
-
-		VideoManager->SetTextColor(Color::white);
-		VideoManager->MoveRelative(0.0f, -25.0f);
-		// TODO: add warm-up and cool-down times (in seconds), and description
-		VideoManager->DrawText(
-			MakeUnicodeString("Name: ") + GetSelectedSkill()->GetName() +
-			MakeUnicodeString("\nSP Required: " + NumberToString(GetSelectedSkill()->GetSPRequired())) +
-			MakeUnicodeString("\nTarget Type: TODO") +
-			MakeUnicodeString("\nAlignment Type: TODO")
-		);
-	}
+	VideoManager->Move(640.0f, 125.0f);
+	VideoManager->SetTextColor(Color(1.0f, 1.0f, 0.0f, 0.8f)); // 80% translucent yellow text
+	VideoManager->DrawText(MakeUnicodeString("Action Information"));
+	VideoManager->MoveRelative(0.0f, -40.0f);
+	_action_information.Draw();
 }
 
 // ----- OTHER METHODS
@@ -514,9 +500,58 @@ void ActionWindow::_ConstructActionSelectionList() {
 } // void ActionWindow::ConstructActionSelectionList()
 
 
-// *****************************************************************************
+
+void ActionWindow::_ConstructTargetInformation() {
+	ustring target_text;
+	_target_information.Clear();
+
+	// TODO: call a method here on the GlobalActor target that constructs the information text about the target
+
+	// TEMP: to be removed once target information is properly constructed
+	if (_action_target_type == GLOBAL_TARGET_ATTACK_POINT) {
+		target_text = MakeUnicodeString("Attack Point Targeted.");
+	}
+	else if (_action_target_type == GLOBAL_TARGET_ACTOR) {
+		target_text = MakeUnicodeString("Actor Targeted.");
+	}
+	else if (_action_target_type == GLOBAL_TARGET_PARTY) {
+		target_text = MakeUnicodeString("Party Targeted.");
+	}
+
+	VideoManager->SetTextColor(Color::white);
+	_target_information.SetText(target_text);
+} // void ActionWindow::_ConstructTargetInformation()
+
+
+
+void ActionWindow::_ConstructActionInformation() {
+	ustring action_text;
+	_action_information.Clear();
+
+	// TODO: need to do a more complete job of filling out action information
+	if (_selected_action_category == ACTION_TYPE_ITEM) {
+		action_text = MakeUnicodeString("Name: ") + GetSelectedItem()->GetName() +
+			MakeUnicodeString("\nCurrent Quantity: " + NumberToString(GetSelectedItem()->GetCount())) +
+			MakeUnicodeString("\nTarget Type: TODO");
+	}
+
+	else if (_selected_action_category == ACTION_TYPE_ATTACK
+			|| _selected_action_category == ACTION_TYPE_DEFEND
+			|| _selected_action_category == ACTION_TYPE_SUPPORT)
+	{
+		// TODO: add warm-up and cool-down times (in seconds), and description
+		action_text = MakeUnicodeString("Name: ") + GetSelectedSkill()->GetName() +
+			MakeUnicodeString("\nSP Required: " + NumberToString(GetSelectedSkill()->GetSPRequired())) +
+			MakeUnicodeString("\nTarget Type: TODO");
+	}
+
+	VideoManager->SetTextColor(Color::white);
+	_action_information.SetText(action_text);
+} // void ActionWindow::_ConstructActionInformation()
+
+// /////////////////////////////////////////////////////////////////////////////
 // FinishWindow class
-// *****************************************************************************
+// /////////////////////////////////////////////////////////////////////////////
 
 FinishWindow::FinishWindow() {
 	// TODO: declare the MenuSkin to be used

@@ -37,7 +37,7 @@ namespace private_battle {
 *** understand what these constants represent
 ***
 **/
-enum ACTION_WINDOW_VIEWS {
+enum ACTION_WINDOW_STATE {
 	VIEW_INVALID = -1,
 	VIEW_ACTION_CATEGORY = 0,
 	VIEW_ACTION_SELECTION = 1,
@@ -51,7 +51,7 @@ enum ACTION_WINDOW_VIEWS {
 *** understand what these constants represent
 ***
 **/
-enum FINISH_WINDOW_VIEWS {
+enum FINISH_WINDOW_STATE {
 	FINISH_INVALID = -1,
 	FINISH_ANNOUNCE_WIN = 0,
 	FINISH_ANNOUNCE_LOSE = 1,
@@ -122,7 +122,7 @@ public:
 
 	//! \name Member Access Functions
 	//@{
-	ACTION_WINDOW_VIEWS GetState() const
+	ACTION_WINDOW_STATE GetState() const
 		{ return _state; }
 
 	uint32 GetActionCategory() const
@@ -142,7 +142,7 @@ public:
 	//@}
 private:
 	//! \brief The state that the action window is in, which reflects the contents of the window
-	ACTION_WINDOW_VIEWS _state;
+	ACTION_WINDOW_STATE _state;
 
 	//! \brief A pointer to the character whom is currently selected for initiating an action
 	BattleCharacter* _character;
@@ -188,19 +188,22 @@ private:
 	//! \brief A vector containing the icons used for representing each action category
 	std::vector<hoa_video::StillImage> _action_category_icons;
 
-	// TODO: implement when rendered text system is more mature
-/*
-	/ ** \brief A string of text which serves as a list header for the action selection screen
-	*** This pointer is set to either _skill_selection_header or _item_selection_header
-	** /
-	hoa_video::RenderedString* _action_selection_header;
-
+	//! \name RenderedText objects
+	//@{
 	//! \brief Rendered text of "Skill     SP" as a header for the skill selection list
-	hoa_video::RenderedString* _skill_selection_header;
+	hoa_video::RenderedText _skill_selection_header;
 
 	//! \brief Rendered text of "Item     QTY" as a header for the item selection list
-	hoa_video::RenderedString* _item_selection_header;
-*/
+	hoa_video::RenderedText _item_selection_header;
+
+	//! \brief Rendered text that contains information about the currently selected action
+	hoa_video::RenderedText _action_information;
+
+	//! \brief Rendered text that contains information about the currently selected target
+	hoa_video::RenderedText _target_information;
+	//@}
+
+	// ----- Private methods
 
 	//! \brief Handles update processing when the _state member is VIEW_ACTION_CATEGORY
 	void _UpdateActionCategory();
@@ -228,6 +231,12 @@ private:
 
 	//! \brief Reconstructs the _action_selection_list based on the current character and selected action category
 	void _ConstructActionSelectionList();
+
+	//! \brief Reconstructs the rendered text for displaying information about the selected target
+	void _ConstructTargetInformation();
+
+	//! \brief Reconstructs the rendered text for displaying information about the selected action
+	void _ConstructActionInformation();
 }; // class ActionWindow : public hoa_video::MenuWindow
 
 /** ****************************************************************************
@@ -270,12 +279,12 @@ public:
 	//! \brief Draws the window and its contents
 	void Draw();
 
-	FINISH_WINDOW_VIEWS GetState() const
+	FINISH_WINDOW_STATE GetState() const
 		{ return _state; }
 
 private:
 	//! \brief The state that the window is in, which determines its contents
-	FINISH_WINDOW_VIEWS _state;
+	FINISH_WINDOW_STATE _state;
 
 	//! \brief Text that displays "VICTORY" or "DEFEAT" depending upon the battle's outcome
 // 	hoa_video::RenderedText* _finish_status;
