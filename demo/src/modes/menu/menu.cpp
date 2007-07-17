@@ -249,15 +249,13 @@ void MenuMode::_SetupMainOptionBox() {
 	options.push_back(MakeUnicodeString("Skills"));
 	options.push_back(MakeUnicodeString("Equip"));
 	options.push_back(MakeUnicodeString("Status"));
+	options.push_back(MakeUnicodeString("Save"));
 	options.push_back(MakeUnicodeString("Formation"));
 	options.push_back(MakeUnicodeString("Exit"));
 
 	// Add strings and set default selection.
 	_main_options.SetOptions(options);
 	_main_options.SetSelection(MAIN_INVENTORY);
-
-	// Disable unused options
-	_main_options.EnableOption(4, false);
 }
 
 
@@ -569,15 +567,37 @@ void MenuMode::_DrawBottomMenu() {
 
 	if (_current_menu_showing == SHOW_INVENTORY )
 	{
-		// Just do nothing and let the inventory drawing do the job
-	}
+		if (_inventory_window._active_box == ITEM_ACTIVE_LIST) {
+			GlobalObject* obj = _inventory_window._item_objects[ _inventory_window._inventory_items.GetSelection() ];
+
+			VideoManager->SetDrawFlags(VIDEO_X_LEFT,VIDEO_Y_CENTER,0);
+
+			VideoManager->Move(100, 600);
+			VideoManager->DrawImage(obj->GetIconImage() );
+			VideoManager->MoveRelative(65, 0);
+			VideoManager->DrawText(obj->GetName());
+			VideoManager->SetDrawFlags(VIDEO_X_LEFT,VIDEO_Y_BOTTOM,0);
+			_inventory_window._description.Draw();
+		} // if ITEM_ACTIVE_LIST
+	} // if SHOW_INVENTORY
 	else if (_current_menu_showing == SHOW_SKILLS )
 	{
-		// For now, let SkillsWindow do the job.
-	}
+		if (_skills_window._active_box == SKILL_ACTIVE_LIST) {
+			GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_skills_window._char_select.GetSelection()));
+			std::vector<hoa_global::GlobalSkill*>* skills = ch->GetAttackSkills();
+			GlobalSkill* skill = skills->at(_skills_window._skills_list.GetSelection());
+
+			VideoManager->SetDrawFlags(VIDEO_X_LEFT,VIDEO_Y_CENTER,0);
+
+			VideoManager->Move(100, 600);
+			VideoManager->MoveRelative(65, 0);
+			VideoManager->DrawText(skill->GetName());
+			VideoManager->SetDrawFlags(VIDEO_X_LEFT,VIDEO_Y_BOTTOM,0);
+			_skills_window._description.Draw();
+		} // if SKILL_ACTIVE_LIST
+	} // if SHOW_SKILLS
 	else if (_current_menu_showing == SHOW_EQUIP) {
-		GlobalActor* actor = GlobalManager->GetActiveParty()->GetActorAtIndex(0);
-		GlobalCharacter* ch = (GlobalCharacter*)(actor);
+		GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_equip_window._char_select.GetSelection()));
 		string text = "STR: " +  NumberToString(ch->GetStrength());
 		VideoManager->DrawText(MakeUnicodeString(text));
 
@@ -628,8 +648,6 @@ void MenuMode::_DrawBottomMenu() {
 
 		VideoManager->Move(400, 577);
 
-		// Skip a line
-
 		text = "PHYS ATK: " + NumberToString(ch->GetWeaponEquipped()->GetPhysicalAttack());
 		VideoManager->MoveRelative(0, 20);
 		VideoManager->DrawText(MakeUnicodeString(text));
@@ -652,8 +670,6 @@ void MenuMode::_DrawBottomMenu() {
 
 		VideoManager->Move(550, 577);
 
-		// Skip a line
-
 		text = "META ATK: " + NumberToString(ch->GetWeaponEquipped()->GetMetaphysicalAttack());
 		VideoManager->MoveRelative(0, 20);
 		VideoManager->DrawText(MakeUnicodeString(text));
@@ -674,7 +690,148 @@ void MenuMode::_DrawBottomMenu() {
 		VideoManager->MoveRelative(0, 20);
 		VideoManager->DrawText(MakeUnicodeString(text));
 		VideoManager->SetDrawFlags(VIDEO_X_CENTER,VIDEO_Y_BOTTOM,0);
-	}
+
+
+		if (_equip_window._active_box == EQUIP_ACTIVE_LIST) {
+			VideoManager->Move(750, 577);
+
+			switch (_equip_window._equip_select.GetSelection()) {
+				case EQUIP_WEAPON:
+				{
+					GlobalWeapon* weapon = GlobalManager->GetInventoryWeapons()->at(_equip_window._equip_list.GetSelection());
+
+					text = "New Weapon:";
+					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->MoveRelative(0, 20);
+
+					text = "PHYS ATK:";
+					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->MoveRelative(0, 20);
+
+					text = NumberToString(weapon->GetPhysicalAttack());
+					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->MoveRelative(0, 20);
+
+					text = "META ATK:";
+					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->MoveRelative(0, 20);
+
+					text = NumberToString(weapon->GetMetaphysicalAttack());
+					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->MoveRelative(0, 20);
+
+					break;
+				} // case EQUIP_WEAPON
+				case EQUIP_HEADGEAR:
+				{
+					GlobalArmor* armor = GlobalManager->GetInventoryHeadArmor()->at(_equip_window._equip_list.GetSelection());
+
+					text = "New Helm:";
+					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->MoveRelative(0, 20);
+
+					text = "PHYS DEF:";
+					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->MoveRelative(0, 20);
+
+					text = NumberToString(armor->GetPhysicalDefense());
+					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->MoveRelative(0, 20);
+
+					text = "META DEF:";
+					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->MoveRelative(0, 20);
+
+					text = NumberToString(armor->GetMetaphysicalDefense());
+					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->MoveRelative(0, 20);
+
+					break;
+				} // case EQUIP_HEADGEAR
+				case EQUIP_BODYARMOR:
+				{
+					GlobalArmor* armor = GlobalManager->GetInventoryTorsoArmor()->at(_equip_window._equip_list.GetSelection());
+
+					text = "New Helm:";
+					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->MoveRelative(0, 20);
+
+					text = "PHYS DEF:";
+					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->MoveRelative(0, 20);
+
+					text = NumberToString(armor->GetPhysicalDefense());
+					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->MoveRelative(0, 20);
+
+					text = "META DEF:";
+					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->MoveRelative(0, 20);
+
+					text = NumberToString(armor->GetMetaphysicalDefense());
+					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->MoveRelative(0, 20);
+
+					break;
+				} // case EQUIP_BODYARMOR
+				case EQUIP_OFFHAND:
+				{
+					GlobalArmor* armor = GlobalManager->GetInventoryArmArmor()->at(_equip_window._equip_list.GetSelection());
+
+					text = "New Helm:";
+					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->MoveRelative(0, 20);
+
+					text = "PHYS DEF:";
+					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->MoveRelative(0, 20);
+
+					text = NumberToString(armor->GetPhysicalDefense());
+					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->MoveRelative(0, 20);
+
+					text = "META DEF:";
+					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->MoveRelative(0, 20);
+
+					text = NumberToString(armor->GetMetaphysicalDefense());
+					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->MoveRelative(0, 20);
+
+					break;
+				} // case EQUIP_OFFHAND
+				case EQUIP_LEGGINGS:
+				{
+					GlobalArmor* armor = GlobalManager->GetInventoryLegArmor()->at(_equip_window._equip_list.GetSelection());
+
+					text = "New Helm:";
+					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->MoveRelative(0, 20);
+
+					text = "PHYS DEF:";
+					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->MoveRelative(0, 20);
+
+					text = NumberToString(armor->GetPhysicalDefense());
+					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->MoveRelative(0, 20);
+
+					text = "META DEF:";
+					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->MoveRelative(0, 20);
+
+					text = NumberToString(armor->GetMetaphysicalDefense());
+					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->MoveRelative(0, 20);
+
+					break;
+				} // case EQUIP_LEGGINGS
+				
+				default:
+					break;
+			} // switch
+		} // if EQUIP_ACTIVE_LIST
+	} // if SHOW_EQUIP
 	else {
 		// Display Location
 		VideoManager->DrawText(_locale_name);
@@ -701,7 +858,7 @@ void MenuMode::_DrawBottomMenu() {
 		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 		VideoManager->Move(390, 685);
 		VideoManager->DrawImage(_locale_graphic);
-	}
+	} // else
 } // void MenuMode::_DrawBottomMenu()
 
 
@@ -724,10 +881,11 @@ void MenuMode::_HandleMainMenu() {
 			_current_menu = &_menu_options;
 			break;*/
 
-		/*case MAIN_FORMATION:
-			_current_menu_showing = SHOW_FORMATION;
-			_current_menu = &_menu_formation;
-			break;*/
+		case MAIN_FORMATION:
+			// FIXME
+			// _current_menu_showing = SHOW_FORMATION;
+			// _current_menu = &_menu_formation;
+			break;
 
 		case MAIN_STATUS:
 			_current_menu_showing = SHOW_STATUS;
@@ -739,10 +897,10 @@ void MenuMode::_HandleMainMenu() {
 			_current_menu = &_menu_equip;
 			break;
 
-		/*case MAIN_SAVE:
+		case MAIN_SAVE:
 			_current_menu_showing = SHOW_SAVE;
 			_current_menu = &_menu_save;
-			break;*/
+			break;
 
 		case MAIN_EXIT:
 			ModeManager->Pop();

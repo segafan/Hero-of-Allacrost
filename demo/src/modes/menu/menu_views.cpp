@@ -214,7 +214,7 @@ void InventoryWindow::_InitCharSelect() {
 
 //Initalizes the available item categories
 void InventoryWindow::_InitCategory() {
-	_item_categories.SetCellSize(85.0f,30.0f);
+	_item_categories.SetCellSize(52.0f,30.0f);
 	_item_categories.SetPosition(458.0f, 120.0f);
 	_item_categories.SetFont("default");
 	_item_categories.SetSize(ITEM_CATEGORY_SIZE,1);
@@ -226,17 +226,17 @@ void InventoryWindow::_InitCategory() {
 
 	vector<ustring> options;
 	options.push_back(MakeUnicodeString("All"));
-	options.push_back(MakeUnicodeString("Field"));
-	options.push_back(MakeUnicodeString("Battle"));
-	options.push_back(MakeUnicodeString("Gear"));
+	options.push_back(MakeUnicodeString("Itm"));
+	options.push_back(MakeUnicodeString("Wpn"));
+	options.push_back(MakeUnicodeString("Hlm"));
+	options.push_back(MakeUnicodeString("Tor"));
+	options.push_back(MakeUnicodeString("Arm"));
+	options.push_back(MakeUnicodeString("Leg"));
 	options.push_back(MakeUnicodeString("Key"));
 
 	_item_categories.SetOptions(options);
 	_item_categories.SetSelection(ITEM_ALL);
 	_item_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-
-	//FIXME: Reenable later
-//	_item_categories.EnableOption(ITEM_KEY,false);
 }
 
 // Activates/deactivates inventory window
@@ -313,79 +313,76 @@ void InventoryWindow::Update() {
 	active_option->Update();
 	// Handle confirm/cancel presses differently for each window
 	switch (_active_box) {
-		case ITEM_ACTIVE_NONE: break;
+		case ITEM_ACTIVE_NONE:
+			break;
 
 		case ITEM_ACTIVE_CATEGORY:
-			{
-				// Activate the item list for this category
-				if (event == VIDEO_OPTION_CONFIRM) {
-					if (_inventory_items.GetNumberOptions() > 0) {
-						_inventory_items.SetSelection(0);
-						_item_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-						_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-						_description.SetDisplayText( _item_objects[ 0 ]->GetDescription() );
-						_active_box = ITEM_ACTIVE_LIST;
-						MenuMode::_instance->_menu_sounds["confirm"].PlaySound();
-					}
-				}
-				// Deactivate inventory
-				else if (event == VIDEO_OPTION_CANCEL) {
-					MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
+		{
+			// Activate the item list for this category
+			if (event == VIDEO_OPTION_CONFIRM) {
+				if (_inventory_items.GetNumberOptions() > 0) {
+					_inventory_items.SetSelection(0);
 					_item_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-					Activate(false);
-				}
-			}
-			break;
-
-		case ITEM_ACTIVE_LIST:
-			{
-				// Activate the character select for application
-				if (event == VIDEO_OPTION_CONFIRM) {
-					_active_box = ITEM_ACTIVE_CHAR;
-					_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
-					_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+					_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+					_description.SetDisplayText( _item_objects[ 0 ]->GetDescription() );
+					_active_box = ITEM_ACTIVE_LIST;
 					MenuMode::_instance->_menu_sounds["confirm"].PlaySound();
 				}
-				// Return to category selection
-				else if (event == VIDEO_OPTION_CANCEL) {
-					_active_box = ITEM_ACTIVE_CATEGORY;
-					MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
-					_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-					_item_categories.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-				}
-				else if ( event == VIDEO_OPTION_BOUNDS_UP || VIDEO_OPTION_BOUNDS_DOWN )
-				{
-					_description.SetDisplayText( _item_objects[ _inventory_items.GetSelection() ]->GetDescription() );
-				}
+			}
+			// Deactivate inventory
+			else if (event == VIDEO_OPTION_CANCEL) {
+				MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
+				_item_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+				Activate(false);
+				cout << "!!!" << endl;
 			}
 			break;
+		} // case ITEM_ACTIVE_CATEGORY
+
+		case ITEM_ACTIVE_LIST:
+		{
+			// Activate the character select for application
+			if (event == VIDEO_OPTION_CONFIRM) {
+				_active_box = ITEM_ACTIVE_CHAR;
+				_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
+				_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+				MenuMode::_instance->_menu_sounds["confirm"].PlaySound();
+			}
+			// Return to category selection
+			else if (event == VIDEO_OPTION_CANCEL) {
+				_active_box = ITEM_ACTIVE_CATEGORY;
+				_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+				_item_categories.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+				MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
+			}
+			else if ( event == VIDEO_OPTION_BOUNDS_UP || VIDEO_OPTION_BOUNDS_DOWN )
+			{
+				_description.SetDisplayText( _item_objects[ _inventory_items.GetSelection() ]->GetDescription() );
+			}
+			break;
+		} // case ITEM_ACTIVE_LIST
 
 		case ITEM_ACTIVE_CHAR:
-			{
-				// Use the item on the chosen character
-				if (event == VIDEO_OPTION_CONFIRM) {
-					GlobalObject* obj = _item_objects[ _inventory_items.GetSelection() ];
-					GlobalCharacter *ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
-					if (obj->GetObjectType() == GLOBAL_OBJECT_ITEM) {
-						GlobalItem *item = (GlobalItem*)obj;
-						item->MenuUse(ch);
-						item->DecrementCount(1);
-						if (item->GetCount() <= 0) {
-							GlobalManager->RemoveFromInventory(item->GetID());
-						} // if
-					} // if
-					//_menu_sounds["confirm"].PlaySound();
+		{
+			// Use the item on the chosen character
+			if (event == VIDEO_OPTION_CONFIRM) {
+				GlobalObject* obj = _item_objects[ _inventory_items.GetSelection() ];
+				GlobalCharacter *ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
+				if (obj->GetObjectType() == GLOBAL_OBJECT_ITEM) {
+					GlobalItem *item = (GlobalItem*)GlobalManager->RetrieveFromInventory(obj->GetID());
+					item->MenuUse(ch);
 				}
-				// Return to item selection
-				else if (event == VIDEO_OPTION_CANCEL) {
-					_active_box = ITEM_ACTIVE_LIST;
-					_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-					_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
-					MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
-				}
-			}
+			} // if VIDEO_OPTION_CONFIRM
+			// Return to item selection
+			else if (event == VIDEO_OPTION_CANCEL) {
+				_active_box = ITEM_ACTIVE_LIST;
+				_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+				_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+				MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
+			} // if VIDEO_OPTION_CANCEL
 			break;
-	}
+		} // case ITEM_ACTIVE_CHAR
+	} // switch (_active_box)
 
 	// Update the item list
 	_UpdateItemText();
@@ -394,127 +391,57 @@ void InventoryWindow::Update() {
 // Updates the item list
 void InventoryWindow::_UpdateItemText()
 {
-	// Get the inventory items
-	std::map<uint32, GlobalObject*>* inv = GlobalManager->GetInventory();
-	std::vector<GlobalItem*>* invItems = GlobalManager->GetInventoryItems();
-	std::vector<GlobalWeapon*>* invWeapons = GlobalManager->GetInventoryWeapons();
-	std::vector<GlobalArmor*>* invArmor;
-	std::vector<GlobalKeyItem*>* invKeyItems = GlobalManager->GetInventoryKeyItems();
-
-
-	// For item names
-	std::vector<ustring> inv_names;
-	// For iterating through items
-	std::map<uint32, GlobalObject*>::iterator i;
-	std::vector<GlobalItem*>::iterator i_item;
-	std::vector<GlobalWeapon*>::iterator i_weapon;
-	std::vector<GlobalArmor*>::iterator i_armor;
-	std::vector<GlobalKeyItem*>::iterator i_key;
-
-	// temporary object storage variables
-	GlobalObject* obj;
-	GlobalItem* item;
-	GlobalWeapon* weapon;
-	GlobalArmor* armor;
-	GlobalKeyItem* key_item;
-
 	_item_objects.clear();
 
-	// Temp var to hold option
-	string text;
-
-	//FIX ME - When video engine is fixed, take out MakeStandardString
 	switch (_item_categories.GetSelection()) {
-
-		//Index all items
 		case ITEM_ALL:
-			for (i = inv->begin(); i != inv->end(); i++) {
-				obj = i->second;
-				text = "<" + obj->GetIconImage().GetFilename() + "><32>     " + MakeStandardString(obj->GetName()) + "<R><350>" + NumberToString(obj->GetCount()) + "   ";
-				inv_names.push_back(MakeUnicodeString(text));
-				_item_objects.push_back( obj );
+		{
+			std::map<uint32, GlobalObject*>* inv = GlobalManager->GetInventory();
+			for (std::map<uint32, GlobalObject*>::iterator i = inv->begin(); i != inv->end(); i++) {
+				_item_objects.push_back( i->second );
 			}
+		}
 			break;
 
-
-		//Index menu items only
-		case ITEM_FIELD:
-			for (i_item = invItems->begin(); i_item != invItems->end(); i_item++) {
-				item = *i_item;
-				if( item->GetUsage() == GLOBAL_USE_MENU || item->GetUsage() == GLOBAL_USE_ALL  ) {
-					text = "<" + item->GetIconImage().GetFilename() + "><32>     " + MakeStandardString(item->GetName()) + "<R><350>" + NumberToString(item->GetCount()) + "   ";
-					inv_names.push_back(MakeUnicodeString(text));
-					_item_objects.push_back( item );
-				}
-			}
+		case ITEM_ITEM:
+			_item_objects = _GetItemVector(GlobalManager->GetInventoryItems());
 			break;
 
-		//Index battle items only
-		case ITEM_BATTLE:
-			for (i_item = invItems->begin(); i_item != invItems->end(); i_item++) {
-				item = *i_item;
-				if( item->GetUsage() == GLOBAL_USE_BATTLE ) {
-					text = "<" + item->GetIconImage().GetFilename() + "><32>     " + MakeStandardString(item->GetName()) + "<R><350>" + NumberToString(item->GetCount()) + "   ";
-					inv_names.push_back(MakeUnicodeString(text));
-					_item_objects.push_back( item );
-				}
-			}
+		case ITEM_WEAPONS:
+			_item_objects = _GetItemVector(GlobalManager->GetInventoryWeapons());
 			break;
 
-		//Index equipment only
-		case ITEM_EQUIPMENT:
-			for (i_weapon = invWeapons->begin(); i_weapon != invWeapons->end(); i_weapon++) {
-				weapon = *i_weapon;
-				text = "<" + weapon->GetIconImage().GetFilename() + "><32>     " + MakeStandardString(weapon->GetName()) + "<R><350>" + NumberToString(weapon->GetCount()) + "   ";
-				inv_names.push_back(MakeUnicodeString(text));
-				_item_objects.push_back( weapon );
-			}
+		case ITEM_HEAD_ARMOR:
+			_item_objects = _GetItemVector(GlobalManager->GetInventoryHeadArmor());
+			break;
 
-			invArmor = GlobalManager->GetInventoryHeadArmor();
-			for (i_armor = invArmor->begin(); i_armor != invArmor->end(); i_armor++) {
-				armor = *i_armor;
-				text = "<" + armor->GetIconImage().GetFilename() + "><32>     " + MakeStandardString(armor->GetName()) + "<R><350>" + NumberToString(armor->GetCount()) + "   ";
-				inv_names.push_back(MakeUnicodeString(text));
-				_item_objects.push_back( armor );
-			}
+		case ITEM_TORSO_ARMOR:
+			_item_objects = _GetItemVector(GlobalManager->GetInventoryTorsoArmor());
+			break;
 
-			invArmor = GlobalManager->GetInventoryTorsoArmor();
-			for (i_armor = invArmor->begin(); i_armor != invArmor->end(); i_armor++) {
-				armor = *i_armor;
-				text = "<" + armor->GetIconImage().GetFilename() + "><32>     " + MakeStandardString(armor->GetName()) + "<R><350>" + NumberToString(armor->GetCount()) + "   ";
-				inv_names.push_back(MakeUnicodeString(text));
-				_item_objects.push_back( armor );
-			}
+		case ITEM_ARM_ARMOR:
+			_item_objects = _GetItemVector(GlobalManager->GetInventoryArmArmor());
+			break;
 
-			invArmor = GlobalManager->GetInventoryArmArmor();
-			for (i_armor = invArmor->begin(); i_armor != invArmor->end(); i_armor++) {
-				armor = *i_armor;
-				text = "<" + armor->GetIconImage().GetFilename() + "><32>     " + MakeStandardString(armor->GetName()) + "<R><350>" + NumberToString(armor->GetCount()) + "   ";
-				inv_names.push_back(MakeUnicodeString(text));
-				_item_objects.push_back( armor );
-			}
-
-			invArmor = GlobalManager->GetInventoryLegArmor();
-			for (i_armor = invArmor->begin(); i_armor != invArmor->end(); i_armor++) {
-				armor = *i_armor;
-				text = "<" + armor->GetIconImage().GetFilename() + "><32>     " + MakeStandardString(armor->GetName()) + "<R><350>" + NumberToString(armor->GetCount()) + "   ";
-				inv_names.push_back(MakeUnicodeString(text));
-				_item_objects.push_back( armor );
-			}
-
+		case ITEM_LEG_ARMOR:
+			_item_objects = _GetItemVector(GlobalManager->GetInventoryLegArmor());
 			break;
 
 		case ITEM_KEY:
-			for (i_key = invKeyItems->begin(); i_key != invKeyItems->end(); i_key++) {
-				key_item = *i_key;
-				text = "<" + key_item->GetIconImage().GetFilename() + "><32>     " + MakeStandardString(key_item->GetName()) + "<R><350>" + NumberToString(key_item->GetCount()) + "   ";
-				inv_names.push_back(MakeUnicodeString(text));
-				_item_objects.push_back( key_item );
-			}
+			_item_objects = _GetItemVector(GlobalManager->GetInventoryKeyItems());
 			break;
 	}
 
-	_inventory_items.SetSize(1,6);
+	string text = "";
+	std::vector<ustring> inv_names;
+
+	//FIX ME - When video engine is fixed, take out MakeStandardString
+	for (int ctr = 0; ctr < _item_objects.size(); ctr++) {
+		text = "<" + _item_objects[ctr]->GetIconImage().GetFilename() + "><32>     " + MakeStandardString(_item_objects[ctr]->GetName()) + "<R><350>" + NumberToString(_item_objects[ctr]->GetCount()) + "   ";
+		inv_names.push_back(MakeUnicodeString(text));
+	}
+
+	_inventory_items.SetSize(1, _item_objects.size());
 	_inventory_items.SetOptions(inv_names);
 } // void InventoryWindow::UpdateItemText()
 
@@ -523,20 +450,6 @@ void InventoryWindow::_UpdateItemText()
 void InventoryWindow::Draw()
 {
 	MenuWindow::Draw();
-
-	// This is part of the bottom menu, but there's really no way to run it from menu.cpp...
-	if (_active_box == ITEM_ACTIVE_LIST) {
-		GlobalObject* obj = _item_objects[ _inventory_items.GetSelection() ];
-
-		VideoManager->SetDrawFlags(VIDEO_X_LEFT,VIDEO_Y_CENTER,0);
-
-		VideoManager->Move(100, 600);
-		VideoManager->DrawImage(obj->GetIconImage() );
-		VideoManager->MoveRelative(65, 0);
-		VideoManager->DrawText(obj->GetName());
-		VideoManager->SetDrawFlags(VIDEO_X_LEFT,VIDEO_Y_BOTTOM,0);
-		_description.Draw();
-	} // if
 
 	// Update the item text in case the number of items changed.
 	_UpdateItemText();
@@ -562,7 +475,6 @@ StatusWindow::StatusWindow() : _char_select_active(false) {
 	// Get party size for iteration
 	uint32 partysize = GlobalManager->GetActiveParty()->GetPartySize();
 	StillImage portrait;
-
 	GlobalCharacter* ch;
 
 	// Set up the full body portrait
@@ -575,10 +487,8 @@ StatusWindow::StatusWindow() : _char_select_active(false) {
 		_full_portraits.push_back(portrait);
 	}
 
-// 	//Init char select option box
+	// Init char select option box
 	_InitCharSelect();
-
-	_current_char =  dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
 } // StatusWindow::StatusWindow()
 
 
@@ -627,8 +537,6 @@ void StatusWindow::_InitCharSelect() {
 
 // Updates the status window
 void StatusWindow::Update() {
-	_current_char =  dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
-
 	// check input values
 	if (InputManager->UpPress())
 	{
@@ -648,14 +556,14 @@ void StatusWindow::Update() {
 		MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
 	}
 	_char_select.Update();
-	_current_char =  dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
-
 } // void StatusWindow::Update()
 
 
 // Draws the status window
 void StatusWindow::Draw() {
 	MenuWindow::Draw();
+
+	GlobalCharacter* ch =  dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
 
 	// Set drawing system
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
@@ -665,11 +573,11 @@ void StatusWindow::Draw() {
 
 	//Draw character name and level
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, 0);
-	VideoManager->DrawText(_current_char->GetName());
+	VideoManager->DrawText(ch->GetName());
 
 	VideoManager->MoveRelative(0, 25);
 	ostringstream lvl;
-	lvl << "Experience Level: " << _current_char->GetExperienceLevel();
+	lvl << "Experience Level: " << ch->GetExperienceLevel();
 	VideoManager->DrawText(MakeUnicodeString(lvl.str()));
 
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, 0);
@@ -678,47 +586,47 @@ void StatusWindow::Draw() {
 	VideoManager->MoveRelative(-55, 60);
 
 	ostringstream ohp;
-	ohp << "HP: " << _current_char->GetHitPoints() << " (" << _current_char->GetMaxHitPoints() << ")";
+	ohp << "HP: " << ch->GetHitPoints() << " (" << ch->GetMaxHitPoints() << ")";
 	VideoManager->DrawText(MakeUnicodeString(ohp.str()));
 
 	VideoManager->MoveRelative(0, 25);
 	ostringstream osp;
-	osp << "SP: " << _current_char->GetSkillPoints() << " (" << _current_char->GetMaxSkillPoints() << ")";
+	osp << "SP: " << ch->GetSkillPoints() << " (" << ch->GetMaxSkillPoints() << ")";
 	VideoManager->DrawText(MakeUnicodeString(osp.str()));
 
 	VideoManager->MoveRelative(0, 25);
 	ostringstream next;
-	next << "XP to Next: " << _current_char->GetExperienceForNextLevel();
+	next << "XP to Next: " << ch->GetExperienceForNextLevel();
 	VideoManager->DrawText(MakeUnicodeString(next.str()));
 
 	VideoManager->MoveRelative(0, 25);
 	ostringstream ostr;
-	ostr << "Strength: " << _current_char->GetStrength();
+	ostr << "Strength: " << ch->GetStrength();
 	VideoManager->DrawText(MakeUnicodeString(ostr.str()));
 
 	VideoManager->MoveRelative(0, 25);
 	ostringstream ovig;
-	ovig << "Vigor: " << _current_char->GetVigor();
+	ovig << "Vigor: " << ch->GetVigor();
 	VideoManager->DrawText(MakeUnicodeString(ovig.str()));
 
 	VideoManager->MoveRelative(0, 25);
 	ostringstream ofort;
-	ofort << "XP to Next: " << _current_char->GetFortitude();
+	ofort << "XP to Next: " << ch->GetFortitude();
 	VideoManager->DrawText(MakeUnicodeString(ofort.str()));
 
 	VideoManager->MoveRelative(0, 25);
 	ostringstream ores;
-	ores << "Protection: " << _current_char->GetProtection();
+	ores << "Protection: " << ch->GetProtection();
 	VideoManager->DrawText(MakeUnicodeString(ores.str()));
 
 	VideoManager->MoveRelative(0, 25);
 	ostringstream agl;
-	agl << "Agility: " << _current_char->GetAgility();
+	agl << "Agility: " << ch->GetAgility();
 	VideoManager->DrawText(MakeUnicodeString(agl.str()));
 
 	VideoManager->MoveRelative(0, 25);
 	ostringstream oeva;
-	oeva << "Evade: " << _current_char->GetEvade() << "%";
+	oeva << "Evade: " << ch->GetEvade() << "%";
 	VideoManager->DrawText(MakeUnicodeString(oeva.str()));
 
 	//Draw character full body portrait
@@ -998,22 +906,6 @@ void SkillsWindow::_UpdateSkillList() {
 void SkillsWindow::Draw() {
 	MenuWindow::Draw();
 	
-	// This is part of the bottom menu.
-	if (_active_box == SKILL_ACTIVE_LIST) {
-		GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
-		std::vector<ustring> options;
-		std::vector<hoa_global::GlobalSkill*>* skills = ch->GetAttackSkills();
-		GlobalSkill* skill = skills->at(_skills_list.GetSelection());
-
-		VideoManager->SetDrawFlags(VIDEO_X_LEFT,VIDEO_Y_CENTER,0);
-
-		VideoManager->Move(100, 600);
-		VideoManager->MoveRelative(65, 0);
-		VideoManager->DrawText(skill->GetName());
-		VideoManager->SetDrawFlags(VIDEO_X_LEFT,VIDEO_Y_BOTTOM,0);
-		_description.Draw();
-	} // if
-
 	//Draw option boxes
 	_char_select.Draw();
 	_skills_categories.Draw();
@@ -1240,43 +1132,50 @@ void EquipWindow::Update() {
 				GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
 				uint32 id_num;
 
-				if (_equip_select.GetSelection() == EQUIP_WEAPON) {
-					id_num = GlobalManager->GetInventoryWeapons()->at(_equip_list.GetSelection())->GetID();
-					GlobalManager->AddToInventory(ch->EquipWeapon((GlobalWeapon*)GlobalManager->RetrieveFromInventory(id_num)));
-				}
-				else if (_equip_select.GetSelection() == EQUIP_HEADGEAR) {
-					id_num = GlobalManager->GetInventoryHeadArmor()->at(_equip_list.GetSelection())->GetID();
-					GlobalManager->AddToInventory(ch->EquipHeadArmor((GlobalArmor*)GlobalManager->RetrieveFromInventory(id_num)));
-				}
-				else if (_equip_select.GetSelection() == EQUIP_BODYARMOR) {
-					id_num = GlobalManager->GetInventoryTorsoArmor()->at(_equip_list.GetSelection())->GetID();
-					GlobalManager->AddToInventory(ch->EquipTorsoArmor((GlobalArmor*)GlobalManager->RetrieveFromInventory(id_num)));
-				}
-				else if (_equip_select.GetSelection() == EQUIP_OFFHAND) {
-					id_num = GlobalManager->GetInventoryArmArmor()->at(_equip_list.GetSelection())->GetID();
-					GlobalManager->AddToInventory(ch->EquipArmArmor((GlobalArmor*)GlobalManager->RetrieveFromInventory(id_num)));
-				}
-				else if (_equip_select.GetSelection() == EQUIP_LEGGINGS) {
-					id_num = GlobalManager->GetInventoryLegArmor()->at(_equip_list.GetSelection())->GetID();
-					GlobalManager->AddToInventory(ch->EquipLegArmor((GlobalArmor*)GlobalManager->RetrieveFromInventory(id_num)));
-				}
-				else {
-					cout << "MENU ERROR: _equip_select.GetSelection value is invalid: " << _equip_select.GetSelection() << endl;
-				}
+				switch ( _equip_select.GetSelection() ) {
+					case EQUIP_WEAPON:
+						id_num = GlobalManager->GetInventoryWeapons()->at(_equip_list.GetSelection())->GetID();
+						GlobalManager->AddToInventory(ch->EquipWeapon((GlobalWeapon*)GlobalManager->RetrieveFromInventory(id_num)));
+					break;
+
+					case EQUIP_HEADGEAR:
+						id_num = GlobalManager->GetInventoryHeadArmor()->at(_equip_list.GetSelection())->GetID();
+						GlobalManager->AddToInventory(ch->EquipHeadArmor((GlobalArmor*)GlobalManager->RetrieveFromInventory(id_num)));
+					break;
+
+					case EQUIP_BODYARMOR:
+						id_num = GlobalManager->GetInventoryTorsoArmor()->at(_equip_list.GetSelection())->GetID();
+						GlobalManager->AddToInventory(ch->EquipTorsoArmor((GlobalArmor*)GlobalManager->RetrieveFromInventory(id_num)));
+					break;
+
+					case EQUIP_OFFHAND:
+						id_num = GlobalManager->GetInventoryArmArmor()->at(_equip_list.GetSelection())->GetID();
+						GlobalManager->AddToInventory(ch->EquipArmArmor((GlobalArmor*)GlobalManager->RetrieveFromInventory(id_num)));
+					break;
+
+					case EQUIP_LEGGINGS:
+						id_num = GlobalManager->GetInventoryLegArmor()->at(_equip_list.GetSelection())->GetID();
+						GlobalManager->AddToInventory(ch->EquipLegArmor((GlobalArmor*)GlobalManager->RetrieveFromInventory(id_num)));
+					break;
+
+					default:
+						cout << "MENU ERROR: _equip_select.GetSelection value is invalid: " << _equip_select.GetSelection() << endl;
+					break;
+				} // switch _equip_select.GetSelection()
 
 				_active_box = EQUIP_ACTIVE_SELECT;
 				_equip_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 				_equip_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 				MenuMode::_instance->_menu_sounds["confirm"].PlaySound();
-			}
+			} // if VIDEO_OPTION_CONFIRM
 			else if (event == VIDEO_OPTION_CANCEL) {
 				_active_box = EQUIP_ACTIVE_SELECT;
 				MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
 				_equip_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 				_equip_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
-			}
+			} // else if VIDEO_OPTION_CANCEL
 		break;
-	}
+	} // switch _active_box
 
 	_UpdateEquipList();
 } // void EquipWindow::Update()

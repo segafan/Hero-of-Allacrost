@@ -38,11 +38,14 @@ namespace private_menu {
 //! \brief The different item categories
 enum ITEM_CATEGORY {
 	ITEM_ALL = 0,
-	ITEM_FIELD = 1,
-	ITEM_BATTLE = 2,
-	ITEM_EQUIPMENT = 3,
-	ITEM_KEY = 4,
-	ITEM_CATEGORY_SIZE = 5
+	ITEM_ITEM = 1,
+	ITEM_WEAPONS = 2,
+	ITEM_HEAD_ARMOR = 3,
+	ITEM_TORSO_ARMOR = 4,
+	ITEM_ARM_ARMOR = 5,
+	ITEM_LEG_ARMOR = 6,
+	ITEM_KEY = 7,
+	ITEM_CATEGORY_SIZE = 8
 };
 
 //! \brief The different skill types
@@ -132,6 +135,8 @@ public:
 *** This handles item use.  You can also view all items by category.
 *** ***************************************************************************/
 class InventoryWindow : public hoa_video::MenuWindow {
+	friend class hoa_menu::MenuMode;
+
 public:
 	InventoryWindow();
 
@@ -207,6 +212,7 @@ private:
 	*/
 	void _InitCategory();
 
+	template <class T> std::vector<hoa_global::GlobalObject*> _GetItemVector(std::vector<T*>* inv);
 }; // class InventoryWindow : public hoa_video::MenuWindow
 
 
@@ -224,9 +230,6 @@ private:
 
 	//! A graphic for the location (map) that the player is currently on
 	hoa_video::StillImage _location_graphic;
-
-	//! the current character for this screen.
-	hoa_global::GlobalCharacter *_current_char;
 
 	//! if the window is active or not
 	bool _char_select_active;
@@ -279,6 +282,8 @@ public:
 *** to a character.
 *** ***************************************************************************/
 class SkillsWindow : public hoa_video::MenuWindow {
+	friend class hoa_menu::MenuMode;
+
 public:
 	SkillsWindow();
 
@@ -358,6 +363,8 @@ private:
 *** You can choose a piece of equipment and replace with an item from the given list.
 *** ***************************************************************************/
 class EquipWindow : public hoa_video::MenuWindow {
+	friend class hoa_menu::MenuMode;
+
 public:
 	EquipWindow();
 	~EquipWindow();
@@ -438,6 +445,15 @@ private:
 
 }; // class FormationWindow : public hoa_video::MenuWindow
 
+template <class T> std::vector<hoa_global::GlobalObject*> InventoryWindow::_GetItemVector(std::vector<T*>* inv) {
+	std::vector<hoa_global::GlobalObject*> obj_vector; //= (new std::vector<hoa_global::GlobalObject*
+
+	for (typename std::vector<T*>::iterator i = inv->begin(); i != inv->end(); i++) {
+		obj_vector.push_back( *i );
+	}
+	
+	return obj_vector;
+}
 
 } // namespace private_menu
 

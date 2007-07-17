@@ -51,9 +51,9 @@ const uint32 MAIN_EQUIP          = 2;
 const uint32 MAIN_STATUS         = 3;
 // const uint32 MAIN_OPTIONS        = 3;
 const uint32 MAIN_SAVE           = 4;
-// const uint32 MAIN_FORMATION      = 4;
-const uint32 MAIN_EXIT           = 5;
-const uint32 MAIN_SIZE           = 6;
+const uint32 MAIN_FORMATION      = 5;
+const uint32 MAIN_EXIT           = 6;
+const uint32 MAIN_SIZE           = 7;
 //@}
 
 //! \name Inventory Menu Options Constants
@@ -117,9 +117,9 @@ const uint32 SHOW_SKILLS        = 2;
 const uint32 SHOW_EQUIP         = 3;
 const uint32 SHOW_STATUS        = 4;
 //const uint32 SHOW_OPTIONS       = 5;
-const uint32 SHOW_SAVE          = 111;
-const uint32 SHOW_FORMATION     = 5;
-const uint32 SHOW_EXIT          = 6;
+const uint32 SHOW_SAVE          = 5;
+const uint32 SHOW_FORMATION     = 6;
+const uint32 SHOW_EXIT          = 7;
 //@}
 
 /** \name MenuMode Active Window Flags
@@ -149,7 +149,6 @@ const uint32 WINDOW_FORMATION      = 5;
 *** ***************************************************************************/
 class MenuMode : public hoa_mode_manager::GameMode {
 	friend class private_menu::CharacterWindow;
-//	friend class private_menu::MiniCharacterSelectWindow;
 	friend class private_menu::InventoryWindow;
 	friend class private_menu::StatusWindow;
 	friend class private_menu::SkillsWindow;
