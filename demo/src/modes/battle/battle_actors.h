@@ -301,15 +301,6 @@ public:
 
 	hoa_global::GlobalCharacter* GetActor()
 		{ return dynamic_cast<hoa_global::GlobalCharacter*>(_actor); }
-
-private:
-	//! \brief Image of the cover of the bottom menu shrinking bar
-	//! \todo This should be moved to BattleMode
-	hoa_video::StillImage _status_bar_cover_image;
-
-	//! \brief Image of the menu status
-	//! \todo This should be moved to BattleMode
-	hoa_video::StillImage _status_menu_image;
 }; // class BattleCharacter
 
 

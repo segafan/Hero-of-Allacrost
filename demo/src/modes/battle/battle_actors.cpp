@@ -125,13 +125,6 @@ BattleCharacter::BattleCharacter(GlobalCharacter* character, float x_origin, flo
 	if (VideoManager->LoadImage(_stamina_icon) == false)
 		cerr << "oh noes" << endl;
 
-	// Load images for the down menu
-	_status_bar_cover_image.SetFilename("img/menus/bar_cover.png");
-	VideoManager->LoadImage(_status_bar_cover_image);
-
-	_status_menu_image.SetFilename("img/menus/battle_character_menu.png");
-	VideoManager->LoadImage(_status_menu_image);
-
 	_state = ACTOR_IDLE;
 } // BattleCharacter::BattleCharacter(GlobalCharacter* character, float x_origin, float y_origin)
 
@@ -139,8 +132,6 @@ BattleCharacter::BattleCharacter(GlobalCharacter* character, float x_origin, flo
 
 BattleCharacter::~BattleCharacter() {
 	VideoManager->DeleteImage(_stamina_icon);
-	VideoManager->DeleteImage(_status_bar_cover_image);
-	VideoManager->DeleteImage(_status_menu_image);
 }
 
 
@@ -263,13 +254,14 @@ void BattleCharacter::DrawStatus() {
 
 	// Draw the background of the menu
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-	VideoManager->Move(149, 84.0f + y_offset);
-	VideoManager->DrawImage(_status_menu_image);
-
 	VideoManager->SetTextColor(Color::white);
 
+	if (current_battle->_selected_character == this) {
+		VideoManager->Move(149, 84.0f + y_offset);
+		VideoManager->DrawImage(current_battle->_character_selection);
+	}
+
 	// Draw the character's name
-	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 	VideoManager->Move(225.0f, 90.0f + y_offset);
  	VideoManager->DrawText(GetActor()->GetName());
 
@@ -283,7 +275,7 @@ void BattleCharacter::DrawStatus() {
 		float bar_size;
 
 		// Draw HP bar in green
-		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_NO_BLEND, 0);
+		VideoManager->SetDrawFlags(VIDEO_NO_BLEND, 0);
 		bar_size = static_cast<float>(83 * GetActor()->GetHitPoints()) / static_cast<float>(GetActor()->GetMaxHitPoints());
 		VideoManager->Move(312, 90 + y_offset);
 
@@ -295,9 +287,6 @@ void BattleCharacter::DrawStatus() {
 			VideoManager->DrawRectangle(83.0f - bar_size, 6, Color::black);
 			VideoManager->Move(312, 90 + y_offset);
 		}
-
-		VideoManager->SetDrawFlags(VIDEO_BLEND_ADD, 0);
-		VideoManager->DrawImage(_status_bar_cover_image);
 
 		// Draw SP bar in blue
 		VideoManager->SetDrawFlags(VIDEO_NO_BLEND, 0);
@@ -313,11 +302,13 @@ void BattleCharacter::DrawStatus() {
 			VideoManager->Move(412, 90 + y_offset);
 		}
 
-		VideoManager->SetDrawFlags(VIDEO_BLEND_ADD, 0);
-		VideoManager->DrawImage(_status_bar_cover_image);
+		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
+
+		// Draw the cover image over the top of the bar
+		VideoManager->Move(294.0f, 90.0f + y_offset);
+		VideoManager->DrawImage(current_battle->_character_bars);
 
 		// Draw the character's current health on top of the middle of the HP bar
-		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 		VideoManager->Move(355.0f, 90.0f + y_offset);
 		VideoManager->DrawText(NumberToString(GetActor()->GetHitPoints()));
 

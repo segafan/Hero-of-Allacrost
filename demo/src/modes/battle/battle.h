@@ -374,6 +374,12 @@ private:
 	**/
 	hoa_video::AnimatedImage _attack_point_indicator;
 
+	//! \brief Used to provide a background highlight a selected character's stats
+	hoa_video::StillImage _character_selection;
+
+	//! \brief An image which contains the covers for the HP and SP bars
+	hoa_video::StillImage _character_bars;
+
 	/** \brief The universal stamina bar that is used to represent the state of battle actors
 	*** All battle actors have a portrait that moves along this meter to signify their
 	*** turn in the rotation.  The meter and corresponding portraits must be drawn after the
