@@ -108,9 +108,16 @@ BattleMode::BattleMode() :
 
 	_actor_selection_image.SetDimensions(109, 78);
 	_actor_selection_image.SetFilename("img/icons/battle/character_selector.png");
-	if (!VideoManager->LoadImage(_actor_selection_image)) {
+	if (!VideoManager->LoadImage(_actor_selection_image))
 		cerr << "BATTLE ERROR: Unable to load player selector image." << endl;
-	}
+
+	_character_selection.SetFilename("img/menus/battle_character_selection.png");
+	if (VideoManager->LoadImage(_stamina_meter) == false)
+		cerr << "BATTLE ERROR: Failed to load character selection image" << endl;
+
+	_character_bars.SetFilename("img/menus/battle_character_bars.png");
+	if (VideoManager->LoadImage(_stamina_meter) == false)
+		cerr << "BATTLE ERROR: Failed to load character bars image" << endl;
 
 	_action_window = new ActionWindow();
 	_finish_window = new FinishWindow();
