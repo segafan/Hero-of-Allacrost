@@ -96,7 +96,8 @@ enum FINISH_WINDOW_STATE {
 *** of categories available after special events
 *** ***************************************************************************/
 class ActionWindow : public hoa_video::MenuWindow {
-	friend class BattleMode;
+	friend class hoa_battle::BattleMode;
+
 public:
 	ActionWindow();
 
@@ -262,7 +263,8 @@ private:
 *** returning from the finished battle.
 *** ***************************************************************************/
 class FinishWindow : public hoa_video::MenuWindow {
-	friend class BattleMode;
+	friend class hoa_battle::BattleMode;
+
 public:
 	FinishWindow();
 

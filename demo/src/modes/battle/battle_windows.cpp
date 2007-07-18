@@ -242,15 +242,13 @@ void ActionWindow::_UpdateActionSelection() {
 		{
 			_action_target_type = _skill_list->at(_selected_action)->GetTargetType();
 			_action_target_ally = _skill_list->at(_selected_action)->IsTargetAlly();
-			current_battle->_cursor_state = CURSOR_SELECT_TARGET;
-			current_battle->_SetInitialTarget(_action_target_type, _action_target_ally);
+			current_battle->_SetInitialTarget();
 		}
 
 		else if (_selected_action_category == ACTION_TYPE_ITEM) {
 			_action_target_type = _item_list[_selected_action]->GetTargetType();
 			_action_target_ally = _item_list[_selected_action]->IsTargetAlly();
-			current_battle->_cursor_state = CURSOR_SELECT_TARGET;
-			current_battle->_SetInitialTarget(_action_target_type, _action_target_ally);
+			current_battle->_SetInitialTarget();
 		}
 
 		else {
@@ -278,8 +276,31 @@ void ActionWindow::_UpdateTargetSelection() {
 		_state = VIEW_ACTION_SELECTION;
 	}
 	else if (InputManager->ConfirmPress()) {
+		vector<GlobalAttackPoint*>* attack_points = current_battle->_selected_target->GetActor()->GetAttackPoints();
+		BattleAction* new_event;
+		if (_selected_action_category != ACTION_TYPE_ITEM) {
+			new_event = new SkillAction(current_battle->_selected_character, current_battle->_selected_target, GetSelectedSkill(),
+				attack_points->at(current_battle->_selected_attack_point));
+		}
+		else {
+			GlobalItem* item = GetSelectedItem();
+			// NOTE: Don't know if decrementing the item count is the best approach to use here.
+			// We decrement the count now so that if the next character wants to use items, they know
+			// how many are available to use. If the current chararacter uses the item, then the decrement stays.
+			// If count == 0, then it's removed from inventory...if item is not used (i.e. battle ends before use),
+			// it is incremented back.
+			item->DecrementCount(1);
+			new_event = new ItemAction(current_battle->_selected_character, current_battle->_selected_target, item,
+				attack_points->at(current_battle->_selected_attack_point));
+		}
+		current_battle->AddBattleActionToQueue(new_event);
+		current_battle->_selected_character->SetState(ACTOR_WARM_UP);
+		current_battle->_selected_target = NULL;
+		current_battle->_selected_character = NULL;
+		current_battle->_selected_character_index = current_battle->GetIndexOfFirstIdleCharacter();
+		current_battle->_selected_attack_point = 0;
+
 		Reset();
-		// TODO: call BattleMode method that confirms the selected character, target, and action for execution
 	}
 
 	// If the target is a party type, then ignore arrow key presses since they are not processed
@@ -289,14 +310,14 @@ void ActionWindow::_UpdateTargetSelection() {
 
 	if (InputManager->UpPress() || InputManager->DownPress()) {
 		BattleActor* previous_target = current_battle->_selected_target;
-		// TODO: call BattleMode method that updates the targeted actor
+		current_battle->_SelectNextTarget(InputManager->UpPress());
 		if (previous_target != current_battle->_selected_target) {
 			_ConstructTargetInformation();
 		}
 	}
 	else if (InputManager->LeftPress() || InputManager->RightPress()) {
 		uint32 previous_ap = current_battle->_selected_attack_point;
-		// TODO: call BattleMode method that updates the targeted attack point
+		current_battle->_SelectNextAttackPoint(InputManager->RightPress());
 		if (previous_ap != current_battle->_selected_attack_point) {
 			_ConstructTargetInformation();
 		}
