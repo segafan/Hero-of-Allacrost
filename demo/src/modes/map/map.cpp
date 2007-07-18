@@ -102,9 +102,28 @@ MapMode::MapMode(string filename) :
 
 	// TEMP: chest test
 	ChestObject* chest = new ChestObject( "img/misc/chest1.png", 1, 3 );
+	chest->SetObjectID( 7689 );
 	chest->SetXPosition(111, 0);
 	chest->SetYPosition(36, 0);
 	chest->AddObject( 1, 50 );
+
+	if( GlobalManager->DoesEventGroupExist( "chest_test_group" ) ) {
+		if( GlobalManager->DoesEventExist( "chest_test_group", "chest_7689" ) ) {
+			cout << "Exists" << endl;
+			if( GlobalManager->GetEventValue( "chest_test_group", "chest_7689" ) == 1 ) {
+				cout << "Cleared" << endl;
+				chest->Clear();
+			}
+		} else {
+			cout << "Doesn't exist" << endl;
+			GlobalManager->GetEventGroup( "chest_test_group" )->AddNewEvent( "chest_7689", 0 );
+		}
+	}
+	else {
+		cout << "Group Doesn't exist" << endl;
+		GlobalManager->AddNewEventGroup( "chest_test_group" );
+	}
+
 	_AddGroundObject( chest );
 }
 
