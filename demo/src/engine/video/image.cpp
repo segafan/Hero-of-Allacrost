@@ -490,10 +490,11 @@ void AnimatedImage::Update() {
 		_frame_index++;
 		if (_frame_index >= _frames.size()) {
 				// Check if the animation has looping enabled and if so, increment the loop counter
-				// and cease the animation if the number of animation loops have finished
+				// and cease the ani_loop_countermation if the number of animation loops have finished
 			if (_number_loops >= 0 && ++_loop_counter >= _number_loops) {
 				_loops_finished = true;
 				_frame_counter = 0;
+				_frame_index--;
 				return;
 			}
 			_frame_index = 0;

@@ -33,6 +33,7 @@ const uint8 PHYSICAL_TYPE = 0;
 const uint8 VIRTUAL_TYPE = 1;
 const uint8 SPRITE_TYPE = 2;
 const uint8 ENEMY_TYPE = 3;
+const uint8 CHEST_TYPE = 4;
 //@}
 
 /** ****************************************************************************
@@ -338,6 +339,91 @@ public:
 		{ return current_animation; }
 	//@}
 }; // class PhysicalObject : public MapObject
+
+/** ****************************************************************************
+ *** \brief Represents an physical object which can give other objects to the player when activated
+ ***
+ *** This class acts as an optionnaly hidden object that has to be found before
+ *** being able to activate. When activated it will transfer its content to the
+ *** player's inventory.
+ ***
+ *** ***************************************************************************/
+class ChestObject : public PhysicalObject {
+public:
+	/** \name ChestObject defaults constants
+ 	*** These constants are used to identify the default settings of a ChestObject
+	**/
+	//@{
+	static const uint8 NB_FRAMES_CLOSED_DEFAULT;
+	static const uint8 NB_FRAMES_OPENING_DEFAULT;
+
+	static const uint32 HIDE_FORCE_DEFAULT;
+	//@}
+
+	//! Values indicating which animation is which, should not be changed!
+	enum {
+		  CLOSED_CHEST_ANIM = 0
+  		, OPENING_CHEST_ANIM = 1
+	};
+
+
+	//TODO: that
+	/** \brief Creates a ChestObject
+	**/
+	ChestObject( std::string image_file,
+	             uint8 nb_frames_closed = NB_FRAMES_CLOSED_DEFAULT,
+	             uint8 nb_frames_opening = NB_FRAMES_OPENING_DEFAULT,
+	             uint32 hide_force = HIDE_FORCE_DEFAULT );
+
+	~ChestObject();
+
+	/** \name Lua Access Functions
+	*** These functions are specifically written for Lua binding, to enable Lua to access the
+	*** members of this class.
+ 	**/
+	//@{
+
+	/** \brief Applies a number of sensing force to the object to make it appear
+	*** \param force_applied The amount of sensing forced applied
+	*** \return false if the object is still hidden, true if it was discovered
+	**/
+	bool UpdateHideForce( uint32 force_applied );
+
+	//! Sets the hiding force required to discover the object
+	void SetHidingForce( uint32 force )
+		{ _hide_force = force; }
+
+	//! Returns the hiding force left in order to discover the object
+	uint32 GetHidingForce() const
+		{ return _hide_force; }
+
+	//! Indicates if the object is hidden or not
+	bool IsHidden() const
+		{ return _hide_force > 0; }
+
+	//! Indicates if the object was used by the player
+	bool IsUsed() const
+		{ return _objects_list.empty(); }
+
+	/** \brief Adds an object tot he contents of the ChestObject
+	*** \param id The id of the object to add
+	*** \param number The number of the object to add
+	*** \return false if the id is not valid
+	**/
+	bool AddObject( uint32 id, uint32 number );
+
+	//! Transfers the ChestObject's content to the player's inventory
+	void Use();
+
+	//@}
+private:
+	//! The remaining hiding force of the object
+	uint32 _hide_force;
+
+	//! The list of objects given to the player upon activation
+	std::vector< hoa_global::GlobalObject* > _objects_list;
+
+}; // class ChestObject : public PhysicalObject
 
 } // namespace private_map
 
