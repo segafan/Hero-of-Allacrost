@@ -415,6 +415,10 @@ public:
 	//! Transfers the ChestObject's content to the player's inventory
 	void Use();
 
+	//! Clears the content of the chest and opens it (used when loading)
+	void Clear()
+		{ _objects_list.clear(); SetCurrentAnimation( OPENING_CHEST_ANIM ); }
+
 	//@}
 private:
 	//! The remaining hiding force of the object

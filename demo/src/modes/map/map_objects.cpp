@@ -150,7 +150,6 @@ ChestObject::ChestObject( std::string image_file, uint8 nb_frames_closed, uint8 
 	//--(3)-- Create the two needed animations
 	hoa_video::AnimatedImage closed_anim;
 	closed_anim.SetNumberLoops( 0 );
-	//closed_anim.SetLoopCounter( 0 );
 
 	//Make sure that a frame number was set
 	if( nb_frames_closed > 0 ) {
@@ -173,7 +172,6 @@ ChestObject::ChestObject( std::string image_file, uint8 nb_frames_closed, uint8 
 
 	hoa_video::AnimatedImage opening_anim;
 	opening_anim.SetNumberLoops( 0 );
-	//opening_anim.SetLoopCounter( 0 );
 
 	//Make sure that a frame number was set
 	if( nb_frames_opening > 0 ) {
@@ -249,6 +247,17 @@ void ChestObject::Use() {
 		SetCurrentAnimation( OPENING_CHEST_ANIM );
 
 		_objects_list.clear();
+
+		//TODO: Use an other group for the chests
+		if( GlobalManager->DoesEventGroupExist( "chest_test_group" ) ) {
+			if( GlobalManager->DoesEventExist( "chest_test_group", "chest_7689" ) ) {
+				GlobalManager->GetEventGroup( "chest_test_group" )->SetEvent( "chest_7689", 1 );
+			} else {
+				GlobalManager->GetEventGroup( "chest_test_group" )->AddNewEvent( "chest_7689", 1 );
+			}
+		} else {
+			GlobalManager->AddNewEventGroup( "chest_test_group" );
+		}
 	}
 }
 
