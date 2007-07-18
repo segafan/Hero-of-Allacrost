@@ -116,7 +116,7 @@ BattleMode::BattleMode() :
 		cerr << "BATTLE ERROR: Failed to load character selection image" << endl;
 
 	_character_bars.SetFilename("img/menus/battle_character_bars.png");
-	if (VideoManager->LoadImage(_stamina_meter) == false)
+	if (VideoManager->LoadImage(_character_bars) == false)
 		cerr << "BATTLE ERROR: Failed to load character bars image" << endl;
 
 	_action_window = new ActionWindow();
