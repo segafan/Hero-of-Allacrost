@@ -252,68 +252,58 @@ void BattleCharacter::DrawStatus() {
 		y_offset = -75.0f;
 	}
 
-	// Draw the background of the menu
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 	VideoManager->SetTextColor(Color::white);
 
+	// Draw the highlighted background if the character is selected
 	if (current_battle->_selected_character == this) {
 		VideoManager->Move(149, 84.0f + y_offset);
 		VideoManager->DrawImage(current_battle->_character_selection);
 	}
 
 	// Draw the character's name
-	VideoManager->Move(225.0f, 90.0f + y_offset);
+	VideoManager->SetDrawFlags(VIDEO_X_RIGHT, 0);
+	VideoManager->Move(280.0f, 90.0f + y_offset);
  	VideoManager->DrawText(GetActor()->GetName());
 
-	// If the swap key is being held down draw status icons
+	// If the swap key is being held down, draw status icons
 	if (InputManager->SwapState()) {
 		// TODO: draw status icons and information for actor
 	}
 
-	// Otherwise, draw the HP and SP bars
+	// Otherwise, draw the HP and SP bars (bars are 90 pixels wide and 6 pixels high)
 	else {
 		float bar_size;
+		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_NO_BLEND, 0);
 
 		// Draw HP bar in green
-		VideoManager->SetDrawFlags(VIDEO_NO_BLEND, 0);
-		bar_size = static_cast<float>(83 * GetActor()->GetHitPoints()) / static_cast<float>(GetActor()->GetMaxHitPoints());
+		bar_size = static_cast<float>(90 * GetActor()->GetHitPoints()) / static_cast<float>(GetActor()->GetMaxHitPoints());
 		VideoManager->Move(312, 90 + y_offset);
 
-		if (GetActor()->GetHitPoints() > 0) { // Draw color bar if needed
+		if (GetActor()->GetHitPoints() > 0) {
 			VideoManager->DrawRectangle(bar_size, 6, Color(0.133f, 0.455f, 0.133f, 1.0f));
-		}
-		if (GetActor()->GetHitPoints() != GetActor()->GetMaxHitPoints()) { // Draw black bar if needed
-			VideoManager->MoveRelative(bar_size, 0.0f);
-			VideoManager->DrawRectangle(83.0f - bar_size, 6, Color::black);
-			VideoManager->Move(312, 90 + y_offset);
 		}
 
 		// Draw SP bar in blue
-		VideoManager->SetDrawFlags(VIDEO_NO_BLEND, 0);
-		bar_size = static_cast<float>(84 * GetActor()->GetSkillPoints()) / static_cast<float>(GetActor()->GetMaxSkillPoints());
-		VideoManager->Move(412, 90 + y_offset);
+		bar_size = static_cast<float>(90 * GetActor()->GetSkillPoints()) / static_cast<float>(GetActor()->GetMaxSkillPoints());
+		VideoManager->Move(420, 90 + y_offset);
 
-		if (GetActor()->GetSkillPoints() > 0) { // Draw color bar if needed
-			VideoManager->DrawRectangle(bar_size,6,Color(0.129f, 0.263f, 0.451f, 1.0f));
+		if (GetActor()->GetSkillPoints() > 0) {
+			VideoManager->DrawRectangle(bar_size, 6, Color(0.129f, 0.263f, 0.451f, 1.0f));
 		}
-		if (GetActor()->GetHitPoints() != GetActor()->GetMaxHitPoints()) { // Draw black bar if needed
-			VideoManager->MoveRelative(bar_size,0.0f);
-			VideoManager->DrawRectangle(83.0f - bar_size, 6, Color::black);
-			VideoManager->Move(412, 90 + y_offset);
-		}
-
-		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 
 		// Draw the cover image over the top of the bar
-		VideoManager->Move(294.0f, 90.0f + y_offset);
+		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
+		VideoManager->Move(293.0f, 84.0f + y_offset);
 		VideoManager->DrawImage(current_battle->_character_bars);
 
+		VideoManager->SetDrawFlags(VIDEO_X_CENTER, 0);
 		// Draw the character's current health on top of the middle of the HP bar
-		VideoManager->Move(355.0f, 90.0f + y_offset);
+		VideoManager->Move(355.0f, 94.0f + y_offset);
 		VideoManager->DrawText(NumberToString(GetActor()->GetHitPoints()));
 
 		// Draw the character's current skill points on top of the middle of the SP bar
-		VideoManager->MoveRelative(100, 0);
+		VideoManager->MoveRelative(110, 0);
 		VideoManager->DrawText(NumberToString(GetActor()->GetSkillPoints()));
 	}
 } // void BattleCharacter::DrawInformation()
