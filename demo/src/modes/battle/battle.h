@@ -85,25 +85,6 @@ const uint32 ACTION_TYPE_SUPPORT   = 2;
 const uint32 ACTION_TYPE_ITEM      = 3;
 //@}
 
-/** \brief Enumerated values for the possible states that the user's input context may be in
-*** These constants are used throughout the battle code for various purposes, including determining what 
-*** user input commands should do, which components of the battle scene should be updated, and what 
-*** objects in the battle scene should be drawn.
-*** 
-*** - IDLE: no characters are ready to take an action
-*** - WAIT: the player is selecting an action for a character, but is not ready to select a target yet
-*** - SELECT_TARGET:
-*** 
-*** \todo Don't think select_attack_point or select_party will be necessary with the new control scheme
-**/
-enum CURSOR_STATE {
-	CURSOR_IDLE = 0,
-	CURSOR_WAIT = 1,
-	CURSOR_SELECT_ATTACK_POINT = 2,
-	CURSOR_SELECT_TARGET = 3,
-	CURSOR_SELECT_PARTY = 4
-};
-
 //! Returned as an index when looking for a character or enemy and they do not exist
 const uint32 INVALID_BATTLE_ACTOR_INDEX = 999;
 
@@ -312,12 +293,6 @@ private:
 
 	//! \name Selection Data
 	//@{
-	//! \brief The state of the battle's selection cursor
-	private_battle::CURSOR_STATE _cursor_state;
-
-	// NOTE: Are _selected_character_index and _selected_target_index really necessary in addition to _selected_character
-	// and _selected target? They essentially represent the same thing...
-
 	/** \brief Character index of the currently selected actor
 	*** \note This needs to be made defunct. Occurences of it in battle.cpp should
 	*** be replaced with the index of the _selected_character member
@@ -456,12 +431,6 @@ private:
 	bool _IsExecutingAction() const
 		{ return (_active_action != NULL); }
 
-	/** \brief Selects the initial target for an action to take effect on
-	*** \param target_type The type of target that the action takes effect on (attack point, actor, or party)
-	*** \param target_ally If true, the initial target is on the character party
-	**/
-	void _SetInitialTarget(hoa_global::GLOBAL_TARGET target_type, bool target_ally);
-
 	//! \brief Returns the number of enemies that are still alive in the battle
 	uint32 _NumberEnemiesAlive() const;
 
@@ -470,19 +439,21 @@ private:
 	**/
 	uint32 _NumberCharactersAlive() const;
 
-	/** \name Update helper functions
-	*** \brief Functions which update the state of various battle components
+	/** \brief Selects the initial target for an action to take effect on
+	*** This is only used for characters to select an initial target, but not for enemies.
 	**/
-	//@{
-	//! \brief Updates which character the player has chosen to select
-	void _UpdateCharacterSelection();
+	void _SetInitialTarget();
 
-	//! \brief Processes user input when the player's cursor is selecting a target for an action
-	void _UpdateTargetSelection();
+	/** \brief Sets the _target_selected member to the next available target
+	*** \param forward_direction Determines whether the next target should be located ahead or behind of the current one
+	*** This member will also change the _attack_point selected member
+	**/
+	void _SelectNextTarget(bool forward_direction);
 
-	//! \brief Processes user input when the player's cursor is selecting an attack point for an action
-	void _UpdateAttackPointSelection();
-	//@}
+	/** \brief Sets the _attack_point_selected member to the next available attack point
+	*** \param forward_direction Determines whether the next target should be located ahead or behind of the current one
+	**/
+	void _SelectNextAttackPoint(bool forward_direction);
 
 	/** \name Draw helper functions
 	*** \brief Functions which draw various components of the battle screen
@@ -506,10 +477,9 @@ private:
 	**/
 	void _DrawSprites();
 
-	/** \brief Draws the universal time meter and the portraits attached to it
-	*** Portraits are retrieved from the battle actors.
+	/** \brief Draws the universal stamina bar and the icons of the present actors
 	**/
-	void _DrawTimeMeter();
+	void _DrawStaminaBar();
 	//@}
 }; // class BattleMode : public hoa_mode_manager::GameMode
 

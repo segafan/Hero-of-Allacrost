@@ -157,7 +157,7 @@ void BattleCharacter::DrawSprite() {
 
 	if (IsAlive()) {
 		// Draw the actor selector image if this character is currently selected
-		if (this == current_battle->_selected_character && current_battle->_cursor_state != CURSOR_IDLE) {
+		if (this == current_battle->_selected_character) {
 			VideoManager->Move(_x_location - 20.0f, _y_location - 20.0f);
 			VideoManager->DrawImage(current_battle->_actor_selection_image);
 		}
@@ -306,7 +306,7 @@ void BattleCharacter::DrawStatus() {
 		VideoManager->MoveRelative(110, 0);
 		VideoManager->DrawText(NumberToString(GetActor()->GetSkillPoints()));
 	}
-} // void BattleCharacter::DrawInformation()
+} // void BattleCharacter::DrawStatus()
 
 // /////////////////////////////////////////////////////////////////////////////
 // BattleEnemy class
@@ -413,7 +413,7 @@ void BattleEnemy::DrawSprite() {
 		}
 
 		// Draw the attack point indicator if necessary
-		if (this == current_battle->_selected_target && current_battle->_cursor_state == CURSOR_SELECT_ATTACK_POINT) {
+		if (this == current_battle->_selected_target && current_battle->_action_window->GetActionTargetType() == GLOBAL_TARGET_ATTACK_POINT) {
 			VideoManager->PushState();
 			VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 			std::vector<GlobalAttackPoint*>& attack_points = *(GetActor()->GetAttackPoints());
@@ -453,7 +453,7 @@ void BattleEnemy::DrawInformation() {
 	VideoManager->DrawText(GetActor()->GetName());
 
 	// Draw the name of the enemy's currently selected attack point
-	if (current_battle->_cursor_state == CURSOR_SELECT_ATTACK_POINT) {
+	if (current_battle->_action_window->GetActionTargetType() == GLOBAL_TARGET_ATTACK_POINT) {
 		std::vector<GlobalAttackPoint*>& attack_points = *(GetActor()->GetAttackPoints());
 		VideoManager->MoveRelative(0, -25);
 		ustring attack_point = MakeUnicodeString("(") + attack_points[current_battle->_selected_attack_point]->GetName() + MakeUnicodeString(")");
