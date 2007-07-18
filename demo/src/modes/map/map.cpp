@@ -98,6 +98,14 @@ MapMode::MapMode(string filename) :
 		private_map::new_dialogue_icon.SetDimensions(2, 2);
 		private_map::new_dialogue_icon.Load();
 	}
+
+
+	// TEMP: chest test
+	ChestObject* chest = new ChestObject( "img/misc/chest1.png", 1, 3 );
+	chest->SetXPosition(111, 0);
+	chest->SetYPosition(36, 0);
+	chest->AddObject( 1, 50 );
+	_AddGroundObject( chest );
 }
 
 
@@ -538,6 +546,15 @@ void MapMode::_HandleInputExplore() {
 				return;
 			}
 		}
+		else if ( obj && obj->GetType() == CHEST_TYPE ) {
+			ChestObject *chest = reinterpret_cast<ChestObject*>(obj);
+
+			if( !chest->IsHidden() ) {
+				chest->Use();
+			}
+		}
+
+
 	}
 
 	// Detect and handle movement input from the user
