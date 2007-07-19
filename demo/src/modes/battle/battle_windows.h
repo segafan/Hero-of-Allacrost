@@ -139,7 +139,7 @@ public:
 		{ return _skill_list->at(_selected_action); }
 
 	hoa_global::GlobalItem* GetSelectedItem() const
-		{ return _item_list[_selected_action]; }
+		{ return _item_list.at(_selected_action); }
 	//@}
 private:
 	//! \brief The state that the action window is in, which reflects the contents of the window

@@ -156,11 +156,16 @@ public:
 	//! \brief Returns true if the actor is considered an enemy of the character party
 	virtual bool IsEnemy() = 0;
 
+	/** \brief Constructs a string with the actor's vital information
+	*** \param info A reference to the string which should hold the information
+	*** \param ap_index The attack point to include information on, set to -1 if no AP info is needed
+	*** This information is used by the ActionWindow class to display target information
+	*** in the window.
+	**/
+	virtual void ConstructInformation(hoa_utils::ustring& info, int32 ap_index);
+
 	//! \brief Draws the actor's current sprite animation frame
 	virtual void DrawSprite() = 0;
-
-	//! \brief Draws the status information of the actor in the action window
-	virtual void DrawInformation() = 0;
 
 	/** \brief Draws the actor's stamina icon at the appropriate location
 	*** \param is_selected If true, the stamina icon will be drawn highlighted
@@ -293,9 +298,6 @@ public:
 	//! \brief Draws the character's damage-blended face portrait
 	void DrawPortrait();
 
-	//! \brief Draws the character's status information in the action window box
-	void DrawInformation();
-
 	//! \brief Draws the character's status in the bottom area of the screen
 	void DrawStatus();
 
@@ -323,9 +325,6 @@ public:
 
 	//! \brief Draws the damage-blended enemy sprite on the battle field
 	void DrawSprite();
-
-	//! \brief Draws the enemy's status information in the action window box
-	void DrawInformation();
 
 	hoa_global::GlobalEnemy* GetActor()
 		{ return dynamic_cast<hoa_global::GlobalEnemy*>(_actor); }

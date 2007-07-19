@@ -526,17 +526,12 @@ void ActionWindow::_ConstructTargetInformation() {
 	ustring target_text;
 	_target_information.Clear();
 
-	// TODO: call a method here on the GlobalActor target that constructs the information text about the target
-
-	// TEMP: to be removed once target information is properly constructed
-	if (_action_target_type == GLOBAL_TARGET_ATTACK_POINT) {
-		target_text = MakeUnicodeString("Attack Point Targeted.");
-	}
-	else if (_action_target_type == GLOBAL_TARGET_ACTOR) {
-		target_text = MakeUnicodeString("Actor Targeted.");
-	}
-	else if (_action_target_type == GLOBAL_TARGET_PARTY) {
-		target_text = MakeUnicodeString("Party Targeted.");
+	if (_action_target_type == GLOBAL_TARGET_ATTACK_POINT)
+		current_battle->_selected_target->ConstructInformation(target_text, current_battle->_selected_attack_point);
+	else if (_action_target_type == GLOBAL_TARGET_ACTOR)
+		current_battle->_selected_target->ConstructInformation(target_text, -1);
+	else {
+		// TODO: construct a list of all characters or enemies depending upon the type
 	}
 
 	VideoManager->SetTextColor(Color::white);
