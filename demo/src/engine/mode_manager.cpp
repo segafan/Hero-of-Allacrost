@@ -148,6 +148,9 @@ GameMode* GameModeManager::GetTop() {
 
 // Checks if any game modes need to be pushed or popped off the stack, then updates the top stack mode.
 void GameModeManager::Update() {
+	// Call the Update function on the top stack mode (the active game mode)
+	_game_stack.back()->Update();
+
 	// If a Push() or Pop() function was called, we need to adjust the state of the game stack.
 	if (_state_change == true) {
 		// Pop however many game modes we need to from the top of the stack
@@ -184,9 +187,6 @@ void GameModeManager::Update() {
 		// Call the system manager and tell it that the active game mode changed so it can update timers accordingly
 		SystemManager->ExamineSystemTimers();
 	} // if (_state_change == true)
-
-	// Call the Update function on the top stack mode (the active game mode)
-	_game_stack.back()->Update();
 }
 
 
