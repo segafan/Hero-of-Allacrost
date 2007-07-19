@@ -271,6 +271,7 @@ class MapMode : public hoa_mode_manager::GameMode {
 	friend class private_map::MapFrame;
 	friend class private_map::MapObject;
 	friend class private_map::PhysicalObject;
+	friend class private_map::ChestObject;
 	friend class private_map::VirtualSprite;
 	friend class private_map::MapSprite;
 	friend class private_map::EnemySprite;

@@ -478,6 +478,23 @@ void BindEngineToLua() {
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
 	[
+		class_<ChestObject, PhysicalObject>("ChestObject")
+			.def(constructor<std::string>())
+			.def(constructor<std::string, uint8>())
+			.def(constructor<std::string, uint8, uint8>())
+			.def(constructor<std::string,uint8, uint8, uint32>())
+			.def("AddObject", &ChestObject::AddObject)
+			.def("UpdateHideForce", &ChestObject::UpdateHideForce)
+			.def("SetHidingForce", &ChestObject::SetHidingForce)
+			.def("GetHidingForce", &ChestObject::GetHidingForce)
+			.def("IsHidden", &ChestObject::IsHidden)
+			.def("IsUsed", &ChestObject::IsUsed)
+			.def("Use", &ChestObject::Use)
+			.def("Clear", &ChestObject::Clear)
+	];
+
+	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
+	[
 		class_<VirtualSprite, MapObject>("VirtualSprite")
 			.def(constructor<>())
 			.def("SetDirection", &VirtualSprite::SetDirection)

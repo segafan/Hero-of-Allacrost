@@ -188,6 +188,9 @@ public:
 		{ return (static_cast<float>(y_position) + y_offset); }
 	//@}
 
+	//! Loads the saved state of the object
+	virtual void LoadSaved(){};
+
 	/** \name Lua Access Functions
 	*** These functions are specifically written for Lua binding, to enable Lua to access the
 	*** members of this class.
@@ -366,9 +369,18 @@ public:
   		, OPENING_CHEST_ANIM = 1
 	};
 
+	//! Values indicating the state of the chest in a save file
+	enum {
+		  CHEST_UNUSED = 0
+		, CHEST_USED = 1
+	};
 
-	//TODO: that
+
 	/** \brief Creates a ChestObject
+	*** \param image_file An image file in the form of a 1 row strip
+	*** \param nb_frames_closed The number of frames to use as the closed chest animation
+	*** \param nb_frames_opening The number of frames to use as the opening chest animation (taken after the closed animation in the strip)
+	*** \param hide_force The number of sensing force required to show the chest. 0 = not hidden
 	**/
 	ChestObject( std::string image_file,
 	             uint8 nb_frames_closed = NB_FRAMES_CLOSED_DEFAULT,
@@ -376,6 +388,9 @@ public:
 	             uint32 hide_force = HIDE_FORCE_DEFAULT );
 
 	~ChestObject();
+
+	//! This loads the saved state of the chest
+	void LoadSaved();
 
 	/** \name Lua Access Functions
 	*** These functions are specifically written for Lua binding, to enable Lua to access the
@@ -421,6 +436,8 @@ public:
 
 	//@}
 private:
+
+
 	//! The remaining hiding force of the object
 	uint32 _hide_force;
 

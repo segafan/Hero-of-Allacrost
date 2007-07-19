@@ -98,33 +98,6 @@ MapMode::MapMode(string filename) :
 		private_map::new_dialogue_icon.SetDimensions(2, 2);
 		private_map::new_dialogue_icon.Load();
 	}
-
-
-	// TEMP: chest test
-	ChestObject* chest = new ChestObject( "img/misc/chest1.png", 1, 3 );
-	chest->SetObjectID( 7689 );
-	chest->SetXPosition(111, 0);
-	chest->SetYPosition(36, 0);
-	chest->AddObject( 1, 50 );
-
-	if( GlobalManager->DoesEventGroupExist( "chest_test_group" ) ) {
-		if( GlobalManager->DoesEventExist( "chest_test_group", "chest_7689" ) ) {
-			cout << "Exists" << endl;
-			if( GlobalManager->GetEventValue( "chest_test_group", "chest_7689" ) == 1 ) {
-				cout << "Cleared" << endl;
-				chest->Clear();
-			}
-		} else {
-			cout << "Doesn't exist" << endl;
-			GlobalManager->GetEventGroup( "chest_test_group" )->AddNewEvent( "chest_7689", 0 );
-		}
-	}
-	else {
-		cout << "Group Doesn't exist" << endl;
-		GlobalManager->AddNewEventGroup( "chest_test_group" );
-	}
-
-	_AddGroundObject( chest );
 }
 
 
@@ -270,6 +243,19 @@ void MapMode::_Load() {
 	ScriptCallFunction<void>(_map_script.GetLuaState(), "Load", this);
 	_update_function = _map_script.ReadFunctionPointer("Update");
 	_draw_function = _map_script.ReadFunctionPointer("Draw");
+
+	// ---------- (6) Load the saved states of all the objects
+	for (uint32 i = 0; i < _ground_objects.size(); i++) {
+		_ground_objects[i]->LoadSaved();
+	}
+
+	for (uint32 i = 0; i < _pass_objects.size(); i++) {
+		_pass_objects[i]->LoadSaved();
+	}
+
+	for (uint32 i = 0; i < _sky_objects.size(); i++) {
+		_sky_objects[i]->LoadSaved();
+	}
 } // void MapMode::_Load()
 
 
