@@ -654,7 +654,7 @@ MapObject* MapMode::_FindNearestObject(const VirtualSprite* sprite) {
 			continue;
 
 		// Objects in different contexts can not interact with one another
-		if (obj->context & sprite->context == 0) // Since objects can span multiple context, we check that no contexts are equal
+		if ((obj->context & sprite->context) == 0) // Since objects can span multiple context, we check that no contexts are equal
 			continue;
 
 		// Compute the full position coordinates for the object under study
@@ -742,7 +742,7 @@ bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 		// the map grid tile indeces referenced in this loop are all valid entries.
 		for (uint32 r = static_cast<uint32>(cr_top); r <= static_cast<uint32>(y_location); r++) {
 			for (uint32 c = static_cast<uint32>(cr_left); c <= static_cast<uint32>(cr_right); c++) {
-				if (_map_grid[r][c] & sprite->context > 0) { // Then this overlapping tile is unwalkable
+				if ((_map_grid[r][c] & sprite->context) > 0) { // Then this overlapping tile is unwalkable
 					return true;
 				}
 			}
@@ -758,7 +758,7 @@ bool MapMode::_DetectCollision(VirtualSprite* sprite) {
 		// Only verify this object if it is not the same object as the sprite
 		if ((*objects)[i]->object_id != sprite->object_id
 			&& !(*objects)[i]->no_collision
-			&& (*objects)[i]->context & sprite->context > 0 )
+			&& ((*objects)[i]->context & sprite->context) > 0 )
 		{
 			// Compute the full position coordinates of the other object
 			float other_x_location = (*objects)[i]->ComputeXLocation();
@@ -851,7 +851,7 @@ void MapMode::_FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path
 	}
 	for (int16 r = dest.row - y_span; r < dest.row; r++) {
 		for (int16 c = dest.col - x_span; c < dest.col + x_span; c++) {
-			if (_map_grid[r][c] & sprite->context > 0) {
+			if ((_map_grid[r][c] & sprite->context) > 0) {
 				if (MAP_DEBUG)
 					cerr << "MAP ERROR: sprite can not move to destination node on path because one or more grid tiles are unwalkable" << endl;
 				return;
@@ -895,7 +895,7 @@ void MapMode::_FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path
 			bool continue_loop = true;
 			for (int16 r = nodes[i].row - y_span; r < nodes[i].row && continue_loop; r++) {
 				for (int16 c = nodes[i].col - x_span; c < nodes[i].col + x_span; c++) {
-					if (_map_grid[r][c] & sprite->context > 0) {
+					if ((_map_grid[r][c] & sprite->context) > 0) {
 						continue_loop = false;
 						break;
 					}
@@ -1089,26 +1089,26 @@ void MapMode::_CalculateDrawInfo() {
 		x_resolution = abs(x_resolution);
 		y_resolution = abs(y_resolution);
 
-		_draw_info.tile_x_start = FloorToFloatMultiple (_draw_info.tile_x_start, x_resolution);
-		_draw_info.tile_y_start = FloorToFloatMultiple (_draw_info.tile_y_start, y_resolution);
+		_draw_info.tile_x_start = FloorToFloatMultiple (_draw_info.tile_x_start, static_cast<float>(x_resolution));
+		_draw_info.tile_y_start = FloorToFloatMultiple (_draw_info.tile_y_start, static_cast<float>(y_resolution));
 
 		if (x2 - _draw_info.tile_x_start > x_resolution*0.5f)
-			_draw_info.tile_x_start += x_resolution;
+			_draw_info.tile_x_start += static_cast<float>(x_resolution);
 		if (y2 - _draw_info.tile_y_start > y_resolution*0.5f)
-			_draw_info.tile_y_start += y_resolution;
+			_draw_info.tile_y_start += static_cast<float>(y_resolution);
 	}
 #endif
 
 #if defined(__MAP_CHANGE_1__) && defined(__MAP_CHANGE_2__)
 //	if (VideoManager->GetWidth() == 1024 && VideoManager->GetHeight() == 768)
 	{
-		_draw_info.left_edge = FloorToFloatMultiple (_draw_info.left_edge, x_resolution);
-		_draw_info.top_edge = FloorToFloatMultiple (_draw_info.top_edge, y_resolution);
+		_draw_info.left_edge = FloorToFloatMultiple (_draw_info.left_edge, static_cast<float>(x_resolution));
+		_draw_info.top_edge = FloorToFloatMultiple (_draw_info.top_edge, static_cast<float>(y_resolution));
 
 		if (camera_x - HALF_SCREEN_COLS - _draw_info.left_edge > x_resolution*0.5f)
-			_draw_info.left_edge += x_resolution;
+			_draw_info.left_edge += static_cast<float>(x_resolution);
 		if (camera_y - HALF_SCREEN_ROWS - _draw_info.top_edge > y_resolution*0.5f)
-			_draw_info.top_edge += y_resolution;
+			_draw_info.top_edge += static_cast<float>(y_resolution);
 
 		_draw_info.right_edge = _draw_info.left_edge + 2*SCREEN_COLS;
 		_draw_info.bottom_edge = _draw_info.top_edge + 2*SCREEN_ROWS;

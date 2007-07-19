@@ -436,7 +436,7 @@ void InventoryWindow::_UpdateItemText()
 	std::vector<ustring> inv_names;
 
 	//FIX ME - When video engine is fixed, take out MakeStandardString
-	for (int ctr = 0; ctr < _item_objects.size(); ctr++) {
+	for (size_t ctr = 0; ctr < _item_objects.size(); ctr++) {
 		text = "<" + _item_objects[ctr]->GetIconImage().GetFilename() + "><32>     " + MakeStandardString(_item_objects[ctr]->GetName()) + "<R><350>" + NumberToString(_item_objects[ctr]->GetCount()) + "   ";
 		inv_names.push_back(MakeUnicodeString(text));
 	}

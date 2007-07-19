@@ -209,6 +209,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\modes\battle\battle_actions.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\modes\battle\battle_actors.h"
 				>
 			</File>
@@ -478,6 +482,10 @@
 			</File>
 			<File
 				RelativePath=".\src\modes\battle\battle.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\battle\battle_actions.cpp"
 				>
 			</File>
 			<File
