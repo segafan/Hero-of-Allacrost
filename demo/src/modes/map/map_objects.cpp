@@ -25,6 +25,8 @@
 #include "system.h"
 #include "global.h"
 
+#include <algorithm> //For std::replace in the ChestObject saving code
+
 using namespace std;
 using namespace hoa_utils;
 using namespace hoa_audio;
@@ -248,19 +250,45 @@ void ChestObject::Use() {
 
 		_objects_list.clear();
 
-		//TODO: Use an other group for the chests
-		if( GlobalManager->DoesEventGroupExist( "chest_test_group" ) ) {
-			if( GlobalManager->DoesEventExist( "chest_test_group", "chest_7689" ) ) {
-				GlobalManager->GetEventGroup( "chest_test_group" )->SetEvent( "chest_7689", 1 );
-			} else {
-				GlobalManager->GetEventGroup( "chest_test_group" )->AddNewEvent( "chest_7689", 1 );
-			}
+		//Create an Event Group called "path_to_map_file_lua_chests"
+		std::string group_name = MapMode::_current_map->_map_filename + "_chests";
+		std::replace( group_name.begin(), group_name.end(), '/', '_' );
+		std::replace( group_name.begin(), group_name.end(), '.', '_' );
+
+		if( !GlobalManager->DoesEventGroupExist( group_name ) ) {
+			GlobalManager->AddNewEventGroup( group_name );
+		}
+
+		//Add an event in the group having the ObjectID of the chest as name
+		std::string event_name;
+		DataToString( event_name, GetObjectID() );
+		if( GlobalManager->DoesEventExist( group_name, event_name ) ) {
+			GlobalManager->GetEventGroup( group_name )->SetEvent( event_name, CHEST_USED );
 		} else {
-			GlobalManager->AddNewEventGroup( "chest_test_group" );
+			GlobalManager->GetEventGroup( group_name )->AddNewEvent( event_name, CHEST_USED );
 		}
 	}
 }
 
+
+
+void ChestObject::LoadSaved() {
+	//Check for an Event Group called "path_to_map_file_lua_chests"
+	std::string group_name = MapMode::_loading_map->_map_filename + "_chests";
+	std::replace( group_name.begin(), group_name.end(), '/', '_' );
+	std::replace( group_name.begin(), group_name.end(), '.', '_' );
+
+	if( GlobalManager->DoesEventGroupExist( group_name ) ) {
+		//Add an event in the group having the ObjectID of the chest as name
+		std::string event_name;
+		DataToString( event_name, GetObjectID() );
+		if( GlobalManager->DoesEventExist( group_name, event_name ) ) {
+			if( GlobalManager->GetEventValue( group_name, event_name ) == CHEST_USED ) {
+				Clear();
+			}
+		}
+	}
+}
 
 
 } // namespace private_map
