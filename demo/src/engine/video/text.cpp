@@ -1126,7 +1126,7 @@ void RenderedText::_Regenerate() {
 	int32 shadow_offset_y = 0;
 	Color shadow_color    = VideoManager->_GetTextShadowColor(fp);
 
-	float total_height = (line_array.size() - 1) * fp->line_skip;
+	float total_height = static_cast<float>( (line_array.size() - 1) * fp->line_skip );
 
 	for (line_iter = line_array.begin(); line_iter != line_array.end(); ++line_iter)
 	{
@@ -1143,7 +1143,7 @@ void RenderedText::_Regenerate() {
 		timage->Add();
 		float y_offset = total_height + _height * -VideoManager->_coord_sys.GetVerticalDirection();
 		y_offset += (fp->line_skip - timage->height) * VideoManager->_coord_sys.GetVerticalDirection();
-		TImageElement element(timage, 0, y_offset, 0.0f, 0.0f, 1.0f, 1.0f, timage->width, timage->height, _color);
+		TImageElement element(timage, 0, y_offset, 0.0f, 0.0f, 1.0f, 1.0f, static_cast<float>(timage->width), static_cast<float>(timage->height), _color);
 
 		// if text shadows are enabled, add a shadow version
 		if (style.shadow_enable && timage->style.shadow_style != VIDEO_TEXT_SHADOW_NONE)
@@ -1158,8 +1158,8 @@ void RenderedText::_Regenerate() {
 
 			// Line offsets must be set to be retained
 			// after lines are aligned
-			shadow_element.x_line_offset = shadow_offset_x;
-			shadow_element.y_line_offset = shadow_offset_y;
+			shadow_element.x_line_offset = static_cast<float>(shadow_offset_x);
+			shadow_element.y_line_offset = static_cast<float>(shadow_offset_y);
 
 			shadow_element.color[0] = shadow_color * _color[0];
 			shadow_element.color[1] = shadow_color * _color[1];
@@ -1180,7 +1180,7 @@ void RenderedText::_Regenerate() {
 
 		// Set width to timage width, if wider
 		if (timage->width > _width)
-			_width = timage->width;
+			_width = static_cast<float>(timage->width);
 
 		// Increase height by the font specified line height
 		_height += fp->line_skip;

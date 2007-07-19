@@ -204,6 +204,9 @@ bool ReadScriptDescriptor::_CheckDataType(int32 type, luabind::object& obj_check
 				return false;
 			}
 		}
+		else {
+			return false;
+		}
 	}
 
 	else {

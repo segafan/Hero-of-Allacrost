@@ -380,7 +380,7 @@ void ObjectSellListWindow::Update() {
 	} // if LeftPress()
 	else if (InputManager->RightPress()) {
 		uint32 x = object_list.GetSelection();
-		if (current_shop->_current_inv[x]->GetCount() > current_shop->_sell_objects_quantities[x]) {
+		if (current_shop->_current_inv[x]->GetCount() > static_cast<unsigned>(current_shop->_sell_objects_quantities[x])) {
 			current_shop->_sell_objects_quantities[x]++;
 			current_shop->_sales_revenue += (current_shop->_current_inv[x]->GetPrice() / 2);
 			current_shop->_action_window.UpdateFinanceText();
