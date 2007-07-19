@@ -66,6 +66,25 @@ BattleActor::BattleActor(GlobalActor* actor, float x_origin, float y_origin) :
 
 
 
+void BattleActor::ConstructInformation(hoa_utils::ustring& info, int32 ap_index) {
+	info.clear();
+
+	// Add character's name and attack point name if viable
+	info += GetActor()->GetName();
+	if (ap_index > 0 && static_cast<uint32>(ap_index) < GetActor()->GetAttackPoints()->size()) {
+		info += MakeUnicodeString(" - ") + GetActor()->GetAttackPoints()->at(ap_index)->GetName();
+	}
+	info += MakeUnicodeString("\n");
+
+	// Add character's current and max HP/SP amounts
+	info += MakeUnicodeString("HP: ") + MakeUnicodeString(NumberToString(GetActor()->GetHitPoints())) +
+		MakeUnicodeString(" / ") + MakeUnicodeString(NumberToString(GetActor()->GetMaxHitPoints())) + MakeUnicodeString("\n");
+	info += MakeUnicodeString("SP: ") + MakeUnicodeString(NumberToString(GetActor()->GetSkillPoints())) +
+		MakeUnicodeString(" / ") + MakeUnicodeString(NumberToString(GetActor()->GetMaxSkillPoints())) + MakeUnicodeString("\n");
+} // void BattleActor::ConstructInformation(hoa_utils::ustring& info, int32 ap_index)
+
+
+
 void BattleActor::DrawStaminaIcon(bool is_selected) {
 	if (IsAlive()) {
 		VideoManager->Move(995, _stamina_icon_location);
@@ -182,8 +201,6 @@ void BattleCharacter::DrawSprite() {
 			if (_total_time_damaged > 3000) { // Show it for three seconds
 				_total_time_damaged = 0;
 			}
-				//current_battle->SetPerformingScript (false);
-			//}
 		}
 	}
 	else {
@@ -227,13 +244,7 @@ void BattleCharacter::DrawPortrait() {
 	else { // Character is at full health
 		VideoManager->DrawImage(portrait_frames[0]);
 	}
-}
-
-
-
-void BattleCharacter::DrawInformation() {
-	// TODO: Draw the character's statistics in the action window
-}
+} // void BattleCharacter::DrawPortrait()
 
 
 
@@ -442,26 +453,6 @@ void BattleEnemy::DrawSprite() {
 		}
 	}
 } // void BattleEnemy::DrawSprite()
-
-
-
-void BattleEnemy::DrawInformation() {
-	// Draw the enemy's name
-	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-	VideoManager->SetTextColor(Color::white);
-	VideoManager->Move(920, 84);
-	VideoManager->DrawText(GetActor()->GetName());
-
-	// Draw the name of the enemy's currently selected attack point
-	if (current_battle->_action_window->GetActionTargetType() == GLOBAL_TARGET_ATTACK_POINT) {
-		std::vector<GlobalAttackPoint*>& attack_points = *(GetActor()->GetAttackPoints());
-		VideoManager->MoveRelative(0, -25);
-		ustring attack_point = MakeUnicodeString("(") + attack_points[current_battle->_selected_attack_point]->GetName() + MakeUnicodeString(")");
-		VideoManager->DrawText(attack_point);
-	}
-
-	// TODO Draw the icons for any status afflictions that the enemy has
-} // void BattleEnemy::DrawInformation()
 
 
 
