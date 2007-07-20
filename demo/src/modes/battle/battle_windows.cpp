@@ -19,6 +19,7 @@
 #include "audio.h"
 #include "video.h"
 #include "input.h"
+#include "mode_manager.h"
 #include "system.h"
 #include "global.h"
 
@@ -33,6 +34,7 @@ using namespace hoa_utils;
 using namespace hoa_audio;
 using namespace hoa_video;
 using namespace hoa_input;
+using namespace hoa_mode_manager;
 using namespace hoa_system;
 using namespace hoa_global;
 
@@ -572,13 +574,21 @@ void ActionWindow::_ConstructActionInformation() {
 FinishWindow::FinishWindow() {
 	// TODO: declare the MenuSkin to be used
 	if (MenuWindow::Create(512.0f, 256.0f) == false) {
-		cerr << "BATTLE ERROR: In ActionWindow constructor, the call to MenuWindow::Create() failed" << endl;
+		cerr << "BATTLE ERROR: In FinishWindow constructor, the call to MenuWindow::Create() failed" << endl;
 	}
 	MenuWindow::SetPosition(512.0f, 384.0f);
 	MenuWindow::SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
 	MenuWindow::Hide();
 
 	_state = FINISH_INVALID;
+
+	TextBox box;
+	_finish_outcome.SetPosition(512, 0);
+	_finish_outcome.SetDimensions(400, 100);
+	_finish_outcome.SetDisplaySpeed(30);
+	_finish_outcome.SetFont("default");
+	_finish_outcome.SetDisplayMode(VIDEO_TEXT_REVEAL);
+	_finish_outcome.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 
 	vector<ustring> lose_text;
 	lose_text.push_back(MakeUnicodeString("Retry  <R>the battle"));
@@ -610,76 +620,194 @@ FinishWindow::~FinishWindow() {
 void FinishWindow::Initialize(bool victory) {
 	MenuWindow::Show();
 
+	for (uint32 i = 0; i < current_battle->_character_actors.size(); i++) {
+		_characters.push_back(dynamic_cast<GlobalCharacter*>(current_battle->_character_actors[i]->GetActor()));
+		_character_growths.push_back(_characters[i]->GetGrowth());
+	}
+
 	if (victory) {
-		_state = FINISH_ANNOUNCE_WIN;
+		_state = FINISH_WIN_ANNOUNCE;
 		current_battle->AddMusic("mus/Allacrost_Fanfare.ogg");
 		current_battle->_battle_music.back().PlayMusic();
+		_finish_outcome.SetDisplayText("The heroes are victorious!");
 	}
 	else {
-		_state = FINISH_ANNOUNCE_LOSE;
+		_state = FINISH_LOSE_ANNOUNCE;
 		current_battle->AddMusic("mus/Allacrost_Intermission.ogg");
 		current_battle->_battle_music.back().PlayMusic();
+		_finish_outcome.SetDisplayText("The heroes have been defeated...");
 	}
 }
 
-
+// ----- UPDATE METHODS
 
 void FinishWindow::Update() {
-	// TODO: This is temporary... need to properly allow player
+	MenuWindow::Update(SystemManager->GetUpdateTime());
 
-	if (_state == FINISH_ANNOUNCE_WIN) {
-		if (InputManager->ConfirmPress()) {
-			AudioManager->PlaySound("snd/confirm.wav");
-			current_battle->_ShutDown();
-		}
+	switch (_state) {
+		case FINISH_WIN_ANNOUNCE:
+			_UpdateAnnounceWin();
+			break;
+		case FINISH_WIN_GROWTH:
+			_UpdateWinGrowth();
+			break;
+		case FINISH_WIN_SPOILS:
+			_UpdateWinSpoils();
+			break;
+		case FINISH_LOSE_ANNOUNCE:
+			_UpdateAnnounceLose();
+			break;
+		case FINISH_LOSE_CONFIRM:
+			_UpdateLoseConfirm();
+			break;
+		case FINISH_INVALID:
+		case FINISH_TOTAL:
+		default:
+			if (BATTLE_DEBUG)
+				cerr << "BATTLE ERROR: In FinishWindow::Update(), the window state was invalid: " << _state << endl;
+			return;
+	}
+} // void FinishWindow::Update()
+
+
+
+void FinishWindow::_UpdateAnnounceWin() {
+	if (_finish_outcome.IsFinished() == false) {
+		_finish_outcome.Update(SystemManager->GetUpdateTime());
+		
+		if (InputManager->ConfirmPress())
+			_finish_outcome.ForceFinish();
+		return;
 	}
 
-	else if (_state == FINISH_ANNOUNCE_LOSE) {
-		if (InputManager->ConfirmPress()) {
-			
-		}
+	if (InputManager->ConfirmPress())
+		_state = FINISH_WIN_GROWTH;
+}
+
+
+
+void FinishWindow::_UpdateWinGrowth() {
+	if (InputManager->ConfirmPress())
+		_state = FINISH_WIN_SPOILS;
+}
+
+
+
+void FinishWindow::_UpdateWinSpoils() {
+	if (InputManager->ConfirmPress()) {
+		current_battle->_ShutDown();
 	}
 }
 
 
+
+void FinishWindow::_UpdateAnnounceLose() {
+	if (_finish_outcome.IsFinished() == false) {
+		_finish_outcome.Update(SystemManager->GetUpdateTime());
+		
+		if (InputManager->ConfirmPress())
+			_finish_outcome.ForceFinish();
+		return;
+	}
+
+	if (InputManager->UpPress()) {
+		_lose_options.HandleUpKey();
+	}
+	else if (InputManager->DownPress()) {
+		_lose_options.HandleDownKey();
+	}
+	else if (InputManager->ConfirmPress()) {
+		switch (_lose_options.GetSelection()) {
+			case 0: // Retry the battle
+				// TODO
+				break;
+			case 1: // Load from last save point
+				// TODO
+				break;
+			case 2: // Return to main menu
+			case 3: // Exit game
+				_state = FINISH_LOSE_CONFIRM;
+				break;
+		}
+	}
+	
+}
+
+
+
+void FinishWindow::_UpdateLoseConfirm() {
+	if (InputManager->CancelPress()) {
+		_state = FINISH_LOSE_ANNOUNCE;
+	}
+
+	else if (InputManager->ConfirmPress()) {
+		if (_lose_options.GetSelection() == 2) {
+			ModeManager->SingletonInitialize(); // Removes all game modes and returns to boot mode
+		}
+		else {
+			SystemManager->ExitGame();
+		}
+	}
+}
+
+// ----- DRAW METHODS
 
 void FinishWindow::Draw() {
 	VideoManager->DisableSceneLighting();
 	MenuWindow::Draw();
 
-	// TODO: This all needs to be re-written so that it is formatted nicely and fits on the menu window
-	if (_state == FINISH_ANNOUNCE_WIN) {
-		VideoManager->Move(520.0f, 384.0f);
-		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
-		VideoManager->SetTextColor(Color::white);
-
-		ustring text = MakeUnicodeString("Your party is victorious!\n\n");
-// 		text += MakeUnicodeString("XP: ") + MakeUnicodeString(NumberToString(current_battle->_victory_xp) + "\n\n");
-// 		text += MakeUnicodeString("SP: ") + MakeUnicodeString(NumberToString(current_battle->_victory_sp) + "\n\n");
-// 		text += MakeUnicodeString("Drunes: ") + MakeUnicodeString(NumberToString(current_battle->_victory_money) + "\n\n");
-// 		if (current_battle->_victory_level) {
-// 			text += MakeUnicodeString("Experience Level Gained\n\n");
-// 		}
-// 		if (current_battle->_victory_skill) {
-// 			text += MakeUnicodeString("New Skill Learned\n\n");
-// 		}
-
-// 		if (current_battle->_victory_items.size() > 0) {
-// 			text += MakeUnicodeString("Items: ");
-// 			std::map<string, uint32>::iterator it;
-// 			for (it = current_battle->_victory_items.begin(); it != current_battle->_victory_items.end(); ++it) {
-// 				text += MakeUnicodeString(it->first);
-// 				text += MakeUnicodeString(" x" + NumberToString(it->second) + "\n\n");
-// 			}
-// 		}
-		VideoManager->DrawText(text);
+	switch (_state) {
+		case FINISH_WIN_ANNOUNCE:
+			_DrawAnnounceWin();
+			break;
+		case FINISH_WIN_GROWTH:
+			_DrawWinGrowth();
+			break;
+		case FINISH_WIN_SPOILS:
+			_DrawWinSpoils();
+			break;
+		case FINISH_LOSE_ANNOUNCE:
+			_DrawAnnounceLose();
+			break;
+		case FINISH_LOSE_CONFIRM:
+			_DrawLoseConfirm();
+			break;
+		case FINISH_INVALID:
+		case FINISH_TOTAL:
+		default:
+			if (BATTLE_DEBUG)
+				cerr << "BATTLE ERROR: In FinishWindow::Draw(), the window state was invalid: " << _state << endl;
+			return;
 	}
+}
 
-	else if (_state == FINISH_ANNOUNCE_LOSE) {
-		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
-		VideoManager->Move(520.0f, 430.0f);
-		VideoManager->DrawText("Your party has been defeated!");
-	}
+
+void FinishWindow::_DrawAnnounceWin() {
+
+}
+
+
+
+void FinishWindow::_DrawWinGrowth() {
+
+}
+
+
+
+void FinishWindow::_DrawWinSpoils() {
+
+}
+
+
+
+void FinishWindow::_DrawAnnounceLose() {
+
+}
+
+
+
+void FinishWindow::_DrawLoseConfirm() {
+
 }
 
 } // namespace private_battle
