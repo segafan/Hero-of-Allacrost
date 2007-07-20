@@ -215,7 +215,7 @@ void InventoryWindow::_InitCharSelect() {
 
 //Initalizes the available item categories
 void InventoryWindow::_InitCategory() {
-	_item_categories.SetCellSize(52.0f,30.0f);
+	_item_categories.SetCellSize(56.0f,30.0f);
 	_item_categories.SetPosition(458.0f, 120.0f);
 	_item_categories.SetFont("default");
 	_item_categories.SetSize(ITEM_CATEGORY_SIZE,1);
@@ -328,15 +328,14 @@ void InventoryWindow::Update() {
 					_description.SetDisplayText( _item_objects[ 0 ]->GetDescription() );
 					_active_box = ITEM_ACTIVE_LIST;
 					MenuMode::_instance->_menu_sounds["confirm"].PlaySound();
-				}
-			}
+				} // if _inventory_items.GetNumberOptions() > 0
+			} // if VIDEO_OPTION_CONFIRM
 			// Deactivate inventory
 			else if (event == VIDEO_OPTION_CANCEL) {
 				MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
 				_item_categories.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 				Activate(false);
-				cout << "!!!" << endl;
-			}
+			} // if VIDEO_OPTION_CANCEL
 			break;
 		} // case ITEM_ACTIVE_CATEGORY
 
@@ -348,18 +347,17 @@ void InventoryWindow::Update() {
 				_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
 				_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 				MenuMode::_instance->_menu_sounds["confirm"].PlaySound();
-			}
+			} // if VIDEO_OPTION_CONFIRM
 			// Return to category selection
 			else if (event == VIDEO_OPTION_CANCEL) {
 				_active_box = ITEM_ACTIVE_CATEGORY;
 				_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 				_item_categories.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 				MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
-			}
-			else if ( event == VIDEO_OPTION_BOUNDS_UP || VIDEO_OPTION_BOUNDS_DOWN )
-			{
+			} // else if VIDEO_OPTION_CANCEL
+			else if ( event == VIDEO_OPTION_BOUNDS_UP || VIDEO_OPTION_BOUNDS_DOWN ) {
 				_description.SetDisplayText( _item_objects[ _inventory_items.GetSelection() ]->GetDescription() );
-			}
+			} // else if VIDEO_OPTION_BOUNDS_UP
 			break;
 		} // case ITEM_ACTIVE_LIST
 
@@ -390,8 +388,7 @@ void InventoryWindow::Update() {
 } // void InventoryWindow::Update()
 
 // Updates the item list
-void InventoryWindow::_UpdateItemText()
-{
+void InventoryWindow::_UpdateItemText() {
 	_item_objects.clear();
 	_inventory_items.ClearOptions();
 
@@ -434,13 +431,12 @@ void InventoryWindow::_UpdateItemText()
 			break;
 	}
 
-	string text = "";
+	ustring text;
 	std::vector<ustring> inv_names;
 
-	//FIX ME - When video engine is fixed, take out MakeStandardString
 	for (size_t ctr = 0; ctr < _item_objects.size(); ctr++) {
-		text = "<" + _item_objects[ctr]->GetIconImage().GetFilename() + "><32>     " + MakeStandardString(_item_objects[ctr]->GetName()) + "<R><350>" + NumberToString(_item_objects[ctr]->GetCount()) + "   ";
-		inv_names.push_back(MakeUnicodeString(text));
+		text = MakeUnicodeString("<" + _item_objects[ctr]->GetIconImage().GetFilename() + "><32>     ") + _item_objects[ctr]->GetName() + MakeUnicodeString("<R><350>" + NumberToString(_item_objects[ctr]->GetCount()) + "   ");
+		inv_names.push_back(text);
 	}
 
 	//_inventory_items.SetSize(1, _item_objects.size());
@@ -449,8 +445,7 @@ void InventoryWindow::_UpdateItemText()
 
 
 
-void InventoryWindow::Draw()
-{
+void InventoryWindow::Draw() {
 	MenuWindow::Draw();
 
 	// Update the item text in case the number of items changed.
@@ -464,8 +459,6 @@ void InventoryWindow::Draw()
 
 	// Draw item list
 	_inventory_items.Draw();
-
-	return;
 } // bool InventoryWindow::Draw()
 
 

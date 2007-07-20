@@ -400,11 +400,13 @@ void MenuMode::Update() {
 		// Play sound.
 		_menu_sounds["cancel"].PlaySound();
 		// If in main menu, return to previous Mode, else return to main menu.
-		if (_current_menu_showing == SHOW_MAIN)
+		if (_current_menu_showing == SHOW_MAIN) {
 			ModeManager->Pop();
+		}
 		else {
 			_current_menu_showing = SHOW_MAIN;
 			_current_menu = &_main_options;
+			_current_menu->Update();
 		}
 	}
 	else if (InputManager->ConfirmPress()) {
@@ -461,8 +463,9 @@ void MenuMode::Update() {
 			default:
 				cerr << "MENU: ERROR: Invalid menu showing!" << endl;
 				break;
-		}
-	}
+		} // switch (_current_menu_showing)
+	} // if VIDEO_OPTION_CONFIRM
+	
 	_current_menu->Update();
 } // void MenuMode::Update()
 
@@ -542,7 +545,7 @@ void MenuMode::Draw() {
 		case SHOW_SAVE:
 			_HandleSaveMenu();
 			break;
-	}
+	} // switch draw_window
 
 	//FIX ME:  Test
 
@@ -565,8 +568,7 @@ void MenuMode::_DrawBottomMenu() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 	VideoManager->Move(150, 577);
 
-	if (_current_menu_showing == SHOW_INVENTORY )
-	{
+	if (_current_menu_showing == SHOW_INVENTORY ) {
 		if (_inventory_window._active_box == ITEM_ACTIVE_LIST) {
 			GlobalObject* obj = _inventory_window._item_objects[ _inventory_window._inventory_items.GetSelection() ];
 
@@ -693,15 +695,14 @@ void MenuMode::_DrawBottomMenu() {
 
 
 		if (_equip_window._active_box == EQUIP_ACTIVE_LIST) {
-			VideoManager->Move(750, 577);
+			VideoManager->Move(755, 577);
 
 			switch (_equip_window._equip_select.GetSelection()) {
 				case EQUIP_WEAPON:
 				{
 					GlobalWeapon* weapon = GlobalManager->GetInventoryWeapons()->at(_equip_window._equip_list.GetSelection());
 
-					text = "New Weapon:";
-					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->DrawText(weapon->GetName());
 					VideoManager->MoveRelative(0, 20);
 
 					text = "PHYS ATK:";
@@ -726,8 +727,7 @@ void MenuMode::_DrawBottomMenu() {
 				{
 					GlobalArmor* armor = GlobalManager->GetInventoryHeadArmor()->at(_equip_window._equip_list.GetSelection());
 
-					text = "New Helm:";
-					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->DrawText(armor->GetName());
 					VideoManager->MoveRelative(0, 20);
 
 					text = "PHYS DEF:";
@@ -752,8 +752,7 @@ void MenuMode::_DrawBottomMenu() {
 				{
 					GlobalArmor* armor = GlobalManager->GetInventoryTorsoArmor()->at(_equip_window._equip_list.GetSelection());
 
-					text = "New Helm:";
-					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->DrawText(armor->GetName());
 					VideoManager->MoveRelative(0, 20);
 
 					text = "PHYS DEF:";
@@ -778,8 +777,7 @@ void MenuMode::_DrawBottomMenu() {
 				{
 					GlobalArmor* armor = GlobalManager->GetInventoryArmArmor()->at(_equip_window._equip_list.GetSelection());
 
-					text = "New Helm:";
-					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->DrawText(armor->GetName());
 					VideoManager->MoveRelative(0, 20);
 
 					text = "PHYS DEF:";
@@ -804,8 +802,7 @@ void MenuMode::_DrawBottomMenu() {
 				{
 					GlobalArmor* armor = GlobalManager->GetInventoryLegArmor()->at(_equip_window._equip_list.GetSelection());
 
-					text = "New Helm:";
-					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->DrawText(armor->GetName());
 					VideoManager->MoveRelative(0, 20);
 
 					text = "PHYS DEF:";
@@ -939,7 +936,6 @@ void MenuMode::_HandleInventoryMenu() {
 			if (GlobalManager->GetInventory()->size() == 0)
 				return;
 			_inventory_window.Activate(true);
-			_current_menu->SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
 			break;
 
 		case INV_SORT:
@@ -969,7 +965,6 @@ void MenuMode::_HandleSkillsMenu() {
 
 		case SKILLS_USE:
 			_skills_window.Activate(true);
-			_current_menu->SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
 			break;
 
 		default:
@@ -984,7 +979,6 @@ void MenuMode::_HandleEquipMenu() {
 	switch (_menu_equip.GetSelection()) {
 		case EQUIP_EQUIP:
 			_equip_window.Activate(true);
-			_current_menu->SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
 			break;
 
 		case EQUIP_REMOVE:
