@@ -43,7 +43,8 @@ OptionBox::OptionBox() {
 	_horizontal_spacing = _vertical_spacing = 0.0f;
 	_number_rows = _number_columns = 0;
 	_initialized = IsInitialized(_initialization_errors);
-	_TEMP_overide_scissorring = false;
+	_scissoring = false;
+	_scissoring_owner = false;
 }
 
 
@@ -101,33 +102,31 @@ void OptionBox::Draw() {
 	if (h < 0)
 		h = -h;
 
+	//Calculate scissoring rectangle
 	ScreenRect rect(x, y, w, h);
 
-	int32 cursor_margin = static_cast<int32>(VideoManager->GetDefaultCursor()->GetWidth() + 1 - _cursor_xoffset);
-	rect.left -= cursor_margin;
-	rect.width += cursor_margin;
+	CoordSys &cs = VideoManager->_coord_sys;
 
+	if( cs.GetVerticalDirection() < 0 ) {
+		rect.top += static_cast<int32>( _vertical_spacing ) + ( _number_rows ); //To accomodate the 1 pixel per row offset
+	}
 
-	// TEMP: Code to make the inventory look good for now until scissoring can be fixed correctly
-	// Used to set the scissoring back to what it was before
-	bool scissoring_rollback = VideoManager->IsScissoringEnabled();
-	if (_TEMP_overide_scissorring) {
-		rect.top += 71;
-		rect.height += 10;
-		rect.Intersect(VideoManager->GetScissorRect());
-		VideoManager->EnableScissoring(true);
+	bool scissor = VideoManager->IsScissoringEnabled();
+	if ( _owner && _scissoring && _scissoring_owner ) {
+		rect.Intersect(_owner->GetScissorRect());
+		if( VideoManager->IsScissoringEnabled() ) {
+			rect.Intersect(VideoManager->GetScissorRect());
+		}
+		scissor = true;
+		VideoManager->SetScissorRect(rect);
+	} else if ( _scissoring && !_scissoring_owner ) {
+		if( VideoManager->IsScissoringEnabled() ) {
+			rect.Intersect(VideoManager->GetScissorRect());
+		}
+		scissor = true;
 		VideoManager->SetScissorRect(rect);
 	}
-	else {
-		if (_owner && VideoManager->IsScissoringEnabled() ) {
-			rect.Intersect(_owner->GetScissorRect());
-			rect.Intersect(VideoManager->GetScissorRect());
-			VideoManager->EnableScissoring(true);
-			VideoManager->SetScissorRect(rect);
-		}
-	}
 
-	CoordSys &cs = VideoManager->_coord_sys;
 	VideoManager->SetFont(_font);
 	VideoManager->SetDrawFlags(_option_xalign, _option_yalign, VIDEO_X_NOFLIP, VIDEO_Y_NOFLIP, VIDEO_BLEND, 0);
 
@@ -142,12 +141,12 @@ void OptionBox::Draw() {
 		row_min = _scroll_offset;
 		row_max = _scroll_offset + _number_rows + 1;
 
-		cell_offset = cs.GetVerticalDirection() * (1.0f - (_scroll_time / (VIDEO_OPTION_SCROLL_TIME))) * _vertical_spacing;
+		cell_offset = cs.GetVerticalDirection() * (1.0f - (_scroll_time / static_cast<float>(VIDEO_OPTION_SCROLL_TIME))) * _vertical_spacing;
 	}
 	else { // Scrolling down
 		row_min = _scroll_offset - 1;
 		row_max = _scroll_offset + _number_rows;
-		cell_offset = cs.GetVerticalDirection() * ((_scroll_time / (VIDEO_OPTION_SCROLL_TIME))) * _vertical_spacing;
+		cell_offset = cs.GetVerticalDirection() * ((_scroll_time / static_cast<float>(VIDEO_OPTION_SCROLL_TIME))) * _vertical_spacing;
 	}
 
 	OptionCellBounds bounds;
@@ -161,6 +160,9 @@ void OptionBox::Draw() {
 
 	// Iterate through all the visible option cells and draw them
 	for (int32 row = row_min; row < row_max; row++) {
+
+		VideoManager->EnableScissoring( scissor );
+
 		bounds.x_left = left;
 		bounds.x_center = bounds.x_left + (0.5f * _horizontal_spacing * cs.GetHorizontalDirection());
 		bounds.x_right = (bounds.x_center * 2.0f) - bounds.x_left;
@@ -269,6 +271,9 @@ void OptionBox::Draw() {
 				} // switch (op.elements[element].type)
 			} // for (int32 element = 0; element < static_cast<int32>(op.elements.size()); element++)
 
+			//Never scissor the cursor
+			VideoManager->EnableScissoring( false );
+
 			float cursor_offset = 0;
 			if (_scrolling) {
 				if (_scroll_direction == -1)// Scrolling up
@@ -312,7 +317,7 @@ void OptionBox::Draw() {
 		bounds.y_bottom += yoff;
 	} // for (int32 row = row_min; row < row_max; row++)
 
-	VideoManager->EnableScissoring(scissoring_rollback);
+	//VideoManager->EnableScissoring(scissoring_rollback);
 	VideoManager->_PopContext();
 } // void OptionBox::Draw()
 
@@ -364,7 +369,7 @@ bool OptionBox::SetOptions(const vector<ustring>& format_text) {
 bool OptionBox::AddOption(const hoa_utils::ustring &text) {
 	Option option;
 
-	// Construct the option 
+	// Construct the option
 	if (_ConstructOption(text, option) == false) {
 		return false;
 	}
@@ -673,9 +678,9 @@ bool OptionBox::_ConstructOption(const ustring& format_string, Option& op) {
 				}
 			}
 			else { // The tag contains more than 1-character
-				// Extract the tag string 
+				// Extract the tag string
 				string tag_text = MakeStandardString(tmp.substr(1, end_position - 1));
-				
+
 				if (IsStringNumeric(tag_text)) { // Then this must be a positioning tag
 					new_element.type  = VIDEO_OPTION_ELEMENT_POSITION;
 					new_element.value = atoi(tag_text.c_str());
@@ -744,8 +749,8 @@ bool OptionBox::_ChangeSelection(int32 offset, bool horizontal) {
 	bool bounds_exceeded = false;
 
 	// Determine if the movement selection will exceed a column or row bondary
-	if ((horizontal == true && ((col + offset < 0) || (col + offset >= _number_columns))) ||
-		(horizontal == false && ((row + offset < 0) || (row + offset >= _number_rows))))
+	if( (horizontal == true && ( (col + offset < 0) || (col + offset >= _number_columns) || (col + offset >= _number_options ) ) ) ||
+		    (horizontal == false && ( (row + offset < 0) || (row + offset >= _number_rows) || (row + offset >= _number_options ) ) ) )
 	{
 		bounds_exceeded = true;
 	}
@@ -789,7 +794,7 @@ bool OptionBox::_ChangeSelection(int32 offset, bool horizontal) {
 		}
 		_selection = (_selection + offset) % _number_options;
 	}
-	
+
 	// Case #4: vertical movement with wrapping enabled
 	else {
 		if (row + offset < 0) { // The top boundary was exceeded
@@ -803,8 +808,10 @@ bool OptionBox::_ChangeSelection(int32 offset, bool horizontal) {
 			}
 		}
 		else  { // The bottom boundary was exceeded
-			if (_vertical_wrap_mode == VIDEO_WRAP_MODE_STRAIGHT)
-				offset -= _number_options;
+			if (_vertical_wrap_mode == VIDEO_WRAP_MODE_STRAIGHT) {
+				if( row + offset >= _number_options )
+					offset -= _number_options;
+			}
 			else if (_vertical_wrap_mode == VIDEO_WRAP_MODE_SHIFTED) {
 				if (_horizontal_wrap_mode != VIDEO_WRAP_MODE_NONE) // Make sure horizontal wrapping is accepted
 					offset -= (_number_columns - 1);
@@ -817,14 +824,14 @@ bool OptionBox::_ChangeSelection(int32 offset, bool horizontal) {
 
 	// If the new selection isn't currently being displayed, scroll it into view
 	row = _selection / _number_columns;
-	if (row < _scroll_offset || row > _scroll_offset + _number_rows - 1) {
+	if (row < _scroll_offset || row >= _scroll_offset + _number_rows ) {
 		_scrolling = true;
 		_scroll_time = 0;
 
 		if (row < _scroll_offset)
-			_scroll_direction = -1; // scroll up
+			_scroll_direction = -1 * ( _scroll_offset - row ); // scroll up
 		else
-			_scroll_direction = 1; // scroll down
+			_scroll_direction = 1 * ( row - _number_rows - _scroll_offset + 1 ); // scroll down
 
 		_scroll_offset += _scroll_direction;
 	}

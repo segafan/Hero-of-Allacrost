@@ -133,7 +133,7 @@ const uint16 RIGHT_TAG2   = static_cast<uint16>('R');
 *** \brief A class which encapsulates the various contents of an option.
 ***
 *** Contents can include text, images, mark-up tags, etc.
-*** 
+***
 *** \todo Store the element content in here as well instead of in the Option
 *** class. Will require multiple derived classes for images, text, alignment
 *** flags, etc. Text should also be stored as rendered text images
@@ -400,11 +400,12 @@ public:
 		{ return _number_options; }
 	//@}
 
-	/** \brief Used to enable scissoring to the size of the option box instead of the MenuWindow owner's size
+	/** \brief Used to enable scissoring of the option box
 	*** \param enable Set to true to enable, or false to disable
+	*** \param owner Set to true to scissor to the _owner's size, or false to scissor to the box's size
 	**/
-	void TEMP_OverideScissorring(bool enable)
-		{ _TEMP_overide_scissorring = enable; }
+	void Scissoring( bool enable, bool owner )
+		{ _scissoring = enable; _scissoring_owner = owner; }
 
 private:
 	//! \brief When set to true, indicates that the option box is initialized and ready to be used
@@ -497,8 +498,11 @@ private:
 	int32 _scroll_direction;
 	//@}
 
-	//! \brief True if scissoring is enabled and using the option box's size instead of the owner MenuWindow's size
-	bool _TEMP_overide_scissorring;
+	//! \brief True if scissoring is enabled
+	bool _scissoring;
+
+	//! \brief True if scissoring should be applied according to the owner window, false for the box's size
+	bool _scissoring_owner;
 
 	// ---------- Private methods
 

@@ -172,10 +172,11 @@ void InventoryWindow::_InitInventoryItems() {
 	_inventory_items.SetPosition(500.0f, 170.0f);
 	_inventory_items.SetFont("default");
 	_inventory_items.SetCursorOffset(-52.0f, -20.0f);
-	_inventory_items.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
 	_inventory_items.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	_inventory_items.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-	_inventory_items.TEMP_OverideScissorring(true);
+	_inventory_items.SetSize( 1, 6 );
+	_inventory_items.Scissoring( true, false );
+	//_inventory_items.TEMP_OverideScissorring(true);
 
 	// Update the item text
 	_UpdateItemText();
@@ -392,6 +393,7 @@ void InventoryWindow::Update() {
 void InventoryWindow::_UpdateItemText()
 {
 	_item_objects.clear();
+	_inventory_items.ClearOptions();
 
 	switch (_item_categories.GetSelection()) {
 		case ITEM_ALL:
@@ -441,7 +443,7 @@ void InventoryWindow::_UpdateItemText()
 		inv_names.push_back(MakeUnicodeString(text));
 	}
 
-	_inventory_items.SetSize(1, _item_objects.size());
+	//_inventory_items.SetSize(1, _item_objects.size());
 	_inventory_items.SetOptions(inv_names);
 } // void InventoryWindow::UpdateItemText()
 
@@ -879,7 +881,7 @@ void SkillsWindow::_UpdateSkillList() {
 	//FIX ME Need new categories
 	std::vector<hoa_global::GlobalSkill*>* skills = ch->GetAttackSkills();
 	uint32 skillsize = skills->size();
-	
+
 	string tempstr = "";
 
 	switch (_skills_categories.GetSelection()) {
@@ -897,7 +899,7 @@ void SkillsWindow::_UpdateSkillList() {
 		default:
 			_skills_list.SetSize(1,0);
 	}
-	
+
 	_skills_list.SetOptions(options);
 }
 
@@ -905,7 +907,7 @@ void SkillsWindow::_UpdateSkillList() {
 
 void SkillsWindow::Draw() {
 	MenuWindow::Draw();
-	
+
 	//Draw option boxes
 	_char_select.Draw();
 	_skills_categories.Draw();
@@ -1311,7 +1313,7 @@ void EquipWindow::Draw() {
 	}
 	else {
 		_equip_select.Draw();
-		
+
 		//FIX ME: Use XML tags for formatting option boxes
 		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 		VideoManager->Move(450.0f, 170.0f);
