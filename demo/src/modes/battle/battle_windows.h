@@ -39,9 +39,13 @@ namespace private_battle {
 **/
 enum ACTION_WINDOW_STATE {
 	VIEW_INVALID = -1,
+	//! Player is selecting the type of action to execute
 	VIEW_ACTION_CATEGORY = 0,
+	//! Player is selecting from a list of actions to execute
 	VIEW_ACTION_SELECTION = 1,
+	//! Player is selecting the target to execute the action on
 	VIEW_TARGET_SELECTION = 2,
+	//! Player is viewing information about the selected action
 	VIEW_ACTION_INFORMATION = 3,
 	VIEW_TOTAL = 4
 };
@@ -53,9 +57,17 @@ enum ACTION_WINDOW_STATE {
 **/
 enum FINISH_WINDOW_STATE {
 	FINISH_INVALID = -1,
-	FINISH_ANNOUNCE_WIN = 0,
-	FINISH_ANNOUNCE_LOSE = 1,
-	FINISH_TOTAL = 2
+	//! Announces that the player is victorious and notes any characters who have gained an experience level
+	FINISH_WIN_ANNOUNCE = 0,
+	//! Reports all character growth
+	FINISH_WIN_GROWTH = 2,
+	//! Reports all drunes earned and dropped items obtained
+	FINISH_WIN_SPOILS = 3,
+	//! Announces that the player has lost and queries the player for an action
+	FINISH_LOSE_ANNOUNCE = 4,
+	//! Used to double-confirm when the player selects to quit the game or return to the main menu
+	FINISH_LOSE_CONFIRM = 5,
+	FINISH_TOTAL = 6
 };
 
 /** ****************************************************************************
@@ -244,7 +256,7 @@ private:
 *** \brief The window displayed once a battle has either been won or lost
 ***
 *** This window is located in the center right portion of the screen and only appears
-*** when a victor has been decided in the battle. The contents of this window differ
+*** when an outcome has been decided in the battle. The contents of this window differ
 *** depending on whether the battle was victorious or a loss. If the player won
 *** the battle, they will have their victory spoils written to the screen along
 *** with any character growth information (e.g. experience level up). If the player
@@ -258,9 +270,6 @@ private:
 ***
 *** \todo Add feature where spoils (XP, drunes, etc) are quickly counted down as
 *** they go into the party's posession.
-***
-*** \todo If the battle is victorious, allow the player to go to menu mode before
-*** returning from the finished battle.
 *** ***************************************************************************/
 class FinishWindow : public hoa_video::MenuWindow {
 	friend class hoa_battle::BattleMode;
@@ -288,11 +297,49 @@ private:
 	//! \brief The state that the window is in, which determines its contents
 	FINISH_WINDOW_STATE _state;
 
-	//! \brief Text that displays "VICTORY" or "DEFEAT" depending upon the battle's outcome
-// 	hoa_video::RenderedText* _finish_status;
+	//! \brief Pointers to all characters who took part in the battle
+	std::vector<hoa_global::GlobalCharacter*> _characters;
+
+	//! \brief The growth members for all object pointers in the _characters table
+	std::vector<hoa_global::GlobalCharacterGrowth*> _character_growths;
+
+	//! \brief Text that displays the battle's outcome (victory or defeat)
+	hoa_video::TextBox _finish_outcome;
 
 	//! \brief The list of options that the player may choose from when they lose the battle
 	hoa_video::OptionBox _lose_options;
+
+	// ----- Private methods
+
+	//! \brief Handles update processing when the _state member is FINISH_ANNOUNCE_WIN
+	void _UpdateAnnounceWin();
+
+	//! \brief Handles update processing when the _state member is FINISH_WIN_GROWTH
+	void _UpdateWinGrowth();
+
+	//! \brief Handles update processing when the _state member is FINISH_WIN_SPOILS
+	void _UpdateWinSpoils();
+
+	//! \brief Handles update processing when the _state member is FINISH_ANNOUNCE_LOSE
+	void _UpdateAnnounceLose();
+
+	//! \brief Handles update processing when the _state member is FINISH_LOSE_CONFIRM
+	void _UpdateLoseConfirm();
+
+	//! \brief Handles update processing when the _state member is FINISH_ANNOUNCE_WIN
+	void _DrawAnnounceWin();
+
+	//! \brief Handles update processing when the _state member is FINISH_WIN_GROWTH
+	void _DrawWinGrowth();
+
+	//! \brief Handles update processing when the _state member is FINISH_WIN_SPOILS
+	void _DrawWinSpoils();
+
+	//! \brief Handles update processing when the _state member is FINISH_ANNOUNCE_LOSE
+	void _DrawAnnounceLose();
+
+	//! \brief Handles update processing when the _state member is FINISH_LOSE_CONFIRM
+	void _DrawLoseConfirm();
 }; // class FinishWindow : public hoa_video:MenuWindow
 
 } // namespace private_battle
