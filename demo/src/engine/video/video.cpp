@@ -574,11 +574,11 @@ bool GameVideo::ApplySettings()
 		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
 		SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-		
+
 		// set up multisampling
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 2);
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
-		
+
 		// set up vsync
 		SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, 1);
 
@@ -591,11 +591,11 @@ bool GameVideo::ApplySettings()
 			SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
 			SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
 			SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0);
-			
+
 			// kill multisampling
 			SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
 			SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
-			
+
 			// cancel vsync
 			SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, 0);
 
@@ -613,7 +613,7 @@ bool GameVideo::ApplySettings()
 				return false;
 			}
 		}
-		
+
 		// turn off writing to the depth buffer
 		glDepthMask ( GL_FALSE );
 
@@ -1212,21 +1212,21 @@ bool GameVideo::ApplyLightingOverlay()
 		glBlendFunc(GL_DST_COLOR, GL_ZERO);
 
 		_BindTexture(_light_overlay);
-		
+
 		GLfloat vertices[8] = { xlo, ylo, xhi, ylo, xhi, yhi, xlo, yhi };
 		GLfloat tex_coords[8] = { 0.0f, 0.0f, mx, 0.0f, mx, my, 0.0f, my };
-		
+
 		glEnableClientState ( GL_VERTEX_ARRAY );
 		glEnableClientState ( GL_TEXTURE_COORD_ARRAY );
-		
+
 		glVertexPointer ( 2, GL_FLOAT, 0, vertices );
 		glTexCoordPointer ( 2, GL_FLOAT, 0, tex_coords );
-		
+
 		glDrawArrays ( GL_QUADS, 0, 4 );
-		
+
 		glDisableClientState ( GL_TEXTURE_COORD_ARRAY );
 		glDisableClientState ( GL_VERTEX_ARRAY );
-		
+
 		/*glBegin(GL_QUADS);
 		glTexCoord2f(0.0f, 0.0f);
 		glVertex2f(xlo, ylo); //bl
@@ -1476,7 +1476,10 @@ void GameVideo::_PopContext()
 	if(_scissor_enabled)
 	{
 		glEnable(GL_SCISSOR_TEST);
-		glScissor(_scissor_rect.left, _scissor_rect.top, _scissor_rect.width, _scissor_rect.height);
+		glScissor( static_cast<GLint>( (_scissor_rect.left / static_cast<float>(VIDEO_STANDARD_RES_WIDTH) ) * _viewport.width ),
+		           static_cast<GLint>( ( _scissor_rect.top / static_cast<float>(VIDEO_STANDARD_RES_HEIGHT) ) * _viewport.height ),
+		           static_cast<GLsizei>( ( _scissor_rect.width / static_cast<float>(VIDEO_STANDARD_RES_WIDTH) ) * _viewport.width ),
+		           static_cast<GLsizei>( ( _scissor_rect.height / static_cast<float>(VIDEO_STANDARD_RES_HEIGHT) ) * _viewport.height ) );
 	}
 	else
 	{
@@ -1583,7 +1586,10 @@ void GameVideo::EnableScissoring(bool enable)
 void GameVideo::SetScissorRect(float left, float right, float bottom, float top)
 {
 	_scissor_rect = CalculateScreenRect(left, right, bottom, top);
-	glScissor(_scissor_rect.left, _scissor_rect.top, _scissor_rect.width, _scissor_rect.height);
+	glScissor( static_cast<GLint>( (_scissor_rect.left / static_cast<float>(VIDEO_STANDARD_RES_WIDTH) ) * _viewport.width ),
+	           static_cast<GLint>( ( _scissor_rect.top / static_cast<float>(VIDEO_STANDARD_RES_HEIGHT) ) * _viewport.height ),
+	           static_cast<GLsizei>( ( _scissor_rect.width / static_cast<float>(VIDEO_STANDARD_RES_WIDTH) ) * _viewport.width ),
+	           static_cast<GLsizei>( ( _scissor_rect.height / static_cast<float>(VIDEO_STANDARD_RES_HEIGHT) ) * _viewport.height ) );
 }
 
 
@@ -1593,7 +1599,10 @@ void GameVideo::SetScissorRect(float left, float right, float bottom, float top)
 void GameVideo::SetScissorRect(const ScreenRect &rect)
 {
 	_scissor_rect = rect;
-	glScissor(rect.left, rect.top, rect.width, rect.height);
+	glScissor( static_cast<GLint>( (_scissor_rect.left / static_cast<float>(VIDEO_STANDARD_RES_WIDTH) ) * _viewport.width ),
+		   static_cast<GLint>( ( _scissor_rect.top / static_cast<float>(VIDEO_STANDARD_RES_HEIGHT) ) * _viewport.height ),
+	           static_cast<GLsizei>( ( _scissor_rect.width / static_cast<float>(VIDEO_STANDARD_RES_WIDTH) ) * _viewport.width ),
+	           static_cast<GLsizei>( ( _scissor_rect.height / static_cast<float>(VIDEO_STANDARD_RES_HEIGHT) ) * _viewport.height ) );
 }
 
 //-----------------------------------------------------------------------------
@@ -1811,10 +1820,10 @@ void GameVideo::DrawGrid(float x, float y, float x_step, float y_step, const Col
 	PushState();
 
 	Move(0, 0);
-	
+
 	float x_Max = _coord_sys.GetRight();
 	float y_Max = _coord_sys.GetBottom();
-	
+
 	std::vector<GLfloat> vertices;
 	int numvertices = 0;
 	for (; x <= x_Max; x += x_step)
