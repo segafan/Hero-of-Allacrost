@@ -404,8 +404,8 @@ void BindEngineToLua() {
 				// Sprite directions
 				value("NORTH", NORTH),
 				value("SOUTH", SOUTH),
-				value("EAST", WEST),
-				value("WEST", EAST),
+				value("EAST", EAST),
+				value("WEST", WEST),
 				value("NW_NORTH", NW_NORTH),
 				value("NW_WEST", NW_WEST),
 				value("NE_NORTH", NE_NORTH),
