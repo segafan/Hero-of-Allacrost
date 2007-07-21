@@ -352,7 +352,7 @@ function Load(m)
 	sprite:SetName("Claudius");
 	sprite:SetObjectID(1000);
 	sprite:SetContext(1);
-	sprite:SetXPosition(7, 0.0);
+	sprite:SetXPosition(5, 0.5);
 	sprite:SetYPosition(118, 0.0);
 	sprite:SetCollHalfWidth(0.95);
 	sprite:SetCollHeight(1.9);
@@ -619,6 +619,9 @@ function Update()
 	if (exit_zone:IsInsideZone(map._camera.x_position, map._camera.y_position) == true) then
 		ModeManager:Pop();
 		local cave_map = hoa_map.MapMode("dat/maps/demo_town.lua");
+		cave_map._camera:SetXPosition(117, 0.0);
+		cave_map._camera:SetYPosition(38, 0.5);
+		cave_map._camera:SetDirection(hoa_map.MapMode.WEST);
 		ModeManager:Push(cave_map);
 	end
 end
