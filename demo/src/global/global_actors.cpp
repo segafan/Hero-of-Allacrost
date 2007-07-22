@@ -772,7 +772,10 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
 
 	// (4): Setup the character's attack points
 	char_script.OpenTable("attack_points");
-	for (uint32 i = GLOBAL_POSITION_HEAD; i < GLOBAL_POSITION_LEGS; i++) {
+	for (uint32 i = GLOBAL_POSITION_HEAD; i <= GLOBAL_POSITION_LEGS; i++) {
+		if (initial == false) // Make sure the armor_equipped vector is the same size as the _attack_points vector
+			_armor_equipped.push_back(NULL);
+	
 		_attack_points.push_back(new GlobalAttackPoint(this));
 		char_script.OpenTable(i);
 		if (_attack_points[i]->_LoadData(char_script) == false) {

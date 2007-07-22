@@ -995,7 +995,7 @@ void GameGlobal::_LoadCharacter(hoa_script::ReadScriptDescriptor& file, uint32 i
 			cerr << "GLOBAL WARNING: GameGlobal::_LoadCharacter() failed because the file passed to it was not open" << endl;
 		return;
 	}
-cout << "1" << endl;
+
 	// ----- (1): Create a new GlobalCharacter object using the provided id
 	// This loads all of the character's "static" data, such as their name, etc.
 	GlobalCharacter* character = new GlobalCharacter(id, false);
@@ -1003,30 +1003,23 @@ cout << "1" << endl;
 	// This function assumes that the characters table in the saved game file is already open.
 	// So all we need to open is the character's table
 	file.OpenTable(id);
-cout << "2" << endl;
+
 	// ----- (2): Read in all of the character's stats data
 	character->SetExperienceLevel(file.ReadUInt("experience_level"));
 	character->SetExperiencePoints(file.ReadUInt("experience_points"));
-// 	character->SetExperienceNextLevel(file.ReadUInt("experience_points_next"));
 
 	character->SetMaxHitPoints(file.ReadUInt("max_hit_points"));
 	character->SetHitPoints(file.ReadUInt("hit_points"));
 	character->SetMaxSkillPoints(file.ReadUInt("max_skill_points"));
 	character->SetSkillPoints(file.ReadUInt("skill_points"));
 
-cout << "s" << endl;
 	character->SetStrength(file.ReadUInt("strength"));
-		cout << "v" << endl;
 	character->SetVigor(file.ReadUInt("vigor"));
-	cout << "f" << endl;
 	character->SetFortitude(file.ReadUInt("fortitude"));
-	cout << "p" << endl;
 	character->SetProtection(file.ReadUInt("protection"));
-	cout << "a" << endl;
 	character->SetAgility(file.ReadUInt("agility"));
-	cout << "e" << endl;
 	character->SetEvade(file.ReadFloat("evade"));
-cout << "3" << endl;
+
 	// ----- (3): Read the character's equipment and load it onto the character
 	file.OpenTable("equipment");
 	uint32 equip_id;
@@ -1058,7 +1051,7 @@ cout << "3" << endl;
 	}
 
 	file.CloseTable();
-cout << "4" << endl;
+
 	// ----- (4): Read the character's skills and pass those onto the character object
 	vector<uint32> skill_ids;
 
@@ -1081,7 +1074,7 @@ cout << "4" << endl;
 	}
 
 	file.CloseTable();
-cout << "5" << endl;
+
 	// ----- (5): Reset the character's growth from the saved data
 	GlobalCharacterGrowth* growth = character->GetGrowth();
 	vector<uint32> growth_keys;
