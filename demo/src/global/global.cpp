@@ -835,83 +835,91 @@ void GameGlobal::_SaveCharacter(WriteScriptDescriptor& file, GlobalCharacter* ch
 	file.WriteLine("\t\t\texperience_for_last_level = " + NumberToString(growth->_experience_for_last_level) + ",");
 	file.WriteLine("\t\t\texperience_for_next_level = " + NumberToString(growth->_experience_for_next_level) + ",");
 
-	file.WriteLine("\t\t\thit_points_growth = { ");
+	file.WriteLine("\t\t\thit_points = { ");
 	for (uint32 i = 0; i < growth->_hit_points_periodic_growth.size(); i++) {
 		if (i == 0)
 			file.WriteLine("\t\t\t\t", false);
 		else
 			file.WriteLine(", ", false);
-		file.WriteLine("[" + NumberToString(growth->_hit_points_periodic_growth[i].first) + "] = " + NumberToString(growth->_hit_points_periodic_growth[i].second), false);
+		file.WriteLine("[" + NumberToString(growth->_hit_points_periodic_growth[i].first) + "] = "
+			+ NumberToString(growth->_hit_points_periodic_growth[i].second), false);
 	}
 	file.WriteLine("\n\t\t\t},");
 
-	file.WriteLine("\t\t\tskill_points_growth = { ");
+	file.WriteLine("\t\t\tskill_points = { ");
 	for (uint32 i = 0; i < growth->_skill_points_periodic_growth.size(); i++) {
 		if (i == 0)
 			file.WriteLine("\t\t\t\t", false);
 		else
 			file.WriteLine(", ", false);
-		file.WriteLine("[" + NumberToString(growth->_skill_points_periodic_growth[i].first) + "] = " + NumberToString(growth->_skill_points_periodic_growth[i].second), false);
+		file.WriteLine("[" + NumberToString(growth->_skill_points_periodic_growth[i].first) + "] = "
+			+ NumberToString(growth->_skill_points_periodic_growth[i].second), false);
 	}
 	file.WriteLine("\n\t\t\t},");
 
-	file.WriteLine("\t\t\tstrength_growth = { ");
+	file.WriteLine("\t\t\tstrength = { ");
 	for (uint32 i = 0; i < growth->_strength_periodic_growth.size(); i++) {
 		if (i == 0)
 			file.WriteLine("\t\t\t\t", false);
 		else
 			file.WriteLine(", ", false);
-		file.WriteLine("[" + NumberToString(growth->_strength_periodic_growth[i].first) + "] = " + NumberToString(growth->_strength_periodic_growth[i].second), false);
+		file.WriteLine("[" + NumberToString(growth->_strength_periodic_growth[i].first) + "] = "
+			+ NumberToString(growth->_strength_periodic_growth[i].second), false);
 	}
 	file.WriteLine("\n\t\t\t},");
 
-	file.WriteLine("\t\t\tvigor_growth = { ");
+	file.WriteLine("\t\t\tvigor = { ");
 	for (uint32 i = 0; i < growth->_vigor_periodic_growth.size(); i++) {
 		if (i == 0)
 			file.WriteLine("\t\t\t\t", false);
 		else
 			file.WriteLine(", ", false);
-		file.WriteLine("[" + NumberToString(growth->_vigor_periodic_growth[i].first) + "] = " + NumberToString(growth->_vigor_periodic_growth[i].second), false);
+		file.WriteLine("[" + NumberToString(growth->_vigor_periodic_growth[i].first) + "] = "
+			+ NumberToString(growth->_vigor_periodic_growth[i].second), false);
 	}
 	file.WriteLine("\n\t\t\t},");
 
-	file.WriteLine("\t\t\tfortitude_growth = { ");
+	file.WriteLine("\t\t\tfortitude = { ");
 	for (uint32 i = 0; i < growth->_fortitude_periodic_growth.size(); i++) {
 		if (i == 0)
 			file.WriteLine("\t\t\t\t", false);
 		else
 			file.WriteLine(", ", false);
-		file.WriteLine("[" + NumberToString(growth->_fortitude_periodic_growth[i].first) + "] = " + NumberToString(growth->_fortitude_periodic_growth[i].second), false);
+		file.WriteLine("[" + NumberToString(growth->_fortitude_periodic_growth[i].first) + "] = "
+			+ NumberToString(growth->_fortitude_periodic_growth[i].second), false);
 	}
 	file.WriteLine("\n\t\t\t},");
 
-	file.WriteLine("\t\t\tprotection_growth = { ");
+	file.WriteLine("\t\t\tprotection = { ");
 	for (uint32 i = 0; i < growth->_protection_periodic_growth.size(); i++) {
 		if (i == 0)
 			file.WriteLine("\t\t\t\t", false);
 		else
 			file.WriteLine(", ", false);
-		file.WriteLine("[" + NumberToString(growth->_protection_periodic_growth[i].first) + "] = " + NumberToString(growth->_protection_periodic_growth[i].second), false);
+		file.WriteLine("[" + NumberToString(growth->_protection_periodic_growth[i].first) + "] = "
+			+ NumberToString(growth->_protection_periodic_growth[i].second), false);
 	}
 	file.WriteLine("\n\t\t\t},");
 
-	file.WriteLine("\t\t\tagility_growth = { ");
+	file.WriteLine("\t\t\tagility = { ");
 	for (uint32 i = 0; i < growth->_agility_periodic_growth.size(); i++) {
 		if (i == 0)
 			file.WriteLine("\t\t\t\t", false);
 		else
 			file.WriteLine(", ", false);
-		file.WriteLine("[" + NumberToString(growth->_agility_periodic_growth[i].first) + "] = " + NumberToString(growth->_agility_periodic_growth[i].second), false);
+		file.WriteLine("[" + NumberToString(growth->_agility_periodic_growth[i].first) + "] = "
+			+ NumberToString(growth->_agility_periodic_growth[i].second), false);
 	}
 	file.WriteLine("\n\t\t\t},");
 
-	file.WriteLine("\t\t\tevade_growth = { ");
+	file.WriteLine("\t\t\tevade = { ");
 	for (uint32 i = 0; i < growth->_evade_periodic_growth.size(); i++) {
 		if (i == 0)
 			file.WriteLine("\t\t\t\t", false);
 		else
 			file.WriteLine(", ", false);
-		file.WriteLine("[" + NumberToString(growth->_evade_periodic_growth[i].first) + "] = " + NumberToString(growth->_evade_periodic_growth[i].second), false);
+		file.WriteLine("[" + NumberToString(growth->_evade_periodic_growth[i].first) + "] = "
+			+ NumberToString(growth->_evade_periodic_growth[i].second), false);
 	}
 	file.WriteLine("\n\t\t\t},");
 
@@ -987,15 +995,15 @@ void GameGlobal::_LoadCharacter(hoa_script::ReadScriptDescriptor& file, uint32 i
 			cerr << "GLOBAL WARNING: GameGlobal::_LoadCharacter() failed because the file passed to it was not open" << endl;
 		return;
 	}
-
+cout << "1" << endl;
 	// ----- (1): Create a new GlobalCharacter object using the provided id
 	// This loads all of the character's "static" data, such as their name, etc.
-	GlobalCharacter* character = new GlobalCharacter(id);
+	GlobalCharacter* character = new GlobalCharacter(id, false);
 
 	// This function assumes that the characters table in the saved game file is already open.
 	// So all we need to open is the character's table
 	file.OpenTable(id);
-
+cout << "2" << endl;
 	// ----- (2): Read in all of the character's stats data
 	character->SetExperienceLevel(file.ReadUInt("experience_level"));
 	character->SetExperiencePoints(file.ReadUInt("experience_points"));
@@ -1006,13 +1014,19 @@ void GameGlobal::_LoadCharacter(hoa_script::ReadScriptDescriptor& file, uint32 i
 	character->SetMaxSkillPoints(file.ReadUInt("max_skill_points"));
 	character->SetSkillPoints(file.ReadUInt("skill_points"));
 
+cout << "s" << endl;
 	character->SetStrength(file.ReadUInt("strength"));
+		cout << "v" << endl;
 	character->SetVigor(file.ReadUInt("vigor"));
+	cout << "f" << endl;
 	character->SetFortitude(file.ReadUInt("fortitude"));
+	cout << "p" << endl;
 	character->SetProtection(file.ReadUInt("protection"));
+	cout << "a" << endl;
 	character->SetAgility(file.ReadUInt("agility"));
-	character->SetEvade(file.ReadUInt("evade"));
-
+	cout << "e" << endl;
+	character->SetEvade(file.ReadFloat("evade"));
+cout << "3" << endl;
 	// ----- (3): Read the character's equipment and load it onto the character
 	file.OpenTable("equipment");
 	uint32 equip_id;
@@ -1044,7 +1058,7 @@ void GameGlobal::_LoadCharacter(hoa_script::ReadScriptDescriptor& file, uint32 i
 	}
 
 	file.CloseTable();
-
+cout << "4" << endl;
 	// ----- (4): Read the character's skills and pass those onto the character object
 	vector<uint32> skill_ids;
 
@@ -1067,8 +1081,90 @@ void GameGlobal::_LoadCharacter(hoa_script::ReadScriptDescriptor& file, uint32 i
 	}
 
 	file.CloseTable();
+cout << "5" << endl;
+	// ----- (5): Reset the character's growth from the saved data
+	GlobalCharacterGrowth* growth = character->GetGrowth();
+	vector<uint32> growth_keys;
+
+	file.OpenTable("growth");
+
+	growth->_experience_for_last_level = file.ReadUInt("experience_for_last_level");
+	growth->_experience_for_next_level = file.ReadUInt("experience_for_next_level");
+
+	growth_keys.clear();
+	file.OpenTable("hit_points");
+	file.ReadTableKeys(growth_keys);
+	for (uint32 i = 0; i < growth_keys.size(); i++) {
+		growth->_hit_points_periodic_growth.push_back(make_pair(growth_keys[i], file.ReadUInt(growth_keys[i])));
+	}
+	file.CloseTable();
+
+	growth_keys.clear();
+	file.OpenTable("skill_points");
+	file.ReadTableKeys(growth_keys);
+	for (uint32 i = 0; i < growth_keys.size(); i++) {
+		growth->_skill_points_periodic_growth.push_back(make_pair(growth_keys[i], file.ReadUInt(growth_keys[i])));
+	}
+	file.CloseTable();
+
+	growth_keys.clear();
+	file.OpenTable("strength");
+	file.ReadTableKeys(growth_keys);
+	for (uint32 i = 0; i < growth_keys.size(); i++) {
+		growth->_strength_periodic_growth.push_back(make_pair(growth_keys[i], file.ReadUInt(growth_keys[i])));
+	}
+	file.CloseTable();
+
+	growth_keys.clear();
+	file.OpenTable("vigor");
+	file.ReadTableKeys(growth_keys);
+	for (uint32 i = 0; i < growth_keys.size(); i++) {
+		growth->_vigor_periodic_growth.push_back(make_pair(growth_keys[i], file.ReadUInt(growth_keys[i])));
+	}
+	file.CloseTable();
+
+	growth_keys.clear();
+	file.OpenTable("fortitude");
+	file.ReadTableKeys(growth_keys);
+	for (uint32 i = 0; i < growth_keys.size(); i++) {
+		growth->_fortitude_periodic_growth.push_back(make_pair(growth_keys[i], file.ReadUInt(growth_keys[i])));
+	}
+	file.CloseTable();
+
+	growth_keys.clear();
+	file.OpenTable("protection");
+	file.ReadTableKeys(growth_keys);
+	for (uint32 i = 0; i < growth_keys.size(); i++) {
+		growth->_protection_periodic_growth.push_back(make_pair(growth_keys[i], file.ReadUInt(growth_keys[i])));
+	}
+	file.CloseTable();
+
+	growth_keys.clear();
+	file.OpenTable("agility");
+	file.ReadTableKeys(growth_keys);
+	for (uint32 i = 0; i < growth_keys.size(); i++) {
+		growth->_agility_periodic_growth.push_back(make_pair(growth_keys[i], file.ReadUInt(growth_keys[i])));
+	}
+	file.CloseTable();
+
+	growth_keys.clear();
+	file.OpenTable("evade");
+	file.ReadTableKeys(growth_keys);
+	for (uint32 i = 0; i < growth_keys.size(); i++) {
+		growth->_evade_periodic_growth.push_back(make_pair(growth_keys[i], file.ReadFloat(growth_keys[i])));
+	}
+	file.CloseTable();
+
+	growth_keys.clear();
+	file.ReadUIntVector("skills_learned", growth_keys);
+	for (uint32 i = 0; i < growth_keys.size(); i++) {
+		growth->_skills_learned.push_back(new GlobalSkill(growth_keys[i]));
+	}
+
+	file.CloseTable();
 
 	AddCharacter(character);
+	cout << "end load char" << endl;
 } // void GameGlobal::_LoadCharacter(hoa_script::ReadScriptDescriptor& file, uint32 id);
 
 
