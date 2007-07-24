@@ -689,6 +689,7 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
 	_growth(this)
 {
 	_id = id;
+	_weapon_equipped = NULL;
 
 	// (1): Attempt to open the characters script file
 	ReadScriptDescriptor char_script;

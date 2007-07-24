@@ -1073,8 +1073,6 @@ void GameGlobal::_LoadCharacter(hoa_script::ReadScriptDescriptor& file, uint32 i
 		character->AddSkill(skill_ids[i]);
 	}
 
-	file.CloseTable();
-
 	// ----- (5): Reset the character's growth from the saved data
 	GlobalCharacterGrowth* growth = character->GetGrowth();
 	vector<uint32> growth_keys;
@@ -1155,9 +1153,9 @@ void GameGlobal::_LoadCharacter(hoa_script::ReadScriptDescriptor& file, uint32 i
 	}
 
 	file.CloseTable();
+	file.CloseTable();
 
 	AddCharacter(character);
-	cout << "end load char" << endl;
 } // void GameGlobal::_LoadCharacter(hoa_script::ReadScriptDescriptor& file, uint32 id);
 
 
