@@ -7,14 +7,14 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-/*!****************************************************************************
- * \file    interpolator.h
- * \author  Raj Sharma, roos@allacrost.org
- * \brief   Header file for Interpolator class
- *
- * The Interpolator class can interpolate between a single and final value
- * using various methods (linear, fast, slow, etc.)
- *****************************************************************************/ 
+/** ****************************************************************************
+*** \file    interpolator.h
+*** \author  Raj Sharma, roos@allacrost.org
+*** \brief   Header file for Interpolator class
+***
+*** The Interpolator class can interpolate between a single and final value
+*** using various methods (linear, fast, slow, etc.)
+*** ***************************************************************************/
 
 #ifndef __INTERPOLATOR_HEADER__
 #define __INTERPOLATOR_HEADER__
@@ -22,137 +22,110 @@
 #include "defs.h"
 #include "utils.h"
 
-namespace hoa_video
-{
+namespace hoa_video {
 
-
-/*!***************************************************************************
- *  \brief Interpolation metods are various ways to create smoothed values
- *         between two numbers, e.g. linear interpolation
- *****************************************************************************/
-
-enum InterpolationMethod
-{
+//! \brief The various ways to create smoothed values between two numbers (e.g. linear interpolation)
+enum InterpolationMethod {
 	VIDEO_INTERPOLATE_INVALID = -1,
 	
-	//! rise from A to B and then down to A again
+	//! Rise from A to B and then down to A again
 	VIDEO_INTERPOLATE_EASE = 0,
-	//! constant value of A
+	//! Keeps a constant value of A
 	VIDEO_INTERPOLATE_SRCA = 1,
-	//! constant value of B
+	//! Keeps a constant value of B
 	VIDEO_INTERPOLATE_SRCB = 2,
-	//! rises quickly at the beginning and levels out
+	//! Rises quickly at the beginning and levels out
 	VIDEO_INTERPOLATE_FAST = 3,
-	//! rises slowly at the beginning then shoots up
+	//! Rises slowly at the beginning then shoots up
 	VIDEO_INTERPOLATE_SLOW = 4,
-	//! simple linear interpolation between A and B
+	//! Simple linear interpolation between A and B
 	VIDEO_INTERPOLATE_LINEAR = 5,
 	
 	VIDEO_INTERPOLATE_TOTAL = 6
 };
 
 
-/*!***************************************************************************
- *  \brief class that lets you set up various kinds of interpolations.
- *         The basic way to use it is to set the interpolation method using
- *         SetMethod(), then call Start() with the values you want to
- *         interpolate between and the time to do it in.
- *****************************************************************************/
- 
-class Interpolator
-{
+/** ****************************************************************************
+*** \brief Enables various methods of interpolation
+***
+*** The basic way to use it is to set the interpolation method using
+***        SetMethod(), then call Start() with the values you want to
+***        interpolate between and the time to do it in.
+*** ***************************************************************************/
+class Interpolator {
 public:
-
-	/*!***************************************************************************
-	*  \brief Constructor
-	*****************************************************************************/
 	Interpolator();
 
-	/*!***************************************************************************
-	*  \brief Begins interpolation
-	* \param a start value of interpolation
-	* \param b end value of interpolation
-	* \param milliseconds amount of time to interpolate over
-	* \return success/failure
-	*****************************************************************************/
-	bool Start(float a, float b, int32 milliseconds);
+	/** \brief Sets the interpolation method to use
+	*** \param method interpolation method to use
+	*** \note This method should only be invoked when there is no interpolation
+	*** taking place. If the class is in the middle of an interpolation, the new
+	*** method will not be set.
+	**/
+	void SetMethod(InterpolationMethod method);
 
-	/*!***************************************************************************
-	*  \brief Sets the interpolation method.  If this is not called, VIDEO_INTERPOLATION_LINEAR
-	*	     is assumed
-	* \param method interpolation method to use
-	* \return success/failure
-	*****************************************************************************/
-	bool  SetMethod(InterpolationMethod method);
+	/** \brief Begins a new interpolation
+	*** \param a The start value of interpolation
+	*** \param b The end value of interpolation
+	*** \param milliseconds The amount of time, in milliseconds, to interpolate over
+	**/
+	void Start(float a, float b, uint32 milliseconds);
+
+	/** \brief Updates the interpolation timer and value
+	*** \param frame_time The amount of milliseconds to update the time value by
+	**/
+	void Update(uint32 frame_time);
 	
-	/*!***************************************************************************
-	*  \brief Gets the current interpolated value
-	* \return the current interpolated value
-	*****************************************************************************/
-	float GetValue();
-	
-	/*!***************************************************************************
-	*  \brief Increments time by frameTime and updates the interpolation
-	* \param frame_time amount to update the time value by
-	* \return success/failure
-	*****************************************************************************/
-	bool  Update(int32 frame_time);
-	
-	/*!***************************************************************************
-	*  \brief Is interpolation finished?
-	* \return true if done, false if not
-	*****************************************************************************/
-	bool  IsFinished();
+	//! \brief Returns true if the interpolation is complete
+	bool IsFinished() const
+		{ return _finished; }
+
+	//! \brief Returns the current value for the interpolation in progress
+	float GetValue() const
+		{ return _current_value; }
 
 private:
-
-	/*!***************************************************************************
-	*  \brief Interpolates logarithmically.  Increases quickly then levels off.
-	* \param t float value to interpolate
-	* \return interpolated value
-	*****************************************************************************/
-	float _FastTransform(float t);
-	
-	/*!***************************************************************************
-	*  \brief Interpolates exponentially.  Increases slowly then skyrockets.
-	* \param t float value to interpolate
-	* \return interpolated value
-	*****************************************************************************/
-	float _SlowTransform(float t);
-	
-	/*!***************************************************************************
-	*  \brief Interpolates periodically.  Increases slowly to 1.0 then back down to 0.0
-	* \param t float value to interpolate
-	* \return interpolated value
-	*****************************************************************************/
-	float _EaseTransform(float t);
-
-	/*!***************************************************************************
-	*  \brief Verifies the interpolation method is valid.
-	* \return true for valid, false for not
-	*****************************************************************************/
-	bool _ValidMethod();
-	
-	//! Interpolation method used
+	//! \brief The interpolation method to be used
 	InterpolationMethod _method;
 	
-	//! the two numbers to interpolate between
+	//! \brief The two numbers to interpolate between
 	float _a, _b;
 	
-	//! The current time in the interpolation
-	int32   _current_time;
+	//! \brief The current time in the interpolation
+	uint32 _current_time;
 	
-	//! The end of the interpolation
-	int32   _end_time;
+	//! \brief The end of the interpolation
+	uint32 _end_time;
 	
-	//! If the interpolation is finished
-	bool  _finished;
-	
-	//! The current interpolated value
+	//! \brief The current interpolated value
 	float _current_value;
+
+	//! \brief Set to true if the interpolation is finished
+	bool _finished;
+
+	//! \brief Returns true if a valid interpolation method is set
+	bool _ValidMethod()
+		{ return (_method > VIDEO_INTERPOLATE_INVALID && _method < VIDEO_INTERPOLATE_TOTAL); }
+
+	/** \brief Interpolates logarithmically. Increases quickly and then levels off.
+	*** \param initial_value The initial value to interpolate. Should be between 0.0f and 1.0f (inclusive)
+	*** \return The interpolated value
+	**/
+	float _FastTransform(float initial_value);
 	
+	/** \brief Interpolates exponentially. Increases slowly and then sky rockets.
+	*** \param initial_value The initial value to interpolate. Should be between 0.0f and 1.0f (inclusive)
+	*** \return The interpolated value
+	**/
+	float _SlowTransform(float initial_value);
+	
+	/** \brief Interpolates periodically. Increases slowly to 1.0f then back down to 0.0f via a sine function.
+	*** \param initial_value The initial value to interpolate. Should be between 0.0f and 1.0f (inclusive)
+	*** \return The interpolated value
+	**/
+	float _EaseTransform(float initial_value);
 }; // class Interpolator
 
 }  // namespace hoa_video
 
-#endif // !__INTERPOLATOR_HEADER__
+#endif // __INTERPOLATOR_HEADER__
