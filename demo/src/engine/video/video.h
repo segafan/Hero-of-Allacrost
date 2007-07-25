@@ -957,16 +957,16 @@ public:
 	//-- Fading ---------------------------------------------------------------
 
 	/** \brief Begins a screen fade.
-	 *  \param color - color to fade to.
-	 *  \param fade_time - the fade will last this number of seconds
-	 *  \return True if fade was successful, false otherwise.
-	 */
-	void FadeScreen(const Color &color, float fade_time);
+	*** \param color The color to fade the screen to
+	*** \param fade_time The fading process will take this number of milliseconds
+	*** \return True if fade was successful, false otherwise.
+	**/
+	void FadeScreen(const Color &color, uint32 time)
+		{ _fader.BeginFade(color, time); }
 
-	/** \brief Determines if a fade is currently occurring.
-	 *  \return True if screen fade is currently in progress, false otherwise.
-	 */
-	bool IsFading();
+	//! \brief Returns true if a screen fade is currently in progress
+	bool IsFading()
+		{ return _fader.IsFading(); }
 
 	//-- Screen shaking -------------------------------------------------------
 

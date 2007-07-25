@@ -11,47 +11,44 @@
 #include <cassert>
 #include <cstdarg>
 #include <math.h>
+
 #include "utils.h"
 #include "fade.h"
 #include "video.h"
-#include "gui.h"
 
 using namespace std;
-using namespace hoa_video::private_video;
+
+using namespace hoa_utils;
 
 namespace hoa_video {
 
 namespace private_video {
 
-ScreenFader::ScreenFader()
-	: current_color(0.0f, 0.0f, 0.0f, 0.0f),
-	is_fading(false)
-{
-	current_time = 0;
-	end_time = 0;
-	fade_modulation = 1.0f;
-	use_fade_overlay = false;
-}
+ScreenFader::ScreenFader() :
+	current_color(0.0f, 0.0f, 0.0f, 0.0f),
+	initial_color(0.0f, 0.0f, 0.0f, 0.0f),
+	final_color(0.0f, 0.0f, 0.0f, 0.0f),
+	current_time(0),
+	end_time(0),
+	is_fading(false),
+	use_fade_overlay(false),
+	fade_overlay_color(0.0f, 0.0f, 0.0f, 0.0f),
+	fade_modulation(1.0f),
+	interpolate_rgb_values(false)
+{}
 
-//-----------------------------------------------------------------------------
-// FadeTo: Begins a fade to the given color in num_seconds
-//         returns false if invalid parameter is passed
-//-----------------------------------------------------------------------------
-void ScreenFader::FadeTo(const Color &final, float num_seconds)
-{
-	if (num_seconds <= 0.0f)
-		end_time = 0;
-	else
-		end_time = static_cast<int32>(num_seconds * 1000); // Convert seconds to milliseconds
+
+
+void ScreenFader::BeginFade(const Color &final, uint32 time) {
+	is_fading = true;
+
+	end_time = time;
 
 	initial_color = current_color;
-	final_color   = final;
+	final_color = final;
 	current_time = 0;
-
 	
-	is_fading = true;
-	
-	// figure out if this is a simple fade or if an overlay is required
+	// Figure out if this is a simple fade or if an overlay is required
 	// A simple fade is defined as a fade from clear to black, from black
 	// to clear, or from somewhere between clear and black to either clear
 	// or black. More simply, it's a fade where both the initial and final
@@ -59,46 +56,51 @@ void ScreenFader::FadeTo(const Color &final, float num_seconds)
 
 	use_fade_overlay = true;	
 
-	if( (initial_color[0] == 0.0f &&
-	     initial_color[1] == 0.0f &&
-	     initial_color[2] == 0.0f &&
-	     final_color[0]   == 0.0f &&
-	     final_color[1]   == 0.0f &&
-	     final_color[2]   == 0.0f))
+	if ((IsFloatEqual(initial_color[0], 0.0f) && IsFloatEqual(initial_color[1], 0.0f)
+		&& IsFloatEqual(initial_color[2], 0.0f) && IsFloatEqual(final_color[0], 0.0f)
+		&& IsFloatEqual(final_color[1], 0.0f) && IsFloatEqual(final_color[2], 0.0f)))
 	{
 		use_fade_overlay = false;
 	}
-	else
-	{
+	else {
 		fade_modulation = 1.0f;
 	}
-	
-	Update(0);  // do initial update
-}
+
+	// If we are fading to or from transparent, then the RGB values do not need to be interpolated
+	if (IsFloatEqual(final_color[3], 0.0f)) {
+		interpolate_rgb_values = true;
+		current_color[0] = initial_color[0];
+		current_color[1] = initial_color[1];
+		current_color[2] = initial_color[2];
+	}
+	else if (IsFloatEqual(initial_color[3], 0.0f)) {
+		interpolate_rgb_values = true;
+		current_color[0] = final_color[0];
+		current_color[1] = final_color[1];
+		current_color[2] = final_color[2];
+	}
+	else {
+		interpolate_rgb_values = false;
+	}
+
+	Update(0); // Do an initial update
+} // void ScreenFader::BeginFade(const Color &final, uint32 time)
 
 
 
-//-----------------------------------------------------------------------------
-// Update: updates screen fader- figures out new interpolated fade color,
-//         whether to fade using overlays or modulation, etc.
-//-----------------------------------------------------------------------------
-void ScreenFader::Update(int32 t)
-{
-	if(!is_fading)
+void ScreenFader::Update(uint32 time) {
+	if (is_fading == false)
 		return;
-				
-	if(current_time >= end_time)
-	{
+
+	// Check for fading finish condition
+	if (current_time >= end_time) {
 		current_color = final_color;
-		is_fading     = false;
+		is_fading = false;
 		
-		if(use_fade_overlay)
-		{
-			// check if we have faded to black or clear. If so, we can use modulation
-			if(final_color[3] == 0.0f ||
-			  (final_color[0] == 0.0f &&
-			   final_color[1] == 0.0f &&
-			   final_color[2] == 0.0f))
+		if (use_fade_overlay) {
+			// Check if we have faded to black or clear. If so, we can use modulation
+			if (IsFloatEqual(final_color[3], 0.0f) || (IsFloatEqual(final_color[0], 0.0f)
+				&& IsFloatEqual(final_color[1], 0.0f) && IsFloatEqual(final_color[2], 0.0f)))
 			{
 				use_fade_overlay = false;
 				fade_modulation = 1.0f - final_color[3];
@@ -106,62 +108,28 @@ void ScreenFader::Update(int32 t)
 		}
 		else
 			fade_modulation = 1.0f - final_color[3];
+
+		return;
 	}
+
+	// Calculate the new interpolated color
+	float percent_complete = static_cast<float>(current_time) / static_cast<float>(end_time);
+
+	if (interpolate_rgb_values == true) {
+		current_color[0] = Lerp(percent_complete, initial_color[0], final_color[0]);
+		current_color[1] = Lerp(percent_complete, initial_color[1], final_color[1]);
+		current_color[2] = Lerp(percent_complete, initial_color[2], final_color[2]);
+	}
+	current_color[3] = Lerp(percent_complete, initial_color[3], final_color[3]);
+
+	if (use_fade_overlay == false)
+		fade_modulation = 1.0f - current_color[3];
 	else
-	{
-		// calculate the new interpolated color
-		float a = (float)current_time / (float)end_time;
+		fade_overlay_color = current_color;
 
-		current_color[3] = Lerp(a, initial_color[3], final_color[3]);
-
-		// if we are fading to or from clear, then only the alpha should get
-		// interpolated.
-		if(final_color[3] == 0.0f)
-		{
-			current_color[0] = initial_color[0];
-			current_color[1] = initial_color[1];
-			current_color[2] = initial_color[2];
-		}
-		if(initial_color[3] == 0.0f)
-		{
-			current_color[0] = final_color[0];
-			current_color[1] = final_color[1];
-			current_color[2] = final_color[2];
-		}
-		else
-		{
-			current_color[0] = Lerp(a, initial_color[0], final_color[0]);
-			current_color[1] = Lerp(a, initial_color[1], final_color[1]);
-			current_color[2] = Lerp(a, initial_color[2], final_color[2]);
-		}
-		
-		if(!use_fade_overlay)
-			fade_modulation = 1.0f - current_color[3];
-		else
-			fade_overlay_color = current_color;
-	}
-
-	current_time += t;
-} // void FadeScreen::Update(int32 t)
+	current_time += time;
+} // void FadeScreen::Update(uint32 time)
 
 } // namespace private_video
-
-//-----------------------------------------------------------------------------
-// FadeScreen: sets up a fade to the given color over "fade_time" number of seconds
-//-----------------------------------------------------------------------------
-void GameVideo::FadeScreen(const Color &color, float fade_time)
-{
-	_fader.FadeTo(color, fade_time);
-}
-
-
-
-//-----------------------------------------------------------------------------
-// IsFading: returns true if screen is in the middle of a fade
-//-----------------------------------------------------------------------------
-bool GameVideo::IsFading()
-{
-	return _fader.IsFading();
-}
 
 }  // namespace hoa_video

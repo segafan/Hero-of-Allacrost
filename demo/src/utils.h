@@ -141,6 +141,17 @@ bool IsOddNumber(uint32 x);
 bool IsFloatInRange(float value, float lower, float upper);
 
 
+/** \brief Alternative function for determining if a floating point number is close to a specific value
+*** \param value The floating point value to compare.
+*** \param base The number that we want to compare the value to
+*** \param delta The maximum degree of tolerance allowed (default value: 0.001f)
+*** \return True if the value lies within the two bounds.
+*** This is an alternative method for testing equality between two floating point values. The delta
+*** member should always be positive.
+**/
+bool IsFloatEqual(float value, float base, float delta = 0.001f);
+
+
 //! \brief Rounds down a float to a multiple of another float
 /*!
  *  \return Rounded float

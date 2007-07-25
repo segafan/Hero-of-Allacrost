@@ -67,6 +67,11 @@ bool IsFloatInRange(float value, float lower, float upper) {
 }
 
 
+bool IsFloatEqual(float value, float base, float delta) {
+	return (value >= (base - delta) && value <= (base + delta));
+}
+
+
 float FloorToFloatMultiple (const float value, const float multiple)
 {
 	return multiple * floor(value / multiple);

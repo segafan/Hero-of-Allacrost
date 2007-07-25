@@ -38,18 +38,16 @@ class ScreenFader {
 public:
 	ScreenFader();
 	
-	/** \brief Begins a screen fading process.
+	/** \brief Begins a new screen fading process
 	*** \param final The color to fade the screen to.
-	*** \param num_seconds Screen fade will start in this number of seconds.
-	*** \note A value less than or equal to 0.0f for num_seconds will begin the
-	*** fading immediately.
+	*** \param time The number of milliseconds that the fade should last for.
 	**/
-	void FadeTo(const Color &final, float num_seconds);
+	void BeginFade(const Color &final, uint32 time);
 
-	/** \brief Updates the ScreenFader class.
-	*** \param t The number of milliseconds that have passed since last update.
+	/** \brief Updates the amount of fading for the screen
+	*** \param time The number of milliseconds that have passed since last update.
 	**/
-	void Update(int32 t);
+	void Update(uint32 time);
 
 	//! \brief Class Member Accessor Functions
 	bool ShouldUseFadeOverlay() const
@@ -73,13 +71,13 @@ public:
 	//! \brief The destination color that the screen is being fade to.
 	Color final_color;
 
-	//! \brief The number of milliseconds that have passed since the fading started.
-	int32 current_time;
+	//! \brief The number of milliseconds that have passed since the fading began.
+	uint32 current_time;
 
 	//! \brief The number of milliseconds that this fade was set to last for.
-	int32 end_time;
+	uint32 end_time;
 
-	//! \brief True if we're in the middle of a fade.
+	//! \brief True if the class is currently in the process of fading
 	bool is_fading;
 	
 	//! \brief Set to true if using an overlay, false if using modulation.
@@ -90,6 +88,9 @@ public:
 
 	//! \brief A float determining the degree of modulation.
 	float fade_modulation;
+
+	//! \brief Set to true if the fading process requires interpolation of RGB values between colors
+	bool interpolate_rgb_values;
 	//@}
 }; // class ScreenFader
 
