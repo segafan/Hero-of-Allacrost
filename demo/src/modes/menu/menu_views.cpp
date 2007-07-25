@@ -46,23 +46,19 @@ namespace private_menu {
 // CharacterWindow Class
 ////////////////////////////////////////////////////////////////////////////////
 
-CharacterWindow::CharacterWindow()
-{
-	_char_id = GLOBAL_CHARACTER_INVALID;
+CharacterWindow::CharacterWindow() : _char_id(GLOBAL_CHARACTER_INVALID) {
 }
 
 
 
-CharacterWindow::~CharacterWindow()
-{
+CharacterWindow::~CharacterWindow() {
 	// Delete the character's portrait
 	VideoManager->DeleteImage(_portrait);
 }
 
 
 
-void CharacterWindow::SetCharacter(GlobalCharacter *character)
-{
+void CharacterWindow::SetCharacter(GlobalCharacter *character) {
 	_char_id = character->GetID();
 
 	_portrait.SetFilename("img/portraits/map/" + character->GetFilename() + ".png");
@@ -74,8 +70,7 @@ void CharacterWindow::SetCharacter(GlobalCharacter *character)
 
 
 // Draw the window to the screen
-void CharacterWindow::Draw()
-{
+void CharacterWindow::Draw() {
 	// Call parent Draw method, if failed pass on fail result
 	MenuWindow::Draw();
 
@@ -143,8 +138,7 @@ void CharacterWindow::Draw()
 ////////////////////////////////////////////////////////////////////////////////
 
 
-InventoryWindow::InventoryWindow() : _active_box(ITEM_ACTIVE_NONE)
-{
+InventoryWindow::InventoryWindow() : _active_box(ITEM_ACTIVE_NONE) {
 	_InitCategory();
 	_InitInventoryItems();
 	_InitCharSelect();
@@ -158,7 +152,7 @@ InventoryWindow::InventoryWindow() : _active_box(ITEM_ACTIVE_NONE)
 	_description.SetDisplayMode(VIDEO_TEXT_INSTANT);
 	_description.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 
-}// void InventoryWindow::InventoryWindow
+} // void InventoryWindow::InventoryWindow
 
 InventoryWindow::~InventoryWindow()
 {
@@ -180,7 +174,9 @@ void InventoryWindow::_InitInventoryItems() {
 
 	// Update the item text
 	_UpdateItemText();
-	_inventory_items.SetSelection(0);
+	if (_inventory_items.GetNumberOptions() > 0) {
+		_inventory_items.SetSelection(0);
+	}
 	VideoManager->MoveRelative(-65, 20);
 	// Initially hide the cursor
 	_inventory_items.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
@@ -241,8 +237,7 @@ void InventoryWindow::_InitCategory() {
 }
 
 // Activates/deactivates inventory window
-void InventoryWindow::Activate(bool new_status)
-{
+void InventoryWindow::Activate(bool new_status) {
 	// Set new status
 	if (_inventory_items.GetNumberOptions() > 0 && new_status) {
 		_active_box = ITEM_ACTIVE_CATEGORY;
@@ -439,7 +434,6 @@ void InventoryWindow::_UpdateItemText() {
 		inv_names.push_back(text);
 	}
 
-	//_inventory_items.SetSize(1, _item_objects.size());
 	_inventory_items.SetOptions(inv_names);
 } // void InventoryWindow::UpdateItemText()
 
@@ -980,7 +974,9 @@ void EquipWindow::_InitEquipmentList() {
 	_equip_list.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	// Update the equipment list
 	_UpdateEquipList();
-	_equip_list.SetSelection(0);
+	if (_equip_list.GetNumberOptions() > 0) {
+		_equip_list.SetSelection(0);
+	}
 	// Initially hide the cursor
 	_equip_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 }
@@ -1183,8 +1179,8 @@ void EquipWindow::_UpdateEquipList() {
 
 	if (_active_box == EQUIP_ACTIVE_LIST) {
 		uint32 gearsize = 0;
-		vector<hoa_global::GlobalWeapon*> weapons;
-		vector<hoa_global::GlobalArmor*> armor;
+//		vector<hoa_global::GlobalWeapon*> weapons;
+//		vector<hoa_global::GlobalArmor*> armor;
 
 		switch (_equip_select.GetSelection()) {
 			case EQUIP_WEAPON:
@@ -1331,18 +1327,147 @@ void EquipWindow::Draw() {
 } // void EquipWindow::Draw()
 
 
-FormationWindow::FormationWindow() {
-	// TEMP: This is just temp code for testing
-	string file_name = "dat/saved_game.lua";
-	GlobalManager->SaveGame(file_name);
-	cout << "Game saved!" << endl;
+FormationWindow::FormationWindow() : _active_box(FORM_ACTIVE_NONE) {
+	_InitCharSelect();
 }
+
 
 FormationWindow::~FormationWindow() {
 }
 
+
+void FormationWindow::_InitCharSelect() {
+	//character selection set up
+	std::vector<ustring> options;
+	uint32 size = GlobalManager->GetActiveParty()->GetPartySize();
+
+	_char_select.SetCursorOffset(-50.0f, -6.0f);
+	_char_select.SetFont("default");
+	_char_select.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
+	_char_select.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_char_select.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	_char_select.SetSize(1, ((size >= 4) ? 4 : size));
+	_char_select.SetCellSize(360, 108);
+	_char_select.SetPosition(72.0f, 109.0f);
+
+	_second_char_select.SetCursorOffset(-50.0f, -6.0f);
+	_second_char_select.SetFont("default");
+	_second_char_select.SetHorizontalWrapMode(VIDEO_WRAP_MODE_SHIFTED);
+	_second_char_select.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
+	_second_char_select.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	_second_char_select.SetSize(1, ((size >= 4) ? 4 : size));
+	_second_char_select.SetCellSize(360, 108);
+	_second_char_select.SetPosition(72.0f, 109.0f);
+
+	// Use blank string so cursor can point somewhere
+	for (uint32 i = 0; i < size; i++) {
+		options.push_back(MakeUnicodeString(" "));
+	}
+
+	_char_select.SetOptions(options);
+	_char_select.SetSelection(0);
+	_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+
+	_second_char_select.SetOptions(options);
+	_second_char_select.SetSelection(0);
+	_second_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+
+}
+
+
+void FormationWindow::Update() {
+	// Points to the active option box
+	OptionBox *active_option = NULL;
+
+	//choose correct menu
+	switch (_active_box) {
+		case FORM_ACTIVE_CHAR:
+			active_option = &_char_select;
+			break;
+		case FORM_ACTIVE_SECOND:
+			active_option = &_second_char_select;
+			break;
+	}
+
+	// Handle the appropriate input events
+	if (InputManager->ConfirmPress())
+	{
+		active_option->HandleConfirmKey();
+	}
+	else if (InputManager->CancelPress())
+	{
+		active_option->HandleCancelKey();
+	}
+	else if (InputManager->LeftPress())
+	{
+		active_option->HandleLeftKey();
+	}
+	else if (InputManager->RightPress())
+	{
+		active_option->HandleRightKey();
+	}
+	else if (InputManager->UpPress())
+	{
+		active_option->HandleUpKey();
+	}
+	else if (InputManager->DownPress())
+	{
+		active_option->HandleDownKey();
+	}
+
+	uint32 event = active_option->GetEvent();
+	active_option->Update();
+
+	switch (_active_box) {
+		case FORM_ACTIVE_CHAR:
+			if (event == VIDEO_OPTION_CONFIRM) {
+				_active_box = FORM_ACTIVE_SECOND;
+				_char_select.SetCursorState(VIDEO_CURSOR_STATE_BLINKING);
+				_second_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+				MenuMode::_instance->_menu_sounds["confirm"].PlaySound();
+			}
+			else if (event == VIDEO_OPTION_CANCEL) {
+				Activate(false);
+				MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
+			}
+			break;
+
+		case FORM_ACTIVE_SECOND:
+			if (event == VIDEO_OPTION_CONFIRM) {
+				// TODO: Implement Character Switch
+				_active_box = FORM_ACTIVE_CHAR;
+				_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+				_second_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+			}
+			else if (event == VIDEO_OPTION_CANCEL) {
+				_active_box = FORM_ACTIVE_CHAR;
+				_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+				_second_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+				MenuMode::_instance->_menu_sounds["cancel"].PlaySound();
+			}
+			break;
+	} // switch
+	_char_select.Update();
+}
+
+
 void FormationWindow::Draw() {
 	MenuWindow::Draw();
+	_char_select.Draw();
+	_second_char_select.Draw();
+}
+
+
+void FormationWindow::Activate(bool new_status) {
+	if (new_status) {
+		_active_box = FORM_ACTIVE_CHAR;
+		_char_select.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
+	}
+	else {
+		_active_box = FORM_ACTIVE_NONE;
+		_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+		_second_char_select.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
+	}
 }
 
 } // namespace private_menu

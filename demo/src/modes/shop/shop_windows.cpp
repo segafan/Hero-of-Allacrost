@@ -17,6 +17,7 @@
 #include "system.h"
 #include "global.h"
 #include "mode_manager.h"
+#include "menu.h"
 
 #include "shop.h"
 #include "shop_windows.h"
@@ -126,8 +127,8 @@ void ShopActionWindow::Update() {
 			current_shop->_confirm_window.Show();
 		}
 		else if (options.GetSelection() == 3) { // Menu
-			current_shop->_shop_sounds["confirm"].PlaySound();
-//			hoa_menu::MenuMode *MM = new hoa_menu::MenuMode(MakeUnicodeString("Village Shop"), "img/menus/locations/mountain_village.png");
+			current_shop->_shop_sounds["cancel"].PlaySound();
+//			hoa_menu::MenuMode *MM = new hoa_menu::MenuMode(MakeUnicodeString("The Boot Screen"), "img/menus/locations/desert_cave.png");
 //			ModeManager->Push(MM);
 		}
 		else if (options.GetSelection() == 4) { // Exit
@@ -307,11 +308,13 @@ ObjectSellListWindow::ObjectSellListWindow() {
 
 	object_list.SetOwner(this);
 	object_list.SetCellSize(500.0f, 50.0f);
-	object_list.SetPosition(50.0f, 400.0f);
+	object_list.SetPosition(50.0f, 350.0f);
+	object_list.SetSize(1, 6);
 	object_list.SetOptionAlignment(VIDEO_X_LEFT, VIDEO_Y_CENTER);
 	object_list.SetFont("default");
 	object_list.SetSelectMode(VIDEO_SELECT_SINGLE);
 	object_list.SetCursorOffset(-50.0f, 20.0f);
+	object_list.SetVerticalWrapMode(VIDEO_WRAP_MODE_STRAIGHT);
 	object_list.SetHorizontalWrapMode(VIDEO_WRAP_MODE_NONE);
 
 	hide_options = true;
@@ -334,9 +337,8 @@ void ObjectSellListWindow::Clear() {
 
 
 void ObjectSellListWindow::AddEntry(hoa_utils::ustring name, uint32 count, uint32 price, uint32 sell_count) {
-	std::string text = "  x" + NumberToString(count) + "<R>x" + NumberToString(sell_count) + "   " + NumberToString(price);
-
-	option_text.push_back(name + MakeUnicodeString(" x") + MakeUnicodeString(NumberToString(count)) + MakeUnicodeString("<R>x") + MakeUnicodeString(NumberToString(sell_count)) + MakeUnicodeString("   ") + MakeUnicodeString(NumberToString(price)));
+	std::string text = MakeStandardString(name) + "<R>" + NumberToString(count) + "      " + NumberToString(sell_count) + "       " + NumberToString(price);
+	option_text.push_back(MakeUnicodeString(text));
 }
 
 
@@ -403,7 +405,6 @@ void ObjectSellListWindow::UpdateSellList() {
 		AddEntry(iter->second->GetName(), iter->second->GetCount(), iter->second->GetPrice() / 2, current_shop->_sell_objects_quantities[x]);
 		x++;
 	}
-	object_list.SetSize(1, option_text.size());
 	object_list.SetOptions(option_text);
 }
 
@@ -415,6 +416,9 @@ void ObjectSellListWindow::Draw() {
 	if (current_shop->_state == SHOP_STATE_SELL) {	
 		if (hide_options == false && option_text.empty() == false) {
 			object_list.Draw();
+			VideoManager->Move(375, 640);
+			string text = "Item                                     Inv   Sell   Price";
+			VideoManager->DrawText(MakeUnicodeString(text));
 		}
 	}
 }

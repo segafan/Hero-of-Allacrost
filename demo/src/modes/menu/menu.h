@@ -43,18 +43,18 @@ extern bool MENU_DEBUG;
 //! \brief An internal namespace to be used only within the menu code. Don't use this namespace anywhere else!
 namespace private_menu {
 
-//! \name Main Options Constants
-//@{
-const uint32 MAIN_INVENTORY      = 0;
-const uint32 MAIN_SKILLS         = 1;
-const uint32 MAIN_EQUIP          = 2;
-const uint32 MAIN_STATUS         = 3;
-// const uint32 MAIN_OPTIONS        = 3;
-const uint32 MAIN_SAVE           = 4;
-const uint32 MAIN_FORMATION      = 5;
-const uint32 MAIN_EXIT           = 6;
-const uint32 MAIN_SIZE           = 7;
-//@}
+//! \brief The different item categories
+enum MAIN_CATEGORY {
+	MAIN_INVENTORY      = 0,
+	MAIN_SKILLS         = 1,
+	MAIN_EQUIP          = 2,
+	MAIN_STATUS         = 3,
+//	MAIN_OPTIONS        = 3;
+	MAIN_SAVE           = 4,
+	MAIN_FORMATION      = 5,
+	MAIN_EXIT           = 6,
+	MAIN_SIZE           = 7
+};
 
 //! \name Inventory Menu Options Constants
 //@{
@@ -205,6 +205,7 @@ private:
 	private_menu::SkillsWindow _skills_window;
 	private_menu::EquipWindow _equip_window;
 	private_menu::FormationWindow _formation_window;
+//	private_menu::SaveWindow _save_window;
 
 	// FIXME
 	//std::vector<private_menu::CharacterWindow> _character_windows;
@@ -238,8 +239,9 @@ private:
 	hoa_video::OptionBox _menu_skills;
 	hoa_video::OptionBox _menu_status;
 	hoa_video::OptionBox _menu_options;
-	hoa_video::OptionBox _menu_save;
 	hoa_video::OptionBox _menu_equip;
+	hoa_video::OptionBox _menu_formation;
+	hoa_video::OptionBox _menu_save;
 	//@}
 	
 	//! \brief Functions that initialize the numerous option boxes
@@ -250,6 +252,7 @@ private:
 	void _SetupSkillsOptionBox();
 	void _SetupStatusOptionBox();
 	void _SetupOptionsOptionBox();
+	void _SetupFormationOptionBox();
 	void _SetupSaveOptionBox();
 	void _SetupEquipOptionBox();
 	//@}
@@ -263,6 +266,7 @@ private:
 	void _HandleSkillsMenu();
 	void _HandleStatusMenu();
 	void _HandleOptionsMenu();
+	void _HandleFormationMenu();
 	void _HandleSaveMenu();
 	void _HandleEquipMenu();
 	//@}
