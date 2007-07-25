@@ -59,14 +59,9 @@ Color Color::violet(0.0f, 0.0f, 1.0f, 1.0f);
 Color Color::brown (0.6f, 0.3f, 0.1f, 1.0f);
 
 
-//-----------------------------------------------------------------------------
-// Lerp: linearly interpolates value between initial and final
-//-----------------------------------------------------------------------------
 
 float Lerp(float alpha, float initial, float final)
-{
-	return alpha * final + (1.0f-alpha) * initial;
-}
+	{ return alpha * final + (1.0f - alpha) * initial; }
 
 
 //-----------------------------------------------------------------------------
@@ -741,8 +736,7 @@ bool GameVideo::Display(int32 frame_time)
 		_lightning_active = false;
 
 	// show an overlay over the screen if we're fading
-	if(_fader.ShouldUseFadeOverlay())
-	{
+	if (_fader.ShouldUseFadeOverlay()) {
 		Color c = _fader.GetFadeOverlayColor();
 		StillImage fade_overlay;
 		fade_overlay.SetDimensions(1024.0f, 768.0f);

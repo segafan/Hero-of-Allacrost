@@ -605,7 +605,7 @@ void BootMode::_OnNewGame() {
 	GlobalManager->SetDrunes(250);
 
 	_fade_out = true;
-	VideoManager->FadeScreen(Color::black, 1.0f);
+	VideoManager->FadeScreen(Color::black, 1000); // Fade to black over the course of one second
 	_boot_music.at(0).SetFadeOutTime(500); // Fade out the music
 	_boot_music.at(0).StopMusic();
 }
@@ -620,7 +620,7 @@ void BootMode::_OnLoadGame() {
 		
 		GlobalManager->LoadGame("dat/saved_game.lua");
 		_fade_out = true;
-		VideoManager->FadeScreen(Color::black, 1.0f);
+		VideoManager->FadeScreen(Color::black, 1000);
 		_boot_music.at(0).SetFadeOutTime(500); // Fade out the music
 		_boot_music.at(0).StopMusic();
 	}
@@ -923,7 +923,7 @@ void BootMode::Update() {
 			ModeManager->Pop();
 			MapMode *MM = new MapMode("dat/maps/demo_town.lua");
 			ModeManager->Push(MM);
-			VideoManager->FadeScreen(Color::clear, 1.0f);
+			VideoManager->FadeScreen(Color::clear, 1000);
 		}
 		return;
 	}
