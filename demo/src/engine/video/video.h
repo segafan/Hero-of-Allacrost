@@ -270,22 +270,26 @@ public:
 	/** \brief returns width, (whatever was set with SetResolution)
 	 * \return width of the screen
 	 */
-	int32 GetWidth() const { return _width; }
+	int32 GetWidth() const
+		{ return _width; }
 
 	/** \brief returns height, (whatever was set with SetResolution)
 	 * \return height of the screen
 	 */
-	int32 GetHeight() const { return _height; }
+	int32 GetHeight() const
+		{ return _height; }
 
 	/** \brief return a reference to the coordinates system
 	 *  \return Reference to the coordinates system
 	 */
-	const CoordSys& GetCoordSys() const { return _coord_sys; }
+	const CoordSys& GetCoordSys() const
+		{ return _coord_sys; }
 
 	/** \brief returns true if game is in fullscreen mode
 	 * \return true if in fullscreen mode, false if in windowed mode
 	 */
-	bool IsFullscreen();
+	bool IsFullscreen() const
+		{ return _fullscreen; }
 
 	/** \brief Return the pixel size expressed coordinate system units
 	 *  \return Pixel size expressed in cordinate system units
@@ -970,26 +974,23 @@ public:
 
 	//-- Screen shaking -------------------------------------------------------
 
-	/** \brief shakes the screen
-	 *
-	 *  \param force        Initial force of the shake
-	 *  \param falloff_time  How long the shake should last for. Pass 0.0f for
-	 *                      a shake that doesn't end until you stop it manually
-	 *  \param falloff      Specifies the method of falloff. The default is
-	 *                      VIDEO_FALLOFF_NONE.
-	 * \return success/failure
-	 */
-	bool ShakeScreen(float force, float falloff_time, ShakeFalloff falloff = VIDEO_FALLOFF_NONE);
+	/** \brief Adds a new shaking effect to the screen
+	***
+	*** \param force The initial force of the shake
+	*** \param falloff_time The number of milliseconds that the effect should last for. 0 indicates infinite time.
+	*** \param falloff_method Specifies the method of falloff. The default is VIDEO_FALLOFF_NONE.
+	*** \note If you want to manually control when the shaking stops, set the falloff_time to zero
+	*** and the falloff_method to VIDEO_FALLOFF_NONE.
+	**/
+	void ShakeScreen(float force, uint32 falloff_time, ShakeFalloff falloff_method = VIDEO_FALLOFF_NONE);
 
-	/**  \brief stops all shake effects
-	 * \return success/failure
-	 */
-	bool StopShaking();
+	//! \brief Terminates all current screen shake effects
+	void StopShaking()
+		{ _shake_forces.clear(); _x_shake = 0.0f; _y_shake = 0.0f; }
 
-	/** \brief returns true if screen is shaking
-	 * \return true if the screen is shaking, false if it's not
-	 */
-	bool IsShaking();
+	//! \brief Returns true if the screen is shaking
+	bool IsShaking()
+		{ return (_shake_forces.empty() == false); }
 
 	//-- Miscellaneous --------------------------------------------------------
 
@@ -1567,13 +1568,14 @@ private:
 	 */
 	bool _RemoveSheet(private_video::TexSheet *sheet_to_remove);
 
-	/**
-	 *  \brief rounds a force value to the nearest integer. Rounding is based on probability. For example the number 2.85 has an 85% chance of rounding to 3 and a 15% chance of rounding to 2
-	 *
-	 *  \param force  The force to round
-	 * \return the rounded force value
-	 */
-	float _RoundForce(float force);   // rounds a force value
+	/** \brief Rounds a force value to the nearest integer based on probability. 
+	*** \param force  The force to round
+	*** \return the rounded force value
+	*** \note For example, a force value of 2.85 has an 85% chance of rounding to 3 and a 15% chance of rounding to 2. This rounding
+	*** methodology is necessary because for force values less than 1 (e.g. 0.5f), the shake force would always round down to zero
+	*** even though there is positive force.
+	**/
+	float _RoundForce(float force);
 
 	/**
 	 *  \brief restores coord system, draw flags, and transformations
@@ -1606,12 +1608,10 @@ private:
 	*/
 	int32 _ScreenCoordY(float y);
 
-	/**
-	 *  \brief updates the shaking effect
-	 *
-	 *  \param frame_time  elapsed time for the current rendering frame
-	 */
-	void  _UpdateShake(int32 frame_time);
+	/** \brief Updates all active shaking effects
+	*** \param frame_time The number of milliseconds that have elapsed for the current rendering frame
+	**/
+	void _UpdateShake(uint32 frame_time);
 
 	//! Whether textures should be smoothed for non natural resolution.
 	bool _ShouldSmooth();

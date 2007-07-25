@@ -7,212 +7,142 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "utils.h"
+
 #include <cassert>
 #include <cstdarg>
-#include "video.h"
 #include <math.h>
-#include "gui.h"
+
+#include "utils.h"
+#include "video.h"
 
 using namespace std;
 using namespace hoa_video::private_video;
 
-namespace hoa_video 
-{
+namespace hoa_video  {
 
-// time between screen shake updates in milliseconds
-const int32 VIDEO_TIME_BETWEEN_SHAKE_UPDATES = 50;  
+// The time between screen shake updates in milliseconds
+const uint32 VIDEO_TIME_BETWEEN_SHAKE_UPDATES = 50;
 
-//-----------------------------------------------------------------------------
-// ShakeScreen: shakes the screen with a given force and shake method
-//              If you want it to shake until you manually stop it, then
-//              pass in VIDEO_FALLOFF_NONE and 0.0f for falloffTime
-//-----------------------------------------------------------------------------
 
-bool GameVideo::ShakeScreen(float force, float falloff_time, ShakeFalloff falloff_method)
-{
-	// check inputs
-	if(force < 0.0f)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: passed negative force to ShakeScreen()!" << endl;
-		return false;
+
+void GameVideo::ShakeScreen(float force, uint32 falloff_time, ShakeFalloff falloff_method) {
+	if (force < 0.0f) {
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO WARNING: " << __FUNCTION__ << " was passed a negative force value" << endl;
+		return;
 	}
 
-	if(falloff_time < 0.0f)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: passed negative falloff time to ShakeScreen()!" << endl;
-		return false;
-	}
-
-	if(falloff_method <= VIDEO_FALLOFF_INVALID || falloff_method >= VIDEO_FALLOFF_TOTAL)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: passed invalid shake method to ShakeScreen()!" << endl;
-		return false;
+	if (falloff_method <= VIDEO_FALLOFF_INVALID || falloff_method >= VIDEO_FALLOFF_TOTAL) {
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO WARNING: " << __FUNCTION__ << " was passed an invalid falloff method" << endl;
+		return;
 	}
 	
-	if(falloff_time == 0.0f && falloff_method != VIDEO_FALLOFF_NONE)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: ShakeScreen() called with 0.0f (infinite), but falloff method was not VIDEO_FALLOFF_NONE!" << endl;
-		return false;
+	if (falloff_time == 0 && falloff_method != VIDEO_FALLOFF_NONE) {
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO WARNING: " << __FUNCTION__ << " was called with infinite falloff_time (0), but falloff_method was not VIDEO_FALLOFF_NONE" << endl;
+		return;
 	}
 		
-	// create the shake force structure
-	
-	int32 milliseconds = int32(falloff_time * 1000);
-	ShakeForce s;
-	s.current_time  = 0;
-	s.end_time      = milliseconds;
-	s.initial_force = force;
-	
+	// Create a new ShakeForce object to represent the shake
+	ShakeForce shake;
+	shake.current_time  = 0;
+	shake.end_time = falloff_time;
+	shake.initial_force = force;
 	
 	// set up the interpolation
-	switch(falloff_method)
-	{
+	switch (falloff_method) {
 		case VIDEO_FALLOFF_NONE:
-			s.interpolator.SetMethod(VIDEO_INTERPOLATE_SRCA);
-			s.interpolator.Start(force, 0.0f, milliseconds);
+			shake.interpolator.SetMethod(VIDEO_INTERPOLATE_SRCA);
+			shake.interpolator.Start(force, 0.0f, falloff_time);
 			break;
 		
 		case VIDEO_FALLOFF_EASE:
-			s.interpolator.SetMethod(VIDEO_INTERPOLATE_EASE);
-			s.interpolator.Start(0.0f, force, milliseconds);
+			shake.interpolator.SetMethod(VIDEO_INTERPOLATE_EASE);
+			shake.interpolator.Start(0.0f, force, falloff_time);
 			break;
 		
 		case VIDEO_FALLOFF_LINEAR:
-			s.interpolator.SetMethod(VIDEO_INTERPOLATE_LINEAR);
-			s.interpolator.Start(force, 0.0f, milliseconds);
+			shake.interpolator.SetMethod(VIDEO_INTERPOLATE_LINEAR);
+			shake.interpolator.Start(force, 0.0f, falloff_time);
 			break;
 			
 		case VIDEO_FALLOFF_GRADUAL:
-			s.interpolator.SetMethod(VIDEO_INTERPOLATE_SLOW);
-			s.interpolator.Start(force, 0.0f, milliseconds);
+			shake.interpolator.SetMethod(VIDEO_INTERPOLATE_SLOW);
+			shake.interpolator.Start(force, 0.0f, falloff_time);
 			break;
 			
 		case VIDEO_FALLOFF_SUDDEN:
-			s.interpolator.SetMethod(VIDEO_INTERPOLATE_FAST);
-			s.interpolator.Start(force, 0.0f, milliseconds);
+			shake.interpolator.SetMethod(VIDEO_INTERPOLATE_FAST);
+			shake.interpolator.Start(force, 0.0f, falloff_time);
 			break;
 		
 		default:
-		{
-			if(VIDEO_DEBUG)
+			if (VIDEO_DEBUG)
 				cerr << "VIDEO ERROR: falloff method passed to ShakeScreen() was not supported!" << endl;
-			return false;
-		}		
+			return;
 	};
 	
-	// add the shake force to GameVideo's list
-	_shake_forces.push_front(s);
+	// Add the shake force to the list of shakes
+	_shake_forces.push_front(shake);
+} // bool GameVideo::ShakeScreen(float force, uint32 falloff_time, ShakeFalloff falloff_method)
+
+
+
+void GameVideo::_UpdateShake(uint32 frame_time) {
+	if (_shake_forces.empty()) {
+		_x_shake = 0;
+		_y_shake = 0;
+		return;
+	}
+
+	static int32 time_til_next_update = 0; // Used to cap the maximum update frequency
+	time_til_next_update += frame_time;
+
+	// Return if not enough time has expired to do a shake update
+	if (time_til_next_update < VIDEO_TIME_BETWEEN_SHAKE_UPDATES)
+		return;
+
+	// First, update all the shake effects based on the time expired.
+	// Then calculate the net force, i.e. the sum of forces for all the shakes
+	float net_force = 0.0f;
+
+	// NOTE: time_til_next_update now holds the total update time for ShakeForce and Interpolator to use
+
+	for (list<ShakeForce>::iterator i = _shake_forces.begin(); i != _shake_forces.end();) {
+		ShakeForce &shake = *i;
+		shake.current_time += time_til_next_update;
+
+		if (shake.end_time != 0 && shake.current_time >= shake.end_time) {
+			i = _shake_forces.erase(i);
+		}
+		else {
+			shake.interpolator.Update(time_til_next_update);
+			net_force += shake.interpolator.GetValue();
+			i++;
+		}
+	}
+
+	time_til_next_update -= VIDEO_TIME_BETWEEN_SHAKE_UPDATES;
+
+	// Calculate random shake offsets using the negative and positive net force values
+	// Note that this doesn't produce a radially symmetric distribution of offsets
+	_x_shake = _RoundForce(RandomFloat(-net_force, net_force));
+	_y_shake = _RoundForce(RandomFloat(-net_force, net_force));	
+} // void GameVideo::_UpdateShake(uint32 frame_time)
+
+
+
+float GameVideo::_RoundForce(float force) {
+	int32 fraction_percent = static_cast<int32>(force * 100.0f) - (static_cast<int32>(force) * 100);
 	
-	return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// StopShaking: removes ALL shaking on the screen
-//-----------------------------------------------------------------------------
-
-bool GameVideo::StopShaking()
-{
-	_shake_forces.clear();
-	_x_shake = _y_shake = 0.0f;
-	return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// IsShaking: returns true if the screen has any shake effect applied to it
-//-----------------------------------------------------------------------------
-
-bool GameVideo::IsShaking()
-{
-	return !_shake_forces.empty();
-}
-
-
-//-----------------------------------------------------------------------------
-// _RoundForce: rounds a force to an integer. Whether to round up or round down
-//             is based on the fractional part. A force of 1.37 has a 37%
-//             chance of being a 2, else it's a 1
-//             This is necessary because otherwise a shake force of 0.5f
-//             would get rounded to zero all the time even though there is some
-//             force
-//-----------------------------------------------------------------------------
-
-float GameVideo::_RoundForce(float force)
-{
-	int32 fraction_pct = int32(force * 100) - (int32(force) * 100);
-	
-	int32 r = rand()%100;
-	if(fraction_pct > r)
+	int32 random_percent = rand() % 100;
+	if (fraction_percent > random_percent)
 		force = ceilf(force);
 	else
 		force = floorf(force);
 		
 	return force;
 }
-
-
-//-----------------------------------------------------------------------------
-// _UpdateShake: called once per frame to update the the shake effects
-//              and update the shake x,y offsets
-//-----------------------------------------------------------------------------
-
-void GameVideo::_UpdateShake(int32 frame_time)
-{
-	if(_shake_forces.empty())
-	{
-		_x_shake = _y_shake = 0;
-		return;
-	}
-
-	// first, update all the shake effects and calculate the net force, i.e.
-	// the sum of the forces of all the shakes
-	
-	float net_force = 0.0f;
-	
-	list<ShakeForce>::iterator iShake = _shake_forces.begin();
-	list<ShakeForce>::iterator iEnd   = _shake_forces.end();
-	
-	while(iShake != iEnd)
-	{
-		ShakeForce &s = *iShake;
-		s.current_time += frame_time;
-
-		if(s.end_time != 0 && s.current_time >= s.end_time)
-		{
-			iShake = _shake_forces.erase(iShake);
-		}
-		else
-		{
-			s.interpolator.Update(frame_time);
-			net_force += s.interpolator.GetValue();
-			++iShake;	
-		}
-	}	
-
-	// cap the max update frequency
-	
-	static int32 time_til_next_update = 0;		
-	time_til_next_update -= frame_time;
-	
-	if(time_til_next_update > 0)
-		return;
-	
-	time_til_next_update = VIDEO_TIME_BETWEEN_SHAKE_UPDATES;
-
-
-	// now that we have our force (finally), calculate the proper shake offsets
-	// note that this doesn't produce a radially symmetric distribution of offsets
-	// but I think it's not noticeable so... :)
-	
-	_x_shake = _RoundForce(RandomFloat(-net_force, net_force));
-	_y_shake = _RoundForce(RandomFloat(-net_force, net_force));	
-}
-
 
 }  // namespace hoa_video

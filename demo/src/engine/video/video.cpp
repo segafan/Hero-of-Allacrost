@@ -795,15 +795,6 @@ bool GameVideo::Display(int32 frame_time)
 }
 
 
-//-----------------------------------------------------------------------------
-// IsFullscreen: returns true if we're in fullscreen mode, false if windowed
-//-----------------------------------------------------------------------------
-
-bool GameVideo::IsFullscreen()
-{
-	return _fullscreen;
-}
-
 
 //-----------------------------------------------------------------------------
 // SetFullscreen: if you pass in true, makes the game fullscreen, otherwise
