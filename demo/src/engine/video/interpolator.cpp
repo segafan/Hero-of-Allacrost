@@ -7,262 +7,156 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "utils.h"
+/** ****************************************************************************
+*** \file    interpolator.h
+*** \author  Raj Sharma, roos@allacrost.org
+*** \brief   Source file for Interpolator class
+*** ***************************************************************************/
+
 #include <cassert>
 #include <cstdarg>
-#include "video.h"
 #include <math.h>
+
+#include "utils.h"
+#include "video.h"
 
 using namespace std;
 using namespace hoa_utils;
 using namespace hoa_video::private_video;
 
+namespace hoa_video {
 
-namespace hoa_video
-{
-
-// controls how slow the slow transform is. The greater the number, the "slower" it is.
+// Controls how slow the slow transform is. The greater the number, the "slower" it is. Should be greater than 1.0f
 const float VIDEO_SLOW_TRANSFORM_POWER = 2.0f;
 
-// controls how fast the fast transform is. The smaller the number, the "faster" it is.
+// Controls how fast the fast transform is. The smaller the number, the "faster" it is. Should be between 0.0f and 1.0f
 const float VIDEO_FAST_TRANSFORM_POWER = 0.3f;
 
 
-//-----------------------------------------------------------------------------
-// Interpolator constructor
-//-----------------------------------------------------------------------------
 
-Interpolator::Interpolator()
-{
-	_method = VIDEO_INTERPOLATE_LINEAR;
-	_current_time = _end_time = 0;
-	_a = _b  = 0.0f;
-	_finished  = true;    // no interpolation in progress
-	_current_value = 0.0f;
-}
+Interpolator::Interpolator() :
+	_method(VIDEO_INTERPOLATE_LINEAR),
+	_a(0.0f),
+	_b(0.0f),
+	_current_time(0),
+	_end_time(0),
+	_current_value(0.0f),
+	_finished(true) // no interpolation is in progress
+{}
 
 
-//-----------------------------------------------------------------------------
-// Start: begins an interpolation using a and b as inputs, in the given amount
-//        of time.
-//
-// Note: not all interpolation methods mean "going from A to B". In the case of
-//       linear, constant, fast, slow, they do start at A and go to B. But,
-//       ease interpolations go from A to B and then back. And constant
-//       interpolation means just staying at either A or B.
-//-----------------------------------------------------------------------------
 
-bool Interpolator::Start(float a, float b, int32 milliseconds)
-{
-	if(!_ValidMethod())
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: tried to start interpolation with invalid method!" << endl;
-		return false;
-	}
-
-	if(milliseconds < 0)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: passed negative time value to Interpolator::Start()!" << endl;
-		return false;
+void Interpolator::Start(float a, float b, uint32 milliseconds) {
+	if (_ValidMethod() == false) {
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO WARNING: " << __FUNCTION__ << " was called when an invalid interpolation method was set" << endl;
+		return;
 	}
 
 	_a = a;
 	_b = b;
 
 	_current_time = 0;
-	_end_time     = milliseconds;
-	_finished    = false;
+	_end_time = milliseconds;
+	_finished = false;
 
-	Update(0);  // do initial update so we have a valid value for GetValue()
-	return true;
+	Update(0);  // Do an initial update so that we have a valid value for GetValue()
 }
 
 
-//-----------------------------------------------------------------------------
-// SetMethod: sets the current interpolation method. Two things will cause
-//            this to fail:
-//
-//            1. You pass in an invalid method
-//            2. You change the method while an interpolation is in progress
-//-----------------------------------------------------------------------------
 
-bool Interpolator::SetMethod(InterpolationMethod method)
-{
-	if(!_finished)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: tried to call SetMethod() on an interpolator that was still in progress!" << endl;
-		return false;
-	}
-
-	if(!_ValidMethod())
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: passed an invalid method to Interpolator::SetMethod()!" << endl;
-		return false;
+void Interpolator::SetMethod(InterpolationMethod method) {
+	if (_finished == false) {
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO WARNING: " << __FUNCTION__ << " was called when an interpolation was still in progress" << endl;
+		return;
 	}
 
 	_method = method;
-	return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// GetValue: returns the current value of the interpolator. The current value
-//           gets set when Update() is called so make sure to never call
-//           GetValue() before updating
-//-----------------------------------------------------------------------------
-
-float Interpolator::GetValue()
-{
-	return _current_value;
-}
-
-
-//-----------------------------------------------------------------------------
-// Update: updates the interpolation by frameTime milliseconds.
-//         If we reach the end of the interpolation, then IsFinished()
-//         will return true.
-//         This function will return false if the method is invalid.
-//-----------------------------------------------------------------------------
-
-bool Interpolator::Update(int32 frame_time)
-{
-	if(frame_time < 0)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: called Interpolator::Update() with negative frameTime!" << endl;
-		return false;
+	if (_ValidMethod() == false) {
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO WARNING: " << __FUNCTION__ << " was passed an invalid method argument" << endl;
 	}
+}
 
-	if(!_ValidMethod())
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: called Interpolator::Update(), but method was invalid!" << endl;
-		return false;
+
+
+void Interpolator::Update(uint32 frame_time) {
+	if (_ValidMethod() == false) {
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO WARNING: " << __FUNCTION__ << " was called when an invalid method was set" << endl;
+		return;
 	}
 
 	// update current time
 	_current_time += frame_time;
 
-	if(_current_time > _end_time)
-	{
+	if (_current_time > _end_time) {
 		_current_time = _end_time;
-		_finished    = true;
+		_finished = true;
 	}
 
-	// calculate a value from 0.0f to 1.0f of how far we are in the interpolation
-	float t;
+	// Calculate a value from 0.0f to 1.0f that tells how far we are in the interpolation
+	float progress;
 
-	if(_end_time == 0)
-	{
-		t = 1.0f;
+	if (_end_time == 0) {
+		progress = 1.0f;
 	}
-	else
-	{
-		t = (float)_current_time / (float)_end_time;
+	else {
+		progress = static_cast<float>(_current_time) / static_cast<float>(_end_time);
 	}
 
-	if(t > 1.0f)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: calculated value of 't' was more than 1.0!" << endl;
-		t = 1.0f;
+	if (progress > 1.0f) {
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO WARNING: " << __FUNCTION__ << " calculated a progress value greater than 1.0" << endl;
+		progress = 1.0f;
 	}
 
-	// now apply a transformation based on the interpolation method
-
-	switch(_method)
-	{
+	// Apply a transformation based on the interpolation method
+	switch(_method) {
 		case VIDEO_INTERPOLATE_EASE:
-			t = _EaseTransform(t);
+			progress = _EaseTransform(progress);
 			break;
 		case VIDEO_INTERPOLATE_SRCA:
-			t = 0.0f;
+			progress = 0.0f;
 			break;
 		case VIDEO_INTERPOLATE_SRCB:
-			t = 1.0f;
+			progress = 1.0f;
 			break;
 		case VIDEO_INTERPOLATE_FAST:
-			t = _FastTransform(t);
+			progress = _FastTransform(progress);
 			break;
 		case VIDEO_INTERPOLATE_SLOW:
-			t = _SlowTransform(t);
+			progress = _SlowTransform(progress);
 			break;
 		case VIDEO_INTERPOLATE_LINEAR:
-			// nothing to do, just use t value as it is!
+			// Nothing to do, just use progress value as it is
 			break;
 		default:
-		{
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: in Interpolator::Update(), current method didn't match supported methods!" << endl;
-			return false;
-		}
+			if (VIDEO_DEBUG)
+				cerr << "VIDEO WARNING: " << __FUNCTION__ << " the current method did not match any supported methods" << endl;
+			return;
 	};
 
-	_current_value = Lerp(t, _a, _b);
+	_current_value = Lerp(progress, _a, _b);
+} // void Interpolator::Update(uint32 frame_time)
 
-	return true;
+
+
+float Interpolator::_FastTransform(float initial_value) {
+	return powf(initial_value, VIDEO_FAST_TRANSFORM_POWER);
 }
 
 
-//-----------------------------------------------------------------------------
-// _FastTransform: rescales the range of t so that it looks like a sqrt function
-//                from 0.0 to 1.0, i.e. it increases quickly then levels off
-//-----------------------------------------------------------------------------
 
-float Interpolator::_FastTransform(float t)
-{
-	// the fast transform power is some number above 0.0 and less than 1.0
-	return powf(t, VIDEO_FAST_TRANSFORM_POWER);
+float Interpolator::_SlowTransform(float initial_value) {
+	return powf(initial_value, VIDEO_SLOW_TRANSFORM_POWER);
 }
 
 
-//-----------------------------------------------------------------------------
-// _SlowTransform: rescales the range of t so it looks like a power function
-//                from 0.0 to 1.0, i.e. it increases slowly then rockets up
-//-----------------------------------------------------------------------------
 
-float Interpolator::_SlowTransform(float t)
-{
-	// the slow transform power is a number above 1.0
-	return powf(t, VIDEO_SLOW_TRANSFORM_POWER);
+float Interpolator::_EaseTransform(float initial_value) {
+	return 0.5f * (1.0f + sinf(UTILS_2PI * (initial_value - 0.25f)));
 }
-
-
-//-----------------------------------------------------------------------------
-// _EaseTransform: rescales the range of t so it increases slowly, rises to 1.0
-//                then falls back to 0.0
-//-----------------------------------------------------------------------------
-
-float Interpolator::_EaseTransform(float t)
-{
-	return 0.5f * (1.0f + sinf(UTILS_2PI * (t - 0.25f)));
-}
-
-
-//-----------------------------------------------------------------------------
-// IsFinished: returns true if the interpolator is done with the current
-//             interpolation
-//-----------------------------------------------------------------------------
-
-bool Interpolator::IsFinished()
-{
-	return _finished;
-}
-
-
-//-----------------------------------------------------------------------------
-// _ValidMethod: private function to check that the current method is valid
-//-----------------------------------------------------------------------------
-
-bool Interpolator::_ValidMethod()
-{
-	return (_method < VIDEO_INTERPOLATE_TOTAL &&
-	        _method > VIDEO_INTERPOLATE_INVALID);
-}
-
 
 }  // namespace hoa_video
