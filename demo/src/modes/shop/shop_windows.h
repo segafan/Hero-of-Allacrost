@@ -153,6 +153,8 @@ public:
 	*** Each option includes the name of the object and its price.
 	**/
 	hoa_video::OptionBox object_list;
+
+	hoa_video::TextBox list_header;
 }; // class ObjectSellListWindow : public hoa_video::MenuWindow
 
 

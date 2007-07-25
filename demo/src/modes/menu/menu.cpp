@@ -219,7 +219,7 @@ void MenuMode::Reset() {
 	_SetupOptionsOptionBox();
 	_SetupSaveOptionBox();
 	_SetupEquipOptionBox();
-
+	_SetupFormationOptionBox();
 } // void MenuMode::Reset()
 
 
@@ -311,8 +311,6 @@ void MenuMode::_SetupEquipOptionBox() {
 	_menu_equip.SetOptions(options);
 	_menu_equip.SetSelection(EQUIP_EQUIP);
 
-	// Disable unused options
-//	_menu_equip.EnableOption(EQUIP_REMOVE, false);
 }
 
 
@@ -348,6 +346,23 @@ void MenuMode::_SetupOptionsOptionBox() {
 	// Add strings and set default selection.
 	_menu_options.SetOptions(options);
 	_menu_options.SetSelection(OPTIONS_EDIT);
+}
+
+
+
+void MenuMode::_SetupFormationOptionBox() {
+	// setup the save options box
+	_SetupOptionBoxCommonSettings(&_menu_formation);
+	_menu_formation.SetSize(FORMATION_SIZE, 1);
+
+	// Generate the strings
+	vector<ustring> options;
+	options.push_back(MakeUnicodeString("Switch"));
+	options.push_back(MakeUnicodeString("Back"));
+
+	// Add strings and set default selection.
+	_menu_formation.SetOptions(options);
+	_menu_formation.SetSelection(FORMATION_SWITCH);
 }
 
 
@@ -393,6 +408,11 @@ void MenuMode::Update() {
 	else if (_equip_window.IsActive()) {
 		// Update equipment window
 		_equip_window.Update();
+		return;
+	}
+	else if (_formation_window.IsActive()) {
+		// Update formation window
+		_formation_window.Update();
 		return;
 	}
 
@@ -450,6 +470,10 @@ void MenuMode::Update() {
 
 			case SHOW_EQUIP:
 				_HandleEquipMenu();
+				break;
+
+			case SHOW_FORMATION:
+				_HandleFormationMenu();
 				break;
 
 			/*case SHOW_OPTIONS:
@@ -536,14 +560,10 @@ void MenuMode::Draw() {
 			//_HandleOptionsMenu();
 			break;*/
 
-		// FIXME
-		case SHOW_FORMATION:
-		case SHOW_EXIT:
-			_formation_window.Draw();
-			break;
-
 		case SHOW_SAVE:
-			_HandleSaveMenu();
+		case SHOW_EXIT:
+		case SHOW_FORMATION:
+			_formation_window.Draw();
 			break;
 	} // switch draw_window
 
@@ -582,8 +602,7 @@ void MenuMode::_DrawBottomMenu() {
 			_inventory_window._description.Draw();
 		} // if ITEM_ACTIVE_LIST
 	} // if SHOW_INVENTORY
-	else if (_current_menu_showing == SHOW_SKILLS )
-	{
+	else if (_current_menu_showing == SHOW_SKILLS ) {
 		if (_skills_window._active_box == SKILL_ACTIVE_LIST) {
 			GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_skills_window._char_select.GetSelection()));
 			std::vector<hoa_global::GlobalSkill*>* skills = ch->GetAttackSkills();
@@ -705,18 +724,14 @@ void MenuMode::_DrawBottomMenu() {
 					VideoManager->DrawText(weapon->GetName());
 					VideoManager->MoveRelative(0, 20);
 
-					text = "PHYS ATK:";
-					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->DrawText(MakeUnicodeString("PHYS ATK:"));
 					VideoManager->MoveRelative(0, 20);
-
 					text = NumberToString(weapon->GetPhysicalAttack());
 					VideoManager->DrawText(MakeUnicodeString(text));
 					VideoManager->MoveRelative(0, 20);
 
-					text = "META ATK:";
-					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->DrawText(MakeUnicodeString("META ATK:"));
 					VideoManager->MoveRelative(0, 20);
-
 					text = NumberToString(weapon->GetMetaphysicalAttack());
 					VideoManager->DrawText(MakeUnicodeString(text));
 					VideoManager->MoveRelative(0, 20);
@@ -730,18 +745,14 @@ void MenuMode::_DrawBottomMenu() {
 					VideoManager->DrawText(armor->GetName());
 					VideoManager->MoveRelative(0, 20);
 
-					text = "PHYS DEF:";
-					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->DrawText(MakeUnicodeString("PHYS DEF:"));
 					VideoManager->MoveRelative(0, 20);
-
 					text = NumberToString(armor->GetPhysicalDefense());
 					VideoManager->DrawText(MakeUnicodeString(text));
 					VideoManager->MoveRelative(0, 20);
 
-					text = "META DEF:";
-					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->DrawText(MakeUnicodeString("META DEF:"));
 					VideoManager->MoveRelative(0, 20);
-
 					text = NumberToString(armor->GetMetaphysicalDefense());
 					VideoManager->DrawText(MakeUnicodeString(text));
 					VideoManager->MoveRelative(0, 20);
@@ -755,18 +766,14 @@ void MenuMode::_DrawBottomMenu() {
 					VideoManager->DrawText(armor->GetName());
 					VideoManager->MoveRelative(0, 20);
 
-					text = "PHYS DEF:";
-					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->DrawText(MakeUnicodeString("PHYS DEF:"));
 					VideoManager->MoveRelative(0, 20);
-
 					text = NumberToString(armor->GetPhysicalDefense());
 					VideoManager->DrawText(MakeUnicodeString(text));
 					VideoManager->MoveRelative(0, 20);
 
-					text = "META DEF:";
-					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->DrawText(MakeUnicodeString("META DEF:"));
 					VideoManager->MoveRelative(0, 20);
-
 					text = NumberToString(armor->GetMetaphysicalDefense());
 					VideoManager->DrawText(MakeUnicodeString(text));
 					VideoManager->MoveRelative(0, 20);
@@ -780,18 +787,14 @@ void MenuMode::_DrawBottomMenu() {
 					VideoManager->DrawText(armor->GetName());
 					VideoManager->MoveRelative(0, 20);
 
-					text = "PHYS DEF:";
-					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->DrawText(MakeUnicodeString("PHYS DEF:"));
 					VideoManager->MoveRelative(0, 20);
-
 					text = NumberToString(armor->GetPhysicalDefense());
 					VideoManager->DrawText(MakeUnicodeString(text));
 					VideoManager->MoveRelative(0, 20);
 
-					text = "META DEF:";
-					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->DrawText(MakeUnicodeString("META DEF:"));
 					VideoManager->MoveRelative(0, 20);
-
 					text = NumberToString(armor->GetMetaphysicalDefense());
 					VideoManager->DrawText(MakeUnicodeString(text));
 					VideoManager->MoveRelative(0, 20);
@@ -805,18 +808,14 @@ void MenuMode::_DrawBottomMenu() {
 					VideoManager->DrawText(armor->GetName());
 					VideoManager->MoveRelative(0, 20);
 
-					text = "PHYS DEF:";
-					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->DrawText(MakeUnicodeString("PHYS DEF:"));
 					VideoManager->MoveRelative(0, 20);
-
 					text = NumberToString(armor->GetPhysicalDefense());
 					VideoManager->DrawText(MakeUnicodeString(text));
 					VideoManager->MoveRelative(0, 20);
 
-					text = "META DEF:";
-					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->DrawText(MakeUnicodeString("META DEF:"));
 					VideoManager->MoveRelative(0, 20);
-
 					text = NumberToString(armor->GetMetaphysicalDefense());
 					VideoManager->DrawText(MakeUnicodeString(text));
 					VideoManager->MoveRelative(0, 20);
@@ -879,9 +878,8 @@ void MenuMode::_HandleMainMenu() {
 			break;*/
 
 		case MAIN_FORMATION:
-			// FIXME
-			// _current_menu_showing = SHOW_FORMATION;
-			// _current_menu = &_menu_formation;
+			_current_menu_showing = SHOW_FORMATION;
+			_current_menu = &_menu_formation;
 			break;
 
 		case MAIN_STATUS:
@@ -924,6 +922,25 @@ void MenuMode::_HandleStatusMenu() {
 
 		default:
 			cerr << "MENU ERROR: Invalid option in MenuMode::_HandleStatusMenu()" << endl;
+			break;
+	}
+}
+
+
+
+void MenuMode::_HandleFormationMenu() {
+	switch (_menu_formation.GetSelection()) {
+		case FORMATION_SWITCH:
+			_formation_window.Activate(true);
+			break;
+
+		case FORMATION_BACK:
+			_current_menu_showing = SHOW_MAIN;
+			_current_menu = &_main_options;
+			break;
+
+		default:
+			cerr << "MENU ERROR: Invalid option in MenuMode::_HandleFormationMenu()" << endl;
 			break;
 	}
 }
@@ -983,7 +1000,7 @@ void MenuMode::_HandleEquipMenu() {
 
 		case EQUIP_REMOVE:
 			// TODO: Handle the remove command
-			cout << "MENU: Remove command!" << endl;
+			cout << "MENU: Equip - Remove command!" << endl;
 			break;
 
 		case EQUIP_BACK:

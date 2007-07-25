@@ -121,7 +121,9 @@ void ShopMode::Reset() {
 	_list_window.RefreshList();
 
 	_sell_window.UpdateSellList();
-	_sell_window.object_list.SetSelection(0);
+	if (_sell_window.object_list.GetNumberOptions() > 0) {
+		_sell_window.object_list.SetSelection(0);
+	}
 
 	SoundDescriptor snd;
 	_shop_sounds["confirm"] = SoundDescriptor();

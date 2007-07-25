@@ -94,6 +94,14 @@ enum EQUIP_ACTIVE_OPTION {
 	EQUIP_ACTIVE_SIZE = 4
 };
 
+//! \brief The different option boxes that can be active for equipment
+enum FORM_ACTIVE_OPTION {
+	FORM_ACTIVE_NONE = 0,
+	FORM_ACTIVE_CHAR = 1,
+	FORM_ACTIVE_SECOND = 2,
+	FORM_ACTIVE_SIZE = 3
+};
+
 
 
 /** ****************************************************************************
@@ -227,9 +235,6 @@ class StatusWindow : public hoa_video::MenuWindow {
 private:
 	//! char portraits
 	std::vector<hoa_video::StillImage> _full_portraits;
-
-	//! A graphic for the location (map) that the player is currently on
-	hoa_video::StillImage _location_graphic;
 
 	//! if the window is active or not
 	bool _char_select_active;
@@ -433,7 +438,12 @@ private:
 }; // class EquipWindow : public hoa_video::MenuWindow
 
 
-// TODO: implement and comment me
+
+/** ****************************************************************************
+*** \brief Represents the Formation window, allowing the party to change order.
+***
+*** This window changes party order.
+*** ***************************************************************************/
 class FormationWindow : public hoa_video::MenuWindow {
 public:
 	FormationWindow();
@@ -441,12 +451,43 @@ public:
 	void Update();
 	void Draw();
 
+	/*!
+	* \brief Activates the window
+	* \param new_value true to activate window, false to deactivate window
+	*/
+	void Activate(bool new_status);
+
+	/*!
+	* \brief Checks to see if the skills window is active
+	* \return true if the window is active, false if it's not
+	*/
+	bool IsActive()
+		{ return _active_box; }
+
 private:
+	//! Flag to specify the active option box
+	uint32 _active_box;
+
+	//! The character select option box
+	hoa_video::OptionBox _char_select;
+
+	//! The character select option box once first character has been selected
+	hoa_video::OptionBox _second_char_select;
+
+	/*!
+	* \brief initialize character selection option box
+	*/
+	void _InitCharSelect();
 
 }; // class FormationWindow : public hoa_video::MenuWindow
 
+
+/*!
+* \brief Converts a vector of GlobalItem*, etc. to a vector of GlobalObjects*
+* \return the same vector, with elements of type GlobalObject*
+*/
 template <class T> std::vector<hoa_global::GlobalObject*> InventoryWindow::_GetItemVector(std::vector<T*>* inv) {
-	std::vector<hoa_global::GlobalObject*> obj_vector; //= (new std::vector<hoa_global::GlobalObject*
+	std::vector<hoa_global::GlobalObject*> obj_vector;
 
 	for (typename std::vector<T*>::iterator i = inv->begin(); i != inv->end(); i++) {
 		obj_vector.push_back( *i );
