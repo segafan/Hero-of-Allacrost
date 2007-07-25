@@ -1720,12 +1720,7 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 	id._elements.push_back(elem);
 
 
-	if(!DrawImage(id))
-	{
-		glPopMatrix();
-		_PopContext();
-		return false;
-	}
+	DrawImage(id);
 
 	glPopMatrix();
 

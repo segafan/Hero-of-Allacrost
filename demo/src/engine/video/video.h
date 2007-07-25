@@ -763,17 +763,15 @@ public:
 	/** \brief draws an image which is modulated by the scene's light color
 	 *
 	 *  \param id  image descriptor to draw (either StillImage or AnimatedImage)
-	 * \return success/failure
 	 */
-	bool DrawImage(const ImageDescriptor &id);
+	void DrawImage(const ImageDescriptor &id);
 
 	/** \brief draws an image which is modulated by a custom color
 	 *
 	 *  \param id  image descriptor to draw (either StillImage or AnimatedImage)
 	 *  \param color Color used for modulating the image
-	 * \return success/failure
 	 */
-	bool DrawImage(const ImageDescriptor &id, const Color &color);
+	void DrawImage(const ImageDescriptor &id, const Color &color);
 
 	/** \brief converts a 2D array of tiles into one big image
 	 *
@@ -899,9 +897,8 @@ public:
 	 *  \param x     x coordinate of halo
 	 *  \param y     y coordinate of halo
 	 *  \param color color of halo
-	 * \return success/failure
 	 */
-	bool DrawHalo(const StillImage &id, float x, float y, const Color &color = Color(1.0f, 1.0f, 1.0f, 1.0f));
+	void DrawHalo(const StillImage &id, float x, float y, const Color &color = Color(1.0f, 1.0f, 1.0f, 1.0f));
 
 	/** \brief draws a real light at the given spot
 	 *
@@ -909,9 +906,8 @@ public:
 	 *  \param x     x coordinate of light
 	 *  \param y     y coordinate of light
 	 *  \param color color of light
-	 * \return success/failure
 	 */
-	bool DrawLight(const StillImage &id, float x, float y, const Color &color = Color(1.0f, 1.0f, 1.0f, 1.0f));
+	void DrawLight(const StillImage &id, float x, float y, const Color &color = Color(1.0f, 1.0f, 1.0f, 1.0f));
 
 	/** \brief call if this map uses real lights
 	 * \return always returns true
@@ -1347,24 +1343,21 @@ private:
 	 *  \param element        pointer to the image element to draw
 	 *  \param color_array    pointer to an 4 element array of vertex colors,
 	 *                        modulated if necessary
-	 * \return success/failure
 	 */
-	bool _DrawElement(const private_video::BaseImageElement &element, const Color *color_array);
+	void _DrawElement(const private_video::BaseImageElement &element, const Color *color_array);
 
 	/** \brief helper function to DrawImage() to do the actual work of doing an image
 	 *
 	 *  \param img static image to draw
-	 * \return success/failure
 	 */
-	bool _DrawStillImage(const ImageListDescriptor &img);
+	void _DrawStillImage(const ImageListDescriptor &img);
 
 	/** \brief helper function to DrawImage() to do the actual work of drawing an image
 	 *
 	 *  \param img static image to draw
 	 *  \param color color to modulate image by
-	 * \return success/failure
 	 */
-	bool _DrawStillImage(const ImageListDescriptor &img, const Color &color);
+	void _DrawStillImage(const ImageListDescriptor &img, const Color &color);
 
 	/** \brief does the actual work of drawing text
 	 *

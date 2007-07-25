@@ -666,6 +666,10 @@ public:
 	uint32 GetNumFrames() const
 		{ return _frames.size(); }
 
+	//! \brief Retuns a pointer to the StillImage representing the current frame
+	StillImage *GetCurrentFrame() const
+		{ return const_cast<StillImage*>(&(_frames[_frame_index].image)); }
+
 	//! \brief Returns the index number of the current frame in the animation.
 	uint32 GetCurrentFrameIndex() const
 		{ return _frame_index; }
