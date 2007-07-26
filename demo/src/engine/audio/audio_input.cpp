@@ -501,7 +501,7 @@ int OggFile::_FseekWrap(FILE *f,ogg_int64_t off,int whence)
 	}
 	else
 	{
-		return fseek(f,off,whence);
+		return fseek(f,static_cast<long>(off),whence);
 	}
 }
 
