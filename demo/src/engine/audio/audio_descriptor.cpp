@@ -297,6 +297,7 @@ void AudioDescriptor::LoadSound (const std::string &file_name, AUDIO_LOAD load_t
 			// Pass the data to the OpenAl buffer
 			_buffer->FillBuffer (buffer, _format, stream.GetDataSize(), stream.GetSamplesPerSecond());
 			delete[] buffer;
+			buffer = NULL;
 
 			// Get a source
 			_source = AudioManager->_AcquireSoundSrc ();
