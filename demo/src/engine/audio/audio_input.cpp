@@ -106,6 +106,7 @@ AudioMemory::~AudioMemory ()
 	if (_buffer)
 	{
 		delete[] _buffer;
+		_buffer = 0;
 	}
 }
 

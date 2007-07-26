@@ -213,7 +213,7 @@ class SoundDescriptor : public AudioDescriptor
 {
 public:
 	SoundDescriptor ();
-	~SoundDescriptor ();
+	virtual ~SoundDescriptor ();
 	virtual void SetVolume (const float volume);
 };
 
@@ -228,7 +228,7 @@ class MusicDescriptor : public AudioDescriptor
 {
 public:
 	MusicDescriptor ();
-	~MusicDescriptor ();
+	virtual ~MusicDescriptor ();
 	virtual void SetVolume (const float volume);
 };
 
