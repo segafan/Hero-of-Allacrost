@@ -62,11 +62,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/NODEFAULTLIB:LIBCMT&#x0D;&#x0A;/NODEFAULTLIB:msvcrt.lib"
-				AdditionalDependencies="SDL.lib SDL_TTF.lib SDL_mixer.lib SDL_net.lib SDLMain.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib LuaBind_debug.lib"
-				LinkIncremental="0"
+				AdditionalDependencies="SDL.lib SDL_TTF.lib OpenAL32.lib ogg.lib vorbis.lib vorbisfile.lib SDL_net.lib SDLMain.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib LuaBind_debug.lib"
+				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"
-				LinkTimeCodeGeneration="1"
+				LinkTimeCodeGeneration="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -149,7 +149,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/NODEFAULTLIB:LIBCMT"
-				AdditionalDependencies="SDL.lib SDL_Net.lib SDL_Net.lib SDL_TTF.lib SDL_mixer.lib SDLMain.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib LuaBind.lib"
+				AdditionalDependencies="SDL.lib SDL_Net.lib SDL_Net.lib SDL_TTF.lib OpenAL32.lib ogg.lib vorbis.lib vorbisfile.lib SDLMain.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib LuaBind.lib"
 				LinkIncremental="0"
 				GenerateDebugInformation="false"
 				SubSystem="2"
@@ -197,11 +197,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\engine\audio\audio_music.h"
+				RelativePath=".\src\engine\audio\audio_descriptor.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\engine\audio\audio_sound.h"
+				RelativePath=".\src\engine\audio\audio_fx.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\audio\audio_input.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\audio\audio_stream.h"
 				>
 			</File>
 			<File
@@ -473,11 +481,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\engine\audio\audio_music.cpp"
+				RelativePath=".\src\engine\audio\audio_descriptor.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\engine\audio\audio_sound.cpp"
+				RelativePath=".\src\engine\audio\audio_fx.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\audio\audio_input.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\audio\audio_stream.cpp"
 				>
 			</File>
 			<File

@@ -298,8 +298,10 @@ void StillImage::EnableGrayScale() {
 
 			delete new_image_gray;
 
-			if (buffer.pixels)
+			if (buffer.pixels) {
 				free (buffer.pixels);
+				buffer.pixels = NULL;
+			}
 
 			return;
 		}

@@ -132,7 +132,7 @@ void ActionAnimate::Execute() {
 			}
 		}
 
-		dynamic_cast<MapSprite*>(_sprite)->SetCurrentAnimation(frames[current_frame]);
+		dynamic_cast<MapSprite*>(_sprite)->SetCurrentAnimation(static_cast<uint8>(frames[current_frame]));
 	}
 
 } // void ActionAnimate::Execute()
