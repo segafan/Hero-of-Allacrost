@@ -91,7 +91,7 @@ bool SoundBuffer::IsValid () const
 
 
 
-SoundSource::SoundSource () :
+SoundSrc::SoundSrc () :
 source (0),
 attached (false),
 owner (0)
@@ -99,7 +99,7 @@ owner (0)
 }
 
 
-SoundSource::~SoundSource ()
+SoundSrc::~SoundSrc ()
 {
 	// Stop the soure before leaving
 	if (IsValid())
@@ -114,7 +114,7 @@ SoundSource::~SoundSource ()
 /*!
 	Checks if the source is a valid OpenAL source.
 */
-bool SoundSource::IsValid () const
+bool SoundSrc::IsValid () const
 {
 	bool valid = alIsSource(source) == AL_TRUE;
 	ALError ();
@@ -127,7 +127,7 @@ bool SoundSource::IsValid () const
 /*!
 	Start playing a source. If the source is already playing, it does nothing.
 */
-void SoundSource::Play ()
+void SoundSrc::Play ()
 {
 	if (IsValid())
 	{
@@ -141,7 +141,7 @@ void SoundSource::Play ()
 /*!
 	Stops playing a source. If the source is already stopped, it does nothing.
 */
-void SoundSource::Stop ()
+void SoundSrc::Stop ()
 {
 	if (IsValid())
 	{
@@ -155,7 +155,7 @@ void SoundSource::Stop ()
 /*!
 	Pauses a source. If the source is already pauses, it does nothing.
 */
-void SoundSource::Pause ()
+void SoundSrc::Pause ()
 {
 	if (IsValid())
 	{
@@ -169,7 +169,7 @@ void SoundSource::Pause ()
 /*!
 	Resumes a paused source. If the source is not paused, it does nothing.
 */ 
-void SoundSource::Resume ()
+void SoundSrc::Resume ()
 {
 	if (IsValid())
 	{
@@ -183,7 +183,7 @@ void SoundSource::Resume ()
 /*!
 	Rewinds a source.
 */ 
-void SoundSource::Rewind ()
+void SoundSrc::Rewind ()
 {
 	if (IsValid())
 	{
@@ -299,8 +299,8 @@ void AudioDescriptor::LoadSound (const std::string &file_name, AUDIO_LOAD load_t
 			delete[] buffer;
 
 			// Get a source
-			_source = AudioManager->_AcquireSoundSource ();
-			// _source = GameAudio::SingletonGetReference()->_AcquireSoundSource ();
+			_source = AudioManager->_AcquireSoundSrc ();
+			// _source = GameAudio::SingletonGetReference()->_AcquireSoundSrc ();
 			if (_source)
 			{
 				alSourcei (_source->source, AL_BUFFER, _buffer->buffer);
@@ -348,8 +348,8 @@ void AudioDescriptor::LoadSound (const std::string &file_name, AUDIO_LOAD load_t
 			}
 
 			// Get a source
-			_source = AudioManager->_AcquireSoundSource ();
-			// _source = GameAudio::SingletonGetReference()->_AcquireSoundSource ();
+			_source = AudioManager->_AcquireSoundSrc ();
+			// _source = GameAudio::SingletonGetReference()->_AcquireSoundSrc ();
 			if (_source)
 			{
 				_source->owner = this;
@@ -398,8 +398,8 @@ void AudioDescriptor::LoadSound (const std::string &file_name, AUDIO_LOAD load_t
 			}
 
 			// Get a source
-			// _source = GameAudio::SingletonGetReference()->_AcquireSoundSource ();
-			_source = AudioManager->_AcquireSoundSource ();
+			// _source = GameAudio::SingletonGetReference()->_AcquireSoundSrc ();
+			_source = AudioManager->_AcquireSoundSrc ();
 			
 			if (_source)
 			{

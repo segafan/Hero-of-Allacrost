@@ -73,7 +73,7 @@ public:
 /*!
 	Class wrapping an OpenAL source.
 */
-class SoundSource
+class SoundSrc
 {
 public:
 	ALuint source;				//!< \brief OpenAL Id of the source.
@@ -82,8 +82,8 @@ public:
 	AudioDescriptor* owner;		//!< \brief Pointer to the descriptor associated to this source.
 
 public:
-	SoundSource ();
-	~SoundSource ();
+	SoundSrc ();
+	~SoundSrc ();
 
 	bool IsValid () const;
 
@@ -134,7 +134,7 @@ enum AUDIO_LOAD
 class AudioDescriptor
 {
 protected:
-	private_audio::SoundSource* _source;	//!< \brief Pointer to the OpenAL source attached to the sound.
+	private_audio::SoundSrc* _source;	//!< \brief Pointer to the OpenAL source attached to the sound.
 	private_audio::SoundBuffer* _buffer;	//!< \brief Pointer to the OpenAL buffers attached to the sound (1 for static sounds, 2 for streamed ones).
 	AUDIO_STATE _state;						//!< \brief Current state of the sound (playing, stopped, ...).
 	private_audio::Stream* _stream;			//!< \brief Pointer to the stream object (0 if the sound is static).
