@@ -93,6 +93,7 @@ Stream::~Stream ()
 	if (_audio_input)
 	{
 		delete _audio_input;
+		_audio_input = 0;
 	}
 }
 
