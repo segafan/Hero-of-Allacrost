@@ -65,6 +65,14 @@
 #include <stdexcept>
 #include <sstream>
 
+#ifdef __MACH__
+	#include <OpenAL/al.h>
+	#include <OpenAL/alc.h>
+#else
+	#include "al.h"
+	#include "alc.h"
+#endif
+
 #ifdef _WIN32
 	// Even though Allacrost is platform independent, OpenGL on Windows requires windows.h to be included
 	#include <windows.h>

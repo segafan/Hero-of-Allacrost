@@ -3,6 +3,7 @@ AM_CPPFLAGS = -DDATADIR=\"$(datadir)\"
 ACLOCAL_AMFLAGS = -I m4
 INCLUDES = \
 	-I/usr/include/SDL \
+	-I/usr/include/AL \
 	-I$(top_srcdir)/src \
 	-I$(top_srcdir)/src/engine \
 	-I$(top_srcdir)/src/engine/audio \
@@ -60,10 +61,14 @@ AUDIO_DIR = src/engine/audio
 audio_SOURCES = \
 	$(AUDIO_DIR)/audio.cpp \
 	$(AUDIO_DIR)/audio.h \
-	$(AUDIO_DIR)/audio_sound.cpp \
-	$(AUDIO_DIR)/audio_sound.h \
-	$(AUDIO_DIR)/audio_music.cpp \
-	$(AUDIO_DIR)/audio_music.h 
+	$(AUDIO_DIR)/audio_descriptor.cpp \
+	$(AUDIO_DIR)/audio_descriptor.h \
+	$(AUDIO_DIR)/audio_fx.cpp \
+	$(AUDIO_DIR)/audio_fx.h \
+	$(AUDIO_DIR)/audio_input.cpp \
+	$(AUDIO_DIR)/audio_input.h \
+	$(AUDIO_DIR)/audio_stream.cpp \
+	$(AUDIO_DIR)/audio_stream.h
 
 SCRIPT_DIR = src/engine/script
 script_SOURCES = \

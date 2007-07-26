@@ -126,11 +126,12 @@ BootMode::BootMode() :
 	// Load all music files used in boot mode
 	_boot_music.resize(new_music_files.size(), MusicDescriptor());
 	for (uint32 i = 0; i < new_music_files.size(); i++) {
-		if (_boot_music[i].LoadMusic(new_music_files[i]) == false) {
+/*		if (_boot_music[i].LoadMusic(new_music_files[i]) == false) {
 			cout << "BOOT: failed to load music file " << new_music_files[i] << endl;
 			SystemManager->ExitGame();
 			return;
-		}
+		}*/
+		_boot_music[i].LoadSound(new_music_files[i]);
 	}
 
 	SoundDescriptor new_sound;
@@ -182,7 +183,7 @@ BootMode::~BootMode() {
 	if (BOOT_DEBUG) cout << "BOOT: BootMode destructor invoked." << endl;
 
 	for (uint32 i = 0; i < _boot_music.size(); i++)
-		_boot_music[i].FreeMusic();
+		_boot_music[i].FreeSound();
 
 	for (uint32 i = 0; i < _boot_sounds.size(); i++)
 		_boot_sounds[i].FreeSound();
@@ -205,9 +206,9 @@ void BootMode::Reset() {
 
 	// Decide which music track to play
 	if (_logo_animating)
-		_boot_music.at(1).PlayMusic(); // Opening Effect
+		_boot_music.at(1).Play(); // Opening Effect
 	else
-		_boot_music.at(0).PlayMusic(); // Main theme
+		_boot_music.at(0).Play(); // Main theme
 }
 
 
@@ -358,10 +359,13 @@ void BootMode::_EndOpeningAnimation() {
 	VideoManager->DisableFog(); // Turn off the fog
 
 	// Stop playing SFX and start playing the main theme
-	_boot_music.at(1).SetFadeOutTime(1000);
-	_boot_music.at(1).StopMusic();
-	_boot_music.at(0).SetFadeInTime(5000);
-	_boot_music.at(0).PlayMusic();
+//	_boot_music.at(1).SetFadeOutTime(1000);
+	_boot_music.at(1).Stop();
+//	_boot_music.at(0).SetFadeInTime(5000);
+	_boot_music.at(0).Play();
+
+//	Effects::FadeOut(_boot_music.at(1), 10.0f);
+//	Effects::FadeIn(_boot_music.at(0), 50.0f);
 	
 	// Load the settings file for reading in the welcome variable
 	ReadScriptDescriptor settings_lua;
@@ -606,8 +610,8 @@ void BootMode::_OnNewGame() {
 
 	_fade_out = true;
 	VideoManager->FadeScreen(Color::black, 1000); // Fade to black over the course of one second
-	_boot_music.at(0).SetFadeOutTime(500); // Fade out the music
-	_boot_music.at(0).StopMusic();
+//	_boot_music.at(0).SetFadeOutTime(500); // Fade out the music
+	_boot_music.at(0).Stop();
 }
 
 
@@ -621,8 +625,8 @@ void BootMode::_OnLoadGame() {
 		GlobalManager->LoadGame("dat/saved_game.lua");
 		_fade_out = true;
 		VideoManager->FadeScreen(Color::black, 1000);
-		_boot_music.at(0).SetFadeOutTime(500); // Fade out the music
-		_boot_music.at(0).StopMusic();
+//		_boot_music.at(0).SetFadeOutTime(500); // Fade out the music
+		_boot_music.at(0).Stop();
 	}
 	else {
 		cout << "BOOT: No saved game file exists, can not load game" << endl;
@@ -727,7 +731,7 @@ void BootMode::_OnVideoMode() {
 void BootMode::_OnSoundLeft() {
 	AudioManager->SetSoundVolume(AudioManager->GetSoundVolume() - 0.1f);
 	_UpdateAudioOptions();
-	_boot_sounds.at(4).PlaySound(); // Play a sound for user to hear new volume level.
+	_boot_sounds.at(4).Play(); // Play a sound for user to hear new volume level.
 }
 
 
@@ -735,7 +739,7 @@ void BootMode::_OnSoundLeft() {
 void BootMode::_OnSoundRight() {
 	AudioManager->SetSoundVolume(AudioManager->GetSoundVolume() + 0.1f);
 	_UpdateAudioOptions();
-	_boot_sounds.at(4).PlaySound(); // Play a sound for user to hear new volume level
+	_boot_sounds.at(4).Play(); // Play a sound for user to hear new volume level
 }
 
 
@@ -951,7 +955,7 @@ void BootMode::Update() {
 	{
 		if (InputManager->AnyKeyPress())
 		{
-			_boot_sounds.at(0).PlaySound();
+			_boot_sounds.at(0).Play();
 			welcome = 0;
 			_welcome_screen.Hide();
 
@@ -977,9 +981,9 @@ void BootMode::Update() {
 	{
 		// Play 'confirm sound' if the selection isn't grayed out and it has a confirm handler
 		if (_current_menu->IsSelectionEnabled())
-			_boot_sounds.at(0).PlaySound();
+			_boot_sounds.at(0).Play();
 		else
-			_boot_sounds.at(3).PlaySound(); // Otherwise play a silly 'b�p'
+			_boot_sounds.at(3).Play(); // Otherwise play a silly 'b�p'
 
 		_current_menu->ConfirmPressed();
 
@@ -1015,7 +1019,7 @@ void BootMode::Update() {
 		if (_credits_screen.IsVisible())
 		{
 			_credits_screen.Hide();
-			_boot_sounds.at(1).PlaySound(); // Play cancel sound here as well
+			_boot_sounds.at(1).Play(); // Play cancel sound here as well
 		}
 
 		// Otherwise the cancel was given for the main menu
@@ -1025,7 +1029,7 @@ void BootMode::Update() {
 		if (_current_menu->GetParent() != 0)
 		{
 			// Play cancel sound
-			_boot_sounds.at(1).PlaySound();
+			_boot_sounds.at(1).Play();
 
 			// Go up a level in the menu hierarchy
 			_current_menu = _current_menu->GetParent();

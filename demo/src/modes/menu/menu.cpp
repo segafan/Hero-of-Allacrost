@@ -418,7 +418,7 @@ void MenuMode::Update() {
 
 	if (InputManager->CancelPress()) {
 		// Play sound.
-		_menu_sounds["cancel"].PlaySound();
+		_menu_sounds["cancel"].Play();
 		// If in main menu, return to previous Mode, else return to main menu.
 		if (_current_menu_showing == SHOW_MAIN) {
 			ModeManager->Pop();
@@ -432,7 +432,7 @@ void MenuMode::Update() {
 	else if (InputManager->ConfirmPress()) {
 		// Play Sound
 		if (_current_menu->IsEnabled(_current_menu->GetSelection()))
-			_menu_sounds["confirm"].PlaySound();
+			_menu_sounds["confirm"].Play();
 
 		_current_menu->HandleConfirmKey();
 	}

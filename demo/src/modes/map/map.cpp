@@ -106,7 +106,7 @@ MapMode::~MapMode() {
 	if (MAP_DEBUG) cout << "MAP: MapMode destructor invoked" << endl;
 
 	for (uint32 i = 0; i < _music.size(); i++) {
-		_music[i].FreeMusic();
+		_music[i].FreeSound();
 	}
 
 	for (uint32 i = 0; i < _sounds.size(); i++) {
@@ -149,14 +149,14 @@ void MapMode::Reset() {
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, 0);
 
 	if (!VideoManager->SetFont("map"))
-    	cerr << "MAP ERROR: Failed to set the map font" << endl;
+	cerr << "MAP ERROR: Failed to set the map font" << endl;
 
 	// Let all map objects know that this is the current map
 	MapMode::_current_map = this;
 
 	// TEMP: This will need to be scripted later
-	if (_music.size() > 0 && _music[0].IsPlaying() == false) {
-		_music[0].PlayMusic();
+	if (_music.size() > 0 && _music[0].GetState() == AUDIO_STATE_PLAYING) {
+		_music[0].Play();
 	}
 
 	_intro_timer.Run();
@@ -210,26 +210,29 @@ void MapMode::_Load() {
 
 	for (uint32 i = 0; i < sound_filenames.size(); i++) {
 		SoundDescriptor new_sound;
-		if (new_sound.LoadSound(sound_filenames[i]) == true) {
+//		if (new_sound.LoadSound(sound_filenames[i]) == true) {
+			new_sound.LoadSound(sound_filenames[i]);
 			_sounds.push_back(new_sound);
-		}
-		else {
-			cerr << "MAP ERROR: failed to load map sound: " << sound_filenames[i] << endl;
-			return;
-		}
+//		}
+//		else {
+//			cerr << "MAP ERROR: failed to load map sound: " << sound_filenames[i] << endl;
+//			return;
+//		}
 	}
 
 	vector<string> music_filenames;
 	_map_script.ReadStringVector("music_filenames", music_filenames);
 	for (uint32 i = 0; i < music_filenames.size(); i++) {
 		MusicDescriptor new_music;
-		if (new_music.LoadMusic(music_filenames[i]) == true) {
+//		if (new_music.LoadSound(music_filenames[i]) == true) {
+			new_music.LoadSound(music_filenames[i]);
+			new_music.SetLooping(true);
 			_music.push_back(new_music);
-		}
+/*		}
 		else {
 			cerr << "MAP ERROR: failed to load map music: " << music_filenames[i] << endl;
 			return;
-		}
+		}*/
 	}
 
 	// ---------- (4) Construct all enemies that may appear on this map
