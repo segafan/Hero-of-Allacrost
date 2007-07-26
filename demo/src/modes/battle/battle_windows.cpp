@@ -628,13 +628,13 @@ void FinishWindow::Initialize(bool victory) {
 	if (victory) {
 		_state = FINISH_WIN_ANNOUNCE;
 		current_battle->AddMusic("mus/Allacrost_Fanfare.ogg");
-		current_battle->_battle_music.back().PlayMusic();
+		current_battle->_battle_music.back().Play();
 		_finish_outcome.SetDisplayText("The heroes are victorious!");
 	}
 	else {
 		_state = FINISH_LOSE_ANNOUNCE;
 		current_battle->AddMusic("mus/Allacrost_Intermission.ogg");
-		current_battle->_battle_music.back().PlayMusic();
+		current_battle->_battle_music.back().Play();
 		_finish_outcome.SetDisplayText("The heroes have been defeated...");
 	}
 }

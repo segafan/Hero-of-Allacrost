@@ -101,7 +101,7 @@ void ShopActionWindow::Update() {
 			current_shop->_sell_window.Hide();
 			current_shop->_list_window.object_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 			current_shop->_state = SHOP_STATE_LIST;
-			current_shop->_shop_sounds["confirm"].PlaySound();
+			current_shop->_shop_sounds["confirm"].Play();
 		}
 		else if (options.GetSelection() == 1) { // Sell
 			if (GlobalManager->GetInventory()->empty() == false) {
@@ -114,10 +114,10 @@ void ShopActionWindow::Update() {
 				current_shop->_list_window.Hide();
 				current_shop->_sell_window.object_list.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 				current_shop->_state = SHOP_STATE_SELL;
-				current_shop->_shop_sounds["confirm"].PlaySound();
+				current_shop->_shop_sounds["confirm"].Play();
 			}
 			else {
-				current_shop->_shop_sounds["cancel"].PlaySound();
+				current_shop->_shop_sounds["cancel"].Play();
 			}
 		}
 		else if (options.GetSelection() == 2) { // Complete Transactions
@@ -127,13 +127,13 @@ void ShopActionWindow::Update() {
 			current_shop->_confirm_window.Show();
 		}
 		else if (options.GetSelection() == 3) { // Menu
-			current_shop->_shop_sounds["cancel"].PlaySound();
+			current_shop->_shop_sounds["cancel"].Play();
 //			hoa_menu::MenuMode *MM = new hoa_menu::MenuMode(MakeUnicodeString("The Boot Screen"), "img/menus/locations/desert_cave.png");
 //			ModeManager->Push(MM);
 		}
 		else if (options.GetSelection() == 4) { // Exit
 			ModeManager->Pop();
-			current_shop->_shop_sounds["cancel"].PlaySound();
+			current_shop->_shop_sounds["cancel"].Play();
 		}
 		else {
 			if (SHOP_DEBUG)
@@ -143,7 +143,7 @@ void ShopActionWindow::Update() {
 	}
 	else if (InputManager->CancelPress()) {
 		ModeManager->Pop();
-		current_shop->_shop_sounds["cancel"].PlaySound();
+		current_shop->_shop_sounds["cancel"].Play();
 	}
 	else if (InputManager->UpPress()) {
 		options.HandleUpKey();
@@ -247,7 +247,7 @@ void ObjectListWindow::Update() {
 		current_shop->_info_window.SetObject(NULL);
 		current_shop->_confirm_window.options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 		current_shop->_confirm_window.Show();
-		current_shop->_shop_sounds["confirm"].PlaySound();
+		current_shop->_shop_sounds["confirm"].Play();
 	}
 	else if (InputManager->CancelPress()) {
 		hide_options = true;
@@ -255,7 +255,7 @@ void ObjectListWindow::Update() {
 		current_shop->_action_window.options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 		object_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 		current_shop->_info_window.SetObject(NULL);
-		current_shop->_shop_sounds["cancel"].PlaySound();
+		current_shop->_shop_sounds["cancel"].Play();
 	}
 	else if (InputManager->UpPress()) {
 		object_list.HandleUpKey();
@@ -354,7 +354,7 @@ void ObjectSellListWindow::Update() {
 		current_shop->_state = SHOP_STATE_CONFIRM;
 		current_shop->_confirm_window.options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 		current_shop->_confirm_window.Show();
-		current_shop->_shop_sounds["confirm"].PlaySound();
+		current_shop->_shop_sounds["confirm"].Play();
 	}
 	else if (InputManager->CancelPress()) {
 		hide_options = true;
@@ -362,7 +362,7 @@ void ObjectSellListWindow::Update() {
 		current_shop->_action_window.options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 		object_list.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
 		current_shop->_info_window.SetObject(NULL);
-		current_shop->_shop_sounds["cancel"].PlaySound();
+		current_shop->_shop_sounds["cancel"].Play();
 	}
 	else if (InputManager->UpPress()) {
 		object_list.HandleUpKey();
@@ -570,7 +570,7 @@ void ConfirmWindow::Update() {
 	}
 
 	if (InputManager->CancelPress()) {
-		current_shop->_shop_sounds["cancel"].PlaySound();
+		current_shop->_shop_sounds["cancel"].Play();
 		options.SetSelection(0);
 		current_shop->_action_window.options.SetCursorState(VIDEO_CURSOR_STATE_VISIBLE);
 		options.SetCursorState(VIDEO_CURSOR_STATE_HIDDEN);
@@ -603,7 +603,7 @@ void ConfirmWindow::Update() {
 			GlobalManager->AddDrunes(current_shop->GetSalesRevenue());
 			current_shop->_purchases_cost = 0;
 			current_shop->_sales_revenue = 0;
-			current_shop->_shop_sounds["coins"].PlaySound();
+			current_shop->_shop_sounds["coins"].Play();
 			current_shop->_action_window.UpdateFinanceText();
 			current_shop->_info_window.SetObject(NULL);
 			current_shop->_list_window.RefreshList();
@@ -611,7 +611,7 @@ void ConfirmWindow::Update() {
 			current_shop->_state = SHOP_STATE_LIST;
 		}
 		else {
-			current_shop->_shop_sounds["cancel"].PlaySound();
+			current_shop->_shop_sounds["cancel"].Play();
 		}
 
 		// Return to previous window
