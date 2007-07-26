@@ -234,7 +234,7 @@ bool GameAudio::SingletonInitialize ()
 			_max_sources = i;
 			break;
 		}
-		_source.push_back (new private_audio::SoundSource);
+		_source.push_back (new private_audio::SoundSrc);
 		_source.back()->source = source;
 		_source.back()->source_pos = i;
 	}
@@ -250,7 +250,7 @@ bool GameAudio::SingletonInitialize ()
 GameAudio::~GameAudio ()
 {
 	// Stop and delete the sources
-	for (std::vector <private_audio::SoundSource*>::iterator it=_source.begin(); it<_source.end(); it++)
+	for (std::vector <private_audio::SoundSrc*>::iterator it=_source.begin(); it<_source.end(); it++)
 	{
 		if ((*it)->IsValid())
 		{
@@ -305,7 +305,7 @@ void GameAudio::Update ()
 {
 //	alcSuspendContext (_context);
 
-	for (std::vector <private_audio::SoundSource*>::iterator it=_source.begin(); it<_source.end(); it++)
+	for (std::vector <private_audio::SoundSrc*>::iterator it=_source.begin(); it<_source.end(); it++)
 	{
 		if ((*it)->attached)
 		{
@@ -695,9 +695,9 @@ void GameAudio::PlayPersistantSound(const std::string soundName)
 	\return A pointer to the available source.
 	\todo Add an algoihtm to give priority to some sounds/music over others.
 */
-private_audio::SoundSource* GameAudio::_AcquireSoundSource ()
+private_audio::SoundSrc* GameAudio::_AcquireSoundSrc ()
 {
-	for (std::vector<private_audio::SoundSource*>::iterator it=_source.begin(); it<_source.end(); it++)
+	for (std::vector<private_audio::SoundSrc*>::iterator it=_source.begin(); it<_source.end(); it++)
 	{
 		if (!(*it)->attached)
 		{

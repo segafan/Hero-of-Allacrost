@@ -9,9 +9,9 @@
 		};
 	};
 	4941A4A10AC1D76400D65B8E /* Project object */ = {
-		activeBuildConfigurationName = Release;
-		activeExecutable = D4D1BA4A0B02B1DB0052BF1E /* Editor */;
-		activeTarget = D4D1BA480B02B1DB0052BF1E /* Editor */;
+		activeBuildConfigurationName = Debug;
+		activeExecutable = D43080DE0AF982F800A5173A /* Allacrost */;
+		activeTarget = 4941A4AF0AC1D77500D65B8E /* Allacrost */;
 		addToTargets = (
 			4941A4AF0AC1D77500D65B8E /* Allacrost */,
 		);
@@ -158,8 +158,8 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 206506618;
-			PBXWorkspaceStateSaveDate = 206506618;
+			PBXPerProjectTemplateStateSaveDate = 207123640;
+			PBXWorkspaceStateSaveDate = 207123640;
 		};
 		sourceControlManager = D43082570AF9831800A5173A /* Source Control */;
 		userBuildSettings = {
@@ -347,12 +347,20 @@
 			sepNavWindowFrame = "{{38, 194}, {750, 558}}";
 		};
 	};
-	4999AC200AF407BD004DD3A3 /* audio_music.h */ = {
+	4999AC1D0AF407BD004DD3A3 /* audio.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {711, 2058}}";
+			sepNavIntBoundsRect = "{{0, 0}, {788, 10024}}";
+			sepNavSelRange = "{16512, 0}";
+			sepNavVisRect = "{{0, 3097}, {711, 429}}";
+			sepNavWindowFrame = "{{130, 110}, {750, 558}}";
+		};
+	};
+	4999AC1F0AF407BD004DD3A3 /* audio.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {764, 3150}}";
 			sepNavSelRange = "{0, 0}";
 			sepNavVisRect = "{{0, 0}, {711, 429}}";
-			sepNavWindowFrame = "{{15, 215}, {750, 558}}";
+			sepNavWindowFrame = "{{153, 89}, {750, 558}}";
 		};
 	};
 	D404C6AB0B02F27D00827A19 /* XCBreakpointsBucket */ = {
@@ -612,9 +620,9 @@
 	};
 	D4E561260BB71B53002FB758 /* defs.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {711, 8946}}";
+			sepNavIntBoundsRect = "{{0, 0}, {711, 9184}}";
 			sepNavSelRange = "{22554, 0}";
-			sepNavVisRect = "{{0, 490}, {711, 429}}";
+			sepNavVisRect = "{{0, 665}, {711, 429}}";
 			sepNavWindowFrame = "{{58, 211}, {750, 558}}";
 		};
 	};
@@ -632,6 +640,46 @@
 			sepNavSelRange = "{1887, 0}";
 			sepNavVisRect = "{{0, 297}, {711, 429}}";
 			sepNavWindowFrame = "{{38, 194}, {750, 558}}";
+		};
+	};
+	D4F110400C58546800ADC969 /* audio_descriptor.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {818, 15484}}";
+			sepNavSelRange = "{8507, 0}";
+			sepNavVisRect = "{{0, 1095}, {711, 429}}";
+			sepNavWindowFrame = "{{15, 215}, {750, 558}}";
+		};
+	};
+	D4F110420C58547700ADC969 /* audio_descriptor.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {926, 3416}}";
+			sepNavSelRange = "{3617, 0}";
+			sepNavVisRect = "{{0, 843}, {711, 429}}";
+			sepNavWindowFrame = "{{38, 194}, {750, 558}}";
+		};
+	};
+	D4F110440C58548B00ADC969 /* audio_fx.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {711, 3584}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRect = "{{0, 0}, {711, 429}}";
+			sepNavWindowFrame = "{{107, 131}, {750, 558}}";
+		};
+	};
+	D4F110460C58548B00ADC969 /* audio_input.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {716, 7112}}";
+			sepNavSelRange = "{1, 0}";
+			sepNavVisRect = "{{0, 0}, {711, 429}}";
+			sepNavWindowFrame = "{{61, 173}, {750, 558}}";
+		};
+	};
+	D4F110480C58548B00ADC969 /* audio_stream.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1142, 3220}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRect = "{{0, 0}, {711, 429}}";
+			sepNavWindowFrame = "{{84, 152}, {750, 558}}";
 		};
 	};
 }

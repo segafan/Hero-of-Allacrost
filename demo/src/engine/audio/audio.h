@@ -89,7 +89,7 @@ private:
 	ALCdevice* _device;			//!< \brief Pointer to an OpenAL device.
 	ALCcontext* _context;		//!< \brief Pointer to an OpenAL context.
 	std::vector <private_audio::SoundBuffer*> _buffer;	//!< \brief Vector of OpenAL buffers.
-	std::vector <private_audio::SoundSource*> _source;	//!< \brief Vector of OpenAL sources.
+	std::vector <private_audio::SoundSrc*> _source;	//!< \brief Vector of OpenAL sources.
 
 	int16 _max_sources;		//!< \brief Maximum number of availables sources.
 
@@ -214,7 +214,7 @@ public:
 	static void PlayPersistantSound(const std::string soundName);
 
 private:
-	private_audio::SoundSource* _AcquireSoundSource ();
+	private_audio::SoundSrc* _AcquireSoundSrc ();
 };
 
 
