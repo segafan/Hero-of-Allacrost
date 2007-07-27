@@ -143,7 +143,7 @@ bool ParticleSystem::Draw()
 
 	StillImage *id = _animation.GetFrame(_animation.GetCurrentFrameIndex());
 	Image *img = id->_elements[0].image;
-	VideoManager->_BindTexture(img->texture_sheet->tex_ID);
+	VideoManager->_BindTexture(img->texture_sheet->tex_id);
 
 
 	float frame_progress = _animation.GetPercentProgress();
@@ -349,7 +349,7 @@ bool ParticleSystem::Draw()
 
 		StillImage *id2 = _animation.GetFrame(findex);
 		Image *img2 = id2->_elements[0].image;
-		VideoManager->_BindTexture(img2->texture_sheet->tex_ID);
+		VideoManager->_BindTexture(img2->texture_sheet->tex_id);
 
 
 		u1 = img2->u1;

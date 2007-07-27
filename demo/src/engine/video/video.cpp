@@ -120,7 +120,7 @@ GameVideo::GameVideo()
 	_current_debug_TexSheet = -1;
 	_uses_lights = false;
 	_light_overlay = 0xFFFFFFFF;
-	_last_tex_ID = 0xFFFFFFFF;
+	_last_tex_id = 0xFFFFFFFF;
 	_num_tex_switches = 0;
 	_advanced_display = false;
 	_fps_display = false;
@@ -156,28 +156,19 @@ GameVideo::GameVideo()
 // SingletonInitialize: called to actually initialize the video engine
 //-----------------------------------------------------------------------------
 
-bool GameVideo::SingletonInitialize()
-{
-	if(VIDEO_DEBUG)
-		cout << "VIDEO: Initializing SDL subsystem\n";
-
+bool GameVideo::SingletonInitialize() {
 	// Set the window title and icon name
-	if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0)
-	{
-		fprintf(stderr, "Barf! SDL Video Initialization failed!\n");
-		exit(1);
-	}
-
-	// initialize SDL_ttf
-	if(TTF_Init() < 0)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: SDL_ttf did not initialize! (TTF_Init() failed)" << endl;
+	if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) {
+		cerr << "VIDEO ERROR: SDL Video Initialization failed" << endl;
 		return false;
 	}
 
-	if(VIDEO_DEBUG)
-		cout << "VIDEO: setting video mode\n";
+	// initialize SDL_ttf
+	if(TTF_Init() < 0) {
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: SDL_ttf did not initialize! (TTF_Init() failed)" << endl;
+		return false;
+	}
 
 	// Get the current system color depth and resolution
 	const SDL_VideoInfo* video_info (0);
@@ -235,19 +226,12 @@ bool GameVideo::SingletonInitialize()
 		return false;
 	}
 
-	if(VIDEO_DEBUG)
-		cout << "VIDEO: Loading default font\n";
-
 	if(!LoadFont("img/fonts/tarnhalo.ttf", "debug_font", 16))
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: Could not load tarnhalo.ttf file!" << endl;
 		return false;
 	}
-
-	if(VIDEO_DEBUG)
-		cout << "VIDEO: Creating texture sheets\n";
-
 
 	// create our default texture sheets
 
@@ -293,24 +277,13 @@ bool GameVideo::SingletonInitialize()
 	// make a temp directory and make sure it doesn't contain any files
 	// (in case the game crashed during a previous run, leaving stuff behind)
 
-	// enable text shadows
 	EnableTextShadow(true);
-
-	// set default menu cursor
-
-	if(VIDEO_DEBUG)
-		cout << "VIDEO: Setting default menu cursor" << endl;
 
 	if(!SetDefaultCursor("img/menus/cursor.png"))
 	{
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: problem loading default menu cursor" << endl;
 	}
-
-
-	if(VIDEO_DEBUG)
-		cout << "VIDEO: Erasing the screen\n";
-
 
 	// set up the screen for rendering
 	if(!Clear())
@@ -333,9 +306,6 @@ bool GameVideo::SingletonInitialize()
 			cerr << "VIDEO ERROR: second call to Clear() in GameVideo::SingletonInitialize() failed!" << endl;
 		return false;
 	}
-
-	if(VIDEO_DEBUG)
-		cout << "VIDEO: GameVideo::SingletonInitialize() returned successfully" << endl;
 
 	_rectangle_image.SetFilename("");
 	if (!_rectangle_image.Load())
@@ -1009,12 +979,12 @@ bool GameVideo::LoadMenuSkin(std::string skin_name, std::string border_image, st
 //              discard the call if we try to bind the same texture twice
 //-----------------------------------------------------------------------------
 
-bool GameVideo::_BindTexture(GLuint tex_ID)
+bool GameVideo::_BindTexture(GLuint tex_id)
 {
-	if(tex_ID != _last_tex_ID)
+	if(tex_id != _last_tex_id)
 	{
-		_last_tex_ID = tex_ID;
-		glBindTexture(GL_TEXTURE_2D, tex_ID);
+		_last_tex_id = tex_id;
+		glBindTexture(GL_TEXTURE_2D, tex_id);
 		++_num_tex_switches;
 	}
 

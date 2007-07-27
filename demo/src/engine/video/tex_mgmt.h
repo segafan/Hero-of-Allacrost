@@ -7,42 +7,41 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-/*!****************************************************************************
- * \file    tex_mgmt.h
- * \author  Raj Sharma, roos@allacrost.org
- * \brief   Header file for texture management code
- *
- * We use texture management so that at runtime, we can load many small
- * images (e.g. tiles) and stick them together into larger textures called
- * "texture sheets". This improves performance, because then we don't have to
- * constantly switch textures while rendering.
- *
- * This file contains several classes:
- *
- * TexSheet: physically represents an OpenGL texture in memory, plus a pointer
- *           to a texture management class which keeps track of which images
- *           are in that texture sheet.
- *
- * TexMemMgr: abstract base class, used by TexSheet. The job of a texture
- *            memory manager is to allocate sub-rectangles within the sheet
- *            so we can stuff images into it.
- *
- * FixedTexMemMgr: texture memory manager for fixed-size images, i.e. 32x32.
- *                 This class can do all its operations in constant (O(1)) time
- *                 because it knows in advance that all textures are the same size
- *
- * FixedImageNode: this represents a single allocation within the fixed-size
- *                 texture memory manager
- *
- * VariableTexMemMgr: this manages memory for any size images. This works fairly
- *                    well in practice, but it generally has a fair amount of wasted
- *                    space, because the images don't always "fit together" perfectly
- *                    on the sheet.
- *
- * VariableImageNode: a single alloaction within the variable-size texture memory
- *                    manager
- *****************************************************************************/ 
-
+/** ****************************************************************************
+*** \file    tex_mgmt.h
+*** \author  Raj Sharma, roos@allacrost.org
+*** \brief   Header file for texture management code
+***
+*** We use texture management so that at runtime, we can load many small images
+*** (e.g. tiles) and stick them together into larger textures called "texture
+*** sheets". This improves performance, because then we don't have to constantly
+*** switch textures while rendering.
+***
+*** This file contains several classes:
+***
+*** - <b>TexSheet</b>: physically represents an OpenGL texture in memory, plus
+***  a pointer to a texture management class which keeps track of which images
+***  are in that texture sheet.
+***
+*** - <b>TexMemMgr</b>: abstract base class for texture memory management. The
+*** job of a texture memory manager is to allocate sub-rectangles within the
+*** sheet so we can stuff images into it.
+***
+*** - <b>FixedTexMemMgr</b>: texture memory manager for fixed-size images,
+*** i.e. 32x32. This class can do all its operations in constant (O(1)) time
+*** because it knows in advance that all textures are the same size.
+***
+*** - <b>FixedImageNode</b>: this represents a single allocation within the fixed-size
+*** texture memory manager
+***
+*** - <b>VariableTexMemMgr</b>: this manages memory for variable-sized images.
+*** This works fairly well in practice, but it generally has a fair amount of
+*** wasted space, because the images don't always "fit together" perfectly on
+*** the sheet.
+***
+*** - <b>VariableImageNode</b>: a single alloaction within the variable-size 
+*** texture memory manager
+*** ***************************************************************************/
 
 #ifndef __TEX_MGMT_HEADER__
 #define __TEX_MGMT_HEADER__
@@ -59,17 +58,12 @@
 	#include <GL/glu.h>
 #endif
 
-namespace hoa_video
-{
+namespace hoa_video {
 
-namespace private_video
-{
-
-
+namespace private_video {
 
 //! \brief Represents the different image sizes that a texture sheet can hold
-enum TexSheetType
-{
+enum TexSheetType {
 	VIDEO_TEXSHEET_INVALID = -1,
 	
 	VIDEO_TEXSHEET_32x32 = 0,
@@ -81,218 +75,211 @@ enum TexSheetType
 };
 
 
-
-
-//! \brief Base class for texture memory managers.
-/*!
-	It is used by TextureSheet to manage which areas of the texture are available and which are used.
-*/
-class TexMemMgr
-{
+/** ****************************************************************************
+*** \brief An abstract base class for texture memory managerment
+***
+*** This class is used by texture sheets to manage which areas of the sheet are
+*** available and which are occupied.
+*** ***************************************************************************/
+class TexMemMgr {
 public:
-	
-	virtual ~TexMemMgr() {}
+	virtual ~TexMemMgr()
+		{}
 
-	//! \brief Inserts a new block into the texture
-	/*!	\param img the image to insert
-		\return Success/failure
+	/** \brief Inserts a new block into the texture
+	*** \param img A pointer to the image to insert
+	*** \return Success/failure
 	*/
-	virtual bool Insert  (BaseImage *img)=0;
+	virtual bool Insert(BaseImage *img) = 0;
 	
-	//! \brief Removes a block from the texture
-	/*!	\param img the image to remove
-		\return success/failure
-	*/
-	virtual bool Remove  (BaseImage *img)=0;
+	/** \brief Removes a block from the texture
+	*** \param img A pointer to the image to remove
+	**/
+	virtual void Remove(BaseImage *img) = 0;
 	
-	//! \brief Marks a block as free
-	/*!	\param img the image to free
-		\return Success/failure
-	*/
-	virtual bool Free    (BaseImage *img)=0;
+	/** \brief Marks a block as free
+	*** \param img A pointer to the image to free
+	**/
+	virtual void Free(BaseImage *img) = 0;
 	
-	//! \brief Marks a block previously freed as used
-	/*!	\param img the image to restore
-		\return Success/failure
-	*/
-	virtual bool Restore (BaseImage *img)=0;
-};
+	/** \brief Marks a block previously freed as used
+	*** \param img A pointer to the image to restore
+	**/
+	virtual void Restore(BaseImage *img) = 0;
+}; // class TexMemMgr
 
 
-
-
-//! \brief An actual OpenGL texture which can be used for storing multiple smaller images in it
-/*!
-	The purpose of this is to save on texture switches, so an increased performance can be achieved.
-	\note This is called TexSheet instead of Texture, so it's clear that
-	this doesn't represent an image that you would draw on the screen,
-	but simply a "container" for smaller images.
-*/
-class TexSheet
-{
+/** ****************************************************************************
+*** \brief An OpenGL texture which can store multiple smaller images in itself
+***
+*** The purpose of this is to save computation resources on texture switches,
+*** so that an increased performance can be achieved.
+***
+*** \note This is called TexSheet instead of Texture, so that it is clear that
+*** this doesn't represent an image that you would draw on the screen, but
+*** simply a "container" for smaller images.
+*** ***************************************************************************/
+class TexSheet {
 public:
+	/** \brief Constructs a new texture sheet
+	*** \param sheet_width The width of the sheet
+	*** \param sheet_height The height of the sheet
+	*** \param sheet_id A unique ID value for the texture sheet
+	*** \param sheet_type The size of the images that the texture sheet holds
+	*** \param sheet_static Whether the sheet should be labeled static or not
+	**/
+	TexSheet(int32 sheet_width, int32 sheet_height, GLuint sheet_id, TexSheetType sheet_type, bool sheet_static);
 
-	TexSheet(int32 w, int32 h, GLuint texID_, TexSheetType type_, bool is_static_);
 	~TexSheet();
 
-	//! \brief Adds new image to the tex sheet
-	/*! \param img The image to add
-		\param load_info The image loading info
-		\return Success/failure
-	*/
-	bool AddImage
-	(
-		BaseImage *img,
-		ImageLoadInfo & load_info
-	);
-	
-	//! \brief Copies an image into a sub-rectangle of the texture
-	/*!	\param x X coordinate of rectangle to copy image to
-		\param y Y coordinate of rectangle to copy image to
-		\param load_info The image loading info
-		\return Success/failure
-	*/
-	bool CopyRect(int32 x, int32 y, private_video::ImageLoadInfo & load_info);
-
-	//! \brief Copies an portion of the screen into a sub-rectangle of the texture
-	/*!	\param x X coordinate of rectangle to copy screen to
-		\param y Y coordinate of rectangle to copy screen to
-		\param screen_rect The portion of the screen
-		\return Success/failure
-	*/
-	bool CopyScreenRect(int32 x, int32 y, const ScreenRect &screen_rect);
-	
-	//! \brief Removes an image completely
-	/*!	\param img The image to remove
-		\return Success/failure
-	*/
-	bool RemoveImage (BaseImage *img);
-	
-	//! \brief Marks the image as free
-	/*!	\param img The image to mark as free
-		\return Success/failure
-	*/
-	bool FreeImage   (BaseImage *img);
-	
-	//! \brief Marks a previously freed image as "used"
-	/*!	\param img The image to mark as used
-		\return Success/failure
-	*/
-	bool RestoreImage (BaseImage *img);
-	
-	//! \brief Unloads texture memory used by this sheet
-	/*!	\return Success/failure
-	*/
+	/** \brief Unloads all texture memory used by OpenGL for this sheet
+	*** \return Success/failure
+	**/
 	bool Unload();
 	
-	//! \brief Reloads all the images into the sheet
-	/*!	\return Success/failure
-	*/
+	/** \brief Reloads all the images into the sheet and reallocates OpenGL memory
+	*** \return Success/failure
+	**/
 	bool Reload();
 
-	//! \brief Enable or disable smoothing (GL_LINEAR) on this texsheet
+	/** \brief Adds a new image to the tex sheet
+	*** \param img A pointer to the new image to add
+	*** \param load_info The image loading info
+	*** \return Success/failure
+	**/
+	bool AddImage(BaseImage *img, ImageLoadInfo& load_info);
+
+	/** \brief Removes an image completely from the texture sheet's memory manager
+	*** \param img The image to remove
+	**/
+	void RemoveImage(BaseImage *img)
+		{ tex_mem_manager->Remove(img); }
+	
+	/** \brief Marks the image as free
+	*** \param img The image to mark as free
+	*** \note Marking an image as free does not delete it. The image may be later
+	*** restored from the free state so that it does not have to be re-fetched
+	*** from the hard disk.
+	**/
+	void FreeImage(BaseImage *img)
+	 	{ tex_mem_manager->Free(img); }
+	
+	/** \brief Restores an image which was previously freed
+	*** \param img The image to mark as used
+	**/
+	void RestoreImage(BaseImage *img)
+		{ tex_mem_manager->Restore(img); }
+
+	/** \brief Copies an image into a sub-rectangle of the texture
+	*** \param x X coordinate of rectangle to copy image to
+	*** \param y Y coordinate of rectangle to copy image to
+	*** \param load_info The image loading info
+	*** \return Success/failure
+	**/
+	bool CopyRect(int32 x, int32 y, private_video::ImageLoadInfo& load_info);
+
+	/** \brief Copies an portion of the screen into a sub-rectangle of the texture
+	*** \param x X coordinate of rectangle to copy screen to
+	*** \param y Y coordinate of rectangle to copy screen to
+	*** \param screen_rect The portion of the screen
+	*** \return Success/failure
+	**/
+	bool CopyScreenRect(int32 x, int32 y, const ScreenRect &screen_rect);
+
+	/** \brief Enables (GL_LINEAR) or disables (GL_NEAREST) smoothing on this texsheet
+	*** \param flag True enables smoothing while false disables it. Default value is true.
+	**/
 	void Smooth(bool flag = true);
 
-	//! \brief Width of the texsheet
+	//! \brief The width of the texsheet
 	int32 width;
 	
-	//! \brief Height of the texsheet
+	//! \brief The height of the texsheet
 	int32 height;
+
+	//! \brief The interger that OpenGL uses to refer to this texture
+	GLuint tex_id;
+
+	//! \brief The type (dimensions) of images that this texture sheet holds
+	TexSheetType type;
+
+	//! \brief A pointer to the manager which controls which areas of the texture are free or occupied
+	TexMemMgr* tex_mem_manager;
 
 	//! \brief If true, images in this sheet that are unlikely to change
 	bool is_static;
 	
-	//! \brief Does it hold 32x32, 32x64, 64x64, or any kind
-	TexSheetType type;
+	//! \brief Flag indicating if texture sheet is loaded or not
+	bool loaded;
 
-	//! \brief Manages which areas of the texture are free
-	TexMemMgr *tex_mem_manager;
-
-	//! \brief Number OpenGL uses to refer to this texture
-	GLuint tex_ID;
-	
-	//! \brief Flag indicating if texsheet is loaded
-	bool loaded;		
-
-	//! \brief Whether this tex sheet is currently set GL_LINEAR
+	//! \brief True if this texture sheet is currently set to GL_LINEAR
 	bool smoothed;
-};
+}; // class TexSheet
 
 
-
-
-//! \brief Used by the fixed-size texture manager to keep track of which blocks are owned by which images.
-/*!
-	\note The list is doubly linked to allow for O(1) removal
-*/
-class FixedImageNode
-{
+/** ****************************************************************************
+*** \brief Used by the fixed-size texture manager to keep track of which blocks are owned by which images.
+***
+*** \note The list is doubly linked to allow for O(1) removal
+*** ***************************************************************************/
+class FixedImageNode {
 public:
-
 	//! \brief The image that belongs to the block
-	BaseImage          *image;
+	BaseImage* image;
 	
 	//! \brief The next node in the list
-	FixedImageNode *next;
+	FixedImageNode* next;
 	
 	//! \brief The previous node in the list
-	FixedImageNode *prev;
+	FixedImageNode* prev;
 	
 	//! \brief The block index
 	int32 block_index;
-};
+}; // class FixedImageNode
 
 
-
-
-//! \brief Used to manage textures which are designated for fixed image sizes.
-/*!  
-	For example, a 512x512 sheet that only holds 32x32 tiles.
-	\note  The texture sheet's size must be divisible by the size of the images
-			that it holds. For example, you can't create a 256x256 sheet which
-			holds tiles which are 17x93.
-*/
-class FixedTexMemMgr : public TexMemMgr
-{
+/** ****************************************************************************
+*** \brief Used to manage texture sheets which are designated for fixed image sizes.
+***
+*** An example where this class would be used would be a 512x512 pixel sheet that
+*** only holds 32x32 pixel tiles. The texture sheet's size must be divisible by
+*** the size of the images that it holds. For example, you can't create a 256x256
+*** sheet which holds tiles which are 17x93.
+*** ***************************************************************************/
+class FixedTexMemMgr : public TexMemMgr {
 public:
-	FixedTexMemMgr(TexSheet *texSheet, int32 imgW, int32 imgH);
-	~FixedTexMemMgr();
+	/** \brief Constructs a new memory manager for a texture sheet
+	*** \param tex_sheet The texture sheet which this object will manage
+	*** \param img_width The width of the images which will be stored in this sheet
+	*** \param img_height The height of the images which will be stored in this sheet
+	**/
+	FixedTexMemMgr(TexSheet* tex_sheet, int32 img_width, int32 img_height);
+
+	~FixedTexMemMgr()
+		{ delete[] _blocks; }
+
+	//! \name Methods inherited from TexMemMgr
+	//@{
+	bool Insert(BaseImage *img);
 	
-	//! \brief Inserts a new block into the texture
-	/*!	\param img The image to insert
-		\return Success/failure
-	*/
-	bool Insert  (BaseImage *img);
+	void Remove(BaseImage *img);
 	
-	//! \brief Removes a block from the texture
-	/*!	\param img The image to remove
-		\return Success/failure
-	*/
-	bool Remove  (BaseImage *img);
+	void Free(BaseImage *img);
 	
-	//! \brief Marks a block as free
-	/*!	\param img The image to free
-		\return Success/failure
-	*/
-	bool Free    (BaseImage *img);
-	
-	//! \brief Marks a block previously freed as used
-	/*!	\param img The image to restore
-		\return Success/failure
-	*/
-	bool Restore (BaseImage *img);
+	void Restore(BaseImage *img)
+		{ _DeleteNode(_CalculateBlockIndex(img)); }
+	//@}
 
 private:
-
-	//! \brief Grabs the block index based off of the image
-	/*!	\param img The image to look for
-		\return The block index for that image
-	*/
+	/** \brief Grabs the block index based off of the image
+	*** \param img The image to look for
+	*** \return The block index for that image
+	**/
 	int32 _CalculateBlockIndex(BaseImage *img);
 	
-	//! \brief Grabs the block index based off of the image
-	/*!	\param block_index The node in the list to delete
-	*/
+	/** \brief Grabs the block index based off of the image
+	*** \param block_index The node in the list to delete
+	**/
 	void _DeleteNode(int32 block_index);
 
 	//! \brief Sheet width, in number of images
@@ -306,134 +293,106 @@ private:
 
 	//! \brief Images height, in pixels
 	int32 _image_height;
+
+	//! \brief The texture sheet which is managed by this class object
+	TexSheet* _tex_sheet;
 	
-	TexSheet *_tex_sheet;
+	/** \brief Head of list of open memory blocks.
+	*** The open list keeps track of which blocks of memory are open. Note that
+	*** we track blocks with both an array and a list. Although it takes up
+	*** more memory, this makes all operations dealing with the blocklist
+	*** O(1) so that performance is awesome. Memory isn't too bad either,
+	*** since the block list is fairly small.
+	**/
+	FixedImageNode* _open_list_head;
+
+	/** \brief Tail of list of open memory blocks.
+	*** The open list keeps track of which blocks of memory are open. The tail
+	*** pointer is also kept so that we can add newly freed blocks to the end
+	*** of the list. That way, essentially blocks that are freed are given a
+	*** little bit of time from the time they're freed to the time they're
+	*** removed, in case they are loaded again in the near future.
+	**/
+	FixedImageNode* _open_list_tail;
 	
-	//! \brief Head of list of open memory blocks.
-	/*!	The open list keeps track of which blocks of memory are open.
-		Note that we track blocks with BOTH an array and a list.
-		Although it takes up more memory, this makes ALL operations
-		dealing with the blocklist O(1) so performance is awesome.
-		Memory isn't too bad either, since blocklist is fairly small.
-	*/
-	FixedImageNode *_open_list_head;
-
-	//! \brief Tail of list of open memory blocks.
-	/*!	The open list keeps track of which blocks of memory are open.
-		The tail pointer is also kept so that we can add newly
-		freed blocks to the end of the list- that way, essentially
-		blocks that are freed are given a little bit of time from the
-		time they're freed to the time they're removed, in case they
-		are loaded again in the near future
-	*/
-	FixedImageNode *_open_list_tail;
-	
-	//! \brief This is our actual array of blocks which is indexed like a 2D array.
-	/*!	For example, blocks[x+y*width]->image would tell us
-		which image is currently allocated at spot (x,y)
-	*/
-	FixedImageNode *_blocks;
-};
+	/** \brief This is our actual array of blocks which is indexed like a 2D array.
+	*** For example, blocks[x + y * width]->image would tell us which image is
+	*** currently allocated at spot (x,y).
+	**/
+	FixedImageNode* _blocks;
+}; // class FixedTexMemMgr : public TexMemMgr
 
 
-
-
-//! \brief This is how we keep track of which images are used/freed in the variable texture mem manager
-class VariableImageNode
-{
+/** ****************************************************************************
+*** \brief Keeps track of which images are used/freed in the variable texture mem manager
+*** ***************************************************************************/
+class VariableImageNode {
 public:
-	VariableImageNode()
-	{
-		image = NULL;
-		free  = true;
-	}
+	VariableImageNode() :
+		image(NULL), free(true) {}
 
-	//! \brief Pointer to the image
-	BaseImage *image;
+	//! \brief A pointer to the image
+	BaseImage* image;
 	
-	//! \brief Is the image freed?
-	bool   free;
-};
+	//! \brief Set to true if the image is freed
+	bool free;
+}; // class VariableImageNode
 
 
-
-
-//! \brief Used to manage a texture sheet where the size of the images it will contain are unknown
-/*!
-	For the sake of reducing the time it takes to allocate an image,
-	this class rounds image dimensions up to powers of 16. So although
-	it's fine to add any-sized images to a variable texture sheet,
-	some space will be wasted due to rounding.
- */
-class VariableTexMemMgr : public TexMemMgr
-{
+/** ****************************************************************************
+*** \brief Used to manage texture sheets for variable image sizes
+***
+*** For the sake of reducing the time it takes to allocate an image, this class rounds image
+*** dimensions up to powers of 16. So although it's fine to add any-sized images to a variable
+*** texture sheet, some space will be wasted for images which are not multiples of 16 pixels.
+*** ***************************************************************************/
+class VariableTexMemMgr : public TexMemMgr {
 public:
-	
-	VariableTexMemMgr(TexSheet *sheet);
-	~VariableTexMemMgr();
+	VariableTexMemMgr(TexSheet* sheet);
 
-	//! \brief Inserts a new block into the texture
-	/*!	\param img the image to insert
-		\return success/failure
-	*/
-	bool Insert  (BaseImage *img);
-	
-	//! \brief Removes a block from the texture
-	/*!	\param img the image to remove
-		\return success/failure
-	*/
-	bool Remove  (BaseImage *img);
-	
-	//! \brief Marks a block as free
-	/*!	\param img the image to free
-		\return success/failure
-	*/
-	bool Free    (BaseImage *img);
-	
-	//! \brief Marks a block previously freed as used
-	/*!	\param img the image to restore
-		\return success/failure
-	*/
-	bool Restore (BaseImage *img);
+	~VariableTexMemMgr()
+		{ delete[] _blocks; }
+
+	//! \name Methods inherited from TexMemMgr
+	//@{
+	bool Insert(BaseImage *img);
+
+	void Remove(BaseImage *img)
+		{ _SetBlockProperties(img, true, true, true, NULL); }
+
+	void Free(BaseImage *img)
+		{ _SetBlockProperties(img, true, false, true, NULL); }
+
+	void Restore(BaseImage *img)
+		{ _SetBlockProperties(img, true, false, false, NULL); }
+	//@}
 
 private:
-
-	//! \brief Goes through all the blocks associated with img, and updates their "free" and "image" properties.
-	/*!	This actually will happen when changeFree and changeImage are true, respectively
-		\param img the image to use for the block
-		\param change_free the block's free status has changed
-		\param change_image the block's image has changed
-		\param free the block's free status
-		\param new_image the new image to use if changeImage is true
-	*/
-	bool SetBlockProperties
-	(
-		BaseImage *img, 
-		bool change_free, 
-		bool change_image, 
-		bool free, 
-		BaseImage *new_image
-	);
+	/** \brief Goes through all the blocks associated with an image, and updates their "free" and "image" properties.
+	*** This actually will happen when changeFree and changeImage are true, respectively
+	*** \param img The image to use for the block
+	*** \param change_free The block's free status has changed
+	*** \param change_image The block's image has changed
+	*** \param free The block's free status
+	*** \param new_image The new image to use if changeImage is true
+	**/
+	void _SetBlockProperties(BaseImage* img, bool change_free, bool change_image, bool free, BaseImage* new_image);
 
 	//! \brief The texhseet it's using
-	TexSheet *_tex_sheet;
+	TexSheet* _tex_sheet;
 	
 	//! \brief It's list of blocks
-	VariableImageNode *_blocks;
+	VariableImageNode* _blocks;
 		
-	//! Sheet width, not in pixels but in pixels/16 (since the sheet contains 16x16 blocks)
+	//! \brief Sheet width in number of blocks
 	int32 _sheet_width;
 
-	//! Sheet height, not in pixels but in pixels/16 (since the sheet contains 16x16 blocks)
+	//! \brief Sheet height in number of blocks
 	int32 _sheet_height;
-};
-
-
+}; // class VariableTexMemMgr : public TexMemMgr
 
 }  // namespace private_video
 
 }  // namespace hoa_video
 
-
-
-#endif   // !__TEX_MGMT_HEADER__
+#endif   // __TEX_MGMT_HEADER__

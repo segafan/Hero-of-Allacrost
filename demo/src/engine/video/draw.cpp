@@ -214,7 +214,7 @@ void GameVideo::_DrawElement(const BaseImageElement &element, const Color *color
 
 		// Enable texturing and bind texture
 		glEnable(GL_TEXTURE_2D);
-		_BindTexture(img->texture_sheet->tex_ID);
+		_BindTexture(img->texture_sheet->tex_id);
 		img->texture_sheet->Smooth(img->smooth);
 
 		// Enable texture coordinate array
