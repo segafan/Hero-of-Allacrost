@@ -7,25 +7,1156 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "utils.h"
-#include "tex_mgmt.h"
+/** ****************************************************************************
+*** \file    tex_mgmt.h
+*** \author  Raj Sharma, roos@allacrost.org
+*** \brief   Source file for texture management code
+*** ***************************************************************************/
+
 #include <cassert>
 #include <cstdarg>
 #include <set>
+#include <fstream>
 #include <math.h>
+
+#include "utils.h"
+#include "tex_mgmt.h"
 #include "video.h"
 #include "gui.h"
-#include <fstream>
-
-
-using namespace hoa_video::private_video;
-
-
-namespace hoa_video
-{
 
 using namespace std;
 using namespace hoa_utils;
+
+namespace hoa_video {
+
+namespace private_video {
+
+// -----------------------------------------------------------------------------
+// TexSheet class
+// -----------------------------------------------------------------------------
+
+TexSheet::TexSheet(int32 sheet_width, int32 sheet_height, GLuint sheet_id, TexSheetType sheet_type, bool sheet_static) {
+	width = sheet_width;
+	height = sheet_height;
+	tex_id = sheet_id;
+	type = sheet_type;
+	is_static = sheet_static;
+	loaded = true;
+
+	if (VideoManager->_ShouldSmooth())
+		Smooth();
+
+	if (type == VIDEO_TEXSHEET_32x32)
+		tex_mem_manager = new FixedTexMemMgr(this, 32, 32);
+	else if (type == VIDEO_TEXSHEET_32x64)
+		tex_mem_manager = new FixedTexMemMgr(this, 32, 64);
+	else if (type == VIDEO_TEXSHEET_64x64)
+		tex_mem_manager = new FixedTexMemMgr(this, 64, 64);
+	else
+		tex_mem_manager = new VariableTexMemMgr(this);
+}
+
+
+
+TexSheet::~TexSheet() {
+	// Delete texture memory manager
+	delete tex_mem_manager;
+
+	// Unload actual texture from memory
+	VideoManager->_DeleteTexture(tex_id);
+}
+
+
+
+bool TexSheet::Unload() {
+	// Check if we're already unloaded
+	if (loaded == false) {
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: unloading an already unloaded texture sheet" << endl;
+		return false;
+	}
+
+	// Delete the texture
+	if (VideoManager->_DeleteTexture(tex_id) == false) {
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: _DeleteTexture() failed in TexSheet::Unload()!" << endl;
+		return false;
+	}
+
+	loaded = false;
+	return true;
+}
+
+
+
+bool TexSheet::Reload() {
+	// Check if we're already loaded
+	if (loaded == true) {
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: loading an already loaded texture sheet" << endl;
+		return false;
+	}
+
+	// Create new OpenGL texture
+	GLuint id = VideoManager->_CreateBlankGLTexture(width, height);
+
+	if (id == 0xFFFFFFFF) {
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: _CreateBlankGLTexture() failed in TexSheet::Reload()!" << endl;
+		return false;
+	}
+
+	tex_id = id;
+
+	// Restore texture smoothing if applied.
+	bool was_smoothed = smoothed;
+	smoothed = false;
+	Smooth(was_smoothed);
+
+	// Now reload all all of the images that belong to this texture
+	if (VideoManager->_ReloadImagesToSheet(this) == false) {
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: CopyImagesToSheet() failed in TexSheet::Reload()!" << endl;
+		return false;
+	}
+
+	loaded = true;
+	return true;
+}
+
+
+
+bool TexSheet::AddImage(BaseImage* img, ImageLoadInfo& load_info) {
+	// Try inserting into the texture memory manager
+	bool could_insert = tex_mem_manager->Insert(img);
+	if (could_insert == false)
+		return false;
+
+	// Now img contains the x, y, width, and height of the subrectangle
+	// inside the texture sheet, so go ahead and copy that area
+
+	TexSheet *tex_sheet = img->texture_sheet;
+	if (!tex_sheet) {
+		// Technically this should never happen since Insert() returned true
+		if (VIDEO_DEBUG) {
+			cerr << "VIDEO ERROR: texSheet was NULL after tex_mem_manager->Insert() returned true" << endl;
+		}
+		return false;
+	}
+
+	if (CopyRect(img->x, img->y, load_info) == false) {
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: CopyRect() failed in TexSheet::AddImage()!" << endl;
+		return false;
+	}
+
+	return true;
+}
+
+
+
+bool TexSheet::CopyRect(int32 x, int32 y, ImageLoadInfo& load_info) {
+	if (VideoManager->_BindTexture(tex_id) == false) {
+		if(VIDEO_DEBUG) {
+			cerr << "VIDEO ERROR: could not bind texture in TexSheet::CopyRect()!" << endl;
+		}
+		return false;
+	}
+
+	glTexSubImage2D
+	(
+		GL_TEXTURE_2D, // target
+		0, // level
+		x, // x offset within tex sheet
+		y, // y offset within tex sheet
+		load_info.width, // width in pixels of image
+		load_info.height, // height in pixels of image
+		GL_RGBA, // format
+		GL_UNSIGNED_BYTE, // type
+		load_info.pixels // pixels of the sub image
+	);
+
+	GLenum error = glGetError();
+	if (error) {
+		if(VIDEO_DEBUG) {
+			cerr << "VIDEO ERROR: glTexSubImage2D() failed in TexSheet::CopyRect()!" << endl;
+		}
+		return false;
+	}
+
+	return true;
+}
+
+
+
+bool TexSheet::CopyScreenRect(int32 x, int32 y, const ScreenRect& screen_rect) {
+	if (VideoManager->_BindTexture(tex_id) == false) {
+		if (VIDEO_DEBUG) {
+			cerr << "VIDEO ERROR: could not bind texture in TexSheet::CopyScreenRect()!" << endl;
+		}
+		return false;
+	}
+
+	glCopyTexSubImage2D
+	(
+		GL_TEXTURE_2D, // target
+		0, // level
+		x, // x offset within tex sheet
+		y, // y offset within tex sheet
+		screen_rect.left, // left starting pixel of the screen to copy
+		screen_rect.top - screen_rect.height, // bottom starting pixel of the screen to copy
+		screen_rect.width, // width in pixels of image
+		screen_rect.height // height in pixels of image
+	);
+
+	GLenum error = glGetError();
+	if (error) {
+		if (VIDEO_DEBUG) {
+			cerr << "VIDEO ERROR: glTexSubImage2D() failed in TexSheet::CopyScreenRect()!" << endl;
+		}
+		return false;
+	}
+
+	return true;
+}
+
+
+
+void TexSheet::Smooth(bool flag) {
+	// In case of global smoothing, do nothing here
+	if (VideoManager->_ShouldSmooth())
+		return;
+
+	// If setting has changed, set the appropriate filtering
+	if (smoothed != flag) {
+		smoothed = flag;
+		GLenum filtering_type = smoothed ? GL_LINEAR : GL_NEAREST;
+
+		VideoManager->_BindTexture(tex_id);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering_type);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering_type);
+	}
+}
+
+// -----------------------------------------------------------------------------
+// FixedTexMemMgr class
+// -----------------------------------------------------------------------------
+
+FixedTexMemMgr::FixedTexMemMgr(TexSheet *tex_sheet, int32 img_width, int32 img_height) {
+	if (tex_sheet == NULL) {
+		cerr << "VIDEO WARNING: " << __FILE__ << ":" << __FUNCTION__ << ": tex_sheet argument was NULL" << endl;
+		return;
+	}
+
+	_tex_sheet = tex_sheet;
+
+	// Set all the dimensions
+	_image_width  = img_width;
+	_image_height = img_height;
+	_sheet_width  = tex_sheet->width  / img_width;
+	_sheet_height = tex_sheet->height / img_height;
+
+	// Allocate the blocks array
+	int32 num_blocks = _sheet_width * _sheet_height;
+	_blocks = new FixedImageNode[num_blocks];
+
+	// Initialize linked list of open blocks... which, at this point is all the blocks!
+	_open_list_head = &_blocks[0];
+	_open_list_tail = &_blocks[num_blocks-1];
+
+	// Now initialize all the blocks to proper values
+	for (int32 i = 0; i < num_blocks - 1; ++i) {
+		_blocks[i].next  = &_blocks[i+1];
+		_blocks[i].image = NULL;
+		_blocks[i].block_index = i;
+	}
+
+	_blocks[num_blocks-1].next  = NULL;
+	_blocks[num_blocks-1].image = NULL;
+	_blocks[num_blocks-1].block_index = num_blocks - 1;
+}
+
+
+
+bool FixedTexMemMgr::Insert(BaseImage *img) {
+	// Whoa, nothing on the open list! (no blocks left) return false :(
+	if (_open_list_head == NULL)
+		return false;
+
+	// Otherwise, get and remove the head of the open list
+
+	FixedImageNode *node = _open_list_head;
+	_open_list_head = _open_list_head->next;
+
+	if (_open_list_head == NULL) {
+		// This must mean we just removed the last open block, so
+		// set the tail to NULL as well
+		_open_list_tail = NULL;
+	}
+	else {
+		// Since this is the new head, it's prev pointer should be NULL
+		_open_list_head->prev = NULL;
+	}
+
+	node->next = NULL;
+
+	// Check if there's already an image allocated at this block.
+	// If so, we have to notify GameVideo that we're ejecting
+	// this image out of memory to make place for the new one
+
+	if (node->image) {
+		VideoManager->_RemoveImage(node->image);
+		node->image = NULL;
+	}
+
+	// Calculate the actual pixel coordinates given this node's
+	// block index
+
+	img->x = _image_width  * (node->block_index % _sheet_width);
+	img->y = _image_height * (node->block_index / _sheet_width);
+
+	// Calculate the u,v coordinates
+
+	float sheet_width = (float) _tex_sheet->width;
+	float sheet_height = (float) _tex_sheet->height;
+
+	img->u1 = float(img->x + 0.5f)               / sheet_width;
+	img->u2 = float(img->x + img->width - 0.5f)  / sheet_width;
+	img->v1 = float(img->y + 0.5f)               / sheet_height;
+	img->v2 = float(img->y + img->height - 0.5f) / sheet_height;
+
+	img->texture_sheet = _tex_sheet;
+
+	return true;
+} // bool FixedTexMemMgr::Insert(BaseImage *img)
+
+
+
+void FixedTexMemMgr::Remove(BaseImage *img) {
+	// Translate x,y coordinates into a block index
+	int32 block_index = _CalculateBlockIndex(img);
+
+	// Check to make sure the block is actually owned by this image
+	if (_blocks[block_index].image != img) {
+		// Error, the block that the image thinks it owns is actually not
+		// owned by that image
+
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: tried to remove a fixed block not owned by this Image" << endl;
+	}
+
+	// Set the image to NULL to indicate that this block is completely free
+	_blocks[block_index].image = NULL;
+
+	// Remove block from the open list
+	_DeleteNode(block_index);
+}
+
+
+
+void FixedTexMemMgr::Free(BaseImage *img) {
+	int32 block_index = _CalculateBlockIndex(img);
+
+	FixedImageNode *node = &_blocks[block_index];
+
+	if (_open_list_tail != NULL) {
+		// Simply append to end of list
+		_open_list_tail->next = node;
+		node->prev = _open_list_tail;
+		node->next = NULL;
+		_open_list_tail = node;
+	}
+	else {
+		// Special case: empty list
+		_open_list_head = _open_list_tail = node;
+		node->next = node->prev = NULL;
+	}
+}
+
+
+
+int32 FixedTexMemMgr::_CalculateBlockIndex(BaseImage *img) {
+	int32 block_x = img->x / _image_width;
+	int32 block_y = img->y / _image_height;
+
+	return (block_x + _sheet_width * block_y);
+}
+
+
+
+void FixedTexMemMgr::_DeleteNode(int32 block_index) {
+	if (block_index < 0)
+		return;
+
+	if (block_index >= _sheet_width * _sheet_height)
+		return;
+
+	FixedImageNode *node = &_blocks[block_index];
+
+	if (node->prev && node->next) { // Node is somewhere in the middle of the list
+		node->prev->next = node->next;
+	}
+	else if (node->prev) { // Node is the tail of the list
+		node->prev->next = NULL;
+		_open_list_tail = node->prev;
+	}
+	else if (node->next) { // Node is the head of the list
+		
+		_open_list_head = node->next;
+		node->next->prev = NULL;
+	}
+	else {
+		// Node is the only element in the list
+		_open_list_head = NULL;
+		_open_list_tail = NULL;
+	}
+
+	// Just for good measure, clear out this node's pointers
+	node->prev = NULL;
+	node->next = NULL;
+}
+
+// -----------------------------------------------------------------------------
+// VariableTexMemMgr class
+// -----------------------------------------------------------------------------
+
+VariableTexMemMgr::VariableTexMemMgr(TexSheet *sheet) {
+	_tex_sheet = sheet;
+	_sheet_width = sheet->width / 16;
+	_sheet_height = sheet->height / 16;
+	_blocks = new VariableImageNode[_sheet_width*_sheet_height];
+}
+
+
+
+bool VariableTexMemMgr::Insert(BaseImage *img) {
+	// Don't allow insertions into a texture bigger than 512x512...
+	// This way, if we have a 1024x1024 texture holding a fullscreen background,
+	// it is always safe to remove the texture sheet from memory when the
+	// background is unreferenced. That way backgrounds don't stick around in memory.
+	if (_sheet_width > 32 || _sheet_height > 32) { // 32 blocks = 512 pixels
+		if (_blocks[0].free == false)  // Quick way to test if texsheet's occupied
+			return false;
+	}
+
+	// Find an open block of memory. If none is found, return false
+	// Calculate the width and height in blocks
+	int32 w = (img->width + 15) / 16;
+	int32 h = (img->height + 15) / 16;
+
+	int32 block_x = -1, block_y = -1;
+
+	// This is a 100% brute force way to allocate a block, just a bunch
+	// of nested loops. In practice, this actually works fine, because
+	// the allocator deals with 16x16 blocks instead of trying to worry
+	// about fitting images with pixel perfect resolution.
+	// Later, if this turns out to be a bottleneck, we can rewrite this
+	// algorithm to something more intelligent
+	for (int32 y = 0; y < _sheet_height - h + 1; y++) {
+		for (int32 x = 0; x < _sheet_width - w + 1; x++) {
+			int32 furthest_blocker = -1;
+
+			for (int32 dy = 0; dy < h; dy++) {
+				for (int32 dx = 0; dx < w; dx++) {
+					if (_blocks[(x + dx) + ((y + dy) * _sheet_width)].free == false) {
+						furthest_blocker = x+dx;
+						goto endneighborsearch_GOTO;
+					}
+				}
+			}
+
+			endneighborsearch_GOTO:
+
+			if (furthest_blocker == -1) {
+				block_x = x;
+				block_y = y;
+				goto endsearch_GOTO;
+			}
+		}
+	}
+
+	endsearch_GOTO:
+
+	if (block_x == -1 || block_y == -1)
+		return false;
+
+	// Check if there's already an image allocated at this block.
+	// If so, we have to notify GameVideo that we're ejecting
+	// this image out of memory to make place for the new one
+
+	// Update blocks
+	set<BaseImage*> remove_images;
+
+	for(int32 y = block_y; y < block_y + h; y++) {
+		for(int32 x = block_x; x < block_x + w; x++) {
+			int32 index = x + (y * _sheet_width);
+			// Check if there's already an image at the point we're
+			// trying to load at. If so, we need to tell GameVideo
+			// to update its internal vector
+
+			if(_blocks[index].image) {
+				remove_images.insert(_blocks[index].image);
+			}
+
+			_blocks[index].free  = false;
+			_blocks[index].image = img;
+		}
+	}
+
+	for(set<BaseImage*>::iterator i = remove_images.begin(); i != remove_images.end(); i++) {
+		Remove(*i);
+		VideoManager->_RemoveImage(*i);
+	}
+
+
+	// Calculate the actual pixel coordinates given this node's block index
+	img->x = block_x * 16;
+	img->y = block_y * 16;
+
+	// Calculate the u,v coordinates
+
+	float sheet_width = static_cast<float>(_tex_sheet->width);
+	float sheet_height = static_cast<float>(_tex_sheet->height);
+
+	img->u1 = float(img->x + 0.5f) / sheet_width;
+	img->u2 = float(img->x + img->width - 0.5f) / sheet_width;
+	img->v1 = float(img->y + 0.5f) / sheet_height;
+	img->v2 = float(img->y + img->height - 0.5f) / sheet_height;
+
+	img->texture_sheet = _tex_sheet;
+	return true;
+} // bool VariableTexMemMgr::Insert(BaseImage *img)
+
+
+
+void VariableTexMemMgr::_SetBlockProperties(BaseImage *img, bool change_free, bool change_image, bool free, BaseImage *new_image) {
+	// Calculate upper-left corner in blocks
+	int32 block_x = img->x / 16;
+	int32 block_y = img->y / 16;
+
+	// Calculate width and height in blocks
+	int32 w = (img->width  + 15) / 16;
+	int32 h = (img->height + 15) / 16;
+
+	for (int32 y = block_y; y < block_y + h; y++) {
+		for (int32 x = block_x; x < block_x + w; x++) {
+			if (_blocks[x + y * _sheet_width].image == img) {
+				if (change_free)
+					_blocks[x + y * _sheet_width].free  = free;
+				if (change_image)
+					_blocks[x + y * _sheet_width].image = new_image;
+			}
+		}
+	}
+}
+
+} // namespace private_video
+
+using namespace hoa_video::private_video;
+
+//-----------------------------------------------------------------------------
+// DEBUG_NextTexSheet: increments to the next texture sheet to show with
+//                     _DEBUG_ShowTexSheet().
+//-----------------------------------------------------------------------------
+
+void GameVideo::DEBUG_NextTexSheet()
+{
+	++_current_debug_TexSheet;
+
+	if(_current_debug_TexSheet >= (int32) _tex_sheets.size())
+	{
+		_current_debug_TexSheet = -1;   // disable display
+	}
+}
+
+
+
+
+//-----------------------------------------------------------------------------
+// DEBUG_PrevTexSheet: cycles to the previous texturesheet to show with
+//                     _DEBUG_ShowTexSheet().
+//-----------------------------------------------------------------------------
+
+void GameVideo::DEBUG_PrevTexSheet()
+{
+	--_current_debug_TexSheet;
+
+	if(_current_debug_TexSheet < -1)
+	{
+		_current_debug_TexSheet = (int32) _tex_sheets.size() - 1;
+	}
+}
+
+
+
+
+//-----------------------------------------------------------------------------
+// ReloadTextures: reloads the texture sheets, after they have been unloaded
+//                 most likely due to a change of video mode.
+//                 Returns false if any of the textures fail to reload
+//-----------------------------------------------------------------------------
+
+bool GameVideo::ReloadTextures()
+{
+	// Reload texture sheets
+
+	vector<TexSheet *>::iterator iSheet    = _tex_sheets.begin();
+	vector<TexSheet *>::iterator iSheetEnd = _tex_sheets.end();
+
+	bool success = true;
+
+	while(iSheet != iSheetEnd)
+	{
+		TexSheet *sheet = *iSheet;
+
+		if(sheet)
+		{
+			if(!sheet->Reload())
+			{
+				if(VIDEO_DEBUG)
+					cerr << "VIDEO_ERROR: in ReloadTextures(), sheet->Reload() failed!" << endl;
+				success = false;
+			}
+		}
+		else
+		{
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: in ReloadTextures(), one of the tex sheets in the vector was NULL!" << endl;
+			success = false;
+		}
+
+		++iSheet;
+	}
+
+	_DeleteTempTextures();
+
+	if(_uses_lights)
+		_light_overlay = _CreateBlankGLTexture(1024, 1024);
+
+	return success;
+}
+
+
+
+
+//-----------------------------------------------------------------------------
+// UnloadTextures: frees the texture memory taken up by the texture sheets,
+//                 but leaves the lists of images intact so we can reload them
+//                 Returns false if any of the textures fail to unload.
+//-----------------------------------------------------------------------------
+
+bool GameVideo::UnloadTextures()
+{
+	// Save temporary textures to disk, in other words textures which weren't
+	// loaded to a file. This way when we recreate the GL context we will
+	// be able to load them again.
+	_SaveTempTextures();
+
+	// Unload texture sheets
+	vector<TexSheet *>::iterator iSheet    = _tex_sheets.begin();
+	vector<TexSheet *>::iterator iSheetEnd = _tex_sheets.end();
+
+	bool success = true;
+
+	while(iSheet != iSheetEnd)
+	{
+		TexSheet *sheet = *iSheet;
+
+		if(sheet)
+		{
+			if(!sheet->Unload())
+			{
+				if(VIDEO_DEBUG)
+					cerr << "VIDEO_ERROR: in UnloadTextures(), sheet->Unload() failed!" << endl;
+				success = false;
+			}
+		}
+		else
+		{
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: in UnloadTextures(), one of the tex sheets in the vector was NULL!" << endl;
+			success = false;
+		}
+
+		++iSheet;
+	}
+
+	if(_light_overlay != 0xFFFFFFFF)
+	{
+		_DeleteTexture(_light_overlay);
+		_light_overlay = 0xFFFFFFFF;
+	}
+
+	// Clear all font caches
+	map<string, FontProperties *>::iterator iFontProp    = _font_map.begin();
+	map<string, FontProperties *>::iterator iFontPropEnd = _font_map.end();
+
+	while(iFontProp != _font_map.end())
+	{
+		FontProperties *fp = iFontProp->second;
+
+		if(fp->glyph_cache)
+		{
+			for(std::map<uint16, FontGlyph *>::iterator glyphitr = fp->glyph_cache->begin(); glyphitr != fp->glyph_cache->end(); glyphitr++)
+			{
+				_DeleteTexture((*glyphitr).second->texture);
+				delete (*glyphitr).second;
+			}
+
+			fp->glyph_cache->clear();
+		}
+
+		++iFontProp;
+	}
+
+	return success;
+}
+
+
+
+
+//-----------------------------------------------------------------------------
+// _DeleteTexture: wraps call to glDeleteTexture(), adds some checking to see
+//                if we deleted the last texture we bound using _BindTexture(),
+//                then set the last tex ID to 0xffffffff
+//-----------------------------------------------------------------------------
+
+bool GameVideo::_DeleteTexture(GLuint tex_id)
+{
+	glDeleteTextures(1, &tex_id);
+
+	if(_last_tex_id == tex_id)
+		_last_tex_id = 0xFFFFFFFF;
+
+	if(glGetError())
+		return false;
+
+	return true;
+}
+
+
+
+
+
+
+
+
+bool GameVideo::_DEBUG_ShowTexSheet()
+{
+	// Value of zero means to disable display
+	if(_current_debug_TexSheet == -1)
+	{
+		return true;
+	}
+
+	// Check if there aren't any texture sheets! (should never happen)
+	if(_tex_sheets.empty())
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO_WARNING: Called DEBUG_ShowTexture(), but there were no texture sheets" << endl;
+		return false;
+	}
+
+	int32 num_sheets = (int32) _tex_sheets.size();
+
+	// We may go out of bounds say, if we were viewing a texture sheet and then it got
+	// deleted or something. To recover, just set it to the last texture sheet
+	if(_current_debug_TexSheet >= num_sheets)
+	{
+		_current_debug_TexSheet = num_sheets - 1;
+	}
+
+	TexSheet *sheet = _tex_sheets[_current_debug_TexSheet];
+
+	if(!sheet)
+	{
+		return false;
+	}
+
+	int32 w = sheet->width;
+	int32 h = sheet->height;
+
+	Image img(sheet, string(), "<T>", 0, 0, 0.0f, 0.0f, 1.0f, 1.0f, w, h, false);
+
+
+	_PushContext();
+	SetDrawFlags(VIDEO_NO_BLEND, VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
+	SetCoordSys(0.0f, 1024.0f, 0.0f, 760.0f);
+
+	glPushMatrix();
+
+	Move(0.0f,0.0f);
+	glScalef(0.5f, 0.5f, 0.5f);
+
+	ImageElement elem(&img, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, (float)w, (float)h);
+
+	StillImage id;
+	id._elements.push_back(elem);
+
+
+	DrawImage(id);
+
+	glPopMatrix();
+
+	if(!SetFont("debug_font"))
+	{
+		_PopContext();
+		return false;
+	}
+
+	char buf[200];
+
+	Move(20, _coord_sys.GetTop() - 30);
+	if(!DrawText("Current Texture sheet:"))
+	{
+		_PopContext();
+		return false;
+	}
+
+	sprintf(buf, "  Sheet #: %d", _current_debug_TexSheet);
+	MoveRelative(0, -20);
+	if(!DrawText(buf))
+	{
+		_PopContext();
+		return false;
+	}
+
+	MoveRelative(0, -20);
+	sprintf(buf, "  Size:    %dx%d", sheet->width, sheet->height);
+	if(!DrawText(buf))
+	{
+		_PopContext();
+		return false;
+	}
+
+	if(sheet->type == VIDEO_TEXSHEET_32x32)
+		sprintf(buf, "  Type:    32x32");
+	else if(sheet->type == VIDEO_TEXSHEET_32x64)
+		sprintf(buf, "  Type:    32x64");
+	else if(sheet->type == VIDEO_TEXSHEET_64x64)
+		sprintf(buf, "  Type:    64x64");
+	else if(sheet->type == VIDEO_TEXSHEET_ANY)
+		sprintf(buf, "  Type:    Any size");
+
+	MoveRelative(0, -20);
+	if(!DrawText(buf))
+	{
+		_PopContext();
+		return false;
+	}
+
+	sprintf(buf, "  Static:  %d", sheet->is_static);
+	MoveRelative(0, -20);
+	if(!DrawText(buf))
+	{
+		_PopContext();
+		return false;
+	}
+
+	sprintf(buf, "  TexID:   %d", sheet->tex_id);
+	MoveRelative(0, -20);
+	if(!DrawText(buf))
+	{
+		_PopContext();
+		return false;
+	}
+
+	_PopContext();
+	return true;
+}
+
+
+
+//-----------------------------------------------------------------------------
+// _DeleteImage: decreases the reference count on an image, and deletes it
+//               if zero is reached. Note that for images larger than 512x512,
+//               there is no reference counting; we just delete it immediately
+//               because we don't want huge textures sitting around in memory
+//-----------------------------------------------------------------------------
+
+bool GameVideo::_DeleteImage(BaseImage *const base_img) {
+	// If the image is grayscale, also perform a delete for the color image one
+	if (base_img->grayscale) {
+		Image *img = dynamic_cast<Image *>(base_img);
+		if (img)
+		{
+			// The filename of the color image is the grayscale one but without "_grayscale" (10 characters) at the end
+			string filename (img->filename,0,img->filename.length()-10);
+
+			map<string,Image*>::iterator it = _images.find(filename);
+			if (it == _images.end())
+			{
+				if (VIDEO_DEBUG)
+					cerr << "Attemp to delete a color copy didn't work" << endl;
+				return false;
+			}
+
+			_DeleteImage(it->second);
+		}
+		else
+		{
+			if (VIDEO_DEBUG)
+				cerr << "_DeleteImage(): Error: Grayscale BaseImage* was not of dynamic type Image*." << endl;
+			return false;
+		}
+	}
+
+	if (base_img->Remove()) {
+		if (base_img->width > 512 || base_img->height > 512) {
+			// Remove the image and texture sheet completely
+			_RemoveSheet(base_img->texture_sheet);
+			_RemoveImage(base_img);
+		}
+		else {
+			// For smaller images, simply mark them as free 
+			// in the memory manager
+			base_img->texture_sheet->FreeImage(base_img);
+		}
+	}
+
+	return true;
+}
+
+
+
+
+//-----------------------------------------------------------------------------
+// _RemoveSheet: removes a texture sheet from the internal std::vector
+//-----------------------------------------------------------------------------
+
+bool GameVideo::_RemoveSheet(TexSheet *sheet)
+{
+	if(_tex_sheets.empty())
+	{
+		return false;
+	}
+
+	vector<TexSheet*>::iterator iSheet = _tex_sheets.begin();
+	vector<TexSheet*>::iterator iEnd   = _tex_sheets.end();
+
+	// Search std::vector for pointer matching sheet and remove it
+	while(iSheet != iEnd)
+	{
+		if(*iSheet == sheet)
+		{
+			delete sheet;
+			_tex_sheets.erase(iSheet);
+			return true;
+		}
+		++iSheet;
+	}
+
+	// Couldn't find the image
+	return false;
+}
+
+
+
+void GameVideo::DeleteImage(ImageDescriptor &id) {
+	if (id._animated) {
+		_DeleteImage(dynamic_cast<AnimatedImage&>(id));
+	}
+	else {
+		_DeleteImage(dynamic_cast<StillImage&>(id));
+	}
+}
+
+
+
+void GameVideo::_DeleteImage(AnimatedImage &id) {
+	for (uint32 i = 0; i < id.GetNumFrames(); i++) {
+		_DeleteImage(id._frames[i].image);
+	}
+}
+
+//-----------------------------------------------------------------------------
+// _DeleteImage: decrements the reference count for all images composing this
+//              image descriptor.
+//
+// NOTE: for images which are 1024x1024 or higher, once their reference count
+//       reaches zero, they're immediately deleted. (don't want to keep those
+//       in memory if possible). For others, they're simply marked as "free"
+//-----------------------------------------------------------------------------
+
+void GameVideo::_DeleteImage(StillImage &id) {
+	// Loop through all the images inside this descriptor
+	for (vector<ImageElement>::iterator i = id._elements.begin(); i != id._elements.end(); i++) {
+		Image *img = (*i).image;
+
+		// Only delete the image if the pointer is valid. Some ImageElements
+		// have a NULL pointer because they are just colored quads
+		if (img) {
+			if (img->ref_count <= 0) {
+				if (VIDEO_DEBUG)
+					cerr << "VIDEO WARNING: Called DeleteImage() when refcount was already <= 0!" << endl;
+				return;
+			}
+
+			(img->ref_count)--;
+
+			if (img->ref_count == 0) {
+				// 1. If it's on a large tex sheet (> 512x512), delete it
+				// Note: We can assume that this is the only image on that texture
+				//       sheet, so it's safe to delete it. (Big textures always
+				//       are allocated to their own sheet, by design.)
+
+				if (img->width > 512 || img->height > 512) {
+					_DeleteImage(img);  // overloaded DeleteImage for deleting Image
+				}
+
+				// 2. otherwise, mark it as "freed"
+				img->texture_sheet->FreeImage(img);
+			}
+		}
+	}
+
+	id._elements.clear();
+	id._filename = "";
+	id._height = id._width = 0;
+	id._is_static = 0;
+}
+
+//-----------------------------------------------------------------------------
+// _RemoveImage(BaseImage*): removes the child image class from its specific storage method
+//-----------------------------------------------------------------------------
+
+bool GameVideo::_RemoveImage(BaseImage *base_image)
+{
+	Image  *img;
+	TImage *timage;
+
+	img = dynamic_cast<Image*>(base_image);
+	if (img)
+		return _RemoveImage(img);
+	
+	timage = dynamic_cast<TImage*>(base_image);
+	if (timage)
+		return _RemoveImage(timage);
+	
+	if (VIDEO_DEBUG)
+		cerr << "_RemoveImage(BaseImage*): Dynamic cast failed for all accepted types." << endl;
+
+	return false;
+}
+
+
+//-----------------------------------------------------------------------------
+// _RemoveImage(Image*): removes the image pointer from the std::map
+//-----------------------------------------------------------------------------
+
+bool GameVideo::_RemoveImage(Image *img)
+{
+	// Nothing to do if img is null
+	if(!img)
+		return true;
+
+	if(_images.empty())
+	{
+		return false;
+	}
+
+	map<string, Image*>::iterator iImage = _images.begin();
+	map<string, Image*>::iterator iEnd   = _images.end();
+
+	// Search std::map for pointer matching img and remove it
+	while(iImage != iEnd)
+	{
+		if(iImage->second == img)
+		{
+			delete img;
+			_images.erase(iImage);
+			return true;
+		}
+		++iImage;
+	}
+
+	// Couldn't find the image
+	return false;
+}
+
+
+//-----------------------------------------------------------------------------
+// _RemoveImage: removes the timage pointer from the std::set
+//-----------------------------------------------------------------------------
+
+bool GameVideo::_RemoveImage(TImage *img)
+{
+	// Nothing to do if img is null
+	if(!img)
+		return true;
+
+	if(_t_images.empty())
+	{
+		return false;
+	}
+
+	if(_GetTImage(img))
+	{
+		_t_images.erase(img);
+		delete img;
+		return true;
+	}
+
+	// Couldn't find the image
+	return false;
+}
+
+
+//-----------------------------------------------------------------------------
+// _CreateBlankGLTexture: creates a blank texture of the given width and height
+//                       and returns its OpenGL texture ID.
+//                       Returns 0xFFFFFFFF on failure
+//-----------------------------------------------------------------------------
+
+GLuint GameVideo::_CreateBlankGLTexture(int32 width, int32 height) {
+	// Attempt to create a GL texture with the given width and height
+	int32 error;
+
+	GLuint tex_id;
+
+	glGenTextures(1, &tex_id);
+	error = glGetError();
+
+	if(!error)   // If there's no error so far, attempt to bind texture
+	{
+		_BindTexture(tex_id);
+		error = glGetError();
+
+		// If the binding was successful, initialize the texture with glTexImage2D()
+		if(!error)
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+			error = glGetError();
+		}
+	}
+
+	if(error != 0)   // If there's an error, delete the texture and return error code
+	{
+		_DeleteTexture(tex_id);
+
+		// This error is fatal, always show
+		cerr << "VIDEO ERROR: failed to create new " << width << " by " << height << " texture in _CreateBlankGLTexture()." << endl;
+		cerr << "  OpenGL reported the following error:" << endl << "  ";
+		char *errString = (char*)gluErrorString(error);
+		cerr << errString << endl;
+
+		return 0xFFFFFFFF;
+	}
+
+	// Set linear texture interpolation if we're at non-natural resolution
+	GLenum filtering_type = VideoManager->_ShouldSmooth() ? GL_LINEAR : GL_NEAREST;
+
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering_type );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering_type );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
+
+	return tex_id;
+}
+
+
+
+
 
 
 
@@ -312,8 +1443,8 @@ bool GameVideo::_LoadImage(StillImage &id)
 		{
 			// If ref count is zero, it means this image was freed, but
 			// not removed, so restore it
-			if(!img->texture_sheet->RestoreImage(img))
-				return false;
+			img->texture_sheet->RestoreImage(img);
+
 		}
 
 		img->Add();		// Increment the reference counter of the Image
@@ -515,14 +1646,7 @@ bool GameVideo::_LoadMultiImage (std::vector <StillImage>& images, const std::st
 				{
 					// If ref count is zero, it means this image was freed, but
 					// not removed, so restore it
-					if (!img->texture_sheet->RestoreImage(img))
-					{
-						if (info.multi_image.pixels)
-							free (info.multi_image.pixels);
-						if (info.image.pixels)
-							free (info.image.pixels);
-						return false;
-					}
+					img->texture_sheet->RestoreImage(img);
 				}
 
 				++(img->ref_count);
@@ -1160,7 +2284,7 @@ bool GameVideo::SaveImage (const std::string &file_name, const std::vector<Still
 	// Do that for the first image (on later ones, maybe we don't need to get again
 	// the texture, since it might be the same)
 	img = const_cast<Image*>(image[0]->_elements[0].image);
-	ID = img->texture_sheet->tex_ID;
+	ID = img->texture_sheet->tex_id;
 	texture.width = img->texture_sheet->width;
 	texture.height = img->texture_sheet->height;
 	texture.pixels = malloc (texture.width * texture.height * 4);
@@ -1173,11 +2297,11 @@ bool GameVideo::SaveImage (const std::string &file_name, const std::vector<Still
 		for (uint32 y=0; y<columns; y++)
 		{
 			img = const_cast<Image*>(image[i]->_elements[0].image);
-			if (ID != img->texture_sheet->tex_ID)
+			if (ID != img->texture_sheet->tex_id)
 			{
 				// Get new texture ID
-				VideoManager->_BindTexture(img->texture_sheet->tex_ID);
-				ID = img->texture_sheet->tex_ID;
+				VideoManager->_BindTexture(img->texture_sheet->tex_id);
+				ID = img->texture_sheet->tex_id;
 
 				// If the new texture is bigger, reallocate memory
 				if (texture.height * texture.width < img->texture_sheet->height * img->texture_sheet->width * 4)
@@ -1334,7 +2458,7 @@ void GameVideo::_GetBufferFromTexture (hoa_video::private_video::ImageLoadInfo& 
 	buffer.height = texture->height;
 	buffer.width = texture->width;
 	buffer.pixels = malloc (buffer.height * buffer.width * 4);
-	VideoManager->_BindTexture(texture->tex_ID);
+	VideoManager->_BindTexture(texture->tex_id);
 	glGetTexImage (GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer.pixels);
 }
 
@@ -1430,7 +2554,6 @@ StillImage GameVideo::TilesToObject (std::vector<StillImage> &tiles, std::vector
 
 	return id;
 }
-
 
 
 
@@ -1574,1490 +2697,15 @@ TexSheet *GameVideo::_CreateTexSheet
 		return NULL;
 	}
 
-	GLuint tex_ID = _CreateBlankGLTexture(width, height);
+	GLuint tex_id = _CreateBlankGLTexture(width, height);
 
 	// Now that we have our texture loaded, simply create a new TexSheet
 
- 	TexSheet *sheet = new TexSheet(width, height, tex_ID, type, is_static);
+ 	TexSheet *sheet = new TexSheet(width, height, tex_id, type, is_static);
 	_tex_sheets.push_back(sheet);
 
 	return sheet;
 }
-
-
-
-
-//-----------------------------------------------------------------------------
-// TexSheet constructor
-//-----------------------------------------------------------------------------
-
-TexSheet::TexSheet(int32 w, int32 h, GLuint tex_ID_, TexSheetType type_, bool is_static_)
-{
-	width = w;
-	height = h;
-	tex_ID = tex_ID_;
-	type = type_;
-	is_static = is_static_;
-	loaded = true;
-
-	if (VideoManager->_ShouldSmooth())
-		Smooth();
-
-	if(type == VIDEO_TEXSHEET_32x32)
-		tex_mem_manager = new FixedTexMemMgr(this, 32, 32);
-	else if(type == VIDEO_TEXSHEET_32x64)
-		tex_mem_manager = new FixedTexMemMgr(this, 32, 64);
-	else if(type == VIDEO_TEXSHEET_64x64)
-		tex_mem_manager = new FixedTexMemMgr(this, 64, 64);
-	else
-		tex_mem_manager = new VariableTexMemMgr(this);
-}
-
-
-
-
-//-----------------------------------------------------------------------------
-// TexSheet destructor
-//-----------------------------------------------------------------------------
-
-TexSheet::~TexSheet()
-{
-	// Delete texture memory manager
-	delete tex_mem_manager;
-
-	if(!VideoManager)
-	{
-		if(VIDEO_DEBUG)
-		{
-			cerr << "VIDEO ERROR: GameVideo::GetReference() returned NULL in TexSheet destructor!" << endl;
-		}
-	}
-
-	// Unload actual texture from memory
-	VideoManager->_DeleteTexture(tex_ID);
-}
-
-
-
-
-//-----------------------------------------------------------------------------
-// VariableTexMemMgr constructor
-//-----------------------------------------------------------------------------
-
-VariableTexMemMgr::VariableTexMemMgr(TexSheet *sheet)
-{
-	_tex_sheet    = sheet;
-	_sheet_width  = sheet->width / 16;
-	_sheet_height = sheet->height / 16;
-	_blocks      = new VariableImageNode[_sheet_width*_sheet_height];
-}
-
-
-
-
-//-----------------------------------------------------------------------------
-// VariableTexMemMgr destructor
-//-----------------------------------------------------------------------------
-
-VariableTexMemMgr::~VariableTexMemMgr()
-{
-	delete [] _blocks;
-}
-
-
-
-
-bool GameVideo::_DEBUG_ShowTexSheet()
-{
-	// Value of zero means to disable display
-	if(_current_debug_TexSheet == -1)
-	{
-		return true;
-	}
-
-	// Check if there aren't any texture sheets! (should never happen)
-	if(_tex_sheets.empty())
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO_WARNING: Called DEBUG_ShowTexture(), but there were no texture sheets" << endl;
-		return false;
-	}
-
-	int32 num_sheets = (int32) _tex_sheets.size();
-
-	// We may go out of bounds say, if we were viewing a texture sheet and then it got
-	// deleted or something. To recover, just set it to the last texture sheet
-	if(_current_debug_TexSheet >= num_sheets)
-	{
-		_current_debug_TexSheet = num_sheets - 1;
-	}
-
-	TexSheet *sheet = _tex_sheets[_current_debug_TexSheet];
-
-	if(!sheet)
-	{
-		return false;
-	}
-
-	int32 w = sheet->width;
-	int32 h = sheet->height;
-
-	Image img(sheet, string(), "<T>", 0, 0, 0.0f, 0.0f, 1.0f, 1.0f, w, h, false);
-
-
-	_PushContext();
-	SetDrawFlags(VIDEO_NO_BLEND, VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
-	SetCoordSys(0.0f, 1024.0f, 0.0f, 760.0f);
-
-	glPushMatrix();
-
-	Move(0.0f,0.0f);
-	glScalef(0.5f, 0.5f, 0.5f);
-
-	ImageElement elem(&img, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, (float)w, (float)h);
-
-	StillImage id;
-	id._elements.push_back(elem);
-
-
-	DrawImage(id);
-
-	glPopMatrix();
-
-	if(!SetFont("debug_font"))
-	{
-		_PopContext();
-		return false;
-	}
-
-	char buf[200];
-
-	Move(20, _coord_sys.GetTop() - 30);
-	if(!DrawText("Current Texture sheet:"))
-	{
-		_PopContext();
-		return false;
-	}
-
-	sprintf(buf, "  Sheet #: %d", _current_debug_TexSheet);
-	MoveRelative(0, -20);
-	if(!DrawText(buf))
-	{
-		_PopContext();
-		return false;
-	}
-
-	MoveRelative(0, -20);
-	sprintf(buf, "  Size:    %dx%d", sheet->width, sheet->height);
-	if(!DrawText(buf))
-	{
-		_PopContext();
-		return false;
-	}
-
-	if(sheet->type == VIDEO_TEXSHEET_32x32)
-		sprintf(buf, "  Type:    32x32");
-	else if(sheet->type == VIDEO_TEXSHEET_32x64)
-		sprintf(buf, "  Type:    32x64");
-	else if(sheet->type == VIDEO_TEXSHEET_64x64)
-		sprintf(buf, "  Type:    64x64");
-	else if(sheet->type == VIDEO_TEXSHEET_ANY)
-		sprintf(buf, "  Type:    Any size");
-
-	MoveRelative(0, -20);
-	if(!DrawText(buf))
-	{
-		_PopContext();
-		return false;
-	}
-
-	sprintf(buf, "  Static:  %d", sheet->is_static);
-	MoveRelative(0, -20);
-	if(!DrawText(buf))
-	{
-		_PopContext();
-		return false;
-	}
-
-	sprintf(buf, "  TexID:   %d", sheet->tex_ID);
-	MoveRelative(0, -20);
-	if(!DrawText(buf))
-	{
-		_PopContext();
-		return false;
-	}
-
-	_PopContext();
-	return true;
-}
-
-
-
-//-----------------------------------------------------------------------------
-// _DeleteImage: decreases the reference count on an image, and deletes it
-//               if zero is reached. Note that for images larger than 512x512,
-//               there is no reference counting; we just delete it immediately
-//               because we don't want huge textures sitting around in memory
-//-----------------------------------------------------------------------------
-
-bool GameVideo::_DeleteImage(BaseImage *const base_img)
-{
-	// If the image is grayscale, also perform a delete for the color image one
-	if (base_img->grayscale)
-	{
-		Image *img = dynamic_cast<Image *>(base_img);
-		if (img)
-		{
-			// The filename of the color image is the grayscale one but without "_grayscale" (10 characters) at the end
-			string filename (img->filename,0,img->filename.length()-10);
-
-			map<string,Image*>::iterator it = _images.find(filename);
-			if (it == _images.end())
-			{
-				if (VIDEO_DEBUG)
-					cerr << "Attemp to delete a color copy didn't work" << endl;
-				return false;
-			}
-
-			_DeleteImage(it->second);
-		}
-		else
-		{
-			if (VIDEO_DEBUG)
-				cerr << "_DeleteImage(): Error: Grayscale BaseImage* was not of dynamic type Image*." << endl;
-			return false;
-		}
-	}
-
-	if (base_img->Remove())
-	{
-		if(base_img->width > 512 || base_img->height > 512)
-		{
-			// Remove the image and texture sheet completely
-			_RemoveSheet(base_img->texture_sheet);
-			_RemoveImage(base_img);
-		}
-		else
-		{
-			// For smaller images, simply mark them as free 
-			// in the memory manager
-			base_img->texture_sheet->FreeImage(base_img);
-		}
-	}
-
-	return true;
-}
-
-
-
-
-//-----------------------------------------------------------------------------
-// _RemoveSheet: removes a texture sheet from the internal std::vector
-//-----------------------------------------------------------------------------
-
-bool GameVideo::_RemoveSheet(TexSheet *sheet)
-{
-	if(_tex_sheets.empty())
-	{
-		return false;
-	}
-
-	vector<TexSheet*>::iterator iSheet = _tex_sheets.begin();
-	vector<TexSheet*>::iterator iEnd   = _tex_sheets.end();
-
-	// Search std::vector for pointer matching sheet and remove it
-	while(iSheet != iEnd)
-	{
-		if(*iSheet == sheet)
-		{
-			delete sheet;
-			_tex_sheets.erase(iSheet);
-			return true;
-		}
-		++iSheet;
-	}
-
-	// Couldn't find the image
-	return false;
-}
-
-
-
-
-//-----------------------------------------------------------------------------
-// AddImage: adds a new image to a texture sheet
-// NOTE: assumes that the image we're adding is still "bound" in DevIL
-//-----------------------------------------------------------------------------
-
-bool TexSheet::AddImage(BaseImage *img, ImageLoadInfo & load_info)
-{
-	// Try inserting into the texture memory manager
-	bool could_insert = tex_mem_manager->Insert(img);
-	if(!could_insert)
-		return false;
-
-	// Now img contains the x, y, width, and height of the subrectangle
-	// inside the texture sheet, so go ahead and copy that area
-
-	TexSheet *tex_sheet = img->texture_sheet;
-	if(!tex_sheet)
-	{
-		// Technically this should never happen since Insert() returned true
-		if(VIDEO_DEBUG)
-		{
-			cerr << "VIDEO ERROR: texSheet was NULL after tex_mem_manager->Insert() returned true" << endl;
-		}
-		return false;
-	}
-
-	if(!CopyRect(img->x, img->y, load_info))
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: CopyRect() failed in TexSheet::AddImage()!" << endl;
-		return false;
-	}
-
-	return true;
-}
-
-
-
-
-//-----------------------------------------------------------------------------
-// CopyRect: copies an image into a sub-rectangle of the texture
-//-----------------------------------------------------------------------------
-
-bool TexSheet::CopyRect(int32 x, int32 y, private_video::ImageLoadInfo & load_info)
-{
-	GLenum error;
-
-	if (!VideoManager->_BindTexture(tex_ID))
-	{
-		if(VIDEO_DEBUG)
-		{
-			cerr << "VIDEO ERROR: could not bind texture in TexSheet::CopyRect()!" << endl;
-		}
-		return false;
-	}
-
-	glTexSubImage2D
-	(
-		GL_TEXTURE_2D,		// target
-		0,			// level
-		x,			// x offset within tex sheet
-		y,			// y offset within tex sheet
-		load_info.width,	// width in pixels of image
-		load_info.height,	// height in pixels of image
-		GL_RGBA,		// format
-		GL_UNSIGNED_BYTE,	// type
-		load_info.pixels	// pixels of the sub image
-	);
-
-	error = glGetError();
-	if(error)
-	{
-		if(VIDEO_DEBUG)
-		{
-			cerr << "VIDEO ERROR: glTexSubImage2D() failed in TexSheet::CopyRect()!" << endl;
-		}
-		return false;
-	}
-
-	return true;
-}
-
-bool TexSheet::CopyScreenRect(int32 x, int32 y, const ScreenRect &screen_rect)
-{
-	GLenum error;
-
-	if (!VideoManager->_BindTexture(tex_ID))
-	{
-		if(VIDEO_DEBUG)
-		{
-			cerr << "VIDEO ERROR: could not bind texture in TexSheet::CopyScreenRect()!" << endl;
-		}
-		return false;
-	}
-
-	glCopyTexSubImage2D
-	(
-		GL_TEXTURE_2D,		// target
-		0,			// level
-		x,			// x offset within tex sheet
-		y,			// y offset within tex sheet
-		screen_rect.left,	// left starting pixel of the screen to copy
-		screen_rect.top - screen_rect.height,	// bottom starting pixel of the screen to copy
-		screen_rect.width,	// width in pixels of image
-		screen_rect.height	// height in pixels of image
-	);
-
-	error = glGetError();
-	if(error)
-	{
-		if(VIDEO_DEBUG)
-		{
-			cerr << "VIDEO ERROR: glTexSubImage2D() failed in TexSheet::CopyScreenRect()!" << endl;
-		}
-		return false;
-	}
-
-	return true;
-}
-
-
-
-//-----------------------------------------------------------------------------
-// _RemoveImage: removes an image completely from the texture sheet's
-//              memory manager so that a new image can be loaded in its place
-//-----------------------------------------------------------------------------
-
-bool TexSheet::RemoveImage(BaseImage *img)
-{
-	return tex_mem_manager->Remove(img);
-}
-
-
-
-
-//-----------------------------------------------------------------------------
-// FreeImage: sets the area taken up by the image to "free". However, the
-//            image is not removed from any lists yet! It's kept around in
-//            case we reload the image in the near future- in that case,
-//            we can simply Restore the image instead of reloading from disk.
-//-----------------------------------------------------------------------------
-
-bool TexSheet::FreeImage(BaseImage *img)
-{
-	return tex_mem_manager->Free(img);
-}
-
-
-
-
-//-----------------------------------------------------------------------------
-// RestoreImage: If an image is freed using FreeImage, and soon afterwards,
-//               we load that image again, this function restores the image
-//               without reloading the image from disk.
-//-----------------------------------------------------------------------------
-
-bool TexSheet::RestoreImage(BaseImage *img)
-{
-	return tex_mem_manager->Restore(img);
-}
-
-
-//-----------------------------------------------------------------------------
-// Smooth: Sets filtering type of a texsheet if different from current.   
-//-----------------------------------------------------------------------------
-
-void TexSheet::Smooth(bool flag)
-{
-	// In case of global smoothing, do nothing here
-	if (VideoManager->_ShouldSmooth())
-	{
-		return;
-	}
-
-	// If setting has changed, set filtering
-	if (smoothed != flag)
-	{
-		smoothed = flag;
-		GLenum filtering_type = smoothed ? GL_LINEAR : GL_NEAREST;
-
-		VideoManager->_BindTexture(tex_ID);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering_type);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering_type);
-	}
-}
-
-//-----------------------------------------------------------------------------
-// DeleteImage: deletes an image descriptor (this is what the API user should call)
-//-----------------------------------------------------------------------------
-
-bool GameVideo::DeleteImage(ImageDescriptor &id)
-{
-	if(id._animated)
-	{
-		return _DeleteImage(dynamic_cast<AnimatedImage &>(id));
-	}
-	else
-	{
-		return _DeleteImage(dynamic_cast<StillImage &>(id));
-	}
-}
-
-
-
-
-//-----------------------------------------------------------------------------
-// _DeleteImage: deletes an animated image. Actually just goes through each frame
-//               and deletes that static image by calling the other _DeleteImage() function
-//-----------------------------------------------------------------------------
-
-bool GameVideo::_DeleteImage(AnimatedImage &id)
-{
-	int32 num_frames = id.GetNumFrames();
-	bool success = true;
-
-	for(int32 j = 0; j < num_frames; ++j)
-	{
-		success &= _DeleteImage(id._frames[j].image);
-	}
-
-	return success;
-}
-
-
-
-
-//-----------------------------------------------------------------------------
-// _DeleteImage: decrements the reference count for all images composing this
-//              image descriptor.
-//
-// NOTE: for images which are 1024x1024 or higher, once their reference count
-//       reaches zero, they're immediately deleted. (don't want to keep those
-//       in memory if possible). For others, they're simply marked as "free"
-//-----------------------------------------------------------------------------
-
-bool GameVideo::_DeleteImage(StillImage &id)
-{
-	vector<ImageElement>::iterator iImage = id._elements.begin();
-	vector<ImageElement>::iterator iEnd   = id._elements.end();
-
-	// Loop through all the images inside this descriptor
-	while(iImage != iEnd)
-	{
-		Image *img = (*iImage).image;
-
-		// Only delete the image if the pointer is valid. Some ImageElements
-		// have a NULL pointer because they are just colored quads
-
-		if(img)
-		{
-			if(img->ref_count <= 0)
-			{
-				if(VIDEO_DEBUG)
-					cerr << "VIDEO ERROR: Called DeleteImage() when refcount was already <= 0!" << endl;
-				return false;
-			}
-
-			--(img->ref_count);
-
-			if(img->ref_count == 0)
-			{
-				// 1. If it's on a large tex sheet (> 512x512), delete it
-				// Note: We can assume that this is the only image on that texture
-				//       sheet, so it's safe to delete it. (Big textures always
-				//       are allocated to their own sheet, by design.)
-
-				if(img->width > 512 || img->height > 512)
-				{
-					_DeleteImage(img);  // overloaded DeleteImage for deleting Image
-				}
-
-				// 2. otherwise, mark it as "freed"
-
-				else if(!img->texture_sheet->FreeImage(img))
-				{
-					if(VIDEO_DEBUG)
-						cerr << "VIDEO ERROR: Could not remove image from texture sheet!" << endl;
-					return false;
-				}
-			}
-		}
-
-		++iImage;
-	}
-
-	id._elements.clear();
-	id._filename = "";
-	id._height = id._width = 0;
-	id._is_static = 0;
-
-	return true;
-}
-
-//-----------------------------------------------------------------------------
-// _RemoveImage(BaseImage*): removes the child image class from its specific storage method
-//-----------------------------------------------------------------------------
-
-bool GameVideo::_RemoveImage(BaseImage *base_image)
-{
-	Image  *img;
-	TImage *timage;
-
-	img = dynamic_cast<Image*>(base_image);
-	if (img)
-		return _RemoveImage(img);
-	
-	timage = dynamic_cast<TImage*>(base_image);
-	if (timage)
-		return _RemoveImage(timage);
-	
-	if (VIDEO_DEBUG)
-		cerr << "_RemoveImage(BaseImage*): Dynamic cast failed for all accepted types." << endl;
-
-	return false;
-}
-
-
-//-----------------------------------------------------------------------------
-// _RemoveImage(Image*): removes the image pointer from the std::map
-//-----------------------------------------------------------------------------
-
-bool GameVideo::_RemoveImage(Image *img)
-{
-	// Nothing to do if img is null
-	if(!img)
-		return true;
-
-	if(_images.empty())
-	{
-		return false;
-	}
-
-	map<string, Image*>::iterator iImage = _images.begin();
-	map<string, Image*>::iterator iEnd   = _images.end();
-
-	// Search std::map for pointer matching img and remove it
-	while(iImage != iEnd)
-	{
-		if(iImage->second == img)
-		{
-			delete img;
-			_images.erase(iImage);
-			return true;
-		}
-		++iImage;
-	}
-
-	// Couldn't find the image
-	return false;
-}
-
-
-//-----------------------------------------------------------------------------
-// _RemoveImage: removes the timage pointer from the std::set
-//-----------------------------------------------------------------------------
-
-bool GameVideo::_RemoveImage(TImage *img)
-{
-	// Nothing to do if img is null
-	if(!img)
-		return true;
-
-	if(_t_images.empty())
-	{
-		return false;
-	}
-
-	if(_GetTImage(img))
-	{
-		_t_images.erase(img);
-		delete img;
-		return true;
-	}
-
-	// Couldn't find the image
-	return false;
-}
-
-
-
-//-----------------------------------------------------------------------------
-// FixedTexMemMgr constructor
-//-----------------------------------------------------------------------------
-
-FixedTexMemMgr::FixedTexMemMgr
-(
-	TexSheet *tex_sheet,
-	int32 img_width,
-	int32 img_height
-)
-{
-	_tex_sheet = tex_sheet;
-
-	// Set all the dimensions
-	_sheet_width  = tex_sheet->width  / img_width;
-	_sheet_height = tex_sheet->height / img_height;
-	_image_width  = img_width;
-	_image_height = img_height;
-
-	// Allocate the blocks array
-	int32 num_blocks = _sheet_width * _sheet_height;
-	_blocks = new FixedImageNode[num_blocks];
-
-	// Initialize linked list of open blocks... which, at this point is
-	// all the blocks!
-	_open_list_head = &_blocks[0];
-	_open_list_tail = &_blocks[num_blocks-1];
-
-	// Now initialize all the blocks to proper values
-	for(int32 i = 0; i < num_blocks - 1; ++i)
-	{
-		_blocks[i].next  = &_blocks[i+1];
-		_blocks[i].image = NULL;
-		_blocks[i].block_index = i;
-	}
-
-	_blocks[num_blocks-1].next  = NULL;
-	_blocks[num_blocks-1].image = NULL;
-	_blocks[num_blocks-1].block_index = num_blocks - 1;
-}
-
-
-
-
-//-----------------------------------------------------------------------------
-// FixedTexMemMgr destructor
-//-----------------------------------------------------------------------------
-
-FixedTexMemMgr::~FixedTexMemMgr()
-{
-	delete [] _blocks;
-}
-
-
-
-//-----------------------------------------------------------------------------
-// Insert: inserts a new block into the texture. If there's no free blocks
-//         left, return false
-//-----------------------------------------------------------------------------
-
-bool VariableTexMemMgr::Insert  (BaseImage *img)
-{
-
-	// Don't allow insertions into a texture bigger than 512x512...
-	// This way, if we have a 1024x1024 texture holding a fullscreen background,
-	// it is always safe to remove the texture sheet from memory when the
-	// background is unreferenced. That way backgrounds don't stick around in memory.
-
-	if(_sheet_width > 32 || _sheet_height > 32)  // 32 blocks = 512 pixels
-	{
-		if(!_blocks[0].free)  // Quick way to test if texsheet's occupied
-			return false;
-	}
-
-
-	// Find an open block of memory. If none is found, return false
-
-	int32 w = (img->width  + 15) / 16;   // width and height in blocks
-	int32 h = (img->height + 15) / 16;
-
-	int32 block_x=-1, block_y=-1;
-
-
-	// This is a 100% brute force way to allocate a block, just a bunch
-	// of nested loops. In practice, this actually works fine, because
-	// the allocator deals with 16x16 blocks instead of trying to worry
-	// about fitting images with pixel perfect resolution.
-	// Later, if this turns out to be a bottleneck, we can rewrite this
-	// algorithm to something more intelligent ^_^
-	for(int32 y = 0; y < _sheet_height - h + 1; ++y)
-	{
-		for(int32 x = 0; x < _sheet_width - w + 1; ++x)
-		{
-			int32 furthest_blocker = -1;
-
-			for(int32 dy = 0; dy < h; ++dy)
-			{
-				for(int32 dx = 0; dx < w; ++dx)
-				{
-					if(!_blocks[(x+dx)+((y+dy)*_sheet_width)].free)
-					{
-						furthest_blocker = x+dx;
-						goto endneighborsearch_GOTO;
-					}
-				}
-			}
-
-			endneighborsearch_GOTO:
-
-			if(furthest_blocker == -1)
-			{
-				block_x = x;
-				block_y = y;
-				goto endsearch_GOTO;
-			}
-		}
-	}
-
-	endsearch_GOTO:
-
-	if(block_x == -1 || block_y == -1)
-		return false;
-
-	// Check if there's already an image allocated at this block.
-	// If so, we have to notify GameVideo that we're ejecting
-	// this image out of memory to make place for the new one
-
-	// Update blocks
-	std::set<hoa_video::private_video::BaseImage *> remove_images;
-
-	for(int32 y = block_y; y < block_y + h; ++y)
-	{
-		for(int32 x = block_x; x < block_x + w; ++x)
-		{
-			int32 index = x + (y * _sheet_width);
-			// Check if there's already an image at the point we're
-			// trying to load at. If so, we need to tell GameVideo
-			// to update its internal vector
-
-			if(_blocks[index].image)
-			{
-				remove_images.insert(_blocks[index].image);
-			}
-
-			_blocks[index].free  = false;
-			_blocks[index].image = img;
-
-		}
-	}
-
-	for(std::set<hoa_video::private_video::BaseImage *>::iterator itr = remove_images.begin(); itr != remove_images.end(); itr++)
-	{
-		Remove(*itr);
-		VideoManager->_RemoveImage(*itr);
-	}
-
-
-	// Calculate the actual pixel coordinates given this node's
-	// block index
-
-	img->x = block_x * 16;
-	img->y = block_y * 16;
-
-	// Calculate the u,v coordinates
-
-	float sheet_width = (float) _tex_sheet->width;
-	float sheet_height = (float) _tex_sheet->height;
-
-	img->u1 = float(img->x + 0.5f)               / sheet_width;
-	img->u2 = float(img->x + img->width - 0.5f)  / sheet_width;
-	img->v1 = float(img->y + 0.5f)               / sheet_height;
-	img->v2 = float(img->y + img->height - 0.5f) / sheet_height;
-
-	img->texture_sheet = _tex_sheet;
-	return true;
-}
-
-
-
-
-//-----------------------------------------------------------------------------
-// Remove: completely remove an image.
-//         In other words:
-//           1. find all the blocks this image owns
-//           2. mark all those blocks' image pointers to NULL
-//           3. set the "free" flag to true
-//-----------------------------------------------------------------------------
-
-bool VariableTexMemMgr::Remove(BaseImage *img)
-{
-	return SetBlockProperties(img, true, true, true, NULL);
-}
-
-
-
-
-//-----------------------------------------------------------------------------
-// SetBlockProperties: goes through all the blocks associated with img, and
-//                     updates their "free" and "image" properties if
-//                     changeFree and changeImage are true, respectively
-//-----------------------------------------------------------------------------
-
-bool VariableTexMemMgr::SetBlockProperties
-(
-	BaseImage *img,
-	bool change_free,
-	bool change_image,
-	bool free,
-	BaseImage *new_image
-)
-{
-	int32 block_x = img->x / 16;          // Upper-left corner in blocks
-	int32 block_y = img->y / 16;
-
-	int32 w = (img->width  + 15) / 16;   // Width and height in blocks
-	int32 h = (img->height + 15) / 16;
-
-	for(int32 y = block_y; y < block_y + h; ++y)
-	{
-		for(int32 x = block_x; x < block_x + w; ++x)
-		{
-			if(_blocks[x+y*_sheet_width].image == img)
-			{
-				if(change_free)
-					_blocks[x+y*_sheet_width].free  = free;
-				if(change_image)
-					_blocks[x+y*_sheet_width].image = new_image;
-			}
-		}
-	}
-
-	return true;
-}
-
-
-
-
-//-----------------------------------------------------------------------------
-// Free: marks the blocks containing the image as free
-//       NOTE: this assumes that the block isn't ALREADY free
-//-----------------------------------------------------------------------------
-
-bool VariableTexMemMgr::Free(BaseImage *img)
-{
-	return SetBlockProperties(img, true, false, true, NULL);
-}
-
-
-
-
-//-----------------------------------------------------------------------------
-// Restore: marks the blocks containing the image as non-free
-//-----------------------------------------------------------------------------
-
-bool VariableTexMemMgr::Restore(BaseImage *img)
-{
-	return SetBlockProperties(img, true, false, false, NULL);
-}
-
-
-
-
-//-----------------------------------------------------------------------------
-// Insert: inserts a new block into the texture. If there's no free blocks
-//         left, returns false.
-//-----------------------------------------------------------------------------
-
-bool FixedTexMemMgr::Insert(BaseImage *img)
-{
-	// Whoa, nothing on the open list! (no blocks left) return false :(
-
-	if(_open_list_head == NULL)
-		return false;
-
-	// Otherwise, get and remove the head of the open list
-
-	FixedImageNode *node = _open_list_head;
-	_open_list_head = _open_list_head->next;
-
-	if(_open_list_head == NULL)
-	{
-		// This must mean we just removed the last open block, so
-		// set the tail to NULL as well
-		_open_list_tail = NULL;
-	}
-	else
-	{
-		// Since this is the new head, it's prev pointer should be NULL
-		_open_list_head->prev = NULL;
-	}
-
-	node->next = NULL;
-
-	// Check if there's already an image allocated at this block.
-	// If so, we have to notify GameVideo that we're ejecting
-	// this image out of memory to make place for the new one
-
-	if(node->image)
-	{
-		VideoManager->_RemoveImage(node->image);
-		node->image = NULL;
-	}
-
-	// Calculate the actual pixel coordinates given this node's
-	// block index
-
-	img->x = _image_width  * (node->block_index % _sheet_width);
-	img->y = _image_height * (node->block_index / _sheet_width);
-
-	// Calculate the u,v coordinates
-
-	float sheet_width = (float) _tex_sheet->width;
-	float sheet_height = (float) _tex_sheet->height;
-
-	img->u1 = float(img->x + 0.5f)               / sheet_width;
-	img->u2 = float(img->x + img->width - 0.5f)  / sheet_width;
-	img->v1 = float(img->y + 0.5f)               / sheet_height;
-	img->v2 = float(img->y + img->height - 0.5f) / sheet_height;
-
-	img->texture_sheet = _tex_sheet;
-
-	return true;
-}
-
-
-
-
-//-----------------------------------------------------------------------------
-// CalculateBlockIndex: returns the block index used up by this image
-//-----------------------------------------------------------------------------
-
-int32 FixedTexMemMgr::_CalculateBlockIndex(BaseImage *img)
-{
-	int32 block_x = img->x / _image_width;
-	int32 block_y = img->y / _image_height;
-
-	int32 block_index = block_x + _sheet_width * block_y;
-	return block_index;
-}
-
-
-
-
-//-----------------------------------------------------------------------------
-// Remove: completely remove an image.
-//         In other words:
-//           1. mark its block's image pointer to NULL
-//           2. remove it from the open list
-//-----------------------------------------------------------------------------
-
-bool FixedTexMemMgr::Remove(BaseImage *img)
-{
-	// Translate x,y coordinates into a block index
-	int32 block_index = _CalculateBlockIndex(img);
-
-	// Check to make sure the block is actually owned by this image
-	if(_blocks[block_index].image != img)
-	{
-		// Error, the block that the image thinks it owns is actually not
-		// owned by that image
-
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: tried to remove a fixed block not owned by this Image" << endl;
-		return false;
-	}
-
-	// Set the image to NULL to indicate that this block is completely free
-	_blocks[block_index].image = NULL;
-
-	// Remove block from the open list
-	_DeleteNode(block_index);
-
-	return true;
-}
-
-
-
-
-//-----------------------------------------------------------------------------
-// DeleteNode: deletes a node from the open list with the given block index
-//-----------------------------------------------------------------------------
-
-void FixedTexMemMgr::_DeleteNode(int32 block_index)
-{
-	if(block_index < 0)
-		return;
-
-	if(block_index >= _sheet_width * _sheet_height)
-		return;
-
-	FixedImageNode *node = &_blocks[block_index];
-
-	if(node->prev && node->next)
-	{
-		// Node has a prev and next
-		node->prev->next = node->next;
-	}
-	else if(node->prev)
-	{
-		// Node is tail of the list
-		node->prev->next = NULL;
-		_open_list_tail = node->prev;
-	}
-	else if(node->next)
-	{
-		// Node is head of the list
-		_open_list_head = node->next;
-		node->next->prev = NULL;
-	}
-	else
-	{
-		// Node is the only element in the list
-		_open_list_head = NULL;
-		_open_list_tail = NULL;
-	}
-
-	// Just for good measure, clear out this node's pointers
-	node->prev = NULL;
-	node->next = NULL;
-}
-
-
-
-
-//-----------------------------------------------------------------------------
-// Free: marks the block containing the image as free, i.e. on the open list
-//       but leaves the image pointer intact in case we decide to restore
-//       the block later on
-//
-//       NOTE: this assumes that the block isn't ALREADY free
-//-----------------------------------------------------------------------------
-
-bool FixedTexMemMgr::Free(BaseImage *img)
-{
-	int32 block_index = _CalculateBlockIndex(img);
-
-	FixedImageNode *node = &_blocks[block_index];
-
-	if(_open_list_tail != NULL)
-	{
-		// Simply append to end of list
-		_open_list_tail->next = node;
-		node->prev = _open_list_tail;
-		node->next = NULL;
-		_open_list_tail = node;
-	}
-	else
-	{
-		// Special case: empty list
-		_open_list_head = _open_list_tail = node;
-		node->next = node->prev = NULL;
-	}
-
-	return true;
-}
-
-
-
-
-//-----------------------------------------------------------------------------
-// Restore: takes a block that was freed and takes it off the open list to
-//          mark it as "used" again
-//-----------------------------------------------------------------------------
-
-bool FixedTexMemMgr::Restore(BaseImage *img)
-{
-	int32 block_index = _CalculateBlockIndex(img);
-	_DeleteNode(block_index);
-	return true;
-}
-
-
-
-
-//-----------------------------------------------------------------------------
-// DEBUG_NextTexSheet: increments to the next texture sheet to show with
-//                     _DEBUG_ShowTexSheet().
-//-----------------------------------------------------------------------------
-
-void GameVideo::DEBUG_NextTexSheet()
-{
-	++_current_debug_TexSheet;
-
-	if(_current_debug_TexSheet >= (int32) _tex_sheets.size())
-	{
-		_current_debug_TexSheet = -1;   // disable display
-	}
-}
-
-
-
-
-//-----------------------------------------------------------------------------
-// DEBUG_PrevTexSheet: cycles to the previous texturesheet to show with
-//                     _DEBUG_ShowTexSheet().
-//-----------------------------------------------------------------------------
-
-void GameVideo::DEBUG_PrevTexSheet()
-{
-	--_current_debug_TexSheet;
-
-	if(_current_debug_TexSheet < -1)
-	{
-		_current_debug_TexSheet = (int32) _tex_sheets.size() - 1;
-	}
-}
-
-
-
-
-//-----------------------------------------------------------------------------
-// ReloadTextures: reloads the texture sheets, after they have been unloaded
-//                 most likely due to a change of video mode.
-//                 Returns false if any of the textures fail to reload
-//-----------------------------------------------------------------------------
-
-bool GameVideo::ReloadTextures()
-{
-	// Reload texture sheets
-
-	vector<TexSheet *>::iterator iSheet    = _tex_sheets.begin();
-	vector<TexSheet *>::iterator iSheetEnd = _tex_sheets.end();
-
-	bool success = true;
-
-	while(iSheet != iSheetEnd)
-	{
-		TexSheet *sheet = *iSheet;
-
-		if(sheet)
-		{
-			if(!sheet->Reload())
-			{
-				if(VIDEO_DEBUG)
-					cerr << "VIDEO_ERROR: in ReloadTextures(), sheet->Reload() failed!" << endl;
-				success = false;
-			}
-		}
-		else
-		{
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: in ReloadTextures(), one of the tex sheets in the vector was NULL!" << endl;
-			success = false;
-		}
-
-		++iSheet;
-	}
-
-	_DeleteTempTextures();
-
-	if(_uses_lights)
-		_light_overlay = _CreateBlankGLTexture(1024, 1024);
-
-	return success;
-}
-
-
-
-
-//-----------------------------------------------------------------------------
-// UnloadTextures: frees the texture memory taken up by the texture sheets,
-//                 but leaves the lists of images intact so we can reload them
-//                 Returns false if any of the textures fail to unload.
-//-----------------------------------------------------------------------------
-
-bool GameVideo::UnloadTextures()
-{
-	// Save temporary textures to disk, in other words textures which weren't
-	// loaded to a file. This way when we recreate the GL context we will
-	// be able to load them again.
-	_SaveTempTextures();
-
-	// Unload texture sheets
-	vector<TexSheet *>::iterator iSheet    = _tex_sheets.begin();
-	vector<TexSheet *>::iterator iSheetEnd = _tex_sheets.end();
-
-	bool success = true;
-
-	while(iSheet != iSheetEnd)
-	{
-		TexSheet *sheet = *iSheet;
-
-		if(sheet)
-		{
-			if(!sheet->Unload())
-			{
-				if(VIDEO_DEBUG)
-					cerr << "VIDEO_ERROR: in UnloadTextures(), sheet->Unload() failed!" << endl;
-				success = false;
-			}
-		}
-		else
-		{
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: in UnloadTextures(), one of the tex sheets in the vector was NULL!" << endl;
-			success = false;
-		}
-
-		++iSheet;
-	}
-
-	if(_light_overlay != 0xFFFFFFFF)
-	{
-		_DeleteTexture(_light_overlay);
-		_light_overlay = 0xFFFFFFFF;
-	}
-
-	// Clear all font caches
-	map<string, FontProperties *>::iterator iFontProp    = _font_map.begin();
-	map<string, FontProperties *>::iterator iFontPropEnd = _font_map.end();
-
-	while(iFontProp != _font_map.end())
-	{
-		FontProperties *fp = iFontProp->second;
-
-		if(fp->glyph_cache)
-		{
-			for(std::map<uint16, FontGlyph *>::iterator glyphitr = fp->glyph_cache->begin(); glyphitr != fp->glyph_cache->end(); glyphitr++)
-			{
-				_DeleteTexture((*glyphitr).second->texture);
-				delete (*glyphitr).second;
-			}
-
-			fp->glyph_cache->clear();
-		}
-
-		++iFontProp;
-	}
-
-	return success;
-}
-
-
-
-
-//-----------------------------------------------------------------------------
-// _DeleteTexture: wraps call to glDeleteTexture(), adds some checking to see
-//                if we deleted the last texture we bound using _BindTexture(),
-//                then set the last tex ID to 0xffffffff
-//-----------------------------------------------------------------------------
-
-bool GameVideo::_DeleteTexture(GLuint tex_ID)
-{
-	glDeleteTextures(1, &tex_ID);
-
-	if(_last_tex_ID == tex_ID)
-		_last_tex_ID = 0xFFFFFFFF;
-
-	if(glGetError())
-		return false;
-
-	return true;
-}
-
-
-
-
-//-----------------------------------------------------------------------------
-// Unload: unloads all memory used by OpenGL for this texture sheet
-//         Returns false if we fail to unload, or if the sheet was already
-//         unloaded
-//-----------------------------------------------------------------------------
-
-bool TexSheet::Unload()
-{
-	// Check if we're already unloaded
-	if(!loaded)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: unloading an already unloaded texture sheet" << endl;
-		return false;
-	}
-
-	// Delete the texture
-	if(!VideoManager->_DeleteTexture(tex_ID))
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: _DeleteTexture() failed in TexSheet::Unload()!" << endl;
-		return false;
-	}
-
-	loaded = false;
-	return true;
-}
-
-
-
-
-//-----------------------------------------------------------------------------
-// _CreateBlankGLTexture: creates a blank texture of the given width and height
-//                       and returns its OpenGL texture ID.
-//                       Returns 0xffffffff on failure
-//-----------------------------------------------------------------------------
-
-GLuint GameVideo::_CreateBlankGLTexture(int32 width, int32 height)
-{
-	// Attempt to create a GL texture with the given width and height
-	// if texture creation fails, return NULL
-
-	int32 error;
-
-	GLuint tex_ID;
-
-	glGenTextures(1, &tex_ID);
-	error = glGetError();
-
-	if(!error)   // If there's no error so far, attempt to bind texture
-	{
-		_BindTexture(tex_ID);
-		error = glGetError();
-
-		// If the binding was successful, initialize the texture with glTexImage2D()
-		if(!error)
-		{
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-			error = glGetError();
-		}
-	}
-
-	if(error != 0)   // If there's an error, delete the texture and return error code
-	{
-		_DeleteTexture(tex_ID);
-
-		// This error is fatal, always show
-		cerr << "VIDEO ERROR: failed to create new " << width << " by " << height << " texture in _CreateBlankGLTexture()." << endl;
-		cerr << "  OpenGL reported the following error:" << endl << "  ";
-		char *errString = (char*)gluErrorString(error);
-		cerr << errString << endl;
-
-		return 0xffffffff;
-	}
-
-	// Set linear texture interpolation if we're at non-natural resolution
-	GLenum filtering_type = VideoManager->_ShouldSmooth() ? GL_LINEAR : GL_NEAREST;
-
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering_type );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering_type );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
-
-	return tex_ID;
-}
-
-
-
-
-//-----------------------------------------------------------------------------
-// Reload: reallocate memory with OpenGL for this texture and load all the images
-//         back into it
-//         Returns false if we fail to reload or if the sheet was already loaded
-//-----------------------------------------------------------------------------
-
-bool TexSheet::Reload()
-{
-	// Check if we're already loaded
-	if(loaded)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: loading an already loaded texture sheet" << endl;
-		return false;
-	}
-
-	// Create new OpenGL texture
-	GLuint tID = VideoManager->_CreateBlankGLTexture(width, height);
-
-	if(tID == 0xFFFFFFFF)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: _CreateBlankGLTexture() failed in TexSheet::Reload()!" << endl;
-		return false;
-	}
-
-	tex_ID = tID;
-
-	// Restore texture smoothing if applied.
-	bool was_smoothed = smoothed;
-	smoothed = false;
-	Smooth(was_smoothed);
-
-	// Now the hard part: go through all the images that belong to this texture
-	// and reload them again. (GameVideo's function, _ReloadImagesToSheet does this)
-
-	if(!VideoManager->_ReloadImagesToSheet(this))
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: CopyImagesToSheet() failed in TexSheet::Reload()!" << endl;
-		return false;
-	}
-
-	loaded = true;
-	return true;
-}
-
-
 
 
 //-----------------------------------------------------------------------------
@@ -3246,18 +2894,6 @@ bool GameVideo::_AddTImage(TImage *timg)
 	}
 	return false;
 }
-
-
-//-----------------------------------------------------------------------------
-// _DeleteTempTextures: delete all the textures in the temp directory
-//-----------------------------------------------------------------------------
-
-bool GameVideo::_DeleteTempTextures()
-{
-	return CleanDirectory("img\\temp");
-}
-
-
 
 }  // namespace hoa_video
 

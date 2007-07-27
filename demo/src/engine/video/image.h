@@ -66,28 +66,31 @@ namespace private_video {
 *** ***************************************************************************/
 class ImageLoadInfo {
 public:
-	//! \brief The width of the image (in pixels)
-	int32 width;
-
-	//! \brief The height of the image (in pixels)
-	int32 height;
-
-	//! \todo Buffer of data, usually of size width*height*4 (RGBA, 8 bits per component)
-	void* pixels;
-
-	//! Constructor for intializing the class data members
+	//! \brief Constructor for intializing the class data members
 	ImageLoadInfo () :
 		width (0),
 		height (0),
 		pixels (NULL)
 	{}
 
+	//! \brief The width of the image (in pixels)
+	int32 width;
+
+	//! \brief The height of the image (in pixels)
+	int32 height;
+
+	//! \brief Buffer of data, usually of size width*height*4 (RGBA, 8 bits per component)
+	void* pixels;
 }; // class ImageLoadInfo
 
 
 class BaseImage {
-public:
 	friend class GameVideo;
+
+public:
+	//! \brief Default virtual constructor.
+	virtual ~BaseImage() {};
+
 	//! \brief A pointer to the texture sheet where the image is contained.
 	TexSheet* texture_sheet;
 
@@ -97,7 +100,7 @@ public:
 	/** \brief The actual uv coordinates.
 	*** This is a little redundant, but saves effort on floating point calcuations.
 	*** u1 and v1 are the upper-left UV coordinates, while u2 and v2 correspond to
-	*** the lower-right. They are expressed in the [0.0,1.0] range.
+	*** the lower-right. They are expressed in the [0.0, 1.0] range.
 	**/
 	float u1, v1, u2, v2;
 
@@ -115,23 +118,15 @@ public:
 	//! \brief Whether the image should be drawn smoothed (GL_LINEAR)
 	bool smooth;
 
-	//! \brief Virtual function decrements reference count,
-	//         returning true if deletion ref count reached.
+	/** \brief Removes one reference count from the image
+	*** \return True if there are no more references to the image
+	**/
 	virtual bool Remove()
-	{
-		--ref_count;
-		if (ref_count <= 0)
-			return true;
-		return false;
-	}
-	//! \brief Virtual function adds to reference count.
-	virtual void Add()
-	{
-		++ref_count;
-	}
+		{ --ref_count; if (ref_count <= 0) return true; else return false; }
 
-	//! \brief Default virtual constructor.
-	virtual ~BaseImage() {};
+	//! \brief Adds one to the reference count
+	virtual void Add()
+		{ ++ref_count; }
 };
 
 /** ****************************************************************************
@@ -175,7 +170,8 @@ public:
 		{ return *this; }
 
 	//! \brief Default virtual constructor.
-	virtual ~Image() {};
+	virtual ~Image()
+		{}
 }; // class Image
 
 

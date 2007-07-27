@@ -138,9 +138,7 @@ _music_volume (1.0f),
 _device (0),
 _context (0),
 _max_sources (64)
-{
-	SingletonInitialize ();
-}
+{}
 
 
 
@@ -320,7 +318,7 @@ void GameAudio::Update ()
 }
 
 
-void GameAudio::PlaySound(std::string filename) {
+void GameAudio::PlaySound(const std::string& filename) {
 	SoundDescriptor* new_sound = new SoundDescriptor();
 
 //	Apparently, LoadSound returns void, so we'll try doing it this way.

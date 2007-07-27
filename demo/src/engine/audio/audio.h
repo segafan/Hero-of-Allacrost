@@ -121,7 +121,7 @@ public:
 	 *  This method of playback is useful because it doesn't require any SoundDescriptor objects to be managed by the user.
 	 *  This is ideal for the case of scripts which wish to play a sound only once.
 	 */
-	void PlaySound(std::string filename);
+	void PlaySound(const std::string& filename);
 
 	/*! \name Global Audio Manipulation Functions
 	 *  \brief Performs specified operation on all active sounds and music.

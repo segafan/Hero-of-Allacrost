@@ -728,6 +728,12 @@ public:
 	 */
 	bool SaveImage (const std::string &file_name, const AnimatedImage &image) const;
 
+
+	/** \brief decreases ref count of an image (static or animated)
+	*** \param id  image descriptor to decrease the reference count of
+	**/
+	void DeleteImage(ImageDescriptor &id);
+
 	/** \brief captures the contents of the screen and saves it to an image
 	 *         descriptor
 	 *
@@ -735,13 +741,6 @@ public:
 	 * \return success/failure
 	 */
 	bool CaptureScreen(StillImage &id);
-
-	/** \brief decreases ref count of an image (static or animated)
-	 *
-	 *  \param id  image descriptor to decrease the reference count of
-	 * \return success/failure
-	 */
-	bool DeleteImage(ImageDescriptor &id);
 
 	/** \brief unloads all texture sheets from memory when we lose the GL
 	 *         context, so textures can be properly reloaded
@@ -1187,13 +1186,13 @@ private:
 	int32  _temp_height;
 
 	//! ID of the last texture that was bound. Used to eliminate redundant binding of textures
-	GLuint _last_tex_ID;
+	GLuint _last_tex_id;
 
 	//! current font name
 	std::string _current_font;
 
 	//! current text color
-	Color       _current_text_color;
+	Color _current_text_color;
 
 	//! image which is to be used as the cursor
 	StillImage _default_menu_cursor;
@@ -1309,31 +1308,27 @@ private:
 	bool _DeleteTexture(GLuint tex_ID);
 
 	/** \brief decreases the reference count of an image
-	 *
-	 *  \param image  pointer to image
-	 * \return success/failure
-	 */
+	*** \param image  pointer to image
+	*** \return success/failure
+	**/
 	bool _DeleteImage(private_video::BaseImage *const image);
 
 	/** \brief decreases ref count of an image
-	 *
-	 *  \param id  image descriptor to decrease the reference count of
-	 * \return success/failure
-	 */
-	bool _DeleteImage(StillImage &id);
+	*** \param id  image descriptor to decrease the reference count of
+	**/
+	void _DeleteImage(StillImage &id);
 
 	/** \brief decreases ref count of an animated image
-	 *
-	 *  \param id  image descriptor to decrease the reference count of
-	 * \return success/failure
-	 */
-	bool _DeleteImage(AnimatedImage &id);
+	*** \param id  image descriptor to decrease the reference count of
+	**/
+	void _DeleteImage(AnimatedImage &id);
 
 	/** \brief deletes the temporary textures from the "temp" folder that were saved
 	 *         by _SaveTempTextures()
 	 * \return success/failure
 	 */
-	bool _DeleteTempTextures();
+	bool _DeleteTempTextures()
+		{ return hoa_utils::CleanDirectory("img\\temp"); }
 
 	/** \brief draws an image element, i.e. one image within an image descriptor which may contain multiple images
 	 *
