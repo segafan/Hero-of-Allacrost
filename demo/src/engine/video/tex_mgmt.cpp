@@ -779,7 +779,7 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 	Image img(sheet, string(), "<T>", 0, 0, 0.0f, 0.0f, 1.0f, 1.0f, w, h, false);
 
 
-	_PushContext();
+	PushState();
 	SetDrawFlags(VIDEO_NO_BLEND, VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 	SetCoordSys(0.0f, 1024.0f, 0.0f, 760.0f);
 
@@ -800,7 +800,7 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 
 	if(!SetFont("debug_font"))
 	{
-		_PopContext();
+		PopState();
 		return false;
 	}
 
@@ -809,7 +809,7 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 	Move(20, _coord_sys.GetTop() - 30);
 	if(!DrawText("Current Texture sheet:"))
 	{
-		_PopContext();
+		PopState();
 		return false;
 	}
 
@@ -817,7 +817,7 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 	MoveRelative(0, -20);
 	if(!DrawText(buf))
 	{
-		_PopContext();
+		PopState();
 		return false;
 	}
 
@@ -825,7 +825,7 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 	sprintf(buf, "  Size:    %dx%d", sheet->width, sheet->height);
 	if(!DrawText(buf))
 	{
-		_PopContext();
+		PopState();
 		return false;
 	}
 
@@ -841,7 +841,7 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 	MoveRelative(0, -20);
 	if(!DrawText(buf))
 	{
-		_PopContext();
+		PopState();
 		return false;
 	}
 
@@ -849,7 +849,7 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 	MoveRelative(0, -20);
 	if(!DrawText(buf))
 	{
-		_PopContext();
+		PopState();
 		return false;
 	}
 
@@ -857,11 +857,11 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 	MoveRelative(0, -20);
 	if(!DrawText(buf))
 	{
-		_PopContext();
+		PopState();
 		return false;
 	}
 
-	_PopContext();
+	PopState();
 	return true;
 }
 

@@ -93,7 +93,7 @@ void TextBox::Draw() {
 	//  (4): Determine the text draw position from the alignment flags
 	//  (5): Draw each line of text to the screen
 	//  (6): Restore the original video engine context
-	VideoManager->_PushContext();
+	VideoManager->PushState();
 
 	VideoManager->SetDrawFlags(_xalign, _yalign, VIDEO_BLEND, 0);
 	VideoManager->SetFont(_font);
@@ -167,7 +167,7 @@ void TextBox::Draw() {
 	_DrawTextLines(text_xpos, text_ypos, rect);
 	VideoManager->SetTextColor(oldColor);
 
-	VideoManager->_PopContext();
+	VideoManager->PopState();
 } // void TextBox::Draw()
 
 

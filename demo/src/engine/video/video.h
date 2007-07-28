@@ -84,33 +84,27 @@ extern GameVideo* VideoManager;
 extern bool VIDEO_DEBUG;
 
 /** \brief Creates a random float between a and b.
- * \param a lower bound of random selection
- * \param b upper bound of random selection
- * \return the randomly generated float
- */
+*** \param a lower bound of random selection
+*** \param b upper bound of random selection
+*** \return the randomly generated float
+**/
 float RandomFloat(float a, float b);
 
-
 /** \brief Rotates a point (x,y) around the origin (0,0), by angle radians
- * \param x x coordinate of point to rotate
- * \param y y coordinate of point to rotate
- * \param angle amount to rotate by (in radians)
- */
+*** \param x x coordinate of point to rotate
+*** \param y y coordinate of point to rotate
+*** \param angle amount to rotate by (in radians)
+**/
 void RotatePoint(float &x, float &y, float angle);
 
-
 /** \brief linearly interpolation, returns a value which is (alpha*100) percent between initial and final
- *
- *  \param alpha    controls the linear interpolation
- *  \param initial  initial value
- *  \param final    final value
- * \return the linear interpolated value
- */
+***
+***  \param alpha    controls the linear interpolation
+***  \param initial  initial value
+***  \param final    final value
+*** \return the linear interpolated value
+**/
 float Lerp(float alpha, float initial, float final);
-
-
-
-
 
 //! animation frame period: how many milliseconds 1 frame of animation lasts for
 const int32 VIDEO_ANIMATION_FRAME_PERIOD = 10;
@@ -248,7 +242,7 @@ public:
 	 *  \note  If you don't call this function, the default target is SDL window
 	 *         Also, note that you MUST call this before calling Initialize()
 	 */
-	bool SetTarget(VIDEO_TARGET target);
+	void SetTarget(VIDEO_TARGET target);
 
 	//-- Video settings -------------------------------------------------------
 
@@ -256,14 +250,13 @@ public:
 	//!       to actually apply them
 
 	/** \brief sets the current resolution to the given width and height
-	 *
 	 *  \param width new screen width
 	 *  \param height new screen height
-	 * \return success/failure
 	 *
 	 *  \note  you must call ApplySettings() to actually apply the change
 	 */
-	bool SetResolution(int32 width, int32 height);
+	void SetResolution(uint32 width, uint32 height)
+		{ _temp_width = width; _temp_height = height; }
 
 	/** \brief returns width, (whatever was set with SetResolution)
 	 * \return width of the screen
@@ -306,13 +299,15 @@ public:
 	 *  \param fullscreen set to true if you want fullscreen, false for windowed.
 	 *  \note  you must call ApplySettings() to actually apply the change
 	 */
-	bool SetFullscreen(bool fullscreen);
+	void SetFullscreen(bool fullscreen)
+		{ _temp_fullscreen = fullscreen; }
 
 	/** \brief toggles fullscreen on and off
 	 * \return success/failure
 	 *  \note  you must call ApplySettings() to actually apply the change
 	 */
-	bool ToggleFullscreen();
+	void ToggleFullscreen()
+		{ SetFullscreen(!_temp_fullscreen); }
 
 	/** \brief applies any changes to video settings like resolution and
 	 *         fullscreen. If the changes fail, then this function returns
@@ -400,30 +395,37 @@ public:
 
 	//-- Transformations ------------------------------------------------------
 
-	/** \brief saves entire state of the video engine on to the stack (all draw
-	 *         flags, coordinate system, scissor rect, viewport, etc.)
-	 *         This is useful for safety purposes between two major parts of code
-	 *         to ensure that one part doesn't inadvertently affect the other.
-	 *         However, it's a very expensive function call. If you only need to
-	 *         push the current transformation, you should use PushMatrix() and
-	 *         PopMatrix()
-	 */
+	/** \brief Saves relevant state of the video engine on to an internal stack
+	*** The contents saved include: all draw flags, the coordinate system,
+	*** the scissor rectangle, the viewport, etc.). This is useful for safety
+	*** purposes between two major parts of code to ensure that one part doesn't
+	*** inadvertently affect the other.
+	***
+	*** \note This is a very expensive function call. If you only need to push
+	*** the current transformation, you should use PushMatrix() and PopMatrix().
+	***
+	*** \note The size of the stack is small (around 32 entries), so you should
+	*** try and limit the maximum number of pushed state entries so that this
+	*** limit is not exceeded
+	**/
 	void PushState();
 
-	/** \brief pops the most recently pushed video engine state from the stack
-	 *         and restores all of the old settings.
-	 */
+	//! \brief Restores the most recently pushed video engine state
 	void PopState ();
 
 
 	/** \brief saves current modelview transformation on to the stack. In English,
 	 *         that means the combined result of calls to Move/MoveRelative/Scale/Rotate
+	 *   \note Assumes that glMatrixMode(GL_MODELVIEW) has been called
 	 */
-	void PushMatrix();
+	void PushMatrix()
+		{ glPushMatrix(); }
 
 	/** \brief pops the modelview transformation from the stack.
+	*** \note Assumes that glMatrixMode(GL_MODELVIEW) has been called
 	 */
-	void PopMatrix();
+	void PopMatrix()
+		{ glPopMatrix(); }
 
 	/** \brief sets draw position to (x,y)
 	 *  \param x  x coordinate to move to
@@ -869,9 +871,8 @@ public:
 
 	/** \brief turn on the ligt color for the scene
 	 * \param color the light color to use
-	 * \return success/failure
 	 */
-	bool EnableSceneLighting(const Color &color);
+	void EnableSceneLighting(const Color& color);
 
 	/** \brief disables scene lighting
 	*/
@@ -880,18 +881,16 @@ public:
 	/** \brief returns the scene lighting color
 	 * \return the light color used in the scene
 	 */
-	Color &GetSceneLightingColor();
+	const Color& GetSceneLightingColor()
+		{ return _light_color; }
 
-	/** \brief sets fog parameters
-	 *
-	 *  \param color  Color of the fog (alpha should be 1.0)
-	 *  \param intensity  Intensity of fog from 0.0f to 1.0f
-	 * \return success/failure
-	 */
-	bool EnableFog(const Color &color, float intensity);
+	/** \brief Initializes and enables fog parameters
+	*** \param color The color of the fog (the alpha value should be 1.0)
+	*** \param intensity Intensity of fog from 0.0f to 1.0f. 0.0f will disable fog.
+	**/
+	void EnableFog(const Color& color, float intensity);
 
-	/** \brief disables fog
-	*/
+	//! \brief Disables the fog effect
 	void DisableFog();
 
 	/** \brief draws a halo at the given spot
@@ -912,59 +911,48 @@ public:
 	 */
 	void DrawLight(const StillImage &id, float x, float y, const Color &color = Color(1.0f, 1.0f, 1.0f, 1.0f));
 
-	/** \brief call if this map uses real lights
-	 * \return always returns true
-	 */
-	bool EnablePointLights();
+	//! \brief Prepares the 
+	void EnablePointLights();
 
 	/**
 	* \brief disables point lights
 	*/
 	void DisablePointLights();
 
-	/** \brief call after rendering all real lights.  This function renders all lights
-	 *		   to the lighting overlay texture, Moved into ApplyLightingOverlay
-	 * \return success/failure
-	 */
-	//bool AccumulateLights();
-
 	/** \brief call after all map images are drawn to apply lighting. All
 	 *         menu and text rendering should occur AFTER this call, so that
 	 *         they are not affected by lighting.
-	 * \return success/failure
 	 */
-	bool ApplyLightingOverlay();
+	void ApplyLightingOverlay();
 
 	//-- Overlays / lightning -------------------------------------------------------
 
 	/** \brief draws a full screen overlay of the given color
 	 *  \note  This is very slow, so use sparingly!
-	 * \return success/failure
 	 */
-	bool DrawFullscreenOverlay(const Color &color);
+	void DrawFullscreenOverlay(const Color& color);
 
 	/** \brief call to create lightning effect
 	 *  \param lit_file a .lit file which contains lightning intensities stored
 	 *                 as bytes (0-255).
 	 * \return success/failure
 	 */
-	bool MakeLightning(const std::string &lit_file);
+	bool MakeLightning(const std::string& lit_file);
 
 	/** \brief call this every frame to draw any lightning effects. You should make
 	 *         sure to place this call in an appropriate spot. In particular, you should
-	 *         draw the lightning before drawing the GUI.
-	 * \return success/failure
+	 *         draw the lightning before drawing the GUI. The lightning is drawn by
+	 *         using a fullscreen overlay.
 	 */
-	bool DrawLightning();
+	void DrawLightning();
 
 	//-- Fading ---------------------------------------------------------------
 
 	/** \brief Begins a screen fade.
 	*** \param color The color to fade the screen to
-	*** \param fade_time The fading process will take this number of milliseconds
-	*** \return True if fade was successful, false otherwise.
+	*** \param time The fading process will take this number of milliseconds
 	**/
-	void FadeScreen(const Color &color, uint32 time)
+	void FadeScreen(const Color& color, uint32 time)
 		{ _fader.BeginFade(color, time); }
 
 	//! \brief Returns true if a screen fade is currently in progress
@@ -1002,7 +990,8 @@ public:
 	/** \brief Returns the gamma value
 	 * \return the gamma value
 	 */
-	float GetGamma();
+	float GetGamma() const
+		{ return _gamma_value; }
 
 	/** \brief Updates the FPS counter and draws the current average FPS to the screen
 	*** The number of milliseconds that have expired since the last frame was drawn
@@ -1011,7 +1000,8 @@ public:
 
 	/** \brief toggles the FPS display (on by default)
 	 */
-	void ToggleFPS();
+	void ToggleFPS()
+		{ _fps_display = !_fps_display; }
 
 	/** \brief draws a line grid. Used by map editor to draw a grid over all
 	 *         the tiles. This function will start at (x,y), and go to
@@ -1037,7 +1027,7 @@ public:
 	 * \param height Height of the rectangle.
 	 * \param color Color to paint the rectangle.
 	 */
-	void DrawRectangle(const float width, const float height, const Color &color);
+	void DrawRectangle(float width, float height, const Color& color);
 
 	/** \brief Takes a screenshot and saves the image to a file
 	*** \param filename The name of the file, if any, to save the screenshot as. Default is "screenshot.jpg"
@@ -1046,9 +1036,9 @@ public:
 
 	/** \brief toggles advanced information display for video engine, shows
 	 *         things like number of texture switches per frame, etc.
-	 * \return always returns true
 	 */
-	bool ToggleAdvancedDisplay();
+	void ToggleAdvancedDisplay()
+		{ _advanced_display = !_advanced_display; }
 
 	/** \brief sets the default cursor to the image in the given filename
 	* \param cursor_image_filename file containing the cursor image
@@ -1069,19 +1059,19 @@ public:
 	 * \param line The rendered line
 	 * \param tex_index Whether main or shadow texture
 	 */
-	bool Draw(const RenderedLine &line, int32 tex_index);
+	bool Draw(const RenderedLine& line, int32 tex_index);
 
 	/** \brief Renders the given string to a drawable object
 	 * \param txt The string to render
 	 */
-	RenderedString *RenderText(const hoa_utils::ustring &txt);
+	RenderedString* RenderText(const hoa_utils::ustring& txt);
 
 	/** Renders a given unicode string and TextStyle to a pixel array
 	 * \param string The ustring to render
 	 * \param style  The text style to render
 	 * \param buffer The pixel array to render to
 	 */
-	bool _RenderText(hoa_utils::ustring &string, TextStyle &style, private_video::ImageLoadInfo &buffer);
+	bool _RenderText(hoa_utils::ustring& string, TextStyle& style, private_video::ImageLoadInfo& buffer);
 
 private:
 	GameVideo();
@@ -1091,7 +1081,7 @@ private:
 	//! particle manager, does dirty work of managing particle effects
 	private_video::ParticleManager _particle_manager;
 
-	//! target (QT widget or SDL window)
+	//! \brief The type of window target that the video manager will operate on (SDL window or QT widget)
 	VIDEO_TARGET _target;
 
 	// draw flags
@@ -1130,22 +1120,22 @@ private:
 	private_video::ScreenFader _fader;
 
 	//! advanced display flag. If true, info about the video engine is shown on screen
-	bool   _advanced_display;
+	bool _advanced_display;
 
 	//! fps display flag. If true, FPS is displayed
-	bool   _fps_display;
+	bool _fps_display;
 
 	//! current debug texture sheet
-	int32  _current_debug_TexSheet;
+	int32 _current_debug_TexSheet;
 
 	//! keep track of number of texture switches per frame
-	int32  _num_tex_switches;
+	int32 _num_tex_switches;
 
 	//! keep track of number of draw calls per frame
-	int32  _num_draw_calls;
+	int32 _num_draw_calls;
 
 	//! true if real lights are enabled
-	bool   _uses_lights;
+	bool _uses_lights;
 
 	//! lighting overlay texture
 	GLuint _light_overlay;
@@ -1230,22 +1220,22 @@ private:
 	int32 _current_frame_diff;
 
 	//! STL map containing all the images currently being managed by the video engine
-	std::map    <std::string, private_video::Image*>   _images;
+	std::map<std::string, private_video::Image*> _images;
 
 	//! STL map containing all the text images currently being managed by the video engine
-	std::set    <hoa_video::TImage*>               _t_images;
+	std::set<hoa_video::TImage*> _t_images;
 
 	//! vector containing all texture sheets currently being managed by the video engine
-	std::vector <private_video::TexSheet *>     _tex_sheets;
+	std::vector<private_video::TexSheet*> _tex_sheets;
 
 	//! STL map containing properties for each font (includeing TTF_Font *)
-	std::map    <std::string, FontProperties *> _font_map;
+	std::map<std::string, FontProperties*> _font_map;
 
 	//! STL map containing all loaded particle effect definitions
-	std::map <std::string, ParticleEffectDef *> _particle_effect_defs;
+	std::map<std::string, ParticleEffectDef*> _particle_effect_defs;
 
 	//! stack containing context, i.e. draw flags plus coord sys. Context is pushed and popped by any GameVideo functions that clobber these settings
-	std::stack  <private_video::Context>      _context_stack;
+	std::stack<private_video::Context> _context_stack;
 
 	//-- Private methods ------------------------------------------------------
 
@@ -1483,14 +1473,14 @@ private:
 	 *	\param info Structure of the information to store
 	 *	\return True if the process was carried out with no problem, false otherwise
 	 */
-	bool _SavePng (const std::string& file_name, hoa_video::private_video::ImageLoadInfo &info) const;
+	bool _SavePng(const std::string& file_name, hoa_video::private_video::ImageLoadInfo &info) const;
 
 	/*! \brief Saves Raw data in a Jpeg file
 	 *	\param file_name Name of the file, without the extension
 	 *	\param info Structure of the information to store
 	 *	\return True if the process was carried out with no problem, false otherwise
 	 */
-	bool _SaveJpeg (const std::string& file_name, hoa_video::private_video::ImageLoadInfo &info) const;
+	bool _SaveJpeg(const std::string& file_name, hoa_video::private_video::ImageLoadInfo &info) const;
 
 	/*! \brief Get information of a Png file
 	 *	\param file_name Name of the file, without the extension
@@ -1499,7 +1489,7 @@ private:
 	 *	\param bpp Bits per pixel of the image
 	 *	\return True if the process was carried out with no problem, false otherwise
 	 */
-	bool _GetImageInfoPng (const std::string& file_name, uint32 &rows, uint32& cols, uint32& bpp);
+	bool _GetImageInfoPng(const std::string& file_name, uint32& rows, uint32& cols, uint32& bpp);
 
 	/*! \brief Get information of a Jpeg file
 	 *	\param file_name Name of the file, without the extension
@@ -1508,14 +1498,14 @@ private:
 	 *	\param bpp Bits per pixel of the image
 	 *	\return True if the process was carried out with no problem, false otherwise
 	 */
-	bool _GetImageInfoJpeg (const std::string& file_name, uint32 &rows, uint32& cols, uint32& bpp);
+	bool _GetImageInfoJpeg(const std::string& file_name, uint32& rows, uint32& cols, uint32& bpp);
 
 	/** \brief loop through all currently loaded images and if they belong to the given tex sheet, reload them into it
 	 *
 	 *  \param tex_sheet   pointer to the tex sheet whose images we want to load
 	 * \return success/failure
 	 */
-	bool _ReloadImagesToSheet(private_video::TexSheet *tex_sheet);
+	bool _ReloadImagesToSheet(private_video::TexSheet* tex_sheet);
 
 	/** \brief removes the image from the STL map with the same pointer as the one passed in. Returns false on failure
 	 *
@@ -1572,16 +1562,6 @@ private:
 	float _RoundForce(float force);
 
 	/**
-	 *  \brief restores coord system, draw flags, and transformations
-	 */
-	void _PopContext();
-
-	/**
-	 *  \brief saves coord system, draw flags, and transformations
-	 */
-	void _PushContext();
-
-	/**
 	 *  \brief saves temporary textures to disk, in other words, textures which were not
 	 *         loaded to a file. This is used when the GL context is being destroyed,
 	 *         perhaps because we are switching from windowed to fullscreen. So, we need
@@ -1608,7 +1588,8 @@ private:
 	void _UpdateShake(uint32 frame_time);
 
 	//! Whether textures should be smoothed for non natural resolution.
-	bool _ShouldSmooth();
+	bool _ShouldSmooth()
+		{ return ( _width != VIDEO_STANDARD_RES_WIDTH || _height != VIDEO_STANDARD_RES_HEIGHT); }
 
 	/**
 	 *  \brief function solely for debugging, which shows number of texture switches made during a frame,
