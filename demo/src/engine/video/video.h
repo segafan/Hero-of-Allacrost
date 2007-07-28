@@ -220,24 +220,22 @@ public:
 	//-- General --------------------------------------------------------------
 
 	/** \brief Clears the contents of the current screen.
-	*** \return success/failure
 	***
 	*** This method should be called at the beginning of every frame, before any
-	*** draw operations are performed.
+	*** draw operations are performed. Note that it only clears the color buffer,
+	*** not any of the other OpenGL buffers.
 	**/
-	bool Clear();
+	void Clear();
 
 	/** \brief Clears the screen to a specific color.
 	*** \param c The color to set the cleared screen to.
-	*** \return success/failure
 	**/
-	bool Clear(const Color &c);
+	void Clear(const Color &c);
 
 	/** \brief call at end of every frame
 	*** \param frame_time The number of milliseconds that have passed since the last frame.
-	*** \return success/failure
 	**/
-	bool Display(int32 frame_time);
+	void Display(int32 frame_time);
 
 
 	/** \brief set the target, i.e. whether the video engine is being used to
@@ -326,29 +324,30 @@ public:
 
 	//-- Coordinate system / viewport  ------------------------------------------
 
-	/** \brief sets the viewport, i.e. the area of the screen that gets drawn
-	 *         to. The default is (0, 100, 0, 100).
-	 *
-	 *  \param left   left border of screen
-	 *  \param right  right border of screen
-	 *  \param top    top border of screen
-	 *  \param bottom bottom border of screen
-	 *  \note  The arguments are percentages (0-100)
-	 */
+	/** \brief Sets the viewport, i.e. the area of the screen that gets drawn to.
+	*** \param left Left border of screen
+	*** \param right Right border of screen
+	*** \param top Top border of screen
+	*** \param bottom Bottom border of screen
+	***
+	*** The arguments are percentages, and the default viewport is (0, 100,
+	*** 0, 100), which covers the entire screen.
+	**/
 	void SetViewport(float left, float right, float bottom, float top);
 
-	/** \brief sets the coordinate system. Default is (0,1024,0,768)
+	/** \brief Sets the coordinate system to use. Default is (0, 1024, 0, 768)
 	 *  \param left   left border of screen
 	 *  \param right  right border of screen
 	 *  \param top    top border of screen
 	 *  \param bottom bottom border of screen
 	 */
-	void SetCoordSys(float left, float right, float bottom, float top);
+	void SetCoordSys(float left, float right, float bottom, float top)
+		{ SetCoordSys(CoordSys(left, right, bottom, top)); }
 
-	/** \brief sets the coordinate system. Default is (0,1024,0,768)
-	 *  \param coordinate_system the coordinate system you want to set to
-	 */
-	void SetCoordSys(const CoordSys &coordinate_system);
+	/** \brief Sets the coordinate system. Default is (0, 1024, 0, 768)
+	*** \param coordinate_system the coordinate system you want to set to
+	**/
+	void SetCoordSys(const CoordSys& coordinate_system);
 
 	/** \brief enables scissoring, where you can specify a rectangle of the screen
 	 *         which is affected by rendering operations. MAKE SURE to disable
@@ -442,7 +441,8 @@ public:
 	* \param x stores x position of the cursor
 	* \param y stores y position of the cursor
 	*/
-	void GetDrawPosition(float &x, float &y);
+	void GetDrawPosition(float &x, float &y) const
+		{ x = _x; y = _y; }
 
 	/** \brief rotates images counterclockwise by 'angle' radians
 	 *  \param angle how many radians to rotate by
@@ -1039,11 +1039,10 @@ public:
 	 */
 	void DrawRectangle(const float width, const float height, const Color &color);
 
-	/** \brief makes a screenshot, saves it as screenshot.jpg in the directory
-	 *         of the game
-	 * \return success/failure
-	 */
-	bool MakeScreenshot();
+	/** \brief Takes a screenshot and saves the image to a file
+	*** \param filename The name of the file, if any, to save the screenshot as. Default is "screenshot.jpg"
+	**/
+	void MakeScreenshot(const std::string& filename = "screenshot.jpg");
 
 	/** \brief toggles advanced information display for video engine, shows
 	 *         things like number of texture switches per frame, etc.

@@ -60,38 +60,26 @@ Color Color::brown (0.6f, 0.3f, 0.1f, 1.0f);
 
 
 
-float Lerp(float alpha, float initial, float final)
-	{ return alpha * final + (1.0f - alpha) * initial; }
+float Lerp(float alpha, float initial, float final) {
+	return alpha * final + (1.0f - alpha) * initial;
+}
 
 
-//-----------------------------------------------------------------------------
-// RandomFloat: returns a random float between a and b
-//-----------------------------------------------------------------------------
 
-float RandomFloat(float a, float b)
-{
-	if(a == b)
-		return a;
-
-	if(a > b)
-	{
-		float c = a;  // swap
+float RandomFloat(float a, float b) {
+	if (a > b) {
+		float c = a;
 		a = b;
 		b = c;
 	}
 
-	float r = float(rand()%10001);
-
+	float r = static_cast<float>(rand() % 10001);
 	return a + (b - a) * r / 10000.0f;
 }
 
 
-//-----------------------------------------------------------------------------
-// RotatePoint: rotates (x,y) around origin by angle radians
-//-----------------------------------------------------------------------------
 
-void RotatePoint(float &x, float &y, float angle)
-{
+void RotatePoint(float &x, float &y, float angle) {
 	float old_x = x;
 	float cos_angle = cosf(angle);
 	float sin_angle = sinf(angle);
@@ -101,11 +89,10 @@ void RotatePoint(float &x, float &y, float angle)
 }
 
 //-----------------------------------------------------------------------------
-// GameVideo
+// GameVideo class
 //-----------------------------------------------------------------------------
 
-GameVideo::GameVideo()
-{
+GameVideo::GameVideo() {
 	_width = 0;
 	_height = 0;
 	_fullscreen = false;
@@ -152,121 +139,130 @@ GameVideo::GameVideo()
 }
 
 
-//-----------------------------------------------------------------------------
-// SingletonInitialize: called to actually initialize the video engine
-//-----------------------------------------------------------------------------
+
+GameVideo::~GameVideo() {
+	if (VIDEO_DEBUG)
+		cout << "VIDEO: GameVideo destructor invoked" << endl;
+
+	_particle_manager.Destroy();
+
+	GUIManager->SingletonDestroy();
+
+	// Remove all loaded fonts and shutdown the font library
+	for (map<string, FontProperties*>::iterator i = _font_map.begin(); i!= _font_map.end(); i++) {
+		FontProperties* fp = i->second;
+
+		if (fp->ttf_font)
+			TTF_CloseFont(fp->ttf_font);
+
+		if (fp->glyph_cache) {
+			for (std::map<uint16, FontGlyph*>::iterator j = fp->glyph_cache->begin(); j != fp->glyph_cache->end(); j++) {
+				delete (*j).second;
+			}
+			delete fp->glyph_cache;
+		}
+
+		delete fp;
+	}
+	TTF_Quit();
+
+	// Delete all texture sheets and images
+	for (vector<TexSheet*>::iterator i = _tex_sheets.begin(); i != _tex_sheets.end(); i++) {
+		delete *i;
+	}
+
+	for (map<string, Image*>::iterator i = _images.begin(); i != _images.end(); i++) {
+		delete i->second;
+	}
+}
+
+
 
 bool GameVideo::SingletonInitialize() {
-	// Set the window title and icon name
 	if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) {
 		cerr << "VIDEO ERROR: SDL Video Initialization failed" << endl;
 		return false;
 	}
 
-	// initialize SDL_ttf
-	if(TTF_Init() < 0) {
-		if (VIDEO_DEBUG)
+	if (TTF_Init() < 0) {
 			cerr << "VIDEO ERROR: SDL_ttf did not initialize! (TTF_Init() failed)" << endl;
 		return false;
 	}
 
 	// Get the current system color depth and resolution
-	const SDL_VideoInfo* video_info (0);
-	video_info = SDL_GetVideoInfo ();
+	const SDL_VideoInfo* video_info(0);
+	video_info = SDL_GetVideoInfo();
 
 	hoa_script::ReadScriptDescriptor settings_lua;
-	static const char *settings_filename = "dat/config/settings.lua";
+	static const char* settings_filename = "dat/config/settings.lua";
 
-	if (!settings_lua.OpenFile(settings_filename))
-	{
+	if (settings_lua.OpenFile(settings_filename) == false) {
 		fprintf(stderr, "Failed to load file '%s'.\n", settings_filename);
 		exit(1);
 	}
 
 	settings_lua.OpenTable("video_settings");
-	int32  settings_width      = settings_lua.ReadInt("screen_resx");
-	int32  settings_height     = settings_lua.ReadInt("screen_resy");
+	int32 settings_width = settings_lua.ReadInt("screen_resx");
+	int32 settings_height = settings_lua.ReadInt("screen_resy");
 	bool settings_fullscreen = settings_lua.ReadBool("full_screen");
 	settings_lua.CloseTable();
 
 	settings_lua.CloseFile();
 
-	if (video_info)
-	{
+	if (video_info) {
 		// Set the resolution to be the highest possible (lower than the user one)
-		if (video_info->current_w > settings_width && video_info->current_h > settings_height)
-		{
+		if (video_info->current_w > settings_width && video_info->current_h > settings_height) {
 			SetResolution (settings_width, settings_height);
 		}
-		else if (video_info->current_w > 1024 && video_info->current_h > 768)
-		{
+		else if (video_info->current_w > 1024 && video_info->current_h > 768) {
 			SetResolution (1024, 768);
 		}
-		else if (video_info->current_w > 800 && video_info->current_h > 600)
-		{
+		else if (video_info->current_w > 800 && video_info->current_h > 600) {
 			SetResolution (800, 600);
 		}
-		else
-		{
+		else {
 			SetResolution (640, 480);
 		}
 	}
-	else
-	{
+	else {
 		// Default resoltion if we could not retrieve the resolution of the user
 		SetResolution(settings_width, settings_height);
 	}
 
 	SetFullscreen(settings_fullscreen);
 
-	if(!ApplySettings())
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: ChangeMode() failed in GameVideo::SingletonInitialize()!" << endl;
+	if (ApplySettings() == false) {
 		return false;
 	}
 
-	if(!LoadFont("img/fonts/tarnhalo.ttf", "debug_font", 16))
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: Could not load tarnhalo.ttf file!" << endl;
+	if (LoadFont("img/fonts/tarnhalo.ttf", "debug_font", 16) == false) {
+		cerr << "VIDEO ERROR: Could not load tarnhalo.ttf file!" << endl;
 		return false;
 	}
 
-	// create our default texture sheets
-
-	if(!_CreateTexSheet(512, 512, VIDEO_TEXSHEET_32x32, false))
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: could not create default 32x32 tex sheet!" << endl;
+	// Create our default set of texture sheets
+	if (_CreateTexSheet(512, 512, VIDEO_TEXSHEET_32x32, false) == NULL) {
+		cerr << "VIDEO ERROR: could not create default 32x32 tex sheet!" << endl;
 		return false;
 	}
 
-	if(!_CreateTexSheet(512, 512, VIDEO_TEXSHEET_32x64, false))
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: could not create default 32x64 tex sheet!" << endl;
+	if (_CreateTexSheet(512, 512, VIDEO_TEXSHEET_32x64, false) == NULL) {
+		cerr << "VIDEO ERROR: could not create default 32x64 tex sheet!" << endl;
 		return false;
 	}
 
-	if(!_CreateTexSheet(512, 512, VIDEO_TEXSHEET_64x64, false))
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: could not create default 64x64 tex sheet!" << endl;
+	if (_CreateTexSheet(512, 512, VIDEO_TEXSHEET_64x64, false) == NULL) {
+		cerr << "VIDEO ERROR: could not create default 64x64 tex sheet!" << endl;
 		return false;
 	}
 
-	if(!_CreateTexSheet(512, 512, VIDEO_TEXSHEET_ANY,   true))
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: could not create default static  var-sized tex sheet!" << endl;
+	if (_CreateTexSheet(512, 512, VIDEO_TEXSHEET_ANY, true) == NULL) {
+		cerr << "VIDEO ERROR: could not create default static  var-sized tex sheet!" << endl;
 		return false;
 	}
 
-	if(!_CreateTexSheet(512, 512, VIDEO_TEXSHEET_ANY,   false))
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: could not create default var-sized tex sheet!" << endl;
+	if (_CreateTexSheet(512, 512, VIDEO_TEXSHEET_ANY, false) == NULL) {
+		cerr << "VIDEO ERROR: could not create default var-sized tex sheet!" << endl;
 		return false;
 	}
 
@@ -279,33 +275,15 @@ bool GameVideo::SingletonInitialize() {
 
 	EnableTextShadow(true);
 
-	if(!SetDefaultCursor("img/menus/cursor.png"))
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: problem loading default menu cursor" << endl;
+	if (SetDefaultCursor("img/menus/cursor.png") == false) {
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO WARNING: problem loading default menu cursor" << endl;
 	}
 
-	// set up the screen for rendering
-	if(!Clear())
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: first call to Clear() in GameVideo::SingletonInitialize() failed!" << endl;
-		return false;
-	}
-
-	if(!Display(0))
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: Display() in GameVideo::SingletonInitialize() failed!" << endl;
-		return false;
-	}
-
-	if(!Clear())
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: second call to Clear() in GameVideo::SingletonInitialize() failed!" << endl;
-		return false;
-	}
+	// Set up the screen for rendering
+	Clear();
+	Display(0);
+	Clear();
 
 	_rectangle_image.SetFilename("");
 	if (!_rectangle_image.Load())
@@ -316,21 +294,14 @@ bool GameVideo::SingletonInitialize() {
 	}
 
 	return true;
-}
+} // bool GameVideo::SingletonInitialize()
 
 
-//-----------------------------------------------------------------------------
-// MakeScreenshot: create a screenshot and save as screenshot.jpg
-//-----------------------------------------------------------------------------
 
-bool GameVideo::MakeScreenshot()
-{
+void GameVideo::MakeScreenshot(const std::string& filename) {
 	private_video::ImageLoadInfo buffer;
 
-	if(VIDEO_DEBUG)
-		cout << "VIDEO: Entering MakeScreenshot()" << endl;
-
-	// Retrieve width/height of the viewport
+	// Retrieve the width and height of the viewport
 	GLint viewport_dimensions[4];
 	glGetIntegerv(GL_VIEWPORT, viewport_dimensions);
 
@@ -342,168 +313,69 @@ bool GameVideo::MakeScreenshot()
 	// Read pixel data
 	glReadPixels(0, 0, buffer.width, buffer.height, GL_RGB, GL_UNSIGNED_BYTE, buffer.pixels);
 
-	if(glGetError())
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO_DEBUG: glReadPixels() returned an error inside GameVideo::CaptureScreen!" << endl;
+	if (glGetError()) {
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO WARNING:" << __FILE__ << ":" << __FUNCTION__ << "glReadPixels() returned an error" << endl;
 
 		free(buffer.pixels);
-		return false;
+		return;
 	}
 
-	// Flip vertically the image
+	// Vertically flip the image
 	void* buffer_temp = malloc(buffer.width * buffer.height * 3);
-	for (int32 i=0; i<buffer.height; ++i)
-	{
-		memcpy ((uint8*)buffer_temp+i*buffer.width*3, (uint8*)buffer.pixels+(buffer.height-i-1)*buffer.width*3, buffer.width*3);
+	for (int32 i=0; i < buffer.height; ++i) {
+		memcpy((uint8*)buffer_temp + i * buffer.width * 3, (uint8*)buffer.pixels + (buffer.height - i - 1) * buffer.width * 3, buffer.width * 3);
 	}
-	free (buffer.pixels);
+	free(buffer.pixels);
 	buffer.pixels = buffer_temp;
 
-	_SaveJpeg("screenshot.jpg", buffer);
-
+	_SaveJpeg(filename, buffer);
 	free(buffer.pixels);
-
-	return true;
 }
 
 
-//-----------------------------------------------------------------------------
-// ~GameVideo
-//-----------------------------------------------------------------------------
 
-GameVideo::~GameVideo()
-{
-	if (VIDEO_DEBUG)
-		cout << "VIDEO: GameVideo destructor invoked" << endl;
-
-	// destroy particle manager
-	_particle_manager.Destroy();
-
-	// delete GUI
-	GUIManager->SingletonDestroy();
-
-	// delete font properties
-
-	map<string, FontProperties *>::iterator iFontProp    = _font_map.begin();
-	map<string, FontProperties *>::iterator iFontPropEnd = _font_map.end();
-
-	while(iFontProp != _font_map.end())
-	{
-		FontProperties *fp = iFontProp->second;
-
-		if(fp->ttf_font)
-			TTF_CloseFont(fp->ttf_font);
-
-		if(fp->glyph_cache)
-		{
-			for(std::map<uint16, FontGlyph *>::iterator glyphitr = fp->glyph_cache->begin(); glyphitr != fp->glyph_cache->end(); glyphitr++)
-			{
-				// Possibly de-init the GL texture
-				delete (*glyphitr).second;
-			}
-
-			delete fp->glyph_cache;
-		}
-
-		delete fp;
-		++iFontProp;
-	}
-
-
-	// uninitialize SDL_ttf
-	TTF_Quit();
-
-	// delete texture sheets
-	vector<TexSheet *>::iterator iSheet      = _tex_sheets.begin();
-	vector<TexSheet *>::iterator iSheetEnd   = _tex_sheets.end();
-
-	while(iSheet != iSheetEnd)
-	{
-		delete *iSheet;
-		++iSheet;
-	}
-
-	// delete images
-	map<string, Image *>::iterator iImage     = _images.begin();
-	map<string, Image *>::iterator iImageEnd  = _images.end();
-
-	while(iImage != iImageEnd)
-	{
-		delete iImage->second;
-		++iImage;
-	}
-}
-
-
-//-----------------------------------------------------------------------------
-// SetCoordSys: sets the current coordinate system
-//-----------------------------------------------------------------------------
-
-void GameVideo::SetCoordSys(const CoordSys &coordinate_system)
-{
+void GameVideo::SetCoordSys(const CoordSys& coordinate_system) {
 	_coord_sys = coordinate_system;
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(_coord_sys.GetLeft(), _coord_sys.GetRight(), _coord_sys.GetBottom(), _coord_sys.GetTop(), -1, 1);
 
-	// Removed this code bleow
  	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
 
 
-//-----------------------------------------------------------------------------
-// SetCoordSys: sets the current coordinate system
-//-----------------------------------------------------------------------------
 
-void GameVideo::SetCoordSys
-(
-	float left,
-	float right,
-	float bottom,
-	float top
-)
-{
-	SetCoordSys(CoordSys(left, right, bottom, top));
-}
-
-
-//-----------------------------------------------------------------------------
-// SetDrawFlags: used for controlling various flags like blending, flipping, etc.
-//-----------------------------------------------------------------------------
-
-void GameVideo::SetDrawFlags(int32 first_flag, ...)
-{
+void GameVideo::SetDrawFlags(int32 first_flag, ...) {
 	int32 flag = first_flag;
 	va_list args;
 
 	va_start(args, first_flag);
-	while( flag != 0 )
-	{
+	while (flag != 0) {
 		switch (flag) {
-		case VIDEO_X_LEFT: _x_align=-1; break;
-		case VIDEO_X_CENTER: _x_align=0; break;
-		case VIDEO_X_RIGHT: _x_align=1; break;
+		case VIDEO_X_LEFT: _x_align = -1; break;
+		case VIDEO_X_CENTER: _x_align = 0; break;
+		case VIDEO_X_RIGHT: _x_align = 1; break;
 
-		case VIDEO_Y_TOP: _y_align=1; break;
-		case VIDEO_Y_CENTER: _y_align=0; break;
-		case VIDEO_Y_BOTTOM: _y_align=-1; break;
+		case VIDEO_Y_TOP: _y_align = 1; break;
+		case VIDEO_Y_CENTER: _y_align = 0; break;
+		case VIDEO_Y_BOTTOM: _y_align = -1; break;
 
-		case VIDEO_X_NOFLIP: _x_flip=0; break;
-		case VIDEO_X_FLIP: _x_flip=1; break;
+		case VIDEO_X_NOFLIP: _x_flip = 0; break;
+		case VIDEO_X_FLIP: _x_flip = 1; break;
 
-		case VIDEO_Y_NOFLIP: _y_flip=0; break;
-		case VIDEO_Y_FLIP: _y_flip=1; break;
+		case VIDEO_Y_NOFLIP: _y_flip = 0; break;
+		case VIDEO_Y_FLIP: _y_flip = 1; break;
 
-		case VIDEO_NO_BLEND: _blend=0; break;
-		case VIDEO_BLEND: _blend=1; break;
-		case VIDEO_BLEND_ADD: _blend=2; break;
+		case VIDEO_NO_BLEND: _blend = 0; break;
+		case VIDEO_BLEND: _blend = 1; break;
+		case VIDEO_BLEND_ADD: _blend = 2; break;
 
 		default:
-			if(VIDEO_DEBUG)
-				cerr << "Unknown flag " << flag << " passed to SetDrawFlags()\n";
+			if (VIDEO_DEBUG)
+				cerr << "VIDEO WARNING: " << __FILE__ << ":" << __FUNCTION__ << ": Unknown flag in argument list: " << flag << endl;
 			break;
 		}
 		flag = va_arg(args, int32);
@@ -594,10 +466,9 @@ bool GameVideo::ApplySettings()
 	} // if (_target == VIDEO_TARGET_SDL_WINDOW)
 
 	// Used by the Allacrost editor, which uses QT4
-	else if (_target == VIDEO_TARGET_QT_WIDGET)
-	{
-		_width      = _temp_width;
-		_height     = _temp_height;
+	else if (_target == VIDEO_TARGET_QT_WIDGET) {
+		_width = _temp_width;
+		_height = _temp_height;
 		_fullscreen = _temp_fullscreen;
 
 		return true;
@@ -613,58 +484,49 @@ bool GameVideo::ApplySettings()
 //              whole screen
 //-----------------------------------------------------------------------------
 
-void GameVideo::SetViewport(float left, float right, float bottom, float top)
-{
+void GameVideo::SetViewport(float left, float right, float bottom, float top) {
 	assert(left < right);
 	assert(bottom < top);
 
-	int32 l=int32(left*_width*.01f);
-	int32 b=int32(bottom*_height*.01f);
-	int32 r=int32(right*_width*.01f);
-	int32 t=int32(top*_height*.01f);
+	int32 l = int32(left * _width * .01f);
+	int32 b = int32(bottom * _height * .01f);
+	int32 r = int32(right * _width * .01f);
+	int32 t = int32(top * _height * .01f);
 
-	if (l<0) l=0;
-	if (b<0) b=0;
-	if (r>_width) r=_width;
-	if (t>_height) t=_height;
+	if (l < 0)
+		l = 0;
+	if (b < 0)
+		b = 0;
+	if (r > _width)
+		r = _width;
+	if (t > _height)
+		t = _height;
 
-	_viewport = ScreenRect(l, b, r-l+1, t-b+1);
-	glViewport(l, b, r-l+1, t-b+1);
+	_viewport = ScreenRect(l, b, r - l + 1, t - b + 1);
+	glViewport(l, b, r - l + 1, t - b + 1);
 }
 
 
-//-----------------------------------------------------------------------------
-// Clear: clear the screen to black, it doesnt clear other buffers, that can be
-//        done by videostates that use them
-//-----------------------------------------------------------------------------
 
-bool GameVideo::Clear()
-{
-	if(_uses_lights)
-		return Clear(_light_color);
+void GameVideo::Clear() {
+	if (_uses_lights)
+		Clear(_light_color);
 	else
-		return Clear(Color::black);
+		Clear(Color::black);
 }
 
 
 
-//-----------------------------------------------------------------------------
-// Clear: clear the screen to given color, it doesnt clear other buffers, that can be
-//        done by videostates that use them
-//-----------------------------------------------------------------------------
-
-bool GameVideo::Clear(const Color &c)
-{
+void GameVideo::Clear(const Color &c) {
 	SetViewport(0,100,0,100);
 	glClearColor(c[0], c[1], c[2], c[3]);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	_num_tex_switches = 0;
 
-	if(glGetError())
-		return false;
-
-	return true;
+	if (glGetError() && VIDEO_DEBUG) {
+		cerr << "VIDEO WARNING:" << __FILE__ << ":" << __FUNCTION__ << ": glGetError returned true" << endl;
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -684,13 +546,8 @@ bool GameVideo::Clear(const Color &c)
 }*/
 
 
-//-----------------------------------------------------------------------------
-// Display: if running in double buffered mode then flip the other buffer to the
-//          screen
-//-----------------------------------------------------------------------------
 
-bool GameVideo::Display(int32 frame_time)
-{
+void GameVideo::Display(int32 frame_time) {
 	// update particle effects
 	_particle_manager.Update(frame_time);
 
@@ -760,8 +617,6 @@ bool GameVideo::Display(int32 frame_time)
 	int32 current_frame_index = _animation_counter / VIDEO_ANIMATION_FRAME_PERIOD;
 
 	_current_frame_diff = current_frame_index - old_frame_index;
-
-	return true;
 }
 
 
@@ -866,14 +721,6 @@ void GameVideo::MoveRelative(float tx, float ty)
 	_y += ty;
 }
 
-//-----------------------------------------------------------------------------
-// GetDrawPosition: Get the location that the draw cursor is currently located at.
-//-----------------------------------------------------------------------------
-void GameVideo::GetDrawPosition(float &x, float &y)
-{
-	x = _x;
-	y = _y;
-}
 
 //-----------------------------------------------------------------------------
 // Rotate: rotates the coordinate axes anticlockwise by acAngle degrees, think
