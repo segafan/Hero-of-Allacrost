@@ -185,7 +185,7 @@ void MenuWindow::Draw() {
 	if (_window_state == VIDEO_MENU_STATE_HIDDEN)
 		return;
 
-	VideoManager->_PushContext();
+	VideoManager->PushState();
 	VideoManager->SetDrawFlags(_xalign, _yalign, VIDEO_BLEND, 0);
 
 	if (_is_scissored) {
@@ -202,7 +202,7 @@ void MenuWindow::Draw() {
 	VideoManager->Move(_x_position, _y_position);
 	VideoManager->DrawImage(_menu_image, Color::white);
 
-	VideoManager->_PopContext();
+	VideoManager->PopState();
 	return;
 } // void MenuWindow::Draw()
 

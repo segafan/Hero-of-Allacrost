@@ -96,7 +96,7 @@ void GameVideo::_UpdateShake(uint32 frame_time) {
 		return;
 	}
 
-	static int32 time_til_next_update = 0; // Used to cap the maximum update frequency
+	static uint32 time_til_next_update = 0; // Used to cap the maximum update frequency
 	time_til_next_update += frame_time;
 
 	// Return if not enough time has expired to do a shake update

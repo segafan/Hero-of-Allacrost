@@ -82,6 +82,30 @@
 
 #include <SDL/SDL.h>
 
+/** \name Print Message Helper Macros
+*** These macros assist programmers with writing debug, warning, or error messages that are to be printed to
+*** a user's terminal. They are formatted as follows: `MSGTYPE:FILE:FUNCTION:LINE: `. To use the macro, all
+*** that is needed is to add `<< "print message" << std::endl;` after the macro name.
+**/
+//@{
+#define PRINT_DEBUG std::cout << "DEBUG:" << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << ": "
+#define PRINT_WARNING std::cerr << "WARNING:" << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << ": "
+#define PRINT_ERROR std::cout << "ERROR:" << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << ": "
+//@}
+
+/** \name Print Message Helper Macros With Conditional
+*** \param var Any type of variable that can be used to evaluate a true/false condition
+*** These macros perform the exact same function as the previous set of print message macros, but these include a conditional
+*** parameter. If the parameter is true the message will be printed and if it is false, no message will be printed. Note that
+*** the if statement is not enclosed in brackets, so the programmer is not required to add a terminating bracket after they
+*** append their print message.
+**/
+//@{
+#define IF_PRINT_DEBUG(var) if (var) std::cout << "DEBUG:" << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << ": "
+#define IF_PRINT_WARNING(var) if (var) std::cerr << "WARNING:" << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << ": "
+#define IF_PRINT_ERROR(var) if (var) std::cout << "ERROR:" << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << ": "
+//@}
+
 /** \name Allacrost Integer Types
 *** \brief These are the integer types used throughout the Allacrost source code.
 *** These types are created by redefining the SDL types (we do not like SDL's type-naming conventions).

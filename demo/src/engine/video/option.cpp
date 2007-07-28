@@ -79,7 +79,7 @@ void OptionBox::Draw() {
 		return;
 	}
 
-	VideoManager->_PushContext();
+	VideoManager->PushState();
 	VideoManager->SetDrawFlags(_xalign, _yalign, VIDEO_BLEND, 0);
 
 	// (1) Determine the edge dimensions of the option box
@@ -318,7 +318,7 @@ void OptionBox::Draw() {
 	} // for (int32 row = row_min; row < row_max; row++)
 
 	//VideoManager->EnableScissoring(scissoring_rollback);
-	VideoManager->_PopContext();
+	VideoManager->PopState();
 } // void OptionBox::Draw()
 
 

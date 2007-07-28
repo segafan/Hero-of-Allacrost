@@ -7,11 +7,11 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-/*!****************************************************************************
- * \file    video.cpp
- * \author  Raj Sharma, roos@allacrost.org
- * \brief   Source file for video engine interface.
- *****************************************************************************/
+/** ****************************************************************************
+*** \file    video.cpp
+*** \author  Raj Sharma, roos@allacrost.org
+*** \brief   Source file for video engine interface.
+*** ***************************************************************************/
 
 
 #include <cassert>
@@ -29,10 +29,6 @@ using namespace std;
 
 using namespace hoa_utils;
 using namespace hoa_video::private_video;
-
-
-
-
 
 template<> hoa_video::GameVideo* Singleton<hoa_video::GameVideo>::_singleton_reference = NULL;
 
@@ -286,10 +282,8 @@ bool GameVideo::SingletonInitialize() {
 	Clear();
 
 	_rectangle_image.SetFilename("");
-	if (!_rectangle_image.Load())
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: quad StillImage for rendering rectangles could not be created" << endl;
+	if (!_rectangle_image.Load()) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "_rectangle_image could not be created" << endl;
 		return false;
 	}
 
@@ -314,8 +308,7 @@ void GameVideo::MakeScreenshot(const std::string& filename) {
 	glReadPixels(0, 0, buffer.width, buffer.height, GL_RGB, GL_UNSIGNED_BYTE, buffer.pixels);
 
 	if (glGetError()) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO WARNING:" << __FILE__ << ":" << __FUNCTION__ << "glReadPixels() returned an error" << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "glReadPixels() returned an error" << endl;
 
 		free(buffer.pixels);
 		return;
@@ -374,8 +367,7 @@ void GameVideo::SetDrawFlags(int32 first_flag, ...) {
 		case VIDEO_BLEND_ADD: _blend = 2; break;
 
 		default:
-			if (VIDEO_DEBUG)
-				cerr << "VIDEO WARNING: " << __FILE__ << ":" << __FUNCTION__ << ": Unknown flag in argument list: " << flag << endl;
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "Unknown flag in argument list: " << flag << endl;
 			break;
 		}
 		flag = va_arg(args, int32);
@@ -389,13 +381,11 @@ void GameVideo::SetDrawFlags(int32 first_flag, ...) {
 //                calling this function actually applies those settings
 //-----------------------------------------------------------------------------
 
-bool GameVideo::ApplySettings()
-{
+bool GameVideo::ApplySettings() {
 	// Used by the game Hero of Allacrost, an SDL application
 	if (_target == VIDEO_TARGET_SDL_WINDOW) {
 		// Losing GL context, so unload images first
-		if  (!UnloadTextures())
-		{
+		if (!UnloadTextures()) {
 			cerr << "VIDEO: Failed to delete OpenGL textures during a context change" << endl;
 		}
 
@@ -485,13 +475,19 @@ bool GameVideo::ApplySettings()
 //-----------------------------------------------------------------------------
 
 void GameVideo::SetViewport(float left, float right, float bottom, float top) {
-	assert(left < right);
-	assert(bottom < top);
+	if (left > right) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "left argument was greater than right argument" << endl;
+		return;
+	}
+	if (bottom > top) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "bottom argument was greater than top argument" << endl;
+		return;
+	}
 
-	int32 l = int32(left * _width * .01f);
-	int32 b = int32(bottom * _height * .01f);
-	int32 r = int32(right * _width * .01f);
-	int32 t = int32(top * _height * .01f);
+	int32 l = static_cast<int32>(left * _width * .01f);
+	int32 b = static_cast<int32>(bottom * _height * .01f);
+	int32 r = static_cast<int32>(right * _width * .01f);
+	int32 t = static_cast<int32>(top * _height * .01f);
 
 	if (l < 0)
 		l = 0;
@@ -524,26 +520,10 @@ void GameVideo::Clear(const Color &c) {
 
 	_num_tex_switches = 0;
 
-	if (glGetError() && VIDEO_DEBUG) {
-		cerr << "VIDEO WARNING:" << __FILE__ << ":" << __FUNCTION__ << ": glGetError returned true" << endl;
+	if (glGetError()) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "glGetError() returned true" << endl;
 	}
 }
-
-//-----------------------------------------------------------------------------
-// AccumulateLights: if real lights are enabled, then you must call DrawLight()
-//                   for each light, and then call AccumulateLights() to
-//                   save the lighting information into the overlay
-//-----------------------------------------------------------------------------
-/*bool GameVideo::AccumulateLights()
-{
-	if(_light_overlay != 0xFFFFFFFF)
-	{
-		_BindTexture(_light_overlay);
-		glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, 1024, 1024, 0);
-	}
-
-	return true;
-}*/
 
 
 
@@ -552,7 +532,7 @@ void GameVideo::Display(int32 frame_time) {
 	_particle_manager.Update(frame_time);
 
 	// update shaking effect
-	_PushContext();
+	PushState();
 	SetCoordSys(0, 1024, 0, 768);
 	_UpdateShake(frame_time);
 
@@ -604,7 +584,7 @@ void GameVideo::Display(int32 frame_time) {
 		}
 	}
 
-	_PopContext();
+	PopState();
 
 	SDL_GL_SwapBuffers();
 
@@ -621,158 +601,110 @@ void GameVideo::Display(int32 frame_time) {
 
 
 
-//-----------------------------------------------------------------------------
-// SetFullscreen: if you pass in true, makes the game fullscreen, otherwise
-//                makes it windowed. Returns false on failure.
-// NOTE: to actually apply the change, call ApplySettings()
-//-----------------------------------------------------------------------------
-
-bool GameVideo::SetFullscreen(bool fullscreen)
-{
-	_temp_fullscreen = fullscreen;
-	return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// ToggleFullscreen: if game is currently windowed, makes it fullscreen and
-//                   vica versa. Returns false on failure.
-// NOTE: to actually apply the change, call ApplySettings()
-//-----------------------------------------------------------------------------
-
-bool GameVideo::ToggleFullscreen()
-{
-	return SetFullscreen(!_temp_fullscreen);
-}
-
-
-//-----------------------------------------------------------------------------
-// SetResolution: sets the resolution
-// NOTE: to actually apply the change, call ApplySettings()
-//-----------------------------------------------------------------------------
-
-bool GameVideo::SetResolution(int32 width, int32 height)
-{
-	if (width <= 0 || height <= 0)
-	{
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: invalid width and/or height passed to SetResolution!" << endl;
-		return false;
-	}
-
-	_temp_width  = width;
-	_temp_height = height;
-	return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// _DEBUG_ShowAdvancedStats: display # of tex switches and other useful runtime
-//                           statistics
-//-----------------------------------------------------------------------------
-
-bool GameVideo::_DEBUG_ShowAdvancedStats()
-{
-	// display to screen
+bool GameVideo::_DEBUG_ShowAdvancedStats() {
 	char text[50];
 	sprintf(text, "Switches: %d\nParticles: %d", _num_tex_switches, _particle_manager.GetNumParticles());
 
-	if( !SetFont("debug_font"))
-		return false;
+	if (SetFont("debug_font") == false) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to set the debug_font" << endl;
+	}
 
 	Move(896.0f, 690.0f);
-	if( !DrawText(text))
-		return false;
-
-	return true;
+	DrawText(text);
 }
 
 
 
-//-----------------------------------------------------------------------------
-// Move: move relativly x+=rx, y+=ry
-//-----------------------------------------------------------------------------
-
-void GameVideo::Move(float tx, float ty)
-{
-#ifndef NDEBUG
-	GLint matrix_mode;
-	glGetIntegerv(GL_MATRIX_MODE, &matrix_mode);
-	assert(matrix_mode == GL_MODELVIEW);
-#endif
+void GameVideo::Move(float tx, float ty) {
 	glLoadIdentity();
 	glTranslatef(tx, ty, 0);
 	_x = tx;
 	_y = ty;
 }
 
-//-----------------------------------------------------------------------------
-// MoveRelative:
-//-----------------------------------------------------------------------------
-void GameVideo::MoveRelative(float tx, float ty)
-{
-#ifndef NDEBUG
-	GLint matrix_mode;
-	glGetIntegerv(GL_MATRIX_MODE, &matrix_mode);
-	assert(matrix_mode == GL_MODELVIEW);
-#endif
+
+
+void GameVideo::MoveRelative(float tx, float ty) {
 	glTranslatef(tx, ty, 0);
 	_x += tx;
 	_y += ty;
 }
 
 
-//-----------------------------------------------------------------------------
-// Rotate: rotates the coordinate axes anticlockwise by acAngle degrees, think
-//         about this CARFULLY before you call it
-//-----------------------------------------------------------------------------
-
-void GameVideo::Rotate(float ac_angle)
-{
-#ifndef NDEBUG
-	GLint matrix_mode;
-	glGetIntegerv(GL_MATRIX_MODE, &matrix_mode);
-	assert(matrix_mode == GL_MODELVIEW);
-#endif
+void GameVideo::Rotate(float ac_angle) {
 	glRotatef(ac_angle, 0, 0, 1);
 }
 
 
-//-----------------------------------------------------------------------------
-// Scale: scales the coordinate axes by xScale and yScale respectively
-//-----------------------------------------------------------------------------
 
-void GameVideo::Scale(float x, float y)
-{
-#ifndef NDEBUG
-	GLint matrix_mode;
-	glGetIntegerv(GL_MATRIX_MODE, &matrix_mode);
-	assert(matrix_mode == GL_MODELVIEW);
-#endif
-
+void GameVideo::Scale(float x, float y) {
 	glScalef(x, y, 1.0f);
 }
 
 
 
-//-----------------------------------------------------------------------------
-// PushState: saves your current position in a stack, bewarned this stack is
-//            small ~32 so use it wisely
-//-----------------------------------------------------------------------------
 
-void GameVideo::PushState()
-{
-	_PushContext();
+void GameVideo::PushState() {
+	// Push current modelview transformation
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+
+	// Save video engine state context information
+	Context saved_context;
+	saved_context.coordinate_system = _coord_sys;
+	saved_context.blend = _blend;
+	saved_context.x_align = _x_align;
+	saved_context.y_align = _y_align;
+	saved_context.x_flip = _x_flip;
+	saved_context.y_flip = _y_flip;
+	saved_context.viewport = _viewport;
+	saved_context.scissor_rectangle = _scissor_rect;
+	saved_context.scissoring_enabled = _scissor_enabled;
+	saved_context.font = _current_font;
+	saved_context.text_color = _current_text_color;
+
+	_context_stack.push(saved_context);
 }
 
 
-//-----------------------------------------------------------------------------
-// PopState: restores last position, read PushState()
-//-----------------------------------------------------------------------------
 
-void GameVideo::PopState()
-{
-	_PopContext();
+void GameVideo::PopState() {
+	// Restore the most recent context information and pop it from stack
+	if (_context_stack.empty()) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "no video states were saved on the stack" << endl;
+		return;
+	}
+	
+	Context restore_context = _context_stack.top();
+	SetCoordSys(restore_context.coordinate_system);
+	_blend  = restore_context.blend;
+	_x_align = restore_context.x_align;
+	_y_align = restore_context.y_align;
+	_x_flip = restore_context.x_flip;
+	_y_flip = restore_context.y_flip;
+	_viewport = restore_context.viewport;
+	_scissor_rect = restore_context.scissor_rectangle;
+	_scissor_enabled = restore_context.scissoring_enabled;
+	_current_font = restore_context.font;
+	_current_text_color = restore_context.text_color;
+	_context_stack.pop();
+
+	// Restore the modelview transformation
+	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
+	glViewport(_viewport.left, _viewport.top, _viewport.width, _viewport.height);
+
+	if (_scissor_enabled) {
+		glEnable(GL_SCISSOR_TEST);
+		glScissor(static_cast<GLint>((_scissor_rect.left / static_cast<float>(VIDEO_STANDARD_RES_WIDTH)) * _viewport.width),
+			static_cast<GLint>((_scissor_rect.top / static_cast<float>(VIDEO_STANDARD_RES_HEIGHT)) * _viewport.height),
+			static_cast<GLsizei>((_scissor_rect.width / static_cast<float>(VIDEO_STANDARD_RES_WIDTH)) * _viewport.width),
+			static_cast<GLsizei>((_scissor_rect.height / static_cast<float>(VIDEO_STANDARD_RES_HEIGHT)) * _viewport.height)
+		);
+	}
+	else {
+		glDisable(GL_SCISSOR_TEST);
+	}
 }
 
 
@@ -821,113 +753,61 @@ bool GameVideo::LoadMenuSkin(std::string skin_name, std::string border_image, st
 		top_left, top_right, bottom_left, bottom_right, make_default);
 }
 
-//-----------------------------------------------------------------------------
-// _BindTexture: wraps call to glBindTexture(), plus some extra checking to
-//              discard the call if we try to bind the same texture twice
-//-----------------------------------------------------------------------------
 
-bool GameVideo::_BindTexture(GLuint tex_id)
-{
-	if(tex_id != _last_tex_id)
-	{
+
+bool GameVideo::_BindTexture(GLuint tex_id) {
+	if (tex_id != _last_tex_id) {
 		_last_tex_id = tex_id;
 		glBindTexture(GL_TEXTURE_2D, tex_id);
 		++_num_tex_switches;
 	}
 
-	if(glGetError())
+	if (glGetError())
 		return false;
 
 	return true;
 }
 
 
-//-----------------------------------------------------------------------------
-// ToggleAdvancedDisplay: toggles advanced display. When advanced display is
-//                        enabled, you can see things like how many texture
-//                        switches occurred during the current frame, etc.
-//-----------------------------------------------------------------------------
-
-bool GameVideo::ToggleAdvancedDisplay()
-{
-	_advanced_display = !_advanced_display;
-	return true;
-}
 
 
-
-//-----------------------------------------------------------------------------
-// EnableSceneLighting: sets lighting parameters for the scene, actually just a color
-//              unless we change the lighting system later on.
-//              NOTE: the color's alpha value (i.e. color[3]) must be 1.0f
-//-----------------------------------------------------------------------------
-bool GameVideo::EnableSceneLighting(const Color &color)
-{
+void GameVideo::EnableSceneLighting(const Color& color) {
 	_light_color = color;
 
-	if(color[3] != 1.0f)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: color passed to EnableSceneLighting() had alpha other than 1.0f!" << endl;
+	if (IsFloatEqual(color[3], 1.0f) == false) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "color argrument had alpha not equal to 1.0f" << endl;
 		_light_color[3] = 1.0f;
 	}
-
-	return true;
 }
 
-//-----------------------------------------------------------------------------
-// DisableSceneLighting: Turn off scene lighting
-//-----------------------------------------------------------------------------
-void GameVideo::DisableSceneLighting()
-{
+
+void GameVideo::DisableSceneLighting() {
 	_light_color = Color::white;
 }
 
-//-----------------------------------------------------------------------------
-// GetLighting: returns the scene lighting color
-//-----------------------------------------------------------------------------
-
-Color &GameVideo::GetSceneLightingColor()
-{
-	return _light_color;
-}
 
 
+void GameVideo::EnableFog(const Color &color, float intensity) {
+	// Check if intensity is within acceptable bounds.
 
-//-----------------------------------------------------------------------------
-// EnableFog: sets fog parameters. Fog color is usually gray, and intensity can
-//         be from 0.0 (no fog) to 1.0 (entire screen is gray)
-//         To turn off fog, just call this function with intensity of 0.0f
-//-----------------------------------------------------------------------------
-bool GameVideo::EnableFog(const Color &color, float intensity)
-{
-	// check if intensity is within bounds. If not, clamp it but display an
-	// error message
-
-	if(intensity < 0.0f)
-	{
+	if (intensity < 0.0f) {
 		intensity = 0.0f;
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: negative intensity passed to SetFog()" << endl;
+		IF_PRINT_DEBUG(VIDEO_DEBUG) << "intensity argument was less than 0.0f" << endl;
 	}
-	else if(intensity > 1.0f)
-	{
+	else if (intensity > 1.0f) {
 		intensity = 1.0f;
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: intensity larger than 1.0f passed to SetFog()" << endl;
+		IF_PRINT_DEBUG(VIDEO_DEBUG) << "intensity argument was greater than 1.0f" << endl;
 	}
 
 	// set the parameters
 	_fog_color = color;
 	_fog_intensity = intensity;
 
-	// apply the new settings with OpenGL
-	if(intensity == 0.0f)
-	{
+	// Apply the new settings with OpenGL
+	if (IsFloatEqual(intensity, 0.0f)) {
 		glDisable(GL_FOG);
 	}
-	else
-	{
+	else {
 		glEnable(GL_FOG);
 		glHint(GL_FOG_HINT, GL_DONT_CARE);
 		glFogf(GL_FOG_MODE, GL_LINEAR);
@@ -935,114 +815,80 @@ bool GameVideo::EnableFog(const Color &color, float intensity)
 		glFogf(GL_FOG_END, 1.0f - intensity);
 		glFogfv(GL_FOG_COLOR, (GLfloat *)color.GetColors());
 	}
-
-	return true;
 }
 
-//-----------------------------------------------------------------------------
-// DisableFog: Turns off fog
-//-----------------------------------------------------------------------------
-void GameVideo::DisableFog()
-{
+
+
+void GameVideo::DisableFog() {
 	glDisable(GL_FOG);
 	_fog_intensity = 0.0f;
 }
 
 
-//-----------------------------------------------------------------------------
-// SetTransform: set current OpenGL modelview matrix to the 4x4 matrix (16 values)
-//               that's passed in
-//-----------------------------------------------------------------------------
-void GameVideo::SetTransform(float m[16])
-{
+
+void GameVideo::SetTransform(float m[16]) {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glLoadMatrixf(m);
 }
 
-//-----------------------------------------------------------------------------
-// EnablePointLights: call if this map uses point lights
-//-----------------------------------------------------------------------------
-bool GameVideo::EnablePointLights()
-{
+
+
+void GameVideo::EnablePointLights() {
 	_light_overlay = _CreateBlankGLTexture(1024, 1024);
-
 	_uses_lights = true;
-
-	return true;
 }
 
-//-----------------------------------------------------------------------------
-// DisablePointLights: call when done with point lights
-//-----------------------------------------------------------------------------
-void GameVideo::DisablePointLights()
-{
-	if(_light_overlay != 0xFFFFFFFF)
-	{
+
+void GameVideo::DisablePointLights() {
+	if (_light_overlay != 0xFFFFFFFF) {
 		_DeleteTexture(_light_overlay);
 	}
 
 	_light_overlay = 0xFFFFFFFF;
-
 	_uses_lights = false;
 }
 
 
-//-----------------------------------------------------------------------------
-// ApplyLightingOverlay: call after all map images are drawn to apply lighting.
-//                       All menu and text rendering should occur AFTER this
-//                       call, so that they are not affected by lighting.
-//-----------------------------------------------------------------------------
-bool GameVideo::ApplyLightingOverlay()
-{
-	if(_light_overlay != 0xFFFFFFFF)
-	{
-		// Copy light overlay to opengl texture
-		_BindTexture(_light_overlay);
-		glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, 1024, 1024, 0);
 
-		CoordSys temp_CoordSys = _coord_sys;
-
-		SetCoordSys(0.0f, 1.0f, 0.0f, 1.0f);
-		float xlo = 0.0f, ylo = 0.0f, xhi = 1.0f, yhi = 1.0f;
-		glEnable(GL_TEXTURE_2D);
-
-		float mx = _width / 1024.0f;
-		float my = _height / 1024.0f;
-
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_DST_COLOR, GL_ZERO);
-
-		_BindTexture(_light_overlay);
-
-		GLfloat vertices[8] = { xlo, ylo, xhi, ylo, xhi, yhi, xlo, yhi };
-		GLfloat tex_coords[8] = { 0.0f, 0.0f, mx, 0.0f, mx, my, 0.0f, my };
-
-		glEnableClientState ( GL_VERTEX_ARRAY );
-		glEnableClientState ( GL_TEXTURE_COORD_ARRAY );
-
-		glVertexPointer ( 2, GL_FLOAT, 0, vertices );
-		glTexCoordPointer ( 2, GL_FLOAT, 0, tex_coords );
-
-		glDrawArrays ( GL_QUADS, 0, 4 );
-
-		glDisableClientState ( GL_TEXTURE_COORD_ARRAY );
-		glDisableClientState ( GL_VERTEX_ARRAY );
-
-		/*glBegin(GL_QUADS);
-		glTexCoord2f(0.0f, 0.0f);
-		glVertex2f(xlo, ylo); //bl
-		glTexCoord2f(mx, 0.0f);
-		glVertex2f(xhi, ylo); //br
-		glTexCoord2f(mx, my);
-		glVertex2f(xhi, yhi);//tr
-		glTexCoord2f(0.0f, my);
-		glVertex2f(xlo, yhi);//tl
-		glEnd();*/
-		SetCoordSys(temp_CoordSys.GetLeft(), temp_CoordSys.GetRight(), temp_CoordSys.GetBottom(), temp_CoordSys.GetTop());
+void GameVideo::ApplyLightingOverlay() {
+	if (_light_overlay == 0xFFFFFFFF) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "light overlay texture was invalid" << endl;
+		return;
 	}
 
-	return true;
+	// Copy light overlay to opengl texture
+	_BindTexture(_light_overlay);
+	glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, 1024, 1024, 0);
+
+	CoordSys temp_coords = _coord_sys;
+
+	SetCoordSys(0.0f, 1.0f, 0.0f, 1.0f);
+	glEnable(GL_TEXTURE_2D);
+
+	float mx = _width / 1024.0f;
+	float my = _height / 1024.0f;
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_DST_COLOR, GL_ZERO);
+
+	_BindTexture(_light_overlay);
+
+	GLfloat vertices[8] = { 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f };
+	GLfloat tex_coords[8] = { 0.0f, 0.0f, mx, 0.0f, mx, my, 0.0f, my };
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+	glVertexPointer(2, GL_FLOAT, 0, vertices);
+	glTexCoordPointer(2, GL_FLOAT, 0, tex_coords);
+
+	glDrawArrays(GL_QUADS, 0, 4);
+
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
+
+	SetCoordSys(temp_coords.GetLeft(), temp_coords.GetRight(), temp_coords.GetBottom(), temp_coords.GetTop());
 }
 
 
@@ -1127,45 +973,21 @@ bool GameVideo::CaptureScreen(StillImage &id)
 }
 
 
-//-----------------------------------------------------------------------------
-// SetGamma: Sets a new gamma value using SDL_SetGamma()
-//-----------------------------------------------------------------------------
-void GameVideo::SetGamma(float value)
-{
+
+void GameVideo::SetGamma(float value) {
 	_gamma_value = value;
 
 	// Limit min/max gamma
-	if (_gamma_value > 2.0f)
-	{
-		if(VIDEO_DEBUG) cout << "VIDEO: Tried to set gamma over 2.0f!" << endl;
+	if (_gamma_value > 2.0f) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "tried to set gamma over 2.0f" << endl;
 		_gamma_value = 2.0f;
 	}
-	else if (_gamma_value < 0.0f)
-	{
-		if(VIDEO_DEBUG) cout << "VIDEO: Tried to set gamma below 0.0f!" << endl;
+	else if (_gamma_value < 0.0f) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "tried to set gamma below 0.0f" << endl;
 		_gamma_value = 0.0f;
 	}
 
 	SDL_SetGamma(_gamma_value, _gamma_value, _gamma_value);
-}
-
-
-//-----------------------------------------------------------------------------
-// Returns the gamma value
-//-----------------------------------------------------------------------------
-float GameVideo::GetGamma()
-{
-	return _gamma_value;
-}
-
-
-//-----------------------------------------------------------------------------
-// ToggleFPS: toggles the FPS display
-//-----------------------------------------------------------------------------
-
-void GameVideo::ToggleFPS()
-{
-	_fps_display = !_fps_display;
 }
 
 
@@ -1214,90 +1036,10 @@ std::string GameVideo::_CreateTempFilename(const std::string &extension)
 }
 
 
-//-----------------------------------------------------------------------------
-// _PushContext: pushes transformation, coordsys, and draw flags so that
-//               GameVideo doesn't trample on client's settings
-//-----------------------------------------------------------------------------
-
-void GameVideo::_PushContext()
-{
-	// push current modelview transformation
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-
-	// save context information
-	private_video::Context c;
-	c.coordinate_system = _coord_sys;
-	c.blend    = _blend;
-	c.x_align   = _x_align;
-	c.y_align   = _y_align;
-	c.x_flip    = _x_flip;
-	c.y_flip    = _y_flip;
-
-	c.viewport = _viewport;
-	c.scissor_rectangle = _scissor_rect;
-	c.scissoring_enabled = _scissor_enabled;
-
-	c.font      = _current_font;
-	c.text_color = _current_text_color;
-
-	_context_stack.push(c);
-}
 
 
-//-----------------------------------------------------------------------------
-// _PopContext: pops transformation, coordsys, and draw flags so that
-//              GameVideo doesn't trample on client's settings
-//-----------------------------------------------------------------------------
-
-void GameVideo::_PopContext()
-{
-	// restore context information and pop it from stack
-	private_video::Context c = _context_stack.top();
-	SetCoordSys(c.coordinate_system);
-	_blend  = c.blend;
-	_x_align = c.x_align;
-	_y_align = c.y_align;
-	_x_flip  = c.x_flip;
-	_y_flip  = c.y_flip;
-
-	_current_font      = c.font;
-	_current_text_color = c.text_color;
-
-	_viewport = c.viewport;
-	_scissor_rect = c.scissor_rectangle;
-	_scissor_enabled = c.scissoring_enabled;
-	_context_stack.pop();
-
-	// restore modelview transformation
-	glMatrixMode(GL_MODELVIEW);
-	glPopMatrix();
-
-	glViewport(_viewport.left, _viewport.top, _viewport.width, _viewport.height);
-
-	if(_scissor_enabled)
-	{
-		glEnable(GL_SCISSOR_TEST);
-		glScissor( static_cast<GLint>( (_scissor_rect.left / static_cast<float>(VIDEO_STANDARD_RES_WIDTH) ) * _viewport.width ),
-		           static_cast<GLint>( ( _scissor_rect.top / static_cast<float>(VIDEO_STANDARD_RES_HEIGHT) ) * _viewport.height ),
-		           static_cast<GLsizei>( ( _scissor_rect.width / static_cast<float>(VIDEO_STANDARD_RES_WIDTH) ) * _viewport.width ),
-		           static_cast<GLsizei>( ( _scissor_rect.height / static_cast<float>(VIDEO_STANDARD_RES_HEIGHT) ) * _viewport.height ) );
-	}
-	else
-	{
-		glDisable(GL_SCISSOR_TEST);
-	}
-}
-
-
-//-----------------------------------------------------------------------------
-// _ConvertYAlign: convert a value like VIDEO_Y_BOTTOM to an offset like -1
-//-----------------------------------------------------------------------------
-
-int32 GameVideo::_ConvertYAlign(int32 y_align)
-{
-	switch(y_align)
-	{
+int32 GameVideo::_ConvertYAlign(int32 y_align) {
+	switch (y_align) {
 		case VIDEO_Y_BOTTOM:
 			return -1;
 		case VIDEO_Y_CENTER:
@@ -1308,14 +1050,10 @@ int32 GameVideo::_ConvertYAlign(int32 y_align)
 }
 
 
-//-----------------------------------------------------------------------------
-// _ConvertXAlign: convert a value like VIDEO_X_LEFT to an offset like -1
-//-----------------------------------------------------------------------------
 
-int32 GameVideo::_ConvertXAlign(int32 x_align)
-{
-	switch(x_align)
-	{
+
+int32 GameVideo::_ConvertXAlign(int32 x_align) {
+	switch (x_align) {
 		case VIDEO_X_LEFT:
 			return -1;
 		case VIDEO_X_CENTER:
@@ -1325,173 +1063,115 @@ int32 GameVideo::_ConvertXAlign(int32 x_align)
 	}
 }
 
-//-----------------------------------------------------------------------------
-// SetDefaultCursor: sets the default menu cursor, returns false if it fails
-//-----------------------------------------------------------------------------
-bool GameVideo::SetDefaultCursor(const std::string &cursor_image_filename)
-{
+
+bool GameVideo::SetDefaultCursor(const std::string &cursor_image_filename) {
 	_default_menu_cursor.SetFilename(cursor_image_filename);
 	return LoadImage(_default_menu_cursor);
 }
 
 
-//-----------------------------------------------------------------------------
-// GetDefaultCursor: sets the gefault menu cursor, returns NULL if none is set
-//-----------------------------------------------------------------------------
-StillImage *GameVideo::GetDefaultCursor()
-{
-	if(_default_menu_cursor.GetWidth() != 0.0f)  // cheap test if image is valid
+
+StillImage* GameVideo::GetDefaultCursor() {
+	if (_default_menu_cursor.GetWidth() != 0.0f)  // cheap test if image is valid
 		return &_default_menu_cursor;
 	else
 		return NULL;
 }
 
 
-//-----------------------------------------------------------------------------
-// PushMatrix: pushes the current model view transformation on to stack
-//             Note, this assumes that glMatrixMode(GL_MODELVIEW) has been called
-//-----------------------------------------------------------------------------
-void GameVideo::PushMatrix()
-{
-	glPushMatrix();
-}
-
-//-----------------------------------------------------------------------------
-// PopMatrix: pops the current model view transformation from stack
-//            Note, this assumes that glMatrixMode(GL_MODELVIEW) has been called
-//-----------------------------------------------------------------------------
-void GameVideo::PopMatrix()
-{
-	glPopMatrix();
-}
 
 
 
-//-----------------------------------------------------------------------------
-// EnableScissoring: enable/disable scissoring
-//-----------------------------------------------------------------------------
-void GameVideo::EnableScissoring(bool enable)
-{
+
+void GameVideo::EnableScissoring(bool enable) {
 	_scissor_enabled = enable;
 
-	if(enable)
+	if (enable)
 		glEnable(GL_SCISSOR_TEST);
 	else
 		glDisable(GL_SCISSOR_TEST);
 }
 
 
-//-----------------------------------------------------------------------------
-// SetScissorRect: set the scissoring rectangle, coordinates relative to the
-//                 current coord sys
-//-----------------------------------------------------------------------------
-void GameVideo::SetScissorRect(float left, float right, float bottom, float top)
-{
+
+void GameVideo::SetScissorRect(float left, float right, float bottom, float top) {
 	_scissor_rect = CalculateScreenRect(left, right, bottom, top);
-	glScissor( static_cast<GLint>( (_scissor_rect.left / static_cast<float>(VIDEO_STANDARD_RES_WIDTH) ) * _viewport.width ),
-	           static_cast<GLint>( ( _scissor_rect.top / static_cast<float>(VIDEO_STANDARD_RES_HEIGHT) ) * _viewport.height ),
-	           static_cast<GLsizei>( ( _scissor_rect.width / static_cast<float>(VIDEO_STANDARD_RES_WIDTH) ) * _viewport.width ),
-	           static_cast<GLsizei>( ( _scissor_rect.height / static_cast<float>(VIDEO_STANDARD_RES_HEIGHT) ) * _viewport.height ) );
+	glScissor(static_cast<GLint>((_scissor_rect.left / static_cast<float>(VIDEO_STANDARD_RES_WIDTH)) * _viewport.width),
+		static_cast<GLint>(( _scissor_rect.top / static_cast<float>(VIDEO_STANDARD_RES_HEIGHT)) * _viewport.height),
+		static_cast<GLsizei>(( _scissor_rect.width / static_cast<float>(VIDEO_STANDARD_RES_WIDTH)) * _viewport.width),
+		static_cast<GLsizei>(( _scissor_rect.height / static_cast<float>(VIDEO_STANDARD_RES_HEIGHT)) * _viewport.height)
+	);
 }
 
 
-//-----------------------------------------------------------------------------
-// SetScissorRect: set the scissoring rectangle
-//-----------------------------------------------------------------------------
-void GameVideo::SetScissorRect(const ScreenRect &rect)
-{
+
+void GameVideo::SetScissorRect(const ScreenRect &rect) {
 	_scissor_rect = rect;
-	glScissor( static_cast<GLint>( (_scissor_rect.left / static_cast<float>(VIDEO_STANDARD_RES_WIDTH) ) * _viewport.width ),
-		   static_cast<GLint>( ( _scissor_rect.top / static_cast<float>(VIDEO_STANDARD_RES_HEIGHT) ) * _viewport.height ),
-	           static_cast<GLsizei>( ( _scissor_rect.width / static_cast<float>(VIDEO_STANDARD_RES_WIDTH) ) * _viewport.width ),
-	           static_cast<GLsizei>( ( _scissor_rect.height / static_cast<float>(VIDEO_STANDARD_RES_HEIGHT) ) * _viewport.height ) );
+	glScissor(static_cast<GLint>((_scissor_rect.left / static_cast<float>(VIDEO_STANDARD_RES_WIDTH)) * _viewport.width),
+		static_cast<GLint>((_scissor_rect.top / static_cast<float>(VIDEO_STANDARD_RES_HEIGHT)) * _viewport.height),
+		static_cast<GLsizei>(( _scissor_rect.width / static_cast<float>(VIDEO_STANDARD_RES_WIDTH)) * _viewport.width),
+		static_cast<GLsizei>(( _scissor_rect.height / static_cast<float>(VIDEO_STANDARD_RES_HEIGHT)) * _viewport.height)
+	);
 }
 
-//-----------------------------------------------------------------------------
-// CalculateScreenRect: calculate a rectangle in screen coordinates given one
-//                       using our current coordinate system
-//-----------------------------------------------------------------------------
-ScreenRect GameVideo::CalculateScreenRect(float left, float right, float bottom, float top)
-{
+
+
+ScreenRect GameVideo::CalculateScreenRect(float left, float right, float bottom, float top) {
 	ScreenRect rect;
 
-	int32 scr_left    = _ScreenCoordX(left);
-	int32 scr_right   = _ScreenCoordX(right);
-	int32 scr_bottom  = _ScreenCoordY(bottom);
-	int32 scr_top     = _ScreenCoordY(top);
+	int32 scr_left = _ScreenCoordX(left);
+	int32 scr_right = _ScreenCoordX(right);
+	int32 scr_bottom = _ScreenCoordY(bottom);
+	int32 scr_top = _ScreenCoordY(top);
 
 	int32 temp;
-	if(scr_left > scr_right)
-	{
+	if (scr_left > scr_right) {
 		temp = scr_left;
 		scr_left = scr_right;
 		scr_right = temp;
 	}
 
-	if(scr_top > scr_bottom)
-	{
+	if (scr_top > scr_bottom) {
 		temp = scr_top;
 		scr_top = scr_bottom;
 		scr_bottom = temp;
 	}
 
-	rect.top    = scr_top;
-	rect.left   = scr_left;
-	rect.width  = scr_right - scr_left;
+	rect.top = scr_top;
+	rect.left = scr_left;
+	rect.width = scr_right - scr_left;
 	rect.height = scr_bottom - scr_top;
 
 	return rect;
 }
 
 
-//-----------------------------------------------------------------------------
-// _ScreenCoordX
-//-----------------------------------------------------------------------------
 
-int32 GameVideo::_ScreenCoordX(float x)
-{
+int32 GameVideo::_ScreenCoordX(float x) {
 	float percent;
-	if(_coord_sys.GetLeft() < _coord_sys.GetRight())
+	if (_coord_sys.GetLeft() < _coord_sys.GetRight())
 		percent = (x - _coord_sys.GetLeft()) / (_coord_sys.GetRight() - _coord_sys.GetLeft());
 	else
 		percent = (x - _coord_sys.GetRight()) / (_coord_sys.GetLeft() - _coord_sys.GetRight());
 
-	return int32(percent * float(_width));
+	return static_cast<int32>(percent * static_cast<float>(_width));
 }
 
 
-//-----------------------------------------------------------------------------
-// _ScreenCoordY
-//-----------------------------------------------------------------------------
 
-int32 GameVideo::_ScreenCoordY(float y)
-{
+int32 GameVideo::_ScreenCoordY(float y) {
 	float percent;
-	if(_coord_sys.GetTop() < _coord_sys.GetBottom())
+	if (_coord_sys.GetTop() < _coord_sys.GetBottom())
 		percent = (y - _coord_sys.GetTop()) / (_coord_sys.GetBottom() - _coord_sys.GetTop());
 	else
 		percent = (y - _coord_sys.GetBottom()) / (_coord_sys.GetTop() - _coord_sys.GetBottom());
 
-	return int32(percent * float(_height));
+	return static_cast<int32>(percent * static_cast<float>(_height));
 }
 
 
-//-----------------------------------------------------------------------------
-// _ShouldSmooth: call to check if textures should be smoothed to display
-//                nicely on non-natural (non 1024x768) resolutions
-//-----------------------------------------------------------------------------
-bool GameVideo::_ShouldSmooth() {
-	return ( _width  != VIDEO_STANDARD_RES_WIDTH ||
-		 _height != VIDEO_STANDARD_RES_HEIGHT);
-}
 
-
-//-----------------------------------------------------------------------------
-// MakeLightning: creates a lightning effect
-//-----------------------------------------------------------------------------
-
-bool GameVideo::MakeLightning(const std::string &lit_file)
-{
+bool GameVideo::MakeLightning(const std::string &lit_file) {
 	FILE *fp = fopen(lit_file.c_str(), "rb");
 	if(!fp)
 		return false;
@@ -1542,14 +1222,10 @@ bool GameVideo::MakeLightning(const std::string &lit_file)
 }
 
 
-//-----------------------------------------------------------------------------
-// DrawLightning: draws lightning effect on the screen using a fullscreen overlay
-//-----------------------------------------------------------------------------
 
-bool GameVideo::DrawLightning()
-{
+void GameVideo::DrawLightning() {
 	if(!_lightning_active)
-		return true;
+		return;
 
 	// convert milliseconds elapsed into data points elapsed
 
@@ -1566,17 +1242,11 @@ bool GameVideo::DrawLightning()
 	float intensity = data1 * (1-t) + data2 * t;
 
 	DrawFullscreenOverlay(Color(1.0f, 1.0f, 1.0f, intensity));
-
-	return true;
 }
 
 
-//-----------------------------------------------------------------------------
-// DrawFullscreenOverlay
-//-----------------------------------------------------------------------------
 
-bool GameVideo::DrawFullscreenOverlay(const Color &color)
-{
+void GameVideo::DrawFullscreenOverlay(const Color& color) {
 	PushState();
 
 	SetCoordSys(0.0f, 1.0f, 0.0f, 1.0f);
@@ -1588,91 +1258,57 @@ bool GameVideo::DrawFullscreenOverlay(const Color &color)
 	DrawImage(img, color);
 
 	PopState();
-
-	return true;
 }
 
 
-//-----------------------------------------------------------------------------
-// SetTarget: lets video engine know if it's drawing to an SDL window or a
-//            QT widget
-//-----------------------------------------------------------------------------
 
-bool GameVideo::SetTarget(VIDEO_TARGET target)
-{
-	if(target <= VIDEO_TARGET_INVALID || target >= VIDEO_TARGET_TOTAL)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: tried to set video engine to invalid target (" << target << ")" << endl;
-		return false;
+void GameVideo::SetTarget(VIDEO_TARGET target) {
+	if (target <= VIDEO_TARGET_INVALID || target >= VIDEO_TARGET_TOTAL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "tried to set video engine to an invalid target: " << target << endl;
+		return;
 	}
 
 	_target = target;
-	return true;
 }
 
 
-//-----------------------------------------------------------------------------
-// DrawGrid: draws a grid going from (x,y) to (maxX, maxY), with horizontal and
-//           vertical grid spacing of xstep and ystep, with a color 'c'
-//-----------------------------------------------------------------------------
 
-void GameVideo::DrawGrid(float x, float y, float x_step, float y_step, const Color &c)
-{
+void GameVideo::DrawGrid(float x, float y, float x_step, float y_step, const Color& c) {
 	PushState();
 
 	Move(0, 0);
 
-	float x_Max = _coord_sys.GetRight();
-	float y_Max = _coord_sys.GetBottom();
+	float x_max = _coord_sys.GetRight();
+	float y_max = _coord_sys.GetBottom();
 
-	std::vector<GLfloat> vertices;
-	int numvertices = 0;
-	for (; x <= x_Max; x += x_step)
-	{
+	vector<GLfloat> vertices;
+	int32 num_vertices = 0;
+	for (; x <= x_max; x += x_step) {
 		vertices.push_back(x);
 		vertices.push_back(_coord_sys.GetBottom());
 		vertices.push_back(x);
 		vertices.push_back(_coord_sys.GetTop());
-		numvertices += 2;
+		num_vertices += 2;
 	}
-	for (; y < y_Max; y += y_step)
-	{
+	for (; y < y_max; y += y_step) {
 		vertices.push_back(_coord_sys.GetLeft());
 		vertices.push_back(y);
 		vertices.push_back(_coord_sys.GetRight());
 		vertices.push_back(y);
-		numvertices += 2;
+		num_vertices += 2;
 	}
 	glColor4fv(&c[0]);
-	glEnableClientState ( GL_VERTEX_ARRAY );
-	glVertexPointer ( 2, GL_FLOAT, 0, &(vertices[0]) );
-	glDrawArrays ( GL_LINES, 0, numvertices );
-	glDisableClientState ( GL_VERTEX_ARRAY );
-	/*glBegin(GL_LINES);
-	glColor4fv(&c[0]);
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(2, GL_FLOAT, 0, &(vertices[0]));
+	glDrawArrays(GL_LINES, 0, num_vertices);
+	glDisableClientState(GL_VERTEX_ARRAY);
 
-	for(; x <= x_Max; x += x_step)
-	{
-		glVertex2f(x, _coord_sys.GetBottom());
-		glVertex2f(x, _coord_sys.GetTop());
-	}
-
-	for(; y <= y_Max; y += y_step)
-	{
-		glVertex2f(_coord_sys.GetLeft(), y);
-		glVertex2f(_coord_sys.GetRight(), y);
-	}
-
-	glEnd();*/
 	PopState();
 }
 
-//-----------------------------------------------------------------------------
-// Draws a solid rectangle of a given color.
-//-----------------------------------------------------------------------------
-void GameVideo::DrawRectangle(const float width, const float height, const Color &color)
-{
+
+
+void GameVideo::DrawRectangle(float width, float height, const Color& color) {
 	_rectangle_image._elements[0].width = width;
 	_rectangle_image._elements[0].height = height;
 

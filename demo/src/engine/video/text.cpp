@@ -476,7 +476,7 @@ bool GameVideo::DrawText(const ustring &txt)
 	
 	if(font)
 	{
-		_PushContext();
+		PushState();
 		int32 lineSkip = fp->line_skip;
 		
 		// Optimization: something seems to be wrong with ustring, using a buffer instead
@@ -544,7 +544,7 @@ bool GameVideo::DrawText(const ustring &txt)
 				
 				if(!_DrawTextHelper(buffer))
 				{
-					_PopContext();
+					PopState();
 					return false;
 				}
 				glPopMatrix();
@@ -555,7 +555,7 @@ bool GameVideo::DrawText(const ustring &txt)
 			// draw the text itself
 			if(!_DrawTextHelper(buffer))
 			{
-				_PopContext();
+				PopState();
 				return false;
 			}
 			
@@ -565,7 +565,7 @@ bool GameVideo::DrawText(const ustring &txt)
 
 		} while(lastline < txt.length());
 		
-		_PopContext();
+		PopState();
 	}
 		
 	return true;
