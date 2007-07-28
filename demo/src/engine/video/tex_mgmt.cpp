@@ -542,7 +542,7 @@ void VariableTexMemMgr::_SetBlockProperties(BaseImage *img, bool change_free, bo
 		for (int32 x = block_x; x < block_x + w; x++) {
 			if (_blocks[x + y * _sheet_width].image == img) {
 				if (change_free)
-					_blocks[x + y * _sheet_width].free  = free;
+					_blocks[x + y * _sheet_width].free = free;
 				if (change_image)
 					_blocks[x + y * _sheet_width].image = new_image;
 			}
@@ -902,16 +902,17 @@ bool GameVideo::_DeleteImage(BaseImage *const base_img) {
 	}
 
 	if (base_img->Remove()) {
-		if (base_img->width > 512 || base_img->height > 512) {
+// 		if (base_img->width > 512 || base_img->height > 512) {
 			// Remove the image and texture sheet completely
-			_RemoveSheet(base_img->texture_sheet);
-			_RemoveImage(base_img);
-		}
-		else {
+			// TODO: This introduces a seg fault when TexSheet::FreeImage is later called. Fix this bug!
+// 			_RemoveSheet(base_img->texture_sheet);
+// 			_RemoveImage(base_img);
+// 		}
+// 		else {
 			// For smaller images, simply mark them as free 
 			// in the memory manager
 			base_img->texture_sheet->FreeImage(base_img);
-		}
+// 		}
 	}
 
 	return true;
