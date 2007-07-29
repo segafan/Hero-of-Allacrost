@@ -105,7 +105,7 @@ void OptionBox::Draw() {
 	//Calculate scissoring rectangle
 	ScreenRect rect(x, y, w, h);
 
-	CoordSys &cs = VideoManager->_coord_sys;
+	CoordSys &cs = VideoManager->_current_context.coordinate_system;
 
 	if( cs.GetVerticalDirection() < 0 ) {
 		rect.top += static_cast<int32>( _vertical_spacing ) + ( _number_rows ); //To accomodate the 1 pixel per row offset
@@ -160,8 +160,10 @@ void OptionBox::Draw() {
 
 	// Iterate through all the visible option cells and draw them
 	for (int32 row = row_min; row < row_max; row++) {
-
-		VideoManager->EnableScissoring( scissor );
+		if (scissor)
+			VideoManager->EnableScissoring();
+		else
+			VideoManager->DisableScissoring();
 
 		bounds.x_left = left;
 		bounds.x_center = bounds.x_left + (0.5f * _horizontal_spacing * cs.GetHorizontalDirection());
@@ -271,8 +273,8 @@ void OptionBox::Draw() {
 				} // switch (op.elements[element].type)
 			} // for (int32 element = 0; element < static_cast<int32>(op.elements.size()); element++)
 
-			//Never scissor the cursor
-			VideoManager->EnableScissoring( false );
+			// Should never scissor the cursor
+			VideoManager->DisableScissoring();
 
 			float cursor_offset = 0;
 			if (_scrolling) {

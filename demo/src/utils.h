@@ -433,6 +433,13 @@ size_t NumberElementsArray(T (&)[N])
 **/
 float RandomFloat();
 
+/** \brief Creates a random float value between a and b.
+*** \param a The lower bound value
+*** \param b The upper bound value
+*** \return A random float with a value bewen a and b
+**/
+float RandomFloat(float a, float b);
+
 /** \brief Returns a random interger value uniformally distributed between two inclusive bounds
 *** \param lower_bound The lower inclusive bound
 *** \param upper_bound The upper inclusive bound
@@ -442,23 +449,20 @@ float RandomFloat();
 **/
 int32 RandomBoundedInteger(int32 lower_bound, int32 upper_bound);
 
-/******************************************************************************
- * int GaussianValue(int mean, int range, bool positive_value):
- *
- *	This function computes a random number based on a Gaussian Distribution Curve. This number will be between
- *	 mean - range and mean + range if range is greater than zero, otherwise it will return a true, unbounded
- *	 guassian random value. If positive_value is set to true, this function will only return a number that is
- *	 zero or positive.
- *
- *	Mean is (obviously) the mean, and the range represents the value for 3 standard deviations from the mean.
- *	 That means that 99.7% of the random values chosen will lay between mean - range and mean + range, if
- *	 range is a greater than or equal to zero.
- ******************************************************************************/
 /** \brief Returns a Gaussian random value with specified mean and standard deviation
 *** \param mean
 *** \param std_dev The standard deviation of the Gaussian function (optional, default is 10.0f)
 *** \param positive_value If true the function will not return a negative result (optional, default is true)
 *** \return An Gaussian random integer with a mean and standard deviation as specified by the user
+***
+*** This function computes a random number based on a Gaussian Distribution Curve. This number will be between
+*** mean - range and mean + range if range is greater than zero, otherwise it will return a true, unbounded
+*** guassian random value. If positive_value is set to true, this function will only return a number that is
+*** zero or positive.
+***
+*** Mean is (obviously) the mean, and the range represents the value for 3 standard deviations from the mean.
+*** That means that 99.7% of the random values chosen will lay between mean - range and mean + range, if
+*** range is a greater than or equal to zero.
 **/
 int32 GaussianRandomValue(int32 mean, float std_dev = 10.0f, bool positive_value = true);
 

@@ -106,9 +106,9 @@ void PauseMode::Update() {
 void PauseMode::Draw() {
 	// Draw the background image
 	// For that, set the system coordinates to the size of the window (same with the save-screen)
-	int32 width = VideoManager->GetWidth();
-	int32 height = VideoManager->GetHeight();
-	VideoManager->SetCoordSys (0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height));
+	int32 width = VideoManager->GetScreenWidth();
+	int32 height = VideoManager->GetScreenHeight();
+	VideoManager->SetCoordSys(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height));
 
 	Color grayed(0.35f, 0.35f, 0.35f, 1.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, 0);

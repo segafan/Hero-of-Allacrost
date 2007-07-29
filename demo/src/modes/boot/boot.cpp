@@ -765,17 +765,17 @@ void BootMode::_SetResolution(int32 width, int32 height) {
 }
 
 void BootMode::_OnResolution640x480() {
-	if (VideoManager->GetWidth() != 640 && VideoManager->GetHeight() != 480)
+	if (VideoManager->GetScreenWidth() != 640 && VideoManager->GetScreenHeight() != 480)
 		_SetResolution(640, 480);
 }
 
 void BootMode::_OnResolution800x600() {
-	if (VideoManager->GetWidth() != 800 && VideoManager->GetHeight() != 600)
+	if (VideoManager->GetScreenWidth() != 800 && VideoManager->GetScreenHeight() != 600)
 		_SetResolution(800, 600);
 }
 
 void BootMode::_OnResolution1024x768() {
-	if (VideoManager->GetWidth() != 1024 && VideoManager->GetHeight() != 768)
+	if (VideoManager->GetScreenWidth() != 1024 && VideoManager->GetScreenHeight() != 768)
 		_SetResolution(1024, 768);
 }
 
@@ -810,7 +810,7 @@ void BootMode::_OnRestoreDefaultJoyButtons() {
 void BootMode::_UpdateVideoOptions() {
 	// Update resolution text
 	std::ostringstream resolution("");
-	resolution << "Resolution: " << VideoManager->GetWidth() << " x " << VideoManager->GetHeight();
+	resolution << "Resolution: " << VideoManager->GetScreenWidth() << " x " << VideoManager->GetScreenHeight();
 	_video_options_menu.SetOptionText(0, MakeUnicodeString(resolution.str()));
 
 	// Update text on current video mode
@@ -881,8 +881,8 @@ void BootMode::_SaveSettingsFile() {
 
 	// Write the current settings into the .lua file
 	// video
-	settings_lua.ModifyInt("video_settings.screen_resx", VideoManager->GetWidth());
-	settings_lua.ModifyInt("video_settings.screen_resy", VideoManager->GetHeight());
+	settings_lua.ModifyInt("video_settings.screen_resx", VideoManager->GetScreenWidth());
+	settings_lua.ModifyInt("video_settings.screen_resy", VideoManager->GetScreenHeight());
 	settings_lua.ModifyString("video_settings.full_screen", VideoManager->IsFullscreen() ? "true" : "false");
 	settings_lua.ModifyFloat("video_settings.brightness", VideoManager->GetGamma());
 

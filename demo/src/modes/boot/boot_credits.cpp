@@ -64,7 +64,7 @@ void CreditsScreen::Draw()
 	// Set clip region for the text and draw the visible part of it
 	VideoManager->Move(512.0f, 384.0f + _text_offset_y);
 	VideoManager->SetScissorRect(_window.GetScissorRect());
-	VideoManager->EnableScissoring(true);
+	VideoManager->EnableScissoring();
 
 	// Fade in the text by setting new color with alpha value below 1.0f
 	float color_alpha = _text_offset_y * 0.025f;
@@ -76,7 +76,7 @@ void CreditsScreen::Draw()
 	VideoManager->DrawImage(_credits_rendered, modulated);
 	VideoManager->SetDrawFlags(VIDEO_Y_CENTER, 0);
 
-	VideoManager->EnableScissoring(false);
+	VideoManager->DisableScissoring();
 }
 
 

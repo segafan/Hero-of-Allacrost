@@ -352,7 +352,7 @@ void BindEngineToLua() {
 	{
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_utils")
 	[
-		def("RandomFloat", &hoa_utils::RandomFloat)
+		def("RandomFloat", (float(*)(void)) &hoa_utils::RandomFloat)
 	];
 	}
 
