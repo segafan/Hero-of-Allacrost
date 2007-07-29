@@ -29,6 +29,10 @@
 #ifndef __VIDEO_HEADER__
 #define __VIDEO_HEADER__
 
+#ifdef _WINDOWS
+#include <windows.h> // needs to be included before gl.h
+#endif
+
 #ifdef __APPLE__
 	#include <OpenGL/gl.h>
 	#include <OpenGL/glu.h>
