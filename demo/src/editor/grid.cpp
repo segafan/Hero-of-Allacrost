@@ -478,8 +478,8 @@ void Grid::paintGL()
 	int tile_index;                  // ranges from 0-255
 
 	// Setup drawing parameters
-	VideoManager->SetCoordSys(0.0f, VideoManager->GetWidth() / TILE_WIDTH,
-		VideoManager->GetHeight() / TILE_HEIGHT, 0.0f);
+	VideoManager->SetCoordSys(0.0f, VideoManager->GetScreenWidth() / TILE_WIDTH,
+		VideoManager->GetScreenHeight() / TILE_HEIGHT, 0.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
 	VideoManager->Clear(Color::black);
 

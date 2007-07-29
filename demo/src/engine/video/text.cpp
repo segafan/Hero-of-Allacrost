@@ -69,7 +69,7 @@ bool GameVideo::LoadFont(const string &filename, const string &name, uint32 size
 
 
 FontProperties* GameVideo::GetFontProperties(const std::string &font_name) {
-	if (!IsValidFont(font_name)) {
+	if (!IsFontValid(font_name)) {
 		if (VIDEO_DEBUG)
 			cerr << "VIDEO ERROR: GetFontProperties() failed becase an invalid font name was passed: " << font_name << endl;
 		return NULL;
@@ -85,7 +85,7 @@ bool GameVideo::SetFont(const std::string &name) {
 	if ( _font_map.find(name) == _font_map.end())
 		return false;
 		
-	_current_font = name;
+	_current_context.font = name;
 	return true;
 }
 
@@ -96,7 +96,7 @@ bool GameVideo::SetFont(const std::string &name) {
 
 std::string GameVideo::GetFont() const
 {
-	return _current_font;
+	return _current_context.font;
 }
 
 
@@ -106,7 +106,7 @@ std::string GameVideo::GetFont() const
 
 Color GameVideo::GetTextColor () const
 {
-	return _current_text_color;
+	return _current_context.text_color;
 }
 
 //-----------------------------------------------------------------------------
@@ -299,15 +299,15 @@ bool GameVideo::_DrawTextHelper
 	if(*uText == 0)
 		return true;
 		
-	if(_font_map.find(_current_font) == _font_map.end())
+	if(_font_map.find(_current_context.font) == _font_map.end())
 		return false;
 	
-	FontProperties * fp = _font_map[_current_font];
+	FontProperties * fp = _font_map[_current_context.font];
 	
 	glBlendFunc(GL_ONE, GL_ONE);
 	glEnable(GL_BLEND);
 
-	CoordSys &cs = _coord_sys;
+	CoordSys &cs = _current_context.coordinate_system;
 
 	_CacheGlyphs(uText, fp);
 
@@ -330,13 +330,13 @@ bool GameVideo::_DrawTextHelper
 		return false;
 	}
 
-	float xoff = ((_x_align+1) * fontwidth) * .5f * -cs.GetHorizontalDirection();
-	float yoff = ((_y_align+1) * fontheight) * .5f * -cs.GetVerticalDirection();
+	float xoff = ((_current_context.x_align+1) * fontwidth) * .5f * -cs.GetHorizontalDirection();
+	float yoff = ((_current_context.y_align+1) * fontheight) * .5f * -cs.GetVerticalDirection();
 
 	MoveRelative(xoff, yoff);
 
-	float modulation = _fader.GetFadeModulation();
-	Color textColor = _current_text_color * modulation;
+	float modulation = _screen_fader.GetFadeModulation();
+	Color textColor = _current_context.text_color * modulation;
 
 	int xpos = 0;
 	
@@ -463,15 +463,15 @@ bool GameVideo::DrawText(const ustring &txt)
 		return true;
 	}
 
-	if(_font_map.find(_current_font) == _font_map.end())
+	if(_font_map.find(_current_context.font) == _font_map.end())
 	{
 		if(VIDEO_DEBUG)
 			cerr << "GameVideo::DrawText() failed because font passed was either not loaded or improperly loaded!\n" <<
-			        "  *fontname: " << _current_font << endl;
+			        "  *fontname: " << _current_context.font << endl;
 		return false;
 	}
 
-	FontProperties * fp = _font_map[_current_font];
+	FontProperties * fp = _font_map[_current_context.font];
 	TTF_Font * font = fp->ttf_font;
 	
 	if(font)
@@ -500,7 +500,7 @@ bool GameVideo::DrawText(const ustring &txt)
 
 			glPushMatrix();
 			
-			Color oldTextColor = _current_text_color;
+			Color oldTextColor = _current_context.text_color;
 
 			// if text shadows are enabled, draw the shadow
 			if(_text_shadow && fp->shadow_style != VIDEO_TEXT_SHADOW_NONE)
@@ -539,8 +539,8 @@ bool GameVideo::DrawText(const ustring &txt)
 				
 				
 				glPushMatrix();
-				MoveRelative(+_coord_sys.GetHorizontalDirection() * fp->shadow_x, 0.0f);
-				MoveRelative(0.0f, _coord_sys.GetVerticalDirection() * fp->shadow_y);
+				MoveRelative(+_current_context.coordinate_system.GetHorizontalDirection() * fp->shadow_x, 0.0f);
+				MoveRelative(0.0f, _current_context.coordinate_system.GetVerticalDirection() * fp->shadow_y);
 				
 				if(!_DrawTextHelper(buffer))
 				{
@@ -561,7 +561,7 @@ bool GameVideo::DrawText(const ustring &txt)
 			
 			glPopMatrix();
 			
-			MoveRelative(0, -lineSkip * _coord_sys.GetVerticalDirection());
+			MoveRelative(0, -lineSkip * _current_context.coordinate_system.GetVerticalDirection());
 
 		} while(lastline < txt.length());
 		
@@ -728,7 +728,7 @@ bool GameVideo::_RenderText(hoa_utils::ustring &string, TextStyle &style, ImageL
 
 int32 GameVideo::CalculateTextWidth(const std::string &fontName, const hoa_utils::ustring &text)
 {
-	if(!IsValidFont(fontName))
+	if(!IsFontValid(fontName))
 		return -1;
 		
 	int32 w;	
@@ -745,7 +745,7 @@ int32 GameVideo::CalculateTextWidth(const std::string &fontName, const hoa_utils
 
 int32 GameVideo::CalculateTextWidth(const std::string &fontName, const std::string  &text)
 {
-	if(!IsValidFont(fontName))
+	if(!IsFontValid(fontName))
 		return -1;
 
 	int32 w;	
@@ -859,22 +859,22 @@ Color GameVideo::_GetTextShadowColor(FontProperties *fp)
 		{
 			case VIDEO_TEXT_SHADOW_DARK:
 				shadowColor = Color::black;
-				shadowColor[3] = _current_text_color[3] * 0.5f;
+				shadowColor[3] = _current_context.text_color[3] * 0.5f;
 				break;
 			case VIDEO_TEXT_SHADOW_LIGHT:
 				shadowColor = Color::white;
-				shadowColor[3] = _current_text_color[3] * 0.5f;
+				shadowColor[3] = _current_context.text_color[3] * 0.5f;
 				break;
 			case VIDEO_TEXT_SHADOW_BLACK:
 				shadowColor = Color::black;
-				shadowColor[3] = _current_text_color[3];
+				shadowColor[3] = _current_context.text_color[3];
 				break;
 			case VIDEO_TEXT_SHADOW_COLOR:
-				shadowColor = _current_text_color;
-				shadowColor[3] = _current_text_color[3] * 0.5f;
+				shadowColor = _current_context.text_color;
+				shadowColor[3] = _current_context.text_color[3] * 0.5f;
 				break;
 			case VIDEO_TEXT_SHADOW_INVCOLOR:
-				shadowColor = Color(1.0f - _current_text_color[0], 1.0f - _current_text_color[1], 1.0f - _current_text_color[2], _current_text_color[3] * 0.5f);
+				shadowColor = Color(1.0f - _current_context.text_color[0], 1.0f - _current_context.text_color[1], 1.0f - _current_context.text_color[2], _current_context.text_color[3] * 0.5f);
 				break;
 			default:
 			{
@@ -1084,7 +1084,7 @@ void RenderedText::_Regenerate() {
 	style.font          = VideoManager->GetFont();
 	style.shadow_enable = VideoManager->_text_shadow;
 	FontProperties *fp;
-	if (!VideoManager->IsValidFont(style.font)
+	if (!VideoManager->IsFontValid(style.font)
 	|| ((fp = VideoManager->GetFontProperties(style.font)) == NULL))
 	{
 		if(VIDEO_DEBUG)
@@ -1141,15 +1141,15 @@ void RenderedText::_Regenerate() {
 
 		// Increment the reference count
 		timage->Add();
-		float y_offset = total_height + _height * -VideoManager->_coord_sys.GetVerticalDirection();
-		y_offset += (fp->line_skip - timage->height) * VideoManager->_coord_sys.GetVerticalDirection();
+		float y_offset = total_height + _height * -VideoManager->_current_context.coordinate_system.GetVerticalDirection();
+		y_offset += (fp->line_skip - timage->height) * VideoManager->_current_context.coordinate_system.GetVerticalDirection();
 		TImageElement element(timage, 0, y_offset, 0.0f, 0.0f, 1.0f, 1.0f, static_cast<float>(timage->width), static_cast<float>(timage->height), _color);
 
 		// if text shadows are enabled, add a shadow version
 		if (style.shadow_enable && timage->style.shadow_style != VIDEO_TEXT_SHADOW_NONE)
 		{
-			shadow_offset_x = static_cast<int32>(VideoManager->_coord_sys.GetHorizontalDirection()) * timage->style.shadow_offset_x;
-			shadow_offset_y = static_cast<int32>(VideoManager->_coord_sys.GetVerticalDirection())   * timage->style.shadow_offset_y;
+			shadow_offset_x = static_cast<int32>(VideoManager->_current_context.coordinate_system.GetHorizontalDirection()) * timage->style.shadow_offset_x;
+			shadow_offset_y = static_cast<int32>(VideoManager->_current_context.coordinate_system.GetVerticalDirection())   * timage->style.shadow_offset_y;
 
 			TImageElement shadow_element = element;
 			shadow_element.x_offset += shadow_offset_x;
@@ -1198,7 +1198,7 @@ void RenderedText::_Realign()
 	std::vector<TImageElement>::iterator it;
 	for (it = _text_sections.begin(); it != _text_sections.end(); ++it)
 	{
-		it->x_offset = _alignment * VideoManager->_coord_sys.GetHorizontalDirection() * ( (_width - it->width) / 2.0f) + it->x_line_offset;
+		it->x_offset = _alignment * VideoManager->_current_context.coordinate_system.GetHorizontalDirection() * ( (_width - it->width) / 2.0f) + it->x_line_offset;
 	}
 }
 

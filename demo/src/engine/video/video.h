@@ -29,10 +29,6 @@
 #ifndef __VIDEO_HEADER__
 #define __VIDEO_HEADER__
 
-#include "defs.h"
-#include "utils.h"
-
-// OpenGL includes
 #ifdef __APPLE__
 	#include <OpenGL/gl.h>
 	#include <OpenGL/glu.h>
@@ -41,22 +37,20 @@
 	#include <GL/glu.h>
 #endif
 
-// libpng and libjpeg image loader includes
 #include <png.h>
 extern "C" {
 	#include <jpeglib.h>
 }
 
-// SDL_ttf includes
 #ifdef __APPLE__
 	#include <SDL_ttf/SDL_ttf.h>
 #else
 	#include <SDL/SDL_ttf.h>
 #endif
 
-#include <set>
+#include "defs.h"
+#include "utils.h"
 
-// Various other headers of the video engine
 #include "context.h"
 #include "color.h"
 #include "coord_sys.h"
@@ -83,90 +77,75 @@ extern GameVideo* VideoManager;
 //! \brief Determines whether the code in the hoa_video namespace should print
 extern bool VIDEO_DEBUG;
 
-/** \brief Creates a random float between a and b.
-*** \param a lower bound of random selection
-*** \param b upper bound of random selection
-*** \return the randomly generated float
-**/
-float RandomFloat(float a, float b);
-
-/** \brief Rotates a point (x,y) around the origin (0,0), by angle radians
-*** \param x x coordinate of point to rotate
-*** \param y y coordinate of point to rotate
-*** \param angle amount to rotate by (in radians)
-**/
-void RotatePoint(float &x, float &y, float angle);
-
-/** \brief linearly interpolation, returns a value which is (alpha*100) percent between initial and final
-***
-***  \param alpha    controls the linear interpolation
-***  \param initial  initial value
-***  \param final    final value
-*** \return the linear interpolated value
-**/
-float Lerp(float alpha, float initial, float final);
 
 //! animation frame period: how many milliseconds 1 frame of animation lasts for
 const int32 VIDEO_ANIMATION_FRAME_PERIOD = 10;
+
 
 //! \brief Draw flags to control x and y alignment, flipping, and texture blending.
 enum VIDEO_DRAW_FLAGS {
 	VIDEO_DRAW_FLAGS_INVALID = -1,
 
+	//! X draw alignment flags
 	//@{
-	//! X alignment flags
-	VIDEO_X_LEFT = 1, VIDEO_X_CENTER = 2, VIDEO_X_RIGHT = 3,
+	VIDEO_X_LEFT = 1,
+	VIDEO_X_CENTER = 2,
+	VIDEO_X_RIGHT = 3,
 	//@}
 
+	//! Y draw alignment flags
 	//@{
-	//! Y alignment flags
-	VIDEO_Y_TOP = 4, VIDEO_Y_CENTER = 5, VIDEO_Y_BOTTOM = 6,
+	VIDEO_Y_TOP = 4,
+	VIDEO_Y_CENTER = 5,
+	VIDEO_Y_BOTTOM = 6,
 	//@}
 
-	//@{
 	//! X flip flags
-	VIDEO_X_FLIP = 7, VIDEO_X_NOFLIP = 8,
+	//@{
+	VIDEO_X_FLIP = 7,
+	VIDEO_X_NOFLIP = 8,
 	//@}
 
-	//@{
 	//! Y flip flags
-	VIDEO_Y_FLIP = 9, VIDEO_Y_NOFLIP = 10,
+	//@{
+	VIDEO_Y_FLIP = 9,
+	VIDEO_Y_NOFLIP = 10,
 	//@}
 
-	//@{
 	//! Texture blending flags
-	VIDEO_NO_BLEND = 11, VIDEO_BLEND = 12, VIDEO_BLEND_ADD = 13,
+	//@{
+	VIDEO_NO_BLEND = 11,
+	VIDEO_BLEND = 12,
+	VIDEO_BLEND_ADD = 13,
 	//@}
 
 	VIDEO_DRAW_FLAGS_TOTAL = 14
 };
 
 
-/** \brief This specifies whether the engine is to draw to an SDL window, a QT widget, etc.
-*** \note The target must be set before the call to GameVideo::Initialize().
-**/
+//! \brief Specifies the target window environement where the video engine will run
 enum VIDEO_TARGET {
 	VIDEO_TARGET_INVALID = -1,
 
-	//! Drawing to a SDL window
+	//! Represents a SDL window
 	VIDEO_TARGET_SDL_WINDOW = 0,
 
-	//! Drawing to a QT widget
+	//! Represents a QT widget
 	VIDEO_TARGET_QT_WIDGET  = 1,
 
 	VIDEO_TARGET_TOTAL = 2
 };
 
 
-//! \brief Specifies the stencil operation to use and describes how stencil buffer is modified.
+//! \brief Specifies the stencil operation to use and describes how the stencil buffer is modified
 enum VIDEO_STENCIL_OP {
 	VIDEO_STENCIL_OP_INVALID = -1,
 
 	//! Set the stencil value to one
-	VIDEO_STENCIL_OP_ONE      = 0,
+	VIDEO_STENCIL_OP_ZERO = 0,
 
 	//! Set the stencil value to zero
-	VIDEO_STENCIL_OP_ZERO     = 1,
+	VIDEO_STENCIL_OP_ONE = 1,
 
 	//! Increase the stencil value
 	VIDEO_STENCIL_OP_INCREASE = 2,
@@ -177,11 +156,29 @@ enum VIDEO_STENCIL_OP {
 	VIDEO_STENCIL_OP_TOTAL = 4
 };
 
-//! \brief Standard natural resolution sizes for allacrost images.
+//! \brief The standard screen resolution for Allacrost
 enum {
 	VIDEO_STANDARD_RES_WIDTH  = 1024,
 	VIDEO_STANDARD_RES_HEIGHT = 768
 };
+
+
+/** \brief Linearly interpolates a value which is (alpha * 100) percent between initial and final
+***  \param alpha Determines where inbetween initial (0.0f) and final (1.0f) the interpolation should be
+***  \param initial The initial value
+***  \param final The final value
+*** \return the linear interpolated value
+**/
+float Lerp(float alpha, float initial, float final);
+
+
+/** \brief Rotates a point (x,y) around the origin (0,0), by angle radians
+*** \param x x coordinate of point to rotate
+*** \param y y coordinate of point to rotate
+*** \param angle amount to rotate by (in radians)
+**/
+void RotatePoint(float &x, float &y, float angle);
+
 
 /** ****************************************************************************
 *** \brief Manages all the video operations and serves as the API to the video engine.
@@ -208,198 +205,210 @@ class GameVideo : public hoa_utils::Singleton<GameVideo> {
 public:
 	~GameVideo();
 
+	/** \brief Initialzies all video engine libraries and sub-systems
+	*** \return True if all initializations were successful, false if there was an error.
+	**/
 	bool SingletonInitialize();
 
+	// ---------- General methods
 
-	//-- General --------------------------------------------------------------
+	/** \brief Sets the target window environment where the video engine will be used
+	*** \param target The window target, which can be VIDEO_TARGET_SDL_WINDOW or VIDEO_TARGET_QT_WIDGET
+	*** \note The video engien's default target is a SDL window, so if that's what you desire then this
+	*** function does not need to be called.
+	*** \note You must set the target before calling the SingletonInitialize() function. Any invocations
+	*** of the SetTarget function after SingletonInitialize has been called will result in no effect.
+	**/
+	void SetTarget(VIDEO_TARGET target);
 
-	/** \brief Clears the contents of the current screen.
-	***
-	*** This method should be called at the beginning of every frame, before any
-	*** draw operations are performed. Note that it only clears the color buffer,
-	*** not any of the other OpenGL buffers.
+	/** \brief Sets one to multiple flags which control drawing orientation (flip, align, blending, etc). Simply pass
+	*** \param first_flag The first (and possibly only) draw flag to set
+	*** \param ... Additional draw flags. The list must terminate with a 0.
+	*** \note Refer to the VIDEO_DRAW_FLAGS enum for a list of valid flags that this function will accept
+	**/
+	void SetDrawFlags(int32 first_flag, ...);
+
+	/** \brief Clears the contents of the screen
+	*** This method should be called at the beginning of every frame, before any draw operations
+	*** are performed. Note that it only clears the color buffer, not any of the other OpenGL buffers.
 	**/
 	void Clear();
 
-	/** \brief Clears the screen to a specific color.
-	*** \param c The color to set the cleared screen to.
+	/** \brief Clears the contents of the screen to a specific color
+	*** \param background_color The color to set the cleared screen to
 	**/
-	void Clear(const Color &c);
+	void Clear(const Color& background_color);
 
-	/** \brief call at end of every frame
-	*** \param frame_time The number of milliseconds that have passed since the last frame.
+	/** \brief Swaps the frame buffers and displays the newly drawn contents onto the screen
+	*** \param frame_time The number of milliseconds that have expired since the last frame was drawn.
 	**/
-	void Display(int32 frame_time);
+	void Display(uint32 frame_time);
 
+	// ---------- Screen size and resolution methods
 
-	/** \brief set the target, i.e. whether the video engine is being used to
-	 *         draw to an SDL window, or a QT widget. (There are some important
-	 *         differences, so the video engine needs to know).
-	 *
-	 *  \param target can be VIDEO_TARGET_QT_WIDGET, or VIDEO_TARGET_SDL_WINDOW
-	 * \return success/failure
-	 *
-	 *  \note  If you don't call this function, the default target is SDL window
-	 *         Also, note that you MUST call this before calling Initialize()
-	 */
-	void SetTarget(VIDEO_TARGET target);
+	//! \brief Returns the width of the screen, in pixels
+	int32 GetScreenWidth() const
+		{ return _screen_width; }
 
-	//-- Video settings -------------------------------------------------------
+	//! \brief Returns the height of the screen, in pixels
+	int32 GetScreenHeight() const
+		{ return _screen_height; }
 
-	//! NOTE: when you modify video setting, you must call ApplySettings()
-	//!       to actually apply them
-
-	/** \brief sets the current resolution to the given width and height
-	 *  \param width new screen width
-	 *  \param height new screen height
-	 *
-	 *  \note  you must call ApplySettings() to actually apply the change
-	 */
-	void SetResolution(uint32 width, uint32 height)
-		{ _temp_width = width; _temp_height = height; }
-
-	/** \brief returns width, (whatever was set with SetResolution)
-	 * \return width of the screen
-	 */
-	int32 GetWidth() const
-		{ return _width; }
-
-	/** \brief returns height, (whatever was set with SetResolution)
-	 * \return height of the screen
-	 */
-	int32 GetHeight() const
-		{ return _height; }
-
-	/** \brief return a reference to the coordinates system
-	 *  \return Reference to the coordinates system
-	 */
-	const CoordSys& GetCoordSys() const
-		{ return _coord_sys; }
-
-	/** \brief returns true if game is in fullscreen mode
-	 * \return true if in fullscreen mode, false if in windowed mode
-	 */
+	//! \brief Returns true if game is in fullscreen mode, false if it is in windowed mode
 	bool IsFullscreen() const
 		{ return _fullscreen; }
 
-	/** \brief Return the pixel size expressed coordinate system units
-	 *  \return Pixel size expressed in cordinate system units
-	 *  \param x Horizontal resolution
-	 *  \param x Vertical resolution
-	 */
-	void GetPixelSize(double &x, double &y)
-	{
-		x = (_coord_sys.GetRight() - _coord_sys.GetLeft()) / _width;
-		y = (_coord_sys.GetTop() - _coord_sys.GetBottom()) / _height;
-	}
+	/** \brief sets the current resolution to the given width and height
+	*** \param width new screen width
+	*** \param height new screen height
+	***
+	*** \note  you must call ApplySettings() to actually apply the change
+	**/
+	void SetResolution(uint32 width, uint32 height)
+		{ _temp_width = width; _temp_height = height; }
 
 	/** \brief sets the game to fullscreen or windowed depending on whether
 	 *         true or false is passed
-	 *
 	 *  \param fullscreen set to true if you want fullscreen, false for windowed.
 	 *  \note  you must call ApplySettings() to actually apply the change
 	 */
 	void SetFullscreen(bool fullscreen)
 		{ _temp_fullscreen = fullscreen; }
 
-	/** \brief toggles fullscreen on and off
-	 * \return success/failure
+	/** \brief Toggles fullscreen mode on or off
 	 *  \note  you must call ApplySettings() to actually apply the change
 	 */
 	void ToggleFullscreen()
 		{ SetFullscreen(!_temp_fullscreen); }
 
+	//! \brief Returns a reference to the current coordinate system
+	const CoordSys& GetCoordSys() const
+		{ return _current_context.coordinate_system; }
+
+	/** \brief Returns the pixel size expressed in coordinate system units
+	*** \param x A reference of where to store the horizontal resolution
+	*** \param x A reference of where to store the vertical resolution
+	**/
+	void GetPixelSize(float& x, float& y);
+
 	/** \brief applies any changes to video settings like resolution and
 	 *         fullscreen. If the changes fail, then this function returns
 	 *         false, and the video settings are reset to whatever the last
 	 *         working setting was.
-	 * \return success/failure
+	 * \return True if the video settings were successfully applied, false if they could not be applied
 	 */
 	bool ApplySettings();
 
-	//-- Coordinate system / viewport  ------------------------------------------
+	// ---------- Coordinate system and viewport methods
 
-	/** \brief Sets the viewport, i.e. the area of the screen that gets drawn to.
+	/** \brief Sets the viewport (the area of the screen that gets drawn)
 	*** \param left Left border of screen
 	*** \param right Right border of screen
 	*** \param top Top border of screen
 	*** \param bottom Bottom border of screen
 	***
-	*** The arguments are percentages, and the default viewport is (0, 100,
-	*** 0, 100), which covers the entire screen.
+	*** The arguments are percentages from 0.0f to 100.0f. The default viewport is
+	*** (0, 100, 0, 100), which covers the entire screen.
 	**/
 	void SetViewport(float left, float right, float bottom, float top);
 
-	/** \brief Sets the coordinate system to use. Default is (0, 1024, 0, 768)
-	 *  \param left   left border of screen
-	 *  \param right  right border of screen
-	 *  \param top    top border of screen
-	 *  \param bottom bottom border of screen
-	 */
+	/** \brief Sets the coordinate system to use.
+	*** \param left The coordinate for the left border of screen
+	*** \param right The coordinate for the right border of screen
+	*** \param top The coordinate for the top border of screen
+	*** \param bottom The coordinate for the bottom border of screen
+	*** \note The default coordinate system for the video engine is
+	*** (0.0f, 1024.0f, 0.0f, 768.0f)
+	**/
 	void SetCoordSys(float left, float right, float bottom, float top)
 		{ SetCoordSys(CoordSys(left, right, bottom, top)); }
 
-	/** \brief Sets the coordinate system. Default is (0, 1024, 0, 768)
-	*** \param coordinate_system the coordinate system you want to set to
+	/** \brief Sets the coordinate system to use.
+	*** \param coordinate_system The coordinate system to set the screen to use
 	**/
 	void SetCoordSys(const CoordSys& coordinate_system);
 
-	/** \brief enables scissoring, where you can specify a rectangle of the screen
-	 *         which is affected by rendering operations. MAKE SURE to disable
-	 *         scissoring as soon as you're done using the effect, or all subsequent
-	 *         draw calls will get messed up
-	 *
-	 *  \param enable pass true to turn on scissoring, false to disable
-	 */
-	void EnableScissoring(bool enable);
+	/** \brief Enables the scissoring effect in the video engine
+	*** Scisorring is where you can specify a rectangle of the screen which is affected
+	*** by rendering operations (and hence, specify what area is not affected). Make sure
+	*** to disable scissoring as soon as you're done using the effect, or all subsequent
+	*** draw calls will get messed up.
+	**/
+	void EnableScissoring();
 
-	/** \brief returns true if scissoring's enabled
-	 * \return true if enabled, false if not
-	 */
+	//! \brief Disables the scissoring effect
+	void DisableScissoring();
+
+	//! \brief Returns true if scissoring is enabled, or false if it is not
 	bool IsScissoringEnabled()
-		{ return _scissor_enabled; }
+		{ return _current_context.scissoring_enabled; }
 
-	/** \brief sets the rectangle to use for scissorring, where you can specify an
-	 *         area of the screen for draw operations to affect. Note, the coordinates
-	 *         you pass in are based on the current coordinate system, not screen coords
-	 * \param left coordinate for left side of rectanlge
-	 * \param right coordinate for right side of rectanlge
-	 * \param bottom coordinate for bottom side of rectanlge
-	 * \param top coordinate for top side of rectanlge
-	 */
+	//! \brief Retrieves the current scissoring rectangle
+	ScreenRect GetScissorRect()
+		{ return _current_context.scissor_rectangle; }
+
+	/** \brief Sets the rectangle area to use for scissorring
+	*** \param left Coordinate for left side of scissoring rectangle
+	*** \param right Coordinate for right side of scissoring rectangle
+	*** \param bottom Coordinate for bottom side of scissoring rectangle
+	*** \param top Coordinate for top side of scissoring rectangle
+	*** \note The coordinate arguments are based on the current coordinate system,
+	*** not the screen coordinates
+	**/
 	void SetScissorRect(float left, float right, float bottom, float top);
 
-	/** \brief sets the rectangle to use for scissorring. This version of the function
-	 *         expects a ScreenRect, in other words the coordinates have already been
-	 *         transformed to integer values (pixel unit) with (0,0) as the upper left
-	 *         and (w-1, h-1) as the lower right, where w and h are the current screen
-	 *         dimensions
-	 * \param rect rectangle to set the scissor rectangle to
-	 */
-	void SetScissorRect(const ScreenRect &rect);
+	/** \brief Sets the rectangle area to use for scissorring
+	*** \param rect The rectangle to set the scissoring rectangle to
+	*** In this function the rect coordinates should have already been transformed to
+	*** integer values (pixel unit) with (0,0) as the upper left and (w-1, h-1) as the
+	*** lower right, where w and h are the current screen dimensions. Do <b>not</b>
+	*** incorrectly assume that rect should contain coordinates based on the current
+	*** coordinate system.
+	**/
+	void SetScissorRect(const ScreenRect& rect);
 
-	/** \brief returns scissor rect
-	 * \return the scissor rectangle
-	 */
-	ScreenRect GetScissorRect()
-		{ return _scissor_rect; }
-
-	/** \brief converts coordinates given relative to the current coord sys into
-	 *         "screen coordinates", which are in pixel units with (0,0) as the
-	 *         top left and (w-1, h-1) as the lower-right, where w and h are the
-	 *         dimensions of the screen
-	 * \return the screen rectangle
-	 */
-
+	/** \brief Converts coordinates from the current coordinate system into screen coordinates
+	*** \return A ScreenRect object that contains the translated screen coordinates.
+	*** Screen coordinates are in pixel units with (0,0) as the top left and (w-1, h-1)
+	*** as the lower-right, where w and h are the dimensions of the screen.
+	**/
 	ScreenRect CalculateScreenRect(float left, float right, float bottom, float top);
 
-	//-- Transformations ------------------------------------------------------
+	// ----------  Transformation methods
+
+	/** \brief Gets the location of the draw cursor
+	* \param x stores x position of the cursor
+	* \param y stores y position of the cursor
+	*/
+	void GetDrawPosition(float &x, float &y) const
+		{ x = _x_cursor; y = _y_cursor; }
+
+	/** \brief Moves the draw cursor position to (x,y)
+	*** \param x The x coordinate to move the draw cursor to
+	*** \param y The y coordinate to move the draw cursor to
+	**/
+	void Move(float x, float y);
+
+	/** \brief Moves the draw position relative to its current location by (x, y)
+	*** \param x How far to move the draw cursor in the x direction
+	*** \param y How far to move the draw cursor in the y direction
+	**/
+	void MoveRelative(float x, float y);
+
+	/** \brief Saves the current modelview transformation on to the stack
+	*** What this means is that it save the combined result of all transformation
+	*** calls (Move/MoveRelative/Scale/Rotate)
+	**/
+	void PushMatrix()
+		{ glMatrixMode(GL_MODELVIEW); glPushMatrix(); }
+
+	//! \brief Pops the modelview transformation from the stack
+	void PopMatrix()
+		{ glMatrixMode(GL_MODELVIEW); glPopMatrix(); }
 
 	/** \brief Saves relevant state of the video engine on to an internal stack
-	*** The contents saved include: all draw flags, the coordinate system,
-	*** the scissor rectangle, the viewport, etc.). This is useful for safety
-	*** purposes between two major parts of code to ensure that one part doesn't
-	*** inadvertently affect the other.
+	*** The contents saved include the modelview transformation and the current
+	*** video engine context.
 	***
 	*** \note This is a very expensive function call. If you only need to push
 	*** the current transformation, you should use PushMatrix() and PopMatrix().
@@ -413,65 +422,36 @@ public:
 	//! \brief Restores the most recently pushed video engine state
 	void PopState ();
 
+	/** \brief Rotates images counterclockwise by the specified number of radians
+	*** \param angle How many radians to perform the rotation by
+	*** \note You should understand how transformation matrices work in OpenGL
+	*** prior to using this function.
+	**/
+	void Rotate(float angle)
+		{ glRotatef(angle, 0, 0, 1); }
 
-	/** \brief saves current modelview transformation on to the stack. In English,
-	 *         that means the combined result of calls to Move/MoveRelative/Scale/Rotate
-	 *   \note Assumes that glMatrixMode(GL_MODELVIEW) has been called
-	 */
-	void PushMatrix()
-		{ glPushMatrix(); }
+	/** \brief Scales all subsequent image drawing calls in the horizontal and vertical direction
+	*** \param x The amount of horizontal scaling to perform (0.5 for half, 1.0 for normal, 2.0 for double, etc)
+	*** \param y The amount of vertical scaling to perform (0.5 for half, 1.0 for normal, 2.0 for double, etc)
+	*** \note You should understand how transformation matrices work in OpenGL
+	*** prior to using this function.
+	**/
+	void Scale(float x, float y)
+		{ glScalef(x, y, 1.0f); }
 
-	/** \brief pops the modelview transformation from the stack.
-	*** \note Assumes that glMatrixMode(GL_MODELVIEW) has been called
-	 */
-	void PopMatrix()
-		{ glPopMatrix(); }
+	/** \brief Sets the OpenGL transform to the contents of 4x4 matrix
+	*** \param matrix A pointer to an array of 16 float values that form a 4x4 transformation matrix
+	**/
+	void SetTransform(float matrix[16]);
 
-	/** \brief sets draw position to (x,y)
-	 *  \param x  x coordinate to move to
-	 *  \param y  y coordinate to move to
-	 */
-	void Move(float x, float y);
+	// ---------- Font and text methods
 
-	/** \brief moves draw position (dx, dy) units
-	 *  \param dx how many units to move in x direction
-	 *  \param dy how many units to move in y direction
-	 */
-	void MoveRelative(float dx, float dy);
-
-	/** \brief Gets the location of the draw cursor
-	* \param x stores x position of the cursor
-	* \param y stores y position of the cursor
-	*/
-	void GetDrawPosition(float &x, float &y) const
-		{ x = _x; y = _y; }
-
-	/** \brief rotates images counterclockwise by 'angle' radians
-	 *  \param angle how many radians to rotate by
-	 *  \note This function should NOT be used unless you understand how transformation
-	 *        matrices work in OpenGL.
-	 */
-	void Rotate (float angle);
-
-	/** \brief after you call this, subsequent calls to DrawImage() result in
-	 *         a scaled image
-	 *
-	 *  \param x pass 1.0 for normal horizontal scaling, 2.0 for double
-	 *                  scaling, etc.
-	 *  \param y same, except vertical scaling
-	 *
-	 *  \note This function should NOT be used unless you understand how transformation
-	 *        matrices work in OpenGL.
-	 */
-
-	void Scale(float x, float y);
-
-	/** \brief sets OpenGL transform to contents of 4x4 matrix (16 values)
-	 *  \param m of 16 float values forming a 4x4 transformation matrix
-	 */
-	void SetTransform(float m[16]);
-
-	//-- Text -----------------------------------------------------------------
+	/** \brief Returns true if a font has already been successfully loaded
+	*** \param name The name which to refer to the loaded font (e.g. "courier24").
+	*** \return True if font is valid, false if it is not.
+	**/
+	bool IsFontValid(const std::string &name)
+		{ return (_font_map.find(name) != _font_map.end()); }
 
 	/** \brief Loads a font from a .ttf file with a specific size
 	*** \param TTF_filename The filename of the .ttf file to load.
@@ -480,13 +460,6 @@ public:
 	*** \return success/failure
 	**/
 	bool LoadFont(const std::string &TTF_filename, const std::string &name, uint32 size);
-
-	/** \brief Returns true if a font has already been successfully loaded
-	*** \param name The name which to refer to the loaded font (e.g. "courier24").
-	*** \return True if font is valid, false if it is not.
-	**/
-	bool IsValidFont(const std::string &name)
-		{ return (_font_map.find(name) != _font_map.end()); }
 
 	/** \brief Get the font properties for a previously loaded font
 	*** \param font_name  The referred name of the loaded font (e.g. "courier24").
@@ -529,7 +502,7 @@ public:
 	 * \return success/failure
 	 */
 	void SetTextColor(const Color &color)
-		{ _current_text_color = color; }
+		{ _current_context.text_color = color; }
 
 	/** \brief sets the shadow offset to use for a given font. By default, all font shadows
 	 *         are slightly to the right and to the bottom of the text, by an offset of
@@ -564,7 +537,7 @@ public:
 	/** \brief get name of current font
 	 * \return string containing the name of the font
 	 */
-	std::string GetFont      () const;
+	std::string GetFont() const;
 
 	/**
 	 *  \brief get current text color
@@ -589,7 +562,7 @@ public:
 	 */
 	bool DrawText(const hoa_utils::ustring &uText);
 
-	//-- Particle effects -----------------------------------------------------------
+	// ----------  Particle effect methods
 
 	/** \brief add a particle effect at the given point x and y
 	 *  \param particle_effect_filename - file containing the particle effect definition
@@ -626,7 +599,7 @@ public:
 	 */
 	int32 GetNumParticles();
 
-	//-- Images / Animation ---------------------------------------------------------
+	// ----------  Image operation methods
 
 	/*! \brief Get information of an image file
 	 *	\param file_name Name of the file, without the extension
@@ -755,15 +728,6 @@ public:
 	 * \return success/failure
 	 */
 	bool ReloadTextures();
-
-	/** \brief sets draw flags (flip, align, blending, etc). Simply pass
-	 *         in as many parameters as you want, as long as the last
-	 *         parameter is a zero.
-	 *         e.g. SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, 0);
-	 * \param first_flag the first of many draw flags
-	 * \param .. specify as many draw flags as you want.  Terminate with a 0.
-	 */
-	void SetDrawFlags(int32 first_flag, ...);
 
 	/** \brief draws an image which is modulated by the scene's light color
 	 *
@@ -953,11 +917,11 @@ public:
 	*** \param time The fading process will take this number of milliseconds
 	**/
 	void FadeScreen(const Color& color, uint32 time)
-		{ _fader.BeginFade(color, time); }
+		{ _screen_fader.BeginFade(color, time); }
 
 	//! \brief Returns true if a screen fade is currently in progress
 	bool IsFading()
-		{ return _fader.IsFading(); }
+		{ return _screen_fader.IsFading(); }
 
 	//-- Screen shaking -------------------------------------------------------
 
@@ -1043,7 +1007,7 @@ public:
 	/** \brief sets the default cursor to the image in the given filename
 	* \param cursor_image_filename file containing the cursor image
 	*/
-	bool SetDefaultCursor(const std::string &cursor_image_filename);
+	bool SetDefaultCursor(const std::string& cursor_image_filename);
 
 	/** \brief returns the cursor image
 	* \return the cursor image
@@ -1078,46 +1042,28 @@ private:
 
 	//-- Private variables ----------------------------------------------------
 
-	//! particle manager, does dirty work of managing particle effects
-	private_video::ParticleManager _particle_manager;
-
 	//! \brief The type of window target that the video manager will operate on (SDL window or QT widget)
 	VIDEO_TARGET _target;
 
-	// draw flags
+	//! \brief The width and height of the current screen, in pixels
+	int32  _screen_width, _screen_height;
 
-	//! blend flag which specifies normal alpha blending
-	int8 _blend;
+    //! \brief True if the game is currently running fullscreen
+	bool _fullscreen;
 
-	//! x align flag which tells if images should be left, center, or right aligned
-	int8 _x_align;
+	//! \brief The x and y coordinates of the current draw cursor position
+	float _x_cursor, _y_cursor;
 
-	//! y align flag which tells if images should be top, center, or bottom aligned
-	int8 _y_align;
+	//! \brief Contains information about the current video engine's context, such as draw flags, the coordinate system, etc.
+	private_video::Context _current_context;
 
-	//! x flip flag. true if images should be flipped horizontally
-	int8 _x_flip;
-
-	//! y flip flag. true if images should be flipped vertically
-	int8 _y_flip;
+	//! \brief Manages the current screen fading effect when fading is activated
+	private_video::ScreenFader _screen_fader;
 
 	//! eight character name for temp files that increments every time you create a new one so they are always unique
 	char _next_temp_file[9];
 
-	//! current coordinate system
-	CoordSys    _coord_sys;
 
-	//! current viewport
-	ScreenRect _viewport;
-
-	//! current scissor rectangle
-	ScreenRect _scissor_rect;
-
-	//! is scissoring enabled or not
-	bool _scissor_enabled;
-
-	//! fader class which implements screen fading
-	private_video::ScreenFader _fader;
 
 	//! advanced display flag. If true, info about the video engine is shown on screen
 	bool _advanced_display;
@@ -1152,14 +1098,8 @@ private:
 	//! current shake forces affecting screen
 	std::list<private_video::ShakeForce> _shake_forces;
 
-    //! true if game is currently running fullscreen
-	bool _fullscreen;
-
-	//! current screen width
-	int32  _width;
-
-	//! current screen height
-	int32  _height;
+	//! particle manager, does dirty work of managing particle effects
+	private_video::ParticleManager _particle_manager;
 
 	// changing the video settings does not actually do anything until
 	// you call ApplySettings(). Up til that point, store them in temp
@@ -1176,12 +1116,6 @@ private:
 
 	//! ID of the last texture that was bound. Used to eliminate redundant binding of textures
 	GLuint _last_tex_id;
-
-	//! current font name
-	std::string _current_font;
-
-	//! current text color
-	Color _current_text_color;
 
 	//! image which is to be used as the cursor
 	StillImage _default_menu_cursor;
@@ -1589,24 +1523,19 @@ private:
 
 	//! Whether textures should be smoothed for non natural resolution.
 	bool _ShouldSmooth()
-		{ return ( _width != VIDEO_STANDARD_RES_WIDTH || _height != VIDEO_STANDARD_RES_HEIGHT); }
+		{ return ( _screen_width != VIDEO_STANDARD_RES_WIDTH || _screen_height != VIDEO_STANDARD_RES_HEIGHT); }
 
 	/**
 	 *  \brief function solely for debugging, which shows number of texture switches made during a frame,
 	 *         and other statistics useful for performance tweaking, etc.
-	 * \return success/failure
 	 */
-	bool _DEBUG_ShowAdvancedStats();
+	void _DEBUG_ShowAdvancedStats();
 
 	/**
 	 *  \brief function solely for debugging, which displays the currently selected texture sheet. By using DEBUG_NextTexSheet() and DEBUG_PrevTexSheet(), you can change the current texture sheet so the sheet shown by this function cycles through all currently loaded sheets.
 	 * \return success/failure
 	 */
 	bool _DEBUG_ShowTexSheet();
-
-	//! \brief the current draw cursor position
-	float _x;
-	float _y;
 }; // class GameVideo
 
 }  // namespace hoa_video

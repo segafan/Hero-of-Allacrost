@@ -69,14 +69,14 @@ void GameVideo::_DrawStillImage(const ImageListDescriptor &id, const Color &colo
 
 	size_t num_elements = id.GetNumElements();
 	
-	float modulation = _fader.GetFadeModulation();
+	float modulation = _screen_fader.GetFadeModulation();
 	Color fade_color(modulation, modulation, modulation, 1.0f);
 
-	float x_shake = _x_shake * (_coord_sys.GetRight() - _coord_sys.GetLeft()) / 1024.0f;
-	float y_shake = _y_shake * (_coord_sys.GetTop() - _coord_sys.GetBottom()) / 768.0f;
+	float x_shake = _x_shake * (_current_context.coordinate_system.GetRight() - _current_context.coordinate_system.GetLeft()) / 1024.0f;
+	float y_shake = _y_shake * (_current_context.coordinate_system.GetTop() - _current_context.coordinate_system.GetBottom()) / 768.0f;
 
-	float x_align_offset = ((_x_align+1) * id.GetWidth()) * 0.5f * -_coord_sys.GetHorizontalDirection();
-	float y_align_offset = ((_y_align+1) * id.GetHeight()) * 0.5f * -_coord_sys.GetVerticalDirection();
+	float x_align_offset = ((_current_context.x_align+1) * id.GetWidth()) * 0.5f * -_current_context.coordinate_system.GetHorizontalDirection();
+	float y_align_offset = ((_current_context.y_align+1) * id.GetHeight()) * 0.5f * -_current_context.coordinate_system.GetVerticalDirection();
 
 	glPushMatrix();
 	MoveRelative(x_align_offset, y_align_offset);	
@@ -100,11 +100,11 @@ void GameVideo::_DrawStillImage(const ImageListDescriptor &id, const Color &colo
 		float x_off = static_cast<float>(element.x_offset);
 		float y_off = static_cast<float>(element.y_offset);
 
-		if (_x_flip) {
+		if (_current_context.x_flip) {
 			x_off = id.GetWidth() - x_off - element.width;
 		}
 		
-		if (_y_flip) {
+		if (_current_context.y_flip) {
 			y_off = id.GetHeight() - y_off - element.height;
 		}
 
@@ -112,14 +112,14 @@ void GameVideo::_DrawStillImage(const ImageListDescriptor &id, const Color &colo
 		y_off += y_shake;
 
 		glPushMatrix();
-		MoveRelative(x_off * _coord_sys.GetHorizontalDirection(), y_off * _coord_sys.GetVerticalDirection());
+		MoveRelative(x_off * _current_context.coordinate_system.GetHorizontalDirection(), y_off * _current_context.coordinate_system.GetVerticalDirection());
 		
 		float x_scale = element.width;
 		float y_scale = element.height;
 		
-		if (_coord_sys.GetHorizontalDirection() < 0.0f)
+		if (_current_context.coordinate_system.GetHorizontalDirection() < 0.0f)
 			x_scale = -x_scale;
-		if (_coord_sys.GetVerticalDirection() < 0.0f)
+		if (_current_context.coordinate_system.GetVerticalDirection() < 0.0f)
 			y_scale = -y_scale;
 		
 		glScalef(x_scale, y_scale, 1.0f);
@@ -160,9 +160,9 @@ void GameVideo::_DrawElement(const BaseImageElement &element, const Color *color
 	};
 
 	// Set blending parameters
-	if (_blend) {
+	if (_current_context.blend) {
 		glEnable(GL_BLEND);
-		if (_blend == 1)
+		if (_current_context.blend == 1)
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // Normal blending
 		else
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE); // Additive blending
@@ -191,14 +191,14 @@ void GameVideo::_DrawElement(const BaseImageElement &element, const Color *color
 		t1 = img->v1 + element.v2 * (img->v2 - img->v1);
 
 		// Swap x texture coordinates for x flipping
-		if (_x_flip) {
+		if (_current_context.x_flip) {
 			float temp = s0;
 			s0 = s1;
 			s1 = temp;
 		}
 
 		// Swap y texture coordinates for y flipping
-		if (_y_flip) {
+		if (_current_context.y_flip) {
 			float temp = t0;
 			t0 = t1;
 			t1 = temp;
@@ -263,7 +263,7 @@ void GameVideo::_DrawElement(const BaseImageElement &element, const Color *color
 		glDrawArrays(GL_QUADS, 0, num_vertexes);
 	}
 
-	if (_blend)
+	if (_current_context.blend)
 		glDisable(GL_BLEND);
 	
 	if (glGetError()) {
@@ -278,10 +278,10 @@ void GameVideo::DrawHalo(const StillImage &id, float x, float y, const Color &co
 	PushMatrix();
 	Move(x, y);
 
-	char old_blend_mode = _blend;
-	_blend = VIDEO_BLEND_ADD;
+	char old_blend_mode = _current_context.blend;
+	_current_context.blend = VIDEO_BLEND_ADD;
 	DrawImage(id, color);
-	_blend = old_blend_mode;
+	_current_context.blend = old_blend_mode;
 	PopMatrix();
 }
 

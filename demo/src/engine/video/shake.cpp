@@ -17,6 +17,7 @@
 
 using namespace std;
 using namespace hoa_video::private_video;
+using namespace hoa_utils;
 
 namespace hoa_video  {
 

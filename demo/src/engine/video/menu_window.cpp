@@ -194,7 +194,7 @@ void MenuWindow::Draw() {
 			rect.Intersect(VideoManager->GetScissorRect());
 		}
 		else {
-			VideoManager->EnableScissoring(true);
+			VideoManager->EnableScissoring();
 		}
 		VideoManager->SetScissorRect(rect);
 	}

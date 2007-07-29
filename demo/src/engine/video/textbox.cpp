@@ -142,10 +142,10 @@ void TextBox::Draw() {
 		text_ypos = top;
 	}
 	else if (_yalign == VIDEO_Y_CENTER) {
-		text_ypos = top - (VideoManager->_coord_sys.GetVerticalDirection() * (_height - text_height) * 0.5f);
+		text_ypos = top - (VideoManager->_current_context.coordinate_system.GetVerticalDirection() * (_height - text_height) * 0.5f);
 	}
 	else { // (_yalign == VIDEO_Y_BOTTOM)
-		text_ypos = top - (VideoManager->_coord_sys.GetVerticalDirection() * (_height - text_height));
+		text_ypos = top - (VideoManager->_current_context.coordinate_system.GetVerticalDirection() * (_height - text_height));
 	}
 
 	// Determine the horizontal position of the text based on the alignment
@@ -342,7 +342,7 @@ bool TextBox::IsInitialized(string& errors) {
 	// Check font
 	if (_font.empty())
 		stream << "* Invalid font: no font has been set" << endl;
-	else if (VideoManager->IsValidFont(_font) == false)
+	else if (VideoManager->IsFontValid(_font) == false)
 		stream << "* Invalid font: " << _font << endl;
 
 	errors = stream.str();
@@ -463,7 +463,7 @@ void TextBox::_DrawTextLines(float text_x, float text_y, ScreenRect scissor_rect
 		// (1): Calculate the x draw offset for this line and move to that position
 		float line_width = static_cast<float>(VideoManager->CalculateTextWidth(_font, _text[line]));
 		int32 x_align = VideoManager->_ConvertXAlign(_text_xalign);
-		float x_offset = text_x + ((x_align + 1) * line_width) * 0.5f * VideoManager->_coord_sys.GetHorizontalDirection();
+		float x_offset = text_x + ((x_align + 1) * line_width) * 0.5f * VideoManager->_current_context.coordinate_system.GetHorizontalDirection();
 		VideoManager->MoveRelative(x_offset, 0.0f);
 
 		int32 line_size = static_cast<int32>(_text[line].size());
@@ -576,30 +576,30 @@ void TextBox::_DrawTextLines(float text_x, float text_y, ScreenRect scissor_rect
 
 				// Create a rectangle for the current character, in window coordinates
 				int32 char_x, char_y, char_w, char_h;
-				char_x = static_cast<int32>(x_offset + VideoManager->_coord_sys.GetHorizontalDirection()
+				char_x = static_cast<int32>(x_offset + VideoManager->_current_context.coordinate_system.GetHorizontalDirection()
 					* VideoManager->CalculateTextWidth(_font, substring));
-				char_y = static_cast<int32>(text_y - VideoManager->_coord_sys.GetVerticalDirection()
+				char_y = static_cast<int32>(text_y - VideoManager->_current_context.coordinate_system.GetVerticalDirection()
 					* (_font_properties->height + _font_properties->descent));
 
-				if (VideoManager->_coord_sys.GetHorizontalDirection() < 0.0f)
-					char_y = static_cast<int32>(VideoManager->_coord_sys.GetBottom()) - char_y;
+				if (VideoManager->_current_context.coordinate_system.GetHorizontalDirection() < 0.0f)
+					char_y = static_cast<int32>(VideoManager->_current_context.coordinate_system.GetBottom()) - char_y;
 
-				if (VideoManager->_coord_sys.GetVerticalDirection() < 0.0f)
-					char_x = static_cast<int32>(VideoManager->_coord_sys.GetLeft()) - char_x;
+				if (VideoManager->_current_context.coordinate_system.GetVerticalDirection() < 0.0f)
+					char_x = static_cast<int32>(VideoManager->_current_context.coordinate_system.GetLeft()) - char_x;
 
 				char_w = VideoManager->CalculateTextWidth(_font, cur_char_string);
 				char_h = _font_properties->height;
 
 				// Multiply the width by percentage done to determine the scissoring dimensions
 				char_w = static_cast<int32>(cur_percent * char_w);
-				VideoManager->MoveRelative(VideoManager->_coord_sys.GetHorizontalDirection()
+				VideoManager->MoveRelative(VideoManager->_current_context.coordinate_system.GetHorizontalDirection()
 					* VideoManager->CalculateTextWidth(_font, substring), 0.0f);
 
 				// Construct the scissor rectangle using the character dimensions and draw the revealing character
 				VideoManager->PushState();
 				ScreenRect char_scissor_rect(char_x, char_y, char_w, char_h);
 				scissor_rect.Intersect(char_scissor_rect);
-				VideoManager->EnableScissoring(true);
+				VideoManager->EnableScissoring();
 				VideoManager->SetScissorRect(scissor_rect);
 				VideoManager->DrawText(cur_char_string);
 				VideoManager->PopState();
@@ -618,7 +618,7 @@ void TextBox::_DrawTextLines(float text_x, float text_y, ScreenRect scissor_rect
 		// (3): Prepare to draw the next line and move the draw cursor appropriately
 		num_chars_drawn += line_size;
 // 		VideoManager->MoveRelative(-xOffset, _font_properties.line_skip * -cs._vertical_direction);
-		text_y += _font_properties->line_skip * -VideoManager->_coord_sys.GetVerticalDirection();
+		text_y += _font_properties->line_skip * -VideoManager->_current_context.coordinate_system.GetVerticalDirection();
 		VideoManager->Move(0.0f, text_y);
 	} // for (int32 line = 0; line < static_cast<int32>(_text.size()); ++line)
 } // void TextBox::_DrawTextLines(float text_x, float text_y, ScreenRect scissor_rect)

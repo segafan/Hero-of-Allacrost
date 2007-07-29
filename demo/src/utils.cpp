@@ -308,6 +308,18 @@ float RandomFloat() {
 }
 
 
+
+float RandomFloat(float a, float b) {
+	if (a > b) {
+		float c = a;
+		a = b;
+		b = c;
+	}
+
+	float r = static_cast<float>(rand() % 10001);
+	return a + (b - a) * r / 10000.0f;
+}
+
 // Returns a random integer between two inclusive bounds
 int32 RandomBoundedInteger(int32 lower_bound, int32 upper_bound) {
 	int32 range;  // The number of possible values we may return

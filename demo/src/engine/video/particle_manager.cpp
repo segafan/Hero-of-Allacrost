@@ -503,7 +503,7 @@ bool ParticleManager::Draw()
 {
 	VideoManager->PushState();
 	VideoManager->SetCoordSys(CoordSys(0.0f, 1024.0f, 768.0f, 0.0f));
-	VideoManager->EnableScissoring(false);	
+	VideoManager->DisableScissoring();
 	
 	map<ParticleEffectID, ParticleEffect *>::iterator iEffect = _effects.begin();
 
