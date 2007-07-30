@@ -53,20 +53,28 @@ class FontGlyph {
 public:
 	//! \brief The index of the GL texture for this glyph.
 	GLuint texture;
+
 	//! \brief The width of the glyph in pixels.
 	int32 width;
+
 	//! \brief The height of the glyph in pixels.
 	int32 height;
+
 	//! \brief The minx of the glyph in pixels (see TTF_GlyphMetrics).
 	int min_x;
+
 	//! \brief The miny of the glyph in pixels (see TTF_GlyphMetrics).
 	int min_y;
+
 	//! \brief The maxx of the glyph in texture space (see TTF_GlyphMetrics).
 	float max_x;
+
 	//! \brief The maxy of the glyph in texture space (see TTF_GlyphMetrics).
 	float max_y;
+
 	//! \brief The amount of space between glyphs.
 	int32 advance;
+
 	//! \brief The top y value of the glyph.
 	int top_y;
 }; // class FontGlyph
@@ -79,20 +87,28 @@ class FontProperties {
 public:
 	//! \brief The maximum height of all of the glyphs for this font.
 	int32 height;
+
 	//! \brief SDL_ttf's recommended amount of spacing between lines.
 	int32 line_skip;
+
 	//! \brief The height above baseline of font
 	int32 ascent;
+
 	//! \brief The height below baseline of font
 	int32 descent;
+
 	//! \brief The x offset of the text shadow.
 	int32 shadow_x;
+
 	//! \brief The y offset of the text shadow.
 	int32 shadow_y;
+
 	//! \brief The style of the text shadow.
 	TEXT_SHADOW_STYLE shadow_style;
+
 	//! \brief A pointer to SDL_TTF's font structure.
 	TTF_Font* ttf_font;
+
 	//! \brief A pointer to a cache which holds all of the glyphs used in this font.
 	std::map<uint16, FontGlyph*>* glyph_cache;
 }; // class FontProperties
@@ -102,10 +118,11 @@ public:
 *** ***************************************************************************/
 class RenderedLine {
 private:
-        //! \brief Disabled copy constructor
-        RenderedLine(const RenderedLine &other);
-        //! \brief Disabled assignment operator
-        RenderedLine &operator=(const RenderedLine &other);
+	//! \brief Disabled copy constructor
+	RenderedLine(const RenderedLine &other);
+
+	//! \brief Disabled assignment operator
+	RenderedLine &operator=(const RenderedLine &other);
 public:
 	//! \brief Num textures constant enum
 	enum
@@ -145,35 +162,55 @@ class RenderedString {
 private:
 	//! \brief The total width of this text block.
 	int32 _width;
+
 	//! \brief SDL_ttf's recommended amount of spacing between lines.
 	int32 _line_skip;
+
 	//! \brief X offset of the shadow texture
 	int32 _shadow_xoff;
+
 	//! \brief Y offset of the shadow texture
 	int32 _shadow_yoff;
+
 public:
 	//! \brief Vector of line textures
 	std::vector<RenderedLine*> lines;
+
 	//! \brief Constructs empty string.
 	RenderedString(int32 line_skip, int32 shadowX = 0, int32 shadowY = 0);
+
 	//! \brief Deletes textures
 	~RenderedString();
+
 	//! \brief Draw the string
 	bool Draw() const;
+
 	//! \brief Add a line to the string
 	bool Add(RenderedLine *line);
+
 	//! \brief Get the current line skip
-	int32 GetLineSkip() const { return _line_skip; };
+	int32 GetLineSkip() const
+		{ return _line_skip; }
+
 	//! \brief Get the line width
-	int32 GetWidth() const { return _width; };
+	int32 GetWidth() const
+		{ return _width; }
+
 	//! \brief Get the shadow X offset
-	int32 GetShadowX() const { return _shadow_xoff; };
+	int32 GetShadowX() const
+		{ return _shadow_xoff; }
+
 	//! \brief Get the shadow X offset
-	int32 GetShadowY() const { return _shadow_yoff; };
+	int32 GetShadowY() const
+		{ return _shadow_yoff; }
+
 	//! \brief Set the shadow X offset
-	void SetShadowX(int32 xoff) { _shadow_xoff = xoff; };
+	void SetShadowX(int32 xoff)
+		{ _shadow_xoff = xoff; }
+
 	//! \brief Set the shadow X offset
-	void SetShadowY(int32 yoff) { _shadow_yoff = yoff; };
+	void SetShadowY(int32 yoff)
+		{ _shadow_yoff = yoff; }
 }; // class RenderedString
 
 /** ****************************************************************************
@@ -182,22 +219,26 @@ public:
 class TextStyle {
 public:
 	//! \brief The string font name
-	std::string       font;
+	std::string font;
+
 	//! \brief Whether shadowing is enabled
-	bool              shadow_enable;
+	bool shadow_enable;
+
 	//! \brief The x offset of the shadow
-	int32	          shadow_offset_x;
+	int32 shadow_offset_x;
+
 	//! \brief The y offset of the shadow
-	int32	          shadow_offset_y;
+	int32 shadow_offset_y;
+
 	//! \brief The enum representing the shadow style
 	TEXT_SHADOW_STYLE shadow_style;
+
 	//! \brief The text color
 	Color		  color;
 
-	//! Default constructor sets shadow style to invalid
-	TextStyle()
-	: shadow_style(VIDEO_TEXT_SHADOW_INVALID)
-	{}
+	TextStyle() :
+		shadow_style(VIDEO_TEXT_SHADOW_INVALID) {}
+	
 };
 
 
@@ -246,6 +287,7 @@ public:
 
 	//! \brief X offset from the line proper
 	float x_line_offset;
+
 	//! \brief Y offset from the line proper
 	float y_line_offset;
 
@@ -264,12 +306,14 @@ public:
 	/** Helper function to get abstract drawable
 	 *  image type.
 	 */
-	virtual private_video::BaseImage *GetBaseImage();
+	virtual private_video::BaseImage *GetBaseImage()
+		{ return image; }
 
 	/** Helper function to get abstract drawable
 	 *  image type (const version).
 	 */
-	virtual const private_video::BaseImage *GetBaseImage() const;
+	virtual const private_video::BaseImage *GetBaseImage() const
+		{ return image; }
 };
 
 
@@ -369,6 +413,7 @@ public:
 
 	//! \brief Virtual method to retrieve a drawable base class element
 	virtual const private_video::BaseImageElement *GetElement(uint32 index) const;
+
 	//! \brief Virtual method to retrieve number of drawable base class elements
 	virtual uint32 GetNumElements() const;
 
@@ -396,11 +441,9 @@ private:
 
 	//! \brief The horizontal text alignment
 	int8 _alignment;
-
 }; // class RenderedText : public ImageDescriptor
 
 
 }  // namespace hoa_video
 
-
-#endif
+#endif // __TEXT_HEADER__

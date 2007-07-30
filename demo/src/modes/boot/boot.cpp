@@ -102,12 +102,6 @@ BootMode::BootMode() :
 	                 read_data.ReadFloat("logo_text_height"));
 	_boot_images.push_back(im);
 
-	// Set up a coordinate system - now you can use the boot.lua to set it to whatever you like
-	VideoManager->SetCoordSys(read_data.ReadFloat("coord_sys_x_left"),
-	                          read_data.ReadFloat("coord_sys_x_right"),
-	                          read_data.ReadFloat("coord_sys_y_bottom"),
-	                          read_data.ReadFloat("coord_sys_y_top"));
-
 	// Load the audio stuff
 	// Make a call to the config code that loads in two vectors of strings
 	vector<string> new_music_files;

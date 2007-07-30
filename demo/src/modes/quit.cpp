@@ -105,8 +105,7 @@ void QuitMode::Reset() {
 	
 	// Setup video engine constructs.
 	VideoManager->SetCoordSys(0, 1024, 0, 768);
-	if(!VideoManager->SetFont("default")) 
-    cerr << "MAP: ERROR > Couldn't set map font!" << endl;
+	VideoManager->SetFont("default");
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 
 }

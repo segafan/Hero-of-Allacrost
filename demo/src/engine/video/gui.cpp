@@ -366,11 +366,7 @@ void GUISupervisor::DrawFPS(uint32 frame_time) {
 	char fps_text[16];
 	sprintf(fps_text, "FPS: %d", avg_fps);
 
-	if (!VideoManager->SetFont("debug_font")) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO WARNING: In GUISupervisor::DrawFPS(), the font \"debug_font\" could not be set and the FPS was not drawn" << endl;
-		return;
-	}
+	VideoManager->SetFont("debug_font");
 
 	VideoManager->Move(930.0f, 720.0f); // Upper right hand corner of the screen
 	VideoManager->DrawText(fps_text);

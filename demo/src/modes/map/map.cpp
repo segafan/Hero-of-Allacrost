@@ -148,8 +148,7 @@ void MapMode::Reset() {
 	VideoManager->SetCoordSys(0.0f, SCREEN_COLS, SCREEN_ROWS, 0.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, 0);
 
-	if (!VideoManager->SetFont("map"))
-	cerr << "MAP ERROR: Failed to set the map font" << endl;
+	VideoManager->SetFont("map");
 
 	// Let all map objects know that this is the current map
 	MapMode::_current_map = this;
@@ -982,9 +981,8 @@ void MapMode::_FindPath(const VirtualSprite* sprite, std::vector<PathNode>& path
 // **************************** DRAW FUNCTIONS ********************************
 // ****************************************************************************
 
-// #define __MAP_CHANGE_1__
-// #define __MAP_CHANGE_2__
-
+#define __MAP_CHANGE_1__
+#define __MAP_CHANGE_2__
 
 // Determines things like our starting tiles
 void MapMode::_CalculateDrawInfo() {
@@ -1105,8 +1103,8 @@ void MapMode::_CalculateDrawInfo() {
 #if defined(__MAP_CHANGE_1__) && defined(__MAP_CHANGE_2__)
 //	if (VideoManager->GetWidth() == 1024 && VideoManager->GetHeight() == 768)
 	{
-		_draw_info.left_edge = FloorToFloatMultiple (_draw_info.left_edge, static_cast<float>(x_resolution));
-		_draw_info.top_edge = FloorToFloatMultiple (_draw_info.top_edge, static_cast<float>(y_resolution));
+		_draw_info.left_edge = FloorToFloatMultiple (_draw_info.left_edge, x_resolution);
+		_draw_info.top_edge = FloorToFloatMultiple (_draw_info.top_edge, y_resolution);
 
 		if (camera_x - HALF_SCREEN_COLS - _draw_info.left_edge > x_resolution*0.5f)
 			_draw_info.left_edge += x_resolution;
@@ -1143,6 +1141,7 @@ void MapMode::Draw() {
 
 
 void MapMode::_DrawMapLayers() {
+	VideoManager->SetCoordSys(0.0f, SCREEN_COLS, SCREEN_ROWS, 0.0f);
 	// ---------- (1) Draw the lower tile layer
 	VideoManager->SetDrawFlags(VIDEO_NO_BLEND, 0);
 	VideoManager->Move(_draw_info.tile_x_start, _draw_info.tile_y_start);

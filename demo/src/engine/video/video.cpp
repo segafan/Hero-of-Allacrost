@@ -245,7 +245,7 @@ bool GameVideo::SingletonInitialize() {
 		return false;
 	}
 	if (_CreateTexSheet(512, 512, VIDEO_TEXSHEET_ANY, false) == NULL) {
-		cerr << "VIDEO ERROR: could not create default var-sized tex sheet!" << endl;
+		cerr << "VIDEO ERROR: could not create default variable sized tex sheet" << endl;
 		return false;
 	}
 
@@ -260,7 +260,7 @@ bool GameVideo::SingletonInitialize() {
 		if (VIDEO_DEBUG)
 			cerr << "VIDEO WARNING: problem loading default menu cursor" << endl;
 	}
-	EnableTextShadow(true);
+	EnableTextShadow();
 
 	// Prepare the screen for rendering
 	Clear();
@@ -337,7 +337,7 @@ void GameVideo::Clear() {
 
 
 void GameVideo::Clear(const Color &c) {
-	SetViewport(0,100,0,100);
+	SetViewport(0.0f, 100.0f, 0.0f, 100.0f);
 	glClearColor(c[0], c[1], c[2], c[3]);
 	glClear(GL_COLOR_BUFFER_BIT);
 
@@ -1033,13 +1033,16 @@ std::string GameVideo::_CreateTempFilename(const std::string &extension)
 
 
 int32 GameVideo::_ConvertYAlign(int32 y_align) {
-	switch (_current_context.y_align) {
+	switch (y_align) {
 		case VIDEO_Y_BOTTOM:
 			return -1;
 		case VIDEO_Y_CENTER:
 			return 0;
-		default:
+		case VIDEO_Y_TOP:
 			return 1;
+		default:
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "unknown value for argument flag: " << y_align << endl;
+			return 0;
 	}
 }
 
@@ -1047,13 +1050,16 @@ int32 GameVideo::_ConvertYAlign(int32 y_align) {
 
 
 int32 GameVideo::_ConvertXAlign(int32 x_align) {
-	switch (_current_context.x_align) {
+	switch (x_align) {
 		case VIDEO_X_LEFT:
 			return -1;
 		case VIDEO_X_CENTER:
 			return 0;
-		default:
+		case VIDEO_X_RIGHT:
 			return 1;
+		default:
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "unknown value for argument flag: " << x_align << endl;
+			return 0;
 	}
 }
 
@@ -1198,9 +1204,7 @@ void GameVideo::_DEBUG_ShowAdvancedStats() {
 	char text[50];
 	sprintf(text, "Switches: %d\nParticles: %d", _num_tex_switches, _particle_manager.GetNumParticles());
 
-	if (SetFont("debug_font") == false) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to set the debug_font" << endl;
-	}
+	SetFont("debug_font");
 
 	Move(896.0f, 690.0f);
 	DrawText(text);

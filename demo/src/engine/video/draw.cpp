@@ -137,26 +137,19 @@ void GameVideo::_DrawStillImage(const ImageListDescriptor &id, const Color &colo
 	}
 
 	glPopMatrix();
-	return;
 } // void GameVideo::_DrawStillImage(const ImageListDescriptor &id, const Color &color)
 
 
 
-void GameVideo::_DrawElement(const BaseImageElement &element, const Color *color_array) {
+void GameVideo::_DrawElement(const BaseImageElement& element, const Color* color_array) {
 	const BaseImage *img = element.GetBaseImage();
-	
-	// Set vertex coordinates
-	static const float xlo = 0.0f;
-	static const float xhi = 1.0f;
-	static const float ylo = 0.0f;
-	static const float yhi = 1.0f;
 
 	// Array of the four vertexes defined on the 2D plane for glDrawArrays().
 	static const float vert_coords[] = {
-		xlo, ylo,
-		xhi, ylo,
-		xhi, yhi,
-		xlo, yhi,
+		0.0f, 0.0f,
+		1.0f, 0.0f,
+		1.0f, 1.0f,
+		0.0f, 1.0f,
 	};
 
 	// Set blending parameters

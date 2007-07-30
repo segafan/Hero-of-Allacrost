@@ -798,36 +798,19 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 
 	glPopMatrix();
 
-	if(!SetFont("debug_font"))
-	{
-		PopState();
-		return false;
-	}
-
+	SetFont("debug_font");
 	char buf[200];
 
 	Move(20, _current_context.coordinate_system.GetTop() - 30);
-	if(!DrawText("Current Texture sheet:"))
-	{
-		PopState();
-		return false;
-	}
+	DrawText("Current Texture sheet:");
 
 	sprintf(buf, "  Sheet #: %d", _current_debug_TexSheet);
 	MoveRelative(0, -20);
-	if(!DrawText(buf))
-	{
-		PopState();
-		return false;
-	}
+	DrawText(buf);
 
 	MoveRelative(0, -20);
 	sprintf(buf, "  Size:    %dx%d", sheet->width, sheet->height);
-	if(!DrawText(buf))
-	{
-		PopState();
-		return false;
-	}
+	DrawText(buf);
 
 	if(sheet->type == VIDEO_TEXSHEET_32x32)
 		sprintf(buf, "  Type:    32x32");
@@ -839,27 +822,15 @@ bool GameVideo::_DEBUG_ShowTexSheet()
 		sprintf(buf, "  Type:    Any size");
 
 	MoveRelative(0, -20);
-	if(!DrawText(buf))
-	{
-		PopState();
-		return false;
-	}
+	DrawText(buf);
 
 	sprintf(buf, "  Static:  %d", sheet->is_static);
 	MoveRelative(0, -20);
-	if(!DrawText(buf))
-	{
-		PopState();
-		return false;
-	}
+	DrawText(buf);
 
 	sprintf(buf, "  TexID:   %d", sheet->tex_id);
 	MoveRelative(0, -20);
-	if(!DrawText(buf))
-	{
-		PopState();
-		return false;
-	}
+	DrawText(buf);
 
 	PopState();
 	return true;

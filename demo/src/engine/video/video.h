@@ -30,7 +30,7 @@
 #define __VIDEO_HEADER__
 
 #ifdef _WINDOWS
-#include <windows.h> // needs to be included before gl.h
+	#include <windows.h> // needs to be included before gl.h
 #endif
 
 #ifdef __APPLE__
@@ -404,11 +404,11 @@ public:
 	*** calls (Move/MoveRelative/Scale/Rotate)
 	**/
 	void PushMatrix()
-		{ glMatrixMode(GL_MODELVIEW); glPushMatrix(); }
+		{ glPushMatrix(); }
 
 	//! \brief Pops the modelview transformation from the stack
 	void PopMatrix()
-		{ glMatrixMode(GL_MODELVIEW); glPopMatrix(); }
+		{ glPopMatrix(); }
 
 	/** \brief Saves relevant state of the video engine on to an internal stack
 	*** The contents saved include the modelview transformation and the current
@@ -450,6 +450,14 @@ public:
 
 	// ---------- Font and text methods
 
+	/** \brief Loads a font file from disk with a specific size and name
+	*** \param font_filename The filename of the font file to load
+	*** \param name The name which to refer to the font after it is loaded
+	*** \param size The point size to set the font after it is loaded
+	*** \return True if the font was successfully loaded, or false if there was an error
+	**/
+	bool LoadFont(const std::string &font_filename, const std::string &name, uint32 size);
+
 	/** \brief Returns true if a font has already been successfully loaded
 	*** \param name The name which to refer to the loaded font (e.g. "courier24").
 	*** \return True if font is valid, false if it is not.
@@ -457,151 +465,79 @@ public:
 	bool IsFontValid(const std::string &name)
 		{ return (_font_map.find(name) != _font_map.end()); }
 
-	/** \brief Loads a font from a .ttf file with a specific size
-	*** \param TTF_filename The filename of the .ttf file to load.
-	*** \param name The name which to refer to the font (e.g. "courier24", "default", etc.)
-	*** \param size The point size of the font
-	*** \return success/failure
+	//! \brief Gets the name of the current default font used for text rendering
+	std::string GetFont() const
+		{ return _current_context.font; }
+
+	/** \brief Sets the default font to use for text rendering
+	*** \param name The name of the pre-loaded font to set as the default
 	**/
-	bool LoadFont(const std::string &TTF_filename, const std::string &name, uint32 size);
+	void SetFont(const std::string& name);
 
-	/** \brief Get the font properties for a previously loaded font
-	*** \param font_name  The referred name of the loaded font (e.g. "courier24").
-	*** \return A pointer to the FontProperties object with the requested data, or NULL if an error occurred.
+	//! \brief Returns the current text color
+	Color GetTextColor() const
+		{ return _current_context.text_color; }
+
+	/** \brief Sets the current text color
+	*** \param color The color to set the text to
 	**/
-	FontProperties* GetFontProperties(const std::string &font_name);
-
-	/** \brief calculates the width of the given text if it were rendered with the given font
-	 *         If an invalid font name is passed, returns -1
-	 *
-	 *  \param font_name  the font to use
-	 *  \param text      the text string in unicode
-	 * \return width of the given text
-	 */
-	int32 CalculateTextWidth(const std::string &font_name, const hoa_utils::ustring &text);
-
-
-	/** \brief calculates the width of the given text if it were rendered with the given font
-	 *         If an invalid font name is passed, returns -1
-	 *
-	 *  \param font_name  the font to use
-	 *  \param text      the text string in multi-byte character format
-	 * \return width of the given text
-	 */
-	int32 CalculateTextWidth(const std::string &font_name, const std::string  &text);
-
-	/** \brief sets current font
-	 *  \param name  name of the font to set to
-	 * \return success/failure
-	 */
-	bool SetFont(const std::string &name);
-
-	/** \brief enables/disables text shadowing
-	 *  \param enable  pass true to enable, false to disable
-	 */
-	void EnableTextShadow(bool enable);
-
-	/** \brief sets current text color
-	 *  \param color  color to set to
-	 * \return success/failure
-	 */
-	void SetTextColor(const Color &color)
+	void SetTextColor(const Color& color)
 		{ _current_context.text_color = color; }
 
-	/** \brief sets the shadow offset to use for a given font. By default, all font shadows
-	 *         are slightly to the right and to the bottom of the text, by an offset of
-	 *         fontHeight / 8. That doesn't always look good though, so use this function
-	 *         to adjust it if you want.
-	 *
-	 *  \param font_name  label of the font you want to set the shadow offset for
-	 *  \param x         x offset in pixels (based on 1024x768)
-	 * \return success/failure
-	 */
-	bool SetFontShadowXOffset(const std::string &font_name, int32 x);
+	/** \brief Get the font properties for a previously loaded font
+	*** \param font_name The name reference of the loaded font
+	*** \return A pointer to the FontProperties object with the requested data, or NULL if the properties could not be fetched.
+	**/
+	FontProperties* GetFontProperties(const std::string& font_name);
 
-	/** \brief sets the shadow offset to use for a given font. By default, all font shadows
-	 *         are slightly to the right and to the bottom of the text, by an offset of
-	 *         fontHeight / 8. That doesn't always look good though, so use this function
-	 *         to adjust it if you want.
-	 *
-	 *  \param font_name  label of the font you want to set the shadow offset for
-	 *  \param y         y offset in pixels (based on 1024x768)
-	 * \return success/failure
-	 */
-	bool SetFontShadowYOffset(const std::string &font_name, int32 y);
+	//! \brief Enables shadows to be drawn for text
+	void EnableTextShadow()
+		{ _text_shadow = true; }
 
-	/** \brief sets the shadow style to use for the given font
-	 *
-	 *  \param font_name  label of the font you want to set the shadow style for
-	 *  \param style     the shadow style you want (e.g. VIDEO_TEXT_SHADOW_BLACK)
-	 * \return success/failure
-	 */
-	bool SetFontShadowStyle(const std::string &font_name, TEXT_SHADOW_STYLE style);
+	//! \brief Disables text shadows
+	void DisableTextShadow()
+		{ _text_shadow = false; }
 
-	/** \brief get name of current font
-	 * \return string containing the name of the font
-	 */
-	std::string GetFont() const;
+	/** \brief Sets the shadow style to use for a specified font
+	*** \param font_name The reference name of the font to set the shadow style for
+	*** \param style The shadow style desired (e.g. VIDEO_TEXT_SHADOW_BLACK)
+	**/
+	void SetFontShadowStyle(const std::string& font_name, TEXT_SHADOW_STYLE style);
 
-	/**
-	 *  \brief get current text color
-	 * \return the color fo the text
-	 */
-	Color       GetTextColor () const;
+	/** \brief Sets the x and y shadow offsets to use for a specified font
+	*** \param font_name The reference name of the font to set the shadow offsets for
+	*** \param x The x offset in number of pixels
+	*** \param y The y offset in number of pixels
+	***
+	*** By default, all font shadows are slightly to the right and to the bottom of the text,
+	*** by an offset of one eight of the font's height.
+	**/
+	void SetFontShadowOffsets(const std::string& font_name, int32 x, int32 y);
 
-	/** \brief non-unicode version of DrawText(). Only use this for debug
-	 *         output or other things which don't have to be localized
-	 *
-	 *  \param text   text string to draw
-	 * \return success/failure
-	 */
-	bool DrawText(const std::string &text);
+	/** \brief Renders and draws a string of text to the screen
+	*** \param text The text string to draw in unicode format
+	**/
+	void DrawText(const hoa_utils::ustring& text);
 
-	/** \brief unicode version of DrawText(). This should be used for
-	 *         anything in the game which might need to be localized
-	 *         (game dialogue, interface text, etc.)
-	 *
-	 *  \param uText  unicode text string to draw
-	 * \return success/failure
-	 */
-	bool DrawText(const hoa_utils::ustring &uText);
+	/** \brief Renders and draws a string of text to the screen
+	*** \param text The text string to draw in standard format
+	**/
+	void DrawText(const std::string& text)
+		{ DrawText(hoa_utils::MakeUnicodeString(text)); }
 
-	// ----------  Particle effect methods
-
-	/** \brief add a particle effect at the given point x and y
-	 *  \param particle_effect_filename - file containing the particle effect definition
-	 *  \param x - X coordinate of the effect
-	 *  \param y - Y coordinate of the effect
-	 *  \param reload - reload the effect from file if it already exists
-	 *  \return id corresponding to the loaded particle effect
-	 *  \note  set the reload parameter to true to reload the effect definition file
-	 *         every time the effect is played. This is useful if you are working on an
-	 *         effect and want to see how it looks. When we actually release the game,
-	 *         reload should be false since it adds some cost to the loading
+	/** \brief Calculates what the width would be of a rendered string of text
+	*** \param font_name The reference name of the font to use for the calculation
+	*** \param text The text string in unicode format
+	*** \return The width of the text as it would be rendered, or -1 if there was an error
 	 */
-	ParticleEffectID AddParticleEffect(const std::string &particle_effect_filename, float x, float y, bool reload=false);
+	int32 CalculateTextWidth(const std::string& font_name, const hoa_utils::ustring& text);
 
-	/** \brief draws all active particle effects
-	 * \return success/failure
-	 */
-	bool DrawParticleEffects();
-
-	/** \brief stops all active particle effects
-	 *  \param kill_immediate  If this is true, then the particle effects die out immediately
-	 *                         If it is false, then they don't immediately die, but new particles
-	 *                         stop spawning
-	 */
-	void StopAllParticleEffects(bool kill_immediate = false);
-
-	/** \brief get pointer to an effect given its ID
-	 * \return the particle effect with the given ID
-	 */
-	ParticleEffect *GetParticleEffect(ParticleEffectID id);
-
-	/** \brief get number of live particles
-	 * \return the number of live particles in the system
-	 */
-	int32 GetNumParticles();
+	/** \brief calculates the width of the given text if it were rendered with the given font
+	*** \param font_name The reference name of the font to use for the calculation
+	*** \param text The text string in standard format
+	*** \return The width of the text as it would be rendered, or -1 if there was an error
+	**/
+	int32 CalculateTextWidth(const std::string& font_name, const std::string& text);
 
 	// ----------  Image operation methods
 
@@ -946,6 +882,43 @@ public:
 	//! \brief Returns true if the screen is shaking
 	bool IsShaking()
 		{ return (_shake_forces.empty() == false); }
+
+	// ----------  Particle effect methods
+
+	/** \brief add a particle effect at the given point x and y
+	 *  \param particle_effect_filename - file containing the particle effect definition
+	 *  \param x - X coordinate of the effect
+	 *  \param y - Y coordinate of the effect
+	 *  \param reload - reload the effect from file if it already exists
+	 *  \return id corresponding to the loaded particle effect
+	 *  \note  set the reload parameter to true to reload the effect definition file
+	 *         every time the effect is played. This is useful if you are working on an
+	 *         effect and want to see how it looks. When we actually release the game,
+	 *         reload should be false since it adds some cost to the loading
+	 */
+	ParticleEffectID AddParticleEffect(const std::string &particle_effect_filename, float x, float y, bool reload=false);
+
+	/** \brief draws all active particle effects
+	 * \return success/failure
+	 */
+	bool DrawParticleEffects();
+
+	/** \brief stops all active particle effects
+	 *  \param kill_immediate  If this is true, then the particle effects die out immediately
+	 *                         If it is false, then they don't immediately die, but new particles
+	 *                         stop spawning
+	 */
+	void StopAllParticleEffects(bool kill_immediate = false);
+
+	/** \brief get pointer to an effect given its ID
+	 * \return the particle effect with the given ID
+	 */
+	ParticleEffect *GetParticleEffect(ParticleEffectID id);
+
+	/** \brief get number of live particles
+	 * \return the number of live particles in the system
+	 */
+	int32 GetNumParticles();
 
 	//-- Miscellaneous --------------------------------------------------------
 

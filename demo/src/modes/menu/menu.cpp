@@ -193,10 +193,7 @@ void MenuMode::Reset() {
 	// Top left corner coordinates in menu mode are always (0,0)
 	VideoManager->SetCoordSys(0, 1024, 768, 0);
 
-	if (!VideoManager->SetFont("default")) {
-		cerr << "MAP: ERROR > Couldn't set menu font!" << endl;
-		exit(1);
-	}
+	VideoManager->SetFont("default");
 
 	// Show all windows (make them visible)
 	_bottom_window.Show();
