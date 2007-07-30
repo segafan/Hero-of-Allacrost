@@ -29,865 +29,6 @@ using namespace hoa_video::private_video;
 
 namespace hoa_video {
 
-bool GameVideo::LoadFont(const string &filename, const string &name, uint32 size) {
-	// Return true if the font is already loaded
-	if (_font_map.find(filename) != _font_map.end()) {
-		return true;
-	}
-
-	// Attempt to load the font
-	TTF_Font *font = TTF_OpenFont(filename.c_str(), size);
-	
-	if (!font) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: TTF_OpenFont() failed for font file: " << filename.c_str() << endl;
-		return false;
-	}
-
-	// Create a new FontProperties object for the font, and add it to the font map
-	FontProperties *fp = new FontProperties;
-	_font_map[name] = fp;
-
-	// Set all of the font's properties
-	fp->ttf_font = font;
-	fp->height = TTF_FontHeight(font);
-	fp->line_skip = TTF_FontLineSkip(font);
-	fp->ascent = TTF_FontAscent(font);
-	fp->descent = TTF_FontDescent(font);
-
-	// Set default shadow: x to be 1/8th of the font's height (or 1 pixel), y to be -x
-	fp->shadow_x = max(fp->height / 8, 1);
-	fp->shadow_y = -fp->shadow_x;
-
-	// Set default shadow style and create the glyph cache
-	fp->shadow_style = VIDEO_TEXT_SHADOW_DARK;
-	fp->glyph_cache = new std::map<uint16, FontGlyph*>;
-		
-	return true;
-} // bool GameVideo::LoadFont(const string &filename, const string &name, int32 size)
-
-
-
-FontProperties* GameVideo::GetFontProperties(const std::string &font_name) {
-	if (!IsFontValid(font_name)) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: GetFontProperties() failed becase an invalid font name was passed: " << font_name << endl;
-		return NULL;
-	}
-	
-	return _font_map[font_name];
-}
-
-
-
-bool GameVideo::SetFont(const std::string &name) {
-	// check if font is loaded before setting it
-	if ( _font_map.find(name) == _font_map.end())
-		return false;
-		
-	_current_context.font = name;
-	return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// GetFont: returns the name of the current font (e.g. "verdana18")
-//-----------------------------------------------------------------------------
-
-std::string GameVideo::GetFont() const
-{
-	return _current_context.font;
-}
-
-
-//-----------------------------------------------------------------------------
-// GetTextColor: returns the current text color
-//-----------------------------------------------------------------------------
-
-Color GameVideo::GetTextColor () const
-{
-	return _current_context.text_color;
-}
-
-//-----------------------------------------------------------------------------
-// _CacheGlyphs: renders unicode characters to the internal glyph cache
-//-----------------------------------------------------------------------------
-
-bool GameVideo::_CacheGlyphs
-(
-	const uint16 *uText,
-	FontProperties *fp 
-)
-{
-	if (!fp)
-		return false;
-
-	static const SDL_Color color = { 0xFF, 0xFF, 0xFF, 0xFF };
-	static const uint16 fallbackglyph = '?'; // fall back to this glyph if one does not exist
-
-	TTF_Font * font = fp->ttf_font;
-	
-	SDL_Surface *initial = NULL;
-	SDL_Surface *intermediary = NULL;
-	int32 w,h;
-	GLuint texture;
-
-	for(const uint16 * character_ptr = uText; *character_ptr != 0; ++character_ptr)
-	{
-		// Reference for legibility
-		const uint16 &character = *character_ptr;
-
-		// Check if glyph already cached
-		if(fp->glyph_cache->find(character) != fp->glyph_cache->end())
-			continue;
-
-		initial = TTF_RenderGlyph_Blended(font, character, color);
-		
-		if(!initial)
-		{
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: TTF_RenderUNICODE_Blended() returned NULL in CacheGlyphs(), resorting to fallback" << endl;
-			initial = TTF_RenderGlyph_Blended(font, fallbackglyph, color);
-			if (!fallbackglyph)
-			{
-				if (VIDEO_DEBUG)
-					cerr << "VIDEO ERROR: TTF_RenderUNICODE_Blended() could not render fallback glyph, aborting!" << endl;
-				return false;
-			}
-			// TEMP
-			//cerr << "VIDEO ERROR (Probably a problem from SDL_ttf): " << TTF_GetError() << endl;
-			//return false;
-		}
-
-		w = RoundUpPow2(initial->w + 1);
-		h = RoundUpPow2(initial->h + 1);	
-
-		uint32 rmask, gmask, bmask, amask;
-
-			// SDL interprets each pixel as a 32-bit number, so our masks must depend
-			// on the endianness (byte order) of the machine
-		#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-			rmask = 0xff000000;
-			gmask = 0x00ff0000;
-			bmask = 0x0000ff00;
-			amask = 0x000000ff;
-		#else
-			rmask = 0x000000ff;
-			gmask = 0x0000ff00;
-			bmask = 0x00ff0000;
-			amask = 0xff000000;
-		#endif	
-
-		intermediary = SDL_CreateRGBSurface(0, w, h, 32, 
-				rmask, gmask, bmask, amask);
-
-		if(!intermediary)
-		{
-			SDL_FreeSurface(initial);
-			SDL_FreeSurface(intermediary);
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: SDL_CreateRGBSurface() returned NULL in CacheGlyphs()!" << endl;
-			return false;
-		}
-
-
-		if(SDL_BlitSurface(initial, 0, intermediary, 0) < 0)
-		{
-			SDL_FreeSurface(initial);
-			SDL_FreeSurface(intermediary);
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: SDL_BlitSurface() failed in CacheGlyphs()!" << endl;
-			return false;
-		}
-
-		glGenTextures(1, &texture);
-		if(glGetError())
-		{
-			SDL_FreeSurface(initial);
-			SDL_FreeSurface(intermediary);
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: glGetError() true after glGenTextures() in CacheGlyphs()!" << endl;
-			return false;
-		}
-		
-		_BindTexture(texture);
-		if(glGetError())
-		{
-			SDL_FreeSurface(initial);
-			SDL_FreeSurface(intermediary);
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: glGetError() true after glBindTexture() in CacheGlyphs()!" << endl;
-			return false;
-		}
-
-		SDL_LockSurface(intermediary);
-		for(int j = 0; j < w * h ; ++ j)
-		{
-			((uint8*)intermediary->pixels)[j*4+3] = ((uint8*)intermediary->pixels)[j*4+2];
-			
-			((uint8*)intermediary->pixels)[j*4+0] = 
-			((uint8*)intermediary->pixels)[j*4+1] = 
-			((uint8*)intermediary->pixels)[j*4+2] = 0xff;
-		}
-
-		glTexImage2D(GL_TEXTURE_2D, 0, 4, w, h, 0, GL_RGBA, 
-					 GL_UNSIGNED_BYTE, intermediary->pixels );
-		SDL_UnlockSurface(intermediary);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);	
-
-
-		if(glGetError())
-		{
-			SDL_FreeSurface(initial);
-			SDL_FreeSurface(intermediary);
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: glGetError() true after glTexImage2D() in CacheGlyphs()!" << endl;
-			return false;
-		}
-
-		int minx, maxx;
-		int miny, maxy;
-		int advance;
-
-		if(TTF_GlyphMetrics(font, character, &minx, &maxx, &miny, &maxy, &advance))
-		{
-			SDL_FreeSurface(initial);
-			SDL_FreeSurface(intermediary);
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: glGetError() true after glTexImage2D() in CacheGlyphs()!" << endl;
-			return false;
-		}
-
-		FontGlyph * glyph = new FontGlyph;
-		glyph->texture = texture;
-		glyph->min_x = minx;
-		glyph->min_y = miny;
-		glyph->top_y = fp->ascent - maxy;
-		glyph->width = initial->w + 1;
-		glyph->height = initial->h + 1;
-		glyph->max_x = (float)(((double)initial->w + 1) / ((double)w));
-		glyph->max_y = (float)(((double)initial->h + 1) / ((double)h));
-		glyph->advance = advance;
-
-		fp->glyph_cache->insert(std::pair<uint16, FontGlyph *>(character, glyph));
-
-		SDL_FreeSurface(initial);
-		SDL_FreeSurface(intermediary);
-	}
-	return true;
-} // GameVideo::CacheGlyphs()
-
-//-----------------------------------------------------------------------------
-// _DrawTextHelper: since there are two DrawText functions (one for unicode and
-//                 one for non-unicode), this private function is used to
-//                 do all the work so that code doesn't have to be duplicated.
-//                 Either text or uText is valid string and the other is NULL.
-//-----------------------------------------------------------------------------
-
-bool GameVideo::_DrawTextHelper
-( 
-	const uint16 *uText
-)
-{
-
-	if(_font_map.empty())
-		return false;
-		
-	// empty string, do nothing
-	if(*uText == 0)
-		return true;
-		
-	if(_font_map.find(_current_context.font) == _font_map.end())
-		return false;
-	
-	FontProperties * fp = _font_map[_current_context.font];
-	
-	glBlendFunc(GL_ONE, GL_ONE);
-	glEnable(GL_BLEND);
-
-	CoordSys &cs = _current_context.coordinate_system;
-
-	_CacheGlyphs(uText, fp);
-
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	glEnable(GL_TEXTURE_2D);
-	glDisable(GL_FOG);
-
-	glEnable(GL_ALPHA_TEST);
-	glAlphaFunc(GL_GREATER, 0.1f);
-
-	glPushMatrix();
-
-	int fontwidth;
-	int fontheight;
-	if(TTF_SizeUNICODE(fp->ttf_font, uText, &fontwidth, &fontheight) != 0)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: TTF_SizeUNICODE() returned NULL in _DrawTextHelper()!" << endl;
-		return false;
-	}
-
-	float xoff = ((_current_context.x_align+1) * fontwidth) * .5f * -cs.GetHorizontalDirection();
-	float yoff = ((_current_context.y_align+1) * fontheight) * .5f * -cs.GetVerticalDirection();
-
-	MoveRelative(xoff, yoff);
-
-	float modulation = _screen_fader.GetFadeModulation();
-	Color textColor = _current_context.text_color * modulation;
-
-	int xpos = 0;
-	
-	GLfloat tex_coords[8];
-	GLint vertices[8];
-	
-	glEnableClientState ( GL_VERTEX_ARRAY );
-	glEnableClientState ( GL_TEXTURE_COORD_ARRAY );
-	
-	glVertexPointer ( 2, GL_INT, 0, vertices );
-	glTexCoordPointer ( 2, GL_FLOAT, 0, tex_coords );
-
-	for(const uint16 * glyph = uText; *glyph != 0; glyph++)
-	{
-		FontGlyph * glyphinfo = (*fp->glyph_cache)[*glyph];
-		
-		int xhi = glyphinfo->width; 
-		int yhi = glyphinfo->height;
-		
-		if(cs.GetHorizontalDirection() < 0.0f)
-			xhi = -xhi;
-		if(cs.GetVerticalDirection() < 0.0f)
-			yhi = -yhi;
-			
-		float tx, ty;
-		tx = glyphinfo->max_x;
-		ty = glyphinfo->max_y;
-
-		int minx, miny;
-		minx = glyphinfo->min_x * (int)cs.GetHorizontalDirection() + xpos;
-		miny = glyphinfo->min_y * (int)cs.GetVerticalDirection();
-		
-		_BindTexture(glyphinfo->texture);
-
-		if(glGetError())
-		{
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: glGetError() true after 2nd call to glBindTexture() in _DrawTextHelper!" << endl;
-			return false;
-		}
-		
-		vertices[0] = minx;
-		vertices[1] = miny;
-		vertices[2] = minx + xhi;
-		vertices[3] = miny;
-		vertices[4] = minx + xhi;
-		vertices[5] = miny + yhi;
-		vertices[6] = minx;
-		vertices[7] = miny + yhi;
-		tex_coords[0] = 0.0f;
-		tex_coords[1] = ty;
-		tex_coords[2] = tx;
-		tex_coords[3] = ty;
-		tex_coords[4] = tx;
-		tex_coords[5] = 0.0f;
-		tex_coords[6] = 0.0f;
-		tex_coords[7] = 0.0f;
-		
-		glColor4fv((GLfloat*)&textColor);
-		glDrawArrays(GL_QUADS, 0, 4);
-		/*glBegin(GL_QUADS);
-		glColor4fv((GLfloat *)&textColor);
-
-		glTexCoord2f(0.0, ty); 
-		glVertex2i(minx, miny);
-
-		glTexCoord2f(tx, ty); 
-		glVertex2i(minx + xhi, miny);
-
-		glTexCoord2f(tx, 0.0); 
-		glVertex2i(minx + xhi, miny + yhi);
-
-		glTexCoord2f(0.0, 0.0); 
-		glVertex2i(minx, miny + yhi);
-
-		glEnd();*/
-
-		xpos += glyphinfo->advance;
-	}
-
-	glDisableClientState ( GL_VERTEX_ARRAY );
-	glDisableClientState ( GL_TEXTURE_COORD_ARRAY );
-
-	glPopMatrix();
-	
-	if(_fog_intensity > 0.0f)
-		glEnable(GL_FOG);
-
-	glDisable(GL_ALPHA_TEST);
-
-	//glFinish();
-
-	return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// DrawText: non unicode version
-// Note: this simply converts to unicode and calls the unicode version.
-//       This performance penalty is acceptable because any text that the player
-//       sees will be unicode text anyways. Non-unicode is only used for
-//       debugging text.
-//-----------------------------------------------------------------------------
-
-bool GameVideo::DrawText(const string &txt)
-{
-	ustring wstr = MakeUnicodeString(txt);
-	return DrawText(wstr);
-}
-
-
-//-----------------------------------------------------------------------------
-// DrawText: unicode version
-//-----------------------------------------------------------------------------
-
-bool GameVideo::DrawText(const ustring &txt)
-{
-	if(txt.empty())
-	{
-		// Previously, if an empty string was passed, it was considered an error
-		// However, it happens often enough in practice that now we just return true
-		// without doing anything.
-		
-		return true;
-	}
-
-	if(_font_map.find(_current_context.font) == _font_map.end())
-	{
-		if(VIDEO_DEBUG)
-			cerr << "GameVideo::DrawText() failed because font passed was either not loaded or improperly loaded!\n" <<
-			        "  *fontname: " << _current_context.font << endl;
-		return false;
-	}
-
-	FontProperties * fp = _font_map[_current_context.font];
-	TTF_Font * font = fp->ttf_font;
-	
-	if(font)
-	{
-		PushState();
-		int32 lineSkip = fp->line_skip;
-		
-		// Optimization: something seems to be wrong with ustring, using a buffer instead
-		uint16 buffer[2048];
-		uint16 newline('\n');
-
-		size_t lastline = 0;
-		
-		do
-		{
-			size_t nextline;
-			for(nextline = lastline; nextline < txt.length(); nextline++)
-			{
-				if(txt[nextline] == newline)
-					break;
-
-				buffer[nextline - lastline] = txt[nextline];
-			}
-			buffer[nextline - lastline] = 0;
-			lastline = nextline + 1;
-
-			glPushMatrix();
-			
-			Color oldTextColor = _current_context.text_color;
-
-			// if text shadows are enabled, draw the shadow
-			if(_text_shadow && fp->shadow_style != VIDEO_TEXT_SHADOW_NONE)
-			{
-				Color textColor;
-				
-				switch(fp->shadow_style)
-				{
-					case VIDEO_TEXT_SHADOW_DARK:
-						textColor = Color::black;
-						textColor[3] = oldTextColor[3] * 0.5f;
-						break;
-					case VIDEO_TEXT_SHADOW_LIGHT:
-						textColor = Color::white;
-						textColor[3] = oldTextColor[3] * 0.5f;
-						break;
-					case VIDEO_TEXT_SHADOW_BLACK:
-						textColor = Color::black;
-						textColor[3] = oldTextColor[3];
-						break;
-					case VIDEO_TEXT_SHADOW_COLOR:
-						textColor = oldTextColor;
-						textColor[3] = oldTextColor[3] * 0.5f;
-						break;
-					case VIDEO_TEXT_SHADOW_INVCOLOR:
-						textColor = Color(1.0f - oldTextColor[0], 1.0f - oldTextColor[1], 1.0f - oldTextColor[2], oldTextColor[3] * 0.5f);
-						break;
-					default:
-					{
-						if(VIDEO_DEBUG)
-							cerr << "VIDEO ERROR: Unknown text shadow style (" << fp->shadow_style << ") found in GameVideo::DrawText()!" << endl;
-						break;
-					}
-				};
-				SetTextColor(textColor);
-				
-				
-				glPushMatrix();
-				MoveRelative(+_current_context.coordinate_system.GetHorizontalDirection() * fp->shadow_x, 0.0f);
-				MoveRelative(0.0f, _current_context.coordinate_system.GetVerticalDirection() * fp->shadow_y);
-				
-				if(!_DrawTextHelper(buffer))
-				{
-					PopState();
-					return false;
-				}
-				glPopMatrix();
-			}
-
-			SetTextColor(oldTextColor);
-
-			// draw the text itself
-			if(!_DrawTextHelper(buffer))
-			{
-				PopState();
-				return false;
-			}
-			
-			glPopMatrix();
-			
-			MoveRelative(0, -lineSkip * _current_context.coordinate_system.GetVerticalDirection());
-
-		} while(lastline < txt.length());
-		
-		PopState();
-	}
-		
-	return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// _RenderText: Renders a given unicode string and TextStyle to a pixel array
-//-----------------------------------------------------------------------------
-
-bool GameVideo::_RenderText(hoa_utils::ustring &string, TextStyle &style, ImageLoadInfo &buffer)
-{
-	FontProperties * fp = _font_map[style.font];
-	TTF_Font * font     = fp->ttf_font;
-
-	if (!font)
-	{
-		if (VIDEO_DEBUG)
-			cerr << "GameVideo::_RenderText(): font '" << style.font << "' not valid." << endl;
-		return false;
-	}
-
-	ImageLoadInfo load_info;
-
-	static const SDL_Color color = { 0xFF, 0xFF, 0xFF, 0xFF };
-
-	SDL_Surface *initial      = NULL;
-	SDL_Surface *intermediary = NULL;
-
-	int32 line_w, line_h;
-
-	// Minimum Y value of the line
-	int32 min_y = 0;
-	// Calculated line width
-	int32 calc_line_width = 0;
-	// Pixels left of '0' the first character extends, if any
-	int32 line_start_x = 0;
-
-	const uint16 *char_ptr;
-
-	#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-		static const int rmask = 0xff000000;
-		static const int gmask = 0x00ff0000;
-		static const int bmask = 0x0000ff00;
-		static const int amask = 0x000000ff;
-	#else
-		static const int rmask = 0x000000ff;
-		static const int gmask = 0x0000ff00;
-		static const int bmask = 0x00ff0000;
-		static const int amask = 0xff000000;
-	#endif	
-
-	if (TTF_SizeUNICODE(font, string.c_str(), &line_w, &line_h) == -1)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: TTF_SizeUNICODE() returned NULL in _RenderText()!" << endl;
-		return false;
-	}
-
-	_CacheGlyphs(string.c_str(), fp);
-
-	for (char_ptr = string.c_str(); *char_ptr; ++char_ptr)
-	{
-		FontGlyph * glyphinfo = (*fp->glyph_cache)[*char_ptr];
-
-		if (glyphinfo->top_y < min_y)
-			min_y = glyphinfo->top_y;
-		calc_line_width += glyphinfo->advance;
-	}
-
-	// Minimum y off by one pixel in some cases.
-	min_y -= 1;
-
-	// First character, check if it starts left of 0
-	char_ptr = string.c_str();
-	if (*char_ptr)
-	{
-		FontGlyph * first_glyphinfo = (*fp->glyph_cache)[*char_ptr];
-		if (first_glyphinfo->min_x < 0)
-			line_start_x = first_glyphinfo->min_x;
-	}
-
-	// TTF_SizeUNICODE underestimates line width as a 
-	// result of its micro positioning
-	if (calc_line_width > line_w)
-		line_w = calc_line_width;
-
-	// Adjust line sizes by negative starting offsets if present
-	line_w -= line_start_x;
-	line_h -= min_y;
-
-	intermediary = SDL_CreateRGBSurface(0, line_w, line_h, 32, 
-			rmask, gmask, bmask, amask);
-
-	if (!intermediary)
-	{
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: SDL_CreateRGBSurface() returned NULL in _RenderText()!" << endl;
-		return false;
-	}
-
-	SDL_Rect surf_target;
-	int32 xpos = -line_start_x;
-	int32 ypos = -min_y;
-	for (char_ptr = string.c_str(); *char_ptr; ++char_ptr)
-	{
-		FontGlyph * glyphinfo = (*fp->glyph_cache)[*char_ptr];
-
-		initial = TTF_RenderGlyph_Blended(font, *char_ptr, color);
-
-		if(!initial)
-		{
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: TTF_RenderGlyph_Blended() returned NULL in _RenderText()!" << endl;
-			return false;
-		}
-
-		surf_target.x = xpos + glyphinfo->min_x;
-		surf_target.y = ypos + glyphinfo->top_y;
-
-		if (SDL_BlitSurface(initial, NULL, intermediary, &surf_target) < 0)
-		{
-			SDL_FreeSurface(initial);
-			SDL_FreeSurface(intermediary);
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: SDL_BlitSurface() failed in _RenderText()! (" << SDL_GetError() << ")" << endl;
-			return false;
-		}
-		SDL_FreeSurface(initial);
-		xpos += glyphinfo->advance;
-	}
-
-	SDL_LockSurface(intermediary);
-	for (int j = 0; j < intermediary->w * intermediary->h; ++ j)
-	{
-		((uint8*)intermediary->pixels)[j*4+3] = ((uint8*)intermediary->pixels)[j*4+2];
-		((uint8*)intermediary->pixels)[j*4+0] = (uint8) (style.color[0] * 0xFF);
-		((uint8*)intermediary->pixels)[j*4+1] = (uint8) (style.color[1] * 0xFF);
-		((uint8*)intermediary->pixels)[j*4+2] = (uint8) (style.color[2] * 0xFF);
-	}
-
-	load_info.width  = line_w;
-	load_info.height = line_h;
-	load_info.pixels = intermediary->pixels;
-
-	// Prevent SDL from deleting pixel array
-	intermediary->pixels = NULL;
-
-	buffer = load_info;
-
-	SDL_UnlockSurface(intermediary);
-	SDL_FreeSurface(intermediary);
-
-	return true;
-}
-
-//-----------------------------------------------------------------------------
-// CalculateTextWidth: return the width of the given text using the given font
-//-----------------------------------------------------------------------------
-
-int32 GameVideo::CalculateTextWidth(const std::string &fontName, const hoa_utils::ustring &text)
-{
-	if(!IsFontValid(fontName))
-		return -1;
-		
-	int32 w;	
-	if(-1 == TTF_SizeUNICODE(_font_map[fontName]->ttf_font, text.c_str(), &w, NULL))
-		return -1;
-		
-	return w;
-}
-
-
-//-----------------------------------------------------------------------------
-// CalculateTextWidth: non-unicode version
-//-----------------------------------------------------------------------------
-
-int32 GameVideo::CalculateTextWidth(const std::string &fontName, const std::string  &text)
-{
-	if(!IsFontValid(fontName))
-		return -1;
-
-	int32 w;	
-	if(-1 == TTF_SizeText(_font_map[fontName]->ttf_font, text.c_str(), &w, NULL))
-		return -1;
-		
-	return w;
-}
-
-
-//-----------------------------------------------------------------------------
-// EnableTextShadow: enable/disable text shadow effect
-//-----------------------------------------------------------------------------
-
-void GameVideo::EnableTextShadow(bool enable)
-{
-	_text_shadow = enable;
-}
-
-
-//-----------------------------------------------------------------------------
-// SetFontShadowXOffset: sets x offset to use for font shadow
-//-----------------------------------------------------------------------------
-
-bool GameVideo::SetFontShadowXOffset(const std::string &fontName, int32 x)
-{
-	if(_font_map.find(fontName) == _font_map.end())
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: GameVideo::SetFontShadowXOffset() failed for font (" << fontName << ") because the font's properties could not be found!" << endl;
-		return false;
-	}
-	
-	FontProperties *fp = _font_map[fontName];
-	
-	if(!fp)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: GameVideo::SetFontShadowXOffset() failed for font (" << fontName << ") because the FontProperties pointer was NULL!" << endl;
-		return false;
-	}
-
-	fp->shadow_x = x;
-	return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// SetFontShadowYOffset: sets y offset to use for font shadow
-//-----------------------------------------------------------------------------
-
-bool GameVideo::SetFontShadowYOffset(const std::string &fontName, int32 y)
-{
-	if(_font_map.find(fontName) == _font_map.end())
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: GameVideo::SetFontShadowYOffset() failed for font (" << fontName << ") because the font's properties could not be found!" << endl;
-		return false;
-	}
-
-	FontProperties *fp = _font_map[fontName];
-	
-	if(!fp)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: GameVideo::SetFontShadowYOffset() failed for font (" << fontName << ") because the FontProperties pointer was NULL!" << endl;
-		return false;
-	}
-	
-	fp->shadow_y = y;
-	return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// SetFontShadowStyle: sets the shadow style for the given font
-//-----------------------------------------------------------------------------
-
-bool GameVideo::SetFontShadowStyle(const std::string &fontName, TEXT_SHADOW_STYLE style)
-{
-	if(_font_map.find(fontName) == _font_map.end())
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: GameVideo::SetFontShadowYOffset() failed for font (" << fontName << ") because the font's properties could not be found!" << endl;
-		return false;
-	}
-
-	FontProperties *fp = _font_map[fontName];
-	
-	if(!fp)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: GameVideo::SetFontShadowYOffset() failed for font (" << fontName << ") because the FontProperties pointer was NULL!" << endl;
-		return false;
-	}
-	
-	fp->shadow_style = style;
-	return true;
-}
-
-//-----------------------------------------------------------------------------
-// _GetTextShadowColor: gets the current text shadow color
-//-----------------------------------------------------------------------------
-
-Color GameVideo::_GetTextShadowColor(FontProperties *fp)
-{
-	Color shadowColor;
-	if(_text_shadow && fp->shadow_style != VIDEO_TEXT_SHADOW_NONE)
-	{
-		switch(fp->shadow_style)
-		{
-			case VIDEO_TEXT_SHADOW_DARK:
-				shadowColor = Color::black;
-				shadowColor[3] = _current_context.text_color[3] * 0.5f;
-				break;
-			case VIDEO_TEXT_SHADOW_LIGHT:
-				shadowColor = Color::white;
-				shadowColor[3] = _current_context.text_color[3] * 0.5f;
-				break;
-			case VIDEO_TEXT_SHADOW_BLACK:
-				shadowColor = Color::black;
-				shadowColor[3] = _current_context.text_color[3];
-				break;
-			case VIDEO_TEXT_SHADOW_COLOR:
-				shadowColor = _current_context.text_color;
-				shadowColor[3] = _current_context.text_color[3] * 0.5f;
-				break;
-			case VIDEO_TEXT_SHADOW_INVCOLOR:
-				shadowColor = Color(1.0f - _current_context.text_color[0], 1.0f - _current_context.text_color[1], 1.0f - _current_context.text_color[2], _current_context.text_color[3] * 0.5f);
-				break;
-			default:
-			{
-				if(VIDEO_DEBUG)
-					cerr << "VIDEO ERROR: Unknown text shadow style (" << fp->shadow_style << ") -  GameVideo::_GetTextShadowColor()" << endl;
-				break;
-			}
-		}
-	}
-	return shadowColor;
-}
-
-
 // *****************************************************************************
 // ********************************* RenderedText *********************************
 // *****************************************************************************
@@ -1331,7 +472,6 @@ TImage *GameVideo::_GetTImage(TImage *pntr)
 	return pntr;
 }
 
-
 // *****************************************************************************
 // ****************************** TImageElement *********************************
 // *****************************************************************************
@@ -1394,15 +534,725 @@ TImageElement::TImageElement(TImage *image_, float x_offset_, float y_offset_, f
 	}
 } // TImageElement::TImageElement()
 
-BaseImage *TImageElement::GetBaseImage()
-{
-	return image;
+//-----------------------------------------------------------------------------
+// GameVideo class font and text methods
+//-----------------------------------------------------------------------------
+
+bool GameVideo::LoadFont(const string& filename, const string& name, uint32 size) {
+	// Make sure that the font name is not already taken
+	if (IsFontValid(name) == true) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "a font with the desired reference name already existed: " << name << endl;
+		return false;
+	}
+
+	// Attempt to load the font
+	TTF_Font* font = TTF_OpenFont(filename.c_str(), size);
+	
+	if (font == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "TTF_OpenFont() failed to load the font file: " << filename << endl;
+		return false;
+	}
+
+	// Create a new FontProperties object for the font, and add it to the font map
+	FontProperties* fp = new FontProperties;
+	_font_map[name] = fp;
+
+	// Set all of the font's properties
+	fp->ttf_font = font;
+	fp->height = TTF_FontHeight(font);
+	fp->line_skip = TTF_FontLineSkip(font);
+	fp->ascent = TTF_FontAscent(font);
+	fp->descent = TTF_FontDescent(font);
+
+	// Set default shadow: x to be 1/8th of the font's height (or 1 pixel), y to be -x
+	fp->shadow_x = max(fp->height / 8, 1);
+	fp->shadow_y = -fp->shadow_x;
+
+	// Set default shadow style and create the glyph cache
+	fp->shadow_style = VIDEO_TEXT_SHADOW_DARK;
+	fp->glyph_cache = new std::map<uint16, FontGlyph*>;
+
+	return true;
+} // bool GameVideo::LoadFont(const string &filename, const string &name, int32 size)
+
+
+
+void GameVideo::SetFont(const std::string& name) {
+	if ( _font_map.find(name) == _font_map.end()) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because no font existed for name: " << name << endl;
+		return;
+	}
+		
+	_current_context.font = name;
 }
 
-const BaseImage *TImageElement::GetBaseImage() const
+
+
+FontProperties* GameVideo::GetFontProperties(const std::string& font_name) {
+	if (IsFontValid(font_name) == false) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed becase argument was invalid for font name: " << font_name << endl;
+		return NULL;
+	}
+	
+	return _font_map[font_name];
+}
+
+
+
+void GameVideo::SetFontShadowStyle(const std::string& font_name, TEXT_SHADOW_STYLE style) {
+	if (IsFontValid(font_name) == false) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because the properties could not be found for font: " << font_name << endl;
+		return;
+	}
+
+	FontProperties *font = _font_map[font_name];
+	if (font == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because the properties were NULL for for font: " << font_name << endl;
+		return;
+	}
+	
+	font->shadow_style = style;
+}
+
+
+
+void GameVideo::SetFontShadowOffsets(const std::string& font_name, int32 x, int32 y) {
+	if (IsFontValid(font_name) == false) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "invalid font_name argument: " << font_name << endl;
+		return;
+	}
+	
+	FontProperties *font = _font_map[font_name];
+	
+	if (font == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to retrieve font properties for font: " << font_name << endl;
+		return;
+	}
+
+	font->shadow_x = x;
+	font->shadow_y = y;
+}
+
+
+
+void GameVideo::DrawText(const ustring& text) {
+	if (text.empty()) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "empty string was passed to function" << endl;
+		return;
+	}
+
+	if(IsFontValid(_current_context.font) == false) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because font was invalid: " << _current_context.font << endl;
+		return;
+	}
+
+	FontProperties* fp = _font_map[_current_context.font];
+	TTF_Font* font = fp->ttf_font;
+
+	if (fp == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because font properties were invalid for font: " << _current_context.font << endl;
+		return;
+	}
+	if (font == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because TTF_Font was invalid in font proproperties for font: " << _current_context.font << endl;
+		return;
+	}
+
+	PushState();
+
+	int32 line_skip = fp->line_skip;
+	// NOTE Optimization: something seems to be wrong with ustring, using a buffer instead
+	uint16 buffer[2048];
+	uint16 newline('\n');
+	size_t last_line = 0;
+
+	do {
+		size_t next_line;
+		for (next_line = last_line; next_line < text.length(); next_line++) {
+			if (text[next_line] == newline)
+				break;
+
+			buffer[next_line - last_line] = text[next_line];
+		}
+		buffer[next_line - last_line] = 0;
+		last_line = next_line + 1;
+
+		glPushMatrix();
+
+		// If text shadows are enabled, draw the shadow first
+		if (_text_shadow && fp->shadow_style != VIDEO_TEXT_SHADOW_NONE) {
+			Color old_text_color = _current_context.text_color;
+			Color text_color;
+
+			switch(fp->shadow_style) {
+				case VIDEO_TEXT_SHADOW_DARK:
+					text_color = Color::black;
+					text_color[3] = old_text_color[3] * 0.5f;
+					break;
+				case VIDEO_TEXT_SHADOW_LIGHT:
+					text_color = Color::white;
+					text_color[3] = old_text_color[3] * 0.5f;
+					break;
+				case VIDEO_TEXT_SHADOW_BLACK:
+					text_color = Color::black;
+					text_color[3] = old_text_color[3];
+					break;
+				case VIDEO_TEXT_SHADOW_COLOR:
+					text_color = old_text_color;
+					text_color[3] = old_text_color[3] * 0.5f;
+					break;
+				case VIDEO_TEXT_SHADOW_INVCOLOR:
+					text_color = Color(1.0f - old_text_color[0], 1.0f - old_text_color[1], 1.0f - old_text_color[2], old_text_color[3] * 0.5f);
+					break;
+				default:
+					IF_PRINT_WARNING(VIDEO_DEBUG) << "Unknown text shadow style was set: " << fp->shadow_style << endl;
+					break;
+			};
+			SetTextColor(text_color);
+
+			glPushMatrix();
+			MoveRelative(_current_context.coordinate_system.GetHorizontalDirection() * fp->shadow_x, 0.0f);
+			MoveRelative(0.0f, _current_context.coordinate_system.GetVerticalDirection() * fp->shadow_y);
+
+			if (_DrawTextHelper(buffer) == false) {
+				PopState();
+				return;
+			}
+
+			SetTextColor(old_text_color);
+			glPopMatrix();
+		}
+
+		// Now draw the text itself
+		if (_DrawTextHelper(buffer) == false) {
+			PopState();
+			return;
+		}
+
+		glPopMatrix();
+		MoveRelative(0, -line_skip * _current_context.coordinate_system.GetVerticalDirection());
+
+	} while (last_line < text.length());
+
+	PopState();
+} // void GameVideo::DrawText(const ustring& text)
+
+
+
+int32 GameVideo::CalculateTextWidth(const std::string& font_name, const hoa_utils::ustring& text) {
+	if (IsFontValid(font_name) == false) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "font name argument was invalid: " << font_name << endl;
+		return -1;
+	}
+
+	int32 width;	
+	if (TTF_SizeUNICODE(_font_map[font_name]->ttf_font, text.c_str(), &width, NULL) == -1) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TTF_SizeUNICODE failed with TTF error: " << TTF_GetError() << endl;
+		return -1;
+	}
+		
+	return width;
+}
+
+
+
+int32 GameVideo::CalculateTextWidth(const std::string& font_name, const std::string& text) {
+	if (IsFontValid(font_name) == false) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "font name argument was invalid: " << font_name << endl;
+		return -1;
+	}
+
+	int32 width;	
+	if (TTF_SizeText(_font_map[font_name]->ttf_font, text.c_str(), &width, NULL) == -1) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TTF_SizeText failed with TTF error: " << TTF_GetError() << endl;
+		return -1;
+	}
+		
+	return width;
+}
+
+
+
+bool GameVideo::_CacheGlyphs(const uint16 *uText, FontProperties *fp) {
+	if (!fp)
+		return false;
+
+	static const SDL_Color color = { 0xFF, 0xFF, 0xFF, 0xFF };
+	static const uint16 fallbackglyph = '?'; // fall back to this glyph if one does not exist
+
+	TTF_Font * font = fp->ttf_font;
+	
+	SDL_Surface *initial = NULL;
+	SDL_Surface *intermediary = NULL;
+	int32 w,h;
+	GLuint texture;
+
+	for(const uint16 * character_ptr = uText; *character_ptr != 0; ++character_ptr)
+	{
+		// Reference for legibility
+		const uint16 &character = *character_ptr;
+
+		// Check if glyph already cached
+		if(fp->glyph_cache->find(character) != fp->glyph_cache->end())
+			continue;
+
+		initial = TTF_RenderGlyph_Blended(font, character, color);
+		
+		if(!initial)
+		{
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: TTF_RenderUNICODE_Blended() returned NULL in CacheGlyphs(), resorting to fallback" << endl;
+			initial = TTF_RenderGlyph_Blended(font, fallbackglyph, color);
+			if (!fallbackglyph)
+			{
+				if (VIDEO_DEBUG)
+					cerr << "VIDEO ERROR: TTF_RenderUNICODE_Blended() could not render fallback glyph, aborting!" << endl;
+				return false;
+			}
+			// TEMP
+			//cerr << "VIDEO ERROR (Probably a problem from SDL_ttf): " << TTF_GetError() << endl;
+			//return false;
+		}
+
+		w = RoundUpPow2(initial->w + 1);
+		h = RoundUpPow2(initial->h + 1);	
+
+		uint32 rmask, gmask, bmask, amask;
+
+			// SDL interprets each pixel as a 32-bit number, so our masks must depend
+			// on the endianness (byte order) of the machine
+		#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+			rmask = 0xff000000;
+			gmask = 0x00ff0000;
+			bmask = 0x0000ff00;
+			amask = 0x000000ff;
+		#else
+			rmask = 0x000000ff;
+			gmask = 0x0000ff00;
+			bmask = 0x00ff0000;
+			amask = 0xff000000;
+		#endif	
+
+		intermediary = SDL_CreateRGBSurface(0, w, h, 32, 
+				rmask, gmask, bmask, amask);
+
+		if(!intermediary)
+		{
+			SDL_FreeSurface(initial);
+			SDL_FreeSurface(intermediary);
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: SDL_CreateRGBSurface() returned NULL in CacheGlyphs()!" << endl;
+			return false;
+		}
+
+
+		if(SDL_BlitSurface(initial, 0, intermediary, 0) < 0)
+		{
+			SDL_FreeSurface(initial);
+			SDL_FreeSurface(intermediary);
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: SDL_BlitSurface() failed in CacheGlyphs()!" << endl;
+			return false;
+		}
+
+		glGenTextures(1, &texture);
+		if(glGetError())
+		{
+			SDL_FreeSurface(initial);
+			SDL_FreeSurface(intermediary);
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: glGetError() true after glGenTextures() in CacheGlyphs()!" << endl;
+			return false;
+		}
+		
+		_BindTexture(texture);
+		if(glGetError())
+		{
+			SDL_FreeSurface(initial);
+			SDL_FreeSurface(intermediary);
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: glGetError() true after glBindTexture() in CacheGlyphs()!" << endl;
+			return false;
+		}
+
+		SDL_LockSurface(intermediary);
+		for(int j = 0; j < w * h ; ++ j)
+		{
+			((uint8*)intermediary->pixels)[j*4+3] = ((uint8*)intermediary->pixels)[j*4+2];
+			
+			((uint8*)intermediary->pixels)[j*4+0] = 
+			((uint8*)intermediary->pixels)[j*4+1] = 
+			((uint8*)intermediary->pixels)[j*4+2] = 0xff;
+		}
+
+		glTexImage2D(GL_TEXTURE_2D, 0, 4, w, h, 0, GL_RGBA, 
+					 GL_UNSIGNED_BYTE, intermediary->pixels );
+		SDL_UnlockSurface(intermediary);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);	
+
+
+		if(glGetError())
+		{
+			SDL_FreeSurface(initial);
+			SDL_FreeSurface(intermediary);
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: glGetError() true after glTexImage2D() in CacheGlyphs()!" << endl;
+			return false;
+		}
+
+		int minx, maxx;
+		int miny, maxy;
+		int advance;
+
+		if(TTF_GlyphMetrics(font, character, &minx, &maxx, &miny, &maxy, &advance))
+		{
+			SDL_FreeSurface(initial);
+			SDL_FreeSurface(intermediary);
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: glGetError() true after glTexImage2D() in CacheGlyphs()!" << endl;
+			return false;
+		}
+
+		FontGlyph * glyph = new FontGlyph;
+		glyph->texture = texture;
+		glyph->min_x = minx;
+		glyph->min_y = miny;
+		glyph->top_y = fp->ascent - maxy;
+		glyph->width = initial->w + 1;
+		glyph->height = initial->h + 1;
+		glyph->max_x = (float)(((double)initial->w + 1) / ((double)w));
+		glyph->max_y = (float)(((double)initial->h + 1) / ((double)h));
+		glyph->advance = advance;
+
+		fp->glyph_cache->insert(std::pair<uint16, FontGlyph *>(character, glyph));
+
+		SDL_FreeSurface(initial);
+		SDL_FreeSurface(intermediary);
+	}
+	return true;
+} // GameVideo::CacheGlyphs()
+
+//-----------------------------------------------------------------------------
+// _DrawTextHelper: since there are two DrawText functions (one for unicode and
+//                 one for non-unicode), this private function is used to
+//                 do all the work so that code doesn't have to be duplicated.
+//                 Either text or uText is valid string and the other is NULL.
+//-----------------------------------------------------------------------------
+
+bool GameVideo::_DrawTextHelper(const uint16 *uText) {
+	if(_font_map.empty())
+		return false;
+		
+	// empty string, do nothing
+	if(*uText == 0)
+		return true;
+		
+	if(_font_map.find(_current_context.font) == _font_map.end())
+		return false;
+	
+	FontProperties * fp = _font_map[_current_context.font];
+	
+	glBlendFunc(GL_ONE, GL_ONE);
+	glEnable(GL_BLEND);
+
+	CoordSys &cs = _current_context.coordinate_system;
+
+	_CacheGlyphs(uText, fp);
+
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glEnable(GL_TEXTURE_2D);
+	glDisable(GL_FOG);
+
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0.1f);
+
+	glPushMatrix();
+
+	int fontwidth;
+	int fontheight;
+	if(TTF_SizeUNICODE(fp->ttf_font, uText, &fontwidth, &fontheight) != 0)
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: TTF_SizeUNICODE() returned NULL in _DrawTextHelper()!" << endl;
+		return false;
+	}
+
+	float xoff = ((_current_context.x_align+1) * fontwidth) * .5f * -cs.GetHorizontalDirection();
+	float yoff = ((_current_context.y_align+1) * fontheight) * .5f * -cs.GetVerticalDirection();
+
+	MoveRelative(xoff, yoff);
+
+	float modulation = _screen_fader.GetFadeModulation();
+	Color textColor = _current_context.text_color * modulation;
+
+	int xpos = 0;
+	
+	GLfloat tex_coords[8];
+	GLint vertices[8];
+	
+	glEnableClientState ( GL_VERTEX_ARRAY );
+	glEnableClientState ( GL_TEXTURE_COORD_ARRAY );
+	
+	glVertexPointer ( 2, GL_INT, 0, vertices );
+	glTexCoordPointer ( 2, GL_FLOAT, 0, tex_coords );
+
+	for(const uint16 * glyph = uText; *glyph != 0; glyph++)
+	{
+		FontGlyph * glyphinfo = (*fp->glyph_cache)[*glyph];
+		
+		int xhi = glyphinfo->width; 
+		int yhi = glyphinfo->height;
+		
+		if(cs.GetHorizontalDirection() < 0.0f)
+			xhi = -xhi;
+		if(cs.GetVerticalDirection() < 0.0f)
+			yhi = -yhi;
+			
+		float tx, ty;
+		tx = glyphinfo->max_x;
+		ty = glyphinfo->max_y;
+
+		int minx, miny;
+		minx = glyphinfo->min_x * (int)cs.GetHorizontalDirection() + xpos;
+		miny = glyphinfo->min_y * (int)cs.GetVerticalDirection();
+		
+		_BindTexture(glyphinfo->texture);
+
+		if(glGetError())
+		{
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: glGetError() true after 2nd call to glBindTexture() in _DrawTextHelper!" << endl;
+			return false;
+		}
+		
+		vertices[0] = minx;
+		vertices[1] = miny;
+		vertices[2] = minx + xhi;
+		vertices[3] = miny;
+		vertices[4] = minx + xhi;
+		vertices[5] = miny + yhi;
+		vertices[6] = minx;
+		vertices[7] = miny + yhi;
+		tex_coords[0] = 0.0f;
+		tex_coords[1] = ty;
+		tex_coords[2] = tx;
+		tex_coords[3] = ty;
+		tex_coords[4] = tx;
+		tex_coords[5] = 0.0f;
+		tex_coords[6] = 0.0f;
+		tex_coords[7] = 0.0f;
+		
+		glColor4fv((GLfloat*)&textColor);
+		glDrawArrays(GL_QUADS, 0, 4);
+
+		xpos += glyphinfo->advance;
+	}
+
+	glDisableClientState ( GL_VERTEX_ARRAY );
+	glDisableClientState ( GL_TEXTURE_COORD_ARRAY );
+
+	glPopMatrix();
+	
+	if(_fog_intensity > 0.0f)
+		glEnable(GL_FOG);
+
+	glDisable(GL_ALPHA_TEST);
+
+	//glFinish();
+
+	return true;
+}
+
+
+
+//-----------------------------------------------------------------------------
+// _RenderText: Renders a given unicode string and TextStyle to a pixel array
+//-----------------------------------------------------------------------------
+
+bool GameVideo::_RenderText(hoa_utils::ustring &string, TextStyle &style, ImageLoadInfo &buffer)
 {
-	return image;
+	FontProperties * fp = _font_map[style.font];
+	TTF_Font * font     = fp->ttf_font;
+
+	if (!font)
+	{
+		if (VIDEO_DEBUG)
+			cerr << "GameVideo::_RenderText(): font '" << style.font << "' not valid." << endl;
+		return false;
+	}
+
+	ImageLoadInfo load_info;
+
+	static const SDL_Color color = { 0xFF, 0xFF, 0xFF, 0xFF };
+
+	SDL_Surface *initial      = NULL;
+	SDL_Surface *intermediary = NULL;
+
+	int32 line_w, line_h;
+
+	// Minimum Y value of the line
+	int32 min_y = 0;
+	// Calculated line width
+	int32 calc_line_width = 0;
+	// Pixels left of '0' the first character extends, if any
+	int32 line_start_x = 0;
+
+	const uint16 *char_ptr;
+
+	#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+		static const int rmask = 0xff000000;
+		static const int gmask = 0x00ff0000;
+		static const int bmask = 0x0000ff00;
+		static const int amask = 0x000000ff;
+	#else
+		static const int rmask = 0x000000ff;
+		static const int gmask = 0x0000ff00;
+		static const int bmask = 0x00ff0000;
+		static const int amask = 0xff000000;
+	#endif	
+
+	if (TTF_SizeUNICODE(font, string.c_str(), &line_w, &line_h) == -1)
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: TTF_SizeUNICODE() returned NULL in _RenderText()!" << endl;
+		return false;
+	}
+
+	_CacheGlyphs(string.c_str(), fp);
+
+	for (char_ptr = string.c_str(); *char_ptr; ++char_ptr)
+	{
+		FontGlyph * glyphinfo = (*fp->glyph_cache)[*char_ptr];
+
+		if (glyphinfo->top_y < min_y)
+			min_y = glyphinfo->top_y;
+		calc_line_width += glyphinfo->advance;
+	}
+
+	// Minimum y off by one pixel in some cases.
+	min_y -= 1;
+
+	// First character, check if it starts left of 0
+	char_ptr = string.c_str();
+	if (*char_ptr)
+	{
+		FontGlyph * first_glyphinfo = (*fp->glyph_cache)[*char_ptr];
+		if (first_glyphinfo->min_x < 0)
+			line_start_x = first_glyphinfo->min_x;
+	}
+
+	// TTF_SizeUNICODE underestimates line width as a 
+	// result of its micro positioning
+	if (calc_line_width > line_w)
+		line_w = calc_line_width;
+
+	// Adjust line sizes by negative starting offsets if present
+	line_w -= line_start_x;
+	line_h -= min_y;
+
+	intermediary = SDL_CreateRGBSurface(0, line_w, line_h, 32, 
+			rmask, gmask, bmask, amask);
+
+	if (!intermediary)
+	{
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: SDL_CreateRGBSurface() returned NULL in _RenderText()!" << endl;
+		return false;
+	}
+
+	SDL_Rect surf_target;
+	int32 xpos = -line_start_x;
+	int32 ypos = -min_y;
+	for (char_ptr = string.c_str(); *char_ptr; ++char_ptr)
+	{
+		FontGlyph * glyphinfo = (*fp->glyph_cache)[*char_ptr];
+
+		initial = TTF_RenderGlyph_Blended(font, *char_ptr, color);
+
+		if(!initial)
+		{
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: TTF_RenderGlyph_Blended() returned NULL in _RenderText()!" << endl;
+			return false;
+		}
+
+		surf_target.x = xpos + glyphinfo->min_x;
+		surf_target.y = ypos + glyphinfo->top_y;
+
+		if (SDL_BlitSurface(initial, NULL, intermediary, &surf_target) < 0)
+		{
+			SDL_FreeSurface(initial);
+			SDL_FreeSurface(intermediary);
+			if(VIDEO_DEBUG)
+				cerr << "VIDEO ERROR: SDL_BlitSurface() failed in _RenderText()! (" << SDL_GetError() << ")" << endl;
+			return false;
+		}
+		SDL_FreeSurface(initial);
+		xpos += glyphinfo->advance;
+	}
+
+	SDL_LockSurface(intermediary);
+	for (int j = 0; j < intermediary->w * intermediary->h; ++ j)
+	{
+		((uint8*)intermediary->pixels)[j*4+3] = ((uint8*)intermediary->pixels)[j*4+2];
+		((uint8*)intermediary->pixels)[j*4+0] = (uint8) (style.color[0] * 0xFF);
+		((uint8*)intermediary->pixels)[j*4+1] = (uint8) (style.color[1] * 0xFF);
+		((uint8*)intermediary->pixels)[j*4+2] = (uint8) (style.color[2] * 0xFF);
+	}
+
+	load_info.width  = line_w;
+	load_info.height = line_h;
+	load_info.pixels = intermediary->pixels;
+
+	// Prevent SDL from deleting pixel array
+	intermediary->pixels = NULL;
+
+	buffer = load_info;
+
+	SDL_UnlockSurface(intermediary);
+	SDL_FreeSurface(intermediary);
+
+	return true;
+}
+
+
+
+Color GameVideo::_GetTextShadowColor(FontProperties *fp) {
+	Color shadow_color;
+
+	if (_text_shadow && fp->shadow_style != VIDEO_TEXT_SHADOW_NONE) {
+		switch( fp->shadow_style) {
+			case VIDEO_TEXT_SHADOW_DARK:
+				shadow_color = Color::black;
+				shadow_color[3] = _current_context.text_color[3] * 0.5f;
+				break;
+			case VIDEO_TEXT_SHADOW_LIGHT:
+				shadow_color = Color::white;
+				shadow_color[3] = _current_context.text_color[3] * 0.5f;
+				break;
+			case VIDEO_TEXT_SHADOW_BLACK:
+				shadow_color = Color::black;
+				shadow_color[3] = _current_context.text_color[3];
+				break;
+			case VIDEO_TEXT_SHADOW_COLOR:
+				shadow_color = _current_context.text_color;
+				shadow_color[3] = _current_context.text_color[3] * 0.5f;
+				break;
+			case VIDEO_TEXT_SHADOW_INVCOLOR:
+				shadow_color = Color(1.0f - _current_context.text_color[0], 1.0f - _current_context.text_color[1],
+					1.0f - _current_context.text_color[2], _current_context.text_color[3] * 0.5f);
+				break;
+			default:
+				if(VIDEO_DEBUG)
+					cerr << "VIDEO ERROR: Unknown text shadow style (" << fp->shadow_style << ") -  GameVideo::_GetTextShadowColor()" << endl;
+				break;
+		}
+	}
+
+	return shadow_color;
 }
 
 }  // namespace hoa_video
-

@@ -130,28 +130,21 @@ bool InitializeEngine() {
 		return false;
 	}
 
-	VideoManager->SetFontShadowXOffset("default", 1);
-	VideoManager->SetFontShadowYOffset("default", -2);
-	VideoManager->SetFontShadowStyle("default", VIDEO_TEXT_SHADOW_BLACK);
-
-	VideoManager->SetFontShadowXOffset("default", 1);
-	VideoManager->SetFontShadowYOffset("default", -2);
+	VideoManager->SetFontShadowOffsets("default", 1, -2);
 	VideoManager->SetFontShadowStyle("default", VIDEO_TEXT_SHADOW_BLACK);
 
 	if (!VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "map", 24)) {
 		return false;
 	}
 
-	VideoManager->SetFontShadowXOffset("map", 0);
-	VideoManager->SetFontShadowYOffset("map", 0);
+	VideoManager->SetFontShadowOffsets("map", 0, 0);
 	VideoManager->SetFontShadowStyle("map", VIDEO_TEXT_SHADOW_BLACK);
 
 	if (!VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "battle", 20)) {
 		return false;
 	}
 
-	VideoManager->SetFontShadowXOffset("battle", 1);
-	VideoManager->SetFontShadowYOffset("battle", -2);
+	VideoManager->SetFontShadowOffsets("battle", 1, -2);
 	VideoManager->SetFontShadowStyle("battle", VIDEO_TEXT_SHADOW_BLACK);
 
 	// Font used to show damage received / given in battle mode
@@ -159,8 +152,7 @@ bool InitializeEngine() {
 		return false;
 	}
 
-	VideoManager->SetFontShadowXOffset("battle_dmg", 1);
-	VideoManager->SetFontShadowYOffset("battle_dmg", -2);
+	VideoManager->SetFontShadowOffsets("battle_dmg", 1, -2);
 	VideoManager->SetFontShadowStyle("battle_dmg", VIDEO_TEXT_SHADOW_BLACK);
 
 	if (AudioManager->SingletonInitialize() == false) {
@@ -174,10 +166,6 @@ bool InitializeEngine() {
 	}
 	hoa_defs::BindEngineToLua();
 
-	if (ModeManager->SingletonInitialize() == false) {
-		cerr << "ERROR: unable to initialize ModeManager" << endl;
-		return false;
-	}
 	if (SystemManager->SingletonInitialize() == false) {
 		cerr << "ERROR: unable to initialize SystemManager" << endl;
 		return false;
@@ -188,6 +176,10 @@ bool InitializeEngine() {
 	}
 	if (GlobalManager->SingletonInitialize() == false) {
 		cerr << "ERROR: unable to initialize GlobalManager" << endl;
+		return false;
+	}
+	if (ModeManager->SingletonInitialize() == false) {
+		cerr << "ERROR: unable to initialize ModeManager" << endl;
 		return false;
 	}
 

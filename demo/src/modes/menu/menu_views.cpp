@@ -94,40 +94,35 @@ void CharacterWindow::Draw() {
 
 	// Write character name
 	VideoManager->MoveRelative(150, 0);
-	if (!VideoManager->DrawText(character->GetName()))
-		cerr << "CHARACTERWINDOW: ERROR > Couldn't draw Character Name!" << endl;
+	VideoManager->DrawText(character->GetName());
 
 	// Level
 	VideoManager->MoveRelative(0,20);
 	std::ostringstream os_level;
 	os_level << character->GetExperienceLevel();
 	std::string xp_level = std::string("Lv: ") + os_level.str();
-	if (!VideoManager->DrawText(MakeUnicodeString(xp_level)))
-		cerr << "CHARACTERWINDOW: ERROR: > Couldn't draw xp level" << endl;
+	VideoManager->DrawText(MakeUnicodeString(xp_level));
 
 	// HP
 	VideoManager->MoveRelative(0,20);
 	ostringstream os_health;
 	os_health << character->GetHitPoints() << " / " << character->GetMaxHitPoints();
 	std::string health = std::string("HP: ") + os_health.str();
-	if (!VideoManager->DrawText(MakeUnicodeString(health)))
-		cerr << "CHARACTERWINDOW: ERROR > Couldn't draw health!" << endl;
+	VideoManager->DrawText(MakeUnicodeString(health));
 
 	// SP
 	VideoManager->MoveRelative(0,20);
 	ostringstream os_skill;
 	os_skill << character->GetSkillPoints() << " / " << character->GetMaxSkillPoints();
 	std::string skill = std::string("SP: ") + os_skill.str();
-	if (!VideoManager->DrawText(MakeUnicodeString(skill)))
-		cerr << "CHARACTERWINDOW: ERROR > Couldn't draw skill!" << endl;
+	VideoManager->DrawText(MakeUnicodeString(skill));
 
 	// XP to level up
 	VideoManager->MoveRelative(0, 20);
 	ostringstream os_xp;
 	os_xp << character->GetExperienceForNextLevel();
 	std::string xp = std::string("XP To Next: ") + os_xp.str();
-	if (!VideoManager->DrawText(MakeUnicodeString(xp)))
-		cerr << "CHARACTERWINDOW: ERROR > Couldn't draw xp!" << endl;
+	VideoManager->DrawText(MakeUnicodeString(xp));
 
 	return;
 }
