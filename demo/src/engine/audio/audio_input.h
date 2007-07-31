@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-//            Copyright (C) 2004-2006 by The Allacrost Project
+//            Copyright (C) 2004-2007 by The Allacrost Project
 //                         All Rights Reserved
 //
 // This code is licensed under the GNU GPL version 2. It is free software 
@@ -9,28 +9,19 @@
 
 /** ****************************************************************************
 *** \file   audio_input.h
-*** \author Moisï¿½s Ferrer Serra, byaku@allacrost.org
+*** \author Moisés Ferrer Serra, byaku@allacrost.org
 *** \brief  Header file for classes that provide input for sounds
-*** 
-*** This code provides classes for loading sounds (WAV and OGG). It also
-*** provides the functionality for basic streaming operations, both from memory and from 
-*** file
 ***
-*** \note This code uses Ogg-vorbis library for loading Ogg files
+*** This code provides classes for loading sounds (WAV and OGG). It also
+*** provides the functionality for basic streaming operations, both from memory
+*** and from a file.
+***
+*** \note This code uses the Ogg/Vorbis libraries for loading Ogg files. WAV
+*** files are loaded via custom loading code
 *** ***************************************************************************/
-
 
 #ifndef __AUDIO_INPUT_HEADER__
 #define __AUDIO_INPUT_HEADER__
-
-/*
-typedef int int32;
-typedef unsigned int uint32;
-typedef short int int16;
-typedef unsigned short int uint16;
-typedef char int8;
-typedef unsigned char uint8;
-*/
 
 #ifdef __MACH__
 	#include <OpenAL/al.h>
@@ -40,19 +31,15 @@ typedef unsigned char uint8;
 	#include "alc.h"
 #endif
 
-#include "utils.h"
-#include <string>
-#include <fstream>
 #include <vorbis/vorbisfile.h>
+#include <fstream>
 
+#include "defs.h"
+#include "utils.h"
 
-//! \brief Namespace for the audio engine
-namespace hoa_audio
-{
+namespace hoa_audio {
 
-//! \brief Private namespace for the audio engine
-namespace private_audio
-{
+namespace private_audio {
 
 //! \brief Interface for audio input objects
 /*!
@@ -61,24 +48,12 @@ namespace private_audio
 	derive from this one and will have to implement all the pure virtual functions.
 	These functions are the real interface of the class.
 */
-class IAudioInput
-{
-private:
-
-protected:
-	uint32 _samples_per_second;		//!< \brief Samples per second (tipically 11025, 22050, 44100).
-	uint8 _bits_per_sample;			//!< \brief Bits per sample (tipically 8 or 16).
-	uint16 _channels;				//!< \brief Channels of the sound (1=mono, 2=stereo).
-	uint32 _samples;				//!< \brief Samples of the audio piece.
-
-	// These are derived variables, defined becase are frequently required
-	uint32 _data_size;				//!< \brief Size of the audio in bytes.
-	uint16 _sample_size;			//!< \brief Size of a sample in bytes (_bits_per_sample * _channels / 8).
-	float _time;					//!< \brief Time of the audio piece (_samples / _samples_per_second).
-
+class AudioInput {
 public:
-	IAudioInput ();
-	virtual ~IAudioInput () {  };
+	AudioInput ();
+
+	virtual ~AudioInput ()
+		{};
 
 	//! \brief Initialize the input stream.
 	/*!
@@ -88,7 +63,7 @@ public:
 		the variables, so the data can be properly interpreted.
 		\return True if the stream was successfully opened and is ready to read, false otherwise.
 	*/
-	virtual bool Initialize () = 0;
+	virtual bool Initialize() = 0;
 
 	//! \brief Seeks the stream in the sample specified.
 	/*!
@@ -97,7 +72,7 @@ public:
 		work as if no Seek call was done.
 		\param cursor Sample position to place the read cursor.
 	*/
-	virtual void Seek (const uint32 cursor) = 0;
+	virtual void Seek(uint32 cursor) = 0;
 
 	//! \brief Reads up to the specified number of samples.
 	/*!
@@ -109,7 +84,7 @@ public:
 		\param end The function will set this to true if the end of stream is reached, false otherwise.
 		\return Number of samples readed.
 	*/
-	virtual uint32 Read (uint8* buffer, const uint32 size, bool &end) = 0;
+	virtual uint32 Read(uint8* buffer, uint32 size, bool& end) = 0;
 
 	//! \name Accessors of the data of the class
 	//! \brief Accessors for retrieving audio parameters.
@@ -118,91 +93,90 @@ public:
 		channels, data size and other derived variables. These values can not be assigned.
 	*/
 	//@{
-	inline uint32 GetSamplesPerSecond () const
-	{
-		return _samples_per_second;
-	}
+	uint32 GetSamplesPerSecond() const
+		{ return _samples_per_second; }
 
-	inline uint8 GetBitsPerSample () const
-	{
-		return _bits_per_sample;
-	}
+	uint8 GetBitsPerSample() const
+		{ return _bits_per_sample; }
 
-	inline uint16 GetChannels () const
-	{
-		return _channels;
-	}
+	uint16 GetChannels() const
+		{ return _channels; }
 
-	inline uint32 GetSamples () const
-	{
-		return _samples;
-	}
+	uint32 GetSamples() const
+		{ return _samples; }
 
-	inline uint32 GetDataSize () const
-	{
-		return _data_size;
-	}
+	uint32 GetDataSize() const
+		{ return _data_size; }
 
-	inline float GetTime () const
-	{
-		return _time;
-	}
+	float GetTime() const
+		{ return _time; }
 
-	inline uint16 GetSampleSize () const
-	{
-		return _sample_size;
-	}
-	//}@
-};
+	uint16 GetSampleSize() const
+		{ return _sample_size; }
+	//@}
 
-
-
-
-//! \brief Interface for audio files (for input).
-/*!
-	This class is an interface for audio files that will be read. Any supported
-	audio file will be implemented in a new class derivated from this one.
-*/
-class IAudioFile : public IAudioInput
-{
 protected:
-	std::string _file_name;		//!< \brief File name
+	//! \brief Samples per second (typically 11025, 22050, 44100).
+	uint32 _samples_per_second;
 
+	//! \brief Bits per sample (typically 8 or 16).
+	uint8 _bits_per_sample;
+
+	//! \brief Channels of the sound (1=mono, 2=stereo).
+	uint16 _channels;
+
+	//! \brief Samples of the audio piece.
+	uint32 _samples;
+
+	//! \brief Size of the audio in bytes.
+	uint32 _data_size;
+
+	//! \brief Size of a sample in bytes (_bits_per_sample * _channels / 8).
+	uint16 _sample_size;
+
+	//! \brief Time of the audio piece (_samples / _samples_per_second).
+	float _time;
+}; // class AudioInput
+
+
+/** ****************************************************************************
+*** \brief Manages input extraced from .wav files
+***
+*** Wav files are usually used for sounds. This class implements its own custom
+*** wav file parser/loader to interpret the data from the file into meaningful
+*** audio data.
+*** ***************************************************************************/
+class WavFile : public AudioInput {
 public:
-	IAudioFile (const std::string file_name);
-	~IAudioFile () {  };
+	WavFile(const std::string& file_name) :
+		AudioInput(), _file_name(file_name) {}
 
-	//! \brief Gets the names of the file.
-	/*!
-		Gets the name of the file.
-	*/
-	inline const std::string &GetFileName () const
-	{
-		return _file_name;
-	}
-};
+	~WavFile()
+		{ if (_file_input) _file_input.close(); }
 
+	//! \brief Inherited functions from AudioInput class
+	//@{
+	//! \todo Enable this function to handle loading of more complex WAV files
+	bool Initialize();
 
+	void Seek(uint32 cursor);
 
+	uint32 Read(uint8* buffer, uint32 size, bool& end);
+	//@}
 
-//! \brief Class for managing input from WAV files.
-/*!
-	Class for managing input from WAV files.
-*/
-class WavFile : public IAudioFile
-{
+	const std::string& GetFileName() const
+		{ return _file_name; }
+
 private:
-	std::ifstream _file_in;		//!< \brief Input stream for the file.
-	std::streampos _data_init;	//!< \brief Offset from the begining of the file where the data begins.
+	//! \brief The name of the audio file operated on by this class
+	std::string _file_name;
 
-public:
-	WavFile (const std::string &file_name);
-	~WavFile ();
+	//! \brief The input I/O stream for the file
+	std::ifstream _file_input;
 
-	bool Initialize ();
-	void Seek (const uint32 cursor);
-	uint32 Read (uint8* buffer, const uint32 size, bool &end);
-};
+	//! \brief The offset to where the data begins in the file (past the header information)
+	std::streampos _data_init;
+}; // class WavFile : public AudioInput
 
 
 
@@ -212,13 +186,48 @@ public:
 /*!
 	Class for managing input from OGG files.
 */
-class OggFile : public IAudioFile
-{
+/** ****************************************************************************
+*** \brief Represents an OpenAL buffer
+***
+*** A buffer in OpenAL is simply a structure which contains raw audio data.
+*** Buffers must be attached to an OpenAL source in order to play. OpenAL
+*** suppports an infinte number of buffers (as long as there is enough memory).
+*** ***************************************************************************/
+class OggFile : public AudioInput {
+public:
+	OggFile(const std::string &file_name) :
+		AudioInput(), _file_name(file_name), _read_buffer_position(0), _read_buffer_size(0) {}
+
+	~OggFile()
+		{ ov_clear(&_vorbis_file); }
+
+	//! \brief Inherited functions from AudioInput class
+	//@{
+	bool Initialize();
+
+	void Seek(uint32 cursor);
+
+	uint32 Read(uint8* buffer, uint32 size, bool& end);
+	//@}
+
+	const std::string& GetFileName() const
+		{ return _file_name; }
+
 private:
-	OggVorbis_File _vorbis_file;		//!< \brief Vorbis file information.
-	unsigned char _read_buffer[4096];	//!< \brief Temporal buffer for reading data.
-	uint16 _read_buffer_position;		//!< \brief Position of previous read data (for the emporal buffer).
-	uint16 _read_buffer_size;			//!< \brief Size of available data on the buffer (for the emporal buffer).
+	//! \brief The name of the audio file operated on by this class
+	std::string _file_name;
+
+	//!< \brief Vorbis file information.
+	OggVorbis_File _vorbis_file;		
+
+	//!< \brief Temporal buffer for reading data.
+	unsigned char _read_buffer[4096];	
+
+	//!< \brief Position of previous read data (for the emporal buffer).
+	uint16 _read_buffer_position;		
+
+	//!< \brief Size of available data on the buffer (for the emporal buffer).
+	uint16 _read_buffer_size;			
 
 	//! \brief Reads up to the specified number of samples.
 	/*!
@@ -228,47 +237,51 @@ private:
 		\param whence The position to read, added to the off paramater to determine actual seek position.
 		\return Zero if successful, the nonzer fseek error code otherwise.
 	*/
-	static int _FseekWrap(FILE * f, ogg_int64_t off, int whence);
+	static int _FileSeekWrapper(FILE* file, ogg_int64_t off, int whence);
+}; // class OggFile : public AudioInput
 
+
+/** ****************************************************************************
+*** \brief Manages audio input data that is stored in memory
+***
+*** 
+*** ***************************************************************************/
+class AudioMemory : public AudioInput {
 public:
-	OggFile (const std::string &file_name);
-	~OggFile ();
-
-	bool Initialize ();
-	void Seek (const uint32 cursor);
-	uint32 Read (uint8* buffer, const uint32 size, bool &end);
-};
-
-
-
-
-
-//! \brief Class for managing input from memory.
+//! \brief Constructor of the class.
 /*!
-	Class for managing input from memory.
+	Constructor of the class. It needs the parameters of the audio to interpret the raw audio data.
+	\param samples_per_second Samples per second.
+	\param bits_per_sample Bits per sample.
+	\param channels Number of channels (1=mono, 2=stereo).
+	\param samples Number of samples in the data.
+	\param data Pointer to the raw PCM data.
 */
-class AudioMemory : public IAudioInput
-{
+	AudioMemory(uint32 samples_per_second, uint8 bits_per_sample, uint16 channels, uint32 samples, uint8* data);
+
+	~AudioMemory();
+
+	//! \brief Inherited functions from AudioInput class
+	//@{
+	//! \note Audio memory does not need to be initialized, as that is done by the class constructor
+	bool Initialize()
+		{ return true; }
+
+	void Seek(uint32 cursor);
+
+	uint32 Read(uint8* buffer, uint32 size, bool& end);
+	//@}
+
 private:
-	uint8* _buffer;		//!< \brief Data buffer where the audio is stored.
-	uint32 _cursor;		//!< \brief Position of the cursor where the next read operation will be performed.
+	//!< \brief Data buffer where the audio is stored.
+	uint8* _buffer;
 
-public:
-	AudioMemory (const uint32 samples_per_second, const uint8 bits_per_sample,
-				 const uint16 channels, const uint32 samples, uint8* data);
-	~AudioMemory ();
+	//!< \brief Position of the cursor where the next read operation will be performed.
+	uint32 _cursor;
+}; // class AudioMemory : public AudioInput
 
-	bool Initialize ();
-	void Seek (const uint32 cursor);
-	uint32 Read (uint8* buffer, const uint32 size, bool &end);
-};
+} // namespace private_audio
 
+} // namespace hoa_audio
 
-} // End of namespace private_audio
-
-
-} // End of namespace hoa_audio
-
-
-#endif
-
+#endif // __AUDIO_INPUT_HEADER__

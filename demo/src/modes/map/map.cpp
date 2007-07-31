@@ -106,11 +106,11 @@ MapMode::~MapMode() {
 	if (MAP_DEBUG) cout << "MAP: MapMode destructor invoked" << endl;
 
 	for (uint32 i = 0; i < _music.size(); i++) {
-		_music[i].FreeSound();
+		_music[i].FreeAudio();
 	}
 
 	for (uint32 i = 0; i < _sounds.size(); i++) {
-		_sounds[i].FreeSound();
+		_sounds[i].FreeAudio();
 	}
 
 	// Delete all enemy's created
@@ -209,8 +209,8 @@ void MapMode::_Load() {
 
 	for (uint32 i = 0; i < sound_filenames.size(); i++) {
 		SoundDescriptor new_sound;
-//		if (new_sound.LoadSound(sound_filenames[i]) == true) {
-			new_sound.LoadSound(sound_filenames[i]);
+//		if (new_sound.LoadAudio(sound_filenames[i]) == true) {
+			new_sound.LoadAudio(sound_filenames[i]);
 			_sounds.push_back(new_sound);
 //		}
 //		else {
@@ -223,8 +223,8 @@ void MapMode::_Load() {
 	_map_script.ReadStringVector("music_filenames", music_filenames);
 	for (uint32 i = 0; i < music_filenames.size(); i++) {
 		MusicDescriptor new_music;
-//		if (new_music.LoadSound(music_filenames[i]) == true) {
-			new_music.LoadSound(music_filenames[i]);
+//		if (new_music.LoadAudio(music_filenames[i]) == true) {
+			new_music.LoadAudio(music_filenames[i]);
 			new_music.SetLooping(true);
 			_music.push_back(new_music);
 /*		}

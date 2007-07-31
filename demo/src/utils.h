@@ -90,7 +90,7 @@
 //@{
 #define PRINT_DEBUG std::cout << "DEBUG:" << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << ": "
 #define PRINT_WARNING std::cerr << "WARNING:" << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << ": "
-#define PRINT_ERROR std::cout << "ERROR:" << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << ": "
+#define PRINT_ERROR std::cerr << "ERROR:" << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << ": "
 //@}
 
 /** \name Print Message Helper Macros With Conditional
@@ -99,11 +99,11 @@
 *** parameter. If the parameter is true the message will be printed and if it is false, no message will be printed. Note that
 *** the if statement is not enclosed in brackets, so the programmer is not required to add a terminating bracket after they
 *** append their print message.
+*** \note There is no error conditional macro because detected errors should always be printed when they are discovered
 **/
 //@{
 #define IF_PRINT_DEBUG(var) if (var) std::cout << "DEBUG:" << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << ": "
 #define IF_PRINT_WARNING(var) if (var) std::cerr << "WARNING:" << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << ": "
-#define IF_PRINT_ERROR(var) if (var) std::cout << "ERROR:" << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << ": "
 //@}
 
 /** \name Allacrost Integer Types

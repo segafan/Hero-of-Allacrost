@@ -125,7 +125,7 @@ BootMode::BootMode() :
 			SystemManager->ExitGame();
 			return;
 		}*/
-		_boot_music[i].LoadSound(new_music_files[i]);
+		_boot_music[i].LoadAudio(new_music_files[i]);
 	}
 
 	SoundDescriptor new_sound;
@@ -134,11 +134,11 @@ BootMode::BootMode() :
 	_boot_sounds.push_back(new_sound);
 	_boot_sounds.push_back(new_sound);
 	_boot_sounds.push_back(new_sound);
-	_boot_sounds[0].LoadSound(new_sound_files[0]);
-	_boot_sounds[1].LoadSound(new_sound_files[1]);
-	_boot_sounds[2].LoadSound(new_sound_files[2]);
-	_boot_sounds[3].LoadSound(new_sound_files[3]);
-	_boot_sounds[4].LoadSound(new_sound_files[4]);
+	_boot_sounds[0].LoadAudio(new_sound_files[0]);
+	_boot_sounds[1].LoadAudio(new_sound_files[1]);
+	_boot_sounds[2].LoadAudio(new_sound_files[2]);
+	_boot_sounds[3].LoadAudio(new_sound_files[3]);
+	_boot_sounds[4].LoadAudio(new_sound_files[4]);
 
 	// Check the version
 	_latest_version = true; //IsLatestVersion();
@@ -150,7 +150,7 @@ BootMode::BootMode() :
 	// This loop causes a seg fault for an unknown reason. Roots is looking into it (04/01/2006)
 // 	for (uint32 i = 0; i < new_sound_files.size(); i++) {
 // 		_boot_sounds.push_back(new_sound);
-// 		_boot_sounds[i].LoadSound(new_sound_files[i]);
+// 		_boot_sounds[i].LoadAudio(new_sound_files[i]);
 // 	}
 
 	// Load all bitmaps
@@ -177,10 +177,10 @@ BootMode::~BootMode() {
 	if (BOOT_DEBUG) cout << "BOOT: BootMode destructor invoked." << endl;
 
 	for (uint32 i = 0; i < _boot_music.size(); i++)
-		_boot_music[i].FreeSound();
+		_boot_music[i].FreeAudio();
 
 	for (uint32 i = 0; i < _boot_sounds.size(); i++)
-		_boot_sounds[i].FreeSound();
+		_boot_sounds[i].FreeAudio();
 
 	for (uint32 i = 0; i < _boot_images.size(); i++)
 		VideoManager->DeleteImage(_boot_images[i]);
