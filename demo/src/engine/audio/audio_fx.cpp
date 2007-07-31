@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-//            Copyright (C) 2004-2006 by The Allacrost Project
+//            Copyright (C) 2004-2007 by The Allacrost Project
 //                         All Rights Reserved
 //
 // This code is licensed under the GNU GPL version 2. It is free software 
@@ -9,7 +9,7 @@
 
 /** ****************************************************************************
 *** \file   audio_fx.cpp
-*** \author Moisï¿½s Ferrer Serra, byaku@allacrost.org
+*** \author Moisés Ferrer Serra, byaku@allacrost.org
 *** \brief  Source for audio effects system
 *** 
 *** This code provides the interface for effects, as well as the private classes

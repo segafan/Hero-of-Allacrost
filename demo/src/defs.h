@@ -43,12 +43,19 @@ namespace hoa_audio {
 	extern bool AUDIO_DEBUG;
 	class GameAudio;
 
+	class AudioDescriptor;
 	class MusicDescriptor;
 	class SoundDescriptor;
 
 	namespace private_audio {
-		class MusicData;
-		class SoundData;
+		class AudioBuffer;
+		class AudioSource;
+		class AudioStream;
+
+		class AudioInput;
+		class WavFile;
+		class OggFile;
+		class AudioMemory;
 	}
 }
 

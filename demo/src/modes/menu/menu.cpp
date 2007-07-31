@@ -141,11 +141,11 @@ MenuMode::MenuMode(ustring locale_name, string locale_image) {
 
 	// Load menu sounds
 	_menu_sounds["confirm"] = SoundDescriptor();
-	_menu_sounds["confirm"].LoadSound("snd/confirm.wav");
+	_menu_sounds["confirm"].LoadAudio("snd/confirm.wav");
 	_menu_sounds["cancel"] = SoundDescriptor();
-	_menu_sounds["cancel"].LoadSound("snd/cancel.wav");
+	_menu_sounds["cancel"].LoadAudio("snd/cancel.wav");
 	_menu_sounds["bump"] = SoundDescriptor();
-	_menu_sounds["bump"].LoadSound("snd/bump.wav");
+	_menu_sounds["bump"].LoadAudio("snd/bump.wav");
 
 	if (_instance != NULL) {
 		if (MENU_DEBUG)
@@ -180,9 +180,9 @@ MenuMode::~MenuMode() {
 	_formation_window.Destroy();
 
 	// Free sounds
-	_menu_sounds["confirm"].FreeSound();
-	_menu_sounds["bump"].FreeSound();
-	_menu_sounds["cancel"].FreeSound();
+	_menu_sounds["confirm"].FreeAudio();
+	_menu_sounds["bump"].FreeAudio();
+	_menu_sounds["cancel"].FreeAudio();
 
 	_instance = NULL;
 } // MenuMode::~MenuMode()

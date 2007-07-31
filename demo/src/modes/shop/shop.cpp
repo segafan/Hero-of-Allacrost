@@ -130,10 +130,10 @@ void ShopMode::Reset() {
 	_shop_sounds["coins"] = SoundDescriptor();
 	_shop_sounds["bump"] = SoundDescriptor();
 
-	_shop_sounds["confirm"].LoadSound("snd/confirm.wav");
-	_shop_sounds["cancel"].LoadSound("snd/cancel.wav");
-	_shop_sounds["coins"].LoadSound("snd/coins.wav");
-	_shop_sounds["bump"].LoadSound("snd/bump.wav");
+	_shop_sounds["confirm"].LoadAudio("snd/confirm.wav");
+	_shop_sounds["cancel"].LoadAudio("snd/cancel.wav");
+	_shop_sounds["coins"].LoadAudio("snd/coins.wav");
+	_shop_sounds["bump"].LoadAudio("snd/bump.wav");
 }
 
 

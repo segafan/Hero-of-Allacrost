@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-//            Copyright (C) 2004-2006 by The Allacrost Project
+//            Copyright (C) 2004-2007 by The Allacrost Project
 //                         All Rights Reserved
 //
 // This code is licensed under the GNU GPL version 2. It is free software 
@@ -18,15 +18,16 @@
 *** \note This code is not dependent on any (audio) library.
 *** ***************************************************************************/
 
-
 #include "audio_stream.h"
 #include "audio_input.h"
 #include <cstring>
 #include <cctype>
 
+using namespace std;
 
-using namespace hoa_audio::private_audio;
+namespace hoa_audio {
 
+namespace private_audio {
 
 //! \brief Constructor of the class.
 /*!
@@ -35,20 +36,20 @@ using namespace hoa_audio::private_audio;
 	\param mode Mode of streaming (0 for streaming from memory, 1 for streaming from file).
 	\param loop Flag to enable looping.
 */
-Stream::Stream (const std::string &filename, const int mode, const bool loop) :
-_looping (loop),
-_audio_input (0),
-_cursor (0),
-_loop_start (0),
-_loop_end (0),
-_end_of_stream (false)
+AudioStream::AudioStream (const std::string &filename, const int mode, const bool loop) :
+	_looping(loop),
+	_loop_start(0),
+	_loop_end(0),
+	_audio_input(NULL),
+	_cursor(0),
+	_end_of_stream(false)
 {
 	if (filename.size() <= 3)		// Name of file is at least 3 letters (so the extension is in there)
 	{
 		return;
 	}
 
-	IAudioInput* input (0);
+	AudioInput* input (0);
 
 	std::string audio_extension = filename.substr (filename.size()-3, 3);
 
@@ -88,7 +89,7 @@ _end_of_stream (false)
 }
 
 
-Stream::~Stream ()
+AudioStream::~AudioStream ()
 {
 	if (_audio_input)
 	{
@@ -105,7 +106,7 @@ Stream::~Stream ()
 	\param buffer Buffer where the data will be loaded.
 	\param size Number of samples to be read.
 */
-uint32 Stream::FillBuffer (uint8* buffer, const uint32 size)
+uint32 AudioStream::FillBuffer (uint8* buffer, const uint32 size)
 {
 	if (!_audio_input)
 	{
@@ -149,47 +150,10 @@ uint32 Stream::FillBuffer (uint8* buffer, const uint32 size)
 
 	return 0;
 
-/*
-	if (_loop_start == 0 && _loop_end == GetSamples())	// If no special looping structure is presented, do normal looping
-	{
-		readed = _audio_input->Read (buffer, size, end);
-
-		while (readed < size)
-		{
-			if (_looping)		// If there is looping, rewind to the beginning and continue filling the buffer
-			{
-				_audio_input->Seek (0);
-				readed += _audio_input->Read (buffer+(readed*_audio_input->GetChannels()*_audio_input->GetBitsPerSample()/8), size-readed, end);
-			}
-			else			// If there is no looping, fill with silence
-			{
-				memset (buffer+(readed*_audio_input->GetChannels()*_audio_input->GetBitsPerSample()/8), 0, (size-readed)*(_audio_input->GetChannels()*_audio_input->GetBitsPerSample()/8));
-				silence = true;
-				readed = size;
-			}
-		}
-	}
-	else
-	{
-		while (readed < size)
-		{
-			if (_looping)		// If there is looping, rewind to the beginning and continue filling the buffer
-			{
-				_audio_input->Seek (0);
-				readed += _audio_input->Read (buffer+(readed*_audio_input->GetChannels()*_audio_input->GetBitsPerSample()/8), size-readed, end);
-			}
-			else			// If there is no looping, fill with silence
-			{
-				memset (buffer+(readed*_audio_input->GetChannels()*_audio_input->GetBitsPerSample()/8), 0, (size-readed)*(_audio_input->GetChannels()*_audio_input->GetBitsPerSample()/8));
-				silence = true;
-				readed = size;
-			}
-		}
-	}*/
 }
 
 
-void Stream::Seek (const uint32 sample)
+void AudioStream::Seek (const uint32 sample)
 {
 	if (sample >= 0 && sample < GetSamples())
 	{
@@ -206,9 +170,9 @@ void Stream::Seek (const uint32 sample)
 	Sets the value for the start position of the loop. If an invalid position
 	is provided, no operation is performed.
 */
-void Stream::SetLoopStart (const uint32 sample)
+void AudioStream::SetLoopStart (const uint32 sample)
 {
-	if (sample >= 0 && sample < GetSamples())
+	if (sample < GetSamples())
 	{
 		_loop_start = sample;
 	}
@@ -220,11 +184,14 @@ void Stream::SetLoopStart (const uint32 sample)
 	Sets the value for the end position of the loop. If an invalid position
 	is provided, no operation is performed.
 */
-void Stream::SetLoopEnd (const uint32 sample)
+void AudioStream::SetLoopEnd (const uint32 sample)
 {
-	if (sample >= 0 && sample < GetSamples())
+	if (sample < GetSamples())
 	{
 		_loop_end = sample;
 	}
 }
 
+} // namespace private_audio
+
+} // namespace hoa_audio
