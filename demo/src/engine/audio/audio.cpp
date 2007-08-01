@@ -141,6 +141,12 @@ bool GameAudio::SingletonInitialize() {
 
 
 GameAudio::~GameAudio() {
+	// Delete any active audio effects
+	for (list<AudioEffect*>::iterator i = _audio_effects.begin(); i != _audio_effects.end(); i++) {
+		delete (*i);
+	}
+	_audio_effects.clear();
+
 	// Delete all entries in the sound cache
 	for (map<string, SoundDescriptor*>::iterator i = _sound_cache.begin(); i != _sound_cache.end(); i++) {
 		delete i->second;
@@ -175,7 +181,19 @@ void GameAudio::Update () {
 		}
 	}
 
-	_fx_manager.Update();
+	// Update all registered audio effects
+	for (list<AudioEffect*>::iterator i = _audio_effects.begin(); i != _audio_effects.end();) {
+		(*i)->Update();
+
+		// If the effect is finished, delete it
+		if ((*i)->active == false) {
+			delete (*i);
+			i = _audio_effects.erase(i);
+		}
+		else {
+			i++;
+		}
+	}
 }
 
 

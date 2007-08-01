@@ -63,8 +63,8 @@ audio_SOURCES = \
 	$(AUDIO_DIR)/audio.h \
 	$(AUDIO_DIR)/audio_descriptor.cpp \
 	$(AUDIO_DIR)/audio_descriptor.h \
-	$(AUDIO_DIR)/audio_fx.cpp \
-	$(AUDIO_DIR)/audio_fx.h \
+	$(AUDIO_DIR)/audio_effects.cpp \
+	$(AUDIO_DIR)/audio_effects.h \
 	$(AUDIO_DIR)/audio_input.cpp \
 	$(AUDIO_DIR)/audio_input.h \
 	$(AUDIO_DIR)/audio_stream.cpp \
