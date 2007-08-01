@@ -56,6 +56,10 @@ namespace hoa_audio {
 		class WavFile;
 		class OggFile;
 		class AudioMemory;
+
+		class AudioEffect;
+		class FadeInEffect;
+		class FadeOutEffect;
 	}
 }
 

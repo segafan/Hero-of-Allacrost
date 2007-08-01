@@ -33,7 +33,7 @@
 #include "utils.h"
 
 #include "audio_descriptor.h"
-#include "audio_fx.h"
+#include "audio_effects.h"
 
 //! \brief All related audio engine code is wrapped within this namespace
 namespace hoa_audio {
@@ -168,23 +168,18 @@ public:
 	//! \name Audio Effect Functions
 	//@{
 	/** \brief Fades a music or sound in as it plays
-	*** \param descriptor A reference to the music or sound to fade in
+	*** \param audio A reference to the music or sound to fade in
 	*** \param time The amount of time that the fade should last for, in seconds
 	**/
-	void FadeIn(AudioDescriptor& descriptor, float time);
+	void FadeIn(AudioDescriptor& audio, float time)
+		{ _audio_effects.push_back(new private_audio::FadeInEffect(audio, time)); }
 
 	/** \brief Fades a music or sound out as it finisheds
-	*** \param descriptor A refernece to the music or sound to fade out
+	*** \param audio A referenece to the music or sound to fade out
 	*** \param time The amount of time that the fade should last for, in seconds
 	**/
-	void FadeOut(AudioDescriptor& descriptor, float time);
-
-	/** \brief Fades one piece of audio out while fading the other in
-	*** \param descriptor_in The audio to fade in
-	*** \param descriptor_out The audio to fade out
-	*** \param time The amount of time that the cross fade should last for, in seconds
-	**/
-	void CrossFade(AudioDescriptor& descriptor_in, AudioDescriptor &descriptor_out, float time);
+	void FadeOut(AudioDescriptor& audio, float time)
+		{ _audio_effects.push_back(new private_audio::FadeOutEffect(audio, time)); }
 	//@}
 
 	/** \brief Plays a sound once with no looping
@@ -270,8 +265,8 @@ private:
 	float _listener_orientation[3];
 	//@}
 
-	//! \brief A sub-manager object for the audio engine which manages all audio effects
-	private_audio::AudioFxManager _fx_manager;
+	//! \brief Holds all active audio effects
+	std::list<private_audio::AudioEffect*> _audio_effects;
 
 	//! \brief Lists of pointers to all audio descriptor objects which have been created by the user
 	//@{
