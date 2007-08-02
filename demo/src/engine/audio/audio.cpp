@@ -9,7 +9,7 @@
 
 /** ****************************************************************************
 *** \file    audio.cpp
-*** \author  Tyler Olsen - Moisés Ferrer Serra - Aaron Smith, roots@allacrost.org - byaku@allacrost.org - etherstar@allacrost.org
+*** \author  Tyler Olsen - Moisï¿½s Ferrer Serra - Aaron Smith, roots@allacrost.org - byaku@allacrost.org - etherstar@allacrost.org
 *** \brief   Implementation of the audio engine singleton.
 ***
 *** The code included here implements the interface of the audio singleton.
@@ -113,7 +113,7 @@ bool GameAudio::SingletonInitialize() {
 		alcCloseDevice(_device);
 		return false;
 	}
-	
+
 	alcMakeContextCurrent(_context);
 	CheckALError(); // Clear errors
 	CheckALCError(); // Clear errors
@@ -158,7 +158,7 @@ GameAudio::~GameAudio() {
 		alDeleteSources(1, &(*i)->source);
 	}
 	_source.clear();
-	
+
 	// Delete all audio buffers
 	for (vector<AudioBuffer*>::iterator i = _buffer.begin(); i != _buffer.end(); i++) {
 		if ((*i)->IsValid()) {
@@ -409,7 +409,7 @@ void GameAudio::DEBUG_PrintInfo() {
 			c++;
 			continue;
 		}
-		
+
 		cout << c[0];
 		c++;
 	}

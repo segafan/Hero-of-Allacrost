@@ -2,14 +2,14 @@
 //            Copyright (C) 2004-2007 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ////////////////////////////////////////////////////////////////////////////////
 
 /** ****************************************************************************
 *** \file   audio_descriptor.h
-*** \author Moisés Ferrer Serra, byaku@allacrost.org
+*** \author Moisï¿½s Ferrer Serra, byaku@allacrost.org
 *** \brief  Header file for audio descriptors, sources and buffers
 ***
 *** This code provides the interface for the sound and music descriptors, that
@@ -136,7 +136,7 @@ public:
 
 //! \brief Class that provides the funcionality for managing sounds.
 /*!
-	Class that provides the funcionality for managing sounds. This includes the basic 
+	Class that provides the funcionality for managing sounds. This includes the basic
 	functionality such play, stop, pause, seeking, and also 3D functions.
 */
 /** ****************************************************************************
@@ -160,7 +160,7 @@ public:
 		{ FreeAudio(); }
 
 	/** \brief Loads a new piece of audio data from a file
-	*** \param file_name The name of the file that contains the new audio data (should have a .wav or .ogg file extension)
+	*** \param filename The name of the file that contains the new audio data (should have a .wav or .ogg file extension)
 	*** \param load_type The type of loading to perform (default == AUDIO_LOAD_STATIC)
 	*** \param stream_buffer_size If the loading type is streaming, the buffer size to use (default == DEFAULT_BUFFER_SIZE)
 	*** \return True if the audio was succesfully loaded, false if there was an error
@@ -168,12 +168,15 @@ public:
 	*** The action taken by this function depends on the load type selected. For static sounds, a single OpenAL buffer is
 	*** filled. For streaming, the file/memory is prepared.
 	*/
-	bool LoadAudio(const std::string& file_name, AUDIO_LOAD load_type = AUDIO_LOAD_STATIC, uint32 stream_buffer_size = private_audio::DEFAULT_BUFFER_SIZE);
+	bool LoadAudio(const std::string& filename, AUDIO_LOAD load_type = AUDIO_LOAD_STATIC, uint32 stream_buffer_size = private_audio::DEFAULT_BUFFER_SIZE);
 
 	//! \brief Frees all data resources and resets class parameters
 	void FreeAudio();
 
-	//! \brief Returns true if this audio represents a .wav sound, false if the audio represents a .ogg music piece
+	const std::string GetFilename() const
+		{ if (_input == NULL) return ""; else return _input->GetFilename(); }
+
+	//! \brief Returns true if this audio represents a sound, false if the audio represents a music piece
 	virtual bool IsSound() const = 0;
 
 	AUDIO_STATE GetState() const
@@ -246,7 +249,7 @@ public:
 	void SetPosition(const float position[3]);
 	void SetVelocity(const float velocity[3]);
 	void SetDirection(const float direction[3]);
-	
+
 	void GetPosition(float position[3]) const
 		{ memcpy(&position, _position, sizeof(float) * 3); }
 
@@ -267,29 +270,32 @@ protected:
 	//! \brief A pointer to the buffer(s) being used by the audio (1 buffer for static sounds, 2 for streamed ones)
 	private_audio::AudioBuffer* _buffer;
 
-	//! \brief A pointer to the source object being used by the audio 
+	//! \brief A pointer to the source object being used by the audio
 	private_audio::AudioSource* _source;
+
+	//! \brief A pointer to the input object that manages the data
+	private_audio::AudioInput* _input;
 
 	//! \brief A pointer to the stream object (set to NULL if the audio was loaded statically)
 	private_audio::AudioStream* _stream;
 
-	//! \brief A pointer for the loaded data when memory streaming is enabled
+	//! \brief A pointer to where the data is streamed to
 	uint8* _data;
 
 	//! \brief The format of the audio (mono/stereo, 8/16 bits per second).
 	ALenum _format;
 
 	//! \brief Samples per second of the sound.
-	uint32 _samples_per_second;
+// 	uint32 _samples_per_second;
 
 	//! \brief Flag for indicating if the audio should loop or not
 	bool _looping;
 
 	//! \brief The total play time of the audio, in seconds
-	float _time;
+// 	float _time;
 
 	//! \brief The total number of samples of the audio
-	uint32 _samples;
+// 	uint32 _samples;
 
 	//! \brief The audio position that was last seeked, in samples.
 	uint32 _offset;
@@ -338,7 +344,7 @@ public:
 
 //! \brief Sets the volume of a sound.
 /*!
-	Sets the volume of the sound, in the range [0.0,1.0]. This value will be modulated by the 
+	Sets the volume of the sound, in the range [0.0,1.0]. This value will be modulated by the
 	volume value of the sound group.
 	\param volume Volume of the sound.
 */
@@ -364,7 +370,7 @@ public:
 
 //! \brief Sets the volume of the music.
 /*!
-	Sets the volume of the music, in the range [0.0,1.0]. This value will be modulated by the 
+	Sets the volume of the music, in the range [0.0,1.0]. This value will be modulated by the
 	volume value of the music group.
 	\param volume Volume of the sound.
 */

@@ -2,14 +2,14 @@
 //            Copyright (C) 2004-2007 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ////////////////////////////////////////////////////////////////////////////////
 
 /** ****************************************************************************
 *** \file   audio_descriptor.cpp
-*** \author Moisés Ferrer Serra, byaku@allacrost.org
+*** \author Moisï¿½s Ferrer Serra, byaku@allacrost.org
 *** \brief  Source for audio descriptors, sources and buffers
 ***
 *** This code provides the funcionality for load sounds and music in the engine.
@@ -89,12 +89,10 @@ AudioDescriptor::AudioDescriptor () :
 	_state(AUDIO_STATE_UNLOADED),
 	_buffer(NULL),
 	_source(NULL),
+	_input(NULL),
 	_stream(NULL),
 	_data(NULL),
-	_samples_per_second(0),
 	_looping(false),
-	_time(0.0f),
-	_samples(0),
 	_offset(0),
 	_volume(1.0f),
 	_stream_buffer_size(0)
@@ -112,48 +110,78 @@ AudioDescriptor::AudioDescriptor () :
 
 
 
-bool AudioDescriptor::LoadAudio(const string& file_name, AUDIO_LOAD load_type, uint32 stream_buffer_size) {
+bool AudioDescriptor::LoadAudio(const string& filename, AUDIO_LOAD load_type, uint32 stream_buffer_size) {
 	// Clean out any audio resources being used before trying to set new ones
 	FreeAudio();
 
+	// Load the input file for the audio
+	if (filename.size() <= 3) { // Name of file is at least 3 letters (so the extension is in there)
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "file name argument is too short: " << filename << endl;
+		return false;
+	}
+	// Convert the file extension to uppercase and use it to create the proper input type
+	string file_extension = filename.substr(filename.size() - 3, 3);
+	for (string::iterator i = file_extension.begin(); i != file_extension.end(); i++)
+		*i = toupper(*i);
+
+	// Based on the extension of the file, load properly one
+	if (file_extension.compare("WAV") == 0) {
+		_input = new WavFile(filename);
+	}
+	else if (file_extension.compare("OGG") == 0) {
+		_input = new OggFile(filename);
+	}
+	else {
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "failed due to unsupported input file extension: " << file_extension << endl;
+		return false;
+	}
+
+	if (_input->Initialize() == false) {
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "failed to load and initialize audio file: " << filename << endl;
+		return false;
+	}
+
+	// Retreive audio data properties from the newly initialized input
+	if (_input->GetBitsPerSample() == 8) {
+		if (_input->GetNumberChannels() == 1) {
+			_format = AL_FORMAT_MONO8;
+		}
+		else {
+			_format = AL_FORMAT_STEREO8;
+		}
+	}
+	else { // 16 bits per sample
+		if (_input->GetNumberChannels() == 1) {
+			_format = AL_FORMAT_MONO16;
+		}
+		else {
+			_format = AL_FORMAT_STEREO16;
+		}
+	}
+
+	// Load the audio data depending upon the load type requested
 	if (load_type == AUDIO_LOAD_STATIC) {
-		// For static sounds just 1 buffer is needed. We create it dynamically as an array here,
-		// so that later we can delete it with a call of delete[], same as in the streaming case
+		// For static sounds just 1 buffer is needed. We create it as an array here, so that
+		// later we can delete it with a call of delete[], similar to the streaming cases
 		_buffer = new AudioBuffer[1];
 
-		// Load the sound and get its parameters
-		AudioStream stream(file_name, STREAM_FILE, false);
-		_samples = stream.GetSamples();
-		_time = stream.GetTime();
-		_samples_per_second = stream.GetSamplesPerSecond();
-		_data = new uint8[stream.GetDataSize()];
-		stream.FillBuffer(_data, stream.GetSamples());
-		if (stream.GetBitsPerSample() == 8) {
-			if (stream.GetChannels() == 1) {
-				_format = AL_FORMAT_MONO8;
-			}
-			else {
-				_format = AL_FORMAT_STEREO8;
-			}
-		}
-		else { // 16 bits per sample
-			if (stream.GetChannels() == 1) {
-				_format = AL_FORMAT_MONO16;
-			}
-			else {
-				_format = AL_FORMAT_STEREO16;
-			}
+		// Create space in memory for the audio data to be read and passed to the OpenAL buffer
+		_data = new uint8[_input->GetDataSize()];
+		bool all_data_read = false;
+		_input->Read(_data, _input->GetTotalNumberSamples(), all_data_read);
+		if (all_data_read == false) {
+			IF_PRINT_WARNING(AUDIO_DEBUG) << "failed to read entire audio data stream for file: " << filename << endl;
 		}
 
-		// Pass the data to the OpenAL buffer
-		_buffer->FillBuffer(_data, _format, stream.GetDataSize(), stream.GetSamplesPerSecond());
+		// Pass the buffer data to the OpenAL buffer
+		_buffer->FillBuffer(_data, _format, _input->GetDataSize(), _input->GetSamplesPerSecond());
 		delete[] _data;
 		_data = NULL;
 
 		// Attempt to acquire a source for the new audio to use
-		_source = AudioManager->_AcquireAudioSource ();
+		_source = AudioManager->_AcquireAudioSource();
 		if (_source == NULL) {
-			IF_PRINT_WARNING(AUDIO_DEBUG) << "could not acquire audio source for new audio file: " << file_name << endl;
+			IF_PRINT_WARNING(AUDIO_DEBUG) << "could not acquire audio source for new audio file: " << filename << endl;
 			return true;
 		}
 
@@ -161,78 +189,17 @@ bool AudioDescriptor::LoadAudio(const string& file_name, AUDIO_LOAD load_type, u
 		_source->owner = this;
 	} // if (load_type == AUDIO_LOAD_STATIC)
 
-	else if (load_type == AUDIO_LOAD_STREAM_MEMORY) {
-		_stream = new AudioStream(file_name, STREAM_MEMORY, _looping);
-		_buffer = new AudioBuffer[2]; // For streaming we need to use 2 buffers
-
-		_samples = _stream->GetSamples();
-		_time = _stream->GetTime();
-		_samples_per_second = _stream->GetSamplesPerSecond();
-		_stream_buffer_size = stream_buffer_size;
-
-		_data = new uint8[_stream_buffer_size * _stream->GetSampleSize()];
-		if (_stream->GetBitsPerSample() == 8) {
-			if (_stream->GetChannels() == 1) {
-				_format = AL_FORMAT_MONO8;
-			}
-			else {
-				_format = AL_FORMAT_STEREO8;
-			}
-		}
-		else {
-			if (_stream->GetChannels() == 1) {
-				_format = AL_FORMAT_MONO16;
-			}
-			else {
-				_format = AL_FORMAT_STEREO16;
-			}
-		}
-
-		// Attempt to acquire a source for the new audio to use
-		_source = AudioManager->_AcquireAudioSource ();
-		if (_source == NULL) {
-			IF_PRINT_WARNING(AUDIO_DEBUG) << "could not acquire audio source for new audio file: " << file_name << endl;
-			return true;
-		}
-
-		_source->owner = this;
-		// Fill the buffers and queue them on the source
-		_PrepareStreamingBuffers();
-	} // else if (load_type == AUDIO_LOAD_STREAM_MEMORY) {
-
-		// Load file streamed sound
+	// Stream the audio from the file data
 	else if (load_type == AUDIO_LOAD_STREAM_FILE) {
-		_stream = new AudioStream(file_name, STREAM_FILE, _looping);
 		_buffer = new AudioBuffer[2]; // For streaming we need to use 2 buffers
+		_stream = new AudioStream(_input, _looping);
 
-		_samples = _stream->GetSamples();
-		_time = _stream->GetTime ();
-		_samples_per_second = _stream->GetSamplesPerSecond ();
-		_stream_buffer_size = stream_buffer_size;
-
-		_data = new uint8[_stream_buffer_size * _stream->GetSampleSize()];
-
-		if (_stream->GetBitsPerSample() == 8) {
-			if (_stream->GetChannels() == 1) {
-				_format = AL_FORMAT_MONO8;
-			}
-			else {
-				_format = AL_FORMAT_STEREO8;
-			}
-		}
-		else {
-			if (_stream->GetChannels() == 1) {
-				_format = AL_FORMAT_MONO16;
-			}
-			else {
-				_format = AL_FORMAT_STEREO16;
-			}
-		}
+		_data = new uint8[_stream_buffer_size * _input->GetSampleSize()];
 
 		// Attempt to acquire a source for the new audio to use
 		_source = AudioManager->_AcquireAudioSource ();
 		if (_source == NULL) {
-			IF_PRINT_WARNING(AUDIO_DEBUG) << "could not acquire audio source for new audio file: " << file_name << endl;
+			IF_PRINT_WARNING(AUDIO_DEBUG) << "could not acquire audio source for new audio file: " << filename << endl;
 			return true;
 		}
 
@@ -240,6 +207,30 @@ bool AudioDescriptor::LoadAudio(const string& file_name, AUDIO_LOAD load_type, u
 		// Fill the buffers and queue them on the source
 		_PrepareStreamingBuffers();
 	} // else if (load_type == AUDIO_LOAD_STREAM_FILE)
+
+	// Allocate memory for the audio data to remain in and stream it from that location
+	else if (load_type == AUDIO_LOAD_STREAM_MEMORY) {
+		_buffer = new AudioBuffer[2]; // For streaming we need to use 2 buffers
+		_stream = new AudioStream(_input, _looping);
+
+		_data = new uint8[_stream_buffer_size * _input->GetSampleSize()];
+
+		// We need to replace the _input member with a AudioMemory class object
+		AudioInput* temp_input = _input;
+		_input = new AudioMemory(temp_input);
+		delete[] temp_input;
+
+		// Attempt to acquire a source for the new audio to use
+		_source = AudioManager->_AcquireAudioSource ();
+		if (_source == NULL) {
+			IF_PRINT_WARNING(AUDIO_DEBUG) << "could not acquire audio source for new audio file: " << filename << endl;
+			return true;
+		}
+
+		_source->owner = this;
+		// Fill the buffers and queue them on the source
+		_PrepareStreamingBuffers();
+	} // else if (load_type == AUDIO_LOAD_STREAM_MEMORY) {
 
 	else {
 		IF_PRINT_WARNING(AUDIO_DEBUG) << "unknown load_type argument passed: " << load_type << endl;
@@ -253,9 +244,6 @@ bool AudioDescriptor::LoadAudio(const string& file_name, AUDIO_LOAD load_type, u
 
 void AudioDescriptor::FreeAudio() {
 	_state = AUDIO_STATE_UNLOADED;
-	_samples = 0;
-	_time = 0;
-	_samples_per_second = 0;
 	_offset = 0;
 	_looping = false;
 	_volume = 1.0f;
@@ -271,9 +259,19 @@ void AudioDescriptor::FreeAudio() {
 		_buffer = NULL;
 	}
 
+	if (_input != NULL) {
+		delete _input;
+		_input = NULL;
+	}
+
 	if (_stream != NULL) {
 		delete _stream;
 		_stream = NULL;
+	}
+
+	if (_data != NULL) {
+		delete[] _data;
+		_data = NULL;
 	}
 }
 
@@ -378,7 +376,7 @@ void AudioDescriptor::SetLoopStart(uint32 loop_start) {
 		IF_PRINT_WARNING(AUDIO_DEBUG) << "the audio data was not loaded with streaming properties, this operation is not permitted" << endl;
 		return;
 	}
-	_stream->SetLoopStart (loop_start);
+	_stream->SetLoopStart(loop_start);
 }
 
 
@@ -388,13 +386,13 @@ void AudioDescriptor::SetLoopEnd(uint32 loop_end) {
 		IF_PRINT_WARNING(AUDIO_DEBUG) << "the audio data was not loaded with streaming properties, this operation is not permitted" << endl;
 		return;
 	}
-	_stream->SetLoopEnd (loop_end);
+	_stream->SetLoopEnd(loop_end);
 }
 
 
 
 void AudioDescriptor::SeekSample(uint32 sample) {
-	if (sample >= _samples) {
+	if (sample >= _input->GetTotalNumberSamples()) {
 		IF_PRINT_WARNING(AUDIO_DEBUG) << "failed because requested seek time fell outside the valid range of samples: " << sample << endl;
 		return;
 	}
@@ -418,8 +416,8 @@ void AudioDescriptor::SeekSecond(float second) {
 		return;
 	}
 
-	uint32 pos = static_cast<uint32>(second * _samples_per_second);
-	if (pos >= _samples) {
+	uint32 pos = static_cast<uint32>(second * _input->GetSamplesPerSecond());
+	if (pos >= _input->GetTotalNumberSamples()) {
 		IF_PRINT_WARNING(AUDIO_DEBUG) << "failed because requested seek time fell outside the valid range of samples: " << pos << endl;
 		return;
 	}
@@ -485,7 +483,7 @@ void AudioDescriptor::SetDirection(const float direction[3]) {
 		IF_PRINT_WARNING(AUDIO_DEBUG) << "audio is stereo channel and will not be effected by function call" << endl;
 		return;
 	}
-	
+
 	memcpy(_direction, direction, sizeof(float) * 3);
 	if (_source != NULL) {
 		alSourcefv(_source->source, AL_DIRECTION, _direction);
@@ -523,11 +521,11 @@ void AudioDescriptor::DEBUG_PrintInfo() {
 
 	cout << "Channels:           " << num_channels << endl;
 	cout << "Bits Per Samples:   " << bits_per_sample << endl;
-	cout << "Frequency:          " << _samples_per_second << endl;
-	cout << "Samples:            " << _samples << endl;
-	cout << "Time:               " << _time << endl;
+	cout << "Frequency:          " << _input->GetSamplesPerSecond() << endl;
+	cout << "Samples:            " << _input->GetTotalNumberSamples() << endl;
+	cout << "Time:               " << _input->GetPlayTime() << endl;
 
-	if (_stream) {
+	if (_stream != NULL) {
 		cout << "Load audio type:              streamed" << endl;
 		cout << "Stream buffer size (samples): " << _stream_buffer_size << endl;
 	}
@@ -562,7 +560,7 @@ void AudioDescriptor::_Update() {
 
 			uint32 size = _stream->FillBuffer(_data, _stream_buffer_size);
 			if (size > 0) { // Make sure that there is data available to fill
-				alBufferData(buffer_finished, _format, _data, size * _stream->GetSampleSize(), _stream->GetSamplesPerSecond());
+				alBufferData(buffer_finished, _format, _data, size * _input->GetSampleSize(), _input->GetSamplesPerSecond());
 				alSourceQueueBuffers(_source->source, 1, &buffer_finished);
 			}
 
@@ -605,7 +603,7 @@ void AudioDescriptor::_PrepareStreamingBuffers() {
 	// Refill the first buffer
 	uint32 read = _stream->FillBuffer(_data, _stream_buffer_size);
 	if (read > 0) {
-		_buffer[0].FillBuffer(_data, _format, read * _stream->GetSampleSize(), _stream->GetSamplesPerSecond());
+		_buffer[0].FillBuffer(_data, _format, read * _input->GetSampleSize(), _input->GetSamplesPerSecond());
 		if (_source != NULL)
 			alSourceQueueBuffers(_source->source, 1, &_buffer[0].buffer);
 	}
@@ -613,13 +611,13 @@ void AudioDescriptor::_PrepareStreamingBuffers() {
 	// Refill the second buffer
 	read = _stream->FillBuffer(_data, _stream_buffer_size);
 	if (read > 0) {
-		_buffer[1].FillBuffer(_data, _format, read * _stream->GetSampleSize(), _stream->GetSamplesPerSecond());
+		_buffer[1].FillBuffer(_data, _format, read * _input->GetSampleSize(), _input->GetSamplesPerSecond());
 		if (_source != NULL)
 			alSourceQueueBuffers(_source->source, 1, &_buffer[1].buffer);
 	}
 
 	if (AudioManager->CheckALError()) {
-		IF_PRINT_WARNING(AUDIO_DEBUG) << "OpenAL error detected: " << AudioManager->CreateALErrorString();
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "OpenAL error detected: " << AudioManager->CreateALErrorString() << endl;
 	}
 
 	if (was_playing) {
@@ -654,7 +652,7 @@ void SoundDescriptor::SetVolume(float volume) {
 	AudioDescriptor::SetVolume(volume);
 
 	float sound_volume = _volume * AudioManager->GetSoundVolume();
-	
+
 	if (_source) {
 			alSourcef(_source->source, AL_GAIN, sound_volume);
 	}
@@ -665,6 +663,7 @@ void SoundDescriptor::SetVolume(float volume) {
 ////////////////////////////////////////////////////////////////////////////////
 
 MusicDescriptor::MusicDescriptor() {
+	_looping = true;
 	AudioManager->_music.push_back(this);
 }
 
