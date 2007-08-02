@@ -2,18 +2,19 @@
 //            Copyright (C) 2004-2007 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ////////////////////////////////////////////////////////////////////////////////
 
 /** ****************************************************************************
 *** \file   audio_input.cpp
-*** \author Moisés Ferrer Serra - Aaron Smith, byaku@allacrost.org - etherstar@allacrost.org.
+*** \author Moisï¿½s Ferrer Serra - byaku@allacrost.org
+*** \author Aaron Smith - etherstar@allacrost.org
 *** \brief  Source for the classes that provide input for sounds
-*** 
+***
 *** This code provides classes for loading sounds (WAV and OGG). It also
-*** provides the functionality for basic streaming operations, both from memory and from 
+*** provides the functionality for basic streaming operations, both from memory and from
 *** file
 ***
 *** \note This code uses Ogg-vorbis library for loading Ogg files
@@ -32,13 +33,14 @@ namespace private_audio {
 ////////////////////////////////////////////////////////////////////////////////
 
 AudioInput::AudioInput() :
-	_samples_per_second (0),
+	_filename(""),
+	_samples_per_second(0),
 	_bits_per_sample(0),
-	_channels(0),
-	_samples(0),
+	_number_channels(0),
+	_total_number_samples(0),
 	_data_size(0),
 	_sample_size(0),
-	_time(0.0f)
+	_play_time(0.0f)
 {}
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -50,7 +52,11 @@ bool WavFile::Initialize() {
 
 	char buffer[4];
 
-	_file_input.open(_file_name.c_str(), std::ios::binary);
+	#ifdef __BIG_ENDIAN__ // Temporary variables needed for byte swapping on big endian machines
+		uint8 e1, e2, e3, e4;
+	#endif
+
+	_file_input.open(_filename.c_str(), std::ios::binary);
 	if (_file_input.fail()) {
 		_file_input.clear();
 		return false;
@@ -67,7 +73,6 @@ bool WavFile::Initialize() {
 	_file_input.read(buffer, 4);
 	memcpy(&size, buffer, 4);
 	#ifdef __BIG_ENDIAN__ // Swap the bytes for the big endian hardware
-		uint8 e1, e2, e3, e4;
 		e1 = size & 255;
   		e2 = (size >> 8) & 255;
   		e3 = (size >> 16) & 255;
@@ -93,7 +98,6 @@ bool WavFile::Initialize() {
 	_file_input.read(buffer, 4);
 	memcpy(&size, buffer, 4);
 	#ifdef __BIG_ENDIAN__ // Swap the bytes for the big endian hardware
-		uint8 e1, e2, e3, e4;
 		e1 = size & 255;
 		e2 = (size >> 8) & 255;
 		e3 = (size >> 16) & 255;
@@ -110,7 +114,6 @@ bool WavFile::Initialize() {
 	size = 0;
 	memcpy(&size, buffer, 2);
 	#ifdef __BIG_ENDIAN__ // Swap the bytes for the big endian hardware
-		uint8 e1, e2;
 		e1 = size & 255;
 		e2 = (size>> 8) * 255;
 		size = (e1 << 8) + e2;
@@ -122,14 +125,13 @@ bool WavFile::Initialize() {
 
 	// Get the number of channels (only mono and stereo supported) -- 2 bytes
 	_file_input.read(buffer, 2);
-	memcpy(&_channels, buffer, 2);
+	memcpy(&_number_channels, buffer, 2);
 	#ifdef __BIG_ENDIAN__ // Swap the bytes for the big endian hardware
-		uint8 e1, e2;
-		e1 = _channels & 255;
-		e2 = (_channels >> 8) * 255;
-		_channels = (e1 << 8) + e2;
+		e1 = _number_channels & 255;
+		e2 = (_number_channels >> 8) * 255;
+		_number_channels = (e1 << 8) + e2;
 	#endif
-	if (_channels != 1 && _channels != 2) {
+	if (_number_channels != 1 && _number_channels != 2) {
 		IF_PRINT_WARNING(AUDIO_DEBUG) << "failed because number of channels was neither mono nor stereo" << endl;
 		return false;
 	}
@@ -138,7 +140,6 @@ bool WavFile::Initialize() {
 	_file_input.read(buffer, 4);
 	memcpy(&_samples_per_second, buffer, 4);
 	#ifdef __BIG_ENDIAN__ // Swap the bytes for the big endian hardware
-		uint8 e1, e2, e3, e4;
 		e1 = _samples_per_second & 255;
 		e2 = (_samples_per_second >> 8) & 255;
 		e3 = (_samples_per_second >> 16) & 255;
@@ -151,7 +152,6 @@ bool WavFile::Initialize() {
 	_file_input.read(buffer, 4);
 	memcpy(&byte_rate, buffer, 4);
 	#ifdef __BIG_ENDIAN__ // Swap the bytes for the big endian hardware
-		uint8 e1, e2, e3, e4;
 		e1 = byte_rate & 255;
 		e2 = (byte_rate >> 8) & 255;
 		e3 = (byte_rate >> 16) & 255;
@@ -163,7 +163,6 @@ bool WavFile::Initialize() {
 	_file_input.read(buffer, 2);
 	memcpy(&_sample_size, buffer, 2);
 	#ifdef __BIG_ENDIAN__ // Swap the bytes for the big endian hardware
-		uint8 e1, e2;
 		e1 = _sample_size & 255;
 		e2 = (_sample_size >> 8) * 255;
 		_sample_size = (e1 << 8) + e2;
@@ -173,7 +172,6 @@ bool WavFile::Initialize() {
 	_file_input.read(buffer, 2);
 	memcpy(&_bits_per_sample, buffer, 2);
 	#ifdef __BIG_ENDIAN__ // Swap the bytes for the big endian hardware
-		uint8 e1, e2;
 		e1 = _bits_per_sample & 255;
 		e2 = (_bits_per_sample >> 8) * 255;
 		_bits_per_sample = (e1 << 8) + e2;
@@ -185,12 +183,11 @@ bool WavFile::Initialize() {
 		IF_PRINT_WARNING(AUDIO_DEBUG) << "failed because subchunk 2 ID was not \"data\"" << endl;
 		return false;
 	}
-	
+
 	// Check subchunck 2 size -- 4 bytes
 	_file_input.read(buffer, 4);
 	memcpy(&_data_size, buffer, 4);
 	#ifdef __BIG_ENDIAN__ // Swap the bytes for the big endian hardware
-	uint8 e1, e2, e3, e4;
 		e1 = _data_size & 255;
 		e2 = (_data_size >> 8) & 255;
 		e3 = (_data_size >> 16) & 255;
@@ -199,18 +196,18 @@ bool WavFile::Initialize() {
 	#endif
 
 	_data_init = _file_input.tellg();
-	_samples = _data_size / _sample_size;
-	_time = static_cast<float>(_samples) / static_cast<float>(_samples_per_second);
+	_total_number_samples = _data_size / _sample_size;
+	_play_time = static_cast<float>(_total_number_samples) / static_cast<float>(_samples_per_second);
 	return true;
 } // bool WavFile::Initialize()
 
 
 
-void WavFile::Seek(uint32 cursor) {
-	uint32 sample = cursor * _sample_size;
+void WavFile::Seek(uint32 sample_position) {
+	uint32 sample = sample_position * _sample_size;
 
 	if (sample >= _data_size) {
-		IF_PRINT_WARNING(AUDIO_DEBUG) << "failed because cursor parameter exceeded the data size: " << sample << endl;
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "failed because desired seek position exceeded the range of samples: " << sample << endl;
 		return;
 	}
 
@@ -240,38 +237,38 @@ bool OggFile::Initialize() {
 	#ifdef WIN32
 		// Callbacks struct defining the open, closing, seeking and location behaviors.
 		ov_callbacks callbacks =  {
-			(size_t (*)(void *, size_t, size_t, void *)) fread,
-			(int (*)(void *, ogg_int64_t, int)) _FileSeekWrapper,
-			(int (*)(void *)) fclose,
-			(long (*)(void *)) ftell
+			(size_t (*)(void*, size_t, size_t, void*)) fread,
+			(int (*)(void*, ogg_int64_t, int)) _FileSeekWrapper,
+			(int (*)(void*)) fclose,
+			(long (*)(void*)) ftell
 		};
 
 		FILE* file = fopen(_file_name.c_str(), "rb");
 
 		if (ov_open_callbacks(file, &_vorbis_file, NULL, 0, callbacks) < 0) {
 			fclose(file);
-			IF_PRINT_WARNING(AUDIO_DEBUG) << "input file does not appear to be an Ogg bitstream: " << _file_name << endl;
+			IF_PRINT_WARNING(AUDIO_DEBUG) << "input file does not appear to be an Ogg bitstream: " << _filename << endl;
 			return false;
 		}
 
 	#else
 		// File loading code for non Win32 platforms.  Much simpler.
-		FILE* file = fopen (_file_name.c_str(), "rb");
+		FILE* file = fopen (_filename.c_str(), "rb");
 
 		if (ov_open(file, &_vorbis_file, NULL, 0) < 0) {
 			fclose(file);
-			IF_PRINT_WARNING(AUDIO_DEBUG) << "input file does not appear to be an Ogg bitstream: " << _file_name << endl;
+			IF_PRINT_WARNING(AUDIO_DEBUG) << "input file does not appear to be an Ogg bitstream: " << _filename << endl;
 			return false;
 		}
 	#endif
 
-	_channels = _vorbis_file.vi->channels;
+	_number_channels = _vorbis_file.vi->channels;
 	_samples_per_second = _vorbis_file.vi->rate;
 	_bits_per_sample = 16;
-	_samples = static_cast<uint32>(ov_pcm_total(&_vorbis_file, -1));
-	_time = static_cast<float>(ov_time_total(&_vorbis_file, -1));
-	_sample_size = _channels * _bits_per_sample / 8;
-	_data_size = _samples * _sample_size;
+	_total_number_samples = static_cast<uint32>(ov_pcm_total(&_vorbis_file, -1));
+	_play_time = static_cast<float>(ov_time_total(&_vorbis_file, -1));
+	_sample_size = _number_channels * _bits_per_sample / 8;
+	_data_size = _total_number_samples * _sample_size;
 
 	return true;
 } // bool OggFile::Initialize()
@@ -280,11 +277,11 @@ bool OggFile::Initialize() {
 
 void OggFile::Seek(uint32 cursor) {
 	if (ov_seekable(&_vorbis_file) == 0) {
-		IF_PRINT_WARNING(AUDIO_DEBUG) << "failed because Ogg file was not seekable: " << _file_name << endl;
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "failed because Ogg file was not seekable: " << _filename << endl;
 		return;
 	}
 
-	ov_pcm_seek (&_vorbis_file, cursor);
+	ov_pcm_seek(&_vorbis_file, cursor);
 
 	// Reset the temporal buffer by setting the position to 0
 	_read_buffer_position = 0;
@@ -314,7 +311,7 @@ uint32 OggFile::Read(uint8* buffer, uint32 size, bool& end) {
 	while (read < size * _sample_size && !end) {
 		_read_buffer_position = 0;
 		int32 num_bytes_read = 0;
-		
+
 		#ifdef __BIG_ENDIAN__
 			num_bytes_read = ov_read(&_vorbis_file, (char*)_read_buffer, 4096, 1, _bits_per_sample/8, 1, &current_section);
 		#else
@@ -365,55 +362,59 @@ int OggFile::_FileSeekWrapper(FILE* file, ogg_int64_t off, int whence) {
 ////////////////////////////////////////////////////////////////////////////////
 
 
-AudioMemory::AudioMemory(uint32 samples_per_second, uint8 bits_per_sample, uint16 channels, uint32 samples, uint8* data) :
+AudioMemory::AudioMemory(AudioInput* input) :
 	AudioInput(),
-	_buffer(0),
-	_cursor(0)
+	_audio_data(NULL),
+	_data_position(0)
 {
-	_samples_per_second = samples_per_second;
-	_bits_per_sample = bits_per_sample;
-	_channels = channels;
-	_samples = samples;
+	_filename = input->GetFilename();
+	_samples_per_second = input->GetSamplesPerSecond();
+	_bits_per_sample = input->GetBitsPerSample();
+	_number_channels = input->GetNumberChannels();
+	_total_number_samples = input->GetTotalNumberSamples();
+	_sample_size = input->GetSampleSize();
+	_play_time = input->GetPlayTime();
+	_data_size = input->GetDataSize();
 
-	_sample_size = _bits_per_sample * _channels / 8;
-	_time = static_cast<float>(samples) / static_cast<float>(_samples_per_second);
-	_data_size = _samples * _sample_size;
-
-	_buffer = new uint8[_data_size];
-	memcpy(_buffer, data, _data_size);
+	_audio_data = new uint8[input->GetDataSize()];
+	bool all_data_read = false;
+	input->Read(_audio_data, input->GetTotalNumberSamples(), all_data_read);
+	if (all_data_read == false) {
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "failed to read entire audio data stream for file: " << _filename << endl;
+	}
 }
 
 
 
 AudioMemory::~AudioMemory() {
-	if (_buffer) {
-		delete[] _buffer;
-		_buffer = NULL;
+	if (_audio_data != NULL) {
+		delete[] _audio_data;
+		_audio_data = NULL;
 	}
 }
 
 
 
-void AudioMemory::Seek(uint32 cursor) {
-	if (cursor >= _samples) {
-		IF_PRINT_WARNING(AUDIO_DEBUG) << "attempted to seek cursor to postion beyond the maximum number of samples: " << cursor << endl;
+void AudioMemory::Seek(uint32 sample_position) {
+	if (_data_position >= _total_number_samples) {
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "attempted to seek postion beyond the maximum number of samples: "
+			<< sample_position << endl;
 		return;
 	}
 
-	_cursor = cursor;
-
+	_data_position = sample_position;
 }
 
 
 
 uint32 AudioMemory::Read(uint8* buffer, uint32 size, bool& end) {
 	// Clamp the number of samples to read in case there are not enough because of end of stream
-	uint32 read = (_samples - _cursor >= size) ? size : (_samples - _cursor);
+	uint32 read = (_total_number_samples - _data_position >= size) ? size : (_total_number_samples - _data_position);
 
 	// Copy the data in the buffer and move the read cursor
-	memcpy(buffer, _buffer + _cursor * _sample_size, read * _sample_size);
-	_cursor += read;
-	end = (_cursor == _samples);
+	memcpy(buffer, buffer + _data_position * _sample_size, read * _sample_size);
+	_data_position += read;
+	end = (_data_position == _total_number_samples);
 
 	return read;
 }

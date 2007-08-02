@@ -2,21 +2,18 @@
 //            Copyright (C) 2004-2007 by The Allacrost Project
 //                         All Rights Reserved
 //
-// This code is licensed under the GNU GPL version 2. It is free software 
+// This code is licensed under the GNU GPL version 2. It is free software
 // and you may modify it and/or redistribute it under the terms of this license.
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ////////////////////////////////////////////////////////////////////////////////
 
 /** ****************************************************************************
 *** \file   audio_stream.h
-*** \author Moisés Ferrer Serra, byaku@allacrost.org
+*** \author Moisï¿½s Ferrer Serra, byaku@allacrost.org
 *** \brief  Header file for class for streaming audio from diferent sources
-*** 
-*** This code implements the functionality for more advanced streaming.
 ***
-*** \note This code is not dependent on any (audio) library.
+*** This code implements functionality for advanced streaming operations
 *** ***************************************************************************/
-
 
 #ifndef __AUDIO_STREAM_HEADER__
 #define __AUDIO_STREAM_HEADER__
@@ -38,109 +35,92 @@ namespace hoa_audio {
 
 namespace private_audio {
 
-//! \brief Availble streaming modes
-enum STREAM_MODE	 {
-	STREAM_MEMORY	= 0,	//!< \brief Streaming from memory
-	STREAM_FILE		= 1		//!< \brief Streaming from file
-};
-
-
-//! \brief Class for managing simple streaming based on audio input objects.
-/*!
-	This class manages properly streaming on input audio objects. It can handle
-	looping properly.
-
-	\note This class will be extended to manage customized looping
-*/
+/** ****************************************************************************
+*** \brief Handles streaming audio from input data sources
+***
+*** This class operates on a AudioInput object to stream the audio data to the
+*** listener. The primary purpose of streaming is to support customized looping,
+*** where specific parts of a piece of audio can be looped rather than the
+*** entire audio itself.
+***
+*** \note The _end_of_stream will never be set to true while the stream has
+*** looping enabled.
+***
+*** \todo Customized looping support is only very rudimentary right now (one
+*** start, one end position). We need full support added to this class to be
+*** able to do operations such as: play section A once, loop section B 3 times,
+*** then loop section C infinitely. We may also want to be able to apply audio
+*** effects to the different streaming portions.
+*** ***************************************************************************/
 class AudioStream {
 public:
-	AudioStream (const std::string &filename, const int mode=STREAM_FILE, const bool loop = true);
-	~AudioStream ();
+	/** \brief Class constructor which initializes the audio stream
+	*** \param input A pointer to the AudioInput object which will manage the input data
+	*** \param loop If true, enables looping for the audio stream
+	**/
+	AudioStream (AudioInput* input, bool loop);
 
-	uint32 FillBuffer (uint8* buffer, const uint32 size);
-	void Seek (const uint32 sample);
+	~AudioStream()
+		{}
 
-	//! \brief Gets the state of stream.
-	/*!
-		This functions returns true if the stream finished, or false otherwise. It is
-		used to stop soundss when the stream is over. A looping sound will never reach
-		the end of stream.
-		\return True if the end of stream was reached, false otherwise.
-	*/
-	bool GetEndOfStream() const
-		{ return _end_of_stream; }
+	/** \brief Fills a buffer with data read from the stream
+	*** \param buffer A pointer to the buffer where the data will be loaded to
+	*** \param size The total number of samples to read
+	*** \return The number of samples which were read, which may be different from size
+	**/
+	uint32 FillBuffer(uint8* buffer, uint32 size);
 
+	/** \brief Seeks the audio stream to the specified sample
+	*** \param sample The sample number to seek the stream to
+	*** \note This will also automatically invoke the Seek method on the AudioInput object
+	**/
+	void Seek(uint32 sample);
 
-	//! \brief Enables/disables looping.
-	/*!
-		Ths function enables/disables looping.
-		\param loop True to enable looping, false to disable it.
-	*/
-	void SetLooping(const bool loop)
-		{ _looping = loop; if (loop) _end_of_stream = false; }
-
-
-	void SetLoopStart(const uint32 sample);
-	void SetLoopEnd(const uint32 sample);
-
-	//! \brief Gets the state of the looping.
-	/*!
-		Gets the looping state.
-		\return True if looping is enabled, false if it is not.
-	*/
+	//! \brief Returns true if the audio stream is looping
 	bool IsLooping() const
 		{ return _looping; }
 
-	//! \name Accessors of the data of the class
-	//! \brief Accessors for retrieving audio parameters.
-	/*!
-		Accessors for retrieving audio parameters. That includes samples per second, bits per sample,
-		channels, data size and other derived variables. These values can not be assigned.
-	*/
-	//@{
-	uint8 GetBitsPerSample () const
-		{ return _audio_input->GetBitsPerSample(); }
+	/** \brief Enables/disables looping for this stream
+	*** \param loop True to enable looping, false to disable it.
+	**/
+	void SetLooping(bool loop)
+		{ _looping = loop; if (loop) _end_of_stream = false; }
 
-	uint32 GetSamplesPerSecond () const
-		{ return _audio_input->GetSamplesPerSecond(); }
+	/** \brief Sets the sample to serve as the start position for looping
+	*** \param sample The sample number to be the new starting position
+	**/
+	void SetLoopStart(uint32 sample);
 
-	uint16 GetChannels () const
-		{ return _audio_input->GetChannels(); }
+	/** \brief Sets the sample to serve as the end position for looping
+	*** \param sample The sample number to be the new ending position
+	**/
+	void SetLoopEnd(uint32 sample);
 
-	uint32 GetDataSize () const
-		{ return _audio_input->GetDataSize(); }
+	//! \brief Returns true if the stream has finished playing
+	bool GetEndOfStream() const
+		{ return _end_of_stream; }
 
-	uint32 GetSamples () const
-		{ return _audio_input->GetSamples(); }
+private:
+	//! \brief Pointer to an AudioInput object that holds the audio data
+	AudioInput* _audio_input;
 
-	uint16 GetSampleSize () const
-		{ return _audio_input->GetSampleSize(); }
+	//! \brief Set to true when the stream should loop
+	bool _looping;
 
-	float GetTime () const
-		{ return _audio_input->GetTime(); }
-	//}@
+	//! \brief The sample that represents the start position of the loop
+	uint32 _loop_start_position;
 
-protected:
-	bool _looping;				//!< \brief Flag for looping sound.
+	//! \brief The sample that represents the end position of the loop
+	uint32 _loop_end_position;
 
-	
-	uint32 _loop_start;			//!< \brief Cursor (sample) for the start position of the loop.
+	//! \brief The sample position from where the next read operation will be performed
+	uint32 _read_position;
 
-	
-	uint32 _loop_end;			//!< \brief Cursor (sample) for the end position of the loop.
-
-	
-	AudioInput* _audio_input;	//!< \brief Pointer to an input audio object.
-
-	
-	uint32 _cursor;				//!< \brief Sample position from the next read operation will be performed.
-
-	
-	bool _end_of_stream;		//!< \brief True if the end of stream was reached, false otherwise.
-};
+	//! \brief True if the end of the stream was reached, false otherwise
+	bool _end_of_stream;
+}; // class AudioStream
 
 } // namespace private_audio
-
 
 } // namespace hoa_audio
 
