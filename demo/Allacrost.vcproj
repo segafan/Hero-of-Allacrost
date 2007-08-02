@@ -62,8 +62,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/NODEFAULTLIB:LIBCMT&#x0D;&#x0A;/NODEFAULTLIB:msvcrt.lib"
-				AdditionalDependencies="SDL.lib SDL_TTF.lib OpenAL32.lib ogg.lib vorbis.lib vorbisfile.lib SDL_net.lib SDLMain.lib Opengl32.lib glu32.lib libpng.lib jpegd.lib zdll.lib LuaBind_debug.lib"
-				LinkIncremental="0"
+				AdditionalDependencies="SDL.lib SDL_TTF.lib OpenAL32.lib ogg.lib vorbis.lib vorbisfile.lib SDL_net.lib SDLMain.lib Opengl32.lib glu32.lib libpng.lib jpegd.lib zdll.lib Luabind_Debug.lib lua50.lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				LinkTimeCodeGeneration="0"
@@ -201,7 +200,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\engine\audio\audio_fx.h"
+				RelativePath=".\src\engine\audio\audio_effects.h"
 				>
 			</File>
 			<File
@@ -485,7 +484,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\engine\audio\audio_fx.cpp"
+				RelativePath=".\src\engine\audio\audio_effects.cpp"
 				>
 			</File>
 			<File
