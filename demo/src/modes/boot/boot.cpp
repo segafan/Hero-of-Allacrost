@@ -117,28 +117,24 @@ BootMode::BootMode() :
 
 	read_data.CloseFile();
 
-	// Load all music files used in boot mode
+	// Load all music and sound files used in boot mode
 	_boot_music.resize(new_music_files.size(), MusicDescriptor());
 	for (uint32 i = 0; i < new_music_files.size(); i++) {
-/*		if (_boot_music[i].LoadMusic(new_music_files[i]) == false) {
-			cout << "BOOT: failed to load music file " << new_music_files[i] << endl;
+		if (_boot_music[i].LoadAudio(new_music_files[i]) == false) {
+			PRINT_ERROR << "failed to load music file: " << new_music_files[i] << endl;
 			SystemManager->ExitGame();
 			return;
-		}*/
-		_boot_music[i].LoadAudio(new_music_files[i]);
+		}
 	}
 
-	SoundDescriptor new_sound;
-	_boot_sounds.push_back(new_sound);
-	_boot_sounds.push_back(new_sound);
-	_boot_sounds.push_back(new_sound);
-	_boot_sounds.push_back(new_sound);
-	_boot_sounds.push_back(new_sound);
-	_boot_sounds[0].LoadAudio(new_sound_files[0]);
-	_boot_sounds[1].LoadAudio(new_sound_files[1]);
-	_boot_sounds[2].LoadAudio(new_sound_files[2]);
-	_boot_sounds[3].LoadAudio(new_sound_files[3]);
-	_boot_sounds[4].LoadAudio(new_sound_files[4]);
+	_boot_sounds.resize(new_sound_files.size(), SoundDescriptor());
+	for (uint32 i = 0; i < new_sound_files.size(); i++) {
+		if (_boot_sounds[i].LoadAudio(new_sound_files[i]) == false) {
+			PRINT_ERROR << "failed to load sound file: " << new_sound_files[i] << endl;
+			SystemManager->ExitGame();
+			return;
+		}
+	}
 
 	// Check the version
 	_latest_version = true; //IsLatestVersion();

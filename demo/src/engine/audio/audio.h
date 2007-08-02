@@ -249,10 +249,7 @@ private:
 	//! \brief Holds the most recently fetched OpenAL context error code
 	ALCenum _alc_error_code;
 
-	//! \brief Contains all open and active sound buffers
-	std::vector<private_audio::AudioBuffer*> _buffer;
-
-	//! \brief Contains all open and active sound sources
+	//! \brief Contains all available audio sources
 	std::vector<private_audio::AudioSource*> _source;
 
 	//! \brief Contains the maximum number of available audio sources that can exist simultaneously
