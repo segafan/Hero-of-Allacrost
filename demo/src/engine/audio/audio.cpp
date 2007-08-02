@@ -55,51 +55,55 @@ bool GameAudio::SingletonInitialize() {
 	CheckALError(); // Clears errors
 	CheckALCError(); // Clears errors
 
-	// Find the highest-version device available
-	const ALCchar* device_name = alcGetString(0, ALC_DEVICE_SPECIFIER); // Get list of all devices (terminated with two '0')
-	if (CheckALCError() == true) {
-		PRINT_WARNING << "failed to retreive the list of available audio devices: " << CreateALCErrorString() << endl;
-	}
-
-	while (*device_name != 0) { // Check all the detected devices
-		ALCint major_v = 0, minor_v = 0;
-
-		// Open a temporary device for reading in its version number
-		ALCdevice* temp_device = alcOpenDevice(device_name);
-		if (CheckALCError() || temp_device == NULL) { // If we couldn't open the device, just move on to the next
-			IF_PRINT_WARNING(AUDIO_DEBUG) << "couldn't open device for version checking: " << device_name << endl;
-			device_name += strlen(device_name) + 1;
-			continue;
+	// Find the highest-version device available, if the extension for device enumeration is present
+	if (alcIsExtensionPresent(NULL, "ALC_ENUMERATION_EXT") == AL_TRUE) {
+		const ALCchar* device_list = 0;
+		device_list = alcGetString(0, ALC_DEVICE_SPECIFIER); // Get list of all devices (terminated with two '0')
+		if (CheckALCError() == true) {
+			PRINT_WARNING << "failed to retreive the list of available audio devices: " << CreateALCErrorString() << endl;
 		}
 
-		// Create a temporary context for the device
-		ALCcontext *temp_context = alcCreateContext(temp_device, 0);
-		if (CheckALCError() || temp_context == NULL) { // If we couldn't create the context, move on to the next device
-			IF_PRINT_WARNING(AUDIO_DEBUG) << "couldn't create a temporary context for device: " << device_name << endl;
-			alcCloseDevice(temp_device);
-			device_name += strlen(device_name) + 1;
-			continue;
-		}
 
-		// Retrieve the version number for the device
-		alcMakeContextCurrent(temp_context);
+		while (*device_list != 0) { // Check all the detected devices
+			ALCint major_v = 0, minor_v = 0;
 
-		alcGetIntegerv(temp_device, ALC_MAJOR_VERSION, sizeof(ALCint), &major_v);
-		alcGetIntegerv(temp_device, ALC_MINOR_VERSION, sizeof(ALCint), &minor_v);
-		alcMakeContextCurrent(0); // Disable the temporary context
-		alcDestroyContext(temp_context); // Destroy the temporary context
-		alcCloseDevice(temp_device); // Close the temporary device
+			// Open a temporary device for reading in its version number
+			ALCdevice* temp_device = alcOpenDevice(device_list);
+			if (CheckALCError() || temp_device == NULL) { // If we couldn't open the device, just move on to the next
+				IF_PRINT_WARNING(AUDIO_DEBUG) << "couldn't open device for version checking: " << device_list << endl;
+				device_list += strlen(device_list) + 1;
+				continue;
+			}
 
-		// Check if a higher version device was found
-		if (highest_version < (major_v * 10 + minor_v)) {
-			highest_version = (major_v * 10 + minor_v);
-			best_device = device_name;
-		}
-		device_name += strlen(device_name) + 1; // Go to the next device name in the list
-	} // while (*device_name != 0)
+			// Create a temporary context for the device
+			ALCcontext *temp_context = alcCreateContext(temp_device, 0);
+			if (CheckALCError() || temp_context == NULL) { // If we couldn't create the context, move on to the next device
+				IF_PRINT_WARNING(AUDIO_DEBUG) << "couldn't create a temporary context for device: " << device_list << endl;
+				alcCloseDevice(temp_device);
+				device_list += strlen(device_list) + 1;
+				continue;
+			}
+
+			// Retrieve the version number for the device
+			alcMakeContextCurrent(temp_context);
+
+			alcGetIntegerv(temp_device, ALC_MAJOR_VERSION, sizeof(ALCint), &major_v);
+			alcGetIntegerv(temp_device, ALC_MINOR_VERSION, sizeof(ALCint), &minor_v);
+			alcMakeContextCurrent(0); // Disable the temporary context
+			alcDestroyContext(temp_context); // Destroy the temporary context
+			alcCloseDevice(temp_device); // Close the temporary device
+
+			// Check if a higher version device was found
+			if (highest_version < (major_v * 10 + minor_v)) {
+				highest_version = (major_v * 10 + minor_v);
+				best_device = device_list;
+			}
+			device_list += strlen(device_list) + 1; // Go to the next device name in the list
+		} // while (*device_name != 0)
+	} // if (alcIsExtensionPresent(NULL, "ALC_ENUMERATION_EXT") == AL_TRUE)
 
 	// Open the 'best' device we found above. If no devices were previously found,
-	// it will try opening the default one (0)
+	// it will try opening the default device (= 0)
 	_device = alcOpenDevice(best_device);
 	if (CheckALCError() || _device == NULL) {
 		PRINT_ERROR << "failed to open an OpenAL audio device: " << CreateALCErrorString() << endl;
@@ -155,17 +159,9 @@ GameAudio::~GameAudio() {
 
 	// Delete all audio sources
 	for (vector<AudioSource*>::iterator i = _source.begin(); i != _source.end(); i++) {
-		alDeleteSources(1, &(*i)->source);
+		delete (*i);
 	}
 	_source.clear();
-
-	// Delete all audio buffers
-	for (vector<AudioBuffer*>::iterator i = _buffer.begin(); i != _buffer.end(); i++) {
-		if ((*i)->IsValid()) {
-			alDeleteBuffers(1, &(*i)->buffer);
-		}
-	}
-	_buffer.clear();
 
 	alcMakeContextCurrent(0);
 	alcDestroyContext(_context);
@@ -331,6 +327,8 @@ void GameAudio::PlaySound(const std::string& filename) {
 		delete new_sound;
 		return;
 	}
+
+	cout << __FUNCTION__ << ": " << filename << endl;
 
 	_sound_cache.insert(make_pair(filename, new_sound));
 	new_sound->Play();

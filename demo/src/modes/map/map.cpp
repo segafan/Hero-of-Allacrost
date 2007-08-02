@@ -154,7 +154,7 @@ void MapMode::Reset() {
 	MapMode::_current_map = this;
 
 	// TEMP: This will need to be scripted later
-	if (_music.size() > 0 && _music[0].GetState() == AUDIO_STATE_PLAYING) {
+	if (_music.size() > 0) {
 		_music[0].Play();
 	}
 
@@ -208,30 +208,21 @@ void MapMode::_Load() {
 	_map_script.ReadStringVector("sound_filenames", sound_filenames);
 
 	for (uint32 i = 0; i < sound_filenames.size(); i++) {
-		SoundDescriptor new_sound;
-//		if (new_sound.LoadAudio(sound_filenames[i]) == true) {
-			new_sound.LoadAudio(sound_filenames[i]);
-			_sounds.push_back(new_sound);
-//		}
-//		else {
-//			cerr << "MAP ERROR: failed to load map sound: " << sound_filenames[i] << endl;
-//			return;
-//		}
+		_sounds.push_back(SoundDescriptor());
+		if (_sounds.back().LoadAudio(sound_filenames[i]) == false) {
+			cerr << "MAP ERROR: failed to load map sound: " << sound_filenames[i] << endl;
+			return;
+		}
 	}
 
 	vector<string> music_filenames;
 	_map_script.ReadStringVector("music_filenames", music_filenames);
 	for (uint32 i = 0; i < music_filenames.size(); i++) {
-		MusicDescriptor new_music;
-//		if (new_music.LoadAudio(music_filenames[i]) == true) {
-			new_music.LoadAudio(music_filenames[i]);
-			new_music.SetLooping(true);
-			_music.push_back(new_music);
-/*		}
-		else {
+		_music.push_back(MusicDescriptor());
+		if (_music.back().LoadAudio(music_filenames[i]) == false) {
 			cerr << "MAP ERROR: failed to load map music: " << music_filenames[i] << endl;
 			return;
-		}*/
+		}
 	}
 
 	// ---------- (4) Construct all enemies that may appear on this map

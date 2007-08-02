@@ -168,8 +168,7 @@ bool AudioDescriptor::LoadAudio(const string& filename, AUDIO_LOAD load_type, ui
 		// Create space in memory for the audio data to be read and passed to the OpenAL buffer
 		_data = new uint8[_input->GetDataSize()];
 		bool all_data_read = false;
-		_input->Read(_data, _input->GetTotalNumberSamples(), all_data_read);
-		if (all_data_read == false) {
+		if (_input->Read(_data, _input->GetTotalNumberSamples(), all_data_read) != _input->GetTotalNumberSamples()) {
 			IF_PRINT_WARNING(AUDIO_DEBUG) << "failed to read entire audio data stream for file: " << filename << endl;
 		}
 
@@ -278,9 +277,6 @@ void AudioDescriptor::FreeAudio() {
 
 
 void AudioDescriptor::Play() {
-	if (_state == AUDIO_STATE_PLAYING)
-		return;
-
 	if (_source == NULL) {
 		IF_PRINT_WARNING(AUDIO_DEBUG) << "did not have access to valid AudioSource" << endl;
 		return;
@@ -642,8 +638,6 @@ SoundDescriptor::~SoundDescriptor() {
 			return;
 		}
 	}
-
-	IF_PRINT_WARNING(AUDIO_DEBUG) << "class object was not found in AudioManager's list of registered sounds" << endl;
 }
 
 
@@ -670,14 +664,12 @@ MusicDescriptor::MusicDescriptor() {
 
 
 MusicDescriptor::~MusicDescriptor() {
-	for (list<MusicDescriptor*>::iterator i = AudioManager->_music.begin(); i !=AudioManager->_music.end(); i++) {
+	for (list<MusicDescriptor*>::iterator i = AudioManager->_music.begin(); i != AudioManager->_music.end(); i++) {
 		if (*i == this) {
 			AudioManager->_music.erase(i);
 			return;
 		}
 	}
-
-	IF_PRINT_WARNING(AUDIO_DEBUG) << "class object was not found in AudioManager's list of registered music" << endl;
 }
 
 
