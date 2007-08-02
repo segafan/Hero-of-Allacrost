@@ -243,7 +243,7 @@ bool OggFile::Initialize() {
 			(long (*)(void*)) ftell
 		};
 
-		FILE* file = fopen(_file_name.c_str(), "rb");
+		FILE* file = fopen(_filename.c_str(), "rb");
 
 		if (ov_open_callbacks(file, &_vorbis_file, NULL, 0, callbacks) < 0) {
 			fclose(file);
