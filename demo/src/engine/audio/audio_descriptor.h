@@ -149,6 +149,11 @@ public:
 ***
 *** \note Some features of this class are only available if the audio is loaded
 *** in a streaming manner.
+***
+*** \note You should <b>never</b> trust the value of _state when it is set to
+*** AUDIO_STATE_PLAYING. This is because the audio may stop playing on its own
+*** after the play state has been set. Instead, you should call the GetState()
+*** method, which guarantees that the correct state value is set.
 *** ***************************************************************************/
 class AudioDescriptor {
 	friend class GameAudio;
@@ -158,6 +163,8 @@ public:
 
 	virtual ~AudioDescriptor()
 		{ FreeAudio(); }
+
+	AudioDescriptor(const AudioDescriptor& copy);
 
 	/** \brief Loads a new piece of audio data from a file
 	*** \param filename The name of the file that contains the new audio data (should have a .wav or .ogg file extension)
@@ -179,8 +186,12 @@ public:
 	//! \brief Returns true if this audio represents a sound, false if the audio represents a music piece
 	virtual bool IsSound() const = 0;
 
-	AUDIO_STATE GetState() const
-		{ return _state; }
+	/** \brief Returns the state of the audio,
+	*** \note This function does not simply return the _state member. If _state is set
+	*** to AUDIO_STATE_PLAYING, the source state is queried to assure that it is still
+	*** playing.
+	**/
+	AUDIO_STATE GetState();
 
 	/** \name Audio State Manipulation Functions
 	*** \brief Performs specified operation on the audio

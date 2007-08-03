@@ -85,7 +85,7 @@ void AudioSource::Reset() {
 // AudioDescriptor class methods
 ////////////////////////////////////////////////////////////////////////////////
 
-AudioDescriptor::AudioDescriptor () :
+AudioDescriptor::AudioDescriptor() :
 	_state(AUDIO_STATE_UNLOADED),
 	_buffer(NULL),
 	_source(NULL),
@@ -108,6 +108,35 @@ AudioDescriptor::AudioDescriptor () :
 	_direction[2] = 0.0f;
 }
 
+
+
+AudioDescriptor::AudioDescriptor(const AudioDescriptor& copy) :
+	_state(AUDIO_STATE_UNLOADED),
+	_buffer(NULL),
+	_source(NULL),
+	_input(NULL),
+	_stream(NULL),
+	_data(NULL),
+	_looping(false),
+	_offset(0),
+	_volume(1.0f),
+	_stream_buffer_size(0)
+{
+	_position[0] = 0.0f;
+	_position[1] = 0.0f;
+	_position[2] = 0.0f;
+	_velocity[0] = 0.0f;
+	_velocity[1] = 0.0f;
+	_velocity[2] = 0.0f;
+	_direction[0] = 0.0f;
+	_direction[1] = 0.0f;
+	_direction[2] = 0.0f;
+
+	// If the copy is not in the unloaded state, print a warning
+	if (copy._state != AUDIO_STATE_UNLOADED) {
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "created a copy of an already initialiazed AudioDescriptor" << endl;
+	}
+}
 
 
 bool AudioDescriptor::LoadAudio(const string& filename, AUDIO_LOAD load_type, uint32 stream_buffer_size) {
@@ -272,6 +301,28 @@ void AudioDescriptor::FreeAudio() {
 		delete[] _data;
 		_data = NULL;
 	}
+}
+
+
+
+AUDIO_STATE AudioDescriptor::GetState() {
+	// If the last set state was the playing state, we have to double check
+	// with the OpenAL source to make sure that the audio is still playing.
+	if (_state == AUDIO_STATE_PLAYING) {
+		// If the descriptor no longe
+		if (_source == NULL) {
+			_state = AUDIO_STATE_STOPPED;
+		}
+		else {
+			ALint source_state;
+			alGetSourcei(_source->source, AL_SOURCE_STATE, &source_state);
+			if (source_state != AL_PLAYING) {
+				_state = AUDIO_STATE_STOPPED;
+			}
+		}
+	}
+
+	return _state;
 }
 
 
