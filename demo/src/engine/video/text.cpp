@@ -86,7 +86,7 @@ RenderedText::RenderedText(const RenderedText &other)
 // RenderedText::operator=: Copies state variables and increases ref counts.
 //-----------------------------------------------------------------------------
 
-void RenderedText::operator=(const RenderedText &other)
+RenderedText &RenderedText::operator=(const RenderedText &other)
 {
 	// Copy values from other RenderedText manually
 	_string        = other._string;
@@ -105,6 +105,8 @@ void RenderedText::operator=(const RenderedText &other)
 		if (it->image)
 			it->image->Add();
 	}
+	
+	return *this;
 }
 
 //-----------------------------------------------------------------------------
@@ -1061,8 +1063,6 @@ bool GameVideo::_DrawTextHelper(const uint16 *uText) {
 
 	glDisable(GL_ALPHA_TEST);
 
-	//glFinish();
-
 	return true;
 }
 
@@ -1153,7 +1153,7 @@ bool GameVideo::_RenderText(hoa_utils::ustring &string, TextStyle &style, ImageL
 	line_w -= line_start_x;
 	line_h -= min_y;
 
-	intermediary = SDL_CreateRGBSurface(0, line_w, line_h, 32, 
+	intermediary = SDL_CreateRGBSurface(SDL_SWSURFACE, line_w, line_h, 32, 
 			rmask, gmask, bmask, amask);
 
 	if (!intermediary)

@@ -249,8 +249,8 @@ void GameVideo::_DrawElement(const BaseImageElement& element, const Color* color
 		// Setup the vertex array pointer
 		glVertexPointer(coords_per_vertex, GL_FLOAT, 0, vert_coords);
 
-		// Disable the texture array as we're not texturing
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		// Disable texturing as we're using pure colour
+		glDisable(GL_TEXTURE_2D);
 
 		// Draw the object using the array pointers we've just setup
 		glDrawArrays(GL_QUADS, 0, num_vertexes);

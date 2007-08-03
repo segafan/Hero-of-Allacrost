@@ -873,17 +873,17 @@ bool GameVideo::_DeleteImage(BaseImage *const base_img) {
 	}
 
 	if (base_img->Remove()) {
-// 		if (base_img->width > 512 || base_img->height > 512) {
+ 		if (base_img->width > 512 || base_img->height > 512) {
 			// Remove the image and texture sheet completely
 			// TODO: This introduces a seg fault when TexSheet::FreeImage is later called. Fix this bug!
-// 			_RemoveSheet(base_img->texture_sheet);
-// 			_RemoveImage(base_img);
-// 		}
-// 		else {
+ 			_RemoveImage(base_img);
+ 			_RemoveSheet(base_img->texture_sheet);
+ 		}
+ 		else {
 			// For smaller images, simply mark them as free 
 			// in the memory manager
 			base_img->texture_sheet->FreeImage(base_img);
-// 		}
+ 		}
 	}
 
 	return true;
@@ -957,29 +957,9 @@ void GameVideo::_DeleteImage(StillImage &id) {
 
 		// Only delete the image if the pointer is valid. Some ImageElements
 		// have a NULL pointer because they are just colored quads
-		if (img) {
-			if (img->ref_count <= 0) {
-				if (VIDEO_DEBUG)
-					cerr << "VIDEO WARNING: Called DeleteImage() when refcount was already <= 0!" << endl;
-				return;
-			}
+		if (img)
+			_DeleteImage(img);
 
-			(img->ref_count)--;
-
-			if (img->ref_count == 0) {
-				// 1. If it's on a large tex sheet (> 512x512), delete it
-				// Note: We can assume that this is the only image on that texture
-				//       sheet, so it's safe to delete it. (Big textures always
-				//       are allocated to their own sheet, by design.)
-
-				if (img->width > 512 || img->height > 512) {
-					_DeleteImage(img);  // overloaded DeleteImage for deleting Image
-				}
-
-				// 2. otherwise, mark it as "freed"
-				img->texture_sheet->FreeImage(img);
-			}
-		}
 	}
 
 	id._elements.clear();
