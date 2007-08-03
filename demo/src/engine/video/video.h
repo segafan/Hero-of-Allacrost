@@ -991,22 +991,6 @@ public:
 	*/
 	StillImage *GetDefaultCursor();
 
-	/** \brief Draws a rendered string object
-	 * \param string The rendered string
-	 */
-	bool Draw(const RenderedString &string);
-
-	/** \brief Draws a rendered line object
-	 * \param line The rendered line
-	 * \param tex_index Whether main or shadow texture
-	 */
-	bool Draw(const RenderedLine& line, int32 tex_index);
-
-	/** \brief Renders the given string to a drawable object
-	 * \param txt The string to render
-	 */
-	RenderedString* RenderText(const hoa_utils::ustring& txt);
-
 	/** Renders a given unicode string and TextStyle to a pixel array
 	 * \param string The ustring to render
 	 * \param style  The text style to render
@@ -1269,14 +1253,6 @@ private:
 	 * \return success/failure
 	 */
 	bool _CacheGlyphs(const uint16 *uText, FontProperties *fp);
-
-	/** \brief generates a texture for a given line
-	 *
-	 *  \param line  Pointer to a unicode string holding the text to render
-	 *  \param fp     Pointer to the internal FontProperties class representing the font
-	 * \return the line or NULL on failure
-	 */
-	RenderedLine *_GenTexLine(uint16 *line, FontProperties *fp);
 
 	/** \brief retrieves the shadow color based on the current color and shadow style
 	 *
