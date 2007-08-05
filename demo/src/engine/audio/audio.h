@@ -9,7 +9,9 @@
 
 /** ****************************************************************************
 *** \file    audio.h
-*** \author  Tyler Olsen - Moisés Ferrer Serra - Aaron Smith, roots@allacrost.org - byaku@allacrost.org - etherstar@allacrost.org
+*** \author  Tyler Olsen - roots@allacrost.org
+*** \author  Moisï¿½s Ferrer Serra - byaku@allacrost.org
+*** \author  Aaron Smith - etherstar@allacrost.org
 *** \brief   Header file for audio engine interface.
 ***
 *** This code provides an easy-to-use API for managing all music and sounds used
@@ -154,7 +156,7 @@ public:
 	void SetListenerPosition(const float position[3]);
 	void SetListenerVelocity(const float velocity[3]);
 	void SetListenerOrientation(const float orientation[3]);
-	
+
 	void GetListenerPosition(float position[3]) const
 		{ memcpy(position, _listener_position, sizeof(float) * 3); }
 
@@ -249,9 +251,6 @@ private:
 	//! \brief Holds the most recently fetched OpenAL context error code
 	ALCenum _alc_error_code;
 
-	//! \brief Contains all available audio sources
-	std::vector<private_audio::AudioSource*> _source;
-
 	//! \brief Contains the maximum number of available audio sources that can exist simultaneously
 	uint16 _max_sources;
 
@@ -262,20 +261,29 @@ private:
 	float _listener_orientation[3];
 	//@}
 
+	//! \brief A pointer to the last music descriptor which was played
+	MusicDescriptor* _active_music;
+
+	//! \brief Contains all available audio sources
+	std::vector<private_audio::AudioSource*> _audio_sources;
+
 	//! \brief Holds all active audio effects
 	std::list<private_audio::AudioEffect*> _audio_effects;
 
-	//! \brief Lists of pointers to all audio descriptor objects which have been created by the user
+	/** \brief Lists of pointers to all audio descriptor objects which have been created by the user
+	*** These lists are kept so that when the global sound or music volume levels are changed, all
+	*** sound and music objects will also have their volumes updated.
+	**/
 	//@{
-	std::list<SoundDescriptor*> _sound;
-	std::list<MusicDescriptor*> _music;
+	std::list<SoundDescriptor*> _registered_sounds;
+	std::list<MusicDescriptor*> _registered_music;
 	//@}
 
 	/** \brief A LRU cache of sounds which are managed internally by the audio engine
 	*** The purpose of this cache is to allow the user to quickly and easily play
 	*** sounds without having to maintain a SoundDescriptor object in memory. This is
 	*** used, for example, by script functions which simply want to play a sound to
-	*** indicate an action or event has occurred. 
+	*** indicate an action or event has occurred.
 	***
 	*** The sound cache is a LRU (least recently used) structure, meaning that if an
 	*** entry needs to be evicted or replaced to make room for another, the least

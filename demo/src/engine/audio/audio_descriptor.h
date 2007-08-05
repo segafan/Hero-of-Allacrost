@@ -10,6 +10,7 @@
 /** ****************************************************************************
 *** \file   audio_descriptor.h
 *** \author Mois�s Ferrer Serra, byaku@allacrost.org
+*** \author Tyler Olsen, roots@allacrost.org
 *** \brief  Header file for audio descriptors, sources and buffers
 ***
 *** This code provides the interface for the sound and music descriptors, that
@@ -51,14 +52,17 @@ enum AUDIO_STATE {
 
 //! \brief The possible ways for that a piece of audio data may be loaded
 enum AUDIO_LOAD {
-	AUDIO_LOAD_STATIC           = 0, //!< \brief Load sound statically.
-	AUDIO_LOAD_STREAM_MEMORY    = 1, //!< \brief Load sound for streaming from memory.
-	AUDIO_LOAD_STREAM_FILE      = 2 //!< \brief Load sound for streaming from file.
+	//! \brief Load audio statically by placing the entire contents of the audio into a single OpenAL buffer
+	AUDIO_LOAD_STATIC         = 0,
+	//! \brief Stream the audio data from a file into a pair of OpenAL buffers
+	AUDIO_LOAD_STREAM_FILE    = 1,
+	//! \brief Stream the audio data from memory into a pair of OpenAL buffers
+	AUDIO_LOAD_STREAM_MEMORY  = 2
 };
 
 namespace private_audio {
 
-//! \brief The default size for streaming buffers
+//! \brief The default buffer size (in bytes) for streaming buffers
 const uint32 DEFAULT_BUFFER_SIZE = 16384;
 
 /** ****************************************************************************
@@ -109,6 +113,11 @@ public:
 ***
 *** \note OpenAL sources are created and by the GameAudio class, not within the
 *** AudioSource constructor. The sources are, however, deleted by the destructor.
+***
+*** \note You should never really need to call the IsValid() function when
+*** retrieving a new AudioSource to use. This is because all AudioSource objects
+*** created by GameAudio are guaranteed to have a valid OpenAL source contained
+*** by the object.
 *** ***************************************************************************/
 class AudioSource {
 public:
@@ -133,12 +142,6 @@ public:
 
 } // namespace private_audio
 
-
-//! \brief Class that provides the funcionality for managing sounds.
-/*!
-	Class that provides the funcionality for managing sounds. This includes the basic
-	functionality such play, stop, pause, seeking, and also 3D functions.
-*/
 /** ****************************************************************************
 *** \brief An abstract class for representing a piece of audio
 ***
@@ -154,6 +157,9 @@ public:
 *** AUDIO_STATE_PLAYING. This is because the audio may stop playing on its own
 *** after the play state has been set. Instead, you should call the GetState()
 *** method, which guarantees that the correct state value is set.
+***
+*** \todo This class either needs to have its copy assignment operator defined
+*** or it should be made private.
 *** ***************************************************************************/
 class AudioDescriptor {
 	friend class GameAudio;
@@ -204,10 +210,10 @@ public:
 	*** - RewindAudio()   <==>   all states
 	**/
 	//@{
-	void Play();
-	void Stop();
-	void Pause();
-	void Resume();
+	virtual void Play();
+	virtual void Stop();
+	virtual void Pause();
+	virtual void Resume();
 	void Rewind();
 	//@}
 
@@ -249,6 +255,9 @@ public:
 
 	/** \brief Sets the volume for this particular audio piece
 	*** \param volume The volume level to set, ranging from [0.0f, 1.0f]
+	*** This should be thought of as a helper function to the SetVolume methods
+	*** for the derived classes, which modulate the volume level of the sound/music
+	*** by the global sound and music volume controls in the GameAudio class.
 	**/
 	virtual void SetVolume(float volume);
 
@@ -296,22 +305,19 @@ protected:
 	//! \brief The format of the audio (mono/stereo, 8/16 bits per second).
 	ALenum _format;
 
-	//! \brief Samples per second of the sound.
-// 	uint32 _samples_per_second;
-
 	//! \brief Flag for indicating if the audio should loop or not
 	bool _looping;
-
-	//! \brief The total play time of the audio, in seconds
-// 	float _time;
-
-	//! \brief The total number of samples of the audio
-// 	uint32 _samples;
 
 	//! \brief The audio position that was last seeked, in samples.
 	uint32 _offset;
 
-	//! \brief The volume of the sound, ranging from 0.0f to 1.0f
+	/** \brief The volume of the sound, ranging from 0.0f to 1.0f
+	*** This isn't actually the true volume of the audio, but rather the modulation
+	*** value of the global sound or music volume level. For example, if this object
+	*** represented a sound and the volume was set to 0.75f, and the global sound
+	*** volume in GameAudio was 0.80f, the true volume would be (0.75 * 0.8 = 0.6).
+	*** By default this member is set to 1.0f.
+	**/
 	float _volume;
 
 	//! \brief Size of the streaming buffer, if the audio was loaded for streaming
@@ -331,6 +337,13 @@ private:
 	**/
 	void _Update();
 
+	/** \brief Sets all of the relevant properties for the OpenAL source
+	*** This function should be called whenever a new source is allocated for the audio to use.
+	*** It sets all of the necessary properties for the OpenAL source, such as the volume (gain),
+	*** enables looping if requested, etc.
+	**/
+	void _SetSourceProperties();
+
 	/** \brief Prepares streaming buffers when used for first time or after a seeking operation.
 	*** This is a special case, since the already queued buffers must be unqueued, and the new
 	*** ones must be refilled. This function should only be called for streaming audio.
@@ -342,7 +355,7 @@ private:
 /** ****************************************************************************
 *** \brief An class for representing a piece of sound audio
 ***
-*** Sounds are almost always in the .wav file format. T
+*** Sounds are almost always in the .wav file format.
 *** ***************************************************************************/
 class SoundDescriptor : public AudioDescriptor {
 public:
@@ -353,12 +366,11 @@ public:
 	bool IsSound() const
 		{ return true; }
 
-//! \brief Sets the volume of a sound.
-/*!
-	Sets the volume of the sound, in the range [0.0,1.0]. This value will be modulated by the
-	volume value of the sound group.
-	\param volume Volume of the sound.
-*/
+	/** \brief Sets the volume of the sound
+	*** \param volume The volume to set the sound, value between [0.0, 1.0]
+	*** This value will be modulated by the global sound volume found in the
+	*** GameAudio class.
+	**/
 	void SetVolume(float volume);
 }; // class SoundDescriptor : public AudioDescriptor
 
@@ -379,13 +391,19 @@ public:
 	bool IsSound() const
 		{ return false; }
 
-//! \brief Sets the volume of the music.
-/*!
-	Sets the volume of the music, in the range [0.0,1.0]. This value will be modulated by the
-	volume value of the music group.
-	\param volume Volume of the sound.
-*/
+	/** \brief Sets the volume of the music
+	*** \param volume The volume to set the music, value between [0.0, 1.0]
+	*** This value will be modulated by the global music volume found in the
+	*** GameAudio class.
+	**/
 	void SetVolume(float volume);
+
+	/** \brief Plays the selected music, after stopping the previous playing music
+	*** No two pieces of music are allowed to play simultaneously, meaning that
+	*** calling this method on one music also effectively calls stop on another
+	*** piece of music that was playing when the call was made
+	**/
+	void Play();
 }; // class MusicDescriptor : public AudioDescriptor
 
 } // namespace hoa_audio

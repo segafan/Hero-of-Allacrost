@@ -10,6 +10,7 @@
 /** ****************************************************************************
 *** \file   audio_stream.cpp
 *** \author Mois�s Ferrer Serra, byaku@allacrost.org
+*** \author Tyler Olsen, roots@allacrost.org
 *** \brief  Implementation of the streaming audio classes
 ***
 *** This code implements the functionality for more advanced streaming. Streaming

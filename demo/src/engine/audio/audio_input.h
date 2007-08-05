@@ -10,6 +10,7 @@
 /** ****************************************************************************
 *** \file   audio_input.h
 *** \author Mois�s Ferrer Serra, byaku@allacrost.org
+*** \author Aaron Smith - etherstar@allacrost.org
 *** \brief  Header file for classes that provide input for sounds
 ***
 *** This code provides classes for loading sounds (WAV and OGG). It also
@@ -229,6 +230,11 @@ private:
 *** stored, and then operates off of that data. This is useful for efficient
 *** streaming operations so that I/O files containing the data do not need to
 *** be continually accessed.
+***
+*** \todo This class needs to have a copy constructor/copy assignment operator
+*** defined because of its data pointer class member. They should either be made
+*** private or defined so that the new class copy does not point to the same
+*** memory address as the original.
 *** ***************************************************************************/
 class AudioMemory : public AudioInput {
 public:
