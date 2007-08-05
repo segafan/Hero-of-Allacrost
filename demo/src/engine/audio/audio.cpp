@@ -9,7 +9,9 @@
 
 /** ****************************************************************************
 *** \file    audio.cpp
-*** \author  Tyler Olsen - Mois�s Ferrer Serra - Aaron Smith, roots@allacrost.org - byaku@allacrost.org - etherstar@allacrost.org
+*** \author  Tyler Olsen - roots@allacrost.org
+*** \author  Mois�s Ferrer Serra - byaku@allacrost.org
+*** \author  Aaron Smith - etherstar@allacrost.org
 *** \brief   Implementation of the audio engine singleton.
 ***
 *** The code included here implements the interface of the audio singleton.
@@ -43,7 +45,8 @@ GameAudio::GameAudio () :
 	_music_volume(1.0f),
 	_device(0),
 	_context(0),
-	_max_sources(MAX_DEFAULT_AUDIO_SOURCES)
+	_max_sources(MAX_DEFAULT_AUDIO_SOURCES),
+	_active_music(NULL)
 {}
 
 
@@ -122,7 +125,7 @@ bool GameAudio::SingletonInitialize() {
 	CheckALError(); // Clear errors
 	CheckALCError(); // Clear errors
 
-	// Create as many sources as possible (we fix an upper bound of _max_sources)
+	// Create as many sources as possible (we fix an upper bound of MAX_DEFAULT_AUDIO_SOURCES)
 	ALuint source;
 	for (uint16 i = 0; i < _max_sources; i++) {
 		alGenSources(1, &source);
@@ -130,8 +133,8 @@ bool GameAudio::SingletonInitialize() {
 			_max_sources = i;
 			break;
 		}
-		_source.push_back(new private_audio::AudioSource);
-		_source.back()->source = source;
+		_audio_sources.push_back(new private_audio::AudioSource);
+		_audio_sources.back()->source = source;
 	}
 
 	if (_max_sources == 0) {
@@ -145,6 +148,14 @@ bool GameAudio::SingletonInitialize() {
 
 
 GameAudio::~GameAudio() {
+	// We shouldn't have any descriptors registered by the time the destructor was invoked -- check that this is true
+	if (_registered_sounds.empty() == false) {
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "SoundDescriptor objects were still registered when destructor was invoked" << endl;
+	}
+	if (_registered_music.empty() == false) {
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "MusicDescriptor objects were still registered when destructor was invoked" << endl;
+	}
+
 	// Delete any active audio effects
 	for (list<AudioEffect*>::iterator i = _audio_effects.begin(); i != _audio_effects.end(); i++) {
 		delete (*i);
@@ -158,10 +169,10 @@ GameAudio::~GameAudio() {
 	_sound_cache.clear();
 
 	// Delete all audio sources
-	for (vector<AudioSource*>::iterator i = _source.begin(); i != _source.end(); i++) {
+	for (vector<AudioSource*>::iterator i = _audio_sources.begin(); i != _audio_sources.end(); i++) {
 		delete (*i);
 	}
-	_source.clear();
+	_audio_sources.clear();
 
 	alcMakeContextCurrent(0);
 	alcDestroyContext(_context);
@@ -170,8 +181,8 @@ GameAudio::~GameAudio() {
 
 
 
-void GameAudio::Update () {
-	for (vector<AudioSource*>::iterator i = _source.begin(); i != _source.end(); i++) {
+void GameAudio::Update() {
+	for (vector<AudioSource*>::iterator i = _audio_sources.begin(); i != _audio_sources.end(); i++) {
 		if ((*i)->owner != NULL) {
 			(*i)->owner->_Update();
 		}
@@ -207,8 +218,10 @@ void GameAudio::SetSoundVolume(float volume) {
 		_sound_volume = volume;
 	}
 
-	for (list<SoundDescriptor*>::iterator i = _sound.begin(); i != _sound.end(); i++) {
-		(*i)->SetVolume(_sound_volume);
+	for (list<SoundDescriptor*>::iterator i = _registered_sounds.begin(); i != _registered_sounds.end(); i++) {
+		// The following line may look like it makes no sense, but the SetVolume call also modulates the
+		// volume by the global sound volume, hence this call actually does update the volume of the object
+		(*i)->SetVolume((*i)->GetVolume());
 	}
 }
 
@@ -227,15 +240,18 @@ void GameAudio::SetMusicVolume(float volume) {
 		_music_volume = volume;
 	}
 
-	for (list<MusicDescriptor*>::iterator i = _music.begin(); i != _music.end(); i++) {
-		(*i)->SetVolume(_music_volume);
+	for (list<MusicDescriptor*>::iterator i = _registered_music.begin(); i != _registered_music.end(); i++) {
+		// The following line may look like it makes no sense, but the SetVolume call also modulates the
+		// volume by the global music volume, hence this call actually does update the volume of the object
+		(*i)->SetVolume((*i)->GetVolume());
 	}
 }
 
 
 
 void GameAudio::PauseAllSounds() {
-	for (list<SoundDescriptor*>::iterator i = _sound.begin(); i != _sound.end(); i++) {
+	for (list<SoundDescriptor*>::iterator i = _registered_sounds.begin();
+			i != _registered_sounds.end(); i++) {
 		(*i)->Pause();
 	}
 }
@@ -243,7 +259,8 @@ void GameAudio::PauseAllSounds() {
 
 
 void GameAudio::ResumeAllSounds() {
-	for (list<SoundDescriptor*>::iterator i = _sound.begin(); i != _sound.end(); i++) {
+	for (list<SoundDescriptor*>::iterator i = _registered_sounds.begin();
+			i != _registered_sounds.end(); i++) {
 		(*i)->Resume();
 	}
 }
@@ -251,7 +268,8 @@ void GameAudio::ResumeAllSounds() {
 
 
 void GameAudio::StopAllSounds() {
-	for (list<SoundDescriptor*>::iterator i = _sound.begin(); i != _sound.end(); i++) {
+	for (list<SoundDescriptor*>::iterator i =_registered_sounds.begin();
+			i != _registered_sounds.end(); i++) {
 		(*i)->Stop();
 	}
 }
@@ -259,7 +277,8 @@ void GameAudio::StopAllSounds() {
 
 
 void GameAudio::RewindAllSounds() {
-	for (list<SoundDescriptor*>::iterator i =_sound.begin(); i != _sound.end(); i++) {
+	for (list<SoundDescriptor*>::iterator i = _registered_sounds.begin();
+			i != _registered_sounds.end(); i++) {
 		(*i)->Rewind();
 	}
 }
@@ -267,7 +286,8 @@ void GameAudio::RewindAllSounds() {
 
 
 void GameAudio::PauseAllMusic() {
-	for (list<MusicDescriptor*>::iterator i = _music.begin(); i != _music.end(); i++) {
+	for (list<MusicDescriptor*>::iterator i = _registered_music.begin();
+			i != _registered_music.end(); i++) {
 		(*i)->Pause();
 	}
 }
@@ -275,7 +295,8 @@ void GameAudio::PauseAllMusic() {
 
 
 void GameAudio::ResumeAllMusic() {
-	for (list<MusicDescriptor*>::iterator i = _music.begin(); i != _music.end(); i++) {
+	for (list<MusicDescriptor*>::iterator i = _registered_music.begin();
+			i != _registered_music.end(); i++) {
 		(*i)->Resume();
 	}
 }
@@ -283,7 +304,8 @@ void GameAudio::ResumeAllMusic() {
 
 
 void GameAudio::StopAllMusic() {
-	for (list<MusicDescriptor*>::iterator i = _music.begin(); i != _music.end(); i++) {
+	for (list<MusicDescriptor*>::iterator i = _registered_music.begin();
+			i != _registered_music.end(); i++) {
 		(*i)->Stop();
 	}
 }
@@ -291,7 +313,8 @@ void GameAudio::StopAllMusic() {
 
 
 void GameAudio::RewindAllMusic() {
-	for (list<MusicDescriptor*>::iterator i = _music.begin(); i != _music.end(); i++) {
+	for (list<MusicDescriptor*>::iterator i = _registered_music.begin();
+			i != _registered_music.end(); i++) {
 		(*i)->Rewind();
 	}
 }
@@ -327,8 +350,6 @@ void GameAudio::PlaySound(const std::string& filename) {
 		delete new_sound;
 		return;
 	}
-
-	cout << __FUNCTION__ << ": " << filename << endl;
 
 	_sound_cache.insert(make_pair(filename, new_sound));
 	new_sound->Play();
@@ -416,7 +437,7 @@ void GameAudio::DEBUG_PrintInfo() {
 
 
 private_audio::AudioSource* GameAudio::_AcquireAudioSource () {
-	for (vector<AudioSource*>::iterator i = _source.begin(); i != _source.end(); i++) {
+	for (vector<AudioSource*>::iterator i = _audio_sources.begin(); i != _audio_sources.end(); i++) {
 		if ((*i)->owner == NULL) {
 			return *i;
 		}

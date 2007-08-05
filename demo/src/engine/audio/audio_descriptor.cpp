@@ -10,6 +10,7 @@
 /** ****************************************************************************
 *** \file   audio_descriptor.cpp
 *** \author Mois�s Ferrer Serra, byaku@allacrost.org
+*** \author Tyler Olsen, roots@allacrost.org
 *** \brief  Source for audio descriptors, sources and buffers
 ***
 *** This code provides the funcionality for load sounds and music in the engine.
@@ -215,6 +216,7 @@ bool AudioDescriptor::LoadAudio(const string& filename, AUDIO_LOAD load_type, ui
 
 		alSourcei(_source->source, AL_BUFFER, _buffer->buffer);
 		_source->owner = this;
+		_SetSourceProperties();
 	} // if (load_type == AUDIO_LOAD_STATIC)
 
 	// Stream the audio from the file data
@@ -232,7 +234,7 @@ bool AudioDescriptor::LoadAudio(const string& filename, AUDIO_LOAD load_type, ui
 		}
 
 		_source->owner = this;
-		// Fill the buffers and queue them on the source
+		_SetSourceProperties();
 		_PrepareStreamingBuffers();
 	} // else if (load_type == AUDIO_LOAD_STREAM_FILE)
 
@@ -256,7 +258,7 @@ bool AudioDescriptor::LoadAudio(const string& filename, AUDIO_LOAD load_type, ui
 		}
 
 		_source->owner = this;
-		// Fill the buffers and queue them on the source
+		_SetSourceProperties();
 		_PrepareStreamingBuffers();
 	} // else if (load_type == AUDIO_LOAD_STREAM_MEMORY) {
 
@@ -626,6 +628,36 @@ void AudioDescriptor::_Update() {
 
 
 
+void AudioDescriptor::_SetSourceProperties() {
+	if (_source == NULL) {
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "function was invoked when class did not have access to an audio source" << endl;
+		return;
+	}
+
+	// Set volume (gain)
+	float volume_multiplier = 0.0f;
+	if (IsSound())
+		volume_multiplier = AudioManager->GetSoundVolume();
+	else
+		volume_multiplier = AudioManager->GetMusicVolume();
+
+	alSourcef(_source->source, AL_GAIN, _volume * volume_multiplier);
+
+	// Set looping (source has looping disabled by default, so only need to check the true case)
+	if (_looping)
+		alSourcei(_source->source, AL_LOOPING, AL_TRUE);
+
+	// Set streaming property on or off
+	if (_stream != NULL)
+		alSourcei(_source->source, AL_SOURCE_TYPE, AL_STREAMING);
+	else
+		alSourcei(_source->source, AL_SOURCE_TYPE, AL_STATIC);
+
+	//! \todo More properties need to be set here, such as source position, etc.
+}
+
+
+
 void AudioDescriptor::_PrepareStreamingBuffers() {
 	if (_stream == NULL) {
 		IF_PRINT_WARNING(AUDIO_DEBUG) << "_stream pointer was NULL, meaning this function should never have been called" << endl;
@@ -677,15 +709,16 @@ void AudioDescriptor::_PrepareStreamingBuffers() {
 ////////////////////////////////////////////////////////////////////////////////
 
 SoundDescriptor::SoundDescriptor() {
-	AudioManager->_sound.push_back(this);
+	AudioManager->_registered_sounds.push_back(this);
 }
 
 
 
 SoundDescriptor::~SoundDescriptor() {
-	for (list<SoundDescriptor*>::iterator i = AudioManager->_sound.begin(); i != AudioManager->_sound.end(); i++) {
+	for (list<SoundDescriptor*>::iterator i = AudioManager->_registered_sounds.begin();
+		i != AudioManager->_registered_sounds.end(); i++) {
 		if (*i == this) {
-			AudioManager->_sound.erase(i);
+			AudioManager->_registered_sounds.erase(i);
 			return;
 		}
 	}
@@ -709,15 +742,19 @@ void SoundDescriptor::SetVolume(float volume) {
 
 MusicDescriptor::MusicDescriptor() {
 	_looping = true;
-	AudioManager->_music.push_back(this);
+	AudioManager->_registered_music.push_back(this);
 }
 
 
 
 MusicDescriptor::~MusicDescriptor() {
-	for (list<MusicDescriptor*>::iterator i = AudioManager->_music.begin(); i != AudioManager->_music.end(); i++) {
+	if (AudioManager->_active_music == this)
+		AudioManager->_active_music = NULL;
+
+	for (list<MusicDescriptor*>::iterator i = AudioManager->_registered_music.begin();
+		i != AudioManager->_registered_music.end(); i++) {
 		if (*i == this) {
-			AudioManager->_music.erase(i);
+			AudioManager->_registered_music.erase(i);
 			return;
 		}
 	}
@@ -725,13 +762,24 @@ MusicDescriptor::~MusicDescriptor() {
 
 
 
+void MusicDescriptor::Play() {
+	if (AudioManager->_active_music != this && AudioManager->_active_music != NULL) {
+		AudioManager->_active_music->Stop();
+	}
+
+	AudioManager->_active_music = this;
+	AudioDescriptor::Play();
+}
+
+
+
 void MusicDescriptor::SetVolume(float volume) {
 	AudioDescriptor::SetVolume(volume);
 
-	float sound_volume = _volume * AudioManager->GetMusicVolume();
+	float music_volume = _volume * AudioManager->GetMusicVolume();
 
 	if (_source) {
-		alSourcef(_source->source, AL_GAIN, sound_volume);
+		alSourcef(_source->source, AL_GAIN, music_volume);
 	}
 }
 

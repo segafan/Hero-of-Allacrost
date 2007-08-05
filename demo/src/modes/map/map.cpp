@@ -154,12 +154,9 @@ void MapMode::Reset() {
 	MapMode::_current_map = this;
 
 	// TEMP: This will need to be scripted later
-	cout << "Determining whether to play music track: " << _music.back().GetFilename() << " ... ";
 	if (_music.size() > 0 && _music.back().GetState() != AUDIO_STATE_PLAYING) {
-		cout << "yes";
 		_music.back().Play();
 	}
-	cout << endl;
 
 	_intro_timer.Run();
 }
