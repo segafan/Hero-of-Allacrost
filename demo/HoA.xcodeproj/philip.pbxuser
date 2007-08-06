@@ -52,7 +52,7 @@
 				PBXFileTableDataSourceColumnWidthsKey = (
 					20,
 					300,
-					133.2085,
+					133,
 				);
 				PBXFileTableDataSourceColumnsKey = (
 					PBXErrorsWarningsDataSource_TypeID,
@@ -94,6 +94,18 @@
 					PBXFileDataSource_Errors_ColumnID,
 					PBXFileDataSource_Warnings_ColumnID,
 					PBXFileDataSource_Target_ColumnID,
+				);
+			};
+			PBXConfiguration.PBXFileTableDataSource3.PBXFindDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFindDataSource_LocationID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					200,
+					120,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFindDataSource_MessageID,
+					PBXFindDataSource_LocationID,
 				);
 			};
 			PBXConfiguration.PBXFileTableDataSource3.PBXSymbolsDataSource = {
@@ -158,8 +170,12 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 207123640;
-			PBXWorkspaceStateSaveDate = 207123640;
+			PBXPerProjectTemplateStateSaveDate = 208071097;
+			PBXWorkspaceStateSaveDate = 208071097;
+		};
+		perUserProjectItems = {
+			D4EDD40A0C66EA4E00CE712C /* PBXTextBookmark */ = D4EDD40A0C66EA4E00CE712C /* PBXTextBookmark */;
+			D4EDD40E0C66EA9A00CE712C /* PBXTextBookmark */ = D4EDD40E0C66EA9A00CE712C /* PBXTextBookmark */;
 		};
 		sourceControlManager = D43082570AF9831800A5173A /* Source Control */;
 		userBuildSettings = {
@@ -466,9 +482,9 @@
 	};
 	D4D166430BC0D91400190FC0 /* tex_mgmt.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {711, 5964}}";
+			sepNavIntBoundsRect = "{{0, 0}, {722, 5586}}";
 			sepNavSelRange = "{0, 0}";
-			sepNavVisRect = "{{0, 0}, {711, 429}}";
+			sepNavVisRect = "{{0, 482}, {711, 429}}";
 			sepNavWindowFrame = "{{15, 215}, {750, 558}}";
 		};
 	};
@@ -482,9 +498,9 @@
 	};
 	D4D166490BC0D91400190FC0 /* video.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1670, 22484}}";
-			sepNavSelRange = "{58501, 0}";
-			sepNavVisRect = "{{0, 21971}, {711, 429}}";
+			sepNavIntBoundsRect = "{{0, 0}, {1670, 20958}}";
+			sepNavSelRange = "{5326, 9}";
+			sepNavVisRect = "{{0, 2586}, {711, 429}}";
 			sepNavWindowFrame = "{{38, 194}, {750, 558}}";
 		};
 	};
@@ -612,9 +628,9 @@
 	};
 	D4DBE6D80BC1E91A00E85DCB /* tex_mgmt.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1358, 43792}}";
-			sepNavSelRange = "{76350, 0}";
-			sepNavVisRect = "{{0, 40254}, {711, 429}}";
+			sepNavIntBoundsRect = "{{0, 0}, {1358, 39956}}";
+			sepNavSelRange = "{1012, 0}";
+			sepNavVisRect = "{{0, 91}, {711, 429}}";
 			sepNavWindowFrame = "{{424, 116}, {750, 558}}";
 		};
 	};
@@ -625,6 +641,24 @@
 			sepNavVisRect = "{{0, 665}, {711, 429}}";
 			sepNavWindowFrame = "{{58, 211}, {750, 558}}";
 		};
+	};
+	D4EDD40A0C66EA4E00CE712C /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "error: 'GameVideo' has not been declared";
+		fRef = D4DBE6D80BC1E91A00E85DCB /* tex_mgmt.cpp */;
+		rLen = 1;
+		rLoc = 563;
+		rType = 1;
+	};
+	D4EDD40E0C66EA9A00CE712C /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = D4DBE6D80BC1E91A00E85DCB /* tex_mgmt.cpp */;
+		name = "tex_mgmt.cpp: hoa_video";
+		rLen = 0;
+		rLoc = 1012;
+		rType = 0;
+		vrLen = 939;
+		vrLoc = 348;
 	};
 	D4EE2D630BE85F5B00B7112A /* boot_welcome.cpp */ = {
 		uiCtxt = {
@@ -656,14 +690,6 @@
 			sepNavSelRange = "{3617, 0}";
 			sepNavVisRect = "{{0, 843}, {711, 429}}";
 			sepNavWindowFrame = "{{38, 194}, {750, 558}}";
-		};
-	};
-	D4F110440C58548B00ADC969 /* audio_fx.cpp */ = {
-		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {711, 3584}}";
-			sepNavSelRange = "{0, 0}";
-			sepNavVisRect = "{{0, 0}, {711, 429}}";
-			sepNavWindowFrame = "{{107, 131}, {750, 558}}";
 		};
 	};
 	D4F110460C58548B00ADC969 /* audio_input.cpp */ = {
