@@ -26,6 +26,8 @@
 
 using namespace std;
 using namespace hoa_utils;
+using namespace hoa_video;
+using namespace hoa_video::private_video;
 
 namespace hoa_video {
 
@@ -552,7 +554,7 @@ void VariableTexMemMgr::_SetBlockProperties(BaseImage *img, bool change_free, bo
 
 } // namespace private_video
 
-using namespace hoa_video::private_video;
+
 
 //-----------------------------------------------------------------------------
 // DEBUG_NextTexSheet: increments to the next texture sheet to show with
