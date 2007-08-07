@@ -241,7 +241,7 @@ int32 main(int32 argc, char *argv[]) {
 	srand(static_cast<unsigned int>(time(NULL)));
 
 	// This variable will be set by the ParseProgramOptions function
-	int32 return_code;
+	int32 return_code = EXIT_FAILURE;
 
 	// Parse command lines and exit out of the game if needed
 	if (hoa_main::ParseProgramOptions(return_code, argc, argv) == false) {
@@ -250,28 +250,33 @@ int32 main(int32 argc, char *argv[]) {
 
 	if (InitializeEngine() == false) {
 		cerr << "ERROR: failed to initialize game engine, exiting..." << endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
-	// This is the main loop for the game. The loop iterates once for every frame drawn to the screen.
-	while (SystemManager->NotDone()) {
-		// 1) Render the scene
-		VideoManager->Clear();
-		ModeManager->Draw();
-		VideoManager->Display(SystemManager->GetUpdateTime());
+    try {
+        // This is the main loop for the game. The loop iterates once for every frame drawn to the screen.
+        while (SystemManager->NotDone()) {
+            // 1) Render the scene
+            VideoManager->Clear();
+            ModeManager->Draw();
+            VideoManager->Display(SystemManager->GetUpdateTime());
 
-		// 2) Process all new events
-		InputManager->EventHandler();
+            // 2) Process all new events
+            InputManager->EventHandler();
 
-		// 3) Update any streaming audio sources
-		AudioManager->Update();
+            // 3) Update any streaming audio sources
+            AudioManager->Update();
 
-		// 4) Update timers for correct time-based movement operation
-		SystemManager->UpdateTimers();
+            // 4) Update timers for correct time-based movement operation
+            SystemManager->UpdateTimers();
 
-		// 5) Update the game status
-		ModeManager->Update();
-	} // while (SystemManager->NotDone())
+            // 5) Update the game status
+            ModeManager->Update();
+        } // while (SystemManager->NotDone())
+    } catch (Exception e) {
+        cerr << e.ToString() << std::endl;
+        return EXIT_FAILURE;
+    }
 
 	return EXIT_SUCCESS;
 } // int32 main(int32 argc, char *argv[])

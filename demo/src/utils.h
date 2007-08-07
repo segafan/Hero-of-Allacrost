@@ -283,6 +283,52 @@ private:
 	std::vector<uint16> _str;
 }; // class ustring
 
+/** ****************************************************************************
+*** \brief This is the superclass for all the C++ exceptions used in HoA
+***
+***
+***
+**/
+class Exception
+{
+public:
+    /** \brief The constructor
+    ***
+    *** The constructor of the Exception class. Use as follows:
+    *** throw Exception("error message here", __FILE__, __LINE__, __func__);
+    ***
+    *** \param message A message string that describes the cause of this exception
+    *** \param file The file the exception was thrown
+    *** \param line Line of the file the exception was thrown
+    *** \param function Function the exception was thrown
+    */
+    Exception(const std::string & message, const std::string & file="", const int line=-1, const std::string & function="");
+
+    //! \brief The destructor
+    virtual ~Exception();
+
+    //! \brief Converts the exception data to a single string object
+    virtual std::string ToString() const;
+
+    //! \brief Returns the message set by the user
+    virtual std::string GetMessage() const;
+
+    //! \brief Returns the file the exception was thrown
+    virtual std::string GetFile() const;
+
+    //! \brief Returns the line the exception was thrown
+    virtual int GetLine() const;
+
+    //! \brief Returns the function the exception was thrown
+    virtual std::string GetFunction() const;
+
+private:
+    const std::string _message;
+    const std::string _file;
+    const int _line;
+    const std::string _function;
+};
+
 
 /** ****************************************************************************
 *** \brief Used for transforming a standard class into a singleton class
