@@ -226,6 +226,53 @@ size_t ustring::find(const ustring &s, size_t pos) const {
 	return npos;
 } // size_t ustring::find(const ustring &s, size_t pos) const
 
+
+////////////////////////////////////////////////////////////////////////////////
+///// Exception Class
+////////////////////////////////////////////////////////////////////////////////
+Exception::Exception(const std::string & message, const std::string & file, const int line, const std::string & function) :
+    _message(message),
+    _file(file),
+    _line(line),
+    _function(function)
+{
+}
+
+// The destructor
+Exception::~Exception()
+{
+}
+
+// Converts the exception data to a single string object
+std::string Exception::ToString() const
+{
+    return std::string("An unhandled exception has occurred: \"") + GetMessage() + "\" in file \"" + GetFile() + "\" in function \"" + GetFunction() + "\" on line: " + NumberToString(GetLine()) + ".";
+}
+
+// Returns the message set by the user
+std::string Exception::GetMessage() const
+{
+    return _message;
+}
+
+// Returns the file the exception was thrown
+std::string Exception::GetFile() const
+{
+    return _file;
+}
+
+// Returns the line the exception was thrown
+int Exception::GetLine() const
+{
+    return _line;
+}
+
+// Returns the function the exception was thrown
+std::string Exception::GetFunction() const
+{
+    return _function;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 ///// string and ustring manipulator functions
 ////////////////////////////////////////////////////////////////////////////////
