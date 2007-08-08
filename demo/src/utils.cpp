@@ -239,7 +239,7 @@ Exception::Exception(const std::string & message, const std::string & file, cons
 }
 
 // The destructor
-Exception::~Exception()
+Exception::~Exception() throw()
 {
 }
 
