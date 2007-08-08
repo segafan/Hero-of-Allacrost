@@ -302,25 +302,25 @@ public:
     *** \param line Line of the file the exception was thrown
     *** \param function Function the exception was thrown
     */
-    Exception(const std::string & message, const std::string & file="", const int line=-1, const std::string & function="");
+    Exception(const std::string & message, const std::string & file="", const int line=-1, const std::string & function="") throw();
 
     //! \brief The destructor
-    virtual ~Exception();
+    virtual ~Exception() throw();
 
     //! \brief Converts the exception data to a single string object
-    virtual std::string ToString() const;
+    virtual std::string ToString() const throw();
 
     //! \brief Returns the message set by the user
-    virtual std::string GetMessage() const;
+    virtual std::string GetMessage() const throw();
 
     //! \brief Returns the file the exception was thrown
-    virtual std::string GetFile() const;
+    virtual std::string GetFile() const throw();
 
     //! \brief Returns the line the exception was thrown
-    virtual int GetLine() const;
+    virtual int GetLine() const throw();
 
     //! \brief Returns the function the exception was thrown
-    virtual std::string GetFunction() const;
+    virtual std::string GetFunction() const throw();
 
 private:
     const std::string _message;

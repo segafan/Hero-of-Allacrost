@@ -230,7 +230,7 @@ size_t ustring::find(const ustring &s, size_t pos) const {
 ////////////////////////////////////////////////////////////////////////////////
 ///// Exception Class
 ////////////////////////////////////////////////////////////////////////////////
-Exception::Exception(const std::string & message, const std::string & file, const int line, const std::string & function) :
+Exception::Exception(const std::string & message, const std::string & file, const int line, const std::string & function) throw() :
     _message(message),
     _file(file),
     _line(line),
@@ -244,31 +244,31 @@ Exception::~Exception()
 }
 
 // Converts the exception data to a single string object
-std::string Exception::ToString() const
+std::string Exception::ToString() const throw()
 {
     return std::string("An unhandled exception has occurred: \"") + GetMessage() + "\" in file \"" + GetFile() + "\" in function \"" + GetFunction() + "\" on line: " + NumberToString(GetLine()) + ".";
 }
 
 // Returns the message set by the user
-std::string Exception::GetMessage() const
+std::string Exception::GetMessage() const throw()
 {
     return _message;
 }
 
 // Returns the file the exception was thrown
-std::string Exception::GetFile() const
+std::string Exception::GetFile() const throw()
 {
     return _file;
 }
 
 // Returns the line the exception was thrown
-int Exception::GetLine() const
+int Exception::GetLine() const throw()
 {
     return _line;
 }
 
 // Returns the function the exception was thrown
-std::string Exception::GetFunction() const
+std::string Exception::GetFunction() const throw()
 {
     return _function;
 }
