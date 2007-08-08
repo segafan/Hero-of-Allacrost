@@ -104,7 +104,7 @@ void QuitAllacrost() {
 void InitializeEngine() throw (Exception) {
 	// Initialize SDL. The video, audio, and joystick subsystems are initialized elsewhere.
       	if (SDL_Init(SDL_INIT_TIMER) != 0) {
-      		throw Exception("MAIN ERROR: Unable to initialize SDL: ", __FILE__, __LINE__, __func__);
+      		throw Exception("MAIN ERROR: Unable to initialize SDL: ", __FILE__, __LINE__, __FUNCTION__);
       	}
       
       	// Create and initialize singleton class managers
@@ -117,29 +117,29 @@ void InitializeEngine() throw (Exception) {
       	GlobalManager = GameGlobal::SingletonCreate();
       
       	if (VideoManager->SingletonInitialize() == false) {
-      		throw Exception("ERROR: unable to initialize VideoManager", __FILE__, __LINE__, __func__);
+      		throw Exception("ERROR: unable to initialize VideoManager", __FILE__, __LINE__, __FUNCTION__);
       	}
       
       	if (VideoManager->LoadMenuSkin("black_sleet", "img/menus/black_sleet_skin.png", "img/menus/black_sleet_texture.png") == false) {
-      		  throw Exception("Failed to load the 'Black Sleet' MenuSkin images.", __FILE__, __LINE__, __func__);
+      		  throw Exception("Failed to load the 'Black Sleet' MenuSkin images.", __FILE__, __LINE__, __FUNCTION__);
       	}
       
       	if (VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "default", 18) == false) {
-      		  throw Exception("Failed to load the 'Switchblade Romance' font as 'default, size 18'", __FILE__, __LINE__, __func__);
+      		  throw Exception("Failed to load the 'Switchblade Romance' font as 'default, size 18'", __FILE__, __LINE__, __FUNCTION__);
       	}
       
       	VideoManager->SetFontShadowOffsets("default", 1, -2);
       	VideoManager->SetFontShadowStyle("default", VIDEO_TEXT_SHADOW_BLACK);
       
       	if (!VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "map", 24)) {
-      		  throw Exception("Failed to load the 'Switchblade Romance' font as 'map, size 24'", __FILE__, __LINE__, __func__);
+      		  throw Exception("Failed to load the 'Switchblade Romance' font as 'map, size 24'", __FILE__, __LINE__, __FUNCTION__);
       	}
       
       	VideoManager->SetFontShadowOffsets("map", 0, 0);
       	VideoManager->SetFontShadowStyle("map", VIDEO_TEXT_SHADOW_BLACK);
       
       	if (!VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "battle", 20)) {
-      		  throw Exception("Failed to load the 'Switchblade Romance' font as 'battle, size 20'", __FILE__, __LINE__, __func__);
+      		  throw Exception("Failed to load the 'Switchblade Romance' font as 'battle, size 20'", __FILE__, __LINE__, __FUNCTION__);
        	}
       
       	VideoManager->SetFontShadowOffsets("battle", 1, -2);
@@ -147,32 +147,32 @@ void InitializeEngine() throw (Exception) {
       
       	// Font used to show damage received / given in battle mode
       	if (!VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "battle_dmg", 24)) {
-      		  throw Exception("Failed to load the 'Switchblade Romance' font as 'battle_dmg, size 24'", __FILE__, __LINE__, __func__);
+      		  throw Exception("Failed to load the 'Switchblade Romance' font as 'battle_dmg, size 24'", __FILE__, __LINE__, __FUNCTION__);
        	}
       
       	VideoManager->SetFontShadowOffsets("battle_dmg", 1, -2);
       	VideoManager->SetFontShadowStyle("battle_dmg", VIDEO_TEXT_SHADOW_BLACK);
       
       	if (AudioManager->SingletonInitialize() == false) {
-      			throw Exception("ERROR: unable to initialize AudioManager", __FILE__, __LINE__, __func__);
+      			throw Exception("ERROR: unable to initialize AudioManager", __FILE__, __LINE__, __FUNCTION__);
       	}
       
       	if (ScriptManager->SingletonInitialize() == false) {
-      			throw Exception("ERROR: unable to initialize ScriptManager", __FILE__, __LINE__, __func__);
+      			throw Exception("ERROR: unable to initialize ScriptManager", __FILE__, __LINE__, __FUNCTION__);
       	}
       	hoa_defs::BindEngineToLua();
       
       	if (SystemManager->SingletonInitialize() == false) {
-      			throw Exception("ERROR: unable to initialize SystemManager", __FILE__, __LINE__, __func__);
+      			throw Exception("ERROR: unable to initialize SystemManager", __FILE__, __LINE__, __FUNCTION__);
       	}
       	if (InputManager->SingletonInitialize() == false) {
-      			throw Exception("ERROR: unable to initialize InputManager", __FILE__, __LINE__, __func__);
+      			throw Exception("ERROR: unable to initialize InputManager", __FILE__, __LINE__, __FUNCTION__);
       	}
       	if (GlobalManager->SingletonInitialize() == false) {
-      			throw Exception("ERROR: unable to initialize GlobalManager", __FILE__, __LINE__, __func__);
+      			throw Exception("ERROR: unable to initialize GlobalManager", __FILE__, __LINE__, __FUNCTION__);
       	}
       	if (ModeManager->SingletonInitialize() == false) {
-      			throw Exception("ERROR: unable to initialize ModeManager", __FILE__, __LINE__, __func__);
+      			throw Exception("ERROR: unable to initialize ModeManager", __FILE__, __LINE__, __FUNCTION__);
       	}
       
       	// Set the window title and icon name

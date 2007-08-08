@@ -295,7 +295,7 @@ public:
     /** \brief The constructor
     ***
     *** The constructor of the Exception class. Use as follows:
-    *** throw Exception("error message here", __FILE__, __LINE__, __func__);
+    *** throw Exception("error message here", __FILE__, __LINE__, __FUNCTION__);
     ***
     *** \param message A message string that describes the cause of this exception
     *** \param file The file the exception was thrown
