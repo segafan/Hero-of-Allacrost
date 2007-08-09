@@ -284,14 +284,24 @@ function Load(m)
 	sprite:SetFacePortrait("img/portraits/map/laila.png");
 
 	dialogue = hoa_map.MapDialogue();
-	dialogue:AddText("Laila, what's wrong? You have a worried look on your face.", 1000, -1, -1);
-	dialogue:AddText("You're going into the cave again, aren't you?", 2, -1, -1);
-	dialogue:AddText("Well.....yes I intend to...", 1000, -1, -1);
-	dialogue:AddText("Its dangerous in there! Why do you always do these types of reckless things?!", 2, -1, -1);
-	dialogue:AddText("Laila, if I want to be capable on the battlefiled I have to fight some real battles. Not doing this type of training is what would truly be reckless. You understand that, don't you?", 1000, -1, -1);
-	dialogue:AddText("I know that you're worried about me and I appreciate it, but you need to stop doing this.", 1000, -1, -1);
-	dialogue:AddText(".....Alright, I'm sorry. Just be careful in there, okay? Turn back if things are looking risky and make sure to stock up on healing potions.", 2, -1, -1);
-	dialogue:AddText("Will do. Thanks Laila.", 1000, -1, -1);
+	--dialogue:SetMaxViews(1);
+	dialogue:AddText("Laila, what's wrong? You have a worried look on your face.", 1000, -1, -1); --Line 0
+	dialogue:AddText("You're going into the cave again, aren't you?", 2, -1, -1); --Line 1
+	dialogue:AddOption("Well......yes, I intend to...", 1000, 2, -1);
+	dialogue:AddOption("No, of course not...", 1000, 7, -1);
+	
+	--Yes
+	dialogue:AddText("Its dangerous in there! Why do you always do these types of reckless things?!", 2, -1, -1); --Line 2
+	dialogue:AddText("Laila, if I want to be capable on the battlefield I have to fight some real battles. Not doing this type of training is what would truly be reckless. You understand that, don't you?", 1000, -1, -1); --Line 3
+	dialogue:AddText("I know that you're worried about me and I appreciate it, but you need to stop doing this.", 1000, -1, -1); --Line 4
+	dialogue:AddText(".....Alright, I'm sorry. Just be careful in there, okay? Turn back if things are looking risky and make sure to stock up on healing potions.", 2, -1, -1); --Line 5
+	dialogue:AddText("Will do. Thanks Laila.", 1000, -1, -1); --Line 6
+	dialogue:EndDialogue();
+	
+	--No
+	dialogue:AddText("Oh good. I was worried you were...", 2, -1,-1); --Line 7
+	dialogue:AddText("Please tell me if you are Cladius, just so I can know...", 2, -1, -1); --Line 8
+	dialogue:AddText("Of course, I promise.", 1000, -1, -1); --Line 9
 	sprite:AddDialogue(dialogue);
 
 	action = hoa_map.ActionAnimate(sprite);
@@ -372,6 +382,7 @@ function Load(m)
 	sprite:SetFacePortrait("img/portraits/map/vanica.png");
 
 	dialogue = hoa_map.MapDialogue();
+	dialogue:SetMaxViews(1);
 	dialogue:AddText("Oh, Claudius? What seems to be the matter?", 4, -1, -1);
 	dialogue:AddText("There are odd little icons above people's heads. What do they mean?", 1000, -1, -1);
 	dialogue:AddText("Oh, that. That is a new dialogue indicator. Any person that has something new to say that you haven't already heard will have that icon above their head. Once you've heard everything that they've had to say, the icon will disappear.", 4, -1, -1);

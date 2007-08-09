@@ -577,6 +577,10 @@ void BindEngineToLua() {
 		class_<MapDialogue>("MapDialogue")
 			.def(constructor<>())
 			.def("AddText", &MapDialogue::AddText)
+			.def("AddOption", &MapDialogue::AddOption)
+			.def("SetMaxViews", &MapDialogue::SetMaxViews)
+			.def("GoToLine", &MapDialogue::GoToLine)
+			.def("EndDialogue", &MapDialogue::EndDialogue)
 	];
 
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_map")
