@@ -82,6 +82,7 @@ namespace hoa_video {
 	class FontGlyph;
 	class FontProperties;
 
+	class GUISupervisor;
 	class MenuWindow;
 	class TextBox;
 	class OptionBox;
@@ -108,7 +109,6 @@ namespace hoa_video {
 		class MultiImage;
 		class AnimationFrame;
 
-		class GUISupervisor;
 		class GUIElement;
 		class GUIControl;
 		class MenuSkin;

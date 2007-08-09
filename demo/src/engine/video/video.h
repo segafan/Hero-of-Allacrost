@@ -196,8 +196,8 @@ class GameVideo : public hoa_utils::Singleton<GameVideo> {
 	friend class TextBox;
 	friend class OptionBox;
 	friend class MenuWindow;
+	friend class GUISupervisor;
 	friend class private_video::GUIElement;
-	friend class private_video::GUISupervisor;
 	friend class private_video::FixedTexMemMgr;
 	friend class private_video::VariableTexMemMgr;
 	friend class private_video::TexSheet;
@@ -703,73 +703,15 @@ public:
 	void DEBUG_NextTexSheet();
 	void DEBUG_PrevTexSheet();
 
-	//-- Menus -----------------------------------------------------------------
-
-	/** \name Methods for loading of menu skins
+	/** \brief Returns a pointer to the GUIManager singleton object
+	*** This method allows the user to perform GUI management operations. For example, to load a
+	*** menu skin, the user may utilize this method like so:
+	*** `if (VideoManager->GUI()->LoadMenuSkin(...) == true) { cout << "Success" << endl; }`
 	***
-	*** These methods all attempt to load a menu skin. The differences between these implementations are
-	*** whether the skin includes a background image, single background color, multiple background colors,
-	*** or some combination thereof.
-	***
-	*** \param skin_name The name that will be used to refer to the skin after it is successfully loaded
-	*** \param border_image The filename for the multi-image that contains the menu's border images
-	*** \param background_image The filename for the skin's background image (optional)
-	*** \param top_left Sets the background color for the top left portion of the skin
-	*** \param top_right Sets the background color for the top right portion of the skin
-	*** \param bottom_left Sets the background color for the bottom left portion of the skin
-	*** \param bottom_right Sets the background color for the bottom right portion of the skin
-	*** \param make_default If this skin should be the default menu skin to be used, set this argument to true
-	*** \return True if the skin was loaded successfully, or false in case of an error
-	***
-	*** A few notes about this function:
-	*** - If you set a background image, any background colors will not be visible unless the background image has some transparency
-	*** - If no other menu skins are loaded when this function is called, the default skin will automatically be set to this skin,
-	***   regardless of the value of the make_default parameter.
+	*** \note See gui.h for the public methods available from the GUISupervisor class
 	**/
-	//@{
-	//! \brief A background image with no background colors
-	bool LoadMenuSkin(std::string skin_name, std::string border_image, std::string background_image, bool make_default = false);
-
-	//! \brief No background image with a single background color
-	bool LoadMenuSkin(std::string skin_name, std::string border_image, Color background_color, bool make_default = false);
-
-	//! \brief No background image with multiple background colors
-	bool LoadMenuSkin(std::string skin_name, std::string border_image, Color top_left, Color top_right,
-		Color bottom_left, Color bottom_right, bool make_default = false);
-
-	//! \brief A background image with a single background color
-	bool LoadMenuSkin(std::string skin_name, std::string border_image, std::string background_image,
-		Color background_color, bool make_default = false);
-
-	//! \brief A background image with multiple background colors
-	bool LoadMenuSkin(std::string skin_name, std::string border_image, std::string background_image,
-		Color top_left, Color top_right, Color bottom_left, Color bottom_right, bool make_default = false);
-	//@}
-
-	//! \brief Returns true if there is a menu skin avialable corresponding to the argument name
-	bool IsMenuSkinAvailable(std::string& skin_name) const
-		{ if (private_video::GUIManager->GetMenuSkin(skin_name) == NULL) return false; else return true; }
-
-	/** \brief Sets the default menu skin to use
-	*** \param skin_name The name of the already loaded menu skin that should be made the default skin
-	***
-	*** If the skin_name does not refer to a valid skin, a warning message will be printed and no change
-	*** will occur.
-	*** \note This method will <b>not</b> change the skins of any existing menu windows.
-	**/
-	void SetDefaultMenuSkin(std::string& skin_name)
-		{ private_video::GUIManager->SetDefaultMenuSkin(skin_name); }
-
-	/** \brief Deletes a menu skin that has been loaded
-	*** \param skin_name The name of the loaded menu skin that should be removed
-	***
-	*** Before you call this function, you must delete any and all MenuWindow objects which make use of this skin,
-	*** or change the skin used by those objects. Failing to do so will result in a warning message being printed
-	*** and the skin will not be deleted. The function will also print a warning message and exit if it could not
-	*** find a skin referred to by the argument name.
-	**/
-	void DeleteMenuSkin(std::string& skin_name)
-		{ private_video::GUIManager->DeleteMenuSkin(skin_name); }
+	GUISupervisor* GUI()
+		{ return GUIManager; }
 
 	//-- Lighting and fog -----------------------------------------------------
 

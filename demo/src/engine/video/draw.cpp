@@ -293,7 +293,7 @@ void GameVideo::DrawLight(const StillImage &id, float x, float y, const Color &c
 
 void GameVideo::DrawFPS(uint32 frame_time) {
 	PushState();
-	GUIManager->DrawFPS(frame_time);
+	GUIManager->_DrawFPS(frame_time);
 	PopState();
 
 }

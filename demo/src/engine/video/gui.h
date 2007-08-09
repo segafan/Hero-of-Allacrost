@@ -26,6 +26,9 @@
 
 namespace hoa_video {
 
+//! \brief The singleton pointer for the GUI manager
+extern GUISupervisor* GUIManager;
+
 namespace private_video {
 
 //! \brief The number of FPS samples to retain across frames
@@ -36,9 +39,6 @@ const uint32 MAX_FTIME_DIFF = 5;
 
 //! \brief The number of samples to take if we need to play catchup with the current FPS
 const uint32 FPS_CATCHUP = 20;
-
-//! \brief The singleton pointer for the GUI manager
-extern GUISupervisor* GUIManager;
 
 /** ****************************************************************************
 *** \brief An abstract base class for all GUI elements (windows + controls).
@@ -167,23 +167,34 @@ protected:
 	virtual void CalculateAlignedRect(float &left, float &right, float &bottom, float &top);
 }; // class GUIControl : public GUIElement
 
+} // namespace private_video
 
 /** ****************************************************************************
 *** \brief A helper class to the video engine to manage all of the GUI functionality.
 ***
 *** There is exactly one instance of this class, which is both created and destroyed
 *** by the GameVideo class. This class is essentially an extension of the GameVideo
-*** class which manages the GUI system. It also happens to handle the drawing of
-*** the average frames per second (FPS) on the screen.
+*** class which manages the GUI system. It also handles the drawing of the 
+*** average frames per second (FPS) on the screen.
 *** ***************************************************************************/
 class GUISupervisor : public hoa_utils::Singleton<GUISupervisor> {
 	friend class hoa_utils::Singleton<GUISupervisor>;
+	friend class GameVideo;
+	friend class MenuWindow;
 public:
 	GUISupervisor();
+
 	~GUISupervisor();
+
 	bool SingletonInitialize();
 
-	/** \brief Prepares a new menu skin for use in game
+	/** \name Methods for loading of menu skins
+	***
+	*** These methods all attempt to load a menu skin. The differences between these implementations are
+	*** whether the skin includes a background image, single background color, multiple background colors,
+	*** or some combination thereof. Only the skin_name and border_image arguments are mandatory for all
+	*** versions of this function to have
+	***
 	*** \param skin_name The name that will be used to refer to the skin after it is successfully loaded
 	*** \param border_image The filename for the multi-image that contains the menu's border images
 	*** \param background_image The filename for the skin's background image (optional)
@@ -193,17 +204,31 @@ public:
 	*** \param bottom_right Sets the background color for the bottom right portion of the skin
 	*** \param make_default If this skin should be the default menu skin to be used, set this argument to true
 	*** \return True if the skin was loaded successfully, or false in case of an error
-	*** 
+	***
 	*** A few notes about this function:
-	*** - Only the first two arguments are required; the rest are optional
-	*** - If you want a consistent background color for the menu, you should set all four color arguments to the same value
-	*** - If you set a background image, the background colors will not be visible unless the background image has some transparency
+	*** - If you set a background image, any background colors will not be visible unless the background image has some transparency
 	*** - If no other menu skins are loaded when this function is called, the default skin will automatically be set to this skin,
 	***   regardless of the value of the make_default parameter.
 	**/
-	bool LoadMenuSkin(std::string skin_name, std::string border_image, std::string background_image = "",
-		Color top_left = Color::clear, Color top_right = Color::clear, Color bottom_left = Color::clear,
-		Color bottom_right = Color::clear, bool make_default = false);
+	//@{
+	//! \brief Loads a background image with no background colors
+	bool LoadMenuSkin(std::string skin_name, std::string border_image, std::string background_image, bool make_default = false);
+
+	//! \brief Loads a single background color with no background image
+	bool LoadMenuSkin(std::string skin_name, std::string border_image, Color background_color, bool make_default = false);
+
+	//! \brief Loads multiple multiple background colors with no background image
+	bool LoadMenuSkin(std::string skin_name, std::string border_image, Color top_left, Color top_right,
+		Color bottom_left, Color bottom_right, bool make_default = false);
+
+	//! \brief Loads a background image with a single background color
+	bool LoadMenuSkin(std::string skin_name, std::string border_image, std::string background_image,
+		Color background_color, bool make_default = false);
+
+	//! \brief Loads a background image with multiple background colors
+	bool LoadMenuSkin(std::string skin_name, std::string border_image, std::string background_image,
+		Color top_left, Color top_right, Color bottom_left, Color bottom_right, bool make_default = false);
+	//@}
 
 	/** \brief Deletes a menu skin that has been loaded
 	*** \param skin_name The name of the loaded menu skin that should be removed
@@ -216,16 +241,9 @@ public:
 	**/
 	void DeleteMenuSkin(std::string& skin_name);
 
-	//! \brief Returns a pointer to the default menu skin
-	MenuSkin* GetDefaultMenuSkin() const
-		{ return _default_skin; }
-
-	/** \brief Returns a pointer to the MenuSkin of a corresponding skin name
-	*** \param skin_name The name of the menu skin to grab
-	*** \return A pointer to the MenuSkin, or NULL if the skin name was not found
-	**/
-	MenuSkin* GetMenuSkin(std::string& skin_name)
-		{ if (_menu_skins.find(skin_name) == _menu_skins.end()) return NULL; else return &(_menu_skins[skin_name]); }
+	//! \brief Returns true if there is a menu skin avialable corresponding to the argument name
+	bool IsMenuSkinAvailable(std::string& skin_name) const
+		{ if (_menu_skins.find(skin_name) == _menu_skins.end()) return false; else return true; }
 
 	/** \brief Sets the default menu skin to use from the set of pre-loaded skins
 	*** \param skin_name The name of the already loaded menu skin that should be made the default skin
@@ -236,41 +254,13 @@ public:
 	**/
 	void SetDefaultMenuSkin(std::string& skin_name);
 
-	/** \brief Returns the next available MenuWindow ID for a MenuWindow to use
-	*** \return The ID number for the MenuWindow to use
-	*** This method should only need to be called from the MenuWindow constructor.
-	**/
-	uint32 GetNextMenuWindowID()
-		{ _next_window_id++; return (_next_window_id - 1); }
-
-	/** \brief Adds a newly created MenuWindow into the map of existing windows
-	*** \param new_window A pointer to the newly created MenuWindow
-	*** Don't call this method anywhere else but from MenuWindow::Create(), or you may cause problems.
-	**/
-	void AddMenuWindow(MenuWindow* new_window);
-
-	/** \brief Removes an existing MenuWindow from the map of existing windows
-	*** \param old_window A pointer to the MenuWindow to be removed
-	*** Don't call this method anywhere else but from MenuWindow::Destroy(), or you may cause problems.
-	**/
-	void RemoveMenuWindow(MenuWindow* old_window);
-
-	/** \brief Updates the FPS counter and draws it on the screen
-	*** \param frame_time The number of milliseconds it took for the last frame.
-	***
-	*** Calculates and draws the FPS based on the time the frame took.
-	*** To make the FPS appear more "steady", the FPS that's displayed on the
-	*** screen is actually the average over the last several frames.
-	**/
-	void DrawFPS(uint32 frame_time);
-
 private:
 	/** \brief A map containing all of the menu skins which have been loaded
 	*** The string argument is the reference name of the menu, which is defined
 	*** by the user when they load a new skin. 
 	***
 	**/
-	std::map<std::string, MenuSkin> _menu_skins;
+	std::map<std::string, private_video::MenuSkin> _menu_skins;
 
 	/** \brief A map containing all of the actively created MenuWindow objects
 	*** The integer key is the MenuWindow's ID number. This primary purpose of this map is to coordinate menu windows
@@ -283,13 +273,13 @@ private:
 	*** If no menu skins exist, this member will be NULL. It will never be NULL as long as one menu skin is loaded.
 	*** If the default menu skin is deleted by the user, an alternative default skin will automatically be set.
 	**/
-	MenuSkin* _default_skin;
+	private_video::MenuSkin* _default_skin;
 
 	//! \brief The next ID to assign to a MenuWindow when one is created
 	uint32 _next_window_id;
 
 	//! \brief A circular array of FPS samples used for calculating average FPS
-	uint32 _fps_samples[FPS_SAMPLES];
+	uint32 _fps_samples[private_video::FPS_SAMPLES];
 
 	/** \brief Keeps track of the sum of FPS values over the last VIDEO_FPS_SAMPLES frames
 	*** This is used to simplify the calculation of average frames per second.
@@ -305,9 +295,48 @@ private:
 	*** been displayed.
 	**/
 	uint32 _number_samples;
-}; // class GUISupervisor
 
-} // namespace private_video
+	// ---------- Private methods
+
+	/** \brief Returns a pointer to the MenuSkin of a corresponding skin name
+	*** \param skin_name The name of the menu skin to grab
+	*** \return A pointer to the MenuSkin, or NULL if the skin name was not found
+	**/
+	private_video::MenuSkin* _GetMenuSkin(std::string& skin_name)
+		{ if (_menu_skins.find(skin_name) == _menu_skins.end()) return NULL; else return &(_menu_skins[skin_name]); }
+
+	//! \brief Returns a pointer to the default menu skin
+	private_video::MenuSkin* _GetDefaultMenuSkin() const
+		{ return _default_skin; }
+
+	/** \brief Returns the next available MenuWindow ID for a MenuWindow to use
+	*** \return The ID number for the MenuWindow to use
+	*** This method should only need to be called from the MenuWindow constructor.
+	**/
+	uint32 _GetNextMenuWindowID()
+		{ _next_window_id++; return (_next_window_id - 1); }
+
+	/** \brief Adds a newly created MenuWindow into the map of existing windows
+	*** \param new_window A pointer to the newly created MenuWindow
+	*** Don't call this method anywhere else but from MenuWindow::Create(), or you may cause problems.
+	**/
+	void _AddMenuWindow(MenuWindow* new_window);
+
+	/** \brief Removes an existing MenuWindow from the map of existing windows
+	*** \param old_window A pointer to the MenuWindow to be removed
+	*** Don't call this method anywhere else but from MenuWindow::Destroy(), or you may cause problems.
+	**/
+	void _RemoveMenuWindow(MenuWindow* old_window);
+
+	/** \brief Updates the FPS counter and draws it on the screen
+	*** \param frame_time The number of milliseconds it took for the last frame.
+	***
+	*** Calculates and draws the FPS based on the time the frame took.
+	*** To make the FPS appear more "steady", the FPS that's displayed on the
+	*** screen is actually the average over the last several frames.
+	**/
+	void _DrawFPS(uint32 frame_time);
+}; // class GUISupervisor
 
 } // namespace hoa_video
 
