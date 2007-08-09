@@ -168,7 +168,7 @@ void MapMode::_Load() {
 	if (_map_script.OpenFile(_map_filename) == false) {
 		return;
 	}
-
+	
 	_map_name = MakeUnicodeString(_map_script.ReadString("map_name"));
 	_location_graphic.SetFilename("img/menus/locations/" + _map_script.ReadString("location_filename"));
 	if (_location_graphic.Load() == false) {
@@ -206,7 +206,7 @@ void MapMode::_Load() {
 	// ---------- (3) Load map sounds and music
 	vector<string> sound_filenames;
 	_map_script.ReadStringVector("sound_filenames", sound_filenames);
-
+	
 	for (uint32 i = 0; i < sound_filenames.size(); i++) {
 		_sounds.push_back(SoundDescriptor());
 		if (_sounds.back().LoadAudio(sound_filenames[i]) == false) {

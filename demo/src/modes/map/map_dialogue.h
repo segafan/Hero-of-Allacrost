@@ -27,6 +27,40 @@ namespace private_map {
 //! \brief This constant is used to indicate that a line of dialogue can stay an infinite time on the screen.
 const int32 DIALOGUE_INFINITE = -1;
 
+//! \brief This constant indicates the maximum amount of options a line of dialogue can have.
+const uint32 MAX_OPTIONS = 5;
+
+//! \brief This enum defines the different states the dialogue can be in. 
+enum DIALOGUE_STATE {
+	DIALOGUE_STATE_NORMAL		=  0,
+	DIALOGUE_STATE_OPTION		=  1,
+};
+
+
+
+class DialogueOptionBox {
+public:
+	DialogueOptionBox();
+	~DialogueOptionBox();
+
+	bool AddOption(std::string text, uint32 speaker_id, int32 next_line, int32 action = -1);
+	
+	int32 Update();
+	
+	void Draw();
+
+	uint32 GetCurrentSpeaker() { return _speaker; }
+
+	void SetCurrentDialogue(MapDialogue* dialogue) {_current_dialogue = dialogue;}
+
+private:
+	MapDialogue* _current_dialogue;
+	uint32 _size;
+	uint32 _speaker;
+	hoa_video::OptionBox _options;
+	std::vector<ScriptObject*> _actions;
+	std::vector<int32> _next_line_index;
+};
 
 /** ****************************************************************************
 *** \brief A display for managing and displaying dialogue on maps
@@ -47,6 +81,14 @@ public:
 
 	//! \brief Draws the dialogue window, text, portraits, and other related visuals to the screen
 	void Draw();
+	
+	//! \brief Sets the dialogue state. 
+	void SetDialogueState(DIALOGUE_STATE state)
+		{ _state = state; }
+
+	//! \brief Returns the state the dialogue is currently in.
+	DIALOGUE_STATE GetDialogueState()
+		{ return _state; }
 
 	void SetCurrentDialogue(MapDialogue* dialogue)
 		{ _current_dialogue = dialogue; }
@@ -57,7 +99,17 @@ public:
 	MapDialogue* GetCurrentDialogue() const
 		{ return _current_dialogue; }
 
+
 private:
+	//! \brief Keeps track of whether dialogue is in text mode or option mode. 
+	DIALOGUE_STATE _state;
+	
+	//! \brief A pointer to the current set of options
+	DialogueOptionBox* _current_option;
+
+	//! \brief A pointer to the current speaker.
+	VirtualSprite* _current_speaker;
+
 	//! \brief A pointer to the current piece of dialogue that is active
 	MapDialogue* _current_dialogue;
 
@@ -70,6 +122,11 @@ private:
 	//! \brief The textbox used for rendering the dialogue text
 	hoa_video::TextBox _display_textbox;
 }; // class DialogueManager : public hoa_video::MenuWindow
+
+
+
+
+
 
 
 /** ****************************************************************************
@@ -118,10 +175,25 @@ public:
 	**/
 	void AddText(std::string text, uint32 speaker_id, int32 time = DIALOGUE_INFINITE, int32 action = -1);
 
+	//! \brief This method adds an option to the current line of text
+	void AddOption(std::string text, uint32 speaker_id, int32 next_line = -1, int32 action = -1);
+	
+	DialogueOptionBox* GetCurrentOption() const {return _options[_current_line];};
+
+	//! \brief This method will return true if the current line contains options.
+	bool HasOptions() 
+	{ if(_options[_current_line] != NULL) return true; else return false; }
+
+	int32 GetNextLine();
+	
 	/** \brief This method will update the current line of the dialogue.
 	*** \return False if the dialogue is finished, true otherwise.
 	**/
-	bool ReadNextLine();
+	bool ReadNextLine(int32 line = -1);
+
+	void GoToLine(int32 next_line) { _next_line_index[_next_line_index.size()-1] = next_line; }
+
+	void EndDialogue() { _next_line_index[_next_line_index.size()-1] = 9999; }
 
 	//! \name Class Member Access Functions
 	//@{
@@ -137,6 +209,14 @@ public:
 	void IncrementTimesSeen()
 		{ _seen++; }
 
+	//! \brief This sets the max number of times a dialogue can be viewed by the player.
+	void SetMaxViews(int32 views)
+		{ _max_views = views; }
+
+	//! \brief This returns the number of views that this dialogue can be seen by the player.
+	int32 GetMaxViews() const
+		{ return _max_views; }
+
 	//! \brief This method controls if the dialogue should ignore user input (true) or not (false).
 	void SetBlock(bool b)
 		{ _blocked = b; }
@@ -147,6 +227,10 @@ public:
 	//! \brief This returns the number of times that this dialogue has been seen by the player.
 	int32 GetTimesSeen() const
 		{ return _seen; }
+
+	//! \brief Return true if this dialogue is active.(IE _seen is still less than _max_views)
+	bool isActive() const
+		{ return _active; }
 
 	//! \brief Returns a bool that indicates whether a dialogue is blocked (ignores user input)
 	bool IsBlocked() const
@@ -183,6 +267,8 @@ public:
 	hoa_utils::ustring GetLineText(uint32 line) const
 		{ if (line > _text.size()) return hoa_utils::ustring(); else return _text[line]; }
 
+	uint32 GetCurrentLine() {return _current_line;}
+
 	//! \brief Returns the object id of the speaker of a line.
 	uint32 GetLineSpeaker(uint32 line) const
 		{ if (line > _speakers.size()) return 0; else return _speakers[line]; }
@@ -194,15 +280,21 @@ public:
 	//! \brief Returns the actions of a specific line.
 	ScriptObject* GetLineAction(uint32 line)
 		{ if (line > _actions.size()) return NULL; else return _actions[line]; }
-	//@}
-
 
 private:
 	//! \brief This counts the number of time a player has seen this dialogue.
 	uint32 _seen;
 
+	//! \brief Declares the max number of times this dialogue can be viewed.
+	int32 _max_views;
+
+	uint32 _line_count;
+
 	//! \brief An index to the current line to read.
 	uint32 _current_line;
+
+	//! \brief Declares whether or not the dialogue is still active, which is determined by _max_views.
+	bool _active;
 
 	//! \brief When this member is set to true, dialogues will ignore user input and instead execute independently.
 	bool _blocked;
@@ -222,8 +314,15 @@ private:
 	//! \brief The maximum display time of each line in the dialogue. A time less than zero indicates infinite time.
 	std::vector<int32> _time;
 
+	//! \brief A list of DialogueOptions indexed according to the line of dialogue they belong to. 
+	std::vector<DialogueOptionBox*> _options;
+	//@}
+
 	//! \brief A list of optional events that may occur after each line.
 	std::vector<ScriptObject*> _actions;
+	
+	//! \brief 
+	std::vector<int32> _next_line_index;
 }; // class MapDialogue
 
 } // namespace private_map

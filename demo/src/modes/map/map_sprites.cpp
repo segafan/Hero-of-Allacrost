@@ -51,6 +51,7 @@ VirtualSprite::VirtualSprite() :
 	moving(false),
 	sky_object(false),
 	face_portrait( NULL ),
+	has_active_dialogue(true),
 	current_action(-1),
 	forced_action(-1),
 	_saved(false),
@@ -93,7 +94,17 @@ void VirtualSprite::UpdateSeenDialogue() {
 	seen_all_dialogue = true;
 }
 
-
+void VirtualSprite::UpdateActiveDialogue() {
+	// Check all dialogues for any that are still active.
+	for (uint i = 0; i < dialogues.size(); i++) {
+		if(dialogues[i]->isActive()) {
+			has_active_dialogue = true;
+			return;
+		}
+	}
+	has_active_dialogue = false;
+}
+	
 
 uint16 VirtualSprite::CalculateOppositeDirection(const uint16 direction) {
 	switch (direction) {

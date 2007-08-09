@@ -148,6 +148,9 @@ public:
 	//! \brief Set to false if the sprite contains dialogue that has not been seen by the player
 	bool seen_all_dialogue;
 
+	//! \brief True is sprite contains active dialogue.
+	bool has_active_dialogue;
+
 	/** \brief An index to the actions vector, representing the current sprite action being performed.
 	*** A negative value indicates that the sprite is taking no action. If the sprite has no entries
 	*** in its actions vector, this member should remain negative, otherwise a segmentation fault
@@ -240,6 +243,9 @@ public:
 	//! \brief Examines all dialogue owned by the sprite and sets the appropriate value of VirtualSprite#seen_all_dialogue
 	void UpdateSeenDialogue();
 
+	//! \brief Examines all dialogue owned by the sprite and sets the appropriate value of VirtualSprite#has_active_dialogue
+	void UpdateActiveDialogue();
+
 	/** \name Dialogue control methods
 	*** These methods are used to add and control which dialogue should the sprite speak.
 	**/
@@ -251,7 +257,8 @@ public:
 		{ dialogues.push_back(md); md->SetOwner(this); if (md->HasAlreadySeen() == false) seen_all_dialogue = false; }
 
 	bool HasDialogue() const
-		{ return (dialogues.size() > 0); }
+		//{ return (dialogues.size() > 0); }
+		{ if(dialogues.size() > 0) return has_active_dialogue; else return false; }
 
 	MapDialogue* GetCurrentDialogue() const
 		{ return dialogues[_current_dialogue]; }
@@ -260,7 +267,7 @@ public:
 		{ if (static_cast<uint16>(dialogue) >= dialogues.size()) return; else _current_dialogue = dialogue; }
 
 	void NextDialogue()
-		{ _current_dialogue++; if (static_cast<uint16>(_current_dialogue) >= dialogues.size()) _current_dialogue = 0; }
+		{ do { _current_dialogue++; if (static_cast<uint16>(_current_dialogue) >= dialogues.size()) _current_dialogue = 0; } while (dialogues[_current_dialogue]->isActive() == false); }
 
 	int16 GetNumDialogues() const
 		{ return dialogues.size(); }
