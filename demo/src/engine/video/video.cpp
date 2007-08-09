@@ -675,51 +675,6 @@ void GameVideo::SetTransform(float matrix[16]) {
 	glLoadMatrixf(matrix);
 }
 
-//-----------------------------------------------------------------------------
-// Menu Methods
-//-----------------------------------------------------------------------------
-
-bool GameVideo::LoadMenuSkin(std::string skin_name, std::string border_image, std::string background_image, bool make_default)
-{
-	return GUIManager->LoadMenuSkin(skin_name, border_image, background_image,
-		Color::clear, Color::clear, Color::clear, Color::clear, make_default);
-}
-
-
-
-bool GameVideo::LoadMenuSkin(std::string skin_name, std::string border_image, Color background_color, bool make_default)
-{
-	return GUIManager->LoadMenuSkin(skin_name, border_image, "",
-		background_color, background_color, background_color, background_color, make_default);
-}
-
-
-
-bool GameVideo::LoadMenuSkin(std::string skin_name, std::string border_image, Color top_left, Color top_right,
-	Color bottom_left, Color bottom_right, bool make_default)
-{
-	return GUIManager->LoadMenuSkin(skin_name, border_image, "",
-		top_left, top_right, bottom_left, bottom_right, make_default);
-}
-
-
-
-bool GameVideo::LoadMenuSkin(std::string skin_name, std::string border_image, std::string background_image,
-	Color background_color, bool make_default)
-{
-	return GUIManager->LoadMenuSkin(skin_name, border_image, background_image,
-		background_color, background_color, background_color, background_color, make_default);
-}
-
-
-
-bool GameVideo::LoadMenuSkin(std::string skin_name, std::string border_image, std::string background_image,
-	Color top_left, Color top_right, Color bottom_left, Color bottom_right, bool make_default)
-{
-	return GUIManager->LoadMenuSkin(skin_name, border_image, background_image,
-		top_left, top_right, bottom_left, bottom_right, make_default);
-}
-
 
 
 bool GameVideo::_BindTexture(GLuint tex_id) {
@@ -755,20 +710,20 @@ void GameVideo::DisableSceneLighting() {
 
 
 void GameVideo::EnableFog(const Color &color, float intensity) {
-	// Check if intensity is within acceptable bounds.
+	// Set the parameters
+	_fog_color = color;
+	_fog_intensity = intensity;
 
-	if (intensity < 0.0f) {
-		intensity = 0.0f;
+	// Check if te intensity is within acceptable bounds
+	if (_fog_intensity < 0.0f) {
+		_fog_intensity = 0.0f;
 		IF_PRINT_DEBUG(VIDEO_DEBUG) << "intensity argument was less than 0.0f" << endl;
 	}
-	else if (intensity > 1.0f) {
-		intensity = 1.0f;
+	else if (_fog_intensity > 1.0f) {
+		_fog_intensity = 1.0f;
 		IF_PRINT_DEBUG(VIDEO_DEBUG) << "intensity argument was greater than 1.0f" << endl;
 	}
 
-	// set the parameters
-	_fog_color = color;
-	_fog_intensity = intensity;
 
 	// Apply the new settings with OpenGL
 	if (IsFloatEqual(intensity, 0.0f)) {

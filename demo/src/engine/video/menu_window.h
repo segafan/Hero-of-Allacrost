@@ -142,7 +142,7 @@ public:
 *** hiding the menu window.
 *** ***************************************************************************/
 class MenuWindow : public private_video::GUIElement {
-	friend class private_video::GUISupervisor;
+	friend class GUISupervisor;
 public:
 	MenuWindow();
 

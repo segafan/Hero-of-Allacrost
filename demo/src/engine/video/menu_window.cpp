@@ -31,14 +31,14 @@ MenuWindow::MenuWindow() :
 	_display_mode(VIDEO_MENU_INSTANT),
 	_is_scissored(false)
 {
-	_id = GUIManager->GetNextMenuWindowID();
+	_id = GUIManager->_GetNextMenuWindowID();
 	_initialized = IsInitialized(_initialization_errors);
 }
 
 
 
 bool MenuWindow::Create(string skin_name, float w, float h, int32 visible_flags, int32 shared_flags) {
-	_skin = GUIManager->GetMenuSkin(skin_name);
+	_skin = GUIManager->_GetMenuSkin(skin_name);
 	if (_skin == NULL) {
 		if (VIDEO_DEBUG)
 			cerr << "VIDEO WARNING: MenuWindow::Create() failed because the requested menu skin was not found: "
@@ -65,7 +65,7 @@ bool MenuWindow::Create(float w, float h, int32 visible_flags, int32 shared_flag
 	_edge_shared_flags = shared_flags;
 
 	if (_skin == NULL) {
-		_skin = GUIManager->GetDefaultMenuSkin();
+		_skin = GUIManager->_GetDefaultMenuSkin();
 	}
 	if (_skin == NULL) {
 		if (VIDEO_DEBUG)
@@ -81,7 +81,7 @@ bool MenuWindow::Create(float w, float h, int32 visible_flags, int32 shared_flag
 	}
 
 	// Add the new menu window to the menu map
-	GUIManager->AddMenuWindow(this);
+	GUIManager->_AddMenuWindow(this);
 	_initialized = IsInitialized(_initialization_errors);
 	return true;
 }
@@ -90,7 +90,7 @@ bool MenuWindow::Create(float w, float h, int32 visible_flags, int32 shared_flag
 
 void MenuWindow::Destroy() {
 	_skin = NULL;
-	GUIManager->RemoveMenuWindow(this);
+	GUIManager->_RemoveMenuWindow(this);
 	VideoManager->DeleteImage(_menu_image);
 }
 
@@ -307,7 +307,7 @@ void MenuWindow::ChangeEdgeSharedFlags(int32 flags) {
 
 
 void MenuWindow::ChangeMenuSkin(string& skin_name) {
-	MenuSkin* new_skin = GUIManager->GetMenuSkin(skin_name);
+	MenuSkin* new_skin = GUIManager->_GetMenuSkin(skin_name);
 	if (new_skin == NULL) {
 		if (VIDEO_DEBUG)
 			cerr << "VIDEO WARNING: MenuWindow::ChangeMenuSkin() failed because the skin_name \""

@@ -14,13 +14,13 @@
 using namespace std;
 using namespace hoa_utils;
 
-template<> hoa_video::private_video::GUISupervisor* Singleton<hoa_video::private_video::GUISupervisor>::_singleton_reference = NULL;
+template<> hoa_video::GUISupervisor* Singleton<hoa_video::GUISupervisor>::_singleton_reference = NULL;
 
 namespace hoa_video {
 
-namespace private_video {
-
 GUISupervisor* GUIManager = NULL;
+
+namespace private_video {
 
 // *****************************************************************************
 // ******************************* GUIElement **********************************
@@ -133,6 +133,10 @@ void GUIControl::CalculateAlignedRect(float &left, float &right, float &bottom, 
 	} // if (_owner)
 }
 
+} // namespace private_video
+
+using namespace private_video;
+
 // *****************************************************************************
 // ****************************** GUISupervisor ********************************
 // *****************************************************************************
@@ -183,8 +187,43 @@ GUISupervisor::~GUISupervisor() {
 }
 
 
+
 bool GUISupervisor::SingletonInitialize() {
 	return true;
+}
+
+
+
+bool GUISupervisor::LoadMenuSkin(std::string skin_name, std::string border_image, std::string background_image, bool make_default)
+{
+	return LoadMenuSkin(skin_name, border_image, background_image,
+		Color::clear, Color::clear, Color::clear, Color::clear, make_default);
+}
+
+
+
+bool GUISupervisor::LoadMenuSkin(std::string skin_name, std::string border_image, Color background_color, bool make_default)
+{
+	return LoadMenuSkin(skin_name, border_image, "", background_color, background_color,
+		background_color, background_color, make_default);
+}
+
+
+
+bool GUISupervisor::LoadMenuSkin(std::string skin_name, std::string border_image, Color top_left, Color top_right,
+	Color bottom_left, Color bottom_right, bool make_default)
+{
+	return LoadMenuSkin(skin_name, border_image, "", top_left, top_right,
+		bottom_left, bottom_right, make_default);
+}
+
+
+
+bool GUISupervisor::LoadMenuSkin(std::string skin_name, std::string border_image, std::string background_image,
+	Color background_color, bool make_default)
+{
+	return LoadMenuSkin(skin_name, border_image, background_image, background_color,
+		background_color, background_color, background_color, make_default);
 }
 
 
@@ -290,7 +329,7 @@ void GUISupervisor::DeleteMenuSkin(std::string& skin_name) {
 
 
 
-void GUISupervisor::AddMenuWindow(MenuWindow* new_window) {
+void GUISupervisor::_AddMenuWindow(MenuWindow* new_window) {
 	if (_menu_windows.find(new_window->_id) != _menu_windows.end()) {
 		if (VIDEO_DEBUG)
 			cerr << "VIDEO WARNING: GUISupervisor::AddMenuWindow() failed because there already existed a window with the same ID" << endl;
@@ -301,7 +340,7 @@ void GUISupervisor::AddMenuWindow(MenuWindow* new_window) {
 
 
 
-void GUISupervisor::RemoveMenuWindow(MenuWindow* old_window) {
+void GUISupervisor::_RemoveMenuWindow(MenuWindow* old_window) {
 	map<uint32, MenuWindow*>::iterator i = _menu_windows.find(old_window->_id);
 
 	if (i != _menu_windows.end()) {
@@ -315,7 +354,7 @@ void GUISupervisor::RemoveMenuWindow(MenuWindow* old_window) {
 
 
 
-void GUISupervisor::DrawFPS(uint32 frame_time) {
+void GUISupervisor::_DrawFPS(uint32 frame_time) {
 	VideoManager->SetTextColor(Color::white);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_X_NOFLIP, VIDEO_Y_NOFLIP, VIDEO_BLEND, 0);
 
@@ -370,8 +409,6 @@ void GUISupervisor::DrawFPS(uint32 frame_time) {
 
 	VideoManager->Move(930.0f, 720.0f); // Upper right hand corner of the screen
 	VideoManager->DrawText(fps_text);
-} // void GUISupervisor::DrawFPS(uint32 frame_time)
-
-} // namespace private_video
+} // void GUISupervisor::_DrawFPS(uint32 frame_time)
 
 } // namespace hoa_video
