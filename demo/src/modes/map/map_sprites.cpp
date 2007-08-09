@@ -96,7 +96,7 @@ void VirtualSprite::UpdateSeenDialogue() {
 
 void VirtualSprite::UpdateActiveDialogue() {
 	// Check all dialogues for any that are still active.
-	for (uint i = 0; i < dialogues.size(); i++) {
+	for (size_t i = 0; i < dialogues.size(); i++) {
 		if(dialogues[i]->isActive()) {
 			has_active_dialogue = true;
 			return;
