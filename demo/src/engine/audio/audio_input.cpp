@@ -370,7 +370,7 @@ AudioMemory::AudioMemory(AudioInput* input) :
 	_filename = input->GetFilename();
 	_samples_per_second = input->GetSamplesPerSecond();
 	_bits_per_sample = input->GetBitsPerSample();
-	_number_channels = input->GetNumberChannels();
+	_number_channels = static_cast<uint8>(input->GetNumberChannels());
 	_total_number_samples = input->GetTotalNumberSamples();
 	_sample_size = input->GetSampleSize();
 	_play_time = input->GetPlayTime();
