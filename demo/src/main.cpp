@@ -246,7 +246,11 @@ int32 main(int32 argc, char *argv[]) {
 		InitializeEngine();
 
 	} catch (Exception& e) {
+		#ifdef WIN32
+		MessageBox(NULL, e.ToString().c_str(), "Unhandled exception", MB_OK | MB_ICONERROR);
+		#else
 		cerr << e.ToString() << std::endl;
+		#endif
 		return EXIT_FAILURE;
 	}
 
@@ -272,7 +276,11 @@ int32 main(int32 argc, char *argv[]) {
 			ModeManager->Update();
 		} // while (SystemManager->NotDone())
 	} catch (Exception& e) {
+		#ifdef WIN32
+		MessageBox(NULL, e.ToString().c_str(), "Unhandled exception", MB_OK | MB_ICONERROR);
+		#else
 		cerr << e.ToString() << std::endl;
+		#endif
 		return EXIT_FAILURE;
 	}
 

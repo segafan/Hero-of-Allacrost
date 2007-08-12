@@ -18,7 +18,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)"
-			IntermediateDirectory="Debug"
+			IntermediateDirectory="Allacrost-Debug"
 			ConfigurationType="1"
 			>
 			<Tool
@@ -48,7 +48,7 @@
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="4"
-				DisableSpecificWarnings="4996;4005;4800;4267;4355;4288"
+				DisableSpecificWarnings="4996;4005;4800;4267;4355;4288;4290"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -62,7 +62,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/NODEFAULTLIB:LIBCMT&#x0D;&#x0A;/NODEFAULTLIB:msvcrt.lib"
-				AdditionalDependencies="SDL.lib SDL_TTF.lib OpenAL32.lib ogg.lib vorbis.lib vorbisfile.lib SDL_net.lib SDLMain.lib Opengl32.lib glu32.lib libpng.lib jpegd.lib zdll.lib Luabind_Debug.lib lua50.lib"
+				AdditionalDependencies="user32.lib SDL.lib SDL_TTF.lib OpenAL32.lib ogg.lib vorbis.lib vorbisfile.lib SDL_net.lib SDLMain.lib Opengl32.lib glu32.lib libpng.lib jpegd.lib zdll.lib Luabind_Debug.lib lua50.lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				LinkTimeCodeGeneration="0"
@@ -96,7 +96,7 @@
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)"
-			IntermediateDirectory="Release"
+			IntermediateDirectory="Allacrost-Release"
 			ConfigurationType="1"
 			>
 			<Tool
@@ -132,7 +132,7 @@
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 				CompileAs="2"
-				DisableSpecificWarnings="4996;4005;4800;4267;4355;4288"
+				DisableSpecificWarnings="4996;4005;4800;4267;4355;4288;4290"
 				ForcedIncludeFiles=""
 				OmitDefaultLibName="false"
 			/>
@@ -148,7 +148,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/NODEFAULTLIB:LIBCMT"
-				AdditionalDependencies="SDL.lib SDL_Net.lib SDL_Net.lib SDL_TTF.lib OpenAL32.lib ogg.lib vorbis.lib vorbisfile.lib SDLMain.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib LuaBind.lib"
+				AdditionalDependencies="user32.lib SDL.lib SDL_Net.lib SDL_Net.lib SDL_TTF.lib OpenAL32.lib ogg.lib vorbis.lib vorbisfile.lib SDLMain.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib LuaBind.lib"
 				LinkIncremental="0"
 				GenerateDebugInformation="false"
 				SubSystem="2"
