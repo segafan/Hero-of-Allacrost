@@ -200,6 +200,7 @@ bool AudioDescriptor::LoadAudio(const string& filename, AUDIO_LOAD load_type, ui
 		bool all_data_read = false;
 		if (_input->Read(_data, _input->GetTotalNumberSamples(), all_data_read) != _input->GetTotalNumberSamples()) {
 			IF_PRINT_WARNING(AUDIO_DEBUG) << "failed to read entire audio data stream for file: " << filename << endl;
+			return false;
 		}
 
 		// Pass the buffer data to the OpenAL buffer
@@ -211,7 +212,7 @@ bool AudioDescriptor::LoadAudio(const string& filename, AUDIO_LOAD load_type, ui
 		_source = AudioManager->_AcquireAudioSource();
 		if (_source == NULL) {
 			IF_PRINT_WARNING(AUDIO_DEBUG) << "could not acquire audio source for new audio file: " << filename << endl;
-			return true;
+			return false;
 		}
 
 		alSourcei(_source->source, AL_BUFFER, _buffer->buffer);
@@ -230,7 +231,7 @@ bool AudioDescriptor::LoadAudio(const string& filename, AUDIO_LOAD load_type, ui
 		_source = AudioManager->_AcquireAudioSource ();
 		if (_source == NULL) {
 			IF_PRINT_WARNING(AUDIO_DEBUG) << "could not acquire audio source for new audio file: " << filename << endl;
-			return true;
+			return false;
 		}
 
 		_source->owner = this;
@@ -254,7 +255,7 @@ bool AudioDescriptor::LoadAudio(const string& filename, AUDIO_LOAD load_type, ui
 		_source = AudioManager->_AcquireAudioSource ();
 		if (_source == NULL) {
 			IF_PRINT_WARNING(AUDIO_DEBUG) << "could not acquire audio source for new audio file: " << filename << endl;
-			return true;
+			return false;
 		}
 
 		_source->owner = this;

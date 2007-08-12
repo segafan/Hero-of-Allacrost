@@ -51,6 +51,8 @@
 		49DEC4270AD18E9800DC8362 /* Allacrost-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 49DEC4260AD18E9800DC8362 /* Allacrost-Info.plist */; };
 		D404C6EA0B02FD3E00827A19 /* editor.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D404C6E90B02FD3E00827A19 /* editor.moc.cpp */; };
 		D404C6EC0B02FD6D00827A19 /* grid.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D404C6EB0B02FD6D00827A19 /* grid.moc.cpp */; };
+		D407482D0C6E8602008A25BD /* Ogg.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D407482C0C6E8602008A25BD /* Ogg.framework */; };
+		D40748310C6E8615008A25BD /* Vorbis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D40748300C6E8615008A25BD /* Vorbis.framework */; };
 		D407F7ED0BADECF300848C43 /* shop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D407F7E90BADECF300848C43 /* shop.cpp */; };
 		D407F7EF0BADECF300848C43 /* shop_windows.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D407F7EB0BADECF300848C43 /* shop_windows.cpp */; };
 		D41AC1DB0C4C7C980097B042 /* script_write.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D440963B0C45E37300E58975 /* script_write.cpp */; };
@@ -63,6 +65,8 @@
 		D440963F0C45E37300E58975 /* script_modify.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D44096370C45E37300E58975 /* script_modify.cpp */; };
 		D44096410C45E37300E58975 /* script_read.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D44096390C45E37300E58975 /* script_read.cpp */; };
 		D44096430C45E37300E58975 /* script_write.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D440963B0C45E37300E58975 /* script_write.cpp */; };
+		D44EDF970C6E873600FFBA19 /* Ogg.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D407482C0C6E8602008A25BD /* Ogg.framework */; };
+		D44EDF980C6E874400FFBA19 /* Vorbis.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D40748300C6E8615008A25BD /* Vorbis.framework */; };
 		D468098F0C1E6E31009F76A9 /* QtSql.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D468098E0C1E6E31009F76A9 /* QtSql.framework */; };
 		D46809930C1E6E4E009F76A9 /* QtNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D46809920C1E6E4E009F76A9 /* QtNetwork.framework */; };
 		D46809970C1E6E66009F76A9 /* QtXml.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D46809960C1E6E66009F76A9 /* QtXml.framework */; };
@@ -147,6 +151,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				D44EDF980C6E874400FFBA19 /* Vorbis.framework in Copy Frameworks */,
+				D44EDF970C6E873600FFBA19 /* Ogg.framework in Copy Frameworks */,
 				49BDC4480AF540E400940A6C /* SDL_net.framework in Copy Frameworks */,
 				4941A7450AC1D8BA00D65B8E /* SDL_ttf.framework in Copy Frameworks */,
 				4941A7460AC1D8BA00D65B8E /* SDL.framework in Copy Frameworks */,
@@ -247,6 +253,8 @@
 		49DEC4260AD18E9800DC8362 /* Allacrost-Info.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xml; path = "Allacrost-Info.plist"; sourceTree = "<group>"; };
 		D404C6E90B02FD3E00827A19 /* editor.moc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = editor.moc.cpp; path = src/editor/editor.moc.cpp; sourceTree = "<group>"; };
 		D404C6EB0B02FD6D00827A19 /* grid.moc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = grid.moc.cpp; path = src/editor/grid.moc.cpp; sourceTree = "<group>"; };
+		D407482C0C6E8602008A25BD /* Ogg.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Ogg.framework; path = /Library/Frameworks/Ogg.framework; sourceTree = "<absolute>"; };
+		D40748300C6E8615008A25BD /* Vorbis.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Vorbis.framework; path = /Library/Frameworks/Vorbis.framework; sourceTree = "<absolute>"; };
 		D407F7E90BADECF300848C43 /* shop.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = shop.cpp; sourceTree = "<group>"; };
 		D407F7EA0BADECF300848C43 /* shop.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = shop.h; sourceTree = "<group>"; };
 		D407F7EB0BADECF300848C43 /* shop_windows.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = shop_windows.cpp; sourceTree = "<group>"; };
@@ -413,12 +421,14 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D407482D0C6E8602008A25BD /* Ogg.framework in Frameworks */,
 				4941A7680AC1DCE000D65B8E /* Cocoa.framework in Frameworks */,
 				4941A7140AC1D89300D65B8E /* OpenGL.framework in Frameworks */,
 				4941A71B0AC1D8B300D65B8E /* SDL_ttf.framework in Frameworks */,
 				49BDC4260AF540AE00940A6C /* SDL_net.framework in Frameworks */,
 				4941A71C0AC1D8B300D65B8E /* SDL.framework in Frameworks */,
 				D4F110790C5855CC00ADC969 /* OpenAL.framework in Frameworks */,
+				D40748310C6E8615008A25BD /* Vorbis.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -596,6 +606,7 @@
 		4941A7120AC1D87200D65B8E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D40748300C6E8615008A25BD /* Vorbis.framework */,
 				D4F110780C5855CC00ADC969 /* OpenAL.framework */,
 				D46809960C1E6E66009F76A9 /* QtXml.framework */,
 				D46809920C1E6E4E009F76A9 /* QtNetwork.framework */,
@@ -603,6 +614,7 @@
 				D4F68AAB0BD7228A009F6973 /* QtOpenGL.framework */,
 				D4F68AA70BD7227F009F6973 /* QtGui.framework */,
 				D4F68AA30BD72276009F6973 /* QtCore.framework */,
+				D407482C0C6E8602008A25BD /* Ogg.framework */,
 				D4F68A9F0BD72266009F6973 /* Qt3Support.framework */,
 				4941A7670AC1DCDF00D65B8E /* Cocoa.framework */,
 				4941A7130AC1D89300D65B8E /* OpenGL.framework */,

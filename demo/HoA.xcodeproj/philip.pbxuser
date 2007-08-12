@@ -52,7 +52,7 @@
 				PBXFileTableDataSourceColumnWidthsKey = (
 					20,
 					300,
-					133,
+					133.2085,
 				);
 				PBXFileTableDataSourceColumnsKey = (
 					PBXErrorsWarningsDataSource_TypeID,
@@ -170,12 +170,8 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 208071097;
-			PBXWorkspaceStateSaveDate = 208071097;
-		};
-		perUserProjectItems = {
-			D4EDD40A0C66EA4E00CE712C /* PBXTextBookmark */ = D4EDD40A0C66EA4E00CE712C /* PBXTextBookmark */;
-			D4EDD40E0C66EA9A00CE712C /* PBXTextBookmark */ = D4EDD40E0C66EA9A00CE712C /* PBXTextBookmark */;
+			PBXPerProjectTemplateStateSaveDate = 208570017;
+			PBXWorkspaceStateSaveDate = 208570017;
 		};
 		sourceControlManager = D43082570AF9831800A5173A /* Source Control */;
 		userBuildSettings = {
@@ -197,10 +193,10 @@
 	};
 	4941A68B0AC1D86400D65B8E /* main.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {758, 3878}}";
-			sepNavSelRange = "{3996, 0}";
-			sepNavVisRect = "{{0, 2908}, {711, 429}}";
-			sepNavWindowFrame = "{{107, 131}, {750, 558}}";
+			sepNavIntBoundsRect = "{{0, 0}, {854, 3934}}";
+			sepNavSelRange = "{9599, 0}";
+			sepNavVisRect = "{{0, 3311}, {711, 429}}";
+			sepNavWindowFrame = "{{438, 145}, {750, 558}}";
 		};
 	};
 	4941A6900AC1D86400D65B8E /* battle.cpp */ = {
@@ -237,10 +233,18 @@
 	};
 	4941A6950AC1D86400D65B8E /* boot.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1298, 14910}}";
-			sepNavSelRange = "{33511, 0}";
-			sepNavVisRect = "{{0, 12981}, {711, 429}}";
+			sepNavIntBoundsRect = "{{0, 0}, {1298, 15078}}";
+			sepNavSelRange = "{4412, 0}";
+			sepNavVisRect = "{{0, 1533}, {711, 429}}";
 			sepNavWindowFrame = "{{4, 220}, {750, 558}}";
+		};
+	};
+	4941A6960AC1D86400D65B8E /* boot.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {711, 4130}}";
+			sepNavSelRange = "{2341, 11}";
+			sepNavVisRect = "{{0, 553}, {711, 645}}";
+			sepNavWindowFrame = "{{15, -1}, {750, 774}}";
 		};
 	};
 	4941A6970AC1D86400D65B8E /* boot_credits.cpp */ = {
@@ -339,6 +343,14 @@
 			sepNavWindowFrame = "{{50, 220}, {750, 558}}";
 		};
 	};
+	4941A6B00AC1D86400D65B8E /* utils.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {950, 8708}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRect = "{{0, 8279}, {711, 429}}";
+			sepNavWindowFrame = "{{15, 215}, {750, 558}}";
+		};
+	};
 	499629630AF50B1F00B6A328 /* global_objects.h */ = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {746, 4942}}";
@@ -365,17 +377,17 @@
 	};
 	4999AC1D0AF407BD004DD3A3 /* audio.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {788, 10024}}";
-			sepNavSelRange = "{16512, 0}";
-			sepNavVisRect = "{{0, 3097}, {711, 429}}";
-			sepNavWindowFrame = "{{130, 110}, {750, 558}}";
+			sepNavIntBoundsRect = "{{0, 0}, {770, 6300}}";
+			sepNavSelRange = "{2225, 0}";
+			sepNavVisRect = "{{0, 668}, {711, 645}}";
+			sepNavWindowFrame = "{{130, 4}, {750, 774}}";
 		};
 	};
 	4999AC1F0AF407BD004DD3A3 /* audio.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {764, 3150}}";
+			sepNavIntBoundsRect = "{{0, 0}, {711, 4256}}";
 			sepNavSelRange = "{0, 0}";
-			sepNavVisRect = "{{0, 0}, {711, 429}}";
+			sepNavVisRect = "{{0, 3827}, {711, 429}}";
 			sepNavWindowFrame = "{{153, 89}, {750, 558}}";
 		};
 	};
@@ -411,10 +423,12 @@
 	};
 	D43080DE0AF982F800A5173A /* Allacrost */ = {
 		isa = PBXExecutable;
-		activeArgIndex = 2147483647;
+		activeArgIndex = 0;
 		activeArgIndices = (
+			YES,
 		);
 		argumentStrings = (
+			"-d all",
 		);
 		autoAttachOnCrash = 1;
 		configStateDict = {
@@ -642,24 +656,6 @@
 			sepNavWindowFrame = "{{58, 211}, {750, 558}}";
 		};
 	};
-	D4EDD40A0C66EA4E00CE712C /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		comments = "error: 'GameVideo' has not been declared";
-		fRef = D4DBE6D80BC1E91A00E85DCB /* tex_mgmt.cpp */;
-		rLen = 1;
-		rLoc = 563;
-		rType = 1;
-	};
-	D4EDD40E0C66EA9A00CE712C /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = D4DBE6D80BC1E91A00E85DCB /* tex_mgmt.cpp */;
-		name = "tex_mgmt.cpp: hoa_video";
-		rLen = 0;
-		rLoc = 1012;
-		rType = 0;
-		vrLen = 939;
-		vrLoc = 348;
-	};
 	D4EE2D630BE85F5B00B7112A /* boot_welcome.cpp */ = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {740, 1834}}";
@@ -678,26 +674,34 @@
 	};
 	D4F110400C58546800ADC969 /* audio_descriptor.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {818, 15484}}";
-			sepNavSelRange = "{8507, 0}";
-			sepNavVisRect = "{{0, 1095}, {711, 429}}";
-			sepNavWindowFrame = "{{15, 215}, {750, 558}}";
+			sepNavIntBoundsRect = "{{0, 0}, {860, 11032}}";
+			sepNavSelRange = "{6168, 0}";
+			sepNavVisRect = "{{0, 2040}, {711, 429}}";
+			sepNavWindowFrame = "{{517, 197}, {750, 558}}";
 		};
 	};
 	D4F110420C58547700ADC969 /* audio_descriptor.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {926, 3416}}";
+			sepNavIntBoundsRect = "{{0, 0}, {944, 5768}}";
 			sepNavSelRange = "{3617, 0}";
-			sepNavVisRect = "{{0, 843}, {711, 429}}";
+			sepNavVisRect = "{{0, 2372}, {711, 429}}";
 			sepNavWindowFrame = "{{38, 194}, {750, 558}}";
 		};
 	};
 	D4F110460C58548B00ADC969 /* audio_input.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {716, 7112}}";
-			sepNavSelRange = "{1, 0}";
-			sepNavVisRect = "{{0, 0}, {711, 429}}";
+			sepNavIntBoundsRect = "{{0, 0}, {896, 5950}}";
+			sepNavSelRange = "{8971, 0}";
+			sepNavVisRect = "{{0, 3530}, {653, 149}}";
 			sepNavWindowFrame = "{{61, 173}, {750, 558}}";
+		};
+	};
+	D4F110470C58548B00ADC969 /* audio_input.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {711, 3836}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRect = "{{0, 3407}, {711, 429}}";
+			sepNavWindowFrame = "{{38, 194}, {750, 558}}";
 		};
 	};
 	D4F110480C58548B00ADC969 /* audio_stream.cpp */ = {

@@ -63,7 +63,7 @@ bool GameAudio::SingletonInitialize() {
 		const ALCchar* device_list = 0;
 		device_list = alcGetString(0, ALC_DEVICE_SPECIFIER); // Get list of all devices (terminated with two '0')
 		if (CheckALCError() == true) {
-			PRINT_WARNING << "failed to retreive the list of available audio devices: " << CreateALCErrorString() << endl;
+			PRINT_WARNING << "failed to retrieve the list of available audio devices: " << CreateALCErrorString() << endl;
 		}
 
 
