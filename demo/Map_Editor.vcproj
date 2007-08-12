@@ -17,7 +17,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)"
-			IntermediateDirectory="$(ConfigurationName)"
+			IntermediateDirectory="Editor-Debug"
 			ConfigurationType="1"
 			>
 			<Tool
@@ -47,7 +47,7 @@
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="4"
-				DisableSpecificWarnings="4996;4005;4800;4267;4355;4288"
+				DisableSpecificWarnings="4996;4005;4800;4267;4355;4288;4290"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -94,7 +94,7 @@
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)"
-			IntermediateDirectory="$(ConfigurationName)"
+			IntermediateDirectory="Editor-Release"
 			ConfigurationType="1"
 			>
 			<Tool
@@ -126,7 +126,7 @@
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
-				DisableSpecificWarnings="4996;4005;4800;4267;4355;4288"
+				DisableSpecificWarnings="4996;4005;4800;4267;4355;4288;4290"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
