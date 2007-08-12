@@ -441,7 +441,11 @@ bool TImage::Regenerate()
 
 	texture_sheet = sheet;
 
-	free(buffer.pixels);
+	if (buffer.pixels) {
+		free(buffer.pixels);
+		buffer.pixels = NULL;
+	}
+
 	return true;
 }
 
@@ -1153,8 +1157,8 @@ bool GameVideo::_RenderText(hoa_utils::ustring &string, TextStyle &style, ImageL
 	line_w -= line_start_x;
 	line_h -= min_y;
 
-	intermediary = SDL_CreateRGBSurface(SDL_SWSURFACE, line_w, line_h, 32, 
-			rmask, gmask, bmask, amask);
+	uint8 *intermed_buf = (uint8 *) calloc(line_w * line_h, 4);
+	intermediary = SDL_CreateRGBSurfaceFrom(intermed_buf, line_w, line_h, 32, line_w * 4, rmask, gmask, bmask, amask);
 
 	if (!intermediary)
 	{
@@ -1205,7 +1209,7 @@ bool GameVideo::_RenderText(hoa_utils::ustring &string, TextStyle &style, ImageL
 
 	load_info.width  = line_w;
 	load_info.height = line_h;
-	load_info.pixels = intermediary->pixels;
+	load_info.pixels = intermed_buf;
 
 	// Prevent SDL from deleting pixel array
 	intermediary->pixels = NULL;
