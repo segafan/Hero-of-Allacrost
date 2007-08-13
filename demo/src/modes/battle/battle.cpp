@@ -49,7 +49,19 @@ namespace private_battle {
 
 BattleMode* current_battle = NULL;
 
+
+////////////////////////////////////////////////////////////////////////////////
+// BattleException class
+////////////////////////////////////////////////////////////////////////////////
+BattleException::BattleException(const std::string & message, const std::string & file, const int line, const std::string & function) throw() :
+	Exception(message, file, line, function) {
+}
+
+BattleException::~BattleException() throw() {
+}
+
 } // namespace private battle
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // BattleMode class -- Initialization and Destruction Code

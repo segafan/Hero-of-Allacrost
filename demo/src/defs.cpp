@@ -627,6 +627,9 @@ void BindEngineToLua() {
 	module(hoa_script::ScriptManager->GetGlobalState(), "hoa_battle")
 	[
 		class_<BattleActor>("BattleActor")
+			.def("GetPhysicalAttack", &BattleActor::GetPhysicalAttack)
+			.def("GetPhysicalDefense", &BattleActor::GetPhysicalDefense)
+			.def("GetCombatEvade", &BattleActor::GetCombatEvade)
 	];
 	} // End using battle mode namespaces
 

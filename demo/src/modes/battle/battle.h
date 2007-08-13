@@ -107,6 +107,15 @@ const bool ACTIVE_BATTLE_MODE = false;
 **/
 float ComputeAveragePartyLevel();
 
+class BattleException : public hoa_utils::Exception {
+public: 
+	//! \brief The constructor
+	BattleException(const std::string & message, const std::string & file="", const int line=-1, const std::string & function="") throw();
+
+    //! \brief The destructor
+	~BattleException() throw();
+};
+
 } // namespace private_battle
 
 /** ****************************************************************************

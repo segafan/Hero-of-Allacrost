@@ -179,7 +179,13 @@ public:
 	//@{
 	virtual hoa_global::GlobalActor* GetActor()
 		{ return _actor; }
-	
+
+	virtual uint32 GetPhysicalAttack();
+
+	virtual uint32 GetPhysicalDefense();
+
+	virtual float GetCombatEvade();
+
 	private_battle::ACTOR_STATE GetState() const
 		{ return _state; }
 
