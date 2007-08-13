@@ -95,6 +95,19 @@ void BattleActor::DrawStaminaIcon(bool is_selected) {
 }
 
 
+uint32 BattleActor::GetPhysicalAttack() {
+	return GetActor()->GetTotalPhysicalAttack();
+}
+
+uint32 BattleActor::GetPhysicalDefense() {
+	return GetActor()->GetTotalPhysicalDefense(0); /// @todo : fix the parameter to a correct attack point index!
+}
+
+float BattleActor::GetCombatEvade() {
+	return GetActor()->GetEvade();
+}
+
+
 
 void BattleActor::ResetWaitTime() {
 	_wait_time.Reset();
