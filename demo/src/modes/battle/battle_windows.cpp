@@ -591,13 +591,13 @@ FinishWindow::FinishWindow() {
 	_finish_outcome.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 
 	vector<ustring> lose_text;
-	lose_text.push_back(MakeUnicodeString("Retry  <R>the battle"));
-	lose_text.push_back(MakeUnicodeString("Load   <R>from last save point"));
-	lose_text.push_back(MakeUnicodeString("Return <R>to main menu"));
-	lose_text.push_back(MakeUnicodeString("Exit   <R>the game"));
+	lose_text.push_back(MakeUnicodeString("Retry the battle"));
+	lose_text.push_back(MakeUnicodeString("Load from last save point"));
+	lose_text.push_back(MakeUnicodeString("Return to main menu"));
+	lose_text.push_back(MakeUnicodeString("Exit the game"));
 	_lose_options.SetOptions(lose_text);
 	_lose_options.SetCellSize(128.0f, 50.0f);
-	_lose_options.SetPosition(530.0f, 380.0f);
+	_lose_options.SetPosition(270.0f, 130.0f);
 	_lose_options.SetSize(1, 4);
 	_lose_options.SetFont("battle");
 	_lose_options.SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
@@ -702,6 +702,8 @@ void FinishWindow::_UpdateWinSpoils() {
 
 
 void FinishWindow::_UpdateAnnounceLose() {
+	_lose_options.Update();
+
 	if (_finish_outcome.IsFinished() == false) {
 		_finish_outcome.Update(SystemManager->GetUpdateTime());
 		
@@ -801,6 +803,8 @@ void FinishWindow::_DrawWinSpoils() {
 
 
 void FinishWindow::_DrawAnnounceLose() {
+	
+	_lose_options.Draw();
 
 }
 
