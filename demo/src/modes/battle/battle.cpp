@@ -206,7 +206,6 @@ void BattleMode::Reset() {
 		_battle_music.push_back(MD);
 	}
 
-//	if (_battle_music.empty() == false && _battle_music.back().IsPlaying() == false) {
 	if (_battle_music.empty() == false && _battle_music.back().IsLooping() == false) {
 		_battle_music.back().Play();
 	}
@@ -468,14 +467,14 @@ void BattleMode::Update() {
 	} // if (_action_queue.size())
 
 	// ----- (4): Try to select an idle character if no character is currently selected
-	//if (_selected_character == NULL) {
+	if (_selected_character == NULL) {
 		_selected_character_index = GetIndexOfFirstIdleCharacter();
 		if (_selected_character_index != static_cast<int32>(INVALID_BATTLE_ACTOR_INDEX)) {
 			_selected_character = GetPlayerCharacterAt(_selected_character_index);
 			_selected_character->GetWaitTime()->Pause();
 			_action_window->Initialize(_selected_character);
 		}
-	//}
+	}
 
 	// ----- (5): Update the action window if the player is making an action or target selection
 	if (_action_window->GetState() != VIEW_INVALID)
