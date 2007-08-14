@@ -132,7 +132,7 @@ void SystemTimer::_UpdateTimer() {
 			_time_expired -= _duration;
 		}
 		// Checks if the number of loops have expired
-		else if (_times_completed > static_cast<uint32>(_number_loops)) {
+		else if (_times_completed >= static_cast<uint32>(_number_loops)) {
 			_time_expired = 0;
 			_state = SYSTEM_TIMER_FINISHED;
 		}

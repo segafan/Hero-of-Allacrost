@@ -169,7 +169,7 @@ BattleCharacter::~BattleCharacter() {
 
 
 void BattleCharacter::Update() {
-	if (_state == ACTOR_IDLE)
+	if (_state == ACTOR_IDLE && GetWaitTime()->IsRunning())
 		_stamina_icon_location += SystemManager->GetUpdateTime() * (405.0f / _wait_time.GetDuration());
 
 	if (_state == ACTOR_ACTING) {
@@ -372,6 +372,8 @@ void BattleEnemy::Update() {
 		if (_wait_time.IsFinished()) { // Indicates that the idle state is now finished
 			_stamina_icon_location = STAMINA_LOCATION_SELECT;
 			_state = ACTOR_WARM_UP;
+			//Stop the timer!!
+			_wait_time.Pause();
 			_DecideAction();
 		}
 		else { // If still in IDLE state, update the stamina icon's location
