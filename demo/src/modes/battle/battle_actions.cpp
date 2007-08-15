@@ -59,7 +59,8 @@ BattleAction::BattleAction(BattleActor* source, BattleActor* target, GlobalAttac
 
 void BattleAction::Update() {
 	if (_warm_up_time.IsRunning()) {
-		float offset = SystemManager->GetUpdateTime() * (107.f / _warm_up_time.GetDuration());
+		//float offset = SystemManager->GetUpdateTime() * (107.f / _warm_up_time.GetDuration());
+		float offset = SystemManager->GetUpdateTime() * (100.f / _warm_up_time.GetDuration());
 		_source->SetStaminaIconLocation(_source->GetStaminaIconLocation() + offset);
 	}
 
@@ -119,7 +120,8 @@ void SkillAction::RunScript() {
 
 	// FIX ME temporary code!!!
 	if (_source) {
-		_source->TEMP_ResetAttackTimer();
+		//_source->TEMP_ResetAttackTimer();
+		_source->ResetWaitTime();
 	}
 } // void SkillAction::RunScript()
 
@@ -175,7 +177,8 @@ void ItemAction::RunScript() {
 
 	// FIX ME temporary code!!!
 	if (_source) {
-		_source->TEMP_ResetAttackTimer();
+		//_source->TEMP_ResetAttackTimer();
+		_source->ResetWaitTime();
 	}
 } // void ItemAction::RunScript()
 

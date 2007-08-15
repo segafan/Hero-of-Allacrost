@@ -86,12 +86,12 @@ void BattleActor::ConstructInformation(hoa_utils::ustring& info, int32 ap_index)
 
 
 void BattleActor::DrawStaminaIcon(bool is_selected) {
-	if (IsAlive()) {
+	//if (IsAlive()) {
 		VideoManager->Move(995, _stamina_icon_location);
 		VideoManager->DrawImage(_stamina_icon);
 		if (is_selected)
 			VideoManager->DrawImage(current_battle->_stamina_icon_selected);
-	}
+	//}
 }
 
 
@@ -170,7 +170,8 @@ BattleCharacter::~BattleCharacter() {
 
 void BattleCharacter::Update() {
 	if (_state == ACTOR_IDLE && GetWaitTime()->IsRunning())
-		_stamina_icon_location += SystemManager->GetUpdateTime() * (405.0f / _wait_time.GetDuration());
+		_stamina_icon_location += SystemManager->GetUpdateTime() * (300.0f / _wait_time.GetDuration());
+		//_stamina_icon_location += SystemManager->GetUpdateTime() * (405.0f / _wait_time.GetDuration());
 
 	if (_state == ACTOR_ACTING) {
 		if ((_x_location - _x_origin) < 50)
@@ -377,7 +378,8 @@ void BattleEnemy::Update() {
 			_DecideAction();
 		}
 		else { // If still in IDLE state, update the stamina icon's location
-			_stamina_icon_location += SystemManager->GetUpdateTime() * (405.0f / _wait_time.GetDuration());
+			//_stamina_icon_location += SystemManager->GetUpdateTime() * (405.0f / _wait_time.GetDuration());
+			_stamina_icon_location += SystemManager->GetUpdateTime() * (300.0f / _wait_time.GetDuration());
 		}
 		return;
 	}

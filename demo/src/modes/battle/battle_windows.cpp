@@ -107,13 +107,19 @@ ActionWindow::ActionWindow() {
 	// Setup rendered text
 	_skill_selection_header.SetAlignment(RenderedText::ALIGN_LEFT);
 	_item_selection_header.SetAlignment(RenderedText::ALIGN_LEFT);
+
 	_action_information.SetAlignment(RenderedText::ALIGN_LEFT);
+	_action_information.SetColor(Color(1.0f, 1.0f, 1.0f, 1.0f));
+
 	_target_information.SetAlignment(RenderedText::ALIGN_LEFT);
+	_target_information.SetColor(Color(1.0f, 1.0f, 1.0f, 1.0f));
 	
 	VideoManager->SetFont("battle");
 	VideoManager->SetTextColor(Color(1.0f, 1.0f, 0.0f, 0.8f)); // 80% translucent yellow text
 	_skill_selection_header.SetText("Skill                          SP");
+	_skill_selection_header.SetColor(Color(1.0f, 1.0f, 0.0f, 0.8f));
 	_item_selection_header.SetText("Item                          QTY");
+	_item_selection_header.SetColor(Color(1.0f, 1.0f, 0.0f, 0.8f));
 
 	Reset();
 } // ActionWindow::ActionWindow()
@@ -401,6 +407,7 @@ void ActionWindow::_DrawActionSelection() {
 	// Draw the action list header text
 	VideoManager->Move(640.0f, 125.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, 0);
+	VideoManager->SetTextColor(Color(1.0f, 1.0f, 0.0f, 0.8f)); // 80% translucent yellow text
 	if (_selected_action_category != ACTION_TYPE_ITEM) {
 		_skill_selection_header.Draw();
 	}
@@ -536,7 +543,7 @@ void ActionWindow::_ConstructTargetInformation() {
 		// TODO: construct a list of all characters or enemies depending upon the type
 	}
 
-	VideoManager->SetTextColor(Color::white);
+	//VideoManager->SetTextColor(Color::white);
 	_target_information.SetText(target_text);
 } // void ActionWindow::_ConstructTargetInformation()
 
@@ -563,7 +570,7 @@ void ActionWindow::_ConstructActionInformation() {
 			MakeUnicodeString("\nTarget Type: TODO");
 	}
 
-	VideoManager->SetTextColor(Color::white);
+	//VideoManager->SetTextColor(Color::white);
 	_action_information.SetText(action_text);
 } // void ActionWindow::_ConstructActionInformation()
 
