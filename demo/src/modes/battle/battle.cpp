@@ -340,28 +340,6 @@ void BattleMode::_Initialize() {
 			_min_agility = _character_actors[i]->GetActor()->GetAgility();
 	}
 
-	//Now adjust starting wait times based on agility proportions
-	//If current actor's agility is twice the lowest agility, then
-	//they will have a wait time that is half of the slowest actor
-	float proportion;
-
-	for (uint8 i = 0; i < _enemy_actors.size(); i++) {
-		proportion = static_cast<float>(_min_agility) / static_cast<float>(_enemy_actors[i]->GetActor()->GetAgility());
-		_enemy_actors[i]->GetWaitTime()->Initialize(static_cast<uint32>(MAX_INIT_WAIT_TIME * proportion));
-
-		//Start the timer.  We can do this here because the calculations will be done so quickly
-		//that the other chars wont fall far behind.
-		_enemy_actors[i]->ResetWaitTime();
-	}
-
-	for (uint8 i = 0; i < _character_actors.size(); i++) {
-		proportion = static_cast<float>(_min_agility) / static_cast<float>(_character_actors[i]->GetActor()->GetAgility());
-		_character_actors[i]->GetWaitTime()->Initialize(static_cast<uint32>(MAX_INIT_WAIT_TIME * proportion));
-
-		//Start the timer.  We can do this here because the calculations will be done so quickly
-		//that the other chars wont fall far behind.
-		_character_actors[i]->ResetWaitTime();
-	}
 
 	// Andy: Once every game loop, the SystemManager's timers are updated
 	// However, in between calls, battle mode is constructed. As part
@@ -384,7 +362,34 @@ void BattleMode::_Initialize() {
 
 	//FIX ME This will not work in the future (i.e. paralysis)...realized this
 	//after writing all the above crap
+	//CD: Had to move this to before timers are initalized, otherwise this call will give
+	//our timers a little extra nudge with regards to time elapsed, thus making the portraits
+	//stop before they reach they yellow/orange line
 	SystemManager->UpdateTimers();
+
+
+	//Now adjust starting wait times based on agility proportions
+	//If current actor's agility is twice the lowest agility, then
+	//they will have a wait time that is half of the slowest actor
+	float proportion;
+
+	for (uint8 i = 0; i < _enemy_actors.size(); i++) {
+		proportion = static_cast<float>(_min_agility) / static_cast<float>(_enemy_actors[i]->GetActor()->GetAgility());
+		_enemy_actors[i]->GetWaitTime()->Initialize(static_cast<uint32>(MAX_INIT_WAIT_TIME * proportion));
+
+		//Start the timer.  We can do this here because the calculations will be done so quickly
+		//that the other chars wont fall far behind.
+		_enemy_actors[i]->ResetWaitTime();
+	}
+
+	for (uint8 i = 0; i < _character_actors.size(); i++) {
+		proportion = static_cast<float>(_min_agility) / static_cast<float>(_character_actors[i]->GetActor()->GetAgility());
+		_character_actors[i]->GetWaitTime()->Initialize(static_cast<uint32>(MAX_INIT_WAIT_TIME * proportion));
+
+		//Start the timer.  We can do this here because the calculations will be done so quickly
+		//that the other chars wont fall far behind.
+		_character_actors[i]->ResetWaitTime();
+	}
 
 	_initialized = true;
 } // void BattleMode::_Initialize()
@@ -591,36 +596,41 @@ void BattleMode::_DrawStaminaBar() {
 			live_actors.push_back(_enemy_actors[i]);
 	}
 
-	std::vector<bool> selected(live_actors.size(), false);
+	//std::vector<bool> selected(live_actors.size(), false);
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 
+	//CD: Condensed the below code so it takes fewer iterations to draw the portraits
 	if (target_type  == GLOBAL_TARGET_PARTY && target_character == true) { // All characters are selected
 		for (uint32 i = 0; i < live_actors.size(); i++) {
-			if (live_actors[i]->IsEnemy() == false) {
+			/*if (live_actors[i]->IsEnemy() == false) {
 				selected[i] = true;
-			}
+			}*/
+			live_actors[i]->DrawStaminaIcon(!live_actors[i]->IsEnemy());
 		}
 	}
 	else if (target_type  == GLOBAL_TARGET_PARTY && target_character == false) { // All enemies are selected
 		for (uint32 i = 0; i < live_actors.size(); i++) {
-			if (live_actors[i]->IsEnemy() == true) {
+			/*if (live_actors[i]->IsEnemy() == true) {
 				selected[i] = true;
-			}
+			}*/
+			live_actors[i]->DrawStaminaIcon(live_actors[i]->IsEnemy());
 		}
 	}
 	else { // Find the actor who is the selected target
 		for (uint32 i = 0; i < live_actors.size(); i++) {
-			if (live_actors[i] == _selected_target) {
+			/*if (live_actors[i] == _selected_target) {
 				selected[i] = true;
 				break;
-			}
+			}*/
+			live_actors[i]->DrawStaminaIcon(live_actors[i] == _selected_target);
 		}
 	}
 
 	// ----- (3): Draw all stamina icons for live actors
-	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
+	/*VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 	for (uint32 i = 0; i < live_actors.size(); i++) {
 		live_actors[i]->DrawStaminaIcon(selected[i]);
-	}
+	}*/
 } // void BattleMode::_DrawStaminaBar()
 
 ////////////////////////////////////////////////////////////////////////////////
