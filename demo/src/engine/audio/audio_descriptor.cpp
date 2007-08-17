@@ -135,7 +135,7 @@ AudioDescriptor::AudioDescriptor(const AudioDescriptor& copy) :
 
 	// If the copy is not in the unloaded state, print a warning
 	if (copy._state != AUDIO_STATE_UNLOADED) {
-		IF_PRINT_WARNING(AUDIO_DEBUG) << "created a copy of an already initialiazed AudioDescriptor" << endl;
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "created a copy of an already initialized AudioDescriptor" << endl;
 	}
 }
 
@@ -332,8 +332,11 @@ AUDIO_STATE AudioDescriptor::GetState() {
 
 void AudioDescriptor::Play() {
 	if (_source == NULL) {
-		IF_PRINT_WARNING(AUDIO_DEBUG) << "did not have access to valid AudioSource" << endl;
-		return;
+		_source = AudioManager->_AcquireAudioSource();
+		if (_source == NULL) {
+			IF_PRINT_WARNING(AUDIO_DEBUG) << "did not have access to valid AudioSource" << endl;
+			return;
+		}
 	}
 
 	if (_stream && _stream->GetEndOfStream()) {
@@ -545,8 +548,10 @@ void AudioDescriptor::SetDirection(const float direction[3]) {
 void AudioDescriptor::DEBUG_PrintInfo() {
 	cout << "*** Audio Descriptor Information ***" << endl;
 
-	uint8 num_channels = 0;
-	uint8 bits_per_sample = 0;
+	// These were changed to regular ints from uint8s because the variables were not being printed out correctly.
+	// I guess the << operator doesn't know about uint8s. (~gorzuate)
+	int num_channels = 0;
+	int bits_per_sample = 0;
 	switch (_format) {
 		case AL_FORMAT_MONO8:
 			num_channels = 1;
