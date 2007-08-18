@@ -599,21 +599,25 @@ void BattleMode::_DrawStaminaBar() {
 	//std::vector<bool> selected(live_actors.size(), false);
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 
-	//CD: Condensed the below code so it takes fewer iterations to draw the portraits
-	if (target_type  == GLOBAL_TARGET_PARTY && target_character == true) { // All characters are selected
-		for (uint32 i = 0; i < live_actors.size(); i++) {
-			/*if (live_actors[i]->IsEnemy() == false) {
-				selected[i] = true;
-			}*/
-			live_actors[i]->DrawStaminaIcon(!live_actors[i]->IsEnemy());
+	//CD: Condensed the below code so it takes fewer iterations and if checks
+	//to draw the portraits (on average)
+	if (target_type  == GLOBAL_TARGET_PARTY)
+	{
+		if (target_character == true) { // All characters are selected
+			for (uint32 i = 0; i < live_actors.size(); i++) {
+				/*if (live_actors[i]->IsEnemy() == false) {
+					selected[i] = true;
+				}*/
+				live_actors[i]->DrawStaminaIcon(!live_actors[i]->IsEnemy());
+			}
 		}
-	}
-	else if (target_type  == GLOBAL_TARGET_PARTY && target_character == false) { // All enemies are selected
-		for (uint32 i = 0; i < live_actors.size(); i++) {
-			/*if (live_actors[i]->IsEnemy() == true) {
-				selected[i] = true;
-			}*/
-			live_actors[i]->DrawStaminaIcon(live_actors[i]->IsEnemy());
+		else { // All enemies are selected
+			for (uint32 i = 0; i < live_actors.size(); i++) {
+				/*if (live_actors[i]->IsEnemy() == true) {
+					selected[i] = true;
+				}*/
+				live_actors[i]->DrawStaminaIcon(live_actors[i]->IsEnemy());
+			}
 		}
 	}
 	else { // Find the actor who is the selected target
@@ -659,21 +663,43 @@ void BattleMode::_SelectNextTarget(bool forward_direction) {
 	}
 
 	uint32 previous_target = _selected_target_index;
-	if (forward_direction) {
-		_selected_target_index++;
-		if (_action_window->_action_target_ally == true && _selected_target_index >= _character_actors.size())
-			_selected_target_index = 0;
-		else if (_action_window->_action_target_ally == false && _selected_target_index >= _enemy_actors.size())
-			_selected_target_index = 0;
+	if (forward_direction)
+	{
+		if (_action_window->_action_target_ally == true)
+		{
+			_selected_target_index++;
+
+			if (_selected_target_index >= _character_actors.size())
+			{
+				_selected_target_index = 0;
+			}
+			_selected_target = _character_actors[_selected_target_index];
+		}
+		else
+		{
+			_selected_target_index = GetIndexOfNextAliveEnemy(forward_direction);
+			_selected_target = (_selected_target_index == INVALID_BATTLE_ACTOR_INDEX) ? NULL : _enemy_actors[_selected_target_index];
+		}
+			
 	}
 
 	else {
-		if (_selected_target_index == 0 && _action_window->_action_target_ally == true)
-			_selected_target_index = _character_actors.size() - 1;
-		else if (_selected_target_index == 0 && _action_window->_action_target_ally == false)
-			_selected_target_index = _enemy_actors.size() - 1;
-		else
+		
+		if (_action_window->_action_target_ally == true)
+		{
 			_selected_target_index--;
+
+			if (_selected_target_index == 0)
+			{
+				_selected_target_index = _character_actors.size() - 1;
+			}
+			_selected_target = _character_actors[_selected_target_index];
+		}
+		else
+		{
+			_selected_target_index = GetIndexOfNextAliveEnemy(forward_direction);
+			_selected_target = (_selected_target_index == INVALID_BATTLE_ACTOR_INDEX) ? NULL : _enemy_actors[_selected_target_index];
+		}	
 	}
 
 	if (previous_target != _selected_target_index)
