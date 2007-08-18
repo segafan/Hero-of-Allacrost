@@ -106,14 +106,15 @@ void SkillAction::RunScript() {
 	} // if (_skill->GetTargetType() == GLOBAL_TARGET_PARTY)
 
 	else {
-		if (_target->IsAlive()) {
-			_skill->BattleExecute(_target, _source);
-		}
+		//CD: We don't check for alive or dead here...what if it's a resurrect spell?
+	//	if (_target->IsAlive()) {
+		_skill->BattleExecute(_target, _source);
+	//	}
 
 		// TODO: what to do if the target is dead? Find a new target? Cancel?
-		else {
+		//else {
 
-		}
+		//}
 	}
 
 	_source->GetActor()->SubtractSkillPoints(_skill->GetSPRequired());
