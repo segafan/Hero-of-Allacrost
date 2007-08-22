@@ -103,7 +103,7 @@ void QuitAllacrost() {
 **/
 void InitializeEngine() throw (Exception) {
 	// Initialize SDL. The video, audio, and joystick subsystems are initialized elsewhere.
- if (SDL_Init(SDL_INIT_TIMER) != 0) {
+	if (SDL_Init(SDL_INIT_TIMER) != 0) {
 		throw Exception("MAIN ERROR: Unable to initialize SDL: ", __FILE__, __LINE__, __FUNCTION__);
 	}
 
@@ -249,11 +249,10 @@ int32 main(int32 argc, char *argv[]) {
 		#ifdef WIN32
 		MessageBox(NULL, e.ToString().c_str(), "Unhandled exception", MB_OK | MB_ICONERROR);
 		#else
-		cerr << e.ToString() << std::endl;
+		cerr << e.ToString() << endl;
 		#endif
 		return EXIT_FAILURE;
 	}
-
 
 	try {
 		// This is the main loop for the game. The loop iterates once for every frame drawn to the screen.
@@ -279,7 +278,7 @@ int32 main(int32 argc, char *argv[]) {
 		#ifdef WIN32
 		MessageBox(NULL, e.ToString().c_str(), "Unhandled exception", MB_OK | MB_ICONERROR);
 		#else
-		cerr << e.ToString() << std::endl;
+		cerr << e.ToString() << endl;
 		#endif
 		return EXIT_FAILURE;
 	}

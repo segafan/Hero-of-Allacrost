@@ -39,6 +39,8 @@ AudioBuffer::AudioBuffer() :
 {
 	alGenBuffers(1, &buffer);
 	if (AudioManager->CheckALError()) {
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "OpenAL error detected after buffer generation: "
+			<< AudioManager->CreateALErrorString() << endl;
 		buffer = 0;
 	}
 }
@@ -135,7 +137,7 @@ AudioDescriptor::AudioDescriptor(const AudioDescriptor& copy) :
 
 	// If the copy is not in the unloaded state, print a warning
 	if (copy._state != AUDIO_STATE_UNLOADED) {
-		IF_PRINT_WARNING(AUDIO_DEBUG) << "created a copy of an already initialized AudioDescriptor" << endl;
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "created a copy of an already initialiazed AudioDescriptor" << endl;
 	}
 }
 
@@ -209,15 +211,10 @@ bool AudioDescriptor::LoadAudio(const string& filename, AUDIO_LOAD load_type, ui
 		_data = NULL;
 
 		// Attempt to acquire a source for the new audio to use
-		_source = AudioManager->_AcquireAudioSource();
+		_AcquireSource();
 		if (_source == NULL) {
 			IF_PRINT_WARNING(AUDIO_DEBUG) << "could not acquire audio source for new audio file: " << filename << endl;
-			return false;
 		}
-
-		alSourcei(_source->source, AL_BUFFER, _buffer->buffer);
-		_source->owner = this;
-		_SetSourceProperties();
 	} // if (load_type == AUDIO_LOAD_STATIC)
 
 	// Stream the audio from the file data
@@ -231,12 +228,7 @@ bool AudioDescriptor::LoadAudio(const string& filename, AUDIO_LOAD load_type, ui
 		_source = AudioManager->_AcquireAudioSource ();
 		if (_source == NULL) {
 			IF_PRINT_WARNING(AUDIO_DEBUG) << "could not acquire audio source for new audio file: " << filename << endl;
-			return false;
 		}
-
-		_source->owner = this;
-		_SetSourceProperties();
-		_PrepareStreamingBuffers();
 	} // else if (load_type == AUDIO_LOAD_STREAM_FILE)
 
 	// Allocate memory for the audio data to remain in and stream it from that location
@@ -252,21 +244,19 @@ bool AudioDescriptor::LoadAudio(const string& filename, AUDIO_LOAD load_type, ui
 		delete[] temp_input;
 
 		// Attempt to acquire a source for the new audio to use
-		_source = AudioManager->_AcquireAudioSource ();
+		_AcquireSource ();
 		if (_source == NULL) {
 			IF_PRINT_WARNING(AUDIO_DEBUG) << "could not acquire audio source for new audio file: " << filename << endl;
-			return false;
 		}
-
-		_source->owner = this;
-		_SetSourceProperties();
-		_PrepareStreamingBuffers();
 	} // else if (load_type == AUDIO_LOAD_STREAM_MEMORY) {
 
 	else {
 		IF_PRINT_WARNING(AUDIO_DEBUG) << "unknown load_type argument passed: " << load_type << endl;
 		return false;
 	}
+
+	if (AudioManager->CheckALError())
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "OpenAL generated the following error: " << AudioManager->CreateALErrorString() << endl;
 
 	return true;
 } // bool AudioDescriptor::LoadAudio(const string& file_name, AUDIO_LOAD load_type, uint32 stream_buffer_size)
@@ -332,7 +322,7 @@ AUDIO_STATE AudioDescriptor::GetState() {
 
 void AudioDescriptor::Play() {
 	if (_source == NULL) {
-		_source = AudioManager->_AcquireAudioSource();
+		_AcquireSource();
 		if (_source == NULL) {
 			IF_PRINT_WARNING(AUDIO_DEBUG) << "did not have access to valid AudioSource" << endl;
 			return;
@@ -548,10 +538,13 @@ void AudioDescriptor::SetDirection(const float direction[3]) {
 void AudioDescriptor::DEBUG_PrintInfo() {
 	cout << "*** Audio Descriptor Information ***" << endl;
 
-	// These were changed to regular ints from uint8s because the variables were not being printed out correctly.
-	// I guess the << operator doesn't know about uint8s. (~gorzuate)
-	int num_channels = 0;
-	int bits_per_sample = 0;
+	if (_input == NULL) {
+		PRINT_WARNING << "no audio data loaded" << endl;
+		return;
+	}
+
+	uint8 num_channels = 0;
+	uint8 bits_per_sample = 0;
 	switch (_format) {
 		case AL_FORMAT_MONO8:
 			num_channels = 1;
@@ -574,18 +567,19 @@ void AudioDescriptor::DEBUG_PrintInfo() {
 			break;
 	}
 
-	cout << "Channels:           " << num_channels << endl;
-	cout << "Bits Per Samples:   " << bits_per_sample << endl;
-	cout << "Frequency:          " << _input->GetSamplesPerSecond() << endl;
-	cout << "Samples:            " << _input->GetTotalNumberSamples() << endl;
-	cout << "Time:               " << _input->GetPlayTime() << endl;
+	cout << "Filename:          " << _input->GetFilename() << endl;
+	printf("Channels:           %d\n", num_channels);
+	printf("Bits Per Samples:   %d\n", bits_per_sample);
+	printf("Frequency:          %d\n", _input->GetSamplesPerSecond());
+	printf("Samples:            %d\n", _input->GetTotalNumberSamples());
+	printf("Time:               %f\n", _input->GetPlayTime());
 
 	if (_stream != NULL) {
-		cout << "Load audio type:              streamed" << endl;
+		cout << "Load audio type:    streamed" << endl;
 		cout << "Stream buffer size (samples): " << _stream_buffer_size << endl;
 	}
 	else {
-		cout << "Load audio type:              static" << endl;
+		cout << "Load audio type:    static" << endl;
 	}
 } // void AudioDescriptor::DEBUG_PrintInfo()
 
@@ -634,6 +628,29 @@ void AudioDescriptor::_Update() {
 
 
 
+void AudioDescriptor::_AcquireSource() {
+	if (_source != NULL) {
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "function was invoked when object already had a source acquired" << endl;
+		return;
+	}
+
+	_source = AudioManager->_AcquireAudioSource();
+	if (_source == NULL) {
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "could not acquire audio source for new audio file: " << _input->GetFilename() << endl;
+		return;
+	}
+
+	_source->owner = this;
+	_SetSourceProperties();
+	if (_stream == NULL)
+		alSourcei(_source->source, AL_BUFFER, _buffer->buffer);
+	else
+		_PrepareStreamingBuffers();
+
+} // void AudioDescriptor::_AcquireSource()
+
+
+
 void AudioDescriptor::_SetSourceProperties() {
 	if (_source == NULL) {
 		IF_PRINT_WARNING(AUDIO_DEBUG) << "function was invoked when class did not have access to an audio source" << endl;
@@ -652,12 +669,6 @@ void AudioDescriptor::_SetSourceProperties() {
 	// Set looping (source has looping disabled by default, so only need to check the true case)
 	if (_looping)
 		alSourcei(_source->source, AL_LOOPING, AL_TRUE);
-
-	// Set streaming property on or off
-	if (_stream != NULL)
-		alSourcei(_source->source, AL_SOURCE_TYPE, AL_STREAMING);
-	else
-		alSourcei(_source->source, AL_SOURCE_TYPE, AL_STATIC);
 
 	//! \todo More properties need to be set here, such as source position, etc.
 }

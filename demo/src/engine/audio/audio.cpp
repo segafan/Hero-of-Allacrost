@@ -133,8 +133,7 @@ bool GameAudio::SingletonInitialize() {
 			_max_sources = i;
 			break;
 		}
-		_audio_sources.push_back(new private_audio::AudioSource);
-		_audio_sources.back()->source = source;
+		_audio_sources.push_back(new private_audio::AudioSource(source));
 	}
 
 	if (_max_sources == 0) {
