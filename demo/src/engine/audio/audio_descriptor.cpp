@@ -137,7 +137,7 @@ AudioDescriptor::AudioDescriptor(const AudioDescriptor& copy) :
 
 	// If the copy is not in the unloaded state, print a warning
 	if (copy._state != AUDIO_STATE_UNLOADED) {
-		IF_PRINT_WARNING(AUDIO_DEBUG) << "created a copy of an already initialiazed AudioDescriptor" << endl;
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "created a copy of an already initialized AudioDescriptor" << endl;
 	}
 }
 
@@ -543,8 +543,8 @@ void AudioDescriptor::DEBUG_PrintInfo() {
 		return;
 	}
 
-	uint8 num_channels = 0;
-	uint8 bits_per_sample = 0;
+	uint16 num_channels = 0;
+	uint16 bits_per_sample = 0;
 	switch (_format) {
 		case AL_FORMAT_MONO8:
 			num_channels = 1;
