@@ -121,8 +121,9 @@ public:
 *** ***************************************************************************/
 class AudioSource {
 public:
-	AudioSource() :
-		source(0), owner(NULL) {}
+	//! \param al_source A valid OpenAL source that has been generated
+	AudioSource(ALuint al_source) :
+		source(al_source), owner(NULL) {}
 
 	~AudioSource();
 
@@ -337,6 +338,13 @@ private:
 	**/
 	void _Update();
 
+	/** \brief Acquires an audio source for playback
+	*** This function is called whenever an audio piece is loaded and whenever the Play operation is specified on
+	*** the audio, but the audio currently does not have a source. It is not guaranteed that the source acquisition
+	*** will be successful, as all other sources may be occupied by other audio.
+	**/
+	void _AcquireSource();
+
 	/** \brief Sets all of the relevant properties for the OpenAL source
 	*** This function should be called whenever a new source is allocated for the audio to use.
 	*** It sets all of the necessary properties for the OpenAL source, such as the volume (gain),
@@ -344,7 +352,7 @@ private:
 	**/
 	void _SetSourceProperties();
 
-	/** \brief Prepares streaming buffers when used for first time or after a seeking operation.
+	/** \brief Prepares streaming buffers when a new source is acquired or after a seeking operation.
 	*** This is a special case, since the already queued buffers must be unqueued, and the new
 	*** ones must be refilled. This function should only be called for streaming audio.
 	**/
