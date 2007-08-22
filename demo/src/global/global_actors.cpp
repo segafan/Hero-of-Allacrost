@@ -356,23 +356,39 @@ GlobalArmor* GlobalActor::EquipArmor(GlobalArmor* armor, uint32 index) {
 // -----------------------------------------------------------------------------
 
 GlobalCharacterGrowth::~GlobalCharacterGrowth() {
-	for (list<GlobalSkill*>::iterator i = _skills_learned.begin(); i != _skills_learned.end();) {
-		delete (*i);
-		i = _skills_learned.erase(i);
-	}
+	for (uint32 i = 0; i < _skills_learned.size(); i++)
+		delete _skills_learned[i];
+	_skills_learned.clear();
 }
 
 
 
 void GlobalCharacterGrowth::AcknowledgeGrowth() {
 	if (_growth_detected == false) {
-		if (GLOBAL_DEBUG)
-			cerr << "GLOBAL WARNING: GlobalCharacterGrowth::AcknowledgeGrowth() was invoked when there was no character "
-				<< "growth detected" << endl;
+		IF_PRINT_WARNING(GLOBAL_DEBUG) << "function was invoked when there was no character growth detected" << endl;
 		return;
 	}
 
 	_growth_detected = false;
+
+	// Add all growth stats to the character actor
+	if (_hit_points_growth != 0)
+		_character_owner->AddHitPoints(_hit_points_growth);
+	if (_skill_points_growth != 0)
+		_character_owner->AddSkillPoints(_skill_points_growth);
+	if (_strength_growth != 0)
+		_character_owner->AddStrength(_strength_growth);
+	if (_vigor_growth != 0)
+		_character_owner->AddVigor(_vigor_growth);
+	if (_fortitude_growth != 0)
+		_character_owner->AddFortitude(_fortitude_growth);
+	if (_protection_growth != 0)
+		_character_owner->AddProtection(_protection_growth);
+	if (_agility_growth != 0)
+		_character_owner->AddAgility(_agility_growth);
+	if (IsFloatEqual(_evade_growth, 0.0f) == false)
+		_character_owner->AddEvade(_evade_growth);
+
 	_hit_points_growth = 0;
 	_skill_points_growth = 0;
 	_strength_growth = 0;
@@ -384,15 +400,40 @@ void GlobalCharacterGrowth::AcknowledgeGrowth() {
 
 	// If a new experience level has been gained, we must retrieve the growth data for the new experience level
 	if (_experience_level_gained) {
+		// Add any newly learned skills
+		for (uint32 i = 0; i < _skills_learned.size(); i++) {
+			GlobalSkill* skill = _skills_learned[i];
+			if (_character_owner->_skills.find(skill->GetID()) != _character_owner->_skills.end()) {
+				IF_PRINT_WARNING(GLOBAL_DEBUG) <<  "character had already learned the skill with the id: " << skill->GetID() << endl;
+				delete _skills_learned[i];
+				continue;
+			}
+
+			// Insert the pointer to the new skill inside of the global skills map and the skill type vector
+			_character_owner->_skills.insert(make_pair(skill->GetID(), skill));
+			switch (skill->GetType()) {
+				case GLOBAL_SKILL_ATTACK:
+					_character_owner->_attack_skills.push_back(skill);
+					break;
+				case GLOBAL_SKILL_DEFEND:
+					_character_owner->_defense_skills.push_back(skill);
+					break;
+				case GLOBAL_SKILL_SUPPORT:
+					_character_owner->_support_skills.push_back(skill);
+					break;
+				default:
+					IF_PRINT_WARNING(GLOBAL_DEBUG) << "new learned skill had an unknown skill type: " << skill->GetType() << endl;
+					break;
+			}
+		}
+	
 		_character_owner->_experience_level += 1;
 		_experience_level_gained = false;
 		_DetermineNextLevelExperience();
 
 		ReadScriptDescriptor character_script;
 		if (character_script.OpenFile("dat/characters.lua") == false) {
-			if (GLOBAL_DEBUG)
-				cerr << "GLOBAL ERROR: GlobalCharacterGrowth::AcknowledgeGrowth() failed to open the script file containing the "
-					<< "character's definition when the character reached a new experience level" << endl;
+			PRINT_ERROR << "failed to open the characters.lua script file when the character reached a new experience level" << endl;
 			return;
 		}
 
@@ -420,7 +461,7 @@ void GlobalCharacterGrowth::_AddSkill(uint32 skill_id) {
 	}
 
 	// Make sure we don't add a skill to learn more than once
-	for (list<GlobalSkill*>::iterator i = _skills_learned.begin(); i != _skills_learned.end(); i++) {
+	for (vector<GlobalSkill*>::iterator i = _skills_learned.begin(); i != _skills_learned.end(); i++) {
 		if (skill_id == (*i)->GetID()) {
 			if (GLOBAL_DEBUG)
 				cerr << "GLOBAL WARNING: GlobalCharacterGrowth::_AddSkill() failed because the skill to be added was already "
@@ -480,19 +521,6 @@ void GlobalCharacterGrowth::_CheckForGrowth() {
 			_evade_growth += _evade_periodic_growth[i].second;
 		_evade_periodic_growth.clear();
 
-		// Make a run through the skills to learn and make sure that the character does not already know that skill
-		for (list<GlobalSkill*>::iterator i = _skills_learned.begin(); i != _skills_learned.end();) {
-			if (_character_owner->GetSkill(*i) == NULL) { // If true then the skill to learn is not already known by the character
-				i++;
-			}
-			else {
-				if (GLOBAL_DEBUG)
-					cerr << "GLOBAL WARNING: GlobalCharacterGrowth::_CheckForGrowth() detected that the character already knew the skill "
-						<< "that was to be learned on the next experience level. The ID of that skill was: " << (*i)->GetID() << endl;
-				delete *i;
-				i = _skills_learned.erase(i);
-			}
-		}
 		
 		return;
 	} // if (_actor_ower->GetExperiencePoints() >= _experience_for_next_level)
@@ -560,7 +588,7 @@ void GlobalCharacterGrowth::_CheckForGrowth() {
 			break;
 	} // switch (_growth_detected)
 
-	// ----- (3): If there is no growth detected update all periodic growth containers
+	// ----- (3): If there is growth detected update all periodic growth containers
 	if (_growth_detected == true) {
 		while (_hit_points_periodic_growth.begin() != _hit_points_periodic_growth.end()) {
 			if (_character_owner->GetExperiencePoints() >= _hit_points_periodic_growth.begin()->first) {

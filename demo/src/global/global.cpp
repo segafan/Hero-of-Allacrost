@@ -924,7 +924,7 @@ void GameGlobal::_SaveCharacter(WriteScriptDescriptor& file, GlobalCharacter* ch
 	file.WriteLine("\n\t\t\t},");
 
 	file.WriteLine("\t\t\tskills_learned = { ");
-	for (list<GlobalSkill*>::iterator i = growth->_skills_learned.begin(); i != growth->_skills_learned.end(); i++) {
+	for (vector<GlobalSkill*>::iterator i = growth->_skills_learned.begin(); i != growth->_skills_learned.end(); i++) {
 		if (i == growth->_skills_learned.begin())
 			file.WriteLine("\t\t\t\t", false);
 		else

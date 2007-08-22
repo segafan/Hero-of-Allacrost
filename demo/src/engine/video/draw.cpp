@@ -222,14 +222,7 @@ void GameVideo::_DrawElement(const BaseImageElement& element, const Color* color
 			glEnableClientState(GL_COLOR_ARRAY);
 			glColorPointer(4, GL_FLOAT, 0, (GLfloat*)color_array);
 		}
-		// Always use a vertex array
-		glEnableClientState(GL_VERTEX_ARRAY);
 
-		// Setup the vertex array pointer
-		glVertexPointer(coords_per_vertex, GL_FLOAT, 0, vert_coords);
-
-		// Draw the object using the array pointers we've just setup
-		glDrawArrays(GL_QUADS, 0, num_vertexes);
 	} // if (img)
 
 	else {
@@ -243,25 +236,20 @@ void GameVideo::_DrawElement(const BaseImageElement& element, const Color* color
 			glColorPointer(4, GL_FLOAT, 0, (GLfloat*)color_array);
 		}
 
-		// Always use a vertex array
-		glEnableClientState(GL_VERTEX_ARRAY);
-
-		// Setup the vertex array pointer
-		glVertexPointer(coords_per_vertex, GL_FLOAT, 0, vert_coords);
-
 		// Disable texturing as we're using pure colour
 		glDisable(GL_TEXTURE_2D);
-
-		// Draw the object using the array pointers we've just setup
-		glDrawArrays(GL_QUADS, 0, num_vertexes);
 	}
+
+	// Use a vertex array to draw all the vertices
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(coords_per_vertex, GL_FLOAT, 0, vert_coords);
+	glDrawArrays(GL_QUADS, 0, num_vertexes);
 
 	if (_current_context.blend)
 		glDisable(GL_BLEND);
 	
 	if (glGetError()) {
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: glGetError() returned true in _DrawElement()!" << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "glGetError() returned true" << endl;
 	}
 } // void GameVideo::_DrawElement(const BaseImageElement &element, const Color *color_array)
 

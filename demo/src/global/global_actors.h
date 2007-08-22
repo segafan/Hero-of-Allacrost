@@ -626,13 +626,13 @@ protected:
 *** manages and updates the character's growth. The primary reason that this
 *** class exists is to provide an interface for external code to determine
 *** when character growth occurs, inform the player of the growth, and
-*** acknoleged the growth.
+*** acknowleged the growth.
 ***
 *** The recommended proceedure for processing character growth is as follows:
 *** -# If the return value of GlobalCharacter::AddExperiencePoints is true, growth
 ***    has occured and should be processed.
 *** -# Call GlobalCharacter::GetGrowth() to retrieve a pointer to this object
-*** -# Call IsExperienceLevel() to determine whether the type growth is a new 
+*** -# Call IsExperienceLevel() to determine whether the type growth is a new
 ***    experience level, or simply gradual growth.
 *** -# If the growth type is gradual, call the various Growth() methods and
 ***    report any non-zero values to the player. Then call AcknoledgeGrowth()
@@ -645,8 +645,6 @@ protected:
 *** the new experience level to gain). Thus, you should strongly consider calling
 *** the IsGrowthDetected() method after AcknowledgeGrowth() to report any further
 *** character growth that occured after the character reached a new level.
-*** 
-*** \todo Add gradual stat growth feature
 *** ***************************************************************************/
 class GlobalCharacterGrowth {
 	friend class GameGlobal;
@@ -694,7 +692,7 @@ public:
 	float GetEvadeGrowth() const
 		{ return _evade_growth; }
 
-	std::list<GlobalSkill*>* GetSkillsLearned()
+	std::vector<GlobalSkill*>* GetSkillsLearned()
 		{ return &_skills_learned; }
 	//@}
 
@@ -719,8 +717,9 @@ private:
 	*** has enough experience points to meet a growth requirement. They are all cleared to zero after
 	*** a call to AcknowledgeGrowth()
 	***
-	*** \note These members are given read/write access in Lua so that Lua may use them to set the
-	*** growth of stats for the next level
+	*** \note These members are given read/write access in Lua so that Lua may use them to hold new
+	*** growth amounts when a character reaches a new level. Refer to the function DetermineGrowth(character)
+	*** defined in dat/actors/characters.lua
 	**/
 	//@{
 	uint32 _hit_points_growth;
@@ -760,7 +759,7 @@ private:
 	*** These are automatically added to the character by this class after the new experience level growth has been
 	*** acknowledged.
 	**/
-	std::list<GlobalSkill*> _skills_learned;
+	std::vector<GlobalSkill*> _skills_learned;
 
 	/** \brief Adds a new skill for the character to learn at the next experience level gained
 	*** \param skill_id The ID number of the skill to add
