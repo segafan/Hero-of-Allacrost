@@ -92,7 +92,7 @@ public:
 	uint32 GetSamplesPerSecond() const
 		{ return _samples_per_second; }
 
-	uint8 GetBitsPerSample() const
+	uint16 GetBitsPerSample() const
 		{ return _bits_per_sample; }
 
 	uint16 GetNumberChannels() const
@@ -119,10 +119,10 @@ protected:
 	uint32 _samples_per_second;
 
 	//! \brief The number of bits per sample (typically 8 or 16)
-	uint8 _bits_per_sample;
+	uint16 _bits_per_sample;
 
 	//! \brief Channels of the sound (1 = mono, 2 = stereo)
-	uint8 _number_channels;
+	uint16 _number_channels;
 
 	//! \brief The total number of samples of the audio piece
 	uint32 _total_number_samples;

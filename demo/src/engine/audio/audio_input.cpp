@@ -159,7 +159,7 @@ bool WavFile::Initialize() {
 		byte_rate = (static_cast<uint32>(e1) << 24) + (static_cast<uint32>(e2) << 16) + (static_cast<uint32>(e3) << 8) + e4;
 	#endif
 
-	// Get block alignement (channels * bits_per_sample / 8) -- 2 bytes
+	// Get block alignment (channels * bits_per_sample / 8) -- 2 bytes
 	_file_input.read(buffer, 2);
 	memcpy(&_sample_size, buffer, 2);
 	#ifdef __BIG_ENDIAN__ // Swap the bytes for the big endian hardware
@@ -184,7 +184,7 @@ bool WavFile::Initialize() {
 		return false;
 	}
 
-	// Check subchunck 2 size -- 4 bytes
+	// Check subchunk 2 size -- 4 bytes
 	_file_input.read(buffer, 4);
 	memcpy(&_data_size, buffer, 4);
 	#ifdef __BIG_ENDIAN__ // Swap the bytes for the big endian hardware
