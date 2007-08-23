@@ -63,7 +63,7 @@ bool GameAudio::SingletonInitialize() {
 		const ALCchar* device_list = 0;
 		device_list = alcGetString(0, ALC_DEVICE_SPECIFIER); // Get list of all devices (terminated with two '0')
 		if (CheckALCError() == true) {
-			IF_PRINT_WARNING(AUDIO_DEBUG) << "failed to retrieve the list of available audio devices: " << CreateALCErrorString() << endl;
+			PRINT_WARNING << "failed to retrieve the list of available audio devices: " << CreateALCErrorString() << endl;
 		}
 
 
@@ -206,11 +206,11 @@ void GameAudio::Update() {
 
 void GameAudio::SetSoundVolume(float volume) {
 	if (volume < 0.0f) {
-		IF_PRINT_WARNING(AUDIO_DEBUG) << "tried to set sound volume less than 0.0f: " << volume << endl;
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "tried to set sound volume less than 0.0f" << endl;
 		_sound_volume = 0.0f;
 	}
 	else if (volume > 1.0f) {
-		IF_PRINT_WARNING(AUDIO_DEBUG) << "tried to set sound volume greater than 1.0f: " << volume << endl;
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "tried to set sound volume greater than 1.0f" << endl;
 		_sound_volume = 1.0f;
 	}
 	else {
@@ -404,11 +404,10 @@ void GameAudio::DEBUG_PrintInfo() {
 	cout << "*** Audio Information ***" << endl;
 
 	cout << "Maximum number of sources:   " << _max_sources << endl;
-	cout << "Available audio devices:     " << alcGetString (_device, ALC_DEVICE_SPECIFIER) << endl;
-	cout << "Default audio device:        " << alcGetString (_device, ALC_DEFAULT_DEVICE_SPECIFIER) << endl;
-	cout << "OpenAL Version:              " << alGetString (AL_VERSION) << endl;
-	cout << "OpenAL Renderer:             " << alGetString (AL_RENDERER) << endl;
-	cout << "OpenAL Vendor:               " << alGetString (AL_VENDOR) << endl;
+	cout << "Default audio device:        " << alcGetString(_device, ALC_DEFAULT_DEVICE_SPECIFIER) << endl;
+	cout << "OpenAL Version:              " << alGetString(AL_VERSION) << endl;
+	cout << "OpenAL Renderer:             " << alGetString(AL_RENDERER) << endl;
+	cout << "OpenAL Vendor:               " << alGetString(AL_VENDOR) << endl;
 
 	CheckALError();
 
@@ -435,13 +434,26 @@ void GameAudio::DEBUG_PrintInfo() {
 
 
 
-private_audio::AudioSource* GameAudio::_AcquireAudioSource () {
+private_audio::AudioSource* GameAudio::_AcquireAudioSource() {
+	// (1) Find and return the first source that does not have an owner
 	for (vector<AudioSource*>::iterator i = _audio_sources.begin(); i != _audio_sources.end(); i++) {
 		if ((*i)->owner == NULL) {
 			return *i;
 		}
 	}
 
+	// (2) If all sources are owned, find one that is in the initial or stopped state and change its ownership
+	for (vector<AudioSource*>::iterator i = _audio_sources.begin(); i != _audio_sources.end(); i++) {
+		ALint state;
+		alGetSourcei((*i)->source, AL_SOURCE_STATE, &state);
+		if (state == AL_INITIAL || state == AL_STOPPED) {
+			(*i)->owner->_source = NULL;
+			(*i)->Reset(); // this call sets the source owner pointer to NULL
+			return *i;
+		}
+	}
+
+	// (3) Return NULL in the (extremely rare) case that all sources are owned and actively playing or paused
 	return NULL;
 }
 

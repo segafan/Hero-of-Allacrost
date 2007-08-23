@@ -37,7 +37,9 @@ namespace private_audio {
 AudioBuffer::AudioBuffer() :
 	buffer(0)
 {
+	AudioManager->CheckALError(); // Clear the error code
 	alGenBuffers(1, &buffer);
+
 	if (AudioManager->CheckALError()) {
 		IF_PRINT_WARNING(AUDIO_DEBUG) << "OpenAL error detected after buffer generation: "
 			<< AudioManager->CreateALErrorString() << endl;
@@ -120,7 +122,7 @@ AudioDescriptor::AudioDescriptor(const AudioDescriptor& copy) :
 	_input(NULL),
 	_stream(NULL),
 	_data(NULL),
-	_looping(false),
+	_looping(copy._looping),
 	_offset(0),
 	_volume(1.0f),
 	_stream_buffer_size(0)
@@ -137,7 +139,7 @@ AudioDescriptor::AudioDescriptor(const AudioDescriptor& copy) :
 
 	// If the copy is not in the unloaded state, print a warning
 	if (copy._state != AUDIO_STATE_UNLOADED) {
-		IF_PRINT_WARNING(AUDIO_DEBUG) << "created a copy of an already initialized AudioDescriptor" << endl;
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "created a copy of an already initialiazed AudioDescriptor" << endl;
 	}
 }
 
@@ -264,12 +266,15 @@ bool AudioDescriptor::LoadAudio(const string& filename, AUDIO_LOAD load_type, ui
 
 
 void AudioDescriptor::FreeAudio() {
+	if (_source != NULL)
+		Stop();
+
 	_state = AUDIO_STATE_UNLOADED;
 	_offset = 0;
 	_looping = false;
 	_volume = 1.0f;
 
-	// If the sound is still attached to a sound, reset to the default parameters the source
+	// If the source is still attached to a sound, reset to the default parameters the source
 	if (_source != NULL) {
 		_source->Reset();
 		_source = NULL;
@@ -327,6 +332,7 @@ void AudioDescriptor::Play() {
 			IF_PRINT_WARNING(AUDIO_DEBUG) << "did not have access to valid AudioSource" << endl;
 			return;
 		}
+		_SetSourceProperties();
 	}
 
 	if (_stream && _stream->GetEndOfStream()) {
@@ -408,7 +414,7 @@ void AudioDescriptor::SetLooping(bool loop) {
 		if (_looping)
 			alSourcei(_source->source, AL_LOOPING, AL_TRUE);
 		else
-			alSourcei (_source->source, AL_LOOPING, AL_FALSE);
+			alSourcei(_source->source, AL_LOOPING, AL_FALSE);
 	}
 }
 
@@ -477,22 +483,6 @@ void AudioDescriptor::SeekSecond(float second) {
 
 
 
-void AudioDescriptor::SetVolume(float volume) {
-	if (volume < 0.0f) {
-		IF_PRINT_WARNING(AUDIO_DEBUG) << "tried to set volume less than 0.0f: " << volume << endl;
-		_volume = 0.0f;
-	}
-	else if (volume > 1.0f) {
-		IF_PRINT_WARNING(AUDIO_DEBUG) << "tried to set volume greater than 1.0f: " << volume << endl;
-		_volume = 1.0f;
-	}
-	else {
-		_volume = volume;
-	}
-}
-
-
-
 void AudioDescriptor::SetPosition(const float position[3]) {
 	if (_format != AL_FORMAT_MONO8 && _format != AL_FORMAT_MONO16) {
 		IF_PRINT_WARNING(AUDIO_DEBUG) << "audio is stereo channel and will not be effected by function call" << endl;
@@ -543,8 +533,8 @@ void AudioDescriptor::DEBUG_PrintInfo() {
 		return;
 	}
 
-	uint16 num_channels = 0;
-	uint16 bits_per_sample = 0;
+	uint8 num_channels = 0;
+	uint8 bits_per_sample = 0;
 	switch (_format) {
 		case AL_FORMAT_MONO8:
 			num_channels = 1;
@@ -568,20 +558,36 @@ void AudioDescriptor::DEBUG_PrintInfo() {
 	}
 
 	cout << "Filename:          " << _input->GetFilename() << endl;
-	printf("Channels:           %d\n", num_channels);
-	printf("Bits Per Samples:   %d\n", bits_per_sample);
-	printf("Frequency:          %d\n", _input->GetSamplesPerSecond());
-	printf("Samples:            %d\n", _input->GetTotalNumberSamples());
-	printf("Time:               %f\n", _input->GetPlayTime());
+	cout << "Channels:          " << num_channels << endl;
+	cout << "Bits Per Sample:   " << bits_per_sample << endl;
+	cout << "Frequency:         " << _input->GetSamplesPerSecond() << endl;
+	cout << "Samples:           " << _input->GetTotalNumberSamples() << endl;
+	cout << "Time:              " << _input->GetPlayTime() << endl;
 
 	if (_stream != NULL) {
-		cout << "Load audio type:    streamed" << endl;
+		cout << "Audio load type:    streamed" << endl;
 		cout << "Stream buffer size (samples): " << _stream_buffer_size << endl;
 	}
 	else {
-		cout << "Load audio type:    static" << endl;
+		cout << "Audio load type:    static" << endl;
 	}
 } // void AudioDescriptor::DEBUG_PrintInfo()
+
+
+
+void AudioDescriptor::_SetVolumeControl(float volume) {
+	if (volume < 0.0f) {
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "tried to set volume less than 0.0f" << endl;
+		_volume = 0.0f;
+	}
+	else if (volume > 1.0f) {
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "tried to set volume greater than 1.0f" << endl;
+		_volume = 1.0f;
+	}
+	else {
+		_volume = volume;
+	}
+}
 
 
 
@@ -647,7 +653,7 @@ void AudioDescriptor::_AcquireSource() {
 	else
 		_PrepareStreamingBuffers();
 
-} // void AudioDescriptor::_AcquireSource()
+}
 
 
 
@@ -664,7 +670,7 @@ void AudioDescriptor::_SetSourceProperties() {
 	else
 		volume_multiplier = AudioManager->GetMusicVolume();
 
-	alSourcef(_source->source, AL_GAIN, _volume * volume_multiplier);
+	alSourcef(_source->source, AL_GAIN, (ALfloat)(_volume * volume_multiplier));
 
 	// Set looping (source has looping disabled by default, so only need to check the true case)
 	if (_looping)
@@ -725,7 +731,9 @@ void AudioDescriptor::_PrepareStreamingBuffers() {
 // SoundDescriptor class methods
 ////////////////////////////////////////////////////////////////////////////////
 
-SoundDescriptor::SoundDescriptor() {
+SoundDescriptor::SoundDescriptor() :
+	AudioDescriptor()
+{
 	AudioManager->_registered_sounds.push_back(this);
 }
 
@@ -744,12 +752,12 @@ SoundDescriptor::~SoundDescriptor() {
 
 
 void SoundDescriptor::SetVolume(float volume) {
-	AudioDescriptor::SetVolume(volume);
+	AudioDescriptor::_SetVolumeControl(volume);
 
 	float sound_volume = _volume * AudioManager->GetSoundVolume();
 
 	if (_source) {
-			alSourcef(_source->source, AL_GAIN, sound_volume);
+		alSourcef(_source->source, AL_GAIN, (ALfloat)sound_volume);
 	}
 }
 
@@ -757,7 +765,9 @@ void SoundDescriptor::SetVolume(float volume) {
 // MusicDescriptor class methods
 ////////////////////////////////////////////////////////////////////////////////
 
-MusicDescriptor::MusicDescriptor() {
+MusicDescriptor::MusicDescriptor() :
+	AudioDescriptor()
+{
 	_looping = true;
 	AudioManager->_registered_music.push_back(this);
 }
@@ -765,8 +775,9 @@ MusicDescriptor::MusicDescriptor() {
 
 
 MusicDescriptor::~MusicDescriptor() {
-	if (AudioManager->_active_music == this)
+	if (AudioManager->_active_music == this) {
 		AudioManager->_active_music = NULL;
+	}
 
 	for (list<MusicDescriptor*>::iterator i = AudioManager->_registered_music.begin();
 		i != AudioManager->_registered_music.end(); i++) {
@@ -791,12 +802,12 @@ void MusicDescriptor::Play() {
 
 
 void MusicDescriptor::SetVolume(float volume) {
-	AudioDescriptor::SetVolume(volume);
+	AudioDescriptor::_SetVolumeControl(volume);
 
 	float music_volume = _volume * AudioManager->GetMusicVolume();
 
 	if (_source) {
-		alSourcef(_source->source, AL_GAIN, music_volume);
+		alSourcef(_source->source, AL_GAIN, (ALfloat)music_volume);
 	}
 }
 
