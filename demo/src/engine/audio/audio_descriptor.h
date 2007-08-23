@@ -256,11 +256,8 @@ public:
 
 	/** \brief Sets the volume for this particular audio piece
 	*** \param volume The volume level to set, ranging from [0.0f, 1.0f]
-	*** This should be thought of as a helper function to the SetVolume methods
-	*** for the derived classes, which modulate the volume level of the sound/music
-	*** by the global sound and music volume controls in the GameAudio class.
 	**/
-	virtual void SetVolume(float volume);
+	virtual void SetVolume(float volume) = 0;
 
 	/** \name Functions for 3D Spatial Audio
 	*** These functions manipulate and retrieve the 3d properties of the audio. Note that only audio which
@@ -312,7 +309,7 @@ protected:
 	//! \brief The audio position that was last seeked, in samples.
 	uint32 _offset;
 
-	/** \brief The volume of the sound, ranging from 0.0f to 1.0f
+	/** \brief The volume of the audio, ranging from 0.0f to 1.0f
 	*** This isn't actually the true volume of the audio, but rather the modulation
 	*** value of the global sound or music volume level. For example, if this object
 	*** represented a sound and the volume was set to 0.75f, and the global sound
@@ -330,6 +327,14 @@ protected:
 	float _velocity[3];
 	float _direction[3];
 	//@}
+
+	/** \brief Sets the local volume control for this particular audio piece
+	*** \param volume The volume level to set, ranging from [0.0f, 1.0f]
+	*** This should be thought of as a helper function to the SetVolume methods
+	*** for the derived classes, which modulate the volume level of the sound/music
+	*** by the global sound and music volume controls in the GameAudio class.
+	**/
+	void _SetVolumeControl(float volume);
 
 private:
 	/** \brief Updates the audio during playback
