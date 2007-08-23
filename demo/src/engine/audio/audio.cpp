@@ -218,9 +218,9 @@ void GameAudio::SetSoundVolume(float volume) {
 	}
 
 	for (list<SoundDescriptor*>::iterator i = _registered_sounds.begin(); i != _registered_sounds.end(); i++) {
-		// The following line may look like it makes no sense, but the SetVolume call also modulates the
-		// volume by the global sound volume, hence this call actually does update the volume of the object
-		(*i)->SetVolume((*i)->GetVolume());
+		if ((*i)->_source != NULL) {
+			alSourcef((*i)->_source->source, AL_GAIN, _sound_volume * (*i)->GetVolume());
+		}
 	}
 }
 
@@ -240,9 +240,9 @@ void GameAudio::SetMusicVolume(float volume) {
 	}
 
 	for (list<MusicDescriptor*>::iterator i = _registered_music.begin(); i != _registered_music.end(); i++) {
-		// The following line may look like it makes no sense, but the SetVolume call also modulates the
-		// volume by the global music volume, hence this call actually does update the volume of the object
-		(*i)->SetVolume((*i)->GetVolume());
+		if ((*i)->_source != NULL) {
+			alSourcef((*i)->_source->source, AL_GAIN, _music_volume * (*i)->GetVolume());
+		}
 	}
 }
 

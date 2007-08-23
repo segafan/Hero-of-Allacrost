@@ -78,7 +78,7 @@ void AudioSource::Reset() {
 		return;
 	}
 
-	alSourcei(source, AL_LOOPING, AL_FALSE);
+	alSourcei(source, AL_LOOPING, AL_TRUE);
 	alSourcef(source, AL_GAIN, 1.0f);
 	alSourcei(source, AL_SAMPLE_OFFSET, 0);
 	alSourcei(source, AL_BUFFER, 0);
@@ -414,7 +414,7 @@ void AudioDescriptor::SetLooping(bool loop) {
 		if (_looping)
 			alSourcei(_source->source, AL_LOOPING, AL_TRUE);
 		else
-			alSourcei(_source->source, AL_LOOPING, AL_FALSE);
+			alSourcei(_source->source, AL_LOOPING, AL_TRUE);
 	}
 }
 
@@ -670,7 +670,7 @@ void AudioDescriptor::_SetSourceProperties() {
 	else
 		volume_multiplier = AudioManager->GetMusicVolume();
 
-	alSourcef(_source->source, AL_GAIN, (ALfloat)(_volume * volume_multiplier));
+	alSourcef(_source->source, AL_GAIN, _volume * volume_multiplier);
 
 	// Set looping (source has looping disabled by default, so only need to check the true case)
 	if (_looping)
@@ -751,13 +751,21 @@ SoundDescriptor::~SoundDescriptor() {
 
 
 
+SoundDescriptor::SoundDescriptor(const SoundDescriptor& copy) :
+	AudioDescriptor(copy)
+{
+	AudioManager->_registered_sounds.push_back(this);
+}
+
+
+
 void SoundDescriptor::SetVolume(float volume) {
 	AudioDescriptor::_SetVolumeControl(volume);
 
 	float sound_volume = _volume * AudioManager->GetSoundVolume();
 
 	if (_source) {
-		alSourcef(_source->source, AL_GAIN, (ALfloat)sound_volume);
+		alSourcef(_source->source, AL_GAIN, sound_volume);
 	}
 }
 
@@ -786,6 +794,14 @@ MusicDescriptor::~MusicDescriptor() {
 			return;
 		}
 	}
+}
+
+
+
+MusicDescriptor::MusicDescriptor(const MusicDescriptor& copy) :
+	AudioDescriptor(copy)
+{
+	AudioManager->_registered_music.push_back(this);
 }
 
 
