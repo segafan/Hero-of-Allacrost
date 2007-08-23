@@ -376,6 +376,8 @@ public:
 
 	~SoundDescriptor();
 
+	SoundDescriptor(const SoundDescriptor& copy);
+
 	bool IsSound() const
 		{ return true; }
 
@@ -400,6 +402,8 @@ public:
 	MusicDescriptor();
 
 	~MusicDescriptor();
+
+	MusicDescriptor(const MusicDescriptor& copy);
 
 	bool IsSound() const
 		{ return false; }
