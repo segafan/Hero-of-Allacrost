@@ -51,6 +51,21 @@ namespace private_audio {
 //! \brief The maximum default number of audio sources that the engine tries to create
 const uint16 MAX_DEFAULT_AUDIO_SOURCES = 64;
 
+
+
+//! \brief A container class for an element of the LRU audio cache managed by the GameAudio class
+class AudioCacheElement {
+public:
+	AudioCacheElement(uint32 time, AudioDescriptor* aud) :
+		last_update_time(time), audio(aud) {}
+
+	//! \brief Retains the time that the audio was last updated through any operation
+	uint32 last_update_time;
+
+	//! \brief A pointer to the audio descriptor described by the cache element
+	AudioDescriptor* audio;
+};
+
 } // namespace private_audio
 
 /** ****************************************************************************
@@ -191,7 +206,69 @@ public:
 	*** wish to play a sound only once. The sound is loaded (if necessary) into the
 	*** sound cache and played from there.
 	**/
+
+	/** \brief Methods for manipulating audio contained within the audio cache
+	*** \param filename The name of the sound or music file to operate on
+	***
+	*** These methods invoke the named operation on the piece of audio contained
+	*** within the GameAudio's LRU audio cache. The primary intended use for these
+	*** functions are for scripts which simply wish to play a sound once to indicate
+	*** an event or action.
+	***
+	*** The LoadSound/Music functions are not required to use, as invoking a PlaySound/Music
+	*** function will automatically load the audio data if it is not inside the cache already.
+	*** The play, stop, pause, and resume audio operations are the only operations that the user is
+	*** provided with a direct interface to. For any other operations (rewind, seek, volume control,
+	*** looping, etc.), the user must call the RetrieveSound/Music functions to obtain a pointer
+	*** to the audio data and make the desired call on the AudioDescriptor object itself.
+	***
+	*** \note The default parameters for audio loading (static/streaming data type, stream buffer size)
+	*** can not be set nor manipulated with cached audio.
+	**/
+	//@{
+	/** \brief Creates a new SoundDescriptor using the given filename and loads it into the audio cache
+	*** \return True if the sound was loaded into the cache successfully
+	**/
+	bool LoadSound(const std::string& filename);
+
+	/** \brief Creates a new MusicDescriptor using the given filename and loads it into the audio cache
+	*** \return True if the music was loaded into the cache successfully
+	**/
+	bool LoadMusic(const std::string& filename);
+
+	//! \brief Plays a sound that is contained within the audio cache
 	void PlaySound(const std::string& filename);
+
+	//! \brief Plays a piece of music that is contained within the audio cache
+	void PlayMusic(const std::string& filename);
+
+	//! \brief Stops a sound that is playing from within the audio cache
+	void StopSound(const std::string& filename);
+
+	//! \brief Stops a piece of music that is playing from within the audio cache
+	void StopMusic(const std::string& filename)
+		{ StopSound(filename); }
+
+	//! \brief Pauses a sound that is playing from within the audio cache
+	void PauseSound(const std::string& filename);
+
+	//! \brief Pauses a piece of music that is playing from within the audio cache
+	void PauseMusic(const std::string& filename)
+		{ PauseSound(filename); }
+
+	//! \brief Resumes a sound that has been paused from within the audio cache
+	void ResumeSound(const std::string& filename);
+
+	//! \brief Resumes a piece of music that has been paused from within the audio cache
+	void ResumeMusic(const std::string& filename)
+		{ ResumeSound(filename); }
+
+	//! \return A pointer to the SoundDescriptor contained within the cache, or NULL if it could not be found
+	SoundDescriptor* RetrieveSound(const std::string& filename);
+
+	//! \return A pointer to the MusicDescriptor contained within the cache, or NULL if it could not be found
+	MusicDescriptor* RetrieveMusic(const std::string& filename);
+	//@}
 
 	/** \name Error Detection and Processing methods
 	*** Code external to the audio engine should not need to make use of the following methods,
@@ -279,23 +356,38 @@ private:
 	std::list<MusicDescriptor*> _registered_music;
 	//@}
 
-	/** \brief A LRU cache of sounds which are managed internally by the audio engine
+	/** \brief A LRU cache of audio which is managed internally by the audio engine
 	*** The purpose of this cache is to allow the user to quickly and easily play
-	*** sounds without having to maintain a SoundDescriptor object in memory. This is
-	*** used, for example, by script functions which simply want to play a sound to
+	*** sounds and music without having to maintain a Sound//MusicDescriptor object in memory.
+	*** This is used, for example, by script functions which simply want to play a sound to
 	*** indicate an action or event has occurred.
 	***
-	*** The sound cache is a LRU (least recently used) structure, meaning that if an
+	*** The audio cache is a LRU (least recently used) structure, meaning that if an
 	*** entry needs to be evicted or replaced to make room for another, the least
-	*** recently used sound is deleted from the cache.
+	*** recently used sound or music is deleted from the cache (as long as it is not playing).
+	*** The key in the STL map is the filename for the audio contained within the cache, while
+	*** the second is a container wrapping the audio descriptor pointer and the LRU time.
 	**/
-	std::map<std::string, SoundDescriptor*> _sound_cache;
+	std::map<std::string, private_audio::AudioCacheElement> _audio_cache;
+
+	/** \brief The maximum number of entries that are allowed within the audio cache
+	*** The default size is set to 1/4th of _max_sources
+	**/
+	uint16 _max_cache_size;
 
 	/** \brief Acquires an available audio source that may be used
 	*** \return A pointer to the available source, or NULL if no available source could be found
 	*** \todo Add an algoihtm to give priority to some sounds/music over others.
 	**/
 	private_audio::AudioSource* _AcquireAudioSource();
+
+	/** \brief A helper function to LoadSound and LoadMusic that takes care of the messy details of cache managment
+	*** \param audio A pointer to a newly created, unitialized AudioDescriptor object to load into the cache
+	*** \param filename The filename of the audio to load
+	*** \return True if the audio was successfully added to the cache, false if it was not.
+	*** \note If this function returns false, you should delete the pointer that you passed to it.
+	**/ 
+	bool _LoadAudio(AudioDescriptor* audio, const std::string& filename);
 }; // class GameAudio : public hoa_utils::Singleton<GameAudio>
 
 } // namespace hoa_audio

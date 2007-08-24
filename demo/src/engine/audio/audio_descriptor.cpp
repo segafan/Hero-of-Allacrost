@@ -381,13 +381,7 @@ void AudioDescriptor::Resume() {
 	if (_state != AUDIO_STATE_PAUSED)
 		return;
 
-	if (_source == NULL) {
-		IF_PRINT_WARNING(AUDIO_DEBUG) << "did not have access to valid AudioSource" << endl;
-		return;
-	}
-
-	alSourcePlay(_source->source);
-	_state = AUDIO_STATE_PLAYING;
+	Play();
 }
 
 
