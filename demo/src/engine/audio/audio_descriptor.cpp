@@ -78,7 +78,7 @@ void AudioSource::Reset() {
 		return;
 	}
 
-	alSourcei(source, AL_LOOPING, AL_TRUE);
+	alSourcei(source, AL_LOOPING, AL_FALSE);
 	alSourcef(source, AL_GAIN, 1.0f);
 	alSourcei(source, AL_SAMPLE_OFFSET, 0);
 	alSourcei(source, AL_BUFFER, 0);
@@ -124,7 +124,7 @@ AudioDescriptor::AudioDescriptor(const AudioDescriptor& copy) :
 	_data(NULL),
 	_looping(copy._looping),
 	_offset(0),
-	_volume(1.0f),
+	_volume(copy._volume),
 	_stream_buffer_size(0)
 {
 	_position[0] = 0.0f;
@@ -139,7 +139,7 @@ AudioDescriptor::AudioDescriptor(const AudioDescriptor& copy) :
 
 	// If the copy is not in the unloaded state, print a warning
 	if (copy._state != AUDIO_STATE_UNLOADED) {
-		IF_PRINT_WARNING(AUDIO_DEBUG) << "created a copy of an already initialiazed AudioDescriptor" << endl;
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "created a copy of an already initialized AudioDescriptor" << endl;
 	}
 }
 
@@ -260,6 +260,7 @@ bool AudioDescriptor::LoadAudio(const string& filename, AUDIO_LOAD load_type, ui
 	if (AudioManager->CheckALError())
 		IF_PRINT_WARNING(AUDIO_DEBUG) << "OpenAL generated the following error: " << AudioManager->CreateALErrorString() << endl;
 
+	_state = AUDIO_STATE_STOPPED;
 	return true;
 } // bool AudioDescriptor::LoadAudio(const string& file_name, AUDIO_LOAD load_type, uint32 stream_buffer_size)
 
@@ -414,7 +415,7 @@ void AudioDescriptor::SetLooping(bool loop) {
 		if (_looping)
 			alSourcei(_source->source, AL_LOOPING, AL_TRUE);
 		else
-			alSourcei(_source->source, AL_LOOPING, AL_TRUE);
+			alSourcei(_source->source, AL_LOOPING, AL_FALSE);
 	}
 }
 
