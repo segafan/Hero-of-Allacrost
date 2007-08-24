@@ -46,7 +46,8 @@ GameAudio::GameAudio () :
 	_device(0),
 	_context(0),
 	_max_sources(MAX_DEFAULT_AUDIO_SOURCES),
-	_active_music(NULL)
+	_active_music(NULL),
+	_max_cache_size(MAX_DEFAULT_AUDIO_SOURCES / 4)
 {}
 
 
@@ -131,6 +132,7 @@ bool GameAudio::SingletonInitialize() {
 		alGenSources(1, &source);
 		if (CheckALError() == true) {
 			_max_sources = i;
+			_max_cache_size = i / 4;
 			break;
 		}
 		_audio_sources.push_back(new private_audio::AudioSource(source));
@@ -162,10 +164,10 @@ GameAudio::~GameAudio() {
 	_audio_effects.clear();
 
 	// Delete all entries in the sound cache
-	for (map<string, SoundDescriptor*>::iterator i = _sound_cache.begin(); i != _sound_cache.end(); i++) {
-		delete i->second;
+	for (map<std::string, private_audio::AudioCacheElement>::iterator i = _audio_cache.begin(); i != _audio_cache.end(); i++) {
+		delete i->second.audio;
 	}
-	_sound_cache.clear();
+	_audio_cache.clear();
 
 	// Delete all audio sources
 	for (vector<AudioSource*>::iterator i = _audio_sources.begin(); i != _audio_sources.end(); i++) {
@@ -341,17 +343,139 @@ void GameAudio::SetListenerOrientation(const float orientation[3]) {
 
 
 
-void GameAudio::PlaySound(const std::string& filename) {
+bool GameAudio::LoadSound(const std::string& filename) {
 	SoundDescriptor* new_sound = new SoundDescriptor();
 
-	if (new_sound->LoadAudio(filename) == false) {
-		IF_PRINT_WARNING(AUDIO_DEBUG) << "could not load new audio file into sound cache: " << filename << endl;
+	if (_LoadAudio(new_sound, filename) == false) {
 		delete new_sound;
+		return false;
+	}
+
+	return true;
+}
+
+
+
+bool GameAudio::LoadMusic(const std::string& filename) {
+	MusicDescriptor* new_music = new MusicDescriptor();
+	
+	if (_LoadAudio(new_music, filename) == false) {
+		delete new_music;
+		return false;
+	}
+
+	return true;
+}
+
+
+
+void GameAudio::PlaySound(const std::string& filename) {
+	map<std::string, AudioCacheElement>::iterator element = _audio_cache.find(filename);
+
+	if (element == _audio_cache.end()) {
+		if (LoadSound(filename) == false) {
+			IF_PRINT_WARNING(AUDIO_DEBUG) << "could not play sound from cache because the sound could not be loaded" << endl;
+			return;
+		}
+		else {
+			element = _audio_cache.find(filename);
+		}
+	}
+
+	element->second.audio->Play();
+	element->second.last_update_time = SDL_GetTicks();
+}
+
+
+
+void GameAudio::PlayMusic(const std::string& filename) {
+	map<std::string, AudioCacheElement>::iterator element = _audio_cache.find(filename);
+
+	if (element == _audio_cache.end()) {
+		if (LoadMusic(filename) == false) {
+			IF_PRINT_WARNING(AUDIO_DEBUG) << "could not play music from cache because the music could not be loaded" << endl;
+			return;
+		}
+		else {
+			element = _audio_cache.find(filename);
+		}
+	}
+
+	element->second.audio->Play();
+	element->second.last_update_time = SDL_GetTicks();
+}
+
+
+
+void GameAudio::StopSound(const std::string& filename) {
+	map<std::string, AudioCacheElement>::iterator element = _audio_cache.find(filename);
+
+	if (element == _audio_cache.end()) {
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "could not stop audio because it was not contained in the cache: " << filename << endl;
 		return;
 	}
 
-	_sound_cache.insert(make_pair(filename, new_sound));
-	new_sound->Play();
+	element->second.audio->Stop();
+}
+
+
+
+void GameAudio::PauseSound(const std::string& filename) {
+	map<std::string, AudioCacheElement>::iterator element = _audio_cache.find(filename);
+
+	if (element == _audio_cache.end()) {
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "could not pause audio because it was not contained in the cache: " << filename << endl;
+		return;
+	}
+
+	element->second.audio->Pause();
+}
+
+
+
+void GameAudio::ResumeSound(const std::string& filename) {
+	map<std::string, AudioCacheElement>::iterator element = _audio_cache.find(filename);
+
+	if (element == _audio_cache.end()) {
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "could not resume audio because it was not contained in the cache: " << filename << endl;
+		return;
+	}
+
+	element->second.audio->Resume();
+}
+
+
+
+SoundDescriptor* GameAudio::RetrieveSound(const std::string& filename) {
+	map<std::string, AudioCacheElement>::iterator element = _audio_cache.find(filename);
+
+	if (element == _audio_cache.end()) {
+		return NULL;
+	}
+	else if (element->second.audio->IsSound() == false) {
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "incorrectly requested to retrieve a sound for a music filename: " << filename << endl;
+		return NULL;
+	}
+	else {
+		return dynamic_cast<SoundDescriptor*>(element->second.audio);
+	}
+}
+
+
+
+MusicDescriptor* GameAudio::RetrieveMusic(const std::string& filename) {
+	map<std::string, AudioCacheElement>::iterator element = _audio_cache.find(filename);
+
+	if (element == _audio_cache.end()) {
+		return NULL;
+	}
+	else if (element->second.audio->IsSound() == true) {
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "incorrectly requested to retrieve music for a sound filename: " << filename << endl;
+		return NULL;
+	}
+	else {
+		return dynamic_cast<MusicDescriptor*>(element->second.audio);
+	}
 }
 
 
@@ -404,6 +528,7 @@ void GameAudio::DEBUG_PrintInfo() {
 	cout << "*** Audio Information ***" << endl;
 
 	cout << "Maximum number of sources:   " << _max_sources << endl;
+	cout << "Maximum audio cache size:    " << _max_cache_size << endl;
 	cout << "Default audio device:        " << alcGetString(_device, ALC_DEFAULT_DEVICE_SPECIFIER) << endl;
 	cout << "OpenAL Version:              " << alGetString(AL_VERSION) << endl;
 	cout << "OpenAL Renderer:             " << alGetString(AL_RENDERER) << endl;
@@ -456,5 +581,56 @@ private_audio::AudioSource* GameAudio::_AcquireAudioSource() {
 	// (3) Return NULL in the (extremely rare) case that all sources are owned and actively playing or paused
 	return NULL;
 }
+
+
+
+bool GameAudio::_LoadAudio(AudioDescriptor* audio, const std::string& filename) {
+	if (_audio_cache.find(filename) != _audio_cache.end()) {
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "audio was already contained within the cache: " << filename << endl;
+		return false;
+	}
+
+	// (1) If the cache is not full, try loading the audio and adding it in
+	if (_audio_cache.size() < _max_cache_size) {
+		if (audio->LoadAudio(filename) == false) {
+			IF_PRINT_WARNING(AUDIO_DEBUG) << "could not add new audio file into cache because load operation failed: " << filename << endl;
+			return false;
+		}
+
+		_audio_cache.insert(make_pair(filename, AudioCacheElement(SDL_GetTicks(), audio)));
+		return true;
+	}
+
+	// (2) The cache is full, so find an element to remove. First make sure that at least one piece of audio is stopped
+	map<std::string, AudioCacheElement>::iterator lru_element = _audio_cache.end();
+	for (map<std::string, AudioCacheElement>::iterator i = _audio_cache.begin(); i != _audio_cache.end(); i++) {
+		if (i->second.audio->GetState() == AUDIO_STATE_STOPPED) {
+			lru_element = i;
+			break;
+		}
+	}
+
+	if (lru_element == _audio_cache.end()) {
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "failed to remove element from cache because no piece of audio was in the stopped state" << endl;
+		return false;
+	}
+
+	for (map<std::string, AudioCacheElement>::iterator i = _audio_cache.begin(); i != _audio_cache.end(); i++) {
+		if (i->second.audio->GetState() == AUDIO_STATE_STOPPED && i->second.last_update_time < lru_element->second.last_update_time) {
+			lru_element = i;
+		}
+	}
+
+	delete lru_element->second.audio;
+	_audio_cache.erase(lru_element);
+	
+	if (audio->LoadAudio(filename) == false) {
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "could not add new audio file into cache because load operation failed: " << filename << endl;
+		return false;
+	}
+
+	_audio_cache.insert(make_pair(filename, AudioCacheElement(SDL_GetTicks(), audio)));
+	return true;
+} // bool GameAudio::_LoadAudio(AudioDescriptor* audio, const std::string& filename)
 
 } // namespace hoa_audio
