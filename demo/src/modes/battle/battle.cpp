@@ -191,19 +191,10 @@ void BattleMode::Reset() {
 
 	// Load the default battle music track if no other music has been added
 	if (_battle_music.empty()) {
-
-		if (BATTLE_DEBUG) cerr << "BATTLE DEBUG: No music defined. Attempting to load the default theme" << endl;
-
-		MusicDescriptor MD;
-/*		if (MD.LoadAudio("mus/Confrontation.ogg") == false) {
-			cerr << "BATTLE ERROR: failed to load default battle theme track. " << endl;
+		_battle_music.push_back(MusicDescriptor());
+		if (_battle_music.back().LoadAudio("mus/Confrontation.ogg") == false) {
+			PRINT_ERROR << "failed to load default battle theme music" << endl;
 		}
-		else {
-			_battle_music.push_back(MD);
-		}
-*/
-		MD.LoadAudio("mus/Confrontation.ogg");
-		_battle_music.push_back(MD);
 	}
 
 	if (_battle_music.empty() == false && _battle_music.back().IsLooping() == false) {
@@ -260,15 +251,10 @@ void BattleMode::AddMusic(const string& music_filename) {
 		return;
 	}
 
-	MusicDescriptor MD;
-/*	if (MD.LoadAudio(music_filename) == false) {
-		if (BATTLE_DEBUG)
-			cerr << "BATTLE WARNING: BattleMode::AddMusic() failed to load the music file: " << music_filename << endl;
-		return;
+	_battle_music.push_back(MusicDescriptor());
+	if (_battle_music.back().LoadAudio(music_filename) == false) {
+		IF_PRINT_WARNING(BATTLE_DEBUG) << "failed to load music file: " << music_filename << endl;
 	}
-*/
-	MD.LoadAudio(music_filename);
-	_battle_music.push_back(MD);
 }
 
 
