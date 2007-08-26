@@ -416,6 +416,7 @@ void GameAudio::StopSound(const std::string& filename) {
 	}
 
 	element->second.audio->Stop();
+	element->second.last_update_time = SDL_GetTicks();
 }
 
 
@@ -429,6 +430,7 @@ void GameAudio::PauseSound(const std::string& filename) {
 	}
 
 	element->second.audio->Pause();
+	element->second.last_update_time = SDL_GetTicks();
 }
 
 
@@ -442,6 +444,7 @@ void GameAudio::ResumeSound(const std::string& filename) {
 	}
 
 	element->second.audio->Resume();
+	element->second.last_update_time = SDL_GetTicks();
 }
 
 

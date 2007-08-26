@@ -468,7 +468,6 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 			}
 			else if (key_event.keysym.sym == SDLK_f) {
 				// Toggle between full-screen and windowed mode
-				if (INPUT_DEBUG) cout << "Toggle fullscreen!" << endl;
 				VideoManager->ToggleFullscreen();
 				VideoManager->ApplySettings();
 				return;
@@ -497,7 +496,7 @@ void GameInput::_KeyEventHandler(SDL_KeyboardEvent& key_event) {
 			}
 			else if (key_event.keysym.sym == SDLK_t) {
 				// Display and cycle through the texture sheets
-				VideoManager->DEBUG_NextTexSheet();
+				VideoManager->Textures()->DEBUG_NextTexSheet();
 				return;
 			}
 			
@@ -783,70 +782,58 @@ void GameInput::_JoystickEventHandler(SDL_Event& js_event) {
 
 
 // Sets a new key over an older one. If the same key is used elsewhere, the older one is removed
-void GameInput::_SetNewKey(SDLKey & old_key, SDLKey new_key)
-{
-	if (_key.up == new_key)  // up key used already
-	{
+void GameInput::_SetNewKey(SDLKey & old_key, SDLKey new_key) {
+	if (_key.up == new_key) { // up key used already
 		_key.up = old_key;
 		old_key = new_key;
 		return;
 	}
-	if (_key.down == new_key)  // down key used already
-	{
+	if (_key.down == new_key) { // down key used already
 		_key.down = old_key;
 		old_key = new_key;
 		return;
 	}
-	if (_key.left == new_key)  // left key used already
-	{
+	if (_key.left == new_key) { // left key used already
 		_key.left = old_key;
 		old_key = new_key;
 		return;
 	}
-	if (_key.right == new_key)  // right key used already
-	{
+	if (_key.right == new_key) { // right key used already
 		_key.right = old_key;
 		old_key = new_key;
 		return;
 	}
-	if (_key.confirm == new_key)  // confirm key used already
-	{
+	if (_key.confirm == new_key) { // confirm key used already
 		_key.confirm = old_key;
 		old_key = new_key;
 		return;
 	}
-	if (_key.cancel == new_key)  // cancel key used already
-	{
+	if (_key.cancel == new_key) { // cancel key used already
 		_key.cancel = old_key;
 		old_key = new_key;
 		return;
 	}
-	if (_key.menu == new_key)  // menu key used already
-	{
+	if (_key.menu == new_key) { // menu key used already
 		_key.menu = old_key;
 		old_key = new_key;
 		return;
 	}
-	if (_key.swap == new_key)  // swap key used already
-	{
+	if (_key.swap == new_key) { // swap key used already
 		_key.swap = old_key;
 		old_key = new_key;
 		return;
 	}
-	if (_key.left_select == new_key)  // left_select key used already
-	{
+	if (_key.left_select == new_key) { // left_select key used already
 		_key.left_select = old_key;
 		old_key = new_key;
 		return;
 	}
-	if (_key.right_select == new_key)  // right_select key used already
-	{
+	if (_key.right_select == new_key) { // right_select key used already
 		_key.right_select = old_key;
 		old_key = new_key;
 		return;
 	}
-	if (_key.pause == new_key)  // pause key used already
-	{
+	if (_key.pause == new_key) { // pause key used already
 		_key.pause = old_key;
 		old_key = new_key;
 		return;
@@ -857,46 +844,38 @@ void GameInput::_SetNewKey(SDLKey & old_key, SDLKey new_key)
 
 
 // Sets a new joystick button over an older one. If the same button is used elsewhere, the older one is removed
-void GameInput::_SetNewJoyButton(uint8 & old_button, uint8 new_button)
-{
-	if (_joystick.confirm == new_button)  // confirm button used already
-	{
+void GameInput::_SetNewJoyButton(uint8 & old_button, uint8 new_button) {
+	if (_joystick.confirm == new_button) { // confirm button used already
 		_joystick.confirm = old_button;
 		old_button = new_button;
 		return;
 	}
-	if (_joystick.cancel == new_button)  // cancel button used already
-	{
+	if (_joystick.cancel == new_button) { // cancel button used already
 		_joystick.cancel = old_button;
 		old_button = new_button;
 		return;
 	}
-	if (_joystick.menu == new_button)  // menu button used already
-	{
+	if (_joystick.menu == new_button) { // menu button used already
 		_joystick.menu = old_button;
 		old_button = new_button;
 		return;
 	}
-	if (_joystick.swap == new_button)  // swap button used already
-	{
+	if (_joystick.swap == new_button) { // swap button used already
 		_joystick.swap = old_button;
 		old_button = new_button;
 		return;
 	}
-	if (_joystick.left_select == new_button)  // left_select button used already
-	{
+	if (_joystick.left_select == new_button) { // left_select button used already
 		_joystick.left_select = old_button;
 		old_button = new_button;
 		return;
 	}
-	if (_joystick.right_select == new_button)  // right_select button used already
-	{
+	if (_joystick.right_select == new_button) { // right_select button used already
 		_joystick.right_select = old_button;
 		old_button = new_button;
 		return;
 	}
-	if (_joystick.pause == new_button)  // pause button used already
-	{
+	if (_joystick.pause == new_button) { // pause button used already
 		_joystick.pause = old_button;
 		old_button = new_button;
 		return;

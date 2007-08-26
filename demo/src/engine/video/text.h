@@ -147,7 +147,7 @@ public:
 *** A text specific subclass of the BaseImage subclass, contains a
 *** string and style needed to render a piece of text.
 *** ***************************************************************************/
-class TImage : public private_video::BaseImage {
+class TextImage : public private_video::BaseImage {
 public:
 	//! \brief The string represented
 	hoa_utils::ustring string;
@@ -158,13 +158,13 @@ public:
 	/** \brief Constructor defaults image as the first one in a texture sheet.
 	*** \note The actual sheet where the image is located will be determined later.
 	**/
-	TImage(const hoa_utils::ustring &string_, const TextStyle &style_);
+	TextImage(const hoa_utils::ustring &string_, const TextStyle &style_);
 
 	//! \brief Constructor where image coordinates are specified, along with texture coords and the texture sheet.
-	TImage(private_video::TexSheet *sheet, const hoa_utils::ustring &string_, const TextStyle &style_, int32 x_, int32 y_, float u1_, float v1_,
+	TextImage(private_video::TexSheet *sheet, const hoa_utils::ustring &string_, const TextStyle &style_, int32 x_, int32 y_, float u1_, float v1_,
 		float u2_, float v2_, int32 width, int32 height, bool grayscale_);
 
-	TImage & operator=(TImage &rhs)
+	TextImage & operator=(TextImage& rhs)
 		{ return *this; }
 
 	//! Loads the properties of the internal font
@@ -180,11 +180,11 @@ public:
 /** ****************************************************************************
 *** \brief A text specific subclass of the BaseImageElement subclass.
 *** ***************************************************************************/
-class TImageElement : public private_video::BaseImageElement
+class TextImageElement : public private_video::BaseImageElement
 {
 public:
 	//! \brief The image that is being referenced by this object.
-	TImage* image;
+	TextImage* image;
 
 	//! \brief X offset from the line proper
 	float x_line_offset;
@@ -197,11 +197,11 @@ public:
 	/** \brief Constructor specifying a specific image element.
 	*** Multiple elements can be stacked to form one compound image
 	**/
-	TImageElement(TImage *image_, float x_offset_, float y_offset_, float u1_, float v1_,
+	TextImageElement(TextImage *image_, float x_offset_, float y_offset_, float u1_, float v1_,
 		float u2_, float v2_, float width_, float height_, Color color_[4]);
 	
 	//! \brief Constructor defaulting the element to have white vertices and disabled blending.
-	TImageElement(TImage *image_, float x_offset_, float y_offset_, float u1_, float v1_,
+	TextImageElement(TextImage *image_, float x_offset_, float y_offset_, float u1_, float v1_,
 		float u2_, float v2_, float width_, float height_);
 
 	/** Helper function to get abstract drawable
@@ -335,10 +335,10 @@ private:
 	**/
 	hoa_utils::ustring _string;
 
-	/** The TImage elements representing rendered text
+	/** The TextImage elements representing rendered text
 	**  portions, usually lines.
 	**/
-	std::vector<TImageElement> _text_sections;
+	std::vector<TextImageElement> _text_sections;
 
 	//! \brief The horizontal text alignment
 	int8 _alignment;

@@ -168,9 +168,9 @@ enum {
 
 
 /** \brief Linearly interpolates a value which is (alpha * 100) percent between initial and final
-***  \param alpha Determines where inbetween initial (0.0f) and final (1.0f) the interpolation should be
-***  \param initial The initial value
-***  \param final The final value
+*** \param alpha Determines where inbetween initial (0.0f) and final (1.0f) the interpolation should be
+*** \param initial The initial value
+*** \param final The final value
 *** \return the linear interpolated value
 **/
 float Lerp(float alpha, float initial, float final);
@@ -197,13 +197,14 @@ class GameVideo : public hoa_utils::Singleton<GameVideo> {
 	friend class OptionBox;
 	friend class MenuWindow;
 	friend class GUISupervisor;
+	friend class TextureController;
 	friend class private_video::GUIElement;
 	friend class private_video::FixedTexMemMgr;
 	friend class private_video::VariableTexMemMgr;
 	friend class private_video::TexSheet;
 	friend class private_video::ParticleSystem;
 	friend class StillImage;
-	friend class TImage;
+	friend class TextImage;
 	friend class RenderedText;
 
 public:
@@ -247,6 +248,19 @@ public:
 	*** \param frame_time The number of milliseconds that have expired since the last frame was drawn.
 	**/
 	void Display(uint32 frame_time);
+
+	/** \brief Retrieves the OpenGL error code and retains it in the _gl_error_code member
+	*** \return True if an OpenGL error has been detected, false if no errors were detected
+	**/
+	bool CheckGLError()
+		{ _gl_error_code = glGetError(); return (_gl_error_code != GL_NO_ERROR); }
+
+	//! \brief Returns the value of the most recently fetched OpenGL error code
+	GLenum GetGLError()
+		{ return _gl_error_code; }
+
+	///! \brief Returns a string representation of the most recently fetched OpenGL error code
+	const std::string CreateGLErrorString();
 
 	// ---------- Screen size and resolution methods
 
@@ -657,18 +671,6 @@ public:
 	 */
 	bool CaptureScreen(StillImage &id);
 
-	/** \brief unloads all texture sheets from memory when we lose the GL
-	 *         context, so textures can be properly reloaded
-	 * \return success/failure
-	 */
-	bool UnloadTextures();
-
-	/** \brief reloads textures that have been unloaded after a video
-	 *         settings change
-	 * \return success/failure
-	 */
-	bool ReloadTextures();
-
 	/** \brief draws an image which is modulated by the scene's light color
 	 *
 	 *  \param id  image descriptor to draw (either StillImage or AnimatedImage)
@@ -698,20 +700,29 @@ public:
 	 */
 	int32 GetFrameChange() { return _current_frame_diff; }
 
-	/** \brief These cycle through the currently loaded texture sheets so they can be viewed on screen
-	 */
-	void DEBUG_NextTexSheet();
-	void DEBUG_PrevTexSheet();
-
 	/** \brief Returns a pointer to the GUIManager singleton object
 	*** This method allows the user to perform GUI management operations. For example, to load a
 	*** menu skin, the user may utilize this method like so:
 	*** `if (VideoManager->GUI()->LoadMenuSkin(...) == true) { cout << "Success" << endl; }`
 	***
 	*** \note See gui.h for the public methods available from the GUISupervisor class
+	*** \note This function is guaranteed to return a valid pointer so long as the GameVideo class
+	*** has been properly initialized
 	**/
 	GUISupervisor* GUI()
 		{ return GUIManager; }
+
+	/** \brief Returns a pointer to the TextureManager singleton object
+	*** This method allows the user to perform texture management operations. For example, to reload
+	*** all textures, the user may utilize this method like so:
+	*** `if (VideoManager->Textures()->ReloadTextures() == true) { cout << "Success" << endl; }`
+	***
+	*** \note See texture_controller.h for the public methods available from the GUISupervisor class
+	*** \note This function is guaranteed to return a valid pointer so long as the GameVideo class
+	*** has been properly initialized
+	**/
+	TextureController* Textures()
+		{ return TextureManager; }
 
 	//-- Lighting and fog -----------------------------------------------------
 
@@ -945,6 +956,9 @@ private:
 
 	//-- Private variables ----------------------------------------------------
 
+	//! \brief Holds the most recently fetched OpenGL error code
+	GLenum _gl_error_code;
+
 	//! \brief The type of window target that the video manager will operate on (SDL window or QT widget)
 	VIDEO_TARGET _target;
 
@@ -973,12 +987,6 @@ private:
 
 	//! fps display flag. If true, FPS is displayed
 	bool _fps_display;
-
-	//! current debug texture sheet
-	int32 _current_debug_TexSheet;
-
-	//! keep track of number of texture switches per frame
-	int32 _num_tex_switches;
 
 	//! keep track of number of draw calls per frame
 	int32 _num_draw_calls;
@@ -1009,16 +1017,13 @@ private:
 	// variables so if the new settings are invalid, we can roll back.
 
 	//! holds the desired fullscreen status (true=fullscreen, false=windowed). Not actually applied until ApplySettings() is called
-	bool   _temp_fullscreen;
+	bool _temp_fullscreen;
 
 	//! holds the desired screen width. Not actually applied until ApplySettings() is called
-	int32  _temp_width;
+	int32 _temp_width;
 
 	//! holds the desired screen height. Not actually applied until ApplySettings() is called
-	int32  _temp_height;
-
-	//! ID of the last texture that was bound. Used to eliminate redundant binding of textures
-	GLuint _last_tex_id;
+	int32 _temp_height;
 
 	//! image which is to be used as the cursor
 	StillImage _default_menu_cursor;
@@ -1039,7 +1044,7 @@ private:
 	Color _light_color;
 
 	//! true if a lightning effect is active
-	bool  _lightning_active;
+	bool _lightning_active;
 
 	//! current time of lightning effect (time since it started)
 	int32 _lightning_current_time;
@@ -1056,15 +1061,6 @@ private:
 	//! keeps track of the number of frames animations should increment by for the current frame
 	int32 _current_frame_diff;
 
-	//! STL map containing all the images currently being managed by the video engine
-	std::map<std::string, private_video::Image*> _images;
-
-	//! STL map containing all the text images currently being managed by the video engine
-	std::set<hoa_video::TImage*> _t_images;
-
-	//! vector containing all texture sheets currently being managed by the video engine
-	std::vector<private_video::TexSheet*> _tex_sheets;
-
 	//! STL map containing properties for each font (includeing TTF_Font *)
 	std::map<std::string, FontProperties*> _font_map;
 
@@ -1075,13 +1071,6 @@ private:
 	std::stack<private_video::Context> _context_stack;
 
 	//-- Private methods ------------------------------------------------------
-
-	/** \brief wraps a call to glBindTexture(), except it adds checking to eliminate redundant texture binding. Redundancy checks are already implemented by most drivers, but this is a double check "just in case"
-	 *
-	 *  \param tex_ID   integer handle to the OpenGL texture
-	 * \return success/failure
-	 */
-	bool _BindTexture(GLuint tex_ID);
 
 	/** \brief converts VIDEO_DRAW_LEFT or VIDEO_DRAW_RIGHT flags to a numerical offset
 	* \param xalign the draw flag
@@ -1095,14 +1084,6 @@ private:
 	*/
 	int32 _ConvertYAlign(int32 yalign);
 
-	/**  \brief creates a blank texture of the given width and height and returns integer used by OpenGL to refer to this texture. Returns 0xffffffff on failure.
-	 *
-	 *  \param width   desired width of the texture
-	 *  \param height  desired height of the texture
-	 * \return OpenGL ID for this texture or 0xffffffff for failure.
-	 */
-	GLuint _CreateBlankGLTexture(int32 width, int32 height);
-
 	/** \brief returns a filename like TEMP_abcd1234.ext, and each time you call it, it increments the
 	 *         alphanumeric part of the filename. This way, during any particular run
 	 *         of the game, each temp filename is guaranteed to be unique.
@@ -1115,23 +1096,6 @@ private:
 	 * \return name of the generated temp file
 	 */
 	std::string _CreateTempFilename(const std::string &extension);
-
-	/** \brief creates a texture sheet
-	 *
-	 *  \param width    width of the sheet
-	 *  \param height   height of the sheet
-	 *  \param type     specifies what type of images this texture sheet manages (e.g. 32x32 images, 64x64 images, any type, etc)
-	 *  \param is_static if true, this texture sheet is meant to manage images which are not expected to be loaded and unloaded very often
-	 * \return the newly created texsheet
-	 */
-	private_video::TexSheet *_CreateTexSheet(int32 width, int32 height, private_video::TexSheetType type, bool is_static);
-
-	/** \brief wraps a call to glDeleteTextures(), except it adds some checking related to eliminating redundant texture binding.
-	 *
-	 *  \param tex_ID   integer handle to the OpenGL texture
-	 * \return success/failure
-	 */
-	bool _DeleteTexture(GLuint tex_ID);
 
 	/** \brief decreases the reference count of an image
 	*** \param image  pointer to image
@@ -1148,13 +1112,6 @@ private:
 	*** \param id  image descriptor to decrease the reference count of
 	**/
 	void _DeleteImage(AnimatedImage &id);
-
-	/** \brief deletes the temporary textures from the "temp" folder that were saved
-	 *         by _SaveTempTextures()
-	 * \return success/failure
-	 */
-	bool _DeleteTempTextures()
-		{ return hoa_utils::CleanDirectory("img\\temp"); }
 
 	/** \brief draws an image element, i.e. one image within an image descriptor which may contain multiple images
 	 *
@@ -1203,15 +1160,6 @@ private:
 	 */
 	Color _GetTextShadowColor(FontProperties *fp);
 
-	/** \brief inserts an image into a texture sheet
-	 *
-	 *  \param image     pointer to the image to insert
-	 *  \param load_info attributes of the image to be inserted
-	 *  \param is_static Wether an image is static or not  
-	 * \return a new texsheet with the image in it
-	 */
-	private_video::TexSheet *_InsertImageInTexSheet(private_video::BaseImage *image, private_video::ImageLoadInfo & load_info, bool is_static);
-
 	/** \brief loads an image
 	 *
 	 *  \param id  image descriptor to load. Can specify filename, color, width, height, and static as its parameters
@@ -1233,30 +1181,12 @@ private:
 	 */
 	bool _LoadImageHelper(StillImage &id);
 
-	/** \brief Adds a TImage to the internal set
-	 *
-	 * \param timg The pointer to add
-	 *
-	 * \return True if successful, false if already present
-	 */
-	bool _AddTImage(TImage *timg);
-
-	/** \brief Gets a TImage from the internal set
-	 *
-	 * \param pntr The pointer in the set.
-	 *
-	 * \return The pointer itself if successful, or NULL
-	 */
-	TImage *_GetTImage(TImage *pntr);
-
-
-	/** \brief Decrements the reference count of a TImage
+	/** \brief Decrements the reference count of a TextImage
 	 *   and deletes from set if necessary.
 	 *
 	 *  \param img The pointer (and key of the set)
 	 */
-	bool _RemoveImage(TImage *img);
-
+	bool _RemoveImage(TextImage *img);
 
 	/** \brief Decrements the reference count of an Image
 	 *   of the base class and deletes from storage if necessary.
@@ -1329,12 +1259,7 @@ private:
 	 */
 	bool _GetImageInfoJpeg(const std::string& file_name, uint32& rows, uint32& cols, uint32& bpp);
 
-	/** \brief loop through all currently loaded images and if they belong to the given tex sheet, reload them into it
-	 *
-	 *  \param tex_sheet   pointer to the tex sheet whose images we want to load
-	 * \return success/failure
-	 */
-	bool _ReloadImagesToSheet(private_video::TexSheet* tex_sheet);
+
 
 	/** \brief removes the image from the STL map with the same pointer as the one passed in. Returns false on failure
 	 *
@@ -1344,43 +1269,6 @@ private:
 
 	bool _RemoveImage(private_video::Image *image_to_remove);
 
-	/** \brief Converts a color image to a grayscale one;
-	 * Converts a colored image in a grayscale one. Actually, it converts not an image, but
-	 * an ImageLoadInfo structure. This is used internally when creating grayscale images.
-	 * \param src Information of a color image
-	 * \param dst ImageLoadInfo struct where the grayscale image will be stored
-	 */
-	void _ConvertImageToGrayscale(const private_video::ImageLoadInfo& src, private_video::ImageLoadInfo &dst) const;
-
-
-	/** \brief Converts a RGBA buffer to a RGB one
-	 * \param src Information of a RGBA buffer
-	 * \param dst ImageLoadInfo struct where the RGB buffer will be stored
-	 */
-	void _RGBAToRGB (const private_video::ImageLoadInfo& src, private_video::ImageLoadInfo &dst) const;
-
-
-	//! \brief Pass a texture (video memory) to a system memory buffer
-	/*!
-	 *  \param buffer Buffer where the pixels of the texture will be stored
-	 *  \param texture TexSheet to be copied
-	*/
-	void _GetBufferFromTexture (hoa_video::private_video::ImageLoadInfo& buffer, hoa_video::private_video::TexSheet* texture) const;
-
-	//! \brief Pass an image (video memory) to a system memory buffer
-	/*!
-	 *  \param buffer Buffer where the pixels of the image will be stored
-	 *  \param img Image to be copied
-	*/
-	void _GetBufferFromImage (hoa_video::private_video::ImageLoadInfo& buffer, hoa_video::private_video::BaseImage* img) const;
-
-	/** \brief removes a texture sheet from our vector of sheets and deletes it
-	 *
-	 *  \param sheet_to_remove  pointer to the sheet we want to remove
-	 * \return success/failure
-	 */
-	bool _RemoveSheet(private_video::TexSheet *sheet_to_remove);
-
 	/** \brief Rounds a force value to the nearest integer based on probability. 
 	*** \param force  The force to round
 	*** \return the rounded force value
@@ -1389,15 +1277,6 @@ private:
 	*** even though there is positive force.
 	**/
 	float _RoundForce(float force);
-
-	/**
-	 *  \brief saves temporary textures to disk, in other words, textures which were not
-	 *         loaded to a file. This is used when the GL context is being destroyed,
-	 *         perhaps because we are switching from windowed to fullscreen. So, we need
-	 *         to save all textures to disk so we can reload them later.
-	 * \return success/failure
-	 */
-	bool _SaveTempTextures();
 
 	/**
 	* \brief takes an x value and converts it into screen coordinates
@@ -1425,13 +1304,7 @@ private:
 	 *         and other statistics useful for performance tweaking, etc.
 	 */
 	void _DEBUG_ShowAdvancedStats();
-
-	/**
-	 *  \brief function solely for debugging, which displays the currently selected texture sheet. By using DEBUG_NextTexSheet() and DEBUG_PrevTexSheet(), you can change the current texture sheet so the sheet shown by this function cycles through all currently loaded sheets.
-	 * \return success/failure
-	 */
-	bool _DEBUG_ShowTexSheet();
-}; // class GameVideo
+}; // class GameVideo : public hoa_utils::Singleton<GameVideo>
 
 }  // namespace hoa_video
 

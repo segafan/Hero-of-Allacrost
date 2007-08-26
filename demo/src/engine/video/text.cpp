@@ -99,7 +99,7 @@ RenderedText &RenderedText::operator=(const RenderedText &other)
 
 	// Increase ref count for all text sections
 	// as this RenderedText now also points to them
-	std::vector<TImageElement>::iterator it;
+	std::vector<TextImageElement>::iterator it;
 	for (it = _text_sections.begin(); it != _text_sections.end(); ++it)
 	{
 		if (it->image)
@@ -199,7 +199,7 @@ void RenderedText::SetText(const std::string &string) {
 
 void RenderedText::_ClearImages()
 {
-	std::vector<TImageElement>::iterator it;
+	std::vector<TextImageElement>::iterator it;
 	for (it = _text_sections.begin(); it != _text_sections.end(); ++it)
 	{
 		if (it->image)
@@ -273,12 +273,12 @@ void RenderedText::_Regenerate() {
 
 	for (line_iter = line_array.begin(); line_iter != line_array.end(); ++line_iter)
 	{
-		TImage *timage = new TImage(*line_iter, style);
+		TextImage *timage = new TextImage(*line_iter, style);
 		if (!timage->Regenerate())
 		{
 			if (VIDEO_DEBUG)
 			{
-				cerr << "RenderedText::_Regenerate(): Failed to render TImage." << endl;
+				cerr << "RenderedText::_Regenerate(): Failed to render TextImage." << endl;
 			}
 		}
 
@@ -286,7 +286,7 @@ void RenderedText::_Regenerate() {
 		timage->Add();
 		float y_offset = total_height + _height * -VideoManager->_current_context.coordinate_system.GetVerticalDirection();
 		y_offset += (fp->line_skip - timage->height) * VideoManager->_current_context.coordinate_system.GetVerticalDirection();
-		TImageElement element(timage, 0, y_offset, 0.0f, 0.0f, 1.0f, 1.0f, static_cast<float>(timage->width), static_cast<float>(timage->height), _color);
+		TextImageElement element(timage, 0, y_offset, 0.0f, 0.0f, 1.0f, 1.0f, static_cast<float>(timage->width), static_cast<float>(timage->height), _color);
 
 		// if text shadows are enabled, add a shadow version
 		if (style.shadow_enable && timage->style.shadow_style != VIDEO_TEXT_SHADOW_NONE)
@@ -294,7 +294,7 @@ void RenderedText::_Regenerate() {
 			shadow_offset_x = static_cast<int32>(VideoManager->_current_context.coordinate_system.GetHorizontalDirection()) * timage->style.shadow_offset_x;
 			shadow_offset_y = static_cast<int32>(VideoManager->_current_context.coordinate_system.GetVerticalDirection())   * timage->style.shadow_offset_y;
 
-			TImageElement shadow_element = element;
+			TextImageElement shadow_element = element;
 			shadow_element.x_offset += shadow_offset_x;
 			shadow_element.y_offset += shadow_offset_y;
 
@@ -315,8 +315,7 @@ void RenderedText::_Regenerate() {
 			timage->Add();
 		}
 
-		// Add the timage to the video engine set
-		VideoManager->_AddTImage(timage);
+		TextureManager->_RegisterTextImage(timage);
 
 		// And to our internal vector
 		_text_sections.push_back(element);
@@ -338,7 +337,7 @@ void RenderedText::_Regenerate() {
 
 void RenderedText::_Realign()
 {
-	std::vector<TImageElement>::iterator it;
+	std::vector<TextImageElement>::iterator it;
 	for (it = _text_sections.begin(); it != _text_sections.end(); ++it)
 	{
 		it->x_offset = _alignment * VideoManager->_current_context.coordinate_system.GetHorizontalDirection() * ( (_width - it->width) / 2.0f) + it->x_line_offset;
@@ -346,10 +345,10 @@ void RenderedText::_Realign()
 }
 
 // *****************************************************************************
-// ********************************** TImage ***********************************
+// ********************************** TextImage ***********************************
 // *****************************************************************************
 
-TImage::TImage(const hoa_utils::ustring &string_, const TextStyle &style_)
+TextImage::TextImage(const hoa_utils::ustring &string_, const TextStyle &style_)
 :	string(string_),
 	style(style_)
 {
@@ -372,7 +371,7 @@ TImage::TImage(const hoa_utils::ustring &string_, const TextStyle &style_)
 
 
 
-TImage::TImage(TexSheet *sheet, const hoa_utils::ustring &string_, const TextStyle &style_, int32 x_, int32 y_, float u1_, float v1_,
+TextImage::TextImage(TexSheet *sheet, const hoa_utils::ustring &string_, const TextStyle &style_, int32 x_, int32 y_, float u1_, float v1_,
 		float u2_, float v2_, int32 width, int32 height, bool grayscale_)
 :	string(string_),
 	style(style_)
@@ -395,7 +394,7 @@ TImage::TImage(TexSheet *sheet, const hoa_utils::ustring &string_, const TextSty
 }
 
 
-bool TImage::LoadFontProperties()
+bool TextImage::LoadFontProperties()
 {
 	if (style.shadow_style == VIDEO_TEXT_SHADOW_INVALID)
 	{
@@ -403,7 +402,7 @@ bool TImage::LoadFontProperties()
 		if (!fp)
 		{
 			if (VIDEO_DEBUG)
-				cerr << "TImage::LoadFontProperties(): Invalid font '" << style.font << "'." << endl;
+				cerr << "TextImage::LoadFontProperties(): Invalid font '" << style.font << "'." << endl;
 			return false;
 		}
 		style.shadow_style    = fp->shadow_style;
@@ -413,7 +412,7 @@ bool TImage::LoadFontProperties()
 	return true;
 }
 
-bool TImage::Regenerate()
+bool TextImage::Regenerate()
 {
 	if (texture_sheet)
 	{
@@ -429,11 +428,11 @@ bool TImage::Regenerate()
 	width  = buffer.width;
 	height = buffer.height;
 
-	TexSheet *sheet = VideoManager->_InsertImageInTexSheet(this, buffer, true);
+	TexSheet *sheet = TextureManager->_InsertImageInTexSheet(this, buffer, true);
 	if(!sheet)
 	{
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO_DEBUG: TImage::Regenerate(): GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
+			cerr << "VIDEO_DEBUG: TextImage::Regenerate(): GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
 
 		free(buffer.pixels);
 		return false;
@@ -449,7 +448,7 @@ bool TImage::Regenerate()
 	return true;
 }
 
-bool TImage::Reload()
+bool TextImage::Reload()
 {
 	// Check if indeed already loaded. If not - create texture sheet entry.
 	if (!texture_sheet)
@@ -463,26 +462,18 @@ bool TImage::Reload()
 	if (!texture_sheet->CopyRect(x, y, buffer))
 	{
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: sheet->CopyRect() failed in TImage::Reload()!" << endl;
+			cerr << "VIDEO ERROR: sheet->CopyRect() failed in TextImage::Reload()!" << endl;
 		free(buffer.pixels);
 		return false;
 	}
 	return true;
 }
 
-
-TImage *GameVideo::_GetTImage(TImage *pntr)
-{
-	if (_t_images.find(pntr) == _t_images.end())
-		return NULL;
-	return pntr;
-}
-
 // *****************************************************************************
-// ****************************** TImageElement *********************************
+// ****************************** TextImageElement *********************************
 // *****************************************************************************
 
-TImageElement::TImageElement(TImage *image_, float x_offset_, float y_offset_, float u1_, float v1_,
+TextImageElement::TextImageElement(TextImage *image_, float x_offset_, float y_offset_, float u1_, float v1_,
 	float u2_, float v2_, float width_, float height_) :
 	image(image_)
 {
@@ -502,7 +493,7 @@ TImageElement::TImageElement(TImage *image_, float x_offset_, float y_offset_, f
 
 
 
-TImageElement::TImageElement(TImage *image_, float x_offset_, float y_offset_, float u1_, float v1_, 
+TextImageElement::TextImageElement(TextImage *image_, float x_offset_, float y_offset_, float u1_, float v1_,
 		float u2_, float v2_, float width_, float height_, Color color_[4]) :
 	image(image_)
 {
@@ -538,7 +529,7 @@ TImageElement::TImageElement(TImage *image_, float x_offset_, float y_offset_, f
 		// Set blend to true if any of the four colors have an alpha value < 1.0f
 		blend = (color[0][3] < 1.0f || color[1][3] < 1.0f || color[2][3] < 1.0f || color[3][3] < 1.0f);
 	}
-} // TImageElement::TImageElement()
+} // TextImageElement::TextImageElement()
 
 //-----------------------------------------------------------------------------
 // GameVideo class font and text methods
@@ -871,7 +862,7 @@ bool GameVideo::_CacheGlyphs(const uint16 *uText, FontProperties *fp) {
 			return false;
 		}
 		
-		_BindTexture(texture);
+		TextureManager->_BindTexture(texture);
 		if(glGetError())
 		{
 			SDL_FreeSurface(initial);
@@ -1025,7 +1016,7 @@ bool GameVideo::_DrawTextHelper(const uint16 *uText) {
 		minx = glyphinfo->min_x * (int)cs.GetHorizontalDirection() + xpos;
 		miny = glyphinfo->min_y * (int)cs.GetVerticalDirection();
 		
-		_BindTexture(glyphinfo->texture);
+		TextureManager->_BindTexture(glyphinfo->texture);
 
 		if(glGetError())
 		{

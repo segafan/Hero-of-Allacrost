@@ -24,6 +24,127 @@ namespace hoa_video {
 namespace private_video {
 
 // *****************************************************************************
+// ****************************** ImageLoadInfo ********************************
+// *****************************************************************************
+
+ImageLoadInfo::ImageLoadInfo() :
+	width(0),
+	height(0),
+	pixels(NULL)
+{}
+
+
+ImageLoadInfo::~ImageLoadInfo() {
+	if (pixels != NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "pixels member was not NULL upon object destruction" << endl;
+		// TODO: fix all areas in the video engine where it frees pixels but does not set the pointer to NULL
+// 		free(pixels);
+// 		pixels = NULL;
+	}
+}
+
+
+void ImageLoadInfo::ConvertToGrayscale() {
+	if (width <= 0 || height <= 0) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "width and/or height members were invalid (<= 0)" << endl;
+		return;
+	}
+
+	if (pixels == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "no image data (pixels == NULL)" << endl;
+		return;
+	}
+
+	uint8* end_position = static_cast<uint8*>(pixels) + (width * height * 4); // "4" is because of RGBA
+
+	for (uint8* i = static_cast<uint8*>(pixels); i < end_position; i += 4) {
+		// Compute the grayscale value for this pixel based on RGB values: 0.3R + 0.59G + 0.11B
+		uint8 value = static_cast<uint8>((30 * *(i) + 59 * *(i + 1) + 11 * *(i + 2)) * 0.01f);
+		*i = value;
+		*(i + 1) = value;
+		*(i + 2) = value;
+		// *(i + 3) is the alpha value and is left unmodified
+	}
+}
+
+
+void ImageLoadInfo::RGBAToRGB() {
+	if (width <= 0 || height <= 0) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "width and/or height members were invalid (<= 0)" << endl;
+		return;
+	}
+
+	if (pixels == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "no image data (pixels == NULL)" << endl;
+		return;
+	}
+
+	uint8* pixel_index = static_cast<uint8*>(pixels);
+	uint8* pixel_source = pixel_index;
+
+	for (int32 i = 0; i < height * width; i++, pixel_index += 4) {
+		int32 index = 3 * i;
+		pixel_source[index] = *pixel_index;
+		pixel_source[index + 1] = *(pixel_index + 1);
+		pixel_source[index + 2] = *(pixel_index + 2);
+	}
+
+	// Reduce the memory consumed by 1/4 since we no longer need to contain alpha data
+	pixels = realloc(pixels, width * height * 3);
+}
+
+
+
+void ImageLoadInfo::CopyFromTexture(TexSheet* texture) {
+	if (pixels != NULL)
+		free(pixels);
+	pixels = NULL;
+
+	// Get the texture as a buffer
+	height = texture->height;
+	width = texture->width;
+	pixels = malloc(height * width * 4);
+	if (pixels == NULL) {
+		PRINT_ERROR << "failed to malloc enough memory to copy the texture" << endl;
+	}
+
+	TextureManager->_BindTexture(texture->tex_id);
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+}
+
+
+
+void ImageLoadInfo::CopyFromImage(BaseImage* img) {
+	// First copy the image's entire texture sheet to memory
+	CopyFromTexture(img->texture_sheet);
+
+	// Check that the image to copy is smaller than its texture sheet (usually true).
+	// If so, then copy over only the sub-rectangle area of the image from its texture
+	if (height > img->height || width > img->width) {
+		uint32 src_bytes = width * 4;
+		uint32 dst_bytes = img->width * 4;
+		uint32 src_offset = img->y * width * 4 + img->x * 4;
+		void* img_pixels = malloc(img->width * img->height * 4);
+		if (img_pixels == NULL) {
+			PRINT_ERROR << "failed to malloc enough memory to copy the image" << endl;
+			return;
+		}
+
+		for (int32 i = 0; i < img->height; i++) {
+			memcpy((uint8*)img_pixels + i * dst_bytes, (uint8*)pixels + i * src_bytes + src_offset, dst_bytes);
+		}
+
+		// Delete the memory used for the texture sheet and replace it with the memory for the image
+		if (pixels)
+			free(pixels);
+
+		pixels = img_pixels;
+		height = img->height;
+		width = img->width;
+	}
+}
+
+// *****************************************************************************
 // ********************************** Image ************************************
 // *****************************************************************************
 
@@ -274,22 +395,22 @@ void StillImage::EnableGrayScale() {
 		}
 
 		// Check first if there is a grayscale version already in the map
-		if (VideoManager->_images.find(img->filename + img->tags + "<G>") != VideoManager->_images.end())
+		if (TextureManager->_images.find(img->filename + img->tags + "<G>") != TextureManager->_images.end())
 		{
-			_elements[i].image = VideoManager->_images[img->filename + img->tags + "<G>"];
+			_elements[i].image = TextureManager->_images[img->filename + img->tags + "<G>"];
 			++(_elements[i].image->ref_count);
 			continue;
 		}
 
 		// If we arrive here, it means we have to convert to grayscale the image
 		hoa_video::private_video::ImageLoadInfo buffer;
-		VideoManager->_GetBufferFromImage (buffer, img);
+		buffer.CopyFromImage(img);
 
-		VideoManager->_ConvertImageToGrayscale (buffer, buffer);
+		buffer.ConvertToGrayscale();
 		
 		Image* new_image_gray = new Image(img->filename, img->tags+"<G>", buffer.width, buffer.height, true);
 
-		TexSheet *sheet = VideoManager->_InsertImageInTexSheet(new_image_gray, buffer, _is_static);
+		TexSheet *sheet = TextureManager->_InsertImageInTexSheet(new_image_gray, buffer, _is_static);
 
 		if(!sheet)
 		{
@@ -307,7 +428,7 @@ void StillImage::EnableGrayScale() {
 		}
 
 		new_image_gray->ref_count = 1;
-		VideoManager->_images[new_image_gray->filename + new_image_gray->tags] = new_image_gray;
+		TextureManager->_images[new_image_gray->filename + new_image_gray->tags] = new_image_gray;
 		_elements[i].image = new_image_gray;
 	}
 }
@@ -339,14 +460,14 @@ void StillImage::DisableGrayScale() {
 		}
 
 		// Check for the color mode version of the image, already in the map
-		if (VideoManager->_images.find(img->filename + img->tags.substr(0,img->tags.length()-3)) == VideoManager->_images.end())
+		if (TextureManager->_images.find(img->filename + img->tags.substr(0,img->tags.length()-3)) == TextureManager->_images.end())
 		{
 			if (VIDEO_DEBUG)
 				cerr << "VIDEO ERROR: Color image not found in the map, while gray one was in it" << endl;
 			continue;
 		}
 
-		_elements[i].image = VideoManager->_images[img->filename + img->tags.substr(0,img->tags.length()-3)];
+		_elements[i].image = TextureManager->_images[img->filename + img->tags.substr(0,img->tags.length()-3)];
 		--(img->ref_count);
 	}
 }
