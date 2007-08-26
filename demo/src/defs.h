@@ -14,12 +14,12 @@
 ***
 *** This file serves two purposes. The first purpose of this file is to forward
 *** declare classes and shared variables in order to avoid problems with
-*** recursive inclusion. The second purpose of this file is to declare 
+*** recursive inclusion. The second purpose of this file is to declare
 *** the function that contains all of the Allacrost Lua binding code. This makes 
 *** the C++ engine code available for use in Lua scripts.
 ***
 *** \note Pretty much every header file in the source tree will need to include
-*** this file, with a few exceptions (utils.h is one). The only source file 
+*** this file, with a few exceptions (utils.h is one). The only source file
 *** that should need to include this file is defs.cpp
 ***
 *** \note The commenting for all namespaces, variables, and classes declared in
@@ -48,6 +48,8 @@ namespace hoa_audio {
 	class SoundDescriptor;
 
 	namespace private_audio {
+		class AudioCacheElement;
+	
 		class AudioBuffer;
 		class AudioSource;
 		class AudioStream;
@@ -78,6 +80,10 @@ namespace hoa_video {
 	class ImageDescriptor;
 	class StillImage;
 	class AnimatedImage;
+	class TextImage;
+
+
+	class TextureController;
 
 	class FontGlyph;
 	class FontProperties;

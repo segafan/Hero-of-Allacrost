@@ -85,11 +85,8 @@ GameVideo::GameVideo() {
 	_temp_width = 0;
 	_temp_height = 0;
 	_temp_fullscreen = false;
-	_current_debug_TexSheet = -1;
 	_uses_lights = false;
-	_light_overlay = 0xFFFFFFFF;
-	_last_tex_id = 0xFFFFFFFF;
-	_num_tex_switches = 0;
+	_light_overlay = INVALID_TEXTURE_ID;
 	_advanced_display = false;
 	_fps_display = false;
 	_x_shake = 0;
@@ -117,16 +114,12 @@ GameVideo::GameVideo() {
 	_current_context.scissor_rectangle = ScreenRect(0, 0, 1024, 768);
 	_current_context.scissoring_enabled = false;
 
-	IF_PRINT_DEBUG(VIDEO_DEBUG) "GameVideo constructor invoked" << endl;
-
 	strcpy(_next_temp_file, "00000000");
 }
 
 
 
 GameVideo::~GameVideo() {
-	IF_PRINT_DEBUG(VIDEO_DEBUG) "GameVideo destuctor invoked" << endl;
-
 	_particle_manager.Destroy();
 
 	GUIManager->SingletonDestroy();
@@ -149,14 +142,7 @@ GameVideo::~GameVideo() {
 	}
 	TTF_Quit();
 
-	// Delete all texture sheets and images
-	for (vector<TexSheet*>::iterator i = _tex_sheets.begin(); i != _tex_sheets.end(); i++) {
-		delete *i;
-	}
-
-	for (map<string, Image*>::iterator i = _images.begin(); i != _images.end(); i++) {
-		delete i->second;
-	}
+	TextureManager->SingletonDestroy();
 }
 
 
@@ -169,6 +155,13 @@ bool GameVideo::SingletonInitialize() {
 
 	if (TTF_Init() < 0) {
 		PRINT_ERROR << "SDL_ttf initialization failed" << endl;
+		return false;
+	}
+
+	// Create and initialize the TextureManagement sub-system
+	TextureManager = TextureController::SingletonCreate();
+	if (TextureManager->SingletonInitialize() == false) {
+		PRINT_ERROR << "could not initialize texture manager" << endl;
 		return false;
 	}
 
@@ -226,29 +219,7 @@ bool GameVideo::SingletonInitialize() {
 		PRINT_ERROR << "could not load the debug font" << endl;
 		return false;
 	}
-
-	// Create a default set of texture sheets
-	if (_CreateTexSheet(512, 512, VIDEO_TEXSHEET_32x32, false) == NULL) {
-		PRINT_ERROR << "could not create default 32x32 texture sheet" << endl;
-		return false;
-	}
-	if (_CreateTexSheet(512, 512, VIDEO_TEXSHEET_32x64, false) == NULL) {
-		PRINT_ERROR << "could not create default 32x64 texture sheet" << endl;
-		return false;
-	}
-	if (_CreateTexSheet(512, 512, VIDEO_TEXSHEET_64x64, false) == NULL) {
-		PRINT_ERROR << "could not create default 64x64 texture sheet" << endl;
-		return false;
-	}
-	if (_CreateTexSheet(512, 512, VIDEO_TEXSHEET_ANY, true) == NULL) {
-		PRINT_ERROR << "could not create default static variable sized texture sheet" << endl;
-		return false;
-	}
-	if (_CreateTexSheet(512, 512, VIDEO_TEXSHEET_ANY, false) == NULL) {
-		cerr << "VIDEO ERROR: could not create default variable sized tex sheet" << endl;
-		return false;
-	}
-
+	
 	// Create and initialize the GUI sub-system
 	GUIManager = GUISupervisor::SingletonCreate();
 	if (GUIManager->SingletonInitialize() == false) {
@@ -328,6 +299,7 @@ void GameVideo::SetDrawFlags(int32 first_flag, ...) {
 
 
 void GameVideo::Clear() {
+	//! \todo glClearColor is a state change operation. It should only be called when the clear color changes
 	if (_uses_lights)
 		Clear(_light_color);
 	else
@@ -341,7 +313,7 @@ void GameVideo::Clear(const Color &c) {
 	glClearColor(c[0], c[1], c[2], c[3]);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	_num_tex_switches = 0;
+	TextureManager->_debug_num_tex_switches = 0;
 
 	if (glGetError()) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "glGetError() returned true" << endl;
@@ -389,9 +361,8 @@ void GameVideo::Display(uint32 frame_time) {
 	if (_fps_display)
 		DrawFPS(frame_time);
 
-	if (_DEBUG_ShowTexSheet() == false) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "_DEBUG_ShowTexSheet() failed" << endl;
-	}
+	if (TextureManager->_debug_current_sheet >= 0)
+		TextureManager->_DEBUG_ShowTexSheet();
 
 	PopState();
 
@@ -405,6 +376,17 @@ void GameVideo::Display(uint32 frame_time) {
 	int32 current_frame_index = _animation_counter / VIDEO_ANIMATION_FRAME_PERIOD;
 	_current_frame_diff = current_frame_index - old_frame_index;
 } // void GameVideo::Display(uint32 frame_time)
+
+
+
+const std::string GameVideo::CreateGLErrorString() {
+	const GLubyte* error_string = gluErrorString(_gl_error_code);
+
+	if (error_string == NULL)
+		return ("Unknown GL error code: " + NumberToString(_gl_error_code));
+	else
+		return (char*)error_string;
+}
 
 //-----------------------------------------------------------------------------
 // GameVideo class - Screen size and resolution methods
@@ -420,7 +402,7 @@ void GameVideo::GetPixelSize(float& x, float& y) {
 bool GameVideo::ApplySettings() {
 	if (_target == VIDEO_TARGET_SDL_WINDOW) {
 		// Losing GL context, so unload images first
-		if (UnloadTextures() == false) {
+		if (TextureManager->UnloadTextures() == false) {
 			IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to delete OpenGL textures during a context change" << endl;
 		}
 
@@ -461,7 +443,7 @@ bool GameVideo::ApplySettings() {
 				_temp_height = _screen_height;
 
 				if (_screen_width > 0) { // Test to see if we already had a valid video mode
-					ReloadTextures();
+					TextureManager->ReloadTextures();
 				}
 				return false;
 			}
@@ -474,7 +456,7 @@ bool GameVideo::ApplySettings() {
 		_screen_height = _temp_height;
 		_fullscreen = _temp_fullscreen;
 
-		ReloadTextures();
+		TextureManager->ReloadTextures();
 		EnableFog(_fog_color, _fog_intensity);
 
 		return true;
@@ -677,22 +659,6 @@ void GameVideo::SetTransform(float matrix[16]) {
 
 
 
-bool GameVideo::_BindTexture(GLuint tex_id) {
-	if (tex_id != _last_tex_id) {
-		_last_tex_id = tex_id;
-		glBindTexture(GL_TEXTURE_2D, tex_id);
-		++_num_tex_switches;
-	}
-
-	if (glGetError())
-		return false;
-
-	return true;
-}
-
-
-
-
 void GameVideo::EnableSceneLighting(const Color& color) {
 	_light_color = color;
 
@@ -749,30 +715,30 @@ void GameVideo::DisableFog() {
 
 
 void GameVideo::EnablePointLights() {
-	_light_overlay = _CreateBlankGLTexture(1024, 1024);
+	_light_overlay = TextureManager->_CreateBlankGLTexture(1024, 1024);
 	_uses_lights = true;
 }
 
 
 void GameVideo::DisablePointLights() {
-	if (_light_overlay != 0xFFFFFFFF) {
-		_DeleteTexture(_light_overlay);
+	if (_light_overlay != INVALID_TEXTURE_ID) {
+		TextureManager->_DeleteTexture(_light_overlay);
 	}
 
-	_light_overlay = 0xFFFFFFFF;
+	_light_overlay = INVALID_TEXTURE_ID;
 	_uses_lights = false;
 }
 
 
 
 void GameVideo::ApplyLightingOverlay() {
-	if (_light_overlay == 0xFFFFFFFF) {
+	if (_light_overlay == INVALID_TEXTURE_ID) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "light overlay texture was invalid" << endl;
 		return;
 	}
 
 	// Copy light overlay to opengl texture
-	_BindTexture(_light_overlay);
+	TextureManager->_BindTexture(_light_overlay);
 	glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, 1024, 1024, 0);
 
 	CoordSys temp_coords = _current_context.coordinate_system;
@@ -786,7 +752,7 @@ void GameVideo::ApplyLightingOverlay() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_DST_COLOR, GL_ZERO);
 
-	_BindTexture(_light_overlay);
+	TextureManager->_BindTexture(_light_overlay);
 
 	GLfloat vertices[8] = { 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f };
 	GLfloat tex_coords[8] = { 0.0f, 0.0f, mx, 0.0f, mx, my, 0.0f, my };
@@ -840,7 +806,7 @@ bool GameVideo::CaptureScreen(StillImage &id)
 	Image *new_image = new Image(id._filename, "<T>", width, height, false);
 
 	// Try to create a texture sheet of screen size (rounded up)
-	TexSheet *sheet = _CreateTexSheet(RoundUpPow2(width), RoundUpPow2(height), VIDEO_TEXSHEET_ANY, false);
+	TexSheet *sheet = TextureManager->_CreateTexSheet(RoundUpPow2(width), RoundUpPow2(height), VIDEO_TEXSHEET_ANY, false);
 
 	if(!sheet)
 	{
@@ -855,7 +821,7 @@ bool GameVideo::CaptureScreen(StillImage &id)
 	{
 		if (VIDEO_DEBUG)
 			cerr << "VIDEO_DEBUG: TexMemMgr->Insert(image) returned NULL in " << __FUNCTION__ << endl;
-		_RemoveSheet(sheet);
+		TextureManager->_RemoveSheet(sheet);
 		return false;
 	}
 
@@ -863,7 +829,7 @@ bool GameVideo::CaptureScreen(StillImage &id)
 	{
 		if (VIDEO_DEBUG)
 			cerr << "VIDEO_DEBUG: TexSheet->CopyScreenRect() failed in " << __FUNCTION__ << endl;
-		_RemoveSheet(sheet);
+		TextureManager->_RemoveSheet(sheet);
 		return false;
 	}
 
@@ -881,7 +847,7 @@ bool GameVideo::CaptureScreen(StillImage &id)
 	id._elements.push_back(element);
 
 	// Store the image in our std::map
-	_images[id._filename] = new_image;
+	TextureManager->_images[id._filename] = new_image;
 
 	return true;
 }
@@ -1157,7 +1123,7 @@ void GameVideo::DrawFullscreenOverlay(const Color& color) {
 
 void GameVideo::_DEBUG_ShowAdvancedStats() {
 	char text[50];
-	sprintf(text, "Switches: %d\nParticles: %d", _num_tex_switches, _particle_manager.GetNumParticles());
+	sprintf(text, "Switches: %d\nParticles: %d", TextureManager->_debug_num_tex_switches, _particle_manager.GetNumParticles());
 
 	SetFont("debug_font");
 

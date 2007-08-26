@@ -52,26 +52,23 @@
 #include "defs.h"
 #include "utils.h"
 #include "color.h"
-#include "tex_mgmt.h"
+#include "texture.h"
 
 namespace hoa_video {
 
 namespace private_video {
 
 /** ****************************************************************************
-*** \brief A container to store information about an image being loaded.
+*** \brief Store information about an image being loaded.
 *** This class is used to pass information between image loader code and
 *** OpenGL texture creation. It can also be used sometimes as a temporary
-***	holder for pixel data.
+*** holder for pixel data.
 *** ***************************************************************************/
 class ImageLoadInfo {
 public:
-	//! \brief Constructor for intializing the class data members
-	ImageLoadInfo () :
-		width (0),
-		height (0),
-		pixels (NULL)
-	{}
+	ImageLoadInfo();
+
+	~ImageLoadInfo();
 
 	//! \brief The width of the image (in pixels)
 	int32 width;
@@ -79,9 +76,41 @@ public:
 	//! \brief The height of the image (in pixels)
 	int32 height;
 
-	//! \brief Buffer of data, usually of size width*height*4 (RGBA, 8 bits per component)
+	//! \brief Buffer of data, usually of size width * height * 4 (RGBA, 8 bits per component)
 	void* pixels;
+
+	/** \brief Converts the image data to grayscale format
+	*** \note Calling this function when the image data is already grayscaled will create the
+	*** exact same grayscaled image, but still take CPU time to do the conversion. There is
+	*** no way 
+	*** \note You can not convert from grayscale back to the original image. If you wish to
+	*** do that, you must re-load or otherwise re-create the original.
+	**/
+	void ConvertToGrayscale();
+
+	/** \brief Converts the RGBA pixel buffer to a RGB one
+	*** \note Upon conversion, this function will also reduced the memory size pointed to
+	*** by pixels to 3/4s of its original size, since the alpha information is no longer
+	*** neeeded.
+	**/
+	void RGBAToRGB();
+
+	/** \brief Initialize the class members by copying a texture sheet
+	*** \param texture A pointer to the TexSheet to be copied
+	***
+	*** This function effectively copies a texture (in video memory) to a system-side memory buffer
+	**/
+	void CopyFromTexture(TexSheet* texture);
+
+	/** \brief Initialize the class members by copying a loaded image
+	*** \param img A pointer to the image to be copied
+	*** 
+	*** This function effectively copies an image (in video memory) to a system-side memory buffer
+	**/
+	void CopyFromImage(BaseImage* img);
 }; // class ImageLoadInfo
+
+
 
 
 class BaseImage {
@@ -393,7 +422,9 @@ protected:
 class StillImage : public ImageListDescriptor {
 	friend class GameVideo;
 	friend class AnimatedImage;
+	friend class TextureController;
 	friend class private_video::ParticleSystem;
+
 public:
 	StillImage(const bool grayscale = false);
 

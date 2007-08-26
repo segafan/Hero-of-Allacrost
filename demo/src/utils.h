@@ -61,6 +61,7 @@
 #include <vector>
 #include <list>
 #include <map>
+#include <set>
 #include <stack>
 #include <stdexcept>
 #include <sstream>
