@@ -78,7 +78,8 @@ BattleMode::BattleMode() :
 	_swap_countdown_timer(300000), // 5 minutes
 	_min_agility(9999),
 	_active_action(NULL),
-	_next_monster_location_index(0)
+	_next_monster_location_index(0),
+	_finish_window(NULL)
 {
 	if (BATTLE_DEBUG)
 		cout << "BATTLE: BattleMode constructor invoked" << endl;
@@ -131,7 +132,6 @@ BattleMode::BattleMode() :
 		cerr << "BATTLE ERROR: Failed to load character bars image" << endl;
 
 	_action_window = new ActionWindow();
-	_finish_window = new FinishWindow();
 	_TEMP_LoadTestData();
 } // BattleMode::BattleMode()
 
@@ -178,7 +178,8 @@ BattleMode::~BattleMode() {
 
 	// Delete all GUI objects that are allocated
 	delete(_action_window);
-	delete(_finish_window);
+	if (_finish_window)
+		delete(_finish_window);
 } // BattleMode::~BattleMode()
 
 
@@ -402,7 +403,8 @@ void BattleMode::Update() {
 
 	// ----- (1): If the battle is over, only execute this small block of update code
 	if (_battle_over) {
-		if (_finish_window->GetState() == FINISH_INVALID) { // Indicates that the battle has just now finished
+		if (!_finish_window/*_finish_window->GetState() == FINISH_INVALID*/) { // Indicates that the battle has just now finished
+			_finish_window = new FinishWindow();
 			_action_window->Reset();
 			_finish_window->Initialize(_victorious_battle);
 		}
