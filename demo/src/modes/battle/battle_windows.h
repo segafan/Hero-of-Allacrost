@@ -309,6 +309,18 @@ private:
 	//! \brief The list of options that the player may choose from when they lose the battle
 	hoa_video::OptionBox _lose_options;
 
+	//! \brief The window containing the XP and money won
+	hoa_video::MenuWindow _xp_and_money_window;
+
+	//! \brief The windows that show character portraits and stats
+	hoa_video::MenuWindow _character_window[4];
+
+	//! \brief Lists the items won
+	hoa_video::MenuWindow _items_window;
+
+	//! \brief Character portraits
+	hoa_video::StillImage _char_portraits[4];
+
 	// ----- Private methods
 
 	//! \brief Handles update processing when the _state member is FINISH_ANNOUNCE_WIN

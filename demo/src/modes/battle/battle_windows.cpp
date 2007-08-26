@@ -581,12 +581,47 @@ void ActionWindow::_ConstructActionInformation() {
 
 FinishWindow::FinishWindow() {
 	// TODO: declare the MenuSkin to be used
-	if (MenuWindow::Create(512.0f, 256.0f) == false) {
+	//Just like the ones in Menu Mode
+	//NOTE: So, battle mode should have been using the below coordinate system the whole time
+	//Whatever jackass changed it so the bottom left was 0,0 instead of the upper left should be shot.
+	//VideoManager->SetCoordSys(0.0f, 1024.0f, 768.0f, 0.0f);
+	float start_x = (1024 - 800) / 2 - 40;
+	float start_y = 768 - ((768 - 600) / 2 + 15);
+	//if (MenuWindow::Create(512.0f, 256.0f) == false) {
+	/*if (MenuWindow::Create(848.0f, 632.0f) == false) {
 		cerr << "BATTLE ERROR: In FinishWindow constructor, the call to MenuWindow::Create() failed" << endl;
-	}
-	MenuWindow::SetPosition(512.0f, 384.0f);
-	MenuWindow::SetAlignment(VIDEO_X_CENTER, VIDEO_Y_CENTER);
-	MenuWindow::Hide();
+	}*/
+	//MenuWindow::SetPosition(512.0f, 384.0f);
+	//MenuWindow::SetPosition(start_x, start_y - 50.0f);
+	//MenuWindow::Show();
+	//MenuWindow::Hide();
+
+	//Create xp and money window
+	_xp_and_money_window.Create(848.0f, 72.0f, VIDEO_MENU_EDGE_ALL, ~VIDEO_MENU_EDGE_ALL);
+	_xp_and_money_window.SetPosition(start_x, start_y + 50.0f);
+	_xp_and_money_window.Show();
+
+	//Create character windows
+	_character_window[0].Create(480.0f, 140.0f, ~VIDEO_MENU_EDGE_BOTTOM, VIDEO_MENU_EDGE_BOTTOM);
+	_character_window[0].SetPosition(start_x, start_y - 13.0f);
+	_character_window[0].Show();
+
+	_character_window[1].Create(480.0f, 140.0f, ~VIDEO_MENU_EDGE_BOTTOM, VIDEO_MENU_EDGE_BOTTOM);
+	_character_window[1].SetPosition(start_x, start_y - 13.0f - 140.0f);
+	_character_window[1].Show();
+
+	_character_window[2].Create(480.0f, 140.0f, ~VIDEO_MENU_EDGE_BOTTOM, VIDEO_MENU_EDGE_BOTTOM);
+	_character_window[2].SetPosition(start_x, start_y - 13.0f - 140.0f * 2.0f);
+	_character_window[2].Show();
+
+	_character_window[3].Create(480.0f, 140.0f, VIDEO_MENU_EDGE_ALL, ~VIDEO_MENU_EDGE_ALL);//~VIDEO_MENU_EDGE_BOTTOM, VIDEO_MENU_EDGE_BOTTOM);
+	_character_window[3].SetPosition(start_x, start_y - 13.0f - 140.0f * 3.0f);
+	_character_window[3].Show();
+
+	//Create items window
+	_items_window.Create(848.0f, 560.0f, ~VIDEO_MENU_EDGE_TOP, VIDEO_MENU_EDGE_TOP);
+	_items_window.SetPosition(start_x, start_y - 18.0f);
+	_items_window.Show();
 
 	_state = FINISH_INVALID;
 
@@ -615,12 +650,27 @@ FinishWindow::FinishWindow() {
 	_lose_options.SetCursorOffset(-60.0f, 25.0f);
 	_lose_options.SetSelection(0);
 	_lose_options.SetOwner(this);
+
+	_char_portraits[0].SetFilename("img/portraits/map/claudius.png");
+	_char_portraits[0].SetDimensions(130.0f, 130.0f);
+
+	VideoManager->LoadImage(_char_portraits[0]);
 }
 
 
 
 FinishWindow::~FinishWindow() {
-	MenuWindow::Destroy();
+	_character_window[0].Destroy();
+	_character_window[1].Destroy();
+	_character_window[2].Destroy();
+	_character_window[3].Destroy();
+
+	_xp_and_money_window.Destroy();
+	_items_window.Destroy();
+
+	VideoManager->DeleteImage(_char_portraits[0]);
+
+	//MenuWindow::Destroy();
 }
 
 
@@ -764,7 +814,70 @@ void FinishWindow::_UpdateLoseConfirm() {
 
 void FinishWindow::Draw() {
 	VideoManager->DisableSceneLighting();
-	MenuWindow::Draw();
+	//VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, VIDEO_BLEND, 0);
+	//TEMP!
+	//Two different window arrangements for win and lose would be best
+	//Win has all the elaborate windows, lose just has the game over options
+	//MenuWindow::Draw();
+	_items_window.Draw();
+
+	_character_window[0].Draw();
+	_character_window[1].Draw();
+	_character_window[2].Draw();
+	_character_window[3].Draw();
+
+	_xp_and_money_window.Draw();
+
+	//TEMP!!!
+	//Just so everyone has an idea of the potential setup for the finishwindow
+
+	//Draw XP and Money
+	{
+		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP);
+		VideoManager->Move(96, 694);
+		VideoManager->DrawText("XP Gained: 45");
+
+		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_TOP);
+		VideoManager->MoveRelative(800, 0);
+		VideoManager->DrawText("Dorun: 33");
+	}
+
+	//Draw Items Gained
+	{
+		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP);
+		VideoManager->Move(700, 640);
+		VideoManager->DrawText("Items");
+		//VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP);
+		VideoManager->MoveRelative(-140, -25);
+		VideoManager->DrawText("Health Potion");
+		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_TOP);
+		VideoManager->MoveRelative(325, 0);
+		VideoManager->DrawText("1");
+	}
+
+	//Draw char info
+	{
+		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+		VideoManager->Move(80, 580);
+		VideoManager->DrawImage(_char_portraits[0]);
+		VideoManager->MoveRelative(150, 40);
+		VideoManager->DrawText("HP: 14 (+11)");
+		VideoManager->MoveRelative(0, -26);
+		VideoManager->DrawText("SP: 10");
+		VideoManager->MoveRelative(0, -26);
+		VideoManager->DrawText("STR: 22 (+1)");
+		VideoManager->MoveRelative(0, -26);
+		VideoManager->DrawText("VIG: 18 (+2)");
+
+		VideoManager->MoveRelative(155, 78);
+		VideoManager->DrawText("FOR: 11");
+		VideoManager->MoveRelative(0, -26);
+		VideoManager->DrawText("PRO: 16 (+5)");
+		VideoManager->MoveRelative(0, -26);
+		VideoManager->DrawText("AGI: 25 (+2)");
+		VideoManager->MoveRelative(0, -26);
+		VideoManager->DrawText("EVD: 6");
+	}
 
 	switch (_state) {
 		case FINISH_WIN_ANNOUNCE:
