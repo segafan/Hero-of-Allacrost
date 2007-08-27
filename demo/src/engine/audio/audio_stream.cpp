@@ -61,7 +61,8 @@ uint32 AudioStream::FillBuffer(uint8* buffer, uint32 size) {
 		remaining_data -= _read_position;
 		read_samples = (size - num_samples_read < remaining_data) ? size - num_samples_read : remaining_data;
 		num_samples_read += _audio_input->Read(buffer + num_samples_read * _audio_input->GetSampleSize(), read_samples, _end_of_stream);
-
+		_read_position += num_samples_read;
+		
 		// Detect early exit condition
 		if (_looping == false && _end_of_stream == true) {
 			return num_samples_read;
@@ -77,7 +78,6 @@ void AudioStream::Seek(uint32 sample) {
 	if (sample >= _audio_input->GetTotalNumberSamples()) {
 		IF_PRINT_WARNING(AUDIO_DEBUG) << "tried to seek to position beyond sample range: " << sample << endl;
 	}
-
 	_audio_input->Seek(sample);
 	_read_position = sample;
 	_end_of_stream = false;
