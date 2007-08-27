@@ -224,6 +224,20 @@ uint32 WavFile::Read(uint8* buffer, uint32 size, bool& end) {
 
 	uint32 read = _file_input.gcount() / _sample_size;
 	end = (read != size);
+	
+#ifdef __BIG_ENDIAN__
+	if (_bits_per_sample == 16)
+	{
+		uint8 tmp;
+		// iterate through
+		for (uint32 i = 0; i < size; i += 2)
+		{
+			tmp = buffer[i];
+			buffer[i] = buffer[i + 1];
+			buffer[i + 1] = tmp;
+		}
+	}
+#endif
 
 	return read;
 }
