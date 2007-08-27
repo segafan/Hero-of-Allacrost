@@ -115,8 +115,10 @@ bool WavFile::Initialize() {
 	memcpy(&size, buffer, 2);
 	#ifdef __BIG_ENDIAN__ // Swap the bytes for the big endian hardware
 		e1 = size & 255;
-		e2 = (size>> 8) * 255;
-		size = (e1 << 8) + e2;
+		e2 = (size >> 8) & 255;
+		e3 = (size >> 16) & 255;
+		e4 = (size >> 24) & 255;
+		size = (static_cast<uint32>(e1) << 24) + (static_cast<uint32>(e2) << 16) + (static_cast<uint32>(e3) << 8) + e4;
 	#endif
 	if (size != 1) { // PCM == 1
 		IF_PRINT_WARNING(AUDIO_DEBUG) << "failed because audio format was not PCM" << endl;
@@ -128,8 +130,8 @@ bool WavFile::Initialize() {
 	memcpy(&_number_channels, buffer, 2);
 	#ifdef __BIG_ENDIAN__ // Swap the bytes for the big endian hardware
 		e1 = _number_channels & 255;
-		e2 = (_number_channels >> 8) * 255;
-		_number_channels = (e1 << 8) + e2;
+		e2 = (_number_channels >> 8) & 255;
+		_number_channels = (static_cast<uint16>(e1) << 8) + e2;
 	#endif
 	if (_number_channels != 1 && _number_channels != 2) {
 		IF_PRINT_WARNING(AUDIO_DEBUG) << "failed because number of channels was neither mono nor stereo" << endl;
@@ -164,8 +166,8 @@ bool WavFile::Initialize() {
 	memcpy(&_sample_size, buffer, 2);
 	#ifdef __BIG_ENDIAN__ // Swap the bytes for the big endian hardware
 		e1 = _sample_size & 255;
-		e2 = (_sample_size >> 8) * 255;
-		_sample_size = (e1 << 8) + e2;
+		e2 = (_sample_size >> 8) & 255;
+		_sample_size = (static_cast<uint16>(e1) << 8) + e2;
 	#endif
 
 	// Get bits per sample -- 2 bytes
@@ -173,8 +175,8 @@ bool WavFile::Initialize() {
 	memcpy(&_bits_per_sample, buffer, 2);
 	#ifdef __BIG_ENDIAN__ // Swap the bytes for the big endian hardware
 		e1 = _bits_per_sample & 255;
-		e2 = (_bits_per_sample >> 8) * 255;
-		_bits_per_sample = (e1 << 8) + e2;
+		e2 = (_bits_per_sample >> 8) & 255;
+		_bits_per_sample = (static_cast<uint16>(e1) << 8) + e2;
 	#endif
 
 	// Check subchunk 2 ID (to be "data") -- 4 bytes

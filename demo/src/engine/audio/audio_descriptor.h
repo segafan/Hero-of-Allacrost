@@ -182,9 +182,12 @@ public:
 	*** The action taken by this function depends on the load type selected. For static sounds, a single OpenAL buffer is
 	*** filled. For streaming, the file/memory is prepared.
 	*/
-	bool LoadAudio(const std::string& filename, AUDIO_LOAD load_type = AUDIO_LOAD_STATIC, uint32 stream_buffer_size = private_audio::DEFAULT_BUFFER_SIZE);
+	virtual bool LoadAudio(const std::string& filename, AUDIO_LOAD load_type = AUDIO_LOAD_STATIC, uint32 stream_buffer_size = private_audio::DEFAULT_BUFFER_SIZE);
 
-	//! \brief Frees all data resources and resets class parameters
+	/** \brief Frees all data resources and resets class parameters
+	***
+	*** It resets the _state and _offset class members, as well as deleting _data, _stream, _input, _buffer, and resets _source.
+	*/
 	void FreeAudio();
 
 	const std::string GetFilename() const
@@ -404,6 +407,8 @@ public:
 	~MusicDescriptor();
 
 	MusicDescriptor(const MusicDescriptor& copy);
+
+	bool LoadAudio(const std::string& filename, AUDIO_LOAD load_type = AUDIO_LOAD_STREAM_FILE, uint32 stream_buffer_size = private_audio::DEFAULT_BUFFER_SIZE);
 
 	bool IsSound() const
 		{ return false; }
