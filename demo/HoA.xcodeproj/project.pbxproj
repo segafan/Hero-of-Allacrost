@@ -74,6 +74,7 @@
 		D46809C10C1E723F009F76A9 /* QtGui.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D4F68AA70BD7227F009F6973 /* QtGui.framework */; };
 		D4680BE40C1E724E009F76A9 /* QtCore.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D4F68AA30BD72276009F6973 /* QtCore.framework */; };
 		D4680D1C0C1E725F009F76A9 /* Qt3Support.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D4F68A9F0BD72266009F6973 /* Qt3Support.framework */; };
+		D49850D40C82AEA50067770B /* texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D49850D20C82AEA50067770B /* texture.cpp */; };
 		D49D57020C65B1C1006E6ABA /* audio_effects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D49D57010C65B1C1006E6ABA /* audio_effects.cpp */; };
 		D4CE3FB60BC9A11500CA3D30 /* dat in Resources */ = {isa = PBXBuildFile; fileRef = 4931EB160BAF28B700013185 /* dat */; };
 		D4CE3FB70BC9A11900CA3D30 /* img in Resources */ = {isa = PBXBuildFile; fileRef = 4931EB320BAF28B800013185 /* img */; };
@@ -349,6 +350,8 @@
 		D46809920C1E6E4E009F76A9 /* QtNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QtNetwork.framework; path = /Library/Frameworks/QtNetwork.framework; sourceTree = "<absolute>"; };
 		D46809960C1E6E66009F76A9 /* QtXml.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QtXml.framework; path = /Library/Frameworks/QtXml.framework; sourceTree = "<absolute>"; };
 		D46809A70C1E703C009F76A9 /* lib */ = {isa = PBXFileReference; lastKnownFileType = folder; name = lib; path = "macosx-contrib/lib"; sourceTree = "<group>"; };
+		D49850D20C82AEA50067770B /* texture.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = texture.cpp; sourceTree = "<group>"; };
+		D49850D30C82AEA50067770B /* texture.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = texture.h; sourceTree = "<group>"; };
 		D49D57010C65B1C1006E6ABA /* audio_effects.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = audio_effects.cpp; sourceTree = "<group>"; };
 		D49D57030C65B1D2006E6ABA /* audio_effects.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = audio_effects.h; sourceTree = "<group>"; };
 		D4D166250BC0D91300190FC0 /* color.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = color.h; sourceTree = "<group>"; };
@@ -818,6 +821,8 @@
 		D4D166240BC0D91300190FC0 /* video */ = {
 			isa = PBXGroup;
 			children = (
+				D49850D20C82AEA50067770B /* texture.cpp */,
+				D49850D30C82AEA50067770B /* texture.h */,
 				D4DBE6D80BC1E91A00E85DCB /* tex_mgmt.cpp */,
 				D4D166250BC0D91300190FC0 /* color.h */,
 				D4D166260BC0D91300190FC0 /* context.h */,
@@ -1041,6 +1046,7 @@
 				D4F1104E0C58548B00ADC969 /* audio_stream.cpp in Sources */,
 				D4F110410C58546800ADC969 /* audio_descriptor.cpp in Sources */,
 				D49D57020C65B1C1006E6ABA /* audio_effects.cpp in Sources */,
+				D49850D40C82AEA50067770B /* texture.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
