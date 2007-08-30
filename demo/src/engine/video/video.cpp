@@ -160,10 +160,6 @@ bool GameVideo::SingletonInitialize() {
 
 	// Create and initialize the TextureManagement sub-system
 	TextureManager = TextureController::SingletonCreate();
-	if (TextureManager->SingletonInitialize() == false) {
-		PRINT_ERROR << "could not initialize texture manager" << endl;
-		return false;
-	}
 
 	// Load in the user's video configuration settings from a script file
 	hoa_script::ReadScriptDescriptor video_settings_script;
@@ -219,7 +215,12 @@ bool GameVideo::SingletonInitialize() {
 		PRINT_ERROR << "could not load the debug font" << endl;
 		return false;
 	}
-	
+
+	if (TextureManager->SingletonInitialize() == false) {
+		PRINT_ERROR << "could not initialize texture manager" << endl;
+		return false;
+	}
+
 	// Create and initialize the GUI sub-system
 	GUIManager = GUISupervisor::SingletonCreate();
 	if (GUIManager->SingletonInitialize() == false) {
