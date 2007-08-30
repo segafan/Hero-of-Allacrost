@@ -16,6 +16,9 @@
 			4941A4AF0AC1D77500D65B8E /* Allacrost */,
 		);
 		breakpoints = (
+			D4D424950C86877600F4B4BC /* audio_descriptor.cpp:627 */,
+			D4D4249B0C8687C900F4B4BC /* audio_descriptor.cpp:646 */,
+			D4D4249F0C86881100F4B4BC /* audio_descriptor.cpp:588 */,
 		);
 		breakpointsGroup = D404C6AB0B02F27D00827A19 /* XCBreakpointsBucket */;
 		codeSenseManager = D43082580AF9831800A5173A /* Code sense */;
@@ -170,8 +173,8 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 209890953;
-			PBXWorkspaceStateSaveDate = 209890953;
+			PBXPerProjectTemplateStateSaveDate = 210140718;
+			PBXWorkspaceStateSaveDate = 210140718;
 		};
 		sourceControlManager = D43082570AF9831800A5173A /* Source Control */;
 		userBuildSettings = {
@@ -377,17 +380,17 @@
 	};
 	4999AC1D0AF407BD004DD3A3 /* audio.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {854, 8918}}";
-			sepNavSelRange = "{6627, 7}";
-			sepNavVisRect = "{{0, 2303}, {711, 645}}";
+			sepNavIntBoundsRect = "{{0, 0}, {854, 8960}}";
+			sepNavSelRange = "{6483, 0}";
+			sepNavVisRect = "{{0, 2551}, {653, 149}}";
 			sepNavWindowFrame = "{{130, 4}, {750, 774}}";
 		};
 	};
 	4999AC1F0AF407BD004DD3A3 /* audio.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {711, 4256}}";
-			sepNavSelRange = "{0, 0}";
-			sepNavVisRect = "{{0, 3827}, {711, 429}}";
+			sepNavIntBoundsRect = "{{0, 0}, {710, 5544}}";
+			sepNavSelRange = "{10855, 0}";
+			sepNavVisRect = "{{0, 3786}, {672, 311}}";
 			sepNavWindowFrame = "{{153, 89}, {750, 558}}";
 		};
 	};
@@ -395,6 +398,9 @@
 		isa = XCBreakpointsBucket;
 		name = "Project Breakpoints";
 		objects = (
+			D4D424950C86877600F4B4BC /* audio_descriptor.cpp:627 */,
+			D4D4249B0C8687C900F4B4BC /* audio_descriptor.cpp:646 */,
+			D4D4249F0C86881100F4B4BC /* audio_descriptor.cpp:588 */,
 		);
 	};
 	D404C6E90B02FD3E00827A19 /* editor.moc.cpp */ = {
@@ -423,12 +429,12 @@
 	};
 	D43080DE0AF982F800A5173A /* Allacrost */ = {
 		isa = PBXExecutable;
-		activeArgIndex = 0;
+		activeArgIndex = 2147483647;
 		activeArgIndices = (
-			YES,
+			NO,
 		);
 		argumentStrings = (
-			"-d all",
+			"-d audio",
 		);
 		autoAttachOnCrash = 1;
 		configStateDict = {
@@ -504,18 +510,18 @@
 	};
 	D4D166430BC0D91400190FC0 /* tex_mgmt.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {722, 5586}}";
+			sepNavIntBoundsRect = "{{0, 0}, {980, 2884}}";
 			sepNavSelRange = "{0, 0}";
-			sepNavVisRect = "{{0, 482}, {711, 429}}";
+			sepNavVisRect = "{{0, 1152}, {711, 429}}";
 			sepNavWindowFrame = "{{15, 215}, {750, 558}}";
 		};
 	};
 	D4D166480BC0D91400190FC0 /* video.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1016, 27202}}";
-			sepNavSelRange = "{20601, 19}";
-			sepNavVisRect = "{{0, 10227}, {711, 429}}";
-			sepNavWindowFrame = "{{15, 215}, {750, 558}}";
+			sepNavIntBoundsRect = "{{0, 0}, {986, 16520}}";
+			sepNavSelRange = "{4620, 0}";
+			sepNavVisRect = "{{0, 1999}, {711, 429}}";
+			sepNavWindowFrame = "{{617, 177}, {750, 558}}";
 		};
 	};
 	D4D166490BC0D91400190FC0 /* video.h */ = {
@@ -648,12 +654,57 @@
 			sepNavWindowFrame = "{{488, 19}, {750, 558}}";
 		};
 	};
+	D4D424950C86877600F4B4BC /* audio_descriptor.cpp:627 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		delayBeforeContinue = 0;
+		fileReference = D4F110400C58546800ADC969 /* audio_descriptor.cpp */;
+		functionName = "AudioDescriptor::_Update()";
+		hitCount = 24;
+		lineNumber = 627;
+		location = Allacrost;
+		modificationTime = 210145473.107513;
+		state = 1;
+	};
+	D4D4249B0C8687C900F4B4BC /* audio_descriptor.cpp:646 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		delayBeforeContinue = 0;
+		fileReference = D4F110400C58546800ADC969 /* audio_descriptor.cpp */;
+		functionName = "AudioDescriptor::_Update()";
+		hitCount = 4;
+		lineNumber = 646;
+		location = Allacrost;
+		modificationTime = 210145236.520004;
+		state = 2;
+	};
+	D4D4249F0C86881100F4B4BC /* audio_descriptor.cpp:588 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		delayBeforeContinue = 0;
+		fileReference = D4F110400C58546800ADC969 /* audio_descriptor.cpp */;
+		functionName = "AudioDescriptor::DEBUG_PrintInfo()";
+		hitCount = 1;
+		lineNumber = 588;
+		location = Allacrost;
+		modificationTime = 210145104.08016;
+		state = 2;
+	};
 	D4DBE6D80BC1E91A00E85DCB /* tex_mgmt.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1358, 39956}}";
-			sepNavSelRange = "{1012, 0}";
-			sepNavVisRect = "{{0, 91}, {711, 429}}";
-			sepNavWindowFrame = "{{424, 116}, {750, 558}}";
+			sepNavIntBoundsRect = "{{0, 0}, {1358, 29260}}";
+			sepNavSelRange = "{7203, 0}";
+			sepNavVisRect = "{{0, 3429}, {711, 429}}";
+			sepNavWindowFrame = "{{489, 57}, {750, 558}}";
 		};
 	};
 	D4E561260BB71B53002FB758 /* defs.cpp */ = {
@@ -682,17 +733,17 @@
 	};
 	D4F110400C58546800ADC969 /* audio_descriptor.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {860, 12600}}";
-			sepNavSelRange = "{25163, 0}";
-			sepNavVisRect = "{{0, 11947}, {711, 429}}";
+			sepNavIntBoundsRect = "{{0, 0}, {860, 12628}}";
+			sepNavSelRange = "{18298, 0}";
+			sepNavVisRect = "{{0, 9017}, {711, 429}}";
 			sepNavWindowFrame = "{{15, 184}, {750, 558}}";
 		};
 	};
 	D4F110420C58547700ADC969 /* audio_descriptor.h */ = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {992, 6076}}";
-			sepNavSelRange = "{12887, 0}";
-			sepNavVisRect = "{{0, 2540}, {711, 429}}";
+			sepNavSelRange = "{12219, 8}";
+			sepNavVisRect = "{{0, 4114}, {711, 429}}";
 			sepNavWindowFrame = "{{408, 93}, {750, 558}}";
 		};
 	};
@@ -715,8 +766,8 @@
 	D4F110480C58548B00ADC969 /* audio_stream.cpp */ = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {836, 1568}}";
-			sepNavSelRange = "{2961, 0}";
-			sepNavVisRect = "{{0, 590}, {711, 429}}";
+			sepNavSelRange = "{1596, 0}";
+			sepNavVisRect = "{{0, 927}, {653, 149}}";
 			sepNavWindowFrame = "{{511, 33}, {750, 558}}";
 		};
 	};
@@ -724,7 +775,7 @@
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {711, 1806}}";
 			sepNavSelRange = "{0, 0}";
-			sepNavVisRect = "{{0, 1161}, {711, 645}}";
+			sepNavVisRect = "{{0, 577}, {711, 645}}";
 			sepNavWindowFrame = "{{15, -1}, {750, 774}}";
 		};
 	};
