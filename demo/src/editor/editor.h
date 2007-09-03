@@ -30,12 +30,13 @@
 #include <QLayout>
 #include <QLineEdit>
 #include <Q3ListView>
-#include <Q3MainWindow>
+#include <QMainWindow>
 #include <QMenuBar>
 #include <QMessageBox>
 #include <Q3PopupMenu>
 #include <QPushButton>
 #include <Q3ScrollView>
+#include <QSplitter>
 #include <QSpinBox>
 #include <QStatusBar>
 #include <QStringList>
@@ -45,7 +46,6 @@
 #include <QCloseEvent>
 #include <Q3GridLayout>
 #include <QMouseEvent>
-#include <Q3VBoxLayout>
 #include <Q3VButtonGroup>
 
 #include <map>
@@ -66,7 +66,7 @@ enum TILE_MODE_TYPE
 
 class EditorScrollView;
 
-class Editor: public Q3MainWindow
+class Editor: public QMainWindow
 {
 	//! Macro needed to use Qt's slots and signals.
 	Q_OBJECT
@@ -83,7 +83,6 @@ class Editor: public Q3MainWindow
 		//! \note Reimplemented from QMainWindow.
 		//! \param QCloseEvent* A pointer to a Qt close event.
 		void closeEvent(QCloseEvent*);
-		//void resizeEvent(QResizeEvent*); FIXME: do I need this?
 	
 	private slots:
 		//! This slot is used to gray out items in the File menu.
@@ -137,43 +136,66 @@ class Editor: public Q3MainWindow
 		//@}
 		
 	private:
-		//! Saves the map if it is unsaved.
+		//! Helper function to the constructor, creates menu actions.
+		void _CreateActions();
+		//! Helper function to the constructor, creates the actual menus.
+		void _CreateMenus();
+		//! \brief Used to determine if it is safe to erase the current map. Will prompt the user for action:
+		//!        to save or not to save.
+		//! \return True if user decided to save the map or intentionally erase it; false if user canceled the operation.
 		bool _EraseOK();
-		//! Sets current edit mode
-		void _SetEditMode(TILE_MODE_TYPE new_mode);
-		//! Sets currently edited layer
-		void _SetEditLayer(LAYER_TYPE new_layer);		
 
-		//! This is used to represent the File menu.
-		Q3PopupMenu* _file_menu;
-		//! This is used to represent the View menu.
-		Q3PopupMenu* _view_menu;
-		//! This is used to represent the Tiles menu.
-		Q3PopupMenu* _tiles_menu;
-		//! This is used to represent the Tiles menu.
-		Q3PopupMenu* _map_menu;
-		//! This is used to represent the Help menu.
-		Q3PopupMenu* _help_menu;
+		//! \name Application Menus
+		//! \brief These are used to represent the various menus found in the menu bar.
+		//{@
+		QMenu* _file_menu;
+		QMenu* _view_menu;
+		QMenu* _tiles_menu;
+		QMenu* _map_menu;
+		QMenu* _help_menu;
+		//@}
 
-		//! This is used to display status messages.
-		QStatusBar*       _stat_bar;
+		//! \name Application Menu Actions
+		//! \brief These are Qt's way of associating the same back-end functionality to occur whether a user
+		//!        invokes a menu through the menu bar, a keyboard shortcut, a toolbar button, or other means.
+		//{@
+		QAction* _new_action;
+		QAction* _open_action;
+		QAction* _save_as_action;
+		QAction* _save_action;
+		QAction* _resize_action;
+		QAction* _quit_action;
+
+		QAction* _toggle_grid_action;
+		QAction* _toggle_ll_action;
+		QAction* _toggle_ml_action;
+		QAction* _toggle_ul_action;
+
+		QAction* _layer_fill_action;
+		QAction* _layer_clear_action;
+		QAction* _mode_paint_action;
+		QAction* _mode_move_action;
+		QAction* _mode_delete_action;
+		QAction* _edit_ll_action;
+		QAction* _edit_ml_action;
+		QAction* _edit_ul_action;
+		QActionGroup* _mode_group;
+		QActionGroup* _edit_group;
+
+		QAction* _select_music_action;
+
+		QAction* _help_action;
+		QAction* _about_action;
+		QAction* _about_qt_action;
+		//@}
+
 		//! Tabbed widget of tilesets.
-		QTabWidget*       _ed_tabs;
+		QTabWidget* _ed_tabs;
 		//! Used to add scrollbars to the QGLWidget of the map.
 		EditorScrollView* _ed_scrollview;
-		//! Main window layout.
-		Q3BoxLayout*       _ed_layout;
-		//! Needed for _ed_layout for it's children.
-		QWidget*          _ed_widget;
+		//! Used as the main widget in the editor since it enables user-sizable sub-widgets.
+		QSplitter* _ed_splitter;
 
-		//! Grid item in View menu.
-		int  _grid_id;
-		//! Lower layer item in View menu.
-		int  _ll_id;
-		//! Middle layer item in View menu.
-		int  _ml_id;
-		//! Upper layer item in View menu.
-		int  _ul_id;
 		//! Grid toggle view switch.
 		bool _grid_on;
 		//! Lower layer toggle view switch.
@@ -182,11 +204,6 @@ class Editor: public Q3MainWindow
 		bool _ml_on;
 		//! Upper layer toggle view switch.
 		bool _ul_on;
-
-		//! Edit layer items in Tile menu
-		std::map<LAYER_TYPE, int> _layer_ids;
-		//! Mode items in Tile menu
-		std::map<TILE_MODE_TYPE, int> _mode_ids;
 }; // class Editor
 
 class NewMapDialog: public QDialog

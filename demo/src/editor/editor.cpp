@@ -21,76 +21,24 @@ using namespace hoa_editor;
 using namespace hoa_video;
 using namespace std;
 
-Editor::Editor() : Q3MainWindow(0, 0, Qt::WDestructiveClose)
+Editor::Editor() : QMainWindow()
 {
-	// create the statusbar
-	_stat_bar = new QStatusBar(this);
-	
-	// file menu creation
-	_file_menu = new Q3PopupMenu(this);
-	connect(_file_menu, SIGNAL(aboutToShow()), this, SLOT(_FileMenuSetup()));
-	menuBar()->insertItem("&File", _file_menu);
-
-	// view menu creation
-	_view_menu = new Q3PopupMenu(this);
-	menuBar()->insertItem("&View", _view_menu);
-	_grid_id = _view_menu->insertItem("&Grid", this, SLOT(_ViewToggleGrid()));
-	_view_menu->insertSeparator();
-	_ll_id = _view_menu->insertItem("&Lower Tile Layer", this, SLOT(_ViewToggleLL()));
-	_ml_id = _view_menu->insertItem("&Middle Tile Layer", this, SLOT(_ViewToggleML()));
-	_ul_id = _view_menu->insertItem("&Upper Tile Layer", this, SLOT(_ViewToggleUL()));
-	_view_menu->setCheckable(true);
-
-	// tile menu creation
-	_tiles_menu = new Q3PopupMenu(this);
-	menuBar()->insertItem("&Tiles", _tiles_menu);
-	_tiles_menu->insertItem("&Fill current layer", this, SLOT(_TileLayerFill()));
-	_tiles_menu->insertItem("&Clear current layer", this, SLOT(_TileLayerClear()));
-	_tiles_menu->insertSeparator();
-	// store id's for setting and removing checks
-	int paint_mode_id = _tiles_menu->insertItem("&Paint mode", this, SLOT(_TileModePaint()));
-	_mode_ids.insert(std::pair<TILE_MODE_TYPE,int>(PAINT_TILE,paint_mode_id));
-	int move_mode_id = _tiles_menu->insertItem("&Move mode", this, SLOT(_TileModeMove()));
-	_mode_ids.insert(std::pair<TILE_MODE_TYPE,int>(MOVE_TILE,move_mode_id));
-	int delete_mode_id = _tiles_menu->insertItem("&Delete mode", this, SLOT(_TileModeDelete()));
-	_mode_ids.insert(std::pair<TILE_MODE_TYPE,int>(DELETE_TILE,delete_mode_id));
-	_tiles_menu->insertSeparator();
-	int edit_ll_id = _tiles_menu->insertItem("Edit &lower layer", this, SLOT(_TileEditLL()));
-	_layer_ids.insert(std::pair<LAYER_TYPE,int>(LOWER_LAYER,edit_ll_id));
-	int edit_ml_id = _tiles_menu->insertItem("Edit &middle layer", this, SLOT(_TileEditML()));
-	_layer_ids.insert(std::pair<LAYER_TYPE,int>(MIDDLE_LAYER,edit_ml_id));
-	int edit_ul_id = _tiles_menu->insertItem("Edit &upper layer", this, SLOT(_TileEditUL()));
-	_layer_ids.insert(std::pair<LAYER_TYPE,int>(UPPER_LAYER,edit_ul_id));
-	
-	// map menu creation
-	_map_menu = new Q3PopupMenu(this);
-	menuBar()->insertItem("&Map",_map_menu);
-	_map_menu->insertItem("Set background &music...", this, SLOT(_MapSelectMusic()));
-
-	// help menu creation
-	_help_menu = new Q3PopupMenu(this);
-	menuBar()->insertSeparator();
-	menuBar()->insertItem("&Help", _help_menu);
-	_help_menu->insertItem("&Help", this, SLOT(_HelpHelp()), Qt::Key_F1);
-	_help_menu->insertItem("&About", this, SLOT(_HelpAbout()));
-	_help_menu->insertItem("About &Qt", this, SLOT(_HelpAboutQt()));
+	// create menu actions and menus
+	_CreateActions();
+	_CreateMenus();
 
 	// initialize viewing items
-	_grid_on = true;
-	_ll_on = true;
+	_grid_on = false;
+	_ll_on = false;
 	_ml_on = false;
 	_ul_on = false;
-	_view_menu->setItemChecked(_grid_id, _grid_on);
-	_view_menu->setItemChecked(_ll_id,   _ll_on);
-	_view_menu->setItemChecked(_ml_id,   _ml_on);
-	_view_menu->setItemChecked(_ul_id,   _ul_on);
-
+	
 	// create the main widget and layout
-	_ed_widget = new QWidget(this);
-	_ed_layout = new Q3VBoxLayout(_ed_widget);
+	_ed_splitter = new QSplitter(this);
+	_ed_splitter->setOrientation(Qt::Vertical);
 	_ed_scrollview = NULL;
 	_ed_tabs = NULL;
-	setCentralWidget(_ed_widget);
+	setCentralWidget(_ed_splitter);
 	resize(600, 400);
 
 	// set the window icon
@@ -99,15 +47,11 @@ Editor::Editor() : Q3MainWindow(0, 0, Qt::WDestructiveClose)
 
 Editor::~Editor()
 {
-//	if (_tiles != NULL)
-//		delete _tiles;
 	if (_ed_scrollview != NULL)
 		delete _ed_scrollview;
 	if (_ed_tabs != NULL)
 		delete _ed_tabs;
-	delete _ed_layout;
-	delete _ed_widget;
-
+	delete _ed_splitter;
 } // Editor destructor
 
 
@@ -125,28 +69,18 @@ void Editor::closeEvent(QCloseEvent*)
 
 void Editor::_FileMenuSetup()
 {
-	_file_menu->clear();
-	_file_menu->insertItem("&New...", this, SLOT(_FileNew()), Qt::CTRL+Qt::Key_N);
-	_file_menu->insertItem("&Open...", this, SLOT(_FileOpen()), Qt::CTRL+Qt::Key_O);
-	int save_id = _file_menu->insertItem("&Save", this, SLOT(_FileSave()), Qt::CTRL+Qt::Key_S);
-	int save_as_id = _file_menu->insertItem("Save &As...", this, SLOT(_FileSaveAs()));
-	_file_menu->insertSeparator();
-	int resize_id = _file_menu->insertItem("&Resize Map...", this, SLOT(_FileResize()));
-	_file_menu->insertSeparator();
-	_file_menu->insertItem("&Quit", this, SLOT(_FileQuit()), Qt::CTRL+Qt::Key_Q);
-
 	if (_ed_scrollview != NULL && _ed_scrollview->_map != NULL)
 	{
-		_file_menu->setItemEnabled(save_id, _ed_scrollview->_map->GetChanged());
-		_file_menu->setItemEnabled(save_as_id, true);
-	//	_file_menu->setItemEnabled(resize_id, true);
+		_save_as_action->setEnabled(_ed_scrollview->_map->GetChanged());
+		_save_action->setEnabled(_ed_scrollview->_map->GetChanged());
+		_resize_action->setEnabled(false);
 	} // map must exist in order to save or resize it
 	else
 	{
-		_file_menu->setItemEnabled(save_id, false);
-		_file_menu->setItemEnabled(save_as_id, false);
-	} // map does not exist, can't save or resize it
-	_file_menu->setItemEnabled(resize_id, false);
+		_save_as_action->setEnabled(false);
+		_save_action->setEnabled(false);
+		_resize_action->setEnabled(false);
+	} // map does not exist, can't save or resize it*/
 } // _FileMenuSetup()
 
 void Editor::_FileNew()
@@ -159,33 +93,30 @@ void Editor::_FileNew()
 		{
 			if (_ed_scrollview != NULL)
 				delete _ed_scrollview;
-			_ed_scrollview = new EditorScrollView(_ed_widget, "map", new_map->GetWidth(), new_map->GetHeight());
+			_ed_scrollview = new EditorScrollView(NULL, "map", new_map->GetWidth(), new_map->GetHeight());
 
 			if (_ed_tabs != NULL)
 				delete _ed_tabs;
-			_ed_tabs = new QTabWidget(_ed_widget);
+			_ed_tabs = new QTabWidget();
 			_ed_tabs->setTabPosition(QTabWidget::South);
 
-			_ed_layout->addWidget(_ed_scrollview);
-			_ed_layout->addWidget(_ed_tabs);
-			_ed_scrollview->show();
+			_ed_splitter->addWidget(_ed_scrollview);
+			_ed_splitter->addWidget(_ed_tabs);
 
 			Q3CheckListItem* tiles = static_cast<Q3CheckListItem*> (new_map->GetTilesetListView()->firstChild());
 			while (tiles)
 			{
 				if (tiles->isOn())
 				{
-					Tileset* a_tileset = new Tileset(_ed_widget, tiles->text());
+					Tileset* a_tileset = new Tileset(this, tiles->text());
 					_ed_tabs->addTab(a_tileset->table, tiles->text());
-					//_ed_scrollview->_map->tileset_names.append(tiles->text());
 					_ed_scrollview->_map->tilesets.push_back(a_tileset);
 				} // tileset must be selected
 				tiles = static_cast<Q3CheckListItem*> (tiles->nextSibling());
 			} // iterate through all possible tilesets
-	
-			_ed_tabs->show();
 
 			_ed_scrollview->resize(new_map->GetWidth() * TILE_WIDTH, new_map->GetHeight() * TILE_HEIGHT);
+			_ed_splitter->show();
 
 			_grid_on = false;
 			_ll_on   = false;
@@ -197,11 +128,13 @@ void Editor::_FileNew()
 			_ViewToggleUL();
 			
 			// Set default edit mode
-			_SetEditLayer(LOWER_LAYER);
-			_SetEditMode(PAINT_TILE);
+			_ed_scrollview->_layer_edit = LOWER_LAYER;
+			_ed_scrollview->_tile_mode  = PAINT_TILE;
+			
+			statusBar()->showMessage("New map created", 5000);
 		} // only if the user pressed OK
 		else
-			_stat_bar->message("No map created!", 5000);
+			statusBar()->showMessage("No map created!", 5000);
 
 		delete new_map;
 	} // make sure an unsaved map is not lost
@@ -220,16 +153,15 @@ void Editor::_FileOpen()
 		{
 			if (_ed_scrollview != NULL)
 				delete _ed_scrollview;
-			_ed_scrollview = new EditorScrollView(_ed_widget, "map", 0, 0);
+			_ed_scrollview = new EditorScrollView(NULL, "map", 0, 0);
 
 			if (_ed_tabs != NULL)
 				delete _ed_tabs;
-			_ed_tabs = new QTabWidget(_ed_widget);
+			_ed_tabs = new QTabWidget();
 			_ed_tabs->setTabPosition(QTabWidget::South);
 
-			_ed_layout->addWidget(_ed_scrollview);
-			_ed_layout->addWidget(_ed_tabs);
-			_ed_scrollview->show();
+			_ed_splitter->addWidget(_ed_scrollview);
+			_ed_splitter->addWidget(_ed_tabs);
 
 			_ed_scrollview->_map->SetFileName(file_name);
 			_ed_scrollview->_map->LoadMap();
@@ -237,14 +169,13 @@ void Editor::_FileOpen()
 			for (QStringList::ConstIterator it = _ed_scrollview->_map->tileset_names.begin();
 				it != _ed_scrollview->_map->tileset_names.end(); it++)
 			{
-				Tileset* a_tileset = new Tileset(_ed_widget, *it);
+				Tileset* a_tileset = new Tileset(this, *it);
 				_ed_tabs->addTab(a_tileset->table, *it);
 				_ed_scrollview->_map->tilesets.push_back(a_tileset);
 			} // iterate through all tilesets in the map
 
-			_ed_tabs->show();
-
 			_ed_scrollview->resize(_ed_scrollview->_map->GetWidth(), _ed_scrollview->_map->GetHeight());
+			_ed_splitter->show();
 
 			_grid_on = false;
 			_ll_on   = false;
@@ -256,10 +187,10 @@ void Editor::_FileOpen()
 			_ViewToggleUL();
 
 			// Set default edit mode
-			_SetEditLayer(LOWER_LAYER);
-			_SetEditMode(PAINT_TILE);
+			_ed_scrollview->_layer_edit = LOWER_LAYER;
+			_ed_scrollview->_tile_mode  = PAINT_TILE;
 
-			_stat_bar->message(QString("Opened \'%1\'").arg(_ed_scrollview->_map->GetFileName()), 5000);
+			statusBar()->showMessage(QString("Opened \'%1\'").arg(_ed_scrollview->_map->GetFileName()), 5000);
 		} // file must exist in order to open it
 	} // make sure an unsaved map is not lost
 } // _FileOpen()
@@ -289,7 +220,7 @@ void Editor::_FileSaveAs()
 		} // save the file
     } // make sure the file name is not blank
 	
-    _stat_bar->message("Save abandoned.", 5000);
+    statusBar()->showMessage("Save abandoned.", 5000);
 } // _FileSaveAs()
 
 void Editor::_FileSave()
@@ -303,7 +234,7 @@ void Editor::_FileSave()
 
 	_ed_scrollview->_map->SaveMap();      // actually saves the map
 	setCaption(QString("%1").arg(_ed_scrollview->_map->GetFileName()));
-	_stat_bar->message(QString("Saved \'%1\' successfully!").
+	statusBar()->showMessage(QString("Saved \'%1\' successfully!").
 		arg(_ed_scrollview->_map->GetFileName()), 5000);
 } // _FileSave()
 
@@ -320,7 +251,7 @@ void Editor::_FileResize()
 
 		if (_ed_tabs != NULL)
 			delete _ed_tabs;
-		_ed_tabs = new QTabWidget(_ed_widget);
+		_ed_tabs = new QTabWidget();
 		_ed_tabs->setTabPosition(QTabWidget::South);
 
 		Q3CheckListItem* tiles = static_cast<Q3CheckListItem*> (resize->GetTilesetListView()->firstChild());
@@ -329,19 +260,17 @@ void Editor::_FileResize()
 		{
 			if (tiles->isOn())
 			{
-				Tileset* a_tileset = new Tileset(_ed_widget, tiles->text());
+				Tileset* a_tileset = new Tileset(this, tiles->text());
 				_ed_tabs->addTab(a_tileset->table, tiles->text());
-				//_ed_scrollview->_map->tileset_names.append(tiles->text());
 				_ed_scrollview->_map->tilesets.push_back(a_tileset);
 			} // tileset must be selected
 			tiles = static_cast<Q3CheckListItem*> (tiles->nextSibling());
 		} // iterate through all possible tilesets
 	
-		_ed_layout->addWidget(_ed_tabs);
-		_ed_tabs->show();
+		_ed_splitter->addWidget(_ed_tabs);
 	} // only if the user pressed OK
 	else
-		_stat_bar->message("Map not resized!", 5000);
+		statusBar()->showMessage("Map not resized!", 5000);
 
 	delete resize;
 } // _FileResize()
@@ -358,7 +287,7 @@ void Editor::_ViewToggleGrid()
 	if (_ed_scrollview != NULL && _ed_scrollview->_map != NULL)
 	{
 		_grid_on = !_grid_on;
-		_view_menu->setItemChecked(_grid_id, _grid_on);
+		_toggle_grid_action->setChecked(_grid_on);
 		_ed_scrollview->_map->SetGridOn(_grid_on);
 	} // map must exist in order to view things on it
 } // _ViewToggleGrid()
@@ -368,7 +297,7 @@ void Editor::_ViewToggleLL()
 	if (_ed_scrollview != NULL && _ed_scrollview->_map != NULL)
 	{
 		_ll_on = !_ll_on;
-		_view_menu->setItemChecked(_ll_id, _ll_on);
+		_toggle_ll_action->setChecked(_ll_on);
 		_ed_scrollview->_map->SetLLOn(_ll_on);
 	} // map must exist in order to view things on it
 } // _ViewToggleLL()
@@ -378,7 +307,7 @@ void Editor::_ViewToggleML()
 	if (_ed_scrollview != NULL && _ed_scrollview->_map != NULL)
 	{
 		_ml_on = !_ml_on;
-		_view_menu->setItemChecked(_ml_id, _ml_on);
+		_toggle_ml_action->setChecked(_ml_on);
 		_ed_scrollview->_map->SetMLOn(_ml_on);
 	} // map must exist in order to view things on it
 } // _ViewToggleML()
@@ -388,7 +317,7 @@ void Editor::_ViewToggleUL()
 	if (_ed_scrollview != NULL && _ed_scrollview->_map != NULL)
 	{
 		_ul_on = !_ul_on;
-		_view_menu->setItemChecked(_ul_id, _ul_on);
+		_toggle_ul_action->setChecked(_ul_on);
 		_ed_scrollview->_map->SetULOn(_ul_on);
 	} // map must exist in order to view things on it
 } // _ViewToggleUL()
@@ -427,66 +356,40 @@ void Editor::_TileLayerClear()
 	_ed_scrollview->_map->updateGL();
 } // _TileLayerClear()
 
-void Editor::_SetEditMode(TILE_MODE_TYPE new_mode)
-{
-	if(_ed_scrollview == NULL)
-		return;
-
-	// Unset old check
-	_tiles_menu->setItemChecked(_mode_ids[_ed_scrollview->_tile_mode], false);
-
-	// Change mode and apply new check
-	_ed_scrollview->_tile_mode = new_mode;
-	_tiles_menu->setItemChecked(_mode_ids[_ed_scrollview->_tile_mode], true);
-} // _SetEditMode(TILE_MODE_TYPE new_mode)
-
 void Editor::_TileModePaint()
 {
 	if (_ed_scrollview != NULL)
-		_SetEditMode(PAINT_TILE);
+		_ed_scrollview->_tile_mode = PAINT_TILE;
 } // _TileModePaint()
 
 void Editor::_TileModeMove()
 {
 	if (_ed_scrollview != NULL)
-		_SetEditMode(MOVE_TILE);
+		_ed_scrollview->_tile_mode = MOVE_TILE;
 } // _TileModeMove()
 
 void Editor::_TileModeDelete()
 {
 	if (_ed_scrollview != NULL)
-		_SetEditMode(DELETE_TILE);
+		_ed_scrollview->_tile_mode = DELETE_TILE;
 } // _TileModeDelete()
-
-void Editor::_SetEditLayer(LAYER_TYPE new_layer)
-{
-	if(_ed_scrollview == NULL)
-		return;
-
-	// Unset old check
-	_tiles_menu->setItemChecked(_layer_ids[_ed_scrollview->_layer_edit],false);
-
-	// Set new edit layer and set check
-	_ed_scrollview->_layer_edit=new_layer;
-	_tiles_menu->setItemChecked(_layer_ids[_ed_scrollview->_layer_edit],true);
-}
 
 void Editor::_TileEditLL()
 {
 	if (_ed_scrollview != NULL)
-		_SetEditLayer(LOWER_LAYER);
+		_ed_scrollview->_layer_edit = LOWER_LAYER;
 } // _TileEditLL()
 
 void Editor::_TileEditML()
 {
 	if (_ed_scrollview != NULL)
-		_SetEditLayer(MIDDLE_LAYER);
+		_ed_scrollview->_layer_edit = MIDDLE_LAYER;
 } // _TileEditML()
 
 void Editor::_TileEditUL()
 {
 	if (_ed_scrollview != NULL)
-		_SetEditLayer(UPPER_LAYER);
+		_ed_scrollview->_layer_edit = UPPER_LAYER;
 } // _TileEditUL()
 
 void Editor::_MapSelectMusic()
@@ -504,7 +407,7 @@ void Editor::_MapSelectMusic()
 
 void Editor::_HelpHelp()
 {
-	_stat_bar->message(QString("See http://allacrost.sourceforge.net/wiki/index.php/Code_Documentation#Map_Editor_Documentation for more details"), 10000);
+	statusBar()->showMessage(tr("See http://allacrost.sourceforge.net/wiki/index.php/Code_Documentation#Map_Editor_Documentation for more details"), 10000);
 } // _HelpHelp()
 
 void Editor::_HelpAbout()
@@ -526,6 +429,192 @@ void Editor::_HelpAboutQt()
 
 // ********** Private functions **********
 
+void Editor::_CreateActions()
+{
+	// Create menu actions related to the File menu
+	
+	_new_action = new QAction("&New...", this);
+	_new_action->setShortcut(tr("Ctrl+N"));
+	_new_action->setStatusTip("Create a new map");
+	connect(_new_action, SIGNAL(triggered()), this, SLOT(_FileNew()));
+	
+	_open_action = new QAction("&Open...", this);
+	_open_action->setShortcut(tr("Ctrl+O"));
+	_open_action->setStatusTip("Open an existing map");
+	connect(_open_action, SIGNAL(triggered()), this, SLOT(_FileOpen()));
+	
+	_save_as_action = new QAction("&Save As...", this);
+	_save_as_action->setStatusTip("Save the map with another name");
+	connect(_save_as_action, SIGNAL(triggered()), this, SLOT(_FileSaveAs()));
+	
+	_save_action = new QAction("&Save", this);
+	_save_action->setShortcut(tr("Ctrl+S"));
+	_save_action->setStatusTip("Save the map");
+	connect(_save_action, SIGNAL(triggered()), this, SLOT(_FileSave()));
+	
+	_resize_action = new QAction("&Resize...", this);
+	_resize_action->setShortcut(tr("Ctrl+R"));
+	_resize_action->setStatusTip("Resizes the map");
+	connect(_resize_action, SIGNAL(triggered()), this, SLOT(_FileResize()));
+	
+	_quit_action = new QAction("&Quit", this);
+	_quit_action->setShortcut(tr("Ctrl+Q"));
+	_quit_action->setStatusTip("Quits from the editor");
+	//_quit_action->setMenuRole(QAction::QuitRole);
+	connect(_quit_action, SIGNAL(triggered()), this, SLOT(_FileQuit()));
+
+
+
+	// Create menu actions related to the View menu
+
+	_toggle_grid_action = new QAction("&Grid", this);
+	_toggle_grid_action->setStatusTip("Switches the grid on and off");
+	_toggle_grid_action->setCheckable(true);
+	connect(_toggle_grid_action, SIGNAL(triggered()), this, SLOT(_ViewToggleGrid()));
+	
+	_toggle_ll_action = new QAction("&Lower Layer", this);
+	_toggle_ll_action->setStatusTip("Switches the lower layer on and off");
+	_toggle_ll_action->setCheckable(true);
+	connect(_toggle_ll_action, SIGNAL(triggered()), this, SLOT(_ViewToggleLL()));
+	
+	_toggle_ml_action = new QAction("&Middle Layer", this);
+	_toggle_ml_action->setStatusTip("Switches the middle layer on and off");
+	_toggle_ml_action->setCheckable(true);
+	connect(_toggle_ml_action, SIGNAL(triggered()), this, SLOT(_ViewToggleML()));
+	
+	_toggle_ul_action = new QAction("&Upper Layer", this);
+	_toggle_ul_action->setStatusTip("Switches the upper layer on and off");
+	_toggle_ul_action->setCheckable(true);
+	connect(_toggle_ul_action, SIGNAL(triggered()), this, SLOT(_ViewToggleUL()));
+
+
+
+	// Create menu actions related to the Tiles menu
+
+	_layer_fill_action = new QAction("&Fill layer", this);
+	_layer_fill_action->setStatusTip("Fills current layer with selected tile");
+	connect(_layer_fill_action, SIGNAL(triggered()), this, SLOT(_TileLayerFill()));
+
+	_layer_clear_action = new QAction("&Clear layer", this);
+	_layer_clear_action->setStatusTip("Clears current layer from any tiles");
+	connect(_layer_clear_action, SIGNAL(triggered()), this, SLOT(_TileLayerClear()));
+	
+	_mode_paint_action = new QAction("&Paint mode", this);
+	_mode_paint_action->setStatusTip("Switches to paint mode to draw tiles on the map");
+	_mode_paint_action->setCheckable(true);
+	connect(_mode_paint_action, SIGNAL(triggered()), this, SLOT(_TileModePaint()));
+
+	_mode_move_action = new QAction("&Move mode", this);
+	_mode_move_action->setStatusTip("Switches to move mode to move tiles around on the map");
+	_mode_move_action->setCheckable(true);
+	connect(_mode_move_action, SIGNAL(triggered()), this, SLOT(_TileModeMove()));
+
+	_mode_delete_action = new QAction("&Delete mode", this);
+	_mode_delete_action->setStatusTip("Switches to delete mode to erase tiles from the map");
+	_mode_delete_action->setCheckable(true);
+	connect(_mode_delete_action, SIGNAL(triggered()), this, SLOT(_TileModeDelete()));
+	
+	_mode_group = new QActionGroup(this);
+	_mode_group->addAction(_mode_paint_action);
+	_mode_group->addAction(_mode_move_action);
+	_mode_group->addAction(_mode_delete_action);
+	_mode_paint_action->setChecked(true);
+	
+	_edit_ll_action = new QAction("Edit &lower layer", this);
+	_edit_ll_action->setStatusTip("Makes lower layer of the map current");
+	_edit_ll_action->setCheckable(true);
+	connect(_edit_ll_action, SIGNAL(triggered()), this, SLOT(_TileEditLL()));
+	
+	_edit_ml_action = new QAction("Edit &middle layer", this);
+	_edit_ml_action->setStatusTip("Makes middle layer of the map current");
+	_edit_ml_action->setCheckable(true);
+	connect(_edit_ml_action, SIGNAL(triggered()), this, SLOT(_TileEditML()));
+	
+	_edit_ul_action = new QAction("Edit &upper layer", this);
+	_edit_ul_action->setStatusTip("Makes upper layer of the map current");
+	_edit_ul_action->setCheckable(true);
+	connect(_edit_ul_action, SIGNAL(triggered()), this, SLOT(_TileEditUL()));
+
+	_edit_group = new QActionGroup(this);
+	_edit_group->addAction(_edit_ll_action);
+	_edit_group->addAction(_edit_ml_action);
+	_edit_group->addAction(_edit_ul_action);
+	_edit_ll_action->setChecked(true);
+	
+	
+
+	// Create menu actions related to the Map menu
+
+	_select_music_action = new QAction("&Select map music...", this);
+	_select_music_action->setStatusTip("Choose background music for the map");
+	connect(_select_music_action, SIGNAL(triggered()), this, SLOT(_MapSelectMusic()));
+
+
+
+	// Create menu actions related to the Help menu
+
+	_help_action = new QAction("&Help", this);
+	_help_action->setShortcut(Qt::Key_F1);
+	_help_action->setStatusTip("Brings up help documentation for the editor");
+	connect(_help_action, SIGNAL(triggered()), this, SLOT(_HelpHelp()));
+	
+	_about_action = new QAction("&About", this);
+	_about_action->setStatusTip("Brings up information about the editor");
+	connect(_about_action, SIGNAL(triggered()), this, SLOT(_HelpAbout()));
+	
+	_about_qt_action = new QAction("About &Qt", this);
+	_about_qt_action->setStatusTip("Brings up information about Qt");
+	connect(_about_qt_action, SIGNAL(triggered()), this, SLOT(_HelpAboutQt()));
+} // _CreateActions()
+
+void Editor::_CreateMenus()
+{
+	// file menu creation
+	_file_menu = menuBar()->addMenu("&File");
+	_file_menu->addAction(_new_action);
+	_file_menu->addAction(_open_action);
+	_file_menu->addSeparator();
+	_file_menu->addAction(_save_action);
+	_file_menu->addAction(_save_as_action);
+	_file_menu->addSeparator();
+	_file_menu->addAction(_resize_action);
+	_file_menu->addSeparator();
+	_file_menu->addAction(_quit_action);
+	connect(_file_menu, SIGNAL(aboutToShow()), this, SLOT(_FileMenuSetup()));
+
+	// view menu creation
+	_view_menu = menuBar()->addMenu("&View");
+	_view_menu->addAction(_toggle_grid_action);
+	_view_menu->addSeparator();
+	_view_menu->addAction(_toggle_ll_action);
+	_view_menu->addAction(_toggle_ml_action);
+	_view_menu->addAction(_toggle_ul_action);
+	_view_menu->setCheckable(true);
+
+	// tile menu creation
+	_tiles_menu = menuBar()->addMenu("&Tiles");
+	_tiles_menu->addAction(_layer_fill_action);
+	_tiles_menu->addAction(_layer_clear_action);
+	_tiles_menu->addSeparator()->setText("Editing Mode");
+	_tiles_menu->addAction(_mode_paint_action);
+	_tiles_menu->addAction(_mode_move_action);
+	_tiles_menu->addAction(_mode_delete_action);
+	_tiles_menu->addSeparator()->setText("Current Layer");
+	_tiles_menu->addAction(_edit_ll_action);
+	_tiles_menu->addAction(_edit_ml_action);
+	_tiles_menu->addAction(_edit_ul_action);
+	
+	// map menu creation
+	_map_menu = menuBar()->addMenu("&Map");
+	_map_menu->addAction(_select_music_action);
+
+	// help menu creation
+	_help_menu = menuBar()->addMenu("&Help");
+	_help_menu->addAction(_help_action);
+	_help_menu->addAction(_about_action);
+	_help_menu->addAction(_about_qt_action);
+} // _CreateMenus()
+
 bool Editor::_EraseOK()
 {
 	if (_ed_scrollview != NULL && _ed_scrollview->_map != NULL)
@@ -546,7 +635,7 @@ bool Editor::_EraseOK()
 					break;
 				default: // Cancel clicked or Escape pressed
     	    		// don't exit
-					_stat_bar->message("Save abandoned", 5000);
+					statusBar()->showMessage("Save abandoned", 5000);
     	    		return false;
 	    	} // warn the user to save
 	    } // map has been modified

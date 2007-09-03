@@ -74,6 +74,7 @@
 		D46809C10C1E723F009F76A9 /* QtGui.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D4F68AA70BD7227F009F6973 /* QtGui.framework */; };
 		D4680BE40C1E724E009F76A9 /* QtCore.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D4F68AA30BD72276009F6973 /* QtCore.framework */; };
 		D4680D1C0C1E725F009F76A9 /* Qt3Support.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D4F68A9F0BD72266009F6973 /* Qt3Support.framework */; };
+		D46D59760C8A6C1A0074DFF0 /* texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D49850D20C82AEA50067770B /* texture.cpp */; };
 		D49850D40C82AEA50067770B /* texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D49850D20C82AEA50067770B /* texture.cpp */; };
 		D49D57020C65B1C1006E6ABA /* audio_effects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D49D57010C65B1C1006E6ABA /* audio_effects.cpp */; };
 		D4CE3FB60BC9A11500CA3D30 /* dat in Resources */ = {isa = PBXBuildFile; fileRef = 4931EB160BAF28B700013185 /* dat */; };
@@ -123,6 +124,7 @@
 		D4D1BF650B02BB9F0052BF1E /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4941A7190AC1D8B300D65B8E /* SDL.framework */; };
 		D4D1BF6B0B02BC010052BF1E /* SDL_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4941A7180AC1D8B300D65B8E /* SDL_ttf.framework */; };
 		D4D6DB2E0B127DD3002F33F2 /* mac_logo.icns in Resources */ = {isa = PBXBuildFile; fileRef = 4941A7510AC1D9A200D65B8E /* mac_logo.icns */; };
+		D4D7395E0C892BE80050FDD9 /* OpenAL.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D4F110780C5855CC00ADC969 /* OpenAL.framework */; };
 		D4DAC8A90BA13F55009FA7BE /* map_zones.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4DAC8A80BA13F55009FA7BE /* map_zones.cpp */; };
 		D4DBE6D90BC1E91A00E85DCB /* tex_mgmt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4DBE6D80BC1E91A00E85DCB /* tex_mgmt.cpp */; };
 		D4DBE6DA0BC1E91A00E85DCB /* tex_mgmt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4DBE6D80BC1E91A00E85DCB /* tex_mgmt.cpp */; };
@@ -152,6 +154,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				D4D7395E0C892BE80050FDD9 /* OpenAL.framework in Copy Frameworks */,
 				D44EDF980C6E874400FFBA19 /* Vorbis.framework in Copy Frameworks */,
 				D44EDF970C6E873600FFBA19 /* Ogg.framework in Copy Frameworks */,
 				49BDC4480AF540E400940A6C /* SDL_net.framework in Copy Frameworks */,
@@ -1079,10 +1082,11 @@
 				D4D166850BC0D91400190FC0 /* particle_manager.cpp in Sources */,
 				D4D166870BC0D91400190FC0 /* particle_system.cpp in Sources */,
 				D4D1668A0BC0D91400190FC0 /* shake.cpp in Sources */,
+				D4DBE6DA0BC1E91A00E85DCB /* tex_mgmt.cpp in Sources */,
 				D4D1668E0BC0D91400190FC0 /* text.cpp in Sources */,
 				D4D166900BC0D91400190FC0 /* textbox.cpp in Sources */,
+				D46D59760C8A6C1A0074DFF0 /* texture.cpp in Sources */,
 				D4D166920BC0D91400190FC0 /* video.cpp in Sources */,
-				D4DBE6DA0BC1E91A00E85DCB /* tex_mgmt.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1234,16 +1238,17 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
 				HEADER_SEARCH_PATHS = (
-					/sw/include,
-					/opt/local/include,
 					/usr/local/include,
+					/opt/local/include,
+					/sw/include,
 				);
 				INFOPLIST_FILE = "Editor-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = (
-					/sw/lib,
-					/opt/local/lib,
 					/usr/local/lib,
+					/opt/local/lib,
+					/sw/lib,
+					/Users/philip/allacrost/demo,
 				);
 				ONLY_LINK_ESSENTIAL_SYMBOLS = NO;
 				OTHER_CPLUSPLUSFLAGS = (
@@ -1261,6 +1266,7 @@
 					"-lpng",
 					"-ljpeg",
 					"-llualib",
+					"-lz",
 					"-lluabind",
 					"-framework",
 					SDL_net,
