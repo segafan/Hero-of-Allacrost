@@ -21,32 +21,26 @@
 
 #include <QApplication>
 #include <QCheckBox>
+#include <QCloseEvent>
 #include <QComboBox>
+#include <QContextMenuEvent>
 #include <QDialog>
-#include <Q3FileDialog>
-#include <QGLWidget>
-#include <Q3IconView>
+#include <QFileDialog>
+#include <QGridLayout>
 #include <QLabel>
 #include <QLayout>
 #include <QLineEdit>
-#include <Q3ListView>
 #include <QMainWindow>
 #include <QMenuBar>
 #include <QMessageBox>
-#include <Q3PopupMenu>
+#include <QMouseEvent>
 #include <QPushButton>
 #include <Q3ScrollView>
 #include <QSplitter>
 #include <QSpinBox>
 #include <QStatusBar>
-#include <QStringList>
-#include <Q3TabDialog>
 #include <QTabWidget>
-#include <QContextMenuEvent>
-#include <QCloseEvent>
-#include <Q3GridLayout>
-#include <QMouseEvent>
-#include <Q3VButtonGroup>
+#include <QTreeWidget>
 
 #include <map>
 
@@ -216,12 +210,12 @@ class NewMapDialog: public QDialog
 		int GetHeight() const { return _height_sbox->value(); }
 		//! Public accessor to get the map width from the width spinbox.
 		int GetWidth()  const { return  _width_sbox->value(); }
-		//! Public accessor to get the listview containing checkable tilesets.
-		Q3ListView* GetTilesetListView() const { return _tileset_lview; }
+		//! Public accessor to get the tree containing checkable tilesets.
+		QTreeWidget* GetTilesetTree() const { return _tileset_tree; }
 
 	private:
-		//! A listview for showing all available tilesets.
-		Q3ListView* _tileset_lview;
+		//! A tree for showing all available tilesets.
+		QTreeWidget* _tileset_tree;
 		//! A spinbox for specifying the map's height.
 		QSpinBox* _height_sbox;
 		//! A spinbox for specifying the map's width.
@@ -235,7 +229,7 @@ class NewMapDialog: public QDialog
 		//! A pushbutton for okaying the new map dialog.
 		QPushButton* _ok_pbut;
 		//! A layout to manage all the labels, spinboxes, and listviews.
-		Q3GridLayout* _dia_layout;
+		QGridLayout* _dia_layout;
 }; // class NewMapDialog
 
 class MusicDialog: public QDialog
@@ -250,14 +244,14 @@ private:
 	QPushButton* _cancel_pbut;
 	//! A pushbutton for okaying the new map dialog.
 	QPushButton* _ok_pbut;
-	//! Label telling you to select some music
+	//! Label telling you to select some music.
 	QLabel* _select_label;
 	//! A layout to manage all the labels, spinboxes, and listviews.
-	Q3GridLayout* _dia_layout;
-	//! List with all music files
-	Q3ListView* _music_list;
+	QGridLayout* _dia_layout;
+	//! A tree with all the music files.
+	QTreeWidget* _music_list;
 
-	//! Puts music files in the QListView and selects the specified file.
+	//! Puts music files in the QTreeWidget and selects the specified file.
 	//! \param selected_str - this file will be selected
 	void _PopulateMusicList(const QString& selected_str);
 }; // class MusicDialog

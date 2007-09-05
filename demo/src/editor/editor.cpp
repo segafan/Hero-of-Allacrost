@@ -71,7 +71,7 @@ void Editor::_FileMenuSetup()
 {
 	if (_ed_scrollview != NULL && _ed_scrollview->_map != NULL)
 	{
-		_save_as_action->setEnabled(_ed_scrollview->_map->GetChanged());
+		_save_as_action->setEnabled(true);
 		_save_action->setEnabled(_ed_scrollview->_map->GetChanged());
 		_resize_action->setEnabled(false);
 	} // map must exist in order to save or resize it
@@ -103,16 +103,16 @@ void Editor::_FileNew()
 			_ed_splitter->addWidget(_ed_scrollview);
 			_ed_splitter->addWidget(_ed_tabs);
 
-			Q3CheckListItem* tiles = static_cast<Q3CheckListItem*> (new_map->GetTilesetListView()->firstChild());
-			while (tiles)
+			QTreeWidget* tilesets = new_map->GetTilesetTree();
+			int num_items = tilesets->topLevelItemCount();
+			for (int i = 0; i < num_items; i++)
 			{
-				if (tiles->isOn())
+				if (tilesets->topLevelItem(i)->checkState(0) == Qt::Checked)
 				{
-					Tileset* a_tileset = new Tileset(this, tiles->text());
-					_ed_tabs->addTab(a_tileset->table, tiles->text());
+					Tileset* a_tileset = new Tileset(this, tilesets->topLevelItem(i)->text(0));
+					_ed_tabs->addTab(a_tileset->table, tilesets->topLevelItem(i)->text(0));
 					_ed_scrollview->_map->tilesets.push_back(a_tileset);
-				} // tileset must be selected
-				tiles = static_cast<Q3CheckListItem*> (tiles->nextSibling());
+				} // tileset must be checked
 			} // iterate through all possible tilesets
 
 			_ed_scrollview->resize(new_map->GetWidth() * TILE_WIDTH, new_map->GetHeight() * TILE_HEIGHT);
@@ -145,9 +145,8 @@ void Editor::_FileOpen()
 	if (_EraseOK())
 	{
 		// file to open
-		QString file_name = Q3FileDialog::getOpenFileName(
-			"dat/maps", "Maps (*.lua)", this, "file open",
-			"HoA Level Editor -- File Open");
+		QString file_name = QFileDialog::getOpenFileName(this, "HoA Level Editor -- File Open",
+			"dat/maps", "Maps (*.lua)");
 
 		if (!file_name.isEmpty())
 		{
@@ -198,9 +197,8 @@ void Editor::_FileOpen()
 void Editor::_FileSaveAs()
 {
 	// get the file name from the user
-	QString file_name = Q3FileDialog::getSaveFileName(
-		"dat/maps", "Maps (*.lua)", this, "file save",
-		"HoA Level Editor -- File Save");
+	QString file_name = QFileDialog::getSaveFileName(this, "HoA Level Editor -- File Save",
+		"dat/maps", "Maps (*.lua)");
 		
 	if (!file_name.isEmpty())
 	{
@@ -254,18 +252,18 @@ void Editor::_FileResize()
 		_ed_tabs = new QTabWidget();
 		_ed_tabs->setTabPosition(QTabWidget::South);
 
-		Q3CheckListItem* tiles = static_cast<Q3CheckListItem*> (resize->GetTilesetListView()->firstChild());
 		_ed_scrollview->_map->tileset_names.clear();
-		while (tiles)
-		{
-			if (tiles->isOn())
+		QTreeWidget* tilesets = resize->GetTilesetTree();
+			int num_items = tilesets->topLevelItemCount();
+			for (int i = 0; i < num_items; i++)
 			{
-				Tileset* a_tileset = new Tileset(this, tiles->text());
-				_ed_tabs->addTab(a_tileset->table, tiles->text());
-				_ed_scrollview->_map->tilesets.push_back(a_tileset);
-			} // tileset must be selected
-			tiles = static_cast<Q3CheckListItem*> (tiles->nextSibling());
-		} // iterate through all possible tilesets
+				if (tilesets->topLevelItem(i)->checkState(0) == Qt::Checked)
+				{
+					Tileset* a_tileset = new Tileset(this, tilesets->topLevelItem(i)->text(0));
+					_ed_tabs->addTab(a_tileset->table, tilesets->topLevelItem(i)->text(0));
+					_ed_scrollview->_map->tilesets.push_back(a_tileset);
+				} // tileset must be checked
+			} // iterate through all possible tilesets
 	
 		_ed_splitter->addWidget(_ed_tabs);
 	} // only if the user pressed OK
@@ -655,8 +653,6 @@ NewMapDialog::NewMapDialog(QWidget* parent, const QString& name)
 {
 	setCaption("Map Properties...");
 
-	_dia_layout    = new Q3GridLayout(this, 7, 2, 5);
-	
 	_height_label  = new QLabel("Height (in tiles):", this);
 	_height_sbox   = new QSpinBox(this);
 	_height_sbox->setMinimum(24);
@@ -667,8 +663,6 @@ NewMapDialog::NewMapDialog(QWidget* parent, const QString& name)
 	_width_sbox->setMinimum(32);
 	_width_sbox->setMaximum(1000);
 	
-	_tileset_lview = new Q3ListView(this, "tileset_lview", Qt::WStaticContents|Qt::WNoAutoErase);
-	
 	_cancel_pbut   = new QPushButton("Cancel", this);
 	_ok_pbut       = new QPushButton("OK", this);
 	
@@ -677,15 +671,24 @@ NewMapDialog::NewMapDialog(QWidget* parent, const QString& name)
 	connect(_cancel_pbut, SIGNAL(released()), this, SLOT(reject()));
 
 	QDir tileset_dir("img/tilesets");
-	_tileset_lview->addColumn("Tilesets");
-	for (uint32 i = 0; i < tileset_dir.count(); i++)  // looks for tileset files in the tileset directory
-		(void) new Q3CheckListItem(_tileset_lview, tileset_dir[i].remove(".png"), Q3CheckListItem::CheckBox);
-	
+	_tileset_tree = new QTreeWidget(this);
+	_tileset_tree->setColumnCount(1);
+	_tileset_tree->setHeaderLabels(QStringList("Tilesets"));
+	QList<QTreeWidgetItem*> tilesets;
+	// Start the loop at 2 to skip over . (present working directory) and .. (parent directory).
+	for (uint32 i = 2; i < tileset_dir.count(); i++)
+	{
+		tilesets.append(new QTreeWidgetItem((QTreeWidget*)0, QStringList(tileset_dir[i].remove(".png"))));
+		tilesets.back()->setCheckState(0, Qt::Unchecked);  // enables checkboxes
+	} // loop through all files in the tileset directory
+	_tileset_tree->insertTopLevelItems(0, tilesets);
+
+	_dia_layout = new QGridLayout(this);
 	_dia_layout->addWidget(_height_label, 0, 0);
 	_dia_layout->addWidget(_height_sbox, 1, 0);
 	_dia_layout->addWidget(_width_label, 2, 0);
 	_dia_layout->addWidget(_width_sbox, 3, 0);
-	_dia_layout->addMultiCellWidget(_tileset_lview, 0, 5, 1, 1);
+	_dia_layout->addWidget(_tileset_tree, 0, 1, 5, -1);
 	_dia_layout->addWidget(_cancel_pbut, 6, 1);
 	_dia_layout->addWidget(_ok_pbut, 6, 0);
 } // NewMapDialog constructor
@@ -698,6 +701,7 @@ NewMapDialog::~NewMapDialog()
 	delete _width_sbox;
 	delete _cancel_pbut;
 	delete _ok_pbut;
+	delete _tileset_tree;
 	delete _dia_layout;
 } // NewMapDialog destructor
 
@@ -708,18 +712,15 @@ NewMapDialog::~NewMapDialog()
 ************************/
 
 MusicDialog::MusicDialog(QWidget* parent, const QString& name, const QString& selected_music)
-	: QDialog(parent,name)
+	: QDialog(parent, name)
 {
 	setCaption("Select map music");
-	_dia_layout    = new Q3GridLayout(this, 7, 2, 5);
+	_dia_layout   = new QGridLayout(this);
 
-	_cancel_pbut   = new QPushButton("Cancel", this);
-	_ok_pbut       = new QPushButton("OK", this);
-	_select_label  = new QLabel("Select the music for this map:",this);
-	_music_list    = new Q3ListView(this, "tileset_lview", Qt::WStaticContents|Qt::WNoAutoErase);
-
-	//Turn off sorting
-	_music_list->setSorting(-1);
+	_cancel_pbut  = new QPushButton("Cancel", this);
+	_ok_pbut      = new QPushButton("OK", this);
+	_select_label = new QLabel("Select the music for this map:",this);
+	_music_list   = new QTreeWidget(this);
 
 	connect(_ok_pbut,     SIGNAL(released()), this, SLOT(accept()));
 	connect(_cancel_pbut, SIGNAL(released()), this, SLOT(reject()));
@@ -744,24 +745,26 @@ MusicDialog::~MusicDialog()
 void MusicDialog::_PopulateMusicList(const QString& selected_str)
 {
 	QDir music_dir("mus");
-	_music_list->addColumn("Filename");
-
+	_music_list->setColumnCount(1);
+	_music_list->setHeaderLabels(QStringList("Filename"));
+	
 	// Add music files
+	QList<QTreeWidgetItem*> music;
+	music.append(new QTreeWidgetItem((QTreeWidget*)0, QStringList("None")));
 	for (unsigned int i = 0; i < music_dir.count(); i++) 
 	{
 		if (music_dir[i].contains(".ogg"))
 		{
-			QString file_name = music_dir[i];
-			Q3ListViewItem* Item = new Q3ListViewItem(_music_list, file_name);
-			if (selected_str.endsWith(file_name) && !selected_str.isEmpty())
-				_music_list->setSelected(Item, true);
+			music.append(new QTreeWidgetItem((QTreeWidget*)0, QStringList(music_dir[i])));
+			if (selected_str.endsWith(music_dir[i]) && !selected_str.isEmpty())
+				music.back()->setSelected(true);
 		} // only look for .ogg files
 	} // iterate through all files in the music directory
 
-	// Add "None" option
-	Q3ListViewItem* none_item = new Q3ListViewItem(_music_list, "None");
 	if (selected_str.isEmpty() || selected_str == "None")
-		_music_list->setSelected(none_item, true);
+		music.first()->setSelected(true);
+
+	_music_list->insertTopLevelItems(0, music);
 } // MusicDialog::_PopulateMusicList
 
 QString MusicDialog::GetSelectedFile()

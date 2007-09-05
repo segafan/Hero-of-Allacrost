@@ -1201,6 +1201,7 @@
 					"macosx-contrib/lib",
 					/Developer/SDKs/MacOSX10.4u.sdk/,
 				);
+				LINK_WITH_STANDARD_LIBRARIES = YES;
 				ONLY_LINK_ESSENTIAL_SYMBOLS = YES;
 				OTHER_LDFLAGS = (
 					"-framework",
