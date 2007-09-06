@@ -689,6 +689,9 @@ public:
 	uint32 GetProtectionGrowth() const
 		{ return _protection_growth; }
 
+	uint32 GetAgilityGrowth() const
+		{ return _agility_growth; }
+
 	float GetEvadeGrowth() const
 		{ return _evade_growth; }
 

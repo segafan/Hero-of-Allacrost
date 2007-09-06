@@ -870,7 +870,7 @@ MusicDescriptor::MusicDescriptor(const MusicDescriptor& copy) :
 
 bool MusicDescriptor::LoadAudio(const std::string& filename, AUDIO_LOAD load_type, uint32 stream_buffer_size) {
 	// FIXME: set to static until streaming is fixed
-	AudioDescriptor::LoadAudio(filename, AUDIO_LOAD_STATIC, stream_buffer_size);
+	return AudioDescriptor::LoadAudio(filename, AUDIO_LOAD_STATIC, stream_buffer_size);
 }
 
 

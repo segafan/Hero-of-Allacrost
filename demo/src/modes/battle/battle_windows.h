@@ -59,15 +59,27 @@ enum FINISH_WINDOW_STATE {
 	FINISH_INVALID = -1,
 	//! Announces that the player is victorious and notes any characters who have gained an experience level
 	FINISH_WIN_ANNOUNCE = 0,
-	//! Reports all character growth
-	FINISH_WIN_GROWTH = 2,
+	//! Initial display of character stats
+	FINISH_WIN_SHOW_GROWTH = 1,
+	//! Performs countdown of XP (adding it to chars) and triggers level ups
+	FINISH_WIN_COUNTDOWN_GROWTH = 2,
+	//! All XP has been added (or should be added instantly), shows final stats
+	FINISH_WIN_RESOLVE_GROWTH = 3,
+	//! Display of any skills learned
+	FINISH_WIN_SHOW_SKILLS = 4,
 	//! Reports all drunes earned and dropped items obtained
-	FINISH_WIN_SPOILS = 3,
+	FINISH_WIN_SHOW_SPOILS = 5,
+	//! Adds $ earned to party's pot
+	FINISH_WIN_COUNTDOWN_SPOILS = 6,
+	//! All money and items have been added
+	FINISH_WIN_RESOLVE_SPOILS = 7,
+	//! We've gone through all the states of the FinishWindow in Win form
+	FINISH_WIN_COMPLETE = 8,
 	//! Announces that the player has lost and queries the player for an action
-	FINISH_LOSE_ANNOUNCE = 4,
+	FINISH_LOSE_ANNOUNCE = 9,
 	//! Used to double-confirm when the player selects to quit the game or return to the main menu
-	FINISH_LOSE_CONFIRM = 5,
-	FINISH_TOTAL = 6
+	FINISH_LOSE_CONFIRM = 10,
+	FINISH_TOTAL = 11
 };
 
 /** ****************************************************************************
@@ -303,6 +315,9 @@ private:
 	//! \brief The growth members for all object pointers in the _characters table
 	std::vector<hoa_global::GlobalCharacterGrowth*> _character_growths;
 
+	//! \brief Tallies the amount of growth each character has received for each stat
+	int _growth_gained[4][8];
+
 	//! \brief Text that displays the battle's outcome (victory or defeat)
 	hoa_video::TextBox _finish_outcome;
 
@@ -321,13 +336,27 @@ private:
 	//! \brief Character portraits
 	hoa_video::StillImage _char_portraits[4];
 
+	//! \brief The amount of money won
+	int32 _victory_money;
+
+	//! \brief The amount of xp earned (per character)
+	int32 _victory_xp;
+
+	//! \brief Items won from battle (<ID, quantity>)
+	std::map<hoa_global::GlobalObject*, int32> _victory_items;
+
 	// ----- Private methods
+	//! \brief Tallies up the xp, money, and items earned from killing the enemies
+	void _TallyXPMoneyAndItems();
 
 	//! \brief Handles update processing when the _state member is FINISH_ANNOUNCE_WIN
 	void _UpdateAnnounceWin();
 
 	//! \brief Handles update processing when the _state member is FINISH_WIN_GROWTH
 	void _UpdateWinGrowth();
+
+	//! \brief Just waits for the player to press OK, then moves on
+	void _UpdateWinWaitForOK();
 
 	//! \brief Handles update processing when the _state member is FINISH_WIN_SPOILS
 	void _UpdateWinSpoils();
@@ -343,6 +372,9 @@ private:
 
 	//! \brief Handles update processing when the _state member is FINISH_WIN_GROWTH
 	void _DrawWinGrowth();
+
+	//! \brief Handles update processing when the _state member is FINISH_WIN_GROWTH
+	void _DrawWinSkills();
 
 	//! \brief Handles update processing when the _state member is FINISH_WIN_SPOILS
 	void _DrawWinSpoils();

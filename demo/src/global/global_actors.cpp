@@ -1191,7 +1191,7 @@ void GlobalEnemy::DetermineDroppedObjects(vector<GlobalObject*>& objects) {
 
 	for (uint32 i = 0; i < _dropped_objects.size(); i++) {
 		if (_experience_level >= _dropped_level_required[i]) {
-			if (_dropped_chance[i] < RandomFloat()) {
+			if (RandomFloat() < _dropped_chance[i]) {
 				objects.push_back(GlobalCreateNewObject(_dropped_objects[i]));
 			}
 		}
