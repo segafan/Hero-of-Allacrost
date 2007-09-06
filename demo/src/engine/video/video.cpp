@@ -95,7 +95,7 @@ GameVideo::GameVideo() {
 	_fog_color = Color(1.0f, 1.0f, 1.0f, 1.0f);
 	_fog_intensity = 0.0f;
 	_light_color = Color(1.0f, 1.0f, 1.0f, 1.0f);
-
+	_gl_error_code = GL_NO_ERROR;
 	_text_shadow = false;
 	_animation_counter = 0;
 	_current_frame_diff = 0;
@@ -123,6 +123,9 @@ GameVideo::~GameVideo() {
 	_particle_manager.Destroy();
 
 	GUIManager->SingletonDestroy();
+
+	_default_menu_cursor.Clear();
+	_rectangle_image.Clear();
 
 	// Remove all loaded fonts and shutdown the font library
 	for (map<string, FontProperties*>::iterator i = _font_map.begin(); i!= _font_map.end(); i++) {
@@ -239,8 +242,7 @@ bool GameVideo::SingletonInitialize() {
 	Display(0);
 	Clear();
 
-	_rectangle_image.SetFilename("");
-	if (_rectangle_image.Load() == false) {
+	if (_rectangle_image.Load("") == false) {
 		PRINT_ERROR << "_rectangle_image could not be created" << endl;
 		return false;
 	}
@@ -316,8 +318,8 @@ void GameVideo::Clear(const Color &c) {
 
 	TextureManager->_debug_num_tex_switches = 0;
 
-	if (glGetError()) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "glGetError() returned true" << endl;
+	if (CheckGLError() == true) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "an OpenGL error occured: " << CreateGLErrorString() << endl;
 	}
 }
 
@@ -342,15 +344,13 @@ void GameVideo::Display(uint32 frame_time) {
 	if (_screen_fader.ShouldUseFadeOverlay()) {
 		Color fade_color = _screen_fader.GetFadeOverlayColor();
 		StillImage fade_overlay;
-		fade_overlay.SetDimensions(1024.0f, 768.0f);
 		fade_overlay.SetColor(fade_color);
-		LoadImage(fade_overlay);
+		fade_overlay.Load("", 1024.0f, 768.0f);
 		SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 		PushState();
 		Move(0, 0);
-		DrawImage(fade_overlay);
+		fade_overlay.Draw();
 		PopState();
-		DeleteImage(fade_overlay);
 	}
 
 	// This must be called before DrawFPS, because we only want to count
@@ -804,7 +804,7 @@ bool GameVideo::CaptureScreen(StillImage &id)
 	// create an Image structure and store it our std::map of images
 	if (id._filename == "")
 		id._filename = "captured_screen";
-	Image *new_image = new Image(id._filename, "<T>", width, height, false);
+	ImageTexture *new_image = new ImageTexture(id._filename, "<T>", width, height);
 
 	// Try to create a texture sheet of screen size (rounded up)
 	TexSheet *sheet = TextureManager->_CreateTexSheet(RoundUpPow2(width), RoundUpPow2(height), VIDEO_TEXSHEET_ANY, false);
@@ -849,7 +849,6 @@ bool GameVideo::CaptureScreen(StillImage &id)
 
 	// Store the image in our std::map
 	TextureManager->_images[id._filename] = new_image;
-
 	return true;
 }
 
@@ -874,7 +873,7 @@ void GameVideo::SetGamma(float value) {
 
 
 void GameVideo::MakeScreenshot(const std::string& filename) {
-	private_video::ImageLoadInfo buffer;
+	private_video::ImageMemory buffer;
 
 	// Retrieve the width and height of the viewport
 	GLint viewport_dimensions[4];
@@ -888,10 +887,11 @@ void GameVideo::MakeScreenshot(const std::string& filename) {
 	// Read pixel data
 	glReadPixels(0, 0, buffer.width, buffer.height, GL_RGB, GL_UNSIGNED_BYTE, buffer.pixels);
 
-	if (glGetError()) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "glReadPixels() returned an error" << endl;
+	if (CheckGLError() ==  true) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "an OpenGL error occured: " << CreateGLErrorString() << endl;
 
 		free(buffer.pixels);
+		buffer.pixels = NULL;
 		return;
 	}
 
@@ -903,8 +903,10 @@ void GameVideo::MakeScreenshot(const std::string& filename) {
 	free(buffer.pixels);
 	buffer.pixels = buffer_temp;
 
-	_SaveJpeg(filename, buffer);
+	buffer.SaveImage(filename, false);
+
 	free(buffer.pixels);
+	buffer.pixels = NULL;
 }
 
 //-----------------------------------------------------------------------------
@@ -987,8 +989,7 @@ int32 GameVideo::_ConvertXAlign(int32 x_align) {
 
 
 bool GameVideo::SetDefaultCursor(const std::string &cursor_image_filename) {
-	_default_menu_cursor.SetFilename(cursor_image_filename);
-	return LoadImage(_default_menu_cursor);
+	return _default_menu_cursor.Load(cursor_image_filename);
 }
 
 
@@ -1113,9 +1114,8 @@ void GameVideo::DrawFullscreenOverlay(const Color& color) {
 	SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 	Move(0.0f, 0.0f);
 	StillImage img;
-	img.SetDimensions(1.0f, 1.0f);
-	LoadImage(img);
-	DrawImage(img, color);
+	img.Load("", 1.0f, 1.0f);
+	img.Draw(color);
 
 	PopState();
 }
@@ -1173,7 +1173,39 @@ void GameVideo::DrawRectangle(float width, float height, const Color& color) {
 	_rectangle_image._elements[0].width = width;
 	_rectangle_image._elements[0].height = height;
 
-	VideoManager->DrawImage(_rectangle_image, color);
+	_rectangle_image.Draw(color);
+}
+
+
+
+void GameVideo::DrawHalo(const StillImage &id, float x, float y, const Color &color) {
+	PushMatrix();
+	Move(x, y);
+
+	char old_blend_mode = _current_context.blend;
+	_current_context.blend = VIDEO_BLEND_ADD;
+	id.Draw(color);
+	_current_context.blend = old_blend_mode;
+	PopMatrix();
+}
+
+
+
+void GameVideo::DrawLight(const StillImage &id, float x, float y, const Color &color) {
+	if (_uses_lights == false) {
+		if (VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: called DrawLight() even though real lighting was not enabled!" << endl;
+	}
+
+	DrawHalo(id, x, y, color);
+}
+
+
+
+void GameVideo::DrawFPS(uint32 frame_time) {
+	PushState();
+	GUIManager->_DrawFPS(frame_time);
+	PopState();
 }
 
 }  // namespace hoa_video

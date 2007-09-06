@@ -7,590 +7,1203 @@
 // See http://www.gnu.org/copyleft/gpl.html for details.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "utils.h"
-#include <cassert>
+/** ****************************************************************************
+*** \file    image.cpp
+*** \author  Tyler Olsen, roots@allacrost.org
+*** \brief   Source file for image classes
+*** ***************************************************************************/
+
 #include <cstdarg>
-#include "video.h"
 #include <math.h>
+
+#include "utils.h"
+#include "image.h"
+#include "video.h"
 #include "gui.h"
 
 using namespace std;
-using namespace hoa_video::private_video;
-using namespace hoa_video;
 using namespace hoa_utils;
+using namespace hoa_video::private_video;
 
 namespace hoa_video {
 
-namespace private_video {
-
-// *****************************************************************************
-// ****************************** ImageLoadInfo ********************************
-// *****************************************************************************
-
-ImageLoadInfo::ImageLoadInfo() :
-	width(0),
-	height(0),
-	pixels(NULL)
-{}
-
-
-ImageLoadInfo::~ImageLoadInfo() {
-	if (pixels != NULL) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "pixels member was not NULL upon object destruction" << endl;
-		// TODO: fix all areas in the video engine where it frees pixels but does not set the pointer to NULL
-// 		free(pixels);
-// 		pixels = NULL;
-	}
-}
-
-
-void ImageLoadInfo::ConvertToGrayscale() {
-	if (width <= 0 || height <= 0) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "width and/or height members were invalid (<= 0)" << endl;
-		return;
-	}
-
-	if (pixels == NULL) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "no image data (pixels == NULL)" << endl;
-		return;
-	}
-
-	uint8* end_position = static_cast<uint8*>(pixels) + (width * height * 4); // "4" is because of RGBA
-
-	for (uint8* i = static_cast<uint8*>(pixels); i < end_position; i += 4) {
-		// Compute the grayscale value for this pixel based on RGB values: 0.3R + 0.59G + 0.11B
-		uint8 value = static_cast<uint8>((30 * *(i) + 59 * *(i + 1) + 11 * *(i + 2)) * 0.01f);
-		*i = value;
-		*(i + 1) = value;
-		*(i + 2) = value;
-		// *(i + 3) is the alpha value and is left unmodified
-	}
-}
-
-
-void ImageLoadInfo::RGBAToRGB() {
-	if (width <= 0 || height <= 0) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "width and/or height members were invalid (<= 0)" << endl;
-		return;
-	}
-
-	if (pixels == NULL) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "no image data (pixels == NULL)" << endl;
-		return;
-	}
-
-	uint8* pixel_index = static_cast<uint8*>(pixels);
-	uint8* pixel_source = pixel_index;
-
-	for (int32 i = 0; i < height * width; i++, pixel_index += 4) {
-		int32 index = 3 * i;
-		pixel_source[index] = *pixel_index;
-		pixel_source[index + 1] = *(pixel_index + 1);
-		pixel_source[index + 2] = *(pixel_index + 2);
-	}
-
-	// Reduce the memory consumed by 1/4 since we no longer need to contain alpha data
-	pixels = realloc(pixels, width * height * 3);
-}
-
-
-
-void ImageLoadInfo::CopyFromTexture(TexSheet* texture) {
-	if (pixels != NULL)
-		free(pixels);
-	pixels = NULL;
-
-	// Get the texture as a buffer
-	height = texture->height;
-	width = texture->width;
-	pixels = malloc(height * width * 4);
-	if (pixels == NULL) {
-		PRINT_ERROR << "failed to malloc enough memory to copy the texture" << endl;
-	}
-
-	TextureManager->_BindTexture(texture->tex_id);
-	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-}
-
-
-
-void ImageLoadInfo::CopyFromImage(BaseImage* img) {
-	// First copy the image's entire texture sheet to memory
-	CopyFromTexture(img->texture_sheet);
-
-	// Check that the image to copy is smaller than its texture sheet (usually true).
-	// If so, then copy over only the sub-rectangle area of the image from its texture
-	if (height > img->height || width > img->width) {
-		uint32 src_bytes = width * 4;
-		uint32 dst_bytes = img->width * 4;
-		uint32 src_offset = img->y * width * 4 + img->x * 4;
-		void* img_pixels = malloc(img->width * img->height * 4);
-		if (img_pixels == NULL) {
-			PRINT_ERROR << "failed to malloc enough memory to copy the image" << endl;
-			return;
-		}
-
-		for (int32 i = 0; i < img->height; i++) {
-			memcpy((uint8*)img_pixels + i * dst_bytes, (uint8*)pixels + i * src_bytes + src_offset, dst_bytes);
-		}
-
-		// Delete the memory used for the texture sheet and replace it with the memory for the image
-		if (pixels)
-			free(pixels);
-
-		pixels = img_pixels;
-		height = img->height;
-		width = img->width;
-	}
-}
-
-// *****************************************************************************
-// ********************************** Image ************************************
-// *****************************************************************************
-
-Image::Image(const std::string &fname, const std::string &tags_, int32 w, int32 h, bool grayscale_) :
-	filename(fname),
-	tags(tags_)
-{
-	width = w;
-	height = h;
-	grayscale = grayscale_;
-	texture_sheet = NULL;
-	x = 0;
-	y = 0;
-	u1 = 0.0f;
-	v1 = 0.0f;
-	u2 = 1.0f;
-	v2 = 1.0f;
-	ref_count = 0;
-	smooth = false;
-}
-
-
-
-Image::Image(TexSheet *sheet, const std::string &tags_, const std::string &fname, int32 x_, int32 y_, float u1_, float v1_,
-	float u2_, float v2_, int32 w, int32 h, bool grayscale_) 
-{
-	texture_sheet = sheet;
-	filename = fname;
-	tags = tags_;
-	x = x_;
-	y = y_;
-	u1 = u1_;
-	v1 = v1_;
-	u2 = u2_;
-	v2 = v2_;
-	width = w;
-	height = h;
-	grayscale = grayscale_;
-	ref_count = 0;
-	smooth = false;
-}
-
-
-// *****************************************************************************
-// ****************************** ImageElement *********************************
-// *****************************************************************************
-
-ImageElement::ImageElement(Image *image_, float x_offset_, float y_offset_, float u1_, float v1_,
-	float u2_, float v2_, float width_, float height_) :
-	image(image_)
-{
-	x_offset = x_offset_;
-	y_offset = y_offset_;
-	u1 = u1_;
-	v1 = v1_;
-	u2 = u2_;
-	v2 = v2_;
-	width = width_;
-	height = height_;
-	white = true;
-	one_color = true;
-	blend = false;
-	color[0] = Color::white;
-}
-
-
-
-ImageElement::ImageElement(Image *image_, float x_offset_, float y_offset_, float u1_, float v1_, 
-		float u2_, float v2_, float width_, float height_, Color color_[4]) :
-	image(image_)
-{
-	x_offset = x_offset_;
-	y_offset = y_offset_;
-	u1 = u1_;
-	v1 = v1_;
-	u2 = u2_;
-	v2 = v2_;
-	width = width_;
-	height = height_;
-	color[0] = color_[0];
-
-	// If all colors are the same, then mark it so we don't have to process all vertex colors
-	if (color_[1] == color[0] && color_[2] == color[0] && color_[3] == color[0]) {
-		one_color = true;
-
-		// If all vertex colors are white, set a flag so they don't have to be processed at all
-		if (color[0] == Color::white) {
-			white = true;
-			blend = false;
-		}
-		// Set blend to true if alpha < 1.0f
-		else {
-			blend = (color[0][3] < 1.0f);
-		}
-	}
-	else {
-		color[0] = color_[0];
-		color[1] = color_[1];
-		color[2] = color_[2];
-		color[3] = color_[3];
-		// Set blend to true if any of the four colors have an alpha value < 1.0f
-		blend = (color[0][3] < 1.0f || color[1][3] < 1.0f || color[2][3] < 1.0f || color[3][3] < 1.0f);
-	}
-} // ImageElement::ImageElement()
-
-BaseImage *ImageElement::GetBaseImage()
-{
-	return image;
-}
-
-const BaseImage *ImageElement::GetBaseImage() const
-{
-	return image;
-}
-
-} // namespace private_video
-
-
-
-
-// *****************************************************************************
-// ***************************** ImageDescriptor *******************************
-// *****************************************************************************
+// -----------------------------------------------------------------------------
+// ImageDescriptor class
+// -----------------------------------------------------------------------------
 
 ImageDescriptor::ImageDescriptor() :
-_width (0.0f),
-_height (0.0f),
-_is_static (false),
-_grayscale (false),
-_animated (false),
-_loaded (false)
+	_width(0.0f),
+	_height(0.0f),
+	_is_static(false),
+	_grayscale(false),
+	_loaded(false)
 {
 	_color[0] = _color[1] = _color[2] = _color[3] = Color::white;
 }
 
 
-bool ImageDescriptor::Load()
-{
-	return VideoManager->LoadImage(*this);
-}
 
-
-void ImageDescriptor::Draw()
-{
-	VideoManager->DrawImage(*this);
-}
-
-
-bool ImageDescriptor::Save(const std::string filename) const
-{
-	if (_animated)
-		return VideoManager->SaveImage(filename, dynamic_cast<const AnimatedImage &>(*this));
-	else
-		return VideoManager->SaveImage(filename, dynamic_cast<const StillImage &>(*this));
-}
-
-
-void ImageDescriptor::_Clear()
-{
+void ImageDescriptor::Clear() {
 	_width = 0.0f;
 	_height = 0.0f;
 	_is_static = false;
 	_grayscale = false;
-	_color[0] = _color[1] = _color[2] = _color[3] = Color::white;
-
 	_loaded = false;
+	_color[0] = _color[1] = _color[2] = _color[3] = Color::white;
 }
 
 
-// *****************************************************************************
-// ******************************** StillImage *********************************
-// *****************************************************************************
+
+void ImageDescriptor::GetImageInfo(const std::string& filename, uint32 &rows, uint32& cols, uint32& bpp) {
+	// Isolate the file extension
+	size_t ext_position = filename.rfind('.');
+
+	if (ext_position == string::npos) {
+		throw Exception("could not decipher file extension for filename: " + filename, __FILE__, __LINE__, __FUNCTION__);
+		return;
+	}
+
+	std::string extension = std::string(filename, ext_position, filename.length() - ext_position);
+
+	if (extension == ".png")
+		_GetPngImageInfo(filename, rows, cols, bpp);
+	else if (extension == ".jpg")
+		_GetJpgImageInfo(filename, rows, cols, bpp);
+	else
+		throw Exception("unsupported image file extension \"" + extension + "\" for filename: " + filename, __FILE__, __LINE__, __FUNCTION__);
+}
+
+
+
+bool ImageDescriptor::LoadMultiImageFromElementSize(vector<StillImage>& images, const string& filename,
+	const uint32 elem_width, const uint32 elem_height)
+{
+	// First retrieve the dimensions of the multi image (in pixels)
+	uint32 img_height, img_width, bpp;
+	try {
+		GetImageInfo(filename, img_height, img_width, bpp);
+	}
+	catch (Exception e) {
+		if (VIDEO_DEBUG)
+			cerr << e.ToString() << endl;
+		return false;
+	}
+
+	// Make sure that the element height and width divide evenly into the height and width of the multi image
+	if ((img_height % elem_height) != 0 || (img_width % elem_width) != 0) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "multi image size not evenly divisible by element size for multi image file: " << filename << endl;
+		return false;
+	}
+
+	// Determine the number of rows and columns of element images inside the multi image
+	uint32 grid_rows = img_height / elem_height;
+	uint32 grid_cols = img_width / elem_width;
+
+	// If necessary, resize the images vector so that it is the same size as the number of element images which
+	// we will soon extract from the multi image
+	if (images.size() != grid_rows * grid_cols) {
+		images.resize(grid_rows * grid_cols);
+	}
+
+	// If the width or height of the StillImages in the images vector were not specified (set to the default 0.0f),
+	// then set those sizes to the element width and height arguments (which are in number of pixels)
+	for (vector<StillImage>::iterator i = images.begin(); i < images.end(); i++) {
+		if (IsFloatEqual(i->_height, 0.0f) == true)
+			i->_height = static_cast<float>(elem_height);
+		if (IsFloatEqual(i->_width, 0.0f) == true)
+			i->_width = static_cast<float>(elem_width);
+	}
+
+	return _LoadMultiImage(images, filename, grid_rows, grid_cols);
+} // bool ImageDescriptor::LoadMultiImageFromElementSize(...)
+
+
+
+bool ImageDescriptor::LoadMultiImageFromElementGrid(vector<StillImage>& images, const string& filename,
+		const uint32 grid_rows, const uint32 grid_cols)
+{
+	// First retrieve the dimensions of the multi image (in pixels)
+	uint32 img_height, img_width, bpp;
+	try {
+		GetImageInfo(filename, img_height, img_width, bpp);
+	}
+	catch (Exception e) {
+		if (VIDEO_DEBUG)
+			cerr << e.ToString() << endl;
+		return false;
+	}
+
+	// Make sure that the number of grid rows and columns divide evenly into the image size
+	if ((img_height % grid_rows) != 0 || (img_width % grid_cols) != 0) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "multi image size not evenly divisible by grid rows or columsn for multi image file: " << filename << endl;
+		return false;
+	}
+
+	// If necessary, resize the images vector so that it is the same size as the number of element images which
+	// we will soon extract from the multi image
+	if (images.size() != grid_rows * grid_cols) {
+		images.resize(grid_rows * grid_cols);
+	}
+
+	// If the width or height of the StillImages in the images vector were not specified (set to the default 0.0f),
+	// then set those sizes to the element width and height arguments (which are in number of pixels)
+	float elem_width = static_cast<float>(img_width) / static_cast<float>(grid_cols);
+	float elem_height = static_cast<float>(img_height) / static_cast<float>(grid_rows);
+	for (vector<StillImage>::iterator i = images.begin(); i < images.end(); i++) {
+		if (IsFloatEqual(i->_height, 0.0f) == true)
+			i->_height = static_cast<float>(elem_height);
+		if (IsFloatEqual(i->_width, 0.0f) == true)
+			i->_width = static_cast<float>(elem_width);
+	}
+
+	return _LoadMultiImage(images, filename, grid_rows, grid_cols);
+} // bool ImageDescriptor::LoadMultiImageFromElementGrid(...)
+
+
+
+bool ImageDescriptor::SaveMultiImage(const vector<StillImage*>& images, const string& filename,
+	const uint32 grid_rows, const uint32 grid_columns)
+{
+	// Check there are elements to store
+	if (images.empty()) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "images vector argument was empty when saving file: " << filename << endl;
+		return false;
+	}
+
+	// Check if the number of images is compatible with the number of rows and columns
+	if (images.size() < grid_rows * grid_columns) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "images vector argument did not contain enough images to save for file: " << filename << endl;
+		return false;
+	}
+	else if (images.size() > grid_rows * grid_columns) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "images vector argument had a size greater than the number of images to save for file: " << filename << endl;
+		// NOTE: no return false for this case because we have enough images to continue
+	}
+
+	// Check that all the images have only a single ImageElement
+	for (uint32 i = 0 ; i < images.size(); i++) {
+		if (images[i]->_elements.size() != 1) {
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "a StillImage to be saved contained multiple ImageElements when saving file: " << filename << endl;
+			return false;
+		}
+	}
+
+	// Check that all the images are non-NULL and are of the same size
+	int32 img_width = images[0]->_elements[0].image->width;
+	int32 img_height = images[0]->_elements[0].image->height;
+	for (uint32 i = 0; i < images.size(); i++) {
+		if (images[i] == NULL || images[i]->_elements[0].image == NULL) {
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "NULL StillImage or ImageElement was present in images vector argument when saving file: " << filename << endl;
+			return false;
+		}
+		if (images[i]->_elements[0].image->width != img_width || images[i]->_elements[0].image->height != img_height) {
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "images contained in vector argument did not share the same dimensions" << endl;
+			return false;
+		}
+	}
+
+	// Isolate the filename's extension and determine the type of image file we're saving
+	bool is_png_image;
+	size_t ext_position = filename.rfind('.');
+	if (ext_position == string::npos) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to decipher file extension for filename: " << filename << endl;
+		return false;
+	}
+
+	string extension = string(filename, ext_position, filename.length() - ext_position);
+
+	if (extension == ".png")
+		is_png_image = true;
+	else if (extension == ".jpg")
+		is_png_image = false;
+	else {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "unsupported file extension: \"" << extension << "\" for filename: " << filename << endl;
+		return false;
+	}
+
+	// Structure for the image buffer to save
+	ImageMemory save;
+
+	save.height = grid_rows * img_height;
+	save.width = grid_columns * img_width;
+	save.pixels = malloc(save.width * save.height * 4);
+
+	if (save.pixels == NULL) {
+		PRINT_ERROR << "failed to malloc enough memory to save new image file: " << filename << endl;
+		return false;
+	}
+
+	// Initially, we need to grab the Image pointer of the first StillImage, the texture ID of its TextureSheet owner,
+	// and malloc enough memory for the entire sheet so that we can copy over the texture sheet from video memory to
+	// system memory. 
+	ImageTexture* img = const_cast<ImageTexture*>(images[0]->_elements[0].image);
+	GLuint tex_id = img->texture_sheet->tex_id;
+
+	ImageMemory texture;
+	texture.width = img->texture_sheet->width;
+	texture.height = img->texture_sheet->height;
+	texture.pixels = malloc(texture.width * texture.height * 4);
+
+	if (texture.pixels == NULL) {
+		PRINT_ERROR << "failed to malloc enough memory to save new image file: " << filename << endl;
+		free(save.pixels);
+		return false;
+	}
+
+	TextureManager->_BindTexture(tex_id);
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.pixels);
+
+	uint32 i = 0; // i is used to count through the images vector to get the image to save
+	for (uint32 x = 0; x < grid_rows; x++) {
+		for (uint32 y = 0; y < grid_columns; y++) {
+			img = const_cast<ImageTexture*>(images[i]->_elements[0].image);
+
+			// Check if this image has a different texture ID than the last. If it does, we need to re-grab the texture
+			// memory for the texture sheet that the new image is contained within and store it in the texture.pixels
+			// buffer, which is CPU system memory.
+			if (tex_id != img->texture_sheet->tex_id) {
+				// Get new texture ID
+				TextureManager->_BindTexture(img->texture_sheet->tex_id);
+				tex_id = img->texture_sheet->tex_id;
+
+				// If the new texture is bigger, reallocate memory
+				if (texture.height * texture.width < img->texture_sheet->height * img->texture_sheet->width) {
+					free(texture.pixels);
+					texture.width = img->texture_sheet->width;
+					texture.height = img->texture_sheet->height;
+					texture.pixels = realloc(texture.pixels, texture.width * texture.height * 4);
+					if (texture.pixels == NULL) {
+						PRINT_ERROR << "failed to malloc enough memory to save new image file: " << filename << endl;
+						free(save.pixels);
+						return false;
+					}
+				}
+				glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.pixels);
+			}
+
+			// Determine the part of the texture that we are interested in (the part that contains the current image we're saving)
+			uint32 src_offset = img->y * texture.width * 4 + img->x * 4;
+			uint32 dst_offset = x * img_height * img_width * grid_columns * 4 + y * img_width * 4;
+			uint32 src_bytes = texture.width * 4;
+			uint32 dst_bytes = img_width * grid_columns * 4;
+			uint32 copy_bytes = img_width * 4;
+
+			// Copy each row of image pixels over the the save.pixels buffer one at a time
+			for (int32 j = 0; j < img_height; j++) {
+				memcpy((uint8*)save.pixels + j * dst_bytes + dst_offset, (uint8*)texture.pixels + j * src_bytes + src_offset, copy_bytes);
+			}
+
+			i++;
+		} // for (uint32 y = 0; y < grid_columns; y++)
+	} // for (uint32 x = 0; x < grid_rows; x++)
+
+	// save.pixels now contains all the image data we wish to save, so write it out to the new image file
+	bool success = true;
+	success = save.SaveImage(filename, is_png_image);
+	free(save.pixels);
+	free(texture.pixels);
+
+	return success;
+} // bool ImageDescriptor::SaveMultiImage(...)
+
+
+
+void ImageDescriptor::_GetPngImageInfo(const std::string& filename, uint32& rows, uint32& cols, uint32& bpp) {
+	//! \todo Someone who understands libpng needs to write some comments in this function
+	FILE* fp = fopen(filename.c_str(), "rb");
+
+	if (fp == NULL) {
+		throw Exception("failed to open file: " + filename, __FILE__, __LINE__, __FUNCTION__);
+		return;
+	}
+
+	uint8 test_buffer[8];
+
+	fread(test_buffer, 1, 8, fp);
+	if (png_sig_cmp(test_buffer, 0, 8)) {
+		throw Exception("png_sig_cmp() failed for file: " + filename, __FILE__, __LINE__, __FUNCTION__);
+		fclose(fp);
+		return;
+	}
+
+	png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, (png_voidp)NULL, NULL, NULL);
+
+	if (png_ptr == NULL) {
+		fclose(fp);
+		return;
+	}
+
+	png_infop info_ptr = png_create_info_struct(png_ptr);
+
+	if (!info_ptr) {
+		png_destroy_read_struct(&png_ptr, NULL, (png_infopp)NULL);
+		fclose(fp);
+		throw Exception("png_create_info_struct() returned NULL for file: " + filename, __FILE__, __LINE__, __FUNCTION__);
+		return;
+	}
+
+	if (setjmp(png_jmpbuf(png_ptr))) {
+		png_destroy_read_struct(&png_ptr, NULL, (png_infopp)NULL);
+		fclose(fp);
+		throw Exception("setjmp returned non-zero value for file: " + filename, __FILE__, __LINE__, __FUNCTION__);
+		return;
+	}
+
+	png_init_io(png_ptr, fp);
+	png_set_sig_bytes(png_ptr, 8);
+	png_read_png(png_ptr, info_ptr, PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_PACKING | PNG_TRANSFORM_EXPAND, NULL);
+
+	cols = info_ptr->width;
+	rows = info_ptr->height;
+	bpp = info_ptr->channels * 8;
+
+	png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
+	fclose(fp);
+} // void ImageDescriptor::_GetPngImageInfo(const std::string& filename, uint32& rows, uint32& cols, uint32& bpp)
+
+
+
+void ImageDescriptor::_GetJpgImageInfo(const std::string& filename, uint32& rows, uint32& cols, uint32& bpp) {
+	//! \todo Someone who understands libjpeg needs to write some comments in this function
+	FILE* fp = fopen(filename.c_str(), "rb");
+
+	if (fp == NULL) {
+		throw Exception("failed to open file: " + filename, __FILE__, __LINE__, __FUNCTION__);
+		return;
+	}
+
+	jpeg_decompress_struct cinfo;
+	jpeg_error_mgr jerr;
+
+	cinfo.err = jpeg_std_error(&jerr);
+	jpeg_create_decompress(&cinfo);
+
+	jpeg_stdio_src(&cinfo, fp);
+	jpeg_read_header(&cinfo, TRUE);
+
+	cols = cinfo.output_width;
+	rows = cinfo.output_height;
+	bpp = cinfo.output_components;
+
+	jpeg_destroy_decompress(&cinfo);
+
+	fclose(fp);
+} // void ImageDescriptor::_GetJpgImageInfo(const std::string& filename, uint32& rows, uint32& cols, uint32& bpp)
+
+
+
+bool ImageDescriptor::_LoadMultiImage(vector<StillImage>& images, const string &filename,
+	const uint32 grid_rows, const uint32 grid_cols)
+{
+	std::string tags;
+	uint32 current_image;
+	uint32 x, y;
+
+	bool need_load = false;
+
+	// Check if we have loaded all the sub-images. If any single sub-image is not loaded, then
+	// we must re-load the entire multi-image file
+	for (x = 0; x < grid_rows && need_load == false; x++) {
+		for (y = 0; y < grid_cols && need_load == false; y++) {
+			tags = "<X" + NumberToString(x) + "_" + NumberToString(grid_rows) + ">";
+			tags += "<Y" + NumberToString(y) + "_" + NumberToString(grid_cols) + ">";
+
+			// This sub image was not found, so exit this loop immediately
+			if (TextureManager->_images.find(filename + tags) == TextureManager->_images.end()) {
+				need_load = true;
+			}
+		}
+	}
+
+	// If not all the images are loaded, then load the multi image from disk and create enough memory to copy
+	// over individual sub-image elements from it
+	ImageMemory multi_image;
+	ImageMemory sub_image;
+	if (need_load) {
+		if (multi_image.LoadImage(filename) == false) {
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to load multi image file: " << filename << endl;
+			return false;
+		}
+
+		sub_image.width = multi_image.width / grid_cols;
+		sub_image.height = multi_image.height / grid_rows;
+		sub_image.pixels = malloc(sub_image.width * sub_image.height * 4);
+		if (sub_image.pixels == NULL) {
+			PRINT_ERROR << "failed to malloc memory for multi image file: " << filename << endl;
+			free(multi_image.pixels);
+			multi_image.pixels = NULL;
+			return false;
+		}
+	}
+
+	// One by one, get the subimages
+	for (x = 0; x < grid_rows; x++) {
+		for (y = 0; y < grid_cols; y++) {
+			tags = "<X" + NumberToString(x) + "_" + NumberToString(grid_rows) + ">";
+			tags += "<Y" + NumberToString(y) + "_" + NumberToString(grid_cols) + ">";
+
+			current_image = x * grid_cols + y;
+
+			// If this image already exists in a texture sheet somewhere, add a reference to it
+			// and add a new ImageElement to the current StillImage
+			if (TextureManager->_images.find(filename + tags) != TextureManager->_images.end()) {
+				images.at(current_image)._elements.clear();
+				ImageTexture* img = TextureManager->_images[filename + tags];
+
+				if (img == NULL) {
+					IF_PRINT_WARNING(VIDEO_DEBUG) << "a NULL image was found in the TextureManager's _images container" << endl;
+
+					free(multi_image.pixels);
+					free(sub_image.pixels);
+					multi_image.pixels = NULL;
+					sub_image.pixels = NULL;
+					return false;
+				}
+
+				if (img->ref_count == 0) {
+					// If ref count is zero, it means this image was freed, but not removed, so restore it
+					img->texture_sheet->RestoreImage(img);
+				}
+
+				img->AddReference();
+
+				ImageElement element(img, images.at(current_image)._width, images.at(current_image)._height,
+					0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, images.at(current_image)._color);
+				images.at(current_image)._elements.push_back(element);
+			}
+
+			// We have to first extract this image from the larger multi image and add it to a texture sheet.
+			// Then we can add the image data to the StillImage being constructed
+			else {
+				images.at(current_image)._filename = filename;
+
+				for (int32 i = 0; i < sub_image.height; i++) {
+					memcpy((uint8*)sub_image.pixels + 4 * sub_image.width * i, (uint8*)multi_image.pixels + (((x * multi_image.height / grid_rows) + i) *
+						multi_image.width + y * multi_image.width / grid_cols) * 4, 4 * sub_image.width);
+				}
+
+				ImageTexture* new_image = new ImageTexture(filename, tags, sub_image.width, sub_image.height);
+
+				// Try to insert the image in a texture sheet
+				TexSheet* sheet = TextureManager->_InsertImageInTexSheet(new_image, sub_image, images.at(current_image)._is_static);
+
+				if (sheet == NULL) {
+					IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TextureController::_InsertImageInTexSheet failed" << endl;
+
+					free(multi_image.pixels);
+					free(sub_image.pixels);
+					multi_image.pixels = NULL;
+					sub_image.pixels = NULL;
+					delete new_image;
+					return false;
+				}
+
+				new_image->AddReference();
+				TextureManager->_images[filename + tags] = new_image;
+
+				// store the new image element
+				ImageElement element(new_image, images.at(current_image)._width, images.at(current_image)._height,
+					0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, images.at(current_image)._color);
+				images.at(current_image)._elements.push_back(element);
+			}
+
+			// Finally, do a grayscale conversion for the image if grayscale mode is enabled
+			if (images.at(current_image)._grayscale) {
+				images.at(current_image).EnableGrayScale();
+			}
+		} // for (y = 0; y < grid_cols; y++)
+	} // for (x = 0; x < grid_rows; x++)
+
+	// Make sure to free all dynamically allocated memory
+	if (multi_image.pixels) {
+		free(multi_image.pixels);
+		multi_image.pixels = NULL;
+	}
+	if (sub_image.pixels) {
+		free(sub_image.pixels);
+		sub_image.pixels = NULL;
+ 	}
+
+	return true;
+} // bool ImageDescriptor::_LoadMultiImage(...)
+
+// -----------------------------------------------------------------------------
+// StillImage class
+// -----------------------------------------------------------------------------
 
 StillImage::StillImage(const bool grayscale) {
 	Clear();
-	_animated = false;
 	_grayscale = grayscale;
 }
 
 
 
 void StillImage::Clear() {
-	_Clear();
+	ImageDescriptor::Clear();
 	_filename.clear();
 	_elements.clear();
-
-	SetColor(Color::white);
 }
 
 
-void StillImage::SetWidth (float width)
-{
+
+bool StillImage::Load(const string& filename) {
+	// Delete everything previously stored in here
+	_elements.clear();
+	_filename = filename;
+
+	// TEMP: This is a temporary hack to support procedural images by using empty filenames. It should be removed later
+	// 1. Special case: if filename is empty, load a colored quad
+	if (filename.empty()) {
+		ImageElement quad(NULL, _width, _height, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, _color);
+		_elements.push_back(quad);
+		return true;
+	}
+
+	// 2. Check if an image with the same filename has already been loaded. If so, point to that and increment its reference
+	map<string, ImageTexture*>::iterator i = TextureManager->_images.find(_filename);
+	if (i != TextureManager->_images.end()) {
+		ImageTexture* img = i->second;
+
+		if (img == NULL) {
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "recovered a NULL image inside the TextureManager's image map: " << _filename << endl;
+			return false;
+		}
+
+		// If the following condition is true, it means this image was freed but not removed from the texture sheet
+		// So, we must restore it
+		if (img->ref_count == 0) {
+			img->texture_sheet->RestoreImage(img);
+		}
+
+		img->AddReference();
+
+		if (IsFloatEqual(_width, 0.0f))
+			_width = static_cast<float>(img->width);
+		if (IsFloatEqual(_height, 0.0f))
+			_height = static_cast<float>(img->height);
+
+		ImageElement element(img, _width, _height, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, _color);
+		_elements.push_back(element);
+
+		return true;
+	}
+
+	// 3. The image file needs to be loaded from disk
+	ImageMemory img_data;
+
+	if (img_data.LoadImage(_filename) == false) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "call to ImageMemory::LoadImage() failed for file: " << _filename << endl;
+		return false;
+	}
+
+	// Create a new texture image and store it in a texture sheet. If the _grayscale member of this class is true,
+	// we first load the color copy of the image to a texture sheet. Then we'll convert the image data to grayscale
+	// and save that image data to texture memory as well
+	ImageTexture* new_image = new ImageTexture(_filename, "", img_data.width, img_data.height);
+
+	if (TextureManager->_InsertImageInTexSheet(new_image, img_data, _is_static) == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TextureController::_InsertImageInTexSheet() failed for file: " << _filename << endl;
+
+		delete new_image;
+		free(img_data.pixels);
+		img_data.pixels = NULL;
+		return false;
+	}
+
+	TextureManager->_images[_filename] = new_image;
+	new_image->AddReference();
+
+	// If width or height members are zero, set them to the dimensions of the image data (which are in number of pixels)
+	if (IsFloatEqual(_width, 0.0f) == true)
+		_width = static_cast<float>(img_data.width);
+
+	if (IsFloatEqual(_height, 0.0f) == true)
+		_height = static_cast<float>(img_data.height);
+
+	// Check whether we also need to create a grayscale version of this image or not
+	if (_grayscale == false) {
+		_elements.push_back(ImageElement(new_image, _width, _height, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, _color));
+		free(img_data.pixels);
+		
+		img_data.pixels = NULL;
+		
+		
+		
+		return true;
+	}
+
+	// If we reached this point, we must now create a grayscale version of this image
+	img_data.ConvertToGrayscale();
+	ImageTexture* gray_image = new ImageTexture(_filename, "<G>", img_data.width, img_data.height);
+	if (TextureManager->_InsertImageInTexSheet(gray_image, img_data, _is_static) == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "call to TextureController::_InsertImageInTexSheet() failed for file: " << _filename
+			<< ", could not enable grayscale mode" << endl;
+
+		TextureManager->_images.erase(_filename);
+		new_image->RemoveReference();
+		delete new_image;
+		free(img_data.pixels);
+		img_data.pixels = NULL;
+		return false;
+	}
+
+	TextureManager->_images[_filename + "<G>"] = gray_image;
+	gray_image->AddReference();
+	_elements.push_back(ImageElement(gray_image, _width, _height, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, _color));
+	free(img_data.pixels);
+	img_data.pixels = NULL;
+	return true;
+} // bool StillImage::Load(const string& filename)
+
+
+
+void StillImage::Draw() const {
+	// If real lighting is enabled, draw images normally since the light overlay
+	// will take care of the modulation. If not, (i.e. no overlay is being used)
+	// then pass the light color so the vertex colors can do the modulation
+	if (VideoManager->_uses_lights == false && (VideoManager->_light_color != Color::white))
+		Draw(VideoManager->_light_color);
+	else
+		Draw(Color::white);
+}
+
+
+
+void StillImage::Draw(const Color& draw_color) const {
+	// Don't draw anything if this image is completely transparent (invisible)
+	if (IsFloatEqual(draw_color[3], 0.0f) == true) {
+		return;
+	}
+	
+	float modulation = VideoManager->_screen_fader.GetFadeModulation();
+	Color fade_color(modulation, modulation, modulation, 1.0f);
+	
+	float x_shake = VideoManager->_x_shake * (VideoManager->_current_context.coordinate_system.GetRight() -
+		VideoManager->_current_context.coordinate_system.GetLeft()) / 1024.0f;
+	float y_shake = VideoManager->_y_shake * (VideoManager->_current_context.coordinate_system.GetTop() -
+		VideoManager->_current_context.coordinate_system.GetBottom()) / 768.0f;
+
+	float x_align_offset = ((VideoManager->_current_context.x_align + 1) * _width) * 0.5f * -
+		VideoManager->_current_context.coordinate_system.GetHorizontalDirection();
+	float y_align_offset = ((VideoManager->_current_context.y_align + 1) * _height) * 0.5f * -
+		VideoManager->_current_context.coordinate_system.GetVerticalDirection();
+
+	// Save the draw cursor position as we move to draw each element
+	glPushMatrix();
+
+	VideoManager->MoveRelative(x_align_offset, y_align_offset);
+
+	bool skip_modulation = (draw_color == Color::white && IsFloatEqual(modulation, 1.0f));
+
+	// If we're modulating, calculate the fading color now
+	if (VideoManager->_screen_fader.IsFading() == true && skip_modulation == false)
+		fade_color = draw_color * fade_color;
+	
+	for (uint32 i = 0; i < _elements.size(); ++i) {
+		float x_off, y_off;
+
+		if (VideoManager->_current_context.x_flip) {
+			x_off = _width - _elements[i].x_offset - _elements[i].width;
+		}
+		else {
+			x_off = _elements[i].x_offset;
+		}
+		
+		if (VideoManager->_current_context.y_flip) {
+			y_off = _height - _elements[i].y_offset - _elements[i].height;
+		}
+		else {
+			y_off = _elements[i].y_offset;
+		}
+
+		x_off += x_shake;
+		y_off += y_shake;
+
+		glPushMatrix();
+		VideoManager->MoveRelative(x_off * VideoManager->_current_context.coordinate_system.GetHorizontalDirection(),
+			y_off * VideoManager->_current_context.coordinate_system.GetVerticalDirection());
+		
+		float x_scale = _elements[i].width;
+		float y_scale = _elements[i].height;
+		
+		if (VideoManager->_current_context.coordinate_system.GetHorizontalDirection() < 0.0f)
+			x_scale = -x_scale;
+		if (VideoManager->_current_context.coordinate_system.GetVerticalDirection() < 0.0f)
+			y_scale = -y_scale;
+		
+		glScalef(x_scale, y_scale, 1.0f);
+
+		if (skip_modulation)
+			_elements[i].Draw();
+		else {
+			Color modulated_colors[4];
+			modulated_colors[0] = _elements[i].color[0] * fade_color;
+			modulated_colors[1] = _elements[i].color[1] * fade_color;
+			modulated_colors[2] = _elements[i].color[2] * fade_color;
+			modulated_colors[3] = _elements[i].color[3] * fade_color;
+			_elements[i].Draw(modulated_colors);
+		}
+		glPopMatrix();
+	}
+	glPopMatrix();
+} // void StillImage::Draw(const Color& draw_color) const
+
+
+
+bool StillImage::Save(const string& filename) const {
+	if (_elements.empty()) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "attempted to save an image that contained no image elements" << endl;
+		return false;
+	}
+
+	if (_elements.size() > 1) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "support for the saving of compound (multi-element) images is not supported yet" << endl;
+		return false;
+	}
+
+	// Isolate the file extension
+	size_t ext_position = filename.rfind('.');
+	bool is_png_image;
+
+	if (ext_position == string::npos) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "could not decipher file extension for file: " << filename << endl;
+		return false;
+	}
+
+	string extension = string(filename, ext_position, filename.length() - ext_position);
+
+	if (extension == ".png")
+		is_png_image = true;
+	else if (extension == ".jpg")
+		is_png_image = false;
+	else {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "unsupported file extension \"" << extension << "\" for file: " << filename << endl;
+		return false;
+	}
+
+	ImageMemory buffer;
+	ImageTexture* img = const_cast<ImageTexture*>(_elements[0].image);
+	buffer.CopyFromImage(img);
+	return buffer.SaveImage(filename, is_png_image);
+} // bool StillImage::Save(const string& filename)
+
+
+
+void StillImage::SetWidth(float width) {
+	// Case 1: No image elements loaded, just change the internal width
+	if (_elements.empty() == true) {
+		_width = width;
+		return;
+	}
+
+	// Case 2: we only have one image element to change its width
+	if (_elements.size() == 1) {
+		_width = width;
+		_elements[0].width = width;
+		return;
+	}
+
+	// Case 3: For composite images, we must set the width of each element appropriately
+	// That is, scale its width relative to the width of the composite image
+	if (IsFloatEqual(_width, 0.0f) == true) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "internal width was 0.0f when trying to re-size multiple image elements" << endl;
+		return;
+	}
+
+	for (vector<ImageElement>::iterator i = _elements.begin(); i < _elements.end(); i++) {
+		if (IsFloatEqual(i->width, 0.0f) == false)
+			i->width = width * (_width / i->width);
+	}
 	_width = width;
-
-	for (std::vector <private_video::ImageElement>::iterator it=_elements.begin(); it<_elements.end(); ++it)
-	{
-		it->width = width;
-	}
 }
 
 
-void StillImage::SetHeight (float height)
-{
+
+void StillImage::SetHeight(float height) {
+	// Case 1: No image elements loaded, just change the internal height
+	if (_elements.empty() == true) {
+		_height = height;
+		return;
+	}
+
+	// Case 2: we only have one image element to change its height
+	if (_elements.size() == 1) {
+		_height = height;
+		_elements[0].height = height;
+		return;
+	}
+
+	// Case 3: For composite images, we must set the width of each element appropriately
+	// That is, scale its width relative to the width of the composite image
+	if (IsFloatEqual(_height, 0.0f) == true) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "internal height was 0.0f when trying to re-size multiple image elements" << endl;
+		return;
+	}
+
+	for (vector<ImageElement>::iterator i = _elements.begin(); i < _elements.end(); i++) {
+		if (IsFloatEqual(i->height, 0.0f) == false)
+			i->height = height * (_height / i->height);
+	}
 	_height = height;
-
-	for (std::vector <private_video::ImageElement>::iterator it=_elements.begin(); it<_elements.end(); ++it)
-	{
-		it->height = height;
-	}
 }
 
-
-void StillImage::SetDimensions (float width, float height)
-{
-	_width = width;
-	_height = height;
-
-	for (std::vector <private_video::ImageElement>::iterator it=_elements.begin(); it<_elements.end(); ++it)
-	{
-		it->width = width;
-		it->height = height;
-	}
-}
 
 
 void StillImage::EnableGrayScale() {
-	// If the image is already in grayscale mode, go back
-	if (_grayscale)
+	if (_grayscale) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "grayscale mode was already enabled" << endl;
 		return;
+	}
 	
 	// Mark as grayscale
 	_grayscale = true;
 
-	// If the image is not yet loaded, go back (it will be made grayscale when loading)
-	if (_elements.size() == 0)
+	// If no image element is yet loaded, we are done (during the loading phase, grayscale will automatically be enabled)
+	if (_elements.empty() == true) {
 		return;
+	}
 
-	// Turn gray all the ImageElement components
-	for (uint32 i=0; i<_elements.size(); i++)
-	{
-		Image *img = _elements[i].image;	// Color image
+	// Enable grayscale on each image element
+	for (uint32 i = 0; i < _elements.size(); i++) {
+		ImageTexture* img = _elements[i].image;
 
-		if (img == NULL)
-		{
-			if (VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: Attemp to turn to grayscale mode a NULL Image" << endl;
+		if (img == NULL) {
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "discovered a NULL image element at position: " << i << endl;
 			continue;
 		}
 
-		// Check first if there is a grayscale version already in the map
-		if (TextureManager->_images.find(img->filename + img->tags + "<G>") != TextureManager->_images.end())
-		{
+		// Check if there is a grayscale version of this image in texture memory already and if so, we
+		// only need to change the ImageElement to the grayscale one and add a new reference to it
+		if (TextureManager->_images.find(img->filename + img->tags + "<G>") != TextureManager->_images.end()) {
+			// NOTE: We do not decrement the reference to the colored image, because we want to guarantee that
+			// it remains referenced in texture memory while its grayscale counterpart is being used
 			_elements[i].image = TextureManager->_images[img->filename + img->tags + "<G>"];
-			++(_elements[i].image->ref_count);
+			_elements[i].image->AddReference();
 			continue;
 		}
 
-		// If we arrive here, it means we have to convert to grayscale the image
-		hoa_video::private_video::ImageLoadInfo buffer;
-		buffer.CopyFromImage(img);
-
-		buffer.ConvertToGrayscale();
+		// Create a copy of the image, convert it to grayscale, and add the grayed image copy to texture memory
+		ImageMemory gray_img;
+		gray_img.CopyFromImage(img);
+		gray_img.ConvertToGrayscale();
 		
-		Image* new_image_gray = new Image(img->filename, img->tags+"<G>", buffer.width, buffer.height, true);
+		ImageTexture* new_img = new ImageTexture(img->filename, img->tags + "<G>", gray_img.width, gray_img.height);
 
-		TexSheet *sheet = TextureManager->_InsertImageInTexSheet(new_image_gray, buffer, _is_static);
+		if (TextureManager->_InsertImageInTexSheet(new_img, gray_img, _is_static) == NULL) {
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to insert new grayscale image into texture sheet" << endl;
+			delete new_img;
 
-		if(!sheet)
-		{
-			if(VIDEO_DEBUG)
-				cerr << "VIDEO_DEBUG: GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
-
-			delete new_image_gray;
-
-			if (buffer.pixels) {
-				free (buffer.pixels);
-				buffer.pixels = NULL;
+			if (gray_img.pixels) {
+				free(gray_img.pixels);
+				gray_img.pixels = NULL;
 			}
 
 			return;
 		}
 
-		new_image_gray->ref_count = 1;
-		TextureManager->_images[new_image_gray->filename + new_image_gray->tags] = new_image_gray;
-		_elements[i].image = new_image_gray;
+		new_img->AddReference();
+		TextureManager->_images[new_img->filename + new_img->tags] = new_img;
+		_elements[i].image = new_img;
+
+		if (gray_img.pixels) {
+			free(gray_img.pixels);
+			gray_img.pixels = NULL;
+		}
 	}
-}
+} // void StillImage::EnableGrayScale()
 
 
 
 void StillImage::DisableGrayScale() {
-	// If the image is already in color mode, go back
-	if (!_grayscale)
+	if (_grayscale == false) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "grayscale mode was already disabled" << endl;
 		return;
-	
-	// Mark as not grayscale
+	}
+
 	_grayscale = false;
 
-	// If the image is not yet loaded, go back
-	if (_elements.size() == 0)
+	// If no image elements are yet loaded, we're finished
+	if (_elements.empty() == true) {
 		return;
-
-	// Turn to color all the ImageElement components
-	for (uint32 i=0; i<_elements.size(); i++)
-	{
-		Image *img = _elements[i].image;	// Color image
-
-		if (img == NULL)
-		{
-			if (VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: Attemp to turn to color mode a NULL Image" << endl;
-			continue;
-		}
-
-		// Check for the color mode version of the image, already in the map
-		if (TextureManager->_images.find(img->filename + img->tags.substr(0,img->tags.length()-3)) == TextureManager->_images.end())
-		{
-			if (VIDEO_DEBUG)
-				cerr << "VIDEO ERROR: Color image not found in the map, while gray one was in it" << endl;
-			continue;
-		}
-
-		_elements[i].image = TextureManager->_images[img->filename + img->tags.substr(0,img->tags.length()-3)];
-		--(img->ref_count);
 	}
-}
 
-//------------------------------------------------------------------------------
-// AddImage: this is the function that gives us the ability to form "compound images".
-// Call AddImage() on an existing image descriptor to place a new image at the desired offsets.
-//
-// NOTE: It is an error to pass in negative offsets to this function
-//
-// NOTE: When you create a compound image descriptor with AddImage(), remember to call DeleteImage()
-// on it when you're done. Even though it's not loading any new image from disk, it increases the
-// reference count.
-//------------------------------------------------------------------------------
-bool StillImage::AddImage(const StillImage &id, float x_offset, float y_offset, float u1, float v1, float u2, float v2)
-{
-	// Negative offsets not allowed
+	// For each ImageElement, return to using the non-grayscaled version, which should be located somewhere
+	// in texture memory already (if it is not, this is an error).
+	for (uint32 i = 0; i < _elements.size(); i++) {
+		ImageTexture* img = _elements[i].image; // This points to the grayscale image element
+
+		if (img == NULL) {
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "discovered a NULL image element at position: " << i << endl;
+			continue;
+		}
+
+		// Make sure that the non-grayscale version of the image is located in texture memory. To get the map
+		// string entry for this image, we crop the last 3 letters of the grayscale tag which should contain <G>
+		if (TextureManager->_images.find(img->filename + img->tags.substr(0, img->tags.length() - 3)) == TextureManager->_images.end()) {
+			PRINT_WARNING << "non-grayscale version of image was not found in texture memory" << endl;
+			continue;
+		}
+
+		_elements[i].image = TextureManager->_images[img->filename + img->tags.substr(0, img->tags.length() - 3)];
+
+		// Decrement the grayscale reference and if there are no references left, remove it from texture memory
+		if (img->RemoveReference() == true) {
+			img->texture_sheet->FreeImage(img);
+		}
+	}
+} // void StillImage::DisableGrayScale()
+
+
+
+void StillImage::AddImage(const StillImage& img, float x_offset, float y_offset, float u1, float v1, float u2, float v2) {
 	if (x_offset < 0.0f || y_offset < 0.0f) {
-		if (VIDEO_DEBUG) 
-			cerr << "VIDEO ERROR: passed negative offsets to StillImage::AddImage()" << endl;
-		return false;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "negative x or y offset passed to function" << endl;
+		return;
 	}
 	
-	size_t num_elements = id._elements.size();
-	if (num_elements == 0) {
-		if (VIDEO_DEBUG) 
-			cerr << "VIDEO ERROR: passed in an uninitialized image descriptor to StillImage::AddImage()!" << endl;
-		
-		return false;
+	if (img._elements.empty() == true) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "StillImage argument had no image elements" << endl;
+		return;
 	}
-	
-	for (uint32 i = 0; i < num_elements; ++i) {
-		// Add the new image element to the descriptor
-		ImageElement elem = id._elements[i];
-		elem.x_offset += x_offset;
-		elem.y_offset += y_offset;
-		elem.u1 = u1;
-		elem.v1 = v1;
-		elem.u2 = u2;
-		elem.v2 = v2;
-		
-		elem.width *= (elem.u2 - elem.u1);
-		elem.height *= (elem.v2 - elem.v1);
 
-		// TODO: This needs a comment here
-		if (elem.image) {
-			++(elem.image->ref_count);
-		}
-		_elements.push_back(elem);
+	// Modify the _filename member to reflect this new image element addition (if its the only element, copy the filename)
+	if (_elements.empty()) {
+		_filename = img._filename;
+	} else {
+		_filename = "";
+	}
 
-		// Recalculate the width and height of the descriptor as a whole. (This assumes that there are no negative offsets.)
-		float max_x = elem.x_offset + elem.width;
+	// Add each new image element to this image
+	for (uint32 i = 0; i < img._elements.size(); ++i) {
+		ImageElement elem_copy = img._elements[i];
+		elem_copy.x_offset += x_offset;
+		elem_copy.y_offset += y_offset;
+		elem_copy.u1 = u1;
+		elem_copy.v1 = v1;
+		elem_copy.u2 = u2;
+		elem_copy.v2 = v2;
+		elem_copy.width *= (elem_copy.u2 - elem_copy.u1);
+		elem_copy.height *= (elem_copy.v2 - elem_copy.v1);
+		_elements.push_back(elem_copy);
+
+		// Recalculate the width and height of the composite StillImage now that a new element has been added to it
+		float max_x = elem_copy.x_offset + elem_copy.width;
 		if (max_x > _width)
 			_width = max_x;
 			
-		float max_y = elem.y_offset + elem.height;
+		float max_y = elem_copy.y_offset + elem_copy.height;
 		if (max_y > _height)
 			_height = max_y;
 	}
-	
-	return true;	
-} // bool StillImage::AddImage()
+} // void StillImage::AddImage(const StillImage& img, float x_offset, float y_offset, float u1, float v1, float u2, float v2)
 
 
-const BaseImageElement *StillImage::GetElement(uint32 index) const
-{
-	if (index >= GetNumElements())
-		return NULL;
-	return &_elements[index];
-}
 
-uint32 StillImage::GetNumElements() const
-{
-	return _elements.size();
-}
+void StillImage::ConstructCompositeImage(const std::vector<StillImage>& tiles, const std::vector<std::vector<uint32> >& indeces) {
+	if (tiles.empty() == true || indeces.empty() == true) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "either the tiles or indeces vector function arguments were empty" << endl;
+		return;
+	}
 
+	for (uint32 i = 1; i < tiles.size(); i++) {
+		if (tiles[0]._width != tiles[i]._width || tiles[0]._height != tiles[i]._height) {
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "images within the tiles argument had unequal dimensions" << endl;
+			return;
+		}
+	}
 
-// *****************************************************************************
-// ******************************* AnimatedImage *******************************
-// *****************************************************************************
+	for (uint32 i = 1; i < indeces.size(); i++) {
+		if (indeces[0].size() != indeces[i].size()) {
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "the row sizes in the indices 2D vector argument did not match" << endl;
+			return;
+		}
+	}
+
+	Clear();
+
+	// Set the members of the composite image that we are about to construct
+	_width  = static_cast<float>(indeces[0].size()) * tiles[0]._width;
+	_height = static_cast<float>(indeces.size()) * tiles[0]._height;
+	_is_static = tiles[0]._is_static;
+
+	// Add each tile at the image at the appropriate offset
+	for (uint32 y = 0; y < indeces.size(); ++y) {
+		for (uint32 x = 0; x < indeces[0].size(); ++x) {
+			// NOTE: we did not check that all the entries in indeces were within the
+			// correct range for the size of the tiles vector, so this may cause a out-of-bounds
+			// run-time error.
+			AddImage(tiles[indeces[y][x]], x * tiles[0]._width, y * tiles[0]._height);
+		}
+	}
+} // void ConstructCompositeImage(const std::vector<StillImage>& tiles, const std::vector<std::vector<uint32> >& indeces)
+
+// -----------------------------------------------------------------------------
+// AnimatedImage class
+// -----------------------------------------------------------------------------
 
 AnimatedImage::AnimatedImage(const bool grayscale) {
 	Clear();
-	_animated = true;
 	_grayscale = grayscale;
-	_number_loops = -1;
-	_loop_counter = 0;
-	_loops_finished = false;
+}
+
+
+
+AnimatedImage::AnimatedImage(float width, float height, bool grayscale) {
+	Clear();
+	_width = width;
+	_height = height;
+	_grayscale = grayscale;
 }
 
 
 
 void AnimatedImage::Clear() {
-	_Clear();
+	ImageDescriptor::Clear();
 	_frame_index = 0;
 	_frame_counter = 0;
 	_frames.clear();
 	_number_loops = -1;
 	_loop_counter = 0;
 	_loops_finished = false;
+}
 
-	SetColor(Color::white);
+
+
+bool AnimatedImage::LoadFromFrameSize(const string& filename, const vector<uint32>& timings, const uint32 frame_width, const uint32 frame_height, const uint32 trim) {
+	// Make the multi image call
+	// TODO: Handle the case where the _grayscale member is true so all frames are loaded in grayscale format
+	vector<StillImage> image_frames;
+	if (ImageDescriptor::LoadMultiImageFromElementSize(image_frames, filename, frame_width, frame_height) == false) {
+		return false;
+	}
+
+	if (trim >= image_frames.size()) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "attempt to trim away more frames than requested to load for file: " << filename << endl;
+		return false;
+	}
+
+	if (timings.size() < (image_frames.size() - trim)) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "not enough timing data to fill frames grid when loading file: " << filename << endl;
+		return false;
+	}
+
+	_frames.clear();
+	ResetAnimation();
+
+	// Add the loaded frame image and timing information
+	for (uint32 i = 0; i < image_frames.size() - trim; i++) {
+		_frames.push_back(AnimationFrame());
+		image_frames[i].SetDimensions(_width, _height);
+		_frames.back().image = image_frames[i];
+		_frames.back().frame_time = timings[i];
+		if (timings[i] == 0) {
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "added a frame time value of zero when loading file: " << filename << endl;
+		}
+	}
+
+	return true;
+} // bool AnimatedImage::LoadFromFrameSize(...)
+
+
+
+bool AnimatedImage::LoadFromFrameGrid(const string& filename, const vector<uint32>& timings, const uint32 frame_rows, const uint32 frame_cols, const uint32 trim) {
+	if (trim >= frame_rows * frame_cols) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "attempt to trim away more frames than requested to load for file: " << filename << endl;
+		return false;
+	}
+
+	if (timings.size() < (frame_rows * frame_cols - trim)) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "not enough timing data to fill frames grid when loading file: " << filename << endl;
+		return false;
+	}
+
+	_frames.clear();
+	ResetAnimation();
+
+	// Make the multi image call
+	// TODO: Handle the case where the _grayscale member is true so all frames are loaded in grayscale format
+	vector<StillImage> image_frames;
+	if (ImageDescriptor::LoadMultiImageFromElementGrid(image_frames, filename, frame_rows, frame_cols) == false) {
+		return false;
+	}
+
+	// Add the loaded frame image and timing information
+	for (uint32 i = 0; i < frame_rows * frame_cols - trim; i++) {
+		_frames.push_back(AnimationFrame());
+		image_frames[i].SetDimensions(_width, _height);
+		_frames.back().image = image_frames[i];
+		_frames.back().frame_time = timings[i];
+		if (timings[i] == 0) {
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "added zero frame time for an image frame when loading file: " << filename << endl;
+		}
+	}
+
+	return true;
+} // bool AnimatedImage::LoadFromFrameGrid(...)
+
+
+
+void AnimatedImage::Draw() const {
+	if (_frames.empty()) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "no frames were loaded into the AnimatedImage object" << endl;
+		return;
+	}
+
+	_frames[_frame_index].image.Draw();
+}
+
+
+
+void AnimatedImage::Draw(const Color& draw_color) const {
+	if (_frames.empty()) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "no frames were loaded into the AnimatedImage object" << endl;
+		return;
+	}
+
+	_frames[_frame_index].image.Draw(draw_color);
+}
+
+
+
+bool AnimatedImage::Save(const std::string& filename, uint32 grid_rows, uint32 grid_cols) const {
+	vector<StillImage*> image_frames;
+	for (uint32 i = 0; i < _frames.size(); i++) {
+		image_frames.push_back(const_cast<StillImage*>(&(_frames[i].image)));
+	}
+
+	if (grid_rows == 0 || grid_cols == 0) {
+		return ImageDescriptor::SaveMultiImage(image_frames, filename, 1, _frames.size());
+	}
+	else {
+		return ImageDescriptor::SaveMultiImage(image_frames, filename, grid_rows, grid_cols);
+	}
 }
 
 
 
 void AnimatedImage::EnableGrayScale() {
-	// Enable gray scale on all frames
-	StillImage *img;
+	if (_grayscale == true) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "grayscale mode was already enabled when function was invoked" << endl;
+		return;
+	}
+
+	_grayscale = true;
 	for (uint32 i = 0; i < _frames.size(); i++) {
-		img = GetFrame(i);
-		img->EnableGrayScale();
+		_frames[i].image.EnableGrayScale();
 	}
 }
 
 
 
 void AnimatedImage::DisableGrayScale() {
-	// Disable gray scale on all frames
-	StillImage *img;
+	if (_grayscale == false) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "grayscale mode was already disabled when function was invoked" << endl;
+		return;
+	}
+
+	_grayscale = false;
 	for (uint32 i = 0; i < _frames.size(); i++) {
-		img = GetFrame(i);
-		img->DisableGrayScale();
+		_frames[i].image.DisableGrayScale();
 	}
 }
 
@@ -624,40 +1237,36 @@ void AnimatedImage::Update() {
 		}
 		_frame_counter = frame_change;
 	}
-}
+} // void AnimatedImage::Update()
 
 
 
-bool AnimatedImage::AddFrame(const std::string &frame, uint32 frame_time) {
+bool AnimatedImage::AddFrame(const string& frame, uint32 frame_time) {
 	StillImage img;
-	img.SetFilename(frame);	
-	img.SetDimensions(_width, _height);
-	img.SetVertexColors(_color[0], _color[1], _color[2], _color[3]);
 	img.SetStatic(_is_static);
+	img.SetVertexColors(_color[0], _color[1], _color[2], _color[3]);
+	if (img.Load(frame, _width, _height) == false) {
+		return false;
+	}
 	
 	AnimationFrame new_frame;
 	new_frame.frame_time = frame_time;
 	new_frame.image = img;
 	_frames.push_back(new_frame);
-
 	return true;
 }
 
 
 
-bool AnimatedImage::AddFrame(const StillImage &frame, uint32 frame_time) {
+bool AnimatedImage::AddFrame(const StillImage& frame, uint32 frame_time) {
+	if (frame.GetNumElements() == 0) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "StillImage argument did not contain any image elements" << endl;
+		return false;
+	}
+
 	AnimationFrame new_frame;
 	new_frame.image = frame;
 	new_frame.frame_time = frame_time;
-
-	// Check if the static image argument has been loaded yet.
-	// If it has, then we have to increment the reference count
-	uint32 num_elements = new_frame.image._elements.size();
-	if (num_elements) {
-		for (uint32 i = 0; i < num_elements; i++) {
-			++(new_frame.image._elements[i].image->ref_count);
-		}
-	}
 	
 	_frames.push_back(new_frame);
 	return true;
@@ -668,11 +1277,8 @@ bool AnimatedImage::AddFrame(const StillImage &frame, uint32 frame_time) {
 void AnimatedImage::SetWidth(float width) {
 	_width = width;
 
-	// Update the width of each frame image
-	StillImage *img;
 	for (uint32 i = 0; i < _frames.size(); ++i) {
-		img = GetFrame(i);
-		img->SetWidth(width);
+		_frames[i].image.SetWidth(width);
 	}
 }
 
@@ -681,11 +1287,8 @@ void AnimatedImage::SetWidth(float width) {
 void AnimatedImage::SetHeight(float height) {
 	_height = height;
 
-	// Update the height of each frame image
-	StillImage *img;
 	for (uint32 i = 0; i < _frames.size(); i++) {
-		img = GetFrame(i);
-		img->SetHeight(height);
+		_frames[i].image.SetHeight(height);
 	}
 }
 
@@ -695,28 +1298,21 @@ void AnimatedImage::SetDimensions(float width, float height) {
 	_width = width;
 	_height = height;
 
-	// Update the width and height of each frame image
-	StillImage *img;
 	for (uint32 i = 0; i < _frames.size(); i++) {
-		img = GetFrame(i);
-		img->SetDimensions(width, height);
+		_frames[i].image.SetDimensions(width, height);
 	}
 }
 
 
 
-void AnimatedImage::SetColor(const Color &color)
-{
+void AnimatedImage::SetColor(const Color &color) {
 	_color[0] = color;
 	_color[1] = color;
 	_color[2] = color;
 	_color[3] = color;
 
-	// Update the color of each frame image
-	StillImage *img;
 	for (uint32 i = 0; i < _frames.size(); i++) {
-		img = GetFrame(i);
-		img->SetColor(color);
+		_frames[i].image.SetColor(color);
 	}
 }
 
@@ -728,11 +1324,8 @@ void AnimatedImage::SetVertexColors(const Color &tl, const Color &tr, const Colo
 	_color[2] = bl;
 	_color[3] = br;
 
-	// Update the vertex colors of each frame image
-	StillImage *img;
 	for (uint32 i = 0; i < _frames.size(); i++) {
-		img = GetFrame(i);
-		img->SetVertexColors(tl, tr, bl, br);
+		_frames[i].image.SetVertexColors(tl, tr, bl, br);
 	}
 }
 

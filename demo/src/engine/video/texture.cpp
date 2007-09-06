@@ -117,7 +117,7 @@ bool TexSheet::Reload() {
 
 
 
-bool TexSheet::AddImage(BaseImage* img, ImageLoadInfo& load_info) {
+bool TexSheet::AddImage(BaseImageTexture* img, ImageMemory& load_info) {
 	// Try inserting into the texture memory manager
 	bool could_insert = tex_mem_manager->Insert(img);
 	if (could_insert == false)
@@ -145,7 +145,7 @@ bool TexSheet::AddImage(BaseImage* img, ImageLoadInfo& load_info) {
 
 
 
-bool TexSheet::CopyRect(int32 x, int32 y, ImageLoadInfo& load_info) {
+bool TexSheet::CopyRect(int32 x, int32 y, ImageMemory& load_info) {
 	TextureManager->_BindTexture(tex_id);
 
 	glTexSubImage2D
@@ -161,11 +161,8 @@ bool TexSheet::CopyRect(int32 x, int32 y, ImageLoadInfo& load_info) {
 		load_info.pixels // pixels of the sub image
 	);
 
-	GLenum error = glGetError();
-	if (error) {
-		if (VIDEO_DEBUG) {
-			cerr << "VIDEO ERROR: glTexSubImage2D() failed in TexSheet::CopyRect()!" << endl;
-		}
+	if (VideoManager->CheckGLError() == true) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "an OpenGL error occured: " << VideoManager->CreateGLErrorString() << endl;
 		return false;
 	}
 
@@ -189,11 +186,8 @@ bool TexSheet::CopyScreenRect(int32 x, int32 y, const ScreenRect& screen_rect) {
 		screen_rect.height // height in pixels of image
 	);
 
-	GLenum error = glGetError();
-	if (error) {
-		if (VIDEO_DEBUG) {
-			cerr << "VIDEO ERROR: glTexSubImage2D() failed in TexSheet::CopyScreenRect()!" << endl;
-		}
+	if (VideoManager->CheckGLError() == true) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "an OpenGL error occured: " << VideoManager->CreateGLErrorString() << endl;
 		return false;
 	}
 
@@ -217,6 +211,44 @@ void TexSheet::Smooth(bool flag) {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering_type);
 	}
 }
+
+
+
+void TexSheet::Draw() const {
+	// The vertex coordinate array to use (assumes glScale() has been appropriately set)
+	static const float vertex_coords[] = {
+		0.0f, 0.0f, // Upper left
+		1.0f, 0.0f, // Upper right
+		1.0f, 1.0f, // Lower right
+		0.0f, 1.0f, // Lower left
+	};
+
+	// The texture coordinate array to use (specifies the coordinates encompassing the entire texture)
+	static const float texture_coords[] = {
+		0.0f, 1.0f, // Upper right
+		1.0f, 1.0f, // Lower right
+		1.0f, 0.0f, // Lower left
+		0.0f, 0.0f, // Upper left
+	};
+
+	// Enable texturing and bind the texture
+	glDisable(GL_BLEND);
+	glEnable(GL_TEXTURE_2D);
+	TextureManager->_BindTexture(tex_id);
+
+	// Enable and setup the texture coordinate array
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glTexCoordPointer(2, GL_FLOAT, 0, texture_coords);
+
+	// Use a vertex array to draw all of the vertices
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(2, GL_FLOAT, 0, vertex_coords);
+	glDrawArrays(GL_QUADS, 0, 4);
+
+	if (VideoManager->CheckGLError() == true) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "an OpenGL error occurred: " << VideoManager->CreateGLErrorString() << endl;
+	}
+} // void TexSheet::Draw() const
 
 // -----------------------------------------------------------------------------
 // FixedTexMemMgr class
@@ -258,7 +290,7 @@ FixedTexMemMgr::FixedTexMemMgr(TexSheet *tex_sheet, int32 img_width, int32 img_h
 
 
 
-bool FixedTexMemMgr::Insert(BaseImage *img) {
+bool FixedTexMemMgr::Insert(BaseImageTexture *img) {
 	// Whoa, nothing on the open list! (no blocks left) return false :(
 	if (_open_list_head == NULL)
 		return false;
@@ -285,7 +317,7 @@ bool FixedTexMemMgr::Insert(BaseImage *img) {
 	// this image out of memory to make place for the new one
 
 	if (node->image) {
-		VideoManager->_RemoveImage(node->image);
+		Remove(node->image);
 		node->image = NULL;
 	}
 
@@ -308,11 +340,11 @@ bool FixedTexMemMgr::Insert(BaseImage *img) {
 	img->texture_sheet = _tex_sheet;
 
 	return true;
-} // bool FixedTexMemMgr::Insert(BaseImage *img)
+} // bool FixedTexMemMgr::Insert(BaseImageTexture *img)
 
 
 
-void FixedTexMemMgr::Remove(BaseImage *img) {
+void FixedTexMemMgr::Remove(BaseImageTexture *img) {
 	// Translate x,y coordinates into a block index
 	int32 block_index = _CalculateBlockIndex(img);
 
@@ -334,7 +366,7 @@ void FixedTexMemMgr::Remove(BaseImage *img) {
 
 
 
-void FixedTexMemMgr::Free(BaseImage *img) {
+void FixedTexMemMgr::Free(BaseImageTexture *img) {
 	int32 block_index = _CalculateBlockIndex(img);
 
 	FixedImageNode *node = &_blocks[block_index];
@@ -355,7 +387,7 @@ void FixedTexMemMgr::Free(BaseImage *img) {
 
 
 
-int32 FixedTexMemMgr::_CalculateBlockIndex(BaseImage *img) {
+int32 FixedTexMemMgr::_CalculateBlockIndex(BaseImageTexture *img) {
 	int32 block_x = img->x / _image_width;
 	int32 block_y = img->y / _image_height;
 
@@ -409,7 +441,7 @@ VariableTexMemMgr::VariableTexMemMgr(TexSheet *sheet) {
 
 
 
-bool VariableTexMemMgr::Insert(BaseImage *img) {
+bool VariableTexMemMgr::Insert(BaseImageTexture *img) {
 	// Don't allow insertions into a texture bigger than 512x512...
 	// This way, if we have a 1024x1024 texture holding a fullscreen background,
 	// it is always safe to remove the texture sheet from memory when the
@@ -465,7 +497,7 @@ bool VariableTexMemMgr::Insert(BaseImage *img) {
 	// this image out of memory to make place for the new one
 
 	// Update blocks
-	set<BaseImage*> remove_images;
+	set<BaseImageTexture*> remove_images;
 
 	for(int32 y = block_y; y < block_y + h; y++) {
 		for(int32 x = block_x; x < block_x + w; x++) {
@@ -483,9 +515,8 @@ bool VariableTexMemMgr::Insert(BaseImage *img) {
 		}
 	}
 
-	for(set<BaseImage*>::iterator i = remove_images.begin(); i != remove_images.end(); i++) {
+	for(set<BaseImageTexture*>::iterator i = remove_images.begin(); i != remove_images.end(); i++) {
 		Remove(*i);
-		VideoManager->_RemoveImage(*i);
 	}
 
 
@@ -505,11 +536,11 @@ bool VariableTexMemMgr::Insert(BaseImage *img) {
 
 	img->texture_sheet = _tex_sheet;
 	return true;
-} // bool VariableTexMemMgr::Insert(BaseImage *img)
+} // bool VariableTexMemMgr::Insert(BaseImageTexture *img)
 
 
 
-void VariableTexMemMgr::_SetBlockProperties(BaseImage *img, bool change_free, bool change_image, bool free, BaseImage *new_image) {
+void VariableTexMemMgr::_SetBlockProperties(BaseImageTexture *img, bool change_free, bool change_image, bool free, BaseImageTexture *new_image) {
 	// Calculate upper-left corner in blocks
 	int32 block_x = img->x / 16;
 	int32 block_y = img->y / 16;

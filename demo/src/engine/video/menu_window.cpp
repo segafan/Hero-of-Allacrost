@@ -91,7 +91,6 @@ bool MenuWindow::Create(float w, float h, int32 visible_flags, int32 shared_flag
 void MenuWindow::Destroy() {
 	_skin = NULL;
 	GUIManager->_RemoveMenuWindow(this);
-	VideoManager->DeleteImage(_menu_image);
 }
 
 
@@ -200,7 +199,7 @@ void MenuWindow::Draw() {
 	}
 
 	VideoManager->Move(_x_position, _y_position);
-	VideoManager->DrawImage(_menu_image, Color::white);
+	_menu_image.Draw(Color::white);
 
 	VideoManager->PopState();
 	return;
@@ -341,7 +340,6 @@ bool MenuWindow::_RecreateImage() {
 		return false;
 	}
 
-	VideoManager->DeleteImage(_menu_image);
 	_menu_image.Clear();
 
 	// Get information about the border sizes
@@ -412,10 +410,9 @@ bool MenuWindow::_RecreateImage() {
 	_skin->borders[1][1].GetVertexColor(c[2], 2);
 	_skin->borders[1][1].GetVertexColor(c[3], 3);
 
-	VideoManager->DeleteImage(_skin->borders[1][1]);
 	_skin->borders[1][1].SetDimensions(left_border_size, top_border_size);
 	_skin->borders[1][1].SetVertexColors(c[0], c[1], c[2], c[3]);
-	VideoManager->LoadImage(_skin->borders[1][1]);
+// 	VideoManager->LoadImage(_skin->borders[1][1]);
 
 
 	// If a valid background image is loaded, then tile the interior of the window with it
@@ -455,10 +452,9 @@ bool MenuWindow::_RecreateImage() {
 	}
 	else {
 		// Otherwise re-create the overlay at the correct width and height
-		VideoManager->DeleteImage(_skin->borders[1][1]);
 		_skin->borders[1][1].SetDimensions(_inner_width, _inner_height);
 		_skin->borders[1][1].SetVertexColors(c[0], c[1], c[2], c[3]);
-		VideoManager->LoadImage(_skin->borders[1][1]);
+// 		VideoManager->LoadImage(_skin->borders[1][1]);
 
 		_menu_image.AddImage(_skin->borders[1][1], left_border_size, bottom_border_size);
 	}

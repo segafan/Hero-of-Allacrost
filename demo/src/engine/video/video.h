@@ -63,7 +63,7 @@ extern "C" {
 #include "interpolator.h"
 #include "shake.h"
 #include "screen_rect.h"
-#include "tex_mgmt.h"
+#include "texture_controller.h"
 #include "text.h"
 #include "particle_manager.h"
 #include "particle_effect.h"
@@ -198,6 +198,7 @@ class GameVideo : public hoa_utils::Singleton<GameVideo> {
 	friend class MenuWindow;
 	friend class GUISupervisor;
 	friend class TextureController;
+	friend class private_video::BaseImageElement;
 	friend class private_video::GUIElement;
 	friend class private_video::FixedTexMemMgr;
 	friend class private_video::VariableTexMemMgr;
@@ -251,9 +252,12 @@ public:
 
 	/** \brief Retrieves the OpenGL error code and retains it in the _gl_error_code member
 	*** \return True if an OpenGL error has been detected, false if no errors were detected
+	*** \note This function only produces a meaningful result if the VIDEO_DEBUG variable is set to true. This is done
+	*** because the call to glGetError() requires a round trip to the GPU and a flush of the rendering pipeline; a fairly
+	*** expensive operation. If VIDEO_DEBUG is false, the function will always return false immediately.
 	**/
 	bool CheckGLError()
-		{ _gl_error_code = glGetError(); return (_gl_error_code != GL_NO_ERROR); }
+		{ if (VIDEO_DEBUG == false) return false; _gl_error_code = glGetError(); return (_gl_error_code != GL_NO_ERROR); }
 
 	//! \brief Returns the value of the most recently fetched OpenGL error code
 	GLenum GetGLError()
@@ -555,114 +559,6 @@ public:
 
 	// ----------  Image operation methods
 
-	/*! \brief Get information of an image file
-	 *	\param file_name Name of the file, without the extension
-	 *	\param rows Rows of the image
-	 *	\param cols Columns of the image
-	 *	\param bpp Bits per pixel of the image
-	 *	\return True if the process was carried out with no problem, false otherwise
-	 */
-	bool GetImageInfo (const std::string& file_name, uint32 &rows, uint32& cols, uint32& bpp);
-
-	/** \brief loads an image (static or animated image). Assumes that you have already called
-	 *         all the appropriate functions to initialize the image. In the case of a static image,
-	 *         this means setting its filename, and possibly other properties like width, height, and
-	 *         color. In the case of an animated image, it means calling AddFrame().
-	 *
-	 *  \param id  image descriptor to load- either a StillImage or AnimatedImage.
-	 * \return success/failure
-	 */
-	bool LoadImage(ImageDescriptor &id);
-
-	/** \brief loads an image (static or animated image). Assumes that you have already called
-	 *         all the appropriate functions to initialize the image. In the case of a static image,
-	 *         this means setting its filename, and possibly other properties like width, height, and
-	 *         color. In the case of an animated image, it means calling AddFrame().  The image is
-	 *	  loaded in grayscale.
-	 *
-	 *  \param id  image descriptor to load- either a StillImage or AnimatedImage.
-	 * \return success/failure
-	 */
-	bool LoadImageGrayScale(ImageDescriptor &id);
-
-	/** \brief Loads a MultiImage in a vector of StillImages.
-	 *	This function loads an image and cut it in pieces, loading each of
-	 *	that on separate StillImage objects. It uses the number of stored elements as input parameters.
-	 *  \param images  Vector of StillImages where the cut images will be loaded.
-	 *	\param filename Name of the file.
-	 *	\param rows Number of rows of sub-images in the MultiImage.
-	 *	\param cols Number of columns of sub-images in the MultiImage.
-	 *	\return success/failure
-	 */
-	bool LoadMultiImageFromNumberElements(std::vector<StillImage> &images, const std::string &filename, const uint32 rows, const uint32 cols);
-
-	/** \brief Loads a MultiImage in a vector of StillImages.
-	 *	This function loads an image and cut it in pieces, loading each of
-	 *	that on separate StillImage objects. It uses the size of the stored elements as input parameters.
-	 *  \param images  Vector of StillImages where the cut images will be loaded.
-	 *	\param filename Name of the file.
-	 *	\param width Width of a stored element.
-	 *	\param height Height of a stored element.
-	 *	\return success/failure
-	 */
-	bool LoadMultiImageFromElementsSize(std::vector<StillImage> &images, const std::string &filename, const uint32 width, const uint32 height);
-
-	/** \brief Loads a MultiImage in an AnimatedImage as frames.
-	 *	This function loads an image and cut it in pieces, loading each of
-	 *	that on frames of an AnimatedImage.
-	 *  \param image AnimatedImage where the cut images will be loaded.
-	 *	\param file_name Name of the file.
-	 *	\param rows Number of rows of sub-images in the MultiImage.
-	 *	\param cols Number of columns of sub-images in the MultiImage.
-	 *	\return success/failure
-	 */
-	bool LoadAnimatedImageFromNumberElements(AnimatedImage &image, const std::string &file_name, const uint32 rows, const uint32 cols);
-
-	/** \brief Loads a MultiImage in an AnimatedImage as frames.
-	 *	This function loads an image and cut it in pieces, loading each of
-	 *	that on frames of an AnimatedImage.
-	 *  \param image AnimatedImage where the cut images will be loaded.
-	 *	\param file_name Name of the file.
-	 *	\param rows Number of rows of sub-images in the MultiImage.
-	 *	\param cols Number of columns of sub-images in the MultiImage.
-	 *	\return success/failure
-	 */
-	bool LoadAnimatedImageFromElementsSize(AnimatedImage &image, const std::string &file_name, const uint32 rows, const uint32 cols);
-
-	//! \brief Saves a vector of images in a single file.
-	/*	This function stores a vector of images as a single image. This is useful for creating multiimage 
-	 *	images. The image can be stored in JPEG or PNG, which is decided by the filename.
-	 *  \param image Vector of images to save
-	 *	\param file_name Name of the file.
-	 *	\param rows Number of rows of sub-images in the MultiImage.
-	 *	\param cols Number of columns of sub-images in the MultiImage.
-	 *	\return success/failure
-	 */
-	bool SaveImage (const std::string &file_name, const std::vector<StillImage*> &image, const uint32 rows, const uint32 columns) const;
-
-	//! \brief Saves a StillImage into a file.
-	/*	The image can be stored in JPEG or PNG, which is decided by the filename.
-	 *  \param image StillImage to store.
-	 *	\param file_name Name of the file.
-	 *	\return success/failure
-	 */
-	bool SaveImage (const std::string &file_name, const StillImage &image) const;
-
-	//! \brief Saves an AnimatedImage into a file.
-	/*	The image can be stored in JPEG or PNG, which is decided by the filename.
-	 *  It will be stored as a multiimage, with each frame aligned in one row and as many columns as frames.
-	 *  \param image AnimatedImage to store.
-	 *	\param file_name Name of the file.
-	 *	\return success/failure
-	 */
-	bool SaveImage (const std::string &file_name, const AnimatedImage &image) const;
-
-
-	/** \brief decreases ref count of an image (static or animated)
-	*** \param id  image descriptor to decrease the reference count of
-	**/
-	void DeleteImage(ImageDescriptor &id);
-
 	/** \brief captures the contents of the screen and saves it to an image
 	 *         descriptor
 	 *
@@ -671,34 +567,13 @@ public:
 	 */
 	bool CaptureScreen(StillImage &id);
 
-	/** \brief draws an image which is modulated by the scene's light color
-	 *
-	 *  \param id  image descriptor to draw (either StillImage or AnimatedImage)
-	 */
-	void DrawImage(const ImageDescriptor &id);
-
-	/** \brief draws an image which is modulated by a custom color
-	 *
-	 *  \param id  image descriptor to draw (either StillImage or AnimatedImage)
-	 *  \param color Color used for modulating the image
-	 */
-	void DrawImage(const ImageDescriptor &id, const Color &color);
-
-	/** \brief converts a 2D array of tiles into one big image
-	 *
-	 *  \param tiles   a vector of image descriptors (the tiles)
-	 *  \param indices a 2D vector in row-column order (e.g. indices[y][x])
-	 *         which forms a rectangular array of tiles
-	 * \return the image built out of the 2D array of tiles
-	 */
-	StillImage TilesToObject(std::vector<StillImage> &tiles, std::vector< std::vector<uint32> > indices);
-
 	/** \brief returns the amount of animation frames that have passed since the last
 	 *         call to GameVideo::Display(). This number is based on VIDEO_ANIMATION_FRAME_PERIOD,
 	 *         and is used so that AnimatedImages know how many frames to increment themselves by.
 	 * \return the number of nimations frames passed since last GameVideo::Display() call
 	 */
-	int32 GetFrameChange() { return _current_frame_diff; }
+	int32 GetFrameChange()
+		{ return _current_frame_diff; }
 
 	/** \brief Returns a pointer to the GUIManager singleton object
 	*** This method allows the user to perform GUI management operations. For example, to load a
@@ -949,7 +824,7 @@ public:
 	 * \param style  The text style to render
 	 * \param buffer The pixel array to render to
 	 */
-	bool _RenderText(hoa_utils::ustring& string, TextStyle& style, private_video::ImageLoadInfo& buffer);
+	bool _RenderText(hoa_utils::ustring& string, TextStyle& style, private_video::ImageMemory& buffer);
 
 private:
 	GameVideo();
@@ -979,8 +854,6 @@ private:
 
 	//! eight character name for temp files that increments every time you create a new one so they are always unique
 	char _next_temp_file[9];
-
-
 
 	//! advanced display flag. If true, info about the video engine is shown on screen
 	bool _advanced_display;
@@ -1097,47 +970,6 @@ private:
 	 */
 	std::string _CreateTempFilename(const std::string &extension);
 
-	/** \brief decreases the reference count of an image
-	*** \param image  pointer to image
-	*** \return success/failure
-	**/
-	bool _DeleteImage(private_video::BaseImage *const image);
-
-	/** \brief decreases ref count of an image
-	*** \param id  image descriptor to decrease the reference count of
-	**/
-	void _DeleteImage(StillImage &id);
-
-	/** \brief decreases ref count of an animated image
-	*** \param id  image descriptor to decrease the reference count of
-	**/
-	void _DeleteImage(AnimatedImage &id);
-
-	/** \brief draws an image element, i.e. one image within an image descriptor which may contain multiple images
-	 *
-	 *  \note  this function takes an array of vertex colors. in cases where
-	 *         modulation is required, copy the element.color array and modulate
-	 *         it, else just pass element.color as this argument.
-	 *
-	 *  \param element        pointer to the image element to draw
-	 *  \param color_array    pointer to an 4 element array of vertex colors,
-	 *                        modulated if necessary
-	 */
-	void _DrawElement(const private_video::BaseImageElement &element, const Color *color_array);
-
-	/** \brief helper function to DrawImage() to do the actual work of doing an image
-	 *
-	 *  \param img static image to draw
-	 */
-	void _DrawStillImage(const ImageListDescriptor &img);
-
-	/** \brief helper function to DrawImage() to do the actual work of drawing an image
-	 *
-	 *  \param img static image to draw
-	 *  \param color color to modulate image by
-	 */
-	void _DrawStillImage(const ImageListDescriptor &img, const Color &color);
-
 	/** \brief does the actual work of drawing text
 	 *
 	 *  \param uText  Pointer to a unicode string holding the text to draw
@@ -1159,115 +991,6 @@ private:
 	 * \return the shadow color
 	 */
 	Color _GetTextShadowColor(FontProperties *fp);
-
-	/** \brief loads an image
-	 *
-	 *  \param id  image descriptor to load. Can specify filename, color, width, height, and static as its parameters
-	 * \return success/failure
-	 */
-	bool _LoadImage(StillImage &id);
-
-	/** \brief loads an animated image. Assumes that you have called AddFrame for all the frames.
-	 *
-	 *  \param id  image descriptor to load
-	 * \return success/failure
-	 */
-	bool _LoadImage(AnimatedImage &id);
-
-	/** \brief does the actual work of loading an image
-	 *
-	 *  \param id  StillImage of the image to load. May specify a filename, color, width, height, and static
-	 * \return success/failure
-	 */
-	bool _LoadImageHelper(StillImage &id);
-
-	/** \brief Decrements the reference count of a TextImage
-	 *   and deletes from set if necessary.
-	 *
-	 *  \param img The pointer (and key of the set)
-	 */
-	bool _RemoveImage(TextImage *img);
-
-	/** \brief Decrements the reference count of an Image
-	 *   of the base class and deletes from storage if necessary.
-	 *
-	 *  \param base_img The pointer (and key of the set/map)
-	 */
-	bool _RemoveImage(private_video::BaseImage *base_image);
-
-	/** \brief Loads an image file in several StillImages
-	 *  \param images Vector of StillImages to be loaded
-	 *  \param file_name Name of the image file to read
-	 *  \param rows Number of rows of StillImages
-	 *  \param cols Number of columns of StillImages
-	 */
-	bool _LoadMultiImage (std::vector <StillImage>& images, const std::string &file_name, const uint32& rows, const uint32& cols);
-
-	/** \brief Load raw image data from a file
-	 *
-	 *  \param file_name   Filename of image to load
-	 *  \param load_info   Returns with the image file attributes and pixels
-	 * \return success/failure
-	 */
-	bool _LoadRawImage(const std::string & file_name, private_video::ImageLoadInfo & load_info);
-
-	/** \brief Load raw image data from a JPG file
-	 *
-	 *  \param file_name   Filename of image to load
-	 *  \param load_info   Returns with the image file attributes and pixels
-	 * \return success/failure
-	 */
-	bool _LoadRawImageJpeg(const std::string & file_name, private_video::ImageLoadInfo & load_info);
-
-	/** \brief Load raw image data from a PNG file
-	 *
-	 *  \param file_name   Filename of image to load
-	 *  \param load_info   Returns with the image file attributes and pixels
-	 * \return success/failure
-	 */
-	bool _LoadRawImagePng(const std::string & file_name, private_video::ImageLoadInfo & load_info);
-
-	/*! \brief Saves Raw data in a Png file
-	 *	\param file_name Name of the file, without the extension
-	 *	\param info Structure of the information to store
-	 *	\return True if the process was carried out with no problem, false otherwise
-	 */
-	bool _SavePng(const std::string& file_name, hoa_video::private_video::ImageLoadInfo &info) const;
-
-	/*! \brief Saves Raw data in a Jpeg file
-	 *	\param file_name Name of the file, without the extension
-	 *	\param info Structure of the information to store
-	 *	\return True if the process was carried out with no problem, false otherwise
-	 */
-	bool _SaveJpeg(const std::string& file_name, hoa_video::private_video::ImageLoadInfo &info) const;
-
-	/*! \brief Get information of a Png file
-	 *	\param file_name Name of the file, without the extension
-	 *	\param rows Rows of the image
-	 *	\param cols Columns of the image
-	 *	\param bpp Bits per pixel of the image
-	 *	\return True if the process was carried out with no problem, false otherwise
-	 */
-	bool _GetImageInfoPng(const std::string& file_name, uint32& rows, uint32& cols, uint32& bpp);
-
-	/*! \brief Get information of a Jpeg file
-	 *	\param file_name Name of the file, without the extension
-	 *	\param rows Rows of the image
-	 *	\param cols Columns of the image
-	 *	\param bpp Bits per pixel of the image
-	 *	\return True if the process was carried out with no problem, false otherwise
-	 */
-	bool _GetImageInfoJpeg(const std::string& file_name, uint32& rows, uint32& cols, uint32& bpp);
-
-
-
-	/** \brief removes the image from the STL map with the same pointer as the one passed in. Returns false on failure
-	 *
-	 *  \param image_to_remove   pointer to the image we want to remove
-	 * \return success/failure
-	 */
-
-	bool _RemoveImage(private_video::Image *image_to_remove);
 
 	/** \brief Rounds a force value to the nearest integer based on probability. 
 	*** \param force  The force to round
@@ -1295,14 +1018,13 @@ private:
 	**/
 	void _UpdateShake(uint32 frame_time);
 
-	//! Whether textures should be smoothed for non natural resolution.
+	//! \brief Returns true if textures should be smoothed (used for non natural screen resolutions)
 	bool _ShouldSmooth()
 		{ return ( _screen_width != VIDEO_STANDARD_RES_WIDTH || _screen_height != VIDEO_STANDARD_RES_HEIGHT); }
 
-	/**
-	 *  \brief function solely for debugging, which shows number of texture switches made during a frame,
-	 *         and other statistics useful for performance tweaking, etc.
-	 */
+	/** \brief Shows graphical statistics useful for performance tweaking
+	*** This includes, for instance, the number of texture switches made during a frame.
+	**/
 	void _DEBUG_ShowAdvancedStats();
 }; // class GameVideo : public hoa_utils::Singleton<GameVideo>
 

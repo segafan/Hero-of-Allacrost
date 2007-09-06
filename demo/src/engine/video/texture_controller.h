@@ -23,6 +23,7 @@
 #include "defs.h"
 #include "utils.h"
 #include "texture.h"
+#include "image_base.h"
 
 // OpenGL includes
 #ifdef __APPLE__
@@ -41,9 +42,12 @@ extern TextureController* TextureManager;
 class TextureController : public hoa_utils::Singleton<TextureController> {
 	friend class hoa_utils::Singleton<TextureController>;
 	friend class GameVideo;
-	friend class private_video::ImageLoadInfo;
+	friend class private_video::ImageMemory;
+	friend class ImageDescriptor;
 	friend class StillImage;
-	friend class TextImage;
+	friend class private_video::ImageTexture;
+	friend class private_video::TextImageTexture;
+	friend class private_video::BaseImageElement;
 	friend class RenderedText;
 	friend class private_video::TexSheet;
 	friend class private_video::FixedTexMemMgr;
@@ -88,10 +92,10 @@ private:
 	std::vector<private_video::TexSheet*> _tex_sheets;
 
 	//! \brief A STL map containing all of the images currently being managed by this class
-	std::map<std::string, private_video::Image*> _images;
+	std::map<std::string, private_video::ImageTexture*> _images;
 
 	//! \brief A STL set containing all of the text images currently being managed by this class
-	std::set<TextImage*> _text_images;
+	std::set<private_video::TextImageTexture*> _text_images;
 
 	//! \brief An index to _tex_sheets of the current texture sheet being shown in debug mode. -1 indicates no sheet
 	int32 _debug_current_sheet;
@@ -163,7 +167,7 @@ private:
 	*** compatible texture sheets. Second, if the image is very large (either height or width of the image exceeds 512 pixels), it will
 	*** merit having its own un-shared texture sheet.
 	**/
-	private_video::TexSheet* _InsertImageInTexSheet(private_video::BaseImage* image, private_video::ImageLoadInfo& load_info, bool is_static);
+	private_video::TexSheet* _InsertImageInTexSheet(private_video::BaseImageTexture* image, private_video::ImageMemory& load_info, bool is_static);
 
 	/** \brief Iterate through all currently loaded images and if they belong to the specified TexSheet, reload them into it
 	*** \param sheet A pointer to the TexSheet whose images we wish to reload
@@ -179,18 +183,18 @@ private:
 
 	//! \name Text Image Operations
 	//@{
-	/** \brief Determines if a TextImage is already registered and maintainted by the texture controller
-	*** \param img A pointer to the TextImage to check for
-	*** \return True if the TextImage is already registered, false if it is not
+	/** \brief Determines if a TextImageTexture is already registered and maintainted by the texture controller
+	*** \param img A pointer to the TextImageTexture to check for
+	*** \return True if the TextImageTexture is already registered, false if it is not
 	**/
-	bool _IsTextImageRegistered(TextImage* img)
+	bool _IsTextImageRegistered(private_video::TextImageTexture* img)
 		{ if (_text_images.find(img) == _text_images.end()) return false; else return true; }
 
-	/** \brief Registers a TextImage to be managed by the internal set
-	*** \param img A pointer to the TextImage to register
-	*** \note The function make sure that it does not register any TextImage more than once
+	/** \brief Registers a TextImageTexture to be managed by the internal set
+	*** \param img A pointer to the TextImageTexture to register
+	*** \note The function make sure that it does not register any TextImageTexture more than once
 	**/
-	void _RegisterTextImage(TextImage* img);
+	void _RegisterTextImage(private_video::TextImageTexture* img);
 	//@}
 
 	/** \brief Displays the currently selected texture sheet.

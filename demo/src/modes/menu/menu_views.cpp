@@ -52,8 +52,6 @@ CharacterWindow::CharacterWindow() : _char_id(GLOBAL_CHARACTER_INVALID) {
 
 
 CharacterWindow::~CharacterWindow() {
-	// Delete the character's portrait
-	VideoManager->DeleteImage(_portrait);
 }
 
 
@@ -61,10 +59,8 @@ CharacterWindow::~CharacterWindow() {
 void CharacterWindow::SetCharacter(GlobalCharacter *character) {
 	_char_id = character->GetID();
 
-	_portrait.SetFilename("img/portraits/map/" + character->GetFilename() + ".png");
 	_portrait.SetStatic(true);
-	_portrait.SetDimensions(100, 100);
-	VideoManager->LoadImage(_portrait);
+	_portrait.Load("img/portraits/map/" + character->GetFilename() + ".png", 100, 100);
 } // void CharacterWindow::SetCharacter(GlobalCharacter *character)
 
 
@@ -90,7 +86,7 @@ void CharacterWindow::Draw() {
 
 	//Draw character portrait
 	VideoManager->Move(x + 12, y + 8);
-	VideoManager->DrawImage(_portrait);
+	_portrait.Draw();
 
 	// Write character name
 	VideoManager->MoveRelative(150, 0);
@@ -464,10 +460,8 @@ StatusWindow::StatusWindow() : _char_select_active(false) {
 	// Set up the full body portrait
 	for (uint32 i = 0; i < partysize; i++) {
 		ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(i));
-		portrait.SetFilename("img/portraits/menu/" + ch->GetFilename() + "_large.png");
 		portrait.SetStatic(true);
-		portrait.SetDimensions(150, 350);
-		VideoManager->LoadImage(portrait);
+		portrait.Load("img/portraits/menu/" + ch->GetFilename() + "_large.png", 150, 350);
 		_full_portraits.push_back(portrait);
 	}
 
@@ -479,10 +473,6 @@ StatusWindow::StatusWindow() : _char_select_active(false) {
 
 StatusWindow::~StatusWindow() {
 	uint32 partysize = GlobalManager->GetActiveParty()->GetPartySize();
-
-	for (uint32 i = 0; i < partysize; i++) {
-		VideoManager->DeleteImage(_full_portraits[i]);
-	}
 }
 
 // Activate/deactivate window
@@ -616,7 +606,7 @@ void StatusWindow::Draw() {
 	//Draw character full body portrait
 	VideoManager->Move(735, 145);
 
-	VideoManager->DrawImage(_full_portraits[_char_select.GetSelection()]);
+	_full_portraits[_char_select.GetSelection()].Draw();
 
 	_char_select.Draw();
 } // void StatusWindow::Draw()
@@ -909,34 +899,25 @@ EquipWindow::EquipWindow() : _active_box(EQUIP_ACTIVE_NONE) {
 	StillImage i;
 	GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
 
-	i.SetFilename(ch->GetWeaponEquipped()->GetIconImage().GetFilename());
+	i.Load(ch->GetWeaponEquipped()->GetIconImage().GetFilename(), 60, 60);
 	_equip_images.push_back(i);
 
-	i.SetFilename(ch->GetHeadArmorEquipped()->GetIconImage().GetFilename());
+	i.Load(ch->GetHeadArmorEquipped()->GetIconImage().GetFilename(), 60, 60);
 	_equip_images.push_back(i);
 
-	i.SetFilename(ch->GetTorsoArmorEquipped()->GetIconImage().GetFilename());
+	i.Load(ch->GetTorsoArmorEquipped()->GetIconImage().GetFilename(), 60, 60);
 	_equip_images.push_back(i);
 
-	i.SetFilename(ch->GetArmArmorEquipped()->GetIconImage().GetFilename());
+	i.Load(ch->GetArmArmorEquipped()->GetIconImage().GetFilename(), 60, 60);
 	_equip_images.push_back(i);
 
-	i.SetFilename(ch->GetLegArmorEquipped()->GetIconImage().GetFilename());
+	i.Load(ch->GetLegArmorEquipped()->GetIconImage().GetFilename(), 60, 60);
 	_equip_images.push_back(i);
-
-	for (uint32 i = 0; i < EQUIP_CATEGORY_SIZE; i++) {
-		_equip_images[i].SetDimensions(60, 60);
-		VideoManager->LoadImage(_equip_images[i]);
-	}
-
 }
 
 
 
 EquipWindow::~EquipWindow() {
-	for (uint32 i = 0; i < EQUIP_CATEGORY_SIZE; i++) {
-		VideoManager->DeleteImage(_equip_images[i]);
-	}
 }
 
 
@@ -1232,25 +1213,20 @@ void EquipWindow::_UpdateEquipList() {
 		_equip_images.clear();
 		StillImage i;
 
-		i.SetFilename(ch->GetWeaponEquipped()->GetIconImage().GetFilename());
+		i.Load(ch->GetWeaponEquipped()->GetIconImage().GetFilename(), 60, 60);
 		_equip_images.push_back(i);
 
-		i.SetFilename(ch->GetHeadArmorEquipped()->GetIconImage().GetFilename());
+		i.Load(ch->GetHeadArmorEquipped()->GetIconImage().GetFilename(), 60, 60);
 		_equip_images.push_back(i);
 
-		i.SetFilename(ch->GetTorsoArmorEquipped()->GetIconImage().GetFilename());
+		i.Load(ch->GetTorsoArmorEquipped()->GetIconImage().GetFilename(), 60, 60);
 		_equip_images.push_back(i);
 
-		i.SetFilename(ch->GetArmArmorEquipped()->GetIconImage().GetFilename());
+		i.Load(ch->GetArmArmorEquipped()->GetIconImage().GetFilename(), 60, 60);
 		_equip_images.push_back(i);
 
-		i.SetFilename(ch->GetLegArmorEquipped()->GetIconImage().GetFilename());
+		i.Load(ch->GetLegArmorEquipped()->GetIconImage().GetFilename(), 60, 60);
 		_equip_images.push_back(i);
-
-		for (uint32 i = 0; i < EQUIP_CATEGORY_SIZE; i++) {
-			_equip_images[i].SetDimensions(60, 60);
-			VideoManager->LoadImage(_equip_images[i]);
-		}
 
 		// Now, update the NAMES of the equipped items
 
@@ -1315,7 +1291,7 @@ void EquipWindow::Draw() {
 
 		for (uint32 i = 0; i < _equip_images.size(); i++) {
 			VideoManager->MoveRelative(0.0f, 70.0f);
-			VideoManager->DrawImage(_equip_images[i]);
+			_equip_images[i].Draw();
 		}
 	}
 

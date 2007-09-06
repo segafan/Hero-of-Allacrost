@@ -88,15 +88,11 @@ MapMode::MapMode(string filename) :
 
 	// TEMP: Load dialogue icon
 	if (private_map::new_dialogue_icon.GetNumFrames() == 0) {
-		std::vector<StillImage> frames;
-		VideoManager->LoadMultiImageFromElementsSize(frames, "img/misc/dialogue_icon.png", 32, 32);
-
-		for( size_t i = 0; i < frames.size(); ++i ) {
-			private_map::new_dialogue_icon.AddFrame(frames[i], 100);
-		}
-
 		private_map::new_dialogue_icon.SetDimensions(2, 2);
-		private_map::new_dialogue_icon.Load();
+		std::vector<uint32> timings(16, 100);
+
+		if (private_map::new_dialogue_icon.LoadFromFrameSize("img/misc/dialogue_icon.png", timings, 32, 32) == false)
+			IF_PRINT_WARNING(MAP_DEBUG) << "new dialogue icon load failure" << endl;
 	}
 }
 
@@ -170,8 +166,7 @@ void MapMode::_Load() {
 	}
 	
 	_map_name = MakeUnicodeString(_map_script.ReadString("map_name"));
-	_location_graphic.SetFilename("img/menus/locations/" + _map_script.ReadString("location_filename"));
-	if (_location_graphic.Load() == false) {
+	if (_location_graphic.Load("img/menus/locations/" + _map_script.ReadString("location_filename")) == false) {
 		cerr << "MAP ERROR: failed to load location graphic image: " << _location_graphic.GetFilename() << endl;
 	}
 
@@ -285,7 +280,7 @@ void MapMode::_LoadTiles() {
 			tileset_images[i][j].SetDimensions(2.0f, 2.0f);
 		}
 
-		if (VideoManager->LoadMultiImageFromNumberElements(tileset_images[i], image_filename, 16, 16) == false) {
+		if (ImageDescriptor::LoadMultiImageFromElementGrid(tileset_images[i], image_filename, 16, 16) == false) {
 			cerr << "MAP ERROR: MapMode::_LoadTiles() failed to load tileset image:" << image_filename << endl;
 			return;
 		}
@@ -1221,7 +1216,7 @@ void MapMode::_DrawGUI() {
 		VideoManager->SetCoordSys(0.0f, 1024.0f, 768.0f, 0.0f);
 		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 		VideoManager->Move(512.0f, 100.0f);
-		VideoManager->DrawImage(_location_graphic, blend);
+		_location_graphic.Draw(blend);
 		VideoManager->MoveRelative(0.0f, -80.0f);
 		VideoManager->SetTextColor(blend);
 		VideoManager->DrawText(_map_name);

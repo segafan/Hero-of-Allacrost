@@ -93,9 +93,6 @@ QuitMode::QuitMode() {
 // The destructor might possibly have to free any text textures we create...
 QuitMode::~QuitMode() {
 	if (QUIT_DEBUG) cout << "QUIT: QuitMode destructor invoked" << endl;
-
-	// Delete the background image
-	VideoManager->DeleteImage(_saved_screen);
 }
 
 
@@ -178,7 +175,7 @@ void QuitMode::Draw() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 	Color grayed(0.35f, 0.35f, 0.35f, 1.0f);
 	VideoManager->Move(0, 0);
-	VideoManager->DrawImage(_saved_screen, grayed);
+	_saved_screen.Draw(grayed);
 
 	// Draw the quit menu
 	// Restore the Coordinate system (that one is quit mode coodinate system)
@@ -186,7 +183,7 @@ void QuitMode::Draw() {
 
 	VideoManager->Move(512, 384);
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
-	VideoManager->DrawImage(_quit_menu);
+	_quit_menu.Draw();
 
 	_option_box.Draw();
 }

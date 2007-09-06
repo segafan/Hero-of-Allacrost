@@ -218,9 +218,9 @@ void OptionBox::Draw() {
 
 						if (image_index >= 0 && image_index < static_cast<int32>(op.images.size())) {
 							if (op.disabled)
-								VideoManager->DrawImage(op.images[image_index], Color::gray);
+								op.images[image_index].Draw(Color::gray);
 							else
-								VideoManager->DrawImage(op.images[image_index], Color::white);
+								op.images[image_index].Draw(Color::white);
 
 							float width = op.images[image_index].GetWidth();
 							float edge = x - bounds.x_left; // edge value for VIDEO_X_LEFT
@@ -292,7 +292,7 @@ void OptionBox::Draw() {
 				StillImage *default_cursor = VideoManager->GetDefaultCursor();
 
 				if (default_cursor)
-					VideoManager->DrawImage(*default_cursor, Color::white);
+					default_cursor->Draw(Color::white);
 			}
 
 			// Check if this is the index where we should draw the selection cursor icon, if it is visible
@@ -303,7 +303,7 @@ void OptionBox::Draw() {
 				StillImage *default_cursor = VideoManager->GetDefaultCursor();
 
 				if (default_cursor)
-					VideoManager->DrawImage(*default_cursor, Color::white);
+					default_cursor->Draw(Color::white);
 			}
 
 			bounds.x_left += xoff;
@@ -326,13 +326,6 @@ void OptionBox::Draw() {
 
 
 void OptionBox::ClearOptions() {
-	// Before deleting the options, deallocate any images that are stored by them
-	for(int32 j = 0; j < static_cast<int32>(_options.size()); ++j) {
-		for(int32 i = 0; i < static_cast<int32>(_options[j].images.size()); ++i) {
-			VideoManager->DeleteImage(_options[j].images[i]);
-		}
-	}
-
 	_options.clear();
 }
 
@@ -689,16 +682,14 @@ bool OptionBox::_ConstructOption(const ustring& format_string, Option& op) {
 				}
 				else { // Then this must be an image tag
 					StillImage imd;
-					imd.SetFilename(tag_text);
-
-					if (VideoManager->LoadImage(imd) == false) {
+					if (imd.Load(tag_text) == false) {
 						if (VIDEO_DEBUG)
 							cerr << "VIDEO ERROR: OptionBox::_ConstructOption failed because of an invalid image tag: "
 								<< MakeStandardString(format_string) << endl;
 						return false;
 					}
 					new_element.type  = VIDEO_OPTION_ELEMENT_IMAGE;
-					new_element.value = static_cast<int32> (op.images.size());
+					new_element.value = static_cast<int32>(op.images.size());
 					op.images.push_back(imd);
 				}
 			}

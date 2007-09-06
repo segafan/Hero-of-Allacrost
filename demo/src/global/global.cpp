@@ -576,14 +576,14 @@ uint32 GameGlobal::GetNumberEvents(const string& group_name) const {
 void GameGlobal::SetLocation(const hoa_utils::ustring& location_name, const std::string& location_graphic_filename) {
 	_location_name = location_name;
 
-	VideoManager->DeleteImage(_location_graphic);
-	_location_graphic.SetFilename(location_graphic_filename);
-	if (VideoManager->LoadImage(_location_graphic) == false) {
+	if (_location_graphic.Load(location_graphic_filename) == false) {
 		if (GLOBAL_DEBUG)
 			cerr << "GLOBAL WARNING: GameGlobal::SetLocation() failed to load location graphic"
 				<< location_graphic_filename << endl;
 	}
 }
+
+
 
 bool GameGlobal::SaveGame(string& filename) {
 	WriteScriptDescriptor file;
@@ -657,8 +657,7 @@ bool GameGlobal::LoadGame(const string& filename) {
 
 	// ----- (1) Load play data
 	_location_name = MakeUnicodeString(file.ReadString("location_name"));
-	_location_graphic.SetFilename(file.ReadString("location_graphic"));
-	if (_location_graphic.Load() == false) {
+	if (_location_graphic.Load(file.ReadString("location_graphic")) == false) {
 		if (GLOBAL_DEBUG)
 			cerr << "GLOBAL WARNING: GameGlobal::LoadGame() failed to load the location graphic: "
 				<< _location_graphic.GetFilename() << endl;

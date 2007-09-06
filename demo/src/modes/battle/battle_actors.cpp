@@ -88,9 +88,9 @@ void BattleActor::ConstructInformation(hoa_utils::ustring& info, int32 ap_index)
 void BattleActor::DrawStaminaIcon(bool is_selected) {
 	//if (IsAlive()) {
 		VideoManager->Move(995, _stamina_icon_location);
-		VideoManager->DrawImage(_stamina_icon);
+		_stamina_icon.Draw();
 		if (is_selected)
-			VideoManager->DrawImage(current_battle->_stamina_icon_selected);
+			current_battle->_stamina_icon_selected.Draw();
 	//}
 }
 
@@ -152,9 +152,7 @@ void BattleActor::TEMP_ResetAttackTimer() {
 BattleCharacter::BattleCharacter(GlobalCharacter* character, float x_origin, float y_origin) :
 	BattleActor(character, x_origin, y_origin)
 {
-	_stamina_icon.SetFilename("img/icons/actors/characters/" + character->GetFilename() + ".png");
-	_stamina_icon.SetDimensions(45,45);
-	if (VideoManager->LoadImage(_stamina_icon) == false)
+	if (_stamina_icon.Load("img/icons/actors/characters/" + character->GetFilename() + ".png", 45, 45) == false)
 		cerr << "oh noes" << endl;
 
 	_state = ACTOR_IDLE;
@@ -163,7 +161,6 @@ BattleCharacter::BattleCharacter(GlobalCharacter* character, float x_origin, flo
 
 
 BattleCharacter::~BattleCharacter() {
-	VideoManager->DeleteImage(_stamina_icon);
 }
 
 
@@ -192,7 +189,7 @@ void BattleCharacter::DrawSprite() {
 		// Draw the actor selector image if this character is currently selected
 		if (this == current_battle->_selected_character) {
 			VideoManager->Move(_x_location - 20.0f, _y_location - 20.0f);
-			VideoManager->DrawImage(current_battle->_actor_selection_image);
+			current_battle->_actor_selection_image.Draw();
 		}
 		// Draw the character sprite
 		VideoManager->Move(_x_location, _y_location);
@@ -200,7 +197,7 @@ void BattleCharacter::DrawSprite() {
 
 		if (this == current_battle->_selected_target) {
 			VideoManager->Move(_x_location - 20.0f, _y_location - 20.0f);
-			VideoManager->DrawImage(current_battle->_actor_selection_image);
+			current_battle->_actor_selection_image.Draw();
 		}
 
 		// TEMP: determine if character sprite needs red damage numbers drawn next to it
@@ -232,31 +229,31 @@ void BattleCharacter::DrawPortrait() {
 	float hp_percent =  static_cast<float>(GetActor()->GetHitPoints()) / static_cast<float>(GetActor()->GetMaxHitPoints());
 
 	if (GetActor()->GetHitPoints() == 0) {
-	  VideoManager->DrawImage(portrait_frames[4]);
+		portrait_frames[4].Draw();
 	}
 	// The blend alpha will range from 1.0 to 0.0 in the following calculations
 	else if (hp_percent < 0.25f) {
-		VideoManager->DrawImage(portrait_frames[4]);
+		portrait_frames[4].Draw();
 		float alpha = (hp_percent) * 4;
-		VideoManager->DrawImage(portrait_frames[3], Color(1.0f, 1.0f, 1.0f, alpha));
+		portrait_frames[3].Draw(Color(1.0f, 1.0f, 1.0f, alpha));
 	}
   else if (hp_percent < 0.50f) {
-		VideoManager->DrawImage(portrait_frames[3]);
+		portrait_frames[3].Draw();
 		float alpha = (hp_percent - 0.25f) * 4;
-		VideoManager->DrawImage(portrait_frames[2], Color(1.0f, 1.0f, 1.0f, alpha));
+		portrait_frames[2].Draw(Color(1.0f, 1.0f, 1.0f, alpha));
 	}
 	else if (hp_percent < 0.75f) {
-		VideoManager->DrawImage(portrait_frames[2]);
+		portrait_frames[2].Draw();
 		float alpha = (hp_percent - 0.50f) * 4;
-		VideoManager->DrawImage(portrait_frames[1], Color(1.0f, 1.0f, 1.0f, alpha));
+		portrait_frames[1].Draw(Color(1.0f, 1.0f, 1.0f, alpha));
 	}
 	else if (hp_percent < 1.00f) {
-		VideoManager->DrawImage(portrait_frames[1]);
+		portrait_frames[1].Draw();
 		float alpha = (hp_percent - 0.75f) * 4;
-		VideoManager->DrawImage(portrait_frames[0], Color(1.0f, 1.0f, 1.0f, alpha));
+		portrait_frames[0].Draw(Color(1.0f, 1.0f, 1.0f, alpha));
 	}
 	else { // Character is at full health
-		VideoManager->DrawImage(portrait_frames[0]);
+		portrait_frames[0].Draw();
 	}
 } // void BattleCharacter::DrawPortrait()
 
@@ -283,7 +280,7 @@ void BattleCharacter::DrawStatus() {
 	// Draw the highlighted background if the character is selected
 	if (current_battle->_selected_character == this) {
 		VideoManager->Move(149, 84.0f + y_offset);
-		VideoManager->DrawImage(current_battle->_character_selection);
+		current_battle->_character_selection.Draw();
 	}
 
 	// Draw the character's name
@@ -320,7 +317,7 @@ void BattleCharacter::DrawStatus() {
 		// Draw the cover image over the top of the bar
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 		VideoManager->Move(293.0f, 84.0f + y_offset);
-		VideoManager->DrawImage(current_battle->_character_bars);
+		current_battle->_character_bars.Draw();
 
 		VideoManager->SetDrawFlags(VIDEO_X_CENTER, 0);
 		// Draw the character's current health on top of the middle of the HP bar
@@ -340,9 +337,7 @@ void BattleCharacter::DrawStatus() {
 BattleEnemy::BattleEnemy(GlobalEnemy* enemy, float x_origin, float y_origin) :
 	BattleActor(enemy, x_origin, y_origin)
 {
-	_stamina_icon.SetFilename("img/icons/actors/enemies/" + _actor->GetFilename() + ".png");
-	_stamina_icon.SetDimensions(45,45);
-	if (VideoManager->LoadImage(_stamina_icon) == false)
+	if (_stamina_icon.Load("img/icons/actors/enemies/" + _actor->GetFilename() + ".png", 45, 45) == false)
 		cerr << "oh noes" << endl;
 
 	_state = ACTOR_IDLE;
@@ -351,8 +346,6 @@ BattleEnemy::BattleEnemy(GlobalEnemy* enemy, float x_origin, float y_origin) :
 
 
 BattleEnemy::~BattleEnemy() {
-	VideoManager->DeleteImage(_stamina_icon);
-
 	delete _actor;
 }
 
@@ -404,7 +397,7 @@ void BattleEnemy::DrawSprite() {
 	if (_state == ACTOR_DEAD) {
 		VideoManager->Move(_x_location, _y_location);
 		sprite_frames[3].EnableGrayScale();
-		VideoManager->DrawImage(sprite_frames[3]);
+		sprite_frames[3].Draw();
 		sprite_frames[3].DisableGrayScale();
 	}
 	else {
@@ -412,7 +405,7 @@ void BattleEnemy::DrawSprite() {
 		if (this == current_battle->_selected_target) {
 			VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 			VideoManager->Move(_x_location + GetActor()->GetSpriteWidth() / 2, _y_location - 25);
-			VideoManager->DrawImage(current_battle->_actor_selection_image);
+			current_battle->_actor_selection_image.Draw();
 			VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 		}
 
@@ -422,22 +415,22 @@ void BattleEnemy::DrawSprite() {
 
 		// Alpha will range from 1.0 to 0.0 in the following calculations
 		if (hp_percent < 0.33f) {
-			VideoManager->DrawImage(sprite_frames[3]);
+			sprite_frames[3].Draw();
 			float alpha = (hp_percent) * 3;
-			VideoManager->DrawImage(sprite_frames[2], Color(1.0f, 1.0f, 1.0f, alpha));
+			sprite_frames[2].Draw(Color(1.0f, 1.0f, 1.0f, alpha));
 		}
 		else if (hp_percent < 0.66f) {
-			VideoManager->DrawImage(sprite_frames[2]);
+			sprite_frames[2].Draw();
 			float alpha = (hp_percent - 0.33f) * 3;
-			VideoManager->DrawImage(sprite_frames[1], Color(1.0f, 1.0f, 1.0f, alpha));
+			sprite_frames[1].Draw(Color(1.0f, 1.0f, 1.0f, alpha));
 		}
 		else if (hp_percent < 1.00f) {
-			VideoManager->DrawImage(sprite_frames[1]);
+			sprite_frames[1].Draw();
 			float alpha = (hp_percent - 0.66f) * 3;
-			VideoManager->DrawImage(sprite_frames[0], Color (1.0f, 1.0f, 1.0f, alpha));
+			sprite_frames[0].Draw(Color (1.0f, 1.0f, 1.0f, alpha));
 		}
 		else { // Enemy is at full health
-			VideoManager->DrawImage(sprite_frames[0]);
+			sprite_frames[0].Draw();
 		}
 
 		// Draw the attack point indicator if necessary
@@ -448,7 +441,7 @@ void BattleEnemy::DrawSprite() {
 
 			VideoManager->Move(GetXLocation() + attack_points[current_battle->_selected_attack_point]->GetXPosition(),
 				GetYLocation() + attack_points[current_battle->_selected_attack_point]->GetYPosition());
-			VideoManager->DrawImage(current_battle->_attack_point_indicator);
+			current_battle->_attack_point_indicator.Draw();
 
 			// Reset default X and Y draw orientation
 			VideoManager->PopState();

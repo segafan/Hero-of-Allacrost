@@ -54,12 +54,10 @@ DialogueManager::DialogueManager() {
 // 	MenuWindow::SetPosition(0.0f, 512.0f);
 // 	MenuWindow::SetDisplayMode(VIDEO_MENU_EXPAND_FROM_CENTER);
 
-	_background_image.SetFilename("img/menus/dialogue_box.png");
-	if (_background_image.Load() == false)
+	if (_background_image.Load("img/menus/dialogue_box.png") == false)
 		cerr << "MAP ERROR: failed to load image: " << _background_image.GetFilename() << endl;
 
-	_nameplate_image.SetFilename("img/menus/dialogue_nameplate.png");
-	if (_nameplate_image.Load() == false)
+	if (_nameplate_image.Load("img/menus/dialogue_nameplate.png") == false)
 		cerr << "MAP ERROR: failed to load image: " << _nameplate_image.GetFilename() << endl;
 
 	_display_textbox.SetDisplaySpeed(30);
