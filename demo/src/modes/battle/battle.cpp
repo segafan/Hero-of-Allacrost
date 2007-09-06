@@ -74,61 +74,37 @@ BattleMode::BattleMode() :
 	_selected_character(NULL),
 	_selected_target(NULL),
 	_selected_attack_point(0),
+	_finish_window(NULL),
 	_current_number_swaps(0),
 	_swap_countdown_timer(300000), // 5 minutes
 	_min_agility(9999),
 	_active_action(NULL),
-	_next_monster_location_index(0),
-	_finish_window(NULL)
+	_next_monster_location_index(0)
 {
 	if (BATTLE_DEBUG)
 		cout << "BATTLE: BattleMode constructor invoked" << endl;
 
 	mode_type = MODE_MANAGER_BATTLE_MODE;
 
-	std::vector<hoa_video::StillImage> attack_point_indicator;
-	StillImage frame;
-	frame.SetDimensions(16, 16);
-	frame.SetFilename("img/icons/battle/ap_indicator_fr0.png");
-	attack_point_indicator.push_back(frame);
-	frame.SetFilename("img/icons/battle/ap_indicator_fr1.png");
-	attack_point_indicator.push_back(frame);
-	frame.SetFilename("img/icons/battle/ap_indicator_fr2.png");
-	attack_point_indicator.push_back(frame);
-	frame.SetFilename("img/icons/battle/ap_indicator_fr3.png");
-	attack_point_indicator.push_back(frame);
-
-	_stamina_icon_selected.SetDimensions(45,45);
-	_stamina_icon_selected.SetFilename("img/menus/stamina_icon_selected.png");
-	if (VideoManager->LoadImage(_stamina_icon_selected) == false)
+	if (_stamina_icon_selected.Load("img/menus/stamina_icon_selected.png", 45, 45) == false)
 		cerr << "BATTLE ERROR: Failed to load stamina icon selected image" << endl;
 
-	for (uint32 i = 0; i < attack_point_indicator.size(); i++) {
-		if (!VideoManager->LoadImage(attack_point_indicator[i]))
-			cerr << "BATTLE ERROR: Failed to load attack point indicator." << endl;
-	}
-
-	for (uint32 i = 0; i < attack_point_indicator.size(); i++) {
-		_attack_point_indicator.AddFrame(attack_point_indicator[i], 10);
+	if (_attack_point_indicator.LoadFromFrameSize("img/icons/battle/attack_point_target.png", vector<uint32>(4, 10), 16, 16) == false) {
+		cerr << "BATTLE ERROR: Failed to load attack point indicator." << endl;
 	}
 
 	//Load the universal time meter image
-	_stamina_meter.SetDimensions(10, 512);
-	_stamina_meter.SetFilename("img/menus/stamina_bar.png");
-	if (!VideoManager->LoadImage(_stamina_meter))
+	if (_stamina_meter.Load("img/menus/stamina_bar.png", 10, 512) == false)
 		cerr << "BATTLE ERROR: Failed to load time meter." << endl;
 
 	_actor_selection_image.SetDimensions(109, 78);
-	_actor_selection_image.SetFilename("img/icons/battle/character_selector.png");
-	if (!VideoManager->LoadImage(_actor_selection_image))
+	if (_actor_selection_image.Load("img/icons/battle/character_selector.png") == false)
 		cerr << "BATTLE ERROR: Unable to load player selector image." << endl;
 
-	_character_selection.SetFilename("img/menus/battle_character_selection.png");
-	if (VideoManager->LoadImage(_stamina_meter) == false)
+	if (_character_selection.Load("img/menus/battle_character_selection.png") == false)
 		cerr << "BATTLE ERROR: Failed to load character selection image" << endl;
 
-	_character_bars.SetFilename("img/menus/battle_character_bars.png");
-	if (VideoManager->LoadImage(_character_bars) == false)
+	if (_character_bars.Load("img/menus/battle_character_bars.png") == false)
 		cerr << "BATTLE ERROR: Failed to load character bars image" << endl;
 
 	_action_window = new ActionWindow();
@@ -166,15 +142,6 @@ BattleMode::~BattleMode() {
 		delete *i;
 	}
 	_action_queue.clear();
-
-	// Remove all of the battle images that were loaded
-	VideoManager->DeleteImage(_battle_background);
-	VideoManager->DeleteImage(_bottom_menu_image);
-	VideoManager->DeleteImage(_actor_selection_image);
-	VideoManager->DeleteImage(_attack_point_indicator);
-	VideoManager->DeleteImage(_swap_icon);
-	VideoManager->DeleteImage(_swap_card);
-	VideoManager->DeleteImage(_stamina_meter);
 
 	// Delete all GUI objects that are allocated
 	delete(_action_window);
@@ -262,30 +229,22 @@ void BattleMode::AddMusic(const string& music_filename) {
 
 void BattleMode::_TEMP_LoadTestData() {
 	// Load all background images
-	_battle_background.SetFilename("img/backdrops/battle/desert_cave.png");
-	_battle_background.SetDimensions(SCREEN_LENGTH * TILE_SIZE, SCREEN_HEIGHT * TILE_SIZE);
-	if (!VideoManager->LoadImage(_battle_background)) {
+	if (_battle_background.Load("img/backdrops/battle/desert_cave.png", SCREEN_LENGTH * TILE_SIZE, SCREEN_HEIGHT * TILE_SIZE) == false) {
 		cerr << "BATTLE ERROR: Failed to load background image: " << endl;
 		_ShutDown();
 	}
 
-	_bottom_menu_image.SetFilename("img/menus/battle_bottom_menu.png");
-	_bottom_menu_image.SetDimensions(1024, 128);
-	if (!VideoManager->LoadImage(_bottom_menu_image)) {
+	if (_bottom_menu_image.Load("img/menus/battle_bottom_menu.png", 1024, 128) == false) {
 		cerr << "BATTLE ERROR: Failed to load bottom menu image: " << endl;
 		_ShutDown();
 	}
 
-	_swap_icon.SetFilename("img/icons/battle/swap_icon.png");
-	_swap_icon.SetDimensions(35, 30);
-	if (!VideoManager->LoadImage(_swap_icon)) {
+	if (_swap_icon.Load("img/icons/battle/swap_icon.png", 35, 30) == false) {
 		cerr << "BATTLE ERROR: Failed to load swap icon: " << endl;
 		_ShutDown();
 	}
 
-	_swap_card.SetFilename("img/icons/battle/swap_card.png");
-	_swap_card.SetDimensions(25, 37);
-	if (!VideoManager->LoadImage(_swap_card)) {
+	if (_swap_card.Load("img/icons/battle/swap_card.png", 25, 37) == false) {
 		cerr << "BATTLE ERROR: Failed to load swap card: " << endl;
 		_ShutDown();
 	}
@@ -509,7 +468,7 @@ void BattleMode::_DrawBackgroundVisuals() {
 	// Draw the full-screen, static background image
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_NO_BLEND, 0);
 	VideoManager->Move(0, 0);
-	VideoManager->DrawImage(_battle_background);
+	_battle_background.Draw();
 
 	// TODO: Draw other background objects and animations
 } // void BattleMode::_DrawBackgroundVisuals()
@@ -520,14 +479,14 @@ void BattleMode::_DrawBottomMenu() {
 	// Draw the static image for the lower menu
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
 	VideoManager->Move(0, 0);
-	VideoManager->DrawImage(_bottom_menu_image);
+	_bottom_menu_image.Draw();
 
 	// Draw the swap icon and any swap cards
 	VideoManager->Move(6, 16);
-	VideoManager->DrawImage(_swap_icon, Color::gray);
+	_swap_icon.Draw(Color::gray);
 	VideoManager->Move(6, 68);
 	for (uint8 i = 0; i < _current_number_swaps; i++) {
-		VideoManager->DrawImage(_swap_card);
+		_swap_card.Draw();
 		VideoManager->MoveRelative(4, -4);
 	}
 
@@ -566,7 +525,7 @@ void BattleMode::_DrawStaminaBar() {
 	// ----- (1): Draw the stamina bar
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 	VideoManager->Move(1010, 128);
-	VideoManager->DrawImage(_stamina_meter);
+	_stamina_meter.Draw();
 
 	// ----- (2): Determine the draw order of all stamina icons and whether or not they are selected
 	GLOBAL_TARGET target_type = _action_window->GetActionTargetType();

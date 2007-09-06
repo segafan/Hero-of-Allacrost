@@ -57,16 +57,13 @@ ActionWindow::ActionWindow() {
 
 	// NOTE: may need to set the dimensions of these images to 45, 45
 	_action_category_icons.resize(4);
-	_action_category_icons[0].SetFilename("img/icons/battle/attack.png");
-	_action_category_icons[1].SetFilename("img/icons/battle/defend.png");
-	_action_category_icons[2].SetFilename("img/icons/battle/support.png");
-	_action_category_icons[3].SetFilename("img/icons/battle/item.png");
-	for (uint32 i = 0; i < 4; i++) {
-		if (VideoManager->LoadImage(_action_category_icons[i]) == false) {
-			cerr << "BATTLE ERROR: In ActionWindow constructor, failed to load action category icon: "
-				<< _action_category_icons[i].GetFilename() << endl;
-			return;
-		}
+	bool success = true;
+	success &= _action_category_icons[0].Load("img/icons/battle/attack.png");
+	success &= _action_category_icons[1].Load("img/icons/battle/defend.png");
+	success &= _action_category_icons[2].Load("img/icons/battle/support.png");
+	success &= _action_category_icons[3].Load("img/icons/battle/item.png");
+	if (success == false) {
+		cerr << "BATTLE ERROR: In ActionWindow constructor, failed to load an action category icon" << endl;
 	}
 
 	// Setup options for VIEW_ACTION_CATEGORY
@@ -128,10 +125,6 @@ ActionWindow::ActionWindow() {
 
 ActionWindow::~ActionWindow() {
 	MenuWindow::Destroy();
-
-	for (uint32 i = 0; i < _action_category_icons.size(); i++) {
-		VideoManager->DeleteImage(_action_category_icons[i]);
-	}
 }
 
 
@@ -381,7 +374,7 @@ void ActionWindow::_DrawActionSelection() {
 	// Draw the selected action category and name
 	VideoManager->Move(570.0f, 80.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
-	VideoManager->DrawImage(_action_category_icons[_selected_action_category]);
+	_action_category_icons[_selected_action_category].Draw();
 	VideoManager->MoveRelative(0.0f, -40.0f);
 	VideoManager->SetDrawFlags(VIDEO_Y_CENTER, 0);
 
@@ -658,10 +651,7 @@ FinishWindow::FinishWindow() {
 	_lose_options.SetSelection(0);
 	_lose_options.SetOwner(this);
 
-	_char_portraits[0].SetFilename("img/portraits/map/claudius.png");
-	_char_portraits[0].SetDimensions(130.0f, 130.0f);
-
-	VideoManager->LoadImage(_char_portraits[0]);
+	_char_portraits[0].Load("img/portraits/map/claudius.png", 130.0f, 130.0f);
 }
 
 
@@ -674,8 +664,6 @@ FinishWindow::~FinishWindow() {
 
 	_xp_and_money_window.Destroy();
 	_items_window.Destroy();
-
-	VideoManager->DeleteImage(_char_portraits[0]);
 
 	//MenuWindow::Destroy();
 }
@@ -1031,7 +1019,7 @@ void FinishWindow::Draw() {
 
 
 void FinishWindow::_DrawAnnounceWin() {
-	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 	VideoManager->Move(512.0f, 384.0f);
 	VideoManager->DrawText("MAJOR PWNAGE!!!!");
 }
@@ -1040,12 +1028,12 @@ void FinishWindow::_DrawAnnounceWin() {
 
 void FinishWindow::_DrawWinGrowth() {
 	//Draw XP Earned
-	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 	VideoManager->Move(496, 683);
 	VideoManager->DrawText(MakeUnicodeString("XP Gained: ") + MakeUnicodeString(NumberToString(_victory_xp)));
 
 	//Now draw char info
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, 0);
 	//VideoManager->Move(80, 580);
 	VideoManager->Move(265, 580);
 
@@ -1053,7 +1041,7 @@ void FinishWindow::_DrawWinGrowth() {
 	for (uint32 i = 0; i < _characters.size(); ++i)
 	{
 		//Portraits
-		VideoManager->DrawImage(_char_portraits[i]);
+		_char_portraits[i].Draw();
 
 		//First column
 		VideoManager->MoveRelative(150, 40);
@@ -1145,12 +1133,12 @@ void FinishWindow::_DrawWinGrowth() {
 void FinishWindow::_DrawWinSkills()
 {
 	//Draw XP Earned
-	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 	VideoManager->Move(496, 683);
 	VideoManager->DrawText(MakeUnicodeString("XP Gained: ") + MakeUnicodeString(NumberToString(_victory_xp)));
 
 	//Now draw char info
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, 0);
 	//VideoManager->Move(80, 580);
 	VideoManager->Move(265, 580);
 
@@ -1158,7 +1146,7 @@ void FinishWindow::_DrawWinSkills()
 	for (uint32 i = 0; i < _characters.size(); ++i)
 	{
 		//Portraits
-		VideoManager->DrawImage(_char_portraits[i]);
+		_char_portraits[i].Draw();
 		//TEMP
 		VideoManager->MoveRelative(240, 0);
 		VideoManager->DrawText("Learned");
@@ -1167,18 +1155,18 @@ void FinishWindow::_DrawWinSkills()
 
 void FinishWindow::_DrawWinSpoils() 
 {
-	//VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER);	
+	//VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, 0);	
 	//VideoManager->Move(496, 683);
 	//VideoManager->Move(96, 683);
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, 0);
 	VideoManager->Move(280, 683);
 	VideoManager->DrawText(MakeUnicodeString("Drunes: ") + MakeUnicodeString(NumberToString(_victory_money)));
 
-	VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_CENTER);
+	VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_CENTER, 0);
 	VideoManager->Move(712, 683);
 	VideoManager->DrawText(MakeUnicodeString("$ ") + MakeUnicodeString(NumberToString(GlobalManager->GetDrunes())));
 
-	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 	//VideoManager->Move(700, 640);
 	VideoManager->Move(475, 640);
 	VideoManager->DrawText("Items");
@@ -1190,11 +1178,11 @@ void FinishWindow::_DrawWinSpoils()
 	for (iter = _victory_items.begin(); iter != _victory_items.end(); ++iter)
 	{
 		VideoManager->DrawText(iter->first->GetName());
-		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_TOP);
+		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_TOP, 0);
 		VideoManager->MoveRelative(325, 0);
 		VideoManager->DrawText(MakeUnicodeString(NumberToString(iter->second)));
 		VideoManager->MoveRelative(-325, -25);
-		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP);
+		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 	}
 }
 

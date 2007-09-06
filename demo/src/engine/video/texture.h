@@ -92,22 +92,22 @@ public:
 	*** \param img A pointer to the image to insert
 	*** \return Success/failure
 	*/
-	virtual bool Insert(BaseImage *img) = 0;
+	virtual bool Insert(BaseImageTexture *img) = 0;
 	
 	/** \brief Removes a block from the texture
 	*** \param img A pointer to the image to remove
 	**/
-	virtual void Remove(BaseImage *img) = 0;
+	virtual void Remove(BaseImageTexture *img) = 0;
 	
 	/** \brief Marks a block as free
 	*** \param img A pointer to the image to free
 	**/
-	virtual void Free(BaseImage *img) = 0;
+	virtual void Free(BaseImageTexture *img) = 0;
 	
 	/** \brief Marks a block previously freed as used
 	*** \param img A pointer to the image to restore
 	**/
-	virtual void Restore(BaseImage *img) = 0;
+	virtual void Restore(BaseImageTexture *img) = 0;
 }; // class TexMemMgr
 
 
@@ -126,8 +126,8 @@ public:
 	/** \brief Constructs a new texture sheet
 	*** \param sheet_width The width of the sheet
 	*** \param sheet_height The height of the sheet
-	*** \param sheet_id A unique ID value for the texture sheet
-	*** \param sheet_type The size of the images that the texture sheet holds
+	*** \param sheet_id The OpenGL texture ID value for the sheet
+	*** \param sheet_type The type of texture data that the texture sheet should hold
 	*** \param sheet_static Whether the sheet should be labeled static or not
 	**/
 	TexSheet(int32 sheet_width, int32 sheet_height, GLuint sheet_id, TexSheetType sheet_type, bool sheet_static);
@@ -149,12 +149,12 @@ public:
 	*** \param load_info The image loading info
 	*** \return Success/failure
 	**/
-	bool AddImage(BaseImage *img, ImageLoadInfo& load_info);
+	bool AddImage(BaseImageTexture *img, ImageMemory& load_info);
 
 	/** \brief Removes an image completely from the texture sheet's memory manager
 	*** \param img The image to remove
 	**/
-	void RemoveImage(BaseImage *img)
+	void RemoveImage(BaseImageTexture *img)
 		{ tex_mem_manager->Remove(img); }
 	
 	/** \brief Marks the image as free
@@ -163,13 +163,13 @@ public:
 	*** restored from the free state so that it does not have to be re-fetched
 	*** from the hard disk.
 	**/
-	void FreeImage(BaseImage *img)
+	void FreeImage(BaseImageTexture *img)
 	 	{ tex_mem_manager->Free(img); }
 	
 	/** \brief Restores an image which was previously freed
 	*** \param img The image to mark as used
 	**/
-	void RestoreImage(BaseImage *img)
+	void RestoreImage(BaseImageTexture *img)
 		{ tex_mem_manager->Restore(img); }
 
 	/** \brief Copies an image into a sub-rectangle of the texture
@@ -178,7 +178,7 @@ public:
 	*** \param load_info The image loading info
 	*** \return Success/failure
 	**/
-	bool CopyRect(int32 x, int32 y, private_video::ImageLoadInfo& load_info);
+	bool CopyRect(int32 x, int32 y, private_video::ImageMemory& load_info);
 
 	/** \brief Copies an portion of the screen into a sub-rectangle of the texture
 	*** \param x X coordinate of rectangle to copy screen to
@@ -192,6 +192,12 @@ public:
 	*** \param flag True enables smoothing while false disables it. Default value is true.
 	**/
 	void Smooth(bool flag = true);
+
+	/** \brief Draws the entire texture sheet to the screen
+	*** This is primarily used for debugging, as it draws all images contained within the texture to the screen.
+	*** It ignores any blending or lighting properties that are enabled in the VideoManager
+	**/
+	void Draw() const;
 
 	//! \brief The width of the texsheet
 	int32 width;
@@ -227,7 +233,7 @@ public:
 class FixedImageNode {
 public:
 	//! \brief The image that belongs to the block
-	BaseImage* image;
+	BaseImageTexture* image;
 	
 	//! \brief The next node in the list
 	FixedImageNode* next;
@@ -262,13 +268,13 @@ public:
 
 	//! \name Methods inherited from TexMemMgr
 	//@{
-	bool Insert(BaseImage *img);
+	bool Insert(BaseImageTexture *img);
 	
-	void Remove(BaseImage *img);
+	void Remove(BaseImageTexture *img);
 	
-	void Free(BaseImage *img);
+	void Free(BaseImageTexture *img);
 	
-	void Restore(BaseImage *img)
+	void Restore(BaseImageTexture *img)
 		{ _DeleteNode(_CalculateBlockIndex(img)); }
 	//@}
 
@@ -277,7 +283,7 @@ private:
 	*** \param img The image to look for
 	*** \return The block index for that image
 	**/
-	int32 _CalculateBlockIndex(BaseImage *img);
+	int32 _CalculateBlockIndex(BaseImageTexture *img);
 	
 	/** \brief Grabs the block index based off of the image
 	*** \param block_index The node in the list to delete
@@ -334,7 +340,7 @@ public:
 		image(NULL), free(true) {}
 
 	//! \brief A pointer to the image
-	BaseImage* image;
+	BaseImageTexture* image;
 	
 	//! \brief Set to true if the image is freed
 	bool free;
@@ -357,15 +363,15 @@ public:
 
 	//! \name Methods inherited from TexMemMgr
 	//@{
-	bool Insert(BaseImage *img);
+	bool Insert(BaseImageTexture *img);
 
-	void Remove(BaseImage *img)
+	void Remove(BaseImageTexture *img)
 		{ _SetBlockProperties(img, true, true, true, NULL); }
 
-	void Free(BaseImage *img)
+	void Free(BaseImageTexture *img)
 		{ _SetBlockProperties(img, true, false, true, NULL); }
 
-	void Restore(BaseImage *img)
+	void Restore(BaseImageTexture *img)
 		{ _SetBlockProperties(img, true, false, false, NULL); }
 	//@}
 
@@ -378,7 +384,7 @@ private:
 	*** \param free The block's free status
 	*** \param new_image The new image to use if changeImage is true
 	**/
-	void _SetBlockProperties(BaseImage* img, bool change_free, bool change_image, bool free, BaseImage* new_image);
+	void _SetBlockProperties(BaseImageTexture* img, bool change_free, bool change_image, bool free, BaseImageTexture* new_image);
 
 	//! \brief The texhseet it's using
 	TexSheet* _tex_sheet;
@@ -397,4 +403,4 @@ private:
 
 }  // namespace hoa_video
 
-#endif   // __TEXTURE_HEADER__
+#endif // __TEXTURE_HEADER__

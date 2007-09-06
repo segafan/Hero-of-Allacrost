@@ -30,7 +30,7 @@ namespace hoa_video {
 class Color {
 public:
 	/** \brief Default colors for user convenience.
-	*** These are defined in the file video.cpp. All colors are opaque (0.0f alpha value) except for "clear".
+	*** These are defined in the file video.cpp. All colors are opaque (1.0f alpha value) except for "clear".
 	**/
 	//@{
 	static Color clear;     //!< Clear (transparent) color (r=0.0, g=0.0, b=0.0, a=0.0)
@@ -56,7 +56,10 @@ public:
 	//! \brief Overloaded Operators
 	//@{
 	bool operator == (const Color &c) const
-		{ return _colors[0] == c._colors[0] && _colors[1] == c._colors[1] && _colors[2] == c._colors[2] && _colors[3] == c._colors[3]; }
+		{
+			return (hoa_utils::IsFloatEqual(_colors[0], c._colors[0]) && hoa_utils::IsFloatEqual(_colors[1], c._colors[1]) &&
+				hoa_utils::IsFloatEqual(_colors[2], c._colors[2]) && hoa_utils::IsFloatEqual(_colors[3], c._colors[3]));
+		}
 
 	bool operator != (const Color &c) const
 		{ return _colors[0] != c._colors[0] || _colors[1] != c._colors[1] || _colors[2] != c._colors[2] || _colors[3] != c._colors[3]; }

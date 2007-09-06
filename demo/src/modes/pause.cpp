@@ -78,9 +78,6 @@ PauseMode::~PauseMode() {
 // 			break;
 // 		
 // 	}
-
-	// Release the saved screen frame.
-	VideoManager->DeleteImage(_saved_screen);
 }
 
 
@@ -112,7 +109,7 @@ void PauseMode::Draw() {
 	Color grayed(0.35f, 0.35f, 0.35f, 1.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, 0);
 	VideoManager->Move(0,0);
-	VideoManager->DrawImage(_saved_screen, grayed);
+	_saved_screen.Draw(grayed);
 	
 	// Render the "Paused" text to appear on the center of the screen
 	// Restore the Coordinate system (that one is quit mode coodinate system)

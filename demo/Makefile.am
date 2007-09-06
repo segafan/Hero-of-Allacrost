@@ -22,12 +22,13 @@ video_SOURCES = \
 	$(VIDEO_DIR)/color.h \
 	$(VIDEO_DIR)/context.h \
 	$(VIDEO_DIR)/coord_sys.h \
-	$(VIDEO_DIR)/draw.cpp \
 	$(VIDEO_DIR)/effects.cpp \
 	$(VIDEO_DIR)/fade.cpp \
 	$(VIDEO_DIR)/fade.h \
 	$(VIDEO_DIR)/gui.cpp \
 	$(VIDEO_DIR)/gui.h \
+	$(VIDEO_DIR)/image_base.cpp \
+	$(VIDEO_DIR)/image_base.h \
 	$(VIDEO_DIR)/image.cpp \
 	$(VIDEO_DIR)/image.h \
 	$(VIDEO_DIR)/interpolator.cpp \
@@ -48,14 +49,14 @@ video_SOURCES = \
 	$(VIDEO_DIR)/screen_rect.h \
 	$(VIDEO_DIR)/shake.cpp \
 	$(VIDEO_DIR)/shake.h \
-	$(VIDEO_DIR)/tex_mgmt.cpp \
-	$(VIDEO_DIR)/tex_mgmt.h \
 	$(VIDEO_DIR)/text.cpp \
 	$(VIDEO_DIR)/text.h \
 	$(VIDEO_DIR)/textbox.cpp \
 	$(VIDEO_DIR)/textbox.h \
 	$(VIDEO_DIR)/texture.cpp \
 	$(VIDEO_DIR)/texutre.h \
+	$(VIDEO_DIR)/texture_controller.cpp \
+	$(VIDEO_DIR)/texutre_controller.h \
 	$(VIDEO_DIR)/video.cpp \
 	$(VIDEO_DIR)/video.h
 

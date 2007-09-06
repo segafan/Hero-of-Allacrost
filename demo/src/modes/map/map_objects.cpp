@@ -113,7 +113,7 @@ void PhysicalObject::Update() {
 
 void PhysicalObject::Draw() {
 	if (MapObject::DrawHelper() == true)
-		VideoManager->DrawImage(animations[current_animation]);
+		animations[current_animation].Draw();
 }
 
 // *****************************************************************************
@@ -137,7 +137,7 @@ ChestObject::ChestObject( std::string image_file, uint8 nb_frames_closed, uint8 
 	std::vector<StillImage> frames;
 
 	//--(1)-- Load a 1 row image strip of the length of all the needed frames
-	if( VideoManager->LoadMultiImageFromNumberElements( frames, image_file, 1, nb_frames_closed + nb_frames_opening ) == false ) {
+	if (ImageDescriptor::LoadMultiImageFromElementGrid(frames, image_file, 1, nb_frames_closed + nb_frames_opening) == false ) {
 		cerr << "File: " << filename << " could not be loaded correctly." << endl;
 		exit( 1 );
 	}

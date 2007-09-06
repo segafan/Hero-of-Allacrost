@@ -56,10 +56,8 @@ MenuMode::MenuMode(ustring locale_name, string locale_image) {
 	_locale_name = locale_name;
 
 	// Initialize the location graphic
-	_locale_graphic.SetFilename(locale_image);
-	_locale_graphic.SetDimensions(500, 125);
 	_locale_graphic.SetStatic(true);
-	if (VideoManager->LoadImage(_locale_graphic) == false) {
+	if (_locale_graphic.Load(locale_image, 500, 125) == false) {
 		cerr << "MENU ERROR: failed to load locale graphic in MenuMode constructor: " << locale_image << endl;
 		exit(1);
 	}
@@ -159,12 +157,6 @@ MenuMode::MenuMode(ustring locale_name, string locale_image) {
 MenuMode::~MenuMode() {
 	if (MENU_DEBUG)
 		cout << "MENU: MenuMode destructor invoked." << endl;
-
-	// Remove saved images
-	VideoManager->DeleteImage(_saved_screen);
-
-	// Unload location picture
-	VideoManager->DeleteImage(_locale_graphic);
 
 	// Destroy all menu windows
 	_bottom_window.Destroy();
@@ -504,10 +496,10 @@ void MenuMode::Draw() {
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 	Color grayed(0.35f, 0.35f, 0.35f, 1.0f);
 	VideoManager->Move(0, 0);
-	VideoManager->DrawImage(_saved_screen);
+	_saved_screen.Draw();
 
 	// Restore the Coordinate system (that one is menu mode coodinate system)
-	VideoManager->SetCoordSys (0.0f, 1024.0f, 768.0f, 0.0f);
+	VideoManager->SetCoordSys(0.0f, 1024.0f, 768.0f, 0.0f);
 
 
 	uint32 draw_window;
@@ -592,7 +584,7 @@ void MenuMode::_DrawBottomMenu() {
 			VideoManager->SetDrawFlags(VIDEO_X_LEFT,VIDEO_Y_CENTER,0);
 
 			VideoManager->Move(100, 600);
-			VideoManager->DrawImage(obj->GetIconImage() );
+			obj->GetIconImage().Draw();
 			VideoManager->MoveRelative(65, 0);
 			VideoManager->DrawText(obj->GetName());
 			VideoManager->SetDrawFlags(VIDEO_X_LEFT,VIDEO_Y_BOTTOM,0);
@@ -850,8 +842,8 @@ void MenuMode::_DrawBottomMenu() {
 		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, 0);
 		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 		VideoManager->Move(390, 685);
-		VideoManager->DrawImage(_locale_graphic);
-	} // else
+		_locale_graphic.Draw();
+	}
 } // void MenuMode::_DrawBottomMenu()
 
 

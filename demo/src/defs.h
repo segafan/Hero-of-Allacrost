@@ -80,13 +80,13 @@ namespace hoa_video {
 	class ImageDescriptor;
 	class StillImage;
 	class AnimatedImage;
-	class TextImage;
-
 
 	class TextureController;
 
 	class FontGlyph;
 	class FontProperties;
+
+	class RenderedText;
 
 	class GUISupervisor;
 	class MenuWindow;
@@ -104,15 +104,18 @@ namespace hoa_video {
 		class Context;
 
 		class TexSheet;
+
 		class TexMemMgr;
 		class FixedTexMemMgr;
 		class VariableTexMemMgr;
 
-		class ImageLoadInfo;
-		class Image;
-		class BaseImage;
+		class ImageMemory;
+		class BaseImageTexture;
+		class ImageTexture;
+		class TextImageTexture;
+		class BaseImageElement;
 		class ImageElement;
-		class MultiImage;
+		class TextImageElement;
 		class AnimationFrame;
 
 		class GUIElement;

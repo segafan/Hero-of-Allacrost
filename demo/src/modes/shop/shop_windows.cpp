@@ -513,7 +513,7 @@ void ObjectInfoWindow::Draw() {
 
 	// Draw the object's icon and name
 	VideoManager->Move(350, 200);
-	VideoManager->DrawImage(_object->GetIconImage());
+	_object->GetIconImage().Draw();
 	VideoManager->MoveRelative(60, 20);
 	VideoManager->DrawText(_object->GetName());
 

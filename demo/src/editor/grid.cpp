@@ -497,7 +497,7 @@ void Grid::paintGL()
 					tile_index = *it;
 				else  // Don't divide by 0
 					tile_index = *it % (tileset_index * 256);
-				VideoManager->DrawImage(tilesets[tileset_index]->tiles[tile_index]);
+				tilesets[tileset_index]->tiles[tile_index].Draw();
 			} // a tile exists to draw
 			col = ++col % _width;
 			if (col == 0)
@@ -521,7 +521,7 @@ void Grid::paintGL()
 					tile_index = *it;
 				else  // Don't divide by 0
 					tile_index = *it % (tileset_index * 256);
-				VideoManager->DrawImage(tilesets[tileset_index]->tiles[tile_index]);
+				tilesets[tileset_index]->tiles[tile_index].Draw();
 			} // a tile exists to draw
 			col = ++col % _width;
 			if (col == 0)
@@ -545,7 +545,7 @@ void Grid::paintGL()
 					tile_index = *it;
 				else  // Don't divide by 0
 					tile_index = *it % (tileset_index * 256);
-				VideoManager->DrawImage(tilesets[tileset_index]->tiles[tile_index]);
+				tilesets[tileset_index]->tiles[tile_index].Draw();
 			} // a tile exists to draw
 			col = ++col % _width;
 			if (col == 0)

@@ -72,7 +72,7 @@ bool ParticleSystem::Create(const ParticleSystemDef *sys_def)
 		_animation.AddFrame(sys_def->animation_frame_filenames[j], frame_time);
 	}
 
-	VideoManager->LoadImage(_animation);
+// 	VideoManager->LoadImage(_animation);
 	return true;
 }
 
@@ -142,7 +142,7 @@ bool ParticleSystem::Draw()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	StillImage *id = _animation.GetFrame(_animation.GetCurrentFrameIndex());
-	Image *img = id->_elements[0].image;
+	ImageTexture *img = id->_elements[0].image;
 	TextureManager->_BindTexture(img->texture_sheet->tex_id);
 
 
@@ -348,7 +348,7 @@ bool ParticleSystem::Draw()
 		findex = (findex + 1) % _animation.GetNumFrames();
 
 		StillImage *id2 = _animation.GetFrame(findex);
-		Image *img2 = id2->_elements[0].image;
+		ImageTexture *img2 = id2->_elements[0].image;
 		TextureManager->_BindTexture(img2->texture_sheet->tex_id);
 
 
@@ -535,7 +535,6 @@ void ParticleSystem::Destroy()
 {
 	_particles.clear();
 	_particle_vertices.clear();
-	VideoManager->DeleteImage(_animation);
 }
 
 

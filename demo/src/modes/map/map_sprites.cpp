@@ -57,7 +57,7 @@ VirtualSprite::VirtualSprite() :
 	_saved(false),
 	_current_dialogue(0),
 	_show_dialogue_icon(true),
-	_dialogue_icon_color( 1.0f, 1.0f, 1.0f, 0.0f )
+	_dialogue_icon_color(1.0f, 1.0f, 1.0f, 0.0f)
 {
 	MapObject::_object_type = VIRTUAL_TYPE;
 }
@@ -66,7 +66,7 @@ VirtualSprite::VirtualSprite() :
 
 VirtualSprite::~VirtualSprite() {
 	if (face_portrait != NULL) {
-		VideoManager->DeleteImage(*face_portrait);
+		delete face_portrait;
 		face_portrait = NULL;
 	}
 
@@ -221,7 +221,7 @@ void VirtualSprite::Draw() {
 	if (HasDialogue()) {
 		if (IsShowingDialogueIcon() && MapMode::_IsShowingDialogueIcons() && seen_all_dialogue == false) {
 			VideoManager->MoveRelative(0, -GetImgHeight());
-			VideoManager->DrawImage(new_dialogue_icon, _dialogue_icon_color);
+			new_dialogue_icon.Draw(_dialogue_icon_color);
 		}
 	}
 }
@@ -274,8 +274,7 @@ void VirtualSprite::SetFacePortrait(std::string pn) {
 	}
 
 	face_portrait = new StillImage();
-	face_portrait->SetFilename(pn);
-	VideoManager->LoadImage(*face_portrait);
+	face_portrait->Load(pn);
 }
 
 
@@ -361,13 +360,8 @@ MapSprite::MapSprite() :
 
 // Free all allocated images and other data
 MapSprite::~MapSprite() {
-	for (uint32 i = 0; i < animations.size(); i++) {
-		VideoManager->DeleteImage(animations[i]);
-	}
-	animations.clear();
-
 	if (face_portrait != NULL) {
-		VideoManager->DeleteImage(*face_portrait);
+		delete face_portrait;
 		face_portrait = NULL;
 	}
 
@@ -392,7 +386,7 @@ bool MapSprite::LoadStandardAnimations(std::string filename) {
 	for (uint8 i = 0; i < 24; i++)
 		frames[i].SetDimensions(img_half_width * 2, img_height);
 
-	if (VideoManager->LoadMultiImageFromNumberElements(frames, filename, 4, 6) == false) {
+	if (ImageDescriptor::LoadMultiImageFromElementGrid(frames, filename, 4, 6) == false) {
 		return false;
 	}
 
@@ -430,13 +424,6 @@ bool MapSprite::LoadStandardAnimations(std::string filename) {
 	animations[7].AddFrame(frames[19], frame_speed);
 	animations[7].AddFrame(frames[22], frame_speed);
 	animations[7].AddFrame(frames[23], frame_speed);
-
-	for (uint32 i = 0; i < animations.size(); i++) {
-		if (animations[i].Load() == false) {
-			cerr << "MAP ERROR: failed to load sprite animation" << endl;
-			return false;
-		}
-	}
 
 	return true;
 } // bool MapSprite::LoadStandardAnimations(std::string filename)
@@ -516,7 +503,7 @@ void MapSprite::Update() {
 // Draw the appropriate sprite frame at the correct position on the screen
 void MapSprite::Draw() {
 	if (MapObject::DrawHelper() == true) {
-		VideoManager->DrawImage(animations[current_animation]);
+		animations[current_animation].Draw();
 		VirtualSprite::Draw();
 	}
 }
@@ -729,7 +716,7 @@ void EnemySprite::Update() {
 void EnemySprite::Draw() {
 	// Otherwise, only draw it if it is not in the DEAD state
 	if (_state != DEAD && MapObject::DrawHelper() == true) {
-		VideoManager->DrawImage(animations[current_animation], _color);
+		animations[current_animation].Draw(_color);
 		return;
 	}
 }

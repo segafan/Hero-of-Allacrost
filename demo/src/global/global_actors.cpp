@@ -885,15 +885,12 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
 
 	// TEMP TEMP TEMP: Load the character's idle animation
 	AnimatedImage idle;
-	StillImage img;
-	img.SetDimensions(64, 128);
-	for (uint32 i = 0; i < 6; i ++) {
-		idle.AddFrame(img, 10);
-	}
-	if (VideoManager->LoadAnimatedImageFromNumberElements(idle, "img/sprites/battle/characters/" + _filename + "_idle.png", 1, 6) == false) {
+	idle.SetDimensions(64, 128);
+	vector<uint32> timings(6, 10);
+
+	if (idle.LoadFromFrameGrid("img/sprites/battle/characters/" + _filename + "_idle.png", timings, 1, 6) == false) {
 		exit(1);
 	}
-	idle.SetFrameIndex(0);
 	_battle_animation["idle"] = idle;
 
 	// Load the character's battle portraits from a multi image
@@ -901,7 +898,7 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
 	for (uint32 i = 0; i < _battle_portraits.size(); i++) {
 		_battle_portraits[i].SetDimensions(100, 100);
 	}
-	if (VideoManager->LoadMultiImageFromNumberElements(_battle_portraits, "img/portraits/battle/" + _filename + "_damage.png", 1, 5) == false)
+	if (ImageDescriptor::LoadMultiImageFromElementGrid(_battle_portraits, "img/portraits/battle/" + _filename + "_damage.png", 1, 5) == false)
 		exit(1);
 } // GlobalCharacter::GlobalCharacter(uint32 id, bool initial)
 
@@ -1001,7 +998,7 @@ GlobalEnemy::GlobalEnemy(uint32 id) {
 	// (4): Attempt to load the MultiImage for the sprite's frames, which should contain one row and four columns of images
 	_battle_sprite_frames.assign(4, StillImage());
 	string sprite_filename = "img/sprites/battle/enemies/" + _filename + ".png";
-	if (VideoManager->LoadMultiImageFromNumberElements(_battle_sprite_frames, sprite_filename, 1, 4) == false) {
+	if (ImageDescriptor::LoadMultiImageFromElementGrid(_battle_sprite_frames, sprite_filename, 1, 4) == false) {
 		cerr << "GLOBAL WARNING: failed to load sprite frames for enemy: " << sprite_filename << endl;
 	}
 

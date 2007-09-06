@@ -77,30 +77,24 @@ BootMode::BootMode() :
 
 	// Load all bitmaps using this StillImage
 	StillImage im;
+	bool success = true;
 
-	// background
-	im.SetFilename(read_data.ReadString("background_image"));
-	im.SetDimensions(read_data.ReadFloat("background_image_width"),
-	                 read_data.ReadFloat("background_image_height"));
+	success &= im.Load(read_data.ReadString("background_image"), read_data.ReadFloat("background_image_width"), read_data.ReadFloat("background_image_height"));
 	_boot_images.push_back(im);
 
-	// logo background
-	im.SetFilename(read_data.ReadString("logo_background"));
-	im.SetDimensions(read_data.ReadFloat("logo_background_width"),
-	                 read_data.ReadFloat("logo_background_height"));
+	success &= im.Load(read_data.ReadString("logo_background"), read_data.ReadFloat("logo_background_width"), read_data.ReadFloat("logo_background_height"));
 	_boot_images.push_back(im);
 
-	// The big-ass sword of character whopping
-	im.SetFilename(read_data.ReadString("logo_sword"));
-	im.SetDimensions(read_data.ReadFloat("logo_sword_width"),
-	                 read_data.ReadFloat("logo_sword_height"));
+	success &= im.Load(read_data.ReadString("logo_sword"), read_data.ReadFloat("logo_sword_width"), read_data.ReadFloat("logo_sword_height"));
 	_boot_images.push_back(im);
 
-	// Logo text
-	im.SetFilename(read_data.ReadString("logo_text"));
-	im.SetDimensions(read_data.ReadFloat("logo_text_width"),
-	                 read_data.ReadFloat("logo_text_height"));
+	success &= im.Load(read_data.ReadString("logo_text"), read_data.ReadFloat("logo_text_width"), read_data.ReadFloat("logo_text_height"));
 	_boot_images.push_back(im);
+
+	if (success == false) {
+		if (BOOT_DEBUG)
+			cerr << "BOOT ERROR: failed to load a boot mode image" << endl;
+	}
 
 	// Load the audio stuff
 	// Make a call to the config code that loads in two vectors of strings
@@ -143,17 +137,6 @@ BootMode::BootMode() :
 	else
 		_latest_version_number = "";
 
-	// This loop causes a seg fault for an unknown reason. Roots is looking into it (04/01/2006)
-// 	for (uint32 i = 0; i < new_sound_files.size(); i++) {
-// 		_boot_sounds.push_back(new_sound);
-// 		_boot_sounds[i].LoadAudio(new_sound_files[i]);
-// 	}
-
-	// Load all bitmaps
-	for (uint32 i = 0; i < _boot_images.size(); i++) {
-		VideoManager->LoadImage(_boot_images[i]);
-	}
-
 	// Construct our menu hierarchy here
 	_SetupMainMenu();
 	_SetupOptionsMenu();
@@ -177,9 +160,6 @@ BootMode::~BootMode() {
 
 	for (uint32 i = 0; i < _boot_sounds.size(); i++)
 		_boot_sounds[i].FreeAudio();
-
-	for (uint32 i = 0; i < _boot_images.size(); i++)
-		VideoManager->DeleteImage(_boot_images[i]);
 }
 
 
@@ -237,14 +217,14 @@ void BootMode::_AnimateLogo() {
 
 		VideoManager->Move(512.0f, 385.0f); // logo bg
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-		VideoManager->DrawImage(_boot_images[1], Color(alpha, alpha, alpha, 1.0f));
+		_boot_images[1].Draw(Color(alpha, alpha, alpha, 1.0f));
 		VideoManager->Move(sword_x, sword_y); // sword
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 		VideoManager->Rotate(-90.0f);
-		VideoManager->DrawImage(_boot_images[2], Color(alpha, alpha, alpha, 1.0f));
+		_boot_images[2].Draw(Color(alpha, alpha, alpha, 1.0f));
 		VideoManager->Move(512.0f, 385.0f); // text
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-		VideoManager->DrawImage(_boot_images[3], Color(alpha, alpha, alpha, 1.0f));
+		_boot_images[3].Draw(Color(alpha, alpha, alpha, 1.0f));
 	}
 	// Sequence three: Sword unsheathe & slide
 	else if (total_time >= SEQUENCE_THREE && total_time < SEQUENCE_FOUR)
@@ -253,14 +233,14 @@ void BootMode::_AnimateLogo() {
 		sword_x = 670.0f + (dt * dt) * 660.0f; // s = s0 + 0.5 * a * t^2
 		VideoManager->Move(512.0f, 385.0f); // logo bg
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-		VideoManager->DrawImage(_boot_images[1]);
+		_boot_images[1].Draw();
 		VideoManager->Move(sword_x, sword_y); // sword
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 		VideoManager->Rotate(-90.0f);
-		VideoManager->DrawImage(_boot_images[2]);
+		_boot_images[2].Draw();
 		VideoManager->Move(512.0f, 385.0f); // text
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-		VideoManager->DrawImage(_boot_images[3]);
+		_boot_images[3].Draw();
 	}
 	// Sequence four: Spin around the sword
 	else if (total_time >= SEQUENCE_FOUR && total_time < SEQUENCE_FIVE)
@@ -279,14 +259,14 @@ void BootMode::_AnimateLogo() {
 
 		VideoManager->Move(512.0f, 385.0f); // logo bg
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-		VideoManager->DrawImage(_boot_images[1]);
+		_boot_images[1].Draw();
 		VideoManager->Move(512.0f, 385.0f); // text
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-		VideoManager->DrawImage(_boot_images[3]);
+		_boot_images[3].Draw();
 		VideoManager->Move(sword_x, sword_y); // sword
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
 		VideoManager->Rotate(rotation);
-		VideoManager->DrawImage(_boot_images[2]);
+		_boot_images[2].Draw();
 	}
 	// Sequence five: Sword comes back
 	else if (total_time >= SEQUENCE_FIVE && total_time < SEQUENCE_SIX)
@@ -299,13 +279,13 @@ void BootMode::_AnimateLogo() {
 
 		VideoManager->Move(512.0f, 385.0f); // logo bg
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-		VideoManager->DrawImage(_boot_images[1]);
+		_boot_images[1].Draw();
 		VideoManager->Move(512.0f, 385.0f); // text
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-		VideoManager->DrawImage(_boot_images[3]);
+		_boot_images[3].Draw();
 		VideoManager->Move(newX, newY); // sword
 		VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-		VideoManager->DrawImage(_boot_images[2]);
+		_boot_images[2].Draw();
 	}
 	// Sequence six: flash of light
 	else if (total_time >= SEQUENCE_SIX && total_time < SEQUENCE_SEVEN)
@@ -328,19 +308,19 @@ void BootMode::_AnimateLogo() {
 void BootMode::_DrawBackgroundItems() {
 	VideoManager->Move(512.0f, 384.0f);
 	VideoManager->SetDrawFlags(VIDEO_NO_BLEND, 0);
-	VideoManager->DrawImage(_boot_images[0]); // Draw background
+	_boot_images[0].Draw(); // Draw background
 
 	VideoManager->Move(512.0f, 648.0f);
 	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-	VideoManager->DrawImage(_boot_images[1]); // Draw the logo background
+	_boot_images[1].Draw(); // Draw the logo background
 
 	VideoManager->Move(762.0f, 578.0f);
 	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-	VideoManager->DrawImage(_boot_images[2]); // Draw the sword
+	_boot_images[2].Draw(); // Draw the sword
 
 	VideoManager->Move(512, 648);
 	VideoManager->SetDrawFlags(VIDEO_BLEND, 0);
-	VideoManager->DrawImage(_boot_images[3]); // Draw the logo text
+	_boot_images[3].Draw(); // Draw the logo text
 }
 
 

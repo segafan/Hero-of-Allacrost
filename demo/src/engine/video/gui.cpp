@@ -165,24 +165,6 @@ GUISupervisor::~GUISupervisor() {
 	}
 
 	// Delete all menu skins which are still active
-	for (map<string, MenuSkin>::iterator i = _menu_skins.begin(); i != _menu_skins.end(); i++) {
-		// Delete all border images and connectors
-		for (uint32 x = 0; x < 3; x++) {
-			for (uint32 y = 0; y < 3; y++) {
-				VideoManager->DeleteImage(i->second.borders[x][y]);
-			}
-		}
-
-		for (uint32 x = 0; x < 5; x++) {
-			VideoManager->DeleteImage(i->second.connectors[x]);
-		}
-		
-		// Delete background image only if one has been loaded
-		if (i->second.background.GetWidth() != 0) {
-			VideoManager->DeleteImage(i->second.background);
-		}
-	}
-
 	_menu_skins.clear();
 }
 
@@ -242,7 +224,7 @@ bool GUISupervisor::LoadMenuSkin(string skin_name, string border_image, string b
 
 	// ----- (2) Load the MultiImage containing the borders of the skin.
 	std::vector<StillImage> skin_borders;
-	if (VideoManager->LoadMultiImageFromNumberElements(skin_borders, border_image, 3, 6) == false) {
+	if (ImageDescriptor::LoadMultiImageFromElementGrid(skin_borders, border_image, 3, 6) == false) {
 		_menu_skins.erase(skin_name);
 		return false;
 	}
@@ -266,16 +248,12 @@ bool GUISupervisor::LoadMenuSkin(string skin_name, string border_image, string b
 	// Set the four background colors for the vertices of the middle image
 	new_skin.borders[1][1].SetVertexColors(top_left, top_right, bottom_left, bottom_right);
 
-	VideoManager->DeleteImage(skin_borders[3]);
-	VideoManager->DeleteImage(skin_borders[5]);
-	VideoManager->DeleteImage(skin_borders[7]);
-	VideoManager->DeleteImage(skin_borders[15]);
-	VideoManager->DeleteImage(skin_borders[17]);
+	// The skin borders at indeces: 3, 5, 7, 15, and 17 are not used, and will be discarded when
+	// they go out of scope (ie when this function returns)
 
 	// ----- (3) Load the background image, if one has been specified
 	if (background_image != "") {
-		new_skin.background.SetFilename(background_image);
-		if (VideoManager->LoadImage(new_skin.background) == false) {
+		if (new_skin.background.Load(background_image) == false) {
 			cerr << "VIDEO ERROR: In GUI::LoadMenuSkin(), the background image file could not be loaded" << endl;
 			_menu_skins.erase(skin_name);
 			return false;

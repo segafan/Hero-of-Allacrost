@@ -82,7 +82,7 @@ GlobalItem::GlobalItem(uint32 id, uint32 count) :
 	script_file.OpenTable(_id);
 	_name = MakeUnicodeString(script_file.ReadString("name"));
 	_description = MakeUnicodeString(script_file.ReadString("description"));
-	_icon_image.SetFilename(script_file.ReadString("icon"));
+	string icon_file = script_file.ReadString("icon");
 	_target_type = static_cast<GLOBAL_TARGET>(script_file.ReadInt("target_type"));
 	_target_ally = script_file.ReadBool("target_ally");
 	_price = script_file.ReadUInt("standard_price");
@@ -106,7 +106,7 @@ GlobalItem::GlobalItem(uint32 id, uint32 count) :
 	else
 		_usage = GLOBAL_USE_INVALID;
 
-	if (_icon_image.Load() == false) {
+	if (_icon_image.Load(icon_file) == false) {
 		if (GLOBAL_DEBUG)
 			cerr << "GLOBAL WARNING: GlobalItem constructor failed to load the icon image for the item: " << _id << endl;
 	}
@@ -256,13 +256,13 @@ GlobalWeapon::GlobalWeapon(uint32 id, uint32 count) :
 	script_file.OpenTable(_id);
 	_name = MakeUnicodeString(script_file.ReadString("name"));
 	_description = MakeUnicodeString(script_file.ReadString("description"));
-	_icon_image.SetFilename(script_file.ReadString("icon"));
+	string icon_file = script_file.ReadString("icon");
 	_physical_attack = script_file.ReadUInt("physical_attack");
 	_metaphysical_attack = script_file.ReadUInt("metaphysical_attack");
 	_price = script_file.ReadUInt("standard_price");
 	_usable_by = script_file.ReadUInt("usable_by");
 
-	if (_icon_image.Load() == false) {
+	if (_icon_image.Load(icon_file) == false) {
 		if (GLOBAL_DEBUG)
 			cerr << "GLOBAL WARNING: GlobalWeapon constructor failed to load the icon image for the weapon: " << _id << endl;
 	}
@@ -315,13 +315,13 @@ GlobalArmor::GlobalArmor(uint32 id, uint32 count) :
 	script_file->OpenTable(_id);
 	_name = MakeUnicodeString(script_file->ReadString("name"));
 	_description = MakeUnicodeString(script_file->ReadString("description"));
-	_icon_image.SetFilename(script_file->ReadString("icon"));
+	string icon_file = script_file->ReadString("icon");
 	_physical_defense = script_file->ReadUInt("physical_defense");
 	_metaphysical_defense = script_file->ReadUInt("metaphysical_defense");
 	_price = script_file->ReadUInt("standard_price");
 	_usable_by = script_file->ReadUInt("usable_by");
 
-	if (_icon_image.Load() == false) {
+	if (_icon_image.Load(icon_file) == false) {
 		if (GLOBAL_DEBUG)
 			cerr << "GLOBAL WARNING: GlobalArmor constructor failed to load the icon image for the armor: " << _id << endl;
 	}

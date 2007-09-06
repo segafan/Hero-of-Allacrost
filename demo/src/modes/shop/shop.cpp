@@ -72,8 +72,6 @@ ShopMode::~ShopMode() {
 	if (SHOP_DEBUG)
 		cout << "SHOP: ShopMode destructor invoked" << endl;
 
-	VideoManager->DeleteImage(_saved_screen);
-
 	for (uint32 i = 0; i < _all_objects.size(); i++) {
 		delete(_all_objects[i]);
 	}
@@ -170,7 +168,7 @@ void ShopMode::Draw() {
 	VideoManager->SetCoordSys(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height));
 
 	VideoManager->Move(0,0);
-	VideoManager->DrawImage(_saved_screen);
+	_saved_screen.Draw();
 	
 	// Restore the Coordinate system (that one will be shop mode coodinate system?)
 	VideoManager->SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f);

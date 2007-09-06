@@ -142,87 +142,78 @@ public:
 	
 };
 
+namespace private_video {
 
 /** ****************************************************************************
+*** \brief Represents an image of rendered text stored in a texture sheet
 *** A text specific subclass of the BaseImage subclass, contains a
 *** string and style needed to render a piece of text.
 *** ***************************************************************************/
-class TextImage : public private_video::BaseImage {
+class TextImageTexture : public private_video::BaseImageTexture {
 public:
+	/** \brief Constructor defaults image as the first one in a texture sheet.
+	*** \note The actual sheet where the image is located will be determined later.
+	**/
+	TextImageTexture(const hoa_utils::ustring& string_, const TextStyle& style_);
+
+	~TextImageTexture();
+
+	// ---------- Public members
+
 	//! \brief The string represented
 	hoa_utils::ustring string;
 
 	//! \brief The font/color/etc.
-	TextStyle          style;
+	TextStyle style;
 
-	/** \brief Constructor defaults image as the first one in a texture sheet.
-	*** \note The actual sheet where the image is located will be determined later.
-	**/
-	TextImage(const hoa_utils::ustring &string_, const TextStyle &style_);
+	// ---------- Public methods
 
-	//! \brief Constructor where image coordinates are specified, along with texture coords and the texture sheet.
-	TextImage(private_video::TexSheet *sheet, const hoa_utils::ustring &string_, const TextStyle &style_, int32 x_, int32 y_, float u1_, float v1_,
-		float u2_, float v2_, int32 width, int32 height, bool grayscale_);
-
-	TextImage & operator=(TextImage& rhs)
-		{ return *this; }
-
-	//! Loads the properties of the internal font
+	//! \brief Loads the properties of the internal font
 	bool LoadFontProperties();
 
-	//! Generate a text texture and add to a texture sheet
+	//! \brief Generate a text texture and add to a texture sheet
 	bool Regenerate();
 
-	//! Reload texture to an already assigned texture sheet
+	//! \brief Reload texture to an already assigned texture sheet
 	bool Reload();
-};
+
+private:
+	TextImageTexture(const TextImageTexture& copy);
+	TextImageTexture& operator=(const TextImageTexture& copy);
+}; // class TextImageTexture : public private_video::BaseImage
+
 
 /** ****************************************************************************
 *** \brief A text specific subclass of the BaseImageElement subclass.
 *** ***************************************************************************/
-class TextImageElement : public private_video::BaseImageElement
-{
+class TextImageElement : public private_video::BaseImageElement {
 public:
-	//! \brief The image that is being referenced by this object.
-	TextImage* image;
-
-	//! \brief X offset from the line proper
-	float x_line_offset;
-
-	//! \brief Y offset from the line proper
-	float y_line_offset;
-
-
-
-	/** \brief Constructor specifying a specific image element.
-	*** Multiple elements can be stacked to form one compound image
-	**/
-	TextImageElement(TextImage *image_, float x_offset_, float y_offset_, float u1_, float v1_,
-		float u2_, float v2_, float width_, float height_, Color color_[4]);
-	
 	//! \brief Constructor defaulting the element to have white vertices and disabled blending.
-	TextImageElement(TextImage *image_, float x_offset_, float y_offset_, float u1_, float v1_,
+	TextImageElement(TextImageTexture* image_, float x_offset_, float y_offset_, float u1_, float v1_,
 		float u2_, float v2_, float width_, float height_);
 
-	/** Helper function to get abstract drawable
-	 *  image type.
-	 */
-	virtual private_video::BaseImage *GetBaseImage()
-		{ return image; }
+	TextImageElement(TextImageTexture* image_, float x_offset_, float y_offset_, float u1_, float v1_,
+		float u2_, float v2_, float width_, float height_, Color color_[4]);
 
-	/** Helper function to get abstract drawable
-	 *  image type (const version).
-	 */
-	virtual const private_video::BaseImage *GetBaseImage() const
-		{ return image; }
-};
+	// ---------- Public members
 
+	//! \brief The image that is being referenced by this object.
+	TextImageTexture* image;
+
+	//! \brief The x offset from the line proper
+	float x_line_offset;
+
+	//! \brief The y offset from the line proper
+	float y_line_offset;
+}; // class TextImageElement : public private_video::BaseImageElement
+
+} // namespace private_video
 
 /** ****************************************************************************
 *** \brief Represents a rendered text string
 *** RenderedText is a compound image containing each line of a text string.
 *** ***************************************************************************/
-class RenderedText : public ImageListDescriptor {
+class RenderedText : public ImageDescriptor {
 	friend class GameVideo;
 public:
 	enum align {
@@ -251,6 +242,10 @@ public:
 
 	//! \brief Clears the image by resetting its properties
 	void Clear();
+
+	void Draw() const {}
+
+	void Draw(const Color& draw_color) const {}
 
 	//! \name Class Member Set Functions
 	//@{
@@ -298,6 +293,9 @@ public:
 
 	//! \name Class Member Get Functions
 	//@{
+	bool IsAnimated() const
+		{ return false; }
+	
 	//! \brief Returns the filename of the image.
 	hoa_utils::ustring GetString() const
 		{ return _string; }
@@ -338,12 +336,11 @@ private:
 	/** The TextImage elements representing rendered text
 	**  portions, usually lines.
 	**/
-	std::vector<TextImageElement> _text_sections;
+	std::vector<private_video::TextImageElement> _text_sections;
 
 	//! \brief The horizontal text alignment
 	int8 _alignment;
 }; // class RenderedText : public ImageDescriptor
-
 
 }  // namespace hoa_video
 

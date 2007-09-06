@@ -73,7 +73,7 @@ void CreditsScreen::Draw()
 	Color modulated(1.0f, 1.0f, 1.0f, color_alpha);
 
 	VideoManager->SetDrawFlags(VIDEO_Y_TOP, 0);
-	VideoManager->DrawImage(_credits_rendered, modulated);
+	_credits_rendered.Draw(modulated);
 	VideoManager->SetDrawFlags(VIDEO_Y_CENTER, 0);
 
 	VideoManager->DisableScissoring();

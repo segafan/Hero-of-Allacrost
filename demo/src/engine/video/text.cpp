@@ -29,6 +29,146 @@ using namespace hoa_video::private_video;
 
 namespace hoa_video {
 
+namespace private_video {
+
+// *****************************************************************************
+// ********************************** TextImageTexture ***********************************
+// *****************************************************************************
+
+TextImageTexture::TextImageTexture(const hoa_utils::ustring &string_, const TextStyle &style_) :
+	BaseImageTexture(),
+	string(string_),
+	style(style_)
+{
+
+	// Use image smoothing
+	smooth = true;
+
+	LoadFontProperties();
+}
+
+
+
+TextImageTexture::~TextImageTexture() {
+	if (TextureManager->_text_images.empty()) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "TextureManager's _text_images container was empty upon destructor invocation" << endl;
+		return;
+	}
+
+	if (TextureManager->_IsTextImageRegistered(this)) {
+		TextureManager->_text_images.erase(this);
+		return;
+	}
+}
+
+
+bool TextImageTexture::LoadFontProperties()
+{
+	if (style.shadow_style == VIDEO_TEXT_SHADOW_INVALID)
+	{
+		FontProperties *fp = VideoManager->GetFontProperties(style.font);
+		if (!fp)
+		{
+			if (VIDEO_DEBUG)
+				cerr << "TextImageTexture::LoadFontProperties(): Invalid font '" << style.font << "'." << endl;
+			return false;
+		}
+		style.shadow_style    = fp->shadow_style;
+		style.shadow_offset_x = fp->shadow_x;
+		style.shadow_offset_y = fp->shadow_y;
+	}
+	return true;
+}
+
+bool TextImageTexture::Regenerate()
+{
+	if (texture_sheet) {
+		texture_sheet->RemoveImage(this);
+		TextureManager->_RemoveSheet(texture_sheet);
+		texture_sheet = NULL;
+	}
+
+	ImageMemory buffer;
+
+	if (!VideoManager->_RenderText(string, style, buffer))
+		return false;
+	
+	width  = buffer.width;
+	height = buffer.height;
+
+	TexSheet *sheet = TextureManager->_InsertImageInTexSheet(this, buffer, true);
+	if(!sheet)
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO_DEBUG: TextImageTexture::Regenerate(): GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
+
+		free(buffer.pixels);
+		buffer.pixels = NULL;
+		return false;
+	}
+
+	texture_sheet = sheet;
+
+	if (buffer.pixels) {
+		free(buffer.pixels);
+		buffer.pixels = NULL;
+	}
+
+	return true;
+}
+
+bool TextImageTexture::Reload()
+{
+	// Check if indeed already loaded. If not - create texture sheet entry.
+	if (!texture_sheet)
+		return Regenerate();
+
+	ImageMemory buffer;
+
+	if (!VideoManager->_RenderText(string, style, buffer))
+		return false;
+	
+	if (!texture_sheet->CopyRect(x, y, buffer))
+	{
+		if(VIDEO_DEBUG)
+			cerr << "VIDEO ERROR: sheet->CopyRect() failed in TextImageTexture::Reload()!" << endl;
+		free(buffer.pixels);
+		buffer.pixels = NULL;
+		return false;
+	}
+
+	if (buffer.pixels) {
+		free(buffer.pixels);
+		buffer.pixels = NULL;
+	}
+
+	return true;
+}
+
+// *****************************************************************************
+// ****************************** TextImageElement *********************************
+// *****************************************************************************
+
+TextImageElement::TextImageElement(TextImageTexture *image_, float x_offset_, float y_offset_, float u1_, float v1_,
+	float u2_, float v2_, float width_, float height_) :
+	BaseImageElement(width_, height_, x_offset_, y_offset_, u1_, v1_, u2_, v2_),
+	image(image_)
+{
+	base_image = image_;
+}
+
+
+
+TextImageElement::TextImageElement(TextImageTexture *image_, float x_offset_, float y_offset_, float u1_, float v1_,
+		float u2_, float v2_, float width_, float height_, Color color_[4]) :
+	BaseImageElement(width_, height_, x_offset_, y_offset_, u1_, v1_, u2_, v2_, color_),
+	image(image_)
+{
+	base_image =  image_;
+}
+
+} // namespace private_video
+
 // *****************************************************************************
 // ********************************* RenderedText *********************************
 // *****************************************************************************
@@ -37,10 +177,11 @@ namespace hoa_video {
 // RenderedText::DefaultConstructor: Constructs empty RenderedText
 //-----------------------------------------------------------------------------
 
-RenderedText::RenderedText()
-: _alignment (ALIGN_CENTER) {
+RenderedText::RenderedText() :
+	ImageDescriptor(),
+	_alignment(ALIGN_CENTER)
+{
 	Clear();
-	_animated = false;
 	_grayscale = false;
 }
 
@@ -48,10 +189,8 @@ RenderedText::RenderedText()
 // RenderedText::ustring-Constructor: Constructs and renders RenderedText with String
 //-----------------------------------------------------------------------------
 
-RenderedText::RenderedText(const ustring &string, int8 alignment)
-: _alignment (ALIGN_CENTER) {
+RenderedText::RenderedText(const ustring &string, int8 alignment) {
 	Clear();
-	_animated = false;
 	_grayscale = false;
 	_string = string;
 	SetAlignment(alignment);
@@ -62,10 +201,8 @@ RenderedText::RenderedText(const ustring &string, int8 alignment)
 // RenderedText::sstring-Constructor: Constructs and renders RenderedText with String
 //-----------------------------------------------------------------------------
 
-RenderedText::RenderedText(const std::string &string, int8 alignment)
-: _alignment (ALIGN_CENTER) {
+RenderedText::RenderedText(const std::string &string, int8 alignment)  {
 	Clear();
-	_animated = false;
 	_grayscale = false;
 	_string = MakeUnicodeString(string);
 	SetAlignment(alignment);
@@ -103,7 +240,7 @@ RenderedText &RenderedText::operator=(const RenderedText &other)
 	for (it = _text_sections.begin(); it != _text_sections.end(); ++it)
 	{
 		if (it->image)
-			it->image->Add();
+			it->image->AddReference();
 	}
 	
 	return *this;
@@ -123,7 +260,7 @@ RenderedText::~RenderedText()
 //-----------------------------------------------------------------------------
 
 void RenderedText::Clear() {
-	_Clear();
+	ImageDescriptor::Clear();
 	_string.clear();
 	_ClearImages();
 
@@ -199,12 +336,6 @@ void RenderedText::SetText(const std::string &string) {
 
 void RenderedText::_ClearImages()
 {
-	std::vector<TextImageElement>::iterator it;
-	for (it = _text_sections.begin(); it != _text_sections.end(); ++it)
-	{
-		if (it->image)
-			VideoManager->_DeleteImage(it->image);
-	}
 	_text_sections.clear();
 	
 	_width  = 0;
@@ -273,17 +404,17 @@ void RenderedText::_Regenerate() {
 
 	for (line_iter = line_array.begin(); line_iter != line_array.end(); ++line_iter)
 	{
-		TextImage *timage = new TextImage(*line_iter, style);
+		TextImageTexture *timage = new TextImageTexture(*line_iter, style);
 		if (!timage->Regenerate())
 		{
 			if (VIDEO_DEBUG)
 			{
-				cerr << "RenderedText::_Regenerate(): Failed to render TextImage." << endl;
+				cerr << "RenderedText::_Regenerate(): Failed to render TextImageTexture" << endl;
 			}
 		}
 
 		// Increment the reference count
-		timage->Add();
+		timage->AddReference();
 		float y_offset = total_height + _height * -VideoManager->_current_context.coordinate_system.GetVerticalDirection();
 		y_offset += (fp->line_skip - timage->height) * VideoManager->_current_context.coordinate_system.GetVerticalDirection();
 		TextImageElement element(timage, 0, y_offset, 0.0f, 0.0f, 1.0f, 1.0f, static_cast<float>(timage->width), static_cast<float>(timage->height), _color);
@@ -312,7 +443,7 @@ void RenderedText::_Regenerate() {
 			_text_sections.push_back(shadow_element);
 
 			// Increment reference count to reflect use in shadow texture
-			timage->Add();
+			timage->AddReference();
 		}
 
 		TextureManager->_RegisterTextImage(timage);
@@ -343,193 +474,6 @@ void RenderedText::_Realign()
 		it->x_offset = _alignment * VideoManager->_current_context.coordinate_system.GetHorizontalDirection() * ( (_width - it->width) / 2.0f) + it->x_line_offset;
 	}
 }
-
-// *****************************************************************************
-// ********************************** TextImage ***********************************
-// *****************************************************************************
-
-TextImage::TextImage(const hoa_utils::ustring &string_, const TextStyle &style_)
-:	string(string_),
-	style(style_)
-{
-	width = 0;
-	height = 0;
-	grayscale = false;
-	texture_sheet = NULL;
-	x = 0;
-	y = 0;
-	u1 = 0.0f;
-	v1 = 0.0f;
-	u2 = 1.0f;
-	v2 = 1.0f;
-	ref_count = 0;
-	// Use image smoothing
-	smooth = true;
-
-	LoadFontProperties();
-}
-
-
-
-TextImage::TextImage(TexSheet *sheet, const hoa_utils::ustring &string_, const TextStyle &style_, int32 x_, int32 y_, float u1_, float v1_,
-		float u2_, float v2_, int32 width, int32 height, bool grayscale_)
-:	string(string_),
-	style(style_)
-{
-	texture_sheet = sheet;
-	x = x_;
-	y = y_;
-	u1 = u1_;
-	v1 = v1_;
-	u2 = u2_;
-	v2 = v2_;
-	width = width;
-	height = height;
-	grayscale = grayscale_;
-	ref_count = 0;
-	// Use image smoothing
-	smooth = true;
-
-	LoadFontProperties();
-}
-
-
-bool TextImage::LoadFontProperties()
-{
-	if (style.shadow_style == VIDEO_TEXT_SHADOW_INVALID)
-	{
-		FontProperties *fp = VideoManager->GetFontProperties(style.font);
-		if (!fp)
-		{
-			if (VIDEO_DEBUG)
-				cerr << "TextImage::LoadFontProperties(): Invalid font '" << style.font << "'." << endl;
-			return false;
-		}
-		style.shadow_style    = fp->shadow_style;
-		style.shadow_offset_x = fp->shadow_x;
-		style.shadow_offset_y = fp->shadow_y;
-	}
-	return true;
-}
-
-bool TextImage::Regenerate()
-{
-	if (texture_sheet)
-	{
-		VideoManager->_DeleteImage(this);
-		texture_sheet = NULL;
-	}
-
-	ImageLoadInfo buffer;
-
-	if (!VideoManager->_RenderText(string, style, buffer))
-		return false;
-	
-	width  = buffer.width;
-	height = buffer.height;
-
-	TexSheet *sheet = TextureManager->_InsertImageInTexSheet(this, buffer, true);
-	if(!sheet)
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO_DEBUG: TextImage::Regenerate(): GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
-
-		free(buffer.pixels);
-		return false;
-	}
-
-	texture_sheet = sheet;
-
-	if (buffer.pixels) {
-		free(buffer.pixels);
-		buffer.pixels = NULL;
-	}
-
-	return true;
-}
-
-bool TextImage::Reload()
-{
-	// Check if indeed already loaded. If not - create texture sheet entry.
-	if (!texture_sheet)
-		return Regenerate();
-
-	ImageLoadInfo buffer;
-
-	if (!VideoManager->_RenderText(string, style, buffer))
-		return false;
-	
-	if (!texture_sheet->CopyRect(x, y, buffer))
-	{
-		if(VIDEO_DEBUG)
-			cerr << "VIDEO ERROR: sheet->CopyRect() failed in TextImage::Reload()!" << endl;
-		free(buffer.pixels);
-		return false;
-	}
-	return true;
-}
-
-// *****************************************************************************
-// ****************************** TextImageElement *********************************
-// *****************************************************************************
-
-TextImageElement::TextImageElement(TextImage *image_, float x_offset_, float y_offset_, float u1_, float v1_,
-	float u2_, float v2_, float width_, float height_) :
-	image(image_)
-{
-	x_offset = x_offset_;
-	y_offset = y_offset_;
-	u1 = u1_;
-	v1 = v1_;
-	u2 = u2_;
-	v2 = v2_;
-	width = width_;
-	height = height_;
-	white = true;
-	one_color = true;
-	blend = false;
-	color[0] = Color::white;
-}
-
-
-
-TextImageElement::TextImageElement(TextImage *image_, float x_offset_, float y_offset_, float u1_, float v1_,
-		float u2_, float v2_, float width_, float height_, Color color_[4]) :
-	image(image_)
-{
-	x_offset = x_offset_;
-	y_offset = y_offset_;
-	u1 = u1_;
-	v1 = v1_;
-	u2 = u2_;
-	v2 = v2_;
-	width = width_;
-	height = height_;
-	color[0] = color_[0];
-
-	// If all colors are the same, then mark it so we don't have to process all vertex colors
-	if (color_[1] == color[0] && color_[2] == color[0] && color_[3] == color[0]) {
-		one_color = true;
-
-		// If all vertex colors are white, set a flag so they don't have to be processed at all
-		if (color[0] == Color::white) {
-			white = true;
-			blend = false;
-		}
-		// Set blend to true if alpha < 1.0f
-		else {
-			blend = (color[0][3] < 1.0f);
-		}
-	}
-	else {
-		color[0] = color_[0];
-		color[1] = color_[1];
-		color[2] = color_[2];
-		color[3] = color_[3];
-		// Set blend to true if any of the four colors have an alpha value < 1.0f
-		blend = (color[0][3] < 1.0f || color[1][3] < 1.0f || color[2][3] < 1.0f || color[3][3] < 1.0f);
-	}
-} // TextImageElement::TextImageElement()
 
 //-----------------------------------------------------------------------------
 // GameVideo class font and text methods
@@ -853,7 +797,7 @@ bool GameVideo::_CacheGlyphs(const uint16 *uText, FontProperties *fp) {
 		}
 
 		glGenTextures(1, &texture);
-		if(glGetError())
+		if(VideoManager->CheckGLError())
 		{
 			SDL_FreeSurface(initial);
 			SDL_FreeSurface(intermediary);
@@ -863,7 +807,7 @@ bool GameVideo::_CacheGlyphs(const uint16 *uText, FontProperties *fp) {
 		}
 		
 		TextureManager->_BindTexture(texture);
-		if(glGetError())
+		if(VideoManager->CheckGLError())
 		{
 			SDL_FreeSurface(initial);
 			SDL_FreeSurface(intermediary);
@@ -877,9 +821,9 @@ bool GameVideo::_CacheGlyphs(const uint16 *uText, FontProperties *fp) {
 		{
 			((uint8*)intermediary->pixels)[j*4+3] = ((uint8*)intermediary->pixels)[j*4+2];
 			
-			((uint8*)intermediary->pixels)[j*4+0] = 
-			((uint8*)intermediary->pixels)[j*4+1] = 
-			((uint8*)intermediary->pixels)[j*4+2] = 0xff;
+			((uint8*)intermediary->pixels)[j*4+0] = 0xFF;
+			((uint8*)intermediary->pixels)[j*4+1] = 0xFF;
+			((uint8*)intermediary->pixels)[j*4+2] = 0xFF;
 		}
 
 		glTexImage2D(GL_TEXTURE_2D, 0, 4, w, h, 0, GL_RGBA, 
@@ -890,7 +834,7 @@ bool GameVideo::_CacheGlyphs(const uint16 *uText, FontProperties *fp) {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);	
 
 
-		if(glGetError())
+		if(VideoManager->CheckGLError())
 		{
 			SDL_FreeSurface(initial);
 			SDL_FreeSurface(intermediary);
@@ -1018,7 +962,7 @@ bool GameVideo::_DrawTextHelper(const uint16 *uText) {
 		
 		TextureManager->_BindTexture(glyphinfo->texture);
 
-		if(glGetError())
+		if(VideoManager->CheckGLError())
 		{
 			if(VIDEO_DEBUG)
 				cerr << "VIDEO ERROR: glGetError() true after 2nd call to glBindTexture() in _DrawTextHelper!" << endl;
@@ -1067,7 +1011,7 @@ bool GameVideo::_DrawTextHelper(const uint16 *uText) {
 // _RenderText: Renders a given unicode string and TextStyle to a pixel array
 //-----------------------------------------------------------------------------
 
-bool GameVideo::_RenderText(hoa_utils::ustring &string, TextStyle &style, ImageLoadInfo &buffer)
+bool GameVideo::_RenderText(hoa_utils::ustring &string, TextStyle &style, ImageMemory &buffer)
 {
 	FontProperties * fp = _font_map[style.font];
 	TTF_Font * font     = fp->ttf_font;
@@ -1078,8 +1022,6 @@ bool GameVideo::_RenderText(hoa_utils::ustring &string, TextStyle &style, ImageL
 			cerr << "GameVideo::_RenderText(): font '" << style.font << "' not valid." << endl;
 		return false;
 	}
-
-	ImageLoadInfo load_info;
 
 	static const SDL_Color color = { 0xFF, 0xFF, 0xFF, 0xFF };
 
@@ -1198,14 +1140,13 @@ bool GameVideo::_RenderText(hoa_utils::ustring &string, TextStyle &style, ImageL
 		((uint8*)intermediary->pixels)[j*4+2] = (uint8) (style.color[2] * 0xFF);
 	}
 
-	load_info.width  = line_w;
-	load_info.height = line_h;
-	load_info.pixels = intermed_buf;
+	buffer.width = line_w;
+	buffer.height = line_h;
+	buffer.pixels = intermed_buf;
 
 	// Prevent SDL from deleting pixel array
 	intermediary->pixels = NULL;
 
-	buffer = load_info;
 
 	SDL_UnlockSurface(intermediary);
 	SDL_FreeSurface(intermediary);
