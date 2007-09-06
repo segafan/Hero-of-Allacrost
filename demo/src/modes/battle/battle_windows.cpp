@@ -582,10 +582,7 @@ void ActionWindow::_ConstructActionInformation() {
 FinishWindow::FinishWindow() {
 	// TODO: declare the MenuSkin to be used
 	//Just like the ones in Menu Mode
-	//NOTE: So, battle mode should have been using the below coordinate system the whole time
-	//Whatever jackass changed it so the bottom left was 0,0 instead of the upper left should be shot.
-	//VideoManager->SetCoordSys(0.0f, 1024.0f, 768.0f, 0.0f);
-	float start_x = (1024 - 800) / 2 - 40;
+	float start_x = (1024 - 800) / 2 + 144;
 	float start_y = 768 - ((768 - 600) / 2 + 15);
 	//if (MenuWindow::Create(512.0f, 256.0f) == false) {
 	/*if (MenuWindow::Create(848.0f, 632.0f) == false) {
@@ -597,7 +594,8 @@ FinishWindow::FinishWindow() {
 	//MenuWindow::Hide();
 
 	//Create xp and money window
-	_xp_and_money_window.Create(848.0f, 72.0f, VIDEO_MENU_EDGE_ALL, ~VIDEO_MENU_EDGE_ALL);
+	//_xp_and_money_window.Create(848.0f, 72.0f, VIDEO_MENU_EDGE_ALL, ~VIDEO_MENU_EDGE_ALL);
+	_xp_and_money_window.Create(480.0f, 72.0f, VIDEO_MENU_EDGE_ALL, ~VIDEO_MENU_EDGE_ALL);
 	_xp_and_money_window.SetPosition(start_x, start_y + 50.0f);
 	_xp_and_money_window.Show();
 
@@ -619,9 +617,18 @@ FinishWindow::FinishWindow() {
 	_character_window[3].Show();
 
 	//Create items window
-	_items_window.Create(848.0f, 560.0f, ~VIDEO_MENU_EDGE_TOP, VIDEO_MENU_EDGE_TOP);
-	_items_window.SetPosition(start_x, start_y - 18.0f);
+	//_items_window.Create(848.0f, 560.0f, ~VIDEO_MENU_EDGE_TOP, VIDEO_MENU_EDGE_TOP);
+	//_items_window.SetPosition(start_x, start_y - 18.0f);
+	//_items_window.Show();
+	_items_window.Create(480.0f, 560.0f, ~VIDEO_MENU_EDGE_TOP, VIDEO_MENU_EDGE_TOP);
+	_items_window.SetPosition(start_x, start_y - 13.0f);
 	_items_window.Show();
+
+	for (int32 i = 0; i < 4; ++i)
+	{
+		for (int32 j = 0; j < 8; ++j)
+			_growth_gained[i][j] = 0;
+	}
 
 	_state = FINISH_INVALID;
 
@@ -678,6 +685,10 @@ FinishWindow::~FinishWindow() {
 void FinishWindow::Initialize(bool victory) {
 	MenuWindow::Show();
 
+	_victory_money = 0;
+	_victory_xp = 0;
+	_victory_items.clear();
+
 	for (uint32 i = 0; i < current_battle->_character_actors.size(); i++) {
 		_characters.push_back(dynamic_cast<GlobalCharacter*>(current_battle->_character_actors[i]->GetActor()));
 		_character_growths.push_back(_characters[i]->GetGrowth());
@@ -688,6 +699,7 @@ void FinishWindow::Initialize(bool victory) {
 		current_battle->AddMusic("mus/Allacrost_Fanfare.ogg");
 		current_battle->_battle_music.back().Play();
 		_finish_outcome.SetDisplayText("The heroes are victorious!");
+		_TallyXPMoneyAndItems();
 	}
 	else {
 		_state = FINISH_LOSE_ANNOUNCE;
@@ -695,6 +707,38 @@ void FinishWindow::Initialize(bool victory) {
 		current_battle->_battle_music.back().Play();
 		_finish_outcome.SetDisplayText("The heroes have been defeated...");
 	}
+}
+
+// ----- Tallies all the stuff we've won (xp, money, items)
+
+void FinishWindow::_TallyXPMoneyAndItems()
+{
+	GlobalEnemy* ge;
+	vector<GlobalObject*> objects;
+	std::map<GlobalObject*, int32>::iterator iter;
+
+	for (uint32 i = 0; i < current_battle->GetNumberOfEnemies(); ++i)
+	{
+		ge = current_battle->GetEnemyActorAt(i)->GetActor();
+		_victory_money += ge->GetDrunesDropped();
+		_victory_xp += ge->GetExperiencePoints();
+		ge->DetermineDroppedObjects(objects);
+
+		for (uint32 i = 0; i < objects.size(); ++i)
+		{
+			iter = _victory_items.find(objects[i]);
+			if (iter != _victory_items.end())
+			{
+				iter->second++;
+			}
+			else
+			{
+				_victory_items.insert(make_pair(objects[i], 1));
+			}
+		}
+	}
+
+	_victory_xp /= current_battle->GetNumberOfEnemies();
 }
 
 // ----- UPDATE METHODS
@@ -706,11 +750,21 @@ void FinishWindow::Update() {
 		case FINISH_WIN_ANNOUNCE:
 			_UpdateAnnounceWin();
 			break;
-		case FINISH_WIN_GROWTH:
+		case FINISH_WIN_SHOW_GROWTH:
+		case FINISH_WIN_RESOLVE_GROWTH:
+		case FINISH_WIN_SHOW_SKILLS:
+		case FINISH_WIN_SHOW_SPOILS:
+		case FINISH_WIN_RESOLVE_SPOILS:
+			_UpdateWinWaitForOK();
+			break;
+		case FINISH_WIN_COUNTDOWN_GROWTH:
 			_UpdateWinGrowth();
 			break;
-		case FINISH_WIN_SPOILS:
+		case FINISH_WIN_COUNTDOWN_SPOILS:
 			_UpdateWinSpoils();
+			break;
+		case FINISH_WIN_COMPLETE:
+			current_battle->_ShutDown();
 			break;
 		case FINISH_LOSE_ANNOUNCE:
 			_UpdateAnnounceLose();
@@ -739,22 +793,128 @@ void FinishWindow::_UpdateAnnounceWin() {
 	}
 
 	if (InputManager->ConfirmPress())
-		_state = FINISH_WIN_GROWTH;
+		_state = FINISH_WIN_SHOW_GROWTH;
 }
 
-
+// If OK was pressed, just move to the next state
+void FinishWindow::_UpdateWinWaitForOK()
+{
+	if (InputManager->ConfirmPress())
+	{
+		switch (_state)
+		{
+			case FINISH_WIN_SHOW_GROWTH:
+				_state = FINISH_WIN_COUNTDOWN_GROWTH;
+				break;
+			case FINISH_WIN_RESOLVE_GROWTH:
+				_state = FINISH_WIN_SHOW_SKILLS;
+				break;
+			case FINISH_WIN_SHOW_SKILLS:
+				_state = FINISH_WIN_SHOW_SPOILS;
+				break;
+			case FINISH_WIN_SHOW_SPOILS:
+				_state = FINISH_WIN_COUNTDOWN_SPOILS;
+				break;
+			case FINISH_WIN_RESOLVE_SPOILS:
+				_state = FINISH_WIN_COMPLETE;
+				break;
+		}
+	}
+}
 
 void FinishWindow::_UpdateWinGrowth() {
+	static uint32 time_of_next_update = SDL_GetTicks();
+	uint32 xp_to_add = 1;
+
 	if (InputManager->ConfirmPress())
-		_state = FINISH_WIN_SPOILS;
+	{
+		xp_to_add = _victory_xp;
+		_victory_xp = 0;
+	}
+	else if (SDL_GetTicks() < time_of_next_update)
+	{
+		return;
+	}
+	else
+	{
+		--_victory_xp;
+	}
+
+	for (uint32 i = 0; i < _characters.size(); ++i)
+	{
+		if (_characters[i]->AddExperiencePoints(_victory_xp))
+		{
+			do {
+				//Record growth stats for each character for rendering
+				//HP
+				_growth_gained[i][0] += _character_growths[i]->GetHitPointsGrowth();
+				//SP
+				_growth_gained[i][1] += _character_growths[i]->GetSkillPointsGrowth();
+				//STR
+				_growth_gained[i][2] += _character_growths[i]->GetStrengthGrowth();
+				//VIG
+				_growth_gained[i][3] += _character_growths[i]->GetVigorGrowth();
+				//FOR
+				_growth_gained[i][4] += _character_growths[i]->GetFortitudeGrowth();
+				//PRO
+				_growth_gained[i][5] += _character_growths[i]->GetProtectionGrowth();
+				//AGI
+				_growth_gained[i][6] += _character_growths[i]->GetAgilityGrowth();
+				//EVD
+				_growth_gained[i][7] += _character_growths[i]->GetEvadeGrowth();
+
+				if (_character_growths[i]->IsExperienceLevelGained())
+				{
+					//Play Sound
+				}
+				_character_growths[i]->AcknowledgeGrowth();
+			} while(_character_growths[i]->IsGrowthDetected());
+		}
+	//	_state = FINISH_WIN_SPOILS;
+	}
+
+	//We've allocated all the XP
+	if (!_victory_xp)
+		_state = FINISH_WIN_RESOLVE_GROWTH;
+
+	//Every 50 milliseconds we update
+	time_of_next_update += 50;
 }
 
-
-
 void FinishWindow::_UpdateWinSpoils() {
-	if (InputManager->ConfirmPress()) {
-		current_battle->_ShutDown();
+	static uint32 time_of_next_update = SDL_GetTicks();
+	uint32 money_to_add = 1;
+
+	if (InputManager->ConfirmPress())
+	{
+		money_to_add = _victory_money;
+		_victory_money = 0;
 	}
+	else if (SDL_GetTicks() < time_of_next_update)
+	{
+		return;
+	}
+	else
+	{
+		--_victory_money;
+	}
+
+	GlobalManager->AddDrunes(money_to_add);
+
+	if (!_victory_money)
+	{
+		std::map<GlobalObject*, int32>::iterator iter;
+
+		for (iter = _victory_items.begin(); iter != _victory_items.end(); ++iter)
+		{
+			GlobalManager->AddToInventory(iter->first->GetID(), iter->second);
+		}
+
+		_state = FINISH_WIN_RESOLVE_SPOILS;
+	}
+
+	//Every 50 milliseconds we update
+	time_of_next_update += 50;
 }
 
 
@@ -794,7 +954,6 @@ void FinishWindow::_UpdateAnnounceLose() {
 }
 
 
-
 void FinishWindow::_UpdateLoseConfirm() {
 	if (InputManager->CancelPress()) {
 		_state = FINISH_LOSE_ANNOUNCE;
@@ -819,74 +978,40 @@ void FinishWindow::Draw() {
 	//Two different window arrangements for win and lose would be best
 	//Win has all the elaborate windows, lose just has the game over options
 	//MenuWindow::Draw();
-	_items_window.Draw();
-
-	_character_window[0].Draw();
-	_character_window[1].Draw();
-	_character_window[2].Draw();
-	_character_window[3].Draw();
-
-	_xp_and_money_window.Draw();
+	//_items_window.Draw();
 
 	//TEMP!!!
 	//Just so everyone has an idea of the potential setup for the finishwindow
-
-	//Draw XP and Money
-	{
-		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP);
-		VideoManager->Move(96, 694);
-		VideoManager->DrawText("XP Gained: 45");
-
-		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_TOP);
-		VideoManager->MoveRelative(800, 0);
-		VideoManager->DrawText("Dorun: 33");
-	}
-
-	//Draw Items Gained
-	{
-		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP);
-		VideoManager->Move(700, 640);
-		VideoManager->DrawText("Items");
-		//VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP);
-		VideoManager->MoveRelative(-140, -25);
-		VideoManager->DrawText("Health Potion");
-		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_TOP);
-		VideoManager->MoveRelative(325, 0);
-		VideoManager->DrawText("1");
-	}
-
-	//Draw char info
-	{
-		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER);
-		VideoManager->Move(80, 580);
-		VideoManager->DrawImage(_char_portraits[0]);
-		VideoManager->MoveRelative(150, 40);
-		VideoManager->DrawText("HP: 14 (+11)");
-		VideoManager->MoveRelative(0, -26);
-		VideoManager->DrawText("SP: 10");
-		VideoManager->MoveRelative(0, -26);
-		VideoManager->DrawText("STR: 22 (+1)");
-		VideoManager->MoveRelative(0, -26);
-		VideoManager->DrawText("VIG: 18 (+2)");
-
-		VideoManager->MoveRelative(155, 78);
-		VideoManager->DrawText("FOR: 11");
-		VideoManager->MoveRelative(0, -26);
-		VideoManager->DrawText("PRO: 16 (+5)");
-		VideoManager->MoveRelative(0, -26);
-		VideoManager->DrawText("AGI: 25 (+2)");
-		VideoManager->MoveRelative(0, -26);
-		VideoManager->DrawText("EVD: 6");
-	}
 
 	switch (_state) {
 		case FINISH_WIN_ANNOUNCE:
 			_DrawAnnounceWin();
 			break;
-		case FINISH_WIN_GROWTH:
+		case FINISH_WIN_SHOW_GROWTH:
+		case FINISH_WIN_COUNTDOWN_GROWTH:
+		case FINISH_WIN_RESOLVE_GROWTH:
+			_character_window[0].Draw();
+			_character_window[1].Draw();
+			_character_window[2].Draw();
+			_character_window[3].Draw();
+
+			_xp_and_money_window.Draw();
 			_DrawWinGrowth();
 			break;
-		case FINISH_WIN_SPOILS:
+		case FINISH_WIN_SHOW_SKILLS:
+			_character_window[0].Draw();
+			_character_window[1].Draw();
+			_character_window[2].Draw();
+			_character_window[3].Draw();
+
+			_xp_and_money_window.Draw();
+			_DrawWinSkills();
+			break;
+		case FINISH_WIN_SHOW_SPOILS:
+		case FINISH_WIN_COUNTDOWN_SPOILS:
+		case FINISH_WIN_RESOLVE_SPOILS:
+			_items_window.Draw();
+			_xp_and_money_window.Draw();
 			_DrawWinSpoils();
 			break;
 		case FINISH_LOSE_ANNOUNCE:
@@ -906,19 +1031,171 @@ void FinishWindow::Draw() {
 
 
 void FinishWindow::_DrawAnnounceWin() {
-
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	VideoManager->Move(512.0f, 384.0f);
+	VideoManager->DrawText("MAJOR PWNAGE!!!!");
 }
 
 
 
 void FinishWindow::_DrawWinGrowth() {
+	//Draw XP Earned
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	VideoManager->Move(496, 683);
+	VideoManager->DrawText(MakeUnicodeString("XP Gained: ") + MakeUnicodeString(NumberToString(_victory_xp)));
 
+	//Now draw char info
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	//VideoManager->Move(80, 580);
+	VideoManager->Move(265, 580);
+
+	ustring display_text;
+	for (uint32 i = 0; i < _characters.size(); ++i)
+	{
+		//Portraits
+		VideoManager->DrawImage(_char_portraits[i]);
+
+		//First column
+		VideoManager->MoveRelative(150, 40);
+
+		display_text = MakeUnicodeString("HP: ") + 
+			MakeUnicodeString(NumberToString(_characters[i]->GetMaxHitPoints()));
+		if (_growth_gained[i][0])
+		{
+			display_text += MakeUnicodeString(" (") + 
+			MakeUnicodeString(NumberToString(_growth_gained[i][0])) + MakeUnicodeString(")");
+		}
+		VideoManager->DrawText(display_text);
+
+		//VideoManager->DrawText(MakeUnicodeString("HP: ") + 
+		//	MakeUnicodeString(NumberToString(_characters[i]->GetMaxHitPoints())) ;
+		VideoManager->MoveRelative(0, -26);
+		display_text = MakeUnicodeString("SP: ") + 
+			MakeUnicodeString(NumberToString(_characters[i]->GetMaxSkillPoints()));
+		if (_growth_gained[i][1])
+		{
+			display_text += MakeUnicodeString(" (") + 
+			MakeUnicodeString(NumberToString(_growth_gained[i][1])) + MakeUnicodeString(")");
+		}
+		VideoManager->DrawText(display_text);
+
+		VideoManager->MoveRelative(0, -26);
+		display_text = MakeUnicodeString("STR: ") + 
+			MakeUnicodeString(NumberToString(_characters[i]->GetStrength()));
+		if (_growth_gained[i][2])
+		{
+			display_text += MakeUnicodeString(" (") + 
+			MakeUnicodeString(NumberToString(_growth_gained[i][2])) + MakeUnicodeString(")");
+		}
+		VideoManager->DrawText(display_text);
+
+		VideoManager->MoveRelative(0, -26);
+		display_text = MakeUnicodeString("VIG: ") + 
+			MakeUnicodeString(NumberToString(_characters[i]->GetVigor()));
+		if (_growth_gained[i][3])
+		{
+			display_text += MakeUnicodeString(" (") + 
+			MakeUnicodeString(NumberToString(_growth_gained[i][3])) + MakeUnicodeString(")");
+		}
+		VideoManager->DrawText(display_text);
+
+		//Second Column
+		VideoManager->MoveRelative(155, 78);
+		display_text = MakeUnicodeString("FOR: ") + 
+			MakeUnicodeString(NumberToString(_characters[i]->GetStrength()));
+		if (_growth_gained[i][4])
+		{
+			display_text += MakeUnicodeString(" (") + 
+			MakeUnicodeString(NumberToString(_growth_gained[i][4])) + MakeUnicodeString(")");
+		}
+		VideoManager->DrawText(display_text);
+
+		VideoManager->MoveRelative(0, -26);
+		display_text = MakeUnicodeString("PRO: ") + 
+			MakeUnicodeString(NumberToString(_characters[i]->GetProtection()));
+		if (_growth_gained[i][5])
+		{
+			display_text += MakeUnicodeString(" (") + 
+			MakeUnicodeString(NumberToString(_growth_gained[i][5])) + MakeUnicodeString(")");
+		}
+		VideoManager->DrawText(display_text);
+
+		VideoManager->MoveRelative(0, -26);
+		display_text = MakeUnicodeString("AGI: ") + 
+			MakeUnicodeString(NumberToString(_characters[i]->GetAgility()));
+		if (_growth_gained[i][6])
+		{
+			display_text += MakeUnicodeString(" (") + 
+			MakeUnicodeString(NumberToString(_growth_gained[i][6])) + MakeUnicodeString(")");
+		}
+		VideoManager->DrawText(display_text);
+
+		VideoManager->MoveRelative(0, -26);
+		display_text = MakeUnicodeString("EVD: ") + 
+			MakeUnicodeString(NumberToString(_characters[i]->GetEvade()));
+		if (_growth_gained[i][7])
+		{
+			display_text += MakeUnicodeString(" (") + 
+			MakeUnicodeString(NumberToString(_growth_gained[i][7])) + MakeUnicodeString(")");
+		}
+		VideoManager->DrawText(display_text);
+	}
 }
 
+void FinishWindow::_DrawWinSkills()
+{
+	//Draw XP Earned
+	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER);
+	VideoManager->Move(496, 683);
+	VideoManager->DrawText(MakeUnicodeString("XP Gained: ") + MakeUnicodeString(NumberToString(_victory_xp)));
 
+	//Now draw char info
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	//VideoManager->Move(80, 580);
+	VideoManager->Move(265, 580);
 
-void FinishWindow::_DrawWinSpoils() {
+	ustring display_text;
+	for (uint32 i = 0; i < _characters.size(); ++i)
+	{
+		//Portraits
+		VideoManager->DrawImage(_char_portraits[i]);
+		//TEMP
+		VideoManager->MoveRelative(240, 0);
+		VideoManager->DrawText("Learned");
+	}
+}
 
+void FinishWindow::_DrawWinSpoils() 
+{
+	//VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER);	
+	//VideoManager->Move(496, 683);
+	//VideoManager->Move(96, 683);
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER);
+	VideoManager->Move(280, 683);
+	VideoManager->DrawText(MakeUnicodeString("Drunes: ") + MakeUnicodeString(NumberToString(_victory_money)));
+
+	VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_CENTER);
+	VideoManager->Move(712, 683);
+	VideoManager->DrawText(MakeUnicodeString("$ ") + MakeUnicodeString(NumberToString(GlobalManager->GetDrunes())));
+
+	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	//VideoManager->Move(700, 640);
+	VideoManager->Move(475, 640);
+	VideoManager->DrawText("Items");
+	//VideoManager->MoveRelative(-140, -25);
+	VideoManager->MoveRelative(-200, -35);
+
+	std::map<GlobalObject*, int32>::iterator iter;
+
+	for (iter = _victory_items.begin(); iter != _victory_items.end(); ++iter)
+	{
+		VideoManager->DrawText(iter->first->GetName());
+		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_TOP);
+		VideoManager->MoveRelative(325, 0);
+		VideoManager->DrawText(MakeUnicodeString(NumberToString(iter->second)));
+		VideoManager->MoveRelative(-325, -25);
+		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP);
+	}
 }
 
 
