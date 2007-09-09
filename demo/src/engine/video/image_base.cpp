@@ -689,12 +689,16 @@ BaseImageElement::BaseImageElement(const BaseImageElement& copy) :
 	v1(copy.v1),
 	u2(copy.u2),
 	v2(copy.v2),
-	color(copy.color),
+	//color(copy.color),
 	blend(copy.blend),
 	unichrome_vertices(copy.unichrome_vertices),
 	white_vertices(copy.white_vertices),
 	base_image(copy.base_image)
 {
+	color[0] = copy.color[0];
+	color[1] = copy.color[1];
+	color[2] = copy.color[2];
+	color[3] = copy.color[3];
 	if (base_image != NULL)
 		base_image->AddReference();
 }
