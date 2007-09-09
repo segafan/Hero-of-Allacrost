@@ -594,19 +594,19 @@ FinishWindow::FinishWindow() {
 
 	//Create character windows
 	_character_window[0].Create(480.0f, 140.0f, ~VIDEO_MENU_EDGE_BOTTOM, VIDEO_MENU_EDGE_BOTTOM);
-	_character_window[0].SetPosition(start_x, start_y - 13.0f);
+	_character_window[0].SetPosition(start_x, start_y - 12.0f);
 	_character_window[0].Show();
 
 	_character_window[1].Create(480.0f, 140.0f, ~VIDEO_MENU_EDGE_BOTTOM, VIDEO_MENU_EDGE_BOTTOM);
-	_character_window[1].SetPosition(start_x, start_y - 13.0f - 140.0f);
+	_character_window[1].SetPosition(start_x, start_y - 12.0f - 140.0f);
 	_character_window[1].Show();
 
 	_character_window[2].Create(480.0f, 140.0f, ~VIDEO_MENU_EDGE_BOTTOM, VIDEO_MENU_EDGE_BOTTOM);
-	_character_window[2].SetPosition(start_x, start_y - 13.0f - 140.0f * 2.0f);
+	_character_window[2].SetPosition(start_x, start_y - 11.0f - 140.0f * 2.0f);
 	_character_window[2].Show();
 
 	_character_window[3].Create(480.0f, 140.0f, VIDEO_MENU_EDGE_ALL, ~VIDEO_MENU_EDGE_ALL);//~VIDEO_MENU_EDGE_BOTTOM, VIDEO_MENU_EDGE_BOTTOM);
-	_character_window[3].SetPosition(start_x, start_y - 13.0f - 140.0f * 3.0f);
+	_character_window[3].SetPosition(start_x, start_y - 10.0f - 140.0f * 3.0f);
 	_character_window[3].Show();
 
 	//Create items window
@@ -650,8 +650,6 @@ FinishWindow::FinishWindow() {
 	_lose_options.SetCursorOffset(-60.0f, 25.0f);
 	_lose_options.SetSelection(0);
 	_lose_options.SetOwner(this);
-
-	_char_portraits[0].Load("img/portraits/map/claudius.png", 130.0f, 130.0f);
 }
 
 
@@ -680,6 +678,7 @@ void FinishWindow::Initialize(bool victory) {
 	for (uint32 i = 0; i < current_battle->_character_actors.size(); i++) {
 		_characters.push_back(dynamic_cast<GlobalCharacter*>(current_battle->_character_actors[i]->GetActor()));
 		_character_growths.push_back(_characters[i]->GetGrowth());
+		_char_portraits[i].Load("img/portraits/map/" + current_battle->_character_actors[i]->GetActor()->GetFilename() + ".png", 100.0f, 100.0f);
 	}
 
 	if (victory) {
@@ -806,6 +805,10 @@ void FinishWindow::_UpdateWinWaitForOK()
 			case FINISH_WIN_RESOLVE_SPOILS:
 				_state = FINISH_WIN_COMPLETE;
 				break;
+			default:
+				if (BATTLE_DEBUG)
+					cerr << "BATTLE ERROR: In FinishWindow::_UpdateWinWaitForOK(), the window state was invalid: " << _state << endl;
+				return;
 		}
 	}
 }
@@ -830,7 +833,7 @@ void FinishWindow::_UpdateWinGrowth() {
 
 	for (uint32 i = 0; i < _characters.size(); ++i)
 	{
-		if (_characters[i]->AddExperiencePoints(_victory_xp))
+		if (_characters[i]->AddExperiencePoints(xp_to_add))
 		{
 			do {
 				//Record growth stats for each character for rendering
@@ -858,7 +861,6 @@ void FinishWindow::_UpdateWinGrowth() {
 				_character_growths[i]->AcknowledgeGrowth();
 			} while(_character_growths[i]->IsGrowthDetected());
 		}
-	//	_state = FINISH_WIN_SPOILS;
 	}
 
 	//We've allocated all the XP
@@ -1034,8 +1036,8 @@ void FinishWindow::_DrawWinGrowth() {
 
 	//Now draw char info
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, 0);
-	//VideoManager->Move(80, 580);
-	VideoManager->Move(265, 580);
+	//VideoManager->Move(265, 580);
+	VideoManager->Move(270, 595);
 
 	ustring display_text;
 	for (uint32 i = 0; i < _characters.size(); ++i)
@@ -1043,9 +1045,19 @@ void FinishWindow::_DrawWinGrowth() {
 		//Portraits
 		_char_portraits[i].Draw();
 
-		//First column
-		VideoManager->MoveRelative(150, 40);
+		VideoManager->MoveRelative(5,-55);
+		VideoManager->DrawText(MakeUnicodeString("Lv. ") + 
+			MakeUnicodeString(NumberToString(_characters[i]->GetExperienceLevel())));
+		VideoManager->MoveRelative(0, -15);
+		VideoManager->DrawText(MakeUnicodeString("XP To Next: ") + 
+			MakeUnicodeString(NumberToString(_characters[i]->GetExperienceForNextLevel() - _characters[i]->GetExperiencePoints())));
 
+		//First column
+		//VideoManager->MoveRelative(150, 40);
+		//VideoManager->MoveRelative(150, 25);
+		VideoManager->MoveRelative(140, 105);
+
+		//HP
 		display_text = MakeUnicodeString("HP: ") + 
 			MakeUnicodeString(NumberToString(_characters[i]->GetMaxHitPoints()));
 		if (_growth_gained[i][0])
@@ -1055,8 +1067,7 @@ void FinishWindow::_DrawWinGrowth() {
 		}
 		VideoManager->DrawText(display_text);
 
-		//VideoManager->DrawText(MakeUnicodeString("HP: ") + 
-		//	MakeUnicodeString(NumberToString(_characters[i]->GetMaxHitPoints())) ;
+		//SP
 		VideoManager->MoveRelative(0, -26);
 		display_text = MakeUnicodeString("SP: ") + 
 			MakeUnicodeString(NumberToString(_characters[i]->GetMaxSkillPoints()));
@@ -1067,6 +1078,7 @@ void FinishWindow::_DrawWinGrowth() {
 		}
 		VideoManager->DrawText(display_text);
 
+		//STR
 		VideoManager->MoveRelative(0, -26);
 		display_text = MakeUnicodeString("STR: ") + 
 			MakeUnicodeString(NumberToString(_characters[i]->GetStrength()));
@@ -1077,6 +1089,7 @@ void FinishWindow::_DrawWinGrowth() {
 		}
 		VideoManager->DrawText(display_text);
 
+		//VIG
 		VideoManager->MoveRelative(0, -26);
 		display_text = MakeUnicodeString("VIG: ") + 
 			MakeUnicodeString(NumberToString(_characters[i]->GetVigor()));
@@ -1088,6 +1101,7 @@ void FinishWindow::_DrawWinGrowth() {
 		VideoManager->DrawText(display_text);
 
 		//Second Column
+		//FOR
 		VideoManager->MoveRelative(155, 78);
 		display_text = MakeUnicodeString("FOR: ") + 
 			MakeUnicodeString(NumberToString(_characters[i]->GetStrength()));
@@ -1098,6 +1112,7 @@ void FinishWindow::_DrawWinGrowth() {
 		}
 		VideoManager->DrawText(display_text);
 
+		//PRO
 		VideoManager->MoveRelative(0, -26);
 		display_text = MakeUnicodeString("PRO: ") + 
 			MakeUnicodeString(NumberToString(_characters[i]->GetProtection()));
@@ -1108,6 +1123,7 @@ void FinishWindow::_DrawWinGrowth() {
 		}
 		VideoManager->DrawText(display_text);
 
+		//AGI
 		VideoManager->MoveRelative(0, -26);
 		display_text = MakeUnicodeString("AGI: ") + 
 			MakeUnicodeString(NumberToString(_characters[i]->GetAgility()));
@@ -1118,6 +1134,7 @@ void FinishWindow::_DrawWinGrowth() {
 		}
 		VideoManager->DrawText(display_text);
 
+		//EVD
 		VideoManager->MoveRelative(0, -26);
 		display_text = MakeUnicodeString("EVD: ") + 
 			MakeUnicodeString(NumberToString(_characters[i]->GetEvade()));
@@ -1127,6 +1144,8 @@ void FinishWindow::_DrawWinGrowth() {
 			MakeUnicodeString(NumberToString(_growth_gained[i][7])) + MakeUnicodeString(")");
 		}
 		VideoManager->DrawText(display_text);
+
+		VideoManager->MoveRelative(-300,-140 + 43);
 	}
 }
 
@@ -1139,17 +1158,29 @@ void FinishWindow::_DrawWinSkills()
 
 	//Now draw char info
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, 0);
-	//VideoManager->Move(80, 580);
-	VideoManager->Move(265, 580);
+	//VideoManager->Move(265, 580);
+	VideoManager->Move(270, 595);
 
+	std::vector<GlobalSkill*>* skills_learned = NULL;
 	ustring display_text;
 	for (uint32 i = 0; i < _characters.size(); ++i)
 	{
-		//Portraits
+		//Portrait
 		_char_portraits[i].Draw();
 		//TEMP
-		VideoManager->MoveRelative(240, 0);
-		VideoManager->DrawText("Learned");
+		VideoManager->MoveRelative(140, 35);
+		VideoManager->DrawText("Skills Learned");
+		VideoManager->MoveRelative(50, -30);
+		
+		skills_learned = _character_growths[i]->GetSkillsLearned();
+
+		for (uint32 j = 0; j < skills_learned->size(); ++j)
+		{
+			VideoManager->DrawText(skills_learned->at(j)->GetName());
+			VideoManager->MoveRelative(0, -20);
+		}
+
+		VideoManager->MoveRelative(-190, -5 + (20 * skills_learned->size()) - 97);
 	}
 }
 
@@ -1179,9 +1210,9 @@ void FinishWindow::_DrawWinSpoils()
 	{
 		VideoManager->DrawText(iter->first->GetName());
 		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_TOP, 0);
-		VideoManager->MoveRelative(325, 0);
+		VideoManager->MoveRelative(425, 0);
 		VideoManager->DrawText(MakeUnicodeString(NumberToString(iter->second)));
-		VideoManager->MoveRelative(-325, -25);
+		VideoManager->MoveRelative(-425, -25);
 		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 	}
 }
