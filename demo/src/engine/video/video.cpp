@@ -1172,6 +1172,7 @@ void GameVideo::DrawGrid(float x, float y, float x_step, float y_step, const Col
 void GameVideo::DrawRectangle(float width, float height, const Color& color) {
 	_rectangle_image._elements[0].width = width;
 	_rectangle_image._elements[0].height = height;
+	_rectangle_image._elements[0].color[0] = color;
 
 	_rectangle_image.Draw(color);
 }
