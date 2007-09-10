@@ -73,21 +73,77 @@ void Editor::_FileMenuSetup()
 	{
 		_save_as_action->setEnabled(true);
 		_save_action->setEnabled(_ed_scrollview->_map->GetChanged());
-		_resize_action->setEnabled(false);
 	} // map must exist in order to save or resize it
 	else
 	{
 		_save_as_action->setEnabled(false);
 		_save_action->setEnabled(false);
-		_resize_action->setEnabled(false);
 	} // map does not exist, can't save or resize it*/
 } // _FileMenuSetup()
+
+void Editor::_ViewMenuSetup()
+{
+	if (_ed_scrollview != NULL && _ed_scrollview->_map != NULL)
+	{
+		_toggle_grid_action->setEnabled(true);
+		_toggle_ll_action->setEnabled(true);
+		_toggle_ml_action->setEnabled(true);
+		_toggle_ul_action->setEnabled(true);
+	} // map must exist in order to set view options
+	else
+	{
+		_toggle_grid_action->setEnabled(false);
+		_toggle_ll_action->setEnabled(false);
+		_toggle_ml_action->setEnabled(false);
+		_toggle_ul_action->setEnabled(false);
+	} // map does not exist, can't view it*/
+} // _ViewMenuSetup()
+
+void Editor::_TilesMenuSetup()
+{
+	if (_ed_scrollview != NULL && _ed_scrollview->_map != NULL)
+	{
+		_layer_fill_action->setEnabled(true);
+		_layer_clear_action->setEnabled(true);
+		_mode_paint_action->setEnabled(true);
+		_mode_move_action->setEnabled(true);
+		_mode_delete_action->setEnabled(true);
+		_edit_ll_action->setEnabled(true);
+		_edit_ml_action->setEnabled(true);
+		_edit_ul_action->setEnabled(true);
+	} // map must exist in order to paint it
+	else
+	{
+		_layer_fill_action->setEnabled(false);
+		_layer_clear_action->setEnabled(false);
+		_mode_paint_action->setEnabled(false);
+		_mode_move_action->setEnabled(false);
+		_mode_delete_action->setEnabled(false);
+		_edit_ll_action->setEnabled(false);
+		_edit_ml_action->setEnabled(false);
+		_edit_ul_action->setEnabled(false);
+	} // map does not exist, can't paint it*/
+} // _TilesMenuSetup()
+
+void Editor::_MapMenuSetup()
+{
+	if (_ed_scrollview != NULL && _ed_scrollview->_map != NULL)
+	{
+		_select_music_action->setEnabled(true);
+		_map_properties_action->setEnabled(false);
+	} // map must exist in order to set music
+	else
+	{
+		_select_music_action->setEnabled(false);
+		_map_properties_action->setEnabled(false);
+	} // map does not exist, can't modify it*/
+} // _MapMenuSetup()
 
 void Editor::_FileNew()
 {
 	if (_EraseOK())
 	{
-		NewMapDialog* new_map = new NewMapDialog(this, "new_map");
+		MapPropertiesDialog* new_map = new MapPropertiesDialog(this, "new_map", false);
 
 		if (new_map->exec() == QDialog::Accepted)
 		{
@@ -236,43 +292,6 @@ void Editor::_FileSave()
 		arg(_ed_scrollview->_map->GetFileName()), 5000);
 } // _FileSave()
 
-void Editor::_FileResize()
-{
-	NewMapDialog* resize = new NewMapDialog(this, "map_resize");
-	
-	if (resize->exec() == QDialog::Accepted)
-	{
-		_ed_scrollview->_map->SetHeight(resize->GetHeight());
-		_ed_scrollview->_map->SetWidth(resize->GetWidth());
-		_ed_scrollview->_map->resize(resize->GetWidth() * TILE_WIDTH, resize->GetHeight() * TILE_HEIGHT);
-		_ed_scrollview->resize(resize->GetWidth() * TILE_WIDTH, resize->GetHeight() * TILE_HEIGHT);
-
-		if (_ed_tabs != NULL)
-			delete _ed_tabs;
-		_ed_tabs = new QTabWidget();
-		_ed_tabs->setTabPosition(QTabWidget::South);
-
-		_ed_scrollview->_map->tileset_names.clear();
-		QTreeWidget* tilesets = resize->GetTilesetTree();
-			int num_items = tilesets->topLevelItemCount();
-			for (int i = 0; i < num_items; i++)
-			{
-				if (tilesets->topLevelItem(i)->checkState(0) == Qt::Checked)
-				{
-					Tileset* a_tileset = new Tileset(this, tilesets->topLevelItem(i)->text(0));
-					_ed_tabs->addTab(a_tileset->table, tilesets->topLevelItem(i)->text(0));
-					_ed_scrollview->_map->tilesets.push_back(a_tileset);
-				} // tileset must be checked
-			} // iterate through all possible tilesets
-	
-		_ed_splitter->addWidget(_ed_tabs);
-	} // only if the user pressed OK
-	else
-		statusBar()->showMessage("Map not resized!", 5000);
-
-	delete resize;
-} // _FileResize()
-
 void Editor::_FileQuit()
 {
 	// Checks to see if the map is unsaved.
@@ -401,7 +420,121 @@ void Editor::_MapSelectMusic()
 		_ed_scrollview->_map->SetChanged(true);
 	}
 	delete music;
-}
+} // _MapSelectMusic()
+
+void Editor::_MapProperties()
+{
+	MapPropertiesDialog* props = new MapPropertiesDialog(this, "map_properties", true);
+	
+	if (props->exec() == QDialog::Accepted)
+	{
+		if (_ed_scrollview->_map->GetWidth() < props->GetWidth())
+		{
+			// User wants to make map wider so we must insert columns of tiles at the edge of the map.
+			
+			int map_width = _ed_scrollview->_map->GetWidth();
+			int map_height = _ed_scrollview->_map->GetHeight();
+			int extra_columns = props->GetWidth() - map_width;
+			
+			// Add in the extra columns one by one.
+			for (int col = extra_columns; col > 0; col--)
+			{
+				vector<int32>& lower_layer = _ed_scrollview->_map->GetLayer(LOWER_LAYER);
+				vector<int32>::iterator it = lower_layer.begin() + map_width;
+				for (int row = 0; row < map_height; row++)
+				{
+					lower_layer.insert(it, -1);
+					it += map_width + 1;
+				} // iterate through the rows of the lower layer
+	
+				vector<int32>& middle_layer = _ed_scrollview->_map->GetLayer(MIDDLE_LAYER);
+				it = middle_layer.begin() + map_width;
+				for (int row = 0; row < map_height; row++)
+				{
+					middle_layer.insert(it, -1);
+					it += map_width + 1;
+				} // iterate through the rows of the middle layer
+	
+				vector<int32>& upper_layer = _ed_scrollview->_map->GetLayer(UPPER_LAYER);
+				it = upper_layer.begin() + map_width;
+				for (int row = 0; row < map_height; row++)
+				{
+					upper_layer.insert(it, -1);
+					it += map_width + 1;
+				} // iterate through the rows of the upper layer
+			} // add in all the extra columns
+		} // insert columns
+		else if (_ed_scrollview->_map->GetWidth() > props->GetWidth())
+		{
+			// User wants to make map less wide so we must delete columns of tiles from the edge of the map.
+			
+			int map_width = _ed_scrollview->_map->GetWidth();
+			int map_height = _ed_scrollview->_map->GetHeight();
+			int extra_columns = props->GetWidth() - map_width;
+			
+			// Delete all the extra columns one by one.
+			for (int col = extra_columns; col > 0; col--)
+			{
+				vector<int32>& lower_layer = _ed_scrollview->_map->GetLayer(LOWER_LAYER);
+				vector<int32>::iterator it = lower_layer.begin() + map_width;
+				for (int row = 0; row < map_height; row++)
+				{
+					lower_layer.erase(it);
+					it += map_width - 1;
+				} // iterate through the rows of the lower layer
+	
+				vector<int32>& middle_layer = _ed_scrollview->_map->GetLayer(MIDDLE_LAYER);
+				it = middle_layer.begin() + map_width;
+				for (int row = 0; row < map_height; row++)
+				{
+					middle_layer.erase(it);
+					it += map_width - 1;
+				} // iterate through the rows of the middle layer
+	
+				vector<int32>& upper_layer = _ed_scrollview->_map->GetLayer(UPPER_LAYER);
+				it = upper_layer.begin() + map_width;
+				for (int row = 0; row < map_height; row++)
+				{
+					upper_layer.erase(it);
+					it += map_width - 1;
+				} // iterate through the rows of the upper layer
+			} // delete all the extra columns
+		} // delete columns
+		_ed_scrollview->_map->SetWidth(props->GetWidth());
+		
+		if (_ed_scrollview->_map->GetHeight() != props->GetHeight())
+		{
+			// TODO: insert or delete rows
+		} // height has changed, compensate appropriately
+		_ed_scrollview->_map->SetHeight(props->GetHeight());
+		_ed_scrollview->_map->resize(props->GetWidth() * TILE_WIDTH, props->GetHeight() * TILE_HEIGHT);
+		_ed_scrollview->resize(props->GetWidth() * TILE_WIDTH, props->GetHeight() * TILE_HEIGHT);
+
+		if (_ed_tabs != NULL)
+			delete _ed_tabs;
+		_ed_tabs = new QTabWidget();
+		_ed_tabs->setTabPosition(QTabWidget::South);
+
+		_ed_scrollview->_map->tileset_names.clear();
+		QTreeWidget* tilesets = props->GetTilesetTree();
+			int num_items = tilesets->topLevelItemCount();
+			for (int i = 0; i < num_items; i++)
+			{
+				if (tilesets->topLevelItem(i)->checkState(0) == Qt::Checked)
+				{
+					Tileset* a_tileset = new Tileset(this, tilesets->topLevelItem(i)->text(0));
+					_ed_tabs->addTab(a_tileset->table, tilesets->topLevelItem(i)->text(0));
+					_ed_scrollview->_map->tilesets.push_back(a_tileset);
+				} // tileset must be checked
+			} // iterate through all possible tilesets
+	
+		_ed_splitter->addWidget(_ed_tabs);
+	} // only if the user pressed OK
+	else
+		statusBar()->showMessage("Properties not modified!", 5000);
+
+	delete props;
+} // _MapProperties()
 
 void Editor::_HelpHelp()
 {
@@ -449,11 +582,6 @@ void Editor::_CreateActions()
 	_save_action->setShortcut(tr("Ctrl+S"));
 	_save_action->setStatusTip("Save the map");
 	connect(_save_action, SIGNAL(triggered()), this, SLOT(_FileSave()));
-	
-	_resize_action = new QAction("&Resize...", this);
-	_resize_action->setShortcut(tr("Ctrl+R"));
-	_resize_action->setStatusTip("Resizes the map");
-	connect(_resize_action, SIGNAL(triggered()), this, SLOT(_FileResize()));
 	
 	_quit_action = new QAction("&Quit", this);
 	_quit_action->setShortcut(tr("Ctrl+Q"));
@@ -546,6 +674,10 @@ void Editor::_CreateActions()
 	_select_music_action = new QAction("&Select map music...", this);
 	_select_music_action->setStatusTip("Choose background music for the map");
 	connect(_select_music_action, SIGNAL(triggered()), this, SLOT(_MapSelectMusic()));
+	
+	_map_properties_action = new QAction("&Properties...", this);
+	_map_properties_action->setStatusTip("Modify the properties of the map");
+	connect(_map_properties_action, SIGNAL(triggered()), this, SLOT(_MapProperties()));
 
 
 
@@ -575,8 +707,6 @@ void Editor::_CreateMenus()
 	_file_menu->addAction(_save_action);
 	_file_menu->addAction(_save_as_action);
 	_file_menu->addSeparator();
-	_file_menu->addAction(_resize_action);
-	_file_menu->addSeparator();
 	_file_menu->addAction(_quit_action);
 	connect(_file_menu, SIGNAL(aboutToShow()), this, SLOT(_FileMenuSetup()));
 
@@ -588,6 +718,7 @@ void Editor::_CreateMenus()
 	_view_menu->addAction(_toggle_ml_action);
 	_view_menu->addAction(_toggle_ul_action);
 	_view_menu->setCheckable(true);
+	connect(_view_menu, SIGNAL(aboutToShow()), this, SLOT(_ViewMenuSetup()));
 
 	// tile menu creation
 	_tiles_menu = menuBar()->addMenu("&Tiles");
@@ -601,10 +732,13 @@ void Editor::_CreateMenus()
 	_tiles_menu->addAction(_edit_ll_action);
 	_tiles_menu->addAction(_edit_ml_action);
 	_tiles_menu->addAction(_edit_ul_action);
+	connect(_tiles_menu, SIGNAL(aboutToShow()), this, SLOT(_TilesMenuSetup()));
 	
 	// map menu creation
 	_map_menu = menuBar()->addMenu("&Map");
 	_map_menu->addAction(_select_music_action);
+	_map_menu->addAction(_map_properties_action);
+	connect(_map_menu, SIGNAL(aboutToShow()), this, SLOT(_MapMenuSetup()));
 
 	// help menu creation
 	_help_menu = menuBar()->addMenu("&Help");
@@ -645,31 +779,34 @@ bool Editor::_EraseOK()
 
 
 /************************
-  NewMapDialog class functions follow
+  MapPropertiesDialog class functions follow
 ************************/
 
-NewMapDialog::NewMapDialog(QWidget* parent, const QString& name)
+MapPropertiesDialog::MapPropertiesDialog(QWidget* parent, const QString& name, bool prop)
 	: QDialog(parent, (const char*) name)
 {
 	setCaption("Map Properties...");
 
+	// Set up the height spinbox
 	_height_label  = new QLabel("Height (in tiles):", this);
 	_height_sbox   = new QSpinBox(this);
 	_height_sbox->setMinimum(24);
 	_height_sbox->setMaximum(1000);
 	
+	// Set up the width spinbox
 	_width_label   = new QLabel(" Width (in tiles):", this);
 	_width_sbox    = new QSpinBox(this);
 	_width_sbox->setMinimum(32);
 	_width_sbox->setMaximum(1000);
 	
+	// Set up the cancel and okay push buttons
 	_cancel_pbut   = new QPushButton("Cancel", this);
 	_ok_pbut       = new QPushButton("OK", this);
-	
 	_cancel_pbut->setDefault(true);
 	connect(_ok_pbut,     SIGNAL(released()), this, SLOT(accept()));
 	connect(_cancel_pbut, SIGNAL(released()), this, SLOT(reject()));
 
+	// Set up the list of selectable tilesets
 	QDir tileset_dir("img/tilesets");
 	_tileset_tree = new QTreeWidget(this);
 	_tileset_tree->setColumnCount(1);
@@ -680,9 +817,33 @@ NewMapDialog::NewMapDialog(QWidget* parent, const QString& name)
 	{
 		tilesets.append(new QTreeWidgetItem((QTreeWidget*)0, QStringList(tileset_dir[i].remove(".png"))));
 		tilesets.back()->setCheckState(0, Qt::Unchecked);  // enables checkboxes
+		if (prop)
+		{
+			// get reference to the Editor
+			Editor* editor = static_cast<Editor*> (parent);
+
+			// Iterate through the names of the tabs to see which ones in the list are already present and set
+			// their checkbox appropriately.
+			for (int j = 0; j < editor->_ed_tabs->count(); j++)
+				if (tilesets.back()->text(0) == editor->_ed_tabs->tabText(j))
+				{
+					tilesets.back()->setCheckState(0, Qt::Checked);
+					break;
+				} // the two tileset names must match in order to set the checkbox
+		} // user wants to edit the map's properties
 	} // loop through all files in the tileset directory
 	_tileset_tree->insertTopLevelItems(0, tilesets);
 
+	if (prop)
+	{
+		// get reference to the Editor
+		Editor* editor = static_cast<Editor*> (parent);
+
+		_height_sbox->setValue(editor->_ed_scrollview->_map->GetHeight());
+		_width_sbox->setValue(editor->_ed_scrollview->_map->GetWidth());
+	} // user wants to edit the map's properties
+	
+	// Add all of the aforementioned widgets into a nice-looking grid layout
 	_dia_layout = new QGridLayout(this);
 	_dia_layout->addWidget(_height_label, 0, 0);
 	_dia_layout->addWidget(_height_sbox, 1, 0);
@@ -691,9 +852,9 @@ NewMapDialog::NewMapDialog(QWidget* parent, const QString& name)
 	_dia_layout->addWidget(_tileset_tree, 0, 1, 5, -1);
 	_dia_layout->addWidget(_cancel_pbut, 6, 1);
 	_dia_layout->addWidget(_ok_pbut, 6, 0);
-} // NewMapDialog constructor
+} // MapPropertiesDialog constructor
 
-NewMapDialog::~NewMapDialog()
+MapPropertiesDialog::~MapPropertiesDialog()
 {
 	delete _height_label;
 	delete _height_sbox;
@@ -703,7 +864,7 @@ NewMapDialog::~NewMapDialog()
 	delete _ok_pbut;
 	delete _tileset_tree;
 	delete _dia_layout;
-} // NewMapDialog destructor
+} // MapPropertiesDialog destructor
 
 
 
@@ -792,18 +953,33 @@ EditorScrollView::EditorScrollView(QWidget* parent, const QString& name, int wid
 	_map = new Grid(viewport(), "Untitled", width, height);
 	addChild(_map);
 
+	// Create menu actions related to the Context menu.
+	_insert_row_action = new QAction("Insert row", this);
+	_insert_row_action->setStatusTip("Inserts a row of empty tiles above the currently selected tile");
+	connect(_insert_row_action, SIGNAL(triggered()), this, SLOT(_ContextInsertRow()));
+	_insert_column_action = new QAction("Insert column", this);
+	_insert_column_action->setStatusTip("Inserts a column of empty tiles to the left of the currently selected tile");
+	connect(_insert_column_action, SIGNAL(triggered()), this, SLOT(_ContextInsertColumn()));
+	_delete_row_action = new QAction("Delete row", this);
+	_delete_row_action->setStatusTip("Deletes the currently selected row of tiles");
+	connect(_delete_row_action, SIGNAL(triggered()), this, SLOT(_ContextDeleteRow()));
+	_delete_column_action = new QAction("Delete column", this);
+	_delete_column_action->setStatusTip("Deletes the currently selected column of tiles");
+	connect(_delete_column_action, SIGNAL(triggered()), this, SLOT(_ContextDeleteColumn()));
+	
 	// Context menu creation.
-	//_context_menu = new Q3PopupMenu(this);
-
-	//connect(_context_menu, SIGNAL(aboutToShow()), this, SLOT(_ContextMenuSetup()));
-	//connect(_context_menu, SIGNAL(aboutToHide()), this, SLOT(_ContextMenuEvaluate()));
-	//_context_menu->insertItem("Unwalkability", checkboxes, NULL);
+	_context_menu = new QMenu(this);
+	_context_menu->addAction(_insert_row_action);
+	_context_menu->addAction(_insert_column_action);
+	_context_menu->addSeparator();
+	_context_menu->addAction(_delete_row_action);
+	_context_menu->addAction(_delete_column_action);
 } // EditorScrollView constructor
 
 EditorScrollView::~EditorScrollView()
 {
 	delete _map;
-	//delete _context_menu;
+	delete _context_menu;
 } // EditorScrollView destructor
 
 void EditorScrollView::Resize(int width, int height)
@@ -974,7 +1150,6 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 	_map->updateGL();
 } // contentsMouseReleaseEvent(...)
 
-/*
 void EditorScrollView::contentsContextMenuEvent(QContextMenuEvent *evt)
 {
 	// Don't popup a menu outside the map.
@@ -984,18 +1159,105 @@ void EditorScrollView::contentsContextMenuEvent(QContextMenuEvent *evt)
 
 	_tile_index = evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH;
 	_context_menu->exec(QCursor::pos());
+	(static_cast<Editor*> (topLevelWidget()))->statusBar()->clear();
 } // contentsContextMenuEvent(...)
-*/
+
 
 
 // ********** Private slots **********
-/*
-void EditorScrollView::_ContextMenuSetup()
-{
-// used for a right-click menu on the tiles
-} // _ContextMenuSetup()
 
-void EditorScrollView::_ContextMenuEvaluate()
+void EditorScrollView::_ContextInsertRow()
 {
-} // _ContextMenuEvaluate()
-*/
+	int map_width = _map->GetWidth();
+	int row = _tile_index / map_width;
+	
+	vector<int32>& lower_layer = _map->GetLayer(LOWER_LAYER);
+	lower_layer.insert(lower_layer.begin() + row * map_width, map_width, -1);
+	vector<int32>& middle_layer = _map->GetLayer(MIDDLE_LAYER);
+	middle_layer.insert(middle_layer.begin() + row * map_width, map_width, -1);
+	vector<int32>& upper_layer = _map->GetLayer(UPPER_LAYER);
+	upper_layer.insert(upper_layer.begin() + row * map_width, map_width, -1);
+	
+	Resize(map_width, _map->GetHeight() + 1);
+} // _ContextInsertRow()
+
+void EditorScrollView::_ContextInsertColumn()
+{
+	int map_width = _map->GetWidth();
+	int map_height = _map->GetHeight();
+	int col = _tile_index % map_width;
+	
+	vector<int32>& lower_layer = _map->GetLayer(LOWER_LAYER);
+	vector<int32>::iterator it = lower_layer.begin() + col;
+	for (int row = 0; row < map_height; row++)
+	{
+		lower_layer.insert(it, -1);
+		it += map_width + 1;
+	} // iterate through the rows of the lower layer
+	
+	vector<int32>& middle_layer = _map->GetLayer(MIDDLE_LAYER);
+	it = middle_layer.begin() + col;
+	for (int row = 0; row < map_height; row++)
+	{
+		middle_layer.insert(it, -1);
+		it += map_width + 1;
+	} // iterate through the rows of the middle layer
+	
+	vector<int32>& upper_layer = _map->GetLayer(UPPER_LAYER);
+	it = upper_layer.begin() + col;
+	for (int row = 0; row < map_height; row++)
+	{
+		upper_layer.insert(it, -1);
+		it += map_width + 1;
+	} // iterate through the rows of the upper layer
+
+	Resize(map_width + 1, map_height);
+} // _ContextInsertColumn()
+
+void EditorScrollView::_ContextDeleteRow()
+{
+	int map_width = _map->GetWidth();
+	int row = _tile_index / map_width;
+	
+	vector<int32>& lower_layer = _map->GetLayer(LOWER_LAYER);
+	lower_layer.erase(lower_layer.begin() + row * map_width, lower_layer.begin() + row * map_width + map_width);
+	vector<int32>& middle_layer = _map->GetLayer(MIDDLE_LAYER);
+	middle_layer.erase(middle_layer.begin() + row * map_width, middle_layer.begin() + row * map_width + map_width);
+	vector<int32>& upper_layer = _map->GetLayer(UPPER_LAYER);
+	upper_layer.erase(upper_layer.begin() + row * map_width, upper_layer.begin() + row * map_width + map_width);
+	
+	Resize(map_width, _map->GetHeight() - 1);
+} // _ContextDeleteRow()
+
+void EditorScrollView::_ContextDeleteColumn()
+{
+	int map_width = _map->GetWidth();
+	int map_height = _map->GetHeight();
+	int col = _tile_index % map_width;
+	
+	vector<int32>& lower_layer = _map->GetLayer(LOWER_LAYER);
+	vector<int32>::iterator it = lower_layer.begin() + col;
+	for (int row = 0; row < map_height; row++)
+	{
+		lower_layer.erase(it);
+		it += map_width - 1;
+	} // iterate through the rows of the lower layer
+	
+	vector<int32>& middle_layer = _map->GetLayer(MIDDLE_LAYER);
+	it = middle_layer.begin() + col;
+	for (int row = 0; row < map_height; row++)
+	{
+		middle_layer.erase(it);
+		it += map_width - 1;
+	} // iterate through the rows of the middle layer
+	
+	vector<int32>& upper_layer = _map->GetLayer(UPPER_LAYER);
+	it = upper_layer.begin() + col;
+	for (int row = 0; row < map_height; row++)
+	{
+		upper_layer.erase(it);
+		it += map_width - 1;
+	} // iterate through the rows of the upper layer
+
+	Resize(map_width - 1, map_height);
+} // _ContextDeleteColumn()
