@@ -9,11 +9,12 @@
 		};
 	};
 	4941A4A10AC1D76400D65B8E /* Project object */ = {
-		activeBuildConfigurationName = Release;
-		activeExecutable = D43080DE0AF982F800A5173A /* Allacrost */;
-		activeTarget = 4941A4AF0AC1D77500D65B8E /* Allacrost */;
+		activeBuildConfigurationName = Debug;
+		activeExecutable = D4D1BA4A0B02B1DB0052BF1E /* Editor */;
+		activeTarget = D4D1BA480B02B1DB0052BF1E /* Editor */;
 		addToTargets = (
 			4941A4AF0AC1D77500D65B8E /* Allacrost */,
+			D4D1BA480B02B1DB0052BF1E /* Editor */,
 		);
 		breakpoints = (
 			D4D424950C86877600F4B4BC /* audio_descriptor.cpp:627 */,
@@ -82,7 +83,7 @@
 				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
 				PBXFileTableDataSourceColumnWidthsKey = (
 					20,
-					243,
+					242,
 					20,
 					48,
 					43,
@@ -157,7 +158,7 @@
 				PBXFileTableDataSourceColumnWidthsKey = (
 					20,
 					200,
-					63,
+					62,
 					20,
 					48,
 					43,
@@ -173,12 +174,8 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 210663744;
-			PBXWorkspaceStateSaveDate = 210663744;
-		};
-		perUserProjectItems = {
-			D4C2B70D0C8E786B005A234B /* PBXTextBookmark */ = D4C2B70D0C8E786B005A234B /* PBXTextBookmark */;
-			D4C2B85D0C8E7FBE005A234B /* PBXTextBookmark */ = D4C2B85D0C8E7FBE005A234B /* PBXTextBookmark */;
+			PBXPerProjectTemplateStateSaveDate = 211092704;
+			PBXWorkspaceStateSaveDate = 211092704;
 		};
 		sourceControlManager = D43082570AF9831800A5173A /* Source Control */;
 		userBuildSettings = {
@@ -352,9 +349,9 @@
 	};
 	4941A6B00AC1D86400D65B8E /* utils.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {950, 8708}}";
-			sepNavSelRange = "{0, 0}";
-			sepNavVisRect = "{{0, 8279}, {711, 429}}";
+			sepNavIntBoundsRect = "{{0, 0}, {950, 8722}}";
+			sepNavSelRange = "{16016, 0}";
+			sepNavVisRect = "{{0, 5418}, {672, 267}}";
 			sepNavWindowFrame = "{{15, 215}, {750, 558}}";
 		};
 	};
@@ -473,6 +470,13 @@
 		isa = PBXCodeSenseManager;
 		indexTemplatePath = "";
 	};
+	D438C7970C9117300032F79E /* texture_controller.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {860, 8666}}";
+			sepNavSelRange = "{1322, 0}";
+			sepNavVisRect = "{{0, 448}, {672, 267}}";
+		};
+	};
 	D44096300C45E31900E58975 /* battle_windows.cpp */ = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {908, 8904}}";
@@ -521,39 +525,12 @@
 			sepNavWindowFrame = "{{15, -1}, {750, 774}}";
 		};
 	};
-	D4C2B70D0C8E786B005A234B /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = D4D1BA650B02B27F0052BF1E /* editor.cpp */;
-		name = "editor.cpp: 256";
-		rLen = 0;
-		rLoc = 7408;
-		rType = 0;
-		vrLen = 1648;
-		vrLoc = 6495;
-	};
-	D4C2B85D0C8E7FBE005A234B /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = D4D1BA650B02B27F0052BF1E /* editor.cpp */;
-		name = "editor.cpp: 256";
-		rLen = 0;
-		rLoc = 7408;
-		rType = 0;
-		vrLen = 1648;
-		vrLoc = 6495;
-	};
 	D4D166250BC0D91300190FC0 /* color.h */ = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {848, 1918}}";
 			sepNavSelRange = "{0, 0}";
 			sepNavVisRect = "{{0, 408}, {711, 429}}";
 			sepNavWindowFrame = "{{61, 173}, {750, 558}}";
-		};
-	};
-	D4D166280BC0D91300190FC0 /* draw.cpp */ = {
-		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {674, 7266}}";
-			sepNavSelRange = "{12660, 0}";
-			sepNavVisRect = "{{0, 6756}, {653, 149}}";
 		};
 	};
 	D4D1662D0BC0D91300190FC0 /* gui.h */ = {
@@ -574,9 +551,9 @@
 	};
 	D4D166480BC0D91400190FC0 /* video.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {986, 16520}}";
-			sepNavSelRange = "{4620, 0}";
-			sepNavVisRect = "{{0, 1999}, {711, 429}}";
+			sepNavIntBoundsRect = "{{0, 0}, {986, 16968}}";
+			sepNavSelRange = "{4285, 0}";
+			sepNavVisRect = "{{0, 1932}, {672, 267}}";
 			sepNavWindowFrame = "{{617, 177}, {750, 558}}";
 		};
 	};
@@ -656,18 +633,18 @@
 	};
 	D4D1BA650B02B27F0052BF1E /* editor.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {956, 14028}}";
-			sepNavSelRange = "{7408, 0}";
-			sepNavVisRect = "{{0, 3256}, {711, 645}}";
-			sepNavWindowFrame = "{{356, 4}, {750, 774}}";
+			sepNavIntBoundsRect = "{{0, 0}, {956, 17696}}";
+			sepNavSelRange = "{39742, 0}";
+			sepNavVisRect = "{{0, 17051}, {711, 645}}";
+			sepNavWindowFrame = "{{0, 4}, {750, 774}}";
 		};
 	};
 	D4D1BA660B02B27F0052BF1E /* editor.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {746, 4480}}";
-			sepNavSelRange = "{1328, 0}";
-			sepNavVisRect = "{{0, 137}, {711, 645}}";
-			sepNavWindowFrame = "{{804, 4}, {750, 774}}";
+			sepNavIntBoundsRect = "{{0, 0}, {746, 4928}}";
+			sepNavSelRange = "{3341, 0}";
+			sepNavVisRect = "{{0, 0}, {711, 645}}";
+			sepNavWindowFrame = "{{529, 4}, {750, 774}}";
 		};
 	};
 	D4D1BA670B02B27F0052BF1E /* editor_main.cpp */ = {
@@ -681,24 +658,24 @@
 	D4D1BA680B02B27F0052BF1E /* grid.cpp */ = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {800, 7952}}";
-			sepNavSelRange = "{3667, 0}";
-			sepNavVisRect = "{{0, 0}, {711, 429}}";
+			sepNavSelRange = "{2117, 0}";
+			sepNavVisRect = "{{0, 77}, {711, 429}}";
 			sepNavWindowFrame = "{{451, 63}, {750, 558}}";
 		};
 	};
 	D4D1BA690B02B27F0052BF1E /* grid.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {711, 2016}}";
-			sepNavSelRange = "{3339, 0}";
-			sepNavVisRect = "{{0, 1587}, {711, 429}}";
+			sepNavIntBoundsRect = "{{0, 0}, {674, 2016}}";
+			sepNavSelRange = "{1890, 0}";
+			sepNavVisRect = "{{0, 715}, {672, 265}}";
 			sepNavWindowFrame = "{{13, 127}, {750, 558}}";
 		};
 	};
 	D4D1BA6C0B02B27F0052BF1E /* tileset.cpp */ = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {764, 2310}}";
-			sepNavSelRange = "{2919, 6}";
-			sepNavVisRect = "{{0, 0}, {711, 429}}";
+			sepNavSelRange = "{3284, 0}";
+			sepNavVisRect = "{{0, 1881}, {711, 429}}";
 			sepNavWindowFrame = "{{528, 6}, {750, 558}}";
 		};
 	};
@@ -721,7 +698,7 @@
 		functionName = "AudioDescriptor::_Update()";
 		hitCount = 1;
 		lineNumber = 627;
-		modificationTime = 210406205.412275;
+		modificationTime = 211094410.269204;
 		state = 1;
 	};
 	D4D4249B0C8687C900F4B4BC /* audio_descriptor.cpp:646 */ = {
@@ -736,7 +713,7 @@
 		hitCount = 1;
 		lineNumber = 646;
 		location = Allacrost;
-		modificationTime = 210406187.102607;
+		modificationTime = 211094335.575023;
 		state = 2;
 	};
 	D4D4249F0C86881100F4B4BC /* audio_descriptor.cpp:588 */ = {
@@ -751,16 +728,8 @@
 		hitCount = 1;
 		lineNumber = 588;
 		location = Allacrost;
-		modificationTime = 210406187.102613;
+		modificationTime = 211094335.575027;
 		state = 2;
-	};
-	D4DBE6D80BC1E91A00E85DCB /* tex_mgmt.cpp */ = {
-		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1358, 29260}}";
-			sepNavSelRange = "{34362, 0}";
-			sepNavVisRect = "{{0, 16361}, {672, 285}}";
-			sepNavWindowFrame = "{{489, 57}, {750, 558}}";
-		};
 	};
 	D4E561260BB71B53002FB758 /* defs.cpp */ = {
 		uiCtxt = {

@@ -69,8 +69,9 @@ class Editor: public QMainWindow
 		Editor();                       // constructor
 		~Editor();                      // destructor
 
-		//! Needed for tile editing.
+		//! Needed for tile editing and accessing the map properties.
 		friend class EditorScrollView;
+		friend class MapPropertiesDialog;
 
 	protected:
 		//! Handles close and/or quit events.
@@ -79,8 +80,14 @@ class Editor: public QMainWindow
 		void closeEvent(QCloseEvent*);
 	
 	private slots:
-		//! This slot is used to gray out items in the File menu.
+		//! \name Menu Setup Slots
+		//! \brief These slots are used to gray out items in the menus.
+		//{@
 		void _FileMenuSetup();
+		void _ViewMenuSetup();
+		void _TilesMenuSetup();
+		void _MapMenuSetup();
+		//@}
 
 		//! \name File Menu Item Slots
 		//! \brief These slots process selection for their item in the File menu.
@@ -89,7 +96,6 @@ class Editor: public QMainWindow
 		void _FileOpen();
 		void _FileSaveAs();
 		void _FileSave();
-		void _FileResize();
 		void _FileQuit();
 		//@}
 
@@ -119,6 +125,7 @@ class Editor: public QMainWindow
 		//! \brief These slots process selection for their item in the Map menu.
 		//{@
 		void _MapSelectMusic();
+		void _MapProperties();
 		//@}
 
 		//! \name Help Menu Item Slots
@@ -157,7 +164,6 @@ class Editor: public QMainWindow
 		QAction* _open_action;
 		QAction* _save_as_action;
 		QAction* _save_action;
-		QAction* _resize_action;
 		QAction* _quit_action;
 
 		QAction* _toggle_grid_action;
@@ -176,6 +182,7 @@ class Editor: public QMainWindow
 		QActionGroup* _mode_group;
 		QActionGroup* _edit_group;
 
+		QAction* _map_properties_action;
 		QAction* _select_music_action;
 
 		QAction* _help_action;
@@ -200,11 +207,19 @@ class Editor: public QMainWindow
 		bool _ul_on;
 }; // class Editor
 
-class NewMapDialog: public QDialog
+class MapPropertiesDialog: public QDialog
 {
 	public:
-		NewMapDialog(QWidget* parent, const QString& name);   // constructor
-		~NewMapDialog();                                      // destructor
+		//! \name MapPropertiesDialog constructor
+		//! \brief A constructor for the MapPropertiesDialog class. This class is used in 2 instances:
+		//!        for presenting a dialog to the user to (1) create a new map or (2) modify the properties
+		//!        (such as height, width, or tilesets loaded in the bottom portion of the editor) of an
+		//!        already existing map. For case #1, the parameter prop is false, and for case #2, it is true.
+		//! \param parent The widget from which this dialog was invoked.
+		//! \param name The name of this widget.
+		//! \param prop True when accessing an already loaded map's properties, false otherwise.
+		MapPropertiesDialog(QWidget* parent, const QString& name, bool prop);
+		~MapPropertiesDialog();               // destructor
 
 		//! Public accessor to get the map height from the height spinbox.
 		int GetHeight() const { return _height_sbox->value(); }
@@ -212,6 +227,10 @@ class NewMapDialog: public QDialog
 		int GetWidth()  const { return  _width_sbox->value(); }
 		//! Public accessor to get the tree containing checkable tilesets.
 		QTreeWidget* GetTilesetTree() const { return _tileset_tree; }
+		
+		//! Needed for accessing map properties.
+		friend class Editor;
+		friend class EditorScrollView;
 
 	private:
 		//! A tree for showing all available tilesets.
@@ -230,7 +249,7 @@ class NewMapDialog: public QDialog
 		QPushButton* _ok_pbut;
 		//! A layout to manage all the labels, spinboxes, and listviews.
 		QGridLayout* _dia_layout;
-}; // class NewMapDialog
+}; // class MapPropertiesDialog
 
 class MusicDialog: public QDialog
 {
@@ -273,8 +292,9 @@ class EditorScrollView: public Q3ScrollView
 		//! Gets currently edited layer
 		std::vector<int32>& GetCurrentLayer();		
 
-		//! Needed for changing the editing mode and painting.
+		//! Needed for changing the editing mode and painting, and accessing the map's properties.
 		friend class Editor;
+		friend class MapPropertiesDialog;
 
 	protected:
 		//! \name Mouse Processing Functions
@@ -285,21 +305,33 @@ class EditorScrollView: public Q3ScrollView
 		void contentsMousePressEvent(QMouseEvent *evt);
 		void contentsMouseMoveEvent(QMouseEvent *evt);
 		void contentsMouseReleaseEvent(QMouseEvent *evt);
-//		void contentsContextMenuEvent(QContextMenuEvent *evt);
+		void contentsContextMenuEvent(QContextMenuEvent *evt);
 		//@}
 
 	private slots:
-/*		//! \name Context Menu Slots
-		//! \brief These slots are used to correctly setup and process the context
-		//!        menu, which pops up on right-clicks of the mouse on the map.
+		//! \name Context Menu Slots
+		//! \brief These slots process selection for their item in the Context menu,
+		//!        which pops up on right-clicks of the mouse on the map.
 		//{@
-		void _ContextMenuSetup();
-		void _ContextMenuEvaluate();
+		void _ContextInsertRow();
+		void _ContextInsertColumn();
+		void _ContextDeleteRow();
+		void _ContextDeleteColumn();
 		//@}
-*/
+
 	private:
+		//! \name Context Menu Actions
+		//! \brief These are Qt's way of associating the same back-end functionality to occur whether a user
+		//!        invokes a menu through the menu bar, a keyboard shortcut, a toolbar button, or other means.
+		//{@
+		QAction* _insert_row_action;
+		QAction* _insert_column_action;
+		QAction* _delete_row_action;
+		QAction* _delete_column_action;
+		//@}
+
 		//! Current working map.
-		Grid *_map;
+		Grid* _map;
 		//! Current tile edit mode being used.
 		TILE_MODE_TYPE _tile_mode;
 		//! Current layer being edited.
@@ -307,7 +339,7 @@ class EditorScrollView: public Q3ScrollView
 		//! Mouse is at this tile index on the map.
 		int _tile_index;
 		//! Menu used on right-clicks of the mouse on the map.
-		//Q3PopupMenu *_context_menu;
+		QMenu* _context_menu;
 
 		//! Stores source index of moved tiles
 		int _move_source_index;
