@@ -59,8 +59,12 @@ QuitMode::QuitMode() {
 // 	}
 
 	// Save a copy of the current screen to use as a backdrop
-	if (!VideoManager->CaptureScreen(_saved_screen)) 
-		if (QUIT_DEBUG) cerr << "PAUSE: ERROR: Couldn't save the screen!" << endl;
+	try {
+		_saved_screen = VideoManager->CaptureScreen();
+	}
+	catch(Exception e) {
+		cerr << e.ToString() << endl;
+	}
 
 
 // !@# Roots: I got rid of this code for now since CreateMenu() is defunct

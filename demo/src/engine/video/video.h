@@ -559,13 +559,17 @@ public:
 
 	// ----------  Image operation methods
 
-	/** \brief captures the contents of the screen and saves it to an image
-	 *         descriptor
-	 *
-	 *  \param id  image descriptor to capture to
-	 * \return success/failure
-	 */
-	bool CaptureScreen(StillImage &id);
+	/** \brief Captures the contents of the screen and saves it as an image texture
+	*** \return An initialized StillImage object used to draw/manipulate the captured screen
+	*** \throw Exception If the new captured screen could not be created
+	***
+	*** When this function is called, it will generate an image using the contents that are
+	*** being displayed on the current screen. This means that you can have multiple screen
+	*** captures in memory at the same time. You should be careful not to have too many
+	*** screen captures existing at one time, because each image capture requires a relatively
+	*** large amount of texutre memory (roughly 3GB for a 1024x768 screen).
+	**/
+	StillImage CaptureScreen();
 
 	/** \brief returns the amount of animation frames that have passed since the last
 	 *         call to GameVideo::Display(). This number is based on VIDEO_ANIMATION_FRAME_PERIOD,

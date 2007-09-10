@@ -62,9 +62,11 @@ MenuMode::MenuMode(ustring locale_name, string locale_image) {
 		exit(1);
 	}
 
-	if (VideoManager->CaptureScreen(_saved_screen) == false) {
-		if (MENU_DEBUG)
-			cerr << "MENU WARNING: Couldn't save the screen!" << endl;
+	try {
+		_saved_screen = VideoManager->CaptureScreen();
+	}
+	catch(Exception e) {
+		cerr << e.ToString() << endl;
 	}
 
 	_current_window = WINDOW_INVENTORY;

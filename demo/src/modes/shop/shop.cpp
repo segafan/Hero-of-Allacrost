@@ -31,6 +31,7 @@
 #include "mode_manager.h"
 
 using namespace std;
+using namespace hoa_utils;
 using namespace hoa_audio;
 using namespace hoa_video;
 using namespace hoa_input;
@@ -60,9 +61,11 @@ ShopMode::ShopMode() {
 	private_shop::current_shop = this;
 	_state = SHOP_STATE_ACTION;
 	
-	if (VideoManager->CaptureScreen(_saved_screen) == false) {
-		if (SHOP_DEBUG)
-			cerr << "SHOP ERROR: Failed to capture saved screen" << endl;
+	try {
+		_saved_screen = VideoManager->CaptureScreen();
+	}
+	catch(Exception e) {
+		cerr << e.ToString() << endl;
 	}
 }
 
