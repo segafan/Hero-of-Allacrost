@@ -22,6 +22,7 @@
 #include "system.h"
 
 using namespace std;
+using namespace hoa_utils;
 using namespace hoa_audio;
 using namespace hoa_video;
 using namespace hoa_mode_manager;
@@ -54,8 +55,12 @@ PauseMode::PauseMode() {
 // 	}
 
 	// Save a copy of the current screen to use as a backdrop
-	if (!VideoManager->CaptureScreen(_saved_screen)) 
-		if (PAUSE_DEBUG) cerr << "PAUSE: ERROR: Couldn't save the screen!" << endl;
+	try {
+		_saved_screen = VideoManager->CaptureScreen();
+	}
+	catch(Exception e) {
+		cerr << e.ToString() << endl;
+	}
 }
 
 

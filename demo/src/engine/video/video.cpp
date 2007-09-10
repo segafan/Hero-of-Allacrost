@@ -773,83 +773,54 @@ void GameVideo::ApplyLightingOverlay() {
 }
 
 
-//-----------------------------------------------------------------------------
-// CaptureScreen: captures the contents of the screen and saves it to an image
-//                descriptor. Note that this function ignores the filename
-//                and isStatic properties of the image descriptor. It will
-//                obey the color property though, in case you want to create
-//                a funky colored image of the screen...
-//
-//                NOTE: this function assumes that you will never have two
-//                      captured screens loaded at the same time. If it detects
-//                      that you try to capture the screen even though a
-//                      capture is already in memory, it is considered an error
-//-----------------------------------------------------------------------------
 
-bool GameVideo::CaptureScreen(StillImage &id)
-{
-	if(VIDEO_DEBUG)
-		cout << "VIDEO: Entering CaptureScreen()" << endl;
+StillImage GameVideo::CaptureScreen() {
+	// Static variable used to make sure the capture has a unique name in the texture image map
+	static uint32 capture_id = 0;
 
-	// Retrieve width/height of the viewport
+	StillImage screen_image;
+
+	// Retrieve width/height of the viewport. viewport_dimensions[2] is the width, [3] is the height
 	GLint viewport_dimensions[4];
 	glGetIntegerv(GL_VIEWPORT, viewport_dimensions);
+	screen_image.SetDimensions(viewport_dimensions[2], viewport_dimensions[3]);
 
 	// Set up the screen rectangle to copy
-	int32 width  = viewport_dimensions[2];
-	int32 height = viewport_dimensions[3];
-	ScreenRect screen_rect(0, height, width, height);
+	ScreenRect screen_rect(0, viewport_dimensions[3], viewport_dimensions[2], viewport_dimensions[3]);
 
-	//TEMP TAGS
-	// create an Image structure and store it our std::map of images
-	if (id._filename == "")
-		id._filename = "captured_screen";
-	ImageTexture *new_image = new ImageTexture(id._filename, "<T>", width, height);
+	// Create a new ImageTexture with a unique filename for this newly captured screen
+	ImageTexture* new_image = new ImageTexture("capture_screen" + NumberToString(capture_id), "<T>", viewport_dimensions[2], viewport_dimensions[3]);
 
-	// Try to create a texture sheet of screen size (rounded up)
-	TexSheet *sheet = TextureManager->_CreateTexSheet(RoundUpPow2(width), RoundUpPow2(height), VIDEO_TEXSHEET_ANY, false);
+	// Create a texture sheet of an appropriate size that can retain the capture
+	TexSheet* sheet = TextureManager->_CreateTexSheet(RoundUpPow2(viewport_dimensions[2]), RoundUpPow2(viewport_dimensions[3]), VIDEO_TEXSHEET_ANY, false);
 
-	if(!sheet)
-	{
-		// This should never happen, unless we run out of memory or the
-		// size of the screen texture is larger than the max available
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO_DEBUG: GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
-
-		return false;
+	// Ensure that texture sheet creation succeeded, insert the texture image into the sheet, and copy the screen into the sheet
+	if (sheet == NULL) {
+		delete new_image;
+		throw Exception("could not create texture sheet to store captured screen", __FILE__, __LINE__, __FUNCTION__);
+		return screen_image;
 	}
-	if (!sheet->tex_mem_manager->Insert(new_image))
-	{
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO_DEBUG: TexMemMgr->Insert(image) returned NULL in " << __FUNCTION__ << endl;
+	if (sheet->tex_mem_manager->Insert(new_image) == false) {
 		TextureManager->_RemoveSheet(sheet);
-		return false;
+		delete new_image;
+		throw Exception("could not insert captured screen image into texture sheet", __FILE__, __LINE__, __FUNCTION__);
+		return screen_image;
 	}
-
-	if (!sheet->CopyScreenRect(0, 0, screen_rect))
-	{
-		if (VIDEO_DEBUG)
-			cerr << "VIDEO_DEBUG: TexSheet->CopyScreenRect() failed in " << __FUNCTION__ << endl;
+	if (sheet->CopyScreenRect(0, 0, screen_rect) == false) {
 		TextureManager->_RemoveSheet(sheet);
-		return false;
+		delete new_image;
+		throw Exception("call to TexSheet::CopyScreenRect() failed", __FILE__, __LINE__, __FUNCTION__);
+		return screen_image;
 	}
 
-	new_image->ref_count = 1;
+	new_image->AddReference();
+	TextureManager->_images["captured_screen" + NumberToString(capture_id) + "<T>"] = new_image;
 
-	// if width or height are zero, that means to use the dimensions of image
-	if (id._width == 0.0f)
-		id._width  = (float)width;
+	// Store the image element to the saved image (with a flipped y axis)
+	ImageElement element(new_image, 0, 0, screen_image._width, screen_image._height, 0.0f, 1.0f, 1.0f, 0.0f, screen_image._color);
+	screen_image._elements.push_back(element);
 
-	if (id._height == 0.0f)
-		id._height = (float)height;
-
-	// Store the new image element (flipped y)
-	ImageElement element(new_image, 0, 0, 0.0f, 1.0f, 1.0f, 0.0f, id._width, id._height, id._color);
-	id._elements.push_back(element);
-
-	// Store the image in our std::map
-	TextureManager->_images[id._filename] = new_image;
-	return true;
+	return screen_image;
 }
 
 
