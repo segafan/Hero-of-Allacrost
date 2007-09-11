@@ -1037,6 +1037,22 @@ void StillImage::ConstructCompositeImage(const std::vector<StillImage>& tiles, c
 	}
 } // void ConstructCompositeImage(const std::vector<StillImage>& tiles, const std::vector<std::vector<uint32> >& indeces)
 
+
+
+void ImageDescriptor::DEBUG_PrintInfo() {
+	cout << "ImageDescriptor properties:" << endl;
+	cout << "* width:                " << _width << endl;
+	cout << "* height:               " << _height << endl;
+	cout << "* colors, RGBA format:  " << endl;
+	cout << "  * TL                  " << _color[0].GetRed() << ", " << _color[0].GetGreen() << ", " << _color[0].GetBlue() << ", " << _color[0].GetAlpha() << endl;
+	cout << "  * TR                  " << _color[1].GetRed() << ", " << _color[1].GetGreen() << ", " << _color[1].GetBlue() << ", " << _color[1].GetAlpha() << endl;
+	cout << "  * BL                  " << _color[2].GetRed() << ", " << _color[2].GetGreen() << ", " << _color[2].GetBlue() << ", " << _color[2].GetAlpha() << endl;
+	cout << "  * BR:                 " << _color[3].GetRed() << ", " << _color[3].GetGreen() << ", " << _color[3].GetBlue() << ", " << _color[3].GetAlpha() << endl;
+	cout << "* static:               " << (_is_static ? "true" : "false") << endl;
+	cout << "* grayscale:            " << (_grayscale ? "true" : "false") << endl;
+	cout << endl;
+}
+
 // -----------------------------------------------------------------------------
 // AnimatedImage class
 // -----------------------------------------------------------------------------

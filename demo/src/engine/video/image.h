@@ -208,6 +208,9 @@ public:
 		const uint32 grid_rows, const uint32 grid_cols);
 	//@}
 
+	//! \brief A debug function which prints the image's information to the screen
+	void DEBUG_PrintInfo();
+
 protected:
 	/** \brief The width and height of the image, in coordinate system units.
 	*** If this represents a compound StillImage, (i.e. it is a composite image of multiple image elements)

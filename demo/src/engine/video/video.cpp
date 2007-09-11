@@ -817,12 +817,13 @@ StillImage GameVideo::CaptureScreen() throw(Exception) {
 	TextureManager->_images["captured_screen" + NumberToString(capture_id) + "<T>"] = new_image;
 
 	// Store the image element to the saved image (with a flipped y axis)
-	ImageElement element(new_image, 0, 0, screen_image._width, screen_image._height, 0.0f, 1.0f, 1.0f, 0.0f, screen_image._color);
+	ImageElement element(new_image, screen_image._width, screen_image._height, 0, 0, 0.0f, 1.0f, 1.0f, 0.0f, screen_image._color);
 	screen_image._elements.push_back(element);
 
 	if (CheckGLError() == true) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "an OpenGL error occurred: " << CreateGLErrorString() << endl;
 	}
+
 	capture_id++;
 	return screen_image;
 }
