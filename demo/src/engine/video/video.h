@@ -569,7 +569,7 @@ public:
 	*** screen captures existing at one time, because each image capture requires a relatively
 	*** large amount of texutre memory (roughly 3GB for a 1024x768 screen).
 	**/
-	StillImage CaptureScreen();
+	StillImage CaptureScreen() throw(hoa_utils::Exception);
 
 	/** \brief returns the amount of animation frames that have passed since the last
 	 *         call to GameVideo::Display(). This number is based on VIDEO_ANIMATION_FRAME_PERIOD,
@@ -647,7 +647,7 @@ public:
 	 */
 	void DrawLight(const StillImage &id, float x, float y, const Color &color = Color(1.0f, 1.0f, 1.0f, 1.0f));
 
-	//! \brief Prepares the 
+	//! \brief Prepares the
 	void EnablePointLights();
 
 	/**
@@ -876,7 +876,7 @@ private:
 
 	//! X offset to shake the screen by (if any)
 	float  _x_shake;
-	
+
 	//! Y offset to shake the screen by (if any)
 	float _y_shake;
 
@@ -996,7 +996,7 @@ private:
 	 */
 	Color _GetTextShadowColor(FontProperties *fp);
 
-	/** \brief Rounds a force value to the nearest integer based on probability. 
+	/** \brief Rounds a force value to the nearest integer based on probability.
 	*** \param force  The force to round
 	*** \return the rounded force value
 	*** \note For example, a force value of 2.85 has an 85% chance of rounding to 3 and a 15% chance of rounding to 2. This rounding
