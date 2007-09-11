@@ -855,14 +855,14 @@ void GameVideo::MakeScreenshot(const std::string& filename) {
 	GLint viewport_dimensions[4]; // viewport_dimensions[2] is the width, [3] is the height
 	glGetIntegerv(GL_VIEWPORT, viewport_dimensions);
 
-	// TODO: retrieve the frame buffer in RGB format, not RGBA, once ImageMemory class is able to self-determine if its data is in RGBA or RGB format
 	// Buffer to store the image before it is flipped
 	buffer.width = viewport_dimensions[2];
 	buffer.height = viewport_dimensions[3];
-	buffer.pixels = malloc(buffer.width * buffer.height * 4);
+	buffer.pixels = malloc(buffer.width * buffer.height * 3);
+	buffer.rgb_format = true;
 
 	// Read pixel data
-	glReadPixels(0, 0, buffer.width, buffer.height, GL_RGBA, GL_UNSIGNED_BYTE, buffer.pixels);
+	glReadPixels(0, 0, buffer.width, buffer.height, GL_RGB, GL_UNSIGNED_BYTE, buffer.pixels);
 
 	if (CheckGLError() == true) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "an OpenGL error occured: " << CreateGLErrorString() << endl;
@@ -872,16 +872,18 @@ void GameVideo::MakeScreenshot(const std::string& filename) {
 		return;
 	}
 
-	// Vertically flip the image
-	void* buffer_temp = malloc(buffer.width * buffer.height * 4);
+	// Vertically flip the image, then swap the flipped and original images
+	void* buffer_temp = malloc(buffer.width * buffer.height * 3);
 	for (int32 i=0; i < buffer.height; ++i) {
-		memcpy((uint8*)buffer_temp + i * buffer.width * 4, (uint8*)buffer.pixels + (buffer.height - i - 1) * buffer.width * 4, buffer.width * 4);
+		memcpy((uint8*)buffer_temp + i * buffer.width * 3, (uint8*)buffer.pixels + (buffer.height - i - 1) * buffer.width * 3, buffer.width * 3);
 	}
-	free(buffer.pixels);
+	void* temp = buffer.pixels;
 	buffer.pixels = buffer_temp;
+	buffer_temp = temp;
 
 	buffer.SaveImage(filename, false);
 
+	free(buffer_temp);
 	free(buffer.pixels);
 	buffer.pixels = NULL;
 }

@@ -35,7 +35,8 @@ namespace private_video {
 ImageMemory::ImageMemory() :
 	width(0),
 	height(0),
-	pixels(NULL)
+	pixels(NULL),
+	rgb_format(false)
 {}
 
 
@@ -92,7 +93,8 @@ bool ImageMemory::SaveImage(const string& filename, bool png_image) {
 	}
 	else {
 		// JPG images don't have alpha information, so we must convert the data to RGB format first
-		RGBAToRGB();
+		if (rgb_format == false)
+			RGBAToRGB();
 		return _SaveJpgImage(filename);
 	}
 }
@@ -110,15 +112,16 @@ void ImageMemory::ConvertToGrayscale() {
 		return;
 	}
 
-	uint8* end_position = static_cast<uint8*>(pixels) + (width * height * 4); // "4" is because of RGBA
+	uint8 format_bytes = (rgb_format ? 3 : 4);
+	uint8* end_position = static_cast<uint8*>(pixels) + (width * height * format_bytes);
 
-	for (uint8* i = static_cast<uint8*>(pixels); i < end_position; i += 4) {
+	for (uint8* i = static_cast<uint8*>(pixels); i < end_position; i += format_bytes) {
 		// Compute the grayscale value for this pixel based on RGB values: 0.30R + 0.59G + 0.11B
 		uint8 value = static_cast<uint8>((30 * *(i) + 59 * *(i + 1) + 11 * *(i + 2)) * 0.01f);
 		*i = value;
 		*(i + 1) = value;
 		*(i + 2) = value;
-		// *(i + 3) is the alpha value and is left unmodified
+		// *(i + 3) for RGBA is the alpha value and is left unmodified
 	}
 }
 
@@ -134,6 +137,11 @@ void ImageMemory::RGBAToRGB() {
 		return;
 	}
 
+	if (rgb_format == true) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "image data was said to already be in RGB format" << endl;
+		return;
+	}
+
 	uint8* pixel_index = static_cast<uint8*>(pixels);
 	uint8* pixel_source = pixel_index;
 
@@ -146,6 +154,7 @@ void ImageMemory::RGBAToRGB() {
 
 	// Reduce the memory consumed by 1/4 since we no longer need to contain alpha data
 	pixels = realloc(pixels, width * height * 3);
+	rgb_format = true;
 }
 
 
@@ -158,7 +167,7 @@ void ImageMemory::CopyFromTexture(TexSheet* texture) {
 	// Get the texture as a buffer
 	height = texture->height;
 	width = texture->width;
-	pixels = malloc(height * width * 4);
+	pixels = malloc(height * width * (rgb_format ? 3 : 4));
 	if (pixels == NULL) {
 		PRINT_ERROR << "failed to malloc enough memory to copy the texture" << endl;
 	}
@@ -176,10 +185,11 @@ void ImageMemory::CopyFromImage(BaseImageTexture* img) {
 	// Check that the image to copy is smaller than its texture sheet (usually true).
 	// If so, then copy over only the sub-rectangle area of the image from its texture
 	if (height > img->height || width > img->width) {
-		uint32 src_bytes = width * 4;
-		uint32 dst_bytes = img->width * 4;
-		uint32 src_offset = img->y * width * 4 + img->x * 4;
-		void* img_pixels = malloc(img->width * img->height * 4);
+		uint8 format_bytes = (rgb_format ? 3 : 4);
+		uint32 src_bytes = width * format_bytes;
+		uint32 dst_bytes = img->width * format_bytes;
+		uint32 src_offset = img->y * width * format_bytes + img->x * format_bytes;
+		void* img_pixels = malloc(img->width * img->height * format_bytes);
 		if (img_pixels == NULL) {
 			PRINT_ERROR << "failed to malloc enough memory to copy the image" << endl;
 			return;
@@ -246,6 +256,7 @@ bool ImageMemory::_LoadPngImage(const string& filename) {
 	width = info_ptr->width;
 	height = info_ptr->height;
 	pixels = malloc(info_ptr->width * info_ptr->height * 4);
+
 	if (pixels == NULL) {
 		png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
 		fclose(fp);
@@ -318,6 +329,7 @@ bool ImageMemory::_LoadPngImage(const string& filename) {
 	png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
 	fclose(fp);
 
+	rgb_format = false;
 	return true;
 } // bool ImageMemory::_LoadPngImage(const string& filename)
 
@@ -348,7 +360,7 @@ bool ImageMemory::_LoadJpgImage(const string& filename) {
 
 	width = cinfo.output_width;
 	height = cinfo.output_height;
-	pixels = malloc(cinfo.output_width * cinfo.output_height * 4);
+	pixels = malloc(cinfo.output_width * cinfo.output_height * 3);
 
 	uint32 bpp = cinfo.output_components;
 	uint8* img_pixel = NULL;
@@ -360,12 +372,11 @@ bool ImageMemory::_LoadJpgImage(const string& filename) {
 
 			for(uint32 x = 0; x < cinfo.output_width; x++) {
 				img_pixel = buffer[0] + (x * bpp);
-				dst_pixel = ((uint8 *)pixels) + ((y * cinfo.output_width) + x) * 4;
+				dst_pixel = ((uint8 *)pixels) + ((y * cinfo.output_width) + x) * 3;
 
 				dst_pixel[0] = img_pixel[0];
 				dst_pixel[1] = img_pixel[1];
 				dst_pixel[2] = img_pixel[2];
-				dst_pixel[3] = 0xFF;
 			}
 		}
 	}
@@ -375,12 +386,11 @@ bool ImageMemory::_LoadJpgImage(const string& filename) {
 
 			for (uint32 x = 0; x < cinfo.output_width; x++) {
 				img_pixel = buffer[0] + (x * bpp);
-				dst_pixel = ((uint8 *)pixels) + ((y * cinfo.output_width) + x) * 4;
+				dst_pixel = ((uint8 *)pixels) + ((y * cinfo.output_width) + x) * 3;
 
 				dst_pixel[0] = img_pixel[0];
 				dst_pixel[1] = img_pixel[1];
 				dst_pixel[2] = img_pixel[2];
-				dst_pixel[3] = img_pixel[3];
 			}
 		}
 	}
@@ -396,6 +406,7 @@ bool ImageMemory::_LoadJpgImage(const string& filename) {
 	jpeg_destroy_decompress(&cinfo);
 
 	fclose(fp);
+	rgb_format = true;
 	return true;
 } // bool ImageMemory::_LoadJpgImage(const string& filename)
 
@@ -408,6 +419,10 @@ bool ImageMemory::_SavePngImage(const std::string& filename) const {
 	if (fp == NULL) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "could not open file: " << filename << endl;
 		return false;
+	}
+
+	if (rgb_format == true) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "attempting to save RGB format image data as a RGBA format PNG image" << endl;
 	}
 
 	png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, (png_voidp)NULL, NULL, NULL);
@@ -464,6 +479,10 @@ bool ImageMemory::_SaveJpgImage(const std::string& filename) const {
 	if (fp == NULL) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "could not open file: " << filename << endl;
 		return false;
+	}
+
+	if (rgb_format == false) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "attempting to save non-RGB format pixel data as a RGB format JPG image" << endl;
 	}
 
 	jpeg_compress_struct cinfo;

@@ -66,8 +66,8 @@ namespace private_video {
 *** image data. This class may also be used as a temporary holder for pixel
 *** data.
 ***
-*** \todo Add a member that determines if the pixel data is in RGB or RGBA
-*** format
+*** \note All of the members of this class are public, so you must be careful
+*** not to assign them to an incorrect value.
 *** ***************************************************************************/
 class ImageMemory {
 public:
@@ -83,6 +83,9 @@ public:
 
 	//! \brief Buffer of data, usually of size width * height * 4 (RGBA, 8 bits per component)
 	void* pixels;
+
+	//! \brief Set to true if the data is in RGB format, false if the data is in RGBA format.
+	bool rgb_format;
 
 	/** \brief Loads raw image data from a file and stores the data in the class members
 	*** \param file_name The filename of the image to load, which should have a .png or .jpg extension

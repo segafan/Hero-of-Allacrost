@@ -156,7 +156,7 @@ bool TexSheet::CopyRect(int32 x, int32 y, ImageMemory& load_info) {
 		y, // y offset within tex sheet
 		load_info.width, // width in pixels of image
 		load_info.height, // height in pixels of image
-		GL_RGBA, // format
+		(load_info.rgb_format ? GL_RGB : GL_RGBA), // format
 		GL_UNSIGNED_BYTE, // type
 		load_info.pixels // pixels of the sub image
 	);
