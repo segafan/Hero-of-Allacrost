@@ -628,7 +628,7 @@ void GameVideo::PopState() {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "no video states were saved on the stack" << endl;
 		return;
 	}
-	
+
 	_current_context = _context_stack.top();
 	_context_stack.pop();
 
@@ -774,7 +774,7 @@ void GameVideo::ApplyLightingOverlay() {
 
 
 
-StillImage GameVideo::CaptureScreen() {
+StillImage GameVideo::CaptureScreen() throw(Exception) {
 	// Static variable used to make sure the capture has a unique name in the texture image map
 	static uint32 capture_id = 0;
 
@@ -820,6 +820,10 @@ StillImage GameVideo::CaptureScreen() {
 	ImageElement element(new_image, 0, 0, screen_image._width, screen_image._height, 0.0f, 1.0f, 1.0f, 0.0f, screen_image._color);
 	screen_image._elements.push_back(element);
 
+	if (CheckGLError() == true) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "an OpenGL error occurred: " << CreateGLErrorString() << endl;
+	}
+	capture_id++;
 	return screen_image;
 }
 
