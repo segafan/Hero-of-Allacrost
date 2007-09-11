@@ -373,6 +373,9 @@ public:
 	*** colors to draw the element.
 	**/
 	void Draw(const Color* color_array = NULL) const;
+
+	//! \brief A debug function which prints the image element's properties to standard output
+	void DEBUG_PrintInfo();
 }; // class BaseImageElement
 
 

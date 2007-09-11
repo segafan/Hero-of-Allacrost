@@ -866,6 +866,25 @@ void BaseImageElement::Draw(const Color* color_array) const {
 	}
 } // void BaseImageElement::Draw(const Color* color_array) const
 
+
+void BaseImageElement::DEBUG_PrintInfo() {
+	cout << "BaseImageElement properties:" << endl;
+	cout << "* width:                " << width << endl;
+	cout << "* height:               " << height << endl;
+	cout << "* x offset:             " << x_offset << endl;
+	cout << "* y offset:             " << y_offset << endl;
+	cout << "* uv coords (1, 2):      (" << u1 << "," << v1 << ") (" << u2 << ", " << v2 << ")" << endl;
+	cout << "* colors, RGBA format:  " << endl;
+	cout << "  * TL                  " << color[0].GetRed() << ", " << color[0].GetGreen() << ", " << color[0].GetBlue() << ", " << color[0].GetAlpha() << endl;
+	cout << "  * TR                  " << color[1].GetRed() << ", " << color[1].GetGreen() << ", " << color[1].GetBlue() << ", " << color[1].GetAlpha() << endl;
+	cout << "  * BL                  " << color[2].GetRed() << ", " << color[2].GetGreen() << ", " << color[2].GetBlue() << ", " << color[2].GetAlpha() << endl;
+	cout << "  * BR:                 " << color[3].GetRed() << ", " << color[3].GetGreen() << ", " << color[3].GetBlue() << ", " << color[3].GetAlpha() << endl;
+	cout << "* blend:                " << (blend ? "true" : "false") << endl;
+	cout << "* unichrome vertices:   " << (unichrome_vertices ? "true" : "false") << endl;
+	cout << "* white vertices:       " << (white_vertices ? "true" : "false") << endl;
+	cout << endl;
+}
+
 // -----------------------------------------------------------------------------
 // ImageElement class
 // -----------------------------------------------------------------------------
