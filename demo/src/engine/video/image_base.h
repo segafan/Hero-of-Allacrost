@@ -65,6 +65,9 @@ namespace private_video {
 *** There are also several routines for performing manipulations on the raw
 *** image data. This class may also be used as a temporary holder for pixel
 *** data.
+***
+*** \todo Add a member that determines if the pixel data is in RGB or RGBA
+*** format
 *** ***************************************************************************/
 class ImageMemory {
 public:
