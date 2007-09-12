@@ -40,6 +40,7 @@
 #include <QSpinBox>
 #include <QStatusBar>
 #include <QTabWidget>
+#include <QToolBar>
 #include <QTreeWidget>
 
 #include <map>
@@ -80,12 +81,12 @@ class Editor: public QMainWindow
 		void closeEvent(QCloseEvent*);
 	
 	private slots:
-		//! \name Menu Setup Slots
-		//! \brief These slots are used to gray out items in the menus.
+		//! \name Menu-Toolbar Setup Slots
+		//! \brief These slots are used to gray out items in the menus and toolbars.
 		//{@
 		void _FileMenuSetup();
 		void _ViewMenuSetup();
-		void _TilesMenuSetup();
+		void _TilesEnableActions();
 		void _MapMenuSetup();
 		//@}
 
@@ -137,23 +138,34 @@ class Editor: public QMainWindow
 		//@}
 		
 	private:
-		//! Helper function to the constructor, creates menu actions.
+		//! Helper function to the constructor, creates actions for use by menus
+		//! and toolbars.
 		void _CreateActions();
 		//! Helper function to the constructor, creates the actual menus.
 		void _CreateMenus();
-		//! \brief Used to determine if it is safe to erase the current map. Will prompt the user for action:
-		//!        to save or not to save.
-		//! \return True if user decided to save the map or intentionally erase it; false if user canceled the operation.
+		//! Helper function to the constructor, creates the actual toolbars.
+		void _CreateToolbars();
+
+		//! \brief Used to determine if it is safe to erase the current map.
+		//!        Will prompt the user for action: to save or not to save.
+		//! \return True if user decided to save the map or intentionally erase it;
+		//!         False if user canceled the operation.
 		bool _EraseOK();
 
 		//! \name Application Menus
-		//! \brief These are used to represent the various menus found in the menu bar.
+		//! \brief These are used to represent various menus found in the menu bar.
 		//{@
 		QMenu* _file_menu;
 		QMenu* _view_menu;
 		QMenu* _tiles_menu;
 		QMenu* _map_menu;
 		QMenu* _help_menu;
+		//@}
+
+		//! \name Application Toolbars
+		//! \brief These are used to represent various toolbars found in the main window.
+		//{@
+		QToolBar* _tiles_toolbar;
 		//@}
 
 		//! \name Application Menu Actions

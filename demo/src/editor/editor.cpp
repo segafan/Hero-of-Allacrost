@@ -23,9 +23,11 @@ using namespace std;
 
 Editor::Editor() : QMainWindow()
 {
-	// create menu actions and menus
+	// create actions, menus, and toolbars
 	_CreateActions();
 	_CreateMenus();
+	_CreateToolbars();
+	_TilesEnableActions();
 
 	// initialize viewing items
 	_grid_on = false;
@@ -99,7 +101,7 @@ void Editor::_ViewMenuSetup()
 	} // map does not exist, can't view it*/
 } // _ViewMenuSetup()
 
-void Editor::_TilesMenuSetup()
+void Editor::_TilesEnableActions()
 {
 	if (_ed_scrollview != NULL && _ed_scrollview->_map != NULL)
 	{
@@ -123,14 +125,14 @@ void Editor::_TilesMenuSetup()
 		_edit_ml_action->setEnabled(false);
 		_edit_ul_action->setEnabled(false);
 	} // map does not exist, can't paint it*/
-} // _TilesMenuSetup()
+} // _TilesEnableActions()
 
 void Editor::_MapMenuSetup()
 {
 	if (_ed_scrollview != NULL && _ed_scrollview->_map != NULL)
 	{
 		_select_music_action->setEnabled(true);
-		_map_properties_action->setEnabled(false);
+		_map_properties_action->setEnabled(true);
 	} // map must exist in order to set music
 	else
 	{
@@ -183,6 +185,9 @@ void Editor::_FileNew()
 			_ViewToggleML();
 			_ViewToggleUL();
 			
+			// Enable appropriate actions
+			_TilesEnableActions();
+
 			// Set default edit mode
 			_ed_scrollview->_layer_edit = LOWER_LAYER;
 			_ed_scrollview->_tile_mode  = PAINT_TILE;
@@ -240,6 +245,9 @@ void Editor::_FileOpen()
 			_ViewToggleLL();
 			_ViewToggleML();
 			_ViewToggleUL();
+
+			// Enable appropriate actions
+			_TilesEnableActions();
 
 			// Set default edit mode
 			_ed_scrollview->_layer_edit = LOWER_LAYER;
@@ -432,8 +440,8 @@ void Editor::_MapProperties()
 		{
 			// User wants to make map wider so we must insert columns of tiles at the edge of the map.
 			
-			int map_width = _ed_scrollview->_map->GetWidth();
-			int map_height = _ed_scrollview->_map->GetHeight();
+			int map_width     = _ed_scrollview->_map->GetWidth();
+			int map_height    = _ed_scrollview->_map->GetHeight();
 			int extra_columns = props->GetWidth() - map_width;
 			
 			// Add in the extra columns one by one.
@@ -462,15 +470,18 @@ void Editor::_MapProperties()
 					upper_layer.insert(it, -1);
 					it += map_width + 1;
 				} // iterate through the rows of the upper layer
+
+				map_width++;
+				_ed_scrollview->_map->SetWidth(map_width);
 			} // add in all the extra columns
 		} // insert columns
 		else if (_ed_scrollview->_map->GetWidth() > props->GetWidth())
 		{
 			// User wants to make map less wide so we must delete columns of tiles from the edge of the map.
 			
-			int map_width = _ed_scrollview->_map->GetWidth();
-			int map_height = _ed_scrollview->_map->GetHeight();
-			int extra_columns = props->GetWidth() - map_width;
+			int map_width     = _ed_scrollview->_map->GetWidth();
+			int map_height    = _ed_scrollview->_map->GetHeight();
+			int extra_columns = map_width - props->GetWidth();
 			
 			// Delete all the extra columns one by one.
 			for (int col = extra_columns; col > 0; col--)
@@ -498,36 +509,94 @@ void Editor::_MapProperties()
 					upper_layer.erase(it);
 					it += map_width - 1;
 				} // iterate through the rows of the upper layer
+
+				map_width--;
+				_ed_scrollview->_map->SetWidth(map_width);
 			} // delete all the extra columns
 		} // delete columns
-		_ed_scrollview->_map->SetWidth(props->GetWidth());
 		
-		if (_ed_scrollview->_map->GetHeight() != props->GetHeight())
+		if (_ed_scrollview->_map->GetHeight() < props->GetHeight())
 		{
-			// TODO: insert or delete rows
-		} // height has changed, compensate appropriately
+			// User wants to make map taller so we must insert rows of tiles at the edge of the map.
+
+			int map_width = _ed_scrollview->_map->GetWidth();
+			int extra_rows = props->GetHeight() - _ed_scrollview->_map->GetHeight();
+	
+			vector<int32>& lower_layer  = _ed_scrollview->_map->GetLayer(LOWER_LAYER);
+			vector<int32>& middle_layer = _ed_scrollview->_map->GetLayer(MIDDLE_LAYER);
+			vector<int32>& upper_layer  = _ed_scrollview->_map->GetLayer(UPPER_LAYER);
+			lower_layer.insert( lower_layer.end(),  extra_rows * map_width, -1);
+			middle_layer.insert(middle_layer.end(), extra_rows * map_width, -1);
+			upper_layer.insert( upper_layer.end(),  extra_rows * map_width, -1);
+		} // add rows
+		else if (_ed_scrollview->_map->GetHeight() > props->GetHeight())
+		{
+			// User wants to make map less tall so we must delete rows of tiles from the edge of the map.
+			
+			int map_width  = _ed_scrollview->_map->GetWidth();
+			int extra_rows = _ed_scrollview->_map->GetHeight() - props->GetHeight();
+	
+			vector<int32>& lower_layer  = _ed_scrollview->_map->GetLayer(LOWER_LAYER);
+			vector<int32>& middle_layer = _ed_scrollview->_map->GetLayer(MIDDLE_LAYER);
+			vector<int32>& upper_layer  = _ed_scrollview->_map->GetLayer(UPPER_LAYER);
+			lower_layer.erase( lower_layer.end()  - extra_rows * map_width, lower_layer.end());
+			middle_layer.erase(middle_layer.end() - extra_rows * map_width, middle_layer.end());
+			upper_layer.erase( upper_layer.end()  - extra_rows * map_width, upper_layer.end());
+	
+		} // delete rows
+
+		// Resize the map, QOpenGL and QScrollView widgets.
 		_ed_scrollview->_map->SetHeight(props->GetHeight());
 		_ed_scrollview->_map->resize(props->GetWidth() * TILE_WIDTH, props->GetHeight() * TILE_HEIGHT);
 		_ed_scrollview->resize(props->GetWidth() * TILE_WIDTH, props->GetHeight() * TILE_HEIGHT);
 
-		if (_ed_tabs != NULL)
-			delete _ed_tabs;
-		_ed_tabs = new QTabWidget();
-		_ed_tabs->setTabPosition(QTabWidget::South);
 
-		_ed_scrollview->_map->tileset_names.clear();
+
+		// User has the ability to add or remove tilesets being used. We don't want
+		// to reload tilesets that have already been loaded before.
+
 		QTreeWidget* tilesets = props->GetTilesetTree();
-			int num_items = tilesets->topLevelItemCount();
-			for (int i = 0; i < num_items; i++)
+
+		// Put the names of the tabs into a nice list that can be easily searched
+		// with one command instead of a loop.
+		QStringList tab_names;
+		for (int i = 0; i < _ed_tabs->count(); i++)
+			tab_names << _ed_tabs->tabText(i);
+
+		// Go through the list of tilesets, adding selected tilesets and removing
+		// any unwanted tilesets.
+		int num_items = tilesets->topLevelItemCount();
+		for (int i = 0; i < num_items; i++)
+		{
+			if (tilesets->topLevelItem(i)->checkState(0) == Qt::Checked)
 			{
-				if (tilesets->topLevelItem(i)->checkState(0) == Qt::Checked)
+				if (tab_names.contains(tilesets->topLevelItem(i)->text(0)) == false)
 				{
 					Tileset* a_tileset = new Tileset(this, tilesets->topLevelItem(i)->text(0));
 					_ed_tabs->addTab(a_tileset->table, tilesets->topLevelItem(i)->text(0));
 					_ed_scrollview->_map->tilesets.push_back(a_tileset);
-				} // tileset must be checked
-			} // iterate through all possible tilesets
-	
+				} // only add a tileset if it isn't already loaded
+			} // tileset must be checked in order to add it
+			else if (tilesets->topLevelItem(i)->checkState(0) == Qt::Unchecked &&
+			         tab_names.contains(tilesets->topLevelItem(i)->text(0)))
+				_ed_tabs->removeTab(tab_names.indexOf(tilesets->topLevelItem(i)->text(0)));
+				// FIXME:
+				// Where to add and remove tileset name from the tilesets list
+				// in the _map? Do it here or when actually painting and deleting
+				// tiles? Here the assumption is made that if the user is adding a
+				// tileset, then s/he expects to use tiles from that tileset and we
+				// can safely add the tileset name to the _map. Otherwise we would
+				// have to constantly check every time a paint operation occurs
+				// whether or not the tileset name of the selected tile was present
+				// in the tileset name list in _map. That's cumbersome.
+				//
+				// When removing a tileset however, there might still be tiles in
+				// the map from that tileset, and the user is only removing the
+				// tileset from the view in the bottom of the map to unclutter
+				// things. In this case we wouldn't want to remove the tileset name
+				// from the list in _map.
+		} // iterate through all possible tilesets
+
 		_ed_splitter->addWidget(_ed_tabs);
 	} // only if the user pressed OK
 	else
@@ -617,7 +686,9 @@ void Editor::_CreateActions()
 
 	// Create menu actions related to the Tiles menu
 
-	_layer_fill_action = new QAction("&Fill layer", this);
+	_layer_fill_action = new QAction(
+		QIcon("img/misc/editor-tools/stock-tool-bucket-fill-22.png"),
+		"&Fill layer", this);
 	_layer_fill_action->setStatusTip("Fills current layer with selected tile");
 	connect(_layer_fill_action, SIGNAL(triggered()), this, SLOT(_TileLayerFill()));
 
@@ -625,7 +696,9 @@ void Editor::_CreateActions()
 	_layer_clear_action->setStatusTip("Clears current layer from any tiles");
 	connect(_layer_clear_action, SIGNAL(triggered()), this, SLOT(_TileLayerClear()));
 	
-	_mode_paint_action = new QAction("&Paint mode", this);
+	_mode_paint_action = new QAction(
+		QIcon("img/misc/editor-tools/stock-tool-pencil-22.png"),
+		"&Paint mode", this);
 	_mode_paint_action->setStatusTip("Switches to paint mode to draw tiles on the map");
 	_mode_paint_action->setCheckable(true);
 	connect(_mode_paint_action, SIGNAL(triggered()), this, SLOT(_TileModePaint()));
@@ -635,7 +708,9 @@ void Editor::_CreateActions()
 	_mode_move_action->setCheckable(true);
 	connect(_mode_move_action, SIGNAL(triggered()), this, SLOT(_TileModeMove()));
 
-	_mode_delete_action = new QAction("&Delete mode", this);
+	_mode_delete_action = new QAction(
+		QIcon("img/misc/editor-tools/stock-tool-eraser-22.png"),
+		"&Delete mode", this);
 	_mode_delete_action->setStatusTip("Switches to delete mode to erase tiles from the map");
 	_mode_delete_action->setCheckable(true);
 	connect(_mode_delete_action, SIGNAL(triggered()), this, SLOT(_TileModeDelete()));
@@ -718,6 +793,7 @@ void Editor::_CreateMenus()
 	_view_menu->addAction(_toggle_ml_action);
 	_view_menu->addAction(_toggle_ul_action);
 	_view_menu->setCheckable(true);
+	_view_menu->setTearOffEnabled(true);
 	connect(_view_menu, SIGNAL(aboutToShow()), this, SLOT(_ViewMenuSetup()));
 
 	// tile menu creation
@@ -732,7 +808,8 @@ void Editor::_CreateMenus()
 	_tiles_menu->addAction(_edit_ll_action);
 	_tiles_menu->addAction(_edit_ml_action);
 	_tiles_menu->addAction(_edit_ul_action);
-	connect(_tiles_menu, SIGNAL(aboutToShow()), this, SLOT(_TilesMenuSetup()));
+	_tiles_menu->setTearOffEnabled(true);
+	connect(_tiles_menu, SIGNAL(aboutToShow()), this, SLOT(_TilesEnableActions()));
 	
 	// map menu creation
 	_map_menu = menuBar()->addMenu("&Map");
@@ -746,6 +823,15 @@ void Editor::_CreateMenus()
 	_help_menu->addAction(_about_action);
 	_help_menu->addAction(_about_qt_action);
 } // _CreateMenus()
+
+void Editor::_CreateToolbars()
+{
+	_tiles_toolbar = addToolBar("Tiles");
+	_tiles_toolbar->addAction(_layer_fill_action);
+	_tiles_toolbar->addSeparator();
+	_tiles_toolbar->addAction(_mode_paint_action);
+	_tiles_toolbar->addAction(_mode_delete_action);
+} // _CreateToolbars()
 
 bool Editor::_EraseOK()
 {
@@ -803,6 +889,8 @@ MapPropertiesDialog::MapPropertiesDialog(QWidget* parent, const QString& name, b
 	_cancel_pbut   = new QPushButton("Cancel", this);
 	_ok_pbut       = new QPushButton("OK", this);
 	_cancel_pbut->setDefault(true);
+	// TODO: connect the OK push button to a signal and slot such that it is
+	// disabled if no tilesets are selected
 	connect(_ok_pbut,     SIGNAL(released()), this, SLOT(accept()));
 	connect(_cancel_pbut, SIGNAL(released()), this, SLOT(reject()));
 
@@ -955,16 +1043,16 @@ EditorScrollView::EditorScrollView(QWidget* parent, const QString& name, int wid
 
 	// Create menu actions related to the Context menu.
 	_insert_row_action = new QAction("Insert row", this);
-	_insert_row_action->setStatusTip("Inserts a row of empty tiles above the currently selected tile");
+	_insert_row_action->setStatusTip("Inserts a row of empty tiles on all layers above the currently selected tile");
 	connect(_insert_row_action, SIGNAL(triggered()), this, SLOT(_ContextInsertRow()));
 	_insert_column_action = new QAction("Insert column", this);
-	_insert_column_action->setStatusTip("Inserts a column of empty tiles to the left of the currently selected tile");
+	_insert_column_action->setStatusTip("Inserts a column of empty tiles on all layers to the left of the currently selected tile");
 	connect(_insert_column_action, SIGNAL(triggered()), this, SLOT(_ContextInsertColumn()));
 	_delete_row_action = new QAction("Delete row", this);
-	_delete_row_action->setStatusTip("Deletes the currently selected row of tiles");
+	_delete_row_action->setStatusTip("Deletes the currently selected row of tiles from all layers");
 	connect(_delete_row_action, SIGNAL(triggered()), this, SLOT(_ContextDeleteRow()));
 	_delete_column_action = new QAction("Delete column", this);
-	_delete_column_action->setStatusTip("Deletes the currently selected column of tiles");
+	_delete_column_action->setStatusTip("Deletes the currently selected column of tiles from all layers");
 	connect(_delete_column_action, SIGNAL(triggered()), this, SLOT(_ContextDeleteColumn()));
 	
 	// Context menu creation.
@@ -1048,7 +1136,7 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 				// delete the tile
 				GetCurrentLayer()[_tile_index] = -1;
 
-				// No longer needed
+				// FIXME: No longer needed
 				//_RemoveIfUnused(file_index);
 			} // left mouse button was pressed
 			break;
@@ -1115,7 +1203,7 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 					// delete the tile
 					GetCurrentLayer()[_tile_index] = -1;
 
-					//_RemoveIfUnused(file_index);
+					// FIXME: _RemoveIfUnused(file_index);
 				} // left mouse button was pressed
 				break;
 			} // edit mode DELETE_TILE
