@@ -188,8 +188,8 @@ void DialogueManager::Draw() {
 	_nameplate_image.Draw();
 
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, 0);
-	VideoManager->SetFont("map");
-	VideoManager->SetTextColor(Color(Color::black));
+	VideoManager->Text()->SetDefaultFont("map");
+	VideoManager->Text()->SetDefaultTextColor(Color(Color::black));
 	VideoManager->MoveRelative(120.0f, -10.0f);
 	
 	VirtualSprite* speaker = NULL;
@@ -201,7 +201,7 @@ void DialogueManager::Draw() {
 		_current_option->Draw(); // Display options
 		speaker = reinterpret_cast<VirtualSprite*>(MapMode::_current_map->_all_objects[_current_option->GetCurrentSpeaker()]); 
 	}
-	VideoManager->DrawText(speaker->name);
+	VideoManager->Text()->Draw(speaker->name);
 	if (speaker->face_portrait != NULL) {
 		VideoManager->MoveRelative(0.0f, -26.0f);
 		speaker->face_portrait->Draw();

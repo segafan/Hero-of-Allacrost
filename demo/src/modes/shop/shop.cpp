@@ -88,9 +88,9 @@ ShopMode::~ShopMode() {
 void ShopMode::Reset() {
 	// Setup video engine constructs
 	VideoManager->SetCoordSys(0, 1024, 0, 768);
-	VideoManager->SetFont("default");
+	VideoManager->Text()->SetDefaultFont("default");
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
-	VideoManager->SetTextColor(Color::white);
+	VideoManager->Text()->SetDefaultTextColor(Color::white);
 
 	// Temporary code
 	_all_objects.clear();

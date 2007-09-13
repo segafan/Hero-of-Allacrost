@@ -169,7 +169,7 @@ void BootMode::Reset() {
 	VideoManager->SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 	VideoManager->DisableFog(); // Turn off any remaining fog
-	VideoManager->SetTextColor(Color::white);
+	VideoManager->Text()->SetDefaultTextColor(Color::white);
 
 	// Reset the game universe
 	GlobalManager->ClearAllData();
@@ -1039,17 +1039,17 @@ void BootMode::Draw() {
 
 	if (!_latest_version)
 	{
-		VideoManager->SetTextColor(Color::green);
+		VideoManager->Text()->SetDefaultTextColor(Color::green);
 		VideoManager->Move(482.0f, 553.0f);
-		VideoManager->DrawText("New version available from allacrost.org: " + _latest_version_number);
+		VideoManager->Text()->Draw("New version available from allacrost.org: " + _latest_version_number);
 	}
 
 	VideoManager->Move(65.0f, 10.0f);
-	VideoManager->SetFont("default");
-	VideoManager->SetTextColor(Color::gray);
-	VideoManager->DrawText("Tech Demo");
+	VideoManager->Text()->SetDefaultFont("default");
+	VideoManager->Text()->SetDefaultTextColor(Color::gray);
+	VideoManager->Text()->Draw("Tech Demo");
 	VideoManager->MoveRelative(730.0f, 0.0f);
-	VideoManager->DrawText("Copyright (C) 2004 - 2007 The Allacrost Project");
+	VideoManager->Text()->Draw("Copyright (C) 2004 - 2007 The Allacrost Project");
 }
 
 

@@ -203,11 +203,11 @@ void BattleCharacter::DrawSprite() {
 		// TEMP: determine if character sprite needs red damage numbers drawn next to it
 		if (_total_time_damaged > 0) {
 			_total_time_damaged += SystemManager->GetUpdateTime();
-			VideoManager->SetFont("battle_dmg");
-			VideoManager->SetTextColor(Color::red);
+			VideoManager->Text()->SetDefaultFont("battle_dmg");
+			VideoManager->Text()->SetDefaultTextColor(Color::red);
 			VideoManager->Move(GetXLocation() + 40.0f, GetYLocation() + ( _total_time_damaged / 35.0f ) + 100.0f);
-			VideoManager->DrawText(NumberToString(_damage_dealt));
-			VideoManager->SetFont("battle");
+			VideoManager->Text()->Draw(NumberToString(_damage_dealt));
+			VideoManager->Text()->SetDefaultFont("battle");
 
 			if (_total_time_damaged > 3000) { // Show it for three seconds
 				_total_time_damaged = 0;
@@ -275,7 +275,7 @@ void BattleCharacter::DrawStatus() {
 	}
 
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_BLEND, 0);
-	VideoManager->SetTextColor(Color::white);
+	VideoManager->Text()->SetDefaultTextColor(Color::white);
 
 	// Draw the highlighted background if the character is selected
 	if (current_battle->_selected_character == this) {
@@ -286,7 +286,7 @@ void BattleCharacter::DrawStatus() {
 	// Draw the character's name
 	VideoManager->SetDrawFlags(VIDEO_X_RIGHT, 0);
 	VideoManager->Move(280.0f, 90.0f + y_offset);
- 	VideoManager->DrawText(GetActor()->GetName());
+ 	VideoManager->Text()->Draw(GetActor()->GetName());
 
 	// If the swap key is being held down, draw status icons
 	if (InputManager->SwapState()) {
@@ -322,11 +322,11 @@ void BattleCharacter::DrawStatus() {
 		VideoManager->SetDrawFlags(VIDEO_X_CENTER, 0);
 		// Draw the character's current health on top of the middle of the HP bar
 		VideoManager->Move(355.0f, 94.0f + y_offset);
-		VideoManager->DrawText(NumberToString(GetActor()->GetHitPoints()));
+		VideoManager->Text()->Draw(NumberToString(GetActor()->GetHitPoints()));
 
 		// Draw the character's current skill points on top of the middle of the SP bar
 		VideoManager->MoveRelative(110, 0);
-		VideoManager->DrawText(NumberToString(GetActor()->GetSkillPoints()));
+		VideoManager->Text()->Draw(NumberToString(GetActor()->GetSkillPoints()));
 	}
 } // void BattleCharacter::DrawStatus()
 
@@ -452,11 +452,11 @@ void BattleEnemy::DrawSprite() {
 	if (_total_time_damaged > 0) {
 		_total_time_damaged += SystemManager->GetUpdateTime();
 
-		VideoManager->SetFont("battle_dmg");
-		VideoManager->SetTextColor(Color::red);
+		VideoManager->Text()->SetDefaultFont("battle_dmg");
+		VideoManager->Text()->SetDefaultTextColor(Color::red);
 		VideoManager->Move(GetXLocation() + 25.0f, GetYLocation() + ( _total_time_damaged / 35.0f ) + 80.0f);
-		VideoManager->DrawText(NumberToString(_damage_dealt));
-		VideoManager->SetFont("battle");
+		VideoManager->Text()->Draw(NumberToString(_damage_dealt));
+		VideoManager->Text()->SetDefaultFont("battle");
 
 		if (_total_time_damaged > 3000) {
 			_total_time_damaged = 0;

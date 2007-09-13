@@ -90,35 +90,35 @@ void CharacterWindow::Draw() {
 
 	// Write character name
 	VideoManager->MoveRelative(150, 0);
-	VideoManager->DrawText(character->GetName());
+	VideoManager->Text()->Draw(character->GetName());
 
 	// Level
 	VideoManager->MoveRelative(0,20);
 	std::ostringstream os_level;
 	os_level << character->GetExperienceLevel();
 	std::string xp_level = std::string("Lv: ") + os_level.str();
-	VideoManager->DrawText(MakeUnicodeString(xp_level));
+	VideoManager->Text()->Draw(MakeUnicodeString(xp_level));
 
 	// HP
 	VideoManager->MoveRelative(0,20);
 	ostringstream os_health;
 	os_health << character->GetHitPoints() << " / " << character->GetMaxHitPoints();
 	std::string health = std::string("HP: ") + os_health.str();
-	VideoManager->DrawText(MakeUnicodeString(health));
+	VideoManager->Text()->Draw(MakeUnicodeString(health));
 
 	// SP
 	VideoManager->MoveRelative(0,20);
 	ostringstream os_skill;
 	os_skill << character->GetSkillPoints() << " / " << character->GetMaxSkillPoints();
 	std::string skill = std::string("SP: ") + os_skill.str();
-	VideoManager->DrawText(MakeUnicodeString(skill));
+	VideoManager->Text()->Draw(MakeUnicodeString(skill));
 
 	// XP to level up
 	VideoManager->MoveRelative(0, 20);
 	ostringstream os_xp;
 	os_xp << character->GetExperienceForNextLevel();
 	std::string xp = std::string("XP To Next: ") + os_xp.str();
-	VideoManager->DrawText(MakeUnicodeString(xp));
+	VideoManager->Text()->Draw(MakeUnicodeString(xp));
 
 	return;
 }
@@ -547,12 +547,12 @@ void StatusWindow::Draw() {
 
 	//Draw character name and level
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, 0);
-	VideoManager->DrawText(ch->GetName());
+	VideoManager->Text()->Draw(ch->GetName());
 
 	VideoManager->MoveRelative(0, 25);
 	ostringstream lvl;
 	lvl << "Experience Level: " << ch->GetExperienceLevel();
-	VideoManager->DrawText(MakeUnicodeString(lvl.str()));
+	VideoManager->Text()->Draw(MakeUnicodeString(lvl.str()));
 
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, 0);
 
@@ -561,47 +561,47 @@ void StatusWindow::Draw() {
 
 	ostringstream ohp;
 	ohp << "HP: " << ch->GetHitPoints() << " (" << ch->GetMaxHitPoints() << ")";
-	VideoManager->DrawText(MakeUnicodeString(ohp.str()));
+	VideoManager->Text()->Draw(MakeUnicodeString(ohp.str()));
 
 	VideoManager->MoveRelative(0, 25);
 	ostringstream osp;
 	osp << "SP: " << ch->GetSkillPoints() << " (" << ch->GetMaxSkillPoints() << ")";
-	VideoManager->DrawText(MakeUnicodeString(osp.str()));
+	VideoManager->Text()->Draw(MakeUnicodeString(osp.str()));
 
 	VideoManager->MoveRelative(0, 25);
 	ostringstream next;
 	next << "XP to Next: " << ch->GetExperienceForNextLevel();
-	VideoManager->DrawText(MakeUnicodeString(next.str()));
+	VideoManager->Text()->Draw(MakeUnicodeString(next.str()));
 
 	VideoManager->MoveRelative(0, 25);
 	ostringstream ostr;
 	ostr << "Strength: " << ch->GetStrength();
-	VideoManager->DrawText(MakeUnicodeString(ostr.str()));
+	VideoManager->Text()->Draw(MakeUnicodeString(ostr.str()));
 
 	VideoManager->MoveRelative(0, 25);
 	ostringstream ovig;
 	ovig << "Vigor: " << ch->GetVigor();
-	VideoManager->DrawText(MakeUnicodeString(ovig.str()));
+	VideoManager->Text()->Draw(MakeUnicodeString(ovig.str()));
 
 	VideoManager->MoveRelative(0, 25);
 	ostringstream ofort;
 	ofort << "XP to Next: " << ch->GetFortitude();
-	VideoManager->DrawText(MakeUnicodeString(ofort.str()));
+	VideoManager->Text()->Draw(MakeUnicodeString(ofort.str()));
 
 	VideoManager->MoveRelative(0, 25);
 	ostringstream ores;
 	ores << "Protection: " << ch->GetProtection();
-	VideoManager->DrawText(MakeUnicodeString(ores.str()));
+	VideoManager->Text()->Draw(MakeUnicodeString(ores.str()));
 
 	VideoManager->MoveRelative(0, 25);
 	ostringstream agl;
 	agl << "Agility: " << ch->GetAgility();
-	VideoManager->DrawText(MakeUnicodeString(agl.str()));
+	VideoManager->Text()->Draw(MakeUnicodeString(agl.str()));
 
 	VideoManager->MoveRelative(0, 25);
 	ostringstream oeva;
 	oeva << "Evade: " << ch->GetEvade() << "%";
-	VideoManager->DrawText(MakeUnicodeString(oeva.str()));
+	VideoManager->Text()->Draw(MakeUnicodeString(oeva.str()));
 
 	//Draw character full body portrait
 	VideoManager->Move(735, 145);
@@ -1255,19 +1255,19 @@ void EquipWindow::Draw() {
 		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 		switch (_equip_select.GetSelection()) {
 			case EQUIP_WEAPON:
-				VideoManager->DrawText(MakeUnicodeString("Weapons"));
+				VideoManager->Text()->Draw(MakeUnicodeString("Weapons"));
 				break;
 			case EQUIP_HEADGEAR:
-				VideoManager->DrawText(MakeUnicodeString("Headgear"));
+				VideoManager->Text()->Draw(MakeUnicodeString("Headgear"));
 				break;
 			case EQUIP_BODYARMOR:
-				VideoManager->DrawText(MakeUnicodeString("Body Armor"));
+				VideoManager->Text()->Draw(MakeUnicodeString("Body Armor"));
 				break;
 			case EQUIP_OFFHAND:
-				VideoManager->DrawText(MakeUnicodeString("Offhand"));
+				VideoManager->Text()->Draw(MakeUnicodeString("Offhand"));
 				break;
 			case EQUIP_LEGGINGS:
-				VideoManager->DrawText(MakeUnicodeString("Leggings"));
+				VideoManager->Text()->Draw(MakeUnicodeString("Leggings"));
 				break;
 		}
 	}
@@ -1277,15 +1277,15 @@ void EquipWindow::Draw() {
 		//FIX ME: Use XML tags for formatting option boxes
 		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 		VideoManager->Move(450.0f, 170.0f);
-		VideoManager->DrawText(MakeUnicodeString("Weapon"));
+		VideoManager->Text()->Draw(MakeUnicodeString("Weapon"));
 		VideoManager->MoveRelative(0.0f, 70.0f);
-		VideoManager->DrawText(MakeUnicodeString("Headgear"));
+		VideoManager->Text()->Draw(MakeUnicodeString("Headgear"));
 		VideoManager->MoveRelative(0.0f, 70.0f);
-		VideoManager->DrawText(MakeUnicodeString("Body Armor"));
+		VideoManager->Text()->Draw(MakeUnicodeString("Body Armor"));
 		VideoManager->MoveRelative(0.0f, 70.0f);
-		VideoManager->DrawText(MakeUnicodeString("Offhand"));
+		VideoManager->Text()->Draw(MakeUnicodeString("Offhand"));
 		VideoManager->MoveRelative(0.0f, 70.0f);
-		VideoManager->DrawText(MakeUnicodeString("Leggings"));
+		VideoManager->Text()->Draw(MakeUnicodeString("Leggings"));
 
 		VideoManager->MoveRelative(150.0f, -370.0f);
 

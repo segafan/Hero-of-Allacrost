@@ -124,34 +124,22 @@ void InitializeEngine() throw (Exception) {
 		throw Exception("Failed to load the 'Black Sleet' MenuSkin images.", __FILE__, __LINE__, __FUNCTION__);
 	}
 
-	if (VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "default", 18) == false) {
+	if (VideoManager->Text()->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "default", 18, VIDEO_TEXT_SHADOW_BLACK, 1, -2, true) == false) {
 		throw Exception("Failed to load the 'Switchblade Romance' font as 'default, size 18'", __FILE__, __LINE__, __FUNCTION__);
 	}
 
-	VideoManager->SetFontShadowOffsets("default", 1, -2);
-	VideoManager->SetFontShadowStyle("default", VIDEO_TEXT_SHADOW_BLACK);
-
-	if (VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "map", 24) == false) {
+	if (VideoManager->Text()->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "map", 24, VIDEO_TEXT_SHADOW_BLACK) == false) {
 		throw Exception("Failed to load the 'Switchblade Romance' font as 'map, size 24'", __FILE__, __LINE__, __FUNCTION__);
 	}
 
-	VideoManager->SetFontShadowOffsets("map", 0, 0);
-	VideoManager->SetFontShadowStyle("map", VIDEO_TEXT_SHADOW_BLACK);
-
-	if (VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "battle", 20) == false) {
+	if (VideoManager->Text()->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "battle", 20, VIDEO_TEXT_SHADOW_BLACK, 1, -2) == false) {
 		throw Exception("Failed to load the 'Switchblade Romance' font as 'battle, size 20'", __FILE__, __LINE__, __FUNCTION__);
 	}
 
-	VideoManager->SetFontShadowOffsets("battle", 1, -2);
-	VideoManager->SetFontShadowStyle("battle", VIDEO_TEXT_SHADOW_BLACK);
-
 	// Font used to show damage received / given in battle mode
-	if (VideoManager->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "battle_dmg", 24) == false) {
+	if (VideoManager->Text()->LoadFont("img/fonts/vtc_switchblade_romance.ttf", "battle_dmg", 24, VIDEO_TEXT_SHADOW_BLACK, 1, -2) == false) {
 		throw Exception("Failed to load the 'Switchblade Romance' font as 'battle_dmg, size 24'", __FILE__, __LINE__, __FUNCTION__);
 	}
-
-	VideoManager->SetFontShadowOffsets("battle_dmg", 1, -2);
-	VideoManager->SetFontShadowStyle("battle_dmg", VIDEO_TEXT_SHADOW_BLACK);
 
 	if (AudioManager->SingletonInitialize() == false) {
 		throw Exception("ERROR: unable to initialize AudioManager", __FILE__, __LINE__, __FUNCTION__);

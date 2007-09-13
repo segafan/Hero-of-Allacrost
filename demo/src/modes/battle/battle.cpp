@@ -155,7 +155,7 @@ void BattleMode::Reset() {
 	current_battle = this;
 
 	VideoManager->SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
-	VideoManager->SetFont("battle");
+	VideoManager->Text()->SetDefaultFont("battle");
 
 	// Load the default battle music track if no other music has been added
 	if (_battle_music.empty()) {

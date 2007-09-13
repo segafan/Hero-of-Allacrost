@@ -88,7 +88,7 @@ void WelcomeScreen::Show()
 {
 	_window.Show();
 	_visible = true;
-	VideoManager->SetFont("default"); // Reset font
+	VideoManager->Text()->SetDefaultFont("default"); // Reset font
 
 	_welcome_header_rendered = RenderedText(_welcome_text_header);
 	_welcome_body_rendered   = RenderedText(_welcome_text_body, RenderedText::ALIGN_LEFT);
@@ -100,7 +100,7 @@ void WelcomeScreen::Hide()
 {
 	_window.Hide();
 	_visible = false;
-	VideoManager->SetTextColor(Color::white); // Reset text color
+	VideoManager->Text()->SetDefaultTextColor(Color::white); // Reset text color
 	_welcome_header_rendered.Clear();
 	_welcome_body_rendered.Clear();
 }

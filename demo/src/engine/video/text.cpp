@@ -27,7 +27,11 @@ using namespace std;
 using namespace hoa_utils;
 using namespace hoa_video::private_video;
 
+template<> hoa_video::TextSupervisor* Singleton<hoa_video::TextSupervisor>::_singleton_reference = NULL;
+
 namespace hoa_video {
+
+TextSupervisor* TextManager = NULL;
 
 namespace private_video {
 
@@ -66,7 +70,7 @@ bool TextImageTexture::LoadFontProperties()
 {
 	if (style.shadow_style == VIDEO_TEXT_SHADOW_INVALID)
 	{
-		FontProperties *fp = VideoManager->GetFontProperties(style.font);
+		FontProperties *fp = TextManager->GetFontProperties(style.font);
 		if (!fp)
 		{
 			if (VIDEO_DEBUG)
@@ -90,7 +94,7 @@ bool TextImageTexture::Regenerate()
 
 	ImageMemory buffer;
 
-	if (!VideoManager->_RenderText(string, style, buffer))
+	if (!TextManager->_RenderText(string, style, buffer))
 		return false;
 	
 	width  = buffer.width;
@@ -100,7 +104,7 @@ bool TextImageTexture::Regenerate()
 	if(!sheet)
 	{
 		if(VIDEO_DEBUG)
-			cerr << "VIDEO_DEBUG: TextImageTexture::Regenerate(): GameVideo::_InsertImageInTexSheet() returned NULL!" << endl;
+			cerr << "VIDEO_DEBUG: TextImageTexture::Regenerate(): TextureManager::_InsertImageInTexSheet() returned NULL!" << endl;
 
 		free(buffer.pixels);
 		buffer.pixels = NULL;
@@ -125,7 +129,7 @@ bool TextImageTexture::Reload()
 
 	ImageMemory buffer;
 
-	if (!VideoManager->_RenderText(string, style, buffer))
+	if (!TextManager->_RenderText(string, style, buffer))
 		return false;
 	
 	if (!texture_sheet->CopyRect(x, y, buffer))
@@ -355,23 +359,22 @@ void RenderedText::_Regenerate() {
 	}
 
 	TextStyle style;
-	style.font          = VideoManager->GetFont();
-	style.shadow_enable = VideoManager->_text_shadow;
+	style.font = TextManager->GetDefaultFont();
 	FontProperties *fp;
-	if (!VideoManager->IsFontValid(style.font)
-	|| ((fp = VideoManager->GetFontProperties(style.font)) == NULL))
+	if (!TextManager->IsFontValid(style.font)
+	|| ((fp = TextManager->GetFontProperties(style.font)) == NULL))
 	{
 		if(VIDEO_DEBUG)
 			cerr << "RenderedText::_Regenerate(): Video engine contains invalid font." << endl;
 		return;
 	}
 
-	style.color = VideoManager->GetTextColor();
+	style.color = TextManager->GetDefaultTextColor();
 
 	uint16 newline = '\n';
 	std::vector<uint16 *> line_array;
 
-	VideoManager->_CacheGlyphs(_string.c_str(), fp);
+	TextManager->_CacheGlyphs(_string.c_str(), fp);
 
 	const uint16 *char_iter;
 	uint16 *reformatted_text = new uint16[_string.size() + 1];
@@ -398,7 +401,7 @@ void RenderedText::_Regenerate() {
 	Color old_color       = style.color;
 	int32 shadow_offset_x = 0;
 	int32 shadow_offset_y = 0;
-	Color shadow_color    = VideoManager->_GetTextShadowColor(fp);
+	Color shadow_color    = TextManager->_GetTextShadowColor(fp);
 
 	float total_height = static_cast<float>( (line_array.size() - 1) * fp->line_skip );
 
@@ -420,7 +423,7 @@ void RenderedText::_Regenerate() {
 		TextImageElement element(timage, 0, y_offset, 0.0f, 0.0f, 1.0f, 1.0f, static_cast<float>(timage->width), static_cast<float>(timage->height), _color);
 
 		// if text shadows are enabled, add a shadow version
-		if (style.shadow_enable && timage->style.shadow_style != VIDEO_TEXT_SHADOW_NONE)
+		if (timage->style.shadow_style != VIDEO_TEXT_SHADOW_NONE)
 		{
 			shadow_offset_x = static_cast<int32>(VideoManager->_current_context.coordinate_system.GetHorizontalDirection()) * timage->style.shadow_offset_x;
 			shadow_offset_y = static_cast<int32>(VideoManager->_current_context.coordinate_system.GetVerticalDirection())   * timage->style.shadow_offset_y;
@@ -476,27 +479,77 @@ void RenderedText::_Realign()
 }
 
 //-----------------------------------------------------------------------------
-// GameVideo class font and text methods
+// TextSupervisor class font and text methods
 //-----------------------------------------------------------------------------
 
-bool GameVideo::LoadFont(const string& filename, const string& name, uint32 size) {
+TextSupervisor::TextSupervisor()
+{}
+
+
+
+TextSupervisor::~TextSupervisor() {
+	// Remove all loaded fonts and shutdown the font library
+	for (map<string, FontProperties*>::iterator i = _font_map.begin(); i!= _font_map.end(); i++) {
+		FontProperties* fp = i->second;
+
+		if (fp->ttf_font)
+			TTF_CloseFont(fp->ttf_font);
+
+		if (fp->glyph_cache) {
+			for (std::map<uint16, FontGlyph*>::iterator j = fp->glyph_cache->begin(); j != fp->glyph_cache->end(); j++) {
+				delete (*j).second;
+			}
+			delete fp->glyph_cache;
+		}
+
+		delete fp;
+	}
+
+	TTF_Quit();
+}
+
+
+
+bool TextSupervisor::SingletonInitialize() {
+	if (TTF_Init() < 0) {
+		PRINT_ERROR << "SDL_ttf initialization failed" << endl;
+		return false;
+	}
+
+	if (LoadFont("img/fonts/tarnhalo.ttf", "debug_font", 16) == false) {
+		PRINT_ERROR << "could not load the debug font" << endl;
+		TTF_Quit();
+		return false;
+	}
+
+	return true;
+}
+
+
+
+bool TextSupervisor::LoadFont(const string& filename, const string& font_name, uint32 size, TEXT_SHADOW_STYLE style,
+	int32 x_offset, int32 y_offset, bool make_default)
+{
 	// Make sure that the font name is not already taken
-	if (IsFontValid(name) == true) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "a font with the desired reference name already existed: " << name << endl;
+	if (IsFontValid(font_name) == true) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "a font with the desired reference name already existed: " << font_name << endl;
+		return false;
+	}
+
+	if (size == 0) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "attempted to load a font of point size zero" << font_name << endl;
 		return false;
 	}
 
 	// Attempt to load the font
 	TTF_Font* font = TTF_OpenFont(filename.c_str(), size);
-	
 	if (font == NULL) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "TTF_OpenFont() failed to load the font file: " << filename << endl;
 		return false;
 	}
 
-	// Create a new FontProperties object for the font, and add it to the font map
+	// Create a new FontProperties object for this font
 	FontProperties* fp = new FontProperties;
-	_font_map[name] = fp;
 
 	// Set all of the font's properties
 	fp->ttf_font = font;
@@ -505,31 +558,45 @@ bool GameVideo::LoadFont(const string& filename, const string& name, uint32 size
 	fp->ascent = TTF_FontAscent(font);
 	fp->descent = TTF_FontDescent(font);
 
-	// Set default shadow: x to be 1/8th of the font's height (or 1 pixel), y to be -x
-	fp->shadow_x = max(fp->height / 8, 1);
-	fp->shadow_y = -fp->shadow_x;
+	// Set default shadow. If both offsets are zero, set the shadow offset to be 1/8th the height of the font
+	if (x_offset == 0 && y_offset == 0) {
+		fp->shadow_x = max(fp->height / 8, 1);
+		fp->shadow_y = -fp->shadow_x;
+	}
+	else {
+		fp->shadow_x = x_offset;
+		fp->shadow_y = y_offset;
+	}
 
-	// Set default shadow style and create the glyph cache
-	fp->shadow_style = VIDEO_TEXT_SHADOW_DARK;
+	// Set the shadow style and create the glyph cache
+	fp->shadow_style = style;
 	fp->glyph_cache = new std::map<uint16, FontGlyph*>;
 
+	_font_map[font_name] = fp;
+
 	return true;
-} // bool GameVideo::LoadFont(const string &filename, const string &name, int32 size)
+} // bool TextSupervisor::LoadFont(...)
 
 
 
-void GameVideo::SetFont(const std::string& name) {
-	if ( _font_map.find(name) == _font_map.end()) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because no font existed for name: " << name << endl;
+void TextSupervisor::SetDefaultFont(const std::string& font_name) {
+	if (_font_map.find(font_name) == _font_map.end()) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because no font existed by the name: " << font_name << endl;
 		return;
 	}
-		
-	_current_context.font = name;
+	
+	VideoManager->_current_context.font = font_name;
 }
 
 
 
-FontProperties* GameVideo::GetFontProperties(const std::string& font_name) {
+const string& TextSupervisor::GetDefaultFont() const {
+	return VideoManager->_current_context.font;
+}
+
+
+
+FontProperties* TextSupervisor::GetFontProperties(const std::string& font_name) {
 	if (IsFontValid(font_name) == false) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed becase argument was invalid for font name: " << font_name << endl;
 		return NULL;
@@ -540,13 +607,13 @@ FontProperties* GameVideo::GetFontProperties(const std::string& font_name) {
 
 
 
-void GameVideo::SetFontShadowStyle(const std::string& font_name, TEXT_SHADOW_STYLE style) {
+void TextSupervisor::SetFontShadowStyle(const std::string& font_name, TEXT_SHADOW_STYLE style) {
 	if (IsFontValid(font_name) == false) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because the properties could not be found for font: " << font_name << endl;
 		return;
 	}
 
-	FontProperties *font = _font_map[font_name];
+	FontProperties* font = _font_map[font_name];
 	if (font == NULL) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because the properties were NULL for for font: " << font_name << endl;
 		return;
@@ -557,14 +624,13 @@ void GameVideo::SetFontShadowStyle(const std::string& font_name, TEXT_SHADOW_STY
 
 
 
-void GameVideo::SetFontShadowOffsets(const std::string& font_name, int32 x, int32 y) {
+void TextSupervisor::SetFontShadowOffsets(const std::string& font_name, int32 x, int32 y) {
 	if (IsFontValid(font_name) == false) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "invalid font_name argument: " << font_name << endl;
 		return;
 	}
 	
 	FontProperties *font = _font_map[font_name];
-	
 	if (font == NULL) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to retrieve font properties for font: " << font_name << endl;
 		return;
@@ -576,30 +642,42 @@ void GameVideo::SetFontShadowOffsets(const std::string& font_name, int32 x, int3
 
 
 
-void GameVideo::DrawText(const ustring& text) {
+Color TextSupervisor::GetDefaultTextColor() const {
+	return VideoManager->_current_context.text_color;
+}
+
+
+
+void TextSupervisor::SetDefaultTextColor(const Color& color) {
+	VideoManager->_current_context.text_color = color;
+}
+
+
+
+void TextSupervisor::Draw(const ustring& text) {
 	if (text.empty()) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "empty string was passed to function" << endl;
 		return;
 	}
 
-	if(IsFontValid(_current_context.font) == false) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because font was invalid: " << _current_context.font << endl;
+	if (IsFontValid(VideoManager->_current_context.font) == false) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because font was invalid: " << VideoManager->_current_context.font << endl;
 		return;
 	}
 
-	FontProperties* fp = _font_map[_current_context.font];
-	TTF_Font* font = fp->ttf_font;
-
+	FontProperties* fp = _font_map[VideoManager->_current_context.font];
 	if (fp == NULL) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because font properties were invalid for font: " << _current_context.font << endl;
-		return;
-	}
-	if (font == NULL) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because TTF_Font was invalid in font proproperties for font: " << _current_context.font << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because font properties were invalid for font: " << VideoManager->_current_context.font << endl;
 		return;
 	}
 
-	PushState();
+	TTF_Font* font = fp->ttf_font;
+	if (font == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because TTF_Font was invalid in font proproperties for font: " << VideoManager->_current_context.font << endl;
+		return;
+	}
+
+	VideoManager->PushState();
 
 	int32 line_skip = fp->line_skip;
 	// NOTE Optimization: something seems to be wrong with ustring, using a buffer instead
@@ -621,8 +699,8 @@ void GameVideo::DrawText(const ustring& text) {
 		glPushMatrix();
 
 		// If text shadows are enabled, draw the shadow first
-		if (_text_shadow && fp->shadow_style != VIDEO_TEXT_SHADOW_NONE) {
-			Color old_text_color = _current_context.text_color;
+		if (fp->shadow_style != VIDEO_TEXT_SHADOW_NONE) {
+			Color old_text_color = VideoManager->_current_context.text_color;
 			Color text_color;
 
 			switch(fp->shadow_style) {
@@ -649,38 +727,38 @@ void GameVideo::DrawText(const ustring& text) {
 					IF_PRINT_WARNING(VIDEO_DEBUG) << "Unknown text shadow style was set: " << fp->shadow_style << endl;
 					break;
 			};
-			SetTextColor(text_color);
+			SetDefaultTextColor(text_color);
 
 			glPushMatrix();
-			MoveRelative(_current_context.coordinate_system.GetHorizontalDirection() * fp->shadow_x, 0.0f);
-			MoveRelative(0.0f, _current_context.coordinate_system.GetVerticalDirection() * fp->shadow_y);
+			VideoManager->MoveRelative(VideoManager->_current_context.coordinate_system.GetHorizontalDirection() * fp->shadow_x, 0.0f);
+			VideoManager->MoveRelative(0.0f, VideoManager->_current_context.coordinate_system.GetVerticalDirection() * fp->shadow_y);
 
 			if (_DrawTextHelper(buffer) == false) {
-				PopState();
+				VideoManager->PopState();
 				return;
 			}
 
-			SetTextColor(old_text_color);
+			SetDefaultTextColor(old_text_color);
 			glPopMatrix();
 		}
 
 		// Now draw the text itself
 		if (_DrawTextHelper(buffer) == false) {
-			PopState();
+			VideoManager->PopState();
 			return;
 		}
 
 		glPopMatrix();
-		MoveRelative(0, -line_skip * _current_context.coordinate_system.GetVerticalDirection());
+		VideoManager->MoveRelative(0, -line_skip * VideoManager->_current_context.coordinate_system.GetVerticalDirection());
 
 	} while (last_line < text.length());
 
-	PopState();
-} // void GameVideo::DrawText(const ustring& text)
+	VideoManager->PopState();
+} // void TextSupervisor::Draw(const ustring& text)
 
 
 
-int32 GameVideo::CalculateTextWidth(const std::string& font_name, const hoa_utils::ustring& text) {
+int32 TextSupervisor::CalculateTextWidth(const std::string& font_name, const hoa_utils::ustring& text) {
 	if (IsFontValid(font_name) == false) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "font name argument was invalid: " << font_name << endl;
 		return -1;
@@ -697,7 +775,7 @@ int32 GameVideo::CalculateTextWidth(const std::string& font_name, const hoa_util
 
 
 
-int32 GameVideo::CalculateTextWidth(const std::string& font_name, const std::string& text) {
+int32 TextSupervisor::CalculateTextWidth(const std::string& font_name, const std::string& text) {
 	if (IsFontValid(font_name) == false) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "font name argument was invalid: " << font_name << endl;
 		return -1;
@@ -714,7 +792,7 @@ int32 GameVideo::CalculateTextWidth(const std::string& font_name, const std::str
 
 
 
-bool GameVideo::_CacheGlyphs(const uint16 *uText, FontProperties *fp) {
+bool TextSupervisor::_CacheGlyphs(const uint16 *uText, FontProperties *fp) {
 	if (!fp)
 		return false;
 
@@ -873,7 +951,7 @@ bool GameVideo::_CacheGlyphs(const uint16 *uText, FontProperties *fp) {
 		SDL_FreeSurface(intermediary);
 	}
 	return true;
-} // GameVideo::CacheGlyphs()
+} // TextSupervisor::CacheGlyphs()
 
 //-----------------------------------------------------------------------------
 // _DrawTextHelper: since there are two DrawText functions (one for unicode and
@@ -882,7 +960,7 @@ bool GameVideo::_CacheGlyphs(const uint16 *uText, FontProperties *fp) {
 //                 Either text or uText is valid string and the other is NULL.
 //-----------------------------------------------------------------------------
 
-bool GameVideo::_DrawTextHelper(const uint16 *uText) {
+bool TextSupervisor::_DrawTextHelper(const uint16 *uText) {
 	if(_font_map.empty())
 		return false;
 		
@@ -890,15 +968,15 @@ bool GameVideo::_DrawTextHelper(const uint16 *uText) {
 	if(*uText == 0)
 		return true;
 		
-	if(_font_map.find(_current_context.font) == _font_map.end())
+	if(_font_map.find(VideoManager->_current_context.font) == _font_map.end())
 		return false;
 	
-	FontProperties * fp = _font_map[_current_context.font];
+	FontProperties * fp = _font_map[VideoManager->_current_context.font];
 	
 	glBlendFunc(GL_ONE, GL_ONE);
 	glEnable(GL_BLEND);
 
-	CoordSys &cs = _current_context.coordinate_system;
+	CoordSys &cs = VideoManager->_current_context.coordinate_system;
 
 	_CacheGlyphs(uText, fp);
 
@@ -921,13 +999,13 @@ bool GameVideo::_DrawTextHelper(const uint16 *uText) {
 		return false;
 	}
 
-	float xoff = ((_current_context.x_align+1) * fontwidth) * .5f * -cs.GetHorizontalDirection();
-	float yoff = ((_current_context.y_align+1) * fontheight) * .5f * -cs.GetVerticalDirection();
+	float xoff = ((VideoManager->_current_context.x_align+1) * fontwidth) * .5f * -cs.GetHorizontalDirection();
+	float yoff = ((VideoManager->_current_context.y_align+1) * fontheight) * .5f * -cs.GetVerticalDirection();
 
-	MoveRelative(xoff, yoff);
+	VideoManager->MoveRelative(xoff, yoff);
 
-	float modulation = _screen_fader.GetFadeModulation();
-	Color textColor = _current_context.text_color * modulation;
+	float modulation = VideoManager->_screen_fader.GetFadeModulation();
+	Color textColor = VideoManager->_current_context.text_color * modulation;
 
 	int xpos = 0;
 	
@@ -997,7 +1075,7 @@ bool GameVideo::_DrawTextHelper(const uint16 *uText) {
 
 	glPopMatrix();
 	
-	if(_fog_intensity > 0.0f)
+	if (VideoManager->_fog_intensity > 0.0f)
 		glEnable(GL_FOG);
 
 	glDisable(GL_ALPHA_TEST);
@@ -1011,7 +1089,7 @@ bool GameVideo::_DrawTextHelper(const uint16 *uText) {
 // _RenderText: Renders a given unicode string and TextStyle to a pixel array
 //-----------------------------------------------------------------------------
 
-bool GameVideo::_RenderText(hoa_utils::ustring &string, TextStyle &style, ImageMemory &buffer)
+bool TextSupervisor::_RenderText(hoa_utils::ustring &string, TextStyle &style, ImageMemory &buffer)
 {
 	FontProperties * fp = _font_map[style.font];
 	TTF_Font * font     = fp->ttf_font;
@@ -1019,7 +1097,7 @@ bool GameVideo::_RenderText(hoa_utils::ustring &string, TextStyle &style, ImageM
 	if (!font)
 	{
 		if (VIDEO_DEBUG)
-			cerr << "GameVideo::_RenderText(): font '" << style.font << "' not valid." << endl;
+			cerr << "TextSupervisor::_RenderText(): font '" << style.font << "' not valid." << endl;
 		return false;
 	}
 
@@ -1156,34 +1234,34 @@ bool GameVideo::_RenderText(hoa_utils::ustring &string, TextStyle &style, ImageM
 
 
 
-Color GameVideo::_GetTextShadowColor(FontProperties *fp) {
+Color TextSupervisor::_GetTextShadowColor(FontProperties *fp) {
 	Color shadow_color;
 
-	if (_text_shadow && fp->shadow_style != VIDEO_TEXT_SHADOW_NONE) {
+	if (fp->shadow_style != VIDEO_TEXT_SHADOW_NONE) {
 		switch( fp->shadow_style) {
 			case VIDEO_TEXT_SHADOW_DARK:
 				shadow_color = Color::black;
-				shadow_color[3] = _current_context.text_color[3] * 0.5f;
+				shadow_color[3] = VideoManager->_current_context.text_color[3] * 0.5f;
 				break;
 			case VIDEO_TEXT_SHADOW_LIGHT:
 				shadow_color = Color::white;
-				shadow_color[3] = _current_context.text_color[3] * 0.5f;
+				shadow_color[3] = VideoManager->_current_context.text_color[3] * 0.5f;
 				break;
 			case VIDEO_TEXT_SHADOW_BLACK:
 				shadow_color = Color::black;
-				shadow_color[3] = _current_context.text_color[3];
+				shadow_color[3] = VideoManager->_current_context.text_color[3];
 				break;
 			case VIDEO_TEXT_SHADOW_COLOR:
-				shadow_color = _current_context.text_color;
-				shadow_color[3] = _current_context.text_color[3] * 0.5f;
+				shadow_color = VideoManager->_current_context.text_color;
+				shadow_color[3] = VideoManager->_current_context.text_color[3] * 0.5f;
 				break;
 			case VIDEO_TEXT_SHADOW_INVCOLOR:
-				shadow_color = Color(1.0f - _current_context.text_color[0], 1.0f - _current_context.text_color[1],
-					1.0f - _current_context.text_color[2], _current_context.text_color[3] * 0.5f);
+				shadow_color = Color(1.0f - VideoManager->_current_context.text_color[0], 1.0f - VideoManager->_current_context.text_color[1],
+					1.0f - VideoManager->_current_context.text_color[2], VideoManager->_current_context.text_color[3] * 0.5f);
 				break;
 			default:
 				if(VIDEO_DEBUG)
-					cerr << "VIDEO ERROR: Unknown text shadow style (" << fp->shadow_style << ") -  GameVideo::_GetTextShadowColor()" << endl;
+					cerr << "VIDEO ERROR: Unknown text shadow style (" << fp->shadow_style << ") -  TextSupervisor::_GetTextShadowColor()" << endl;
 				break;
 		}
 	}

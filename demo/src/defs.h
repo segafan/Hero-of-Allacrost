@@ -83,9 +83,9 @@ namespace hoa_video {
 
 	class TextureController;
 
+	class TextSupervisor;
 	class FontGlyph;
 	class FontProperties;
-
 	class RenderedText;
 
 	class GUISupervisor;

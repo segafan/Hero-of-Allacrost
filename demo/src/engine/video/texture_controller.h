@@ -48,6 +48,7 @@ class TextureController : public hoa_utils::Singleton<TextureController> {
 	friend class private_video::ImageTexture;
 	friend class private_video::TextImageTexture;
 	friend class private_video::BaseImageElement;
+	friend class TextSupervisor;
 	friend class RenderedText;
 	friend class private_video::TexSheet;
 	friend class private_video::FixedTexMemMgr;

@@ -187,7 +187,7 @@ void MenuMode::Reset() {
 	// Top left corner coordinates in menu mode are always (0,0)
 	VideoManager->SetCoordSys(0, 1024, 768, 0);
 
-	VideoManager->SetFont("default");
+	VideoManager->Text()->SetDefaultFont("default");
 
 	// Show all windows (make them visible)
 	_bottom_window.Show();
@@ -512,7 +512,7 @@ void MenuMode::Draw() {
 	VideoManager->Move(0,0);
 
 	// Set the text colour to white
-	VideoManager->SetTextColor(Color(1.0f, 1.0f, 1.0f, 1.0f));
+	VideoManager->Text()->SetDefaultTextColor(Color(1.0f, 1.0f, 1.0f, 1.0f));
 
 	_main_options_window.Draw();
 	_DrawBottomMenu();
@@ -588,7 +588,7 @@ void MenuMode::_DrawBottomMenu() {
 			VideoManager->Move(100, 600);
 			obj->GetIconImage().Draw();
 			VideoManager->MoveRelative(65, 0);
-			VideoManager->DrawText(obj->GetName());
+			VideoManager->Text()->Draw(obj->GetName());
 			VideoManager->SetDrawFlags(VIDEO_X_LEFT,VIDEO_Y_BOTTOM,0);
 			_inventory_window._description.Draw();
 		} // if ITEM_ACTIVE_LIST
@@ -603,7 +603,7 @@ void MenuMode::_DrawBottomMenu() {
 
 			VideoManager->Move(100, 600);
 			VideoManager->MoveRelative(65, 0);
-			VideoManager->DrawText(skill->GetName());
+			VideoManager->Text()->Draw(skill->GetName());
 			VideoManager->SetDrawFlags(VIDEO_X_LEFT,VIDEO_Y_BOTTOM,0);
 			_skills_window._description.Draw();
 		} // if SKILL_ACTIVE_LIST
@@ -611,96 +611,96 @@ void MenuMode::_DrawBottomMenu() {
 	else if (_current_menu_showing == SHOW_EQUIP) {
 		GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_equip_window._char_select.GetSelection()));
 		string text = "STR: " +  NumberToString(ch->GetStrength());
-		VideoManager->DrawText(MakeUnicodeString(text));
+		VideoManager->Text()->Draw(MakeUnicodeString(text));
 
 		text = "VIG: " +  NumberToString(ch->GetVigor());
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->DrawText(MakeUnicodeString(text));
+		VideoManager->Text()->Draw(MakeUnicodeString(text));
 
 		text = "FRT: " +  NumberToString(ch->GetFortitude());
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->DrawText(MakeUnicodeString(text));
+		VideoManager->Text()->Draw(MakeUnicodeString(text));
 
 		text = "PRO: " +  NumberToString(ch->GetProtection());
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->DrawText(MakeUnicodeString(text));
+		VideoManager->Text()->Draw(MakeUnicodeString(text));
 
 		text = "AGI: " +  NumberToString(ch->GetAgility());
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->DrawText(MakeUnicodeString(text));
+		VideoManager->Text()->Draw(MakeUnicodeString(text));
 
 		text = "EVD: " +  NumberToString(ch->GetEvade()) + "%";
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->DrawText(MakeUnicodeString(text));
+		VideoManager->Text()->Draw(MakeUnicodeString(text));
 
 		VideoManager->Move(310, 577);
 
 		text = "Current Equipment:";
-		VideoManager->DrawText(MakeUnicodeString(text));
+		VideoManager->Text()->Draw(MakeUnicodeString(text));
 
 		text = "Weapon";
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->DrawText(MakeUnicodeString(text));
+		VideoManager->Text()->Draw(MakeUnicodeString(text));
 
 		text = "Head";
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->DrawText(MakeUnicodeString(text));
+		VideoManager->Text()->Draw(MakeUnicodeString(text));
 
 		text = "Torso";
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->DrawText(MakeUnicodeString(text));
+		VideoManager->Text()->Draw(MakeUnicodeString(text));
 
 		text = "Arm";
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->DrawText(MakeUnicodeString(text));
+		VideoManager->Text()->Draw(MakeUnicodeString(text));
 
 		text = "Legs";
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->DrawText(MakeUnicodeString(text));
+		VideoManager->Text()->Draw(MakeUnicodeString(text));
 
 		VideoManager->Move(400, 577);
 
 		text = "PHYS ATK: " + NumberToString(ch->GetWeaponEquipped()->GetPhysicalAttack());
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->DrawText(MakeUnicodeString(text));
+		VideoManager->Text()->Draw(MakeUnicodeString(text));
 
 		text = "PHYS DEF: " + NumberToString(ch->GetHeadArmorEquipped()->GetPhysicalDefense());
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->DrawText(MakeUnicodeString(text));
+		VideoManager->Text()->Draw(MakeUnicodeString(text));
 
 		text = "PHYS DEF: " +  NumberToString(ch->GetTorsoArmorEquipped()->GetPhysicalDefense());
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->DrawText(MakeUnicodeString(text));
+		VideoManager->Text()->Draw(MakeUnicodeString(text));
 
 		text = "PHYS DEF: " +  NumberToString(ch->GetArmArmorEquipped()->GetPhysicalDefense());
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->DrawText(MakeUnicodeString(text));
+		VideoManager->Text()->Draw(MakeUnicodeString(text));
 
 		text = "PHYS DEF: " +  NumberToString(ch->GetLegArmorEquipped()->GetPhysicalDefense());
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->DrawText(MakeUnicodeString(text));
+		VideoManager->Text()->Draw(MakeUnicodeString(text));
 
 		VideoManager->Move(550, 577);
 
 		text = "META ATK: " + NumberToString(ch->GetWeaponEquipped()->GetMetaphysicalAttack());
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->DrawText(MakeUnicodeString(text));
+		VideoManager->Text()->Draw(MakeUnicodeString(text));
 
 		text = "META DEF: " + NumberToString(ch->GetHeadArmorEquipped()->GetMetaphysicalDefense());
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->DrawText(MakeUnicodeString(text));
+		VideoManager->Text()->Draw(MakeUnicodeString(text));
 
 		text = "META DEF: " +  NumberToString(ch->GetTorsoArmorEquipped()->GetMetaphysicalDefense());
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->DrawText(MakeUnicodeString(text));
+		VideoManager->Text()->Draw(MakeUnicodeString(text));
 
 		text = "META DEF: " +  NumberToString(ch->GetArmArmorEquipped()->GetMetaphysicalDefense());
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->DrawText(MakeUnicodeString(text));
+		VideoManager->Text()->Draw(MakeUnicodeString(text));
 
 		text = "META DEF: " +  NumberToString(ch->GetLegArmorEquipped()->GetMetaphysicalDefense());
 		VideoManager->MoveRelative(0, 20);
-		VideoManager->DrawText(MakeUnicodeString(text));
+		VideoManager->Text()->Draw(MakeUnicodeString(text));
 		VideoManager->SetDrawFlags(VIDEO_X_CENTER,VIDEO_Y_BOTTOM,0);
 
 
@@ -712,19 +712,19 @@ void MenuMode::_DrawBottomMenu() {
 				{
 					GlobalWeapon* weapon = GlobalManager->GetInventoryWeapons()->at(_equip_window._equip_list.GetSelection());
 
-					VideoManager->DrawText(weapon->GetName());
+					VideoManager->Text()->Draw(weapon->GetName());
 					VideoManager->MoveRelative(0, 20);
 
-					VideoManager->DrawText(MakeUnicodeString("PHYS ATK:"));
+					VideoManager->Text()->Draw(MakeUnicodeString("PHYS ATK:"));
 					VideoManager->MoveRelative(0, 20);
 					text = NumberToString(weapon->GetPhysicalAttack());
-					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->Text()->Draw(MakeUnicodeString(text));
 					VideoManager->MoveRelative(0, 20);
 
-					VideoManager->DrawText(MakeUnicodeString("META ATK:"));
+					VideoManager->Text()->Draw(MakeUnicodeString("META ATK:"));
 					VideoManager->MoveRelative(0, 20);
 					text = NumberToString(weapon->GetMetaphysicalAttack());
-					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->Text()->Draw(MakeUnicodeString(text));
 					VideoManager->MoveRelative(0, 20);
 
 					break;
@@ -733,19 +733,19 @@ void MenuMode::_DrawBottomMenu() {
 				{
 					GlobalArmor* armor = GlobalManager->GetInventoryHeadArmor()->at(_equip_window._equip_list.GetSelection());
 
-					VideoManager->DrawText(armor->GetName());
+					VideoManager->Text()->Draw(armor->GetName());
 					VideoManager->MoveRelative(0, 20);
 
-					VideoManager->DrawText(MakeUnicodeString("PHYS DEF:"));
+					VideoManager->Text()->Draw(MakeUnicodeString("PHYS DEF:"));
 					VideoManager->MoveRelative(0, 20);
 					text = NumberToString(armor->GetPhysicalDefense());
-					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->Text()->Draw(MakeUnicodeString(text));
 					VideoManager->MoveRelative(0, 20);
 
-					VideoManager->DrawText(MakeUnicodeString("META DEF:"));
+					VideoManager->Text()->Draw(MakeUnicodeString("META DEF:"));
 					VideoManager->MoveRelative(0, 20);
 					text = NumberToString(armor->GetMetaphysicalDefense());
-					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->Text()->Draw(MakeUnicodeString(text));
 					VideoManager->MoveRelative(0, 20);
 
 					break;
@@ -754,19 +754,19 @@ void MenuMode::_DrawBottomMenu() {
 				{
 					GlobalArmor* armor = GlobalManager->GetInventoryTorsoArmor()->at(_equip_window._equip_list.GetSelection());
 
-					VideoManager->DrawText(armor->GetName());
+					VideoManager->Text()->Draw(armor->GetName());
 					VideoManager->MoveRelative(0, 20);
 
-					VideoManager->DrawText(MakeUnicodeString("PHYS DEF:"));
+					VideoManager->Text()->Draw(MakeUnicodeString("PHYS DEF:"));
 					VideoManager->MoveRelative(0, 20);
 					text = NumberToString(armor->GetPhysicalDefense());
-					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->Text()->Draw(MakeUnicodeString(text));
 					VideoManager->MoveRelative(0, 20);
 
-					VideoManager->DrawText(MakeUnicodeString("META DEF:"));
+					VideoManager->Text()->Draw(MakeUnicodeString("META DEF:"));
 					VideoManager->MoveRelative(0, 20);
 					text = NumberToString(armor->GetMetaphysicalDefense());
-					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->Text()->Draw(MakeUnicodeString(text));
 					VideoManager->MoveRelative(0, 20);
 
 					break;
@@ -775,19 +775,19 @@ void MenuMode::_DrawBottomMenu() {
 				{
 					GlobalArmor* armor = GlobalManager->GetInventoryArmArmor()->at(_equip_window._equip_list.GetSelection());
 
-					VideoManager->DrawText(armor->GetName());
+					VideoManager->Text()->Draw(armor->GetName());
 					VideoManager->MoveRelative(0, 20);
 
-					VideoManager->DrawText(MakeUnicodeString("PHYS DEF:"));
+					VideoManager->Text()->Draw(MakeUnicodeString("PHYS DEF:"));
 					VideoManager->MoveRelative(0, 20);
 					text = NumberToString(armor->GetPhysicalDefense());
-					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->Text()->Draw(MakeUnicodeString(text));
 					VideoManager->MoveRelative(0, 20);
 
-					VideoManager->DrawText(MakeUnicodeString("META DEF:"));
+					VideoManager->Text()->Draw(MakeUnicodeString("META DEF:"));
 					VideoManager->MoveRelative(0, 20);
 					text = NumberToString(armor->GetMetaphysicalDefense());
-					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->Text()->Draw(MakeUnicodeString(text));
 					VideoManager->MoveRelative(0, 20);
 
 					break;
@@ -796,19 +796,19 @@ void MenuMode::_DrawBottomMenu() {
 				{
 					GlobalArmor* armor = GlobalManager->GetInventoryLegArmor()->at(_equip_window._equip_list.GetSelection());
 
-					VideoManager->DrawText(armor->GetName());
+					VideoManager->Text()->Draw(armor->GetName());
 					VideoManager->MoveRelative(0, 20);
 
-					VideoManager->DrawText(MakeUnicodeString("PHYS DEF:"));
+					VideoManager->Text()->Draw(MakeUnicodeString("PHYS DEF:"));
 					VideoManager->MoveRelative(0, 20);
 					text = NumberToString(armor->GetPhysicalDefense());
-					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->Text()->Draw(MakeUnicodeString(text));
 					VideoManager->MoveRelative(0, 20);
 
-					VideoManager->DrawText(MakeUnicodeString("META DEF:"));
+					VideoManager->Text()->Draw(MakeUnicodeString("META DEF:"));
 					VideoManager->MoveRelative(0, 20);
 					text = NumberToString(armor->GetMetaphysicalDefense());
-					VideoManager->DrawText(MakeUnicodeString(text));
+					VideoManager->Text()->Draw(MakeUnicodeString(text));
 					VideoManager->MoveRelative(0, 20);
 
 					break;
@@ -821,7 +821,7 @@ void MenuMode::_DrawBottomMenu() {
 	} // if SHOW_EQUIP
 	else {
 		// Display Location
-		VideoManager->DrawText(_locale_name);
+		VideoManager->Text()->Draw(_locale_name);
 
 		// Draw Played Time
 		VideoManager->MoveRelative(-40, 60);
@@ -834,12 +834,12 @@ void MenuMode::_DrawBottomMenu() {
 		os_time << (seconds < 10 ? "0" : "") << static_cast<uint32>(seconds);
 
 		std::string time = std::string("Time: ") + os_time.str();
-		VideoManager->DrawText(MakeUnicodeString(time));
+		VideoManager->Text()->Draw(MakeUnicodeString(time));
 
 		// Display the current funds that the party has
 		string money = string("Drunes: " + NumberToString(GlobalManager->GetDrunes()));
 		VideoManager->MoveRelative(0, 30);
-		VideoManager->DrawText(MakeUnicodeString(money));
+		VideoManager->Text()->Draw(MakeUnicodeString(money));
 
 		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_BOTTOM, 0);
 		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);

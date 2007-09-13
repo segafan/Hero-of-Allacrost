@@ -96,7 +96,6 @@ GameVideo::GameVideo() {
 	_fog_intensity = 0.0f;
 	_light_color = Color(1.0f, 1.0f, 1.0f, 1.0f);
 	_gl_error_code = GL_NO_ERROR;
-	_text_shadow = false;
 	_animation_counter = 0;
 	_current_frame_diff = 0;
 	_lightning_active = false;
@@ -123,27 +122,10 @@ GameVideo::~GameVideo() {
 	_particle_manager.Destroy();
 
 	GUIManager->SingletonDestroy();
+	TextManager->SingletonDestroy();
 
 	_default_menu_cursor.Clear();
 	_rectangle_image.Clear();
-
-	// Remove all loaded fonts and shutdown the font library
-	for (map<string, FontProperties*>::iterator i = _font_map.begin(); i!= _font_map.end(); i++) {
-		FontProperties* fp = i->second;
-
-		if (fp->ttf_font)
-			TTF_CloseFont(fp->ttf_font);
-
-		if (fp->glyph_cache) {
-			for (std::map<uint16, FontGlyph*>::iterator j = fp->glyph_cache->begin(); j != fp->glyph_cache->end(); j++) {
-				delete (*j).second;
-			}
-			delete fp->glyph_cache;
-		}
-
-		delete fp;
-	}
-	TTF_Quit();
 
 	TextureManager->SingletonDestroy();
 }
@@ -156,13 +138,15 @@ bool GameVideo::SingletonInitialize() {
 		return false;
 	}
 
-	if (TTF_Init() < 0) {
-		PRINT_ERROR << "SDL_ttf initialization failed" << endl;
+	// Create instances of the various sub-systems
+	TextureManager = TextureController::SingletonCreate();
+	TextManager = TextSupervisor::SingletonCreate();
+	GUIManager = GUISupervisor::SingletonCreate();
+
+	if (TextureManager->SingletonInitialize() == false) {
+		PRINT_ERROR << "could not initialize texture manager" << endl;
 		return false;
 	}
-
-	// Create and initialize the TextureManagement sub-system
-	TextureManager = TextureController::SingletonCreate();
 
 	// Load in the user's video configuration settings from a script file
 	hoa_script::ReadScriptDescriptor video_settings_script;
@@ -214,18 +198,12 @@ bool GameVideo::SingletonInitialize() {
 		return false;
 	}
 
-	if (LoadFont("img/fonts/tarnhalo.ttf", "debug_font", 16) == false) {
-		PRINT_ERROR << "could not load the debug font" << endl;
+	// Initialize all sub-systems
+	if (TextManager->SingletonInitialize() == false) {
+		PRINT_ERROR << "could not initialize text manager" << endl;
 		return false;
 	}
 
-	if (TextureManager->SingletonInitialize() == false) {
-		PRINT_ERROR << "could not initialize texture manager" << endl;
-		return false;
-	}
-
-	// Create and initialize the GUI sub-system
-	GUIManager = GUISupervisor::SingletonCreate();
 	if (GUIManager->SingletonInitialize() == false) {
 		PRINT_ERROR << "could not initialize GUI manager" << endl;
 		return false;
@@ -235,7 +213,6 @@ bool GameVideo::SingletonInitialize() {
 		if (VIDEO_DEBUG)
 			cerr << "VIDEO WARNING: problem loading default menu cursor" << endl;
 	}
-	EnableTextShadow();
 
 	// Prepare the screen for rendering
 	Clear();
@@ -1105,10 +1082,10 @@ void GameVideo::_DEBUG_ShowAdvancedStats() {
 	char text[50];
 	sprintf(text, "Switches: %d\nParticles: %d", TextureManager->_debug_num_tex_switches, _particle_manager.GetNumParticles());
 
-	SetFont("debug_font");
+	TextManager->SetDefaultFont("debug_font");
 
 	Move(896.0f, 690.0f);
-	DrawText(text);
+	TextManager->Draw(text);
 }
 
 

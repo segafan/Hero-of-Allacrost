@@ -144,7 +144,7 @@ void MapMode::Reset() {
 	VideoManager->SetCoordSys(0.0f, SCREEN_COLS, SCREEN_ROWS, 0.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_BOTTOM, 0);
 
-	VideoManager->SetFont("map");
+	VideoManager->Text()->SetDefaultFont("map");
 
 	// Let all map objects know that this is the current map
 	MapMode::_current_map = this;
@@ -1218,8 +1218,8 @@ void MapMode::_DrawGUI() {
 		VideoManager->Move(512.0f, 100.0f);
 		_location_graphic.Draw(blend);
 		VideoManager->MoveRelative(0.0f, -80.0f);
-		VideoManager->SetTextColor(blend);
-		VideoManager->DrawText(_map_name);
+		VideoManager->Text()->SetDefaultTextColor(blend);
+		VideoManager->Text()->Draw(_map_name);
 		VideoManager->PopState();
 	}
 

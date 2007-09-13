@@ -418,7 +418,7 @@ void ObjectSellListWindow::Draw() {
 			object_list.Draw();
 			VideoManager->Move(375, 640);
 			string text = "Item                                     Inv   Sell   Price";
-			VideoManager->DrawText(MakeUnicodeString(text));
+			VideoManager->Text()->Draw(MakeUnicodeString(text));
 		}
 	}
 }
@@ -515,7 +515,7 @@ void ObjectInfoWindow::Draw() {
 	VideoManager->Move(350, 200);
 	_object->GetIconImage().Draw();
 	VideoManager->MoveRelative(60, 20);
-	VideoManager->DrawText(_object->GetName());
+	VideoManager->Text()->Draw(_object->GetName());
 
 	// Draw the object's description and stats text boxes
 	description.Draw();
@@ -631,7 +631,7 @@ void ConfirmWindow::Draw() {
 		VideoManager->PushState();
 		VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 		VideoManager->Move(512, 450);
-		VideoManager->DrawText("Finalize transactions?");
+		VideoManager->Text()->Draw("Finalize transactions?");
 		VideoManager->PopState();
 	}
 }
