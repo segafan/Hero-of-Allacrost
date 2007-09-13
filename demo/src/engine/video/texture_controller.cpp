@@ -114,8 +114,8 @@ bool TextureController::UnloadTextures() {
 	}
 
 	// Clear all font caches
-	map<string, FontProperties*>::iterator j = VideoManager->_font_map.begin();
-	while (j != VideoManager->_font_map.end()) {
+	map<string, FontProperties*>::iterator j = TextManager->_font_map.begin();
+	while (j != TextManager->_font_map.end()) {
 		FontProperties *fp = j->second;
 
 		if (fp->glyph_cache) {
@@ -576,19 +576,19 @@ void TextureController::_DEBUG_ShowTexSheet() {
 // 	id.Draw();
 	glPopMatrix();
 
-	VideoManager->SetFont("debug_font");
+	TextManager->SetDefaultFont("debug_font");
 	char buf[200];
 
 	VideoManager->Move(20, VideoManager->_current_context.coordinate_system.GetTop() - 30);
-	VideoManager->DrawText("Current Texture sheet:");
+	TextManager->Draw("Current Texture sheet:");
 
 	sprintf(buf, "  Sheet:   %d", _debug_current_sheet);
 	VideoManager->MoveRelative(0, -20);
-	VideoManager->DrawText(buf);
+	TextManager->Draw(buf);
 
 	VideoManager->MoveRelative(0, -20);
 	sprintf(buf, "  Size:    %dx%d", sheet->width, sheet->height);
-	VideoManager->DrawText(buf);
+	TextManager->Draw(buf);
 
 	if (sheet->type == VIDEO_TEXSHEET_32x32)
 		sprintf(buf, "  Type:    32x32");
@@ -602,15 +602,15 @@ void TextureController::_DEBUG_ShowTexSheet() {
 		sprintf(buf, "  Type:    Unknown");
 
 	VideoManager->MoveRelative(0, -20);
-	VideoManager->DrawText(buf);
+	TextManager->Draw(buf);
 
 	sprintf(buf, "  Static:  %d", sheet->is_static);
 	VideoManager->MoveRelative(0, -20);
-	VideoManager->DrawText(buf);
+	TextManager->Draw(buf);
 
 	sprintf(buf, "  TexID:   %d", sheet->tex_id);
 	VideoManager->MoveRelative(0, -20);
-	VideoManager->DrawText(buf);
+	TextManager->Draw(buf);
 
 	VideoManager->PopState();
 } // void TextureController::_DEBUG_ShowTexSheet()

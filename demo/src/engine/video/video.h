@@ -193,11 +193,15 @@ void RotatePoint(float &x, float &y, float angle);
 *** *****************************************************************************/
 class GameVideo : public hoa_utils::Singleton<GameVideo> {
 	friend class hoa_utils::Singleton<GameVideo>;
+
+	friend class TextureController;
+	friend class TextSupervisor;
+	friend class GUISupervisor;
+
 	friend class TextBox;
 	friend class OptionBox;
 	friend class MenuWindow;
-	friend class GUISupervisor;
-	friend class TextureController;
+
 	friend class private_video::BaseImageElement;
 	friend class private_video::GUIElement;
 	friend class private_video::FixedTexMemMgr;
@@ -466,97 +470,6 @@ public:
 	**/
 	void SetTransform(float matrix[16]);
 
-	// ---------- Font and text methods
-
-	/** \brief Loads a font file from disk with a specific size and name
-	*** \param font_filename The filename of the font file to load
-	*** \param name The name which to refer to the font after it is loaded
-	*** \param size The point size to set the font after it is loaded
-	*** \return True if the font was successfully loaded, or false if there was an error
-	**/
-	bool LoadFont(const std::string &font_filename, const std::string &name, uint32 size);
-
-	/** \brief Returns true if a font has already been successfully loaded
-	*** \param name The name which to refer to the loaded font (e.g. "courier24").
-	*** \return True if font is valid, false if it is not.
-	**/
-	bool IsFontValid(const std::string &name)
-		{ return (_font_map.find(name) != _font_map.end()); }
-
-	//! \brief Gets the name of the current default font used for text rendering
-	std::string GetFont() const
-		{ return _current_context.font; }
-
-	/** \brief Sets the default font to use for text rendering
-	*** \param name The name of the pre-loaded font to set as the default
-	**/
-	void SetFont(const std::string& name);
-
-	//! \brief Returns the current text color
-	Color GetTextColor() const
-		{ return _current_context.text_color; }
-
-	/** \brief Sets the current text color
-	*** \param color The color to set the text to
-	**/
-	void SetTextColor(const Color& color)
-		{ _current_context.text_color = color; }
-
-	/** \brief Get the font properties for a previously loaded font
-	*** \param font_name The name reference of the loaded font
-	*** \return A pointer to the FontProperties object with the requested data, or NULL if the properties could not be fetched.
-	**/
-	FontProperties* GetFontProperties(const std::string& font_name);
-
-	//! \brief Enables shadows to be drawn for text
-	void EnableTextShadow()
-		{ _text_shadow = true; }
-
-	//! \brief Disables text shadows
-	void DisableTextShadow()
-		{ _text_shadow = false; }
-
-	/** \brief Sets the shadow style to use for a specified font
-	*** \param font_name The reference name of the font to set the shadow style for
-	*** \param style The shadow style desired (e.g. VIDEO_TEXT_SHADOW_BLACK)
-	**/
-	void SetFontShadowStyle(const std::string& font_name, TEXT_SHADOW_STYLE style);
-
-	/** \brief Sets the x and y shadow offsets to use for a specified font
-	*** \param font_name The reference name of the font to set the shadow offsets for
-	*** \param x The x offset in number of pixels
-	*** \param y The y offset in number of pixels
-	***
-	*** By default, all font shadows are slightly to the right and to the bottom of the text,
-	*** by an offset of one eight of the font's height.
-	**/
-	void SetFontShadowOffsets(const std::string& font_name, int32 x, int32 y);
-
-	/** \brief Renders and draws a string of text to the screen
-	*** \param text The text string to draw in unicode format
-	**/
-	void DrawText(const hoa_utils::ustring& text);
-
-	/** \brief Renders and draws a string of text to the screen
-	*** \param text The text string to draw in standard format
-	**/
-	void DrawText(const std::string& text)
-		{ DrawText(hoa_utils::MakeUnicodeString(text)); }
-
-	/** \brief Calculates what the width would be of a rendered string of text
-	*** \param font_name The reference name of the font to use for the calculation
-	*** \param text The text string in unicode format
-	*** \return The width of the text as it would be rendered, or -1 if there was an error
-	 */
-	int32 CalculateTextWidth(const std::string& font_name, const hoa_utils::ustring& text);
-
-	/** \brief calculates the width of the given text if it were rendered with the given font
-	*** \param font_name The reference name of the font to use for the calculation
-	*** \param text The text string in standard format
-	*** \return The width of the text as it would be rendered, or -1 if there was an error
-	**/
-	int32 CalculateTextWidth(const std::string& font_name, const std::string& text);
-
 	// ----------  Image operation methods
 
 	/** \brief Captures the contents of the screen and saves it as an image texture
@@ -590,6 +503,18 @@ public:
 	**/
 	GUISupervisor* GUI()
 		{ return GUIManager; }
+
+	/** \brief Returns a pointer to the GUIManager singleton object
+	*** This method allows the user to perform text operations. For example, to load a
+	*** font, the user may utilize this method like so:
+	*** `if (VideoManager->Text()->LoadFont(...) == true) { cout << "Success" << endl; }`
+	***
+	*** \note See text.h for the public methods available from the TextSupervisor class
+	*** \note This function is guaranteed to return a valid pointer so long as the GameVideo class
+	*** has been properly initialized
+	**/
+	TextSupervisor* Text()
+		{ return TextManager; }
 
 	/** \brief Returns a pointer to the TextureManager singleton object
 	*** This method allows the user to perform texture management operations. For example, to reload
@@ -823,13 +748,6 @@ public:
 	*/
 	StillImage *GetDefaultCursor();
 
-	/** Renders a given unicode string and TextStyle to a pixel array
-	 * \param string The ustring to render
-	 * \param style  The text style to render
-	 * \param buffer The pixel array to render to
-	 */
-	bool _RenderText(hoa_utils::ustring& string, TextStyle& style, private_video::ImageMemory& buffer);
-
 private:
 	GameVideo();
 
@@ -908,9 +826,6 @@ private:
 	//! Image used for rendering rectangles
 	StillImage _rectangle_image;
 
-	//! if true, text shadow effect is enabled
-	bool _text_shadow;
-
 	//! current fog color (set by SetFog())
 	Color _fog_color;
 
@@ -937,9 +852,6 @@ private:
 
 	//! keeps track of the number of frames animations should increment by for the current frame
 	int32 _current_frame_diff;
-
-	//! STL map containing properties for each font (includeing TTF_Font *)
-	std::map<std::string, FontProperties*> _font_map;
 
 	//! STL map containing all loaded particle effect definitions
 	std::map<std::string, ParticleEffectDef*> _particle_effect_defs;
@@ -973,28 +885,6 @@ private:
 	 * \return name of the generated temp file
 	 */
 	std::string _CreateTempFilename(const std::string &extension);
-
-	/** \brief does the actual work of drawing text
-	 *
-	 *  \param uText  Pointer to a unicode string holding the text to draw
-	 * \return success/failure
-	 */
-	bool _DrawTextHelper(const uint16 *const uText);
-
-	/** \brief caches glyph info and textures for rendering
-	 *
-	 *  \param uText  Pointer to a unicode string holding the glyphs to cache
-	 *  \param fp     Pointer to the internal FontProperties class representing the font
-	 * \return success/failure
-	 */
-	bool _CacheGlyphs(const uint16 *uText, FontProperties *fp);
-
-	/** \brief retrieves the shadow color based on the current color and shadow style
-	 *
-	 *  \param fp     Pointer to the internal FontProperties class representing the font
-	 * \return the shadow color
-	 */
-	Color _GetTextShadowColor(FontProperties *fp);
 
 	/** \brief Rounds a force value to the nearest integer based on probability.
 	*** \param force  The force to round

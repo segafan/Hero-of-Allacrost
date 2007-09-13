@@ -127,7 +127,7 @@ void OptionBox::Draw() {
 		VideoManager->SetScissorRect(rect);
 	}
 
-	VideoManager->SetFont(_font);
+	VideoManager->Text()->SetDefaultFont(_font);
 	VideoManager->SetDrawFlags(_option_xalign, _option_yalign, VIDEO_X_NOFLIP, VIDEO_Y_NOFLIP, VIDEO_BLEND, 0);
 
 	int32 row_min, row_max;
@@ -187,9 +187,9 @@ void OptionBox::Draw() {
 
 			Option &op = _options.at(index);
 			if (op.disabled)
-				VideoManager->SetTextColor(Color::gray);
+				VideoManager->Text()->SetDefaultTextColor(Color::gray);
 			else
-				VideoManager->SetTextColor(Color::white);
+				VideoManager->Text()->SetDefaultTextColor(Color::white);
 
 			// Iterate through all option elements in the current option
 			for (int32 element = 0; element < static_cast<int32>(op.elements.size()); element++) {
@@ -247,7 +247,7 @@ void OptionBox::Draw() {
 
 						if (text_index >= 0 && text_index < static_cast<int32>(op.text.size())) {
 							const ustring& text = op.text[text_index];
-							float width = static_cast<float>(VideoManager->CalculateTextWidth(_font, text));
+							float width = static_cast<float>(VideoManager->Text()->CalculateTextWidth(_font, text));
 							float edge = x - bounds.x_left; // edge value for VIDEO_X_LEFT
 
 							if (xalign == VIDEO_X_CENTER)
@@ -258,7 +258,7 @@ void OptionBox::Draw() {
 							if (edge < left_edge)
 								left_edge = edge;
 
-							VideoManager->DrawText(text);
+							VideoManager->Text()->Draw(text);
 						}
 
 						break;
@@ -591,7 +591,7 @@ void OptionBox::HandleCancelKey() {
 // -----------------------------------------------------------------------------
 
 void OptionBox::SetFont(const std::string& font_name) {
-	if (VideoManager->GetFontProperties(font_name) == NULL) {
+	if (VideoManager->Text()->GetFontProperties(font_name) == NULL) {
 		if(VIDEO_DEBUG)
 			cerr << "VIDEO WARNING: OptionBox::SetFont() failed because GameVideo::GetFontProperties() returned false for font: " << font_name << endl;
 		return;

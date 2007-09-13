@@ -111,8 +111,8 @@ ActionWindow::ActionWindow() {
 	_target_information.SetAlignment(RenderedText::ALIGN_LEFT);
 	_target_information.SetColor(Color(1.0f, 1.0f, 1.0f, 1.0f));
 	
-	VideoManager->SetFont("battle");
-	VideoManager->SetTextColor(Color(1.0f, 1.0f, 0.0f, 0.8f)); // 80% translucent yellow text
+	VideoManager->Text()->SetDefaultFont("battle");
+	VideoManager->Text()->SetDefaultTextColor(Color(1.0f, 1.0f, 0.0f, 0.8f)); // 80% translucent yellow text
 	_skill_selection_header.SetText("Skill                          SP");
 	_skill_selection_header.SetColor(Color(1.0f, 1.0f, 0.0f, 0.8f));
 	_item_selection_header.SetText("Item                          QTY");
@@ -380,16 +380,16 @@ void ActionWindow::_DrawActionSelection() {
 
 	switch (_selected_action_category) {
 		case ACTION_TYPE_ATTACK:
-			VideoManager->DrawText("Attack");
+			VideoManager->Text()->Draw("Attack");
 			break;
 		case ACTION_TYPE_DEFEND:
-			VideoManager->DrawText("Defend");
+			VideoManager->Text()->Draw("Defend");
 			break;
 		case ACTION_TYPE_SUPPORT:
-			VideoManager->DrawText("Support");
+			VideoManager->Text()->Draw("Support");
 			break;
 		case ACTION_TYPE_ITEM:
-			VideoManager->DrawText("Item");
+			VideoManager->Text()->Draw("Item");
 			break;
 		default:
 			if (BATTLE_DEBUG)
@@ -401,7 +401,7 @@ void ActionWindow::_DrawActionSelection() {
 	// Draw the action list header text
 	VideoManager->Move(640.0f, 125.0f);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, 0);
-	VideoManager->SetTextColor(Color(1.0f, 1.0f, 0.0f, 0.8f)); // 80% translucent yellow text
+	VideoManager->Text()->SetDefaultTextColor(Color(1.0f, 1.0f, 0.0f, 0.8f)); // 80% translucent yellow text
 	if (_selected_action_category != ACTION_TYPE_ITEM) {
 		_skill_selection_header.Draw();
 	}
@@ -417,8 +417,8 @@ void ActionWindow::_DrawActionSelection() {
 
 void ActionWindow::_DrawTargetSelection() {
 	VideoManager->Move(640.0f, 125.0f);
-	VideoManager->SetTextColor(Color(1.0f, 1.0f, 0.0f, 0.8f)); // 80% translucent yellow text
-	VideoManager->DrawText(MakeUnicodeString("Target Information"));
+	VideoManager->Text()->SetDefaultTextColor(Color(1.0f, 1.0f, 0.0f, 0.8f)); // 80% translucent yellow text
+	VideoManager->Text()->Draw(MakeUnicodeString("Target Information"));
 	VideoManager->MoveRelative(0.0f, -40.0f);
 	_target_information.Draw();
 }
@@ -427,8 +427,8 @@ void ActionWindow::_DrawTargetSelection() {
 
 void ActionWindow::_DrawActionInformation() {
 	VideoManager->Move(640.0f, 125.0f);
-	VideoManager->SetTextColor(Color(1.0f, 1.0f, 0.0f, 0.8f)); // 80% translucent yellow text
-	VideoManager->DrawText(MakeUnicodeString("Action Information"));
+	VideoManager->Text()->SetDefaultTextColor(Color(1.0f, 1.0f, 0.0f, 0.8f)); // 80% translucent yellow text
+	VideoManager->Text()->Draw(MakeUnicodeString("Action Information"));
 	VideoManager->MoveRelative(0.0f, -40.0f);
 	_action_information.Draw();
 }
@@ -537,7 +537,7 @@ void ActionWindow::_ConstructTargetInformation() {
 		// TODO: construct a list of all characters or enemies depending upon the type
 	}
 
-	//VideoManager->SetTextColor(Color::white);
+	//VideoManager->Text()->SetDefaultTextColor(Color::white);
 	_target_information.SetText(target_text);
 } // void ActionWindow::_ConstructTargetInformation()
 
@@ -564,7 +564,7 @@ void ActionWindow::_ConstructActionInformation() {
 			MakeUnicodeString("\nTarget Type: TODO");
 	}
 
-	//VideoManager->SetTextColor(Color::white);
+	//VideoManager->Text()->SetDefaultTextColor(Color::white);
 	_action_information.SetText(action_text);
 } // void ActionWindow::_ConstructActionInformation()
 
@@ -1023,7 +1023,7 @@ void FinishWindow::Draw() {
 void FinishWindow::_DrawAnnounceWin() {
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 	VideoManager->Move(512.0f, 384.0f);
-	VideoManager->DrawText("MAJOR PWNAGE!!!!");
+	VideoManager->Text()->Draw("MAJOR PWNAGE!!!!");
 }
 
 
@@ -1032,7 +1032,7 @@ void FinishWindow::_DrawWinGrowth() {
 	//Draw XP Earned
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 	VideoManager->Move(496, 683);
-	VideoManager->DrawText(MakeUnicodeString("XP Gained: ") + MakeUnicodeString(NumberToString(_victory_xp)));
+	VideoManager->Text()->Draw(MakeUnicodeString("XP Gained: ") + MakeUnicodeString(NumberToString(_victory_xp)));
 
 	//Now draw char info
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, 0);
@@ -1046,10 +1046,10 @@ void FinishWindow::_DrawWinGrowth() {
 		_char_portraits[i].Draw();
 
 		VideoManager->MoveRelative(5,-55);
-		VideoManager->DrawText(MakeUnicodeString("Lv. ") + 
+		VideoManager->Text()->Draw(MakeUnicodeString("Lv. ") +
 			MakeUnicodeString(NumberToString(_characters[i]->GetExperienceLevel())));
 		VideoManager->MoveRelative(0, -15);
-		VideoManager->DrawText(MakeUnicodeString("XP To Next: ") + 
+		VideoManager->Text()->Draw(MakeUnicodeString("XP To Next: ") +
 			MakeUnicodeString(NumberToString(_characters[i]->GetExperienceForNextLevel() - _characters[i]->GetExperiencePoints())));
 
 		//First column
@@ -1065,7 +1065,7 @@ void FinishWindow::_DrawWinGrowth() {
 			display_text += MakeUnicodeString(" (") + 
 			MakeUnicodeString(NumberToString(_growth_gained[i][0])) + MakeUnicodeString(")");
 		}
-		VideoManager->DrawText(display_text);
+		VideoManager->Text()->Draw(display_text);
 
 		//SP
 		VideoManager->MoveRelative(0, -26);
@@ -1076,7 +1076,7 @@ void FinishWindow::_DrawWinGrowth() {
 			display_text += MakeUnicodeString(" (") + 
 			MakeUnicodeString(NumberToString(_growth_gained[i][1])) + MakeUnicodeString(")");
 		}
-		VideoManager->DrawText(display_text);
+		VideoManager->Text()->Draw(display_text);
 
 		//STR
 		VideoManager->MoveRelative(0, -26);
@@ -1087,7 +1087,7 @@ void FinishWindow::_DrawWinGrowth() {
 			display_text += MakeUnicodeString(" (") + 
 			MakeUnicodeString(NumberToString(_growth_gained[i][2])) + MakeUnicodeString(")");
 		}
-		VideoManager->DrawText(display_text);
+		VideoManager->Text()->Draw(display_text);
 
 		//VIG
 		VideoManager->MoveRelative(0, -26);
@@ -1098,7 +1098,7 @@ void FinishWindow::_DrawWinGrowth() {
 			display_text += MakeUnicodeString(" (") + 
 			MakeUnicodeString(NumberToString(_growth_gained[i][3])) + MakeUnicodeString(")");
 		}
-		VideoManager->DrawText(display_text);
+		VideoManager->Text()->Draw(display_text);
 
 		//Second Column
 		//FOR
@@ -1110,7 +1110,7 @@ void FinishWindow::_DrawWinGrowth() {
 			display_text += MakeUnicodeString(" (") + 
 			MakeUnicodeString(NumberToString(_growth_gained[i][4])) + MakeUnicodeString(")");
 		}
-		VideoManager->DrawText(display_text);
+		VideoManager->Text()->Draw(display_text);
 
 		//PRO
 		VideoManager->MoveRelative(0, -26);
@@ -1121,7 +1121,7 @@ void FinishWindow::_DrawWinGrowth() {
 			display_text += MakeUnicodeString(" (") + 
 			MakeUnicodeString(NumberToString(_growth_gained[i][5])) + MakeUnicodeString(")");
 		}
-		VideoManager->DrawText(display_text);
+		VideoManager->Text()->Draw(display_text);
 
 		//AGI
 		VideoManager->MoveRelative(0, -26);
@@ -1132,7 +1132,7 @@ void FinishWindow::_DrawWinGrowth() {
 			display_text += MakeUnicodeString(" (") + 
 			MakeUnicodeString(NumberToString(_growth_gained[i][6])) + MakeUnicodeString(")");
 		}
-		VideoManager->DrawText(display_text);
+		VideoManager->Text()->Draw(display_text);
 
 		//EVD
 		VideoManager->MoveRelative(0, -26);
@@ -1143,7 +1143,7 @@ void FinishWindow::_DrawWinGrowth() {
 			display_text += MakeUnicodeString(" (") + 
 			MakeUnicodeString(NumberToString(_growth_gained[i][7])) + MakeUnicodeString(")");
 		}
-		VideoManager->DrawText(display_text);
+		VideoManager->Text()->Draw(display_text);
 
 		VideoManager->MoveRelative(-300,-140 + 43);
 	}
@@ -1154,7 +1154,7 @@ void FinishWindow::_DrawWinSkills()
 	//Draw XP Earned
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, VIDEO_Y_CENTER, 0);
 	VideoManager->Move(496, 683);
-	VideoManager->DrawText(MakeUnicodeString("XP Gained: ") + MakeUnicodeString(NumberToString(_victory_xp)));
+	VideoManager->Text()->Draw(MakeUnicodeString("XP Gained: ") + MakeUnicodeString(NumberToString(_victory_xp)));
 
 	//Now draw char info
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, 0);
@@ -1169,14 +1169,14 @@ void FinishWindow::_DrawWinSkills()
 		_char_portraits[i].Draw();
 		//TEMP
 		VideoManager->MoveRelative(140, 35);
-		VideoManager->DrawText("Skills Learned");
+		VideoManager->Text()->Draw("Skills Learned");
 		VideoManager->MoveRelative(50, -30);
 		
 		skills_learned = _character_growths[i]->GetSkillsLearned();
 
 		for (uint32 j = 0; j < skills_learned->size(); ++j)
 		{
-			VideoManager->DrawText(skills_learned->at(j)->GetName());
+			VideoManager->Text()->Draw(skills_learned->at(j)->GetName());
 			VideoManager->MoveRelative(0, -20);
 		}
 
@@ -1191,16 +1191,16 @@ void FinishWindow::_DrawWinSpoils()
 	//VideoManager->Move(96, 683);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_CENTER, 0);
 	VideoManager->Move(280, 683);
-	VideoManager->DrawText(MakeUnicodeString("Drunes: ") + MakeUnicodeString(NumberToString(_victory_money)));
+	VideoManager->Text()->Draw(MakeUnicodeString("Drunes: ") + MakeUnicodeString(NumberToString(_victory_money)));
 
 	VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_CENTER, 0);
 	VideoManager->Move(712, 683);
-	VideoManager->DrawText(MakeUnicodeString("$ ") + MakeUnicodeString(NumberToString(GlobalManager->GetDrunes())));
+	VideoManager->Text()->Draw(MakeUnicodeString("$ ") + MakeUnicodeString(NumberToString(GlobalManager->GetDrunes())));
 
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 	//VideoManager->Move(700, 640);
 	VideoManager->Move(475, 640);
-	VideoManager->DrawText("Items");
+	VideoManager->Text()->Draw("Items");
 	//VideoManager->MoveRelative(-140, -25);
 	VideoManager->MoveRelative(-200, -35);
 
@@ -1208,10 +1208,10 @@ void FinishWindow::_DrawWinSpoils()
 
 	for (iter = _victory_items.begin(); iter != _victory_items.end(); ++iter)
 	{
-		VideoManager->DrawText(iter->first->GetName());
+		VideoManager->Text()->Draw(iter->first->GetName());
 		VideoManager->SetDrawFlags(VIDEO_X_RIGHT, VIDEO_Y_TOP, 0);
 		VideoManager->MoveRelative(425, 0);
-		VideoManager->DrawText(MakeUnicodeString(NumberToString(iter->second)));
+		VideoManager->Text()->Draw(MakeUnicodeString(NumberToString(iter->second)));
 		VideoManager->MoveRelative(-425, -25);
 		VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_TOP, 0);
 	}

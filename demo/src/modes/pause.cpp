@@ -90,7 +90,7 @@ PauseMode::~PauseMode() {
 void PauseMode::Reset() {
 	// Setup video engine constructs.
 	VideoManager->SetCoordSys(0, 1024, 0, 768);
-	VideoManager->SetFont("default");
+	VideoManager->Text()->SetDefaultFont("default");
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 }
 
@@ -122,7 +122,7 @@ void PauseMode::Draw() {
 
 	VideoManager->SetDrawFlags(VIDEO_X_CENTER, 0);
 	VideoManager->Move(512, 384);
-	VideoManager->DrawText("Paused");
+	VideoManager->Text()->Draw("Paused");
 }
 
 } // namespace hoa_pause

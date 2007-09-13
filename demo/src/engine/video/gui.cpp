@@ -333,7 +333,7 @@ void GUISupervisor::_RemoveMenuWindow(MenuWindow* old_window) {
 
 
 void GUISupervisor::_DrawFPS(uint32 frame_time) {
-	VideoManager->SetTextColor(Color::white);
+	VideoManager->Text()->SetDefaultTextColor(Color::white);
 	VideoManager->SetDrawFlags(VIDEO_X_LEFT, VIDEO_Y_BOTTOM, VIDEO_X_NOFLIP, VIDEO_Y_NOFLIP, VIDEO_BLEND, 0);
 
 	// Calculate the FPS for the current frame
@@ -383,10 +383,10 @@ void GUISupervisor::_DrawFPS(uint32 frame_time) {
 	char fps_text[16];
 	sprintf(fps_text, "FPS: %d", avg_fps);
 
-	VideoManager->SetFont("debug_font");
+	VideoManager->Text()->SetDefaultFont("debug_font");
 
 	VideoManager->Move(930.0f, 720.0f); // Upper right hand corner of the screen
-	VideoManager->DrawText(fps_text);
+	VideoManager->Text()->Draw(fps_text);
 } // void GUISupervisor::_DrawFPS(uint32 frame_time)
 
 } // namespace hoa_video

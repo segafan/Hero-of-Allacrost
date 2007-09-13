@@ -95,8 +95,8 @@ void CreditsScreen::Show()
 	_window.Show();
 	_visible = true;
 	_text_offset_y = 0.0f; // Reset the text offset
-	VideoManager->SetFont("default"); // Reset font
-	VideoManager->SetTextColor(Color::white); // Reset text color
+	VideoManager->Text()->SetDefaultFont("default"); // Reset font
+	VideoManager->Text()->SetDefaultTextColor(Color::white); // Reset text color
 	_credits_rendered.SetText(_credits_text);
 }
 

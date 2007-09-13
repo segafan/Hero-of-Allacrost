@@ -9,7 +9,7 @@
 
 /** ****************************************************************************
 *** \file    text.h
-*** \author  Raj Sharma, roos@allacrost.org
+*** \author  Lindsay Roberts, linds@allacrost.org
 *** \brief   Header file for text rendering
 ***
 *** This code makes use of the SDL_ttf font library for representing fonts,
@@ -25,6 +25,9 @@
 typedef struct _TTF_Font TTF_Font;
 
 namespace hoa_video {
+
+//! \brief The singleton pointer for the instance of the text supervisor
+extern TextSupervisor* TextManager;
 
 //! \brief Styles for setting the type of text shadows.
 enum TEXT_SHADOW_STYLE {
@@ -45,6 +48,8 @@ enum TEXT_SHADOW_STYLE {
 
 	VIDEO_TEXT_SHADOW_TOTAL = 6
 };
+
+
 
 /** ****************************************************************************
 *** \brief A structure to hold properties about a particular font glyph
@@ -91,17 +96,11 @@ public:
 	//! \brief SDL_ttf's recommended amount of spacing between lines.
 	int32 line_skip;
 
-	//! \brief The height above baseline of font
-	int32 ascent;
+	//! \brief The height above and below baseline of font
+	int32 ascent, descent;
 
-	//! \brief The height below baseline of font
-	int32 descent;
-
-	//! \brief The x offset of the text shadow.
-	int32 shadow_x;
-
-	//! \brief The y offset of the text shadow.
-	int32 shadow_y;
+	//! \brief The x and y offsets of the text shadow.
+	int32 shadow_x, shadow_y;
 
 	//! \brief The style of the text shadow.
 	TEXT_SHADOW_STYLE shadow_style;
@@ -119,11 +118,12 @@ public:
 *** ***************************************************************************/
 class TextStyle {
 public:
+	TextStyle() :
+		shadow_style(VIDEO_TEXT_SHADOW_INVALID)
+	{}
+
 	//! \brief The string font name
 	std::string font;
-
-	//! \brief Whether shadowing is enabled
-	bool shadow_enable;
 
 	//! \brief The x offset of the shadow
 	int32 shadow_offset_x;
@@ -135,11 +135,7 @@ public:
 	TEXT_SHADOW_STYLE shadow_style;
 
 	//! \brief The text color
-	Color		  color;
-
-	TextStyle() :
-		shadow_style(VIDEO_TEXT_SHADOW_INVALID) {}
-	
+	Color color;
 };
 
 namespace private_video {
@@ -341,6 +337,174 @@ private:
 	//! \brief The horizontal text alignment
 	int8 _alignment;
 }; // class RenderedText : public ImageDescriptor
+
+
+
+class TextSupervisor : public hoa_utils::Singleton<TextSupervisor> {
+	friend class GameVideo;
+	friend class TextureController;
+
+	friend class private_video::TextImageTexture;
+	friend class RenderedText;
+
+public:
+	TextSupervisor();
+
+	~TextSupervisor();
+
+	bool SingletonInitialize();
+
+	//! \name Font manipulation methods
+	//@{
+	/** \brief Loads a font file from disk with a specific size and name
+	*** \param font_filename The filename of the font file to load
+	*** \param font_name The name which to refer to the font after it is loaded
+	*** \param size The point size to set the font after it is loaded
+	*** \param style The default shadow style for this font (default value = VIDEO_TEXT_SHADOW_NONE)
+	*** \param x_offset The x shadow offset for this font in number of pixels (default value = 0)
+	*** \param y_offset The y shadow offset for this font in number of pixels (default value = 0)
+	*** \param make_default If set to true, this font will be made the default font if it is loaded successfully (default value = false)
+	*** \return True if the font was successfully loaded, or false if there was an error
+	***
+	*** \note If both the x and y offset arguments are zero, the offset value will instead be set to 1/8th of the font's height
+	*** to the right in the x direction, and down in the y direction. This is done because a shadow with a (0, 0) offset is not
+	*** valid (the shadow will be completely obscured by the text itself).
+	**/
+	bool LoadFont(const std::string& filename, const std::string& font_name, uint32 size, TEXT_SHADOW_STYLE style = VIDEO_TEXT_SHADOW_NONE,
+		 int32 x_offset = 0, int32 y_offset = 0, bool make_default = false);
+
+	/** \brief Removes a loaded font from memory and frees up associated resources
+	*** \param font_name The reference name of the font to unload
+	***
+	*** If the argument name is invalid (i.e. no font with that reference name exists), this method will do
+	*** nothing more than print out a warning message if running in debug mode.
+	**/
+// 	void FreeFont(const std::string& font_name);
+
+	/** \brief Returns true if a font of a certain reference name exists
+	*** \param font_name The reference name of the font to check
+	*** \return True if font name is valid, false if it is not.
+	**/
+	bool IsFontValid(const std::string& font_name)
+		{ return (_font_map.find(font_name) != _font_map.end()); }
+
+	/** \brief Gets the name of the current default font used for text rendering
+	*** \note If there are no fonts loaded, this method will return an empty string
+	**/
+	const std::string& GetDefaultFont() const;
+
+	/** \brief Sets the default font to use for text rendering
+	*** \param font_name The name of the pre-loaded font to set as the default
+	***
+	*** If the argument does not have valid font data associated with it, no
+	*** change will be made and a warning message will be printed if debug
+	*** mode is enabled.
+	**/
+	void SetDefaultFont(const std::string& font_name);
+
+	/** \brief Sets the default shadow style to use for a specified font
+	*** \param font_name The reference name of the font to set the shadow style for
+	*** \param style The shadow style desired for this font
+	**/
+	void SetFontShadowStyle(const std::string& font_name, TEXT_SHADOW_STYLE style);
+
+	/** \brief Sets the default x and y shadow offsets to use for a specified font
+	*** \param font_name The reference name of the font to set the shadow offsets for
+	*** \param x The x offset in number of pixels
+	*** \param y The y offset in number of pixels
+	***
+	*** By default, all font shadows are slightly to the right and to the bottom of the text,
+	*** by an offset of one eight of the font's height.
+	**/
+	void SetFontShadowOffsets(const std::string& font_name, int32 x, int32 y);
+
+	// NOTE: Make this function private
+	/** \brief Get the font properties for a previously loaded font
+	*** \param font_name The name reference of the loaded font
+	*** \return A pointer to the FontProperties object with the requested data, or NULL if the properties could not be fetched.
+	**/
+	FontProperties* GetFontProperties(const std::string& font_name);
+	//@}
+
+	//! \brief Text manipulation methods
+	//@{
+	//! \brief Returns the current default color for rendering text
+	Color GetDefaultTextColor() const;
+
+	/** \brief Sets the default color to render text in
+	*** \param color The color to set the text to
+	**/
+	void SetDefaultTextColor(const Color& color);
+
+	/** \brief Renders and draws a string of text to the screen
+	*** \param text The text string to draw in unicode format
+	**/
+	void Draw(const hoa_utils::ustring& text);
+// 	void Draw(const hoa_utils::ustring& text, std::string font_name);
+// 	void Draw(const hoa_utils::ustring& text, Color& color);
+// 	void Draw(const hoa_utils::ustring& text, std::string font_name);
+// 	void Draw(const hoa_utils::ustring& text, std::string font_name, Color& color);
+
+	/** \brief Renders and draws a string of text to the screen
+	*** \param text The text string to draw in standard format
+	**/
+	void Draw(const std::string& text)
+		{ Draw(hoa_utils::MakeUnicodeString(text)); }
+
+	/** \brief Calculates what the width would be of a rendered string of text
+	*** \param font_name The reference name of the font to use for the calculation
+	*** \param text The text string in unicode format
+	*** \return The width of the text as it would be rendered, or -1 if there was an error
+	 */
+	int32 CalculateTextWidth(const std::string& font_name, const hoa_utils::ustring& text);
+
+	/** \brief calculates the width of the given text if it were rendered with the given font
+	*** \param font_name The reference name of the font to use for the calculation
+	*** \param text The text string in standard format
+	*** \return The width of the text as it would be rendered, or -1 if there was an error
+	**/
+	int32 CalculateTextWidth(const std::string& font_name, const std::string& text);
+	//@}
+
+private:
+	//! \brief The default font, set to empty string if no fonts are loaded
+	std::string _default_font;
+
+	//! \brief The default color to render text in
+	Color _default_text_color;
+
+	//! STL map containing properties for each font (includeing TTF_Font *)
+	std::map<std::string, FontProperties*> _font_map;
+
+	/** \brief does the actual work of drawing text
+	 *
+	 *  \param uText  Pointer to a unicode string holding the text to draw
+	 * \return success/failure
+	 */
+	bool _DrawTextHelper(const uint16 *const uText);
+
+	/** Renders a given unicode string and TextStyle to a pixel array
+	 * \param string The ustring to render
+	 * \param style  The text style to render
+	 * \param buffer The pixel array to render to
+	 */
+	bool _RenderText(hoa_utils::ustring& string, TextStyle& style, private_video::ImageMemory& buffer);
+
+	/** \brief caches glyph info and textures for rendering
+	 *
+	 *  \param uText  Pointer to a unicode string holding the glyphs to cache
+	 *  \param fp     Pointer to the internal FontProperties class representing the font
+	 * \return success/failure
+	 */
+	bool _CacheGlyphs(const uint16 *uText, FontProperties *fp);
+
+	/** \brief retrieves the shadow color based on the current color and shadow style
+	 *
+	 *  \param fp     Pointer to the internal FontProperties class representing the font
+	 * \return the shadow color
+	 */
+	Color _GetTextShadowColor(FontProperties *fp);
+}; // class TextSupervisor : public hoa_utils::Singleton
 
 }  // namespace hoa_video
 
