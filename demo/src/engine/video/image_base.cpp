@@ -604,9 +604,11 @@ ImageTexture::~ImageTexture() {
 	for (map<string, ImageTexture*>::iterator i = (TextureManager->_images.begin()); i != (TextureManager->_images.end()); i++) {
 		if (i->second == this) {
 			TextureManager->_images.erase(i);
-			break;
+			return;
 		}
 	}
+
+	IF_PRINT_WARNING(VIDEO_DEBUG) << "could not find ImageTexture to erase in TextureController container" << endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -688,6 +690,7 @@ BaseImageElement::~BaseImageElement() {
 				// TODO: This introduces a seg fault when TexSheet::FreeImage is later called. Fix this bug!
 				base_image->texture_sheet->RemoveImage(base_image);
 				TextureManager->_RemoveSheet(base_image->texture_sheet);
+				delete base_image;
 			}
 			else {
 				// Otherise simply mark the image as free in the texture sheet
