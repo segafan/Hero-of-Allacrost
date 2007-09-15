@@ -790,7 +790,6 @@ StillImage GameVideo::CaptureScreen() throw(Exception) {
 		return screen_image;
 	}
 
-	new_image->AddReference();
 	TextureManager->_images["captured_screen" + NumberToString(capture_id) + "<T>"] = new_image;
 
 	// Store the image element to the saved image (with a flipped y axis)
