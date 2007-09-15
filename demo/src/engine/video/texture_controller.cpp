@@ -39,10 +39,12 @@ TextureController::TextureController() :
 
 
 TextureController::~TextureController() {
+	IF_PRINT_DEBUG(VIDEO_DEBUG) << "Deleting all remaining ImageTextures, a total of: " << _images.size() << endl;
 	for (map<string, ImageTexture*>::iterator i = _images.begin(); i != _images.end(); i++) {
 		delete i->second;
 	}
 
+	IF_PRINT_DEBUG(VIDEO_DEBUG) << "Deleting all remaining texture sheets, a total of: " << _tex_sheets.size() << endl;
 	for (vector<TexSheet*>::iterator i = _tex_sheets.begin(); i != _tex_sheets.end(); i++) {
 		delete *i;
 	}

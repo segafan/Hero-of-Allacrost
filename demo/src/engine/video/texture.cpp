@@ -256,7 +256,7 @@ void TexSheet::Draw() const {
 
 FixedTexMemMgr::FixedTexMemMgr(TexSheet *tex_sheet, int32 img_width, int32 img_height) {
 	if (tex_sheet == NULL) {
-		cerr << "VIDEO WARNING: " << __FILE__ << ":" << __FUNCTION__ << ": tex_sheet argument was NULL" << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "tex_sheet argument was NULL" << endl;
 		return;
 	}
 
@@ -291,6 +291,11 @@ FixedTexMemMgr::FixedTexMemMgr(TexSheet *tex_sheet, int32 img_width, int32 img_h
 
 
 bool FixedTexMemMgr::Insert(BaseImageTexture *img) {
+	if (img == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "NULL pointer was given as function argument" << endl;
+		return false;
+	}
+
 	// Whoa, nothing on the open list! (no blocks left) return false :(
 	if (_open_list_head == NULL)
 		return false;
@@ -345,6 +350,11 @@ bool FixedTexMemMgr::Insert(BaseImageTexture *img) {
 
 
 void FixedTexMemMgr::Remove(BaseImageTexture *img) {
+	if (img == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "NULL pointer was given as function argument" << endl;
+		return;
+	}
+
 	// Translate x,y coordinates into a block index
 	int32 block_index = _CalculateBlockIndex(img);
 
@@ -367,6 +377,11 @@ void FixedTexMemMgr::Remove(BaseImageTexture *img) {
 
 
 void FixedTexMemMgr::Free(BaseImageTexture *img) {
+	if (img == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "NULL pointer was given as function argument" << endl;
+		return;
+	}
+
 	int32 block_index = _CalculateBlockIndex(img);
 
 	FixedImageNode *node = &_blocks[block_index];
@@ -442,6 +457,11 @@ VariableTexMemMgr::VariableTexMemMgr(TexSheet *sheet) {
 
 
 bool VariableTexMemMgr::Insert(BaseImageTexture *img) {
+	if (img == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "NULL pointer was given as function argument" << endl;
+		return false;
+	}
+
 	// Don't allow insertions into a texture bigger than 512x512...
 	// This way, if we have a 1024x1024 texture holding a fullscreen background,
 	// it is always safe to remove the texture sheet from memory when the
@@ -541,6 +561,11 @@ bool VariableTexMemMgr::Insert(BaseImageTexture *img) {
 
 
 void VariableTexMemMgr::_SetBlockProperties(BaseImageTexture *img, bool change_free, bool change_image, bool free, BaseImageTexture *new_image) {
+	if (img == NULL) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "NULL pointer was given as function argument" << endl;
+		return;
+	}
+
 	// Calculate upper-left corner in blocks
 	int32 block_x = img->x / 16;
 	int32 block_y = img->y / 16;

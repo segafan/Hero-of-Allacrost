@@ -465,8 +465,6 @@ bool ImageDescriptor::_LoadMultiImage(vector<StillImage>& images, const string &
 					img->texture_sheet->RestoreImage(img);
 				}
 
-				img->AddReference();
-
 				ImageElement element(img, images.at(current_image)._width, images.at(current_image)._height,
 					0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, images.at(current_image)._color);
 				images.at(current_image)._elements.push_back(element);
@@ -498,7 +496,6 @@ bool ImageDescriptor::_LoadMultiImage(vector<StillImage>& images, const string &
 					return false;
 				}
 
-				new_image->AddReference();
 				TextureManager->_images[filename + tags] = new_image;
 
 				// store the new image element
@@ -575,8 +572,6 @@ bool StillImage::Load(const string& filename) {
 			img->texture_sheet->RestoreImage(img);
 		}
 
-		img->AddReference();
-
 		if (IsFloatEqual(_width, 0.0f))
 			_width = static_cast<float>(img->width);
 		if (IsFloatEqual(_height, 0.0f))
@@ -611,7 +606,6 @@ bool StillImage::Load(const string& filename) {
 	}
 
 	TextureManager->_images[_filename] = new_image;
-	new_image->AddReference();
 
 	// If width or height members are zero, set them to the dimensions of the image data (which are in number of pixels)
 	if (IsFloatEqual(_width, 0.0f) == true)
@@ -648,7 +642,6 @@ bool StillImage::Load(const string& filename) {
 	}
 
 	TextureManager->_images[_filename + "<G>"] = gray_image;
-	gray_image->AddReference();
 	_elements.push_back(ImageElement(gray_image, _width, _height, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, _color));
 	free(img_data.pixels);
 	img_data.pixels = NULL;
@@ -878,7 +871,6 @@ void StillImage::EnableGrayScale() {
 			// NOTE: We do not decrement the reference to the colored image, because we want to guarantee that
 			// it remains referenced in texture memory while its grayscale counterpart is being used
 			_elements[i].image = TextureManager->_images[img->filename + img->tags + "<G>"];
-			_elements[i].image->AddReference();
 			continue;
 		}
 
@@ -901,7 +893,6 @@ void StillImage::EnableGrayScale() {
 			return;
 		}
 
-		new_img->AddReference();
 		TextureManager->_images[new_img->filename + new_img->tags] = new_img;
 		_elements[i].image = new_img;
 

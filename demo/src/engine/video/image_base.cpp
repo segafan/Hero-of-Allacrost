@@ -914,6 +914,8 @@ ImageElement::ImageElement(ImageTexture* image_, float width_, float height_, fl
 	image(image_)
 {
 	base_image = image_;
+	if (base_image != NULL)
+		base_image->AddReference();
 }
 
 
@@ -924,6 +926,8 @@ ImageElement::ImageElement(ImageTexture *image_, float width_, float height_, fl
 	image(image_)
 {
 	base_image = image_;
+	if (base_image != NULL)
+		base_image->AddReference();
 }
 
 } // namespace private_video
