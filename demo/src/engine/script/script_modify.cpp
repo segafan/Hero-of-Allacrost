@@ -57,8 +57,8 @@ bool ModifyScriptDescriptor::OpenFile(const std::string& file_name) {
 	lua_checkstack(ScriptManager->GetGlobalState(),1);
 	_lstack = lua_newthread(ScriptManager->GetGlobalState());
 
-	// Attempt to load the Lua file.
-	if (lua_dofile(_lstack, file_name.c_str()) != 0) {
+	// Attempt to load and execute the Lua file.
+	if (luaL_loadfile(_lstack, file_name.c_str()) != 0 || lua_pcall(_lstack, 0, 0, 0)) {
 		cerr << "SCRIPT ERROR: ModifyScriptDescriptor::OpenFile() could not open the file " << file_name << endl;
 		_access_mode = SCRIPT_CLOSED;
 		return false;
