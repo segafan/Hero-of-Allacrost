@@ -138,16 +138,6 @@ bool GameVideo::SingletonInitialize() {
 		return false;
 	}
 
-	// Create instances of the various sub-systems
-	TextureManager = TextureController::SingletonCreate();
-	TextManager = TextSupervisor::SingletonCreate();
-	GUIManager = GUISupervisor::SingletonCreate();
-
-	if (TextureManager->SingletonInitialize() == false) {
-		PRINT_ERROR << "could not initialize texture manager" << endl;
-		return false;
-	}
-
 	// Load in the user's video configuration settings from a script file
 	hoa_script::ReadScriptDescriptor video_settings_script;
 	int32 settings_width;
@@ -195,6 +185,16 @@ bool GameVideo::SingletonInitialize() {
 	SetFullscreen(settings_fullscreen);
 
 	if (ApplySettings() == false) {
+		return false;
+	}
+	
+	// Create instances of the various sub-systems
+	TextureManager = TextureController::SingletonCreate();
+	TextManager = TextSupervisor::SingletonCreate();
+	GUIManager = GUISupervisor::SingletonCreate();
+	
+	if (TextureManager->SingletonInitialize() == false) {
+		PRINT_ERROR << "could not initialize texture manager" << endl;
 		return false;
 	}
 
@@ -380,7 +380,7 @@ void GameVideo::GetPixelSize(float& x, float& y) {
 bool GameVideo::ApplySettings() {
 	if (_target == VIDEO_TARGET_SDL_WINDOW) {
 		// Losing GL context, so unload images first
-		if (TextureManager->UnloadTextures() == false) {
+		if (TextureManager && TextureManager->UnloadTextures() == false) {
 			IF_PRINT_WARNING(VIDEO_DEBUG) << "failed to delete OpenGL textures during a context change" << endl;
 		}
 
@@ -420,7 +420,7 @@ bool GameVideo::ApplySettings() {
 				_temp_width = _screen_width;
 				_temp_height = _screen_height;
 
-				if (_screen_width > 0) { // Test to see if we already had a valid video mode
+				if (TextureManager && _screen_width > 0) { // Test to see if we already had a valid video mode
 					TextureManager->ReloadTextures();
 				}
 				return false;
@@ -434,7 +434,8 @@ bool GameVideo::ApplySettings() {
 		_screen_height = _temp_height;
 		_fullscreen = _temp_fullscreen;
 
-		TextureManager->ReloadTextures();
+		if (TextureManager)
+			TextureManager->ReloadTextures();
 		EnableFog(_fog_color, _fog_intensity);
 
 		return true;
