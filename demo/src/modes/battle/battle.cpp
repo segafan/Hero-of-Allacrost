@@ -165,9 +165,7 @@ void BattleMode::Reset() {
 		}
 	}
 
-	if (_battle_music.empty() == false && _battle_music.back().IsLooping() == false) {
-		_battle_music.back().Play();
-	}
+	_battle_music.back().Play();
 
 	if (_initialized == false) {
 		_Initialize();
@@ -343,7 +341,7 @@ void BattleMode::_Initialize() {
 
 
 void BattleMode::_ShutDown() {
-	_battle_music[0].Stop();
+	_battle_music.back().Stop();
 
 	// This call will clear the input state
 	InputManager->EventHandler();
