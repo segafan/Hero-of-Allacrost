@@ -46,13 +46,10 @@
 		4999AC810AF407BE004DD3A3 /* system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4999AC4E0AF407BE004DD3A3 /* system.cpp */; };
 		49BDC4260AF540AE00940A6C /* SDL_net.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 49BDC4250AF540AE00940A6C /* SDL_net.framework */; };
 		49BDC4480AF540E400940A6C /* SDL_net.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 49BDC4250AF540AE00940A6C /* SDL_net.framework */; };
-		49BDC4520AF5412600940A6C /* socket.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 49BDC4500AF5412600940A6C /* socket.h */; };
 		49BDC4530AF5412600940A6C /* socket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49BDC4510AF5412600940A6C /* socket.cpp */; };
 		49DEC4270AD18E9800DC8362 /* Allacrost-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 49DEC4260AD18E9800DC8362 /* Allacrost-Info.plist */; };
 		D404C6EA0B02FD3E00827A19 /* editor.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D404C6E90B02FD3E00827A19 /* editor.moc.cpp */; };
 		D404C6EC0B02FD6D00827A19 /* grid.moc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D404C6EB0B02FD6D00827A19 /* grid.moc.cpp */; };
-		D407482D0C6E8602008A25BD /* Ogg.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D407482C0C6E8602008A25BD /* Ogg.framework */; };
-		D40748310C6E8615008A25BD /* Vorbis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D40748300C6E8615008A25BD /* Vorbis.framework */; };
 		D407F7ED0BADECF300848C43 /* shop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D407F7E90BADECF300848C43 /* shop.cpp */; };
 		D407F7EF0BADECF300848C43 /* shop_windows.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D407F7EB0BADECF300848C43 /* shop_windows.cpp */; };
 		D41AC1DB0C4C7C980097B042 /* script_write.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D440963B0C45E37300E58975 /* script_write.cpp */; };
@@ -69,8 +66,6 @@
 		D440963F0C45E37300E58975 /* script_modify.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D44096370C45E37300E58975 /* script_modify.cpp */; };
 		D44096410C45E37300E58975 /* script_read.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D44096390C45E37300E58975 /* script_read.cpp */; };
 		D44096430C45E37300E58975 /* script_write.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D440963B0C45E37300E58975 /* script_write.cpp */; };
-		D44EDF970C6E873600FFBA19 /* Ogg.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D407482C0C6E8602008A25BD /* Ogg.framework */; };
-		D44EDF980C6E874400FFBA19 /* Vorbis.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D40748300C6E8615008A25BD /* Vorbis.framework */; };
 		D468098F0C1E6E31009F76A9 /* QtSql.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D468098E0C1E6E31009F76A9 /* QtSql.framework */; };
 		D46809930C1E6E4E009F76A9 /* QtNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D46809920C1E6E4E009F76A9 /* QtNetwork.framework */; };
 		D46809970C1E6E66009F76A9 /* QtXml.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D46809960C1E6E66009F76A9 /* QtXml.framework */; };
@@ -126,7 +121,6 @@
 		D4D1BF650B02BB9F0052BF1E /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4941A7190AC1D8B300D65B8E /* SDL.framework */; };
 		D4D1BF6B0B02BC010052BF1E /* SDL_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4941A7180AC1D8B300D65B8E /* SDL_ttf.framework */; };
 		D4D6DB2E0B127DD3002F33F2 /* mac_logo.icns in Resources */ = {isa = PBXBuildFile; fileRef = 4941A7510AC1D9A200D65B8E /* mac_logo.icns */; };
-		D4D7395E0C892BE80050FDD9 /* OpenAL.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D4F110780C5855CC00ADC969 /* OpenAL.framework */; };
 		D4DAC8A90BA13F55009FA7BE /* map_zones.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4DAC8A80BA13F55009FA7BE /* map_zones.cpp */; };
 		D4DDE3940C4A15EE00937677 /* battle_actions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4DDE3930C4A15EE00937677 /* battle_actions.cpp */; };
 		D4E561270BB71B53002FB758 /* defs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4E561260BB71B53002FB758 /* defs.cpp */; };
@@ -154,13 +148,9 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				D4D7395E0C892BE80050FDD9 /* OpenAL.framework in Copy Frameworks */,
-				D44EDF980C6E874400FFBA19 /* Vorbis.framework in Copy Frameworks */,
-				D44EDF970C6E873600FFBA19 /* Ogg.framework in Copy Frameworks */,
 				49BDC4480AF540E400940A6C /* SDL_net.framework in Copy Frameworks */,
 				4941A7450AC1D8BA00D65B8E /* SDL_ttf.framework in Copy Frameworks */,
 				4941A7460AC1D8BA00D65B8E /* SDL.framework in Copy Frameworks */,
-				49BDC4520AF5412600940A6C /* socket.h in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -429,14 +419,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D407482D0C6E8602008A25BD /* Ogg.framework in Frameworks */,
 				4941A7680AC1DCE000D65B8E /* Cocoa.framework in Frameworks */,
 				4941A7140AC1D89300D65B8E /* OpenGL.framework in Frameworks */,
 				4941A71B0AC1D8B300D65B8E /* SDL_ttf.framework in Frameworks */,
 				49BDC4260AF540AE00940A6C /* SDL_net.framework in Frameworks */,
 				4941A71C0AC1D8B300D65B8E /* SDL.framework in Frameworks */,
 				D4F110790C5855CC00ADC969 /* OpenAL.framework in Frameworks */,
-				D40748310C6E8615008A25BD /* Vorbis.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1101,7 +1089,24 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SOURCE_ROOT)/../allacrost-dep/frameworks",
+				);
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SOURCE_ROOT)/../allacrost-dep/include",
+					/sw/include,
+					/opt/local/include,
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SOURCE_ROOT)/../allacrost-dep/lib",
+					/sw/lib,
+					/opt/local/lib,
+				);
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				USER_HEADER_SEARCH_PATHS = "$(inherited) /Library/Frameworks/SDL.framework/Headers";
 			};
 			name = Debug;
 		};
@@ -1113,7 +1118,24 @@
 					i386,
 				);
 				COPY_PHASE_STRIP = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SOURCE_ROOT)/../allacrost-dep/frameworks",
+				);
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SOURCE_ROOT)/../allacrost-dep/include",
+					/sw/include,
+					/opt/local/include,
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SOURCE_ROOT)/../allacrost-dep/lib",
+					/sw/lib,
+					/opt/local/lib,
+				);
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				USER_HEADER_SEARCH_PATHS = "$(inherited) /Library/Frameworks/SDL.framework/Headers";
 			};
 			name = Release;
 		};
@@ -1133,39 +1155,36 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
 				HEADER_SEARCH_PATHS = (
-					/usr/local/include,
-					/opt/local/include,
-					/sw/include,
+					"${inherited}",
+					"$(SOURCE_ROOT)/../allacrost-dep/frameworks/SDL.framework/Headers",
 				);
 				INFOPLIST_FILE = "Allacrost-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = (
-					/usr/local/lib,
-					/opt/local/lib,
-					/sw/lib,
+					"${inherited}",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)\"";
 				OTHER_LDFLAGS = (
 					"-framework",
 					Carbon,
-					"-framework",
-					Vorbis,
-					"-framework",
-					Ogg,
 					"-llua",
 					"-lpng",
 					"-ljpeg",
 					"-llualib",
 					"-lz",
 					"-lluabind",
+					"-lvorbis",
+					"-logg",
+					"-lvorbisfile",
+					"-lvorbisenc",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Allacrost;
-				USER_HEADER_SEARCH_PATHS = /Library/Frameworks/SDL.framework/Headers;
+				USER_HEADER_SEARCH_PATHS = "";
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
 			};
@@ -1190,42 +1209,39 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 3;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
 				GCC_THREADSAFE_STATICS = NO;
 				HEADER_SEARCH_PATHS = (
-					"macosx-contrib/include",
-					/opt/local/include,
-					/sw/include,
-					src/global,
+					"${inherited}",
+					"$(SOURCE_ROOT)/../allacrost-dep/frameworks/SDL.framework/Headers",
 				);
 				INFOPLIST_FILE = "Allacrost-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = (
-					"macosx-contrib/lib",
-					/opt/local/lib,
-					/Developer/SDKs/MacOSX10.4u.sdk/,
+					"${inherited}",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
 				);
 				LINK_WITH_STANDARD_LIBRARIES = YES;
 				ONLY_LINK_ESSENTIAL_SYMBOLS = YES;
 				OTHER_LDFLAGS = (
 					"-framework",
 					Carbon,
-					"-framework",
-					Vorbis,
-					"-framework",
-					Ogg,
 					"-llua",
 					"-lpng",
 					"-ljpeg",
 					"-llualib",
 					"-lz",
 					"-lluabind",
+					"-lvorbis",
+					"-logg",
+					"-lvorbisfile",
+					"-lvorbisenc",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Allacrost;
 				STRIP_INSTALLED_PRODUCT = YES;
-				USER_HEADER_SEARCH_PATHS = /Library/Frameworks/SDL.framework/Headers;
+				USER_HEADER_SEARCH_PATHS = "";
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
 			};
