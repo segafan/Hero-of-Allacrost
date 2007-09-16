@@ -596,7 +596,8 @@ bool IsLatestVersion ()
 	conn.Connect ( VERSION_HOST, 80 );
 	if (!conn.IsConnected()) // could not connect
 		return true; // assume latest version
-	conn.Write ( "GET http://%s%s\r\n", VERSION_HOST, VERSION_PATH );
+	//conn.Write ( "GET http://%s%s\r\n", VERSION_HOST, VERSION_PATH );
+	conn.Write ( "GET http://" VERSION_HOST VERSION_PATH "\r\n" );
 	conn.IsQueued ( 300 );
 	conn.ScanLine ( "%d.%d.%d", &rversionmajor, &rversionminor, &rpatch );
 	conn.Disconnect();

@@ -76,7 +76,7 @@ bool Socket::IsQueued(uint32 wait_time) {
 	return SDLNet_CheckSockets ( set, wait_time );
 }
 
-uint32 Socket::SendBinary(void* data, uint32 len) {
+uint32 Socket::SendBinary(const void* data, uint32 len) {
 	if (!IsConnected())
 		return 0;
 	return SDLNet_TCP_Send(sock, data, len);
@@ -86,20 +86,6 @@ uint32 Socket::RecvBinary(void* location, uint32 len) {
 	if (!IsConnected())
 		return 0;
 	return SDLNet_TCP_Recv ( sock, location, len );
-}
-
-void Socket::Write (const char* fmt, ... ) {
-	/*va_list va;
-	va_start ( va, fmt );
-	
-	char* buffer;
-	vasprintf ( &buffer, fmt, va );
-	
-	SendBinary ( buffer, strlen(buffer) );
-	
-	free ( (void*)buffer );
-	
-	va_end ( va );*/
 }
 
 std::string Socket::ReadLine() {

@@ -27,6 +27,7 @@
 #include <SDL/SDL_net.h>
 #endif
 #include <stdarg.h>
+#include <string.h>
 
 namespace hoa_socket
 {
@@ -79,7 +80,7 @@ public:
 	*** \param len The number of bytes of data
 	*** \return The amount of data sent
 	**/
-	uint32 SendBinary ( void* data, uint32 len );
+	uint32 SendBinary ( const void* data, uint32 len );
 	
 	/** \brief Reads binary data
 	*** \param d A pointer to the location in which to store the data
@@ -89,10 +90,10 @@ public:
 	uint32 RecvBinary ( void* location, uint32 maxlen );
 	
 	/** \brief Writes textual data
-	*** \param fmt The format of the data, in printf style
-	*** \param ... Other arguments, following from the format given (the format is a const char*, don't forget)
+	*** \param data The string to send
 	**/
-	void Write ( const char* format, ... );
+	void Write ( const std::string& data )
+		{ SendBinary(data.data(), data.length()); }
 	
 	/** \brief Reads one line
 	*** \return One line of text. Note that this is a std::string
