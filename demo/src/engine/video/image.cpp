@@ -689,7 +689,7 @@ void StillImage::Draw(const Color& draw_color) const {
 	bool skip_modulation = (draw_color == Color::white && IsFloatEqual(modulation, 1.0f));
 
 	// If we're modulating, calculate the fading color now
-	if (VideoManager->_screen_fader.IsFading() == true && skip_modulation == false)
+	if (skip_modulation == false)
 		fade_color = draw_color * fade_color;
 	
 	for (uint32 i = 0; i < _elements.size(); ++i) {
