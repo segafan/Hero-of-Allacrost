@@ -42,6 +42,7 @@
 #include <QTabWidget>
 #include <QToolBar>
 #include <QTreeWidget>
+#include <QUndoCommand>
 
 #include <map>
 
@@ -73,6 +74,7 @@ class Editor: public QMainWindow
 		//! Needed for tile editing and accessing the map properties.
 		friend class EditorScrollView;
 		friend class MapPropertiesDialog;
+		friend class LayerCommand;
 
 	protected:
 		//! Handles close and/or quit events.
@@ -111,7 +113,7 @@ class Editor: public QMainWindow
 
 		//! \name Tiles Menu Item Slots
 		//! \brief These slots process selection for their item in the Tiles menu.
-		//{@
+		//{@LayerCommand
 		void _TileLayerFill();
 		void _TileLayerClear();
 		void _TileModePaint();
@@ -183,6 +185,8 @@ class Editor: public QMainWindow
 		QAction* _toggle_ml_action;
 		QAction* _toggle_ul_action;
 
+		QAction* _undo_action;
+		QAction* _redo_action;
 		QAction* _layer_fill_action;
 		QAction* _layer_clear_action;
 		QAction* _mode_paint_action;
@@ -217,6 +221,9 @@ class Editor: public QMainWindow
 		bool _ml_on;
 		//! Upper layer toggle view switch.
 		bool _ul_on;
+		
+		//! The stack that contains the undo and redo operations.
+		QUndoStack* _undo_stack;
 }; // class Editor
 
 class MapPropertiesDialog: public QDialog
@@ -307,6 +314,7 @@ class EditorScrollView: public Q3ScrollView
 		//! Needed for changing the editing mode and painting, and accessing the map's properties.
 		friend class Editor;
 		friend class MapPropertiesDialog;
+		friend class LayerCommand;
 
 	protected:
 		//! \name Mouse Processing Functions
@@ -355,7 +363,51 @@ class EditorScrollView: public Q3ScrollView
 
 		//! Stores source index of moved tiles
 		int _move_source_index;
+		
+		//! \name Tile Vectors
+		//! \brief The following three vectors are used to know how to perform undo and redo operations
+		//!        for this command. They should be the same size and one-to-one. So, the j-th element
+		//!        of each vector should correspond to the j-th element of the other vectors.
+		//{@
+		std::vector<int> _tile_indeces;  //! A vector of tile indeces in the map that were modified by a command.
+		std::vector<int> _previous_tiles;//! A vector of indeces into tilesets of the modified tiles before they were modified.
+		std::vector<int> _modified_tiles;//! A vector of indeces into tilesets of the modified tiles after they were modified.
+		//@}
 }; // class EditorScrollView
+
+class LayerCommand: public QUndoCommand
+{
+	public:
+		LayerCommand(std::vector<int> indeces, std::vector<int> previous, std::vector<int> modified, LAYER_TYPE layer,
+			Editor* editor, const QString& text = "Layer Operation", QUndoCommand* parent = 0);      // constructor
+
+		//! \name Undo Functions
+		//! \brief Reimplemented from the QUndoCommand class to provide specific undo/redo capability towards the map.
+		//{@
+		void undo();
+		void redo();
+		//@}
+
+		//! Needed for accessing the current map's layers.
+		friend class Editor;
+		friend class EditorScrollView;
+
+	private:
+		//! \name Tile Vectors
+		//! \brief The following three vectors are used to know how to perform undo and redo operations
+		//!        for this command. They should be the same size and one-to-one. So, the j-th element
+		//!        of each vector should correspond to the j-th element of the other vectors.
+		//{@
+		std::vector<int> _tile_indeces;  //! A vector of tile indeces in the map that were modified by this command.
+		std::vector<int> _previous_tiles;//! A vector of indeces into tilesets of the modified tiles before they were modified.
+		std::vector<int> _modified_tiles;//! A vector of indeces into tilesets of the modified tiles after they were modified.
+		//@}
+		
+		//! Indicates which map layer this command was performed upon.
+		LAYER_TYPE _edited_layer;
+		//! A reference to the main window so we can get the current map.
+		Editor* _editor;
+}; // class LayerCommand
 
 } // namespace hoa_editor
 

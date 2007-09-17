@@ -174,8 +174,8 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 211092704;
-			PBXWorkspaceStateSaveDate = 211092704;
+			PBXPerProjectTemplateStateSaveDate = 211683078;
+			PBXWorkspaceStateSaveDate = 211683078;
 		};
 		sourceControlManager = D43082570AF9831800A5173A /* Source Control */;
 		userBuildSettings = {
@@ -633,18 +633,18 @@
 	};
 	D4D1BA650B02B27F0052BF1E /* editor.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {956, 17696}}";
-			sepNavSelRange = "{39742, 0}";
-			sepNavVisRect = "{{0, 17051}, {711, 645}}";
+			sepNavIntBoundsRect = "{{0, 0}, {956, 21266}}";
+			sepNavSelRange = "{6049, 0}";
+			sepNavVisRect = "{{0, 2359}, {711, 645}}";
 			sepNavWindowFrame = "{{0, 4}, {750, 774}}";
 		};
 	};
 	D4D1BA660B02B27F0052BF1E /* editor.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {746, 4928}}";
-			sepNavSelRange = "{3341, 0}";
-			sepNavVisRect = "{{0, 0}, {711, 645}}";
-			sepNavWindowFrame = "{{529, 4}, {750, 774}}";
+			sepNavIntBoundsRect = "{{0, 0}, {782, 5824}}";
+			sepNavSelRange = "{12349, 0}";
+			sepNavVisRect = "{{0, 5179}, {711, 645}}";
+			sepNavWindowFrame = "{{522, 4}, {750, 774}}";
 		};
 	};
 	D4D1BA670B02B27F0052BF1E /* editor_main.cpp */ = {
@@ -675,7 +675,7 @@
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {764, 2310}}";
 			sepNavSelRange = "{3284, 0}";
-			sepNavVisRect = "{{0, 1881}, {711, 429}}";
+			sepNavVisRect = "{{0, 1019}, {711, 429}}";
 			sepNavWindowFrame = "{{528, 6}, {750, 558}}";
 		};
 	};
@@ -683,7 +683,7 @@
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {711, 1064}}";
 			sepNavSelRange = "{1025, 0}";
-			sepNavVisRect = "{{0, 0}, {711, 429}}";
+			sepNavVisRect = "{{0, 267}, {711, 429}}";
 			sepNavWindowFrame = "{{488, 19}, {750, 558}}";
 		};
 	};
@@ -698,7 +698,7 @@
 		functionName = "AudioDescriptor::_Update()";
 		hitCount = 1;
 		lineNumber = 627;
-		modificationTime = 211094410.269204;
+		modificationTime = 211700316.387341;
 		state = 1;
 	};
 	D4D4249B0C8687C900F4B4BC /* audio_descriptor.cpp:646 */ = {
@@ -713,7 +713,7 @@
 		hitCount = 1;
 		lineNumber = 646;
 		location = Allacrost;
-		modificationTime = 211094335.575023;
+		modificationTime = 211700223.501768;
 		state = 2;
 	};
 	D4D4249F0C86881100F4B4BC /* audio_descriptor.cpp:588 */ = {
@@ -728,7 +728,7 @@
 		hitCount = 1;
 		lineNumber = 588;
 		location = Allacrost;
-		modificationTime = 211094335.575027;
+		modificationTime = 211700223.501773;
 		state = 2;
 	};
 	D4E561260BB71B53002FB758 /* defs.cpp */ = {
