@@ -23,11 +23,17 @@ using namespace std;
 
 Editor::Editor() : QMainWindow()
 {
+	// create the undo stack
+	_undo_stack = new QUndoStack();
+
 	// create actions, menus, and toolbars
 	_CreateActions();
 	_CreateMenus();
 	_CreateToolbars();
 	_TilesEnableActions();
+
+	connect(_undo_stack, SIGNAL(canRedoChanged(bool)), _redo_action, SLOT(setEnabled(bool)));
+	connect(_undo_stack, SIGNAL(canUndoChanged(bool)), _undo_action, SLOT(setEnabled(bool)));
 
 	// initialize viewing items
 	_grid_on = false;
@@ -54,6 +60,7 @@ Editor::~Editor()
 	if (_ed_tabs != NULL)
 		delete _ed_tabs;
 	delete _ed_splitter;
+	delete _undo_stack;
 } // Editor destructor
 
 
@@ -105,6 +112,8 @@ void Editor::_TilesEnableActions()
 {
 	if (_ed_scrollview != NULL && _ed_scrollview->_map != NULL)
 	{
+		_undo_action->setText("Undo " + _undo_stack->undoText());
+		_redo_action->setText("Redo " + _undo_stack->redoText());
 		_layer_fill_action->setEnabled(true);
 		_layer_clear_action->setEnabled(true);
 		_mode_paint_action->setEnabled(true);
@@ -116,6 +125,8 @@ void Editor::_TilesEnableActions()
 	} // map must exist in order to paint it
 	else
 	{
+		_undo_action->setEnabled(false);
+		_redo_action->setEnabled(false);
 		_layer_fill_action->setEnabled(false);
 		_layer_clear_action->setEnabled(false);
 		_mode_paint_action->setEnabled(false);
@@ -191,7 +202,8 @@ void Editor::_FileNew()
 			// Set default edit mode
 			_ed_scrollview->_layer_edit = LOWER_LAYER;
 			_ed_scrollview->_tile_mode  = PAINT_TILE;
-			
+
+			_undo_stack->setClean();
 			statusBar()->showMessage("New map created", 5000);
 		} // only if the user pressed OK
 		else
@@ -253,6 +265,7 @@ void Editor::_FileOpen()
 			_ed_scrollview->_layer_edit = LOWER_LAYER;
 			_ed_scrollview->_tile_mode  = PAINT_TILE;
 
+			_undo_stack->setClean();
 			statusBar()->showMessage(QString("Opened \'%1\'").arg(_ed_scrollview->_map->GetFileName()), 5000);
 		} // file must exist in order to open it
 	} // make sure an unsaved map is not lost
@@ -295,6 +308,7 @@ void Editor::_FileSave()
 	} // gets a file name if it is blank
 
 	_ed_scrollview->_map->SaveMap();      // actually saves the map
+	_undo_stack->setClean();
 	setCaption(QString("%1").arg(_ed_scrollview->_map->GetFileName()));
 	statusBar()->showMessage(QString("Saved \'%1\' successfully!").
 		arg(_ed_scrollview->_map->GetFileName()), 5000);
@@ -362,22 +376,54 @@ void Editor::_TileLayerFill()
 	} // calculate index of current tileset
 
 	vector<int32>::iterator it;    // used to iterate over an entire layer
-	vector<int32>& CurrentLayer = _ed_scrollview->GetCurrentLayer();
-	for (it = CurrentLayer.begin(); it != CurrentLayer.end(); it++)
+	vector<int32>& current_layer = _ed_scrollview->GetCurrentLayer();
+	
+	// Record the information for undo/redo operations.
+	vector<int32> previous = current_layer;
+	vector<int32> modified(current_layer.size(), tileset_index + multiplier * 256);
+	vector<int32> indeces(current_layer.size());
+	for (int32 i = 0; i < current_layer.size(); i++)
+		indeces[i] = i;
+
+	// Fill the layer.
+	for (it = current_layer.begin(); it != current_layer.end(); it++)
 		*it = tileset_index + multiplier * 256;
 
-	// Draw the changes
+	LayerCommand* fill_command = new LayerCommand(indeces, previous, modified,
+		_ed_scrollview->_layer_edit, this, "Fill Layer");
+	_undo_stack->push(fill_command);
+	indeces.clear();
+	previous.clear();
+	modified.clear();
+	
+	// Draw the changes.
 	_ed_scrollview->_map->updateGL();
 } // _TileLayerFill()
 
 void Editor::_TileLayerClear()
 {
 	vector<int32>::iterator it;    // used to iterate over an entire layer
-	vector<int32>& CurrentLayer = _ed_scrollview->GetCurrentLayer();
-	for (it = CurrentLayer.begin(); it != CurrentLayer.end(); it++)
+	vector<int32>& current_layer = _ed_scrollview->GetCurrentLayer();
+	
+	// Record the information for undo/redo operations.
+	vector<int32> previous = current_layer;
+	vector<int32> modified(current_layer.size(), -1);
+	vector<int32> indeces(current_layer.size());
+	for (int32 i = 0; i < current_layer.size(); i++)
+		indeces[i] = i;
+
+	// Clear the layer.
+	for (it = current_layer.begin(); it != current_layer.end(); it++)
 		*it = -1;
 
-	// Draw the changes
+	LayerCommand* clear_command = new LayerCommand(indeces, previous, modified,
+		_ed_scrollview->_layer_edit, this, "Clear Layer");
+	_undo_stack->push(clear_command);
+	indeces.clear();
+	previous.clear();
+	modified.clear();
+
+	// Draw the changes.
 	_ed_scrollview->_map->updateGL();
 } // _TileLayerClear()
 
@@ -686,6 +732,16 @@ void Editor::_CreateActions()
 
 	// Create menu actions related to the Tiles menu
 
+	_undo_action = new QAction("&Undo", this);
+	_undo_action->setShortcut(tr("Ctrl+Z"));
+	_undo_action->setStatusTip("Undoes the previous command");
+	connect(_undo_action, SIGNAL(triggered()), _undo_stack, SLOT(undo()));
+
+	_redo_action = new QAction("&Redo", this);
+	_redo_action->setShortcut(tr("Ctrl+Y"));
+	_redo_action->setStatusTip("Redoes the next command");
+	connect(_redo_action, SIGNAL(triggered()), _undo_stack, SLOT(redo()));
+
 	_layer_fill_action = new QAction(
 		QIcon("img/misc/editor-tools/stock-tool-bucket-fill-22.png"),
 		"&Fill layer", this);
@@ -798,6 +854,9 @@ void Editor::_CreateMenus()
 
 	// tile menu creation
 	_tiles_menu = menuBar()->addMenu("&Tiles");
+	_tiles_menu->addAction(_undo_action);
+	_tiles_menu->addAction(_redo_action);
+	_tiles_menu->addSeparator();
 	_tiles_menu->addAction(_layer_fill_action);
 	_tiles_menu->addAction(_layer_clear_action);
 	_tiles_menu->addSeparator()->setText("Editing Mode");
@@ -1037,6 +1096,11 @@ EditorScrollView::EditorScrollView(QWidget* parent, const QString& name, int wid
 	_tile_mode  = PAINT_TILE;
 	_layer_edit = LOWER_LAYER;
 	
+	// Clear the undo/redo vectors.
+	_tile_indeces.clear();
+	_previous_tiles.clear();
+	_modified_tiles.clear();
+
 	// Create a new map.
 	_map = new Grid(viewport(), "Untitled", width, height);
 	addChild(_map);
@@ -1115,7 +1179,15 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 				} // calculate index of current tileset
 				
 				if (_map->tilesets[multiplier]->walkability[tileset_index][0] != -1)
+				{
+					// Record information for undo/redo action.
+					_tile_indeces.push_back(_tile_index);
+					_previous_tiles.push_back(GetCurrentLayer()[_tile_index]);
+					_modified_tiles.push_back(tileset_index + multiplier * 256);
+					
+					// Paint the tile.
 					GetCurrentLayer()[_tile_index] = tileset_index + multiplier * 256;
+				}
 			} // left mouse button was pressed
 			break;
 		} // edit mode PAINT_TILE
@@ -1133,7 +1205,12 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 				// NOTE: Is file_index going to be used?? If not, no reason for this call
 				//int file_index = GetCurrentLayer()[_tile_index];
 
-				// delete the tile
+				// Record information for undo/redo action.
+				_tile_indeces.push_back(_tile_index);
+				_previous_tiles.push_back(GetCurrentLayer()[_tile_index]);
+				_modified_tiles.push_back(-1);
+
+				// Delete the tile.
 				GetCurrentLayer()[_tile_index] = -1;
 
 				// FIXME: No longer needed
@@ -1183,7 +1260,14 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 					} // calculate index of current tileset
 
 					if (_map->tilesets[multiplier]->walkability[tileset_index][0] != -1)
+					{
+						// Record information for undo/redo action.
+						_tile_indeces.push_back(_tile_index);
+						_previous_tiles.push_back(GetCurrentLayer()[_tile_index]);
+						_modified_tiles.push_back(tileset_index + multiplier * 256);
+
 						GetCurrentLayer()[_tile_index] = tileset_index + multiplier * 256;
+					}
 				} // left mouse button was pressed
 				break;
 			} // edit mode PAINT_TILE
@@ -1200,7 +1284,12 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 					// NOTE: file_index is not being used here...
 					//int file_index = GetCurrentLayer()[_tile_index];
 
-					// delete the tile
+					// Record information for undo/redo action.
+					_tile_indeces.push_back(_tile_index);
+					_previous_tiles.push_back(GetCurrentLayer()[_tile_index]);
+					_modified_tiles.push_back(-1);
+
+					// Delete the tile.
 					GetCurrentLayer()[_tile_index] = -1;
 
 					// FIXME: _RemoveIfUnused(file_index);
@@ -1224,15 +1313,62 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 
 	_tile_index = evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH;
 
-	if (_tile_mode == MOVE_TILE)
+	// get reference to Editor so we can access the undo stack
+	Editor* editor = static_cast<Editor*> (topLevelWidget());
+	
+	switch (_tile_mode)
 	{
-		std::vector<int32>& layer = GetCurrentLayer();
-		layer[_tile_index] = layer[_move_source_index];
-		layer[_move_source_index] = -1;
-	} // finish moving a tile
-	else if (_tile_mode == INVALID_TILE)
-		QMessageBox::warning(this, "Tile editing mode",
-			"ERROR: Invalid tile editing mode!");
+		case PAINT_TILE: // wrap up painting tiles
+		{
+			LayerCommand* paint_command = new LayerCommand(_tile_indeces, _previous_tiles, _modified_tiles,
+				_layer_edit, editor, "Paint");
+			editor->_undo_stack->push(paint_command);
+			_tile_indeces.clear();
+			_previous_tiles.clear();
+			_modified_tiles.clear();
+			break;
+		} // edit mode PAINT_TILE
+		
+		case MOVE_TILE: // wrap up moving tiles
+		{
+			vector<int32>& layer = GetCurrentLayer();
+			
+			// Record information for undo/redo action.
+			_tile_indeces.push_back(_move_source_index);
+			_previous_tiles.push_back(layer[_move_source_index]);
+			_modified_tiles.push_back(-1);
+			_tile_indeces.push_back(_tile_index);
+			_previous_tiles.push_back(layer[_tile_index]);
+			_modified_tiles.push_back(layer[_move_source_index]);
+
+			// Perform the move.
+			layer[_tile_index] = layer[_move_source_index];
+			layer[_move_source_index] = -1;
+			
+			LayerCommand* move_command = new LayerCommand(_tile_indeces, _previous_tiles, _modified_tiles,
+				_layer_edit, editor, "Move");
+			editor->_undo_stack->push(move_command);
+			_tile_indeces.clear();
+			_previous_tiles.clear();
+			_modified_tiles.clear();
+			break;
+		} // edit mode MOVE_TILE
+		
+		case DELETE_TILE: // wrap up deleting tiles
+		{
+			LayerCommand* delete_command = new LayerCommand(_tile_indeces, _previous_tiles, _modified_tiles,
+				_layer_edit, editor, "Delete");
+			editor->_undo_stack->push(delete_command);
+			_tile_indeces.clear();
+			_previous_tiles.clear();
+			_modified_tiles.clear();
+			break;
+		} // edit mode DELETE_TILE
+		
+		default:
+			QMessageBox::warning(this, "Tile editing mode",
+				"ERROR: Invalid tile editing mode!");
+	} // switch on tile editing mode
 
 	// Draw the changes
 	_map->updateGL();
@@ -1349,3 +1485,34 @@ void EditorScrollView::_ContextDeleteColumn()
 
 	Resize(map_width - 1, map_height);
 } // _ContextDeleteColumn()
+
+
+
+/************************
+  LayerCommand class functions follow
+************************/
+
+LayerCommand::LayerCommand(vector<int> indeces, vector<int> previous, vector<int> modified, LAYER_TYPE layer,
+	Editor* editor, const QString& text, QUndoCommand* parent)
+	: QUndoCommand(text, parent)
+{
+	_tile_indeces = indeces;
+	_previous_tiles = previous;
+	_modified_tiles = modified;
+	_edited_layer = layer;
+	_editor = editor;
+} // constructor
+
+void LayerCommand::undo()
+{
+	for (int i = 0; i < _tile_indeces.size(); i++)
+		_editor->_ed_scrollview->_map->GetLayer(_edited_layer)[_tile_indeces[i]] = _previous_tiles[i];
+	_editor->_ed_scrollview->_map->updateGL();
+} // undo()
+
+void LayerCommand::redo()
+{
+	for (int i = 0; i < _tile_indeces.size(); i++)
+		_editor->_ed_scrollview->_map->GetLayer(_edited_layer)[_tile_indeces[i]] = _modified_tiles[i];
+	_editor->_ed_scrollview->_map->updateGL();
+} // redo()

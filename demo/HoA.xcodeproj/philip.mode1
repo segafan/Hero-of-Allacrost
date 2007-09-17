@@ -265,7 +265,7 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>13</integer>
+									<integer>10</integer>
 									<integer>8</integer>
 									<integer>6</integer>
 									<integer>2</integer>
@@ -373,9 +373,9 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>D40242F40C950B4900B458C5</string>
+				<string>D4D3C0550C9E073300120F97</string>
 				<string>1CE0B1FE06471DED0097A5F4</string>
-				<string>D40242F50C950B4900B458C5</string>
+				<string>D4D3C0560C9E073300120F97</string>
 				<string>1CE0B20306471E060097A5F4</string>
 				<string>1CE0B20506471E060097A5F4</string>
 			</array>
@@ -509,11 +509,11 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
-		<string>D40242F90C950B4900B458C5</string>
-		<string>D40242FA0C950B4900B458C5</string>
+		<string>D4D3C0950C9E4CEB00120F97</string>
+		<string>D4D3C0960C9E4CEB00120F97</string>
 		<string>D4F7165E0B06B36400361DA9</string>
 		<string>1CD10A99069EF8BA00B06720</string>
-		<string>D40242E40C95065700B458C5</string>
+		<string>D4D3C0900C9E4A7C00120F97</string>
 		<string>D43083E80AF9860800A5173A</string>
 		<string>1C0AD2B3069F1EA900FABCE6</string>
 		<string>/Users/philip/allacrost/demo/HoA.xcodeproj</string>
@@ -562,7 +562,7 @@
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXBuildLogShowsTranscriptDefaultKey</key>
-								<string>{{0, 538}, {1280, 134}}</string>
+								<string>{{0, 508}, {1280, 164}}</string>
 								<key>PBXProjectModuleGUID</key>
 								<string>XCMainBuildResultsModuleGUID</string>
 								<key>PBXProjectModuleLabel</key>
@@ -600,7 +600,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>D43083E80AF9860800A5173A</string>
-				<string>D40242DD0C95065700B458C5</string>
+				<string>D4D3C0570C9E073300120F97</string>
 				<string>1CD0528F0623707200166675</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 			</array>
@@ -642,8 +642,8 @@
 										<string>yes</string>
 										<key>sizes</key>
 										<array>
-											<string>{{0, 0}, {262, 325}}</string>
-											<string>{{262, 0}, {451, 325}}</string>
+											<string>{{0, 0}, {260, 327}}</string>
+											<string>{{260, 0}, {453, 327}}</string>
 										</array>
 									</dict>
 									<key>VerticalSplitView</key>
@@ -658,8 +658,8 @@
 										<string>yes</string>
 										<key>sizes</key>
 										<array>
-											<string>{{0, 0}, {713, 325}}</string>
-											<string>{{0, 325}, {713, 297}}</string>
+											<string>{{0, 0}, {713, 327}}</string>
+											<string>{{0, 327}, {713, 295}}</string>
 										</array>
 									</dict>
 								</dict>
@@ -706,14 +706,14 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>1CD10A99069EF8BA00B06720</string>
-				<string>D40242DE0C95065700B458C5</string>
+				<string>D4D3C08A0C9E4A7C00120F97</string>
 				<string>1C162984064C10D400B95A72</string>
-				<string>D40242DF0C95065700B458C5</string>
-				<string>D40242E00C95065700B458C5</string>
-				<string>D40242E10C95065700B458C5</string>
-				<string>D40242E20C95065700B458C5</string>
-				<string>D40242E30C95065700B458C5</string>
-				<string>D40242E40C95065700B458C5</string>
+				<string>D4D3C08B0C9E4A7C00120F97</string>
+				<string>D4D3C08C0C9E4A7C00120F97</string>
+				<string>D4D3C08D0C9E4A7C00120F97</string>
+				<string>D4D3C08E0C9E4A7C00120F97</string>
+				<string>D4D3C08F0C9E4A7C00120F97</string>
+				<string>D4D3C0900C9E4A7C00120F97</string>
 			</array>
 			<key>ToolbarConfiguration</key>
 			<string>xcode.toolbar.config.debug</string>
@@ -867,7 +867,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>D4F7165E0B06B36400361DA9</string>
-				<string>D40242E50C95065700B458C5</string>
+				<string>D4D3C0910C9E4A7C00120F97</string>
 				<string>1C78EAAC065D492600B07095</string>
 			</array>
 			<key>WindowString</key>
@@ -962,9 +962,9 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>1C0AD2B3069F1EA900FABCE6</string>
-				<string>D40242E60C95065700B458C5</string>
+				<string>D4D3C0580C9E073300120F97</string>
 				<string>1CD0528B0623707200166675</string>
-				<string>D40242E70C95065700B458C5</string>
+				<string>D4D3C0590C9E073300120F97</string>
 			</array>
 			<key>ToolbarConfiguration</key>
 			<string>xcode.toolbar.config.run</string>
