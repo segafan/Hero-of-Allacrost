@@ -916,12 +916,16 @@
 					"$(SOURCE_ROOT)/../allacrost-dep/include",
 					/sw/include,
 					/opt/local/include,
+					"$(SOURCE_ROOT)/macosx-contrib",
+					/usr/local/include,
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SOURCE_ROOT)/../allacrost-dep/lib",
 					/sw/lib,
 					/opt/local/lib,
+					/usr/local/lib,
+					"$(SOURCE_ROOT)/macosx-contrib",
 				);
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				USER_HEADER_SEARCH_PATHS = "$(inherited) /Library/Frameworks/SDL.framework/Headers";
@@ -945,12 +949,16 @@
 					"$(SOURCE_ROOT)/../allacrost-dep/include",
 					/sw/include,
 					/opt/local/include,
+					"$(SOURCE_ROOT)/macosx-contrib",
+					/usr/local/include,
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SOURCE_ROOT)/../allacrost-dep/lib",
 					/sw/lib,
 					/opt/local/lib,
+					/usr/local/lib,
+					"$(SOURCE_ROOT)/macosx-contrib",
 				);
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				USER_HEADER_SEARCH_PATHS = "$(inherited) /Library/Frameworks/SDL.framework/Headers";
