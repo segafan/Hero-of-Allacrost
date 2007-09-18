@@ -37,30 +37,61 @@ enum DIALOGUE_STATE {
 };
 
 
-
+/** ***************************************************************************************
+*** \brief Stores a single OptionBox instance and contains methods and members to update/draw it.
+***
+*** This class is used only by the MapDialogue class. It creates an instance of 
+*** the OptionBox class which is located in the video engine GUI. Using the 
+*** AddOption method, the OptionBox is populated. There are also methods to 
+*** update the OptionBox(check for selections, key presses, etc) and to draw 
+*** the OptionBox to the screen, both of these are defined by the OptionBox class.
+***
+*** **************************************************************************************/
 class DialogueOptionBox {
 public:
 	DialogueOptionBox();
 	~DialogueOptionBox();
 
+	/** \brief This method adds an option to the OptionBox
+	*** \param text The text of this particular option.
+	*** \param speaker_id The object ID of the speaker of the set of options. (Should correspond to a VirtualSprite or derived class.)
+	*** \param next_line An integer value of the next line of dialogue should this option be selected. 
+	*** \param action An integer key to the map_functions table in the map file that contains the script function to execute when this line complese. (Less than 0 indicates no action is to occur.)
+	***/
 	bool AddOption(std::string text, uint32 speaker_id, int32 next_line, int32 action = -1);
 	
+	//! \brief Calls upon the OptionBox update to check for key presses/selections. 
 	int32 Update();
 	
+	//! \brief Calls upon the OptionBox draw function.
 	void Draw();
 
+	//! \brief Returns the speaker who owns the Options
 	uint32 GetCurrentSpeaker() { return _speaker; }
 
+	//! \brief Sets the dialogue that the option belongs to.
 	void SetCurrentDialogue(MapDialogue* dialogue) {_current_dialogue = dialogue;}
 
 private:
+	//! \brief Stores the dialogue that the options belong to.
 	MapDialogue* _current_dialogue;
+	
+	//! \brief The size of the option box(number of options.)
 	uint32 _size;
+	
+	//! \brief The speaker of the options
 	uint32 _speaker;
+	
+	//! \brief Instance of the OptionBox class.
 	hoa_video::OptionBox _options;
+	
+	//! \brief A list of optional events that may occur after each line.
 	std::vector<ScriptObject*> _actions;
+	
+	//! \brief A index containing the line of dialogue each option is directed to.	
 	std::vector<int32> _next_line_index;
 };
+
 
 /** ****************************************************************************
 *** \brief A display for managing and displaying dialogue on maps
@@ -90,12 +121,15 @@ public:
 	DIALOGUE_STATE GetDialogueState()
 		{ return _state; }
 
+	//! \brief Updates the current dialogue.
 	void SetCurrentDialogue(MapDialogue* dialogue)
 		{ _current_dialogue = dialogue; }
 
+	//! \brief Clears the current dialogue.
 	void ClearDialogue()
 		{ _current_dialogue = NULL; }
 
+	//! \brief Returns the current dialogue.
 	MapDialogue* GetCurrentDialogue() const
 		{ return _current_dialogue; }
 
@@ -126,9 +160,6 @@ private:
 
 
 
-
-
-
 /** ****************************************************************************
 *** \brief Retains and manages dialogues between characters on a map.
 *** 
@@ -139,6 +170,12 @@ private:
 *** -# An object ID that indicates who is currently speaking the line
 *** -# A value that indicates the maximum time that the line should be displayed
 *** -# A pointer to a script function to execute after the line is finished
+***
+*** Dialogues may also have a set of options attached to it. The options are 
+*** created and displayed using the OptionBox class in the video engine GUI. The options are 
+*** stored in a vector of DialogueOptionBox object pointers. The vector is indexed by
+*** the lines of dialogue, so options for line 3 would be stored in _options[3]. 
+*** A null value would mean there are no options for that line of dialogue.
 ***
 *** Both the time value and the script function pointer are optional and do not
 *** need to be set for every line of dialogue. Dialogues may also be "blocked",
@@ -175,24 +212,36 @@ public:
 	**/
 	void AddText(std::string text, uint32 speaker_id, int32 time = DIALOGUE_INFINITE, int32 action = -1);
 
-	//! \brief This method adds an option to the current line of text
+	/** \brief This method adds an option to the current line of text
+	*** \param text The text of this particular option.
+	*** \param speaker_id The object ID of the speaker of the set of options. (Should correspond to a VirtualSprite or derived class.)
+	*** \param next_line An integer value of the next line of dialogue should this option be selected. 
+	*** \param action An integer key to the map_functions table in the map file that contains the script function to execute when this line complese. (Less than 0 indicates no action is to occur.)
+	***/
 	void AddOption(std::string text, uint32 speaker_id, int32 next_line = -1, int32 action = -1);
 	
+	//! \brief This method returns the currently loaded option. 
 	DialogueOptionBox* GetCurrentOption() const {return _options[_current_line];};
 
 	//! \brief This method will return true if the current line contains options.
 	bool HasOptions() 
 	{ if(_options[_current_line] != NULL) return true; else return false; }
 
+	//! \brief This method returns an integer value of the next line of dialogue to be displayed. 
 	int32 GetNextLine();
 	
 	/** \brief This method will update the current line of the dialogue.
+	*** \param line Integer value of the next line of dialogue. This value defaults to -1 which indicates that the next line of dialogue is immediately after the current line. 
 	*** \return False if the dialogue is finished, true otherwise.
 	**/
 	bool ReadNextLine(int32 line = -1);
 
+	/** \brief This method skips to an indicated line of dialogue.
+	*** \param line Integer value of the line of dialogue to skip to.
+	**/
 	void GoToLine(int32 next_line) { _next_line_index[_next_line_index.size()-1] = next_line; }
 
+	//! \brief This method ends the current dialogue, by setting the next line to an impossibly high value.
 	void EndDialogue() { _next_line_index[_next_line_index.size()-1] = 9999; }
 
 	//! \name Class Member Access Functions
@@ -221,6 +270,9 @@ public:
 	void SetBlock(bool b)
 		{ _blocked = b; }
 
+	/** \brief This method sets the owner of the sprite.
+	*** \param sprite The VirtualSprite you are setting as the owner. 
+	**/
 	void SetOwner(VirtualSprite* sprite)
 		{ _owner = sprite; }
 
@@ -240,6 +292,7 @@ public:
 	bool IsSaving() const
 		{ return _save_state; }
 
+	//! \brief Returns the owner of the VirtualSprite object which owns the current dialogue.
 	VirtualSprite* GetOwner() const
 		{ return _owner; }
 
@@ -267,6 +320,7 @@ public:
 	hoa_utils::ustring GetLineText(uint32 line) const
 		{ if (line > _text.size()) return hoa_utils::ustring(); else return _text[line]; }
 
+	//! \brief Returns the current line of the dialogue.
 	uint32 GetCurrentLine() {return _current_line;}
 
 	//! \brief Returns the object id of the speaker of a line.
@@ -288,6 +342,7 @@ private:
 	//! \brief Declares the max number of times this dialogue can be viewed.
 	int32 _max_views;
 
+	//! \brief Stores the amount of lines in the dialogue.
 	uint32 _line_count;
 
 	//! \brief An index to the current line to read.
@@ -321,7 +376,7 @@ private:
 	//! \brief A list of optional events that may occur after each line.
 	std::vector<ScriptObject*> _actions;
 	
-	//! \brief 
+	//! \brief Each element of the vector represents a line of dialogue, and the value stored within that element is the line the dialogue will progress to next. 
 	std::vector<int32> _next_line_index;
 }; // class MapDialogue
 
