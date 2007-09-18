@@ -241,7 +241,7 @@ bool DialogueOptionBox::AddOption(std::string text, uint32 speaker_id, int32 nex
 	if(_options.AddOption(MakeUnicodeString(text))) {
 		_next_line_index.push_back(next_line);
 			
-		if(action != static_cast<int32>(-1)) {/*TODO::put action function pointer into vector*/}
+		// TODO Add support for actions
 		
 		_speaker = speaker_id;
 		_size++; 
