@@ -73,7 +73,6 @@ ShopActionWindow::ShopActionWindow() {
 	text_box.SetPosition(25.0f, 85.0f);
 	text_box.SetDimensions(150.0f, 65.0f);
 	text_box.SetDisplaySpeed(30);
-	text_box.SetFont("default");
 	text_box.SetDisplayMode(VIDEO_TEXT_INSTANT);
 	text_box.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 	UpdateFinanceText();
@@ -443,7 +442,6 @@ ObjectInfoWindow::ObjectInfoWindow() {
 	description.SetPosition(25.0f, 100.0f);
 	description.SetDimensions(550.0f, 80.0f);
 	description.SetDisplaySpeed(30);
-	description.SetFont("default");
 	description.SetDisplayMode(VIDEO_TEXT_INSTANT);
 	description.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 
@@ -452,7 +450,6 @@ ObjectInfoWindow::ObjectInfoWindow() {
 	properties.SetPosition(50.0f, 150.0f);
 	properties.SetDimensions(300.0f, 80.0f);
 	properties.SetDisplaySpeed(30);
-	properties.SetFont("default");
 	properties.SetDisplayMode(VIDEO_TEXT_INSTANT);
 	properties.SetTextAlignment(VIDEO_X_RIGHT, VIDEO_Y_TOP);
 }

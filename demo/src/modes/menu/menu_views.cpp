@@ -139,7 +139,6 @@ InventoryWindow::InventoryWindow() : _active_box(ITEM_ACTIVE_NONE) {
 	_description.SetPosition(30.0f, 525.0f);
 	_description.SetDimensions(800.0f, 80.0f);
 	_description.SetDisplaySpeed(30);
-	_description.SetFont("default");
 	_description.SetDisplayMode(VIDEO_TEXT_INSTANT);
 	_description.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 
@@ -625,7 +624,6 @@ SkillsWindow::SkillsWindow() : _active_box(SKILL_ACTIVE_NONE) {
 	_description.SetPosition(30.0f, 525.0f);
 	_description.SetDimensions(800.0f, 80.0f);
 	_description.SetDisplaySpeed(30);
-	_description.SetFont("default");
 	_description.SetDisplayMode(VIDEO_TEXT_INSTANT);
 	_description.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 

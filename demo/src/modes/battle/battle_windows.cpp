@@ -102,21 +102,22 @@ ActionWindow::ActionWindow() {
 	// Setup options for VIEW_ACTION_INFORMATION
 
 	// Setup rendered text
-	_skill_selection_header.SetAlignment(RenderedText::ALIGN_LEFT);
-	_item_selection_header.SetAlignment(RenderedText::ALIGN_LEFT);
+	TextStyle battle_style("battle", Color(1.0f, 1.0f, 0.0f, 0.8f));
 
+	_skill_selection_header.SetAlignment(RenderedText::ALIGN_LEFT);
+	_skill_selection_header.SetStyle(battle_style);
+	_item_selection_header.SetAlignment(RenderedText::ALIGN_LEFT);
+	_item_selection_header.SetStyle(battle_style);
+
+	battle_style.color = Color::white;
 	_action_information.SetAlignment(RenderedText::ALIGN_LEFT);
-	_action_information.SetColor(Color(1.0f, 1.0f, 1.0f, 1.0f));
+	_action_information.SetStyle(battle_style);
 
 	_target_information.SetAlignment(RenderedText::ALIGN_LEFT);
-	_target_information.SetColor(Color(1.0f, 1.0f, 1.0f, 1.0f));
+	_target_information.SetStyle(battle_style);
 	
-	VideoManager->Text()->SetDefaultFont("battle");
-	VideoManager->Text()->SetDefaultTextColor(Color(1.0f, 1.0f, 0.0f, 0.8f)); // 80% translucent yellow text
 	_skill_selection_header.SetText("Skill                          SP");
-	_skill_selection_header.SetColor(Color(1.0f, 1.0f, 0.0f, 0.8f));
 	_item_selection_header.SetText("Item                          QTY");
-	_item_selection_header.SetColor(Color(1.0f, 1.0f, 0.0f, 0.8f));
 
 	Reset();
 } // ActionWindow::ActionWindow()
@@ -629,7 +630,6 @@ FinishWindow::FinishWindow() {
 	_finish_outcome.SetPosition(512, 0);
 	_finish_outcome.SetDimensions(400, 100);
 	_finish_outcome.SetDisplaySpeed(30);
-	_finish_outcome.SetFont("default");
 	_finish_outcome.SetDisplayMode(VIDEO_TEXT_REVEAL);
 	_finish_outcome.SetTextAlignment(VIDEO_X_LEFT, VIDEO_Y_TOP);
 
