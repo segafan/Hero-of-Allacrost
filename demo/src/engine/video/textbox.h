@@ -112,10 +112,10 @@ public:
 	**/
 	void SetTextAlignment(int32 xalign, int32 yalign);
 
-	/** \brief Sets the font to use for this textbox.
-	*** \param font_name The label associated with the font when you called LoadFont()
+	/** \brief Sets the text style to use for this textbox.
+	*** \param style The style intended \see #TextStyle
 	**/
-	void SetFont(const std::string &font_name);
+	void SetTextStyle(const TextStyle& style);
 
 	/** \brief Sets the current text display mode (e.g. fading lines of text, etc.)
 	*** \param mode The display mode to use for the text.
@@ -163,11 +163,11 @@ public:
 	void GetTextAlignment(int32& xalign, int32& yalign)
 		{ xalign = _text_xalign; yalign = _text_yalign; }
 
-	/** \brief Gets the font label for this textbox.
-	*** \return The string containing the font label.
+	/** \brief  Gets the current text style for this textbox
+	*** \return The current text style.
 	**/
-	std::string GetFont() const
-		{ return _font; }
+	const TextStyle& GetTextStyle()
+		{ return _text_style; }
 
 	//! \brief Return the current text display mode that is set for this textbox.
 	TEXT_DISPLAY_MODE GetDisplayMode() const
@@ -201,11 +201,6 @@ public:
 	**/
 	bool IsInitialized(std::string& errors);
 
-
-	//! \brief Sets the display text color of this text box
-	void SetTextColor(Color &color)
-		{ _text_color = color; }
-
 private:
 	//! \brief The dimensions of the text box, in pixels.
 	float _width, _height;
@@ -228,8 +223,8 @@ private:
 	//! \brief The number of milliseconds remaining until the gradual text display will be complete.
 	uint32 _end_time;
 
-	//! \brief The font name to use for this textbox.
-	std::string _font;
+	//! \brief The text style for this textbox
+	TextStyle _text_style;
 
 	//! \brief A pointer to the structure containing properties of the current font such as its height, etc.
 	FontProperties* _font_properties;
@@ -243,9 +238,6 @@ private:
 	//! \brief The unedited text for reformatting
 	hoa_utils::ustring _text_save;
 	
-	//! \brief A set text color to display
-	Color _text_color;
-
 	/** \brief Returns the height of the text when it's rendered with the current font
 	*** \return The height of text rendered in current font
 	*** \note This is a low-level function so it doesn't check if the current font is valid or not

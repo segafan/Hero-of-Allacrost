@@ -193,10 +193,11 @@ RenderedText::RenderedText() :
 // RenderedText::ustring-Constructor: Constructs and renders RenderedText with String
 //-----------------------------------------------------------------------------
 
-RenderedText::RenderedText(const ustring &string, int8 alignment) {
+RenderedText::RenderedText(const ustring &string, TextStyle style, int8 alignment) {
 	Clear();
 	_grayscale = false;
 	_string = string;
+	_style = style;
 	SetAlignment(alignment);
 	_Regenerate();
 }
@@ -205,10 +206,11 @@ RenderedText::RenderedText(const ustring &string, int8 alignment) {
 // RenderedText::sstring-Constructor: Constructs and renders RenderedText with String
 //-----------------------------------------------------------------------------
 
-RenderedText::RenderedText(const std::string &string, int8 alignment)  {
+RenderedText::RenderedText(const std::string &string, TextStyle style, int8 alignment)  {
 	Clear();
 	_grayscale = false;
 	_string = MakeUnicodeString(string);
+	_style = style;
 	SetAlignment(alignment);
 	_Regenerate();
 }
@@ -235,6 +237,7 @@ RenderedText &RenderedText::operator=(const RenderedText &other)
 	_alignment     = other._alignment;
 	_width         = other._width;
 	_height        = other._height;
+	_style         = other._style;
 
 	memcpy(_color, other._color, sizeof(_color));
 
@@ -335,6 +338,25 @@ void RenderedText::SetText(const std::string &string) {
 }
 
 //-----------------------------------------------------------------------------
+// GetStyle: Gets the current text style
+//-----------------------------------------------------------------------------
+
+TextStyle RenderedText::GetStyle() const
+{
+	return _style;
+}
+
+//-----------------------------------------------------------------------------
+// SetStyle: Sets the text style and regenerates.
+//-----------------------------------------------------------------------------
+
+void RenderedText::SetStyle(TextStyle style)
+{
+	_style = style;
+	_Regenerate();
+}
+
+//-----------------------------------------------------------------------------
 // _ClearImages: Decrements reference counts on all contained timages
 //-----------------------------------------------------------------------------
 
@@ -358,18 +380,14 @@ void RenderedText::_Regenerate() {
 		return;
 	}
 
-	TextStyle style;
-	style.font = TextManager->GetDefaultFont();
 	FontProperties *fp;
-	if (!TextManager->IsFontValid(style.font)
-	|| ((fp = TextManager->GetFontProperties(style.font)) == NULL))
+	if (!TextManager->IsFontValid(_style.font)
+	|| ((fp = TextManager->GetFontProperties(_style.font)) == NULL))
 	{
 		if(VIDEO_DEBUG)
 			cerr << "RenderedText::_Regenerate(): Video engine contains invalid font." << endl;
 		return;
 	}
-
-	style.color = TextManager->GetDefaultTextColor();
 
 	uint16 newline = '\n';
 	std::vector<uint16 *> line_array;
@@ -398,7 +416,7 @@ void RenderedText::_Regenerate() {
 
 	std::vector<uint16 *>::iterator line_iter;
 
-	Color old_color       = style.color;
+	Color old_color       = _style.color;
 	int32 shadow_offset_x = 0;
 	int32 shadow_offset_y = 0;
 	Color shadow_color    = TextManager->_GetTextShadowColor(fp);
@@ -407,7 +425,7 @@ void RenderedText::_Regenerate() {
 
 	for (line_iter = line_array.begin(); line_iter != line_array.end(); ++line_iter)
 	{
-		TextImageTexture *timage = new TextImageTexture(*line_iter, style);
+		TextImageTexture *timage = new TextImageTexture(*line_iter, _style);
 		if (!timage->Regenerate())
 		{
 			if (VIDEO_DEBUG)
@@ -655,25 +673,30 @@ void TextSupervisor::SetDefaultTextColor(const Color& color) {
 
 
 void TextSupervisor::Draw(const ustring& text) {
+	Draw(text, _default_style);
+}
+
+
+void TextSupervisor::Draw(const ustring& text, const TextStyle& style) {
 	if (text.empty()) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "empty string was passed to function" << endl;
 		return;
 	}
 
-	if (IsFontValid(VideoManager->_current_context.font) == false) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because font was invalid: " << VideoManager->_current_context.font << endl;
+	if (IsFontValid(style.font) == false) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because font was invalid: " << style.font << endl;
 		return;
 	}
 
-	FontProperties* fp = _font_map[VideoManager->_current_context.font];
+	FontProperties* fp = _font_map[style.font];
 	if (fp == NULL) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because font properties were invalid for font: " << VideoManager->_current_context.font << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because font properties were invalid for font: " << style.font << endl;
 		return;
 	}
 
 	TTF_Font* font = fp->ttf_font;
 	if (font == NULL) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because TTF_Font was invalid in font proproperties for font: " << VideoManager->_current_context.font << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "failed because TTF_Font was invalid in font proproperties for font: " << style.font << endl;
 		return;
 	}
 
@@ -700,50 +723,22 @@ void TextSupervisor::Draw(const ustring& text) {
 
 		// If text shadows are enabled, draw the shadow first
 		if (fp->shadow_style != VIDEO_TEXT_SHADOW_NONE) {
-			Color old_text_color = VideoManager->_current_context.text_color;
-			Color text_color;
-
-			switch(fp->shadow_style) {
-				case VIDEO_TEXT_SHADOW_DARK:
-					text_color = Color::black;
-					text_color[3] = old_text_color[3] * 0.5f;
-					break;
-				case VIDEO_TEXT_SHADOW_LIGHT:
-					text_color = Color::white;
-					text_color[3] = old_text_color[3] * 0.5f;
-					break;
-				case VIDEO_TEXT_SHADOW_BLACK:
-					text_color = Color::black;
-					text_color[3] = old_text_color[3];
-					break;
-				case VIDEO_TEXT_SHADOW_COLOR:
-					text_color = old_text_color;
-					text_color[3] = old_text_color[3] * 0.5f;
-					break;
-				case VIDEO_TEXT_SHADOW_INVCOLOR:
-					text_color = Color(1.0f - old_text_color[0], 1.0f - old_text_color[1], 1.0f - old_text_color[2], old_text_color[3] * 0.5f);
-					break;
-				default:
-					IF_PRINT_WARNING(VIDEO_DEBUG) << "Unknown text shadow style was set: " << fp->shadow_style << endl;
-					break;
-			};
-			SetDefaultTextColor(text_color);
+			Color shadow_color = _GetTextShadowColor(fp);
 
 			glPushMatrix();
 			VideoManager->MoveRelative(VideoManager->_current_context.coordinate_system.GetHorizontalDirection() * fp->shadow_x, 0.0f);
 			VideoManager->MoveRelative(0.0f, VideoManager->_current_context.coordinate_system.GetVerticalDirection() * fp->shadow_y);
 
-			if (_DrawTextHelper(buffer) == false) {
+			if (_DrawTextHelper(buffer, fp, shadow_color) == false) {
 				VideoManager->PopState();
 				return;
 			}
 
-			SetDefaultTextColor(old_text_color);
 			glPopMatrix();
 		}
 
 		// Now draw the text itself
-		if (_DrawTextHelper(buffer) == false) {
+		if (_DrawTextHelper(buffer, fp, style.color) == false) {
 			VideoManager->PopState();
 			return;
 		}
@@ -895,13 +890,16 @@ bool TextSupervisor::_CacheGlyphs(const uint16 *uText, FontProperties *fp) {
 		}
 
 		SDL_LockSurface(intermediary);
-		for(int j = 0; j < w * h ; ++ j)
+
+		uint32 num_bytes = w * h * 4;
+
+		for (uint32 j = 0; j < num_bytes; j += 4)
 		{
-			((uint8*)intermediary->pixels)[j*4+3] = ((uint8*)intermediary->pixels)[j*4+2];
+			((uint8*)intermediary->pixels)[j+3] = ((uint8*)intermediary->pixels)[j+2];
 			
-			((uint8*)intermediary->pixels)[j*4+0] = 0xFF;
-			((uint8*)intermediary->pixels)[j*4+1] = 0xFF;
-			((uint8*)intermediary->pixels)[j*4+2] = 0xFF;
+			((uint8*)intermediary->pixels)[j+0] = 0xff;
+			((uint8*)intermediary->pixels)[j+1] = 0xff;
+			((uint8*)intermediary->pixels)[j+2] = 0xff;
 		}
 
 		glTexImage2D(GL_TEXTURE_2D, 0, 4, w, h, 0, GL_RGBA, 
@@ -960,18 +958,16 @@ bool TextSupervisor::_CacheGlyphs(const uint16 *uText, FontProperties *fp) {
 //                 Either text or uText is valid string and the other is NULL.
 //-----------------------------------------------------------------------------
 
-bool TextSupervisor::_DrawTextHelper(const uint16 *uText) {
+bool TextSupervisor::_DrawTextHelper(const uint16 *uText, FontProperties *fp, Color color) {
 	if(_font_map.empty())
 		return false;
 		
 	// empty string, do nothing
-	if(*uText == 0)
+	if (*uText == 0)
 		return true;
 		
-	if(_font_map.find(VideoManager->_current_context.font) == _font_map.end())
+	if (!fp)
 		return false;
-	
-	FontProperties * fp = _font_map[VideoManager->_current_context.font];
 	
 	glBlendFunc(GL_ONE, GL_ONE);
 	glEnable(GL_BLEND);
@@ -1005,7 +1001,7 @@ bool TextSupervisor::_DrawTextHelper(const uint16 *uText) {
 	VideoManager->MoveRelative(xoff, yoff);
 
 	float modulation = VideoManager->_screen_fader.GetFadeModulation();
-	Color textColor = VideoManager->_current_context.text_color * modulation;
+	Color textColor = color * modulation;
 
 	int xpos = 0;
 	
@@ -1201,6 +1197,7 @@ bool TextSupervisor::_RenderText(hoa_utils::ustring &string, TextStyle &style, I
 		{
 			SDL_FreeSurface(initial);
 			SDL_FreeSurface(intermediary);
+			free(intermed_buf);
 			if(VIDEO_DEBUG)
 				cerr << "VIDEO ERROR: SDL_BlitSurface() failed in _RenderText()! (" << SDL_GetError() << ")" << endl;
 			return false;
@@ -1210,21 +1207,25 @@ bool TextSupervisor::_RenderText(hoa_utils::ustring &string, TextStyle &style, I
 	}
 
 	SDL_LockSurface(intermediary);
-	for (int j = 0; j < intermediary->w * intermediary->h; ++ j)
+
+	uint8 color_mult[] = {
+		(uint8) style.color[0] * 0xFF,
+		(uint8) style.color[1] * 0xFF,
+		(uint8) style.color[2] * 0xFF,
+	};
+
+	uint32 num_bytes = intermediary->w * intermediary->h * 4;
+	for (uint32 j = 0; j < num_bytes; j += 4)
 	{
-		((uint8*)intermediary->pixels)[j*4+3] = ((uint8*)intermediary->pixels)[j*4+2];
-		((uint8*)intermediary->pixels)[j*4+0] = (uint8) (style.color[0] * 0xFF);
-		((uint8*)intermediary->pixels)[j*4+1] = (uint8) (style.color[1] * 0xFF);
-		((uint8*)intermediary->pixels)[j*4+2] = (uint8) (style.color[2] * 0xFF);
+		((uint8*)intermediary->pixels)[j+3] = ((uint8*)intermediary->pixels)[j+2];
+		((uint8*)intermediary->pixels)[j+0] = color_mult[0];
+		((uint8*)intermediary->pixels)[j+1] = color_mult[1];
+		((uint8*)intermediary->pixels)[j+2] = color_mult[2];
 	}
 
 	buffer.width = line_w;
 	buffer.height = line_h;
 	buffer.pixels = intermed_buf;
-
-	// Prevent SDL from deleting pixel array
-	intermediary->pixels = NULL;
-
 
 	SDL_UnlockSurface(intermediary);
 	SDL_FreeSurface(intermediary);

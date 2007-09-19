@@ -748,6 +748,9 @@ public:
 	*/
 	StillImage *GetDefaultCursor();
 
+	/** Retrieves current set text style for rendering
+	 */
+	TextStyle GetTextStyle();
 private:
 	GameVideo();
 

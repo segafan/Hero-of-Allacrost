@@ -119,8 +119,19 @@ public:
 class TextStyle {
 public:
 	TextStyle() :
-		shadow_style(VIDEO_TEXT_SHADOW_INVALID)
-	{}
+		font("default"), shadow_style(VIDEO_TEXT_SHADOW_DARK) , color(Color::white) {}
+	
+	TextStyle(Color col) :
+		font("default"), shadow_style(VIDEO_TEXT_SHADOW_DARK), color(col) {}
+	
+	TextStyle(std::string fnt, TEXT_SHADOW_STYLE style) :
+		font(fnt), shadow_style(style), color(Color::white) {}
+	
+	TextStyle(std::string fnt, Color col = Color::white, TEXT_SHADOW_STYLE style = VIDEO_TEXT_SHADOW_DARK) :
+		font(fnt), shadow_style(style), color(col) {}
+	
+	TextStyle(TEXT_SHADOW_STYLE style, Color col = Color::white) :
+		font("default"), shadow_style(style), color(col) {}
 
 	//! \brief The string font name
 	std::string font;
@@ -222,10 +233,10 @@ public:
 	RenderedText();
 
 	//! \brief Constructs rendered string of specified ustring
-	RenderedText(const hoa_utils::ustring &string, int8 alignment = ALIGN_CENTER);
+	RenderedText(const hoa_utils::ustring &string, TextStyle style = TextStyle(), int8 alignment = ALIGN_CENTER);
 
 	//! \brief Constructs rendered string of specified std::string
-	RenderedText(const std::string        &string, int8 alignment = ALIGN_CENTER);
+	RenderedText(const std::string        &string, TextStyle style = TextStyle(), int8 alignment = ALIGN_CENTER);
 
 	//! \brief Copy constructor increases contained reference counts
 	RenderedText(const RenderedText &other);
@@ -312,6 +323,12 @@ public:
 	//! \brief Virtual method to retrieve number of drawable base class elements
 	virtual uint32 GetNumElements() const;
 
+	//! \brief Returns the text's style.
+	TextStyle GetStyle() const;
+
+	//! \brief Sets the texts style - regenerating text if present.
+	void SetStyle(TextStyle style);
+
 private:
 	/** \brief Clears all rendered text, decreasing ref count.
 	**/
@@ -336,6 +353,9 @@ private:
 
 	//! \brief The horizontal text alignment
 	int8 _alignment;
+
+	//! \brief The style of the text contained
+	TextStyle _style;
 }; // class RenderedText : public ImageDescriptor
 
 
@@ -392,6 +412,8 @@ public:
 	*** \note If there are no fonts loaded, this method will return an empty string
 	**/
 	const std::string& GetDefaultFont() const;
+	const TextStyle& GetDefaultStyle() const {return _default_style;};
+	TextStyle& GetDefaultStyle() {return _default_style;};
 
 	/** \brief Sets the default font to use for text rendering
 	*** \param font_name The name of the pre-loaded font to set as the default
@@ -401,6 +423,7 @@ public:
 	*** mode is enabled.
 	**/
 	void SetDefaultFont(const std::string& font_name);
+	void SetDefaultStyle(TextStyle style) {_default_style = style;};
 
 	/** \brief Sets the default shadow style to use for a specified font
 	*** \param font_name The reference name of the font to set the shadow style for
@@ -440,6 +463,7 @@ public:
 	*** \param text The text string to draw in unicode format
 	**/
 	void Draw(const hoa_utils::ustring& text);
+	void Draw(const hoa_utils::ustring& text, const TextStyle& style);
 // 	void Draw(const hoa_utils::ustring& text, std::string font_name);
 // 	void Draw(const hoa_utils::ustring& text, Color& color);
 // 	void Draw(const hoa_utils::ustring& text, std::string font_name);
@@ -473,6 +497,9 @@ private:
 	//! \brief The default color to render text in
 	Color _default_text_color;
 
+	//! \brief The default text style
+	TextStyle _default_style;
+
 	//! STL map containing properties for each font (includeing TTF_Font *)
 	std::map<std::string, FontProperties*> _font_map;
 
@@ -481,7 +508,7 @@ private:
 	 *  \param uText  Pointer to a unicode string holding the text to draw
 	 * \return success/failure
 	 */
-	bool _DrawTextHelper(const uint16 *const uText);
+	bool _DrawTextHelper(const uint16 *const uText, FontProperties *fp, Color color);
 
 	/** Renders a given unicode string and TextStyle to a pixel array
 	 * \param string The ustring to render
