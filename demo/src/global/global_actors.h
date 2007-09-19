@@ -652,8 +652,7 @@ class GlobalCharacterGrowth {
 	friend void hoa_defs::BindEngineToLua();
 
 public:
-	GlobalCharacterGrowth(GlobalCharacter* owner) :
-		_character_owner(owner) {}
+	GlobalCharacterGrowth(GlobalCharacter* owner);
 
 	~GlobalCharacterGrowth();
 

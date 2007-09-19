@@ -355,6 +355,24 @@ GlobalArmor* GlobalActor::EquipArmor(GlobalArmor* armor, uint32 index) {
 // GlobalCharacterGrowth class
 // -----------------------------------------------------------------------------
 
+GlobalCharacterGrowth::GlobalCharacterGrowth(GlobalCharacter* owner) :
+	_character_owner(owner),
+	_experience_level_gained(false),
+	_growth_detected(false),
+	_experience_for_next_level(0),
+	_experience_for_last_level(0),
+	_hit_points_growth(0),
+	_skill_points_growth(0),
+	_strength_growth(0),
+	_vigor_growth(0),
+	_fortitude_growth(0),
+	_protection_growth(0),
+	_agility_growth(0),
+	_evade_growth(0.0f)
+{}
+
+
+
 GlobalCharacterGrowth::~GlobalCharacterGrowth() {
 	for (uint32 i = 0; i < _skills_learned.size(); i++)
 		delete _skills_learned[i];
