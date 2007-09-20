@@ -128,7 +128,7 @@ const uint32 ChestObject::HIDE_FORCE_DEFAULT = 0;	//! By default a ChestObject w
 
 
 ChestObject::ChestObject( std::string image_file, uint8 nb_frames_closed, uint8 nb_frames_opening, uint32 hide_force )
-	: _hide_force( hide_force )
+	: _hide_force( hide_force ), _drunes( 0 )
 {
 	MapObject::_object_type = CHEST_TYPE;
 
@@ -242,9 +242,13 @@ void ChestObject::Use() {
 
 	//TODO: Create a class to show items gained in the map code
 	if( !IsUsed() ) {
+		//Add the items to the player's inventory
 		for( size_t i = 0; i < _objects_list.size(); ++i ) {
 			GlobalManager->AddToInventory( _objects_list[i] );
 		}
+
+		//Add the drunes to the player's inventory
+		GlobalManager->AddDrunes( _drunes );
 
 		SetCurrentAnimation( OPENING_CHEST_ANIM );
 

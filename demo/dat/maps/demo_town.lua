@@ -587,6 +587,7 @@ function Load(m)
 	chest:SetContext(1);
 	chest:SetXPosition(111, 0);
 	chest:SetYPosition(34, 0);
+	chest:AddDrunes( 100 );
 	chest:AddObject( 1, 2 ); 	-- Adds 2 potions (ID: 1)
 	chest:AddObject( 10001, 1 );  	-- Adds 1 Karlate Sword (ID: 10001)
 	chest:AddObject( 20001, 1 );  	-- Adds 1 Karlate Sword (ID: 10001)

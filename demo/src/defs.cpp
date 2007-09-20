@@ -484,6 +484,7 @@ void BindEngineToLua() {
 			.def(constructor<std::string, uint8, uint8>())
 			.def(constructor<std::string,uint8, uint8, uint32>())
 			.def("AddObject", &ChestObject::AddObject)
+			.def("AddDrunes", &ChestObject::AddDrunes)
 			.def("UpdateHideForce", &ChestObject::UpdateHideForce)
 			.def("SetHidingForce", &ChestObject::SetHidingForce)
 			.def("GetHidingForce", &ChestObject::GetHidingForce)
