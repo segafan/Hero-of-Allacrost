@@ -427,6 +427,11 @@ public:
 	**/
 	bool AddObject( uint32 id, uint32 number );
 
+	//! Adds drunes to be contained in the chest
+	//! \note The overflow condition is not checked here: we just assume it will never occur
+	void AddDrunes( uint32 amount )
+		{ _drunes += amount; }
+
 	//! Transfers the ChestObject's content to the player's inventory
 	void Use();
 
@@ -440,6 +445,9 @@ private:
 
 	//! The remaining hiding force of the object
 	uint32 _hide_force;
+
+	//! The number of drunes contained in the chest
+	uint32 _drunes;
 
 	//! The list of objects given to the player upon activation
 	std::vector< hoa_global::GlobalObject* > _objects_list;
