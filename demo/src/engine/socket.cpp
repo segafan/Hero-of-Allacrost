@@ -79,7 +79,7 @@ bool Socket::IsQueued(uint32 wait_time) {
 uint32 Socket::SendBinary(const void* data, uint32 len) {
 	if (!IsConnected())
 		return 0;
-	return SDLNet_TCP_Send(sock, data, len);
+	return SDLNet_TCP_Send(sock, const_cast<void*> (data), len);
 }
 
 uint32 Socket::RecvBinary(void* location, uint32 len) {
