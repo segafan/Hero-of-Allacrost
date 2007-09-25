@@ -1,5 +1,5 @@
 EXTRA_DIST = MANUAL configure dat doc img mus snd
-AM_CPPFLAGS = -DDATADIR=\"$(datadir)\"
+AM_CPPFLAGS = -DDATADIR=\"$(datadir)/allacrost\"
 ACLOCAL_AMFLAGS = -I m4
 INCLUDES = \
 	-I/usr/include/SDL \
@@ -210,13 +210,13 @@ install-data-local:
 	@$(NORMAL_INSTALL)
 	test -z "$(datadir)" || $(mkdir_p) "$(DESTDIR)$(datadir)"
 	( $(find_datadirs) ) | while read dir; do \
-		$(mkdir_p) "$(DESTDIR)$(datadir)/$$dir"; \
+		$(mkdir_p) "$(DESTDIR)$(datadir)/allacrost/$$dir"; \
 	done; \
 	( $(find_data) ) | while read file; do \
-		echo $(INSTALL_DATA) "$$file" "$(DESTDIR)$(datadir)/$$file"; \
-		$(INSTALL_DATA) "$$file" "$(DESTDIR)$(datadir)/$$file"; \
+		echo $(INSTALL_DATA) "$$file" "$(DESTDIR)$(datadir)/allacrost/$$file"; \
+		$(INSTALL_DATA) "$$file" "$(DESTDIR)$(datadir)/allacrost/$$file"; \
 	done 
 
 uninstall-local:
 	@$(NORMAL_UNINSTALL)
-	rm -r "$(DESTDIR)$(datadir)"
+	rm -r "$(DESTDIR)$(datadir)/allacrost"
