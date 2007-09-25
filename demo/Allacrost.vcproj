@@ -149,7 +149,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/NODEFAULTLIB:LIBCMT"
-				AdditionalDependencies="user32.lib SDL.lib SDL_Net.lib SDL_Net.lib SDL_TTF.lib OpenAL32.lib ogg.lib vorbis.lib vorbisfile.lib SDLMain.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib LuaBind.lib lua50.lib"
+				AdditionalDependencies="user32.lib SDL.lib SDL_Net.lib SDL_TTF.lib OpenAL32.lib ogg.lib vorbis.lib vorbisfile.lib SDLMain.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib LuaBind.lib lua50.lib"
 				LinkIncremental="0"
 				GenerateDebugInformation="false"
 				SubSystem="2"

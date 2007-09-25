@@ -22,7 +22,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="moc &quot;$(ProjectDir)\src\editor\editor.h&quot; &gt; &quot;$(ProjectDir)\src\editor\editor_moc.cpp&quot;"
+				CommandLine="moc &quot;$(ProjectDir)\src\editor\editor.h&quot; &gt; &quot;$(ProjectDir)\src\editor\editor_moc.cpp&quot;&#x0D;&#x0A;moc &quot;$(ProjectDir)\src\editor\grid.h&quot; &gt; &quot;$(ProjectDir)\src\editor\grid_moc.cpp&quot;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -60,7 +60,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="QtGui4.lib QtCore4.lib QtOpenGL4.lib Qt3Support4.lib SDL.lib SDL_Net.lib SDL_TTF.lib SDLMain.lib LuaBind_debug.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib SDL_mixer.lib"
+				AdditionalDependencies="QtGui4.lib QtCore4.lib QtOpenGL4.lib Qt3Support4.lib SDL.lib OpenAL32.lib ogg.lib vorbis.lib vorbisfile.lib SDL_Net.lib SDL_TTF.lib SDLMain.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib SDL_mixer.lib LuaBind_Debug.lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				LinkTimeCodeGeneration="1"
@@ -187,15 +187,27 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\engine\audio\audio_music.cpp"
+				RelativePath=".\src\engine\audio\audio_descriptor.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\engine\audio\audio_sound.cpp"
+				RelativePath=".\src\engine\audio\audio_effects.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\audio\audio_input.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\audio\audio_stream.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\src\modes\battle\battle.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\battle\battle_actions.cpp"
 				>
 			</File>
 			<File
@@ -224,10 +236,6 @@
 			</File>
 			<File
 				RelativePath=".\src\defs.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\engine\video\draw.cpp"
 				>
 			</File>
 			<File
@@ -280,6 +288,10 @@
 			</File>
 			<File
 				RelativePath=".\src\engine\video\image.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\video\image_base.cpp"
 				>
 			</File>
 			<File
@@ -395,15 +407,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\engine\video\tex_mgmt.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\engine\video\text.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\src\engine\video\textbox.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\video\texture.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\video\texture_controller.cpp"
 				>
 			</File>
 			<File
@@ -425,7 +441,31 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\src\engine\audio\audio.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\audio\audio_descriptor.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\audio\audio_effects.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\audio\audio_input.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\audio\audio_stream.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\modes\battle\battle.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\modes\battle\battle_actions.h"
 				>
 			</File>
 			<File
@@ -473,6 +513,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\global\global.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\global\global_actors.h"
 				>
 			</File>
@@ -494,6 +538,10 @@
 			</File>
 			<File
 				RelativePath=".\src\engine\video\image.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\video\image_base.h"
 				>
 			</File>
 			<File
@@ -605,15 +653,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\engine\video\tex_mgmt.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\engine\video\text.h"
 				>
 			</File>
 			<File
 				RelativePath=".\src\engine\video\textbox.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\video\texture.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\engine\video\texture_controller.h"
 				>
 			</File>
 			<File
