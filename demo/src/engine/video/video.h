@@ -29,7 +29,7 @@
 #ifndef __VIDEO_HEADER__
 #define __VIDEO_HEADER__
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	#include <windows.h> // needs to be included before gl.h
 #endif
 

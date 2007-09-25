@@ -26,6 +26,9 @@ Editor::Editor() : QMainWindow()
 	// create the undo stack
 	_undo_stack = new QUndoStack();
 
+	// set scollview to NULL because it's being checked inside _TilesEnableActions
+	_ed_scrollview = NULL;
+
 	// create actions, menus, and toolbars
 	_CreateActions();
 	_CreateMenus();
@@ -44,13 +47,14 @@ Editor::Editor() : QMainWindow()
 	// create the main widget and layout
 	_ed_splitter = new QSplitter(this);
 	_ed_splitter->setOrientation(Qt::Vertical);
-	_ed_scrollview = NULL;
 	_ed_tabs = NULL;
 	setCentralWidget(_ed_splitter);
 	resize(600, 400);
 
 	// set the window icon
 	setWindowIcon(QIcon("img/logos/program_icon.bmp"));
+
+	
 } // Editor constructor
 
 Editor::~Editor()
