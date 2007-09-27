@@ -22,7 +22,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="moc &quot;$(ProjectDir)\src\editor\editor.h&quot; &gt; &quot;$(ProjectDir)\src\editor\editor_moc.cpp&quot;&#x0D;&#x0A;moc &quot;$(ProjectDir)\src\editor\grid.h&quot; &gt; &quot;$(ProjectDir)\src\editor\grid_moc.cpp&quot;"
+				CommandLine="moc &quot;$(ProjectDir)\src\editor\editor.h&quot; &gt; &quot;$(ProjectDir)\src\editor\editor_moc.cpp&quot;&#x0D;&#x0A;moc &quot;$(ProjectDir)\src\editor\grid.h&quot; &gt; &quot;$(ProjectDir)\src\editor\grid_moc.cpp&quot;&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -60,7 +60,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="QtGui4.lib QtCore4.lib QtOpenGL4.lib Qt3Support4.lib SDL.lib OpenAL32.lib ogg.lib vorbis.lib vorbisfile.lib SDL_Net.lib SDL_TTF.lib SDLMain.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib SDL_mixer.lib LuaBind_Debug.lib"
+				AdditionalDependencies="QtGui4.lib QtCore4.lib QtOpenGL4.lib Qt3Support4.lib SDL.lib OpenAL32.lib ogg.lib vorbis.lib vorbisfile.lib SDL_Net.lib SDL_TTF.lib SDLMain.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib LuaBind_Debug.lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				LinkTimeCodeGeneration="1"
@@ -139,7 +139,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="QtGui4.lib QtCore4.lib QtOpenGL4.lib Qt3Support4.lib SDL.lib SDL_Net.lib SDL_TTF.lib SDLMain.lib LuaBind.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib SDL_mixer.lib"
+				AdditionalDependencies="QtGui4.lib QtCore4.lib QtOpenGL4.lib Qt3Support4.lib OpenAL32.lib ogg.lib vorbis.lib vorbisfile.lib SDL.lib SDL_Net.lib SDL_TTF.lib SDLMain.lib LuaBind.lib Opengl32.lib glu32.lib libpng.lib jpeg.lib zdll.lib"
 				IgnoreAllDefaultLibraries="false"
 				IgnoreDefaultLibraryNames=""
 				SubSystem="2"

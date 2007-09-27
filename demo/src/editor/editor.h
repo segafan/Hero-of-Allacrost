@@ -89,6 +89,7 @@ class Editor: public QMainWindow
 		void _FileMenuSetup();
 		void _ViewMenuSetup();
 		void _TilesEnableActions();
+		void _TileSetEnableActions();
 		void _MapMenuSetup();
 		//@}
 
@@ -123,6 +124,10 @@ class Editor: public QMainWindow
 		void _TileEditML();
 		void _TileEditUL();
 		//@}
+
+		//! \name Tileset Menu Item Slots
+		//! \brief These slots process selection for their item in the Tileset menu.
+		void _TileSetEditWalkability();
 
 		//! \name Map Menu Item Slots
 		//! \brief These slots process selection for their item in the Map menu.
@@ -162,6 +167,7 @@ class Editor: public QMainWindow
 		QMenu* _tiles_menu;
 		QMenu* _map_menu;
 		QMenu* _help_menu;
+		QMenu* _tileset_menu;
 		//@}
 
 		//! \name Application Toolbars
@@ -198,6 +204,8 @@ class Editor: public QMainWindow
 		QActionGroup* _mode_group;
 		QActionGroup* _edit_group;
 
+		QAction* _edit_walkability_action;
+		
 		QAction* _map_properties_action;
 		QAction* _select_music_action;
 
