@@ -142,6 +142,19 @@ void Editor::_TilesEnableActions()
 	} // map does not exist, can't paint it*/
 } // _TilesEnableActions()
 
+
+void Editor::_TileSetEnableActions()
+{
+	if(_ed_scrollview != NULL && _ed_scrollview->_map != NULL)
+	{
+		_edit_walkability_action->setEnabled(true);
+	}
+	else
+	{
+		_edit_walkability_action->setEnabled(false);
+	}
+} // _TileSetEnableActions
+
 void Editor::_MapMenuSetup()
 {
 	if (_ed_scrollview != NULL && _ed_scrollview->_map != NULL)
@@ -167,7 +180,7 @@ void Editor::_FileNew()
 			if (_ed_scrollview != NULL)
 				delete _ed_scrollview;
 			_ed_scrollview = new EditorScrollView(NULL, "map", new_map->GetWidth(), new_map->GetHeight());
-
+			
 			if (_ed_tabs != NULL)
 				delete _ed_tabs;
 			_ed_tabs = new QTabWidget();
@@ -304,6 +317,7 @@ void Editor::_FileSaveAs()
 
 void Editor::_FileSave()
 {
+	
 	if (_ed_scrollview->_map->GetFileName().isEmpty() ||
 		_ed_scrollview->_map->GetFileName() == "Untitled")
 	{
@@ -466,6 +480,11 @@ void Editor::_TileEditUL()
 	if (_ed_scrollview != NULL)
 		_ed_scrollview->_layer_edit = UPPER_LAYER;
 } // _TileEditUL()
+
+void Editor::_TileSetEditWalkability()
+{
+	QMessageBox::about(this, "Walkability Editor!","Replace with the walkability editor!");
+} // _TileSetEditWalkability
 
 void Editor::_MapSelectMusic()
 {
@@ -802,7 +821,12 @@ void Editor::_CreateActions()
 	_edit_group->addAction(_edit_ul_action);
 	_edit_ll_action->setChecked(true);
 	
-	
+	// Create tileset actions related to the Tileset Menu
+
+	_edit_walkability_action = new QAction("Edit &Walkability", this);
+	_edit_walkability_action->setStatusTip("Lets the user paint walkability on the tileset");
+	//_edit_walkability_action->setCheckable(true);
+	connect(_edit_walkability_action, SIGNAL(triggered()), this, SLOT(_TileSetEditWalkability()));
 
 	// Create menu actions related to the Map menu
 
@@ -874,6 +898,12 @@ void Editor::_CreateMenus()
 	_tiles_menu->setTearOffEnabled(true);
 	connect(_tiles_menu, SIGNAL(aboutToShow()), this, SLOT(_TilesEnableActions()));
 	
+	// tileset menu creation
+	_tileset_menu = menuBar()->addMenu("Tile&set");
+	_tileset_menu->addAction(_edit_walkability_action);
+	_tileset_menu->setTearOffEnabled(true);
+	connect(_tileset_menu, SIGNAL(aboutToShow()), this, SLOT(_TileSetEnableActions()));
+
 	// map menu creation
 	_map_menu = menuBar()->addMenu("&Map");
 	_map_menu->addAction(_select_music_action);
@@ -894,6 +924,7 @@ void Editor::_CreateToolbars()
 	_tiles_toolbar->addSeparator();
 	_tiles_toolbar->addAction(_mode_paint_action);
 	_tiles_toolbar->addAction(_mode_delete_action);
+
 } // _CreateToolbars()
 
 bool Editor::_EraseOK()
