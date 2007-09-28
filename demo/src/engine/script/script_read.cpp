@@ -53,16 +53,21 @@ bool ReadScriptDescriptor::OpenFile(const string& file_name) {
 		return false;
 	}
 
-	// Increases the global stack size by 1 element. That is needed because the new thread will be pushed in the
-	// stack and we have to be sure there is enough space there.
-	lua_checkstack(ScriptManager->GetGlobalState(),1);
-	_lstack = lua_newthread(ScriptManager->GetGlobalState());
+	// Check if this file was opened previously.
+	if ((this->_lstack = ScriptManager->_CheckForPreviousLuaState(file_name)) == NULL)
+	{	
+		// Increases the global stack size by 1 element. That is needed because the new thread will be pushed in the
+		// stack and we have to be sure there is enough space there.
+		lua_checkstack(ScriptManager->GetGlobalState(),1);
+		_lstack = lua_newthread(ScriptManager->GetGlobalState());
 
-	// Attempt to load and execute the Lua file.
-	if (luaL_loadfile(_lstack, file_name.c_str()) != 0 || lua_pcall(_lstack, 0, 0, 0)) {
-		cerr << "SCRIPT ERROR: ReadScriptDescriptor::OpenFile() could not open the file " << file_name << endl;
-		_access_mode = SCRIPT_CLOSED;
-		return false;
+		// Attempt to load and execute the Lua file.
+		if (luaL_loadfile(_lstack, file_name.c_str()) != 0 || lua_pcall(_lstack, 0, 0, 0)) {
+			cerr << "SCRIPT ERROR: ReadScriptDescriptor::OpenFile() could not open the file " << file_name << endl;
+			cerr << lua_tostring(_lstack, private_script::STACK_TOP) << endl;
+			_access_mode = SCRIPT_CLOSED;
+			return false;
+		}
 	}
 
 	_filename = file_name;

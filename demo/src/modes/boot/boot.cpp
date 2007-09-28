@@ -379,56 +379,67 @@ uint8 BootMode::_WaitJoyPress() {
 // Redefines a key to be mapped to another command. Waits for keypress using _WaitKeyPress()
 void BootMode::_RedefineUpKey() {
 	InputManager->SetUpKey(_WaitKeyPress());
+	_has_modified_settings = true;
 	_UpdateKeySettings();
 }
 
 void BootMode::_RedefineDownKey() {
 	InputManager->SetDownKey(_WaitKeyPress());
+	_has_modified_settings = true;
 	_UpdateKeySettings();
 }
 
 void BootMode::_RedefineLeftKey() {
 	InputManager->SetLeftKey(_WaitKeyPress());
+	_has_modified_settings = true;
 	_UpdateKeySettings();
 }
 
 void BootMode::_RedefineRightKey() {
 	InputManager->SetRightKey(_WaitKeyPress());
+	_has_modified_settings = true;
 	_UpdateKeySettings();
 }
 
 void BootMode::_RedefineConfirmKey() {
 	InputManager->SetConfirmKey(_WaitKeyPress());
+	_has_modified_settings = true;
 	_UpdateKeySettings();
 }
 
 void BootMode::_RedefineCancelKey() {
 	InputManager->SetCancelKey(_WaitKeyPress());
+	_has_modified_settings = true;
 	_UpdateKeySettings();
 }
 
 void BootMode::_RedefineMenuKey() {
 	InputManager->SetMenuKey(_WaitKeyPress());
+	_has_modified_settings = true;
 	_UpdateKeySettings();
 }
 
 void BootMode::_RedefineSwapKey() {
 	InputManager->SetSwapKey(_WaitKeyPress());
+	_has_modified_settings = true;
 	_UpdateKeySettings();
 }
 
 void BootMode::_RedefineLeftSelectKey() {
 	InputManager->SetLeftSelectKey(_WaitKeyPress());
+	_has_modified_settings = true;
 	_UpdateKeySettings();
 }
 
 void BootMode::_RedefineRightSelectKey() {
 	InputManager->SetRightSelectKey(_WaitKeyPress());
+	_has_modified_settings = true;
 	_UpdateKeySettings();
 }
 
 void BootMode::_RedefinePauseKey() {
 	InputManager->SetPauseKey(_WaitKeyPress());
+	_has_modified_settings = true;
 	_UpdateKeySettings();
 }
 
@@ -436,30 +447,37 @@ void BootMode::_RedefinePauseKey() {
 // Redefines a joystick button to be mapped to another command. Waits for press using _WaitJoyPress()
 void BootMode::_RedefineConfirmJoy() {
 	InputManager->SetConfirmJoy(_WaitJoyPress());
+	_has_modified_settings = true;
 	_UpdateJoySettings();
 }
 void BootMode::_RedefineCancelJoy() {
 	InputManager->SetCancelJoy(_WaitJoyPress());
+	_has_modified_settings = true;
 	_UpdateJoySettings();
 }
 void BootMode::_RedefineMenuJoy() {
 	InputManager->SetMenuJoy(_WaitJoyPress());
+	_has_modified_settings = true;
 	_UpdateJoySettings();
 }
 void BootMode::_RedefineSwapJoy() {
 	InputManager->SetSwapJoy(_WaitJoyPress());
+	_has_modified_settings = true;
 	_UpdateJoySettings();
 }
 void BootMode::_RedefineLeftSelectJoy() {
 	InputManager->SetLeftSelectJoy(_WaitJoyPress());
+	_has_modified_settings = true;
 	_UpdateJoySettings();
 }
 void BootMode::_RedefineRightSelectJoy() {
 	InputManager->SetRightSelectJoy(_WaitJoyPress());
+	_has_modified_settings = true;
 	_UpdateJoySettings();
 }
 void BootMode::_RedefinePauseJoy() {
 	InputManager->SetPauseJoy(_WaitJoyPress());
+	_has_modified_settings = true;
 	_UpdateJoySettings();
 }
 
@@ -607,7 +625,6 @@ void BootMode::_OnLoadGame() {
 // 'Options' confirmed
 void BootMode::_OnOptions() {
 	_current_menu = &_options_menu;
-	_has_modified_settings = true; // Lazy way to check if we've changed anything. The correct way is to move this line in every setting-modifying function...
 }
 
 
@@ -840,7 +857,7 @@ void BootMode::_SaveSettingsFile() {
 
 	// No need to save the settings if we haven't edited anything!
 	// TODO: Uncomment the next line when the lua tables are saved correctly!
-	//if (!_has_modified_settings)
+	if (!_has_modified_settings)
 		return;
 
 	// Load the settings file for reading in the original data
@@ -851,6 +868,7 @@ void BootMode::_SaveSettingsFile() {
 
 	// Write the current settings into the .lua file
 	// video
+	settings_lua.OpenTable("settings");
 	settings_lua.ModifyInt("video_settings.screen_resx", VideoManager->GetScreenWidth());
 	settings_lua.ModifyInt("video_settings.screen_resy", VideoManager->GetScreenHeight());
 	settings_lua.ModifyString("video_settings.full_screen", VideoManager->IsFullscreen() ? "true" : "false");
@@ -879,9 +897,9 @@ void BootMode::_SaveSettingsFile() {
 	settings_lua.ModifyInt("joystick_settings.left_select", InputManager->GetLeftSelectJoy());
 	settings_lua.ModifyInt("joystick_settings.right_select", InputManager->GetRightSelectJoy());
 	settings_lua.ModifyInt("joystick_settings.pause", InputManager->GetPauseJoy());
-
 	// and save it!
 	settings_lua.CommitChanges();
+	settings_lua.CloseTable();
 }
 
 

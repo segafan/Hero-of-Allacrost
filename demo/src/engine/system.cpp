@@ -177,6 +177,7 @@ bool GameSystem::SingletonInitialize() {
 		return false;
 	}
 
+	settings_data.OpenTable("settings");
 	settings_data.OpenTable("video_settings");
 // 	SetFullScreen(settings_data.ReadBool("full_screen"));
 	settings_data.CloseTable();
@@ -184,6 +185,7 @@ bool GameSystem::SingletonInitialize() {
 	settings_data.OpenTable("audio_settings");
 	AudioManager->SetMusicVolume(settings_data.ReadFloat("music_vol"));
 	AudioManager->SetSoundVolume(settings_data.ReadFloat("sound_vol"));
+	settings_data.CloseTable();
 	settings_data.CloseTable();
 
 	if (settings_data.IsErrorDetected()) {

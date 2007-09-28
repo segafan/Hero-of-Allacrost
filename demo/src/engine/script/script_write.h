@@ -223,7 +223,7 @@ template <class T> void WriteScriptDescriptor::_WriteData(const std::string &key
 	}
 	else {
 		_WriteTablePath();
-		_outfile << '[' << key << ']' << " = " << value << std::endl;
+		_outfile << '.' << key << " = " << value << std::endl;
 	}
 }
 
@@ -253,7 +253,7 @@ template <class T> void WriteScriptDescriptor::_WriteDataVector(const std::strin
 	}
 	else {
 		_WriteTablePath();
-		_outfile << '[' << key << "] = { ";
+		_outfile << '.' << key << " = { ";
 	}
 
 	_outfile << vect[0];

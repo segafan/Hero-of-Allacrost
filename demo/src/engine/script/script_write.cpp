@@ -178,7 +178,7 @@ void WriteScriptDescriptor::WriteBool(const string& key, bool value) {
 	}
 	else {
 		_WriteTablePath();
-		_outfile << '[' << key << ']' << " = ";
+		_outfile << '.' << key << " = ";
 		if (value)
 			_outfile << "true" << endl;
 		else
@@ -212,7 +212,7 @@ void WriteScriptDescriptor::WriteString(const string& key, const string& value) 
 	}
 	else {
 		_WriteTablePath();
-		_outfile << '[' << key << ']' << " = \"" << value << "\"" << endl;
+		_outfile << '.' << key << " = \"" << value << "\"" << endl;
 	}
 }
 
@@ -260,7 +260,7 @@ void WriteScriptDescriptor::WriteBoolVector(const string& key, std::vector<bool>
 	}
 	else {
 		_WriteTablePath();
-		_outfile << '[' << key << "] = { ";
+		_outfile << '.' << key << " = { ";
 	}
 
 	if (vect[0])
@@ -316,7 +316,7 @@ void WriteScriptDescriptor::WriteStringVector(const string &key, std::vector<str
 	}
 	else {
 		_WriteTablePath();
-		_outfile << '[' << key << "] = { ";
+		_outfile << '.' << key << " = { ";
 	}
 
 	_outfile << "\"" << vect[0] << "\"";
@@ -375,7 +375,7 @@ void WriteScriptDescriptor::BeginTable(const string &key) {
 	}
 	else {
 		_WriteTablePath();
-		_outfile << '[' << key << "] = {}" << endl;
+		_outfile << '.' << key << " = {}" << endl;
 	}
 
 	_open_tables.push_back(key);
@@ -419,7 +419,10 @@ void WriteScriptDescriptor::_WriteTablePath() {
 
 	_outfile << _open_tables[0];
 	for (uint32 i = 1; i < _open_tables.size(); i++) {
-		_outfile << '[' << _open_tables[i] << ']';
+		if (IsStringNumeric(_open_tables[i]))
+			_outfile << '[' << _open_tables[i] << ']';
+		else
+			_outfile << '.' << _open_tables[i];
 	}
 }
 

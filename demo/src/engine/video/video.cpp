@@ -150,10 +150,12 @@ bool GameVideo::SingletonInitialize() {
 		return false;
 	}
 
+	video_settings_script.OpenTable("settings");
 	video_settings_script.OpenTable("video_settings");
 	settings_width = video_settings_script.ReadInt("screen_resx");
 	settings_height = video_settings_script.ReadInt("screen_resy");
 	settings_fullscreen = video_settings_script.ReadBool("full_screen");
+	video_settings_script.CloseTable();
 	video_settings_script.CloseTable();
 
 	video_settings_script.CloseFile();
