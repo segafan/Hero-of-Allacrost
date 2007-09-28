@@ -52,20 +52,25 @@ bool ModifyScriptDescriptor::OpenFile(const std::string& file_name) {
 		return false;
 	}
 
-	// Increases the global stack size by 1 element. That is needed because the new thread will be pushed in the
-	// stack and we have to be sure there is enough space there.
-	lua_checkstack(ScriptManager->GetGlobalState(),1);
-	_lstack = lua_newthread(ScriptManager->GetGlobalState());
+	// Check if this file was opened previously.
+	if ((this->_lstack = ScriptManager->_CheckForPreviousLuaState(file_name)) == NULL)
+	{
+		// Increases the global stack size by 1 element. That is needed because the new thread will be pushed in the
+		// stack and we have to be sure there is enough space there.
+		lua_checkstack(ScriptManager->GetGlobalState(),1);
+		_lstack = lua_newthread(ScriptManager->GetGlobalState());
 
-	// Attempt to load and execute the Lua file.
-	if (luaL_loadfile(_lstack, file_name.c_str()) != 0 || lua_pcall(_lstack, 0, 0, 0)) {
-		cerr << "SCRIPT ERROR: ModifyScriptDescriptor::OpenFile() could not open the file " << file_name << endl;
-		_access_mode = SCRIPT_CLOSED;
-		return false;
+		// Attempt to load and execute the Lua file.
+		if (luaL_loadfile(_lstack, file_name.c_str()) != 0 || lua_pcall(_lstack, 0, 0, 0)) {
+			cerr << "SCRIPT ERROR: ModifyScriptDescriptor::OpenFile() could not open the file " << file_name << endl;
+			_access_mode = SCRIPT_CLOSED;
+			return false;
+		}
 	}
 
+	// Write out some global stuff
 	_filename = file_name;
-	_access_mode = SCRIPT_READ;
+	_access_mode = SCRIPT_MODIFY;
 	ScriptManager->_AddOpenFile(this);
 	return true;
 } // bool ModifyScriptDescriptor::OpenFile(std::string file_name)
@@ -106,13 +111,14 @@ void ModifyScriptDescriptor::CloseFile() {
 	ScriptManager->_RemoveOpenFile(this);
 }
 
+
 //-----------------------------------------------------------------------------
 // Commit Function Definitions
 //-----------------------------------------------------------------------------
 
 void ModifyScriptDescriptor::CommitChanges(bool leave_closed) {
 	WriteScriptDescriptor file; // The file to write the modified Lua state out to
-	string temp_filename = "TEMP" + _filename;
+	string temp_filename = _filename.substr(0, _filename.find_last_of('.')) + "_TEMP" + _filename.substr(_filename.find_last_of('.'));
 
 	if (file.OpenFile(temp_filename) == false) {
 		if (SCRIPT_DEBUG)
@@ -147,6 +153,8 @@ void ModifyScriptDescriptor::_CommitTable(WriteScriptDescriptor& file, const lua
 	int32 num_key = 0;    // Holds the current numeric key
 	string str_key = "";  // Holds the current string key
 
+	static vector<string>::iterator t = _open_tables.begin();
+
 	for (luabind::iterator it(table), end; it != end; ++it) {
 		try {
 			num_key = object_cast<int32>(it.key());
@@ -155,7 +163,30 @@ void ModifyScriptDescriptor::_CommitTable(WriteScriptDescriptor& file, const lua
 			str_key = object_cast<string>(it.key());
 			key_is_numeric = false;
 		}
+
+		if (key_is_numeric && t == _open_tables.end())
+		{
+			cerr << "ModifyScriptDescriptor::_CommitTable: reached numeric key before writing out open tables" << endl;
+			return;
+		}
+		else if (!key_is_numeric && t != _open_tables.end())
+		{
+			if (str_key == (*t))
+			{
+				file.BeginTable(str_key);
+				t++;
+				_CommitTable(file, object(*it));
+				file.EndTable();
+				return;
+			}
+			continue;
+		}
 	
+		// Check for _G table and do not write it out, causes
+		// infinite recursion.
+		if (!key_is_numeric)
+			if (str_key == "_G")
+				continue;
 		switch (luabind::type(*it)) {
 			case LUA_TBOOLEAN:
 				if (key_is_numeric)

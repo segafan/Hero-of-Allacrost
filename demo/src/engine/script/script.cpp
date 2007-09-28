@@ -83,10 +83,25 @@ void GameScript::HandleCastError(luabind::cast_failed& err) {
 }
 
 
+lua_State *GameScript::_CheckForPreviousLuaState(const std::string &filename)
+{
+	if (_open_threads.find(filename) != _open_threads.end())
+			return _open_threads[filename];
+	return NULL;
+}
+
+
 
 void GameScript::_AddOpenFile(ScriptDescriptor* sd) {
 	// NOTE: Function assumes that the file is not already open
 	_open_files.insert(make_pair(sd->_filename, sd));
+	// add the lua_State to the list of opened lua states
+	if (sd->GetAccessMode() == SCRIPT_READ || sd->GetAccessMode() == SCRIPT_MODIFY)
+	{
+		ReadScriptDescriptor *rsd = (ReadScriptDescriptor *)sd;
+		if (_open_threads.find(rsd->GetFilename()) == _open_threads.end())
+			_open_threads[rsd->GetFilename()] = rsd->_lstack;
+	}
 }
 
 

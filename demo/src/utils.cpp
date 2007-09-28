@@ -443,6 +443,8 @@ bool DoesFileExist(const std::string& file_name) {
 
 
 bool MoveFile(const std::string& source_name, const std::string& destination_name) {
+	if (DoesFileExist(destination_name))
+		remove(destination_name.c_str());
 	return (rename(source_name.c_str(), destination_name.c_str()) == 0);
 }
 

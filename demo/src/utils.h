@@ -576,7 +576,7 @@ bool DoesFileExist(const std::string& file_name);
 *** This function can also be used to rename files.
 *** \note If there exists a file with the same name + path as the destination_name,
 *** it will be overwritten without warning or indication. Be careful when using this
-*** function!
+*** function! (Had to be modified for Win32 to explicitly delete the file)
 **/
 bool MoveFile(const std::string& source_name, const std::string& destination_name);
 

@@ -189,8 +189,26 @@ private:
 template <class T> void ModifyScriptDescriptor::_ModifyData(const std::string& key, T value) {
 	// A pointer to the table where the object is contained
 	luabind::object* table = NULL;
+	// check to see if key is a table
+	std::string search_key = key;
+	int period = key.find('.');
+	std::string tablename;
+	std::vector<std::string> subkeys;
+	if (period != std::string::npos) {
+		// This key is a table with sub-keys
+		tablename = key.substr(0, period);
+		this->OpenTable(tablename);
+		int last = period;
+		while ((period = key.find('.', period + 1)) != std::string::npos) {
+			// push all subkeys into this table
+			subkeys.push_back(key.substr(last + 1, period));
+			this->OpenTable(key.substr(last+1, period));
+			last = period;
+		}
+		search_key = key.substr(last + 1);
+	}
 
-	if (_open_tables.empty() == false) // Retrieve the globals table
+	if (_open_tables.empty() == true) // Retrieve the globals table
 		table = new luabind::object(luabind::from_stack(_lstack, LUA_GLOBALSINDEX));
 	else // Retrieve the most recently opened table from the top of the stack
 		table = new luabind::object(luabind::from_stack(_lstack, private_script::STACK_TOP));
@@ -205,9 +223,11 @@ template <class T> void ModifyScriptDescriptor::_ModifyData(const std::string& k
 	for (luabind::iterator i(*table); i != private_script::TABLE_END; ++i) {
 		// Check to see if global value exists
 		try {
-			if (luabind::object_cast<std::string>(i.key()) == key) {
+			if (luabind::object_cast<std::string>(i.key()) == search_key) {
 				*i = value;
 				delete(table);
+				// close open tables
+				this->CloseTable();
 				return;
 			}
 		}
@@ -220,6 +240,7 @@ template <class T> void ModifyScriptDescriptor::_ModifyData(const std::string& k
 	_error_messages << "* _ModifyData() failed because in the active scope, it did not find the "
 		<< "table key: " << key << std::endl;
 	delete(table);
+	this->CloseTable();
 } // template <class T> void ModifyScriptDescriptor::_ModifyData(const std::string& key, T value) {
 
 

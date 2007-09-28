@@ -129,6 +129,7 @@ bool GameInput::SingletonInitialize() {
 		return false;
 	}
 
+	input_map_data.OpenTable("settings");
 	input_map_data.OpenTable("key_settings");
 	_key.up           = static_cast<SDLKey>(input_map_data.ReadInt("up"));
 	_key.down         = static_cast<SDLKey>(input_map_data.ReadInt("down"));
@@ -161,6 +162,7 @@ bool GameInput::SingletonInitialize() {
 	_joystick.pause        = static_cast<uint8>(input_map_data.ReadInt("pause"));
 	_joystick.quit         = static_cast<uint8>(input_map_data.ReadInt("quit"));
 	input_map_data.CloseTable();
+	input_map_data.CloseTable();			
 
 	if (input_map_data.IsErrorDetected()) {
 		cerr << "INPUT: an error occured while trying to retrieve joystick mapping information "
@@ -196,6 +198,7 @@ bool GameInput::RestoreDefaultKeys() {
 	}
 
 	// Load all default keys from the table
+	settings_file.OpenTable("settings");
 	settings_file.OpenTable("key_defaults");
 	_key.up           = static_cast<SDLKey>(settings_file.ReadInt("up"));
 	_key.down         = static_cast<SDLKey>(settings_file.ReadInt("down"));
@@ -208,6 +211,7 @@ bool GameInput::RestoreDefaultKeys() {
 	_key.left_select  = static_cast<SDLKey>(settings_file.ReadInt("left_select"));
 	_key.right_select = static_cast<SDLKey>(settings_file.ReadInt("right_select"));
 	_key.pause        = static_cast<SDLKey>(settings_file.ReadInt("pause"));
+	settings_file.CloseTable();
 	settings_file.CloseTable();
 
 	settings_file.CloseFile();
@@ -228,6 +232,7 @@ bool GameInput::RestoreDefaultJoyButtons()
 	}
 
 	// Load all default buttons from the table
+	settings_file.OpenTable("settings");
 	settings_file.OpenTable("joystick_defaults");
 	_joystick.confirm      = static_cast<uint8>(settings_file.ReadInt("confirm"));
 	_joystick.cancel       = static_cast<uint8>(settings_file.ReadInt("cancel"));
@@ -236,6 +241,7 @@ bool GameInput::RestoreDefaultJoyButtons()
 	_joystick.left_select  = static_cast<uint8>(settings_file.ReadInt("left_select"));
 	_joystick.right_select = static_cast<uint8>(settings_file.ReadInt("right_select"));
 	_joystick.pause        = static_cast<uint8>(settings_file.ReadInt("pause"));
+	settings_file.CloseTable();
 	settings_file.CloseTable();
 
 	settings_file.CloseFile();
