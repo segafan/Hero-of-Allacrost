@@ -254,7 +254,7 @@ private:
 	***
 	*** \return returns the lua_State * for that file, or null if the file has never been opened.
 	**/
-	lua_State *GameScript::_CheckForPreviousLuaState(const std::string &filename);
+	lua_State *_CheckForPreviousLuaState(const std::string &filename);
 
 	//! \brief Removes an open file from the list of open files
 	void _RemoveOpenFile(ScriptDescriptor* sd);
