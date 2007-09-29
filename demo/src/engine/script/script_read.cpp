@@ -53,8 +53,9 @@ bool ReadScriptDescriptor::OpenFile(const string& file_name) {
 		return false;
 	}
 
+	
 	// Check if this file was opened previously.
-	if ((this->_lstack = ScriptManager->_CheckForPreviousLuaState(file_name)) == NULL)
+	if ((_lstack = ScriptManager->_CheckForPreviousLuaState(file_name)) == NULL)
 	{	
 		// Increases the global stack size by 1 element. That is needed because the new thread will be pushed in the
 		// stack and we have to be sure there is enough space there.
@@ -318,7 +319,7 @@ void ReadScriptDescriptor::OpenTable(int32 table_name) {
 				<< "to open the with the element key " << table_name << endl;
 		return;
 	}
-
+	
 	lua_pushnumber(_lstack, table_name);
 	lua_gettable(_lstack, STACK_TOP - 1);
 	if (!lua_istable(_lstack, STACK_TOP)) {
@@ -439,10 +440,24 @@ void ReadScriptDescriptor::DEBUG_PrintGlobals() {
 	for (luabind::iterator it(o), end; it != end; ++it) {
 		cout << it.key() << " = " << (*it) << " ::: data type = " << type(*it) << endl;
 		if (luabind::type(*it) == LUA_TTABLE) {
-			// TODO: what needs to go here? Printing out the table contents?
+			if (object_cast<string>(it.key()) != "_G")
+				DEBUG_PrintTable(object(*it), 1);
 		}
 	}
 	cout << endl;
+}
+
+
+void ReadScriptDescriptor::DEBUG_PrintTable(object table, int tab)
+{
+	for (luabind::iterator it(table), end; it != end; ++it)
+	{
+		for (int i = 0; i < tab; ++i)
+			cout << '\t';
+		cout << it.key() << " = " << (*it) << " (Type: " << type(*it) << ")" << endl;
+		if (type(*it) == LUA_TTABLE)
+			DEBUG_PrintTable(object(*it), tab + 1);
+	}
 }
 
 } // namespace hoa_script
