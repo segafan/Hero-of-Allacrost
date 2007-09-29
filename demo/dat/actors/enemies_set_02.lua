@@ -7,7 +7,9 @@
 ------------------------------------------------------------------------------]]
 
 -- All enemy definitions are stored in this table
-enemies = {}
+if _G.enemies = nil
+   enemies = {}
+end
 
 enemies[101] = {
 	name = "Daemarbora",
