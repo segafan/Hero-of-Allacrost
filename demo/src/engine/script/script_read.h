@@ -344,6 +344,9 @@ public:
 
 	//! \brief Prints out all global variable names to standard output
 	void DEBUG_PrintGlobals();
+
+	//! \brief Prints out a specific table
+	void DEBUG_PrintTable(luabind::object table, int tab = 0);
 	
 protected:
 	//! \brief The Lua stack, which handles all data sharing between C++ and Lua.
@@ -414,6 +417,7 @@ template <class T> T ReadScriptDescriptor::_ReadData(const std::string &key, T d
 
 		if (!o) {
 			_error_messages << "* _ReadData() was unable to access the global variable: " << key << std::endl;
+			_error_messages << " Type: " << luabind::type(o) << std::endl;
 			return default_value;
 		}
 
@@ -432,6 +436,7 @@ template <class T> T ReadScriptDescriptor::_ReadData(const std::string &key, T d
 		luabind::object o(luabind::from_stack(_lstack, private_script::STACK_TOP));
 		if (luabind::type(o) != LUA_TTABLE) {
 			_error_messages << "* _ReadData() failed because the top of the stack was not a table when trying to read variable: " << key << std::endl;
+			_error_messages << " Type: " << luabind::type(o) << std::endl;
 			return default_value;
 		}
 
