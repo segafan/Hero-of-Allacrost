@@ -132,6 +132,12 @@ void BattleActor::TakeDamage(int32 damage) {
 		GetWaitTime()->Reset();
 		current_battle->RemoveActionsForActor(this);
 		_state = ACTOR_DEAD;
+
+		if (IsEnemy() == true) {
+			BattleEnemy* enemy = dynamic_cast<BattleEnemy*>(this);
+			std::vector<StillImage>& sprite_frames = *(enemy->GetActor()->GetBattleSpriteFrames());
+			sprite_frames[3].EnableGrayScale();
+		}
 	}
 	else {
 		GetActor()->SubtractHitPoints(_damage_dealt);
@@ -396,9 +402,7 @@ void BattleEnemy::DrawSprite() {
 	// Draw the sprite's final damage frame in grayscale and return
 	if (_state == ACTOR_DEAD) {
 		VideoManager->Move(_x_location, _y_location);
-		sprite_frames[3].EnableGrayScale();
 		sprite_frames[3].Draw();
-		sprite_frames[3].DisableGrayScale();
 	}
 	else {
 		// Draw the actor selector image over the currently selected enemy

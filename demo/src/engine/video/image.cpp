@@ -848,7 +848,6 @@ void StillImage::EnableGrayScale() {
 		return;
 	}
 	
-	// Mark as grayscale
 	_grayscale = true;
 
 	// If no image element is yet loaded, we are done (during the loading phase, grayscale will automatically be enabled)
@@ -871,6 +870,7 @@ void StillImage::EnableGrayScale() {
 			// NOTE: We do not decrement the reference to the colored image, because we want to guarantee that
 			// it remains referenced in texture memory while its grayscale counterpart is being used
 			_elements[i].image = TextureManager->_images[img->filename + img->tags + "<G>"];
+			_elements[i].image->AddReference();
 			continue;
 		}
 
@@ -895,6 +895,7 @@ void StillImage::EnableGrayScale() {
 
 		TextureManager->_images[new_img->filename + new_img->tags] = new_img;
 		_elements[i].image = new_img;
+		_elements[i].image->AddReference();
 
 		if (gray_img.pixels) {
 			free(gray_img.pixels);
