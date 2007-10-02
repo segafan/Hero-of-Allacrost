@@ -771,13 +771,15 @@ void FinishWindow::Update() {
 
 
 void FinishWindow::_UpdateAnnounceWin() {
-	if (_finish_outcome.IsFinished() == false) {
+//	This block is for gradual text. Currently, battle mode uses full text.
+// This block causes the game to freeze at the end of battle.
+/*	if (_finish_outcome.IsFinished() == false) {
 		_finish_outcome.Update(SystemManager->GetUpdateTime());
 		
 		if (InputManager->ConfirmPress())
 			_finish_outcome.ForceFinish();
 		return;
-	}
+	} */
 
 	if (InputManager->ConfirmPress())
 		_state = FINISH_WIN_SHOW_GROWTH;
@@ -912,13 +914,15 @@ void FinishWindow::_UpdateWinSpoils() {
 void FinishWindow::_UpdateAnnounceLose() {
 	_lose_options.Update();
 
-	if (_finish_outcome.IsFinished() == false) {
+//	This block is for gradual text. Currently, battle mode uses full text.
+// This block causes the game to freeze at the end of battle.
+/*	if (_finish_outcome.IsFinished() == false) {
 		_finish_outcome.Update(SystemManager->GetUpdateTime());
 		
 		if (InputManager->ConfirmPress())
 			_finish_outcome.ForceFinish();
 		return;
-	}
+	} */
 
 	if (InputManager->UpPress()) {
 		_lose_options.HandleUpKey();
@@ -945,17 +949,11 @@ void FinishWindow::_UpdateAnnounceLose() {
 
 
 void FinishWindow::_UpdateLoseConfirm() {
-	if (InputManager->CancelPress()) {
-		_state = FINISH_LOSE_ANNOUNCE;
+	if (_lose_options.GetSelection() == 2) {
+		ModeManager->SingletonInitialize(); // Removes all game modes and returns to boot mode
 	}
-
-	else if (InputManager->ConfirmPress()) {
-		if (_lose_options.GetSelection() == 2) {
-			ModeManager->SingletonInitialize(); // Removes all game modes and returns to boot mode
-		}
-		else {
-			SystemManager->ExitGame();
-		}
+	else {
+		SystemManager->ExitGame();
 	}
 }
 

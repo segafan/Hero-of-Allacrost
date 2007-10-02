@@ -893,24 +893,6 @@ EquipWindow::EquipWindow() : _active_box(EQUIP_ACTIVE_NONE) {
 	_InitCharSelect();
 	_InitEquipmentSelect();
 	_InitEquipmentList();
-
-	StillImage i;
-	GlobalCharacter* ch = dynamic_cast<GlobalCharacter*>(GlobalManager->GetActiveParty()->GetActorAtIndex(_char_select.GetSelection()));
-
-	i.Load(ch->GetWeaponEquipped()->GetIconImage().GetFilename(), 60, 60);
-	_equip_images.push_back(i);
-
-	i.Load(ch->GetHeadArmorEquipped()->GetIconImage().GetFilename(), 60, 60);
-	_equip_images.push_back(i);
-
-	i.Load(ch->GetTorsoArmorEquipped()->GetIconImage().GetFilename(), 60, 60);
-	_equip_images.push_back(i);
-
-	i.Load(ch->GetArmArmorEquipped()->GetIconImage().GetFilename(), 60, 60);
-	_equip_images.push_back(i);
-
-	i.Load(ch->GetLegArmorEquipped()->GetIconImage().GetFilename(), 60, 60);
-	_equip_images.push_back(i);
 }
 
 
