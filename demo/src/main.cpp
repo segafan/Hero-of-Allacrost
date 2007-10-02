@@ -195,7 +195,7 @@ void InitializeEngine() throw (Exception) {
 
 
 // Every great game begins with a single function :)
-int32 main(int32 argc, char *argv[]) {
+int main(int argc, char *argv[]) {
 	// When the program exits, first the QuitAllacrost() function is called, followed by SDL_Quit()
 	atexit(SDL_Quit);
 	atexit(QuitAllacrost);
@@ -226,8 +226,8 @@ int32 main(int32 argc, char *argv[]) {
 		int32 return_code = EXIT_FAILURE;
 
 		// Parse command lines and exit out of the game if needed
-		if (hoa_main::ParseProgramOptions(return_code, argc, argv) == false) {
-			return return_code;
+		if (hoa_main::ParseProgramOptions(return_code, (int32) argc, argv) == false) {
+			return (int) return_code;
 		}
 
 		// Function call below throws exceptions if any errors occur
@@ -272,4 +272,4 @@ int32 main(int32 argc, char *argv[]) {
 	}
 
 	return EXIT_SUCCESS;
-} // int32 main(int32 argc, char *argv[])
+} // int main(int argc, char *argv[])

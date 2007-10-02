@@ -898,8 +898,12 @@ GlobalCharacter::GlobalCharacter(uint32 id, bool initial) :
 			cerr << char_script.GetErrorMessages() << endl;
 		}
 	}
-	
+
 	char_script.CloseFile();
+
+	_CalculateAttackRatings();
+	_CalculateDefenseRatings();
+	_CalculateEvadeRatings();
 
 	// TEMP TEMP TEMP: Load the character's idle animation
 	AnimatedImage idle;
@@ -1105,6 +1109,11 @@ GlobalEnemy::GlobalEnemy(uint32 id) {
 	}
 
 	enemy_data.CloseFile();
+
+	_CalculateAttackRatings();
+	_CalculateDefenseRatings();
+	_CalculateEvadeRatings();
+
 } // GlobalEnemy::~GlobalEnemy()
 
 

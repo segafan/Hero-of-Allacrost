@@ -135,7 +135,7 @@ bool ImageDescriptor::LoadMultiImageFromElementGrid(vector<StillImage>& images, 
 
 	// Make sure that the number of grid rows and columns divide evenly into the image size
 	if ((img_height % grid_rows) != 0 || (img_width % grid_cols) != 0) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "multi image size not evenly divisible by grid rows or columsn for multi image file: " << filename << endl;
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "multi image size not evenly divisible by grid rows or columns for multi image file: " << filename << endl;
 		return false;
 	}
 

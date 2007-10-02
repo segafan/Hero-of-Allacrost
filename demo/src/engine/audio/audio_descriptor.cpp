@@ -83,8 +83,14 @@ void AudioSource::Reset() {
 
 	alSourcei(source, AL_LOOPING, AL_FALSE);
 	alSourcef(source, AL_GAIN, 1.0f);
-	alSourcei(source, AL_SAMPLE_OFFSET, 0);
+	alSourcei(source, AL_SAMPLE_OFFSET, 0);		// This line will cause AL_INVALID_ENUM error in linux/Solaris. It is normal.
 	alSourcei(source, AL_BUFFER, 0);
+
+	if (AudioManager->CheckALError()) {
+		#ifdef WIN32
+			IF_PRINT_WARNING(AUDIO_DEBUG) << "resetting source failed: " << AudioManager->CreateALErrorString() << endl;
+		#endif
+	}
 }
 
 } // namespace private_audio
@@ -312,7 +318,7 @@ AUDIO_STATE AudioDescriptor::GetState() {
 	// with the OpenAL source to make sure that the audio is still playing.
 	if (_state == AUDIO_STATE_PLAYING) {
 		// If the descriptor no longe
-		if (_source == NULL) {
+		if (_source == NULL || _data == NULL) {
 			_state = AUDIO_STATE_STOPPED;
 		}
 		else {
@@ -347,6 +353,11 @@ void AudioDescriptor::Play() {
 		_PrepareStreamingBuffers();
 	}
 
+	// Temp: Checks if there is already an AL error in the buffer. If it is, print error and clear buffer.
+	if (AudioManager->CheckALError()) {
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "audio error occured some time before playing source: " << AudioManager->CreateALErrorString() << endl;
+	}
+
 	alSourcePlay(_source->source);
 	if (AudioManager->CheckALError()) {
 		IF_PRINT_WARNING(AUDIO_DEBUG) << "playing the source failed: " << AudioManager->CreateALErrorString() << endl;
@@ -363,6 +374,11 @@ void AudioDescriptor::Stop() {
 	if (_source == NULL) {
 		IF_PRINT_WARNING(AUDIO_DEBUG) << "did not have access to valid AudioSource" << endl;
 		return;
+	}
+
+	// Temp: Checks if there is already an AL error in the buffer. If it is, print error and clear buffer.
+	if (AudioManager->CheckALError()) {
+		IF_PRINT_WARNING(AUDIO_DEBUG) << "audio error occured some time before stopping source: " << AudioManager->CreateALErrorString() << endl;
 	}
 
 	alSourceStop(_source->source);
