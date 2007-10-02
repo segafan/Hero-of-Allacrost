@@ -342,6 +342,7 @@ void BootMode::_EndOpeningAnimation() {
 	if (!settings_lua.OpenFile("dat/config/settings.lua")) {
 		cout << "BOOT ERROR: failed to load the settings file!" << endl;
 	}
+	settings_lua.OpenTable("settings");
 	welcome = settings_lua.ReadInt("welcome");
 	settings_lua.CloseFile();
 	if (welcome) {

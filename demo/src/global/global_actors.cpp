@@ -299,7 +299,7 @@ void GlobalActor::_CalculateDefenseRatings() {
 			_attack_points[i]->_total_metaphysical_defense = _protection + static_cast<uint32>(_protection * _attack_points[i]->_protection_modifier);
 
 		// If there's armor equipped on this attack point add its defensive properties to the defense totals
-		if (_armor_equipped[i] != NULL) {
+		if (_armor_equipped.size() > i && _armor_equipped[i] != NULL) {
 			_attack_points[i]->_total_physical_defense += _armor_equipped[i]->GetPhysicalDefense();
 			_attack_points[i]->_total_metaphysical_defense += _armor_equipped[i]->GetMetaphysicalDefense();
 		}
