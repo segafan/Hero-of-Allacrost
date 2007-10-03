@@ -483,7 +483,20 @@ void Editor::_TileEditUL()
 
 void Editor::_TileSetEditWalkability()
 {
-	QMessageBox::about(this, "Walkability Editor!","Replace with the walkability editor!");
+	//QMessageBox::about(this, "Walkability Editor!","Replace with the walkability editor!");
+
+	TilesetEditor* tilesetEditor = new TilesetEditor(this,"tileset_editor",true);
+	if(tilesetEditor->exec() == QDialog::Accepted){
+
+
+
+	}
+	else{
+		statusBar()->showMessage("Properties not modified!", 5000);
+	}
+
+	delete tilesetEditor;
+
 } // _TileSetEditWalkability
 
 void Editor::_MapSelectMusic()
@@ -822,7 +835,7 @@ void Editor::_CreateActions()
 	_edit_ll_action->setChecked(true);
 	
 	// Create tileset actions related to the Tileset Menu
-
+	
 	_edit_walkability_action = new QAction("Edit &Walkability", this);
 	_edit_walkability_action->setStatusTip("Lets the user paint walkability on the tileset");
 	//_edit_walkability_action->setCheckable(true);
