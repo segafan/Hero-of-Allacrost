@@ -7,7 +7,7 @@
 ------------------------------------------------------------------------------]]
 
 -- All enemy definitions are stored in this table
-if _G.enemies = nil
+if (_G.enemies == nil) then
    enemies = {}
 end
 
