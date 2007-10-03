@@ -18,6 +18,7 @@
 
 #include "grid.h"
 #include "tileset.h"
+#include "tileset_editor.h"
 
 #include <QApplication>
 #include <QCheckBox>
@@ -75,6 +76,7 @@ class Editor: public QMainWindow
 		friend class EditorScrollView;
 		friend class MapPropertiesDialog;
 		friend class LayerCommand;
+		
 
 	protected:
 		//! Handles close and/or quit events.
