@@ -32,7 +32,6 @@ Tileset::Tileset(QWidget* parent, const QString& name)
 	tiles.resize(256);
 	for (int i = 0; i < 256; i++)
 		tiles[i].SetDimensions(1.0f, 1.0f);
-	// NOTE: the following line currently causes a seg fault when the editor exits!
 	if (ImageDescriptor::LoadMultiImageFromElementGrid(tiles, std::string(img_filename.toAscii()), 16, 16) == false)
 		qDebug("LoadMultiImage failed to load tileset " + img_filename);
 
@@ -49,6 +48,12 @@ Tileset::Tileset(QWidget* parent, const QString& name)
 		table->setColumnWidth(i, TILE_WIDTH);
 
 	// Read in tiles and create table items.
+	// FIXME: this is one ugly hack. It loads each individual tile's image and puts it into a table. But each
+	// tile's image only exists together with a bunch of other tiles in a tileset image. So we have to split them
+	// up. Qt has no built-in function to split a big image into little ones. This image information has already
+	// been loaded by the above call to LoadMultiImageFromElementGrid(...). If we could somehow take that info
+	// and put it into a Qt table, that would be ideal.
+	// This piece of code is what takes so long for the editor to load a tileset.
 	QRect rectangle;
 	for (int row = 0; row < 16; row++)
 	{
@@ -69,53 +74,69 @@ Tileset::Tileset(QWidget* parent, const QString& name)
 		} // iterate through the columns of the tileset
 	} // iterate through the rows of the tileset
 
-
-	// Read in walkability information.
+	// Set up for reading the tileset definition file.
 	ReadScriptDescriptor read_data;
-	vector<int32> vect;           // used to read in vectors from the data file
-	
-	if (!read_data.OpenFile(std::string(dat_filename.toAscii())))
+	if (read_data.OpenFile(std::string(dat_filename.toAscii())) == false)
 		QMessageBox::warning(parent, "Loading File...", QString("ERROR: could not open %1 for reading!").arg(dat_filename));
 
-	read_data.OpenTable("walkability");
-	//uint32 table_size = read_data.ReadGetTableSize();
-	for (int32 i = 0; i < 16; i++)
+	// Read in walkability information.
+	if (read_data.DoesTableExist("walkability") == true)
 	{
-		read_data.OpenTable(i);
-		if (read_data.IsErrorDetected() == false)
+		vector<int32> vect;  // used to read in vectors from the data file
+		read_data.OpenTable("walkability");
+		for (int32 i = 0; i < 16; i++)
 		{
-			for (int32 j = 0; j < 16; j++)
+			read_data.OpenTable(i);
+			if (read_data.IsErrorDetected() == false)
 			{
-				read_data.ReadIntVector(j, vect);
-				if (read_data.IsErrorDetected() == false)
-					walkability[i * 16 + j] = vect;
-				vect.clear();
-			} // iterate through all tiles in a row
-			read_data.CloseTable();
-		} // make sure a row exists
-	} // iterate through all rows of the walkability table
-	read_data.CloseTable();
+				for (int32 j = 0; j < 16; j++)
+				{
+					read_data.ReadIntVector(j, vect);
+					if (read_data.IsErrorDetected() == false)
+						walkability[i * 16 + j] = vect;
+					vect.clear();
+				} // iterate through all tiles in a row
+				read_data.CloseTable();
+			} // make sure a row exists
+		} // iterate through all rows of the walkability table
+		read_data.CloseTable();
+	} // make sure table exists first
+	
+	// Read in autotiling information.
+	if (read_data.DoesTableExist("autotiling") == true)
+	{
+		uint32 table_size = read_data.GetTableSize("autotiling");
+		read_data.OpenTable("autotiling");
+		vector<int32> keys;  // will contain the keys (indeces, if you will) of this table's entries
+		read_data.ReadTableKeys(keys);
+		for (uint32 i = 0; i < table_size; i++)
+			autotileability[keys[i]] = read_data.ReadString(keys[i]);
+		read_data.CloseTable();
+	} // make sure table exists first
 
-	//Read animated tiles
+/*	// Read in animated tiles.
 	uint32 animated_table_size = read_data.GetTableSize("animated_tiles");
 	read_data.OpenTable("animated_tiles");
-	for (uint32 i=1; i<=animated_table_size; i++) 
+	for (uint32 i = 1; i <= animated_table_size; i++) 
 	{
 		_animated_tiles.push_back(std::vector<AnimatedTileData>());
-		std::vector<AnimatedTileData>& tiles=_animated_tiles.back();
-		// Tile count is table size / 2 (tile id + time)
-		uint32 tile_count=read_data.GetTableSize(i) / 2;
+		std::vector<AnimatedTileData>& tiles = _animated_tiles.back();
+		// Calculate loop end: an animated tile is comprised of a tile id and a time, so the loop end
+		// is really half the table size.
+		uint32 tile_count = read_data.GetTableSize(i) / 2;
 		read_data.OpenTable(i);
-		for(uint32 index=1; index<=tile_count; index++) 
+		for(uint32 index = 1; index <= tile_count; index++) 
 		{
 			tiles.push_back(AnimatedTileData());
-			AnimatedTileData& tile_data=tiles.back();
-			tile_data.tile_id=read_data.ReadUInt(index*2-1);
-			tile_data.time=read_data.ReadUInt(index*2);
+			AnimatedTileData& tile_data = tiles.back();
+			tile_data.tile_id = read_data.ReadUInt(index * 2 - 1);
+			tile_data.time = read_data.ReadUInt(index * 2);
 		}
 		read_data.CloseTable();
 	}
-	read_data.CloseTable();
+	read_data.CloseTable();*/
+
+	read_data.CloseFile();
 } // Tileset constructor
 
 Tileset::~Tileset()
@@ -123,7 +144,7 @@ Tileset::~Tileset()
 	delete table;
 } // TilesetTable destructor
 
-void Tileset::Save() {
+/*void Tileset::Save() {
 	std::string dat_filename = "dat/tilesets/" + std::string(tileset_name.toAscii()) + ".lua";
 	std::string img_filename = "img/tilesets/" + std::string(tileset_name.toAscii()) + ".png";
 	WriteScriptDescriptor write_data;
@@ -161,4 +182,4 @@ void Tileset::Save() {
 	write_data.EndTable();
 
 	write_data.CloseFile();
-}
+}*/

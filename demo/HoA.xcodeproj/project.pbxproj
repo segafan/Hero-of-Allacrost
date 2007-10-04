@@ -127,6 +127,7 @@
 		D4E90FDF0C20F7D6004185CF /* QtXml.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D46809960C1E6E66009F76A9 /* QtXml.framework */; };
 		D4E90FE00C20F7E4004185CF /* QtNetwork.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D46809920C1E6E4E009F76A9 /* QtNetwork.framework */; };
 		D4E90FE10C20F7F7004185CF /* QtSql.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = D468098E0C1E6E31009F76A9 /* QtSql.framework */; };
+		D4EDF4E00CB477130064919D /* tileset_editor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4EDF4DE0CB477130064919D /* tileset_editor.cpp */; };
 		D4EE2D640BE85F5B00B7112A /* boot_welcome.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4EE2D630BE85F5B00B7112A /* boot_welcome.cpp */; };
 		D4F110410C58546800ADC969 /* audio_descriptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F110400C58546800ADC969 /* audio_descriptor.cpp */; };
 		D4F1104C0C58548B00ADC969 /* audio_input.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4F110460C58548B00ADC969 /* audio_input.cpp */; };
@@ -324,6 +325,8 @@
 		D4DDE3930C4A15EE00937677 /* battle_actions.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = battle_actions.cpp; sourceTree = "<group>"; };
 		D4DDE3950C4A15FC00937677 /* battle_actions.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = battle_actions.h; sourceTree = "<group>"; };
 		D4E561260BB71B53002FB758 /* defs.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = defs.cpp; sourceTree = "<group>"; };
+		D4EDF4DE0CB477130064919D /* tileset_editor.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = tileset_editor.cpp; sourceTree = "<group>"; };
+		D4EDF4DF0CB477130064919D /* tileset_editor.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = tileset_editor.h; sourceTree = "<group>"; };
 		D4EE2D630BE85F5B00B7112A /* boot_welcome.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = boot_welcome.cpp; sourceTree = "<group>"; };
 		D4EE2D650BE85F6700B7112A /* boot_welcome.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = boot_welcome.h; sourceTree = "<group>"; };
 		D4F110400C58546800ADC969 /* audio_descriptor.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = audio_descriptor.cpp; sourceTree = "<group>"; };
@@ -680,6 +683,8 @@
 		D4D1BA640B02B27F0052BF1E /* editor */ = {
 			isa = PBXGroup;
 			children = (
+				D4EDF4DE0CB477130064919D /* tileset_editor.cpp */,
+				D4EDF4DF0CB477130064919D /* tileset_editor.h */,
 				D4D1BA650B02B27F0052BF1E /* editor.cpp */,
 				D4D1BA660B02B27F0052BF1E /* editor.h */,
 				D4D1BA670B02B27F0052BF1E /* editor_main.cpp */,
@@ -873,6 +878,7 @@
 				D4D1BA700B02B27F0052BF1E /* grid.cpp in Sources */,
 				D4D1BA740B02B3560052BF1E /* socket.cpp in Sources */,
 				D4D1BA720B02B27F0052BF1E /* tileset.cpp in Sources */,
+				D4EDF4E00CB477130064919D /* tileset_editor.cpp in Sources */,
 				D4D1BA730B02B3240052BF1E /* utils.cpp in Sources */,
 				D41AC1DE0C4C7CAE0097B042 /* script.cpp in Sources */,
 				D41AC1DD0C4C7CA60097B042 /* script_modify.cpp in Sources */,
@@ -973,6 +979,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
+					/Library/Frameworks,
 				);
 				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
 				GCC_DEBUGGING_SYMBOLS = full;
@@ -1010,7 +1017,7 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Allacrost;
-				USER_HEADER_SEARCH_PATHS = "";
+				USER_HEADER_SEARCH_PATHS = /Library/Frameworks/SDL.framework/Headers;
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
 			};
@@ -1028,6 +1035,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
+					/Library/Frameworks,
 				);
 				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
 				GCC_AUTO_VECTORIZATION = YES;

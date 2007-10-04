@@ -5,6 +5,12 @@ image = "img/tilesets/mountain_landscape.png"
 num_tile_cols = 16
 num_tile_rows = 16
 
+autotiling = {}
+autotiling[78] = "grass"
+autotiling[79] = "grass"
+autotiling[94] = "grass"
+autotiling[95] = "grass"
+
 walkability = { [0] = {}, [1] = {}, [2] = {}, [3] = {}, 
 		[4]= {}, [5] = {}, [6] = {}, [7] = {},
 		[8] = {}, [9] = {}, [10] = {}, [11] = {}, 

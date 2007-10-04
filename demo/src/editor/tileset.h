@@ -32,11 +32,11 @@
 namespace hoa_editor
 {
 
-	struct AnimatedTileData {
+/*	struct AnimatedTileData {
 		int tile_id;
 		int time;
 	};
-
+*/
 //! Width and height of a tile in pixels.
 const int TILE_WIDTH  = 32;
 const int TILE_HEIGHT = 32;
@@ -53,7 +53,7 @@ class Tileset
 		//! Tileset destructor.
 		~Tileset();
 
-		void Save();
+		//void Save();
 
 		//! The name of the tileset this table is representing.
 		QString tileset_name;
@@ -61,12 +61,14 @@ class Tileset
 		std::vector<hoa_video::StillImage> tiles;
 		//! Contains walkability information for each tile.
 		std::map<int, std::vector<int32> > walkability;
+		//! Contains autotiling information for any autotileable tile.
+		std::map<int, std::string> autotileability;
 		//! Reference to the table implementation of this tileset in the bottom of the editor.
 		Q3Table* table;
 		// TODO: implement some sort of dynamic table resizing on window resize
 
 	private:
-		std::vector<std::vector<AnimatedTileData> > _animated_tiles;
+		//std::vector<std::vector<AnimatedTileData> > _animated_tiles;
 }; // class Tileset
 
 } // namespace hoa_editor
