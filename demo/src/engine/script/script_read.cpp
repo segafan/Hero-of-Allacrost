@@ -45,7 +45,14 @@ ReadScriptDescriptor::~ReadScriptDescriptor() {
 // File Access Functions
 //-----------------------------------------------------------------------------
 
-bool ReadScriptDescriptor::OpenFile(const string& file_name) {
+bool ReadScriptDescriptor::OpenFile(const string& filename) {
+	// check for file extensions
+	string file_name = filename;
+	if (DoesFileExist(file_name + ".lua"))
+		file_name = filename + ".lua";
+	else if (DoesFileExist(file_name + ".hoa"))
+		file_name = filename + ".hoa";
+
 	if (ScriptManager->IsFileOpen(file_name) == true) {
 		if (SCRIPT_DEBUG)
 			cerr << "SCRIPT WARNING: ReadScriptDescriptor::OpenFile() attempted to open file that is already opened: "
