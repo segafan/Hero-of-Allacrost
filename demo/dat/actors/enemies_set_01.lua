@@ -7,7 +7,10 @@
 ------------------------------------------------------------------------------]]
 
 -- All enemy definitions are stored in this table
-enemies = {}
+-- check to see if the enemies table has already been created by another script
+if (_G.enemies == nil) then
+   enemies = {}
+end
 
 enemies[1] = {
 	name = "Green Slime",
