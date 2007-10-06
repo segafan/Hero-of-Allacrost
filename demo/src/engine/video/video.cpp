@@ -796,8 +796,9 @@ StillImage GameVideo::CaptureScreen() throw(Exception) {
 	TextureManager->_images["captured_screen" + NumberToString(capture_id) + "<T>"] = new_image;
 
 	// Store the image element to the saved image (with a flipped y axis)
-	ImageElement element(new_image, screen_image._width, screen_image._height, 0, 0, 0.0f, 1.0f, 1.0f, 0.0f, screen_image._color);
-	screen_image._elements.push_back(element);
+	screen_image._image_texture = new_image;
+	screen_image._texture = new_image;
+	screen_image.SetUVCoordinates(0.0f, 1.0f, 1.0f, 0.0f);
 
 	if (CheckGLError() == true) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "an OpenGL error occurred: " << CreateGLErrorString() << endl;
@@ -1128,9 +1129,9 @@ void GameVideo::DrawGrid(float x, float y, float x_step, float y_step, const Col
 
 
 void GameVideo::DrawRectangle(float width, float height, const Color& color) {
-	_rectangle_image._elements[0].width = width;
-	_rectangle_image._elements[0].height = height;
-	_rectangle_image._elements[0].color[0] = color;
+	_rectangle_image._width = width;
+	_rectangle_image._height = height;
+	_rectangle_image._color[0] = color;
 
 	_rectangle_image.Draw(color);
 }

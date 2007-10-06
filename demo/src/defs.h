@@ -80,6 +80,7 @@ namespace hoa_video {
 	class ImageDescriptor;
 	class StillImage;
 	class AnimatedImage;
+	class CompositeImage;
 
 	class TextureController;
 
@@ -113,10 +114,9 @@ namespace hoa_video {
 		class BaseImageTexture;
 		class ImageTexture;
 		class TextImageTexture;
-		class BaseImageElement;
-		class ImageElement;
 		class TextImageElement;
 		class AnimationFrame;
+		class ImageElement;
 
 		class GUIElement;
 		class GUIControl;

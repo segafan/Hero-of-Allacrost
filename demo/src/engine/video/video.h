@@ -202,14 +202,15 @@ class GameVideo : public hoa_utils::Singleton<GameVideo> {
 	friend class OptionBox;
 	friend class MenuWindow;
 
-	friend class private_video::BaseImageElement;
 	friend class private_video::GUIElement;
 	friend class private_video::FixedTexMemMgr;
 	friend class private_video::VariableTexMemMgr;
 	friend class private_video::TexSheet;
 	friend class private_video::ParticleSystem;
+
+	friend class ImageDescriptor;
 	friend class StillImage;
-	friend class TextImage;
+	friend class CompositeImage;
 	friend class RenderedText;
 
 public:

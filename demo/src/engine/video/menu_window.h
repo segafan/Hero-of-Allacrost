@@ -268,7 +268,7 @@ private:
 	int32 _display_timer;
 
 	//! \brief The image that creates the window
-	StillImage _menu_image;
+	CompositeImage _menu_image;
 
 	//! \brief The window's display mode (instant, expand from center, etc).
 	VIDEO_MENU_DISPLAY_MODE _display_mode;

@@ -21,8 +21,7 @@
 *** code.
 ***
 *** - <b>StillImage</b> is a single non-animated image and is what the user
-*** will utilize most of the time. A StillImage can be composed of multiple
-*** image elements to form a composite image.
+*** will utilize most of the time.
 ***
 *** - <b>AnimatedImage</b> is an animated image that contains multiple frames,
 *** where a frame is a StillImage object along with timing information.
@@ -32,18 +31,16 @@
 *** This class is contained in the private_video namespace and is not a part
 *** of the image manipulation API.
 ***
-*** \note A composite image (also referred to as a compound image) is a
-*** StillImage object with multiple image elements that work together to create
-*** the resulting image. For example, a triangle can be drawn by putting together
-*** two image elements that contain the left and right halves of a triangle.
-*** The image elements are all placed next to one another and do not overlap.
+*** - <b>CompositeImage</b> is an image formed by piecing together multiple
+*** StillImage objects. The image elements in a composite image may or may
+*** not overlap one another
 ***
-*** \note A multi image is nothing more than a single image file which contains
-*** multiple adjacent sub-images within it. For example, a tileset file contains
-*** numerous tile images. All sub-images are required to have the same dimensions
-*** in a multi image file. Multi images are never explicitly contained in any
-*** way by the video engine -- rather, these multi images are loaded into memory
-*** and then the sub-images are split up into separate StillImage objects.
+*** \note A <b>multi image</b> is nothing more than a single image file which
+*** contains multiple adjacent sub-images within it. For example, a tileset file
+*** contains numerous tile images. All sub-images are required to have the same
+*** dimensions in a multi image file. Multi images are never explicitly contained
+*** in any way by the video engine -- rather, these multi images are loaded into
+*** memory and then the sub-images are split up into separate StillImage objects.
 *** ***************************************************************************/
 
 #ifndef __IMAGE_HEADER__
@@ -71,6 +68,18 @@ namespace hoa_video {
 *** tileset file, or multiple animation frames stored in a single image file.
 *** All individual image elements in a multi image are required to be the same
 *** size.
+***
+*** \note The copy constructor and copy assignement operator ensure that the
+*** reference to the image texure being used is updated appropriately. The
+*** derived classes should not require the implementation of a copy constructor
+*** or assignment operator, at least not for the purposes of proper reference
+*** counting.
+***
+*** \note If the destructor finds that the image texture has no more references
+*** after it decrements the reference counter, it will mark it as free on the
+*** image texture's texture sheet. However it will <b>not</b> attempt to remove
+*** it from any container in the TextureManager class, so that is up to the
+*** destructors of the derived classes to implement.
 *** ***************************************************************************/
 class ImageDescriptor {
 	friend class GameVideo;
@@ -78,8 +87,11 @@ class ImageDescriptor {
 public:
 	ImageDescriptor();
 
-	virtual ~ImageDescriptor()
-		{}
+	virtual ~ImageDescriptor();
+
+	ImageDescriptor(const ImageDescriptor& copy);
+
+	ImageDescriptor& operator=(const ImageDescriptor& copy);
 
 	//! \brief Clears all data retained by the object (color, width, height, etc.)
 	virtual void Clear() = 0;
@@ -109,13 +121,6 @@ public:
 	bool IsGrayScale() const
 		{ return _grayscale; }
 
-	/** \brief Returns true if the image is animated.
-	*** \note This can also be used to determine whether an ImageDescriptor pointer is a StillImage
-	*** or an AnimatedImage. This would be a better solution than trying to do a dynamic_cast on
-	*** the pointer.
-	**/
-	virtual bool IsAnimated() const = 0;
-
 	/** \brief Enables or disables the image's static property
 	*** \param is_static If true, the image will be made static
 	**/
@@ -137,10 +142,21 @@ public:
 	**/
 	virtual void SetDimensions(float width, float height) = 0;
 
+	/** \brief Sets the UV coordinates for the image
+	*** \param u1 First u coordinate
+	*** \param v1 First v coordinate
+	*** \param u2 Second u coordinate
+	*** \param v2 Second v coordinate
+	***
+	*** This method rarely needs to be called, as the default UV coordinates suffice
+	*** for nearly all images.
+	**/
+	virtual void SetUVCoordinates(float u1, float v1, float u2, float v2) = 0;
+
 	/** \brief Sets the image's four vertices to a single color
 	*** \param color The desired color of all image vertices
 	**/
-	virtual void SetColor(const Color& color) = 0;
+	virtual void SetColor(const Color& color);
 
 	/** \brief Sets the image's vertex colors
 	*** \param tl The top left vertex color
@@ -148,7 +164,7 @@ public:
 	*** \param bl The bottom left vertex color
 	*** \param br The bottom right vertex color
 	**/
-	virtual void SetVertexColors(const Color& tl, const Color& tr, const Color& bl, const Color& br) = 0;
+	virtual void SetVertexColors(const Color& tl, const Color& tr, const Color& bl, const Color& br);
 	//@}
 
 	/** \name Static Image Manipulation Functions
@@ -163,7 +179,7 @@ public:
 	*** \param bpp The number of bits per pixel of the image
 	*** \throw Exception If any of the properties are not retrieved successfully
 	**/
-	static void GetImageInfo(const std::string& filename, uint32& rows, uint32& cols, uint32& bpp);
+	static void GetImageInfo(const std::string& filename, uint32& rows, uint32& cols, uint32& bpp) throw(hoa_utils::Exception);
 
 	/** \brief Loads a multi image into a vector of StillImage objects
 	*** \param images Reference to the vector of StillImages to be loaded with elements from the multi image
@@ -202,7 +218,7 @@ public:
 	*** \param grid_rows The number of rows of sub-images in the MultiImage.
 	*** \param grid_cols Number of columns of sub-images in the MultiImage.
 	*** \return True upon successful loading, false if there was an error
-	*** \note All image elements within the images vector should be of the same size
+	*** \note All images within the images vector should be of the same size
 	**/
 	static bool SaveMultiImage(const std::vector<StillImage*>& images, const std::string& filename,
 		const uint32 grid_rows, const uint32 grid_cols);
@@ -212,14 +228,28 @@ public:
 	void DEBUG_PrintInfo();
 
 protected:
-	/** \brief The width and height of the image, in coordinate system units.
-	*** If this represents a compound StillImage, (i.e. it is a composite image of multiple image elements)
-	*** then the width and height refer to the composite image as a whole
+	/** \brief A pointer to the texture used by the image
+	*** The purpose of this member is for the ImageDescriptor class to be able to manage 
 	**/
+	private_video::BaseImageTexture* _texture;
+
+	//! \brief The width and height of the image, in coordinate system units.
 	float _width, _height;
+
+	/** \brief The texture coordinates for the image
+	*** (u1, v1) represents the upper-left corner while (u2, v2) represents the bottom-right corner. These coordinates
+	*** are typically (0.0f, 0.0f), (1.0f, 1.0f) and do not need to be modified except in special cases.
+	**/
+	float _u1, _v1, _u2, _v2;
 
     //! \brief Holds the color of the upper left, upper right, lower left, and lower right vertices, respectively.
 	Color _color[4];
+
+	//! \brief True indicates to perform blending with this image
+	bool _blend;
+
+	//! \brief Set to true if all vertices are the same color
+	bool _unichrome_vertices;
 
 	//! \brief Indicates whether the image being loaded should be loaded into a non-volatile area of texture memory.
 	bool  _is_static;
@@ -227,8 +257,26 @@ protected:
 	//! \brief True if this image is grayscale.
 	bool _grayscale;
 
-	//! \brief Flag indicating if the image is already loaded
-	bool _loaded;
+	/** \brief Removes a reference to a texture, and frees or deletes it if it has no remaining references
+	*** \param texture A pointer to the texture to remove a reference from
+	*** \param null_base_ptr If true, the _texture member of the class will be set to NULL (default value = true)
+	***
+	*** After calling this function, you should make sure to set the pointer that you passed in as an argument
+	*** to be NULL or immediately re-assign it to point to another texture object. Failing to observe this
+	*** can lead to devastating problems, such as referring to freed memory.
+	**/
+	void _RemoveTextureReference(private_video::BaseImageTexture* texture, bool null_base_ptr = true);
+
+	/** \brief Draws the OpenGL texture referred to by the object on the screen
+	*** \param draw_color A non-NULL pointer to an array of four valid Color objects
+	***
+	*** This method is typically a helper method to other draw calls in some way. It assumes that
+	*** all of the appropriate transformation, scaling, and other image property opertaions have been
+	*** completed prior to the calling of this function. The draw_color argument is usually nothing
+	*** more than a pointer to the _color member of this very class, but in certain cases like during
+	*** a screen fade these colors may differ.
+	**/
+	void _DrawTexture(const Color* draw_color) const;
 
 private:
 	/** \brief Retrieves various properties about a PNG image file
@@ -238,7 +286,7 @@ private:
 	*** \param bpp The number of bits per pixel of the image
 	*** \throw Exception If any of the properties are not retrieved successfully
 	**/
-	static void _GetPngImageInfo(const std::string& filename, uint32& rows, uint32& cols, uint32& bpp);
+	static void _GetPngImageInfo(const std::string& filename, uint32& rows, uint32& cols, uint32& bpp) throw(hoa_utils::Exception);
 
 	/** \brief Retrieves various properties about a JPG image file
 	*** \param filename The name of the JPG image file to retrieve the properties of
@@ -247,7 +295,7 @@ private:
 	*** \param bpp The number of bits per pixel of the image
 	*** \throw Exception If any of the properties are not retrieved successfully
 	**/
-	static void _GetJpgImageInfo(const std::string& filename, uint32& rows, uint32& cols, uint32& bpp);
+	static void _GetJpgImageInfo(const std::string& filename, uint32& rows, uint32& cols, uint32& bpp) throw(hoa_utils::Exception);
 
 	/** \brief A helper function to the public LoadMultiImage* calls
 	*** \param images Reference to the vector of StillImages to be loaded
@@ -262,18 +310,17 @@ private:
 
 
 /** ****************************************************************************
-*** \brief Represents a simple or compound still image
+*** \brief Represents a simple still image
 ***
-*** This is the most frequently used image construct of the video engine.
-*** A StillImage may be a composite/compound image if it is an image that is
-*** comprised of multiple image elements (smaller sub-images).
-***
-*** \todo Add a routine that returns a vector of strings of filenames for each
-*** element contained by the image.
+*** This is the most frequently used image construct of the video engine. Objects
+*** of this class are used in the construction of some of the more advanced image
+*** classes.
 *** ***************************************************************************/
 class StillImage : public ImageDescriptor {
 	friend class GameVideo;
 	friend class ImageDescriptor;
+	friend class AnimatedImage;
+	friend class CompositeImage;
 	friend class TextureController;
 	friend class private_video::ParticleSystem;
 
@@ -281,8 +328,7 @@ public:
 	//! \brief Supply the constructor with "true" if you want this to represent a grayscale image
 	StillImage(const bool grayscale = false);
 
-	~StillImage()
-		{}
+	~StillImage();
 
 	//! \brief Resets the image's properties and removes any references to image data that it maintains
 	void Clear();
@@ -299,7 +345,7 @@ public:
 	bool Load(const std::string& filename);
 
 	bool Load(const std::string& filename, float width, float height)
-		{ _elements.clear(); SetDimensions(width, height); return Load(filename); }
+		{ SetDimensions(width, height); return Load(filename); }
 
 	//! \brief Draws the image to the screen
 	void Draw() const;
@@ -324,42 +370,8 @@ public:
 	//! \brief Disables grayscaling for the image then reloads it
 	void DisableGrayScale();
 
-	/** \brief Allows the user to create composite images by adding multiple image elements
-	*** \param img The image to add to the composite image.
-	*** \param x_offset The x offset of the composite image.
-	*** \param y_offset The y offset of the composite image.
-	*** \param u1 The upper-left u coordinate for the image. The default is 0.0f.
-	*** \param v1 The upper-left v coordinate for the image. The default is 0.0f.
-	*** \param u2 The lower-right u coordinate for the image. The default is 1.0f.
-	*** \param v2 The lower-right v coordinate for the image. The default is 1.0f.
-	***
-	*** Starting with a newly created StillImage, call AddImage(), for all of the images you wish
-	*** to add, along with the x and y offsets that they should be positioned at. The u1, v1, u2, v2
-	*** coordinates tell which portion of the image to use (usually 0.0f, 0.0f, 1.0f, 1.0f)
-	**/
-	void AddImage(const StillImage& img, float x_offset, float y_offset, float u1 = 0.0f, float v1 = 0.0f,
-		float u2 = 1.0f, float v2 = 1.0f);
-
-	/** \brief Creates a single composite image from a 2D array of like-sized images
-	*** \param tiles A 1D vector of StillImage objects that will be used to construct the composite image
-	*** \param indeces A 2D vector in row-column order (e.g. indices[y][x]) with indeces into the tiles vector
-	***
-	*** This method is useful for constructing variable-sized objects within a map from multiple smaller tile
-	*** images. The StillImage object that this method is invoked upon will be cleared prior to constructing
-	*** the composite image.
-	***
-	*** \note This should be obvious, but don't include "this" StillImage object inside the tiles argument vector
-	*** \note All StillImages in the tiles vector should have the same dimensions
-	*** \note Every vector row in indeces must be the same size
-	*** \note Every index element (indices[y][x]) should range from 0 to tiles.size() - 1
-	**/
-	void ConstructCompositeImage(const std::vector<StillImage>& tiles, const std::vector<std::vector<uint32> >& indeces);
-
 	//! \name Class Member Access Functions
 	//@{
-	bool IsAnimated() const
-		{ return false; }
-
 	//! \brief Returns the filename string for the image
 	const std::string& GetFilename() const
 		{ return _filename; }
@@ -372,23 +384,17 @@ public:
 	void GetVertexColor(Color& c, uint8 index)
 		{ if (index > 3) return; else c = _color[index]; }
 
-	//! \brief Returns an image element at a specified index, or NULL if the index is invalid
-	const private_video::BaseImageElement* GetElement(uint32 index) const
-		{ if (index >= GetNumElements()) return NULL; else return &(_elements[index]); }
-
-	//! \brief Retuns the number of image elements contained within the image
-	uint32 GetNumElements() const
-		{ return _elements.size(); }
-
 	/** \brief Sets width of the image
 	*** \param width Width of the image
 	**/
-	void SetWidth(float width);
+	void SetWidth(float width)
+		{ _width = width; }
 
 	/** \brief Sets height of the image
 	*** \param height Height of the image
 	**/
-	void SetHeight(float height);
+	void SetHeight(float height)
+		{ _height = height; }
 
 	/** \brief Sets the dimensions of the image for a desired coordinate system
 	*** \param width The width of the image
@@ -397,26 +403,14 @@ public:
 	void SetDimensions(float width, float height)
 		{ SetWidth(width); SetHeight(height); }
 
+	void SetUVCoordinates(float u1, float v1, float u2, float v2)
+		{}
+
 	/** \brief Sets image to static/animated
 	***	\param is_static Flag indicating whether the image should be made static or not
 	**/
 	void SetStatic(bool is_static)
 		{ _is_static = is_static; }
-
-	/** \brief Sets the color for the image (for all four verteces).
-	***	\param color Colors for the 4 vertex of the image
-	**/
-	void SetColor(const Color &color)
-		{ _color[0] = _color[1] = _color[2] = _color[3] = color; }
-
-	/** \brief Sets individual vertex colors in the image.
-	*** \param tl top left vertex color
-	*** \param tr top right vertex color
-	*** \param bl bottom left vertex color
-	*** \param br bottom right vertex color
-	**/
-	void SetVertexColors(const Color &tl, const Color &tr, const Color &bl, const Color &br)
-		{ _color[0] = tl; _color[1] = tr; _color[2] = bl; _color[3] = br; }
 	//@}
 
 protected:
@@ -427,12 +421,10 @@ protected:
 	**/
 	std::string _filename;
 
-	/** \brief The list of internal image elements that compose this StillImage
-	*** If the StillImage is not a composite image, then this vector will contain only
-	*** a single element
-	**/
-	std::vector<private_video::ImageElement> _elements;
+	//! \brief The texture image that is referenced by this element
+	private_video::ImageTexture* _image_texture;
 }; // class StillImage : public ImageDescriptor
+
 
 
 namespace private_video {
@@ -449,7 +441,27 @@ public:
 	StillImage image;
 }; // class AnimationFrame
 
+
+/** ****************************************************************************
+*** \brief Represents a single element in a composite image
+*** ***************************************************************************/
+class ImageElement {
+public:
+	ImageElement() :
+		x_offset(0.0f), y_offset(0.0f) {}
+
+	ImageElement(const StillImage& img, float x, float y) :
+		image(img), x_offset(x), y_offset(y) {}
+
+	//! \brief The singular image that represents this element
+	StillImage image;
+
+	//! \brief X and y draw position offsets of this element
+	float x_offset, y_offset;
+}; // class ImageElement
+
 } // namespace private_video
+
 
 /** ****************************************************************************
 *** \brief Represents an animated image with both frames and timing information
@@ -576,9 +588,6 @@ public:
 
 	//! \name Class Member Access Functions
 	//@{
-	bool IsAnimated() const
-		{ return true; }
-
 	//! \brief Returns the number of frames in this animation
 	uint32 GetNumFrames() const
 		{ return _frames.size(); }
@@ -634,8 +643,11 @@ public:
 	**/
 	void SetDimensions(float width, float height);
 
+	void SetUVCoordinates(float u1, float v1, float u2, float v2)
+		{}
+
 	/** \brief Sets the static member for all animation frame images
-	*** \param is_static Flag indicating wether the image will be static or not.
+	*** \param is_static Flag indicating whether the image will be static or not.
 	*** \note If the frames are already loaded, it doesn't bother to try to unload them
 	*** and then reload them again statically.
 	**/
@@ -713,6 +725,120 @@ private:
 	//! \brief The vector of animation frames (contains both images and timing)
 	std::vector<private_video::AnimationFrame> _frames;
 }; // class AnimatedImage : public ImageDescriptor
+
+
+/** ****************************************************************************
+*** \brief Represents a composite image created from multiple image elements
+***
+*** A composite image is created by taking multiple StillImage objects and
+*** "stitching" them together to represent a singular image object. Each image
+*** element has x and y offsets that determine where the image is located in
+*** the composite image. A good example usage of this class can be found in the
+*** MenuWindow class, where a window is represented as a composite image and
+*** created by attaching multiple border images together to create the window.
+***
+*** \note Because this class references other StillImage objects, it's _texture
+*** member is always NULL, since the class itself does not make use of any
+*** textures.
+*** ***************************************************************************/
+class CompositeImage : public ImageDescriptor {
+public:
+	CompositeImage()
+		{}
+
+	~CompositeImage()
+		{}
+
+	//! \brief Removes all image elements held by this class
+	void Clear();
+
+	/** \brief Draws the image to the display buffer
+	*** The location and orientation of the drawn image is dependent upon the current cursor position
+	*** and context (draw flags) set in the GameVideo class.
+	**/
+	void Draw() const;
+
+	/** \brief Draws a color modulated version of the image to the display buffer
+	*** \param draw_color The color to modulate the image by
+	**/
+	void Draw(const Color& draw_color) const;
+
+	/** \brief Sets the static member for all future element images
+	*** \param is_static Flag indicating whether the image will be static or not
+	*** \note If the elements are already loaded, it doesn't bother to try to unload them
+	*** and then reload them again statically.
+	**/
+	void SetStatic(bool is_static)
+		{ _is_static = is_static; }
+
+	/** \brief Sets the image's width, expressed as coordinate system units
+	*** \param width The desired width of the image
+	**/
+	void SetWidth(float width);
+
+	/** \brief Sets the image's height, expressed as coordinate system units
+	*** \param height The desired height of the image
+	**/
+	void SetHeight(float height);
+
+	/** \brief Sets the image's dimensions, expressed as coordinate system units
+	*** \param width The desired width of the image
+	*** \param height The desired height of the image
+	**/
+	void SetDimensions(float width, float height)
+		{ SetWidth(width); SetHeight(height); }
+
+	void SetUVCoordinates(float u1, float v1, float u2, float v2)
+		{}
+
+	/** \brief Sets the image's four vertices to a single color
+	*** \param color The desired color of all image vertices
+	**/
+	void SetColor(const Color& color);
+
+	/** \brief Sets the image's vertex colors
+	*** \param tl The top left vertex color
+	*** \param tr The top right vertex color
+	*** \param bl The bottom left vertex color
+	*** \param br The bottom right vertex color
+	**/
+	void SetVertexColors(const Color& tl, const Color& tr, const Color& bl, const Color& br);
+	
+	/** \brief Adds a new image element to the composite image
+	*** \param img The image to add to the composite image.
+	*** \param x_offset The x offset of the composite image.
+	*** \param y_offset The y offset of the composite image.
+	*** \param u1 The upper-left u coordinate for the image. The default is 0.0f.
+	*** \param v1 The upper-left v coordinate for the image. The default is 0.0f.
+	*** \param u2 The lower-right u coordinate for the image. The default is 1.0f.
+	*** \param v2 The lower-right v coordinate for the image. The default is 1.0f.
+	***
+	*** Starting with a newly created StillImage, call AddImage(), for all of the images you wish
+	*** to add, along with the x and y offsets that they should be positioned at. The u1, v1, u2, v2
+	*** coordinates tell which portion of the image to use (usually 0.0f, 0.0f, 1.0f, 1.0f)
+	**/
+	void AddImage(const StillImage& img, float x_offset, float y_offset, float u1 = 0.0f, float v1 = 0.0f,
+		float u2 = 1.0f, float v2 = 1.0f);
+
+	/** \brief Creates a single composite image from a 2D array of like-sized images
+	*** \param tiles A 1D vector of StillImage objects that will be used to construct the composite image
+	*** \param indeces A 2D vector in row-column order (e.g. indices[y][x]) with indeces into the tiles vector
+	***
+	*** This method is useful for constructing variable-sized objects within a map from multiple smaller tile
+	*** images. The StillImage object that this method is invoked upon will be cleared prior to constructing
+	*** the composite image.
+	***
+	*** \note This should be obvious, but don't include "this" StillImage object inside the tiles argument vector
+	*** \note All StillImages in the tiles vector should have the same dimensions
+	*** \note Every vector row in indeces must be the same size
+	*** \note Every index element (indices[y][x]) should range from 0 to tiles.size() - 1
+	**/
+// 	void ConstructCompositeImage(const std::vector<ImageElement>& tiles, const std::vector<std::vector<uint32> >& indeces);
+
+private:
+	//! \brief A container for each element in the composite image
+	std::vector<private_video::ImageElement> _elements;
+}; // class CompositeImage : public ImageDescriptor
 
 }  // namespace hoa_video
 

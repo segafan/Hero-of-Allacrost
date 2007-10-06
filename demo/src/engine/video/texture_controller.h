@@ -47,7 +47,6 @@ class TextureController : public hoa_utils::Singleton<TextureController> {
 	friend class StillImage;
 	friend class private_video::ImageTexture;
 	friend class private_video::TextImageTexture;
-	friend class private_video::BaseImageElement;
 	friend class TextSupervisor;
 	friend class RenderedText;
 	friend class private_video::TexSheet;
@@ -121,7 +120,7 @@ private:
 	**/
 	void _BindTexture(GLuint tex_id);
 
-	/** \brief A wrapper to glDeleteTextures() that also adds checking to eliminate redundant texture binding 
+	/** \brief A wrapper to glDeleteTextures() that also adds checking to eliminate redundant texture binding
 	*** \param tex_id The integer handle to the OpenGL texture to delete
 	 */
 	void _DeleteTexture(GLuint tex_id);
