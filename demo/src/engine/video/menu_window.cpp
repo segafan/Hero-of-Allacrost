@@ -446,7 +446,7 @@ bool MenuWindow::_RecreateImage() {
 				if (y + height > max_y)
 					v = (max_y - y) / height;
 
-				_menu_image.AddImage(_skin->background, x, y, 0, 0, u, v);
+				_menu_image.AddImage(_skin->background, x, y, 0.0f, 0.0f, u, v);
 			}
 		}
 	}
@@ -454,8 +454,6 @@ bool MenuWindow::_RecreateImage() {
 		// Otherwise re-create the overlay at the correct width and height
 		_skin->borders[1][1].SetDimensions(_inner_width, _inner_height);
 		_skin->borders[1][1].SetVertexColors(c[0], c[1], c[2], c[3]);
-// 		VideoManager->LoadImage(_skin->borders[1][1]);
-
 		_menu_image.AddImage(_skin->borders[1][1], left_border_size, bottom_border_size);
 	}
 

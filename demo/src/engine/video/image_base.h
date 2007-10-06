@@ -23,23 +23,12 @@
 ***
 *** - <b>BaseImageTexture</b> describes a sub-rectangle contained within a
 *** texture sheet. In other words, it can essentially be viewed as a pointer
-*** to an image's location in texture memory. Pointers of this type are
-*** referenced in the ImageElement line of classes, and are used throughout
-*** the texture management code. It is an abstract class.
+*** to an image's location in texture memory. It is an abstract class.
 ***
 *** - <b>ImageTexture</b> derives from BaseImageTexture and adds a filename
 *** and tag information to the member data. This is used to internally
 *** represent an image that has been loaded from a file and any special
 *** properties of that image data.
-***
-*** - <b>BaseImageElement</b> is an abstract class that is used by the public
-*** set of image classes to refer to ImageTexture types. In other words, it
-*** is an intermediary medium between the API for images and the ImageTexture
-*** set of classes. These elements are combined together in the public image
-*** classes to create composite images.
-***
-*** - <b>ImageElement</b> contains a pointer to an ImageTexture type. It is
-*** used internally by the public StillImage class.
 ***
 *** \note There are more derived classes from this set in other areas of the
 *** code. In particular, there is a TextImageTexture and TextImageElement class
@@ -292,119 +281,6 @@ private:
 	ImageTexture(const ImageTexture& copy);
 	ImageTexture& operator=(const ImageTexture& copy);
 }; // class ImageTexture : public BaseImageTexture
-
-
-/** ****************************************************************************
-*** \brief An abstract base class representing an image element
-***
-*** Image elements represent two things: a pointer to an ImageTexture, and
-*** information about this element's position in relationship to other elements.
-*** The purpose of this class is to allow the public image API classes
-*** (StillImage, etc.) to be able to manage "composite" images consisting of
-*** many different "elements". So really, this class is a facilitator in the
-*** construction and management of composite images. Non-composite images
-*** require only one image element.
-***
-*** \note This class is abstract because it does not contain any type of image
-*** texture pointers, although there are methods defined to retrieve those
-*** pointers from the derived classes.
-***
-*** \note The copy constructor and copy assignement operator ensure that the
-*** reference to the image texure being used is updated appropriately. The
-*** derived classes should not require the implementation of a copy constructor
-*** or assignment operator, at least not for the purposes of proper reference
-*** counting.
-***
-*** \note If the destructor finds that the image texture has no more references
-*** after it decrements the reference counter, it will mark it as free on the
-*** image texture's texture sheet. However it will <b>not</b> attempt to remove
-*** it from any container in the TextureManager class, so that is up to the
-*** destructors of the derived classes to implement.
-*** ***************************************************************************/
-class BaseImageElement {
-	friend class AnimatedImage;
-
-public:
-	//! \brief Constructor that set the element to have all white vertices and disables blending
-	BaseImageElement(float width_, float height_, float x_offset_, float y_offset_,
-		float u1_, float v1_, float u2_, float v2_);
-
-	BaseImageElement(float width_, float height_, float x_offset_, float y_offset_,
-		float u1_, float v1_, float u2_, float v2_, Color color_[4]);
-
-	virtual ~BaseImageElement();
-
-	BaseImageElement(const BaseImageElement& copy);
-
-	BaseImageElement& operator=(const BaseImageElement& copy);
-
-	// ---------- Public members
-
-	//! \brief The dimenions of the imag element, in coordinate system units
-	float width, height;
-
-	//! \brief The draw position offsets of the element
-	float x_offset, y_offset;
-
-	/** \brief The texture coordinates for the image element
-	*** (u1, v1) represents the upper-left corner while (u2, v2) represents
-	*** the bottom-right corner.
-	**/
-	float u1, v1, u2, v2;
-
-	//! \brief The colors of each of the four image vertices (tl, tr, bl, br)
-	Color color[4];
-
-	//! \brief True indicates to perform blending with this element
-	bool blend;
-
-	//! \brief Set to true if all vertices are the same color
-	bool unichrome_vertices;
-
-	//! \brief Set to true if all vertices are white in color
-	bool white_vertices;
-
-	//! \brief A pointer to the element's texture image, or NULL if it does not have one
-	BaseImageTexture* base_image;
-
-	// ---------- Public methods
-
-	/** \brief Draws the image element at the appropriate position
-	*** \param color_array A pointer to a 4-element array of vertex colors to draw (default value == NULL)
-	***
-	*** The reason this function takes a color_array pointer is to allow support for modulation
-	*** of colors. In other words, this allows us to fade images to blackness or alter the
-	*** amount of transparency. When no modulation is taking place, this function should be
-	*** called with no argument, which will then cause the element to use its own vertex
-	*** colors to draw the element.
-	**/
-	void Draw(const Color* color_array = NULL) const;
-
-	//! \brief A debug function which prints the image element's properties to standard output
-	void DEBUG_PrintInfo();
-}; // class BaseImageElement
-
-
-/** ****************************************************************************
-*** \brief Represents a single image element within an StillImage object
-***
-*** This class is used soley for ImageTexture data and is used to support
-*** multiple image elements in the StillImage class.
-*** ***************************************************************************/
-class ImageElement : public BaseImageElement {
-public:
-	//! \brief Constructor that set the element to have all white vertices and disables blending
-	ImageElement(ImageTexture* image_, float width_, float height_, float x_offset_, float y_offset_,
-		float u1_, float v1_, float u2_, float v2_);
-
-	ImageElement(ImageTexture* image_, float width_, float height_, float x_offset_, float y_offset_,
-		float u1_, float v1_, float u2_, float v2_, Color color_[4]);
-
-	// ---------- Public members
-
-	//! \brief The texture image that is referenced by this element
-	ImageTexture* image;
-}; // class ImageElement : public BaseImageElement
 
 } // namespace private_video
 

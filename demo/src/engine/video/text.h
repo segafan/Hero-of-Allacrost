@@ -193,7 +193,7 @@ private:
 /** ****************************************************************************
 *** \brief A text specific subclass of the BaseImageElement subclass.
 *** ***************************************************************************/
-class TextImageElement : public private_video::BaseImageElement {
+class TextImageElement {
 public:
 	//! \brief Constructor defaulting the element to have white vertices and disabled blending.
 	TextImageElement(TextImageTexture* image_, float x_offset_, float y_offset_, float u1_, float v1_,
@@ -207,11 +207,21 @@ public:
 	//! \brief The image that is being referenced by this object.
 	TextImageTexture* image;
 
-	//! \brief The x offset from the line proper
-	float x_line_offset;
+	float width, height;
 
-	//! \brief The y offset from the line proper
-	float y_line_offset;
+	float u1, v1, u2, v2;
+
+	//! \brief The draw position offsets of the element
+	float x_offset, y_offset;
+
+	//! \brief The x and y offsets from the line proper
+	float x_line_offset, y_line_offset;
+
+	Color color[4];
+
+	bool blend;
+
+	bool unichrome_vertices;
 }; // class TextImageElement : public private_video::BaseImageElement
 
 } // namespace private_video
@@ -280,6 +290,9 @@ public:
 	virtual void SetDimensions(float width, float height)
 		{ _width  = width; _height = height; }
 
+	void SetUVCoordinates(float u1, float v1, float u2, float v2)
+		{}
+
 	//! \brief Sets image to static/animated
 	virtual void SetStatic(bool is_static)
 		{ _is_static = is_static; }
@@ -300,9 +313,6 @@ public:
 
 	//! \name Class Member Get Functions
 	//@{
-	bool IsAnimated() const
-		{ return false; }
-	
 	//! \brief Returns the filename of the image.
 	hoa_utils::ustring GetString() const
 		{ return _string; }
@@ -314,14 +324,7 @@ public:
 	**/
 	void GetVertexColor(Color &c, uint8 index)
 		{ if (index > 3) return; else c = _color[index]; }
-
 	//@}
-
-	//! \brief Virtual method to retrieve a drawable base class element
-	virtual const private_video::BaseImageElement *GetElement(uint32 index) const;
-
-	//! \brief Virtual method to retrieve number of drawable base class elements
-	virtual uint32 GetNumElements() const;
 
 	//! \brief Returns the text's style.
 	TextStyle GetStyle() const;

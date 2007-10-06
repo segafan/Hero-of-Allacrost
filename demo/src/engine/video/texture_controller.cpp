@@ -40,8 +40,11 @@ TextureController::TextureController() :
 
 TextureController::~TextureController() {
 	IF_PRINT_DEBUG(VIDEO_DEBUG) << "Deleting all remaining ImageTextures, a total of: " << _images.size() << endl;
-	for (map<string, ImageTexture*>::iterator i = _images.begin(); i != _images.end(); i++) {
-		delete i->second;
+
+	// Invoking the ImageTexture destructor will erase the entry in the _images map that corresponds to that object
+	// Thus the map will decrement in size by one on every iteration through this loop
+	while (_images.empty() == false) {
+		delete (*_images.begin()).second;
 	}
 
 	IF_PRINT_DEBUG(VIDEO_DEBUG) << "Deleting all remaining texture sheets, a total of: " << _tex_sheets.size() << endl;

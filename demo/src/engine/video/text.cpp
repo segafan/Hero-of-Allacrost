@@ -155,20 +155,50 @@ bool TextImageTexture::Reload()
 
 TextImageElement::TextImageElement(TextImageTexture *image_, float x_offset_, float y_offset_, float u1_, float v1_,
 	float u2_, float v2_, float width_, float height_) :
-	BaseImageElement(width_, height_, x_offset_, y_offset_, u1_, v1_, u2_, v2_),
-	image(image_)
+	image(image_),
+	width(width_),
+	height(height_),
+	u1(u1_),
+	v1(v1_),
+	u2(u2_),
+	v2(v2_),
+	x_offset(x_offset_),
+	y_offset(y_offset_),
+	x_line_offset(0.0f),
+	y_line_offset(0.0f),
+	blend(false),
+	unichrome_vertices(true)
 {
-	base_image = image_;
+	color[0] = Color::white;
+	color[1] = Color::white;
+	color[2] = Color::white;
+	color[3] = Color::white;
 }
 
 
 
 TextImageElement::TextImageElement(TextImageTexture *image_, float x_offset_, float y_offset_, float u1_, float v1_,
 		float u2_, float v2_, float width_, float height_, Color color_[4]) :
-	BaseImageElement(width_, height_, x_offset_, y_offset_, u1_, v1_, u2_, v2_, color_),
-	image(image_)
+	image(image_),
+	width(width_),
+	height(height_),
+	u1(u1_),
+	v1(v1_),
+	u2(u2_),
+	v2(v2_),
+	x_offset(x_offset_),
+	y_offset(y_offset_),
+	x_line_offset(0.0f),
+	y_line_offset(0.0f),
+	blend(false),
+	unichrome_vertices(true)
 {
-	base_image =  image_;
+	color[0] = color_[0];
+	color[1] = color_[1];
+	color[2] = color_[2];
+	color[3] = color_[3];
+
+	// TODO: check the color argument to determine value to set blend and unichrome_vertices
 }
 
 } // namespace private_video
@@ -274,25 +304,6 @@ void RenderedText::Clear() {
 	SetColor(Color::white);
 }
 
-//-----------------------------------------------------------------------------
-// GetElement: Gets the array referenced generic BaseImageElement for drawing
-//-----------------------------------------------------------------------------
-
-const private_video::BaseImageElement *RenderedText::GetElement(uint32 index) const
-{
-	if (index >= GetNumElements())
-		return NULL;
-	return &_text_sections[index];
-}
-
-//-----------------------------------------------------------------------------
-// GetNumElements: Gets the number of drawable elements contained
-//-----------------------------------------------------------------------------
-
-uint32 RenderedText::GetNumElements() const
-{
-	return _text_sections.size();
-}
 
 //-----------------------------------------------------------------------------
 // SetAlignment: Sets the horizontal text alignment of a RenderedText

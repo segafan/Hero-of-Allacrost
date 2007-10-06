@@ -582,7 +582,14 @@ ImageTexture::ImageTexture(const string& filename_, const string& tags_, int32 w
 	BaseImageTexture(width_, height_),
 	filename(filename_),
 	tags(tags_)
-{}
+{
+	if (VIDEO_DEBUG) {
+		if (TextureManager->_images.find(filename + tags) != TextureManager->_images.end())
+			PRINT_WARNING << "constructor invoked when ImageTexture was already referenced for: " << filename << tags << endl;
+	}
+
+	TextureManager->_images[filename + tags] = this;
+}
 
 
 
@@ -590,16 +597,18 @@ ImageTexture::ImageTexture(TexSheet* texture_sheet_, const string& filename_, co
 	BaseImageTexture(texture_sheet_, width_, height_),
 	filename(filename_),
 	tags(tags_)
-{}
+{
+	if (VIDEO_DEBUG) {
+		if (TextureManager->_images.find(filename + tags) != TextureManager->_images.end())
+			PRINT_WARNING << "constructor invoked when ImageTexture was already referenced for: " << filename << tags << endl;
+	}
+
+	TextureManager->_images[filename + tags] = this;
+}
 
 
 
 ImageTexture::~ImageTexture() {
-	if (TextureManager->_images.empty()) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "TextureManager _images container was empty upon destructor invocation" << endl;
-		return;
-	}
-
 	// Search the map of images in the TextureManager for this instance and remove it
 	for (map<string, ImageTexture*>::iterator i = (TextureManager->_images.begin()); i != (TextureManager->_images.end()); i++) {
 		if (i->second == this) {
@@ -609,328 +618,6 @@ ImageTexture::~ImageTexture() {
 	}
 
 	IF_PRINT_WARNING(VIDEO_DEBUG) << "could not find ImageTexture to erase in TextureController container" << endl;
-}
-
-// -----------------------------------------------------------------------------
-// BaseImageElement class
-// -----------------------------------------------------------------------------
-
-BaseImageElement::BaseImageElement(float width_, float height_, float x_offset_, float y_offset_,
-	float u1_, float v1_, float u2_, float v2_) :
-	width(width_),
-	height(height_),
-	x_offset(x_offset_),
-	y_offset(y_offset_),
-	u1(u1_),
-	v1(v1_),
-	u2(u2_),
-	v2(v2_),
-	blend(false),
-	unichrome_vertices(true),
-	white_vertices(true),
-	base_image(NULL)
-{
-	color[0] = Color::white;
-	color[1] = Color::white;
-	color[2] = Color::white;
-	color[3] = Color::white;
-}
-
-
-
-BaseImageElement::BaseImageElement(float width_, float height_, float x_offset_, float y_offset_,
-	float u1_, float v1_, float u2_, float v2_, Color color_[4]) :
-	width(width_),
-	height(height_),
-	x_offset(x_offset_),
-	y_offset(y_offset_),
-	u1(u1_),
-	v1(v1_),
-	u2(u2_),
-	v2(v2_),
-	blend(false),
-	unichrome_vertices(false),
-	white_vertices(false),
-	base_image(NULL)
-{
-	color[0] = color_[0];
-	color[1] = color_[1];
-	color[2] = color_[2];
-	color[3] = color_[3];
-	
-	// If all colors are the same, then mark it so we don't have to process all vertex colors
-	if (color[0] == color[1] && color[0] == color[2] && color[0] == color[3]) {
-		unichrome_vertices = true;
-
-		// If all vertex colors are white, set a flag so they don't have to be processed at all
-		if (color[0] == Color::white) {
-			white_vertices = true;
-			blend = false;
-		}
-		// Set blend to true if the alpha is less than 1.0f (opaque)
-		else {
-			blend = (color[0][3] < 1.0f);
-		}
-	}
-	else {
-		// Set blend to true if any of the four colors have an alpha value less than 1.0f (opaque)
-		blend = (color[0][3] < 1.0f || color[1][3] < 1.0f || color[2][3] < 1.0f || color[3][3] < 1.0f);
-	}
-}
-
-
-
-BaseImageElement::~BaseImageElement() {
-	if (base_image != NULL) {
-		if (base_image->RemoveReference() == true) {
-			// If the image exceeds 512 in either width or height, it has an un-shared texture sheet, which we
-			// should now delete that the image is being removed
-			if (base_image->width > 512 || base_image->height > 512) {
-				// Remove the image and texture sheet completely
-				// TODO: This introduces a seg fault when TexSheet::FreeImage is later called. Fix this bug!
-				base_image->texture_sheet->RemoveImage(base_image);
-				TextureManager->_RemoveSheet(base_image->texture_sheet);
-				delete base_image;
-			}
-			else {
-				// Otherise simply mark the image as free in the texture sheet
-				base_image->texture_sheet->FreeImage(base_image);
-			}
-		}
-	}
-}
-
-
-
-BaseImageElement::BaseImageElement(const BaseImageElement& copy) :
-	width(copy.width),
-	height(copy.height),
-	x_offset(copy.x_offset),
-	y_offset(copy.y_offset),
-	u1(copy.u1),
-	v1(copy.v1),
-	u2(copy.u2),
-	v2(copy.v2),
-	//color(copy.color),
-	blend(copy.blend),
-	unichrome_vertices(copy.unichrome_vertices),
-	white_vertices(copy.white_vertices),
-	base_image(copy.base_image)
-{
-	color[0] = copy.color[0];
-	color[1] = copy.color[1];
-	color[2] = copy.color[2];
-	color[3] = copy.color[3];
-	if (base_image != NULL)
-		base_image->AddReference();
-}
-
-
-
-BaseImageElement& BaseImageElement::operator=(const BaseImageElement& copy) {
-	// Handle the case were a dumbass assigns an object to itself
-	if (this == &copy) {
-		return *this;
-	}
-
-	width = copy.width;
-	height = copy.height;
-	x_offset = copy.x_offset;
-	y_offset = copy.y_offset;
-	u1 = copy.u1;
-	v1 = copy.v1;
-	u2 = copy.u2;
-	v2 = copy.v2;
-	color[0] = copy.color[0];
-	color[1] = copy.color[1];
-	color[2] = copy.color[2];
-	color[3] = copy.color[3];
-	blend = copy.blend;
-	unichrome_vertices = copy.unichrome_vertices;
-	white_vertices = copy.white_vertices;
-
-	// Update the reference to the old image texture and possibly free it from texture memory
-	// Case 1: We previously pointed to a valid image texture and the copy does not point to the same texture
-	if (base_image != NULL && copy.base_image != base_image) {
-		if (base_image->RemoveReference() == true) {
-			// If the image exceeds 512 in either width or height, it has an un-shared texture sheet, which we
-			// should now delete that the image is being removed
-			if (base_image->width > 512 || base_image->height > 512) {
-				// Remove the image and texture sheet completely
-				// TODO: This introduces a seg fault when TexSheet::FreeImage is later called. Fix this bug!
-				base_image->texture_sheet->RemoveImage(base_image);
-				TextureManager->_RemoveSheet(base_image->texture_sheet);
-			}
-			else {
-				// Otherise simply mark the image as free in the texture sheet
-				base_image->texture_sheet->FreeImage(base_image);
-			}
-		}
-	}
-	// Case 2: The original image texture was NULL and the copy is not NULL, so increment the reference
-	else if (copy.base_image != NULL) {
-		copy.base_image->AddReference();
-	}
-
-	base_image = copy.base_image;
-
-	return *this;
-}
-
-
-
-void BaseImageElement::Draw(const Color* color_array) const {
-	// If no color array was passed, use the element's own vertex colors
-	if (color_array == NULL) {
-		color_array = color;
-	}
-
-	// Array of the four vertexes defined on the 2D plane for glDrawArrays()
-	static const float vert_coords[] = {
-		0.0f, 0.0f,
-		1.0f, 0.0f,
-		1.0f, 1.0f,
-		0.0f, 1.0f,
-	};
-
-	// Set blending parameters
-	if (VideoManager->_current_context.blend) {
-		glEnable(GL_BLEND);
-		if (VideoManager->_current_context.blend == 1)
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // Normal blending
-		else
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE); // Additive blending
-	}
-	else {
-		// If blending isn't in the draw flags, don't use blending UNLESS the given image element has translucent vertex colors
-		if (blend == false)
-			glDisable(GL_BLEND);
-		else
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // Normal blending
-	}
-
-	// If we have a valid image texture poiner, setup texture coordinates and the texture coordinate array for glDrawArrays()
-	if (base_image != NULL) {
-		// Set the texture coordinates
-		float s0, s1, t0, t1;
-
-		s0 = base_image->u1 + u1 * (base_image->u2 - base_image->u1);
-		s1 = base_image->u1 + u2 * (base_image->u2 - base_image->u1);
-		t0 = base_image->v1 + v1 * (base_image->v2 - base_image->v1);
-		t1 = base_image->v1 + v2 * (base_image->v2 - base_image->v1);
-
-		// Swap x texture coordinates if x flipping is enabled
-		if (VideoManager->_current_context.x_flip) {
-			float temp = s0;
-			s0 = s1;
-			s1 = temp;
-		}
-
-		// Swap y texture coordinates if y flipping is enabled
-		if (VideoManager->_current_context.y_flip) {
-			float temp = t0;
-			t0 = t1;
-			t1 = temp;
-		}
-
-		// Place the texture coordinates in a 4x2 array mirroring the structure of the vertex array for use in glDrawArrays().
-		float tex_coords[] = {
-			s0, t1,
-			s1, t1,
-			s1, t0,
-			s0, t0,
-		};
-
-		// Enable texturing and bind texture
-		glEnable(GL_TEXTURE_2D);
-		TextureManager->_BindTexture(base_image->texture_sheet->tex_id);
-		base_image->texture_sheet->Smooth(base_image->smooth);
-
-		// Enable and setup the texture coordinate array
-		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		glTexCoordPointer(2, GL_FLOAT, 0, tex_coords);
-
-		if (unichrome_vertices == true) {
-			glColor4fv((GLfloat*)color_array[0].GetColors());
-		}
-		else {
-			glEnableClientState(GL_COLOR_ARRAY);
-			glColorPointer(4, GL_FLOAT, 0, (GLfloat*)color_array);
-		}
-	} // if (img != NULL)
-
-	// Otherwise there is no image, so we're drawing pure color on the vertices
-	else {
-		// Use a single call to glColor for unichrome images, or a setup a gl color array for multiple colors
-		if (unichrome_vertices == true) {
-			glColor4fv((GLfloat*)color_array[0].GetColors());
-			glDisableClientState(GL_COLOR_ARRAY);
-		}
-		else {
-			glEnableClientState(GL_COLOR_ARRAY);
-			glColorPointer(4, GL_FLOAT, 0, (GLfloat*)color_array);
-		}
-
-		// Disable texturing as we're using pure colour
-		glDisable(GL_TEXTURE_2D);
-	}
-
-	// Use a vertex array to draw all of the vertices
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(2, GL_FLOAT, 0, vert_coords);
-	glDrawArrays(GL_QUADS, 0, 4);
-
-	if (VideoManager->_current_context.blend)
-		glDisable(GL_BLEND);
-
-	if (VideoManager->CheckGLError() == true) {
-		IF_PRINT_WARNING(VIDEO_DEBUG) << "an OpenGL error occurred: " << VideoManager->CreateGLErrorString() << endl;
-	}
-} // void BaseImageElement::Draw(const Color* color_array) const
-
-
-void BaseImageElement::DEBUG_PrintInfo() {
-	cout << "BaseImageElement properties:" << endl;
-	cout << "* width:                " << width << endl;
-	cout << "* height:               " << height << endl;
-	cout << "* x offset:             " << x_offset << endl;
-	cout << "* y offset:             " << y_offset << endl;
-	cout << "* uv coords (1, 2):      (" << u1 << "," << v1 << ") (" << u2 << ", " << v2 << ")" << endl;
-	cout << "* colors, RGBA format:  " << endl;
-	cout << "  * TL                  " << color[0].GetRed() << ", " << color[0].GetGreen() << ", " << color[0].GetBlue() << ", " << color[0].GetAlpha() << endl;
-	cout << "  * TR                  " << color[1].GetRed() << ", " << color[1].GetGreen() << ", " << color[1].GetBlue() << ", " << color[1].GetAlpha() << endl;
-	cout << "  * BL                  " << color[2].GetRed() << ", " << color[2].GetGreen() << ", " << color[2].GetBlue() << ", " << color[2].GetAlpha() << endl;
-	cout << "  * BR:                 " << color[3].GetRed() << ", " << color[3].GetGreen() << ", " << color[3].GetBlue() << ", " << color[3].GetAlpha() << endl;
-	cout << "* blend:                " << (blend ? "true" : "false") << endl;
-	cout << "* unichrome vertices:   " << (unichrome_vertices ? "true" : "false") << endl;
-	cout << "* white vertices:       " << (white_vertices ? "true" : "false") << endl;
-	cout << endl;
-}
-
-// -----------------------------------------------------------------------------
-// ImageElement class
-// -----------------------------------------------------------------------------
-
-ImageElement::ImageElement(ImageTexture* image_, float width_, float height_, float x_offset_, float y_offset_,
-		float u1_, float v1_, float u2_, float v2_) :
-	BaseImageElement(width_, height_, x_offset_, y_offset_, u1_, v1_, u2_, v2_),
-	image(image_)
-{
-	base_image = image_;
-	if (base_image != NULL)
-		base_image->AddReference();
-}
-
-
-
-ImageElement::ImageElement(ImageTexture *image_, float width_, float height_, float x_offset_, float y_offset_, 
-		float u1_, float v1_, float u2_, float v2_, Color color_[4]) :
-	BaseImageElement(width_, height_, x_offset_, y_offset_, u1_, v1_, u2_, v2_, color_),
-	image(image_)
-{
-	base_image = image_;
-	if (base_image != NULL)
-		base_image->AddReference();
 }
 
 } // namespace private_video
