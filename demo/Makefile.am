@@ -162,7 +162,7 @@ BUILT_SOURCES = $(allacrost_editor_MOC)
 CLEANFILES = $(BUILT_SOURCES)
 $(EDITOR_DIR)%.moc.cpp: $(EDITOR_DIR)%.h
 	$(MOC) -o $@ $<
-allacrost_editor_MOC = $(EDITOR_DIR)/editor.moc.cpp $(EDITOR_DIR)/grid.moc.cpp
+allacrost_editor_MOC = $(EDITOR_DIR)/editor.moc.cpp $(EDITOR_DIR)/grid.moc.cpp $(EDITOR_DIR)/tileset_editor.moc.cpp
 allacrost_editor_SOURCES = \
 	$(EDITOR_DIR)/editor_main.cpp \
 	$(EDITOR_DIR)/editor.cpp \
@@ -171,6 +171,8 @@ allacrost_editor_SOURCES = \
 	$(EDITOR_DIR)/grid.h \
 	$(EDITOR_DIR)/tileset.cpp \
 	$(EDITOR_DIR)/tileset.h \
+	$(EDITOR_DIR)/tileset_editor.cpp \
+	$(EDITOR_DIR)/tileset_editor.h \
 	$(video_SOURCES) \
 	$(script_SOURCES) \
 	$(ENGINE_DIR)/socket.cpp \
