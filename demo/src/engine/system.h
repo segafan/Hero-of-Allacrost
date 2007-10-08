@@ -348,6 +348,13 @@ private:
 	std::set<SystemTimer*> _system_timers;
 }; // class GameSystem : public hoa_utils::Singleton<GameSystem>
 
+class SystemThread {
+
+public:
+	bool SpawnThread(int (*func)(void *));
+	
+}; // class SystemThread
+
 } // namepsace hoa_system
 
 #endif
