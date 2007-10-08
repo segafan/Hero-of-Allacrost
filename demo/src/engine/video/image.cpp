@@ -139,6 +139,9 @@ void ImageDescriptor::Clear() {
 // 	if (_grayscale)
 // 		DisableGrayScale();
 
+	if (_texture != NULL)
+		_RemoveTextureReference(_texture);
+
 	_texture = NULL;
 	_width = 0.0f;
 	_height = 0.0f;
@@ -151,9 +154,6 @@ void ImageDescriptor::Clear() {
 	_unichrome_vertices = true;
 	_is_static = false;
 	_grayscale = false;
-
-	if (_texture != NULL)
-		_RemoveTextureReference(_texture);
 }
 
 
@@ -833,13 +833,9 @@ StillImage::~StillImage() {
 
 
 void StillImage::Clear() {
-	ImageDescriptor::Clear();
+	ImageDescriptor::Clear(); // This call will remove the texture reference for us
 	_filename.clear();
-
-	if (_image_texture != NULL) {
-		_RemoveTextureReference(_image_texture);
-		_image_texture = NULL;
-	}
+	_image_texture = NULL;
 }
 
 

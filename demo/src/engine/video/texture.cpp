@@ -35,6 +35,7 @@ namespace private_video {
 // -----------------------------------------------------------------------------
 
 TexSheet::TexSheet(int32 sheet_width, int32 sheet_height, GLuint sheet_id, TexSheetType sheet_type, bool sheet_static) {
+	num_textures = 0;
 	width = sheet_width;
 	height = sheet_height;
 	tex_id = sheet_id;
@@ -58,6 +59,9 @@ TexSheet::TexSheet(int32 sheet_width, int32 sheet_height, GLuint sheet_id, TexSh
 
 
 TexSheet::~TexSheet() {
+	if (num_textures != 0)
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "texture sheet being deleted when it still has textures referenced: " << num_textures << endl;
+
 	// Delete texture memory manager
 	delete tex_mem_manager;
 
@@ -140,6 +144,7 @@ bool TexSheet::AddImage(BaseImageTexture* img, ImageMemory& load_info) {
 		return false;
 	}
 
+	num_textures++;
 	return true;
 }
 

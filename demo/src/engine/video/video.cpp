@@ -760,6 +760,9 @@ StillImage GameVideo::CaptureScreen() throw(Exception) {
 
 	StillImage screen_image;
 
+	// TEMP: temporary resolution until capture screen bug is fixed
+	return screen_image;
+
 	// Retrieve width/height of the viewport. viewport_dimensions[2] is the width, [3] is the height
 	GLint viewport_dimensions[4];
 	glGetIntegerv(GL_VIEWPORT, viewport_dimensions);
@@ -778,18 +781,21 @@ StillImage GameVideo::CaptureScreen() throw(Exception) {
 	if (sheet == NULL) {
 		delete new_image;
 		throw Exception("could not create texture sheet to store captured screen", __FILE__, __LINE__, __FUNCTION__);
+		screen_image.Clear();
 		return screen_image;
 	}
 	if (sheet->tex_mem_manager->Insert(new_image) == false) {
 		TextureManager->_RemoveSheet(sheet);
 		delete new_image;
 		throw Exception("could not insert captured screen image into texture sheet", __FILE__, __LINE__, __FUNCTION__);
+		screen_image.Clear();
 		return screen_image;
 	}
 	if (sheet->CopyScreenRect(0, 0, screen_rect) == false) {
 		TextureManager->_RemoveSheet(sheet);
 		delete new_image;
 		throw Exception("call to TexSheet::CopyScreenRect() failed", __FILE__, __LINE__, __FUNCTION__);
+		screen_image.Clear();
 		return screen_image;
 	}
 

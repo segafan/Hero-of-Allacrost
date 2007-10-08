@@ -155,7 +155,7 @@ public:
 	*** \param img The image to remove
 	**/
 	void RemoveImage(BaseImageTexture *img)
-		{ tex_mem_manager->Remove(img); }
+		{ num_textures--; tex_mem_manager->Remove(img); }
 	
 	/** \brief Marks the image as free
 	*** \param img The image to mark as free
@@ -164,13 +164,13 @@ public:
 	*** from the hard disk.
 	**/
 	void FreeImage(BaseImageTexture *img)
-	 	{ tex_mem_manager->Free(img); }
+	 	{ num_textures--; tex_mem_manager->Free(img); }
 	
 	/** \brief Restores an image which was previously freed
 	*** \param img The image to mark as used
 	**/
 	void RestoreImage(BaseImageTexture *img)
-		{ tex_mem_manager->Restore(img); }
+		{ num_textures++; tex_mem_manager->Restore(img); }
 
 	/** \brief Copies an image into a sub-rectangle of the texture
 	*** \param x X coordinate of rectangle to copy image to
@@ -198,6 +198,9 @@ public:
 	*** It ignores any blending or lighting properties that are enabled in the VideoManager
 	**/
 	void Draw() const;
+
+	//! \brief The number of textures that are stored within this sheet
+	uint32 num_textures;
 
 	//! \brief The width of the texsheet
 	int32 width;
