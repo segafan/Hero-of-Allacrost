@@ -761,7 +761,7 @@ StillImage GameVideo::CaptureScreen() throw(Exception) {
 	StillImage screen_image;
 
 	// TEMP: temporary resolution until capture screen bug is fixed
-	return screen_image;
+// 	return screen_image;
 
 	// Retrieve width/height of the viewport. viewport_dimensions[2] is the width, [3] is the height
 	GLint viewport_dimensions[4];
@@ -800,6 +800,7 @@ StillImage GameVideo::CaptureScreen() throw(Exception) {
 	}
 
 	TextureManager->_images["captured_screen" + NumberToString(capture_id) + "<T>"] = new_image;
+	new_image->AddReference();
 
 	// Store the image element to the saved image (with a flipped y axis)
 	screen_image._image_texture = new_image;

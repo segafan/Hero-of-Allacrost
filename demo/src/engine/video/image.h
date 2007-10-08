@@ -151,7 +151,8 @@ public:
 	*** This method rarely needs to be called, as the default UV coordinates suffice
 	*** for nearly all images.
 	**/
-	virtual void SetUVCoordinates(float u1, float v1, float u2, float v2) = 0;
+	virtual void SetUVCoordinates(float u1, float v1, float u2, float v2)
+		{ _u1 = u1; _v1 = v1; _u2 = u2; _v2 = v2; }
 
 	/** \brief Sets the image's four vertices to a single color
 	*** \param color The desired color of all image vertices
@@ -402,9 +403,6 @@ public:
 	**/
 	void SetDimensions(float width, float height)
 		{ SetWidth(width); SetHeight(height); }
-
-	void SetUVCoordinates(float u1, float v1, float u2, float v2)
-		{}
 
 	/** \brief Sets image to static/animated
 	***	\param is_static Flag indicating whether the image should be made static or not
