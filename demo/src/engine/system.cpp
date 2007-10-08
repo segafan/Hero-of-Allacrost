@@ -17,6 +17,20 @@
 #include "system.h"
 #include "audio.h"
 #include "script.h"
+#include "thread.h"
+
+#define NO_THREADS 0
+#define SDL_THREADS 1
+
+/* Set this to NO_THREADS to disable threads. Set this to SDL_THREADS to use
+ * SDL Threads. */
+#define THREAD_TYPE SDL_THREADS
+
+#if (THREAD_TYPE == SDL_THREADS)
+#include "SDL_thread.h"
+#include "SDL_mutex.h"
+#endif
+
 
 using namespace std;
 
@@ -272,6 +286,22 @@ void GameSystem::SetLanguage(std::string lang) {
 //
 // 	cerr << "SETTINGS ERROR: attempt to set unsupported language \"" << lang << "\" failed" << endl;
 	_language = lang;
+}
+
+bool SystemThread::SpawnThread(int (*func)(void *)) {
+#if (THREAD_TYPE == SDL_THREADS)
+	SDL_Thread * thread;
+
+	thread = SDL_CreateThread(func, NULL);
+	if (thread == NULL) {
+		PRINT_ERROR << "Unable to create thread: " << SDL_GetError() << std::endl;
+		return false;
+	}
+#elif (THREAD_TYPE == NO_THREADS)
+	func();
+#endif
+
+	return true;
 }
 
 } // namespace hoa_system
