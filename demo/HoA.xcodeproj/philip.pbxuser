@@ -10,8 +10,8 @@
 	};
 	4941A4A10AC1D76400D65B8E /* Project object */ = {
 		activeBuildConfigurationName = Debug;
-		activeExecutable = D4D1BA4A0B02B1DB0052BF1E /* Editor */;
-		activeTarget = D4D1BA480B02B1DB0052BF1E /* Editor */;
+		activeExecutable = D43080DE0AF982F800A5173A /* Allacrost */;
+		activeTarget = 4941A4AF0AC1D77500D65B8E /* Allacrost */;
 		addToTargets = (
 			D4D1BA480B02B1DB0052BF1E /* Editor */,
 		);
@@ -69,7 +69,7 @@
 				PBXFileTableDataSourceColumnWidthsKey = (
 					22,
 					300,
-					130,
+					129.5835,
 				);
 				PBXFileTableDataSourceColumnsKey = (
 					PBXExecutablesDataSource_ActiveFlagID,
@@ -173,8 +173,8 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 213152537;
-			PBXWorkspaceStateSaveDate = 213152537;
+			PBXPerProjectTemplateStateSaveDate = 213602367;
+			PBXWorkspaceStateSaveDate = 213602367;
 		};
 		sourceControlManager = D43082570AF9831800A5173A /* Source Control */;
 		userBuildSettings = {
@@ -394,6 +394,14 @@
 			sepNavWindowFrame = "{{153, 89}, {750, 558}}";
 		};
 	};
+	4999AC4E0AF407BE004DD3A3 /* system.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {711, 4340}}";
+			sepNavSelRange = "{897, 0}";
+			sepNavVisRect = "{{0, 0}, {711, 645}}";
+			sepNavWindowFrame = "{{15, -1}, {750, 774}}";
+		};
+	};
 	D404C6AB0B02F27D00827A19 /* XCBreakpointsBucket */ = {
 		isa = XCBreakpointsBucket;
 		name = "Project Breakpoints";
@@ -429,12 +437,14 @@
 	};
 	D43080DE0AF982F800A5173A /* Allacrost */ = {
 		isa = PBXExecutable;
-		activeArgIndex = 2147483647;
+		activeArgIndex = 1;
 		activeArgIndices = (
 			NO,
+			YES,
 		);
 		argumentStrings = (
 			"-d audio",
+			"-i",
 		);
 		autoAttachOnCrash = 1;
 		configStateDict = {

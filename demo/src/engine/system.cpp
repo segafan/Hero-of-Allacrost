@@ -18,7 +18,9 @@
 #include "audio.h"
 #include "script.h"
 #ifndef _WIN32
+#ifndef __MACH__
 	#include "thread.h"
+#endif
 #endif
 
 #define NO_THREADS 0
