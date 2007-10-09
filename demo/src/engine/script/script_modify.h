@@ -194,12 +194,12 @@ template <class T> void ModifyScriptDescriptor::_ModifyData(const std::string& k
 	int32 period = key.find('.');
 	std::string tablename;
 	std::vector<std::string> subkeys;
-	if (period != std::string::npos) {
+	if (period != static_cast<int32>(std::string::npos)) {
 		// This key is a table with sub-keys
 		tablename = key.substr(0, period);
 		this->OpenTable(tablename);
 		int last = period;
-		while ((period = key.find('.', period + 1)) != std::string::npos) {
+		while ((period = key.find('.', period + 1)) != static_cast<int32>(std::string::npos)) {
 			// push all subkeys into this table
 			subkeys.push_back(key.substr(last + 1, period));
 			this->OpenTable(key.substr(last+1, period));
