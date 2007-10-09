@@ -1626,7 +1626,7 @@ void CompositeImage::AddImage(const StillImage& img, float x_offset, float y_off
 	StillImage& new_image = _elements.back().image;
 
 	new_image.SetUVCoordinates(u1, v1, u2, v2);
-	new_image.SetDimensions(u2 - u1, v2 - v1);
+	new_image.SetDimensions(img.GetWidth(), img.GetHeight());
 
 	// Determine if the width or height of the composite image has grown from adding this new element
 	float max_x = x_offset + new_image.GetWidth();

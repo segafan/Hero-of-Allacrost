@@ -191,7 +191,7 @@ template <class T> void ModifyScriptDescriptor::_ModifyData(const std::string& k
 	luabind::object* table = NULL;
 	// check to see if key is a table
 	std::string search_key = key;
-	uint32 period = key.find('.');
+	int32 period = key.find('.');
 	std::string tablename;
 	std::vector<std::string> subkeys;
 	if (period != std::string::npos) {

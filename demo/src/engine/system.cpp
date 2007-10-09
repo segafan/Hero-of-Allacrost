@@ -17,7 +17,9 @@
 #include "system.h"
 #include "audio.h"
 #include "script.h"
-#include "thread.h"
+#ifndef _WIN32
+	#include "thread.h"
+#endif
 
 #define NO_THREADS 0
 #define SDL_THREADS 1
@@ -27,8 +29,8 @@
 #define THREAD_TYPE SDL_THREADS
 
 #if (THREAD_TYPE == SDL_THREADS)
-#include "SDL_thread.h"
-#include "SDL_mutex.h"
+	#include <SDL/SDL_thread.h>
+	#include <SDL/SDL_mutex.h>
 #endif
 
 
