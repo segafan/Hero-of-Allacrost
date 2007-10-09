@@ -49,9 +49,14 @@ bool ReadScriptDescriptor::OpenFile(const string& filename) {
 	// check for file extensions
 	string file_name = filename;
 	if (DoesFileExist(file_name + ".lua"))
+	{
 		file_name = filename + ".lua";
-	else if (DoesFileExist(file_name + ".hoa"))
-		file_name = filename + ".hoa";
+	}
+	if (DoesFileExist(file_name + ".hoa"))
+	{
+		if (!(DoesFileExist(file_name + ".lua") && SCRIPT_DEBUG))
+			file_name = filename + ".hoa";
+	}
 
 	if (ScriptManager->IsFileOpen(file_name) == true) {
 		if (SCRIPT_DEBUG)
