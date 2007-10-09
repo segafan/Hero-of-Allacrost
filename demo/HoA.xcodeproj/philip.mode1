@@ -262,21 +262,20 @@
 								<string>4999AC1A0AF407BD004DD3A3</string>
 								<string>D44096340C45E37300E58975</string>
 								<string>1C37FBAC04509CD000000102</string>
-								<string>D4EDF4FF0CB4866B0064919D</string>
-								<string>D4EDF5000CB4866B0064919D</string>
 								<string>1C37FAAC04509CD000000102</string>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>7</integer>
+									<integer>33</integer>
+									<integer>17</integer>
 									<integer>5</integer>
 									<integer>2</integer>
 									<integer>0</integer>
 								</array>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateVisibleRectKey</key>
-							<string>{{0, 76}, {187, 338}}</string>
+							<string>{{0, 339}, {187, 338}}</string>
 						</dict>
 						<key>PBXTopSmartGroupGIDs</key>
 						<array/>
@@ -376,9 +375,9 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>D4EDF4C40CB4732E0064919D</string>
+				<string>D4F45A820CBB4BE700B17840</string>
 				<string>1CE0B1FE06471DED0097A5F4</string>
-				<string>D4EDF4C50CB4732E0064919D</string>
+				<string>D4F45A830CBB4BE700B17840</string>
 				<string>1CE0B20306471E060097A5F4</string>
 				<string>1CE0B20506471E060097A5F4</string>
 			</array>
@@ -512,11 +511,6 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
-		<string>D4EDF5010CB4866B0064919D</string>
-		<string>D4EDF5020CB4866B0064919D</string>
-		<string>D4F7165E0B06B36400361DA9</string>
-		<string>1CD10A99069EF8BA00B06720</string>
-		<string>D4EDF4FB0CB486540064919D</string>
 		<string>1C0AD2B3069F1EA900FABCE6</string>
 		<string>/Users/philip/allacrost/demo/HoA.xcodeproj</string>
 	</array>
@@ -564,7 +558,7 @@
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXBuildLogShowsTranscriptDefaultKey</key>
-								<string>{{0, 479}, {1280, 193}}</string>
+								<string>{{0, 449}, {1280, 223}}</string>
 								<key>PBXProjectModuleGUID</key>
 								<string>XCMainBuildResultsModuleGUID</string>
 								<key>PBXProjectModuleLabel</key>
@@ -602,7 +596,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>D43083E80AF9860800A5173A</string>
-				<string>D4EDF4EE0CB47ECA0064919D</string>
+				<string>D4F45A840CBB4BE700B17840</string>
 				<string>1CD0528F0623707200166675</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 			</array>
@@ -964,9 +958,9 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>1C0AD2B3069F1EA900FABCE6</string>
-				<string>D4EDF4C20CB4731E0064919D</string>
+				<string>D4F45A850CBB4BE700B17840</string>
 				<string>1CD0528B0623707200166675</string>
-				<string>D4EDF4C30CB4731E0064919D</string>
+				<string>D4F45A860CBB4BE700B17840</string>
 			</array>
 			<key>ToolbarConfiguration</key>
 			<string>xcode.toolbar.config.run</string>
@@ -975,7 +969,7 @@
 			<key>WindowToolGUID</key>
 			<string>1C0AD2B3069F1EA900FABCE6</string>
 			<key>WindowToolIsVisible</key>
-			<false/>
+			<true/>
 		</dict>
 		<dict>
 			<key>Identifier</key>
