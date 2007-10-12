@@ -101,7 +101,7 @@ Tileset::Tileset(QWidget* parent, const QString& name)
 		} // iterate through all rows of the walkability table
 		read_data.CloseTable();
 	} // make sure table exists first
-	
+
 	// Read in autotiling information.
 	if (read_data.DoesTableExist("autotiling") == true)
 	{

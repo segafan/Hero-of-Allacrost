@@ -400,7 +400,7 @@ void Editor::_TileLayerFill()
 	vector<int32> previous = current_layer;
 	vector<int32> modified(current_layer.size(), tileset_index + multiplier * 256);
 	vector<int32> indeces(current_layer.size());
-	for (int32 i = 0; i < current_layer.size(); i++)
+	for (int32 i = 0; i < static_cast<int32>(current_layer.size()); i++)
 		indeces[i] = i;
 
 	// Fill the layer.
@@ -427,7 +427,7 @@ void Editor::_TileLayerClear()
 	vector<int32> previous = current_layer;
 	vector<int32> modified(current_layer.size(), -1);
 	vector<int32> indeces(current_layer.size());
-	for (int32 i = 0; i < current_layer.size(); i++)
+	for (int32 i = 0; i < static_cast<int32>(current_layer.size()); i++)
 		indeces[i] = i;
 
 	// Clear the layer.
@@ -1203,7 +1203,7 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 		(evt->x() / TILE_WIDTH)  >= _map->GetWidth())
 		return;
 
-	_tile_index = evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH;
+	_tile_index = static_cast<int32> (evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH);
 	_map->SetChanged(true);
 
 	switch (_tile_mode)
@@ -1231,10 +1231,10 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 					// Record information for undo/redo action.
 					_tile_indeces.push_back(_tile_index);
 					_previous_tiles.push_back(GetCurrentLayer()[_tile_index]);
-					_modified_tiles.push_back(tileset_index + multiplier * 256);
+					_modified_tiles.push_back(static_cast<int32> (tileset_index + multiplier * 256));
 					
 					// Paint the tile.
-					GetCurrentLayer()[_tile_index] = tileset_index + multiplier * 256;
+					GetCurrentLayer()[_tile_index] = static_cast<int32> (tileset_index + multiplier * 256);
 				}
 			} // left mouse button was pressed
 			break;
@@ -1283,7 +1283,7 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 		(evt->x() / TILE_WIDTH)  >= _map->GetWidth())
 		return;
 
-	int index = evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH;
+	int32 index = static_cast<int32> (evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH);
 	if (index != _tile_index)
 	{
 		_tile_index = index;
@@ -1307,14 +1307,40 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 						multiplier = _map->tileset_names.findIndex(tileset_name);
 					} // calculate index of current tileset
 
+					// perform randomization for autotiles
+					map<int, string>::iterator it = _map->tilesets[multiplier]->
+						autotileability.find(tileset_index);
+					if (it != _map->tilesets[multiplier]->autotileability.end())
+					{
+						// set up for opening autotiling.lua
+						ReadScriptDescriptor read_data;
+						if (read_data.OpenFile("dat/tilesets/autotiling.lua") == false)
+							QMessageBox::warning(this, "Loading File...", QString("ERROR: could not open dat/tilesets/autotiling.lua for reading!"));
+
+						if (read_data.DoesTableExist(it->second) == true)
+						{
+							read_data.OpenTable(it->second);
+							int32 random_index = RandomBoundedInteger(0, static_cast<int32>(read_data.GetTableSize() + 1));
+							read_data.OpenTable(random_index);
+							string tileset_name = read_data.ReadString(1);
+							tileset_index = static_cast<int>(read_data.ReadInt(2));
+							read_data.CloseTable();
+							multiplier = _map->tileset_names.findIndex(
+								QString::fromStdString(tileset_name));
+							read_data.CloseTable();
+						} // autotileable group exists
+
+						read_data.CloseFile();
+					} // must have an autotileable tile
+
 					if (_map->tilesets[multiplier]->walkability[tileset_index][0] != -1)
 					{
 						// Record information for undo/redo action.
 						_tile_indeces.push_back(_tile_index);
 						_previous_tiles.push_back(GetCurrentLayer()[_tile_index]);
-						_modified_tiles.push_back(tileset_index + multiplier * 256);
+						_modified_tiles.push_back(static_cast<int32> (tileset_index + multiplier * 256));
 
-						GetCurrentLayer()[_tile_index] = tileset_index + multiplier * 256;
+						GetCurrentLayer()[_tile_index] = static_cast<int32> (tileset_index + multiplier * 256);
 					}
 				} // left mouse button was pressed
 				break;
@@ -1359,7 +1385,7 @@ void EditorScrollView::contentsMouseReleaseEvent(QMouseEvent *evt)
 {
 	// Should already be finished painting or deleting tiles.
 
-	_tile_index = evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH;
+	_tile_index = static_cast<int32> (evt->y() / TILE_HEIGHT * _map->GetWidth() + evt->x() / TILE_WIDTH);
 
 	// get reference to Editor so we can access the undo stack
 	Editor* editor = static_cast<Editor*> (topLevelWidget());
@@ -1540,8 +1566,9 @@ void EditorScrollView::_ContextDeleteColumn()
   LayerCommand class functions follow
 ************************/
 
-LayerCommand::LayerCommand(vector<int> indeces, vector<int> previous, vector<int> modified, LAYER_TYPE layer,
-	Editor* editor, const QString& text, QUndoCommand* parent)
+LayerCommand::LayerCommand(vector<int32> indeces, vector<int32> previous,
+	vector<int32> modified, LAYER_TYPE layer, Editor* editor,
+	const QString& text, QUndoCommand* parent)
 	: QUndoCommand(text, parent)
 {
 	_tile_indeces = indeces;
@@ -1553,14 +1580,14 @@ LayerCommand::LayerCommand(vector<int> indeces, vector<int> previous, vector<int
 
 void LayerCommand::undo()
 {
-	for (int i = 0; i < _tile_indeces.size(); i++)
+	for (int32 i = 0; i < static_cast<int32>(_tile_indeces.size()); i++)
 		_editor->_ed_scrollview->_map->GetLayer(_edited_layer)[_tile_indeces[i]] = _previous_tiles[i];
 	_editor->_ed_scrollview->_map->updateGL();
 } // undo()
 
 void LayerCommand::redo()
 {
-	for (int i = 0; i < _tile_indeces.size(); i++)
+	for (int32 i = 0; i < static_cast<int32>(_tile_indeces.size()); i++)
 		_editor->_ed_scrollview->_map->GetLayer(_edited_layer)[_tile_indeces[i]] = _modified_tiles[i];
 	_editor->_ed_scrollview->_map->updateGL();
 } // redo()

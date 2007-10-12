@@ -50,4 +50,5 @@ private:
 } // namespace hoa_editor
 
 #endif 
-// __EDITOR_HEADER__
+// __TILESET_EDITOR_HEADER__
+
