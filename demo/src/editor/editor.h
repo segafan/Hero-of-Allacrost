@@ -367,29 +367,30 @@ class EditorScrollView: public Q3ScrollView
 		//! Current layer being edited.
 		LAYER_TYPE _layer_edit;
 		//! Mouse is at this tile index on the map.
-		int _tile_index;
+		int32 _tile_index;
 		//! Menu used on right-clicks of the mouse on the map.
 		QMenu* _context_menu;
 
-		//! Stores source index of moved tiles
-		int _move_source_index;
+		//! Stores source index of the moved tile.
+		int32 _move_source_index;
 		
 		//! \name Tile Vectors
 		//! \brief The following three vectors are used to know how to perform undo and redo operations
 		//!        for this command. They should be the same size and one-to-one. So, the j-th element
 		//!        of each vector should correspond to the j-th element of the other vectors.
 		//{@
-		std::vector<int> _tile_indeces;  //! A vector of tile indeces in the map that were modified by a command.
-		std::vector<int> _previous_tiles;//! A vector of indeces into tilesets of the modified tiles before they were modified.
-		std::vector<int> _modified_tiles;//! A vector of indeces into tilesets of the modified tiles after they were modified.
+		std::vector<int32> _tile_indeces;  //! A vector of tile indeces in the map that were modified by a command.
+		std::vector<int32> _previous_tiles;//! A vector of indeces into tilesets of the modified tiles before they were modified.
+		std::vector<int32> _modified_tiles;//! A vector of indeces into tilesets of the modified tiles after they were modified.
 		//@}
 }; // class EditorScrollView
 
 class LayerCommand: public QUndoCommand
 {
 	public:
-		LayerCommand(std::vector<int> indeces, std::vector<int> previous, std::vector<int> modified, LAYER_TYPE layer,
-			Editor* editor, const QString& text = "Layer Operation", QUndoCommand* parent = 0);      // constructor
+		LayerCommand(std::vector<int32> indeces, std::vector<int32> previous,
+			std::vector<int32> modified, LAYER_TYPE layer, Editor* editor,
+			const QString& text = "Layer Operation", QUndoCommand* parent = 0);
 
 		//! \name Undo Functions
 		//! \brief Reimplemented from the QUndoCommand class to provide specific undo/redo capability towards the map.
@@ -408,9 +409,9 @@ class LayerCommand: public QUndoCommand
 		//!        for this command. They should be the same size and one-to-one. So, the j-th element
 		//!        of each vector should correspond to the j-th element of the other vectors.
 		//{@
-		std::vector<int> _tile_indeces;  //! A vector of tile indeces in the map that were modified by this command.
-		std::vector<int> _previous_tiles;//! A vector of indeces into tilesets of the modified tiles before they were modified.
-		std::vector<int> _modified_tiles;//! A vector of indeces into tilesets of the modified tiles after they were modified.
+		std::vector<int32> _tile_indeces;  //! A vector of tile indeces in the map that were modified by this command.
+		std::vector<int32> _previous_tiles;//! A vector of indeces into tilesets of the modified tiles before they were modified.
+		std::vector<int32> _modified_tiles;//! A vector of indeces into tilesets of the modified tiles after they were modified.
 		//@}
 		
 		//! Indicates which map layer this command was performed upon.
