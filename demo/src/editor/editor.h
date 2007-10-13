@@ -350,6 +350,18 @@ class EditorScrollView: public Q3ScrollView
 		//@}
 
 	private:
+		//! \name Autotiling Functions
+		//! \brief These functions perform all the nitty gritty details associated
+		//!        with autotiling. _AutotileRandomize randomizes tiles being painted
+		//!        on the map, and _AutotileTransitions calculates which tiles need
+		//!        border transitions from one tile group to the next.
+		//! \param tileset_num The index of the specified tileset as loaded in the
+		//!                    QTabWidget.
+		//! \param tile_index The index of the selected tile in its tileset.
+		//{@
+		void _AutotileRandomize(int& tileset_num, int& tile_index);
+		//@}
+
 		//! \name Context Menu Actions
 		//! \brief These are Qt's way of associating the same back-end functionality to occur whether a user
 		//!        invokes a menu through the menu bar, a keyboard shortcut, a toolbar button, or other means.

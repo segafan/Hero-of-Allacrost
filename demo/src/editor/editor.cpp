@@ -398,14 +398,18 @@ void Editor::_TileLayerFill()
 	
 	// Record the information for undo/redo operations.
 	vector<int32> previous = current_layer;
-	vector<int32> modified(current_layer.size(), tileset_index + multiplier * 256);
+	vector<int32> modified;
 	vector<int32> indeces(current_layer.size());
 	for (int32 i = 0; i < static_cast<int32>(current_layer.size()); i++)
 		indeces[i] = i;
 
 	// Fill the layer.
 	for (it = current_layer.begin(); it != current_layer.end(); it++)
-		*it = tileset_index + multiplier * 256;
+	{
+		_ed_scrollview->_AutotileRandomize(multiplier, tileset_index);
+		*it = static_cast<int32> (tileset_index + multiplier * 256);
+		modified.push_back(static_cast<int32> (tileset_index + multiplier * 256));
+	} // iterate through the entire layer
 
 	LayerCommand* fill_command = new LayerCommand(indeces, previous, modified,
 		_ed_scrollview->_layer_edit, this, "Fill Layer");
@@ -1226,16 +1230,13 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 					multiplier = _map->tileset_names.findIndex(tileset_name);
 				} // calculate index of current tileset
 				
-				if (_map->tilesets[multiplier]->walkability[tileset_index][0] != -1)
-				{
-					// Record information for undo/redo action.
-					_tile_indeces.push_back(_tile_index);
-					_previous_tiles.push_back(GetCurrentLayer()[_tile_index]);
-					_modified_tiles.push_back(static_cast<int32> (tileset_index + multiplier * 256));
+				// Record information for undo/redo action.
+				_tile_indeces.push_back(_tile_index);
+				_previous_tiles.push_back(GetCurrentLayer()[_tile_index]);
+				_modified_tiles.push_back(static_cast<int32> (tileset_index + multiplier * 256));
 					
-					// Paint the tile.
-					GetCurrentLayer()[_tile_index] = static_cast<int32> (tileset_index + multiplier * 256);
-				}
+				// Paint the tile.
+				GetCurrentLayer()[_tile_index] = static_cast<int32> (tileset_index + multiplier * 256);
 			} // left mouse button was pressed
 			break;
 		} // edit mode PAINT_TILE
@@ -1250,7 +1251,7 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 		{
 			if (evt->button() == Qt::LeftButton)
 			{
-				// NOTE: Is file_index going to be used?? If not, no reason for this call
+				// FIXME: Is file_index going to be used?? If not, no reason for this call
 				//int file_index = GetCurrentLayer()[_tile_index];
 
 				// Record information for undo/redo action.
@@ -1261,7 +1262,7 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 				// Delete the tile.
 				GetCurrentLayer()[_tile_index] = -1;
 
-				// FIXME: No longer needed
+				// FIXME: No longer needed (I think...)
 				//_RemoveIfUnused(file_index);
 			} // left mouse button was pressed
 			break;
@@ -1308,40 +1309,14 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 					} // calculate index of current tileset
 
 					// perform randomization for autotiles
-					map<int, string>::iterator it = _map->tilesets[multiplier]->
-						autotileability.find(tileset_index);
-					if (it != _map->tilesets[multiplier]->autotileability.end())
-					{
-						// set up for opening autotiling.lua
-						ReadScriptDescriptor read_data;
-						if (read_data.OpenFile("dat/tilesets/autotiling.lua") == false)
-							QMessageBox::warning(this, "Loading File...", QString("ERROR: could not open dat/tilesets/autotiling.lua for reading!"));
+					_AutotileRandomize(multiplier, tileset_index);
 
-						if (read_data.DoesTableExist(it->second) == true)
-						{
-							read_data.OpenTable(it->second);
-							int32 random_index = RandomBoundedInteger(0, static_cast<int32>(read_data.GetTableSize() + 1));
-							read_data.OpenTable(random_index);
-							string tileset_name = read_data.ReadString(1);
-							tileset_index = static_cast<int>(read_data.ReadInt(2));
-							read_data.CloseTable();
-							multiplier = _map->tileset_names.findIndex(
-								QString::fromStdString(tileset_name));
-							read_data.CloseTable();
-						} // autotileable group exists
+					// Record information for undo/redo action.
+					_tile_indeces.push_back(_tile_index);
+					_previous_tiles.push_back(GetCurrentLayer()[_tile_index]);
+					_modified_tiles.push_back(static_cast<int32> (tileset_index + multiplier * 256));
 
-						read_data.CloseFile();
-					} // must have an autotileable tile
-
-					if (_map->tilesets[multiplier]->walkability[tileset_index][0] != -1)
-					{
-						// Record information for undo/redo action.
-						_tile_indeces.push_back(_tile_index);
-						_previous_tiles.push_back(GetCurrentLayer()[_tile_index]);
-						_modified_tiles.push_back(static_cast<int32> (tileset_index + multiplier * 256));
-
-						GetCurrentLayer()[_tile_index] = static_cast<int32> (tileset_index + multiplier * 256);
-					}
+					GetCurrentLayer()[_tile_index] = static_cast<int32> (tileset_index + multiplier * 256);
 				} // left mouse button was pressed
 				break;
 			} // edit mode PAINT_TILE
@@ -1559,6 +1534,40 @@ void EditorScrollView::_ContextDeleteColumn()
 
 	Resize(map_width - 1, map_height);
 } // _ContextDeleteColumn()
+
+
+
+// ********** Private functions **********
+
+void EditorScrollView::_AutotileRandomize(int& tileset_num, int& tile_index)
+{
+	map<int, string>::iterator it = _map->tilesets[tileset_num]->
+		autotileability.find(tile_index);
+
+	if (it != _map->tilesets[tileset_num]->autotileability.end())
+	{
+		// set up for opening autotiling.lua
+		ReadScriptDescriptor read_data;
+		if (read_data.OpenFile("dat/tilesets/autotiling.lua") == false)
+			QMessageBox::warning(this, "Loading File...",
+				QString("ERROR: could not open dat/tilesets/autotiling.lua for reading!"));
+
+		if (read_data.DoesTableExist(it->second) == true)
+		{
+			read_data.OpenTable(it->second);
+			int32 random_index = RandomBoundedInteger(1, static_cast<int32>(read_data.GetTableSize()));
+			read_data.OpenTable(random_index);
+			string tileset_name = read_data.ReadString(1);
+			tile_index = static_cast<int>(read_data.ReadInt(2));
+			read_data.CloseTable();
+			tileset_num = _map->tileset_names.findIndex(
+				QString::fromStdString(tileset_name));
+			read_data.CloseTable();
+		} // autotileable group exists
+
+		read_data.CloseFile();
+	} // must have an autotileable tile
+} // AutotileRandomize(...)
 
 
 
