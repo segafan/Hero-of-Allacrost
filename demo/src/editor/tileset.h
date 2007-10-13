@@ -65,7 +65,6 @@ class Tileset
 		std::map<int, std::string> autotileability;
 		//! Reference to the table implementation of this tileset in the bottom of the editor.
 		Q3Table* table;
-		// TODO: implement some sort of dynamic table resizing on window resize
 
 	private:
 		//std::vector<std::vector<AnimatedTileData> > _animated_tiles;

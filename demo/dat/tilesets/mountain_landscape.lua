@@ -6,6 +6,14 @@ num_tile_cols = 16
 num_tile_rows = 16
 
 autotiling = {}
+autotiling[10] = "cracked_earth"
+autotiling[14] = "pavers"
+autotiling[15] = "pavers"
+autotiling[26] = "cracked_earth"
+autotiling[30] = "pavers"
+autotiling[31] = "pavers"
+autotiling[42] = "cracked_earth"
+autotiling[76] = "pavers"
 autotiling[78] = "grass"
 autotiling[79] = "grass"
 autotiling[94] = "grass"
@@ -16,7 +24,6 @@ walkability = { [0] = {}, [1] = {}, [2] = {}, [3] = {},
 		[8] = {}, [9] = {}, [10] = {}, [11] = {}, 
 		[12] = {}, [13] = {}, [14] = {}, [15] = {} 
 }
-
 
 walkability[0][0]   = { 0, 0, 0, 0 }
 walkability[0][1]   = { 0, 0, 0, 1 }
