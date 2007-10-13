@@ -64,8 +64,6 @@ const int32 FLOAT_TYPE      = 0x12344321;
 *** this class assume that the file is open and do not check otherwise. If you
 *** try to invoke these functions with an unopened file, you will generate a
 *** segmentation fault.
-***
-*** \bug Fix GetTableSize methods to account for tables with a 0th element
 *** ***************************************************************************/
 class ReadScriptDescriptor : public ScriptDescriptor {
 	friend class GameScript;

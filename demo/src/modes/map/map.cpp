@@ -175,20 +175,19 @@ void MapMode::_Load() {
 
 	// Do some checking to make sure tables are of the proper size
 	// NOTE: we only check that the number of rows are correct, but not the number of columns
-	// NOTE: the "+ 1" is due to a bug in ReadGetTableSize that is not yet resolved
-	if (_map_script.GetTableSize("map_grid") + 1 != _num_grid_rows) {
+	if (_map_script.GetTableSize("map_grid") != _num_grid_rows) {
 		cerr << "MAP ERROR: In MapMode::_Load(), the map_grid table had an incorrect number of rows" << endl;
 		return;
 	}
-	if (_map_script.GetTableSize("lower_layer") + 1 != _num_tile_rows) {
+	if (_map_script.GetTableSize("lower_layer") != _num_tile_rows) {
 		cerr << "MAP ERROR: In MapMode::_Load(), the lower_layer table had an incorrect number of rows" << endl;
 		return;
 	}
-	if (_map_script.GetTableSize("middle_layer") + 1 != _num_tile_rows) {
+	if (_map_script.GetTableSize("middle_layer") != _num_tile_rows) {
 		cerr << "MAP ERROR: In MapMode::_Load(), the middle_layer table had an incorrect number of rows" << endl;
 		return;
 	}
-	if (_map_script.GetTableSize("upper_layer") + 1 != _num_tile_rows) {
+	if (_map_script.GetTableSize("upper_layer") != _num_tile_rows) {
 		cerr << "MAP ERROR: In MapMode::_Load(), the upper_layer table had an incorrect number of rows" << endl;
 		return;
 	}
