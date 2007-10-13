@@ -394,7 +394,27 @@ uint32 ReadScriptDescriptor::GetTableSize() {
 		return 0;
 	}
 
-	return static_cast<uint32>(luaL_getn(_lstack, STACK_TOP));
+	uint32 table_size = static_cast<uint32>(luaL_getn(_lstack, STACK_TOP));
+	if (table_size != 0)
+		return table_size;
+
+	// check the table size to make sure it actually is zero before returning zero.
+	// lua returns 0 on table sizes in a couple situations
+	// 1. the indexes don't start from what lua expects
+	// 2. a hash table instead of an array table.
+	object o(from_stack(_lstack, STACK_TOP));
+
+	if (type(o) != LUA_TTABLE)
+	{
+		_error_messages << "* GetTableSize() failed because the top of the stack is not a table." << endl;
+		return 0;
+	}
+
+	table_size = 0;
+	for (luabind::iterator i(o); i != private_script::TABLE_END; ++i)
+		table_size++;
+
+	return table_size;
 }
 
 //-----------------------------------------------------------------------------
