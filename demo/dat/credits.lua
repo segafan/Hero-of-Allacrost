@@ -29,18 +29,17 @@ credits_text =
 	"Guillaume Anctil (Drakkoon) ~ map code\n\n" ..
 	"Daniel Steuernol (Steu) ~ scripting engine\n\n" ..
 	"Lindsay Roberts (Linds) ~ video engine\n\n" ..
-	"Jacob Rudolph (rujasu) ~ menu code\n\n" ..
+	"Jacob Rudolph (rujasu) ~ menu code\n\n" ..
+
 	"\n\n\n" ..
 
 	"Artwork Team\n\n" ..
-	"Richard Kettering (Jetryl) ~ map tiles, map sprites, inventory icons, location graphics\n\n" ..
-	"Brett Steele (Safir~Kreuz) ~ map sprites, battle sprites, character portraits\n\n" ..
-	"Joe Raucci (Sylon) ~ battle sprites, map sprites, GUI artwork\n\n" ..
+	"Brett Steele (Safir~Kreuz) ~ map sprites, battle sprites, character portraits, location graphics\n\n" ..
+	"Richard Kettering (Jetryl) ~ map tiles, map sprites, inventory icons, artwork coordination\n\n" ..
 	"Josiah Tobin (Josiah Tobin) ~ map tiles\n\n" ..
 	"Matthew James (nunvuru) ~ website graphics, GUI artwork, game logos\n\n" ..
-	"Max Humber (zomby138) ~ concept art, computer graphics\n\n" ..
-        "Herbert Glaser (hollowgrind) ~ map sprites\n\n" ..
-        "Adam Black (indigoshift) ~ concept art\n\n" ..
+	"Max Humber (zomby138) ~ concept art, title screen image\n\n" ..
+	"Joe Raucci (Sylon) ~ battle sprites, old GUI artwork\n\n" ..
 	"\n\n\n" ..
 
 	"Music and Sound Team\n\n" ..
@@ -75,8 +74,8 @@ credits_text =
 	"Philip Vorsilak (gorzuate) ~ Source distribution\n\n" ..
 	"Viljami Korhonen (MindFlayer) ~ Windows distribution\n\n" ..
 	"Alistair Lynn (prophile) ~ OS X distribution\n\n" ..
-	"(ettin) ~ Debian distribution\n\n" ..
-        "Dmitry Marakasov (AMDmi3) ~ FreeBSD distribution\n\n" ..
+	"Jorda Polo (ettin) ~ Debian distribution\n\n" ..
+    "Dmitry Marakasov (AMDmi3) ~ FreeBSD distribution\n\n" ..
 	"\n\n\n" ..
 
 	"Additional Programming\n\n" ..
@@ -90,6 +89,9 @@ credits_text =
 	"\n\n\n" ..
 
 	"Additional Artwork\n\n" ..
+    "Adam Black (indigoshift) ~ concept art\n\n" ..
+    "Herbert Glaser (hollowgrind) ~ map sprites\n\n" ..
+    "(neoriceisgood) ~ map monster sprites\n\n" ..
 	"John W. Bjerk (eleazar) ~ map tiles\n\n" .. 
 	"Mark Goodenough (RangerM) ~ map sprites, map tiles\n\n" ..
 	"Richard Marks (DeveloperX) ~ map tiles\n\n" ..
@@ -99,9 +101,9 @@ credits_text =
 	"Tyler Olsen (Roots) ~ various art\n\n" ..
 	"Jason Frailey (Valdroni) ~ concept art, map sprites\n\n" ..
 	"Nathan Christie (Adarias) ~ concept art, map sprites, map tiles\n\n" ..
-	"(fmunoz) ~ inventory icons\n\n" ..
+	"Francisco Munoz (fmunoz) ~ inventory icons\n\n" ..
 	"(Jarks) ~ map tiles, inventory icons\n\n" ..
-	"(wayfarer) ~ Concept art, map sprites\n\n" ..
+	"Peter Geinitz (wayfarer) ~ Concept art, map sprites\n\n" ..
 	"Chris Luspo (Venndetta1) ~ concept art\n\n" ..
 	"Jon Williams (Jonatron) ~ map sprites\n\n" ..
 	"\n\n\n" ..
@@ -122,9 +124,8 @@ credits_text =
 	"\n\n\n" ..
 
         "Special Thanks\n\n" ..
-        "(Danc)\n\n" ..
-        "The Battle for Wesnoth Development Team\n\n" ..
-        "The Mana World Game Development Team\n\n" ..
+        "Daniel Cook (Danc) ~ Map Tiles\n\n" ..
+        "The Battle for Wesnoth Development Team ~ Inventory Icons\n\n" ..
         "\n\n\n" ..
 
 	"Extra Thanks\n\n" ..
