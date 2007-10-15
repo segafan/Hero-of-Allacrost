@@ -61,6 +61,25 @@ enum TILE_MODE_TYPE
 	TOTAL_TILE   = 3
 };
 
+//! Different types of transition patterns for autotileable tiles follow.
+enum TRANSITION_PATTERN_TYPE
+{
+	INVALID_PATTERN   = -1,
+	NW_BORDER_PATTERN = 0,
+	N_BORDER_PATTERN  = 1,
+	NE_BORDER_PATTERN = 2,
+	E_BORDER_PATTERN  = 3,
+	SE_BORDER_PATTERN = 4,
+	S_BORDER_PATTERN  = 5,
+	SW_BORDER_PATTERN = 6,
+	W_BORDER_PATTERN  = 7,
+	NW_CORNER_PATTERN = 8,
+	NE_CORNER_PATTERN = 9,
+	SE_CORNER_PATTERN = 10,
+	SW_CORNER_PATTERN = 11,
+	TOTAL_PATTERN     = 12
+};
+
 class EditorScrollView;
 
 class Editor: public QMainWindow
@@ -355,11 +374,18 @@ class EditorScrollView: public Q3ScrollView
 		//!        with autotiling. _AutotileRandomize randomizes tiles being painted
 		//!        on the map, and _AutotileTransitions calculates which tiles need
 		//!        border transitions from one tile group to the next.
+		//!        _CheckForTransitionPattern checks tiles surrounding the current tile
+		//!        for patterns necessary to put in a transition tile. It's a helper to
+		//!        _AutotileTransitions.
 		//! \param tileset_num The index of the specified tileset as loaded in the
 		//!                    QTabWidget.
 		//! \param tile_index The index of the selected tile in its tileset.
+		//! \param tile_group The autotileable group that the current tile belongs to.
 		//{@
-		void _AutotileRandomize(int& tileset_num, int& tile_index);
+		void _AutotileRandomize(int32& tileset_num, int32& tile_index);
+		void _AutotileTransitions(int32& tileset_num, int32& tile_index, const std::string tile_group);
+		TRANSITION_PATTERN_TYPE _CheckForTransitionPattern(const std::string current_group,
+			const std::vector<std::string>& surrounding_groups, std::string& border_group);
 		//@}
 
 		//! \name Context Menu Actions

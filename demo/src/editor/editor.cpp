@@ -385,15 +385,14 @@ void Editor::_TileLayerFill()
 	Q3Table* table = static_cast<Q3Table*> (_ed_tabs->currentPage());
 
 	// put selected tile from tileset into tile array at correct position
-	int tileset_index = table->currentRow() * 16 + table->currentColumn();
-	int multiplier = _ed_scrollview->_map->tileset_names.findIndex(_ed_tabs->tabText(_ed_tabs->currentIndex()));
+	int32 tileset_index = table->currentRow() * 16 + table->currentColumn();
+	int32 multiplier = _ed_scrollview->_map->tileset_names.findIndex(_ed_tabs->tabText(_ed_tabs->currentIndex()));
 	if (multiplier == -1)
 	{
 		_ed_scrollview->_map->tileset_names.append(_ed_tabs->tabText(_ed_tabs->currentIndex()));
 		multiplier = _ed_scrollview->_map->tileset_names.findIndex(_ed_tabs->tabText(_ed_tabs->currentIndex()));
 	} // calculate index of current tileset
 
-	vector<int32>::iterator it;    // used to iterate over an entire layer
 	vector<int32>& current_layer = _ed_scrollview->GetCurrentLayer();
 	
 	// Record the information for undo/redo operations.
@@ -404,10 +403,10 @@ void Editor::_TileLayerFill()
 		indeces[i] = i;
 
 	// Fill the layer.
-	for (it = current_layer.begin(); it != current_layer.end(); it++)
+	for (vector<int32>::iterator iter = current_layer.begin(); iter != current_layer.end(); iter++)
 	{
-		_ed_scrollview->_AutotileRandomize(multiplier, tileset_index);
-		*it = static_cast<int32> (tileset_index + multiplier * 256);
+		_ed_scrollview->_AutotileRandomize(multiplier, tileset_index);		
+		*iter = static_cast<int32> (tileset_index + multiplier * 256);
 		modified.push_back(static_cast<int32> (tileset_index + multiplier * 256));
 	} // iterate through the entire layer
 
@@ -1300,8 +1299,8 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 					QString tileset_name = editor->_ed_tabs->tabText(editor->_ed_tabs->currentIndex());
 
 					// put selected tile from tileset into tile array at correct position
-					int tileset_index = table->currentRow() * 16 + table->currentColumn();
-					int multiplier = _map->tileset_names.findIndex(tileset_name);
+					int32 tileset_index = table->currentRow() * 16 + table->currentColumn();
+					int32 multiplier = _map->tileset_names.findIndex(tileset_name);
 					if (multiplier == -1)
 					{
 						_map->tileset_names.append(tileset_name);
@@ -1314,9 +1313,9 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 					// Record information for undo/redo action.
 					_tile_indeces.push_back(_tile_index);
 					_previous_tiles.push_back(GetCurrentLayer()[_tile_index]);
-					_modified_tiles.push_back(static_cast<int32> (tileset_index + multiplier * 256));
+					_modified_tiles.push_back(tileset_index + multiplier * 256);
 
-					GetCurrentLayer()[_tile_index] = static_cast<int32> (tileset_index + multiplier * 256);
+					GetCurrentLayer()[_tile_index] = tileset_index + multiplier * 256;
 				} // left mouse button was pressed
 				break;
 			} // edit mode PAINT_TILE
@@ -1539,14 +1538,14 @@ void EditorScrollView::_ContextDeleteColumn()
 
 // ********** Private functions **********
 
-void EditorScrollView::_AutotileRandomize(int& tileset_num, int& tile_index)
+void EditorScrollView::_AutotileRandomize(int32& tileset_num, int32& tile_index)
 {
 	map<int, string>::iterator it = _map->tilesets[tileset_num]->
 		autotileability.find(tile_index);
 
 	if (it != _map->tilesets[tileset_num]->autotileability.end())
 	{
-		// set up for opening autotiling.lua
+		// Set up for opening autotiling.lua.
 		ReadScriptDescriptor read_data;
 		if (read_data.OpenFile("dat/tilesets/autotiling.lua") == false)
 			QMessageBox::warning(this, "Loading File...",
@@ -1558,7 +1557,7 @@ void EditorScrollView::_AutotileRandomize(int& tileset_num, int& tile_index)
 			int32 random_index = RandomBoundedInteger(1, static_cast<int32>(read_data.GetTableSize()));
 			read_data.OpenTable(random_index);
 			string tileset_name = read_data.ReadString(1);
-			tile_index = static_cast<int>(read_data.ReadInt(2));
+			tile_index = read_data.ReadInt(2);
 			read_data.CloseTable();
 			tileset_num = _map->tileset_names.findIndex(
 				QString::fromStdString(tileset_name));
@@ -1567,7 +1566,147 @@ void EditorScrollView::_AutotileRandomize(int& tileset_num, int& tile_index)
 
 		read_data.CloseFile();
 	} // must have an autotileable tile
-} // AutotileRandomize(...)
+} // _AutotileRandomize(...)
+
+void EditorScrollView::_AutotileTransitions(int32& tileset_num, int32& tile_index, const string tile_group)
+{
+	// These 2 vectors have a one-to-one correspondence.
+	vector<int32>  existing_tiles;   // This vector will contain all the tiles around the current painted tile that need to be examined.
+	vector<string> existing_groups;  // This vector will contain the autotileable groups of the existing tiles.
+
+	// These booleans are used to know whether the current tile being painted is on the edge of the map.
+	// This will affect the transition/border algorithm.
+	bool top_edge    = (_tile_index - _map->GetWidth()) < 0;
+	bool bottom_edge = (_tile_index + _map->GetWidth()) > (_map->GetWidth() * _map->GetHeight());
+	bool left_edge   = (_tile_index % _map->GetWidth()) == 0;
+	bool right_edge  = (_tile_index & _map->GetWidth()) == (_map->GetWidth() - 1);
+
+
+	// Now figure out which tiles surround the current painted one and put them into the existing_tiles vector.
+	if (!top_edge)
+	{
+		if (!left_edge)
+			existing_tiles.push_back(GetCurrentLayer()[_tile_index - _map->GetWidth() - 1]);
+		existing_tiles.push_back(GetCurrentLayer()[_tile_index - _map->GetWidth()]);
+		if (!right_edge)
+			existing_tiles.push_back(GetCurrentLayer()[_tile_index - _map->GetWidth() + 1]);
+	} // make sure there is a row of tiles above the painted one
+	if (!left_edge)
+		existing_tiles.push_back(GetCurrentLayer()[_tile_index - 1]);
+	if (!right_edge)
+		existing_tiles.push_back(GetCurrentLayer()[_tile_index + 1]);
+	if (!bottom_edge)
+	{
+		if (!left_edge)
+			existing_tiles.push_back(GetCurrentLayer()[_tile_index + _map->GetWidth() - 1]);
+		existing_tiles.push_back(GetCurrentLayer()[_tile_index + _map->GetWidth()]);
+		if (!right_edge)
+			existing_tiles.push_back(GetCurrentLayer()[_tile_index + _map->GetWidth() + 1]);
+	} // make sure there is a row of tiles below the painted one
+	
+
+	// Now figure out what groups the existing tiles belong to.
+	for (int i = 0; i < existing_tiles.size(); i++)
+	{
+		int32 multiplier    = existing_tiles[i] / 256;
+		int32 tileset_index = existing_tiles[i] % 256;
+		map<int, string>::iterator it = _map->tilesets[multiplier]->
+			autotileability.find(tileset_index);
+			
+		if (it != _map->tilesets[multiplier]->autotileability.end())
+			existing_groups[i] = it->second;
+		else
+			existing_groups[i] = "none";
+	} // iterate through the existing_tiles vector
+
+
+	// Transition tiles exist only for certain patterns of tiles surrounding the painted tile.
+	// Check for any of these patterns, and if one exists, transition magic begins!
+	
+	string transition_group = "none";  // autotileable grouping for the border tile if it exists 
+	TRANSITION_PATTERN_TYPE pattern = _CheckForTransitionPattern(tile_group, existing_groups,
+		transition_group);
+	
+	if (pattern != INVALID_PATTERN)
+	{
+		transition_group = tile_group + "_" + transition_group;
+		
+		// Set up for opening autotiling.lua.
+		ReadScriptDescriptor read_data;
+		if (read_data.OpenFile("dat/tilesets/autotiling.lua") == false)
+			QMessageBox::warning(this, "Loading File...",
+				QString("ERROR: could not open dat/tilesets/autotiling.lua for reading!"));
+
+		// Extract the correct transition tile from autotiling.lua as determined by
+		// _CheckForTransitionPattern(...).
+		if (read_data.DoesTableExist(transition_group) == true)
+		{
+			read_data.OpenTable(transition_group);
+
+			switch (pattern)
+			{
+				case NW_BORDER_PATTERN:
+					read_data.OpenTable(1);
+					break;
+				case N_BORDER_PATTERN:
+					read_data.OpenTable(2);
+					break;
+				case NE_BORDER_PATTERN:
+					read_data.OpenTable(3);
+					break;
+				case E_BORDER_PATTERN:
+					read_data.OpenTable(4);
+					break;
+				case SE_BORDER_PATTERN:
+					read_data.OpenTable(5);
+					break;
+				case S_BORDER_PATTERN:
+					read_data.OpenTable(6);
+					break;
+				case SW_BORDER_PATTERN:
+					read_data.OpenTable(7);
+					break;
+				case W_BORDER_PATTERN:
+					read_data.OpenTable(8);
+					break;
+				case NW_CORNER_PATTERN:
+					read_data.OpenTable(9);
+					break;
+				case NE_CORNER_PATTERN:
+					read_data.OpenTable(10);
+					break;
+				case SE_CORNER_PATTERN:
+					read_data.OpenTable(11);
+					break;
+				case SW_CORNER_PATTERN:
+					read_data.OpenTable(12);
+					break;
+				default: // should never get here
+					read_data.CloseTable();
+					read_data.CloseFile();
+					QMessageBox::warning(this, "Transition detection...",
+						QString("ERROR: Invalid pattern detected! No autotiling will occur for this tile!"));
+					return;
+			} // switch on transition pattern
+
+			string tileset_name = read_data.ReadString(1);
+			tile_index = read_data.ReadInt(2);
+			read_data.CloseTable();
+			tileset_num = _map->tileset_names.findIndex(
+				QString::fromStdString(tileset_name));
+
+			read_data.CloseTable();
+		} // make sure the selected transition tiles exist
+		
+		read_data.CloseFile();
+	} // make sure a transition pattern exists
+} // _AutotileTransitions(...)
+
+TRANSITION_PATTERN_TYPE EditorScrollView::_CheckForTransitionPattern(const string current_group,
+	const vector<string>& surrounding_groups, string& border_group)
+{
+	return INVALID_PATTERN;
+} // _CheckForTransitionPattern(...)
 
 
 
