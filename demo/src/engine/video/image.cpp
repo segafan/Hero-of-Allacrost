@@ -113,12 +113,12 @@ ImageDescriptor& ImageDescriptor::operator=(const ImageDescriptor& copy) {
 			if (_texture->width > 512 || _texture->height > 512) {
 				// Remove the image and texture sheet completely
 				// TODO: This introduces a seg fault when TexSheet::FreeImage is later called. Fix this bug!
-				_texture->texture_sheet->RemoveImage(_texture);
+				_texture->texture_sheet->RemoveTexture(_texture);
 				TextureManager->_RemoveSheet(_texture->texture_sheet);
 			}
 			else {
 				// Otherise simply mark the image as free in the texture sheet
-				_texture->texture_sheet->FreeImage(_texture);
+				_texture->texture_sheet->FreeTexture(_texture);
 			}
 		}
 	}
@@ -469,13 +469,13 @@ void ImageDescriptor::_RemoveTextureReference(private_video::BaseImageTexture* t
 		if (texture->width > 512 || texture->height > 512) {
 			// Remove the image and texture sheet completely
 			// TODO: This introduces a seg fault when TexSheet::FreeImage is later called. Fix this bug!
-			texture->texture_sheet->RemoveImage(texture);
+			texture->texture_sheet->RemoveTexture(texture);
 			TextureManager->_RemoveSheet(texture->texture_sheet);
 			delete texture;
 		}
 		else {
 			// Otherise simply mark the image as free in the texture sheet
-			texture->texture_sheet->FreeImage(texture);
+			texture->texture_sheet->FreeTexture(texture);
 		}
 	}
 
@@ -750,7 +750,7 @@ bool ImageDescriptor::_LoadMultiImage(vector<StillImage>& images, const string &
 
 				// If ref count is zero, it means this image was freed, but not removed, so restore it
 				if (img->ref_count == 0) {
-					img->texture_sheet->RestoreImage(img);
+					img->texture_sheet->RestoreTexture(img);
 				}
 
 				images.at(current_image)._texture = img;
@@ -868,7 +868,7 @@ bool StillImage::Load(const string& filename) {
 		// If the following condition is true, it means this image was freed but not removed from the texture sheet
 		// So, we must restore it
 		if (_image_texture->ref_count == 0) {
-			_image_texture->texture_sheet->RestoreImage(_image_texture);
+			_image_texture->texture_sheet->RestoreTexture(_image_texture);
 		}
 
 		// If the width or height of this object is 0.0, use the pixel width/height of the image texture

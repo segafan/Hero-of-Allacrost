@@ -50,8 +50,8 @@ class TextureController : public hoa_utils::Singleton<TextureController> {
 	friend class TextSupervisor;
 	friend class RenderedText;
 	friend class private_video::TexSheet;
-	friend class private_video::FixedTexMemMgr;
-	friend class private_video::VariableTexMemMgr;
+	friend class private_video::FixedTexSheet;
+	friend class private_video::VariableTexSheet;
 	friend class private_video::ParticleSystem;
 
 public:

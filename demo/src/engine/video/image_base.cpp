@@ -44,9 +44,8 @@ ImageMemory::ImageMemory() :
 ImageMemory::~ImageMemory() {
 	if (pixels != NULL) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "pixels member was not NULL upon object destruction" << endl;
-		// TODO: fix all areas in the video engine where it frees pixels but does not set the pointer to NULL
-// 		free(pixels);
-// 		pixels = NULL;
+		free(pixels);
+		pixels = NULL;
 	}
 }
 

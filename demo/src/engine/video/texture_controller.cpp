@@ -292,7 +292,16 @@ TexSheet* TextureController::_CreateTexSheet(int32 width, int32 height, TexSheet
 		return NULL;
 	}
 
- 	TexSheet *sheet = new TexSheet(width, height, tex_id, type, is_static);
+	TexSheet* sheet = NULL;
+	if (type == VIDEO_TEXSHEET_32x32)
+		sheet = new FixedTexSheet(width, height, tex_id, type, is_static, 32, 32);
+	else if (type == VIDEO_TEXSHEET_32x64)
+		sheet = new FixedTexSheet(width, height, tex_id, type, is_static, 32, 64);
+	else if (type == VIDEO_TEXSHEET_64x64)
+		sheet = new FixedTexSheet(width, height, tex_id, type, is_static, 64, 64);
+	else
+		sheet = new VariableTexSheet(width, height, tex_id, type, is_static);
+
 	_tex_sheets.push_back(sheet);
 	return sheet;
 }
@@ -339,10 +348,10 @@ TexSheet* TextureController::_InsertImageInTexSheet(BaseImageTexture *image, Ima
 			return NULL;
 		}
 
-		if (sheet->AddImage(image, load_info) == true)
+		if (sheet->AddTexture(image, load_info) == true)
 			return sheet;
 		else {
-			IF_PRINT_WARNING(VIDEO_DEBUG) << "TexSheet::AddImage returned false when trying to insert a large image" << endl;
+			IF_PRINT_WARNING(VIDEO_DEBUG) << "TexSheet::AddTexture returned false when trying to insert a large image" << endl;
 			return NULL;
 		}
 	}
@@ -369,7 +378,7 @@ TexSheet* TextureController::_InsertImageInTexSheet(BaseImageTexture *image, Ima
 		}
 
 		if (sheet->type == type && sheet->is_static == is_static) {
-			if (sheet->AddImage(image, load_info) == true) {
+			if (sheet->AddTexture(image, load_info) == true) {
 				return sheet;
 			}
 		}
@@ -382,8 +391,8 @@ TexSheet* TextureController::_InsertImageInTexSheet(BaseImageTexture *image, Ima
 		return NULL;
 	}
 
-	// AddImage should always work here. If not, there is a serious problem
-	if (sheet->AddImage(image, load_info)) {
+	// AddTexture should always work here. If not, there is a serious problem
+	if (sheet->AddTexture(image, load_info)) {
 		return sheet;
 	}
 	else {
@@ -558,27 +567,16 @@ void TextureController::_DEBUG_ShowTexSheet() {
 		return;
 	}
 
-// 	int32 w = sheet->width;
-// 	int32 h = sheet->height;
-
-// 	ImageTexture img(sheet, "", "<T>", w, h);
-
 	VideoManager->PushState();
 	VideoManager->SetDrawFlags(VIDEO_NO_BLEND, VIDEO_X_LEFT, VIDEO_Y_BOTTOM, 0);
 	VideoManager->SetCoordSys(0.0f, 1024.0f, 0.0f, 768.0f);
 
 	glPushMatrix();
 	VideoManager->Move(0.0f,0.0f);
-// 	VideoManager->Move(512.0f,384.0f);
 	glScalef(sheet->width / 2, sheet->height / 2, 1.0f);
 
-	sheet->Draw();
+	sheet->DEBUG_Draw();
 
-// 	ImageElement elem(&img, static_cast<float>(w), static_cast<float>(h), 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f);
-// 	StillImage id;
-// 	id._elements.push_back(elem);
-// 
-// 	id.Draw();
 	glPopMatrix();
 
 	TextManager->SetDefaultFont("debug_font");
