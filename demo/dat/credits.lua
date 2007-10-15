@@ -90,10 +90,11 @@ credits_text =
 
 	"Additional Artwork\n\n" ..
     "Adam Black (indigoshift) ~ concept art\n\n" ..
-    "Herbert Glaser (hollowgrind) ~ map sprites\n\n" ..
+    "Chris Hopp (fydo) ~ map sprite animations\n\n" ..
+    "Herbert Glaser (hollowgrind) ~ map sprite animations\n\n" ..
     "(neoriceisgood) ~ map monster sprites\n\n" ..
 	"John W. Bjerk (eleazar) ~ map tiles\n\n" .. 
-	"Mark Goodenough (RangerM) ~ map sprites, map tiles\n\n" ..
+	"Mark Goodenough (RangerM) ~ map sprite animations, map tiles\n\n" ..
 	"Richard Marks (DeveloperX) ~ map tiles\n\n" ..
 	"Victoria Smith (alenacat) ~ map sprites, map tiles\n\n" ..
 	"Jerimiah Short (BigPapaN0z) ~ map tiles\n\n" ..
