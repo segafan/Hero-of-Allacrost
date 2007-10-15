@@ -10,8 +10,8 @@
 	};
 	4941A4A10AC1D76400D65B8E /* Project object */ = {
 		activeBuildConfigurationName = Debug;
-		activeExecutable = D43080DE0AF982F800A5173A /* Allacrost */;
-		activeTarget = 4941A4AF0AC1D77500D65B8E /* Allacrost */;
+		activeExecutable = D4D1BA4A0B02B1DB0052BF1E /* Editor */;
+		activeTarget = D4D1BA480B02B1DB0052BF1E /* Editor */;
 		addToTargets = (
 			D4D1BA480B02B1DB0052BF1E /* Editor */,
 		);
@@ -19,6 +19,8 @@
 			D4D424950C86877600F4B4BC /* audio_descriptor.cpp:627 */,
 			D4D4249B0C8687C900F4B4BC /* audio_descriptor.cpp:646 */,
 			D4D4249F0C86881100F4B4BC /* audio_descriptor.cpp:588 */,
+			D4E6562C0CC33B2300747964 /* editor.cpp:578 */,
+			D4E656340CC33BF800747964 /* editor.cpp:567 */,
 		);
 		breakpointsGroup = D404C6AB0B02F27D00827A19 /* XCBreakpointsBucket */;
 		codeSenseManager = D43082580AF9831800A5173A /* Code sense */;
@@ -173,8 +175,14 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 213602367;
-			PBXWorkspaceStateSaveDate = 213602367;
+			PBXPerProjectTemplateStateSaveDate = 214012332;
+			PBXWorkspaceStateSaveDate = 214012332;
+		};
+		perUserProjectItems = {
+			D4E656020CC2D1FF00747964 /* PBXBookmark */ = D4E656020CC2D1FF00747964 /* PBXBookmark */;
+			D4E656200CC3360300747964 /* PBXTextBookmark */ = D4E656200CC3360300747964 /* PBXTextBookmark */;
+			D4E656440CC33D8700747964 /* PBXTextBookmark */ = D4E656440CC33D8700747964 /* PBXTextBookmark */;
+			D4E656450CC33D8700747964 /* PBXTextBookmark */ = D4E656450CC33D8700747964 /* PBXTextBookmark */;
 		};
 		sourceControlManager = D43082570AF9831800A5173A /* Source Control */;
 		userBuildSettings = {
@@ -350,8 +358,15 @@
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {950, 8722}}";
 			sepNavSelRange = "{16016, 0}";
-			sepNavVisRect = "{{0, 5418}, {672, 267}}";
+			sepNavVisRect = "{{0, 86}, {711, 429}}";
 			sepNavWindowFrame = "{{15, 215}, {750, 558}}";
+		};
+	};
+	4941A7630AC1DCA500D65B8E /* SDLMain.m */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {734, 2576}}";
+			sepNavSelRange = "{5026, 0}";
+			sepNavVisRect = "{{0, 2296}, {672, 263}}";
 		};
 	};
 	499629630AF50B1F00B6A328 /* global_objects.h */ = {
@@ -396,8 +411,8 @@
 	};
 	4999AC4E0AF407BE004DD3A3 /* system.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {711, 4340}}";
-			sepNavSelRange = "{897, 0}";
+			sepNavIntBoundsRect = "{{0, 0}, {711, 4368}}";
+			sepNavSelRange = "{940, 0}";
 			sepNavVisRect = "{{0, 0}, {711, 645}}";
 			sepNavWindowFrame = "{{15, -1}, {750, 774}}";
 		};
@@ -409,6 +424,8 @@
 			D4D424950C86877600F4B4BC /* audio_descriptor.cpp:627 */,
 			D4D4249B0C8687C900F4B4BC /* audio_descriptor.cpp:646 */,
 			D4D4249F0C86881100F4B4BC /* audio_descriptor.cpp:588 */,
+			D4E6562C0CC33B2300747964 /* editor.cpp:578 */,
+			D4E656340CC33BF800747964 /* editor.cpp:567 */,
 		);
 	};
 	D404C6E90B02FD3E00827A19 /* editor.moc.cpp */ = {
@@ -634,17 +651,17 @@
 	};
 	D4D1BA650B02B27F0052BF1E /* editor.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {956, 21266}}";
-			sepNavSelRange = "{6049, 0}";
-			sepNavVisRect = "{{0, 2359}, {711, 645}}";
-			sepNavWindowFrame = "{{0, 4}, {750, 774}}";
+			sepNavIntBoundsRect = "{{0, 0}, {956, 24388}}";
+			sepNavSelRange = "{15244, 0}";
+			sepNavVisRect = "{{0, 23420}, {711, 617}}";
+			sepNavWindowFrame = "{{0, 32}, {750, 746}}";
 		};
 	};
 	D4D1BA660B02B27F0052BF1E /* editor.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {782, 5824}}";
-			sepNavSelRange = "{12349, 0}";
-			sepNavVisRect = "{{0, 5179}, {711, 645}}";
+			sepNavIntBoundsRect = "{{0, 0}, {794, 6510}}";
+			sepNavSelRange = "{12279, 0}";
+			sepNavVisRect = "{{0, 5104}, {711, 645}}";
 			sepNavWindowFrame = "{{522, 4}, {750, 774}}";
 		};
 	};
@@ -699,8 +716,7 @@
 		functionName = "AudioDescriptor::_Update()";
 		hitCount = 1;
 		lineNumber = 627;
-		location = Allacrost;
-		modificationTime = 213158128.565574;
+		modificationTime = 214121524.449838;
 		state = 1;
 	};
 	D4D4249B0C8687C900F4B4BC /* audio_descriptor.cpp:646 */ = {
@@ -715,7 +731,7 @@
 		hitCount = 1;
 		lineNumber = 646;
 		location = Allacrost;
-		modificationTime = 213158128.565593;
+		modificationTime = 214121507.936734;
 		state = 2;
 	};
 	D4D4249F0C86881100F4B4BC /* audio_descriptor.cpp:588 */ = {
@@ -730,7 +746,7 @@
 		hitCount = 1;
 		lineNumber = 588;
 		location = Allacrost;
-		modificationTime = 213158128.5656;
+		modificationTime = 214121507.936739;
 		state = 2;
 	};
 	D4E561260BB71B53002FB758 /* defs.cpp */ = {
@@ -740,6 +756,68 @@
 			sepNavVisRect = "{{0, 665}, {711, 429}}";
 			sepNavWindowFrame = "{{58, 211}, {750, 558}}";
 		};
+	};
+	D4E656020CC2D1FF00747964 /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = D4D1BA690B02B27F0052BF1E /* grid.h */;
+	};
+	D4E656200CC3360300747964 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "error: '_AutotileRandomize' was not declared in this scope";
+		fRef = D4D1BA650B02B27F0052BF1E /* editor.cpp */;
+		rLen = 1;
+		rLoc = 407;
+		rType = 1;
+	};
+	D4E6562C0CC33B2300747964 /* editor.cpp:578 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		delayBeforeContinue = 0;
+		fileReference = D4D1BA650B02B27F0052BF1E /* editor.cpp */;
+		functionName = "Editor::_MapProperties()";
+		hitCount = 1;
+		lineNumber = 578;
+		location = Editor;
+		modificationTime = 214121507.936753;
+		state = 1;
+	};
+	D4E656340CC33BF800747964 /* editor.cpp:567 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		delayBeforeContinue = 0;
+		fileReference = D4D1BA650B02B27F0052BF1E /* editor.cpp */;
+		functionName = "Editor::_MapProperties()";
+		hitCount = 1;
+		lineNumber = 567;
+		location = Editor;
+		modificationTime = 214121507.936767;
+		state = 1;
+	};
+	D4E656440CC33D8700747964 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = D4D1BA650B02B27F0052BF1E /* editor.cpp */;
+		name = "editor.cpp: 531";
+		rLen = 0;
+		rLoc = 15244;
+		rType = 0;
+		vrLen = 1333;
+		vrLoc = 57061;
+	};
+	D4E656450CC33D8700747964 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = D4D1BA690B02B27F0052BF1E /* grid.h */;
+		name = "grid.h: GetHeight";
+		rLen = 0;
+		rLoc = 1890;
+		rType = 0;
+		vrLen = 1225;
+		vrLoc = 1217;
 	};
 	D4EE2D630BE85F5B00B7112A /* boot_welcome.cpp */ = {
 		uiCtxt = {
