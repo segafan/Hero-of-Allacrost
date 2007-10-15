@@ -120,7 +120,6 @@ GameVideo::GameVideo() {
 
 GameVideo::~GameVideo() {
 	_particle_manager.Destroy();
-
 	GUIManager->SingletonDestroy();
 	TextManager->SingletonDestroy();
 
@@ -775,7 +774,8 @@ StillImage GameVideo::CaptureScreen() throw(Exception) {
 	ImageTexture* new_image = new ImageTexture("capture_screen" + NumberToString(capture_id), "<T>", viewport_dimensions[2], viewport_dimensions[3]);
 
 	// Create a texture sheet of an appropriate size that can retain the capture
-	TexSheet* sheet = TextureManager->_CreateTexSheet(RoundUpPow2(viewport_dimensions[2]), RoundUpPow2(viewport_dimensions[3]), VIDEO_TEXSHEET_ANY, false);
+	TexSheet* temp_sheet = TextureManager->_CreateTexSheet(RoundUpPow2(viewport_dimensions[2]), RoundUpPow2(viewport_dimensions[3]), VIDEO_TEXSHEET_ANY, false);
+	VariableTexSheet* sheet = dynamic_cast<VariableTexSheet*>(temp_sheet);
 
 	// Ensure that texture sheet creation succeeded, insert the texture image into the sheet, and copy the screen into the sheet
 	if (sheet == NULL) {
@@ -784,7 +784,7 @@ StillImage GameVideo::CaptureScreen() throw(Exception) {
 		screen_image.Clear();
 		return screen_image;
 	}
-	if (sheet->tex_mem_manager->Insert(new_image) == false) {
+	if (sheet->InsertTexture(new_image) == false) {
 		TextureManager->_RemoveSheet(sheet);
 		delete new_image;
 		throw Exception("could not insert captured screen image into texture sheet", __FILE__, __LINE__, __FUNCTION__);

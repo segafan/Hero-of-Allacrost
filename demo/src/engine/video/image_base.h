@@ -155,6 +155,10 @@ private:
 *** serves to prevent the duplication of the same image data in more than one
 *** location in texture memory.
 ***
+*** \note Whenever you create an instance of this class or one of its child
+*** classes and you intend to have some piece of code use it, you MUST remember
+*** to call AddReference() at least once, otherwise bad things can happen.
+***
 *** \note Objects of this class are intended to be constructed via the new
 *** operator. The copy constructor and copy assignment operator are kept
 *** private because we do not wish to allow duplicate pointers to the same

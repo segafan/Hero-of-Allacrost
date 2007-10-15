@@ -105,10 +105,10 @@ namespace hoa_video {
 		class Context;
 
 		class TexSheet;
-
-		class TexMemMgr;
-		class FixedTexMemMgr;
-		class VariableTexMemMgr;
+		class FixedTexSheet;
+		class VariableTexSheet;
+		class FixedTexNode;
+		class VariableTexNode;
 
 		class ImageMemory;
 		class BaseImageTexture;

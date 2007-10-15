@@ -87,7 +87,7 @@ bool TextImageTexture::LoadFontProperties()
 bool TextImageTexture::Regenerate()
 {
 	if (texture_sheet) {
-		texture_sheet->RemoveImage(this);
+		texture_sheet->RemoveTexture(this);
 		TextureManager->_RemoveSheet(texture_sheet);
 		texture_sheet = NULL;
 	}
