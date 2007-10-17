@@ -175,14 +175,11 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 214012332;
-			PBXWorkspaceStateSaveDate = 214012332;
+			PBXPerProjectTemplateStateSaveDate = 214289370;
+			PBXWorkspaceStateSaveDate = 214289370;
 		};
 		perUserProjectItems = {
-			D4E656020CC2D1FF00747964 /* PBXBookmark */ = D4E656020CC2D1FF00747964 /* PBXBookmark */;
-			D4E656200CC3360300747964 /* PBXTextBookmark */ = D4E656200CC3360300747964 /* PBXTextBookmark */;
-			D4E656440CC33D8700747964 /* PBXTextBookmark */ = D4E656440CC33D8700747964 /* PBXTextBookmark */;
-			D4E656450CC33D8700747964 /* PBXTextBookmark */ = D4E656450CC33D8700747964 /* PBXTextBookmark */;
+			D4E656020CC2D1FF00747964 = D4E656020CC2D1FF00747964 /* PBXBookmark */;
 		};
 		sourceControlManager = D43082570AF9831800A5173A /* Source Control */;
 		userBuildSettings = {
@@ -651,9 +648,9 @@
 	};
 	D4D1BA650B02B27F0052BF1E /* editor.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {956, 24388}}";
-			sepNavSelRange = "{15244, 0}";
-			sepNavVisRect = "{{0, 23420}, {711, 617}}";
+			sepNavIntBoundsRect = "{{0, 0}, {956, 25158}}";
+			sepNavSelRange = "{56324, 0}";
+			sepNavVisRect = "{{0, 23074}, {672, 263}}";
 			sepNavWindowFrame = "{{0, 32}, {750, 746}}";
 		};
 	};
@@ -716,7 +713,7 @@
 		functionName = "AudioDescriptor::_Update()";
 		hitCount = 1;
 		lineNumber = 627;
-		modificationTime = 214121524.449838;
+		modificationTime = 214295568.998311;
 		state = 1;
 	};
 	D4D4249B0C8687C900F4B4BC /* audio_descriptor.cpp:646 */ = {
@@ -731,7 +728,7 @@
 		hitCount = 1;
 		lineNumber = 646;
 		location = Allacrost;
-		modificationTime = 214121507.936734;
+		modificationTime = 214295565.446951;
 		state = 2;
 	};
 	D4D4249F0C86881100F4B4BC /* audio_descriptor.cpp:588 */ = {
@@ -746,7 +743,7 @@
 		hitCount = 1;
 		lineNumber = 588;
 		location = Allacrost;
-		modificationTime = 214121507.936739;
+		modificationTime = 214295565.446958;
 		state = 2;
 	};
 	D4E561260BB71B53002FB758 /* defs.cpp */ = {
@@ -761,14 +758,6 @@
 		isa = PBXBookmark;
 		fRef = D4D1BA690B02B27F0052BF1E /* grid.h */;
 	};
-	D4E656200CC3360300747964 /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		comments = "error: '_AutotileRandomize' was not declared in this scope";
-		fRef = D4D1BA650B02B27F0052BF1E /* editor.cpp */;
-		rLen = 1;
-		rLoc = 407;
-		rType = 1;
-	};
 	D4E6562C0CC33B2300747964 /* editor.cpp:578 */ = {
 		isa = PBXFileBreakpoint;
 		actions = (
@@ -781,7 +770,7 @@
 		hitCount = 1;
 		lineNumber = 578;
 		location = Editor;
-		modificationTime = 214121507.936753;
+		modificationTime = 214295565.446962;
 		state = 1;
 	};
 	D4E656340CC33BF800747964 /* editor.cpp:567 */ = {
@@ -796,28 +785,8 @@
 		hitCount = 1;
 		lineNumber = 567;
 		location = Editor;
-		modificationTime = 214121507.936767;
+		modificationTime = 214295565.446966;
 		state = 1;
-	};
-	D4E656440CC33D8700747964 /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = D4D1BA650B02B27F0052BF1E /* editor.cpp */;
-		name = "editor.cpp: 531";
-		rLen = 0;
-		rLoc = 15244;
-		rType = 0;
-		vrLen = 1333;
-		vrLoc = 57061;
-	};
-	D4E656450CC33D8700747964 /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = D4D1BA690B02B27F0052BF1E /* grid.h */;
-		name = "grid.h: GetHeight";
-		rLen = 0;
-		rLoc = 1890;
-		rType = 0;
-		vrLen = 1225;
-		vrLoc = 1217;
 	};
 	D4EE2D630BE85F5B00B7112A /* boot_welcome.cpp */ = {
 		uiCtxt = {
