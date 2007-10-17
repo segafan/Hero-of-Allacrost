@@ -1143,6 +1143,8 @@ QString MusicDialog::GetSelectedFile()
 EditorScrollView::EditorScrollView(QWidget* parent, const QString& name, int width, int height)
 	: Q3ScrollView(parent, (const char*) name, Qt::WNoAutoErase|Qt::WStaticContents)
 {
+	setMouseTracking(true);
+	
 	// Set default editing modes.
 	_tile_mode  = PAINT_TILE;
 	_layer_edit = LOWER_LAYER;
@@ -1197,7 +1199,14 @@ std::vector<int32>& EditorScrollView::GetCurrentLayer()
 	return _map->GetLayer(_layer_edit);
 }
 
-// ********** Protected slots **********
+// ********** Protected functions **********
+
+void EditorScrollView::mouseMoveEvent(QMouseEvent *evt)
+{
+	// Display mouse position.
+	(static_cast<Editor*> (topLevelWidget()))->statusBar()->showMessage(
+		QString("Position - x:%1 y:%2").arg(evt->x() / TILE_WIDTH).arg(evt->y() / TILE_HEIGHT));
+} // mouseMoveEvent(...)
 
 void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 {
@@ -1351,7 +1360,7 @@ void EditorScrollView::contentsMouseMoveEvent(QMouseEvent *evt)
 		} // switch on tile editing mode
 	} // mouse has moved to a new tile position
 
-	// Draw the changes
+	// Draw the changes.
 	_map->updateGL();
 } // contentsMouseMoveEvent(...)
 
@@ -1565,12 +1574,15 @@ void EditorScrollView::_AutotileRandomize(int32& tileset_num, int32& tile_index)
 		} // autotileable group exists
 
 		read_data.CloseFile();
+
+		_AutotileTransitions(tileset_num, tile_index, it->second);
 	} // must have an autotileable tile
 } // _AutotileRandomize(...)
 
 void EditorScrollView::_AutotileTransitions(int32& tileset_num, int32& tile_index, const string tile_group)
 {
-	// These 2 vectors have a one-to-one correspondence.
+	// These 2 vectors have a one-to-one correspondence. They should always
+	// contain 8 entries.
 	vector<int32>  existing_tiles;   // This vector will contain all the tiles around the current painted tile that need to be examined.
 	vector<string> existing_groups;  // This vector will contain the autotileable groups of the existing tiles.
 
@@ -1587,22 +1599,49 @@ void EditorScrollView::_AutotileTransitions(int32& tileset_num, int32& tile_inde
 	{
 		if (!left_edge)
 			existing_tiles.push_back(GetCurrentLayer()[_tile_index - _map->GetWidth() - 1]);
+		else
+			existing_tiles.push_back(-1);
 		existing_tiles.push_back(GetCurrentLayer()[_tile_index - _map->GetWidth()]);
 		if (!right_edge)
 			existing_tiles.push_back(GetCurrentLayer()[_tile_index - _map->GetWidth() + 1]);
+		else
+			existing_tiles.push_back(-1);
 	} // make sure there is a row of tiles above the painted one
+	else
+	{
+		existing_tiles.push_back(-1);
+		existing_tiles.push_back(-1);
+		existing_tiles.push_back(-1);
+	} // these tiles don't exist
+
 	if (!left_edge)
 		existing_tiles.push_back(GetCurrentLayer()[_tile_index - 1]);
+	else
+		existing_tiles.push_back(-1);
+
 	if (!right_edge)
 		existing_tiles.push_back(GetCurrentLayer()[_tile_index + 1]);
+	else
+		existing_tiles.push_back(-1);
+
 	if (!bottom_edge)
 	{
 		if (!left_edge)
 			existing_tiles.push_back(GetCurrentLayer()[_tile_index + _map->GetWidth() - 1]);
+		else
+			existing_tiles.push_back(-1);
 		existing_tiles.push_back(GetCurrentLayer()[_tile_index + _map->GetWidth()]);
 		if (!right_edge)
 			existing_tiles.push_back(GetCurrentLayer()[_tile_index + _map->GetWidth() + 1]);
+		else
+			existing_tiles.push_back(-1);
 	} // make sure there is a row of tiles below the painted one
+	else
+	{
+		existing_tiles.push_back(-1);
+		existing_tiles.push_back(-1);
+		existing_tiles.push_back(-1);
+	} // these tiles don't exist
 	
 
 	// Now figure out what groups the existing tiles belong to.
@@ -1614,9 +1653,9 @@ void EditorScrollView::_AutotileTransitions(int32& tileset_num, int32& tile_inde
 			autotileability.find(tileset_index);
 			
 		if (it != _map->tilesets[multiplier]->autotileability.end())
-			existing_groups[i] = it->second;
+			existing_groups.push_back(it->second);
 		else
-			existing_groups[i] = "none";
+			existing_groups.push_back("none");
 	} // iterate through the existing_tiles vector
 
 
@@ -1705,6 +1744,181 @@ void EditorScrollView::_AutotileTransitions(int32& tileset_num, int32& tile_inde
 TRANSITION_PATTERN_TYPE EditorScrollView::_CheckForTransitionPattern(const string current_group,
 	const vector<string>& surrounding_groups, string& border_group)
 {
+	// Assumes that surrounding_groups always has 8 entries. Well, it's an error if it doesn't,
+	// and technically should never happen.
+
+	if (
+	    (surrounding_groups[1] == surrounding_groups[0]) &&
+	    (surrounding_groups[3] == surrounding_groups[0]) &&
+	    (surrounding_groups[0] != current_group && surrounding_groups[0] != "none" &&
+	     current_group != "none") &&
+	    (surrounding_groups[4] == current_group || surrounding_groups[4] == "none") &&
+	    (surrounding_groups[6] == current_group || surrounding_groups[6] == "none") &&
+	    (surrounding_groups[7] != surrounding_groups[0])) 
+	{
+		border_group = surrounding_groups[0];
+		return NW_BORDER_PATTERN;
+	} // check for the northwestern border pattern
+
+	else if (
+	    (surrounding_groups[0] == surrounding_groups[1] || surrounding_groups[0] == "none") &&
+	    (surrounding_groups[2] == surrounding_groups[1] || surrounding_groups[2] == "none") &&
+	    (surrounding_groups[1] != current_group && surrounding_groups[1] != "none" &&
+	     current_group != "none") &&
+	    (surrounding_groups[3] == current_group || surrounding_groups[3] == "none") &&
+	    (surrounding_groups[4] == current_group || surrounding_groups[4] == "none") &&
+	    (surrounding_groups[5] != surrounding_groups[1]) &&
+	    (surrounding_groups[6] != surrounding_groups[1]) &&
+	    (surrounding_groups[7] != surrounding_groups[1])) 
+	{
+		border_group = surrounding_groups[1];
+		return N_BORDER_PATTERN;
+	} // check for the northern border pattern
+
+	else if (
+	    (surrounding_groups[1] == surrounding_groups[2]) &&
+	    (surrounding_groups[4] == surrounding_groups[2]) &&
+	    (surrounding_groups[2] != current_group && surrounding_groups[2] != "none" &&
+	     current_group != "none") &&
+	    (surrounding_groups[3] == current_group || surrounding_groups[3] == "none") &&
+	    (surrounding_groups[6] == current_group || surrounding_groups[6] == "none") &&
+	    (surrounding_groups[5] != surrounding_groups[2])) 
+	{
+		border_group = surrounding_groups[2];
+		return NE_BORDER_PATTERN;
+	} // check for the northeastern border pattern
+
+	else if (
+	    (surrounding_groups[2] == surrounding_groups[4] || surrounding_groups[2] == "none") &&
+	    (surrounding_groups[7] == surrounding_groups[4] || surrounding_groups[7] == "none") &&
+	    (surrounding_groups[4] != current_group && surrounding_groups[4] != "none" &&
+	     current_group != "none") &&
+	    (surrounding_groups[1] == current_group || surrounding_groups[1] == "none") &&
+	    (surrounding_groups[6] == current_group || surrounding_groups[6] == "none") &&
+	    (surrounding_groups[0] != surrounding_groups[4]) &&
+	    (surrounding_groups[3] != surrounding_groups[4]) &&
+	    (surrounding_groups[5] != surrounding_groups[4])) 
+	{
+		border_group = surrounding_groups[4];
+		return E_BORDER_PATTERN;
+	} // check for the eastern border pattern
+
+	else if (
+	    (surrounding_groups[4] == surrounding_groups[7]) &&
+	    (surrounding_groups[6] == surrounding_groups[7]) &&
+	    (surrounding_groups[7] != current_group && surrounding_groups[7] != "none" &&
+	     current_group != "none") &&
+	    (surrounding_groups[1] == current_group || surrounding_groups[1] == "none") &&
+	    (surrounding_groups[3] == current_group || surrounding_groups[3] == "none") &&
+	    (surrounding_groups[0] != surrounding_groups[7])) 
+	{
+		border_group = surrounding_groups[7];
+		return SE_BORDER_PATTERN;
+	} // check for the southeastern border pattern
+
+	else if (
+	    (surrounding_groups[7] == surrounding_groups[6] || surrounding_groups[7] == "none") &&
+	    (surrounding_groups[5] == surrounding_groups[6] || surrounding_groups[5] == "none") &&
+	    (surrounding_groups[6] != current_group && surrounding_groups[6] != "none" &&
+	     current_group != "none") &&
+	    (surrounding_groups[3] == current_group || surrounding_groups[3] == "none") &&
+	    (surrounding_groups[4] == current_group || surrounding_groups[4] == "none") &&
+	    (surrounding_groups[2] != surrounding_groups[6]) &&
+	    (surrounding_groups[1] != surrounding_groups[6]) &&
+	    (surrounding_groups[0] != surrounding_groups[6])) 
+	{
+		border_group = surrounding_groups[6];
+		return S_BORDER_PATTERN;
+	} // check for the southern border pattern
+
+	else if (
+	    (surrounding_groups[3] == surrounding_groups[5]) &&
+	    (surrounding_groups[6] == surrounding_groups[5]) &&
+	    (surrounding_groups[5] != current_group && surrounding_groups[5] != "none" &&
+	     current_group != "none") &&
+	    (surrounding_groups[1] == current_group || surrounding_groups[1] == "none") &&
+	    (surrounding_groups[4] == current_group || surrounding_groups[4] == "none") &&
+	    (surrounding_groups[2] != surrounding_groups[5])) 
+	{
+		border_group = surrounding_groups[5];
+		return SW_BORDER_PATTERN;
+	} // check for the southwestern border pattern
+
+	else if (
+	    (surrounding_groups[0] == surrounding_groups[3] || surrounding_groups[0] == "none") &&
+	    (surrounding_groups[5] == surrounding_groups[3] || surrounding_groups[5] == "none") &&
+	    (surrounding_groups[3] != current_group && surrounding_groups[3] != "none" &&
+	     current_group != "none") &&
+	    (surrounding_groups[1] == current_group || surrounding_groups[1] == "none") &&
+	    (surrounding_groups[6] == current_group || surrounding_groups[6] == "none") &&
+	    (surrounding_groups[2] != surrounding_groups[3]) &&
+	    (surrounding_groups[4] != surrounding_groups[3]) &&
+	    (surrounding_groups[7] != surrounding_groups[3])) 
+	{
+		border_group = surrounding_groups[3];
+		return W_BORDER_PATTERN;
+	} // check for the western border pattern
+
+	else if (
+	    (surrounding_groups[0] != current_group && surrounding_groups[0] != "none" &&
+	     current_group != "none") &&
+	    (surrounding_groups[1] == current_group || surrounding_groups[1] == "none") &&
+	    (surrounding_groups[3] == current_group || surrounding_groups[3] == "none") &&
+	    (surrounding_groups[2] != surrounding_groups[0]) &&
+	    (surrounding_groups[4] != surrounding_groups[0]) &&
+	    (surrounding_groups[5] != surrounding_groups[0]) &&
+	    (surrounding_groups[6] != surrounding_groups[0]) &&
+	    (surrounding_groups[7] != surrounding_groups[0])) 
+	{
+		border_group = surrounding_groups[0];
+		return NW_CORNER_PATTERN;
+	} // check for the northwestern corner pattern
+
+	else if (
+	    (surrounding_groups[2] != current_group && surrounding_groups[2] != "none" &&
+	     current_group != "none") &&
+	    (surrounding_groups[1] == current_group || surrounding_groups[1] == "none") &&
+	    (surrounding_groups[4] == current_group || surrounding_groups[4] == "none") &&
+	    (surrounding_groups[0] != surrounding_groups[2]) &&
+	    (surrounding_groups[3] != surrounding_groups[2]) &&
+	    (surrounding_groups[5] != surrounding_groups[2]) &&
+	    (surrounding_groups[6] != surrounding_groups[2]) &&
+	    (surrounding_groups[7] != surrounding_groups[2])) 
+	{
+		border_group = surrounding_groups[2];
+		return NE_CORNER_PATTERN;
+	} // check for the northeastern corner pattern
+
+	else if (
+	    (surrounding_groups[7] != current_group && surrounding_groups[7] != "none" &&
+	     current_group != "none") &&
+	    (surrounding_groups[4] == current_group || surrounding_groups[4] == "none") &&
+	    (surrounding_groups[6] == current_group || surrounding_groups[6] == "none") &&
+	    (surrounding_groups[0] != surrounding_groups[7]) &&
+	    (surrounding_groups[1] != surrounding_groups[7]) &&
+	    (surrounding_groups[2] != surrounding_groups[7]) &&
+	    (surrounding_groups[3] != surrounding_groups[7]) &&
+	    (surrounding_groups[5] != surrounding_groups[7])) 
+	{
+		border_group = surrounding_groups[7];
+		return SE_CORNER_PATTERN;
+	} // check for the southeastern corner pattern
+
+	else if (
+	    (surrounding_groups[5] != current_group && surrounding_groups[5] != "none" &&
+	     current_group != "none") &&
+	    (surrounding_groups[3] == current_group || surrounding_groups[3] == "none") &&
+	    (surrounding_groups[6] == current_group || surrounding_groups[6] == "none") &&
+	    (surrounding_groups[0] != surrounding_groups[5]) &&
+	    (surrounding_groups[1] != surrounding_groups[5]) &&
+	    (surrounding_groups[2] != surrounding_groups[5]) &&
+	    (surrounding_groups[4] != surrounding_groups[5]) &&
+	    (surrounding_groups[7] != surrounding_groups[5])) 
+	{
+		border_group = surrounding_groups[5];
+		return SW_CORNER_PATTERN;
+	} // check for the southwestern corner pattern
+
 	return INVALID_PATTERN;
 } // _CheckForTransitionPattern(...)
 
