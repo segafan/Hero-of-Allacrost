@@ -26,11 +26,39 @@ cracked_earth_grass[10] = { "mountain_landscape", 111 } -- northeastern corner
 cracked_earth_grass[11] = { "mountain_landscape", 127 } -- southeastern corner
 cracked_earth_grass[12] = { "mountain_landscape", 126 } -- southwestern corner
 
+cracked_earth_pavers = {}
+cracked_earth_pavers[1]  = { "mountain_landscape", 63 }  -- northwest border
+cracked_earth_pavers[2]  = { "mountain_landscape", 92 }  -- northern border
+cracked_earth_pavers[3]  = { "mountain_landscape", 62 }  -- northeast border
+cracked_earth_pavers[4]  = { "mountain_landscape", 75 }  -- eastern border
+cracked_earth_pavers[5]  = { "mountain_landscape", 46 }  -- southeastern border
+cracked_earth_pavers[6]  = { "mountain_landscape", 60 }  -- southern border
+cracked_earth_pavers[7]  = { "mountain_landscape", 47 }  -- southwestern border
+cracked_earth_pavers[8]  = { "mountain_landscape", 77 }  -- western border
+cracked_earth_pavers[9]  = { "mountain_landscape", 93 }  -- northwestern corner
+cracked_earth_pavers[10] = { "mountain_landscape", 91 }  -- northeastern corner
+cracked_earth_pavers[11] = { "mountain_landscape", 59 }  -- southeastern corner
+cracked_earth_pavers[12] = { "mountain_landscape", 61 }  -- southwestern corner
+
 grass = {}
 grass[1] = { "mountain_landscape", 78 }
 grass[2] = { "mountain_landscape", 79 }
 grass[3] = { "mountain_landscape", 94 }
 grass[4] = { "mountain_landscape", 95 }
+
+grass_cracked_earth = {}
+grass_cracked_earth[1]  = { "mountain_landscape", 127 } -- northwest border
+grass_cracked_earth[2]  = { "mountain_landscape", 44 }  -- northern border
+grass_cracked_earth[3]  = { "mountain_landscape", 126 } -- northeast border
+grass_cracked_earth[4]  = { "mountain_landscape", 27 }  -- eastern border
+grass_cracked_earth[5]  = { "mountain_landscape", 110 } -- southeastern border
+grass_cracked_earth[6]  = { "mountain_landscape", 12 }  -- southern border
+grass_cracked_earth[7]  = { "mountain_landscape", 111 } -- southwestern border
+grass_cracked_earth[8]  = { "mountain_landscape", 29 }  -- western border
+grass_cracked_earth[9]  = { "mountain_landscape", 45 }  -- northwestern corner
+grass_cracked_earth[10] = { "mountain_landscape", 43 }  -- northeastern corner
+grass_cracked_earth[11] = { "mountain_landscape", 11 }  -- southeastern corner
+grass_cracked_earth[12] = { "mountain_landscape", 13 }  -- southwestern corner
 
 pavers = {}
 pavers[1] = { "mountain_landscape", 14 }

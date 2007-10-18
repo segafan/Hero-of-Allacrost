@@ -1230,14 +1230,17 @@ void EditorScrollView::contentsMousePressEvent(QMouseEvent* evt)
 				QString tileset_name = editor->_ed_tabs->tabText(editor->_ed_tabs->currentIndex());
 
 				// put selected tile from tileset into tile array at correct position
-				int tileset_index = table->currentRow() * 16 + table->currentColumn();
-				int multiplier = _map->tileset_names.findIndex(tileset_name);
+				int32 tileset_index = table->currentRow() * 16 + table->currentColumn();
+				int32 multiplier = _map->tileset_names.findIndex(tileset_name);
 				if (multiplier == -1)
 				{
 					_map->tileset_names.append(tileset_name);
 					multiplier = _map->tileset_names.findIndex(tileset_name);
 				} // calculate index of current tileset
 				
+				// perform randomization for autotiles
+				_AutotileRandomize(multiplier, tileset_index);
+
 				// Record information for undo/redo action.
 				_tile_indeces.push_back(_tile_index);
 				_previous_tiles.push_back(GetCurrentLayer()[_tile_index]);
