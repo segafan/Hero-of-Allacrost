@@ -5,6 +5,24 @@ image = "img/tilesets/desert_cave_ground.png"
 num_tile_cols = 16
 num_tile_rows = 16
 
+autotiling = {}
+autotiling[0]  = "cave_dirt"
+autotiling[1]  = "cave_dirt"
+autotiling[2]  = "cave_dirt"
+autotiling[9]  = "cave_floor"
+autotiling[10] = "cave_floor"
+autotiling[11] = "cave_floor"
+autotiling[12] = "cave_floor"
+autotiling[25] = "cave_floor"
+autotiling[26] = "cave_floor"
+autotiling[27] = "cave_floor"
+autotiling[28] = "cave_floor"
+autotiling[41] = "cave_floor"
+autotiling[42] = "cave_floor"
+autotiling[43] = "cave_floor"
+autotiling[44] = "cave_floor"
+
+
 walkability = { [0] = {}, [1] = {}, [2] = {}, [3] = {}, 
 		[4]= {}, [5] = {}, [6] = {}, [7] = {},
 		[8] = {}, [9] = {}, [10] = {}, [11] = {}, 
