@@ -467,140 +467,109 @@ bool VariableTexSheet::InsertTexture(BaseTexture* img) {
 		return false;
 	}
 
-	// Don't allow insertions into a texture bigger than 512x512...
-	// This way, if we have a 1024x1024 texture holding a fullscreen background,
-	// it is always safe to remove the texture sheet from memory when the
-	// background is unreferenced. That way backgrounds don't stick around in memory.
-	if (_block_width > 32 || _block_height > 32) { // 32 blocks = 512 pixels
-		if (_blocks[0].free == false)  // Quick way to test if texsheet's occupied
+	// Don't allow insertions into a texture sheet containing a texture larger than 512x512.
+	// Texture sheets with this property may only be used by one texture at a time
+	if (_block_width > 32 || _block_height > 32) { // 32 blocks == 512 pixels
+		if (_blocks[0].free == false)
 			return false;
 	}
 
-	// Find an open block of memory. If none is found, return false
-	// Calculate the width and height in blocks
+	// Attempt to find an open region in the texture sheet to fit this texture
+	int32 block_x = -1, block_y = -1;
 	int32 w = (img->width + 15) / 16;
 	int32 h = (img->height + 15) / 16;
 
-	int32 block_x = -1, block_y = -1;
-
-	// This is a 100% brute force way to allocate a block, just a bunch
-	// of nested loops. In practice, this actually works fine, because
-	// the allocator deals with 16x16 blocks instead of trying to worry
-	// about fitting images with pixel perfect resolution.
-	// Later, if this turns out to be a bottleneck, we can rewrite this
-	// algorithm to something more intelligent
-	for (int32 y = 0; y < _block_height - h + 1; y++) {
+	// This is a brute force algorithm to try and find space to allocate the texture.
+	// If this becomes a bottleneck, we may wish to use a more intellegent algorithm here.
+	bool continue_search = true;
+	for (int32 y = 0; y < _block_height - h + 1 && continue_search; y++) {
 		for (int32 x = 0; x < _block_width - w + 1; x++) {
 			int32 furthest_blocker = -1;
 
-			for (int32 dy = 0; dy < h; dy++) {
+			bool continue_neighbor_search = true;
+			for (int32 dy = 0; dy < h && continue_neighbor_search; dy++) {
 				for (int32 dx = 0; dx < w; dx++) {
 					if (_blocks[(x + dx) + ((y + dy) * _block_width)].free == false) {
-						furthest_blocker = x+dx;
-						goto endneighborsearch_GOTO;
+						furthest_blocker = x + dx;
+						continue_neighbor_search = false;
+						break;
 					}
 				}
 			}
 
-			endneighborsearch_GOTO:
-
 			if (furthest_blocker == -1) {
 				block_x = x;
 				block_y = y;
-				goto endsearch_GOTO;
+				continue_search = false;
+				break;
 			}
 		}
 	}
 
-	endsearch_GOTO:
-
+	// If either of these conditions is true, it means we were unable to allocate enough space to insert this texture
 	if (block_x == -1 || block_y == -1)
 		return false;
 
-	// Check if there's already an image allocated at this block.
-	// If so, we have to notify GameVideo that we're ejecting
-	// this image out of memory to make place for the new one
-
-	// Update blocks
-	set<BaseTexture*> remove_images;
-
-	for(int32 y = block_y; y < block_y + h; y++) {
-		for(int32 x = block_x; x < block_x + w; x++) {
+	// Go through each block that is to be occupied by the new texture and set its properties
+	for (int32 y = block_y; y < block_y + h; y++) {
+		for (int32 x = block_x; x < block_x + w; x++) {
 			int32 index = x + (y * _block_width);
-			// Check if there's already an image at the point we're
-			// trying to load at. If so, we need to tell GameVideo
-			// to update its internal vector
 
-			if(_blocks[index].image) {
-				remove_images.insert(_blocks[index].image);
+			// If the texture pointer for the block is not NULL, this means it contains a freed texture.
+			// Now we must remove that texture entirely since we are overwriting at least one of its blocks.
+			if (_blocks[index].image) {
+				RemoveTexture(_blocks[index].image);
 			}
 
-			_blocks[index].free  = false;
+			_blocks[index].free = false;
 			_blocks[index].image = img;
 		}
 	}
 
-	for(set<BaseTexture*>::iterator i = remove_images.begin(); i != remove_images.end(); i++) {
-		RemoveTexture(*i);
-	}
-
-
-	// Calculate the actual pixel coordinates given this node's block index
+	// Calculate the pixel and uv coordinates for the newly inserted texture
 	img->x = block_x * 16;
 	img->y = block_y * 16;
-
-	// Calculate the u,v coordinates
 
 	float sheet_width = static_cast<float>(width);
 	float sheet_height = static_cast<float>(height);
 
-	img->u1 = float(img->x + 0.5f) / sheet_width;
-	img->u2 = float(img->x + img->width - 0.5f) / sheet_width;
-	img->v1 = float(img->y + 0.5f) / sheet_height;
-	img->v2 = float(img->y + img->height - 0.5f) / sheet_height;
+	img->u1 = static_cast<float>(img->x + 0.5f) / sheet_width;
+	img->u2 = static_cast<float>(img->x + img->width - 0.5f) / sheet_width;
+	img->v1 = static_cast<float>(img->y + 0.5f) / sheet_height;
+	img->v2 = static_cast<float>(img->y + img->height - 0.5f) / sheet_height;
 
 	img->texture_sheet = this;
+	_textures.insert(img);
 
 	return true;
 } // bool VariableTexSheet::InsertTexture(BaseTexture* img)
 
 
 
-uint32 VariableTexSheet::GetNumberTextures() {
-	set<BaseTexture*> textures;
-
-	for (int32 i = 0; i < _block_width * _block_height; i++) {
-		if (_blocks[i].image != NULL && textures.find(_blocks[i].image) != textures.end()) {
-			textures.insert(_blocks[i].image);
-		}
-	}
-
-	return textures.size();
-}
-
-
-
-void VariableTexSheet::_SetBlockProperties(BaseTexture* img, bool change_free, bool change_image, bool free, BaseTexture* new_image) {
-	if (img == NULL) {
+void VariableTexSheet::_SetBlockProperties(BaseTexture* tex, BaseTexture* new_tex, bool free) {
+	if (tex == NULL) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "NULL pointer was given as function argument" << endl;
 		return;
 	}
 
+	if (_textures.find(tex) == _textures.end()) {
+		IF_PRINT_WARNING(VIDEO_DEBUG) << "texture pointer argument was not contained within this texture sheet" << endl;
+	}
+
 	// Calculate upper-left corner in blocks
-	int32 block_x = img->x / 16;
-	int32 block_y = img->y / 16;
+	int32 block_x = tex->x / 16;
+	int32 block_y = tex->y / 16;
 
 	// Calculate width and height in blocks
-	int32 w = (img->width  + 15) / 16;
-	int32 h = (img->height + 15) / 16;
+	int32 w = (tex->width  + 15) / 16;
+	int32 h = (tex->height + 15) / 16;
 
 	for (int32 y = block_y; y < block_y + h; y++) {
 		for (int32 x = block_x; x < block_x + w; x++) {
-			if (_blocks[x + y * _block_width].image == img) {
-				if (change_free)
-					_blocks[x + y * _block_width].free = free;
-				if (change_image)
-					_blocks[x + y * _block_width].image = new_image;
+			int32 index = x + y * _block_width;
+			if (_blocks[index].image == tex) {
+				_blocks[index].free = free;
+				_blocks[index].image = new_tex;
 			}
 		}
 	}

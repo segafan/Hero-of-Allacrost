@@ -376,32 +376,35 @@ public:
 	bool InsertTexture(BaseTexture* img);
 	
 	void RemoveTexture(BaseTexture* img)
-		{ _SetBlockProperties(img, true, true, true, NULL); }
+		{ _SetBlockProperties(img, NULL, true); _textures.erase(img); }
 	
 	void FreeTexture(BaseTexture* img)
-		{ _SetBlockProperties(img, true, false, true, NULL); }
+		{ _SetBlockProperties(img, img, true); }
 	
 	void RestoreTexture(BaseTexture* img)
-		{ _SetBlockProperties(img, true, false, false, NULL); }
+		{ _SetBlockProperties(img, img, false); }
 
-	uint32 GetNumberTextures();
+	uint32 GetNumberTextures()
+		{ return _textures.size(); }
 	//@}
 
 private:
-	/** \brief Goes through all the blocks associated with an image, and updates their "free" and "image" properties.
-	*** This actually will happen when changeFree and changeImage are true, respectively
-	*** \param img The image to use for the block
-	*** \param change_free The block's free status has changed
-	*** \param change_image The block's image has changed
-	*** \param free The block's free status
-	*** \param new_image The new image to use if changeImage is true
-	**/
-	void _SetBlockProperties(BaseTexture* img, bool change_free, bool change_image, bool free, BaseTexture* new_image);
-	
 	/** \brief The list of 16x16 pixel blocks in the sheet.
-	*** The size of this structure is: (sheet_width / 16) * (sheet_height / 16)
+	*** The size of this structure is: (width / 16) * (height / 16)
 	**/
 	VariableTexNode* _blocks;
+
+	/** \brief A set containing each texture that has been inserted into this class
+	*** This container is used to be able to quickly determine if a texture is loaded by an object of this class
+	**/
+	std::set<BaseTexture*> _textures;
+
+	/** \brief Updates the properties of all of the blocks associated with a given texture
+	*** \param tex The texture to update
+	*** \param new_tex The texture pointer to set the block to
+	*** \param new_image The boolean value to set the free status flag to
+	**/
+	void _SetBlockProperties(BaseTexture* tex, BaseTexture* new_tex, bool free);
 }; // class VariableTexSheet : public TexSheet
 
 }  // namespace private_video
