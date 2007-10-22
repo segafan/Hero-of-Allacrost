@@ -45,6 +45,22 @@ cave_floor_cave_dirt[10] = { "desert_cave_ground", 35 } -- northeastern corner
 cave_floor_cave_dirt[11] = { "desert_cave_ground", 3 }  -- southeastern corner
 cave_floor_cave_dirt[12] = { "desert_cave_ground", 5 }  -- southwestern corner
 
+cave_floor_cave_dirt_east = {}
+cave_floor_cave_dirt_east[1] = { "desert_cave_ground", 19 }
+cave_floor_cave_dirt_east[2] = { "desert_cave_ground", 24 }
+
+cave_floor_cave_dirt_north = {}
+cave_floor_cave_dirt_north[1] = { "desert_cave_ground", 7 }
+cave_floor_cave_dirt_north[2] = { "desert_cave_ground", 36 }
+
+cave_floor_cave_dirt_south = {}
+cave_floor_cave_dirt_south[1] = { "desert_cave_ground", 4 }
+cave_floor_cave_dirt_south[2] = { "desert_cave_ground", 39 }
+
+cave_floor_cave_dirt_west = {}
+cave_floor_cave_dirt_west[1] = { "desert_cave_ground", 21 }
+cave_floor_cave_dirt_west[2] = { "desert_cave_ground", 22 }
+
 cracked_earth = {}
 cracked_earth[1] = { "mountain_landscape", 10 }
 cracked_earth[2] = { "mountain_landscape", 26 }

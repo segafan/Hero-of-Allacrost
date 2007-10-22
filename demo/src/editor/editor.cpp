@@ -406,8 +406,8 @@ void Editor::_TileLayerFill()
 	for (vector<int32>::iterator iter = current_layer.begin(); iter != current_layer.end(); iter++)
 	{
 		_ed_scrollview->_AutotileRandomize(multiplier, tileset_index);		
-		*iter = static_cast<int32> (tileset_index + multiplier * 256);
-		modified.push_back(static_cast<int32> (tileset_index + multiplier * 256));
+		*iter = tileset_index + multiplier * 256;
+		modified.push_back(tileset_index + multiplier * 256);
 	} // iterate through the entire layer
 
 	LayerCommand* fill_command = new LayerCommand(indeces, previous, modified,
@@ -572,7 +572,7 @@ void Editor::_MapProperties()
 			for (int col = extra_columns; col > 0; col--)
 			{
 				vector<int32>& lower_layer = _ed_scrollview->_map->GetLayer(LOWER_LAYER);
-				vector<int32>::iterator it = lower_layer.begin() + map_width;
+				vector<int32>::iterator it = lower_layer.begin() + map_width - 1;
 				for (int row = 0; row < map_height; row++)
 				{
 					lower_layer.erase(it);
@@ -580,7 +580,7 @@ void Editor::_MapProperties()
 				} // iterate through the rows of the lower layer
 	
 				vector<int32>& middle_layer = _ed_scrollview->_map->GetLayer(MIDDLE_LAYER);
-				it = middle_layer.begin() + map_width;
+				it = middle_layer.begin() + map_width - 1;
 				for (int row = 0; row < map_height; row++)
 				{
 					middle_layer.erase(it);
@@ -588,7 +588,7 @@ void Editor::_MapProperties()
 				} // iterate through the rows of the middle layer
 	
 				vector<int32>& upper_layer = _ed_scrollview->_map->GetLayer(UPPER_LAYER);
-				it = upper_layer.begin() + map_width;
+				it = upper_layer.begin() + map_width - 1;
 				for (int row = 0; row < map_height; row++)
 				{
 					upper_layer.erase(it);
@@ -627,7 +627,6 @@ void Editor::_MapProperties()
 			lower_layer.erase( lower_layer.end()  - extra_rows * map_width, lower_layer.end());
 			middle_layer.erase(middle_layer.end() - extra_rows * map_width, middle_layer.end());
 			upper_layer.erase( upper_layer.end()  - extra_rows * map_width, upper_layer.end());
-	
 		} // delete rows
 
 		// Resize the map, QOpenGL and QScrollView widgets.
@@ -1654,8 +1653,25 @@ void EditorScrollView::_AutotileTransitions(int32& tileset_num, int32& tile_inde
 		int32 tileset_index = existing_tiles[i] % 256;
 		map<int, string>::iterator it = _map->tilesets[multiplier]->
 			autotileability.find(tileset_index);
-			
-		if (it != _map->tilesets[multiplier]->autotileability.end())
+
+		// Here we check to make sure the tile exists in the autotileability
+		// table. But if the tile in question is a transition tile with multiple
+		// variations, we want to assign it a group name of "none", otherwise
+		// the pattern detection algorithm won't work properly. Transition tiles
+		// with multiple variations are still handled correctly.
+		if (it != _map->tilesets[multiplier]->autotileability.end() &&
+			it->second.find("east", 0)      == string::npos &&
+			it->second.find("north", 0)     == string::npos &&
+			it->second.find("_ne", 0)       == string::npos &&
+			it->second.find("ne_corner", 0) == string::npos &&
+			it->second.find("_nw", 0)       == string::npos &&
+			it->second.find("nw_corner", 0) == string::npos &&
+			it->second.find("_se", 0)       == string::npos &&
+			it->second.find("se_corner", 0) == string::npos &&
+			it->second.find("south", 0)     == string::npos &&
+			it->second.find("_sw", 0)       == string::npos &&
+			it->second.find("sw_corner", 0) == string::npos &&
+			it->second.find("west", 0)      == string::npos)
 			existing_groups.push_back(it->second);
 		else
 			existing_groups.push_back("none");
@@ -1738,6 +1754,9 @@ void EditorScrollView::_AutotileTransitions(int32& tileset_num, int32& tile_inde
 				QString::fromStdString(tileset_name));
 
 			read_data.CloseTable();
+
+			// Border/transition tiles may also have variations, so randomize them.
+			_AutotileRandomize(tileset_num, tile_index);
 		} // make sure the selected transition tiles exist
 		
 		read_data.CloseFile();
