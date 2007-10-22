@@ -111,7 +111,8 @@ namespace hoa_video {
 		class VariableTexNode;
 
 		class ImageMemory;
-		class BaseImageTexture;
+
+		class BaseTexture;
 		class ImageTexture;
 		class TextImageTexture;
 		class TextImageElement;

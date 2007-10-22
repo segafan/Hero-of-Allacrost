@@ -156,7 +156,7 @@ namespace private_video {
 *** A text specific subclass of the BaseImage subclass, contains a
 *** string and style needed to render a piece of text.
 *** ***************************************************************************/
-class TextImageTexture : public private_video::BaseImageTexture {
+class TextImageTexture : public private_video::BaseTexture {
 public:
 	/** \brief Constructor defaults image as the first one in a texture sheet.
 	*** \note The actual sheet where the image is located will be determined later.

@@ -335,7 +335,7 @@ void TextureController::_RemoveSheet(TexSheet* sheet) {
 
 
 
-TexSheet* TextureController::_InsertImageInTexSheet(BaseImageTexture *image, ImageMemory& load_info, bool is_static) {
+TexSheet* TextureController::_InsertImageInTexSheet(BaseTexture *image, ImageMemory& load_info, bool is_static) {
 	// Image sizes larger than 512 in either dimension require their own texture sheet
 	if (load_info.width > 512 || load_info.height > 512) {
 		int32 round_width = RoundUpPow2(load_info.width);

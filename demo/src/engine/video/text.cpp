@@ -40,7 +40,7 @@ namespace private_video {
 // *****************************************************************************
 
 TextImageTexture::TextImageTexture(const hoa_utils::ustring &string_, const TextStyle &style_) :
-	BaseImageTexture(),
+	BaseTexture(),
 	string(string_),
 	style(style_)
 {

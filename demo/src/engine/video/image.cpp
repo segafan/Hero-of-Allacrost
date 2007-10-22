@@ -108,18 +108,21 @@ ImageDescriptor& ImageDescriptor::operator=(const ImageDescriptor& copy) {
 	// Case 1: We previously pointed to a valid image texture and the copy does not point to the same texture
 	if (_texture != NULL && copy._texture != _texture) {
 		if (_texture->RemoveReference() == true) {
+			_texture->texture_sheet->RemoveTexture(_texture);
+
 			// If the image exceeds 512 in either width or height, it has an un-shared texture sheet, which we
 			// should now delete that the image is being removed
 			if (_texture->width > 512 || _texture->height > 512) {
 				// Remove the image and texture sheet completely
-				// TODO: This introduces a seg fault when TexSheet::FreeImage is later called. Fix this bug!
-				_texture->texture_sheet->RemoveTexture(_texture);
 				TextureManager->_RemoveSheet(_texture->texture_sheet);
 			}
-			else {
-				// Otherise simply mark the image as free in the texture sheet
-				_texture->texture_sheet->FreeTexture(_texture);
-			}
+
+			// TODO: Free/Restore ability for textures needs further testing
+// 			else {
+// 				// Otherise simply mark the image as free in the texture sheet
+// 				_texture->texture_sheet->FreeTexture(_texture);
+// 			}
+			delete _texture;
 		}
 	}
 	// Case 2: The original image texture was NULL and the copy is not NULL, so increment the reference
@@ -457,26 +460,26 @@ void ImageDescriptor::DEBUG_PrintInfo() {
 
 
 
-void ImageDescriptor::_RemoveTextureReference(private_video::BaseImageTexture* texture, bool null_base_ptr) {
+void ImageDescriptor::_RemoveTextureReference(private_video::BaseTexture* texture, bool null_base_ptr) {
 	if (texture == NULL) {
 		IF_PRINT_WARNING(VIDEO_DEBUG) << "NULL argument passed to function" << endl;
 		return;
 	}
 
 	if (texture->RemoveReference() == true) {
+		texture->texture_sheet->RemoveTexture(texture);
+
 		// If the image exceeds 512 in either width or height, it has an un-shared texture sheet, which we
 		// should now delete that the image is being removed
 		if (texture->width > 512 || texture->height > 512) {
-			// Remove the image and texture sheet completely
-			// TODO: This introduces a seg fault when TexSheet::FreeImage is later called. Fix this bug!
-			texture->texture_sheet->RemoveTexture(texture);
 			TextureManager->_RemoveSheet(texture->texture_sheet);
-			delete texture;
 		}
-		else {
-			// Otherise simply mark the image as free in the texture sheet
-			texture->texture_sheet->FreeTexture(texture);
-		}
+// 		else {
+// 
+// 			// TODO: Otherise simply mark the image as free in the texture sheet
+// // 			texture->texture_sheet->FreeTexture(texture);
+// 		}
+		delete texture;
 	}
 
 	if (null_base_ptr == true)
@@ -748,10 +751,11 @@ bool ImageDescriptor::_LoadMultiImage(vector<StillImage>& images, const string &
 					return false;
 				}
 
-				// If ref count is zero, it means this image was freed, but not removed, so restore it
-				if (img->ref_count == 0) {
-					img->texture_sheet->RestoreTexture(img);
-				}
+				// TEMP: Free/Restore feature removed
+// 				// If ref count is zero, it means this image was freed, but not removed, so restore it
+// 				if (img->ref_count == 0) {
+// 					img->texture_sheet->RestoreTexture(img);
+// 				}
 
 				images.at(current_image)._texture = img;
 				images.at(current_image)._image_texture = img;
@@ -865,11 +869,12 @@ bool StillImage::Load(const string& filename) {
 			return false;
 		}
 
-		// If the following condition is true, it means this image was freed but not removed from the texture sheet
-		// So, we must restore it
-		if (_image_texture->ref_count == 0) {
-			_image_texture->texture_sheet->RestoreTexture(_image_texture);
-		}
+		// TEMP: free/restore feature removed
+// 		// If the following condition is true, it means this image was freed but not removed from the texture sheet
+// 		// So, we must restore it
+// 		if (_image_texture->ref_count == 0) {
+// 			_image_texture->texture_sheet->RestoreTexture(_image_texture);
+// 		}
 
 		// If the width or height of this object is 0.0, use the pixel width/height of the image texture
 		if (IsFloatEqual(_width, 0.0f))

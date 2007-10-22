@@ -232,7 +232,7 @@ protected:
 	/** \brief A pointer to the texture used by the image
 	*** The purpose of this member is for the ImageDescriptor class to be able to manage 
 	**/
-	private_video::BaseImageTexture* _texture;
+	private_video::BaseTexture* _texture;
 
 	//! \brief The width and height of the image, in coordinate system units.
 	float _width, _height;
@@ -266,7 +266,7 @@ protected:
 	*** to be NULL or immediately re-assign it to point to another texture object. Failing to observe this
 	*** can lead to devastating problems, such as referring to freed memory.
 	**/
-	void _RemoveTextureReference(private_video::BaseImageTexture* texture, bool null_base_ptr = true);
+	void _RemoveTextureReference(private_video::BaseTexture* texture, bool null_base_ptr = true);
 
 	/** \brief Draws the OpenGL texture referred to by the object on the screen
 	*** \param draw_color A non-NULL pointer to an array of four valid Color objects
