@@ -210,7 +210,7 @@ FixedTexSheet::FixedTexSheet(int32 sheet_width, int32 sheet_height, GLuint sheet
 	_texture_height(img_height)
 {
 	// Set all the dimensions
-	_block_width  = width  / _texture_width;
+	_block_width  = width / _texture_width;
 	_block_height = height / _texture_height;
 
 	// Allocate the blocks array
@@ -221,13 +221,15 @@ FixedTexSheet::FixedTexSheet(int32 sheet_width, int32 sheet_height, GLuint sheet
 	_open_list_head = &_blocks[0];
 	_open_list_tail = &_blocks[num_blocks - 1];
 
-	for (int32 i = 0; i < num_blocks - 1; ++i) {
+	for (int32 i = 0; i < num_blocks - 1; i++) {
 		_blocks[i].image = NULL;
 		_blocks[i].next = &_blocks[i + 1];
 		_blocks[i].block_index = i;
 	}
 
+	_open_list_tail->image = NULL;
 	_open_list_tail->next = NULL;
+	_open_list_tail->block_index = num_blocks - 1;
 }
 
 
@@ -269,16 +271,13 @@ bool FixedTexSheet::InsertTexture(BaseTexture* img) {
 
 	// Check if there's already an image allocated at this block (an image was freed earlier, but not removed)
 	// If so, we must now remove it from memory
-	/** \bug I have no idea why, but it seems that when the open list is made empty, the image pointer is non-NULL
-	*** even though it should be...
-	**/
 	if (node->image != NULL) {
 		// TODO: TextureManager needs to have the image element removed from its map containers
 		node->image = NULL;
 	}
 
 	// Calculate the texture's pixel coordinates in the sheet given this node's block index
-	img->x = _texture_width  * (node->block_index % _block_width);
+	img->x = _texture_width * (node->block_index % _block_width);
 	img->y = _texture_height * (node->block_index / _block_width);
 
 	// Calculate the u,v coordinates
